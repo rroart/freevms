@@ -90,9 +90,7 @@ unsigned char decnet_ether_address[ETH_ALEN] = { 0xAA, 0x00, 0x04, 0x00, 0x00, 0
 #define DN_SK_HASH_SIZE (1 << DN_SK_HASH_SHIFT)
 #define DN_SK_HASH_MASK (DN_SK_HASH_SIZE - 1)
 
-static struct proto_ops dn_proto_ops;
 rwlock_t dn_hash_lock = RW_LOCK_UNLOCKED;
-static struct _cdt *dn_sk_hash[DN_SK_HASH_SIZE];
 
 struct _cdt *dn_sklist_find_listener2(char *addr)
 {
@@ -109,54 +107,6 @@ struct _cdt *dn_sklist_find_listener2(char *addr)
   if (tmp==sbnb)
     return 0;
   return tmp;
-}
-
-struct _cdt *dn_find_by_skb2(struct sk_buff *skb)
-{
-	struct _cdt *cb = (skb);
-	struct _cdt *sk=0;
-	struct _cdt *scp;
-
-	read_lock(&dn_hash_lock);
-	read_unlock(&dn_hash_lock);
-
-	return sk;
-}
-
-int dn_nsp_backlog_rcv2(struct _cdt *sk, struct sk_buff *skb) { }
-
-struct _cdt *dn_alloc_sock(struct socket *sock, int gfp)
-{
-	struct _cdt *sk;
-	struct _cdt *scp;
-
-#ifndef CONFIG_VMS
-	if  ((sk = sk_alloc(PF_DECnet, gfp, 1)) == NULL) 
-		goto no_sock;
-#endif
-
-	if (sock) {
-			sock->ops = &dn_proto_ops;
-	}
-#ifndef CONFIG_VMS
-	sock_init_data(sock,sk);
-#endif
-	scp = sk;
-
-	sk->cdt$l_dginput = dn_nsp_backlog_rcv2;
-
-	skb_queue_head_init(&scp->cdt$l_waitqfl);
-	skb_queue_head_init(&scp->cdt$l_waitqfl);
-	skb_queue_head_init(&scp->cdt$l_share_flink);
-
-	init_timer(0);
-	dn_start_slow_timer2(sk);
-
-	MOD_INC_USE_COUNT;
-
-	return sk;
-no_sock:
-	return NULL;
 }
 
 // whoa...
@@ -475,19 +425,6 @@ static int scs_std$sendmsg(int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cd
 static int dn_device_event(struct notifier_block *this, unsigned long event,
 			void *ptr)
 {
-	struct net_device *dev = (struct net_device *)ptr;
-
-	switch(event) {
-		case NETDEV_UP:
-			dn_dev_up(dev);
-			break;
-		case NETDEV_DOWN:
-			dn_dev_down(dev);
-			break;
-		default:
-			break;
-	}
-
 	return NOTIFY_DONE;
 }
 
@@ -506,24 +443,6 @@ static struct packet_type dn_dix_packet_type = {
 
 #define IS_NOT_PRINTABLE(x) ((x) < 32 || (x) > 126)
 
-static void dn_printable_object(struct sockaddr_dn *dn, unsigned char *buf)
-{
-	int i;
-    
-	switch (dn_ntohs(dn->sdn_objnamel)) {
-		case 0:
-			sprintf(buf, "%d", dn->sdn_objnum);
-			break;
-		default:
-			for (i = 0; i < dn_ntohs(dn->sdn_objnamel); i++) {
-				buf[i] = dn->sdn_objname[i];
-				if (IS_NOT_PRINTABLE(buf[i]))
-					buf[i] = '.';
-			}
-			buf[i] = 0;
-    	}
-}
-
 char *dn_addr2asc(dn_address addr, char *buf)
 {
   unsigned short node, area;
@@ -535,130 +454,15 @@ char *dn_addr2asc(dn_address addr, char *buf)
   return buf;
 }
 
-static char *dn_state2asc(unsigned char state)
-{
-  switch(state) {
-  case CDT$C_OPEN:
-    return "OPEN";
-  case CDT$C_CON_REC:
-    return "CORE";
-  case CDT$C_REJ_SENT:
-    return "RESE";
-  case CDT$C_CON_ACK:
-    return "COAC";
-  case CDT$C_VC_FAIL:
-    return "VCFA";
-  case CDT$C_CON_SENT:
-    return "COSE";
-  case CDT$C_DISC_SENT:
-    return "DISE";
-  case CDT$C_DISC_ACK:
-    return "DIAC";
-  case CDT$C_CLOSED:
-    return "CLOS";
-  case CDT$C_DISC_REC:
-    return "DIRE";
-  }
-
-  return "????";
-}
-
-
 static int dn_get_info(char *buffer, char **start, off_t offset, int length)
 {
-	struct _cdt *sk;
-	struct _cdt *scp;
-	int len = 0;
-	off_t pos = 0;
-	off_t begin = 0;
-	char buf1[DN_ASCBUF_LEN];
-	char buf2[DN_ASCBUF_LEN];
-	char local_object[DN_MAXOBJL+3];
-	char remote_object[DN_MAXOBJL+3];
-	int i;
-
-	len += sprintf(buffer + len, "Local                                              Remote\n");
-
-	read_lock(&dn_hash_lock);
-	for(i = 0; i < DN_SK_HASH_SIZE; i++) {
-		for(sk = dn_sk_hash[i]; sk != NULL; sk = sk->cdt$l_reserved3) {
-			scp = sk;
-
-			dn_printable_object(&scp->cdt$l_lconid, local_object);
-			dn_printable_object(&scp->cdt$l_rconid, remote_object);
-
-			len += sprintf(buffer + len,
-					"%6s/%04X %04d:%04d %04d:%04d %01d %-16s %6s/%04X %04d:%04d %04d:%04d %01d %-16s %4s %s\n",
-					dn_addr2asc(dn_ntohs(dn_saddr2dn(&scp->cdt$l_lconid)), buf1),
-					scp->cdt$l_lconid,
-					scp->cdt$l_pb->pb$l_vc_addr->vc$w_hsr,
-					scp->cdt$l_pb->pb$l_vc_addr->vc$w_hsr,
-					scp->cdt$l_pb->pb$l_vc_addr->vc$l_preferred_channel->ch$w_rmt_chan_seq_num,
-					scp->cdt$l_pb->pb$l_vc_addr->vc$l_preferred_channel->ch$w_rmt_chan_seq_num,
-				       0,
-					local_object,
-					dn_addr2asc(dn_ntohs(dn_saddr2dn(&scp->cdt$l_rconid)), buf2),
-					scp->cdt$l_rconid,
-					scp->cdt$l_pb->pb$l_vc_addr->vc$w_hsr,
-					scp->cdt$l_pb->pb$l_vc_addr->vc$w_hsr,
-					scp->cdt$l_pb->pb$l_vc_addr->vc$w_hsr,
-					scp->cdt$l_pb->pb$l_vc_addr->vc$w_hsr,
-				       0,
-					remote_object,
-					dn_state2asc(scp->cdt$w_state),
-					"");
-
-			pos = begin + len;
-			if (pos < offset) {
-				len = 0;
-				begin = pos;
-			}
-			if (pos > (offset + length))
-				break;
-		}
-	}
-	read_unlock(&dn_hash_lock);
-
-	*start = buffer + (offset - begin);
-	len -= (offset - begin);
-
-	if (len > length)
-		len = length;
-
-	return len;
+	return 0;
 }
 
 
 static struct net_proto_family	dn_family_ops = {
 	family:		AF_DECnet,
 	create:		0,
-};
-
-static void none(void) { }
-
-static struct proto_ops dn_proto_ops = {
-	family:		AF_DECnet,
-
-	release:	none,
-	bind:		none,
-	connect:	none,
-#ifndef CONFIG_VMS
-	socketpair:	sock_no_socketpair,
-#endif
-	accept:		scs_std$accept,
-	getname:	none,
-	poll:		none,
-	ioctl:		none,
-	listen:		scs_std$listen,
-	shutdown:	none,
-	setsockopt:	none,
-	getsockopt:	none,
-	sendmsg:	scs_std$sendmsg,
-	recvmsg:	none,
-#ifndef CONFIG_VMS
-	mmap:		sock_no_mmap,
-	sendpage:	sock_no_sendpage,
-#endif
 };
 
 #ifdef CONFIG_SYSCTL
@@ -708,9 +512,7 @@ static int __init decnet_init(void)
 
 	proc_net_create("myscs", 0, dn_get_info);
 
-	dn_neigh_init();
 	dn_dev_init();
-	dn_route_init();
 
 #ifdef CONFIG_SYSCTL
 	dn_register_sysctl();
@@ -757,9 +559,7 @@ static void __exit decnet_exit(void)
 	unregister_netdevice_notifier(&dn_dev_notifier);
 #endif
 
-	dn_route_cleanup();
 	dn_dev_cleanup();
-	dn_neigh_cleanup();
 
 	proc_net_remove("myscs");
 }
