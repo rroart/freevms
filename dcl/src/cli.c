@@ -602,7 +602,7 @@ static unsigned long int_show_working_set         (unsigned long h_input, unsign
 static unsigned long int_show_event           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_iochan          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_job             (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_show_logical_name    (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
+static unsigned long int_show_logical_name    (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_logical_table   (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_job             (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_mutex           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
@@ -627,7 +627,9 @@ static Command intcmd[] = {
 	1, "create file",          int_create_file,          NULL, "[-lockmode <lockmode>] [-logical <logical_name>] <file_name>", 
 	0, "create job",           int_create_job,           NULL, "<logical_name> <job_name>", 
 	0, "create logical name",  int_create_logical_name,  NULL, "[-kernel] [-nooutermode] [-nosupersede] <logical_name> [-copy <logical_name>] [-link <logical_name>] [-object <handle>] [-terminal] [-value <value>] <value> ...", 
+	0, "define",  int_create_logical_name,  NULL, "<logical_name>", 
 	0, "create logical table", int_create_logical_table, NULL, "[-kernel] [-nooutermode] [-nosupersede] <table_name>", 
+	0, "create /name_table",  int_create_logical_table,  NULL, "<table_name>", 
 	1, "create mutex",         int_create_mutex,         NULL, "<iochan_logical_name> <mutex_device_name> <mutex_name>", 
 	0, "create symbol",        int_create_symbol,        NULL, "[-global] [-integer] [-level <n>] [-string] <name> <value> ...",
 	0, "deallocate device",    int_deallocate_device,    NULL, "<device_name>", 
@@ -660,8 +662,8 @@ static Command intcmd[] = {
 	1, "show event",           int_show_event,           NULL, "<event_logical_name> ...", 
 	1, "show iochan",          int_show_iochan,          NULL, "[<iochan_logical_name> ...] [-objaddr] [-security]", 
 	1, "show job",             int_show_job,             NULL, "[<job_logical_name> ...] [-objaddr] [-processes] [-security] [-threads]", 
-	1, "show logical name",    int_show_logical_name,    NULL, "<logical_name> [-security]", 
-	1, "show logical table",   int_show_logical_table,   NULL, "[<table_name>] [-security]", 
+	0, "show logical",    int_show_logical_name,    NULL, "<logical_name> [-security]", 
+	0, "show logical table",   int_show_logical_table,   NULL, "[<table_name>] [-security]", 
 	1, "show mutex",           int_show_mutex,           NULL, "<iochan_logical_name>", 
 	1, "show process",         int_show_process,         NULL, "[<process_logical_name> ...] [-objaddr] [-security] [-threads]", 
 	0, "show symbol",          int_show_symbol,          NULL, "[<symbol_name> ...]", 
@@ -4311,251 +4313,26 @@ static unsigned long int_create_logical_name (unsigned long h_input, unsigned lo
   OZ_Logvalue *newvals;
   unsigned char objtype;
 
-  crelognampar.logical_name = NULL;
-  crelognampar.lognamatr = 0;
-  crelognampar.nvalues = 0;
-  crelognampar.values = malloc (argc * sizeof *crelognampar.values);
-  crelognampar.values[0].attr = 0;
-  handlecloses = NULL;
-  kernel = 0;
+  struct dsc$descriptor mytabnam, mynam;
+  struct item_list_3 itm[2];
 
-  /* Find the table to put the logical in */
-
-  sts = sys$trnlnm (0, 0,  defaulttables,  kernel ? PSL$C_KERNEL : PSL$C_USER,  &crelognampar.h_table);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u looking up %s\n", sts, defaulttables);
-    return (sts);
+  if (argc>1 && 0==strncmp(argv[0],"/table",strlen(argv[0]))) {
+  } else {
+    return 0;
   }
 
-  /* Process command line args */
+  mynam.dsc$w_length=strlen(argv[2]);
+  mynam.dsc$a_pointer=argv[2];
+  mytabnam.dsc$w_length=strlen(argv[1]);
+  mytabnam.dsc$a_pointer=argv[1];
 
-  for (i = 0; i < argc; i ++) {
 
-    /* Copy - copy the values of the logical name given as the next argument */
+  itm[0].item_code=1;
+  itm[0].buflen=strlen(argv[3]);
+  itm[0].bufaddr=argv[3];
+  bzero(&itm[1],sizeof(struct item_list_3));
 
-    if (strcmp (argv[i], "-copy") == 0) {
-
-      /* -copy is followed by the logical name to be copied */
-
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing logical name after -copy\n");
-        sts = SS$_IVPARAM;
-        goto rtn;
-      }
-
-      /* Lookup that logical name */
-
-      sts = sys$trnlnm (0, crelognampar.h_table,  argv[i],  kernel ? PSL$C_KERNEL : PSL$C_USER,  &h_logname);
-      if (sts != SS$_NORMAL) {
-        fprintf (h_error, "oz_cli: error %u looking up logical %s for -copy\n", sts, argv[i]);
-        goto rtn;
-      }
-
-      /* If it has more than one value, expand the values array to accomodate all possibilities */
-
-      if (nvalues > 1) {
-        newvals = malloc ((crelognampar.nvalues + nvalues + argc - i) * sizeof *crelognampar.values);
-        memcpy (newvals, crelognampar.values, crelognampar.nvalues * sizeof *newvals);
-        free (crelognampar.values);
-        crelognampar.values = newvals;
-      }
-
-      /* Copy each value to the values array */
-
-      for (j = 0; j < nvalues; j ++) {
-        sts = sys$trnlnm (0, h_logname, j,  sizeof buff,  &logvalatr);
-        if (sts != SS$_NORMAL) {
-          fprintf (h_error, "oz_cli: error %u reading logical %s value %u for -copy\n", sts, argv[i], j);
-          oz_sys_handle_release (PSL$C_KERNEL, h_logname);
-          return (sts);
-        }
-        crelognampar.values[crelognampar.nvalues+j].attr = logvalatr;
-        crelognampar.values[crelognampar.nvalues+j].buff = (void *)h_object;
-        if (logvalatr & 1/*OZ_LOGVALATR_OBJECT*/) {
-          handleclose = malloc (sizeof *handleclose);
-          handleclose -> next   = handlecloses;
-          handleclose -> handle = h_object;
-          handlecloses = handleclose;
-        } else {
-          crelognampar.values[crelognampar.nvalues+j].buff = malloc (rlen + 1);
-          memcpy (crelognampar.values[crelognampar.nvalues+j].buff, buff, rlen + 1);
-        }
-      }
-      crelognampar.nvalues += j;
-
-      /* Release source logical and continue processing command line */
-
-      oz_sys_handle_release (PSL$C_KERNEL, h_logname);
-      crelognampar.values[crelognampar.nvalues].attr = 0;
-      continue;
-    }
-
-    /* Kernel - create logical in kernel mode */
-
-    if (strcmp (argv[i], "-kernel") == 0) {
-      kernel = 1;
-      continue;
-    }
-
-    /* Link - link to the logical name given as the next argument */
-
-    if (strcmp (argv[i], "-link") == 0) {
-
-      /* -link is followed by the logical name to be copied */
-
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing logical name after -link\n");
-        sts = SS$_IVPARAM;
-        goto rtn;
-      }
-
-      /* Lookup that logical name */
-
-      sts = sys$trnlnm (0, crelognampar.h_table,  argv[i],  kernel ? PSL$C_KERNEL : PSL$C_USER,  &h_logname);
-      if (sts != SS$_NORMAL) {
-        fprintf (h_error, "oz_cli: error %u looking up logical %s for -link\n", sts, argv[i]);
-        goto rtn;
-      }
-      handleclose = malloc (sizeof *handleclose);
-      handleclose -> next   = handlecloses;
-      handleclose -> handle = h_logname;
-      handlecloses = handleclose;
-
-      /* Set up value that points to that logical as an object */
-
-      crelognampar.values[crelognampar.nvalues].attr |= 1;//OZ_LOGVALATR_OBJECT;
-      crelognampar.values[crelognampar.nvalues++].buff = (void *)h_logname;
-      crelognampar.values[crelognampar.nvalues].attr = 0;
-      continue;
-    }
-
-    /* Nooutermode - do not allow outer mode versions of logical */
-
-    if (strcmp (argv[i], "-nooutermode") == 0) {
-      crelognampar.lognamatr |= 0; //OZ_LOGNAMATR_NOOUTERMODE;
-      continue;
-    }
-
-    /* Nosupersede - logical is not allowed to be overwritten, must be deassigned first */
-
-    if (strcmp (argv[i], "-nosupersede") == 0) {
-      crelognampar.lognamatr |= 2;//OZ_LOGNAMATR_NOSUPERSEDE;
-      continue;
-    }
-
-    /* Object - the next arg is in internal handle format */
-
-    if (strcmp (argv[i], "-object") == 0) {
-
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing handle after -object\n");
-        sts = SS$_IVPARAM;
-        goto rtn;
-      }
-
-      h_object = oz_hw_atoz (argv[i], &usedup);
-      if ((argv[i][usedup] != ':') || (decode_objtype_string (argv[i] + usedup + 1, &objtype) != SS$_NORMAL)) {
-        fprintf (h_error, "oz_cli: bad handle %s\n", argv[i]);
-        sts = SS$_BADPARAM;
-        goto rtn;
-      }
-
-      crelognampar.values[crelognampar.nvalues].attr |= 1;//OZ_LOGVALATR_OBJECT;
-      crelognampar.values[crelognampar.nvalues++].buff = (void *)h_object;
-      crelognampar.values[crelognampar.nvalues].attr = 0;
-      continue;
-    }
-
-    /* Terminal - the next value specified should not be recursively translated */
-
-    if (strcmp (argv[i], "-terminal") == 0) {
-      crelognampar.values[crelognampar.nvalues].attr |= LNM$M_TERMINAL;
-      continue;
-    }
-
-    /* Value - next arg is a value (maybe beginning with an hyphen) */
-
-    if (strcmp (argv[i], "-value") == 0) {
-      if (++ i >= argc) {
-        fprintf (h_error, "oz_cli: missing value string after -value\n");
-        sts = SS$_IVPARAM;
-        goto rtn;
-      }
-      rlen = strlen (argv[i]);
-      crelognampar.values[crelognampar.nvalues].buff = malloc (rlen + 1);
-      memcpy (crelognampar.values[crelognampar.nvalues++].buff, argv[i], rlen + 1);
-      crelognampar.values[crelognampar.nvalues].attr = 0;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      sts = SS$_IVPARAM;
-      goto rtn;
-    }
-
-    /* No option - this is the logical name or a value */
-
-    if (crelognampar.logical_name == NULL) {
-      crelognampar.logical_name = argv[i];
-    } else {
-      rlen = strlen (argv[i]);
-      crelognampar.values[crelognampar.nvalues].buff = malloc (rlen + 1);
-      memcpy (crelognampar.values[crelognampar.nvalues++].buff, argv[i], rlen + 1);
-      crelognampar.values[crelognampar.nvalues].attr = 0;
-    }
-  }
-
-  /* Make sure we got a logical name in there somewhere */
-
-  if (crelognampar.logical_name == NULL) {
-    fprintf (h_error, "oz_cli: missing logical name\n");
-    sts = SS$_IVPARAM;
-    goto rtn;
-  }
-
-  /* Create the logical name */
-
-#if 0
-  oz_sys_printkp (0, "  crelognampar.h_table      %x\n", crelognampar.h_table);
-  oz_sys_printkp (0, "  crelognampar.logical_name %p '%s'\n", crelognampar.logical_name, crelognampar.logical_name);
-  oz_sys_printkp (0, "  crelognampar.lognamatr    %x\n", crelognampar.lognamatr);
-  oz_sys_printkp (0, "  crelognampar.nvalues      %u\n", crelognampar.nvalues);
-  oz_sys_printkp (0, "  crelognampar.values       %p\n", crelognampar.values);
-  for (j = 0; j < crelognampar.nvalues; j ++) {
-    oz_sys_printkp (0, "  crelognampar.values[%u].attr %x\n", j, crelognampar.values[j].attr);
-    if (crelognampar.values[j].attr & 1/*OZ_LOGVALATR_OBJECT*/) oz_sys_printkp (0, "  crelognampar.values[%u].buff %x\n", j, (unsigned long)crelognampar.values[j].buff);
-    else oz_sys_printkp (0, "  crelognampar.values[%u].buff %p '%s'\n", j, crelognampar.values[j].buff, crelognampar.values[j].buff);
-  }
-#endif
-
-  if (!kernel) sts = crelognam (PSL$C_USER, &crelognampar);
-  else sts = oz_sys_callknl (crelognam, &crelognampar);
-
-  if ((sts != SS$_NORMAL) && (sts != SS$_SUPERSEDE)) fprintf (h_error, "oz_cli: error %u creating logical name %s\n", sts, crelognampar.logical_name);
-
-  /* All done, release memory for any strings and release handles for any objects in the values array */
-
-rtn:
-  while (crelognampar.nvalues > 0) {
-    j = -- crelognampar.nvalues;
-    if (!(crelognampar.values[j].attr & 1/*OZ_LOGVALATR_OBJECT*/)) free (crelognampar.values[j].buff);
-  }
-  while ((handleclose = handlecloses) != NULL) {
-    handlecloses = handleclose -> next;
-    oz_sys_handle_release (PSL$C_KERNEL, handleclose -> handle);
-    free (handleclose);
-  }
-
-  /* Free off the values array */
-
-  free (crelognampar.values);
-
-  /* Return completion status */
-
-  oz_sys_handle_release (PSL$C_KERNEL, crelognampar.h_table);
+  sts=sys$crelnm(0,&mytabnam,&mynam,0,itm);
 
   return (sts);
 }
@@ -4592,36 +4369,26 @@ static unsigned long crelogtbl (unsigned long cprocmode, void *crelogtblparv);
 static unsigned long int_create_logical_table (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  Crelogtblpar crelogtblpar;
   int i, kernel;
   unsigned long sts;
 
-  crelogtblpar.table_name = NULL;
-  crelogtblpar.lognamatr  = LNM$M_TABLE;
+  struct dsc$descriptor mypartab, mytabnam;
+
+  if (argc>1 && 0==strncmp(argv[0],"/parent_table",strlen(argv[0]))) {
+    mypartab.dsc$w_length=strlen(argv[1]);
+    mypartab.dsc$a_pointer=argv[1];
+    mytabnam.dsc$w_length=strlen(argv[2]);
+    mytabnam.dsc$a_pointer=argv[2];
+  } else {
+    mypartab.dsc$w_length=strlen("LNM$SYSTEM_DIRECTORY");
+    mypartab.dsc$a_pointer="LNM$SYSTEM_DIRECTORY";
+    mytabnam.dsc$w_length=strlen(argv[0]);
+    mytabnam.dsc$a_pointer=argv[0];
+  }
+
   kernel = 0;
 
   for (i = 0; i < argc; i ++) {
-
-    /* Kernel - create logical in kernel mode */
-
-    if (strcmp (argv[i], "-kernel") == 0) {
-      kernel = 1;
-      continue;
-    }
-
-    /* Nooutermode - do not allow outer mode versions of logical */
-
-    if (strcmp (argv[i], "-nooutermode") == 0) {
-      crelogtblpar.lognamatr |= 0; //OZ_LOGNAMATR_NOOUTERMODE;
-      continue;
-    }
-
-    /* Nosupersede - logical is not allowed to be overwritten, must be deassigned first */
-
-    if (strcmp (argv[i], "-nosupersede") == 0) {
-      crelogtblpar.lognamatr |= 2;//OZ_LOGNAMATR_NOSUPERSEDE;
-      continue;
-    }
 
     /* Unknown option */
 
@@ -4630,10 +4397,9 @@ static unsigned long int_create_logical_table (unsigned long h_input, unsigned l
       return (SS$_IVPARAM);
     }
 
-    /* No option - this is the logical name */
-
-    crelogtblpar.table_name = argv[i];
   }
+
+#if 0
 
   /* Make sure we got a logical name in there somewhere */
 
@@ -4642,11 +4408,12 @@ static unsigned long int_create_logical_table (unsigned long h_input, unsigned l
     return (SS$_IVPARAM);
   }
 
+#endif
+
   /* Create the table and return status */
 
-  if (!kernel) sts = crelogtbl (PSL$C_USER, &crelogtblpar);
-  else sts = oz_sys_callknl (crelogtbl, &crelogtblpar);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u creating logical table %s\n", sts, crelogtblpar.table_name);
+  sts = sys$crelnt(0,0,0,0,0,&mytabnam,&mypartab,0);
+
   return (sts);
 }
 
@@ -7900,6 +7667,9 @@ static unsigned long show_job_byhandle (unsigned long h_output, unsigned long h_
 
   return (sts);
 }
+
+#endif
+
 
 /************************************************************************/
 /*									*/
@@ -7918,26 +7688,9 @@ static unsigned long int_show_logical_name (unsigned long h_input, unsigned long
   logical_name = NULL;
   sholnmflg    = 0;
 
-  for (i = 0; i < argc; i ++) {
+  sts = show_logical(argc, argv);
 
-    /* - security */
-
-    if (strcmp (argv[i], "-security") == 0) {
-      sholnmflg |= SHOLNMFLG_SECURITY;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is the logical name */
-
-    logical_name = argv[i];
-  }
+  return sts;
 
   if (logical_name == NULL) {
     fprintf (h_error, "oz_cli: missing logical name\n");
@@ -7958,6 +7711,8 @@ static unsigned long int_show_logical_name (unsigned long h_input, unsigned long
 
   return (sts);
 }
+
+#if 0
 
 /************************************************************************/
 /*									*/

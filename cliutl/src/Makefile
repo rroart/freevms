@@ -23,8 +23,8 @@ setproces: setproces.o
 set.a: setproces.o setwork.o
 	ar r set.a setproces.o setwork.o
 
-show.a: showsystem.o showdevice.o showwork.o
-	ar r show.a showsystem.o showdevice.o showwork.o
+show.a: showsystem.o showdevice.o showwork.o showlog.o
+	ar r show.a showsystem.o showdevice.o showwork.o showlog.o
 
 setproces.o: setproces.c
 	gcc -I../../starlet/src -I../../librtl/src/ -c setproces.c
@@ -40,6 +40,9 @@ showdevice.o: showdevice.c
 
 showwork.o: showwork.c
 	gcc -I../../starlet/src -I../../librtl/src/ -c showwork.c
+
+showlog.o: showlog.c
+	gcc -I../../starlet/src -I../../librtl/src/ -c showlog.c
 
 create${EXE}: create.c $(LIB)
 	gcc $(FLAGS) -g -I../../starlet/src -I../../librtl/src/ -I../../lib/src create.c ../../librtl/src/starlet.a ../../starlet/src/starlet.a -o create${EXE}

@@ -73,6 +73,19 @@ STOP:
 	stop
 	DCL only (unless you use /vms\$common/syshlp/examples/forcex)
 
+DEFINE:
+	define /table table logical equivalence
+	DCL only
+
+CREATE /NAME_TABLE
+	create /name_table /parent_table parent name
+	create /name_table name
+	DCL only
+
+SHOW LOGICAL:
+	show /table table logical
+	DCL only
+
 ******************************
 
 Clustering:
@@ -117,6 +130,8 @@ NOTES/bugs general:
 
 ODS2 write-support seems to have gotten some problems.
 Do not expect DECnet to work (collides with cluster code)
+Logicals only can be used with show logical, define and create /name_table;
+nowhere else yet. (And only without nesting.)
 
 ******************************
 
