@@ -166,7 +166,7 @@ void ide$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, st
   ucb->ucb$b_flck=IPL$_IOLOCK8;
   ucb->ucb$b_dipl=IPL$_IOLOCK8;
 
-  ucb->ucb$l_devchar = DEV$M_REC | DEV$M_AVL | DEV$M_CCL /*| DEV$M_OOV*/;
+  ucb->ucb$l_devchar = DEV$M_REC | DEV$M_AVL | DEV$M_CCL | DEV$M_FOD/*| DEV$M_OOV*/;
 
   ucb->ucb$l_devchar2 = DEV$M_NNM;
   ucb->ucb$b_devclass = DC$_MISC;
