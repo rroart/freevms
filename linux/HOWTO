@@ -10,6 +10,7 @@ Redhat 8.0 with gcc 3.2 (RedHat patched) works. The anonymous structure offset
 bugs present in pure gcc 3.0.1 was gone in pure 3.1.
 With recent gcc/Redhat uml gets backtrace problems and is partially broken.
 Use gcc 2.96 etc with uml.
+Do not use as recent gcc as 3.3.
 
 Linker (experimental):
 If you want to know how to make the linker do: cat linker/src/HOW
