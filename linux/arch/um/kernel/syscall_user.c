@@ -121,6 +121,22 @@ int do_syscall(void *task, int pid)
 		unsigned long long i = 1, j = 80;
 		unsigned long * l;
 		printk("trace myself %x %x\n",syscall,(unsigned long *) PT_IP(proc_regs));
+		{
+			extern int segfault_index;
+			extern struct {
+				unsigned long address;
+				int is_write;
+				int pid;
+				unsigned long sp;
+				int is_user;
+			} segfault_record[1024];
+			int i=segfault_index-1;
+			printk("segf addr %x\n",segfault_record[i].address);
+			printk("segf pid %x\n",segfault_record[i].pid);
+			printk("segf is_write %x\n",segfault_record[i].is_write);
+			printk("segf sp %x\n",segfault_record[i].sp);
+			printk("segf is_user %x\n",segfault_record[i].is_user);
+		}
 		for(l=&i; j; j--, l++) printk("%x ",*l); 
 		printk("\n");
 		tracer_panic("I'm tracing myself and I can't get out");
