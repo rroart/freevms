@@ -8,6 +8,7 @@
 #include<aqbdef.h>
 #include<cdtdef.h>
 #include<crbdef.h>
+#include<dcdef.h>
 #include<ddbdef.h>
 #include<ddtdef.h>
 #include<devdef.h>
@@ -25,7 +26,7 @@
 #include<vcbdef.h>
 #include<linux/vmalloc.h>
 
-struct _fdt fdt_file = {
+struct _fdt file$fdt = {
   fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
@@ -119,6 +120,7 @@ void  file_startio3 (struct _irp * i, struct _ucb * u) {
 /* more yet undefined dummies */
 void  file_unsolint (void) { };
 void  file_cancel (void) { };
+static void  ioc_std$cancelio (void) { };
 void  file_regdump (void) { };
 void  file_diagbuf (void) { };
 void  file_errorbuf (void) { };
@@ -142,6 +144,10 @@ int acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _cc
 
 int acp_std$deaccess(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
+int acp_std$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
 void fl_read(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   exe$qiodrvpkt(i,p,u);
 };
@@ -150,10 +156,10 @@ void file_write(void) {
 
 };
 
-struct _ddt ddt_file = {
+struct _ddt file$ddt = {
   ddt$l_start: file_startio,
   ddt$l_unsolint: file_unsolint,
-  ddt$l_fdt: &fdt_file,
+  ddt$l_fdt: &file$fdt,
   ddt$l_cancel: file_cancel,
   ddt$l_regdump: file_regdump,
   ddt$l_diagbuf: file_diagbuf,
@@ -173,6 +179,86 @@ struct _ddt ddt_file = {
 /* include a buffered 4th param? */
 extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long);
 
+void file$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
+  ucb->ucb$b_flck=IPL$_IOLOCK8;
+  ucb->ucb$b_dipl=IPL$_IOLOCK8;
+
+  ucb->ucb$l_devchar = DEV$M_REC | DEV$M_AVL | DEV$M_CCL /*| DEV$M_OOV*/;
+
+  ucb->ucb$l_devchar2 = DEV$M_NNM;
+  ucb->ucb$b_devclass = DC$_MISC;
+  ucb->ucb$b_devtype = DT$_TTYUNKN;
+  ucb->ucb$w_devbufsiz = 132;
+
+  ucb->ucb$l_devdepend = 99; // just something to fill
+
+  // dropped the mutex stuff
+
+  return;
+}
+
+void file$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
+  ddb->ddb$ps_ddt=&file$ddt;
+  //dpt_store_isr(crb,nl_isr);
+  return;
+}
+
+int file$unit_init (struct _idb * idb, struct _ucb * ucb) {
+  ucb->ucb$v_online = 0;
+  //ucb->ucb$l_lr_msg_tmo = 0 ; // or offline? // where did this go?
+
+  // idb->idb$ps_owner=&(ucb->ucb$r_ucb); // this is mailbox?
+  // no adp or cram stuff
+
+  // or ints etc
+  
+  ucb->ucb$v_online = 1;
+
+  return SS$_NORMAL;
+}
+
+struct _dpt file$dpt;
+struct _ddb file$ddb;
+struct _ucb file$ucb;
+struct _crb file$crb;
+
+int file$init_tables() {
+  ini_dpt_name(&file$dpt, "DFDRIVER");
+  ini_dpt_adapt(&file$dpt, 0);
+  ini_dpt_defunits(&file$dpt, 1);
+  ini_dpt_ucbsize(&file$dpt,sizeof(struct _ucb));
+  ini_dpt_struc_init(&file$dpt, file$struc_init);
+  ini_dpt_struc_reinit(&file$dpt, file$struc_reinit);
+  ini_dpt_ucb_crams(&file$dpt, 1/*NUMBER_CRAMS*/);
+  ini_dpt_end(&file$dpt);
+
+  ini_ddt_unitinit(&file$ddt, file$unit_init);
+  ini_ddt_start(&file$ddt, file_startio);
+  ini_ddt_cancel(&file$ddt, ioc_std$cancelio);
+  ini_ddt_end(&file$ddt);
+
+  /* for the fdt init part */
+  /* a lot of these? */
+  ini_fdt_act(&file$fdt,IO$_ACCESS,acp_std$access,1);
+  ini_fdt_act(&file$fdt,IO$_READLBLK,acp_std$readblk,1);
+  ini_fdt_act(&file$fdt,IO$_READPBLK,acp_std$readblk,1);
+  ini_fdt_act(&file$fdt,IO$_READVBLK,acp_std$readblk,1);
+  ini_fdt_act(&file$fdt,IO$_WRITELBLK,acp_std$writeblk,1);
+  ini_fdt_act(&file$fdt,IO$_WRITEPBLK,acp_std$writeblk,1);
+  ini_fdt_act(&file$fdt,IO$_WRITEVBLK,acp_std$writeblk,1);
+  ini_fdt_act(&file$fdt,IO$_CREATE,acp_std$access,1);
+  ini_fdt_act(&file$fdt,IO$_DEACCESS,acp_std$deaccess,1);
+  ini_fdt_act(&file$fdt,IO$_DELETE,acp_std$modify,1);
+  ini_fdt_act(&file$fdt,IO$_MODIFY,acp_std$modify,1);
+  ini_fdt_act(&file$fdt,IO$_ACPCONTROL,acp_std$modify,1);
+  ini_fdt_act(&file$fdt,IO$_MOUNT,acp_std$mount,1);
+  ini_fdt_end(&file$fdt);
+
+  return SS$_NORMAL;
+}
+
+
+
 //static struct _fdt file_fdt;
 
 struct _dpt file_dpt;
@@ -184,92 +270,65 @@ struct _crb nullcrb;
 struct _ccb nullccb;
 #endif
 
-int acp_std$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
-int acp_std$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+void __fl_init(void) {
+  struct _ucb * ucb=&file$ucb;
+  struct _ddb * ddb=&file$ddb;
+  struct _crb * crb=&file$crb;
+  unsigned long idb=0,orb=0;
+  struct _ccb * ccb;
+  struct _ucb * newucb,newucb1;
 
-struct _ucb * fl_init(char * s) {
-  struct _ucb * u;
-  struct _ddb * d;
-  struct _crb * c;
+//  ioc_std$clone_ucb(&file$ucb,&ucb);
+  bzero(ucb,sizeof(struct _ucb));
+  bzero(ddb,sizeof(struct _ddb));
+  bzero(crb,sizeof(struct _crb));
 
-  u=vmalloc(sizeof(struct _ucb));
-  bzero(u,sizeof(struct _ucb));
-  d=vmalloc(sizeof(struct _ddb));
-  bzero(d,sizeof(struct _ddb));
-  c=vmalloc(sizeof(struct _crb));
+  init_ddb(&file$ddb,&file$ddt,&file$ucb,"dfa");
+  init_ucb(&file$ucb, &file$ddb, &file$ddt, &file$crb);
+  init_crb(&file$crb);
 
-  bzero(c,sizeof(struct _crb));
-  bzero(u,sizeof(struct _ucb));
-  bzero(d,sizeof(struct _ddb));
-  bzero(c,sizeof(struct _crb));
+  file$init_tables();
+  file$struc_init (crb, ddb, idb, orb, ucb);
+  file$struc_reinit (crb, ddb, idb, orb, ucb);
+  file$unit_init (idb, ucb);
 
-  insertdevlist(d);
-  insertfillist(u);
-
-  /* this is a all-in-one, should be split later */
-
-  /* for the dpt part */
-  bcopy("FLDRIVER",file_dpt.dpt$t_name,8);
-  file_dpt.dpt$ps_ddt=&ddt_file;
-
-  /* for the ddb init part */
-  //  d->ddb$ps_link=d;
-  //  d->ddb$ps_blink=d;
-  d->ddb$b_type=DYN$C_DDB;
-  d->ddb$l_ddt=&ddt_file;
-  d->ddb$ps_ucb=u;
-  bcopy(s,d->ddb$t_name,strlen(s));
-
-  /* for the ucb init part */
-  qhead_init(&u->ucb$l_ioqfl);
-  u->ucb$b_type=DYN$C_UCB;
-  u->ucb$b_flck=IPL$_IOLOCK8;
-  /* devchars? */
-  u->ucb$b_devclass=DEV$M_RND; /* just maybe? */
-  u->ucb$b_dipl=IPL$_IOLOCK8;
-  //  bcopy("nla0",u->ucb$t_name,4);
-  u->ucb$l_ddb=d;
-  u->ucb$l_crb=c;
-  u->ucb$l_ddt=&ddt_file;
-
-  /* for the crb init part */
-  c->crb$b_type=DYN$C_CRB;
-
-  /* and for the ddt init part */
-  ddt_file.ddt$l_fdt=&fdt_file;
-
-  /* for the fdt init part */
-  /* a lot of these? */
-  ini_fdt_act(&fdt_file,IO$_READLBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt_file,IO$_READPBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt_file,IO$_READVBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt_file,IO$_WRITELBLK,acp_std$writeblk,1);
-  ini_fdt_act(&fdt_file,IO$_WRITEPBLK,acp_std$writeblk,1);
-  ini_fdt_act(&fdt_file,IO$_WRITEVBLK,acp_std$writeblk,1);
-  ini_fdt_act(&fdt_file,IO$_ACCESS,acp_std$access,1);
-  ini_fdt_act(&fdt_file,IO$_CREATE,acp_std$access,1);
-  ini_fdt_act(&fdt_file,IO$_DEACCESS,acp_std$deaccess,1);
-  ini_fdt_act(&fdt_file,IO$_DELETE,acp_std$modify,1);
-  ini_fdt_act(&fdt_file,IO$_MODIFY,acp_std$modify,1);
-  ini_fdt_act(&fdt_file,IO$_ACPCONTROL,acp_std$modify,1);
-  ini_fdt_act(&fdt_file,IO$_MOUNT,acp_std$mount,1);
-  return u;
+  insertdevlist(ddb);
 }
 
-char filedriverstring[]="FLDRIVER";
-
-struct _dpt file_dpt = {
-  //  dpt$t_name:"FLDRIVER"
-  //  dpt$b_type:&testme,
-  // dpt$t_name:filedriverstring  // have no idea why this won't compile
-  // dpt$ps_ddt:&ddt_file;
-};
-
 struct _ucb * myfilelist[50];
+char * myfilelists[50];
 int myfilelistptr=0;
 
-insertfillist(struct _ucb *u) {
+insertfillist(struct _ucb *u, char *s) {
+  myfilelists[myfilelistptr]=kmalloc(strlen(s),0);
+  memcpy(myfilelists[myfilelistptr],s,strlen(s));
   myfilelist[myfilelistptr++]=u;
+}
+
+struct _ucb * fl_init(char * s) {
+  struct _ucb * newucb;
+
+  ioc_std$clone_ucb(&file$ucb,&newucb);
+
+  newucb->ucb$l_orb=myfilelistptr;
+
+  insertfillist(newucb,s);
+
+  return newucb;
+}
+
+char * do_file_translate(char * from) {
+  int i;
+  for (i=0;i<myfilelistptr;i++) {
+    if (0==strncmp(from,myfilelists[i],strlen(myfilelists[i]))) {
+      char * c=kmalloc(strlen(myfilelists[i])+2,GFP_KERNEL);
+      memcpy(c,"dfa0",4);
+      c[3]+=i;
+      c[4]=0;
+      return c;
+    }
+  }
+  return from;
 }
 
 #if 0
