@@ -862,7 +862,7 @@ void * exttwo_search_fcb(struct _vcb * vcb,struct inode * inode)
     struct _fcb * head = &vcb->vcb$l_fcbfl;
     struct _fcb * tmp = head->fcb$l_fcbfl;
     while(tmp!=head) {
-      if (tmp->fcb$l_fid_recnum==inode->i_ino && tmp->fcb$w_fid_dirnum==inode->i_dev) return tmp;
+      if (tmp->fcb$w_fid[1]==(inode->i_ino&0xffff) && tmp->fcb$w_fid[2]==(inode->i_ino>>16) && tmp->fcb$w_fid_dirnum==inode->i_dev) return tmp;
       tmp=tmp->fcb$l_fcbfl;
     }
     return 0;
