@@ -340,8 +340,8 @@ extern syscall_handler_t exe$getqui           ;
 extern syscall_handler_t exe$getmsg           ;
 extern syscall_handler_t exe$putmsg           ;
 extern syscall_handler_t exe$excmsg           ;
-extern syscall_handler_t exe$getsyi           ;
-extern syscall_handler_t exe$getsyiw          ;
+extern syscall_handler_t exe$getsyi_wrap           ;
+extern syscall_handler_t exe$getsyiw_wrap          ;
 extern syscall_handler_t exe$device_scan      ;
 extern syscall_handler_t exe$getdvi_wrap      ;
 extern syscall_handler_t exe$fao              ;
@@ -705,8 +705,8 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$getmsg           ] = exe$getmsg          ,
 	[ __NR_$putmsg           ] = exe$putmsg          ,
 	[ __NR_$excmsg           ] = exe$excmsg          ,
-	[ __NR_$getsyi           ] = exe$getsyi          ,
-	[ __NR_$getsyiw          ] = exe$getsyiw         ,
+	[ __NR_$getsyi           ] = exe$getsyi_wrap          ,
+	[ __NR_$getsyiw          ] = exe$getsyiw_wrap         ,
 	[ __NR_$device_scan      ] = exe$device_scan     ,
 	[ __NR_$getdvi           ] = exe$getdvi_wrap     ,
 	[ __NR_$fao              ] = exe$fao             ,
