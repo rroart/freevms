@@ -24,6 +24,8 @@
 #include <lnmdef.h>
 #include <descrip.h>
 
+#ifdef CONFIG_VMS
+
 struct mm_struct *swap_mm = &init_mm;
 
 DECLARE_WAIT_QUEUE_HEAD(kswapd_wait);
@@ -124,6 +126,7 @@ static int __init kswapd_init(void)
 }
 
 module_init(kswapd_init)
+#endif
 
 struct _lnmth lnm_sys_dir_table_header;
 

@@ -532,7 +532,7 @@ int unit_init(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
 int net_open(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) ;
 int queue_2_acp(struct _irp * i, struct _pcb * p, struct _ucb * u) ;
 int net_abort(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) ;
-int net_send(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) ;
+int Net_Send(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) ;
 int send_common(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c, struct AB * buf) ;
 int ip_send(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) ;
 int net_receive(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) ;				// Receive data from network
@@ -640,7 +640,7 @@ int ip4$init_tables() {
   /* for the fdt init part */
   /* a lot of these? */
 
-  ini_fdt_act(&ip4$fdt,IO$_WRITELBLK,net_send,1);
+  ini_fdt_act(&ip4$fdt,IO$_WRITELBLK,Net_Send,1);
   ini_fdt_act(&ip4$fdt,IO$_READVBLK,exe_std$abortio,1);
   ini_fdt_act(&ip4$fdt,IO$_READVBLK,exe_std$abortio,1);
   ini_fdt_act(&ip4$fdt,IO$_READLBLK,net_receive,1);
@@ -1217,7 +1217,7 @@ Bad_LC_ID:
 
 
 
-int net_Send(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+int Net_Send(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   struct SE * buf;
 	int sts = netacp_alive(u);		// network ACP still running?
 	if (sts!=SS$_NORMAL)

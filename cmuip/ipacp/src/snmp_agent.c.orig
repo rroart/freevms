@@ -73,8 +73,6 @@ SOFTWARE.
 
 #include "mib.h"
 
-#include <linux/string.h>
-
 int	snmp_input();
 void	snmp_trap();
 int	create_identical();

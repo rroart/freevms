@@ -29,14 +29,14 @@ obj-y     = sched.o \
 	    sysgetsyi.o sysrundwn.o syscreprc.o procstrt.o sysimgact.o \
 	    syssetprt.o syssetprv.o syspurgws.o uai.o sysparprc.o \
 	    sysupdsec.o sysgetjpi.o syssetexv.o process_scan.o \
-	    pagefile.o comdrvsub.o syscancel.o
+	    pagefile.o comdrvsub.o syscancel.o swapper.o 
 
 ifeq ($(CONFIG_VMS),y)
 export-objs := vmsshmem.o vmsfilemap.o vmsbuffer.o
 endif
 
 obj-$(CONFIG_VMS) += memoryalc.o vmsbootmem.o ptalloc.o \
-			vmsslab.o swapper.o wrtmfypag.o \
+			vmsslab.o wrtmfypag.o \
 			vmsmmap.o vmsfilemap.o vmsmemory.o vmsmremap.o \
 	 		vmsmprotect.o vmsmlock.o vmsvmalloc.o \
 			vmsshmem.o vmsswapfile.o allocpfn.o
