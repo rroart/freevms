@@ -100,7 +100,7 @@ struct _cwpssrv {
   unsigned short int cwpssrv$w_spare2;
   unsigned char cwpssrv$b_spare3;
   unsigned char cwpssrv$b_retries_left;
-  unsigned unsigned long long cwpssrv$q_time;
+  unsigned long long cwpssrv$q_time;
 };
  
 #define		CWPS$_ENABLED		1
@@ -137,8 +137,8 @@ struct _cwpspri {
 #define		CWPSSWK$S_$CWPSSWKDEF		16
 	
 struct _cwpsswk {
-  unsigned unsigned long long cwpsswk$q_daytim;
-  unsigned unsigned long long cwpsswk$q_reptim;
+  unsigned long long cwpsswk$q_daytim;
+  unsigned long long cwpsswk$q_reptim;
 };
 
 #define		CWPSJPI$K_LENGTH		60
@@ -153,7 +153,7 @@ struct _cwpsjpi {
   void *cwpsjpi$l_itmlst;
   unsigned int cwpsjpi$l_buflen;
   void *cwpsjpi$l_iosbadr;
-  unsigned unsigned long long cwpsjpi$q_iosb;
+  unsigned long long cwpsjpi$q_iosb;
   void (*cwpsjpi$l_astadr)();
   unsigned int cwpsjpi$l_astprm;
   void *cwpsjpi$l_pscanctx_addr;
@@ -184,8 +184,8 @@ struct _cwpsjpi_64 {
 struct _cwpscreprc {
   unsigned int cwpscre$l_base_offset;
   unsigned int cwpscre$l_acboff;
-  unsigned unsigned long long cwpscre$q_prvmsk;
-  unsigned unsigned long long cwpscre$q_iosb;
+  unsigned long long cwpscre$q_prvmsk;
+  unsigned long long cwpscre$q_iosb;
   unsigned int cwpscre$l_priority;
   unsigned int cwpscre$l_uic;
   unsigned int cwpscre$l_defprot;
@@ -253,7 +253,7 @@ struct _cwpscreprc {
 struct _cwpsterm {
   unsigned int cwpsterm$l_base_offset;
   unsigned int cwpsterm$l_acboff;
-  unsigned unsigned long long< cwpsterm$q_iosb;
+  unsigned long long cwpsterm$q_iosb;
   unsigned int cwpsterm$l_deleted_proc_epid;
   unsigned int cwpsterm$l_spare;
   char cwpsterm$t_term_msg [84];
