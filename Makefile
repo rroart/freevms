@@ -104,4 +104,14 @@ build-bliss:
 	make build-bliss; \
 	cd ../..
 
+download-grub:
+	cd grub/src; \
+	make download-grub; \
+	cd ../..
+
+build-grub:
+	cd grub/src; \
+	make build-grub; \
+	cd ../..
+
 include Makefile.kernel

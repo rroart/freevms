@@ -1,0 +1,14 @@
+#!/bin/sh
+CFLAGS=
+CPPFLAGS=
+CC=
+rm -rf grub-0.95
+tar xzf grub-0.95.tar.gz
+cd grub-0.95
+patch -p1 < ../grub-0.95-diff1
+cd ..
+mkdir build
+cd build
+../grub-0.95/configure --enable-ext2fs --enable-ods2
+make
+cd ..
