@@ -464,6 +464,7 @@ unsigned f11b_create(struct _vcb *vcb,struct _irp * i)
     //fib->fib$b_did_rvn = 0;
     //fib->fib$b_did_nmx = 0;
     sts = f11b_access(vcb,i); // should not be, but can not implement otherwise for a while
+    if ( (sts & 1) == 0) { iosbret(i,sts); return sts; }
 #if 0
     fcb=f11b_search_fcb(vcb,fid);
     head = f11b_read_header(vcb,fid,fcb,&iosb);
