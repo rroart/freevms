@@ -1,14 +1,19 @@
 # $Id$
 # $Locker$
 
-all: setproces
+all: setproces show.a
 
 setproces: setproces.o
-	cc -o setproces setproces.o ../../starlet/src/vmsopt.a ../../starlet/src/starlet.a
+	gcc -o setproces setproces.o ../../starlet/src/vmsopt.a ../../starlet/src/starlet.a
 
 setproces.o: setproces.c
-	cc -c setproces.c
+	gcc -c setproces.c
 
-userland:
-	cc -I. -I.. lnmsub.c syslnm.c system_data_cells.c ../../pal/src/libqueue.a -o test -g -DUSERLAND
+show.a: showsystem.o showdevice.o
+	ar q show.a showsystem.o showdevice.o
 
+showsystem.o: showsystem.c
+	gcc -I../../starlet/src -I../../librtl/src/ -c showsystem.c
+
+showdevice.o: showdevice.c
+	gcc -I../../starlet/src -I../../librtl/src/ -c showdevice.c

@@ -1,9 +1,11 @@
-all: vmsopt.a starlet.c starlet.h
-	cc -c starlet.c
-	cc -Dcompile_um -c starlet.c -o starletum.o
-	cc -c -I../../starlet/src rms.c
-	ar q starlet.a starlet.o rms.o
-	ar q starletum.a starletum.o rms.o
+all: starlet.a starletum.a
+
+starlet.a: vmsopt.a starlet.c starlet.h
+	gcc -c starlet.c
+	gcc -Dcompile_um -c starlet.c -o starletum.o
+	gcc -c -I../../starlet/src rms.c
+	ar r starlet.a starlet.o rms.o
+	ar r starletum.a starletum.o rms.o
 	ranlib starlet.a
 	ranlib starletum.a
 
@@ -12,5 +14,5 @@ vmsopt.a:	vmsopt.o
 
 
 vmsopt.o:	vmsopt.c
-		cc -O2 -o vmsopt.o -c vmsopt.c
+		gcc -O2 -o vmsopt.o -c vmsopt.c
 
