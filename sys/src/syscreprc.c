@@ -209,6 +209,8 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	write_lock_irq(&tasklist_lock);
 
 	/* CLONE_PARENT and CLONE_THREAD re-use the old parent */
+	p->p_opptr = current->p_opptr;
+	p->p_pptr = current->p_pptr;
 
 	SET_LINKS(p);
 
@@ -226,7 +228,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	// wait, better do execve itself
 
 #ifdef __arch_um__
-	//what:?	retval = new_thread(0, clone_flags, 0, 0, p, 0);
+	retval = new_thread(0, clone_flags, 0, 0, p, 0);
 
 	void * regs = &p->thread.regs;
 #else
