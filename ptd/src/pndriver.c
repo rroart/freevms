@@ -1083,7 +1083,7 @@ int PN$CLONE_INIT(struct _ucb * u) {
  // R5 = PTY UCB
  void (*fn)();
  fn=R0;
- fn(new);  // check				// CALL THE UNIT INIT ROUTINE
+ fn(0,new);  // check				// CALL THE UNIT INIT ROUTINE
  p = ctl$gl_pcb;		// Use current PCB
 #if 0
  // not yet
@@ -1265,8 +1265,8 @@ int PN$STARTIO (struct _irp * i, struct _ucb * u) {
  // Output queue exhausted
  PZ_DONE:
  u = ((struct _tz_ucb *)u)->ucb$l_tz_xucb;		// Switch UCBs to PZ UCB
- if	(UCB$M_BSY&		// If not BSY then ignore
-	 u->ucb$l_sts==0) return;	// the char
+ if	((UCB$M_BSY&		// If not BSY then ignore
+	 u->ucb$l_sts)==0) return;	// the char
  irp = u->ucb$l_irp;		// Restore IRP
  if	(irp->irp$l_bcnt==	// Any characters moved
 	 u->ucb$l_bcnt)
@@ -1697,7 +1697,7 @@ int PN$FDTSENSEC(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
     buf[2]=devdep2;		;
   // RETURN IOSB DATA
   //expanded	goto	CMN_EXIT;		// EXIT RETURNING R0,R1	
-  return exe$finishioc(speed|SS$_NORMAL,parity,i,p,u);	// check 	// COMPLETE REQUEST IOSB WORD 0,1
+  return exe$finishio(speed|SS$_NORMAL,parity,i,p,u);	// check 	// COMPLETE REQUEST IOSB WORD 0,1
   //duplicated
 
 }
