@@ -64,6 +64,9 @@
 #include <cdrpdef.h>
 #include <cdtdef.h>
 #include <chdef.h>
+#include <ddbdef.h>
+#include <descrip.h>
+#include <dyndef.h>
 #include <mscpdef.h> // does not belong?
 #include <nisca.h>
 #include <pbdef.h>
@@ -75,10 +78,11 @@
 #include <scsdef.h>
 #include <ssdef.h>
 #include <system_data_cells.h>
+#include <ucbdef.h>
 #include <vcdef.h>
 
 extern struct _pb mypb;
-extern struct _sb mysb;
+extern struct _sb othersb;
 
 extern struct _cdt cdtl[1024];
 extern struct _rdt rdt;
@@ -1290,6 +1294,8 @@ static int first_hello=0;
 /*
  * Endnode hello message received
  */
+extern int startconnect(int);
+
 int dn_neigh_endnode_hello(struct sk_buff *skb)
 {
 	struct _nisca *msg = skb->data;
@@ -1308,6 +1314,13 @@ int dn_neigh_endnode_hello(struct sk_buff *skb)
 	if (!first_hello) {
 	  first_hello++;
 	  printk("scs received hello from node %s\n",&msg->nisca$t_nodename[1]);
+	  {
+	    signed long long time=-100000000;
+	    //	    $DESCRIPTOR(tensec,"0 00:00:10.00");
+	    //exe$bintim(&tensec,&time);
+	    //time=-time;
+	    exe$setimr(0,&time,startconnect,0,0);
+	  }
 	}
 
 	// next should be more protocol-stuff or first a plain init
@@ -1315,7 +1328,7 @@ int dn_neigh_endnode_hello(struct sk_buff *skb)
 	mypb.pb$w_state=PB$C_OPEN;
 
 	memcpy(&mypb.pb$b_rstation,&msg->nisca$ab_lan_hw_addr,6);
-	memcpy(&mysb.sb$t_nodename,&msg->nisca$t_nodename,8);
+	memcpy(&othersb.sb$t_nodename,&msg->nisca$t_nodename,8);
 
 #if 0
 	src = dn_htons(dn_eth2dn(msg->id));
@@ -1882,7 +1895,7 @@ void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgf
 	scs->scs$l_dst_conid=cdt->cdt$l_rconid;
 	scs->scs$l_src_conid=cdt->cdt$l_lconid;
 
-	memcpy(&nisca->nisca$t_nodename,&mysb.sb$t_nodename,8);
+	memcpy(&nisca->nisca$t_nodename,&othersb.sb$t_nodename,8);
 }
 
 void printscs(void * skbdata) {
@@ -1930,7 +1943,7 @@ void scs_msg_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg, 
 
 	//ppd->ppb$b_opc=NISCA$C_MSGREC;
 	
-	//memcpy(&nisca->nisca$t_nodename,&mysb.sb$t_nodename,8);
+	//memcpy(&nisca->nisca$t_nodename,&othersb.sb$t_nodename,8);
 }
 
 void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdrp, int bufsiz)
@@ -2183,8 +2196,8 @@ int opc_msgrec(struct sk_buff *skb) {
     scs_msg_ctl_comm(cdt,SCS$C_ACCP_REQ);
     break;
   case SCS$C_CON_RSP: 
-    //printk("CON_RSP src dst %x %x\n",scs->scs$l_src_conid,scs->scs$l_dst_conid);
-    //printk("CON_RSP l r %x %x\n",cdt->cdt$l_lconid,cdt->cdt$l_rconid);
+    printk("CON_RSP src dst %x %x\n",scs->scs$l_src_conid,scs->scs$l_dst_conid);
+    printk("CON_RSP l r %x %x\n",cdt->cdt$l_lconid,cdt->cdt$l_rconid);
     cdt->cdt$l_rconid=scs->scs$l_src_conid;
     cdt->cdt$w_state=CDT$C_CON_ACK;
     break;
@@ -2326,6 +2339,81 @@ int opc_mdatrec (struct sk_buff * skb, void * addr) { }
 int opc_snddatwm (struct sk_buff * skb, void * addr) { }
 int opc_cnfwmrec (struct sk_buff * skb, void * addr) { }
 int opc_retcnfwm (struct sk_buff * skb, void * addr) { }
+
+extern struct _ddt du$ddt;
+
+void cf_err() { }
+void cf_msg() { }
+void cf_dg() { } 
+void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
+  // just using something at some value to config ddb etc
+  struct _scs * scs = packet;
+  char * b = ((unsigned long)packet) + sizeof(*scs);
+  char devnam[16];
+  int num, i;
+  char type;
+  struct _ddb * ddb;
+  struct _ucb * ucb;
+  struct dsc$descriptor d;
+  d.dsc$w_length=4;
+  d.dsc$a_pointer=devnam;
+
+ again:
+  type=*b++;
+
+  switch (type) {
+  case 0:
+    goto end;
+
+  case DYN$C_DDB:
+    memcpy(devnam,b,16);
+    b+=16;
+    printk("maybe creating remote ddb %s on other node\n",devnam);
+#ifdef CONFIG_VMS
+    if (0==strncmp(devnam,"daa",3)) 
+      ddb=ubd_iodb_vmsinit();
+#endif
+    if (0==strncmp(devnam,"dua",3)) 
+      ddb=du_iodb_vmsinit();
+    if (0==strncmp(devnam,"dfa",3)) {
+      ddb=du_iodb_vmsinit(); // was file_
+      du_iodb_clu_vmsinit(ddb->ddb$l_ucb);
+      ddb->ddb$t_name[1]='f';
+    }
+    break;
+
+  case DYN$C_UCB:
+    num=*b++;
+    printk("maybe creating remote ddb %s on other node with %x units\n",devnam,num);
+    for (i=0;i<num;i++) {
+      devnam[3]=48+i;
+      ucb=0;
+#ifdef CONFIG_VMS
+      if (0==strncmp(devnam,"daa",3)) 
+	ucb = ubd_iodbunit_vmsinit(ddb,i,&d);
+#endif
+      if (0==strncmp(devnam,"dua",3)) 
+	ucb = du_iodbunit_vmsinit(ddb,i,&d);
+      if (0==strncmp(devnam,"dfa",3)) 
+	ucb = du_iodbunit_vmsinit(ddb,i,&d); //was file_...
+      if (ucb)
+	ucb->ucb$l_ddt=&du$ddt; // maybe bad thing to do?
+    }
+    break;
+
+  default:
+    printk("wrong scs dyn type %x\n",type);
+    break;
+  }
+
+  if (ddb)
+    ddb->ddb$ps_sb=&othersb;
+
+  goto again;
+
+ end:
+  //kfree_skb(skb);
+}
 
 unsigned long nisca_dispatch[0x17]={
 nisca_snt_dg,
