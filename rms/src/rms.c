@@ -27,8 +27,10 @@
 
 #define DEBUGx x
 
+#include<linux/config.h>
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
+#include<linux/mm.h>
 
 //#include <stdio.h>
 #include <linux/ctype.h>
@@ -1272,9 +1274,9 @@ unsigned exe$open(struct _fabdef *fab)
 			 buffer,512,block,0,0,0);
 	  sts = iosb.iosb$w_status;
 	}
-	key=vmalloc(sizeof(struct _prologue_key));
+	key=kmalloc(sizeof(struct _prologue_key),GFP_KERNEL);
 	bcopy(buffer_offset(buffer,offset),key,sizeof(struct _prologue_key));
-	xabkey=vmalloc(sizeof(struct _xabkeydef));
+	xabkey=kmalloc(sizeof(struct _xabkeydef),GFP_KERNEL);
 	xabkey->xab$b_cod=XAB$C_KEY;
 	bcopy(key,((unsigned long)xabkey)+2,sizeof(struct _prologue_key));
 	xabkey->xab$l_dvb=key->key$l_ldvbn;
@@ -1293,7 +1295,7 @@ unsigned exe$open(struct _fabdef *fab)
 		       buffer,512,block,0,0,0);
 	sts = iosb.iosb$w_status;
 	area=buffer_offset(buffer,offset);
-	xaball=vmalloc(sizeof(struct _xaballdef));
+	xaball=kmalloc(sizeof(struct _xaballdef),GFP_KERNEL);
 	xaball->xab$b_cod=XAB$C_ALL;
 	xaball->xab$b_aop=area->area$b_aop;
 	xaball->xab$b_aln=area->area$b_aln;
@@ -1311,7 +1313,7 @@ unsigned exe$open(struct _fabdef *fab)
 		       buffer,512,block,0,0,0);
 	sts = iosb.iosb$w_status;
 	area=buffer_offset(buffer,offset);
-	xaball=vmalloc(sizeof(struct _xaballdef));
+	xaball=kmalloc(sizeof(struct _xaballdef),GFP_KERNEL);
 	xaball->xab$b_cod=XAB$C_ALL;
 	xaball->xab$b_aop=area->area$b_aop;
 	xaball->xab$b_aln=area->area$b_aln;

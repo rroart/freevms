@@ -23,7 +23,7 @@
         'RMS' routines.
 */
 
-#include<linux/vmalloc.h>
+#include<linux/config.h>
 #include<linux/linkage.h>
 #include<linux/mm.h>
 

@@ -6,7 +6,6 @@
 #include<linux/unistd.h>
 #include<linux/linkage.h>
 #include<linux/sched.h>
-#include <linux/vmalloc.h>
 #include<ssdef.h>
 #include<starlet.h>
 #include<cebdef.h>
@@ -21,6 +20,7 @@
 // Author. Roar Thronæs.
 
 asmlinkage int exe$ascefc(unsigned int efn, void *name, char prot, char perm) {
+  int sts;
   struct _ceb * first=&sch$gq_cebhd;
   struct _ceb * tmp=first->ceb$l_cebfl;
   struct _ceb * c;
@@ -45,8 +45,10 @@ asmlinkage int exe$ascefc(unsigned int efn, void *name, char prot, char perm) {
   found=0;
  out:
   if (!found) {
-    c=vmalloc(sizeof(struct _ceb));
-    bzero(c,sizeof(struct _ceb));
+    int alosize;
+    sts=exe_std$allocceb(&alosize,&c);
+    if (sts!=SS$_NORMAL)
+      return sts;
     qhead_init(&c->ceb$l_wqfl);
     c->ceb$l_state=SCH$C_CEF;
     c->ceb$t_efcnam[0]=((struct dsc$descriptor *)name)->dsc$w_length;
@@ -59,6 +61,7 @@ asmlinkage int exe$ascefc(unsigned int efn, void *name, char prot, char perm) {
   efcp=getefcp(p,efn);
   *efcp=tmp;
   /* unlock mutex */
+  return SS$_NORMAL;
 }
 
 asmlinkage int exe$dacefc(unsigned int efn) {

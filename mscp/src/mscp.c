@@ -44,10 +44,10 @@ int get_mscp_chan(char * s) {
   if (ioc$search(&r,&dsc)==SS$_NORMAL)
     return ((struct _ucb *)r.val1)->ucb$ps_adp;
   ucb = fl_init(s);
-  vcb = (struct _vcb *) vmalloc(sizeof(struct _vcb));
+  vcb = (struct _vcb *) kmalloc(sizeof(struct _vcb),GFP_KERNEL);
   bzero(vcb,sizeof(struct _vcb));
   vcb->vcb$b_type=DYN$C_VCB;
-  aqb = (struct _aqb *) vmalloc(sizeof(struct _aqb));
+  aqb = (struct _aqb *) kmalloc(sizeof(struct _aqb),GFP_KERNEL);
   bzero(aqb,sizeof(struct _aqb));
   aqb->aqb$b_type=DYN$C_AQB;
   qhead_init(&aqb->aqb$l_acpqfl);
@@ -85,7 +85,7 @@ extern struct _ddt du$ddt;
 
 int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
   int sts;
-  struct _iosb * iosb=vmalloc(sizeof(struct _iosb));
+  struct _iosb * iosb=kmalloc(sizeof(struct _iosb),GFP_KERNEL);
   struct _cdrp * cdrp;
   struct _scs * scs = packet;
   struct _scs1 * scs1 = scs;
@@ -125,7 +125,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
  mscp:
   {
     unsigned long lbn=trans->mscp$l_lbn;
-    struct _hrb * hrb=vmalloc(sizeof(struct _hrb));
+    struct _hrb * hrb=kmalloc(sizeof(struct _hrb),GFP_KERNEL);
     cdrp = vmalloc(sizeof(struct _cdrp));
     bzero(cdrp,sizeof(struct _cdrp));
     bzero(hrb,sizeof(struct _hrb));

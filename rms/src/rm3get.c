@@ -3,8 +3,9 @@
 
 // Author. Roar Thronæs.
 
-#include<linux/vmalloc.h>
+#include<linux/config.h>
 #include<linux/linkage.h>
+#include<linux/string.h>
 
 //#include <stdio.h>
 #include <linux/ctype.h>
@@ -141,7 +142,7 @@ int rms$get_idx(struct _rabdef * rab) {
     restlen = get_buffer_word(rest, 0);
     primkeylen=primkeystrlen(key,keylen);
 
-    count=min(primkeylen,rab->rab$b_ksz);
+    count=mymin(primkeylen,rab->rab$b_ksz);
 
     if (0==strncmp(key,rab->rab$l_kbf,count)) {
       bcopy(key,rab->rab$l_ubf,primkeylen);

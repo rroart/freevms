@@ -19,8 +19,8 @@
 /*  This module does all directory file handling - mostly
     lookups of filenames in directory files... */
 
-
-#include <linux/vmalloc.h>
+#include <linux/config.h>
+#include <linux/mm.h>
 //#include <stdio.h>
 //#include <stdlib.h>
 #include <linux/ctype.h>

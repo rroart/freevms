@@ -8,7 +8,6 @@
 #include <linux/fs.h>
 #include <linux/ext2_fs.h>
 
-#include<linux/vmalloc.h>
 #include<linux/linkage.h>
 #include<linux/mm.h>
 #include<linux/dirent.h>
@@ -804,16 +803,16 @@ int exttwo_read_writevb(struct _irp * i) {
     buffer=exttwo_read_block(vcb,lbn*factor+rest,blocks,&iosb);
     //memcpy(i->irp$l_qio_p1,buffer+512*rest,512);
     memcpy(i->irp$l_qio_p1,buffer,512);
-    vfree(buffer);
+    kfree(buffer);
   }
   //exttwo_io_done(i);
 }
 
 void * exttwo_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
   struct _iosb myiosb;
-  unsigned char * buf = vmalloc(512*count);
+  unsigned char * buf = kmalloc(512*count, GFP_KERNEL);
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(buf[0]=0,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,0,0,0);
+  unsigned long sts=sys$qiow(0,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -866,7 +865,7 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
 	head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);  
 	sts=iosb.iosb$w_status;
 	memcpy(atrp->atr$l_addr,head,atrp->atr$w_size);
-	vfree(head); // wow. freeing something
+	kfree(head); // wow. freeing something
       }
       break;
 #endif
