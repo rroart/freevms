@@ -801,6 +801,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   /* No DYN check yet */
   /* And no capabilities yet */
   cpu->cpu$l_curpcb=next;
+  cpu->cpu$b_ipl=next->psl_ipl;
   next->state=TASK_RUNNING;
   next->pcb$w_state = SCH$C_CUR;
   next->pcb$l_cpu_id=cpu->cpu$l_phy_cpuid;
@@ -828,6 +829,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
     spin_unlock(&SPIN_SCHED);
     reacquire_kernel_lock(curpcb);
     //splret();
+    goto return_a_reimac;
     return;
   } 
 
@@ -883,11 +885,15 @@ asmlinkage void sch$sched(int from_sch$resched) {
   //  if (mydebug6) printk("bef swto %x %x\n",curpcb,next);
 
   next->pr_astlvl=next->phd$b_astlvl;
+  if (from_sch$resched==0) {
+    // myrei();
+  }
   switch_to(curpcb, next, curpcb);
 
   /* does not get here */
 
   //splret();
+  goto return_a_reimac;
   return;
  qempty:
   panic("qempty");
@@ -899,6 +905,10 @@ asmlinkage void sch$sched(int from_sch$resched) {
   //    cpu->cpu$b_cur_pri=-1;
   //	goto label30$;
   return;
+ return_a_reimac:
+  if (from_sch$resched==0) {
+    // myrei();
+  }
 }
 
 /*
