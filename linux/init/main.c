@@ -862,6 +862,10 @@ static int init(void * unused)
 	prepare_namespace();
 	printk("%%KERNEL-I-DEBUG, After prepare_namspace\n");
 
+#ifdef CONFIG_VMS
+	probe_units();
+#endif
+
 	/*
 	 * Ok, we have completed the initial bootup, and
 	 * we're essentially up and running. Get rid of the
@@ -895,7 +899,12 @@ static int init(void * unused)
 
 #ifdef CONFIG_VMS
 	extern void Main(void);
-	kernel_thread(Main, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
+	extern char * mydevice;
+	probe_units();
+	if (mydevice==0)
+	  printk("No network module. Can not start IPACP.\n");
+	else
+	  kernel_thread(Main, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 #endif
 
 
