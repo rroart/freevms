@@ -50,10 +50,15 @@
 #include <nisca.h>
 #include <pbdef.h>
 #include <pdtdef.h>
+#include <sbdef.h>
 #include <sbnbdef.h>
+#include <scsdef.h>
 #include <ssdef.h>
 #include <system_data_cells.h>
 #include <vcdef.h>
+
+struct _pb mypb;
+struct _sb mysb;
 
 static void dn_keepalive(struct _cdt *sk);
 
@@ -476,87 +481,29 @@ static int dn_auto_bind(struct _cdt *sock)
 }
 
 
-static int dn_connect(struct _cdt *sock, struct sockaddr *uaddr, int addr_len, int flags)
+static int dn_connect(struct _cdt *sock, struct sockaddr *uaddr, int addr_len, int flags) {
+
+}
+
+// whoa...
+int scs$connect (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsysid, void *rstadr, void *rprnam, void *lprnam, int initcr, int minscr, int initdg, int blkpri, void *condat, void *auxstr, void (*badrsp)(), void (*movadr)(), int load_rating,int (*req_fast_recvmsg)(), void (*fast_recvmsg_pm)(), void (*change_aff)(), void (*complete)(), int connect_parameter)
 {
-	struct sockaddr_dn *addr = (struct sockaddr_dn *)uaddr;
+	struct _cdt *cdt = find_free_cdt();
+	struct _cdt *sock = cdt;
 	struct _cdt *sk = sock;
 	struct _cdt *scp = sk;
 	int err = -EISCONN;
 
-	
-
-	if (sock->cdt$w_state == SS_CONNECTED) 
-		goto out;
-
-	if (sock->cdt$w_state == SS_CONNECTING) {
-		err = 0;
-		if (sk->cdt$w_state == CDT$C_OPEN)
-			goto out;
-
-		err = -ECONNREFUSED;
-		if (sk->cdt$w_state == CDT$C_CLOSED)
-			goto out;
-	}
-
-	err = -EINVAL;
-	if (sk->cdt$w_state != CDT$C_OPEN)
-		goto out;
-
-	if (addr_len != sizeof(struct sockaddr_dn))
-		goto out;
-
-	if (addr->sdn_family != AF_DECnet)
-		goto out;
-
-	if (addr->sdn_flags & SDF_WILD)
-		goto out;
-
-	err = -EADDRNOTAVAIL;
-
-	memcpy(&scp->cdt$l_rconid, addr, addr_len);
-
-	err = -EHOSTUNREACH;
+	struct _sbnb *s = register_name(lprnam,"");
+	s->sbnb$w_local_index=cdt->cdt$l_lconid;
+	cdt->cdt$w_state = CDT$C_CLOSED;
 
 	sk->cdt$w_state   = CDT$C_CON_SENT;
-	sock->cdt$w_state = SS_CONNECTING;
-	sk->cdt$w_state = CDT$C_CON_SENT;
 
-	dn_nsp_send_conninit2(sk, NSP_CI);
-
-	err = -EINPROGRESS;
-	if ((sk->cdt$w_state == CDT$C_CON_SENT) && (flags & O_NONBLOCK))
-		goto out;
-
-	while(sk->cdt$w_state == CDT$C_CON_SENT) {
-
-		err = -ERESTARTSYS;
-		if (signal_pending(current))
-			goto out;
-
-		if ((err = sock_error(sk)) != 0) {
-			sock->cdt$w_state = SS_UNCONNECTED;
-			goto out;
-		}
-
-		
-
-		if (sk->cdt$w_state == CDT$C_CON_SENT)
-			schedule();
-
-		
-	}
-
-	if (sk->cdt$w_state != CDT$C_OPEN) {
-		sock->cdt$w_state = SS_UNCONNECTED;
-		err = sock_error(sk);
-		goto out;
-	}
+	dn_nsp_send_conninit2(sk, SCS$C_CON_REQ);
 
 	err = 0;
-	sock->cdt$w_state = SS_CONNECTED;
 out:
-	
-
         return err;
 }
 
@@ -885,40 +832,27 @@ void * register_name(char * c1, char * c2) {
 //static int scs$listen(struct _cdt *sock, int backlog)
 //sock is about-ish lprnam;
 
-int scs$listen (void (*msgadr)(void *msg_buf, struct _cdt *cdt, struct _pdt *pdt ),
+int scs$listen (void (*msgadr)(void *msg_buf, struct _cdt **cdt, struct _pdt *pdt ),
 		    void (*erradr)( unsigned int err_status, unsigned int reason, struct _cdt *cdt, struct _pdt *pdt), 
 		    void *lprnam, 
-		    void *prinfo)
+		    void *prinfo,
+		struct _cdt **cdt)
 {
   int err = -EINVAL;
 
-  struct _cdt *sk = find_free_cdt();
+  struct _cdt *c = find_free_cdt();
+  struct _sbnb *s;
   //
 
-  //sk->cdt$l_msginput=msgadr;
-  //sk->cdt$l_erraddr=erradr;
+  c->cdt$l_msginput=msgadr;
+  c->cdt$l_erraddr=erradr;
 
-  register_name(lprnam,prinfo);
+  s=register_name(lprnam,prinfo);
+  s->sbnb$w_local_index=c->cdt$l_lconid;
+  c->cdt$w_state = CDT$C_LISTEN;
 
-  //	
-
-  //#if 0
-  //if (sk->zapped)
-  //	goto out;
-
-  //if ((sk->cdt$w_state != CDT$C_OPEN) || (sk->cdt$w_state == CDT$C_LISTEN))
-  //	goto out;
-	//#endif
-
-	//sk->max_ack_backlog = backlog;
-	//sk->ack_backlog     = 0;
-	//	sk->cdt$w_state           = CDT$C_LISTEN;
-	err                 = 0;
-
-out:
-	//
-
-        return err;
+  if (cdt && *cdt) *cdt=c;
+  return SS$_NORMAL;
 }
 
 void mydirerr() {
@@ -971,7 +905,7 @@ int /*__init*/ scs_init(void) {
     r->rd$w_seqnum=i; // ?
   }
 
-  scs$listen(dir_listen,mydirerr,myname,myinfo);
+  scs$listen(dir_listen,mydirerr,myname,myinfo,0);
 
 }
 

@@ -2290,7 +2290,7 @@ int mscp(void) {
   mscpdaemonize(); /* find out what this does */
   
   //  listen(msgbuf,err,cdt,pdt,cdt);
-  //scs$listen(mscplisten,mscp,mscpmyerr,myname,myinfo);
+  scs$listen(mscplisten,mscp,mscpmyerr,myname,myinfo);
 }
 
 

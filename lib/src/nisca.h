@@ -60,6 +60,8 @@
 #define NISCA$C_NODE_HW_VAX            0x00
 #define NISCA$C_PIPE_QUOTA             0x08
 #define NISCA$C_PPC_LNG_HDR            0x01
+#define NISCA$C_SMSG_OVHD              0x18
+
 #define NISCA$C_PPDMSG_MAX             0x16
 #define NISCA$C_REQ_DAT0               0x08
 #define NISCA$C_REQ_DAT1               0x09
@@ -69,12 +71,12 @@
 #define NISCA$C_RESET                  0x12
 #define NISCA$C_RET_CNF                0x0F
 #define NISCA$C_RET_CNFM               0x0E
+#define NISCA$C_RET_CNFWM              0x16
 #define NISCA$C_RET_DAT                0x0C
 #define NISCA$C_RET_DATM               0x0B
 #define NISCA$C_RET_DAT_LP             0x0D
 #define NISCA$C_RET_ID                 0x10
 #define NISCA$C_RET_LB                 0x11
-#define NISCA$C_SMSG_OVHD              0x18
 #define NISCA$C_SNT_DAT                0x04
 #define NISCA$C_SNT_DATM               0x03
 #define NISCA$C_SNT_DATWM              0x14
@@ -84,7 +86,9 @@
 #define NISCA$C_SNT_LB                 0x01
 #define NISCA$C_SNT_SEQ                0x02
 #define NISCA$C_START                  0x13
+
 #define NISCA$C_TIMER                  0x00989680
+
 #define NISCA$C_TR_LNG_HDR             0x09             
 #define NISCA$C_TR_LNG_HDR_V10         0x06
 #define NISCA$C_TR_LNG_HDR_V13         0x09

@@ -1,0 +1,30 @@
+Higher level stuff.
+Most of it.
+Prefix: state: CDT$C gets: SCS$C does:SCS$/SCS$C
+
+state:		gets:		does:			next state:
+
+closed (listen)	con_req		con_rsp			con_rec
+closed (conn)			con_req			con_sent	
+con_rec				$accept, accp_req	accp_sent
+con_rec				$reject, rej_req	rej_sent
+rej_sent 	rej_rsp?				closed
+accp_sent	accp_rsp 				open
+con_sent	con_rsp					con_ack
+con_ack		accp_req	accp_rsp		open
+con_ack		rej_req		rej_rsp			closed
+open		disc_req	disc_rsp		disc_rec
+open				maybe disc_req		disc_sent
+disc_rec			$disconnect, disc_req	disc_mtch
+disc_mtch	disc_rsp				closed
+disc_sent	disc_rsp				disc_ack
+disc_ack	disc_req	disc_rsp		closed
+
+unaccounted for:
+state:
+	disc_mtch_rspq
+	disc_rspq
+	vc_fail
+packet:
+	cr_req
+	cr_rsp

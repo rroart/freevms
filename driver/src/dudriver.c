@@ -2287,6 +2287,7 @@ mscp_requeue(mi)
 #include<mscpdef.h>
 #include<pbdef.h>
 #include<pdtdef.h>
+#include<sbdef.h>
 #include<ssdef.h>
 #include<ucbdef.h>
 
@@ -2315,7 +2316,7 @@ int dumscp(void) {
   dudaemonize(); /* find out what this does */
   
   //  listen(msgbuf,err,cdt,pdt,cdt);
-  //scs$listen(dulisten,dumyerr,myname,myinfo);
+  scs$listen(dulisten,dumyerr,myname,myinfo);
 }
 
 struct _pdt dupdt;
@@ -2335,7 +2336,7 @@ void  du_startio (struct _irp * i, struct _ucb * u) {
     c=(struct _cdrp *) & i->irp$l_fqfl;
     c->cdrp$l_rwcptr=&u->ucb$w_rwaitcnt;
     c->cdrp$l_cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
-    c->cdrp$l_rspid=0;//rspid_alloc(c);
+    c->cdrp$l_rspid=rspid_alloc(c);
     m=vmalloc(sizeof(struct _transfer_commands));
     bzero(m,sizeof(struct _transfer_commands));
     ((struct _mscp_basic_pkt *)m)->mscp$l_cmd_ref=c->cdrp$l_rspid;
@@ -2450,6 +2451,18 @@ struct _dpt du_dpt;
 
 void find_free_cdt(void);
 
+extern struct _pb mypb;
+extern struct _sb mysb;
+
+void du_msg() {
+
+}
+void du_dg() {
+
+}
+void du_err() {
+}
+
 void du_init(char *s) {
   struct _ucb * u;
   struct _ddb * d;
@@ -2550,6 +2563,12 @@ void du_init(char *s) {
   ini_fdt_act(&du_fdt,IO$_MODIFY,acp_std$modify,1);
   ini_fdt_act(&du_fdt,IO$_ACPCONTROL,acp_std$modify,1);
   ini_fdt_act(&du_fdt,IO$_MOUNT,acp_std$mount,1);
+
+  mypb.pb$b_type=DYN$C_SCS_PB;
+  mypb.pb$w_state=PB$C_CLOSED;
+  mysb.sb$b_type=DYN$C_SCS_SB;
+
+  scs$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drvr");
 }
 
 char dudriverstring[]="DUDRIVER";

@@ -56,17 +56,30 @@
 #include <linux/utsname.h>
 
 #include <ccdef.h>
+#include <cdldef.h>
+#include <cdtdef.h>
 #include <cdrpdef.h>
 #include <cdtdef.h>
 #include <chdef.h>
 #include <nisca.h>
 #include <pbdef.h>
 #include <pdtdef.h>
+#include <rddef.h>
+#include <rdtdef.h>
+#include <sbdef.h>
 #include <sbnbdef.h>
+#include <scsdef.h>
 #include <ssdef.h>
 #include <system_data_cells.h>
 #include <vcdef.h>
 
+extern struct _pb mypb;
+extern struct _sb mysb;
+
+extern struct _cdt cdtl[1024];
+extern struct _rdt rdt;
+extern struct _scs_rd rdtl[128];
+extern struct _cdl cdl;
 
 #define DN_IFREQ_SIZE (sizeof(struct ifreq) - sizeof(struct sockaddr) + sizeof(struct sockaddr_dn))
 
@@ -572,29 +585,31 @@ done:
 static void dn_send_endnode_hello(struct net_device *dev)
 {
         struct _nisca_intro *intro;
-        struct _nisca *msg;
+        struct _nisca *nisca;
         struct sk_buff *skb = NULL;
         unsigned short int *pktlen;
 	struct dn_dev *dn_db = (struct dn_dev *)dev->dn_ptr;
 
-        if ((skb = dn_alloc_skb2(NULL, sizeof(*msg)+16, GFP_ATOMIC)) == NULL)
+        if ((skb = dn_alloc_skb2(NULL, sizeof(*nisca)+16, GFP_ATOMIC)) == NULL)
 		return;
 
         skb->dev = dev;
 
-        intro = (struct _nisca_intro *)skb_put(skb,sizeof(*msg)+16);
+        intro = skb->data;
 	* ((char*)intro)= 43;
-	msg = ((char *)intro)+16;
+	nisca=getcc(skb->data);
 
-        msg->nisca$b_msg  = NISCA$C_HELLO;
-        msg->nisca$b_reason  = NISCA$M_TR_CTL;
-	msg->nisca$l_maint  = NISCA$M_MAINT;
+        nisca->nisca$b_msg  = NISCA$C_HELLO;
+        nisca->nisca$b_reason  = NISCA$M_TR_CTL|NISCA$M_TR_CCFLG;
+	nisca->nisca$l_maint  = NISCA$M_MAINT;
 	if (strlen(system_utsname.nodename)) {
-	  msg->nisca$t_nodename[0]=4; //strlen(system_utsname.nodename);
-	  memcpy(&msg->nisca$t_nodename[1],system_utsname.nodename,4);
+	  nisca->nisca$t_nodename[0]=4; //strlen(system_utsname.nodename);
+	  memcpy(&nisca->nisca$t_nodename[1],system_utsname.nodename,4);
+	  //memcpy(&nisca->nisca$ab_lan_hw_addr,6);
+	  
 	} else {
-	  msg->nisca$t_nodename[0]=6;
-	  memcpy(&msg->nisca$t_nodename[1],"NODNAM",6);
+	  nisca->nisca$t_nodename[0]=6;
+	  memcpy(&nisca->nisca$t_nodename[1],"NODNAM",6);
 	}
 #if 0
         memcpy(msg->tiver, dn_eco_version, 3);
@@ -1399,7 +1414,12 @@ int dn_neigh_endnode_hello(struct sk_buff *skb)
 	  return 1;
 
 	// next should be more protocol-stuff or first a plain init
-	
+
+	mypb.pb$w_state=PB$C_OPEN;
+
+	memcpy(&mypb.pb$b_rstation,&msg->nisca$ab_lan_hw_addr,6);
+	memcpy(&mysb.sb$t_nodename,&msg->nisca$t_nodename,8);
+
 #if 0
 	src = dn_htons(dn_eth2dn(msg->id));
 
@@ -2943,44 +2963,55 @@ void dn_nsp_send_link2(struct _cdt *sk, unsigned char lsflags, char fcval)
 
 static int dn_nsp_retrans_conninit(struct _cdt *sk)
 {
-	struct _cdt *scp = sk;
-
-	if (scp->cdt$w_state == CDT$C_CON_SENT)
-		dn_nsp_send_conninit2(sk, NSP_RCI);
-
+	dn_nsp_send_conninit2(sk, SCS$C_CON_REQ);
 	return 0;
+}
+
+void scs_msg_ctl_comm(struct _cdt *sk, unsigned char msgflg)
+{
+	struct sk_buff *skb = NULL;
+	if ((skb = dn_alloc_skb2(sk, 200, (msgflg == SCS$C_CON_REQ) ? 0 : GFP_ATOMIC)) == NULL)
+	  return;
+
+	scs_msg_ctl_fill(skb->data,sk,msgflg);
+
+	dn_nsp_send(skb);	
 }
 
 void dn_nsp_send_conninit2(struct _cdt *sk, unsigned char msgflg)
 {
-	struct _cdt *scp = sk;
 	struct sk_buff *skb = NULL;
-	struct nsp_conn_init_msg *msg;
-	unsigned char aux;
-	unsigned char menuver;
-	struct _cdt *cb;
-	unsigned char type = 1;
+	struct _nisca *nisca;
+	struct _ppd * ppd;
+	struct _scs * scs;
+	if ((skb = dn_alloc_skb2(sk, 200, (msgflg == SCS$C_CON_REQ) ? 0 : GFP_ATOMIC)) == NULL)
+	  return;
 
-	if ((skb = dn_alloc_skb2(sk, 200, (msgflg == NSP_CI) ? 0 : GFP_ATOMIC)) == NULL)
-		return;
-
-	cb  = (skb);
-	msg = (struct nsp_conn_init_msg *)skb_put(skb,sizeof(*msg));
-
-	msg->msgflg	= msgflg;
-	msg->dstaddr	= 0x0000;		/* Remote Node will assign it*/
-
-	msg->srcaddr	= scp->cdt$l_lconid;
-
-	skb_put(skb, dn_sockaddr2username(&scp->cdt$l_rconid, skb->tail, type));
-	skb_put(skb, dn_sockaddr2username(&scp->cdt$l_lconid, skb->tail, 2));
-
-	menuver = DN_MENUVER_ACC | DN_MENUVER_USR;
-	*skb_put(skb, 1) = menuver;	/* Menu Version		*/
-	
-	cb->cdt$b_ls_flag = DN_RT_F_RQR;
+	scs_msg_ctl_fill(skb->data,sk,msgflg);
 
 	dn_nsp_send(skb);	
+}
+
+void scs_msg_ctl_fill(void * data, struct _cdt * cdt, unsigned char msgflg)
+{
+	struct _nisca *nisca;
+	struct _ppd * ppd;
+	struct _scs * scs;
+	nisca=gettr(data);
+	nisca->nisca$b_tr_flag=NISCA$M_TR_CTL;
+	nisca->nisca$b_tr_pad=0x13;
+	nisca->nisca$b_tr_pad_data_len=0x12;
+	
+	ppd=getppdscs(data);
+	scs=getppdscs(data);
+
+	//ppd->ppb$b_opc=NISCA$C_MSGREC;
+	
+	scs->scs$w_mtype=msgflg;
+	scs->scs$l_dst_conid=cdt->cdt$l_rconid;
+	scs->scs$l_src_conid=cdt->cdt$l_lconid;
+
+	memcpy(&nisca->nisca$t_nodename,&mysb.sb$t_nodename,8);
 }
 
 
@@ -3481,6 +3512,248 @@ static int dn_route_ptp_hello(struct sk_buff *skb)
 	return NET_RX_SUCCESS;
 }
 
+int opc_msgrec(struct sk_buff *skb) {
+  struct _cdt *cb;
+  struct _cdt *cdt;
+  unsigned char flags = 0;
+  __u16 len = dn_ntohs(*(__u16 *)skb->data);
+  unsigned char padlen = 0;
+  struct _scs * msg=skb;
+  msg=((long)msg)+16;
+  
+  if (msg->scs$w_mtype) {
+    cdt=&cdtl[msg->scs$l_src_conid];
+  } else {
+    cdt=find_free_cdt();
+  }
+
+  switch (msg->scs$w_mtype) {
+  case SCS$C_CON_REQ: 
+    scs_msg_ctl_comm(cdt,SCS$C_CON_RSP);
+    cdt->cdt$w_state=CDT$C_CON_REC;
+    // do an accept or reject
+    //cdt->cdt$w_state=CDT$C_REJ_SENT
+    //scs_msg_ctl_comm(cdt,SCS$C_REJ_REQ);
+    cdt->cdt$w_state=CDT$C_ACCP_SENT;
+    scs_msg_ctl_comm(cdt,SCS$C_ACCP_REQ);
+    break;
+  case SCS$C_CON_RSP: 
+    cdt->cdt$w_state=CDT$C_CON_ACK;
+    break;
+  case SCS$C_ACCP_REQ: 
+    scs_msg_ctl_comm(cdt,SCS$C_ACCP_RSP);
+    cdt->cdt$w_state=CDT$C_OPEN;
+    break;
+  case SCS$C_ACCP_RSP: 
+    cdt->cdt$w_state=CDT$C_OPEN;
+    break;
+  case SCS$C_REJ_REQ: 
+    scs_msg_ctl_comm(cdt,SCS$C_REJ_RSP);
+    cdt->cdt$w_state=CDT$C_CLOSED;
+    // and then kill it;
+    break;
+  case SCS$C_REJ_RSP: 
+    cdt->cdt$w_state=CDT$C_CLOSED;
+    // and then kill it?
+    break;
+  case SCS$C_DISC_REQ: 
+    scs_msg_ctl_comm(cdt,SCS$C_DISC_RSP);
+    if (cdt->cdt$w_state == CDT$C_OPEN) {
+      cdt->cdt$w_state=CDT$C_DISC_REC;
+    } else {
+      cdt->cdt$w_state=CDT$C_CLOSED;
+      // and then kill it
+    }
+    break;
+  case SCS$C_DISC_RSP: 
+    if (cdt->cdt$w_state == CDT$C_DISC_MTCH) {
+      cdt->cdt$w_state=CDT$C_CLOSED;
+      // and then kill it;
+    } else {
+      cdt->cdt$w_state=CDT$C_DISC_ACK;
+    }
+    break;
+
+  }
+}
+
+int nisca_snt_dg (struct sk_buff * skb, void * addr) { 
+  //  return do_opc_dispatch(skb);
+}
+
+int nisca_snt_lb (struct sk_buff * skb, void * addr) { }
+int nisca_snt_seq (struct sk_buff * skb, void * addr) { }
+int nisca_snt_datm (struct sk_buff * skb, void * addr) { }
+int nisca_snt_dat (struct sk_buff * skb, void * addr) { }
+int nisca_snt_dat_lp (struct sk_buff * skb, void * addr) { }
+int nisca_req_id (struct sk_buff * skb, void * addr) { }
+int nisca_req_datm (struct sk_buff * skb, void * addr) { }
+int nisca_req_dat0 (struct sk_buff * skb, void * addr) { }
+int nisca_req_dat1 (struct sk_buff * skb, void * addr) { }
+int nisca_req_dat2 (struct sk_buff * skb, void * addr) { }
+int nisca_ret_datm (struct sk_buff * skb, void * addr) { }
+int nisca_ret_dat (struct sk_buff * skb, void * addr) { }
+int nisca_ret_dat_lp (struct sk_buff * skb, void * addr) { }
+int nisca_ret_cnfm (struct sk_buff * skb, void * addr) { }
+int nisca_ret_cnf (struct sk_buff * skb, void * addr) { }
+int nisca_ret_id (struct sk_buff * skb, void * addr) { }
+int nisca_ret_lb (struct sk_buff * skb, void * addr) { }
+int nisca_reset (struct sk_buff * skb, void * addr) { }
+int nisca_start (struct sk_buff * skb, void * addr) { }
+int nisca_snt_datwm (struct sk_buff * skb, void * addr) { }
+int nisca_snt_datwm_lp (struct sk_buff * skb, void * addr) { }
+int nisca_ret_cnfwm (struct sk_buff * skb, void * addr) { }
+
+int opc_snddg (struct sk_buff * skb, void * addr) { }
+int opc_sndmsg (struct sk_buff * skb, void * addr) { }
+int opc_retcnf (struct sk_buff * skb, void * addr) { }
+int opc_reqid (struct sk_buff * skb, void * addr) { }
+int opc_sndrst (struct sk_buff * skb, void * addr) { }
+int opc_sndstrt (struct sk_buff * skb, void * addr) { }
+int opc_reqdat (struct sk_buff * skb, void * addr) { }
+int opc_reqdat1 (struct sk_buff * skb, void * addr) { }
+int opc_reqdat2 (struct sk_buff * skb, void * addr) { }
+int opc_sndlb (struct sk_buff * skb, void * addr) { }
+int opc_reqmdat (struct sk_buff * skb, void * addr) { }
+int opc_snddat (struct sk_buff * skb, void * addr) { }
+int opc_retdat (struct sk_buff * skb, void * addr) { }
+int opc_sndmdat (struct sk_buff * skb, void * addr) { }
+int opc_invtc (struct sk_buff * skb, void * addr) { }
+int opc_setckt (struct sk_buff * skb, void * addr) { }
+int opc_rdcnt (struct sk_buff * skb, void * addr) { }
+int opc_setckt_len (struct sk_buff * skb, void * addr) { }
+int opc_dgrec (struct sk_buff * skb, void * addr) { }
+int opc_msgrec2 (struct sk_buff * skb, void * addr) { }
+int opc_cnfrec (struct sk_buff * skb, void * addr) { }
+int opc_mcnfrec (struct sk_buff * skb, void * addr) { }
+int opc_idrec (struct sk_buff * skb, void * addr) { }
+int opc_lbrec (struct sk_buff * skb, void * addr) { }
+int opc_datrec (struct sk_buff * skb, void * addr) { }
+int opc_mdatrec (struct sk_buff * skb, void * addr) { }
+int opc_snddatwm (struct sk_buff * skb, void * addr) { }
+int opc_cnfwmrec (struct sk_buff * skb, void * addr) { }
+int opc_retcnfwm (struct sk_buff * skb, void * addr) { }
+
+unsigned long nisca_dispatch[0x17]={
+nisca_snt_dg,
+nisca_snt_lb,
+nisca_snt_seq,
+nisca_snt_datm,
+nisca_snt_dat,
+nisca_snt_dat_lp,
+nisca_req_id,
+nisca_req_datm,
+nisca_req_dat0,
+nisca_req_dat1,
+nisca_req_dat2,
+nisca_ret_datm,
+nisca_ret_dat,
+nisca_ret_dat_lp,
+nisca_ret_cnfm,
+nisca_ret_cnf,
+nisca_ret_id,
+nisca_ret_lb,
+nisca_reset,
+nisca_start,
+nisca_snt_datwm,
+nisca_snt_datwm_lp,
+nisca_ret_cnfwm
+};
+
+unsigned long opc_dispatch[0x40] =
+{
+0,
+opc_snddg,
+opc_sndmsg,
+opc_retcnf,
+0,
+opc_reqid,
+opc_sndrst,
+opc_sndstrt,
+opc_reqdat,
+opc_reqdat1,
+opc_reqdat2,
+0,
+0,
+opc_sndlb,
+opc_reqmdat,
+0,
+opc_snddat,
+opc_retdat,
+opc_sndmdat,
+0,
+0,
+0,
+0,
+0,
+opc_invtc,
+opc_setckt,
+opc_rdcnt,
+0,
+opc_setckt_len,
+0,
+0,
+0,
+0,
+opc_dgrec,
+opc_msgrec, // not used?
+opc_cnfrec,
+0,
+0,
+0,
+0,
+0,
+opc_mcnfrec,
+0,
+opc_idrec,
+0,
+opc_lbrec,
+0,
+0,
+0,
+opc_datrec,
+0,
+opc_mdatrec,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+opc_snddatwm,
+opc_cnfwmrec,
+opc_retcnfwm,
+0
+};
+
+void * getdx(void * buf) {
+  return buf;
+}
+
+void * getcc(void * buf) {
+  unsigned long l=(unsigned long)buf;
+  struct _nisca * nisca=(struct _nisca *)(l+16);
+  return nisca;
+}
+
+void * gettr(void * buf) {
+  unsigned long l=(unsigned long)buf;
+  struct _nisca * nisca=(struct _nisca *)(l+16);
+  return nisca;
+}
+
+void * getppdscs(void * buf) {
+  unsigned long l=(unsigned long)buf;
+  struct _nisca * nisca=(struct _nisca *)(l+16);
+  unsigned long tr_flag=nisca->nisca$b_tr_flag;
+  unsigned long tr_pad=nisca->nisca$b_tr_pad_data_len;
+  unsigned long retadr=(unsigned long)(&nisca->nisca$b_tr_pad_data_len)+tr_pad;
+  retadr-=16; // offset related
+  return retadr;
+}
+
 int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt)
 {
 	struct _cdt *cb;
@@ -3488,23 +3761,28 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
 	__u16 len = dn_ntohs(*(__u16 *)skb->data);
 	struct dn_dev *dn = (struct dn_dev *)dev->dn_ptr;
 	unsigned char padlen = 0;
-
-	if (dn == NULL)
-		goto dump_it;
+	struct _nisca * nisca=skb;
+	unsigned char tr_flag;
+	unsigned char tr_pad;
+	unsigned char * msg;
+	struct _ppd *ppd;
+	struct _scs *scs;
+	int (*func)();
+	nisca=gettr(skb->data);
+	scs=getppdscs(skb->data);
+	ppd=getppdscs(skb->data);
 
 	if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
 		goto out;
 
 	skb_pull(skb, 2);
 
-	if (len > skb->len)
-		goto dump_it;
-
 	skb_trim(skb, len);
 
-	flags = *skb->data;
-
-	cb = (skb);
+	tr_flag=nisca->nisca$b_tr_flag;
+	tr_pad=nisca->nisca$b_tr_pad;
+	ppd=nisca+9+1;//tr_pad
+	scs=ppd;
 
 	/*
 	 * If we have padding, remove it.
@@ -3517,69 +3795,42 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
 
 	skb->nh.raw = skb->data;
 
-	/*
-	 * Weed out future version DECnet
-	 */
-	if (flags & DN_RT_F_VER)
-		goto dump_it;
-
-	cb->cdt$b_ls_flag = flags;
-
 	if (decnet_debug_level & 1)
 		printk(KERN_DEBUG 
 			"dn_route_rcv: got 0x%02x from %s [%d %d %d]\n",
 			(int)flags, (dev) ? dev->name : "???", len, skb->len, 
 			padlen);
 
-        if (flags & DN_RT_PKT_CNTL) {
-                switch(flags & DN_RT_CNTL_MSK) {
-        	        case DN_RT_PKT_INIT:
-				dn_dev_init_pkt(skb);
-				break;
-                	case DN_RT_PKT_VERI:
-				dn_dev_veri_pkt(skb);
-				break;
-		}
+	if (nisca->nisca$b_reason & NISCA$M_TR_CCFLG) {
+	  switch(nisca->nisca$b_msg) {
+	  case NISCA$C_HELLO:
+	    return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, dn_neigh_endnode_hello);
+	  }
+	}
 
-		if (dn->parms.state != DN_DEV_S_RU)
-			goto dump_it;
+	if (nisca->nisca$b_reason & NISCA$M_TR_CTL) {
+	    return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, opc_msgrec);
+	}
 
-		switch(flags & DN_RT_CNTL_MSK) {
-                	case DN_RT_PKT_HELO:
-				return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, dn_route_ptp_hello);
-
-                	case DN_RT_PKT_L1RT:
-                	case DN_RT_PKT_L2RT:
-                                return NF_HOOK(PF_DECnet, NF_DN_ROUTE, skb, skb->dev, NULL, dn_route_discard);
-                	case DN_RT_PKT_EEDH:
-				return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, dn_neigh_endnode_hello);
-		case 43:
-		  {
-		    switch (skb->data[16]) {
-		    case NISCA$C_HELLO:
-		      return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, dn_neigh_endnode_hello);
-		    }
-		  }
-		  break;
-                }
-        } else {
-		if (dn->parms.state != DN_DEV_S_RU)
-			goto dump_it;
-
-		skb_pull(skb, 1); /* Pull flags */
-
-                switch(flags & DN_RT_PKT_MSK) {
-                	case DN_RT_PKT_LONG:
-                        	return dn_route_rx_long(skb);
-                	case DN_RT_PKT_SHORT:
-                        	return dn_route_rx_short(skb);
-		}
-        }
+	if (scs->scs$w_mtype>0x17)
+	  panic("scs$w_mtype too large\n");
+	func=nisca_dispatch[scs->scs$w_mtype];
+	return func(skb,scs);
 
 dump_it:
-	kfree_skb(skb);
+kfree_skb(skb);
 out:
-	return NET_RX_DROP;
+return NET_RX_DROP;
+}
+
+int do_opc_dispatch(struct sk_buff *skb)
+{
+  int (*func)();
+  struct _ppd * ppd=getppdscs(skb->data);
+  if (ppd->ppd$b_opc>0x40)
+    panic("ppd$b_opc too large\n");
+  func=opc_dispatch[ppd->ppd$b_opc];
+  return func(skb,ppd);
 }
 
 static int dn_output(struct sk_buff *skb)
