@@ -1428,7 +1428,7 @@ unsigned long sch$gl_pfrath;
 unsigned long sch$gl_pfratl;
 unsigned long sch$gl_pixlast;
 unsigned long sch$gl_pixwidth;
-unsigned long sch$gl_resmask;
+unsigned long sch$gl_resmask=0;
 unsigned long sch$gl_seqvec;
 unsigned long sch$gl_sip=0;
 unsigned long sch$gl_swppid;
