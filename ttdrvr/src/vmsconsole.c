@@ -160,25 +160,6 @@ long pididx=0;
 int con$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   //  return read(0,i->irp$l_qio_p1,i->irp$l_qio_p2);
   return kbd$fdtread(i,p,u,c);
-#if 0
-  struct tty_struct * tty;
-  //  init_dev2(chan2dev(i->irp$w_chan ,&tty));
-  u->ucb$l_irp=i;
-  //tty_flip_buffer_push(tty);
-  tty = console_driver.table[0];
-  vms_read_chan(tty, 0, i->irp$l_qio_p1, i->irp$l_qio_p2);
-  if (1) {	
-    struct _ccb * ccb = &ctl$gl_ccbbase[dev2chan(tty->device)];
-    struct _ucb * ucb = ccb->ccb$l_ucb;
-    //	  ioc$reqcom(SS$_NORMAL,0,ucb);
-    //ucb->ucb$l_irp->irp$l_iost1 = SS$_NORMAL; // wrong too?
-    i->irp$l_iost1 = SS$_NORMAL;
-    pidtab[pididx++]=i->irp$l_pid;
-    com$post(i,ucb); // better?
-    //com$post(ucb->ucb$l_irp,ucb); //why was ucb->ucb$l_irp wrong?
-  }
-  return SS$_NORMAL;
-#endif
 }
 
 int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
@@ -190,8 +171,7 @@ int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   //  init_dev2(chan2dev(i->irp$w_chan ,&tty));
   //printk("dev %x %x\n",chan2dev(i->irp$w_chan),i->irp$w_chan);
   //init_dev2(0x0401,&tty);
-  tty = console_driver.table[0];
-  console_driver.write(tty, 1, i->irp$l_qio_p1, i->irp$l_qio_p2);
+  console_driver.write(i,p,u,c);
 #if 1
   // this must be put back sometime
   u->ucb$l_irp=i;
