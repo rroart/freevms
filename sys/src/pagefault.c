@@ -194,7 +194,7 @@ int makereadast(unsigned long file, unsigned long address, unsigned long pte, un
   pf->pte=pte;
   rde=mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
   pf->pteentry=rde->rde$r_regprot.regprt$l_region_prot;
-  if (write_flag) pf->pteentry|=_PAGE_RW;
+  if (write_flag) pf->pteentry|=_PAGE_RW|_PAGE_DIRTY;
   pf->rde=rde;
   a->acb$b_rmod=0;
   a->acb$l_kast=0;
