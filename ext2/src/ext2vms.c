@@ -937,6 +937,8 @@ char * ext2_vms_to_unix(struct dsc$descriptor * dsc) {
   d=strchr(c,";");
   if (d)
     *d=0;
+  if (c[strlen(c)]=='.')
+    c[strlen(c)]=0;
   return c;
 }
 
