@@ -151,6 +151,7 @@ static struct swap_info_struct * swap_info_get(swp_entry_t entry)
 	struct swap_info_struct * p;
 	unsigned long offset, type;
 
+	return 0;
 	if (!entry.val)
 		goto out;
 	type = SWP_TYPE(entry);
@@ -1151,6 +1152,7 @@ int swap_duplicate(swp_entry_t entry)
 	unsigned long offset, type;
 	int result = 0;
 
+	return 1;
 	type = SWP_TYPE(entry);
 	if (type >= nr_swapfiles)
 		goto bad_file;
