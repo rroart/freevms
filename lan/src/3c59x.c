@@ -2089,14 +2089,16 @@ static void vortex_tx_timeout(struct net_device *dev)
 		if (vp->cur_tx - vp->dirty_tx > 0  &&  inl(ioaddr + DownListPtr) == 0)
 			outl(vp->tx_ring_dma + (vp->dirty_tx % TX_RING_SIZE) * sizeof(struct boom_tx_desc),
 				 ioaddr + DownListPtr);
+#if 0
 		if (vp->cur_tx - vp->dirty_tx < TX_RING_SIZE)
-			netif_wake_queue (dev);
+			// not yet? netif_wake_queue (dev);
+#endif
 		if (vp->drv_flags & IS_BOOMERANG)
 			outb(PKT_BUF_SZ>>8, ioaddr + TxFreeThreshold);
 		outw(DownUnstall, ioaddr + EL3_CMD);
 	} else {
 		vp->stats.tx_dropped++;
-		netif_wake_queue(dev);
+		// not yet? netif_wake_queue(dev);
 	}
 	
 	/* Issue Tx Enable */
@@ -2208,8 +2210,11 @@ vortex_error(struct net_device *dev, int status)
 	if (do_tx_reset) {
 		issue_and_wait(dev, TxReset|reset_mask);
 		outw(TxEnable, ioaddr + EL3_CMD);
+#if 0
+		// not yet?
 		if (!vp->full_bus_master_tx)
 			netif_wake_queue(dev);
+#endif
 	}
 }
 
@@ -2424,7 +2429,7 @@ static void vortex_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 				printk(KERN_DEBUG "	TX room bit was handled.\n");
 			/* There's room in the FIFO for a full-sized packet. */
 			outw(AckIntr | TxAvailable, ioaddr + EL3_CMD);
-			netif_wake_queue (dev);
+			// not yet? netif_wake_queue (dev);
 		}
 
 		if (status & DMADone) {
@@ -2441,7 +2446,7 @@ static void vortex_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 					 * insufficient FIFO room, the TxAvailable test will succeed and call
 					 * netif_wake_queue()
 					 */
-					netif_wake_queue(dev);
+					// not yet? netif_wake_queue(dev);
 				} else { /* Interrupt when FIFO has room for max-sized packet. */
 					outw(SetTxThreshold + (1536>>2), ioaddr + EL3_CMD);
 					netif_stop_queue(dev);
@@ -2579,7 +2584,7 @@ static void boomerang_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 			if (vp->cur_tx - dirty_tx <= TX_RING_SIZE - 1) {
 				if (vortex_debug > 6)
 					printk(KERN_DEBUG "boomerang_interrupt: wake queue\n");
-				netif_wake_queue (dev);
+				// not yet? netif_wake_queue (dev);
 			}
 		}
 
