@@ -2272,7 +2272,9 @@ mscp_requeue(mi)
 
 #include<linux/vmalloc.h>
 
+#include<acbdef.h>
 #include<cddbdef.h>
+#include<cdrpdef.h>
 #include<cdtdef.h>
 #include<crbdef.h>
 #include<ddbdef.h>
@@ -2288,6 +2290,7 @@ mscp_requeue(mi)
 #include<mscpdef.h>
 #include<pbdef.h>
 #include<pdtdef.h>
+#include<pridef.h>
 #include<sbdef.h>
 #include<scsdef.h>
 #include<ssdef.h>
@@ -2483,10 +2486,14 @@ void du_dg(void * packet, struct _cdt * c, struct _pdt * p) {
   struct _transfer_commands * trans = basic;
   unsigned long lbn=trans->mscp$l_lbn;
   char * buf;
+  struct _acb * a=vmalloc(sizeof(struct _acb));
+  bzero(a,sizeof(struct _acb));
   if (basic->mscp$b_caa==MSCP$K_OP_READ) {
     bcopy((unsigned long)basic+sizeof(*trans),c->cdt$l_reserved4,512);
-    exe$wake(&c->cdt$l_reserved3,0);
   }
+  a->acb$l_ast=((struct _cdrp *)c->cdt$l_fp_scs_norecv)->cdrp$l_fpc;
+  a->acb$l_astprm=((struct _cdrp *)c->cdt$l_fp_scs_norecv)->cdrp$l_fr3;
+  sch$qast(c->cdt$l_reserved3,PRI$_IOCOM,a);
 }
 
 void du_err() {
@@ -2641,20 +2648,25 @@ int du_writeblk(struct _irp * i, struct _ucb * u, struct _mscp_basic_pkt * m) {
   return du_rw(i,u,m);
 }
 
+void du_rw_more(struct _irp * i);
+
 int du_rw(struct _irp * i, struct _mscp_ucb * u, struct _transfer_commands * m) {
   int sts;
-  void (*func)(void *,void *);
   unsigned long *l = &m->mscp$b_buffer;
   m->mscp$l_byte_cnt = i->irp$l_qio_p2;  // change later
   *l= i->irp$l_qio_p1;
   m->mscp$l_lbn = i->irp$l_qio_p3;
   insque(&i->irp$l_fqfl,&u->ucb$l_cddb->cddb$l_cdrpqfl);
+  i->irp$l_fpc=du_rw_more;
+  i->irp$l_fr3=i;
   u->ucb$l_cddb->cddb$l_pdt->pdtvec$l_senddg(0,0,&i->irp$l_fqfl);
-  exe$hiber();
-  {
-    struct _cdrp * cdrp = &i->irp$l_fqfl;
-    bcopy((unsigned long)cdrp->cdrp$l_msg_buf, i->irp$l_qio_p1,i->irp$l_qio_p2);
-  }
+}
+
+void du_rw_more(struct _irp * i) {
+  struct _cdrp * cdrp = &i->irp$l_fqfl;
+  unsigned int sts;
+  void (*func)(void *,void *);
+  bcopy((unsigned long)cdrp->cdrp$l_msg_buf, i->irp$l_qio_p1,i->irp$l_qio_p2);
   // receive something
   func=i->irp$l_ucb->ucb$l_fpc;
   func(i,i->irp$l_ucb);
