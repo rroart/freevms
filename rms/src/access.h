@@ -12,7 +12,7 @@
 
 #define NO_DOLLAR
 
-#ifdef BIG_ENDIAN
+#ifdef FREEVMS_BIG_ENDIAN
 #define VMSLONG(l) ((l & 0xff) << 24 | (l & 0xff00) << 8 | (l & 0xff0000) >> 8 | l >> 24)
 #define VMSWORD(w) ((w & 0xff) << 8 | w >> 8)
 #define VMSSWAP(l) ((l & 0xff0000) << 8 | (l & 0xff000000) >> 8 |(l & 0xff) << 8 | (l & 0xff00) >> 8)
