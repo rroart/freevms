@@ -9,6 +9,7 @@
  * most "normal" filesystems (but you don't /have/ to use this:
  * the NFS filesystem used to do this differently, for example)
  */
+#include <linux/config.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/shm.h>
@@ -73,6 +74,8 @@ spinlock_t pagemap_lru_lock __cacheline_aligned_in_smp = SPIN_LOCK_UNLOCKED;
 #define CLUSTER_OFFSET(x)	(((x) >> page_cluster) << page_cluster)
 
 static void FASTCALL(add_page_to_hash_queue(struct page * page, struct page **p));
+static void add_page_to_hash_queue(struct page * page, struct page **p){}
+#if 0
 static void add_page_to_hash_queue(struct page * page, struct page **p)
 {
 	struct page *next = *p;
@@ -86,6 +89,7 @@ static void add_page_to_hash_queue(struct page * page, struct page **p)
 		PAGE_BUG(page);
 	atomic_inc(&page_cache_size);
 }
+#endif
 
 static inline void add_page_to_inode_queue(struct address_space *mapping, struct page * page)
 {
@@ -105,6 +109,7 @@ static inline void remove_page_from_inode_queue(struct page * page)
 	page->mapping = NULL;
 }
 
+#if 0
 static inline void remove_page_from_hash_queue(struct page * page)
 {
 	struct page *next = page->next_hash;
@@ -116,6 +121,7 @@ static inline void remove_page_from_hash_queue(struct page * page)
 	page->pprev_hash = NULL;
 	atomic_dec(&page_cache_size);
 }
+#endif
 
 /*
  * Remove a page from the page cache and free it. Caller has to make
@@ -126,7 +132,7 @@ void __remove_inode_page(struct page *page)
 {
 	if (PageDirty(page)) BUG();
 	remove_page_from_inode_queue(page);
-	remove_page_from_hash_queue(page);
+	//remove_page_from_hash_queue(page);
 }
 
 void remove_inode_page(struct page *page)
@@ -153,7 +159,7 @@ static inline int sync_page(struct page *page)
  */
 void set_page_dirty(struct page *page)
 {
-	if (!test_and_set_bit(PG_dirty, &page->flags)) {
+	if (!test_and_set_bit(PG_dirty, &page->pfn$l_page_state)) {
 		struct address_space *mapping = page->mapping;
 
 		if (mapping) {
@@ -439,6 +445,7 @@ void invalidate_inode_pages2(struct address_space * mapping)
 	spin_unlock(&pagecache_lock);
 }
 
+#if 0
 static inline struct page * __find_page_nolock(struct address_space *mapping, unsigned long offset, struct page *page)
 {
 	goto inside;
@@ -457,6 +464,7 @@ inside:
 not_found:
 	return page;
 }
+#endif
 
 static int do_buffer_fdatasync(struct list_head *head, unsigned long start, unsigned long end, int (*fn)(struct page *))
 {
@@ -639,7 +647,7 @@ void add_to_page_cache_locked(struct page * page, struct address_space *mapping,
 	page_cache_get(page);
 	spin_lock(&pagecache_lock);
 	add_page_to_inode_queue(mapping, page);
-	add_page_to_hash_queue(page, page_hash(mapping, index));
+	//add_page_to_hash_queue(page, page_hash(mapping, index));
 	spin_unlock(&pagecache_lock);
 
 	lru_cache_add(page);
@@ -655,12 +663,12 @@ static inline void __add_to_page_cache(struct page * page,
 {
 	unsigned long flags;
 
-	flags = page->flags & ~(1 << PG_uptodate | 1 << PG_error | 1 << PG_dirty | 1 << PG_referenced | 1 << PG_arch_1 | 1 << PG_checked);
-	page->flags = flags | (1 << PG_locked);
+	flags = page->pfn$l_page_state & ~(1 << PG_uptodate | 1 << PG_error | 1 << PG_dirty | 1 << PG_referenced | 1 << PG_arch_1 | 1 << PG_checked);
+	page->pfn$l_page_state = flags | (1 << PG_locked);
 	page_cache_get(page);
 	page->index = offset;
 	add_page_to_inode_queue(mapping, page);
-	add_page_to_hash_queue(page, hash);
+	//add_page_to_hash_queue(page, hash);
 }
 
 void add_to_page_cache(struct page * page, struct address_space * mapping, unsigned long offset)
@@ -679,7 +687,7 @@ int add_to_page_cache_unique(struct page * page,
 	struct page *alias;
 
 	spin_lock(&pagecache_lock);
-	alias = __find_page_nolock(mapping, offset, *hash);
+	alias = 0;//__find_page_nolock(mapping, offset, *hash);
 
 	err = 1;
 	if (!alias) {
@@ -705,7 +713,7 @@ int add_to_page_cache_unique(struct page * page,
 	struct page *page; 
 
 	spin_lock(&pagecache_lock);
-	page = __find_page_nolock(mapping, offset, *hash);
+	page = 0;//__find_page_nolock(mapping, offset, *hash);
 	spin_unlock(&pagecache_lock);
 	if (page)
 		return 0;
@@ -775,9 +783,9 @@ void ___wait_on_page(struct page *page)
 
 void unlock_page(struct page *page)
 {
-	clear_bit(PG_launder, &(page)->flags);
+	clear_bit(PG_launder, &(page)->pfn$l_page_state);
 	smp_mb__before_clear_bit();
-	if (!test_and_clear_bit(PG_locked, &(page)->flags))
+	if (!test_and_clear_bit(PG_locked, &(page)->pfn$l_page_state))
 		BUG();
 	smp_mb__after_clear_bit(); 
 	if (waitqueue_active(&(page)->wait))
@@ -832,7 +840,7 @@ struct page * __find_get_page(struct address_space *mapping,
 	 * the hash-list needs a held write-lock.
 	 */
 	spin_lock(&pagecache_lock);
-	page = __find_page_nolock(mapping, offset, *hash);
+	page = 0;//__find_page_nolock(mapping, offset, *hash);
 	if (page)
 		page_cache_get(page);
 	spin_unlock(&pagecache_lock);
@@ -848,7 +856,7 @@ struct page *find_trylock_page(struct address_space *mapping, unsigned long offs
 	struct page **hash = page_hash(mapping, offset);
 
 	spin_lock(&pagecache_lock);
-	page = __find_page_nolock(mapping, offset, *hash);
+	page = 0;//__find_page_nolock(mapping, offset, *hash);
 	if (page) {
 		if (TryLockPage(page))
 			page = NULL;
@@ -873,7 +881,7 @@ static struct page * __find_lock_page_helper(struct address_space *mapping,
 	 * the hash-list needs a held write-lock.
 	 */
 repeat:
-	page = __find_page_nolock(mapping, offset, hash);
+	page = 0;//__find_page_nolock(mapping, offset, hash);
 	if (page) {
 		page_cache_get(page);
 		if (TryLockPage(page)) {
@@ -1330,7 +1338,7 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 		hash = page_hash(mapping, index);
 
 		spin_lock(&pagecache_lock);
-		page = __find_page_nolock(mapping, index, *hash);
+		page = 0;//__find_page_nolock(mapping, index, *hash);
 		if (!page)
 			goto no_cached_page;
 found_page:
@@ -1441,7 +1449,7 @@ no_cached_page:
 			 * dropped the page cache lock. Check for that.
 			 */
 			spin_lock(&pagecache_lock);
-			page = __find_page_nolock(mapping, index, *hash);
+			page = 0;//__find_page_nolock(mapping, index, *hash);
 			if (page)
 				goto found_page;
 		}
@@ -2012,7 +2020,7 @@ static inline int filemap_sync_pte(pte_t * ptep, struct _rde *vma,
 	if (pte_present(pte)) {
 		struct page *page = pte_page(pte);
 		if (VALID_PAGE(page) && !PageReserved(page) && ptep_test_and_clear_dirty(ptep)) {
-			flush_tlb_page(vma, address);
+			flush_tlb_page2(current->mm, address);
 			set_page_dirty(page);
 		}
 	}
@@ -2114,6 +2122,12 @@ static struct vm_operations_struct generic_file_vm_ops = {
 
 /* This is used for a general mmap of a disk file */
 
+#undef vm_area_struct
+int generic_file_mmap(struct file * file, struct vm_area_struct * vma) {
+}
+#define vm_area_struct _rde
+
+#if 0
 int generic_file_mmap(struct file * file, struct vm_area_struct * vma)
 {
 	struct address_space *mapping = file->f_dentry->d_inode->i_mapping;
@@ -2129,6 +2143,7 @@ int generic_file_mmap(struct file * file, struct vm_area_struct * vma)
 	vma->vm_ops = &generic_file_vm_ops;
 	return 0;
 }
+#endif
 
 /*
  * The msync() system call.
@@ -2611,7 +2626,7 @@ static unsigned char mincore_page(struct _rde * vma,
 	struct page * page, ** hash = page_hash(as, pgoff);
 
 	spin_lock(&pagecache_lock);
-	page = __find_page_nolock(as, pgoff, *hash);
+	page = 0;//__find_page_nolock(as, pgoff, *hash);
 	if ((page) && (Page_Uptodate(page)))
 		present = 1;
 	spin_unlock(&pagecache_lock);
