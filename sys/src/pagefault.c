@@ -188,7 +188,7 @@ void pagefaultast(struct pfast * p) {
 
   extern int myswapfile;
   struct _pfl * pfl = myswapfile;
-  if (p->window=pfl->pfl$l_window)
+  if (pfl && p->window==pfl->pfl$l_window)
     mmg$dallocpagfil1(p->offset>>PAGE_SHIFT);
 
   kfree(p);
@@ -410,7 +410,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	      *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	    }
 	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
-	    printk("soon reading pfl_page %x\n",page);
+	    printk("soon reading pfl_page %x %x %x %x\n",vbn,pte,*(long*)pte,page);
 	    makereadast(window,pfn,address,pte,offset,error_code&2);	
 	    return;
 	  }
@@ -438,7 +438,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 		*(unsigned long *)pte|=_PAGE_PRESENT;
 		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	      }
-	      printk("put transition page back in %x %x %x\n",loc,pte,address);
+	      //printk("put transition page back in %x %x %x\n",loc,pte,address);
 	      return;
 	    notyet:
 	    } else { // zero page demand?
@@ -848,7 +848,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	      *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	    }
 	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
-	    printk("soon reading pfl_page %x\n",page);
+	    printk("soon reading pfl_page %x %x %x %x\n",vbn,pte,*(long*)pte,page);
 	    makereadast(window,pfn,address,pte,offset,is_write);	
 	    return;
 	  }
@@ -876,7 +876,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 		*(unsigned long *)pte|=_PAGE_PRESENT;
 		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	      }
-	      printk("put transition page back in %x %x %x\n",loc,pte,address);
+	      //printk("put transition page back in %x %x %x\n",loc,pte,address);
 	      return;
 	    notyet:
 	    } else { // zero page demand?
