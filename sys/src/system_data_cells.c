@@ -731,7 +731,7 @@ unsigned long ioc$gl_cramh_blink;
 unsigned long ioc$gl_cramh_flink;
 unsigned long ioc$gl_cramh_pages;
 unsigned long ioc$gl_crbtmout;
-unsigned long ioc$gl_devlist; /* ddb liste */
+unsigned long ioc$gl_devlist=0; /* ddb liste */
 unsigned long ioc$gl_dptlist;
 unsigned long ioc$gl_dtn_list;
 unsigned long ioc$gl_du_cddb;
@@ -2045,4 +2045,9 @@ void __init vms_init2(void) {
 
   nl_init(); /* first */  
   rnd_init();
+#if 0
+#ifdef CONFIG_BLK_DEV_FD_VMS
+  vms_floppy_init();
+#endif
+#endif
 }

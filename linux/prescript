@@ -55,6 +55,15 @@ done
 
 		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
 		rm ast.c; ln -s ../../freevms/pal/src/ast.c .;
+cd ..;
+
+cd drivers/block;
+		ln -s ../../../freevms/driver/src/pvdriver.c .;
+cd ../..;
+
+cd arch/i386/kernel;
+		ln -s ../../../../freevms/sys/src/vmsirq.c .;
+cd ../../..;
 )
 
 echo you have read the HOWTO and done a make in ../freevms?

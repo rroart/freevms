@@ -166,7 +166,7 @@ void nl_init(void) {
   bzero(d,sizeof(struct _ddb));
   bzero(c,sizeof(struct _crb));
 
-  ioc$gl_devlist=d; /* one-shot */
+  insertdevlist(d);
 
   /* this is a all-in-one, should be split later */
 
@@ -175,8 +175,8 @@ void nl_init(void) {
   null_dpt.dpt$ps_ddt=&ddt_null;
 
   /* for the ddb init part */
-  d->ddb$ps_link=d;
-  d->ddb$ps_blink=d;
+  //  d->ddb$ps_link=d;
+  //  d->ddb$ps_blink=d;
   d->ddb$b_type=DYN$C_DDB;
   d->ddb$l_ddt=&ddt_null;
   d->ddb$ps_ucb=u;
@@ -217,3 +217,8 @@ struct _dpt null_dpt = {
   // dpt$ps_ddt:&ddt_null;
 };
 
+/* move this later */
+insertdevlist(struct _ddb *d) {
+    d->ddb$ps_link=ioc$gl_devlist;
+    ioc$gl_devlist=d;
+}
