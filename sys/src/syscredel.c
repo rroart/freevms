@@ -71,7 +71,7 @@ int mmg$credel(int acmode, void * first, void * last, void (* pagesubr)(), struc
     return SS$_NOPRIV;
   mymmg.mmg$l_pagesubr=pagesubr;
   while (tmp<last) {
-    pagesubr(0,tmp,0,+PAGE_SIZE,newpte);      // crepag or del
+    pagesubr(0,tmp,0,+PAGE_SIZE,0,newpte);      // crepag or del
     tmp=tmp+PAGE_SIZE;
   }
   return SS$_NORMAL;
@@ -84,11 +84,13 @@ asmlinkage int exe$cretva (struct _va_range *inadr, struct _va_range *retadr, un
   struct _pcb * p=current;
   struct _rde * rde;
   unsigned long numpages=(last-first)/PAGE_SIZE;
+#if 0
   rde=vmalloc(sizeof(struct _rde));
   bzero(rde,sizeof(struct _rde));
   rde->rde$pq_start_va=first;
   rde->rde$q_region_size=last-first;
   insrde(rde,&p->pcb$l_phd->phd$ps_p0_va_list_flink);
+#endif
   mmg$credel(acmode, first, last, mmg$crepag, inadr, retadr, acmode, p, numpages);
 }
 
@@ -212,3 +214,24 @@ int mmg$fast_create(struct _pcb * p, struct _rde *rde, void * start_va, void * e
     tmp+=PAGE_SIZE;
   }
 }
+
+asmlinkage int exe$create_region_32  ( unsigned long length, unsigned int region_prot, unsigned int flags, unsigned long long *return_region_id, void **return_va, unsigned long *return_length, unsigned long start_va) {
+  struct _rde * rde;
+  rde=vmalloc(sizeof(struct _rde));
+  bzero(rde,sizeof(struct _rde));
+  rde->rde$pq_start_va=start_va;
+  rde->rde$q_region_size=length;
+  rde->rde$l_flags=flags;
+  rde->rde$r_regprot.regprt$l_region_prot = region_prot;
+  insrde(rde,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
+
+}
+
+asmlinkage int exe$delete_region_32  (unsigned long long *region_id,  unsigned int acmode, void **return_va, unsigned long *return_length) {
+
+}
+
+asmlinkage int exe$get_region_info  (unsigned int function_code, unsigned long long *region_id, void *start_va, void *reserved, unsigned int buffer_length, void *buffer_address, unsigned int *return_length) {
+
+}
+     
