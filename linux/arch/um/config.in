@@ -33,6 +33,7 @@ define_bool CONFIG_PROC_FS y
 define_bool CONFIG_DEVFS_FS y
 define_bool CONFIG_DEVFS_MOUNT y
 define_bool CONFIG_DEVPTS_FS y
+define_bool CONFIG_MTD
 fi
 
 tristate 'Kernel support for a.out binaries' CONFIG_BINFMT_AOUT
@@ -122,7 +123,9 @@ fi
 
 source drivers/md/Config.in
 
+if [ "$CONFIG_VMS" != "y" ]; then
 source drivers/mtd/Config.in
+fi
 
 mainmenu_option next_comment
 comment 'Kernel hacking'

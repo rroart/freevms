@@ -371,7 +371,9 @@ static release_t mtdblock_release(struct inode *inode, struct file *file)
 	if (inode == NULL)
 		release_return(-ENODEV);
 
+#ifndef CONFIG_VMS
 	invalidate_device(inode->i_rdev, 1);
+#endif
 
 	dev = MINOR(inode->i_rdev);
 	mtdblk = mtdblks[dev];
@@ -459,7 +461,9 @@ static void handle_mtdblock_request(void)
 
 end_req:
 		spin_lock_irq(&io_request_lock);
+#ifndef CONFIG_VMS
 		end_request(res);
+#endif
 	}
 }
 
@@ -544,7 +548,9 @@ static int mtdblock_ioctl(struct inode * inode, struct file * file,
 			return -EACCES;
 #endif
 		fsync_dev(inode->i_rdev);
+#ifndef CONFIG_VMS
 		invalidate_buffers(inode->i_rdev);
+#endif
 		down(&mtdblk->cache_sem);
 		write_cached_data(mtdblk);
 		up(&mtdblk->cache_sem);
@@ -636,7 +642,9 @@ int __init init_mtdblock(void)
 	blksize_size[MAJOR_NR] = mtd_blksizes;
 	blk_size[MAJOR_NR] = mtd_sizes;
 	
+#ifndef CONFIG_VMS
 	blk_init_queue(BLK_DEFAULT_QUEUE(MAJOR_NR), &mtdblock_request);
+#endif
 	kernel_thread (mtdblock_thread, NULL, CLONE_FS|CLONE_FILES|CLONE_SIGHAND);
 	return 0;
 }
@@ -653,7 +661,9 @@ static void __exit cleanup_mtdblock(void)
 #else
 	unregister_blkdev(MAJOR_NR,DEVICE_NAME);
 #endif
+#ifndef CONFIG_VMS
 	blk_cleanup_queue(BLK_DEFAULT_QUEUE(MAJOR_NR));
+#endif
 	blksize_size[MAJOR_NR] = NULL;
 	blk_size[MAJOR_NR] = NULL;
 }

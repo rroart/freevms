@@ -296,7 +296,7 @@ if [ "$CONFIG_VMS" != "n" ]; then
 define_bool CONFIG_IDE y
 define_bool CONFIG_BLK_DEV_IDE y
 define_bool CONFIG_BLK_DEV_IDEDISK y
-define_bool CONFIG_BLK_DEV_FD y
+# define_bool CONFIG_BLK_DEV_FD y
 define_bool CONFIG_IO_VMS y
 define_bool CONFIG_MM_VMS y
 define_bool CONFIG_MSDOS_PARTITION y
