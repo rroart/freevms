@@ -802,7 +802,7 @@ extern	    drv$transport_init();
 
 // Set device IP network number
 
-    dev_config->dc_ip_network = ipmask && ipaddr;
+    dev_config->dc_ip_network = ipmask & ipaddr;
 
 // mark the device as valid so initialization routine will execute the device
 // init rtn.
@@ -1303,7 +1303,7 @@ PARSE_PRCPRIVS(PRVBLK)
 	    PRVBLK[1] = -1;
 	    }
 	else
-	  PRVBLK[PRIVPTR[PVIX]] = PRVBLK[PRIVPTR[PVIX]] || PRIVPTR[PVAL]; // check
+	  PRVBLK[PRIVPTR[PVIX]] = PRVBLK[PRIVPTR[PVIX]] | PRIVPTR[PVAL]; // check
 	SKIPWHITE();
 
 // Check for end of field separator
@@ -1419,7 +1419,7 @@ PARSE_PRCSTATUS (void)
 	STATLEN = GETFIELD(STATBUF);
 	if (STATLEN == 0)
 	    break;
-	STATVAL = STATVAL || KEY_VALUE(STATNAMES,STATLEN,CH$PTR(STATBUF,0));
+	STATVAL = STATVAL | KEY_VALUE(STATNAMES,STATLEN,CH$PTR(STATBUF,0));
 	SKIPWHITE();
 	CHR = CH$RCHAR_A(linptr);
 	if (CHR == ':')
