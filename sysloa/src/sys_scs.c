@@ -52,11 +52,13 @@
 #include <cdrpdef.h>
 #include <cdtdef.h>
 #include <chdef.h>
+#include <cwpsdef.h>
 #include <ddtdef.h>
 #include <dptdef.h>
 #include <dyndef.h>
 #include <fdtdef.h>
 #include <iodef.h>
+#include <iosbdef.h>
 #include <mscpdef.h> // does not belong here
 #include <nisca.h>
 #include <pbdef.h>
@@ -150,7 +152,7 @@ no_sock:
 }
 
 // whoa...
-int scs$connect (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsysid, void *rstadr, void *rprnam, void *lprnam, int initcr, int minscr, int initdg, int blkpri, void *condat, void *auxstr, void (*badrsp)(), void (*movadr)(), int load_rating,int (*req_fast_recvmsg)(), void (*fast_recvmsg_pm)(), void (*change_aff)(), void (*complete)(), int connect_parameter)
+int scs_std$connect (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsysid, void *rstadr, void *rprnam, void *lprnam, int initcr, int minscr, int initdg, int blkpri, void *condat, void *auxstr, void (*badrsp)(), void (*movadr)(), int load_rating,int (*req_fast_recvmsg)(), void (*fast_recvmsg_pm)(), void (*change_aff)(), void (*complete)(), int connect_parameter)
 {
 	struct _cdt *cdt = find_free_cdt();
 	struct _cdt *sock = cdt;
@@ -175,6 +177,8 @@ int scs$connect (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsys
 	}
  out2:
 
+	if (auxstr) *((unsigned long **)auxstr)=cdt; // wrong, but temporary
+
 	err = 0;
 out:
         return err;
@@ -182,7 +186,7 @@ out:
 
 //static int dn_accept(struct _cdt *sock, struct _cdt *newsock, int flags)
 
-int scs$accept (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsysid, void *rstadr, void *rprnam, void *lprnam, int initcr, int minscr, int initdg, int blkpri, void *condat, void *auxstr, void (*badrsp)(), void (*movadr)(), int load_rating,int (*req_fast_recvmsg)(), void (*fast_recvmsg_pm)(), void (*change_aff)(), void (*complete)(), struct _cdt * cdt, int connect_parameter)
+int scs_std$accept (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsysid, void *rstadr, void *rprnam, void *lprnam, int initcr, int minscr, int initdg, int blkpri, void *condat, void *auxstr, void (*badrsp)(), void (*movadr)(), int load_rating,int (*req_fast_recvmsg)(), void (*fast_recvmsg_pm)(), void (*change_aff)(), void (*complete)(), struct _cdt * cdt, int connect_parameter)
 {
 	struct _cdt *sk = cdt, *newsk, *newsock;
 	struct sk_buff *skb = NULL;
@@ -192,84 +196,6 @@ int scs$accept (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsysi
 	unsigned char type;
 	int flags;
 	
-
-        if (sk->cdt$w_state != CDT$C_LISTEN) {
-		
-		return -EINVAL;
-	}
-
-	if (sk->cdt$w_state != CDT$C_OPEN) {
-		
-		return -EINVAL;
-	}
-
-        do
-        {
-                if ((skb = skb_dequeue(&sk->cdt$l_share_flink)) == NULL)
-                {
-                        if (flags & O_NONBLOCK)
-                        {
-                                
-                                return -EAGAIN;
-                        }
-
-			
-
-			if (!skb_peek(&sk->cdt$l_share_flink))
-				schedule();
-
-			
-
-                        if (signal_pending(current))
-                        {
-				
-                                return -ERESTARTSYS;
-                        }
-                }
-        } while (skb == NULL);
-
-	cb = (skb);
-
-	if ((newsk = dn_alloc_sock(newsock, 0)) == NULL) {
-		
-		kfree_skb(skb);
-		return -ENOBUFS;
-	}
-
-        (newsk)->cdt$w_state        = CDT$C_CON_REC;
-	(newsk)->cdt$l_rconid      = 0;
-	
-	newsk->cdt$w_state  = CDT$C_LISTEN;
-
-	memcpy(&((newsk)->cdt$l_lconid), &(sk->cdt$l_lconid), sizeof(struct sockaddr_dn));
-
-	/*
-	 * If we are listening on a wild socket, we don't want
-	 * the newly created socket on the wrong hash queue.
-	 */
-
-
-	skb_pull(skb, dn_username2sockaddr(skb->data, skb->len, &((newsk)->cdt$l_lconid), &type));
-	skb_pull(skb, dn_username2sockaddr(skb->data, skb->len, &((newsk)->cdt$l_rconid), &type));
-
-
-
-	menuver = *skb->data;
-	skb_pull(skb, 1);
-
-	kfree_skb(skb);
-
-	
-	/*
-	 * FIXME: This can fail if we've run out of local ports....
-	 */
-
-	dn_send_conn_ack2(newsk);
-
-	/*
-	 * Here we use sk->allocation since although the conn conf is
-	 * for the newsk, the context is the old socket.
-	 */
         return err;
 }
 
@@ -298,13 +224,38 @@ void * find_free_cdt(void) {
   return c;
 }
 
-int rspid_alloc(struct _cdrp * c) {
+int scs_std$alloc_rspid(struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp * c,  void (*ravail_p)()) {
   /* remember to fix rdtdef */
   struct _scs_rd * r=rdt.rdt$l_freerd;
   rdt.rdt$l_freerd=r->rd$l_link;
   r->rd$w_state=1;
   r->rd$l_cdrp=c;
   return r->rd$w_seqnum;
+}
+
+int   scs_std$find_rdte ( int rspid, struct _scs_rd **rdte_p ) {
+  int i;
+  struct _scs_rd * rd=&rdtl[rspid];
+  *rdte_p=0;
+  if (rspid>100) return 0;
+  if (rd->rd$w_seqnum != rspid) return 0;
+  //if (rd->rd$v_busy) return 0;
+  *rdte_p=rd;
+  return 1;
+}
+
+int   scs_std$deall_rspid (struct _cdrp *cdrp_p) {
+  int seq=cdrp_p->cdrp$l_rspid;
+  struct _scs_rd * rd;
+  if (scs_std$find_rdte(seq,&rd)) {
+    //rd->rd$w_seqnum++;
+    rd->rd$w_state=0;
+    rd->rd$l_link=rdt.rdt$l_freerd;
+    rdt.rdt$l_freerd=rd;
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 void * scs_register_name(char * c1, char * c2) {
@@ -331,7 +282,7 @@ void * scs_find_name(char * c1) {
 //static int scs$listen(struct _cdt *sock, int backlog)
 //sock is about-ish lprnam;
 
-int scs$listen (void (*msgadr)(void *msg_buf, struct _cdt **cdt, struct _pdt *pdt ),
+int scs_std$listen (void (*msgadr)(void *msg_buf, struct _cdt **cdt, struct _pdt *pdt ),
 		    void (*erradr)( unsigned int err_status, unsigned int reason, struct _cdt *cdt, struct _pdt *pdt), 
 		    void *lprnam, 
 		    void *prinfo,
@@ -404,25 +355,39 @@ int /*__init*/ scs_init(void) {
     r->rd$w_seqnum=i; // ?
   }
 
-  scs$listen(dir_listen,mydirerr,myname,myinfo,0);
+  scs_std$listen(dir_listen,mydirerr,myname,myinfo,0);
 
 }
 
 //static int dn_sendmsg(struct _cdt *sock, struct msghdr *msg, int size,struct scm_cookie *scm)
 
 int scs_std$senddg(int disposition_flag, int dg_msg_length, struct _cdrp *cdrp ) {
-  struct _cdt * sk=cdrp->cdrp$l_cdt;
+  struct _scs * scs = vmalloc(sizeof(struct _scs));
+  struct _scs1 * scs1 = scs;
+  struct _ppd * ppd = scs;
+  struct _cdt * cdt = cdrp->cdrp$l_cdt;
+  ppd->ppd$b_opc=PPD$C_SNDDG;
+  scs->scs$w_mtype=SCS$C_APPL_DG;
+  scs1->scs$l_lconid=cdt->cdt$l_lconid;
+  scs->scs$l_src_conid=cdt->cdt$l_lconid;
+  scs->scs$l_dst_conid=cdt->cdt$l_rconid;
+  scs1->scs$l_rspid=cdrp->cdrp$l_rspid;
+  scs1->scs$l_xct_len=cdrp->cdrp$l_xct_len;
+  scs_lower_level_send(cdrp,scs);
+}
+
+void scs_lower_level_send(struct _cdrp * cdrp, struct _scs * scs) {
   struct sk_buff *skb = NULL;
+  struct _cdt * sk=cdrp->cdrp$l_cdt;
+
   if ((skb = dn_alloc_skb2(sk, 1000, GFP_ATOMIC)) == NULL)
     return;
 
-  scs_msg_fill(skb,sk,0);
+  scs_msg_fill(skb,sk,0,scs);
 
-  scs_msg_fill_more(skb,sk,cdrp);
+  scs_msg_fill_more(skb,sk,cdrp,600);
 
   dn_nsp_send2(skb);	
-
-	
 }
 
 static int scs_std$sendmsg(int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (* complete)(void))
@@ -446,96 +411,6 @@ static int scs_std$sendmsg(int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cd
 	unsigned short ack;
 	int len;
 	unsigned char fctype;
-
-	if (flags & ~(MSG_TRYHARD|MSG_OOB|MSG_DONTWAIT|MSG_EOR))
-		return -EOPNOTSUPP;
-
-	if (addr_len && (addr_len != sizeof(struct sockaddr_dn)))
-		return -EINVAL;
-
-	if (scp->cdt$w_state == CDT$C_OPEN) {
-		if (!addr_len || !addr) {
-			err = -ENOTCONN;
-			goto out;
-		}
-
-	}
-
-	fctype = 0;
-
-	/*
-	 * The only difference between SEQPACKET & STREAM sockets under DECnet
-	 * is that SEQPACKET sockets set the MSG_EOR flag for the last
-	 * session control message segment. 
-	 */
-
-	if (flags & MSG_OOB) {
-		mss = 16;
-		queue = &scp->cdt$l_waitqfl;
-		if (size > mss) {
-			err = -EMSGSIZE;
-			goto out;
-		}
-	}
-
-	while(sent < size) {
-		err = sock_error(sk);
-		if (err)
-			goto out;
-
-		if (signal_pending(current)) {
-			err = -ERESTARTSYS;
-			goto out;
-		}
-
-		/*
-		 * Calculate size that we wish to send.
-		 */
-		len = size - sent;
-
-		if (len > mss)
-			len = mss;
-
-		/*
-		 * Get a suitably sized skb.
-		 */
-		skb = dn_alloc_send_skb2(sk, &len, flags & MSG_DONTWAIT, &err);
-
-		if (err)
-			break;
-
-		if (!skb)
-			continue;
-
-		cb = (skb);
-
-		ptr = skb_put(skb, 9);
-
-		if (memcpy_fromiovec(skb_put(skb, len), msg->msg_iov, len)) {
-			err = -EFAULT;
-			goto out;
-		}
-
-		*ptr++ = msgflg;
-		*(__u16 *)ptr = scp->cdt$l_rconid;
-		ptr += 2;
-		*(__u16 *)ptr = scp->cdt$l_lconid;
-		ptr += 2;
-		*(__u16 *)ptr = dn_htons(ack);
-		ptr += 2;
-		*(__u16 *)ptr = dn_htons(cb->cdt$l_pb->pb$l_vc_addr->vc$l_preferred_channel->ch$w_lcl_chan_seq_num);
-
-		sent += len;
-		dn_nsp_queue_xmit2(sk, skb, 0, flags & MSG_OOB);
-		skb = NULL;
-
-	}
-out:
-
-	if (skb)
-		kfree_skb(skb);
-
-	
 
 	return sent ? sent : err;
 }
@@ -711,11 +586,11 @@ static struct proto_ops dn_proto_ops = {
 	bind:		none,
 	connect:	none,
 	socketpair:	sock_no_socketpair,
-	accept:		scs$accept,
+	accept:		scs_std$accept,
 	getname:	none,
 	poll:		none,
 	ioctl:		none,
-	listen:		scs$listen,
+	listen:		scs_std$listen,
 	shutdown:	none,
 	setsockopt:	none,
 	getsockopt:	none,
@@ -827,3 +702,83 @@ module_exit(decnet_exit);
 //#endif /* #if 0 second one */
 
 #endif
+
+int   scs_std$reqdata( struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (*complete)() ) {
+  struct _scs * scs = vmalloc(sizeof(struct _scs));
+  struct _scs1 * scs1 = scs;
+  struct _ppd * ppd = scs;
+  struct _cdt * cdt = cdrp_p->cdrp$l_cdt;
+  ppd->ppd$b_opc=PPD$C_REQDAT;
+  scs->scs$w_mtype=SCS$C_APPL_DG;
+  scs1->scs$l_lconid=cdt->cdt$l_lconid;
+  scs->scs$l_src_conid=cdt->cdt$l_lconid;
+  scs->scs$l_dst_conid=cdt->cdt$l_rconid;
+  scs1->scs$l_rspid=cdrp_p->cdrp$l_rspid;
+  scs1->scs$l_xct_len=cdrp_p->cdrp$l_xct_len;
+  //insque(cdrp_p,&pdt_p->pdt$q_comql);
+  scs_lower_level_send(cdrp_p,scs);
+}
+
+
+int   scs_std$request_data ( struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (*complete)() ) {
+  return scs_std$reqdata(pdt_p,cdrp_p,complete);
+}
+
+int   scs_std$senddata ( struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (*complete)() ) {
+  struct _scs * scs = vmalloc(sizeof(struct _scs));
+  struct _scs1 * scs1 = scs;
+  struct _ppd * ppd = scs;
+  struct _cdt * cdt = cdrp_p->cdrp$l_cdt;
+  ppd->ppd$b_opc=PPD$C_SNDDAT;
+  scs->scs$w_mtype=SCS$C_APPL_DG;
+  scs1->scs$l_lconid=cdt->cdt$l_lconid;
+  scs->scs$l_src_conid=cdt->cdt$l_lconid;
+  scs->scs$l_dst_conid=cdt->cdt$l_rconid;
+  scs1->scs$l_rspid=cdrp_p->cdrp$l_rspid;
+  scs1->scs$l_xct_len=cdrp_p->cdrp$l_xct_len;
+  //insque(cdrp_p,&pdt_p->pdt$q_comql);
+  scs_lower_level_send(cdrp_p,scs);
+}
+
+int   scs_std$send_data ( struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (*complete)() ) { 
+  return scs_std$senddata(pdt_p,cdrp_p,complete);
+}
+
+cwpsmyerr(){}
+
+cwpslisten(void * packet, struct _cdt * c, struct _pdt * p) {
+  int sts;
+  struct _iosb * iosb=vmalloc(sizeof(struct _iosb));
+  struct _cdrp * cdrp;
+  struct _scs * scs = packet;
+  struct _cdt * cdt = &cdtl[scs->scs$l_dst_conid];
+  struct _cwpssrv * cp = ((unsigned long)packet) + sizeof(*scs);
+  void * next = (unsigned long) cp + sizeof(struct _cwpssrv);
+  switch (cp->cwpssrv$b_subtype) {
+  case CWPSSRV$K_FORCEX:
+    {
+      struct _cwpsfex * fex = next;
+      exe$forcex(&cp->cwpssrv$l_sought_epid,0,fex->cwpsfex$l_code);
+    }
+    break;
+  default:
+  }
+}
+
+
+init_cwps() {
+  char myname[]="cwps";
+  char myinfo[]="cwps service";
+
+  //  listen(msgbuf,err,cdt,pdt,cdt);
+  scs_std$listen(cwpslisten,cwpsmyerr,myname,myinfo,0);
+
+}
+
+cwps$getjpi(){}
+
+cwps$getjpi_pscan(){}
+
+cwps$srcv_getjpi_ast(){}
+
+// module cwps_service_recv
