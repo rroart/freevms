@@ -1283,10 +1283,10 @@ l10:
 //	MULL2	100, R0		// Convert seconds to 100ths
   /*PUSHL	R1*/			// Save R1 from being tromped on
 	R0 = exe$gq_systime;	// copy the current time into R0/R1
-	R0 &=	~0xFFFF8000;
+	R0 &=	0x7fffffffffff;
 	// not yet	R0 = R0/100; R0=R0/1000; // Convert with R0 in 100ths
 	  /*POPL	R1*/
-	return R0;
+	return (R0/100/1000;
 }
 
 
