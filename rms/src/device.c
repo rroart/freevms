@@ -125,6 +125,10 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **ret
     struct _ucb *dev;
     int i;
     unsigned sts = 1,devsiz = 0;
+    if (*devnam=='_') {
+      devnam++;
+      devlen--;
+    }
     for (i=0;i<myfilelistptr;i++) {
       dev=myfilelist[i];
       if (strlen(dev->ucb$l_ddb->ddb$t_name)==strlen(devnam) && strncmp(dev->ucb$l_ddb->ddb$t_name,devnam,strlen(devnam))==0) goto end;
