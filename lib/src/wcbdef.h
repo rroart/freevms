@@ -89,6 +89,18 @@ struct _wcb {
   unsigned int wcb$l_p2_count;
   unsigned int wcb$l_p2_lbn;
   unsigned int wcb$l_p2_rvn;
+
+  // borrowing until I understand wcb better
+
+#if 0
+  unsigned hd_seg_num;        /* Header segment number */
+  unsigned short extcount;    /* Extents in use */
+  unsigned phylen[20];
+  unsigned phyblk[20];
+  unsigned char rvn[20];
+  unsigned long loblk,hiblk;
+  unsigned hd_basevbn;        /* File blocks prior to header */
+#endif
 };
 
 #define WCB$K_MAP_PTR_LENGTH 12
