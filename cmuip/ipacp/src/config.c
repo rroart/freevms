@@ -257,10 +257,11 @@ extern     GET_HEX_NUM();
 extern  void    ASCII_DEC_BYTES();
 extern  void    ASCII_HEX_BYTES();
 
-#define CH$PTR(X) ((long)X+1)
-#define CH$RCHAR(X) *(((char *)X)++) // check or ++ char?
+#define CH$PTR(X) ((long)X) // check + 1?
+#define CH$RCHAR(X) *((char *)X) // check or ++ char?
 #define CH$PLUS(X,Y) ((long)X+(long)Y)
-#define CH$WCHAR_A(X,Y) *(char*)Y=X
+#define CH$WCHAR_A(X,Y) *(char*)Y++=X
+#define CH$RCHAR_A(X) *(((char *)X)++)  // not yet? *((*(char **)X)++) 
  
 #if 0
     STR[] = CH$PTR(UPLIT(%ASCIZ %STRING(%REMAINING))) %,
@@ -289,7 +290,7 @@ extern  void    ASCII_HEX_BYTES();
 
 #define     RECLEN   512
 #define     STRLEN   128
-#define     STRSIZ   CH$ALLOCATION(STRLEN)
+#define     STRSIZ   STRLEN // was: CH$ALLOCATION(STRLEN)
 
 // Define file reading blocks
 
@@ -462,7 +463,7 @@ PSECT
 
 signed long
     dev_count;
-Device_Configuration_Entry * dev_config_tab; /* check PSECT(quads) ALIGN(3), */
+Device_Configuration_Entry dev_config_tab[DC_Max_Num_Net_Devices]; /* check PSECT(quads) ALIGN(3), */
 
 
 
@@ -587,11 +588,12 @@ void CNF$Configure_ACP (void)
 
 // if (1st char of line is a "!" then is it a comment & we ignore it.
 
-#if 0	
+#if 1	
 	chr = CH$RCHAR(CH$PTR(CFRAB->rab$l_ubf));
-#endif
+#else
 	int d=CH$PTR(CFRAB->rab$l_ubf);  // check
 	chr = CH$RCHAR(d);
+#endif
 	if ((chr != '!') && (chr != ';'))
 	    {
 	    if (linlen > (RECLEN-1))
