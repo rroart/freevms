@@ -393,12 +393,26 @@ unsigned long round_and_round;
 
 void cpu_idle(void)
 {
+	init_idle();
+	printk("id %x\n",current->pid);	
+	printk("idle %x %x %x\n",done_init_idle,current,&init_task);
+  printk("pid 0 here again%x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl); 
+	{ int i; for(i=0;i<10000000;i++) ; }
+	if (current->pid==0) { /* just to be sure */
+	  	  current->pcb$b_prib  = 24;
+	  	  current->pcb$b_pri   = 24;
+	  current->pcb$b_prib  = 31;
+	  current->pcb$b_pri   = 31;
+	  current->phd$w_quant = 0;
+	} /* we might not need these settings */
+
  	if(CPU(current) == 0) idle_timer();
 
 	atomic_inc(&init_mm.mm_count);
 	current->mm = &init_mm;
 	current->active_mm = &init_mm;
 
+	printk("bef while\n");
 	while(1){
 		/* endless idle loop with no priority at all */
 		SET_PRI(current);
@@ -407,12 +421,14 @@ void cpu_idle(void)
 		 * although we are an idle CPU, we do not want to
 		 * get into the scheduler unnecessarily.
 		 */
+		schedule();
 		if (current->need_resched) {
 			schedule();
 			check_pgt_cache();
 		}
 		idle_sleep(10);
 	}
+	printk("aft while\n");
 }
 
 int page_size(void)
