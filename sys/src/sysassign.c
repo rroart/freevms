@@ -47,6 +47,7 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   */
 
   c->ccb$l_ucb=u;
+  c->ccb$l_ucb->ucb$l_refc++;
   sch$iounlock();
   return status;
 }
