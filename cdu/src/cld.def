@@ -47,4 +47,4 @@ DEFTREECODE (OR_BOOL, "or_bool", 'e', 2)
 DEFTREECODE (AND_BOOL, "and_bool", 'e', 2)
 DEFTREECODE (NOT_BOOL, "not_bool", 'e', 1)
 DEFTREECODE (ANY2_UNIT, "any2_unit", 'e', 1)
-
+DEFTREECODE (MODULE_STMT, "module_stmt", 'e', 1)

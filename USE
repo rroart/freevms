@@ -99,7 +99,8 @@ SHOW LOGICAL:
 	DCL only
 
 DFU:
-	dfu
+	dfu (run from bash)
+	commands: verify dfa0, exit; non CONFIG_VMS mode
 
 ******************************
 
