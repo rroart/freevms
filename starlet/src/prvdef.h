@@ -6,7 +6,7 @@
 #define		PRV$M_SYSNAM		0x4
 #define		PRV$M_GRPNAM		0x8
 #define		PRV$M_ALLSPOOL		0x10
-#define		PRV$M_IMPERSONATE		0x20
+#define		PRV$M_IMPERSONATE	0x20
 #define		PRV$M_DIAGNOSE		0x40
 #define		PRV$M_LOG_IO		0x80
 #define		PRV$M_GROUP		0x100
@@ -54,6 +54,46 @@
 #define		PRV$M_BRIEF		0x2
 #define		PRV$M_FILLED		0x4
 	
+#define		PRV$V_CMKRNL		0
+#define		PRV$V_CMEXEC		1
+#define		PRV$V_SYSNAM		2
+#define		PRV$V_GRPNAM		3
+#define		PRV$V_ALLSPOOL		4
+#define		PRV$V_IMPERSONATE	5
+#define		PRV$V_DIAGNOSE		6
+#define		PRV$V_LOG_IO		7
+#define		PRV$V_GROUP		8
+#define		PRV$V_NOACNT		9
+#define		PRV$V_PRMCEB		10
+#define		PRV$V_PRMMBX		11
+#define		PRV$V_PSWAPM		12
+#define		PRV$V_SETPRI		13
+#define		PRV$V_SETPRV		14
+#define		PRV$V_TMPMBX		15
+#define		PRV$V_WORLD		16
+#define		PRV$V_MOUNT		17
+#define		PRV$V_OPER		18
+#define		PRV$V_EXQUOTA		19
+#define		PRV$V_NETMBX		20
+#define		PRV$V_VOLPRO		21
+#define		PRV$V_PHY_IO		22
+#define		PRV$V_BUGCHK		23
+#define		PRV$V_PRMGBL		24
+#define		PRV$V_SYSGBL		25
+#define		PRV$V_PFNMAP		26
+#define		PRV$V_SHMEM		27
+#define		PRV$V_SYSPRV		28
+#define		PRV$V_BYPASS		29
+#define		PRV$V_SYSLCK		30
+#define		PRV$V_SHARE		31
+#define		PRV$V_UPGRADE		32
+#define		PRV$V_DOWNGRADE		33
+#define		PRV$V_GRPPRV		34
+#define		PRV$V_READALL		35
+#define		PRV$V_IMPORT		36
+#define		PRV$V_AUDIT		37
+#define		PRV$V_SECURITY		38
+
 union _prvdef {
   struct  {
     unsigned prv$v_cmkrnl		: 1;
