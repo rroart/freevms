@@ -41,6 +41,7 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
 
   switch (i->irp$v_fcode) {
 
+    case IO$_WRITELBLK:
     case IO$_WRITEPBLK: {
       rq->cmd=WRITE;
       rq->buffer=i->irp$l_qio_p1;
@@ -50,6 +51,7 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
       return (sts);
     }
 
+    case IO$_READLBLK:
     case IO$_READPBLK: {
       rq->cmd=READ;
       rq->buffer=i->irp$l_qio_p1;
@@ -152,8 +154,8 @@ extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, uns
 
 int ide_vmsinit(void) {
   unsigned short chan;
-  $DESCRIPTOR(u0,"hda0");
-  struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda0","hddriver");
+  $DESCRIPTOR(u0,"hda");
+  struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
   printk(KERN_INFO "dev here\n");
   /* for the fdt init part */
   /* a lot of these? */
