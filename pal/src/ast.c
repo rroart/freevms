@@ -4,6 +4,7 @@
 #include<linux/sched.h>
 #include "../../freevms/sys/src/asmlink.h"
 #include<asm/hw_irq.h>
+#include "../../freevms/sys/src/system_data_cells.h"
 
 int in_sw_ast;
 

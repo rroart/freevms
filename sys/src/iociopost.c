@@ -3,6 +3,7 @@
 #include"../../freevms/lib/src/acbdef.h"
 #include"../../freevms/lib/src/ipldef.h"
 #include"../../freevms/pal/src/ipl.h"
+#include "../../freevms/sys/src/system_data_cells.h"
 
 dirpost(void) { }
 

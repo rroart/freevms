@@ -6,6 +6,7 @@
 #include"../../freevms/lib/src/statedef.h"
 #include"../../freevms/lib/src/evtdef.h"
 #include"../../freevms/librtl/src/descrip.h"
+#include "../../freevms/sys/src/system_data_cells.h"
 
 /* Author: Roar Thronæs */
 

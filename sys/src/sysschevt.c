@@ -1,12 +1,12 @@
 #include<linux/linkage.h>
-#include<linux/vmalloc.h>
-#include<linux/smp.h>
 #include<linux/sched.h>
 #include"../../freevms/starlet/src/ssdef.h"
 #include"../../freevms/lib/src/tqedef.h"
 #include"../../freevms/lib/src/cpudef.h"
 #include"../../freevms/sys/src/system_data_cells.h"
 #include "../../freevms/lib/src/statedef.h"
+#include<linux/vmalloc.h>
+#include<linux/smp.h>
 
 asmlinkage int exe$setimr  (unsigned int efn, signed long long *daytim,
 		 void (*astadr)(long), unsigned

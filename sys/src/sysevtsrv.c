@@ -4,6 +4,7 @@
 #include "../../freevms/lib/src/pridef.h"
 #include "../../freevms/lib/src/cpudef.h"
 #include "../../freevms/starlet/src/ssdef.h"
+#include "../../freevms/sys/src/system_data_cells.h"
 
 asmlinkage int exe$clref(unsigned int efn) {
   struct _pcb * p=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;

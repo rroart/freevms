@@ -69,7 +69,12 @@
 #define		CPU$K_LENGTH		2528
 #define		CPU$C_LENGTH		2528
 #define		CPU$M_AGE_DATA		0x1
-	
+
+#ifndef _pcb
+#define _pcb task_struct
+struct task_struct;
+#endif
+
 struct _cpu {
   struct _pcb *cpu$l_curpcb;
   // struct _ktb *cpu$l_curktb;

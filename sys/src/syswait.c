@@ -2,6 +2,7 @@
 #include <linux/smp.h>
 #include "../../freevms/lib/src/cpudef.h"
 #include "../../freevms/starlet/src/ssdef.h"
+#include "../../freevms/sys/src/system_data_cells.h"
 
 int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   struct _pcb * p=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;

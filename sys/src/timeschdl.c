@@ -45,6 +45,7 @@
 #include <asm/hw_irq.h>
 #include "../../freevms/sys/src/sysgen.h"
 #include "../../freevms/sys/src/rse.h"
+#include "../../freevms/sys/src/system_data_cells.h"
 
 extern int pid1count; /* Will be removed in the future */
 extern int pid0count; /* Will be removed in the future */
@@ -170,6 +171,9 @@ asmlinkage void exe$swtimint(void) {
 }
 
 /* vax has 100 Hz clock interrupts. Quantum is in those 10 ns units */
+#ifdef __arch_um__
+#define QUANTADD 1
+#endif
 #ifdef __i386
 /* 100Hz interrupts here */
 #define QUANTADD 1
@@ -186,6 +190,7 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
 
     write_lock(&xtime_lock);
 
+#ifndef __arch_um__
     if (use_tsc)
       {
 	rdtscl(last_tsc_low);
@@ -209,6 +214,7 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
       spin_unlock(&i8259A_lock);
     }
 #endif
+#endif /* __arch_um__ */
 
     exe$gq_systime+=exe$gl_ticklength;
 
@@ -258,6 +264,7 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
     if (TQ_ACTIVE(tq_timer))
       mark_bh(TQUEUE_BH);
 
+#ifdef __i386__
 #ifndef CONFIG_X86_LOCAL_APIC
     if (!user_mode(regs))
       x86_do_profile(regs->eip);
@@ -265,15 +272,20 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
     if (!using_apic_timer)
       smp_local_timer_interrupt(regs);
 #endif
+#endif
 
     if ((time_status & STA_UNSYNC) == 0 &&
+#ifndef __arch_um__
 	xtime.tv_sec > last_rtc_update + 660 &&
+#endif
 	xtime.tv_usec >= 500000 - ((unsigned) tick) / 2 &&
 	xtime.tv_usec <= 500000 + ((unsigned) tick) / 2) {
+#ifndef __arch_um__
       if (set_rtc_mmss(xtime.tv_sec) == 0)
 	last_rtc_update = xtime.tv_sec;
       else
 	last_rtc_update = xtime.tv_sec - 600;
+#endif
     }
 
     write_unlock(&xtime_lock);

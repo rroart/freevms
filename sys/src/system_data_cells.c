@@ -548,6 +548,11 @@ unsigned long exe$gl_sysucb;
 unsigned long exe$gl_sysuic;
 unsigned long exe$gl_tenusec;
 unsigned long exe$gl_tickadjust;
+#if 0
+#ifdef __arch_um__
+unsigned long exe$gl_ticklength=100000;
+#endif
+#endif
 #ifdef __i386
 unsigned long exe$gl_ticklength=100000;
 #endif

@@ -46,6 +46,9 @@
 #include "../../freevms/pal/src/ipl.h"
 #include "../../freevms/pal/src/queue.h"
 #include"../../freevms/lib/src/system_service_setup.h"
+#ifdef __arch_um__
+#include <asm-i386/hw_irq.h>
+#endif
 
 extern void timer_bh(void);
 extern void tqueue_bh(void);
