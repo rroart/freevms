@@ -161,6 +161,7 @@ int ide_vmsinit(void) {
   printk(KERN_INFO "dev here\n");
   /* for the fdt init part */
   /* a lot of these? */
+  ini_fdt_act(&fdt,IO$_ACCESS,acp_std$access,1);
   ini_fdt_act(&fdt,IO$_READLBLK,acp_std$readblk,1);
   ini_fdt_act(&fdt,IO$_READPBLK,acp_std$readblk,1);
   ini_fdt_act(&fdt,IO$_READVBLK,acp_std$readblk,1);
