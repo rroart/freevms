@@ -32,15 +32,30 @@ int ioc$searchdev() {
   /* implement later */
 }
 
+// remember to make this interface like ioc_std$search in ioc_routines.h
+
 int ioc$search(struct return_values *r, void * devnam) {
+  // no use of ioc$trandevnam yet 
   /* ddb d not needed? */
   /* real device, no logical. do not have logicals yet */
   /* return ucb or 0 */
   struct dsc$descriptor *s=devnam;
   struct _ddb * d=ioc$gl_devlist;
   do {
+    //    printk("bcmp %s %s\n",d->ddb$t_name,s->dsc$a_pointer);
     if (!bcmp(d->ddb$t_name,s->dsc$a_pointer,3/* was s->dsc$w_length*/)) {
-      r->val1=d->ddb$l_ucb;
+      struct _ucb * tmp = d->ddb$l_ucb;
+      char * c=s->dsc$a_pointer;
+      char unit=c[3]-48;
+      do {
+	//printk("unitcmp %x %x\n",unit,tmp->ucb$w_unit);
+	if (unit==tmp->ucb$w_unit)
+	  goto out;
+	tmp=tmp->ucb$l_link;
+      } while (tmp && tmp!=d->ddb$l_ucb);
+      return SS$_NOSUCHDEV;
+    out:
+      r->val1=tmp; // was d->ddb$l_ucb;
       return SS$_NORMAL;
     }
     d=d->ddb$ps_link;
