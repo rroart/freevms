@@ -1053,17 +1053,17 @@ void Terminal_Type_Sub (TVT)
 void Set_DEVDEP_DONE(TVT)
 	struct TVT$BLOCK * TVT;
     {
-	short int tty_chan	= &TVT->TVT$TTY_CHN;
+	int * tty_chan	= &TVT->TVT$TTY_CHN;
     signed long
 	Status;
 
 	XLOG$FAO(LOG$TELNEG,"!%T Set_DEVDEP_Done:!/",0);
-	if (tty_chan == 0) return(SS$_NORMAL);
-	Status = exe$dassgn (tty_chan);
+	if (*tty_chan == 0) return(SS$_NORMAL);
+	Status = exe$dassgn (*tty_chan);
 	if (! Status)
 		    XLOG$FAO(LOG$TELERR
 		    ,"!%T Set_DEVDEP_Done: DASSGN status=!UL!/",0,Status);
-	tty_chan = 0;
+	*tty_chan = 0;
 	return SS$_NORMAL;
 };
 
@@ -1097,8 +1097,8 @@ void set_devdep(TVT)
 	struct dsc$descriptor * ptynam = &ptynam_;
 	struct item_list_3 Item_List[3];
 	unsigned long Status;
-	short * pty_chan	= &TVT->TVT$PTY_CHN;
-	short * tty_chan	= &TVT->TVT$TTY_CHN;
+	short int pty_chan	= TVT->TVT$PTY_CHN;
+	short int tty_chan	= TVT->TVT$TTY_CHN;
 	  struct _qcbdef * PTY_Char= &TVT->TVT$TTY_CHAR;
 	union _ttdef * Charistics = PTY_Char->QCB$L_CHARISTICS;
 	union _tt2def * Extend_Char = PTY_Char->QCB$L_EXTEND_CHAR;   // JC
@@ -1255,16 +1255,17 @@ void set_devdep(TVT)
 //!!JC			,"!%T Set_DEVDEP: TTY_TERM == "!AS""
 //!!JC			,0,devnam);			// Concatonate
 
-	Status = exe$assign(devnam,tty_chan,0,0,0);		// Open new channel
+	Status = exe$assign(devnam,&tty_chan,0,0,0);		// Open new channel
 
 
 	if (! Status)					// No channel ?
 	     {
-		tty_chan = 0;
+	       TVT->TVT$TTY_CHN = 0; // was: tty_chan = 0;
 		XLOG$FAO(LOG$TELERR
 		,"!%T Set_DEVDEP: ASSIGN status=!UL!/",0,Status);
 	    }
 	    else {
+	      TVT->TVT$TTY_CHN = tty_chan;
 		Status = sys$qio (
 0,
 			tty_chan,
@@ -1280,7 +1281,7 @@ void set_devdep(TVT)
 		    XLOG$FAO(LOG$TELERR
 			,"!%T Set_DEVDEP: SETMODE TTY status=!UL!/",0,Status);
 		    Status = exe$dassgn ( tty_chan);
-		    tty_chan = 0;
+		    TVT->TVT$TTY_CHN = 0; // was: tty_chan = 0;
 		};
 	    };
 
