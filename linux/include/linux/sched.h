@@ -469,7 +469,7 @@ struct task_struct {
   unsigned short pcb$w_aptcnt;
   unsigned short pcb$w_mtxcnt;
   unsigned long pcb$l_gpgcnt;
-  unsigned long pcb$l_ppg;
+  unsigned long pcb$l_ppgcnt;
   unsigned long pcb$l_jib;
   unsigned long pcb$l_wsswp;
   unsigned long pcb$l_swapsize;
