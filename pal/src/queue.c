@@ -1,7 +1,7 @@
 /* Not implemented: atomicity */
 /* Not implemented: long and quadword alignments */
 
-/* Hmm C i too strongly typed */
+/* Hmm C is too strongly typed */
 
 /* These are VARM based. 32 bits */
 
@@ -16,10 +16,11 @@ void insque(void * entry, void * pred) {
 *(void **)pred=entry;
 }
 
-void remque(void * entry, void * addr) {
+unsigned long remque(void * entry, void * addr) {
 *(void **)(*(void **)(entry+4))=*(void **)entry;
 *(void **)((*(void **)entry)+4)=*(void **)(entry+4);
 addr=entry;
+return (unsigned long) addr;
 }
 
 /* These are AARM based. Still 32 bits */
@@ -51,7 +52,7 @@ else
 /* sti() */
 }
 
-void remqhi(void * header, void * addr) {
+unsigned long remqhi(void * header, void * addr) {
 signed long tmp1=*(signed long *)header;
 signed long tmp2=(signed long)header+tmp1;
 signed long tmp3;
@@ -63,10 +64,11 @@ else
 *((signed long *)(tmp3+4))=(signed long)header-tmp3;
 *(signed long *)header=tmp3-(signed long)header;
 addr=(signed long *)tmp2;
+return (unsigned long) addr;
 /* sti() */
 }
 
-void remqti(void * header, void * myaddr) {
+unsigned long remqti(void * header, void * myaddr) {
 /*signed long tmp1=*header;*/
 signed long tmp5=*(signed long *)(header+4);
 signed long addr=(signed long)header+tmp5;
@@ -78,5 +80,6 @@ if (tmp2 == (signed long) header)
 else
  *(signed long *)tmp2=(signed long)header-tmp2;
 myaddr=(signed long *) addr;
+return (unsigned long) myaddr;
 /* sti() */
 }

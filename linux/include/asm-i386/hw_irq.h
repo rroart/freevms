@@ -87,7 +87,8 @@
 #define SOFTINT_TIMERFORK_VECTOR do { __asm__ __volatile__ ("int $0x96\n"); } while (0);
 #define SOFTINT_QUEUEAST_VECTOR do { __asm__ __volatile__ ("int $0x95\n"); } while (0);
 #define SOFTINT_IOPOST_VECTOR do { __asm__ __volatile__ ("int $0x94\n"); } while (0);
-#define SOFTINT_RESCHED_VECTOR do { __asm__ __volatile__ ("int $0x93\n"); } while (0);
+//#define SOFTINT_RESCHED_VECTOR do { __asm__ __volatile__ ("int $0x93\n"); } while (0);
+#define SOFTINT_RESCHED_VECTOR sch$resched();
 #define SOFTINT_ASTDEL_VECTOR do { __asm__ __volatile__ ("int $0x92\n"); } while (0);
 
 /*

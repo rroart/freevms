@@ -4,8 +4,8 @@
 all: libqueue.a
 
 libqueue.a: queue.o
-	ar cr libqueue.a queue.o
-	ranlib libqueue.a
+	ar cr lib.a queue.o
+	ranlib lib.a
 
 queue.o:
 	cc -c queue.c

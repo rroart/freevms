@@ -11,6 +11,8 @@
 
 #define __KERNEL_SYSCALLS__
 
+#include "../../freevms/sys/src/system_data_cells.h"
+
 #include <linux/config.h>
 #include <linux/proc_fs.h>
 #include <linux/devfs_fs_kernel.h>
@@ -527,15 +529,21 @@ static void __init smp_init(void)
  * cpu_idle.
  */
 
+int fix_init_thread=1;
+
 static void rest_init(void)
 {
+  printk("before first kernel_thread\n");
 	kernel_thread(init, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
+	// { int j; for(j=0;j<1000000000;j++) ; } 
+  printk("after first kernel_thread\n");
+  fix_init_thread=0;
 	unlock_kernel();
 	current->need_resched = 1;
  	cpu_idle();
 } 
 
-void vms_init(void);
+void vms_init(void) __init;
 
 /*
  *	Activate the first processor.
@@ -557,6 +565,7 @@ asmlinkage void __init start_kernel(void)
 	parse_options(command_line);
 	trap_init();
 	init_IRQ();
+	vms_init();
 	sched_init();
 	softirq_init();
 	time_init();
@@ -592,7 +601,9 @@ asmlinkage void __init start_kernel(void)
 	}
 #endif
 	mem_init();
+	printk("aft mem_init\n");
 	kmem_cache_sizes_init();
+	printk("aft kmem\n");
 	mempages = num_physpages;
 
 	fork_init(mempages);
@@ -619,7 +630,6 @@ asmlinkage void __init start_kernel(void)
 	 *	make syscalls (and thus be locked).
 	 */
 	smp_init();
-	vms_init();
 	rest_init();
 }
 
@@ -728,9 +738,11 @@ static void __init do_basic_setup(void)
 
 	/* Networking initialization needs a process context */ 
 	sock_init();
-
+	printk("aft sockinit\n");
 	start_context_thread();
+	printk("aft contextthr\n");
 	do_initcalls();
+	printk("aft initcalls\n");
 
 #ifdef CONFIG_IRDA
 	irda_proto_init();
@@ -798,26 +810,33 @@ static void prepare_namespace(void)
 #endif
 }
 
+extern int mydebug5;
+extern int mydebug6;
+
 static int init(void * unused)
 {
 	lock_kernel();
 	do_basic_setup();
-
+	printk("after dobasic\n");
 	prepare_namespace();
-
+	printk("after prepnamspac\n");
 	/*
 	 * Ok, we have completed the initial bootup, and
 	 * we're essentially up and running. Get rid of the
 	 * initmem segments and start the user-mode stuff..
 	 */
 	free_initmem();
+	printk("aft freini\n");
 	unlock_kernel();
-
+	//	mydebug5=1;
+	//	mydebug6=1;
+	printk("aft unlker %x %x %x %x %x %x %x %x\n",current,current->pid,current->mm,current->active_mm,&init_task,init_task.pid,init_task.mm,init_task.active_mm);
 	if (open("/dev/console", O_RDWR, 0) < 0)
 		printk("Warning: unable to open an initial console.\n");
-
+	printk("here 1\n");
 	(void) dup(0);
 	(void) dup(0);
+	printk("here 2\n");
 	
 	/*
 	 * We try each of these until one succeeds.

@@ -14,18 +14,23 @@ int sch$qend(struct _pcb * p) {
   //  p->need_resched = 1;
   if (mydebug) printk("quend %x %x\n",p->pid,p->need_resched);
   {
-    struct list_head * tmp;
+    //    struct list_head * tmp;
     struct _pcb * e, * next;
     unsigned char c;
-    list_for_each(tmp, &runqueue_head) {
-      e = list_entry(tmp, struct task_struct, run_list);
-      if (e->pcb$b_pri <= c) c=e->pcb$b_pri, next=e;
-    }
-    if (next == e)
-      { 
+    int tmppri;
+    //    list_for_each(tmp, &runqueue_head) {
+    //      e = list_entry(tmp, struct task_struct, run_list);
+    //      if (e->pcb$b_pri <= c) c=e->pcb$b_pri, next=e;
+    //    }
+    //SOFTINT_RESCHED_VECTOR;
+    // return;
+    tmppri=ffs(sch$gl_comqs);
+    tmppri--;
+    if (tmppri<=p->pcb$b_pri) {
 	if (p->pcb$b_pri != p->pcb$b_prib) ++p->pcb$b_pri;
-	/* p->need_resched = 0; */
-      }
+	 sch$resched(); /*no interrupt yet*/ /*did not work*/
+	//SOFTINT_RESCHED_VECTOR;
+	 p->need_resched = 0;       }
     else
       {
 	p->need_resched=1;

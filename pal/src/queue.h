@@ -2,10 +2,10 @@
 #define queue_h
 
 void insque(void * entry, void * pred);
-void remque(void * entry, void * addr);
+unsigned long remque(void * entry, void * addr);
 void insqhi(void * entry, void * header);
-void remqhi(void * header, void * addr);
+unsigned long remqhi(void * header, void * addr);
 void insqti(void * entry, void * header);
-void remqti(void * header, void * addr);
+unsigned long remqti(void * header, void * addr);
 
 #endif

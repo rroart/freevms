@@ -298,6 +298,9 @@ void mm_release(void)
 	}
 }
 
+extern int mydebug6;
+extern int mydebug4;
+
 static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
 {
 	struct mm_struct * mm, *oldmm;
@@ -307,6 +310,10 @@ static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
 	tsk->cmin_flt = tsk->cmaj_flt = 0;
 	tsk->nswap = tsk->cnswap = 0;
 
+	if (mydebug4) {
+	printk("copy_mm %x %x %x %x\n",tsk,tsk->pid,tsk->mm,tsk->active_mm);
+    { int j; for(j=0;j<1000000000;j++) ; }
+	}
 	tsk->mm = NULL;
 	tsk->active_mm = NULL;
 
@@ -569,7 +576,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	struct completion vfork;
 
 	retval = -EPERM;
-
+	//	printk("do_fork\n");
 	/* 
 	 * CLONE_PID is only allowed for the initial SMP swapper
 	 * calls
@@ -682,7 +689,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	/* pcb stuff */
 
 	p->pcb$b_prib=31-DEFPRI;
-	p->pcb$b_pri=DEFPRI-6; /* pri boost */
+	p->pcb$b_pri=31-DEFPRI-6; /* pri boost */
 	if (p->pcb$b_pri<16) p->pcb$b_pri=16;
 	p->phd$w_quant=-QUANTUM/10;
 
@@ -727,7 +734,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	if (p->ptrace & PT_PTRACED)
 		send_sig(SIGSTOP, p, 1);
-
+	//	printk("fork befwak\n");
 	wake_up_process(p);		/* do this last */
 	++total_forks;
 	if (clone_flags & CLONE_VFORK)

@@ -417,8 +417,8 @@ NORET_TYPE void do_exit(long code)
 {
 	struct task_struct *tsk = current;
 
-	if (in_interrupt())
-		panic("Aiee, killing interrupt handler!");
+	//	if (in_interrupt())
+	//		panic("Aiee, killing interrupt handler!");
 	if (!tsk->pid)
 		panic("Attempted to kill the idle task!");
 	if (tsk->pid == 1)
@@ -449,7 +449,8 @@ fake_volatile:
 	tsk->exit_code = code;
 	exit_notify();
 	//	schedule();
-	SOFTINT_RESCHED_VECTOR;
+	//	SOFTINT_RESCHED_VECTOR;
+	sch$resched();
 	printk("before bug\n");
 	BUG();
 /*

@@ -120,12 +120,19 @@ static void poll_idle (void)
  * low exit latency (ie sit in a loop waiting for
  * somebody to say that they'd like to reschedule)
  */
+
+extern int done_init_idle;
+
 void cpu_idle (void)
 {
 	/* endless idle loop with no priority at all */
 	init_idle();
-	printk("id %x\n",current->pid);
+	printk("id %x\n",current->pid);	
+	printk("idle %x %x %x\n",done_init_idle,current,&init_task);
+	{ int i; for(i=0;i<10000000;i++) ; }
 	if (current->pid==0) { /* just to be sure */
+	  	  current->pcb$b_prib  = 24;
+	  	  current->pcb$b_pri   = 24;
 	  current->pcb$b_prib  = 31;
 	  current->pcb$b_pri   = 31;
 	  current->phd$w_quant = 0;
@@ -133,15 +140,19 @@ void cpu_idle (void)
 
 	while (1) {
 		void (*idle)(void) = pm_idle;
-		// printk("cpu_idle\n");
+		//		 printk("cpu_idle\n");
 		if (!idle)
 			idle = default_idle;
 		// printk("bef while\n");
-		while (!current->need_resched)
-			idle();
+		//		while (!current->need_resched)
+		cli();
+		{ int i; for(i=0;i<1000000;i++) ; }
+		sti();
+		//			idle();
 		// printk("aft while\n");
 		//schedule();
-		SOFTINT_RESCHED_VECTOR;
+		//SOFTINT_RESCHED_VECTOR;
+		sch$resched();
 		check_pgt_cache();
 	}
 }

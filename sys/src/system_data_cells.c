@@ -1350,10 +1350,10 @@ unsigned long rms$gq_reserved08;
 unsigned long rms$gq_reserved09;
 unsigned long rms$gq_reserved10;
 unsigned long sch$al_cpu_cap;
-unsigned long long sch$aq_comh[32];
-unsigned long long sch$aq_comoh[32];
-unsigned long long sch$aq_comot[32];
-unsigned long long sch$aq_comt[32];
+unsigned long long sch$aq_comh[33];
+unsigned long long sch$aq_comoh[33];
+unsigned long long * sch$aq_comot;
+unsigned long long * sch$aq_comt;
 unsigned long sch$aq_wqhdr[44];
 unsigned long sch$ar_cap_priv;
 unsigned long sch$ar_class_name;
@@ -1416,14 +1416,15 @@ unsigned long sch$gl_wsdec_pagelets;
 unsigned long sch$gl_wsdec_pages;
 unsigned long sch$gl_wsinc_pagelets;
 unsigned long sch$gl_wsinc_pages;
-unsigned long sch$gq_active_priority;
+unsigned long sch$gl_active_priority;
+unsigned long sch$al_cpu_priority[32];
 unsigned long sch$gq_affinity_time_int;
 unsigned long sch$gq_cc_per_hardtick;
 unsigned long sch$gq_cc_per_quant;
 unsigned long sch$gq_cebhd;
 unsigned long sch$gq_colpgwq;
-unsigned long sch$gq_comoqs;
-unsigned long sch$gq_comqs;
+unsigned long sch$gl_comoqs;
+unsigned long sch$gl_comqs;
 unsigned long sch$gq_fpgwq;
 unsigned long sch$gq_hibowq;
 unsigned long sch$gq_hibwq;
@@ -1892,16 +1893,30 @@ unsigned long xqp$gl_sections;
 struct lnmhshs lnmhshs; /* should be one struct, will be solved later */
 struct lnmhshp lnmhshp;
 
-/*struct _cpu vmscpus[32];*/ /* max. this number should be defined */
-void vms_init(void) {
-  int i;
+struct _tqe tqehead;
 
-  for(i=0;i<32;i++)
-    smp$gl_cpu_data[i]=vmalloc(sizeof(struct _cpu));
+struct _cpu vmscpus[32]; /* max. this number should be defined */
+
+void __init vms_init(void) {
+  int i,j;
+
+  for(i=0;i<32;i++) {
+    smp$gl_cpu_data[i]=&vmscpus[i];
+    smp$gl_cpu_data[i]->cpu$l_cpuid_mask=2^i;
+  }
 
   sch$gl_idle_cpus=0;
+  sch$aq_comot=(void *)sch$aq_comoh+4;
+  sch$aq_comt=(void *)sch$aq_comh+4;
 
-  exe$gl_tqfl=vmalloc(sizeof(struct _tqe));
+  for(i=0;i<32;i++) {
+    struct _pcb * tmp;
+    tmp=(struct _pcb *) &sch$aq_comh[i];
+        tmp->pcb$l_sqfl=tmp;
+        tmp->pcb$l_sqbl=tmp;
+  }
+
+  exe$gl_tqfl=&tqehead;
   exe$gl_tqfl->tqe$l_tqfl=exe$gl_tqfl; 
   exe$gl_tqfl->tqe$l_tqbl=exe$gl_tqfl;
   exe$gl_tqfl->tqe$w_size=0;

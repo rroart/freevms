@@ -4,7 +4,7 @@ CPU structure.
 SCH structure.
 Interrupt/IPLs. Interrupt stack. iret/REI & ASTs.
 Syscalls: copied linux ones and use 0x81.
-	  VMS does not seem to use interrupt for syscalls
+	  VMS does not seem to use interrupt for syscalls at first, a bit later
 Memory management: need to be studied
 
 Currently broken:

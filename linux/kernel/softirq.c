@@ -65,8 +65,8 @@ asmlinkage void do_softirq()
 	long flags;
 	__u32 mask;
 
-	if (in_interrupt())
-		return;
+		if (in_interrupt())
+			return;
 
 	local_irq_save(flags);
 

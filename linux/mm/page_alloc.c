@@ -139,8 +139,8 @@ static void __free_pages_ok (struct page *page, unsigned int order)
  local_freelist:
 	if (current->nr_local_pages)
 		goto back_local_freelist;
-	if (in_interrupt())
-		goto back_local_freelist;		
+		if (in_interrupt())
+			goto back_local_freelist;		
 
 	list_add(&page->list, &current->local_pages);
 	page->index = order;

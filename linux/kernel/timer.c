@@ -583,13 +583,20 @@ void update_one_process(struct task_struct *p, unsigned long user,
 pid1count=0; /* Will be removed in the future */
 pid0count=0; /* Will be removed in the future */
 
+int countme2=500;
+
+extern int mydebug5;
+
 void update_process_times(int user_tick)
 {
 	struct task_struct *p = current;
 	int cpu = smp_processor_id(), system = user_tick ^ 1;
-
-	// if (p->pid==0) p->need_resched=1;
-	// {printk("timer %x %x %x\n",p->pid,p->phd$w_quant,p->pcb$b_pri);}
+	if (mydebug5 && !countme2--) { 
+	  countme2=500; printk(",");
+	  printk("timer %x %x %x\n",p->pid,p->phd$w_quant,p->pcb$b_pri);
+	}
+  //  printk(":");
+	//	if (p->pid==2) { int i; for(i=0;i<1000000;i++) ; }
 	// { int i; for (i=0; i<1000000; i++ ) ; }}
 	update_one_process(p, user_tick, system, cpu);
 	if (p->pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}  /* Will be removed in the future */
@@ -597,8 +604,10 @@ void update_process_times(int user_tick)
 	if (p->pid) {
 	  p->phd$l_cputim++;
 		if (++p->phd$w_quant  >= 0 ) {
-		  if (p->phd$w_quant<128)
+		  if (p->phd$w_quant<128) {
 		    SOFTINT_TIMER_VECTOR;
+		    //		    sch$resched();
+		  }
 		}
 		if (p->pcb$b_prib == 31)
 			kstat.per_cpu_nice[cpu] += user_tick;
