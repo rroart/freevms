@@ -172,6 +172,8 @@ void pagefaultast(struct pfast * p) {
     *(unsigned long *)(p->pte)|=_PAGE_RW|_PAGE_DIRTY;
 #endif
 
+  *(unsigned long *)(p->pte)|=_PAGE_NEWPAGE;
+
 #ifdef __arch_um__
   flush_tlb_range(current->mm, p->address, p->address + PAGE_SIZE);
 #endif
