@@ -952,6 +952,7 @@ void __init trap_init(void)
 
 	set_system_gate(SYSCALL_VECTOR,&system_call);
 		set_system_gate(VMSSYSCALL_VECTOR,&vmssystem_call);
+		set_system_gate(VMSSYSCALL_VECTOR1,&vmssystem_call1);
 		set_system_gate(VMSSYSCALL_VECTOR3,&vmssystem_call3); /* will need to figure out where the user mode setup is */
 
 		//		set_intr_gate(TEST_VECTOR,&test_code);

@@ -315,6 +315,18 @@ ENTRY(vmssystem_call3)
 	call *SYMBOL_NAME(vmssys_call_table3)(,%eax,4)
         jmp syscall_common
 
+ENTRY(vmssystem_call1)
+        PUSHPSL
+	pushl %eax			# save orig_eax
+	SAVE_ALL
+	GET_CURRENT(%ebx)
+	testb $0x02,tsk_ptrace(%ebx)	# PT_TRACESYS
+	jne vmstracesys
+	cmpl $(NR_vmssyscalls1),%eax
+	jae vmsbadsys
+	call *SYMBOL_NAME(vmssys_call_table1)(,%eax,4)
+        jmp syscall_common
+
 ENTRY(vmssystem_call)
         PUSHPSL
 	pushl %eax			# save orig_eax
@@ -870,6 +882,14 @@ ENTRY(vmssys_call_table)
 		.long SYMBOL_NAME(sys_$ni_syscall)
 
   .endr
+
+ENTRY(vmssys_call_table1)
+        .long SYMBOL_NAME(sys_$ni_syscall1)
+	.rept NR_vmssyscalls1-(.-vmssys_call_table1)/4
+		.long SYMBOL_NAME(sys_$ni_syscall1)
+
+  .endr
+
 
 ENTRY(vmssys_call_table3)
 	.long SYMBOL_NAME(sys_$ni_syscall3)	/* 0  -  old "setup()" system call*/

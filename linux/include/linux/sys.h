@@ -6,6 +6,7 @@
  */
 #define NR_syscalls 256
 #define NR_vmssyscalls 256
+#define NR_vmssyscalls1 256
 #define NR_vmssyscalls3 256
 
 /*

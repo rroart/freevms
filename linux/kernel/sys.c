@@ -190,6 +190,11 @@ asmlinkage long sys_$ni_syscall(void)
 	return -ENOSYS;
 }
 
+asmlinkage long sys_$ni_syscall1(void)
+{
+	return -ENOSYS;
+}
+
 asmlinkage long sys_$ni_syscall3(void)
 {
 	return -ENOSYS;
