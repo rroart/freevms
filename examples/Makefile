@@ -1,4 +1,6 @@
-all: timer ast time eftim schdwk forcex ef wake synch enq lnm lnm2 qio1 qio2 cef cefw mem memf getjpi crec
+all: alli386 allum
+
+alli386: timer ast time eftim schdwk forcex ef wake synch enq lnm lnm2 qio1 qio2 cef cefw mem memf getjpi crec
 
 timer: timer.c
 	gcc -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.a -o timer
@@ -61,69 +63,69 @@ getjpi: getjpi.c
 crec: crec.c
 	gcc -static -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.a -o crec
 
-allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum lnmum lnm2um qio1um qio2um cef cefwum mem memfum getjpium crecum
+allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum lnmum lnm2um qio1um qio2um cefum cefwum memfum getjpium crecum
 
-UMDEF=-Dcompile_um -I.
+UMDEF=-Dcompile_um
 
 timerum: timer.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.c -o timerum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starletum.a -o timerum
 timeum: gettim.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ gettim.c ../starlet/src/starlet.c -o timeum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ gettim.c ../starlet/src/starletum.a -o timeum
 
 astum: astdel.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ astdel.c ../starlet/src/starlet.c -o astum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ astdel.c ../starlet/src/starletum.a -o astum
 
 eftimum: eftim.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ eftim.c ../starlet/src/starlet.c -o eftimum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ eftim.c ../starlet/src/starletum.a -o eftimum
 
 schdwkum: schdwk.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ schdwk.c ../starlet/src/starlet.c -o schdwkum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ schdwk.c ../starlet/src/starletum.a -o schdwkum
 
 forcexum: forcex.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ forcex.c ../starlet/src/starlet.c -o forcexum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ forcex.c ../starlet/src/starletum.a -o forcexum
 
 efum: ef.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ ef.c ../starlet/src/starlet.c -o efum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ ef.c ../starlet/src/starletum.a -o efum
 
 wakeum: wake.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ wake.c ../starlet/src/starlet.c -o wakeum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ wake.c ../starlet/src/starletum.a -o wakeum
 
 
 synchum: synch.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ synch.c ../starlet/src/starlet.c -o synchum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ synch.c ../starlet/src/starletum.a -o synchum
 
 
 enqum: enq.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.c -o enqum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starletum.a -o enqum
 
 lnmum: lnm.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starlet.c -o lnmum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starletum.a -o lnmum
 
 lnm2um: lnm2.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ lnm2.c ../starlet/src/starlet.c -o lnm2um
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ lnm2.c ../starlet/src/starletum.a -o lnm2um
 
 qio1um: qio1.c
-	gcc ${UMDEF} -I../starlet/src -I../librtl/src/ qio1.c ../starlet/src/starlet.c -o qio1um
+	gcc ${UMDEF} -I../starlet/src -I../librtl/src/ qio1.c ../starlet/src/starletum.a -o qio1um
 
 qio2um: qio2.c
-	gcc ${UMDEF} -I../starlet/src -I../librtl/src/ qio2.c ../starlet/src/starlet.c -o qio2um
+	gcc ${UMDEF} -I../starlet/src -I../librtl/src/ qio2.c ../starlet/src/starletum.a -o qio2um
 
 cefum: cef.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ cef.c ../starlet/src/starlet.c -o cefum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ cef.c ../starlet/src/starletum.a -o cefum
 
 cefwum: cefwait.c
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starlet.c -o cefwum
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starletum.a -o cefwum
 
 memum: mem.c
-	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starlet.c -o memum
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starletum.a -o memum
 
 memfum: memf.c
-	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ memf.c ../starlet/src/starlet.c -o memfum
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ memf.c ../starlet/src/starletum.a -o memfum
 
 getjpium: getjpi.c
-	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starlet.c -o getjpium
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starletum.a -o getjpium
 
 
 crecum: crec.c
-	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.c ../starlet/src/rms.c -o crecum
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starletum.a -o crecum
 

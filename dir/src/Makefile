@@ -10,5 +10,5 @@ directory${EXE}: directory.c
 UMDEF=-Dcompile_um -I.
 
 directoryum${EXE}: directory.c
-	cc -g $(UMDEF) -I../../starlet/src -I../../librtl/src/ -I../../lib/src directory.c -I../../examples ../../starlet/src/starlet.c ../../starlet/src/rms.c -o directoryum${EXE}
+	cc -g $(UMDEF) -I../../starlet/src -I../../librtl/src/ -I../../lib/src directory.c ../../starlet/src/starletum.a -o directoryum${EXE}
 	cp -p directory mount

@@ -1,6 +1,9 @@
 #include "starlet.h"
 #include "sysdep.h"
-#include <asm/unistd.h>
+#include "../../linux/include/asm-i386/unistd.h"
+#ifdef compile_um
+#include "unistdum.h"
+#endif
 
 int sys$testcode(void) {
   return INLINE_SYSCALLTEST($setprn,0);
