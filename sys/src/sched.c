@@ -54,6 +54,13 @@
 #include <asm-i386/hw_irq.h>
 #endif
 
+#undef DEBUG_SCHED
+
+#ifdef CONFIG_VMS
+#define DEBUG_SCHED
+#endif
+#define DEBUG_SCHED
+
 /* try to cut out wake_up_process schedule_timeout __wake_up __wake_up_sync 
    complete wait_for_completion interruptible_sleep_on 
    interruptible_sleep_on_timeout sleep_on sleep_on_timeout 
@@ -77,20 +84,29 @@ int mydebug4 = 0;
 int mydebug5 = 0;
 int mydebug6 = 1;
 
-mycheckaddr(){
+mycheckaddr(unsigned int ctl){
 #if 1
   int nr0=nr_running;
   int i,n=0,m=0;
   struct _pcb  *tmp2;
   unsigned long tmp;
+  int pan=0;
   for(i=0;i<32;i++) {
     tmp=&sch$aq_comh[i];
+    if(*(unsigned long *)tmp == tmp) {
+      if (test_bit(i,&sch$gl_comqs))
+	panic("testbit\n");
+    }
     if(*(unsigned long *)tmp == tmp) {; } else {
       tmp2=tmp;
       do {
 	n++;
-	if (tmp2!=(tmp2->pcb$l_sqfl->pcb$l_sqbl)) goto mypanic;
-	if (tmp2!=(tmp2->pcb$l_sqbl->pcb$l_sqfl)) goto mypanic;
+	if (ctl<42 && ctl$gl_pcb==tmp2)
+	  panic("ctl$gl_pcb on comq\n");
+	if (ctl>42 && ctl==tmp2)
+	  panic("next ctl$gl_pcb on comq\n");
+	if (tmp2!=(tmp2->pcb$l_sqfl->pcb$l_sqbl)) { pan=1; goto mypanic; }
+	if (tmp2!=(tmp2->pcb$l_sqbl->pcb$l_sqfl)) { pan=2; goto mypanic; }
 	tmp2=tmp2->pcb$l_sqfl;
       } while (tmp2!=tmp);
       n--;
@@ -103,28 +119,28 @@ mycheckaddr(){
       do {
 	m++;
 	tmp2=tmp2->pcb$l_sqbl;
-	if (tmp2!=(tmp2->pcb$l_sqfl->pcb$l_sqbl)) goto mypanic;
-	if (tmp2!=(tmp2->pcb$l_sqbl->pcb$l_sqfl)) goto mypanic;
+	if (tmp2!=(tmp2->pcb$l_sqfl->pcb$l_sqbl)) { pan=3; goto mypanic; }
+	if (tmp2!=(tmp2->pcb$l_sqbl->pcb$l_sqfl)) { pan=4; goto mypanic; }
       } while (tmp2!=tmp);
       m--;
     }
   }
   if (nr0!=nr_running) { /*printk("nr0 changed\n");*/ return; }
-  if (n!=m) goto mypanic;
+  if (n!=m) { pan=5|(n<<4)|(m<<8); goto mypanic; }
 #if 0
   unsigned long * f=&sch$aq_comh[31];
   unsigned long * b=&sch$aq_comt[31];
   if (*f==f && *b!=f)
-    goto mypanic;
+    { pan=6; goto mypanic; }
   if (*b==f && *f!=f)
-    goto mypanic;
+    { pan=7; goto mypanic; }
   if (nr_running<2 && *b!=*f)
-    goto mypanic;
-  printk("mypanic %x %x %x %x %x\n",nr_running,f,b,*f,*b);
+    {pan=8; goto mypanic; }
+  printk("mypanic pan %x %x %x %x %x %x\n",pan,nr_running,f,b,*f,*b);
 #endif
   return;
  mypanic:
-  printk("mypanic %x %x %x %x %x\n",i,n,m,tmp,tmp2);
+  printk("mypanic pan %x %x %x %x %x %x\n",pan,i,n,m,tmp,tmp2);
   printk("mypanic %x %x %x %x %x\n",tmp2->pcb$l_sqfl,tmp2->pcb$l_sqfl->pcb$l_sqbl,tmp2->pcb$l_sqbl,tmp2->pcb$l_sqbl->pcb$l_sqfl,42);
   cli();
 #ifdef __i386__
@@ -378,7 +394,8 @@ int task_on_comqueue(struct _pcb *p) {
       tmp2=tmp;
       do {
 	//	if (tmp2 == p) found=1;
-	if (tmp2 == p && tmp2->pcb$l_sqfl!=tmp) found=1;
+	// wrong/why?	if (tmp2 == p && tmp2->pcb$l_sqfl!=tmp) found=1;
+	if (tmp2 == p) found=1;
 	tmp2=tmp2->pcb$l_sqfl;
       } while (tmp2!=tmp);
     }
@@ -406,7 +423,9 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
 
   spin_lock_irqsave(&runqueue_lock, flags);
   p->state = TASK_RUNNING;
-  p->pcb$w_state = SCH$C_CUR;
+  p->pcb$w_state = SCH$C_COM;
+  if (p==ctl$gl_pcb)
+    goto out;
   if (task_on_comqueue(p)) /*  argh! */
     goto out;
 
@@ -423,9 +442,8 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   before=numproc();
   //    printcom();
   //    printcom2();
-  mycheckaddr();
+  mycheckaddr(0);
   insque(p,qhead);
-  mycheckaddr();
   nr_running++;
   after=numproc();
   if(after-before!=1) {
@@ -443,6 +461,8 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   if (mydebug4) printk("comq1 %x %x\n",curpri,sch$gl_comqs);
 
   sch$gl_comqs=sch$gl_comqs | (1 << curpri);
+
+  mycheckaddr(0);
 
   if (mydebug4) printk("comq1 %x %x\n",curpri,sch$gl_comqs);
   if (mydebug4) {
@@ -726,28 +746,36 @@ asmlinkage void sch$resched(void) {
       curpcb->pcb$w_state = SCH$C_CUR;
     }
 
+  curpcb->pcb$w_state=SCH$C_COM; // use here temporarily
+
   //  if (curpcb->pcb$l_pid>0 && curpcb->state==TASK_RUNNING) {
   // Need pid 0 in the queue, this is more a linux thingie
+
+  if (task_on_comqueue(curpcb))
+    panic("on comq\n");
+
   if (!task_on_comqueue(curpcb)) // why???
   if (curpcb->state==TASK_RUNNING) {
-    sch$gl_comqs=sch$gl_comqs | (1 << curpri);
-    //    curpcb->state=TASK_INTERRUPTIBLE; /* soon SCH$C_COM ? */
-    //    curpcb->pcb$w_state=SCH$C_COM;
-    qhead=*(unsigned long *)&sch$aq_comt[curpri];
 #ifdef DEBUG_SCHED
     before=numproc();
     //    printcom();
     //if (curpcb==0xa018c000 && qhead==0xa018c000)
     //  panic("aieeeeeh\n");
-    mycheckaddr();
+    mycheckaddr(0);
     //if (curpcb==qhead) panic(" a panic\n");
 #endif
+    sch$gl_comqs=sch$gl_comqs | (1 << curpri);
+    //    curpcb->state=TASK_INTERRUPTIBLE; /* soon SCH$C_COM ? */
+    curpcb->pcb$w_state=SCH$C_COM;
+    qhead=*(unsigned long *)&sch$aq_comt[curpri];
     if (!task_on_comqueue(curpcb)) {
       if (curpcb==qhead) panic(" a panic\n");
       insque(curpcb,qhead);
+    } else {
+      panic("something\n");
     }
 #ifdef DEBUG_SCHED
-    mycheckaddr();
+    mycheckaddr(42);
 #endif
     nr_running++;
 #ifdef DEBUG_SCHED
@@ -862,12 +890,12 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
     if (mydebug4) printk("next %x %x %x %x\n",qhead,*(void**)qhead,next,sch$aq_comh[tmppri]);
     before=numproc();
-    mycheckaddr();
+#endif
+#ifdef DEBUG_SCHED
+    mycheckaddr(42);
 #endif
     next=(struct _pcb *) remque(qhead,next);
-#ifdef DEBUG_SCHED
-    mycheckaddr();
-#endif
+    qhead_init(next); // temp measure since we don't insert into wqs
     nr_running--;
 #ifdef DEBUG_SCHED
     after=numproc();
@@ -879,8 +907,12 @@ asmlinkage void sch$sched(int from_sch$resched) {
     if (mydebug4) printk("next %x %x %x %x\n",qhead,*(void**)qhead,next,sch$aq_comh[tmppri]);
     if (mydebug4) printk("comh %x %x\n",sch$aq_comh[tmppri],((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl);
 #endif
-    if (sch$aq_comh[tmppri]==((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl)
+    //if (sch$aq_comh[tmppri]==((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl)
+    if (sch$aq_comh[tmppri]==&sch$aq_comh[tmppri])
       sch$gl_comqs=sch$gl_comqs & (~(1 << tmppri));
+#ifdef DEBUG_SCHED
+    mycheckaddr(next);
+#endif
     //    if(*(unsigned long *)qhead == qhead)
     //  if(*(unsigned long *)qhead == 0)
     if (mydebug5) printk("comq3 %x %x %x\n",tmppri,sch$gl_comqs,(~(1 << tmppri)));
