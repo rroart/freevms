@@ -2098,8 +2098,6 @@ void __init vms_init2(void) {
   exe$gq_systime+=xtime.tv_sec;
   exe$gq_systime*=10000000;
 
-  nl_init(); /* first */  
-  rnd_init();
   xqp_init();
 #ifdef CONFIG_VMS
   exttwo_init();
@@ -2110,6 +2108,11 @@ void __init vms_init2(void) {
   vms_floppy_init();
 #endif
 #endif
+}
+
+void __init vms_init4(void) {
+  nl_init(); /* first */  
+  rnd_init();
 }
 
 void __init vms_init3(void) {
