@@ -159,7 +159,7 @@ int tt$init_tables() {
   ini_dpt_end(&tt$dpt);
 
   ini_ddt_unitinit(&tt$ddt, tt$unit_init);
-  ini_ddt_start(&tt$ddt, startio);
+  ini_ddt_start(&tt$ddt, tty$startio);
   ini_ddt_cancel(&tt$ddt, ioc_std$cancelio);
   ini_ddt_end(&tt$ddt);
 
@@ -176,7 +176,7 @@ int tt$init_tables() {
   return SS$_NORMAL;
 }
 
-int ide_iodb_vmsinit(void) {
+int tty_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&tt$ucb;
   struct _ddb * ddb=&tt$ddb;
@@ -213,42 +213,38 @@ int ide_iodb_vmsinit(void) {
 
 }
 
-int ide_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+int tty_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&tt$ucb*/,&newucb);
   exe$assign(dsc,&chan,0,0,0);
-  registerdevchan(MKDEV(IDE0_MAJOR,unitno),chan);
+  registerdevchan(MKDEV(TTYAUX_MAJOR,unitno),chan);
+
 
   return newucb;
 }
 
-int ide_vmsinit(void) {
+int tty_vmsinit(void) {
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
 
   unsigned short chan0, chan1, chan2;
-  $DESCRIPTOR(u0,"dqa0");
-  $DESCRIPTOR(u1,"dqa1");
-  $DESCRIPTOR(u2,"dqa2");
+  $DESCRIPTOR(dsc,"opa0");
   unsigned long idb=0,orb=0;
   struct _ccb * ccb;
   struct _ucb * newucb0,*newucb1,*newucb2;
   struct _ddb * ddb;
 
-  printk(KERN_INFO "dev here pre\n");
+  printk(KERN_INFO "dev con here pre\n");
 
-  ddb=ide_iodb_vmsinit();
+  ddb=tty_iodb_vmsinit();
 
   /* for the fdt init part */
   /* a lot of these? */
 
-  ide_iodbunit_vmsinit(ddb,0,&u0);
-  ide_iodbunit_vmsinit(ddb,1,&u1);
-  ide_iodbunit_vmsinit(ddb,2,&u2);
+  tty_iodbunit_vmsinit(ddb,1,&dsc);
 
-  printk(KERN_INFO "dev here\n");
+  printk(KERN_INFO "dev con here\n");
 
   // return chan0;
 
 }
-
