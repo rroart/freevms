@@ -144,7 +144,7 @@ unsigned long ctl$gl_buffer_items;
 unsigned long ctl$gl_catchall_extension;
 unsigned long ctl$gl_catchall_extension_cnt;
 unsigned long ctl$gl_cdsptr;
-unsigned long ctl$gl_chindx;
+unsigned long ctl$gl_chindx=CHANNELCNT;
 unsigned long ctl$gl_clintown;
 unsigned long ctl$gl_cmsupr;
 unsigned long ctl$gl_cmuser;

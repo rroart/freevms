@@ -22,17 +22,11 @@ struct _fdt fdt_null = {
 };
 
 void  null_startio (struct _irp * i, struct _ucb * u) { 
-  if (u->ucb$l_devchar2&DEV$M_CDP) {
-    /* not local? */
-    struct _cdrp * c;
-    c=(struct _cdrp *) i->irp$l_fqfl;
-    c->cdrp$l_cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
-    
-  } else {
-    /* local */
-    /* error if it gets here, got no real mscp */
-    panic("no real mscp\n");
-  }
+  //wfikpch
+
+  //iofork
+
+  //reqcom
 };
 
 /* more yet undefined dummies */
@@ -52,6 +46,13 @@ void  null_mntv_sqd (void) { };
 void  null_aux_storage (void) { };
 void  null_aux_routine (void) { };
 
+void nl_read(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c, int funcno, void * fdt, void * p1, long p2, long p3, long p4, long p5, long p6) {
+  exe$qiodrvpkt(i,p,u);
+};
+
+void null_write(void) {
+
+};
 
 struct _ddt ddt_null = {
   ddt$l_start: null_startio,
@@ -76,7 +77,7 @@ struct _ddt ddt_null = {
 /* include a buffered 4th param? */
 extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn);
 
-static struct _fdt null_fdt;
+//static struct _fdt null_fdt;
 
 void acp$readblk();
 void acp$writeblk();
@@ -134,15 +135,20 @@ void nl_init(void) {
   //  bcopy("nla0",u->ucb$t_name,4);
   u->ucb$l_ddb=d;
   u->ucb$l_crb=c;
+  u->ucb$l_ddt=&ddt_null;
 
   /* for the crb init part */
   c->crb$b_type=DYN$C_CRB;
 
+  /* and for the ddt init part */
+  ddt_null.ddt$l_fdt=&fdt_null;
+  ddt_null.ddt$l_functb=&fdt_null;
+
   /* for the fdt init part */
   /* a lot of these? */
-  ini_fdt_act(&null_fdt,IO$_READLBLK,acp$readblk);
-  ini_fdt_act(&null_fdt,IO$_READPBLK,acp$readblk);
-  ini_fdt_act(&null_fdt,IO$_READVBLK,acp$readblk);
+  ini_fdt_act(&fdt_null,IO$_READLBLK,nl_read);
+  ini_fdt_act(&fdt_null,IO$_READPBLK,nl_read);
+  ini_fdt_act(&fdt_null,IO$_READVBLK,nl_read);
 }
 
 char nulldriverstring[]="NLDRIVER";

@@ -1,25 +1,21 @@
 #include <stdio.h> 
 #include <ssdef.h> 
+#include <iodef.h>
+#include <misc.h>
 #include <descrip.h> 
 
-signed long long step1;
-signed long long step2;
-
-void my1(int i) {
-printf("here1\n");
-sys$setimr(0,&step1,my1,0,0);
-}
-
-void my2(int i) {
-printf("here2\n");
-sys$setimr(0,&step2,my2,0,0);
-}
-
 main(){
-int status,chan;
+struct _iosb myiosb;
+int status;
+unsigned short int chan;
+char mybuf[512];
 $DESCRIPTOR(null,"NLA0");
 
 status=sys$assign(&null,&chan,0,0,0);
+
+printf("status %x chan %x \n", status,chan);
+
+status=sys$qio(0,chan,IO$_READVBLK,0,0,0,mybuf,512,0,0,0,0);
 
 printf("status %x chan %x \n", status,chan);
 

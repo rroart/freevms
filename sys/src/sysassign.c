@@ -23,7 +23,8 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   if (status!=SS$_NORMAL) return status;
   /* lock i/o db */
   // printk("here assign %x\n", chan);
-  if (*chan) c=&ctl$gl_ccbbase[*chan];
+  c=&ctl$gl_ccbbase[*chan];
+  c->ccb$b_amod=1; /* wherever this gets set */
   //  printk("here assign\n");
   if (mbxnam) ioc$searchdev();
   status=ioc$search(&r,devnam);
