@@ -922,7 +922,11 @@ static int init(void * unused)
 #endif
 
 #ifdef CONFIG_VMS
-	memcpy(&ctl$gl_pcb->pcb$t_terminal,"opa0",4);
+#ifdef __arch_um__
+ go:
+	exe$hiber();
+	goto go;
+#endif
 #endif
 	if (execute_command)
 		execve(execute_command,argv_init,envp_init);
