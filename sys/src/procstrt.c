@@ -257,10 +257,9 @@ int exe$procstrt(struct _pcb * p) {
 #endif
 
   init_p1pp(p,p->pcb$l_phd);
+  lnm_init_prc(current);
 
   if (strncmp(".exe",pqb->pqb$t_image+len-4,4)) goto do_execve;
-
-  lnm_init_prc(current);
 
   aname.dsc$w_length=len-4;
   aname.dsc$a_pointer=pqb->pqb$t_image;
