@@ -739,9 +739,11 @@ void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
     return;
   } 
 
-  fcb->fcb$w_fid_num=4;
-  fcb->fcb$w_fid_seq=4;
-  fcb->fcb$w_fid_rvn=0;
+  fcb4->fcb$w_fid_num=4;
+  fcb4->fcb$w_fid_seq=4;
+  fcb4->fcb$w_fid_rvn=0;
+
+  insque(fcb4,&vcb->vcb$l_fcbfl);
 
   return fcb;
 }
