@@ -21,12 +21,44 @@ struct _fdt fdt_null = {
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
 
+struct _irp * globali;
+struct _ucb * globalu;
+
+void nl_isr (void) {
+
+  struct _irp * i;
+  struct _ucb * u;
+
+  /* have to do this until we get things more in order */
+  i=globali;
+  u=globalu;
+
+  /* should really call ucb$l_fpc(r5) */
+
+  null_startio(i,u);
+
+}
+
 void  null_startio (struct _irp * i, struct _ucb * u) { 
-  //wfikpch
+  globali=i;
+  globalu=u;
+  u->ucb$l_fpc=null_startio;
 
-  //iofork
+  if (u->ucb$b_second_time_in_startio) goto secondtime;
+  if (u->ucb$b_third_time_in_startio) goto thirdtime;
 
-  //reqcom
+  u->ucb$b_second_time_in_startio=1;
+  ioc$wfikpch(i,u,8,2);
+  return;
+
+ secondtime:
+
+  u->ucb$b_third_time_in_startio=1;
+  exe$iofork(i,u);
+
+ thirdtime:
+  reqcom(i,u);
+
 };
 
 /* more yet undefined dummies */

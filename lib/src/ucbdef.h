@@ -598,6 +598,8 @@ struct _ucb {
   struct _ucb *ucb$ps_dtn_link;
   void (*ucb$ps_toutrout)();
   struct _sud *ucb$ps_sud;
+  unsigned char ucb$b_second_time_in_startio;
+  unsigned char ucb$b_third_time_in_startio;
 };
  
 struct _mb_ucb {

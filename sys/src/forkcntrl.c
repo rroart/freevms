@@ -9,17 +9,26 @@
 #include <asm/current.h>
 
 asmlinkage void exe$forkdspth(void) {
+  void (*func)(void *,void *);
+  struct _fkb * f, * dummy, * fq;
   if (intr_blocked(IPL$_QUEUEAST))
     return;
   regtrap(REG_INTR, IPL$_QUEUEAST);
   setipl(IPL$_TIMER);
+  fq=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[0]; /* so far */
+  while (!aqempty(fq)) {
+    f=remque(fq,dummy);
+    func=f->fkb$l_fpc;
+    func(0,f);
+  }
 }
 
-void exe$iofork(struct _ucb * u, struct _irp * i) {
+void exe$iofork(struct _irp * i, struct _ucb * u) {
   int curipl;
   int newipl;
   int isempty;
-  struct _fkb * f;
+  struct _fkb * f=u;
+  /* I think that the below is really an fkb */
   /* need caller and caller's caller address of return again */
   u->ucb$l_sts&=~UCB$M_TIM;
   u->ucb$l_fr3=i;
@@ -28,7 +37,8 @@ void exe$iofork(struct _ucb * u, struct _irp * i) {
   f=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[newipl-6];
   isempty=aqempty(f);
   insque(u,f->fkb$l_fqbl);
-  if (f) {
+  if (isempty) {
     /* do SOFTINTS */
+    SOFTINT_QUEUEAST_VECTOR; /* wrong one, but I did not want to recompile because of changing a central .h */
   }
 }

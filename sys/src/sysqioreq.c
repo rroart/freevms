@@ -37,7 +37,7 @@ int exe$insioq (struct _ucb * u, struct _irp * i) {
     exe$insertirp(&u->ucb$l_ioqfl,i);
   else {
     u->ucb$l_sts|=UCB$M_BSY;
-    ioc$initiate(u,i);
+    ioc$initiate(i,u);
   }
   /* restore ipl */
   /* release fork lock */

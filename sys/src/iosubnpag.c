@@ -9,7 +9,7 @@
 #include"../../freevms/lib/src/ucbdef.h"
 #include"../../freevms/lib/src/irpdef.h"
 
-void ioc$initiate(struct _ucb * u, struct _irp * i) {
+void ioc$initiate(struct _irp * i, struct _ucb * u) {
   struct _ddt *d; 
   void (*f)(void *,void *);
   /* no  smp affinity check yet */
@@ -25,7 +25,7 @@ void ioc$initiate(struct _ucb * u, struct _irp * i) {
   
 }
 
-void ioc$reqcom(void) {
+void ioc$reqcom(struct _irp * i, struct _ucb * u) {
   int qemp;
 
   qemp=rqempty(ioc$gq_postiq);
@@ -41,7 +41,7 @@ void ioc$reqcom(void) {
  notempty:
 }
 
-void ioc$wfikpch(struct _ucb * u, struct _irp *i, int newipl, int timeout) {
+void ioc$wfikpch(struct _ipr * i, struct _ucb * u, int newipl, int timeout) {
   /* should also have had return addresses caller and caller's caller as params? */
   /* must have them... */
   u->ucb$l_sts|=UCB$M_INT|UCB$M_TIM;
@@ -50,6 +50,5 @@ void ioc$wfikpch(struct _ucb * u, struct _irp *i, int newipl, int timeout) {
   u->ucb$l_fr4=current;
   u->ucb$l_sts&=~UCB$M_TIMOUT;
   /* release spinlock */
-  
 }
 
