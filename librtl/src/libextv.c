@@ -1,4 +1,4 @@
-int lib$extv(int * position , int * size , int *base) {
+int lib$extv(int * position , char * size , int *base) {
   int retval;
   int s=*size;
   int pos=*position;

@@ -1,4 +1,4 @@
-void lib$insv(int * source ,int * position , int * size , int *base) {
+void lib$insv(int * source ,int * position , char * size , int *base) {
   int src=*source;
   int s=*size;
   int pos=*position;

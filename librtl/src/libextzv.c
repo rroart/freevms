@@ -1,4 +1,4 @@
-int lib$extzv(int * position , int * size , int *base) {
+int lib$extzv(int * position , char * size , int *base) {
   int retval;
   int s=*size;
   int pos=*position;
