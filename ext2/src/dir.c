@@ -54,7 +54,7 @@ static int ext2_commit_chunk(struct page *page, unsigned from, unsigned to)
 	struct inode *dir = page->mapping->host;
 	int err = 0;
 	dir->i_version = ++event;
-	ext2_aops.commit_write(NULL, page, from, to);
+	block_commit_write2(dir, page, from, to, 0);
 	goto sync;
 	if (IS_SYNC(dir)) {
 		int err2;
@@ -156,7 +156,7 @@ static struct page * ext2_get_page(struct inode *dir, unsigned long n)
 {
 	struct address_space *mapping = dir->i_mapping;
 	struct page *page = alloc_pages(GFP_KERNEL, 0);
-	block_read_full_page2(page,dir,n);
+	block_read_full_page2(dir,page,n);
 	// read_cache_page(mapping, n, (filler_t*)ext2_aops.readpage, NULL);
 	if (!IS_ERR(page)) {
 		wait_on_page(page);
@@ -386,7 +386,7 @@ void ext2_set_link(struct inode *dir, struct ext2_dir_entry_2 *de,
 	int err;
 
 	lock_page(page);
-	err = ext2_aops.prepare_write(NULL, page, from, to);
+	err = block_prepare_write2(NULL, page, from, to, 0);
 	if (err)
 		BUG();
 	de->inode = cpu_to_le32(inode->i_ino);
@@ -395,7 +395,7 @@ void ext2_set_link(struct inode *dir, struct ext2_dir_entry_2 *de,
 	UnlockPage(page);
 	ext2_put_page(page);
 	dir->i_mtime = dir->i_ctime = CURRENT_TIME;
-	ext2_sync_inode (inode);
+	ext2_sync_inode (dir);
 	//mark_inode_dirty(dir);
 }
 
@@ -447,7 +447,7 @@ got_it:
 	from = (char*)de - (char*)page_address(page);
 	to = from + rec_len;
 	lock_page(page);
-	err = ext2_aops.prepare_write(NULL, page, from, to);
+	err = block_prepare_write2(dir, page, from, to, 0);
 	if (err)
 		goto out_unlock;
 	if (de->inode) {
@@ -462,7 +462,7 @@ got_it:
 	ext2_set_de_type (de, inode);
 	err = ext2_commit_chunk(page, from, to);
 	dir->i_mtime = dir->i_ctime = CURRENT_TIME;
-	ext2_sync_inode (inode);
+	ext2_sync_inode (dir);
 	//mark_inode_dirty(dir);
 	/* OFFSET_CACHE */
 out_unlock:
@@ -495,7 +495,7 @@ int ext2_delete_entry (struct ext2_dir_entry_2 * dir, struct page * page )
 	if (pde)
 		from = (char*)pde - (char*)page_address(page);
 	lock_page(page);
-	err = ext2_aops.prepare_write(NULL, page, from, to);
+	err = block_prepare_write2(inode, page, from, to, 0);
 	if (err)
 		BUG();
 	if (pde)
@@ -516,7 +516,7 @@ int ext2_delete_entry (struct ext2_dir_entry_2 * dir, struct page * page )
 int ext2_make_empty(struct inode *inode, struct inode *parent)
 {
 	struct address_space *mapping = inode->i_mapping;
-	struct page *page = grab_cache_page(mapping, 0);
+	struct page *page = alloc_pages(GFP_KERNEL, 0);// was grab_cache_page
 	unsigned chunk_size = ext2_chunk_size(inode);
 	struct ext2_dir_entry_2 * de;
 	char *base;
@@ -524,7 +524,7 @@ int ext2_make_empty(struct inode *inode, struct inode *parent)
 
 	if (!page)
 		return -ENOMEM;
-	err = ext2_aops.prepare_write(NULL, page, 0, chunk_size);
+	err = block_prepare_write2(inode, page, 0, chunk_size, 0);
 	if (err)
 		goto fail;
 
