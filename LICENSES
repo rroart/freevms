@@ -4,6 +4,8 @@ Locally produced code by roart: GPL (might change to BSD)
 
 Other locally produced stuff: GPL
 
+Login/src/login.c: BSD also
+
 ODS2 (Nankervis): ODS2 is distributed freely for all members of the VMS
 	community to use. However all derived works must maintain comments in
 	their source to acknowledge the contibution of the original author.
