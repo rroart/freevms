@@ -19,8 +19,8 @@ obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \
 	    pal/libqueue.a
 
 pal/libqueue.a:
-	(cd pal; cc -c queue.c)
-	ar cr $@ pal/queue.o
+	(cd ../pal; cc -c queue.c)
+	ar cr $@ ../pal/queue.o
 	ranlib $@
 
 obj-$(CONFIG_UID16) += uid16.o
