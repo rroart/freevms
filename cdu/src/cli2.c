@@ -3,12 +3,48 @@
 
 // Author. Roar Thronæs.
 
-#include<descrip.h>
-
+#include <descrip.h>
+#include <climsgdef.h>
+#include <ssdef.h>
 #include "cli.h"
 
+int my_cdu_search_next(int i, int type, char * s, int size, int * retval) {
+  struct _cdu * my_cdu_root = *my_cdu;
+  do {
+    struct _cdu * name;
+    switch (type) {
+    case CDU$C_VERB:
+      name=&my_cdu_root[my_cdu_root[i].cdu$l_verb];
+      break;
+    case CDU$C_TYPE:
+      name=&my_cdu_root[my_cdu_root[i].cdu$l_type];
+      break;
+    case CDU$C_SYNTAX:
+      name=&my_cdu_root[my_cdu_root[i].cdu$l_syntax];
+      break;
+    case CDU$C_KEYWORD:
+      name=&my_cdu_root[my_cdu_root[i].cdu$l_name];
+      break;
+    case CDU$C_PARAMETER:
+    case CDU$C_QUALIFIER:
+      name=&my_cdu_root[my_cdu_root[i].cdu$l_name];
+      break;
+    }
+    int dlen=size; 
+    int len=strlen(name->cdu$t_name);
+    int min=len<dlen?len:dlen;
+    if (my_cdu_root[i].cdu$b_type==type && strncmp(name->cdu$t_name,s,min)==0) {
+      if (retval)
+	*retval=i;
+      return 1;
+    }
+    i=my_cdu_root[i].cdu$l_next;
+  } while (i);
+  return 0;
+}
+
 unsigned int cli$get_value(void *entity_desc, void *retdesc,short * retlen) {
-  struct _cdu * cdu_root = *root_cdu;
+  struct _cdu * my_cdu_root = *my_cdu;
   
   struct dsc$descriptor * ret = retdesc;
 
@@ -17,46 +53,31 @@ unsigned int cli$get_value(void *entity_desc, void *retdesc,short * retlen) {
   int dlen = desc->dsc$w_length;
   int min; 
   struct _cdu * cdu = *my_cdu;
-
-  if (dlen == 2 && name[0]=='p' && name[1]>'0' && name[1]<'9') {
-    int p = cdu->cdu$l_parameters;
-    while (p) {
-      int namecdu=cdu_root[p].cdu$l_name;
-      char * pname = cdu_root[namecdu].cdu$t_name;
-      if (0==strncmp(pname,name,2)) {
-	int valuecdu=cdu_root[p].cdu$l_value;
-	char * vname = cdu_root[valuecdu].cdu$t_name;
-	memcpy(ret->dsc$a_pointer,vname,strlen(vname));
-	if (retlen)
-	  *retlen=strlen(vname);
-	return 1;
-      }
-      p=cdu_root[p].cdu$l_next;
-    }
-  } else {
-    int q = cdu->cdu$l_qualifiers;
-    while (q) {
-      int namecdu=cdu_root[q].cdu$l_name;
-      char * pname = cdu_root[namecdu].cdu$t_name;
-      int len=strlen(pname);
-      min=len<dlen?len:dlen;
-      if (0==strncmp(pname,name,min)) {
-	int valuecdu=cdu_root[q].cdu$l_value;
-	char * vname = cdu_root[valuecdu].cdu$t_name;
-	memcpy(ret->dsc$a_pointer,vname,strlen(vname));
-	if (retlen)
-	  *retlen=strlen(vname);
-	return 1;
-      }
-      q=cdu_root[q].cdu$l_next;
-    }
+  int sts=0;
+  
+  int e; 
+  int elem;
+  e = cdu->cdu$l_parameters; 
+  sts = my_cdu_search_next(e, CDU$C_PARAMETER, name, dlen, &elem);
+  e = cdu->cdu$l_qualifiers;
+  if ((sts&1)==0)
+    sts = my_cdu_search_next(e, CDU$C_QUALIFIER, name, dlen, &elem);
+  if (sts&1) {
+    e=elem;
+    int valuecdu=my_cdu_root[e].cdu$l_value;
+    char * vname = my_cdu_root[valuecdu].cdu$t_name;
+    memcpy(ret->dsc$a_pointer,vname,strlen(vname));
+    if (retlen)
+      *retlen=strlen(vname);
   }
-  return 0;
+  if (sts&1)
+    return SS$_NORMAL;
+  else
+    return CLI$_ABSENT;
 }
 
 unsigned int cli$present(void *entity_desc) {
   struct _cdu * my_cdu_root = *my_cdu;
-  struct _cdu * cdu_root = *root_cdu;
 
   struct dsc$descriptor * desc = entity_desc;
   char * name = desc->dsc$a_pointer;
@@ -64,16 +85,10 @@ unsigned int cli$present(void *entity_desc) {
   int min; 
   struct _cdu * cdu = *my_cdu;
   int q = cdu->cdu$l_qualifiers;
-  while (q) {
-    int n = my_cdu_root[q].cdu$l_name;
-    int len=strlen(my_cdu_root[n].cdu$t_name);
-    //printf("q n %x %x %x\n",q,n,len);
-    min=len<dlen?len:dlen;
-    //printf("cmp %s, %s, %x\n",my_cdu_root[n].cdu$t_name,name,min);
-    if (0==strncmp(my_cdu_root[n].cdu$t_name,name,min))
-      return 1;
-    q=my_cdu_root[q].cdu$l_next;
-  }
-  return 0;
+  int sts = my_cdu_search_next(q, CDU$C_QUALIFIER, name, dlen, 0);
+  if (sts&1)
+    return CLI$_PRESENT;
+  else
+    return CLI$_ABSENT;
 }
 
