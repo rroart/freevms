@@ -72,10 +72,10 @@ SHOW TIME:
 	DCL only
 
 STOP:
-	you will have to give it decimal numbers
+	It can now be given hexadecimal numbers 
 	It must be used with VMS PIDs if to be used         
 	in a cluster (the Unix pids can be used on the local node).
-	(Stop on cluster currently has some problems)
+	(Stop on cluster works again)
 
 	stop /id proc
 	stop
@@ -97,15 +97,15 @@ SHOW LOGICAL:
 ******************************
 
 Clustering:
-At least works on uml, problems on both bochs/i386 and ordinary i386.
-Does not work with CONFIG_VMS yet (mount /proc panics).
+Now works with CONFIG_VMS (without, there are problems with timer queue?).
 You need to have the nodename in params.dat.
 The two first letters in the nodename must be different.
+Clustering starts automatically.
 Within 10 secs, you will see a "scs received hello"
 After 10 secs, you will see starting cluster connects and some CON_RSPs.
-10 secs later you may see some maybes and ddb transfers.
+Later you may see something about probing and MSCP units.
 Wait until you see these kernel messages.
-Then you can do mount other$dfa0 etc.
+Currently "disabled" due to new CONFIGURE: Then you can do mount other$dfa0 etc.
 
 ******************************
 
