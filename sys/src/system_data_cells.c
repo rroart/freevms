@@ -759,7 +759,7 @@ unsigned long ioc$gq_dev_wwid_list;
 unsigned long ioc$gq_min_bap_window;
 unsigned long ioc$gq_mountlst;
 unsigned long ioc$gq_mutex;
-unsigned long long ioc$gq_postiq;
+unsigned long long ioc$gq_postiq=0;
 unsigned long ioc$gw_lamapreg;
 unsigned long ioc$gw_maxbuf;
 unsigned long ioc$gw_mbxbfquo;
@@ -2014,7 +2014,7 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
 
   vmstimerconf=1;
 
-  qhead_init(&ioc$gq_postiq);
+  //  qhead_init(&ioc$gq_postiq);
 
   qhead_init(&lck$gl_rrsfl);
 

@@ -4,9 +4,11 @@ timing (partly)
 event flags (partly)
 process control and communication (partly)
 logicals (partly)
+fork (partly)
 
 syscalls:
 $asctim
+$assign
 $bintim
 $clref
 $crelnm
@@ -17,6 +19,7 @@ $forcex
 $gettim
 $hiber
 $numtim
+$qio
 $readef
 $schdwk
 $setef

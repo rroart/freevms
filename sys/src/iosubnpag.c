@@ -28,8 +28,8 @@ void ioc$initiate(struct _irp * i, struct _ucb * u) {
 void ioc$reqcom(struct _irp * i, struct _ucb * u) {
   int qemp;
 
-  qemp=rqempty(ioc$gq_postiq);
-  insqti(0,ioc$gq_postiq);
+  qemp=rqempty(&ioc$gq_postiq);
+  insqti(u,&ioc$gq_postiq);
   if (!qemp) goto notempty;
 
   if (smp_processor_id()==0) {

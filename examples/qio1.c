@@ -17,6 +17,8 @@ printf("status %x chan %x \n", status,chan);
 
 status=sys$qio(0,chan,IO$_READVBLK,0,0,0,mybuf,512,0,0,0,0);
 
+sleep(2);
+
 printf("status %x chan %x \n", status,chan);
 
 }

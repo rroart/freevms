@@ -21,12 +21,15 @@ asmlinkage void ioc$iopost(void) {
   setipl(IPL$_IOPOST);
 
  again:
-  if (!rqempty(ioc$gq_postiq)) {
-    i=remqhi(ioc$gq_postiq,i);
+  if (!rqempty(&ioc$gq_postiq)) {
+    i=remqhi(&ioc$gq_postiq,i);
   } else {
     return;
   }
   p=find_process_by_pid(i->irp$l_pid);
+
+  return; // the rest is not finished
+
   if (i->irp$w_sts & IRP$M_BUFIO) goto bufio;
 
  dirio:

@@ -29,6 +29,8 @@ void nl_isr (void) {
   struct _irp * i;
   struct _ucb * u;
 
+  printk("isr\n");
+
   /* have to do this until we get things more in order */
   i=globali;
   u=globalu;
@@ -40,6 +42,7 @@ void nl_isr (void) {
 }
 
 void  null_startio (struct _irp * i, struct _ucb * u) { 
+  signed long long step1=-10000000;
   globali=i;
   globalu=u;
   u->ucb$l_fpc=null_startio;
@@ -47,17 +50,22 @@ void  null_startio (struct _irp * i, struct _ucb * u) {
   if (u->ucb$b_second_time_in_startio) goto secondtime;
   if (u->ucb$b_third_time_in_startio) goto thirdtime;
 
+  printk("firsttime\n");
+  exe$setimr(0, &step1, nl_isr,0,0);
+
   u->ucb$b_second_time_in_startio=1;
   ioc$wfikpch(i,u,8,2);
   return;
 
  secondtime:
+  printk("secondtime\n");
 
   u->ucb$b_third_time_in_startio=1;
   exe$iofork(i,u);
 
  thirdtime:
-  reqcom(i,u);
+  printk("thirdtime\n");
+  ioc$reqcom(i,u);
 
 };
 

@@ -7,6 +7,8 @@
 #include"../../freevms/pal/src/ipl.h"
 #include <linux/smp.h>
 #include <asm/current.h>
+#include <linux/kernel.h>
+#include <asm/hw_irq.h>
 
 asmlinkage void exe$forkdspth(void) {
   void (*func)(void *,void *);

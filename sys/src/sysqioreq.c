@@ -34,7 +34,8 @@ void exe$finishioc (long long * iosb, struct _irp * i, struct _pcb * p, struct _
 int exe$insioq (struct _ucb * u, struct _irp * i) {
   /* raise ipl */
   if (u->ucb$l_sts & UCB$M_BSY)
-    exe$insertirp(&u->ucb$l_ioqfl,i);
+    // exe$insertirp(&u->ucb$l_ioqfl,i); do not do this yet
+    u->ucb$l_sts&=~UCB$M_BSY;
   else {
     u->ucb$l_sts|=UCB$M_BSY;
     ioc$initiate(i,u);
