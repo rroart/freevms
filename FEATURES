@@ -19,6 +19,7 @@ dcl (or something like it)
 vms images
 mailboxes
 P1 space (a little bit)
+edt
 
 syscalls/services:
 $adjwsl
