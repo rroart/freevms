@@ -13,8 +13,8 @@ clean:
 install: all
 	install -d ../../rootum/vms"$$"common/sysexe
 	install -d ../../rooti386/vms"$$"common/sysexe
-	install um/* ../../rootum/vms"$$"common/sysexe/
-	install i386/* ../../rooti386/vms"$$"common/sysexe
+	install um/*.* ../../rootum/vms"$$"common/sysexe/
+	install i386/*.* ../../rooti386/vms"$$"common/sysexe
 
 setproces: setproces.o
 	gcc -o setproces setproces.o ../../starlet/src/vmsopt.a $(VMSLIBS)
@@ -50,25 +50,25 @@ um/create${EXE}: create.o $(VMSLIBSUM) $(EXTERNAL2)
 	install -d um
 	$(LINKER) $(LINKPRE) create.o $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o um/create${EXE}
 
-i386/type${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
+i386/type${NOEXE}: $(VMSLIBS) type.o $(EXTERNAL2)
 	install -d i386
-	gcc -g -static $(OBJS) $(VMSLIBS) $(EXTERNAL2) -o i386/type${NOEXE}
+	gcc -g -static type.o $(VMSLIBS) $(EXTERNAL2) -o i386/type${NOEXE}
 
-i386/type${EXE_ELF}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
-	ld -Bshareable $(OBJS) $(VMSLIBS) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/type${EXE_ELF}
+i386/type${EXE_ELF}: $(VMSLIBS) type.o $(EXTERNAL2)
+	ld -Bshareable type.o $(VMSLIBS) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/type${EXE_ELF}
 
-i386/type${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
+i386/type${EXE}: $(VMSLIBS) type.o $(EXTERNAL2)
 	install -d i386
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o i386/type${EXE}
+	$(LINKER) $(LINKPRE) type.o $(VMSLIBS) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o i386/type${EXE}
 
 UMDEF=-Dcompile_um -I.
 
-um/type${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
+um/type${NOEXE}: $(VMSLIBSUM) type.o $(EXTERNAL2)
 	install -d um
-	gcc -g -static $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) -o um/type${NOEXE}
-um/type${EXE_ELF}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
-	ld -Bshareable $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/type${EXE_ELF}
+	gcc -g -static type.o $(VMSLIBSUM) $(EXTERNAL2) -o um/type${NOEXE}
+um/type${EXE_ELF}: $(VMSLIBSUM) type.o $(EXTERNAL2)
+	ld -Bshareable type.o $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o um/type${EXE_ELF}
 
-um/type${EXE}: $(VMSLIBSUM) $(OBJS)
+um/type${EXE}: $(VMSLIBSUM) type.o
 	install -d um
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o um/type${EXE}
+	$(LINKER) $(LINKPRE) type.o $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o um/type${EXE}
