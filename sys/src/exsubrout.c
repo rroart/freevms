@@ -33,7 +33,7 @@ void exe$instimq(struct _tqe * t) {
 void exe_std$rmvtimq(int acmode, int reqid, int remval, int ipid) {
   struct _tqe *tmp=exe$gl_tqfl->tqe$l_tqfl,*next;
   //int savipl=vmslock(&SPIN_TIMER,IPL$_TIMER);
-  while (tmp!=exe$gl_tqfl) {
+  while (tmp && tmp!=exe$gl_tqfl) {
     next=tmp->tqe$l_tqfl;
     if (reqid && reqid==tmp->tqe$l_astprm) {
       remque(tmp,0);
