@@ -5,12 +5,22 @@
 inline void panic(char * c) { }
 #endif 
 
+#ifdef USERLAND
 #include"sysgen.h"
 #include"lnmsub.h"
 #include"system_data_cells.h"
 #include"../../pal/src/queue.h"
 #include"../../lib/src/lnmstrdef.h"
 #include"../../starlet/src/ssdef.h"
+#else
+#include<linux/vmalloc.h>
+#include"../../freevms/sys/src/sysgen.h"
+#include"../../freevms/sys/src/lnmsub.h"
+#include"../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/pal/src/queue.h"
+#include"../../freevms/lib/src/lnmstrdef.h"
+#include"../../freevms/starlet/src/ssdef.h"
+#endif
 
 /* Author: Roar Thronæs */
 
@@ -85,7 +95,9 @@ int lnm$search_one(struct struct_lnm_ret * r,int loglen, char * logical, int tab
   /* lock mutex */
   // lnm$searchlog();
   lnmprintf("searchoneexit\n");
+#ifdef USERLAND
   exit(1);
+#endif
   /* unlock */
 }
 
@@ -209,8 +221,8 @@ int lnm$inslogtab(struct struct_lnm_ret * r,int tabnamlen,  char * tablename, st
   else {
     lnmhshs.entry[2*(*myhash)]=mylnmb;
     lnmhshs.entry[2*(*myhash)+1]=mylnmb;
-    //    (r->mylnmb)->lnmb$l_flink=r->mylnmb;
-    //    (r->mylnmb)->lnmb$l_blink=r->mylnmb;
+    mylnmb->lnmb$l_flink=mylnmb;
+    mylnmb->lnmb$l_blink=mylnmb;
   }
   lnmprintf("inslog\n");
   

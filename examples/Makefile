@@ -1,4 +1,4 @@
-all: timer ast time eftim schdwk forcex ef wake synch enq
+all: timer ast time eftim schdwk forcex ef wake synch enq lnm
 
 timer: timer.c
 	gcc -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.o -o timer
@@ -31,7 +31,10 @@ synch: synch.c
 enq: enq.c
 	gcc -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.o -o enq
 
-allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum
+lnm: lnm.c
+	gcc -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starlet.o -o lnm
+
+allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum lnmum
 
 UMDEF=-Dcompile_um -I.
 
@@ -66,4 +69,6 @@ synchum: synch.c
 enqum: enq.c
 	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.c -o enqum
 
+lnmum: lnm.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starlet.c -o lnmum
 

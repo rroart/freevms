@@ -615,7 +615,9 @@ asmlinkage void __init start_kernel(void)
 	}
 #endif
 	mem_init();
-	printk("aft mem_init\n");
+	printk("aft mem_init, before lnm\n");
+	lnm_init();
+	printk("aft lnm_init\n");
 	kmem_cache_sizes_init();
 	printk("aft kmem\n");
 	mempages = num_physpages;

@@ -280,6 +280,9 @@
 #define __NR_$getlki           34
 #define __NR_$getlkiw          35
 #define __NR_$enqw             36
+#define __NR_$crelnm           37
+#define __NR_$trnlnm           38
+#define __NR_$dellnm           39
 
 #define __NR_$close 1
 #define __NR_$connect 2

@@ -2031,11 +2031,8 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
 
   qhead_init(&scs$gq_local_names);
 
-  /* take lnm stuff from syslnm.c etc */
-
   printk("Done system data cells\n");
 }
-
 
 #define FUDGEFACTOR 40587
 

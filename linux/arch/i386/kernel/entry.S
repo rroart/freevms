@@ -850,7 +850,7 @@ ENTRY(vmssys_call_table)
 	.long SYMBOL_NAME(sys_$ni_syscall)	/* 0  -  old "setup()" system call*/
 	.long SYMBOL_NAME(sys_$testtest)
 	.long SYMBOL_NAME(exe$setpri)
-        .long SYMBOL_NAME(sys_$ni_syscall)
+        .long SYMBOL_NAME(exe$crelnt)
         .long SYMBOL_NAME(exe$setprn)
         .long SYMBOL_NAME(exe$dclast)
         .long SYMBOL_NAME(exe$waitfr)
@@ -884,6 +884,9 @@ ENTRY(vmssys_call_table)
         .long SYMBOL_NAME(exe$getlki)
         .long SYMBOL_NAME(exe$getlkiw)
         .long SYMBOL_NAME(exe$enqw) 
+        .long SYMBOL_NAME(exe$crelnm) 
+        .long SYMBOL_NAME(exe$trnlnm) 
+        .long SYMBOL_NAME(exe$dellnm) 
 
 	.rept NR_vmssyscalls-(.-vmssys_call_table)/4
 		.long SYMBOL_NAME(sys_$ni_syscall)

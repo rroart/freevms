@@ -232,6 +232,9 @@ static inline pid_t setsid(void)
 #define __NR_$getlki 308
 #define __NR_$getlkiw 309
 #define __NR_$enqw 310
+#define __NR_$crelnm 311
+#define __NR_$trnlnm 312
+#define __NR_$dellnm 313
 
 #endif
 

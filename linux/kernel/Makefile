@@ -22,6 +22,7 @@ obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \
 	    sysdelprc.o sysforcex.o sysexit.o syssetmod.o sysenqdeq.o \
 	    sysqioreq.o sysqiofdt.o mscp.o dudriver.o sys_scs.o sysacpfdt.o \
 	    sysassign.o sysdassgn.o iosubpagd.o sysgetlki.o \
+	    syslnm.o lnmsub.o \
 	    ../../freevms/pal/src/libqueue.a
 
 obj-$(CONFIG_UID16) += uid16.o

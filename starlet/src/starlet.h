@@ -62,16 +62,17 @@ int sys$asctim  (unsigned short int *timlen, void *timbuf,
 		 unsigned long long *timadr, char cvtflg);
 
 int sys$bintim  (void *timbuf, unsigned long long *timadr);
- int sys$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
 
- int sys$crelnt  (unsigned int *attr, void *resnam, unsigned
+int sys$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
+
+int sys$crelnt  (unsigned int *attr, void *resnam, unsigned
                          int *reslen, unsigned int *quota,
                 unsigned short *promsk, void *tabnam, void
                          *partab, unsigned char *acmode);
 
- int sys$dellnm  (void *tabnam, void *lognam, unsigned char *acmode);
+int sys$dellnm  (void *tabnam, void *lognam, unsigned char *acmode);
 
- int sys$trnlnm  (unsigned int *attr, void *tabnam, void
+int sys$trnlnm  (unsigned int *attr, void *tabnam, void
 		  *lognam, unsigned char *acmode, void *itmlst);
 
 int sys$dassgn(unsigned short int chan);

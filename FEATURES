@@ -3,11 +3,14 @@ asts (partly)
 timing (partly)
 event flags (partly)
 process control and communication (partly)
+logicals (partly)
 
 syscalls:
 $asctim
 $bintim
 $clref
+$crelnm
+$crelnt
 $dclast
 $enq
 $forcex
@@ -22,6 +25,7 @@ $setimr
 $setpri
 $setprn
 $synch
+$trnlnm
 $waitfr
 $wake
 

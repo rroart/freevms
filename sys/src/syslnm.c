@@ -7,7 +7,8 @@ struct lnmhshp lnmhshp;
 #endif 
 
 #include<linux/linkage.h>
-#include<stdlib.h>
+//#include<stdlib.h>
+#ifdef USERLAND
 #include"../../starlet/src/starlet.h"
 #include"../../starlet/src/lnmdef.h"
 #include"../../starlet/src/ssdef.h"
@@ -20,25 +21,43 @@ struct lnmhshp lnmhshp;
 #include"lnmsub.h"
 #include"sysgen.h" 
 #include"system_data_cells.h"
+#else
+#include<linux/sched.h>
+#include<linux/vmalloc.h>
+#include"../../freevms/starlet/src/starlet.h"
+#include"../../freevms/starlet/src/lnmdef.h"
+#include"../../freevms/starlet/src/ssdef.h"
+#include"../../freevms/starlet/src/misc.h"
+#include"../../freevms/librtl/src/descrip.h"
+#include"../../freevms/lib/src/lnmstrdef.h"
+#include"../../freevms/lib/src/orbdef.h"
+#include"../../freevms/lib/src/dyndef.h"
+#include"../../freevms/lib/src/system_service_setup.h"
+#include"../../freevms/sys/src/lnmsub.h"
+#include"../../freevms/sys/src/sysgen.h" 
+#include"../../freevms/sys/src/system_data_cells.h"
+#endif
 
 /* Author: Roar Thronæs */
 
 #ifndef USERLAND
+#if 0
 #define __KERNEL__         /* We're part of the kernel */
 #define MODULE             /* Not a permanent part, though. */
 #endif
+#endif
 
+#if 0
 /* Standard headers for LKMs */
 #include <linux/modversions.h> 
 #include <linux/module.h>  
-#include "system_data_cells.h"
 
 #define _LOOSE_KERNEL_NAMES
 /* With some combinations of Linux and gcc, tty.h will not compile if
         you don't define _LOOSE_KERNEL_NAMES.  It's a bug somewhere.
      */
 #include <linux/tty.h>      /* console_print() interface */
-
+#endif
 
 int isp1(void * a) { return 0; }
 
@@ -245,7 +264,7 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
 }
 
 asmlinkage sys_$DELLNM() {;}
-asmlinkage sys$dellnm  (void *tabnam, void *lognam, unsigned char *acmode) {
+asmlinkage exe$dellnm  (void *tabnam, void *lognam, unsigned char *acmode) {
 }
 
 asmlinkage sys_$TRNLNM() {;}
@@ -281,6 +300,7 @@ main(){
   struct lnmth * lnm$system_directory_b;
   struct struct_crelnt * s;
   $DESCRIPTOR(mynam,"BIBI");
+  $DESCRIPTOR(mynam2,"BOBO");
   $DESCRIPTOR(mytabnam3,"MYTEST3");
   $DESCRIPTOR(mytabnam2,"MYTEST2");
   $DESCRIPTOR(mytabnam,"MYTEST");
@@ -337,6 +357,11 @@ main(){
   i[0].bufaddr="mylog";
   bzero(&i[1],sizeof(struct item_list_3));
   status=exe$crelnm(0,&mytabnam2,&mynam,0,i);
+  i[0].item_code=1;
+  i[0].buflen=6;
+  i[0].bufaddr="mylog3";
+  bzero(&i[1],sizeof(struct item_list_3));
+  status=exe$crelnm(0,&mytabnam2,&mynam2,0,i);
   status=exe$trnlnm(0,&mytabnam2,&mynam,0,i);
   lnmprintf("end status %x\n",status);
   for (c=0;c<LNMSHASHTBL;c++) {
@@ -348,5 +373,61 @@ main(){
     }
   }
 }
+#else
+
+struct lnmb lnm_sys_dir;
+struct lnmth lnm_sys_dir_b;
+
+void lnm_init(void) {
+
+  /* this has to be done after malloc has been initialized */
+  /* can possibly done with mallocs */
+
+  unsigned long ahash;
+  unsigned long * myhash;
+  int status;
+  struct lnmb * lnm$system_directory=&lnm_sys_dir;
+  struct lnmth * lnm$system_directory_b=&lnm_sys_dir_b;
+  struct struct_crelnt s_c;
+  struct struct_crelnt * s=&s_c;
+  $DESCRIPTOR(mypartab,"LNM$SYSTEM_DIRECTORY");
+  /*    lnm$system_directory_b=lnmmalloc(sizeof(struct lnmth));*/
+  //  lnm$system_directory=lnmmalloc(sizeof(struct lnmb));
+  bzero(lnm$system_directory,sizeof(struct lnmb));
+  lnm$system_directory->lnmb$l_flink=0;
+  lnm$system_directory->lnmb$l_blink=0;
+  lnm$system_directory->lnmb$b_type=DYN$C_LNM;
+  lnm$system_directory->lnmb$b_acmode=MODE_K_KERNEL;
+  lnm$system_directory_b=(struct lnmth *)&lnm$system_directory->lnmxs[0].lnmx$b_count;
+  lnm$system_directory->lnmb$l_table=lnm$system_directory_b;
+  lnm$system_directory->lnmb$b_flags=LNM$M_NO_ALIAS|LNM$M_TABLE|LNM$M_NO_DELETE;
+  lnm$system_directory->lnmb$b_count=mypartab.dsc$w_length;
+  strncpy(lnm$system_directory->lnmb$t_name,mypartab.dsc$a_pointer,lnm$system_directory->lnmb$b_count);
+  lnm$system_directory->lnmxs[0].lnmx$b_flags=LNM$M_MYTERMINAL;
+  lnm$system_directory->lnmxs[0].lnmx$b_index=LNM$C_TABLE;
+  lnm$system_directory->lnmxs[1].lnmx$b_flags=LNM$M_MYXEND;
+
+  lnm$system_directory_b->lnmth$b_flags=LNM$M_MYSHAREABLE|LNM$M_MYDIRECTORY;
+  lnm$system_directory_b->lnmth$l_name=lnm$system_directory;
+  lnm$system_directory_b->lnmth$l_parent=0;
+  lnm$system_directory_b->lnmth$l_sibling=0;
+  lnm$system_directory_b->lnmth$l_child=0;
+  lnm$system_directory_b->lnmth$l_qtable=0;
+  lnm$system_directory_b->lnmth$l_hash=0;
+  lnm$system_directory_b->lnmth$l_orb=0;
+  lnm$system_directory_b->lnmth$l_byteslm=0;
+  lnm$system_directory_b->lnmth$l_bytes=0;
+
+  /*ctl$gl_lnmdirect=LNM$PROCESS_DIRECTORY;
+    lnm$al_dirtbl[0]=LNM$SYSTEM_DIRECTORY;
+    lnm$al_dirtbl[1]=ctl$gl_lnmdirect;*/
+  myhash=&ahash; //lnmmalloc(sizeof(unsigned long));
+  status=lnm$hash(mypartab.dsc$w_length,mypartab.dsc$a_pointer,0xffff,myhash);
+  lnmprintf("here %x %x\n",myhash,*myhash);
+  lnmhshs.entry[2*(*myhash)]=lnm$system_directory;
+  lnmhshs.entry[2*(*myhash)+1]=lnm$system_directory;
+}
+
 #endif
+
 

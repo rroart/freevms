@@ -40,7 +40,20 @@ int sys$setpri( unsigned int * pidadr, void * prcnam, unsigned int pri, unsigned
    s.tabnam=tabnam;
    s.partab=partab;
    s.acmode=acmode;
-   
+  return INLINE_SYSCALL($crelnt,1,&s);
+}
+
+int sys$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst) {
+  return INLINE_SYSCALL($crelnm,5,attr,tabnam,lognam,acmode,itmlst);
+}
+
+int sys$dellnm  (void *tabnam, void *lognam, unsigned char *acmode) {
+  return INLINE_SYSCALL($dellnm,3,tabnam,lognam,acmode);
+}
+
+int sys$trnlnm  (unsigned int *attr, void *tabnam, void
+		 *lognam, unsigned char *acmode, void *itmlst) {
+  return INLINE_SYSCALL($trnlnm,5,attr,tabnam,lognam,acmode,itmlst);
 }
 
 int sys$dclast  ( void (*astadr)(unsigned long), unsigned long astprm, unsigned int acmode) { 
