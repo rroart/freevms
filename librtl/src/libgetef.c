@@ -1,6 +1,8 @@
 #include<libdef.h>
 #include<ssdef.h>
 
+#include<linux/bitops.h>
+
 unsigned long long not_my_event_flags = 0xffffffff;
 // 1 taken, 0 free
 
