@@ -89,6 +89,8 @@
 			int (*function)(), int type);
 
 	int commands_init(dcl$command **commands);
+	int parsing(unsigned char *command_line, dcl$command *commands,
+			dcl$env *env);
 
 	unsigned char *read_command(dcl$env *env);
 
