@@ -205,10 +205,14 @@ struct _rdt rdt;
 extern struct _scs_rd rdtl[128];
 struct _cdl cdl;
 
+extern void mscpmyerr(void);
+
 void * find_mscp_cdt(void) {
   /* remember to fix cdldef */
   int i;
+  return &cdtl[4]; // gross gross hack
   for (i=0; i<100; i++) {
+    //if (cdtl[i].cdt$l_erraddr==mscpmyerr) return &cdtl[i];
     if (cdtl[i].cdt$l_rconid) return &cdtl[i];
   }
   return 0;
@@ -262,7 +266,7 @@ void * scs_register_name(char * c1, char * c2) {
   struct _sbnb * s=vmalloc(sizeof(struct _sbnb));
   bzero(s,sizeof(struct _sbnb));
 
-  bcopy(c1,&s->sbnb$b_procnam,max(16,strlen(c1)));
+  bcopy(c1,&s->sbnb$b_procnam,min(16,strlen(c1)));
 
   insque(s,scs$gq_local_names);
 
@@ -386,6 +390,8 @@ void scs_lower_level_send(struct _cdrp * cdrp, struct _scs * scs) {
   scs_msg_fill(skb,sk,0,scs);
 
   scs_msg_fill_more(skb,sk,cdrp,600);
+
+  printscs(skb->data);
 
   dn_nsp_send2(skb);	
 }
