@@ -7,6 +7,9 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
   *chr=0;
   struct _tty_ucb * tty=u;
   tty->ucb$b_tt_outype=0;
+  if (tty->tty$v_st_write) {
+    return  tty$putnextchar(chr,u);
+  }
   tty->tty$v_st_read==1; // mark reader?
   if (tty->ucb$l_tt_typahd==0)
     return;
