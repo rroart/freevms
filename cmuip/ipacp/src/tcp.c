@@ -1765,7 +1765,7 @@ tcp$send_data(struct tcb_structure * tcb)
 	    User$Post_IO_Status(uargs,SS$_NORMAL,qb->sn$size,0,0);
 	    mm$uarg_free(uargs);
 	    nqb = qb->sn$next;
-	    REMQUE(qb,qb);
+	    REMQUE(qb,&qb);
 	    mm$qblk_free(qb);
 	    qb = nqb;
 	    };

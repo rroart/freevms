@@ -125,7 +125,16 @@ INSQUE(x,y) {
   printk("INSQUE not implemented\n");
 }
 
-REMQUE() {
+REMQUE(e, a)
+     long *e;
+     long *a;
+{
+  int retval=0;
+  if (e==e[1]) retval|=1;
+  remque(e,0);
+  if (e[0]==e[1]) retval|=2;
+  *a=e;
+  return retval;
   printk("REMQUE not implemented\n");
 }
 
@@ -251,7 +260,7 @@ DRV$Fatal_FAO_not() {
   printk("DRV$Fatal_FAO not implemented\n");
 }
 
-QUEUE_EMPTY() {
+QUEUE_EMPTY_not() {
   printk("QUEUE_EMPTY not implemented\n");
 }
 
@@ -365,7 +374,7 @@ find_cpu_data() {
   printk("find_cpu_data not implemented\n");
 }
 
-Queue_Not_Empty() {
+Queue_Not_Empty_not() {
   printk("Queue_Not_Empty not implemented\n");
 }
 

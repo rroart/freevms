@@ -382,7 +382,7 @@ extern	mm$qblk_get();
 
 // If there is a user read outstanding, deliver data, else queue for later
 
-    if (REMQUE(IPCB->ipcb$usr_qhead,QBR) != EMPTY_QUEUE) // check
+    if (REMQUE(IPCB->ipcb$usr_qhead,&QBR) != EMPTY_QUEUE) // check
       Deliver_IP_Data(IPCB,QB,QBR);
     else
 	INSQUE(QB,IPCB->ipcb$nr_qtail);
@@ -600,7 +600,7 @@ void Kill_IP_Requests(struct IPCB_Structure * IPCB,long RC)
 
 // Purge the user request queue, posting all requests
 
-    while (REMQUE(IPCB->ipcb$usr_qhead,URQ) != EMPTY_QUEUE) // check
+    while (REMQUE(IPCB->ipcb$usr_qhead,&URQ) != EMPTY_QUEUE) // check
 	{
 	user$post_io_status(URQ->ur$uargs,RC,0,0,0);
 	mm$uarg_free(URQ->ur$uargs);
@@ -609,7 +609,7 @@ void Kill_IP_Requests(struct IPCB_Structure * IPCB,long RC)
 
 // Purge any received qblocks as well
 
-    while (REMQUE(IPCB->ipcb$nr_qhead,QB) != EMPTY_QUEUE) // check
+    while (REMQUE(IPCB->ipcb$nr_qhead,&QB) != EMPTY_QUEUE) // check
 	{
 	mm$seg_free(QB->nr$buf_size,QB->nr$buf);
 	mm$qblk_free(QB);
@@ -1097,7 +1097,7 @@ void ipu$receive(struct user_recv_args * Uargs)
 // If anything is available on the queue, deliver it now, else queue for later
 
     NOINT;
-    if (REMQUE(IPCB->ipcb$nr_qhead,QB) != EMPTY_QUEUE) // check
+    if (REMQUE(IPCB->ipcb$nr_qhead,&QB) != EMPTY_QUEUE) // check
       Deliver_IP_Data(IPCB,QB,URQ);
     else
 	INSQUE(URQ,IPCB->ipcb$usr_qtail);

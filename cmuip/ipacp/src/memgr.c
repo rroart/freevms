@@ -447,7 +447,7 @@ void mm$qblk_get (void)
 	ptr,
     Pages =0;
 
-    if (REMQUE(&FREE_Qblks.qhead,Hptr) != EMPTY_QUEUE) // check
+    if (REMQUE(&FREE_Qblks.qhead,&Hptr) != EMPTY_QUEUE) // check
 	qblk_count = qblk_count - 1; // Say there is 1 less avail.
     else			// allocate a new qb.
 	{
@@ -518,7 +518,7 @@ void mm$qblk_free(Ptr)
     Hptr = Ptr - MEM$HDR_SIZE*4; // Point at header
     XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Free !XL size !SL!/",0,Hptr, Pages);
     NOINT;
-    REMQUE(Hptr,Hptr);		// Remove from the used queue
+    REMQUE(Hptr,&Hptr);		// Remove from the used queue
     OKINT;
     if (Hptr->MEM$ISPERM)
 	{			// Free a permanent block - just put on free Q
@@ -626,7 +626,7 @@ void mm$uarg_get (void)
 	Ptr,
 	Pages ;
 
-    if (REMQUE(&FREE_Uargs.qhead,Ptr) != EMPTY_QUEUE) // check
+    if (REMQUE(&FREE_Uargs.qhead,&Ptr) != EMPTY_QUEUE) // check
       uarg_count = uarg_count - 1;
     else
 	{
@@ -790,7 +790,7 @@ mm$seg_get(Size)
 
     case MIN_PHYSICAL_BUFSIZE:
 	{
-	  if (REMQUE(&Free_Minsize_Segs.qhead,Ptr) != EMPTY_QUEUE) // check
+	  if (REMQUE(&Free_Minsize_Segs.qhead,&Ptr) != EMPTY_QUEUE) // check
 	    {
 	    min_seg_count = min_seg_count - 1;
 	    Alloc = TRUE;
@@ -808,7 +808,7 @@ mm$seg_get(Size)
 
     case MAX_PHYSICAL_BUFSIZE:
 	{
-	  if (REMQUE(&Free_Maxsize_Segs.qhead,Ptr) != EMPTY_QUEUE) // check
+	  if (REMQUE(&Free_Maxsize_Segs.qhead,&Ptr) != EMPTY_QUEUE) // check
 	    {
 	    max_seg_count = max_seg_count - 1;
 	    Alloc = TRUE;
@@ -1047,7 +1047,7 @@ mm$remque(QHDR,QBLK,QRTN,QID,QVAL)
       struct MEM$HDR_STRUCT * HPTR;
     signed long
 	RVAL;
-    if ((RVAL = REMQUE(QHDR,QBLK)) != EMPTY_QUEUE) // check
+    if ((RVAL = REMQUE(QHDR,&QBLK)) != EMPTY_QUEUE) // check
 	{
 	HPTR = *QBLK - MEM$HDR_SIZE*4;
 	HPTR->MEM$REMQUERTN = QRTN;

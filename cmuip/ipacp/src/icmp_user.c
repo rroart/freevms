@@ -400,7 +400,7 @@ extern	mm$qblk_get();
 
 // If there is a user read outstanding, deliver data, else queue for later
 
-    if (REMQUE(ICMPCB->ICMPCB$USR_Qhead,QBR) != EMPTY_QUEUE) // check
+    if (REMQUE(ICMPCB->ICMPCB$USR_Qhead,&QBR) != EMPTY_QUEUE) // check
       Deliver_ICMP_Data(ICMPCB,QB,QBR);
     else
 	INSQUE(QB,ICMPCB->ICMPCB$NR_Qtail);
@@ -613,7 +613,7 @@ void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,long RC)
 
 // Purge the user request queue, posting all requests
 
-    while (REMQUE(ICMPCB->ICMPCB$USR_Qhead,URQ) != EMPTY_QUEUE) // check
+    while (REMQUE(ICMPCB->ICMPCB$USR_Qhead,&URQ) != EMPTY_QUEUE) // check
 	{
 	if (ICMPCB->ICMPCB$Internal)
 	  (URQ->ur$astadr)(URQ->ur$astprm,RC,0);
@@ -627,7 +627,7 @@ void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,long RC)
 
 // Purge any received qblocks as well
 
-    while (REMQUE(ICMPCB->ICMPCB$NR_Qhead,QB) != EMPTY_QUEUE) // check
+    while (REMQUE(ICMPCB->ICMPCB$NR_Qhead,&QB) != EMPTY_QUEUE) // check
 	{
 	mm$seg_free(QB->nr$buf_size,QB->nr$buf);
 	mm$qblk_free(QB);
@@ -1152,7 +1152,7 @@ void icmp$receive(struct user_recv_args * uargs)
 // If anything is available on the queue, deliver it now, else queue for later
 
     NOINT;
-    if (REMQUE(ICMPCB->ICMPCB$NR_Qhead,QB) != EMPTY_QUEUE) // check
+    if (REMQUE(ICMPCB->ICMPCB$NR_Qhead,&QB) != EMPTY_QUEUE) // check
 	Deliver_ICMP_Data(ICMPCB,QB,URQ);
     else
 	INSQUE(URQ,ICMPCB->ICMPCB$USR_Qtail);

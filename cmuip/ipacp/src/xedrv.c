@@ -641,7 +641,7 @@ void XE_FreeBufs ( struct XE_Interface_Structure * XE_Int )
 
 // Flush IP buffers
 
-    while (REMQUE ( XE_Int-> XEI$recv_Qhead  , BUFF ) != EMPTY_QUEUE)
+    while (REMQUE ( XE_Int-> XEI$recv_Qhead  , &BUFF ) != EMPTY_QUEUE)
 	drv$seg_free ( DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len + IOS_len) , BUFF );
 
 // Release the ARP buffer
@@ -975,7 +975,7 @@ void xe$xmit ( Device_Configuration_Entry * dev_config )
     DRV$NOINT;
 // Check if a request is on the Net_send_Q for this device
 
-    if ((REMQUE(dev_config->dc_Send_Qhead,QB)) == EMPTY_QUEUE) // check
+    if ((REMQUE(dev_config->dc_Send_Qhead,&QB)) == EMPTY_QUEUE) // check
 	return;			// The Q is empty
 
     ARstat = 0;			// Assume we will deallocate the packet
@@ -1123,7 +1123,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 
 // Get first input packet off of the queue
 //!!HACK!!// What if the first packet wasn't the one which $QIO returned?
-    REMQUE(XE_Int->XEI$recv_Qhead,Rbuf);
+    REMQUE(XE_Int->XEI$recv_Qhead,&Rbuf);
     Rbuf = Rbuf + XE_hdr_offset;
     rcvix = XE_Int->XEI$curhdr;
 

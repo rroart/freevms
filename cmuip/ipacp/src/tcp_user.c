@@ -349,7 +349,7 @@ void tcp$purge_send_queue(struct tcb_structure * TCB,signed long RC)
       struct queue_blk_structure(qb_send_fields) * QB;
 register	struct user_send_args * Uargs;
 
- while (REMQUE(TCB->snd_qhead,QB) != EMPTY_QUEUE) // check
+ while (REMQUE(TCB->snd_qhead,&QB) != EMPTY_QUEUE) // check
 	{
 	Uargs = QB->sn$uargs;	// point at user argblk.
 	user$post_io_status(Uargs,RC,0,0,0);
@@ -393,7 +393,7 @@ void tcp$purge_receive_queue(struct tcb_structure * TCB, signed long RC)
     register
 	struct queue_blk_structure(qb_ur_fields) * QB;
 
-    while (REMQUE(TCB->ur_qhead,QB) != EMPTY_QUEUE) // check
+    while (REMQUE(TCB->ur_qhead,&QB) != EMPTY_QUEUE) // check
 	{
 	user$post_io_status(QB->ur$uargs,RC,0,0,0);
 	mm$uarg_free(QB->ur$uargs); // release user arg block.
@@ -524,7 +524,7 @@ void tcp$kill_pending_requests(struct tcb_structure * TCB,signed long ERcode)
 
 //~~~WHILE XREMQUE(TCB->RF_Qhead,QBR,tcp$kill_pending_requests,
 //~~~		  Q$TCBFQ,TCB->RF_Qhead) != Empty_Queue DO
-    while (REMQUE(TCB->rf_qhead,QBR) != EMPTY_QUEUE) // check
+    while (REMQUE(TCB->rf_qhead,&QBR) != EMPTY_QUEUE) // check
 	{
 	mm$seg_free(QBR->nr$buf_size,QBR->nr$buf);
 	mm$qblk_free(QBR);
@@ -1093,7 +1093,7 @@ void tcp$deliver_user_data(struct tcb_structure * TCB)
 
 	// we want to REMQUE the QBlock here since we don't want it on
 	// the rec queue after we post it (since it might be posted twice.
-	REMQUE(TCB->ur_qhead,UQB); // remove the entry
+	REMQUE(TCB->ur_qhead,&UQB); // remove the entry
 
 	// post the IRP and release the Uargs
 	user$post_io_status(UQB->ur$uargs,SS$_NORMAL,datasize,Uflags,0);

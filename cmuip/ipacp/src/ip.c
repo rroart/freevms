@@ -1405,7 +1405,7 @@ X:  {			// *** Block X ***
 
 // Insert on the queue and start RA purge timer, if first entry on queue.
 
-	    FIRST = QUEUE_EMPTY(RA_QUEUE);
+	    FIRST = queue_empty(RA_QUEUE);
 	    INSQUE(RAPTR,RA_QUEUE->qtail);
 	    if (FIRST)
 		exe$setimr(0, RA_CHECK_TIME, IP_FRAGMENT_CHECK, 0, 0);
@@ -1479,7 +1479,7 @@ Y:	{
 
 // Remove from the queue
 
-	    REMQUE(RAPTR,RAPTR);
+	    REMQUE(RAPTR,&RAPTR);
 
 // Calculate sizes of entire, reassembled packet & dispatch it.
 
@@ -1543,7 +1543,7 @@ void IP_FRAGMENT_CHECK  (void)
 // Flush the buffer & free the block
 
 	    XQL$FAO(LOG$IP,"!%T Flushing expired IP RA block !XL!/",0,RAPTR);
-	    REMQUE(RAPTR,RAPTR);
+	    REMQUE(RAPTR,&RAPTR);
 	    mm$seg_free(RAPTR->ra$bufsize,RAPTR->ra$buf);
 //	    LIB$FREE_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
 	    LIB$FREE_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),RAPTR);
@@ -1559,6 +1559,6 @@ void IP_FRAGMENT_CHECK  (void)
 
 // If there are still entries on the reassembly queue, then requeue us
 
-    if (! QUEUE_EMPTY(RA_QUEUE))
+    if (! queue_empty(RA_QUEUE))
 	exe$setimr(0, RA_CHECK_TIME, IP_FRAGMENT_CHECK, 0, 0);
     }

@@ -226,8 +226,8 @@ static    OPR$FAO(CST, ...)
 
 // Queue management macros.
 
-#define    Queue_Empty(Queue$Head) (Queue$Head->si_qhead == Queue$Head)
-#define    Queue_NOT_Empty(Queue$Head) = (Queue$Head->si_qhead != Queue$Head)
+#define    queue_empty(Queue$Head) (((struct si_fields *)Queue$Head)->si_qhead == Queue$Head)
+#define    queue_not_empty(Queue$Head) (((struct si_fields *)Queue$Head)->si_qhead != Queue$Head)
 
 // Enable/Disable AST Delivery.
 // If AST_IN_Progress then don't bother with AST blocking as AST will block

@@ -954,7 +954,7 @@ extern	STR$FREE1_DX ();
 
 // Scan the error message queue, writing each entry to the log file.
 
-    while (REMQUE(ERR_MSG_Q->EM$QHEAD,QB) != EMPTY_QUEUE)
+    while (REMQUE(ERR_MSG_Q->EM$QHEAD,&QB) != EMPTY_QUEUE)
 	{
 	MDSC = QB->EMQ$MDSC;
 	LOG_OUTPUT(MDSC);

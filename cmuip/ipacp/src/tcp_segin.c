@@ -999,7 +999,7 @@ Y:  {
 
     XLOG$FAO(LOG$TCP,"!%T SYN-wait-list match,TCB=!XL,QB=!XL,Seg=!XL!/",
 	     0,TCB,QB,QB->nr$seg);
-    REMQUE(QB,QB);		// Remove entry from syn-wait-list.
+    REMQUE(QB,&QB);		// Remove entry from syn-wait-list.
     syn_wait_count = syn_wait_count + 1;
     WKS_LIST[WIX].WKS$SYN_Qcount = WKS_LIST[WIX].WKS$SYN_Qcount + 1;
     Seg = QB->nr$seg;		// point at segment.
@@ -1259,7 +1259,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 	    {
 	    if (QB->nr$timeout < Now)
 		{		// Timed-out
-		REMQUE(QB,QB);	// Remove queue entry.
+		REMQUE(QB,&QB);	// Remove queue entry.
 		WKS_LIST[WIX].WKS$SYN_Qcount=WKS_LIST[WIX].WKS$SYN_Qcount+1;
 		syn_wait_count = syn_wait_count + 1;
 		mm$seg_free(QB->nr$buf_size,QB->nr$buf); // Release the seg.
@@ -1591,7 +1591,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 	     {
 	     delete = TRUE;
 //~~~	     XREMQUE(QB,QB,Check_Future_Q,Q$TCBFQ,TCB->rf_qhead);
-	     REMQUE(QB,QB);
+	     REMQUE(QB,&QB);
 	     TCB->rf_qcount = TCB->rf_qcount-1;
 	     XLOG$FAO(LOG$TCP,"!%T Flushing FQ seg !XL, QB !XL, SEQ=!XL,!XL!/",
 		      0,QB->nr$seg,QB,QB->nr$seq_start,QB->nr$seq_end);
@@ -1605,7 +1605,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 	       if (SEQoffset >= 0)
 	    {
 //~~~	    XREMQUE(QB,QB,Check_Future_Q,Q$TCBFQ,TCB->rf_qhead);
-	    REMQUE(QB,QB);
+	    REMQUE(QB,&QB);
 	    TCB->rf_qcount = TCB->rf_qcount-1;
 	    XLOG$FAO(LOG$TCP,"!%T Using FQ seg !XL, QB !XL, SEQ=!XL,!XL!/",
 		     0,QB->nr$seg,QB,QB->nr$seq_start,QB->nr$seq_end);
@@ -2506,7 +2506,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 
 	if (TCB->rcv_q_count == 0)
 	    {
-	      while ((REMQUE(TCB->ur_qhead,QBR)) != EMPTY_QUEUE) // check
+	      while ((REMQUE(TCB->ur_qhead,&QBR)) != EMPTY_QUEUE) // check
 		{
 		user$post_io_status(QBR->ur$uargs,
 				     SS$_NORMAL,0,NSB$PUSHBIT,0);
@@ -2631,7 +2631,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 
 //~~~WHILE XREMQUE(segin->si_qhead,QB,Process_Received_Segments,Q$SEGIN,0)
 //~~~	  != Empty_Queue DO
-    while ((RQV = REMQUE(segin->si_qhead,QB)) != EMPTY_QUEUE) // check
+    while ((RQV = REMQUE(segin->si_qhead,&QB)) != EMPTY_QUEUE) // check
 	{
 	ts$sr = ts$sr + 1;	// count segments received from IP.
 	seg = QB->nr$seg;	// point at segment proper.
@@ -2832,7 +2832,7 @@ Y:		{
 
 // See if we can remove some stuff from the future queue
 
-		if (Queue_Not_Empty(TCB->rf_qhead))
+		if (queue_not_empty(TCB->rf_qhead))
 		    Check_Future_Q(TCB);
 		};
 	    };		// TCP segment case (block X)

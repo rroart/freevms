@@ -606,7 +606,7 @@ NML$CANCEL(ASTPRM,ASTFLG,STATUS)
 	    {
 	    XQL$FAO(LOG$MSG,"!%T NML$CANCEL - Deleting NQE !XL!/",0,NQE);
 	    RC = RC + 1;
-	    REMQUE(NQE,NQE);
+	    REMQUE(NQE,&NQE);
 	    if (ASTFLG != 0)
 		(NQE->NQE$ASTADR)(NQE->NQE$ASTPRM,STATUS);
 	    NQE_DEALLOC(NQE);
@@ -681,7 +681,7 @@ void NML$PURGE(STATUS)
     while (NQE != NQE_QUEUE)
 	{
 	NXNQE = NQE->NQE$NEXT;
-	REMQUE(NQE,NQE);
+	REMQUE(NQE,&NQE);
 	(NQE->NQE$ASTADR)(NQE->NQE$ASTPRM,STATUS);
 	NQE_DEALLOC(NQE);
 	NQE = NXNQE;
@@ -872,7 +872,7 @@ void NQE_DELETE(NQE,ASTFLG,STATUS)
 
 // First, unlink the request from the queue
 
-    REMQUE(NQE,NQE);
+    REMQUE(NQE,&NQE);
 
 // Next, call the AST routine if that is requested
 
@@ -1065,7 +1065,7 @@ void DECODE_REPLY(PID,RLEN,RBUF)
 // Have a match. Dequeue & finish request according to the reply type
 
 	    FOUND = FOUND + 1;
-	    REMQUE(NQE,NQE);
+	    REMQUE(NQE,&NQE);
 	    ASTADR = NQE->NQE$ASTADR;
 	    ASTPRM = NQE->NQE$ASTPRM;
 	    if ( RTYPE >= NLRP$MIN && RTYPE <= NLRP$MAX) 

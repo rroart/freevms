@@ -426,7 +426,7 @@ Conect_Remove ( struct tcb_structure * TCB )
 	RC,
 	tcb_ptr;
 
-    if ((REMQUE(TCB,tcb_ptr)) == QUEUE_EMPTY_NOW)  // check
+    if ((REMQUE(TCB,&tcb_ptr)) == QUEUE_EMPTY_NOW)  // check
 	{
 	if ((RC=Find_Local_Port(TCB->local_port)) != ERROR)
 	    ConectPtr[RC].CN$Local_Port = -1; // Make CONECT entry avail.
@@ -765,7 +765,7 @@ void TCB_Promote ( struct tcb_structure * TCB )
 	TCBptr;
 
     NOINT;
-    REMQUE(TCB,TCBptr);
+    REMQUE(TCB,&TCBptr);
     INSQUE(TCBptr,ConectPtr[TCB->con_index].CN$TCB_List);
     OKINT;
     }
