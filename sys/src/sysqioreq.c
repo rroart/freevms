@@ -67,6 +67,23 @@ int exe$insioq (struct _irp * i, struct _ucb * u) {
   return;
 }
 
+asmlinkage int exe_qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
+  struct struct_qio s;
+  s.efn=efn;
+  s.chan=chan;
+  s.func=func;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.p1=p1;
+  s.p2=p2;
+  s.p3=p3;
+  s.p4=p4;
+  s.p5=p5;
+  s.p6=p6;
+  return exe$qiow(&s);
+}
+
 asmlinkage int exe$qiow (struct struct_qio * q) {
 
   /* I think this is about it */
@@ -116,20 +133,22 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   /* does it do one or more functions */
   //  for(c=0,d=1;c<64;c++,d=d<1) /* right order? */
   //  if (d&func) {
-  ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[func](i,p,i->irp$l_ucb,&ctl$gl_ccbbase[q->chan]); // a real beauty, isn't it :)
+  c=i->irp$v_fcode;
+  d=i->irp$v_fmod;
+  return ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[i->irp$v_fcode](i,p,i->irp$l_ucb,&ctl$gl_ccbbase[q->chan]); // a real beauty, isn't it :)
       //  }
 }
 
-void exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
+int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
   int wasempty;
   struct _vcb * v=u->ucb$l_vcb;
   struct _aqb * a=v->vcb$l_aqb;
   wasempty=aqempty(&a->aqb$l_acpqfl);
-  exe$insioq(i,&a->aqb$l_acpqfl);
-  if (wasempty) return SS$_NORMAL;
+  insque(i,&a->aqb$l_acpqfl);
+  if (!wasempty) return SS$_NORMAL;
   if (a->aqb$l_acppid==0) {
     exe$qioqxqppkt(p,&i->irp$l_fqfl);
-    return;
+    return SS$_NORMAL;
   }
   sch$wake(a->aqb$l_acppid);
   /* restore ipl to 0 */
