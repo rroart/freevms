@@ -1071,10 +1071,14 @@ out:
 	/* Something went wrong, return the inode and free the argument pages*/
 #ifdef CONFIG_VMS
 	printk("uh oh, something went wrong error\n");
+	if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB) {
 #endif
 	allow_write_access(bprm.file);
 	if (bprm.file)
 		fput(bprm.file);
+#ifdef CONFIG_VMS
+	}
+#endif
 
 	for (i = 0 ; i < MAX_ARG_PAGES ; i++) {
 		struct page * page = bprm.page[i];
