@@ -3095,6 +3095,7 @@ static void redo_fd_request(void)
 	if (current_drive < N_DRIVE)
 		floppy_off(current_drive);
 
+	return; // return here to avoid pagefault and panic
 	if (!QUEUE_EMPTY && CURRENT->rq_status == RQ_INACTIVE){
 		CLEAR_INTR;
 		unlock_fdc();
@@ -3994,7 +3995,7 @@ static int floppy_open(struct inode * inode, struct file * filp)
 	if (old_dev != -1 && old_dev != MINOR(inode->i_rdev)) {
 		if (buffer_drive == drive)
 			buffer_track = -1;
-		invalidate_buffers(MKDEV(FLOPPY_MAJOR,old_dev));
+		//invalidate_buffers(MKDEV(FLOPPY_MAJOR,old_dev));
 	}
 
 	/* Allow ioctls if we have write-permissions even if read-only open.
@@ -4101,8 +4102,10 @@ static int floppy_revalidate(kdev_t dev)
 				process_fd_request();
 				return -ENXIO;
 			}
+#if 0
 			if (bh && !buffer_uptodate(bh))
 				ll_rw_block(READ, 1, &bh);
+#endif
 			process_fd_request();
 			wait_on_buffer(bh);
 			brelse(bh);
@@ -4396,7 +4399,9 @@ int __init floppy_init(void)
 
 	blk_size[MAJOR_NR] = floppy_sizes;
 	blksize_size[MAJOR_NR] = floppy_blocksizes;
+#if 0
 	blk_init_queue(BLK_DEFAULT_QUEUE(MAJOR_NR), DEVICE_REQUEST);
+#endif
 	reschedule_timeout(MAXTIMEOUT, "floppy init", MAXTIMEOUT);
 	config_types();
 
@@ -4416,7 +4421,9 @@ int __init floppy_init(void)
 	if (fdc_state[0].address == -1) {
 		devfs_unregister_blkdev(MAJOR_NR,"fd");
 		del_timer(&fd_timeout);
+#if 0
 		blk_cleanup_queue(BLK_DEFAULT_QUEUE(MAJOR_NR));
+#endif
 		return -ENODEV;
 	}
 #if N_FDC > 1
@@ -4426,7 +4433,9 @@ int __init floppy_init(void)
 	fdc = 0; /* reset fdc in case of unexpected interrupt */
 	if (floppy_grab_irq_and_dma()){
 		del_timer(&fd_timeout);
+#if 0
 		blk_cleanup_queue(BLK_DEFAULT_QUEUE(MAJOR_NR));
+#endif
 		devfs_unregister_blkdev(MAJOR_NR,"fd");
 		return -EBUSY;
 	}
@@ -4489,7 +4498,9 @@ int __init floppy_init(void)
 		run_task_queue(&tq_immediate);
 		if (usage_count)
 			floppy_release_irq_and_dma();
+#if 0
 		blk_cleanup_queue(BLK_DEFAULT_QUEUE(MAJOR_NR));
+#endif
 		devfs_unregister_blkdev(MAJOR_NR,"fd");
 	}
 	
@@ -4696,7 +4707,9 @@ void cleanup_module(void)
 	devfs_unregister (devfs_handle);
 	devfs_unregister_blkdev(MAJOR_NR, "fd");
 
+#if 0
 	blk_cleanup_queue(BLK_DEFAULT_QUEUE(MAJOR_NR));
+#endif
 	/* eject disk, if any */
 	dummy = fd_eject(0);
 }
