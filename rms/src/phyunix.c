@@ -32,6 +32,7 @@
 //#include "phyio.h"
 //#include "ssdef.h"
 #include <ssdef.h>
+#include <ucbdef.h>
 
 //#include <linux/mm.h>
 //#include <linux/slab.h>
@@ -64,7 +65,7 @@ void phyio_show(void)
            init_count,read_count,write_count);
 }
 
-unsigned phyio_init(int devlen,char *devnam,struct file **handle,struct phyio_info *info)
+unsigned phyio_init(int devlen,char *devnam,struct file **handle,struct phyio_info *info, struct _dt_ucb * ucb)
 {
     struct file * vmsfd;
     char *cp,devbuf[200];
@@ -80,6 +81,7 @@ unsigned phyio_init(int devlen,char *devnam,struct file **handle,struct phyio_in
     if (IS_ERR(vmsfd))
       return SS$_NOSUCHDEV;
     *handle = vmsfd;
+    ucb->ucb$l_maxblock=vmsfd->f_dentry->d_inode->i_size>>9; // block size
     return SS$_NORMAL;
 }
 
