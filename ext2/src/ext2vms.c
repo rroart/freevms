@@ -561,6 +561,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   void * atrp=irp->irp$l_qio_p5;
   struct _fibdef * fib=(struct _fibdef *)fibdsc->dsc$a_pointer;
   struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
+  int wild=0;
   unsigned action=0;
   if (irp->irp$l_func & IO$M_ACCESS) action=0;
   if (irp->irp$l_func & IO$M_DELETE) action=1;
@@ -593,6 +594,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     if (wildcard || (fib->fib$w_nmctl & FIB$M_WILD)) {
         fib->fib$l_wcc = 1/*curblk*/;
 	strcpy(name,&x2p->context_save);
+	wild=1;
     } else {
         fib->fib$l_wcc = 0;
 	strcpy(name,&x2p->context_save);
@@ -613,7 +615,11 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     buf.dirent = &dir;
     if (IS_ERR(f)) {
       sts=SS$_NOSUCHFILE;
-      if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
+      if ( (sts & 1) == 0) { 
+	memset(&x2p->context_save,0,54);
+	iosbret(irp,sts);
+	return sts;
+      }
     }
     error=generic_file_llseek(f, x2p->prev_fp /*fib->fib$l_wcc*//*dir.d_off*/, 0);
     if (error<0)
@@ -689,7 +695,15 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 #endif
   }
 
-  if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
+  if ( (sts & 1) == 0) { 
+    memset(&x2p->context_save,0,54);
+    iosbret(irp,sts); 
+    return sts;
+  }
+
+  // has to reset context_save somewhere? this is a trial place
+  if ((irp->irp$l_func & IO$M_ACCESS) == 0 && wild == 0)
+    memset(&x2p->context_save,0,54);
 
   if ((irp->irp$l_func & IO$M_ACCESS) == 0 && irp->irp$l_qio_p5 == 0)
     return SS$_NORMAL;
@@ -772,8 +786,8 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
 	f->fat$b_rtype=FAT$C_SEQUENTIAL << 4;
 	f->fat$b_rattrib=0;
 	f->fat$w_rsize=0;
-	f->fat$l_hiblk=VMSSWAP(1+head->i_blocks);
-	f->fat$l_efblk=VMSSWAP(1+head->i_size/512);
+	f->fat$l_hiblk=VMSSWAP((1+head->i_blocks));
+	f->fat$l_efblk=VMSSWAP((1+head->i_size/512));
 	f->fat$w_ffbyte=head->i_size%512;
 	f->fat$b_bktsize=0;
 	f->fat$b_vfcsize=0;
@@ -993,3 +1007,55 @@ void * exttwo_search_fcb2(struct _vcb * vcb,struct _fiddef * fid)
     return 0;
 }
 
+unsigned long e2_access_file(const char *name) {
+  char result[256];
+  unsigned long reslen;
+  int sts;
+  struct _iosb iosb;
+
+  struct _fibdef fibblk;
+  struct dsc$descriptor fibdsc,resdsc,fildsc;
+
+  memset(&fibblk, 0, sizeof(fibblk));
+  fibblk.fib$w_fid_num = 4;
+  fibblk.fib$w_fid_seq = 4;
+
+  fibdsc.dsc$w_length = sizeof(struct _fibdef);
+  fibdsc.dsc$a_pointer = (char *) &fibblk;
+
+  resdsc.dsc$w_length = 256;
+  resdsc.dsc$a_pointer = result;
+
+  fildsc.dsc$w_length = strlen(name);
+  fildsc.dsc$a_pointer = name;
+
+  //memcpy(&fibblk.fib$w_did_num,&wcc->wcd_dirid,sizeof(struct _fiddef));
+  fibblk.fib$w_nmctl = 0;     /* FIB_M_WILD; */
+  fibblk.fib$l_acctl = 0;
+  fibblk.fib$w_fid_num = 0;
+  fibblk.fib$w_fid_seq = 0;
+  fibblk.fib$b_fid_rvn = 0;
+  fibblk.fib$b_fid_nmx = 0;
+  fibblk.fib$l_wcc = 1; //wcc->wcd_wcc;
+
+  fibblk.fib$w_fid_num = fibblk.fib$w_did_num;
+  fibblk.fib$w_fid_seq = fibblk.fib$w_did_seq;
+  fibblk.fib$w_did_num = 0;
+  fibblk.fib$w_did_seq = 0;
+  sts = sys$qiow(0,getchan(x2p->current_vcb),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
+		 &fibdsc,&fildsc,&reslen,&resdsc,0,0);
+  sts = iosb.iosb$w_status;
+
+  fibblk.fib$w_did_num = fibblk.fib$w_fid_num;
+  fibblk.fib$w_did_seq = fibblk.fib$w_fid_seq;
+  fibblk.fib$w_fid_num = 0;
+  fibblk.fib$w_fid_seq = 0;
+  sts = sys$qiow(0,getchan(x2p->current_vcb),IO$_ACCESS,&iosb,0,0,
+		 &fibdsc,&fildsc,&reslen,&resdsc,0,0);
+  sts = iosb.iosb$w_status;
+  return sts;
+}
+
+unsigned long get_prim_fcb() {
+  return 	  x2p->primary_fcb;
+}
