@@ -46,6 +46,7 @@ void acp_std$accessnet(struct _irp * i, struct _pcb * p, struct _ucb * u, struct
 }
 
 void acp_std$deaccess(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  return exe$qioacppkt(i,p,u);
 }
 
 void acp_std$modify(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
@@ -53,6 +54,7 @@ void acp_std$modify(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _c
 }
 
 void acp_std$mount(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  return exe$qioacppkt(i,p,u);
 }
 
 
