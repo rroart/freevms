@@ -10,14 +10,18 @@
 
 O_TARGET := idedriver.o
 
+ifneq ($(CONFIG_IO_VMS),y)
 export-objs		:= ide.o ide-features.o ataraid.o
+else
+export-objs             := myide.o ide-features.o ataraid.o
+endif
 list-multi		:= ide-mod.o ide-probe-mod.o
 
 obj-y		:=
 obj-m		:=
 ide-obj-y	:=
 
-obj-$(CONFIG_IO_VMS) += oz_dev_ide8038i_486.o
+obj-$(CONFIG_IO_VMS) += myide.o myide-disk.o
 
 obj-$(CONFIG_BLK_DEV_HD)	+= hd.o
 obj-$(CONFIG_BLK_DEV_IDE_VMS)       += dqdriver.o enable-ide.o 

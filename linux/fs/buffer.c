@@ -55,6 +55,10 @@
 #include <asm/hw_irq.h>
 
 #include <pridef.h>
+#include <iodef.h>
+#include <misc.h>
+
+//asmlinkage int exe_qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) ;
 
 #define MAX_BUF_PER_PAGE (PAGE_CACHE_SIZE / 512)
 #define NR_RESERVED (10*MAX_BUF_PER_PAGE)
@@ -1160,6 +1164,10 @@ void __brelse(struct buffer_head * buf)
 {
 	if (atomic_read(&buf->b_count)) {
 		put_bh(buf);
+#ifdef CONFIG_IO_VMS
+		 if (atomic_read(&buf->b_count)==0)
+		   kfree(buf);
+#endif
 		return;
 	}
 	printk(KERN_ERR "VFS: brelse: Trying to free free buffer\n");
@@ -1183,6 +1191,7 @@ void __bforget(struct buffer_head * buf)
  *	Reads a specified block, and returns buffer head that
  *	contains it. It returns NULL if the block was unreadable.
  */
+#ifndef CONFIG_IO_VMS
 struct buffer_head * bread(kdev_t dev, int block, int size)
 {
 	struct buffer_head * bh;
@@ -1198,6 +1207,30 @@ struct buffer_head * bread(kdev_t dev, int block, int size)
 	brelse(bh);
 	return NULL;
 }
+#else
+struct buffer_head * bread(kdev_t dev, int block, int size)
+{
+	 struct buffer_head * bh;
+	 long long iosb;
+	 int sts;
+
+	 bh = kmalloc (sizeof(struct buffer_head), GFP_KERNEL);
+	 init_buffer(bh, NULL, NULL);
+	 init_waitqueue_head(&bh->b_wait);
+	 get_bh(bh);
+
+	 bh -> b_data = kmalloc(size, GFP_KERNEL);
+	 bh -> b_size = size;
+
+	 //printk(KERN_INFO "qiow2 %x,%x,%x,%x | ",dev,dev2chan(dev),size,block);
+	 //printk(KERN_INFO "q2 %x,%x|",dev,block);
+
+	 sts = exe_qiow(0,dev2chan(dev),IO$_READPBLK,&iosb,0,0,
+			bh -> b_data,size,block,MINOR(dev)&31,0,0);
+
+	 return bh;
+}
+#endif
 
 /*
  * Note: the caller should wake up the buffer_wait list if needed.
@@ -1756,6 +1789,7 @@ static int __block_commit_write(struct inode *inode, struct page *page,
  * mark_buffer_uptodate() functions propagate buffer state into the
  * page struct once IO has completed.
  */
+#ifndef CONFIG_IO_VMS
 int block_read_full_page(struct page *page, get_block_t *get_block)
 {
 	struct inode *inode = page->mapping->host;
@@ -1826,6 +1860,124 @@ int block_read_full_page(struct page *page, get_block_t *get_block)
 
 	return 0;
 }
+#else
+int block_read_full_page(struct page *page, get_block_t *get_block)
+{
+	 struct inode *inode = page->mapping->host;
+	 unsigned long iblock, lblock;
+	 struct buffer_head *bh, *head, *arr[MAX_BUF_PER_PAGE];
+	 unsigned int blocksize, blocks;
+	 int nr, i;
+	 int sts;
+	 unsigned long long iosb;
+	 int turns;
+
+	 //	printk("bl r f p\n");
+
+	 blocksize = 1 << inode->i_blkbits;
+
+	 blocks = PAGE_CACHE_SIZE >> inode->i_blkbits;
+	 iblock = page->index << (PAGE_CACHE_SHIFT - inode->i_blkbits);
+	 lblock = (inode->i_size+blocksize-1) >> inode->i_blkbits;
+
+	 nr = 0;
+	 i = 0;
+	 turns = 0;
+
+	 do {
+	   bh = kmalloc (sizeof(struct buffer_head), GFP_KERNEL);
+	   bzero(bh, sizeof(struct buffer_head));
+	   init_buffer(bh, NULL, NULL);
+	   init_waitqueue_head(&bh->b_wait);
+	   get_bh(bh);
+
+	   if (buffer_uptodate(bh))
+	     continue;
+
+		 if (!buffer_mapped(bh)) {
+			 if (iblock < lblock) {
+			   if (get_block(inode, iblock, bh, 0)) {
+			     brelse(bh);
+					 continue;
+			   }
+			 }
+			 if (!buffer_mapped(bh)) {
+				 memset(kmap(page) + i*blocksize, 0, blocksize);
+				 flush_dcache_page(page);
+				 kunmap(page);
+				 set_bit(BH_Uptodate, &bh->b_state);
+				 __brelse(bh);
+				 continue;
+			 }
+			 /* get_block() might have updated the buffer synchronously */
+			 if (buffer_uptodate(bh)) {
+			   __brelse(bh);
+				continue;
+			 }
+		}
+
+		bh -> b_data = page_address(page) + i*blocksize;
+		bh -> b_size = blocksize;
+
+		arr[nr] = bh;
+		nr++;
+		//		printk("bl r f p 2 %x\n",i);
+
+	} while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
+
+	//printk("bl r f p 3\n");
+
+	if (!nr) {
+		/*
+		 * all buffers are uptodate - we can set the page
+		 * uptodate as well.
+		 */
+		SetPageUptodate(page);
+		UnlockPage(page);
+		return 0;
+	}
+
+	//printk("bl r f p 4\n");
+
+	/* Stage two: lock the buffers */
+	for (i = 0; i < nr; i++) {
+		struct buffer_head * bh = arr[i];
+		//printk("bl r f p 4 %x\n",i);
+		lock_buffer(bh);
+		set_buffer_async_io(bh);
+	}
+
+	//printk("bl r f p 5\n");
+
+	for (i = 0; i < nr; i++) {
+	  //printk(KERN_INFO "qiow %x,%x,%x,%x |",inode->i_dev,dev2chan(inode->i_dev),blocksize,arr[i]->b_blocknr);
+
+	  sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
+			 arr[i]->b_data,blocksize, arr[i]->b_blocknr,MINOR(inode->i_dev)&31,0,0);
+	  //printk(KERN_INFO "qiow %x %x\n",arr[i]->b_data[0],arr[i]->b_data[1]);
+	}
+
+#if 0
+	    printk(KERN_INFO "%x \n",arr[0]->b_data[0]);
+	    printk(KERN_INFO "%x \n",arr[0]->b_data[1]);
+	    printk(KERN_INFO "%x \n",arr[0]->b_data[1024]);
+	    printk(KERN_INFO "%x \n",arr[0]->b_data[1025]);
+#endif
+	if (0) {
+	  int i;
+	  for (i=0; i<10; i++)
+	    printk(KERN_INFO "%x ",arr[0]->b_data[i]);
+	  for (i=512; i<522; i++)
+	    printk(KERN_INFO "%x ",arr[0]->b_data[i]);
+	  printk(KERN_INFO "\n");
+	}
+
+	SetPageUptodate(page);
+	UnlockPage(page);
+
+	return 0;
+}
+#endif
 
 /* utility function for filesystems that need to do work on expanding
  * truncates.  Uses prepare/commit_write to allow the filesystem to

@@ -171,6 +171,7 @@ tristate '/dev/cpu/*/msr - Model-specific register support' CONFIG_X86_MSR
 tristate '/dev/cpu/*/cpuid - CPU information support' CONFIG_X86_CPUID
 
 bool 'VMS Memory Management' CONFIG_MM_VMS
+bool 'VMS I/O' CONFIG_IO_VMS
 
 choice 'High Memory Support' \
 	"off    CONFIG_NOHIGHMEM \
@@ -292,6 +293,13 @@ fi
 
 endmenu
 
+if [ "$CONFIG_IO_VMS" != "n" ]; then
+define_bool CONFIG_IDE y
+define_bool CONFIG_BLK_DEV_IDE y
+define_bool CONFIG_BLK_DEV_IDEDISK y
+fi
+
+if [ "$CONFIG_IO_VMS" != "y" ]; then
 source drivers/mtd/Config.in
 
 source drivers/parport/Config.in
@@ -301,11 +309,13 @@ source drivers/pnp/Config.in
 source drivers/block/Config.in
 
 source drivers/md/Config.in
+fi
 
 if [ "$CONFIG_NET" = "y" ]; then
    source net/Config.in
 fi
 
+if [ "$CONFIG_IO_VMS" != "y" ]; then
 source drivers/telephony/Config.in
 
 mainmenu_option next_comment
@@ -378,11 +388,14 @@ endmenu
 # input before char - char/joystick depends on it. As does USB.
 #
 source drivers/input/Config.in
+fi
 source drivers/char/Config.in
 
+if [ "$CONFIG_IO_VMS" != "y" ]; then
 #source drivers/misc/Config.in
 
 source drivers/media/Config.in
+fi
 
 source fs/Config.in
 
@@ -398,6 +411,7 @@ if [ "$CONFIG_VT" = "y" ]; then
    endmenu
 fi
 
+if [ "$CONFIG_IO_VMS" != "y" ]; then
 mainmenu_option next_comment
 comment 'Sound'
 
@@ -411,6 +425,7 @@ source drivers/usb/Config.in
 
 if [ "$CONFIG_EXPERIMENTAL" = "y" ]; then
    source net/bluetooth/Config.in
+fi
 fi
 
 mainmenu_option next_comment

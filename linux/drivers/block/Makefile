@@ -14,9 +14,11 @@ export-objs	:= ll_rw_blk.o blkpg.o loop.o DAC960.o genhd.o
 
 obj-y	:= ll_rw_blk.o blkpg.o genhd.o elevator.o
 
+ifneq ($(ARCH),um)
+obj-$(CONFIG_IO_VMS) 		+= oz_dev_floppy_486.o
+endif
 obj-$(CONFIG_MAC_FLOPPY)	+= swim3.o
 obj-$(CONFIG_BLK_DEV_FD)	+= floppy.o
-obj-$(CONFIG_BLK_DEV_FD_VMS)	+= pvdriver.o
 obj-$(CONFIG_AMIGA_FLOPPY)	+= amiflop.o
 obj-$(CONFIG_ATARI_FLOPPY)	+= ataflop.o
 obj-$(CONFIG_BLK_DEV_SWIM_IOP)	+= swim_iop.o
