@@ -37,6 +37,6 @@
 #include "dcl.h"
 
 int
-analyse(unsigned char *command_line, dcl$command *commands, dcl$env *env)
+parsing(unsigned char *command_line, dcl$command *commands, dcl$env *env)
 {
 }

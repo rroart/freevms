@@ -42,6 +42,8 @@ main(int argc, char *argv[])
 	dcl$command		*commands;
 	dcl$env			env;
 
+	unsigned char	*command_line;
+
 	/*
 	 * dcl$env struct initialization
 	 */
@@ -70,7 +72,11 @@ main(int argc, char *argv[])
 
 	while(env.end_flag == 0)
 	{
-		read_command(&env);
+		command_line = read_command(&env);
+
+		if (parsing() != 0)
+		{
+		}
 	}
 
 	/*

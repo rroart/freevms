@@ -28,12 +28,12 @@
 VERSION_DCL=0.00
 
 SRCC=\
-	analyse.c \
 	builtins_d.c \
 	builtins_l.c \
 	builtins_s.c \
 	dcl.c \
 	init.c \
+	parsing.c \
 	readcommand.c
 
 SRCH=\
