@@ -653,6 +653,16 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     fib->fib$w_file_hdrseq_incr=f->f_pos;//dir.d_off+*reslen;
     fib->fib$w_dir_hdrseq_incr=*reslen;
 
+    fib->fib$w_fid_num=0;
+    if (dir.d_ino!=2) {
+      *(unsigned long*)(&fib->fib$w_fid_seq)=dir.d_ino;
+    } else {
+      fib->fib$w_fid_num=4;
+      fib->fib$w_fid_seq=4;
+      fib->fcb$w_fid_rvn=0;
+      fib->fcb$w_fid_nmx=0;
+    }
+
     if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
       wildcard=1;
 
