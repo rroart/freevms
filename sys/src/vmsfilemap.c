@@ -249,7 +249,10 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 
 void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_t * desc, read_actor_t actor)
 {
-  struct inode * inode = filp->fcb$l_primfcb;
+	struct _fcb * fcb = filp;
+	struct inode * inode=0;
+	if (fcb->fcb$l_fill_5)
+	  inode = filp->fcb$l_primfcb;
 	unsigned long index, offset;
 	struct page *cached_page;
 	int error;
@@ -261,15 +264,20 @@ void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_
 	for (;;) {
 		struct page *page;
 		unsigned long end_index, nr, ret;
-		struct _fcb * fcb;
 
+		if (fcb->fcb$l_fill_5)
 		end_index = inode->i_size >> PAGE_CACHE_SHIFT;
-			
+		else
+		end_index = fcb->fcb$l_efblk + 1;  
+
 		if (index > end_index)
 			break;
 		nr = PAGE_CACHE_SIZE;
 		if (index == end_index) {
+			if (fcb->fcb$l_fill_5)
 			nr = inode->i_size & ~PAGE_CACHE_MASK;
+			else
+			nr = ((fcb->fcb$l_efblk << 9) + 0 ) & ~PAGE_CACHE_MASK;
 			if (nr <= offset)
 				break;
 		}
@@ -304,8 +312,12 @@ void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_
 		cached_page = NULL;
 
 		/* ... and start the actual read. The read will unlock the page. */
+		//printk("R %x %x R",page,index);
+		if (fcb->fcb$l_fill_5)
 		error = block_read_full_page3(filp, page, index);
-
+		else
+		error = ods2_block_read_full_page3(filp->fcb$l_wlfl, page, index);
+		  
 		/*
 		 * Mark the page accessed if we read the
 		 * beginning or we just did an lseek.
@@ -340,6 +352,7 @@ void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_
 	*ppos = ((loff_t) index << PAGE_CACHE_SHIFT) + offset;
 	if (cached_page)
 		page_cache_release(cached_page);
+	if (inode)
 	UPDATE_ATIME(inode);
 }
 

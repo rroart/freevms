@@ -9,6 +9,7 @@
 #include <linux/vmalloc.h>
 
 #include<dyndef.h>
+#include<fcbdef.h>
 #include<ipldef.h>
 #include<irpdef.h>
 #include<mpwdef.h>
@@ -123,7 +124,10 @@ void mmg$purgempl(unsigned long command) {
   extern int myswapfile;
   struct _pfl * pfl = myswapfile;
 
+  if (pfl->pfl$l_window->wcb$l_fcb->fcb$l_fill_5)
   block_write_full_page3(pfl->pfl$l_window->wcb$l_fcb, pfn, pfl_page);
+  else
+  ods2_block_write_full_page3(pfl->pfl$l_window, pfn, pfl_page);
 #if 0
   pfn->virtual=old_va;
 #endif

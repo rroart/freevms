@@ -284,7 +284,7 @@ int /*__init*/ scs_init(void) {
   char myname[]="scs$directory";
   char myinfo[]="directory srv";
 
-  struct file * file;
+  struct file * file=0;
   unsigned long long pos=0;
 
   bzero(cdtl,1024*sizeof(sizeof (struct _cdt)));
@@ -329,11 +329,16 @@ int /*__init*/ scs_init(void) {
 
   scs_std$listen(cf_listen,cf_myerr,"configure","hw conf",0); 
 
-  file = filp_open("/vms$common/sysexe/params.dat",O_RDONLY,0);
+  extern int mount_root_vfs;
+  if (mount_root_vfs)
+    file = filp_open("/vms$common/sysexe/params.dat",O_RDONLY,0);
   if (!IS_ERR(file)) {
     char * c, *b, *n;
     char buf[1024];
-    int size=generic_file_read(file,buf,1024,&pos);
+    file = rms_open_exec("[vms$common.sysexe]params.dat");
+    if (file==0)
+      goto out2;
+    int size=rms_generic_file_read(file,buf,1024,&pos);
     int i=0;
     b=buf;
     while (b<(buf+size)) {
@@ -359,6 +364,7 @@ int /*__init*/ scs_init(void) {
     filp_close(file,0);
   }
   mypb.pb$l_pdt=&mypdt;
+ out2: {}
 }
 
 //static int scs_sendmsg(struct _cdt *sock, struct msghdr *msg, int size,struct scm_cookie *scm)

@@ -26,6 +26,7 @@
 #include <system_data_cells.h>
 #include <linux/mm.h>
 #include <acbdef.h>
+#include <fcbdef.h>
 #include <ipl.h>
 #include <ipldef.h>
 #include <mmgdef.h>
@@ -169,7 +170,10 @@ struct pfast {
 
 void pagefaultast(struct pfast * p) {
   int res;
+  if (p->window->wcb$l_fcb->fcb$l_fill_5)
   block_read_full_page3(p->window->wcb$l_fcb, &mem_map[p->pfn], p->offset);
+  else
+  ods2_block_read_full_page3(p->window, &mem_map[p->pfn], p->offset);
   *(unsigned long *)(p->pte)&=0xfffff000;
   *(unsigned long *)(p->pte)|=p->pteentry;
 
@@ -1075,6 +1079,14 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 
 #ifdef CONFIG_VMS
 
+#if 0
+long myindex=0;
+long mystack[1024];
+long mystack2[1024];
+long mystack3[1024];
+long mystack4[1024];
+#endif
+
 int mmg$frewsle(struct _pcb * p, void * va) {
   struct _phd * phd = p->pcb$l_phd;
   struct _wsl * wsl = phd->phd$l_wslist;
@@ -1171,6 +1183,13 @@ int mmg$frewslx(struct _pcb * p, void * va,unsigned long * pte, unsigned long in
   //wsl[index].wsl$pq_va=0;
   mmg$delwslx(p,p->pcb$l_phd,index,pte);
 
+#if 0
+  mystack[myindex]=va;
+  mystack2[myindex]=pte;
+  mystack3[myindex]=*(long*)pte;
+  mystack4[myindex]=index|((mem_map[pfn].pfn$l_page_state&PFN$M_MODIFY)<<16);
+  myindex++;
+#endif
   mmg$relpfn(pfn);
 
   return SS$_NORMAL;
