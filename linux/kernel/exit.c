@@ -50,6 +50,7 @@ static void release_task(struct task_struct * p)
 #endif
 		atomic_dec(&p->user->processes);
 		free_uid(p->user);
+		nr_threads--;
 		REMOVE_LINKS(p);
 		release_thread(p);
 		current->cmin_flt += p->min_flt + p->cmin_flt;
