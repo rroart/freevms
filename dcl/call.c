@@ -37,17 +37,43 @@
 #include "dcl.h"
 
 int
-run_function(unsigned char *argument, dcl$command *self,
-		dcl$command *commands, dcl$env *env)
-/*
-RUN
-
-     Executes an image within the context of your process (see Image).
-
-     Creates a subprocess or a detached process to run an image and
-     deletes the process when the image completes execution (see
-     Process).
-*/
+call(unsigned char *argument, dcl$env *env)
 {
-	return(call(argument, env));
+	char			*argv[4];
+
+	int				status;
+
+	pid_t			pid;
+
+	argument = next_argument(argument);
+
+	if ((pid = fork()) < 0)
+	{
+		return(DCL$FAILURE);
+	}
+
+	if (pid == 0)
+	{
+		argv[0] = "sh";
+		argv[1] = "-c";
+		argv[2] = argument;
+		argv[3] = NULL;
+
+		execvp("/bin/sh", argv);
+
+		/*
+		 * Child process has returned an error.
+		 */
+
+		return(DCL$FAILURE);
+	}
+	else
+	{
+		if (waitpid(pid, &status, 0) == -1)
+		{
+			return(DCL$FAILURE);
+		}
+	}
+
+	return(DCL$SUCCESS);
 }

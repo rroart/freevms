@@ -34,6 +34,7 @@ SRCC=\
 	builtins_l.c \
 	builtins_r.c \
 	builtins_s.c \
+	call.c \
 	dcl.c \
 	init.c \
 	loop.c \
