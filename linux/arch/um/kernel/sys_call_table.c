@@ -328,7 +328,7 @@ extern syscall_handler_t exe$lckpag ;
 extern syscall_handler_t exe$ulwset ;
 extern syscall_handler_t exe$ulkpag ;
 extern syscall_handler_t exe$purgws ;
-extern syscall_handler_t exe$creprc           ;
+extern syscall_handler_t exe$creprc_wrap           ;
 extern syscall_handler_t exe$imgact_wrap           ;
 extern syscall_handler_t exe$imgfix           ;
 extern syscall_handler_t exe$imgsta_wrap           ;
@@ -693,7 +693,7 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$ulwset ] = exe$ulwset,
 	[ __NR_$ulkpag ] = exe$ulkpag,
 	[ __NR_$purgws ] = exe$purgws,
-	[ __NR_$creprc           ] = exe$creprc          ,
+	[ __NR_$creprc           ] = exe$creprc_wrap          ,
 	[ __NR_$imgact           ] = exe$imgact_wrap          ,
 	[ __NR_$imgfix           ] = exe$imgfix          ,
 	[ __NR_$imgsta           ] = exe$imgsta_wrap          ,

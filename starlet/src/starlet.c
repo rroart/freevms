@@ -412,6 +412,23 @@ int sys$ulkpag(struct _va_range *inadr, struct _va_range *retadr, unsigned int a
   return INLINE_SYSCALL($ulkpag,3,inadr,retadr,acmode);
 }
 
+int sys$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr, unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, unsigned short int mbxunt, unsigned int stsflg) {
+  struct struct_args s;
+s.s1=pidadr;
+s.s2=image;
+s.s3=input;
+s.s4=output;
+s.s5=error;
+s.s6=prvadr;
+s.s7=quota;
+s.s8=prcnam;
+s.s9=baspri;
+s.s10=uic;
+s.s11=mbxunt;
+s.s12=stsflg;
+ return INLINE_SYSCALL($creprc,1,&s);
+}
+
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
 int sys$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }
 int sys$create (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($create,3,fab,err,suc); }
