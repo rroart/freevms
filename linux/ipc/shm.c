@@ -633,6 +633,9 @@ asmlinkage long sys_shmat (int shmid, char *shmaddr, int shmflg, ulong *raddr)
 #ifndef CONFIG_MM_VMS
 		if (find_vma_intersection(current->mm, addr, addr + size))
 			goto invalid;
+#else
+		if (find_vma_intersection2(current->pcb$l_phd, addr, addr + size))
+			goto invalid;
 #endif
 		/*
 		 * If shm segment goes below stack, make sure there is some

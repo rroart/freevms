@@ -171,7 +171,7 @@ static int do_mlock(unsigned long start, size_t len, int on)
 	if (end == start)
 		return 0;
 	//vma = find_vma(current->mm, start);
-	vma = mmg$lookup_rde_va(start,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+	vma = find_vma(current->pcb$l_phd,start);
 	if (!vma || vma->rde$pq_start_va > start)
 		return -ENOMEM;
 

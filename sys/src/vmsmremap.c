@@ -135,8 +135,7 @@ static inline unsigned long move_vma(struct _rde * vma,
 
 	new_vma = NULL;
 	//next = find_vma_prev(mm, new_addr, &prev);
-	next = mmg$lookup_rde_va(new_addr,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
-	prev = next->rde$ps_va_list_blink;
+	next = find_vma_prev(current->pcb$l_phd,new_addr,&prev);
 	if (next) {
 		if (prev && (prev->rde$pq_start_va + prev->rde$q_region_size) == new_addr &&
 		    can_vma_merge(prev, vma->rde$l_flags) /*&& !vma->vm_file */&& !(vma->rde$l_flags & VM_SHARED)) {
@@ -164,7 +163,7 @@ static inline unsigned long move_vma(struct _rde * vma,
 		}
 	} else {
 	  //prev = find_vma(mm, new_addr-1);
-	  prev = mmg$lookup_rde_va(new_addr-1,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+	  prev = find_vma(current->pcb$l_phd,new_addr-1);
 		if (prev && (prev->rde$pq_start_va + prev->rde$q_region_size) == new_addr &&
 		    can_vma_merge(prev, vma->rde$l_flags) /*&& !vma->vm_file*/ && !(vma->rde$l_flags & VM_SHARED)) {
 			spin_lock(&mm->page_table_lock);
@@ -273,7 +272,7 @@ unsigned long do_mremap(unsigned long addr,
 	 */
 	ret = -EFAULT;
 	//vma = find_vma(current->mm, addr);
-	vma = mmg$lookup_rde_va(addr,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+	vma = find_vma(current->pcb$l_phd,addr);
 	if (!vma || vma->rde$pq_start_va > addr)
 		goto out;
 	/* We can't remap across vm area boundaries */

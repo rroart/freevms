@@ -19,6 +19,7 @@
 #include <asm/pgalloc.h>
 
 #include <ipldef.h>
+#include <phddef.h>
 #include <rdedef.h>
 #include <va_rangedef.h>
 
@@ -157,10 +158,8 @@ asmlinkage unsigned long sys_brk(unsigned long brk)
 		goto out;
 
 	/* Check against existing mmap mappings. */
-#if 0
-	if (find_vma_intersection(mm, oldbrk, newbrk+PAGE_SIZE))
+	if (find_vma_intersection2(current->pcb$l_phd, oldbrk, newbrk+PAGE_SIZE))
 		goto out;
-#endif
 
 	/* Check if we have enough memory.. */
 	if (!vm_enough_memory((newbrk-oldbrk) >> PAGE_SHIFT))
@@ -240,8 +239,6 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 	int error;
 	rb_node_t ** rb_link, * rb_parent;
 	struct _va_range inadr;
-	inadr.va_range$ps_start_va=addr;
-	inadr.va_range$ps_end_va=addr+len;
 
 	if (file && (!file->f_op || !file->f_op->mmap))
 		return -ENODEV;
@@ -260,24 +257,32 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 	if (mm->map_count > MAX_MAP_COUNT)
 		return -ENOMEM;
 
-#if 0
-	prot=prot; //translate later?
-	flags=flags; //translate later?
-
-	exe$crmpsc(&inadr,0,0,flags,0,0,(unsigned short int)file,0,pgoff,prot,0);
-
-	// if file 0
-	// exe$cretva(&inadr,0,0);
-
-#endif
-	return;
-
 	/* Obtain the address to map to. we verify (or select) it and ensure
 	 * that it represents a valid section of the address space.
 	 */
 	addr = get_unmapped_area(file, addr, len, pgoff, flags);
 	if (addr & ~PAGE_MASK)
 		return addr;
+
+munmap_back2:
+	//vma = find_vma_prepare(mm, addr, &prev, &rb_link, &rb_parent);
+	vma = find_vma_prev(current->pcb$l_phd, addr, &prev);
+	if (vma && vma->rde$pq_start_va < addr + len) {
+		if (do_munmap(mm, addr, len))
+			return -ENOMEM;
+		goto munmap_back2;
+	}
+
+	inadr.va_range$ps_start_va=addr;
+	inadr.va_range$ps_end_va=addr+len;
+	prot=prot; //translate later?
+	flags=flags; //translate later?
+
+	if (file)
+	  exe$crmpsc(&inadr,0,0,flags,0,0,/*(unsigned short int)*/file,0,pgoff,prot,0);
+	else
+	  exe$cretva(&inadr,0,0);
+	return addr;
 
 	/* Do simple checking here so the lower-level routines won't have
 	 * to. we assume access permissions have been handled by the open
@@ -337,6 +342,7 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 	error = -ENOMEM;
 munmap_back:
 	//vma = find_vma_prepare(mm, addr, &prev, &rb_link, &rb_parent);
+	vma = find_vma(current->pcb$l_phd, addr);
 	if (vma && vma->rde$pq_start_va < addr + len) {
 		if (do_munmap(mm, addr, len))
 			return -ENOMEM;
@@ -457,14 +463,14 @@ static inline unsigned long arch_get_unmapped_area(struct file *filp, unsigned l
 	if (addr) {
 		addr = PAGE_ALIGN(addr);
 		//vma = find_vma(current->mm, addr);
-		vma = mmg$lookup_rde_va(addr,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+		vma = find_vma(current->pcb$l_phd,addr);
 		if (TASK_SIZE - len >= addr &&
 		    (!vma || addr + len <= vma->rde$pq_start_va))
 			return addr;
 	}
 	addr = PAGE_ALIGN(TASK_UNMAPPED_BASE);
 
-	for (vma = mmg$lookup_rde_va(addr,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL); ; vma = vma->rde$ps_va_list_flink) {
+	for (vma = find_vma(current->pcb$l_phd,addr); ; vma = vma->rde$ps_va_list_flink) {
 		/* At this point:  (!vma || addr < (vma->rde$pq_start_va + vma->rde$q_region_size)). */
 		if (TASK_SIZE - len < addr)
 			return -ENOMEM;
@@ -491,6 +497,65 @@ unsigned long get_unmapped_area(struct file *file, unsigned long addr, unsigned 
 		return file->f_op->get_unmapped_area(file, addr, len, pgoff, flags);
 
 	return arch_get_unmapped_area(file, addr, len, pgoff, flags);
+}
+
+struct vm_area_struct * find_vma(struct mm_struct * mm, unsigned long addr) {
+  struct _phd * phd=mm;
+  struct _rde * head=&phd->phd$ps_p0_va_list_flink;
+  struct _rde * tmp=head->rde$ps_va_list_flink;
+  struct _rde * prev=head;
+  while (tmp!=head) {
+    if (addr<(tmp->rde$ps_start_va+(unsigned long)tmp->rde$q_region_size)) 
+      return tmp;
+    prev=tmp;
+    tmp=tmp->rde$ps_va_list_flink;
+  }
+  return 0;
+}
+
+struct vm_area_struct * find_vma_prev(struct mm_struct * mm, unsigned long addr, struct vm_area_struct **prev) {
+  struct _phd * phd=mm;
+  struct _rde * head=&phd->phd$ps_p0_va_list_flink;
+  struct _rde * tmp=head->rde$ps_va_list_flink;
+  *prev=0;
+  while (tmp!=head) {
+    if (addr<(tmp->rde$ps_start_va+(unsigned long)tmp->rde$q_region_size)) 
+      return tmp;
+    *prev=tmp;
+    tmp=tmp->rde$ps_va_list_flink;
+  }
+  return 0;
+}
+
+struct vm_area_struct * find_extend_vma(struct mm_struct * mm, unsigned long addr)
+{
+	struct _rde * vma;
+	unsigned long start;
+
+	addr &= PAGE_MASK;
+	vma = find_vma(current->pcb$l_phd,addr);
+	if (!vma)
+		return NULL;
+	if (vma->rde$ps_start_va <= addr)
+		return vma;
+	if (!(vma->rde$l_flags & VM_GROWSDOWN))
+		return NULL;
+	start = vma->rde$ps_start_va;
+	if (expand_stack(vma, addr))
+		return NULL;
+	if (vma->rde$l_flags & VM_LOCKED) {
+		make_pages_present(addr, start);
+	}
+	return vma;
+}
+
+struct vm_area_struct * find_vma_intersection2(struct mm_struct * mm, unsigned long start_addr, unsigned long end_addr)
+{
+  struct _rde * vma = find_vma(mm,start_addr);
+
+  if (vma && end_addr <= vma->rde$ps_start_va)
+    vma = NULL;
+  return vma;
 }
 
 /* Normal function to fix up a mapping
@@ -537,7 +602,7 @@ static struct _rde * unmap_fixup(struct mm_struct *mm,
 		if (area->vm_file)
 			fput(area->vm_file);
 #endif
-		kmem_cache_free(vm_area_cachep, area);
+		//kmem_cache_free(vm_area_cachep, area); //not yet
 		return extra;
 	}
 
@@ -586,9 +651,11 @@ static struct _rde * unmap_fixup(struct mm_struct *mm,
 		lock_vma_mappings(area);
 		spin_lock(&mm->page_table_lock);
 		//__insert_vm_struct(mm, mpnt);
+		insrde(mpnt,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	}
 
 	//__insert_vm_struct(mm, area);
+	insrde(area,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	spin_unlock(&mm->page_table_lock);
 	unlock_vma_mappings(area);
 	return extra;
@@ -673,8 +740,7 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
 	 * on the list.  If nothing is put on, nothing is affected.
 	 */
 	//mpnt = find_vma_prev(mm, addr, &prev);
-	mpnt = mmg$lookup_rde_va(addr,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
-	prev = mpnt->rde$ps_va_list_blink;
+	mpnt = find_vma_prev(current->pcb$l_phd,addr,&prev);
 	if (!mpnt)
 		return 0;
 	/* we have  addr < (mpnt->rde$pq_start_va + mpnt->rde$q_region_size)  */
@@ -695,11 +761,12 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
 	if (!extra)
 		return -ENOMEM;
 
-	npp = (prev ? &prev->rde$ps_va_list_flink : &mm->mmap);
+	npp = (prev ? &prev->rde$ps_va_list_flink : &current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	free = NULL;
 	spin_lock(&mm->page_table_lock);
 	for ( ; mpnt && mpnt->rde$pq_start_va < addr+len; mpnt = *npp) {
-		*npp = mpnt->rde$ps_va_list_flink;
+	        //*npp = mpnt->rde$ps_va_list_flink;
+		remque(mpnt,0);
 		mpnt->rde$ps_va_list_flink = free;
 		free = mpnt;
 		//rb_erase(&mpnt->vm_rb, &mm->mm_rb);
@@ -743,11 +810,13 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
 		if (file)
 			atomic_inc(&file->f_dentry->d_inode->i_writecount);
 	}
-	validate_mm(mm);
+	//validate_mm(mm);
 
 	/* Release the extra vma struct if it wasn't used */
+#if 0 // not yet
 	if (extra)
 		kmem_cache_free(vm_area_cachep, extra);
+#endif
 
 	free_pgtables(mm, prev, addr, addr+len);
 
@@ -796,6 +865,7 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
 	 */
  munmap_back:
 	//vma = find_vma_prepare(mm, addr, &prev, &rb_link, &rb_parent);
+	vma = find_vma(current->pcb$l_phd, addr);
 	if (vma && vma->rde$pq_start_va < addr + len) {
 		if (do_munmap(mm, addr, len))
 			return -ENOMEM;
@@ -889,7 +959,7 @@ void exit_mmap(struct mm_struct * mm)
 		if (mpnt->vm_file)
 			fput(mpnt->vm_file);
 #endif
-		kmem_cache_free(vm_area_cachep, mpnt);
+		//kmem_cache_free(vm_area_cachep, mpnt);// not yet
 		mpnt = next;
 	}
 	flush_tlb_mm(mm);

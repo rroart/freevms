@@ -295,8 +295,8 @@ asmlinkage long sys_mprotect(unsigned long start, size_t len, unsigned long prot
 
 	//vma = find_vma_prev(current->mm, start, &prev);
 	//vma = mmg$search_rde_va(start, &current->pcb$l_phd->phd$ps_p0_va_list_flink, &prev, &next);
-	vma = mmg$lookup_rde_va(start,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
-	prev = vma->rde$ps_va_list_blink;
+	vma = find_vma_prev(current->pcb$l_phd,start,&prev);
+	//prev = vma->rde$ps_va_list_blink;
 	error = -EFAULT;
 	if (!vma || vma->rde$pq_start_va > start)
 		goto out;

@@ -47,6 +47,7 @@
 #endif
 
 #include<phddef.h>
+#include<rdedef.h>
 
 int core_uses_pid;
 
@@ -296,7 +297,11 @@ out:
 int setup_arg_pages(struct linux_binprm *bprm)
 {
 	unsigned long stack_base;
+#ifndef CONFIG_MM_VMS
 	struct vm_area_struct *mpnt;
+#else
+	struct _rde *mpnt;
+#endif
 	int i;
 
 	stack_base = STACK_TOP - MAX_ARG_PAGES*PAGE_SIZE;
@@ -312,6 +317,7 @@ int setup_arg_pages(struct linux_binprm *bprm)
 	
 	down_write(&current->mm->mmap_sem);
 	{
+#ifndef CONFIG_MM_VMS
 		mpnt->vm_mm = current->mm;
 		mpnt->vm_start = PAGE_MASK & (unsigned long) bprm->p;
 		mpnt->vm_end = STACK_TOP;
@@ -321,12 +327,15 @@ int setup_arg_pages(struct linux_binprm *bprm)
 		mpnt->vm_pgoff = 0;
 		mpnt->vm_file = NULL;
 		mpnt->vm_private_data = (void *) 0;
-#ifndef CONFIG_MM_VMS
 		insert_vm_struct(current->mm, mpnt);
-#else
-		insque(mpnt,current->pcb$l_phd->phd$ps_p0_va_list_flink);
-#endif
 		current->mm->total_vm = (mpnt->vm_end - mpnt->vm_start) >> PAGE_SHIFT;
+#else
+		mpnt->rde$pq_start_va = PAGE_MASK & (unsigned long) bprm->p;
+		mpnt->rde$q_region_size = STACK_TOP - (unsigned long) mpnt->rde$pq_start_va;
+		mpnt->rde$r_regprot.regprt$l_region_prot = 0;//PAGE_COPY;
+		mpnt->rde$l_flags = VM_STACK_FLAGS;
+		insrde(mpnt,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
+#endif
 	} 
 
 	for (i = 0 ; i < MAX_ARG_PAGES ; i++) {
@@ -820,8 +829,10 @@ int search_binary_handler(struct linux_binprm *bprm,struct pt_regs *regs)
 			if (retval >= 0) {
 				put_binfmt(fmt);
 				allow_write_access(bprm->file);
+#ifndef CONFIG_MM_VMS
 				if (bprm->file)
 					fput(bprm->file);
+#endif
 				bprm->file = NULL;
 				current->did_exec = 1;
 				return retval;

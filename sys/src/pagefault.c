@@ -23,11 +23,14 @@
 #include<linux/sched.h>
 #include <system_data_cells.h>
 #include <linux/mm.h>
+#include <acbdef.h>
+#include <ipl.h>
 #include <ipldef.h>
 #include <mmgdef.h>
 #include <pfndef.h>
 #include <phddef.h>
 #include <rdedef.h>
+#include <secdef.h>
 #include <ssdef.h>
 #include <wsldef.h>
 #include <va_rangedef.h>
@@ -159,7 +162,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	down_read(&mm->mmap_sem);
 
 	//	vma = find_vma(mm, address);
-	vma = mmg$search_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+	vma = mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	if (!vma)
 		goto bad_area;
 	if (vma->vm_start <= address)
@@ -378,6 +381,23 @@ vmalloc_fault:
 
 #else 
 
+struct pfast {
+  struct file * file;
+  unsigned long offset;
+  unsigned long address;
+};
+
+void pagefaultast(struct pfast * p) {
+  mm_segment_t fs;
+  int res;
+  fs = get_fs();
+  set_fs(KERNEL_DS);
+  generic_file_llseek(p->file,p->offset<<12,0);
+  p->file->f_op->read(p->file, p->address, 4096, &p->file->f_pos);
+  kfree(p);
+  set_fs(fs);
+}
+
 unsigned long segv(unsigned long address, unsigned long ip, int is_write, 
 		   int is_user)
 {
@@ -390,16 +410,22 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	pte_t *pte;
 	unsigned long page;
 
+	//check if ipl>2 bugcheck
+
+	if (intr_blocked(IPL$_MMG))
+	  return;
+
+	regtrap(REG_INTR,IPL$_MMG);
+
+	setipl(IPL$_MMG);
+	//spin_lock(&SPIN_SCHED);
+
 	//some linux stuff
 	if((address >= start_vm) && (address < end_vm)){
 		flush_tlb_kernel_vm();
 		return(0);
 	}
 	if(mm == NULL) panic("Segfault with no mm");
-
-	//check if ipl>2 bugcheck
-	setipl(IPL$_MMG);
-	spin_lock(&SPIN_MMG);
 
 	if (address&0x80000000) {
 	  //check if another process phd
@@ -431,13 +457,61 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 
 	if ((*(unsigned long *)pte)&_PAGE_TYP1) { // page or image file
 	  if ((*(unsigned long *)pte)&_PAGE_TYP0) { // image file
+	    unsigned long index=(*(unsigned long *)pte)>>12;
+	    struct _secdef *pstl=current->pcb$l_phd->phd$l_pst_base_offset;
+	    struct _secdef *sec=&pstl[index];
+	    struct file * file=sec->sec$l_ccb;
+	    unsigned long vbn=sec->sec$l_vbn;
+	    struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+	    unsigned long offset;// in PAGE_SIZE units
+	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>12)+vbn;
+	    //page_cache_read(file, offset);
+	    //file->f_dentry->d_inode->i_mapping->a_ops->readpage(file, page);
+
+	    {
+	      signed long page = mmg$allocpfn();
+	      unsigned long address2 = address & PAGE_MASK;
+	      mem_map[page].virtual=__va(page*PAGE_SIZE);
+	      *(unsigned long *)pte=(__va(page*PAGE_SIZE));
+	      //flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
+	      map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
+	      *(unsigned long *)pte|=1;
+	    }
 	    
+	    {
+	      struct _acb * a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
+	      struct pfast * pf=kmalloc(sizeof(struct pfast),GFP_KERNEL);
+	      pf->file=file;
+	      pf->address=address&0xfffff000;
+	      pf->offset=offset;
+	      bzero(a,sizeof(struct _acb));
+	      a->acb$l_ast=pagefaultast;
+	      a->acb$l_astprm=pf;
+	      sch$qast(current->pid,0,a);
+	    }
+	    return;
 	  } else { // page file
 	  }
 	}
 
 	if (!((*(unsigned long *)pte)&_PAGE_TYP1)) { //zero transition or global
-
+	  if (!((*(unsigned long *)pte)&_PAGE_TYP0)) {
+	    if ((*(unsigned long *)pte)&0xfffff000) {
+	    } else { // zero page demand?
+	      {
+		signed long page = mmg$allocpfn();
+		unsigned long address2 = address & PAGE_MASK;
+		mem_map[page].virtual=__va(page*PAGE_SIZE);
+		*(unsigned long *)pte=(__va(page*PAGE_SIZE));
+		//flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
+		map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
+		*(unsigned long *)pte|=1;
+	      }
+	      return;
+	    }
+	  } else {
+	  }
+	  
 
 	}
 
@@ -449,7 +523,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	si.si_code = SEGV_MAPERR;
 	down_read(&mm->mmap_sem);
 	//vma = find_vma(mm, address);
-	vma = mmg$search_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+	vma = mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	if(!vma) goto bad;
 	else if(vma->rde$pq_start_va <= address) goto good_area;
 //else if(!(vma->vm_flags & VM_GROWSDOWN)) goto bad;// -> DESCEND

@@ -696,8 +696,8 @@ int add_to_page_cache_unique(struct page * page,
  * This adds the requested page to the page cache if it isn't already there,
  * and schedules an I/O to read in its contents from disk.
  */
-static int FASTCALL(page_cache_read(struct file * file, unsigned long offset));
-static int page_cache_read(struct file * file, unsigned long offset)
+/*static*/ int FASTCALL(page_cache_read(struct file * file, unsigned long offset));
+/*static*/ int page_cache_read(struct file * file, unsigned long offset)
 {
 	struct address_space *mapping = file->f_dentry->d_inode->i_mapping;
 	struct page **hash = page_hash(mapping, offset);
@@ -2197,7 +2197,7 @@ asmlinkage long sys_msync(unsigned long start, size_t len, int flags)
 	 * just ignore them, but return -EFAULT at the end.
 	 */
 	//vma = find_vma(current->mm, start);
-	vma = mmg$lookup_rde_va(start,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+	vma = find_vma(current->pcb$l_phd,start);
 	unmapped_error = 0;
 	for (;;) {
 		/* Still start < end. */
@@ -2554,7 +2554,7 @@ asmlinkage long sys_madvise(unsigned long start, size_t len, int behavior)
 	 * ranges, just ignore them, but return -ENOMEM at the end.
 	 */
 	//vma = find_vma(current->mm, start);
-	vma = mmg$lookup_rde_va(start,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+	vma = find_vma(current->pcb$l_phd,start);
 	for (;;) {
 		/* Still start < end. */
 		error = -ENOMEM;
@@ -2710,7 +2710,7 @@ asmlinkage long sys_mincore(unsigned long start, size_t len,
 	 * ranges, just ignore them, but return -ENOMEM at the end.
 	 */
 	//vma = find_vma(current->mm, start);
-	vma = mmg$lookup_rde_va(start,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+	vma = find_vma(current->pcb$l_phd,start);
 	for (;;) {
 		/* Still start < end. */
 		error = -ENOMEM;

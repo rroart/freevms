@@ -713,7 +713,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	  struct _rde * rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
 	  bzero(rde,sizeof(struct _rde));
 	  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
-	  insque(rde,p->pcb$l_phd->phd$ps_p0_va_list_flink);
+	  //insque(rde,p->pcb$l_phd->phd$ps_p0_va_list_flink);
 	  rde->rde$ps_start_va=0x1000;
 	  rde->rde$l_region_size=0x1000;
 	  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
@@ -726,8 +726,8 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	  p->pcb$l_phd->phd$l_wslast=511;
 	  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
 	  bzero(p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
-	  p->pcb$l_phd->phd$l_pst_last=65535;
-	  p->pcb$l_phd->phd$l_pst_free=65535;
+	  p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
+	  p->pcb$l_phd->phd$l_pst_free=0;
 	}
 #endif
 

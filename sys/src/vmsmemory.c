@@ -63,7 +63,7 @@ unsigned long num_physpages;
 void * high_memory;
 struct page *highmem_start_page;
 
-struct vm_area_struct * find_vma(struct mm_struct * mm, unsigned long addr) {
+struct vm_area_struct * find_vma2(struct mm_struct * mm, unsigned long addr) {
   panic("findvma\n");
 }
 
@@ -479,8 +479,7 @@ int get_user_pages(struct task_struct *tsk, struct mm_struct *mm, unsigned long 
 	do {
 		struct _rde *	vma;
 
-		//		vma = find_extend_vma(mm, start);
-		vma = mmg$lookup_rde_va(start, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL); // might break something
+		vma = find_extend_vma(current->pcb$l_phd, start);
 
 		if ( !vma || (pages && vma->rde$l_flags & VM_IO) || !(flags & vma->rde$l_flags) )
 			return i ? : -EFAULT;
@@ -1474,7 +1473,7 @@ int make_pages_present(unsigned long addr, unsigned long end)
 	struct _rde * vma;
 
 	//	vma = find_vma(current->mm, addr);
-	vma = mmg$lookup_rde_va(addr,current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+	vma = find_vma(current->pcb$l_phd,addr);
 	write = (((struct _rde *) vma)->rde$l_flags & VM_WRITE) != 0;
 	if (addr >= end)
 		BUG();
