@@ -24,7 +24,10 @@ int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirecti
   struct _phd * phd;
   struct _wsl * wsl, *wsle;
   unsigned long pfn;
-  struct _mypte *pte = findpte(p,va);
+  struct mm_struct * mm = p->mm;
+  if (mm==0) 
+    mm = p->active_mm; // workaround for do_exit
+  struct _mypte *pte = findpte_new(mm,va);
   if (pte->pte$v_valid==0)
     return SS$_NORMAL;
 #ifdef __arch_um__
@@ -47,7 +50,7 @@ int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirecti
   if ((((unsigned long)wsle->wsl$pq_va)&WSL$M_PAGTYP)>=WSL$C_PPGTBL)
     return SS$_NORMAL;
 
-  mmg$frewslx(p, va, findpte(p,va), page->pfn$l_wslx_qw);
+  mmg$frewslx(p, va, findpte_new(mm, va), page->pfn$l_wslx_qw);
 
   return SS$_NORMAL;
 #endif
