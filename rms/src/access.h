@@ -28,17 +28,16 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **ret
 unsigned dismount(struct _vcb *vcb);
 unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],struct _vcb **vcb);
 
-unsigned accesserase(struct _vcb *vcb,struct _fiddef *fid);
+unsigned accesserase(struct _vcb *vcb,struct _fibdef *fib);
 unsigned deaccessfile(struct _fcb *fcb);
-unsigned accessfile(struct _vcb *vcb,struct _fiddef *fid,
-                    struct _fcb **fcb,unsigned wrtflg);
+unsigned accessfile(struct _vcb * vcb,struct dsc$descriptor * fibdsc,struct dsc$descriptor * filedsc,unsigned short *reslen,struct dsc$descriptor * resdsc,struct dsc$descriptor * atrp,struct _fcb **fcbadd, unsigned action, struct _irp * i);
 
 unsigned deaccesschunk(unsigned wrtvbn,int wrtblks,int reuse);
 unsigned accesschunk(struct _fcb *fcb,unsigned vbn,
-                     char **retbuff,unsigned *retblocks,unsigned wrtblks);
+                     char **retbuff,unsigned *retblocks,unsigned wrtblks, struct _irp * i);
 unsigned access_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);
 unsigned update_freecount(struct _vcb *vcbdev,unsigned *retcount);
-unsigned update_create(struct _vcb *vcb,struct _fiddef *did,char *filename,
+unsigned update_create(struct _vcb *vcb,struct _fibdef *fib,char *filename,
                        struct _fiddef *fid,struct _fcb **fcb);
 unsigned update_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);
 unsigned short checksum(vmsword *block);

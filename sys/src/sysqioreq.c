@@ -4,6 +4,7 @@
 // Author. Roar Thronæs.
 
 #include<linux/spinlock.h>
+#include<asm/unistd.h>
 
 #include<acbdef.h>
 #include<aqbdef.h>
@@ -25,6 +26,58 @@
 #include<linux/linkage.h>
 #include<linux/kernel.h>
 #include<asm/hw_irq.h>
+#include "../../starlet/src/sysdep.h"
+
+// temporary stuff with syscalls
+
+extern int kernel_errno;
+
+#ifdef __i386__
+int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6) {
+  struct struct_qio s;
+  s.efn=efn;
+  s.chan=chan;
+  s.func=func;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.p1=p1;
+  s.p2=p2;
+  s.p3=p3;
+  s.p4=p4;
+  s.p5=p5;
+  s.p6=p6;
+  //  return ({ unsigned int resultvar; asm volatile ( "bpushl .L__X'%k2, %k2\n\t" "bmovl .L__X'%k2, %k2\n\t" "movl %1, %%eax\n\t" "int $0x81\n\t" "bpopl .L__X'%k2, %k2\n\t" : "=a" (resultvar) : "i" (__NR_$qio) , "acdSD" (&s) : "memory", "cc"); if (resultvar >= 0xfffff001) { errno= (-resultvar); resultvar = 0xffffffff; } (int) resultvar; });
+  return INLINE_SYSCALL($qio,1,&s);
+}
+#endif
+
+#ifdef __arch_um__
+int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct
+	     _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
+  int sts;
+  struct struct_qio s;
+  s.efn=efn;
+  s.chan=chan;
+  s.func=func;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.p1=p1;
+  s.p2=p2;
+  s.p3=p3;
+  s.p4=p4;
+  s.p5=p5;
+  s.p6=p6;
+  //  return ({     unsigned int resultvar; asm volatile (  "bpushl .L__X'%k2, %k2\n\t"     "bmovl .L__X'%k2, %k2\n\t"      "movl %1, %%eax\n\t"    "int $0x80\n\t" "bpopl .L__X'%k2, %k2\n\t"      : "=a" (resultvar)      : "i" (__NR_$qio  ) , "acdSD" (  &s  )  : "memory", "cc");    if (resultvar >= 0xfffff001) {       errno= (-resultvar);    resultvar = 0xffffffff; }       (int) resultvar; }) ;
+  //  return INLINE_SYSCALL($qio,1,&s); // did not work?
+  pushpsl();
+  sts=exe$qio(&s);
+  myrei();
+  return sts;
+}
+
+#endif
 
 void exe$insertirp(void * u, struct _irp * i) {
   struct _irp *tmp=((struct _irp *)u)->irp$l_ioqfl;
@@ -88,7 +141,7 @@ asmlinkage int exe$qiow (struct struct_qio * q) {
 
   /* I think this is about it */
 
-  int status=exe$qio(q);
+  int status=sys$qio(q->efn,q->chan,q->func,q->iosb,q->astadr,q->astprm,q->p1,q->p2,q->p3,q->p4,q->p5,q->p6);
   if ((status&1)==0) return status;
   return exe$synch(q->efn,q->iosb);
 
@@ -109,6 +162,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   /*check fdt mask*/
   /*check func code*/
   /*check iosb*/
+  if (q->iosb) *((unsigned long long *)q->iosb)=0;
   setipl(IPL$_ASTDEL);
   /*check proc quota*/
   i=vmalloc(sizeof(struct _irp));
@@ -137,6 +191,10 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   d=i->irp$v_fmod;
   return ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[i->irp$v_fcode](i,p,i->irp$l_ucb,&ctl$gl_ccbbase[q->chan]); // a real beauty, isn't it :)
       //  }
+ earlyerror:
+  setipl(0);
+  sch$postef(current->pid,PRI$_NULL,q->efn);
+  return 0;		   
 }
 
 int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
@@ -147,7 +205,7 @@ int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
   insque(i,&a->aqb$l_acpqfl);
   if (!wasempty) return SS$_NORMAL;
   if (a->aqb$l_acppid==0) {
-    exe$qioqxqppkt(p,&i->irp$l_fqfl);
+    exe$qioqxqppkt(p,i);
     return SS$_NORMAL;
   }
   sch$wake(a->aqb$l_acppid);
@@ -168,12 +226,13 @@ int exe_std$qiodrvpkt (struct _irp * i, struct _ucb * u) {
 
 extern f11b$dispatch();
 
-void exe$qioqxqppkt (struct _pcb * p, struct _cdrp * c) {
-  struct _acb *a=c;
+void exe$qioqxqppkt (struct _pcb * p, struct _irp * i) {
+  struct _acb *a=i;
   //  struct _f11b * f=ctl$gl_f11bxqp;
 
   a->acb$l_ast=f11b$dispatch;
-  a->acb$l_astprm=c->cdrp$l_fqfl;
+  a->acb$l_astprm=i;
+  remque(i,0); // got to get rid of this somewhere, why not here?
   sch$qast(p->pid,PRI$_RESAVL,a);
 }
 

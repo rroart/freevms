@@ -10,22 +10,6 @@
         the contibution of the original author.
 */
 
-
-
-struct dir$rec_not {
-    vmsword dir$size;
-    vmsword dir$verlimit;
-    vmsbyte dir$flags;
-    vmsbyte dir$namecount;
-    char dir$name[1];
-};
-
-struct dir$ent_not {
-    vmsword dir$version;
-    struct _fiddef dir$fid;
-};
-
-
 unsigned direct(struct _vcb *vcb,struct dsc$descriptor *fibdsc,
                 struct dsc$descriptor *filedsc,unsigned short *reslen,
-                struct dsc$descriptor *resdsc,unsigned action);
+                struct dsc$descriptor *resdsc, struct _atrdef * atrp, unsigned action, struct _irp * i);

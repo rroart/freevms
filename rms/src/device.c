@@ -70,18 +70,24 @@ struct phyio_info {
 void *device_create(unsigned devsiz,void *keyval,unsigned *retsts)
 {
     char *devnam = (char *) keyval;
+    struct dsc$descriptor dsc;
     struct _ucb *dev = (struct _ucb *) vmalloc(sizeof(struct _ucb) + devsiz + 2);
+    int chan;
+    dsc.dsc$w_length=strlen(devnam);
+    dsc.dsc$a_pointer=devnam;
     if (dev == NULL) {
         *retsts = SS$_INSFMEM;
     } else {
         unsigned sts;
         struct phyio_info info;
-        sts = phyio_init(devsiz + 1,dev->ucb$l_ddb->ddb$t_name,&dev->ucb$l_vcb->vcb$l_aqb->aqb$l_acppid,&info);
+        sts = phyio_init(devsiz + 1,dev->ucb$l_ddb->ddb$t_name,&dev->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,&info);
         *retsts = sts;
         if (sts & 1) {
             dev->ucb$l_vcb = NULL;
             dev->ucb$b_state = info.status;
             dev->ucb$b_sectors = info.sectors;
+	    sts=exe$assign(&dsc,&chan,0,0,0);
+	    dev->ucb$ps_adp=chan; //wrong field and use, but....
 	    //            dev->sectorsize = info.sectorsize;
         } else {
             vfree(dev);

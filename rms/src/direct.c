@@ -29,8 +29,12 @@
 //#include "fibdef.h"
 
 #include <mytypes.h>
+#include <atrdef.h>
+#include <ccbdef.h>
 #include <fatdef.h>
 #include <fcbdef.h>
+#include <iodef.h>
+#include <irpdef.h>
 #include <ucbdef.h>
 #include <wcbdef.h>
 #include <aqbdef.h>
@@ -52,7 +56,7 @@
 #include <hm2def.h>
 #include <dirdef.h>
 #include <vmstime.h>
-
+#include "../../freevms/f11x/src/xqp.h"
 #include "cache.h"
 #include "access.h"
 #include "direct.h"
@@ -330,11 +334,11 @@ unsigned insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
             panic("I can't extend a directory yet!!\n");
         }
         fcb->fcb$l_highwater = 0;
-        sts = accesschunk(fcb,newblk,&newbuf,NULL,1);
+        sts = accesschunk(fcb,newblk,&newbuf,NULL,1,0);
         if (sts & 1) {
             while (newblk > curblk + 1) {
                 char *frombuf;
-                sts = accesschunk(fcb,newblk - 1,&frombuf,NULL,1);
+                sts = accesschunk(fcb,newblk - 1,&frombuf,NULL,1,0);
                 if ((sts & 1) == 0) break;
                 memcpy(newbuf,frombuf,BLOCKSIZE);;
                 sts = deaccesschunk(newblk,1,1);
@@ -454,7 +458,7 @@ unsigned delete_ent(struct _fcb * fcb,unsigned curblk,
         } else {
             while (curblk < eofblk) {
                 char *nxtbuffer;
-                sts = accesschunk(fcb,curblk + 1,&nxtbuffer,NULL,1);
+                sts = accesschunk(fcb,curblk + 1,&nxtbuffer,NULL,1,0);
                 if ((sts & 1) == 0) break;
                 memcpy(buffer,nxtbuffer,BLOCKSIZE);
                 sts = deaccesschunk(curblk++,1,1);
@@ -558,7 +562,7 @@ unsigned search_ent(struct _fcb * fcb,
             unsigned newblk;
             struct _dir *dr;
             direct_searches++;
-            sts = accesschunk(fcb,curblk,&buffer,NULL,action ? 1 : 0);
+            sts = accesschunk(fcb,curblk,&buffer,NULL,action ? 1 : 0,0);
             if ((sts & 1) == 0) return sts;
             dr = (struct _dir *) buffer;
             if (VMSWORD(dr->dir$w_size) > MAXREC) {
@@ -620,7 +624,7 @@ unsigned search_ent(struct _fcb * fcb,
             /* Access a directory block. Reset relative version if it starts
                with a record we haven't seen before... */
 
-	    sts = accesschunk(fcb,curblk,&buffer,NULL,action ? 1 : 0);
+	    sts = accesschunk(fcb,curblk,&buffer,NULL,action ? 1 : 0,0);
                 if ((sts & 1) == 0) return sts;
 
             dr = (struct _dir *) buffer;
@@ -774,13 +778,21 @@ unsigned search_ent(struct _fcb * fcb,
 
 unsigned direct(struct _vcb * vcb,struct dsc$descriptor * fibdsc,
                 struct dsc$descriptor * filedsc,unsigned short *reslen,
-                struct dsc$descriptor * resdsc,unsigned action)
+                struct dsc$descriptor * resdsc,struct _atrdef * atrp, unsigned action, struct _irp *i)
 {
     struct _fcb *fcb;
     struct _fh2 *head;
     unsigned sts,eofblk;
     struct _fibdef *fib = (struct _fibdef *) fibdsc->dsc$a_pointer;
-    sts = accessfile(vcb,(struct _fiddef *) & fib->fib$w_did_num,&fcb,action);
+    struct _fibdef dirfib;
+    struct dsc$descriptor dirdsc;
+    dirdsc.dsc$w_length=sizeof(struct _fibdef);
+    dirdsc.dsc$a_pointer=&dirfib;
+    memcpy(&dirfib,fib,sizeof(struct _fibdef));
+    dirfib.fib$w_fid_num=fib->fib$w_did_num;
+    dirfib.fib$w_fid_seq=fib->fib$w_did_seq;
+    sts = accessfile(vcb,&dirdsc,0,0,0,atrp, 0,action,i);
+    fcb=xqp->primary_fcb;
     if (sts & 1) {
       gethead(fcb,&head);
         if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
