@@ -2434,8 +2434,6 @@ struct _ddt ddt_du = {
   ddt$l_aux_routine: du_aux_routine
 };
 
-static struct _fdt du_fdt;
-
 extern int acp_std$readblk();
 extern int acp_std$writeblk();
 extern int scs_std$sendmsg();
@@ -2477,7 +2475,7 @@ int mscpcli(void) {
 }
 #endif
 
-void du_init(char *s) {
+void * du_init(char *s) {
   struct _ucb * u;
   struct _ddb * d;
   struct _crb * c;
@@ -2566,25 +2564,27 @@ void du_init(char *s) {
   qhead_init(&cddb->cddb$l_cdrpqfl);
 
   /* a lot of these? */
-  ini_fdt_act(&du_fdt,IO$_READLBLK,acp_std$readblk);
-  ini_fdt_act(&du_fdt,IO$_READPBLK,acp_std$readblk);
-  ini_fdt_act(&du_fdt,IO$_READVBLK,acp_std$readblk);
-  ini_fdt_act(&du_fdt,IO$_WRITELBLK,acp_std$writeblk,1);
-  ini_fdt_act(&du_fdt,IO$_WRITEPBLK,acp_std$writeblk,1);
-  ini_fdt_act(&du_fdt,IO$_WRITEVBLK,acp_std$writeblk,1);
-  ini_fdt_act(&du_fdt,IO$_ACCESS,acp_std$access,1);
-  ini_fdt_act(&du_fdt,IO$_CREATE,acp_std$access,1);
-  ini_fdt_act(&du_fdt,IO$_DEACCESS,acp_std$deaccess,1);
-  ini_fdt_act(&du_fdt,IO$_DELETE,acp_std$modify,1);
-  ini_fdt_act(&du_fdt,IO$_MODIFY,acp_std$modify,1);
-  ini_fdt_act(&du_fdt,IO$_ACPCONTROL,acp_std$modify,1);
-  ini_fdt_act(&du_fdt,IO$_MOUNT,acp_std$mount,1);
+  ini_fdt_act(&fdt_du,IO$_READLBLK,acp_std$readblk);
+  ini_fdt_act(&fdt_du,IO$_READPBLK,acp_std$readblk);
+  ini_fdt_act(&fdt_du,IO$_READVBLK,acp_std$readblk);
+  ini_fdt_act(&fdt_du,IO$_WRITELBLK,acp_std$writeblk,1);
+  ini_fdt_act(&fdt_du,IO$_WRITEPBLK,acp_std$writeblk,1);
+  ini_fdt_act(&fdt_du,IO$_WRITEVBLK,acp_std$writeblk,1);
+  ini_fdt_act(&fdt_du,IO$_ACCESS,acp_std$access,1);
+  ini_fdt_act(&fdt_du,IO$_CREATE,acp_std$access,1);
+  ini_fdt_act(&fdt_du,IO$_DEACCESS,acp_std$deaccess,1);
+  ini_fdt_act(&fdt_du,IO$_DELETE,acp_std$modify,1);
+  ini_fdt_act(&fdt_du,IO$_MODIFY,acp_std$modify,1);
+  ini_fdt_act(&fdt_du,IO$_ACPCONTROL,acp_std$modify,1);
+  ini_fdt_act(&fdt_du,IO$_MOUNT,acp_std$mount,1);
 
   mypb.pb$b_type=DYN$C_SCS_PB;
   mypb.pb$w_state=PB$C_CLOSED;
   mysb.sb$b_type=DYN$C_SCS_SB;
 
   scs$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drvr");
+
+  return u;
 }
 
 char dudriverstring[]="DUDRIVER";
