@@ -542,10 +542,10 @@ int fix_init_thread=1;
 
 static void rest_init(void)
 {
-  printk("before first kernel_thread\n");
+  printk("%%KERNEL-I-DEBUG, Before first kernel_thread\n");
 	kernel_thread(init, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	// { int j; for(j=0;j<1000000000;j++) ; } 
-  printk("after first kernel_thread\n");
+  printk("%%KERNEL-I-DEBUG, After first kernel_thread\n");
   fix_init_thread=0;
 	unlock_kernel();
 	current->need_resched = 1;
@@ -632,11 +632,11 @@ asmlinkage void __init start_kernel(void)
 	}
 #endif
 	mem_init();
-	printk("aft mem_init, before lnm\n");
+	printk("%%KERNEL-I-DEBUG, After mem_init, before lnm_init\n");
 	lnm_init();
-	printk("aft lnm_init\n");
+	printk("%%KERNEL-I-DEBUG, After lnm_init\n");
 	kmem_cache_sizes_init();
-	printk("aft kmem\n");
+	printk("%%KERNEL-I-DEBUG, After kmem_cache_size_init\n");
 	mempages = num_physpages;
 
 	fork_init(mempages);
@@ -772,11 +772,11 @@ static void __init do_basic_setup(void)
 
 	/* Networking initialization needs a process context */ 
 	sock_init();
-	printk("aft sockinit\n");
+	printk("%%KERNEL-I-DEBUG, After sock_init\n");
 	start_context_thread();
-	printk("aft contextthr\n");
+	printk("%%KERNEL-I-DEBUG, After start_context_thread\n");
 	do_initcalls();
-	printk("aft initcalls\n");
+	printk("%%KERNEL-I-DEBUG, After do_initcalls\n");
 
 #ifdef CONFIG_IRDA
 	irda_proto_init();
@@ -851,12 +851,12 @@ static int init(void * unused)
 {
 	lock_kernel();
 	do_basic_setup();
-	printk("after dobasic\n");
+	printk("%%KERNEL-I-DEBUG, After do_basic_setup\n");
 #ifdef CONFIG_VMS
         vms_mount();
 #endif
 	prepare_namespace();
-	printk("after prepnamspac\n");
+	printk("%%KERNEL-I-DEBUG, After prepare_namspace\n");
 
 	/*
 	 * Ok, we have completed the initial bootup, and
@@ -864,17 +864,17 @@ static int init(void * unused)
 	 * initmem segments and start the user-mode stuff..
 	 */
 	free_initmem();
-	printk("aft freini\n");
+	printk("%%KERNEL-I-DEBUG, After free_initmem\n");
 	unlock_kernel();
 	//	mydebug5=1;
 	//	mydebug6=1;
-	printk("aft unlker %x %x %x %x %x %x %x %x\n",current,current->pid,current->mm,current->active_mm,&init_task,init_task.pid,init_task.mm,init_task.active_mm);
+	printk("%%KERNEL-I-DEBUG, After unlock_kernel %x %x %x %x %x %x %x %x\n",current,current->pid,current->mm,current->active_mm,&init_task,init_task.pid,init_task.mm,init_task.active_mm);
 	if (open("/dev/console", O_RDWR, 0) < 0)
 		printk("Warning: unable to open an initial console.\n");
-	printk("here 1\n");
+	printk("%%KERNEL-I-DEBUG, Before dup\n");
 	(void) dup(0);
 	(void) dup(0);
-	printk("here 2\n");
+	printk("%%KERNEL-I-DEBUG, After dup\n");
 	
 	/*
 	 * We try each of these until one succeeds.
