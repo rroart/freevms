@@ -755,10 +755,10 @@ char * ext2_vms_to_unix(struct dsc$descriptor * d) {
 }
 
 void ext2_translate_fid (struct _vcb * vcb, struct _fiddef * fid) {
-  if (fid$w_num==4 && fid$w_seq==4 && fid$w_rvn==0) {
-    fid$w_num=vcb->vcb$l_fcbfl->fcb$w_fid_dirnum; // i_dev
-    fid$w_seq=0;
-    fid$w_rvn=2; // EXT2 root ino
+  if (fid->fid$w_num==4 && fid->fid$w_seq==4 && fid->fid$w_rvn==0) {
+    fid->fid$w_num=vcb->vcb$l_fcbfl->fcb$w_fid_dirnum; // i_dev
+    fid->fid$w_seq=0;
+    fid->fid$w_rvn=2; // EXT2 root ino
   }
 }
 
