@@ -61,10 +61,11 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     }
     //lsb->lsb$l_next_lsb=ni->ucb$l_ni_lsb;
     //ni->ucb$l_ni_lsb=lsb;
-  }
 
-  if (dev->open) {
-    dev->open(dev);
+    if (dev->open) {
+      dev->open(dev);
+    }
+
   }
 
   if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL;
