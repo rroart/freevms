@@ -3,38 +3,28 @@
 
 // Author. Roar Thronæs.
 
-#include"../../starlet/src/starlet.h"
-#include"../../starlet/src/vmsopt.h" 
-#include"../../librtl/src/descrip.h"
+#include<starlet.h>
+//#include"../../starlet/src/vmsopt.h" 
+#include<descrip.h>
 #include<stdio.h>
+#include<ssdef.h>
 
 /* Author: Roar Thronæs */
 
 /* Don't know anywhere else to put this */
 
-main(int argc, char**argv){
+set_process(int argc, char**argv){
   int pid=1;
-  char * newprcnam=0;
-  //sys$setpri(&pid,30,30,30,30,30);
-  signed int n;
-  while ((n=vmsopt_parse( argc, argv ) ) != -1) {
-    switch(n) {
-    case VMSOPT_NOARG:
-      printf("noarg\n");
-      break;
-    case VMSOPT_ARG_CO:
-    case VMSOPT_ARG_EQ:
-      printf("arg\n");
-      break;
-    case VMSOPT_ARG_PL:
-      newprcnam=vms_optstr;
-    default:
-      break;
-    }
+  struct dsc$descriptor d;
+  if (0==strncmp(argv[0],"/name",strlen(argv[0]))) {
+    d.dsc$w_length=strlen(argv[1]);
+    d.dsc$a_pointer=argv[1];
+    sys$setprn(&d);
+    return SS$_NORMAL;
   }
-  if (newprcnam) {
-    $DESCRIPTOR(newstr,newprcnam);
-    sys$setprn(&newstr);
-	       }
+  if (0==strncmp(argv[0],"/priority",strlen(argv[0]))) {
+    sys$setpri(0,0,atoi(argv[1]),0,0,0);
+    return SS$_NORMAL;
+  }
 } 
 
