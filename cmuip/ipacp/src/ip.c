@@ -85,7 +85,7 @@ Modification History:
 	Moved all of the ICMP code into ICMP.BLI.
 
 4.2  20-Nov-87, Edit by VAF
-	Change IP$S} to return zero on error (no route) and nonzero on
+	Change IP$SEND to return zero on error (no route) and nonzero on
 	success. Also, deallocate packets that can't be sent in this manner.
 	Use new $ACPWAKE macro instead of testing "sleeping" and doing $WAKE.
 	Flush a few unneeded externals. Log IP errors under (new) LOG$IPERR as
@@ -116,7 +116,7 @@ Modification History:
 
 3.6  12-Sep-86, Edit by VAF
 	Know about cloned devices in IP_ROUTE.
-	In IP$S}, don't override IP$SRC if it has been specified. It is
+	In IP$SEND, don't override IP$SRC if it has been specified. It is
 	necessary to allow the higher levels to specify the source IP address
 	in order to properly support multi-homing.
 
@@ -206,63 +206,66 @@ Modification History:
 
 //SBTTL "Module Definition"
 
+#if 0
 MODULE IP(IDENT="4.5c",LANGUAGE(BLISS32),
 	  ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 			  NONEXTERNAL=LONG_RELATIVE),
 	  LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
 	  OPTIMIZE,OPTLEVEL=3,ZIP)=
-{
-#include "SYS$LIBRARY:STARLET";	// VMS system definitions
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";		// BLISS transportablity package
-#include "CMUIP_SRC:[CENTRAL]NETCOMMON";	// CMU-OpenVMS/IP common decls
-#include "CMUIP_SRC:[central]NETCONFIG"; 	// Tranport devices interface
-#include "CMUIP_SRC:[CENTRAL]NETVMS";		// VMS specifics
-#include "CMUIP_SRC:[CENTRAL]NetTCPIP";		// IP definitions
-#include "STRUCTURE";		// TCB & Segment Structure definition
-#include "TCPMACROS";		// Local macros
-#include "SNMP";
+#endif
 
-extern
-    TIME_STAMP,
- VOID    LOG_FAO,
- VOID    LOG_OUTPUT,
- VOID    OPR_FAO,
-    LIB$GET_VM : ADDRESSING_MODE(GENERAL),
-    LIB$GET_VM_PAGE : ADDRESSING_MODE(GENERAL),
-    LIB$FREE_VM : ADDRESSING_MODE(GENERAL),
-    LIB$FREE_VM_PAGE : ADDRESSING_MODE(GENERAL),
-    LIB$SYS_FAOL: ADDRESSING_MODE(GENERAL),
-    STR$FREE1_DX : ADDRESSING_MODE(GENERAL),
+#include <starlet.h>	// VMS system definitions
+// not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";		// BLISS transportablity package
+#include <cmuip/central/include/netcommon.h>	// CMU-OpenVMS/IP common decls
+#include <cmuip_src/central/include/netconfig.h> 	// Tranport devices interface
+#include "netvms.h"		// VMS specifics
+#include <cmuip/central/include/nettcpip.h>		// IP definitions
+#include "structure.h"		// TCB & Segment Structure definition
+#include "tcpmacros.h"		// Local macros
+#include "snmp.h"
+
+#include <ssdef.h>
+
+extern     TIME_STAMP();
+extern  void    LOG_FAO();
+extern  void    LOG_OUTPUT();
+extern  void    OPR_FAO();
+extern   LIB$GET_VM ();
+extern   LIB$GET_VM_PAGE ();
+extern   LIB$FREE_VM();
+extern   LIB$FREE_VM_PAGE();
+extern   LIB$SYS_FAOL();
+extern   STR$FREE1_DX ();
 
 // IOUTIL.BLI
 
- VOID    ASCII_DEC_BYTES,
- VOID    QL_FAO,
+extern  void    ASCII_DEC_BYTES();
+extern  void    QL_FAO();
 
 // Maclib.mar
 
-    Calc_checksum,
-    Gen_Checksum,
- void    MovByt,
- void    SwapBytes,
+extern     Calc_checksum();
+extern     Gen_Checksum();
+extern  void    MovByt();
+extern  void    SwapBytes();
 
 // Memgr.bli
 
-    MM$Seg_Get,
- void    MM$Seg_Free,
-    MM$QBLK_Get,
- void    MM$QBLK_Free,
+extern     MM$Seg_Get();
+extern  void    MM$Seg_Free();
+extern     MM$QBLK_Get();
+extern  void    MM$QBLK_Free();
 
 // SEGIN.BLI/TCP.BLI
 
- void    Seg$Input,
+extern  void    Seg$Input();
 
 // UDP.BLI
 
- void    UDP$Input,
+extern  void    UDP$Input();
 
 // ICMP.BLI
-    ICMP$Check,
+extern     ICMP$Check();
  void    ICMP$Input;
 
 
@@ -278,21 +281,23 @@ extern signed long
 
 //SBTTL "Gateway table definition"
 
-$Field GWY_Fields=
-    SET
-    GWY_Name		= [$BYTES(8)],		// Gateway name
-    GWY_Address		= [$Long_Integer],	// Gateway IP address
-    GWY_Network		= [$Long_Integer],	// IP network served
-    GWY_Netmask		= [$Long_Integer],	// Mask for that network
-    GWY_Status		= [$Byte]		// Status (nonzero is "up")
-    TES;
+struct Gateway_Structure
+{
+unsigned char    GWY_Name[8];		// Gateway name
+long int     GWY_Address		;	// Gateway IP address
+long int     GWY_Network		;	// IP network served
+long int     GWY_Netmask		;	// Mask for that network
+char    GWY_Status;		// Status (nonzero is "up")
+    };
 
+#if 0
 LITERAL
     GWY_Size = $Field_Set_Size,
     Max_GWY = 10;	// Max number of gateways we can store
 
 MACRO
     Gateway_Structure = BLOCKVECTOR[Max_GWY,GWY_Size] FIELD(GWY_Fields)%;
+#endif
 
 
 //SBTTL "IP Fragment reassembly queue blocks"
@@ -302,25 +307,27 @@ MACRO
 // until either the last fragment of the datagram has been seen, a bad fragment
 // has been seen, or the block times-out.
 
-$Field RA$DATA_FIELDS (void)
-    SET
-    RA$Next	= [$Address],	// Next block on queue
-    RA$Prev	= [$Address],	// Previous block on queue
-    RA$Source	= [$Bytes(4)],	// Source IP address
-    RA$Dest	= [$Bytes(4)],	// Destination IP address
-    RA$Ident	= [$UWord],	// IP identifier
-    RA$Buf	= [$Address],	// Pointer to buffer (first fragment pkt buffer)
-    RA$Bufsize	= [$Uword],	// Size of buffer
-    RA$Data	= [$Address],	// Pointer to start of protocol data in buffer
-    RA$Datend	= [$Address],	// Pointer to first free byte in buffer
-    RA$Octet	= [$ULong],	// Fragment octet offset we are waiting for
-    RA$Timeout	= [$ULong]	// Timer for how long to wait for fragments
-    TES;
+struct RA$DATA_BLOCK
+{
+void *     RA$Next	;	// Next block on queue
+void *     RA$Prev	;	// Previous block on queue
+unsigned char     RA$Source	[4];	// Source IP address
+unsigned char     RA$Dest	[4];	// Destination IP address
+unsigned short     RA$Ident	;	// IP identifier
+void *     RA$Buf	;	// Pointer to buffer (first fragment pkt buffer)
+unsigned short     RA$Bufsize	;	// Size of buffer
+void *     RA$Data	;	// Pointer to start of protocol data in buffer
+void *     RA$Datend	;	// Pointer to first free byte in buffer
+unsigned long     RA$Octet	;	// Fragment octet offset we are waiting for
+unsigned long     RA$Timeout	;// Timer for how long to wait for fragments
+    };
+#if 0
 LITERAL
     RA$DATA_SIZE = $FIELD_SET_SIZE,
     RA$DATA_BLEN = RA$DATA_SIZE*4;
 MACRO
     RA$DATA_BLOCK = BLOCK->RA$DATA_SIZE FIELD(RA$DATA_FIELDS) %;
+#endif
 
 //SBTTL "Data and definitions associated with IP and ICMP"
 
@@ -340,7 +347,7 @@ signed long
     IP_group_MIB : IP_group_MIB_struct;
 
 static signed long
-!!!HACK!!// Make this dynamic
+//!!HACK!!// Make this dynamic
     GWY_table: Gateway_structure, // space for list of known gateways
     GWY_count,			// Count of gateways
     RA_QUEUE : QUEUE_HEADER
@@ -375,7 +382,7 @@ IP$GWY_CONFIG(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK) : NOVALUE (void)
     GWYIDX = GWY_COUNT;
     GWY_COUNT = GWY_COUNT + 1;
 
-!!!HACK!!// just do it!
+//!!HACK!!// just do it!
 // Allocate virtual string and copy it
 //    GWY_table_ptr = GWY_table;
 
@@ -406,9 +413,9 @@ IP$GWY_CONFIG(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK) : NOVALUE (void)
 //SBTTL "IP_INIT - Initialize state of IP"
 
 IP$INIT : NOVALUE (void)
-!
+//
 // Initialize the IP reassembly queue and the time value for checking it.
-!
+//
     {
     signed long
 	RC;
@@ -480,21 +487,21 @@ void IP$LOG(NAME,struct IP_Structure * IPHDR) (void)
 
 //    Here is where all routing descisions for IP packet output are made.
 //    The basic algorithm is:
-!	IF destination is on the same network as one of our interfaces,
-!	   return send directly - return device index for interface
-!	else
-!	    IF ICMP knows a route to that address, return device index for
-!	       appropriate gateway address
-!	    else
-!		IF we know a gateway for that address, return device index
-!		   for it
-!		else
-!		    Return device index for default gateway.
+//	IF destination is on the same network as one of our interfaces,
+//	   return send directly - return device index for interface
+//	else
+//	    IF ICMP knows a route to that address, return device index for
+//	       appropriate gateway address
+//	    else
+//		IF we know a gateway for that address, return device index
+//		   for it
+//		else
+//		    Return device index for default gateway.
 
 IP_FIND_DEV(IPADDR)
 
-!Find interface for a destination IP address
-!Returns:
+//Find interface for a destination IP address
+//Returns:
 //   -1	Failure, IP address is not on local network
 //  >=0	Success, device index to use is returned
 
@@ -519,13 +526,13 @@ IP_FIND_DEV(IPADDR)
 
 IP_FIND_GWY(IPADDR)
 
-!Find gateway for a destination IP address.
-!Search the ICMP database for an entry matching this IP address. If
-!existant, then use the gateway that it returned. Otherwise, look in
-!the gateway table for the first gateway which knows how to serve that
-!network. Note that a default gateway should always exist with GWY_MASK
-!and GWY_NET of 0, indicating service to all networks.
-!Returns address of connected gateway or 0 if none defined (or all down)
+//Find gateway for a destination IP address.
+//Search the ICMP database for an entry matching this IP address. If
+//existant, then use the gateway that it returned. Otherwise, look in
+//the gateway table for the first gateway which knows how to serve that
+//network. Note that a default gateway should always exist with GWY_MASK
+//and GWY_NET of 0, indicating service to all networks.
+//Returns address of connected gateway or 0 if none defined (or all down)
 
     {
     for (IDX=0;IDX<=(GWY_COUNT-1);IDX++)
@@ -538,13 +545,13 @@ IP_FIND_GWY(IPADDR)
 
 IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 
-!Obtain source and destination IP addresses for first hop given a
-!destination IP address.
+//Obtain source and destination IP addresses for first hop given a
+//destination IP address.
 //   IPDEST	Pointer to destination IP address
-!		(may be changed on broadcasts)
+//		(may be changed on broadcasts)
 //   IPSRC	Pointer to place to put local IP source address
 //   NEWIPDEST	Pointer to place to put first hop IP destination address
-!Returns:
+//Returns:
 //   -1 on failure, no route known to that address
 //  >=0 on success, with device index
 
@@ -600,8 +607,8 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 
 IP$ISME(IPADDR, STRICT)
 
-!Determine if an IP address refers to this system
-!Returns:
+//Determine if an IP address refers to this system
+//Returns:
 //   -1 - not a local address
 //  >=0 - address is local, device index is returned
 
@@ -646,9 +653,9 @@ signed long BIND ROUTINE
     IP_ISLOCAL = IP_FIND_DEV;
 
 IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR) : NOVALUE (void)
-!
+//
 // Set local/foreign hosts pair given list of foreign addresses.
-!
+//
     {
     MAP
 	struct VECTOR * ADRLST;	// Assume 32-bit IP addr
@@ -677,7 +684,7 @@ IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR) : NOVALUE (void)
     LCLPTR = DEV_CONFIG_TAB[LIDX,DC_IP_ADDRESS];
     }
 
-//SBTTL "IP$S}_RAW:  Send TCP segment to IP for transmission."
+//SBTTL "IP$SEND_RAW:  Send TCP segment to IP for transmission."
 /******************************************************************************
 
 Function:
@@ -710,9 +717,9 @@ Side Effects:
 */
 
 FORWARD ROUTINE
- VOID    IP$RECEIVE;
+ void    IP$RECEIVE;
 
-IP$S}_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
+IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
     {
     MAP
 	struct segment_Structure * SEG;
@@ -754,9 +761,9 @@ IP$S}_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	    return 0;		// No route exists
 	    };
 	};
-!*********************************
+//*********************************
 // Send the segment to the network
-!*********************************
+//*********************************
 
 // Fill in the IP header fields
 
@@ -770,7 +777,7 @@ IP$S}_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	    ASCII_DEC_BYTES(dststr,4,newip_dest,dststr->DSC$W_LENGTH);
 	    QL$FAO("!%T IPsend: route is !AS!/",0,dststr);
 	    };
-!	QL$FAO("!%T IPsend: dev index=",1,dev,0)
+//	QL$FAO("!%T IPsend: dev index=",1,dev,0)
 	};
 
     if (dev LSS 0)
@@ -821,7 +828,7 @@ IP$S}_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 
 
 
-//SBTTL "IP$S}:  Send TCP segment to IP for transmission."
+//SBTTL "IP$SEND:  Send TCP segment to IP for transmission."
 /******************************************************************************
 
 Function:
@@ -858,7 +865,7 @@ Side Effects:
 *******************************************************************************
 */
 
-IP$S}(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
+IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 		       ID,Frag,Delete_Seg,Protocol,Buf,Bufsize)
     {
     MAP
@@ -904,7 +911,7 @@ IP$S}(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	    fragmentation_data = (frag_offset / 8);
 	    if ((frag_offset + frag_size) LSS SegSize)
 		fragmentation_data = fragmentation_data + %X"2000"; !more frags
-	    IP$S}(IP$Src, IP$Dest, Service, Life, subseg, frag_size,
+	    IP$SEND(IP$Src, IP$Dest, Service, Life, subseg, frag_size,
 	            ID, Frag, 1, Protocol, subbuff, Max_Physical_Bufsize);
 	    frag_offset = frag_offset + frag_size;
 	    }
@@ -957,15 +964,15 @@ IP$S}(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 					UDP_Protocol);
 	};
 
-!*********************************
+//*********************************
 // Send the segment to the network
-!*********************************
+//*********************************
 
 // Position buffer for IP header
 
     IPHDR = Seg - IP_hdr_byte_size;
     iplen = IP_hdr_byte_size + segsize;
-!!!HACK!!// Check to see if IPHDR < Buf 
+//!!HACK!!// Check to see if IPHDR < Buf 
 
 // Fill in the IP header fields
 
@@ -997,7 +1004,7 @@ IP$S}(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	    ASCII_DEC_BYTES(dststr,4,newip_dest,dststr->DSC$W_LENGTH);
 	    QL$FAO("!%T IPsend: route is !AS!/",0,dststr);
 	    };
-!	QL$FAO("!%T IPsend: dev index=",1,dev,0)
+//	QL$FAO("!%T IPsend: dev index=",1,dev,0)
 	};
 
 // Re-arrange bytes and words in IP header
@@ -1030,8 +1037,8 @@ IP$S}(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	}
     else
 	{
-!	BIND
-!	    dev_config = Dev_config_tab[dev,dc_begin] : Device_Configuration_Entry;
+//	BIND
+//	    dev_config = Dev_config_tab[dev,dc_begin] : Device_Configuration_Entry;
 	signed long
 	    struct Device_Configuration_Entry * dev_config;
 
@@ -1068,7 +1075,7 @@ IP$S}(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 
 Function:
 
-!!!HACK!!// These comments are wrong.
+//!!HACK!!// These comments are wrong.
     This routine is called by the link level device receive handler
     for an incomming network datagram.  The checksum for the
     IP header is checked and the datagram is routed to either the higher
@@ -1091,8 +1098,8 @@ Outputs:
 */
 
 FORWARD ROUTINE
- VOID    IP_FRAGMENT,
- VOID    IP_DISPATCH;
+ void    IP_FRAGMENT,
+ void    IP_DISPATCH;
 
 void IP$Receive (Buf,Buf_size,IPHdr,devlen,dev_config) (void)
     {
@@ -1285,11 +1292,11 @@ void IP$Receive (Buf,Buf_size,IPHdr,devlen,dev_config) (void)
 //SBTTL "Dispatch IP packet to protocol routine"
 
 IP_DISPATCH(IPHDR,IPLEN,HDRLEN,BUF,BUFSIZE) : NOVALUE (void)
-!
+//
 // Hand a complete protocol segment off to it's handling routine.
 // Called from both IP$RECEIVE when it receives a complete packet and from
 // IP_FRAGMENT when it receives the last fragment for a segment.
-!
+//
     {
     MAP
 	struct IP_Structure * IPHDR;
@@ -1343,13 +1350,13 @@ IP_DISPATCH(IPHDR,IPLEN,HDRLEN,BUF,BUFSIZE) : NOVALUE (void)
 //SBTTL "Handle reception of IP packet fragment"
 
 FORWARD ROUTINE
- VOID    IP_FRAGMENT_CHECK;
+ void    IP_FRAGMENT_CHECK;
 
 IP_FRAGMENT(IPHDR,IPLEN,HDRLEN,BUF,BUFSIZE) : NOVALUE (void)
-!
+//
 // Match the fragment with appropriate entry on the fragment reassembly queue.
 // If last fragment, then recursively call IP$RECEIVE to re-handle the packet.
-!
+//
     {
     MAP
 	struct IP_Structure * IPHDR;
@@ -1405,7 +1412,7 @@ X:  {			// *** Block X ***
 
 // RA data doesn't exist yet. Allocate it & fill in the IP parameters.
 
-!	    RC = LIB$GET_VM(%REF(RA$Data_BLEN),RAPTR);
+//	    RC = LIB$GET_VM(%REF(RA$Data_BLEN),RAPTR);
 	    RC = LIB$GET_VM_PAGE(%REF((RA$Data_BLEN / 512) + 1),RAPTR);
 	    if (NOT RC)
 		FATAL$FAO("IP_FRAGMENT - LIB$GET_VM failure, RC=!XL",RC);
@@ -1509,7 +1516,7 @@ Y:	{
 
 // Deallocate the queue block.
 
-!	    LIB$FREE_VM(%REF(RA$Data_BLEN),RAPTR);
+//	    LIB$FREE_VM(%REF(RA$Data_BLEN),RAPTR);
 	    LIB$FREE_VM_PAGE(%REF((RA$Data_BLEN / 512) + 1),RAPTR);
 	    };
 	RETURN;
@@ -1531,10 +1538,10 @@ Y:	{
     }
 
 IP_FRAGMENT_CHECK : NOVALUE (void)
-!
+//
 // Routine to periodically check the reassembly queue, purging any entries
 // which have expired.
-!
+//
     {
     signed long
 	NOW,
@@ -1559,7 +1566,7 @@ IP_FRAGMENT_CHECK : NOVALUE (void)
 	    XQL$FAO(LOG$IP,"!%T Flushing expired IP RA block !XL!/",0,RAPTR);
 	    REMQUE(RAPTR,RAPTR);
 	    MM$Seg_Free(RAPTR->RA$Bufsize,RAPTR->RA$Buf);
-!	    LIB$FREE_VM(%REF(RA$Data_BLEN),RAPTR);
+//	    LIB$FREE_VM(%REF(RA$Data_BLEN),RAPTR);
 	    LIB$FREE_VM_PAGE(%REF((RA$Data_BLEN / 512) + 1),RAPTR);
 	    IP_group_MIB->IPMIB$ipReasmFails = 
 			IP_group_MIB->IPMIB$ipReasmFails + 1;

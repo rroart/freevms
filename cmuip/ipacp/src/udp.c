@@ -66,7 +66,7 @@ Modification History
 	Updated IDENT.
 
 	10-Sep-1990     Henry W. Miller 	USBR
-	Make UDP_CS}() use DEFTTL.
+	Make UDP_CSEND() use DEFTTL.
 
 4.0   04-Dec-1989, Bruce R. Miller	CMU Network Development
 	Restructured the UDP packet.  Wildcard receives are passed
@@ -79,11 +79,11 @@ Modification History
 	now be spedified with a user supplid buffer.
 
 3.7   11-FEB-1988, Dale Moore
-	On UDP$S} and ADDR_MODE check to see if sufficient bytes
+	On UDP$SEND and ADDR_MODE check to see if sufficient bytes
 	given by user for udp header. If not return BTS.
 
 3.6  19-Nov-87, Edit by VAF
-	Know about IP$S} failures and give user return status of NET$_NRT
+	Know about IP$SEND failures and give user return status of NET$_NRT
 	on failures (no route to destination).
 
 3.5  23-Sep-87, Edit by VAF
@@ -112,7 +112,7 @@ Modification History
 
 2.9   2-Mar-87, Edit by VAF
 	Add support for klugy "address mode" - allows user to specify the IP
-	addresses for each UDP$S} and returns the IP addresses of the input
+	addresses for each UDP$SEND and returns the IP addresses of the input
 	packet for each UDP$RECEIVE.
 
 2.8  19-Feb-87, Edit by VAF
@@ -180,27 +180,30 @@ Modification History
 
 //SBTTL "Module definition"	
 
+#if 0
 MODULE UDP( IDENT="4.0e",LANGUAGE(BLISS32),
 	    ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 			    NONEXTERNAL=LONG_RELATIVE),
 	    LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
 	    OPTIMIZE,OPTLEVEL=3,ZIP)=
 
-{
+#endif
 
 // Include standard definition files
 
-#include "SYS$LIBRARY:STARLET";
-#include "CMUIP_SRC:[CENTRAL]NETERROR";
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";
-#include "CMUIP_SRC:[CENTRAL]NETVMS";
-#include "CMUIP_SRC:[CENTRAL]NETCOMMON";
-#include "CMUIP_SRC:[CENTRAL]NETTCPIP";
-#include "STRUCTURE";
-#include "TCPMACROS";
-#include "SNMP";
+#include <starlet.h>
+#include <cmuip/central/include/neterror.h>
+// not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";
+#include "netvms.h"
+#include <cmuip/central/include/netcommon.h>
+#include <cmuip/central/include/nettcpip.h> 
+#include "structure.h"
+#include "tcpmacros.h"
+#include "snmp.h"
 
-!*** Special literals from USER.BLI ***
+#include <ssdef.h>
+
+//*** Special literals from USER.BLI ***
 
 extern signed long LITERAL
     UCB$Q_DDP,
@@ -219,56 +222,55 @@ extern signed long
 
 // External routines
 
-extern
 
 // MACLIB.MAR
 
- void    Swapbytes,
- void    Movbyt,
+extern  void    Swapbytes();
+extern  void    Movbyt();
 
 // MEMGR.BLI
 
- void    MM$UArg_Free,
-    MM$QBLK_Get,
- void    MM$QBLK_Free,
-    MM$Seg_Get,
- void    MM$Seg_Free,
+extern  void    MM$UArg_Free();
+extern     MM$QBLK_Get();
+extern  void    MM$QBLK_Free();
+extern     MM$Seg_Get();
+extern  void    MM$Seg_Free();
 
 // USER.BLI
 
-    USER$GET_LOCAL_PORT,
-    USER$CHECK_ACCESS,
-    USER$Err,
- VOID    IO$POST,
- void    User$Post_IO_Status,
+extern     USER$GET_LOCAL_PORT();
+extern     USER$CHECK_ACCESS();
+extern     USER$Err();
+extern  void    IO$POST();
+extern  void    User$Post_IO_Status();
 
 // IP.BLI
 
- VOID    IP$SET_HOSTS,
-    IP$S},
-    Gen_Checksum,
+extern  void    IP$SET_HOSTS();
+extern     IP$SEND();
+extern     Gen_Checksum();
 
 // NMLOOK.BLI
 
- VOID    NML$CANCEL,
- VOID    NML$GETALST,
- VOID    NML$GETNAME,
+extern  void    NML$CANCEL();
+extern  void    NML$GETALST();
+extern  void    NML$GETNAME();
 
 // IOUTIL.BLI
 
-    GET_IP_ADDR,
- VOID    ASCII_DEC_BYTES,
- VOID    ASCII_HEX_BYTES,
- VOID    LOG_FAO,
- VOID    QL_FAO,
+extern     GET_IP_ADDR();
+extern  void    ASCII_DEC_BYTES();
+extern  void    ASCII_HEX_BYTES();
+extern  void    LOG_FAO();
+extern  void    QL_FAO();
 
 // SNMP.BLI
 
-    SNMP$NET_INPUT,
+extern     SNMP$NET_INPUT();
 
 // RPC.BLI
 
-    RPC$INPUT,
+extern     RPC$INPUT();
     RPC$CHECK_PORT;
 
 signed long
@@ -281,45 +283,48 @@ extern signed long
 
 //SBTTL "UDP data structures"
 
-LITERAL
-    Max_UDP_Data_Size = 16384,	// Max UDP data size
-    UDPTOS = 0,			// Type of service
-    UDPDF = FALSE;		// Don't fragment flag (try fragmenting)
+#define    Max_UDP_Data_Size  16384	// Max UDP data size
+#define    UDPTOS  0			// Type of service
+#define    UDPDF  FALSE		// Don't fragment flag (try fragmenting)
 
 // Define the "UDPCB" - UDP analogue of TCB.
 
-$FIELD  UDPCB_Fields (void)
-    SET
-    UDPCB$Foreign_Host	= [$Ulong],	// UDP foreign host number
-    UDPCB$Foreign_Port	= [$Ulong],	//     foreign port
-    UDPCB$Local_Host	= [$Ulong],	//     local host
-    UDPCB$Local_Port	= [$Ulong],	//     local port
-    UDPCB$Foreign_Hname	= [$Bytes(MAX_HNAME)],
-    UDPCB$Foreign_Hnlen	= [$Short_Integer],
-    UDPCB$USR_Qhead	= [$Address],	// User receive request queue
-    UDPCB$USR_Qtail	= [$Address],
-    UDPCB$NR_Qhead	= [$Address],	// Net receive queue
-    UDPCB$NR_Qtail	= [$Address],
-    UDPCB$NR_Qcount	= [$Short_Integer],
-    UDPCB$Flags		= [$Bytes(2)],
-    $OVERLAY(UDPCB$Flags)
-	UDPCB$Wildcard	= [$Bit],	// UDPCB opened with wild FH/FP/LH
-	UDPCB$Addr_Mode	= [$Bit],	// IP addresses in data buffer
-	UDPCB$Aborting	= [$Bit],	// UDPCB is closing
-	UDPCB$NMLook	= [$Bit],	// UDPCB has an outstanding name lookup
-    $CONTINUE
-    UDPCB$UDPCBID	= [$Address],	// UDPCB_Table index for this connection
-    UDPCB$UCB_Adrs	= [$Address],	// Connection UDPCB address
-    UDPCB$UArgs		= [$Address],	// Uarg block in pending open
-    UDPCB$User_ID	= [$Bytes(4)],	// Process ID of owner
-    UDPCB$PIOchan	= [$Bytes(2)]	// Process IO channel
-    TES;
+struct  UDPCB_Structure
+{
+unsigned long     UDPCB$Foreign_Host	;	// UDP foreign host number
+unsigned long     UDPCB$Foreign_Port	;	//     foreign port
+unsigned long     UDPCB$Local_Host	;	//     local host
+unsigned long     UDPCB$Local_Port	;	//     local port
+unsigned char     UDPCB$Foreign_Hname	[MAX_HNAME];
+unsigned short int     UDPCB$Foreign_Hnlen	;
+void *     UDPCB$USR_Qhead	;	// User receive request queue
+void *     UDPCB$USR_Qtail	;
+void *     UDPCB$NR_Qhead	;	// Net receive queue
+void *     UDPCB$NR_Qtail	;
+unsigned short int     UDPCB$NR_Qcount	;
+  union {
+unsigned char     UDPCB$Flags		[2];
+    struct {
+unsigned  	UDPCB$Wildcard	 : 1;	// UDPCB opened with wild FH/FP/LH
+unsigned  	UDPCB$Addr_Mode	 : 1;	// IP addresses in data buffer
+unsigned  	UDPCB$Aborting	 : 1;	// UDPCB is closing
+unsigned  	UDPCB$NMLook	 : 1;	// UDPCB has an outstanding name lookup
+	  };
+  };
+void *     UDPCB$UDPCBID	;	// UDPCB_Table index for this connection
+void *     UDPCB$UCB_Adrs	;	// Connection UDPCB address
+void *     UDPCB$UArgs		;	// Uarg block in pending open
+unsigned char     UDPCB$User_ID	[4];	// Process ID of owner
+unsigned char     UDPCB$PIOchan	[2];// Process IO channel
+    };
 
+#if 0
 LITERAL
     UDPCB_Size = $Field_Set_Size;
 MACRO
     UDPCB_Structure = BLOCK->UDPCB_Size FIELD(UDPCB_Fields) %;
 //MESSAGE(%NUMBER(UDPCB_Size)," longwords per UDPCB")
+#endif
 
 
 //SBTTL "UDP data storage"
@@ -440,7 +445,7 @@ UDPCB_Find(Src$Adrs,Src$Port,Dest$Port)
 */
 
 FORWARD ROUTINE
-    UDP_S},
+    UDP_SEND,
     Queue_User_UDP;
 
 UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg): NOvalue=
@@ -515,7 +520,7 @@ UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg): NOvalue=
         if ((RC && (out_len > 0)))
 	    {
 	    // Send off the reply datagram
-	    RC = UDP_S}(Dest$Adrs,Src$Adrs,
+	    RC = UDP_SEND(Dest$Adrs,Src$Adrs,
 			  Seg->UP$Dest_Port,Seg->UP$Source_Port,
 		 	  out_buff,out_len);
 	    if (RC != SS$_NORMAL)
@@ -548,7 +553,7 @@ UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg): NOvalue=
 			     UCount,Uptr,out_buff,out_len);
 
 	// Send off the reply datagram
-	RC = UDP_S}(Dest$Adrs,Src$Adrs,
+	RC = UDP_SEND(Dest$Adrs,Src$Adrs,
 		      Seg->UP$Dest_Port,Seg->UP$Source_Port,
 		      out_buff,out_len);
 	if (RC != SS$_NORMAL)
@@ -591,12 +596,12 @@ X2:	{
 
 // "Normal" UDPCB's stop being wildcarded when they receive something....
 
-!	if (NOT UDPCB->UDPCB$ADDR_MODE)
-!	    {
+//	if (NOT UDPCB->UDPCB$ADDR_MODE)
+//	    {
 
 // If the connection was wildcarded, resolve hosts and ports now
 
-!	    if (UDPCB->UDPCB$Wildcard)
+//	    if (UDPCB->UDPCB$Wildcard)
 	    if (0)
 		{
 		UDPCB->UDPCB$Wildcard = FALSE;
@@ -612,10 +617,10 @@ X2:	{
 		    UDPCB->UDPCB$Foreign_Port = Seg->UP$Source_Port;
 		TES;
 		};
-!	    };		// (non ADDR_MODE case)
+//	    };		// (non ADDR_MODE case)
 
 // Kluge. Overwrite the UDP/IP header in the buffer, since we don't need it.
-!!!HACK!!!
+//!!HACK!!!
 	Aptr = Uptr - IPADR$UDP_ADDRESS_BLEN;
 	Ucount = Ucount + IPADR$UDP_ADDRESS_BLEN;
 	APTR->IPADR$SRC_PORT = Seg->UP$Source_Port;
@@ -644,18 +649,18 @@ X2:	{
 
 FORWARD ROUTINE
  void    Deliver_UDP_Data,
- VOID    UDPCB_ABORT;
+ void    UDPCB_ABORT;
 
 UDP$ICMP(ICMtype,ICMex,IPsrc,IPdest,UDPptr,UDPlen,
 			buf,bufsize) : NOVALUE (void)
-!ICMtype - ICMP packet type
-!ICMex - extra data from ICMP packet (pointer for ICM_PPROBLEM)
-!IPsrc - source address of offending packet
-!IPdest - destination address of offending packet
-!UDPptr - first 64-bits of data from offending packet
-!UDPlen - calculated octet count of data
-!Buf - address of network buffer
-!Bufsize - size of network buffer
+//ICMtype - ICMP packet type
+//ICMex - extra data from ICMP packet (pointer for ICM_PPROBLEM)
+//IPsrc - source address of offending packet
+//IPdest - destination address of offending packet
+//UDPptr - first 64-bits of data from offending packet
+//UDPlen - calculated octet count of data
+//Buf - address of network buffer
+//Bufsize - size of network buffer
 
     {
     MAP
@@ -706,8 +711,8 @@ X:	{			// Good UDP/ICMP message
 
 // ADDR_MODE UDPCB's get the ICMP message delivered to them, with IOSB flags set
 // indicating that this is an ICMP message and the ICMP error code
-!!!HACK!!// How will we send back the ICMP message?
-!!!HACK!!// Are you sure???
+//!!HACK!!// How will we send back the ICMP message?
+//!!HACK!!// Are you sure???
 	if (1)
 	    {
 	    signed long
@@ -864,7 +869,7 @@ Deliver_UDP_Data(UDPCB,QB,URQ) : NOVALUE (void)
 
 // Truncate to user receive request size
 
-!!!HACK!!// You can't just drop data like that//  Or can you?
+//!!HACK!!// You can't just drop data like that//  Or can you?
     if (Ucount > URQ->UR$Size)
 	Ucount = URQ->UR$Size;
 
@@ -1035,9 +1040,9 @@ void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,RC) (void)
 	struct queue_blk_structure(QB_NR_Fields) * QB;
 
 // Make sure we aren't doing this more than once
-!
+//
 //   if (UDPCB->UDPCB$Aborting)
-!	RETURN;
+//	RETURN;
 
 // Say that this connection is aborting (prevent future requests)
 
@@ -1088,9 +1093,9 @@ void UDPCB_Close(UIDX,struct UDPCB_Structure * UDPCB,RC) (void)
     }
 
 void UDPCB_Abort(struct UDPCB_Structure * UDPCB,RC) (void)
-!
+//
 // Abort a UDPCB - called by ICMP code.
-!
+//
     {
     UDPCB_CLOSE(UDPCB->UDPCB$UDPCBID,UDPCB,RC)
     }
@@ -1147,8 +1152,8 @@ UDP_Conn_Unique(LP,FH,FP)
 
 FORWARD ROUTINE
     UDP_COPEN_DONE,
- VOID    UDP_NMLOOK_DONE,
- VOID    UDP_ADLOOK_DONE;
+ void    UDP_NMLOOK_DONE,
+ void    UDP_ADLOOK_DONE;
 
 void UDP$OPEN(struct User_Open_Args * Uargs) (void)
     {
@@ -1456,13 +1461,13 @@ void UDP$ABORT(struct User_Abort_Args * Uargs) (void)
     MM$UArg_Free(Uargs);
     }
 
-//SBTTL "UDP$S} - send UDP packet"
+//SBTTL "UDP$SEND - send UDP packet"
 /*
     Handle user send request for UDP connection. Form a UDP packet from the
     user's data buffer and hand it to IP layer for transmission.
  )%
 
-void UDP$S}(struct User_Send_Args * Uargs) (void)
+void UDP$SEND(struct User_Send_Args * Uargs) (void)
     {
     signed long
 	RC,
@@ -1478,7 +1483,7 @@ void UDP$S}(struct User_Send_Args * Uargs) (void)
 	USER$Err(Uargs,RC);	// No such connection
 	RETURN;
 	};
-    XLOG$FAO(LOG$USER,"!%T UDP$S}: Conn=!XL, UDPCB=!XL, Size=!SL, X1=!XL, X2=!XL!/",
+    XLOG$FAO(LOG$USER,"!%T UDP$SEND: Conn=!XL, UDPCB=!XL, Size=!SL, X1=!XL, X2=!XL!/",
 	     0,Uargs->SE$Local_Conn_ID,UDPCB,Uargs->SE$Buf_size,
 	     Uargs->SE$EXT1,Uargs->SE$EXT2);
 
@@ -1486,7 +1491,7 @@ void UDP$S}(struct User_Send_Args * Uargs) (void)
 
     if (UDPCB->UDPCB$Aborting)
 	{
-	XLOG$FAO(LOG$USER,"!%T UDP$S} for aborted UDPCB !XL!/",0,UDPCB);
+	XLOG$FAO(LOG$USER,"!%T UDP$SEND for aborted UDPCB !XL!/",0,UDPCB);
 	USER$Err(Uargs,NET$_CC);
 	RETURN;
 	};
@@ -1534,7 +1539,7 @@ void UDP$S}(struct User_Send_Args * Uargs) (void)
 
 // Do common portion of the send
 
-    RC = UDP_S}(LocalAddr, ForeignAddr, LocalPort, ForeignPort,
+    RC = UDP_SEND(LocalAddr, ForeignAddr, LocalPort, ForeignPort,
 		  Uargs->SE$Data_Start, Uargs->SE$Buf_size );
 
 // Post the I/O request back to the user
@@ -1545,13 +1550,13 @@ void UDP$S}(struct User_Send_Args * Uargs) (void)
 
 
 
-//SBTTL "UDP_S} - Common routine for sending UDP datagrams"
+//SBTTL "UDP_SEND - Common routine for sending UDP datagrams"
 
-UDP_S} ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
+UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
 			  UData, USize )
-!
-// Returns success or failure of IP$S}.
-!
+//
+// Returns success or failure of IP$SEND.
+//
     {
     signed long
 	RC,
@@ -1598,12 +1603,12 @@ UDP_S} ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
 
     SwapBytes(UDP_Header_Size/2,Seg);
 //    Seg->UP$Checksum=Gen_Checksum(Segsize,Seg,LocalAddr,ForeignAddr,
-!				  UDP_Protocol);
+//				  UDP_Protocol);
 
 // Send the segment to IP (it will deallocate it)
 
     UDPIPID = UDPIPID+1;	// Increment packet ID
-    RC = IP$S}(LocalAddr,ForeignAddr,UDPTOS,UDPTTL,
+    RC = IP$SEND(LocalAddr,ForeignAddr,UDPTOS,UDPTTL,
 		   Seg,Segsize,UDPIPID,UDPDF,TRUE,UDP_Protocol,
 		   Buf,Bufsize);
 
@@ -1762,9 +1767,9 @@ UDP$CANCEL(struct VMS$Cancel_Args * Uargs)
 //SBTTL "UDP dump routines"
 
 UDP$Connection_List(RB) : NOVALUE (void)
-!
+//
 // Dump out the list of UDP connections.
-!
+//
     {
     MAP
 	struct D$UDP_List_Return_Blk * RB;
@@ -1781,9 +1786,9 @@ UDP$Connection_List(RB) : NOVALUE (void)
     }
 
 UDP$UDPCB_DUMP(UDPCBIX,RB)
-!
+//
 // Dump out a single UDP connection
-!
+//
     {
     MAP
 	struct D$UDPCB_Dump_Return_BLK * RB;
