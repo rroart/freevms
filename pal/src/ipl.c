@@ -195,9 +195,12 @@ asmlinkage void do_sw_int(void) {
       case IPL$_IOLOCK9:
 	SOFTINT_IOLOCK9_VECTOR;
 	break;
+      case IPL$_IOLOCK8:
+	SOFTINT_IOLOCK8_VECTOR;
+	break;
 	/* some more iolock fork stuff? */
-      case IPL$_TIMER:
-	SOFTINT_TIMER_VECTOR;
+      case IPL$_TIMERFORK:
+	SOFTINT_TIMERFORK_VECTOR;
 	break;
       case IPL$_QUEUEAST:
 	SOFTINT_QUEUEAST_VECTOR;

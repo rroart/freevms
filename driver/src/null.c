@@ -185,10 +185,10 @@ void nl_init(void) {
   /* for the ucb init part */
   qhead_init(&u->ucb$l_ioqfl);
   u->ucb$b_type=DYN$C_UCB;
-  u->ucb$b_flck=IPL$_QUEUEAST; /* should be IOLOCK8 */
+  u->ucb$b_flck=IPL$_IOLOCK8;
   /* devchars? */
   u->ucb$b_devclass=DEV$M_RND; /* just maybe? */
-  u->ucb$b_dipl=IPL$_QUEUEAST; /* should be IPL$_IOLOCK8 */
+  u->ucb$b_dipl=IPL$_IOLOCK8;
   //  bcopy("nla0",u->ucb$t_name,4);
   u->ucb$l_ddb=d;
   u->ucb$l_crb=c;

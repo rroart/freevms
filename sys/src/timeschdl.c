@@ -232,7 +232,7 @@ int hwclkdone=1;
     exe$gl_abstim_tics=jiffies;
 
     if (exe$gq_systime>=exe$gq_1st_time) 
-      SOFTINT_TIMER_VECTOR;
+      SOFTINT_TIMERFORK_VECTOR;
 
 #ifndef CONFIG_SMP
     {
@@ -256,7 +256,7 @@ int hwclkdone=1;
 	p->phd$w_quant+=QUANTADD;
 	if (++p->phd$w_quant  >= 0 ) {
 	  if (p->phd$w_quant<128) {
-	    SOFTINT_TIMER_VECTOR;
+	    SOFTINT_TIMERFORK_VECTOR;
 	    //		    sch$resched();
 	  }
 	}
