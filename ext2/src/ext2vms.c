@@ -616,7 +616,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 #endif
     buf.count = 0;
     buf.dirent = dirent;
-    vfs_readdir(file, fillonedir64, &buf);
+    vfs_readdir(f, fillonedir64, &buf);
     filp_close(f,0);
 
     resdsc->dsc$a_pointer=strdup(dir.d_name);
