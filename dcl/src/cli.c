@@ -475,8 +475,10 @@ static unsigned long show_logical_table (unsigned long h_output, unsigned long h
 static unsigned long show_logical_name (unsigned long h_output, unsigned long h_error, int level, unsigned long sholnmflg, int table, unsigned long h_logname);
 static unsigned long show_process_bylogical (unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts);
 static unsigned long show_process_byhandle (unsigned long h_output, unsigned long h_error, unsigned long h_process, unsigned long *showopts);
-static void show_symbol (unsigned long h_output, unsigned long h_error, Symbol *symbol);
-static unsigned long show_system (unsigned long h_output, unsigned long h_error, unsigned long *showopts);
+//static unsigned long show_system (unsigned long h_output, unsigned long h_error, unsigned long *showopts);
+int show_system();
+int show_symbol();
+int delete_symbol();
 static void show_secattr (unsigned long h_output, unsigned long h_object, unsigned long secattrcode, int prefix_w, const char *prefix);
 static void *secmalloc (void *dummy, unsigned long osize, void *obuff, unsigned long nsize);
 static unsigned long show_user_bylogical (unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts);
@@ -511,8 +513,7 @@ static unsigned long int_show_default         (unsigned long h_input, unsigned l
 static unsigned long int_show_working_set         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_job             (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_logical_name    (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_show_symbol          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_show_system          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+//static unsigned long int_show_system          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 
 static Command intcmd[] = {
 	0, "allocate device",      int_allocate_device,      NULL, "[-user] [-job] [-process] [-thread] <device_name>", 
@@ -541,39 +542,40 @@ static Command intcmd[] = {
 	0, "show default",         int_show_default,         NULL, "", 
 	0, "show working_set",     int_show_working_set,     NULL, "", 
 	0, "show logical",    int_show_logical_name,    NULL, "<logical_name> [-security]", 
-	0, "show symbol",          int_show_symbol,          NULL, "[<symbol_name> ...]", 
+#if 0
 	0, "show system",          int_show_system,          NULL, "[-devices] [-iochans] [-job] [-processes] [-security] [-threads]", 
+#endif
 	0, "stop",                 int_stop,                 NULL, "[/id <pid>] <name>", 
 	// the following are really not internal
 	// waiting for dcltables.exe
-	0, "_mount", 1, 0, "/vms$common/sysexe/mount",
-	0, "_directory", 1, 0, "/vms$common/sysexe/directory",
-	0, "_copy", 1, 0, "/vms$common/sysexe/copy",
-	0, "_export", 1, 0, "/vms$common/sysexe/export",
-	0, "_import", 1, 0, "/vms$common/sysexe/import",
-	0, "_delete", 1, 0, "/vms$common/sysexe/delete",
-	0, "_difference", 1, 0, "/vms$common/sysexe/difference",
-	0, "_extend", 1, 0, "/vms$common/sysexe/extend",
-	0, "_search", 1, 0, "/vms$common/sysexe/search",
-	0, "_type", 1, 0, "/vms$common/sysexe/type",
-	0, "_init", 1, 0, "/vms$common/sysexe/init",
-	0, "_create /directory", 1, 0, "/vms$common/sysexe/create",
-	0, "_edt", 1, 0, "/vms$common/sysexe/edt",
-	0, "_dfu", 1, 0, "/vms$common/sysexe/dfu",
-	0, "mount", 1, 0, "SYS$SYSTEM:mount.exe",
-	0, "directory", 1, 0, "SYS$SYSTEM:directory.exe",
-	0, "copy", 1, 0, "SYS$SYSTEM:copy.exe",
-	0, "export", 1, 0, "SYS$SYSTEM:export.exe",
-	0, "import", 1, 0, "SYS$SYSTEM:import.exe",
-	0, "delete", 1, 0, "SYS$SYSTEM:delete.exe",
-	0, "difference", 1, 0, "SYS$SYSTEM:difference.exe",
-	0, "extend", 1, 0, "SYS$SYSTEM:extend.exe",
-	0, "search", 1, 0, "SYS$SYSTEM:search.exe",
+	0, "_omount", 1, 0, "/vms$common/sysexe/mount",
+	0, "_odirectory", 1, 0, "/vms$common/sysexe/directory",
+	0, "_ocopy", 1, 0, "/vms$common/sysexe/copy",
+	0, "_oexport", 1, 0, "/vms$common/sysexe/export",
+	0, "_oimport", 1, 0, "/vms$common/sysexe/import",
+	0, "_odelete", 1, 0, "/vms$common/sysexe/delete",
+	0, "_odifference", 1, 0, "/vms$common/sysexe/difference",
+	0, "_oextend", 1, 0, "/vms$common/sysexe/extend",
+	0, "_osearch", 1, 0, "/vms$common/sysexe/search",
+	0, "_otype", 1, 0, "/vms$common/sysexe/type",
+	0, "_oinit", 1, 0, "/vms$common/sysexe/init",
+	0, "_ocreate /directory", 1, 0, "/vms$common/sysexe/create",
+	0, "_oedt", 1, 0, "/vms$common/sysexe/edt",
+	0, "_odfu", 1, 0, "/vms$common/sysexe/dfu",
+	0, "omount", 1, 0, "SYS$SYSTEM:mount.exe",
+	0, "odirectory", 1, 0, "SYS$SYSTEM:directory.exe",
+	0, "ocopy", 1, 0, "SYS$SYSTEM:copy.exe",
+	0, "oexport", 1, 0, "SYS$SYSTEM:export.exe",
+	0, "oimport", 1, 0, "SYS$SYSTEM:import.exe",
+	0, "odelete", 1, 0, "SYS$SYSTEM:delete.exe",
+	0, "odifference", 1, 0, "SYS$SYSTEM:difference.exe",
+	0, "oextend", 1, 0, "SYS$SYSTEM:extend.exe",
+	0, "osearch", 1, 0, "SYS$SYSTEM:search.exe",
 	0, "type", 1, 0, "SYS$SYSTEM:type.exe",
-	0, "init", 1, 0, "SYS$SYSTEM:init.exe",
-	0, "create /directory", 1, 0, "SYS$SYSTEM:create.exe",
-	0, "edt", 1, 0, "SYS$SYSTEM:edt.exe",
-	0, "dfu", 1, 0, "SYS$SYSTEM:dfu.exe",
+	0, "oinit", 1, 0, "SYS$SYSTEM:init.exe",
+	0, "ocreate /directory", 1, 0, "SYS$SYSTEM:create.exe",
+	0, "oedt", 1, 0, "SYS$SYSTEM:edt.exe",
+	0, "odfu", 1, 0, "SYS$SYSTEM:dfu.exe",
 	0, NULL, NULL, NULL, NULL };
 
 
@@ -594,7 +596,9 @@ struct cli_struct cliroutines[]={
 {  "show_default",         int_show_default,          },
 {  "show_working_set",     int_show_working_set,      },
 {  "show_logical",    int_show_logical_name,     },
-{  "show_system",          int_show_system,           },
+{  "show_system",          show_system,           },
+{  "show_symbol",          show_symbol, },
+{  "delete_symbol",          delete_symbol, },
 { 0, 0 , },
 };
 
@@ -3851,6 +3855,11 @@ static unsigned long extcommand (unsigned long h_input, unsigned long h_output, 
     return (SS$_IVPARAM);
   }
 
+  if (0==strncmp(argv[1],"=",1)) {
+    set_symbol(argv[0],argv[2]);
+    return SS$_NORMAL;
+  }
+
   /* If it's a RUN command, it is followed by the image filename then args for the image */
 
   if (strcasecmp (argv[0], "run") == 0 || strcasecmp (argv[0], "mcr") == 0 || strcasecmp (argv[0], "creprc") == 0 || dummy) {
@@ -4390,6 +4399,32 @@ static unsigned long int_set_process (unsigned long h_input, unsigned long h_out
 {
   unsigned long sts;
 
+  $DESCRIPTOR(p, "p1");
+  $DESCRIPTOR(d, "identification");
+
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+
+  int retlen;
+
+  sts = cli$present(&d);
+
+  printf("sts %x\n",sts);
+
+  sts = cli$get_value(&d, &o, &retlen);
+
+  printf("sts %x %x %s\n",sts,retlen,o.dsc$a_pointer);
+
+  sts = cli$present(&p);
+
+  printf("sts %x\n",sts);
+
+  sts = cli$get_value(&p, &o, &retlen);
+
+  printf("sts %x %x %s\n",sts,retlen,o.dsc$a_pointer);
+
   /* We should have exactly one argument - the process name */
 
   set_process(argc,argv);
@@ -4575,85 +4610,10 @@ static unsigned long int_show_logical_name (unsigned long h_input, unsigned long
 
 /************************************************************************/
 /*									*/
-/*	show symbol [<symbol_name>]					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_show_symbol (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  int i;
-  unsigned long sts, x;
-  Script *script;
-  Symbol *symbol;
-
-  x = 0;
-  for (i = 0; i < argc; i ++) {
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is a symbol name */
-
-    symbol = lookup_symbol (argv[i], 0, &x);
-    if (symbol == NULL) fprintf (h_output, "   %s (undefined)\n", argv[i]);
-    else {
-      fprintf (h_output, "  %s [%u]", argv[i], x);
-      show_symbol (h_output, h_error, symbol);
-    }
-    x = 1;
-  }
-
-  if (x == 0) {
-    script = scripts;
-    symbol = symbols;
-    while (1) {
-      fprintf (h_output, "[%u]\n", x ++);
-      for (; symbol != NULL; symbol = symbol -> next) {
-        fprintf (h_output, "  %s", symbol -> name);
-        show_symbol (h_output, h_error, symbol);
-      }
-      if (script == NULL) break;
-      symbol = script -> symbols;
-      script = script -> next;
-    }
-  }
-
-  return (SS$_NORMAL);
-}
-
-static void show_symbol (unsigned long h_output, unsigned long h_error, Symbol *symbol)
-
-{
-  switch (symbol -> symtype) {
-    case SYMTYPE_INTEGER: {
-      if (symbol -> func != NULL) fprintf (h_output, " (integer) (function): %s\n", symbol -> svalue);
-      else fprintf (h_output, " (integer) = %u\n", symbol -> ivalue);
-      break;
-    }
-    case SYMTYPE_STRING: {
-      if (symbol -> func != NULL) fprintf (h_output, " (string) (function): %s\n", symbol -> svalue);
-      else fprintf (h_output, " (string) = %s\n", symbol -> svalue);
-      break;
-    }
-    default: {
-      fprintf (h_output, " (symtype %d)\n", symbol -> symtype);
-      break;
-    }
-  }
-}
-
-
-/************************************************************************/
-/*									*/
 /*	show system							*/
 /*									*/
 /************************************************************************/
-
+#if 0
 static unsigned long int_show_system (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
@@ -4662,75 +4622,10 @@ static unsigned long int_show_system (unsigned long h_input, unsigned long h_out
 
   showopts = 0;
 
-  for (i = 0; i < argc; i ++) {
-
-    /* Devices - display all devices in system */
-
-    if (strcmp (argv[i], "-devices") == 0) {
-      showopts |= SHOWOPT_SYSTEM_DEVICES;
-      continue;
-    }
-
-    /* Iochans - display iochan information for each device */
-
-    if (strcmp (argv[i], "-iochans") == 0) {
-      showopts |= SHOWOPT_SYSTEM_IOCHANS;
-      continue;
-    }
-
-    /* Jobs - display job information for each user */
-
-    if (strcmp (argv[i], "-jobs") == 0) {
-      showopts |= SHOWOPT_SYSTEM_JOBS;
-      continue;
-    }
-
-    /* Objaddr - show objects kernel memory address */
-
-    if (strcmp (argv[i], "-objaddr") == 0) {
-      showopts |= SHOWOPT_OBJADDR;
-      continue;
-    }
-
-    /* Processes - display process information for each job */
-
-    if (strcmp (argv[i], "-processes") == 0) {
-      showopts |= SHOWOPT_SYSTEM_PROCS;
-      continue;
-    }
-
-    /* - security */
-
-    if (strcmp (argv[i], "-security") == 0) {
-      showopts |= SHOWOPT_SECURITY;
-      continue;
-    }
-
-    /* Threads - display thread information for each process */
-
-    if (strcmp (argv[i], "-threads") == 0) {
-      showopts |= SHOWOPT_SYSTEM_THREADS;
-      continue;
-    }
-
-    /* Users - display user information */
-
-    if (strcmp (argv[i], "-users") == 0) {
-      showopts |= SHOWOPT_SYSTEM_USERS;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-  }
-
   sts = show_system (h_output, h_error, &showopts);
   return (sts);
 }
+#endif
 
 static unsigned long int_stop (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 

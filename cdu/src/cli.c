@@ -214,6 +214,19 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
       my_cdu_root[q].cdu$l_next=my->cdu$l_qualifiers;
       my->cdu$l_qualifiers=q;
 
+      struct _cdu * cdu = (*cur_cdu);
+      int s = 0;
+      int q2 = cdu->cdu$l_qualifiers;
+      found = cdu_search_next(q2, CDU$C_QUALIFIER, line, endunit-line, &q2);
+      if (q2)
+	s = cdu_root[q2].cdu$l_syntax;
+      if (s) {
+	int i;
+	found = cdu_search_next(0, CDU$C_SYNTAX, cdu_root[s].cdu$t_name, strlen(cdu_root[s].cdu$t_name), &i);
+	if (found)
+	  *cur_cdu=&cdu_root[i];
+      }
+
       line = endunit;
       while (*line==' ')
 	line++;
