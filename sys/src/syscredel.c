@@ -3,6 +3,7 @@
 
 // Author. Roar Thronæs.
 
+#include<linux/config.h>
 #include<linux/unistd.h>
 #include<linux/linkage.h>
 #include<linux/sched.h>
@@ -18,6 +19,7 @@
 #include <starlet.h>
 #include <va_rangedef.h>
 #include <vmspte.h>
+#include <wsldef.h>
 
 // mmg$credel
 // mmg$crepag
@@ -33,7 +35,119 @@ inline struct _rde * mmg$search_rde_va (void * va, struct _rde *head, struct _rd
 asmlinkage void exe$cntreg(void) {
 }
 
-asmlinkage void exe$deltva(void) {
+int vava=0;
+
+int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
+#ifdef CONFIG_VMS
+  //spinlock  , too
+  int savipl=setipl(IPL$_MMG);
+  if ((unsigned long)va>=0x3ff000) {
+    //   vava=1;
+  }
+  
+  pgd_t *pgd = 0;
+  pmd_t *pmd = 0;
+  pte_t *pte = 0;
+  struct mm_struct * mm=current->mm;
+  unsigned long address=va;
+  
+  if (va>=rde->rde$pq_first_free_va) {
+
+  }
+
+  pgd = pgd_offset(mm, address);
+  pmd = pmd_offset(pgd, address);
+  if (pmd && *(long *)pmd) {
+    pte = pte_offset(pmd, address);
+  }
+
+  if (vava)
+    printk("va %x %x %x\n",pgd,pmd,pte);
+
+  if (pte==0) {
+    setipl(savipl);
+    return SS$_NORMAL;
+  }
+
+  if (*(unsigned long*)pte==0) {
+    setipl(savipl);
+    return SS$_NORMAL;
+  }
+
+  struct _mypte * mypte = pte;
+
+  if (*(long *)pte&_PAGE_PRESENT)
+    goto valid;
+  if (mypte->pte$v_typ1) { // page or image file
+    if (mypte->pte$v_typ0) { // image file
+      *(unsigned long *)mypte=0;
+    } else { // page file
+      mmg$dallocpagfil1(mypte->pte$v_pgflpag);
+      // restore job page file quota
+      // fix phd$l_ppgflva
+      *(unsigned long *)mypte=0;
+      // if last page remove null pages
+      // the book also said something about it coming from a demand zero...
+    }
+  }
+  if (mypte->pte$v_typ1==0) { //zero transition or global
+    if (mypte->pte$v_typ0==0) {
+      if (mypte->pte$v_pfn) { //transition
+	if (mem_map[mypte->pte$v_pfn].pfn$v_loc==PFN$C_FREPAGLST) {
+	  mmg$delpfnlst(PFN$C_FREPAGLST,mypte->pte$v_pfn);
+	  // do something with pfn shrcnt 
+	  goto skipthis;
+	}
+
+	if (mem_map[mypte->pte$v_pfn].pfn$v_loc==PFN$C_MFYPAGLST) {
+	  //also check if it has page file backing store
+	  mem_map[mypte->pte$v_pfn].pfn$l_page_state&=~PFN$M_MODIFY;
+	  mmg$delpfnlst(PFN$C_MFYPAGLST,mypte->pte$v_pfn);
+	  goto skipthis;
+	}
+
+	// there also is a couple of more steps and checks
+
+      skipthis:
+
+      } else { // zero page demand?
+	// do not do anything?
+      }      
+    } else {
+    }
+  }
+  goto out;
+
+ valid:
+  {}
+  struct _phd * phd = p->pcb$l_phd;
+  struct _wsl * wsl = phd->phd$l_wslist;
+  struct _pfn * pfn = &mem_map[mypte->pte$v_pfn];
+  struct _wsl * wsle = &wsl[pfn->pfn$l_wslx_qw];
+  wsle->wsl$pq_va=0;
+
+ out:
+
+#ifndef __arch_um__
+  __flush_tlb(); //flush_tlb_range(current->mm, page, page + PAGE_SIZE);
+#endif
+  setipl(savipl);
+  return SS$_NORMAL;
+#endif
+}
+
+asmlinkage int exe$deltva(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
+  // create and init stack scratch space
+
+  setipl(IPL$_ASTDEL);
+
+  void * first=inadr->va_range$ps_start_va;
+  void * last=inadr->va_range$ps_end_va;
+  struct _pcb * p=ctl$gl_pcb;
+  struct _rde * rde;
+  unsigned long numpages=(last-first)/PAGE_SIZE;
+  int acmode=0;
+  mmg$credel(acmode, first, last, mmg$delpag, inadr, retadr, acmode, p, numpages);
 }
 
 asmlinkage void exe$expreg(void) {
