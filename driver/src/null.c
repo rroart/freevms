@@ -314,8 +314,6 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
   bzero(u,sizeof(struct _ucb));
   bzero(idb,sizeof(struct _idb));
 
-  insertdevlist(ddb);
-
   bcopy(sdpt,dpt->dpt$t_name,strlen(sdpt));
 
   /* for the ddb init part */
@@ -345,6 +343,8 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
   ddt->ddt$l_fdt=fdt;
 
   dpt->dpt$ps_ddt=ddt;
+
+  insertdevlist(ddb);
 
   return u;
 }

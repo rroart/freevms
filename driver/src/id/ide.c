@@ -261,8 +261,6 @@ int ide_vmsinit(void) {
   bzero(ddb,sizeof(struct _ddb));
   bzero(crb,sizeof(struct _crb));
 
-  insertdevlist(ddb);
-
   init_ddb(&ide$ddb,&ide$ddt,&ide$ucb,"dqa");
   init_ucb(&ide$ucb, &ide$ddb, &ide$ddt, &ide$crb);
   init_crb(&ide$crb);
@@ -271,6 +269,8 @@ int ide_vmsinit(void) {
   ide$struc_init (crb, ddb, idb, orb, ucb);
   ide$struc_reinit (crb, ddb, idb, orb, ucb);
   ide$unit_init (idb, ucb);
+
+  insertdevlist(ddb);
 
   /* for the fdt init part */
   /* a lot of these? */
