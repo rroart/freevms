@@ -451,8 +451,10 @@ extern  void    cq_deqcopy();
 
 // IOUTIL.BLI
 
+#if 0
 extern  void    FATAL_FAO();
 extern  void    OPR_FAO();
+#endif
 extern  void    LOG_FAO();
 extern  void    LOG_OUTPUT();
 extern  void    ASCII_Dec_Bytes();
