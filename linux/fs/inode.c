@@ -79,8 +79,10 @@ static kmem_cache_t * inode_cachep;
 	 ((struct inode *) kmem_cache_alloc(inode_cachep, SLAB_KERNEL))
 static void destroy_inode(struct inode *inode) 
 {
+#ifndef CONFIG_VMS
 	if (inode_has_buffers(inode))
 		BUG();
+#endif
 	kmem_cache_free(inode_cachep, (inode));
 }
 
@@ -475,12 +477,14 @@ int generic_osync_inode(struct inode *inode, int what)
 	 * every O_SYNC write, not just the synchronous I/Os.  --sct
 	 */
 
+#ifndef CONFIG_VMS
 	if (what & OSYNC_METADATA)
 		err = fsync_inode_buffers(inode);
 	if (what & OSYNC_DATA)
 		err2 = fsync_inode_data_buffers(inode);
 	if (!err)
 		err = err2;
+#endif
 
 	spin_lock(&inode_lock);
 	if ((inode->i_state & I_DIRTY) &&
@@ -507,9 +511,9 @@ int generic_osync_inode(struct inode *inode, int what)
  
 void clear_inode(struct inode *inode)
 {
+#ifndef CONFIG_VMS       
 	invalidate_inode_buffers(inode);
 
-#ifndef CONFIG_VMS       
 	if (inode->i_data.nrpages)
 		BUG();
 	if (!(inode->i_state & I_FREEING))
@@ -571,7 +575,9 @@ static int invalidate_list(struct list_head *head, struct super_block * sb, stru
 		inode = list_entry(tmp, struct inode, i_list);
 		if (inode->i_sb != sb)
 			continue;
+#ifndef CONFIG_VMS
 		invalidate_inode_buffers(inode);
+#endif
 		if (!atomic_read(&inode->i_count)) {
 			list_del_init(&inode->i_hash);
 			list_del(&inode->i_list);
@@ -642,7 +648,9 @@ int invalidate_device(kdev_t dev, int do_sync)
 		res = invalidate_inodes(sb);
 		drop_super(sb);
 	}
+#ifndef CONFIG_VMS
 	invalidate_buffers(dev);
+#endif
 	return res;
 }
 
@@ -658,9 +666,14 @@ int invalidate_device(kdev_t dev, int do_sync)
  * N.B. The spinlock is released during the call to
  *      dispose_list.
  */
+#ifndef CONFIG_VMS
 #define CAN_UNUSE(inode) \
 	((((inode)->i_state | (inode)->i_data.nrpages) == 0)  && \
 	 !inode_has_buffers(inode))
+#else
+#define CAN_UNUSE(inode) \
+	((((inode)->i_state | (inode)->i_data.nrpages) == 0))
+#endif
 #define INODE(entry)	(list_entry(entry, struct inode, i_list))
 
 void prune_icache(int goal)

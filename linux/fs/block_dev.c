@@ -59,7 +59,9 @@ static loff_t blkdev_size(kdev_t dev)
 /* Kill _all_ buffers, dirty or not.. */
 static void kill_bdev(struct block_device *bdev)
 {
+#ifndef CONFIG_VMS
 	invalidate_bdev(bdev, 1);
+#endif
 	truncate_inode_pages(bdev->bd_inode->i_mapping, 0);
 }	
 
@@ -120,12 +122,20 @@ static int blkdev_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf,
 
 static int blkdev_writepage(struct page * page)
 {
+#ifndef CONFIG_VMS
 	return block_write_full_page(page, blkdev_get_block);
+#else
+	panic("ai blkdev wr\n");
+#endif
 }
 
 static int blkdev_readpage(struct file * file, struct page * page)
 {
+#ifndef CONFIG_VMS
 	return block_read_full_page(page, blkdev_get_block);
+#else
+	panic("ai blkdev rd\n");
+#endif
 }
 
 static int blkdev_prepare_write(struct file *file, struct page *page, unsigned from, unsigned to)

@@ -1998,7 +1998,9 @@ static char *page_getlink(struct dentry * dentry, struct page **ppage)
 #endif
 	if (IS_ERR(page))
 		goto sync_fail;
+#ifndef CONFIG_VMS
 	wait_on_page(page);
+#endif
 	if (!Page_Uptodate(page))
 		goto async_fail;
 	*ppage = page;

@@ -260,8 +260,8 @@ static void check_partition(struct gendisk *hd, kdev_t dev, int first_part_minor
 
 	printk(" unknown partition table\n");
 setup_devfs:
-	invalidate_bdev(bdev, 1);
 #ifndef CONFIG_VMS
+	invalidate_bdev(bdev, 1);
 	truncate_inode_pages(bdev->bd_inode->i_mapping, 0);
 #else
 	truncate_inode_pages(bdev->bd_inode->i_mapping, 0);
@@ -445,7 +445,9 @@ unsigned char *read_dev_sector(struct block_device *bdev, unsigned long n, Secto
 	block_read_full_page2(bdev->bd_inode,page,n/sect);
 
 	if (!IS_ERR(page)) {
+#if 0
 		wait_on_page(page);
+#endif
 		if (!Page_Uptodate(page))
 			goto fail;
 		if (PageError(page))
