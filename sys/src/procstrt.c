@@ -256,7 +256,7 @@ int exe$procstrt(struct _pcb * p) {
 #else
 #endif
 
-  init_p1pp(p,p->pcb$l_phd);
+  // not?  init_p1pp(p,p->pcb$l_phd);
   lnm_init_prc(current);
 
   if (strncmp(".exe",pqb->pqb$t_image+len-4,4)) goto do_execve;
