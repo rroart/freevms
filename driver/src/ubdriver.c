@@ -603,6 +603,7 @@ int ubd_vmsinit(void) {
   struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"ubd0","ubdriver");
   /* for the fdt init part */
   /* a lot of these? */
+  ini_fdt_act(&fdt,IO$_ACCESS,acp_std$access,1);
   ini_fdt_act(&fdt,IO$_READLBLK,acp_std$readblk,1);
   ini_fdt_act(&fdt,IO$_READPBLK,acp_std$readblk,1);
   ini_fdt_act(&fdt,IO$_READVBLK,acp_std$readblk,1);
