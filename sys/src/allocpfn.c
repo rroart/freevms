@@ -8,8 +8,8 @@
 #include <pfndef.h>
 
 struct _mypfn {
-  struct myq * pfn$l_flink;
-  struct myq * pfn$l_blink;
+  struct _mypfn * pfn$l_flink;
+  struct _mypfn * pfn$l_blink;
 };
 
 signed long mmg$allocpfn(void) {
@@ -67,12 +67,49 @@ signed long mmg$dallocpfn(unsigned long pfn) {
   //  mem_map[pfn].pfn$l_flink=0;
   //mem_map[pfn].pfn$l_blink=pfn$al_tail;
   //return;
+
+#if 0
+  // do not do original algorithm for now
   m->pfn$l_flink=0;
   m->pfn$l_blink=pfn$al_tail;
   if (mem_map[pfn].pfn$l_flink) panic("dalloc\n");
   ((struct _pfn *)pfn$al_tail)->pfn$l_flink=&mem_map[pfn];
   pfn$al_tail=&mem_map[pfn];
   sch$gl_freecnt++;
+#else
+  // do one that "sorts"; we do not want totally fragmentation and panic
+  struct _mypfn * tmp = pfn$al_head;
+  mypfncheckaddr();
+  if (m<pfn$al_head) {
+    m->pfn$l_flink=pfn$al_head;
+    m->pfn$l_blink=0;
+    tmp->pfn$l_blink=m;
+    pfn$al_head=m;
+    goto out;
+  }
+  while (tmp!=pfn$al_tail) {
+    if (m>tmp && m<tmp->pfn$l_flink) { 
+      m->pfn$l_flink=tmp->pfn$l_flink;
+      m->pfn$l_blink=tmp;
+      ((struct _mypfn *)tmp->pfn$l_flink)->pfn$l_blink=m;
+      tmp->pfn$l_flink=m;
+      goto out;
+    }
+    if (m>tmp && tmp->pfn$l_flink==0) {
+      tmp->pfn$l_flink=m;
+      m->pfn$l_flink=0;
+      m->pfn$l_blink=pfn$al_tail;
+      pfn$al_tail=m;
+      goto out;
+    }
+    tmp=tmp->pfn$l_flink;
+  }
+ out:
+  //  if (mem_map[pfn].pfn$l_flink) panic("dalloc\n");
+  //((struct _pfn *)pfn$al_tail)->pfn$l_flink=&mem_map[pfn];
+  mypfncheckaddr();
+  sch$gl_freecnt++;
+#endif
 }
 
 /* at least task_struct need to be on a 8k/16k aligned va */
@@ -111,5 +148,42 @@ signed long mmg$allocontig_align(unsigned long num) {
     panic("refcnt\n");
   sch$gl_freecnt-=num;
   return (((unsigned long)first-(unsigned long)mem_map)/sizeof(struct _pfn));
+}
+
+mypfncheckaddr(){
+#if 0
+  // for debugging "only"
+  int i,n=0,m=0;
+  struct _mypfn  *tmp2;
+  unsigned long tmp;
+  tmp=pfn$al_head;
+  tmp2=tmp;
+  tmp2=tmp2->pfn$l_flink;
+  do {
+    n++;
+    if (tmp2!=(tmp2->pfn$l_flink->pfn$l_blink)) goto mypanic;
+    if (tmp2!=(tmp2->pfn$l_blink->pfn$l_flink)) goto mypanic;
+    tmp2=tmp2->pfn$l_flink;
+  } while (tmp2!=pfn$al_tail);
+  n--;
+  tmp=pfn$al_tail;
+  tmp2=tmp;
+  tmp2=tmp2->pfn$l_blink;
+  do {
+    m++;
+    if (tmp2!=(tmp2->pfn$l_flink->pfn$l_blink)) goto mypanic;
+    if (tmp2!=(tmp2->pfn$l_blink->pfn$l_flink)) goto mypanic;
+    tmp2=tmp2->pfn$l_blink;
+  } while (tmp2!=pfn$al_head);
+  m--;
+  if (n!=m) goto mypanic;
+  return;
+ mypanic:
+  printk("mypanic %x %x %x %x %x\n",i,n,m,tmp,tmp2);
+  printk("mypanic %x %x %x %x %x\n",tmp2->pfn$l_flink,tmp2->pfn$l_flink->pfn$l_blink,tmp2->pfn$l_blink,tmp2->pfn$l_blink->pfn$l_flink,42);
+  cli();
+  while(1) {; };
+  sickinsque(0x11111111,0x22222222);
+#endif 
 }
 
