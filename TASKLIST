@@ -103,7 +103,7 @@ FreeVMS tasklist
   RMS, barely started, need more people.
   "SRM" handling ODS-2
   Utilities COPY DIRECTORY etc, barely started, vacant
-  VMS image support, linker+compiler support for images, nothing done, vacant.
+  VMS image support, linker+compiler support for images, some done.
   Kernel:
     Control Mechanisms:
 	Condition handling, no work done yet, vacant.
@@ -127,7 +127,7 @@ Medium/low priority:
 
 Low priority:
   CRTL, we will continue to try to use libc etc? 
-  Editors, nothing done, vacant
+  Editors, got edt from Ozone, vacant
   Volume shadowing, nothing done, vacant
 
 

@@ -68,3 +68,13 @@ Look at how ne2000 is probed
 Look at how simple and complex buffers are allocated and freed
 
 Make echoing work in putnextchar (right before reqcom)
+
+In syslnm trnlnm only use retlenaddr and not buflen for it.
+
+Check for more of the following in cmuip code (and more):
+signed long vtcb_ptr[0]; and replace with like: long * vtcb_ptr;
+Gcc 3.4 had problems with the first.
+
+sysimgact use PAGE_ instead of numbers.
+
+Look at having images as ELF? (Itanic is going to use ELF, it seems)

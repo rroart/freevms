@@ -13,6 +13,7 @@ Use gcc 2.96 etc with uml.
 As recent gcc as 3.4 can now be used. (But some new problems are there)
 
 Linker (experimental):
+The linker must be made.
 If you want to know how to make the linker do: 
 make download-linker
 make build-linker
@@ -73,6 +74,10 @@ Running stuff:
 		Do not expect X to work.
 	With CONFIG_VMS:
 		Boot with single-user bash or dcl.
+
+Bochs:
+	Configure with at least 
+	--enable-debugger --enable-ne2000 --enable-cpu-level=6
 
 Automation:
 	Use make image to make a floppy and disk image.

@@ -273,22 +273,80 @@ Follows the internals book, I think.
 
 Miscellaneous I/O topics
 
-There is a tty line driver implemented with QIO in CONFIG_VMS.
-It is a bit bad, but not as bad as before.
+Terminal, pseudo terminal and terminal class driver.
+
+The pseudo terminal driver has two parts, tza and pna.
+Tza is connected directly to DCL, while pna is connected to the other end,
+the CMUIP telnetd.
+If you read/write from DCL, it first goes into a part of the class driver, and
+tty$fdtread/write is run.
+They build some structures, and goes into tty$startio.
+Note that both read and write for tty$startio does a tty$getnextchar,
+but inside tty$getnextchar behaves differently. (Same as PN$STARTIO does.)
+Then tty$startio starts to call the port driver, in this case TZ$STARTIO.
+Note that it is called with a different interface that is not the quite
+usual for startio. (But the same as get/putnextchar has, it seems.)
+TZ$STARTIO is using the pna ucb to call PN$STARTIO (standard interface).
+PN$STARTIO does tty$getnextchar regardless of whether the operation is
+read/write (the same as tty$startio does).
+Reading/writing in the other direction, PN$FDTREAD gets into PN$STARTIO
+using the same ucb.
+PN$FDTWRITE runs if needed, tty$putnextchar, before it with the same ucb
+calls PN$STARTIO.
+Both tty$put/getnextchar is called with the tza ucb.
+
+Tty$putnextchar checks whether this is unsolicited I/O, and if it is it
+creates a new process.
+If there is no typeahead buffer it creates one.
+Then it inserts the character into the typeahead buffer.
+Next last it does call tty$getnextchar to output the character.
+Last is does ioc$reqcom.
+
+Tty$getnextchar may be used for both read/write.
+If it is used for writing it gets its data from the write buffer
+tty$fdtwrite made.
+When that buffer is empty is does ioc$reqcom.
+If it is used for reading it takes a character out of the typeahead buffer.
+It also puts that character into the read buffer made by tty$fdtread.
+The read buffer is a DYN$C_BUFIO, which is later moved by movbuf in bufpost.
+
+The key interpreting is done in the terminal class driver, which just passes
+the characters through. (Which explains the messy output.)
+
+For the following, note that UML is not modified with regard to the new
+terminal drivers, so it might not work if UML were to be fixed.
 
 The main 386 module is vmsconsole (not derived from console).
-The read routine uses kbd$fdtread in pc_keyb.
+As of now, the previous read routine kbd$fdtread in pc_keyb is no longer
+used.
 Pc_keybd is based on the Linux routine, but does it differently.
 Use of PSMOUSE may break it in the future.
-
+The tty$fdtread/write still goes to tty$startio, which calls the
+port startio con$startio in vmsconsole (note different interface).
 The write routine uses console_driver.write in console.
-The routine n_tty.c is based on the one in char/, but changed a bit. Vms_read_chan is added, and it is a modified version of read_chan. Vms_read_chan is no longer used.
+If it wants to read it does a getchar and loops.
+When a key is actually read, put_queue checks whether it is ctrl-p and acts
+accordingly.
+It also goes to tty$putnextchar.
+
+The routine n_tty.c is based on the one in char/, but changed a bit. 
+Vms_read_chan is added, and it is a modified version of read_chan. Vms_read_chan is no longer used.
 Console.c in ttdrvr is based on the one in char/ (include changed, only)
-Tty_io.c is modifies, but has mostly changes for $qio use.
-Keyboard.c is new.
+Tty_io.c is modified, but has mostly changes for $qio use.
+When tty_read/write is entered, it goes into the terminal class driver.
+Keyboard.c is new, and has modifications to put_queue.
 Vmspc_keybd is not doing anything, and will be removed.
 
+[ptd.src]
+pndriver.c
+tzdriver.c
+
 [ttdrvr.src]
+ttychari.c
+ttycharo.c
+ttydrvdat.c
+ttyfdt.c
+ttystrstp.c
 vmsconsole.c
 
 ****************
