@@ -240,8 +240,6 @@ void __exit dn_dev_cleanup(void)
 #endif
 
 	proc_net_remove("myscs_dev");
-
-	dn_dev_devices_off();
 }
 
 static u32 dn_neigh_hash(const void *pkey, const struct net_device *dev);
