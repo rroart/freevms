@@ -856,12 +856,19 @@ void Main (void) {
 
     exe$setrwm(1);
 
+    // borrow from tcpmod.req until we get tcpmod.h
+
+#define    IPACP_Version_String "IP_ACP(V6.6-5.001) "  //Becomes ACP process name.
+#define    IPACP_Version_Name IPACP_Version_String
+#define    IPACP_Date_String "26-Aug-2004" 	// Date of last change
+#define    IPACP_Who_String "roart" // Author of last change
+
 // Announce that we exist.
 
-#if 0
-    OPR$FAO(%STRING(IPACP_Version_String," [',IPACP_Who_String,'/",
-		    IPACP_Date_String,"] starting"));
-#endif
+    char s[256];
+    sprintf(s,"%s%s%s%s%s%s\n",IPACP_Version_String,"[",IPACP_Who_String,"/",
+		    IPACP_Date_String,"] starting");
+    OPR$FAO(s);
 
 //    OPR$FAO("NET$_CC = !XL",NET$_CC);
 
@@ -881,7 +888,6 @@ void Main (void) {
     OPR$FAO("Network online");
 
 // Main processing loop....till forever or time 2 Exit.
-
     do {
 	    long nxtime ;
 
