@@ -113,6 +113,8 @@ void  file_mntv_sqd (void) { };
 void  file_aux_storage (void) { };
 void  file_aux_routine (void) { };
 
+int acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
 void fl_read(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   exe$qiodrvpkt(i,p,u);
 };
@@ -154,6 +156,9 @@ struct _ucb nullucb;
 struct _crb nullcrb;
 struct _ccb nullccb;
 #endif
+
+int acp_std$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+int acp_std$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
 struct _ucb * fl_init(char * s) {
   struct _ucb * u;
@@ -209,10 +214,13 @@ struct _ucb * fl_init(char * s) {
 
   /* for the fdt init part */
   /* a lot of these? */
-  ini_fdt_act(&fdt_file,IO$_READLBLK,fl_read,1);
-  ini_fdt_act(&fdt_file,IO$_READPBLK,fl_read,1);
-  ini_fdt_act(&fdt_file,IO$_READVBLK,fl_read,1);
-
+  ini_fdt_act(&fdt_file,IO$_READLBLK,acp_std$readblk,1);
+  ini_fdt_act(&fdt_file,IO$_READPBLK,acp_std$readblk,1);
+  ini_fdt_act(&fdt_file,IO$_READVBLK,acp_std$readblk,1);
+  ini_fdt_act(&fdt_file,IO$_WRITELBLK,acp_std$writeblk,1);
+  ini_fdt_act(&fdt_file,IO$_WRITEPBLK,acp_std$writeblk,1);
+  ini_fdt_act(&fdt_file,IO$_WRITEVBLK,acp_std$writeblk,1);
+  ini_fdt_act(&fdt_file,IO$_ACCESS,acp_std$access,1);
   return u;
 }
 
