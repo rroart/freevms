@@ -27,7 +27,7 @@ int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirecti
   struct _mypte *pte = findpte(p,va);
   if (pte->pte$v_valid==0)
     return SS$_NORMAL;
-#ifdef __arch_um
+#ifdef __arch_um__
   pfn=__pa(pte->pte$v_pfn<<PAGE_SHIFT)>>PAGE_SHIFT;
 #else
   pfn=pte->pte$v_pfn;
