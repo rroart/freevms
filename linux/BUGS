@@ -1,5 +1,3 @@
 doing something like ctrl-c in a shell gotten by ssh-ing locks the machine.
 
 smp is broken.
-
-ext3 journaling is broken.
