@@ -121,7 +121,7 @@ int lan$eth_type_trans(struct _ucb * u, void * data ) {
 	return htons(ETH_P_802_2);
 }
 
-int lan$netif_rx(struct _ucb * u, char * buf ) {
+int lan$netif_rx(struct _ucb * u, char * buf, int len ) {
   int proto=lan$eth_type_trans(u, buf);
   struct _ucbnidef * ni;
   struct _ucb * head=u;
@@ -131,6 +131,12 @@ int lan$netif_rx(struct _ucb * u, char * buf ) {
     if (proto == ni->ucb$l_ni_pty) break;
     tmp=tmp->ucb$l_fqfl;
   }
+  exe$iofork(u->ucb$l_ioqfl,u);
+}
+
+int lan$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  exe$insertirp(u,i);
+  return SS$_NORMAL;
 }
 
 init_etherdev() {

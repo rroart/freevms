@@ -3,11 +3,12 @@
 #include <ucbnidef.h>
 
 int er$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  return lan$readblk(i,p,u,c);
 }
 
 int er$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   int sts = ei_start_xmit  (i, p, u, c); 
-  return sts;
+  return sts = SS$_NORMAL;
 }
 
 /* 8390.c: A general NS8390 ethernet driver core for linux. */
@@ -769,7 +770,7 @@ static void ei_receive(struct net_device *dev)
 #if 0
 				skb->protocol=eth_type_trans(skb,dev);
 #endif
-				lan$netif_rx(u, buf);
+				lan$netif_rx(u, buf, pkt_len);
 				dev->last_rx = jiffies;
 				ei_local->stat.rx_packets++;
 				ei_local->stat.rx_bytes += pkt_len;

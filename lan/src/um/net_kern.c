@@ -318,11 +318,12 @@ int eu_vmsinit(void) {
 }
 
 int eu$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  return lan$readblk(i,p,u,c);
 }
 
 int eu$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   int sts = uml_net_start_xmit  (i, p, u, c); 
-  return sts;
+  return sts = SS$_NORMAL;
 }
 
 /*
@@ -516,7 +517,7 @@ static int uml_net_rx(struct net_device *dev)
 
 	reactivate_fd(lp->fd);
 	if (pkt_len > 0) {
-		lan$netif_rx(u, buf);
+		lan$netif_rx(u, buf, pkt_len);
 
 		lp->stats.rx_bytes += pkt_len;
 		lp->stats.rx_packets++;
