@@ -14,6 +14,7 @@
 #include<fiddef.h>
 #include<iodef.h>
 #include<iosbdef.h>
+#include<ipldef.h>
 #include<irpdef.h>
 #include<ssdef.h>
 #include<ucbdef.h>
@@ -52,6 +53,7 @@ void f11b$dispatcher(void) {
   pid=0;
   while (!aqempty(&xqp->xqp_head)) {
     i=remque(xqp->xqp_head,0);
+    xqp->io_channel=i->irp$w_chan;
     fcode=i->irp$v_fcode;
     fmode=i->irp$v_fmod;
     iosbret(i,SS$_NORMAL);
@@ -81,6 +83,7 @@ void f11b$dispatcher(void) {
       {
 	char * buffer;
 	f11b_read_writevb(i);
+	//return; // too early, maybe, but because of io_done
 	//accesschunk(0,i->irp$l_qio_p3,&buffer,0,0,i);
 	//memcpy(i->irp$l_qio_p1,buffer,512);
       }
@@ -109,6 +112,8 @@ void f11b$dispatcher(void) {
       printk ("xqp %x code not implemented yet\n",fcode);
       break;
     }
+    if (i) 
+      f11b_io_done(i);
   }
 }
 
@@ -198,4 +203,30 @@ unsigned f11b_modify(struct _vcb * vcb, struct _irp * irp)
 
   iosbret(irp,SS$_NORMAL);
   return SS$_NORMAL;
+}
+
+int f11b_io_done(struct _irp * i) {
+  void (*func)(unsigned long);
+  // move user_status into irp$l_media
+  if (i->irp$l_iosb==0) { // not set, or something vipes the irp
+    i->irp$l_iost1=SS$_NORMAL;  // temporary value, must be set
+  } else {
+    i->irp$l_iost1=((struct _iosb *)i->irp$l_iosb)->iosb$w_status;
+  }
+  // decr vcb transaction count
+  // clear namestring
+  // copy local fib back intro the complex buffer packet
+  // set irp$l_bcnt to abd$c_attrib
+  
+  // call check-dismount
+
+  setipl(IPL$_ASTDEL);
+  ioc$bufpost(i);
+
+  sch$postef(i->irp$l_pid,0,i->irp$b_efn);
+  
+  func=i->irp$l_wind; //really acb$l_kast
+  func(i);
+
+  setipl(0);
 }
