@@ -262,8 +262,26 @@ extern int errno;
       }									      \
     (int) resultvar; })
 
-#undef INLINE_SYSCALL2
-#define INLINE_SYSCALL2(name, nr, args...) \
+#undef INLINE_SYSCALL3
+#define INLINE_SYSCALL3(name, nr, args...) \
+  ({									      \
+    unsigned int resultvar;						      \
+    asm volatile (							      \
+    LOADARGS_##nr							      \
+    "movl %1, %%eax\n\t"						      \
+    "int $0x84\n\t"							      \
+    RESTOREARGS_##nr							      \
+    : "=a" (resultvar)							      \
+    : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");		      \
+    if (resultvar >= 0xfffff001)					      \
+      {									      \
+	errno= (-resultvar);					      \
+	resultvar = 0xffffffff;						      \
+      }									      \
+    (int) resultvar; })
+
+#undef INLINE_SYSCALLTEST
+#define INLINE_SYSCALLTEST(name, nr, args...) \
   ({									      \
     unsigned int resultvar;						      \
     asm volatile (							      \

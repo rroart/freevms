@@ -20,6 +20,11 @@ done
 		ln -s ../../freevms/sys/src/forkcntrl.c .;
 		ln -s ../../freevms/sys/src/iosubnpag.c .;
 		ln -s ../../freevms/sys/src/sysastcon.c .;
+		ln -s ../../freevms/sys/src/sysgettim.c .;
+		ln -s ../../freevms/sys/src/syssetime.c .;
+		ln -s ../../freevms/sys/src/syscvrtim.c .;
+		ln -s ../../freevms/sys/src/sysschevt.c .;
+		ln -s ../../freevms/sys/src/syscanevt.c .;
 		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
 		rm ast.c; ln -s ../../freevms/pal/src/ast.c .;
 )

@@ -292,6 +292,17 @@ reschedule:
 	jmp ret_from_sys_call
 
 
+ENTRY(vmssystem_call3)
+	pushl %eax			# save orig_eax
+	SAVE_ALL
+	GET_CURRENT(%ebx)
+	testb $0x02,tsk_ptrace(%ebx)	# PT_TRACESYS
+	jne vmstracesys
+	cmpl $(NR_vmssyscalls3),%eax
+	jae vmsbadsys
+	call *SYMBOL_NAME(vmssys_call_table3)(,%eax,4)
+        jmp syscall_common
+
 ENTRY(vmssystem_call)
 	pushl %eax			# save orig_eax
 	SAVE_ALL
@@ -301,7 +312,8 @@ ENTRY(vmssystem_call)
 	cmpl $(NR_vmssyscalls),%eax
 	jae vmsbadsys
 	call *SYMBOL_NAME(vmssys_call_table)(,%eax,4)
-	movl %eax,EAX(%esp)		# save the return value
+syscall_common:
+        movl %eax,EAX(%esp)		# save the return value
 ENTRY(vmsret_from_sys_call)
 	cli				# need_resched and signals atomic test
 	cmpl $0,need_resched(%ebx)
@@ -769,9 +781,26 @@ ENTRY(vmssys_call_table)
         .long SYMBOL_NAME(exe$wflor)
         .long SYMBOL_NAME(exe$wfland)
         .long SYMBOL_NAME(exe$clref)
+        .long SYMBOL_NAME(exe$setime)
+        .long SYMBOL_NAME(exe$setimr)
+        .long SYMBOL_NAME(exe$cantim)
+        .long SYMBOL_NAME(exe$numtim)
+        .long SYMBOL_NAME(exe$gettim)
 
 	.rept NR_vmssyscalls-(.-vmssys_call_table)/4
 		.long SYMBOL_NAME(sys_$ni_syscall)
 
   .endr
+
+ENTRY(vmssys_call_table3)
+	.long SYMBOL_NAME(sys_$ni_syscall3)	/* 0  -  old "setup()" system call*/
+        .long SYMBOL_NAME(exe$asctim)
+        .long SYMBOL_NAME(exe$bintim)
+
+	.rept NR_vmssyscalls3-(.-vmssys_call_table3)/4
+		.long SYMBOL_NAME(sys_$ni_syscall3)
+
+  .endr
+
+
 

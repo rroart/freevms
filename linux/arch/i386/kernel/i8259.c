@@ -458,6 +458,7 @@ void __init init_IRQ(void)
 		int vector = FIRST_EXTERNAL_VECTOR + i;
 		if (vector != SYSCALL_VECTOR &&/* vector !=TEST_VECTOR &&*/
 		    vector != VMSSYSCALL_VECTOR  &&
+		    vector != VMSSYSCALL_VECTOR3 &&
 						   ! (vector >= ASTDEL_VECTOR && vector <= POWER_VECTOR)) 
 			set_intr_gate(vector, interrupt[i]);
 	}

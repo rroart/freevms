@@ -24,6 +24,9 @@
 
 #define SYSCALL_VECTOR		0x80
 #define VMSSYSCALL_VECTOR       0x81
+#define VMSSYSCALL_VECTOR1       0x82
+#define VMSSYSCALL_VECTOR2       0x83
+#define VMSSYSCALL_VECTOR3       0x84
 
 #define FORKABLE_IPL_VECTOR 3904
 #define POWER_VECTOR 0xaf

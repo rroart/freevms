@@ -52,6 +52,7 @@
 
 asmlinkage int system_call(void);
 asmlinkage int vmssystem_call(void);
+asmlinkage int vmssystem_call3(void);
 asmlinkage void lcall7(void);
 asmlinkage void lcall27(void);
 
@@ -951,6 +952,7 @@ void __init trap_init(void)
 
 	set_system_gate(SYSCALL_VECTOR,&system_call);
 		set_system_gate(VMSSYSCALL_VECTOR,&vmssystem_call);
+		set_system_gate(VMSSYSCALL_VECTOR3,&vmssystem_call3); /* will need to figure out where the user mode setup is */
 
 		//		set_intr_gate(TEST_VECTOR,&test_code);
 		set_intr_gate(SCHED_VECTOR,&sched_vector);

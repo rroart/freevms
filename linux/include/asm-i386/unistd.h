@@ -231,7 +231,7 @@
 #define __NR_gettid		224
 #define __NR_readahead		225
 
-
+/* vms kernel mode */
 #define __NR_$testtest          1
 #define __NR_$setpri		2
 #define __NR_$crelnt            3
@@ -241,6 +241,14 @@
 #define __NR_$wflor             7
 #define __NR_$wfland            8
 #define __NR_$clref             9
+#define __NR_$setime           10
+#define __NR_$setimr           11
+#define __NR_$cantim           12
+#define __NR_$numtim           13 /* really in exec mode */
+#define __NR_$gettim           14
+ 
+#define __NR_$asctim            1
+#define __NR_$bintim            2
 
 /* user-visible error numbers are in the range -1 - -124: see <asm-i386/errno.h> */
 

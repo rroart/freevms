@@ -3,7 +3,7 @@
 #include <asm/unistd.h>
 
 int sys$testcode(void) {
-  return INLINE_SYSCALL2($setprn,0);
+  return INLINE_SYSCALLTEST($setprn,0);
 }
 
 int sys$setprn  ( void *prcnam) { 
@@ -61,5 +61,36 @@ int sys$wflor  (unsigned int efn, unsigned int mask) {
 
 int sys$clref  (unsigned int efn) {
   return INLINE_SYSCALL($clref,1,efn);
+}
+
+int sys$setime  (unsigned long long  *timadr) {
+  return INLINE_SYSCALL($setime,1,timadr);
+}
+
+int sys$setimr  (unsigned int efn, unsigned long long *daytim,
+		 void (*astadr)(long), unsigned
+		 long reqidt, unsigned int flags) {
+  return INLINE_SYSCALL($setimr,5,efn,daytim,astadr,reqidt,flags);
+}
+
+int sys$cantim  (unsigned long long reqidt, unsigned int acmode) {
+  return INLINE_SYSCALL($cantim,2,reqidt,acmode);
+}
+
+int sys$numtim  (unsigned short int timbuf [7], unsigned long long * timadr) {
+  return INLINE_SYSCALL($numtim,2,timbuf,timadr);
+}
+
+int sys$gettim (unsigned long long * timadr) {
+  return INLINE_SYSCALL($gettim,1,timadr);
+}
+
+int sys$asctim  (unsigned short int *timlen, void *timbuf,
+		 unsigned long long *timadr, char cvtflg) {
+  return INLINE_SYSCALL3($asctim,4,timlen,timbuf,timadr,(unsigned long)cvtflg);
+}
+
+int sys$bintim  (void *timbuf, unsigned long long *timadr) {
+  return INLINE_SYSCALL3($bintim,2,timbuf,timadr);
 }
 

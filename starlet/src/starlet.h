@@ -17,6 +17,22 @@ int sys$wflor  (unsigned int efn, unsigned int mask);
 
 int sys$clref  (unsigned int efn);
 
+int sys$setime  (unsigned long long  *timadr);
+
+int sys$setimr  (unsigned int efn, unsigned long long *daytim,
+		 void (*astadr)(long), unsigned
+		 long reqidt, unsigned int flags);
+
+int sys$cantim  (unsigned long long reqidt, unsigned int acmode);
+
+int sys$numtim  (unsigned short int timbuf [7], unsigned long long * timadr);
+
+int sys$gettim (unsigned long long * timadr);
+
+int sys$asctim  (unsigned short int *timlen, void *timbuf,
+		 unsigned long long *timadr, char cvtflg);
+
+int sys$bintim  (void *timbuf, unsigned long long *timadr);
  int sys$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
 
  int sys$crelnt  (unsigned int *attr, void *resnam, unsigned

@@ -21,7 +21,7 @@ int sch$qend(struct _pcb * p) {
   struct _cpu * cpu=smp$gl_cpu_data[cpuid];
 
   p->pcb$l_pixhist=p->pcb$l_pixhist << 1;
-  p->phd$w_quant = -QUANTUM/10;
+  p->phd$w_quant = -QUANTUM;
   p->pcb$l_onqtime=exe$gl_abstim_tics;
   p->pcb$l_sts=p->pcb$l_sts & ( ~ PCB$M_INQUAN );
   if (ffs(sch$gl_comoqs)) {

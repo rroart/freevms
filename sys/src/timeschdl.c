@@ -76,6 +76,7 @@ void exe$timeout(void) {
   /* scan lock mgr etc */
   sch$one_sec();
   /* sch$ravail() */
+  printk("exe$timeout\n");
 }
 
 asmlinkage void exe$swtimint(void) {
@@ -83,26 +84,43 @@ asmlinkage void exe$swtimint(void) {
     sch$qend(current);
   /* check tqe from EXE$GL_TQFL */
   if (smp_processor_id()==0) {
-    if (exe$gl_abstim_tics>=exe$gq_1st_time) {
+    if (exe$gq_systime>=exe$gq_1st_time) {
       struct _tqe * t, * dummy;
+      //    printk(".");
       t=remque(exe$gl_tqfl,dummy);
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_TMSNGL) {
+	void (*f)(void);
+	f=t->tqe$l_fpc;
+	//	printk("herexxx\n");
+	//		printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
       }
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_SSSNGL) {
 	void (*f)(void);
-	f=t->tqe$l_pc;
-	//	printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_pc,exe$timeout,&exe$timeout);
+	f=t->tqe$l_fpc;
+		printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
 	f();
-	//	printk(KERN_EMERG "after f %x %x %x %x\n",f,t->tqe$l_pc,exe$timeout,&exe$timeout);
+		printk(KERN_EMERG "after f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
       }
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_WKSNGL) {
+	void (*f)(void);
+	f=t->tqe$l_fpc;
+		printk(KERN_EMERG "xbefore f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
       }
-      if (t->tqe$b_rqtype & TQE$M_REPEAT)
-	insque(t,exe$gl_tqfl);
-      
+      if (t->tqe$b_rqtype & TQE$M_REPEAT) {
+	t->tqe$q_time=exe$gq_systime+t->tqe$q_delta;
+	exe$instimq(t);
+	//	insque(t,exe$gl_tqfl); /* move this to a sort */
+      }
+      exe$gq_1st_time=exe$gl_tqfl->tqe$q_time;
     }
   }
 }
+
+/* vax has 100 Hz clock interrupts. Quantum is in those 10 ns units */
+#ifdef __i386
+/* 100Hz interrupts here */
+#define QUANTADD 1
+#endif
 
 void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
   /* reset pr$_iccs */
@@ -144,7 +162,7 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
     (*(unsigned long *)&jiffies)++;
     exe$gl_abstim_tics=jiffies;
 
-    if (exe$gl_abstim_tics>=exe$gq_1st_time) 
+    if (exe$gq_systime>=exe$gq_1st_time) 
       SOFTINT_TIMER_VECTOR;
 
 #ifndef CONFIG_SMP
@@ -166,6 +184,7 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
       if (p->pid==1) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}  /* Will be removed in the future */
       if (p->pid) {
 	p->phd$l_cputim++;
+	p->phd$w_quant+=QUANTADD;
 	if (++p->phd$w_quant  >= 0 ) {
 	  if (p->phd$w_quant<128) {
 	    SOFTINT_TIMER_VECTOR;

@@ -8,7 +8,7 @@
 extern "C" {
 # endif
 
-#include "descrip.h"
+#include "../../librtl/src/descrip.h"
 
 
 unsigned long lib$adawi(const short *,short *,short *);

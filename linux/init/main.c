@@ -544,6 +544,7 @@ static void rest_init(void)
 } 
 
 void vms_init(void) __init;
+void vms_init2(void) __init;
 
 /*
  *	Activate the first processor.
@@ -569,7 +570,7 @@ asmlinkage void __init start_kernel(void)
 	sched_init();
 	softirq_init();
 	time_init();
-
+	vms_init2();
 	/*
 	 * HACK ALERT! This is early. We're enabling the console before
 	 * we've done PCI setups etc, and console_init() must be aware of

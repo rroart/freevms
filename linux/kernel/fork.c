@@ -692,7 +692,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	p->pcb$b_prib=31-DEFPRI;
 	p->pcb$b_pri=31-DEFPRI-6;
 	//	if (p->pcb$b_pri<16) p->pcb$b_pri=16;
-	p->phd$w_quant=-QUANTUM/10;
+	p->phd$w_quant=-QUANTUM;
 
 	qhead_init(&p->pcb$l_astqfl);
 	p->pcb$b_asten=15;

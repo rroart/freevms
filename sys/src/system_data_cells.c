@@ -545,7 +545,9 @@ unsigned long exe$gl_sysucb;
 unsigned long exe$gl_sysuic;
 unsigned long exe$gl_tenusec;
 unsigned long exe$gl_tickadjust;
-unsigned long exe$gl_ticklength=1;
+#ifdef __i386
+unsigned long exe$gl_ticklength=100000;
+#endif
 unsigned long exe$gl_tickwidth;
 unsigned long exe$gl_time_control;
 unsigned long exe$gl_time_deviation;
@@ -575,7 +577,7 @@ unsigned long exe$gpq_fru_table;
 unsigned long exe$gpq_hwrpb;
 unsigned long exe$gpq_rad_info_header;
 unsigned long exe$gpq_swrpb;
-unsigned long exe$gq_1st_time;
+unsigned long long exe$gq_1st_time;
 unsigned long exe$gq_bap_max_pa_registered;
 unsigned long exe$gq_bap_max_request_size;
 unsigned long exe$gq_bap_min_pa_registered;
@@ -610,7 +612,7 @@ unsigned long exe$gq_security_domain;
 unsigned long exe$gq_snap_bitmap;
 unsigned long exe$gq_snap_fork_list;
 unsigned long exe$gq_sysdisk;
-unsigned long exe$gq_systime;
+unsigned long long exe$gq_systime;
 unsigned long exe$gq_systype;
 unsigned long exe$gq_syswcbiq;
 unsigned long exe$gq_tdf;
@@ -1946,6 +1948,11 @@ sch$gq_susp=&sch$aq_wqhdr[9];
 sch$gq_suspo=&sch$aq_wqhdr[10];
 sch$gq_fpgwq=&sch$aq_wqhdr[11];
 
+  exe$gq_systime=40916*864;
+  exe$gq_systime*=100;
+  exe$gq_systime+=xtime.tv_sec;
+  exe$gq_systime*=10000000;
+
   exe$gl_tqfl=&tqehead;
   exe$gl_tqfl->tqe$l_tqfl=exe$gl_tqfl; 
   exe$gl_tqfl->tqe$l_tqbl=exe$gl_tqfl;
@@ -1954,13 +1961,14 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   exe$gl_tqfl->tqe$b_rqtype=TQE$C_TMSNGL|TQE$M_REPEAT; /* ???? */
   exe$gl_tqfl->tqe$l_rqpid=0xffffffff;
   exe$gl_tqfl->tqe$l_cputim=0xffffffff;
+  exe$gl_tqfl->tqe$q_time=0x4000000000000000;
 
   tqe2.tqe$l_tqfl=0;
   tqe2.tqe$l_tqbl=0;
   tqe2.tqe$w_size=0;
   tqe2.tqe$b_type=DYN$C_TQE;
   tqe2.tqe$b_rqtype=TQE$C_SSREPT;
-  tqe2.tqe$l_pc=&exe$timeout;
+  tqe2.tqe$l_fpc=&exe$timeout;
   tqe2.tqe$q_fr3=0; /* something? */
   tqe2.tqe$q_fr4=0; /* something? */
   tqe2.tqe$q_time=0;
@@ -1975,4 +1983,12 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
 }
 
 
+#define FUDGEFACTOR 40587
 
+void __init vms_init2(void) {
+  //  exe$gq_systime=40916*864;
+  exe$gq_systime=FUDGEFACTOR*864;
+  exe$gq_systime*=100;
+  exe$gq_systime+=xtime.tv_sec;
+  exe$gq_systime*=10000000;
+}

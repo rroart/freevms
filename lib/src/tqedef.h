@@ -25,7 +25,7 @@ struct _tqe {
   unsigned char tqe$b_rqtype;
   union  {
     unsigned long tqe$l_pid;
-    long tqe$l_pc;
+    long tqe$l_fpc;
   } tqe$r_pid_union;
   union  {
     struct  {
@@ -46,7 +46,7 @@ struct _tqe {
   unsigned int tqe$l_cputim;
 };
 
-#define tqe$l_pc tqe$r_pid_union.tqe$l_pc
+#define tqe$l_fpc tqe$r_pid_union.tqe$l_fpc
 #define tqe$q_fr3 tqe$r_ast_union.tqe$r_fr_fields.tqe$q_fr3
 #define tqe$q_fr4 tqe$r_ast_union.tqe$r_fr_fields.tqe$q_fr4
 
