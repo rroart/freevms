@@ -1,6 +1,7 @@
 #include<ccbdef.h>
 #include<crbdef.h>
 #include<cdtdef.h>
+#include<dcdef.h>
 #include<ddtdef.h>
 #include<dptdef.h>
 #include<fdtdef.h>
@@ -55,7 +56,7 @@ static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
   myrei();
 }
 
-static struct _fdt fdt = {
+static struct _fdt ubd$fdt = {
   fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
@@ -63,8 +64,8 @@ static struct _fdt fdt = {
 /* more yet undefined dummies */
 static void  startio ();
 static void  unsolint (void) { };
-static void  functb (void) { };
 static void  cancel (void) { };
+static void  ioc_std$cancelio (void) { };
 static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
@@ -78,10 +79,10 @@ static void  mntv_sqd (void) { };
 static void  aux_storage (void) { };
 static void  aux_routine (void) { };
 
-struct _ddt ddt = {
+struct _ddt ubd$ddt = {
   ddt$l_start: startio,
   ddt$l_unsolint: unsolint,
-  ddt$l_functb: functb,
+  ddt$l_fdt: &ubd$fdt,
   ddt$l_cancel: cancel,
   ddt$l_regdump: regdump,
   ddt$l_diagbuf: diagbuf,
@@ -97,9 +98,6 @@ struct _ddt ddt = {
   ddt$l_aux_storage: aux_storage,
   ddt$l_aux_routine: aux_routine
 };
-
-static struct _ddb ddb;
-static struct _dpt dpt;
 
 void startio (struct _irp * i, struct _ucb * u) { 
   int m;
@@ -157,6 +155,84 @@ int acp_std$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _c
 int acp_std$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
 extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
+
+void ubd$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
+  ucb->ucb$b_flck=IPL$_IOLOCK8;
+  ucb->ucb$b_dipl=IPL$_IOLOCK8;
+
+  ucb->ucb$l_devchar = DEV$M_REC | DEV$M_AVL | DEV$M_CCL /*| DEV$M_OOV*/;
+
+  ucb->ucb$l_devchar2 = DEV$M_NNM;
+  ucb->ucb$b_devclass = DC$_MISC;
+  ucb->ucb$b_devtype = DT$_TTYUNKN;
+  ucb->ucb$w_devbufsiz = 132;
+
+  ucb->ucb$l_devdepend = 99; // just something to fill
+
+  // dropped the mutex stuff
+
+  return;
+}
+
+void ubd$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
+  ddb->ddb$ps_ddt=&ubd$ddt;
+  //dpt_store_isr(crb,nl_isr);
+  return;
+}
+
+int ubd$unit_init (struct _idb * idb, struct _ucb * ucb) {
+  ucb->ucb$v_online = 0;
+  //ucb->ucb$l_lr_msg_tmo = 0 ; // or offline? // where did this go?
+
+  // idb->idb$ps_owner=&(ucb->ucb$r_ucb); // this is mailbox?
+  // no adp or cram stuff
+
+  // or ints etc
+  
+  ucb->ucb$v_online = 1;
+
+  return SS$_NORMAL;
+}
+
+struct _dpt ubd$dpt;
+struct _ddb ubd$ddb;
+struct _ucb ubd$ucb;
+struct _crb ubd$crb;
+
+int ubd$init_tables() {
+  ini_dpt_name(&ubd$dpt, "DADRIVER");
+  ini_dpt_adapt(&ubd$dpt, 0);
+  ini_dpt_defunits(&ubd$dpt, 1);
+  ini_dpt_ucbsize(&ubd$dpt,sizeof(struct _ucb));
+  ini_dpt_struc_init(&ubd$dpt, ubd$struc_init);
+  ini_dpt_struc_reinit(&ubd$dpt, ubd$struc_reinit);
+  ini_dpt_ucb_crams(&ubd$dpt, 1/*NUMBER_CRAMS*/);
+  ini_dpt_end(&ubd$dpt);
+
+  ini_ddt_unitinit(&ubd$ddt, ubd$unit_init);
+  ini_ddt_start(&ubd$ddt, startio);
+  ini_ddt_cancel(&ubd$ddt, ioc_std$cancelio);
+  ini_ddt_end(&ubd$ddt);
+
+  /* for the fdt init part */
+  /* a lot of these? */
+  ini_fdt_act(&ubd$fdt,IO$_ACCESS,acp_std$access,1);
+  ini_fdt_act(&ubd$fdt,IO$_READLBLK,acp_std$readblk,1);
+  ini_fdt_act(&ubd$fdt,IO$_READPBLK,acp_std$readblk,1);
+  ini_fdt_act(&ubd$fdt,IO$_READVBLK,acp_std$readblk,1);
+  ini_fdt_act(&ubd$fdt,IO$_WRITELBLK,acp_std$writeblk,1);
+  ini_fdt_act(&ubd$fdt,IO$_WRITEPBLK,acp_std$writeblk,1);
+  ini_fdt_act(&ubd$fdt,IO$_WRITEVBLK,acp_std$writeblk,1);
+  ini_fdt_act(&ubd$fdt,IO$_CREATE,acp_std$access,1);
+  ini_fdt_act(&ubd$fdt,IO$_DEACCESS,acp_std$deaccess,1);
+  ini_fdt_act(&ubd$fdt,IO$_DELETE,acp_std$modify,1);
+  ini_fdt_act(&ubd$fdt,IO$_MODIFY,acp_std$modify,1);
+  ini_fdt_act(&ubd$fdt,IO$_ACPCONTROL,acp_std$modify,1);
+  ini_fdt_act(&ubd$fdt,IO$_MOUNT,acp_std$mount,1);
+  ini_fdt_end(&ubd$fdt);
+
+  return SS$_NORMAL;
+}
 
 /* 
  * Copyright (C) 2000 Jeff Dike (jdike@karaya.com)
@@ -611,25 +687,41 @@ static request_queue_t *ubd_get_queue(kdev_t device)
 
 int ubd_vmsinit(void) {
   unsigned short chan;
-  $DESCRIPTOR(u0,"ubd0");
-  struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"ubd0","ubdriver");
+  $DESCRIPTOR(u0,"daa0");
+  //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"ubd0","ubdriver");
+  struct _ucb * ucb=&ubd$ucb;
+  struct _ddb * ddb=&ubd$ddb;
+  struct _crb * crb=&ubd$crb;
+  unsigned long idb=0,orb=0;
+  struct _ccb * ccb;
+  struct _ucb * newucb;
+
+//  ioc_std$clone_ucb(&ubd$ucb,&ucb);
+  bzero(ucb,sizeof(struct _ucb));
+  bzero(ddb,sizeof(struct _ddb));
+  bzero(crb,sizeof(struct _crb));
+
+  insertdevlist(ddb);
+
+  init_ddb(&ubd$ddb,&ubd$ddt,&ubd$ucb,"daa");
+  init_ucb(&ubd$ucb, &ubd$ddb, &ubd$ddt, &ubd$crb);
+  init_crb(&ubd$crb);
+
+  ubd$init_tables();
+  ubd$struc_init (crb, ddb, idb, orb, ucb);
+  ubd$struc_reinit (crb, ddb, idb, orb, ucb);
+  ubd$unit_init (idb, ucb);
+
   /* for the fdt init part */
   /* a lot of these? */
-  ini_fdt_act(&fdt,IO$_ACCESS,acp_std$access,1);
-  ini_fdt_act(&fdt,IO$_READLBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt,IO$_READPBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt,IO$_READVBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt,IO$_WRITELBLK,acp_std$writeblk,1);
-  ini_fdt_act(&fdt,IO$_WRITEPBLK,acp_std$writeblk,1);
-  ini_fdt_act(&fdt,IO$_WRITEVBLK,acp_std$writeblk,1);
-  ini_fdt_act(&fdt,IO$_CREATE,acp_std$access,1);
-  ini_fdt_act(&fdt,IO$_DEACCESS,acp_std$deaccess,1);
-  ini_fdt_act(&fdt,IO$_DELETE,acp_std$modify,1);
-  ini_fdt_act(&fdt,IO$_MODIFY,acp_std$modify,1);
-  ini_fdt_act(&fdt,IO$_ACPCONTROL,acp_std$modify,1);
-  ini_fdt_act(&fdt,IO$_MOUNT,acp_std$mount,1);
+
+  ubd_open_dev(&ubd_dev[0]);
+  ioc_std$clone_ucb(&ubd$ucb,&newucb);
   exe$assign(&u0,&chan,0,0,0);
   registerdevchan(MKDEV(UBD_MAJOR,0),chan);
+  ccb = &ctl$ga_ccb_table[chan];
+  ccb->ccb$l_ucb->ucb$l_orb=ubd_dev[0].fd;
+
   return chan;
 }
 
@@ -688,12 +780,7 @@ int ubd_init(void)
 	if(err != 0) printk(KERN_ERR 
 			    "um_request_irq failed - errno = %d\n", -err);
 	ubd_vmsinit();
-	{
-		struct _ccb * ccb;
-		ubd_open_dev(&ubd_dev[0]);
-		ccb = &ctl$ga_ccb_table[dev2chan(MKDEV(UBD_MAJOR,0))];
-		ccb->ccb$l_ucb->ucb$l_orb=ubd_dev[0].fd;
-	}
+
 	return(err);
 }
 

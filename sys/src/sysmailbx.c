@@ -43,7 +43,7 @@ asmlinkage int exe$crembx(struct struct_crembx * s) {
   /* incr ref count */
   // ucb ccb stuff 
   c=&ctl$gl_ccbbase[*s->chan];
-  c->ccb$l_ucb=ioc_std$clone_ucb(mb$ar_ucb0);
+  ioc_std$clone_ucb(0 /*mb$ar_ucb0*/,&c->ccb$l_ucb);
   // unlock mutex
   setipl(0);
   return SS$_NORMAL;

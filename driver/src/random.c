@@ -39,7 +39,6 @@ void  rnd_startio (struct _irp * i, struct _ucb * u) {
 
 /* more yet undefined dummies */
 void  rnd_unsolint (void) { };
-void  rnd_functb (void) { };
 void  rnd_cancel (void) { };
 void  rnd_regdump (void) { };
 void  rnd_diagbuf (void) { };
@@ -58,7 +57,7 @@ void  rnd_aux_routine (void) { };
 struct _ddt ddt_rnd = {
   ddt$l_start: rnd_startio,
   ddt$l_unsolint: rnd_unsolint,
-  ddt$l_functb: rnd_functb,
+  ddt$l_fdt: &fdt_rnd,
   ddt$l_cancel: rnd_cancel,
   ddt$l_regdump: rnd_regdump,
   ddt$l_diagbuf: rnd_diagbuf,

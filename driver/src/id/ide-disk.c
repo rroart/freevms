@@ -910,7 +910,15 @@ int idedisk_init (void)
 		  struct _ccb * ccb;
 		  ccb = &ctl$ga_ccb_table[dev2chan(MKDEV(IDE0_MAJOR,0))];
 		  ccb->ccb$l_ucb->ucb$l_orb=drive;
+		  //		  printk("ccb ucb %x %x %x %x\n",ccb,ccb->ccb$l_ucb,ccb->ccb$l_ucb->ucb$w_unit,drive);
+		  ccb = &ctl$ga_ccb_table[dev2chan(MKDEV(IDE0_MAJOR,1))];
+		  ccb->ccb$l_ucb->ucb$l_orb=drive;
+		  //printk("ccb ucb %x %x %x %x\n",ccb,ccb->ccb$l_ucb,ccb->ccb$l_ucb->ucb$w_unit,drive);
+		  ccb = &ctl$ga_ccb_table[dev2chan(MKDEV(IDE0_MAJOR,2))];
+		  ccb->ccb$l_ucb->ucb$l_orb=drive;
+		  //printk("ccb ucb %x %x %x %x\n",ccb,ccb->ccb$l_ucb,ccb->ccb$l_ucb->ucb$w_unit,drive);
 		  printk("VMS IDE0 here\n");
+		  //{int i; for(i=0;i<100000000;i++); }
 		}
 	}
 	ide_register_module(&idedisk_module);

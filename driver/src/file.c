@@ -118,7 +118,6 @@ void  file_startio3 (struct _irp * i, struct _ucb * u) {
 
 /* more yet undefined dummies */
 void  file_unsolint (void) { };
-void  file_functb (void) { };
 void  file_cancel (void) { };
 void  file_regdump (void) { };
 void  file_diagbuf (void) { };
@@ -154,7 +153,7 @@ void file_write(void) {
 struct _ddt ddt_file = {
   ddt$l_start: file_startio,
   ddt$l_unsolint: file_unsolint,
-  ddt$l_functb: file_functb,
+  ddt$l_fdt: &fdt_file,
   ddt$l_cancel: file_cancel,
   ddt$l_regdump: file_regdump,
   ddt$l_diagbuf: file_diagbuf,
@@ -238,7 +237,6 @@ struct _ucb * fl_init(char * s) {
 
   /* and for the ddt init part */
   ddt_file.ddt$l_fdt=&fdt_file;
-  ddt_file.ddt$l_functb=&fdt_file;
 
   /* for the fdt init part */
   /* a lot of these? */

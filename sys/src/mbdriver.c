@@ -146,7 +146,7 @@ void mb_aux_routine (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _
 
 struct _ddt mb_ddt = {
   //  devnam: "MB",
-  ddt$l_functb: &mb_fdt,
+  ddt$l_fdt: &mb_fdt,
   ddt$l_cancel: mb_cancel,
   ddt$l_aux_routine: mb_aux_routine
 };

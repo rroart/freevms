@@ -157,7 +157,6 @@ void  du_startio (struct _irp * i, struct _ucb * u) {
 
 /* more yet undefined dummies */
 void  du_unsolint (void) { };
-void  du_functb (void) { };
 void  du_cancel (void) { };
 void  du_regdump (void) { };
 void  du_diagbuf (void) { };
@@ -176,7 +175,7 @@ void  du_aux_routine (void) { };
 struct _ddt ddt_du = {
   ddt$l_start: du_startio,
   ddt$l_unsolint: du_unsolint,
-  ddt$l_functb: du_functb,
+  ddt$l_fdt: &fdt_du,
   ddt$l_cancel: du_cancel,
   ddt$l_regdump: du_regdump,
   ddt$l_diagbuf: du_diagbuf,
@@ -353,7 +352,6 @@ void * du_init(char *s) {
 
   /* and for the ddt init part */
   ddt_du.ddt$l_fdt=&fdt_du;
-  ddt_du.ddt$l_functb=&fdt_du;
 
   ((struct _mscp_ucb *)u)->ucb$l_cddb=cddb;
   qhead_init(&cddb->cddb$l_cdrpqfl);
