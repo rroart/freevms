@@ -574,6 +574,8 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     }
 
     f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY, 0);
+    fd = get_unused_fd();
+    fd_install(fd, f);
     {
       struct files_struct * files = current->files;
       while (fd < files->max_fds) {
