@@ -282,6 +282,8 @@
 
 #include <system_data_cells.h>
 
+#include <linux/kernel.h>
+
 #define TTY$GW_DEFBUF tty$gw_defbuf
 #define TTY$GL_DEFCHAR tty$gl_defchar
 #define TTY$GL_DEFCHAR2 tty$gl_defchar2
@@ -416,6 +418,8 @@ TZ$DPT::
 // The offset definitions are defined by the ttydefs.
 #endif
 
+	  void SET_FORCED_CHARS(struct _ucb * ucb);
+
 //
 // TZ specific dispatch table
 //
@@ -493,7 +497,6 @@ void TZ$INITLINE(struct _ucb * ucb)				// RESET SINGLE LINE
   CLASS_UNIT_INIT(ucb,R0);			
   if	(ucb->ucb$w_unit==0)	// Skip initialization of TEMPLATE
     	return;			// Unit #0 = Template: Skip everything!
- 
   if	(UCB$M_POWER&ucb->ucb$l_sts)	// Skip if powerfail recovery
     goto l20;
   R1	 = ((struct _tty_ucb *)ucb)->ucb$l_tt_logucb;		// Look at logical term UCB
@@ -516,12 +519,12 @@ void TZ$INITLINE(struct _ucb * ucb)				// RESET SINGLE LINE
   ucb->ucb$l_devdepend |= TT$M_HOSTSYNC;		// Always set device to HOSTSYNC
   tty->ucb$l_tt_dechar |= TT$M_HOSTSYNC;		//
   R2=R1;
-  R2->class_setup_ucb();		// Init ucb fields
+  R2->class_setup_ucb(tty);		// Init ucb fields
  l20:
   if	(UCB$M_POWER&ucb->ucb$l_sts==0) return;	// Powerfail handler
   R0	 = tty->ucb$l_tt_class;
   R2=R1;
-  R2->class_powerfail();
+  R2->class_powerfail(ucb);
   
   return;
 }
@@ -646,7 +649,7 @@ void TZ$STARTIO(char R3, struct _ucb * u, int CC) {				// START I/O ON UNIT
   struct _ucb * ucb = u;
   struct _tty_ucb * tty=ucb;
   if (CC) {			// Single character
-    tty->ucb$w_tt_hold = R3;		// Save output character
+    tty->tty$b_tank_char = R3;		// Save output character
     tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal charater in tank
   } else {
     tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;	// Signal burst active
@@ -724,6 +727,8 @@ void TZ$STARTIO(char R3, struct _ucb * u, int CC) {				// START I/O ON UNIT
 //	R5 = UCB Address
 //--
 
+	  void TZ$XON_XOFF_CMN(struct _ucb * ucb, struct _acb ** acb_p, int R3);
+
 	  static int	TTY$M_TP_XOFF = 8;
 static int	TTY$V_TP_XOFF = 3;
 #if 0
@@ -735,7 +740,7 @@ void TZ$XOFF(void * vec, int R3, struct _ucb *ucb) {
   struct _tz_ucb * tz=ucb;
   struct _acb * acb_p=&tz->ucb$l_tz_xoff_ast ; //Get address of AST list
   if	(R3!=0x13)		// Is XOFF
-    return TZ$XON_XOFF_CMN(ucb,acb_p);		// NEQ not XONN use common rotuine
+    return TZ$XON_XOFF_CMN(ucb,acb_p,R3);		// NEQ not XONN use common rotuine
   struct _tpd_ucb * tpd = ucb;
   tpd->ucb$b_tp_stat|=TTY$M_TP_XOFF;	// Set XOFF bit in UCB
   TZ$XON_XOFF_CMN(ucb,acb_p,R3);		// Do common processing
@@ -745,12 +750,14 @@ void TZ$XON (void * vec, int R3, struct _ucb * ucb) {
   struct _tz_ucb * tz=ucb;
   struct _acb ** acb_p=&tz->ucb$l_tz_xon_ast ; //Get address of AST list
   if (R3!=0x11)		// Is it XON
-    return	TZ$XON_XOFF_CMN(ucb,acb_p);		// NEQ not XONN use common rotuine
+    return	TZ$XON_XOFF_CMN(ucb,acb_p,R3);		// NEQ not XONN use common rotuine
   struct _tpd_ucb * tpd = ucb;
   tpd->ucb$b_tp_stat&=~TTY$M_TP_XOFF;	// Clear XOFF bit in UCB
   ;
   TZ$XON_XOFF_CMN(ucb,acb_p,R3);
 }
+
+void TZ$CONT (struct _ucb * ucb);
 
 //
 // Schedule xon/xoff to be sent, and changed schedule bit mask 
@@ -944,7 +951,7 @@ static struct _fdt tz$fdt = {
 };
 
 /* more yet undefined dummies */
-int tz$startio (int a,int b) { };
+//int tz$startio (int a,int b) { };
 static void  unsolint (void) { };
 static void  cancel (void) { };
 static void  ioc_std$cancelio (void) { };
@@ -1026,6 +1033,8 @@ int tz$unit_init (struct _idb * idb, struct _ucb * ucb) {
   
   ucb->ucb$v_online = 1;
 
+  TZ$INITLINE(ucb); // temp  placed
+
   return SS$_NORMAL;
 }
 
@@ -1049,7 +1058,7 @@ int tz$init_tables() {
 
   ini_ddt_ctrlinit(&tz$ddt, TZ$INITIAL);
   ini_ddt_unitinit(&tz$ddt, TZ$INITLINE);
-  ini_ddt_start(&tz$ddt, tz$startio);
+  // check. should be 0?  ini_ddt_start(&tz$ddt, TZ$STARTIO);
   ini_ddt_cancel(&tz$ddt, ioc_std$cancelio);
   ini_ddt_end(&tz$ddt);
 
@@ -1087,13 +1096,16 @@ int tz_iodb_vmsinit(void) {
   init_crb(&tz$crb);
 #endif
 
-  ucb -> ucb$w_size = sizeof(struct _tz_ucb); // temp placed
-
-  ucb -> ucb$w_unit_seed = 0; // temp placed
-
   init_ddb(ddb,&tz$ddt,ucb,"tza");
   init_ucb(ucb, ddb, &tz$ddt, crb);
   init_crb(crb);
+
+  ucb -> ucb$w_size = sizeof(struct _tz_ucb); // temp placed
+
+  ucb -> ucb$w_unit_seed = 1; // was: 0 // check // temp placed
+  ucb -> ucb$w_unit = 0; // temp placed
+
+  ucb -> ucb$l_sts |= UCB$M_TEMPLATE; // temp placed
 
 //  ioc_std$clone_ucb(&tz$ucb,&ucb);
   tz$init_tables();
@@ -1110,7 +1122,7 @@ int tz_iodb_vmsinit(void) {
 int tz_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
-  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&tz$ucb*/,&newucb);
+  // ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&tz$ucb*/,&newucb); // check. skip?
   exe$assign(dsc,&chan,0,0,0);
   registerdevchan(MKDEV(TTYAUX_MAJOR,unitno),chan);
 
@@ -1145,10 +1157,10 @@ int tz_vmsinit(void) {
 }
 
 int tz$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
-
+  printk("should not be in tz$read\n");
 }
 
 int tz$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
-
+  printk("should not be in tz$write\n");
 }
 
