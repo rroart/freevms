@@ -602,7 +602,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 	strcpy(&x2p->context_save,name);
 	if (strstr(filedsc->dsc$a_pointer,".DIR")) {
 	  dirflg=O_DIRECTORY;
-	  x2p->context_save[0]=0;
 	}
     }
 
@@ -680,6 +679,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 	filp_close(f,0);
       }
     }
+    x2p->context_save[0]=0;
 
 #if 0
       sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
