@@ -4,6 +4,7 @@
 #ifdef compile_um
 #include "unistdum.h"
 #endif
+#include<stdarg.h>
 
 int sys$testcode(void) {
   return INLINE_SYSCALLTEST($setprn,0);
@@ -357,6 +358,24 @@ int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *i
   s.astprm=astprm;
   s.nullarg=nullarg;
   return INLINE_SYSCALL($getdviw,1,&s);
+}
+
+int sys$fao(void * ctrstr , short int * outlen , void * outbuf , ...) {
+  struct struct_args s;
+  va_list args;
+  int * argv=&s;
+  int argc=0;
+  va_start(args,outbuf);
+  while(argc<15) { // check. should be 17.
+    *argv=va_arg(args,int);
+    argv++;
+  }
+  va_end(args);
+  return INLINE_SYSCALL($faol,4,ctrstr,outlen,outbuf,&s); // need not call fao?
+}
+
+int sys$faol(void * ctrstr , short int * outlen , void * outbuf , int * prmlst) {
+  return INLINE_SYSCALL($faol,4,ctrstr,outlen,outbuf,prmlst);
 }
 
 int sys$device_scan(void *return_devnam, unsigned short int *retlen, void *search_devnam, void *itmlst, unsigned long long *contxt) {
