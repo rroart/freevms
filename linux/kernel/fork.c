@@ -30,6 +30,7 @@
 #include <phddef.h>
 #include <pridef.h>
 #include <rdedef.h>
+#include <secdef.h>
 
 /* The idle threads do not count.. */
 int nr_threads;
@@ -701,11 +702,11 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	/* pcb stuff */
 
+#ifdef CONFIG_MM_VMS
 	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
 	bzero(p->pcb$l_phd,sizeof(struct _phd));
 
-	p->pcb$l_phd->phd$q_ptbr=p->mm->pgd;
-#ifdef CONFIG_MM_VMS
+	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
 	{
 	  struct _rde * rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
 	  bzero(rde,sizeof(struct _rde));
@@ -721,6 +722,10 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	  bzero(p->pcb$l_phd->phd$l_wsdyn,4*512);
 	  p->pcb$l_phd->phd$l_wsnext=0;
 	  p->pcb$l_phd->phd$l_wslast=511;
+	  p->pcb$l_phd->phd$l_pst_base_offset=vmalloc(PROCSECTCNT*sizeof(struct _secdef));
+	  bzero(p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+	  p->pcb$l_phd->phd$l_pst_last=65535;
+	  p->pcb$l_phd->phd$l_pst_free=65535;
 	}
 #endif
 
