@@ -289,7 +289,8 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				if (((struct _rde *)vma)->rde$l_flags & VM_SHARED)
 					pte = pte_mkclean(pte);
 				pte = pte_mkold(pte);
-				get_page(ptepage);
+				//get_page(ptepage); bugged
+				ptepage->pfn$q_pte_index+=0x100000001;
 				dst->rss++;
 
 				if (did_cow==0 && (ptepage->pfn$q_bak&PTE$M_TYP0)) {
@@ -301,6 +302,7 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				    struct _wsl * wsle = &wsl[ptepage->pfn$l_wslx_qw];
 #endif
 
+				    ptepage->pfn$q_pte_index-=0x100000001;
 				    mem_map[page]=*ptepage;
 #if 0
 				    wsle->wsl$v_valid=1;
