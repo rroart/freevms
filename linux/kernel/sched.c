@@ -1,4 +1,4 @@
-#include "/usr/src/freevms/sys/src/sched.c"
+#include "../../freevms/sys/src/sched.c"
 #if 0
 /*
  *  linux/kernel/sched.c
