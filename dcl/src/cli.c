@@ -956,11 +956,20 @@ unsigned long main (int argc, char *argv[])
 
     else {
       if (inscript==0) {
+	char c=0;
+	int idx=0;
 	fprintf(stdout,"%s",prompt);
 	fflush(stdout);
 	//scanf("%s",cmdbuf);
+	//programmed with buffer overflow possibility
 	bzero(cmdbuf,CMDSIZ);
-	read(0,cmdbuf,CMDSIZ);
+	// was: read(0,cmdbuf,CMDSIZ);
+      again:
+	read(1,&cmdbuf[idx],1);
+	c=cmdbuf[idx++];
+	fprintf(stdout,"%c",c);
+	fflush(stdout);
+	if (c!='\n' && c!='\r') goto again;
       }
 
       cmdlen=strlen(cmdbuf)-1;
