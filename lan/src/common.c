@@ -683,3 +683,12 @@ config_in_dev(struct in_device ** in) {
   in_ifa-> ifa_address = dev_config_tab[0].dc_ip_address;
   in_ifa-> ifa_mask = dev_config_tab[0].dc_ip_netmask;
 }
+
+struct net_device mynetdevice;
+
+probe_units() {
+#ifdef __arch_i386__
+  bzero(&mynetdevice,sizeof(mynetdevice));
+  ne_probe(&mynetdevice);
+#endif
+}
