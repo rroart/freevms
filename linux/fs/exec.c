@@ -861,11 +861,12 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	int retval;
 	int i;
 
-	//	printk("execve %s\n",filename);
+	//printk("execve %s\n",filename);
 	//	mydebug=1;
 	file = open_exec(filename);
 
 	retval = PTR_ERR(file);
+	//printk("here 5\n");
 	if (IS_ERR(file))
 		return retval;
 
@@ -880,29 +881,35 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	if ((bprm.argc = count(argv, bprm.p / sizeof(void *))) < 0) {
 		allow_write_access(file);
 		fput(file);
+		//printk("here 7 %x\n",bprm.argc);
 		return bprm.argc;
 	}
 
 	if ((bprm.envc = count(envp, bprm.p / sizeof(void *))) < 0) {
 		allow_write_access(file);
 		fput(file);
+		//printk("here 6\n");
 		return bprm.envc;
 	}
 
 	retval = prepare_binprm(&bprm);
+	//printk("here 4\n");
 	if (retval < 0) 
 		goto out; 
 
 	retval = copy_strings_kernel(1, &bprm.filename, &bprm);
+	//printk("here 3\n");
 	if (retval < 0) 
 		goto out; 
 
 	bprm.exec = bprm.p;
 	retval = copy_strings(bprm.envc, envp, &bprm);
+	//printk("here 2\n");
 	if (retval < 0) 
 		goto out; 
 
 	retval = copy_strings(bprm.argc, argv, &bprm);
+	//printk("here 1\n");
 	if (retval < 0) 
 		goto out; 
 

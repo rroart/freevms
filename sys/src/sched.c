@@ -989,23 +989,23 @@ static int setscheduler(pid_t pid, int policy,
 		policy = p->policy;
 	else {
 		retval = -EINVAL;
-		if (policy != SCHED_FIFO && policy != SCHED_RR &&
-				policy != SCHED_OTHER)
+		if (policy != PCB$K_SCHED_FIFO && policy != PCB$K_SCHED_RR &&
+				policy != PCB$K_SCHED_OTHER)
 			goto out_unlock;
 	}
 	
 	/*
-	 * Valid priorities for SCHED_FIFO and SCHED_RR are 1..99, valid
-	 * priority for SCHED_OTHER is 0.
+	 * Valid priorities for PCB$K_SCHED_FIFO and PCB$K_SCHED_RR are 1..99, valid
+	 * priority for PCB$K_SCHED_OTHER is 0.
 	 */
 	retval = -EINVAL;
 	if (lp.sched_priority < 0 || lp.sched_priority > 99)
 		goto out_unlock;
-	if ((policy == SCHED_OTHER) != (lp.sched_priority == 0))
+	if ((policy == PCB$K_SCHED_OTHER) != (lp.sched_priority == 0))
 		goto out_unlock;
 
 	retval = -EPERM;
-	if ((policy == SCHED_FIFO || policy == SCHED_RR) && 
+	if ((policy == PCB$K_SCHED_FIFO || policy == PCB$K_SCHED_RR) && 
 	    !capable(CAP_SYS_NICE))
 		goto out_unlock;
 	if ((current->euid != p->euid) && (current->euid != p->uid) &&
@@ -1120,7 +1120,7 @@ asmlinkage long sys_sched_yield(void)
 		 * This process can only be rescheduled by us,
 		 * so this is safe without any locking.
 		 */
-	  //		if (current->policy == SCHED_OTHER)
+	  //		if (current->policy == PCB$K_SCHED_OTHER)
 	  //			current->policy |= SCHED_YIELD;
 		current->need_resched = 1;
 
@@ -1136,11 +1136,11 @@ asmlinkage long sys_sched_get_priority_max(int policy)
 	int ret = -EINVAL;
 
 	switch (policy) {
-	case SCHED_FIFO:
-	case SCHED_RR:
+	case PCB$K_SCHED_FIFO:
+	case PCB$K_SCHED_RR:
 		ret = 99;
 		break;
-	case SCHED_OTHER:
+	case PCB$K_SCHED_OTHER:
 		ret = 0;
 		break;
 	}
@@ -1152,11 +1152,11 @@ asmlinkage long sys_sched_get_priority_min(int policy)
 	int ret = -EINVAL;
 
 	switch (policy) {
-	case SCHED_FIFO:
-	case SCHED_RR:
+	case PCB$K_SCHED_FIFO:
+	case PCB$K_SCHED_RR:
 		ret = 1;
 		break;
-	case SCHED_OTHER:
+	case PCB$K_SCHED_OTHER:
 		ret = 0;
 	}
 	return ret;
@@ -1175,7 +1175,7 @@ asmlinkage long sys_sched_rr_get_interval(pid_t pid, struct timespec *interval)
 	read_lock(&tasklist_lock);
 	p = find_process_by_pid(pid);
 	if (p)
-		jiffies_to_timespec(p->policy & SCHED_FIFO ? 0 : NICE_TO_TICKS(p->pcb$b_prib), &t);
+		jiffies_to_timespec(p->policy & PCB$K_SCHED_FIFO ? 0 : NICE_TO_TICKS(p->pcb$b_prib), &t);
 	read_unlock(&tasklist_lock);
 	if (p)
 		retval = copy_to_user(interval, &t, sizeof(t)) ? -EFAULT : 0;
@@ -1312,7 +1312,7 @@ void reparent_to_init(void)
 
 	this_task->ptrace = 0;
 	this_task->pcb$b_prib = DEFPRI;
-	this_task->policy = SCHED_OTHER;
+	this_task->policy = PCB$K_SCHED_OTHER;
 	/* cpus_allowed? */
 	/* rt_priority? */
 	/* signals? */

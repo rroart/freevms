@@ -116,6 +116,14 @@ extern int last_pid;
 #define SCHED_FIFO		1
 #define SCHED_RR		2
 
+#define	PCB$K_SCHED_OTHER	0
+#define	PCB$K_SCHED_FIFO	1
+#define	PCB$K_SCHED_RR	        2
+
+#define	KTB$K_SCHED_OTHER	0
+#define	KTB$K_SCHED_FIFO	1
+#define	KTB$K_SCHED_RR	        2
+
 /*
  * This is an additional bit set when we want to
  * yield the CPU for one re-schedule..
@@ -281,11 +289,11 @@ extern struct user_struct root_user;
 #define _pcb task_struct
 #define _ktb task_struct
 struct task_struct {
-  //  struct _pcb *pcb$l_sqfl;            Broke someting?
-  //  struct _pcb *pcb$l_sqbl;            
+  struct _pcb *pcb$l_sqfl;
+  struct _pcb *pcb$l_sqbl;            
 	/*
 	 * offsets of these are hardcoded elsewhere - touch with care
-	 * meaning entry.S -roar
+	 * meaning entry.S and getuser.S -roar
 	 */
 	volatile long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
 	unsigned long flags;	/* per process flags, defined below */
