@@ -1278,7 +1278,8 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 
 	print_name = pdev ? pdev->slot_name : "3c59x";
 
-	dev = kmalloc(sizeof(*vp), GFP_KERNEL);
+	//dev = kmalloc(sizeof(*vp), GFP_KERNEL);
+	dev = alloc_etherdev(sizeof(*vp));
 	retval = -ENOMEM;
 	if (!dev) {
 		printk (KERN_ERR PFX "unable to allocate etherdev, aborting\n");
@@ -1327,14 +1328,12 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 	vp->io_size = vci->io_size;
 	vp->card_idx = card_idx;
 
-	printk("ehi 1\n");
 	/* module list only for EISA devices */
 	if (pdev == NULL) {
 		vp->next_module = root_vortex_eisa_dev;
 		root_vortex_eisa_dev = dev;
 	}
 
-	printk("ehi2 \n");
 	/* PCI-only startup logic */
 	if (pdev) {
 		/* EISA resources already marked, so only PCI needs to do this here */
@@ -1367,7 +1366,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 	spin_lock_init(&vp->lock);
 	spin_lock_init(&vp->mdio_lock);
 	vp->pdev = pdev;
-	printk("ehi 3\n");
 
 	/* Makes sure rings are at least 16 byte aligned. */
 	vp->rx_ring = pci_alloc_consistent(pdev, sizeof(struct boom_rx_desc) * RX_RING_SIZE
@@ -1380,7 +1378,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 	vp->tx_ring = (struct boom_tx_desc *)(vp->rx_ring + RX_RING_SIZE);
 	vp->tx_ring_dma = vp->rx_ring_dma + sizeof(struct boom_rx_desc) * RX_RING_SIZE;
 
-	printk("ehi 4\n");
 	/* if we are a PCI driver, we store info in pdev->driver_data
 	 * instead of a module list */	
 	if (pdev)
@@ -1395,7 +1392,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 		vp->bus_master = (option & 16) ? 1 : 0;
 	}
 
-	printk("ehi 5\n");
 	if (card_idx < MAX_UNITS) {
 		if (full_duplex[card_idx] > 0)
 			vp->full_duplex = 1;
@@ -1408,7 +1404,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 	vp->force_fd = vp->full_duplex;
 	vp->options = option;
 	/* Read the station address from the EEPROM. */
-	printk("ehi 6\n");
 	EL3WINDOW(0);
 	{
 		int base;
@@ -1432,7 +1427,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 			eeprom[i] = inw(ioaddr + Wn0EepromData);
 		}
 	}
-	printk("ehi 7\n");
 	for (i = 0; i < 0x18; i++)
 		checksum ^= eeprom[i];
 	checksum = (checksum ^ (checksum >> 8)) & 0xff;
@@ -1449,7 +1443,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 		for (i = 0; i < 6; i++)
 			printk("%c%2.2x", i ? ':' : ' ', dev->dev_addr[i]);
 	}
-	printk("ehi 8\n");
 	EL3WINDOW(2);
 	for (i = 0; i < 6; i++)
 		outb(dev->dev_addr[i], ioaddr + i);
@@ -1465,7 +1458,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 		printk(KERN_WARNING " *** Warning: IRQ %d is unlikely to work! ***\n",
 			   dev->irq);
 #endif
-	printk("ehi 9\n");
 
 	EL3WINDOW(4);
 	step = (inb(ioaddr + Wn4_NetDiag) & 0x1e) >> 1;
@@ -1512,7 +1504,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 			printk(KERN_INFO "Full duplex capable\n");
 	}
 
-	printk("ehi a\n");
 	{
 		static const char * ram_split[] = {"5:3", "3:1", "1:1", "3:5"};
 		unsigned int config;
@@ -1546,7 +1537,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 	} else
 		dev->if_port = vp->default_media;
 
-	printk("ehi b\n");
 	if (dev->if_port == XCVR_MII || dev->if_port == XCVR_NWAY) {
 		int phy, phy_idx = 0;
 		EL3WINDOW(4);
@@ -1602,7 +1592,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 	}
 
 	/* The 3c59x-specific entries in the device structure. */
-	printk("ehi b\n");
 	dev->open = vortex_open;
 	if (vp->full_bus_master_tx) {
 		dev->hard_start_xmit = boomerang_start_xmit;
@@ -1623,7 +1612,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 				(dev->features & NETIF_F_IP_CSUM) ? "en":"dis");
 	}
 
-	printk("ehi c\n");
 	dev->stop = vortex_close;
 	dev->get_stats = vortex_get_stats;
 	dev->do_ioctl = vortex_ioctl;
@@ -1635,7 +1623,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
  		pci_save_state(vp->pdev, vp->power_state);
  		acpi_set_WOL(dev);
 	}
-	printk("ehi d\n");
 	retval = register_netdev(dev);
 
 	ec_vmsinit(dev);
