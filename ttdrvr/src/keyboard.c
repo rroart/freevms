@@ -52,6 +52,8 @@
 #include <pridef.h>
 #include <ttydef.h>
 
+#include <linux/reboot.h>
+
 #define SIZE(x) (sizeof(x)/sizeof((x)[0]))
 
 #ifndef KBD_DEFMODE
@@ -353,6 +355,8 @@ void put_queue(int ch)
   kb_twp.tty$l_wb_map=(char*)kb_twp.tty$l_wb_map+1;
   if (kb_twp.tty$l_wb_map==kb_twp.tty$l_wb_end)
     kb_twp.tty$l_wb_map=kb_twp.tty$l_wb_data;
+  if (ch==16)
+    sys_reboot(LINUX_REBOOT_MAGIC1,LINUX_REBOOT_MAGIC2,LINUX_REBOOT_CMD_RESTART,0);
 }
 
 static void puts_queue(char *cp)
