@@ -1649,7 +1649,7 @@ void daemonize(void)
 
 extern unsigned long wait_init_idle;
 
-struct _phd init_phd;
+extern struct _phd system_phd;
 
 void __init init_idle(void)
 {
@@ -1667,8 +1667,7 @@ void __init init_idle(void)
 	cur->pcb$b_asten=15;
 	cur->phd$b_astlvl=4;
 	cur->pr_astlvl=4;
-	cur->pcb$l_phd=&init_phd;
-	bzero(cur->pcb$l_phd,sizeof(struct _phd));
+	cur->pcb$l_phd=&system_phd;
 	// current->pcb$l_phd->phd$q_ptbr=current->mm->pgd; // same wait
 	printk("done init_idle\n");
 	done_init_idle=1;
