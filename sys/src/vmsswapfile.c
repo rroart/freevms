@@ -5,6 +5,7 @@
  *  Swap reorganised 29.12.95, Stephen Tweedie
  */
 
+#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/smp_lock.h>
 #include <linux/kernel_stat.h>
@@ -373,9 +374,9 @@ static inline void unuse_pte(struct vm_area_struct * vma, unsigned long address,
 	if (unlikely(pte_none(pte) || pte_present(pte)))
 		return;
 	get_page(page);
-	set_pte(dir, pte_mkold(mk_pte(page, vma->vm_page_prot)));
+	set_pte(dir, pte_mkold(mk_pte(page, *(pgprot_t*)&vma->rde$r_regprot.regprt$l_region_prot)));
 	swap_free(entry);
-	++vma->vm_mm->rss;
+	//++vma->vm_mm->rss;
 }
 
 /* mmlist_lock and vma->vm_mm->page_table_lock are held */
@@ -400,7 +401,7 @@ static inline void unuse_pmd(struct vm_area_struct * vma, pmd_t *dir,
 	if (end > PMD_SIZE)
 		end = PMD_SIZE;
 	do {
-		unuse_pte(vma, offset+address-vma->vm_start, pte, entry, page);
+		unuse_pte(vma, offset+address-(unsigned long)vma->rde$ps_start_va, pte, entry, page);
 		address += PAGE_SIZE;
 		pte++;
 	} while (address && (address < end));
@@ -441,7 +442,7 @@ static inline void unuse_pgd(struct vm_area_struct * vma, pgd_t *dir,
 static void unuse_vma(struct vm_area_struct * vma, pgd_t *pgdir,
 			swp_entry_t entry, struct page* page)
 {
-	unsigned long start = vma->vm_start, end = vma->vm_end;
+	unsigned long start = vma->rde$ps_start_va, end = vma->rde$ps_start_va + vma->rde$q_region_size;
 
 	if (start >= end)
 		BUG();
@@ -461,8 +462,8 @@ static void unuse_process(struct mm_struct * mm,
 	 * Go through process' page directory.
 	 */
 	spin_lock(&mm->page_table_lock);
-	for (vma = mm->mmap; vma; vma = vma->vm_next) {
-		pgd_t * pgd = pgd_offset(mm, vma->vm_start);
+	for (vma = mm->mmap; vma; vma = vma->rde$ps_va_list_flink) {
+		pgd_t * pgd = pgd_offset(mm, (unsigned long)vma->rde$ps_start_va);
 		unuse_vma(vma, pgd, entry, page);
 	}
 	spin_unlock(&mm->page_table_lock);

@@ -36,6 +36,7 @@
  *		(Gerhard.Wichert@pdb.siemens.de)
  */
 
+#include <linux/config.h>
 #include <linux/mm.h>
 #include <linux/mman.h>
 #include <linux/swap.h>
@@ -935,7 +936,7 @@ int remap_page_range(unsigned long from, unsigned long phys_addr, unsigned long 
 static inline void establish_pte(struct _rde * vma, unsigned long address, pte_t *page_table, pte_t entry)
 {
 	set_pte(page_table, entry);
-	flush_tlb_page(vma, address);
+	flush_tlb_page2(current->mm, address);
 	update_mmu_cache(vma, address, entry);
 }
 
