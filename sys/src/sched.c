@@ -74,7 +74,6 @@ int mydebug6 = 1;
 
 mycheckaddr(){
 #if 1
-  extern volatile int nr_running;
   int nr0=nr_running;
   int i,n=0,m=0;
   struct _pcb  *tmp2;
