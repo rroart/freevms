@@ -8,6 +8,7 @@ fork (partly)
 queued i/o (a little bit)
 memory management (a little bit)
 ods2 read/write (partly)
+ods2 initialize
 rms read/write (partly) SEQ (yes) IDX (a little)
 ods5 readonly (partly)
 xqp (barely)
