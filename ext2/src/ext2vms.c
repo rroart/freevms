@@ -549,19 +549,27 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
   x2p->current_vcb=vcb; // until I can place it somewhere else
 
-#if 0
   if (fib->fib$w_did_num) {
+    char * name;
+    struct nameidata nd;
     struct inode * head;
     struct _fcb * fcb=x2p->primary_fcb;
     head = fcb->fcb$l_primfcb;
     sts=iosb.iosb$w_status;
+
+    name=ext2_vms_to_unix(filedesc);
+
+    if (path_init(name,LOOKUP_POSITIVE|LOOKUP_FOLLOW|LOOKUP_DIRECTORY,&nd))
+      error = path_walk(name, &nd);
+
+#if 0
     if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
       sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
     } else {
       sts = SS$_BADIRECTORY;
     }
-  }
 #endif
+  }
 
   if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
 
@@ -725,4 +733,21 @@ int e2_fcb_wcb_add_one(struct _fcb * fcb,signed long vbn,signed long result)
   wcb->wcb$l_p1_lbn=result;
 
   return SS$_NORMAL;
+}
+
+char * ext2_vms_to_unix(struct dsc$descriptor * d) {
+  char *c=strdup(d->dsc$a_pointer);
+  char *d;
+  if (0==strncmp(c,"000000.",7)) {
+    c[1]=0;
+    c[0]='/';
+    return c;
+  }
+  d=strstr(c,".DIR");
+  if (d)
+    *d=0;
+  d=strchr(c,";");
+  if (d)
+    *d=0;
+  return c;
 }
