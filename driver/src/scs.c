@@ -98,7 +98,7 @@ inline void dn_nsp_send2(struct sk_buff *skb)
   skb->nh.raw = skb->data;
   skb->dev = decnet_default_device;
   //skb->dst = dst_clone(dst);
-  dn_rt_finish_output2(skb,dn_rt_all_rt_mcast);
+  dn_rt_finish_output2(skb,&mypb.pb$b_rstation);
   //  dev_queue_xmit(skb);
 }
 
@@ -640,6 +640,7 @@ static void dn_send_endnode_hello(struct net_device *dev)
         skb->dev = dev;
 
 	msg = skb_put(skb,sizeof(*nisca));
+	skb_put(skb,16);
 
         intro = msg;
 
@@ -655,7 +656,7 @@ static void dn_send_endnode_hello(struct net_device *dev)
 	if (strlen(system_utsname.nodename)) {
 	  nisca->nisca$t_nodename[0]=4; //strlen(system_utsname.nodename);
 	  memcpy(&nisca->nisca$t_nodename[1],system_utsname.nodename,4);
-	  //memcpy(&nisca->nisca$ab_lan_hw_addr,6);
+	  memcpy(&nisca->nisca$ab_lan_hw_addr,dev->dev_addr,6);
 	  
 	} else {
 	  nisca->nisca$t_nodename[0]=6;
