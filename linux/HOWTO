@@ -80,3 +80,17 @@ Running stuff:
 		Do not expect X to work.
 	With CONFIG_VMS:
 		Boot with single-user bash or dcl.
+
+Automation:
+	Use make image to make a floppy and disk image.
+	Set bochs to boot the floppy grub image, and set
+	c.img to cyl=4, heads=255, spt=63
+	The make image script works on RedHat 9, and may need some
+	tailoring other places.
+	Use make image-install to install the FreeVMS binaries to be
+	found in /vms$common.
+	Use make image-kernel-iomm and image-kernel-noiomm to install
+	the CONFIG_VMS and non-CONFIG_VMS kernels, respectively.
+	Use make environment or ./envscript to set up the build
+	environments for 386 and uml for both CONFIG_VMS and without,
+	up to the point where you do make bzImage or make linux/linux ARCH=um.
