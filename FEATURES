@@ -1,7 +1,7 @@
 scheduling (partly)
 asts (partly)
 timing (partly)
-event flags (partly)
+event flags, both local and common (partly)
 process control and communication (partly)
 logicals (partly)
 fork (partly)
@@ -9,6 +9,7 @@ queued i/o (a little bit)
 memory management (a little bit at low-level)
 
 syscalls:
+$ascefc
 $asctim
 $assign
 $bintim
