@@ -14,6 +14,7 @@
 #include<ssdef.h>
 #include<iodef.h>
 #include<devdef.h>
+#include<dyndef.h>
 #include<system_data_cells.h>
 #include<ipl.h>
 #include<linux/vmalloc.h>
@@ -60,6 +61,8 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 	if (tty->ucb$l_tt_typahd==0) {  // this is duplicated -> own routine?
 	  tty->ucb$l_tt_typahd = kmalloc (sizeof (struct _tt_type_ahd),GFP_KERNEL);
 	  struct _tt_type_ahd * ahd = tty->ucb$l_tt_typahd;
+	  memset(ahd, 0, sizeof(struct _tt_type_ahd));
+	  ahd->tty$b_ta_type = DYN$C_TYPAHD;
 	  ahd->tty$l_ta_data=kmalloc(1024,GFP_KERNEL);
 	  ahd->tty$l_ta_get=ahd->tty$l_ta_put=ahd->tty$l_ta_data;
 	  ahd->tty$l_ta_end=(long)ahd->tty$l_ta_data+1024;
@@ -67,9 +70,11 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 	  tty->ucb$b_tt_outype=0;
 	  // not  yet? : return;
 	}
-	
+
+	tty->tty$v_st_write = 1;
 	int chr;
-	tty$putnextchar(&chr,u);
+	int CC;
+	tty$getnextchar(&chr, &CC, u);
 
 	tty=u;
 	if (tty->ucb$b_tt_outype==0) //check
@@ -93,6 +98,8 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 	if (tty->ucb$l_tt_typahd==0) {  // this is duplicated -> own routine?
 	  tty->ucb$l_tt_typahd = kmalloc (sizeof (struct _tt_type_ahd),GFP_KERNEL);
 	  struct _tt_type_ahd * ahd = tty->ucb$l_tt_typahd;
+	  memset(ahd, 0, sizeof(struct _tt_type_ahd));
+	  ahd->tty$b_ta_type = DYN$C_TYPAHD;
 	  ahd->tty$l_ta_data=kmalloc(1024,GFP_KERNEL);
 	  ahd->tty$l_ta_get=ahd->tty$l_ta_put=ahd->tty$l_ta_data;
 	  ahd->tty$l_ta_end=(long)ahd->tty$l_ta_data+1024;
@@ -103,7 +110,7 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 	
 	int chr;
 	int CC;
-	tty$getnextchar(&chr,&CC,u);
+	tty$getnextchar(&chr, &CC, u);
 
 	tty=u;
 	if (tty->ucb$b_tt_outype==0) //check
