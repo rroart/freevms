@@ -628,7 +628,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
     //    fib->fib$l_wcc=dir.d_off;
     fib->fib$w_exctl=dir.d_off;
-    fib->fib$w_nmctl=dir.d_reclen;
+    fib->fib$w_nmctl=*reslen;
 
     fib->fib$l_wcc = 1;
 
