@@ -600,9 +600,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 	name[strlen(name)]='/';
 	ext2_vms_to_unix(name+strlen(name),filedsc);
 	strcpy(&x2p->context_save,name);
-	if (strstr(filedsc->dsc$a_pointer,".DIR"))
+	if (strstr(filedsc->dsc$a_pointer,".DIR")) {
 	  dirflg=O_DIRECTORY;
-	x2p->context_save[0]=0;
+	  x2p->context_save[0]=0;
+	}
     }
 
     dir.d_ino=0;
