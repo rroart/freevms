@@ -516,7 +516,7 @@ static unsigned long int_show_logical_name    (unsigned long h_input, unsigned l
 //static unsigned long int_show_system          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 
 static Command intcmd[] = {
-	0, "odefine",  int_create_logical_name,  NULL, "<logical_name>", 
+	0, "define",  int_create_logical_name,  NULL, "<logical_name>", 
 	0, "delete logical name",  int_delete_logical_name,  NULL, "<logical_name>", 
 	0, "delete logical table", int_delete_logical_table, NULL, "<table_name>", 
 	1, "echo",                 int_echo,                 NULL, "<string> ...", 
@@ -3273,32 +3273,28 @@ static unsigned long crelognam (unsigned long cprocmode, void *crelognamparv);
 static unsigned long int_create_logical_name (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  char buff[OZ_LOGNAME_MAXNAMSZ];
-  Crelognampar crelognampar;
-  Handleclose *handleclose, *handlecloses;
-  int i, kernel, usedup;
-  unsigned long j, logvalatr, nvalues, rlen, sts;
-  unsigned long h_logname, h_object;
-  OZ_Logvalue *newvals;
-  unsigned char objtype;
-
+  unsigned long sts;
+  char * default_table = "LNM$PROCESS_TABLE";
+  char * table;
   struct dsc$descriptor mytabnam, mynam;
   struct item_list_3 itm[2];
+  int argvadd = 0;
 
   if (argc>1 && 0==strncmp(argv[0],"/table",strlen(argv[0]))) {
+    table=argv[1];
+    argvadd=2;
   } else {
-    return 0;
+    table=default_table;
   }
 
-  mynam.dsc$w_length=strlen(argv[2]);
-  mynam.dsc$a_pointer=argv[2];
-  mytabnam.dsc$w_length=strlen(argv[1]);
-  mytabnam.dsc$a_pointer=argv[1];
-
+  mynam.dsc$w_length=strlen(argv[0+argvadd]);
+  mynam.dsc$a_pointer=argv[0+argvadd];
+  mytabnam.dsc$w_length=strlen(table);
+  mytabnam.dsc$a_pointer=table;
 
   itm[0].item_code=LNM$_STRING;
-  itm[0].buflen=strlen(argv[3]);
-  itm[0].bufaddr=argv[3];
+  itm[0].buflen=strlen(argv[1+argvadd]);
+  itm[0].bufaddr=argv[1+argvadd];
   bzero(&itm[1],sizeof(struct item_list_3));
 
   sts=sys$crelnm(0,&mytabnam,&mynam,0,itm);
