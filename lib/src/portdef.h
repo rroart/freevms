@@ -115,7 +115,7 @@ struct _port {
   unsigned char port$b_scan_sbuf;
   unsigned char port$b_need_sack;
   unsigned long port$l_sysid_lo;
-  /* missing long? */
+  unsigned short port$w_sysid_hi;
   unsigned short port$w_group;
   unsigned long port$l_mcast_lo;
   unsigned short port$w_mcast_hi;

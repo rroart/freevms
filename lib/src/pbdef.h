@@ -131,7 +131,8 @@ struct _pb {
   int pb$l_load_class;
   int pb$l_priority;
   int pb$l_mgt_priority;
-  unsigned int pb$l_vc_addr;
+  //  unsigned int pb$l_vc_addr;
+  struct _vcdef * pb$l_vc_addr;
   int pb$$_fill_3 [2];
 };
  
