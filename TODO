@@ -30,3 +30,14 @@ Make a make linker autobuild
 Use sys$ with system service call instead in exe$ in ipacp etc, to make asts etc function properly.
 
 Schedule code cleanup.
+
+More P1 space.
+Will do more with the IP stuff.
+Might move clustering to just CONFIG_VMS mode, and go from socket to QIO.
+
+Let RMS also use Ext2 with write support.
+Execute programs with execve and imgact on Ods-2.
+Get more/better write-support in.
+Do more SCA/SCS stuff.
+After some time even more driver support might be cut/broke (the most).
+
