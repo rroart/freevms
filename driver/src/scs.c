@@ -1850,7 +1850,7 @@ void dn_nsp_send_conninit2(struct _cdt *sk, unsigned char msgflg, char * rprnam,
 	bzero(&scs->scs$b_con_dat,16);
 	bcopy(rprnam,&scs->scs$t_dst_proc,strlen(rprnam));
 	bcopy(lprnam,&scs->scs$t_src_proc,strlen(lprnam));
-	bcopy(condat,&scs->scs$b_con_dat,strlen(condat));
+	if (condat) bcopy(condat,&scs->scs$b_con_dat,strlen(condat));
 
 	dn_nsp_send2(skb);	
 }
@@ -1882,7 +1882,7 @@ void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgf
 }
 
 
-void scs_msg_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg)
+void scs_msg_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg, struct _scs * newscs)
 {
 	struct _nisca *nisca;
 	struct _ppd * ppd;
@@ -1899,16 +1899,14 @@ void scs_msg_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg)
 	ppd=getppdscs(data);
 	scs=getppdscs(data);
 
+	bcopy(newscs,scs,sizeof(struct _scs));
+
 	//ppd->ppb$b_opc=NISCA$C_MSGREC;
 	
-	scs->scs$w_mtype=SCS$C_APPL_DG;
-	scs->scs$l_dst_conid=cdt->cdt$l_rconid;
-	scs->scs$l_src_conid=cdt->cdt$l_lconid;
-
-	memcpy(&nisca->nisca$t_nodename,&mysb.sb$t_nodename,8);
+	//memcpy(&nisca->nisca$t_nodename,&mysb.sb$t_nodename,8);
 }
 
-void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdrp)
+void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdrp, int bufsiz)
 {
 	struct _nisca *nisca;
 	struct _ppd * ppd;
@@ -1923,13 +1921,13 @@ void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdr
 	data = skb_put(skb,sizeof(*scs));
 	data = (unsigned long)scs + sizeof(*scs);
 
-	bcopy(cdrp->cdrp$l_msg_buf,data,cdrp->cdrp$w_cdrpsize);
+	bcopy(cdrp->cdrp$l_msg_buf,data,bufsiz);
 
 	cdt->cdt$l_fp_scs_norecv=cdrp;
 	cdt->cdt$l_reserved3=current->pid;
 	cdt->cdt$l_reserved4=cdrp->cdrp$l_msg_buf;
 
-	data=skb_put(skb,cdrp->cdrp$w_cdrpsize);
+	data=skb_put(skb,bufsiz);
 }
 
 
@@ -2143,7 +2141,7 @@ int opc_msgrec(struct sk_buff *skb) {
     // do an accept or reject
     //cdt->cdt$w_state=CDT$C_REJ_SENT
     //scs_msg_ctl_comm(cdt,SCS$C_REJ_REQ);
-    scs$accept(0,0,0,0,0,0,0,0,0,0,0,0,cdt,0);
+    scs_std$accept(0,0,0,0,0,0,0,0,0,0,0,0,cdt,0);
     cdt->cdt$l_condat=vmalloc(16);
     cdt->cdt$l_lprocnam=vmalloc(16);
     bcopy(&scs->scs$b_con_dat,cdt->cdt$l_condat,16);
@@ -2236,6 +2234,7 @@ int nisca_snt_dg (struct sk_buff * skb) {
     setipl(savipl);
   }
 #endif
+  kfree_skb(skb);
 }
 
 int nisca_snt_lb (struct sk_buff * skb, void * addr) { }
