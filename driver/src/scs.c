@@ -87,9 +87,9 @@ void * getdx(void * buf);
 void * getcc(void * buf);
 void * gettr(void * buf);
 void * getppdscs(void * buf);
-void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg);
+void scs_msg_ctl_fill(char * buf, struct _cdt * cdt, unsigned char msgflg);
 struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri);
-static inline void scs_rt_finish_output2(struct sk_buff *skb, char *dst);
+static inline void scs_rt_finish_output2(char *buf, int len, char *dst);
 
 #ifdef CONFIG_VMS
 
@@ -122,201 +122,17 @@ struct  scs_interface_structure
   };
 } scs_int_, * scs_int = &scs_int_;
 
-void skb_over_panic(struct sk_buff *skb, int sz, void *here)
-{
-	printk("skput:over: %p:%d put:%d dev:%s", 
-		here, skb->len, sz, skb->dev ? skb->dev->name : "<NULL>");
-	BUG();
-}
-
-void skb_under_panic(struct sk_buff *skb, int sz, void *here)
-{
-        printk("skput:under: %p:%d put:%d dev:%s",
-                here, skb->len, sz, skb->dev ? skb->dev->name : "<NULL>");
-	BUG();
-}
-
-static __inline__ struct sk_buff *skb_head_from_pool(void)
-{
-	return NULL;
-}
-
-static __inline__ void skb_head_to_pool(struct sk_buff *skb)
-{
-  kfree(skb);
-}
-void __kfree_skb(struct sk_buff *skb)
-{
-	if (skb->list) {
-	 	printk(KERN_WARNING "Warning: kfree_skb passed an skb still "
-		       "on a list (from %p).\n", NET_CALLER(skb));
-		BUG();
-	}
-
-	//dst_release(skb->dst);
-	if(skb->destructor) {
-		if (in_irq()) {
-			printk(KERN_WARNING "Warning: kfree_skb on hard IRQ %p\n",
-				NET_CALLER(skb));
-		}
-		skb->destructor(skb);
-	}
-#ifdef CONFIG_NETFILTER
-	nf_conntrack_put(skb->nfct);
-#endif
-	skb_headerinit(skb, NULL, 0);  /* clean state */
-	kfree_skbmem(skb);
-}
-
-struct sk_buff *alloc_skb(unsigned int size,int gfp_mask)
-{
-	struct sk_buff *skb;
-	u8 *data;
-
-	//if (in_interrupt() && (gfp_mask & __GFP_WAIT)) {
-	if (0 && (gfp_mask & __GFP_WAIT)) {
-		static int count = 0;
-		if (++count < 5) {
-			printk(KERN_ERR "alloc_skb called nonatomically "
-			       "from interrupt %p\n", NET_CALLER(size));
- 			BUG();
-		}
-		gfp_mask &= ~__GFP_WAIT;
-	}
-
-	/* Get the HEAD */
-	skb = skb_head_from_pool();
-	if (skb == NULL) {
-	  //		skb = kmem_cache_alloc(skbuff_head_cache, gfp_mask & ~__GFP_DMA);
-	  skb = kmalloc(sizeof(struct sk_buff), GFP_KERNEL);
-		if (skb == NULL)
-			goto nohead;
-	}
-
-	/* Get the DATA. Size must match skb_add_mtu(). */
-	size = SKB_DATA_ALIGN(size);
-	data = kmalloc(size + sizeof(struct skb_shared_info), gfp_mask);
-	if (data == NULL)
-		goto nodata;
-
-	/* XXX: does not include slab overhead */ 
-	skb->truesize = size + sizeof(struct sk_buff);
-
-	/* Load the data pointers. */
-	skb->head = data;
-	skb->data = data;
-	skb->tail = data;
-	skb->end = data + size;
-
-	/* Set up other state */
-	skb->len = 0;
-	skb->cloned = 0;
-	skb->data_len = 0;
-
-	atomic_set(&skb->users, 1); 
-	atomic_set(&(skb_shinfo(skb)->dataref), 1);
-	skb_shinfo(skb)->nr_frags = 0;
-	skb_shinfo(skb)->frag_list = NULL;
-	return skb;
-
-nodata:
-	skb_head_to_pool(skb);
-nohead:
-	return NULL;
-}
-
-/*
- *	Slab constructor for a skb head. 
- */ 
-static inline void skb_headerinit(void *p, kmem_cache_t *cache, 
-				  unsigned long flags)
-{
-	struct sk_buff *skb = p;
-
-	skb->next = NULL;
-	skb->prev = NULL;
-	skb->list = NULL;
-	skb->sk = NULL;
-	skb->stamp.tv_sec=0;	/* No idea about time */
-	skb->dev = NULL;
-	skb->dst = NULL;
-	memset(skb->cb, 0, sizeof(skb->cb));
-	skb->pkt_type = PACKET_HOST;	/* Default type */
-	skb->ip_summed = 0;
-	skb->priority = 0;
-	skb->security = 0;	/* By default packets are insecure */
-	skb->destructor = NULL;
-
-#ifdef CONFIG_NETFILTER
-	skb->nfmark = skb->nfcache = 0;
-	skb->nfct = NULL;
-#ifdef CONFIG_NETFILTER_DEBUG
-	skb->nf_debug = 0;
-#endif
-#endif
-#ifdef CONFIG_NET_SCHED
-	skb->tc_index = 0;
-#endif
-}
-
-/*
- *	Free an skbuff by memory without cleaning the state. 
- */
-void kfree_skbmem(struct sk_buff *skb)
-{
-	skb_release_data(skb);
-	skb_head_to_pool(skb);
-}
-
-static void skb_release_data(struct sk_buff *skb)
-{
-	if (!skb->cloned ||
-	    atomic_dec_and_test(&(skb_shinfo(skb)->dataref))) {
-		if (skb_shinfo(skb)->nr_frags) {
-			int i;
-			for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
-				put_page(skb_shinfo(skb)->frags[i].page);
-		}
-
-		if (skb_shinfo(skb)->frag_list)
-			skb_drop_fraglist(skb);
-
-		kfree(skb->head);
-	}
-}
-
-static void skb_drop_fraglist(struct sk_buff *skb)
-{
-	struct sk_buff *list = skb_shinfo(skb)->frag_list;
-
-	skb_shinfo(skb)->frag_list = NULL;
-
-	do {
-		struct sk_buff *this = list;
-		list = list->next;
-		kfree_skb(this);
-	} while (list);
-}
-
 #endif
 
 int is_cluster_on() {
   return mypb.pb$w_state==PB$C_OPEN;
 }
 
-inline void scs_nsp_send2(struct sk_buff *skb)
+inline void scs_nsp_send2(char * buf, int len)
 {
   unsigned short int *pktlen;
-#ifndef CONFIG_VMS
-  pktlen = (unsigned short *)skb_push(skb,2);
-#else
-  pktlen = (unsigned short *)skb_push(skb,2);
-#endif
-  *pktlen = htons(skb->len - 2);
-  skb->nh.raw = skb->data;
-  skb->dev = scs_default_device;
   //skb->dst = dst_clone(dst);
-  scs_rt_finish_output2(skb,&mypb.pb$b_rstation);
+  scs_rt_finish_output2(buf,len,&mypb.pb$b_rstation);
   //  dev_queue_xmit(skb);
 }
 
@@ -324,11 +140,13 @@ static void scs_dev_delete(struct net_device *dev);
 
 static void scs_send_brd_hello(struct net_device *dev);
 
-static inline void scs_rt_finish_output2(struct sk_buff *skb, char *dst)
+static inline void scs_rt_finish_output2(char * buf , int len, char *dst)
 {
-  struct net_device *dev = skb->dev;
 
-#ifndef CONFIG_VMS
+#ifndef CONFIG_VMS 
+  struct net_device *dev = skb->dev;
+  skb->nh.raw = skb->data;
+  skb->dev = scs_default_device;
   if ((dev->type != ARPHRD_ETHER) && (dev->type != ARPHRD_LOOPBACK))
     dst = NULL;
 
@@ -342,8 +160,8 @@ static inline void scs_rt_finish_output2(struct sk_buff *skb, char *dst)
   int sts = exe$qiow(4,	scs_int->sei$io_chan,
 		     IO$_WRITEVBLK,
 		     IOS, 0, 0,
-		     skb->data,
-		     skb->len, 0, 0,
+		     buf,
+		     len, 0, 0,
 		     dst, 0);
 
 #endif
@@ -366,56 +184,38 @@ int scs_from_myself(struct _nisca * msg,unsigned short sr_hi,unsigned long sr_lo
 
 static void scs_send_endnode_hello(struct net_device *dev)
 {
-        struct _nisca *intro;
-        struct _nisca *nisca, *dx;
-        struct sk_buff *skb = NULL;
-        unsigned short int *pktlen;
-	void * msg;
+  struct _nisca *intro;
+  struct _nisca *nisca, *dx;
+  unsigned short int *pktlen;
+  void * msg;
 
-        if ((skb = scs_alloc_skb2(NULL, sizeof(*nisca)+16, GFP_ATOMIC)) == NULL)
-		return;
+  char * buf = kmalloc (256, GFP_KERNEL);
+  memset(buf, 0, 256);
+  int len = sizeof(*nisca)+16;
 
-        skb->dev = dev;
+  msg = buf;
+  intro = msg;
 
-#ifndef CONFIG_VMS
-	msg = skb_put(skb,sizeof(*nisca));
-	skb_put(skb,16);
-#else
-	msg = skb_put(skb,sizeof(*nisca));
-	skb_put(skb,16);
-#endif
+  dx=getdx(msg);
 
-        intro = msg;
+  scs_fill_dx(msg,0xab00,0x04010000,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1]);
 
-	dx=getdx(msg);
+  nisca=getcc(msg);
 
-	scs_fill_dx(msg,0xab00,0x04010000,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1]);
-
-	nisca=getcc(msg);
-
-        nisca->nisca$b_msg  = NISCA$C_HELLO;
-        nisca->nisca$b_msg  |= NISCA$M_TR_CTL|NISCA$M_TR_CCFLG;
-	nisca->nisca$l_maint  = NISCA$M_MAINT;
-	if (strlen(&mysb.sb$t_nodename)) {
-	  nisca->nisca$t_nodename[0]=4; //strlen(system_utsname.nodename);
-	  memcpy(&nisca->nisca$t_nodename[1],&mysb.sb$t_nodename,4);
-	  memcpy(&nisca->nisca$ab_lan_hw_addr,dev->dev_addr,6);
+  nisca->nisca$b_msg  = NISCA$C_HELLO;
+  nisca->nisca$b_msg  |= NISCA$M_TR_CTL|NISCA$M_TR_CCFLG;
+  nisca->nisca$l_maint  = NISCA$M_MAINT;
+  if (strlen(&mysb.sb$t_nodename)) {
+    nisca->nisca$t_nodename[0]=4; //strlen(system_utsname.nodename);
+    memcpy(&nisca->nisca$t_nodename[1],&mysb.sb$t_nodename,4);
+    memcpy(&nisca->nisca$ab_lan_hw_addr,dev->dev_addr,6);
 	  
-	} else {
-	  nisca->nisca$t_nodename[0]=6;
-	  memcpy(&nisca->nisca$t_nodename[1],"NODNAM",6);
-	}
+  } else {
+    nisca->nisca$t_nodename[0]=6;
+    memcpy(&nisca->nisca$t_nodename[1],"NODNAM",6);
+  }
 
-#ifndef CONFIG_VMS
-	pktlen = (unsigned short *)skb_push(skb,2);
-#else
-	pktlen = (unsigned short *)skb_push(skb,2);
-#endif
-        *pktlen = htons(skb->len - 2);
-
-	skb->nh.raw = skb->data;
-
-	scs_rt_finish_output2(skb, scs_rt_all_rt_mcast);
+  scs_rt_finish_output2(buf, len, scs_rt_all_rt_mcast);
 }
 
 
@@ -442,7 +242,7 @@ static void scs_dev_timer_func(unsigned long arg)
   scs_dev_set_timer(dev);
 }
 
-static timer_done=0;
+static timers=5;
 
 static void scs_dev_set_timer()
 {
@@ -458,10 +258,11 @@ static void scs_dev_set_timer()
 #else
   //  add_timer(timer);
   // fix regular timing later
-  signed long long time=-100000000;
-  if (!timer_done)
+  signed long long time=-1000000000;
+  if (timers) {
     exe$setimr (0, &time ,scs_dev_timer_func,scs_default_device,0);
-  timer_done=1;
+    timers--;
+  }
 #endif
 }
 
@@ -495,7 +296,7 @@ int scs_neigh_endnode_hello(struct sk_buff *skb)
 
 	msg=getcc(msg);
 #else
-	struct _nisca *msg = (long)getcc(msg)-14;
+	struct _nisca *msg = (long)getcc(skb);
 #endif
 
  	if (0==strncmp("NODNAM",&msg->nisca$t_nodename[1],6))
@@ -525,12 +326,11 @@ int scs_neigh_endnode_hello(struct sk_buff *skb)
 
 #ifndef CONFIG_VMS
 	kfree_skb(skb);
-#else
-	kfree_skb(skb);
 #endif
 	return 0;
 }
 
+#ifndef CONFIG_VMS
 /*
  * This function uses a slightly different lookup method
  * to find its sockets, since it searches on object name/number
@@ -574,53 +374,51 @@ struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri)
 
 	return skb;
 }
+#endif
 
 void scs_msg_ctl_comm(struct _cdt *sk, unsigned char msgflg)
 {
-	struct sk_buff *skb = NULL;
-	if ((skb = scs_alloc_skb2(sk, 200, (msgflg == SCS$C_CON_REQ) ? 0 : GFP_ATOMIC)) == NULL)
-	  return;
+	int len=200;
+	char * buf = kmalloc (200, GFP_KERNEL);
+	memset (buf, 0, 200);
 
-	scs_msg_ctl_fill(skb,sk,msgflg);
+	scs_msg_ctl_fill(buf,sk,msgflg);
 
-	scs_nsp_send2(skb);	
+	scs_nsp_send2(buf, len);	
 }
 
 void scs_nsp_send_conninit2(struct _cdt *sk, unsigned char msgflg, char * rprnam, char * lprnam, char * condat)
 {
-	struct sk_buff *skb = NULL;
 	struct _nisca *nisca;
 	struct _ppd * ppd;
 	struct _scs * scs;
-	if ((skb = scs_alloc_skb2(sk, 200, (msgflg == SCS$C_CON_REQ) ? 0 : GFP_ATOMIC)) == NULL)
-	  return;
+	
+	int len=200;
+	char * buf=kmalloc(200, GFP_KERNEL);
+	memset(buf, 0, 200);
 
-	scs_msg_ctl_fill(skb,sk,msgflg);
+	scs_msg_ctl_fill(buf,sk,msgflg);
 
-	scs=getppdscs(skb->data);
+	scs=getppdscs(buf);
 
-	bzero(&scs->scs$t_dst_proc,16);
-	bzero(&scs->scs$t_src_proc,16);
-	bzero(&scs->scs$b_con_dat,16);
-	bcopy(rprnam,&scs->scs$t_dst_proc,strlen(rprnam));
-	bcopy(lprnam,&scs->scs$t_src_proc,strlen(lprnam));
-	if (condat) bcopy(condat,&scs->scs$b_con_dat,strlen(condat));
+	memset(&scs->scs$t_dst_proc,0,16);
+	memset(&scs->scs$t_src_proc,0,16);
+	memset(&scs->scs$b_con_dat,0,16);
+	memcpy(&scs->scs$t_dst_proc,rprnam,strlen(rprnam));
+	memcpy(&scs->scs$t_src_proc,lprnam,strlen(lprnam));
+	if (condat) memcpy(&scs->scs$b_con_dat,condat,strlen(condat));
 
-	scs_nsp_send2(skb);	
+	scs_nsp_send2(buf,len);	
 }
 
-void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg)
+void scs_msg_ctl_fill(char * buf, struct _cdt * cdt, unsigned char msgflg)
 {
 	struct _nisca *nisca;
 	struct _ppd * ppd;
 	struct _scs * scs;
 	struct _nisca *dx;
 	void * data;
-#ifndef CONFIG_VMS
-	data = skb_put(skb,sizeof(*nisca));
-#else
-	data = skb_put(skb,sizeof(*nisca));
-#endif
+	data=buf;
 	scs_fill_dx(data,0xab00,0x04010000,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1]);
 	nisca=gettr(data);
 	nisca->nisca$b_tr_flag=NISCA$M_TR_CTL;
@@ -645,7 +443,7 @@ void printscs(void * skbdata) {
 	struct _scs * scs;
 	struct _nisca *dx;
 	void * data;
-	data = (int)skbdata/*+14*/;
+	data = (int)skb_getdata(skbdata)/*+14*/;
 	nisca=gettr(data);
 	ppd=getppdscs(data);
 	scs=getppdscs(data);
@@ -663,92 +461,60 @@ void printscs(void * skbdata) {
 }
 
 
-void scs_msg_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg, struct _scs * newscs)
+void scs_msg_fill(char * buf, struct _cdt * cdt, unsigned char msgflg, struct _scs * newscs)
 {
 	struct _nisca *nisca;
 	struct _ppd * ppd;
 	struct _scs * scs;
 	struct _nisca *dx;
 	void * data;
-#ifndef CONFIG_VMS
-	data = skb_put(skb,sizeof(*nisca));
-#else
-	data = skb_put(skb,sizeof(*nisca));
-#endif
+	data = buf;
+
 	scs_fill_dx(data,0xab00,0x04010000,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1]);
 	nisca=gettr(data);
 	nisca->nisca$b_tr_flag=0;
 	nisca->nisca$b_tr_pad=0x13;
 	nisca->nisca$b_tr_pad_data_len=0x12;
-	
+
 	ppd=getppdscs(data);
 	scs=getppdscs(data);
 
-	bcopy(newscs,scs,sizeof(struct _scs));
+	memcpy(scs,newscs,sizeof(struct _scs));
 
 	//ppd->ppb$b_opc=NISCA$C_MSGREC;
 	
 	//memcpy(&nisca->nisca$t_nodename,&othersb.sb$t_nodename,8);
 }
 
-void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdrp, int bufsiz)
+void scs_msg_fill_more(char * buf,struct _cdt * cdt, struct _cdrp * cdrp, int bufsiz)
 {
 	struct _nisca *nisca;
 	struct _ppd * ppd;
 	struct _scs * scs;
 	struct _nisca *dx;
 	void * data;
-#ifndef CONFIG_VMS
-	data = skb_put(skb,sizeof(*nisca));
-#else
-	data = skb_put(skb,sizeof(*nisca));
-#endif
-	data = skb->data;
+	data = buf;
+
 	ppd=getppdscs(data);
 	scs=getppdscs(data);
 
-#ifndef CONFIG_VMS
-	data = skb_put(skb,sizeof(*scs));
-#else
-	data = skb_put(skb,sizeof(*scs));
-#endif
 	data = (unsigned long)scs + sizeof(*scs);
 
-	bcopy(cdrp->cdrp$l_msg_buf,data,bufsiz);
+	memcpy(data, cdrp->cdrp$l_msg_buf, bufsiz);
 
-	//cdt->cdt$l_fp_scs_norecv=cdrp;
-	//cdt->cdt$l_reserved3=current->pcb$l_pid;
-	//cdt->cdt$l_reserved4=cdrp->cdrp$l_msg_buf;
-
-#ifndef CONFIG_VMS
-	data=skb_put(skb,bufsiz);
-#else
-	data=skb_put(skb,bufsiz);
-#endif
 }
 
 static unsigned char dn_hiord_addr[6] = {0xAB,0x00,0x04,0x01,0x00,0x00}; // remember to add clusterid + 1
 
-int opc_msgrec(struct sk_buff *skb) {
+int opc_msgrec(char * buf) {
   struct _cdt *cb;
   struct _cdt *cdt;
   unsigned char flags = 0;
-#ifndef CONFIG_VMS 
-  __u16 len = ntohs(*(__u16 *)skb->data);
-#endif
   unsigned char padlen = 0;
-#ifndef CONFIG_VMS
-  struct _scs * msg=skb->data;
-#else
-  struct _scs * msg=skb;
-#endif
+  struct _scs * msg=buf;
   struct _scs * scs;
   struct _sbnb * sbnb;
-#ifndef CONFIG_VMS
   scs=getppdscs(msg);
-#else
-  scs=(long)getppdscs(msg)-14;
-#endif
   
   if (scs->scs$w_mtype) { // if other than con_req
     cdt=&cdtl[scs->scs$l_dst_conid];
@@ -767,8 +533,8 @@ int opc_msgrec(struct sk_buff *skb) {
     //cdt->cdt$w_state=CDT$C_REJ_SENT
     //scs_msg_ctl_comm(cdt,SCS$C_REJ_REQ);
     scs_std$accept(0,0,0,0,0,0,0,0,0,0,0,0,cdt,0);
-    cdt->cdt$l_condat=vmalloc(16);
-    cdt->cdt$l_lprocnam=vmalloc(16);
+    cdt->cdt$l_condat=kmalloc(16,GFP_KERNEL);
+    cdt->cdt$l_lprocnam=kmalloc(16,GFP_KERNEL);
     bcopy(&scs->scs$b_con_dat,cdt->cdt$l_condat,16);
     bcopy(&scs->scs$t_dst_proc,cdt->cdt$l_lprocnam,16);
     sbnb=scs_find_name(cdt->cdt$l_lprocnam);
@@ -822,13 +588,8 @@ int opc_msgrec(struct sk_buff *skb) {
 }
 
 //int nisca_snt_dg (struct sk_buff * skb, void * addr) 
-int nisca_snt_dg (struct sk_buff * skb) { 
-  //  return do_opc_dispatch(skb);
-#ifndef CONFIG_VMS
-  void * addr = getppdscs(skb->data);
-#else
-  void * addr = (long)getppdscs(skb)-14;
-#endif
+int nisca_snt_dg (char * buf) { 
+  void * addr = getppdscs(buf);
   struct _scs * scs = addr;
   struct _cdt * cdt = &cdtl[scs->scs$l_dst_conid];
   // shortcut
@@ -871,11 +632,7 @@ int nisca_snt_dg (struct sk_buff * skb) {
     setipl(savipl);
   }
 #endif
-#ifndef CONFIG_VMS
-  kfree_skb(skb);
-#else
-  kfree_skb(skb);
-#endif
+  //kfree(buf);
 }
 
 int nisca_snt_lb (struct sk_buff * skb, void * addr) { }
@@ -1118,21 +875,25 @@ void * getdx(void * buf) {
   return buf;
 }
 
+void * skb_getdata (void * buf) {
+  return ((long)buf)+16;
+}
+
 void * getcc(void * buf) {
   unsigned long l=(unsigned long)buf;
-  struct _nisca * nisca=(struct _nisca *)(l+14);
+  struct _nisca * nisca=(struct _nisca *)(l+16);
   return nisca;
 }
 
 void * gettr(void * buf) {
   unsigned long l=(unsigned long)buf;
-  struct _nisca * nisca=(struct _nisca *)(l+14);
+  struct _nisca * nisca=(struct _nisca *)(l+16);
   return nisca;
 }
 
 void * getppdscs(void * buf) {
   unsigned long l=(unsigned long)buf;
-  struct _nisca * nisca=(struct _nisca *)(l+14);
+  struct _nisca * nisca=(struct _nisca *)(l+16);
   unsigned long tr_flag=nisca->nisca$b_tr_flag;
   unsigned long tr_pad=nisca->nisca$b_tr_pad_data_len;
   unsigned long retadr=(unsigned long)(&nisca->nisca$b_tr_pad_data_len)+tr_pad;
@@ -1212,7 +973,7 @@ return NET_RX_DROP;
 int do_opc_dispatch(struct sk_buff *skb)
 {
   int (*func)();
-  struct _ppd * ppd=getppdscs(skb->data);
+  struct _ppd * ppd=getppdscs(skb);
   if (ppd->ppd$b_opc>0x40)
     panic("ppd$b_opc too large\n");
   func=opc_dispatch[ppd->ppd$b_opc];
@@ -1246,6 +1007,7 @@ scs_startdev ( scs_int2 , setflag , setaddr)
 	bzero(Setup,sizeof(struct XE_setup_structure));
 
 	scs_int->sei$rcvhdrs = kmalloc(4*16, GFP_KERNEL);
+	memset(scs_int->sei$rcvhdrs, 0, 4*16);
 	qhead_init(& scs_int->sei$recv_qhead );
 
 // Build the nasty setup block required by the ethernet device
@@ -1356,9 +1118,10 @@ scs_startio ( int dummy )
   for (i=0;i<=(MAX_RCV_BUF-1);i++)
     {	// Get buffer, put on Q and issue IO$_READVBLK function
       buff = kmalloc(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len),GFP_KERNEL);
+      memset(buff, 0, DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
       INSQUE ( buff , scs_int-> sei$recv_qtail  );
       buff = buff + XE_hdr_offset;
-      sts = sys$qio(2,scs_int->sei$io_chan,IO$_READVBLK,0,&buff->scs_rcv$vms_code,
+      sts = sys$qio(2,scs_int->sei$io_chan,IO$_READVBLK,&buff->scs_rcv$vms_code,
 		   scs_receive,  scs_int,
 		   &buff->scs_rcv$data,
 		   DRV$MAX_PHYSICAL_BUFSIZE,
@@ -1461,6 +1224,7 @@ void scs_receive ( int i)
     scs_int->sei$curhdr = 0;
 
   NRbuf = kmalloc(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len), GFP_KERNEL);
+  memset(NRbuf, 0, DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
   INSQUE(NRbuf,scs_int->sei$recv_qtail);
   NRbuf = NRbuf + XE_hdr_offset;
   RC = sys$qio(2,scs_int->sei$io_chan,
@@ -1526,10 +1290,10 @@ int scs_rcv2(char * bufh, char * buf)
   int (*func)();
 
   msg=buf;
-  nisca=(long)gettr(msg)-14;
-  scs=(long)getppdscs(msg)-14;
-  ppd=(long)getppdscs(msg)-14;
-  dx=(long)getdx(msg)-14;
+  nisca=(long)gettr(msg);
+  scs=(long)getppdscs(msg);
+  ppd=(long)getppdscs(msg);
+  dx=(long)getdx(msg);
 
   if (scs_from_myself(dx,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1])) {
     //printk("discarding packet from myself (mcast...?)\n");

@@ -126,7 +126,15 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
       dev_open = 1;
       printk("%%KERNEL-I-INFO, Doing network dev->open(), one is enough.\n");
     }
+    //dev_open stuff
+    dev->flags |= IFF_UP;
+    set_bit(__LINK_STATE_PRESENT, &dev->state);
     set_bit(__LINK_STATE_START, &dev->state);
+    //dev_mc_upload(dev);
+#if 1
+    if (ni->ucb$l_ni_pty==0x6009 || ni->ucb$l_ni_pty==0x0960) 
+      dev_set_allmulti(dev, 1);
+#endif
     }
   dup:
     break;
@@ -765,6 +773,46 @@ static struct net_device *alloc_netdev(int sizeof_priv, const char *mask,
 struct net_device *alloc_etherdev(int sizeof_priv)
 {
 	return alloc_netdev(sizeof_priv, "eth%d", ether_setup);
+}
+
+void dev_set_allmulti(struct net_device *dev, int inc)
+{
+  unsigned short old_flags = dev->flags;
+
+  dev->flags |= IFF_ALLMULTI;
+  if ((dev->allmulti += inc) == 0)
+    dev->flags &= ~IFF_ALLMULTI;
+  if (dev->flags^old_flags)
+    dev_mc_upload(dev);
+}
+
+static void __dev_mc_upload(struct net_device *dev)
+{
+	/* Don't do anything till we up the interface
+	 * [dev_open will call this function so the list will
+	 * stay sane]
+	 */
+
+	if (!(dev->flags&IFF_UP))
+		return;
+
+	/*
+	 *	Devices with no set multicast or which have been
+	 *	detached don't get set.
+	 */
+
+	if (dev->set_multicast_list == NULL ||
+	    !netif_device_present(dev))
+		return;
+
+	dev->set_multicast_list(dev);
+}
+
+void dev_mc_upload(struct net_device *dev)
+{
+  //	spin_lock_bh(&dev->xmit_lock);
+  __dev_mc_upload(dev);
+  //	spin_unlock_bh(&dev->xmit_lock);
 }
 
 // maybe the wrong place, but temporary
