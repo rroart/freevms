@@ -558,8 +558,10 @@ void unlock_page(struct page *page)
 {
 	clear_bit(PG_launder, &(page)->pfn$l_page_state);
 	smp_mb__before_clear_bit();
+#if 0
 	if (!test_and_clear_bit(PG_locked, &(page)->pfn$l_page_state))
 		BUG();
+#endif
 	smp_mb__after_clear_bit(); 
 	if (waitqueue_active(&(page)->wait))
 	wake_up(&(page)->wait);
