@@ -49,6 +49,8 @@ LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 SYSOBJ = sys__combine_date_time.o sys_asctim.o sys_bintim.o \
 	sys_gettim.o sys_numtim.o
 
+CVTOBJ = cvt_convert_float.o
+
 STRLIB = starlet.a
 
 all : $(STRLIB) tests
@@ -68,7 +70,7 @@ test_str_element : test_str_element.c $(STRLIB)
 test_addx : test_addx.c $(STRLIB)
 test_date : test_date.c $(STRLIB)
 
-$(STRLIB) : $(STROBJ) $(LIBOBJ) $(SYSOBJ)
+$(STRLIB) : $(STROBJ) $(LIBOBJ) $(SYSOBJ) $(CVTOBJ)
 	ar -rv $(STRLIB) $?
 
 str.o : str.c ../../starlet/src/strdef.h
@@ -99,4 +101,4 @@ str_find_first_not_in_set.o : str_find_first_not_in_set.c ../../starlet/src/strd
 str_translate.o : str_translate.c ../../starlet/src/strdef.h
 str_trim.o : str_trim.c ../../starlet/src/strdef.h
 str_upcase.o : str_upcase.c ../../starlet/src/strdef.h
-
+cvt_convert_float.o: cvt_convert_float.c
