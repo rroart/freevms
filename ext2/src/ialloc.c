@@ -410,6 +410,7 @@ repeat:
 		return ERR_PTR(-EDQUOT);
 	}
 	ext2_debug ("allocating inode %lu\n", inode->i_ino);
+	make_fcb(inode);
 	return inode;
 
 fail2:
