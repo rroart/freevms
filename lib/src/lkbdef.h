@@ -83,8 +83,12 @@ struct _lkb {
   unsigned char lkb$b_tslt;
   unsigned char lib$b_res;
   struct _rsb *lkb$l_rsb;
+  unsigned long lkb$l_lksb;
   unsigned int lkb$l_remlkid;
-  unsigned int lkb$l_csid;
+  union {
+    unsigned int lkb$l_csid;
+    unsigned long lkb$l_oldastprm;
+  };
   int (*lkb$pq_oldblkast)();
   unsigned int lkb$l_duetime;
 };
