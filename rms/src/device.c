@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Paul Nankervis.
+// Author. Roar Thronæs.
+
 /* Device.c v1.3  Module to remember and find devices...*/
 
 /*
@@ -70,14 +76,6 @@ void *device_create(unsigned devsiz,void *keyval,unsigned *retsts)
     } else {
         unsigned sts;
         struct phyio_info info;
-#if 0
-        dev->cache.objmanager = NULL;
-        dev->cache.objtype = 1;
-#endif
-#if 0
-        memcpy(dev->devnam,devnam,devsiz);
-        memcpy(dev->devnam + devsiz,":",2);
-#endif
         sts = phyio_init(devsiz + 1,dev->ucb$l_ddb->ddb$t_name,&dev->ucb$l_vcb->vcb$l_aqb->aqb$l_acppid,&info);
         *retsts = sts;
         if (sts & 1) {
@@ -112,27 +110,6 @@ int device_compare(unsigned keylen,void *keyval,void *node)
 /* device_lookup() is to to find devices... */
 
 struct _ucb *dev_root = NULL;
-
-unsigned device_lookup_not(unsigned devlen,char *devnam,int create,struct _ucb **retdev)
-{
-#if 0
-    struct _ucb *dev;
-    unsigned sts = 1,devsiz = 0;
-    while (devsiz < devlen) {
-        if (devnam[devsiz] == ':') break;
-        devsiz++;
-    }
-    dev = (struct _ucb *) cache_find((void **) &dev_root,devsiz,devnam,&sts,
-                                    device_compare,create ? device_create : NULL);
-    if (dev == NULL) {
-        if (sts == SS$_ITEMNOTFOUND) sts = SS$_NOSUCHDEV;
-    } else {
-        *retdev = dev;
-        sts = SS$_NORMAL;
-    }
-    return sts;
-#endif
-}
 
 extern struct _ucb * myfilelist[50];
 extern int myfilelistptr;

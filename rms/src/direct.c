@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Paul Nankervis.
+// Author. Roar Thronæs.
+
 /* Direct.c v1.3 */
 
 /*

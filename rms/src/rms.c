@@ -2,6 +2,7 @@
 // $Locker$
 
 // Author. Paul Nankervis.
+// Author. Roar Thronæs.
 
 /* check for cr - return terminator - update file length */
 /* RMS.c v1.3  RMS components */
@@ -157,26 +158,6 @@ unsigned name_delim(char *str,int len,int size[5])
     }
 }
 
-
-/* Function to compare directory cache names - directory cache NOT IN USE */
-
-int dircmp(unsigned keylen,void *key,void *node)
-{
-    struct DIRCACHE *dirnode = (struct DIRCACHE *) node;
-    int cmp = keylen - dirnode->dirlen;
-    if (cmp == 0) {
-        int len = keylen;
-        char *keynam = (char *) key;
-        char *dirnam = dirnode->dirnam;
-        while (len-- > 0) {
-            cmp = toupper(*keynam++) - toupper(*dirnam++);
-            if (cmp != 0) break;
-        }
-    }
-    return cmp;
-}
-
-
 /* Routine to find directory name in cache... NOT CURRENTLY IN USE!!! */
 
 unsigned dircache(struct _vcb *vcb,char *dirnam,int dirlen,struct _fiddef *dirid)
@@ -192,10 +173,12 @@ unsigned dircache(struct _vcb *vcb,char *dirnam,int dirlen,struct _fiddef *dirid
         unsigned sts;
 	dir = NULL;
 	//        dir = cache_find((void *) &vcb->dircache,dirlen,dirnam,&sts,dircmp,NULL);
+#if 0
         if (dir != NULL) {
             memcpy(dirid,&dir->dirid,sizeof(struct _fiddef));
             return 1;
         }
+#endif
         return 0;
     }
 }
@@ -428,7 +411,7 @@ unsigned do_search(struct _fabdef *fab,struct WCCFILE *wccfile)
             }
         }
     }
-    cleanup_wcf(wccfile);
+    // cleanup_wcf(wccfile); no, I know this is still in use
     if (nam != NULL) nam->nam$l_wcc = 0;
     fab->fab$w_ifi = 0;         /* must dealloc memory blocks! */
     return sts;
@@ -1051,9 +1034,10 @@ unsigned exe$display(struct _fabdef *fab)
 
     int ifi_no = fab->fab$w_ifi;
     struct _fh2 * head;
-    unsigned short *pp = (unsigned short *) &head;
+    unsigned short *pp;
     gethead(ifi_table[fab->fab$w_ifi]->wcf_fcb,&head);
-    if (head->fh2$w_struclev=0x501) {
+    pp = (unsigned short *) head;
+    if (head->fh2$w_struclev==0x501) {
       id5 = (struct _fi5 *) (pp + head->fh2$b_idoffset);
       myfi$t_filename=&id5->fi5$t_filename;
       myfi$w_revision=id5->fi5$w_revision;

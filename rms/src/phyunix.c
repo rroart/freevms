@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Paul Nankervis.
+// Author. Roar Thronæs.
+
 /* PHYVMS.c v1.3    Physical I/O module for Unix */
 
 /*
@@ -31,14 +37,6 @@
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 
-#if 0
-#define sys_close close
-#define sys_open open
-#define sys_read read
-#define sys_write write
-#define sys_lseek lseek
-#endif
-
 struct phyio_info {
   unsigned status;
   unsigned sectors;
@@ -71,11 +69,6 @@ unsigned phyio_init(int devlen,char *devnam,struct file **handle,struct phyio_in
     char *cp,devbuf[200];
     char *tmpname;
     init_count++;
-#if 0
-    info->status = 0;           /* We don't know anything about this device! */
-    info->sectors = 0;
-    info->sectorsize = 0;
-#endif
     //    sprintf(devbuf,DEV_PREFIX,devnam);
     sprintf(devbuf,"%s",devnam);
     cp = strchr(devbuf,':');
@@ -104,20 +97,6 @@ unsigned phyio_read(struct file * handle,unsigned block,unsigned length,char *bu
     printk("Phyio read block: %d into %x (%d bytes)\n",block,buffer,length);
 #endif
     read_count++;
-
-#if 0
-    if ((res = sys_lseek(handle,block*512,0)) < 0) {
-        printk("lseek ");
-	printk("sys_lseek failed %d\n",res);
-        return SS$_PARITY;
-    }
-    if ((res = sys_read(handle,buffer,length)) != length) {
-        printk("read ");
-	printk("read failed %d\n",res);
-        return SS$_PARITY;
-    }
-    return SS$_NORMAL;
-#endif
 
     fs = get_fs();
     set_fs(KERNEL_DS);
