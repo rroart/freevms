@@ -76,8 +76,8 @@ done
 		ln -s ../../freevms/mount/src/mountdsp.c .;
 		ln -s ../../freevms/sys/src/ucbcredel.c .;
 
-		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
-		rm ast.c; ln -s ../../freevms/pal/src/ast.c .;
+		ln -s ../../freevms/pal/src/ipl.c .;
+		ln -s ../../freevms/pal/src/ast.c .;
 		ln -s ../../freevms/pal/src/queue.c .;
 cd ..;
 cd mm;

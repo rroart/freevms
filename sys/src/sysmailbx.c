@@ -6,15 +6,18 @@
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
 
+#include <system_data_cells.h>
 #include <descrip.h>
 #include <starlet.h>
 #include <misc.h>
 #include <ssdef.h>
 #include <ipldef.h>
+#include <ccbdef.h>
 
 //int exe$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk, unsigned int acmode, void *lognam,...) {
 asmlinkage int exe$crembx(struct struct_crembx * s) {
   int status;
+  struct _ccb * c;
   $DESCRIPTOR(mytabnam,"LNM$SYSTEM_TABLE");
   $DESCRIPTOR(mypartab,"LNM$SYSTEM_DIRECTORY");
   struct item_list_3 i[2];
@@ -31,14 +34,16 @@ asmlinkage int exe$crembx(struct struct_crembx * s) {
     i[0].item_code=1;
     
     i[1].item_code=0;
-    status=exe$trnlnm(0,mytabnam,s->lognam,0,i);
+    //    status=exe$trnlnm(0,mytabnam,s->lognam,0,i);
     
   }
   if (status&0==0) { //does not exist?
-    status=exe$crelnm(0,mytabnam,s->lognam,0,i);
+    //    status=exe$crelnm(0,mytabnam,s->lognam,0,i);
   }
   /* incr ref count */
   // ucb ccb stuff 
+  c=&ctl$gl_ccbbase[*s->chan];
+  c->ccb$l_ucb=ioc_std$clone_ucb(mb$ar_ucb0);
   // unlock mutex
   setipl(0);
   return SS$_NORMAL;
