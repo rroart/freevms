@@ -9,6 +9,7 @@
 #include"../../lib/src/system_service_setup.h"
 #include"lnmsub.h"
 #include"sysgen.h" 
+#include"system_data_cells.h"
 
 /* Author: Roar Thronæs */
 
@@ -20,7 +21,7 @@
 /* Standard headers for LKMs */
 #include <linux/modversions.h> 
 #include <linux/module.h>  
-
+#include "system_data_cells.h"
 
 #define _LOOSE_KERNEL_NAMES
 /* With some combinations of Linux and gcc, tty.h will not compile if
@@ -33,20 +34,14 @@ int isp1(void * a) { return 0; }
 
 int isshar(void * a) { return 1; }
 
-static struct lnmt * CTL$GL_LNMHASH;
-static struct lnmb * CTL$GL_LNMDIRECT;
-static struct lnmc * CTL$GQ_LNMTBLCACHE;
-
-void* LNM$AL_DIRTBL[2];
-
 /* Initialize the LKM */
 #ifdef MODULE 
 int init_module()
 {
   /*exe$crelnt();*/
-  /*CTL$GL_LNMDIRECT=LNM$PROCESS_DIRECTORY;
-LNM$AL_DIRTBL[0]=LNM$SYSTEM_DIRECTORY;
-LNM$AL_DIRTBL[1]=CTL$GL_LNMDIRECT;*/
+  /*ctl$gl_lnmdirect=LNM$PROCESS_DIRECTORY;
+lnm$al_dirtbl[0]=LNM$SYSTEM_DIRECTORY;
+lnm$al_dirtbl[1]=ctl$gl_lnmdirect;*/
   console_print("Hello, world - this is the kernel speaking\n");
   /* More normal is printk(), but there's less that can go wrong with 
      console_print(), so let's start simple.
@@ -251,9 +246,9 @@ int status;
     lnm$system_directory_b->lnmth$l_byteslm=0;
     lnm$system_directory_b->lnmth$l_bytes=0;
 
-    /*CTL$GL_LNMDIRECT=LNM$PROCESS_DIRECTORY;
-      LNM$AL_DIRTBL[0]=LNM$SYSTEM_DIRECTORY;
-      LNM$AL_DIRTBL[1]=CTL$GL_LNMDIRECT;*/
+    /*ctl$gl_lnmdirect=LNM$PROCESS_DIRECTORY;
+      lnm$al_dirtbl[0]=LNM$SYSTEM_DIRECTORY;
+      lnm$al_dirtbl[1]=ctl$gl_lnmdirect;*/
     myhash=lnmmalloc(sizeof(unsigned long));
   status=lnm$hash(mypartab.dsc$w_length,mypartab.dsc$a_pointer,0xffff,myhash);
     printf("here %x %x\n",myhash,*myhash);

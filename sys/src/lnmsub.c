@@ -1,5 +1,6 @@
 #include"sysgen.h"
 #include"lnmsub.h"
+#include"system_data_cells.h"
 #include"../../lbr/src/queue.h"
 #include"../../lib/src/lnmstrdef.h"
 #include"../../starlet/src/ssdef.h"

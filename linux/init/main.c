@@ -535,6 +535,8 @@ static void rest_init(void)
  	cpu_idle();
 } 
 
+void vms_init(void);
+
 /*
  *	Activate the first processor.
  */
@@ -617,6 +619,7 @@ asmlinkage void __init start_kernel(void)
 	 *	make syscalls (and thus be locked).
 	 */
 	smp_init();
+	vms_init();
 	rest_init();
 }
 

@@ -38,6 +38,7 @@
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 #include "../../freevms/sys/src/sysgen.h"
+#include "../../freevms/sys/src/system_data_cells.h"
 
 extern void timer_bh(void);
 extern void tqueue_bh(void);
@@ -52,7 +53,6 @@ unsigned securebits = SECUREBITS_DEFAULT; /* systemwide security settings */
 extern void mem_use(void);
 
 static unsigned char from_sch$resched=0; /* because could not goto from sch$resched to sch$sched */
-static unsigned long SCH$GL_IDLE_CPUS=0; /* placed here until further. smp is in this, but not right now */
 
 /*
  * Scheduling quanta.
@@ -508,7 +508,7 @@ int this_cpu = smp_processor_id();
 	  }
 	}
 	//	current->state=TASK_INTERRUPTIBLE;
-	SCH$GL_IDLE_CPUS=0;
+	sch$gl_idle_cpus=0;
 	// not yet? del from runq
 	current->need_resched=1;
 	from_sch$resched=1; /* can not goto */
@@ -689,25 +689,8 @@ repeat_schedule:
 	spin_unlock_irq(&runqueue_lock);
 
 	if (next->pcb$b_pri<next->pcb$b_prib) next->pcb$b_pri++;
-	SCH$GL_IDLE_CPUS=0;
+	sch$gl_idle_cpus=0;
 
-#ifdef CONFIG_SMP
- 	/*
- 	 * maintain the per-process 'last schedule' value.
- 	 * (this has to be recalculated even if we reschedule to
- 	 * the same process) Currently this is only used on SMP,
-	 * and it's approximate, so we do not have to maintain
-	 * it while holding the runqueue spinlock.
- 	 */
- 	sched_data->last_schedule = get_cycles();
-
-	/*
-	 * We drop the scheduler lock early (it's a global spinlock),
-	 * thus we have to lock the previous process from getting
-	 * rescheduled during switch_to().
-	 */
-
-#endif /* CONFIG_SMP */
 	if (prev->pid==2 && prev->run_list.next==0) {
 	  /* int i; */
 	  if (mydebug2)
@@ -757,8 +740,8 @@ repeat_schedule:
 
  sch$idle:
 	//	printk("sch$idle\n");
-	SCH$GL_IDLE_CPUS=1;
-	//	for (; SCH$GL_IDLE_CPUS ;) ;
+	sch$gl_idle_cpus=1;
+	//	for (; sch$gl_idle_cpus ;) ;
 
 	//	goto try_for_process;
 

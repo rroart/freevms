@@ -73,8 +73,8 @@
 struct _cpu {
   struct _pcb *cpu$l_curpcb;
   // struct _ktb *cpu$l_curktb;
-  unsigned char cpu$b_ipl = 1; /* some cpus lack something */  
-  unsigned char cpu$b_astlvl = 0; /* some cpus lack something */
+  unsigned char cpu$b_ipl; /* some cpus lack something */  
+  unsigned char cpu$b_astlvl; /* some cpus lack something */
 
   unsigned long cpu$l_realstack;
   unsigned short int cpu$w_size;
@@ -111,7 +111,7 @@ struct _cpu {
   unsigned long cpu$l_ubdelay;
   unsigned long cpu$l_nullcpu;
 
-}
+};
  
 struct _sched_ds {
   unsigned long cpu$q_acc_run;
@@ -119,7 +119,7 @@ struct _sched_ds {
   unsigned long cpu$q_acc_interrupt;
   unsigned long cpu$q_acc_waitime;
   unsigned long cpu$q_sched_flags;
-}
+};
  
 #endif
  

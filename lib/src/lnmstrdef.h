@@ -3,7 +3,7 @@
 
 /* Author: Roar Thronæs */
 
-#include"sysgen.h"
+#include"../../sys/src/sysgen.h"
 #include<linux/linkage.h>
 
 #define LNM$M_NO_DELETE 0x10 /* for use in lnmb. the rest is decl otherplace */
@@ -86,7 +86,7 @@ unsigned short lnmhsh$w_size;
 unsigned char lnmhsh$b_type;
 unsigned char reserved2;
 struct lnmb entry[LNMPHASHTBL];
-} lnmhshp;
+};
 
 struct lnmhshs {
 struct lnmhsh * lnmhsh$l_flink;
@@ -97,7 +97,7 @@ unsigned short lnmhsh$w_size;
 unsigned char lnmhsh$b_type;
 unsigned char reserved2;
 void * entry[2*LNMSHASHTBL];
-} lnmhshs;
+};
 
 struct struct_crelnt {
  unsigned int *attr;
@@ -110,18 +110,18 @@ struct struct_crelnt {
  unsigned char *acmode;
 };
 
-asmlinkage sys$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
+asmlinkage int sys$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
 
 /*asmlinkage sys$crelnt  (unsigned int *attr, void *resnam, unsigned
                          int *reslen, unsigned int *quota,
                 unsigned short *promsk, void *tabnam, void
                          *partab, unsigned char *acmode);*/
 
-asmlinkage sys$crelnt  (struct struct_crelnt *);
+asmlinkage int sys$crelnt  (struct struct_crelnt *);
 
-asmlinkage sys$dellnm  (void *tabnam, void *lognam, unsigned char *acmode);
+asmlinkage int sys$dellnm  (void *tabnam, void *lognam, unsigned char *acmode);
 
-asmlinkage sys_trnlnm  (unsigned int *attr, void *tabnam, void
+asmlinkage int sys_trnlnm  (unsigned int *attr, void *tabnam, void
 *lognam, unsigned char *acmode, void *itmlst);
 
 struct struct_nt {

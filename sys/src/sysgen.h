@@ -1,5 +1,7 @@
 #ifndef __SYSGEN_LOADED
 #define __SYSGEN_LOADED 1
+
+/* Will change name to sysparam.h */
  
 /*Parameter Name            Current    Default     Min.     Max.     Unit  Dynamic */
 

@@ -2,4 +2,4 @@
 # $Locker$
 
 all:
-	cc -I. lnmsub.c syslnm.c ../../lbr/src/libqueue.a -o test -g -DUSERLAND
+	cc -I. -I.. lnmsub.c syslnm.c system_data_cells.c ../../lbr/src/libqueue.a -o test -g -DUSERLAND
