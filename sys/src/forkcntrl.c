@@ -67,7 +67,7 @@ asmlinkage void exe$frkipl11dsp(void) {
 }
 
 asmlinkage void exe$forkdspth(int i) {
-  void (*func)(void *,void *);
+  void (*func)(void *,void *, void *);
   struct _fkb * f, * dummy, * fq;
   if (intr_blocked(i))
     return;
@@ -80,7 +80,7 @@ asmlinkage void exe$forkdspth(int i) {
     //printk("forking entry %x\n",f);
     func=f->fkb$l_fpc;
     vmslock(forklock_table[i-6].spin, -1);
-    func(f->fkb$l_fr3,f);
+    func(f->fkb$l_fr3,f->fkb$l_fr4,f);
     vmsunlock(forklock_table[i-6].spin, -1);
     fq=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[0]; /* so far */
   }
@@ -104,7 +104,7 @@ void exe$queue_fork(struct _irp * i, struct _ucb * u) {
   struct _fkb * f=u;
   /* I think that the below is really an fkb */
   /* need caller and caller's caller address of return again */
-  u->ucb$l_fr4=current;
+  // u->ucb$l_fr4=current; // wrong?
   newipl=u->ucb$b_dipl;
   f=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[newipl-6];
   isempty=aqempty(f);

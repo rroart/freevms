@@ -645,10 +645,10 @@ void TZ$DISCONNECT(struct _ucb * ucb, int r0) {
 //--
 	static int dummy2;
 
-void TZ$STARTIO(char R3, struct _ucb * u, int CC) {				// START I/O ON UNIT
+void TZ$STARTIO(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UNIT
   struct _ucb * ucb = u;
   struct _tty_ucb * tty=ucb;
-  if (CC) {			// Single character
+  if (CC==1) {			// Single character
     tty->tty$b_tank_char = R3;		// Save output character
     tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal charater in tank
   } else {
