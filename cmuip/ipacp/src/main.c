@@ -760,7 +760,7 @@ Side Effects:
 
 void    INIT_PROCNAME(void);
 
-char * mydevice;
+char * mydevice = 0;
 
 void Main (void) {
   $DESCRIPTOR(logical_netname_,"INET$NETWORK_NAME");
