@@ -251,6 +251,8 @@ struct _ddb du$ddb;
 struct _mscp_ucb du$ucb;
 struct _crb du$crb;
 
+extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long);
+
 int du$init_tables() {
   ini_dpt_name(&du$dpt, "DUDRIVER");
   ini_dpt_adapt(&du$dpt, 0);
@@ -265,7 +267,7 @@ int du$init_tables() {
   ini_ddt_start(&du$ddt, du_startio);
   ini_ddt_cancel(&du$ddt, ioc_std$cancelio);
   ini_ddt_end(&du$ddt);
-
+ 
   /* for the fdt init part */
   /* a lot of these? */
   ini_fdt_act(&du$fdt,IO$_ACCESS,acp_std$access,1);
@@ -346,8 +348,6 @@ int mscpcli(void) {
 }
 #endif
 
-extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long);
-
 void __du_init(void) {
   struct _ucb * ucb=&du$ucb;
   struct _ddb * ddb=&du$ddb;
@@ -355,6 +355,10 @@ void __du_init(void) {
   unsigned long idb=0,orb=0;
   struct _ccb * ccb;
   struct _ucb * newucb,newucb1;
+  struct _cddb * cddb;
+  struct _pb * pb;
+  struct _cdt * cdt;
+  struct _ucb * u = ucb;
 
 //  ioc_std$clone_ucb(&du$ucb,&ucb);
   bzero(ucb,sizeof(struct _mscp_ucb));
@@ -371,46 +375,19 @@ void __du_init(void) {
   du$unit_init (idb, ucb);
 
   insertdevlist(ddb);
-}
 
-struct _ucb * du_init2(char * s) {
-  struct _ucb * newucb;
-  struct _ucb * u=&du$ucb;
-  struct _ddb * d=&du$ddb;
-
-  insertfillist(u);
-
-  bcopy(s,d->ddb$t_name,strlen(s));
-
-  //ubd_open_dev(&ubd_dev[0]);
-  ioc_std$clone_ucb(&du$ucb,&newucb);
-  //exe$assign(&u0,&chan,0,0,0);
-  //registerdevchan(MKDEV(UBD_MAJOR,0),chan);
-  //ccb = &ctl$ga_ccb_table[chan];
-  //ccb->ccb$l_ucb->ucb$l_orb=ubd_dev[0].fd;
-
-  return u;
-}
-
-void * du_init(char *s) {
-  struct _ucb * u=&du$ucb;
-  struct _ddb * d=&du$ddb;
-  struct _crb * c=&du$crb;
-  struct _cddb * cddb;
-  struct _pb * pb;
-  struct _cdt * cdt;
-
-  s++;
+  // specific cluster stuff here 
 
   pb=vmalloc(sizeof(struct _pb));
   bzero(pb,sizeof(struct _pb));
 
   cddb=vmalloc(sizeof(struct _cddb));
-  bzero(u,sizeof(struct _cddb));
+  bzero(cddb,sizeof(struct _cddb));
   
   qhead_init(&cddb->cddb$l_cdrpqfl);
   cddb->cddb$l_pdt=&dupdt;
-  ((struct _mscp_ucb *)u)->ucb$l_cddb=c;
+  ((struct _mscp_ucb *)u)->ucb$l_cddb=cddb;
+
   u->ucb$l_pdt=&dupdt;
   pb->pb$l_pdt=&dupdt;
   ((struct _mscp_ucb *)u)->ucb$l_cdt=find_mscp_cdt(); // should be find_free_cdt();
@@ -432,23 +409,31 @@ void * du_init(char *s) {
   qhead_init(&dupdt.pdt$q_comq2);
   qhead_init(&dupdt.pdt$q_comq3);
 
-  insertdevlist(d);
-  insertfillist(u);
+}
+
+//extern struct _ucb file$ucb;
+
+void * du_init(char *s) {
+  struct _ucb * u=&du$ucb;
+  struct _ddb * d=&du$ddb;
+  struct _crb * c=&du$crb;
+  struct _ucb * newucb;
+
+  s++;
 
   /* this is a all-in-one, should be split later */
-
-  bcopy(s,d->ddb$t_name,strlen(s));
-
-  ((struct _mscp_ucb *)u)->ucb$l_cddb=cddb;
-  qhead_init(&cddb->cddb$l_cdrpqfl);
 
   mypb.pb$b_type=DYN$C_SCS_PB;
   mypb.pb$w_state=PB$C_CLOSED;
   mysb.sb$b_type=DYN$C_SCS_SB;
 
-  scs_std$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drvr",0,0,0,0,s);
+  ioc_std$clone_mscp_ucb(&du$ucb,&newucb);
 
-  return u;
+  insertfillist(newucb,s);
+
+  scs_std$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drv",0,0,0,0,s);
+  // should be vms$disk_cl_drvr but use null-term for now
+  return newucb;
 }
 
 char dudriverstring[]="DUDRIVER";

@@ -38,8 +38,8 @@ int get_mscp_chan(char * s) {
   struct return_values r;
   struct _vcb * vcb;
   struct _aqb * aqb;
-  dsc.dsc$w_length=strlen(s);
-  dsc.dsc$a_pointer=s;
+  dsc.dsc$a_pointer=do_file_translate(s);
+  dsc.dsc$w_length=strlen(dsc.dsc$a_pointer);
   if (ioc$search(&r,&dsc)==SS$_NORMAL)
     return ((struct _ucb *)r.val1)->ucb$ps_adp;
   ucb = fl_init(s);
@@ -54,7 +54,9 @@ int get_mscp_chan(char * s) {
   vcb->vcb$l_aqb=aqb;
   qhead_init(&vcb->vcb$l_fcbfl);
   vcb->vcb$l_cache = NULL; // ?
-  sts = phyio_init(strlen(s),ucb->ucb$l_ddb->ddb$t_name,&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
+  sts = phyio_init(strlen(s),s,&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
+  dsc.dsc$a_pointer=do_file_translate(s);
+  dsc.dsc$w_length=strlen(dsc.dsc$a_pointer);
   sts=exe$assign(&dsc,&chan,0,0,0);
   ucb->ucb$ps_adp=chan; //wrong field and use, but....
   return chan;
@@ -92,6 +94,8 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
   int chan=get_mscp_chan(cdt->cdt$l_condat);
 
   if (hrbq==0) qhead_init(&hrbq);
+
+  //printk("packet %x %x %x %x\n",packet,ppd,ppd->ppd$b_opc,chan);
 
   switch (ppd->ppd$b_opc) {
   case PPD$C_REQDAT:
@@ -137,6 +141,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     struct _irp * i=kmalloc(sizeof(struct _irp),GFP_KERNEL);
     struct _ucb * u;
     struct _hrb * hrb = find_hrb(scs1->scs$l_rspid);
+    //printk("mscpread\n");
     remque(hrb,hrb);
     bzero(i,sizeof(struct _irp));
     iosb->iosb$w_status=0;
@@ -165,6 +170,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     struct _irp * i=kmalloc(sizeof(struct _irp),GFP_KERNEL);
     struct _ucb * u;
     struct _hrb * hrb = find_hrb(scs1->scs$l_rspid);
+    //printk("mscpwrite\n");
     remque(hrb,hrb);
     bzero(i,sizeof(struct _irp));
     iosb->iosb$w_status=0;

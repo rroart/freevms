@@ -300,8 +300,8 @@ char * myfilelists[50];
 int myfilelistptr=0;
 
 insertfillist(struct _ucb *u, char *s) {
-  myfilelists[myfilelistptr]=kmalloc(strlen(s),0);
-  memcpy(myfilelists[myfilelistptr],s,strlen(s));
+  myfilelists[myfilelistptr]=kmalloc(strlen(s)+1,0);
+  memcpy(myfilelists[myfilelistptr],s,strlen(s)+1);
   myfilelist[myfilelistptr++]=u;
 }
 
@@ -319,10 +319,15 @@ struct _ucb * fl_init(char * s) {
 
 char * do_file_translate(char * from) {
   int i;
+  int remote= (*from=='_');
+  if (remote) from++;
   for (i=0;i<myfilelistptr;i++) {
     if (0==strncmp(from,myfilelists[i],strlen(myfilelists[i]))) {
       char * c=kmalloc(strlen(myfilelists[i])+2,GFP_KERNEL);
-      memcpy(c,"dfa0",4);
+      if (remote)
+	memcpy(c,"dua0",4);
+      else
+	memcpy(c,"dfa0",4);
       c[3]+=i;
       c[4]=0;
       return c;
