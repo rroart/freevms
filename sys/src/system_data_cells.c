@@ -395,8 +395,8 @@ unsigned long exe$ga_wp_del;
 unsigned long exe$ga_wp_wpre;
 unsigned long exe$gb_erlbufpagelets;
 unsigned long exe$gb_vp_load;
-unsigned long exe$gl_abstim;
-unsigned long exe$gl_abstim_tics;
+unsigned long exe$gl_abstim=0;
+unsigned long exe$gl_abstim_tics=0;
 unsigned long exe$gl_abstim_utics;
 unsigned long exe$gl_aclmtx;
 unsigned long exe$gl_acmflags;
@@ -1354,7 +1354,7 @@ unsigned long long sch$aq_comh[33];
 unsigned long long sch$aq_comoh[33];
 unsigned long long * sch$aq_comot;
 unsigned long long * sch$aq_comt;
-unsigned long sch$aq_wqhdr[44];
+struct _wqh sch$aq_wqhdr[12];
 unsigned long sch$ar_cap_priv;
 unsigned long sch$ar_class_name;
 unsigned long sch$ar_class_pcblink;
@@ -1442,7 +1442,7 @@ unsigned long sch$gq_susp;
 unsigned long sch$gq_suspo;
 unsigned long sch$gw_cebcnt;
 unsigned long sch$gw_delphdct;
-unsigned long sch$gw_dormantwait;
+unsigned long sch$gw_dormantwait=DORMANTWAIT;
 unsigned long sch$gw_iota;
 unsigned long sch$gw_localnode;
 unsigned long sch$gw_longwait;
@@ -1660,7 +1660,7 @@ unsigned long sgn$gw_maxpstct;
 unsigned long sgn$gw_pagfilct;
 unsigned long sgn$gw_pchancnt;
 unsigned long sgn$gw_piopagelets;
-unsigned long sgn$gw_pixscan;
+unsigned long sgn$gw_pixscan=1;
 unsigned long sgn$gw_swpfilct;
 unsigned long sgn$gw_swpfiles;
 unsigned long sgn$gw_tpwait;
@@ -1915,6 +1915,27 @@ void __init vms_init(void) {
         tmp->pcb$l_sqfl=tmp;
         tmp->pcb$l_sqbl=tmp;
   }
+
+  for(i=0;i<12;i++) {
+    struct _wqh * tmp;
+    tmp=&sch$aq_wqhdr[i];
+    tmp->wqh$l_wqfl=tmp;
+    tmp->wqh$l_wqbl=tmp;
+    tmp->wqh$l_wqcnt=0;
+    tmp->wqh$l_wqstate=i;
+  }
+
+sch$gq_colpgwq=&sch$aq_wqhdr[1];
+sch$gq_mwait=&sch$aq_wqhdr[2];
+//sch$gq_cefwq=&sch$aq_wqhdr[3];
+sch$gq_pfwq=&sch$aq_wqhdr[4];
+sch$gq_lefwq=&sch$aq_wqhdr[5];
+sch$gq_lefowq=&sch$aq_wqhdr[6];
+sch$gq_hibwq=&sch$aq_wqhdr[7];
+sch$gq_hibowq=&sch$aq_wqhdr[8];
+sch$gq_susp=&sch$aq_wqhdr[9];
+sch$gq_suspo=&sch$aq_wqhdr[10];
+sch$gq_fpgwq=&sch$aq_wqhdr[11];
 
   exe$gl_tqfl=&tqehead;
   exe$gl_tqfl->tqe$l_tqfl=exe$gl_tqfl; 

@@ -701,6 +701,7 @@ void timer_bh(void)
 void do_timer(struct pt_regs *regs)
 {
 	(*(unsigned long *)&jiffies)++;
+	exe$gl_abstim_tics=jiffies;
 #ifndef CONFIG_SMP
 	/* SMP process accounting uses the local APIC timer */
 

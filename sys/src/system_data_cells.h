@@ -6,6 +6,7 @@
 #include"../../lib/src/lnmstrdef.h"
 #include"../../lib/src/cpudef.h"
 #include"../../lib/src/tqedef.h"
+#include"../../lib/src/wqhdef.h"
 
 extern unsigned long acme$gq_mutex;
 extern unsigned long acme$gq_request_queue;
@@ -1351,7 +1352,7 @@ extern unsigned long long sch$aq_comh[33];
 extern unsigned long long sch$aq_comoh[33];
 extern  unsigned long long * sch$aq_comot; /* really 32 */
 extern unsigned long long * sch$aq_comt;
-extern unsigned long sch$aq_wqhdr[44];
+extern struct _wqh sch$aq_wqhdr[12];
 extern unsigned long sch$ar_cap_priv;
 extern unsigned long sch$ar_class_name;
 extern unsigned long sch$ar_class_pcblink;
