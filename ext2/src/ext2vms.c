@@ -609,6 +609,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     fd = get_unused_fd();
     fd_install(fd, f);
     {
+      static mywcc=0;
       struct files_struct * files = current->files;
       while (fd < files->max_fds) {
 	if (f == files->fd[fd]) break;
@@ -619,7 +620,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 #endif
     buf.count = 0;
     buf.dirent = &dir;
-    error=generic_file_llseek(f, fib->fib$l_wcc/*dir.d_off*/, 0);
+    error=generic_file_llseek(f, mywcc /*fib->fib$l_wcc*//*dir.d_off*/, 0);
     if (error<0)
       goto err;
     error=vfs_readdir(f, fillonedir64, &buf);
@@ -627,8 +628,11 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       error = buf.count;
   err:
     if (error < 0)
-      sts = SS$_NOMOREFILES;
-    fib->fib$l_wcc = f->f_pos;
+      sts =  SS$_NOMOREFILES;
+    //fib->fib$l_wcc = f->f_pos;
+    mywcc = f->f_pos;
+    if (sts!=SS$_NORMAL)
+      mywcc=0;
 
     filp_close(f,0);
 
