@@ -51,7 +51,8 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
   cur=ctl$gl_pcb;
   p = alloc_task_struct();
   //bzero(p,sizeof(struct _pcb));//not wise?
-  
+  memset(p,0,sizeof(struct _pcb));
+
   qhead_init(&p->pcb$l_astqfl);
   // and enable ast del to all modes
   p->pcb$b_asten=15;
