@@ -119,6 +119,7 @@ asmlinkage int exe$qiow (unsigned int efn, unsigned short int chan,unsigned int 
 
 /* put this into a struct */
 asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
+  int retval = 0;
   unsigned int c, d;
   struct _pcb * p=current;
   struct _irp * i;
@@ -159,12 +160,16 @@ asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int f
   //  if (d&func) {
   c=i->irp$v_fcode;
   d=i->irp$v_fmod;
+  if (0==ctl$ga_ccb_table[chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[i->irp$v_fcode]) {
+    retval = SS$_ILLIOFUNC;
+    goto earlyerror;
+  }
   return ctl$ga_ccb_table[chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[i->irp$v_fcode](i,p,i->irp$l_ucb,&ctl$gl_ccbbase[chan]); // a real beauty, isn't it :)
       //  }
  earlyerror:
   setipl(0);
   sch$postef(current->pcb$l_pid,PRI$_NULL,efn);
-  return 0;		   
+  return retval;
 }
 
 int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
