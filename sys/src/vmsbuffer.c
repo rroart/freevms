@@ -930,7 +930,6 @@ static int __block_prepare_write(struct inode *inode, struct page *page,
 	     memset(kaddr+block_start, 0, from-block_start);
 	   if (block_end > to || block_start < from)
 	     flush_dcache_page(page);
-	   continue;
 	   if ((block_start < from || block_end > to)) {
 	     sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
 			    kaddr+turns*blocksize,blocksize, blocknr,MINOR(inode->i_dev)&31,0,0);
