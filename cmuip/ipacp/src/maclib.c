@@ -227,6 +227,9 @@
 #include "structure.h"
 
 #include <asm/hw_irq.h>
+#include <linux/mm.h>
+
+#include <misc.h>
 
 	  // inconsistent naming. avoiding and working around
 #define ab$l_pid vc$pid
@@ -236,6 +239,19 @@
 #define ab$l_tcbid vc$conn_id
 #define ab$b_protocol vc$protocol
 #define ab$w_iochan vc$piochan
+
+#define exe$alononpaged EXE$ALONONPAGED
+#define exe$deanonpaged EXE$DEANONPAGED
+
+int EXE$ALONONPAGED(int size, int * addr) {
+	  *addr=kmalloc(size,GFP_KERNEL);
+	  return SS$_NORMAL;
+}
+
+int EXE$DEANONPAGED(int * addr) {
+  kfree(addr);
+  return SS$_NORMAL;
+}
 
 // Local symbols
 
@@ -369,10 +385,12 @@ void mount_ip_device() {
   struct _aqb * R2;
   struct _pcb * R4;
   struct _ucb * R5;
+  struct _ucb * U;
 Begin_Lock:
   // not yet	$LKWSET_S	Locked_Range	// lock us in the working set.	
 	R1 = &Shared_Device;	// point @ Pseudo device desc.
-	R0 = find_ucb(R1);		// locate the UCB
+	R0 = find_ucb(R1,&U);		// locate the UCB
+	R1 = U;
 	if ((R0&1)==1) goto l2;			// OK ?
 
 // Unable to find UCB,  return error here.
@@ -406,7 +424,7 @@ l4:
 
 // Indicate we now own the device, set my PID in ACP queue blk.
 
-	R0 = Lock_IODB();
+	R0 = lock_iodb();
 
 #ifdef VMS_V4
 	SETIPL	#IPL$_SYNCH		// synchronize with VMS
@@ -417,12 +435,12 @@ l4:
 	R2->aqb$l_acppid = R4->pcb$l_pid;	// set new owner PID.
 	mypid = R4->pcb$l_pid;	// save for net$dump rtn.
 	R1 = R4->pcb$l_arb;	// adrs of ARB
-	myuic = ((struct _arb *)R1)->arb$l_uic;	// save my UIC.
+	// not yet myuic = ((struct _arb *)R1)->arb$l_uic;	// save my UIC.
 
 #ifndef VMS_V4
 	FORKUNLOCK(R5->ucb$b_flck,-1);			// R5->ucb$b_flck
 #endif
-	R0 = UnLock_IODB();
+	R0 = unlock_iodb();
 
 #ifdef VMS_V4
 	SETIPL	#0				// timeshare
@@ -505,9 +523,9 @@ Not_Mounted:
 //
 //--
 
-LOCK_IODB() {
-  int R4;
-	R4 = ctl$gl_pcb;		// get my PCB address
+lock_iodb(int * R4) {
+  // not yetR4 = ctl$gl_pcb;		// get my PCB address
+  *R4=smp$gl_cpu_data[0]->cpu$l_curpcb;
 	return	SCH$IOLOCKW();		// lock & return
 	}
 
@@ -538,9 +556,10 @@ LOCK_IODB() {
 //
 //--
 
-UNLOCK_IODB() {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
-	R4 = ctl$gl_pcb;
+unlock_iodb(int * R4) {
+  int R0,R1,R2,R3,R5,R6,R7,R8,R9;
+  // not yet R4 = ctl$gl_pcb;
+  *R4=smp$gl_cpu_data[0]->cpu$l_curpcb;
 	R0 = SCH$IOUNLOCK();			// unlock I/O database
 #ifdef VMS_V4
 	SETIPL	#0				// timeshare
@@ -572,16 +591,20 @@ UNLOCK_IODB() {
 //
 //--
 
-int find_ucb(R1)
+int find_ucb(R1, U)
+     struct _ucb ** U;
 {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  int R0,R2,R3,R4,R5,R6,R7,R8,R9;
+  struct return_values r;
+  int sts;
 
-	R0 = Lock_IODB();
-	ioc$searchdev(R1);		// find the UCB
+	R0 = lock_iodb(&R4);
+	sts = ioc$searchdev(&r,R1);		// find the UCB
+	*U=r.val1;
 	// not yet	-(SP) = R0;		// save return info
-	R0 = UNlock_IODB();
+	R0 = unlock_iodb(&R4);
 	// not yet	MOVQ	(SP)+,R0		// restore info
-	return R0;				// return
+	return sts;				// return
 }
 
 //SBTTL	BUILD_ACP_QB - build the ACP Queue Blk structure
@@ -622,7 +645,7 @@ Build_ACP_QB(R5)
   struct _aqb * R2, *R8;
   struct _pcb * R4;
 	R1 = AQB$C_LENGTH;
-	R0 = exe$alononpaged();		// get chunck of non-paged pool.
+	R0 = exe$alononpaged(R1,&R2);		// get chunck of non-paged pool.
 	if ((R0&1)==1) goto l5;				// Error?
 
 // Return error, unable to allocate non-paged pool.
@@ -654,7 +677,7 @@ l5:
 
 	R8 = R2;				// save AQB adrs
 
-	R0 = Lock_IODB();			// lock IO datbase
+	R0 = lock_iodb(&R4);			// lock IO datbase
 #ifdef VMS_V4
 	SETIPL	#IPL$_SYNCH			// Synchronize with VMS
 #else
@@ -664,17 +687,17 @@ l5:
 	R2->aqb$l_acppid = R4->pcb$l_pid;	// set owner PID
 	mypid = R4->pcb$l_pid;		// save for net$dump rtn.
 	R1 = ioc$gl_aqblist;		// adrs of system list
-	R8->aqb$l_link = (R1);		// set forward link
-	(R1) = R8;				// set list head.
+	R8->aqb$l_link = R1;		// set forward link
+	ioc$gl_aqblist = R8;				// set list head.
 
 // Save my UIC
 
 	R1 = R4->pcb$l_arb;		// addres ARB
-	myuic = R1->arb$l_uic;		// my uic.
+	// not yet myuic = R1->arb$l_uic;		// my uic.
 #ifndef	VMS_V4
 	FORKUNLOCK(R5->ucb$b_flck,-1);
 #endif
-	R0 = Unlock_IODB();			// unlock & return
+	R0 = unlock_iodb(&R4);			// unlock & return
 	return R0;
 }
 
@@ -713,7 +736,7 @@ l5:
   int R0,R1,R3,R4,R6,R7,R9;
   struct _vcb * R2;
 	R1 = VCB$C_LENGTH;		// size of VCB
-	R0 = exe$alononpaged();		// allocate nonpaged pool.
+	R0 = exe$alononpaged(R1,&R2);		// allocate nonpaged pool.
 	if ((R0&1)==0) goto l10;				// Error? punt if yes.
 
 // Fill in the VCB
@@ -873,7 +896,7 @@ DISMOUNT:
 #endif
 	R0 = vcb_adrs;		// get VCB adrs
 	if (R0==0) goto	l5;			// OK ?
-	R0 = exe$deanonpaged();	// dealllocate space.
+	R0 = exe$deanonpaged(R0);	// dealllocate space.
 
 // Deallocate ACP Queue blk
 
@@ -884,7 +907,7 @@ l5:
 // Unhook AQB from system list
 // AQB list is a singly linked list.
 
-	R0 = Lock_IODB();		// lock IO database
+	R0 = lock_iodb(&R4);		// lock IO database
 #ifdef VMS_V4
 	DSBINT	#IPL$_SYNCH		// Save Current IPL & set new IPL.
 #else
@@ -920,11 +943,11 @@ l90:
 	ENBINT				// restore IPL
 #endif
 	R0 = R8;			// for deallocation rtn.
-	R0 = exe$deanonpaged();
+	R0 = exe$deanonpaged(R0);
 #ifndef VMS_V4
 	FORKUNLOCK(R5->ucb$b_flck,-1);
 #endif
-	R0 = Unlock_IODB();		// unlock IO database.
+	R0 = unlock_iodb(&R4);		// unlock IO database.
 // all done
 
  l100:	/*POPL	r0*/			// get return code

@@ -30,7 +30,8 @@ endif
 else
 
 obj-y	:= socket.o $(join $(subdir-y), $(patsubst %,/%.o,$(notdir $(subdir-y))))
-
+#obj-y   += core/dev.o
+ 
 endif
 
 include $(TOPDIR)/Rules.make

@@ -393,8 +393,9 @@ EXTERNAL ROUTINE
 
 ! MACLIB.MAR
 
-    Mount_IP_Device,
-    Set_IP_Device_OffLine,
+#endif
+extern     mount_ip_device();
+#if 0
     Time_Stamp,
     User_Requests_Avail,
 
@@ -466,6 +467,8 @@ EXTERNAL ROUTINE
 #include <lnmdef.h>
 #include <jpidef.h>
 #include <misc.h>
+
+#include <system_data_cells.h>
 
 #include <netcommon.h>
 #include <nettcpip.h>
@@ -758,7 +761,7 @@ Side Effects:
 void    INIT_PROCNAME(void);
 
 void Main (void) {
-  $DESCRIPTOR(logical_netname,"INET$NETWORK_NAME");
+  $DESCRIPTOR(logical_netname_,"INET$NETWORK_NAME");
 #if 0
     BUILTIN
 	fp;			// VAX Frame Pointer.
@@ -777,8 +780,31 @@ void Main (void) {
 		} , {0,0,0,0}};	// list terminator.
 	long exitblk[4],	// exit handler arg blk.
 	exit_status;		// exit status code( SS$_xxxxxx).
-	$DESCRIPTOR(tabnam,"LNM$SYSTEM_TABLE"); //check shorten later
- 
+	$DESCRIPTOR(tabnam_,"LNM$SYSTEM_TABLE"); //check shorten later
+	struct dsc$descriptor * logical_netname = &logical_netname_, * tabnam = &tabnam_; 
+
+	// some extra temp stuff here
+	if (1) {
+	  int sts;
+	  $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
+	  struct dsc$descriptor * mytabnam = &mytabnam_;
+	  $DESCRIPTOR(dev_, "INET$DEVICE");
+	  struct dsc$descriptor * dev = &dev_;
+	  struct item_list_3 itm[2];
+	  lnm_init_prc(smp$gl_cpu_data[0]->cpu$l_curpcb); // needs this extra one
+	  itm[0].item_code=1;
+	  itm[0].buflen=4;
+#ifdef __arch_um__
+	  itm[0].bufaddr="eua0";
+#else
+	  itm[0].bufaddr="era0";
+#endif
+	  bzero(&itm[1],sizeof(struct item_list_3));
+
+	  sts=exe$crelnm(0,mytabnam,dev,0,itm);
+	}
+	// end of extra temp stuff
+
 // Translate logical network name to equivalence string (myname_buf,desc=myname)
 // provide a default name in case tcp$network_name is undefined.
 
@@ -830,8 +856,8 @@ void Main (void) {
 
 // Mount the network virtual device "IP".
 
-    if (!(rc=mount_ip_device())) 
-	FATAL$FAO("Failed to mount virtual device IP, RC = %x\n",rc);
+    if (! (rc=$$KCALL(mount_ip_device)))
+	FATAL$FAO("Failed to mount virtual device IP ,RC = %x\n",rc);
 
 // Perform tcp/acp initialization
 
@@ -879,7 +905,8 @@ void INIT_PROCNAME (void) {
     BIND
 	PROCESS_NAME = IPACP_Version_Name; // see tcp.mod file.
 #endif
-    $DESCRIPTOR(process_name,"IPACP");
+    $DESCRIPTOR(process_name_,"IPACP");
+    struct dsc$descriptor * process_name = &process_name_;
 
 // First, obtain our original process name
 

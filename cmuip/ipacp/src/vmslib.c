@@ -1,3 +1,5 @@
+#include <ssdef.h>
+
 CH$FILL() {
   printk("not implemented\n");
 }
@@ -158,11 +160,11 @@ FORKUNLOCK () {
   printk("not implemented\n");
 }
 
-Lock_IODB() {
+Lock_IODB_not() {
   printk("not implemented\n");
 }
 
-UnLock_IODB() {
+UnLock_IODB_not() {
   printk("not implemented\n");
 }
 
@@ -224,10 +226,12 @@ LIB$ASN_WTH_MBX() {
 
 SCH$IOLOCKW() {
   printk("not implemented\n");
+  return SS$_NORMAL;
 }
 
 SCH$IOUNLOCK() {
   printk("not implemented\n");
+  return SS$_NORMAL;
 }
 
 STR$FREE1_DX() {
