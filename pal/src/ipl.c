@@ -20,10 +20,21 @@ extern int timer_on;
 
 static mydebugi = 0;  // should have no printk in a non-interruptable zone
 
+inline asmlinkage void pushpsli(void) {
+  pushpsl();
+  current->psl_cur_mod=0;
+  current->psl_prv_mod=0;
+  current->psl_is=1;
+  current->psl_ipl=22;
+  smp$gl_cpu_data[0]->cpu$b_ipl=current->psl_ipl;
+}
+
 inline asmlinkage void pushpsl(void) {
   int this_cpu=smp_processor_id();
+  //  if (current->pslindex>1)
+  //  panic("xyz\n");
   current->pslstk[current->pslindex++]=current->psl;
-  if(current->pslindex<0 || current->pslindex>16) {
+  if(current->pslindex<0 || current->pslindex>14) {
     printk("push %x %x\n",current->pid,current->pslindex);
     panic("push\n");
   }
@@ -39,7 +50,7 @@ inline asmlinkage void poppsl(void) {
   current->oldpsl=current->psl;
   current->psl=current->pslstk[--(current->pslindex)];
   smp$gl_cpu_data[this_cpu]->cpu$b_ipl=current->psl_ipl;
-  if(current->pslindex<0 || current->pslindex>16) {
+  if(current->pslindex<0 || current->pslindex>14) {
     printk("pop %x %x\n",current->pid,current->pslindex);
     if (0) { int dummy;
     unsigned char *i;
@@ -129,7 +140,8 @@ inline void regtrap(char type, char param) {
   case REG_INTR:
     current->psl_cur_mod=0;
     current->psl_prv_mod=0;
-    current->psl_is=1;
+    if (param>2)
+      current->psl_is=1;
     /*  not fully implemented */
     current->psl_ipl=param;
     smp$gl_cpu_data[cpu]->cpu$b_ipl=current->psl_ipl;
@@ -174,7 +186,10 @@ inline char intr_blocked(unsigned char this) {
     //    if (this!=8) block3=0;
     if (block3>20)
       block3++;
-    if (block3>90) mydebugi=3;
+    if (block3>80) {
+      mydebugi=mydebugi;
+      block3++;
+    }
     if (block3>100) {
 #if 0
       extern void show_trace_task(struct task_struct *tsk);
@@ -187,15 +202,18 @@ inline char intr_blocked(unsigned char this) {
       mydebug6=1;
 #else
       mydebugi=1;
+#ifdef __arch_um__
       setipl(0);  // a fix for an error of unknown origin
       printk("lockup fixed by setting ipl 0\n");
 #endif
+#endif
     }
     mysti(flag);
-    pushpsl();
+    p->psl_intr=0;
     return 1;
   }
   block3=0;
+  p->psl_intr=1;
   mysti(flag);
   return 0;
 }
@@ -248,9 +266,14 @@ extern int in_sw_ast;
 
 asmlinkage void myrei (void) {
   /* look at REI for this */
-  int flag=mycli();
+  int flag, this_cpu;
   struct _pcb *p=current;
-  int this_cpu=smp_processor_id();
+  if (!p->psl_intr) {
+    p->psl_intr=1;
+    return; // return if not interrupt did happen
+  }
+  flag=mycli();
+  this_cpu=smp_processor_id();
   if (mydebugi>1) printk("bl %x %x %x\n",p->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
   if (mydebugi>1) printk("befpop %x %x ",p->pid,p->psl_ipl);
   poppsl();
