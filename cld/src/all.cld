@@ -30,6 +30,36 @@ define verb csearch
 	image directory
 	routine search
 
+define syntax show_default
+	cliroutine show_default
+	parameter p1
+
+define syntax set_default
+	cliroutine set_default
+	parameter p1
+
+define syntax set_prompt
+	cliroutine set_prompt
+	parameter p1
+
+define syntax set_process
+	cliroutine set_process
+	qualifier identification,value(required)
+
+define type set_something
+	keyword default, syntax = set_default
+	keyword prompt, syntax = set_prompt
+	keyword process, syntax = set_process
+
+define type show_something
+	keyword default, syntax = show_default
+
+define verb cset
+	parameter p1,label=something,value(type=set_something)
+
+define verb cshow
+	parameter p1,label=something,value(type=show_something)
+
 define verb cdfu
 	image dfu
 	routine verify_command
