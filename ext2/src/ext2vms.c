@@ -278,8 +278,154 @@ exttwo_create(struct _vcb *vcb,struct _irp * i)
   return sts;
 }
 
-exttwo_delete() {}
-exttwo_modify() {}
+struct readdir_callback2 {
+  struct dirent64 * dirent;
+  int count;
+};
+
+exttwo_delete(struct _vcb * vcb,struct _irp * irp) {
+  struct _iosb iosb;
+  struct _fcb *fcb;
+  struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
+  struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
+  unsigned short *reslen=irp->irp$l_qio_p3;
+  struct dsc$descriptor * resdsc=irp->irp$l_qio_p4;
+  struct _fibdef * fib=fibdsc->dsc$a_pointer;
+  struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
+  int sts=1;
+  //struct _fh2 *  head;
+  char name[256], *tmpname;
+  int wild=0;
+  unsigned action=1;
+
+  if (fib->fib$w_fid_num==4 && fib->fib$w_fid_seq==4 && fib->fib$w_did_num==0 && fib->fib$w_did_seq==0) {
+    memset(&x2p->context_save,0,54);
+    x2p->prev_fp=0;
+  }
+
+  if (fib->fib$w_did_num) {
+    int wildcard=0;
+    struct readdir_callback2 buf;
+    int fd=0;
+    struct file * f=0;
+    signed int error=0;
+    int dirflg=0;
+    struct dirent64 dir;
+    struct inode * head;
+    struct _fcb * fcb=x2p->primary_fcb;
+    head = fcb->fcb$l_primfcb;
+
+    if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
+      wildcard=1;
+
+    dir.d_ino=0;
+    dir.d_type=0;
+    memset(dir.d_name,0,256);
+    memset(name,0,256);
+
+    if (wildcard || (fib->fib$w_nmctl & FIB$M_WILD)) {
+        fib->fib$l_wcc = 1/*curblk*/;
+	strcpy(name,&x2p->context_save);
+	wild=1;
+    } else {
+        fib->fib$l_wcc = 0;
+	strcpy(name,&x2p->context_save);
+	if (irp->irp$v_fcode != IO$_DELETE) {
+	  name[strlen(name)]='/';
+	  ext2_vms_to_unix(name+strlen(name),filedsc);
+	  strcpy(&x2p->context_save,name);
+	}
+	if (strstr(filedsc->dsc$a_pointer,".DIR")) {
+	  dirflg=O_DIRECTORY;
+	}
+    }
+
+    if (irp->irp$v_fcode == IO$_DELETE) {
+      printk("unlink/rm %s\n",name);
+      f=sys_unlink(name);
+    } else {
+      //      f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|dirflg, 0);
+    }
+    buf.count = 0;
+    buf.dirent = &dir;
+    if (IS_ERR(f)) {
+      printk("IS ERR %x\n",f);
+      sts=SS$_NOSUCHFILE;
+      iosbret(irp,sts);
+      return sts;
+    }
+  }
+
+  if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
+
+  return sts;
+}
+
+exttwo_modify(struct _vcb * vcb, struct _irp * irp) {
+  struct _iosb iosb;
+  unsigned sts=SS$_NORMAL;
+  unsigned wrtflg=1;
+  struct _fcb *fcb;
+  //struct _fh2 *head;
+  struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
+  struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
+  unsigned short *reslen=irp->irp$l_qio_p3;
+  struct dsc$descriptor * resdsc=irp->irp$l_qio_p4;
+  void * atrp=irp->irp$l_qio_p5;
+  struct _fibdef * fib=(struct _fibdef *)fibdsc->dsc$a_pointer;
+  struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
+  unsigned action=0;
+  if (irp->irp$l_func & IO$M_ACCESS) action=0;
+  if (irp->irp$l_func & IO$M_DELETE) action=1;
+  if (irp->irp$v_fcode == IO$_CREATE) action=2;
+  if (irp->irp$l_func & IO$M_CREATE) action=2;
+  action=0;
+#ifdef DEBUG
+  printk("Accessing file (%d,%d,%d)\n",(fid->fid$b_nmx << 16) +
+	 fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn);
+#endif
+
+  x2p->current_vcb=vcb; // until I can place it somewhere else
+
+  if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
+
+  if (irp->irp$l_qio_p5 == 0)
+    return SS$_NORMAL;
+
+  if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) { iosbret(irp,SS$_WRITLCK);  return SS$_WRITLCK; }
+
+  fcb=exttwo_search_fcb(vcb,fid);
+  if (sts & 1) {
+  } else {
+    printk("Accessfile status %d\n",sts);
+    iosbret(irp,sts);
+    return sts;
+  }
+
+  fcb=x2p->primary_fcb;
+
+#if 0
+  if (fcb==NULL) {
+    fcb=fcb_create2(head,&sts);
+  }
+  if (fcb == NULL) { iosbret(irp,sts); return sts; }
+#endif
+
+  x2p->primary_fcb=fcb;
+  x2p->current_window=&fcb->fcb$l_wlfl;
+
+  if (atrp) exttwo_write_attrib(fcb,fcb->fcb$l_primfcb,atrp);
+
+  if ((fib->fib$w_exctl&FIB$M_EXTEND) && (sts & 1)) {
+    struct _fcb * newfcb;
+    newfcb=exttwo_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
+    sts = exttwo_extend(newfcb,fib->fib$l_exsz,0);
+  }
+
+  iosbret(irp,SS$_NORMAL);
+  return SS$_NORMAL;
+}
+
 int exttwo_io_done(struct _irp * i) {
   return f11b_io_done(i);
 }
@@ -631,11 +777,6 @@ void vms_mount(void) {
         sts = exe$mount(it);
 }
 
-struct readdir_callback2 {
-  struct dirent64 * dirent;
-  int count;
-};
-
 static int fillonedir64(void * __buf, const char * name, int namlen, loff_t offset, ino_t ino, unsigned int d_type)
 {
   struct readdir_callback2 * buf = (struct readdir_callback2 *) __buf;
@@ -684,7 +825,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     memset(&x2p->context_save,0,54);
     x2p->prev_fp=0;
   }
-
 
   if (fib->fib$w_did_num) {
     int wildcard=0;
@@ -773,6 +913,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       dir.d_name[(*reslen)++]=';';
       dir.d_name[(*reslen)++]='1';
       bcopy(dir.d_name,resdsc->dsc$a_pointer,*reslen);
+      printk("resdsc %s %x\n",resdsc->dsc$a_pointer,*reslen);
     }
     if (dir.d_ino!=2) {
       fib->fib$w_fid_num=head->i_dev;
@@ -880,7 +1021,7 @@ int exttwo_read_writevb(struct _irp * i) {
       panic("write lbn -1\n");
     //printk("tried to do an experimental write %x %x %x %x\n",i->irp$l_qio_p1,lbn,blocks,e2bn);
     exttwo_write_block(vcb,i->irp$l_qio_p1,lbn*factor+rest,blocks,&iosb);
-    inode->i_size+=512;
+    //inode->i_size+=512;
     ext2_sync_inode(inode);
     ext2_write_super(inode->i_sb);
   } else {
@@ -924,9 +1065,11 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
 	f->fat$b_rtype=FAT$C_SEQUENTIAL << 4;
 	f->fat$b_rattrib=0;
 	f->fat$w_rsize=0;
+	printk("readat %x %x\n",head->i_blocks,head->i_size%512);
 	f->fat$l_hiblk=VMSSWAP((1+head->i_blocks));
 	f->fat$l_efblk=VMSSWAP((1+head->i_size/512));
 	f->fat$w_ffbyte=head->i_size%512;
+	printk("readat %x %x %x %x\n",head->i_size,VMSSWAP(f->fat$l_efblk),f->fat$w_ffbyte,VMSSWAP(f->fat$l_hiblk));
 	f->fat$b_bktsize=0;
 	f->fat$b_vfcsize=0;
 	f->fat$w_maxrec=0;
@@ -990,6 +1133,84 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
     }
     atrp++;
   }
+  //  vfree(head);
+}
+
+void exttwo_write_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef * atrp) {
+  struct _iosb iosb;
+  int sts=SS$_NORMAL;
+  struct inode * head=inode;
+
+  while(atrp->atr$w_type!=0) {
+    switch (atrp->atr$w_type) {
+    case ATR$C_RECATTR:
+      {
+	struct _fatdef * f=atrp->atr$l_addr;
+	printk("writeat %x %x\n",head->i_size,head->i_blocks);
+	head->i_blocks=VMSSWAP(f->fat$l_hiblk)-1;
+	head->i_size=(VMSSWAP(f->fat$l_efblk)<<9)-512+f->fat$w_ffbyte;
+	printk("writeat %x %x %x %x\n",head->i_size,VMSSWAP(f->fat$l_efblk),f->fat$w_ffbyte,VMSSWAP(f->fat$l_hiblk));
+	//memcpy(atrp->atr$l_addr,&head->fh2$w_recattr,atrp->atr$w_size);
+      }
+      break;
+    case ATR$C_STATBLK:
+      {
+#if 0
+	// not yet?
+	struct _sbkdef * s=atrp->atr$l_addr;
+	s->sbk$l_fcb=fcb;
+#endif	
+      }
+      break;
+#if 0
+      //not now
+      //change to ext2 inode later
+    case ATR$C_HEADER:
+      {
+	struct _fh2 * head;
+	head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);  
+	sts=iosb.iosb$w_status;
+	memcpy(atrp->atr$l_addr,head,atrp->atr$w_size);
+	kfree(head); // wow. freeing something
+      }
+      break;
+#endif
+    case ATR$C_CREDATE:
+      {
+	head->i_ctime=unix_to_vms_time(*(unsigned long long*)atrp->atr$l_addr);
+      }  
+	break;
+    case ATR$C_REVDATE:
+      {
+	head->i_mtime=unix_to_vms_time(*(unsigned long long*)atrp->atr$l_addr);
+      }  
+	break;
+    case ATR$C_EXPDATE:
+      {
+	//*(unsigned long long*)atrp->atr$l_addr=0;
+      }  
+	break;
+    case ATR$C_BAKDATE:
+      {
+	//*(unsigned long long*)atrp->atr$l_addr=0;
+      }  
+	break;
+	
+    case ATR$C_UIC:
+	memcpy(&head->i_uid,atrp->atr$l_addr,atrp->atr$w_size);
+	break;
+
+    case ATR$C_FPRO:
+	memcpy(&head->i_mode,atrp->atr$l_addr,atrp->atr$w_size);
+	break;
+
+    default:
+      printk("atr %x not supported\n",atrp->atr$w_type);
+      break;
+    }
+    atrp++;
+  }
+  ext2_sync_inode(inode);
   //  vfree(head);
 }
 
@@ -1197,3 +1418,26 @@ unsigned long e2_access_file(const char *name) {
 unsigned long get_prim_fcb() {
   return 	  x2p->primary_fcb;
 }
+
+unsigned exttwo_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
+{
+  struct _iosb iosb;
+  unsigned sts=1;
+  struct _vcb *vcbdev;
+  struct _fh2 *head;
+  unsigned headvbn;
+  struct _fiddef hdrfid;
+  unsigned hdrseq;
+  unsigned start_pos = 0;
+  unsigned block_count = blocks;
+  if (block_count < 1) return 0;
+  int dummy;
+
+  struct inode * inode = fcb->fcb$l_primfcb;
+  for (;block_count;block_count--,inode->i_blocks++)
+    ext2_get_block(inode,inode->i_blocks,&dummy,1,fcb);
+
+  return sts;
+}
+
+
