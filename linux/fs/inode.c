@@ -135,7 +135,7 @@ static void init_once(void * foo, kmem_cache_t * cachep, unsigned long flags)
  *	Mark an inode as dirty. Callers should use mark_inode_dirty or
  *  	mark_inode_dirty_sync.
  */
- 
+
 void __mark_inode_dirty(struct inode *inode, int flags)
 {
 	struct super_block * sb = inode->i_sb;
