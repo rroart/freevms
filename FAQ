@@ -15,6 +15,14 @@ Answer:		You have to change the line:
 
 Question:	Bochs does not boot properly, it hangs somewhere.
 
-Answer:		Try to increse ips.
+Answer:		Try to increase or decrease ips in bochsrc.
+
+Question:	Running uml gives an immediate "Segmentation fault".
+
+Answer:		Seems to happen with debian unstable and
+		gentoo (gentoo got it around middle of January).
+		A debian guy said it had something to do with threading
+		and recompiling glibc.
+		It works all right under RedHat 9.
 
 (Written by Roar Thronaes)

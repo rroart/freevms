@@ -24,3 +24,7 @@ Use 2 other cpu modes.
 Put ctl$gl_ccb_table in P1.
 
 Use correct interface to network module in CONFIG_VMS
+
+Make a make linker autobuild
+
+Use sys$ with system service call instead in exe$ in ipacp etc, to make asts etc function properly.
