@@ -10,7 +10,7 @@
 
 CH$FILL(ch, size, addr) {
   memset(addr,ch, size);
-  return SS$_NORMAL;
+  return addr+size;
   printk("CH$FILL not implemented\n");
 }
 
@@ -115,7 +115,7 @@ PLIT() {
 
 CH$MOVE(size, src, addr) {
   memcpy(addr,src, size);
-  return SS$_NORMAL;
+  return addr+size;
   printk("CH$MOVE not implemented\n");
 }
 
@@ -148,15 +148,18 @@ MAX(x,y) {
   printk("MAX not implemented\n");
 }
 
-MINU() {
+MINU(x,y) {
+  return MIN(x,y);
   printk("MINU not implemented\n");
 }
 
 XLOG$FAO() {
-  printk("XLOG$FAO not implemented\n");
+  // not implemented, but no printk
+  // printk("XLOG$FAO not implemented\n");
 }
 
-MAXU() {
+MAXU(x,y) {
+  return MAX(x,y);
   printk("MAXU not implemented\n");
 }
 
@@ -308,7 +311,8 @@ Begin_Lock() {
   printk("Begin_Lock not implemented\n");
 }
 
-CH$PLUS() {
+CH$PLUS(x,y) {
+  return x+y;
   printk("CH$PLUS not implemented\n");
 }
 
@@ -354,11 +358,13 @@ Addm() {
   printk("Addm not implemented\n");
 }
 
-Calc_Checksum() {
+Calc_Checksum_not(Byte_Count,Start,Srca,Dsta,PtclT) {
+  return Calc_Checksum(Byte_Count,Start,Srca,Dsta,PtclT);
   printk("Calc_Checksum not implemented\n");
 }
 
-Calc_checksum() {
+Calc_checksum_not(Byte_Count,Start,Srca,Dsta,PtclT) {
+  return Calc_Checksum(Byte_Count,Start,Srca,Dsta,PtclT);
   printk("Calc_checksum not implemented\n");
 }
 
@@ -366,7 +372,7 @@ End_Lock() {
   printk("End_Loc not implemented\n");
 }
 
-Gen_Checksum() {
+Gen_Checksum_not() {
   printk("Gen_Checksum not implemented\n");
 }
 
@@ -490,4 +496,17 @@ DRV$XQL_FAO_not() {
   printk("DRV$XQL_FAO not implemented\n");
 }
 
+swapbytesiphdr(x,y) {
+  swapbytes(3,y+2);
+  swapbytes(1,y+10);
+}
+
+swapbytesicmphdr(x,y) {
+  swapbytes(1,y+2);
+}
+
+swapbytesseghdr(x,y) {
+  swapbytes(2,y);
+  swapbytes(3,y+14);
+}
 
