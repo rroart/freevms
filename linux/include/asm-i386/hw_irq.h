@@ -68,6 +68,7 @@
 
 #define SOFTINT_TEST_VECTOR do { __asm__ __volatile__ ("int $0x88\n"); } while (0);
 
+#ifdef CONFIG_VMS
 #define SOFTINT_POWER_VECTOR do { __asm__ __volatile__ ("int $0xaf\n"); } while (0);
 #define SOFTINT_EMB_VECTOR do { __asm__ __volatile__ ("int $0xae\n"); } while (0);
 #define SOFTINT_MCHECK_VECTOR do { __asm__ __volatile__ ("int 18\n"); } while (0);
@@ -79,16 +80,11 @@
 #define SOFTINT_PERFMON_VECTOR do { __asm__ __volatile__ ("int $0xa7\n"); } while (0);
 #define SOFTINT_MAILBOX_VECTOR do { __asm__ __volatile__ ("int $0xa6\n"); } while (0);
 #define SOFTINT_POOL_VECTOR do { __asm__ __volatile__ ("int $0xa5\n"); } while (0);
-// #define SOFTINT_IOLOCK11_VECTOR do { __asm__ __volatile__ ("int $0xa4\n"); } while (0);
-// #define SOFTINT_IOLOCK10_VECTOR do { __asm__ __volatile__ ("int $0xa3\n"); } while (0);
-// #define SOFTINT_IOLOCK9_VECTOR do { __asm__ __volatile__ ("int $0xa2\n"); } while (0);
-#define SOFTINT_IOLOCK11_VECTOR do { exe$frkipl11dsp(); myrei(); } while (0);
-#define SOFTINT_IOLOCK10_VECTOR do { exe$frkipl10dsp(); myrei(); } while (0);
-#define SOFTINT_IOLOCK9_VECTOR do { exe$frkipl9dsp(); myrei(); } while (0);
-#define SOFTINT_IOLOCK8_VECTOR do { exe$frkipl8dsp(); myrei(); } while (0);
+#define SOFTINT_IOLOCK11_VECTOR do { __asm__ __volatile__ ("int $0xa4\n"); } while (0);
+#define SOFTINT_IOLOCK10_VECTOR do { __asm__ __volatile__ ("int $0xa3\n"); } while (0);
+#define SOFTINT_IOLOCK9_VECTOR do { __asm__ __volatile__ ("int $0xa2\n"); } while (0);
 #define SOFTINT_SYNCH_VECTOR do { __asm__ __volatile__ ("int $0xa1\n"); } while (0);
-//#define SOFTINT_TIMER_VECTOR do { __asm__ __volatile__ ("int $0xa0\n"); } while (0);
-#define SOFTINT_TIMERFORK_VECTOR do { exe$swtimint(); myrei(); } while (0);
+#define SOFTINT_TIMER_VECTOR do { __asm__ __volatile__ ("int $0xa0\n"); } while (0);
 #define SOFTINT_SCS_VECTOR do { __asm__ __volatile__ ("int $0x9f\n"); } while (0);
 #define SOFTINT_SCHED_VECTOR do { __asm__ __volatile__ ("int $0x9e\n"); } while (0);
 #define SOFTINT_MMG_VECTOR do { __asm__ __volatile__ ("int 14\n"); } while (0);
@@ -96,18 +92,26 @@
 #define SOFTINT_FILSYS_VECTOR do { __asm__ __volatile__ ("int $0x9b\n"); } while (0);
 #define SOFTINT_TX_SYNCH_VECTOR do { __asm__ __volatile__ ("int $0x9a\n"); } while (0);
 #define SOFTINT_LCKMGR_VECTOR do { __asm__ __volatile__ ("int $0x99\n"); } while (0);
-//#define SOFTINT_IOLOCK8_VECTOR do { __asm__ __volatile__ ("int $0x98\n"); } while (0);
+#define SOFTINT_IOLOCK8_VECTOR do { __asm__ __volatile__ ("int $0x98\n"); } while (0);
 #define SOFTINT_PORT_VECTOR do { __asm__ __volatile__ ("int $0x97\n"); } while (0);
-//#define SOFTINT_TIMERFORK_VECTOR do { __asm__ __volatile__ ("int $0x96\n"); } while (0);
-#define SOFTINT_QUEUEAST_VECTOR do { exe$frkipl6dsp(); myrei(); } while(0);
-//#define SOFTINT_QUEUEAST_VECTOR do { __asm__ __volatile__ ("int $0x95\n"); } while (0);
-#define SOFTINT_IOPOST_VECTOR do { ioc$iopost(); myrei(); } while (0);
+#define SOFTINT_TIMERFORK_VECTOR do { __asm__ __volatile__ ("int $0x96\n"); } while (0);
+#define SOFTINT_QUEUEAST_VECTOR do { __asm__ __volatile__ ("int $0x95\n"); } while (0);
+#define SOFTINT_IOPOST_VECTOR do { __asm__ __volatile__ ("int $0x94\n"); } while (0);
+#define SOFTINT_RESCHED_VECTOR do { __asm__ __volatile__ ("int $0x93\n"); } while (0);
+#define SOFTINT_ASTDEL_VECTOR do { __asm__ __volatile__ ("int $0x92\n"); } while (0);
 
-//#define SOFTINT_IOPOST_VECTOR do { __asm__ __volatile__ ("int $0x94\n"); } while (0);
-//#define SOFTINT_RESCHED_VECTOR do { __asm__ __volatile__ ("int $0x93\n"); } while (0);
+#else
+
+#define SOFTINT_IOLOCK11_VECTOR do { exe$frkipl11dsp(); myrei(); } while (0);
+#define SOFTINT_IOLOCK10_VECTOR do { exe$frkipl10dsp(); myrei(); } while (0);
+#define SOFTINT_IOLOCK9_VECTOR do { exe$frkipl9dsp(); myrei(); } while (0);
+#define SOFTINT_IOLOCK8_VECTOR do { exe$frkipl8dsp(); myrei(); } while (0);
+#define SOFTINT_TIMERFORK_VECTOR do { exe$swtimint(); myrei(); } while (0);
+#define SOFTINT_QUEUEAST_VECTOR do { exe$frkipl6dsp(); myrei(); } while(0);
+#define SOFTINT_IOPOST_VECTOR do { ioc$iopost(); myrei(); } while (0);
 #define SOFTINT_RESCHED_VECTOR do { sch$resched(); myrei(); } while (0);
-//#define SOFTINT_ASTDEL_VECTOR do { __asm__ __volatile__ ("int $0x92\n"); } while (0);
 #define SOFTINT_ASTDEL_VECTOR do { sch$astdel(); myrei(); } while (0);
+#endif
 
 /*
  * Vectors 0x20-0x2f are used for ISA interrupts.

@@ -95,10 +95,17 @@ asmlinkage void spurious_interrupt_bug(void);
 asmlinkage void machine_check(void);
 
 asmlinkage void test_code(void);
-asmlinkage void sched_vector(void);
+asmlinkage void astdel_vector(void);
 asmlinkage void resched_vector(void);
-asmlinkage void timer_vector(void);
 asmlinkage void iopost_vector(void);
+asmlinkage void queueast_vector(void);
+asmlinkage void timerfork_vector(void);
+asmlinkage void iolock8_vector(void);
+asmlinkage void sched_vector(void);
+asmlinkage void timer_vector(void);
+asmlinkage void iolock9_vector(void);
+asmlinkage void iolock10_vector(void);
+asmlinkage void iolock11_vector(void);
 
 int kstack_depth_to_print = 24;
 
@@ -993,10 +1000,17 @@ void __init trap_init(void)
 		set_system_gate(VMSSYSCALL_VECTOR3,&vmssystem_call3); /* will need to figure out where the user mode setup is */
 
 		//		set_intr_gate(TEST_VECTOR,&test_code);
-		set_intr_gate(SCHED_VECTOR,&sched_vector);
+		set_intr_gate(ASTDEL_VECTOR,&astdel_vector);
 		set_intr_gate(RESCHED_VECTOR,&resched_vector);
-		set_intr_gate(TIMER_VECTOR,&timer_vector);
 		set_intr_gate(IOPOST_VECTOR,&iopost_vector);
+		set_intr_gate(QUEUEAST_VECTOR,&queueast_vector);
+		set_intr_gate(TIMERFORK_VECTOR,&timerfork_vector);
+		set_intr_gate(IOLOCK8_VECTOR,&iolock8_vector);
+		set_intr_gate(SCHED_VECTOR,&sched_vector);
+		set_intr_gate(TIMER_VECTOR,&timer_vector);
+		set_intr_gate(IOLOCK9_VECTOR,&iolock9_vector);
+		set_intr_gate(IOLOCK10_VECTOR,&iolock10_vector);
+		set_intr_gate(IOLOCK11_VECTOR,&iolock11_vector);
 	puts("puts 6.22\n");
 
 	/*

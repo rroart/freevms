@@ -569,6 +569,13 @@ ENTRY(timer_vector)
         POPR_ALL
         REI
 
+ENTRY(timerfork_vector)
+        PUSHR_ALL
+#        call pushpsl
+        call SYMBOL_NAME(exe$swtimint)
+        POPR_ALL
+        REI
+
 ENTRY(iopost_vector)
         PUSHR_ALL
 #        call pushpsl
@@ -587,6 +594,34 @@ ENTRY(queueast_vector)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$forkdspth)
+        POPR_ALL
+        REI
+
+ENTRY(iolock8_vector)
+        PUSHR_ALL
+#        call pushpsl
+        call SYMBOL_NAME(exe$frkipl8dsp)
+        POPR_ALL
+        REI
+
+ENTRY(iolock9_vector)
+        PUSHR_ALL
+#        call pushpsl
+        call SYMBOL_NAME(exe$frkipl9dsp)
+        POPR_ALL
+        REI
+
+ENTRY(iolock10_vector)
+        PUSHR_ALL
+#        call pushpsl
+        call SYMBOL_NAME(exe$frkipl10dsp)
+        POPR_ALL
+        REI
+
+ENTRY(iolock11_vector)
+        PUSHR_ALL
+#        call pushpsl
+        call SYMBOL_NAME(exe$frkipl11dsp)
         POPR_ALL
         REI
 
