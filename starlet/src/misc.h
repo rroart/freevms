@@ -1,6 +1,8 @@
 #ifndef misc_h
 #define misc_h
 
+#include"iosbdef.h"
+
 struct iosb { unsigned short iostat; unsigned short iolen; unsigned int device_info; 
 };
 

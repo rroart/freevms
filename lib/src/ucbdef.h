@@ -269,8 +269,8 @@ struct _ucb2 {
   unsigned long ucb$l_opcnt;
   unsigned long ucb$l_svpn;
   void *ucb$l_svapte;
-  unsigned short ucb$w_boff;
-  unsigned short ucb$w_bcnt;
+  unsigned long ucb$l_boff;
+  unsigned long ucb$l_bcnt;
   unsigned char ucb$b_ertcnt;
   unsigned char ucb$b_ertmax;
   unsigned short ucb$w_errcnt;
@@ -565,7 +565,8 @@ struct _ucb {
       unsigned ucb$v_fill_5_ : 3;
     };
   };
-  int ucb$l_qlen;    struct _ucb *ucb$ps_start_aff_qfl;
+  int ucb$l_qlen;    
+  struct _ucb *ucb$ps_start_aff_qfl;
   struct _ucb *ucb$ps_start_aff_qbl;
   struct _cpu *ucb$l_port_cpudb;
   int (*ucb$ps_io_counters)();
@@ -573,8 +574,8 @@ struct _ucb {
   unsigned int ucb$l_opcnt;
   unsigned int ucb$l_svpn;
   void *ucb$l_svapte;
-  unsigned short ucb$w_bcnt;
-  unsigned short ucb$w_boff;
+  unsigned long ucb$l_bcnt;
+  unsigned long ucb$l_boff;
   unsigned int ucb$l_softerrcnt;
   unsigned int ucb$l_ertcnt;
   unsigned int ucb$l_ertmax;

@@ -125,40 +125,50 @@
 #define	IRP$S_IRPDEF	536
 	
 struct	_irp	{
-struct _irp *irp$l_ioqfl;
-struct _irp *irp$l_ioqbl;
-unsigned short int irp$w_size;
-unsigned char irp$b_type;
-unsigned char irp$b_rmod;
-unsigned long irp$l_pid;
-unsigned long irp$l_ast;
-unsigned long irp$l_astprm;
-unsigned long irp$l_wind;
-unsigned long irp$l_ucb;
-unsigned short irp$w_func;
-unsigned char irp$b_efn;
-unsigned char irp$b_pri;
-unsigned long irp$l_iosb;
-unsigned short irp$w_chan;
-unsigned short irp$w_sts;
-unsigned long irp$l_svapte;
-                             /* temporary work-around */ 
+  struct _irp *irp$l_ioqfl;
+  struct _irp *irp$l_ioqbl;
+  unsigned short int irp$w_size;
+  unsigned char irp$b_type;
+  unsigned char irp$b_rmod;
+  unsigned long irp$l_pid;
+  unsigned long irp$l_ast;
+  unsigned long irp$l_astprm;
+  unsigned long irp$l_wind;
+  struct _ucb * irp$l_ucb;
+  union {
+    unsigned long irp$l_func;
+    struct {
+      unsigned irp$v_fcode : 6;
+      unsigned irp$v_fmod : 10;
+    };
+  };
+  unsigned char irp$b_efn;
+  unsigned char irp$b_pri;
+  unsigned long irp$l_iosb;
+  unsigned short irp$w_chan;
+  union {
+    unsigned long irp$l_svapte;
+    struct _bufio *irp$ps_bufio_pkt;
+  };
+  /* temporary work-around */ 
   unsigned long useraddress; /* do not know the pte/buffer stuff yet */
-unsigned short irp$w_boff;
-unsigned short irp$w_empty;
-unsigned long irp$l_bcnt;
-unsigned short irp$w_sts2;
-unsigned short irp$w_emptyagain;
-unsigned long irp$l_iost1;
-unsigned long irp$l_iost2;
-unsigned long irp$l_abcnt;
-unsigned long irp$l_obcnt;
-unsigned long irp$l_segvbn;
-unsigned long irp$l_diagbuf;
-unsigned long irp$l_seqnum;
-unsigned long irp$l_extend;
-unsigned long irp$l_arb;
-unsigned long irp$l_keydesc;
+  unsigned long irp$l_boff;
+  unsigned short irp$w_empty;
+  unsigned long irp$l_bcnt;
+  unsigned short irp$w_emptyagain;
+  union {
+    unsigned long irp$l_iost1;
+    long irp$l_media;
+  };
+  unsigned long irp$l_iost2;
+  unsigned long irp$l_abcnt;
+  unsigned long irp$l_obcnt;
+  unsigned long irp$l_segvbn;
+  unsigned long irp$l_diagbuf;
+  unsigned long irp$l_seqnum;
+  unsigned long irp$l_extend;
+  unsigned long irp$l_arb;
+  unsigned long irp$l_keydesc;
   struct _ccb *irp$ps_ccb;
   unsigned long irp$l_qio_p1;
   unsigned long irp$l_qio_p2;
@@ -166,6 +176,81 @@ unsigned long irp$l_keydesc;
   unsigned long irp$l_qio_p4;
   unsigned long irp$l_qio_p5;
   unsigned long irp$l_qio_p6;
+
+  union {
+    unsigned long long irp$q_status;
+    struct {
+      union {
+	unsigned int irp$l_sts;
+	struct {
+	  unsigned irp$v_bufio : 1;
+	  unsigned irp$v_func : 1;
+	  unsigned irp$v_pagio : 1;
+	  unsigned irp$v_complx : 1;
+	  unsigned irp$v_virtual : 1;
+	  unsigned irp$v_chained : 1;
+	  unsigned irp$v_swapio : 1;
+	  unsigned irp$v_diagbuf : 1;
+	  unsigned irp$v_physio : 1;
+	  unsigned irp$v_termio : 1;
+	  unsigned irp$v_mbxio : 1;
+	  unsigned irp$v_extend : 1;
+	  unsigned irp$v_filacp : 1;
+	  unsigned irp$v_mvirp : 1;
+	  unsigned irp$v_srvio : 1;
+	  unsigned irp$v_ccb_looked_up : 1;
+	  unsigned irp$v_cache_pagio : 1;
+	  unsigned irp$v_fill_bit : 1;
+	  unsigned irp$v_bufobj : 1;
+	  unsigned irp$v_trusted : 1;
+	  unsigned irp$v_fastio_done : 1;
+	  unsigned irp$v_fastio : 1;
+	  unsigned irp$v_fast_finish : 1;
+	  unsigned irp$v_dopms : 1;
+	  unsigned irp$v_hifork : 1;
+	  unsigned irp$v_srv_abort : 1;
+	  unsigned irp$v_lock_releaseable : 1;
+	  unsigned irp$v_did_fast_fdt : 1;
+	  unsigned irp$v_syncsts : 1;
+	  unsigned irp$v_finipl8 : 1;
+	  unsigned irp$v_file_flush : 1;
+	  unsigned irp$v_barrier : 1;
+	};
+      };
+      union {
+	unsigned int irp$l_sts2;
+	struct {
+	  unsigned irp$v_start_past_hwm : 1;
+	  unsigned irp$v_end_past_hwm : 1;
+	  unsigned irp$v_erase : 1;
+	  unsigned irp$v_part_hwm : 1;
+	  unsigned irp$v_lckio : 1;
+	  unsigned irp$v_shdio : 1;
+	  unsigned irp$v_cacheio : 1;
+	  unsigned irp$v_wle : 1;
+	  unsigned irp$v_cache_safe : 1;
+	  unsigned irp$v_nocache : 1;
+	  unsigned irp$v_abortio : 1;
+	  unsigned irp$v_forcemv : 1;
+	  unsigned irp$v_hbrio : 1;
+	  unsigned irp$v_on_act_q : 1;
+	  unsigned irp$v_mpdev_retried : 1;
+	  unsigned irp$v_whl : 1;
+	  unsigned irp$v_qcomplex : 1;
+	  unsigned irp$v_noretry : 1;
+	  unsigned irp$v_qbarrier : 1;
+	  unsigned irp$v_pvirp : 1;
+	  unsigned irp$v_usealtddt : 1;
+	  unsigned irp$v_pid_s0_mv : 1;
+	  unsigned irp$v_cache_resume : 1;
+	  unsigned irp$v_qcntrl : 1;
+	  unsigned irp$v_qrqt_srvr_hlpr : 1;
+	  unsigned irp$v_qsvd : 1;
+	  unsigned irp$v_fill_23_ : 6;
+	};
+      };
+    };
+  };
 
   /* copy from cdrp to this area ?*/
   struct _cdrp irp_cdrp;

@@ -473,6 +473,16 @@
 #define SS$_PRIMNOSTP	0x0A68	/* 2664 */
 #define SS$_BOOTREJECT	0x0A70	/* 2672 */
 #define SS$_RMTPATH	0x0A78	/* 2680 */
+#define SS$_OBJECT_EXISTS 0x0A80 /* 2688 */
+#define SS$_NOSUCHOBJECT 0x0A88 /* 2696 */
+#define SS$_NOVOLDESC	0x0A90	/* 2704 */
+#define SS$_NOPTBLDIR	0x0A98	/* 2712 */
+#define SS$_DRVEXISTS	0x0AA0	/* 2720 */
+#define SS$_DEVEXISTS	0x0AA8	/* 2728 */
+#define SS$_GOTO_UNWIND	0x0AB0	/* 2736 */
+#define SS$_EXIT_UNWIND	0x0AB8	/* 2744 */
+#define SS$_SMALLHEADER	0x0AC0	/* 2752 */
+#define SS$_FDT_COMPL	0x0AC8	/* 2760 */
 
 /* informational codes (hex c00-e00) */
 #define SS$_EOTIN	0x0C03	/* 3075 */
