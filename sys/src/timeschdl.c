@@ -1,7 +1,14 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Author. Linux people.
+
 #include"../../freevms/pal/src/queue.h"
 #include "../../freevms/sys/src/asmlink.h"
 #include "../../freevms/lib/src/pridef.h"
 #include"../../freevms/lib/src/ipldef.h"
+#include"../../freevms/lib/src/lkbdef.h"
 #include"../../freevms/pal/src/ipl.h"
 #include <linux/linkage.h>
 #include <linux/sched.h>
@@ -81,6 +88,9 @@ void exe$timeout(void) {
   /* if running monitor... */
   /* scan fork and wait queue. soon to be implemented */
   /* scan lock mgr etc */
+  if (lck$gq_timoutq)
+    if (exe$gl_abstim>=((struct _lkb *)lck$gq_timoutq)->lkb$l_duetime)
+      lck$searchdlck();
   sch$one_sec();
   /* sch$ravail() */
 #ifdef __i386__

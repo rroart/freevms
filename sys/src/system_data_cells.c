@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<linux/vmalloc.h>
 #include"../../freevms/sys/src/system_data_cells.h"
 #include"../../freevms/lib/src/dyndef.h"
@@ -768,11 +773,11 @@ unsigned long ioc$gw_mvtimeout;
 unsigned long ioc$gw_tape_mvtimeout;
 unsigned long ioc$gw_xfmxrate;
 unsigned long ioc$intdisp;
-unsigned long lck$al_dwncvt_tbl;
-unsigned long lck$al_ggmax_tbl;
-unsigned long lck$al_ggred_tbl;
-unsigned long lck$al_valblk_tbl;
-unsigned long lck$ar_compat_tbl;
+//unsigned long lck$al_dwncvt_tbl;
+//unsigned long lck$al_ggmax_tbl;
+//unsigned long lck$al_ggred_tbl;
+//unsigned long lck$al_valblk_tbl;
+//unsigned long lck$ar_compat_tbl;
 unsigned long lck$ar_poolzone_region;
 unsigned long lck$gl_act_thrsh;
 unsigned long lck$gl_activity;
@@ -824,7 +829,7 @@ unsigned long lck$gl_rrsbl; /* unofficial */
 unsigned long lck$gq_rsb_head;
 unsigned long lck$gq_rsb_tail;
 unsigned long lck$gq_shared_anchor;
-unsigned long lck$gq_timoutq;
+unsigned long long lck$gq_timoutq;
 unsigned long ldr$gq_free_s0s1_pt;
 unsigned long ldr$gq_free_s2_pt;
 unsigned long ldr$gq_hpdesc;

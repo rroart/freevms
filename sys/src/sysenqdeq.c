@@ -1,16 +1,48 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<linux/linkage.h>
 #include<linux/vmalloc.h>
 #include<asm/current.h>
 #include"../../freevms/sys/src/system_data_cells.h"
 #include"../../freevms/starlet/src/lckdef.h"
+#include"../../freevms/lib/src/lckctxdef.h"
 #include"../../freevms/starlet/src/misc.h"
 #include"../../freevms/starlet/src/ssdef.h"
 #include"../../freevms/starlet/src/starlet.h"
+#include"../../freevms/lib/src/ipldef.h"
 #include"../../freevms/lib/src/rsbdef.h"
 #include"../../freevms/lib/src/lkbdef.h"
+#include"../../freevms/lib/src/pridef.h"
 #include"../../freevms/librtl/src/descrip.h"
 
 // no vmslock etc here yet
+
+unsigned char lck$ar_compat_tbl[6]={0x3f,0x1f,0x7,0xb,3,1};
+unsigned char lck$ar_compat_tbl2[6,6]={
+  {1,1,1,1,1,1},
+  {0,1,1,1,1,1},
+  {0,0,0,1,1,1},
+  {0,0,1,0,1,1},
+  {0,0,0,0,1,1},
+  {0,0,0,0,0,1}
+};
+
+unsigned char lck$synccvt_tbl[6]={1,3,7,0xb,0x1f,0x3f};
+
+unsigned char lck$quecvt_tbl[6]={0x3e,0x3c,0x38,0x34,0x20,0};
+
+unsigned char lck$ggmax_tbl[6]={0,0,8,4,0,0};
+
+unsigned char lck$ggred_tbl[6]={0,0,0,0,0xc,0};
+
+unsigned char lck$valblk_tbl[6]={0,0,0,0,0x1f,0x3f};
+
+unsigned char lck$al_dwncvt_tbl[6]={0,1,3,3,0xf,0x1f};
+
+
 
 extern struct _rsb * reshashtbl[];
 extern unsigned long lockidtbl[];
@@ -46,7 +78,11 @@ int insert_lck(struct _lkb * l) {
   return i;
 }
 
-asmlinkage int exe$enqw(struct struct_enq * s) {}
+asmlinkage int exe$enqw(struct struct_enq * s) {
+  int status=exe$enq(s);
+  if ((status&1)==0) return status;
+  return exe$synch(s->efn,s->lksb);
+}
 
 asmlinkage int exe$enq(struct struct_enq * s) {
   int convert;
@@ -77,6 +113,8 @@ asmlinkage int exe$enq(struct struct_enq * s) {
       goto error;
     }
 
+    setipl(IPL$_ASTDEL);
+
     r=vmalloc(sizeof(struct _rsb));
     bzero(r,sizeof(struct _rsb));
     l=vmalloc(sizeof(struct _lkb));
@@ -85,6 +123,8 @@ asmlinkage int exe$enq(struct struct_enq * s) {
     l->lkb$b_efn=s->efn;
     l->lkb$b_rqmode=s->lkmode;
     l->lkb$l_cplastadr=s->astadr;
+    //    l->lkb$l_blkastadr=s->blkastadr;
+    l->lkb$l_astprm=s->astprm;
     l->lkb$l_pid=current->pid;
     strncpy(r->rsb$t_resnam,d->dsc$a_pointer,d->dsc$w_length);
 
@@ -102,28 +142,40 @@ asmlinkage int exe$enq(struct struct_enq * s) {
       qhead_init(&r->rsb$l_grqfl);
       qhead_init(&r->rsb$l_cvtqfl);
       qhead_init(&r->rsb$l_wtqfl);
-      insque(&l->lkb$q_sqfl,r->rsb$l_grqfl);
+      insque(&l->lkb$l_sqfl,r->rsb$l_grqfl);
       l->lkb$l_rsb=r;
       insert_reshashtbl(r);
       if (!s->parid) {
 	insque(&r->rsb$l_rrsfl,lck$gl_rrsfl);
+	qhead_init(&r->rsb$l_srsfl);
 	r->rsb$b_depth=0;
 	r->rsb$l_rtrsb=r;
+	insque(&l->lkb$l_ownqfl,&current->pcb$l_lockqfl);
+	//?if (q->flags & LKB$M_DCPLAST) 
+	
+	s->lksb->lksb$l_lkid=insert_lck(l);
+	s->lksb->lksb$w_status=SS$_NORMAL;
+	
+	lck$grant_lock(l,r,-1,s->lkmode);
+
+	goto end;
       }
     } else {
       /* something else? */
       vfree(r);
       r=old;
       if (aqempty(r->rsb$l_cvtqfl) && aqempty(r->rsb$l_wtqfl)) {
-	insque(l->lkb$q_sqfl,r->rsb$l_grqfl);
+	insque(l->lkb$l_sqfl,r->rsb$l_grqfl);
 	l->lkb$b_grmode=s->lkmode;
       } else {
-	insque(l->lkb$q_sqfl,r->rsb$l_wtqfl);
+	insque(l->lkb$l_sqfl,r->rsb$l_wtqfl);
       }
-    }
+
     s->lksb->lksb$l_lkid=insert_lck(l);
     s->lksb->lksb$w_status=SS$_NORMAL;
 
+    }
+  end:
     /* raise ipl */
     return SS$_NORMAL;
   error:
@@ -139,15 +191,49 @@ asmlinkage int exe$enq(struct struct_enq * s) {
     void * dummy;
     l=lockidtbl[s->lksb->lksb$l_lkid];
     r=l->lkb$l_rsb;
+    remque(l->lkb$l_sqfl,l->lkb$l_sqfl);// ?
     remque(r->rsb$l_grqfl,dummy);
-    if (aqempty(r->rsb$l_cvtqfl) && aqempty(r->rsb$l_wtqfl)) {
-      r->rsb$b_cgmode=s->lkmode;
-      l->lkb$b_grmode=s->lkmode;
-      insque(l,r->rsb$l_grqfl);
+    if (aqempty(r->rsb$l_cvtqfl) && aqempty(r->rsb$l_grqfl) && aqempty(r->rsb$l_wtqfl)) {
+      lck$grant_lock(l,r,l->lkb$b_grmode,s->lkmode);
+    } else {
+      if (test_bit(s->lkmode,lck$ar_compat_tbl[l->lkb$b_grmode])) {
+	
+      }
     }
   }
 }
 
 asmlinkage int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags) {
   
+}
+
+int lck$grant_lock(struct _lkb * l,struct _rsb * r, signed int curmode, signed int nextmode) {
+  if (nextmode>curmode) {
+    r->rsb$b_ggmode=nextmode;
+    r->rsb$b_fgmode=nextmode;
+    r->rsb$b_cgmode=nextmode;
+  }
+    l->lkb$b_grmode=nextmode;
+    l->lkb$l_lkst1=SS$_NORMAL;
+
+    if (l->lkb$l_blkastadr) {
+      /* not implemented */
+    }
+
+    insque(l->lkb$l_sqfl,r->rsb$l_grqfl);
+    l->lkb$b_state=LKB$K_GRANTED;
+
+    sch$postef(current->pid,PRI$_RESAVL,l->lkb$b_efn);
+
+    if (l->lkb$l_cplastadr && l->lkb$l_flags&LCK$M_SYNCSTS==0) {
+      sch$qast(current->pid,PRI$_RESAVL,l);
+    }
+    if (l->lkb$l_ast) {
+      /* not implemented */
+    }
+
+    sch$qast(current->pid,PRI$_RESAVL,l);
+    //if (current->pcb$w_state!=SCH$C_CUR)
+    sch$postef(current->pid,PRI$_RESAVL,l->lkb$b_efn);
+
 }
