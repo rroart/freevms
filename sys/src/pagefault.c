@@ -70,8 +70,8 @@ signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _
   //page->pfn$q_pte_index=pte; // hope it's the right one?
 
   page=&mem_map[pfn];
-  set_page_count(page, 1);
-  //mem_map[pfn].pfn$l_refcnt=1;
+  //set_page_count(page, 1);
+  mem_map[pfn].pfn$q_pte_index=1 | 1<<32
 
 
 
