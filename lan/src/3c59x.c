@@ -1001,6 +1001,7 @@ enum rx_desc_status {
 #ifdef MAX_SKB_FRAGS
 #define DO_ZEROCOPY 1
 #else
+#error
 #define DO_ZEROCOPY 0
 #endif
 
@@ -1278,7 +1279,6 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 
 	print_name = pdev ? pdev->slot_name : "3c59x";
 
-	//dev = kmalloc(sizeof(*vp), GFP_KERNEL);
 	dev = alloc_etherdev(sizeof(*vp));
 	retval = -ENOMEM;
 	if (!dev) {
@@ -2321,8 +2321,9 @@ boomerang_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _
 #if 0
 	if (!skb_shinfo(skb)->nr_frags) {
 #endif
+		vp->tx_ring[entry].status = cpu_to_le32(i->irp$l_qio_p2 + 14 | TxIntrUploaded);
 		vp->tx_ring[entry].frag[0].addr = cpu_to_le32(pci_map_single(vp->pdev, buf,
-										i->irp$l_qio_p2 + 14, PCI_DMA_TODEVICE));
+										buf, PCI_DMA_TODEVICE));
 		vp->tx_ring[entry].frag[0].length = cpu_to_le32(i->irp$l_qio_p2 + 14 | LAST_FRAG);
 #if 0
 	} else {
@@ -2764,6 +2765,7 @@ boomerang_rx(struct net_device *dev)
 					   pkt_len);
 #endif
 				char * buf=vp->rx_skbuff[entry];
+
 				memcpy(cb1->cxb$ps_pktdata, buf, 14);
 				memcpy(cb2->cxb$ps_pktdata, &buf[14], pkt_len - 14);
 				cb2->cxb$w_length=pkt_len - 14;
