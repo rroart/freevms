@@ -1668,7 +1668,7 @@ void __init init_idle(void)
 	current->pr_astlvl=4;
 	current->pcb$l_phd=&init_phd;
 	bzero(current->pcb$l_phd,sizeof(struct _phd));
-	current->pcb$l_phd->phd$q_ptbr=current->mm->pgd;
+	// current->pcb$l_phd->phd$q_ptbr=current->mm->pgd; // same wait
 	printk("done init_idle\n");
 	done_init_idle=1;
 }
