@@ -11,7 +11,7 @@
 
 #define __KERNEL_SYSCALLS__
 
-#include "../../freevms/sys/src/system_data_cells.h"
+#include <system_data_cells.h>
 
 #include <linux/config.h>
 #include <linux/proc_fs.h>
