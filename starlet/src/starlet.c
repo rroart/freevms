@@ -509,3 +509,7 @@ struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
 struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 struct _xabkeydef cc$rms_xabkey = {XAB$C_KEY,XAB$C_KEYLEN};
 #endif
+
+signal(int s) {
+  exit(s);
+}
