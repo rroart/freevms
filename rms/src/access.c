@@ -313,6 +313,9 @@ void * getvcb(void) {
 }
 
 int getchan(struct _vcb * v) {
+  unsigned short int c;
+  if (ucb2chan(v, &c))
+    return c;
   return ((struct _ucb *)v->vcb$l_rvt)->ucb$ps_adp;
 }
 
