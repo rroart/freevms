@@ -273,7 +273,7 @@ struct _fi2*pFI2;
     pFH2->fh2$w_recattr.fat$l_efblk=VMSSWAP(2);
     pFH2->fh2$l_highwater=VMSSWAP(clustersize);
     pFH2->fh2$w_recattr.fat$w_maxrec=512;
-    pFH2->fh2$w_recattr.fat$w_ffbyte=216;
+    // seems .dir does not use this? pFH2->fh2$w_recattr.fat$w_ffbyte=216;
     do_checksum(out_line);
     write_blk(out_line, fout, "000000.dir header"); //write down file header
 
