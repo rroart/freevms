@@ -55,11 +55,16 @@ Module Modification History:
 
 typedef unsigned int u_int;
 
-#include stdio
-#include ssdef
-#include ctype
+#include <stdio.h>
+#include <ssdef.h>
+#include <ctype.h>
 
-#include in			/* network defs (defines u_long!) */
+typedef unsigned char u_char;
+typedef unsigned short u_short;
+typedef unsigned long u_long;
+typedef char * caddr_t;
+
+#include <netinet/in.h>			/* network defs (defines u_long!) */
 
 #include "rpc_types.h"		/* usefull and relavant definitions */
 #include "xdr.h"

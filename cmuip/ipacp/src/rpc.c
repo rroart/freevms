@@ -39,20 +39,29 @@ Module Modification History:
 
  ***************************************************************************/
 
+#if 0
 #module RPC
+#endif
+
+#define globaldef
 
 typedef unsigned int u_int;
 
-#include stdio
-#include stdlib
-#include ssdef
-#include ctype
-#include descrip
-#include uaidef
-#include string
-#include opcdef
+#include <stdio.h>
+#include <stdlib.h>
+#include <ssdef.h>
+#include <ctype.h>
+#include <descrip.h>
+#if 0
+// not yet
+#include <uaidef.h>
+#else
+#define UAI$_UIC 6
+#endif
+#include <string.h>
+#include <opcdef.h>
 
-#include in			/* network defs (defines u_long!) */
+#include <netinet/in.h>			/* network defs (defines u_long!) */
 
 #include "rpc_types.h"		/* usefull and relavant definitions */
 #include "xdr.h"
@@ -63,10 +72,31 @@ typedef unsigned int u_int;
 
 
 
+#if 0
 #define RPC_VERSION		 2
 #define RPC_VERSION_LOW		 2
 #define RPC_VERSION_HIGH	 2
 #define MAX_RPC_SRV		10
+#else
+static const int RPC_VERSION = 2;
+static const int RPC_VERSION_LOW = 2;
+static const int RPC_VERSION_HIGH = 2;
+static const int MAX_RPC_SRV = 2;
+static const int rpc_mismatch = RPC_MISMATCH;
+static const int msg_denied = MSG_DENIED;
+static const int msg_accepted = MSG_ACCEPTED;
+static const int reply = REPLY;
+static const int auth_error = AUTH_ERROR;
+static const int auth_none = AUTH_NONE;
+static const int auth_badcred = AUTH_BADCRED;
+static const int auth_badverf = AUTH_BADVERF;
+static const int prog_unavail = PROG_UNAVAIL;
+static const int prog_mismatch = PROG_MISMATCH;
+static const int proc_unavail = PROC_UNAVAIL;
+static const int garbage_args = GARBAGE_ARGS;
+static const int success = SUCCESS;
+#define DEF_MAX_RPC_SRV		10
+#endif
 
 #define RPC_MAX_REPLY_CACHE	10
 
@@ -110,7 +140,7 @@ struct service_record {
 
 globaldef int RPC_SERVICE = 0;
 int RPCsrv_count = 0;
-struct service_record RPCsrv_tab[MAX_RPC_SRV];
+struct service_record RPCsrv_tab[DEF_MAX_RPC_SRV];
 
 int xdr_int(int x) { int y; XDR$ntov_int(&x,&y); return(y); }
 
@@ -714,7 +744,7 @@ int RPC$INPUT ( index, SrcAddr , DstAdr , SrcPrt , DstPrt ,
     XDR$ntov_uint(&Buff->rm_xid,&xid);
     out->rm_xid = Buff->rm_xid;
     XDR$ntov_int(&Buff->rm_direction,&direction);
-    XDR$vton_int(&REPLY,&out->rm_direction);
+    XDR$vton_int(&reply,&out->rm_direction);
     *len = 8;
 
     if (direction != CALL) return(0);
@@ -727,8 +757,8 @@ int RPC$INPUT ( index, SrcAddr , DstAdr , SrcPrt , DstPrt ,
     XDR$ntov_uint(&call_body->cb_proc,&call_body->cb_proc);
 
     if (call_body->cb_rpcvers != RPC_VERSION) {
-	XDR$vton_int(&MSG_DENIED,&out->rm_reply.rp_stat);	     *len += 4;
-	XDR$vton_int(&RPC_MISMATCH,&out->rm_reply.rp_rjct.rj_stat);  *len += 4;
+	XDR$vton_int(&msg_denied,&out->rm_reply.rp_stat);	     *len += 4;
+	XDR$vton_int(&rpc_mismatch,&out->rm_reply.rp_rjct.rj_stat);  *len += 4;
 	XDR$vton_int(&RPC_VERSION_LOW, &out->rm_reply.rp_rjct.rj_vers.low);
 	XDR$vton_int(&RPC_VERSION_HIGH, &out->rm_reply.rp_rjct.rj_vers.high);
 	*len += 8;
@@ -769,9 +799,9 @@ int RPC$INPUT ( index, SrcAddr , DstAdr , SrcPrt , DstPrt ,
 		}
 
 	default : {
-		XDR$vton_int(&MSG_DENIED,&out->rm_reply.rp_stat);
-		XDR$vton_int(&AUTH_ERROR,&out->rm_reply.rp_rjct.rj_stat);
-		XDR$vton_int(&AUTH_BADCRED,&out->rm_reply.rp_rjct.rj_why);
+		XDR$vton_int(&msg_denied,&out->rm_reply.rp_stat);
+		XDR$vton_int(&auth_error,&out->rm_reply.rp_rjct.rj_stat);
+		XDR$vton_int(&auth_badcred,&out->rm_reply.rp_rjct.rj_why);
 		*len += 12;
 		return(1);
 		}
@@ -806,9 +836,9 @@ int RPC$INPUT ( index, SrcAddr , DstAdr , SrcPrt , DstPrt ,
 		}
 
 	default : {
-		XDR$vton_int(&MSG_DENIED,&out->rm_reply.rp_stat);
-		XDR$vton_int(&AUTH_ERROR,&out->rm_reply.rp_rjct.rj_stat);
-		XDR$vton_int(&AUTH_BADVERF,&out->rm_reply.rp_rjct.rj_why);
+		XDR$vton_int(&msg_denied,&out->rm_reply.rp_stat);
+		XDR$vton_int(&auth_error,&out->rm_reply.rp_rjct.rj_stat);
+		XDR$vton_int(&auth_badverf,&out->rm_reply.rp_rjct.rj_why);
 		*len += 12;
 		return(1);
 		}
@@ -834,7 +864,7 @@ int RPC$INPUT ( index, SrcAddr , DstAdr , SrcPrt , DstPrt ,
 
     if (!(username = map_uic(&uic,uid,gid,hname)))
     {
-	struct OPC OPC_buffer;
+	struct _opcdef OPC_buffer;
 	struct dsc$descriptor OPC_descript;
 
 	if (authmechanism == AUTH_UNIX)
@@ -862,7 +892,7 @@ authentication",
     }
 
     /* ok, we've accepted it. */
-    XDR$vton_int(&MSG_ACCEPTED,&out->rm_reply.rp_stat);		   *len += 4;
+    XDR$vton_int(&msg_accepted,&out->rm_reply.rp_stat);		   *len += 4;
     RC = (*RPCsrv_tab[index].dispatch_routine)(
  		uic,
 		hname,
@@ -925,6 +955,11 @@ Module Modification History:
 #define PCNFSD_VERSION_LOW	 1
 #define PCNFSD_VERSION_HIGH      1
 
+static const int pmap_version_low = PMAP_VERSION_LOW;
+static const int pmap_version_high = PMAP_VERSION_HIGH;
+static const int pcnfsd_version_low = PCNFSD_VERSION_LOW;
+static const int pcnfsd_version_high = PCNFSD_VERSION_HIGH;
+
 int ((*(pmap_proc_vector[NPROCS]))());
 int ((*(pcnfsd_proc_vector[NAUTHPROCS]))());
 
@@ -947,28 +982,29 @@ int PMAP$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
     int result_len;
 
     /* fill in the authorization stuff */
-    XDR$vton_int(&AUTH_NONE,areply++);
-    XDR$vton_int(&0,areply++);
+    XDR$vton_int(&auth_none,areply++);
+    static const int null = 0;
+    XDR$vton_int(&null,areply++);
     *len = 2*BYTES_PER_XDR_UNIT;
 
     /* Is the program available? */
     if (prog != RPCPROG_PMAP) {
-	XDR$vton_int(&PROG_UNAVAIL,areply++);		*len += 4;
+	XDR$vton_int(&prog_unavail,areply++);		*len += 4;
 	return(1);
 	}
 
     /* is the procedure number reasonable? */
     if ((proc >= NPROCS) || (proc <0)) {
-	XDR$vton_int(&PROC_UNAVAIL,areply++);		*len += 4;
+	XDR$vton_int(&proc_unavail,areply++);		*len += 4;
 	return(1);
 	}
 
     /* Is he requesting the right version? */
     /* !!!HACK!!! should this check be a bound instead of inequality? */
     if (vers != PMAP_VERSION) {
-	XDR$vton_int(&PROG_MISMATCH,areply++);		*len += 4;
-	XDR$vton_int(&PMAP_VERSION_LOW,areply++);	*len += 4;
-	XDR$vton_int(&PMAP_VERSION_HIGH,areply++);	*len += 4;
+	XDR$vton_int(&prog_mismatch,areply++);		*len += 4;
+	XDR$vton_int(&pmap_version_low,areply++);	*len += 4;
+	XDR$vton_int(&pmap_version_high,areply++);	*len += 4;
 	return(1);
 	}
 
@@ -985,12 +1021,12 @@ int PMAP$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
     
     result_len = (*pmap_proc_vector[proc])(areply+1,cbody);
     if (result_len < 0) {
-	XDR$vton_int(&GARBAGE_ARGS,areply++);		*len += 4;
+	XDR$vton_int(&garbage_args,areply++);		*len += 4;
 	return(1);
 	}
 
     /* it worked! */
-    XDR$vton_int(&SUCCESS,areply++);		*len += 4;
+    XDR$vton_int(&success,areply++);		*len += 4;
     *len += result_len;
     return 1;
 }
@@ -1084,7 +1120,8 @@ int PMAPPROC_DUMP(reply)
 
     for (i=0; i<RPCsrv_count; i++) {
 	/* optional data, a one (TRUE) means there is data */
-	XDR$vton_uint(&1,reply++);
+      static const int one = 1;
+	XDR$vton_uint(&one,reply++);
 
 	/* write out a mappping */
 	XDR$vton_uint(&RPCsrv_tab[i].prog,reply++);
@@ -1093,7 +1130,8 @@ int PMAPPROC_DUMP(reply)
 	XDR$vton_uint(&RPCsrv_tab[i].port,reply++);
 	}
     /* end the list with a 0 */
-    XDR$vton_uint(&0,reply++);
+    static const int zero = 0;
+    XDR$vton_uint(&zero,reply++);
 
     return(RPCsrv_count*5*4 + 4);	/* size of an int */
 }
@@ -1179,14 +1217,15 @@ int PCNFSD$DISPATCH(uic, hname, username, cbody, areply, len, prog, vers, proc)
     
 {
     int flavor, result_len;
-    XDR$vton_int(&AUTH_NONE, areply++);
-    XDR$vton_int(&0, areply++);
+    XDR$vton_int(&auth_none, areply++);
+    static const int zero = 0;
+    XDR$vton_int(&zero, areply++);
     *len = 2*BYTES_PER_XDR_UNIT;
 
     /* Is the program available? */
     if (prog != RPCPROG_PCNFSD)
     {
-        XDR$vton_int(&PROG_UNAVAIL, areply++);
+        XDR$vton_int(&prog_unavail, areply++);
 	*len += 4;
 	return(1);
     }
@@ -1194,7 +1233,7 @@ int PCNFSD$DISPATCH(uic, hname, username, cbody, areply, len, prog, vers, proc)
     /* Is the procedure number reasonable? */
     if ((proc >= NAUTHPROCS) || (proc < 0))
     {
-        XDR$vton_int(&PROC_UNAVAIL, areply++);
+        XDR$vton_int(&proc_unavail, areply++);
 	*len += 4;
 	return(1);
     }
@@ -1202,11 +1241,11 @@ int PCNFSD$DISPATCH(uic, hname, username, cbody, areply, len, prog, vers, proc)
     /* Is he requesting the right version? */
     if ((vers < PCNFSD_VERSION_LOW) || (vers > PCNFSD_VERSION_HIGH))
     {
-        XDR$vton_int(&PROG_MISMATCH, areply++);
+        XDR$vton_int(&prog_mismatch, areply++);
 	*len += 4;
-	XDR$vton_int(&PCNFSD_VERSION_LOW, areply++);
+	XDR$vton_int(&pcnfsd_version_low, areply++);
 	*len += 4;
-	XDR$vton_int(&PCNFSD_VERSION_HIGH, areply++);
+	XDR$vton_int(&pcnfsd_version_high, areply++);
 	*len += 4;
 	return(1);
     }
@@ -1222,12 +1261,12 @@ int PCNFSD$DISPATCH(uic, hname, username, cbody, areply, len, prog, vers, proc)
     result_len = (*pcnfsd_proc_vector[proc])(areply+1, cbody);
     if (result_len < 0)
     {
-        XDR$vton_int(&GARBAGE_ARGS, areply++);
+        XDR$vton_int(&garbage_args, areply++);
 	*len += 4;
 	return(1);
     }
     
-    XDR$vton_int(&SUCCESS, areply++);
+    XDR$vton_int(&success, areply++);
     *len += 4;
     *len += result_len;
     return 1;
@@ -1256,9 +1295,11 @@ int PCNFSDPROC_AUTH(long *reply, struct auth_args *a)
     scramble(username, username);
     scramble(password, password);
     
-    XDR$vton_uint(&AUTH_RES_FAIL, reply++);
-    XDR$vton_uint(&0, reply++);
-    XDR$vton_uint(&0, reply++);
+    static const int auth_res_fail = AUTH_RES_FAIL;
+    XDR$vton_uint(&auth_res_fail, reply++);
+    static const int zero = 0;
+    XDR$vton_uint(&zero, reply++);
+    XDR$vton_uint(&zero, reply++);
 
     return(3*4);
 }
