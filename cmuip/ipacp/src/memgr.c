@@ -357,7 +357,7 @@ mm$get_mem (Addr, Size)
     Pages = Pages + 1 ;
     NOINT;			// Hold AST's please...
 //    if (! (RC = LIB$GET_VM(Size,Addr)))
-    if (! (RC = LIB$GET_VM_PAGE(Pages,Addr)))
+    if (BLISSIFNOT(RC = LIB$GET_VM_PAGE(Pages,Addr)))
 	Memgr_Fault_Handler(0,RC,0);
     OKINT;
 
@@ -400,7 +400,7 @@ void mm$free_mem(Mem,Size)
 
     NOINT;			// Hold AST's
 //    if (! ( RC = LIB$FREE_VM ( Size , Mem ) ))
-    if (! ( RC = LIB$FREE_VM_PAGE ( Pages , Mem ) ))
+    if (BLISSIFNOT( RC = LIB$FREE_VM_PAGE ( Pages , Mem ) ))
 	    Memgr_Fault_Handler(0,RC,0);
     OKINT;
     }
@@ -571,7 +571,7 @@ void QBLK_Init (void)
 	{
 //	LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr);
 	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1) ;
-	if (! (RC = (LIB$GET_VM_PAGE(Pages, &Hptr))))
+	if (BLISSIFNOT(RC = (LIB$GET_VM_PAGE(Pages, &Hptr))))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Init !XL size !SL!/",0,Hptr, Pages);
 	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE*4,Hptr);
@@ -729,7 +729,7 @@ void uarg_init (void)
 	{
 //	LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),Ptr);
 	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
-	if (! (RC = (LIB$GET_VM_PAGE(Pages, &Ptr))))
+	if (BLISSIFNOT(RC = (LIB$GET_VM_PAGE(Pages, &Ptr))))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Init !XL size !SL!/",0,Ptr, Pages);
 	INSQUE(Ptr,&FREE_Uargs.qtail);
@@ -965,7 +965,7 @@ void seg_init (void)
 	{
 //	LIB$GET_VM(MIN_PHYSICAL_BUFSIZE,Ptr);
 	Pages = ((MIN_PHYSICAL_BUFSIZE / 512) + 1) ;
-	if (! (RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
+	if (BLISSIFNOT(RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
 	INSQUE(Ptr,&Free_Minsize_Segs.qtail);
@@ -978,7 +978,7 @@ void seg_init (void)
 	{
 //	LIB$GET_VM(MAX_PHYSICAL_BUFSIZE,ptr);
 	Pages = ((MAX_PHYSICAL_BUFSIZE / 512) + 1) ;
-	if (! (RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
+	if (BLISSIFNOT(RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
 	INSQUE(Ptr,&Free_Maxsize_Segs.qtail);

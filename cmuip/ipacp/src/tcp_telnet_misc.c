@@ -576,7 +576,7 @@ void Line_Changed_AST (Parm)
 	PTY_Char,
 	QCB$K_SIZE,
 		       0,0,0,0);
-    if (! RC)
+    if (BLISSIFNOT(RC))
         {
             XLOG$FAO(LOG$TELERR
 		,"!%T Set_LINE_Change_AST: SENSEMODE status=!UL!/",0,RC);
@@ -613,7 +613,7 @@ void Line_Changed_AST (Parm)
 		3,
 0,
 0);
-	if (! RC)
+	if (BLISSIFNOT(RC))
         {
 	    XLOG$FAO(LOG$TELERR
 		,"!%T Set_LINE_Change_AST: SETMODE status=!UL!/",0,RC);
@@ -1143,7 +1143,7 @@ void set_devdep(TVT)
 		,"!%T Set_DEVDEP: Before Class=!UB Type=!UB Char:x!XL x!XL Size=!UW !UB!/",0
 		,PTY_Char->QCB$B_CLASS
 		,PTY_Char->QCB$B_TYPE
-		 ,(PTY_Char->QCB$L_CHARISTICS[0] + PTY_Char->QCB$L_CHARISTICS[1] << 8 + PTY_Char->QCB$L_CHARISTICS[2] << 16 /* was: & 0xFFFFFF*/)
+		 ,(PTY_Char->QCB$L_CHARISTICS[0] + (PTY_Char->QCB$L_CHARISTICS[1] << 8) + (PTY_Char->QCB$L_CHARISTICS[2] << 16) /* was: & 0xFFFFFF*/)
 		,PTY_Char->QCB$L_EXTEND_CHAR
 		,PTY_Char->QCB$W_PAGE_WIDTH
 		,PTY_Char->QCB$B_PAGE_LENGTH);
@@ -1183,7 +1183,7 @@ void set_devdep(TVT)
 		,"!%T Set_DEVDEP: After  Class=!UB Type=!UB Char:x!XL x!XL Size=!UW !UB!/",0
 		,PTY_Char->QCB$B_CLASS
 		,PTY_Char->QCB$B_TYPE
-		 ,(PTY_Char->QCB$L_CHARISTICS[0] + PTY_Char->QCB$L_CHARISTICS[1] << 8 + PTY_Char->QCB$L_CHARISTICS[2] << 16 /* was: & 0xFFFFFF*/)
+		 ,(PTY_Char->QCB$L_CHARISTICS[0] + (PTY_Char->QCB$L_CHARISTICS[1] << 8) + (PTY_Char->QCB$L_CHARISTICS[2] << 16) /* was: & 0xFFFFFF*/)
 		,PTY_Char->QCB$L_EXTEND_CHAR
 		,PTY_Char->QCB$W_PAGE_WIDTH
 		,PTY_Char->QCB$B_PAGE_LENGTH);

@@ -562,8 +562,8 @@ void CNF$Configure_ACP (void)
 // OPEN the file "config.TXT" & read/decode network device data into blockvector
 // dev_config and memory management info.
 
-    if (! ((RC = exe$open(CFFAB)) &&
-	    (RC = exe$connect(CFRAB))))
+    if (BLISSIFNOT((RC = exe$open(CFFAB)) &&
+	    BLISSIF(RC = exe$connect(CFRAB))))
 	{
 	send_2_operator(ASCIDNOT( "Unable to access INET$CONFIG:"));
 	exe$exit(RC);

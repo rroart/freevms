@@ -522,7 +522,7 @@ X:  {			// ** Block X **
 
 //    LIB$GET_VM(%REF(IPCB_Size*4),IPCB);
     RC = LIB$GET_VM_PAGE(/*%REF*/(((IPCB_Size * 4) / 512) + 1),&IPCB);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	FATAL$FAO("IPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 
 // Clear it out and set it in the table
@@ -564,7 +564,7 @@ extern	LIB$FREE_VM_PAGE();
 
 //    LIB$FREE_VM(/*%REF*/(IPCB_Size*4),IPCB);
     RC = LIB$FREE_VM_PAGE(/*%REF*/(((IPCB_Size * 4) / 512) + 1),IPCB);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	FATAL$FAO("IPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     IPCB_Count = IPCB_Count-1;
     }
@@ -797,7 +797,7 @@ void IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 //!!HACK!!// Should we do this or not??
 //    RC = USER$CHECK_ACCESS(IPCB->ipcb$user_id,IPCB->ipcb$local_host,
 //		      0,IPCB->ipcb$foreign_host,0);
-//    if (! RC)
+//    if (BLISSIFNOT(RC))
 //	UOP_ERROR(RC);
 
 // Set the foreign host name in the IPCB

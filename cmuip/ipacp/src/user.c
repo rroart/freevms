@@ -769,7 +769,7 @@ user$clock_base (void)
 	Now[2];
 
     exe$gettim(Now);
-    return (Now[0]>>20+Now[1]<<12) & 0x7FFF; // check
+    return ((Now[0]>>20)+(Now[1]<<12)) & 0x7FFF; // check
     }
 
 //SBTTL "Allocate a USER Local Port"
@@ -1406,7 +1406,7 @@ extern	   icmp$icmpcb_dump();
 	    rc = (dev_config_tab[uargs->du$device_idx].dc_rtn_Dump)
 		    (uargs->du$device_idx, uargs->du$arg1, uargs->du$arg2,
 		     RB, bufsize);
-	    if (! rc)
+	    if (BLISSIFNOT(rc))
 		Error = USER$Err(uargs,NET$_EPD); // error processing dump
 	    }
 	else
@@ -1601,7 +1601,7 @@ check_id(PID,ID)
     UICBLK[1] = 0;
     RDBCTX = 0;
     CURID = ID;
-    while (STATUS = exe$find_held(UICBLK,ID,0,RDBCTX))
+    while ((STATUS = exe$find_held(UICBLK,ID,0,RDBCTX)))
         {
 	if (CURID == ID)
 	    {

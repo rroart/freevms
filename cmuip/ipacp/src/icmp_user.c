@@ -529,7 +529,7 @@ X:  {			// ** Block X **
 //    LIB$GET_VM(%REF(ICMPCB_Size*4),ICMPCB);
     Pages = ((ICMPCB_Size * 4) / 512) + 1 ;
     RC = LIB$GET_VM_PAGE(Pages, &ICMPCB);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	FATAL$FAO("ICMPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 
 // Clear it out and set it in the table
@@ -573,7 +573,7 @@ extern	LIB$FREE_VM_PAGE();
 //    LIB$FREE_VM(%REF(ICMPCB_Size*4),ICMPCB);
     Pages = ((ICMPCB_Size * 4) / 512) + 1 ;
     RC = LIB$FREE_VM_PAGE(Pages, ICMPCB);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	FATAL$FAO("ICMPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     ICMPCB_Count = ICMPCB_Count-1;
     }
@@ -802,7 +802,7 @@ void ICMP_NMLOOK_DONE(ICMPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 // Finish up the common part of the open
 
     RC = ICMP_COPEN_DONE(ICMPCB,ADRCNT,ADRLST);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	UOP_ERROR(RC);
 
 // Verify that we have access to the host set
@@ -810,7 +810,7 @@ void ICMP_NMLOOK_DONE(ICMPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 //!!HACK!!// Should we do this or not??
 //    RC = USER$CHECK_ACCESS(ICMPCB->ICMPCB$USER_ID,ICMPCB->ICMPCB$Local_Host,
 //		      0,ICMPCB->ICMPCB$Foreign_Host,0);
-//    if (! RC)
+//    if (BLISSIFNOT(RC))
 //	UOP_ERROR(RC);
 
 // Set the foreign host name in the ICMPCB

@@ -502,7 +502,7 @@ void namelook_done(TVT,rc,namlen,name)
       $DESCRIPTOR(lnm_nam,"TELNET_PASS_PORT");
       struct item_list_3 itm[2]={ {buflen:100, item_code:1, bufaddr: nambuf, &nam.dsc$w_length }, {0,0,0,0} };
 
-    if ((! rc)) return;
+    if ((BLISSIFNOT(rc))) return;
 
     TCB = TVT->TVT$TCB;				// get TCB
 
@@ -531,7 +531,7 @@ void namelook_done(TVT,rc,namlen,name)
     if (accpornam->dsc$w_length > 30)
 	return(SS$_NORMAL);				// JC IF too long skip it
 //!//JC	accpornam->dsc$w_length = 30;
-    if (rc)
+    if (BLISSIF(rc))
       rc = exe$qiow (0,TVT->TVT$PTY_CHN,IO$_SETMODE,0,
 		     accpornam->dsc$a_pointer,	// Buffer
 		     accpornam->dsc$w_length,	// Size
@@ -586,7 +586,7 @@ TELNET_OPEN(TCB)
 
 //    RC = LIB$GET_VM(%REF(TVT$SIZE*4),TVT);
     RC = LIB$GET_VM_PAGE(/*%REF*/(((TVT$SIZE * 4) / 512) + 1),&TVT);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 //~~~ Should we do anything better here?
 	XLOG$FAO(LOG$TCPERR,
@@ -613,7 +613,7 @@ TELNET_OPEN(TCB)
 			 /*%REF*/(TVT_MBX_BUFLEN),
 			 PTYCHAN,
 			 MBXCHAN);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	    XLOG$FAO(LOG$TCPERR,
 		"!%T Telnet_Open:  PTY assign failure for TCB x!XL, RC=x!XL!/"
@@ -661,7 +661,7 @@ TELNET_OPEN(TCB)
 	,accpornam);
     if (accpornam->dsc$w_length > 30)		// IF too long
 	accpornam->dsc$w_length = 30;			// Adjust it
-    if (RC)
+    if (BLISSIF(RC))
       RC = exe$qiow (0,TVT->TVT$PTY_CHN,IO$_SETMODE,0,0,0,
 		     accpornam->dsc$a_pointer,	// Buffer
 		     accpornam->dsc$w_length,	// Size
@@ -1604,7 +1604,7 @@ signed long
     Item_List[1].item_code=0; // check
 
     RC = exe$getdviw (0,TVT->TVT$PTY_CHN,0,Item_List);
-    if (RC)
+    if (BLISSIF(RC))
 	{
 	  Item_List[0].item_code=DVI$_PID;
 	  Item_List[0].bufaddr=&Owner_PID;
@@ -1627,10 +1627,10 @@ signed long
 		&lnm_nam,		// JC
 		0,		// JC
 		&itm);				// JC
-	if (! RC) TVT->TVT$DO_PID = 0;		// Cancel
+	if (BLISSIFNOT(RC)) TVT->TVT$DO_PID = 0;		// Cancel
 	if (RC == SS$_NORMAL)
 	    RC = exe$fao(/*%ASCID*/"_!ASA!UL:",devnam,devnam,ptynam,Unit_Number);
-	    if (RC)
+	if (BLISSIF(RC))
 		RC = exe$getdviw (0,0,devnam,Item_List,0);
 
 #if 0
@@ -1722,7 +1722,7 @@ void PTY_READ(TVT)
 		 TVT,
 		 TVT->TVT$RD_BUF,
 		 Byte_Count,0,0,0,0);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	XLOG$FAO(LOG$TCPERR,
 		 "!%T TVT PTY read $QIO failure for TCB x!XL, RC=x!XL!/",
@@ -1755,7 +1755,7 @@ struct PTY$IOSB * IOSB = &TVT->TVT$RD_IOSB;
     RC = IOSB->PTSB$STATUS;
     if ((RC == SS$_CANCEL) || (RC == SS$_ABORT))
 	return;
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT read error for TCB x!XL, RC=x!XL!/",
 		 0,TVT->TVT$TCB,RC);
@@ -1888,7 +1888,7 @@ void PTY_WRITE(TVT)
 //	    IOSB   = TVT->TVT$WR_IOSB,
 //	    P1     = PTY_Char,
 //	    P2     = 8);
-//    if (! RC)
+//    if (BLISSIFNOT(RC))
 //	{
 //	XLOG$FAO(LOG$TCPERR,
 //		 "!%T TVT PTY sensemode $QIO failure for TCB x!XL, RC=x!XL!/",
@@ -1947,7 +1947,7 @@ void PTY_WRITE(TVT)
 		 TVT,
 		 TT_WR_PTR,
 		 Byte_Count,0,0,0,0);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	XLOG$FAO(LOG$TCPERR,
 		 "!%T TVT PTY write $QIO failure for TCB x!XL, RC=x!XL!/",
@@ -1990,7 +1990,7 @@ void PTY_WRITE_DONE(TVT)
 	} ;
 
     TCB = TVT->TVT$TCB;
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT write error for TCB x!XL, RC=x!XL!/",
 		 0,TCB,RC);
@@ -2072,7 +2072,7 @@ MBX_READ(TVT)
 		 TVT,
 		 TVT->TVT$MBX_BUF,
 		 TVT_MBX_BUFLEN, 0,0,0,0);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT MBX Read failure for TCB x!XL, RC=x!XL!/",
 		 0,TVT->TVT$TCB,RC);
@@ -2121,7 +2121,7 @@ void MBX_READ_DONE(TVT)
 
 // If we got an error, we have a problem. Abort.
 
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT MBX read failure for TCB x!XL, RC=x!XL!/",
 		 0,TVT->TVT$TCB,RC);

@@ -824,7 +824,7 @@ extern 	LIB$GET_VM_PAGE();
     xearp$init();
 
 // Assign Ethernet Controller
-    if (! (RC=exe$assign (&dev_config->dc_devname, &XE_Chan, 0, 0, 0)))
+    if (BLISSIFNOT(RC=exe$assign (&dev_config->dc_devname, &XE_Chan, 0, 0, 0)))
          // Ethernet controller assign failed
 	{
 	DRV$Fatal_FAO("XE $ASSIGN failure (dev=), EC = !XL",
@@ -833,7 +833,7 @@ extern 	LIB$GET_VM_PAGE();
 	};
 
 //  Assign the channel for the arp responder
-    if (! (RC=exe$assign( &dev_config->dc_devname,&XAR_Chan, 0, 0 ,0)))
+    if (BLISSIFNOT(RC=exe$assign( &dev_config->dc_devname,&XAR_Chan, 0, 0 ,0)))
          // Ethernet controller assign failed
 	{
 	DRV$Fatal_FAO("XE $ASSIGN failure (dev=), EC = !XL",
@@ -1036,7 +1036,7 @@ X:	{
 // Check for $QIO error
 
 	    // not needed? RC=RC&1; // check bliss ! is lbs?
-	    if (! (RC))
+	    if (BLISSIFNOT(RC))
 		{
 		XE$ERR(XE_Int,"XE $QIO error (send),RC=!XL",RC);
 		goto leave_x;
@@ -1208,7 +1208,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 // is known to get wedged, and the driver gives back SS$_DEVINACT when this
 // happens.
 
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	if (RC == SS$_DEVINACT)
 	    {

@@ -510,3 +510,10 @@ swapbytesseghdr(x,y) {
   swapbytes(3,y+14);
 }
 
+inline BLISSIF(int i) {
+  return i&1;
+}
+
+inline BLISSIFNOT(int i) {
+  return BLISSIF(i)==0;
+}

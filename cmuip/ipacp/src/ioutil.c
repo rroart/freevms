@@ -389,7 +389,7 @@ long * VAL;
 		else
 		    break;
 	NCHR = NCHR+1;
-	RVAL = RVAL<<4+*VAL;
+	RVAL = (RVAL<<4)+*VAL;
 	*INPTR = CPTR;
 	CHR = CH$RCHAR_A(CPTR);
 	};
@@ -428,14 +428,14 @@ LOG_OPEN (void)
     signed long
 	RC;
     RC = exe$create( LOGFAB);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("Log file $CREATE failed, RC = !XL, STV = !XL",
 	    RC, LOGFAB->fab$l_stv);
 	return FALSE;
 	};
     RC = exe$connect( LOGRAB);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("Log file $CONNECT failed, RC = !XL, STV = !XL",
 	    RC, LOGRAB->rab$l_stv);
@@ -526,7 +526,7 @@ void LOG_FAO(CSTR)
 	       OUTDESC->dsc$w_length,
 	       OUTDESC,
 		  /*AP+*/8);
-    if (RC)
+    if (BLISSIF(RC))
       LOG_OUTPUT(OUTDESC);
     else
 	OPR$FAO("LOG_FAO failure, error code is !XL",RC);
@@ -567,13 +567,13 @@ ACT_OPEN (void)
     signed long
 	RC;
     RC = exe$create( ACTFAB);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("Activity file $CREATE failed, RC = !XL",RC);
 	return FALSE;
 	};
     RC = exe$connect(ACTRAB);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("Activity file $CONNECT failed, RC = !XL",RC);
 	return FALSE;
@@ -659,7 +659,7 @@ void ACT_FAO(CSTR)
 	       OUTDESC->dsc$w_length,
 	       OUTDESC,
 		  /*AP+*/8);
-    if (RC)
+    if (BLISSIF(RC))
       ACT_OUTPUT(OUTDESC);
     else
 	OPR$FAO("ACT_FAO failure, error code is !XL",RC);
@@ -752,13 +752,13 @@ void OPR_FAO(CSTR)
 	        OUTDESC->dsc$w_length,
 	       OUTDESC,
 		  /*AP+*/8);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	exe$exit( RC);
 
 // Reformat for console output
 
     RC = exe$fao(ASCID("IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	exe$exit( RC);
     send_2_operator(OPRDESC);
     }
@@ -786,7 +786,7 @@ void ERROR_FAO(CSTR)
 	       OUTDESC->dsc$w_length,
 	       OUTDESC,
 		  /*AP+*/8);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("ERROR_FAO failure, RC = !XL",RC);
 	exe$exit( RC);
@@ -795,14 +795,14 @@ void ERROR_FAO(CSTR)
 // Format and send message to the operator
 
     RC = exe$fao(ASCID("?IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	exe$exit( RC);
     send_2_operator(OPRDESC);
 
 // Format the message for logging - add time+date and EOL
 
     RC = exe$fao(ASCID("!%T !AS!/"),LOGDESC->dsc$w_length,LOGDESC,0,OUTDESC);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	exe$exit( RC);
 
 // Make sure we are logging something & log it
@@ -832,7 +832,7 @@ void FATAL_FAO(CSTR)
 	       OUTDESC->dsc$w_length,
 	       OUTDESC,
 		  /*AP+*/8);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("FATAL_FAO failure, RC = !XL",RC);
 	exe$exit( RC);
@@ -841,7 +841,7 @@ void FATAL_FAO(CSTR)
 // Format & send message to the operator
 
     RC = exe$fao(ASCID("?IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	exe$exit( RC);
     send_2_operator(OPRDESC);
 
@@ -926,7 +926,7 @@ void QL_FAO(CSTR)
 // Format the message
 
     RC = LIB$SYS_FAOL(CSTR, MDSC->dsc$w_length, MDSC, /*AP+*/8);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("QL_FAO failure, RC = !XL",RC);
 	mm$qblk_free(QB);

@@ -338,7 +338,7 @@ struct ARP_BLK * ARBLK;
     else
 //	LIB$GET_VM(%REF(ARP_BLK_LEN*4),ARBLK);
 	RC = LIB$GET_VM_PAGE(/*%REF*/(((ARP_BLK_LEN*4) / 512) + 1), &ARBLK);
-	if (! RC)
+	if (BLISSIFNOT(RC))
 	    {
 	    DRV$WARN_FAO("XE ARP memory allocation error, RC=!XL",RC);
 	    DRV$FATAL_FAO("Device is !AS",dev_config->dc_devname);
@@ -735,7 +735,7 @@ ARP_HASH(IPA)
 
     {
       char * IPAP = &IPA;
-    return (IPAP[0]+IPAP[1]+IPAP[2]+IPAP[3]) & ARP_HSHAND;
+    return ((IPAP[0]+IPAP[1]+IPAP[2]+IPAP[3]) & ARP_HSHAND);
     }
 
 ARP_FIND ( long IPADDR , struct XE_Interface_Structure * XE_Int )
@@ -777,7 +777,7 @@ struct ACACHE_BLK * ACPTR;
 
 //    LIB$GET_VM(/*%REF*/(ACACHE_LEN*4),ACPTR);
     RC = LIB$GET_VM_PAGE(/*%REF*/(((ACACHE_LEN * 4) / 512) + 1), &ACPTR);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	{
 	DRV$WARN_FAO("XE ARP CNEW memory allocation error, RC=!XL",RC);
 	return -1 ;

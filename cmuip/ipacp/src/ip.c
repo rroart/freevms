@@ -433,7 +433,7 @@ void ip$init  (void)
 // Translate time string to quadword value
 
     RC = exe$bintim( &RA_CHECK_TIMESTR,&RA_CHECK_TIME);
-    if (! RC)
+    if (BLISSIFNOT(RC))
 	FATAL$FAO("$BINTIM failed for RA_CHECK_TIMSTR, RC = !XL",RC);
 
     // Initial the IP group MIB
@@ -1399,7 +1399,7 @@ X:  {			// *** Block X ***
 
 //	    RC = LIB$GET_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
 	    RC = LIB$GET_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),&RAPTR);
-	    if (! RC)
+	    if (BLISSIFNOT(RC))
 		FATAL$FAO("IP_FRAGMENT - LIB$GET_VM failure, RC=!XL",RC);
 	    RAPTR->ra$ident = iphdr->iph$ident;
 	    RAPTR->ra$source = iphdr->iph$source;

@@ -794,7 +794,7 @@ void Main (void) {
 	  struct dsc$descriptor * dev = &dev_;
 	  struct item_list_3 itm[2];
 	  lnm_init_prc(smp$gl_cpu_data[0]->cpu$l_curpcb); // needs this extra one
-	  itm[0].item_code=1;
+	  itm[0].item_code=LNM$_STRING;
 	  itm[0].buflen=4;
 	  itm[0].bufaddr=mydevice;
 	  bzero(&itm[1],sizeof(struct item_list_3));
@@ -909,7 +909,7 @@ void INIT_PROCNAME (void) {
 // First, obtain our original process name
 
     rc = exe$getjpiw(0,0,0, &itmlist, 0,0,0);
-    if ( ! rc) {
+    if ( BLISSIFNOT(rc)) {
 	myprclen = 0;
 	WARN$FAO("$GETJPIW failure for process name, RC = %x",rc);
     }
@@ -917,7 +917,7 @@ void INIT_PROCNAME (void) {
 // Now, try to set our name as the IPACP.
 
     rc = exe$setprn(process_name);
-    if (! rc) {
+    if (BLISSIFNOT(rc)) {
       if ( rc == SS$_DUPLNAM )
 	FATAL$FAO("Duplicate network ACP -- exiting");
       else
