@@ -53,7 +53,7 @@ static int ext2_commit_chunk(struct inode *dir, struct page *page, unsigned from
 {
 	int err = 0;
 	dir->i_version = ++event;
-	block_commit_write2(dir, page, from, to, 0);
+	generic_commit_write2(dir, page, from, to, 0);
 #if 0
 	goto sync;
 	if (IS_SYNC(dir)) {
