@@ -28,6 +28,7 @@
 #include <linux/kernel_stat.h>
 #include <linux/completion.h>
 #include <linux/prefetch.h>
+#include <linux/compiler.h>
 
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
@@ -115,8 +116,8 @@ extern struct task_struct *child_reaper;
 #ifdef CONFIG_SMP
 
 #define idle_task(cpu) (init_tasks[cpu_number_map(cpu)])
-#define can_schedule(p,cpu) ((!(p)->has_cpu) && \
-				((p)->cpus_allowed & (1 << cpu)))
+#define can_schedule(p,cpu) \
+	((p)->cpus_runnable & (p)->cpus_allowed & (1 << cpu))
 
 #else
 
@@ -465,11 +466,11 @@ static inline void __schedule_tail(struct task_struct *prev)
 
 	/*
 	 * prev->policy can be written from here only before `prev'
-	 * can be scheduled (before setting prev->has_cpu to zero).
+	 * can be scheduled (before setting prev->cpus_runnable to ~0UL).
 	 * Of course it must also be read before allowing prev
 	 * to be rescheduled, but since the write depends on the read
 	 * to complete, wmb() is enough. (the spin_lock() acquired
-	 * before setting has_cpu is not enough because the spin_lock()
+	 * before setting cpus_runnable is not enough because the spin_lock()
 	 * common code semantics allows code outside the critical section
 	 * to enter inside the critical section)
 	 */
@@ -478,12 +479,12 @@ static inline void __schedule_tail(struct task_struct *prev)
 	wmb();
 
 	/*
-	 * fast path falls through. We have to clear has_cpu before
-	 * checking prev->state to avoid a wakeup race - thus we
-	 * also have to protect against the task exiting early.
+	 * fast path falls through. We have to clear cpus_runnable before
+	 * checking prev->state to avoid a wakeup race. Protect against
+	 * the task exiting early.
 	 */
 	task_lock(prev);
-	prev->has_cpu = 0;
+	task_release_cpu(prev);
 	mb();
 	if (prev->state == TASK_RUNNING)
 		goto needs_resched;
@@ -515,7 +516,7 @@ needs_resched:
 			goto out_unlock;
 
 		spin_lock_irqsave(&runqueue_lock, flags);
-		if ((prev->state == TASK_RUNNING) && !prev->has_cpu)
+		if ((prev->state == TASK_RUNNING) && !task_has_cpu(prev))
 			reschedule_idle(prev);
 		spin_unlock_irqrestore(&runqueue_lock, flags);
 		goto out_unlock;
@@ -525,7 +526,7 @@ needs_resched:
 #endif /* CONFIG_SMP */
 }
 
-void schedule_tail(struct task_struct *prev)
+asmlinkage void schedule_tail(struct task_struct *prev)
 {
 	__schedule_tail(prev);
 }
@@ -556,8 +557,10 @@ need_resched_back:
 	prev = current;
 	this_cpu = prev->pcb$l_cpu_id;
 
-	if (in_interrupt())
-		goto scheduling_in_interrupt;
+	if (unlikely(in_interrupt())) {
+		printk("Scheduling in interrupt\n");
+		BUG();
+	}
 
 	release_kernel_lock(prev, this_cpu);
 
@@ -570,9 +573,12 @@ need_resched_back:
 	spin_lock_irq(&runqueue_lock);
 
 	/* move an exhausted RR process to be last.. */
-	if (prev->policy == SCHED_RR)
-		goto move_rr_last;
-move_rr_back:
+	if (unlikely(prev->policy == SCHED_RR))
+		if ((prev->phd$w_quant&31)>=0) {
+			prev->phd$w_quant=-QUANTUM/10;
+			prev->pcb$b_pri=prev->pcb$b_prib;
+			move_last_runqueue(prev);
+		}
 
 	switch (prev->state) {
 		case TASK_INTERRUPTIBLE:
@@ -597,11 +603,6 @@ repeat_schedule:
 	 */
 	next = idle_task(this_cpu);
 	c = 100;
-	if (prev->state == TASK_RUNNING)
-		goto still_running;
-
-//printk("still\n");
-still_running_back:
 	list_for_each(tmp, &runqueue_head) {
 		p = list_entry(tmp, struct task_struct, run_list);
 		if (can_schedule(p, this_cpu)) {
@@ -615,21 +616,28 @@ still_running_back:
 //printk("wei %x\n",c);
 //{ int i; for (i=0; i<100000; i++ ) ; }
 	/* Do we need to re-calculate counters? */
-	if (!c)
-		goto recalculate;
+	if (unlikely(!c)) {
+		struct task_struct *p;
+
+		spin_unlock_irq(&runqueue_lock);
+		read_lock(&tasklist_lock);
+//		for_each_task(p)
+//			p->counter = (p->counter >> 1) + NICE_TO_TICKS(p->nice);
+		read_unlock(&tasklist_lock);
+		spin_lock_irq(&runqueue_lock);
+		goto repeat_schedule;
+	}
+
 	/*
 	 * from this point on nothing can prevent us from
 	 * switching to the next task, save this fact in
 	 * sched_data.
 	 */
 	sched_data->curr = next;
-#ifdef CONFIG_SMP
- 	next->has_cpu = 1;
-	next->pcb$l_cpu_id = this_cpu;
-#endif
+	task_set_cpu(next, this_cpu);
 	spin_unlock_irq(&runqueue_lock);
 
-	if (prev == next) {
+	if (unlikely(prev == next)) {
 		/* We won't go through the normal tail, so do this by hand */
 		prev->policy &= ~SCHED_YIELD;
 		goto same_process;
@@ -696,38 +704,6 @@ same_process:
 	reacquire_kernel_lock(current);
 	if (current->need_resched)
 		goto need_resched_back;
-
-	return;
-
-recalculate:
-	{
-		struct task_struct *p;
-		spin_unlock_irq(&runqueue_lock);
-		read_lock(&tasklist_lock);
-/*		for_each_task(p)
-		p->pcb$b_pri = (p->pcb$b_pri >> 1) + NICE_TO_TICKS(p->pcb$b_prib); */
-		read_unlock(&tasklist_lock);
-		spin_lock_irq(&runqueue_lock);
-	}
-	goto repeat_schedule;
-
-still_running:
-	if (!(prev->cpus_allowed & (1UL << this_cpu)))
-		goto still_running_back;
-	c = goodness(prev, this_cpu, prev->active_mm);
-	next = prev;
-	goto still_running_back;
-
-move_rr_last:
-	if (prev->phd$w_quant >= 0) {
-//	if (!prev->pcb$b_pri) {
-		move_last_runqueue(prev);
-	}
-	goto move_rr_back;
-
-scheduling_in_interrupt:
-	printk("Scheduling in interrupt\n");
-	BUG();
 	return;
 }
 
@@ -1090,6 +1066,10 @@ asmlinkage long sys_sched_yield(void)
 		if (current->policy == SCHED_OTHER)
 			current->policy |= SCHED_YIELD;
 		current->need_resched = 1;
+
+		spin_lock_irq(&runqueue_lock);
+		move_last_runqueue(current);
+		spin_unlock_irq(&runqueue_lock);
 	}
 	return 0;
 }
@@ -1196,13 +1176,10 @@ static void show_task(struct task_struct * p)
 	else
 		printk(" (NOTLB)\n");
 
-#if defined(CONFIG_X86) || defined(CONFIG_SPARC64) || defined(CONFIG_ARM) || defined(CONFIG_ALPHA)
-/* This is very useful, but only works on ARM, x86 and sparc64 right now */
 	{
 		extern void show_trace_task(struct task_struct *tsk);
 		show_trace_task(p);
 	}
-#endif
 }
 
 char * render_sigset_t(sigset_t *set, char *buffer)
@@ -1270,11 +1247,6 @@ void reparent_to_init(void)
 	SET_LINKS(this_task);
 
 	/* Set the exit signal to SIGCHLD so we signal init on exit */
-	if (this_task->exit_signal != 0) {
-		printk(KERN_ERR "task `%s' exit_signal %d in "
-				__FUNCTION__ "\n",
-			this_task->comm, this_task->exit_signal);
-	}
 	this_task->exit_signal = SIGCHLD;
 
 	/* We also take the runqueue_lock while altering task fields

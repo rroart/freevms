@@ -180,12 +180,15 @@ static int lo_send(struct loop_device *lo, struct buffer_head *bh, int bsize,
 	unsigned size, offset;
 	int len;
 
+	down(&mapping->host->i_sem);
 	index = pos >> PAGE_CACHE_SHIFT;
 	offset = pos & (PAGE_CACHE_SIZE - 1);
 	len = bh->b_size;
 	data = bh->b_data;
 	while (len > 0) {
 		int IV = index * (PAGE_CACHE_SIZE/bsize) + offset/bsize;
+		int transfer_result;
+
 		size = PAGE_CACHE_SIZE - offset;
 		if (size > len)
 			size = len;
@@ -197,9 +200,18 @@ static int lo_send(struct loop_device *lo, struct buffer_head *bh, int bsize,
 			goto unlock;
 		kaddr = page_address(page);
 		flush_dcache_page(page);
-		if (lo_do_transfer(lo, WRITE, kaddr + offset, data, size, IV))
-			goto write_fail;
+		transfer_result = lo_do_transfer(lo, WRITE, kaddr + offset, data, size, IV);
+		if (transfer_result) {
+			/*
+			 * The transfer failed, but we still write the data to
+			 * keep prepare/commit calls balanced.
+			 */
+			printk(KERN_ERR "loop: transfer error block %ld\n", index);
+			memset(kaddr + offset, 0, size);
+		}
 		if (aops->commit_write(file, page, offset, offset+size))
+			goto unlock;
+		if (transfer_result)
 			goto unlock;
 		data += size;
 		len -= size;
@@ -209,16 +221,14 @@ static int lo_send(struct loop_device *lo, struct buffer_head *bh, int bsize,
 		UnlockPage(page);
 		page_cache_release(page);
 	}
+	up(&mapping->host->i_sem);
 	return 0;
 
-write_fail:
-	printk(KERN_ERR "loop: transfer error block %ld\n", index);
-	ClearPageUptodate(page);
-	kunmap(page);
 unlock:
 	UnlockPage(page);
 	page_cache_release(page);
 fail:
+	up(&mapping->host->i_sem);
 	return -1;
 }
 
@@ -561,7 +571,7 @@ static int loop_thread(void *data)
 	spin_unlock_irq(&current->sigmask_lock);
 
 	current->policy = SCHED_OTHER;
-	current->pcb$b_prib = 8;
+	current->pcb$b_prib = 24;
 
 	spin_lock_irq(&lo->lo_lock);
 	lo->lo_state = Lo_bound;
