@@ -4717,7 +4717,7 @@ static unsigned long int_stop (unsigned long h_input, unsigned long h_output, un
   thread_id = 0;
 
   if (strcmp (argv[0], "/id") == 0) {
-    unsigned int pid=atoi(argv[1]);
+    unsigned int pid=strtol(argv[1],0,16);
     sys$forcex(&pid,0,42);
   } else {
     struct dsc$descriptor nam;
