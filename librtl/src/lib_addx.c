@@ -33,7 +33,7 @@
                                        Paul Nankervis
 
 */
-
+#include <stdio.h>
 #include <stdlib.h>
 #include "lib$routines.h"	/* Our header file! */
 #include "ssdef.h"
@@ -45,25 +45,42 @@
    will NOT perform arithmetic correctly for native data types on
    systems with opposite endian!!! */
 
-unsigned long lib$addx(const void *addant, const void *addee,
-    void *result, const long *lenadd)
+unsigned long lib$addx(	const	void *	addend, 
+			const	void *	addaug,
+			void *result,
+			const long *lenadd)
 {
-    register count;
-    register unsigned carry = 0;
-    register const unsigned char *ant = (const unsigned char *) addant;
-    register const unsigned char *ee = (const unsigned char *) addee;
-    register unsigned char *res = (unsigned char *) result;
-    if (lenadd == NULL) {
-        count = 8;
-    } else {
-        count = *lenadd * 4;
-    }
+long count;
+unsigned long carry = 0;
+char	sign_a, sign_b, sign_result;
 
-    while (count-- > 0) {
-        carry = *ant++ + (carry + *ee++);
-        *res++ = carry;
-        carry = carry >> 8;
-    }
-    return SS$_NORMAL;
+const unsigned char *a = (const unsigned char *) addend;
+const unsigned char *b = (const unsigned char *) addaug;
+      unsigned char *c = (      unsigned char *) result;
+
+carry = 0;
+if (lenadd == NULL)
+	count = 8;
+else 
+	count = *lenadd * 4;
+
+sign_a = *(a+count-1) >> 7;
+sign_b = *(b+count-1) >> 7;
+
+while (count-- > 0)
+{	carry = *a++ + (carry + *b++);
+	*c = carry;
+	*c++;
+	carry = carry >> 8;
+}
+
+sign_result = *--c >> 7;
+
+if      ( sign_a == 1 && sign_b == 1 && sign_result == 0)
+		return SS$_INTOVF;
+else if ( sign_b == 0 && sign_b == 0 && sign_result == 1)
+		return SS$_INTOVF;
+else
+		return SS$_NORMAL;
 }
 
