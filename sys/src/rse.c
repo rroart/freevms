@@ -67,26 +67,31 @@ int sch$pixscan(void) {
   struct _pcb *tmp2;
   unsigned long comqs=sch$gl_comqs & 0x7fff0000;
   int tmppri,i,scanned=sgn$gw_pixscan;
+
+  //printk("pixscan 1\n");
+
   if (!sgn$gw_pixscan) return;
   /* get sched spinlock */
   if (!((sch$gl_comqs & 0x7fff0000) || (sch$gl_comoqs & 0x7fff0000))) goto out;
   tmppri=ffs(comqs);
   tmppri--;
   
-  for(i=30;i>tmppri,scanned;i--) {
-    if(*(unsigned long *)tmp == tmp) {; } else {
+  //printk("pri %x|",tmppri);
 
-      tmp=sch$aq_comh[i];
+  for(i=30;i>tmppri,scanned;i--) {
+    tmp=sch$aq_comh[i];
+    if(*(unsigned long *)tmp == tmp) {; } else {
       tmp2=tmp;
       do {
+	//printk("tmp2 %x|",tmp2);
 	if (!(tmp2>=&sch$aq_comh[0] && tmp2<=&sch$aq_comh[33])) {
 	  if (tmp2->pcb$l_onqtime+100*sch$gw_dormantwait<exe$gl_abstim_tics) {
 	    tmp2->pcb$l_pixhist|=1;
 	    sch$chsep(tmp2,tmppri);
 	    scanned--;
-	    if (!scanned) break;
+	    if (!scanned) goto out;
 	  } else {
-	    break;
+	    goto out;
 	  }
 	}
 	tmp2=tmp2->pcb$l_sqfl;
@@ -95,6 +100,7 @@ int sch$pixscan(void) {
   }
   out:
     /* release spinlock */
+  //printk("\n2\n");
     return;
 }
 
@@ -223,3 +229,7 @@ void sch$change_cur_priority(struct _pcb *p, unsigned char newpri) {
   SOFTINT_RESCHED_VECTOR; /* or set need_resched if interrupt probs */
   // interprocessor interrupt not implemented?
 }
+
+void sch$one_sec(void) {
+  sch$pixscan();
+    }

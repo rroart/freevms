@@ -1,0 +1,24 @@
+A sort of very short summary of points to remember from the mailing list.
+
+
+Linux was chosen over mach, hurd, freebsd etc because of availability.
+PC for the same reason.
+
+"Goal": VMS 5.x/32 bit, because that's the newest Internals books.
+
+"VMB/SRM" bootloader is based on Grub.
+
+No new interrupts aside from 0x81 can be implemented yet because of softirqs.
+
+PAL: do CPU stuff like queues, ipls, asts etc in software. (Borrow from FreeBSD?)
+
+Find out how to implement system calls/services with more than 6 params.
+
+Will also have to do some preparations for clustering and 64-bits.
+
+In i/o services you will want to ensure that layering is possible, a la
+unix streams if convenient (no need really to duplicate the detailed
+VMS driver structures if you can use existing ones). Many VMS facilities
+can be done more cleanly with such layering than DEC ever did them
+with special purpose code all over the place.
+Meaning having DKDRIVER as layer, and not putting every driver in it?

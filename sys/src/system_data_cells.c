@@ -544,7 +544,7 @@ unsigned long exe$gl_sysucb;
 unsigned long exe$gl_sysuic;
 unsigned long exe$gl_tenusec;
 unsigned long exe$gl_tickadjust;
-unsigned long exe$gl_ticklength;
+unsigned long exe$gl_ticklength=1;
 unsigned long exe$gl_tickwidth;
 unsigned long exe$gl_time_control;
 unsigned long exe$gl_time_deviation;
@@ -1893,9 +1893,11 @@ unsigned long xqp$gl_sections;
 struct lnmhshs lnmhshs; /* should be one struct, will be solved later */
 struct lnmhshp lnmhshp;
 
-struct _tqe tqehead;
+struct _tqe tqehead,tqe2;
 
 struct _cpu vmscpus[32]; /* max. this number should be defined */
+
+extern void exe$timeout(void);
 
 void __init vms_init(void) {
   int i,j;
@@ -1942,9 +1944,22 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   exe$gl_tqfl->tqe$l_tqbl=exe$gl_tqfl;
   exe$gl_tqfl->tqe$w_size=0;
   exe$gl_tqfl->tqe$b_type=DYN$C_TQE;
-  exe$gl_tqfl->tqe$b_rqtype=TQE$C_TMSNGL;
+  exe$gl_tqfl->tqe$b_rqtype=TQE$C_TMSNGL|TQE$M_REPEAT; /* ???? */
   exe$gl_tqfl->tqe$l_rqpid=0xffffffff;
   exe$gl_tqfl->tqe$l_cputim=0xffffffff;
+
+  tqe2.tqe$l_tqfl=0;
+  tqe2.tqe$l_tqbl=0;
+  tqe2.tqe$w_size=0;
+  tqe2.tqe$b_type=DYN$C_TQE;
+  tqe2.tqe$b_rqtype=TQE$C_SSREPT;
+  tqe2.tqe$l_pc=&exe$timeout;
+  tqe2.tqe$q_fr3=0; /* something? */
+  tqe2.tqe$q_fr4=0; /* something? */
+  tqe2.tqe$q_time=0;
+  tqe2.tqe$q_delta=10000000;
+
+    insque(&tqe2,exe$gl_tqfl);
 
   /* take lnm stuff from syslnm.c etc */
 

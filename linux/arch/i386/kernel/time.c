@@ -67,9 +67,9 @@
 unsigned long cpu_khz;	/* Detected as we calibrate the TSC */
 
 /* Number of usecs that the last interrupt was delayed */
-static int delay_at_last_interrupt;
+int delay_at_last_interrupt;
 
-static unsigned long last_tsc_low; /* lsb 32 bits of Time Stamp Counter */
+unsigned long last_tsc_low; /* lsb 32 bits of Time Stamp Counter */
 
 /* Cached *multiplier* to convert TSC counts to microseconds.
  * (see the equation below).
@@ -323,7 +323,7 @@ void do_settimeofday(struct timeval *tv)
  * BUG: This routine does not handle hour overflow properly; it just
  *      sets the minutes. Usually you'll only notice that after reboot!
  */
-static int set_rtc_mmss(unsigned long nowtime)
+int set_rtc_mmss(unsigned long nowtime)
 {
 	int retval = 0;
 	int real_seconds, real_minutes, cmos_minutes;
@@ -382,7 +382,7 @@ static int set_rtc_mmss(unsigned long nowtime)
 }
 
 /* last time the cmos clock got updated */
-static long last_rtc_update;
+long last_rtc_update;
 
 int timer_ack;
 
@@ -560,6 +560,7 @@ unsigned long get_cmos_time(void)
 
 /* change to exe$hwclkint sometime ? */
 static struct irqaction irq0  = { timer_interrupt, SA_INTERRUPT, 0, "timer", NULL, NULL};
+//static struct irqaction irq0  = { exe$hwclkint, SA_INTERRUPT, 0, "timer", NULL, NULL};
 
 /* ------ Calibrate the TSC ------- 
  * Return 2^32 * (1 / (TSC clocks per usec)) for do_fast_gettimeoffset().

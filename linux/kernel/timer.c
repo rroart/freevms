@@ -580,8 +580,8 @@ void update_one_process(struct task_struct *p, unsigned long user,
  * process.  user_tick is 1 if the tick is user time, 0 for system.
  */
 
-pid1count=0; /* Will be removed in the future */
-pid0count=0; /* Will be removed in the future */
+int pid1count=0; /* Will be removed in the future */
+int pid0count=0; /* Will be removed in the future */
 
 int countme2=500;
 

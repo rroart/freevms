@@ -17,7 +17,7 @@
 #define TQE$K_LENGTH 64
 #define TQE$C_LENGTH 64
 
-typedef struct _tqe {
+struct _tqe {
   struct _tqe *tqe$l_tqfl;
   struct _tqe *tqe$l_tqbl;
   unsigned short int tqe$w_size;
@@ -29,7 +29,7 @@ typedef struct _tqe {
   } tqe$r_pid_union;
   union  {
     struct  {
-      void (*tqe$l_ast)();
+      void (*tqe$l_ast)(void);
       unsigned long tqe$l_astprm;
     } tqe$r_ast_fields;
     struct {
@@ -37,14 +37,19 @@ typedef struct _tqe {
       unsigned long tqe$q_fr4;
     } tqe$r_fr_fields;
   } tqe$r_ast_union;
-  unsigned long tqe$l_time;
-  unsigned long tqe$l_delta;
+  unsigned long long tqe$q_time;
+  unsigned long long tqe$q_delta;
   unsigned char tqe$b_rmod;
   unsigned char tqe$b_efn;
   unsigned short tqe$w_res;
   unsigned int tqe$l_rqpid;
   unsigned int tqe$l_cputim;
 };
- 
+
+#define tqe$l_pc tqe$r_pid_union.tqe$l_pc
+#define tqe$q_fr3 tqe$r_ast_union.tqe$r_fr_fields.tqe$q_fr3
+#define tqe$q_fr4 tqe$r_ast_union.tqe$r_fr_fields.tqe$q_fr4
+
+
 #endif
  
