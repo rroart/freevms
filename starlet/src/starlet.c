@@ -90,7 +90,7 @@ int sys$setimr  (unsigned int efn, signed long long *daytim,
 }
 
 int sys$cantim  (unsigned long long reqidt, unsigned int acmode) {
-  return INLINE_SYSCALL($cantim,2,reqidt,acmode); /* fix this */
+  return INLINE_SYSCALL($cantim,2,(long)reqidt,acmode); /* fix this */
 }
 
 int sys$numtim  (unsigned short int timbuf [7], unsigned long long * timadr) {
@@ -332,6 +332,34 @@ int sys$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itml
   s.astadr=astadr;
   s.astprm=astprm;
   return INLINE_SYSCALL($getjpi,1,&s);
+}
+
+int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, unsigned long long *nullarg) {
+  struct struct_getdvi s;
+  s.efn=efn;
+  s.devnam=devnam;
+  s.itmlst=itmlst;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.nullarg=nullarg;
+  return INLINE_SYSCALL($getdvi,1,&s);
+}
+
+int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, unsigned long long *nullarg) {
+  struct struct_getdvi s;
+  s.efn=efn;
+  s.devnam=devnam;
+  s.itmlst=itmlst;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.nullarg=nullarg;
+  return INLINE_SYSCALL($getdviw,1,&s);
+}
+
+int sys$device_scan(void *return_devnam, unsigned short int *retlen, void *search_devnam, void *itmlst, unsigned long long *contxt) {
+  return INLINE_SYSCALL($device_scan,5,return_devnam,retlen,search_devnam,itmlst,contxt);
 }
 
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }

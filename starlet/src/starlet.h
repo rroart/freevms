@@ -98,6 +98,12 @@ int sys$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, uns
 
 int sys$delmbx  (unsigned short int chan);
 
+int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, unsigned long long *nullarg);
+
+int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, unsigned long long *nullarg);
+
+int sys$device_scan(void *return_devnam, unsigned short int *retlen, void *search_devnam, void *itmlst, unsigned long long *contxt);
+
 int sys$mount(void *itmlst);
 
 struct _fab;
@@ -254,6 +260,17 @@ struct struct_getjpi {
   struct _iosb *iosb;
   void (*astadr)();
   unsigned long long astprm;
+};
+
+struct struct_getdvi {
+unsigned int efn;
+unsigned short int chan;
+void *devnam;
+void *itmlst;
+struct _iosb *iosb;
+void (*astadr)();
+int astprm;
+unsigned long long *nullarg;
 };
 
 #endif
