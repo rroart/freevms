@@ -50,6 +50,9 @@
 #include<rdedef.h>
 #include<secdef.h>
 #include<sysgen.h>
+#include<dyndef.h>
+#include<fcbdef.h>
+#include<fabdef.h>
 
 int core_uses_pid;
 
@@ -393,6 +396,25 @@ out:
 	goto out;
 }
 
+#ifdef CONFIG_VMS
+struct file *rms_open_exec(const char *name)
+{
+	struct file *file=0;
+	int err = 0;
+	struct _fabdef fab = cc$rms_fab;
+	int sts;
+
+	fab.fab$l_fna = name;
+	fab.fab$b_fns = strlen(fab.fab$l_fna);
+	if ((sts = exe$open(&fab)) & 1) {
+	  struct _fcb * fcb=get_prim_fcb();
+	  file=fcb;
+	  exe$close(&fab);
+	}
+	return file;
+}
+#endif
+
 int kernel_read(struct file *file, unsigned long offset,
 	char * addr, unsigned long count)
 {
@@ -400,6 +422,10 @@ int kernel_read(struct file *file, unsigned long offset,
 	loff_t pos = offset;
 	int result = -ENOSYS;
 
+#ifdef CONFIG_VMS
+	if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
+	  return rms_kernel_read(file,offset,addr,count);
+#endif
 	if (!file->f_op->read)
 		goto fail;
 	old_fs = get_fs();
@@ -409,6 +435,22 @@ int kernel_read(struct file *file, unsigned long offset,
 fail:
 	return result;
 }
+#ifdef CONFIG_VMS
+int rms_kernel_read(struct file *file, unsigned long offset,
+	char * addr, unsigned long count)
+{
+	mm_segment_t old_fs;
+	loff_t pos = offset;
+	int result = -ENOSYS;
+
+	old_fs = get_fs();
+	set_fs(get_ds());
+	result = rms_generic_file_read(file, addr, count, &pos);
+	set_fs(old_fs);
+fail:
+	return result;
+}
+#endif
 
 static int exec_mmap(void)
 {
@@ -588,6 +630,9 @@ int flush_old_exec(struct linux_binprm * bprm)
 
 	de_thread(current);
 
+#ifdef CONFIG_VMS
+	if (((struct _fcb *)(bprm->file))->fcb$b_type!=DYN$C_FCB)
+#endif
 	if (bprm->e_uid != current->euid || bprm->e_gid != current->egid || 
 	    permission(bprm->file->f_dentry->d_inode,MAY_READ))
 		current->mm->dumpable = 0;
@@ -684,6 +729,66 @@ int prepare_binprm(struct linux_binprm *bprm)
 	memset(bprm->buf,0,BINPRM_BUF_SIZE);
 	return kernel_read(bprm->file,0,bprm->buf,BINPRM_BUF_SIZE);
 }
+
+#ifdef CONFIG_VMS
+int rms_prepare_binprm(struct linux_binprm *bprm)
+{
+	int mode;
+	struct _fcb * fcb = bprm->file;
+	struct inode * inode = fcb->fcb$l_primfcb;
+
+	mode = inode->i_mode;
+	/*
+	 * Check execute perms again - if the caller has CAP_DAC_OVERRIDE,
+	 * vfs_permission lets a non-executable through
+	 */
+	if (!(mode & 0111))	/* with at least _one_ execute bit set */
+		return -EACCES;
+
+	bprm->e_uid = current->euid;
+	bprm->e_gid = current->egid;
+
+	// no nosuid mount check
+	//if(!(bprm->file->f_vfsmnt->mnt_flags & MNT_NOSUID)) {}
+	/* Set-uid? */
+	if (mode & S_ISUID)
+	  bprm->e_uid = inode->i_uid;
+	
+	/* Set-gid? */
+	/*
+	 * If setgid is set but no group execute bit then this
+	 * is a candidate for mandatory locking, not a setgid
+	 * executable.
+	 */
+	if ((mode & (S_ISGID | S_IXGRP)) == (S_ISGID | S_IXGRP))
+	  bprm->e_gid = inode->i_gid;
+
+	/* We don't have VFS support for capabilities yet */
+	cap_clear(bprm->cap_inheritable);
+	cap_clear(bprm->cap_permitted);
+	cap_clear(bprm->cap_effective);
+
+	/*  To support inheritance of root-permissions and suid-root
+         *  executables under compatibility mode, we raise all three
+         *  capability sets for the file.
+         *
+         *  If only the real uid is 0, we only raise the inheritable
+         *  and permitted sets of the executable file.
+         */
+
+	if (!issecure(SECURE_NOROOT)) {
+		if (bprm->e_uid == 0 || current->uid == 0) {
+			cap_set_full(bprm->cap_inheritable);
+			cap_set_full(bprm->cap_permitted);
+		}
+		if (bprm->e_uid == 0) 
+			cap_set_full(bprm->cap_effective);
+	}
+
+	memset(bprm->buf,0,BINPRM_BUF_SIZE);
+	return rms_kernel_read(bprm->file,0,bprm->buf,BINPRM_BUF_SIZE);
+}
+#endif
 
 /*
  * This function is used to produce the new IDs and capabilities
@@ -833,10 +938,14 @@ int search_binary_handler(struct linux_binprm *bprm,struct pt_regs *regs)
 			retval = fn(bprm, regs);
 			if (retval >= 0) {
 				put_binfmt(fmt);
-				allow_write_access(bprm->file);
-#ifndef CONFIG_MM_VMS
-				if (bprm->file)
-					fput(bprm->file);
+#ifdef CONFIG_MM_VMS
+				if (((struct _fcb *)(bprm->file))->fcb$b_type!=DYN$C_FCB) {
+#endif
+				  allow_write_access(bprm->file);
+				  if (bprm->file)
+				    fput(bprm->file);
+#ifdef CONFIG_MM_VMS
+				}
 #endif
 				bprm->file = NULL;
 				current->did_exec = 1;
@@ -879,12 +988,18 @@ extern int mydebug;
 int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs)
 {
 	struct linux_binprm bprm;
-	struct file *file;
-	int retval;
+	struct file *file=0;
+	int retval=0;
 	int i;
 
 	//printk("execve %s\n",filename);
 	//	mydebug=1;
+
+#ifdef CONFIG_VMS
+	file = rms_open_exec(filename);
+#endif
+	if (file) goto fcb_found;
+
 	file = open_exec(filename);
 
 	retval = PTR_ERR(file);
@@ -892,6 +1007,7 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	if (IS_ERR(file))
 		return retval;
 
+ fcb_found:
 	bprm.p = PAGE_SIZE*MAX_ARG_PAGES-sizeof(void *);
 	memset(bprm.page, 0, MAX_ARG_PAGES*sizeof(bprm.page[0])); 
 
@@ -901,6 +1017,9 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	bprm.loader = 0;
 	bprm.exec = 0;
 	if ((bprm.argc = count(argv, bprm.p / sizeof(void *))) < 0) {
+#ifdef CONFIG_VMS
+	  printk("uh oh, argv error\n");
+#endif
 		allow_write_access(file);
 		fput(file);
 		//printk("here 7 %x\n",bprm.argc);
@@ -908,13 +1027,21 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	}
 
 	if ((bprm.envc = count(envp, bprm.p / sizeof(void *))) < 0) {
+#ifdef CONFIG_VMS
+	  printk("uh oh, envp error\n");
+#endif
 		allow_write_access(file);
 		fput(file);
 		//printk("here 6\n");
 		return bprm.envc;
 	}
 
-	retval = prepare_binprm(&bprm);
+#ifdef CONFIG_VMS
+	if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
+	  retval = rms_prepare_binprm(&bprm);
+	else
+#endif
+	  retval = prepare_binprm(&bprm);
 	//printk("here 4\n");
 	if (retval < 0) 
 		goto out; 
@@ -942,6 +1069,9 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 
 out:
 	/* Something went wrong, return the inode and free the argument pages*/
+#ifdef CONFIG_VMS
+	printk("uh oh, something went wrong error\n");
+#endif
 	allow_write_access(bprm.file);
 	if (bprm.file)
 		fput(bprm.file);

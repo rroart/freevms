@@ -18,6 +18,9 @@
 
 #include <asm/uaccess.h>
 
+#include <dyndef.h>
+#include <fcbdef.h>
+
 #define special_file(m) (S_ISCHR(m)||S_ISBLK(m)||S_ISFIFO(m)||S_ISSOCK(m))
 
 int vfs_statfs(struct super_block *sb, struct statfs *buf)
@@ -822,6 +825,11 @@ asmlinkage long sys_creat(const char * pathname, int mode)
 int filp_close(struct file *filp, fl_owner_t id)
 {
 	int retval;
+
+#ifdef CONFIG_VMS
+	if (((struct _fcb *)filp)->fcb$b_type==DYN$C_FCB)
+	    return 0;
+#endif
 
 	if (!file_count(filp)) {
 		printk(KERN_ERR "VFS: Close: file count is 0\n");

@@ -45,6 +45,8 @@
 #include <phddef.h>
 #include <secdef.h>
 #include <system_data_cells.h>
+#include <dyndef.h>
+#include <fcbdef.h>
 
 static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs);
 static int load_elf_library(struct file*);
@@ -281,6 +283,9 @@ static unsigned long load_elf_interp(struct elfhdr * interp_elf_ex,
 		goto out;
 	if (!elf_check_arch(interp_elf_ex))
 		goto out;
+#ifdef CONFIG_VMS
+	if (((struct _fcb *)interpreter)->fcb$b_type!=DYN$C_FCB)
+#endif
 	if (!interpreter->f_op || !interpreter->f_op->mmap)
 		goto out;
 
@@ -461,8 +466,12 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 		goto out;
 	if (!elf_check_arch(&elf_ex))
 		goto out;
-	if (!bprm->file->f_op||!bprm->file->f_op->mmap)
-		goto out;
+
+#ifdef CONFIG_VMS
+	if (((struct _fcb *)(bprm->file))->fcb$b_type!=DYN$C_FCB)
+#endif
+	  if (!bprm->file->f_op||!bprm->file->f_op->mmap)
+	    goto out;
 
 	/* Now read in all of the header information */
 
@@ -528,7 +537,12 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 
 			SET_PERSONALITY(elf_ex, ibcs2_interpreter);
 
+#ifndef CONFIG_VMS
 			interpreter = open_exec(elf_interpreter);
+#else
+			interpreter = rms_open_exec(elf_interpreter);
+			//interpreter = open_exec(elf_interpreter);
+#endif
 			retval = PTR_ERR(interpreter);
 			if (IS_ERR(interpreter))
 				goto out_free_interp;
@@ -704,8 +718,14 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 						    interpreter,
 						    &interp_load_addr);
 
+#ifdef CONFIG_VMS
+		if (((struct _fcb *)interpreter)->fcb$b_type!=DYN$C_FCB) {
+#endif
 		allow_write_access(interpreter);
 		fput(interpreter);
+#ifdef CONFIG_VMS
+		}
+#endif
 		kfree(elf_interpreter);
 
 		if (BAD_ADDR(elf_entry)) {
@@ -791,8 +811,14 @@ out:
 
 	/* error cleanup */
 out_free_dentry:
+#ifdef CONFIG_VMS
+	if (((struct _fcb *)interpreter)->fcb$b_type!=DYN$C_FCB) {
+#endif
 	allow_write_access(interpreter);
 	fput(interpreter);
+#ifdef CONFIG_VMS
+	}
+#endif
 out_free_interp:
 	if (elf_interpreter)
 		kfree(elf_interpreter);
@@ -823,7 +849,14 @@ static int load_elf_library(struct file *file)
 
 	/* First of all, some simple consistency checks */
 	if (elf_ex.e_type != ET_EXEC || elf_ex.e_phnum > 2 ||
-	   !elf_check_arch(&elf_ex) || !file->f_op || !file->f_op->mmap)
+	   !elf_check_arch(&elf_ex) 
+#ifndef CONFIG_VMS
+|| !file->f_op || !file->f_op->mmap
+	    /* should add a
+	if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)
+	    */
+#endif
+	    )
 		goto out;
 
 	/* Now read in all of the header information */
@@ -895,16 +928,26 @@ out:
  */
 static int dump_write(struct file *file, const void *addr, int nr)
 {
-	return file->f_op->write(file, addr, nr, &file->f_pos) == nr;
+#ifdef CONFIG_VMS
+  if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)
+#endif
+    return file->f_op->write(file, addr, nr, &file->f_pos) == nr;
+  return 0;
 }
 
 static int dump_seek(struct file *file, off_t off)
 {
+#ifdef CONFIG_VMS
+  if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB) {
+#endif
 	if (file->f_op->llseek) {
 		if (file->f_op->llseek(file, off, 0) != off)
 			return 0;
 	} else
 		file->f_pos = off;
+#ifdef CONFIG_VMS
+  }
+#endif
 	return 1;
 }
 
@@ -1006,12 +1049,18 @@ static int writenote(struct memelfnote *men, struct file *file)
 	en.n_descsz = men->datasz;
 	en.n_type = men->type;
 
+#ifdef CONFIG_VMS
+	if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB) {
+#endif
 	DUMP_WRITE(&en, sizeof(en));
 	DUMP_WRITE(men->name, en.n_namesz);
 	/* XXX - cast from long long to long to avoid need for libgcc.a */
 	DUMP_SEEK(roundup((unsigned long)file->f_pos, 4));	/* XXX */
 	DUMP_WRITE(men->data, men->datasz);
 	DUMP_SEEK(roundup((unsigned long)file->f_pos, 4));	/* XXX */
+#ifdef CONFIG_VMS
+	}
+#endif
 
 	return 1;
 }
@@ -1047,6 +1096,11 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 	struct elf_prstatus prstatus;	/* NT_PRSTATUS */
 	elf_fpregset_t fpu;		/* NT_PRFPREG */
 	struct elf_prpsinfo psinfo;	/* NT_PRPSINFO */
+
+#ifdef CONFIG_VMS
+	if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
+	  return has_dumped;
+#endif
 
 	/* first copy the parameters from user space */
 	memset(&psinfo, 0, sizeof(psinfo));
