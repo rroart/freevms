@@ -2063,7 +2063,7 @@ void do_probe(struct tcb_structure * tcb)
 #define BUFSIZE DEVICE_HEADER+IP_HDR_BYTE_SIZE+TCP_HEADER_SIZE
       static long
 	buf[(BUFSIZE+3)/4];
-      const struct segment_structure *
+      struct segment_structure *
 	seg = buf+DEVICE_HEADER+IP_HDR_BYTE_SIZE ; // check
 
 // Fill in the segment
