@@ -68,7 +68,7 @@
 
 #define SOFTINT_TEST_VECTOR do { __asm__ __volatile__ ("int $0x88\n"); } while (0);
 
-#ifdef CONFIG_VMS
+#if defined(CONFIG_VMS) && !defined(__arch_um__)
 #define SOFTINT_POWER_VECTOR do { __asm__ __volatile__ ("int $0xaf\n"); } while (0);
 #define SOFTINT_EMB_VECTOR do { __asm__ __volatile__ ("int $0xae\n"); } while (0);
 #define SOFTINT_MCHECK_VECTOR do { __asm__ __volatile__ ("int 18\n"); } while (0);
