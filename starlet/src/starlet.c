@@ -251,11 +251,11 @@ int sys$ascefc(unsigned int efn, void *name, char prot, char perm) {
 }
 
 int sys$dacefc(unsigned int efn) {
-  return INLINE_SYSCALL($dacefc,1,efn));
+  return INLINE_SYSCALL($dacefc,1,efn);
 }
 
 int sys$dlcefc(void *name) {
-  return INLINE_SYSCALL($dlcefc,1,name));
+  return INLINE_SYSCALL($dlcefc,1,name);
 }
 
 int sys$asctim  (unsigned short int *timlen, void *timbuf,

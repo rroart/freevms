@@ -23,7 +23,7 @@ obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \
 	    sysqioreq.o sysqiofdt.o mscp.o dudriver.o sys_scs.o sysacpfdt.o \
 	    sysassign.o sysdassgn.o iosubpagd.o sysgetlki.o \
 	    syslnm.o lnmsub.o random.o null.o vmsinit.o mutex.o \
-	    queue.o
+	    queue.o sysascefc.o
 
 obj-$(CONFIG_UID16) += uid16.o
 obj-$(CONFIG_MODULES) += ksyms.o

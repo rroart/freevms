@@ -615,6 +615,9 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$dellnm ] = exe$dellnm ,
 	[ __NR_$clrast ] = exe$clrast ,
 	[ __NR_$setast ] = exe$setast ,
+	[ __NR_$ascefc ] = exe$ascefc ,
+	[ __NR_$dacefc ] = exe$dacefc ,
+	[ __NR_$dlcefc ] = exe$dlcefc ,
 	
 	ARCH_SYSCALLS
 	[ LAST_SYSCALL + 1 ... NR_syscalls ] = 
