@@ -72,7 +72,7 @@ void fl_isr (struct _irp * i) {
 }
 
 void  file_startio2 (struct _irp * i, struct _ucb * u);
-void  file_startio3 (struct _irp * i, struct _ucb * u);
+void  file_startio3 (int fr3, int fr4, struct _ucb * u);
 
 void  file_startio (struct _irp * i, struct _ucb * u) { 
   int sts;
@@ -107,11 +107,11 @@ void  file_startio2 (struct _irp * i, struct _ucb * u) {
   //printk("secondtime\n");
 
   u->ucb$l_fpc=file_startio3;
-  exe$iofork(i,u);
+  exe_std$primitive_fork(0,0,u);
   return;
 }
 
-void  file_startio3 (struct _irp * i, struct _ucb * u) { 
+void  file_startio3 (int fr3, int fr4, struct _ucb * u) { 
   //printk("thirdtime %x %x\n",i,u);
   ioc$reqcom(SS$_NORMAL,0,u);
   return;
