@@ -8,17 +8,25 @@
 
 #define LNM$M_NO_DELETE 0x10 /* for use in lnmb. the rest is decl otherplace */
 
-#define LNM$M_MYCONCEALED 1 /* for use with lnmx */
-#define LNM$M_MYTERMINAL 2
-#define LNM$M_MYXEND 4
+#define LNMX$M_XEND 4
 
-#define LNM$M_MYSHAREABLE 1 /* for use with lnmth */
-#define LNM$M_MYDIRECTORY 2
-#define LNM$M_MYGROUP 4
-#define LNM$M_MYSYSTEM 8
+#define LNMTH$M_SHAREABLE   0x1
+#define LNMTH$M_DIRECTORY   0x2
+#define LNMTH$M_GROUP       0x4
+#define LNMTH$M_SYSTEM      0x8
+#define LNMTH$M_CLUSTERWIDE 0x10
+#define LNMTH$M_REMACTION   0x20
+#define LNMTH$K_LENGTH      40
+#define LNMTH$S_LNMTHDEF    40
 
-#define LNM$C_BACKPOINTER 0x81
-#define LNM$C_TABLE 0x82	/* for use with lnmx index */
+#define LNMX$M_CONCEALED    0x1
+#define LNMX$M_TERMINAL     0x2
+#define LNMX$C_HSHFCN       0x80              
+#define LNMX$C_BACKPTR      0x81             
+#define LNMX$C_TABLE        0x82               
+#define LNMX$C_IGNORED_INDEX 0x83
+#define LNMX$C_CW_LINKS     0x84            
+#define LNMX$S_LNMXDEF      25               
 
 #ifndef USERLAND
 #define lnmmalloc vmalloc
@@ -30,53 +38,55 @@
 #define lnmprintf printf
 #endif
 
-struct lnmth {
-unsigned char lnmth$b_flags;
-unsigned char none[3];
-/*unsigned long*/ void * lnmth$l_hash;
-/*unsigned long*/ struct orb * lnmth$l_orb;
-/*unsigned long*/ struct lnmb * lnmth$l_name;
-/*unsigned long*/ void * lnmth$l_parent;
-/*unsigned long*/ void * lnmth$l_child;
-/*unsigned long*/ void * lnmth$l_sibling;
-/*unsigned long*/ void * lnmth$l_qtable;
-unsigned long lnmth$l_byteslm;
-unsigned long lnmth$l_bytes;
+struct _lnmth {
+  unsigned long lnmth$l_flags;
+  void * lnmth$l_hash;
+  struct orb * lnmth$l_orb;
+  struct _lnmb * lnmth$l_name;
+  void * lnmth$l_parent;
+  void * lnmth$l_child;
+  void * lnmth$l_sibling;
+  void * lnmth$l_qtable;
+  unsigned long lnmth$l_byteslm;
+  unsigned long lnmth$l_bytes;
 };
 
-struct lnmc {
-struct lnmc * lnmc$l_flink;
-struct lnmc * lnmc$l_blink;
-unsigned short lnmc$w_size;
-unsigned char lnmc$b_type;
-unsigned char lnmc$b_cacheindx;
-/*unsigned long*/ void * lnmc$l_tbladdr;
-unsigned long lnmc$l_procdirseq;
-unsigned long lnmc$l_sysdirseq;
-struct lnmth lnmths[26]; /* unstandard */
+struct _lnmc {
+  struct _lnmc * lnmc$l_flink;
+  struct _lnmc * lnmc$l_blink;
+  unsigned short lnmc$w_size;
+  unsigned char lnmc$b_type;
+  unsigned char lnmc$b_mode;
+  unsigned long lnmc$l_cacheindx;
+  void * lnmc$l_tbladdr;
+  unsigned long lnmc$l_procdirseq;
+  unsigned long lnmc$l_sysdirseq;
+  struct _lnmth * lnmc$l_entry[26]; /* unstandard */
 };
 
-struct lnmx {
-unsigned char lnmx$b_flags;
-unsigned char lnmx$b_index;
-unsigned short lnmx$b_hash;
-  unsigned short lnmx$b_count;
-/*unsigned*/ char lnmx$t_xlation[254];
-unsigned char none;
+struct _lnmx {
+  unsigned long lnmx$l_flags;
+  unsigned long lnmx$l_index;
+  unsigned long lnmx$l_hash;
+  struct _lnmx *lnmx$l_next;
+  unsigned int lnmx$l_pad;
+  unsigned int lnmx$l_xlen;
+  char lnmx$t_xlation[252];
 };
 
-struct lnmb {
-struct lnmb * lnmb$l_flink;
-struct lnmb * lnmb$l_blink;
-unsigned short lnmb$w_size;
-unsigned char lnmb$b_type;
-unsigned char lnmb$b_acmode;
-/*unsigned long*/ struct lnmth * lnmb$l_table; 
-unsigned char lnmb$b_flags; /* lnmdef is supposed to go here */
-unsigned char lnmb$b_count;
-unsigned char lnmb$t_name[254];
-struct lnmx lnmxs[20]; /* unstandard, and at what size? */
-unsigned char four;
+struct _lnmb {
+  struct _lnmb * lnmb$l_flink;
+  struct _lnmb * lnmb$l_blink;
+  unsigned short lnmb$w_size;
+  unsigned char lnmb$b_type;
+  char empty;
+  unsigned char lnmb$b_acmode;
+  struct _lnmth * lnmb$l_table; 
+  struct _lnmx * lnmb$l_lnmx;
+  
+  unsigned char lnmb$b_flags; /* lnmdef is supposed to go here */
+  unsigned char lnmb$b_count;
+  unsigned char lnmb$t_name[254];
 };
 
 struct lnmhshp {
@@ -87,7 +97,7 @@ unsigned long reserved;
 unsigned short lnmhsh$w_size;
 unsigned char lnmhsh$b_type;
 unsigned char reserved2;
-struct lnmb entry[LNMPHASHTBL];
+struct _lnmb * entry[LNMPHASHTBL];
 };
 
 struct lnmhshs {
@@ -101,13 +111,22 @@ unsigned char reserved2;
 void * entry[2*LNMSHASHTBL];
 };
 
+struct _lnmhsh {
+  unsigned int lnmhsh$l_mask;         
+  int lnmhsh$l_fill_1;                
+  unsigned short int lnmhsh$w_size;   
+  unsigned char lnmhsh$b_type;        
+  char lnmhsh$b_fill_2;               
+};
+
 struct struct_nt {
 /* ???? */
 int depth;
 int tries;
 int acmode;
-struct lnmc * cache;
+struct _lnmc * cache;
 char * context[10];
+struct _lnmb * lnmb;
 };
 
 struct struct_rt {
@@ -115,13 +134,13 @@ struct struct_rt {
 int depth;
 int tries;
 int acmode;
-struct lnmc * cache;
+struct _lnmc * cache;
 char * context[10];
 };
 
 struct struct_lnm_ret {
-  struct lnmth * mylnmth;
-  struct lnmb * mylnmb;
+  struct _lnmth * mylnmth;
+  struct _lnmb * mylnmb;
 };
 
 #endif
