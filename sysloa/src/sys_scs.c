@@ -53,6 +53,7 @@
 #include <nisca.h>
 #include <pbdef.h>
 #include <pdtdef.h>
+#include <prcpoldef.h>
 #include <rddef.h>
 #include <rdtdef.h>
 #include <sbdef.h>
@@ -462,6 +463,11 @@ int scs_init2(void)
 
 	scs_dev_init();
 
+	configure_init();
+	extern void configure();
+	kernel_thread(configure, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
+
+
 	/*
 	 * Prevent DECnet module unloading until its fixed properly.
 	 * Requires an audit of the code to check for memory leaks and
@@ -573,6 +579,7 @@ cwps$srcv_getjpi_ast(){}
 
 // module cwps_service_recv
 
+#if 0
 int ddb_transfer(struct _cdt * conf_cdt) {
   struct _ddb * ddb;
   struct _ucb * ucb;
@@ -624,6 +631,7 @@ int ddb_transfer(struct _cdt * conf_cdt) {
   // also more to transfer
 
 }
+#endif
 
 extern int cf_msg();
 extern int cf_dg();
@@ -642,17 +650,43 @@ int startconnect(int none) {
   struct _cdt * cdt;
   struct _cdt * conf_cdt;
   char * s;
+  signed long long time=-10000000;
 
   printk("starting cluster connects\n");
   scs_std$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drv",0,0,0,0,0/*s*/,0,0,0,0,0,0,0,0,0);
   // should be vms$disk_cl_drvr but use null-term for now
 
+  exe$schdwk(0,0,&time,0);
+  sys$hiber();
+
   scs_std$connect(cf_msg,cf_dg,cf_err,0,0,"configure","configclient",0,0,0,0,0/*s*/,&conf_cdt,0,0,0,0,0,0,0,0);
+
+  exe$schdwk(0,0,&time,0);
+  sys$hiber();
 
   scs_std$connect(forcex_msg,forcex_dg,forcex_err,0,0,"cwps","cwps$forcex",0,0,0,0,0,&cdt,0,0,0,0,0,0,0,0); 
 
+  exe$schdwk(0,0,&time,0);
+  sys$hiber();
+
   scs_std$connect(dlm_msg,dlm_dg,dlm_err,0,0,"dlm$dlm",&current->pcb$t_lname,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
+  exe$schdwk(0,0,&time,0);
+  sys$hiber();
+
+  // mscp$disk is there by default, so it is mandatory polled
+  struct _prcpol prcpol_, * prcpol=&prcpol_;
+  memset(prcpol, 0, sizeof(struct _prcpol));
+  memcpy(&prcpol->prcpol$b_prcnam,"mscp$disk",9);
+  memcpy(&prcpol->prcpol$t_nodnam,&othersb.sb$t_nodename[0],1+othersb.sb$t_nodename[0]);
+  extern short int cf_mbxchan;
+  struct _iosb iosb;
+  printk("just before mbx write to configure\n");
+  int sts = sys$qiow(0, cf_mbxchan, IO$M_NOW|IO$_WRITEVBLK, &iosb, 0, 0, prcpol, sizeof(struct _prcpol), 0, 0, 0, 0);
+  printk("just after mbx write to configure %x %x\n",sts,iosb.iosb$w_status);
+  
+#if 0
+  ddb_transfer(conf_cdt);
 	  {
 	    signed long long time=-100000000;
 	    //	    $DESCRIPTOR(tensec,"0 00:00:10.00");
@@ -660,5 +694,6 @@ int startconnect(int none) {
 	    //time=-time;
 	    exe$setimr(0,&time,ddb_transfer,conf_cdt,0);
 	  }
+#endif
 }
 
