@@ -113,44 +113,6 @@
 #define OZ_THREAD_STATE_MAX 14
 #define OZ_EVENT_NAMESIZE 32
 
-#if 0
-static int oz_sys_io_event_inc() { }
-static int oz_sys_event_nwait() { } 
-static int oz_sys_event_set() { }
-static int OZ_IO_fs_create() { }
-static int fs_create() { }
-static int OZ_Console_modebuff() { }
-static int OZ_IO_console_getmode() { }
-static int OZ_IO_fs_open() { }
-static int OZ_IO_fs_readrec() { }
-static int console_getmode() { }
-static int console_modebuff() { }
-static int fs_open() { }
-static int fs_readrec() { }
-
-static int oz_sys_handle_release() { }
-static int oz_sys_handle_getinfo() { }
-static int oz_sys_iochan_getunitname() { }
-static int sys$suspnd() { }
-static int oz_sys_spawn() { }
-static int oz_sys_io() { }
-static int oz_sys_io_dealloc() { }
-static int oz_sys_callknl() { }
-static int oz_sys_password_change() { }
-static int oz_sys_job_create() { }
-static int oz_sys_io_alloc() { }
-static int oz_sys_thread_getbyid() { }
-static int oz_sys_thread_orphan() { }
-static int oz_sys_thread_abort() { }
-static int oz_sys_process_getbyid() { }
-static int oz_sys_datebin_decode() { }
-static int oz_sys_daynumber_weekday() { }
-static int oz_sys_exhand_create() { }
-static int oz_sys_thread_create() { }
-static int oz_sys_condhand_signal() { }
-static int oz_sys_io_start() { }
-#endif
-
 unsigned long oz_hw_atomic_inc_long(unsigned long *l, char c) {
   (*l)++;
   return (*l);
@@ -595,7 +557,7 @@ static Command intcmd[] = {
 	0, "_search", 1, 0, "/vms$common/sysexe/search",
 	0, "_type", 1, 0, "/vms$common/sysexe/type",
 	0, "_init", 1, 0, "/vms$common/sysexe/init",
-	0, "_create", 1, 0, "/vms$common/sysexe/create",
+	0, "_create /directory", 1, 0, "/vms$common/sysexe/create",
 	0, "_edt", 1, 0, "/vms$common/sysexe/edt",
 	0, "_dfu", 1, 0, "/vms$common/sysexe/dfu",
 	0, "mount", 1, 0, "/vms$common/sysexe/mount.exe",
@@ -609,7 +571,7 @@ static Command intcmd[] = {
 	0, "search", 1, 0, "/vms$common/sysexe/search.exe",
 	0, "type", 1, 0, "/vms$common/sysexe/type.exe",
 	0, "init", 1, 0, "/vms$common/sysexe/init.exe",
-	0, "create", 1, 0, "/vms$common/sysexe/create.exe",
+	0, "create /directory", 1, 0, "/vms$common/sysexe/create.exe",
 	0, "edt", 1, 0, "/vms$common/sysexe/edt.exe",
 	0, "dfu", 1, 0, "/vms$common/sysexe/dfu.exe",
 	0, NULL, NULL, NULL, NULL };
@@ -4413,7 +4375,11 @@ static unsigned long int_set_default (unsigned long h_input, unsigned long h_out
     return (SS$_IVPARAM);
   }
 
-  chdir(argv[0]);
+  struct dsc$descriptor newdir;
+  newdir.dsc$w_length=strlen(argv[0]);
+  newdir.dsc$a_pointer=argv[0];
+  sys$setddir(&newdir,0,0);
+  //chdir(argv[0]);
   return SS$_NORMAL;
 }
 
@@ -4454,8 +4420,14 @@ static unsigned long int_show_default (unsigned long h_input, unsigned long h_ou
   const char *xargv[1];
   unsigned long sts;
   char buf[80];
+  unsigned short len;
 
-  getcwd(buf,80);
+  struct dsc$descriptor newdir;
+  newdir.dsc$w_length=80;
+  newdir.dsc$a_pointer=buf;
+  sys$setddir(0,&len,&newdir);
+  buf[len]=0;
+  //getcwd(buf,80);
 
   printf("%s\n",buf);
 
