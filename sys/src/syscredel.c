@@ -23,6 +23,7 @@
 // mmg$delpag
 // mmg$fast_create
 // mmg$try_all
+// create_bufobj
 
 struct _mmg mymmg;
 
