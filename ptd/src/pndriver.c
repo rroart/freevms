@@ -689,7 +689,7 @@ int PN$FDTREAD(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
 //
 //--
 int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
-  char inp_char;
+  int inp_char;
   char *buf;
   int size=0,send_tot=0,send_chr=0;
   signed int send_num=0;
