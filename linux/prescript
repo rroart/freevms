@@ -113,7 +113,7 @@
 		ln -s ../../sys/src/pagefile.c .;
 		ln -s ../../rms/src/rm3get.c .;
 		ln -s ../../rms/src/rmsmisc.h .;
-		ln -s ../../sys/src/sched.c .;
+		ln -s ../../sys/src/sched.c vmssched.c;
 
 		ln -s ../../pal/src/ipl.c .;
 		ln -s ../../pal/src/ast.c .;
