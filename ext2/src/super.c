@@ -27,6 +27,7 @@
 #include <linux/blkdev.h>
 #include <asm/uaccess.h>
 
+#include <misc.h>
 
 static void ext2_sync_super(struct super_block *sb,
 			    struct ext2_super_block *es);
@@ -445,7 +446,7 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 		offset = (sb_block*BLOCK_SIZE) % blocksize;
 	}
 
-	if (!(bh = sb_bread(sb, logic_sb_block))) {
+	if (!(bh = sb_bread(sb, logic_sb_block*vms_block_factor2(blocksize)))) {
 		printk ("EXT2-fs: unable to read superblock\n");
 		return NULL;
 	}
@@ -504,7 +505,7 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 
 		logic_sb_block = (sb_block*BLOCK_SIZE) / blocksize;
 		offset = (sb_block*BLOCK_SIZE) % blocksize;
-		bh = sb_bread(sb, logic_sb_block);
+		bh = sb_bread(sb, logic_sb_block*vms_block_factor2(blocksize));
 		if(!bh) {
 			printk("EXT2-fs: Couldn't read superblock on "
 			       "2nd try.\n");
@@ -608,7 +609,7 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 		goto failed_mount;
 	}
 	for (i = 0; i < db_count; i++) {
-		sb->u.ext2_sb.s_group_desc[i] = sb_bread(sb, logic_sb_block + i + 1);
+		sb->u.ext2_sb.s_group_desc[i] = sb_bread(sb, (logic_sb_block + i + 1)*vms_block_factor(sb->s_blocksize_bits));
 		if (!sb->u.ext2_sb.s_group_desc[i]) {
 			for (j = 0; j < i; j++)
 				brelse (sb->u.ext2_sb.s_group_desc[j]);

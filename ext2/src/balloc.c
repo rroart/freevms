@@ -17,6 +17,8 @@
 #include <linux/locks.h>
 #include <linux/quotaops.h>
 
+#include <misc.h>
+
 /*
  * balloc.c contains the blocks allocation and deallocation routines
  */
@@ -88,7 +90,7 @@ static int read_block_bitmap (struct super_block * sb,
 	if (!gdp)
 		goto error_out;
 	retval = 0;
-	bh = sb_bread(sb, le32_to_cpu(gdp->bg_block_bitmap));
+	bh = sb_bread(sb, le32_to_cpu(gdp->bg_block_bitmap)*vms_block_factor(sb->s_blocksize_bits));
 	if (!bh) {
 		ext2_error (sb, "read_block_bitmap",
 			    "Cannot read block bitmap - "

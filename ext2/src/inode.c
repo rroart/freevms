@@ -31,6 +31,8 @@
 #include <linux/quotaops.h>
 #include <linux/module.h>
 
+#include <misc.h>
+
 MODULE_AUTHOR("Remy Card and others");
 MODULE_DESCRIPTION("Second Extended Filesystem");
 MODULE_LICENSE("GPL");
@@ -249,7 +251,7 @@ static Indirect *ext2_get_branch(struct inode *inode,
 	if (!p->key)
 		goto no_block;
 	while (--depth) {
-		bh = sb_bread(sb, le32_to_cpu(p->key));
+		bh = sb_bread(sb, le32_to_cpu(p->key)*vms_block_factor(sb->s_blocksize_bits));
 		if (!bh)
 			goto failure;
 		/* Reader: pointers */
@@ -774,7 +776,7 @@ static void ext2_free_branches(struct inode *inode, u32 *p, u32 *q, int depth)
 			if (!nr)
 				continue;
 			*p = 0;
-			bh = sb_bread(inode->i_sb, nr);
+			bh = sb_bread(inode->i_sb, nr*vms_block_factor(inode->i_sb->s_blocksize_bits));
 			/*
 			 * A read failure? Report error and clear slot
 			 * (should be rare).
@@ -942,7 +944,7 @@ void ext2_read_inode (struct inode * inode)
 		EXT2_INODE_SIZE(inode->i_sb);
 	block = le32_to_cpu(gdp[desc].bg_inode_table) +
 		(offset >> EXT2_BLOCK_SIZE_BITS(inode->i_sb));
-	if (!(bh = sb_bread(inode->i_sb, block))) {
+	if (!(bh = sb_bread(inode->i_sb, block*vms_block_factor(inode->i_sb->s_blocksize_bits)))) {
 		ext2_error (inode->i_sb, "ext2_read_inode",
 			    "unable to read inode block - "
 			    "inode=%lu, block=%lu", inode->i_ino, block);
@@ -1086,7 +1088,7 @@ static int ext2_update_inode(struct inode * inode, int do_sync)
 		EXT2_INODE_SIZE(inode->i_sb);
 	block = le32_to_cpu(gdp[desc].bg_inode_table) +
 		(offset >> EXT2_BLOCK_SIZE_BITS(inode->i_sb));
-	if (!(bh = sb_bread(inode->i_sb, block))) {
+	if (!(bh = sb_bread(inode->i_sb, block*vms_block_factor(inode->i_sb->s_blocksize_bits)))) {
 		ext2_error (inode->i_sb, "ext2_write_inode",
 			    "unable to read inode block - "
 			    "inode=%lu, block=%lu", inode->i_ino, block);

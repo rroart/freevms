@@ -18,6 +18,7 @@
 #include <linux/locks.h>
 #include <linux/quotaops.h>
 
+#include <misc.h>
 
 /*
  * ialloc.c contains the inodes allocation and deallocation routines
@@ -51,7 +52,7 @@ static struct buffer_head *read_inode_bitmap (struct super_block * sb,
 	if (!desc)
 		goto error_out;
 
-	bh = sb_bread(sb, le32_to_cpu(desc->bg_inode_bitmap));
+	bh = sb_bread(sb, le32_to_cpu(desc->bg_inode_bitmap)*vms_block_factor(sb->s_blocksize_bits));
 	if (!bh)
 		ext2_error (sb, "read_inode_bitmap",
 			    "Cannot read inode bitmap - "

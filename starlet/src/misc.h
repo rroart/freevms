@@ -30,4 +30,10 @@ struct lock_blk {
                    unsigned int lock_id; 
 };
 
+#define vms_block_factor(x) (1<<(x-9))
+
+#define vms_block_factor2(x) (x>>9)
+
+// #define VMS_BLOCK_FACTOR 2 not! this is dangerous!
+
 #endif

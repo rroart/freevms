@@ -108,13 +108,13 @@ void startio (struct _irp * i, struct _ucb * u) {
 
     case IO$_READLBLK :
       fd=u->ucb$l_orb;
-      lseek(fd,BLOCK_SIZE*i->irp$l_qio_p3,SEEK_SET);
+      lseek(fd,512*i->irp$l_qio_p3,SEEK_SET);
       read_ubd_fs(fd,i->irp$l_qio_p1,i->irp$l_qio_p2);
       return ioc$reqcom(SS$_NORMAL,0,u);
       break;
     case IO$_READPBLK :
       fd=u->ucb$l_orb;
-      lseek(fd,BLOCK_SIZE*i->irp$l_qio_p3,SEEK_SET);
+      lseek(fd,512*i->irp$l_qio_p3,SEEK_SET);
       read_ubd_fs(fd,i->irp$l_qio_p1,i->irp$l_qio_p2);
       return ioc$reqcom(SS$_NORMAL,0,u);
       break;
@@ -123,13 +123,13 @@ void startio (struct _irp * i, struct _ucb * u) {
       break;
     case IO$_WRITELBLK :
       fd=u->ucb$l_orb;
-      lseek(fd,BLOCK_SIZE*i->irp$l_qio_p3,SEEK_SET);
+      lseek(fd,512*i->irp$l_qio_p3,SEEK_SET);
       write_ubd_fs(fd,i->irp$l_qio_p1,i->irp$l_qio_p2);
       return ioc$reqcom(SS$_NORMAL,0,u);
       break;
     case IO$_WRITEPBLK :
       fd=u->ucb$l_orb;
-      lseek(fd,BLOCK_SIZE*i->irp$l_qio_p3,SEEK_SET);
+      lseek(fd,512*i->irp$l_qio_p3,SEEK_SET);
       write_ubd_fs(fd,i->irp$l_qio_p1,i->irp$l_qio_p2);
       return ioc$reqcom(SS$_NORMAL,0,u);
       break;
@@ -142,9 +142,19 @@ void startio (struct _irp * i, struct _ucb * u) {
     }
 }
 
-int acp_std$access();
-int acp_std$readblk();
-int acp_std$writeblk();
+int acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$modify(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$mount(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$deaccess(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
 extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
 
@@ -612,6 +622,12 @@ int ubd_vmsinit(void) {
   ini_fdt_act(&fdt,IO$_WRITELBLK,acp_std$writeblk,1);
   ini_fdt_act(&fdt,IO$_WRITEPBLK,acp_std$writeblk,1);
   ini_fdt_act(&fdt,IO$_WRITEVBLK,acp_std$writeblk,1);
+  ini_fdt_act(&fdt,IO$_CREATE,acp_std$access,1);
+  ini_fdt_act(&fdt,IO$_DEACCESS,acp_std$deaccess,1);
+  ini_fdt_act(&fdt,IO$_DELETE,acp_std$modify,1);
+  ini_fdt_act(&fdt,IO$_MODIFY,acp_std$modify,1);
+  ini_fdt_act(&fdt,IO$_ACPCONTROL,acp_std$modify,1);
+  ini_fdt_act(&fdt,IO$_MOUNT,acp_std$mount,1);
   exe$assign(&u0,&chan,0,0,0);
   registerdevchan(MKDEV(UBD_MAJOR,0),chan);
   return chan;

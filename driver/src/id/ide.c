@@ -33,7 +33,7 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
 
   //  ide_drive_t *drive=u->ucb$l_orb;
 
-  i->irp$l_qio_p3 <<= 1;
+  //i->irp$l_qio_p3 <<= 1;
   i->irp$l_qio_p3 += partadd(u->ucb$l_orb,i->irp$l_qio_p4);
     //drive->part[i->irp$l_qio_p4].start_sect + drive->sect0;
 
@@ -47,7 +47,7 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
       rq->buffer=i->irp$l_qio_p1;
       rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
       i->irp$l_qio_p5=rq;
-      do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3<<1);
+      do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3);
       return (sts);
     }
 
@@ -57,7 +57,7 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
       rq->buffer=i->irp$l_qio_p1;
       rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
       i->irp$l_qio_p5=rq;
-      do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3/*<<1*/);
+      do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3);
       return (sts);
     }
 
@@ -148,9 +148,19 @@ static struct _ddt ddt = {
 static struct _ddb ddb;
 static struct _dpt dpt;
 
-int acp_std$access();
-int acp_std$readblk();
-int acp_std$writeblk();
+int acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$modify(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$mount(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$deaccess(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
 extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
 
@@ -168,6 +178,12 @@ int ide_vmsinit(void) {
   ini_fdt_act(&fdt,IO$_WRITELBLK,acp_std$writeblk,1);
   ini_fdt_act(&fdt,IO$_WRITEPBLK,acp_std$writeblk,1);
   ini_fdt_act(&fdt,IO$_WRITEVBLK,acp_std$writeblk,1);
+  ini_fdt_act(&fdt,IO$_CREATE,acp_std$access,1);
+  ini_fdt_act(&fdt,IO$_DEACCESS,acp_std$deaccess,1);
+  ini_fdt_act(&fdt,IO$_DELETE,acp_std$modify,1);
+  ini_fdt_act(&fdt,IO$_MODIFY,acp_std$modify,1);
+  ini_fdt_act(&fdt,IO$_ACPCONTROL,acp_std$modify,1);
+  ini_fdt_act(&fdt,IO$_MOUNT,acp_std$mount,1);
   exe$assign(&u0,&chan,0,0,0);
   registerdevchan(MKDEV(IDE0_MAJOR,0),chan);
   printk(KERN_INFO "dev here\n");
