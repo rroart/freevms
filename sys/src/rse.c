@@ -91,7 +91,7 @@ int sch$pixscan(void) {
   
   //printk("pri %x|",tmppri);
   goto out; /* not this yet */
-  for(i=30;i>tmppri,scanned;i--) {
+  for(i=30;i>tmppri && scanned;i--) {
     tmp=*(unsigned long *)&sch$aq_comh[i];
     if(*(unsigned long *)tmp == tmp) {; } else {
       tmp2=tmp;

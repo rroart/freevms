@@ -21,7 +21,7 @@
 
 int ioc$ffchan(unsigned short int *chan) {
   unsigned short int i;
-  for (i=0; i<CHANNELCNT,  ctl$gl_ccbbase[i].ccb$b_amod; i++) ;
+  for (i=0; i<CHANNELCNT && ctl$gl_ccbbase[i].ccb$b_amod; i++) ;
   if (ctl$gl_ccbbase[i].ccb$b_amod)
     return SS$_NOIOCHAN;
   else {
