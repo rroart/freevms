@@ -31,54 +31,7 @@
 
 // temporary stuff with syscalls
 
-extern int kernel_errno;
-
-#ifdef __i386__
-int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6) {
-  struct struct_qio s;
-  s.efn=efn;
-  s.chan=chan;
-  s.func=func;
-  s.iosb=iosb;
-  s.astadr=astadr;
-  s.astprm=astprm;
-  s.p1=p1;
-  s.p2=p2;
-  s.p3=p3;
-  s.p4=p4;
-  s.p5=p5;
-  s.p6=p6;
-  //  return ({ unsigned int resultvar; asm volatile ( "bpushl .L__X'%k2, %k2\n\t" "bmovl .L__X'%k2, %k2\n\t" "movl %1, %%eax\n\t" "int $0x81\n\t" "bpopl .L__X'%k2, %k2\n\t" : "=a" (resultvar) : "i" (__NR_$qio) , "acdSD" (&s) : "memory", "cc"); if (resultvar >= 0xfffff001) { errno= (-resultvar); resultvar = 0xffffffff; } (int) resultvar; });
-  return INLINE_SYSCALL($qio,1,&s);
-}
-#endif
-
-#ifdef __arch_um__
-int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct
-	     _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
-  int sts;
-  struct struct_qio s;
-  s.efn=efn;
-  s.chan=chan;
-  s.func=func;
-  s.iosb=iosb;
-  s.astadr=astadr;
-  s.astprm=astprm;
-  s.p1=p1;
-  s.p2=p2;
-  s.p3=p3;
-  s.p4=p4;
-  s.p5=p5;
-  s.p6=p6;
-  //  return ({     unsigned int resultvar; asm volatile (  "bpushl .L__X'%k2, %k2\n\t"     "bmovl .L__X'%k2, %k2\n\t"      "movl %1, %%eax\n\t"    "int $0x80\n\t" "bpopl .L__X'%k2, %k2\n\t"      : "=a" (resultvar)      : "i" (__NR_$qio  ) , "acdSD" (  &s  )  : "memory", "cc");    if (resultvar >= 0xfffff001) {       errno= (-resultvar);    resultvar = 0xffffffff; }       (int) resultvar; }) ;
-  //  return INLINE_SYSCALL($qio,1,&s); // did not work?
-  pushpsl();
-  sts=exe$qio(&s);
-  myrei();
-  return sts;
-}
-
-#endif
+// extern int kernel_errno;
 
 void exe$insertirp(void * u, struct _irp * i) {
   struct _irp *tmp=((struct _irp *)u)->irp$l_ioqfl;
@@ -211,14 +164,14 @@ int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
     return SS$_NORMAL;
   }
   sch$wake(a->aqb$l_acppid);
-  /* restore ipl to 0 */
+  setipl(0);
   return SS$_NORMAL;
 }
 
 int exe$qiodrvpkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
 
   exe$insioq(i,u);
-  /* restore ipl to 0 */
+  setipl(0);
   return SS$_NORMAL;
 }
 
@@ -229,9 +182,10 @@ int exe_std$qiodrvpkt (struct _irp * i, struct _ucb * u) {
 extern f11b$dispatch();
 
 void exe$qioqxqppkt (struct _pcb * p, struct _irp * i) {
-  struct _acb *a=i;
+  struct _acb *a=&i->irp$l_fqfl;
   //  struct _f11b * f=ctl$gl_f11bxqp;
 
+  a->acb$l_pid=p->pid;
   a->acb$l_ast=f11b$dispatch;
   a->acb$l_astprm=i;
   remque(i,0); // got to get rid of this somewhere, why not here?
