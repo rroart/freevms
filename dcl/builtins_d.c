@@ -68,6 +68,74 @@ DIRECTORY
   /PAGE      /PRINTER   /PROTECTION           /SEARCH    /SECURITY  /SELECT
   /SHELVED_STATE        /SINCE     /SIZE      /STYLE     /TIME      /TOTAL
   /TRAILING  /VERSIONS  /WIDTH     /WRAP
+
+Examples:
+$ dir /full
+
+Directory SYS$SYSDEVICE:[JKB]
+
+ESSAI.F;1                     File ID:  (3183,6,0)            
+Size:            1/9          Owner:    [GUESTS,JKB]
+Created:   15-JUN-2001 16:51:23.47
+Revised:   15-JUN-2001 16:51:23.68 (1)
+Expires:   <None specified>
+Backup:    <No backup recorded>
+Effective: <None specified>
+Recording: <None specified>
+File organization:  Sequential
+Shelved state:      Online 
+Caching attribute:  Writethrough
+File attributes:    Allocation: 9, Extend: 0, Global buffer count: 0
+                    No version limit
+Record format:      Variable length, maximum 0 bytes, longest 21 bytes
+Record attributes:  Carriage return carriage control
+RMS attributes:     None
+Journaling enabled: None
+File protection:    System:RWED, Owner:RWED, Group:RE, World:
+Access Cntrl List:  None
+Client attributes:  None
+
+MAIL.MAI;1                    File ID:  (3298,4,0)            
+Size:           45/45         Owner:    [GUESTS,JKB]
+Created:   18-JUN-2001 10:25:00.08
+Revised:    7-NOV-2001 16:58:50.87 (21)
+Expires:   <None specified>
+Backup:    <No backup recorded>
+Effective: <None specified>
+Recording: <None specified>
+File organization:  Indexed, Prolog: 3, Using 2 keys
+                             In 3 areas
+Shelved state:      Online 
+Caching attribute:  Writethrough
+File attributes:    Allocation: 45, Extend: 15, Maximum bucket size: 5
+                    Global buffer count: 0, No version limit
+                    Contiguous best try
+Record format:      Variable length, maximum 2048 bytes, longest 0 bytes
+Record attributes:  None
+RMS attributes:     None
+Journaling enabled: None
+File protection:    System:RW, Owner:RW, Group:, World:
+Access Cntrl List:  None
+Client attributes:  None
+
+Total of 2 files, 46/54 blocks.
+$ dir /protection
+
+Directory SYS$SYSDEVICE:[JKB]
+
+ESSAI.F;1            (RWED,RWED,RE,)
+MAIL.MAI;1           (RW,RW,,)
+
+Total of 2 files.
+$ dir /owner
+
+Directory SYS$SYSDEVICE:[JKB]
+
+ESSAI.F;1            [GUESTS,JKB]                   
+MAIL.MAI;1           [GUESTS,JKB]                   
+
+Total of 2 files.
+$ 
 */
 {
 	int					status;

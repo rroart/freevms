@@ -89,10 +89,15 @@ commands_init(dcl$command **commands)
 
 	if ((*commands = command_add_on(*commands,
 			"HELP", help_function, DCL$VERB, DCL$NONE,
+			DCL$Q_INSTRUCTIONS, DCL$Q_LIBLIST,
+			DCL$Q_LIBRARY, DCL$Q_MESSAGE,
+			DCL$Q_OUTPUT, DCL$Q_PAGE,
+			DCL$Q_PROMPT, DCL$Q_USERLIBRARY,
 			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
 			"LOGOUT", logout_function, DCL$VERB, DCL$NONE,
+			DCL$Q_BRIEF, DCL$Q_FULL, DCL$HANGUP,
 			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
@@ -111,13 +116,187 @@ commands_init(dcl$command **commands)
 			"SHOW", NULL, DCL$VERB, DCL$NONE,
 			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
+
 	/*
 	 * KEYWORDS
 	 */
 
 	if ((*commands = command_add_on(*commands,
+			"ACCOUNTING", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"ACL", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"AUDIT", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"BROADCAST", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"CARD_READER", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"CLUSTER", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"COMMAND", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"CONTROL", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"CPU", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"DAY", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
 			"DEFAULT", NULL, DCL$KEYWORD, DCL$NONE,
 			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"DEVICE", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"DIRECTORY", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"DISPLAY", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"ENTRY", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"FILE", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"HOST", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"KEY", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"LOGINS", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"MAGTAPE", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"MESSAGE", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"NETWORK", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"ON", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"OUTPUT_RATE", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"PASSWORD", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"PREFERRED_PATH", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"PREFIX", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"PRINTER", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"PROCESS", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"PROMPT", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"PROTECTION", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"QUEUE", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"RESTART_VALUE", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"RIGHTS_LIST", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"RMS_DEFAULT", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"SECURITY", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"SERVER", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"SYMBOL", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"TERMINAL", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"TIME", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"UIC", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"VERIFY", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"VOLUME", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"WORKING_SET", NULL, DCL$KEYWORD, DCL$NONE,
+			DCL$END_OF_LIST)) == NULL) return(DCL$FAILURE);
+
 
 	/*
 	 * QUALIFIERS

@@ -45,6 +45,7 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 
 	int				i;
 	int				length;
+	int				negative_qualifier;
 	int				number_of_targets;
 	int				status;
 	int				string_flag;
@@ -94,6 +95,34 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 	number_of_targets = 0;
 	first_target = NULL;
 
+	if (required_type == DCL$QUALIFIER)
+	{
+		if (strlen(string) > 3)
+		{
+			if (strncmp(string, "/NO", 3) == 0)
+			{
+				ptr2 = ((ptr1 = string + 1) + 2);
+				while((*ptr2) != 0) *ptr1++ = *ptr2++;
+				(*ptr1) = 0;
+
+				negative_qualifier = 1;
+				length -= 2;
+			}
+			else
+			{
+				negative_qualifier = 0;
+			}
+		}
+		else
+		{
+			negative_qualifier = 0;
+		}
+	}
+	else
+	{
+		negative_qualifier = 0;
+	}
+
 	while(current_command != NULL)
 	{
 		if ((*current_command).length >= length)
@@ -119,6 +148,16 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 		}
 
 		current_command = (*current_command).next;
+	}
+
+	if (negative_qualifier != 0)
+	{
+		ptr2 = (ptr1 = string + length) - 2;
+		i = length;
+		while(--i) *ptr1-- = *ptr2--;
+		(*(ptr1 = string + 1)) = 'N';
+		(*(++ptr1)) = 'O';
+		length += 2;
 	}
 
 	if (number_of_targets == 1)
