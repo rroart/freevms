@@ -24,6 +24,8 @@
 #include <linux/kernel_stat.h>
 
 #include <asm/uaccess.h>
+#include "../../freevms/sys/src/sysgen.h"
+#include "../../freevms/sys/src/rse.h"
 
 /*
  * Timekeeping variables
@@ -576,18 +578,20 @@ void update_one_process(struct task_struct *p, unsigned long user,
  * Called from the timer interrupt handler to charge one tick to the current 
  * process.  user_tick is 1 if the tick is user time, 0 for system.
  */
+static int xyzxyz=0;
 void update_process_times(int user_tick)
 {
 	struct task_struct *p = current;
 	int cpu = smp_processor_id(), system = user_tick ^ 1;
 
+//printk("timer %x %x %x\n",p->phd$w_quant,p->pcb$b_pri);
 	update_one_process(p, user_tick, system, cpu);
 	if (p->pid) {
-		if (--p->counter <= 0) {
-			p->counter = 0;
-			p->need_resched = 1;
+		if (++p->phd$w_quant >= 0 ) {
+//			sch$qend(p);
+			if (p->phd$w_quant<128) sch$qend(p);
 		}
-		if (p->nice > 0)
+		if (p->pcb$b_prib == 31)
 			kstat.per_cpu_nice[cpu] += user_tick;
 		else
 			kstat.per_cpu_user[cpu] += user_tick;

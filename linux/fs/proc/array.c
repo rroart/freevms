@@ -334,9 +334,9 @@ int proc_pid_stat(struct task_struct *task, char * buffer)
 
 	/* scale priority and nice values from timeslices to -20..20 */
 	/* to make it look like a "normal" Unix priority/nice value  */
-	priority = task->counter;
-	priority = 20 - (priority * 10 + DEF_COUNTER / 2) / DEF_COUNTER;
-	nice = task->nice;
+	priority = task->pcb$b_pri;
+//	priority = 20 - (priority * 10 + DEF_COUNTER / 2) / DEF_COUNTER;
+	nice = task->pcb$b_prib;
 
 	read_lock(&tasklist_lock);
 	ppid = task->pid ? task->p_opptr->pid : 0;
@@ -386,7 +386,7 @@ int proc_pid_stat(struct task_struct *task, char * buffer)
 		task->nswap,
 		task->cnswap,
 		task->exit_signal,
-		task->processor);
+		task->pcb$l_cpu_id);
 	if(mm)
 		mmput(mm);
 	return res;

@@ -365,7 +365,7 @@ static int ksoftirqd(void * __bind_cpu)
 	int cpu = cpu_logical_map(bind_cpu);
 
 	daemonize();
-	current->nice = 19;
+	current->pcb$b_prib = 0; /* should really be the opposite */
 	sigfillset(&current->blocked);
 
 	/* Migrate to the right CPU */

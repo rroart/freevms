@@ -124,15 +124,17 @@ void cpu_idle (void)
 {
 	/* endless idle loop with no priority at all */
 	init_idle();
-	current->nice = 20;
-	current->counter = -100;
+	current->pcb$b_prib = 0; /* should really be the opposite */
+	current->pcb$b_pri = 31;
+	current->phd$w_quant = 0;
 
 	while (1) {
 		void (*idle)(void) = pm_idle;
+//printk("cpu_idle\n");
 		if (!idle)
 			idle = default_idle;
-		while (!current->need_resched)
-			idle();
+/*		while (!current->need_resched)
+			idle(); this has to go for now */
 		schedule();
 		check_pgt_cache();
 	}

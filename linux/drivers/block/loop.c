@@ -563,7 +563,7 @@ static int loop_thread(void *data)
 	spin_unlock_irq(&current->sigmask_lock);
 
 	current->policy = SCHED_OTHER;
-	current->nice = -20;
+	current->pcb$b_prib = 8;
 
 	spin_lock_irq(&lo->lo_lock);
 	lo->lo_state = Lo_bound;

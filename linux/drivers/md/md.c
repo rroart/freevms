@@ -2913,7 +2913,7 @@ int md_thread(void * arg)
 	 * many dirty RAID5 blocks.
 	 */
 	current->policy = SCHED_OTHER;
-	current->nice = -20;
+	current->pcb$b_prib = 24;
 	md_unlock_kernel();
 
 	complete(thread->event);
@@ -3364,7 +3364,7 @@ recheck:
 	/*
 	 * Resync has low priority.
 	 */
-	current->nice = 19;
+	current->pcb$b_prib = 31;
 
 	is_mddev_idle(mddev); /* this also initializes IO event counters */
 	for (m = 0; m < SYNC_MARKS; m++) {
@@ -3442,7 +3442,7 @@ recheck:
 		currspeed = (j-mddev->resync_mark_cnt)/2/((jiffies-mddev->resync_mark)/HZ +1) +1;
 
 		if (currspeed > sysctl_speed_limit_min) {
-			current->nice = 19;
+			current->pcb$b_prib = 31;
 
 			if ((currspeed > sysctl_speed_limit_max) ||
 					!is_mddev_idle(mddev)) {
@@ -3451,7 +3451,7 @@ recheck:
 				goto repeat;
 			}
 		} else
-			current->nice = -20;
+			current->pcb$b_prib = 24;
 	}
 	printk(KERN_INFO "md: md%d: sync done.\n",mdidx(mddev));
 	err = 0;

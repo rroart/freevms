@@ -27,6 +27,8 @@
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 
+#include "../../freevms/sys/src/sysgen.h"
+
 /* The idle threads do not count.. */
 int nr_threads;
 int nr_running;
@@ -644,7 +646,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	{
 		int i;
 		p->has_cpu = 0;
-		p->processor = current->processor;
+		p->pcb$l_cpu_id = current->pcb$l_cpu_id;
 		/* ?? should we just memset this ?? */
 		for(i = 0; i < smp_num_cpus; i++)
 			p->per_cpu_utime[i] = p->per_cpu_stime[i] = 0;
@@ -684,16 +686,20 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	p->exit_signal = clone_flags & CSIGNAL;
 	p->pdeath_signal = 0;
 
+
+	/* pcb stuff */
+
+	p->pcb$b_prib=31-DEFPRI;
+	p->pcb$b_pri=DEFPRI-6; /* pri boost */
+	if (p->pcb$b_pri<16) p->pcb$b_pri=16;
+	p->phd$w_quant=-QUANTUM/10;
+
 	/*
 	 * "share" dynamic priority between parent and child, thus the
 	 * total amount of dynamic priorities in the system doesnt change,
 	 * more scheduling fairness. This is only important in the first
 	 * timeslice, on the long run the scheduling behaviour is unchanged.
 	 */
-	p->counter = (current->counter + 1) >> 1;
-	current->counter >>= 1;
-	if (!current->counter)
-		current->need_resched = 1;
 
 	/*
 	 * Ok, add it to the run-queues and make it

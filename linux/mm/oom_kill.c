@@ -82,7 +82,7 @@ static int badness(struct task_struct *p)
 	 * Niced processes are most likely less important, so double
 	 * their badness points.
 	 */
-	if (p->nice > 0)
+	if (p->pcb$b_prib == 31)
 		points *= 2;
 
 	/*
@@ -149,7 +149,7 @@ void oom_kill_task(struct task_struct *p)
 	 * all the memory it needs. That way it should be able to
 	 * exit() and clear out its resources quickly...
 	 */
-	p->counter = 5 * HZ;
+	p->pcb$b_pri = p->pcb$b_pri - 3; /* boost */
 	p->flags |= PF_MEMALLOC;
 
 	/* This process has hardware access, be more careful. */

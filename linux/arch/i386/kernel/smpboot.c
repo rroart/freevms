@@ -363,7 +363,7 @@ void __init smp_callin(void)
 	 * (This works even if the APIC is not enabled.)
 	 */
 	phys_id = GET_APIC_ID(apic_read(APIC_ID));
-	cpuid = current->processor;
+	cpuid = current->pcb$l_cpu_id;
 	if (test_and_set_bit(cpuid, &cpu_online_map)) {
 		printk("huh, phys CPU#%d, CPU#%d already present??\n",
 					phys_id, cpuid);
@@ -562,7 +562,7 @@ static void __init do_boot_cpu (int apicid)
 	if (!idle)
 		panic("No idle process for CPU %d", cpu);
 
-	idle->processor = cpu;
+	idle->pcb$l_cpu_id = cpu;
 	x86_cpu_to_apicid[cpu] = apicid;
 	x86_apicid_to_cpu[apicid] = cpu;
 	idle->has_cpu = 1; /* we schedule the first task manually */
@@ -860,7 +860,7 @@ void __init smp_boot_cpus(void)
 	x86_apicid_to_cpu[boot_cpu_id] = 0;
 	x86_cpu_to_apicid[0] = boot_cpu_id;
 	global_irq_holder = 0;
-	current->processor = 0;
+	current->pcb$l_cpu_id = 0;
 	init_idle();
 	smp_tune_scheduling();
 

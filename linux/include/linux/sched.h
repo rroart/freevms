@@ -278,6 +278,8 @@ struct user_struct {
 extern struct user_struct root_user;
 #define INIT_USER (&root_user)
 
+#define _pcb task_struct
+#define _ktb task_struct
 struct task_struct {
 	/*
 	 * offsets of these are hardcoded elsewhere - touch with care
@@ -300,8 +302,8 @@ struct task_struct {
  * all fields in a single cacheline that are needed for
  * the goodness() loop in schedule().
  */
-	long counter;
-	long nice;
+/*	long counter; temp */
+/*	long nice; temp */
 	unsigned long policy;
 	struct mm_struct *mm;
 	int has_cpu, processor;
@@ -356,6 +358,18 @@ struct task_struct {
 /* mm fault and swap info: this can arguably be seen as either mm-specific or thread-specific */
 	unsigned long min_flt, maj_flt, nswap, cmin_flt, cmaj_flt, cnswap;
 	int swappable:1;
+  unsigned short pcb$w_size;
+  unsigned char pcb$b_type;
+  unsigned short pcb$w_state;
+  unsigned char pcb$b_pri;             
+  unsigned char pcb$b_prib;            
+  unsigned char pcb$b_prisav;          
+  unsigned char pcb$b_pribsav;         
+  unsigned char pcb$b_authpri;         
+  signed short phd$w_quant; /* really belongs in phd */
+  unsigned long pcb$l_cpu_id;
+  unsigned long pcb$l_pixhist;
+
 /* process credentials */
 	uid_t uid,euid,suid,fsuid;
 	gid_t gid,egid,sgid,fsgid;
@@ -402,6 +416,7 @@ struct task_struct {
 /* Protection of (de-)allocation: mm, files, fs, tty */
 	spinlock_t alloc_lock;
 };
+/* will need a PCB. PCB is a null PCB placeholder */
 
 /*
  * Per process flags
@@ -449,6 +464,8 @@ extern struct exec_domain	default_exec_domain;
  *  INIT_TASK is used to set up the first task table, touch at
  * your own risk!. Base=0, limit=0x1fffff (=2MB)
  */
+/*    counter:		DEF_COUNTER,					
+    nice:		DEF_NICE,          */
 #define INIT_TASK(tsk)	\
 {									\
     state:		0,						\
@@ -457,8 +474,6 @@ extern struct exec_domain	default_exec_domain;
     addr_limit:		KERNEL_DS,					\
     exec_domain:	&default_exec_domain,				\
     lock_depth:		-1,						\
-    counter:		DEF_COUNTER,					\
-    nice:		DEF_NICE,					\
     policy:		SCHED_OTHER,					\
     mm:			NULL,						\
     active_mm:		&init_mm,					\
@@ -487,7 +502,7 @@ extern struct exec_domain	default_exec_domain;
     sig:		&init_signals,					\
     pending:		{ NULL, &tsk.pending.head, {{0}}},		\
     blocked:		{{0}},						\
-    alloc_lock:		SPIN_LOCK_UNLOCKED				\
+    alloc_lock:		SPIN_LOCK_UNLOCKED,				\
 }
 
 

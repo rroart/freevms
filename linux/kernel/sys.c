@@ -205,10 +205,12 @@ asmlinkage long sys_setpriority(int which, int who, int niceval)
 
 	/* normalize: avoid signed division (rounding problems) */
 	error = -ESRCH;
-	if (niceval < -20)
-		niceval = -20;
-	if (niceval > 19)
-		niceval = 19;
+	if (niceval < 0)
+		niceval = 0;
+	if (niceval > 31)
+		niceval = 31;
+
+	niceval = 31 - niceval; 
 
 	read_lock(&tasklist_lock);
 	for_each_task(p) {
@@ -220,7 +222,7 @@ asmlinkage long sys_setpriority(int which, int who, int niceval)
 			error = -EPERM;
 			continue;
 		}
-		if (niceval < p->nice && !capable(CAP_SYS_NICE)) {
+		if (niceval < p->pcb$b_prib && !capable(CAP_SYS_NICE)) {
 			error = -EACCES;
 			continue;
 		}
@@ -231,7 +233,7 @@ asmlinkage long sys_setpriority(int which, int who, int niceval)
 		}
 		if (error == -ESRCH)
 			error = 0;
-		p->nice = niceval;
+		p->pcb$b_prib = niceval;
 	}
 	read_unlock(&tasklist_lock);
 
@@ -257,7 +259,7 @@ asmlinkage long sys_getpriority(int which, int who)
 		long niceval;
 		if (!proc_sel(p, which, who))
 			continue;
-		niceval = 20 - p->nice;
+		niceval = p->pcb$b_prib;
 		if (niceval > retval)
 			retval = niceval;
 	}
