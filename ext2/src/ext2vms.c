@@ -204,7 +204,7 @@ int exttwo_io_done(struct _irp * i) {
   return f11b_io_done(i);
 }
 
-void myqio(int rw, int data, int size, int blocknr,kdev_t dev)
+void myqio(int rw, int data, int size, int blocknr,kdev_t dev, int block_factor)
 {
   int sts;
   int type;
@@ -214,7 +214,7 @@ void myqio(int rw, int data, int size, int blocknr,kdev_t dev)
   else
     type=IO$_READPBLK;
   sts = exe_qiow(0,(unsigned short)dev2chan(dev),type,&iosb,0,0,
-		     data,size, blocknr,MINOR(dev)&31,0,0);
+		     data,size, blocknr*block_factor,MINOR(dev)&31,0,0);
   return sts;
 }
 
@@ -252,7 +252,6 @@ void vms_mark_buffer_dirty(struct buffer_head * bh)
   int sts;
   int type;
   unsigned long long iosb;
-
   if (rw)
     type=IO$_WRITEPBLK;
   else
@@ -313,7 +312,7 @@ int ext2_wcb_create_all(struct _fcb * fcb, struct inode * inode)
       }
       if (l1==0) {
 	l1=inode->u.ext2_i.i_data[i];
-	myqio(READ,b1,EXT2_BLOCK_SIZE(s),l1,inode->i_dev);
+	myqio(READ,b1,EXT2_BLOCK_SIZE(s),l1,inode->i_dev,vms_block_factor(inode->i_blkbits));
       }
       if (i==12) {
 	nextphyblk=b1[l1p];
@@ -328,7 +327,7 @@ int ext2_wcb_create_all(struct _fcb * fcb, struct inode * inode)
       if (i==13) {
 	if (l2==0) {
 	  l2=b1[l1p];
-	  myqio(READ,b2,EXT2_BLOCK_SIZE(s),l2,inode->i_dev);
+	  myqio(READ,b2,EXT2_BLOCK_SIZE(s),l2,inode->i_dev,vms_block_factor(inode->i_blkbits));
 	}
 	nextphyblk=b2[l2p];
 	l2p++;
@@ -612,6 +611,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|dirflg, 0);
     buf.count = 0;
     buf.dirent = &dir;
+    if (IS_ERR(f)) {
+      sts=SS$_NOSUCHFILE;
+      if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
+    }
     error=generic_file_llseek(f, x2p->prev_fp /*fib->fib$l_wcc*//*dir.d_off*/, 0);
     if (error<0)
       goto err;
