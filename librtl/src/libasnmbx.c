@@ -16,7 +16,7 @@ int lib$asn_wth_mbx (void * device_name , long * maximum_message_size, long * bu
   char retbuf[16];
   struct dsc$descriptor d;
 
-  int sts=sys$crembx(0,mailbox_channel,maximum_message_size,buffer_quota,0,0,0);
+  int sts=sys$crembx(0,mailbox_channel,*maximum_message_size,*buffer_quota,0,0,0);
   if ((sts&1)==0)
     return sts;
 
