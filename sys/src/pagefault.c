@@ -37,6 +37,8 @@
 #include <wsldef.h>
 #include <va_rangedef.h>
 
+#include <linux/vmalloc.h>
+
 #ifdef __arch_um__
 #include "user_util.h"
 //#define yield() do { SOFTINT_RESCHED_VECTOR; } while(0)
@@ -102,7 +104,8 @@ int mmg$makewsle(struct _pcb * p, struct _phd * phd, void * va, void * pte, sign
   wsle->wsl$v_pagtyp=mem_map[pfn].pfn$v_pagtyp;
   ((unsigned long)wsle->wsl$pq_va)|=(unsigned long)va;
   // p->pcb$l_phd->phd$l_ptwsleval++
-  page=&((struct _pfn *)pfn$al_head)[pfn];
+  //  page=&((struct _pfn *)pfn$al_head)[pfn];
+  page=&mem_map[pfn];
   page->pfn$l_wslx_qw=new; // hope it's the right one?
 }
 
@@ -161,6 +164,10 @@ void pagefaultast(struct pfast * p) {
   set_fs(fs);
 }
 
+extern int astdeb;
+
+extern int in_atomic;
+
 int makereadast(unsigned long file, unsigned long address, unsigned long pte, unsigned long offset) {
   struct _acb * a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
   struct pfast * pf=kmalloc(sizeof(struct pfast),GFP_KERNEL);
@@ -172,9 +179,11 @@ int makereadast(unsigned long file, unsigned long address, unsigned long pte, un
   rde=mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
   pf->pteentry=rde->rde$r_regprot.regprt$l_region_prot;
   pf->rde=rde;
-  bzero(a,sizeof(struct _acb));
+  a->acb$b_rmod=0;
+  a->acb$l_kast=0;
   a->acb$l_ast=pagefaultast;
   a->acb$l_astprm=pf;
+  astdeb=1;
   sch$qast(current->pcb$l_pid,0,a);
 }
 
@@ -207,6 +216,12 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 
 	//check if ipl>2 bugcheck
 
+	if (in_atomic) { 
+	  printk("atomic addr %x\n",address);
+	  address=0x11111111;
+	}
+
+#if 0
 	if (intr_blocked(IPL$_MMG))
 	  return;
 
@@ -214,9 +229,12 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 
 	setipl(IPL$_MMG);
 	//spin_lock(&SPIN_SCHED);
-
+#endif
 	//some linux stuff
 	tsk = current;
+
+	//printk("fault %x ",address);
+	//printk(":");
 
 	/*
 	 * We fault-in kernel-space virtual memory on-demand. The
@@ -248,12 +266,16 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	page = address & PAGE_MASK;
 	pgd = pgd_offset(mm, page);
 	pmd = pmd_offset(pgd, page);
+
 	if (0) /* not yet (!(pte_present(pmd))) */ { 
 	  // transform it
 	  printk("transform it\n");
 	}
 	pte = pte_offset(pmd, page);
+	//printk("fault3 %x %x %x %x",page,pgd,pmd,pte);
 	mmg$frewsle(current,address);
+
+	//printk(" pte %x ",*(unsigned long *)pte);
 
 	// different forms of invalid ptes?
 	// 0 valid bit, and...?
@@ -277,15 +299,21 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    unsigned long vbn=sec->sec$l_vbn;
 	    struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	    unsigned long offset;// in PAGE_SIZE units
+	    //printk(" i pstl sec file vbn rde %x %x %x %x %x %x\n",index,pstl,sec,file,vbn,rde);
 	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+vbn;
+	    //printk(" offs %x ",offset);
 	    //page_cache_read(file, offset);
 	    //file->f_dentry->d_inode->i_mapping->a_ops->readpage(file, page);
 
+	    //printk(" a ");
 	    {
 	      signed long pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
-	      *(unsigned long *)pte=((unsigned long)__va(page*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	      *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	      //printk(" pfn pte %x %x ",pfn,*(unsigned long *)pte);
 	    }
-	    makereadast(file,address,pte,offset);
+	    //printk(" b ");
+	    makereadast(file,address,pte,offset);	
+	    //printk(" a ");
 	    return;
 	  } else { // page file
 	  }
@@ -297,7 +325,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    } else { // zero page demand?
 	      {
 		signed long pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
-		*(unsigned long *)pte=((unsigned long)__va(page*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+		*(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	      }
 	      return;
 	    }
@@ -307,6 +335,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 
 	}
 
+#if 0
 	vma= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	//do {
 	survive2:
@@ -334,11 +363,14 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
         return(0);
 
 	return;
+#endif
 
+	printk("fault2 %x ",address);
 	down_read(&mm->mmap_sem);
 
 	//	vma = find_vma(mm, address);
 	vma = mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+	printk("err %x vma %x\n",error_code,vma);
 	if (!vma)
 		goto bad_area;
 	if (vma->rde$ps_start_va <= address)
@@ -389,7 +421,9 @@ good_area:
 	 * make sure we exit gracefully rather than endlessly redo
 	 * the fault.
 	 */
+	printk("ha mm 1\n");
 	switch (handle_mm_fault(mm, vma, address, write)) {
+	printk("ha mm 2\n");
 	case 1:
 		tsk->min_flt++;
 		break;
@@ -591,6 +625,11 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 
 	if (address&0x80000000) {
 	  //check if another process phd
+	}
+
+	if (in_atomic) { 
+	  printk("atomic addr %x\n",address);
+	  address=0x11111111;
 	}
 
 	// locate pte of address
