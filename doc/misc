@@ -21,6 +21,6 @@ the first two letters has to differ on the two nodes.
                                                                                 
 I mount with                                                                    
 mount _filename                                                                
-_ at first letter is saying it is on the other node
+_ at first letter is saying it is on the other node. Use only _ with mount.
                                                                                 
 The fileimage must be placed at /.                                              
