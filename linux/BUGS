@@ -1,16 +1,23 @@
-There are currently some problems with newer gcc and redhat with uml: for some reason uml sometimes gets some segv problems after execve, and seems broken
-
-doing something like ctrl-c in a shell gotten by ssh-ing locks the machine. (seems to be gone. wonder why.)
-
-smp is probably broken.
-highmem too.
-do not expect decnet to work for the moment, it may collide with something else.
-
-bochs and uml works only partially, i.e. qio1 has problems (maybe outdated?).
-
-GCC:
+GCC bugs/features:
 Due to use of anynymous structures a more recent gcc is needed.
 Redhat 7.2 with gcc "2.96" works. There are anonymous structure offset bugs
 that has been coded around.
 Redhat 8.0 with gcc 3.2 (RedHat patched) works. The anonymous structure offset
 bugs present in pure gcc 3.0.1 was gone in pure 3.1.
+There are still problems related to anonymous structure initialization.
+
+Our bugs/features:
+No smp support (is probably broken).
+No highmem support.
+Do not expect decnet to work for the moment, it may collide with something else.
+Threads are probably broke.
+Init crashes with keventd after rc.sysinit has finished.
+Cluster networking on a real PC hangs one of them.
+Creprc has some output problems.
+Process sessions has some problems.
+The 60 sec limit and one login only for loginout. (panics).
+ASTs to user space crashes UML, usually.
+Uml gets often tracing myself.
+Uml for the moment is broken.
+With ext2 copy on CONFIG_VMS there are some fs problems. (See fsck)
+With ext2 on CONFIG_VMS truncate is broke/not implemented.
