@@ -475,7 +475,8 @@ void zap_page_range(struct mm_struct *mm, unsigned long address, unsigned long s
 	if (address >= end)
 		BUG();
 	spin_lock(&mm->page_table_lock);
-	exe$purgws(&inadr);
+	exe$deltva(&inadr,0,0);
+	//	exe$purgws(&inadr);
 	flush_cache_range(mm, address, end);
 	tlb = tlb_gather_mmu(mm);
 
@@ -1070,6 +1071,11 @@ static inline void break_cow(struct _rde * vma, struct page * new_page, unsigned
 	new_page = alloc_page(GFP_HIGHUSER);
 	if (!new_page)
 		goto no_mem;
+	new_page->pfn$l_page_state=old_page->pfn$l_page_state;
+	new_page->pfn$l_wslx_qw=old_page->pfn$l_wslx_qw;
+	new_page->pfn$q_pte_index=findpte_new(mm,address);
+	new_page->pfn$q_bak=old_page->pfn$q_bak;
+	new_page->pfn$l_refcnt=1;
 	copy_cow_page(old_page,new_page,address);
 
 	/*
