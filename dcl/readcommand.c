@@ -48,14 +48,20 @@ read_command(dcl$env *env)
 
 	do
 	{
-		if ((command_line = readline(effective_prompt)) == NULL)
+		do
 		{
-			for(i = 0; i < strlen(effective_prompt); i++)
+			if ((command_line = readline(effective_prompt)) == NULL)
 			{
-				printf("\b");
+				for(i = 0; i < strlen(effective_prompt); i++)
+				{
+					printf("\b");
+				}
 			}
-		}
-	} while(command_line == NULL);
+		} while(command_line == NULL);
+	} while((*command_line) == 0);
+
+	add_history(command_line);
+	stifle_history((*env).historic_length);
 
 	return(command_line);
 }

@@ -38,6 +38,31 @@
 
 int
 set_function(unsigned char *argument, dcl$env *env)
+/*
+SET
+
+     Defines or changes, for the current terminal session or batch
+     job, characteristics associated with files and devices owned by
+     the process.
+
+     Format
+
+       SET  option
+   
+
+
+
+  Additional information available:
+
+  Description           ACCOUNTING ACL        AUDIT      BROADCAST
+  CARD_READER           CLUSTER    COMMAND    CONTROL    CPU        DAY
+  DEFAULT    DEVICE     DIRECTORY  DISPLAY    ENTRY      FILE       HOST
+  KEY        LOGINS     MAGTAPE    MESSAGE    NETWORK    ON
+  OUTPUT_RATE           PASSWORD   PREFERRED_PATH        PREFIX     PRINTER
+  PROCESS    PROMPT     PROTECTION QUEUE      RESTART_VALUE
+  RIGHTS_LIST           RMS_DEFAULT           SECURITY   SERVER     SYMBOL
+  TERMINAL   TIME       UIC        VERIFY     VOLUME     WORKING_SET
+*/
 {
-	return(0);
+	return(DCL$SUCCESS);
 }

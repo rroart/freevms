@@ -53,6 +53,8 @@ loop(dcl$command *commands, dcl$env *env)
 			return(DCL$FAILURE);
 		}
 
+		free(command_line);
+
 		switch(status)
 		{
 			case DCL$WABVERB :

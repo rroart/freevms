@@ -52,7 +52,9 @@ main(int argc, char *argv[])
 	}
 
 	strcpy(env.prompt, "$ ");
+
 	env.end_flag = 0;
+	env.historic_length = 256;
 
 	/*
 	 * dcl$command struct initialization

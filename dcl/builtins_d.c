@@ -38,6 +38,36 @@
 
 int
 directory_function(unsigned char *argument, dcl$env *env)
+/*
+DIRECTORY
+
+     Provides a list of files or information about a file or group of
+     files.
+
+     Requires execute (E) access to look up files you know the names
+     of, read (R) access to read or list a file or to use a file
+     name with the asterisk (*)  and the percent sign (%) wildcard
+     characters to look up files.
+
+     Format
+
+       DIRECTORY  [filespec[,...]]
+
+       DIRECTORY/FTP  directorySpec
+   
+
+
+
+  Additional information available:
+
+  Parameter  Qualifiers
+  /ACL       /BACKUP    /BEFORE    /BRIEF     /BY_OWNER  /COLUMNS   /CREATED
+  /DATE      /EXACT     /EXCLUDE   /EXPIRED   /FILE_ID   /FTP       /FULL
+  /GRAND_TOTAL          /HEADING   /HIGHLIGHT /MODIFIED  /OUTPUT    /OWNER
+  /PAGE      /PRINTER   /PROTECTION           /SEARCH    /SECURITY  /SELECT
+  /SHELVED_STATE        /SINCE     /SIZE      /STYLE     /TIME      /TOTAL
+  /TRAILING  /VERSIONS  /WIDTH     /WRAP
+*/
 {
-	return(0);
+	return(DCL$SUCCESS);
 }

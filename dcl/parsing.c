@@ -121,7 +121,10 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 	{
 		if ((*first_target).type == DCL$VERB)
 		{
-			status = (*first_target).function(ptr2, env);
+			if ((*first_target).function != NULL)
+			{
+				status = (*first_target).function(ptr2, env);
+			}
 		}
 		else
 		{
