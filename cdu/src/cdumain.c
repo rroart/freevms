@@ -13,11 +13,6 @@
 
 #include "tree.h"
 
-cdumain(int argc, char ** argv) {
-  if (argc==2) cli$cli(argv[1]);
-  return 0;
-}
-
 extern void fancy_abort (const char * a, int b, const char * c){
   abort();
 }

@@ -581,7 +581,9 @@ const char oz_s_logname_defaulttables[] = "DEFAULT";
 
 const char oz_sys_copyright[] = "C";
 
-int check_vms_mm() {
+int check_vms_mm(int argc, char ** argv) {
+  if (argc==2 && 0==strncmp(argv[1],"not",3))
+    return 0;
   int retlenaddr;
   int mem=0;
   struct item_list_3 lst[14], syilst[2];
@@ -623,15 +625,7 @@ unsigned long main (int argc, char *argv[])
   h_s_input   = stdin;
   h_s_output  = stdout;
 
-  vms_mm = check_vms_mm();
-
-  int cli_table=0;
-  if (vms_mm==0) {
-    cli_table=cli$cli("/vms$common/sysexe/all.cld");
-  } else {
-    //cli_table=cli$cli("SYS$SYSTEM:all.cld");
-    cli_table=cli$cli("/vms$common/sysexe/all.cld");
-  }
+  vms_mm = check_vms_mm(argc,argv);
 
   /* Put argc/argv's in symbols oz_arg0... Set symbol oz_nargs to the number of values. */
 
@@ -665,6 +659,9 @@ unsigned long main (int argc, char *argv[])
       verify = 1;
       continue;
     }
+
+    if (strcmp (argv[i], "not") == 0)
+      continue;
 
     goto usage;
   }
@@ -853,11 +850,11 @@ unsigned long main (int argc, char *argv[])
       p = proclabels (cmdbuf);						/* process any labels that are present */
       if (skiplabel[0] == 0) {						/* ignore line if skipping to a particular label */
 	if (verify) fprintf (h_s_output, "%s\n", cmdbuf);	/* ok, echo if verifying turned on */
-	if (cli_table) {
+	if (1) {
 	  struct dsc$descriptor d;
 	  d.dsc$a_pointer=cmdbuf;
 	  d.dsc$w_length=cmdlen;
-	  sts = cli$dcl_parse(&d,cli_table,0,0,0);
+	  sts = cli$dcl_parse(&d,get_cdu_root(),0,0,0);
 	  if (sts&1)
 	    sts = cli$dispatch(0);
 	  static struct _cdu ** cur_cdu=0x3f000000;

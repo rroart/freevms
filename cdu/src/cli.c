@@ -26,33 +26,69 @@
 
 #include "cli.h"
 
-insert_cdu(struct _cdu * c) {
+#define CDU_ROOT_SIZE 200
+struct _cdu cdu_root[CDU_ROOT_SIZE];
+int cdu_free = 0;
+
+insert_cdu(int c) {
+#if 0
   c->cdu$l_next=cdu_root;
   cdu_root=c;
+#endif
+  cdu_root[c].cdu$l_next=cdu_root[0].cdu$l_next;
+  cdu_root[0].cdu$l_next=c;
+}
+
+get_cdu_root() {
+  return &cdu_root[0];
+}
+
+my_cdu_free = 0;
+struct _cdu my_cdu_root[50];
+
+my_alloc_cdu() {
+  int b = my_cdu_free++;
+  int a = &my_cdu_root[b];
+  memset(a,0,sizeof(struct _cdu));
+  return b;
+}
+
+my_alloc_name(char * n) {
+  int name = my_alloc_cdu();
+  struct _cdu * np = &my_cdu_root[name];
+  memcpy(np->cdu$t_name,n,strlen(n));
+  return name;
 }
 
 alloc_cdu() {
-  int a = malloc(sizeof(struct _cdu));
+  int b = cdu_free++;
+  int a = &cdu_root[b];
   memset(a,0,sizeof(struct _cdu));
-  return a;
+  return b;
 }
 
-void * cli$cli(char * name) {
-  extern FILE *yyin;
-  init_stringpool();
-  yyin=fopen(name, "r");
-  if (yyin==0) {
-    printf("could not fopen %s\n",name);
-    return 0;
-  }
-  yyparse();
-  extern tree root_tree;
-  gencode(root_tree);
-  mmap(0x3f000000, 4,PROT_READ|PROT_WRITE,MAP_FIXED|MAP_ANONYMOUS|MAP_SHARED,0,0); // gross hack
-  return cdu_root;
+alloc_name(char * n) {
+  int name = alloc_cdu();
+  struct _cdu * np = &cdu_root[name];
+  memcpy(np->cdu$t_name,n,strlen(n));
+  return name;
 }
+
+cdu_strncmp(int cdu, char * n, int size) {
+  struct _cdu * np = &cdu_root[cdu];
+  return strncmp(np->cdu$t_name, n, size);
+}
+
+static int mm_done = 0;
 
 unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_routine, void * prompt_routine, void * prompt_string) {
+
+  if (mm_done==0) {
+    mm_done=1;
+    mmap(0x3f000000, 4,PROT_READ|PROT_WRITE,MAP_FIXED|MAP_ANONYMOUS|MAP_SHARED,0,0);
+    *root_cdu=&cdu_root[0];
+  }
+
   struct dsc$descriptor * com = command_string;
   struct _cdu * cdu_root = table;
 
@@ -79,19 +115,24 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
   //printf("line %x %s\n",line,line);
   //printf("endverb %x %s\n",endverb,endverb);
 
-  struct _cdu * cdu = cdu_root;
+  i = 0;
+  int found = 0;
 
-  while (cdu) {
-    if (strncmp(cdu->cdu$l_verb,line,endverb-line)==0)
+  do {
+    struct _cdu * name = &cdu_root[cdu_root[i].cdu$l_verb];
+    if (strncmp(name->cdu$t_name,line,endverb-line)==0) {
+      found = 1;
       break;
-    cdu=cdu->cdu$l_next;
-  }
-  *cur_cdu=cdu;
-  if (cdu==0)
+    }
+    i=cdu_root[i].cdu$l_next;
+  } while (i);
+
+  *cur_cdu=&cdu_root[i];
+  if (!found)
     return 0;
 
-  struct _cdu * my = malloc(sizeof(struct _cdu));
-  memset(my,0,sizeof(struct _cdu));
+  my_cdu_free=0;
+  struct _cdu * my = &my_cdu_root[my_alloc_cdu()];
   *my_cdu=my;
 
   line=endverb;
@@ -110,24 +151,29 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
     if (*line=='/') {
       line++;
       endunit++;
-      while (*endunit!=' ' && *endunit!='/')
+      while (*endunit!=' ' && *endunit!='/' && endunit < end)
 	endunit++;
-      struct _qual * q = malloc (sizeof(struct _qual));
-      q->name = malloc(endunit-line+1);
-      memcpy(q->name,line,endunit-line);
-      q->name[endunit-line]=0;
-      q->next=my->cdu$l_qualifiers;
+      int q = my_alloc_cdu();
+      int n = my_alloc_cdu();
+      my_cdu_root[q].cdu$l_name = n;
+      struct _cdu * np = &my_cdu_root[n];
+      memcpy(np->cdu$t_name,line,endunit-line);
+      my_cdu_root[q].cdu$l_next=my->cdu$l_qualifiers;
       my->cdu$l_qualifiers=q;
     } else {
-      while (*endunit!=' ' && *endunit!='/')
+      while (*endunit!=' ' && *endunit!='/' && endunit < end)
 	endunit++;
-      struct _para * p = malloc (sizeof(struct _para));
-      p->name[0]='p';
-      p->name[1]='0'+pn;
-      p->value = malloc(endunit-line+1);
-      memcpy(p->value,line,endunit-line);
-      p->value[endunit-line]=0;
-      p->next=my->cdu$l_parameters;
+      int p = my_alloc_cdu();
+      int n = my_alloc_cdu();
+      my_cdu_root[p].cdu$l_name = n;
+      struct _cdu * np = &my_cdu_root[n];
+      np->cdu$t_name[0]='p';
+      np->cdu$t_name[1]='0'+pn;
+      int v = my_alloc_cdu();
+      struct _cdu * vp = &my_cdu_root[v];
+      my_cdu_root[p].cdu$l_value = v;
+      memcpy(vp->cdu$t_name,line,endunit-line);
+      my_cdu_root[p].cdu$l_next=my->cdu$l_parameters;
       my->cdu$l_parameters=p;
       pn++;
     }
@@ -213,15 +259,20 @@ unsigned int cli$dispatch(int userarg){
   char image[256];
   char * path;
   int pathlen;
+  int n;
+  char * imagebase;
+  struct _cdu * cdu;
 
   if (vms_mm==0) goto exe2;
 
   path="SYS$SYSTEM:";
   pathlen=strlen(path);
+  n = (*cur_cdu)->cdu$l_image;
+  imagebase = cdu_root[n].cdu$t_name;
   memcpy(image,path,pathlen);
-  memcpy(image+pathlen,(*cur_cdu)->cdu$l_image,strlen((*cur_cdu)->cdu$l_image));
-  memcpy(image+pathlen+strlen((*cur_cdu)->cdu$l_image),".exe",4);
-  image[pathlen+strlen((*cur_cdu)->cdu$l_image)+4]=0;
+  memcpy(image+pathlen,imagebase,strlen(imagebase));
+  memcpy(image+pathlen+strlen(imagebase),".exe",4);
+  image[pathlen+strlen(imagebase)+4]=0;
 
   unsigned long sts;
   struct dsc$descriptor aname;
@@ -231,12 +282,12 @@ unsigned int cli$dispatch(int userarg){
   struct _iha * active;
   struct _va_range inadr;
   void (*func)();
-  char * imgnam = (*cur_cdu)->cdu$l_image;
+  char * imgnam = imagebase;
   int len = strlen(imgnam);
 
   aname.dsc$w_length=len;
   aname.dsc$a_pointer=imgnam;
-  dflnam.dsc$w_length=pathlen+strlen((*cur_cdu)->cdu$l_image)+4;
+  dflnam.dsc$w_length=pathlen+strlen(imagebase)+4;
   dflnam.dsc$a_pointer=image;
 
   hdrbuf=malloc(512);
@@ -300,7 +351,8 @@ unsigned int cli$dispatch(int userarg){
   memset(symtab,0,symtabsize<<12);
 #endif
 
-  routine = (*cur_cdu)->cdu$l_routine;
+  cdu= &cdu_root[(*cur_cdu)->cdu$l_routine];
+  routine = cdu->cdu$t_name;
   int value = 0;
 
   while (1) {
@@ -310,7 +362,7 @@ unsigned int cli$dispatch(int userarg){
     nisse_swap_symbol_in(0, src, 0, &dst);
     symtab += sizeof(Elf_External_Sym);
     src++;
-    if (0==strncmp(symstr+dst.name,routine,strlen(routine))) {
+    if (0==strcmp(symstr+dst.name,routine/*,strlen(routine)*/)) {
       value = dst.value;
       break;
     }
@@ -318,13 +370,16 @@ unsigned int cli$dispatch(int userarg){
 
   if (value)
     func = value + 0x10000;
+  else
+    printf("routine %s not found, going for main in %x tfradr\n",routine,func);
 
  skip:
 
   printf("entering image? %x\n",func);
   if ((*my_cdu)->cdu$l_parameters) {
-    struct _para * p = (*my_cdu)->cdu$l_parameters;
-    myargv[1] = p->value;
+    struct _cdu * p = &my_cdu_root[(*my_cdu)->cdu$l_parameters];
+    struct _cdu * n = &my_cdu_root[p->cdu$l_value];
+    myargv[1] = n->cdu$t_name;
   }
   //  func(argc,argv++);
   func(userarg,myargv,0,0);
@@ -340,11 +395,13 @@ unsigned int cli$dispatch(int userarg){
   routine=mainp;
   path="/vms$common/sysexe/";
   pathlen=strlen(path);
+  n = (*cur_cdu)->cdu$l_image;
+  imagebase = cdu_root[n].cdu$t_name;
 
   memcpy(image,path,pathlen);
-  memcpy(image+pathlen,(*cur_cdu)->cdu$l_image,strlen((*cur_cdu)->cdu$l_image));
-  memcpy(image+pathlen+strlen((*cur_cdu)->cdu$l_image),".exe2",5);
-  image[pathlen+strlen((*cur_cdu)->cdu$l_image)+5]=0;
+  memcpy(image+pathlen,imagebase,strlen(imagebase));
+  memcpy(image+pathlen+strlen(imagebase),".exe2",5);
+  image[pathlen+strlen(imagebase)+5]=0;
   printf("Opening %s\n",image);
   void * handle = dlopen(image,RTLD_NOW);
   if (handle==0) {
@@ -352,7 +409,8 @@ unsigned int cli$dispatch(int userarg){
     return 0;
   }
   dlerror(); // clear error
-  if ((*cur_cdu)->cdu$l_routine) routine=(*cur_cdu)->cdu$l_routine;
+  cdu = &cdu_root[(*cur_cdu)->cdu$l_routine];
+  routine = cdu->cdu$t_name;
   printf("Find routine %s\n",routine);
   int(*fn)() = dlsym(handle,routine);
   printf("Got function address %x\n",fn);
@@ -364,8 +422,9 @@ unsigned int cli$dispatch(int userarg){
   }
   // not yet  fn(userarg);
   if ((*my_cdu)->cdu$l_parameters) {
-    struct _para * p = (*my_cdu)->cdu$l_parameters;
-   myargv[1] = p->value;
+    struct _cdu * p = &my_cdu_root[(*my_cdu)->cdu$l_parameters];
+    struct _cdu * n = &my_cdu_root[p->cdu$l_value];
+    myargv[1] = n->cdu$t_name;
   }
   fn(userarg,myargv,0,0);
   //fn(argc,argv++);
@@ -380,11 +439,15 @@ int gencode(tree t) {
     switch (TREE_CODE(t)) {
     case DEFINE_VERB_STMT:
       {
-	struct _cdu * cdu = alloc_cdu();
-	cdu->cdu$l_verb = IDENTIFIER_POINTER(TREE_OPERAND(t, 0));
+	int cdu = alloc_cdu();
+	int name = alloc_cdu();
+	char * n =  IDENTIFIER_POINTER(TREE_OPERAND(t, 0));
+	cdu_root[cdu].cdu$l_verb = name;
 	insert_cdu(cdu);
+	struct _cdu * np = &cdu_root[name];
+	memcpy(np->cdu$t_name,n,strlen(n));
 	tree verb = TREE_OPERAND(t, 1);
-	gencode_verb(verb, cdu);
+	gencode_verb(verb, &cdu_root[cdu]);
       }
       break;
     default:
@@ -397,26 +460,24 @@ int gencode_verb(tree t,struct _cdu * cdu) {
   while (t) {
     switch (TREE_CODE(t)) {
     case ROUTINE_CLAUSE:
-      cdu->cdu$l_routine=IDENTIFIER_POINTER(TREE_OPERAND(t, 0));
+      cdu->cdu$l_routine = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
       break;
     case IMAGE_CLAUSE:
-      cdu->cdu$l_image=IDENTIFIER_POINTER(TREE_OPERAND(t, 0));
+      cdu->cdu$l_image = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
       break;
     case QUALIFIER_CLAUSE:
       {
-	struct _qual * q = malloc(sizeof(struct _qual));
-	char * name = IDENTIFIER_POINTER(TREE_OPERAND(t, 0));
-	q->name = malloc(strlen(name));
-	memcpy(q->name, name, strlen(name));
-	q->next=cdu->cdu$l_qualifiers;
+	int q = alloc_cdu();
+	cdu_root[q].cdu$l_name = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
+	cdu_root[q].cdu$l_next=cdu->cdu$l_qualifiers;
 	cdu->cdu$l_qualifiers=q;
       }
       break;
     case PARAMETER_CLAUSE:
       {
-	struct _para * p = malloc(sizeof(struct _para));
-	memcpy(p->name,IDENTIFIER_POINTER(TREE_OPERAND(t, 0)),2);
-	p->next=cdu->cdu$l_parameters;
+	int p = alloc_cdu();
+	cdu_root[p].cdu$l_name=alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));;
+	cdu_root[p].cdu$l_next=cdu->cdu$l_parameters;
 	cdu->cdu$l_parameters=p;
       }
       break;
@@ -427,3 +488,41 @@ int gencode_verb(tree t,struct _cdu * cdu) {
   }
 }
   
+genwrite() {
+  int out = fopen("dcltables.c", "w");
+  fprintf(out, "#include \"cli.h\"\n\n");
+  fprintf(out, "struct _cdu cdu_root[] = {\n");
+
+  int i = 0;
+  struct _cdu * cdu = &cdu_root[0];
+
+  while (i<cdu_free) {
+    fprintf(out, "// element %x\n",i);
+    fprintf(out, "  {\n");
+
+    fprintf(out, "    cdu$l_next: 0x%x,\n",cdu->cdu$l_next);
+    fprintf(out, "    cdu$l_cbl: 0x%x,\n",cdu->cdu$l_cbl);
+    fprintf(out, "    cdu$w_size: 0x%x,\n",cdu->cdu$w_size);
+    fprintf(out, "    cdu$b_type: 0x%x,\n",cdu->cdu$b_type);
+    fprintf(out, "    cdu$b_rmod: 0x%x,\n",cdu->cdu$b_rmod);
+    fprintf(out, "    cdu$l_parent: 0x%x,\n",cdu->cdu$l_parent);
+    fprintf(out, "    cdu$l_child: 0x%x,\n",cdu->cdu$l_child);
+    fprintf(out, "    cdu$l_verb: 0x%x,\n",cdu->cdu$l_verb);
+    fprintf(out, "    cdu$l_image: 0x%x,\n",cdu->cdu$l_image);
+    fprintf(out, "    cdu$l_routine: 0x%x,\n",cdu->cdu$l_routine);
+    fprintf(out, "    cdu$l_qualifiers: 0x%x,\n",cdu->cdu$l_qualifiers);
+    fprintf(out, "    cdu$l_parameters: 0x%x,\n",cdu->cdu$l_parameters);
+    fprintf(out, "    cdu$l_name: 0x%x,\n",cdu->cdu$l_name);
+    fprintf(out, "    cdu$l_value: 0x%x,\n",cdu->cdu$l_value);
+    //    fprintf(out, "cdu$l_: 0x%x,\n",cdu->cdu$l_);
+
+    fprintf(out, "  },\n");
+
+    i++;
+    cdu++;
+  }
+
+  fprintf(out,"};\n");
+
+  fclose(out);
+}

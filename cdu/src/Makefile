@@ -6,7 +6,7 @@ FLAGS = -static
 LEX = flex
 BISON = bison
 
-all: cdu cdu.a cdu2.a
+all: cdu cdu.a cdu2.a dcltables.o
 
 clean:
 	rm *.o *.a cdu
@@ -17,16 +17,16 @@ install: all
 	install um/* ../../rootum/vms"$$"common/sysexe/
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
-cdu: parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o
+cdu: parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o cli.h
 	gcc  -g -static parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o -ldl -liberty $(VMSLIBS) -o cdu
 
 cdu2.a: cli2.o
 	ar r cdu2.a cli2.o
 
-cdu.a: parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o
+cdu.a: parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o cli.h
 	ar r cdu.a parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o
 
-%.o: %.c
+%.o: %.c cli.h
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 parse.h: parse.c parse.y
@@ -42,3 +42,6 @@ parse.c: parse.y
 
 lex.c: lex.l parse.h
 	$(LEX) $(LEXFLAGS) -olex.c lex.l
+
+dcltables.c: cdu ../../cld/src/all.cld
+	./cdu ../../cld/src/all.cld
