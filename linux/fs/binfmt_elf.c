@@ -600,34 +600,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	current->mm->end_code = 0;
 	current->mm->mmap = NULL;
 	current->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
-	bzero(current->pcb$l_phd,sizeof(struct _phd));
-#ifdef CONFIG_MM_VMS
-	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
-	{
-	  struct _pcb * p = current;
-	  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
-	  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
-	  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
-	  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-	  bzero((void*)p->pcb$l_phd->phd$l_wslist,4*512);
-	  bzero((void*)p->pcb$l_phd->phd$l_wslock,4*512);
-	  bzero((void*)p->pcb$l_phd->phd$l_wsdyn,4*512);
-	  p->pcb$l_phd->phd$l_wsnext=0;
-	  p->pcb$l_phd->phd$l_wslast=511;
-#if 0
-	  {
-	    struct _wsl * wsl = p->pcb$l_phd->phd$l_wslist;
-	    int i;
-	    for(i=0; i<512; i++)
-	      wsl[i].wsl$v_valid=1;
-	  }
-#endif
-	  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
-	  bzero((void*)p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
-	  p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
-	  p->pcb$l_phd->phd$l_pst_free=0;
-	}
-#endif
+	init_phd(current->pcb$l_phd);
 	current->flags &= ~PF_FORKNOEXEC;
 	elf_entry = (unsigned long) elf_ex.e_entry;
 
