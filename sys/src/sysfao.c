@@ -33,8 +33,8 @@ asmlinkage int exe$faol(void * ctrstr , int * outlen , void * outbuf , int * prm
 	    char len=*bufc++;
 	    memcpy(&out_p[out_dex],bufc,len);
 	    out_dex+=len;
-	    break;
 	  }
+	  break;
 	case 'F':
 	  // not quite implemented yet
 	case 'D':
@@ -43,8 +43,8 @@ asmlinkage int exe$faol(void * ctrstr , int * outlen , void * outbuf , int * prm
 	    char * bufc=argv[argv_num++];
 	    memcpy(&out_p[out_dex],bufc,len);
 	    out_dex+=len;
-	    break;
 	  }
+	  break;
 	case 'S':
 	  {
 	    struct dsc$descriptor * d=argv[argv_num++];
@@ -52,8 +52,8 @@ asmlinkage int exe$faol(void * ctrstr , int * outlen , void * outbuf , int * prm
 	    char * bufc=d->dsc$a_pointer;
 	    memcpy(&out_p[out_dex],bufc,len);
 	    out_dex+=len;
-	    break;
 	  }
+	  break;
 	case 'Z':
 	  {
 	    // do overflow check later
@@ -61,8 +61,8 @@ asmlinkage int exe$faol(void * ctrstr , int * outlen , void * outbuf , int * prm
 	    char len=strlen(bufc);
 	    memcpy(&out_p[out_dex],bufc,len);
 	    out_dex+=len;
-	    break;
 	  }
+	  break;
 	default:
 	  printk("fao !A%c stuff not recognized\n",c);
 	}
@@ -111,8 +111,8 @@ asmlinkage int exe$faol(void * ctrstr , int * outlen , void * outbuf , int * prm
 	  char * format="% ";
 	  format[1]=type;
 	  out_dex+=sprintf(&out_p[out_dex],format,num);
-	  break;
 	}
+	break;
       case '/':
 	out_p[out_dex++]='\n';
 	break;
@@ -138,9 +138,12 @@ asmlinkage int exe$faol(void * ctrstr , int * outlen , void * outbuf , int * prm
 	    char chr[32];
 	    d.dsc$w_length=32;
 	    d.dsc$a_pointer=chr;
-	    exe$asctim(0,&d,l,0);
-	    break;
+	    short int len;
+	    exe$asctim(&len,&d,l,0);
+	    memcpy(&out_p[out_dex],d.dsc$a_pointer,len);
+	    out_dex+=len;
 	  }
+	  break;
 	default:
 	  printk("fao !percent %c not recognized\n",c);
 	}
@@ -149,6 +152,7 @@ asmlinkage int exe$faol(void * ctrstr , int * outlen , void * outbuf , int * prm
 	printk("fao !%c not recognized\n",c);
 	break;
       }
+      break;
     default:
       out_p[out_dex++]=c;
     }
