@@ -105,7 +105,8 @@ int con$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   init_dev2(chan2dev(i->irp$w_chan) ,&tty);
   u->ucb$l_irp=i;
   //tty_flip_buffer_push(tty);
-  vms_read_chan(tty, 0, i->irp$l_qio_p1, i->irp$l_qio_p2);
+  //  vms_read_chan(tty, 0, i->irp$l_qio_p1, i->irp$l_qio_p2);
+  read(0,i->irp$l_qio_p1,i->irp$l_qio_p2);
   if (1) {	
     struct _ccb * ccb = &ctl$gl_ccbbase[dev2chan(tty->device)];
     struct _ucb * ucb = ccb->ccb$l_ucb;
