@@ -8,7 +8,7 @@
 #include"../../freevms/sys/src/rse.h"
 
 int sch$qend(struct _pcb * p) {
-  __asm__ __volatile__("int $TEST_VECTOR\n");
+  //  __asm__ __volatile__("int $0x88\n");
   p->phd$w_quant = -QUANTUM/10;
   /* p->pcb$b_pri++; why must we have this? */
   p->need_resched = 1;
