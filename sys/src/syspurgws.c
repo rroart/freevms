@@ -42,7 +42,7 @@ int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirecti
 }
 
 int mmg$purgwspag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
-  return mmg$purgwspag(acmode,va,p,pagedirection,rde,newpte);
+  return mmg$purgwsscn(acmode,va,p,pagedirection,rde,newpte);
 }
 
 asmlinkage int exe$purgws(struct _va_range *inadr) {
