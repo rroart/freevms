@@ -552,8 +552,8 @@ repeat:
 		swap_free(*entry);
 		*entry = (swp_entry_t) {0};
 		delete_from_swap_cache(page);
-		flags = page->flags & ~((1 << PG_uptodate) | (1 << PG_error) | (1 << PG_referenced) | (1 << PG_arch_1));
-		page->flags = flags | (1 << PG_dirty);
+		flags = page->pfn$l_page_state & ~((1 << PG_uptodate) | (1 << PG_error) | (1 << PG_referenced) | (1 << PG_arch_1));
+		page->pfn$l_page_state = flags | (1 << PG_dirty);
 		add_to_page_cache_locked(page, mapping, idx);
 		info->swapped--;
 		spin_unlock (&info->lock);
@@ -623,6 +623,7 @@ failed:
 
 struct page * shmem_nopage(struct vm_area_struct * vma, unsigned long address, int unused)
 {
+#if 0
 	struct page * page;
 	unsigned int idx;
 	struct inode * inode = vma->vm_file->f_dentry->d_inode;
@@ -635,6 +636,8 @@ struct page * shmem_nopage(struct vm_area_struct * vma, unsigned long address, i
 
 	flush_page_to_ram(page);
 	return(page);
+#endif
+	return 0;
 }
 
 void shmem_lock(struct file * file, int lock)
@@ -649,6 +652,7 @@ void shmem_lock(struct file * file, int lock)
 
 static int shmem_mmap(struct file * file, struct vm_area_struct * vma)
 {
+#if 0
 	struct vm_operations_struct * ops;
 	struct inode *inode = file->f_dentry->d_inode;
 
@@ -657,6 +661,7 @@ static int shmem_mmap(struct file * file, struct vm_area_struct * vma)
 		return -EACCES;
 	UPDATE_ATIME(inode);
 	vma->vm_ops = ops;
+#endif
 	return 0;
 }
 
@@ -1497,16 +1502,18 @@ put_dentry:
 int shmem_zero_setup(struct vm_area_struct *vma)
 {
 	struct file *file;
-	loff_t size = vma->vm_end - vma->vm_start;
+	loff_t size = vma->rde$q_region_size;
 	
 	file = shmem_file_setup("dev/zero", size);
 	if (IS_ERR(file))
 		return PTR_ERR(file);
 
+#if 0
 	if (vma->vm_file)
 		fput (vma->vm_file);
 	vma->vm_file = file;
 	vma->vm_ops = &shmem_vm_ops;
+#endif
 	return 0;
 }
 
