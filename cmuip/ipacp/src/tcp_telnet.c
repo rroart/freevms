@@ -115,7 +115,7 @@ MODULE TELNET(IDENT="1.11",LANGUAGE(BLISS32),
 
 #include<descrip.h> 
 
-#include <starlet.h>	// VMS system definitions
+// not yet #include <starlet.h>	// VMS system definitions
 // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS common definitions
 #include <cmuip/central/include/neterror.h>	// Network error codes
 #include "netvms.h"
@@ -130,6 +130,8 @@ MODULE TELNET(IDENT="1.11",LANGUAGE(BLISS32),
 #include<dvidef.h>
 #include<iosbdef.h>
 #include<msgdef.h>
+#include<lnmdef.h>
+#include<misc.h>
 
 extern signed long log_state,
     local_name,
@@ -500,26 +502,28 @@ void namelook_done(TVT,rc,namlen,name)
 		dsc$a_pointer : accporbuf}, *accpornam = &accpornam;
       $DESCRIPTOR(lnm_table,"LNM$SYSTEM_TABLE");
       $DESCRIPTOR(lnm_nam,"TELNET_PASS_PORT");
-      struct item_list_3 itm[2]={ {buflen:100, item_code:1, bufaddr: nambuf, &nam.dsc$w_length }, {0,0,0,0} };
+      struct item_list_3 itm[2]={ {buflen:100, item_code:LNM$_STRING, bufaddr: nambuf, &nam.dsc$w_length }, {0,0,0,0} };
 
     if ((BLISSIFNOT(rc))) return;
 
     TCB = TVT->TVT$TCB;				// get TCB
 
+    $DESCRIPTOR(ctr,"!AF!AS!UL");
+    $DESCRIPTOR(ctr2,"!AF");
     if (exe$trnlnm(0,&lnm_table,			// JC Get logical
 		&lnm_nam,				// Pass on port number
 		0,					// JC
 		itm)					// JC
 	== SS$_NORMAL)
-      rc = exe$fao(/*%ASCID*/"!AF!AS!UL",
-		accpornam->dsc$w_length,accpornam,
+      rc = exe$fao(&ctr,
+		&accpornam->dsc$w_length,accpornam,
 		namlen,name,
 		nam,
 		TCB->foreign_port
 			     );
     else
-	rc = exe$fao(/*%ASCID*/"!AF",
-		accpornam->dsc$w_length,accpornam,
+      rc = exe$fao(ctr2,
+		&accpornam->dsc$w_length,accpornam,
 		namlen,name
 		);
     XLOG$FAO(LOG$TELNET
@@ -532,7 +536,7 @@ void namelook_done(TVT,rc,namlen,name)
 	return(SS$_NORMAL);				// JC IF too long skip it
 //!//JC	accpornam->dsc$w_length = 30;
     if (BLISSIF(rc))
-      rc = exe$qiow (0,TVT->TVT$PTY_CHN,IO$_SETMODE,0,
+      rc = sys$qiow (0,TVT->TVT$PTY_CHN,IO$_SETMODE,0,
 		     accpornam->dsc$a_pointer,	// Buffer
 		     accpornam->dsc$w_length,	// Size
 		     0,
@@ -576,7 +580,7 @@ TELNET_OPEN(TCB)
       $DESCRIPTOR(lnm_table,"LNM$SYSTEM_TABLE");
       $DESCRIPTOR(lnm_nam,"TELNET_PASS_PORT");
       $DESCRIPTOR(lnm_nam2,"TELNET_ANNOUNCE");
-      struct item_list_3 itm[2]={ {buflen:256, item_code:1, bufaddr: nambuf, &nam->dsc$w_length }, {0,0,0,0} };
+      struct item_list_3 itm[2]={ {buflen:256, item_code:LNM$_STRING, bufaddr: nambuf, &nam->dsc$w_length }, {0,0,0,0} };
 
 // Clear the pending open that we were waiting for.
 
@@ -609,7 +613,7 @@ TELNET_OPEN(TCB)
 // Assign the PTY device and start it up.
 
     int tvt_mbx_buflen = TVT_MBX_BUFLEN;
-    RC = lib$asn_wth_mbx(PTY_NAME,
+    RC = lib$asn_wth_mbx(&PTY_NAME,
 			 /*%REF*/(&tvt_mbx_buflen),
 			 /*%REF*/(&tvt_mbx_buflen),
 			 &PTYCHAN,
@@ -630,40 +634,38 @@ TELNET_OPEN(TCB)
     TVT->TVT$MBX_CHN = MBXCHAN;
     TCB->tvtdata = TVT;
 
+    $DESCRIPTOR(ctr,"!UB.!UB.!UB.!UB!AS!UL");
+    $DESCRIPTOR(ctr2,"!UB.!UB.!UB.!UB");
 // Fill in the access port as [n.n.n.n]
     if (exe$trnlnm(0,&lnm_table,			// JC Get logical
 		&lnm_nam,	// Pass on port number
 		0,		// JC
 		&itm)				// JC
 	== SS$_NORMAL)
-#if 0
-	RC = exe$fao(/*%ASCID*/"!UB.!UB.!UB.!UB!AS!UL",
-		accpornam->dsc$w_length,accpornam,
-		.(TCB->foreign_host)< 0,8,0>,
-		.(TCB->foreign_host)< 8,8,0>,
-		.(TCB->foreign_host)<16,8,0>,
-		.(TCB->foreign_host)<24,8,0>,
+      RC = exe$fao(&ctr,
+		&accpornam->dsc$w_length,accpornam,
+		   TCB->foreign_host&0xff,
+		   (TCB->foreign_host>>8)&0xff,
+		   (TCB->foreign_host>>16)&0xff,
+		   (TCB->foreign_host>>24)&0xff,
 		nam,
 		TCB->foreign_port
-		)
+		   );
     else
-	RC = exe$fao(/*%ASCID*/"!UB.!UB.!UB.!UB",
-		accpornam->dsc$w_length,accpornam,
-		.(TCB->foreign_host)< 0,8,0>,
-		.(TCB->foreign_host)< 8,8,0>,
-		.(TCB->foreign_host)<16,8,0>,
-		.(TCB->foreign_host)<24,8,0>
+      RC = exe$fao(&ctr2,
+		&accpornam->dsc$w_length,accpornam,
+		   TCB->foreign_host&0xff,
+		   (TCB->foreign_host>>8)&0xff,
+		   (TCB->foreign_host>>16)&0xff,
+		   (TCB->foreign_host>>24)&0xff
 		);
-#else
-    { }
-#endif
     XLOG$FAO(LOG$TELNET
 	,"!%T Telnet_Open: Remote host=!AS!/",0
 	,accpornam);
     if (accpornam->dsc$w_length > 30)		// IF too long
 	accpornam->dsc$w_length = 30;			// Adjust it
     if (BLISSIF(RC))
-      RC = exe$qiow (0,TVT->TVT$PTY_CHN,IO$_SETMODE,0,0,0,
+      RC = sys$qiow (0,TVT->TVT$PTY_CHN,IO$_SETMODE,0,0,0,
 		     accpornam->dsc$a_pointer,	// Buffer
 		     accpornam->dsc$w_length,	// Size
 		     0,
@@ -705,14 +707,15 @@ TELNET_OPEN(TCB)
 //	TMPDSC->dsc$w_length, TMPDSC, LOCAL_NAME);
 
     nam->dsc$w_length = sizeof(nambuf);
+    $DESCRIPTOR(ctr3,"!AS!/");
     if (exe$trnlnm(0,&lnm_table,				// JC Get logical
 		&lnm_nam2,		// JC name for banner
 		0,		// JC
 		&itm)				// JC
 	    == SS$_NORMAL)				// JC If got it
 	{
-	  exe$fao(/*%ASCID*/"!AS!/"				// JC Put into output
-		,TMPDSC->dsc$w_length			// JC buffer
+	  exe$fao(&ctr3				// JC Put into output
+		,&TMPDSC->dsc$w_length			// JC buffer
 		,TMPDSC					// JC
 		,nam);					// JC
 	tcp_add_string(TVT, TMPDSC) ;
@@ -766,11 +769,9 @@ void TELNET_CLOSE(TCB)
 
     XLOG$FAO(LOG$TCBSTATE,"!%T TVT TCB x!XL closing, TVT=x!XL!/",
 	     0,TCB,TCB->tvtdata);
-#if 0
     ACT$FAO("!%D Telnet-in closed to IP addr !UB.!UB.!UB.!UB port=!UW!/",0,
-	    FHOST<0,8>,FHOST<8,8>,FHOST<16,8>,FHOST<24,8>,
+	    FHOST&0xff,(FHOST>>8)&0xff,(FHOST>>16)&0xff,(FHOST>>24)&0xff,
 	    FPORT);
-#endif
 
 // Make sure we have a TVT and it isn't already being cancelled.
 
@@ -786,7 +787,7 @@ void TELNET_CLOSE(TCB)
 	TVT->TVT$CANCEL = TRUE;
 	exe$dassgn(TVT->TVT$PTY_CHN);
 	exe$dassgn(TVT->TVT$MBX_CHN);
-	exe$dclast(TELNET_CLOSE_DONE,
+	sys$dclast(TELNET_CLOSE_DONE,
 		TVT);
 	OKINT;
 	};
@@ -822,7 +823,7 @@ void TELNET_INPUT(TCB)
 // Call TCP input routine
 
 #ifdef USE_ASTS
-    exe$dclast(PTY_WRITE,
+    sys$dclast(PTY_WRITE,
 	    TCB->tvtdata);
 #else
     PTY_WRITE(TCB->tvtdata);
@@ -845,7 +846,7 @@ void TELNET_OUTPUT(TCB)
 // Just call TCP write with the TVT's TCB
 
 #ifdef USE_ASTS
-    exe$dclast(PTY_READ,
+    sys$dclast(PTY_READ,
 	    TCB->tvtdata);
 #else
     PTY_READ(TCB->tvtdata);
@@ -1591,7 +1592,7 @@ signed long
  struct item_list_3 Item_List[3];
  $DESCRIPTOR(lnm_table,"LNM$PROCESS_TABLE");
  $DESCRIPTOR(lnm_nam,"INET$PTY_TERM");
- struct item_list_3 itm[2]={ {buflen:20, item_code:1, bufaddr: ptynambuf, &ptynam->dsc$w_length }, {0,0,0,0} };
+ struct item_list_3 itm[2]={ {buflen:20, item_code:LNM$_STRING, bufaddr: ptynambuf, &ptynam->dsc$w_length }, {0,0,0,0} };
 
 // point at the TCB for this TVT.
     TCB = TVT->TVT$TCB;
@@ -1629,14 +1630,13 @@ signed long
 		0,		// JC
 		&itm);				// JC
 	if (BLISSIFNOT(RC)) TVT->TVT$DO_PID = 0;		// Cancel
+	$DESCRIPTOR(ctr,"_!ASA!UL:");
 	if (RC == SS$_NORMAL)
-	    RC = exe$fao(/*%ASCID*/"_!ASA!UL:",devnam,devnam,ptynam,Unit_Number);
+	  RC = exe$fao(&ctr,devnam,devnam,ptynam,Unit_Number); // check
 	if (BLISSIF(RC))
 		RC = exe$getdviw (0,0,devnam,Item_List,0);
 
-#if 0
-    xlog$fao(LOG$TELNET,"!%T PTY_Set_owner_PID: TTY_TERM="!AS"!/",0,devnam);
-#endif
+    XLOG$FAO(LOG$TELNET,"!%T PTY_Set_owner_PID: TTY_TERM=\"!AS\"!/",0,devnam);
 
 // free the string descriptor, we don't need it any more.
 //	LIB$FREE_VM(devsln,devstr);
@@ -1655,13 +1655,11 @@ signed long
 	    PokeAddr(Owner_PID,  TCB->foreign_host, TCB->foreign_port);
 
 	    // Note the connection in the activity log file.
-#if 0
 	    ACT$FAO(
 		"!%D Telnet-in (PID:x!XW UIC:!%U) <!UB.!UB.!UB.!UB/!UW>!/",0,
-		.Owner_PID<0,16,0>, Owner_UIC,
-		.FHost<0,8>,FHost<8,8>,FHost<16,8>,FHost<24,8>,
+		Owner_PID&0xffff, Owner_UIC,
+		FHost&0xff,(FHost>>8)&0xff,(FHost>>16)&0xff,(FHost>>24)&0xff,
 		TCB->foreign_port);
-#endif
 //
 //	Now set any delayed device dependent
 //
@@ -1691,7 +1689,6 @@ void PTY_READ(TVT)
 
     TCB = TVT->TVT$TCB;
     Byte_Count = TCB->snd_q_size-TCB->snd_q_count-TCB->srx_q_count;
-
     XLOG$FAO(LOG$TVT,
 	"!%T TVT PTY_read: TCB x!XL, BC=!SL, RDCNT=!SL, NGCNT=!SL!/",
 	0, TVT->TVT$TCB, Byte_Count, TVT->TVT$RD_BCNT, TVT->TVT$NEG_CNT);
@@ -1715,10 +1712,10 @@ void PTY_READ(TVT)
 
 // Initiate a read on the PTY device
 
-    RC = exe$qio(0,
+    RC = sys$qio(0,
 		 TVT->TVT$PTY_CHN,
 		 IO$_READVBLK,
-		 TVT->TVT$RD_IOSB,
+		 &TVT->TVT$RD_IOSB,
 		 PTY_READ_DONE,
 		 TVT,
 		 TVT->TVT$RD_BUF,
@@ -1821,7 +1818,7 @@ struct PTY$IOSB * IOSB = &TVT->TVT$RD_IOSB;
 	Byte_Count = TCB->snd_q_size-TCB->snd_q_count-TCB->srx_q_count;
 	if (((TVT->TVT$RD_BCNT > 0) || (Byte_Count > 0)))
 	    {
-	    exe$dclast(PTY_READ,
+	    sys$dclast(PTY_READ,
 		TVT);
 	    } ;
 #else
@@ -1940,10 +1937,10 @@ void PTY_WRITE(TVT)
 // Initiate the write on the PTY
 
 //    opr$fao("pty_write !SL bytes (x!XL,x!XL)",TVT->TVT$WR_BCNT,TVT->TVT$WR_BUF,TVT->TVT$WR_PTR);
-    RC = exe$qio(0,
+    RC = sys$qio(0,
 		 TVT->TVT$PTY_CHN,
 		 IO$_WRITEVBLK,
-		 TVT->TVT$WR_IOSB,
+		 &TVT->TVT$WR_IOSB,
 		 PTY_WRITE_DONE,
 		 TVT,
 		 TT_WR_PTR,
@@ -2065,14 +2062,15 @@ MBX_READ(TVT)
 
 // Issue the read $QIO
 
-    RC = exe$qio(0, 
+    RC = sys$qio(0, 
 		 TVT->TVT$MBX_CHN,
 		 IO$_READVBLK,
-		 TVT->TVT$MBX_IOSB,
+		 &TVT->TVT$MBX_IOSB,
 		 MBX_READ_DONE,
 		 TVT,
 		 TVT->TVT$MBX_BUF,
 		 TVT_MBX_BUFLEN, 0,0,0,0);
+
     if (BLISSIFNOT(RC))
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT MBX Read failure for TCB x!XL, RC=x!XL!/",
