@@ -299,11 +299,12 @@ static signed long
     linptr,
   linlen;
 
-static struct _fabdef    CFFAB_ = { fab$l_fna : "INET$CONFIG" }; // check was fnm
+static struct _fabdef    CFFAB_ = { fab$l_fna : "INET$CONFIG", fab$b_fns : 11, fab$b_rfm : FAB$C_VAR }; // check was fnm
 static struct _fabdef * CFFAB = & CFFAB_;
 static struct _rabdef    CFRAB_ = { rab$l_fab : &CFFAB_,
 			    rab$l_ubf : CFBUF,
-			    rab$w_usz : RECLEN }; // check
+			    rab$w_usz : RECLEN,
+				rab$b_rac : RAB$C_SEQ }; // check
 static struct _rabdef * CFRAB = & CFRAB_;
 
  void    config_err();
