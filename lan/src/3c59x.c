@@ -29,49 +29,7 @@ struct _ucbnidef * ecu;
 
 static unsigned long startio (struct _irp * i, struct _ucb * u)
 {
-  unsigned long sts=SS$_NORMAL;
-  struct request * rq = kmalloc (sizeof(struct request), GFP_KERNEL);
-
-  //printk("ec startio %x %x %x\n",i->irp$l_qio_p1,i->irp$l_qio_p2,i->irp$l_qio_p3);
-
-  //  ec_drive_t *drive=u->ucb$l_orb;
-
-  //i->irp$l_qio_p3 <<= 1;
-#if 0
-  i->irp$l_qio_p3 += partadd(u->ucb$l_orb,i->irp$l_qio_p4);
-#endif
-    //drive->part[i->irp$l_qio_p4].start_sect + drive->sect0;
-
-  ecu=u;
-
-  switch (i->irp$v_fcode) {
-
-    case IO$_WRITELBLK:
-    case IO$_WRITEPBLK: {
-      rq->cmd=WRITE;
-      rq->buffer=i->irp$l_qio_p1;
-      rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
-      i->irp$l_qio_p5=rq;
-      do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3);
-      return (sts);
-    }
-
-    case IO$_READLBLK:
-    case IO$_READPBLK: {
-      rq->cmd=READ;
-      rq->buffer=i->irp$l_qio_p1;
-      rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
-      i->irp$l_qio_p5=rq;
-      do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3);
-      return (sts);
-    }
-
-    /* Who knows what */
-
-    default: {
-      return (SS$_BADPARAM);
-    }
-  }
+  return (SS$_BADPARAM);
 }
 
 static struct _irp * globali;
