@@ -66,6 +66,8 @@ unsigned long str$dupl_char(struct dsc$descriptor_s* destination_string,
 	if (ascii_character != NULL)
 	{
 		UseChar = *ascii_character;
+	} else {
+		UseChar = ' ';
 	}
 
 	/*
