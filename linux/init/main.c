@@ -11,7 +11,7 @@
 
 #define __KERNEL_SYSCALLS__
 
-#include <system_data_cells.h>
+#include "../../freevms/sys/src/system_data_cells.h"
 
 #include <linux/config.h>
 #include <linux/proc_fs.h>
@@ -220,7 +220,7 @@ static struct dev_name_struct {
 	{ "pf",		0x2f00 },
 	{ "apblock", APBLOCK_MAJOR << 8},
 	{ "ddv", DDV_MAJOR << 8},
-	{ "ubd", UBD_MAJOR << 8 },
+       { "ubd", UBD_MAJOR << 8 },
 	{ "jsfd",    JSFD_MAJOR << 8},
 #if defined(CONFIG_ARCH_S390)
 	{ "dasda", (DASD_MAJOR << MINORBITS) },
@@ -554,7 +554,6 @@ static void rest_init(void)
 
 void vms_init(void) __init;
 void vms_init2(void) __init;
-void vms_init3(void) __init;
 
 /*
  *	Activate the first processor.
@@ -848,16 +847,13 @@ static void prepare_namespace(void)
 extern int mydebug5;
 extern int mydebug6;
 
-extern int mscp(void);
-extern int msclcli(void);
-
 static int init(void * unused)
 {
 	lock_kernel();
 	do_basic_setup();
 	printk("after dobasic\n");
 #ifdef CONFIG_VMS
-	vms_mount();
+        vms_mount();
 #endif
 	prepare_namespace();
 	printk("after prepnamspac\n");
@@ -880,20 +876,19 @@ static int init(void * unused)
 	(void) dup(0);
 	printk("here 2\n");
 	
-	//kernel_thread(mscp, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
-	//kernel_thread(mscpcli, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
-
-	scs_init();
-	mscp();
-	dlminit();
-	init_cwps();
-
 	/*
 	 * We try each of these until one succeeds.
 	 *
 	 * The Bourne shell can be used instead of init if we are 
 	 * trying to recover a really broken machine.
 	 */
+
+       scs_init();
+       mscp();
+        dlminit();
+        init_cwps();
+
+
 
 	if (execute_command)
 		execve(execute_command,argv_init,envp_init);
