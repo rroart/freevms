@@ -239,6 +239,8 @@
 #define MSCP$K_SC_SRC_INCSTA 1026
 #define MSCP$K_SC_SRC_UNRCOV 1028
 #define MSCP$S_MSCP_SUBCODES 12
+
+
 	
 struct _mscp_basic_pkt {
   /* SSP packages has something here, but we do not need it */

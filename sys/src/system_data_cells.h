@@ -1504,7 +1504,7 @@ extern unsigned long scs$gq_ddma_len;
 extern unsigned long scs$gq_direct;
 extern unsigned long scs$gq_disconnect;
 extern unsigned long scs$gq_listhead_ddma;
-extern unsigned long scs$gq_local_names;
+extern unsigned long long scs$gq_local_names;
 extern unsigned long scs$gq_pingpong_start_time;
 extern unsigned long scs$gq_pingpong_stop_time;
 extern unsigned long scs$gq_poll;

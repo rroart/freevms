@@ -1510,14 +1510,14 @@ unsigned long scs$gq_ddma_len;
 unsigned long scs$gq_direct;
 unsigned long scs$gq_disconnect;
 unsigned long scs$gq_listhead_ddma;
-unsigned long scs$gq_local_names;
+unsigned long long scs$gq_local_names;
 unsigned long scs$gq_pingpong_start_time;
 unsigned long scs$gq_pingpong_stop_time;
 unsigned long scs$gq_poll;
 unsigned long scs$gq_reuse_cdt;
 unsigned long scs$gq_worse_path;
 unsigned long scs$gw_bdtcnt;
-unsigned long scs$gw_cdtcnt;
+unsigned long scs$gw_cdtcnt=1024;
 unsigned long scs$gw_flowcush;
 unsigned long scs$gw_maxdg;
 unsigned long scs$gw_maxmsg;
@@ -1527,7 +1527,7 @@ unsigned long scs$gw_papoolin;
 unsigned long scs$gw_pappddg;
 unsigned long scs$gw_pastmout;
 unsigned long scs$gw_prcpolint;
-unsigned long scs$gw_rdtcnt;
+unsigned long scs$gw_rdtcnt=128;
 unsigned long scs$gw_timvcfail;
 unsigned long sevms$ar_alarm_vector;
 unsigned long sevms$ar_audit_vector;
@@ -1909,6 +1909,9 @@ unsigned long lockidtbl[LOCKIDTBL];
 unsigned long lockmaxid;
 unsigned long locknxtid;
 
+struct _cdt cdtl[scs$gw_cdtcnt];
+struct _rdt rdtl[scs$gw_rdtcnt];
+
 extern void exe$timeout(void);
 
 void qhead_init(void * l) {
@@ -2013,6 +2016,8 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   lck$gl_idtbl=&lockidtbl;
   lck$gl_nxtid=&locknxtid;
   lck$gl_maxid=&lockmaxid;
+
+  qhead_init(&scs$gq_local_names);
 
   /* take lnm stuff from syslnm.c etc */
 
