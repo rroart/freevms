@@ -1,3 +1,6 @@
+# $Id$
+# $Locker$
+
 #include<linux/sched.h>
 #include"../../freevms/sys/src/sysgen.h"
 #include"../../freevms/sys/src/rse.h"
