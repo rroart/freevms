@@ -15,4 +15,7 @@ struct queue_header_structure * si_qtail;
 char x##_str[y];\
 struct dsc$descriptor x##_act={dsc$w_length:y,dsc$a_pointer:x##_str}, *x = &x##_act
 
+#define ASCID(x) ((struct dsc$descriptor){dsc$w_length:strlen(x)-1,dsc$a_pointer:x})
+#define ASCID2(y,x) ((struct dsc$descriptor){dsc$w_length:y,dsc$a_pointer:x})
+
 #endif
