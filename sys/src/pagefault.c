@@ -117,7 +117,7 @@ int mmg$makewsle(struct _pcb * p, struct _phd * phd, void * va, void * pte, sign
   if (wsle->wsl$v_valid) panic("should be invalid\n");
   wsle->wsl$v_valid=1;
   wsle->wsl$v_pagtyp=mem_map[pfn].pfn$v_pagtyp;
-  ((unsigned long)wsle->wsl$pq_va)|=(unsigned long)va;
+  wsle->wsl$pq_va=((unsigned long)wsle->wsl$pq_va)|(unsigned long)va;
   // p->pcb$l_phd->phd$l_ptwsleval++
   //  page=&((struct _pfn *)pfn$al_head[PFN$C_FREPAGLST])[pfn];
   page=&mem_map[pfn];

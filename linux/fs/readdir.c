@@ -202,7 +202,7 @@ static int filldir(void * __buf, const char * name, int namlen, loff_t offset,
 	put_user(reclen, &dirent->d_reclen);
 	copy_to_user(dirent->d_name, name, namlen);
 	put_user(0, dirent->d_name + namlen);
-	((char *) dirent) += reclen;
+	dirent = (void *)dirent + reclen;
 	buf->current_dir = dirent;
 	buf->count -= reclen;
 	return 0;
@@ -285,7 +285,7 @@ static int filldir64(void * __buf, const char * name, int namlen, loff_t offset,
 	copy_to_user(dirent, &d, NAME_OFFSET(&d));
 	copy_to_user(dirent->d_name, name, namlen);
 	put_user(0, dirent->d_name + namlen);
-	((char *) dirent) += reclen;
+	dirent = (void *)dirent + reclen;
 	buf->current_dir = dirent;
 	buf->count -= reclen;
 	return 0;

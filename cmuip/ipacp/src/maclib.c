@@ -1560,13 +1560,17 @@ clop:	R0 = *(R1++)+C;		// add in next fullword and Carry
 Odd_Word:
 	// Check for extra word
 	if ((Byte_Count&2)==0) goto Odd_Byte;
-	R2 =	*( ((short *)R1)++);		// get next word
+	// was: R2 =	*( ((short *)R1)++);		// get next word
+	R2 =	*(short *)R1);		// get next word
+	R1 = (long)R1 +2;
 	R0=R0+R2+C;			// add it in (and the Carry)
 	C = R0 >> 31;
 Odd_Byte:
 	// Check for extra byte
 	if ((Byte_Count&1)==0) goto Reduce16;
-	R2 =	*( ((char *)R1)++);		// get next byte
+// was:	R2 =	*( ((char *)R1)++);		// get next byte
+	R2 =	*(char *)R1;		// get next byte
+R1=(long)R1+1;
 	R0=R0+R2+C;			// add it in (and the Carry)
 	C = R0 >> 31;
 Reduce16:

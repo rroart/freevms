@@ -23,10 +23,10 @@ int mm_common_lock(struct _va_range *inadr,int mask,int set) {
   int i;
   if (set) {
     for(i=0;i<512;i++)
-      if (mm_in_range(inadr,wsl[i].wsl$pq_va)) ((unsigned long)wsl[i].wsl$pq_va)|=mask;
+      if (mm_in_range(inadr,wsl[i].wsl$pq_va)) wsl[i].wsl$pq_va=(unsigned long)wsl[i].wsl$pq_va|mask;
   } else {
     for(i=0;i<512;i++)
-      if (mm_in_range(inadr,wsl[i].wsl$pq_va)) ((unsigned long)wsl[i].wsl$pq_va)&=~mask;
+      if (mm_in_range(inadr,wsl[i].wsl$pq_va)) wsl[i].wsl$pq_va=(unsigned long)wsl[i].wsl$pq_va&~mask;
   }
   return 1;
 }

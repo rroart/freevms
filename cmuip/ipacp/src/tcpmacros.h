@@ -470,8 +470,13 @@ static int inline $$KCALL(int (*func)(), ...) {
 #define CH$PTR(X,Y) ((long)X+(long)Y)
 #define CH$RCHAR(X) *((char *)X) // check or ++ char?
 #define CH$PLUS(X,Y) ((long)X+(long)Y)
+//#define CH$WCHAR_A(X,Y) { char * localc=Y; *localc++=X; Y=localc; } // was: *(char*)Y++=X
 #define CH$WCHAR_A(X,Y) *(char*)Y++=X
-#define CH$RCHAR_A(X) *(((char *)X)++)  // not yet? *((*(char **)X)++) 
+   //#define CH$RCHAR_A(X) *(((char *)X)++)  // not yet? *((*(char **)X)++) 
+   static inline char ch$rchar_a(char **c) {
+  return *(*c)++;
+}
+#define CH$RCHAR_A(X) ch$rchar_a(&X)   
 
 #define LIB$CALLG(X,Y) Y()
 
