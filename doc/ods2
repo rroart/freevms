@@ -1,0 +1,195 @@
+Interface out: ?
+
+ access
+ acl_acllength (acl_queue_head, acl_context, count, length)
+ acl_addentry (acl_queue_head, acl_context, length, ace_buffer)
+ acl_buildacl (first_fcb)
+ acl_copyacl (old_file_fcb, new_file_fcb, option)
+ acl_delentry (acl_queue_head, acl_context, count, ace)
+ acl_deleteacl (acl_queue_head, acl_context)
+ acl_dispatch (code, address, count, ace)
+ acl_findentry (acl_queue_head, acl_context, count, ace, internal)
+ acl_findtype (acl_queue_head, acl_context, count, ace, internal)
+ acl_grantace (acl_queue_head, acl_context, count, ace)
+ acl_init_queue (orb_address)
+ acl_locateace (acl_queue_head, ace_index, ace_number, acl_pointer, acl_split)
+ acl_matchace (first_ace, second_ace)
+ acl_modentry (acl_queue_head, acl_context, count, ace)
+ acl_nextace (acl_queue_head,acl_context)
+ acl_readace (acl_queue_head, acl_context, count, ace)
+ acl_readacl (acl_queue_head, acl_context, length, ace_buffer)
+ acpcontrol
+ allocation_lock
+ allocation_unlock
+ alloc_blocks (fib, blocks_needed, start_lbn, blocks_alloc)
+ arbitrate_access (acctl, fcb)
+ block_wait
+ build_ext_fcbs (primhdr, pfcb)
+ cache_lock (lock_basis, lock_id, mode)
+ cache_server
+ change_cache_lockbasis (bufaddr, lckindx): l_norm novalue
+ change_owner (uic, org_fcb, org_header)
+ charge_quota (uic, block_count, flags)
+ check_dismount
+ check_header2 (header, file_id, header_status)
+ check_protect (access, header, fcb, acmode, alt_access, required)
+ cleanup
+ clean_quo_cache (j, q_record)
+ clean_up_movefile(status)
+ close_file (window)
+ clr_dirindx (dirfcb)
+ conn_qfile (abd, fib)
+ conv_acclock (lckmodearg, fcbarg)
+ copy_name (abd)
+ create
+ create_block (lbn, count, type)
+ create_fcb (header, primfcb)
+ create_header (file_id, lock_index_arg)
+ create_window (acctl, size, header, pid, fcb)
+ deaccess 
+ deacc_qfile
+ deallocate_bad (fib, file_hdr, pointer, last_count)
+ delete
+ delete_fid (filenum)
+ delete_file (fib, fileheader, start_fcb)
+ del_extfcb (start_fcb)
+ deq_lock (lock_id)
+ dir_access (fib, write)
+ dir_scan (name_desc, file_id, start_block, start_rec, start_ver, start_pred, rec_count)
+ dispatcher
+ end_hwm_erase (fcb, packet)
+ enter (abd, fib, result_length, result)
+ erase_blocks (start_lbn, block_count, channel)
+ erase_virtual (start_vbn, block_count, window)
+ err_cleanup
+ extend (user_fib, fileheader, erase)
+ extend_contig (fib, fcb, size)
+ extend_header (fib, old_header, fcb, new_volume, blocks_needed)
+ extend_index
+ fid_to_spec (header)
+ file_size (header)
+ fill_fcb (fcbarg, hdrarg, primfcb)
+ find (abd, fib, find_mode, reslen_arg, result_arg)
+ find_buffer (lbnarg, type, count, found_count)
+ flush_quo_cache
+ get_fib (abd)
+ get_loc (fib, locrvn, loclbn)
+ get_loc_attr (abd, fib)
+ get_map_pointer
+ get_quota_lock (j, mode)
+ get_reqd_bfr_credits
+ get_request
+ get_time (buffer, time)
+ init_ext_cache (cache)
+ init_fcb2 (fcbarg, header, primfcb)
+ init_fcp
+ init_fid_cache (cache)
+ init_storage
+ ins_limbo (fcb)
+ invalidate (buffer)
+ kill_buffers (pool, lockbasis)
+ kill_cache (ucb)
+ kill_dindx (fcb)
+ lock_count (lockid)
+ lock_mode (acctl)
+ lock_volume (func)
+ main_handler (signal, mechanism)
+ make_access (fcb, window, abd)
+ make_dirindx (fcb)
+ make_entry (name_desc, fib)
+ make_fcb_stale (fcbarg)
+ make_nameblock (length, string, nameblock)
+ make_pointer (count, lbn, file_header, placement_code)
+ make_qfcb (fcb)
+ make_string (nameblock, string)
+ map_idx (vbn, count)
+ map_vbn (vbn, window, block_count, unmapped_blocks)
+ markbad_fcb (fcb)
+ markdel_fcb (fcb)
+ mark_complete (window)
+ mark_delete (fib, do_delete, result_length, result)
+ mark_dirty (buffer)
+ mark_dirty (buffer)
+ mark_incomplete (first_block)
+ modify 
+ mount
+ movefile: l_norm addressing_mode (general)
+ move_handler (signal, mechanism)
+ next_dir_rec (old_rec, vbn)
+ next_header (header, fcb, ext_fid, segnum)
+ next_rec (entry)
+ notify_user (control_string, fao_args)
+ nuke_head_fcb (fcb)
+ open_file (fid, write)
+ parse_name (name_desc, name_buffer, count, string, flags)
+ perform_audit
+ pms_end
+ pms_end_sub
+ pms_start
+ pms_start_sub (index)
+ purge_extent (entry_count, cache_limit)
+ qex_n_cancel (lockid)
+ quota_file_op (abd, fib)
+ read_attrib (header, abd)
+ read_block (lbn, count, type)
+ read_data (window, vbn, count)
+ read_header (file_id, fcb, realbasis_a)
+ read_idx_header
+ read_writevb 
+ rebld_prim_fcb (pfcb, header)
+ release_cache
+ release_lockbasis (lckindx)
+ release_serial_lock (lock_index)
+ rel_quota_lock (j)
+ remap_file
+ remove (keep_name)
+ rem_limboq (fcb)
+ reset_lbn (buffer, lbn)
+ restore_context
+ restore_dir (context)
+ return_blocks (start_lbn, block_count, erase_requested)
+ return_credits
+ return_dir (count, string, abd)
+ ret_qentry (q_record, abd)
+ save_context
+ scan_badlog (fid, base_vbn, base_lbn, mode, block_count)
+ search_fcb (file_id)
+ search_quota (uic, flags, start_rec, use_cache)
+ select_volume (fib, blocks_needed)
+ send_badscan (fid)
+ send_errlog (mode, ucb)
+ send_symbiont (header, fcb)
+ serial_cache
+ serial_file (fid_addr, blocking_ast, conditional_status)
+ set_dirindx (fcb)
+ set_expire
+ set_revision (header, mode)
+ shuffle_dir (direction)
+ switch_channel (ucb)
+ switch_volume (new_rvn)
+ take_block_lock
+ take_block_lock
+ toss_cache_data (lckindx)
+ trim_limbo
+ truncate (fib, fileheader, trnvbn)
+ truncate_header (fib, header, pointer, last_count)
+ trunc_checks (fib, header)
+ turn_window (window, header, desired_vbn, start_vbn)
+ turn_window (window, header, desired_vbn, start_vbn)
+ unhook_bfrd (bfrdarg)
+ unhook_bfrl (bfrdarg)
+ unlock_xqp
+ update_dirseq
+ update_eof (fcbarg, hdrarg)
+ update_fcb (header)
+ update_indx (block, str_size, str_addr, dirfcb)
+ write_attrib (header, abd, accessibility_arg, optional_filechar)
+ write_audit (audit_block)
+ write_block (buffer)
+ write_dirty (lockbasis)
+ write_header
+ write_quota (q_record)
+ wrong_lockbasis (header)
+ zero_idx
+ zero_on_error (signal, mechanism)
+ zero_windows (fcb)
