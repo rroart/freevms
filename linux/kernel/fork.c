@@ -86,7 +86,7 @@ void __init fork_init(unsigned long mempages)
 /* Protects next_safe and last_pid. */
 spinlock_t lastpid_lock = SPIN_LOCK_UNLOCKED;
 
-static inline int dup_mmap(struct mm_struct * mm)
+/*static*/ inline int dup_mmap(struct mm_struct * mm)
 {
 	struct vm_area_struct * mpnt, *tmp, **pprev;
 	int retval;
@@ -205,7 +205,7 @@ static inline int dup_phd(struct _pcb * p, struct _pcb * old) {
 
 #ifdef CONFIG_MM_VMS
 
-static inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
+inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
 {
 	struct _rde * mpnt, *tmp, **pprev;
 	int retval;
@@ -256,7 +256,7 @@ int mmlist_nr;
 #define allocate_mm()	(kmem_cache_alloc(mm_cachep, SLAB_KERNEL))
 #define free_mm(mm)	(kmem_cache_free(mm_cachep, (mm)))
 
-static struct mm_struct * mm_init(struct mm_struct * mm)
+/*static*/ struct mm_struct * mm_init(struct mm_struct * mm)
 {
 	atomic_set(&mm->mm_users, 1);
 	atomic_set(&mm->mm_count, 1);
@@ -369,12 +369,13 @@ static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
 	if (!oldmm)
 		return 0;
 
+	goto dont;
 	if (clone_flags & CLONE_VM) {
 		atomic_inc(&oldmm->mm_users);
 		mm = oldmm;
 		goto good_mm;
 	}
-
+ dont:
 	retval = -ENOMEM;
 	mm = allocate_mm();
 	if (!mm)
@@ -756,9 +757,15 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	dup_phd(p,current);
 	if (copy_mm(clone_flags, p))
 		goto bad_fork_cleanup_sighand;
+	int uml_map = init_fork_p1pp(p,p->pcb$l_phd,current,current->pcb$l_phd);
 	//printk("phd %x %x %x\n",tsk,tsk->pcb$l_pid,tsk->pcb$l_phd);
 	//printk("phd %x %x %x\n",current,current->pcb$l_pid,current->pcb$l_phd);
+#ifndef __arch_um__
 	retval = copy_thread(0, clone_flags, stack_start, stack_size, p, regs);
+#else
+	if (uml_map==0) BUG();
+	retval = copy_thread(uml_map, clone_flags, stack_start, stack_size, p, regs);
+#endif
 	if (retval)
 		goto bad_fork_cleanup_mm;
 	p->semundo = NULL;
@@ -831,7 +838,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	if (p->ptrace & PT_PTRACED)
 		send_sig(SIGSTOP, p, 1);
-	//	printk("fork befwak\n");
+	//printk("fork befwak\n");
 	wake_up_process(p);		/* do this last */
 	//	wake_up_process2(p,PRI$_TICOM);		/* do this last */
 	++total_forks;
