@@ -21,6 +21,13 @@ extern int timer_on;
 
 static mydebugi = 0;  // should have no printk in a non-interruptable zone
 
+#define IPL_DEBUG
+#undef IPL_DEBUG
+
+#ifdef IPL_DEBUG
+static long stk[1024];
+#endif
+
 inline asmlinkage void pushpsli(void) {
   pushpsl();
 #if 0
@@ -85,8 +92,22 @@ inline int __PAL_MFPR_IPL() {
 /* no smp yet */
 inline void setipl(unsigned char i) {
   int this_cpu = smp_processor_id();
+#ifdef IPL_DEBUG
+  int this=smp$gl_cpu_data[this_cpu]->cpu$l_curpcb->psl_ipl; 
+#if 0
+  if (i==2 && i<smp$gl_cpu_data[this_cpu]->cpu$l_curpcb->psl_ipl)
+    printk("ouch %x\n",smp$gl_cpu_data[this_cpu]->cpu$l_curpcb->psl_ipl);
+#endif
+#endif
   smp$gl_cpu_data[this_cpu]->cpu$b_ipl=i;
   current->psl_ipl=i;
+#ifdef IPL_DEBUG
+  int addr=&this_cpu;
+  if (i==2)
+    memcpy((long)stk+64*10,addr,128);
+  if (i==8 && i!=this)
+    memcpy((long)stk+64*12,addr,128);
+#endif
 }
 
 inline void __PAL_MTPR_IPL(unsigned char i) {
@@ -170,6 +191,10 @@ inline void regtrap(char type, char param) {
     smp$gl_cpu_data[cpu]->cpu$w_sisr&=~(1<<param);
   }
   if (mydebugi>1) printk("%x\n",smp$gl_cpu_data[cpu]->cpu$w_sisr);
+#ifdef IPL_DEBUG
+  int addr=&flag;
+  memcpy((long)stk+64*param,addr,64);
+#endif
   mysti(flag);
 }
 
