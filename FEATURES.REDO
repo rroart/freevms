@@ -5,3 +5,8 @@ ast delivery: needs to be set up in the corresponding priv level
 i/o startio etc: need to handle caller's and caller's caller address context &c
 
 change som vmalloc to kmalloc etc?
+
+
+
+Workarounds:
+An unwanted loop fixed in ipl.c by setting setipl(0). Search for lockup.
