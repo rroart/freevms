@@ -24,7 +24,7 @@ asmlinkage void sw_ast(void) {
   // should reaaly be if (cpu->cpu$b_cur_mod >= p->pr_astlvl) etc
   //if (p->phd$b_astlvl<4)
   //if (p->psl_is) printk("dropping sw_ast\n");
-  if (!p->oldpsl_is)
+  if (!p->psl_is)
     if (p->psl_cur_mod >= p->pr_astlvl)
       SOFTINT_ASTDEL_VECTOR;
   /* check sw interrupts */
