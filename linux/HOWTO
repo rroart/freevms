@@ -13,7 +13,7 @@ Untar freevms, go to the linux directory, and do ./prescript.
 Go to the freevms directory and do a make and make install (if uml, see Makefiles for how to compile). Then copy the resulting files from root/.
 If you want to know how to make the linker do: cat linker/src/HOW
 
-UserMode Linux needs the symlinks from /usr/include/{asm,linux}
+UserMode Linux no longer needs the symlinks from /usr/include/{asm,linux}
 to the kernel build place.
 If complaints about modversion.h, do a make update-modverfile.
 
@@ -45,8 +45,6 @@ tar xzf freevms-0_0_46.tgz
 cd freevms/linux
 mv /usr/include/linux /usr/include/linux.orig
 mv /usr/include/asm /usr/include/asm.orig
-ln -s include/linux /usr/include/linux
-ln -s include/asm-i386 /usr/include/asm
 ./prescript
 cp -p ~/.config .
 make menuconfig ARCH=um
