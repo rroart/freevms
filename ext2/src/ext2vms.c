@@ -757,8 +757,8 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
 	memcpy(atrp->atr$l_addr,head,atrp->atr$w_size);
 	vfree(head); // wow. freeing something
       }
-#endif
       break;
+#endif
     case ATR$C_CREDATE:
       {
 	*(unsigned long long*)atrp->atr$l_addr=unix_to_vms_time(head->i_ctime);
