@@ -82,6 +82,7 @@ int kswapd(void *unused)
 	daemonize();
 #endif
 	strcpy(tsk->pcb$t_lname, "SWAPPER");
+	sch$gl_swppid=tsk->pcb$l_pid;
 	sigfillset(&tsk->blocked);
 
 
@@ -100,7 +101,7 @@ int kswapd(void *unused)
 	  int bitmapsiz=pages>>3;
 	  struct _pfl * pfl=kmalloc(sizeof(struct _pfl)+bitmapsiz,GFP_KERNEL);
 	  memset(pfl,0,sizeof(struct _pfl)+bitmapsiz);
-	  memset((long)pfl+bitmapsiz,0xff,bitmapsiz);
+	  //	  memset((long)pfl+bitmapsiz,0xff,bitmapsiz);
 	  extern struct _pfl swap_info_pfl[];
 	  //	  swap_info_pfl[0]=pfl;
 	  myswapfile=pfl;
@@ -142,6 +143,7 @@ int kswapd(void *unused)
 	 */
 	for (;;) {
 		__set_current_state(TASK_INTERRUPTIBLE);
+#if 0
 		add_wait_queue(&kswapd_wait, &wait);
 
 		mb();
@@ -153,8 +155,10 @@ int kswapd(void *unused)
 		__set_current_state(TASK_RUNNING);
 		remove_wait_queue(&kswapd_wait, &wait);
 
+#endif
 		//printk("doing the swap\n");
-		exe$hiber(); // check if this should be here still
+		sys$hiber(); // check if this should be here still
+		//printk("doing the swap2\n");
 
 		balance();
 		mmg$wrtmfypag();
