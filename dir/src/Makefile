@@ -19,7 +19,7 @@ directory.o: directory.c
 
 directory${EXE}: directory.o $(LIB)
 	gcc -s -static directory.o ../../starlet/src/starlet.a -o directory${EXE}
-	../../linker/src/linker $(LINKPRE) directory.o ../../starlet/src/starlet.a $(LIBGCC) $(LINKPOST) -o directory.exe
+	../../linker/src/linker $(LINKPRE) directory.o ../../starlet/src/starlet.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o directory.exe
 	mkdir i386 || echo i386 exists
 	cp -p directory i386/directory
 	[ -f directory.exe ] && cp -p directory.exe i386/directory.exe

@@ -153,7 +153,7 @@ i386/edt${EXE}: $(LIB) $(EXTERNAL)
 	mkdir i386 || echo i386 exists
 	gcc -static $(OBJS) $(EXTERNAL) -o i386/edt${EXE}
 	ld -Bshareable $(OBJS) $(LIBC) $(LIBGCC) -o i386/edt.exe2
-	../../linker/src/linker $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) $(LINKPOST) -o i386/edt.exe
+	../../linker/src/linker $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/edt.exe
 
 UMDEF=-Dcompile_um -I.
 

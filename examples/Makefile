@@ -102,7 +102,7 @@ i386/hi: hi.o $(LIB) $(LIBRTL)
 	ld -Bshareable hi.o $(LIBC) -o i386/hi.exe2
 
 i386/hi.exe: hi.o $(LIB) $(LIBRTL)
-	../linker/src/linker $(LINKPRE) hi.o $(LIBGCC) $(LINKPOST) -o i386/hi.exe
+	../linker/src/linker $(LINKPRE) hi.o $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/hi.exe
 
 allum: um/timer um/ast um/time um/eftim um/schdwk um/forcex um/ef um/wake um/synch um/enq um/enq2 um/lnm um/lnm2 um/qio1 um/qio2 um/cef um/cefw um/mem um/memf um/getjpi um/crec um/getdvi um/inout um/mbx um/creprc
 
