@@ -723,6 +723,7 @@ asmlinkage void sch$resched(void) {
   if (curpcb->state==TASK_RUNNING) {
     sch$gl_comqs=sch$gl_comqs | (1 << curpri);
     //    curpcb->state=TASK_INTERRUPTIBLE; /* soon SCH$C_COM ? */
+    //    curpcb->pcb$w_state=SCH$C_COM;
     qhead=*(unsigned long *)&sch$aq_comt[curpri];
     before=numproc();
     //    printcom();

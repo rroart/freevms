@@ -263,6 +263,7 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
  cef:
   if (!(p->pcb$l_sts & PCB$M_RES)) goto lefo;
  event:
+  //p->pcb$b_reserved_b1 == SS$_NORMAL; // temp place. iosb will need this
   /* add stuff to pc no use here */
   goto lefo;
 
