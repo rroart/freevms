@@ -64,11 +64,12 @@ static void release_task(struct task_struct * p)
 		 * timeslices, because any timeslice recovered here
 		 * was given away by the parent in the first place.)
 		 */
-		p->pcb$l_pid = 0;
+
 		{
 		  unsigned long * vec=sch$gl_pcbvec;
 		  vec[p->pcb$l_pid&0xffff]=0;
 		}
+		p->pcb$l_pid = 0;
 		free_task_struct(p);
 	} else {
 		printk("task releasing itself\n");
