@@ -257,7 +257,7 @@ conmakehash: conmakehash.c
 consolemap_deftbl.c: $(FONTMAPFILE) conmakehash
 	./conmakehash $(FONTMAPFILE) > consolemap_deftbl.c
 
-consolemap_deftbl.o: consolemap_deftbl.c $(TOPDIR)/include/linux/types.h
+consolemap_deftbl.o: consolemap_deftbl.c $(TOPDIR)/linux/include/linux/types.h
 
 .DELETE_ON_ERROR:
 

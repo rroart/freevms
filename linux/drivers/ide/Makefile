@@ -10,7 +10,7 @@
 
 O_TARGET := idedriver.o
 
-ifneq ($(CONFIG_IO_VMS),y)
+ifneq ($(CONFIG_VMS),y)
 export-objs		:= ide.o ide-features.o ataraid.o
 else
 export-objs             := myide.o ide-features.o ataraid.o
@@ -21,14 +21,15 @@ obj-y		:=
 obj-m		:=
 ide-obj-y	:=
 
-obj-$(CONFIG_IO_VMS) += myide.o myide-disk.o
+obj-$(CONFIG_VMS) += myide.o myide-disk.o
 
 obj-$(CONFIG_BLK_DEV_HD)	+= hd.o
 obj-$(CONFIG_BLK_DEV_IDE_VMS)       += dqdriver.o enable-ide.o 
 obj-$(CONFIG_BLK_DEV_IDE)       += ide-mod.o ide-probe-mod.o
-ifneq ($(CONFIG_IO_VMS),y)
 obj-$(CONFIG_BLK_DEV_IDECS)     += ide-cs.o
+ifneq ($(CONFIG_VMS),y)
 obj-$(CONFIG_BLK_DEV_IDEDISK)   += ide-disk.o
+endif
 obj-$(CONFIG_BLK_DEV_IDECD)     += ide-cd.o
 obj-$(CONFIG_BLK_DEV_IDETAPE)   += ide-tape.o
 obj-$(CONFIG_BLK_DEV_IDEFLOPPY) += ide-floppy.o
@@ -80,11 +81,10 @@ ide-obj-$(CONFIG_BLK_DEV_MPC8xx_IDE)	+= ide-m8xx.o
 obj-$(CONFIG_BLK_DEV_ATARAID)	+= ataraid.o
 obj-$(CONFIG_BLK_DEV_ATARAID_PDC)	+= pdcraid.o
 obj-$(CONFIG_BLK_DEV_ATARAID_HPT)	+= hptraid.o
-endif
 
 ide-obj-$(CONFIG_PROC_FS)		+= ide-proc.o
 
-ifneq ($(CONFIG_IO_VMS),y)
+ifneq ($(CONFIG_VMS),y)
 ide-mod-objs		:= ide.o ide-features.o $(ide-obj-y)
 else
 ide-mod-objs            := ide-features.o $(ide-obj-y)

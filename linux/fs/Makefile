@@ -11,8 +11,6 @@ export-objs :=	filesystems.o open.o dcache.o
 
 ifneq ($(CONFIG_IO_VMS),y)
  export-objs += buffer.o
-else
- export-objs += vmsbuffer.o
 endif
 
 mod-subdirs :=	nls
@@ -25,8 +23,6 @@ obj-y :=	open.o read_write.o devices.o file_table.o \
 
 ifneq ($(CONFIG_IO_VMS),y)
  obj-y += buffer.o
-else
- obj-y += vmsbuffer.o
 endif
 
 ifeq ($(CONFIG_QUOTA),y)
@@ -41,7 +37,7 @@ subdir-y			+= partitions
 # Do not add any filesystems before this line
 subdir-$(CONFIG_EXT3_FS)	+= ext3    # Before ext2 so root fs can be ext3
 subdir-$(CONFIG_JBD)		+= jbd
-ifneq ($(CONFIG_IO_VMS),y)
+ifneq ($(CONFIG_VMS),y)
 subdir-$(CONFIG_EXT2_FS)	+= ext2
 endif
 subdir-$(CONFIG_EXTTWO_FS)	+= exttwo
@@ -84,8 +80,8 @@ subdir-$(CONFIG_REISERFS_FS)	+= reiserfs
 subdir-$(CONFIG_DEVPTS_FS)	+= devpts
 subdir-$(CONFIG_SUN_OPENPROMFS)	+= openpromfs
 
-ifneq ($(CONFIG_IO_VMS),y)
-subdir-y			+= ods2
+ifneq ($(CONFIG_VMS),y)
+#subdir-y			+= ods2
 endif
 
 obj-$(CONFIG_BINFMT_AOUT)	+= binfmt_aout.o

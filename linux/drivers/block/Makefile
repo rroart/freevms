@@ -10,23 +10,23 @@
 
 O_TARGET := block.o
 
-ifneq ($(CONFIG_IO_VMS),y)
+ifneq ($(CONFIG_VMS),y)
 export-objs	:= ll_rw_blk.o blkpg.o loop.o DAC960.o genhd.o
 else
 export-objs	:= ll_rw_blk.o blkpg.o loop.o genhd.o
 endif
 
-ifneq ($(CONFIG_IO_VMS),y)
+ifneq ($(CONFIG_VMS),y)
 obj-y	:= ll_rw_blk.o blkpg.o genhd.o elevator.o
 else
 obj-y	:= blkpg.o genhd.o vmsblock.o
 endif
 
 ifeq ($(ARCH),i386)
-#obj-$(CONFIG_IO_VMS)		+= pvdriver.o
+#obj-$(CONFIG_VMS)		+= pvdriver.o
 endif
 
-ifneq ($(CONFIG_IO_VMS),y)
+ifneq ($(CONFIG_VMS),y)
 obj-$(CONFIG_MAC_FLOPPY)	+= swim3.o
 obj-$(CONFIG_BLK_DEV_FD)	+= floppy.o
 obj-$(CONFIG_AMIGA_FLOPPY)	+= amiflop.o
