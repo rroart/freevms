@@ -42,7 +42,34 @@ struct __mmb {
   unsigned short int mmb$w_msgsize;
   struct _irp * mmb$l_irp;
   unsigned long mmb$l_pid;
+  void * mmb$l_wqfl;
+  void * mmb$l_wqbl;
+  void * mmb$l_startdata;
+  unsigned short mmb$w_datasize;
+  unsigned short mmb$w_bufquo;
   char mmb$t_data[65536];
+};
+
+struct __rdb {
+  union {
+    struct __rdb * rdb$l_mfl;
+    void * rdb$l_startdata;
+  };
+  union {
+    struct __rdb * rdb$l_mbl;
+    void * rdb$l_userbuffer;
+  };
+  unsigned short int rdb$w_size;
+  unsigned char rdb$b_type;
+  unsigned char rdb$b_func;
+  unsigned short int rdb$w_msgsize;
+  //  struct _irp * rdb$l_irp;
+  //  unsigned long rdb$l_pid;
+  void * rdb$l_startdata;
+  unsigned short rdb$w_datasize;
+  unsigned short rdb$w_reqsiz;
+  unsigned short rdb$w_bufquo;
+  char rdb$t_data[65536];
 };
 
 void mb_setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) { 
