@@ -221,8 +221,6 @@ struct pcb {
       unsigned pcb$v_shelving_reserved : 1; 
       unsigned pcb$v_class_scheduled : 1; 
       unsigned pcb$v_class_supplied : 1; 
-
-
       unsigned pcb$v_in_tbs_state : 1; 
       unsigned pcb$v_windfall : 1; 
       unsigned pcb$v_notify : 1;  
@@ -235,7 +233,6 @@ struct pcb {
   unsigned int pcb$l_pribsav;         
   unsigned int pcb$l_authpri;         
   unsigned int pcb$l_onqtime;         
-
   unsigned int pcb$l_waitime;         
   unsigned int pcb$l_astcnt;          
   unsigned int pcb$l_biocnt;          
@@ -244,7 +241,6 @@ struct pcb {
   int pcb$l_diolm;                    
   unsigned int pcb$l_prccnt;          
   char pcb$t_terminal [8];            
-
   unsigned int pcb$l_wefc;            
   unsigned int pcb$l_efwm;            
   unsigned int pcb$l_efcs;            
@@ -260,10 +256,6 @@ struct pcb {
     } pcb$r_cefc_overlay_2;
   } pcb$r_cefc_overlay;
   unsigned int pcb$l_pid;             
-
-
-
-
   union  {
     unsigned int pcb$l_epid;        
     struct  {
@@ -273,7 +265,6 @@ struct pcb {
       unsigned pcb$v_epid_wild : 1; 
     } pcb$r_fill_5_;
   } pcb$r_fill_4_;
-
   unsigned int pcb$l_eowner;          
   unsigned int pcb$l_aptcnt;          
   unsigned int pcb$l_mtxcnt;          
@@ -308,7 +299,6 @@ struct pcb {
   unsigned int pcb$l_cputim;          
   char pcb$t_lname [16];              
   struct pdb *pcb$l_prcpdb;          
-
   unsigned int pcb$l_pixhist;         
   int pcb$l_affinity_callback;        
   unsigned int pcb$l_permanent_capability; 
@@ -370,7 +360,6 @@ struct pcb {
   union  {
     unsigned int pcb$l_frewsle_param; 
     int pcb$l_pqb;                  
-
   } pcb$r_pqb_overlay;
   unsigned int pcb$l_bufobj_cnt;      
   unsigned int pcb$l_noaudit;         
@@ -534,8 +523,6 @@ struct ktb {
       unsigned ktb$v_shelving_reserved : 1; 
       unsigned ktb$v_class_scheduled : 1; 
       unsigned ktb$v_class_supplied : 1; 
-
-
       unsigned ktb$v_in_tbs_state : 1; 
       unsigned ktb$v_windfall : 1; 
       unsigned ktb$v_notify : 1;  
@@ -547,17 +534,12 @@ struct ktb {
   unsigned int ktb$l_pribsav;         
   unsigned int ktb$l_authpri;         
   unsigned int ktb$l_onqtime;         
-
   unsigned int ktb$l_waitime;         
   char ktb$b_pcb_padding_4 [32];      
   unsigned int ktb$l_wefc;            
   unsigned int ktb$l_efwm;            
   char ktb$b_pcb_padding_5 [16];      
   unsigned int ktb$l_pid;             
-
-
-
-
   union  {
     unsigned int ktb$l_epid;        
     struct  {
@@ -567,7 +549,6 @@ struct ktb {
       unsigned ktb$v_epid_wild : 1; 
     } ktb$r_fill_27_;
   } ktb$r_fill_26_;
-
   char ktb$b_pcb_padding_6 [8];       
   unsigned int ktb$l_mtxcnt;          
   char ktb$b_pcb_padding_7 [16];      
@@ -645,10 +626,8 @@ struct ktb {
   int ktb$l_curr_vol_waits;           
   int ktb$l_qend_count;               
   unsigned long ktb$q_comq_wait;   
-
   unsigned long ktb$q_runtime_start; 
   unsigned long ktb$q_inttime_start; 
-
   int ktb$l_soft_broken;              
   char ktb$b_pcb_padding_14 [20];     
   unsigned long ktb$q_acc_run;     
