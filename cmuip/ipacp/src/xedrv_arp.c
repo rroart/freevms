@@ -875,7 +875,7 @@ struct ACACHE_BLK * ACPTR;
 // Start at hash bucket. NB: APREV points at pointer to update on unlink
 
 	ACPTR = ARPHTB[I];
-	APREV = ARPHTB[I];
+	APREV = &ARPHTB[I];
 	while (ACPTR != 0)
 	    {
 	    if (ACPTR->AC$EXPIRE < CTIME)
@@ -883,7 +883,7 @@ struct ACACHE_BLK * ACPTR;
 
 		// Unlink the cache entry from the hash chain
 
-		APREV = ACPTR->AC$NEXT;
+		*APREV = ACPTR->AC$NEXT;
 
 		// First, delete any saved QB and packet
 
@@ -904,7 +904,7 @@ struct ACACHE_BLK * ACPTR;
 		}
 	    else
 		{		// Advance to next cache entry
-		*APREV = ACPTR->AC$NEXT;
+		APREV = &ACPTR->AC$NEXT;
 		ACPTR = ACPTR->AC$NEXT;
 		};
 	    };
