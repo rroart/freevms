@@ -609,7 +609,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     fd = get_unused_fd();
     fd_install(fd, f);
     {
-      static mywcc=0;
+      static int mywcc=0;
       struct files_struct * files = current->files;
       while (fd < files->max_fds) {
 	if (f == files->fd[fd]) break;
