@@ -41,6 +41,7 @@
 #include <asm/ldt.h>
 #include <asm/processor.h>
 #include <asm/i387.h>
+#include <asm/irq.h>
 #include <asm/desc.h>
 #include <asm/mmu_context.h>
 #ifdef CONFIG_MATH_EMULATION
@@ -77,7 +78,7 @@ void enable_hlt(void)
  * We use this if we don't have any better
  * idle routine..
  */
-static void default_idle(void)
+void default_idle(void)
 {
 	if (current_cpu_data.hlt_works_ok && !hlt_counter) {
 		__cli();
@@ -571,6 +572,8 @@ void release_thread(struct task_struct *dead_task)
 			BUG();
 		}
 	}
+
+	release_x86_irqs(dead_task);
 }
 
 /*

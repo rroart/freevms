@@ -27,8 +27,6 @@
 
 extern void die(const char *,struct pt_regs *,long);
 
-extern int console_loglevel;
-
 /*
  * Ugly, ugly, but the goto's result in better assembly..
  */

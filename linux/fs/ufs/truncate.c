@@ -115,7 +115,7 @@ static int ufs_trunc_direct (struct inode * inode)
 	frag1 = ufs_fragnum (frag1);
 	frag2 = ufs_fragnum (frag2);
 	for (j = frag1; j < frag2; j++) {
-		bh = get_hash_table (sb->s_dev, tmp + j, uspi->s_fsize);
+		bh = sb_get_hash_table (sb, tmp + j);
 		if ((bh && DATA_BUFFER_USED(bh)) || tmp != fs32_to_cpu(sb, *p)) {
 			retry = 1;
 			brelse (bh);
@@ -138,7 +138,7 @@ next1:
 		if (!tmp)
 			continue;
 		for (j = 0; j < uspi->s_fpb; j++) {
-			bh = get_hash_table (sb->s_dev, tmp + j, uspi->s_fsize);
+			bh = sb_get_hash_table(sb, tmp + j);
 			if ((bh && DATA_BUFFER_USED(bh)) || tmp != fs32_to_cpu(sb, *p)) {
 				retry = 1;
 				brelse (bh);
@@ -177,7 +177,7 @@ next2:;
 		ufs_panic(sb, "ufs_truncate_direct", "internal error");
 	frag4 = ufs_fragnum (frag4);
 	for (j = 0; j < frag4; j++) {
-		bh = get_hash_table (sb->s_dev, tmp + j, uspi->s_fsize);
+		bh = sb_get_hash_table (sb, tmp + j);
 		if ((bh && DATA_BUFFER_USED(bh)) || tmp != fs32_to_cpu(sb, *p)) {
 			retry = 1;
 			brelse (bh);
@@ -219,7 +219,7 @@ static int ufs_trunc_indirect (struct inode * inode, unsigned offset, u32 * p)
 	tmp = fs32_to_cpu(sb, *p);
 	if (!tmp)
 		return 0;
-	ind_ubh = ubh_bread (sb->s_dev, tmp, uspi->s_bsize);
+	ind_ubh = ubh_bread(sb, tmp, uspi->s_bsize);
 	if (tmp != fs32_to_cpu(sb, *p)) {
 		ubh_brelse (ind_ubh);
 		return 1;
@@ -236,7 +236,7 @@ static int ufs_trunc_indirect (struct inode * inode, unsigned offset, u32 * p)
 		if (!tmp)
 			continue;
 		for (j = 0; j < uspi->s_fpb; j++) {
-			bh = get_hash_table (sb->s_dev, tmp + j, uspi->s_fsize);
+			bh = sb_get_hash_table(sb, tmp + j);
 			if ((bh && DATA_BUFFER_USED(bh)) || tmp != fs32_to_cpu(sb, *ind)) {
 				retry = 1;
 				brelse (bh);
@@ -313,7 +313,7 @@ static int ufs_trunc_dindirect (struct inode * inode, unsigned offset, u32 * p)
 	tmp = fs32_to_cpu(sb, *p);
 	if (!tmp)
 		return 0;
-	dind_bh = ubh_bread (inode->i_dev, tmp, uspi->s_bsize);
+	dind_bh = ubh_bread(sb, tmp, uspi->s_bsize);
 	if (tmp != fs32_to_cpu(sb, *p)) {
 		ubh_brelse (dind_bh);
 		return 1;
@@ -379,7 +379,7 @@ static int ufs_trunc_tindirect (struct inode * inode)
 	p = inode->u.ufs_i.i_u1.i_data + UFS_TIND_BLOCK;
 	if (!(tmp = fs32_to_cpu(sb, *p)))
 		return 0;
-	tind_bh = ubh_bread (sb->s_dev, tmp, uspi->s_bsize);
+	tind_bh = ubh_bread (sb, tmp, uspi->s_bsize);
 	if (tmp != fs32_to_cpu(sb, *p)) {
 		ubh_brelse (tind_bh);
 		return 1;

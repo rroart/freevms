@@ -702,8 +702,13 @@ static inline ssize_t do_tty_write(
 {
 	ssize_t ret = 0, written = 0;
 	
-	if (down_interruptible(&tty->atomic_write)) {
-		return -ERESTARTSYS;
+	if (file->f_flags & O_NONBLOCK) {
+		if (down_trylock(&tty->atomic_write))
+			return -EAGAIN;
+	}
+	else {
+		if (down_interruptible(&tty->atomic_write))
+			return -ERESTARTSYS;
 	}
 	if ( test_bit(TTY_NO_WRITE_SPLIT, &tty->flags) ) {
 		lock_kernel();
@@ -2197,6 +2202,11 @@ void __init console_init(void)
 #ifdef CONFIG_SERIAL_CONSOLE
 #if (defined(CONFIG_8xx) || defined(CONFIG_8260))
 	console_8xx_init();
+#elif defined(CONFIG_MAC_SERIAL) && defined(CONFIG_SERIAL)
+	if (_machine == _MACH_Pmac)
+ 		mac_scc_console_init();
+	else
+		serial_console_init();
 #elif defined(CONFIG_MAC_SERIAL)
  	mac_scc_console_init();
 #elif defined(CONFIG_PARISC)

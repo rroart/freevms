@@ -654,6 +654,8 @@ int journal_bmap(journal_t *journal, unsigned long blocknr,
  * We play buffer_head aliasing tricks to write data/metadata blocks to
  * the journal without copying their contents, but for journal
  * descriptor blocks we do need to generate bona fide buffers.
+ *
+ * We return a jh whose bh is locked and ready to be populated.
  */
 
 struct journal_head * journal_get_descriptor_buffer(journal_t *journal)
@@ -668,7 +670,7 @@ struct journal_head * journal_get_descriptor_buffer(journal_t *journal)
 		return NULL;
 
 	bh = getblk(journal->j_dev, blocknr, journal->j_blocksize);
-	bh->b_state |= (1 << BH_Dirty);
+	lock_buffer(bh);
 	BUFFER_TRACE(bh, "return this buffer");
 	return journal_add_journal_head(bh);
 }

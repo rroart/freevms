@@ -537,7 +537,7 @@ static void refill_inactive(int nr_pages)
 
 	spin_lock(&pagemap_lru_lock);
 	entry = active_list.prev;
-	while (nr_pages-- && entry != &active_list) {
+	while (nr_pages && entry != &active_list) {
 		struct page * page;
 
 		page = list_entry(entry, struct page, lru);
@@ -547,6 +547,8 @@ static void refill_inactive(int nr_pages)
 			list_add(&page->lru, &active_list);
 			continue;
 		}
+
+		nr_pages--;
 
 		del_page_from_active_list(page);
 		add_page_to_inactive_list(page);

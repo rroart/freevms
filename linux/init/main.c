@@ -108,6 +108,9 @@ extern void ecard_init(void);
 #if defined(CONFIG_SYSVIPC)
 extern void ipc_init(void);
 #endif
+#ifdef CONFIG_PERFMON
+extern void perfmon_init(void);
+#endif
 
 /*
  * Boot command-line arguments
@@ -595,6 +598,9 @@ asmlinkage void __init start_kernel(void)
 	pgtable_cache_init();
 
 	calibrate_delay();
+#ifdef CONFIG_PERFMON
+	perfmon_init();
+#endif
 #ifdef CONFIG_BLK_DEV_INITRD
 	if (initrd_start && !initrd_below_start_ok &&
 			initrd_start < min_low_pfn << PAGE_SHIFT) {

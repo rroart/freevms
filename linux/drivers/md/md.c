@@ -1000,6 +1000,11 @@ int md_update_sb(mddev_t * mddev)
 	struct md_list_head *tmp;
 	mdk_rdev_t *rdev;
 
+	if (!mddev->sb_dirty) {
+		printk("hm, md_update_sb() called without ->sb_dirty == 1, from %p.\n", __builtin_return_address(0));
+		return 0;
+	}
+	mddev->sb_dirty = 0;
 repeat:
 	mddev->sb->utime = CURRENT_TIME;
 	if ((++mddev->sb->events_lo)==0)
@@ -1724,6 +1729,7 @@ static int do_md_run(mddev_t * mddev)
 	}
 
 	mddev->sb->state &= ~(1 << MD_SB_CLEAN);
+	mddev->sb_dirty = 1;
 	md_update_sb(mddev);
 
 	/*
@@ -1841,6 +1847,7 @@ static int do_md_stop(mddev_t * mddev, int ro)
 				printk(KERN_INFO "md: marking sb clean...\n");
 				mddev->sb->state |= 1 << MD_SB_CLEAN;
 			}
+			mddev->sb_dirty = 1;
 			md_update_sb(mddev);
 		}
 		if (ro)
@@ -2464,7 +2471,6 @@ static int hot_add_disk(mddev_t * mddev, kdev_t dev)
 	mddev->sb->working_disks++;
 
 	mddev->sb_dirty = 1;
-
 	md_update_sb(mddev);
 
 	/*
@@ -3519,6 +3525,8 @@ restart:
 			continue;
 		if (sb->active_disks == sb->raid_disks)
 			continue;
+		if (mddev->sb_dirty)
+			md_update_sb(mddev);
 		if (!sb->spare_disks) {
 			printk(KERN_ERR "md%d: no spare disk to reconstruct array! "
 			       "-- continuing in degraded mode\n", mdidx(mddev));

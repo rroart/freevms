@@ -88,6 +88,7 @@ static int get_pid(unsigned long flags)
 {
 	static int next_safe = PID_MAX;
 	struct task_struct *p;
+	int pid;
 
 	if (flags & CLONE_PID)
 		return current->pid;
@@ -123,9 +124,10 @@ inside:
 		}
 		read_unlock(&tasklist_lock);
 	}
+	pid = last_pid;
 	spin_unlock(&lastpid_lock);
 
-	return last_pid;
+	return pid;
 }
 
 static inline int dup_mmap(struct mm_struct * mm)
@@ -222,6 +224,7 @@ static struct mm_struct * mm_init(struct mm_struct * mm)
 	init_rwsem(&mm->mmap_sem);
 	mm->page_table_lock = SPIN_LOCK_UNLOCKED;
 	mm->pgd = pgd_alloc(mm);
+	mm->def_flags = 0;
 	if (mm->pgd)
 		return mm;
 	free_mm(mm);
@@ -595,7 +598,14 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	*p = *current;
 
 	retval = -EAGAIN;
-	if (atomic_read(&p->user->processes) >= p->rlim[RLIMIT_NPROC].rlim_cur)
+	/*
+	 * Check if we are over our maximum process limit, but be sure to
+	 * exclude root. This is needed to make it possible for login and
+	 * friends to set the per-user process limit to something lower
+	 * than the amount of processes root is running. -- Rik
+	 */
+	if (atomic_read(&p->user->processes) >= p->rlim[RLIMIT_NPROC].rlim_cur
+	              && !capable(CAP_SYS_ADMIN) && !capable(CAP_SYS_RESOURCE))
 		goto bad_fork_free;
 
 	atomic_inc(&p->user->__count);

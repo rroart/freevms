@@ -70,6 +70,12 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 	struct page *base;
 	zone_t *zone;
 
+	/* Yes, think what happens when other parts of the kernel take 
+	 * a reference to a page in order to pin it for io. -ben
+	 */
+	if (PageLRU(page))
+		lru_cache_del(page);
+
 	if (page->buffers)
 		BUG();
 	if (page->mapping)
@@ -425,15 +431,6 @@ unsigned long get_zeroed_page(unsigned int gfp_mask)
 		return (unsigned long) address;
 	}
 	return 0;
-}
-
-void page_cache_release(struct page *page)
-{
-	if (!PageReserved(page) && put_page_testzero(page)) {
-		if (PageLRU(page))
-			lru_cache_del(page);
-		__free_pages_ok(page, 0);
-	}
 }
 
 void __free_pages(struct page *page, unsigned int order)

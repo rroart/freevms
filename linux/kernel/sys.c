@@ -1268,6 +1268,22 @@ asmlinkage long sys_prctl(int option, unsigned long arg2, unsigned long arg3,
 #endif
 			break;
 
+	        case PR_SET_FPEMU:
+#ifdef SET_FPEMU_CTL
+			error = SET_FPEMU_CTL(current, arg2);
+#else
+			error = -EINVAL;
+#endif
+			break;
+
+	        case PR_GET_FPEMU:
+#ifdef GET_FPEMU_CTL
+			error = GET_FPEMU_CTL(current, arg2);
+#else
+			error = -EINVAL;
+#endif
+			break;
+
 		case PR_GET_KEEPCAPS:
 			if (current->keep_capabilities)
 				error = 1;

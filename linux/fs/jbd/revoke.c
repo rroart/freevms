@@ -531,6 +531,7 @@ static void flush_descriptor(journal_t *journal,
 
 	if (is_journal_aborted(journal)) {
 		JBUFFER_TRACE(descriptor, "brelse");
+		unlock_buffer(jh2bh(descriptor));
 		__brelse(jh2bh(descriptor));
 		return;
 	}
@@ -541,7 +542,9 @@ static void flush_descriptor(journal_t *journal,
 	{
 		struct buffer_head *bh = jh2bh(descriptor);
 		BUFFER_TRACE(bh, "write");
-		ll_rw_block (WRITE, 1, &bh);
+		clear_bit(BH_Dirty, &bh->b_state);
+		bh->b_end_io = journal_end_buffer_io_sync;
+		submit_bh(WRITE, bh);
 	}
 }
 

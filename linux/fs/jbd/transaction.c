@@ -97,6 +97,8 @@ repeat:
 
 	lock_journal(journal);
 
+repeat_locked:
+
 	if (is_journal_aborted(journal) ||
 	    (journal->j_errno != 0 && !(journal->j_flags & JFS_ACK_ERR))) {
 		unlock_journal(journal);
@@ -110,7 +112,6 @@ repeat:
 		goto repeat;
 	}
 	
-repeat_locked:
 	if (!journal->j_running_transaction)
 		get_transaction(journal, 0);
 	/* @@@ Error? */
@@ -604,6 +605,7 @@ repeat:
 		spin_unlock(&journal_datalist_lock);
 		unlock_buffer(jh2bh(jh));
 		lock_journal(journal);
+		goto repeat;
 	}
 
 	J_ASSERT_JH(jh, !buffer_locked(jh2bh(jh)));

@@ -310,9 +310,10 @@ static int reiserfs_find_entry (struct inode * dir, const char * name, int namel
 
     while (1) {
 	retval = search_by_entry_key (dir->i_sb, &key_to_search, path_to_entry, de);
-	if (retval == IO_ERROR)
-	    // FIXME: still has to be dealt with
-	    reiserfs_panic (dir->i_sb, "zam-7001: io error in " __FUNCTION__ "\n");
+	if (retval == IO_ERROR) {
+	    reiserfs_warning ("zam-7001: io error in " __FUNCTION__ "\n");
+	    return IO_ERROR;
+	}
 
 	/* compare names for all entries having given hash value */
 	retval = linear_search_in_dir_item (&key_to_search, de, name, namelen);
@@ -876,7 +877,7 @@ static int reiserfs_symlink (struct inode * dir, struct dentry * dentry, const c
     }
 
     item_len = ROUND_UP (strlen (symname));
-    if (item_len > MAX_ITEM_LEN (dir->i_sb->s_blocksize)) {
+    if (item_len > MAX_DIRECT_ITEM_LEN (dir->i_sb->s_blocksize)) {
 	iput(inode) ;
 	return -ENAMETOOLONG;
     }
@@ -1043,7 +1044,7 @@ static int reiserfs_rename (struct inode * old_dir, struct dentry *old_dentry,
     INITIALIZE_PATH (old_entry_path);
     INITIALIZE_PATH (new_entry_path);
     INITIALIZE_PATH (dot_dot_entry_path);
-    struct item_head new_entry_ih, old_entry_ih ;
+    struct item_head new_entry_ih, old_entry_ih, dot_dot_ih ;
     struct reiserfs_dir_entry old_de, new_de, dot_dot_de;
     struct inode * old_inode, * new_inode;
     int windex ;
@@ -1132,6 +1133,8 @@ static int reiserfs_rename (struct inode * old_dir, struct dentry *old_dentry,
 
 	copy_item_head(&old_entry_ih, get_ih(&old_entry_path)) ;
 
+	reiserfs_prepare_for_journal(old_inode->i_sb, old_de.de_bh, 1) ;
+
 	// look for new name by reiserfs_find_entry
 	new_de.de_gen_number_bit_string = 0;
 	retval = reiserfs_find_entry (new_dir, new_dentry->d_name.name, new_dentry->d_name.len, 
@@ -1146,6 +1149,7 @@ static int reiserfs_rename (struct inode * old_dir, struct dentry *old_dentry,
 	if (S_ISDIR(old_inode->i_mode)) {
 	    if (search_by_entry_key (new_dir->i_sb, &dot_dot_de.de_entry_key, &dot_dot_entry_path, &dot_dot_de) != NAME_FOUND)
 		BUG ();
+	    copy_item_head(&dot_dot_ih, get_ih(&dot_dot_entry_path)) ;
 	    // node containing ".." gets into transaction
 	    reiserfs_prepare_for_journal(old_inode->i_sb, dot_dot_de.de_bh, 1) ;
 	}
@@ -1162,23 +1166,33 @@ static int reiserfs_rename (struct inode * old_dir, struct dentry *old_dentry,
 	** of the above checks could have scheduled.  We have to be
 	** sure our items haven't been shifted by another process.
 	*/
-	if (!entry_points_to_object(new_dentry->d_name.name, 
+	if (item_moved(&new_entry_ih, &new_entry_path) ||
+	    !entry_points_to_object(new_dentry->d_name.name, 
 	                            new_dentry->d_name.len,
 				    &new_de, new_inode) ||
-	    item_moved(&new_entry_ih, &new_entry_path) ||
 	    item_moved(&old_entry_ih, &old_entry_path) || 
 	    !entry_points_to_object (old_dentry->d_name.name, 
 	                             old_dentry->d_name.len,
 				     &old_de, old_inode)) {
 	    reiserfs_restore_prepared_buffer (old_inode->i_sb, new_de.de_bh);
+	    reiserfs_restore_prepared_buffer (old_inode->i_sb, old_de.de_bh);
 	    if (S_ISDIR(old_inode->i_mode))
 		reiserfs_restore_prepared_buffer (old_inode->i_sb, dot_dot_de.de_bh);
 	    continue;
 	}
+	if (S_ISDIR(old_inode->i_mode)) {
+	    if ( item_moved(&dot_dot_ih, &dot_dot_entry_path) ||
+		 !entry_points_to_object ( "..", 2, &dot_dot_de, old_dir) ) {
+		reiserfs_restore_prepared_buffer (old_inode->i_sb, old_de.de_bh);
+		reiserfs_restore_prepared_buffer (old_inode->i_sb, new_de.de_bh);
+		reiserfs_restore_prepared_buffer (old_inode->i_sb, dot_dot_de.de_bh);
+		continue;
+	    }
+	}
+
 
 	RFALSE( S_ISDIR(old_inode->i_mode) && 
-		(!entry_points_to_object ("..", 2, &dot_dot_de, old_dir) || 
-		 !reiserfs_buffer_prepared(dot_dot_de.de_bh)), "" );
+		!reiserfs_buffer_prepared(dot_dot_de.de_bh), "" );
 
 	break;
     }
@@ -1191,6 +1205,7 @@ static int reiserfs_rename (struct inode * old_dir, struct dentry *old_dentry,
     journal_mark_dirty (&th, old_dir->i_sb, new_de.de_bh);
 
     mark_de_hidden (old_de.de_deh + old_de.de_entry_num);
+    journal_mark_dirty (&th, old_dir->i_sb, old_de.de_bh);
     old_dir->i_ctime = old_dir->i_mtime = CURRENT_TIME;
     new_dir->i_ctime = new_dir->i_mtime = CURRENT_TIME;
 

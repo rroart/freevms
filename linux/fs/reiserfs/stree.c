@@ -127,19 +127,19 @@ inline int  comp_keys (const struct key * le_key, const struct cpu_key * cpu_key
   retval = comp_short_keys (le_key, cpu_key);
   if (retval)
       return retval;
-  if (le_key_k_offset (cpu_key->version, le_key) < cpu_key_k_offset (cpu_key))
+  if (le_key_k_offset (le_key_version(le_key), le_key) < cpu_key_k_offset (cpu_key))
       return -1;
-  if (le_key_k_offset (cpu_key->version, le_key) > cpu_key_k_offset (cpu_key))
+  if (le_key_k_offset (le_key_version(le_key), le_key) > cpu_key_k_offset (cpu_key))
       return 1;
 
   if (cpu_key->key_length == 3)
       return 0;
 
   /* this part is needed only when tail conversion is in progress */
-  if (le_key_k_type (cpu_key->version, le_key) < cpu_key_k_type (cpu_key))
+  if (le_key_k_type (le_key_version(le_key), le_key) < cpu_key_k_type (cpu_key))
     return -1;
 
-  if (le_key_k_type (cpu_key->version, le_key) > cpu_key_k_type (cpu_key))
+  if (le_key_k_type (le_key_version(le_key), le_key) > cpu_key_k_type (cpu_key))
     return 1;
 
   return 0;
@@ -1701,8 +1701,7 @@ void reiserfs_do_truncate (struct reiserfs_transaction_handle *th,
     }
 
     if ( n_file_size == 0 || n_file_size < n_new_file_size ) {
-	pathrelse(&s_search_path);
-	return;
+	goto update_and_out ;
     }
 
     /* Update key to search for the last file item. */
@@ -1755,6 +1754,7 @@ void reiserfs_do_truncate (struct reiserfs_transaction_handle *th,
 	    "PAP-5680: truncate did not finish: new_file_size %Ld, current %Ld, oid %d\n",
 	    n_new_file_size, n_file_size, s_item_key.on_disk_key.k_objectid);
 
+update_and_out:
     if (update_timestamps) {
 	// this is truncate, not file closing
 	p_s_inode->i_mtime = p_s_inode->i_ctime = CURRENT_TIME;

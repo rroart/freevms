@@ -101,13 +101,14 @@
 #include <linux/skbuff.h>
 #include <linux/netdevice.h>
 #include <net/sock.h>
-#include <net/tcp.h>
+#include <linux/tcp.h>
 #include <net/af_unix.h>
 #include <linux/proc_fs.h>
 #include <net/scm.h>
 #include <linux/init.h>
 #include <linux/poll.h>
 #include <linux/smp_lock.h>
+#include <linux/rtnetlink.h>
 
 #include <asm/checksum.h>
 #include <asm/hw_irq.h>
@@ -484,7 +485,7 @@ static struct sock * unix_create1(struct socket *sock)
 	sk->protinfo.af_unix.dentry=NULL;
 	sk->protinfo.af_unix.mnt=NULL;
 	sk->protinfo.af_unix.lock = RW_LOCK_UNLOCKED;
-	atomic_set(&sk->protinfo.af_unix.inflight, 0);
+	atomic_set(&sk->protinfo.af_unix.inflight, sock ? 0 : -1);
 	init_MUTEX(&sk->protinfo.af_unix.readsem);/* single task reading lock */
 	init_waitqueue_head(&sk->protinfo.af_unix.peer_wait);
 	sk->protinfo.af_unix.list=NULL;
@@ -992,7 +993,12 @@ restart:
 	unix_state_wunlock(sk);
 
 	/* take ten and and send info to listening sock */
-	skb_queue_tail(&other->receive_queue,skb);
+	spin_lock(&other->receive_queue.lock);
+	__skb_queue_tail(&other->receive_queue,skb);
+	/* Undo artificially decreased inflight after embrion
+	 * is installed to listening socket. */
+	atomic_inc(&newsk->protinfo.af_unix.inflight);
+	spin_unlock(&other->receive_queue.lock);
 	unix_state_runlock(other);
 	other->data_ready(other, 0);
 	sock_put(other);
@@ -1055,8 +1061,12 @@ static int unix_accept(struct socket *sock, struct socket *newsock, int flags)
 	 */
 
 	skb = skb_recv_datagram(sk, 0, flags&O_NONBLOCK, &err);
-	if (!skb)
+	if (!skb) {
+		/* This means receive shutdown. */
+		if (err == 0)
+			err = -EINVAL;
 		goto out;
+	}
 
 	tsk = skb->sk;
 	skb_free_datagram(sk, skb);
