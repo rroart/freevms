@@ -96,13 +96,19 @@ void vms_read_inode(struct inode * inode)
 		inode->i_fop = &generic_ro_fops;
 		inode->i_nlink = 1;
 		inode->i_blksize = VMS_BLOCKSIZE;
+		inode->i_size = VMS_BLOCKSIZE * pdp_invert(fileh.fh2$w_recattr.fat$l_efblk) - VMS_BLOCKSIZE;
 		{
 		  unsigned long secs;
 		  unsigned long long smith;
 		  struct _fh2 * head=&fileh;
 		  struct _fi2 * fi=(unsigned short *)head+head->fh2$b_idoffset;
 		  memcpy(&fi->fi2$q_credate,&smith,8);
+#ifdef __arch_um__
 		  smith=smith/10000000;
+#else
+		  smith=smith>>23;
+#endif
+		  //smith*=.0000001;
 		  smith=smith-86400*40587;
 		  secs=smith;
 		  inode->i_atime=inode->i_ctime=inode->i_mtime=secs;
