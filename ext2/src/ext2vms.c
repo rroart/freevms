@@ -624,7 +624,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
     //    resdsc->dsc$a_pointer=strdup(dir.d_name);
     *reslen=strlen(dir.d_name);
-    bcopy(dir.d_name,resdsc->dsc$a_pointer,resdsc->dsc$w_length);
+    bcopy(dir.d_name,resdsc->dsc$a_pointer,*reslen);
 
     //    fib->fib$l_wcc=dir.d_off;
     fib->fib$w_exctl=dir.d_off;
