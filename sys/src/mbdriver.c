@@ -84,11 +84,11 @@ int mb$fdt_setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _cc
   if (i->irp$l_func&IO$M_READATTN) {
     com_std$setattnast(i,p,u,c,&u->ucb$l_mb_r_ast);
     if (!aqempty(mu->ucb$l_mb_readqfl))
-      com_std$delattnast(u->ucb$l_mb_r_ast,u);
+      com_std$delattnast(&u->ucb$l_mb_r_ast,u);
   } else {
     com_std$setattnast(i,p,u,c,&u->ucb$l_mb_w_ast);
     if (u->ucb$w_msgcnt)
-      com_std$delattnast(u->ucb$l_mb_w_ast,u);
+      com_std$delattnast(&u->ucb$l_mb_w_ast,u);
   }
 
   return exe$finishioc(SS$_NORMAL,i,p,u);
@@ -306,7 +306,7 @@ int mb$fdt_read (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   if (!aqempty(u->ucb$l_mb_msgqfl))
     mb$finishread(u);
   else
-    com_std$delattnast(u->ucb$l_mb_r_ast ,u);
+    com_std$delattnast(&u->ucb$l_mb_r_ast ,u);
   vmsunlock(&SPIN_MAILBOX,savipl);
   return SS$_NORMAL; // or qioreturn? (forklock held, etc
 }
@@ -326,7 +326,7 @@ void mb$finishread(struct _ucb * u) {
   do {
 
     not_done=0;
-    struct _irp * i = u->ucb$l_irp;
+    struct _irp * i = mu->ucb$l_mb_readqfl; //not? u->ucb$l_irp;?
     struct __mmb * msg = u->ucb$l_mb_msgqfl;
     long read_status=read_equal;
     short func = i->irp$l_func;
@@ -578,7 +578,7 @@ static void  aux_routine (void) { };
 static struct _ddt mb$ddt = {
   ddt$l_start: startio,
   ddt$l_unsolint: unsolint,
-  ddt$l_fdt: &mb$ddt,
+  ddt$l_fdt: &mb$fdt,
   ddt$l_cancel: cancel,
   ddt$l_regdump: regdump,
   ddt$l_diagbuf: diagbuf,
@@ -643,6 +643,8 @@ struct _ddb mb$ddb;
 struct _mb_ucb mb$ucb;
 struct _crb mb$crb;
 
+struct _ucb * mbucb0;
+
 int mb$init_tables() {
   ini_dpt_name(&mb$dpt, "MBDRIVER");
   ini_dpt_adapt(&mb$dpt, 0);
@@ -684,6 +686,8 @@ int mb_iodb_vmsinit(void) {
   struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
+
+  mbucb0=ucb;
 
   bzero(ucb,sizeof(struct _ucb));
   bzero(ddb,sizeof(struct _ddb));
@@ -742,7 +746,9 @@ int mb_vmsinit(void) {
   /* for the fdt init part */
   /* a lot of these? */
 
+#if 0
   mb_iodbunit_vmsinit(ddb,0,&u0);
+#endif
 
   printk(KERN_INFO "dev here\n");
 
