@@ -1141,7 +1141,7 @@ int main_not(int argc,char *argv[])
 	    if (getcmd (str, "$> ") == NULL) break;
 #else
             printf("$> ");
-            if (gets(str) == NULL) break;
+            if (fgets(str,2048,NULL) == NULL) break;
 #endif
         }
         ptr = str;
