@@ -49,6 +49,19 @@ void do_checksum(unsigned char *line){
 	*p = VMSWORD(checksum);
 }
 
+void do_checksum_count(unsigned char *line, int count){
+        unsigned short int checksum=0;
+	unsigned data=0;
+        unsigned short int *p;
+	int i;
+        p=(unsigned short int *) line;
+	for(i=0;i<count;i++) {
+		data=*p++;
+                checksum=checksum+VMSWORD(data);
+        }
+	*p = VMSWORD(checksum);
+}
+
 void create_ods2(FILE *fout, char *volname, int volsize)
 {
 unsigned char out_line[512];
@@ -103,6 +116,8 @@ struct _fi2*pFI2;
     pHM2$->hm2$l_ibmaplbn=VMSLONG(clustersize*4);
     pHM2$->hm2$l_maxfiles=(maxfiles);
     pHM2$->hm2$w_ibmapsize=VMSWORD(roundup( ( (double) pHM2$->hm2$l_maxfiles)/4096 ));
+    pHM2$->hm2$w_resfiles=10;
+    do_checksum_count(out_line,(short *)&pHM2$->hm2$w_checksum1-(short*)pHM2$);
     pHM2$->hm2$w_extend=clustersize;
     strcpy(pHM2$->hm2$t_strucname,"            ");
     strcpy(pHM2$->hm2$t_volname , volnam);
@@ -494,6 +509,7 @@ struct _fi2*pFI2;
 	pSCB->scb$l_sectors=63;	
 	pSCB->scb$l_tracks=255;
 	pSCB->scb$l_cylinders=4998;
+	do_checksum(out_line);
 	write_blk(out_line, fout, "bitmap.sys SCB"); //write storage control block, some missing information...
     
     //storage bitmap 
