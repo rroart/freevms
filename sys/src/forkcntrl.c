@@ -4,13 +4,13 @@
 // Author. Roar Thronæs.
 
 #include<linux/linkage.h>
-#include"../../freevms/sys/src/system_data_cells.h"
-#include"../../freevms/sys/src/internals.h"
-#include"../../freevms/lib/src/ucbdef.h"
-#include"../../freevms/lib/src/irpdef.h"
-#include"../../freevms/lib/src/fkbdef.h"
-#include"../../freevms/lib/src/ipldef.h"
-#include"../../freevms/pal/src/ipl.h"
+#include<system_data_cells.h>
+#include<internals.h>
+#include<ucbdef.h>
+#include<irpdef.h>
+#include<fkbdef.h>
+#include<ipldef.h>
+#include<ipl.h>
 #include <linux/smp.h>
 #include <asm/current.h>
 #include <linux/kernel.h>

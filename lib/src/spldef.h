@@ -1,7 +1,7 @@
 #ifndef spldef_h
 #define spldef_h
 
-#include "../../../freevms/lib/src/cpudef.h"           
+#include <cpudef.h>           
 
 #define SPL$C_SPL_SPINLOCK 1            
 #define SPL$C_SPL_FORKLOCK 2            

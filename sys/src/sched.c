@@ -27,9 +27,9 @@
  * current-task
  */
 
-#include "../../freevms/sys/src/system_data_cells.h"
-#include "../../freevms/lib/src/dyndef.h"
-#include "../../freevms/sys/src/internals.h"
+#include <system_data_cells.h>
+#include <dyndef.h>
+#include <internals.h>
 
 #include <linux/config.h>
 #include <linux/mm.h>
@@ -44,11 +44,11 @@
 
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
-#include "../../freevms/sys/src/sysgen.h"
-#include "../../freevms/lib/src/ipldef.h"
-#include "../../freevms/pal/src/ipl.h"
-#include "../../freevms/pal/src/queue.h"
-#include"../../freevms/lib/src/system_service_setup.h"
+#include <sysgen.h>
+#include <ipldef.h>
+#include <ipl.h>
+#include <queue.h>
+#include<system_service_setup.h>
 #ifdef __arch_um__
 #include <asm-i386/hw_irq.h>
 #endif

@@ -3,9 +3,9 @@
 
 // Author. Roar Thronæs.
 
-#include "../../freevms/sys/src/system_data_cells.h"
-#include "../../freevms/sys/src/internals.h"
-#include "../../freevms/lib/src/ipldef.h"
+#include <system_data_cells.h>
+#include <internals.h>
+#include <ipldef.h>
 
 void exe$instimq(struct _tqe * t) {
   static signed int times=-500;

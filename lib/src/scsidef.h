@@ -982,7 +982,7 @@ struct _datcomp_pg {
   unsigned char page_0f$b_rsvd4 [4];
 };
  
-#include "../../../freevms/starlet/src/wwiddef.h"
+#include <wwiddef.h>
 
 struct _dev_wwid_duple {
   struct _dev_wwid_duple *dev_wwid_duple$ps_flink; 

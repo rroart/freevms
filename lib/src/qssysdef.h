@@ -1,7 +1,7 @@
 #ifndef qssysdef_h
 #define qssysdef_h
 	
-#include "../../../freevms/lib/src/dtndef.h"
+#include <dtndef.h>
 
 #define QSRV_HLPR_ACT$C_C_PREP 1        
 #define QSRV_HLPR_ACT$C_C_POST 2        

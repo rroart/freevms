@@ -43,10 +43,10 @@
 
 #include <time.h>               /* C header for $GETTIM to find time */
 #include <stdlib.h>
-#include "../../freevms/starlet/src/sys$routines.h"	/* Our header file! */
-#include "../../freevms/starlet/src/ssdef.h"
-#include "../../freevms/librtl/src/descrip.h"
-#include "../../freevms/starlet/src/lib$routines.h"	/* LIB$ Header File */
+#include <sys$routines.h>	/* Our header file! */
+#include <ssdef.h>
+#include <descrip.h>
+#include <lib$routines.h>	/* LIB$ Header File */
 
 #define TIMEBASE 100000         /* 10 millisecond units in quadword */
 #define TIMESIZE 8640000        /* Factor between dates & times */

@@ -2270,15 +2270,15 @@ mscp_requeue(mi)
 
 #endif /* if 0 */
 
-#include"../../freevms/lib/src/cdtdef.h"
-#include"../../freevms/lib/src/ddtdef.h"
-#include"../../freevms/lib/src/dptdef.h"
-#include"../../freevms/lib/src/fdtdef.h"
-#include"../../freevms/lib/src/pdtdef.h"
-#include"../../freevms/lib/src/irpdef.h"
-#include"../../freevms/lib/src/ucbdef.h"
-#include"../../freevms/starlet/src/iodef.h"
-#include"../../freevms/starlet/src/devdef.h"
+#include<cdtdef.h>
+#include<ddtdef.h>
+#include<dptdef.h>
+#include<fdtdef.h>
+#include<pdtdef.h>
+#include<irpdef.h>
+#include<ucbdef.h>
+#include<iodef.h>
+#include<devdef.h>
 
 void dumyerr(void) {
   /* do nothing yet */

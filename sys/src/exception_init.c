@@ -3,8 +3,8 @@
 
 // Author. Roar Thronæs.
 
-#include "../../freevms/starlet/src/ssdef.h"
-#include "../../freevms/starlet/src/iosbdef.h"
+#include <ssdef.h>
+#include <iosbdef.h>
 
 int exe$synch(unsigned int efn, struct _iosb *iosb) {
   if (!iosb) {

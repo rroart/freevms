@@ -6,11 +6,11 @@
 #include <linux/linkage.h>
 #include <linux/sched.h>
 #include <linux/smp.h>
-#include "../../freevms/lib/src/cebdef.h"
-#include "../../freevms/lib/src/pridef.h"
-#include "../../freevms/lib/src/cpudef.h"
-#include "../../freevms/starlet/src/ssdef.h"
-#include "../../freevms/sys/src/system_data_cells.h"
+#include <cebdef.h>
+#include <pridef.h>
+#include <cpudef.h>
+#include <ssdef.h>
+#include <system_data_cells.h>
 
 asmlinkage int exe$clref(unsigned int efn) {
   int retval;

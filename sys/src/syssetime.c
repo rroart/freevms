@@ -4,9 +4,9 @@
 // Author. Roar Thronæs.
 
 #include<linux/linkage.h>
-#include "../../freevms/sys/src/system_data_cells.h"	/* SYS$ header file */
-#include "../../freevms/starlet/src/sys$routines.h"	/* SYS$ header file */
-#include "../../freevms/starlet/src/ssdef.h"	/* SYS$ header file */
+#include <system_data_cells.h>	/* SYS$ header file */
+#include <sys$routines.h>	/* SYS$ header file */
+#include <ssdef.h>	/* SYS$ header file */
 
 /* Author: Roar Thronæs */
 

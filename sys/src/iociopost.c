@@ -4,13 +4,13 @@
 // Author. Roar Thronæs.
 
 #include<linux/sched.h>
-#include"../../freevms/lib/src/irpdef.h"
-#include"../../freevms/lib/src/acbdef.h"
-#include"../../freevms/lib/src/ipldef.h"
-#include"../../freevms/lib/src/pridef.h"
-#include"../../freevms/pal/src/ipl.h"
-#include "../../freevms/sys/src/system_data_cells.h"
-#include "../../freevms/sys/src/internals.h"
+#include<irpdef.h>
+#include<acbdef.h>
+#include<ipldef.h>
+#include<pridef.h>
+#include<ipl.h>
+#include <system_data_cells.h>
+#include <internals.h>
 
 dirpost(struct _irp * i) {
   printk("doing dirpost\n");

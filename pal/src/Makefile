@@ -8,4 +8,4 @@ libqueue.a: queue.o
 	ranlib $@ 
 
 queue.o: queue.c
-	cc -c queue.c
+	cc -c queue.c -I.

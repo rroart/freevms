@@ -4,11 +4,11 @@
 // Author. Roar Thronæs.
 
 #include<linux/vmalloc.h>
-#include"../../freevms/sys/src/system_data_cells.h"
-#include"../../freevms/lib/src/dyndef.h"
-#include"../../freevms/pal/src/queue.h"
-#include"../../freevms/lib/src/rdtdef.h"
-#include"../../freevms/lib/src/cdtdef.h"
+#include<system_data_cells.h>
+#include<dyndef.h>
+#include<queue.h>
+#include<rdtdef.h>
+#include<cdtdef.h>
 
 /* Author: Roar Thronæs */
 

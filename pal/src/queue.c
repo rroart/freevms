@@ -12,7 +12,7 @@
 
 /* Author: Roar Thronæs */
 
-#include"../../freevms/pal/src/queue.h"
+#include<queue.h>
 
 void insque(void * entry, void * pred) {
   int flag=mycli();

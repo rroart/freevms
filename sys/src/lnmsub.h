@@ -1,7 +1,7 @@
 #ifndef lnmsub_h
 #define lnmsub_h
 
-#include"../../lib/src/lnmstrdef.h"
+#include <lnmstrdef.h>
 
 int lnm$hash(const int length, const unsigned char * log, const unsigned long mask, unsigned long * myhash);
 int lnm$searchlog(struct struct_lnm_ret * r,int loglen, char * logical, int  tabnamlen, char * tablename) ;

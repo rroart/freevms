@@ -1,25 +1,25 @@
 #ifndef exe_routines_h
 #define exe_routines_h
 
-//#include "../../../freevms/lib/src/ints.h"
-#include "../../../freevms/lib/src/adpdef.h"
-#include "../../../freevms/lib/src/arbdef.h"
-#include "../../../freevms/lib/src/cbbdef.h"
-#include "../../../freevms/lib/src/ccbdef.h"
-#include "../../../freevms/lib/src/cebdef.h"
-#include "../../../freevms/lib/src/chpctldef.h"
-#include "../../../freevms/lib/src/chpretdef.h"
-#include "../../../freevms/lib/src/cpudef.h"
-#include "../../../freevms/starlet/src/far_pointers.h"
-#include "../../../freevms/lib/src/fkbdef.h"
-#include "../../../freevms/lib/src/irpdef.h"
-#include "../../../freevms/lib/src/jibdef.h"
-#include "../../../freevms/lib/src/kpbdef.h"
-#include "../../../freevms/lib/src/mmgdef.h"
-#include "../../../freevms/lib/src/orbdef.h"
-#include "../../../freevms/lib/src/pcbdef.h"
-#include "../../../freevms/lib/src/tqedef.h"
-#include "../../../freevms/lib/src/ucbdef.h"
+//#include <ints.h>
+#include <adpdef.h>
+#include <arbdef.h>
+#include <cbbdef.h>
+#include <ccbdef.h>
+#include <cebdef.h>
+#include <chpctldef.h>
+#include <chpretdef.h>
+#include <cpudef.h>
+#include <far_pointers.h>
+#include <fkbdef.h>
+#include <irpdef.h>
+#include <jibdef.h>
+#include <kpbdef.h>
+#include <mmgdef.h>
+#include <orbdef.h>
+#include <pcbdef.h>
+#include <tqedef.h>
+#include <ucbdef.h>
 
 int   exe_std$abortio (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, int qio_sts);
 int   exe_std$alloc_bufio_32 (struct _irp *irp, struct _pcb *pcb, void *uva32, int pktdatsiz);

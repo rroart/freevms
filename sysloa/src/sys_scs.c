@@ -1166,15 +1166,15 @@ static int dn_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 
 #endif /* #if 0 */
 
-#include"../../freevms/lib/src/cdtdef.h"
-#include"../../freevms/lib/src/ddtdef.h"
-#include"../../freevms/lib/src/dptdef.h"
-#include"../../freevms/lib/src/fdtdef.h"
-#include"../../freevms/lib/src/pdtdef.h"
-#include"../../freevms/lib/src/rdtdef.h"
-#include"../../freevms/lib/src/sbnbdef.h"
-#include"../../freevms/starlet/src/iodef.h"
-#include"../../freevms/sys/src/system_data_cells.h"
+#include<cdtdef.h>
+#include<ddtdef.h>
+#include<dptdef.h>
+#include<fdtdef.h>
+#include<pdtdef.h>
+#include<rdtdef.h>
+#include<sbnbdef.h>
+#include<iodef.h>
+#include<system_data_cells.h>
 #include<linux/vmalloc.h>
 #include<sys/errno.h>
 

@@ -17,7 +17,7 @@
 
 #include <asm/pgalloc.h>
 
-#include "../../freevms/sys/src/system_data_cells.h"
+#include <system_data_cells.h>
 
 struct mm_struct *swap_mm = &init_mm;
 

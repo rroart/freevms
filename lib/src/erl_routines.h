@@ -1,9 +1,9 @@
 #ifndef erl_routines_h
 #define erl_routines_h
 
-//#include "../../../freevms/lib/src/ints.h"
-#include "../../../freevms/lib/src/embdvdef.h"
-#include "../../../freevms/lib/src/ucbdef.h"
+//#include <ints.h>
+#include <embdvdef.h>
+#include <ucbdef.h>
 
 int   erl_std$allocemb (int size, struct _embdv **embdv_p);
 void  erl_std$deviceattn (long long driver_param, struct _ucb *ucb);

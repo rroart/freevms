@@ -1,6 +1,9 @@
 #!/bin/bash
 
-	(cd arch; ln -s ../../freevms .)
+#	(cd arch; ln -s ../../freevms .)
+#	(cd net; ln -s ../../freevms .)
+#	(cd drivers; ln -s ../../freevms .)
+#	ln -s ../freevms .
 	mkdir -p include/asm-um arch/um/{kernel,lib,mm,include}
 	(cd ../freevms/starlet/src; ln -s sys\$routines.h sysoutines.h)
 	(cd ../freevms/starlet/src; ln -s lib\$routines.h liboutines.h)

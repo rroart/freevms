@@ -4,18 +4,18 @@
 // Author. Roar Thronæs.
 
 #include<linux/sched.h>
-#include "../../freevms/sys/src/asmlink.h"
+#include <asmlink.h>
 #include<asm/hw_irq.h>
 
-#include"../../freevms/sys/src/sysgen.h"
-#include"../../freevms/sys/src/rse.h"
-#include"../../freevms/lib/src/pridef.h"
-#include"../../freevms/lib/src/evtdef.h"
-#include"../../freevms/lib/src/statedef.h"
-#include"../../freevms/lib/src/cpudef.h"
-#include"../../freevms/sys/src/system_data_cells.h"
-#include"../../freevms/sys/src/internals.h"
-#include"../../freevms/pal/src/queue.h"
+#include<sysgen.h>
+#include<rse.h>
+#include<pridef.h>
+#include<evtdef.h>
+#include<statedef.h>
+#include<cpudef.h>
+#include<system_data_cells.h>
+#include<internals.h>
+#include<queue.h>
 
 extern int mydebug;
 

@@ -1,12 +1,12 @@
 #ifndef sch_routines_h
 #define sch_routines_h
 
-#include "../../../freevms/lib/src/acbdef.h"
-//#include "../../../freevms/lib/src/ints.h"
-#include "../../../freevms/starlet/src/far_pointers.h"
-#include "../../../freevms/lib/src/mtxdef.h"
-#include "../../../freevms/lib/src/mutexdef.h"
-#include "../../../freevms/lib/src/pcbdef.h"
+#include <acbdef.h>
+//#include <ints.h>
+#include <far_pointers.h>
+#include <mtxdef.h>
+#include <mutexdef.h>
+#include <pcbdef.h>
 
 int    sch$add_cpu_cap(uint32 cpu_id, uint32 mask, UINT64_PQ prev_mask_p);
 int    sch$clear_affinity(uint32 cpu_mask, struct _ktb *ktb, uint32 flags, UINT64_PQ prev_mask_p);

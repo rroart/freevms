@@ -4,17 +4,17 @@
 // Author. Roar Thronæs.
 
 #include <linux/kernel.h>
-#include "../../freevms/sys/src/asmlink.h"
+#include <asmlink.h>
 #include <linux/smp.h>
 #include <asm/hw_irq.h>
 #include <asm/current.h>
-#include "../../freevms/sys/src/system_data_cells.h"
-#include "../../freevms/sys/src/internals.h"
-#include"../../freevms/pal/src/queue.h"
-#include"../../freevms/lib/src/ddtdef.h"
-#include"../../freevms/lib/src/ucbdef.h"
-#include"../../freevms/lib/src/irpdef.h"
-#include"../../freevms/lib/src/ipldef.h"
+#include <system_data_cells.h>
+#include <internals.h>
+#include<queue.h>
+#include<ddtdef.h>
+#include<ucbdef.h>
+#include<irpdef.h>
+#include<ipldef.h>
 
 void ioc$initiate(struct _irp * i, struct _ucb * u) {
   struct _ddt *d; 

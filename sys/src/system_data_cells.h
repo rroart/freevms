@@ -3,12 +3,12 @@
 
 /* cut'n paste and etc from .c */
 
-#include"../../lib/src/lnmstrdef.h"
-#include"../../lib/src/cpudef.h"
-#include"../../lib/src/tqedef.h"
-#include"../../lib/src/wqhdef.h"
-#include"../../lib/src/rsbdef.h"
-#include"../../lib/src/ccbdef.h"
+#include<lnmstrdef.h>
+#include<cpudef.h>
+#include<tqedef.h>
+#include<wqhdef.h>
+#include<rsbdef.h>
+#include<ccbdef.h>
 #include<linux/spinlock.h>
 
 extern unsigned long acme$gq_mutex;

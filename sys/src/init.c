@@ -6,7 +6,7 @@
 #if 0
 is this the erroneous one?
 #include<linux/vmalloc.h>
-#include"../../freevms/sys/src/system_data_cells.h"
+#include<system_data_cells.h>
 
 void __init vms_mem(void) {
 

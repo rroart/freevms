@@ -3,12 +3,12 @@
 
 // Author. Roar Thronæs.
 
-#include "../../freevms/sys/src/system_data_cells.h"
-#include "../../freevms/lib/src/acbdef.h"
-#include "../../freevms/lib/src/pridef.h"
-#include "../../freevms/lib/src/cpudef.h"
-#include "../../freevms/starlet/src/psldef.h"
-#include "../../freevms/starlet/src/ssdef.h"
+#include <system_data_cells.h>
+#include <acbdef.h>
+#include <pridef.h>
+#include <cpudef.h>
+#include <psldef.h>
+#include <ssdef.h>
 #include <linux/smp.h>
 #include <asm/current.h>
 #include <linux/sched.h>

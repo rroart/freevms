@@ -14,7 +14,7 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 TOPDIR	:= $(shell /bin/pwd)
 
 HPATH   	= $(TOPDIR)/include
-FINDHPATH	= $(HPATH)/asm $(HPATH)/linux $(HPATH)/scsi $(HPATH)/net
+FINDHPATH	= $(HPATH)/asm $(HPATH)/linux $(HPATH)/scsi $(HPATH)/net $(TOPDIR)/../freevms/sys/src $(TOPDIR)/../freevms/lib/src $(TOPDIR)/../freevms/librtl/src $(TOPDIR)/../freevms/starlet/src $(TOPDIR)/../freevms/pal/src
 
 HOSTCC  	= gcc
 HOSTCFLAGS	= -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer
@@ -86,7 +86,7 @@ export MODLIB
 # standard CFLAGS
 #
 
-CPPFLAGS := -D__KERNEL__ -I$(HPATH)
+CPPFLAGS := -D__KERNEL__ -I$(HPATH) -I$(TOPDIR)/../freevms/sys/src -I$(TOPDIR)/../freevms/lib/src -I$(TOPDIR)/../freevms/librtl/src -I$(TOPDIR)/../freevms/starlet/src -I$(TOPDIR)/../freevms/pal/src
 
 CFLAGS := $(CPPFLAGS) -Wall -Wstrict-prototypes -Wno-trigraphs -O2 \
 	  -fomit-frame-pointer -fno-strict-aliasing -fno-common

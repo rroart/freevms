@@ -4,15 +4,15 @@
 // Author. Roar Thronæs.
 
 #include <linux/linkage.h>
-#include "../../freevms/sys/src/system_data_cells.h"
-#include "../../freevms/starlet/src/ssdef.h"
-#include "../../freevms/lib/src/pridef.h"
-#include "../../freevms/lib/src/acbdef.h"
-#include "../../freevms/lib/src/evtdef.h"
-#include "../../freevms/lib/src/statedef.h"
-#include "../../freevms/pal/src/queue.h"
-#include"../../freevms/lib/src/ipldef.h"
-#include"../../freevms/pal/src/ipl.h"
+#include <system_data_cells.h>
+#include <ssdef.h>
+#include <pridef.h>
+#include <acbdef.h>
+#include <evtdef.h>
+#include <statedef.h>
+#include <queue.h>
+#include <ipldef.h>
+#include <ipl.h>
 #include <linux/sched.h>
 #include <linux/smp.h>
 

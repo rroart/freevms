@@ -25,7 +25,7 @@
 #include <linux/mmzone.h>
 #include <asm/dma.h>
 
-#include "../../freevms/sys/src/system_data_cells.h"
+#include <system_data_cells.h>
 
 /*
  * Access to this subsystem has to be serialized externally. (this is

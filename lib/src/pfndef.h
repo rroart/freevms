@@ -1,7 +1,7 @@
 #ifndef pfndef_h
 #define pfndef_h
 	
-#include "../../../freevms/lib/src/shm_iddef.h"
+#include <shm_iddef.h>
 
 #define PMAP$C_LENGTH 8                 
 	

@@ -4,12 +4,12 @@
 // Author. Roar Thronæs.
 
 #include<linux/linkage.h>
-#include"../../freevms/lib/src/acbdef.h"
-#include"../../freevms/lib/src/cpudef.h"
+#include<acbdef.h>
+#include<cpudef.h>
 #include<linux/sched.h>
-#include "../../freevms/sys/src/asmlink.h"
+#include <asmlink.h>
 #include<asm/hw_irq.h>
-#include "../../freevms/sys/src/system_data_cells.h"
+#include <system_data_cells.h>
 
 int in_sw_ast;
 

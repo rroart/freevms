@@ -1,7 +1,7 @@
 #ifndef embdvdef_h
 #define embdvdef_h
 	
-#include "../../../freevms/lib/src/embhddef.h"
+#include <embhddef.h>
 
 #define EMB$K_DV_LENGTH 222
 #define EMB$C_DV_LENGTH 222

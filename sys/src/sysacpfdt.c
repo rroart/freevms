@@ -3,9 +3,9 @@
 
 // Author. Roar Thronæs.
 
-#include "../../freevms/lib/src/irpdef.h"
-#include "../../freevms/lib/src/ucbdef.h"
-#include "../../freevms/lib/src/ccbdef.h"
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ccbdef.h>
 #include <linux/sched.h>
 
 void acp_std$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {

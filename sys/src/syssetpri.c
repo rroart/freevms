@@ -6,7 +6,7 @@
 #include<linux/unistd.h>
 #include<linux/linkage.h>
 #include<linux/sched.h>
-#include"../../freevms/starlet/src/starlet.h"
+#include<starlet.h>
 
 /* Author: Roar Thronæs */
 

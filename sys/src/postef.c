@@ -5,12 +5,12 @@
 
 #include<linux/sched.h>
 #include<asm/bitops.h>
-#include"../../freevms/starlet/src/ssdef.h"
-#include"../../freevms/lib/src/cebdef.h"
-#include"../../freevms/lib/src/evtdef.h"
-#include"../../freevms/lib/src/ipldef.h"
-#include"../../freevms/sys/src/system_data_cells.h"
-#include"../../freevms/sys/src/internals.h"
+#include<ssdef.h>
+#include<cebdef.h>
+#include<evtdef.h>
+#include<ipldef.h>
+#include<system_data_cells.h>
+#include<internals.h>
 
 int waitcheck(struct _pcb *p, unsigned long priclass, unsigned long * efp, unsigned long * clusteraddr) {
   unsigned long tmp;

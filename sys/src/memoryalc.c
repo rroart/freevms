@@ -14,8 +14,8 @@
 #include <linux/slab.h>
 #include <linux/compiler.h>
 
-#include "../../freevms/starlet/src/ssdef.h"
-#include "../../freevms/sys/src/system_data_cells.h"
+#include <ssdef.h>
+#include <system_data_cells.h>
 
 struct mymap {
   unsigned long flink;

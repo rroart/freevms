@@ -47,9 +47,9 @@ History:
 
 /* Some mods by Roar Thronæs */
 
-#include "../../freevms/sys/src/system_data_cells.h"	/* SYS$ header file */
-#include "../../freevms/starlet/src/sys$routines.h"	/* SYS$ header file */
-#include "../../freevms/starlet/src/ssdef.h"	/* SYS$ header file */
+#include <system_data_cells.h>	/* SYS$ header file */
+#include <sys$routines.h>	/* SYS$ header file */
+#include <ssdef.h>	/* SYS$ header file */
 #include <time.h>		/* C header for $GETTIM to find time */
 #include<linux/linkage.h>
 

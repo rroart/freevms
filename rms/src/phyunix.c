@@ -25,7 +25,7 @@
 
 //#include "phyio.h"
 //#include "ssdef.h"
-#include "../../freevms/starlet/src/ssdef.h"
+#include <ssdef.h>
 
 #include <linux/mm.h>
 #include <linux/slab.h>

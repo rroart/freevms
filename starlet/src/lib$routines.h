@@ -5,7 +5,7 @@
 #ifndef _LIB$ROUTINES_H
 #define _LIB$ROUTINES_H
 
-#include "../../librtl/src/descrip.h"
+#include <descrip.h>
 
 
 unsigned long lib$adawi(const short *,short *,short *);

@@ -7,16 +7,16 @@
 #include<linux/linkage.h>
 #include<linux/sched.h>
 #include <linux/vmalloc.h>
-#include"../../freevms/starlet/src/ssdef.h"
-#include"../../freevms/starlet/src/starlet.h"
-#include"../../freevms/lib/src/cebdef.h"
-#include"../../freevms/lib/src/pridef.h"
-#include"../../freevms/lib/src/statedef.h"
-#include"../../freevms/lib/src/evtdef.h"
-#include"../../freevms/lib/src/ipldef.h"
-#include"../../freevms/librtl/src/descrip.h"
-#include "../../freevms/sys/src/system_data_cells.h"
-#include "../../freevms/sys/src/internals.h"
+#include<ssdef.h>
+#include<starlet.h>
+#include<cebdef.h>
+#include<pridef.h>
+#include<statedef.h>
+#include<evtdef.h>
+#include<ipldef.h>
+#include<descrip.h>
+#include <system_data_cells.h>
+#include <internals.h>
 
 // Author. Roar Thronæs.
 

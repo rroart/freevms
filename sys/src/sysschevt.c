@@ -5,12 +5,12 @@
 
 #include<linux/linkage.h>
 #include<linux/sched.h>
-#include"../../freevms/starlet/src/ssdef.h"
-#include"../../freevms/lib/src/tqedef.h"
-#include"../../freevms/lib/src/cpudef.h"
-#include"../../freevms/sys/src/system_data_cells.h"
-#include"../../freevms/sys/src/internals.h"
-#include "../../freevms/lib/src/statedef.h"
+#include<ssdef.h>
+#include<tqedef.h>
+#include<cpudef.h>
+#include<system_data_cells.h>
+#include<internals.h>
+#include <statedef.h>
 #include<linux/vmalloc.h>
 #include<linux/smp.h>
 

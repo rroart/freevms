@@ -5,22 +5,22 @@
 
 // This is supposed to be a test driver
 
-#include"../../freevms/lib/src/crbdef.h"
-#include"../../freevms/lib/src/cdtdef.h"
-#include"../../freevms/lib/src/ddtdef.h"
-#include"../../freevms/lib/src/dptdef.h"
-#include"../../freevms/lib/src/fdtdef.h"
-#include"../../freevms/lib/src/pdtdef.h"
-#include"../../freevms/lib/src/irpdef.h"
-#include"../../freevms/lib/src/ucbdef.h"
-#include"../../freevms/lib/src/ddbdef.h"
-#include"../../freevms/lib/src/ipldef.h"
-#include"../../freevms/lib/src/dyndef.h"
-#include"../../freevms/starlet/src/ssdef.h"
-#include"../../freevms/starlet/src/iodef.h"
-#include"../../freevms/starlet/src/devdef.h"
-#include"../../freevms/sys/src/system_data_cells.h"
-#include"../../freevms/pal/src/ipl.h"
+#include<crbdef.h>
+#include<cdtdef.h>
+#include<ddtdef.h>
+#include<dptdef.h>
+#include<fdtdef.h>
+#include<pdtdef.h>
+#include<irpdef.h>
+#include<ucbdef.h>
+#include<ddbdef.h>
+#include<ipldef.h>
+#include<dyndef.h>
+#include<ssdef.h>
+#include<iodef.h>
+#include<devdef.h>
+#include<system_data_cells.h>
+#include<ipl.h>
 #include<linux/vmalloc.h>
 
 struct _fdt fdt_null = {

@@ -3,8 +3,8 @@
 
 // Author. Roar Thronæs.
 
-#include"../../freevms/sys/src/system_data_cells.h"
-#include"../../freevms/sys/src/internals.h"
+#include<system_data_cells.h>
+#include<internals.h>
 
 // definitely needs reimplementation
 

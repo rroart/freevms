@@ -49,10 +49,10 @@
 #include <asm/delay.h>
 #include <asm/desc.h>
 #include <asm/irq.h>
-#include "../../../../freevms/lib/src/idbdef.h"
-#include "../../../../freevms/lib/src/ucbdef.h"
-#include "../../../../freevms/lib/src/crbdef.h"
-#include "../../../../freevms/lib/src/vecdef.h"
+#include <idbdef.h>
+#include <ucbdef.h>
+#include <crbdef.h>
+#include <vecdef.h>
 
 /*
  * Linux has a controller-independent x86 interrupt architecture.

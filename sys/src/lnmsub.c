@@ -11,20 +11,20 @@ inline void panic(char * c) { }
 #endif 
 
 #ifdef USERLAND
-#include"sysgen.h"
-#include"lnmsub.h"
-#include"system_data_cells.h"
-#include"../../pal/src/queue.h"
-#include"../../lib/src/lnmstrdef.h"
-#include"../../starlet/src/ssdef.h"
+#include<sysgen.h>
+#include<lnmsub.h>
+#include<system_data_cells.h>
+#include<queue.h>
+#include<lnmstrdef.h>
+#include<ssdef.h>
 #else
 #include<linux/vmalloc.h>
-#include"../../freevms/sys/src/sysgen.h"
-#include"../../freevms/sys/src/lnmsub.h"
-#include"../../freevms/sys/src/system_data_cells.h"
-#include"../../freevms/pal/src/queue.h"
-#include"../../freevms/lib/src/lnmstrdef.h"
-#include"../../freevms/starlet/src/ssdef.h"
+#include<sysgen.h>
+#include<lnmsub.h>
+#include<system_data_cells.h>
+#include<queue.h>
+#include<lnmstrdef.h>
+#include<ssdef.h>
 #endif
 
 /* Author: Roar Thronæs */

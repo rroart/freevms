@@ -3,11 +3,11 @@
 
 // Author. Roar Thronæs.
 
-#include"../../freevms/lib/src/cpudef.h"
-#include"../../freevms/lib/src/ipldef.h"
-#include"../../freevms/pal/src/ipl.h"
-#include"../../freevms/sys/src/system_data_cells.h"
-#include"../../freevms/lib/src/system_service_setup.h"
+#include<cpudef.h>
+#include<ipldef.h>
+#include<ipl.h>
+#include<system_data_cells.h>
+#include<system_service_setup.h>
 #include<linux/kernel.h>
 #include<linux/smp.h>
 #include<asm/hw_irq.h>

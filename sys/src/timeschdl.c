@@ -4,12 +4,12 @@
 // Author. Roar Thronæs.
 // Author. Linux people.
 
-#include"../../freevms/pal/src/queue.h"
-#include "../../freevms/sys/src/asmlink.h"
-#include "../../freevms/lib/src/pridef.h"
-#include"../../freevms/lib/src/ipldef.h"
-#include"../../freevms/lib/src/lkbdef.h"
-#include"../../freevms/pal/src/ipl.h"
+#include<queue.h>
+#include <asmlink.h>
+#include <pridef.h>
+#include<ipldef.h>
+#include<lkbdef.h>
+#include<ipl.h>
 #include <linux/linkage.h>
 #include <linux/sched.h>
 
@@ -50,10 +50,10 @@
 
 #include <asm/uaccess.h>
 #include <asm/hw_irq.h>
-#include "../../freevms/sys/src/sysgen.h"
-#include "../../freevms/sys/src/rse.h"
-#include "../../freevms/sys/src/system_data_cells.h"
-#include "../../freevms/sys/src/internals.h"
+#include <sysgen.h>
+#include <rse.h>
+#include <system_data_cells.h>
+#include <internals.h>
 
 extern int pid1count; /* Will be removed in the future */
 extern int pid0count; /* Will be removed in the future */

@@ -3,7 +3,7 @@
 
 /* Author: Roar Thronæs */
 
-#include"../../sys/src/sysgen.h"
+#include<sysgen.h>
 #include<linux/linkage.h>
 
 #define LNM$M_NO_DELETE 0x10 /* for use in lnmb. the rest is decl otherplace */

@@ -1,8 +1,8 @@
 #ifndef ldr_routines_h
 #define ldr_routines_h
 
-#include "../../../freevms/starlet/src/far_pointers.h"
-#include "../../../freevms/lib/src/ptedef.h"
+#include <far_pointers.h>
+#include <ptedef.h>
 
 int   ldr_std$alloc_pt (int npte, void **svapte_p);
 int   ldr_std$dealloc_pt (void *svapte, int npte);

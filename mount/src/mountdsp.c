@@ -6,11 +6,11 @@
 #include<linux/unistd.h>
 #include<linux/linkage.h>
 
-#include "../../freevms/lib/src/mytypes.h"
-#include "../../freevms/starlet/src/misc.h"
-#include "../../freevms/starlet/src/fiddef.h"
-#include "../../freevms/starlet/src/uicdef.h"
-#include "../../freevms/lib/src/hm2def.h"
+#include <mytypes.h>
+#include <misc.h>
+#include <fiddef.h>
+#include <uicdef.h>
+#include <hm2def.h>
 #include "../../freevms/rms/src/cache.h"
 #include "../../freevms/rms/src/access.h"
 

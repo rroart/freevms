@@ -5,12 +5,12 @@
 
 #include <linux/sched.h>
 #include <linux/smp.h>
-#include "../../freevms/lib/src/cebdef.h"
-#include "../../freevms/lib/src/cpudef.h"
-#include "../../freevms/lib/src/ipldef.h"
-#include "../../freevms/starlet/src/ssdef.h"
-#include "../../freevms/sys/src/system_data_cells.h"
-#include "../../freevms/sys/src/internals.h"
+#include <cebdef.h>
+#include <cpudef.h>
+#include <ipldef.h>
+#include <ssdef.h>
+#include <system_data_cells.h>
+#include <internals.h>
 
 int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   struct _pcb * p=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;

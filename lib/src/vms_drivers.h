@@ -1,21 +1,21 @@
 #ifndef vms_drivers_h
 #define vms_drivers_h
 
-//#include "../../../freevms/lib/src/builtins.h"
+//#include <builtins.h>
 
-#include "../../../freevms/lib/src/fkbdef.h"
-#include "../../../freevms/lib/src/irpdef.h"
-#include "../../../freevms/starlet/src/pdscdef.h"
-#include "../../../freevms/lib/src/splcoddef.h"
-#include "../../../freevms/lib/src/spldef.h"
-#include "../../../freevms/starlet/src/ssdef.h"
-#include "../../../freevms/starlet/src/stsdef.h"
-#include "../../../freevms/lib/src/ucbdef.h"
-#include "../../../freevms/lib/src/vecdef.h"
+#include <fkbdef.h>
+#include <irpdef.h>
+#include <pdscdef.h>
+#include <splcoddef.h>
+#include <spldef.h>
+#include <ssdef.h>
+#include <stsdef.h>
+#include <ucbdef.h>
+#include <vecdef.h>
 
-#include "../../../freevms/lib/src/exe_routines.h"
-#include "../../../freevms/lib/src/ioc_routines.h"
-#include "../../../freevms/lib/src/smp_routines.h"
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <smp_routines.h>
 
 #define call_abortio(irp,pcb,ucb,final_status) (exe_std$abortio(irp,pcb,ucb,final_status))
 

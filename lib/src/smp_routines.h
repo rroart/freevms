@@ -1,9 +1,9 @@
 #ifndef smp_routines_h
 #define smp_routines_h
 
-#include "../../../freevms/lib/src/ctddef.h"
-#include "../../../freevms/starlet/src/iosbdef.h"
-#include "../../../freevms/lib/src/spldef.h"
+#include <ctddef.h>
+#include <iosbdef.h>
+#include <spldef.h>
 
 void  smp_std$acqnoipl (struct _spl *spl);
 void  smp_std$acquire (int spl_index);

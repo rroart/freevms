@@ -1,7 +1,7 @@
 #ifndef diobmdef_h
 #define diobmdef_h
 
-#include "../../../freevms/lib/src/ptedef.h"
+#include <ptedef.h>
 
 #define DIOBM$M_REL_DEALLOC 0x1
 #define DIOBM$M_PTE_WINDOW 0x2

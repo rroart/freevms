@@ -3,17 +3,17 @@
 
 // Author. Roar Thronæs.
 
-#include"../../freevms/starlet/src/starlet.h"
-#include"../../freevms/starlet/src/iodef.h"
-#include"../../freevms/starlet/src/ssdef.h"
-#include"../../freevms/librtl/src/descrip.h"
-#include"../../freevms/starlet/src/misc.h"
-#include"../../freevms/lib/src/irpdef.h"
-#include"../../freevms/lib/src/ucbdef.h"
-#include"../../freevms/lib/src/ddbdef.h"
-#include"../../freevms/lib/src/ccbdef.h"
-#include"../../freevms/sys/src/system_data_cells.h"
-#include"../../freevms/sys/src/sysgen.h"
+#include<starlet.h>
+#include<iodef.h>
+#include<ssdef.h>
+#include<descrip.h>
+#include<misc.h>
+#include<irpdef.h>
+#include<ucbdef.h>
+#include<ddbdef.h>
+#include<ccbdef.h>
+#include<system_data_cells.h>
+#include<sysgen.h>
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
 

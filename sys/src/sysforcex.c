@@ -6,11 +6,11 @@
 #include<linux/linkage.h>
 #include<linux/sched.h>
 #include<linux/vmalloc.h>
-#include"../../freevms/lib/src/acbdef.h"
-#include"../../freevms/lib/src/pridef.h"
-#include"../../freevms/lib/src/ipldef.h"
-#include"../../freevms/sys/src/internals.h"
-#include"../../freevms/sys/src/system_data_cells.h"
+#include<acbdef.h>
+#include<pridef.h>
+#include<ipldef.h>
+#include<internals.h>
+#include<system_data_cells.h>
 
 asmlinkage int exe$exit(unsigned int code);
 

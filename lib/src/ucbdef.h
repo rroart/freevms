@@ -1,7 +1,7 @@
 #ifndef ucbdef_h
 #define ucbdef_h
 
-#include "../../freevms/lib/src/tqedef.h"
+#include <tqedef.h>
 
 #define UCB$M_TIM 0x1
 #define UCB$M_INT 0x2
