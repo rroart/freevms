@@ -43,6 +43,9 @@
 #define yield() do { sch$resched(); myrei(); } while(0)
 #endif
 
+//mmg$pagefault()
+#ifdef CONFIG_MM_VMS
+
 signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _mypte * pte) {
   signed long pfn=mmg$allocpfn();
   struct _pfn * page;
@@ -102,9 +105,6 @@ int mmg$makewsle(struct _pcb * p, struct _phd * phd, void * va, void * pte, sign
   page=&((struct _pfn *)pfn$al_head)[pfn];
   page->pfn$l_wslx_qw=new; // hope it's the right one?
 }
-
-//mmg$pagefault()
-#ifdef CONFIG_MM_VMS
 
 /* vma is the first one with  address < vma->vm_end,
  * and even  address < vma->vm_start. Have to extend vma. */
