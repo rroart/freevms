@@ -1,0 +1,6 @@
+#define UTS_VERSION "#2334 Tue Jun 10 11:12:01 CEST 2003"
+#define LINUX_COMPILE_TIME "11:12:01"
+#define LINUX_COMPILE_BY "root"
+#define LINUX_COMPILE_HOST "thx1138.nvg.ntnu.no"
+#define LINUX_COMPILE_DOMAIN "nvg.ntnu.no"
+#define LINUX_COMPILER "gcc version 2.96 20000731 (Red Hat Linux 7.2 2.96-112.7.2)"
