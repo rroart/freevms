@@ -65,7 +65,7 @@ int sch$postef(unsigned long ipid, unsigned long priclass, unsigned long efn) {
     else
       retval=SS$_WASCLR;
 
-    if (retval=SS$_WASCLR) {
+    if (retval==SS$_WASCLR) {
       first=&c->ceb$l_wqfl;
       tmp=first->pcb$l_sqfl;
       while (first!=tmp) {
