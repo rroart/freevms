@@ -154,6 +154,9 @@ static void puts(const char *s)
 
 extern struct tty_driver console_driver;
 
+long pidtab[1024];
+long pididx=0;
+
 int con$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   //  return read(0,i->irp$l_qio_p1,i->irp$l_qio_p2);
   struct tty_struct * tty;
@@ -166,8 +169,11 @@ int con$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     struct _ccb * ccb = &ctl$gl_ccbbase[dev2chan(tty->device)];
     struct _ucb * ucb = ccb->ccb$l_ucb;
     //	  ioc$reqcom(SS$_NORMAL,0,ucb);
-    ucb->ucb$l_irp->irp$l_iost1 = SS$_NORMAL;
-    com$post(ucb->ucb$l_irp,ucb);
+    //ucb->ucb$l_irp->irp$l_iost1 = SS$_NORMAL; // wrong too?
+    i->irp$l_iost1 = SS$_NORMAL;
+    pidtab[pididx++]=i->irp$l_pid;
+    com$post(i,ucb); // better?
+    //com$post(ucb->ucb$l_irp,ucb); //why was ucb->ucb$l_irp wrong?
   }
   return SS$_NORMAL;
 }
