@@ -891,6 +891,10 @@ static int init(void * unused)
         dlminit();
         init_cwps();
 
+#ifdef CONFIG_VMS
+	extern void Main(void);
+	kernel_thread(Main, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
+#endif
 
 
 	if (execute_command)
