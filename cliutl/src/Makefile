@@ -4,7 +4,7 @@
 all: setproces
 
 setproces: setproces.o
-	cc -o setproces setproces.o ../../starlet/src/vmsopt.a ../../starlet/src/starlet.o
+	cc -o setproces setproces.o ../../starlet/src/vmsopt.a ../../starlet/src/starlet.a
 
 setproces.o: setproces.c
 	cc -c setproces.c
