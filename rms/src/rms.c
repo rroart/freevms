@@ -889,6 +889,7 @@ unsigned exe$get(struct _rabdef *rab)
   }
   if (rfm == FAB$C_VFC) cpylen -= rab->rab$l_fab->fab$b_fsz;
   rab->rab$w_rsz = cpylen;
+  rab->rab$l_rbf = rab->rab$l_ubf;
 
   rab->rab$w_rfa[0] = block & 0xffff;
   rab->rab$w_rfa[1] = block >> 16;
