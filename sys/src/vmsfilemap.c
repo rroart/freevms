@@ -563,8 +563,10 @@ void unlock_page(struct page *page)
 		BUG();
 #endif
 	smp_mb__after_clear_bit(); 
+#if 0
 	if (waitqueue_active(&(page)->wait))
 	wake_up(&(page)->wait);
+#endif
 }
 
 /*
