@@ -365,7 +365,7 @@ extern syscall_handler_t exe$mod_holder       ;
 extern syscall_handler_t exe$grantid       ;
 extern syscall_handler_t exe$revokid       ;
 extern syscall_handler_t exe$cmexec       ;
-extern syscall_handler_t exe$create_region_32;
+extern syscall_handler_t exe$create_region_32_wrap;
 extern syscall_handler_t exe$delete_region_32;
 extern syscall_handler_t exe$get_region_info;
 #define LAST_GENERIC_SYSCALL __NR_$get_region_info
@@ -728,7 +728,7 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$mod_ident        ] = exe$mod_ident       ,
 	[ __NR_$mod_holder       ] = exe$mod_holder      ,
 	[ __NR_$cmexec       ] = exe$cmexec      ,
-	[ __NR_$create_region_32 ] = exe$create_region_32,
+	[ __NR_$create_region_32 ] = exe$create_region_32_wrap,
 	[ __NR_$delete_region_32 ] = exe$delete_region_32,
 	[ __NR_$get_region_info ] = exe$get_region_info,
 	
