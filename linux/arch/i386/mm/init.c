@@ -384,7 +384,7 @@ void __init paging_init(void)
  */
 static int do_test_wp_bit(unsigned long vaddr);
 
-void __init test_wp_bit(void)
+void /*__init*/ test_wp_bit(void)
 {
 /*
  * Ok, all PSE-capable CPUs are definitely handling the WP bit right.
