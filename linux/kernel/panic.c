@@ -96,6 +96,7 @@ NORET_TYPE void panic(const char * fmt, ...)
 #if defined(CONFIG_ARCH_S390)
         disabled_wait(caller);
 #endif
+	{ int i,j; for(j=0;j<20;j++) for(i=0;i<1000000000;i++); }
 	sti();
 	for(;;) {
 		CHECK_EMERGENCY_SYNC

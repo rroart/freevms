@@ -1,3 +1,5 @@
+#include"../../freevms/pal/src/queue.h"
+#include "../../freevms/sys/src/asmlink.h"
 #include <linux/linkage.h>
 #include <linux/sched.h>
 
@@ -83,7 +85,7 @@ asmlinkage void exe$swtimint(void) {
   if (smp_processor_id()==0) {
     if (exe$gl_abstim_tics>=exe$gq_1st_time) {
       struct _tqe * t, * dummy;
-      t=remque(*exe$gl_tqfl,dummy);
+      t=remque(exe$gl_tqfl,dummy);
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_TMSNGL) {
       }
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_SSSNGL) {
@@ -96,7 +98,7 @@ asmlinkage void exe$swtimint(void) {
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_WKSNGL) {
       }
       if (t->tqe$b_rqtype & TQE$M_REPEAT)
-	insque(t,*exe$gl_tqfl);
+	insque(t,exe$gl_tqfl);
       
     }
   }
@@ -142,8 +144,8 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
     (*(unsigned long *)&jiffies)++;
     exe$gl_abstim_tics=jiffies;
 
-    if (exe$gl_abstim_tics>=exe$gq_1st_time) exe$swtimint();
-    /* SOFTINT_TIMER_VECTOR; */
+    if (exe$gl_abstim_tics>=exe$gq_1st_time) 
+      SOFTINT_TIMER_VECTOR;
 
 #ifndef CONFIG_SMP
     {
@@ -166,8 +168,7 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
 	p->phd$l_cputim++;
 	if (++p->phd$w_quant  >= 0 ) {
 	  if (p->phd$w_quant<128) {
-	    //		    SOFTINT_TIMER_VECTOR;
-	    exe$swtimint();
+	    SOFTINT_TIMER_VECTOR;
 	    //		    sch$resched();
 	  }
 	}

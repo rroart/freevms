@@ -74,7 +74,8 @@
 #define SOFTINT_IOLOCK10_VECTOR do { __asm__ __volatile__ ("int $0xa3\n"); } while (0);
 #define SOFTINT_IOLOCK9_VECTOR do { __asm__ __volatile__ ("int $0xa2\n"); } while (0);
 #define SOFTINT_SYNCH_VECTOR do { __asm__ __volatile__ ("int $0xa1\n"); } while (0);
-#define SOFTINT_TIMER_VECTOR do { __asm__ __volatile__ ("int $0xa0\n"); } while (0);
+//#define SOFTINT_TIMER_VECTOR do { __asm__ __volatile__ ("int $0xa0\n"); } while (0);
+#define SOFTINT_TIMER_VECTOR exe$swtimint();
 #define SOFTINT_SCS_VECTOR do { __asm__ __volatile__ ("int $0x9f\n"); } while (0);
 #define SOFTINT_SCHED_VECTOR do { __asm__ __volatile__ ("int $0x9e\n"); } while (0);
 #define SOFTINT_MMG_VECTOR do { __asm__ __volatile__ ("int 14\n"); } while (0);

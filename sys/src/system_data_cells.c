@@ -1,6 +1,7 @@
 #include<linux/vmalloc.h>
 #include"../../freevms/sys/src/system_data_cells.h"
 #include"../../freevms/lib/src/dyndef.h"
+#include"../../freevms/pal/src/queue.h"
 
 /* Author: Roar Thronæs */
 
@@ -1899,7 +1900,7 @@ struct _cpu vmscpus[32]; /* max. this number should be defined */
 
 extern void exe$timeout(void);
 
-qhead_init(void * l) {
+void qhead_init(void * l) {
   struct _pcb * tmp=(struct _pcb *)l; /* could be anything */
   tmp->pcb$l_sqfl=tmp;
   tmp->pcb$l_sqbl=tmp;

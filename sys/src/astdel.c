@@ -29,11 +29,15 @@ asmlinkage void sch$astdel(void) {
   struct _acb * dummy, *acb;
  more:
   /*lock*/
-  if (aqempty(&p->pcb$l_astqfl)) return;
-  { int i;
+  /* { int i;
   printk("here ast\n");
-  for (i=0; i<100000000; i++) ;
-  }
+  for (i=0; i<1000000; i++) ;
+  } */
+  if (aqempty(&p->pcb$l_astqfl)) return;
+  /* { int i,j;
+  printk("here ast2 %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl);
+  for (j=0; j<20; j++) for (i=0; i<1000000000; i++) ;
+  } */
   acb=remque(p->pcb$l_astqfl,dummy);
   if (acb->acb$b_rmod & ACB$V_KAST) {
     acb->acb$b_rmod&=~ACB$V_KAST;
@@ -44,3 +48,5 @@ asmlinkage void sch$astdel(void) {
   acb->acb$l_ast(); /* ? */
   /*unlock*/
 }
+
+

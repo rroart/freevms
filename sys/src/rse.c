@@ -2,6 +2,7 @@
 // $Locker$
 
 #include<linux/sched.h>
+#include "../../freevms/sys/src/asmlink.h"
 #include<asm/hw_irq.h>
 
 #include"../../freevms/sys/src/sysgen.h"
@@ -11,6 +12,7 @@
 #include"../../freevms/lib/src/statedef.h"
 #include"../../freevms/lib/src/cpudef.h"
 #include"../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/pal/src/queue.h"
 
 extern int mydebug;
 

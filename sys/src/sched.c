@@ -26,6 +26,7 @@
 
 #include "../../freevms/sys/src/system_data_cells.h"
 #include "../../freevms/lib/src/dyndef.h"
+#include "../../freevms/sys/src/internals.h"
 
 #include <linux/config.h>
 #include <linux/mm.h>
@@ -608,7 +609,7 @@ extern int fix_init_thread;
 
 int countme=500;
 
-void sch$resched(void) {
+asmlinkage void sch$resched(void) {
   int cpuid = smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid]; 
   struct _pcb * curpcb;
@@ -1558,7 +1559,8 @@ void __init sched_init(void)
   cpu->cpu$l_curpcb=&init_task;
   cpu->cpu$b_cur_pri=16;
 
-  printk("pid 0 here\n"); 
+  printk("pid 0 here %x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl); 
+  //	{ int i,j; for(j=0;j<2;j++) for(i=0;i<1000000000;i++); }
 
   for(nr = 0; nr < PIDHASH_SZ; nr++)
     pidhash[nr] = NULL;

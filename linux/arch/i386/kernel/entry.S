@@ -85,10 +85,6 @@ processor	= 52
 */
 ENOSYS = 38
 
-#define REI \
-        call sw_ast; \
-        iret;
-
 #define PUSHR_ALL \
 	cld; \
 	pushl %es; \
@@ -111,6 +107,12 @@ ENOSYS = 38
 	popl %eax;	\
 	popl %ds;	\
 	popl %es;
+
+#define REI \
+        PUSHR_ALL; \
+        call sw_ast; \
+        POPR_ALL; \
+        iret;
 
 #define SAVE_ALL \
 	cld; \

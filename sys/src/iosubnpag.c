@@ -1,7 +1,9 @@
 #include <linux/kernel.h>
-#include <asm/hw_irq.h>
+#include "../../freevms/sys/src/asmlink.h"
 #include <linux/smp.h>
+#include <asm/hw_irq.h>
 #include "../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/pal/src/queue.h"
 
 void ioc$reqcom(void) {
   int qemp;
