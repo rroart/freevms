@@ -1,12 +1,15 @@
 So far:
 
-Untar the linux dist in /usr/src
+Untar the linux dist in /usr/src or some other place.
 
-Have a dir in /usr/src (or a symlink) freevms.
+Untar freevms in the same directory (or symlink from there to the real place)
 
-Go to /usr/src/linux.
+Go to the linux directory.
 
-Do ./prescript. (Copies from working area /usr/src/freevms/linux)
+Do ../freevms/linux/prescript. (Copies from working area ../freevms/linux)
+
+If having user mode linux, patch in now, and do ../freevms/linux/prescript.uml.
+(We are based on uml-patch-2.4.18-11)
 
 Make symlinks from the 'kernel directory'/include/linux to /usr/include/linux
 and the same with asm-i386 to /usr/include/asm.

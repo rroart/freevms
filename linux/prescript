@@ -1,5 +1,7 @@
 #!/bin/bash
 
+	(cd arch; ln -s ../../freevms .)
+	mkdir -p include/asm-um arch/um/{kernel,lib,mm,include}
 	(cd ../freevms/starlet/src; ln -s sys\$routines.h sysoutines.h)
 	(cd ../freevms/starlet/src; ln -s lib\$routines.h liboutines.h)
 
@@ -7,6 +9,7 @@ for X in `cd ../freevms/linux; find . \( -name CVS -prune \) -o -type f`; do
 	[ -f $X ] && rm $X
 	[ -f ../freevms/linux/$X ] && cp -p ../freevms/linux/$X $X;
 done
+	rm -rf include/asm-um arch/um/{kernel,lib,mm,include}
 
 (cd kernel; 	ln -s ../../freevms/sys/src/syssetpri.c .;
 		ln -s ../../freevms/sys/src/syspcntrl.c; 

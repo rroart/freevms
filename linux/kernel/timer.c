@@ -28,6 +28,7 @@
 #include <asm/hw_irq.h>
 #include "../../freevms/sys/src/sysgen.h"
 #include "../../freevms/sys/src/rse.h"
+#include "../../freevms/sys/src/system_data_cells.h"
 
 /*
  * Timekeeping variables

@@ -33,6 +33,7 @@
 #include <asm/ptrace.h>
 
 #include <linux/sched.h>
+#include "../../freevms/sys/src/system_data_cells.h"
 
 extern void reset_vc(unsigned int);
 extern struct list_head super_blocks;

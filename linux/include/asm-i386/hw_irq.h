@@ -160,10 +160,16 @@ extern void send_IPI(int dest, int vector);
 
 extern unsigned long io_apic_irqs;
 
+#ifndef __arch_um__
 extern atomic_t irq_err_count;
+#endif
 extern atomic_t irq_mis_count;
 
+#ifdef __arch_um__
+extern unsigned long _stext, _etext;
+#else
 extern char _stext, _etext;
+#endif
 
 #define IO_APIC_IRQ(x) (((x) >= 16) || ((1<<(x)) & io_apic_irqs))
 

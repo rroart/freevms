@@ -29,6 +29,9 @@
 #include <linux/iobuf.h>
 #include <linux/bootmem.h>
 #include <linux/tty.h>
+#ifdef __arch_um__
+#include <asm-i386/hw_irq.h>
+#endif
 
 #include <asm/io.h>
 #include <asm/bugs.h>
@@ -81,7 +84,9 @@ extern int irda_device_init(void);
 #error Sorry, your GCC is too old. It builds incorrect kernels.
 #endif
 
+#ifndef __arch_um__
 extern char _stext, _etext;
+#endif
 extern char *linux_banner;
 
 static int init(void *);
