@@ -2315,7 +2315,7 @@ int dumscp(void) {
   dudaemonize(); /* find out what this does */
   
   //  listen(msgbuf,err,cdt,pdt,cdt);
-  scs$listen(dulisten,dumyerr,myname,myinfo);
+  //scs$listen(dulisten,dumyerr,myname,myinfo);
 }
 
 struct _pdt dupdt;
@@ -2335,7 +2335,7 @@ void  du_startio (struct _irp * i, struct _ucb * u) {
     c=(struct _cdrp *) & i->irp$l_fqfl;
     c->cdrp$l_rwcptr=&u->ucb$w_rwaitcnt;
     c->cdrp$l_cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
-    c->cdrp$l_rspid=rspid_alloc(c);
+    c->cdrp$l_rspid=0;//rspid_alloc(c);
     m=vmalloc(sizeof(struct _transfer_commands));
     bzero(m,sizeof(struct _transfer_commands));
     ((struct _mscp_basic_pkt *)m)->mscp$l_cmd_ref=c->cdrp$l_rspid;
@@ -2479,7 +2479,7 @@ void du_init(char *s) {
   ((struct _mscp_ucb *)u)->ucb$l_cddb=c;
   u->ucb$l_pdt=&dupdt;
   pb->pb$l_pdt=&dupdt;
-  ((struct _mscp_ucb *)u)->ucb$l_cdt=find_free_cdt;
+  ((struct _mscp_ucb *)u)->ucb$l_cdt=0;//find_free_cdt;
   cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
   cdt->cdt$l_pb=pb;
 
