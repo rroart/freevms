@@ -794,7 +794,7 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
     }
     atrp++;
   }
-  vfree(head);
+  //  vfree(head);
 }
 
 void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
