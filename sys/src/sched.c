@@ -257,7 +257,7 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   p->state = TASK_RUNNING;
   nr_running++;
 
-  /* p->pcb$b_pri=p->pcb$b_prib-3; */ /* boost */
+  p->pcb$b_pri=p->pcb$b_prib-3;  /* boost */
   curpri=p->pcb$b_pri;
   if (mydebug4) printk("add tyr %x %x\n",p->pid,curpri);
   qhead=sch$aq_comt[curpri];
@@ -496,6 +496,8 @@ void sch$resched(void) {
   //    old=spl(IPL$_SCHED);
   // svpctx, do not think we need to do this here
 
+  spin_lock_irq(&runqueue_lock);
+
   curpcb=cpu->cpu$l_curpcb;
   curpri=cpu->cpu$b_cur_pri;
 
@@ -547,11 +549,9 @@ asmlinkage void schedule(void) {
 asmlinkage void sch$sched(int from_sch$resched) {
   int cpuid = smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid]; 
-  struct _pcb *prev, *next, *p, *curpcb;
-  struct list_head *tmp;
+  struct _pcb *prev, *next, *curpcb;
   int curpri, affinity;
   unsigned char tmppri;
-  struct _pcb * qelem;
   unsigned long qhead;
 
   curpcb=cpu->cpu$l_curpcb;
@@ -590,7 +590,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   if (!tmppri) {
     //    goto sch$idle;
     sch$gl_idle_cpus=sch$gl_idle_cpus | (cpu->cpu$l_cpuid_mask);
-    qelem=idle_task(cpuid);
+    next=idle_task(cpuid);
   } else {
     tmppri--;
     qhead=sch$aq_comh[tmppri];
@@ -617,9 +617,9 @@ asmlinkage void sch$sched(int from_sch$resched) {
       }
     }
 
-    if (mydebug4) printk("qelem %x %x %x %x\n",qhead,*(void**)qhead,qelem,sch$aq_comh[tmppri]);
-    qelem=(struct _pcb *) remque(qhead,qelem);
-    if (mydebug4) printk("qelem %x %x %x %x\n",qhead,*(void**)qhead,qelem,sch$aq_comh[tmppri]);
+    if (mydebug4) printk("next %x %x %x %x\n",qhead,*(void**)qhead,next,sch$aq_comh[tmppri]);
+    next=(struct _pcb *) remque(qhead,next);
+    if (mydebug4) printk("next %x %x %x %x\n",qhead,*(void**)qhead,next,sch$aq_comh[tmppri]);
     if (mydebug4) printk("comh %x %x\n",sch$aq_comh[tmppri],((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl);
     if (sch$aq_comh[tmppri]==((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl)
       sch$gl_comqs=sch$gl_comqs & (~(1 << tmppri));
@@ -629,7 +629,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
     //	  printk("sch %x\n",sch$gl_comqs);
   }
 
-  if(qelem==0) 	  { int j; printk("qel0\n"); for(j=0;j<1000000000;j++) ; } 
+  if(next==0) 	  { int j; printk("qel0\n"); for(j=0;j<1000000000;j++) ; } 
 
   nr_running--;
 
@@ -640,15 +640,13 @@ asmlinkage void sch$sched(int from_sch$resched) {
 		       *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
   /* No DYN check yet */
   /* And no capabilities yet */
-  cpu->cpu$l_curpcb=qelem;
-  qelem->state=TASK_RUNNING;
-  qelem->pcb$l_cpu_id=cpu->cpu$l_phy_cpuid;
-
-  next=qelem;
+  cpu->cpu$l_curpcb=next;
+  next->state=TASK_RUNNING;
+  next->pcb$l_cpu_id=cpu->cpu$l_phy_cpuid;
 
   if (next->pcb$b_pri<next->pcb$b_prib) next->pcb$b_pri++;
 
-  cpu->cpu$b_cur_pri=qelem->pcb$b_pri;
+  cpu->cpu$b_cur_pri=next->pcb$b_pri;
 
   sch$gl_idle_cpus=sch$gl_idle_cpus & (~ cpu->cpu$l_cpuid_mask);
   sch$al_cpu_priority[cpu->cpu$b_cur_pri]=sch$al_cpu_priority[cpu->cpu$b_cur_pri] | (cpu->cpu$l_cpuid_mask);
@@ -688,8 +686,6 @@ asmlinkage void sch$sched(int from_sch$resched) {
     //splret();
     return;
   } 
-
-  cpu->cpu$l_curpcb = next;
 
   task_set_cpu(next, cpuid);
   spin_unlock_irq(&runqueue_lock);
@@ -738,7 +734,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
    */
 
   if (mydebug4) printk("bef swto\n");
-  sti();
+
   switch_to(prev, next, prev);
 
   /* does not get here */
@@ -1377,7 +1373,7 @@ void __init sched_init(void)
    * process right in SMP mode.
 	 */
   int cpuid = smp_processor_id();
-  int nr,i;
+  int nr;
   struct _cpu * cpu;
 
   init_task.pcb$l_cpu_id = cpuid;

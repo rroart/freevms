@@ -144,11 +144,11 @@ void cpu_idle (void)
 		if (!idle)
 			idle = default_idle;
 		// printk("bef while\n");
-		//		while (!current->need_resched)
-		cli();
-		{ int i; for(i=0;i<1000000;i++) ; }
-		sti();
-		//			idle();
+		while (!current->need_resched)
+					idle();
+		//cli();
+		//{ int i; for(i=0;i<1000000;i++) ; }
+		//sti();
 		// printk("aft while\n");
 		//schedule();
 		//SOFTINT_RESCHED_VECTOR;
