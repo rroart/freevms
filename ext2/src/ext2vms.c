@@ -611,7 +611,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     if (error >= 0)
       error = buf.count;
   err:
-    if (error < 0)
+    if (error == 0)
       sts =  SS$_NOMOREFILES;
     //fib->fib$l_wcc = f->f_pos;
     x2p->prev_fp = f->f_pos;
