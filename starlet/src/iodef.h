@@ -347,14 +347,14 @@ union _iodef {
   struct  {
     unsigned io$v_fcode		        : 6;
     unsigned io$v_fmodifiers		: 10;
-  } io$r_fcode_structure;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_1		: 6;
     unsigned io$v_filler_1		: 5;
     unsigned io$v_inherlog		: 1;
     unsigned io$v_fill_20_		: 4;
-  } io$r_errlog_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_2		: 6;
@@ -373,14 +373,14 @@ union _iodef {
     unsigned io$v_file_flush		: 1;
     unsigned io$v_barrier		: 1;
     unsigned io$v_fill_21_		: 2;
-  } io$r_disk_tape_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_3		: 6;
     unsigned io$v_rsvd_for_devdepend_3	: 6;
     unsigned io$v_inhseek		: 1;
     unsigned io$v_fill_22_		: 3;
-  } io$r_disk_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_4		: 6;
@@ -393,43 +393,43 @@ union _iodef {
     unsigned io$v_allowfast		: 1;
 
     unsigned io$v_mt3_density		: 1;
-  } io$r_tape_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_5		: 6;
     unsigned io$v_dutux_reserved	: 2;
     unsigned io$v_mscpmodifs		: 1;
     unsigned io$v_fill_23_		: 7;
-  } io$r_dutu_xfer_modifiers;
+  };
   struct  {
     unsigned io$v_fcode_fill_6		: 6;
     unsigned io$v_shadow		: 1;
     unsigned io$v_locate		: 1;
-  } io$r_du_sense_modifiers;
+  };
   struct  {
     unsigned io$v_fcode_fill_7		: 6;
     unsigned io$v_mscp_format		: 1;
     unsigned io$v_fill_24_		: 1;
-  } io$r_du_packack_modifiers;
+  };
   struct  {
     unsigned io$v_fcode_fill_8		: 6;
     unsigned io$v_allhosts		: 1;
     unsigned io$v_dissolve		: 1;
     unsigned io$v_nocleanup		: 1;
     unsigned io$v_fill_25_		: 7;
-  } io$r_du_avail_modifiers;
+  };
   struct  {
     unsigned io$v_fcode_fill_9		: 6;
     unsigned io$v_spindown		: 1;
     unsigned io$v_fill_26_		: 1;
-  } io$r_du_remshad_modifiers;
+  };
   struct  {
     unsigned io$v_fcode_fill_11		: 6;
     unsigned io$v_est_com_path		: 1;
     unsigned io$v_lcl_src_unit		: 1;
     unsigned io$v_rtn_com_path		: 1;
     unsigned io$v_fill_27_		: 7;
-  } io$r_du_dcd_modifiers;
+  };
   struct  {
     unsigned io$v_fcode_fill_12		: 6;
     unsigned io$v_dealc_all		: 1;
@@ -440,7 +440,7 @@ union _iodef {
     unsigned io$v_read_hrn		: 1;
     unsigned io$v_break_conn		: 1;
     unsigned io$v_fill_28_		: 3;
-  } io$r_du_whm_modifiers;
+  };
 
 
   struct  {
@@ -449,7 +449,7 @@ union _iodef {
     unsigned io$v_cs_fill		: 1;
     unsigned io$v_copyop		: 1;
     unsigned io$v_fill_29_		: 7;
-  } io$r_hbs_copyshad_modifiers;
+  };
   struct  {
     unsigned io$v_fcode_fill_14		: 6;
     unsigned io$v_exists		: 1;
@@ -459,12 +459,12 @@ union _iodef {
     unsigned io$v_opt_minicopy		: 1;
     unsigned io$v_nominicopy		: 1;
     unsigned io$v_fill_30_		: 4;
-  } io$r_hbs_creshad_modifiers;
+  };
   struct  {
     unsigned io$v_fcode_fill_15		: 9;
     unsigned io$v_vuex_fc		: 1;
     unsigned io$v_fill_31_		: 6;
-  } io$r_hbs_xfer_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_10		: 6;
@@ -473,7 +473,7 @@ union _iodef {
     unsigned io$v_preferred_cpu		: 1;
     unsigned io$v_sys_assignable	: 1;
     unsigned io$v_fill_32_		: 7;
-  } io$r_prfpath_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_16		: 6;
@@ -482,19 +482,19 @@ union _iodef {
     unsigned io$v_diagnostic		: 1;
     unsigned io$v_skpsecinh		: 1;
     unsigned io$v_fill_33_		: 6;
-  } io$r_dr_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_17		: 6;
     unsigned io$v_deldata		: 1;
     unsigned io$v_fill_34_		: 1;
-  } io$r_dy_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_18		: 6;
     unsigned io$v_nomrsp		: 1;
     unsigned io$v_fill_35_		: 1;
-  } io$r_dd_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_19		: 6;
@@ -502,14 +502,14 @@ union _iodef {
     unsigned io$v_swap		        : 1;
     unsigned io$v_opposite		: 1;
     unsigned io$v_fill_36_		: 6;
-  } io$r_ts11_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_20		: 6;
     unsigned io$v_rsvd_for_devdepend_6	: 3;
     unsigned io$v_clserexcp		: 1;
     unsigned io$v_fill_37_		: 6;
-  } io$r_tu_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_21		: 6;
@@ -517,13 +517,13 @@ union _iodef {
     unsigned io$v_rsvd_for_devdepend_7	: 3;
     unsigned io$v_tbc		        : 1;
     unsigned io$v_fill_38_		: 5;
-  } io$r_tu_lg_transfer_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_22		: 6;
     unsigned io$v_enarep		: 1;
     unsigned io$v_fill_39_		: 1;
-  } io$r_tu_setmode_modifiers;
+  };
 
 
   struct  {
@@ -539,13 +539,13 @@ union _iodef {
     unsigned io$v_rwshelved		: 1;
     unsigned io$v_setdir		: 1;
 
-  } io$r_acp_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_24		: 6;
     unsigned io$v_binary		: 1;
     unsigned io$v_packed		: 1;
-  } io$r_cr_modifiers;
+  };
 
 
 
@@ -559,7 +559,7 @@ union _iodef {
 
 
     unsigned io$v_fill_40_		: 5;
-  } io$r_mb_modifiers;
+  };
 
 
   struct  {
@@ -571,7 +571,7 @@ union _iodef {
     unsigned io$v_readerwait		: 1;
     unsigned io$v_writerwait		: 1;
     unsigned io$v_fill_41_		: 4;
-  } io$r_mb_setmode_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_27		: 6;
@@ -585,7 +585,7 @@ union _iodef {
     unsigned io$v_refresh		: 1;
     unsigned io$v_escape		: 1;
     unsigned io$v_extend		: 1;
-  } io$r_tt_read_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_28		: 6;
@@ -595,13 +595,13 @@ union _iodef {
     unsigned io$v_breakthru		: 1;
     unsigned io$v_newline		: 1;
     unsigned io$v_fill_42_		: 5;
-  } io$r_tt_write_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_29		: 6;
     unsigned io$v_typeahdcnt		: 1;
     unsigned io$v_reserve_rd_modem	: 1;
-  } io$r_tt_sensemode_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_30		: 6;
@@ -615,7 +615,7 @@ union _iodef {
     unsigned io$v_tt_process		: 1;
     unsigned io$v_brdcst		: 1;
     unsigned io$v_fill_43_		: 1;
-  } io$r_tt_setmode_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_31		: 6;
@@ -629,7 +629,7 @@ union _iodef {
     unsigned io$v_autxof_ena		: 1;
     unsigned io$v_autxof_dis		: 1;
     unsigned io$v_reserve_int_disable		: 1;
-  } io$r_tt_maint_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_32		: 6;
@@ -637,13 +637,13 @@ union _iodef {
     unsigned io$v_include		: 1;
     unsigned io$v_tt_abort		: 1;
     unsigned io$v_fill_44_		: 3;
-  } io$r_tt_outofband_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_33		: 6;
     unsigned io$v_posixinit		: 1;
     unsigned io$v_posixflow		: 1;
-  } io$r_tt_psxsetmode_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_34		: 6;
@@ -657,7 +657,7 @@ union _iodef {
     unsigned io$v_flush_output		: 1;
     unsigned io$v_update_ptc		: 1;
     unsigned io$v_fill_45_		: 1;
-  } io$r_tt_posixinit_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_35		: 6;
@@ -667,13 +667,13 @@ union _iodef {
     unsigned io$v_in_xoff		: 1;
     unsigned io$v_in_xon		: 1;
     unsigned io$v_fill_46_		: 4;
-  } io$r_tt_posixflow_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_36		: 6;
     unsigned io$v_o_nonblock		: 1;
     unsigned io$v_fill_47_		: 1;
-  } io$r_tt_psxread_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_37		: 6;
@@ -684,7 +684,7 @@ union _iodef {
 
 
     unsigned io$v_fill_48_		: 6;
-  } io$r_net_write_read_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_38		: 6;
@@ -692,13 +692,13 @@ union _iodef {
     unsigned io$v_abort		        : 1;
     unsigned io$v_synch		        : 1;
     unsigned io$v_fill_49_		: 6;
-  } io$r_net_accdea_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_39		: 6;
     unsigned io$v_response		: 1;
     unsigned io$v_fill_50_		: 1;
-  } io$r_dlink_write_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_40		: 6;
@@ -711,7 +711,7 @@ union _iodef {
     unsigned io$v_update_map		: 1;
     unsigned io$v_route		        : 1;
     unsigned io$v_fill_51_		: 2;
-  } io$r_dlink_setmode_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_41		: 6;
@@ -724,24 +724,24 @@ union _iodef {
     unsigned io$v_show_map		: 1;
     unsigned io$v_show_route		: 1;
     unsigned io$v_fill_52_		: 2;
-  } io$r_dlink_sensemode_modifiers;
+  };
   struct  {
     unsigned io$v_fcode_fill_42		: 6;
     unsigned io$v_more		        : 1;
     unsigned io$v_qualified		: 1;
-  } io$r_x25_write_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_43		: 6;
     unsigned io$v_redirect		: 1;
     unsigned io$v_accept		: 1;
-  } io$r_x25_access_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_44		: 6;
     unsigned io$v_setevf		: 1;
     unsigned io$v_fill_53_		: 1;
-  } io$r_lpa_start_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_45		: 6;
@@ -754,7 +754,7 @@ union _iodef {
     unsigned io$v_cycle		        : 1;
     unsigned io$v_reset		        : 1;
     unsigned io$v_fill_54_		: 2;
-  } io$r_xa_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_46		: 6;
@@ -767,7 +767,7 @@ union _iodef {
     unsigned io$v_lpbext		: 1;
     unsigned io$v_lpbint		: 1;
     unsigned io$v_readcsr		: 1;
-  } io$r_ibm3271_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_47		: 6;
@@ -779,7 +779,7 @@ union _iodef {
     unsigned io$v_filler_7		: 1;
     unsigned io$v_intclock		: 1;
     unsigned io$v_fill_55_		: 3;
-  } io$r_xw_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_48		: 6;
@@ -793,7 +793,7 @@ union _iodef {
     unsigned io$v_lt_setmode		: 1;
     unsigned io$v_lt_sensemode		: 1;
     unsigned io$v_lt_que_chg_notif	: 1;
-  } io$r_lt_modifiers;
+  };
 
   struct  {
     unsigned io$v_lt_map_filler		: 1;
@@ -803,13 +803,13 @@ union _iodef {
     unsigned io$v_lt_map_lnknam		: 1;
     unsigned io$v_lt_map_netadr		: 1;
     unsigned io$v_fill_56_		: 2;
-  } io$r_lt_mapitem;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_49		: 6;
     unsigned io$v_flush		        : 1;
     unsigned io$v_write_barrier		: 1;
-  } io$r_fs_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_50		: 6;
@@ -818,232 +818,25 @@ union _iodef {
     unsigned io$v_allowfast_per_io		: 1;
     unsigned io$v_allowfast_always		: 1;
     unsigned io$v_fill_57_		        : 6;
-  } io$r_mk_setmode_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_51		: 6;
     unsigned io$v_add		        : 1;
     unsigned io$v_fill_58_		: 1;
-  } io$r_sd_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_52		: 6;
     unsigned io$v_idstring		: 1;
     unsigned io$v_serialnum		: 1;
-  } io$r_usb_usbattr_modifiers;
+  };
 
   struct  {
     unsigned io$v_fcode_fill_53		: 6;
     unsigned io$v_qsrvfill1		: 1;
     unsigned io$v_qsrv_client_update	: 1;
-  } io$r_qsrv_packack_modifiers;
+  };
 };
- 
-#define io$v_fcode io$r_fcode_structure.io$v_fcode
-#define io$v_fmodifiers io$r_fcode_structure.io$v_fmodifiers
-#define io$v_inherlog io$r_errlog_modifiers.io$v_inherlog
-#define io$v_erase io$r_disk_tape_modifiers.io$v_erase
-#define io$v_exfunc io$r_disk_tape_modifiers.io$v_exfunc
-#define io$v_datacheck io$r_disk_tape_modifiers.io$v_datacheck
-#define io$v_inhretry io$r_disk_tape_modifiers.io$v_inhretry
-#define io$v_syncsts io$r_disk_tape_modifiers.io$v_syncsts
-#define io$v_novcache io$r_disk_tape_modifiers.io$v_novcache
-#define io$v_bufobj io$r_disk_tape_modifiers.io$v_bufobj
-#define io$v_trusted io$r_disk_tape_modifiers.io$v_trusted
-#define io$v_file_flush io$r_disk_tape_modifiers.io$v_file_flush
-#define io$v_barrier io$r_disk_tape_modifiers.io$v_barrier
-#define io$v_inhseek io$r_disk_modifiers.io$v_inhseek
-#define io$v_reverse io$r_tape_modifiers.io$v_reverse
-#define io$v_nowait io$r_tape_modifiers.io$v_nowait
-#define io$v_inhextgap io$r_tape_modifiers.io$v_inhextgap
-#define io$v_retension io$r_tape_modifiers.io$v_retension
-#define io$v_allowfast io$r_tape_modifiers.io$v_allowfast
-#define io$v_mt3_density io$r_tape_modifiers.io$v_mt3_density
-#define io$v_mscpmodifs io$r_dutu_xfer_modifiers.io$v_mscpmodifs
-#define io$v_shadow io$r_du_sense_modifiers.io$v_shadow
-#define io$v_locate io$r_du_sense_modifiers.io$v_locate
-#define io$v_mscp_format io$r_du_packack_modifiers.io$v_mscp_format
-#define io$v_allhosts io$r_du_avail_modifiers.io$v_allhosts
-#define io$v_dissolve io$r_du_avail_modifiers.io$v_dissolve
-#define io$v_nocleanup io$r_du_avail_modifiers.io$v_nocleanup
-#define io$v_spindown io$r_du_remshad_modifiers.io$v_spindown
-#define io$v_est_com_path io$r_du_dcd_modifiers.io$v_est_com_path
-#define io$v_lcl_src_unit io$r_du_dcd_modifiers.io$v_lcl_src_unit
-#define io$v_rtn_com_path io$r_du_dcd_modifiers.io$v_rtn_com_path
-#define io$v_dealc_all io$r_du_whm_modifiers.io$v_dealc_all
-#define io$v_dealc_hrn io$r_du_whm_modifiers.io$v_dealc_hrn
-#define io$v_dealc_entloc io$r_du_whm_modifiers.io$v_dealc_entloc
-#define io$v_decr_afc io$r_du_whm_modifiers.io$v_decr_afc
-#define io$v_read_all io$r_du_whm_modifiers.io$v_read_all
-#define io$v_read_hrn io$r_du_whm_modifiers.io$v_read_hrn
-#define io$v_break_conn io$r_du_whm_modifiers.io$v_break_conn
-#define io$v_stepover io$r_hbs_copyshad_modifiers.io$v_stepover
-#define io$v_copyop io$r_hbs_copyshad_modifiers.io$v_copyop
-#define io$v_exists io$r_hbs_creshad_modifiers.io$v_exists
-#define io$v_cbs io$r_hbs_creshad_modifiers.io$v_cbs
-#define io$v_booting io$r_hbs_creshad_modifiers.io$v_booting
-#define io$v_req_minicopy io$r_hbs_creshad_modifiers.io$v_req_minicopy
-#define io$v_opt_minicopy io$r_hbs_creshad_modifiers.io$v_opt_minicopy
-#define io$v_nominicopy io$r_hbs_creshad_modifiers.io$v_nominicopy
-#define io$v_vuex_fc io$r_hbs_xfer_modifiers.io$v_vuex_fc
-#define io$v_forcepath io$r_prfpath_modifiers.io$v_forcepath
-#define io$v_preferred_cpu io$r_prfpath_modifiers.io$v_preferred_cpu
-#define io$v_sys_assignable io$r_prfpath_modifiers.io$v_sys_assignable
-#define io$v_commod io$r_dr_modifiers.io$v_commod
-#define io$v_movetrackd io$r_dr_modifiers.io$v_movetrackd
-#define io$v_diagnostic io$r_dr_modifiers.io$v_diagnostic
-#define io$v_skpsecinh io$r_dr_modifiers.io$v_skpsecinh
-#define io$v_deldata io$r_dy_modifiers.io$v_deldata
-#define io$v_nomrsp io$r_dd_modifiers.io$v_nomrsp
-#define io$v_swap io$r_ts11_modifiers.io$v_swap
-#define io$v_opposite io$r_ts11_modifiers.io$v_opposite
-#define io$v_clserexcp io$r_tu_modifiers.io$v_clserexcp
-#define io$v_chunkdiag io$r_tu_lg_transfer_modifiers.io$v_chunkdiag
-#define io$v_tbc io$r_tu_lg_transfer_modifiers.io$v_tbc
-#define io$v_enarep io$r_tu_setmode_modifiers.io$v_enarep
-#define io$v_access io$r_acp_modifiers.io$v_access
-#define io$v_create io$r_acp_modifiers.io$v_create
-#define io$v_delete io$r_acp_modifiers.io$v_delete
-#define io$v_mount io$r_acp_modifiers.io$v_mount
-#define io$v_dmount io$r_acp_modifiers.io$v_dmount
-#define io$v_remount io$r_acp_modifiers.io$v_remount
-#define io$v_movefile io$r_acp_modifiers.io$v_movefile
-#define io$v_rwshelved io$r_acp_modifiers.io$v_rwshelved
-#define io$v_setdir io$r_acp_modifiers.io$v_setdir
-#define io$v_binary io$r_cr_modifiers.io$v_binary
-#define io$v_packed io$r_cr_modifiers.io$v_packed
-#define io$v_now io$r_mb_modifiers.io$v_now
-#define io$v_stream io$r_mb_modifiers.io$v_stream
-#define io$v_readercheck io$r_mb_modifiers.io$v_readercheck
-#define io$v_writercheck io$r_mb_modifiers.io$v_writercheck
-#define io$v_norswait io$r_mb_modifiers.io$v_norswait
-#define io$v_mb_room_notify io$r_mb_setmode_modifiers.io$v_mb_room_notify
-#define io$v_readattn io$r_mb_setmode_modifiers.io$v_readattn
-#define io$v_wrtattn io$r_mb_setmode_modifiers.io$v_wrtattn
-#define io$v_setprot io$r_mb_setmode_modifiers.io$v_setprot
-#define io$v_readerwait io$r_mb_setmode_modifiers.io$v_readerwait
-#define io$v_writerwait io$r_mb_setmode_modifiers.io$v_writerwait
-#define io$v_noecho io$r_tt_read_modifiers.io$v_noecho
-#define io$v_timed io$r_tt_read_modifiers.io$v_timed
-#define io$v_cvtlow io$r_tt_read_modifiers.io$v_cvtlow
-#define io$v_nofiltr io$r_tt_read_modifiers.io$v_nofiltr
-#define io$v_dsablmbx io$r_tt_read_modifiers.io$v_dsablmbx
-#define io$v_purge io$r_tt_read_modifiers.io$v_purge
-#define io$v_trmnoecho io$r_tt_read_modifiers.io$v_trmnoecho
-#define io$v_refresh io$r_tt_read_modifiers.io$v_refresh
-#define io$v_escape io$r_tt_read_modifiers.io$v_escape
-#define io$v_extend io$r_tt_read_modifiers.io$v_extend
-#define io$v_canctrlo io$r_tt_write_modifiers.io$v_canctrlo
-#define io$v_enablmbx io$r_tt_write_modifiers.io$v_enablmbx
-#define io$v_noformat io$r_tt_write_modifiers.io$v_noformat
-#define io$v_breakthru io$r_tt_write_modifiers.io$v_breakthru
-#define io$v_newline io$r_tt_write_modifiers.io$v_newline
-#define io$v_typeahdcnt io$r_tt_sensemode_modifiers.io$v_typeahdcnt
-#define io$v_maint io$r_tt_setmode_modifiers.io$v_maint
-#define io$v_ctrlyast io$r_tt_setmode_modifiers.io$v_ctrlyast
-#define io$v_ctrlcast io$r_tt_setmode_modifiers.io$v_ctrlcast
-#define io$v_hangup io$r_tt_setmode_modifiers.io$v_hangup
-#define io$v_outband io$r_tt_setmode_modifiers.io$v_outband
-#define io$v_tt_connect io$r_tt_setmode_modifiers.io$v_tt_connect
-#define io$v_tt_discon io$r_tt_setmode_modifiers.io$v_tt_discon
-#define io$v_tt_process io$r_tt_setmode_modifiers.io$v_tt_process
-#define io$v_brdcst io$r_tt_setmode_modifiers.io$v_brdcst
-#define io$v_loop io$r_tt_maint_modifiers.io$v_loop
-#define io$v_unloop io$r_tt_maint_modifiers.io$v_unloop
-#define io$v_line_off io$r_tt_maint_modifiers.io$v_line_off
-#define io$v_set_modem io$r_tt_maint_modifiers.io$v_set_modem
-#define io$v_line_on io$r_tt_maint_modifiers.io$v_line_on
-#define io$v_loop_ext io$r_tt_maint_modifiers.io$v_loop_ext
-#define io$v_autxof_ena io$r_tt_maint_modifiers.io$v_autxof_ena
-#define io$v_autxof_dis io$r_tt_maint_modifiers.io$v_autxof_dis
-#define io$v_include io$r_tt_outofband_modifiers.io$v_include
-#define io$v_tt_abort io$r_tt_outofband_modifiers.io$v_tt_abort
-#define io$v_posixinit io$r_tt_psxsetmode_modifiers.io$v_posixinit
-#define io$v_posixflow io$r_tt_psxsetmode_modifiers.io$v_posixflow
-#define io$v_set_posix io$r_tt_posixinit_modifiers.io$v_set_posix
-#define io$v_clear_posix io$r_tt_posixinit_modifiers.io$v_clear_posix
-#define io$v_set_termios io$r_tt_posixinit_modifiers.io$v_set_termios
-#define io$v_set_ptc io$r_tt_posixinit_modifiers.io$v_set_ptc
-#define io$v_clear_ptc io$r_tt_posixinit_modifiers.io$v_clear_ptc
-#define io$v_flush_tab io$r_tt_posixinit_modifiers.io$v_flush_tab
-#define io$v_flush_output io$r_tt_posixinit_modifiers.io$v_flush_output
-#define io$v_update_ptc io$r_tt_posixinit_modifiers.io$v_update_ptc
-#define io$v_out_xoff io$r_tt_posixflow_modifiers.io$v_out_xoff
-#define io$v_out_xon io$r_tt_posixflow_modifiers.io$v_out_xon
-#define io$v_in_xoff io$r_tt_posixflow_modifiers.io$v_in_xoff
-#define io$v_in_xon io$r_tt_posixflow_modifiers.io$v_in_xon
-#define io$v_o_nonblock io$r_tt_psxread_modifiers.io$v_o_nonblock
-#define io$v_interrupt io$r_net_write_read_modifiers.io$v_interrupt
-#define io$v_multiple io$r_net_write_read_modifiers.io$v_multiple
-#define io$v_lockbuf io$r_net_write_read_modifiers.io$v_lockbuf
-#define io$v_noblock io$r_net_write_read_modifiers.io$v_noblock
-#define io$v_abort io$r_net_accdea_modifiers.io$v_abort
-#define io$v_synch io$r_net_accdea_modifiers.io$v_synch
-#define io$v_response io$r_dlink_write_modifiers.io$v_response
-#define io$v_startup io$r_dlink_setmode_modifiers.io$v_startup
-#define io$v_shutdown io$r_dlink_setmode_modifiers.io$v_shutdown
-#define io$v_attnast io$r_dlink_setmode_modifiers.io$v_attnast
-#define io$v_ctrl io$r_dlink_setmode_modifiers.io$v_ctrl
-#define io$v_set_mac io$r_dlink_setmode_modifiers.io$v_set_mac
-#define io$v_update_map io$r_dlink_setmode_modifiers.io$v_update_map
-#define io$v_route io$r_dlink_setmode_modifiers.io$v_route
-#define io$v_rd_mem io$r_dlink_sensemode_modifiers.io$v_rd_mem
-#define io$v_rd_modem io$r_dlink_sensemode_modifiers.io$v_rd_modem
-#define io$v_rd_count io$r_dlink_sensemode_modifiers.io$v_rd_count
-#define io$v_clr_count io$r_dlink_sensemode_modifiers.io$v_clr_count
-#define io$v_sense_mac io$r_dlink_sensemode_modifiers.io$v_sense_mac
-#define io$v_show_map io$r_dlink_sensemode_modifiers.io$v_show_map
-#define io$v_show_route io$r_dlink_sensemode_modifiers.io$v_show_route
-#define io$v_more io$r_x25_write_modifiers.io$v_more
-#define io$v_qualified io$r_x25_write_modifiers.io$v_qualified
-#define io$v_redirect io$r_x25_access_modifiers.io$v_redirect
-#define io$v_accept io$r_x25_access_modifiers.io$v_accept
-#define io$v_setevf io$r_lpa_start_modifiers.io$v_setevf
-#define io$v_word io$r_xa_modifiers.io$v_word
-#define io$v_setfnct io$r_xa_modifiers.io$v_setfnct
-#define io$v_datapath io$r_xa_modifiers.io$v_datapath
-#define io$v_cycle io$r_xa_modifiers.io$v_cycle
-#define io$v_reset io$r_xa_modifiers.io$v_reset
-#define io$v_setcuadr io$r_ibm3271_modifiers.io$v_setcuadr
-#define io$v_setbsize io$r_ibm3271_modifiers.io$v_setbsize
-#define io$v_setpoolsz io$r_ibm3271_modifiers.io$v_setpoolsz
-#define io$v_setenqcnt io$r_ibm3271_modifiers.io$v_setenqcnt
-#define io$v_clear io$r_ibm3271_modifiers.io$v_clear
-#define io$v_lpbext io$r_ibm3271_modifiers.io$v_lpbext
-#define io$v_lpbint io$r_ibm3271_modifiers.io$v_lpbint
-#define io$v_readcsr io$r_ibm3271_modifiers.io$v_readcsr
-#define io$v_noctswait io$r_xw_modifiers.io$v_noctswait
-#define io$v_slavloop io$r_xw_modifiers.io$v_slavloop
-#define io$v_nodsrwait io$r_xw_modifiers.io$v_nodsrwait
-#define io$v_maintloop io$r_xw_modifiers.io$v_maintloop
-#define io$v_lastblock io$r_xw_modifiers.io$v_lastblock
-#define io$v_intclock io$r_xw_modifiers.io$v_intclock
-#define io$v_lt_connect io$r_lt_modifiers.io$v_lt_connect
-#define io$v_lt_discon io$r_lt_modifiers.io$v_lt_discon
-#define io$v_lt_readport io$r_lt_modifiers.io$v_lt_readport
-#define io$v_lt_map_port io$r_lt_modifiers.io$v_lt_map_port
-#define io$v_lt_rating io$r_lt_modifiers.io$v_lt_rating
-#define io$v_lt_sol_info io$r_lt_modifiers.io$v_lt_sol_info
-#define io$v_lt_rcv_info io$r_lt_modifiers.io$v_lt_rcv_info
-#define io$v_lt_setmode io$r_lt_modifiers.io$v_lt_setmode
-#define io$v_lt_sensemode io$r_lt_modifiers.io$v_lt_sensemode
-#define io$v_lt_que_chg_notif io$r_lt_modifiers.io$v_lt_que_chg_notif
-#define io$v_lt_map_filler io$r_lt_mapitem.io$v_lt_map_filler
-#define io$v_lt_map_nodnam io$r_lt_mapitem.io$v_lt_map_nodnam
-#define io$v_lt_map_pornam io$r_lt_mapitem.io$v_lt_map_pornam
-#define io$v_lt_map_srvnam io$r_lt_mapitem.io$v_lt_map_srvnam
-#define io$v_lt_map_lnknam io$r_lt_mapitem.io$v_lt_map_lnknam
-#define io$v_lt_map_netadr io$r_lt_mapitem.io$v_lt_map_netadr
-#define io$v_flush io$r_fs_modifiers.io$v_flush
-#define io$v_write_barrier io$r_fs_modifiers.io$v_write_barrier
-#define io$v_mkfill1 io$r_mk_setmode_modifiers.io$v_mkfill1
-#define io$v_allowfast_never io$r_mk_setmode_modifiers.io$v_allowfast_never
-#define io$v_allowfast_per_io io$r_mk_setmode_modifiers.io$v_allowfast_per_io
-#define io$v_allowfast_always io$r_mk_setmode_modifiers.io$v_allowfast_always
-#define io$v_add io$r_sd_modifiers.io$v_add
-#define io$v_idstring io$r_usb_usbattr_modifiers.io$v_idstring
-#define io$v_serialnum io$r_usb_usbattr_modifiers.io$v_serialnum
-#define io$v_qsrvfill1 io$r_qsrv_packack_modifiers.io$v_qsrvfill1
-#define io$v_qsrv_client_update io$r_qsrv_packack_modifiers.io$v_qsrv_client_update
  
 #endif

@@ -124,7 +124,7 @@ typedef struct _pb {
   union  {
     void *pb$l_waitqbl;
     unsigned int pb$l_duetime;
-  } waitqbloverlay;
+  };
   void *pb$l_scsmsg;
   unsigned short int pb$w_sts;
   unsigned short int pb$w_vcfail_rsn;
@@ -139,7 +139,7 @@ typedef struct _pb {
   int pb$l_mgt_priority;
   unsigned int pb$l_vc_addr;
   int pb$$_fill_3 [2];
-} ;
+};
  
 #endif
  

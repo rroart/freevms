@@ -64,11 +64,11 @@ struct _ddt {
   union  {
     int (*ddt$ps_mgt_register)();
     int (*ddt$ps_configure)();
-  } ddt$r_config_overlay;
+  };
   union  {
     int (*ddt$ps_mgt_deregister)();
     int (*ddt$ps_deconfigure)();
-  } ddt$r_deconfig_overlay;
+  };
 };
  
 #endif

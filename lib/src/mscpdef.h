@@ -263,8 +263,8 @@ struct _mscp_basic_pkt {
 	    unsigned mscp$v_ef_erlog : 1;
 	    unsigned mscp$v_ef_bblku : 1;
 	    unsigned mscp$v_ef_bblkr : 1;
-	  } mscp$r_fill_5_;
-	} mscp$r_fill_4_;
+	  };
+	};
 	union  {
 	  unsigned char mscp$b_flags1;
 	  struct  {
@@ -273,17 +273,17 @@ struct _mscp_basic_pkt {
 	    unsigned mscp$v_ef_allof : 1;
 	    unsigned mscp$v_filler2 : 3;
 	    unsigned mscp$v_ef_fastskip_used : 1;
-	  } mscp$r_fill_7_;
-	} mscp$r_fill_6_;
-      } mscp$r_flags_overlay;
+	  };
+	};
+      };
       union  {
 	union  {
 	  unsigned short int mscp$w_status;
 	  struct  {
 	    unsigned mscp$v_st_mask : 5;
 	    unsigned mscp$v_st_sbcod : 11;
-	  } mscp$r_fill_9_;
-	} mscp$r_fill_8_;
+	  };
+	};
 
 	struct  {
 	  union  {
@@ -296,16 +296,16 @@ struct _mscp_basic_pkt {
 	      unsigned mscp$v_sc_stonl : 1;
 	      unsigned mscp$v_sc_eot : 1;
 	      unsigned mscp$v_fill_20_ : 5;
-	    } mscp$r_fields_1;
+	    };
 	    struct  {
 	      unsigned mscp$v_filler : 10;
 	      unsigned mscp$v_sc_inrep : 1;
 	      unsigned mscp$v_sc_ivrct : 1;
 	      unsigned mscp$v_sc_rdony : 1;
 	      unsigned mscp$v_fill_21_ : 3;
-	    } mscp$r_field_2;
-	  } mscp$r_bit_fields;
-	} mscp$r_sc_succ;
+	    };
+	  };
+	};
 
 	struct  {
 	  unsigned mscp$v_filler : 5;
@@ -316,7 +316,7 @@ struct _mscp_basic_pkt {
 	  unsigned mscp$v_sc_exuse : 1;
 	  unsigned mscp$v_sc_ldr : 1;
 	  unsigned mscp$v_fill_22_ : 5;
-	} mscp$r_sc_offln;
+	};
 
 	struct  {
 	  unsigned mscp$v_filler : 5;
@@ -326,7 +326,7 @@ struct _mscp_basic_pkt {
 	  unsigned mscp$v_reserved2 : 2;
 	  unsigned mscp$v_sc_aluse : 1;
 	  unsigned mscp$v_fill_23_ : 5;
-	} mscp$r_sc_avlbl;
+	};
 
 	struct  {
 	  unsigned mscp$v_filler1 : 8;
@@ -335,7 +335,7 @@ struct _mscp_basic_pkt {
 	  unsigned mscp$v_sc_softw : 1;
 	  unsigned mscp$v_sc_hardw : 1;
 	  unsigned mscp$v_fill_24_ : 2;
-	} mscp$r_sc_wrtpr;
+	};
 
 	struct  {
 	  struct  {
@@ -345,12 +345,12 @@ struct _mscp_basic_pkt {
 	    unsigned mscp$v_filler2 : 1;
 	    unsigned mscp$v_sc_noent : 1;
 	    unsigned mscp$v_fill_25_ : 3;
-	  } mscp$r_fields;
-	} mscp$r_sc_wheae;
+	  };
+	};
 
-      } mscp$r_mscp_subcodes;
-    } mscp$r_flags_status;
-  } mscp$r_modifiers_status;
+      };
+    };
+  };
 };
 
 /* these are numbered like this in NetBSD too */  
@@ -398,7 +398,7 @@ struct _generic_mscp {
     unsigned mscp$v_slun_unused : 14;
     unsigned mscp$v_slun : 1;
     unsigned mscp$v_fill_26_ : 1;
-  } mscp$r_slun_unit_bit;
+  };
 };
  
 #define MSCP$K_FMT_DFLT 0
@@ -416,23 +416,23 @@ struct _transfer_commands {
 	unsigned int mscp$l_lbn;
 	unsigned int mscp$l_frst_bad;
 	unsigned int mscp$l_fmt_func;
-      } mscp$r_lbn_longword;
+      };
       unsigned int mscp$l_key_id;
       unsigned int mscp$l_key_lgh;
       unsigned int mscp$l_key_buf [3];
-    } mscp$r_disk;
+    };
     struct  {
       unsigned int mscp$l_position;
       unsigned int mscp$l_taperec;
-    } mscp$r_tape;
-  } mscp$r_disk_tape;
-} ;
+    };
+  };
+};
  
 struct _abort_gtcmd {
   struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
   unsigned int mscp$l_out_ref;
   unsigned int mscp$l_cmd_sts;
-} ;
+};
 
 #define MSCP$K_ANM_READ 0
 #define MSCP$K_ANM_EXCG 1
@@ -445,7 +445,7 @@ struct _accnm {
   unsigned short int mscp$w_anm_oper;
   unsigned short int mscp$w_anm_dlgh;
   char mscp$t_anm_memd [32];
-} ;
+};
 
 	
  struct _display_cmd {
@@ -453,7 +453,7 @@ struct _accnm {
   unsigned short int mscp$w_ditem;
   unsigned short int mscp$w_dmode;
   char mscp$t_dtext [16];
-} ;
+};
 
 #define MSCP$M_UF_CMPRD 0x1
 #define MSCP$M_UF_CMPWR 0x2
@@ -533,8 +533,8 @@ unsigned short int mscp$w_tape_char;
       struct  {
 	void *mscp$l_excl_lba;
 	unsigned int mscp$l_excl_lbc;
-      } mscp$r_fill_30_;
-    } mscp$r_fill_29_;
+      };
+    };
     union  {
       int64 mscp$q_slun_overlay;
       struct  {
@@ -547,11 +547,11 @@ unsigned short int mscp$w_tape_char;
 	    unsigned mscp$v_slun_d1 : 5;
 	    unsigned mscp$v_slun_d0 : 5;
 	    unsigned mscp$v_reserved : 1;
-	  } mscp$r_fill_34_;
-	} mscp$r_fill_33_;
-      } mscp$r_fill_32_;
-    } mscp$r_fill_31_;
-  } mscp$r_unit_id_overlay;
+	  };
+	};
+      };
+    };
+  };
   union  {
     unsigned int mscp$l_dev_parm;
     union  {
@@ -563,17 +563,17 @@ unsigned short int mscp$w_tape_char;
 	unsigned mscp$v_mtyp_a0 : 5;
 	unsigned mscp$v_mtyp_d1 : 5;
 	unsigned mscp$v_mtyp_d0 : 5;
-      } mscp$r_fill_36_;
-    } mscp$r_fill_35_;
-  } mscp$r_dev_parm_overlay;
+      };
+    };
+  };
   union  {
     struct  {
       unsigned short int mscp$w_shdw_unt;
       union  {
 	unsigned short int mscp$w_copy_mod;
 	unsigned short int mscp$w_shdw_sts;
-      } mscp$r_spd_sts;
-    } mscp$r_disk_cmd;
+      };
+    };
     struct  {
       union  {
 	union  {
@@ -584,8 +584,8 @@ unsigned short int mscp$w_tape_char;
 	    unsigned mscp$v_tf_gcr : 1;
 	    unsigned mscp$v_tf_blk : 1;
 	    unsigned mscp$v_fill_49_ : 4;
-	  } mscp$r_fill_38_;
-	} mscp$r_fill_37_;
+	  };
+	};
 	union  {
 	  unsigned short int mscp$w_format_ctp;
 	  struct  {
@@ -596,8 +596,8 @@ unsigned short int mscp$w_tape_char;
 	    unsigned mscp$v_tf_t87 : 1;
 	    unsigned mscp$v_tf_t87c : 1;
 	    unsigned mscp$v_fill_50_ : 2;
-	  } mscp$r_fill_40_;
-	} mscp$r_fill_39_;
+	  };
+	};
 	union  {
 	  unsigned short int mscp$w_format_hpc;
 	  struct  {
@@ -606,16 +606,16 @@ unsigned short int mscp$w_tape_char;
 	    unsigned mscp$v_tf_ndc : 1;
 	    unsigned mscp$v_tf_edc : 1;
 	    unsigned mscp$v_fill_51_ : 4;
-	  } mscp$r_fill_42_;
-	} mscp$r_fill_41_;
+	  };
+	};
 	union  {
 	  unsigned short int mscp$w_format_dat;
 	  struct  {
 	    unsigned mscp$v_fill_11 : 1;
 	    unsigned mscp$v_tf_dcp : 1;
 	    unsigned mscp$v_fill_52_ : 6;
-	  } mscp$r_fill_44_;
-	} mscp$r_fill_43_;
+	  };
+	};
 	union  {
 	  unsigned short int mscp$w_format_8mm;
 	  struct  {
@@ -623,12 +623,12 @@ unsigned short int mscp$w_tape_char;
 	    unsigned mscp$v_tf_x85 : 1;
 	    unsigned mscp$v_tf_x5c : 1;
 	    unsigned mscp$v_fill_53_ : 5;
-	  } mscp$r_fill_46_;
-	} mscp$r_fill_45_;
-      } mscp$r_format_overlay;
+	  };
+	};
+      };
       unsigned short int mscp$w_speed;
-    } mscp$r_tape_cmd;
-  } mscp$r_disk_tape_cmd;
+    };
+  };
   union  {
     union  {
       struct  {
@@ -641,32 +641,32 @@ unsigned short int mscp$w_tape_char;
 	unsigned char mscp$b_rbns;
 	unsigned char mscp$b_rct_cpys;
 	unsigned short int mscp$w_load_avail;
-      } mscp$r_disk_end;
+      };
       struct  {
 	unsigned short int mscp$w_formenu;
 	unsigned char mscp$b_freecap;
-      } mscp$r_tape_end;
-    } mscp$r_disk_tape_end;
+      };
+    };
 
     union  {
       struct  {
 	unsigned int mscp$l_unt_size;
 	unsigned int mscp$l_vol_ser;
-      } mscp$r_disk;
+      };
       struct  {
 	unsigned int mscp$l_maxwtrec;
 	unsigned short int mscp$w_noiserec;
-      } mscp$r_tape;
-    } mscp$r_disk_tape;
+      };
+    };
 
-  } mscp$r_online_stunt;
+  };
 };
  
  struct _rcedc {
   struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
   int mscp$l_filler [5];
   unsigned int mscp$l_code;
-} ;
+};
 
 	
  struct _replc {
@@ -681,13 +681,13 @@ unsigned short int mscp$w_tape_char;
     struct  {
       unsigned int mscp$l_rec_cnt;
       unsigned int mscp$l_tmgp_cnt;
-    } mscp$r_cmd;
+    };
     struct  {
       unsigned int mscp$l_rcskiped;
       unsigned int mscp$l_tmskiped;
-    } mscp$r_endmsg;
-  } mscp$r_cmdend;
-} REPOS;
+    };
+  };
+};
 
 #define MSCP$M_CF_576 0x1
 #define MSCP$M_CF_SHADW 0x2
@@ -801,35 +801,35 @@ unsigned short int mscp$w_tape_char;
 	unsigned mscp$v_cf_load : 1;
 	unsigned mscp$v_cf_edcrp : 1;
 	unsigned mscp$v_cf_replc : 1;
-      } mscp$r_fill_55_;
-    } mscp$r_fill_54_;
+      };
+    };
     union  {
       unsigned short int mscp$w_tu_cnt_flgs;
       struct  {
 	unsigned mscp$v_filler : 14;
 	unsigned mscp$v_cf_mtden : 1;
 	unsigned mscp$v_cf_srt : 1;
-      } mscp$r_fill_57_;
-    } mscp$r_fill_56_;
-  } mscp$r_cnt_flgs_overlay;
+      };
+    };
+  };
   union  {
     unsigned short int mscp$w_hst_tmo;
     struct  {
       unsigned short int mscp$w_cnt_tmo;
-    } mscp$r_fill_59_;
-  } mscp$r_fill_58_;
+    };
+  };
   unsigned char mscp$b_cnt_svr;
   unsigned char mscp$b_cnt_hvr;
   union  {
     unsigned int64 mscp$q_time;
     struct  {
       unsigned int64 mscp$q_cnt_id;
-    } mscp$r_fill_61_;
-  } mscp$r_fill_60_;
+    };
+  };
   unsigned int mscp$l_maxbcnt;
   unsigned short int mscp$w_conn_ref;
 
-} ;
+};
  
 
 #define MSCP$K_MIN_SIZ 12
@@ -856,13 +856,13 @@ unsigned short int mscp$w_tape_char;
       unsigned int mscp$l_src_lbn;
       unsigned int64 mscp$q_port_adr;
       unsigned int64 mscp$q_sys_adr;
-    } mscp$r_lbcount_structure;
+    };
     struct  {
       int mscp$l_filler;
       unsigned char mscp$z_sbc_sts [16];
       unsigned short int mscp$w_ent_loc;
-    } mscp$r_lbcount_end_structure;
-  } mscp$r_lbcount_overlay;
+    };
+  };
 };
  
 
@@ -882,12 +882,12 @@ unsigned short int mscp$w_tape_char;
       unsigned short int mscp$w_unit_al;
       unsigned short int mscp$w_serv_al;
       unsigned short int mscp$w_serv_unal;
-    } mscp$r_unit_al_structure;
-  } mscp$r_wrhis_bd_overlay;
+    };
+  };
   union  {
     unsigned short int mscp$w_oper;
     unsigned short int mscp$w_count;
-  } mscp$r_oper_overlay;
+  };
   unsigned short int mscp$w_offset;
 };
  
@@ -909,15 +909,9 @@ struct _write_log_entry {
       unsigned whis$v_filler : 14;
       unsigned whis$v_et_tlib : 1;
       unsigned whis$v_et_err : 1;
-    } whis$r_fill_63_;
-  } whis$r_fill_62_;
-} ;
- 
-
-#define whis$w_entflgs whis$r_fill_62_.whis$w_entflgs
-#define whis$v_et_tlib whis$r_fill_62_.whis$r_fill_63_.whis$v_et_tlib
-#define whis$v_et_err whis$r_fill_62_.whis$r_fill_63_.whis$v_et_err
-
+    };
+  };
+};
 	
 struct _get_unit_name {
   struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;

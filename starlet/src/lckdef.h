@@ -42,33 +42,15 @@ union _lckdef {
     unsigned lck$v_quecvt : 1;
     unsigned lck$v_bypass : 1;
     unsigned lck$v_fill_70_ : 2;
-  } lck$r_lckdef0;
+  };
   struct  {
     unsigned lck$v_deqall : 1;
     unsigned lck$v_cancel : 1;
     unsigned lck$v_invvalblk : 1;
     unsigned lck$v_fill_71_ : 5;
-  } lck$r_lckdef1;
+  };
 
-} LCKDEF;
- 
-#define lck$v_valblk lck$r_lckdef0.lck$v_valblk
-#define lck$v_convert lck$r_lckdef0.lck$v_convert
-#define lck$v_noqueue lck$r_lckdef0.lck$v_noqueue
-#define lck$v_syncsts lck$r_lckdef0.lck$v_syncsts
-#define lck$v_system lck$r_lckdef0.lck$v_system
-#define lck$v_noquota lck$r_lckdef0.lck$v_noquota
-#define lck$v_cvtsys lck$r_lckdef0.lck$v_cvtsys
-#define lck$v_recover lck$r_lckdef0.lck$v_recover
-#define lck$v_protect lck$r_lckdef0.lck$v_protect
-#define lck$v_nodlckwt lck$r_lckdef0.lck$v_nodlckwt
-#define lck$v_nodlckblk lck$r_lckdef0.lck$v_nodlckblk
-#define lck$v_expedite lck$r_lckdef0.lck$v_expedite
-#define lck$v_quecvt lck$r_lckdef0.lck$v_quecvt
-#define lck$v_bypass lck$r_lckdef0.lck$v_bypass
-#define lck$v_deqall lck$r_lckdef1.lck$v_deqall
-#define lck$v_cancel lck$r_lckdef1.lck$v_cancel
-#define lck$v_invvalblk lck$r_lckdef1.lck$v_invvalblk
+};
  
 #endif
  

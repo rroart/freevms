@@ -26,17 +26,17 @@ struct _tqe {
   union  {
     unsigned long tqe$l_pid;
     long tqe$l_fpc;
-  } tqe$r_pid_union;
+  };
   union  {
     struct  {
       void (*tqe$l_ast)(unsigned long);
       unsigned long tqe$l_astprm;
-    } tqe$r_ast_fields;
+    };
     struct {
-      unsigned long tqe$q_fr3;
-      unsigned long tqe$q_fr4;
-    } tqe$r_fr_fields;
-  } tqe$r_ast_union;
+      unsigned long tqe$l_fr3;
+      unsigned long tqe$l_fr4;
+    };
+  };
   unsigned long long tqe$q_time;
   unsigned long long tqe$q_delta;
   unsigned char tqe$b_rmod;
@@ -45,13 +45,6 @@ struct _tqe {
   unsigned int tqe$l_rqpid;
   unsigned int tqe$l_cputim;
 };
-
-#define tqe$l_pid tqe$r_pid_union.tqe$l_pid
-#define tqe$l_fpc tqe$r_pid_union.tqe$l_fpc
-#define tqe$q_fr3 tqe$r_ast_union.tqe$r_fr_fields.tqe$q_fr3
-#define tqe$q_fr4 tqe$r_ast_union.tqe$r_fr_fields.tqe$q_fr4
-#define tqe$l_astprm tqe$r_ast_union.tqe$r_ast_fields.tqe$l_astprm
-#define tqe$l_ast tqe$r_ast_union.tqe$r_ast_fields.tqe$l_ast
 
 #endif
  

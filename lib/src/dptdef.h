@@ -75,7 +75,7 @@ struct _dpt {
       unsigned char dpt$b_name_len;
       char dpt$t_name_str [15];
     };
-  } dpt$dptunion;
+  };
   union  {
     unsigned int dpt$l_ecolevel;
     struct  {

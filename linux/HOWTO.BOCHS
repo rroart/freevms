@@ -1,0 +1,36 @@
+So I do not forget, and until bochs works properly or plex86 do.
+
+http://bochs.sourceforge.net/doc/docbook/user/x1569.htm
+
+and
+
+http://www.linux.ie/pipermail/ilug/2002-January/041005.html
+
+My lilo.conf, run with lilo -r /mnt -v -C /lilo.conf:
+
+disk=/dev/loop1
+bios=0x80
+sectors=63
+heads=16
+cylinders=609
+partition=/dev/loop0
+start=63
+
+disk=/dev/hda
+bios=0x80
+sectors=63
+heads=16
+cylinders=609
+
+boot=/dev/loop1
+map=/boot/map
+install=/boot/boot.b
+read-only
+#append="mem=32M console=tty0 console=ttyS0"
+prompt
+timeout=50
+
+image=/boot/2.4.18
+        label=2418
+        root=/dev/hda1
+ 

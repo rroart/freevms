@@ -144,8 +144,8 @@ struct pcb {
     struct  {
       unsigned int pcb$l_lefc_0_swapped; 
       unsigned int pcb$l_lefc_1_swapped; 
-    } pcb$r_lefc_clusters_swapped;
-  } pcb$r_lefc_overlay_swapped;
+    };
+  };
   struct acb *pcb$l_astqfl_spk;      
   struct acb *pcb$l_astqbl_spk;      
   struct acb *pcb$l_astqfl_k;        
@@ -202,8 +202,8 @@ struct pcb {
       unsigned pcb$v_erdact : 1;  
       unsigned pcb$v_softsusp : 1; 
       unsigned pcb$v_preempted : 1; 
-    } pcb$r_fill_1_;
-  } pcb$r_fill_0_;
+    };
+  };
   union  {
     unsigned int pcb$l_sts2;        
     struct  {
@@ -228,8 +228,8 @@ struct pcb {
       unsigned pcb$v_single_threaded : 4; 
       unsigned pcb$v_rwast : 1;   
       unsigned pcb$v_soft_single_thread : 1; 
-    } pcb$r_fill_3_;
-  } pcb$r_fill_2_;
+    };
+  };
   unsigned int pcb$l_prisav;          
   unsigned int pcb$l_pribsav;         
   unsigned int pcb$l_authpri;         
@@ -250,12 +250,12 @@ struct pcb {
     struct  {
       int pcb$l_efc2p;            
       int pcb$l_efc3p;            
-    } pcb$r_cefc_overlay_1;
+    };
     struct  {                     
       unsigned short int pcb$w_pgflchar; 
       unsigned char pcb$b_pgflindex; 
-    } pcb$r_cefc_overlay_2;
-  } pcb$r_cefc_overlay;
+    };
+  };
   unsigned int pcb$l_pid;             
   union  {
     unsigned int pcb$l_epid;        
@@ -264,8 +264,8 @@ struct pcb {
       unsigned pcb$v_epid_node_idx : 8; 
       unsigned pcb$v_epid_node_seq : 2; 
       unsigned pcb$v_epid_wild : 1; 
-    } pcb$r_fill_5_;
-  } pcb$r_fill_4_;
+    };
+  };
   unsigned int pcb$l_eowner;          
   unsigned int pcb$l_aptcnt;          
   unsigned int pcb$l_mtxcnt;          
@@ -284,10 +284,10 @@ struct pcb {
       struct  {
 	unsigned short int pcb$w_mem; 
 	unsigned short int pcb$w_grp; 
-      } pcb$r_fill_7_;
-    } pcb$r_fill_6_;
+      };
+    };
     char pcb$$$_arb_fill_2 [60];    
-  } pcb$r_pcbarb;
+  };
   struct orb *pcb$l_orb;             
   unsigned int pcb$l_tmbu;            
   unsigned int pcb$l_home_rad;        
@@ -321,22 +321,22 @@ struct pcb {
     struct  {
       struct xscb *pcb$a_xscb_flink;
       struct xscb *pcb$a_xscb_blink;
-    } pcb$r_fill_9_;
-  } pcb$r_fill_8_;
+    };
+  };
   union  {
     unsigned long pcb$q_rmcb_que; 
     struct  {
       struct rmcb *pcb$a_rmcb_flink;
       struct rmcb *pcb$a_rmcb_blink;
-    } pcb$r_fill_11_;
-  } pcb$r_fill_10_;
+    };
+  };
   union  {
     unsigned long pcb$q_cd_que;  
     struct  {
       struct cde *pcb$a_cd_flink;
       struct cde *pcb$a_cd_blink;
-    } pcb$r_fill_13_;
-  } pcb$r_fill_12_;
+    };
+  };
   unsigned int pcb$l_dpc;             
   unsigned int pcb$l_cputime_ref;     
   unsigned int pcb$l_acc_waitime;     
@@ -348,8 +348,8 @@ struct pcb {
     struct  {
       unsigned pcb$v_fork : 1;    
       unsigned pcb$v_psx_flags_fill : 31;
-    } pcb$r_fill_15_;
-  } pcb$r_fill_14_;
+    };
+  };
   void (*pcb$l_psx_actrtn)(void);         
   unsigned long pcb$q_psx_actprm;  
   unsigned int pcb$l_kernel_counter;  
@@ -361,7 +361,7 @@ struct pcb {
   union  {
     unsigned int pcb$l_frewsle_param; 
     int pcb$l_pqb;                  
-  } pcb$r_pqb_overlay;
+  };
   unsigned int pcb$l_bufobj_cnt;      
   unsigned int pcb$l_noaudit;         
   unsigned int pcb$l_source_epid;     
@@ -370,8 +370,8 @@ struct pcb {
     struct  {
       struct rdpb *pcb$a_rdpb_flink;
       struct rdpb *pcb$a_rdpb_blink;
-    } pcb$r_fill_17_;
-  } pcb$r_fill_16_;
+    };
+  };
   unsigned long pcb$q_files_64;    
   long pcb$q_keep_in_ws;           
   long pcb$q_keep_in_ws2;          
@@ -388,16 +388,16 @@ struct pcb {
     struct  {
       unsigned pcb$v_event_no_flag : 1; 
       unsigned pcb$v_fill_20_ : 7;
-    } pcb$r_fill_19_;
-  } pcb$r_fill_18_;
+    };
+  };
   struct acb *pcb$l_postef_acb;      
   union  {
     unsigned long pcb$q_postef;  
     struct  {
       unsigned int pcb$l_postef1; 
       unsigned int pcb$l_postef2; 
-    } pcb$r_postef_clusters;
-  } pcb$r_postef_overlay;
+    };
+  };
   unsigned int pcb$l_swp_seq;         
   unsigned int pcb$l_swp_kt;          
   struct acb *pcb$l_im_astqfl_spk;   
@@ -415,7 +415,7 @@ struct pcb {
   union  {
     struct ktb *pcb$l_initial_ktb; 
     struct pcb *pcb$l_pcb;         
-  } pcb$r_pcb_iktb_overlay;
+  };
   char pcb$b_ktb_padding_1 [116];     
   void *pcb$l_ctx_waitq;              
 #ifdef INITIAL_POINTER_SIZE			 
@@ -440,7 +440,7 @@ struct pcb {
   unsigned int pcb$l_creator;         
   unsigned int pcb$l_lckrq;           
   char pcb$b_fill_21_ [4];
-} ;
+};
  
 struct ktb {
   struct ktb *ktb$l_sqfl;            
@@ -505,8 +505,8 @@ struct ktb {
       unsigned ktb$v_erdact : 1;  
       unsigned ktb$v_softsusp : 1; 
       unsigned ktb$v_preempted : 1; 
-    } ktb$r_fill_23_;
-  } ktb$r_fill_22_;
+    };
+  };
   union  {
     unsigned int ktb$l_sts2;        
     struct  {
@@ -529,8 +529,8 @@ struct ktb {
       unsigned ktb$v_notify : 1;  
       unsigned ktb$v_single_threaded : 4; 
       unsigned ktb$v_fill_36_ : 2;
-    } ktb$r_fill_25_;
-  } ktb$r_fill_24_;
+    };
+  };
   unsigned int ktb$l_prisav;          
   unsigned int ktb$l_pribsav;         
   unsigned int ktb$l_authpri;         
@@ -548,8 +548,8 @@ struct ktb {
       unsigned ktb$v_epid_node_idx : 8; 
       unsigned ktb$v_epid_node_seq : 2; 
       unsigned ktb$v_epid_wild : 1; 
-    } ktb$r_fill_27_;
-  } ktb$r_fill_26_;
+    };
+  };
   char ktb$b_pcb_padding_6 [8];       
   unsigned int ktb$l_mtxcnt;          
   char ktb$b_pcb_padding_7 [16];      
@@ -577,7 +577,7 @@ struct ktb {
   union  {
     struct pcb *ktb$l_pcb;         
     struct ktb *ktb$l_initial_ktb; 
-  } ktb$r_pcb_iktb_overlay;
+  };
   union  {
     unsigned int ktb$l_flags;       
     struct  {
@@ -586,12 +586,12 @@ struct ktb {
       unsigned ktb$v_single_thread_act : 4; 
       unsigned ktb$v_tolerant : 1; 
       unsigned ktb$v_soft_rad_affinity : 1; 
-    } ktb$r_fill_29_;
-  } ktb$r_fill_28_;
+    };
+  };
   union  {
     struct fred *ktb$l_fred;       
     struct fred *ktb$l_virpcb;     
-  } ktb$r_fred_overlay;
+  };
   void *ktb$l_per_kt_area;            
   struct acb *ktb$l_tquant_acb;      
   unsigned int ktb$l_tquant;          
@@ -603,22 +603,22 @@ struct ktb {
     struct  {
       unsigned int ktb$l_capabilities; 
       unsigned int ktb$l_affinities; 
-    } ktb$r_fill_31_;
-  } ktb$r_fill_30_;
+    };
+  };
   union  {
     unsigned long ktb$q_permanent_capabilities; 
     struct  {
       unsigned int ktb$l_permanent_capabilities; 
       unsigned int ktb$l_permanent_affinities; 
-    } ktb$r_fill_33_;
-  } ktb$r_fill_32_;
+    };
+  };
   union  {
     unsigned long ktb$q_saved_capabilities; 
     struct  {
       unsigned int ktb$l_saved_capabilities; 
       unsigned int ktb$l_saved_affinities; 
-    } ktb$r_fill_35_;
-  } ktb$r_fill_34_;
+    };
+  };
   unsigned int ktb$l_bias_cell;       
   unsigned int ktb$l_persona_id;      
   struct psb *ktb$ar_psb;            
@@ -640,6 +640,6 @@ struct ktb {
   char ktb$b_pcb_padding_15 [16];     
   unsigned int ktb$l_lckrq;           
   char ktb$b_fill_37_ [4];
-} ;
+};
  
 #endif 

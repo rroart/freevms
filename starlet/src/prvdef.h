@@ -97,7 +97,7 @@ typedef union _prvdef {
     unsigned prv$v_security		: 1;
 
     unsigned prv$v_fill_1		: 25;
-  } prv$r_prvdef_bits0;
+  };
 
   struct  {
     unsigned prv$v_fill_2		: 9;
@@ -105,16 +105,16 @@ typedef union _prvdef {
     unsigned prv$v_fill_3		: 3;
     unsigned prv$v_altpri		: 1;
     unsigned prv$v_fill_69_		: 2;
-  } prv$r_prvdef_bits1;
+  };
   struct  {
     unsigned int prv$l_l1_bits;
     unsigned int prv$l_l2_bits;
-  } prv$r_prvdef_bits2;
+  };
   struct  {
     unsigned prv$v_fill_4		: 5;
     unsigned prv$v_detach		: 1;
     unsigned prv$v_fill_70_		: 2;
-  } prv$r_prvdef_bits3;
+  };
 };
  
 typedef struct _prvdsp_bits {
