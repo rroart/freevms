@@ -204,6 +204,16 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
 int hwclkdone=1;
 #endif
 
+#if 0
+// this did not go well, for some reason
+  if (intr_blocked(IPL$_HWCLK))
+      return;
+
+  regtrap(REG_INTR, IPL$_HWCLK);
+
+  setipl(IPL$_HWCLK);
+#endif
+
   // on UP or primary SMP cpu:
   if (smp_processor_id()==0) {
   
