@@ -78,6 +78,11 @@ cd mm;
 		ln -s ../../freevms/rms/src/cache.h .;
 		ln -s ../../freevms/rms/src/update.c .;
 		ln -s ../../freevms/rms/src/access.c .;
+		ln -s ../../freevms/rms/src/cache.c .;
+		ln -s ../../freevms/rms/src/direct.c .;
+		ln -s ../../freevms/rms/src/device.c .;
+		ln -s ../../freevms/rms/src/phyvms.c .;
+		ln -s ../../freevms/rms/src/phyunix.c .;
 cd ..;
 
 cd drivers/block;

@@ -12,7 +12,7 @@
 
 
 
-struct dir$rec {
+struct dir$rec_not {
     vmsword dir$size;
     vmsword dir$verlimit;
     vmsbyte dir$flags;
@@ -20,7 +20,7 @@ struct dir$rec {
     char dir$name[1];
 };
 
-struct dir$ent {
+struct dir$ent_not {
     vmsword dir$version;
     struct _fiddef dir$fid;
 };

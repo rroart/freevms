@@ -30,7 +30,7 @@
 #include<linux/linkage.h>
 
 #include <stdio.h>
-#include <ctype.h>
+#include <linux/ctype.h>
 
 #define NO_DOLLAR
 #define RMS$INITIALIZE          /* used by rms.h to create templates */
@@ -51,6 +51,8 @@
 #include "../../freevms/starlet/src/xabfhcdef.h"
 #include "../../freevms/starlet/src/xabprodef.h"
 #include "../../freevms/lib/src/fh2def.h"
+#include "../../freevms/lib/src/fi2def.h"
+#include "../../freevms/lib/src/hm2def.h"
 #include "../../freevms/lib/src/vmstime.h"
 
 //#include "rms.h"
@@ -1029,7 +1031,7 @@ unsigned exe$display(struct _fabdef *fab)
 
     struct _fh2 *head = ifi_table[fab->fab$w_ifi]->wcf_fcb->head;
     unsigned short *pp = (unsigned short *) head;
-    struct IDENT *id = (struct IDENT *) (pp + head->fh2$b_idoffset);
+    struct _fi2 *id = (struct _fi2 *) (pp + head->fh2$b_idoffset);
     int ifi_no = fab->fab$w_ifi;
     if (ifi_no == 0 || ifi_no >= IFI_MAX) return RMS$_IFI;
     fab->fab$l_alq = VMSSWAP(head->fh2$w_recattr.fat$l_hiblk);

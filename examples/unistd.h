@@ -171,6 +171,8 @@
 #define __NR_$dlcefc 318
 #define __NR_$crembx 319
 #define __NR_$delmbx 320
+#define __NR_$mount  321
+#define __NR_$dismou 322
 
 #endif
 

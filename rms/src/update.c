@@ -21,15 +21,17 @@
 #include "../../freevms/starlet/src/xabfhcdef.h"
 #include "../../freevms/starlet/src/xabprodef.h"
 #include "../../freevms/lib/src/fh2def.h"
+#include "../../freevms/lib/src/fi2def.h"
+#include "../../freevms/lib/src/hm2def.h"
 #include "../../freevms/lib/src/vmstime.h"
 
 //#include "ssdef.h"
 #include "cache.h"
 #include "access.h"
 
-unsigned deaccesshead(struct VIOC *vioc,struct HEAD *head,unsigned idxblk);
+unsigned deaccesshead(struct VIOC *vioc,struct _fh2 *head,unsigned idxblk);
 unsigned accesshead(struct VCB *vcb,struct _fiddef *fid,unsigned seg_num,
-                    struct VIOC **vioc,struct HEAD **headbuff,
+                    struct VIOC **vioc,struct _fh2 **headbuff,
                     unsigned *retidxblk,unsigned wrtflg);
 unsigned getwindow(struct FCB * fcb,unsigned vbn,struct VCBDEV **devptr,
                    unsigned *phyblk,unsigned *phylen,struct _fiddef *hdrfid,
@@ -258,7 +260,7 @@ unsigned headmap_clear(struct VCBDEV *vcbdev,unsigned head_no)
 /* update_findhead() will locate a free header from indexf.sys */
 
 unsigned update_findhead(struct VCBDEV *vcbdev,unsigned *rethead_no,
-                         struct VIOC **retvioc,struct HEAD **headbuff,
+                         struct VIOC **retvioc,struct _fh2 **headbuff,
                          unsigned *retidxblk)
 {
     unsigned head_no = 0;
@@ -315,14 +317,14 @@ unsigned update_findhead(struct VCBDEV *vcbdev,unsigned *rethead_no,
 
 unsigned update_addhead(struct VCB *vcb,char *filename,struct _fiddef *back,
                      unsigned seg_num,struct _fiddef *fid,
-                     struct VIOC **vioc,struct HEAD **rethead,
+                     struct VIOC **vioc,struct _fh2 **rethead,
                      unsigned *idxblk)
 {
     register unsigned free_space = 0;
     register unsigned device,rvn,sts;
     unsigned head_no;
-    struct IDENT *id;
-    struct HEAD *head;
+    struct _fi2 *id;
+    struct _fh2 *head;
     struct VCBDEV *vcbdev = NULL;
     for (device = 0; device < vcb->devices; device++) {
         if (vcb->vcbdev[device].dev != NULL) {
@@ -358,7 +360,7 @@ unsigned update_addhead(struct VCB *vcb,char *filename,struct _fiddef *back,
     head->fh2$l_fileowner.uic$w_grp = 1;
     fid_copy(&head->fh2$w_fid,fid,0);
     if (back != NULL) fid_copy(&head->fh2$w_backlink,back,0);
-    id = (struct IDENT *) ((unsigned short *) head + 40);
+    id = (struct _fi2 *) ((unsigned short *) head + 40);
     memset(id->fi2$t_filenamext,' ',66);
     if (strlen(filename) < 20) {
         memset(id->fi2$t_filename,' ',20);
@@ -385,7 +387,7 @@ unsigned update_create(struct VCB *vcb,struct _fiddef *did,char *filename,
                        struct _fiddef *fid,struct FCB **fcb)
 {
     struct VIOC *vioc;
-    struct HEAD *head;
+    struct _fh2 *head;
     unsigned idxblk;
     register unsigned sts;
     sts = update_addhead(vcb,filename,did,0,fid,&vioc,&head,&idxblk);
@@ -403,7 +405,7 @@ unsigned update_extend(struct FCB *fcb,unsigned blocks,unsigned contig)
     register unsigned sts;
     struct VCBDEV *vcbdev;
     struct VIOC *vioc;
-    struct HEAD *head;
+    struct _fh2 *head;
     unsigned headvbn;
     struct _fiddef hdrfid;
     unsigned hdrseq;
@@ -432,7 +434,7 @@ unsigned update_extend(struct FCB *fcb,unsigned blocks,unsigned contig)
     if (vcbdev->free_clusters == 0 || head->fh2$b_map_inuse + 4 >=
                 head->fh2$b_acoffset - head->fh2$b_mpoffset) {
         struct VIOC *nvioc;
-        struct HEAD *nhead;
+        struct _fh2 *nhead;
         unsigned nidxblk;
         sts = update_addhead(fcb->vcb,"",&head->fh2$w_fid,head->fh2$w_seg_num+1,
               &head->fh2$w_ext_fid,&nvioc,&nhead,&nidxblk);
@@ -496,7 +498,7 @@ unsigned deallocfile(struct FCB *fcb)
     {
         unsigned rvn = fcb->rvn;
         unsigned headvbn = fcb->headvbn;
-        struct HEAD *head = fcb->head;
+        struct _fh2 *head = fcb->head;
         struct VIOC *headvioc = fcb->headvioc;
         do {
             unsigned ext_seg_num = 0;
@@ -646,7 +648,7 @@ unsigned access_create(struct VCB * vcb,struct FCB ** fcbadd,unsigned blocks) {
     if (wrtflg && ((vcb->status & VCB_WRITE) == 0)) return SS$_WRITLCK;
 
     sts = headmap_search(struct VCBDEV * vcbdev,struct _fiddef * fid,
-        struct VIOC ** vioc,struct HEAD ** headbuff,unsigned *retidxblk,) {
+        struct VIOC ** vioc,struct _fh2 ** headbuff,unsigned *retidxblk,) {
         fcb = cachesearch((void *) &vcb->fcb,filenum,0,NULL,NULL,&create);
         if (fcb == NULL) return SS$_INSFMEM;
         /* If not found make one... */

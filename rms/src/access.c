@@ -43,6 +43,8 @@
 #include "../../freevms/starlet/src/xabfhcdef.h"
 #include "../../freevms/starlet/src/xabprodef.h"
 #include "../../freevms/lib/src/fh2def.h"
+#include "../../freevms/lib/src/hm2def.h"
+#include "../../freevms/lib/src/scbdef.h"
 #include "../../freevms/lib/src/vmstime.h"
 
 #include "cache.h"
@@ -97,7 +99,7 @@ void fid_copy(struct _fiddef *dst,struct _fiddef *src,unsigned rvn)
 
 /* deaccesshead() release header from INDEXF... */
 
-unsigned deaccesshead(struct VIOC *vioc,struct HEAD *head,unsigned idxblk)
+unsigned deaccesshead(struct VIOC *vioc,struct _fh2 *head,unsigned idxblk)
 {
     if (head && idxblk) {
 	unsigned short check = checksum((vmsword *) head);
@@ -110,7 +112,7 @@ unsigned deaccesshead(struct VIOC *vioc,struct HEAD *head,unsigned idxblk)
 /* accesshead() find file or extension header from INDEXF... */
 
 unsigned accesshead(struct VCB *vcb,struct _fiddef *fid,unsigned seg_num,
-                    struct VIOC **vioc,struct HEAD **headbuff,
+                    struct VIOC **vioc,struct _fh2 **headbuff,
                     unsigned *retidxblk,unsigned wrtflg)
 {
     register unsigned sts;
@@ -130,7 +132,7 @@ unsigned accesshead(struct VCB *vcb,struct _fiddef *fid,unsigned seg_num,
     sts = accesschunk(vcbdev->idxfcb,idxblk,vioc,(char **) headbuff,
                       NULL,wrtflg ? 1 : 0);
     if (sts & 1) {
-        register struct HEAD *head = *headbuff;
+        register struct _fh2 *head = *headbuff;
         if (retidxblk) {
             if (wrtflg) {
                 *retidxblk = idxblk;
@@ -199,20 +201,20 @@ int wcb_compare(unsigned hashval,void *keyval,void *thiswcb)
 /* premap_indexf() called to physically read the header for indexf.sys
    so that indexf.sys can be mapped and read into virtual cache.. */
 
-struct HEAD *premap_indexf(struct FCB *fcb,unsigned *retsts)
+struct _fh2 *premap_indexf(struct FCB *fcb,unsigned *retsts)
 {
-    struct HEAD *head;
+    struct _fh2 *head;
     struct VCBDEV *vcbdev = rvn_to_dev(fcb->vcb,fcb->rvn);
     if (vcbdev == NULL) {
         *retsts = SS$_DEVNOTMOUNT;
         return NULL;
     }
-    head = (struct HEAD *) vmalloc(sizeof(struct HEAD));
+    head = (struct _fh2 *) vmalloc(sizeof(struct _fh2));
     if (head == NULL) {
         *retsts = SS$_INSFMEM;
     } else {
         *retsts = phyio_read(vcbdev->dev->handle,VMSLONG(vcbdev->home.hm2$l_ibmaplbn) +
-                             VMSWORD(vcbdev->home.hm2$w_ibmapsize),sizeof(struct HEAD),
+                             VMSWORD(vcbdev->home.hm2$w_ibmapsize),sizeof(struct _fh2),
                              (char *) head);
         if (!(*retsts & 1)) {
             vfree(head);
@@ -242,7 +244,7 @@ void *wcb_create(unsigned hashval,void *keyval,unsigned *retsts)
     } else {
         unsigned curvbn;
         unsigned extents = 0;
-        struct HEAD *head;
+        struct _fh2 *head;
         struct VIOC *vioc = NULL;
         register struct WCBKEY *wcbkey = (struct WCBKEY *) keyval;
         wcb->cache.objmanager = NULL;
@@ -743,7 +745,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
     register unsigned device,sts;
     struct VCB *vcb;
     struct VCBDEV *vcbdev;
-    if (sizeof(struct HOME) != 512 || sizeof(struct HEAD) != 512) return SS$_NOTINSTALL;
+    if (sizeof(struct _hm2) != 512 || sizeof(struct _fh2) != 512) return SS$_NOTINSTALL;
     vcb = (struct VCB *) vmalloc(sizeof(struct VCB) + (devices - 1) * sizeof(struct VCBDEV));
     if (vcb == NULL) return SS$_INSFMEM;
     vcb->status = 0;
@@ -759,7 +761,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
             sts = device_lookup(strlen(devnam[device]),devnam[device],1,&vcbdev->dev);
             if (!(sts & 1)) break;
             for (hba = 1; hba <= HOME_LIMIT; hba++) {
-                sts = phyio_read(vcbdev->dev->handle,hba,sizeof(struct HOME),(char *) &vcbdev->home);
+                sts = phyio_read(vcbdev->dev->handle,hba,sizeof(struct _hm2),(char *) &vcbdev->home);
                 if (!(sts & 1)) break;
                 if (hba == VMSLONG(vcbdev->home.hm2$l_homelbn) &&
                     memcmp(vcbdev->home.hm2$t_format,"DECFILE11B  ",12) == 0) break;
@@ -804,7 +806,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
                         sts = accessfile(vcb,&mapfid,&vcbdev->mapfcb,1);
                         if (sts & 1) {
                             struct VIOC *vioc;
-                            struct SCB *scb;
+                            struct _scbdef *scb;
                             sts = accesschunk(vcbdev->mapfcb,1,&vioc,(char **) &scb,NULL,0);
                             if (sts & 1) {
                                 if (scb->scb$w_cluster == vcbdev->home.hm2$w_cluster) {

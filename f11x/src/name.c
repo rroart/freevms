@@ -4,6 +4,7 @@
 
 #include <linux/fs.h>
 #include <linux/errno.h>
+#include <linux/ctype.h>
 #include "vms_fs.h"
 #include "vms_fs_i.h"
 
