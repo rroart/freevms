@@ -21,8 +21,8 @@
 CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -I. -I../../starlet/src -I../../lib/src
 
 
-STROBJ = str.o str__const.o str__is_string_class.o \
-	str__copy_fill.o str__resize.o \
+STROBJ = str__const.o str__is_string_class.o \
+	str__resize.o \
 	str_analyze_sdesc.o stranalyze_sdesc_64.o \
 	str_append.o str_blind_compare.o \
 	str_compare.o str_compare_eql.o str_concat.o \
@@ -54,6 +54,7 @@ LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 	libdate_time.o libdigit_sep.o libutil.o libanalyze_sdesc_64.o \
 	libasnmbx.o lib_char.o \
 	libcli.o \
+	liblocc.o \
 	sysgetmsg.o sysgeterrno.o
 
 SYSOBJ = sys__combine_date_time.o sys_asctim.o sys_bintim.o \
