@@ -16,9 +16,9 @@ obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \
 	    sysctl.o acct.o capability.o ptrace.o timer.o user.o \
 	    signal.o sys.o kmod.o context.o \
 	    syssetpri.o system_data_cells.o ipl.o syspcntrl.o timeschdl.o \
-	    pal/libqueue.a
+	    ../pal/libqueue.a
 
-pal/libqueue.a:
+../pal/libqueue.a:
 	(cd ../pal; cc -c queue.c)
 	ar cr $@ ../pal/queue.o
 	ranlib $@
