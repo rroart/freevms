@@ -177,19 +177,6 @@ void end_buffer_io_sync(struct buffer_head *bh, int uptodate)
 	put_bh(bh);
 }
 
-/*
- * The buffers have been marked clean and locked.  Just submit the dang
- * things.. 
- */
-static void write_locked_buffers(struct buffer_head **array, unsigned int count)
-{
-	do {
-		struct buffer_head * bh = *array++;
-		bh->b_end_io = end_buffer_io_sync;
-		//submit_bh(WRITE, bh);
-	} while (--count);
-}
-
 /* Call sync_buffers with wait!=0 to ensure that the call does not
  * return until all buffer writes have completed.  Sync() may return
  * before the writes have finished; fsync() may not.
@@ -374,86 +361,11 @@ out:
 	return ret;
 }
 
-/* After several hours of tedious analysis, the following hash
- * function won.  Do not mess with it... -DaveM
- */
-static void free_more_memory(void)
-{
-	zone_t * zone = contig_page_data.node_zonelists[GFP_NOFS & GFP_ZONEMASK].zones[0];
-	
-#if 0
-	balance_dirty();
-	wakeup_bdflush();
-#endif
-	try_to_free_pages(zone, GFP_NOFS, 0);
-	//run_task_queue(&tq_disk);
-	//	current->policy |= SCHED_YIELD;
-	__set_current_state(TASK_RUNNING);
-	//schedule();
-	SOFTINT_RESCHED_VECTOR;
-}
-
 void init_buffer(struct buffer_head *bh, bh_end_io_t *handler, void *private)
 {
 	bh->b_list = BUF_CLEAN;
 	bh->b_end_io = handler;
 	bh->b_private = private;
-}
-
-static void end_buffer_io_async(struct buffer_head * bh, int uptodate)
-{
-	static spinlock_t page_uptodate_lock = SPIN_LOCK_UNLOCKED;
-	unsigned long flags;
-	struct buffer_head *tmp;
-	struct page *page;
-
-	mark_buffer_uptodate(bh, uptodate);
-
-	/* This is a temporary buffer used for page I/O. */
-	page = bh->b_page;
-
-	if (!uptodate)
-		SetPageError(page);
-
-	/*
-	 * Be _very_ careful from here on. Bad things can happen if
-	 * two buffer heads end IO at almost the same time and both
-	 * decide that the page is now completely done.
-	 *
-	 * Async buffer_heads are here only as labels for IO, and get
-	 * thrown away once the IO for this page is complete.  IO is
-	 * deemed complete once all buffers have been visited
-	 * (b_count==0) and are now unlocked. We must make sure that
-	 * only the _last_ buffer that decrements its count is the one
-	 * that unlock the page..
-	 */
-	spin_lock_irqsave(&page_uptodate_lock, flags);
-	mark_buffer_async(bh, 0);
-	unlock_buffer(bh);
-	tmp = bh->b_this_page;
-	while (tmp != bh) {
-		if (buffer_async(tmp) && buffer_locked(tmp))
-			goto still_busy;
-		tmp = tmp->b_this_page;
-	}
-
-	/* OK, the async IO on this page is complete. */
-	spin_unlock_irqrestore(&page_uptodate_lock, flags);
-
-	/*
-	 * if none of the buffers had errors then we can set the
-	 * page uptodate:
-	 */
-	if (!PageError(page))
-		SetPageUptodate(page);
-
-	UnlockPage(page);
-
-	return;
-
-still_busy:
-	spin_unlock_irqrestore(&page_uptodate_lock, flags);
-	return;
 }
 
 /*
@@ -602,23 +514,6 @@ struct buffer_head * bread(kdev_t dev, int block, int size)
 	 return bh;
 }
 
-/*
- * Called when truncating a buffer on a page completely.
- */
-static void discard_buffer(struct buffer_head * bh)
-{
-	if (buffer_mapped(bh)) {
-	  //mark_buffer_clean(bh);
-		lock_buffer(bh);
-		clear_bit(BH_Uptodate, &bh->b_state);
-		clear_bit(BH_Mapped, &bh->b_state);
-		clear_bit(BH_Req, &bh->b_state);
-		clear_bit(BH_New, &bh->b_state);
-		//remove_from_queues(bh);
-		unlock_buffer(bh);
-	}
-}
-
 void set_bh_page (struct buffer_head *bh, struct page *page, unsigned long offset)
 {
 	bh->b_page = page;
@@ -641,22 +536,7 @@ EXPORT_SYMBOL(set_bh_page);
 
 int try_to_release_page(struct page * page, int gfp_mask)
 {
-	if (!PageLocked(page))
-		BUG();
-	
-	if (!page->mapping)
-		goto try_to_free;
-	if (!page->mapping->a_ops->releasepage)
-		goto try_to_free;
-	if (page->mapping->a_ops->releasepage(page, gfp_mask))
-		goto try_to_free;
-	/*
-	 * We couldn't release buffer metadata; don't even bother trying
-	 * to release buffers.
-	 */
 	return 0;
-try_to_free:	
-	return 0;//try_to_free_buffers(page, gfp_mask);
 }
 
 /*
@@ -668,46 +548,6 @@ try_to_free:
  */
 int discard_bh_page(struct page *page, unsigned long offset, int drop_pagecache)
 {
-	struct buffer_head *head, *bh, *next, **buffers;
-	unsigned int curr_off = 0;
-	int turns=0;
-
-	if (!PageLocked(page))
-		BUG();
-	if (!page->buffers)
-		return 1;
-
-	buffers = page->buffers;
-	bh = buffers[0];
-	do {
-		unsigned int next_off = curr_off + bh->b_size;
-		turns++;
-		next = buffers[turns];
-
-		/*
-		 * is this block fully flushed?
-		 */
-		if (offset <= curr_off)
-			discard_buffer(bh);
-		curr_off = next_off;
-		bh = next;
-	} while (bh);
-
-	/*
-	 * subtle. We release buffer-heads only if this is
-	 * the 'final' flushpage. We have invalidated the get_block
-	 * cached value unconditionally, so real IO is not
-	 * possible anymore.
-	 *
-	 * If the free doesn't work out, the buffers can be
-	 * left around - they just turn into anonymous buffers
-	 * instead.
-	 */
-	if (!offset) {
-		if (!try_to_release_page(page, 0))
-			return 0;
-	}
-
 	return 1;
 }
 
@@ -1883,44 +1723,6 @@ fail:
 	return err;
 }
 
-static int sync_page_buffers(struct buffer_head *head)
-{
-	struct buffer_head * bh = head;
-	int tryagain = 0;
-
-	do {
-		if (!buffer_dirty(bh) && !buffer_locked(bh))
-			continue;
-
-		/* Don't start IO first time around.. */
-		if (!test_and_set_bit(BH_Wait_IO, &bh->b_state))
-			continue;
-
-		/* Second time through we start actively writing out.. */
-		if (test_and_set_bit(BH_Lock, &bh->b_state)) {
-			if (!test_bit(BH_launder, &bh->b_state))
-				continue;
-			//wait_on_buffer(bh);
-			tryagain = 1;
-			continue;
-		}
-
-		if (!atomic_set_buffer_clean(bh)) {
-			unlock_buffer(bh);
-			continue;
-		}
-
-		//__mark_buffer_clean(bh);
-		get_bh(bh);
-		set_bit(BH_launder, &bh->b_state);
-		bh->b_end_io = end_buffer_io_sync;
-		//submit_bh(WRITE, bh);
-		tryagain = 0;
-	} while ((bh = bh->b_this_page) != head);
-
-	return tryagain;
-}
-
 /*
  * Can the buffer be thrown out?
  */
@@ -2002,7 +1804,6 @@ DECLARE_WAIT_QUEUE_HEAD(bdflush_wait);
 
 int block_sync_page(struct page *page)
 {
-  //run_task_queue(&tq_disk);
 	return 0;
 }
 
