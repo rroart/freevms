@@ -916,7 +916,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       dir.d_name[(*reslen)++]=';';
       dir.d_name[(*reslen)++]='1';
       bcopy(dir.d_name,resdsc->dsc$a_pointer,*reslen);
-      printk("resdsc %s %x\n",resdsc->dsc$a_pointer,*reslen);
+      //printk("resdsc %s %x\n",resdsc->dsc$a_pointer,*reslen);
     }
     if (dir.d_ino!=2) {
       fib->fib$w_fid_num=head->i_dev;
@@ -1068,11 +1068,11 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
 	f->fat$b_rtype=FAT$C_SEQUENTIAL << 4;
 	f->fat$b_rattrib=0;
 	f->fat$w_rsize=0;
-	printk("readat %x %x\n",head->i_blocks,head->i_size%512);
+	//printk("readat %x %x\n",head->i_blocks,head->i_size%512);
 	f->fat$l_hiblk=VMSSWAP((1+head->i_blocks));
 	f->fat$l_efblk=VMSSWAP((1+head->i_size/512));
 	f->fat$w_ffbyte=head->i_size%512;
-	printk("readat %x %x %x %x\n",head->i_size,VMSSWAP(f->fat$l_efblk),f->fat$w_ffbyte,VMSSWAP(f->fat$l_hiblk));
+	//printk("readat %x %x %x %x\n",head->i_size,VMSSWAP(f->fat$l_efblk),f->fat$w_ffbyte,VMSSWAP(f->fat$l_hiblk));
 	f->fat$b_bktsize=0;
 	f->fat$b_vfcsize=0;
 	f->fat$w_maxrec=0;
@@ -1149,10 +1149,10 @@ void exttwo_write_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef 
     case ATR$C_RECATTR:
       {
 	struct _fatdef * f=atrp->atr$l_addr;
-	printk("writeat %x %x\n",head->i_size,head->i_blocks);
+	//printk("writeat %x %x\n",head->i_size,head->i_blocks);
 	head->i_blocks=VMSSWAP(f->fat$l_hiblk)-1;
 	head->i_size=(VMSSWAP(f->fat$l_efblk)<<9)-512+f->fat$w_ffbyte;
-	printk("writeat %x %x %x %x\n",head->i_size,VMSSWAP(f->fat$l_efblk),f->fat$w_ffbyte,VMSSWAP(f->fat$l_hiblk));
+	//printk("writeat %x %x %x %x\n",head->i_size,VMSSWAP(f->fat$l_efblk),f->fat$w_ffbyte,VMSSWAP(f->fat$l_hiblk));
 	//memcpy(atrp->atr$l_addr,&head->fh2$w_recattr,atrp->atr$w_size);
       }
       break;
