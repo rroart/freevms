@@ -936,7 +936,7 @@ unsigned exe$get(struct _rabdef *rab)
 unsigned exe$put(struct _rabdef *rab)
 {
   struct _iosb iosb={0};
-  char *buffer,*recbuff;
+  char buffer[512],*recbuff;
   struct dsc$descriptor fibdsc;
   struct _atrdef atr[2];
   struct _fatdef recattr;
@@ -992,17 +992,19 @@ unsigned exe$put(struct _rabdef *rab)
 		 &fibdsc,0,0,0,atr,0);
   sts = iosb.iosb$w_status;
 
+#if 0
   block = VMSSWAP(recattr.fat$l_efblk);
   offset = VMSWORD(recattr.fat$w_ffbyte);
+#endif
 
-#if 0
+#if 1
   offset = rab->rab$w_rfa[2] % 512;
   block = (rab->rab$w_rfa[1] << 16) + rab->rab$w_rfa[0];
   if (block == 0) block = 1;
 #endif
 
-  buffer=recbuff;
-  sts = sys$qiow(0,getchan(getvcb()),IO$_WRITEVBLK,&iosb,0,0,
+  //buffer=recbuff;
+  sts = sys$qiow(0,getchan(getvcb()),IO$_READVBLK,&iosb,0,0,
 		 buffer,512,block,0,0,0);
   sts = iosb.iosb$w_status;
   blocks=1;
@@ -1061,11 +1063,15 @@ unsigned exe$put(struct _rabdef *rab)
     }
     sts = deaccesschunk(block,blocks,1);
     if ((sts & 1) == 0) return sts;
-    block += blocks;
+    sts = sys$qiow(0,getchan(getvcb()),IO$_WRITEVBLK,&iosb,0,0,
+		   buffer,512,block,0,0,0);
+    sts = iosb.iosb$w_status;
+    //block += blocks;
     if (cpylen >= reclen && delim == 0) {
       break;
     } else {
-      sts = sys$qiow(0,getchan(getvcb()),IO$_WRITEVBLK,&iosb,0,0,
+      block++;
+      sts = sys$qiow(0,getchan(getvcb()),IO$_READVBLK,&iosb,0,0,
 		     buffer,512,block,0,0,0);
       sts = iosb.iosb$w_status;
       blocks=1;
@@ -1077,13 +1083,15 @@ unsigned exe$put(struct _rabdef *rab)
   block += offset / 512;
   offset %= 512;
 
-  recattr.fat$l_efblk = VMSSWAP(block);
-  recattr.fat$w_ffbyte = VMSWORD(offset);
+  if( (block > VMSSWAP(recattr.fat$l_efblk)) || ( (block == VMSSWAP(recattr.fat$l_efblk)) && (offset > VMSWORD(recattr.fat$w_ffbyte)))) {
+    recattr.fat$l_efblk = VMSSWAP(block);
+    recattr.fat$w_ffbyte = VMSWORD(offset);
 
-  sts = sys$qiow(0,getchan(getvcb()),IO$_MODIFY,&iosb,0,0,
-		 &fibdsc,0,0,0,atr,0);
+    sts = sys$qiow(0,getchan(getvcb()),IO$_MODIFY,&iosb,0,0,
+		   &fibdsc,0,0,0,atr,0);
 
-  sts = iosb.iosb$w_status;
+    sts = iosb.iosb$w_status;
+  }
 
   rab->rab$w_rfa[0] = block & 0xffff;
   rab->rab$w_rfa[1] = block >> 16;
