@@ -220,21 +220,33 @@ fail_nomem:
 
 static inline int dup_phd(struct _pcb * p, struct _pcb * old) {
   p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
-  bcopy(old->pcb$l_phd,p->pcb$l_phd,sizeof(struct _phd));
-  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
-  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
-  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
-  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-  bzero(((void*)p->pcb$l_phd->phd$l_wslist),2048);
-  bzero(((void*)p->pcb$l_phd->phd$l_wslock),2048);
-  bzero(((void*)p->pcb$l_phd->phd$l_wsdyn),2048);
-  p->pcb$l_phd->phd$l_wsnext=0;
-  p->pcb$l_phd->phd$l_wslast=511;
-  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
-  if (old->pcb$l_phd->phd$l_pst_base_offset)
-    bcopy(old->pcb$l_phd->phd$l_pst_base_offset,p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+  if (old->pcb$l_phd)
+    bcopy(old->pcb$l_phd,p->pcb$l_phd,sizeof(struct _phd));
   else
-    bzero(((void*)p->pcb$l_phd->phd$l_pst_base_offset),PROCSECTCNT*sizeof(struct _secdef));
+    bzero(p->pcb$l_phd,sizeof(struct _phd));
+#ifdef CONFIG_MM_VMS
+  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
+  if (old->pcb$l_phd) {
+    if (old->pcb$l_phd->phd$l_wslist) {
+      p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
+      bcopy(old->pcb$l_phd->phd$l_wslist,((void*)p->pcb$l_phd->phd$l_wslist),2048);
+    }
+    if (old->pcb$l_phd->phd$l_wslock) {
+      p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
+      bcopy(old->pcb$l_phd->phd$l_wslock,((void*)p->pcb$l_phd->phd$l_wslock),2048);
+    }
+    if (old->pcb$l_phd->phd$l_wsdyn) {
+      p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
+      bcopy(old->pcb$l_phd->phd$l_wsdyn,((void*)p->pcb$l_phd->phd$l_wsdyn),2048);
+    }
+    //p->pcb$l_phd->phd$l_wsnext=0;
+    //p->pcb$l_phd->phd$l_wslast=511;
+    if (old->pcb$l_phd->phd$l_pst_base_offset) {
+      p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
+      bcopy(old->pcb$l_phd->phd$l_pst_base_offset,p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+    }
+  }
+#endif
 }
 
 
@@ -422,7 +434,6 @@ static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
 
 	down_write(&oldmm->mmap_sem);
 	retval = dup_mmap(mm);
-	dup_phd(tsk,current);
 #ifdef CONFIG_MM_VMS
 	retval = dup_stuff(mm,tsk->pcb$l_phd);
 #endif
@@ -749,31 +760,31 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	INIT_LIST_HEAD(&p->local_pages);
 
+#if 0
 	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
-	bzero(p->pcb$l_phd,sizeof(struct _phd));
+	if (current->pcb$l_phd)
+	  bcopy(current->pcb$l_phd,p->pcb$l_phd,sizeof(struct _phd));
+	else
+	  bzero(p->pcb$l_phd,sizeof(struct _phd));
 
 #ifdef CONFIG_MM_VMS
 	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
 	{
-	  struct _rde * rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
-	  bzero(rde,sizeof(struct _rde));
 	  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
-	  //insque(rde,p->pcb$l_phd->phd$ps_p0_va_list_flink);
-	  rde->rde$ps_start_va=0x1000;
-	  rde->rde$l_region_size=0x1000;
 	  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
 	  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
 	  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
 	  bzero((void*)p->pcb$l_phd->phd$l_wslist,2048);
 	  bzero((void*)p->pcb$l_phd->phd$l_wslock,2048);
 	  bzero((void*)p->pcb$l_phd->phd$l_wsdyn,2048);
-	  p->pcb$l_phd->phd$l_wsnext=0;
-	  p->pcb$l_phd->phd$l_wslast=511;
+	  //p->pcb$l_phd->phd$l_wsnext=0;
+	  //p->pcb$l_phd->phd$l_wslast=511;
 	  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
 	  bzero((void*)p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
-	  p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
-	  p->pcb$l_phd->phd$l_pst_free=0;
+	  //p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
+	  //p->pcb$l_phd->phd$l_pst_free=0;
 	}
+#endif
 #endif
 
 	retval = -ENOMEM;
@@ -784,8 +795,11 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 		goto bad_fork_cleanup_files;
 	if (copy_sighand(clone_flags, p))
 		goto bad_fork_cleanup_fs;
+	dup_phd(p,current);
 	if (copy_mm(clone_flags, p))
 		goto bad_fork_cleanup_sighand;
+	//printk("phd %x %x %x\n",tsk,tsk->pid,tsk->pcb$l_phd);
+	//printk("phd %x %x %x\n",current,current->pid,current->pcb$l_phd);
 	retval = copy_thread(0, clone_flags, stack_start, stack_size, p, regs);
 	if (retval)
 		goto bad_fork_cleanup_mm;
