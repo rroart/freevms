@@ -360,7 +360,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 #endif
 	    if (rde==0) printk("vma0 address %x\n",address);
 	    //printk(" i pstl sec window vbn rde %x %x %x %x %x %x\n",index,pstl,sec,window,vbn,rde);
-	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+vbn;
+	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+(vbn>>3);
 	    //printk(" offs %x ",offset);
 	    //page_cache_read(window, offset);
 	    //file->f_dentry->d_inode->i_mapping->a_ops->readpage(file, page);
@@ -759,7 +759,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    unsigned long vbn=sec->sec$l_vbn;
 	    struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	    unsigned long offset;// in PAGE_SIZE units
-	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+vbn;
+	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+(vbn>>3);
 
 	    pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
 	    mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
