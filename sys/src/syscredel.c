@@ -16,6 +16,7 @@
 #include <rdedef.h>
 #include <ssdef.h>
 #include <va_rangedef.h>
+#include <vmspte.h>
 
 // mmg$credel
 // mmg$crepag
@@ -84,13 +85,6 @@ asmlinkage int exe$cretva (struct _va_range *inadr, struct _va_range *retadr, un
   struct _pcb * p=current;
   struct _rde * rde;
   unsigned long numpages=(last-first)/PAGE_SIZE;
-#if 0
-  rde=vmalloc(sizeof(struct _rde));
-  bzero(rde,sizeof(struct _rde));
-  rde->rde$pq_start_va=first;
-  rde->rde$q_region_size=last-first;
-  insrde(rde,&p->pcb$l_phd->phd$ps_p0_va_list_flink);
-#endif
   mmg$credel(acmode, first, last, mmg$crepag, inadr, retadr, acmode, p, numpages);
 }
 
@@ -212,6 +206,20 @@ int mmg$fast_create(struct _pcb * p, struct _rde *rde, void * start_va, void * e
     newpte=prot_pte|0;//tmp;
     mmg$crepag(0,tmp,0,+PAGE_SIZE,0,newpte);
     tmp+=PAGE_SIZE;
+  }
+}
+
+int mmg$fast_create_gptx(struct _pcb * p, struct _rde *rde, void * start_va, void * end_va, unsigned long pages, unsigned long prot_pte) {
+  unsigned long page;
+  unsigned long tmp=start_va;
+  struct _mypte newpte;
+
+  newpte.pte$l_all=prot_pte;
+
+  for(page=0;page<pages;page++) {
+    mmg$crepag(0,tmp,0,+PAGE_SIZE,0,*(unsigned long *)&newpte);
+    tmp+=PAGE_SIZE;
+    newpte.pte$v_gptx++;
   }
 }
 
