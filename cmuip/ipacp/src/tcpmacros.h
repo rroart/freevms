@@ -142,12 +142,20 @@ MACRO
 	    EXTERNAL ROUTINE NAME  %IF NOT %NULL(MODIF) %THEN : MODIF %FI;
 	%FI
     %,
+#endif
 	   
 // Write a message to the console operator
 
-    OPR$FAO(CST) =
-	BEGIN
-	$QEXTR(OPR_FAO,NOVALUE)
+#define OPR$FAO printk
+#define ERROR$FAO printk
+#define WARN$FAO printk
+#define FATAL$FAO printk
+#define Fatal_Error printk
+
+#if 0
+static    OPR$FAO(CST, ...) 
+{
+  extern void OPR_FAO();
 	%IF %NULL(%REMAINING) %THEN
 	    OPR_FAO(%ASCID %STRING(CST));
 	%ELSE
