@@ -334,7 +334,7 @@ void mb$finishread(struct _ucb * u) {
     short func = i->irp$l_func;
     int retstatus=SS$_NORMAL;
 
-    if ((func & IO$M_STREAM)==0) {
+    if (func & IO$M_STREAM) {
       if (msg->mmb$w_datasize < i->irp$l_bcnt)
 	read_status=read_more;
       if (msg->mmb$w_datasize > i->irp$l_bcnt)
