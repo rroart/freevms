@@ -229,6 +229,47 @@ static void validate_mm(struct mm_struct * mm) {
 #define validate_mm(mm) do { } while (0)
 #endif
 
+#if 0
+static int vma_merge(struct mm_struct * mm, struct vm_area_struct * prev,
+		     rb_node_t * rb_parent, unsigned long addr, unsigned long end, unsigned long vm_flags)
+{
+	spinlock_t * lock = &mm->page_table_lock;
+	if (prev->vm_end == addr && can_vma_merge(prev, vm_flags)) {
+		struct vm_area_struct * next;
+
+		spin_lock(lock);
+		prev->vm_end = end;
+		next = prev->vm_next;
+		if (next && prev->vm_end == next->vm_start && can_vma_merge(next, vm_flags)) {
+			prev->vm_end = next->vm_end;
+			__vma_unlink(mm, next, prev);
+			spin_unlock(lock);
+
+			mm->map_count--;
+			kmem_cache_free(vm_area_cachep, next);
+			return 1;
+		}
+		spin_unlock(lock);
+		return 1;
+	}
+
+	prev = prev->vm_next;
+	if (prev) {
+ merge_next:
+		if (!can_vma_merge(prev, vm_flags))
+			return 0;
+		if (end == prev->vm_start) {
+			spin_lock(lock);
+			prev->vm_start = addr;
+			spin_unlock(lock);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+#endif
+
 unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned long len,
 	unsigned long prot, unsigned long flags, unsigned long pgoff)
 {
@@ -264,6 +305,7 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 	if (addr & ~PAGE_MASK)
 		return addr;
 
+#if 0
 munmap_back2:
 	//vma = find_vma_prepare(mm, addr, &prev, &rb_link, &rb_parent);
 	vma = find_vma_prev(current->pcb$l_phd, addr, &prev);
@@ -272,17 +314,7 @@ munmap_back2:
 			return -ENOMEM;
 		goto munmap_back2;
 	}
-
-	inadr.va_range$ps_start_va=addr;
-	inadr.va_range$ps_end_va=addr+len;
-	prot=prot; //translate later?
-	flags=flags; //translate later?
-
-	if (file)
-	  exe$crmpsc(&inadr,0,0,flags,0,0,/*(unsigned short int)*/file,0,pgoff,prot,0);
-	else
-	  exe$cretva(&inadr,0,0);
-	return addr;
+#endif
 
 	/* Do simple checking here so the lower-level routines won't have
 	 * to. we assume access permissions have been handled by the open
@@ -362,10 +394,26 @@ munmap_back:
 
 	/* Can we just expand an old anonymous mapping? */
 #if 0
-	if (!file && !(rde$l_flags & VM_SHARED) && rb_parent)
+	if (!file && !(rde$l_flags & VM_SHARED) && vma /*rb_parent*/)
 		if (vma_merge(mm, prev, rb_parent, addr, addr + len, rde$l_flags))
 			goto out;
 #endif
+
+	inadr.va_range$ps_start_va=addr;
+	inadr.va_range$ps_end_va=addr+len;
+	prot=prot; //translate later?
+	flags=flags; //translate later?
+
+	if (file) {
+	  exe$crmpsc(&inadr,0,0,flags,0,0,/*(unsigned short int)*/file,0,pgoff,*(unsigned long*)&protection_map[rde$l_flags & 0x0f],rde$l_flags);
+	} else {
+	  struct _rde * rde;
+	  exe$cretva(&inadr,0,0);
+	  rde=mmg$lookup_rde_va(addr,current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+	  rde->rde$l_flags=rde$l_flags;
+	  rde->rde$r_regprot.regprt$l_region_prot = *(unsigned long*)&protection_map[rde$l_flags & 0x0f];
+	}
+	return addr;
 
 	/* Determine the object being mapped and call the appropriate
 	 * specific mapper. the address has already been validated, but
@@ -619,6 +667,7 @@ static struct _rde * unmap_fixup(struct mm_struct *mm,
 	  //area->vm_pgoff += (end - area->rde$pq_start_va) >> PAGE_SHIFT;
 		/* same locking considerations of the above case */
 		area->rde$pq_start_va = end;
+		area->rde$q_region_size -= len;
 		lock_vma_mappings(area);
 		spin_lock(&mm->page_table_lock);
 	} else {
@@ -629,7 +678,7 @@ static struct _rde * unmap_fixup(struct mm_struct *mm,
 
 		//mpnt->vm_mm = area->vm_mm;
 		mpnt->rde$pq_start_va = end;
-		mpnt->rde$q_region_size = area->rde$q_region_size;
+		mpnt->rde$q_region_size = area->rde$q_region_size - len;
 		mpnt->rde$r_regprot.regprt$l_region_prot = area->rde$r_regprot.regprt$l_region_prot;
 		mpnt->rde$l_flags = area->rde$l_flags;
 		//mpnt->vm_raend = 0;
@@ -914,6 +963,7 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
 #endif
 
 	//vma_link(mm, vma, prev, rb_link, rb_parent);
+	insrde(vma,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 
 out:
 	mm->total_vm += len >> PAGE_SHIFT;
@@ -965,8 +1015,10 @@ void exit_mmap(struct mm_struct * mm)
 	flush_tlb_mm(mm);
 
 	/* This is just debugging */
+#if 0
 	if (mm->map_count)
 		BUG();
+#endif
 
 	clear_page_tables(mm, FIRST_USER_PGD_NR, USER_PTRS_PER_PGD);
 }
