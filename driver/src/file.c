@@ -5,22 +5,24 @@
 
 // This is supposed to be a file driver
 
-#include<crbdef.h>
+#include<aqbdef.h>
 #include<cdtdef.h>
-#include<ddtdef.h>
-#include<dptdef.h>
-#include<fdtdef.h>
-#include<pdtdef.h>
-#include<irpdef.h>
-#include<ucbdef.h>
+#include<crbdef.h>
 #include<ddbdef.h>
-#include<ipldef.h>
-#include<dyndef.h>
-#include<ssdef.h>
-#include<iodef.h>
+#include<ddtdef.h>
 #include<devdef.h>
-#include<system_data_cells.h>
+#include<dptdef.h>
+#include<dyndef.h>
+#include<fdtdef.h>
+#include<iodef.h>
 #include<ipl.h>
+#include<ipldef.h>
+#include<irpdef.h>
+#include<pdtdef.h>
+#include<ssdef.h>
+#include<system_data_cells.h>
+#include<ucbdef.h>
+#include<vcbdef.h>
 #include<linux/vmalloc.h>
 
 struct _fdt fdt_file = {
@@ -31,34 +33,51 @@ struct _fdt fdt_file = {
 struct _irp * fglobali;
 struct _ucb * fglobalu;
 
-void fl_isr (void) {
+void fl_isr (struct _irp * i) {
+  int sts;
   void (*func)(void *,void *);
-  struct _irp * i;
-  struct _ucb * u;
+  unsigned handle=i->irp$l_ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count;
+  unsigned block=i->irp$l_qio_p3;
+  unsigned length=i->irp$l_qio_p2;
+  char *buffer=i->irp$l_qio_p1;
 
+#if 0
   if (intr_blocked(20))
     return;
   regtrap(REG_INTR,20);
   setipl(20);
-  printk("isr\n");
+#endif
+  //printk("isr\n");
+
+  if (i==0) {
+    
+  }
+
+  if (i->irp$v_fcode==IO$_READLBLK) {
+
+    sts = phyio_read(handle,block,length,buffer);
+
+  } else {
+
+    sts = phyio_write(handle,block,length,buffer);
+
+  }
 
   /* have to do this until we get things more in order */
-  i=fglobali;
-  u=fglobalu;
 
-  func=u->ucb$l_fpc;
-  func(i,u);
-  myrei();
+  func=i->irp$l_ucb->ucb$l_fpc;
+  func(i,i->irp$l_ucb);
+  //  myrei();
 }
 
 void  file_startio2 (struct _irp * i, struct _ucb * u);
 void  file_startio3 (struct _irp * i, struct _ucb * u);
 
 void  file_startio (struct _irp * i, struct _ucb * u) { 
+  int sts;
   static int first=0;
-  signed long long step1=-10000000;
-
-  printk("times %x %x\n",u->ucb$b_second_time_in_startio,u->ucb$b_third_time_in_startio);
+  signed long long step1=-1000000;
+  //printk("times %x %x\n",u->ucb$b_second_time_in_startio,u->ucb$b_third_time_in_startio);
   //  { int j; for(j=100000000;j;j--);}
 
 #if 0
@@ -72,18 +91,19 @@ void  file_startio (struct _irp * i, struct _ucb * u) {
   first++;
 #endif
 
-  printk("firsttime %x %x\n",i,u);
+  //printk("firsttime %x %x\n",i,u);
   fglobali=i;
   fglobalu=u;
 
   u->ucb$b_second_time_in_startio=1;
+
   ioc$wfikpch(file_startio2,0,i,current,u,2,0);
-  exe$setimr(0, &step1, fl_isr,0,0);
+  exe$setimr(0, &step1, fl_isr,i,0);
   return;
 }
 
 void  file_startio2 (struct _irp * i, struct _ucb * u) { 
-  printk("secondtime\n");
+  //printk("secondtime\n");
 
   u->ucb$l_fpc=file_startio3;
   exe$iofork(i,u);
@@ -91,7 +111,7 @@ void  file_startio2 (struct _irp * i, struct _ucb * u) {
 }
 
 void  file_startio3 (struct _irp * i, struct _ucb * u) { 
-  printk("thirdtime %x %x\n",i,u);
+  //printk("thirdtime %x %x\n",i,u);
   ioc$reqcom(SS$_NORMAL,0,u);
   return;
 };
