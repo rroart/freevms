@@ -732,8 +732,8 @@ void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
   *retsts=SS$_NORMAL;
   if (inode->i_ino!=2) return fcb;
 
-  struct _fcb *fcb4 = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
-  bzero(fcb,fcb4,sizeof(struct _fcb));
+  fcb4 = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
+  bcopy(fcb,fcb4,sizeof(struct _fcb));
   if (fcb == NULL) {
     if (retsts) *retsts = SS$_INSFMEM;
     return;
