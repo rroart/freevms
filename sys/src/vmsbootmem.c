@@ -289,6 +289,7 @@ static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 	page++;
 	for (i = 1; i < idx; i++, page++) { // skip physical 0
 	  if (!PageReserved(page)) {
+	    sch$gl_freecnt++;
 	    if (prev) {
 	      prev->pfn$l_flink=page;
 	    } else {

@@ -12,17 +12,17 @@ O_TARGET := mm.o
 export-objs := shmem.o filemap.o
 
 obj-y	 := memory.o mmap.o filemap.o mprotect.o mlock.o mremap.o \
-	    vmalloc.o swap.o vmscan.o page_io.o \
-	    swap_state.o swapfile.o numa.o oom_kill.o \
-	    shmem.o
+	    vmalloc.o page_io.o \
+	    numa.o oom_kill.o \
+	    shmem.o swapfile.o swap.o swap_state.o
 
 obj-$(CONFIG_HIGHMEM) += highmem.o
 
 ifneq ($(CONFIG_MM_VMS),y)
-obj-y += page_alloc.o bootmem.o slab.o
+obj-y += page_alloc.o bootmem.o slab.o vmscan.o
 endif
 
 obj-$(CONFIG_MM_VMS) += memoryalc.o vmsbootmem.o allocpfn.o ptalloc.o \
-			vmsslab.o
+			vmsslab.o swapper.o wrtmfypag.o
 
 include $(TOPDIR)/Rules.make

@@ -18,6 +18,7 @@ signed long mmg$allocpfn(void) {
   //  p->pfn$l_refcnt=0;
   if (p->pfn$l_refcnt)
     panic("refcnt\n");
+  sch$gl_freecnt--;
   return (((unsigned long)p-(unsigned long)mem_map)/sizeof(struct _pfn));
 }
 
@@ -48,6 +49,7 @@ signed long mmg$allocontig(unsigned long num) {
 
   if (p->pfn$l_refcnt) // do more 
     panic("refcnt\n");
+  sch$gl_freecnt-=num;
   return (((unsigned long)first-(unsigned long)mem_map)/sizeof(struct _pfn));
 }
 
@@ -60,6 +62,7 @@ signed long mmg$dallocpfn(unsigned long pfn) {
   if (mem_map[pfn].pfn$l_flink) panic("dalloc\n");
   ((struct _pfn *)pfn$al_tail)->pfn$l_flink=&mem_map[pfn];
   pfn$al_tail=&mem_map[pfn];
+  sch$gl_freecnt++;
 }
 
 /* at least task_struct need to be on a 8k/16k aligned va */
@@ -92,6 +95,7 @@ signed long mmg$allocontig_align(unsigned long num) {
 
   if (p->pfn$l_refcnt) // do more 
     panic("refcnt\n");
+  sch$gl_freecnt-=num;
   return (((unsigned long)first-(unsigned long)mem_map)/sizeof(struct _pfn));
 }
 

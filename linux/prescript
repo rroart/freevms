@@ -63,6 +63,8 @@ cd mm;
 		ln -s ../../freevms/sys/src/vmsslab.c .;
 		ln -s ../../freevms/sys/src/allocpfn.c .;
 		ln -s ../../freevms/sys/src/ptalloc.c .;
+		ln -s ../../freevms/sys/src/swapper.c .;
+		ln -s ../../freevms/sys/src/wrtmfypag.c .;
 cd ..;
 
 cd drivers/block;
