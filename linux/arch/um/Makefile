@@ -1,9 +1,9 @@
-ARCH_DIR = arch/um
+ARCH_DIR = linux/arch/um
 
-include arch/$(ARCH)/Makefile-$(SUBARCH)
+include linux/arch/$(ARCH)/Makefile-$(SUBARCH)
 
 EXTRAVERSION := $(EXTRAVERSION)-11um
-include/linux/version.h: arch/$(ARCH)/Makefile
+linux/include/linux/version.h: linux/arch/$(ARCH)/Makefile
 
 # Recalculate MODLIB to reflect the EXTRAVERSION changes (via KERNELRELEASE)
 # The way the toplevel Makefile is written EXTRAVERSION is not supposed
@@ -51,7 +51,7 @@ ARCH_INCLUDE = $(TOPDIR)/$(ARCH_DIR)/include
 
 CFLAGS += $(DEBUG) $(PROFILE) $(ARCH_CFLAGS) -D__arch_um__ \
 	-DSUBARCH=\"$(SUBARCH)\" -DNESTING=$(NESTING) -D_LARGEFILE64_SOURCE \
-	-I$(ARCH_INCLUDE) -I$(TOPDIR)/../sys/src -I$(TOPDIR)/../lib/src -I$(TOPDIR)/../librtl/src -I$(TOPDIR)/../starlet/src -I$(TOPDIR)/../pal/src -I$(TOPDIR)/include2 -Derrno=kernel_errno
+	-I$(ARCH_INCLUDE) -I$(TOPDIR)/sys/src -I$(TOPDIR)/lib/src -I$(TOPDIR)/librtl/src -I$(TOPDIR)/starlet/src -I$(TOPDIR)/pal/src -I$(TOPDIR)/linux/include2 -Derrno=kernel_errno
 
 LINKFLAGS += -r
 
@@ -61,21 +61,21 @@ $(ARCH_DIR)/link.ld: $(ARCH_DIR)/link.ld.in
 	m4 -DSTART=$(START_ADDR) -DSUBARCH=$(SUBARCH) \
 		-DELF_SUBARCH=$(ELF_SUBARCH) $< > $@
 
-SYMLINK_HEADERS = include/asm-um/archparam.h include/asm-um/system.h \
-	include/asm-um/sigcontext.h include/asm-um/processor.h \
-	include/asm-um/ptrace.h 
+SYMLINK_HEADERS = linux/include/asm-um/archparam.h linux/include/asm-um/system.h \
+	linux/include/asm-um/sigcontext.h linux/include/asm-um/processor.h \
+	linux/include/asm-um/ptrace.h 
 
-ARCH_SYMLINKS = include/asm-um/arch arch/um/include/sysdep $(SYMLINK_HEADERS)
+ARCH_SYMLINKS = linux/include/asm-um/arch linux/arch/um/include/sysdep $(SYMLINK_HEADERS)
 
 GEN_HEADERS = $(ARCH_DIR)/include/task.h
 
-linux: $(ARCH_SYMLINKS) $(SYS_HEADERS) $(GEN_HEADERS) $(ARCH_DIR)/main.o \
-	vmlinux $(ARCH_DIR)/link.ld
-	mv vmlinux vmlinux.o
+linux/linux: $(ARCH_SYMLINKS) $(SYS_HEADERS) $(GEN_HEADERS) $(ARCH_DIR)/main.o \
+	linux/vmlinux $(ARCH_DIR)/link.ld
+	mv linux/vmlinux linux/vmlinux.o
 	$(CC) -Wl,-T,$(ARCH_DIR)/link.ld $(LINK_PROFILE) $(LINK_WRAPS) \
-		-o linux -static $(ARCH_DIR)/main.o vmlinux.o -L/usr/lib
+		-o linux/linux -static $(ARCH_DIR)/main.o linux/vmlinux.o -L/usr/lib
 
-USER_CFLAGS := $(patsubst -I%,,$(CFLAGS)) -I$(TOPDIR)/../sys/src -I$(TOPDIR)/../lib/src -I$(TOPDIR)/include2
+USER_CFLAGS := $(patsubst -I%,,$(CFLAGS)) -I$(TOPDIR)/sys/src -I$(TOPDIR)/lib/src -I$(TOPDIR)/linux/include2
 USER_CFLAGS := $(patsubst -Derrno=kernel_errno,,$(USER_CFLAGS))
 USER_CFLAGS := $(patsubst -D__KERNEL__,,$(USER_CFLAGS)) -I$(ARCH_INCLUDE)
 
@@ -106,11 +106,11 @@ $(SYMLINK_HEADERS):
 	cd $(TOPDIR)/$(dir $@) ; \
 	ln -sf $(basename $(notdir $@))-$(SUBARCH)$(suffix $@) $(notdir $@)
 
-include/asm-um/arch:
-	cd $(TOPDIR)/include/asm-um && ln -sf ../asm-$(SUBARCH) arch
+linux/include/asm-um/arch:
+	cd $(TOPDIR)/linux/include/asm-um && ln -sf ../asm-$(SUBARCH) arch
 
-arch/um/include/sysdep:
-	cd $(TOPDIR)/arch/um/include && ln -sf sysdep-$(SUBARCH) sysdep
+linux/arch/um/include/sysdep:
+	cd $(TOPDIR)/linux/arch/um/include && ln -sf sysdep-$(SUBARCH) sysdep
 
 $(ARCH_DIR)/include/task.h : $(ARCH_DIR)/util/mk_task
 	$< > $@

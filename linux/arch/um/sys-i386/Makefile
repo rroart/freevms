@@ -23,11 +23,11 @@ ptrace_user.o: ptrace_user.c
 
 checksum.S old-checksum.c: 
 	-rm -f $@
-	-ln -s $(TOPDIR)/arch/i386/lib/$@ $@
+	-ln -s $(TOPDIR)/linux/arch/i386/lib/$@ $@
 
 semaphore.c:
 	-rm -f $@
-	-ln -s $(TOPDIR)/arch/i386/kernel/$@ $@
+	-ln -s $(TOPDIR)/linux/arch/i386/kernel/$@ $@
 
 clean:
 	rm -f $(OBJS) $(export-objs)

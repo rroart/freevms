@@ -8,9 +8,9 @@
 # Copyright (C) 1994 by Linus Torvalds
 #
 
-BOOT_INCL =	$(TOPDIR)/include/linux/config.h \
-		$(TOPDIR)/include/linux/autoconf.h \
-		$(TOPDIR)/include/asm/boot.h
+BOOT_INCL =	$(TOPDIR)/linux/include/linux/config.h \
+		$(TOPDIR)/linux/include/linux/autoconf.h \
+		$(TOPDIR)/linux/include/asm/boot.h
 
 zImage: $(CONFIGURE) bootsect setup compressed/vmlinux tools/build
 	$(OBJCOPY) compressed/vmlinux compressed/vmlinux.out
@@ -20,11 +20,11 @@ bzImage: $(CONFIGURE) bbootsect bsetup compressed/bvmlinux tools/build
 	$(OBJCOPY) compressed/bvmlinux compressed/bvmlinux.out
 	tools/build -b bbootsect bsetup compressed/bvmlinux.out $(ROOT_DEV) > bzImage
 
-compressed/vmlinux: $(TOPDIR)/vmlinux
-	@$(MAKE) -C compressed vmlinux
+compressed/vmlinux: $(TOPDIR)/linux/vmlinux
+	@$(MAKE) -C compressed linux/vmlinux
 
-compressed/bvmlinux: $(TOPDIR)/vmlinux
-	@$(MAKE) -C compressed bvmlinux
+compressed/bvmlinux: $(TOPDIR)/linux/vmlinux
+	@$(MAKE) -C compressed linux/bvmlinux
 
 zdisk: $(BOOTIMAGE)
 	dd bs=8192 if=$(BOOTIMAGE) of=/dev/fd0
@@ -66,7 +66,7 @@ setup: setup.o
 setup.o: setup.s
 	$(AS) -o $@ $<
 
-setup.s: setup.S video.S Makefile $(BOOT_INCL) $(TOPDIR)/include/linux/version.h $(TOPDIR)/include/linux/compile.h
+setup.s: setup.S video.S Makefile $(BOOT_INCL) $(TOPDIR)/linux/include/linux/version.h $(TOPDIR)/linux/include/linux/compile.h
 	$(CPP) $(CPPFLAGS) -D__ASSEMBLY__ -traditional $(SVGA_MODE) $(RAMDISK) $< -o $@
 
 bsetup: bsetup.o
@@ -75,7 +75,7 @@ bsetup: bsetup.o
 bsetup.o: bsetup.s
 	$(AS) -o $@ $<
 
-bsetup.s: setup.S video.S Makefile $(BOOT_INCL) $(TOPDIR)/include/linux/version.h $(TOPDIR)/include/linux/compile.h
+bsetup.s: setup.S video.S Makefile $(BOOT_INCL) $(TOPDIR)/linux/include/linux/version.h $(TOPDIR)/linux/include/linux/compile.h
 	$(CPP) $(CPPFLAGS) -D__BIG_KERNEL__ -D__ASSEMBLY__ -traditional $(SVGA_MODE) $(RAMDISK) $< -o $@
 
 dep:

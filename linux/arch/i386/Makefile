@@ -19,7 +19,7 @@
 LD=$(CROSS_COMPILE)ld -m elf_i386
 OBJCOPY=$(CROSS_COMPILE)objcopy -O binary -R .note -R .comment -S
 LDFLAGS=-e stext
-LINKFLAGS =-T $(TOPDIR)/arch/i386/vmlinux.lds $(LDFLAGS)
+LINKFLAGS =-T $(TOPDIR)/linux/arch/i386/vmlinux.lds $(LDFLAGS)
 
 CFLAGS += -pipe
 
@@ -86,56 +86,56 @@ ifdef CONFIG_MCYRIXIII
 CFLAGS += -march=i586
 endif
 
-HEAD := arch/i386/kernel/head.o arch/i386/kernel/init_task.o
+HEAD := linux/arch/i386/kernel/head.o linux/arch/i386/kernel/init_task.o
 
-SUBDIRS += arch/i386/kernel arch/i386/mm arch/i386/lib
+SUBDIRS += linux/arch/i386/kernel linux/arch/i386/mm linux/arch/i386/lib
 
-CORE_FILES := arch/i386/kernel/kernel.o arch/i386/mm/mm.o $(CORE_FILES)
-LIBS := $(TOPDIR)/arch/i386/lib/lib.a $(LIBS) $(TOPDIR)/arch/i386/lib/lib.a
+CORE_FILES := linux/arch/i386/kernel/kernel.o linux/arch/i386/mm/mm.o $(CORE_FILES)
+LIBS := $(TOPDIR)/linux/arch/i386/lib/lib.a $(LIBS) $(TOPDIR)/linux/arch/i386/lib/lib.a
 
 ifdef CONFIG_MATH_EMULATION
-SUBDIRS += arch/i386/math-emu
-DRIVERS += arch/i386/math-emu/math.o
+SUBDIRS += linux/arch/i386/math-emu
+DRIVERS += linux/arch/i386/math-emu/math.o
 endif
 
-arch/i386/kernel: dummy
-	$(MAKE) linuxsubdirs SUBDIRS=arch/i386/kernel
+linux/arch/i386/kernel: dummy
+	$(MAKE) linuxsubdirs SUBDIRS=linux/arch/i386/kernel
 
-arch/i386/mm: dummy
-	$(MAKE) linuxsubdirs SUBDIRS=arch/i386/mm
+linux/arch/i386/mm: dummy
+	$(MAKE) linuxsubdirs SUBDIRS=linux/arch/i386/mm
 
-MAKEBOOT = $(MAKE) -C arch/$(ARCH)/boot
+MAKEBOOT = $(MAKE) -C linux/arch/$(ARCH)/boot
 
-vmlinux: arch/i386/vmlinux.lds
+linux/vmlinux: linux/arch/i386/vmlinux.lds
 
 FORCE: ;
 
 .PHONY: zImage bzImage compressed zlilo bzlilo zdisk bzdisk install \
 		clean archclean archmrproper archdep
 
-zImage: vmlinux
+zImage: linux/vmlinux
 	@$(MAKEBOOT) zImage
 
-bzImage: vmlinux
+bzImage: linux/vmlinux
 	@$(MAKEBOOT) bzImage
 
 compressed: zImage
 
-zlilo: vmlinux
+zlilo: linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=zImage zlilo
 
 tmp:
 	@$(MAKEBOOT) BOOTIMAGE=bzImage zlilo
-bzlilo: vmlinux
+bzlilo: linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=bzImage zlilo
 
-zdisk: vmlinux
+zdisk: linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=zImage zdisk
 
-bzdisk: vmlinux
+bzdisk: linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=bzImage zdisk
 
-install: vmlinux
+install: linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=bzImage install
 
 archclean:

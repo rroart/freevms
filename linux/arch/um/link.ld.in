@@ -11,11 +11,11 @@ SECTIONS
     __start_thread_private = .;
     errno = .;
     . += 4;
-    arch/um/kernel/unmap_fin.o (.data)
+    linux/arch/um/kernel/unmap_fin.o (.data)
     __end_thread_private = .;
   }
   . = ALIGN(4096);
-  .remap : { arch/um/kernel/unmap_fin.o (.text) }
+  .remap : { linux/arch/um/kernel/unmap_fin.o (.text) }
 
   . = ALIGN(4096);		/* Init code and data */
   _stext = .;

@@ -5,7 +5,7 @@
 #
 
 HEAD = head.o
-SYSTEM = $(TOPDIR)/vmlinux
+SYSTEM = $(TOPDIR)/linux/vmlinux
 
 OBJECTS = $(HEAD) misc.o
 
@@ -26,7 +26,7 @@ all: vmlinux
 vmlinux: piggy.o $(OBJECTS)
 	$(LD) $(ZLINKFLAGS) -o vmlinux $(OBJECTS) piggy.o
 
-bvmlinux: piggy.o $(OBJECTS)
+linux/bvmlinux: piggy.o $(OBJECTS)
 	$(LD) $(BZLINKFLAGS) -o bvmlinux $(OBJECTS) piggy.o
 
 head.o: head.S
