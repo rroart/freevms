@@ -87,7 +87,7 @@ void __init fork_init(unsigned long mempages)
 /* Protects next_safe and last_pid. */
 spinlock_t lastpid_lock = SPIN_LOCK_UNLOCKED;
 
-static int get_pid(unsigned long flags)
+/*static*/ int get_pid(unsigned long flags)
 {
 	static int next_safe = PID_MAX;
 	struct task_struct *p;
@@ -215,6 +215,53 @@ fail_nomem:
 	flush_tlb_mm(current->mm);
 	return retval;
 }
+
+#ifdef CONFIG_MM_VMS
+
+static inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
+{
+	struct _rde * mpnt, *tmp, **pprev;
+	int retval;
+
+	pprev = &phd->phd$pq_p0_start_va;
+
+	/*
+	 * Add it to the mmlist after the parent.
+	 * Doing it this way means that we can order the list,
+	 * and fork() won't mess up the ordering significantly.
+	 * Add it first so that swapoff can see any swap entries.
+	 */
+
+	for (mpnt = current->pcb$l_phd->phd$ps_p0_va_list_flink ; mpnt!=&current->pcb$l_phd->phd$ps_p0_va_list_flink ; mpnt = mpnt->rde$ps_va_list_flink) {
+		struct file *file;
+
+		retval = -ENOMEM;
+		if(mpnt->rde$l_flags & VM_DONTCOPY)
+			continue;
+		tmp = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
+		if (!tmp)
+			goto fail_nomem;
+		bcopy(mpnt,tmp,sizeof(struct _rde));
+		tmp->rde$l_flags &= ~VM_LOCKED;
+
+		/*
+		 * Link in the new vma and copy the page table entries:
+		 * link in first so that swapoff can see swap entries.
+		 */
+		pprev = &tmp->rde$ps_va_list_flink;
+		retval = copy_page_range(mm, current->mm, tmp);
+
+		if (retval)
+			goto fail_nomem;
+		insrde(tmp,&phd->phd$ps_p0_va_list_flink);
+	}
+	retval = 0;
+
+fail_nomem:
+	flush_tlb_mm(current->mm);
+	return retval;
+}
+#endif
 
 spinlock_t mmlist_lock __cacheline_aligned = SPIN_LOCK_UNLOCKED;
 int mmlist_nr;
@@ -353,6 +400,9 @@ static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
 
 	down_write(&oldmm->mmap_sem);
 	retval = dup_mmap(mm);
+#ifdef CONFIG_MM_VMS
+	retval = dup_stuff(mm,tsk->pcb$l_phd);
+#endif
 	up_write(&oldmm->mmap_sem);
 
 	if (retval)
@@ -676,6 +726,33 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	INIT_LIST_HEAD(&p->local_pages);
 
+	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
+	bzero(p->pcb$l_phd,sizeof(struct _phd));
+
+#ifdef CONFIG_MM_VMS
+	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
+	{
+	  struct _rde * rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
+	  bzero(rde,sizeof(struct _rde));
+	  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
+	  //insque(rde,p->pcb$l_phd->phd$ps_p0_va_list_flink);
+	  rde->rde$ps_start_va=0x1000;
+	  rde->rde$l_region_size=0x1000;
+	  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
+	  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
+	  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
+	  bzero(p->pcb$l_phd->phd$l_wslist,4*512);
+	  bzero(p->pcb$l_phd->phd$l_wslock,4*512);
+	  bzero(p->pcb$l_phd->phd$l_wsdyn,4*512);
+	  p->pcb$l_phd->phd$l_wsnext=0;
+	  p->pcb$l_phd->phd$l_wslast=511;
+	  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
+	  bzero(p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+	  p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
+	  p->pcb$l_phd->phd$l_pst_free=0;
+	}
+#endif
+
 	retval = -ENOMEM;
 	/* copy all the process information */
 	if (copy_files(clone_flags, p))
@@ -704,37 +781,10 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	/* pcb stuff */
 
-#ifdef CONFIG_MM_VMS
-	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
-	bzero(p->pcb$l_phd,sizeof(struct _phd));
-
-	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
-	{
-	  struct _rde * rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
-	  bzero(rde,sizeof(struct _rde));
-	  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
-	  //insque(rde,p->pcb$l_phd->phd$ps_p0_va_list_flink);
-	  rde->rde$ps_start_va=0x1000;
-	  rde->rde$l_region_size=0x1000;
-	  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
-	  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
-	  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-	  bzero(p->pcb$l_phd->phd$l_wslist,4*512);
-	  bzero(p->pcb$l_phd->phd$l_wslock,4*512);
-	  bzero(p->pcb$l_phd->phd$l_wsdyn,4*512);
-	  p->pcb$l_phd->phd$l_wsnext=0;
-	  p->pcb$l_phd->phd$l_wslast=511;
-	  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
-	  bzero(p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
-	  p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
-	  p->pcb$l_phd->phd$l_pst_free=0;
-	}
-#endif
-
 	p->pcb$b_prib=31-DEFPRI;
 	p->pcb$b_pri=31-DEFPRI-6;
 	//	if (p->pcb$b_pri<16) p->pcb$b_pri=16;
-	p->phd$w_quant=-QUANTUM;
+	p->pcb$w_quant=-QUANTUM;
 
 	qhead_init(&p->pcb$l_lockqfl);
 	qhead_init(&p->pcb$l_astqfl);
