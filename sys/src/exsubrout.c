@@ -24,6 +24,15 @@ void exe$instimq(struct _tqe * t) {
   vmsunlock(&SPIN_TIMER,savipl);
 }
 
-void exe$rmvtimq(struct _tqe * t) {
-
+void exe$rmvtimq(unsigned long reqidt, unsigned int acmode) {
+  struct _tqe *tmp=exe$gl_tqfl->tqe$l_tqfl;
+  //int savipl=vmslock(&SPIN_TIMER,IPL$_TIMER);
+  while (tmp!=exe$gl_tqfl) {
+    if (reqidt==tmp->tqe$l_astprm) {
+      remque(tmp,0);
+      vfree(tmp);
+    }
+    tmp=tmp->tqe$l_tqfl;
+  cont:
+  }
 }
