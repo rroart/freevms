@@ -37,6 +37,16 @@
 #undef __NR_$synch            
 #undef __NR_$enq              
 #undef __NR_$deq              
+#undef __NR_$assign          
+#undef __NR_$dassgn          
+#undef __NR_$qio             
+#undef __NR_$qiow            
+#undef __NR_$getlki          
+#undef __NR_$getlkiw         
+#undef __NR_$enqw            
+#undef __NR_$crelnm          
+#undef __NR_$trnlnm          
+#undef __NR_$dellnm          
 
 #undef __NR_$close 
 #undef __NR_$connect 
@@ -144,7 +154,16 @@
 #define __NR_$asctim       301    
 #define __NR_$bintim          302 
 
-
+#define __NR_$assign 306
+#define __NR_$dassgn 304
+#define __NR_$qio 305
+#define __NR_$qiow 307
+#define __NR_$getlki 308
+#define __NR_$getlkiw 309
+#define __NR_$enqw 310
+#define __NR_$crelnm 311
+#define __NR_$trnlnm 312
+#define __NR_$dellnm 313
 
 #endif
 

@@ -120,7 +120,7 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
     mylnmb->lnmb$w_size=sizeof(struct lnmb);
     mylnmb->lnmb$b_type=DYN$C_LNM;
     mylnmb->lnmb$b_acmode=0;
-    mylnmb->lnmb$l_table=0;
+    mylnmb->lnmb$l_table=ret.mylnmb;
     mylnmb->lnmb$b_flags=0;
     mylnmb->lnmb$b_count=mylognam->dsc$w_length;
     strncpy( &(mylnmb->lnmb$t_name[0]),mylognam->dsc$a_pointer,mylognam->dsc$w_length);
@@ -308,8 +308,8 @@ main(){
   /*    lnm$system_directory_b=lnmmalloc(sizeof(struct lnmth));*/
   lnm$system_directory=lnmmalloc(sizeof(struct lnmb));
   bzero(lnm$system_directory,sizeof(struct lnmb));
-  lnm$system_directory->lnmb$l_flink=0;
-  lnm$system_directory->lnmb$l_blink=0;
+  lnm$system_directory->lnmb$l_flink=lnm$system_directory;
+  lnm$system_directory->lnmb$l_blink=lnm$system_directory;
   lnm$system_directory->lnmb$b_type=DYN$C_LNM;
   lnm$system_directory->lnmb$b_acmode=MODE_K_KERNEL;
   lnm$system_directory_b=(struct lnmth *)&lnm$system_directory->lnmxs[0].lnmx$b_count;
@@ -367,9 +367,16 @@ main(){
   for (c=0;c<LNMSHASHTBL;c++) {
     if (lnmhshs.entry[2*c]) { 
       struct lnmth * l;
-      lnmprintf("lnmhshs entry %x %x %s\n",c,lnmhshs.entry[2*c],((struct lnmb *)(lnmhshs.entry[2*c]))->lnmb$t_name);
-      l=&(((struct lnmb *)(lnmhshs.entry[2*c]))->lnmxs[0].lnmx$b_count);
-      lnmprintf("     parent %x\n",l->lnmth$l_parent);
+      struct lnmb *head, *tmp;
+      head=lnmhshs.entry[2*c];
+      tmp=head;
+      do {
+	lnmprintf("lnmhshs entry %x %x %s\n",c,tmp,tmp->lnmb$t_name);
+	l=&(tmp->lnmxs[0].lnmx$b_count);
+	lnmprintf("     parent %x\n",l->lnmth$l_parent);
+	lnmprintf("     table %x\n",tmp->lnmb$l_table);
+	tmp=tmp->lnmb$l_flink;
+      } while (tmp!=head);
     }
   }
 }
@@ -394,8 +401,8 @@ void lnm_init(void) {
   /*    lnm$system_directory_b=lnmmalloc(sizeof(struct lnmth));*/
   //  lnm$system_directory=lnmmalloc(sizeof(struct lnmb));
   bzero(lnm$system_directory,sizeof(struct lnmb));
-  lnm$system_directory->lnmb$l_flink=0;
-  lnm$system_directory->lnmb$l_blink=0;
+  lnm$system_directory->lnmb$l_flink=lnm$system_directory;
+  lnm$system_directory->lnmb$l_blink=lnm$system_directory;
   lnm$system_directory->lnmb$b_type=DYN$C_LNM;
   lnm$system_directory->lnmb$b_acmode=MODE_K_KERNEL;
   lnm$system_directory_b=(struct lnmth *)&lnm$system_directory->lnmxs[0].lnmx$b_count;

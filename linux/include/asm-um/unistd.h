@@ -118,6 +118,16 @@ static inline pid_t setsid(void)
 #undef __NR_$synch            
 #undef __NR_$enq              
 #undef __NR_$deq              
+#undef __NR_$assign          
+#undef __NR_$dassgn          
+#undef __NR_$qio             
+#undef __NR_$qiow            
+#undef __NR_$getlki          
+#undef __NR_$getlkiw         
+#undef __NR_$enqw            
+#undef __NR_$crelnm          
+#undef __NR_$trnlnm          
+#undef __NR_$dellnm          
 
 #undef __NR_$close 
 #undef __NR_$connect 

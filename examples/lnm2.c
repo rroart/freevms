@@ -15,22 +15,8 @@ main(){
   $DESCRIPTOR(mytabnam,"MYTEST");
   $DESCRIPTOR(mypartab,"LNM$SYSTEM_DIRECTORY");
 
-  sys$crelnt(0,0,0,0,0,&mytabnam,&mypartab,0);
-  sys$crelnt(0,0,0,0,0,&mytabnam2,&mypartab,0);
-  sys$crelnt(0,0,0,0,0,&mytabnam3,&mytabnam2,0);
-
   i[0].item_code=1;
-  i[0].buflen=5;
-  i[0].bufaddr="mylog";
   bzero(&i[1],sizeof(struct item_list_3));
-  status=sys$crelnm(0,&mytabnam2,&mynam,0,i);
-
-  i[0].item_code=1;
-  i[0].buflen=6;
-  i[0].bufaddr="mylog3";
-  bzero(&i[1],sizeof(struct item_list_3));
-  status=sys$crelnm(0,&mytabnam2,&mynam2,0,i);
-
   status=sys$trnlnm(0,&mytabnam2,&mynam,0,i);
 
   printf("log %x %x\n",i[0].bufaddr,i[0].buflen);
