@@ -462,7 +462,7 @@ fail_nomem:
 	return retval;
 }
 
-static inline struct fs_struct *__copy_fs_struct(struct fs_struct *old)
+/*static*/ inline struct fs_struct *__copy_fs_struct(struct fs_struct *old)
 {
 	struct fs_struct *fs = kmem_cache_alloc(fs_cachep, GFP_KERNEL);
 	/* We don't need to lock fs - think why ;-) */
@@ -492,7 +492,7 @@ struct fs_struct *copy_fs_struct(struct fs_struct *old)
 	return __copy_fs_struct(old);
 }
 
-static inline int copy_fs(unsigned long clone_flags, struct task_struct * tsk)
+/*static*/ inline int copy_fs(unsigned long clone_flags, struct task_struct * tsk)
 {
 	if (clone_flags & CLONE_FS) {
 		atomic_inc(&current->fs->count);
@@ -517,7 +517,7 @@ static int count_open_files(struct files_struct *files, int size)
 	return i;
 }
 
-static int copy_files(unsigned long clone_flags, struct task_struct * tsk)
+/*static*/ int copy_files(unsigned long clone_flags, struct task_struct * tsk)
 {
 	struct files_struct *oldf, *newf;
 	struct file **old_fds, **new_fds;
@@ -624,7 +624,7 @@ out_release:
 	goto out;
 }
 
-static inline int copy_sighand(unsigned long clone_flags, struct task_struct * tsk)
+/*static*/ inline int copy_sighand(unsigned long clone_flags, struct task_struct * tsk)
 {
 	struct signal_struct *sig;
 
