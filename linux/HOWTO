@@ -10,7 +10,7 @@ Redhat 8.0 with gcc 3.2 (RedHat patched) works. The anonymous structure offset
 bugs present in pure gcc 3.0.1 was gone in pure 3.1.
 With recent gcc/Redhat uml gets backtrace problems and is partially broken.
 Use gcc 2.96 etc with uml.
-Do not use as recent gcc as 3.3.
+Do not use as recent gcc as 3.4.
 
 Linker (experimental):
 If you want to know how to make the linker do: cat linker/src/HOW
@@ -44,6 +44,7 @@ Example build i386:
 tar xzf freevms-0_0_51.tgz
 cd freevms/linux
 ./prescript
+cd ..
 make symlinks
 make linux/include/linux/compile.h
 maybe do make update-modverfile
@@ -53,6 +54,7 @@ Example build um:
 tar xzf freevms-0_0_51.tgz
 cd freevms/linux
 ./prescript
+cd ..
 make symlinks ARCH=um
 make linux/include/linux/compile.h ARCH=um
 maybe do make update-modverfile ARCH=um
