@@ -205,6 +205,11 @@ extern char _stext, _etext;
         "call pushpsl\n\t" \
         POPR_ALL 
 
+#define PUSHPSLI \
+        PUSHR_ALL \
+        "call pushpsli\n\t" \
+        POPR_ALL 
+
 #define IO_APIC_IRQ(x) (((x) >= 16) || ((1<<(x)) & io_apic_irqs))
 
 #define __STR(x) #x
@@ -273,7 +278,7 @@ __asm__( \
 	"\n" __ALIGN_STR"\n" \
 	"common_interrupt:\n\t" \
 	SAVE_ALL \
-        PUSHPSL \
+        PUSHPSLI \
 	SYMBOL_NAME_STR(call_do_IRQ)":\n\t" \
 	"call " SYMBOL_NAME_STR(do_IRQ) "\n\t" \
 	"jmp ret_from_intr\n");
