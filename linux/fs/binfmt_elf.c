@@ -42,6 +42,8 @@
 
 #include <linux/elf.h>
 
+#include <phddef.h>
+
 static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs);
 static int load_elf_library(struct file*);
 static unsigned long elf_map (struct file *, unsigned long, struct elf_phdr *, int, int);
@@ -595,6 +597,9 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	current->mm->end_data = 0;
 	current->mm->end_code = 0;
 	current->mm->mmap = NULL;
+#ifdef CONFIG_MM_VMS
+	qhead_init(&current->pcb$l_phd->phd$ps_p0_va_list_flink);
+#endif
 	current->flags &= ~PF_FORKNOEXEC;
 	elf_entry = (unsigned long) elf_ex.e_entry;
 
@@ -602,6 +607,9 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	   change some of these later */
 	current->mm->rss = 0;
 	setup_arg_pages(bprm); /* XXX: check error */
+#ifdef CONFIG_MM_VMS
+	flush_tlb_all();
+#endif
 	current->mm->start_stack = bprm->p;
 
 	/* Now we do a little grungy work by mmaping the ELF image into
