@@ -70,7 +70,7 @@ typedef struct { unsigned long pgprot; } pgprot_t;
  * option, but too many people screw it up, and too few need
  * it.
  *
- * A __PAGE_OFFSET of 0xC0000000 means that the kernel has
+ * A __PAGE_OFFSET of 0x80000000 means that the kernel has
  * a virtual address space of one gigabyte, which limits the
  * amount of physical memory you can use to about 950MB. 
  *
@@ -78,7 +78,7 @@ typedef struct { unsigned long pgprot; } pgprot_t;
  * and CONFIG_HIGHMEM64G options in the kernel configuration.
  */
 
-#define __PAGE_OFFSET		(0xC0000000)
+#define __PAGE_OFFSET		(0x80000000)
 
 /*
  * This much address space is reserved for vmalloc() and iomap()
