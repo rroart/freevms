@@ -572,10 +572,10 @@ void Line_Changed_AST (Parm)
 	RC = sys$qiow (0,
 	 TVT->TVT$PTY_CHN,
 	 IO$_SENSEMODE,
-	io_stats,
+	&io_stats,
 		       0,
 		       0,
-	PTY_Char,
+	&PTY_Char,
 	QCB$K_SIZE,
 		       0,0,0,0);
     if (BLISSIFNOT(RC))
@@ -606,7 +606,7 @@ void Line_Changed_AST (Parm)
 0,
 		TVT->TVT$PTY_CHN,
 		IO$_SETMODE,
-		io_stats,
+		&io_stats,
   0,
   0,
 		Line_Changed_AST,
@@ -655,8 +655,10 @@ IS_CNTRLT_GOOD (TVT)
 0,
 	TVT->TVT$PTY_CHN,
 	IO$_SENSEMODE,
-	io_stats,
-	PTY_Char,
+	&io_stats,
+0,
+0,
+	&PTY_Char,
 	QCB$K_SIZE,
 	  0,0,0,0);
     return ! (
@@ -708,9 +710,9 @@ void Set_PTY_Window_Size (TVT, pag, width)
 0,
 	pty_chan,
 	IO$_SENSEMODE,
-	io_stats,
+	&io_stats,
   0,0,
-	PTY_Char,
+	&PTY_Char,
 	QCB$K_SIZE,
   0,0,0,0);
     if (! Status)
@@ -734,9 +736,9 @@ void Set_PTY_Window_Size (TVT, pag, width)
 0,
 		pty_chan,
 		IO$_SETMODE,
-		io_stats,
+		&io_stats,
   0,0,
-		PTY_Char,
+		&PTY_Char,
 		QCB$K_SIZE,
   0,0,0,0);
 	if (! Status)
@@ -811,9 +813,9 @@ void Set_PTY_Term_Type (TVT, type, devdep)
 0,
 	pty_chan,
 	IO$_SENSEMODE,
-	io_stats,
+	&io_stats,
   0,0,
-	PTY_Char,
+	&PTY_Char,
 	QCB$K_SIZE,
 0,0,0,0);
     if (! Status)
@@ -870,9 +872,9 @@ void Set_PTY_Term_Type (TVT, type, devdep)
 0,
 		pty_chan,
 		IO$_SETMODE,
-		io_stats,
+		&io_stats,
   0,0,
-		PTY_Char,
+		&PTY_Char,
 		QCB$K_SIZE,
 0,0,0,0);
 	if (! Status)
@@ -1122,9 +1124,9 @@ void set_devdep(TVT)
 0,
 		pty_chan,
 		IO$_SENSEMODE,
-		io_stats,
+		&io_stats,
   0,0,
-		PTY_Char,
+		&PTY_Char,
 		QCB$K_SIZE,
 0,0,0,0);
 
@@ -1150,7 +1152,12 @@ void set_devdep(TVT)
 		,PTY_Char->QCB$W_PAGE_WIDTH
 		,PTY_Char->QCB$B_PAGE_LENGTH);
 
+#if 0
+	// not yet
 	telnet_passall = exe$trnlnm(0, &lnm_proc, &lnm_pass, 0, itm); // JC
+#else
+	telnet_passall = 0;
+#endif
 
 	Changed = 0;
 	Changed = TVT->TVT$TTSET;
@@ -1194,9 +1201,9 @@ void set_devdep(TVT)
 0,
 		pty_chan,
 		IO$_SETMODE,
-		io_stats,
+		&io_stats,
   0, 0,
-		PTY_Char,
+		&PTY_Char,
 		QCB$K_SIZE,
 0,0,0,0);
 
@@ -1235,7 +1242,8 @@ void set_devdep(TVT)
 	Item_List[0].item_code=DVI$_UNIT;
 	Item_List[0].bufaddr=&Unit_Number;
 	Item_List[1].item_code=0; // check
-	Status = exe$getdviw (0,pty_chan,0,Item_List);		// Get unit
+	Status = exe$getdviw (0,pty_chan,0,Item_List, 0, 0);		// Get unit
+	// seems C can not fill in the rest with 0?
 
 //!!JC	XLOG$FAO(LOG$TELNEG
 //!!JC		,"!%T Set_DEVDEP: Unit_Number=x!XL!/",0
@@ -1273,7 +1281,7 @@ void set_devdep(TVT)
   0,
 			Set_DEVDEP_DONE,
 		        TVT,
-			PTY_Char,
+			&PTY_Char,
 			QCB$K_SIZE,
 0,0,0,0);		// Set front end
 		if (! Status)
