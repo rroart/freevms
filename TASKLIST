@@ -100,9 +100,9 @@ FreeVMS tasklist
   "SRM", started
 
 2. (a bit later) high priority:
-  RMS, nothing done, vacant
+  RMS, barely started, vacant
   "SRM" handling ODS-2
-  Utilities COPY DIRECTORY etc, nothing done, vacant
+  Utilities COPY DIRECTORY etc, barely started, vacant
   VMS image support, linker+compiler support for images, nothing done, vacant.
   Kernel:
     Control Mechanisms:
