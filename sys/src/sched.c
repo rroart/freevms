@@ -103,6 +103,8 @@ mycheckaddr(unsigned int ctl){
 	n++;
 	if (tmp2!=tmp && i!=tmp2->pcb$b_pri)
 	  panic("wrong pri in q %x %x %x\n",tmp2,i,tmp2->pcb$b_pri);
+	if (tmp2!=tmp && tmp2->pcb$b_type!=DYN$C_PCB)
+	  panic("wrong type in q %x %x %x\n",tmp2,i,tmp2->pcb$b_type);
 	if (ctl<42 && ctl$gl_pcb==tmp2)
 	  panic("ctl$gl_pcb on comq\n");
 	if (ctl>42 && ctl==tmp2)
@@ -1567,6 +1569,9 @@ void __init sched_init(void)
 
   init_task.pcb$l_cpu_id = cpuid;
   cpu=smp$gl_cpu_data[cpuid];
+
+  init_task.pcb$b_type = DYN$C_PCB;
+
   init_task.pcb$b_pri=31;
   init_task.pcb$b_prib=31;
   qhead_init(&init_task.pcb$l_astqfl);
