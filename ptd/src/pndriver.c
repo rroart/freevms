@@ -574,48 +574,31 @@ int PN$FDTREAD(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
   int sts;
   int *buf,size;
   size=i->irp$l_qio_p2;	// Get buffer Size
-  if (size) goto	l15;
-  goto	l10;		// Is the size zero? If so, go do it easy.
- l15:	buf = i->irp$l_qio_p1;		// Get buffer Address
+  if (size==0)
+    //
+    // Did he request a read of zero bytes?
+    // Is the size zero? If so, go do it easy.
+    //
+    // Everything is ok
+    return exe$finishioc(SS$_NORMAL,i,p,u);		// complete I/O request
+  buf = i->irp$l_qio_p1;		// Get buffer Address
   EXE$READCHK(i,p,u,c,buf,size); // check buf	// Do we have access to the buffer
-  //PUSHR	#^M<R0,R3>	// Save user buffer address and IRP address
   size+=12;		// Add 12 bytes for buffer header
 
-#if	defined	VMS_V4
-  JSB	G^EXE$BUFFRQUOTA	// Is there enough buffer space left in
-    //  the quota?
-    BLBC	sts, l30;			// Branch if insufficient quota
-  JSB	G^EXE$ALLOCBUF		// Allocate a system buffer
-#else
-    sts=EXE$DEBIT_BYTCNT_ALO(size, p, &buf); 	// Verify enough byte quota allocate buffer
+  sts=EXE$DEBIT_BYTCNT_ALO(size, p, &buf); 	// Verify enough byte quota allocate buffer
   // and charge process for useage
-#endif
 
-  if (!BLISSIF(sts)) goto l30;			// If error report it
-  //POPR	#^M<R0,R3>		// Restore user buffer and irp address
+  if (!BLISSIF(sts))			// If error report it
+    return	exe_std$abortio(i,p,u,sts);		// complete I/O request
+
   i->irp$l_svapte = buf;		// Save address of buffer
   i->irp$l_boff = size;		//  and requested byte count
   size=size; //check			// convert to longword count
 
-#if	defined	VMS_V4
-  R11 = p->pcb$l_jib;		// Get Jib address
-  SUBL	size,R11->JIB$L_BYTCNT	// Adjust quota count
-#endif
-
-    *buf=(long)buf+12;		// Save addr of start of user data
+  *buf=(long)buf+12;		// Save addr of start of user data
   buf[1]=i->irp$l_qio_p1;		// Save user buffer address in 2nd
 					// longword
   return	exe$qiodrvpkt(i, p, u);	// Queue I/O packet to start I/O routine
-  //
-  // Did he request a read of zero bytes?
-  //
- l10:			// Everything is ok
-  return exe$finishioc(SS$_NORMAL,i,p,u);		// complete I/O request
-  //
-  // Come here when something goes wrong
-  //
- l30:	//POPR	#^M<R1,R3>		// Clear buffer addr and restore IRP
-  return	exe_std$abortio(i,p,u,sts);		// complete I/O request
 }
 
 #if 0
@@ -704,24 +687,22 @@ int PN$FDTREAD(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
 int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   char inp_char;
   char *buf;
-  int size,send_tot,send_chr;
-  signed int send_num;
+  int size=0,send_tot=0,send_chr=0;
+  signed int send_num=0;
   struct _tpd_ucb * tpd;
   struct _tz_ucb * tz = u;
   struct _tz_ucb * pz;
   struct _tty_ucb * tty;
   send_chr=0;			// Clear count of characters sent
   size=i->irp$l_qio_p2;		// Get buffer Size
-  if (size) goto	l10;			// Is the non zero? If so, do it easy.
-  goto	l160;			// Zero size buffer just finish it now
+  if (size==0) 			// Is the non zero? If so, do it easy.
+    goto	l160;			// Zero size buffer just finish it now
 
- l10:
   buf	 = i->irp$l_qio_p1;		// Get buffer Address
   EXE$WRITECHK(i,p,u,c,buf,size);		// Do we have access to the buffer
   // No return means no access
   send_tot		 = size;		// Number of characters to send
   pz		 = tz;		// Save away PZ UCB ptr
-  //PUSHR	#^M<R3,R4,R5>		// Save PCB, IRP,and UCB address
   //
   //	User request ok.
   //
@@ -734,38 +715,35 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   //
  l20:
   send_num=	send_tot-send_chr;		// Get number of characters send
-  if	(send_num>=BUFFER_SIZE)		// More data than buffer can hold
-    goto	l30;			// GEQ then use BUFFER_SIZE segment
-  if	(send_num>1)			// Test for one byte only 
-    goto	l40;			// GTR more than one fill up buffer
-  inp_char=	buf[send_chr]; // check	// Move single character into inp_char
-  goto	l60;			// Now go ahead and send it
- l30:
-  memcpy(pz->ucb$t_pz_buffer,buf+send_chr,BUFFER_SIZE); // check // Store data in UCB buffer
+  if	(send_num<BUFFER_SIZE)		// More data than buffer can hold
+    {			// GEQ then use BUFFER_SIZE segment
+      if	(send_num<=1)			// Test for one byte only 
+	{			// GTR more than one fill up buffer
+	  inp_char=	buf[send_chr]; // check	// Move single character into inp_char
+	} else { // send_num > 1
+	  memcpy(pz->ucb$t_pz_buffer,buf+send_chr,send_num); // check 	// Store data in UCB buffer
+	  buf=&pz->ucb$t_pz_buffer;	// Get buffer address
+	  inp_char = *buf++;		// Get first character 
+	}
+    } else { // send_num>=BUFFER_SIZE
+      memcpy(pz->ucb$t_pz_buffer,buf+send_chr,BUFFER_SIZE); // check // Store data in UCB buffer
 #if BUFFER_SIZE < 255 // check 
-  send_num=	BUFFER_SIZE;		// Number of characters in burst
+      send_num=	BUFFER_SIZE;		// Number of characters in burst
 #else
-  send_num=	BUFFER_SIZE;		// Number of characters in burst
+      send_num=	BUFFER_SIZE;		// Number of characters in burst
 #endif
-  goto	l50;			// Now finish setup for transfer
- l40:
-  memcpy(pz->ucb$t_pz_buffer,buf+send_chr,send_num); // check 	// Store data in UCB buffer
- l50:
-  buf=&pz->ucb$t_pz_buffer;	// Get buffer address
-  inp_char = *buf++;		// Get first character 
- l60:
+      buf=&pz->ucb$t_pz_buffer;	// Get buffer address
+      inp_char = *buf++;		// Get first character 
+    }
+
   tz = pz->ucb$l_pz_xucb;		// Get TZ's UCB address
 
-#if	defined	VMS_V4
-  DSBINT	tz->ucb$b_dipl
-#else
     DEVICELOCK(); // Take device lock for TZ device
 #if 0
   LOCKADDR=ucb$l_dlck(tz),- ;
   LOCKIPL=ucb$b_dipl(tz), - ;
   SAVIPL=-(SP),	-	;
   PRESERVE=YES		;
-#endif
 #endif
 
 #define	TTY$M_TP_XOFF 8
@@ -778,45 +756,40 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  l70:
   send_chr++;			// Increment sent character count
   tty=tz;
-  signed int sts=tty->ucb$l_tt_putnxt();	// Buffer character
-  if (sts<0) goto	l90;	// check		// LSS burst 
-  if (sts>0) goto	l100;   // check 		// GTR single character
- l80:	tpd=tz; if	(TTY$M_TP_XOFF&	// See if XOFFED is so then
+  signed int sts=tty->ucb$l_tt_putnxt(&inp_char,tty);	// Buffer character
+  if (sts<0) {	// check		// LSS burst 
+    tty=tz;
+    tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;	// Signal burst
+  }
+  if (sts>0) {   // check 		// GTR single character
+    tty=tz;
+    tty->ucb$w_tt_hold = inp_char;		// Store character in tank
+    tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal character in tank
+  }
+  tpd=tz; if	(TTY$M_TP_XOFF&	// See if XOFFED is so then
 			 tpd->ucb$b_tp_stat) goto l120;	// stop input and check for echoed data
- send_num--;			// Decrease number to send in burst
- if (send_num<=0) goto	l110;			// LEQ block done see if request done
- inp_char=*buf++;		// Get next character
- goto	l70;			// Send next character
- l90:
- tty=tz;
- tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;	// Signal burst
- goto	l80;			// Continue processing
- l100:
- tty=tz;
- tty->ucb$w_tt_hold = inp_char;		// Store character in tank
- tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal character in tank
- goto	l80;			// Continue processing
+  send_num--;			// Decrease number to send in burst
+  if (send_num<=0) goto	l110;			// LEQ block done see if request done
+  inp_char=*buf++;		// Get next character
+  goto	l70;			// Send next character
 
  //
  // See if this request is done or if more to do
  //
  l110:
- if	(send_chr>=send_tot)			// All done
-   goto	l120;			// GEQ done so check for echo
+ if	(send_chr<send_tot)			// All done
+   {			// GEQ done so check for echo
 
-#if	defined	VMS_V4
- ENBINT
-#else
-   DEVICEUNLOCK();	// More in request release lock 
+     DEVICEUNLOCK();	// More in request release lock 
 #if 0
- LOCKADDR=ucb$l_dlck(tz), - ; and go back and get it
-				NEWIPL=(SP)+,	-	;
- PRESERVE=YES		;
-#endif
+     LOCKADDR=ucb$l_dlck(tz), - ; and go back and get it
+				    NEWIPL=(SP)+,	-	;
+     PRESERVE=YES		;
 #endif
 
- buf	 = i->irp$l_qio_p1;		// Restore users buffer address
- goto	l20;			// 
+     buf	 = i->irp$l_qio_p1;		// Restore users buffer address
+     goto	l20;			// 
+   }
 
  //
  // See if need to start up pending read
@@ -826,29 +799,21 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  if 	((TTY$M_TANK_PREMPT|	// If anything is in hold
 	  TTY$M_TANK_HOLD|	//  start output
 	  TTY$M_TANK_BURST)&	//
-	 tty->ucb$w_tt_hold==0)	//
-   goto	l140;			// Otherwise, finish up
- l130:
-#if	defined	VMS_V4
- BBC	#UCB$V_BSY,	-	// PZ ready to take data 
-   pz->ucb$w_sts,l140;	;
-#else
- if	(UCB$M_BSY &	-	// PZ ready to take data 
-	 ((struct _ucb *)pz)->ucb$l_sts==0) goto l140;	//
-#endif
- // Get IRP address
- tz		 = pz;		// Get PZ UCB address
- IOC$INITIATE(((struct _ucb *)pz)->ucb$l_irp, tz);		// Now start PZ read 
- l140:
+	 tty->ucb$w_tt_hold)	//
+   {			// Otherwise, finish up
 
-#if	defined	VMS_V4
- ENBINT
-#else
+     if	(UCB$M_BSY &	-	// PZ ready to take data 
+	 ((struct _ucb *)pz)->ucb$l_sts) {	//
+ // Get IRP address
+       tz		 = pz;		// Get PZ UCB address
+       ioc$initiate(((struct _ucb *)pz)->ucb$l_irp, tz);		// Now start PZ read 
+     }
+   }
+
    DEVICEUNLOCK	();	// Done release lock 
 #if 0
  LOCKADDR=ucb$l_dlck(pz), - ; NOTE PZ & TZ lock are the same
 				NEWIPL=(SP)+		;
-#endif
 #endif
 
  tpd=tz;
@@ -859,12 +824,11 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  // Finish up the read
  //
  l150:
- //POPR	#^M<R3,R4,R5>		// Restore IRP, PCB, and UCB 
  l160:
  {}
  int R=	send_chr<<16;		// Move number of bytes INPUT
  R|=	SS$_NORMAL;		// Everything is just fine
- return EXE$FINISHIOC(R,i,p,u);		// Complete the I/O request
+ return exe$finishioc(R,i,p,u);		// Complete the I/O request
 
  //+
  // Special code to deal with input while xoffed.
@@ -879,10 +843,9 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
    l170:          
  if	(send_chr>=send_tot)			// All done?
    goto	l150;			// Yes, a normal termination
- //POPR	#^M<R3,R4,R5>		// Restore IRP, PCB, and UCB
  R=	send_chr<<16;		// Move number of bytes INPUT
  R|=SS$_DATAOVERUN;	// Cannot input more data 
- return EXE$FINISHIOC(R,i,p,u);		// Complete the I/O request
+ return exe$finishioc(R,i,p,u);		// Complete the I/O request
 }
 
 #if 0
@@ -920,77 +883,59 @@ int PN$CANCEL(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   signed int index=ctl$gl_ccbbase-c;
   int sts;
   ioc_std$cancelio(index,i,p,u);			// Call the cancel routine
-#if	defined	VMS_V4
-  BBC	#UCB$V_CANCEL,tz->ucb$w_sts,l10;	// Branch if not for this guy
-#else
-  if	(UCB$M_CANCEL&tz->ucb$l_sts==0) goto l10;	// Branch if not for this guy
-#endif
-  R1=0;
-  sts=	SS$_ABORT;			// Status is request canceled
-#if	defined	VMS_V4
-  BICW	#<UCB$M_BSY!UCB$M_CANCEL>,-	;
-  tz->ucb$w_sts			// Clear unit status flags
-#else
+  if	(UCB$M_CANCEL&tz->ucb$l_sts) {	// Branch if not for this guy
+    R1=0;
+    sts=	SS$_ABORT;			// Status is request canceled
     tz->ucb$l_sts&=~(UCB$M_BSY|UCB$M_CANCEL);			// Clear unit status flags
-#endif
-  ioc$reqcom(sts,R1,tz);			// Complete request
- l10:	if	(tz->ucb$l_refc)			// Last Deassign
-   goto	l100;				// No, just exit
+    ioc$reqcom(sts,R1,tz);			// Complete request
+  }
+  if	(tz->ucb$l_refc)			// Last Deassign
+    return;				// No, just exit
   //
   // Last DEASSIGN we need to get rid of AST's 
   //
-  //pushr	#^M<r2, r3, r4, r5, r7>
   R6			 = index;		// Save the Channel number
   real_tz=tz;
   tz=	real_tz->ucb$l_pz_xucb;		// Switch to TZ UCB
   if (tz==0) goto	l20;				// if not there, skip
   real_tz=tz;
   acb_p=&	real_tz->ucb$l_tz_xon_ast;		// Get XON list head address
-  if	(*acb_p==0)			// Any ast to deliver
-    goto	l11;				// EQL 0 do not flush it
-  com_std$flushattns(p,tz,index,acb_p);		// Flush it
- l11:	real_tz= tz; acb_p=&real_tz->ucb$l_tz_xoff_ast;	// Get XOFF list head address
- if	(*acb_p==0)			// Any ast to deliver
-   goto	l12;				// EQL 0 do not flush it
- com_std$flushattns(p,tz,index,acb_p);		// Flush it
- l12:	real_tz=tz; acb_p=&real_tz->ucb$l_tz_set_ast;		// Get SET_LINE list head address
- if	(*acb_p==0)			// Any ast to deliver
-   goto	l13;				// EQL 0 do not flush it
- com_std$flushattns(p,tz,index,acb_p);		// Flush it
- //
- // Do a DISCONNECT on the TZ device.
- //
- l13:
- real_tz=tz; real_tz->ucb$l_tz_xucb=0;		// Clear backlink to PZ device
-#if	defined	VMS_V4
- bisw2	#UCB$M_DELETEUCB, r5->ucb$w_sts ; Set it to go bye-bye
-					    bicw2	#UCB$M_ONLINE,tz->ucb$w_sts	// Mark offline
-					    bicb2	#UCB$M_INT, r5->ucb$w_sts	// Don't expect interrupt
-#else
-					    tz->ucb$l_sts|=	UCB$M_DELETEUCB;  // Set it to go bye-bye
- tz->ucb$l_sts&=~UCB$M_ONLINE;	// Mark offline
- tz->ucb$l_sts&=~UCB$M_INT; 	// Don't expect interrupt
-#endif
- tty=tz;
- R1=	tty->ucb$l_tt_logucb;		// Look at logical term UCB
- if	(((struct _ucb *)R1)->ucb$l_refc)			// See if TZ has any references
-   goto	l15;				// If so, go and do disconnect
- IOC$DELETE_UCB();		// if not, delete the UCB
- goto	l20;
- l15:	R0=0;				// indicate that we must hangup
- tty=tz;
- R1=	tty->ucb$l_tt_class;
- ((struct _tt_class *)R1)->class_disconnect();		// Force disconnect
- l20:	//popr	#^M<r2, r3, r4, r5, r7>		// Switch back to PZ UCB
- tz=u;
- real_tz=tz;
- real_tz->ucb$l_pz_xucb=0;		// Clear link to deleted TZ
-#if	defined	VMS_V4
- bisw2	#UCB$M_DELETEUCB, r5->ucb$w_sts	// Set our own delete bit
-#else
-   u->ucb$l_sts|=UCB$M_DELETEUCB;	// Set our own delete bit
-#endif
- l100:	return;
+  if	(*acb_p)			// Any ast to deliver
+    // EQL 0 do not flush it
+    com_std$flushattns(p,tz,index,acb_p);		// Flush it
+  real_tz= tz; acb_p=&real_tz->ucb$l_tz_xoff_ast;	// Get XOFF list head address
+  if	(*acb_p)			// Any ast to deliver
+    // EQL 0 do not flush it
+    com_std$flushattns(p,tz,index,acb_p);		// Flush it
+  real_tz=tz; acb_p=&real_tz->ucb$l_tz_set_ast;		// Get SET_LINE list head address
+  if	(*acb_p)			// Any ast to deliver
+    // EQL 0 do not flush it
+    com_std$flushattns(p,tz,index,acb_p);		// Flush it
+  //
+  // Do a DISCONNECT on the TZ device.
+  //
+
+  real_tz=tz; real_tz->ucb$l_tz_xucb=0;		// Clear backlink to PZ device
+  tz->ucb$l_sts|=	UCB$M_DELETEUCB;  // Set it to go bye-bye
+  tz->ucb$l_sts&=~UCB$M_ONLINE;	// Mark offline
+  tz->ucb$l_sts&=~UCB$M_INT; 	// Don't expect interrupt
+  tty=tz;
+  R1=	tty->ucb$l_tt_logucb;		// Look at logical term UCB
+  if	(((struct _ucb *)R1)->ucb$l_refc==0) {			// See if TZ has any references
+    // If so, go and do disconnect
+    ioc$delete_ucb();		// if not, delete the UCB
+    goto	l20;
+  }	
+  R0=0;				// indicate that we must hangup
+  tty=tz;
+  R1=	tty->ucb$l_tt_class;
+  ((struct _tt_class *)R1)->class_disconnect();		// Force disconnect
+ l20:
+  tz=u;
+  real_tz=tz;
+  real_tz->ucb$l_pz_xucb=0;		// Clear link to deleted TZ
+  u->ucb$l_sts|=UCB$M_DELETEUCB;	// Set our own delete bit
+  return;
 }
 
 #if 0
@@ -1059,16 +1004,11 @@ int PN$CLONE_INIT(struct _ucb * u) {
   //+ ---
   //	Ignore inits on UNIT #0 (the template PZ UCB)
   //- ---
-  if	(u->ucb$w_unit)		//UNIT #0??
-    goto	l10;				//No: Initialize
-  return;					//Yes: Return
- 
- l10:	//PUSHR	#^M<R0,R1,R2,R4,R6,R7,R8>
-#if	defined	VMS_V4
-  Bicw2	#UCB$M_DELETEUCB,R2->ucb$w_sts	// Clear ucbdelete - dec
-#else
-    u->ucb$l_sts&=~UCB$M_DELETEUCB;	// Clear ucbdelete - dec
-#endif
+  if	(u->ucb$w_unit==0)		//UNIT #0??
+    return;					//Yes: Return
+  //No: Initialize
+
+  u->ucb$l_sts&=~UCB$M_DELETEUCB;	// Clear ucbdelete - dec
 
   //
   // Find the associated device.
@@ -1085,16 +1025,14 @@ int PN$CLONE_INIT(struct _ucb * u) {
   // String address for TZA
   // String length
   int sts=SEARCHDEV(ioc$gl_devlist, TZSTRING, TZLENGTH, &search_ddb);			// Find the DDB
-  if (sts) goto	l20;				// Device not found
+  if (sts) return;				// Device not found
   sts=	SEARCHUNIT(search_ddb,0,&search_ucb);			// Search for specific unit
-  if (sts) goto	l30;				// unit found
- l20:	//POPR	#^M<R0,R1,R2,R4,R6,R7,R8>	// NOT FOUND: Return
-  return;
+  if (sts==0) return;				// NOT FOUND: Return
 	
   //
   // Create the PTY, R1 has template UCB of TZ device
   //
- l30:	//PUSHL	R5				// Save R5
+
   R0	 = u->ucb$l_ddb;		// Find UNIT #0 UCB FOR PZ DEV.
   R0=R0->ddb$l_ucb;
   // check. is R0 meaningless?
@@ -1102,39 +1040,31 @@ int PN$CLONE_INIT(struct _ucb * u) {
   sts=ioc_std$clone_ucb(search_ucb,&new);			// Clone UCB
  
   R1			 = new;		// Put PTY UCB back into R1
-  //POPL	R5				// Restore R5
-  if (BLISSIF(sts)) goto l40;				// WIN!!! (big deal.)
-  //+ ---
-  //	CREATE_UCB failed, mark our PZ device offline
-  //- ---
-#if	defined	VMS_V4
-  BICW2	#UCB$M_ONLINE,R5->ucb$w_sts	// Mark offline
-#else
+  if (BLISSIFNOT(sts)) {				// WIN!!! (big deal.)
+    //+ ---
+    //	CREATE_UCB failed, mark our PZ device offline
+    //- ---
     u->ucb$l_sts &= ~UCB$M_ONLINE;		// Mark offline
-#endif
-  goto	l100;				// And return
+    return;
   //+ ---
   //	PTY UCB created successfully, link the UCBs together
   //- ---
- l40:	tz=u; tz->ucb$l_pz_xucb	 = new;		// Store associated UCB
- tz=new; tz->ucb$l_tz_xucb	 = u;		// Store the other one back
- new->ucb$l_pid=0;			// Clear the owner PID in PTY
- new->ucb$l_refc=0;			// Reference count is ZERO
-#if	defined	VMS_V4
- Bicw2	#UCB$M_DELETEUCB,R1->ucb$w_sts	// Inhibit deletion
-#else
-   new->ucb$l_sts&=~UCB$M_DELETEUCB;	// Inhibit deletion
-#endif
- u->ucb$l_devdepend=new->ucb$w_unit;		// Set associated TZ unit
- // number in PZ devdepend
- //+ ---
- //	Call the PTY unit init routine
- //- ---
- R0	 = new->ucb$l_ddt;		// Get DDT
- R0	 = ((struct _ddt *)R0)->ddt$l_unitinit;		// Get Unit Init Addr in DDT
- extern ioc$return();
- if	(R0!=ioc$return)			// Null Address??
-   goto	l50;				// No: Call it
+  }
+  tz=u; tz->ucb$l_pz_xucb	 = new;		// Store associated UCB
+  tz=new; tz->ucb$l_tz_xucb	 = u;		// Store the other one back
+  new->ucb$l_pid=0;			// Clear the owner PID in PTY
+  new->ucb$l_refc=0;			// Reference count is ZERO
+  new->ucb$l_sts&=~UCB$M_DELETEUCB;	// Inhibit deletion
+  u->ucb$l_devdepend=new->ucb$w_unit;		// Set associated TZ unit
+  // number in PZ devdepend
+  //+ ---
+  //	Call the PTY unit init routine
+  //- ---
+  R0	 = new->ucb$l_ddt;		// Get DDT
+  R0	 = ((struct _ddt *)R0)->ddt$l_unitinit;		// Get Unit Init Addr in DDT
+  extern ioc$return();
+  if	(R0!=ioc$return)			// Null Address??
+    goto	l50;				// No: Call it
 #if 0
  // not needed anymore?
  R0	 = new->ucb$l_crb;		// Yes: Look in the CRB
@@ -1142,20 +1072,18 @@ int PN$CLONE_INIT(struct _ucb * u) {
  if (R0==0)	l100;				// No: Unit init routine
 #endif
  
- l50:	//PUSHL	R5				// Save R5
+ l50:
  {}
  // R5 = PTY UCB
  void (*fn)();
  fn=R0;
  fn(new);  // check				// CALL THE UNIT INIT ROUTINE
- p		 = ctl$gl_pcb;		// Use current PCB
+ p = ctl$gl_pcb;		// Use current PCB
  struct _orb * orb	 = new->ucb$l_orb;		// Fetch ORB address
  orb->orb$l_owner = p->pcb$l_uic;		// Set device owner
  orb->orb$b_flags|=ORB$M_PROT_16;	// Indicate using SOGW device protection
  orb->orb$w_prot&=~0xFF;		// Make device S:O:RWLP
- //POPL	R5				// Restore R5
 
- l100:	//POPR	#^M<R0,R1,R2,R4,R6,R7,R8>
  return;
 }
 
@@ -1188,7 +1116,9 @@ int SEARCHDEV(struct _ddb * ddb,char * string, int strlen) {				// Search for de
   char * locstr;
   char loclen;
  l10:	ddb = ddb->ddb$l_link;		// Get address of next ddb
-  if (ddb==0) goto	l20;			// If eql end of list
+  if (ddb==0) 			// If eql end of list
+ 				// indicate search failure
+    return 1; // inverted error coding
   locstr=&ddb->ddb$t_name;	// Get address of generic device name
   loclen=*locstr++;		// Calculate len of string to compare
   if 	(loclen!=strlen)			// Length of names match?
@@ -1196,8 +1126,6 @@ int SEARCHDEV(struct _ddb * ddb,char * string, int strlen) {				// Search for de
   if (strncmp(locstr,string,strlen))		// Compare device names
     goto	l10;			// If neq names do not match
   return 0;
- l20:				// indicate search failure
-  return 1; // inverted error coding
 }
 
 #if 0 
@@ -1277,7 +1205,7 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   struct _tz_ucb * tz;
   struct _tty_ucb * tty;
   struct _ucb * ucb2;
-  char chr;
+  long chr;
   int len;
 #if 0
   .ENABLE LSB
@@ -1312,30 +1240,22 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  //
  // No Pending Data - Look for next character
  //
-#if	defined	VMS_V4
- BICB	#UCB$M_INT, u->ucb$w_sts	// Clear interrupt expected
-#else
-   u->ucb$l_sts&=~UCB$M_INT; 	// Clear interrupt expected
-#endif
+ u->ucb$l_sts&=~UCB$M_INT; 	// Clear interrupt expected
  //
  // Call class driver for more output
  //
- ((struct _tty_ucb *)u)->ucb$l_tt_getnxt();	// Get the next character
+ long cc;  
+ ((struct _tty_ucb *)u)->ucb$l_tt_getnxt(&chr,&cc,u);	// Get the next character
  if	(((struct _tty_ucb *)u)->ucb$b_tt_outype==-1)
-   l1:	goto	PZ_START_BURST;	// Burst specified
+   	goto	PZ_START_BURST;	// Burst specified
  if (((struct _tty_ucb *)u)->ucb$b_tt_outype==-0) goto PZ_DONE;		// None
  goto	BUFFER_CHAR;		// Buffer the character
  //
  // Output queue exhausted
  PZ_DONE:
  u = ((struct _tz_ucb *)u)->ucb$l_tz_xucb;		// Switch UCBs to PZ UCB
-#if	defined	VMS_V4
- BBC	#UCB$V_BSY,-		// If not BSY then ignore
-   u->ucb$w_sts,l47;	// the char
-#else
  if	(UCB$M_BSY&		// If not BSY then ignore
 	 u->ucb$l_sts==0) goto l47;	// the char
-#endif
  irp = u->ucb$l_irp;		// Restore IRP
  if	(irp->irp$l_bcnt!=	// Any characters moved
 	 u->ucb$l_bcnt)
@@ -1362,13 +1282,8 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  //
  BUFFER_CHAR:
  u = ((struct _tz_ucb *)u)->ucb$l_tz_xucb;		// Switch UCBs to PZ UCB
-#if	defined	VMS_V4
- BBC	#UCB$V_BSY,-
-   u->ucb$w_sts, l60;	// If no PZ IRP, ignore
-#else
  if	(UCB$M_BSY&
 	 u->ucb$l_sts==0) goto l60;	// If no PZ IRP, ignore
-#endif
  char * c =u->ucb$l_svapte;
  *c=chr; // check	// Add character to buffer
  u->ucb$l_svapte++;	// Bump pointer
@@ -1393,10 +1308,9 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  goto	l62;
  l61:	len = ucb2->ucb$l_bcnt;		// Just output what we can
  
- l62:	//PUSHR	#^M<R0,R1,R2,R3,R4,R5>	// MOVC3 destroys these registers
+ l62:
  memcpy(ucb2->ucb$l_svapte,((struct _tty_ucb *)u)->ucb$l_tt_outadr,len);
  // Transfer burst to the buffer
- //POPR	#^M<R0,R1,R2,R3,R4,R5>	// Restore the registers
  
  ucb2->ucb$l_svapte+=(long)len;	// Update output pointer
  ucb2->ucb$l_bcnt-=(long)len;	// Update output count
@@ -1421,12 +1335,7 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  // Deleted PZ_STOP2 routine and changed bit clear to byte operation - DEC 
  //
  PZ_STOP:
-#if	defined	VMS_V4
- BICB	#UCB$M_INT, -
-   u->ucb$w_sts		// Reset output active
-#else
    u->ucb$l_sts&=~UCB$M_INT;	// Reset output active
-#endif
  goto	PZ_DONE;			// DON'T go for anymore
 					// Or we'll get into an infinite loop
  //
@@ -1477,7 +1386,6 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   char devtype;
   short bufsiz;
   int devdep;
-  //PUSHL	R5
   char * buf;
   int size;
   struct _acb ** acb_p;
@@ -1516,7 +1424,6 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   //
   //	Set the mode
   //
-  //PUSHR	#^M<R6,R7,R8,R10,R11>
   buf	 = i->irp$l_qio_p1;		// ADDRESS USER BUFFER
   size=i->irp$l_qio_p2;		// GET SIZE ARGUMENT
   if (size==0) goto	l1;			// Default ?
@@ -1527,44 +1434,31 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   if	(bufsiz>511)			// Test it
     goto	l4;			// Too big ?
   if (bufsiz!=511) goto	l5;	// check		// Too small ?
- l4:	//POPR	#^M<R6,R7,R8,R10,R11>
+ l4:
   goto	BAD_SET	;		// Bad size
  l5:	devdep=((long *)buf)[1];		// Page/characteristics
-  if	(size<12)			// DID HE ASK FOR 2ND ?
-    goto	l10;			// NO
-  devdep2=((long *)buf)[2];		// Get extended char.
- l10:
+  if	(size>=12)			// DID HE ASK FOR 2ND ?
+    devdep2=((long *)buf)[2];		// Get extended char.
   tz = ((struct _tty_ucb *)tz)->ucb$l_tt_logucb;		// Switch to logical device if one exists
-#if	defined	VMS_V4
-  DSBINT	tz->ucb$b_dipl
-#else
 #if 0
     DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
 					     LOCKIPL=ucb$b_dipl(tz),-; RAISE IPL
 									 SAVIPL=-(SP)		// SAVE CURRENT IPL
 #endif
-#endif
 
-									 tz->ucb$b_devtype = devtype;		// BUILD TYPE, AND BUFFER SIZE
+  tz->ucb$b_devtype = devtype;		// BUILD TYPE, AND BUFFER SIZE
   tz->ucb$w_devbufsiz = bufsiz;		// Buffer size
   tz->ucb$l_devdepend = devdep;		// Set 1ST CHARACTERISTICS LONGWORD
-  if	(size<12)			// DID HE ASK FOR 2ND ?
-    goto	l12;			// NO
-  devdep2&=~TT2$M_DCL_MAILBX;	// Kill bad bits
-  tz->ucb$l_devdepnd2 = devdep2;		// Set 2nd CHARACTERISTICS LONGWORD
- l12:
-#if	defined	VMS_V4
-  ENBINT
-#else
+  if	(size>=12) {			// DID HE ASK FOR 2ND ?
+    devdep2&=~TT2$M_DCL_MAILBX;	// Kill bad bits
+    tz->ucb$l_devdepnd2 = devdep2;		// Set 2nd CHARACTERISTICS LONGWORD
+  }
 #if 0
     DEVICEUNLOCK LOCKADDR=ucb$l_dlck(tz),- ; RELEASE INTERLOCK
 					       NEWIPL=(SP)+,	-	// RESTORE IPL
 					       CONDITION=RESTORE	;
 #endif
-#endif
-  //POPR	#^M<R6,R7,R8,R10,R11> ; RESTORE SCRATCH REGISTERS
-  //POPL	R5			// restore PZ UCB
- l15:	sts=	SS$_NORMAL;		// Damn, it worked!
+    sts=	SS$_NORMAL;		// Damn, it worked!
   return exe$finishioc(sts,i,p,u);		// Complete request
   //;;JC------------------- END Modified by J. Clement -------------------------
 
@@ -1581,10 +1475,9 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   acb_p=&	((struct _tz_ucb*)tz)->ucb$l_tz_set_ast;	// SET_LINE AST list head address
 
  SET_CMN:
-  //POPL	R5
   //	i->irp$l_qio_p2=0;		// Remove user param (Is this needed?)
   com_std$setattnast(i,p,u,acb_p);	// Insert into AST list
-  return EXE$FINISHIOC(sts,i,p,u);		// Complete request
+  return exe$finishioc(sts,i,p,u);		// Complete request
 
  SET_ACC_PORT:
 
@@ -1599,10 +1492,8 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
     goto	SET_ACC_PORT_FINISH;	// ooops...
 
   tz = ((struct _tz_ucb *)tz)->ucb$l_tz_xucb;		// Switch to PZ UCB
-  //pushr   #^M<R1,R2,R3,R4,R5>	// save state (against MOVC5)
   //	movc5	P2(AP),@P1(AP),#0,#ACCPOR_SIZE,R5->ucb$a_rem_host_str
   memcpy(((struct _tz_ucb *)tz)->ucb$a_rem_host_str,i->irp$l_qio_p1,i->irp$l_qio_p2); // check, zero the rest
-  //popr    #^M<R1,R2,R3,R4,R5>
 
   struct _tz_ucb * tz_real = tz;
   tz_real->ucb$a_rem_host_len = i->irp$l_qio_p2;		// It's a counted string.
@@ -1610,15 +1501,11 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   // Point to the string.
   tz = ((struct _tz_ucb *)tz)->ucb$l_pz_xucb;		// Switch to TZ UCB
 
-#if	defined	VMS_V4
-  DSBINT	tz->ucb$b_dipl
-#else
 #if 0
     DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
 					     LOCKIPL=ucb$b_dipl(tz),-; RAISE IPL
 									 SAVIPL=-(SP),	-	// SAVE CURRENT IPL
 									 PRESERVE=YES		;
-#endif
 #endif
   struct _tty_ucb * tty;
   tty=tz;
@@ -1630,15 +1517,11 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   tty->ucb$w_tt_prtctl|=TTY$M_PC_ACCPORNAM;
   sts=SS$_NORMAL;		// Damn, it worked!
 
-#if	defined	VMS_V4
-  ENBINT
-#else
 #if 0
     DEVICEUNLOCK LOCKADDR=ucb$l_dlck(tz),- ; RELEASE INTERLOCK
 					       NEWIPL=(SP)+,	-	// RESTORE IPL
 					       CONDITION=RESTORE, -	;
   PRESERVE=YES		;
-#endif
 #endif
 
  SET_ACC_PORT_FINISH:
@@ -1689,21 +1572,20 @@ int PN$FDTSENSEM (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
   int devdep;
   int size, *buf, spec_chr, devdep2, speed, parity;
   VERIFY_SENSE(&size,&buf,i);		// VERIFY USER STORAGE
-  //PUSHR	#^M<R5,R6,R7,R8,R10,R11>
   tz = ((struct _tz_ucb *)tz)->ucb$l_pz_xucb;		// Switch to TZ UCB
-  if (tz==0) goto	PN$SENSE_ERR;		// Have UCB
+  if (tz==0) {		// Have UCB
+    //	If no TZ device abort with SS$_NOSUCHDEV
+    // Save error reason
+    return exe_std$abortio(i,p,u,SS$_NOSUCHDEV);		// Abort request
+  }
   tz = ((struct _tty_ucb *)tz)->ucb$l_tt_logucb;		// Switch to logical device if one exists
   spec_chr=GET_DCL();			// BUILD SPECIAL CHARACTERISTICS
 
-#if	defined	VMS_V4
-  DSBINT	tz->ucb$b_dipl
-#else
 #if 0
-    DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
-					     LOCKIPL=ucb$b_dipl(tz),-; RAISE IPL
-									 SAVIPL=-(SP),	-	// SAVE CURRENT IPL
-									 PRESERVE=YES		;
-#endif
+  DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
+					   LOCKIPL=ucb$b_dipl(tz),-; RAISE IPL
+								       SAVIPL=-(SP),	-	// SAVE CURRENT IPL
+								       PRESERVE=YES		;
 #endif
   devclass = tz->ucb$b_devclass;		// BUILD TYPE, AND BUFFER SIZE
   devdep = tz->ucb$l_devdepend;		//RETURN 1ST CHARACTERISTICS LONGWORD
@@ -1713,32 +1595,21 @@ int PN$FDTSENSEM (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
   parity=(long)parity&~0xFF000000;		// ZERO HIGH BYTE
   parity = ((struct _tty_ucb*)tz)->ucb$b_tt_crfill;		// AND CR/LF FILL
 
-#if	defined	VMS_V4
-  ENBINT
-#else
 #if 0
-    DEVICEUNLOCK LOCKADDR=ucb$l_dlck(tz),- ; RELEASE INTERLOCK
-					       NEWIPL=(SP)+,	-	// RESTORE IPL
-					       CONDITION=RESTORE, -	;
+  DEVICEUNLOCK LOCKADDR=ucb$l_dlck(tz),- ; RELEASE INTERLOCK
+					     NEWIPL=(SP)+,	-	// RESTORE IPL
+					     CONDITION=RESTORE, -	;
   PRESERVE=YES		;
-#endif
 #endif
 
   *buf=devclass;			// RETURN USER DATA
   buf[1]=devdep;		//
-  if	(size<12)			// DID HE ASK FOR 2ND ?
-    goto	l10;			// NO
-  buf[2]=devdep2;		//
- l10:			// RETURN IOSB DATA
+  if	(size>=12)			// DID HE ASK FOR 2ND ?
+    buf[2]=devdep2;		//
+  // RETURN IOSB DATA
   //expanded	goto	CMN_EXIT;		// EXIT RETURNING R0,R1	
-  //	POPR	#^M<tz,R6,R7,R8,R10,R11> ; RESTORE SCRATCH REGISTERS
   return exe$finishio(speed|SS$_NORMAL,parity,i,p,u);	// check	// COMPLETE REQUEST IOSB WORD 0,1
   
-  //	If no TZ device abort with SS$_NOSUCHDEV
- PN$SENSE_ERR:
-  //POPR	#^M<tz,R6,R7,R8,R10,R11>
-  // Save error reason
-  exe_std$abortio(i,p,u,SS$_NOSUCHDEV);		// Abort request
 }
 
 #if 0
@@ -1782,22 +1653,22 @@ int PN$FDTSENSEC(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   struct _ucb * tz=u;
   int size, *buf, spec_chr, devdep2, speed, parity;
   VERIFY_SENSE(&size,&buf,i);		// VERIFY USER STORAGE
-  //PUSHR	#^M<R5,R6,R7,R8,R10,R11>
   tz = ((struct _tz_ucb *)tz)->ucb$l_pz_xucb;		// Switch to TZ UCB
-  if (tz==0)	goto PN$SENSE_ERR;		// Have UCB
+  if (tz==0)	{		// Have UCB
+    //	If no TZ device abort with SS$_NOSUCHDEV
+    // Save error reason
+    return exe_std$abortio(i,p,u,SS$_NOSUCHDEV);		// Abort request
+  }
+
   spec_chr=GET_DCL();			// BUILD SPECIAL CHARACTERISTICS
 
-#if	defined	VMS_V4
-  DSBINT	tz->ucb$b_dipl
-#else
 #if 0
-    DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
-					     LOCKIPL=ucb$b_dipl(tz),-; RAISE IPL
-									 SAVIPL=-(SP)		// SAVE CURRENT IPL
-#endif
+  DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
+					   LOCKIPL=ucb$b_dipl(tz),-; RAISE IPL
+								       SAVIPL=-(SP)		// SAVE CURRENT IPL
 #endif
 
-									 devclass=((struct _tty_ucb *)tz)->ucb$b_tt_detype; // check //BUILD TYPE, AND BUFFER SIZE
+  devclass=((struct _tty_ucb *)tz)->ucb$b_tt_detype; // check //BUILD TYPE, AND BUFFER SIZE
   devclass=	DC$_TERM;		// BUILD DEVICE CLASS
   devdep = ((struct _tty_ucb *)tz)->ucb$l_tt_dechar;		//RETURN 1ST CHARACTERISTICS LONGWORD
   devdep2=	((struct _tty_ucb *)tz)->ucb$l_tt_decha1&~spec_chr; // check // AND 2ND LONGWORD (IF REQUESTED)
@@ -1806,51 +1677,42 @@ int PN$FDTSENSEC(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   parity	&=~0xFF000000;		// ZERO HIGH BYTE
   parity = ((struct _tty_ucb *)tz)->ucb$b_tt_decrf;		// AND CR/LF FILL
 
-#if	defined	VMS_V4
-  ENBINT
-#else
 #if 0
-    DEVICEUNLOCK LOCKADDR=ucb$l_dlck(tz),- ; RELEASE INTERLOCK
-					       NEWIPL=(SP)+,	-	// RESTORE IPL
-					       CONDITION=RESTORE	;
-#endif
+  DEVICEUNLOCK LOCKADDR=ucb$l_dlck(tz),- ; RELEASE INTERLOCK
+					     NEWIPL=(SP)+,	-	// RESTORE IPL
+					     CONDITION=RESTORE	;
 #endif
 
   *buf=devclass;			// RETURN USER DATA
   buf[1]=devdep;		//
-  if 	(size<12)			// DID HE ASK FOR 2ND ?
-    goto	l10;			// NO
-  buf[2]=devdep2;		;
- l10:			// RETURN IOSB DATA
+  if 	(size>=12)			// DID HE ASK FOR 2ND ?
+    buf[2]=devdep2;		;
+  // RETURN IOSB DATA
   //expanded	goto	CMN_EXIT;		// EXIT RETURNING R0,R1	
-  //	POPR	#^M<tz,R6,R7,R8,R10,R11> ; RESTORE SCRATCH REGISTERS
   return exe$finishioc(speed|SS$_NORMAL,parity,i,p,u);	// check 	// COMPLETE REQUEST IOSB WORD 0,1
   //duplicated
- PN$SENSE_ERR:
-  //POPR	#^M<R5,R6,R7,R8,R10,R11>
-  // Save error reason
-  return exe_std$abortio(i,p,u,SS$_NOSUCHDEV);		// Abort request
+
 }
 
 //	THIS ROUTINE BUILDS DCL PRIVATE CHARACTERISTICS
 
 int GET_DCL(struct _ucb * ucb) {
   int spec_chr=0;			// INIT RETURN ARGUMENT
-  if	(ucb->ucb$l_amb==0)	// ANY ASSOCIATED MAILBOX?
-    goto	l10;			// NO
-  spec_chr|=	TT2$M_DCL_MAILBX;	// YES, SO BUILD CHARACTERISTIC
- l10:	return spec_chr;
+  if	(ucb->ucb$l_amb)	// ANY ASSOCIATED MAILBOX?
+    spec_chr|=	TT2$M_DCL_MAILBX;	// YES, SO BUILD CHARACTERISTIC
+  return spec_chr;
+}
+
   
   //	Common exit path for PN$FDTSENSEM and PN$FDTSENSEC
 #if 0
  CMN_EXIT:
-  //	POPR	#^M<R5,R6,R7,R8,R10,R11> ; RESTORE SCRATCH REGISTERS
   R0=	SS$_NORMAL;
   return EXE$FINISHIO();		// COMPLETE REQUEST IOSB WORD 0,1
   
 #endif
   //	If no TZ device abort with SS$_NOSUCHDEV
-}
+
 //	This routine verifies that the user buffer is accessable
 
 int VERIFY_SENSE(int **outsize, int **buf, struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {				// SENSE CHAR
@@ -1865,12 +1727,11 @@ int VERIFY_SENSE(int **outsize, int **buf, struct _irp * i, struct _pcb * p, str
   *outsize=8;			// INIT DEFAULT ARGUMENT SIZE
   (*buf)[0]=0; (*buf)[1]=0;			// INIT RETURN DATA
   size=i->irp$l_qio_p2;		// GET SIZE ARGUMENT
-  if	(size<12)			// ROOM FOR SECOND DEVDEPEND SPECIFIED?
-    goto	l10;			// NO
-  // not yet IFNOWRT	#12,(buf),l20;		// CHECK IF WRITE ACCESS
-  (*outsize)=12;			// SAVE ARGUMENT SIZE
-  (*buf)[2]=0;			// INIT RETURN FIELD
- l10:
+  if	(size>=12) {			// ROOM FOR SECOND DEVDEPEND SPECIFIED?
+    // not yet IFNOWRT	#12,(buf),l20;		// CHECK IF WRITE ACCESS
+    (*outsize)=12;			// SAVE ARGUMENT SIZE
+    (*buf)[2]=0;			// INIT RETURN FIELD
+  }
   return;
  l20:
   // SET ERROR STATUS

@@ -20,6 +20,8 @@
 #include<linux/pci.h>
 #include<system_service_setup.h>
 #include<descrip.h>
+#include<ttyucbdef.h>
+#include<ttyvecdef.h>
 
 #include<linux/blkdev.h>
 
@@ -30,31 +32,6 @@ static void  startio3 (struct _irp * i, struct _ucb * u) {
   ioc$reqcom(SS$_NORMAL,0,u);
   return;
 };
-
-static void  startio2 (struct _irp * i, struct _ucb * u) { 
-  u->ucb$l_fpc=startio3;
-  exe$iofork(i,u);
-  return;
-}
-
-static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
-{
-  struct _irp * i;
-  struct _ucb * u;
-  void (*func)();
-
-  if (intr_blocked(20))
-    return;
-  regtrap(REG_INTR,20);
-  setipl(20);
-  /* have to do this until we get things more in order */
-  i=globali;
-  u=globalu;
-
-  func=u->ucb$l_fpc;
-  func(i,u);
-  myrei();
-}
 
 static struct _fdt tt$fdt = {
   fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
@@ -97,6 +74,31 @@ static struct _ddt tt$ddt = {
   ddt$l_mntv_sqd: mntv_sqd,
   ddt$l_aux_storage: aux_storage,
   ddt$l_aux_routine: aux_routine
+};
+
+  extern tty$getnextchar();
+  extern tty$putnextchar();
+  extern tty$setup_ucb();
+  extern tty$ds_tran();
+  extern tty$readerror(); 
+  extern tty$class_disconnect();
+  extern tty$class_fork();
+  extern tty$powerfail();
+
+int class_tables=0; // dummy yet
+int tty$tables=0; // dummy yet
+
+struct _tt_class tt$class = {
+  class_getnxt: tty$getnextchar,
+  class_putnxt: tty$putnextchar,
+  class_setup_ucb: tty$setup_ucb,
+  class_ds_tran: tty$ds_tran,
+  class_ddt: &tt$ddt,
+  class_readerror: tty$readerror, 
+  class_disconnect: tty$class_disconnect,
+  class_fork: tty$class_fork,
+  class_powerfail: tty$powerfail,
+  class_tables: &tty$tables
 };
 
 int tty$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
@@ -156,6 +158,7 @@ int tt$init_tables() {
   ini_dpt_struc_init(&tt$dpt, tt$struc_init);
   ini_dpt_struc_reinit(&tt$dpt, tt$struc_reinit);
   ini_dpt_ucb_crams(&tt$dpt, 1/*NUMBER_CRAMS*/);
+  ini_dpt_vector(&tt$dpt, &tt$class);
   ini_dpt_end(&tt$dpt);
 
   ini_ddt_unitinit(&tt$ddt, tt$unit_init);

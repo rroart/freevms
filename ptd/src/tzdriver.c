@@ -492,35 +492,24 @@ void TZ$INITLINE(struct _ucb * ucb)				// RESET SINGLE LINE
   R0=&port_vector; // check TZ$VEC?		// Set TZ port vector table 
   CLASS_UNIT_INIT();			
   if	(ucb->ucb$w_unit==0)	// Skip initialization of TEMPLATE
-    goto	l40;			// Unit #0 = Template: Skip everything!
+    	return;			// Unit #0 = Template: Skip everything!
  
-#if	defined	VMS_V4
-  BBS	#UCB$V_POWER,ucb->ucb$w_sts,-	// Skip if powerfail recovery
-    l20;
-#else
   if	(UCB$M_POWER&ucb->ucb$l_sts)	// Skip if powerfail recovery
     goto l20;
-#endif
   R1	 = ((struct _tty_ucb *)ucb)->ucb$l_tt_logucb;		// Look at logical term UCB
-  if (R1==0)	goto l10;				// If none, then has no refs
+  if (R1 &&				// If none, then has no refs
 
-  if 	(R1->ucb$l_refc)		// See if TZ has any references
+      R1->ucb$l_refc)		// See if TZ has any references
     goto	l20;				// If so don't reinit ucb
- l10:	SET_FORCED_CHARS();		// Set required characteristics
+  SET_FORCED_CHARS(ucb);		// Set required characteristics
   tty=ucb;
   tty->ucb$l_tt_decha1|=TT2$M_HANGUP;	// Set default characteristics
   R1	 = tty->ucb$l_tt_class;		// Address class vector table
 
-#if	defined	VMS_V4
-  BISW	#<TTY$M_PC_NOTIME!	-	// Tell class driver not to time out,
-    TTY$M_PC_MULTISESSION>,-	// and do not count as user 
-    ucb->ucb$w_tt_prtctl		;
-#else
   tty=ucb;
   tty->ucb$w_tt_prtctl|=	TTY$M_PC_NOTIME|// Tell class driver not to time out,
     TTY$M_PC_NOMODEM|	-	// do not allow modem processing,
     TTY$M_PC_MULTISESSION;	// and do not count as user 
-#endif
 
   ucb->ucb$l_devdepend &= ~TT$M_MODEM;		// Do not allow modem bit to ever be  
   tty->ucb$l_tt_dechar &= ~TT$M_MODEM;		// set.
@@ -529,16 +518,12 @@ void TZ$INITLINE(struct _ucb * ucb)				// RESET SINGLE LINE
   R2=R1;
   R2->class_setup_ucb();		// Init ucb fields
  l20:
-#if	defined	VMS_V4
-  BBC	#UCB$V_POWER,ucb->ucb$w_sts,l40;	// Powerfail handler
-#else
-  if	(UCB$M_POWER&ucb->ucb$l_sts==0) goto l40;	// Powerfail handler
-#endif
+  if	(UCB$M_POWER&ucb->ucb$l_sts==0) return;	// Powerfail handler
   R0	 = tty->ucb$l_tt_class;
   R2=R1;
   R2->class_powerfail();
- 
- l40:	return;
+  
+  return;
 }
  
  
@@ -564,11 +549,14 @@ void TZ$SET_LINE(struct _ucb * ucb) {
   struct _tz_ucb * tz = ucb;
   struct _tty_ucb * tty = ucb;
   acb_p=&tz->ucb$l_tz_set_ast;		// Get list head address
-  if	(*acb_p==0)				// See if list is empty
-    goto	SET_FORCED_CHARS;		// Empty do not deliver ASTs
-  com$delattnast(acb_p, ucb);		// Delliver all ASTs 
+  if	(*acb_p)				// See if list is empty
+    			// Empty do not deliver ASTs
+    com_std$delattnast(acb_p, ucb);		// Delliver all ASTs 
+  SET_FORCED_CHARS(ucb);
+}
 
- SET_FORCED_CHARS:
+void SET_FORCED_CHARS(struct _ucb * ucb) {
+  struct _tty_ucb * tty = ucb;
   //
   // This little routine sets certain required characteristics.  It is called by
   // the INITLINE code to set them at the outset and by the SETLINE code to reset
@@ -577,11 +565,6 @@ void TZ$SET_LINE(struct _ucb * ucb) {
   ucb->ucb$l_devdepnd2 &= ~(TT2$M_DMA | TT2$M_AUTOBAUD);
   tty->ucb$l_tt_decha1 &= ~(TT2$M_DMA | TT2$M_AUTOBAUD);
 		
-#if	defined	VMS_V4
-  ucb->ucb$l_devdepend &= ~TT$M_MODEM;		// Do not allow modem bit to ever be  
-  tty->ucb$l_tt_dechar &= ~TT$M_MODEM;		// set.
-#endif
-
   return;
 }
  
@@ -618,19 +601,18 @@ void TZ$SET_LINE(struct _ucb * ucb) {
 	static int indent_dummy;
 void TZ$DISCONNECT(struct _ucb * ucb, int r0) {
   int R3;
-  if (r0) goto l99;			// If no hangup, skip all this.
- 
-  //PUSHR	#^M<R0,R1,R2,R3,R4,R5>	// Save the registers
+  if (r0) return;			// If no hangup, skip all this.
  
   struct _tz_ucb * tz;
   ucb = tz->ucb$l_tz_xucb;		// Get PZ UCB
-  if (ucb==0) goto	l10;			// If disconnected, ignore
-  R3 = ucb->ucb$l_amb;		// Load Associated Mailbox of PZ UCB
-  if (R3==0) goto	l10;			// If EQL then no mailbox
-  int R4 =	MSG$_TRMHANGUP;	// Load Message Type
-  EXE$SNDEVMSG();		// Send the message
- l10:	//POPR	#^M<R0,R1,R2,R3,R4,R5>	// Restore everything
- l99:	return;
+  if (ucb) {			// If disconnected, ignore
+    R3 = ucb->ucb$l_amb;		// Load Associated Mailbox of PZ UCB
+    if (R3) {			// If EQL then no mailbox
+      int R4 =	MSG$_TRMHANGUP;	// Load Message Type
+      exe_std$sndevmsg();		// Send the message
+    }
+  }
+ return;
 }
  
  
@@ -659,80 +641,64 @@ void TZ$DISCONNECT(struct _ucb * ucb, int r0) {
 //	R5 = UCB ADDRESS
 //--
 	static int dummy2;
-void TZ$STARTIO(char R3, struct _ucb * ucb, int CC) {				// START I/O ON UNIT
-  if (CC) goto	l20;			// Single character
+
+void TZ$STARTIO(char R3, struct _ucb * u, int CC) {				// START I/O ON UNIT
+  struct _ucb * ucb = u;
   struct _tty_ucb * tty=ucb;
-  tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;	// Signal burst active
-		
- l10:
+  if (CC) {			// Single character
+    tty->ucb$w_tt_hold = R3;		// Save output character
+    tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal charater in tank
+  } else {
+    tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;	// Signal burst active
+  }
+
   //
   // Here we must do something to notify our mate device that
   // there is data to pick up
   //
-  //PUSHR	#^M<R0,R2,R3,R4,R5>	// Save TZ UCB
   ucb = ((struct _tz_ucb *)ucb)->ucb$l_tz_xucb;		// Switch to PZ UCB
-  if (ucb==0) goto	l17;			// PZ is disconnected: skip
+  if (ucb) {			// PZ is disconnected: skip
 
-#if	defined	VMS_V4
-  DSBINT	ucb->ucb$b_fipl
-    BBC	#UCB$V_BSY,-		// If the device isn't busy,
-    ucb->ucb$w_sts,l15;	// then dont do i/o
-#else
-  FORKLOCK();	// Take out PZ device FORK LOCK
+    FORKLOCK();	// Take out PZ device FORK LOCK
 #if 0
-  LOCK=ucb$b_flck(ucb), -	;
-  SAVIPL=-(SP),	-	;
-  PRESERVE=NO
+    LOCK=ucb$b_flck(ucb), -	;
+    SAVIPL=-(SP),	-	;
+    PRESERVE=NO
 #endif
-    if	(UCB$M_BSY&		// If the device isn't busy,
-	 ucb->ucb$l_sts==0) goto l15;	// then dont do i/o
-#endif
+      if	(UCB$M_BSY&		// If the device isn't busy,
+		 ucb->ucb$l_sts) 	// then dont do i/o
 
-  // Get IRP address
-  IOC$INITIATE(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
- l15:
+	ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
 
-#if	defined	VMS_V4
-  ENBINT
-#else
     FORKUNLOCK();			// Release PZ drvice FORK LOCK
 #if 0
-  LOCK=ucb$b_flck(ucb), -	;
-  NEWIPL=(SP)+,	-	;
-  PRESERVE=NO,	-	;
-  CONDITION=RESTORE	;
-#endif
+    LOCK=ucb$b_flck(ucb), -	;
+    NEWIPL=(SP)+,	-	;
+    PRESERVE=NO,	-	;
+    CONDITION=RESTORE	;
 #endif
 		
- l16:	//POPR	#^M<R0,R2,R3,R4,R5>	// Switch back to TZ UCB
   return;
+  } else {
   //
   // Come here if we have no PZ control device to send stuff to.  Just
   // suck all the data we can out of the class driver and throw it away.
   //
- l17:	//POPR	#^M<R0,R2,R3,R4,R5>	// Switch back to TZ UCB
-  tty=ucb;
-  tty->ucb$w_tt_hold&= ~(	TTY$M_TANK_HOLD|	// Nothing in progress now
+    ucb=u;
+    tty=ucb;
+    tty->ucb$w_tt_hold&= ~(	TTY$M_TANK_HOLD|	// Nothing in progress now
 				TTY$M_TANK_BURST|
 				TTY$M_TANK_PREMPT);
-
- l18:
-#if	defined	VMS_V4
-  BICB	#UCB$M_INT, ucb$w_sts(ucb)
-#else
+  }
+  do {
     ucb->ucb$l_sts&=~UCB$M_INT; 
-#endif
-  tty=ucb;
-  tty->ucb$l_tt_getnxt();
-  if (tty->ucb$b_tt_outype)
-    goto	l18;
+    tty=ucb;
+    long chr, cc;
+    tty->ucb$l_tt_getnxt(&chr,&cc,ucb);
+  } while (tty->ucb$b_tt_outype);
+
   return;
  
- l20:
-  tty->ucb$w_tt_hold = R3;		// Save output character
-  tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal charater in tank
-			
-  goto	l10;
 }
 
 #if 0
@@ -766,7 +732,6 @@ ASSUME  TTY$V_TP_XOFF EQ TTY$V_TP_DLLOC+1
 #endif
 
 void TZ$XOFF(void * vec, int R3, struct _ucb *ucb) {
-	  //PUSHR	#^M<R0,R1,R4> 		// Save registers
   struct _tz_ucb * tz=ucb;
   struct _acb * acb_p=&tz->ucb$l_tz_xoff_ast ; //Get address of AST list
   if	(R3!=0x13)		// Is XOFF
@@ -777,7 +742,6 @@ void TZ$XOFF(void * vec, int R3, struct _ucb *ucb) {
 }
 
 void TZ$XON (void * vec, int R3, struct _ucb * ucb) {
-  //PUSHR	#^M<R0,R1,R4>		// Save registers
   struct _tz_ucb * tz=ucb;
   struct _acb ** acb_p=&tz->ucb$l_tz_xon_ast ; //Get address of AST list
   if (R3!=0x11)		// Is it XON
@@ -795,27 +759,22 @@ void TZ$XON_XOFF_CMN(struct _ucb * ucb, struct _acb ** acb_p, int R3) {			// Com
   struct _tty_ucb * tty=ucb;
   long * R0;
   short * s;
-  if	(*acb_p==0)		// See if AST present
-    goto	l30;			// EQL no AST to deliver
-  R0		 = acb_p;		// Copy list address
+  if	(*acb_p) {		// See if AST present
+    // EQL no AST to deliver
+    R0		 = acb_p;		// Copy list address
 
- l10:
-  R0=*R0;			// Get next entry
-  if (R0==0) goto	l20;			// All done so deliver ASTs
-  //	MOVZBW	R3,ACB$L_KAST+4(R0)	// Store new param value
-  s=(short*)R0+3; // check
-  *s=R3;
-  // was: MOVZBW	R3,ACB$L_KAST+6(R0)	// Store new param value
-  goto	l10;			// Look for another entry
- l20:
-  com$delattnast(acb_p, ucb);	// Deliver the ASTs
- l30:
-  //POPR	#^M<R0,R1,R4>		// Restore registers
-#if	defined	VMS_V4
-  BISB	#UCB$M_INT,R5->ucb$w_sts
-#else
-    ucb->ucb$l_sts|=UCB$M_INT;
-#endif
+  l10:
+    R0=*R0;			// Get next entry
+    if (R0==0) goto	l20;			// All done so deliver ASTs
+    //	MOVZBW	R3,ACB$L_KAST+4(R0)	// Store new param value
+    s=(short*)R0+3; // check
+    *s=R3;
+    // was: MOVZBW	R3,ACB$L_KAST+6(R0)	// Store new param value
+    goto	l10;			// Look for another entry
+  l20:
+    com_std$delattnast(acb_p, ucb);	// Deliver the ASTs
+  }
+  ucb->ucb$l_sts|=UCB$M_INT;
   tty->ucb$w_tt_hold|=TTY$M_TANK_PREMPT;	// Schedule xon
   tty->ucb$b_tt_prempt		 = R3;		// Save character
   TZ$CONT(ucb);
@@ -825,13 +784,8 @@ void TZ$XON_XOFF_CMN(struct _ucb * ucb, struct _acb ** acb_p, int R3) {			// Com
 // Resume any active output
 //
 void TZ$RESUME (struct _ucb * ucb) {
-#if	defined	VMS_V4
-//;;	BISW	#UCB$M_INT,ucb->ucb$w_sts
-  ucb->ucb$w_sts|=UCB$M_INT;
-#else
 //;;	BISL	#UCB$M_INT,ucb->ucb$l_sts
   ucb->ucb$l_sts&=~UCB$M_INT;
-#endif
   struct _tty_ucb * tty;
   tty=ucb;
   tty->ucb$w_tt_hold&=~TTY$M_TANK_STOP;	// No longer stopped
@@ -851,47 +805,31 @@ void TZ$CONT (struct _ucb * ucb) {
 }
 
 void TZ$FORK(struct _ucb * ucb) {
-  //PUSHR	#^M<R0,R1,R2,R3,R4,R5>	// Save TZ UCB
   struct _tz_ucb * tz;
   tz=ucb;
   ucb = tz->ucb$l_tz_xucb;		// Switch to PZ UCB
-  if (ucb==0) goto	l15;			// PZ is disconnected: skip
+  if (ucb==0) return;			// PZ is disconnected: skip
 
-#if	defined	VMS_V4
-  DSBINT	ucb->ucb$b_fipl
-#else
-    FORKLOCK();	// Take out PZ device FORK LOCK
+  FORKLOCK();	// Take out PZ device FORK LOCK
 #if 0
   LOCK=ucb$b_flck(ucb), -	;
   SAVIPL=-(SP),	-	;
   PRESERVE=NO
 #endif
-#endif
 
-#if	defined	VMS_V4
-    BBC	#UCB$V_BSY,-		// If the device isn't busy,
-    ucb->ucb$w_sts,l10;	// then dont do i/o
-#else
-  if (UCB$M_BSY&		// If the device isn't busy,
-      ucb->ucb$l_sts==0) goto l10;	// then dont do i/o
-#endif
-  // Get IRP address
-  ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
- l10:
+    if (UCB$M_BSY&		// If the device isn't busy,
+	ucb->ucb$l_sts)	// then dont do i/o
+      // Get IRP address
+      ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
 
-#if	defined	VMS_V4
-  ENBINT
-#else
-    FORKUNLOCK();	// Release PZ device FORK LOCK
+  FORKUNLOCK();	// Release PZ device FORK LOCK
 #if 0
   LOCK=ucb$b_flck(ucb), -	;
   NEWIPL=(SP)+,	-	;
   PRESERVE=NO,	-	;
   CONDITION=RESTORE	;
 #endif
-#endif
 
- l15:	//POPR	#^M<R0,R1,R2,R3,R4,R5>	// Switch back to TZ UCB
   return;
 }
 

@@ -20,6 +20,8 @@
 #include<linux/pci.h>
 #include<system_service_setup.h>
 #include<descrip.h>
+#include<ftucbdef.h>
+#include<ftrddef.h>
 
 #include<linux/blkdev.h>
 
@@ -62,7 +64,7 @@ static struct _fdt ft$fdt = {
 };
 
 /* more yet undefined dummies */
-int ft$startio (int,int);
+int ft$startio (int a,int b) { };
 static void  unsolint (void) { };
 static void  cancel (void) { };
 static void  ioc_std$cancelio (void) { };
@@ -70,7 +72,7 @@ static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
 static void  unitinit (void) { };
-int  ft$wrtstartio (int,int);
+int  ft$wrtstartio (int a,int b) { };
 static void  mntver (void) { };
 static void  cloneducb (void) { };
 static void  mntv_sssc (void) { };
@@ -80,7 +82,7 @@ static void  aux_storage (void) { };
 static void  aux_routine (void) { };
 
 static struct _ddt ft$ddt = {
-  ddt$l_start: fty$startio,
+  ddt$l_start: ft$startio,
   ddt$l_unsolint: unsolint,
   ddt$l_fdt: &ft$fdt,
   ddt$l_cancel: cancel,
@@ -152,7 +154,7 @@ int ft$init_tables() {
   ini_dpt_name(&ft$dpt, "FTDRIVER");
   ini_dpt_adapt(&ft$dpt, 0);
   ini_dpt_defunits(&ft$dpt, 1);
-  ini_dpt_ucbsize(&ft$dpt,sizeof(struct _ucb));
+  ini_dpt_ucbsize(&ft$dpt,sizeof(struct _ft_ucb));
   ini_dpt_struc_init(&ft$dpt, ft$struc_init);
   ini_dpt_struc_reinit(&ft$dpt, ft$struc_reinit);
   ini_dpt_ucb_crams(&ft$dpt, 1/*NUMBER_CRAMS*/);
@@ -182,12 +184,12 @@ int ft_iodb_vmsinit(void) {
   struct _ddb * ddb=&ft$ddb;
   struct _crb * crb=&ft$crb;
 #endif 
-  struct _ucb * ucb=kmalloc(sizeof(struct _ucb),GFP_KERNEL);
+  struct _ucb * ucb=kmalloc(sizeof(struct _ft_ucb),GFP_KERNEL);
   struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,sizeof(struct _ucb));
+  bzero(ucb,sizeof(struct _ft_ucb));
   bzero(ddb,sizeof(struct _ddb));
   bzero(crb,sizeof(struct _crb));
 
@@ -196,6 +198,8 @@ int ft_iodb_vmsinit(void) {
   init_ucb(&ft$ucb, &ft$ddb, &ft$ddt, &ft$crb);
   init_crb(&ft$crb);
 #endif
+
+  ucb -> ucb$w_size = sizeof(struct _ft_ucb); // temp placed
 
   init_ddb(ddb,&ft$ddt,ucb,"fta");
   init_ucb(ucb, ddb, &ft$ddt, crb);
@@ -249,5 +253,10 @@ int ft_vmsinit(void) {
 
 }
 
-/*  LocalWords:  include
- */
+int ft$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+
+}
+
+int ft$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+
+}
