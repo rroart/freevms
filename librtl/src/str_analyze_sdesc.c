@@ -28,7 +28,7 @@
  *	starting address of the data for a variety of
  *	string descriptor classes
  */
-void str$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
+short int str$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
 	unsigned short* word_integer_length, char** data_address)
 {
 	/*
@@ -39,7 +39,7 @@ void str$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
 		DOSIGNAL(STR$_ILLSTRCLA);
 		*word_integer_length = 0;
 		*data_address = NULL;
-		return;
+		lib$stop(STR$_ILLSTRCLA);
 	}
 
 	/*
@@ -70,5 +70,6 @@ void str$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
 		*word_integer_length = input_descriptor->dsc$w_length;
 		*data_address = input_descriptor->dsc$a_pointer;
 	}
+	return *word_integer_length;
 }
 
