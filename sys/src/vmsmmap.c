@@ -992,7 +992,7 @@ void exit_mmap(struct mm_struct * mm)
 	release_segments(mm);
 	spin_lock(&mm->page_table_lock);
 	mpnt = current->pcb$l_phd->phd$ps_p0_va_list_flink;
-	mpnt = 0;
+	//	mpnt = 0;
 	// find right phd, otherwise we have got some leak
 	mm->mmap = mm->mmap_cache = NULL;
 	mm->mm_rb = RB_ROOT;
@@ -1002,12 +1002,11 @@ void exit_mmap(struct mm_struct * mm)
 	mm->locked_vm = 0;
 
 	flush_cache_mm(mm);
-	while(0) {
-	//while (mpnt!=&current->pcb$l_phd->phd$ps_p0_va_list_flink) {
+	//while(0) {
+	while (mpnt!=&current->pcb$l_phd->phd$ps_p0_va_list_flink) {
 		struct _rde * next = mpnt->rde$ps_va_list_flink;
 		unsigned long start = mpnt->rde$pq_start_va;
-		unsigned long end = (mpnt->rde$pq_start_va + mpnt->rde$q_region_size);
-		unsigned long size = end - start;
+		unsigned long size = mpnt->rde$q_region_size;
 
 #if 0
 		if (mpnt->vm_ops) {
