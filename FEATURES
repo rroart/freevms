@@ -1,6 +1,8 @@
 scheduling (partly)
 asts (partly)
 timing (partly)
+event flags (partly)
+process control and communication (partly)
 
 syscalls:
 $asctim
@@ -9,6 +11,7 @@ $clref
 $dclast
 $forcex
 $gettim
+$hiber
 $numtim
 $readef
 $schdwk
