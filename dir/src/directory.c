@@ -196,6 +196,7 @@ char *dirquals[] = {"date","file","size",NULL};
 
 unsigned dir(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     char res[NAM$C_MAXRSS + 1],rsa[NAM$C_MAXRSS + 1];
     int sts,options;
     int filecount = 0;
@@ -345,6 +346,7 @@ char *copyquals[] = {"binary",NULL};
 
 unsigned copy(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts,options;
     struct _namdef inam = cc$rms_nam;
     struct _fabdef ifab = cc$rms_fab;
@@ -446,6 +448,7 @@ char *exportquals[] = {"binary",NULL};
 
 unsigned export(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts,options;
     struct _namdef nam = cc$rms_nam;
     struct _fabdef fab = cc$rms_fab;
@@ -563,6 +566,7 @@ unsigned export(int argc,char *argv[],int qualc,char *qualv[])
 
 unsigned import(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts;
     FILE *fromf;
     fromf = fopen(argv[1],"r");
@@ -601,6 +605,7 @@ unsigned import(int argc,char *argv[],int qualc,char *qualv[])
 
 unsigned diff(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts;
     struct _fabdef fab = cc$rms_fab;
     FILE *tof;
@@ -650,6 +655,7 @@ unsigned diff(int argc,char *argv[],int qualc,char *qualv[])
 
 unsigned typ(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts;
     int records = 0;
     struct _fabdef fab = cc$rms_fab;
@@ -686,6 +692,7 @@ unsigned typ(int argc,char *argv[],int qualc,char *qualv[])
 
 unsigned search(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts = 0;
     int filecount = 0;
     int findcount = 0;
@@ -786,6 +793,7 @@ unsigned search(int argc,char *argv[],int qualc,char *qualv[])
 
 unsigned del(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts = 0;
     struct _namdef nam = cc$rms_nam;
     struct _fabdef fab = cc$rms_fab;
@@ -847,6 +855,7 @@ unsigned test(int argc,char *argv[],int qualc,char *qualv[])
 
 unsigned extend(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts;
     struct _fabdef fab = cc$rms_fab;
     fab.fab$l_fna = argv[1];
@@ -870,6 +879,7 @@ unsigned extend(int argc,char *argv[],int qualc,char *qualv[])
 
 unsigned show(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     unsigned sts = 1;
     if (keycomp(argv[1],"default")) {
         unsigned short curlen;
@@ -960,6 +970,7 @@ char *mouquals[] = {"write",NULL};
 
 unsigned domount(int argc,char *argv[],int qualc,char *qualv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     char *dev = argv[1];
     char *lab = argv[2];
     int sts = 1,devices = 0;
