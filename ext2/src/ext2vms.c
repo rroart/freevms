@@ -747,16 +747,20 @@ int exttwo_read_writevb(struct _irp * i) {
   struct _iosb iosb;
   struct _vcb * vcb = i->irp$l_ucb->ucb$l_vcb;
   struct _fcb * fcb = x2p->primary_fcb; // ???? is this right
+  struct inode * inode = fcb->fcb$l_primfcb;
+  int factor = vms_block_factor(inode->i_blkbits);
   struct _wcb * wcb = &fcb->fcb$l_wlfl;
   int blocks=(i->irp$l_qio_p2+511)/512;
-  int kbn=(i->irp$l_qio_p3-1)>>1;
-  int rest=(i->irp$l_qio_p3-1)&1;
-  lbn=f11b_map_vbn(kbn,wcb);
+  int e2bn=(i->irp$l_qio_p3-1)/factor;
+  int rest=(i->irp$l_qio_p3-1)&(factor-1);
+  lbn=f11b_map_vbn(e2bn,wcb);
   if (i->irp$v_fcode==IO$_WRITEVBLK) {
+    panic("tried to do an unfished write\n");
     exttwo_write_block(vcb,i->irp$l_qio_p1,lbn,blocks,&iosb);
   } else {
-    buffer=exttwo_read_block(vcb,lbn,blocks*2,&iosb);
-    memcpy(i->irp$l_qio_p1,buffer+512*rest,512);
+    buffer=exttwo_read_block(vcb,lbn*factor+rest,blocks,&iosb);
+    //memcpy(i->irp$l_qio_p1,buffer+512*rest,512);
+    memcpy(i->irp$l_qio_p1,buffer,512);
     vfree(buffer);
   }
   //exttwo_io_done(i);
