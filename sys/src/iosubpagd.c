@@ -45,7 +45,7 @@ int ioc$search(struct return_values *r, void * devnam) {
   int outlen;
   char * outagain;
   memset(out,0,255); // suspect outlen is not quite operative
-  int sts = ioc_std$trandevnam(devnam, 0, out, outlen, &outagain);
+  int sts = ioc_std$trandevnam(devnam, 0, out, &outlen, &outagain);
   /* ddb d not needed? */
   /* real device, no logical. do not have logicals yet */
   /* return ucb or 0 */
