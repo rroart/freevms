@@ -246,6 +246,16 @@ struct struct_args {
   unsigned long s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16;
 };
 
+struct struct_getjpi {
+  unsigned int efn;
+  unsigned int *pidadr;
+  void * prcnam;
+  void *itmlst;
+  struct _iosb *iosb;
+  void (*astadr)();
+  unsigned long long astprm;
+};
+
 #endif
 
 

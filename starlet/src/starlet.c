@@ -319,6 +319,18 @@ int sys$create_region_32  ( unsigned long length, unsigned int region_prot, unsi
   return INLINE_SYSCALL($create_region_32,1,&s);
 }
 
+int sys$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long long astprm) {
+  struct struct_getjpi s;
+  s.efn=efn;
+  s.pidadr=pidadr;
+  s.prcnam=prcnam;
+  s.itmlst=itmlst;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  return INLINE_SYSCALL($getjpi,1,&s);
+}
+
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
 int sys$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }
 int sys$create (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($create,3,fab,err,suc); }
@@ -363,3 +375,16 @@ int sys$bintim  (void *timbuf, unsigned long long *timadr) {
   return INLINE_SYSCALL3($bintim,2,timbuf,timadr);
 }
 
+#if 0
+struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
+struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
+struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
+				   0, 0, 0, 0,
+			       VMSTIME_ZERO, VMSTIME_ZERO,
+			       VMSTIME_ZERO, VMSTIME_ZERO,
+			       VMSTIME_ZERO, VMSTIME_ZERO};
+struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
+struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
+struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
+struct _xabkeydef cc$rms_xabkey = {XAB$C_KEY,XAB$C_KEYLEN};
+#endif
