@@ -654,14 +654,5 @@
 #define DT$_DMA_520 6
 #define DT$_T3270 7
  
-#pragma __member_alignment __restore
-#ifdef __INITIAL_POINTER_SIZE			 
-#pragma __required_pointer_size __restore		 
-#endif
-#ifdef __cplusplus
-    }
-#endif
-#pragma __standard
- 
 #endif 
  
