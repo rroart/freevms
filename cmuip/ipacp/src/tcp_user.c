@@ -568,7 +568,7 @@ void Cancel_TCB( TCB , Idx , Uargs , P2) (void)
 // If so check if this is the right (matching IO channel numbers) connection
 // to cancel.
 
-    IF (TCB->User_ID EQLU Uargs->VC$PID) AND
+    IF (TCB->User_ID == Uargs->VC$PID) AND
        (TCB->Process_IO_Chan == Uargs->VC$PIOchan) THEN
 	{
 	XLOG$FAO(LOG$USER,"!%T TCP$Cancel: TCB=!XL!/",0,TCB);
@@ -599,10 +599,10 @@ void Cancel_TCB( TCB , Idx , Uargs , P2) (void)
 		};
 	    };
 
-	RETURN 1
+	return 1
 	};
 
-    RETURN 0
+    return 0
     };
 
 
@@ -773,7 +773,7 @@ TCP$TCB_Dump(LCID,RB)
 	QB;
 
     if (NOT VTCB_Indx_OK (LCID))
-	RETURN FALSE;		// Give failure (error) return
+	return FALSE;		// Give failure (error) return
 
     TCB = VTCB_ptr[LCID];
     RB->dm$tcb_addr = TCB;
@@ -789,7 +789,7 @@ TCP$TCB_Dump(LCID,RB)
 //    RB->dm$Conn_TimeOut = TCB->Connection_TimeOut - Now ;
 //    if (RB->dm$Conn_TimeOut LSS 0)
 !	RB->dm$Conn_TimeOut = 0;
-    if ((TCB->Connection_TimeOut GTRU Now))
+    if ((TCB->Connection_TimeOut > Now))
 	RB->dm$Conn_TimeOut = TCB->Connection_TimeOut - Now
     else
 	RB->dm$Conn_TimeOut = 0;
@@ -797,7 +797,7 @@ TCP$TCB_Dump(LCID,RB)
 //    RB->dm$RT_TimeOut = TCB->RX_TimeOut - Now ;
 //    if (RB->dm$RT_TimeOut LSS 0)
 !	RB->dm$RT_TimeOut = 0;
-    if ((TCB->RX_TimeOut GTRU Now))
+    if ((TCB->RX_TimeOut > Now))
 	RB->dm$RT_TimeOut = TCB->RX_TimeOut - Now
     else
 	RB->dm$RT_TimeOut = 0;
@@ -868,7 +868,7 @@ TCP$TCB_Dump(LCID,RB)
     RB->dm$rcv_nxt = TCB->rcv_nxt;
     RB->dm$rcv_wnd = TCB->rcv_wnd;
 
-    RETURN TRUE;
+    return TRUE;
     };
 
 //SBTTL "TCP$ABORT - User call to abort connection."
@@ -908,7 +908,7 @@ TCP$KILL(TCBidx)
 	RC;
 
     if ((RC=GET_TCB(TCBidx,TCB)) != SS$_NORMAL)
-	RETURN RC;
+	return RC;
 
     SELECTONE TCB->State OF
     SET
@@ -1077,7 +1077,7 @@ TCP$Deliver_User_Data(struct tcb_structure * tcb): NOVALUE (void)
 
 	TCB->RCV_DUptr = TCB->RCV_DUptr + Datasize;
 	if (TCB->RCV_Push_Flag)
-	    if ((TCB->RCV_DUptr - TCB->RCV_Pptr) GTRU 0)
+	    if ((TCB->RCV_DUptr - TCB->RCV_Pptr) > 0)
 		TCB->RCV_Push_Flag = FALSE;
 
 // Post user IO request as complete & successful. Return # of bytes
@@ -1336,7 +1336,7 @@ ISN_GEN=
 
     ISN = ISN+1;
     RVAL = (USER$Clock_Base()+.ISN)^16;
-    RETURN RVAL;
+    return RVAL;
     };
 
 //SBTTL "Queue_Send_Data: Queue a data bearing send request."

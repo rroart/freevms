@@ -604,7 +604,7 @@ NML$CANCEL(ASTPRM,ASTFLG,STATUS)
 
 // Return the count of requests found and deleted
 
-    RETURN RC;
+    return RC;
     };
 
 //SBTTL "NML$STEP - Examine the name lookup queue, calling coroutine"
@@ -773,9 +773,9 @@ NQE_ALLOC(NQE)
 // Verify that we should do this.
 
     if (SRVSTATE == SRV$DOWN)
-	RETURN NET$_NONS;
+	return NET$_NONS;
     if (NQE_COUNT GEQ NQE_QLIMIT)
-	RETURN NET$_NSQFULL;
+	return NET$_NSQFULL;
 
 // Allocate the block
 
@@ -783,7 +783,7 @@ NQE_ALLOC(NQE)
 //    RC = LIB$GET_VM(%REF(NQE_MAXSIZE),NQE);
     RC = LIB$GET_VM_PAGE(%REF((NQE_MAXSIZE / 512) + 1),NQE);
     XQL$FAO(LOG$MSG,"!%T NQE_ALLOC, NQE=!XL, RC=!XL!/",0,..NQE,RC);
-    RETURN RC;
+    return RC;
     };
 
 
@@ -809,7 +809,7 @@ NQE_DEALLOC(NQE) : NOVALUE (void)
 // Decrement count of allocated blocks and return success
 
     NQE_COUNT = NQE_COUNT - 1;
-    RETURN SS$_NORMAL;
+    return SS$_NORMAL;
     };
 
 NQE_ENQUEUE(NQE,QRYID,MSLEN,MSBUF) : NOVALUE (void)
@@ -905,9 +905,9 @@ NQE_XMIT(NQE)
 	{
 	XQL$FAO(LOG$MSG,"!%T NQE_XMIT failed, RC=!XL, NQE=!XL, ID=!XL!/",
 		0,RC,NQE,NQE->NQE$ID);
-	RETURN RC;
+	return RC;
 	};
-    RETURN SS$_NORMAL;
+    return SS$_NORMAL;
     };
 
 NQE_XMIT_DONE(NQE) : NOVALUE (void)
@@ -1212,7 +1212,7 @@ CHECK_SERVER (void)
     RC = $ASSIGN(DEVNAM = SRVMBXNAM,
 		 CHAN	= DEVCHN);
     if (NOT RC)
-	RETURN FALSE;
+	return FALSE;
 
 // Now, look for a process with the name "NAMRES"
 // N.B. NAMRES must run with the same group as IPACP for this to work. This is
@@ -1228,7 +1228,7 @@ CHECK_SERVER (void)
     if (NOT RC)
 	{
 	$DASSGN(CHAN	= DEVCHN);
-	RETURN FALSE;
+	return FALSE;
 	};
 
 // Got what we want. Set up the info & return.
@@ -1236,7 +1236,7 @@ CHECK_SERVER (void)
     XQL$FAO(LOG$MSG,"!%T NS is UP, PID is !XL!/",0,PID);
     SRVMBXCHN = DEVCHN;
     SRVPID = PID;
-    RETURN TRUE;
+    return TRUE;
     };
 
 }

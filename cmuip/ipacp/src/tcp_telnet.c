@@ -308,7 +308,7 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT create failed - CONECT table full!/",0);
 	OKINT;
-	RETURN 0;
+	return 0;
 	};
 
 // Create and initialize a new TCB
@@ -317,7 +317,7 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT TCB creation failed!/",0);
 	OKINT;
-	RETURN 0;
+	return 0;
 	};
 
 // Perform standard TCB initializations
@@ -348,7 +348,7 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
 // And return the TCB address
 
     OKINT;
-    RETURN TCB;
+    return TCB;
     };
 
 TELNET_OPEN_TIMEOUT(TCB) : NOVALUE (void)
@@ -498,7 +498,7 @@ TELNET_OPEN(TCB)
 	  "!%T Telnet_Open: LIB$GET_VM_PAGE failure for TCB=x!XL, RC=x!XL!/"
 	  ,0,TCB,RC);
 	TCB$DELETE(TCB);
-	RETURN FALSE;
+	return FALSE;
 	};
 
 // Clear out the TVT data block
@@ -524,7 +524,7 @@ TELNET_OPEN(TCB)
 		"!%T Telnet_Open:  PTY assign failure for TCB x!XL, RC=x!XL!/"
 		,0,TCB,RC);
 	    TCB$DELETE(TCB);
-	    RETURN FALSE;
+	    return FALSE;
 	};
 
 
@@ -578,7 +578,7 @@ TELNET_OPEN(TCB)
     if (NOT MBX_READ(TVT))
 	{
 	TCB$DELETE(TCB);
-	RETURN FALSE;
+	return FALSE;
 	};
 
 // Initialize buffer pointers
@@ -1406,7 +1406,7 @@ VOID NET_TO_PTY(TVT, CHR) (void)
 	    LOG$FAO("!%T TCB x!XL NET_TO_PTY: CHR = x!XB, PTY Buffer full!/",
 		0, TVT->TVT$TCB, CHR) ;
 	    };
-	RETURN ;
+	return ;
 	} ;
 
 //   Stuff character in PTY write buffer, update pointers
@@ -1802,7 +1802,7 @@ PTY_WRITE(TVT) : NOVALUE (void)
 	if ((TVT->TVT$WR_OPTR == TVT->TVT$WR_IPTR))
 	    {
 	    TVT->TVT$PWRITE = FALSE ;
-	    RETURN ;
+	    return ;
 	    } ;
 	// IPTR trailing OPTR, IPTR wrapped, compute linear size remaining
 	Byte_Count = TVT_TTY_BUFLEN - TVT->TVT$WR_OPTR ;
@@ -1964,9 +1964,9 @@ MBX_READ(TVT)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT MBX Read failure for TCB x!XL, RC=x!XL!/",
 		 0,TVT->TVT$TCB,RC);
-	RETURN FALSE;
+	return FALSE;
 	};
-    RETURN TRUE;
+    return TRUE;
     };
 
 MBX_READ_DONE(TVT) : NOVALUE (void)
@@ -1992,16 +1992,16 @@ MBX_READ_DONE(TVT) : NOVALUE (void)
 // Check the status - ignore cancel/abort
 
     RC = IOSB[0,0,16,0];
-    if (RC EQLU SS$_ABORT)
+    if (RC == SS$_ABORT)
 	RETURN;
-    if (RC EQLU SS$_CANCEL)
+    if (RC == SS$_CANCEL)
 	RETURN;
 
 // Check for null status - just reqeueue the read
 
 //    AST_IN_PROGRESS = TRUE;
 //    NOINT ;
-    if (RC EQLU 0)
+    if (RC == 0)
 	{
 	MBX_READ(TVT);
 !	AST_IN_PROGRESS = FALSE;

@@ -93,7 +93,7 @@ Make_Zone : NOVALUE (void)
 	Signal (Status);
 	};
     Mem_Stat();
-    RETURN (User_Zone)
+    return (User_Zone)
     };
 
 Get_Mem (Size, Block_A, Zone)
@@ -107,7 +107,7 @@ Get_Mem (Size, Block_A, Zone)
     XLOG$FAO(LOG$MEM,"!%T GET_MEM: Status: !SL, Size: !SL, Addr: !SL, Zone: !SL!/",
 	0, status, size, Block_A, Zone) ;
     Mem_Stat();
-    RETURN (Status)
+    return (Status)
     };
 
 Free_Mem (Size, Block_A, Zone)
@@ -119,7 +119,7 @@ Free_Mem (Size, Block_A, Zone)
     XLOG$FAO(LOG$MEM,"!%T FREE_MEM: Status: !SL, Size: !SL, Addr: !SL, Zone: !SL!/",
 	0, status, size, Block_A, Zone) ;
     Mem_Stat() ;
-    RETURN (Status)
+    return (Status)
     };
 
 Reset_Mem (Size, Block_A, Zone)
@@ -131,7 +131,7 @@ Reset_Mem (Size, Block_A, Zone)
     XLOG$FAO(LOG$MEM,"!%T RESET_MEM: Status: !SL Size: !SL, Addr: !SL, Zone: !SL!/",
 	0, status, size, Block_A, Zone) ;
     Mem_Stat() ;
-    RETURN (Status)
+    return (Status)
     };
 
 Mem_Stat : NOVALUE (void)

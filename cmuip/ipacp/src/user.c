@@ -524,7 +524,7 @@ IO$POST (IOSB, struct User_Default_Args * UArg): NOVALUE (void)
 	{
 	OPR$FAO("!%T No IRP, UCB=!XL Proto=!XB funct=!XB !/",0,
 		UArg->UD$UCB_Adrs,UArg->UD$Protocol,UArg->UD$funct);
-	RETURN FALSE
+	return FALSE
 	};
 
     $$KCALL(VMS_IO$POST,IOSB,IRP,UArg->UD$UCB_Adrs);
@@ -638,7 +638,7 @@ USER$ERR (struct User_Default_Args * Arg,Err)
 	if ($$LOGF(LOG$USER))
 	    LOG$FAO("!%T No IRP, UArg = !XL UCB=!XL Proto=!XB funct=!XB !/",0,
 		.ARG,ARG->UD$UCB_Adrs,ARG->UD$Protocol,ARG->UD$funct);
-	RETURN FALSE
+	return FALSE
 	};
 // Queue IRP to VMS I/O post-processor
 
@@ -650,7 +650,7 @@ USER$ERR (struct User_Default_Args * Arg,Err)
     if ($$LOGF(LOG$USER))
 	LOG$FAO("!%T User error return, RC = !XL!/",0,Err);
 	    
-    RETURN TRUE;
+    return TRUE;
     };
 
 
@@ -767,7 +767,7 @@ USER$Clock_Base (void)
 	Now: VECTOR->2;
 
     $GETTIM(TimAdr=Now);
-    RETURN (NOW->0^-20+NOW->1^12) && %x"7FFF";
+    return (NOW->0^-20+NOW->1^12) && %x"7FFF";
     };
 
 //SBTTL "Allocate a USER Local Port"
@@ -805,7 +805,7 @@ USER$GET_LOCAL_PORT(Pbase)
     rval = ..Pbase MOD User_LP_End;
     if (rval LSS User_LP_Start)
 	rval = rval+User_LP_Start;
-    RETURN rval && %X"7FFF";
+    return rval && %X"7FFF";
     };
 
 FORWARD ROUTINE
@@ -1573,8 +1573,8 @@ User$Privileged(PID)
 
     if (($GETJPIW(PIDADR=PID,ITMLST=JPI)))
 	if (PRVBUF->PRV$V_PHY_IO || PRVBUF->PRV$V_SETPRV)
-	    RETURN SS$_NORMAL;
-    RETURN NET$_NOPRV;
+	    return SS$_NORMAL;
+    return NET$_NOPRV;
     };
 
 
@@ -1604,7 +1604,7 @@ Check_ID(PID,ID)
 // Retrieve the UIC for the process
 
     if (NOT $GETJPIW(PIDADR=PID,ITMLST=JPI))
-	RETURN FALSE;
+	return FALSE;
 
 // Check the rights database for this user
 
@@ -1618,13 +1618,13 @@ Check_ID(PID,ID)
 	if (CURID == ID)
 	    {
 	    $FINISH_RDB(CONTXT = RDBCTX);
-	    RETURN TRUE;
+	    return TRUE;
 	    };
 	};
 
 // Didn't find it - punt.
 
-    RETURN FALSE;
+    return FALSE;
     };
 
 
@@ -1642,13 +1642,13 @@ USER$CHECK_ACCESS(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
 // If no access checking is enabled, then skip this routine
 
     if (ACCESS_FLAGS == 0)
-	RETURN SS$_NORMAL;
+	return SS$_NORMAL;
 
 // If we're checking acess for any network open, then check for INTERNET_ACCESS
 
     if (ACCESS_FLAGS<ACF$ALLOPENS>)
 	if (NOT CHECK_ID(PID,INTERNET_ID))
-	    RETURN NET$_NOINA;
+	    return NET$_NOINA;
 
 // If we're checking access to non-local hosts, then do so
 
@@ -1661,7 +1661,7 @@ X:	{
 	    if ((FRNHST && ACHOSTS[I,AC$MASK]) == ACHOSTS[I,AC$HOST])
 		LEAVE X;
 	if (NOT CHECK_ID(PID,ARPANET_ID))
-	    RETURN NET$_NOANA;
+	    return NET$_NOANA;
 	};
 
 // If the local port is privileged, then require special privilege
@@ -1671,11 +1671,11 @@ X:	{
 	    ((LCLPRT && %X"FFFF") <= Well_Known_LP_End) && FRNPRT == 0) OR
 	   (FRNPRT == WKS$SMTP) THEN
 	    if (NOT User$Privileged(PID))
-		RETURN NET$_NOPRV;
+		return NET$_NOPRV;
 
 // Passed all of the tests - let them have access to the network
 
-    RETURN SS$_NORMAL;
+    return SS$_NORMAL;
     };
 
 

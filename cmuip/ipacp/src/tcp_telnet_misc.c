@@ -481,7 +481,7 @@ Print (Control_string, P1)=
 	OUTLEN = Out_Desc->DSC$W_LENGTH,
 	OUTBUF = Out_Desc,
 	PRMLST = P1);
-    if (NOT Status) RETURN Status;
+    if (NOT Status) return Status;
     Send_2_Operator(Out_Desc)
     };
 
@@ -1257,7 +1257,7 @@ Linemode_SubOp_Mode ( Mask )
 				[DSC$A_POINTER]	= SubOption_Data);
 
     // If the ACK bit is set, don't do anything.
-    if (Mask<Option$K_LineMode_MODE_ACK,1>) RETURN SS$_NORMAL;
+    if (Mask<Option$K_LineMode_MODE_ACK,1>) return SS$_NORMAL;
 
     Mask = Mask && 3;	// mask the mask.
 
@@ -1318,7 +1318,7 @@ Process_SLC(Code,Modifier,Value,Reply_Desc)
 	struct $BBlock * Char_Def->SLC$K_Size;
 
     if ((Code LSS 0) || (Code > Option$K_Limemode_SLC_MaxOpt))
-	RETURN SS$_NORMAL;
+	return SS$_NORMAL;
 
     Level = Modifier<SLC$F_Level>;
     Char_Def = SLC_Table[Code,SLC$B_{ING] ;
@@ -1331,7 +1331,7 @@ Process_SLC(Code,Modifier,Value,Reply_Desc)
 	(Modifier<SLC$F_Ack)) THEN
 	{
 	Char_Def->SLC$B_CURRENT = Value;
-	RETURN SS$_NORMAL
+	return SS$_NORMAL
 	};
 
     // 3) "Do we agree?"

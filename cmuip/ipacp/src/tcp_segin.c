@@ -772,7 +772,7 @@ QUEUE_NETWORK_DATA(TCB,QB)
 		 "!%T QND: TCB aborted, drop QB !XL, seg !XL, SEQ !XL/!XL!/",
 		 0,QB,QB->NR$Buf,QB->NR$SEQ_Start,QB->NR$SEQ_End);
 	ts$abort_drops = ts$abort_drops+1;
-	RETURN ERROR;		// Deallocate this segment
+	return ERROR;		// Deallocate this segment
 	};
 
 // Set push flag and pointer if the segment has it on
@@ -796,7 +796,7 @@ QUEUE_NETWORK_DATA(TCB,QB)
 		"!%T QND: TCB rcv q full, drop QB !XL, seg !XL, SEQ !XL/!XL!/",
 		0,QB,QB->NR$Buf,QB->NR$SEQ_Start,QB->NR$SEQ_End);
 	ts$qfull_drops = ts$qfull_drops+1;
-	RETURN ERROR;		// Deallocate this segment
+	return ERROR;		// Deallocate this segment
 	};
 
 // Append the segment data to the queue and deallocate it
@@ -812,7 +812,7 @@ QUEUE_NETWORK_DATA(TCB,QB)
 // Adjust the receive window to reflect the resources used by the data bearing
 // portion of this segment.
 
-    if ((TCB->Rcv_Wnd LSSU QB->NR$SEQ_count))
+    if ((TCB->Rcv_Wnd < QB->NR$SEQ_count))
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T Segin(queue_net_data) RCV_WND (!UL) < SEQ_CNT (!UL)!/",
 	    0, TCB->RCV_WND, QB->NR$SEQ_count);
@@ -823,7 +823,7 @@ QUEUE_NETWORK_DATA(TCB,QB)
 	TCB->Rcv_Wnd = TCB->Rcv_Wnd - QB->NR$SEQ_count;
 	} ;
 
-    RETURN TRUE;
+    return TRUE;
     };
 
 //SBTTL "Handle TCP segment input"
@@ -993,7 +993,7 @@ Y:  {
 	IF (TCB->Foreign_Host == Wild) OR
 	   (TCB->Foreign_Host == QB->NR$Src_Adrs) THEN
 	    IF (TCB->Foreign_Port == Wild) OR
-	       (TCB->Foreign_Port EQLU QB->NR$Src_Port) THEN
+	       (TCB->Foreign_Port == QB->NR$Src_Port) THEN
 		LEAVE Y;
 	QB = QB->NR$NEXT;
 	};
@@ -1098,7 +1098,7 @@ Fork_Server(IDX, IP_Address, Remote_Port)
 		   );
 	    ts$servers_forked = ts$servers_forked + 1; // count the servers.
 	    PokeAddr(NewPID, IP_Address, RP);
-	    RETURN TRUE;
+	    return TRUE;
 	    };
 
 	[SS$_DuplNam]:		// Duplicate name - try next name
@@ -1108,7 +1108,7 @@ Fork_Server(IDX, IP_Address, Remote_Port)
 	    {
 	    XLOG$FAO(LOG$TCPERR,"%T Server CREPRC Failed for !AS, RC = !XL!/",
 		     0,ProcName,RC);
-	    RETURN FALSE;
+	    return FALSE;
 	    };
 	TES;
 	};
@@ -1116,7 +1116,7 @@ Fork_Server(IDX, IP_Address, Remote_Port)
 // Failed after max number of tries. Log error and return failure.
 
     XLOG$FAO(LOG$TCPERR,"!%T Failed to fork server !AS!/",0,ProcName);
-    RETURN FALSE;
+    return FALSE;
     };
 
 //SBTTL "Check-Well-Known-Port: Is this a server port?"
@@ -1174,7 +1174,7 @@ X:  {
 	    WIX = I;
 	    LEAVE X;
 	    };
-    RETURN FALSE;
+    return FALSE;
     };
 
 // See if main queue count exceeded
@@ -1183,7 +1183,7 @@ X:  {
 	{
 	XLOG$FAO(LOG$TCP,"!%T SYN wait list full for SYN on WKS !SL!/",
 		 0,Dport);
-	RETURN FALSE;
+	return FALSE;
 	};
 
 // See if queue count for this WKS exceeded
@@ -1191,7 +1191,7 @@ X:  {
     if (WKS_LIST[WIX,WKS$SYN_QCOUNT] <= 0)
 	{
 	XLOG$FAO(LOG$TCP,"!%T SYN wait list for port !SL full!/",0,Dport);
-	RETURN FALSE;
+	return FALSE;
 	};
 
 // Next, check for duplicate SYN segments on the SYN wait list - drop them.
@@ -1203,18 +1203,18 @@ X:  {
 
 // Check IP addresses.
 
-	IF (DHost EQLU QB->NR$Dest_Adrs) AND
-	   (Shost EQLU QB->NR$Src_Adrs) THEN
+	IF (DHost == QB->NR$Dest_Adrs) AND
+	   (Shost == QB->NR$Src_Adrs) THEN
 	    {
 	    Seg = QB->NR$Seg;	// point at TCP segment
 
 // Check TCP ports. If duplicate, return "error" so it will be deallocated.
 
-	    IF (DP EQLU Seg->SH$Dest_Port) AND
-	       (SP EQLU Seg->SH$Source_Port) THEN
+	    IF (DP == Seg->SH$Dest_Port) AND
+	       (SP == Seg->SH$Source_Port) THEN
 		{
 		XLOG$FAO(LOG$TCP,"!%T Dup SYN on Syn-wait list dropped!/");
-		RETURN ERROR;
+		return ERROR;
 		};
 	    };
 	QB = QB->NR$Next;	// Look at next element.
@@ -1238,10 +1238,10 @@ X:  {
 	INSQUE(QBNEW,WKS_LIST[WIX,WKS$SYN_QTAIL]);
 	WKS_LIST[WIX,WKS$SYN_QCOUNT] = WKS_LIST[WIX,WKS$SYN_QCOUNT]-1;
 	SYN_WAIT_COUNT = SYN_WAIT_COUNT - 1;
-	RETURN TRUE;
+	return TRUE;
 	}
     else
-	RETURN FALSE;
+	return FALSE;
     };
 
 //SBTTL "Timeout_Syn_Wait_List - Check SYN wait list for expired entries"
@@ -1258,7 +1258,7 @@ void SEG$Timeout_Syn_Wait_List(Now: UNSIGNED) (void)
 	QB = WKS_LIST[WIX,WKS$SYN_Qhead];
 	WHILE QB NEQA WKS_LIST[WIX,WKS$SYN_Qhead] DO
 	    {
-	    if (QB->NR$TimeOut LSSU now)
+	    if (QB->NR$TimeOut < now)
 		{		// Timed-out
 		REMQUE(QB,QB);	// Remove queue entry.
 		WKS_LIST[WIX,WKS$SYN_Qcount]=.WKS_LIST[WIX,WKS$SYN_Qcount]+1;
@@ -1522,7 +1522,7 @@ Append_Future_Q(TCB, QB, Seg, SEQsize)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T FQ full for seg !XL, QB !XL!/",0,Seg,QB);
 	ts$future_dropped = ts$future_dropped+1;
-	RETURN TRUE;		// Caller should delete
+	return TRUE;		// Caller should delete
 	};
     QB->NR$SEQ_Start = Seg->SH$SEQ;
     QB->NR$SEQ_End = Seg->SH$SEQ + SEQsize;
@@ -1535,16 +1535,16 @@ Append_Future_Q(TCB, QB, Seg, SEQsize)
 	if (FQB == TCB->RF_Qhead)
 	    EXITLOOP (FQB = TCB->RF_Qtail)
 	else
-	    if (QB->NR$SEQ_Start LSSU FQB->NR$SEQ_Start)
+	    if (QB->NR$SEQ_Start < FQB->NR$SEQ_Start)
 		EXITLOOP (FQB = FQB->NR$Last)
 	    else
-		if (QB->NR$SEQ_Start EQLU FQB->NR$SEQ_Start)
+		if (QB->NR$SEQ_Start == FQB->NR$SEQ_Start)
 		    {
 		    XLOG$FAO(LOG$TCP,
 			     "!%T Drop duplicate FQ seg !XL, QB !XL!/",
 			     0,Seg,QB);
 		    ts$future_dups = ts$future_dups+1;
-		    RETURN TRUE;// Tell caller to deallocate
+		    return TRUE;// Tell caller to deallocate
 		    }
 		else
 		    FQB = FQB->NR$Next;
@@ -1556,7 +1556,7 @@ Append_Future_Q(TCB, QB, Seg, SEQsize)
     TCB->RF_Qcount = TCB->RF_Qcount+1;
     INSQUE(QB,FQB);
 !~~~XINSQUE(QB,FQB,Append_Future_Q,Q$TCBFQ,TCB->RF_Qhead);
-    RETURN FALSE;		// Don"t deallocate - it"s on our queue
+    return FALSE;		// Don"t deallocate - it"s on our queue
     };
 
 //SBTTL "Check and attempt to process segments on "future" queue"
@@ -1879,7 +1879,7 @@ Decode_Segment(TCB,Seg,QB)
 		     "!%T Decode Seg(Listen): NON SYN control!/",0);
 	TES;
 
-	RETURN (RetCode);
+	return (RetCode);
 	};			// "LISTEN" State.
 
 !********************************************************
@@ -1893,7 +1893,7 @@ Decode_Segment(TCB,Seg,QB)
 	if (Seg->SH$C_ACK)
 	    {
 	    IF (Seg->SH$ACK LEQU TCB->ISS) OR
-	       (Seg->SH$ACK GTRU TCB->Snd_Nxt) THEN
+	       (Seg->SH$ACK > TCB->Snd_Nxt) THEN
 		{
 		Send_Reset(TCB,Seg->SH$Ack); // Unacceptable "ACK".
 !		XLOG$FAO(LOG$TCPERR, "!%T (Syn-sent)Unacceptable ACK.!/", 0);
@@ -1940,7 +1940,7 @@ Decode_Segment(TCB,Seg,QB)
 
 // Was our "SYN" ack'ed?
 
-		if (TCB->Snd_UNA GTRU TCB->ISS)
+		if (TCB->Snd_UNA > TCB->ISS)
 		    {
 		    TCB->IS_Synched = TRUE;
 		    TCP$Set_TCB_State(TCB,CS$ESTABLISHED);
@@ -1981,7 +1981,7 @@ Decode_Segment(TCB,Seg,QB)
 	IF Keep_Alive
 	    THEN TCB->Connection_Timeout = CONN_TIMEVAL + Time_Stamp()
 	    else TCB->Connection_TimeOut = 0;
-	RETURN (RetCode);
+	return (RetCode);
 	};	// End: "SYN-SENT" State.
     TES;
 
@@ -2029,12 +2029,12 @@ Decode_Segment(TCB,Seg,QB)
 
     SELECTONE TRUE OF
     SET
-    [TCB->RCV_WND EQLU 0]:	// Zero window cases
+    [TCB->RCV_WND == 0]:	// Zero window cases
 	{
 	SELECTONE TRUE OF
 	SET
 	[SEQsize == 0]:	// Empty packet case
-	    if (Seg->SH$Seq EQLU TCB->Rcv_Nxt)
+	    if (Seg->SH$Seq == TCB->Rcv_Nxt)
 		SeqTst_OK = True;
 
 	[SEQsize != 0]:	// Nonempty packet case
@@ -2055,7 +2055,7 @@ Decode_Segment(TCB,Seg,QB)
 	SELECTONE TRUE OF
 	SET
 	[SEQsize == 0]:	// Empty packet case
-	    if ((Seg->SH$SEQ EQLU TCB->RCV_NXT))
+	    if ((Seg->SH$SEQ == TCB->RCV_NXT))
 		SeqTst_OK = True;
 
 	[SEQsize > 0]:	// Nonempty packet case (the useful one)
@@ -2079,7 +2079,7 @@ Decode_Segment(TCB,Seg,QB)
 
 		// Trim to fit in window
 
-		if (SEQcount GTRU TCB->RCV_WND)
+		if (SEQcount > TCB->RCV_WND)
 		    {
 		    Seg_Trimmed = 1;
 		    SEQcount = TCB->RCV_WND;
@@ -2096,12 +2096,12 @@ Decode_Segment(TCB,Seg,QB)
 	    // may be held for future use.
 
 !	    [(SEQoffset LSS 0) && (TCB->RCV_WND > (-.SEQoffset))]:
-	    [(SEQoffset LSS 0) && (TCB->RCV_WND LSSU (SEQoffset))]:
+	    [(SEQoffset LSS 0) && (TCB->RCV_WND < (SEQoffset))]:
 		{
 		RetCode = Append_Future_Q(TCB,QB,Seg,SEQSize);
 !		TCB->Pending_ACK = TRUE; // Force an ACK for this
 		TCP$Enqueue_Ack(TCB);
-		RETURN RetCode;
+		return RetCode;
 		};
 	    TES;
 	    };
@@ -2171,7 +2171,7 @@ Decode_Segment(TCB,Seg,QB)
 
 // Check if ACK actually acknowledges something valid
 
-    IF (TCB->Snd_Una LSSU Seg->SH$Ack) AND
+    IF (TCB->Snd_Una < Seg->SH$Ack) AND
        (Seg->SH$Ack LEQU TCB->Snd_Nxt) THEN
 	ACKTst_OK = True
     else
@@ -2234,7 +2234,7 @@ Decode_Segment(TCB,Seg,QB)
 		    if (NOT TELNET_OPEN(TCB))
 			{
 			Reset_Unknown_Connection(Seg,QB);
-			RETURN Error;
+			return Error;
 			};
 		    }
 		else
@@ -2254,7 +2254,7 @@ Decode_Segment(TCB,Seg,QB)
 // then change state to FIN_WAIT_2.
 
 		if (TCB->State == CS$Fin_Wait_1)
-		    if (TCB->Snd_Nxt EQLU Seg->SH$ACK)
+		    if (TCB->Snd_Nxt == Seg->SH$ACK)
 			TCP$Set_TCB_State(TCB,CS$Fin_Wait_2);
 		};
 
@@ -2283,7 +2283,7 @@ Decode_Segment(TCB,Seg,QB)
 
 // If the ACK acknowledges outstanding FIN, then enter Time_Wait state.
 
-	    if (TCB->snd_nxt EQLU Seg->sh$ack)
+	    if (TCB->snd_nxt == Seg->sh$ack)
 		{		// "FIN" has been ack'ed.
 		XLOG$FAO(LOG$TCBSTATE,
 			 "!%T DS(Closing): FIN ACKed for conn !XL!/",
@@ -2312,7 +2312,7 @@ Decode_Segment(TCB,Seg,QB)
 
 	[CS$Last_Ack]:
 	    {
-	    if (TCB->snd_nxt EQLU Seg->sh$ack)
+	    if (TCB->snd_nxt == Seg->sh$ack)
 		{		// "FIN" has been acked.
 		XLOG$FAO(LOG$TCBSTATE,
 			 "!%T DS(Last-ACK): FIN ACKed, deleting conn !XL!/",
@@ -2372,7 +2372,7 @@ Decode_Segment(TCB,Seg,QB)
 
 // Is segment in the receive window?
 
-	if (Seg->SH$Seq GTRU (TCB->Rcv_Nxt + TCB->Rcv_Wnd))
+	if (Seg->SH$Seq > (TCB->Rcv_Nxt + TCB->Rcv_Wnd))
 	    RETURN(True)	// not in window just drop
 	else
 	    {
@@ -2380,7 +2380,7 @@ Decode_Segment(TCB,Seg,QB)
 // If sequence number is same as IRS, just ignore - it is an old duplicate.
 // Any other in-window SYN is bad news, however - we RESET the connection.
 
-	    if (Seg->SH$Seq EQLU TCB->IRS)
+	    if (Seg->SH$Seq == TCB->IRS)
 		RETURN(True)	// Old, duplicate SYN - just drop it
 	    else
 		{		// In-window SYN - Bad news
@@ -2564,7 +2564,7 @@ Decode_Segment(TCB,Seg,QB)
 // FALSE means that the segment shouldn't be deallocated (it is on someone
 // else queue). TRUE or ERROR means OK to deallocate segment.
 
-    RETURN RetCode;
+    return RetCode;
     };
 
 

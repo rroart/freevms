@@ -151,7 +151,7 @@ ICMP_Hash(IPA)
 !Hash an IP address. Returns hash value (index into ICMHTB)
 
     {
-    RETURN (IPA<0,8>+.IPA<8,8>+.IPA<16,8>+.IPA<24,8>) && ICM_HSHAND;
+    return (IPA<0,8>+.IPA<8,8>+.IPA<16,8>+.IPA<24,8>) && ICM_HSHAND;
     };
 
 ICMP_Find(IPADDR)
@@ -169,10 +169,10 @@ ICMP_Find(IPADDR)
     ICPTR = ICMHTB[ICMP_HASH(IPADDR)];
     WHILE ICPTR != 0 DO
 	if (ICPTR->ICM$Address == IPADDR)
-	    RETURN ICPTR
+	    return ICPTR
 	else
 	    ICPTR = ICPTR->ICM$Next;
-    RETURN 0;
+    return 0;
     };
 
 void ICMP_Add(GWY_Addr,struct IP_Structure * IP_Pkt) (void)
@@ -214,9 +214,9 @@ ICMP$Check(IPaddr)
     signed long
 	struct ICM_DBLOCK * ICMptr;
     if ((ICMptr = ICMP_Find(IPaddr)) == 0)
-	RETURN 0
+	return 0
     else
-	RETURN ICMptr->ICM$GWY;
+	return ICMptr->ICM$GWY;
     };
 
 

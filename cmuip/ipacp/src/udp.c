@@ -423,12 +423,12 @@ UDPCB_Find(Src$Adrs,Src$Port,Dest$Port)
 	       ((UDPCB->UDPCB$Foreign_Port == WILD) OR
 	        (UDPCB->UDPCB$Foreign_Port == Src$Port)) AND
 	       (UDPCB->UDPCB$Local_Port == Dest$Port) THEN
-		RETURN UDPCB;
+		return UDPCB;
 	    Ucount = Ucount-1;
 	    };
 	UDPCBIX = UDPCBIX + 1;
 	};
-    RETURN 0;
+    return 0;
     };
 
 
@@ -811,7 +811,7 @@ Queue_User_UDP(UDPCB,Uptr,Usize,Buf,Bufsize,QB)
 	UDP_MIB->MIB$udpInErrors = UDP_MIB->MIB$udpInErrors + 1;
 	if ($$LOGF(LOG$UDP))
 	    QL$FAO("!%T UDP at !XL dropped - UDPCB NR queue full!/",0,Uptr);
-	RETURN TRUE;		// Drop the packet - no room
+	return TRUE;		// Drop the packet - no room
 	};
 
 // Allocate a queue block and insert onto user receive queue
@@ -829,7 +829,7 @@ Queue_User_UDP(UDPCB,Uptr,Usize,Buf,Bufsize,QB)
 	Deliver_UDP_Data (UDPCB,QB,QBR)
     else
 	INSQUE(QB,UDPCB->UDPCB$NR_Qtail);
-    RETURN FALSE;		// Don't deallocate this segment...
+    return FALSE;		// Don't deallocate this segment...
     };
 
 //SBTTL "Deliver_UDP_Data - Deliver UDP data to user"
@@ -910,7 +910,7 @@ UDPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
     signed long
 	struct UDPCB_Structure * UDPCB;
     MACRO
-	UDPCBERR(EC) = (RCaddr = EC; RETURN 0) %;
+	UDPCBERR(EC) = (RCaddr = EC; return 0) %;
 
 // Range check the connection id. This should never fail, since the user should
 // not be fondling connection IDs.
@@ -932,7 +932,7 @@ UDPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
 
 // Everything is good - return the UDPCB address
 
-    RETURN UDPCB;
+    return UDPCB;
     };
 
 //SBTTL "UDPCB_Get - Allocate and initialize one UDPCB"
@@ -959,7 +959,7 @@ UDPCB_Get(IDX,Src$Port)
 	if ((UDPCB = UDPCB_Table[UDPCBIDX]) != 0)
 	    {
 	    if ((UDPCB->UDPCB$Local_Port == Src$Port))
-		RETURN 0;
+		return 0;
 	    Ucount = Ucount-1;
 	    };
 	UDPCBIDX = UDPCBIDX + 1;
@@ -972,7 +972,7 @@ X:  {			// ** Block X **
     INCR I FROM 1 TO MAX_UDPCB DO
 	if (UDPCB_Table[I] == 0)
 	    LEAVE X WITH (UDPCBIDX = I);
-    RETURN 0;			// Failed to allocate a UDPCB
+    return 0;			// Failed to allocate a UDPCB
     };			// ** Block X **
 
 // Allocate some space for the UDPCB
@@ -1000,7 +1000,7 @@ X:  {			// ** Block X **
 // Return the pointer
 
     IDX = UDPCBIDX;
-    RETURN UDPCB;
+    return UDPCB;
     };
 
 //SBTTL "UDPCB_Free - Deallocate a UDPCB"
@@ -1132,11 +1132,11 @@ UDP_Conn_Unique(LP,FH,FP)
 	    IF (UDPCB->UDPCB$Foreign_Host == FH) AND
 	       (UDPCB->UDPCB$Foreign_Port == FP) AND
 	       (UDPCB->UDPCB$Local_Port == LP) THEN
-		RETURN FALSE;
+		return FALSE;
 	    if ((Ucount = Ucount-1) <= 0)
-		RETURN TRUE;
+		return TRUE;
 	    };
-    RETURN TRUE;
+    return TRUE;
     };
 
 //SBTTL "UDP$OPEN - open a UDP "connection""
@@ -1331,7 +1331,7 @@ UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST)
 	{
 	IF NOT UDP_Conn_Unique(UDPCB->UDPCB$Local_Port,UDPCB->UDPCB$Foreign_Host,
 			       UDPCB->UDPCB$Foreign_Port) THEN
-	    RETURN NET$_NUC;
+	    return NET$_NUC;
 	}
     else
 	{
@@ -1356,7 +1356,7 @@ UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST)
 	    {
 	    XLOG$FAO(LOG$USER,"!%T UDB_COPEN: Conn failed !/", 0);
 	    ACT$FAO("!%D Open UDP Port failed !/", 0 );
-	    RETURN NET$_CSE;
+	    return NET$_CSE;
 	    } ;
 	};
 
@@ -1371,7 +1371,7 @@ UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST)
 	.IP_Address<0,8>,IP_Address<8,8>,
 	.IP_Address<16,8>,IP_Address<24,8>
 		   );
-    RETURN SS$_NORMAL;
+    return SS$_NORMAL;
     };
 
 //SBTTL "UDP_ADLOOK_DONE - Finish UDP address to name lookup"
@@ -1748,7 +1748,7 @@ UDP$CANCEL(struct VMS$Cancel_Args * Uargs)
 
 // If the process doing the cancel owns this connection, then delete it.
 
-	    IF (UDPCB->UDPCB$User_ID EQLU Uargs->VC$PID) AND
+	    IF (UDPCB->UDPCB$User_ID == Uargs->VC$PID) AND
 	       (UDPCB->UDPCB$PIOchan == Uargs->VC$PIOchan) THEN
 		{
 		XLOG$FAO(LOG$USER,"!%T UDP$Cancel: UDPCB=!XL!/",0,UDPCB);
@@ -1756,7 +1756,7 @@ UDP$CANCEL(struct VMS$Cancel_Args * Uargs)
 		Fcount = Fcount + 1;
 		};
 	    };
-    RETURN Fcount;
+    return Fcount;
     };
 
 //SBTTL "UDP dump routines"
@@ -1796,7 +1796,7 @@ UDP$UDPCB_DUMP(UDPCBIX,RB)
 
     IF (UDPCBIX LSS 1) || (UDPCBIX > MAX_UDPCB) OR
        ((UDPCB = UDPCB_TABLE[UDPCBIX]) == 0) THEN
-	RETURN FALSE;
+	return FALSE;
 
 // Copy the UDPCB contents
 
@@ -1836,7 +1836,7 @@ UDP$UDPCB_DUMP(UDPCBIX,RB)
 
 // Done.
 
-    RETURN TRUE;
+    return TRUE;
     };
 
 }

@@ -502,7 +502,7 @@ IP_FIND_DEV(IPADDR)
     INCR IDX FROM 0 TO (DEV_COUNT-1) DO
 	IF ((IPADDR && DEV_CONFIG_TAB[IDX,DC_IP_NETMASK]) EQL
 	   DEV_CONFIG_TAB[IDX,DC_IP_NETWORK]) OR
-	    (IPADDR EQLU %X"FFFFFFFF") THEN
+	    (IPADDR == %X"FFFFFFFF") THEN
 	    {
 	    signed long
 		temp;
@@ -510,11 +510,11 @@ IP_FIND_DEV(IPADDR)
 	    // If this is a clone device return
 	    !	number of device from which it was cloned.
 	    temp = dev_config_tab[idx,dc_clone_dev];
-	    if ((temp GEQ 0)) RETURN temp;
-	    RETURN IDX;
+	    if ((temp GEQ 0)) return temp;
+	    return IDX;
 	    };
 
-    RETURN -1;
+    return -1;
     };
 
 IP_FIND_GWY(IPADDR)
@@ -532,8 +532,8 @@ IP_FIND_GWY(IPADDR)
 	IF (IPADDR && GWY_table_ptr[IDX,GWY_NETMASK]) EQL
 	   GWY_table_ptr[IDX,GWY_NETWORK] THEN
 	    if (GWY_table_ptr[IDX,GWY_STATUS] > 0)
-		RETURN GWY_table_ptr[IDX,GWY_ADDRESS];
-    RETURN 0;
+		return GWY_table_ptr[IDX,GWY_ADDRESS];
+    return 0;
     };
 
 IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
@@ -558,7 +558,7 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 
     if ((IDX = IP_FIND_DEV(..IPDEST)) GEQ 0)
 	{
-	if ((..IPDEST EQLU %X"FFFFFFFF"))
+	if ((..IPDEST == %X"FFFFFFFF"))
 	    {
 	    NEWIPDEST = (NOT DEV_CONFIG_TAB[IDX,DC_IP_NETMASK])
 		OR DEV_CONFIG_TAB[IDX,DC_IP_NETWORK];
@@ -567,7 +567,7 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 	else
 	    NEWIPDEST = ..IPDEST;
 	.IPSRC = DEV_CONFIG_TAB[IDX,DC_IP_ADDRESS];
-	RETURN IDX;
+	return IDX;
 	};
 
 // Make sure recursion depth limit not exceeded
@@ -580,22 +580,22 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 	XQL$FAO(LOG$IP+LOG$IPERR,
 		"!%T IP_ROUTE max recursion depth exceeded, DEST=!AS!/",
 		0,DSTSTR);
-	RETURN -1;
+	return -1;
 	};
 
 // Check for ICMP information, and try again
 
     if ((GWY = ICMP$Check(..IPDEST)) NEQU 0)
-	RETURN IP_ROUTE(GWY,IPSRC,NEWIPDEST,LEV+1);
+	return IP_ROUTE(GWY,IPSRC,NEWIPDEST,LEV+1);
 
 // Check for gateway table and try again.
 
     if ((GWY = IP_FIND_GWY(..IPDEST)) != 0)
-	RETURN IP_ROUTE(GWY,IPSRC,NEWIPDEST,LEV+1);
+	return IP_ROUTE(GWY,IPSRC,NEWIPDEST,LEV+1);
 
 // None of the above - no route exists.
 
-    RETURN -1;
+    return -1;
     };
 
 IP$ISME(IPADDR, STRICT)
@@ -608,13 +608,13 @@ IP$ISME(IPADDR, STRICT)
     {
 
 // 127.x.x.x is a loopback address
-    if (IPADDR<0,8,0> == 127) RETURN 0;
+    if (IPADDR<0,8,0> == 127) return 0;
 
     INCR IDX FROM 0 TO (DEV_COUNT-1) DO
 	{
 // Check for exact address match
 	if (IPADDR == DEV_CONFIG_TAB[IDX,DC_IP_ADDRESS])
-	    RETURN IDX;
+	    return IDX;
 // Check for a wildcard match (only if strict was passed as false (0))
 	if (STRICT == 0)
 	 IF ((((IPADDR && DEV_CONFIG_TAB[IDX,DC_IP_NETMASK]) EQL
@@ -624,7 +624,7 @@ IP$ISME(IPADDR, STRICT)
 	   (IPADDR == 0) OR
 	   (IPADDR == DEV_CONFIG_TAB[IDX,DC_IP_NETWORK]))
 	    THEN
-	     RETURN IDX;
+	     return IDX;
 	};
 
     // Check for proxy ARP
@@ -637,9 +637,9 @@ IP$ISME(IPADDR, STRICT)
 	    temp = IP_Find_Dev (IPADDR);
 	    IF (temp GEQ 0) AND
 		(Strict != Dev_Config_Tab[temp,dc_dev_interface]) THEN
-		RETURN temp;		// yes, make sure it's not
+		return temp;		// yes, make sure it's not
 	    };			// device thaqt rcvd the ARP rqst.
-    RETURN -1;
+    return -1;
     };
 
 signed long BIND ROUTINE
@@ -751,7 +751,7 @@ IP$S}_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 			IP_group_MIB->IPMIB$ipOutNoRoutes + 1;
 	    if (Delete_Seg != 0)
 		MM$Seg_Free(Bufsize,Buf);
-	    RETURN 0;		// No route exists
+	    return 0;		// No route exists
 	    };
 	};
 !*********************************
@@ -816,7 +816,7 @@ IP$S}_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	(Dev_config->dc_rtn_Xmit)(dev_config);
 	};	// Give success return
 
-    RETURN -1;
+    return -1;
     };
 
 
@@ -942,7 +942,7 @@ IP$S}(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 			IP_group_MIB->IPMIB$ipOutNoRoutes + 1;
 	    if (Delete_Seg != 0)
 		MM$Seg_Free(Bufsize,Buf);
-	    RETURN 0;		// No route exists
+	    return 0;		// No route exists
 	    };
 	if (IP_Src == 0)
 	    IP_Src = newip_src;
@@ -1058,7 +1058,7 @@ IP$S}(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	};// Give success return
 
     };
-    RETURN -1;
+    return -1;
     };
 
 

@@ -1,7 +1,6 @@
 #ifndef structure_h
 #define structure_h
 
-#if 0
 /*
 	****************************************************************
 
@@ -23,7 +22,7 @@
 
 	****************************************************************
 */
-%TITLE 'Define TCP-System wide Data Structures'
+//TITLE 'Define TCP-System wide Data Structures'
 /*
 
 Module:
@@ -118,76 +117,70 @@ Modification History:
 	host alias table.
 */
 
-LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';	// Get the transportablity library
-LIBRARY 'CMUIP_SRC:[central]netcommon';// System-wide definitions
+  // not yet#include "cmuip/central/netxport.h"	// Get the transportablity library
+#include "cmuip/central/include/netcommon.h" // System-wide definitions
 
 // Define some standard literals
 
-LITERAL
-#endif
 // Misc Time Values in Hundredths seconds.
 
-#define    Timer_Delta  -10*1000*1000	// conversion factor to VMS delta time.
-#define    Csec  100			// Convert seconds to hundredths.
-#define    Minute  60*Csec		// Convert minutes to .01 sec
-#define    DaySec  24*60*60*Csec	// One day
-#define    Csec_Timer_Delta  -100*1000 // Delta time format converter.
+#define    TIMER_DELTA  -10*1000*1000	// conversion factor to VMS delta time.
+#define    CSEC  100			// Convert seconds to hundredths.
+#define    MINUTE  60*CSEC		// Convert minutes to .01 sec
+#define    DAYSEC  24*60*60*CSEC	// One day
+#define    CSEC_TIMER_DELTA  -100*1000 // Delta time format converter.
 
 // Local Port ranges
 
-#define    Well_Known_LP_Start	 1
-#define    Well_Known_LP_End	 255
-#define    Common_LP_End	 100
-#define    User_LP_Start	 1024	// missing range for bsd4.2 unix.
-#define    User_LP_End		 32767
-#define    AOUS_LP_Start	 32768// Active Open User specified Local Port
-#define    AOUS_LP_End		 65535
-#define    LP_Start		 1
-#define    LP_End		 65535
+#define    WELL_KNOWN_LP_START	 1
+#define    WELL_KNOWN_LP_END	 255
+#define    COMMON_LP_END	 100
+#define    USER_LP_START	 1024	// missing range for bsd4.2 unix.
+#define    USER_LP_END		 32767
+#define    AOUS_LP_START	 32768// Active Open User specified Local Port
+#define    AOUS_LP_END		 65535
+#define    LP_START		 1
+#define    LP_END		 65535
 
 // Misc.
 
-#define    Error  -1			// Return value, indicates error............
-#define    Not_Found  -1
+#define    ERROR  -1			// Return value, indicates error............
+#define    NOT_FOUND  -1
 #define    OK  0			// Valid TCB pointer: RTN, TCB_OK.
-#define    Wild  0			// Indicates a wild-card in Foreign_Socket pair.
-#if 0
-    Empty_Queue = 3: UNSIGNED(8), // REMQUE: unsuccessful removal, queue empty.
-    Queue_Empty_Now = 2: UNSIGNED(8), // REMQUE: OK removal & queue now empty.
-    First_Queue_Elem = 1: UNSIGNED(8); // INSQUE return - inserted 1st element.
+#define    WILD  0			// Indicates a wild-card in Foreign_Socket pair.
 
-COMPILETIME
-    tblsize = 0;
+#define    Empty_Queue 3 // REMQUE: unsuccessful removal, queue empty.
+#define    Queue_Empty_Now 2 // REMQUE: OK removal & queue now empty.
+#define    First_Queue_Elem 1 // INSQUE return - inserted 1st element.
+
+#define    tblsize = 0;
 
-%SBTTL 'Define circular byte queue header'
+//SBTTL 'Define circular byte queue header'
 /*
     Circular byte queues are used to keep track of data as it flows between
     the user and the network.
 */
 
-MACRO
-#endif
-//	%NAME(N,'QUEUE')= [$Bytes(0)],	// First address of structure
 #define    CQF$DEF(N) \
+	unsigned char N##queue[0];	/* First address of structure */\
 	void * N##base;	/* Base address of queue*/\
 	void * N##end;	/* Address of end of queue*/\
 	unsigned short int N##size;	/* Size of queue*/\
 	unsigned short int N##count;	/* Count of items on queue*/\
 	void * N##enqp;	/* Pointer to last byte on queue*/\
 	void * N##deqp;	/* Pointer to first byte on queue*/
-#if 0
 
-$FIELD CQ_FIELDS =
-    SET
-    CQF$DEF('CQ$')		// Define the queue fields
-    TES;
-LITERAL
-    CQ_SIZE = $Field_Set_Size;
-MACRO
-    CQ$BLOCK = BLOCK[CQ_SIZE] FIELD(CQ_FIELDS) %;
+struct cq_fields 
+    {
+    CQF$DEF(cq$)		// Define the queue fields
+    };
+
+#define    CQ_SIZE sizeof(struct cq_fields)
+
+#define    cq$block struct cq_fields
 
 
-%SBTTL 'Queue Element Block Definitions.'
+//SBTTL 'Queue Element Block Definitions.'
 /*
  Queue blks are used as queue elements which in turn contain bliss fullwords
 used for other purposes.  Case: Send Queue consists of a queue of send Queue
@@ -210,113 +203,117 @@ send data eg.
 
 // Queue Block (Send queue) Fields
 
-$FIELD	QB_Send_Fields=
-    SET
-    SN$Next		= [$Address],		// Forward Queue Link (Flink).
-    SN$Last		= [$Address],		// Backwards queue link (Blink).
-    SN$Size		= [$Long_Integer],	// # of bytes to send.
-    SN$Data 		= [$Address],		// Start of data buffer.
-    SN$Uargs		= [$Address],		// Address of user arg blk.
-    SN$TimeOut		= [$Short_Integer],	// connection timeout (time).
-    SN$Flags		= [$Byte],
-    $OverLay(SN$Flags)
-	SN$EOL		= [$Bit],		// End Of Letter Boolean.
-	SN$URG		= [$Bit],		// Urgent data boolean.
-	SN$USER		= [$Bit]		// On if seg is in user space
-    $CONTINUE
-    TES;
+struct qb_send_fields
+{
+  void *     sn$next;		// Forward Queue Link (Flink).
+  void *     sn$last;		// Backwards queue link (Blink).
+  signed long int     sn$size;	// # of bytes to send.
+  void *     sn$data ;		// Start of data buffer.
+  void *     sn$uargs;		// Address of user arg blk.
+  signed short int     sn$timeout;	// connection timeout (time).
+  union {
+    signed char     sn$flags;
+    struct {
+      unsigned 	sn$eol		 : 1;		// End Of Letter Boolean.
+      unsigned 	sn$urg		 : 1;		// Urgent data boolean.
+      unsigned 	sn$user		 : 1;	// On if seg is in user space
+    };
+  };
+};
 
-LITERAL
-    QB_SN_SIZE = $Field_set_size;
+#define    QB_SN_SIZE sizeof(struct qb_send_fields)
 
 // Queue Block (ReTransmission Queue Fields).
 
-$FIELD QB_RT_Fields=
-    SET
-    RT$Next		= [$Address],		// FLink.
-    RT$Last		= [$Address],		// Blink.
-    RT$Buf		= [$Address],		// segment buffer start adrs
-    RT$BufSize		= [$short_integer],	// byte size of buffer.
-    RT$SegSize		= [$short_Integer],	// Byte size of segment.
-    RT$Seg		= [$Address],		// Start address of segment.
-    RT$Dest_Adrs	= [$Bytes(4)],		// Destination network adrs.
-    RT$TimeOut		= [$Bytes(4)],		// Retransmission timeout
-    RT$Maxtimeout	= [$bytes(4)],		// expiration time on RX queue
-    RT$Start_Xmit_Time	= [$bytes(4)],		// base for round trip calc.
-    RT$Xmit_Count	= [$bytes(4)],		// # of transmissions.
-    RT$Seq_End		= [$Bytes(4)]		// Last sequence # in segment
-    TES;
+struct qb_rt_fields
+{
+  void *     rt$next;		// FLink.
+  void *     rt$last;		// Blink.
+  void *     rt$buf;		// segment buffer start adrs
+  signed short int     rt$bufsize;	// byte size of buffer.
+  signed short int     rt$segsize;	// Byte size of segment.
+  void *     rt$seg;		// Start address of segment.
+  signed long     rt$dest_adrs;		// Destination network adrs.
+  signed long     rt$timeout;		// Retransmission timeout
+  signed long     rt$maxtimeout;		// expiration time on RX queue
+  signed long     rt$start_xmit_time;		// base for round trip calc.
+  signed long     rt$xmit_count;		// # of transmissions.
+  signed long     rt$seq_end;		// Last sequence # in segment
+};
 
-LITERAL
-    QB_RT_SIZE = $Field_set_size;
+#define    QB_RT_SIZE sizeof(struct qb_rt_fields)
 
 // Network Receive segment queue.
 
-$FIELD QB_NR_Fields=
-    SET
-    NR$NEXT		= [$Address],		// FLINK.
-    NR$LAST		= [$Address],		// BLink.
-    NR$Buf_Size		= [$Long_Integer],	// byte size of read buffer.
-    NR$Buf		= [$Address],		// Read buffer start.
-    NR$Size		= [$Long_Integer],	// Byte size of TCP segment.
-    NR$Seg		= [$Address],		// start of TCP segment.
-    NR$Data_Size	= [$Long_Integer],	// # of data bytes available.
-    NR$Uptr		= [$Address],		// pointer to new data
-    NR$Ucount		= [$Long_Integer],	// count of new data
-    NR$TimeOut		= [$Long_Integer],
-    NR$SRC_ADRS		= [$Long_Integer],	// Internet address.
-    NR$Dest_Adrs	= [$Long_Integer],	// Internet address.
-    NR$Src_Port		= [$Bytes(2)],		// SYN wait list: Source Port
-    NR$Dest_Port	= [$Bytes(2)],		// SYN wait list: Dest port.
-    NR$SEQ_Start	= [$Bytes(4)],		// First usable seqence #
-    NR$SEQ_End		= [$Bytes(4)],		// Segment's last sequence #.
-    NR$SEQ_Count	= [$Bytes(4)],		// Count of usable sequence #s
-    $OVERLAY(NR$SEQ_Start)			// Reuse for ICMP messages
-	NR$ICM_TYPE	= [$Byte],		// ICMP msg type
-	NR$ICM_CODE	= [$Byte],		// ICMP code field
-	NR$ICM_EX	= [$Bytes(2)],		// ICMP extra data
-    $CONTINUE
-    $OVERLAY(NR$SEQ_Start)
-	NR$FragPtr	= [$Address],		// IP fragment flag/pointer
-    $CONTINUE
-    NR$Flags		= [$Byte],
-    $OVERLAY(NR$Flags)
-	NR$EOL		= [$Bit],		// End Of Letter boolean
-	NR$URG		= [$Bit],		// Urgent data boolean.
-	NR$ICMP		= [$Bit]		// Really an ICMP message
-    $CONTINUE
-    TES;
+struct qb_nr_fields
+{
+  void *     nr$next;		// FLINK.
+  void *     nr$last;		// BLink.
+  signed long int     nr$buf_size;	// byte size of read buffer.
+  void *     nr$buf;		// Read buffer start.
+  signed long int     nr$size;	// Byte size of TCP segment.
+  void *     nr$seg;		// start of TCP segment.
+  signed long int     nr$data_size;	// # of data bytes available.
+  void *     nr$uptr;		// pointer to new data
+  signed long int     nr$ucount;	// count of new data
+  signed long int     nr$timeout;
+  signed long int     nr$src_adrs;	// Internet address.
+  signed long int     nr$dest_adrs;	// Internet address.
+  signed short     nr$src_port;		// SYN wait list: Source Port
+  signed short     nr$dest_port;		// SYN wait list: Dest port.
+  union {
+    signed long     nr$seq_start;		// First usable seqence #
+    struct { 			// Reuse for ICMP messages
+      signed char 	nr$icm_type;		// ICMP msg type
+      signed char 	nr$icm_code;		// ICMP code field
+      signed short 	nr$icm_ex;		// ICMP extra data
+    };  
+    void * 	nr$fragptr;		// IP fragment flag/pointer
+  };
+  signed long     nr$seq_end;		// Segment's last sequence #.
+  signed long     nr$seq_count;		// Count of usable sequence #s
+  union {
+    signed char     nr$flags;
+    struct {
+      unsigned 	nr$eol		 : 1;		// End Of Letter boolean
+      unsigned 	nr$urg		 : 1;		// Urgent data boolean.
+      unsigned 	nr$icmp		 : 1;	// Really an ICMP message
+    };
+  };
+};
 
-LITERAL
-    QB_NR_SIZE = $Field_set_size;
+#define    QB_NR_SIZE sizeof(struct qb_nr_fields)
 
 // User Receive Data Request queue
 
-$FIELD QB_UR_Fields=
-    SET
-    UR$NEXT		= [$Address],		// FLINK.
-    UR$LAST		= [$Address],		// Blink
-    UR$Size		= [$Long_Integer],	// # of bytes requested by user.
-    UR$Data		= [$Address],		// Start of data buffer.
-    UR$IRP_Adrs		= [$Address],		// IO request adrs.
-    UR$UCB_Adrs		= [$Address],		// Unit Control Blk adrs.
-    UR$Uargs		= [$Address],		// Address of user arg blk.
-    $OVERLAY(UR$IRP_Adrs)
-	UR$ASTADR	= [$Address],		// AST address for internal conn
-	UR$ASTPRM	= [$Address]		// AST param for internal conn
-    $CONTINUE
-    TES;
+struct qb_ur_fields
+{
+  void *     ur$next;		// FLINK.
+  void *     ur$last;		// Blink
+  signed long int     ur$size;	// # of bytes requested by user.
+  void *     ur$data;		// Start of data buffer.
+  union {
+    struct {
+      void *     ur$irp_adrs;		// IO request adrs.
+      void *     ur$ucb_adrs;		// Unit Control Blk adrs.
+    };
+    struct {
+      void * 	ur$astadr;		// AST address for internal conn
+      void *	ur$astprm;		// AST param for internal conn
+    };
+  };
+  void *     ur$uargs;		// Address of user arg blk.
+};
 
-LITERAL
-    QB_UR_SIZE = $Field_set_size;
+#define    QB_UR_SIZE sizeof(struct qb_ur_fields)
 
-LITERAL QB_Size = 0;
-$MAXLIT(QB_Size,QB_SN_SIZE,QB_RT_SIZE,QB_NR_SIZE,QB_UR_SIZE);
+#define QB_Size 0
+      // check $MAXLIT(QB_Size,QB_SN_SIZE,QB_RT_SIZE,QB_NR_SIZE,QB_UR_SIZE);
 
-Macro	Queue_Blk_Structure(F) = Block[QB_Size] Field(F)%;
-%MESSAGE(%NUMBER(qb_size),' Longwords allocated per Queue Block')
+#define	queue_blk_structure(F) F
+//MESSAGE(%NUMBER(qb_size),' Longwords allocated per Queue Block')
 
-%SBTTL 'Network Segment Received Queue Definition.'
+//SBTTL 'Network Segment Received Queue Definition.'
 /*
 
 Segment receive queue consists of Queue Blks which are structured according
@@ -324,30 +321,29 @@ to the QB_NR_Field description.  IP places segments on this queue after IP
 has verified the datagram.
 */
 
-$FIELD SI_Fields=
-    SET
-    SI_QHead	= [$Address],
-    SI_QTail	= [$Address]
-    TES;
+struct si_fields
+{
+  void *     si_qhead;
+  void *     si_qtail;
+};
 
-LITERAL
-    SI_Qheader_Size = $Field_Set_Size;
+#define    SI_Qheader_Size sizeof(struct si_fields)
 
 
-%SBTTL '"SYN" Wait Queue Definition.'
+//SBTTL '"SYN" Wait Queue Definition.'
 
 // "SYN" wait queue. List of "SYN" segments received waiting for a server
 // process to do a "PASSIVE" OPEN.  Queue elements (blocks) are structured
 // according to the QB_NR_Fields.
 
-$FIELD SW_Fields=
-    SET
-    SW_QHead	= [$Address],
-    SW_QTail	= [$Address]
-    TES;
+struct sw_fields
+{
+  void *     sw_qhead;
+  void *     sw_qtail;
+};
 
 
-%SBTTL 'User (TCP) I/O request Argument Block definitions.'
+//SBTTL 'User (TCP) I/O request Argument Block definitions.'
 /*
 
 User Network I/O requests are fed to TCP via an ACP queue.  The queue
@@ -377,401 +373,320 @@ user argument blocks have at least these arguments.
 
 */
 
-MACRO Static_Fields(NM) =
-    %NAME(NM,$Data_Start)= [$Address],	// Start of data within this block.
-    %NAME(NM,$UBuf_Adrs)= [$Address],	// User buffer address.
-    %NAME(NM,$VMS_BLK_ID)= [$Bytes(4)],	// VMS system dynamic block ID.
-    %NAME(NM,$IRP_Adrs)	= [$Address],	// I/O Request Packet Address.
-    %NAME(NM,$UCB_Adrs)	= [$Address],	// Unit Control Block Address.
-    %NAME(NM,$PID)	= [$Address],	// Owning process ID.
-    %NAME(NM,$UARGSIZE)	= [$UWord],	// Size of this UARG block
-    %NAME(NM,$Funct)	= [$Bytes(1)],	// ACP Function code.
-    %NAME(NM,$Protocol)	= [$Bytes(1)]	// ACP Protocol code.
-    %;
+#define Static_Fields(NM) \
+void *     NM##data_start;	/* Start of data within this block.*/\
+void *     NM##ubuf_adrs;	/* User buffer address.*/\
+signed long     NM##vms_blk_id;	/* VMS system dynamic block ID.*/\
+void *     NM##irp_adrs;	/* I/O Request Packet Address.*/\
+void *     NM##ucb_adrs;	/* Unit Control Block Address.*/\
+void *     NM##pid;	/* Owning process ID.*/\
+unsigned short     NM##uargsize;	/* Size of this UARG block*/\
+signed char     NM##funct;	/* ACP Function code.*/\
+signed char     NM##protocol;/* ACP Protocol code.*/
 
-$FIELD User_Def_Fields=
-    SET
-    Static_Fields(UD)			// Only the standard fields
-    TES;
+struct User_Def_Fields
+{
+  Static_Fields(ud);			// Only the standard fields
+};
 
-LITERAL
-    UD_Size = $Field_Set_Size;
-MACRO
-    User_Default_Args = BLOCK[UD_Size] Field(User_Def_Fields)%;
-
+#define    UD_Size sizeof(struct User_Def_Fields)
 
 // User Call: OPEN
 
-$FIELD U$OPEN_Fields=
-    SET
-    Static_Fields(OP),			// Define the standard fields
-    OP$ProtoHdrBlk	= [$Bytes(0)],
-    OP$Src_Host		= [$ULong],
-    OP$Dst_Host		= [$ULong],
-    OP$Ext1		= [$ULong],	// Protocol header extension info
-    OP$Ext2		= [$ULong],	// Protocol header extension info
-    OP$FLAGS		= [$UWord],	// Open flags
-    $OVERLAY(OP$FLAGS)
-	OP$Mode		= [$Bit],	// Open mode, 1=Active, 0=Passive
-					// UDP: 1=ADDRMODE 
-	OP$NoWait	= [$Bit],	// 1=No wait, 0=wait
-	OP$Addr_Flag	= [$Bit],	// 1=Address, 0=String (Foreign_Host)
-    $CONTINUE	
-    $OVERLAY(OP$MODE)
-	OP$Active_Open	= [$Bit],	// Alias for the above
-    $CONTINUE
-    OP$TimeOut		= [$SWord],	// Inactivity timeout in seconds.
-    OP$PIOchan		= [$SWord],	// user's IO channel
-    OP$Foreign_Hlen	= [$Uword], 	// Length of foreign host name
-    OP$Foreign_Host	= [$String(MAX_HNAME)], // ASCIZ FH name
-    $OVERLAY(OP$Foreign_Host)
-      OP$Foreign_Address= [$Bytes(4)]	// FH address if OP$ADDR_FLAG set
-    $CONTINUE
-    TES;
+struct u$open_fields
+{
+  Static_Fields(OP);			// Define the standard fields
+  unsigned char    op$protohdrblk;
+  unsigned long     op$src_host;
+  unsigned long     op$dst_host;
+  unsigned long     op$ext1;	// Protocol header extension info
+  unsigned long     op$ext2;	// Protocol header extension info
+  union {
+    unsigned short     op$flags;	// Open flags
+    struct {
+      union {
+	unsigned 	op$mode		 : 1;	// Open mode, 1=Active, 0=Passive
+	unsigned 	op$active_open	 : 1;	// Alias for the above
+      };
+      // UDP: 1=ADDRMODE 
+      unsigned 	op$nowait	 : 1;	// 1=No wait, 0=wait
+      unsigned 	op$addr_flag	 : 1;	// 1=Address, 0=String (Foreign_Host)
+    };
+  };
+  signed short     op$timeout;	// Inactivity timeout in seconds.
+  signed short     op$piochan;	// user's IO channel
+  unsigned short     op$foreign_hlen; 	// Length of foreign host name
+  union {
+    signed char    op$foreign_host[MAX_HNAME]; // ASCIZ FH name
+    signed long      op$foreign_address;	// FH address if OP$ADDR_FLAG set
+  };
+};
 
-LITERAL
-    Open_Arg_Length = $Field_Set_Size,
-    Max_User_ArgBlk_Size = Open_Arg_Length;	// used by Uarg rtns (MEMGR.BLI)
-MACRO
-    User_Open_Args = Block[Open_Arg_Length] Field(U$OPEN_Fields)%;
+#define    Open_Arg_Length sizeof(struct U$OPEN_Fields)
+#define    Max_User_ArgBlk_Size Open_Arg_Length	// used by Uarg rtns (MEMGR.BLI)
 
-LITERAL
-    OP$MODE_PASSIVE = 0,	// OP$MODE value for TCP passive open
-    OP$MODE_ACTIVE = 1,		// OP$MODE value for TCP active open (default)
-    OP$MODE_UDPDATA = 1,	// OP$MODE value for UDP data open (default)
-    OP$MODE_UDPADDR = 0;	// OP$MODE value for UDP address open
+#define     OP$MODE_PASSIVE   0	// OP$MODE value for TCP passive open
+#define     OP$MODE_ACTIVE   1		// OP$MODE value for TCP active open (default)
+#define     OP$MODE_UDPDATA   1	// OP$MODE value for UDP data open (default)
+#define     OP$MODE_UDPADDR   0	// OP$MODE value for UDP address open
 
 
 // User Call: SEND
 
-$FIELD U$Send_Fields=
-    SET
-    Static_Fields(SE),			// Define the standard fields
-    SE$ProtoHdrBlk	= [$Bytes(0)],
-    SE$Src_Host		= [$ULong],
-    SE$Dst_Host		= [$ULong],
-    SE$Ext1		= [$ULong],	// Protocol header extension info
-    SE$Ext2		= [$ULong],	// Protocol header extension info
-    SE$Flags		= [$UWord],
-    $OVERLAY(SE$Flags)
-	SE$OPM		= [$Bit],	// Used in "OPEN" processing.
-	SE$EOL		= [$Bit],	// End Of Letter flag.
-	SE$URG		= [$Bit],	// Urgent data sent.
-    $CONTINUE
-    SE$TimeOut		= [$SWord],	// Send timeout (obsolete)
-    SE$Local_Conn_ID	= [$Address],	// Connection ID
-    SE$Buf_Size		= [$SWord],	// Send buffer size
-    SE$Data		= [$Byte]	// User data start
-    TES;
+struct u$send_fields
+{
+  Static_Fields(se);			// Define the standard fields
+  unsigned char    se$protohdrblk[0];
+  unsigned long     se$src_host;
+  unsigned long     se$dst_host;
+  unsigned long     se$ext1;	// Protocol header extension info
+  unsigned long     se$ext2;	// Protocol header extension info
+  union {
+    unsigned short     se$flags;
+    struct {
+      unsigned 	se$opm		 : 1;	// Used in "OPEN" processing.
+      unsigned 	se$eol		 : 1;	// End Of Letter flag.
+      unsigned 	se$urg		 : 1;	// Urgent data sent.
+    };
+  };
+  signed short     se$timeout;	// Send timeout (obsolete)
+  void *     se$local_conn_id;	// Connection ID
+  signed short     se$buf_size;	// Send buffer size
+  signed char    se$data;	// User data start
+};
 
-LITERAL
-    Send_Arg_Length = $Field_Set_Size;
-MACRO
-    User_Send_Args = Block[Send_Arg_Length] Field(U$Send_Fields)%;
-
+#define    Send_Arg_Length sizeof(struct U$Send_Fields)
 
 // User Call: RECIEVE
 
-$FIELD U$RECV_Fields=
-    SET
-    Static_Fields(RE),			// Define the standard fields
-    RE$ProtoHdrBlk	= [$Bytes(0)],
-    RE$Src_Host		= [$ULong],	// Source Host
-    RE$Dst_Host		= [$ULong],	// Destination Host
-    RE$Ext1		= [$ULong],	// Protocol header extension info
-    RE$Ext2		= [$ULong],	// Protocol header extension info
-    RE$Flags		= [$UWord],	// No flags defined
-    RE$TimeOut		= [$SWord],	// Obsolete, unused
-    RE$Local_Conn_ID	= [$Address],
-    RE$Alt_IO		= [$Address],	// Alternate IO entry point
-    RE$PH_Buff		= [$Address],	// P0 Proto hdr buff pntr
-    RE$Buf_Size		= [$SWord],
-    RE$Data		= [$Byte]
-    TES;
+struct u$recv_fields
+{
+  Static_Fields(re);			// Define the standard fields
+  unsigned char     re$protohdrblkp[0];
+  unsigned long     re$src_host;	// Source Host
+  unsigned long     re$dst_host;	// Destination Host
+  unsigned long     re$ext1;	// Protocol header extension info
+  unsigned long     re$ext2;	// Protocol header extension info
+  unsigned short     re$flags;	// No flags defined
+  signed short     re$timeout;	// Obsolete, unused
+  void *     re$local_conn_id;
+  void *     re$alt_io;	// Alternate IO entry point
+  void *     re$ph_buff;	// P0 Proto hdr buff pntr
+  signed short     re$buf_size;
+  signed char    re$data;
+};
 
-LITERAL
-    RECV_Arg_Length = $Field_Set_Size;
-MACRO
-    User_RECV_Args = Block[Recv_Arg_Length] Field(U$RECV_Fields)%;
-
+#define    RECV_Arg_Length sizeof(struct U$RECV_Fields)
 
 // User Call: CLOSE
 
-$FIELD U$Close_Fields=
-    SET
-    Static_Fields(CL),			// Define the standard fields
-    CL$Flags		= [$UWord],
-    $OVERLAY(CL$FLAGS)
-	CL$Abort	= [$Bit],	// 1=Abort
-	CL$NoWait	= [$Bit],	// 1=No wait, 0=wait
-    $CONTINUE	
-    CL$TimeOut		= [$SWord],	// Not used.
-    CL$Local_Conn_ID	= [$Address]	// Connection ID
-    TES;
+struct u$close_fields
+{
+  Static_Fields(cl);			// Define the standard fields
+  union {
+    unsigned short     cl$flags;
+    struct {
+      unsigned 	cl$abort	 : 1;	// 1=Abort
+      unsigned 	cl$nowait	 : 1;	// 1=No wait, 0=wait
+    };
+  };
+  signed short     cl$timeout;	// Not used.
+  void *    cl$local_conn_id;	// Connection ID
+};
 
-LITERAL
-    Close_Arg_Length = $Field_Set_Size;
-MACRO
-    User_Close_Args = Block[Close_Arg_Length] Field(U$Close_Fields)%;
-
+#define    Close_Arg_Length sizeof(struct U$Close_Fields)
 
 // User Call: STATUS
 
-$FIELD U$STATUS_Fields=
-    SET
-    Static_Fields(ST),			// Define the standard fields
-    ST$Flags		= [$UWord],	// Not used.
-    ST$TimeOut		= [$SWord],	// Not used.
-    ST$Local_Conn_ID	= [$Address],	// Connection ID
-    ST$Buf_Size		= [$SWord]
-    TES;
+struct u$status_fields
+{
+  Static_Fields(st);			// Define the standard fields
+  unsigned short     st$flags;	// Not used.
+  signed short     st$timeout;	// Not used.
+  void *     st$local_conn_id;	// Connection ID
+  signed short    st$buf_size;
+};
 
-LITERAL
-    Status_Arg_Length = $Field_Set_Size;
-MACRO
-    User_Status_Args = Block[Status_Arg_Length] Field(U$Status_Fields)%;
+#define    Status_Arg_Length sizeof(struct U$STATUS_Fields)
 
 // User Status call status-return blk
 
-$FIELD Status_Return_Fields=
-    SET
-    SR$Bytes_Avail	= [$Bytes(2)],
-    SR$State		= [$Byte],
-    SR$Last_State	= [$Byte],
-    SR$Send_Window	= [$Long_Integer],
-    SR$Recv_Window	= [$Long_Integer],
-    SR$User_ID		= [$long_Integer]
-    TES;
+struct status_return_fields
+{
+  signed short     sr$bytes_avail;
+  signed char     sr$state;
+  signed char     sr$last_state;
+  signed long int     sr$send_window;
+  signed long int     sr$recv_window;
+  signed long int     sr$user_id;
+};
 
-LITERAL
-    SR_BLK_Size = $Field_Set_Size;
-MACRO
-    Status_return_Arg_Blk = BLOCK [SR_BLK_SIZE] Field(Status_Return_Fields)%;
-
+#define    SR_BLK_Size sizeof(struct Status_Return_Fields)
 
 // User Call: Net$INFO
 
-$FIELD U$INFO_Fields=
-    SET
-    Static_Fields(IF),			// Define the standard fields
-    IF$Flags		= [$UWord],	// Not used.
-    IF$TimeOut		= [$SWord],	// Not used.
-    IF$Local_Conn_ID	= [$Address],	// Connection ID
-    IF$Buf_Size		= [$SWord]	// Size of returned data buffer
-    TES;
+struct u$info_fields
+{
+  Static_Fields(if);			// Define the standard fields
+  unsigned short     if$flags;	// Not used.
+  signed short     if$timeout;	// Not used.
+  void *     if$local_conn_id;	// Connection ID
+  signed short     if$buf_size;// Size of returned data buffer
+};
 
-LITERAL
-    Info_Arg_Length = $Field_Set_Size;
-MACRO
-    User_Info_Args = Block[Info_Arg_Length] Field(U$Info_Fields)%;
+#define    Info_Arg_Length sizeof(struct U$INFO_Fields)
 
 // User Call: ABORT
 
-$FIELD	U$ABORT_Fields=
-    SET
-    Static_Fields(AB),			// Define the standard fields
-    AB$Flags		= [$UWord],	// None defined
-    AB$TimeOut		= [$SWord],	// Not used.
-    AB$Local_Conn_ID	= [$address]
-    TES;
+struct u$abort_fields
+{
+  Static_Fields(ab);			// Define the standard fields
+  unsigned short     ab$flags;	// None defined
+  signed short     ab$timeout;	// Not used.
+  void *    ab$local_conn_id;
+};
 
-LITERAL
-    Abort_Arg_Length = $Field_Set_Size;
-MACRO
-    User_Abort_Args = Block[Abort_Arg_Length] Field(U$Abort_Fields)%;
-
+#define    Abort_Arg_Length sizeof(struct U$ABORT_Fields)
 
 // User call: GTHST
 
-MACRO
-    GTHST_Static(NM) =
-	%NAME(NM,$FLAGS)	= [$UWord],	// Function flags
-	%NAME(NM,$SUBFUNCT)	= [$SWord],	// GTHST subfunction
-	%NAME(NM,$BUFSIZE)	= [$SWord],	// User buffer size
-	%NAME(NM,$ARG1)		= [$Uword],	// Size of argument
-	%NAME(NM,$ARG2SIZE)	= [$Uword]	// Size of argument
-    %;
+#define    GTHST_Static(NM) \
+unsigned short 	NM##flags;	/* Function flags */\
+signed short 	NM##subfunct;	/* GTHST subfunction*/\
+signed short 	NM##bufsize;	/* User buffer size*/\
+union { \
+unsigned short 	NM##arg1;	/* Size of argument*/\
+unsigned short	NM##rrtype;	/* only for grr */\
+}; \
+union { \
+unsigned short 	NM##arg2size;	/* Size of argument*/\
+ unsigned short  NM##hstlen;	\
+}
 
+struct u$gthst_fields 
+{
+  Static_Fields(gh);			// Define the standard fields
+  GTHST_Static(gh);			// Define the standard fields
+};
 
-$FIELD U$GTHST_FIELDS =
-    SET
-    Static_Fields(GH),			// Define the standard fields
-    GTHST_Static(GH)			// Define the standard fields
-    TES;
-
-LITERAL
-    GTHST_ARG_LENGTH = $FIELD_SET_SIZE;
-MACRO
-    GTHST_ARGS = BLOCK[GTHST_ARG_LENGTH] FIELD(U$GTHST_FIELDS) %;
-
+#define    GTHST_ARG_LENGTH sizeof(struct U$GTHST_FIELDS)
 
 // Overlays for the various GTHST subfunctions
 
 // Name to address function
 
-$FIELD GTHST_NMLOOK_Fields =
-    SET
-    Static_Fields(GHN),			// Define the standard fields
-    GTHST_Static(GHN),			// and the standard GTHST fields
-    $OVERLAY(GHN$ARG2SIZE)
-	GHN$HSTLEN	= [$Uword],
-    $CONTINUE
-    GHN$HSTNAM		= [$STRING(HOST_NAME_MAX_SIZE)]
-    TES;
+struct gthst_nmlook_fields 
+{
+  Static_Fields(ghn);			// Define the standard fields
+  GTHST_Static(ghn);			// and the standard GTHST fields
+  char ghn$hstnam[HOST_NAME_MAX_SIZE];
+};
 
-LITERAL
-    GTHST_NMLOOK_ARGS_LENGTH = $FIELD_SET_SIZE;
-MACRO
-    GTHST_NMLOOK_ARGS =	BLOCK[GTHST_NMLOOK_ARGS_LENGTH]
-			FIELD(GTHST_NMLOOK_FIELDS)%;
+#define    GTHST_NMLOOK_ARGS_LENGTH sizeof(struct GTHST_NMLOOK_Fields)
 
 // Address to name subfunction
 
-$FIELD GTHST_ADLOOK_Fields =
-    SET
-    Static_Fields(GHA),			// Define the standard fields
-    GTHST_Static(GHA),			// and the standard GTHST fields
-    GHA$IPADDR		= [$Bytes(4)]
-    TES;
+struct gthst_adlook_fields 
+{
+  Static_Fields(gha);			// Define the standard fields
+  GTHST_Static(Gha);			// and the standard GTHST fields
+  signed long    gha$ipaddr;
+};
 
-LITERAL
-    GTHST_ADLOOK_ARGS_LENGTH = $FIELD_SET_SIZE;
-MACRO
-    GTHST_ADLOOK_ARGS = BLOCK[GTHST_ADLOOK_ARGS_LENGTH]
-			FIELD(GTHST_ADLOOK_FIELDS)%;
+#define    GTHST_ADLOOK_ARGS_LENGTH sizeof(struct GTHST_ADLOOK_Fields)
 
 // Name to RR function
 
-$FIELD GTHST_RRLOOK_Fields =
-    SET
-    Static_Fields(GRR),			// Define the standard fields
-    GTHST_Static(GRR),			// and the standard GTHST fields
-    $OVERLAY(GRR$ARG1)
-	GRR$RRTYPE	= [$Uword],
-    $CONTINUE
-    $OVERLAY(GRR$ARG2SIZE)
-	GRR$HSTLEN	= [$Uword],
-    $CONTINUE
-    GRR$HSTNAM		= [$STRING(HOST_NAME_MAX_SIZE)]
-    TES;
+struct gthst_rrlook_fields 
+{
+  Static_Fields(grr);			// Define the standard fields
+  GTHST_Static(grr);			// and the standard GTHST fields
+  char grr$hstnam[HOST_NAME_MAX_SIZE];
+};
 
-LITERAL
-    GTHST_RRLOOK_ARGS_LENGTH = $FIELD_SET_SIZE;
-MACRO
-    GTHST_RRLOOK_ARGS =	BLOCK[GTHST_RRLOOK_ARGS_LENGTH]
-			FIELD(GTHST_RRLOOK_FIELDS)%;
+#define    GTHST_RRLOOK_ARGS_LENGTH sizeof(struct GTHST_RRLOOK_Fields)
 
 // Maintenance Call : DUMP
 
-$FIELD M$DUMP_Fields=
-    SET
-    Static_Fields(DU),			// Define the standard fields
-    DU$Dump_Directive	= [$UWord],	// Dump function code.
-    DU$TimeOut		= [$SWord],	// Not used.
-    DU$ARG0		= [$ULong],	// Argument #0
-    $OVERLAY(DU$ARG0)
-	DU$Local_Conn_ID	= [$Address],	// TCB/UDPCB index, DU$TCB_DUMP
-    $CONTINUE
-    $OVERLAY(DU$ARG0)
-	DU$Device_idx	= [$Byte],	// device index, DU$DEVICE_DUMP
-    $CONTINUE
-    $OVERLAY(DU$ARG0)
-	DU$Start_Index	= [$SWord],	// ARP cache index, DU$ARP_CACHE
-    $CONTINUE
-    DU$ARG1		= [$ULong],	// Argument #1
-    DU$ARG2		= [$ULong],	// Argument #2
-    DU$Buf_Size		= [$SWord],	// Size of returned data block
-    DU$Data		= [$Byte]	// Start of return data buffer.
-    TES;
+struct m$dump_fields
+{
+  Static_Fields(du);			// Define the standard fields
+  unsigned short     du$dump_directive;	// Dump function code.
+  signed short     du$timeout;	// Not used.
+  union {
+    unsigned long     du$arg0;	// Argument #0
+    void * 	du$local_conn_id;	// TCB/UDPCB index, DU$TCB_DUMP
+    signed char 	du$device_idx;	// device index, DU$DEVICE_DUMP
+    signed short 	du$start_index;	// ARP cache index, DU$ARP_CACHE
+  };
+  unsigned long     du$arg1;	// Argument #1
+  unsigned long     du$arg2;	// Argument #2
+  signed short     du$buf_size;	// Size of returned data block
+  signed char     du$data;	// Start of return data buffer.
+};
 
-LITERAL
-    Dump_Arg_Length = $Field_Set_Size;
-MACRO
-    Debug_Dump_Args = Block[Dump_Arg_Length] Field(M$Dump_Fields)%;
-
-
+#define    Dump_Arg_Length sizeof(struct M$DUMP_Fields)
 	
 // Maintenance Call : SNMP
 
-$FIELD M$SNMP_Fields=
-    SET
-    Static_Fields(SNMP),			// Define the standard fields
-    SNMP$Function	= [$UWord],	// SNMP sub-function code.
-    SNMP$Misc		= [$SWord],	// Size of returned data block
-    SNMP$WBuf_Size	= [$SWord],	// Size of VAR data block
-    SNMP$RBuf_Size	= [$SWord],	// Size of returned data block
-    SNMP$Data		= [$Byte]	// Start of UArg data buffer.
-    TES;
+struct m$snmp_fields
+{
+  Static_Fields(snmp);			// Define the standard fields
+  unsigned short     snmp$function;	// SNMP sub-function code.
+  signed short     snmp$misc;	// Size of returned data block
+  signed short     snmp$wbuf_size;	// Size of VAR data block
+  signed short     snmp$rbuf_size;	// Size of returned data block
+  signed char      snmp$data;	// Start of UArg data buffer.
+};
 
-LITERAL
-    SNMP_Arg_Length = $Field_Set_Size;
-MACRO
-    SNMP_Args = Block[SNMP_Arg_Length] Field(M$SNMP_Fields)%;
-
-
+#define    SNMP_Arg_Length sizeof(struct M$SNMP_Fields)
 	
 // Maintenance Call: EXIT
  
-$FIELD M$EXIT_Fields=
-    SET
-    Static_Fields(EX),			// Define the standard fields
-    EX$Flags		= [$UWord],	// Not used.
-    EX$TimeOut		= [$SWord],	// Not used.
-    EX$Local_Conn_ID	= [$Address]	// Not used.
-    TES;
+struct m$exit_fields
+{
+  Static_Fields(ex);			// Define the standard fields
+  unsigned short     ex$flags;	// Not used.
+  signed short     ex$timeout;	// Not used.
+  void *     ex$local_conn_id;	// Not used.
+};
 
-LITERAL
-    Exit_arg_Length = $Field_Set_Size;
-MACRO
-    Debug_Exit_Args = Block[Exit_Arg_Length] Field(M$Exit_Fields)%;
-
+#define    Exit_arg_Length sizeof(struct M$EXIT_Fields)
 
 // Maintenance Call: PANIC
 
-$FIELD M$PANIC_Fields=
-    SET
-    Static_Fields(PA),			// Define the standard fields
-    PA$Flags		= [$UWord],	// Not Used.
-    PA$TimeOut		= [$SWord],	// Not used.
-    PA$Local_Conn_ID	= [$Address]	// Not used.
-    TES;
+struct m$panic_fields
+{
+  Static_Fields(pa);			// Define the standard fields
+  unsigned short     pa$flags;	// Not Used.
+  signed short     pa$timeout;	// Not used.
+  void *     pa$local_conn_id;	// Not used.
+};
 
-LITERAL
-    Panic_arg_Length = $Field_Set_Size;
-MACRO
-    Debug_Panic_Args = Block[Panic_Arg_Length] Field(M$Panic_Fields)%;
-
+#define    Panic_arg_Length sizeof(struct M$PANIC_Fields)
 
 // Maintenance Call: DEBUG
 
-$FIELD M$DEBUG_Fields=
-    SET
-    Static_Fields(DE),			// Define the standard fields
-    DE$Level		= [$ULong],	// Debug level mask
-    DE$Local_Conn_ID	= [$ULong],	// Connection-ID (NYI)
-    DE$Group		= [$ULong]	// glag cluster (DEBUG or ACTIVITY)
-    TES;
+struct m$debug_fields
+{
+  Static_Fields(de);			// Define the standard fields
+  unsigned long     de$level;	// Debug level mask
+  unsigned long     de$local_conn_id;	// Connection-ID (NYI)
+  unsigned long     de$group;// glag cluster (DEBUG or ACTIVITY)
+};
 
-LITERAL
-    Debug_Arg_Length = $Field_Set_Size;
-MACRO
-    Debug_Args = Block[Debug_Arg_Length] Field(M$Debug_Fields)%;
-
+#define    Debug_Arg_Length sizeof(struct M$DEBUG_Fields)
 
 // Maintenance Call: EVENT
 
-$FIELD M$EVENT_Fields=
-    SET
-    Static_Fields(EV),			// Define the standard fields
-    EV$Buf_Size		= [$SWord],	// Event buffer size
-    EV$Data		= [$Byte]	// User data start
-    TES;
+struct m$event_fields
+{
+  Static_Fields(ev);			// Define the standard fields
+  signed short     ev$buf_size;	// Event buffer size
+  signed char ev$data;	// User data start
+};
 
-LITERAL
-    Event_Arg_Length = $Field_Set_Size;
-MACRO
-    Event_Args = Block[Event_Arg_Length] Field(M$Event_Fields)%;
-
+#define    Event_Arg_Length sizeof(struct M$EVENT_Fields)
 
 // VMS cancel IO call to TCPACP.  This argument block is generated by the
 // User_requests_avail rtn(module:maclib.bli) in response to the virtual device
@@ -780,19 +695,15 @@ MACRO
 // for which the IO is being canceled.  VMS cancels IO on both the $CANCEL
 // system service & when the user deasssigns ($DEASGN) the IO channel.
 
-$FIELD M$VMS_Cancel_Fields=
-    SET
-    Static_Fields(VC),			// Define the standard fields
-    VC$PIOchan		= [$Bytes(2)],	// Process IO channel (from IRP)
-    VC$Conn_ID		= [$Bytes(4)]	// Connection ID
-    TES;
+struct m$vms_cancel_fields
+{
+  Static_Fields(vc);		// Define the standard fields
+  signed short     vc$piochan;	// Process IO channel (from IRP)
+  signed long    vc$conn_id;	// Connection ID
+};
 
-LITERAL
-    Cancel_Arg_Length = $Field_Set_Size;
-MACRO
-    VMS$Cancel_Args = BLOCK[Cancel_Arg_Length]
-		      FIELD(M$VMS_Cancel_Fields)%;
+#define    Cancel_Arg_Length sizeof(struct M$VMS_Cancel_Fields)
 
 // End: Structure.Def
-#endif
+
 #endif

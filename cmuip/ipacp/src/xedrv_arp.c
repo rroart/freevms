@@ -395,7 +395,7 @@ XEARP$CHECK(XE_Int, IPADDR, HWADDR, QB)
     if ((ARBLK = XE_Int->XEI$ARP_BLOCK) == 0)
 	{
 	DRV$OPR_FAO("ARP_CHECK: Device not initialized, DEV=!XL",XE_DESC);
-	RETURN 0;
+	return 0;
 	};
 
 // See if this address is in the cache. Must run NOINT between ARP_FIND and
@@ -412,7 +412,7 @@ XEARP$CHECK(XE_Int, IPADDR, HWADDR, QB)
 	if (ACPTR == -1)
 	    {
 	    DRV$OKINT;			// Re-allow AST now
-	    RETURN FOUND ;
+	    return FOUND ;
 	    } ;
 	if (QB->NSQ$DELETE)
 	    {
@@ -551,7 +551,7 @@ XEARP$CHECK(XE_Int, IPADDR, HWADDR, QB)
 
 // Return appropriate reply
 
-    RETURN FOUND;
+    return FOUND;
     };
 
 FORWARD ROUTINE
@@ -722,7 +722,7 @@ ARP_HASH(IPA)
 // Returns hash value for this IP address.
 
     {
-    RETURN (IPA<0,8>+.IPA<8,8>+.IPA<16,8>+.IPA<24,8>) && ARP_HSHAND;
+    return (IPA<0,8>+.IPA<8,8>+.IPA<16,8>+.IPA<24,8>) && ARP_HSHAND;
     };
 
 ARP_FIND ( IPADDR , struct XE_Interface_Structure * XE_Int )
@@ -742,10 +742,10 @@ ARP_FIND ( IPADDR , struct XE_Interface_Structure * XE_Int )
     WHILE ACPTR != 0 DO
 	IF (ACPTR->AC$DEVICE == XE_Int) AND
 	   (ACPTR->AC$IPADDR == IPADDR) THEN
-	    RETURN ACPTR
+	    return ACPTR
 	else
 	    ACPTR = ACPTR->AC$NEXT;
-    RETURN 0;
+    return 0;
     };
 
 ARP_CNEW(IPADDR,XE_Int,HWLEN)
@@ -768,7 +768,7 @@ ARP_CNEW(IPADDR,XE_Int,HWLEN)
     if (NOT RC)
 	{
 	DRV$WARN_FAO("XE ARP CNEW memory allocation error, RC=!XL",RC);
-	RETURN -1 ;
+	return -1 ;
 	};
     HSHVAL = ARP_HASH(IPADDR);
 
@@ -791,7 +791,7 @@ ARP_CNEW(IPADDR,XE_Int,HWLEN)
 
     ACPTR->AC$NEXT = ARPHTB[HSHVAL];
     ARPHTB[HSHVAL] = ACPTR;
-    RETURN ACPTR;
+    return ACPTR;
     };
 
 void ARP_UPDATE( IPADDR , XE_Int , HWLEN , HWADDR ) =
@@ -817,7 +817,7 @@ void ARP_UPDATE( IPADDR , XE_Int , HWLEN , HWADDR ) =
 
     if (ACPTR == -1)
 	{
-	RETURN ;
+	return ;
 	} ;
 
 // Update the hardware address and mark this as valid
@@ -981,7 +981,7 @@ X:  {			// Labelled block X
 // Return length of block
 
     DRV$OKINT;
-    RETURN RBSIZE - LRSIZE;
+    return RBSIZE - LRSIZE;
     };
 
 }

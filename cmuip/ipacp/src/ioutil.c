@@ -260,13 +260,13 @@ GET_IP_ADDR(CPTR,VAL)
     DECR I FROM 3 TO 0 DO
 	{
 	if ((CHR = GET_DEC_NUM(CPTR,NVAL)) LSS 0)
-	    RETURN -1;
+	    return -1;
 	CH$WCHAR_A(NVAL,DPTR);
 	if (I != 0)
 	    if (CH$RCHAR_A(CPTR) != %C".")
-		RETURN -1;
+		return -1;
 	};
-    RETURN CHR;
+    return CHR;
     };
 
 GET_DEC_NUM(CPTR,VAL)
@@ -288,7 +288,7 @@ GET_DEC_NUM(CPTR,VAL)
 	CHR = CH$RCHAR_A(LPTR)
     WHILE (CHR == %C" ");
     if ((CHR LSS %C"0') || (CHR > %C'9"))
-	RETURN -1;
+	return -1;
     RVAL = 0;
     WHILE (CHR GEQ %C"0') && (CHR <= %C'9") DO
 	{
@@ -297,7 +297,7 @@ GET_DEC_NUM(CPTR,VAL)
 	CHR = CH$RCHAR_A(LPTR);
 	};
     VAL = RVAL;
-    RETURN CHR;
+    return CHR;
     };
 
 FORWARD ROUTINE
@@ -320,13 +320,13 @@ GET_HEX_BYTES(NUMBYT,CPTR,DEST)
     DECR I FROM (NUMBYT-1) TO 0 DO
 	{
 	if ((TCHR=GET_HEX_NUM(CPTR,CVAL)) LSS 0)
-	    RETURN -1;
+	    return -1;
 	CH$WCHAR_A(CVAL,DPTR);
 	if (I != 0)
 	    if (CH$RCHAR_A(CPTR) != %C"-")
-		RETURN -1;
+		return -1;
 	};
-    RETURN TCHR;
+    return TCHR;
     };
 
 GET_HEX_NUM(INPTR,VAL)
@@ -368,9 +368,9 @@ GET_HEX_NUM(INPTR,VAL)
 	CHR = CH$RCHAR_A(CPTR);
 	};
     if (NCHR == 0)
-	RETURN -1;
+	return -1;
     VAL = RVAL;
-    RETURN CHR;
+    return CHR;
     };
 
 
@@ -409,16 +409,16 @@ LOG_OPEN (void)
 	{
 	OPR$FAO("Log file $CREATE failed, RC = !XL, STV = !XL",
 	    RC, LOGFAB->FAB$L_STV);
-	RETURN FALSE;
+	return FALSE;
 	};
     RC = $CONNECT(RAB = LOGRAB);
     if (NOT RC)
 	{
 	OPR$FAO("Log file $CONNECT failed, RC = !XL, STV = !XL",
 	    RC, LOGRAB->FAB$L_STV);
-	RETURN FALSE;
+	return FALSE;
 	};
-    RETURN TRUE;
+    return TRUE;
     };
 
 LOG_CLOSE (void)
@@ -427,10 +427,10 @@ LOG_CLOSE (void)
 	{
 	$DISCONNECT(RAB = LOGRAB);
 	$CLOSE(FAB = LOGFAB);
-	RETURN TRUE;
+	return TRUE;
 	}
     else
-	RETURN FALSE;
+	return FALSE;
     };
 
 FORWARD ROUTINE
@@ -552,15 +552,15 @@ ACT_OPEN (void)
     if (NOT RC)
 	{
 	OPR$FAO("Activity file $CREATE failed, RC = !XL",RC);
-	RETURN FALSE;
+	return FALSE;
 	};
     RC = $CONNECT(RAB = ACTRAB);
     if (NOT RC)
 	{
 	OPR$FAO("Activity file $CONNECT failed, RC = !XL",RC);
-	RETURN FALSE;
+	return FALSE;
 	};
-    RETURN TRUE;
+    return TRUE;
     };
 
 ACT_CLOSE (void)
@@ -569,10 +569,10 @@ ACT_CLOSE (void)
 	{
 	$DISCONNECT(RAB = ACTRAB);
 	$CLOSE(FAB = ACTFAB);
-	RETURN TRUE;
+	return TRUE;
 	}
     else
-	RETURN FALSE;
+	return FALSE;
     };
 
 FORWARD ROUTINE
@@ -724,7 +724,7 @@ Send_2_Operator(Text)
     MSG->DSC$B_CLASS = DSC$K_CLASS_Z;
     MSG->DSC$B_DTYPE = DSC$K_DTYPE_Z;
     MSG->DSC$A_POINTER = MSGBUF;
-    RETURN $SNDOPR(MSGBUF=MSG);
+    return $SNDOPR(MSGBUF=MSG);
     };
 
 OPR_FAO(CSTR) : NOVALUE (void)

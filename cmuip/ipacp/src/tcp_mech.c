@@ -288,7 +288,7 @@ VTCB_Remove ( struct tcb_structure * tcb )
 	   Max_TCB = 1;
 	   };  // end of block X
 	}
-    else RETURN 0;
+    else return 0;
 
     TCB
     };
@@ -340,7 +340,7 @@ VTCB_Scan ( ASTRTN , ASTP1 , ASTP2 )
 	    if ((count = count-1) <= 0) !only process what we have.
 		{
 		OKINT;
-		RETURN Sum	// all done.
+		return Sum	// all done.
 		}
 	    };
     OKINT;
@@ -374,7 +374,7 @@ TCP$Connection_List(RB) : NOVALUE (void)
 VTCB_Indx_OK ( LCID )
     {
     if ((LCID GEQ 1) && (LCID <= VTCB_Size))
-	if ((VTCB_ptr[LCID] != 0)) RETURN 1;
+	if ((VTCB_ptr[LCID] != 0)) return 1;
 
     0
     };
@@ -408,7 +408,7 @@ Find_Local_Port(Port)
     P = Port && %X"FFFF" ;
     NOINT;
     INCR J FROM 0 TO ConectSize - 1  DO
-	if (ConectPtr[J,CN$Local_Port] EQLU P)
+	if (ConectPtr[J,CN$Local_Port] == P)
 	    EXITLOOP LP = J;
     OKINT;
     RETURN(LP);
@@ -490,12 +490,12 @@ Find_Free_LP_Entry (LPort)
 	if (CONECTPTR[J,CN$Local_Port] == -1)
 	    {
 	    OKINT;
-	    RETURN J
+	    return J
 	    };
 
     // Bypass the conect_table expansion code (for now...)
     OKINT;
-    RETURN Not_Found;
+    return Not_Found;
 
 /*
 //    OPR$FAO("TCP: Growing conect table to !SW entries...!/",ConectSize*2);
@@ -739,15 +739,15 @@ TCB_Find(lclport,frnaddr,frnport)=
 // Check seg source-address aginst TCB foreign-host or a wild foreign-host.
 !	LOG$FAO ( "TCB = !XL !/", TCB);
 
-	    IF (frnaddr EQLU TCB->Foreign_Host) || 
-	       (TCB->Foreign_Host EQLU Wild) THEN
+	    IF (frnaddr == TCB->Foreign_Host) || 
+	       (TCB->Foreign_Host == Wild) THEN
 		{
 
 // Check seg source-port aginst TCB foreign-port or a wild foreign-port
 // If a match make sure TCB has NOT been inactivated.
 
-		IF (FP EQLU (TCB->Foreign_Port && %X"FFFF")) OR
-		   ((TCB->Foreign_Port && %X"FFFF") EQLU Wild) THEN
+		IF (FP == (TCB->Foreign_Port && %X"FFFF")) OR
+		   ((TCB->Foreign_Port && %X"FFFF") == Wild) THEN
 		    if (TCB->state != CS$Inactive)
 			EXITLOOP result = TCB;
 		};
@@ -945,7 +945,7 @@ TCB_OK(TCBIDX,ERR,struct User_Default_Args * UARGS)
     EXTERNAL ROUTINE
 	TCP$KILL_P}ING_REQUESTS;
     MACRO
-	TCBERR(EC) = (ERR = EC; RETURN 0) %;
+	TCBERR(EC) = (ERR = EC; return 0) %;
     REGISTER
 	struct tcb_structure * tcb;
 
@@ -973,10 +973,10 @@ TCB_OK(TCBIDX,ERR,struct User_Default_Args * UARGS)
 	TCP$KILL_P}ING_REQUESTS(TCB,Tmp); // clean up & post user IO.
 	TCB$Delete(TCB); // Delete the inactive connection.
 	.ERR = TMP;
-	RETURN 0;
+	return 0;
 	}
     else
-	RETURN TCB;		// Good connection - return TCB
+	return TCB;		// Good connection - return TCB
     };
 
 
@@ -1014,12 +1014,12 @@ GET_TCB(TCBIDX,TCBret)
 // functions), neither of these checks should ever fail.
 
     if ((TCBIDX <= 0) || (TCBIDX > VTCB_Size))
-	RETURN NET$_CDE;	// Bad connection-ID
+	return NET$_CDE;	// Bad connection-ID
     TCB = VTCB_Ptr[TCBIDX];
     if (TCB <= 0)
-	RETURN NET$_CDE;	// TCB has been deleted
+	return NET$_CDE;	// TCB has been deleted
     if ((TCB->VTCB_INDEX != TCBIDX))
-	RETURN NET$_CDE;	// Confusion...
+	return NET$_CDE;	// Confusion...
 
     TCBret = TCB;		// Good connection - return TCB
     SS$_NORMAL

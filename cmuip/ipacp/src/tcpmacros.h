@@ -308,7 +308,7 @@ MACRO
    // Conditionally do something according to LOG_STATE flags
 
 #define   $$LOGF(logf) \
-	((log_state  (logf)) != 0)
+	((log_state && (logf)) != 0)
 
 #if 0
 // Macros for output to log and opr and the activity log.
@@ -334,7 +334,9 @@ MACRO
 	END
 	%,
 #endif
-	   static XLOG$FAO() {}	   
+#ifndef XLOG$FAO
+// not yet	   static void XLOG$FAO(void) {}	   
+#endif
 #if 0
     XLOG$FAO(LOGF) =
 	BEGIN

@@ -42,9 +42,9 @@ Modification History:
 */
 
     /* Define IP-based protocols */
-#define ICMP_Protocol	 1
-#define TCP_Protocol	 6
-#define UDP_Protocol	17
+#define ICMP_PROTOCOL	 1
+#define TCP_PROTOCOL	 6
+#define UDP_PROTOCOL	17
 
 
 /* This is sooooooooooooo ugly!  Someone should clean it up. (not me) */
@@ -498,7 +498,7 @@ Modification History:
 
 */
 
-#include <cmuip/central/netinet/netxport> // Get the BLISS field def. library.
+// not yet #include <cmuip/central/netinet/netxport> // Get the BLISS field def. library.
 
     // Define IP-based protocols
 #define    ICMP_Protocol        1    // ICMP protocol code
@@ -699,41 +699,41 @@ Modification History:
 // This section defines the Internet Protcol (IP) header.  This protocol
 // header is placed in front of the protocol and data from higher layers.
 
-struct IP_Header
+struct ip_header
   {
     union {
-      unsigned char     IPH$Type_service		;
-      unsigned       IPH$Swap_IHL		 : 4;  // check
+      unsigned char     iph$type_service		;
+      unsigned       iph$swap_ihl		 : 4;  // check
     };
-    unsigned char     IPH$Total_Length		[2];
-    unsigned char     IPH$Ident			[2];
+    unsigned char     iph$total_length		[2];
+    unsigned char     iph$ident			[2];
     union {
-      unsigned char     IPH$Fragmentation_Data	[2];
+      unsigned char     iph$fragmentation_data	[2];
       struct {
-	unsigned       IPH$Fragment_offset	 : 13;
+	unsigned       iph$fragment_offset	 : 13;
 	union {
-	  unsigned       IPH$Flags		 	 : 3;
+	  unsigned       iph$flags		 	 : 3;
 	  struct {
-	    unsigned           IPH$MF		 : 1;	// More fragments flag
-	    unsigned           IPH$DF		 : 1;	// Don't fragment
-	    unsigned           IPH$UNUSED		 : 1;	// Unused bit
+	    unsigned           iph$mf		 : 1;	// More fragments flag
+	    unsigned           iph$df		 : 1;	// Don't fragment
+	    unsigned           iph$unused		 : 1;	// Unused bit
 	  };
 	};
       };
     };
-    unsigned char     IPH$TTL			;
-    unsigned char     IPH$Protocol		;
-    unsigned char     IPH$Checksum		[2];
-    unsigned char     IPH$Source			[4];
-    unsigned char     IPH$Dest			[4];
+    unsigned char     iph$ttl			;
+    unsigned char     iph$protocol		;
+    unsigned char     iph$checksum		[2];
+    unsigned char     iph$source			[4];
+    unsigned char     iph$dest			[4];
   };
 
-#define    IP_Size   sizeof(struct IP_Header)
+#define    IP_SIZE   sizeof(struct IP_Header)
 
-#define    IP_hdr_shwd_size	 10	//IP header size in 16 bit words
-#define    IP_hdr_swap_size	 6	//Number of words of IP header to byteswap
-#define    IP_hdr_wd_size	 5	//IP header size in 32 bit words
-#define    IP_version		 4	//IP version number from DoD spec
+#define    IP_HDR_SHWD_SIZE	 10	//IP header size in 16 bit words
+#define    IP_HDR_SWAP_SIZE	 6	//Number of words of IP header to byteswap
+#define    IP_HDR_WD_SIZE	 5	//IP header size in 32 bit words
+#define    IP_VERSION		 4	//IP version number from DoD spec
 //#define    IPTTL  60			// Time-to-live
 #define    IPTOS  0			// Type of service
 #define    IPDF  1			// Don't fragment flag
@@ -742,14 +742,14 @@ struct IP_Header
 // *** WARNING ***
 //	MUST be a multiple of 4.
 
-#define    IP_hdr_byte_size   20
+#define    IP_HDR_BYTE_SIZE   20
 
 // Device dependent header (bytes).  Currently covers NSC hyperchannel
 // message-proper & interlan ethernet.
 // *** WARNING ***
 //	MUST be a multiple of 4.
 //////HACK////// What a hack//////  Get rid of this.  Calculate it at run time//
-#define    Device_Header	 68
+#define    DEVICE_HEADER	 68
 
 
 
@@ -793,70 +793,70 @@ struct IP_Header
 
 // This section defines the Internet Control Message Protcol (ICMP) header.
 
-struct ICMP_Header
+struct icmp_header
   {
     union {
       struct {
-	unsigned char 	ICM$TYPE	;	// ICMP packet type
-	unsigned char 	ICM$CODE	;	// Type-specific code
-	unsigned char 	ICM$CKSUM	[2];	// Checksum of ICMP portion
+	unsigned char 	icm$type	;	// ICMP packet type
+	unsigned char 	icm$code	;	// Type-specific code
+	unsigned char 	icm$cksum	[2];	// Checksum of ICMP portion
       };
-      unsigned char     ICM$EXT1	[4];	// Blanket for first longword.
+      unsigned char     icm$ext1	[4];	// Blanket for first longword.
     };
 
 // Type-specific fields:
     union {
-      unsigned char     ICM$VAR	[4];	// Type-specific data
+      unsigned char     icm$var	[4];	// Type-specific data
 
 // Echo request and reply (0,8)
       struct {
-	unsigned char ICM$E_ID[2];	// Echo - identifier
-	unsigned char ICM$E_SEQ[2];	// Echo - sequence number
+	unsigned char icm$e_id[2];	// Echo - identifier
+	unsigned char icm$e_seq[2];	// Echo - sequence number
       };
 
 // Types with an unused VAR field (3,4,11)
-      unsigned char ICM$TYP_UNUSED[4];	// Unused.  Must be zero.
+      unsigned char icm$typ_unused[4];	// Unused.  Must be zero.
 
 // Redirect messages (5)
-      unsigned char ICM$R_GWY[4];	// Redirect - new gateway address
+      unsigned char icm$r_gwy[4];	// Redirect - new gateway address
 
 // Parameter Problem messages (12)
       struct {
-	unsigned char ICM$P_PTR;
-	unsigned char ICM$P_UNUSD[3];
+	unsigned char icm$p_ptr;
+	unsigned char icm$p_unusd[3];
       };
 
-// Timestamp request and reply (13,14)
+// timestamp request and reply (13,14)
 
       struct {
-	unsigned char ICM$T_ID[2];	// Timestamp - identifier
-	unsigned char ICM$T_SEQ[2];	// Timestamp - sequence number
+	unsigned char icm$t_id[2];	// Timestamp - identifier
+	unsigned char icm$t_seq[2];	// Timestamp - sequence number
       };
 
 // Information request and reply (15,16)
 
       struct {
-	unsigned char ICM$I_ID[2];	// Information - identifier
-	unsigned char ICM$I_SEQ[2];	// Information - sequence number
+	unsigned char icm$i_id[2];	// Information - identifier
+	unsigned char icm$i_seq[2];	// Information - sequence number
       };
 
 // Information request and reply (17,18)
 
       struct {
-	unsigned char ICM$A_ID[2];	// Address Mask - identifier
-	unsigned char ICM$A_SEQ[2];	// Address Mask - sequence number
+	unsigned char icm$a_id[2];	// Address Mask - identifier
+	unsigned char icm$a_seq[2];	// Address Mask - sequence number
       };
     };
 
-    unsigned char     ICM$DATA	[0];	// Type-specific additional data
+    unsigned char     icm$data	[0];	// Type-specific additional data
 
 
   };
 
-#define    ICMP_Size   sizeof(struct ICMP_Header)
-#define    ICMP_Header_Size   ICMP_Size*4
+#define    ICMP_SIZE   sizeof(struct icmp_header)
+#define    ICMP_HEADER_SIZE   ICMP_SIZE*4
 
-#define    Max_ICMP_Data_Size  512	// Max ICMP data size
+#define    MAX_ICMP_DATA_SIZE  512	// Max ICMP data size
 //    ICMPTTL = 60,		// Time-to-live
 #define    ICMPTOS  0		// Type of service
 #define    ICMPDF  1			// Don't fragment flag
@@ -869,17 +869,17 @@ struct ICMP_Header
 
 // Define the structure of a UDP packet (after IP header)
 
-struct UDPkt_structure
+struct udpkt_structure
     {
-unsigned char     UP$Source_Port	[2]; // UDP source port
-unsigned char     UP$Dest_Port	[2]; // UDP destination port
-unsigned char     UP$Length		[2]; // UDP length (including UDP header)
-unsigned char     UP$Checksum		[2]; // UDP checksum (including pseudo-header)
-unsigned char     UP$Data		[0];  // UDP data start
+unsigned char     up$source_port	[2]; // UDP source port
+unsigned char     up$dest_port	[2]; // UDP destination port
+unsigned char     up$length		[2]; // UDP length (including UDP header)
+unsigned char     up$checksum		[2]; // UDP checksum (including pseudo-header)
+unsigned char     up$data		[0];  // UDP data start
     };
 
-#define    UDPkt_Length  sizeof(struct UDPkt_structure)
-#define    UDP_Header_Size  UDPkt_Length*4
+#define    UDPKT_LENGTH  sizeof(struct udpkt_structure)
+#define    UDP_HEADER_SIZE  UDPKT_LENGTH*4
 
 
 
@@ -909,60 +909,60 @@ unsigned char     UP$Data		[0];  // UDP data start
 
 struct segment_structure // check
 {
-  unsigned char     SH$Source_Port		[2];	// Source port
-  unsigned char     SH$Dest_Port		[2];	// Destination port
-  unsigned int     SH$Seq			;	// Sequence number
-  unsigned int     SH$ACK			;	// ACK number
+  unsigned short     sh$source_port		;	// Source port
+  unsigned short     sh$dest_port		;	// Destination port
+  unsigned int     sh$seq			;	// Sequence number
+  unsigned int     sh$ack			;	// ACK number
   union {
-    unsigned char     SH$Control_Flags		[2];	// For Fast flag clear.
+    unsigned short int     sh$control_flags;	// For Fast flag clear.
     struct {
-      unsigned 	SH$Data_Offset		 : 4;
+      unsigned 	sh$data_offset		 : 4;
       union {
-	unsigned 	SH$C_All_FLAGS		 : 12;
+	unsigned 	sh$c_all_flags		 : 12;
 	struct {
-	  unsigned 	SH$C_FIN		 : 1;	// FIN (close) control
-	  unsigned 	SH$C_SYN		 : 1;	// SYN (open) control
-	  unsigned 	SH$C_RST		 : 1;	// RESET control
-	  unsigned 	SH$C_EOL		 : 1;	// PUSH control
-	  unsigned 	SH$C_ACK		 : 1;	// ACK control (ACK valid)
-	  unsigned 	SH$C_URG		 : 1;	// URG control (URG valid)
-	  unsigned 	SH$Rsvrd		 : 6;	// Unused bits
+	  unsigned 	sh$c_fin		 : 1;	// FIN (close) control
+	  unsigned 	sh$c_syn		 : 1;	// SYN (open) control
+	  unsigned 	sh$c_rst		 : 1;	// RESET control
+	  unsigned 	sh$c_eol		 : 1;	// PUSH control
+	  unsigned 	sh$c_ack		 : 1;	// ACK control (ACK valid)
+	  unsigned 	sh$c_urg		 : 1;	// URG control (URG valid)
+	  unsigned 	sh$rsvrd		 : 6;	// Unused bits
 	};
       };
     };
     struct {
-      unsigned 	SH$BS_C_Rsvrd1		 : 4;
-      unsigned 	SH$BS_Data_Offset	 : 4;
-      unsigned 	SH$BS_C_FIN		 : 1;
-      unsigned 	SH$BS_C_SYN		 : 1;
-      unsigned 	SH$BS_C_RST		 : 1;
-      unsigned 	SH$BS_C_EOL		 : 1;
-      unsigned 	SH$BS_C_ACK		 : 1;
-      unsigned 	SH$BS_C_URG		 : 1;
-      unsigned 	SH$BS_C_Rsvrd2		 : 2;
+      unsigned 	sh$bs_c_rsvrd1		 : 4;
+      unsigned 	sh$bs_data_offset	 : 4;
+      unsigned 	sh$bs_c_fin		 : 1;
+      unsigned 	sh$bs_c_syn		 : 1;
+      unsigned 	sh$bs_c_rst		 : 1;
+      unsigned 	sh$bs_c_eol		 : 1;
+      unsigned 	sh$bs_c_ack		 : 1;
+      unsigned 	sh$bs_c_urg		 : 1;
+      unsigned 	sh$bs_c_rsvrd2		 : 2;
     };
   };
-  unsigned short int SH$Window;	// Window beyond this seq #
-  signed short int SH$CheckSum;	// Segment TCP checksum
-  unsigned short int SH$Urgent;	// Urgent pointer if URG set
-  unsigned char     SH$Data			[0];	// Start of segment data
+  unsigned short int sh$window;	// Window beyond this seq #
+  signed short int sh$checksum;	// Segment TCP checksum
+  unsigned short int sh$urgent;	// Urgent pointer if URG set
+  unsigned char     sh$data			[0];	// Start of segment data
 };
 
 // Segment TCP options
 
-struct tcp$opt_structure
+struct tcp$opt_block
 {
-  unsigned char     TCP$OPT_KIND	;	// Option type
-  unsigned char     TCP$OPT_LENGTH	;	// Option length
+  unsigned char     tcp$opt_kind	;	// Option type
+  unsigned char     tcp$opt_length	;	// Option length
   union {
-    unsigned char     TCP$OPT_DATA	[0];	// Additional data for the option
-    unsigned char       TCP$OPT_DBYTE	;	// One-byte option data
-    unsigned char       TCP$OPT_DWORD	[2];	// Two-byte option data
-    unsigned char       TCP$OPT_DLONG	[4];	// Four-byte option data
+    unsigned char     tcp$opt_data	[0];	// Additional data for the option
+    unsigned char       tcp$opt_dbyte	;	// One-byte option data
+    unsigned short       tcp$opt_dword;	// Two-byte option data
+    unsigned char       tcp$opt_dlong	[4];	// Four-byte option data
     };				//(others require harder processing)
 };
 
-#define    TCP$OPT_SIZE  sizeof(struct TCP$OPT_structure)
+#define    TCP$OPT_SIZE  sizeof(struct tcp$opt_block)
 
 #define    TCP$OPT_KIND_EOL  0	// End of options list
 #define    TCP$OPT_KIND_NOP  1	// No-OP option
@@ -978,14 +978,14 @@ struct tcp$opt_structure
 
 // TCP Segment: header & data sizes.
 
-#define    TCP_Data_Offset  5			// in 32-bit words.
-#define    TCP_Header_Size  TCP_Data_OffSet*4	// in bytes.
+#define    TCP_DATA_OFFSET  5			// in 32-bit words.
+#define    TCP_HEADER_SIZE  TCP_DATA_OFFSET*4	// in bytes.
 //    Default_Data_Size = 1392,			// default: max size of user
-#define    Default_Data_Size  536			// default: max size of user
+#define    DEFAULT_DATA_SIZE  536			// default: max size of user
 						// data per segment.
 
 // segment option parameters
 
-#define   opt$seg_dataSize  2			// MSS option value
-#define   opt$max_recv_dataSize  1392 		// MSS default value
+#define   OPT$SEG_DATASIZE  2			// MSS option value
+#define   OPT$MAX_RECV_DATASIZE  1392 		// MSS default value
 

@@ -159,7 +159,7 @@ signed long MIB$icmpOutTimeStamps	 ;
 signed long MIB$icmpOutTimeStampReps	 ;
 signed long MIB$icmpOutAddrMasks	 ;
 signed long MIB$icmpOutAddrMaskReps	;
-    }
+    };
 
 #define    ICMP_MIB_Size	sizeof(ICMP_MIB_struct)
 
@@ -172,7 +172,7 @@ signed long MIB$UDPINDATAGRAMS	 ;
 signed long MIB$UDPNOPORTS	 ;
 signed long MIB$UDPINERRORS	 ;
 signed long MIB$UDPOUTDATAGRAMS	;
-}
+};
 
 #define    UDP_MIB_Size	sizeof(struct UDP_MIB_struct)
 
@@ -193,7 +193,7 @@ signed long MIB$tcpCurrEstab	 ;
 signed long MIB$tcpInSegs	 ;
 signed long MIB$tcpOutSegs	 ;
 signed long MIB$tcpRetransSegs	 ;
-}
+};
 
 #define    TCP_MIB_Size	sizeof(TCP_MIB_struct)
 

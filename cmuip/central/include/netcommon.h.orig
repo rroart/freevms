@@ -1,6 +1,3 @@
-#ifndef netcommon_h
-#define netcommon_h
-
 /*
 	****************************************************************
 
@@ -72,8 +69,8 @@ typedef union {
 
 /* Name length and address count literals */
 
-#define HOST_NAME_MAX_SIZE	128
-#define MAX_HNAME		HOST_NAME_MAX_SIZE
+#define Host_Name_Max_Size	128
+#define MAX_HNAME		Host_Name_Max_Size
 #define MAX_HADDRS		20
 /*!!!HACK!!! Get rid of this!!!*/
 #define MAX_RRSIZE		1024;
@@ -171,11 +168,11 @@ typedef struct {
 typedef struct {
     uchar CI$FHost_Name_size;
     uchar CI$LHost_Name_size;
-    uchar CI$Foreign_Host[HOST_NAME_MAX_SIZE];
+    uchar CI$Foreign_Host[Host_Name_Max_Size];
     short fill;
     ulong CI$Foreign_Port;
     short fill_1;
-    uchar CI$Local_Host[HOST_NAME_MAX_SIZE];
+    uchar CI$Local_Host[Host_Name_Max_Size];
     ulong CI$Local_Port;
     short fill_2;
     ulong CI$local_internet_adrs;
@@ -515,4 +512,3 @@ typedef struct {
 /* SNMP FCall subfunctions	*/
 #define NCP$C_SNMP_NULL		0
 
-#endif

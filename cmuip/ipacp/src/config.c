@@ -455,7 +455,7 @@ CNF$DEVICE_STAT ( Inx, RB_A )
 
     IF (Inx LSS 0) || (Inx > DC_Max_Num_Net_devices-1) OR
 	(dev_config_tab[Inx,dc_valid_device] == 0) THEN
-	RETURN -1;
+	return -1;
 
     // fill in the simple stuff...
     RB->DU$Dev_Address = dev_config_tab[Inx,dc_ip_address];
@@ -1251,10 +1251,10 @@ KEY_VALUE(KEYTAB,KEYLEN,KEYSTR)
 	CURSTR = KEYTAB[I];
 	IF CH$EQL(KEYLEN,KEYSTR,
 		  CURSTR->DSC$W_LENGTH,CURSTR->DSC$A_POINTER) THEN
-	    RETURN KEYTAB[I+1];
+	    return KEYTAB[I+1];
 	};
     Config_Err(%ASCID"Bad keyword field");
-    RETURN -1;
+    return -1;
     };
 
 PARSE_PRCPRIVS(PRVBLK)
@@ -1305,7 +1305,7 @@ PARSE_PRCPRIVS(PRVBLK)
 
 // Return count of fields found
 
-    RETURN PRIVCNT;
+    return PRIVCNT;
     };
 
 PARSE_PRCQUOTAS(QLIST,QMAX)
@@ -1382,7 +1382,7 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 
 // Return the number of entries in the list.
 
-    RETURN QUOTCNT+1;
+    return QUOTCNT+1;
     };
 
 PARSE_PRCSTATUS (void)
@@ -1417,7 +1417,7 @@ PARSE_PRCSTATUS (void)
 
 // Finall, return the complete value
 
-    RETURN STATVAL;
+    return STATVAL;
     };
 
 //SBTTL "Init_WKS - Add a WKS entry"
@@ -1839,7 +1839,7 @@ GETFIELD(FLDADR)
     CH$WCHAR_A(0,DSTPTR);
     if (cnt == 0)
 	Config_err(%ASCID"Bad or null field found");
-    RETURN cnt;
+    return cnt;
     };
 
 PARSE_NULLFIELD (void)

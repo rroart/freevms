@@ -526,18 +526,18 @@ cmp_TCB (TCB1,TCB2)
     if (result != 0) RETURN result;
 
     // compare local ports
-    if (TCB1->local_port LSSU TCB2->local_port) RETURN -1;
-    if (TCB2->local_port LSSU TCB1->local_port) RETURN 1;
+    if (TCB1->local_port < TCB2->local_port) RETURN -1;
+    if (TCB2->local_port < TCB1->local_port) RETURN 1;
 
     // compare remote address
     result = cmp_ipaddr(TCB1->foreign_host, TCB2->foreign_host);
     if (result != 0) RETURN result;
 
     // compare remote ports
-    if (TCB1->foreign_port LSSU TCB2->foreign_port) RETURN -1;
-    if (TCB2->foreign_port LSSU TCB1->foreign_port) RETURN 1;
+    if (TCB1->foreign_port < TCB2->foreign_port) return -1;
+    if (TCB2->foreign_port < TCB1->foreign_port) return 1;
 
-    RETURN 0
+    return 0
     };
 
 
@@ -595,7 +595,7 @@ var_system (vp, name, length, exact, var_len, access_method)
         struct VECTOR * name[,SNMP$K_OIDsize];
 
     IF (exact && (compare(name,..length,vp->var$name,vp->var$namelen) != 0))
-	THEN RETURN 0;
+	THEN return 0;
     ch$move(vp->var$namelen * SNMP$K_OIDsize, vp->var$name, name );
 
     length = vp->var$namelen;
@@ -607,22 +607,22 @@ var_system (vp, name, length, exact, var_len, access_method)
 	[VERSION_DESCR]:
 	    {
 	    var_len = version_description->DSC$W_LENGTH;
-	    RETURN version_description->DSC$A_POINTER;
+	    return version_description->DSC$A_POINTER;
 	    };
 	[VERSION_ID]:
 	    {
 	    var_len = version_ident_size*SNMP$K_OIDsize;
-	    RETURN version_ident;
+	    return version_ident;
 	    };
 	[CFG_NNETS]:
 	    {
 	    sys_nnets = Dev_Count;
-	    RETURN sys_nnets;
+	    return sys_nnets;
 	    };
 	[UPTIME]:
 	    {
 	    sys_uptime = CALCULATE_UPTIME();
-	    RETURN sys_uptime;
+	    return sys_uptime;
 	    };
 	[OTHERWISE]:
 !!!HACK!!// Put some sort of erro logging in here...
@@ -660,7 +660,7 @@ var_ifEntry (vp, name, length, exact, var_len, access_method)
 	    THEN EXITLOOP interface = i
 	};
 
-    if ((interface == 0)) RETURN 0;
+    if ((interface == 0)) return 0;
 
     interface = interface - 1; // translate into internal index of interfaces
     ch$move(vp->var$namelen * SNMP$K_OIDsize, newname, name);
@@ -673,53 +673,53 @@ var_ifEntry (vp, name, length, exact, var_len, access_method)
     SELECTONE (vp->var$magic) OF
 	SET
 	[IFINDEX]:
-	    RETURN dev_config->dcmib_IFINDEX;
+	    return dev_config->dcmib_IFINDEX;
 	[IFDESCR]:
 	    {
 	    var_len = .(dev_config->dcmib_ifDescr);
-	    RETURN .(dev_config->dcmib_ifDescr+4)
+	    return .(dev_config->dcmib_ifDescr+4)
 	    };
 	[IFTYPE]:
-	    RETURN dev_config->dcmib_IFTYPE;
+	    return dev_config->dcmib_IFTYPE;
 	[IFMTU]:
-	    RETURN dev_config->dcmib_IFMTU;
+	    return dev_config->dcmib_IFMTU;
 	[IFSPEED]:
-	    RETURN dev_config->dcmib_IFSPEED;
+	    return dev_config->dcmib_IFSPEED;
 	[IFPHYSADDRESS]:
 	    {
 	    var_len = dev_config->dcmib_ifPAsize;
-	    RETURN dev_config->dcmib_IFPHYSADDRESS
+	    return dev_config->dcmib_IFPHYSADDRESS
 	    };
 	[IFADMINSTATUS]:
-	    RETURN dev_config->dcmib_IFADMINSTATUS;
+	    return dev_config->dcmib_IFADMINSTATUS;
 	[IFOPERSTATUS]:
-	    RETURN dev_config->dcmib_IFOPERSTATUS;
+	    return dev_config->dcmib_IFOPERSTATUS;
 	[IFLASTSTATE]:
-	    RETURN dev_config->dcmib_IFLASTSTATE;
+	    return dev_config->dcmib_IFLASTSTATE;
 	[IFINOCTETS]:
-	    RETURN dev_config->dcmib_IFINOCTETS;
+	    return dev_config->dcmib_IFINOCTETS;
 	[IFINUCASTPKTS]:
-	    RETURN dev_config->dcmib_IFINUCASTPKTS;
+	    return dev_config->dcmib_IFINUCASTPKTS;
 	[IFINNUCASTPKTS]:
-	    RETURN dev_config->dcmib_IFINNUCASTPKTS;
+	    return dev_config->dcmib_IFINNUCASTPKTS;
 	[IFINDISCARDS]:
-	    RETURN dev_config->dcmib_IFINDISCARDS;
+	    return dev_config->dcmib_IFINDISCARDS;
 	[IFINERRORS]:
-	    RETURN dev_config->dcmib_IFINERRORS;
+	    return dev_config->dcmib_IFINERRORS;
 	[IFINUNKNOWNPROTOS]:
-	    RETURN dev_config->dcmib_IFINUNKNOWNPROTOS;
+	    return dev_config->dcmib_IFINUNKNOWNPROTOS;
 	[IFOUTOCTETS]:
-	    RETURN dev_config->dcmib_IFOUTOCTETS;
+	    return dev_config->dcmib_IFOUTOCTETS;
 	[IFOUTUCASTPKTS]:
-	    RETURN dev_config->dcmib_IFOUTUCASTPKTS;
+	    return dev_config->dcmib_IFOUTUCASTPKTS;
 	[IFOUTNUCASTPKTS]:
-	    RETURN dev_config->dcmib_IFOUTNUCASTPKTS;
+	    return dev_config->dcmib_IFOUTNUCASTPKTS;
 	[IFOUTDISCARDS]:
-	    RETURN dev_config->dcmib_IFOUTDISCARDS;
+	    return dev_config->dcmib_IFOUTDISCARDS;
 	[IFOUTERRORS]:
-	    RETURN dev_config->dcmib_IFOUTERRORS;
+	    return dev_config->dcmib_IFOUTERRORS;
 	[IFOUTQLEN]:
-	    RETURN dev_config->dcmib_IFOUTQLEN;
+	    return dev_config->dcmib_IFOUTQLEN;
 	[OTHERWISE]:
 !!!HACK!!// Put some sort of erro logging in here...
 	    0;
@@ -891,14 +891,14 @@ var_IP (vp, name, length, exact, var_len, access_method)
         struct VECTOR * name[,SNMP$K_OIDsize];
 
     IF (exact && (compare(name,..length,vp->var$name,vp->var$namelen) != 0))
-	THEN RETURN 0;
+	THEN return 0;
     ch$move(vp->var$namelen * SNMP$K_OIDsize, vp->var$name, name );
 
     length = vp->var$namelen;
     access_method = 0;
     var_len = 4;	// default length == 4 bytes
 
-    RETURN IP_group_MIB + (vp->var$magic-1)*4
+    return IP_group_MIB + (vp->var$magic-1)*4
     };
 
 /*
@@ -1006,7 +1006,7 @@ var_ipAddrEntry (vp, name, length, exact, var_len, access_method)
 	    THEN EXITLOOP interface = i;
 	};
 
-    if ((interface LSS 0)) RETURN 0;
+    if ((interface LSS 0)) return 0;
 
     // "Cobble" in the new name
     IPaddr = DEV_CONFIG_TAB[interface,dc_ip_address];
@@ -1022,16 +1022,16 @@ var_ipAddrEntry (vp, name, length, exact, var_len, access_method)
     SELECTONE (vp->var$magic) OF
 	SET
     	[IPADADDR]:
-	    RETURN dev_config_tab[interface,dc_ip_address];
+	    return dev_config_tab[interface,dc_ip_address];
         [IPADIFINDEX]:
-	    RETURN dev_config_tab[interface,dcmib_IFINDEX];
+	    return dev_config_tab[interface,dcmib_IFINDEX];
 	[IPADNETMASK]:
-	    RETURN dev_config_tab[interface,dc_ip_netmask];
+	    return dev_config_tab[interface,dc_ip_netmask];
 	[IPADBCASTADDR]:
-	    RETURN 0;
+	    return 0;
 	TES;
 
-    RETURN 0
+    return 0
     };
 
 
@@ -1045,14 +1045,14 @@ var_ICMP (vp, name, length, exact, var_len, access_method)
         struct VECTOR * name[,SNMP$K_OIDsize];
 
     IF (exact && (compare(name,..length,vp->var$name,vp->var$namelen) != 0))
-	THEN RETURN 0;
+	THEN return 0;
     ch$move(vp->var$namelen * SNMP$K_OIDsize, vp->var$name, name );
 
     length = vp->var$namelen;
     access_method = 0;
     var_len = 4;	// default length == 4 bytes
 
-    RETURN ICMP_MIB + (vp->var$magic-1)*4
+    return ICMP_MIB + (vp->var$magic-1)*4
     };
 
 
@@ -1066,14 +1066,14 @@ var_UDP (vp, name, length, exact, var_len, access_method)
         struct VECTOR * name[,SNMP$K_OIDsize];
 
     IF (exact && (compare(name,..length,vp->var$name,vp->var$namelen) != 0))
-	THEN RETURN 0;
+	THEN return 0;
     ch$move(vp->var$namelen * SNMP$K_OIDsize, vp->var$name, name );
 
     length = vp->var$namelen;
     access_method = 0;
     var_len = 4;	// default length == 4 bytes
 
-    RETURN UDP_MIB + (vp->var$magic-1)*4
+    return UDP_MIB + (vp->var$magic-1)*4
     };
 
 
@@ -1087,14 +1087,14 @@ var_TCP (vp, name, length, exact, var_len, access_method)
         struct VECTOR * name[,SNMP$K_OIDsize];
 
     IF (exact && (compare(name,..length,vp->var$name,vp->var$namelen) != 0))
-	THEN RETURN 0;
+	THEN return 0;
     ch$move(vp->var$namelen * SNMP$K_OIDsize, vp->var$name, name );
 
     length = vp->var$namelen;
     access_method = 0;
     var_len = 4;	// default length == 4 bytes
 
-    RETURN TCP_MIB + (vp->var$magic-1)*4
+    return TCP_MIB + (vp->var$magic-1)*4
     };
 
 
@@ -1148,7 +1148,7 @@ var_tcpConn (vp, name, length, exact, var_len, access_method)
 		EXITLOOP;
 	    };
 
-    if ((bestTcb EQLA 0)) RETURN 0;
+    if ((bestTcb EQLA 0)) return 0;
 
     // "Cobble" in the new name
     TCPaddr = bestTCB->Local_Host;		// Local Host
@@ -1172,25 +1172,25 @@ var_tcpConn (vp, name, length, exact, var_len, access_method)
     	[tcpConnState]:
 	    {
 	    long_return = bestTCB->State+1;
-	    RETURN long_return;
+	    return long_return;
 	    };
     	[tcpConnLocalAddress]:
-	    RETURN bestTCB->local_host;
+	    return bestTCB->local_host;
     	[tcpConnLocalPort]:
 	    {
 	    long_return = bestTCB->local_port;
-	    RETURN long_return;
+	    return long_return;
 	    };
     	[tcpConnRemAddress]:
-	    RETURN bestTCB->foreign_host;
+	    return bestTCB->foreign_host;
     	[tcpConnRemPort]:
 	    {
 	    long_return = bestTCB->foreign_port;
-	    RETURN long_return;
+	    return long_return;
 	    };
 	TES;
 
-    RETURN 0
+    return 0
     };
 
 }

@@ -249,12 +249,12 @@ ICMPCB_Find(Src$Adrs)
 	    {
 	    IF ((ICMPCB->ICMPCB$Foreign_Host == WILD) OR
 		(ICMPCB->ICMPCB$Foreign_Host == Src$Adrs)) THEN
-		RETURN ICMPCB;
+		return ICMPCB;
 	    Ucount = Ucount-1;
 	    };
 	ICMPCBIX = ICMPCBIX + 1;
 	};
-    RETURN 0;
+    return 0;
     };
 
 //SBTTL "ICMP input handler"
@@ -388,7 +388,7 @@ Queue_User_ICMP(ICMPCB,Uptr,Usize,Buf,Bufsize,QB)
 	{
 	if ($$LOGF(LOG$ICMP))
 	    QL$FAO("!%T ICMP at !XL dropped - ICMPCB NR queue full!/",0,Uptr);
-	RETURN TRUE;		// Drop the packet - no room
+	return TRUE;		// Drop the packet - no room
 	};
 
 // Allocate a queue block and insert onto user receive queue
@@ -406,7 +406,7 @@ Queue_User_ICMP(ICMPCB,Uptr,Usize,Buf,Bufsize,QB)
 	Deliver_ICMP_Data(ICMPCB,QB,QBR)
     else
 	INSQUE(QB,ICMPCB->ICMPCB$NR_Qtail);
-    RETURN FALSE;		// Don't deallocate this segment...
+    return FALSE;		// Don't deallocate this segment...
     };
 
 //SBTTL "Deliver_ICMP_Data - Deliver ICMP data to user"
@@ -479,7 +479,7 @@ ICMPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
     signed long
 	struct ICMPCB_Structure * ICMPCB;
     MACRO
-	ICMPCBERR(EC) = (RCaddr = EC; RETURN 0) %;
+	ICMPCBERR(EC) = (RCaddr = EC; return 0) %;
 
 // Range check the connection id. This should never fail, since the user should
 // not be fondling connection IDs.
@@ -501,7 +501,7 @@ ICMPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
 
 // Everything is good - return the ICMPCB address
 
-    RETURN ICMPCB;
+    return ICMPCB;
     };
 
 //SBTTL "ICMPCB_Get - Allocate and initialize one ICMPCB"
@@ -526,7 +526,7 @@ X:  {			// ** Block X **
     INCR I FROM 1 TO MAX_ICMPCB DO
 	if (ICMPCB_Table[I] == 0)
 	    LEAVE X WITH (ICMPCBIDX = I);
-    RETURN 0;			// Failed to allocate a ICMPCB
+    return 0;			// Failed to allocate a ICMPCB
     };			// ** Block X **
 
 // Allocate some space for the ICMPCB
@@ -555,7 +555,7 @@ X:  {			// ** Block X **
 // Return the pointer
 
     IDX = ICMPCBIDX;
-    RETURN ICMPCB;
+    return ICMPCB;
     };
 
 //SBTTL "ICMPCB_Free - Deallocate a ICMPCB"
@@ -855,7 +855,7 @@ ICMP_COPEN_DONE(ICMPCB,ADRCNT,ADRLST)
 
     XLOG$FAO(LOG$USER,"!%T UDB_COPEN: Conn idx = !XL, ICMPCB = !XL!/",
 	     0,ICMPCB->ICMPCB$ICMPCBID,ICMPCB);
-    RETURN SS$_NORMAL;
+    return SS$_NORMAL;
     };
 
 //SBTTL "ICMP_ADLOOK_DONE - Finish ICMP address to name lookup"
@@ -1227,7 +1227,7 @@ ICMP$CANCEL(struct VMS$Cancel_Args * Uargs)
 
 // If the process doing the cancel owns this connection, then delete it.
 
-	    IF (ICMPCB->ICMPCB$User_ID EQLU Uargs->VC$PID) AND
+	    IF (ICMPCB->ICMPCB$User_ID == Uargs->VC$PID) AND
 	       (ICMPCB->ICMPCB$PIOchan == Uargs->VC$PIOchan) THEN
 		{
 		XLOG$FAO(LOG$USER,"!%T ICMP$Cancel: ICMPCB=!XL!/",0,ICMPCB);
@@ -1235,7 +1235,7 @@ ICMP$CANCEL(struct VMS$Cancel_Args * Uargs)
 		Fcount = Fcount + 1;
 		};
 	    };
-    RETURN Fcount;
+    return Fcount;
     };
 
 //SBTTL "ICMP dump routines"
@@ -1275,7 +1275,7 @@ ICMP$ICMPCB_Dump(ICMPCBIX,RB)
 
     IF (ICMPCBIX LSS 1) || (ICMPCBIX > MAX_ICMPCB) OR
        ((ICMPCB = ICMPCB_TABLE[ICMPCBIX]) == 0) THEN
-	RETURN FALSE;
+	return FALSE;
 
 // Copy the ICMPCB contents
 
@@ -1313,7 +1313,7 @@ ICMP$ICMPCB_Dump(ICMPCBIX,RB)
 
 // Done.
 
-    RETURN TRUE;
+    return TRUE;
     };
 }
 ELUDOM

@@ -250,12 +250,12 @@ IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
 		(IPCB->IPCB$Host_Filter == Src$Adrs)) AND
 		((IPCB->IPCB$Proto_Filter == WILD) OR
 		(IPCB->IPCB$Proto_Filter == Protocol)) THEN
-		RETURN IPCB;
+		return IPCB;
 	    Ucount = Ucount-1;
 	    };
 	IPCBIX = IPCBIX + 1;
 	};
-    RETURN 0;
+    return 0;
     };
 
 //SBTTL "IP input handler"
@@ -362,7 +362,7 @@ Queue_User_IP(IPCB,Uptr,Usize,Buf,Bufsize,QB)
 	{
 	if ($$LOGF(LOG$IP))
 	    QL$FAO("!%T IP at !XL dropped - IPCB NR queue full!/",0,Uptr);
-	RETURN TRUE;		// Drop the packet - no room
+	return TRUE;		// Drop the packet - no room
 	};
 
 // We need to make a copy of this IP datagram.
@@ -388,7 +388,7 @@ Queue_User_IP(IPCB,Uptr,Usize,Buf,Bufsize,QB)
     else
 	INSQUE(QB,IPCB->IPCB$NR_Qtail);
 
-    RETURN TRUE;		// Go ahead and deallocate this segment...
+    return TRUE;		// Go ahead and deallocate this segment...
     };
 
 //SBTTL "Deliver_IP_Data - Deliver IP data to user"
@@ -469,7 +469,7 @@ IPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
     signed long
 	struct IPCB_Structure * IPCB;
     MACRO
-	IPCBERR(EC) = (RCaddr = EC; RETURN 0) %;
+	IPCBERR(EC) = (RCaddr = EC; return 0) %;
 
 // Range check the connection id. This should never fail, since the user should
 // not be fondling connection IDs.
@@ -491,7 +491,7 @@ IPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
 
 // Everything is good - return the IPCB address
 
-    RETURN IPCB;
+    return IPCB;
     };
 
 //SBTTL "IPCB_Get - Allocate and initialize one IPCB"
@@ -515,7 +515,7 @@ X:  {			// ** Block X **
     INCR I FROM 1 TO MAX_IPCB DO
 	if (IPCB_Table[I] == 0)
 	    LEAVE X WITH (IPCBIDX = I);
-    RETURN 0;			// Failed to allocate a IPCB
+    return 0;			// Failed to allocate a IPCB
     };			// ** Block X **
 
 // Allocate some space for the IPCB
@@ -543,7 +543,7 @@ X:  {			// ** Block X **
 // Return the pointer
 
     IDX = IPCBIDX;
-    RETURN IPCB;
+    return IPCB;
     };
 
 //SBTTL "IPCB_Free - Deallocate a IPCB"
@@ -1025,7 +1025,7 @@ void IPU$S}(struct User_Send_Args * Uargs) (void)
 	{
 	MM$Seg_FREE(BufSize,Buf);	// Give back buffer
 	USER$Err(Uargs,NET$_NOPN);
-	RETURN 0
+	return 0
 	};
 
 
@@ -1182,7 +1182,7 @@ IPU$CANCEL(struct VMS$Cancel_Args * Uargs)
 
 // If the process doing the cancel owns this connection, then delete it.
 
-	    IF (IPCB->IPCB$User_ID EQLU Uargs->VC$PID) AND
+	    IF (IPCB->IPCB$User_ID == Uargs->VC$PID) AND
 	       (IPCB->IPCB$PIOchan == Uargs->VC$PIOchan) THEN
 		{
 		XLOG$FAO(LOG$USER,"!%T IPU$Cancel: IPCB=!XL!/",0,IPCB);
@@ -1190,7 +1190,7 @@ IPU$CANCEL(struct VMS$Cancel_Args * Uargs)
 		Fcount = Fcount + 1;
 		};
 	    };
-    RETURN Fcount;
+    return Fcount;
     };
 
 //SBTTL "IP dump routines"
@@ -1230,7 +1230,7 @@ IPU$IPCB_Dump(IPCBIX,RB)
 
     IF (IPCBIX LSS 1) || (IPCBIX > MAX_IPCB) OR
        ((IPCB = IPCB_TABLE[IPCBIX]) == 0) THEN
-	RETURN FALSE;
+	return FALSE;
 
 // Copy the IPCB contents
 
@@ -1268,7 +1268,7 @@ IPU$IPCB_Dump(IPCBIX,RB)
 
 // Done.
 
-    RETURN TRUE;
+    return TRUE;
     };
 }
 ELUDOM

@@ -204,7 +204,7 @@ Module Modification History:
 6.0   3-Nov-86, Edit by VAF
 	Set Base_RT_Timeout (initial RX time value) to 5 seconds. The idea of
 	setting it to 1 second was a kluge to get around ARP eating the first
-	packet. Make a minor change in the calculation of TCB->RX_TIMER.
+	packet. Make a minor change in the calculation of tcb->rx_timer.
 
 5.9  24-Oct-86, Edit by VAF
 	Additions to debugging code.
@@ -413,7 +413,7 @@ MODULE TCP(IDENT="8.2",LANGUAGE(BLISS32),
 // Include System libraries.
 
 #include <starlet.h>	// VMS system definitions
-#include <cmuip/central/include/netxport.h>	// Bliss transportable library defs.
+// not yet #include <cmuip/central/include/netxport.h>	// Bliss transportable library defs.
 #include <cmuip/central/include/neterror.h>	// Network error codes
 #include <cmuip/central/include/netcommon.h>// Common decls
 #include "netvms.h"	// Include Local OS Dependent stuff.
@@ -423,7 +423,11 @@ MODULE TCP(IDENT="8.2",LANGUAGE(BLISS32),
 #include "tcpmacros.h"		// Local (tcp) Macro defintions.
 #include "structure.h"		// Structure Definitions
 #include "snmp.h"			// Simple Network Management Protocol
-#include <tcpmod.h>		// Modification history/version
+// not yet #include <tcpmod.h>		// Modification history/version
+
+#include <descrip.h>
+#include <ssdef.h>
+// not yet? #include <iosbdef.h>
 
 
 
@@ -494,6 +498,11 @@ extern    NML$CANCEL();
 
 //SBTTL "External Literals & data segments"
 
+#define M$INTERNAL 15 // see user.c
+#define U$OPEN 1
+#define U$CLOSE 2
+#define M$CANCEL 14
+
 #if 0
 extern signed long LITERAL
 
@@ -508,12 +517,12 @@ extern signed long LITERAL
 // External Data
 
 extern signed long
-    Default_MSS,		// Default MSS
-    MAX_RECV_DATASIZE,		// Max segment size
-    MAX_PHYSICAL_BUFSIZE,	// Max size of device receive buffer
-    MIN_PHYSICAL_BUFSIZE,	// Minimum size of device send buffer
-    Log_State,
-    Act_State;
+    default_mss,		// Default MSS
+    max_recv_datasize,		// Max segment size
+    max_physical_bufsize,	// Max size of device receive buffer
+    min_physical_bufsize,	// Minimum size of device send buffer
+    log_state,
+    act_state;
 extern    struct TCP_MIB_struct * TCP_MIB;   // TCP management Information Block
 
 
@@ -565,15 +574,15 @@ signed long
 
 #define    SEND_SEG(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,XTIME) \
 	TCPIPID = TCPIPID+1; \
-	IP$SEND(TCB->Local_Host,TCB->Foreign_Host,TCPTOS,TCPTTL, \
-		SEGADDR,SEGSIZE,TCPIPID,TCPDF,DELFLAG,TCP_Protocol, \
+	IP$SEND(tcb->local_host,tcb->foreign_host,TCPTOS,TCPTTL, \
+		SEGADDR,SEGSIZE,TCPIPID,TCPDF,DELFLAG,TCP_PROTOCOL, \
 		BUFPTR,BUFSIZE)
 #define    SEND_SEG1(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,XTIME) \
 	{ \
 	if (XTIME == 0) \
-	    TCB->Probe_time = PROBE_IVAL + Time_stamp(); \
+	    tcb->probe_time = PROBE_IVAL + Time_stamp(); \
 	else \
-	    TCB->Probe_time = PROBE_IVAL + XTIME; \
+	    tcb->probe_time = PROBE_IVAL + XTIME; \
 	SEND_SEG(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE) \
 	}
 #define    SEND_SEG0(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,XTIME) \
@@ -582,7 +591,7 @@ signed long
 	}
 
 
-void TCP$SET_TCB_STATE(struct tcb_structure * TCB, long S)
+void TCP$SET_TCB_STATE(struct tcb_structure * tcb, long S)
 // Set the State of a TCB, Old state ==> last_state.
     {
     signed long
@@ -590,18 +599,18 @@ void TCP$SET_TCB_STATE(struct tcb_structure * TCB, long S)
 
 // If changing from Lookup state, kill pending requests
 //    NOINT;
-    if (((TCB->NMLook_Flag) && (TCB->State == CS$NAMELOOK)))
+    if (((tcb->nmlook_flag) && (tcb->state == CS$NAMELOOK)))
 	{
-	TCB->NMLook_Flag = FALSE;
-	NML$CANCEL(TCB, 0, 0);
+	tcb->nmlook_flag = FALSE;
+	NML$CANCEL(tcb, 0, 0);
 	};
 //    OKINT;
 
     if ($$LOGF(LOG$TCBSTATE))
 	LOG$FAO("!%T TCB !XL state change from !SL to !SL!/",
-		0,TCB,TCB->State,S);
-    LS = TCB->Last_State = TCB->State;
-    TCB->State = S;
+		0,tcb,tcb->state,S);
+    LS = tcb->last_state = tcb->state;
+    tcb->state = S;
 
     // SNMP accounting
     if ((S == CS$SYN_SENT) && ((LS == CS$CLOSED) || (LS == CS$NAMELOOK)))
@@ -625,34 +634,34 @@ void TCP$SET_TCB_STATE(struct tcb_structure * TCB, long S)
 	};
     };
 
-void TCP$INACTIVATE_TCB(struct tcb_structure * TCB,long err)
+void TCP$INACTIVATE_TCB(struct tcb_structure * tcb,long err)
 
 // Mark a TCB as inactive & set the user error code in the TCB.  When user
 // accesses this connection the reason for the inactivation is returned
 // instead of connection-does-not-exist error.
 
     {
-    if ((TCB->State != CS$INACTIVE))
+    if ((tcb->state != CS$INACTIVE))
 	{
         signed long
             MNLQs_Outstanding;
 
-        if ((MNLQs_Outstanding = NML$Cancel(TCB,0,0)) > 0)
+        if ((MNLQs_Outstanding = NML$Cancel(tcb,0,0)) > 0)
             {
             XLOG$FAO(LOG$TCPERR,"!%T TCB !XL inactivated with !ZB// NQE outstanding!/",
-                0,TCB,MNLQs_Outstanding);
+                0,tcb,MNLQs_Outstanding);
             XLOG$FAO(LOG$TCP,"!%T TCB !XL inact. with !ZB NQEs outstanding!/",
-                0,TCB,MNLQs_Outstanding);
+                0,tcb,MNLQs_Outstanding);
             };
 
-	TCP$SET_TCB_STATE(TCB,CS$INACTIVE);
+	TCP$SET_TCB_STATE(tcb,CS$INACTIVE);
 	XLOG$FAO(LOG$TCBSTATE,
-		 "!%T TCB !XL inactivated, reason=!SL!/",0,TCB,err);
-	TCB->Inactive_Code = err;
-	TCB->Inactive_Timeout = Time_Stamp() + Max_Seg_LifeTime/2;
+		 "!%T TCB !XL inactivated, reason=!SL!/",0,tcb,err);
+	tcb->inactive_code = err;
+	tcb->inactive_timeout = Time_Stamp() + MAX_SEG_LIFETIME/2;
 	}
     else
-	XLOG$FAO(LOG$TCPERR,"!%T TCB !XL inactive in TCP$Inactivate_TCB!/",0,TCB);
+	XLOG$FAO(LOG$TCPERR,"!%T TCB !XL inactive in TCP$Inactivate_TCB!/",0,tcb);
     };
 
 //SBTTL "TCP$CLOSE - Close a network connection"
@@ -666,33 +675,33 @@ void TCP$INACTIVATE_TCB(struct tcb_structure * TCB,long err)
 
     TCP$Send_CTL();
 
-TCP$TCB_CLOSE(struct tcb_structure * * TCBPT)  // check
+TCP$TCB_CLOSE(struct tcb_structure * * tcbpt)  // check
     {
-      struct tcb_structure * TCB;
-    TCB = *TCBPT;
+      struct tcb_structure * tcb;
+    tcb = *tcbpt;
 
 // Cancel any name lookup that might be in progess
 
     NOINT;
-    if (TCB->NMLook_Flag)
+    if (tcb->nmlook_flag)
 	{
-	TCB->NMLook_Flag = FALSE;
-	NML$CANCEL(TCB, 0, 0);
+	tcb->nmlook_flag = FALSE;
+	NML$CANCEL(tcb, 0, 0);
 	};
     OKINT;
 
-    switch (TCB->State)
+    switch (tcb->state)
       {
     case CS$NAMELOOK: case CS$LISTEN: case CS$SYN_SENT:
 	{
-	TCP$KILL_PENDING_REQUESTS(TCB,NET$_CC); // Error: Connection Closing.
-	TCB$Delete(TCB);
-	*TCBPT = 0;
+	TCP$KILL_PENDING_REQUESTS(tcb,NET$_CC); // Error: Connection Closing.
+	TCB$Delete(tcb);
+	*tcbpt = 0;
 	};
     break;
 
     case CS$SYN_RECV:
-	Send_Fin(TCB);
+	Send_Fin(tcb);
 	break;
 
     case CS$ESTABLISHED:
@@ -702,12 +711,12 @@ TCP$TCB_CLOSE(struct tcb_structure * * TCBPT)  // check
 // to send a "FIN".  TCP$Send_Data rtn will see the flag after all data has been
 // sent.
 
-	if (TCB->SND_Q_count > 0)
-	  TCB->Pending_Close = TRUE;
+	if (tcb->snd_q_count > 0)
+	  tcb->pending_close = TRUE;
 	else
 	    {
-	    Send_FIN(TCB);
-	    TCP$SET_TCB_STATE(TCB,CS$FIN_WAIT_1);
+	    Send_FIN(tcb);
+	    TCP$SET_TCB_STATE(tcb,CS$FIN_WAIT_1);
 	    };
 	};
 	break;
@@ -727,21 +736,22 @@ TCP$TCB_CLOSE(struct tcb_structure * * TCBPT)  // check
 // If user data remains then flag a FIN needs to be sent after ALL the
 // user data has been sent.
 
-	if (TCB->SND_Q_count > 0)
+	if (tcb->snd_q_count > 0)
 	    {
-	    TCB->Pending_Close = TRUE;
-	    TCP$SET_TCB_STATE(TCB,CS$CLOSING);
+	    tcb->pending_close = TRUE;
+	    TCP$SET_TCB_STATE(tcb,CS$CLOSING);
 	    }
 	else
 	    {
-	    Send_FIN(TCB);
- 	    TCP$SET_TCB_STATE(TCB,CS$LAST_ACK);
+	    Send_FIN(tcb);
+ 	    TCP$SET_TCB_STATE(tcb,CS$LAST_ACK);
 	    };
 	}
 	break;
     default:
      return 0;
      };
+    }
 
 
 //SBTTL "Send_TCP_Options - Set TCP options when sending SYN segment"
@@ -749,27 +759,28 @@ TCP$TCB_CLOSE(struct tcb_structure * * TCBPT)  // check
 #define    SEND_OPT_SIZE 4		// Total number of bytes of options we set
 #define    SEND_OPT_OFFSET (SEND_OPT_SIZE/4) // TCP header offset for it
 
-void Send_TCP_Options(TCB,SEG)
-     struct tcb_structure * TCB;
-     struct SEGMENT_STRUCTURE * Seg;
+void Send_TCP_Options(tcb,Seg)
+     struct tcb_structure * tcb;
+     struct segment_structure * Seg;
 {
   extern IP_IsLocal();
-  struct TCP$OPT_BLOCK * OPTR;
+  struct tcp$opt_block * OPTR;
 
 // Point at the start of the TCP data
 
-    OPTR = Seg->SH$DATA;
+    OPTR = &Seg->sh$data;
 
 // Insert the maximum segment size option
 
-    OPTR->TCP$OPT_KIND = TCP$OPT_KIND_MSS;
-    OPTR->TCP$OPT_LENGTH = TCP$OPT_LENGTH_MSS;
-//    OPTR->TCP$OPT_DWORD = MAX_RECV_DATASIZE;
-    IF IP_IsLocal (TCB [Foreign_Host]) == -1
-	THEN OPTR [TCP$OPT_DWORD] = Default_MSS
-	else OPTR [TCP$OPT_DWORD] = Max_Recv_DataSize;
+    OPTR->tcp$opt_kind = TCP$OPT_KIND_MSS;
+    OPTR->tcp$opt_length = TCP$OPT_LENGTH_MSS;
+//    OPTR->TCP$OPT_DWORD = max_recv_datasize;
+    if (IP_IsLocal (tcb->foreign_host) == -1)
+      OPTR->tcp$opt_dword = default_mss;
+    else
+      OPTR->tcp$opt_dword = max_recv_datasize;
 
-    SWAPWORD(OPTR->TCP$OPT_DWORD);
+    SWAPWORD(OPTR->tcp$opt_dword);
 
 // Insert other options here. Be sure to update SEND_OPTION_SIZE and to make
 // sure that the maximum TCP header size is not exceeded.
@@ -790,7 +801,7 @@ Inputs:
 
 Implicit Inputs:
 
-	TCB->Round_Trip_Time & TCB->Calculated_RTO.
+	tcb->round_trip_time & tcb->calculated_rto.
 
 Outputs:
 
@@ -805,28 +816,27 @@ Side Effects:
 signed long	 TCP$Compute_RTT(struct tcb_structure * tcb)
     {
 
-    LITERAL
-	ALPHA = 90,			// Smoothing constant, per RFC973, pg 41
-	BETA = 150,			// Delay variance factor
-	ALPHACOMP = (100 - ALPHA),	// "Compliment" of ALPHA (i.e. 1 - ALPHA)
-	MINRTT = 5,			// Minimum reasonable RTT
-	MINSRTT = 10;			// Minimum smoothed RTT
+#define 	ALPHA   90			// Smoothing constant, per RFC973 pg 41
+#define 	BETA   150			// Delay variance factor
+#define 	ALPHACOMP   (100 - ALPHA)	// "Compliment" of ALPHA (i.e. 1 - ALPHA)
+#define 	MINRTT   5			// Minimum reasonable RTT
+#define 	MINSRTT   10			// Minimum smoothed RTT
 
-    signed long
-	newrto	:	UNSIGNED,
-	newrtt	:	UNSIGNED,
-	crtt	:	UNSIGNED,
-	oldrtt	:	UNSIGNED ;
+    unsigned long
+	newrto	,
+	newrtt	,
+	crtt	,
+	oldrtt	 ;
 
 // Compute round trip time for adaptive retransmission.
 
-    oldrtt = TCB->round_trip_time;
-    crtt = MAXU((Time_Stamp() - TCB->Xmit_Start_Time), MINRTT);
-//    crtt = Time_Stamp() - TCB->Xmit_Start_Time ;
+    oldrtt = tcb->round_trip_time;
+    crtt = MAXU((Time_Stamp() - tcb->xmit_start_time), MINRTT);
+//    crtt = Time_Stamp() - tcb->xmit_start_time ;
 
 // Compute smoothed round trip time, see RFC793 (TCP) page 41 for details.
 
-    if ((TCB->RX_Count == 0))
+    if ((tcb->rx_count == 0))
 	{
 	newrtt = (((oldrtt * ALPHA) + (crtt * ALPHACOMP)) / 100) ;
 	}
@@ -836,17 +846,17 @@ signed long	 TCP$Compute_RTT(struct tcb_structure * tcb)
 	} ;
 
     newrto = (BETA * newrtt) / 100;
-    TCB->round_trip_time = newrtt;
-    TCB->calculated_rto = MINU(MAX_RT_TIMEOUT,MAXU(newrto,MIN_RT_TIMEOUT));
+    tcb->round_trip_time = newrtt;
+    tcb->calculated_rto = MINU(MAX_RT_TIMEOUT,MAXU(newrto,MIN_RT_TIMEOUT));
 
     XLOG$FAO(LOG$TCP,
 	    "!%T Compute_RTT: TCB=!XL, Prev SRTT=!UL, Cur RTT=!UL, New SRTT=!UL, RTO=!UL!/",
- 		 0, TCB, oldrtt, crtt,
-		TCB->round_trip_time, TCB->calculated_rto);
+ 		 0, tcb, oldrtt, crtt,
+		tcb->round_trip_time, tcb->calculated_rto);
 
-    RETURN (NewRTO) ;
+    return (newrto) ;
 
-    } ;
+    }
 
 //SBTTL "Check Retransmission Queue"
 /*
@@ -873,150 +883,148 @@ Side Effects:
 	TCB may be inactivated if RX timeout has occurred.
 */
 
-FORWARD ROUTINE
- void    Build_Header;
+ void    Build_Header();
 
 TCP$Check_Rexmit_Queue(struct tcb_structure * tcb)
     {
-    signed long
-	now	:	UNSIGNED,
-	nxtime	:	UNSIGNED,
-	Delta: UNSIGNED,
-	Tmp;
+    unsigned long
+	now	,
+	nxtime	,
+      delta;
+signed long	tmp;
 
-    Now = Time_Stamp();		// Get the time.
+    now = Time_Stamp();		// Get the time.
 
 // See if anything is on the queue
 
-    if ((TCB->SRX_Q_count > 0) || (TCB->RX_CTL != 0))
+    if ((tcb->srx_q_count > 0) || (tcb->rx_ctl != 0))
 	{
 
 // See if this connection has timed-out.
 
-	if (TCB->RX_Timeout LSSU Now)
+	if (tcb->rx_timeout < now)
 	    {			// Max RX exceeded - conn. timeout
-	    XLOG$FAO(LOG$TCBSTATE,"!%T TCB !XL killed by RX timeout!/",0,TCB);
-	    TCP$KILL_PENDING_REQUESTS(TCB,NET$_cto);
-	    TCP$Inactivate_TCB(TCB,NET$_CTO);
-	    RETURN TCB->Inactive_timeout;
+	    XLOG$FAO(LOG$TCBSTATE,"!%T TCB !XL killed by RX timeout!/",0,tcb);
+	    TCP$KILL_PENDING_REQUESTS(tcb,NET$_CTO);
+	    TCP$Inactivate_TCB(tcb,NET$_CTO);
+	    return tcb->inactive_timeout;
 	    };
 
 // See if it is time to retransmit.
 
-	if (TCB->RX_Timer LSSU Now)
+	if (tcb->rx_timer < now)
 	    {
 	    signed long
 		optsize,
 		EOLF,SYNF,ACKF,FINF,
 		Datasize,Dataptr,
-		SEQsize,Segsize,
-		Bufsize,Buf,
-		struct Segment_Structure * Seg;
+		SEQsize,segsize,
+	      bufsize,Buf;
+		struct segment_structure * Seg;
 
 // Set segment initial transmit time if this is the first time
 
-	    if (TCB->RX_Count == 0)
+	    if (tcb->rx_count == 0)
 		{
-		TCB->Xmit_Start_Time = Now;
-		TCB->MAX_EFF_Data_Size = TCB->MAX_Seg_Data_Size ;
+		tcb->xmit_start_time = now;
+		tcb->max_eff_data_size = tcb->max_seg_data_size ;
 		} ;
 
-	    TCB->RX_Count = TCB->RX_Count + 1;
-!	    if (TCB->RX_COUNT > 0)
-!		{
-!		TCB->MAX_EFF_Data_Size = TCB->MAX_EFF_Data_Size / TCB->RX_COUNT ;
-!		TCB->MAX_EFF_Data_Size = MAX(TCB->MAX_EFF_Data_Size, 512) ;
-!		} ;
+	    tcb->rx_count = tcb->rx_count + 1;
+//	    if (tcb->rx_count > 0)
+//		{
+//		tcb->max_eff_data_size = tcb->max_eff_data_size / tcb->rx_count ;
+//		tcb->max_eff_data_size = MAX(tcb->max_eff_data_size, 512) ;
+//		} ;
 
-	    ts$retrans_segs = ts$retrans_segs+1;
+	    TS$RETRANS_SEGS = TS$RETRANS_SEGS+1;
 
 // Compute new retrans time out based on old round trip time plus fudge factor
 
-!	    Delta = TCB->Round_Trip_time + 
-!		    ( (TCB->Round_Trip_Time * TCB->RX_Count) / 2);
-!	    Delta = MAXU(MINU(Max_RT_TimeOut,Delta),Min_RT_Timeout);
-!	    Delta = MINU(MAXU(TCP$Compute_RTT(TCB),Min_RT_Timeout) *
-!			 TCB->RX_count, Max_RT_Timeout) ;
-	    Delta = MINU(MAXU(TCP$Compute_RTT(TCB),Min_RT_Timeout),
-			Max_RT_Timeout) ;
+//	    Delta = tcb->round_trip_time + 
+//		    ( (tcb->round_trip_time * tcb->rx_count) / 2);
+//	    Delta = MAXU(MINU(MAX_RT_TIMEOUT,Delta),MIN_RT_TIMEOUT);
+//	    Delta = MINU(MAXU(TCP$Compute_RTT(tcb),MIN_RT_TIMEOUT) *
+//			 tcb->rx_count, MAX_RT_TIMEOUT) ;
+	    delta = MINU(MAXU(TCP$Compute_RTT(tcb),MIN_RT_TIMEOUT),
+			MAX_RT_TIMEOUT) ;
 	    now = Time_Stamp();
-	    TCB->RX_Timer = now + Delta;
+	    tcb->rx_timer = now + delta;
 	    XLOG$FAO(LOG$TCBCHECK,
-		     "!%T Check_rexmit TCB !XL delta !UL!/",0,TCB, Delta);
+		     "!%T Check_rexmit TCB !XL delta !UL!/",0,tcb, delta);
 
 // Now, build and send a segment.
 // Calculate buffer size & get control flag values
 
-	    SYNF = (TCB->RX_CTL == M$SYN) || (TCB->RX_CTL == M$SYN_ACK);
-	    ACKF = TCB->RX_CTL == M$SYN_ACK;
-	    FINF = (TCB->RX_CTL == M$FIN);
+	    SYNF = (tcb->rx_ctl == M$SYN) || (tcb->rx_ctl == M$SYN_ACK);
+	    ACKF = tcb->rx_ctl == M$SYN_ACK;
+	    FINF = (tcb->rx_ctl == M$FIN);
 	    if (SYNF)
-		optsize = SEND_OPT_SIZE
+	      optsize = SEND_OPT_SIZE;
 	    else
-		optsize = 0;
-!	    Datasize = MIN(TCB->SRX_Q_count,TCB->MAX_Seg_Data_Size);
-	    Datasize = MIN(TCB->SRX_Q_count, TCB->MAX_EFF_Data_Size);
-	    Segsize = Datasize + optsize + TCP_Header_Size;
+	      optsize = 0;
+//	    Datasize = MIN(tcb->srx_q_count,tcb->max_seg_data_size);
+	    Datasize = MIN(tcb->srx_q_count, tcb->max_eff_data_size);
+	    segsize = Datasize + optsize + TCP_HEADER_SIZE;
 
 // Select network buffer size & allocate it
 
-	    bufsize = Device_Header+IP_Hdr_Byte_Size+.Segsize;
-	    SELECTONE TRUE OF
-	    SET
-	    [Bufsize <= MIN_PHYSICAL_BUFSIZE]:
-		bufsize = MIN_PHYSICAL_BUFSIZE;
-	    [Bufsize <= MAX_PHYSICAL_BUFSIZE]:
-		bufsize = MAX_PHYSICAL_BUFSIZE;
-	    [OTHERWISE]:
-		bufsize = segsize + device_header + ip_hdr_byte_size;
-	    TES;
-	    Buf = MM$Seg_Get(Bufsize);
-	    Seg = Buf + device_header + ip_hdr_byte_size;
-	    Dataptr = Seg->SH$Data;
+	    bufsize = DEVICE_HEADER+IP_HDR_BYTE_SIZE+segsize;
+	    if (bufsize <= min_physical_bufsize) // check
+	      bufsize = min_physical_bufsize;
+	    else { 
+	      if (bufsize <= max_physical_bufsize)
+		bufsize = max_physical_bufsize;
+	      else
+		bufsize = segsize + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
+	    }
+	    Buf = MM$Seg_Get(bufsize);
+	    Seg = Buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
+	    Dataptr = Seg->sh$data;
 
 // Set control flags and options for the segment
 
-	    Seg->SH$Control_Flags = 0;
-	    Seg->SH$C_ACK = ACKF;
+	    Seg->sh$control_flags = 0;
+	    Seg->sh$c_ack = ACKF;
 	    if (SYNF)
 		{
-		SYNF = Seg->SH$C_SYN = TRUE;
-		Send_TCP_Options(TCB,Seg);
+		SYNF = Seg->sh$c_syn = TRUE;
+		Send_TCP_Options(tcb,Seg);
 		Dataptr = Dataptr + SEND_OPT_SIZE;
 		};
 	    if (FINF)
-		Seg->SH$C_FIN = TRUE;
-	    EOLF = TCB->SND_Push_Flag AND
-!		   ((TCB->SND_PPtr - TCB->RX_SEQ) > 0);
-		   (TCB->SND_PPtr GTRU TCB->RX_SEQ);
+		Seg->sh$c_fin = TRUE;
+	    EOLF = tcb->snd_push_flag &&
+//		   ((tcb->snd_pptr - tcb->rx_seq) > 0);
+		   (tcb->snd_pptr > tcb->rx_seq);
 
 // Now, insert the retransmission data, if any.
 
 	    XLOG$FAO(LOG$TCP,
 		"!%T !UL RX TCB !XL,PTR=!XL,RXQ=!XL/!XL,CNT=!SL,CTL=!SL,new RXTO=!SL!/",
-		0,now,TCB,TCB->SRX_Q_DEQP,TCB->SRX_Q_BASE,TCB[SRX_Q_}],
-		TCB->RX_count,TCB->RX_CTL,TCB->RX_Timer);
+		0,now,tcb,tcb->srx_q_deqp,tcb->srx_q_base,tcb->srx_q_end,
+		tcb->rx_count,tcb->rx_ctl,tcb->rx_timer);
 	    if (Datasize > 0)
 		{
-		CQ_DEQCOPY(TCB->SRX_Q_Queue,Dataptr,Datasize);
+		  CQ_DEQCOPY(&tcb->srx_q_queue,Dataptr,Datasize);
 		TCP_MIB->MIB$tcpRetransSegs = TCP_MIB->MIB$tcpRetransSegs + 1;
 		};
 // Build the rest of the header
 
-	    Build_Header(TCB,Seg,Segsize,Datasize,TCB->RX_SEQ,EOLF,
+	    Build_Header(tcb,Seg,segsize,Datasize,tcb->rx_seq,EOLF,
 			 FALSE,optsize / 4);
 
 // Send the segment to IP
 
-	    Send_Seg1(TCB,Seg,Segsize,TRUE,Buf,Bufsize);
+	    Send_Seg1(tcb,Seg,segsize,TRUE,Buf,bufsize);
 
-	    RETURN TCB->RX_Timer;	// Next time retransmit for this TCB
+	    return tcb->rx_timer;	// Next time retransmit for this TCB
 	    };
-!	RETURN TCB->RX_Timer;	// Next time retransmit for this TCB
+//	RETURN tcb->rx_timer;	// Next time retransmit for this TCB
 	};
 
 //    RETURN %X"7FFFFFFF";	// Nothing on retransmission queue
-    RETURN (Now + (20*CSEC));	// Nothing on retransmission queue
+    return (now + (20*CSEC));	// Nothing on retransmission queue
 
     };
 
@@ -1042,7 +1050,7 @@ Inputs:
 
 Implicit Inputs:
 
-	TCB->Snd_Nxt has been updated to point to next byte past end of this
+	tcb->Snd_Nxt has been updated to point to next byte past end of this
 	segment.  Used to flag end of segment field in queue block, aids in
 	ACKing the segment on the ReTransmission queue.
 
@@ -1057,57 +1065,58 @@ Side Effects:
 	Segment round trip timer is started.
 */
 
-Rexmit_Enqueue(TCB,SEQsize,CTLTYPE) : NOVALUE (void)
+void Rexmit_Enqueue(tcb,SEQsize,CTLTYPE)
+     struct tcb_structure * tcb;
     {
-    MAP
-	struct tcb_structure * tcb;
+#if 0
     REGISTER
-	struct Queue_Blk_Structure * QB(QB_RT_Fields);
-    signed long
-	now: UNSIGNED;
+	struct Queue_Blk_Structure(QB_RT_Fields) * QB;
+#endif
+    unsigned long
+	now;
 
     now = Time_Stamp();		// get current time
 
 // If this is the first data item on queue, set retransmit pointer
 
-    XLOG$FAO(LOG$TCP,%STRING(
+    XLOG$FAO(LOG$TCP,/*%STRING(*/
 	     "!%T RX-ENQ: Time=!UL, TCB=!XL, RXTO=!SL, MXTO=!SL!/",
-	     "!%T RX-ENQ: PTR=!XL/!XL, SEQ=!XL, SIZ=!SL, CNT=!SL, CTL=!SL, RXC=!SL!/"),
-	     0,Now,TCB,TCB->RX_Timer,TCB->RX_Timeout,
-	     0,TCB->SRX_Q_DEQP,TCB->SND_Q_DEQP,TCB->RX_SEQ,SEQsize,
-	     TCB->SRX_Q_count,TCB->RX_CTL, TCB->RX_COUNT);
+	     "!%T RX-ENQ: PTR=!XL/!XL, SEQ=!XL, SIZ=!SL, CNT=!SL, CTL=!SL, RXC=!SL!/"/*)*/,
+	     0,now,tcb,tcb->rx_timer,tcb->rx_timeout,
+	     0,tcb->srx_q_deqp,tcb->snd_q_deqp,tcb->rx_seq,SEQsize,
+	     tcb->srx_q_count,tcb->rx_ctl, tcb->rx_count);
 
-    if ((TCB->SRX_Q_count == 0))
+    if ((tcb->srx_q_count == 0))
 	{
-	TCB->SRX_Q_DEQP = TCB->SND_Q_DEQP;
+	tcb->srx_q_deqp = tcb->snd_q_deqp;
 
 // If really the first thing on the queue, set sequence # and timers.
-!~~~ Questionable code here, using RX_CTL seems like a kluge
-// (Should probably use RX_COUNT - HWM)
+//~~~ Questionable code here, using RX_CTL seems like a kluge
+// (Should probably use rx_count - HWM)
 
-!	if (TCB->RX_CTL == 0)
-!	if ((TCB->RX_SEQ LSSU TCB->SND_NXT))
-	if (TCB->RX_Count == 0)
+//	if (tcb->rx_ctl == 0)
+//	if ((tcb->rx_seq < tcb->snd_nxt))
+	if (tcb->rx_count == 0)
 	    {
-	    TCB->RX_SEQ = TCB->SND_NXT;
-	    TCB->RX_Count = 1;
-	    TCB->Xmit_Start_Time = Now;	// Start round-trip-timer
-	    TCB->RX_Timer = Now + TCB->Calculated_RTO;
-	    TCB->RX_Timeout = Now + RX_TIMEVAL; // Max time on RX queue
+	    tcb->rx_seq = tcb->snd_nxt;
+	    tcb->rx_count = 1;
+	    tcb->xmit_start_time = now;	// Start round-trip-timer
+	    tcb->rx_timer = now + tcb->calculated_rto;
+	    tcb->rx_timeout = now + RX_TIMEVAL; // Max time on RX queue
 	    };
 	};
 
 // Add data count for the new seg and set flags
 
-//    TCB->RX_Timeout = Now + RX_TIMEVAL; // Max time on RX queue
-    TCB->SRX_Q_count = TCB->SRX_Q_count + SEQsize;
-    TCB->RX_CTL = CTLTYPE;
-    XLOG$FAO(LOG$TCP,%STRING(
+//    tcb->rx_timeout = now + RX_TIMEVAL; // Max time on RX queue
+    tcb->srx_q_count = tcb->srx_q_count + SEQsize;
+    tcb->rx_ctl = CTLTYPE;
+XLOG$FAO(LOG$TCP,/*%STRING(*/
 	     "!%T RX-ENQ: Time=!UL, TCB=!XL, RXTO=!SL, MXTO=!SL!/",
-	     "!%T RX-ENQ: PTR=!XL/!XL, SEQ=!XL, SIZ=!SL, CNT=!SL, CTL=!SL, RXC=!SL!/"),
-	     0,Now,TCB,TCB->RX_Timer,TCB->RX_Timeout,
-	     0,TCB->SRX_Q_DEQP,TCB->SND_Q_DEQP,TCB->RX_SEQ,SEQsize,
-	     TCB->SRX_Q_count,TCB->RX_CTL, TCB->RX_COUNT);
+	 "!%T RX-ENQ: PTR=!XL/!XL, SEQ=!XL, SIZ=!SL, CNT=!SL, CTL=!SL, RXC=!SL!/"/*)*/,
+	     0,now,tcb,tcb->rx_timer,tcb->rx_timeout,
+	     0,tcb->srx_q_deqp,tcb->snd_q_deqp,tcb->rx_seq,SEQsize,
+	     tcb->srx_q_count,tcb->rx_ctl, tcb->rx_count);
     };
 
 //SBTTL "Debug rtn: Display Specified TCB"
@@ -1129,60 +1138,62 @@ Side Effects:
 
 	None.
 */
-void TCP$Dump_TCB ( struct tcb_structure * tcb ) (void)
+void TCP$Dump_TCB ( struct tcb_structure * tcb )
     {
-    signed long
-	now	:	UNSIGNED,
-	rxtime	:	UNSIGNED,
-	stastr,
-	DESC$STR_ALLOC(fhstr,20),
-	DESC$STR_ALLOC(lhstr,20);
+      char fhstr_str[20], lhstr_str[20];
+    unsigned long
+	now	,
+      rxtime	;
+    struct dsc$descriptor
+      stastr,
+      fhstr={dsc$w_length:20, dsc$a_pointer:fhstr_str},
+      lhstr={dsc$w_length:20, dsc$a_pointer:lhstr_str};
 
-    if (TCB->SRX_Q_count > 0)
+    if (tcb->srx_q_count > 0)
 	{
 	now = Time_Stamp();
-	rxtime = TCB->RX_Timer;
+	rxtime = tcb->rx_timer;
 	}
     else
 	{
 	rxtime = 0;
 	now = 0;
 	};
-    SELECTONE TCB->State OF
-	SET
-	[CS$CLOSED]: stastr = %ASCID"Closed(CMU).";
-	[CS$LISTEN]: stastr = %ASCID"Listen.";
-	[CS$SYN_SENT]: stastr = %ASCID"SYN_SENT.";
-	[CS$SYN_RECV]: stastr = %ASCID"SYN_RECV.";
-	[CS$ESTABLISHED]: stastr = %ASCID"Established.";
-	[CS$FIN_WAIT_1]: stastr = %ASCID"FIN_Wait_1.";
-	[CS$FIN_WAIT_2]: stastr = %ASCID"FIN_Wait_2.";
-	[CS$TIME_WAIT]: stastr = %ASCID"Time_Wait.";
-	[CS$CLOSE_WAIT]: stastr = %ASCID"Close_Wait.";
-	[CS$CLOSING]: stastr = %ASCID"Closing.";
-	[CS$LAST_ACK]: stastr = %ASCID"Last_ACK.";
-	[CS$RESET]: stastr = %ASCID"Reset(CMU).";
-	[CS$INACTIVE]: stastr = %ASCID"Inactive(CMU).";
-	[CS$NAMELOOK]: stastr = %ASCID"NameLook(CMU).";
-	[OTHERWISE]: stastr = %ASCID"Unknown state."
-	TES;
+    switch (tcb->state) {
+	case CS$CLOSED: stastr.dsc$a_pointer = "Closed(CMU)."; break;
+	case CS$LISTEN: stastr.dsc$a_pointer = "Listen."; break;
+	case CS$SYN_SENT: stastr.dsc$a_pointer = "SYN_SENT."; break;
+	case CS$SYN_RECV: stastr.dsc$a_pointer = "SYN_RECV."; break;
+	case CS$ESTABLISHED: stastr.dsc$a_pointer = "Established."; break;
+	case CS$FIN_WAIT_1: stastr.dsc$a_pointer = "FIN_Wait_1."; break;
+	case CS$FIN_WAIT_2: stastr.dsc$a_pointer = "FIN_Wait_2."; break;
+	case CS$TIME_WAIT: stastr.dsc$a_pointer = "Time_Wait."; break;
+	case CS$CLOSE_WAIT: stastr.dsc$a_pointer = "Close_Wait."; break;
+	case CS$CLOSING: stastr.dsc$a_pointer = "Closing."; break;
+	case CS$LAST_ACK: stastr.dsc$a_pointer = "Last_ACK."; break;
+	case CS$RESET: stastr.dsc$a_pointer = "Reset(CMU)."; break;
+	case CS$INACTIVE: stastr.dsc$a_pointer = "Inactive(CMU)."; break;
+	case CS$NAMELOOK: stastr.dsc$a_pointer = "NameLook(CMU)."; break;
+    default: stastr.dsc$a_pointer = "Unknown state."; break;
+	  }
+    stastr.dsc$w_length=strlen(stastr.dsc$a_pointer);
 
-    ASCII_Dec_Bytes(fhstr,4,TCB->foreign_host,fhstr->DSC$W_LENGTH);
-    ASCII_Dec_Bytes(lhstr,4,TCB->local_host,lhstr->DSC$W_LENGTH);
+    ASCII_Dec_Bytes(fhstr,4,tcb->foreign_host,fhstr.dsc$w_length);
+    ASCII_Dec_Bytes(lhstr,4,tcb->local_host,lhstr.dsc$w_length);
 
-    LOG$FAO(%STRING("!_PID:!_!XL!_State:!AS(!XL)!/",
+    LOG$FAO(/*%STRING*/("!_PID:!_!XL!_State:!AS(!XL)!/",
 		    "!_FH:!_!AS!_FP:!_!XL (!UL)!/",
 		    "!_LH:!_!AS!_LP:!_!XL (!UL)!/",
 		    "!_SND.WND: !UL!_RCV.WND: !UL!/",
 		    "!_SND.NXT: !XL (!UL)!_RCV.NXT: !XL (!UL)!/",
 		    "!_SND.UNA: !XL (!UL)!/",
 		    "!_RX time: !UL (now + !UL)!/"),
-		    TCB->User_ID,stastr,TCB->State,
-		    fhstr,TCB->foreign_port,TCB->foreign_port,
-		    lhstr,TCB->local_port,TCB->local_port,
-		    TCB->snd_wnd,TCB->rcv_wnd,
-		    TCB->snd_nxt,TCB->snd_nxt,TCB->rcv_nxt,TCB->rcv_nxt,
-		    TCB->snd_una,TCB->snd_una,rxtime,rxtime-.now);
+		    tcb->user_id,stastr,tcb->state,
+		    fhstr,tcb->foreign_port,tcb->foreign_port,
+		    lhstr,tcb->local_port,tcb->local_port,
+		    tcb->snd_wnd,tcb->rcv_wnd,
+		    tcb->snd_nxt,tcb->snd_nxt,tcb->rcv_nxt,tcb->rcv_nxt,
+		    tcb->snd_una,tcb->snd_una,rxtime,rxtime-now);
     };
 
 
@@ -1209,213 +1220,223 @@ Side Effects:
 	deleted due to timeouts.  Segment retransmission queue is examined.
 */
 
-FORWARD ROUTINE
-    TCP$Send_Data,
-    TCP$Enqueue_ACK: NOVALUE,
-    TCP$Send_ACK: NOVALUE,
-    Do_Probe: NOvalue;
+TCP$Send_Data();
+void    TCP$Enqueue_ACK();
+void    TCP$Send_ACK();
+void    Do_Probe();
 
-Check_TCB ( struct tcb_structure * tcb , Idx , now : UNSIGNED, nxtime : UNSIGNED)
+Check_TCB ( struct tcb_structure * tcb , signed long Idx , unsigned long now, unsigned long nxtime ) // check switch if
     {
 
     if ($$LOGF(LOG$TCBCHECK+LOG$TCBDUMP))
-	LOG$FAO("!%T Servicing TCB !XL (now=!XL,nxtime=!XL)!/",0,TCB,
-		.now,..nxtime);
+	LOG$FAO("!%T Servicing TCB !XL (now=!XL,nxtime=!XL)!/",0,tcb,
+		now,nxtime); // check .now ..nxtime
 
 // TCB sanity check
-    if ((TCB == 0))
-	RETURN 0 ;
+    if ((tcb == 0))
+	return 0 ;
 
     if ($$LOGF(LOG$TCBDUMP))
-	TCP$Dump_TCB(TCB);
+	TCP$Dump_TCB(tcb);
 
-    SELECTONE TRUE OF
-    SET
- 
  // If connection is inactive & the user has not accessed the connection
  // within the timeout period then delete the connection.
- 
-    [(TCB->State == CS$INACTIVE) AND
-     (TCB->Inactive_Timeout LSSU NOW)]:
+
+    if ((tcb->state == CS$INACTIVE) &&
+	(tcb->inactive_timeout < now))
 	{
-	TCP$KILL_PENDING_REQUESTS(TCB,TCB->inactive_code);
+	TCP$KILL_PENDING_REQUESTS(tcb,tcb->inactive_code);
 	XLOG$FAO(LOG$TCBSTATE,"!%T Deleting inactive connection !XL!/",
-		 0,TCB);
-	TCB$Delete(TCB);
-	};
+		 0,tcb);
+	TCB$Delete(tcb);
+	} else {
 
  // If the connection has not received any packets at all, despite our
  // probes for too long, then we inactivate it here.
 
-    [(TCB->State != CS$INACTIVE) AND
-     ((TCB->Connection_timeout LSSU now) && (TCB->Connection_Timeout != 0)) OR
-     ((TCB->User_timeout != 0) && (TCB->User_timeout LSS now))]:
+	  if ((tcb->state != CS$INACTIVE) && // check () on || and &&
+     ((tcb->connection_timeout < now) && (tcb->connection_timeout != 0)) ||
+	      ((tcb->user_timeout != 0) && (tcb->user_timeout < now)))
 	{
-	TCP$KILL_PENDING_REQUESTS(TCB,NET$_cto);
-	SELECTONE TCB->State OF
-	SET
-	[CS$SYN_SENT, CS$SYN_RECV, CS$ESTABLISHED, CS$FIN_WAIT_1,
-	 CS$FIN_WAIT_2, CS$CLOSE_WAIT]:
-	    Send_RST(TCB);
-	TES;
+	TCP$KILL_PENDING_REQUESTS(tcb,NET$_CTO);
+	switch (tcb->state) {
+	case CS$SYN_SENT: case CS$SYN_RECV: case CS$ESTABLISHED: case CS$FIN_WAIT_1:
+	 case CS$FIN_WAIT_2: case CS$CLOSE_WAIT:
+	    Send_RST(tcb);
+	}
 	if ($$LOGF(LOG$TCBSTATE))
 	    {
-	    IF (TCB->Connection_timeout LSSU now) && 
-		(TCB->Connection_Timeout != 0) THEN
+	    if ((tcb->connection_timeout < now) && 
+		(tcb->connection_timeout != 0))
 		LOG$FAO("!%T Conn !XL inactivated - conn timeout!/",
-			0,TCB)
+			0,tcb);
 	    else
 		LOG$FAO("!%T Conn !XL inactivated - user timeout!/",
-			0,TCB);
+			0,tcb);
 	    };
-	TCP$KILL_PENDING_REQUESTS(TCB,NET$_cto);
-	TCP$Inactivate_TCB(TCB,NET$_cto);
-	};
+	TCP$KILL_PENDING_REQUESTS(tcb,NET$_CTO);
+	TCP$Inactivate_TCB(tcb,NET$_CTO);
+	} else {
 
 // Is there a pending IO function being held until a network event occurs?
 // IF so, check the timer & clobber(inactivate) the connection.
 
-    [TCB->pending_io && (TCB->function_timer LSSU now)]:
+	  if (tcb->pending_io && (tcb->function_timer < now))
 	{
-	TCB->pending_io = false;
-	if (TCB->Curr_User_Function == M$INTERNAL)
+	tcb->pending_io = FALSE;
+	if (tcb->curr_user_function == M$INTERNAL)
 	    {
 
 // For internal TCB"s (i.e. TVT"s), just call the timeout handler.
 
-	    (TCB->Timeout_Routine)(TCB);
+	    (tcb->timeout_routine)(tcb);
 	    }
 	else
 	    {
-	    if (TCB->argblk != 0)
-		USER$Err(TCB->argBlk,NET$_fto);
+	    if (tcb->argblk != 0)
+		USER$Err(tcb->argblk,NET$_FTO);
 
 // Process According to TCP function requested.
 
-	    SELECTONE TCB->Curr_User_Function OF
-	    SET
-	    [u$open,u$close,m$cancel]:
+	    switch (tcb->curr_user_function) {
+	    case U$OPEN: case U$CLOSE: case M$CANCEL:
 		{
-		TCP$KILL_PENDING_REQUESTS(TCB,NET$_FTO);
+		TCP$KILL_PENDING_REQUESTS(tcb,NET$_FTO);
  
 // RESET just in case.
 
-		SELECTONE TCB->State OF
-		SET
-		[CS$SYN_SENT TO CS$FIN_WAIT_2,CS$CLOSE_WAIT]:
-		    Send_RST(TCB);
-		TES;
+		switch (tcb->state) {
+		case CS$SYN_SENT: case CS$SYN_RECV: case CS$ESTABLISHED: case CS$FIN_WAIT_1: case CS$FIN_WAIT_2: case CS$CLOSE_WAIT:
+		    Send_RST(tcb);
+		}
 		XLOG$FAO(LOG$TCBSTATE,
 		    "!%T Function timeout: FCN=!XL, TCB=!XL!/",
-		     0,TCB->Curr_User_Function,TCB);
-		TCP$Inactivate_TCB(TCB,NET$_FTO); // Inactivate connection
+		     0,tcb->curr_user_function,tcb);
+		TCP$Inactivate_TCB(tcb,NET$_FTO); // Inactivate connection
 		};
-	    TES;
 	    };
-	};
+	    };
+	} else {
  
 // Test for time-wait timeout.  If true then delete the connection.
  
-    [(TCB->state == CS$TIME_WAIT) AND
-     (TCB->Time_Wait_Timer LSSU now)]:
+    if ((tcb->state == CS$TIME_WAIT) &&
+	(tcb->time_wait_timer < now))
 	{
-	TCP$KILL_PENDING_REQUESTS(TCB,NET$_TWT);
+	TCP$KILL_PENDING_REQUESTS(tcb,NET$_TWT);
 	XLOG$FAO(LOG$TCBSTATE,"!%T Time-wait expired, conn=!XL!/",
-		 0,TCB);
-	TCB$Delete(TCB);
-	};
+		 0,tcb);
+	TCB$Delete(tcb);
+	} else {
  
 // Connection is valid, Check retransmission queue & see if we can move
 // some data. Better check SYN-wait queue also.
- 
-    [OTHERWISE]:
-	{
-	signed long
-		Delay	:	UNSIGNED,
-		Min_Time:	UNSIGNED,
-		RX_Time	:	UNSIGNED ;
 
-!	XLOG$FAO(LOG$DEBUG,
-!		 "!%T Rexmit_Queue : count = !SL!/",
-!		    0,TCB->SRX_Q_count);
-	RX_time = TCP$Check_Rexmit_Queue(TCB);
+#if 0 
+    [OTHERWISE]: 
+#endif
+	{
+	unsigned long
+		delay,
+		min_time,
+		rx_time ;
+
+//	XLOG$FAO(LOG$DEBUG,
+//		 "!%T Rexmit_Queue : count = !SL!/",
+//		    0,tcb->srx_q_count);
+	rx_time = TCP$Check_Rexmit_Queue(tcb);
 	XLOG$FAO(LOG$DEBUG,
 		 "!%T TCP$Check_Rexmit_Queue : RVal = !XL!/",
-		    0,RX_Time);
+		    0,rx_time);
 
-	SELECT TCB->state OF
-	SET
-	[CS$ESTABLISHED,CS$CLOSE_WAIT]:
+	switch (tcb->state) {
+	  case CS$CLOSE_WAIT:
 	    {	// Try to send some data
 	    XLOG$FAO(LOG$TCBCHECK,
-		     "!%T Sending data for TCB !XL!/",0,TCB);
-	    TCP$Send_Data(TCB);
+		     "!%T Sending data for TCB !XL!/",0,tcb);
+	    TCP$Send_Data(tcb);
 	    };
-	[CS$ESTABLISHED]:
+	    break;
+	case CS$ESTABLISHED: // check duplicate from above and below 
 	    {
-	    if ((TCB->ack_Timer LSSU now))
+	    {	// Try to send some data
+	    XLOG$FAO(LOG$TCBCHECK,
+		     "!%T Sending data for TCB !XL!/",0,tcb);
+	    TCP$Send_Data(tcb);
+	    };
+	    if ((tcb->ack_timer < now))
 		{
 		XLOG$FAO(LOG$TCP,
 			 "!%T Sending spontaneous ACK, TCB=!XL!/",
-			 0,TCB);
-!		TCP$Send_ACK(TCB);
-		TCP$Enqueue_ACK(TCB);
+			 0,tcb);
+//		TCP$Send_ACK(tcb);
+		TCP$Enqueue_ACK(tcb);
 		};
-	    if ((TCB->probe_time LSSU now) && Keep_Alive)
-		DO_Probe(TCB); // Time to send another probe
+	    if ((tcb->probe_time < now) && Keep_Alive)
+		DO_Probe(tcb); // Time to send another probe
 	    };
-
-	[CS$ESTABLISHED,CS$FIN_WAIT_1,CS$FIN_WAIT_2]:
-	    {	// Try to receive some data
-	    if (TCB->IS_TVT)
+	    if (tcb->is_tvt)
 		{
-		TELNET_INPUT(TCB);
-		TELNET_OUTPUT(TCB);
+		TELNET_INPUT(tcb);
+		TELNET_OUTPUT(tcb);
 		}
 	    else
-		TCP$Deliver_User_Data(TCB);
+		TCP$Deliver_User_Data(tcb);
+	    break;
+	case CS$FIN_WAIT_1: case CS$FIN_WAIT_2:
+	    {	// Try to receive some data
+	    if (tcb->is_tvt)
+		{
+		TELNET_INPUT(tcb);
+		TELNET_OUTPUT(tcb);
+		}
+	    else
+		TCP$Deliver_User_Data(tcb);
 	    };
-	TES;
+	    break;
+	};
 
 	XLOG$FAO(LOG$DEBUG,
 		 "!%T TCP$Check_Rexmit_Queue : RX_Time = !XL!/",
-		    0,RX_Time);
+		    0,rx_time);
 	XLOG$FAO(LOG$DEBUG,
 		 "!%T TCP$Check_Rexmit_Queue : delay = !XL!/",
-		    0,TCB->SND_Delay_Timer);
+		    0,tcb->snd_delay_timer);
 	XLOG$FAO(LOG$DEBUG,
 		 "!%T TCP$Check_Rexmit_Queue : nxtime = !XL!/",
-		    0,..nxtime);
+		 0,nxtime); // check ..nxtime
 
-	if ((TCB->state NEQU CS$LISTEN) && (TCB->SND_Q_count GTRU 0))
+	if ((tcb->state != CS$LISTEN) && (tcb->snd_q_count > 0))
 	    {
-	    Delay = MINU((TCB->Round_Trip_Time / 2), Base_RT_Timeout) ;
-	    Delay = MAXU(Delay, 33) ;
-	    Min_Time = Now + Delay ;
-!	    IF ((TCB->SND_Delay_Timer LSSU Now) && (TCB->SND_Q_count > 0))THEN
-	    if ((TCB->SND_Q_count > TCB->MAX_EFF_DATA_SIZE))
-		Min_Time = TCB->SND_Delay_Timer ;
-	    Min_Time = MAXU(Min_Time, Now) ;
-	    Min_Time = MINU(RX_Time, Min_Time) ;
-!	    nxtime = MINU(..nxtime,RX_Time);
-	    nxtime = MINU(..nxtime, Min_Time);
+	    delay = MINU((tcb->round_trip_time / 2), BASE_RT_TIMEOUT) ;
+	    delay = MAXU(delay, 33) ;
+	    min_time = now + delay ;
+//	    IF ((tcb->snd_delay_timer < now) && (tcb->snd_q_count > 0))THEN
+	    if ((tcb->snd_q_count > tcb->max_eff_data_size))
+		min_time = tcb->snd_delay_timer ;
+	    min_time = MAXU(min_time, now) ;
+	    min_time = MINU(rx_time, min_time) ;
+//	    nxtime = MINU(..nxtime,rx_time);
+	    nxtime = MINU(nxtime, min_time); // check ..nxtime
 	    XLOG$FAO(LOG$DEBUG,
 		     "!%T TCP$Check_Rexmit_Queue : nxtime = !XL!/",
-		     0,..nxtime);
+		     0,nxtime); // check ..nxtime
 
-	    if (TCB->Pending_ACK)
+	    if (tcb->pending_ack)
 		{
 		XLOG$FAO(LOG$TCP,
-		         "!%T Sending pending ACK, TCB=!XL!/",0,TCB);
-!		TCP$Send_ACK(TCB) // Give the window update/ACK
-		TCP$Enqueue_ACK(TCB) // Give the window update/ACK
+		         "!%T Sending pending ACK, TCB=!XL!/",0,tcb);
+//		TCP$Send_ACK(tcb); // Give the window update/ACK
+		TCP$Enqueue_ACK(tcb); // Give the window update/ACK
 		}
 	    }
 	};
-    TES;
-
-    1
-    };
+	};
+	}
+	}
+	}
+    return 1;
+    }
 
 
 //SBTTL "Service-Connections - Look for things to do."
@@ -1442,31 +1463,28 @@ Side Effects:
 */
 
 TCP$Service_Connections (void)
-    {
-    EXTERNAL ROUTINE
-	VTCB_Scan;
-    REGISTER
-	now	:	UNSIGNED,
-	struct tcb_structure * tcb;
-    Local
-	nxtime	:	UNSIGNED,
-	Count,
-	IOS : IO_Status_Blk;
+{
+  extern	VTCB_Scan();
+  register unsigned long now;
+  register struct tcb_structure * tcb;
+  unsigned long nxtime;
+  signed long count;
+  //  struct _iosbdef ios;
 
 // Examine ALL known Connections.
 
     now = Time_Stamp();
-    nxtime = now+daysec;	// Far into the future....
+    nxtime = now+DAYSEC;	// Far into the future....
 
     if ($$LOGF(LOG$TCBCHECK))
 	LOG$FAO("!%T !UL Servicing all TCBs, !/",0,now);
 
-    Count = VTCB_Scan ( Check_TCB , now , nxtime );
+    count = VTCB_Scan ( Check_TCB , now , nxtime );
     XLOG$FAO(LOG$DEBUG,"!%T Service_connections: now=!XL nxtime=!XL!/",0,
-			.now,nxtime);
+	     now,nxtime); 
 
     if ($$LOGF(LOG$TCBCHECK))
-	LOG$FAO("!%T !UL Serviced !SL TCBs,!/",0,now,Count);
+	LOG$FAO("!%T !UL Serviced !SL TCBs,!/",0,now,count);
 
 
 // Examine Syn wait list for entries that have timed out.
@@ -1475,45 +1493,45 @@ TCP$Service_Connections (void)
 
 // Return calculated next time a TCB needs to be serviced
 
-    RETURN nxtime;
+    return nxtime;
     };
 
 //SBTTL "TCP$SEND_ENQUEUE - Copy send data from user send queue to circular buffer"
 
-TCP$SEND_ENQUEUE(TCB,Bufcount,Buf,PushF) : NOVALUE (void)
-    {
-    MAP
+void TCP$SEND_ENQUEUE(tcb,bufcount,buf,pushf)
 	struct tcb_structure * tcb;
+	signed long * bufcount, *buf; // check my adds
+    {
     signed long
-	Usedcount,
-	Lbptr,
-	Lbcount,
-	Copycount;
-    Lbptr = ..Buf;
-    Lbcount = ..Bufcount;
+	usedcount,
+	lbptr,
+	lbcount,
+	copycount;
+    lbptr = *buf; // check for both these
+    lbcount = *bufcount;
 
 // Compute amount that the queue can take, enqueue it.
 
-    Usedcount = TCB->SND_Q_count + TCB->SRX_Q_count;
-    Copycount = MIN(Lbcount,TCB->SND_Q_Size-.Usedcount);
+    usedcount = tcb->snd_q_count + tcb->srx_q_count;
+    copycount = MIN(lbcount,tcb->snd_q_size-usedcount);
     XLOG$FAO(LOG$TCP,"!%T SEND-ENQ EQ=!XL,DQ=!XL,RX=!XL,SNQ=!XL/!XL,CNT=!SL,SIZ=!SL,PSH=!SL!/",
-	     0,TCB->SND_Q_ENQP,TCB->SND_Q_DEQP,TCB->SRX_Q_DEQP,
-	     TCB->SND_Q_BASE,TCB[SND_Q_END],Usedcount,Copycount, PushF);
-    $$KCALL(CQ_Enqueue,TCB->SND_Q_Queue,Lbptr,Copycount);
+	     0,tcb->snd_q_enqp,tcb->snd_q_deqp,tcb->srx_q_deqp,
+	     tcb->snd_q_base,tcb->snd_q_end,usedcount,copycount, pushf);
+    $$KCALL(CQ_ENQUEUE,&tcb->snd_q_queue,lbptr,copycount);
 
 // Update user pointer and counter
 
-    Bufcount = Lbcount - Copycount;
-    Buf = Lbptr + Copycount;
+    bufcount = lbcount - copycount;
+    buf = lbptr + copycount;
 
-// If PUSH was set, then advance the send Push pointer to end of this buffer
+// if PUSH was set, then advance the send Push pointer to end of this buffer
 
-    if (PushF)
+    if (pushf)
 	{
-	TCB->SND_Push_Flag = TRUE;
-	TCB->SND_Pptr = TCB->SND_NXT + TCB->SND_Q_count;
+	tcb->snd_push_flag = TRUE;
+	tcb->snd_pptr = tcb->snd_nxt + tcb->snd_q_count;
 	};
-    };
+    }
 
 //SBTTL "SEND DATA: Segmentize data & send segment over the network."
 /*
@@ -1531,10 +1549,10 @@ Inputs:
 
 Implicit Inputs:
 
-	TCB->ASM_BC = # of bytes in current user send buffer left. 1st
-			element in TCB->Snd_Qhead.
-	TCB->ASM_Ptr = address of user data in current send buffer.
-	TCB->max_seg_data_size = max # of data bytes per segment receiver
+	tcb->asm_bc = # of bytes in current user send buffer left. 1st
+			element in tcb->snd_qhead.
+	tcb->asm_ptr = address of user data in current send buffer.
+	tcb->max_seg_data_size = max # of data bytes per segment receiver
 				 will accept.
 
 Outputs:
@@ -1550,238 +1568,239 @@ Side Effects:
 */
 
 TCP$SEND_DATA(struct tcb_structure * tcb)
-    {
-    signed long
-	struct Segment_Structure * Seg,
-	SEQsize,
-	struct Queue_Blk_Structure * QB(QB_Send_Fields),
-	Now		:	UNSIGNED,
-	Delay		:	UNSIGNED,
-	Delay_Flag	 = 0,
-	Send_Flag	 = 0,
-	Useable,
-	Bufptr,
-	Bufsize,
-	SegSize,
-	Dcount,
-	EOL,
-	Urg;
+{
+  struct segment_structure * seg;
+  struct queue_blk_structure(qb_send_fields) * qb;
+  unsigned long
+    now,
+    delay;
+  signed long
+    seqsize,
+    delay_flag	 = 0,
+    send_flag	 = 0,
+    useable,
+    bufptr,
+    bufsize,
+    segsize,
+    dcount,
+    eol,
+    urg;
 
 // Get time of day
 
-    Now = Time_Stamp() ;
+    now = Time_Stamp() ;
 
 // If there is anything on the retransmission queue, then don't try to queue
 // anything else up ("Nagle Algorithm")
-//    if (((TCB->SND_NXT GTRU TCB->SND_UNA) && (NOT TCB->DE_NAGLE)))
-!	RETURN 0;
+//    if (((tcb->snd_nxt > tcb->snd_una) && (! tcb->de_nagle)))
+//	RETURN 0;
 
-    if (TCB->SRX_Q_count != 0)
-	RETURN 0 ;
-    if ((TCB->SND_Delay_Timer == 0))
-	TCB->SND_Delay_Timer = Now ;
-//    if ((TCB->SND_Delay_Timer LSSU Now))
-!	{
-!	// Timer still active, but maybe we can send anyway
-!	IF ((TCB->SND_NXT GTRU TCB->SND_UNA) AND
-!	    (NOT TCB->DE_NAGLE) AND
-!	    ((TCB->SND_Q_COUNT + TCB->SRX_Q_COUNT) LSSU TCB->MAX_EFF_DATA_SIZE)) THEN
-!		RETURN 0 ;		// Nope
-!	} ;
+    if (tcb->srx_q_count != 0)
+	return 0 ;
+    if ((tcb->snd_delay_timer == 0))
+	tcb->snd_delay_timer = now ;
+//    if ((tcb->snd_delay_timer < now))
+//	{
+//	// Timer still active, but maybe we can send anyway
+//	IF ((tcb->snd_nxt > tcb->snd_una) AND
+//	    (! tcb->de_nagle) AND
+//	    ((tcb->snd_q_count + tcb->srx_q_count) < tcb->max_eff_data_size)) THEN
+//		RETURN 0 ;		// Nope
+//	} ;
 
-    Useable = TCB->SND_UNA + TCB->SND_WND - TCB->SND_NXT ;
-    if ((MINU(TCB->SND_Q_COUNT, Useable) GTRU TCB->MAX_EFF_DATA_SIZE))
-	Send_Flag = 1 ;
-    IF ((TCB->SND_NXT == TCB->SND_UNA) AND
-	(MINU(TCB->SND_Q_COUNT, Useable) GEQU (TCB->SND_MAX_WND / 2))) THEN
-	Send_Flag = 1 ;
-    IF ((TCB->SND_NXT == TCB->SND_UNA) && (TCB->SND_PUSH_FLAG) AND
-	(TCB->SND_Q_COUNT LEQU Useable)) THEN
-	Send_Flag = 1 ;
-    if ((TCB->SND_Delay_Timer GEQU Now))
-	Send_Flag = 1 ;
-    if ((TCB->SND_NXT GTRU TCB->SND_UNA))
-	Send_Flag = 1 ;
-    if ((NOT TCB->DE_NAGLE))
-	Send_Flag = 1 ;
-    if ((TCB->SND_Q_COUNT GEQU TCB->MAX_EFF_DATA_SIZE))
-	Send_Flag = 1 ;
-    if (((TCB->SND_NXT GTRU TCB->SND_UNA) && (NOT Send_Flag)))
-	RETURN 0 ;		// Nope
+    useable = tcb->snd_una + tcb->snd_wnd - tcb->snd_nxt ;
+    if ((MINU(tcb->snd_q_count, useable) > tcb->max_eff_data_size))
+	send_flag = 1 ;
+    if (((tcb->snd_nxt == tcb->snd_una) &&
+	 (MINU(tcb->snd_q_count, useable) >= (tcb->snd_max_wnd / 2))))
+	send_flag = 1 ;
+    if (((tcb->snd_nxt == tcb->snd_una) && (tcb->snd_push_flag) &&
+	 (tcb->snd_q_count <= useable)))
+	send_flag = 1 ;
+    if ((tcb->snd_delay_timer >= now))
+	send_flag = 1 ;
+    if ((tcb->snd_nxt > tcb->snd_una))
+	send_flag = 1 ;
+    if ((! tcb->de_nagle))
+	send_flag = 1 ;
+    if ((tcb->snd_q_count >= tcb->max_eff_data_size))
+	send_flag = 1 ;
+    if (((tcb->snd_nxt > tcb->snd_una) && (! send_flag)))
+	return 0 ;		// Nope
 
 // If we received a ICMP Source Quench, then see if it's time to try to
 // send more data.
 
-    if ((TCB->SQUENCH))
+    if ((tcb->squench))
 	{
-	if ((Now LSSU TCB->SQUENCH_TIMER))
+	if ((now < tcb->squench_timer))
 		{			//  Still in Source Quench mode
-		RETURN 0 ;
+		return 0 ;
 		}
 	else
 		{
-		TCB->SQUENCH = FALSE ;	//  Reset Source Quench flag
+		tcb->squench = FALSE ;	//  Reset Source Quench flag
 		} ;
 	} ;
 
 // Generate TCP segments from circular queue until all send requests are
 // exhausted or the SEND WINDOW goes to 0.
 
-    Dcount = 0;
-    WHILE (TCB->SND_Q_count > 0) && (TCB->SND_WND GTRU 0) DO
+    dcount = 0;
+    while ((tcb->snd_q_count > 0) && (tcb->snd_wnd > 0))
 	{
-	EOL = Urg = FALSE;
+	eol = urg = FALSE;
 
-// How much user data is avail to send? Up to TCB->max_seg_data_size
+// How much user data is avail to send? Up to tcb->max_seg_data_size
 // Make sure it fits within the send-window.
 
-!	SEQsize = MIN(TCB->SND_Q_count,TCB->Max_Seg_Data_Size);
-	SEQsize = MIN(TCB->SND_Q_count, TCB->Max_EFF_Data_Size);
-	SEQsize = MINU(SEQsize,TCB->Snd_Wnd);
+//	seqsize = MIN(tcb->snd_q_count,tcb->max_seg_data_size);
+	seqsize = MIN(tcb->snd_q_count, tcb->max_eff_data_size);
+	seqsize = MINU(seqsize,tcb->snd_wnd);
 
 // get a buffer large enough to contain: device header, IP, TCP headers and
 // data. Round to nearest big buffer size.
 
-	SegSize = SEQsize + TCP_Header_Size;
-	bufsize = segsize + device_header + IP_hdr_byte_size;
-	SELECTONE TRUE OF
-	SET
-	[bufsize <= MIN_PHYSICAL_BUFSIZE]:
-	    bufsize = MIN_PHYSICAL_BUFSIZE;
-	[bufsize <= MAX_PHYSICAL_BUFSIZE]:
-	    bufsize = MAX_PHYSICAL_BUFSIZE;
-	[OTHERWISE]:
-	    bufsize = segsize + device_header + IP_hdr_byte_size;
-	TES;
+	segsize = seqsize + TCP_HEADER_SIZE;
+	bufsize = segsize + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
+
+	if (bufsize <= min_physical_bufsize)
+	    bufsize = min_physical_bufsize;
+	else {
+	  if (bufsize <= max_physical_bufsize)
+	    bufsize = max_physical_bufsize;
+	  else
+	    bufsize = segsize + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
+	}
 
 // Get buffer, point at segment, clear flags
 
-	bufptr = MM$Seg_Get(BufSize);
-	seg = Bufptr+device_header+IP_hdr_byte_size;
-	Seg->SH$Control_Flags = 0;
+	bufptr = MM$Seg_Get(bufsize);
+	seg = bufptr+DEVICE_HEADER+IP_HDR_BYTE_SIZE;
+	seg->sh$control_flags = 0;
 
 // Set PUSH and advance PUSH pointer
 
-	if (TCB->SND_Push_Flag)
-!	    if ((TCB->SND_Pptr - TCB->SND_NXT) > 0)
-	    if ((TCB->SND_Pptr GTRU TCB->SND_NXT))
+	if (tcb->snd_push_flag)
+//	    if ((tcb->snd_pptr - tcb->snd_nxt) > 0)
+	    if ((tcb->snd_pptr > tcb->snd_nxt))
 		{
-		EOL = TRUE;
-!		if ((TCB->SND_NXT + SEQsize) - TCB->SND_PPtr GTRU 0)
-		if (((TCB->SND_NXT + SEQsize) GTRU TCB->SND_PPtr))
-		    TCB->SND_Push_Flag = FALSE;
+		eol = TRUE;
+//		if ((tcb->snd_nxt + seqsize) - tcb->snd_pptr > 0)
+		if (((tcb->snd_nxt + seqsize) > tcb->snd_pptr))
+		    tcb->snd_push_flag = FALSE;
 		};
 
-!~~~ Set URG and urgent pointer here?
+//!~~~ Set URG and urgent pointer here?
 // Set retransmission info
 	
-	ReXmit_Enqueue(TCB,SEQsize,0);
+	ReXmit_Enqueue(tcb,seqsize,0);
 
 // Remove from the send circular queue into the segment
 
 	XLOG$FAO(LOG$TCP,
 	   "!%T Sending for TCB !XL,SEQ count=!SL,DQ=!XL,EQ=!XL,SNQ=!XL/!XL!/",
-	   0,TCB,SEQsize,TCB->SND_Q_DEQP,TCB->SND_Q_ENQP,
-	   TCB->SND_Q_BASE,TCB[SND_Q_}]);
+	   0,tcb,seqsize,tcb->snd_q_deqp,tcb->snd_q_enqp,
+	   tcb->snd_q_base,tcb->snd_q_end);
 	XLOG$FAO(LOG$TCP,
 	   "!%T Sending for TCB !XL, EFF = !SL!/",
-	   0, TCB, TCB->MAX_EFF_Data_Size);
-	CQ_Dequeue(TCB->SND_Q_Queue,Seg->SH$DATA,SEQsize);
+	   0, tcb, tcb->max_eff_data_size);
+	CQ_Dequeue(tcb->snd_q_queue,seg->sh$data,seqsize);
 
 // Deduct from the window and add to statistics
 
-	TCB->SND_WND = TCB->SND_WND - SEQsize;
-	ts$dbx = ts$dbx + SEQsize;
+	tcb->snd_wnd = tcb->snd_wnd - seqsize;
+	TS$DBX = TS$DBX + seqsize;
 
 // Send the segement to IP (internet Protocol handler).
 
-	Build_Header(TCB,Seg,SegSize,SEQsize,TCB->SND_NXT,EOL,URG,0);
+	Build_Header(tcb,seg,segsize,seqsize,tcb->snd_nxt,eol,urg,0);
 
 // Advance SND_NXT for this segment
 
-	TCB->snd_nxt = TCB->snd_nxt + SEQsize;
+	tcb->snd_nxt = tcb->snd_nxt + seqsize;
 
 // Send the segment to IP for transmission.
 
-	Send_Seg1(TCB, Seg, Segsize, TRUE, Bufptr, Bufsize);
-	ts$sx = ts$sx + 1;
-	Dcount = Dcount+.SEQsize;
+	Send_Seg1(tcb, seg, segsize, TRUE, bufptr, bufsize);
+	TS$SX = TS$SX + 1;
+	dcount = dcount+seqsize;
 	TCP_MIB->MIB$tcpOutSegs = TCP_MIB->MIB$tcpOutSegs + 1;
 
 // If we got here by virtue of expired timer, and not enough left to send
 // another full sized packet, or window is too small then exit to avoid
 // sending runts.
 // (Nice in theory, but it doesn't work...)
-!	IF (((Delay_Flag) AND
-!	     (TCB->Max_SEG_Data_Size GTRU TCB->SND_Q_count)) OR
-!	     (TCB->SND_WND LSSU TCB->SND_Q_count)) THEN
-!		EXITLOOP ;
-	};			!WHILE
+//	IF (((Delay_Flag) AND
+//	     (tcb->max_seg_data_size > tcb->snd_q_count)) OR
+//	     (tcb->snd_wnd < tcb->snd_q_count)) THEN
+//		EXITLOOP ;
+};			//WHILE
 
 // If circular queue is not full, then insert anything we have onto it.
-!~~~ Warning: we count on the RX queue being empty here (known above)
+//!~~~ Warning: we count on the RX queue being empty here (known above)
 
-    if (TCB->SND_Q_count LSS TCB->SND_Q_Size)
+    if (tcb->snd_q_count < tcb->snd_q_size)
 	{
-	QB = TCB->SND_Qhead;
-	WHILE QB != TCB->SND_Qhead DO
+	qb = tcb->snd_qhead;
+	while (qb != tcb->snd_qhead)
 	    {
 	    signed long
-		NQB,
-		struct User_Send_Args * Uargs;
+	      nqb;
+	    struct user_send_args * uargs;
 
 // Enqueue as much data as possible from this user buffer
 
-	    TCP$Send_Enqueue(TCB,QB->SN$SIZE,QB->SN$Data,QB->SN$EOL);
+	    TCP$Send_Enqueue(tcb,qb->sn$size,qb->sn$data,qb->sn$eol);
 
 // If the user buffer still has data in it, then we ran out of queue space.
 
-	    if (QB->SN$SIZE != 0)
-		EXITLOOP;
+	    if (qb->sn$size != 0)
+	      break; // check
 
 // Otherwise, we're done with this buffer. Post the I/O, dequeue the block, and
 // advance to the next entry on the queue.
 
-	    Uargs = QB->SN$Uargs;
-	    User$Post_IO_Status(Uargs,SS$_NORMAL,QB->SN$Size,0,0);
-	    MM$UArg_Free(Uargs);
-	    NQB = QB->SN$NEXT;
-	    REMQUE(QB,QB);
-	    MM$QBLK_Free(QB);
-	    QB = NQB;
+	    uargs = qb->sn$uargs;
+	    User$Post_IO_Status(uargs,SS$_NORMAL,qb->sn$size,0,0);
+	    MM$UArg_Free(uargs);
+	    nqb = qb->sn$next;
+	    REMQUE(qb,qb);
+	    MM$QBLK_Free(qb);
+	    qb = nqb;
 	    };
 	};
 
 // Pending Close & ALL user data sent?
 // If true then send a FIN.
 
-    if ((TCB->Pending_Close) && (TCB->SND_Q_count == 0))
+    if ((tcb->pending_close) && (tcb->snd_q_count == 0))
 	{
-	TCB->Pending_Close = FALSE;
-	Send_FIN(TCB);
+	tcb->pending_close = FALSE;
+	Send_FIN(tcb);
 
-	if (TCB->State == CS$ESTABLISHED)
-	    TCP$SET_TCB_STATE(TCB,CS$FIN_WAIT_1)
+	if (tcb->state == CS$ESTABLISHED)
+	  TCP$SET_TCB_STATE(tcb,CS$FIN_WAIT_1);
 	else
 
 // Technically, this violates the spec, but we got this way when a CLOSE was
 // done in CLOSE-WAIT, so we should really be in LAST-ACK (RFC793 is ambiguous
 // on this point).
 
-	    if (TCB->State == CS$CLOSING)
-		TCP$SET_TCB_STATE(TCB,CS$LAST_ACK);
+	    if (tcb->state == CS$CLOSING)
+		TCP$SET_TCB_STATE(tcb,CS$LAST_ACK);
 	};
 
     // Reset delay timer for next time
-    Now = Time_Stamp() ;
-//    Delay = (TCB->Round_Trip_Time / 10) ;
-    Delay = (TCB->Round_Trip_Time / 2);
-    Delay = MINU(Delay, 100) ;
-    Delay = MAXU(Delay, 10) ;
-    TCB->SND_Delay_Timer = Now + Delay ;
+    now = Time_Stamp() ;
+//    Delay = (tcb->round_trip_time / 10) ;
+    delay = (tcb->round_trip_time / 2);
+    delay = MINU(delay, 100) ;
+    delay = MAXU(delay, 10) ;
+    tcb->snd_delay_timer = now + delay ;
 
-    RETURN Dcount;
-    };
+    return dcount;
+}
 
 
 //SBTTL "Send-ACK: Check if we can piggyback ACK or must send a lone ACK"
@@ -1808,42 +1827,42 @@ Side Effects:
 */
 
 
-TCP$Enqueue_ACK(struct tcb_structure * tcb): NOVALUE (void)
+void TCP$Enqueue_ACK(struct tcb_structure * tcb)
     {
-    signed long
-	Delay	:	UNSIGNED,
-	Now	:	UNSIGNED;
+    unsigned long
+	delay,
+	now;
 
 // Queue an ACK up for short term delivery
 
     XLOG$FAO(LOG$TCP,"!%T TCP$Enqueue_ACK TCB !XL!/",
-	  0, TCB);
+	  0, tcb);
 
-    TCB[PENDING_ACK] = TRUE ;
+    tcb->pending_ack = TRUE ;
 
 // Get Time of Day
 
-    Now = Time_Stamp() ;
+    now = Time_Stamp() ;
 
-    IF ((Now GEQU TCB->Delayed_ACK_Timer) OR
-	((TCB->Old_RCV_NXT + (2 * TCB->MAX_EFF_DATA_SIZE)) GEQU TCB->RCV_NXT)) THEN
+    if (((now >= tcb->delayed_ack_timer) ||
+	((tcb->old_rcv_nxt + (2 * tcb->max_eff_data_size)) >= tcb->rcv_nxt)))
 	{
-	TCP$Send_ACK(TCB) ;
-!	$DCLAST(ASTADR = TCP$Send_ACK,
-!		ASTPRM = TCB);
-!	TCB->Delayed_ACK_Timer = Now + Delayed_ACK_Interval;
-	Delay = MINU((TCB->Round_Trip_Time / 2), Delayed_ACK_Interval) ;
-	Delay = MAXU(Delay, 20);
-	TCB->Delayed_ACK_Timer = Now + Delay ;
+	TCP$Send_ACK(tcb) ;
+//	$DCLAST(ASTADR = TCP$Send_ACK,
+//		ASTPRM = TCB);
+//	tcb->delayed_ack_timer = Now + DELAYED_ACK_INTERVAL;
+	delay = MINU((tcb->round_trip_time / 2), DELAYED_ACK_INTERVAL) ;
+	delay = MAXU(delay, 20);
+	tcb->delayed_ack_timer = now + delay ;
 	} ;
 //    else
-!	{
-!	if (((Now + Delayed_ACK_Interval) (TCB[Delayed_ACK_Timer)))
-!		{
-!		} ;
-!	} ;
+//	{
+//	if (((Now + Delayed_ACK_Interval) (tcb[Delayed_ACK_Timer)))
+//		{
+//		} ;
+//	} ;
 
-    };
+    }
 
 
 //SBTTL "Send-ACK: Check if we can piggyback ACK or must send a lone ACK"
@@ -1870,32 +1889,32 @@ Side Effects:
 */
 
 
-TCP$SEND_ACK(struct tcb_structure * tcb): NOVALUE (void)
+void TCP$SEND_ACK(struct tcb_structure * tcb)
     {
 
 // If user data needs to be sent then piggyback the ACK.
 // Otherwise send a ACK control segment.
 
 XLOG$FAO(LOG$TCP,"!%T TCP$Send_ACK, Rcv window: !UL, ACK number: !XL (!UL)!/",
-	  0, TCB->rcv_wnd, TCB->rcv_nxt, TCB->rcv_nxt);
+	  0, tcb->rcv_wnd, tcb->rcv_nxt, tcb->rcv_nxt);
 
-    if (TCB->SND_Q_count == 0)
-	TCP$Send_CTL(TCB,M$ACK)
+    if (tcb->snd_q_count == 0)
+      TCP$Send_CTL(tcb,M$ACK);
     else
 	{
 
 // Data available to send, is the send window greater than 0?  Must be
 // or TCP$Send_Data will not attempt to send any.
 
-	if ((TCB->State == CS$ESTABLISHED) && (TCB->Snd_Wnd GTRU 0))
+	if ((tcb->state == CS$ESTABLISHED) && (tcb->snd_wnd > 0))
 	    {
-	    if (TCP$Send_Data(TCB) == 0)
-		TCP$Send_CTL(TCB,M$ACK)
+	    if (TCP$Send_Data(tcb) == 0)
+	      TCP$Send_CTL(tcb,M$ACK);
 	    }
 	else
-	    TCP$Send_CTL(TCB,M$ACK); // Send an ACK control segment.
-	};
-    };
+	    TCP$Send_CTL(tcb,M$ACK); // Send an ACK control segment.
+	}
+    }
 
 //SBTTL "SEND CTL: Send a Control Segment"
 /*
@@ -1924,98 +1943,99 @@ Side Effects:
 	the TCB.
 
 */
-TCP$SEND_CTL(struct tcb_structure * tcb,Type)
+TCP$SEND_CTL(struct tcb_structure * tcb,long type)
     {
+      struct segment_structure * seg;
     signed long
-	Bufsize,
-	Bufptr,
-	struct Segment_Structure * Seg,
-	Segsize  = TCP_Header_Size,
-	Option_Offset = 0,
-	SeqSpace = 1;	// Sequence Space occupied by this segment.
+	bufsize,
+	bufptr,
+	segsize  = TCP_HEADER_SIZE,
+	option_offset = 0,
+	seqspace = 1;	// Sequence Space occupied by this segment.
 				// assume protected control segment (SYN or FIN)
 
 // Fix segment size if doing SYN - need to send standard options
 
     if ((type == M$SYN) || (type == M$SYN_ACK))
 	{
-	Segsize = Segsize + SEND_OPT_SIZE; // Include room for our options
-	Option_Offset = SEND_OPT_OFFSET; // And indicate how long they are
+	segsize = segsize + SEND_OPT_SIZE; // Include room for our options
+	option_offset = SEND_OPT_OFFSET; // And indicate how long they are
 	};
 
 // Get a buffer large enough to contain tcp header, data, ip header and device
 // header.  Index into buffer & overlay segment header structure.
 
-    Bufsize = Device_header + IP_Hdr_byte_size + Segsize;
-    if (Bufsize <= MIN_PHYSICAL_BUFSIZE)
-	Bufsize = MIN_PHYSICAL_BUFSIZE
+    bufsize = DEVICE_HEADER + IP_HDR_BYTE_SIZE + segsize;
+    if (bufsize <= min_physical_bufsize)
+      bufsize = min_physical_bufsize;
     else
-	if (Bufsize <= MAX_PHYSICAL_BUFSIZE)
-	    Bufsize = MAX_PHYSICAL_BUFSIZE;
-    Bufptr = MM$Seg_Get(BufSize);	// Carve out a control segment structure.
-    Seg = BufPtr + Device_header + IP_hdr_byte_size; // point at segment start.
+	if (bufsize <= max_physical_bufsize)
+	    bufsize = max_physical_bufsize;
+    bufptr = MM$Seg_Get(bufsize);	// Carve out a control segment structure.
+    seg = bufptr + DEVICE_HEADER + IP_HDR_BYTE_SIZE; // point at segment start.
 
 // build the segment
 
-    Seg->SH$Control_Flags = 0;		// Clear control Flags.
-    SELECTONE TYPE OF
-    SET
-    [M$ACK]:
+    seg->sh$control_flags = 0;		// Clear control Flags.
+    switch (type)
+      {
+    case M$ACK:
 	{
-	Seg->SH$C_ACK = TRUE;
-	SeqSpace = 0;
-	TCB->Pending_Ack = FALSE;		// clear pending ack flag.
+	seg->sh$c_ack = TRUE;
+	seqspace = 0;
+	tcb->pending_ack = FALSE;		// clear pending ack flag.
 	};
-
-    [M$RST]:
+	break;
+    case M$RST:
 	{
-	Seg->SH$C_RST = TRUE;
-	SeqSpace = 0;
+	seg->sh$c_rst = TRUE;
+	seqspace = 0;
 	};
-
+	break;
 // make this a SYN control segment with max receive data size option present.
 // could be syn_ack.
 
-    [M$SYN, M$syn_ack]:
+    case M$SYN: case M$SYN_ACK:
 	{
-	Seg->SH$C_SYN = TRUE;
-	if (type == M$syn_ack)
-	    Seg->SH$C_ACK = TRUE;
+	seg->sh$c_syn = TRUE;
+	if (type == M$SYN_ACK)
+	    seg->sh$c_ack = TRUE;
 
 // include max data size we will receive option.
 
-	Send_TCP_Options(TCB,Seg);
+	Send_TCP_Options(tcb,seg);
 	};
-
-    [M$FIN]:
-	Seg->SH$C_FIN = TRUE;
-    TES;
+	break;
+    case M$FIN:
+	seg->sh$c_fin = TRUE;
+      }
 
 // If this segment occupies sequence number space (i.e. SYN or FIN), then
 // queue it up for retransmission.
 
-    if (SeqSpace > 0)
-	Rexmit_Enqueue(TCB,0,TYPE);
+    if (seqspace > 0)
+	Rexmit_Enqueue(tcb,0,type);
 
 // 2 false parameters are for EOL & Urgent, not on control segments.
 
-    Build_Header(TCB,Seg,SegSize,SeqSpace,TCB->SND_NXT,
-		 FALSE,FALSE,Option_Offset);
+    Build_Header(tcb,seg,segsize,seqspace,tcb->snd_nxt,
+		 FALSE,FALSE,option_offset);
 
 // Advance SND_NXT for FIN/SYN
 
-    TCB->SND_NXT = TCB->SND_NXT + Seqspace;
+    tcb->snd_nxt = tcb->snd_nxt + seqspace;
 
 // Only ACKable segments update the probe timer.
 
     TS$SX = TS$SX + 1;		// track segments transmitted.
     TCP_MIB->MIB$tcpOutSegs = TCP_MIB->MIB$tcpOutSegs + 1;
-    if (SeqSpace > 0)
-	Send_Seg1(TCB, Seg, Segsize, TRUE, Bufptr, Bufsize)
+    if (seqspace > 0)
+      Send_Seg1(tcb, seg, segsize, TRUE, bufptr, bufsize);
     else
-	Send_Seg0(TCB, seg, segsize, TRUE, bufptr, bufsize)
-    };
-%SBTTL "Send a probe packet"
+      Send_Seg0(tcb, seg, segsize, TRUE, bufptr, bufsize);
+    }
+
+//%SBTTL "Send a probe packet"
 /*
 Function:
 
@@ -2028,51 +2048,54 @@ Function:
 	an RST if the connection does not exist.
 */
 
-void DO_PROBE(struct tcb_structure * tcb) (void)
+void DO_PROBE(struct tcb_structure * tcb)
     {
-    BIND
-	segsize = TCP_Header_Size,
-	bufsize = Device_header+IP_HDR_Byte_Size+TCP_Header_Size;
-    OWN
-	buf : VECTOR[(bufsize+3)/4];
-    BIND
-	seg = buf+Device_header+IP_hdr_byte_size : Segment_structure;
+      const long
+	segsize = TCP_HEADER_SIZE;
+      const long
+	bufsize = DEVICE_HEADER+IP_HDR_BYTE_SIZE+TCP_HEADER_SIZE;
+#define BUFSIZE DEVICE_HEADER+IP_HDR_BYTE_SIZE+TCP_HEADER_SIZE
+      static long
+	buf[(BUFSIZE+3)/4];
+      const struct segment_structure *
+	seg = buf+DEVICE_HEADER+IP_HDR_BYTE_SIZE ; // check
 
 // Fill in the segment
 
-    seg->SH$Source_port = TCB->Local_Port;
-    seg->SH$Dest_port = TCB->Foreign_Port;
-    seg->SH$Seq = (TCB->SND_NXT XOR -1);
-    seg->SH$Control_Flags = 0;
-    seg->SH$C_ACK = TRUE;
-    seg->SH$C_SYN = TRUE;
-    seg->SH$ACK = TCB->RCV_NXT;
-    seg->SH$Data_Offset = TCP_Data_Offset;
-    seg->SH$Window = TCB->RCV_WND;
-    seg->SH$Urgent = 0;
-    seg->SH$Checksum = 0;
+    seg->sh$source_port = tcb->local_port;
+    seg->sh$dest_port = tcb->foreign_port;
+    seg->sh$seq = (tcb->snd_nxt ^ -1);
+    seg->sh$control_flags = 0;
+    seg->sh$c_ack = TRUE;
+    seg->sh$c_syn = TRUE;
+    seg->sh$ack = tcb->rcv_nxt;
+    seg->sh$data_offset = TCP_DATA_OFFSET;
+    seg->sh$window = tcb->rcv_wnd;
+    seg->sh$urgent = 0;
+    seg->sh$checksum = 0;
 
     if ($$LOGF(LOG$TCP))
 	{
 	LOG$FAO("!%T Sending TCB inactivity probe!/",0);
-	SEG$Log_Segment(seg,segsize,false,FALSE)
+	SEG$Log_Segment(seg,segsize,FALSE,FALSE);
 	};
 
 // Byteswap header and do checksum
 
-    seg->SH$SEQ = ROT(seg->SH$SEQ,16);
-    seg->SH$ACK = ROT(seg->SH$ACK,16);
+    seg->sh$seq = ROT(seg->sh$seq,16);
+    seg->sh$ack = ROT(seg->sh$ack,16);
 
-    SwapBytes(TCP_Header_Size/2,seg);
-    seg->SH$Checksum = Gen_Checksum(segsize,seg,TCB->Local_Host,
-				    TCB->Foreign_Host,TCP_Protocol);
+    SwapBytes(TCP_HEADER_SIZE/2,seg);
+    seg->sh$checksum = Gen_Checksum(segsize,seg,tcb->local_host,
+				    tcb->foreign_host,TCP_PROTOCOL);
 // Finally, send the packet.
 
     TCP_MIB->MIB$tcpOutSegs = TCP_MIB->MIB$tcpOutSegs + 1;
-    Send_Seg1(TCB, seg, segsize, false, buf, bufsize);
-    };
+    Send_Seg1(tcb, seg, segsize, FALSE, buf, bufsize);
+    }
 
-%SBTTL "Build Header: Fill in TCP segment header."
+
+//%SBTTL "Build Header: Fill in TCP segment header."
 /*
 
 Function:
@@ -2099,25 +2122,24 @@ Side Effects:
 	TCB segment space counters are updated.
 */
 
-Build_Header(TCB,SEG,Length,SeqSpace,SEQstart,
-		     EOL,Urg,OPTOFF): NOVALUE (void)
+void Build_Header(tcb,seg,length,seqspace,seqstart,
+		     eol,urg,optoff)
+     struct tcb_structure * tcb;
+     struct segment_structure * seg;
     {
-    MAP
-	struct tcb_structure * tcb,
-	struct Segment_Structure * SEG;
     signed long
 	swap_wordSize;
 
-    Seg->SH$Source_Port = TCB->Local_Port;
-    Seg->SH$Dest_Port = TCB->Foreign_Port;
-    Seg->SH$Seq = SEQstart;
+    seg->sh$source_port = tcb->local_port;
+    seg->sh$dest_port = tcb->foreign_port;
+    seg->sh$seq = seqstart;
 
 // Is this a synchronized connection?  True implies ack field is valid.
 
-    if (TCB->IS_Synched)
+    if (tcb->is_synched)
 	{
-	Seg->SH$C_ACK = TRUE;
-	TCB->pending_ack = FALSE;
+	seg->sh$c_ack = TRUE;
+	tcb->pending_ack = FALSE;
 	};
 
 // special case reset segs for ack bit.
@@ -2125,9 +2147,9 @@ Build_Header(TCB,SEG,Length,SeqSpace,SEQstart,
     if ((seg->sh$c_rst))
 	{
 	if (seg->sh$seq == 0)
-	    Seg->SH$C_ACK = TRUE
+	  seg->sh$c_ack = TRUE;
 	else
-	    Seg->SH$C_ACK = FALSE;
+	  seg->sh$c_ack = FALSE;
 	};
 
 // If ack control is asserted then update spontaneous ack timer.
@@ -2135,51 +2157,50 @@ Build_Header(TCB,SEG,Length,SeqSpace,SEQstart,
 
     if ((seg->sh$c_ack))
 	{
-	TCB->ack_timer = Time_Stamp() + ACK_INTERVAL;
-	TCB->old_RCV_NXT = TCB->RCV_NXT;
-	TCB->old_RCV_WND = TCB->RCV_WND;
+	tcb->ack_timer = Time_Stamp() + ACK_INTERVAL;
+	tcb->old_rcv_nxt = tcb->rcv_nxt;
+	tcb->old_rcv_wnd = tcb->rcv_wnd;
 	};
 
-    Seg->SH$Ack = TCB->RCV_NXT;
-    Seg->SH$Data_Offset = TCP_Data_Offset + OPTOFF;
-    Seg->SH$Window = TCB->Rcv_Wnd;
+    seg->sh$ack = tcb->rcv_nxt;
+    seg->sh$data_offset = TCP_DATA_OFFSET + optoff;
+    seg->sh$window = tcb->rcv_wnd;
 
 // Process EOL(End Of Letter) & Urgent flags.
 
     if (eol)
-	Seg->SH$C_EOL = TRUE;
+	seg->sh$c_eol = TRUE;
 
     if (urg)
 	{
-	Seg->SH$C_URG = TRUE;
-	Seg->SH$Urgent = (TCB->SND_NXT + SEQspace) - 1;
+	seg->sh$c_urg = TRUE;
+	seg->sh$urgent = (tcb->snd_nxt + seqspace) - 1;
 	};
 
     if ($$LOGF(LOG$TCP))
-	SEG$Log_Segment(Seg,Length,FALSE,FALSE);
+	SEG$Log_Segment(seg,length,FALSE,FALSE);
 
 // Generate the Segment Checksum, Includes TCP Pseudo Header.
 
-    Seg->SH$CheckSum = 0;	// For checksum routine.
+    seg->sh$checksum = 0;	// For checksum routine.
 //   XLOG$FAO(LOG$TCP,"Sending SEQ #: !XL (!UL)!/",Seg->SH$SEQ,Seg->SH$SEQ);
 
 // Swap bytes within TCP header words(16-bits) so checksum is correct for
 // order in which the bytes are transmitted.
 
-    Seg->SH$SEQ = ROT(Seg->SH$SEQ,16);
-    Seg->SH$ACK = ROT(Seg->SH$ACK,16); // swap 16-bit words in 32-bit fullwords
+    seg->sh$seq = ROT(seg->sh$seq,16);
+    seg->sh$ack = ROT(seg->sh$ack,16); // swap 16-bit words in 32-bit fullwords
 
 // Swap the bytes in the header. Note that options are always in network byte
 // order and thus need not be swapped.
 
-    SwapBytes(TCP_Header_Size/2,Seg);
+    SwapBytes(TCP_HEADER_SIZE/2,seg);
 
 // generate the actual checksum now that all the bytes are in the order of
 // transmission.
 
-    Seg->SH$CheckSum = Gen_Checksum(Length,Seg,TCB->Local_Host,
-				    TCB->Foreign_Host,TCP_Protocol);
-    };
+    seg->sh$checksum = Gen_Checksum(length,seg,tcb->local_host,
+				    tcb->foreign_host,TCP_PROTOCOL);
+    }
 
-}
-ELUDOM
+

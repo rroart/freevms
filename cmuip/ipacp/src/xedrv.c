@@ -326,13 +326,13 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
     if (RC != SS$_Normal)
 	{
 	XE$ERR(XE_Int,"XE ARP queued read failure, RC=!XL",RC);
-	RETURN 0;
+	return 0;
 	};
 
 // Indicate that I/O has been started
 
     XE_Int->XEI$IO_queued = TRUE;
-    RETURN -1;
+    return -1;
     };
 
 
@@ -418,7 +418,7 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 	else
 	   XE$ERR(XE_Int,"XE startup failure, RC=!XL,VMS_code=!XL,Xfer size=!SL",
 	       RC,IOS->XE$VMS_Code,IOS->XE$Tran_size);
-	RETURN 0;
+	return 0;
 	};
 
 // Modify the setup block for the arp responder
@@ -439,12 +439,12 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 	XE$ERR(XE_Int,
 	       "XE ARP startup failure, RC=!XL,VMS_code=!XL,Xfer size=!SL",
 	       RC,IOS->XE$VMS_Code,IOS->XE$Tran_size);
-	RETURN 0;
+	return 0;
 	};
 
 // Everything OK - return TRUE value
 
-    RETURN -1;
+    return -1;
     };
 
 XE_SenseDev( struct XE_Interface_Structure * XE_Int,
@@ -478,12 +478,12 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 	XE$ERR(XE_Int,
 	       "XE sense mode QIOW failure, RC=!XL,VMS_Code=!XL,Xfer size=!SL",
 	       RC,IOS->XE$VMS_code,IOS->XE$tran_size);
-	RETURN 0;
+	return 0;
 	};
 
     Paramdescr [XE$SETUP_LENGTH] = IOS [XE$Tran_Size];
 
-    WHILE Paramdescr [XE$SETUP_LENGTH] GTRU 0 DO
+    WHILE Paramdescr [XE$SETUP_LENGTH] > 0 DO
 	{
 	BIND
 	    Param = Paramdescr [XE$SETUP_ADDRESS] : $BBLOCK FIELD (XE_Sense);
@@ -513,7 +513,7 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 
 // Return success
 
-    RETURN -1;
+    return -1;
     };
 
 //SBTTL "Start device - top-level"
@@ -537,7 +537,7 @@ XE_StartAll ( XE_Int , restart )
 // Try to start the device
 
     if (NOT XE_StartDev(XE_Int,0,0))
-	RETURN 0;
+	return 0;
 
 // Only check for DECNET and set ARP address the first time that we successfully
 // start the device up. Otherwise, when (not IF) the first error causes the
@@ -551,7 +551,7 @@ XE_StartAll ( XE_Int , restart )
 // need to wait for it.
 
 	if (NOT XE_SenseDev(XE_Int,phaddr,hwaddr,online))
-	    RETURN 0;
+	    return 0;
 	if (XE_Int->XEI$XE_decnet)
 	    useaddr = phaddr
 	else
@@ -561,7 +561,7 @@ XE_StartAll ( XE_Int , restart )
 	    {
 	    DRV$OPR_FAO("XE restart failed - address mismatch");
 	    XE_Shutdown(XE_Int,true);
-	    RETURN 0;
+	    return 0;
 	    };
 	}
     else
@@ -570,7 +570,7 @@ XE_StartAll ( XE_Int , restart )
 // Get device address
 
 	if (NOT XE_SenseDev(XE_Int,phaddr,hwaddr,online))
-	    RETURN 0;
+	    return 0;
 
 // Remember that it was started at least once
 
@@ -583,7 +583,7 @@ XE_StartAll ( XE_Int , restart )
 		{
 		XE_Shutdown(XE_Int,0);
 		if (NOT XE_StartDev(XE_Int,true,hwaddr))
-		    RETURN 0;
+		    return 0;
 		useaddr = hwaddr;
 		XE_Int->XEI$XE_decnet = FALSE;
 		}
@@ -626,7 +626,7 @@ XE_StartAll ( XE_Int , restart )
 //    dev_config [dc_online] = online;
     dev_config [dc_online] = True;
 
-    RETURN True;
+    return True;
     };
 
 
@@ -769,7 +769,7 @@ XE$CHECK ( struct Device_Configuration_Entry * dev_config )
 !	    Dev_attn = Dev_attn-1;
 	    DRV$ACPWAKE;		// Special event...
 	    // Return -1 to decrement the # of devices needing attention.
-	    RETURN -1
+	    return -1
 	    }
 	else			// Wait a while and try again...
 	    XE_Int->XEI$restart_time = now + XE_RESTART_TIME;

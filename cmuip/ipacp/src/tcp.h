@@ -70,7 +70,7 @@ Modification history:
 
 */
 
-#include "netxport.h"
+// not yet #include "netxport.h"
 #include "netcommon.h"
 #include "netvms.h"
 #include "structure.h"
@@ -112,24 +112,24 @@ Modification history:
 
 // Misc Time Values in Hundredths seconds.
 
-    #define Max_Seg_LifeTime 2*Minute	// seconds.
-    #define Min_RT_TimeOut 1*Csec	// Min allowable retransmission time
-    #define Max_RT_TimeOut 4*Minute	// Max allowable Retransmission time.
-    #define Base_RT_TimeOut 3*CSEC	// Base (initial) Round Trip timer.
-    #define PROBE_IVAL Minute	// Inactivity probe timer
-    #define ack_interval Minute	// spontaneous ack interval timer.
-    #define Delayed_ACK_Interval 20	// Delayed ACK interval, 200ms
-    #define SQUENCH_Interval 2*CSEC	// Source Quench Interval, 2 Seconds
-    #define Function_TimeOut 10*Csec	// User function.
-    #define Active_Open_Timeout 30*Csec// Amount of time for active open to happen
-    #define Passive_Open_Timeout DaySec // Amount of time for passive open
-    #define NameLook_Timeout 2*Minute// How long to wait for name lookup
-    #define Close_Timeout 2*Minute	// How long to wait for connection to close
-    #define CONN_TIMEOUT 10*Minute	// How long before connection is dead
-    #define RX_TIMEVAL 4*Minute	// Retransmit queue time limit
-    #define Inactive_TCB_TimeOut 5*Csec // Time which a TCB will remain inactive
+    #define MAX_SEG_LIFETIME 2*MINUTE	// seconds.
+    #define MIN_RT_TIMEOUT 1*CSEC	// Min allowable retransmission time
+    #define MAX_RT_TIMEOUT 4*MINUTE	// Max allowable Retransmission time.
+    #define BASE_RT_TIMEOUT 3*CSEC	// Base (initial) Round Trip timer.
+    #define PROBE_IVAL MINUTE	// Inactivity probe timer
+    #define ACK_INTERVAL MINUTE	// spontaneous ack interval timer.
+    #define DELAYED_ACK_INTERVAL 20	// Delayed ACK interval, 200ms
+    #define SQUENCH_INTERVAL 2*CSEC	// Source Quench Interval, 2 Seconds
+    #define FUNCTION_TIMEOUT 10*CSEC	// User function.
+    #define ACTIVE_OPEN_TIMEOUT 30*CSEC// Amount of time for active open to happen
+    #define PASSIVE_OPEN_TIMEOUT DAYSEC // Amount of time for passive open
+    #define NAMELOOK_TIMEOUT 2*MINUTE// How long to wait for name lookup
+    #define CLOSE_TIMEOUT 2*MINUTE	// How long to wait for connection to close
+    #define CONN_TIMEOUT 10*MINUTE	// How long before connection is dead
+    #define RX_TIMEVAL 4*MINUTE	// Retransmit queue time limit
+    #define INACTIVE_TCB_TIMEOUT 5*CSEC // Time which a TCB will remain inactive
 				// before being deleted.
-    #define Default_Send_timeOut 300*Csec// Time allowed for a user's buffer
+    #define DEFAULT_SEND_TIMEOUT 300*CSEC// Time allowed for a user's buffer
 				// to be sent.
 
 
@@ -150,19 +150,19 @@ fields LP_Next & LP_Back are used as forward & backwards queue pointers.
 */
 
 struct  tcb_structure {
-    void * LP_Next;	// LP queue Forward Link pointer.
-    void * LP_Back;	// LP queue, Backwards Link.
-    unsigned int Foreign_Host;	// Foreign host address
-    unsigned long Foreign_Port;	// Foreign port
-    unsigned int Local_Host;	// Local address of connection
-    unsigned long Local_Port;	// Local Port #
-    void * RF_Qhead;	// Network: received "future" seg queue
-    void * RF_Qtail;
-    signed long RF_Qcount;	// Count of items on future queue
-    void * UR_QHead;	// User: receive Data request queue.
-    void * UR_QTail;
-    void * SND_QHead;	// User: send Segment request queue
-    void * SND_QTail;
+    void * lp_next;	// LP queue Forward Link pointer.
+    void * lp_back;	// LP queue, Backwards Link.
+    unsigned int foreign_host;	// Foreign host address
+    unsigned long foreign_port;	// Foreign port
+    unsigned int local_host;	// Local address of connection
+    unsigned long local_port;	// Local Port #
+    void * rf_qhead;	// Network: received "future" seg queue
+    void * rf_qtail;
+    signed long rf_qcount;	// Count of items on future queue
+    void * ur_qhead;	// User: receive Data request queue.
+    void * ur_qtail;
+    void * snd_qhead;	// User: send Segment request queue
+    void * snd_qtail;
 
 //
 // Security		= [$SWord],	// not implememted.
@@ -174,109 +174,109 @@ struct  tcb_structure {
 #if 0
     $Align(Fullword)
 #endif
-    unsigned long SND_UNA;	// send unacknowledged seq #
-    unsigned long SND_NXT;	// next send seq #
-    unsigned long SND_WND;	// send window
-    unsigned long SND_WL;	// Last window update.
-    signed long SND_BS;	// send buffer size
-    unsigned long SND_UP;	// urgent pointer
-    unsigned long SND_MAX_WND;	// Maximum Send Window
-    unsigned long ISS;	// Initial Send sequence number.
-    unsigned long SND_Pptr;	// Send PUSH pointer
+    unsigned long snd_una;	// send unacknowledged seq #
+    unsigned long snd_nxt;	// next send seq #
+    unsigned long snd_wnd;	// send window
+    unsigned long snd_wl;	// Last window update.
+    signed long snd_bs;	// send buffer size
+    unsigned long snd_up;	// urgent pointer
+    unsigned long snd_max_wnd;	// Maximum Send Window
+    unsigned long iss;	// Initial Send sequence number.
+    unsigned long snd_pptr;	// Send PUSH pointer
 
 // Send circular queue variables
 
-    CQF$DEF(SND_Q_);			// Send data queue
-    CQF$DEF(SRX_Q_);			// Retransmission data queue
+    CQF$DEF(snd_q_);			// Send data queue
+    CQF$DEF(srx_q_);			// Retransmission data queue
 
 // Receive Sequence variables
 
-    unsigned long RCV_NXT;	// next expected sequence #
-    unsigned long Old_RCV_NXT;	// RCV.NXT last time ACK sent
-    unsigned long RCV_WND;	// window
-    unsigned long Old_RCV_WND;	// RCV.WND last time ACK sent
-    signed long RCV_BS;	// buffer size in bytes
-    unsigned long RCV_UP;	// Receive urgent pointer
-    unsigned long IRS;	// Initial receive sequence #
-    unsigned long RCV_DUptr;	// Last sequence # delivered to user
-    unsigned long RCV_Pptr;	// Receive PUSH pointer
+    unsigned long rcv_nxt;	// next expected sequence #
+    unsigned long old_rcv_nxt;	// RCV.NXT last time ACK sent
+    unsigned long rcv_wnd;	// window
+    unsigned long old_rcv_wnd;	// RCV.WND last time ACK sent
+    signed long rcv_bs;	// buffer size in bytes
+    unsigned long rcv_up;	// Receive urgent pointer
+    unsigned long irs;	// Initial receive sequence #
+    unsigned long rcv_duptr;	// Last sequence # delivered to user
+    unsigned long rcv_pptr;	// Receive PUSH pointer
 
 // Receive circular queue variables
 
-    CQF$DEF(RCV_Q_);			// Receive data queue
+    CQF$DEF(rcv_q_);			// Receive data queue
 
 // Misc connection information
 
-    void * UCB_ADRS;	// UCB address for this TCB
-    unsigned long VTCB_INDEX;	// VALID_TCB index for this TCB
-    unsigned long User_ID;	// Owning process ID
-    unsigned long RX_Timer;	// Time to do retransmit for this TCB
-    unsigned long RX_Timeout;	// Retransmission time-out for TCB
-    signed long RX_Count;	// # of retransmissions done
-    unsigned long RX_SEQ;	// Retransmission sequence start
-    unsigned long RX_CTL;	// Control segment type
-    unsigned long Xmit_Start_Time;	// Time first item queued on RX timer
-    unsigned long Time_Wait_Timer;	// Time_Wait Counter.
-//    $OVERLAY(time_wait_timer)
-    unsigned long ACK_Timer;	// spontaneous ack timer.
-//    $CONTINUE
-    unsigned long Delayed_ACK_Timer;	// Delayed ACK timer.
-    unsigned long SQUENCH_Timer;	// Source Quench timer.
-    unsigned long User_Timeval;	// Amount of time before idle
-    unsigned long User_Timeout;	// Time which connection will be closed
-    unsigned long Probe_time;	// time when we need to probe again
-    unsigned long Connection_TimeOut;	// Time which connection will be reset.
-    unsigned long Inactive_Timeout;	// time which conn will be deleted.
-    unsigned long Function_Timer;	// User function timeout.
-    void * TVTDATA;	// Pointer to TVT data block if IS_TVT
-    void * Timeout_Routine;	// For TVT's, internal timeout routine
-    void * ArgBlk;	// Points at user's i/o request argblk.
-    unsigned long Round_Trip_Time;	// Time required for segment to be ACKed
-    unsigned long Calculated_RTO;	// Calculated retransmission timeout
-    unsigned char Curr_User_Function;	// Current user function being timed.
-    unsigned char State;	// Current state of this connection
-    unsigned char Last_State;	// Last state of this connection.
-    unsigned char Con_Index;	// Connection Table index for local port
-    unsigned short int Process_IO_Chan;	// IO channel for this connection.
-    unsigned short int Max_seg_data_size;	// max size data receiver will accept
-    unsigned short int Max_eff_data_size;	// max effective size data receiver will accept
-    unsigned short int Duplicate_segs;	// duplicate segments.
-    unsigned short int OORW_segs;	// Out Of Recv Window segments.
-    signed long Inactive_Code;	// Reason TCB was set inactive.
-    unsigned long ACK_size;	// # of data bytes to be ack'ed.
-    unsigned long SND_ACK_Threshold;	// Number of bytes before window update
-    unsigned long SND_Delay_Timer;	// Time to wait before forcing send
+    void * ucb_adrs;	// UCB address for this TCB
+    unsigned long vtcb_index;	// VALID_TCB index for this TCB
+    unsigned long user_id;	// Owning process ID
+    unsigned long rx_timer;	// Time to do retransmit for this TCB
+    unsigned long rx_timeout;	// Retransmission time-out for TCB
+    signed long rx_count;	// # of retransmissions done
+    unsigned long rx_seq;	// Retransmission sequence start
+    unsigned long rx_ctl;	// Control segment type
+    unsigned long xmit_start_time;	// Time first item queued on RX timer
   union {
-    unsigned long TCB$Flags;	// Reserve some space for flags
+    unsigned long time_wait_timer;	// Time_Wait Counter.
+    unsigned long ack_timer;	// spontaneous ack timer.
+  };
+    unsigned long delayed_ack_timer;	// Delayed ACK timer.
+    unsigned long squench_timer;	// Source Quench timer.
+    unsigned long user_timeval;	// Amount of time before idle
+    unsigned long user_timeout;	// Time which connection will be closed
+    unsigned long probe_time;	// time when we need to probe again
+    unsigned long connection_timeout;	// Time which connection will be reset.
+    unsigned long inactive_timeout;	// time which conn will be deleted.
+    unsigned long function_timer;	// User function timeout.
+    void * tvtdata;	// Pointer to TVT data block if IS_TVT
+    void (* timeout_routine)();	// For TVT's, internal timeout routine
+    void * argblk;	// Points at user's i/o request argblk.
+    unsigned long round_trip_time;	// Time required for segment to be ACKed
+    unsigned long calculated_rto;	// Calculated retransmission timeout
+    unsigned char curr_user_function;	// Current user function being timed.
+    unsigned char state;	// Current state of this connection
+    unsigned char last_state;	// Last state of this connection.
+    unsigned char con_index;	// Connection Table index for local port
+    unsigned short int process_io_chan;	// IO channel for this connection.
+    unsigned short int max_seg_data_size;	// max size data receiver will accept
+    unsigned short int max_eff_data_size;	// max effective size data receiver will accept
+    unsigned short int duplicate_segs;	// duplicate segments.
+    unsigned short int oorw_segs;	// Out Of Recv Window segments.
+    signed long inactive_code;	// Reason TCB was set inactive.
+    unsigned long ack_size;	// # of data bytes to be ack'ed.
+    unsigned long snd_ack_threshold;	// Number of bytes before window update
+    unsigned long snd_delay_timer;	// Time to wait before forcing send
+  union {
+    unsigned long tcb$flags;	// Reserve some space for flags
     struct {
-	unsigned Active_Open : 1;	// Active open performed.
-	unsigned Open_NoWait : 1;	// Wait-mode of OPEN in progress
-	unsigned Close_NoWait : 1;	// Wait-mode of CLOSE in progress
-	unsigned Pending_Close : 1;	// FIN segment needs to be sent.
-	unsigned Pending_ACK : 1;	// ACK segment needs to be sent.
-	unsigned Pending_IO : 1;	// ARGBLK pts at an user IO request.
-	unsigned Data_2_Send : 1;	// User data needs to be sent.
-	unsigned EOF : 1;	// TCB Closing, All data delivered.
-	unsigned Is_Aborted : 1;	// TCB is aborted - drop incoming data
-	unsigned SND_Push_Flag : 1;	// Push pending on SEND
-	unsigned RCV_Push_Flag : 1;	// Push seen on receive
-	unsigned NMLook_Flag : 1;	// Name or address lookup in progress
-	unsigned IS_Synched : 1;	// OK to send ACKs, connection synched
-	unsigned FIN_RCVD : 1;	// Valid FIN received in FIN-WAIT-2
-	unsigned IS_TVT : 1;	// TCB is a TVT (virtual terminal)
-	unsigned DE_Nagle : 1;	// Turn off Nagle algorithim
-	unsigned SQUENCH : 1;	// Source Quench received
-	unsigned NBWRITE : 1;	// Network Buffer busy
-	unsigned TCP_DF : 1;	// Don't Fragment bit
+	unsigned active_open : 1;	// Active open performed.
+	unsigned open_nowait : 1;	// Wait-mode of OPEN in progress
+	unsigned close_nowait : 1;	// Wait-mode of CLOSE in progress
+	unsigned pending_close : 1;	// FIN segment needs to be sent.
+	unsigned pending_ack : 1;	// ACK segment needs to be sent.
+	unsigned pending_io : 1;	// ARGBLK pts at an user IO request.
+	unsigned data_2_send : 1;	// User data needs to be sent.
+	unsigned eof : 1;	// TCB Closing, All data delivered.
+	unsigned is_aborted : 1;	// TCB is aborted - drop incoming data
+	unsigned snd_push_flag : 1;	// Push pending on SEND
+	unsigned rcv_push_flag : 1;	// Push seen on receive
+	unsigned nmlook_flag : 1;	// Name or address lookup in progress
+	unsigned is_synched : 1;	// OK to send ACKs, connection synched
+	unsigned fin_rcvd : 1;	// Valid FIN received in FIN-WAIT-2
+	unsigned is_tvt : 1;	// TCB is a TVT (virtual terminal)
+	unsigned de_nagle : 1;	// Turn off Nagle algorithim
+	unsigned squench : 1;	// Source Quench received
+	unsigned nbwrite : 1;	// Network Buffer busy
+	unsigned tcp_df : 1;	// Don't Fragment bit
     };
   };
-    signed short int Foreign_Hnlen;	// Length of foreign host name
-    unsigned char Foreign_Hname[MAX_HNAME];	// Foreign host name
+    signed short int foreign_hnlen;	// Length of foreign host name
+    unsigned char foreign_hname[MAX_HNAME];	// Foreign host name
 };
 
 // Set the size of one TCB
 
-    #define TCB_Size sizeof(struct tcb_structure);		// in BLISS Fullwords.
+    #define TCB_SIZE sizeof(struct tcb_structure);		// in BLISS Fullwords.
 
 //MESSAGE(%NUMBER(tcb_size),' longwords per tcb')
 
@@ -306,10 +306,10 @@ struct CN$Fields {
     long CN$Local_Port;	// Local Port #.
 };
 
-    #define Conect_Tbl_Size 4,		// # of blocks in connection blockvector
-    #define Initial_TCBs 2,			// Initial size of Valid TCB table
-    #define CN$Blk_Size sizeof(struct CN$Fields),	// Size in longs
-    #define CN$Blk_BLen 10;			// Size in bytes
+    #define CONECT_TBL_SIZE 4		// # of blocks in connection blockvector
+    #define INITIAL_TCBS 2			// Initial size of Valid TCB table
+    #define CN$BLK_SIZE sizeof(struct CN$Fields)	// Size in longs
+    #define CN$BLK_BLEN 10			// Size in bytes
 
 //ASSIGN(tblsize,%NUMBER(conect_tbl_size)*%NUMBER(cn$blk_size))
 //MESSAGE(%NUMBER(tblsize),' Longwords allocated to Connection Table')
@@ -334,5 +334,5 @@ struct  wk_server_structure {
   void * WKS$SYN_Qtail;
 };
 
-#define WKS_Block_Size sizeof(struct  wk_server_structure)
-    #define WKS_Table_Size 20
+#define WKS_BLOCK_SIZE sizeof(struct  wk_server_structure)
+#define WKS_TABLE_SIZE 20
