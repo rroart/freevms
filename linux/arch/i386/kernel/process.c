@@ -154,7 +154,7 @@ void cpu_idle (void)
 		//  idle();
 		while (!current->need_resched) {
 		  myvar++;
-		  if (myvar>100) printk("idlingg\n");
+		  //if (myvar>100) printk("idlingg\n");
 		  idle();
 		}
 		myvar=0;
