@@ -300,7 +300,7 @@ static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 	    if (prev) {
 	      prev->pfn$l_flink=page;
 	    } else {
-	      pfn$al_head=page;
+	      pfn$al_head[PFN$C_FREPAGLST]=page;
 	    }
 	    {
 	      unsigned long * prev2=&page->pfn$l_flink;
@@ -316,7 +316,12 @@ static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 	  }
 	}
 	prev->pfn$l_flink=0;
-	pfn$al_tail=prev;
+	pfn$al_tail[PFN$C_FREPAGLST]=prev;
+
+	pfn$al_head[PFN$C_MFYPAGLST]=0;
+	pfn$al_tail[PFN$C_MFYPAGLST]=0;
+	pfn$al_head[PFN$C_BADPAGLST]=0;
+	pfn$al_tail[PFN$C_BADPAGLST]=0;
 
 	in_free_all_bootmem_core=0;
 
