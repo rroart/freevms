@@ -283,6 +283,17 @@ int sys$mount(void *itmlst) {
   return INLINE_SYSCALL($mount,1,itmlst);
 }
 
+int sys$cretva (struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
+  return INLINE_SYSCALL($cretva,3,inadr,retadr,acmode);
+}
+
+int sys$expreg(unsigned int pagcnt, struct _va_range *retadr,unsigned int acmode, char region) {
+  return INLINE_SYSCALL($expreg,4,pagcnt,retadr,acmode,region);
+}
+int sys$deltva(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
+  return INLINE_SYSCALL($deltva,3,inadr,retadr,acmode);
+}
+
 int sys$mgblsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam, struct _secid *ident, unsigned int relpag) {
   struct struct_mgblsc s;
   s.inadr=inadr;
@@ -369,6 +380,7 @@ int sys$fao(void * ctrstr , short int * outlen , void * outbuf , ...) {
   while(argc<15) { // check. should be 17.
     *argv=va_arg(args,int);
     argv++;
+    argc++;
   }
   va_end(args);
   return INLINE_SYSCALL($faol,4,ctrstr,outlen,outbuf,&s); // need not call fao?

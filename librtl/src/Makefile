@@ -44,7 +44,8 @@ LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 	lib_ab_ebc_asc_rev.o lib_ab_lowercase.o lib_ab_upcase.o \
 	lib_add_times.o lib_addx.o lib_cvt_vectim.o lib_day.o \
 	lib_day_of_week.o lib_mult_delta_time.o lib_sub_times.o \
-	lib_subx.o libcredir.o libgetinp.o libputout.o libgetef.o
+	lib_subx.o libcredir.o libgetinp.o libputout.o libgetef.o \
+	libffs.o libffc.o libinsv.o libextv.o libextzv.o
 
 SYSOBJ = sys__combine_date_time.o sys_asctim.o sys_bintim.o \
 	sys_gettim.o sys_numtim.o
@@ -109,3 +110,8 @@ libcredir.o: libcredir.c
 libgetinp.o: libgetinp.c
 libputout.o: libputout.c
 libgetef.o: libgetef.c
+libffc.o: libffc.c
+libffs.o: libffs.c
+libinsv.o: libinsv.c
+libextv.o: libextv.c
+libextzv.o: libextzv.c
