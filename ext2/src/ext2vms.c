@@ -619,6 +619,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 #endif
     buf.count = 0;
     buf.dirent = &dir;
+    generic_file_llseek(f, dir.d_off, 0);
     vfs_readdir(f, fillonedir64, &buf);
     filp_close(f,0);
 
@@ -627,7 +628,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     bcopy(dir.d_name,resdsc->dsc$a_pointer,*reslen);
 
     //    fib->fib$l_wcc=dir.d_off;
-    fib->fib$w_file_hdrseq_incr=dir.d_off+*reslen;
+    fib->fib$w_file_hdrseq_incr=f->f_pos;//dir.d_off+*reslen;
     fib->fib$w_dir_hdrseq_incr=*reslen;
 
     fib->fib$l_wcc = 1;
