@@ -2,6 +2,10 @@ define verb ccopy
 	image directory
 	routine copy
 
+define verb cdelete
+	image directory
+	routine del
+
 define verb cdifference
 	image directory
 	routine diff

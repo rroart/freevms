@@ -9,7 +9,7 @@ BISON = bison
 all: cdu cdu.a cdu2.a
 
 clean:
-	rm *.o *.a
+	rm *.o *.a cdu
 
 install: all
 	install -d ../../rootum/vms"$$"common/sysexe
