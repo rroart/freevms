@@ -136,6 +136,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
   p2->state=TASK_RUNNING;
   if (!task_on_comqueue(p2)) insque(p2,sch$aq_comt[newpri]);
   sch$gl_comqs|=(1 << newpri);
+  p->pcb$l_sts&=~PCB$M_WAKEPEN; // got to have this somewhere, here works
 }
 
 // need more statequeues before sch$chse*
