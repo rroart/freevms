@@ -184,8 +184,8 @@ inline char intr_blocked(unsigned char this) {
       printk("lockup fixed by setting ipl 0\n");
 #endif
     }
-    pushpsl();
     mysti(flag);
+    pushpsl();
     return 1;
   }
   block3=0;
