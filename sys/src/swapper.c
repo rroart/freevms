@@ -119,11 +119,11 @@ int kswapd(void *unused)
 	  pfl->pfl$l_frepagcnt=pages;
 	  pfl->pfl$l_bitmap=(long)pfl+sizeof(struct _pfl);
 	  pfl->pfl$l_startbyte=(long)pfl+sizeof(struct _pfl);
-	  printk("Pagefile installed, pages %x\n",fcb->fcb$l_filesize>>12);
+	  printk("%%SWAPPER-I-DEBUG, Pagefile installed, pages %x\n",fcb->fcb$l_filesize>>12);
 	  pagefile=1;
 	} else {
 	out:
-	  printk("Pagefile not installed\n");
+	  printk("%%SWAPPER-I-DEBUG, Pagefile not installed\n");
 	  pagefile=0;
 	}
 
