@@ -30,6 +30,7 @@
 #include <system_data_cells.h>
 #include <dyndef.h>
 #include <internals.h>
+#include <phddef.h>
 
 #include <linux/config.h>
 #include <linux/mm.h>
@@ -1648,6 +1649,8 @@ void daemonize(void)
 
 extern unsigned long wait_init_idle;
 
+struct _phd init_phd;
+
 void __init init_idle(void)
 {
   //	if (current != &init_task && task_on_runqueue(current)) {
@@ -1663,6 +1666,9 @@ void __init init_idle(void)
 	current->pcb$b_asten=15;
 	current->phd$b_astlvl=4;
 	current->pr_astlvl=4;
+	current->pcb$l_phd=&init_phd;
+	bzero(current->pcb$l_phd,sizeof(struct _phd));
+	current->pcb$l_phd->phd$q_ptbr=current->mm->pgd;
 	printk("done init_idle\n");
 	done_init_idle=1;
 }

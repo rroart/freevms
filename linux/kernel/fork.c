@@ -27,6 +27,7 @@
 #include <asm/mmu_context.h>
 
 #include <sysgen.h>
+#include <phddef.h>
 #include <pridef.h>
 
 /* The idle threads do not count.. */
@@ -698,6 +699,19 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 
 	/* pcb stuff */
+
+	p->pcb$l_phd=kmalloc(sizeof(struct _phd));
+	bzero(p->pcb$l_phd,sizeof(struct _phd));
+
+	p->pcb$l_phd->phd$q_ptbr=p->mm->pgd;
+	{
+	  struct _rde * rde=kmalloc(sizeof(struct _rde));
+	  bzero(rde,sizeof(struct _rde));
+	  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
+	  insque(rde,p->pcb$l_phd->phd$ps_p0_va_list_flink);
+	  rde->rde$ps_start_va=0x1000;
+	  rde->rde$l_region_size=0x1000;
+	}
 
 	p->pcb$b_prib=31-DEFPRI;
 	p->pcb$b_pri=31-DEFPRI-6;
