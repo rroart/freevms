@@ -6,6 +6,7 @@
 #include <system_data_cells.h>
 #include <internals.h>
 #include <ipldef.h>
+#include <ssdef.h>
 
 void exe$instimq(struct _tqe * t) {
   static signed int times=-500;
@@ -38,7 +39,7 @@ void exe_std$rmvtimq(int acmode, int reqid, int remval, int ipid) {
       kfree(tmp);
     }
     if (ipid && ipid==tmp->tqe$l_pid) {
-      if (tmp->tqe$b_rqtype=remval) {
+      if (tmp->tqe$b_rqtype==remval) {
 	remque(tmp,0);
 	kfree(tmp);
       }
@@ -46,4 +47,14 @@ void exe_std$rmvtimq(int acmode, int reqid, int remval, int ipid) {
     tmp=next;
   cont:
   }
+}
+
+int exe_std$chkrdacces (struct _arb *arb, struct _orb *orb, struct _pcb *pcb, struct _ucb *ucb) {
+  // doing nothing right now
+  return SS$_NORMAL;
+}
+
+int exe_std$chkwrtacces (struct _arb *arb, struct _orb *orb, struct _pcb *pcb, struct _ucb *ucb) {
+  // doing nothing right now
+  return SS$_NORMAL;
 }
