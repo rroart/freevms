@@ -1023,7 +1023,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
   int islocal;
   if (sizeof(struct _hm2) != 512 || sizeof(struct _fh2) != 512) return SS$_NOTINSTALL;
   for (device = 0; device < devices; device++) {
-    if (strchr(devnam[device],'\;')) {
+    if (strchr(devnam[device],'_')) {
       ucb = du_init(devnam[device]);
       islocal=0;
     } else {
