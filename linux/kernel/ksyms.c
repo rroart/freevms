@@ -567,6 +567,7 @@ EXPORT_SYMBOL(strspn);
 EXPORT_SYMBOL(strsep);
 
 /* software interrupts */
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(tasklet_hi_vec);
 EXPORT_SYMBOL(tasklet_vec);
 EXPORT_SYMBOL(bh_task_vec);
@@ -580,6 +581,7 @@ EXPORT_SYMBOL(raise_softirq);
 EXPORT_SYMBOL(cpu_raise_softirq);
 EXPORT_SYMBOL(__tasklet_schedule);
 EXPORT_SYMBOL(__tasklet_hi_schedule);
+#endif
 
 /* init task, for moving kthread roots - ought to export a function ?? */
 

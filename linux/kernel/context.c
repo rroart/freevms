@@ -42,9 +42,6 @@ int current_is_keventd(void)
 	return ret;
 }
 
-#if 1
-//ndef CONFIG_VMS
-
 /**
  * schedule_task - schedule a function for subsequent execution in process context.
  * @task: pointer to a &tq_struct which defines the function to be scheduled.
@@ -118,8 +115,6 @@ static int context_thread(void *startup)
 	}
 }
 
-#endif
-
 /**
  * flush_scheduled_tasks - ensure that any scheduled tasks have run to completion.
  *
@@ -136,8 +131,6 @@ static struct tq_struct dummy_task;
 
 void flush_scheduled_tasks(void)
 {
-#if 1
-  // ndef CONFIG_VMS
 	int count;
 	DECLARE_WAITQUEUE(wait, current);
 
@@ -159,23 +152,17 @@ void flush_scheduled_tasks(void)
 		schedule();
 	}
 	remove_wait_queue(&context_task_done, &wait);
-#endif
 }
 
 int start_context_thread(void)
 {
-#if 1 
-  //ndef CONFIG_VMS
 	static struct completion startup __initdata = COMPLETION_INITIALIZER(startup);
 
 	kernel_thread(context_thread, &startup, CLONE_FS | CLONE_FILES);
 	wait_for_completion(&startup);
-#endif
+
 	return 0;
 }
 
-#if 1
-//ndef CONFIG_VMS
 EXPORT_SYMBOL(schedule_task);
-#endif
 EXPORT_SYMBOL(flush_scheduled_tasks);

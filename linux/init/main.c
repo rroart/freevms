@@ -589,8 +589,10 @@ asmlinkage void __init start_kernel(void)
 	puts("puts 9\n");
 	sched_init();
 	puts("puts 10\n");
+#ifndef CONFIG_VMS
 	softirq_init();
 	puts("puts 11\n");
+#endif
 	time_init();
 	puts("puts 12\n");
 	vms_init2();
@@ -707,7 +709,9 @@ static void __init do_initcalls(void)
 
 	//printk("bef flush\n");
 	/* Make sure there is no pending stuff from the initcall sequence */
+#ifndef CONFIG_VMS
 	flush_scheduled_tasks();
+#endif
 }
 
 /*
@@ -785,8 +789,10 @@ static void __init do_basic_setup(void)
 	/* Networking initialization needs a process context */ 
 	sock_init();
 	printk("%%KERNEL-I-DEBUG, After sock_init\n");
+#ifndef CONFIG_VMS
 	start_context_thread();
 	printk("%%KERNEL-I-DEBUG, After start_context_thread\n");
+#endif
 	do_initcalls();
 	printk("%%KERNEL-I-DEBUG, After do_initcalls\n");
 

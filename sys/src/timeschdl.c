@@ -302,9 +302,11 @@ int hwclkdone=1;
     }
 #endif
 
+#ifndef CONFIG_VMS
     mark_bh(TIMER_BH);
     if (TQ_ACTIVE(tq_timer))
       mark_bh(TQUEUE_BH);
+#endif
 
 #ifdef __i386__
 #ifndef CONFIG_X86_LOCAL_APIC

@@ -648,8 +648,10 @@ out:
 	desc->handler->end(irq);
 	spin_unlock(&desc->lock);
 
+#ifndef CONFIG_VMS
 	if (softirq_pending(cpu))
 		do_softirq();
+#endif
 	return 1;
 }
 
