@@ -124,7 +124,7 @@ void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count
   struct _iosb myiosb;
   unsigned char * buf = kmalloc(512*count,GFP_KERNEL);
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(0,xqp->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,0,0,0);
+  unsigned long sts=sys$qiow(0,xqp->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -132,7 +132,7 @@ void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count
 void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
   struct _iosb myiosb;
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(0,xqp->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,0,0,0);
+  unsigned long sts=sys$qiow(0,xqp->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -429,7 +429,7 @@ unsigned writechunk(struct _fcb * fcb,unsigned long vblock, char * buff)
   struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
   int pbn;
   int sts=ioc_std$mapvblk(vblock,0,&fcb->fcb$l_wlfl,0,0,&pbn,0,0);
-  sts=sys$qiow(0,xqp->io_channel,IO$_WRITELBLK,&iosb,0,0,buff,512,pbn,0,0,0);
+  sts=sys$qiow(0,xqp->io_channel,IO$_WRITELBLK,&iosb,0,0,buff,512,pbn,ucb->ucb$w_fill_0,0,0);
   return iosb.iosb$w_status;
 }
 
@@ -567,7 +567,7 @@ struct _fh2 *premap_indexf(struct _fcb *fcb,struct _ucb *ucb,unsigned *retsts)
     struct _hm2 home;
     sts = sys$qiow(0,irp->irp$w_chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct _hm2),vcbdev->vcb$l_homelbn,0,0,0);
 #endif
-    *retsts = sys$qiow(0,xqp->io_channel,IO$_READLBLK,&iosb,0,0, (char *) head,sizeof(struct _fh2),VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),0,0,0);
+    *retsts = sys$qiow(0,xqp->io_channel,IO$_READLBLK,&iosb,0,0, (char *) head,sizeof(struct _fh2),VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),((struct _ucb *)vcbdev->vcb$l_rvt)->ucb$w_fill_0,0,0);
     *retsts = iosb.iosb$w_status;
     if (!(*retsts & 1)) {
       kfree(head);
@@ -1140,7 +1140,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       //if (!(sts & 1)) break;
       //      ucb->handle=vcbdev->dev->handle;
       for (hba = 1; hba <= HOME_LIMIT; hba++) {
-	sts = sys$qiow(0,chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct _hm2),hba,0,0,0);
+	sts = sys$qiow(0,chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct _hm2),hba,ucb->ucb$w_fill_0,0,0);
 	if (!(sts & 1)) break;
 	if (hba == VMSLONG(home.hm2$l_homelbn) &&
 	    memcmp(home.hm2$t_format,"DECFILE11B  ",12) == 0) break;
