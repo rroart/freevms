@@ -149,11 +149,11 @@ inline char intr_blocked(unsigned char this) {
     if (p->pslindex>20)
       { long long i;    for(i=1;i!=0;i++) ; }
       //  panic("pslindex\n");
-    pushpsl();
     block3++;
-    if (this!=3) block3=0;
+    //    if (this!=8) block3=0;
     if (block3>90) mydebugi=3;
     if (block3>100) {
+#if 0
       extern void show_trace_task(struct task_struct *tsk);
       extern int mydebug2, mydebug3, mydebug4, mydebug5, mydebug6;
       show_trace_task(p);
@@ -162,7 +162,13 @@ inline char intr_blocked(unsigned char this) {
       mydebug4=1;
       mydebug5=1;
       mydebug6=1;
+#else
+      mydebugi=1;
+      setipl(0);  // a fix for an error of unknown origin
+      printk("lockup fixed by setting ipl 0\n");
+#endif
     }
+    pushpsl();
     return 1;
   }
   block3=0;
