@@ -614,7 +614,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     sys_getdents64(fd,&dir,64);
 #endif
     buf.count = 0;
-    buf.dirent = dir;
+    buf.dirent = &dir;
     vfs_readdir(f, fillonedir64, &buf);
     filp_close(f,0);
 
