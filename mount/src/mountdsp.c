@@ -24,7 +24,7 @@ asmlinkage int exe$mount(void *itmlst) {
 
   devs[0]=it[0].bufaddr;
 
-  status=mount(0,1,devs,labs,&vcb);
+  status=mount(1,1,devs,labs,&vcb);
 
   if (status&1==0) return;
 
