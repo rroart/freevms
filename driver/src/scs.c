@@ -144,9 +144,24 @@ static inline void scs_rt_finish_output2(char * buf , int len, char *dst)
 {
 
 #ifndef CONFIG_VMS 
-  struct net_device *dev = skb->dev;
+  struct sk_buff *skb = NULL;
+
+  if ((skb = alloc_skb(64 + len, GFP_ATOMIC)) == NULL)
+    return;
+
+  skb->protocol = __constant_htons(ETH_P_MYSCS);
+  skb->pkt_type = PACKET_OUTGOING;
+
+  skb_reserve(skb, 64);
+
   skb->nh.raw = skb->data;
   skb->dev = scs_default_device;
+  struct net_device *dev = skb->dev;
+
+  memcpy(skb->data, buf, len);
+
+  skb_put(skb,len);
+
   if ((dev->type != ARPHRD_ETHER) && (dev->type != ARPHRD_LOOPBACK))
     dst = NULL;
 
@@ -224,6 +239,8 @@ static void scs_send_brd_hello(struct net_device *dev)
 	scs_send_endnode_hello(dev);
 }
 
+static do_once=0;
+
 static void scs_dev_set_timer();
 
 static void scs_dev_timer_func(unsigned long arg)
@@ -236,7 +253,16 @@ static void scs_dev_timer_func(unsigned long arg)
     if (newdev)
       dev = scs_default_device = newdev;
   }
+
+  if (!do_once) {
+    if (dev) {
+      dev_open(dev);
+      dev_set_allmulti(dev, 1);
+      do_once=1;
+    }
+  }
 #endif
+
   if (dev) scs_send_brd_hello(dev);
 
   scs_dev_set_timer(dev);
@@ -253,9 +279,6 @@ static void scs_dev_set_timer()
   timer->function = scs_dev_timer_func;
   timer->expires = jiffies + (10 * HZ);
 
-#ifndef CONFIG_VMS
-  add_timer(timer);
-#else
   //  add_timer(timer);
   // fix regular timing later
   signed long long time=-1000000000;
@@ -263,7 +286,6 @@ static void scs_dev_set_timer()
     exe$setimr (0, &time ,scs_dev_timer_func,scs_default_device,0);
     timers--;
   }
-#endif
 }
 
 #ifndef CONFIG_VMS
@@ -920,9 +942,11 @@ int scs_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt)
       if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
               goto out;
 
+#if 0
       skb_pull(skb, 2);
 
       skb_trim(skb, len);
+#endif
 #endif
 
       msg=skb->data;
@@ -1055,6 +1079,7 @@ scs_startdev ( scs_int2 , setflag , setaddr)
     Paramdescr->xe$setup_length = plen;
     Paramdescr->xe$setup_address = Setup;
 
+    printk("H2 %s %x\n",&mysb.sb$t_hwtype,&mysb.sb$t_hwtype);
     $DESCRIPTOR(dev_desc, mysb.sb$t_hwtype);
 
     // Assign Ethernet Controller
@@ -1101,7 +1126,7 @@ struct scs_rcv_qb_structure
 };
 
 #define DRV$MAX_PHYSICAL_BUFSIZE 1400
-#define     MAX_RCV_BUF   8
+#define     MAX_RCV_BUF   64
 
 void scs_receive ( int i);
 

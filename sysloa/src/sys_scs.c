@@ -286,8 +286,8 @@ int /*__init*/ scs_init(void) {
   struct file * file;
   unsigned long long pos=0;
 
-  bzero(cdtl,sizeof(cdtl));
-  bzero(rdtl,sizeof(rdtl));
+  bzero(cdtl,1024*sizeof(sizeof (struct _cdt)));
+  bzero(rdtl,128*sizeof(sizeof(struct _rdt)));
 
   scs$gl_cdl=&cdl;
   //cdl$l_freecdt=&cdtl;
@@ -344,6 +344,8 @@ int /*__init*/ scs_init(void) {
 	goto out;
       }
       if (0==strncmp(b, "SCSDEVICE", c-b)) {
+	extern int scs_init_done;
+	scs_init_done=1;
 	memcpy(&mysb.sb$t_hwtype, c+1, n-c-1); // borrowing t_hwtype
 	goto out;
       }
@@ -575,6 +577,7 @@ int ddb_transfer(struct _cdt * conf_cdt) {
   struct _ddb * ddb;
   struct _ucb * ucb;
   char buf[512]; 
+  memset(buf,0,512);
   char *b = buf;
   int i;
   struct _cdrp * cdrp=kmalloc(sizeof(struct _cdrp),GFP_KERNEL);
