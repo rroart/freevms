@@ -51,6 +51,7 @@
 #include <linux/module.h>
 
 asmlinkage int system_call(void);
+asmlinkage int vmssystem_call(void);
 asmlinkage void lcall7(void);
 asmlinkage void lcall27(void);
 
@@ -916,16 +917,29 @@ cobalt_init(void)
 }
 #endif
 
-static unsigned char ipl = 1;
+static unsigned char cpu$b_ipl = 1;
 
 struct {
   unsigned char interrupt;
   unsigned char at_level;
-} ipending[256];
+} cpu$t_ipending[256];
 
 static inline unsigned char spl(unsigned char new) {
-  unsigned char tmp=ipl;
-  ipl=new;
+  unsigned char tmp=cpu$b_ipl;
+  cpu$b_ipl=new;
+  return tmp;
+}
+
+static inline void splx(unsigned char old) {
+  int i, tmp;
+  tmp=cpu$b_ipl;
+  cpu$b_ipl=old;
+  for(i=0;i<256;i++)
+    if (cpu$t_ipending[i].interrupt>=tmp) { ; }
+  /*
+    do the interrupt?
+   */
+
 }
 
 void __init trap_init(void)
@@ -957,8 +971,9 @@ void __init trap_init(void)
 	set_trap_gate(19,&simd_coprocessor_error);
 
 	set_system_gate(SYSCALL_VECTOR,&system_call);
+		set_system_gate(VMSSYSCALL_VECTOR,&vmssystem_call);
 
-	set_intr_gate(TEST_VECTOR,&test_code);
+		set_intr_gate(TEST_VECTOR,&test_code);
 
 	/*
 	 * default LDT is a single-entry callgate to lcall7 for iBCS

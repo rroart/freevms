@@ -233,7 +233,7 @@
 
 
 
-#define __NR_setpri		224
+#define __NR_$setpri		1
 
 /* user-visible error numbers are in the range -1 - -124: see <asm-i386/errno.h> */
 

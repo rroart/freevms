@@ -73,9 +73,9 @@ VM_MASK		= 0x00020000
 /*
  * these are offsets into the task-struct.
  */
-state		=  0
-flags		=  4
-sigpending	=  8
+state		= 0
+flags		= 4
+sigpending	= 8
 addr_limit	= 12
 exec_domain	= 16
 need_resched	= 20
@@ -258,10 +258,79 @@ ret_from_exception:
 	jne ret_from_sys_call
 	jmp restore_all
 
-	ALIGN
+ALIGN
 reschedule:
 	call SYMBOL_NAME(schedule)    # test
 	jmp ret_from_sys_call
+
+
+ENTRY(vmssystem_call)
+	pushl %eax			# save orig_eax
+	SAVE_ALL
+	GET_CURRENT(%ebx)
+	testb $0x02,tsk_ptrace(%ebx)	# PT_TRACESYS
+	jne vmstracesys
+	cmpl $(NR_vmssyscalls),%eax
+	jae vmsbadsys
+	call *SYMBOL_NAME(vmssys_call_table)(,%eax,4)
+	movl %eax,EAX(%esp)		# save the return value
+ENTRY(vmsret_from_sys_call)
+	cli				# need_resched and signals atomic test
+	cmpl $0,need_resched(%ebx)
+	jne vmsreschedule
+	cmpl $0,sigpending(%ebx)
+	jne vmssignal_return
+vmsrestore_all:
+	RESTORE_ALL
+
+	ALIGN
+vmssignal_return:
+	sti				# we can get here from an interrupt handler
+	testl $(VM_MASK),EFLAGS(%esp)
+	movl %esp,%eax
+	jne vmsv86_signal_return
+	xorl %edx,%edx
+	call SYMBOL_NAME(do_signal)
+	jmp vmsrestore_all
+
+	ALIGN
+vmsv86_signal_return:
+	call SYMBOL_NAME(save_v86_state)
+	movl %eax,%esp
+	xorl %edx,%edx
+	call SYMBOL_NAME(do_signal)
+	jmp vmsrestore_all
+
+	ALIGN
+vmstracesys:
+	movl $-ENOSYS,EAX(%esp)
+	call SYMBOL_NAME(syscall_trace)
+	movl ORIG_EAX(%esp),%eax
+	cmpl $(NR_vmssyscalls),%eax
+	jae vmstracesys_exit
+	call *SYMBOL_NAME(vmssys_call_table)(,%eax,4)
+	movl %eax,EAX(%esp)		# save the return value
+vmstracesys_exit:
+	call SYMBOL_NAME(syscall_trace)
+	jmp vmsret_from_sys_call
+vmsbadsys:
+	movl $-ENOSYS,EAX(%esp)
+	jmp vmsret_from_sys_call
+
+	ALIGN
+ENTRY(vmsret_from_intr)
+	GET_CURRENT(%ebx)
+vmsret_from_exception:
+	movl EFLAGS(%esp),%eax		# mix EFLAGS and CS
+	movb CS(%esp),%al
+	testl $(VM_MASK | 3),%eax	# return to VM86 mode or non-supervisor?
+	jne vmsret_from_sys_call
+	jmp vmsrestore_all
+
+	ALIGN
+vmsreschedule:
+	call SYMBOL_NAME(schedule)    # test
+	jmp vmsret_from_sys_call
 
 ENTRY(divide_error)
 	pushl $0		# no error code
@@ -399,8 +468,9 @@ ENTRY(spurious_interrupt_bug)
 	jmp error_code
 
 ENTRY(test_code)
-        pushl $ SYMBOL_NAME(do_test_code)
-        jmp error_code
+        SAVE_ALL
+        call SYMBOL_NAME(do_test_code)
+        RESTORE_ALL
 
 .data
 ENTRY(sys_call_table)
@@ -631,10 +701,16 @@ ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_gettid)
 	.long SYMBOL_NAME(sys_readahead)	/* 225 */
 
-
-
-	.long SYMBOL_NAME(sys_setpri)
-
 	.rept NR_syscalls-(.-sys_call_table)/4
 		.long SYMBOL_NAME(sys_ni_syscall)
-	.endr
+.endr
+
+ENTRY(vmssys_call_table)
+	.long SYMBOL_NAME(sys_$ni_syscall)	/* 0  -  old "setup()" system call*/
+	.long SYMBOL_NAME(sys_$setpri)
+
+	.rept NR_vmssyscalls-(.-vmssys_call_table)/4
+		.long SYMBOL_NAME(sys_$ni_syscall)
+
+  .endr
+

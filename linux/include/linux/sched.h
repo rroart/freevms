@@ -281,6 +281,8 @@ extern struct user_struct root_user;
 #define _pcb task_struct
 #define _ktb task_struct
 struct task_struct {
+  //  struct _pcb *pcb$l_sqfl;            Broke someting?
+  //  struct _pcb *pcb$l_sqbl;            
 	/*
 	 * offsets of these are hardcoded elsewhere - touch with care
 	 * meaning entry.S -roar
@@ -502,7 +504,7 @@ extern struct exec_domain	default_exec_domain;
     sig:		&init_signals,					\
     pending:		{ NULL, &tsk.pending.head, {{0}}},		\
     blocked:		{{0}},						\
-    alloc_lock:		SPIN_LOCK_UNLOCKED,				\
+    alloc_lock:		SPIN_LOCK_UNLOCKED				\
 }
 
 

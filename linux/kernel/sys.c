@@ -18,9 +18,12 @@
 #include <asm/uaccess.h>
 #include <asm/io.h>
 
+//asmlinkage void do_test_code(struct pt_regs *regs, unsigned long error_code) {
+//   asmlinkage void do_test_code(int irq, void *dev_id, struct pt_regs *regs) {
 asmlinkage void do_test_code(void) {
+  int i;
   printk("here I am\n");
-  return 1;
+  //  __asm__ __volatile__ ("iret\n");
 }
 
 /*
@@ -173,6 +176,11 @@ int unregister_reboot_notifier(struct notifier_block * nb)
 }
 
 asmlinkage long sys_ni_syscall(void)
+{
+	return -ENOSYS;
+}
+
+asmlinkage long sys_$ni_syscall(void)
 {
 	return -ENOSYS;
 }

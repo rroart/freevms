@@ -822,6 +822,11 @@ static int init(void * unused)
 	 * trying to recover a really broken machine.
 	 */
 
+	printk("before init int\n");
+
+//	__asm__ __volatile__ ("int $0x88\n");
+
+	printk("after init int\n");
 	if (execute_command)
 		execve(execute_command,argv_init,envp_init);
 	execve("/sbin/init",argv_init,envp_init);
