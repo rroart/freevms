@@ -5843,7 +5843,7 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
   struct _va_range inadr;
   void (*func)(void);
   int len = strlen(argv[0]);
-  if (strcasecmp (argv[-1], "creprc") == 0) goto do_creprc;
+  //  if (strcasecmp (argv[-1], "creprc") == 0) goto do_creprc;
   if (strncmp(".exe",argv[0]+len-4,4)) goto do_fork;
 
   aname.dsc$w_length=len-4;
