@@ -39,6 +39,9 @@ int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirecti
   phd=p->pcb$l_phd;
   wsl=phd->phd$l_wslist;
 
+  if ((unsigned long)page->pfn$l_wslx_qw>=0x80000000)
+    return SS$_NORMAL;
+
   wsle=&wsl[page->pfn$l_wslx_qw];
 
   if (wsle->wsl$v_valid==0)
