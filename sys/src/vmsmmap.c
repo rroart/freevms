@@ -407,7 +407,8 @@ munmap_back:
 
 	exe$create_region_32 (len,*(unsigned long*)&protection_map[(rde$l_flags>>8) & 0x0f] ,rde$l_flags   ,0,0,0,addr);
 	if (file) {
-	  exe$crmpsc(&inadr,0,0,0,0,0,0,/*(unsigned short int)*/file,0,pgoff,0,0);
+	  struct _fcb * fcb=e2_search_fcb(file->f_dentry->d_inode);
+	  exe$crmpsc(&inadr,0,0,0,0,0,0,/*(unsigned short int)*/fcb,0,pgoff,0,0);
 	} else {
 	  exe$cretva(&inadr,0,0);
 	}

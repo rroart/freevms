@@ -9,6 +9,7 @@
 #include <linux/file.h>
 #include <system_data_cells.h>
 #include<descrip.h>
+#include<fcbdef.h>
 #include<gsddef.h>
 #include<ipldef.h>
 #include<phddef.h>
@@ -24,8 +25,13 @@ asmlinkage int exe$crmpsc_wrap(struct struct_crmpsc * s) {
   int ret;
   int chan=s->chan;
   struct file * file=0;
-  if (chan) file=fget(chan);
-  ret=exe$crmpsc(s->inadr,s->retadr,s->acmode,s->flags,s->gsdnam,s->ident,s->relpag,file,s->pagcnt,s->vbn,s->prot,s->pfc);
+  struct _fcb * fcb = 0;
+  if (chan) { 
+    file=fget(chan);
+    fcb=e2_search_fcb(file->f_dentry->d_inode);
+  }
+  
+  ret=exe$crmpsc(s->inadr,s->retadr,s->acmode,s->flags,s->gsdnam,s->ident,s->relpag,fcb,s->pagcnt,s->vbn,s->prot,s->pfc);
   if (file) fput(file);
   return ret;
 }
@@ -87,7 +93,7 @@ asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, uns
     sec->sec$l_vpx=first;
 
     sec->sec$l_ccb=chan;
-    sec->sec$l_window=chan;
+    sec->sec$l_window=((struct _fcb*)chan)->fcb$l_wlfl;
     mmg$fast_create(p, 0, first, last, (last-first)>>PAGE_SHIFT, prot_pte);
 
     setipl(savipl);
