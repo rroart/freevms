@@ -165,8 +165,11 @@ void pagefaultast(struct pfast * p) {
   p->file->f_op->read(p->file, p->address, PAGE_SIZE, &p->file->f_pos);
   *(unsigned long *)(p->pte)&=0xfffff000;
   *(unsigned long *)(p->pte)|=p->pteentry;
+#if 0
+  // if 0ing: no shortcut, want full compatibility because mm is vulnerable
   if ((p->rde->rde$l_flags)&VM_WRITE)
     *(unsigned long *)(p->pte)|=_PAGE_RW|_PAGE_DIRTY;
+#endif
 #ifdef __arch_um__
   flush_tlb_range(current->mm, p->address, p->address + PAGE_SIZE);
 #endif
