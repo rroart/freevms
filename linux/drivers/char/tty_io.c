@@ -538,7 +538,12 @@ void tty_hangup(struct tty_struct * tty)
 	
 	printk(KERN_DEBUG "%s hangup...\n", tty_name(tty, buf));
 #endif
+#if 1
+	//ndef CONFIG_VMS
 	schedule_task(&tty->tq_hangup);
+#else
+	tty->tq_hangup.routine(tty);
+#endif
 }
 
 void tty_vhangup(struct tty_struct * tty)
@@ -1272,7 +1277,10 @@ static void release_dev(struct file * filp)
 	 * Make sure that the tty's task queue isn't activated. 
 	 */
 	run_task_queue(&tq_timer);
+#if 1 
+	//ndef CONFIG_VMS
 	flush_scheduled_tasks();
+#endif
 
 	/* 
 	 * The release_mem function takes care of the details of clearing
@@ -1886,7 +1894,12 @@ void do_SAK(struct tty_struct *tty)
 	if (!tty)
 		return;
 	PREPARE_TQUEUE(&tty->SAK_tq, __do_SAK, tty);
+#if 1 
+	//ndef CONFIG_VMS
 	schedule_task(&tty->SAK_tq);
+#else
+	__do_SAK(tty);
+#endif
 }
 
 /*
