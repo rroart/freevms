@@ -4,14 +4,19 @@
 #include <syidef.h>
 #include <misc.h>
 
-main(){
+main(int argc,void ** argv){
   $DESCRIPTOR(imgname,"/bin/ls");
   $DESCRIPTOR(prcname,"ls");
   $DESCRIPTOR(imgname2,"/vms$common/syshlp/examples/hi.exe");
   $DESCRIPTOR(imgname3,"[vms$common.syshlp.examples]hi.exe");
   $DESCRIPTOR(prcname3,"hi");
+  $DESCRIPTOR(imgname4,"/vms$common/sysexe/dcl");
+  $DESCRIPTOR(prcname4,"dcl2");
   int pid;
   struct item_list_3 lst[14], syilst[2];
+
+  if (argc>1)
+    goto dcl;
 
   int RC = sys$creprc(&pid, &imgname,0,0,0,
 		      0, 0, &prcname, 24, 0,
@@ -52,4 +57,18 @@ main(){
   sleep(60);
 
   return SS$_NORMAL;
+
+ dcl:
+
+  {
+    $DESCRIPTOR(opa,"opa0");
+    int RC = sys$creprc(&pid, &imgname4,&opa,&opa,&opa,
+			0, 0, &prcname4, 24, 0,
+			0, 0, 0, 0, 0);
+
+  sleep(60);
+
+  return SS$_NORMAL;
+  }
+
 }
