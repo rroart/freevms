@@ -79,6 +79,8 @@ int sys$dassgn(unsigned short int chan);
 
 int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam,int flags);
 
+struct _iosb;
+
 int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
 int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
 
@@ -91,6 +93,47 @@ int sys$ascefc(unsigned int efn, void *name, char prot, char perm);
 int sys$dacefc(unsigned int efn);
 
 int sys$dlcefc(void *name);
+
+int exe$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk, unsigned int acmode, void *lognam,...);
+
+int exe$delmbx  (unsigned short int chan);
+
+struct _fab;
+
+int exe$close (struct _fab * fab, void * err, void * suc);
+int exe$connect (struct _fab * fab, void * err, void * suc);
+int exe$create (struct _fab * fab, void * err, void * suc);
+int exe$delete (struct _fab * fab, void * err, void * suc);
+int exe$disconnect (struct _fab * fab, void * err, void * suc);
+int exe$display (struct _fab * fab, void * err, void * suc);
+int exe$enter (struct _fab * fab, void * err, void * suc);
+int exe$erase (struct _fab * fab, void * err, void * suc);
+int exe$extend (struct _fab * fab, void * err, void * suc);
+int exe$find (struct _fab * fab, void * err, void * suc);
+int exe$flush (struct _fab * fab, void * err, void * suc);
+int exe$free (struct _fab * fab, void * err, void * suc);
+int exe$get (struct _fab * fab, void * err, void * suc);
+int exe$modify (struct _fab * fab, void * err, void * suc);
+int exe$nxtvol (struct _fab * fab, void * err, void * suc);
+int exe$open (struct _fab * fab, void * err, void * suc);
+int exe$parse (struct _fab * fab, void * err, void * suc);
+int exe$put (struct _fab * fab, void * err, void * suc);
+int exe$read (struct _fab * fab, void * err, void * suc);
+int exe$release (struct _fab * fab, void * err, void * suc);
+int exe$remove (struct _fab * fab, void * err, void * suc);
+int exe$rename (struct _fab * fab, void * err, void * suc);
+int exe$rewind (struct _fab * fab, void * err, void * suc);
+int exe$search (struct _fab * fab, void * err, void * suc);
+int exe$space (struct _fab * fab, void * err, void * suc);
+int exe$truncate (struct _fab * fab, void * err, void * suc);
+int exe$update (struct _fab * fab, void * err, void * suc);
+int exe$wait (struct _fab * fab, void * err, void * suc);
+int exe$write (struct _fab * fab, void * err, void * suc);
+int exe$filescan (struct _fab * fab, void * err, void * suc);
+int exe$setddir (struct _fab * fab, void * err, void * suc);
+int exe$setdfprot (struct _fab * fab, void * err, void * suc);
+int exe$ssvexc (struct _fab * fab, void * err, void * suc);
+int exe$rmsrundwn (struct _fab * fab, void * err, void * suc);
 
 struct struct_crelnt {
  unsigned int *attr;
@@ -150,6 +193,16 @@ struct struct_getlki {
   void (*astadr)(int);
   int astprm;
   unsigned int reserved;
+};
+
+struct struct_crembx {
+ char prmflg;
+ unsigned short int *chan;
+ unsigned int maxmsg;
+ unsigned int bufquo;
+ unsigned int promsk;
+ unsigned int acmode;
+  void *lognam;
 };
 
 #endif

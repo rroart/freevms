@@ -69,6 +69,10 @@ cd mm;
 		ln -s ../../freevms/sys/src/mutex.c .;
 		ln -s ../../freevms/sys/src/sysascefc.c .;
 		ln -s ../../freevms/sys/src/deadlock.c .;
+		ln -s ../../freevms/sys/src/sysmailbx.c .;
+		ln -s ../../freevms/sys/src/mbdriver.c .;
+		ln -s ../../freevms/rms/src/rms.c .;
+		ln -s ../../freevms/rms/src/rms2.c .;
 cd ..;
 
 cd drivers/block;

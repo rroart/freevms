@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Paul Nankervis.
+
 /* check for cr - return terminator - update file length */
 /* RMS.c v1.3  RMS components */
 

@@ -255,6 +255,8 @@ static inline pid_t setsid(void)
 #define __NR_$ascefc 316
 #define __NR_$dacefc 317
 #define __NR_$dlcefc 318
+#define __NR_$crembx 319
+#define __NR_$delmbx 320
 #endif
 
 /*
