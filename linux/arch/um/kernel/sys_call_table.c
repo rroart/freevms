@@ -347,7 +347,7 @@ extern syscall_handler_t exe$getdvi           ;
 extern syscall_handler_t exe$fao              ;
 extern syscall_handler_t exe$faol             ;
 extern syscall_handler_t exe$cmkrnl           ;
-extern syscall_handler_t exe$getjpi           ;
+extern syscall_handler_t exe$getjpi_wrap      ;
 extern syscall_handler_t exe$updsec           ;
 extern syscall_handler_t exe$resched          ;
 extern syscall_handler_t exe$setexv           ;
@@ -712,7 +712,7 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$fao              ] = exe$fao             ,
 	[ __NR_$faol             ] = exe$faol            ,
 	[ __NR_$cmkrnl           ] = exe$cmkrnl          ,
-	[ __NR_$getjpi           ] = exe$getjpi          ,
+	[ __NR_$getjpi           ] = exe$getjpi_wrap          ,
 	[ __NR_$updsec           ] = exe$updsec          ,
 	[ __NR_$resched          ] = exe$resched         ,
 	[ __NR_$setexv           ] = exe$setexv          ,
