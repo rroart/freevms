@@ -449,8 +449,8 @@ fake_volatile:
 	tsk->exit_code = code;
 	exit_notify();
 	//	schedule();
-	//	SOFTINT_RESCHED_VECTOR;
-	sch$resched();
+	SOFTINT_RESCHED_VECTOR;
+	//sch$resched();
 	printk("before bug\n");
 	BUG();
 /*

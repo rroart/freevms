@@ -607,8 +607,8 @@ void update_process_times(int user_tick)
 	  p->phd$l_cputim++;
 		if (++p->phd$w_quant  >= 0 ) {
 		  if (p->phd$w_quant<128) {
-		    //		    SOFTINT_TIMER_VECTOR;
-		    exe$swtimint();
+		    		    SOFTINT_TIMER_VECTOR;
+		    //exe$swtimint();
 		    //		    sch$resched();
 		  }
 		}

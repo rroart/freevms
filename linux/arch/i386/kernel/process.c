@@ -160,8 +160,8 @@ void cpu_idle (void)
 		//sti();
 		// printk("aft while\n");
 		//schedule();
-		//SOFTINT_RESCHED_VECTOR;
-		sch$resched();
+		SOFTINT_RESCHED_VECTOR;
+		//sch$resched();
 		check_pgt_cache();
 	}
 }

@@ -448,8 +448,8 @@ static void locks_wake_up_blocks(struct file_lock *blocker, unsigned int wait)
 			 */
 			//			current->policy |= SCHED_YIELD;
 			//schedule();
-			//SOFTINT_RESCHED_VECTOR;
-			sch$resched();
+			SOFTINT_RESCHED_VECTOR;
+			//sch$resched();
 		} else {
 			/* Remove waiter from the block list, because by the
 			 * time it wakes up blocker won't exist any more.
