@@ -186,6 +186,22 @@ insertdevlist(struct _ddb *d) {
     ioc$gl_devlist=d;
 }
 
+void * struct_dup(void * v,int size) {
+  void * new = kmalloc(size,GFP_KERNEL);
+  memcpy(new,v,size);
+  return new;
+}
+
+int clone_ddb(struct _ddb * ddb) {
+  struct _ddb * newddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
+  struct _ucb * newucb;
+  ioc_std$copy_ucb(ddb->ddb$ps_ucb,&newucb);
+  memcpy(newddb,ddb,sizeof(struct _ddb));
+  newddb->ddb$ps_ucb=newucb;
+  newucb->ucb$l_ddb=newddb;
+  return newddb;
+}
+
 /* just putting this here until I find out where it belong */
 
 inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type) {
