@@ -10,6 +10,7 @@
 #include<irpdef.h>
 #include<ucbdef.h>
 #include<ccbdef.h>
+#include <ddtdef.h>
 #include<system_data_cells.h>
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
@@ -50,11 +51,13 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
 
   if (u->ucb$l_sts&UCB$M_TEMPLATE) {
     struct _ucb * new;
+    struct _ddt * ddt=u->ucb$l_ddt;
     int sts=ioc_std$clone_ucb(u, &new);
     u=new;
     printk("ucb cloned in assign\n");
-   if (d->ddt$l_cloneducb) { 
-     int u = d->ddt$l_cloneducb(u, &new);
+    if (ddt->ddt$l_cloneducb) { 
+     int (*fn)() = ddt->ddt$l_cloneducb;
+     int u = fn(u, &new);
    }
   } else {
     c->ccb$l_ucb=u;
