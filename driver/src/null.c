@@ -265,6 +265,13 @@ inline void ini_dpt_unload(struct _dpt * d, unsigned long type) {
   d->dpt$ps_unload=type;
 }
 
+inline void ini_dpt_adptype(struct _dpt * d, long l) {
+  d->dpt$b_adptype=l;
+}
+
+inline void ini_dpt_vector(struct _dpt * d, long l) {
+  d->dpt$ps_vector=l;
+}
 
 inline void ini_dpt_end(struct _dpt * d) {
   //  d->dpt$_=type; ??
