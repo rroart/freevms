@@ -41,6 +41,10 @@ void * cli$cli(char * name) {
   extern FILE *yyin;
   init_stringpool();
   yyin=fopen(name, "r");
+  if (yyin==0) {
+    printf("could not fopen %s\n",name);
+    return 0;
+  }
   yyparse();
   extern tree root_tree;
   gencode(root_tree);
@@ -154,7 +158,7 @@ typedef struct bfd_symbol
 unsigned int
 bfd_getl32 (void * dummy, const void *p)
 {
-  const char *addr = p;
+  const unsigned char *addr = p;
   unsigned long v;
 
   v = (unsigned long) addr[0];
@@ -167,7 +171,7 @@ bfd_getl32 (void * dummy, const void *p)
 signed int
 bfd_getl_signed_32 (void * dummy, const void *p)
 {
-  const char *addr = p;
+  const unsigned char *addr = p;
   unsigned long v;
 
   v = (unsigned long) addr[0];
@@ -206,7 +210,19 @@ unsigned int cli$dispatch(int userarg){
   char * routine;
   char * myp1 = "";
   char * myargv[2]={"",myp1};
+  char image[256];
+  char * path;
+  int pathlen;
+
   if (vms_mm==0) goto exe2;
+
+  path="SYS$SYSTEM:";
+  pathlen=strlen(path);
+  memcpy(image,path,pathlen);
+  memcpy(image+pathlen,(*cur_cdu)->cdu$l_image,strlen((*cur_cdu)->cdu$l_image));
+  memcpy(image+pathlen+strlen((*cur_cdu)->cdu$l_image),".exe",4);
+  image[pathlen+strlen((*cur_cdu)->cdu$l_image)+4]=0;
+
   unsigned long sts;
   struct dsc$descriptor aname;
   struct dsc$descriptor dflnam;
@@ -218,10 +234,10 @@ unsigned int cli$dispatch(int userarg){
   char * imgnam = (*cur_cdu)->cdu$l_image;
   int len = strlen(imgnam);
 
-  aname.dsc$w_length=len-4;
+  aname.dsc$w_length=len;
   aname.dsc$a_pointer=imgnam;
-  dflnam.dsc$w_length=len;
-  dflnam.dsc$a_pointer=imgnam;
+  dflnam.dsc$w_length=pathlen+strlen((*cur_cdu)->cdu$l_image)+4;
+  dflnam.dsc$a_pointer=image;
 
   hdrbuf=malloc(512);
   memset(hdrbuf, 0, 512);
@@ -260,13 +276,13 @@ unsigned int cli$dispatch(int userarg){
       continue;
     }
     if (debug->ihs$l_dstvbn==section->isd$l_vbn) {
-      symtab=section->isd$v_vpn;
+      symtab=section->isd$v_vpn<<12;
       symtabvbn=debug->ihs$l_dstvbn;
       symtabsize=section->isd$w_pagcnt;
     }
 
     if (debug->ihs$l_dmtvbn==section->isd$l_vbn) {
-      symstr=section->isd$v_vpn;
+      symstr=section->isd$v_vpn<<12;
       symstrvbn=debug->ihs$l_dmtvbn;
       symstrsize=section->isd$w_pagcnt;
     }
@@ -301,7 +317,7 @@ unsigned int cli$dispatch(int userarg){
   }
 
   if (value)
-    func = value;
+    func = value + 0x10000;
 
  skip:
 
@@ -322,11 +338,9 @@ unsigned int cli$dispatch(int userarg){
   {}
   char * mainp="main";
   routine=mainp;
-  char * path="/vms$common/sysexe/";
-  int pathlen=strlen(path);
-  char image[256];
+  path="/vms$common/sysexe/";
+  pathlen=strlen(path);
 
-  {}
   memcpy(image,path,pathlen);
   memcpy(image+pathlen,(*cur_cdu)->cdu$l_image,strlen((*cur_cdu)->cdu$l_image));
   memcpy(image+pathlen+strlen((*cur_cdu)->cdu$l_image),".exe2",5);
