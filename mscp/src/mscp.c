@@ -18,6 +18,7 @@
 #include<irpdef.h>
 #include<misc.h>
 #include<mscpdef.h>
+#include<sbdef.h>
 #include<scsdef.h>
 #include<ssdef.h>
 #include<ucbdef.h>
@@ -139,6 +140,82 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     }
     if (basic->mscp$b_opcode == MSCP$K_OP_READ) {
     }
+    if (basic->mscp$b_opcode == MSCP$K_OP_GTUNT) {
+      $DESCRIPTOR(disk,"dqa0");
+      char * str = disk.dsc$a_pointer;
+      str[3]+=basic->mscp$w_unit;
+      long long dummy;
+      int sts=ioc$search(&dummy, &disk);
+      struct _gtunt * gtunt = kmalloc(sizeof(struct _gtunt),GFP_KERNEL);
+      memset(gtunt, 0, sizeof(struct _gtunt));
+      struct _mscp_basic_pkt * gtbas = gtunt;
+      gtbas->mscp$b_opcode=MSCP$K_OP_GTUNT|MSCP$M_OP_END;
+      gtbas->mscp$w_unit=basic->mscp$w_unit;
+      if (sts==SS$_NORMAL)
+	gtbas->mscp$w_status=MSCP$K_ST_SUCC;
+      else
+	gtbas->mscp$w_status=MSCP$K_ST_OFFLN;
+
+      struct _cdrp * cdrp = vmalloc(sizeof(struct _cdrp));
+      bzero(cdrp,sizeof(struct _cdrp));
+
+      cdrp->cdrp$w_cdrpsize=400;
+      cdrp->cdrp$l_rspid=scs_std$alloc_rspid(0,0,cdrp,0);
+      cdrp->cdrp$l_cdt=find_mscp_cdt();
+      cdrp->cdrp$l_msg_buf=gtunt;
+      cdrp->cdrp$l_xct_len=sizeof(struct _gtunt);
+      if (cdrp->cdrp$l_cdt==0) {
+	printk("gtunt srv no cdt\n");
+	return;
+      }
+      scs_std$senddg(0,400,cdrp);
+
+    }
+    if (basic->mscp$b_opcode == (MSCP$K_OP_GTUNT|MSCP$M_OP_END) ) {
+      if (basic->mscp$w_status==MSCP$K_ST_SUCC) {
+	struct _ddb * ddb;
+	struct _ucb * ucb;
+	char dev[16];
+	extern struct _sb othersb;
+	char len=othersb.sb$t_nodename[0];
+	memcpy(dev,&othersb.sb$t_nodename[1],len);
+	dev[len]='$';
+	dev[len+1]='d';
+	dev[len+2]='q';
+	dev[len+3]='a';
+	dev[len+4]='0';//+basic->mscp$w_unit;
+	struct dsc$descriptor disk;
+	disk.dsc$a_pointer=dev;
+	disk.dsc$w_length=len+5;
+	long long dummy;
+	int sts=ioc$search(&dummy, &disk);
+	if (sts!=SS$_NORMAL) {
+#ifndef __arch_um__
+#ifdef CONFIG_VMS
+	  ddb=ide_iodb_vmsinit(1);
+	  du_iodb_clu_vmsinit(ddb->ddb$l_ucb);
+#endif
+#endif
+	  if (ddb)
+	    ddb->ddb$ps_sb=&othersb;
+	} else {
+	  long *l=&dummy;
+	  struct _ucb * u = *l;
+	  ddb = u->ucb$l_ddb;
+	}
+#ifndef __arch_um__
+#ifdef CONFIG_VMS
+	int i=basic->mscp$w_unit;
+	$DESCRIPTOR(d, "dqa0");
+	char * c= d.dsc$a_pointer;
+	c[3]+=i;
+	ucb = ide_iodbunit_vmsinit(ddb,i,&d);
+	((struct _mscp_ucb *)ucb)->ucb$w_mscpunit=ucb->ucb$w_unit;
+	printk("UCB MSCPUNIT %x\n",((struct _mscp_ucb *)ucb)->ucb$w_mscpunit);
+#endif
+#endif
+      }
+    }
   }
   return;
 
@@ -239,4 +316,33 @@ int mscp(void) {
   scs_std$listen(mscplisten,mscpmyerr,myname,myinfo,0);
 }
 
+void mscp_talk_with(char * node, char * sysap) {
+  // both parameters are unused right now
+  // we know they are the other node, and the second is mscp$disk
 
+  signed long long time=-100000000;
+  int unit;
+  struct _cdrp * cdrp = vmalloc(sizeof(struct _cdrp));
+  struct _mscp_basic_pkt * basic = vmalloc(sizeof(struct _mscp_basic_pkt));
+  bzero(cdrp,sizeof(struct _cdrp));
+  bzero(basic,sizeof(struct _mscp_basic_pkt));
+  //basic->mscp$b_caa=MSCP$K_OP_READ;
+  for (unit=1;unit < 5; unit ++) {
+    exe$schdwk(0,0,&time,0);
+    sys$hiber();
+    printk("probing other node dqa%x\n",unit);
+    basic->mscp$b_opcode = MSCP$K_OP_GTUNT;
+    basic->mscp$w_unit=unit;
+    basic->mscp$l_cmd_ref=0;
+    cdrp->cdrp$w_cdrpsize=600;
+    cdrp->cdrp$l_rspid=scs_std$alloc_rspid(0,0,cdrp,0);
+    cdrp->cdrp$l_cdt=find_mscp_cdt();
+    cdrp->cdrp$l_msg_buf=basic;
+    cdrp->cdrp$l_xct_len=sizeof(struct _mscp_basic_pkt);
+    if (cdrp->cdrp$l_cdt==0) {
+      printk("gtunt cli no cdt\n");
+      return;
+    }
+    scs_std$senddg(0,600,cdrp);
+  }
+}
