@@ -5,7 +5,7 @@ EXTERNAL2 = ../../cdu/src/cdu2.a
 
 FLAGS = -static
 
-all: set.a show.a i386/create${NOEXE} i386/create${EXE} um/create${NOEXE} um/create${EXE}
+all: set.a show.a i386/create${NOEXE} i386/create${EXE} i386/create${EXE_ELF} um/create${NOEXE} um/create${EXE} um/create${EXE_ELF} i386/type${NOEXE} i386/type${EXE} i386/type${EXE_ELF} um/type${NOEXE} um/type${EXE} um/type${EXE_ELF}
 
 clean:
 	rm *.o *.a i386/* um/*
@@ -31,7 +31,9 @@ show.a: showsystem.o showdevice.o showwork.o showlog.o
 i386/create${NOEXE}: create.o $(VMSLIBS) $(EXTERNAL2)
 	install -d i386
 	gcc $(FLAGS) -g create.o $(VMSLIBS) $(EXTERNAL2) -o i386/create${NOEXE}
-	ld -Bshareable create.o $(VMSLIBS) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/create.exe2
+
+i386/create${EXE_ELF}: create.o $(VMSLIBS) $(EXTERNAL2)
+	ld -Bshareable create.o $(VMSLIBS) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/create${EXE_ELF}
 
 i386/create${EXE}: create.o $(VMSLIBS) $(EXTERNAL2)
 	install -d i386
@@ -40,8 +42,33 @@ i386/create${EXE}: create.o $(VMSLIBS) $(EXTERNAL2)
 um/create${NOEXE}: create.o $(VMSLIBSUM) $(EXTERNAL2)
 	install -d um
 	gcc $(FLAGS) -g create.o $(VMSLIBSUM) $(EXTERNAL2) -o um/create${NOEXE}
-	ld -Bshareable create.o $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o um/create.exe2
+
+um/create${EXE_ELF}: create.o $(VMSLIBSUM) $(EXTERNAL2)
+	ld -Bshareable create.o $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o um/create${EXE_ELF}
 
 um/create${EXE}: create.o $(VMSLIBSUM) $(EXTERNAL2)
 	install -d um
 	$(LINKER) $(LINKPRE) create.o $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o um/create${EXE}
+
+i386/type${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
+	install -d i386
+	gcc -g -static $(OBJS) $(VMSLIBS) $(EXTERNAL2) -o i386/type${NOEXE}
+
+i386/type${EXE_ELF}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
+	ld -Bshareable $(OBJS) $(VMSLIBS) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/type${EXE_ELF}
+
+i386/type${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
+	install -d i386
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o i386/type${EXE}
+
+UMDEF=-Dcompile_um -I.
+
+um/type${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
+	install -d um
+	gcc -g -static $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) -o um/type${NOEXE}
+um/type${EXE_ELF}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
+	ld -Bshareable $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/type${EXE_ELF}
+
+um/type${EXE}: $(VMSLIBSUM) $(OBJS)
+	install -d um
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o um/type${EXE}

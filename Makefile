@@ -1,5 +1,5 @@
-VMSSUBDIRS = starlet librtl cld cdu cliutl backup dir init login dcl edt dfu
-VMSSUBDIRSINST = cld cliutl dir dcl login init edt dfu
+VMSSUBDIRS = starlet librtl cld cdu cliutl backup dir init login dcl edt dfu mount copy delete dif util32
+VMSSUBDIRSINST = cld cliutl dir dcl login init edt dfu mount copy delete dif util32
 VMSSUBDIRS2 = examples
 
 export LIBGCC = $(shell gcc -print-libgcc-file-name)
@@ -16,6 +16,7 @@ export LINKPOST = /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/libc.a
 
 export EXE = .exe
 export NOEXE =
+export EXE_ELF = .ele
 
 export ROOTI386 = $(TOPDIR)/rooti386
 export ROOTUM = $(TOPDIR)/rootum

@@ -37,7 +37,7 @@ CC = gcc -g -O2 -c
 
 EXTERNAL =
 
-all: $(OBJS) i386/edt${EXE} i386/edt${NOEXE} um/edt${EXE} um/edt${NOEXE}
+all: $(OBJS) i386/edt${EXE} i386/edt${NOEXE} i386/edt${EXE_ELF} um/edt${EXE} um/edt${NOEXE} um/edt${EXE_ELF}
 
 clean:
 	rm *.o um/* i386/*
@@ -150,7 +150,9 @@ write_file.o: write_file.c
 i386/edt${NOEXE}: $(LIB) $(EXTERNAL)
 	install -d i386
 	gcc -g -static $(OBJS) $(EXTERNAL) -o i386/edt${NOEXE}
-	ld -Bshareable $(OBJS) $(LIBC) $(LIBGCC) -o i386/edt.exe2
+
+i386/edt${EXE_ELF}: $(LIB) $(EXTERNAL)
+	ld -Bshareable $(OBJS) $(LIBC) $(LIBGCC) -o i386/edt${EXE_ELF}
 
 i386/edt${EXE}: $(LIB) $(EXTERNAL)
 	install -d i386
@@ -163,4 +165,7 @@ um/edt${NOEXE}: $(LIBUM) $(EXTERNAL)
 um/edt${EXE}: $(LIB) $(EXTERNAL)
 	install -d um
 	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/edt${EXE}
+
+um/edt${EXE_ELF}: $(LIB) $(EXTERNAL)
+	ld -Bshareable $(OBJS) $(LIBC) $(LIBGCC) -o um/edt${EXE_ELF}
 
