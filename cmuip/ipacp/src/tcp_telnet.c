@@ -1605,7 +1605,7 @@ signed long
     Item_List[0].bufaddr=&Unit_Number;
     Item_List[1].item_code=0; // check
 
-    RC = exe$getdviw (0,TVT->TVT$PTY_CHN,0,Item_List);
+    RC = exe$getdviw (0,TVT->TVT$PTY_CHN,0,Item_List,0,0); // seems C can not fill in the rest with 0?
     if (BLISSIF(RC))
 	{
 	  Item_List[0].item_code=DVI$_PID;
@@ -1634,7 +1634,7 @@ signed long
 	if (RC == SS$_NORMAL)
 	  RC = exe$fao(&ctr,devnam,devnam,ptynam,Unit_Number); // check
 	if (BLISSIF(RC))
-		RC = exe$getdviw (0,0,devnam,Item_List,0);
+	  RC = exe$getdviw (0,0,devnam,Item_List,0,0); // seems C can not fill int the rest with 0?
 
     XLOG$FAO(LOG$TELNET,"!%T PTY_Set_owner_PID: TTY_TERM=\"!AS\"!/",0,devnam);
 
@@ -1787,7 +1787,8 @@ struct PTY$IOSB * IOSB = &TVT->TVT$RD_IOSB;
 //  In particular data written to PTY before the prompt is "promptly" lost!!!
 //JC ----------------- Kludge -------------------------
 
-	if ((TVT->TVT$RD_BCNT > 7) &&		// JC Kludge
+// was: 7, because now we only get a 2 byte shell prompt instead
+	if ((TVT->TVT$RD_BCNT > 1) &&		// JC Kludge
 	   (TVT->TVT$RD_BCNT < 15))			// JC Kludge
 							// JC Kludge
 		PTY_SET_OWNER_PID(TVT);
