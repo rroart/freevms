@@ -73,7 +73,8 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
       *bufaddr_int=u->ucb$w_unit;
       break;
     case DVI$_PID:
-      memcpy(it->bufaddr, &u->ucb$l_pid, 4);
+      *bufaddr_int=1; // telnetd needs to have this at non-zero
+      //memcpy(it->bufaddr, &u->ucb$l_pid, 4);
       break;
     case DVI$_OWNUIC:
       {
