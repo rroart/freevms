@@ -15,7 +15,7 @@
  *  1998-12-28  Implemented better SMP scheduling by Ingo Molnar
  */
 
-/* More by Roar Thronæs */
+/* sch$resched, sch$sched and more by Roar Thronæs */
 
 /*
  * 'sched.c' is the main kernel file. It contains scheduling primitives
@@ -110,23 +110,6 @@ struct task_struct * init_tasks[NR_CPUS] = {&init_task, };
 spinlock_t runqueue_lock __cacheline_aligned = SPIN_LOCK_UNLOCKED;  /* inner */
 rwlock_t tasklist_lock __cacheline_aligned = RW_LOCK_UNLOCKED;	/* outer */
 
-//static LIST_HEAD(runqueue_head);
-
-/*
- * We align per-CPU scheduling data on cacheline boundaries,
- * to prevent cacheline ping-pong.
- */
-static union {
-	struct schedule_data {
-		struct task_struct * curr;
-		cycles_t last_schedule;
-	} schedule_data;
-	char __pad [SMP_CACHE_BYTES];
-} aligned_data [NR_CPUS] __cacheline_aligned = { {{&init_task,0}}};
-
-#define cpu_curr(cpu) aligned_data[(cpu)].schedule_data.curr
-#define last_schedule(cpu) aligned_data[(cpu)].schedule_data.last_schedule
-
 struct kernel_stat kstat;
 extern struct task_struct *child_reaper;
 
@@ -144,21 +127,6 @@ extern struct task_struct *child_reaper;
 #endif
 
 void scheduling_functions_start_here(void) { }
-
-/*
- * This is the function that decides how desirable a process is..
- * You can weigh different processes against each other depending
- * on what CPU they've run on lately etc to try to handle cache
- * and TLB miss penalties.
- *
- * Return values:
- *	   "goodness" value (the smaller the better)
- */
-
-static inline unsigned char goodness(struct task_struct * p)
-{
-	return (1 + p->pcb$b_pri);
-}
 
 /*
  * the 'goodness value' of replacing a process on a given CPU.
@@ -262,35 +230,10 @@ send_now_idle:
 	int this_cpu = smp_processor_id();
 	struct task_struct *tsk;
 
-	tsk = cpu_curr(this_cpu);
+	tsk = smp$gl_cpu_data[this_cpu]->cpu$l_curpcb;
 	if (p->pcb$b_pri >= tsk->pcb$b_pri) /* previous was meaningless */
 		tsk->need_resched = 1;
 #endif
-}
-
-/*
- * Careful!
- *
- * This has to add the process to the _beginning_ of the
- * run-queue, not the end. See the comment about "This is
- * subtle" in the scheduler proper..
- */
-static inline void add_to_runqueue(struct task_struct * p)
-{
-  //	list_add(&p->run_list, &runqueue_head);
-	nr_running++;
-}
-
-static inline void move_last_runqueue_not(struct task_struct * p)
-{
-  //	list_del(&p->run_list);
-  //	list_add_tail(&p->run_list, &runqueue_head);
-}
-
-static inline void move_first_runqueue_not(struct task_struct * p)
-{
-  //	list_del(&p->run_list);
-	//	list_add(&p->run_list, &runqueue_head);
 }
 
 /*
@@ -303,70 +246,71 @@ static inline void move_first_runqueue_not(struct task_struct * p)
  */
 static inline int try_to_wake_up(struct task_struct * p, int synchronous)
 {
-	unsigned long flags;
-	int success = 0;
+  unsigned long flags;
+  int success = 0;
 
-	/*
-	 * We want the common case fall through straight, thus the goto.
-	 */
-	spin_lock_irqsave(&runqueue_lock, flags);
-	p->state = TASK_RUNNING;
-	//	if (task_on_runqueue(p))
-	//		goto out;
-	add_to_runqueue(p);
-	{ 
-	  unsigned long qhead;
-	  int curpri;
-	  int cpuid = smp_processor_id();
-	  struct _cpu * cpu=smp$gl_cpu_data[cpuid];
-	  /* p->pcb$b_pri=p->pcb$b_prib-3; */ /* boost */
-	  curpri=p->pcb$b_pri;
-	  if (mydebug4) printk("add tyr %x %x\n",p->pid,curpri);
-	  qhead=sch$aq_comt[curpri];
-  if (mydebug4) printk("eq qhead %x %x %x %x\n",
-	 (unsigned long *)qhead,(unsigned long *)(qhead+4),
-	 *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
-  if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
-  if (mydebug4) printk("iq3 %x\n",sch$aq_comh[curpri]);
-	  insque(p,qhead);
-  if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
-  if (mydebug4) printk("iq3 %x\n",sch$aq_comh[curpri]);
-  if (mydebug4) printk("eq qhead %x %x %x %x\n",
-	 (unsigned long *)qhead,(unsigned long *)(qhead+4),
-	 *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
-	  //	  printk("sch %x\n",sch$gl_comqs);
-  if (mydebug4) printk("comq1 %x %x\n",curpri,sch$gl_comqs);
-	  sch$gl_comqs=sch$gl_comqs | (1 << curpri);
-  if (mydebug4) printk("comq1 %x %x\n",curpri,sch$gl_comqs);
-	  //	  printk("sch %x\n",sch$gl_comqs);
-  if (mydebug4) {
-    int i;
-    struct _pcb  *tmp2,*tmp3=qhead;
-    unsigned long tmp;
-    printk("p %x\n",p);
-    printk("%x %x %x %x\n",tmp3,tmp3->pcb$l_sqfl,tmp3->pcb$l_sqfl->pcb$l_sqfl,tmp3->pcb$l_sqfl->pcb$l_sqfl->pcb$l_sqfl);
-    for(i=0;i<32;i++) {
-      tmp=sch$aq_comh[i];
-      //      printk("i %x %x i",i,tmp);
-      if(*(unsigned long *)tmp == tmp) {; } else {
-	tmp2=((struct _pcb *)tmp)->pcb$l_sqfl->pcb$l_sqfl;
-	do {
-	  printk("com2 %x %x %x %x\n",tmp2,tmp2->pid,tmp2->pcb$b_pri,i);
-	  tmp2=tmp2->pcb$l_sqfl;
-	} while (tmp2!=tmp);
+  /*
+   * We want the common case fall through straight, thus the goto.
+   */
+  spin_lock_irqsave(&runqueue_lock, flags);
+  p->state = TASK_RUNNING;
+  //	if (task_on_runqueue(p))
+  //		goto out;
+  nr_running++;
+  { 
+    unsigned long qhead;
+    int curpri;
+    int cpuid = smp_processor_id();
+    struct _cpu * cpu=smp$gl_cpu_data[cpuid];
+    /* p->pcb$b_pri=p->pcb$b_prib-3; */ /* boost */
+    curpri=p->pcb$b_pri;
+    if (mydebug4) printk("add tyr %x %x\n",p->pid,curpri);
+    qhead=sch$aq_comt[curpri];
+    if (mydebug4) printk("eq qhead %x %x %x %x\n",
+			 (unsigned long *)qhead,(unsigned long *)(qhead+4),
+			 *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
+    if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
+    if (mydebug4) printk("iq3 %x\n",sch$aq_comh[curpri]);
+
+    insque(p,qhead);
+
+    if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
+    if (mydebug4) printk("iq3 %x\n",sch$aq_comh[curpri]);
+    if (mydebug4) printk("eq qhead %x %x %x %x\n",
+			 (unsigned long *)qhead,(unsigned long *)(qhead+4),
+			 *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
+
+    if (mydebug4) printk("comq1 %x %x\n",curpri,sch$gl_comqs);
+
+    sch$gl_comqs=sch$gl_comqs | (1 << curpri);
+
+    if (mydebug4) printk("comq1 %x %x\n",curpri,sch$gl_comqs);
+    if (mydebug4) {
+      int i;
+      struct _pcb  *tmp2,*tmp3=qhead;
+      unsigned long tmp;
+      printk("p %x\n",p);
+      printk("%x %x %x %x\n",tmp3,tmp3->pcb$l_sqfl,tmp3->pcb$l_sqfl->pcb$l_sqfl,tmp3->pcb$l_sqfl->pcb$l_sqfl->pcb$l_sqfl);
+      for(i=0;i<32;i++) {
+	tmp=sch$aq_comh[i];
+	//      printk("i %x %x i",i,tmp);
+	if(*(unsigned long *)tmp == tmp) {; } else {
+	  tmp2=((struct _pcb *)tmp)->pcb$l_sqfl->pcb$l_sqfl;
+	  do {
+	    printk("com2 %x %x %x %x\n",tmp2,tmp2->pid,tmp2->pcb$b_pri,i);
+	    tmp2=tmp2->pcb$l_sqfl;
+	  } while (tmp2!=tmp);
+	}
       }
     }
-    if (mydebug4) printk("loop end\n");
-    if (mydebug4) { int j; for(j=0;j<100000000;j++) ; }
   }
-	}
-	if (!synchronous || !(p->cpus_allowed & (1 << smp_processor_id())))
-		reschedule_idle(p);
-	success = 1;
+  if (!synchronous || !(p->cpus_allowed & (1 << smp_processor_id())))
+    reschedule_idle(p);
+  success = 1;
 
-out:
-	spin_unlock_irqrestore(&runqueue_lock, flags);
-	return success;
+ out:
+  spin_unlock_irqrestore(&runqueue_lock, flags);
+  return success;
 }
 
 inline int wake_up_process(struct task_struct * p)
@@ -538,8 +482,6 @@ asmlinkage void schedule_tail(struct task_struct *prev)
   //	__schedule_tail_not(prev);
 }
 
-static struct _pcb * pid1; /* Keep track of pid 1. Will be removed in the future */
-
 /* should be straight from the internals */
 /* this is not in use, should have some more things like sch$ and cpu$ globals
    implemented first */
@@ -552,49 +494,31 @@ int countme=500;
 void sch$resched(void) {
   int cpuid = smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid]; 
-  //  unsigned int weight;
-  struct _pcb *curpcb;
+  struct _pcb * curpcb;
   unsigned long curpri;
   unsigned long qhead;
 
-  //  if (fix_init_thread) return;
   // lock sched db, soon
   //if (spl(IPL$_SCHED)) return;
   //    old=spl(IPL$_SCHED);
   // svpctx, do not think we need to do this here
-  // get cpu base when it is implemented	
-  // has got no cpu$ yet, but current is here
+
   curpcb=cpu->cpu$l_curpcb;
   curpri=cpu->cpu$b_cur_pri;
-  //  if (curpri>31) panic("large3 curpri %x\n",curpri);
-  //  printk("curstuff %x %x %x %x\n",curpcb,curpcb->pid,curpri,curpcb->pcb$b_pri);
+
   sch$al_cpu_priority[curpri]=sch$al_cpu_priority[curpri] & (~ cpu->cpu$l_cpuid_mask );
   if (!sch$al_cpu_priority[curpri])
     sch$gl_active_priority=sch$gl_active_priority & (~ (1 << (31-curpri)));
-  //	  printk("sch %x\n",sch$gl_comqs);
-  //  if (curpcb->pid) {
+
   //  if (curpcb->pid>0 && curpcb->state==TASK_RUNNING) {
+  // Need pid 0 in the queue, this is more a linux thingie
   if (curpcb->state==TASK_RUNNING) {
     sch$gl_comqs=sch$gl_comqs | (1 << curpri);
-    //	  printk("sch %x\n",sch$gl_comqs);
     //    curpcb->state=TASK_INTERRUPTIBLE; /* soon SCH$C_COM ? */
     qhead=sch$aq_comt[curpri];
-    if (mydebug4) printk("iq %x\n",sch$aq_comh[curpri]);
     insque(curpcb,qhead);
-    if (mydebug4) printk("iq %x\n",sch$aq_comh[curpri]);
     sch$gl_idle_cpus=0;
   }
-  // printk("insq? %x\n",curpcb->pid);  
-  //  list_for_each(tmp,&runqueue_head) {
-  //    p = list_entry(tmp, struct task_struct, run_list);
-  //    if (can_schedule(p, this_cpu)) {
-  //      unsigned char weight = goodness(p);
-  //      if (weight<curpri) curpri=weight, next=p;
-  //    }
-  //  }
-  // current->need_resched=1;
-
-  //	schedule();
   sch$sched(1);
 }
 
@@ -614,7 +538,6 @@ void sch$resched(void) {
 int mydebug=0;
 int mydebug2=0;
 int mycount=0;
-int delfromrunq=0;
 
 /* should be straight from the internals
    aboutish implemented */
@@ -636,21 +559,17 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
   curpcb=cpu->cpu$l_curpcb;
   curpri=cpu->cpu$b_cur_pri;
-  // if (curpri>31) panic("large2 curpri %x\n",curpri);
+
   prev = curpcb;
 
   //  if (!countme--) { countme=500; printk("."); }
 
-  /* wait until both are more finished...? */
   if (from_sch$resched == 1)
     goto label30$;
   sch$al_cpu_priority[curpri]=sch$al_cpu_priority[curpri] & (~ cpu->cpu$l_cpuid_mask );
   if (sch$al_cpu_priority[curpri]) 
     goto label30$;
   sch$gl_active_priority=sch$gl_active_priority & (~ (1 << (31-curpri)));
-
-
-
 
   //if (spl(IPL$_SCHED)) return;
   //  old=spl(IPL$_SCHED);
@@ -659,64 +578,22 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
   if (!curpcb->active_mm) BUG();
 
-  // if (prev->run_list.next==0) printk("n next error %x\n",prev->pid);
-  // if (prev->run_list.prev==0) printk("n prev error %x\n",prev->pid);
-
-  //  if (unlikely(in_interrupt())) {
-  //    printk("Scheduling in interrupt\n");
-  //    BUG();
-  //  }
-
   release_kernel_lock(prev, cpuid);
 
   spin_lock_irq(&runqueue_lock);
-
-  /*
-   * this is the scheduler proper:
-   */
-  //  if (!pid1 && current->pid == 1) { /* this should be moved */
-  //    pid1=current;
-  //    pid1->pcb$b_pri=20;
-  //    pid1->pcb$b_prib=24;
-  //    printk("pid 1 here\n"); 
-  //    mydebug=0;
-  //  }
-  //	printk("rep %x %x\n",current,current->pid);
-  if (mydebug)
-    printk("rep %x %x %x %x %x\n",current,current->pid,current->need_resched,current->pcb$b_pri,current->phd$w_quant);
-  if (mydebug2)
-    printk("rep %x %x %x %x %x\n",current,current->pid,current->need_resched,current->pcb$b_pri,current->phd$w_quant);
-
-  delfromrunq=0;
-
-  //			prev->need_resched = 0;
 
  label30$:
 
   affinity=0;
 
-  /*
-   * Default process to select..
-   */
-  // next = idle_task(cpuid);
-  // c = 100;
-    
   tmppri=ffs(sch$gl_comqs);
-  if (mydebug5) printk("ffs %x %x\n",tmppri,sch$gl_comqs);
-  // 	  { int j; for(j=0;j<1000000000;j++) ; }
+  if (mydebug5)
+    printk("ffs %x %x\n",tmppri,sch$gl_comqs);
+
   if (!tmppri) {
     //    goto sch$idle;
     sch$gl_idle_cpus=sch$gl_idle_cpus | (cpu->cpu$l_cpuid_mask);
-    //    cpu->cpu$b_cur_pri=-1;
-    //    cpu->cpu$b_cur_pri=31; /* trying this? */ 
-      qelem=idle_task(cpuid);
-      //    if (done_init_idle) {
-      //    } else {
-      //      qelem=prev;
-      //    }
-    if (mydebug4) { int i; printk("idle %x %x %x\n",done_init_idle,prev,idle_task(cpuid)); for(i=0;i<100000000;i++) ; }
-    //    qelem=(struct _pcb *) remque(qhead,qelem);
-    if (mydebug4) printk("idlenext %x\n",qelem);
+    qelem=idle_task(cpuid);
   } else {
     tmppri--;
     qhead=sch$aq_comh[tmppri];
@@ -724,11 +601,6 @@ asmlinkage void sch$sched(int from_sch$resched) {
 			 (unsigned long *)qhead,(unsigned long *)(qhead+4),
 			 *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
 
-    //	  printk("hre %x\n",tmppri);
-    //	  printk("%x %x %x %x\n",sch$aq_comot,sch$aq_comoh,sch$aq_comt,sch$aq_comh);
- //	  printk("%x %x %x %x\n",qhead,qhead+4,(void**)qhead,(void**)(qhead+4));
-    //	  printk("%x\n",prev->pid);
-    //	  { int j; for(j=0;j<1000000000;j++) ; }
     if (mydebug5) {
       int i;
       struct _pcb  *tmp2;
@@ -761,12 +633,11 @@ asmlinkage void sch$sched(int from_sch$resched) {
   }
 
   if(qelem==0) 	  { int j; printk("qel0\n"); for(j=0;j<1000000000;j++) ; } 
-  //  if(qelem==0) 	  { int j; for(j=0;j<1000000000;j++) ; }
 
   nr_running--;
-  //  del_from_runqueue(prev);
+
   /* bvs qempty not needed, it might panic on gen prot? */
-  //	  printk("sch %x\n",sch$gl_comqs);
+
   if (mydebug4) printk("eq qhead %x %x %x %x\n",
 		       (unsigned long *)qhead,(unsigned long *)(qhead+4),
 		       *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
@@ -780,7 +651,6 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
   if (next->pcb$b_pri<next->pcb$b_prib) next->pcb$b_pri++;
 
-  //  if (qelem->pcb$b_pri>31) panic("large1 curpri %x\n",qelem->pcb$b_pri);
   cpu->cpu$b_cur_pri=qelem->pcb$b_pri;
 
   sch$gl_idle_cpus=sch$gl_idle_cpus & (~ cpu->cpu$l_cpuid_mask);
@@ -813,101 +683,27 @@ asmlinkage void sch$sched(int from_sch$resched) {
     if (mydebug4) { int j; for(j=0;j<100000000;j++) ; }
   }
 
-  //      list_for_each(tmp, &runqueue_head) {
-  //        p = list_entry(tmp, struct task_struct, run_list);
-  //     if (mydebug2)
-  //       printk("run %x %x %x %x %x\n",p,p->pid,p->run_list.next,p->run_list.prev,p->need_resched);
-  //      if (p->pcb$b_prib & 224) /* should be moved too */
-  //      p->pcb$b_prib=27;
-  //    if (p->pcb$b_pri & 224) /* should be moved too */
-  //      p->pcb$b_pri=27;
-  //    weight = goodness(p);
-  //    if (mydebug)
-  //if(mydebug5)      printk("wei2 %x %x %x %x %x\n",p,p->pid,p->need_resched,p->pcb$b_pri,p->phd$w_quant);
-  //    //	  if (c==100 && prev!=p) c=weight, next=p;
-  //    if (weight < c && p->need_resched==0)
-  //      c = weight, next = p;
-  //    if (c==100 && weight < c) c=weight, next=p;
-  //  }
-  if (mydebug4) printk("loop2 end\n");
-  //  //	{ int i; for (i=0; i<10000000; i++ ) ; }
-
-  //  //	if (c==100) { spin_unlock_irq(&runqueue_lock); goto sch$idle; }
-  if (mydebug && ++mycount==500) {
-    int i;
-    __cli();
-    for (i=0; i<100000000; i++ ) ;
-    mycount=0;
-    __sti();
-  }
-  if (mydebug2 && ++mycount==500) {
-    int i;
-    __cli();
-    for (i=0; i<1000000000; i++ ) ;
-    mycount=0;
-    __sti();
-  }
-
-  /*
-   * from this point on nothing can prevent us from
-   * switching to the next task, save this fact in
-   * sched_data.
-   */
-
   prev->need_resched = 0;
 
-  //  if (next->pid > 1 && pid1->need_resched==1) { /* Need this too? */
-  //    pid1->need_resched=0;
-  //    pid1->pcb$b_pri=24;
-  //    pid1->pcb$b_prib=25;
-  //    printk("pid1\n");
-  //  }
-
-  //	if (next == prev) { next->need_resched=1; goto repeat_schedule; }
-  //    cli();
-  //    printk("%x %x %x %x\n",prev,next,prev->pid,next->pid);
-  //    { int i; for(i=0;i<100000000;i++) ; }
-  //    sti();
-  //  if (next->pid==2) { 
-  //    unsigned int i; 
-  //    for(i=0;i<32;i++)
-  //      printk("i %x %x|",i,sch$aq_comh[i],sch$aq_comt[i]);
-  //    printk("\n");
-  //  for(i=0;i<2000000000;i++) ;
-  //  }
   if (mydebug4) { int i; for(i=0;i<100000000;i++) ; }
   if (next == prev) { /* does not belong in vms, but must be here */
-    /* printk("next == prev\n");*/ 
-    //    if (next->pid==2) { int i; for(i=0;i<2000000000;i++) ; }
     spin_unlock_irq(&runqueue_lock);
     //splret();
     return;
   } 
 
   cpu->cpu$l_curpcb = next;
-  // if (prev->pid>1) move_last_runqueue(prev);
 
   task_set_cpu(next, cpuid);
   spin_unlock_irq(&runqueue_lock);
 
-  if (prev->pid==2 && prev->run_list.next==0) {
-    /* int i; */
-    if (mydebug2)
-      printk("o next error %x\n",prev->pid);
-    mydebug=0; 
-    /* for(i=0;i<1000000000;i++); */
-  }
-
   //      if (mydebug5) { int j; for(j=0;j<1000000000;j++) ; }
 
-  //  if (prev->run_list.prev==0)
-  //    printk("o prev error %x\n",prev->pid);
-
-      if (mydebug6)
-  if (next>=&sch$aq_comh[0] && next<=&sch$aq_comh[33]) {
-    printk("ga!\n");
-    { int j; for(j=0;j<1000000000;j++) ; }
-  }
+  if (mydebug6)
+    if (next>=&sch$aq_comh[0] && next<=&sch$aq_comh[33]) {
+      printk("ga!\n");
+      { int j; for(j=0;j<1000000000;j++) ; }
+    }
 
   kstat.context_swtch++;
   /*
@@ -944,33 +740,12 @@ asmlinkage void sch$sched(int from_sch$resched) {
    * stack.
    */
 
-  if (mydebug4) {
-    cli();
-    printk("bef sw %x %x %x %x\n",prev,prev->pid,next,next->pid);
-    { int i; for(i=0;i<100000000;i++) ; }
-    sti();
-  }
-
-  //  if (prev==0) printk("Z");
-  //  if (next==0) printk("X");
-  //  if (prev->pid==0) printk("z");
-  //  if (next->pid==0) printk("x");
-
-  //  mydebug5=1;
   if (mydebug4) printk("bef swto\n");
-  //  if (prev->pid==3 && next->pid==1) { int j; for(j=0;j<2000000000;j++) ; } 
   sti();
   switch_to(prev, next, prev);
 
   /* does not get here */
 
-  if (mydebug4) {
-    cli();
-    printk("aft sw %x %x\n",prev->pid,next->pid);
-    { int i; for(i=0;i<100000000;i++) ; }
-    sti();
-  }
-  
   //splret();
   return;
  qempty:
@@ -980,7 +755,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   //	printk("sch$idle\n");
   sch$gl_idle_cpus=1;
   //	for (; sch$gl_idle_cpus ;) ;
-
+  //    cpu->cpu$b_cur_pri=-1;
   //	goto label30$;
   return;
 }
@@ -1600,37 +1375,37 @@ extern void init_timervecs (void);
 
 void __init sched_init(void)
 {
-	/*
-	 * We have to do a little magic to get the first
-	 * process right in SMP mode.
+  /*
+   * We have to do a little magic to get the first
+   * process right in SMP mode.
 	 */
-	int cpuid = smp_processor_id();
-	int nr,i;
-	struct _cpu * cpu;
+  int cpuid = smp_processor_id();
+  int nr,i;
+  struct _cpu * cpu;
 
-	init_task.pcb$l_cpu_id = cpuid;
-	cpu=smp$gl_cpu_data[cpuid];
-    init_task.pcb$b_pri=16;
-    init_task.pcb$b_prib=31;
-    cpu->cpu$l_curpcb=&init_task;
-    cpu->cpu$b_cur_pri=16;
+  init_task.pcb$l_cpu_id = cpuid;
+  cpu=smp$gl_cpu_data[cpuid];
+  init_task.pcb$b_pri=16;
+  init_task.pcb$b_prib=31;
+  cpu->cpu$l_curpcb=&init_task;
+  cpu->cpu$b_cur_pri=16;
 
-    printk("pid 0 here\n"); 
+  printk("pid 0 here\n"); 
 
-	for(nr = 0; nr < PIDHASH_SZ; nr++)
-		pidhash[nr] = NULL;
+  for(nr = 0; nr < PIDHASH_SZ; nr++)
+    pidhash[nr] = NULL;
 
-	init_timervecs();
+  init_timervecs();
 
-	init_bh(TIMER_BH, timer_bh);
-	init_bh(TQUEUE_BH, tqueue_bh);
-	init_bh(IMMEDIATE_BH, immediate_bh);
+  init_bh(TIMER_BH, timer_bh);
+  init_bh(TQUEUE_BH, tqueue_bh);
+  init_bh(IMMEDIATE_BH, immediate_bh);
 
 	/*
 	 * The boot idle thread does lazy MMU switching as well:
 	 */
-	atomic_inc(&init_mm.mm_count);
-	enter_lazy_tlb(&init_mm, current, cpu);
+  atomic_inc(&init_mm.mm_count);
+  enter_lazy_tlb(&init_mm, current, cpu);
 }
 
 #include "../../freevms/sys/src/rse.c"
