@@ -1,5 +1,5 @@
-VMSSUBDIRS = starlet librtl cliutl backup dir init login dcl edt
-VMSSUBDIRSINST = dir dcl login init edt
+VMSSUBDIRS = starlet librtl cliutl backup dir init login dcl edt dfu
+VMSSUBDIRSINST = dir dcl login init edt dfu
 VMSSUBDIRS2 = examples
 
 export LIBGCC = `gcc -print-libgcc-file-name`

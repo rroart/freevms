@@ -610,6 +610,7 @@ static Command intcmd[] = {
 	0, "init", 1, 0, "/vms$common/sysexe/init.exe",
 	0, "create", 1, 0, "/vms$common/sysexe/create.exe",
 	0, "edt", 1, 0, "/vms$common/sysexe/edt.exe",
+	0, "dfu", 1, 0, "/vms$common/sysexe/dfu.exe",
 	0, NULL, NULL, NULL, NULL };
 
 
