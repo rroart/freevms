@@ -63,7 +63,7 @@ signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _
   page=&((struct _pfn *)pfn$al_head[PFN$C_FREPAGLST])[pfn];
   // also set page type
   mem_map[pfn].pfn$v_pagtyp=((unsigned long)va)&PFN$M_PAGTYP;
-  mem_map[pfn].virtual=__va(pfn*PAGE_SIZE);
+  //  mem_map[pfn].virtual=__va(pfn*PAGE_SIZE); // not necessary
   //mem_map[pfn].count.counter=1;
   mem_map[pfn].pfn$l_pt_pfn=0;
   mem_map[pfn].pfn$q_pte_index=0;
@@ -73,7 +73,11 @@ signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _
 }
 
 int mmg$incptref(struct _phd * phd, struct _mypte * pte) {
+#ifdef __arch_um__
   signed long pfn=__pa(pte->pte$v_pfn << PAGE_SHIFT) >> PAGE_SHIFT ;
+#else
+  signed long pfn=pte->pte$v_pfn;
+#endif
   if (mem_map[pfn].pfn$v_pagtyp==PFN$C_GLOBAL || mem_map[pfn].pfn$v_pagtyp==PFN$C_GBLWRT) {
     mem_map[pfn].pfn$l_shrcnt++;
     if (mem_map[pfn].pfn$l_shrcnt==1) {
@@ -302,11 +306,29 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	  if ((*(unsigned long *)pte)&_PAGE_TYP0) { // image file
 	    unsigned long index=(*(unsigned long *)pte)>>PAGE_SHIFT;
 	    struct _secdef *pstl=current->pcb$l_phd->phd$l_pst_base_offset;
+#if 0
 	    struct _secdef *sec=&pstl[index];
 	    struct file * file=sec->sec$l_window;
 	    unsigned long vbn=sec->sec$l_vbn;
 	    struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	    unsigned long offset;// in PAGE_SIZE units
+#else
+	    struct _secdef *sec;
+	    struct file * file;
+	    unsigned long vbn;
+	    struct _rde * rde;
+	    unsigned long offset;// in PAGE_SIZE units
+
+	    if (index>64) {
+	      printk("wrong %x %x %x %x\n",address,page,pte,*pte);
+	      die("Wrong\n",regs,error_code);
+	      panic("Wrong\n");
+	    }
+	    sec=&pstl[index];
+	    file=sec->sec$l_window;
+	    vbn=sec->sec$l_vbn;
+	    rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+#endif
 	    if (rde==0) printk("vma0 address %x\n",address);
 	    //printk(" i pstl sec file vbn rde %x %x %x %x %x %x\n",index,pstl,sec,file,vbn,rde);
 	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+vbn;
@@ -337,6 +359,11 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 		signed long pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
 		mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 		*(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+		if (page==0) {
+		  printk("wrong %x %x %x %x\n",address,page,pte,*pte);
+		  die("Wrong\n",regs,error_code);
+		  panic("Wrong\n");
+		}
 		memset(page,0,PAGE_SIZE); // must zero content also
 	      }
 	      return;
@@ -922,7 +949,11 @@ int mmg$frewsle(struct _pcb * p, void * va) {
   pte=findpte(p,va2);
 
   {
+#ifdef __arch_um__
     signed long pfn=__pa(((struct _mypte*)pte)->pte$v_pfn << PAGE_SHIFT) >> PAGE_SHIFT ;
+#else
+    signed long pfn=((struct _mypte*)pte)->pte$v_pfn;
+#endif
 
     //if dem zero (data page)?
     if ((mem_map[pfn].pfn$q_bak&PTE$M_TYP0)==0)
@@ -945,7 +976,11 @@ int mmg$frewsle(struct _pcb * p, void * va) {
 }
 
 int mmg$frewslx(struct _pcb * p, void * va,unsigned long * pte, unsigned long index) {
+#ifdef __arch_um__
   signed long pfn=__pa(((struct _mypte*)pte)->pte$v_pfn << PAGE_SHIFT) >> PAGE_SHIFT ;
+#else
+  signed long pfn=((struct _mypte*)pte)->pte$v_pfn;
+#endif
   struct _wsl * wsl = p->pcb$l_phd->phd$l_wslist;
 
 #if 0
