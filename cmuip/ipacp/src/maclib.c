@@ -1286,8 +1286,7 @@ l10:
 	R0 &=	0x7fffffffffff;
 	// not yet	R0 = R0/100; R0=R0/1000; // Convert with R0 in 100ths
 	  /*POPL	R1*/
-	R0=R0/100;
-	return R0/1000;
+	return R0;//(R0/100/1000);
 }
 
 
