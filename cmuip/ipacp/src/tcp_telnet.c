@@ -1630,9 +1630,9 @@ signed long
 		0,		// JC
 		&itm);				// JC
 	if (BLISSIFNOT(RC)) TVT->TVT$DO_PID = 0;		// Cancel
-	$DESCRIPTOR(ctr,"_!ASA!UL:");
+	$DESCRIPTOR(ctr,"!AS!UL:"); // was: ASA (because tz+a) -_, not needed?
 	if (RC == SS$_NORMAL)
-	  RC = exe$fao(&ctr,devnam,devnam,ptynam,Unit_Number); // check
+	  RC = exe$fao(&ctr,&devnam->dsc$w_length,devnam,ptynam,Unit_Number); // check
 	if (BLISSIF(RC))
 	  RC = exe$getdviw (0,0,devnam,Item_List,0,0); // seems C can not fill int the rest with 0?
 
@@ -1736,7 +1736,6 @@ void PTY_READ_DONE(TVT)
 //
 	struct TVT$BLOCK * TVT;
     {
-      long long dummy; // check. need something so TVT is not destroyed for some reason
 struct PTY$IOSB * IOSB = &TVT->TVT$RD_IOSB;
  struct tcb_structure * TCB;
     signed long
