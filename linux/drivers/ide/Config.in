@@ -3,7 +3,6 @@
 #
 # Andre Hedrick <andre@linux-ide.org>
 #
-dep_tristate 'VMS Enhanced IDE/MFM/RLL disk/cdrom/tape/floppy support' CONFIG_BLK_DEV_IDE_VMS
 
 mainmenu_option next_comment
 comment 'IDE, ATA and ATAPI Block devices'

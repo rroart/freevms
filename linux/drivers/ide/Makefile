@@ -17,9 +17,12 @@ obj-y		:=
 obj-m		:=
 ide-obj-y	:=
 
+obj-$(CONFIG_IO_VMS) += oz_dev_ide8038i_486.o
+
 obj-$(CONFIG_BLK_DEV_HD)	+= hd.o
 obj-$(CONFIG_BLK_DEV_IDE_VMS)       += dqdriver.o enable-ide.o 
 obj-$(CONFIG_BLK_DEV_IDE)       += ide-mod.o ide-probe-mod.o
+ifneq ($(CONFIG_IO_VMS),y)
 obj-$(CONFIG_BLK_DEV_IDECS)     += ide-cs.o
 obj-$(CONFIG_BLK_DEV_IDEDISK)   += ide-disk.o
 obj-$(CONFIG_BLK_DEV_IDECD)     += ide-cd.o
@@ -73,10 +76,15 @@ ide-obj-$(CONFIG_BLK_DEV_MPC8xx_IDE)	+= ide-m8xx.o
 obj-$(CONFIG_BLK_DEV_ATARAID)	+= ataraid.o
 obj-$(CONFIG_BLK_DEV_ATARAID_PDC)	+= pdcraid.o
 obj-$(CONFIG_BLK_DEV_ATARAID_HPT)	+= hptraid.o
+endif
 
 ide-obj-$(CONFIG_PROC_FS)		+= ide-proc.o
 
+ifneq ($(CONFIG_IO_VMS),y)
 ide-mod-objs		:= ide.o ide-features.o $(ide-obj-y)
+else
+ide-mod-objs            := ide-features.o $(ide-obj-y)
+endif
 ide-probe-mod-objs	:= ide-probe.o ide-geometry.o
 
 include $(TOPDIR)/Rules.make
