@@ -1152,8 +1152,8 @@ static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
 	i = 1 << cachep->gfporder;
 	page = virt_to_page(objp);
 	do {
-		SET_PAGE_CACHE(page, cachep);
-		SET_PAGE_SLAB(page, slabp);
+	  SET_PAGE_CACHE(page, cachep);
+	  SET_PAGE_SLAB(page, slabp);
 		PageSetSlab(page);
 		page++;
 	} while (--i);
