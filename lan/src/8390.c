@@ -88,8 +88,6 @@ static const char version[] =
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
 
-#include <linux/string.h>
-
 #define NS8390_CORE
 #include "8390.h"
 
@@ -778,7 +776,7 @@ static void ei_receive(struct net_device *dev)
 				char * buf=kmalloc(4096,GFP_KERNEL);
 				ei_block_input(dev, pkt_len, buf, current_offset + sizeof(rx_frame));
 				memcpy(cb1->cxb$ps_pktdata, buf, 14);
-				memcpy(cb2->cxb$ps_pktdata, &buf[14], pkt_len - 14, lp);
+				memcpy(cb2->cxb$ps_pktdata, &buf[14], pkt_len - 14);
 				kfree(buf);
 				cb2->cxb$w_length=pkt_len - 14;
 

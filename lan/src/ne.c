@@ -245,7 +245,7 @@ int er_iodb_vmsinit(int dev) {
   struct _ddb * ddb=&er$ddb;
   struct _crb * crb=&er$crb;
 #endif 
-  struct _ucbnidef * ucb=kmalloc(sizeof(struct _ucbnidef),GFP_KERNEL);
+  struct _ucb * ucb=kmalloc(sizeof(struct _ucbnidef),GFP_KERNEL);
   struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
