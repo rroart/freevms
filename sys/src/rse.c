@@ -8,7 +8,12 @@
 #include"../../freevms/sys/src/rse.h"
 
 int sch$qend(struct _pcb * p) {
-  //  __asm__ __volatile__("int $0x88\n");
+  //	{ int i; for (i=0;i<1000000;i++) ; }
+  //	set_intr_gate(TEST_VECTOR,&test_code);
+  //
+  //	printk("setting our vectors\n\ndoing\n");
+  //	{ int i; for (i=0;i<1000000;i++) ; }
+  //   __asm__ __volatile__("int $0x88\n");
   p->phd$w_quant = -QUANTUM/10;
   /* p->pcb$b_pri++; why must we have this? */
   p->need_resched = 1;
@@ -30,4 +35,7 @@ int sch$qend(struct _pcb * p) {
       }
   }
   return 1;
+}
+
+void sch$resched() {
 }

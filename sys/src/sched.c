@@ -1,5 +1,3 @@
-#include "/usr/src/freevms/sys/src/sched.c"
-#if 0
 /*
  *  linux/kernel/sched.c
  *
@@ -34,6 +32,7 @@
 
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
+#include "/usr/src/freevms/sys/src/sysgen.h"
 
 extern void timer_bh(void);
 extern void tqueue_bh(void);
@@ -136,14 +135,12 @@ void scheduling_functions_start_here(void) { }
  * and TLB miss penalties.
  *
  * Return values:
- *	 -1000: never select this
  *	     0: out of time, recalculate counters (but it might still be
  *		selected)
- *	   +ve: "goodness" value (the larger, the better)
- *	 +1000: realtime process, select this.
+ *	   +: "goodness" value (the smaller the better)
  */
 
-static inline int goodness(struct task_struct * p, int this_cpu, struct mm_struct *this_mm)
+static inline unsigned char goodness(struct task_struct * p, int this_cpu, struct mm_struct *this_mm)
 {
 	int weight;
 
@@ -152,6 +149,17 @@ static inline int goodness(struct task_struct * p, int this_cpu, struct mm_struc
 	 * runnable process, but before the idle thread.
 	 * Also, dont trigger a counter recalculation.
 	 */
+//	if (p->pcb$b_pri>32) {
+//printk("goodness pid %x %x\n",p->pid,p->pcb$b_pri);
+//{ int i; for (i=0;i<100000; i++);  }
+//	p->pcb$b_pri=p->pcb$b_prib;
+//	}
+	if (p->phd$w_quant >= 0)  {
+		p->phd$w_quant=-QUANTUM; /* trying this to make things work */
+printk("goodness do we ever get here?\n");
+		return 0;
+	}
+	return (1 + p->pcb$b_pri + 31 - p->pcb$b_prib); /* due to high pris */
 	weight = -1;
 	if (p->policy & SCHED_YIELD)
 		goto out;
@@ -167,21 +175,21 @@ static inline int goodness(struct task_struct * p, int this_cpu, struct mm_struc
 		 * Don't do any other calculations if the time slice is
 		 * over..
 		 */
-		weight = p->counter;
-		if (!weight)
+		weight = p->phd$w_quant;
+		if (weight>=0)
 			goto out;
 			
 #ifdef CONFIG_SMP
 		/* Give a largish advantage to the same processor...   */
 		/* (this is equivalent to penalizing other processors) */
-		if (p->processor == this_cpu)
+		if (p->pcb$l_cpu_id == this_cpu)
 			weight += PROC_CHANGE_PENALTY;
 #endif
 
 		/* .. and a slight advantage to the current MM */
 		if (p->mm == this_mm || !p->mm)
 			weight += 1;
-		weight += 20 - p->nice;
+		weight += 20 - p->pcb$b_prib;
 		goto out;
 	}
 
@@ -223,7 +231,7 @@ static void reschedule_idle(struct task_struct * p)
 	 * shortcut if the woken up task's last CPU is
 	 * idle now.
 	 */
-	best_cpu = p->processor;
+	best_cpu = p->pcb$l_cpu_id;
 	if (can_schedule(p, best_cpu)) {
 		tsk = idle_task(best_cpu);
 		if (cpu_curr(best_cpu) == tsk) {
@@ -282,12 +290,12 @@ send_now_idle:
 	tsk = target_tsk;
 	if (tsk) {
 		if (oldest_idle != -1ULL) {
-			best_cpu = tsk->processor;
+			best_cpu = tsk->pcb$l_cpu_id;
 			goto send_now_idle;
 		}
 		tsk->need_resched = 1;
-		if (tsk->processor != this_cpu)
-			smp_send_reschedule(tsk->processor);
+		if (tsk->pcb$l_cpu_id != this_cpu)
+			smp_send_reschedule(tsk->pcb$l_cpu_id);
 	}
 	return;
 		
@@ -533,6 +541,8 @@ asmlinkage void schedule_tail(struct task_struct *prev)
  * tasks can run. It can not be killed, and it cannot sleep. The 'state'
  * information in task[0] is never used.
  */
+
+#define sch$sched schedule
 asmlinkage void schedule(void)
 {
 	struct schedule_data * sched_data;
@@ -540,13 +550,13 @@ asmlinkage void schedule(void)
 	struct list_head *tmp;
 	int this_cpu, c;
 
-
+//printk("schsch\n");
 	spin_lock_prefetch(&runqueue_lock);
 
 	if (!current->active_mm) BUG();
 need_resched_back:
 	prev = current;
-	this_cpu = prev->processor;
+	this_cpu = prev->pcb$l_cpu_id;
 
 	if (unlikely(in_interrupt())) {
 		printk("Scheduling in interrupt\n");
@@ -565,8 +575,9 @@ need_resched_back:
 
 	/* move an exhausted RR process to be last.. */
 	if (unlikely(prev->policy == SCHED_RR))
-		if (!prev->counter) {
-			prev->counter = NICE_TO_TICKS(prev->nice);
+		if ((prev->phd$w_quant&31)>=0) {
+			prev->phd$w_quant=-QUANTUM/10;
+			prev->pcb$b_pri=prev->pcb$b_prib;
 			move_last_runqueue(prev);
 		}
 
@@ -586,29 +597,33 @@ need_resched_back:
 	 * this is the scheduler proper:
 	 */
 
+//printk("rep\n");
 repeat_schedule:
 	/*
 	 * Default process to select..
 	 */
 	next = idle_task(this_cpu);
-	c = -1000;
+	c = 100;
 	list_for_each(tmp, &runqueue_head) {
 		p = list_entry(tmp, struct task_struct, run_list);
 		if (can_schedule(p, this_cpu)) {
-			int weight = goodness(p, this_cpu, prev->active_mm);
-			if (weight > c)
+			unsigned char weight = goodness(p, this_cpu, prev->active_mm);
+//printk("wei2 %x\n",weight);
+			if (weight < c)
 				c = weight, next = p;
 		}
 	}
 
+//printk("wei %x\n",c);
+//{ int i; for (i=0; i<100000; i++ ) ; }
 	/* Do we need to re-calculate counters? */
 	if (unlikely(!c)) {
 		struct task_struct *p;
 
 		spin_unlock_irq(&runqueue_lock);
 		read_lock(&tasklist_lock);
-		for_each_task(p)
-			p->counter = (p->counter >> 1) + NICE_TO_TICKS(p->nice);
+//		for_each_task(p)
+//			p->counter = (p->counter >> 1) + NICE_TO_TICKS(p->nice);
 		read_unlock(&tasklist_lock);
 		spin_lock_irq(&runqueue_lock);
 		goto repeat_schedule;
@@ -628,7 +643,9 @@ repeat_schedule:
 		prev->policy &= ~SCHED_YIELD;
 		goto same_process;
 	}
-
+	if (prev != next) {
+	 	if (next->pcb$b_pri<next->pcb$b_prib) next->pcb$b_pri++;
+	}
 #ifdef CONFIG_SMP
  	/*
  	 * maintain the per-process 'last schedule' value.
@@ -865,12 +882,12 @@ asmlinkage long sys_nice(int increment)
 	if (increment > 40)
 		increment = 40;
 
-	newprio = current->nice + increment;
+	newprio = current->pcb$b_prib + increment;
 	if (newprio < -20)
 		newprio = -20;
 	if (newprio > 19)
 		newprio = 19;
-	current->nice = newprio;
+	current->pcb$b_prib = newprio;
 	return 0;
 }
 
@@ -1102,12 +1119,14 @@ asmlinkage long sys_sched_rr_get_interval(pid_t pid, struct timespec *interval)
 	read_lock(&tasklist_lock);
 	p = find_process_by_pid(pid);
 	if (p)
-		jiffies_to_timespec(p->policy & SCHED_FIFO ? 0 : NICE_TO_TICKS(p->nice),
-				    &t);
+		jiffies_to_timespec(p->policy & SCHED_FIFO ? 0 : NICE_TO_TICKS(p->pcb$b_prib), &t);
 	read_unlock(&tasklist_lock);
 	if (p)
 		retval = copy_to_user(interval, &t, sizeof(t)) ? -EFAULT : 0;
 out_nounlock:
+	return retval;
+out_unlock:
+	read_unlock(&tasklist_lock);
 	return retval;
 }
 
@@ -1236,7 +1255,7 @@ void reparent_to_init(void)
 	spin_lock(&runqueue_lock);
 
 	this_task->ptrace = 0;
-	this_task->nice = DEF_NICE;
+	this_task->pcb$b_prib = DEFPRI;
 	this_task->policy = SCHED_OTHER;
 	/* cpus_allowed? */
 	/* rt_priority? */
@@ -1329,4 +1348,5 @@ void __init sched_init(void)
 	atomic_inc(&init_mm.mm_count);
 	enter_lazy_tlb(&init_mm, current, cpu);
 }
-#endif
+
+#include "/usr/src/freevms/sys/src/rse.c"

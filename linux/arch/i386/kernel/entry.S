@@ -85,6 +85,28 @@ processor	= 52
 */
 ENOSYS = 38
 
+#define PUSHR_ALL \
+	cld; \
+	pushl %es; \
+	pushl %ds; \
+	pushl %eax; \
+	pushl %ebp; \
+	pushl %edi; \
+	pushl %esi; \
+	pushl %edx; \
+	pushl %ecx; \
+	pushl %ebx;
+
+#define POPR_ALL	\
+	popl %ebx;	\
+	popl %ecx;	\
+	popl %edx;	\
+	popl %esi;	\
+	popl %edi;	\
+	popl %ebp;	\
+	popl %eax;	\
+	popl %ds;	\
+	popl %es;
 
 #define SAVE_ALL \
 	cld; \
@@ -468,9 +490,22 @@ ENTRY(spurious_interrupt_bug)
 	jmp error_code
 
 ENTRY(test_code)
-        SAVE_ALL
+        PUSHR_ALL
         call SYMBOL_NAME(do_test_code)
-        RESTORE_ALL
+        POPR_ALL
+        iret
+
+ENTRY(sched_vector)
+        PUSHR_ALL
+        call SYMBOL_NAME(schedule)
+        POPR_ALL
+        iret
+
+ENTRY(resched_vector)
+        PUSHR_ALL
+        call SYMBOL_NAME(sch$resched)
+        POPR_ALL
+        iret
 
 .data
 ENTRY(sys_call_table)

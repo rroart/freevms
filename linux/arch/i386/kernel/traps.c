@@ -87,6 +87,8 @@ asmlinkage void spurious_interrupt_bug(void);
 asmlinkage void machine_check(void);
 
 asmlinkage void test_code(void);
+asmlinkage void sched_vector(void);
+asmlinkage void resched_vector(void);
 
 int kstack_depth_to_print = 24;
 
@@ -973,7 +975,9 @@ void __init trap_init(void)
 	set_system_gate(SYSCALL_VECTOR,&system_call);
 		set_system_gate(VMSSYSCALL_VECTOR,&vmssystem_call);
 
-		set_intr_gate(TEST_VECTOR,&test_code);
+		//		set_intr_gate(TEST_VECTOR,&test_code);
+		set_intr_gate(SCHED_VECTOR,&sched_vector);
+		set_intr_gate(RESCHED_VECTOR,&resched_vector);
 
 	/*
 	 * default LDT is a single-entry callgate to lcall7 for iBCS

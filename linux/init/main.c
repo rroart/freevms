@@ -79,6 +79,8 @@ extern int irda_device_init(void);
 #error Sorry, your GCC is too old. It builds incorrect kernels.
 #endif
 
+#include<asm/hw_irq.h>
+
 extern char _stext, _etext;
 extern char *linux_banner;
 
@@ -824,7 +826,7 @@ static int init(void * unused)
 
 	printk("before init int\n");
 
-//	__asm__ __volatile__ ("int $0x88\n");
+	//	SOFTINT_TEST_VECTOR;
 
 	printk("after init int\n");
 	if (execute_command)
