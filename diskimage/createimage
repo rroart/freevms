@@ -62,6 +62,8 @@ cd /etc
 cp -pi *passwd* *group* *shadow* /mnt/etc
 cd -
 
+dd if=/dev/zero count=128 of=/mnt/vms\$common/sysexe/pagefile.sys
+
 umount /mnt
 losetup -d /dev/loop0
 
