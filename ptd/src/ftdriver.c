@@ -254,9 +254,9 @@ int ft_vmsinit(void) {
 }
 
 int ft$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
-
+  printk("should not be in ft$read\n");
 }
 
 int ft$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
-
+  printk("should not be in ft$write\n");
 }
