@@ -18,15 +18,45 @@ show_logical(int argc, char**argv){
   struct dsc$descriptor mytabnam, mynam;
   char resstring[LNM$C_NAMLENGTH];
 
-  if (argc>1 && 0==strncmp(argv[0],"/table",strlen(argv[0]))) {
+  char * default_table = "LNM$PROCESS_TABLE";
+  char * table;
+
+  $DESCRIPTOR(p, "p1");
+  $DESCRIPTOR(d, "table");
+
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+  memset (c, 0, 80);
+
+  char e[80];
+  struct dsc$descriptor o2;
+  o2.dsc$a_pointer=e;
+  o2.dsc$w_length=80;
+  memset (e, 0, 80);
+
+  int retlen;
+
+  sts = cli$present(&p);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = cli$present(&d);
+
+  if (sts&1) {
+    sts = cli$get_value(&d, &o, &retlen);
+    table=c;
   } else {
-    return 0;
+    table=default_table;
   }
 
-  mynam.dsc$w_length=strlen(argv[2]);
-  mynam.dsc$a_pointer=argv[2];
-  mytabnam.dsc$w_length=strlen(argv[1]);
-  mytabnam.dsc$a_pointer=argv[1];
+  sts = cli$get_value(&p, &o2, &retlen);
+
+  mynam.dsc$w_length=strlen(e);
+  mynam.dsc$a_pointer=e;
+  mytabnam.dsc$w_length=strlen(c);
+  mytabnam.dsc$a_pointer=c;
 
   itm[0].item_code=LNM$_STRING;
   itm[0].buflen=LNM$C_NAMLENGTH;
@@ -35,7 +65,7 @@ show_logical(int argc, char**argv){
 
   sts = sys$trnlnm(0,&mytabnam,&mynam,0,itm);
 
-  printf("   \"%s\" = \"%s\"\n",argv[2],resstring);
+  printf("   \"%s\" = \"%s\"\n",e,resstring);
 
   return sts;
 }
