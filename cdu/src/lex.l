@@ -112,7 +112,8 @@ hexdigit [0-9a-f]
     onlytname:
       s=strdup(yytext);
       yylval.type_node_p=get_identifier(s);
-     printf("T %s T",s);
+     extern int yydebug;
+     if (yydebug) printf("T %s T",s);
       return T_NAME;
     }
   /*yylval.type_str=strdup(yytext);*/

@@ -625,6 +625,11 @@ unsigned long main (int argc, char *argv[])
 
   vms_mm = check_vms_mm();
 
+  int cli_table=0;
+  if (vms_mm==0) {
+    cli_table=cli$cli("/vms$common/sysexe/all.cld");
+  }
+
   /* Put argc/argv's in symbols oz_arg0... Set symbol oz_nargs to the number of values. */
 
   setscriptsyms (argc, (const char **)argv);
@@ -845,7 +850,20 @@ unsigned long main (int argc, char *argv[])
       p = proclabels (cmdbuf);						/* process any labels that are present */
       if (skiplabel[0] == 0) {						/* ignore line if skipping to a particular label */
 	if (verify) fprintf (h_s_output, "%s\n", cmdbuf);	/* ok, echo if verifying turned on */
+	if (vms_mm==0) {
+	  struct dsc$descriptor d;
+	  d.dsc$a_pointer=cmdbuf;
+	  d.dsc$w_length=cmdlen;
+	  sts = cli$dcl_parse(&d,cli_table,0,0,0);
+	  if (sts&1)
+	    sts = cli$dispatch(0);
+	  static struct _cdu ** cur_cdu=0x3f000000;
+	  *cur_cdu=0;
+	  if (sts&1)
+	    goto dontexec;
+	}
 	sts = execute (p);						/* execute the command line */
+      dontexec:
 	if (sts != SS$_BRANCHSTARTED) symbol -> ivalue = sts;			/* save the new status */
       }
     }

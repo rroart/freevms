@@ -207,7 +207,7 @@ tree_size (tree node)
 #if 0
 	case IDENTIFIER_NODE:	return lang_hooks.identifier_size;
 #else
-	case IDENTIFIER_NODE:   return sizeof (2* sizeof(union tree_node)); // check
+	case IDENTIFIER_NODE:   return sizeof (union tree_node); // check
 #endif
 	case TREE_LIST:		return sizeof (struct tree_list);
 	case TREE_VEC:		return (sizeof (struct tree_vec)

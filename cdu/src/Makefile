@@ -6,7 +6,7 @@ FLAGS = -static
 LEX = flex
 BISON = bison
 
-all: cdu cdu.a
+all: cdu cdu.a cdu2.a
 
 clean:
 	rm *.o *.a
@@ -19,6 +19,9 @@ install: all
 
 cdu: parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o
 	gcc parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o -ldl -liberty -o cdu
+
+cdu2.a: cli2.o
+	ar r cdu2.a cli2.o
 
 cdu.a: parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o
 	ar r cdu.a parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o

@@ -1,5 +1,8 @@
 FLAGS = -static
 
+EXTERNAL = ../../cdu/src/cdu.a
+EXTERNAL2 = ../../cdu/src/cdu2.a
+
 all: i386/directory${EXE} i386/directory${NOEXE} um/directory${EXE} um/directory${NOEXE}
 
 clean:
@@ -60,20 +63,21 @@ OBJS = directory.o
 %.o: %.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
-i386/directory${NOEXE}: $(VMSLIBS) $(OBJS)
+i386/directory${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
 	install -d i386
-	gcc -g -static $(OBJS) $(VMSLIBS) -o i386/directory${NOEXE}
+	ld -Bshareable $(OBJS) $(VMSLIBS) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/directory.exe2
+	gcc -g -static $(OBJS) $(VMSLIBS) $(EXTERNAL2) -o i386/directory${NOEXE}
 
-i386/directory${EXE}: $(VMSLIBS) $(OBJS)
+i386/directory${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
 	install -d i386
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/directory${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o i386/directory${EXE}
 
 UMDEF=-Dcompile_um -I.
 
-um/directory${NOEXE}: $(VMSLIBSUM) $(OBJS)
+um/directory${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
 	install -d um
-	gcc -g -static $(OBJS) $(VMSLIBSUM) -o um/directory${NOEXE}
+	gcc -g -static $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) -o um/directory${NOEXE}
 
 um/directory${EXE}: $(VMSLIBSUM) $(OBJS)
 	install -d um
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/directory${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o um/directory${EXE}

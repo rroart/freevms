@@ -139,6 +139,8 @@ struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
 
+static int main_done = 0;
+
 /* keycomp: routine to compare parameter to a keyword - case insensitive! */
 
 int keycomp(char *param,char *keywrd)
@@ -155,17 +157,34 @@ int keycomp(char *param,char *keywrd)
 int checkquals(char *qualset[],int qualc,char *qualv[])
 {
     int result = 0;
+    static struct _cdu ** cur_cdu=0x3f000000;
+    if (main_done == 0 && *cur_cdu)
+      qualc=1;
     while (qualc-- > 0) {
         int i = 0;
         while (qualset[i] != NULL) {
+	  if(main_done == 1 || *cur_cdu == 0) {
             if (keycomp(qualv[qualc],qualset[i])) {
                 result |= 1 << i;
                 i = -1;
                 break;
             }
             i++;
+	  } else { // not ==0
+	    struct dsc$descriptor d;
+	    d.dsc$w_length=strlen(qualset[i]);
+	    d.dsc$a_pointer=qualset[i];
+	    int stat = cli$present(&d);
+	    if (stat&1) {
+	      result |= 1 << i;
+	      i = -1;
+	      break;
+	    }
+            i++;
+	  }
         }
-        if (i >= 0) printf("%%ODS2-W-ILLQUAL, Unknown qualifer '%s' ignored\n",qualv[qualc]);
+	if(main_done == 1 || *cur_cdu == 0)
+	  if (i >= 0) printf("%%ODS2-W-ILLQUAL, Unknown qualifer '%s' ignored\n",qualv[qualc]);
     }
     return result;
 }
@@ -1307,6 +1326,7 @@ int main_not(int argc,char *argv[])
 int main(int argc,char *argv[])
 {
   setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
+  main_done = 1;
   char str[2048];
   int c,i=0;
   for(c=0;c<argc;c++) {

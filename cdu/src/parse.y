@@ -112,6 +112,7 @@ location_t input_location;
 %type <type_node_p> bool_expr bool_expr_list bool_expr_list2 parameter_clause
 %type <type_node_p> verb_clause any_list type_clause parameter_clause_list
 %type <type_node_p> qualifier_clause_list_start qualifier_clause_list
+%type <type_node_p> parameter_clause_list_start
 
 %{
 %}
@@ -156,7 +157,7 @@ K_DEFINE K_TYPE T_NAME type_clause_list
 
 define_verb:
 K_DEFINE K_VERB T_NAME verb_clause_list
-{ $$ = build_nt(DEFINE_VERB_STMT,$1,$3); }
+{ $$ = build_nt(DEFINE_VERB_STMT,$3,$4); }
 ;
 
 verb_clause_list:
@@ -189,7 +190,10 @@ K_NOQUALIFIERS
 |
 K_OUTPUTS name_list_or_zero
 |
-K_PARAMETER T_NAME ',' parameter_clause_list
+K_PARAMETER T_NAME parameter_clause_list_start
+{
+  $$ = build_nt(PARAMETER_CLAUSE, $2);
+}
 |
 K_PREFIX T_NAME
 |
@@ -202,9 +206,12 @@ T_NAME
   tnamemode=0; 
 }
 qualifier_clause_list_start
+{
+  $$ = build_nt(QUALIFIER_CLAUSE, $3);
+}
 |
 K_ROUTINE T_NAME
-{ $$ = build_nt(ROUTINE_CLAUSE, $1); }
+{ $$ = build_nt(ROUTINE_CLAUSE, $2); }
 |
 K_SYNONYM T_NAME
 ;
@@ -236,6 +243,17 @@ keyword_clause_list:
 keyword_clause_list ',' keyword_clause { $$ = chainon ($1, $3); }
 |
 keyword_clause
+;
+
+parameter_clause_list_start:
+{
+  $$ = 0;
+}
+|
+',' parameter_clause_list
+{
+  $$ = $2;
+}
 ;
 
 parameter_clause_list:

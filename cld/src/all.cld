@@ -1,7 +1,11 @@
-define verb dir2
+define verb dird
 	image directory
 	routine dir
+	parameter p1
+	qualifier date
+	qualifier file
+	qualifier size
 
-define verb dfu2
+define verb dfud
 	image dfu
 	routine verify_command
