@@ -74,6 +74,8 @@ int mydebug6 = 1;
 
 mycheckaddr(){
 #if 1
+  extern volatile int nr_running;
+  int nr0=nr_running;
   int i,n=0,m=0;
   struct _pcb  *tmp2;
   unsigned long tmp;
@@ -103,6 +105,7 @@ mycheckaddr(){
       m--;
     }
   }
+  if (nr0!=nr_running) { /*printk("nr0 changed\n");*/ return; }
   if (n!=m) goto mypanic;
 #if 0
   unsigned long * f=&sch$aq_comh[31];
@@ -120,8 +123,10 @@ mycheckaddr(){
   printk("mypanic %x %x %x %x %x\n",i,n,m,tmp,tmp2);
   printk("mypanic %x %x %x %x %x\n",tmp2->pcb$l_sqfl,tmp2->pcb$l_sqfl->pcb$l_sqbl,tmp2->pcb$l_sqbl,tmp2->pcb$l_sqbl->pcb$l_sqfl,42);
   cli();
-  while(1) {; };
+#ifdef __i386__
   sickinsque(0x11111111,0x22222222);
+#endif
+  while(1) {; };
 #endif 
 }
 
