@@ -498,6 +498,9 @@ int scs$connect (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsys
 	s->sbnb$w_local_index=cdt->cdt$l_lconid;
 	cdt->cdt$w_state = CDT$C_CLOSED;
 
+	sk->cdt$l_msginput=msgadr;
+	sk->cdt$l_dginput=dgadr;
+
 	sk->cdt$w_state   = CDT$C_CON_SENT;
 
 	dn_nsp_send_conninit2(sk, SCS$C_CON_REQ,rprnam,lprnam,condat);
@@ -850,7 +853,7 @@ void * scs_find_name(char * c1) {
   struct _sbnb * head = &scs$gq_local_names;
   struct _sbnb * tmp = head->sbnb$l_flink;
   while(tmp!=head) {
-    if (strcmp(c1,&tmp->sbnb$b_procnam)) return tmp;
+    if (strcmp(c1,&tmp->sbnb$b_procnam)==0) return tmp;
     tmp=tmp->sbnb$l_flink;
   }
   return 0;
