@@ -221,10 +221,10 @@ int   scs_std$deall_rspid (struct _cdrp *cdrp_p) {
 }
 
 void * scs_register_name(char * c1, char * c2) {
-  struct _sbnb * s=vmalloc(sizeof(struct _sbnb));
-  bzero(s,sizeof(struct _sbnb));
+  struct _sbnb * s=kmalloc(sizeof(struct _sbnb),GFP_KERNEL);
+  memset(s,0,sizeof(struct _sbnb));
 
-  bcopy(c1,&s->sbnb$b_procnam,min(16,strlen(c1)));
+  memcpy(&s->sbnb$b_procnam,c1,min(16,strlen(c1)));
 
   insque(s,scs$gq_local_names);
 
@@ -361,7 +361,8 @@ int /*__init*/ scs_init(void) {
 //static int scs_sendmsg(struct _cdt *sock, struct msghdr *msg, int size,struct scm_cookie *scm)
 
 int scs_std$senddg(int disposition_flag, int dg_msg_length, struct _cdrp *cdrp ) {
-  struct _scs * scs = vmalloc(sizeof(struct _scs));
+  struct _scs * scs = kmalloc(sizeof(struct _scs), GFP_KERNEL);
+  memset(scs,0,sizeof(struct _scs));
   struct _scs1 * scs1 = scs;
   struct _ppd * ppd = scs;
   struct _cdt * cdt = cdrp->cdrp$l_cdt;
@@ -379,16 +380,14 @@ void scs_lower_level_send(struct _cdrp * cdrp, struct _scs * scs) {
   struct sk_buff *skb = NULL;
   struct _cdt * sk=cdrp->cdrp$l_cdt;
 
-  if ((skb = scs_alloc_skb2(sk, 1000, GFP_ATOMIC)) == NULL)
-    return;
+  char * buf=kmalloc(1600, GFP_KERNEL);
+  memset(buf,0,1600);
 
-  scs_msg_fill(skb,sk,0,scs);
+  scs_msg_fill(buf,sk,0,scs);
 
-  scs_msg_fill_more(skb,sk,cdrp,600);
+  scs_msg_fill_more(buf,sk,cdrp,600);
 
-  printscs(skb->data);
-
-  scs_nsp_send2(skb);	
+  scs_nsp_send2(buf, 1500);	
 }
 
 static int scs_std$sendmsg(int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (* complete)(void))
@@ -488,7 +487,8 @@ module_exit(scs_exit);
 //#endif /* #if 0 second one */
 
 int   scs_std$reqdata( struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (*complete)() ) {
-  struct _scs * scs = vmalloc(sizeof(struct _scs));
+  struct _scs * scs = kmalloc(sizeof(struct _scs),GFP_KERNEL);
+  memset(scs,0,sizeof(struct _scs));
   struct _scs1 * scs1 = scs;
   struct _ppd * ppd = scs;
   struct _cdt * cdt = cdrp_p->cdrp$l_cdt;
@@ -509,7 +509,8 @@ int   scs_std$request_data ( struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (*co
 }
 
 int   scs_std$senddata ( struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (*complete)() ) {
-  struct _scs * scs = vmalloc(sizeof(struct _scs));
+  struct _scs * scs = kmalloc(sizeof(struct _scs),GFP_KERNEL);
+  memset(scs,0,sizeof(struct _scs));
   struct _scs1 * scs1 = scs;
   struct _ppd * ppd = scs;
   struct _cdt * cdt = cdrp_p->cdrp$l_cdt;
@@ -532,7 +533,8 @@ cwpsmyerr(){}
 
 cwpslisten(void * packet, struct _cdt * c, struct _pdt * p) {
   int sts;
-  struct _iosb * iosb=vmalloc(sizeof(struct _iosb));
+  struct _iosb * iosb=kmalloc(sizeof(struct _iosb),GFP_KERNEL);
+  memset(iosb,0,sizeof(struct _iosb));
   struct _cdrp * cdrp;
   struct _scs * scs = packet;
   struct _cdt * cdt = &cdtl[scs->scs$l_dst_conid];
@@ -576,6 +578,7 @@ int ddb_transfer(struct _cdt * conf_cdt) {
   char *b = buf;
   int i;
   struct _cdrp * cdrp=kmalloc(sizeof(struct _cdrp),GFP_KERNEL);
+  memset(cdrp,0,sizeof(struct _cdrp));
   struct _scs_rd *r;
 
   __du_init(); //temp placement?
