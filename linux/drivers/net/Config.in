@@ -2,9 +2,6 @@
 # Network device configuration
 #
 
-source drivers/net/arcnet/Config.in
-source drivers/net/appletalk/Config.in
-
 tristate 'Dummy net driver support' CONFIG_DUMMY
 tristate 'Bonding driver support' CONFIG_BONDING
 tristate 'EQL (serial line load balancing) support' CONFIG_EQUALIZER
@@ -27,9 +24,6 @@ bool 'Ethernet (10 or 100Mbit)' CONFIG_NET_ETHERNET
 if [ "$CONFIG_NET_ETHERNET" = "y" ]; then
    if [ "$CONFIG_ARM" = "y" ]; then  
       dep_bool '  ARM EBSA110 AM79C961A support' CONFIG_ARM_AM79C961A $CONFIG_ARCH_EBSA110
-      if [ "$CONFIG_ARCH_ACORN" = "y" ]; then
-         source drivers/acorn/net/Config.in
-      fi
    fi
    if [ "$CONFIG_PPC" = "y" ]; then
       dep_tristate '  MACE (Power Mac ethernet) support' CONFIG_MACE $CONFIG_ALL_PPC
@@ -310,13 +304,9 @@ if [ "$CONFIG_NET_RADIO" = "y" ]; then
    fi
    dep_tristate '   Aironet 4500/4800 PROC interface ' CONFIG_AIRONET4500_PROC $CONFIG_AIRONET4500 m
 
-# New directory for Wireless LAN devices - cards above will move there
-   source drivers/net/wireless/Config.in
 fi
 
 endmenu
-
-source drivers/net/tokenring/Config.in
 
 bool 'Fibre Channel driver support' CONFIG_NET_FC
 if [ "$CONFIG_NET_FC" = "y" ]; then
@@ -326,10 +316,4 @@ fi
 if [ "$CONFIG_EXPERIMENTAL" = "y" ]; then
    dep_tristate 'Red Creek Hardware VPN (EXPERIMENTAL)' CONFIG_RCPCI $CONFIG_PCI
    tristate 'Traffic Shaper (EXPERIMENTAL)' CONFIG_SHAPER
-fi
-
-source drivers/net/wan/Config.in
-
-if [ "$CONFIG_HOTPLUG" = "y" -a "$CONFIG_PCMCIA" != "n" ]; then
-   source drivers/net/pcmcia/Config.in
 fi

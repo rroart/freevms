@@ -301,8 +301,6 @@ if [ "$CONFIG_NET" = "y" ]; then
 fi
 
 if [ "$CONFIG_IO_VMS" != "y" ]; then
-source drivers/telephony/Config.in
-
 mainmenu_option next_comment
 comment 'ATA/IDE/MFM/RLL support'
 

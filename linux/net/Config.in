@@ -19,16 +19,6 @@ tristate 'Unix domain sockets' CONFIG_UNIX
 bool 'TCP/IP networking' CONFIG_INET
 if [ "$CONFIG_INET" = "y" ]; then
    source net/ipv4/Config.in
-   if [ "$CONFIG_EXPERIMENTAL" = "y" ]; then
-#   IPv6 as module will cause a CRASH if you try to unload it
-      tristate '  The IPv6 protocol (EXPERIMENTAL)' CONFIG_IPV6
-      if [ "$CONFIG_IPV6" != "n" ]; then
-	 source net/ipv6/Config.in
-      fi
-   fi
-   if [ "$CONFIG_EXPERIMENTAL" = "y" ]; then
-      source net/khttpd/Config.in
-   fi
 fi
 if [ "$CONFIG_EXPERIMENTAL" = "y" ]; then
    bool 'Asynchronous Transfer Mode (ATM) (EXPERIMENTAL)' CONFIG_ATM
@@ -50,15 +40,6 @@ if [ "$CONFIG_EXPERIMENTAL" = "y" ]; then
 fi
 
 comment ' '
-tristate 'The IPX protocol' CONFIG_IPX
-if [ "$CONFIG_IPX" != "n" ]; then
-   source net/ipx/Config.in
-fi
-tristate 'Appletalk protocol support' CONFIG_ATALK
-tristate 'DECnet Support' CONFIG_DECNET
-if [ "$CONFIG_DECNET" != "n" ]; then
-   source net/decnet/Config.in
-fi
 dep_tristate '802.1d Ethernet Bridging' CONFIG_BRIDGE $CONFIG_INET
 if [ "$CONFIG_EXPERIMENTAL" = "y" ]; then
    tristate 'CCITT X.25 Packet Layer (EXPERIMENTAL)' CONFIG_X25
