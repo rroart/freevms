@@ -34,3 +34,7 @@ main(int argc, char ** argv) {
   genwrite();
   return 0;
 }
+
+int get_cli_int() {
+  return 0;
+}

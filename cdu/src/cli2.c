@@ -18,7 +18,7 @@ unsigned int cli$get_value(void *entity_desc, void *retdesc,short * retlen) {
   int min; 
   struct _cdu * cdu = *my_cdu;
 
-  if (dlen == 2 && name[0]=='p' && name[1]>='0' && name[1]<='9') {
+  if (dlen == 2 && name[0]=='p' && name[1]>'0' && name[1]<'9') {
     int p = cdu->cdu$l_parameters;
     while (p) {
       int namecdu=cdu_root[p].cdu$l_name;
@@ -36,10 +36,16 @@ unsigned int cli$get_value(void *entity_desc, void *retdesc,short * retlen) {
   } else {
     int q = cdu->cdu$l_qualifiers;
     while (q) {
-      int len=strlen(cdu_root[q].cdu$t_name);
+      int namecdu=cdu_root[q].cdu$l_name;
+      char * pname = cdu_root[namecdu].cdu$t_name;
+      int len=strlen(pname);
       min=len<dlen?len:dlen;
-      if (0==strncmp(cdu_root[q].cdu$t_name,name,min)) {
-	// not yet
+      if (0==strncmp(pname,name,min)) {
+	int valuecdu=cdu_root[q].cdu$l_value;
+	char * vname = cdu_root[valuecdu].cdu$t_name;
+	memcpy(ret->dsc$a_pointer,vname,strlen(vname));
+	if (retlen)
+	  *retlen=strlen(vname);
 	return 1;
       }
       q=cdu_root[q].cdu$l_next;

@@ -222,7 +222,7 @@ K_OUTPUTS name_list_or_zero
 |
 K_PARAMETER T_NAME parameter_clause_list_start
 {
-  $$ = build_nt(PARAMETER_CLAUSE, $2);
+  $$ = build_nt(PARAMETER_CLAUSE, $2, $3);
 }
 |
 K_PREFIX T_NAME
@@ -240,7 +240,7 @@ T_NAME
 }
 qualifier_clause_list_start
 {
-  $$ = build_nt(QUALIFIER_CLAUSE, $3);
+  $$ = build_nt(QUALIFIER_CLAUSE, $3, $5);
 }
 |
 K_ROUTINE T_NAME

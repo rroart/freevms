@@ -7,6 +7,29 @@
 #define CDU$C_PARAMETER 4
 #define CDU$C_QUALIFIER 5
 #define CDU$C_NAME 6
+#define CDU$C_VALUE 7
+#define CDU$C_KEYWORD 8
+
+#define CDU$M_NODISALLOWS 0x1
+#define CDU$M_NOPARAMETERS 0x2
+#define CDU$M_NOQUALIFIERS 0x4
+#define CDU$M_BATCH 0x8
+#define CDU$M_NEGATABLE 0x10
+#define CDU$M_NONNEGATABLE 0x20
+#define CDU$M_DEFAULT 0x40
+#define CDU$M_ABBREVIATE 0x80
+#define CDU$M_FOREIGN 0x100
+#define CDU$M_IMMEDIATE 0x200
+#define CDU$M_MCRIGNORE 0x400
+#define CDU$M_MCROPTDELIM 0x800
+#define CDU$M_MCRPARSE 0x1000
+#define CDU$M_NOSTATUS 0x2000
+#define CDU$M_CONCATENATE 0x4000
+#define CDU$M_NOCONCATENATE 0x8000
+#define CDU$M_IMPCAT 0x10000
+#define CDU$M_LIST 0x20000
+#define CDU$M_REQUIRED 0x40000
+#define CDU$M_INTERNAL 0x80000 // cliroutine is such
 
 struct _cdu {
   int cdu$l_cfl;
@@ -25,6 +48,12 @@ struct _cdu {
   int cdu$l_parameters;
   int cdu$l_name;
   int cdu$l_value;
+  int cdu$l_flags;
+  int cdu$l_label;
+  int cdu$l_type;
+  int cdu$l_syntax;
+  int cdu$l_clauses;
+  int cdu$l_keywords;
 };
 
 #if 0
