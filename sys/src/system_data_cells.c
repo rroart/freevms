@@ -2123,7 +2123,12 @@ void __init vms_init4(void) {
   __fl_init();
   //nl_init(); /* first */  
   //rnd_init();
+#ifdef CONFIG_VMS
+  tty_vmsinit();
   ft_vmsinit();
+  pn_vmsinit();
+  tz_vmsinit();
+#endif
 }
 
 void __init vms_init3(void) {
