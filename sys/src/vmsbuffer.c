@@ -692,6 +692,7 @@ static int __block_write_full_page2(struct inode *inode, struct page *page, unsi
 	blocksize = 1 << inode->i_blkbits;
 
 	block = pageno << (PAGE_CACHE_SHIFT - inode->i_blkbits);
+	iblock = pageno << (PAGE_CACHE_SHIFT - inode->i_blkbits);
 
 	i = 0;
 
@@ -719,6 +720,7 @@ static int __block_write_full_page2(struct inode *inode, struct page *page, unsi
 
 	  turns++;
 	  block++;
+	  iblock++;
 	} while (turns<(PAGE_SIZE/blocksize));
 
 	/* Done - end_buffer_io_async will unlock */
@@ -1365,6 +1367,40 @@ done:
 	goto done;
 }
 
+int block_write_full_page3(struct _fcb * fcb, struct page *page, unsigned long pageno)
+{
+	struct inode * inode=fcb->fcb$l_primfcb;
+	unsigned long end_index = inode->i_size >> PAGE_CACHE_SHIFT;
+	unsigned offset;
+	int err;
+
+	/* easy case */
+	if (pageno < end_index)
+		return __block_write_full_page2(inode, page, pageno);
+
+	/* things got complicated... */
+	offset = inode->i_size & (PAGE_CACHE_SIZE-1);
+	/* OK, are we completely out? */
+	if (pageno >= end_index+1 || !offset) {
+		UnlockPage(page);
+		return -EIO;
+	}
+
+	/* Sigh... will have to work, then... */
+	err = __block_prepare_write(inode, page, 0, offset, pageno);
+	if (!err) {
+		memset(page_address(page) + offset, 0, PAGE_CACHE_SIZE - offset);
+		flush_dcache_page(page);
+		__block_commit_write(inode,page,0,offset,pageno);
+done:
+		kunmap(page);
+		UnlockPage(page);
+		return err;
+	}
+	ClearPageUptodate(page);
+	goto done;
+}
+
 /*
  * Commence writeout of all the buffers against a page.  The
  * page must be locked.   Returns zero on success or a negative
@@ -1434,6 +1470,7 @@ int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsig
 
 	length = iobuf->length;
 	nr_blocks = length / blocksize;
+	iblock = blocknr << (PAGE_CACHE_SHIFT - inode->i_blkbits);
 	/* build the blocklist */
 	for (i = 0; i < nr_blocks; i++, blocknr++) {
 		struct buffer_head bh;
