@@ -1,3 +1,4 @@
+#include<cxbdef.h>
 #include<crbdef.h>
 #include<cdtdef.h>
 #include<dcdef.h>
@@ -34,8 +35,34 @@
 #include "../../cmuip/ipacp/src/xedrv.h"
 #include "../../cmuip/central/include/netconfig.h"
 
+static check_dup(struct _ucb * u, long * l) {
+  long len=l[0]/(2*sizeof(long));
+  long *addr = l[1];
+  long proto=0;
+  for(;len;len--) {
+    switch (*addr++) {
+    case NMA$C_PCLI_PTY:
+      //lsb->lsb$l_valid_pty=*addr++;
+      proto=htons(*addr++);
+      break;
+    default:
+    }
+  }
+  struct _ucb * head=u ;
+  struct _ucb * tmp=head->ucb$l_link;
+  struct _ucbnidef * ni;
+  while (tmp) {
+    ni = tmp;
+    if (proto == ni->ucb$l_ni_pty) break;
+    tmp=tmp->ucb$l_link;
+  }
+  return (proto == ni->ucb$l_ni_pty);
+}
+
 int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c){ 
-  if ((i->irp$l_func&(IO$M_CTRL|IO$M_STARTUP))==(IO$M_CTRL|IO$M_STARTUP)) {
+  switch (i->irp$l_func&IO$M_FMODIFIERS) {
+  case IO$M_CTRL|IO$M_STARTUP:
+    {
     struct dsc$descriptor * d=i->irp$l_qio_p2;
     long * l=d;
     long len=l[0]/(2*sizeof(long));
@@ -43,6 +70,9 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
     unsigned short int chan;
     struct _ucbnidef * newucb;
+
+    if (check_dup(u->ucb$l_ddb->ddb$ps_ucb,d)) goto dup;
+
     ioc_std$clone_ucb(u->ucb$l_ddb->ddb$ps_ucb /*&er$ucb*/,&newucb);
     //    exe$assign(dsc,&chan,0,0,0);
 
@@ -58,7 +88,7 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
       switch (*addr++) {
       case NMA$C_PCLI_PTY:
 	//lsb->lsb$l_valid_pty=*addr++;
-	ni->ucb$l_ni_pty=(*addr++)>>16;
+	ni->ucb$l_ni_pty=htons(*addr++);
 	break;
       default:
       }
@@ -72,7 +102,16 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
       dev->open(dev);
     }
     set_bit(__LINK_STATE_START, &dev->state);
+    }
+  dup:
+    break;
 
+  case IO$M_CTRL|IO$M_SHUTDOWN:
+    // not yet; doing a dup check above first
+    break;
+
+  default:
+    printk("unknown lan$setmode\n");
   }
 
   if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL;
@@ -97,10 +136,21 @@ int lan$sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
     sense->XE_Sense_Length=6;
     
     memcpy(sense->XE_Sense_String,dev->dev_addr,6);
+
+    sense=(long)sense+10+2; // 2 because of gcc feature/bug
+
+    sense->XE_Sense_Param = NMA$C_PCLI_PHA;
+    sense->XE_Sense_Type = 1;
+    sense->XE_Sense_Length=6;
+    
+    signed long bc[3] = { -1, -1 , -1};
+
+    memcpy(sense->XE_Sense_String,bc,6);
+
   }
   if (i->irp$l_iosb) {
     struct XE_iosb_structure * iosb = i->irp$l_iosb;
-    iosb->xe$tran_size=4+6;
+    iosb->xe$tran_size=2*(4+6+2); // 2 from gcc bug / feature
     iosb->xe$vms_code=SS$_NORMAL;
   }
   return SS$_NORMAL;
@@ -169,32 +219,73 @@ int lan$eth_type_trans(struct _ucb * u, void * data ) {
 	return htons(ETH_P_802_2);
 }
 
-int lan$netif_rx(struct _ucb * u, char * buf, int len ) {
-  int proto=ntohs(lan$eth_type_trans(u, buf));
+int lan$netif_rx(struct _ucb * u, void * bdsc) {
+  struct _cxb * cb1 = bdsc;
+  struct _cxb * cb2 = cb1->cxb$l_link; 
+  int proto=ntohs(lan$eth_type_trans(u, cb1->cxb$ps_pktdata));
   struct _ucbnidef * ni;
   struct _ucb * head=u;
   struct _ucb * tmp=u->ucb$l_link;
   if (proto==ETH_P_IPV6) {
-    kfree(buf);
+    kfreebuf(cb1);
     return;
   }
-  while (head!=tmp) {
+  while (tmp) {
     ni = tmp;
     if (proto == ni->ucb$l_ni_pty) break;
     tmp=tmp->ucb$l_link;
   }
   if (proto != ni->ucb$l_ni_pty) {
-    kfree(buf);
+    kfreebuf(cb1);
     return;
   }
 
-  exe$iofork(tmp->ucb$l_ioqfl,tmp);
+  if (aqempty(&tmp->ucb$l_ioqfl)) {
+    kfreebuf(cb1);
+    return;
+  }
+
+  struct _irp * i = remque(tmp->ucb$l_ioqfl, 0);
+  i->irp$l_bcnt=i->irp$l_qio_p2;
+  i->irp$l_svapte = cb1;
+  cb1->cxb$ps_uva32=i->irp$l_qio_p5;
+  cb2->cxb$ps_uva32=i->irp$l_qio_p1;
+  i->irp$l_iost1=SS$_NORMAL|(cb2->cxb$w_length<<16);
+  i->irp$l_iost2=0x0800;
+  return com$post(i,tmp);
 
 }
 
 int lan$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   exe$insertirp(u,i);
   return SS$_NORMAL;
+}
+
+void * lan$alloc_cxb(int len) {
+  struct _cxb * cb1 = kmalloc(sizeof(struct _cxb),GFP_KERNEL);
+  struct _cxb * cb2 = kmalloc(sizeof(struct _cxb),GFP_KERNEL);
+  char * buf1 = kmalloc(14,GFP_KERNEL);
+  char * buf2 = kmalloc(len-14,GFP_KERNEL);
+  cb1->cxb$b_type=DYN$C_CXB;
+  cb2->cxb$b_type=DYN$C_CXB;
+  cb1->cxb$w_length=14;
+  cb2->cxb$w_length=len-14;
+  cb1->cxb$ps_pktdata=buf1;
+  cb2->cxb$ps_pktdata=buf2;
+  cb1->cxb$l_link=cb2;
+  cb2->cxb$l_link=0;
+  return cb1;
+}
+
+void * lan$alloc_xmit_buf(struct _irp * i, struct _ucbnidef * u, char *dest) {
+  char * buf=kmalloc(4096, GFP_KERNEL);
+  unsigned short pty = htons(u->ucb$l_ni_pty);
+  unsigned short * pty_p = &buf[12];
+  memcpy(buf,i->irp$l_qio_p5,6);
+  memcpy(&buf[6],dest,6);
+  *pty_p=pty; // maybe it should be done before qio instead? -> above 6 -> 8
+  memcpy(&buf[14],i->irp$l_qio_p1,i->irp$l_qio_p2);
+  return buf;
 }
 
 #if 0
