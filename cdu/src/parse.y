@@ -112,7 +112,7 @@ location_t input_location;
 %type <type_node_p> bool_expr bool_expr_list bool_expr_list2 parameter_clause
 %type <type_node_p> verb_clause any_list type_clause parameter_clause_list
 %type <type_node_p> qualifier_clause_list_start qualifier_clause_list
-%type <type_node_p> parameter_clause_list_start
+%type <type_node_p> parameter_clause_list_start name_or_string
 
 %{
 %}
@@ -149,10 +149,12 @@ K_MODULE T_NAME
 
 define_syntax:
 K_DEFINE K_SYNTAX T_NAME verb_clause_list
+{ $$ = build_nt(DEFINE_SYNTAX_STMT,$3,$4); }
 ;
 
 define_type:
 K_DEFINE K_TYPE T_NAME type_clause_list
+{ $$ = build_nt(DEFINE_TYPE_STMT,$3,$4); }
 ;
 
 define_verb:
@@ -174,21 +176,44 @@ type_clause_list type_clause { $$ = chainon ($1, $2); }
 
 verb_clause:
 K_CLIFLAGS cli_flag_list
+{
+  $$ = build_nt(CLIFLAGS_CLAUSE, $2)
+}
 |
 K_CLIROUTINE T_NAME
+{
+  $$ = build_nt(CLIROUTINE_CLAUSE, $2)
+}
 |
 K_DISALLOW bool_expr_list
+{
+  $$ = build_nt(DISALLOW_CLAUSE, $2)
+}
 |
 K_IMAGE T_NAME
-{ $$ = build_nt(IMAGE_CLAUSE, $2); }
+{
+  $$ = build_nt(IMAGE_CLAUSE, $2);
+}
 |
 K_NODISALLOWS
+{
+  $$ = build_nt(NODISALLOWS_CLAUSE);
+}
 |
 K_NOPARAMETERS
+{
+  $$ = build_nt(NOPARAMETERS_CLAUSE);
+}
 |
 K_NOQUALIFIERS
+{
+  $$ = build_nt(NOQUALIFIERS_CLAUSE);
+}
 |
 K_OUTPUTS name_list_or_zero
+{
+  $$ = build_nt(OUTPUTS_CLAUSE, $2);
+}
 |
 K_PARAMETER T_NAME parameter_clause_list_start
 {
@@ -196,6 +221,9 @@ K_PARAMETER T_NAME parameter_clause_list_start
 }
 |
 K_PREFIX T_NAME
+{
+  $$ = build_nt(PREFIX_CLAUSE, $2);
+}
 |
 K_QUALIFIER
 {
@@ -211,9 +239,14 @@ qualifier_clause_list_start
 }
 |
 K_ROUTINE T_NAME
-{ $$ = build_nt(ROUTINE_CLAUSE, $2); }
+{
+  $$ = build_nt(ROUTINE_CLAUSE, $2);
+}
 |
 K_SYNONYM T_NAME
+{
+  $$ = build_nt(SYNONYM_CLAUSE, $2);
+}
 ;
 
 qualifier_clause_list_start:
@@ -237,6 +270,9 @@ T_NAME
   tnamemode=0; 
 }
 ',' keyword_clause_list
+{
+  $$ = build_nt(KEYWORD_CLAUSE, $3, $6);
+}
 ;
 
 keyword_clause_list:
@@ -264,24 +300,42 @@ parameter_clause
 
 parameter_clause:
 K_PROMPT '=' T_STRING
+{
+  $$ = build_nt(PROMPT_CLAUSE, $3);
+}
 |
 clauses
 ;
 
 qualifier_clause:
 K_BATCH
+{
+  $$ = build_nt(BATCH_CLAUSE);
+}
 |
 K_NEGATABLE
+{
+  $$ = build_nt(NEGATABLE_CLAUSE);
+}
 |
 K_NONNEGATABLE
+{
+  $$ = build_nt(NONNEGATABLE_CLAUSE);
+}
 |
 clauses
 ;
 
 clauses:
 K_CLIFLAGS cli_flag_list
+{
+  $$ = build_nt(CLIFLAGS_CLAUSE, $2)
+}
 |
 K_DEFAULT
+{
+  $$ = build_nt(DEFAULT_CLAUSE)
+}
 |
 K_LABEL '='
 {
@@ -291,32 +345,68 @@ T_NAME
 {
   tnamemode=0; 
 }
+{
+  $$ = build_nt(LABEL_CLAUSE, $4)
+}
 |
 K_SYNTAX '=' T_NAME
+{
+  $$ = build_nt(SYNTAX_CLAUSE, $3)
+}
 |
 K_VALUE '(' value_clauses ')'
+{
+  $$ = build_nt(VALUE_CLAUSE, $3)
+}
 ;
 
 cli_flag:
 K_ABBREVIATE
+{
+  $$ = build_nt(ABBREVIATE_CLAUSE)
+}
 |
 K_FOREIGN
+{
+  $$ = build_nt(FOREIGN_CLAUSE)
+}
 |
 K_IMMEDIATE
+{
+  $$ = build_nt(IMMEDIATE_CLAUSE)
+}
 |
 K_MCRIGNORE
+{
+  $$ = build_nt(MCRIGNORE_CLAUSE)
+}
 |
 K_MCROPTDELIM
+{
+  $$ = build_nt(MCROPTDELIM_CLAUSE)
+}
 |
 K_MCRPARSE
+{
+  $$ = build_nt(MCRPARSE_CLAUSE)
+}
 |
 K_NOSTATUS
+{
+  $$ = build_nt(NOSTATUS_CLAUSE)
+}
 ;
 
 keyword_clause:
 K_NEGATABLE
+{
+  $$ = build_nt(NEGATABLE_CLAUSE)
+}
 |
 K_NONNEGATABLE
+{
+  $$ = build_nt(NONNEGATABLE_CLAUSE)
+}
 |
 clauses
 ;
@@ -347,8 +437,14 @@ value_clause
 
 value_clause:
 K_CONCATENATE
+{
+  $$ = build_nt(CONCATENATE_CLAUSE)
+}
 |
 K_NOCONCATENATE
+{
+  $$ = build_nt(NOCONCATENATE_CLAUSE)
+}
 |
 K_DEFAULT '='
 {
@@ -358,14 +454,29 @@ name_or_string
 {
   tnamemode=0; 
 }
+{
+  $$ = build_nt(DEFAULT_CLAUSE, $4)
+}
 |
 K_IMPCAT
+{
+  $$ = build_nt(IMPCAT_CLAUSE)
+}
 |
 K_LIST
+{
+  $$ = build_nt(LIST_CLAUSE)
+}
 |
 K_REQUIRED
+{
+  $$ = build_nt(REQUIRED_CLAUSE)
+}
 |
 K_TYPE '=' T_NAME
+{
+  $$ = build_nt(TYPE_CLAUSE, $3)
+}
 ;
 
 bool_expr_list:
@@ -375,6 +486,9 @@ K_OR
   tnamemode=1; 
 }
 bool_expr_list2
+{
+  $$ = build_nt(OR_BOOL, $2, $4)
+}
 |
 bool_expr_list2
 ;
@@ -386,6 +500,9 @@ K_AND
   tnamemode=1; 
 }
 bool_expr
+{
+  $$ = build_nt(AND_BOOL, $2, $4)
+}
 |
 bool_expr
 ;
@@ -407,6 +524,9 @@ T_NAME
 {
   tnamemode=0; 
 }
+{
+  $$ = build_nt(NOT_BOOL, $3)
+}
 |
 T_NAME
 {
@@ -417,12 +537,18 @@ K_ANY2 '(' any_list ')'
 {
   tnamemode=0; 
 }
+{
+  $$ = build_nt(ANY2_UNIT, $3)
+}
 ;
 
 any_list:
-any_list ',' T_NAME { $$ = chainon ($1, $3); }
+any_list ',' T_NAME { $$ = chainon ($1, copy_node($3)); }
 |
 T_NAME
+{ 
+  $$ = copy_node ($1);
+}
 ;
 
 name_or_string:
