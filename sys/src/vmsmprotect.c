@@ -15,6 +15,7 @@
 #include <ipldef.h>
 #include <phddef.h>
 #include <rdedef.h>
+#include <secdef.h>
 
 static inline void change_pte_range(pmd_t * pmd, unsigned long address,
 	unsigned long size, pgprot_t newprot)
@@ -159,7 +160,9 @@ static inline int mprotect_fixup_start(struct _rde * vma, struct _rde ** pprev,
 	lock_vma_mappings(vma);
 	//spin_lock(&vma->vm_mm->page_table_lock);
 	vma->rde$pq_start_va = end;
+	vma->rde$q_region_size -= n->rde$q_region_size;
 	//__insert_vm_struct(current->mm, n);
+	insrde(n,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	//spin_unlock(&vma->vm_mm->page_table_lock);
 	unlock_vma_mappings(vma);
 
@@ -190,8 +193,39 @@ static inline int mprotect_fixup_end(struct _rde * vma, struct _rde ** pprev,
 	lock_vma_mappings(vma);
 	//spin_lock(&vma->vm_mm->page_table_lock);
 	vma->rde$q_region_size = start - (unsigned long)vma->rde$pq_start_va;
+	n->rde$q_region_size -= vma->rde$q_region_size;
 	//__insert_vm_struct(current->mm, n);
+	insrde(n,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	//spin_unlock(&vma->vm_mm->page_table_lock);
+
+	{
+	  struct _secdef * sec, * pstl;
+	  pgd_t *pgd;
+	  pmd_t *pmd;
+	  pte_t *pte;
+	  unsigned long page=start;
+	  unsigned long secno;
+	  unsigned long count;
+	  pgd = pgd_offset(current->mm, page);
+	  pmd = pmd_offset(pgd, page);
+	  pte = pte_offset(pmd, page);
+	  secno = ((*(unsigned long*)pte)&0xfffff000)>>PAGE_SHIFT;
+	  pstl=current->pcb$l_phd->phd$l_pst_base_offset;
+	  sec=&pstl[current->pcb$l_phd->phd$l_pst_free++];
+	  *sec=pstl[secno];
+	  sec->sec$l_vbn+=(vma->rde$q_region_size>>PAGE_SHIFT);
+	  for (count=start; count<(start+n->rde$q_region_size); count+=PAGE_SIZE) {
+	    pgd_t *pgd;
+	    pmd_t *pmd;
+	    pte_t *pte;
+	    pgd = pgd_offset(current->mm, count);
+	    pmd = pmd_offset(pgd, count);
+	    pte = pte_offset(pmd,count);
+	    if (((*(unsigned long*)pte)&0xfff)==0xc00)
+	      *(unsigned long*)pte = ((*(unsigned long*)pte)&0xfff)|((current->pcb$l_phd->phd$l_pst_free-1)<<PAGE_SHIFT);
+	  }
+	}
+
 	unlock_vma_mappings(vma);
 
 	*pprev = n;
@@ -217,6 +251,7 @@ static inline int mprotect_fixup_middle(struct _rde * vma, struct _rde ** pprev,
 	*right = *vma;
 	left->rde$q_region_size = start - (unsigned long)left->rde$pq_start_va;
 	right->rde$pq_start_va = end;
+	right->rde$q_region_size = end - (unsigned long)vma->rde$pq_start_va;
 #if 0
 	right->vm_pgoff += (right->rde$pq_start_va - left->rde$pq_start_va) >> PAGE_SHIFT;
 	left->vm_raend = 0;
@@ -237,7 +272,9 @@ static inline int mprotect_fixup_middle(struct _rde * vma, struct _rde ** pprev,
 	vma->rde$q_region_size = end - start;
 	vma->rde$l_flags = newflags;
 	//__insert_vm_struct(current->mm, left);
+	insrde(left,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	//__insert_vm_struct(current->mm, right);
+	insrde(right,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	//spin_unlock(&vma->vm_mm->page_table_lock);
 	unlock_vma_mappings(vma);
 
