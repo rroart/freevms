@@ -108,7 +108,9 @@
 #include <descrip.h>
 
 #ifdef CONFIG_VT
+#if 0
 extern void con_init_devfs (void);
+#endif
 #endif
 
 #define CONSOLE_DEV MKDEV(TTY_MAJOR,0)
@@ -542,11 +544,13 @@ void tty_hangup(struct tty_struct * tty)
 	
 	printk(KERN_DEBUG "%s hangup...\n", tty_name(tty, buf));
 #endif
+#if 0
 #if 1
 	//ndef CONFIG_VMS
 	schedule_task(&tty->tq_hangup);
 #else
 	tty->tq_hangup.routine(tty);
+#endif
 #endif
 }
 
@@ -1303,8 +1307,10 @@ static void release_dev(struct file * filp)
 	/*
 	 * Make sure that the tty's task queue isn't activated. 
 	 */
+#if 0
 	run_task_queue(&tq_timer);
-#if 1 
+#endif
+#if 0 
 	//ndef CONFIG_VMS
 	flush_scheduled_tasks();
 #endif
@@ -1923,11 +1929,13 @@ void do_SAK(struct tty_struct *tty)
 	if (!tty)
 		return;
 	PREPARE_TQUEUE(&tty->SAK_tq, __do_SAK, tty);
+#if 0
 #if 1 
 	//ndef CONFIG_VMS
 	schedule_task(&tty->SAK_tq);
 #else
 	__do_SAK(tty);
+#endif
 #endif
 }
 
@@ -2243,6 +2251,8 @@ void __init console_init(void)
 	 */
 #ifdef CONFIG_VT
 	con_init();
+#else
+#error
 #endif
 #ifdef CONFIG_AU1000_SERIAL_CONSOLE
 	au1000_serial_console_init();
@@ -2260,7 +2270,9 @@ void __init console_init(void)
 #elif defined(CONFIG_PARISC)
 	pdc_console_init();
 #elif defined(CONFIG_SERIAL)
+#if 0
 	serial_console_init();
+#endif
 #endif /* CONFIG_8xx */
 #ifdef CONFIG_SGI_SERIAL
 	sgi_serial_console_init();
@@ -2358,6 +2370,10 @@ void __init tty_init(void)
 
 	con_vmsinit();
 
+#ifndef __arch_um__
+	kbd_vmsinit();
+#endif
+
 #ifdef CONFIG_UNIX98_PTYS
 	dev_ptmx_driver = dev_tty_driver;
 	dev_ptmx_driver.driver_name = "/dev/ptmx";
@@ -2370,7 +2386,8 @@ void __init tty_init(void)
 	if (tty_register_driver(&dev_ptmx_driver))
 		panic("Couldn't register /dev/ptmx driver\n");
 #endif
-	
+
+#if 0	
 #ifdef CONFIG_VT
 	dev_console_driver = dev_tty_driver;
 	dev_console_driver.driver_name = "/dev/vc/0";
@@ -2382,6 +2399,10 @@ void __init tty_init(void)
 	if (tty_register_driver(&dev_console_driver))
 		panic("Couldn't register /dev/tty0 driver\n");
 
+	kbd_init();
+#endif
+#endif
+#ifndef __arch_um__
 	kbd_init();
 #endif
 
@@ -2429,7 +2450,9 @@ void __init tty_init(void)
 	moxa_init();
 #endif	
 #ifdef CONFIG_VT
+#if 0
 	vcs_init();
+#endif
 #endif
 #ifdef CONFIG_TN3270
 	tub3270_init();

@@ -164,9 +164,11 @@ static int vesa_blank_mode; /* 0:none 1:suspendV 2:suspendH 3:powerdown */
 static int blankinterval = 10*60*HZ;
 static int vesa_off_interval;
 
+#if 0
 static struct tq_struct console_callback_tq = {
 	routine: console_callback,
 };
+#endif
 
 /*
  * fg_console is the current virtual console,
@@ -239,9 +241,12 @@ static inline unsigned short *screenpos(int currcons, int offset, int viewed)
 static inline void scrolldelta(int lines)
 {
 	scrollback_delta += lines;
+#if 0
 	schedule_console_callback();
+#endif
 }
 
+#if 0
 void schedule_console_callback(void)
 {
 #if 1
@@ -251,6 +256,7 @@ void schedule_console_callback(void)
 	//	console_callback(0);
 #endif
 }
+#endif
 
 static void scrup(int currcons, unsigned int t, unsigned int b, int nr)
 {
@@ -618,7 +624,9 @@ void redraw_screen(int new_console, int is_switch)
 	}
 	set_cursor(currcons);
 	if (is_switch) {
+#if 0
 		set_leds();
+#endif
 		compute_shiftstate();
 	}
 }
@@ -1156,11 +1164,13 @@ static void respond_string(const char * p, struct tty_struct * tty)
 		tty_insert_flip_char(tty, *p, 0);
 		p++;
 	}
+#if 0
 #if 1
 	//ndef CONFIG_VMS
 	con_schedule_flip(tty);
 #else
 	tty->flip.tqueue.routine(tty);
+#endif
 #endif
 }
 
@@ -1431,7 +1441,9 @@ static void reset_terminal(int currcons, int do_clear)
 	kbd_table[currcons].slockstate = 0;
 	kbd_table[currcons].ledmode = LED_SHOW_FLAGS;
 	kbd_table[currcons].ledflagstate = kbd_table[currcons].default_ledflagstate;
+#if 0
 	set_leds();
+#endif
 
 	cursor_type = CUR_DEFAULT;
 	complement_mask = s_complement_mask;
@@ -1465,8 +1477,10 @@ static void do_con_trol(struct tty_struct *tty, unsigned int currcons, int c)
 	case 0:
 		return;
 	case 7:
+#if 0
 		if (bell_duration)
 			kd_mksound(bell_pitch, bell_duration);
+#endif
 		return;
 	case 8:
 		bs(currcons);
@@ -2046,6 +2060,7 @@ out:
  * with other console code and prevention of re-entrancy is
  * ensured with console_sem.
  */
+#if 0
 static void console_callback(void *ignored)
 {
 	acquire_console_sem();
@@ -2053,7 +2068,9 @@ static void console_callback(void *ignored)
 	if (want_console >= 0) {
 		if (want_console != fg_console && vc_cons_allocated(want_console)) {
 			hide_cursor(fg_console);
+#if 0
 			change_console(want_console);
+#endif
 			/* we only changed when the console had already
 			   been allocated - a new console is not created
 			   in an interrupt routine */
@@ -2074,11 +2091,14 @@ static void console_callback(void *ignored)
 
 	release_console_sem();
 }
+#endif
 
 void set_console(int nr)
 {
 	want_console = nr;
+#if 0
 	schedule_console_callback();
+#endif
 }
 
 #ifdef CONFIG_VT_CONSOLE
@@ -2215,7 +2235,7 @@ int tioclinux(struct tty_struct *tty, unsigned long arg)
 {
 	char type, data;
 	int ret;
-
+#if 0
 	if (tty->driver.type != TTY_DRIVER_TYPE_CONSOLE)
 		return -EINVAL;
 	if (current->tty != tty && !capable(CAP_SYS_ADMIN))
@@ -2275,6 +2295,9 @@ int tioclinux(struct tty_struct *tty, unsigned long arg)
 			break;
 	}
 	return ret;
+#else
+	return 0;
+#endif
 }
 
 /*
@@ -2341,7 +2364,9 @@ static void con_stop(struct tty_struct *tty)
 	if (!vc_cons_allocated(console_num))
 		return;
 	set_vc_kbd_led(kbd_table + console_num, VC_SCROLLOCK);
+#if 0
 	set_leds();
+#endif
 }
 
 /*
@@ -2356,7 +2381,9 @@ static void con_start(struct tty_struct *tty)
 	if (!vc_cons_allocated(console_num))
 		return;
 	clr_vc_kbd_led(kbd_table + console_num, VC_SCROLLOCK);
+#if 0
 	set_leds();
+#endif
 }
 
 /*
@@ -2401,8 +2428,10 @@ static int con_open(struct tty_struct *tty, struct file * filp)
 		tty->winsize.ws_row = video_num_lines;
 		tty->winsize.ws_col = video_num_columns;
 	}
+#if 0
 	if (tty->count == 1)
 		vcs_make_devfs (currcons, 0);
+#endif
 	return 0;
 }
 
@@ -2411,7 +2440,9 @@ static void con_close(struct tty_struct *tty, struct file * filp)
 	if (!tty)
 		return;
 	if (tty->count != 1) return;
+#if 0
 	vcs_make_devfs (MINOR (tty->device) - tty->driver.minor_start, 1);
+#endif
 	tty->driver_data = 0;
 }
 
@@ -2426,7 +2457,9 @@ static void vc_init(unsigned int currcons, unsigned int rows, unsigned int cols,
 
 	set_origin(currcons);
 	pos = origin;
+#if 0
 	reset_vc(currcons);
+#endif
 	for (j=k=0; j<16; j++) {
 		vc_cons[currcons].d->vc_palette[k++] = default_red[j] ;
 		vc_cons[currcons].d->vc_palette[k++] = default_grn[j] ;
@@ -2487,7 +2520,9 @@ void __init con_init(void)
 	console_driver.put_char = con_put_char;
 	console_driver.flush_chars = con_flush_chars;
 	console_driver.chars_in_buffer = con_chars_in_buffer;
+#if 0
 	console_driver.ioctl = vt_ioctl;
+#endif
 	console_driver.stop = con_stop;
 	console_driver.start = con_start;
 	console_driver.throttle = con_throttle;

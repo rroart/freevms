@@ -159,6 +159,8 @@ long pididx=0;
 
 int con$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   //  return read(0,i->irp$l_qio_p1,i->irp$l_qio_p2);
+  return kbd$fdtread(i,p,u,c);
+#if 0
   struct tty_struct * tty;
   //  init_dev2(chan2dev(i->irp$w_chan ,&tty));
   u->ucb$l_irp=i;
@@ -176,6 +178,7 @@ int con$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     //com$post(ucb->ucb$l_irp,ucb); //why was ucb->ucb$l_irp wrong?
   }
   return SS$_NORMAL;
+#endif
 }
 
 int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
@@ -346,3 +349,13 @@ int con_vmsinit(void) {
 
 }
 
+unsigned int video_font_height;
+unsigned int default_font_height;
+unsigned int video_scan_lines;
+       int sel_cons = 0;		/* must not be disallocated */
+
+void clear_selection(void) { }
+
+struct vt_struct *vt_cons[MAX_NR_CONSOLES];
+
+int (*kbd_rate)(struct kbd_repeat *rep);
