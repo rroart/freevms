@@ -63,7 +63,10 @@ signed int mmg$ininewpfn(struct _pcb * p, void * va, void * pte) {
   page=&((struct _pfn *)pfn$al_head)[pfn];
   page->pfn$q_pte_index=pte; // hope it's the right one?
   // also set page type
-  return mmg$makewsle(p,va,pte,pfn);
+  mem_map[pfn].virtual=__va(pfn*PAGE_SIZE);
+  mem_map[pfn].count.counter=1;
+  mmg$makewsle(p,va,pte,pfn);
+  return pfn;
 }
 
 int mmg$incptref(struct _pcb * p, void * va, void * pte) {
@@ -71,12 +74,13 @@ int mmg$incptref(struct _pcb * p, void * va, void * pte) {
 }
 
 int mmg$makewsle(struct _pcb * p, void * va, void * pte, signed int pfn) {
-  int new=p->pcb$l_phd->phd$l_wsnext;
+  int new=p->pcb$l_phd->phd$l_wsnext++;
   struct _wsl * wsl = p->pcb$l_phd->phd$l_wslist;
   struct _wsl * wsle = &wsl[new];
   struct _pfn * page;
   if (wsle->wsl$v_valid) panic("should be invalid\n");
   wsle->wsl$v_valid=1;
+  ((unsigned long)wsle->wsl$pq_va)|=(unsigned long)va;
   // p->pcb$l_phd->phd$l_ptwsleval++
   page=&((struct _pfn *)pfn$al_head)[pfn];
   page->pfn$l_wslx_qw=new; // hope it's the right one?
@@ -243,16 +247,8 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    //file->f_dentry->d_inode->i_mapping->a_ops->readpage(file, page);
 
 	    {
-	      signed long page = mmg$allocpfn();
-	      unsigned long address2 = address & PAGE_MASK;
-	      mem_map[page].virtual=__va(page*PAGE_SIZE);
-	      mem_map[page].count.counter=1;
-	      *(unsigned long *)pte=(__va(page*PAGE_SIZE));
-	      *(unsigned long *)pte|=_PAGE_NEWPAGE|_PAGE_PRESENT;
-	      *(unsigned long *)pte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-	      //flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
-	      //map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
-	      //*(unsigned long *)pte|=1;
+	      signed long pfn = mmg$ininewpfn(tsk,page,pte);
+	      *(unsigned long *)pte=((unsigned long)__va(page*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	    }
 	    
 	    {
@@ -281,16 +277,8 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    if ((*(unsigned long *)pte)&0xfffff000) {
 	    } else { // zero page demand?
 	      {
-		signed long page = mmg$allocpfn();
-		unsigned long address2 = address & PAGE_MASK;
-		mem_map[page].virtual=__va(page*PAGE_SIZE);
-		mem_map[page].count.counter=1;
-		*(unsigned long *)pte=(__va(page*PAGE_SIZE));
-		*(unsigned long *)pte|=_PAGE_NEWPAGE|_PAGE_PRESENT;
-		*(unsigned long *)pte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-		//flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
-		//map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
-		//*(unsigned long *)pte|=1;
+		signed long pfn = mmg$ininewpfn(tsk,page,pte);
+		*(unsigned long *)pte=((unsigned long)__va(page*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	      }
 	      return;
 	    }
@@ -561,6 +549,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	pmd_t *pmd;
 	pte_t *pte;
 	unsigned long page;
+	struct _pcb * tsk=current;
 
 	//check if ipl>2 bugcheck
 
@@ -621,16 +610,9 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    //file->f_dentry->d_inode->i_mapping->a_ops->readpage(file, page);
 
 	    {
-	      signed long page = mmg$allocpfn();
-	      unsigned long address2 = address & PAGE_MASK;
-	      mem_map[page].virtual=__va(page*PAGE_SIZE);
-	      mem_map[page].count.counter=1;
-	      *(unsigned long *)pte=(__va(page*PAGE_SIZE));
-	      *(unsigned long *)pte|=_PAGE_NEWPAGE|_PAGE_PRESENT;
-	      *(unsigned long *)pte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-	      flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
-	      //map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
-	      //*(unsigned long *)pte|=1;
+	      signed long pfn = mmg$ininewpfn(tsk,page,pte);
+	      *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	      flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	    }
 	    
 	    {
@@ -659,16 +641,9 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    if ((*(unsigned long *)pte)&0xfffff000) {
 	    } else { // zero page demand?
 	      {
-		signed long page = mmg$allocpfn();
-		unsigned long address2 = address & PAGE_MASK;
-		mem_map[page].virtual=__va(page*PAGE_SIZE);
-		mem_map[page].count.counter=1;
-		*(unsigned long *)pte=(__va(page*PAGE_SIZE));
-		*(unsigned long *)pte|=_PAGE_NEWPAGE|_PAGE_PRESENT;
-		*(unsigned long *)pte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-		flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
-		//map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
-		//*(unsigned long *)pte|=1;
+		signed long pfn = mmg$ininewpfn(tsk,page,pte);
+		*(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	      }
 	      return;
 	    }
@@ -711,21 +686,14 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	return;
 
 	if (is_write==0) {
-	  signed long page = mmg$allocpfn();
-	  unsigned long address2 = (*(unsigned long *)pte)&0xfffff000;
-	  mem_map[page].virtual=__va(page*PAGE_SIZE);
-	  mem_map[page].count.counter=1;
-	  *(unsigned long *)pte=(__va(page*PAGE_SIZE));
-	  *(unsigned long *)pte|=_PAGE_PRESENT;
-	  *(unsigned long *)pte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-	  flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
-	  bcopy(address2,__va(page*PAGE_SIZE),PAGE_SIZE);
-	  //map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
-	  //*(unsigned long *)pte|=1;
+	  signed long pfn = mmg$ininewpfn(tsk,page,pte);
+	  *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	  flush_tlb_range(current->mm, page, page + PAGE_SIZE);
+	  bcopy(page,__va(pfn*PAGE_SIZE),PAGE_SIZE);
 	}
 
 	return;
-	// mmg$ininewpfn(p,va,pte); // put this somewhere?
+	// mmg$ininewpfn(tsk,va,pte); // put this somewhere?
 
 
 	// keep some linux stuff for now
