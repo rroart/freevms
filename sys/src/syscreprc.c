@@ -15,6 +15,7 @@
 #include<ipldef.h>
 #include<phddef.h>
 #include<prcdef.h>
+#include<pridef.h>
 #include<rdedef.h>
 #include<secdef.h>
 #include<ssdef.h>
@@ -223,10 +224,12 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	retval = new_thread(0, clone_flags, 0, 0, p, 0);
 
 #ifdef __arch_um__
-	void * regs = &p->thread.regs
+	void * regs = &p->thread.regs;
 #else
 	void * regs = &pidadr;
 #endif
+
+	int eip=0,esp=0;
 
 	start_thread(regs,eip,esp);
 
