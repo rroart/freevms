@@ -103,6 +103,7 @@ asmlinkage void sch$astdel(void) {
     }
     acb->acb$l_kast(acb->acb$l_astprm);
     //p->pcb$b_astact=0;
+    if ((acb->acb$b_rmod&ACB$M_NODELETE)==0) vfree(acb);
     goto more;
   }
   //printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
@@ -122,6 +123,7 @@ asmlinkage void sch$astdel(void) {
   }
   if(acb->acb$l_ast) acb->acb$l_ast(acb->acb$l_astprm); /* ? */
   p->pcb$b_astact=0;
+  if ((acb->acb$b_rmod&ACB$M_NODELETE)==0) vfree(acb);
   /*unlock*/
   goto more;
 }
