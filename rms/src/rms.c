@@ -53,6 +53,7 @@
 #include "../../freevms/lib/src/fh2def.h"
 #include "../../freevms/lib/src/fi2def.h"
 #include "../../freevms/lib/src/hm2def.h"
+#include "../../freevms/lib/src/fcbdef.h"
 #include "../../freevms/lib/src/vmstime.h"
 
 //#include "rms.h"
@@ -238,7 +239,7 @@ struct WCCDIR {
 struct WCCFILE {
     struct _fabdef *wcf_fab;
     struct _vcb *wcf_vcb;
-    struct FCB *wcf_fcb;
+    struct FCB_not *wcf_fcb;
     int wcf_status;
     struct _fiddef wcf_fid;
     char wcf_result[MAX_FILELEN];
@@ -759,7 +760,7 @@ unsigned exe$get(struct _rabdef *rab)
     unsigned cpylen,reclen;
     unsigned delim,rfm,sts;
     struct VIOC *vioc;
-    struct FCB *fcb = ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fcb;
+    struct FCB_not *fcb = ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fcb;
 
     reclen = rab->rab$w_usz;
     recbuff = rab->rab$l_ubf;
@@ -909,7 +910,7 @@ unsigned exe$put(struct _rabdef *rab)
     unsigned cpylen,reclen;
     unsigned delim,rfm,sts;
     struct VIOC *vioc;
-    struct FCB *fcb = ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fcb;
+    struct FCB_not *fcb = ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fcb;
 
     reclen = rab->rab$w_rsz;
     recbuff = rab->rab$l_rbf;
@@ -1271,7 +1272,7 @@ unsigned exe$extend(struct _fabdef *fab)
     int sts;
     int ifi_no = fab->fab$w_ifi;
     if (ifi_no < 1 || ifi_no >= IFI_MAX) return RMS$_IFI;
-    sts = update_extend(ifi_table[ifi_no]->wcf_fcb,
+    sts = update_extend(ifi_table[ifi_no]->wcf_fcb ,
                         fab->fab$l_alq - ifi_table[ifi_no]->wcf_fcb->hiblock,0);
     return sts;
 }

@@ -44,6 +44,7 @@
 #include "../../freevms/starlet/src/xabprodef.h"
 #include "../../freevms/lib/src/fh2def.h"
 #include "../../freevms/lib/src/hm2def.h"
+#include "../../freevms/lib/src/fcbdef.h"
 #include "../../freevms/lib/src/scbdef.h"
 #include "../../freevms/lib/src/vmstime.h"
 
@@ -170,7 +171,7 @@ unsigned accesshead(struct VCB *vcb,struct _fiddef *fid,unsigned seg_num,
 
 struct WCBKEY {
     unsigned vbn;
-    struct FCB *fcb;
+    struct FCB_not *fcb;
     struct WCB *prevwcb;
 };                              /* WCBKEY passes info to compare/create routines... */
 
@@ -201,7 +202,7 @@ int wcb_compare(unsigned hashval,void *keyval,void *thiswcb)
 /* premap_indexf() called to physically read the header for indexf.sys
    so that indexf.sys can be mapped and read into virtual cache.. */
 
-struct _fh2 *premap_indexf(struct FCB *fcb,unsigned *retsts)
+struct _fh2 *premap_indexf(struct FCB_not *fcb,unsigned *retsts)
 {
     struct _fh2 *head;
     struct VCBDEV *vcbdev = rvn_to_dev(fcb->vcb,fcb->rvn);
@@ -347,7 +348,7 @@ void *wcb_create(unsigned hashval,void *keyval,unsigned *retsts)
 
 /* getwindow() find a window to map VBN to LBN ... */
 
-unsigned getwindow(struct FCB * fcb,unsigned vbn,struct VCBDEV **devptr,
+unsigned getwindow(struct FCB_not * fcb,unsigned vbn,struct VCBDEV **devptr,
                    unsigned *phyblk,unsigned *phylen,struct _fiddef *hdrfid,
                    unsigned *hdrseq)
 {
@@ -393,7 +394,7 @@ void *vioc_manager(struct CACHE * cacheobj,int flushonly)
 {
     register struct VIOC *vioc = (struct VIOC *) cacheobj;
     if (vioc->modmask != 0) {
-        register struct FCB *fcb = vioc->fcb;
+        register struct FCB_not *fcb = vioc->fcb;
         register int length = VIOC_CHUNKSIZE;
         register unsigned curvbn = vioc->cache.hashval + 1;
         register char *address = (char *) vioc->data;
@@ -475,7 +476,7 @@ void *vioc_create(unsigned hashval,void *keyval,unsigned *retsts)
         register int length;
         register unsigned curvbn = hashval + 1;
         register char *address;
-        register struct FCB *fcb = (struct FCB *) keyval;
+        register struct FCB_not *fcb = (struct FCB_not *) keyval;
         vioc->cache.objmanager = NULL;
         vioc->cache.objtype = 7;
         vioc->fcb = fcb;
@@ -519,7 +520,7 @@ void *vioc_create(unsigned hashval,void *keyval,unsigned *retsts)
 
 /* accesschunk() return pointer to a 'chunk' of a file ... */
 
-unsigned accesschunk(struct FCB *fcb,unsigned vbn,struct VIOC **retvioc,
+unsigned accesschunk(struct FCB_not *fcb,unsigned vbn,struct VIOC **retvioc,
                      char **retbuff,unsigned *retblocks,unsigned wrtblks)
 {
     unsigned sts;
@@ -560,11 +561,11 @@ unsigned accesschunk(struct FCB *fcb,unsigned vbn,struct VIOC **retvioc,
 }
 
 
-unsigned deallocfile(struct FCB *fcb);
+unsigned deallocfile(struct FCB_not *fcb);
 
 /* deaccessfile() finish accessing a file.... */
 
-unsigned deaccessfile(struct FCB *fcb)
+unsigned deaccessfile(struct FCB_not *fcb)
 {
 #ifdef DEBUG
     printk("Deaccessing file (%x) reference %d\n",fcb->cache.hashval,fcb->cache.refcount);
@@ -593,14 +594,14 @@ unsigned deaccessfile(struct FCB *fcb)
 }
 
 
-/* Object manager for FCB objects:- we point to one of our
+/* Object manager for FCB_not objects:- we point to one of our
    sub-objects (vioc or wcb) in preference to letting the
    cache routines get us!  But we when run out of excuses
    it is time to clean up the file header...  :-(   */
 
 void *fcb_manager(struct CACHE *cacheobj,int flushonly)
 {
-    register struct FCB *fcb = (struct FCB *) cacheobj;
+    register struct FCB_not *fcb = (struct FCB_not *) cacheobj;
     if (fcb->vioc != NULL) return &fcb->vioc->cache;
     if (fcb->wcb != NULL) return &fcb->wcb->cache;
     if (fcb->cache.refcount != 0 || flushonly) return NULL;
@@ -613,7 +614,7 @@ void *fcb_manager(struct CACHE *cacheobj,int flushonly)
 
 void *fcb_create(unsigned filenum,void *keyval,unsigned *retsts)
 {
-    register struct FCB *fcb = (struct FCB *) vmalloc(sizeof(struct FCB));
+    register struct FCB_not *fcb = (struct FCB_not *) vmalloc(sizeof(struct FCB_not));
     if (fcb == NULL) {
         *retsts = SS$_INSFMEM;
     } else {
@@ -636,11 +637,11 @@ void *fcb_create(unsigned filenum,void *keyval,unsigned *retsts)
 
 /* accessfile() open up file for access... */
 
-unsigned accessfile(struct VCB * vcb,struct _fiddef * fid,struct FCB **fcbadd,
+unsigned accessfile(struct VCB * vcb,struct _fiddef * fid,struct FCB_not **fcbadd,
                     unsigned wrtflg)
 {
     unsigned sts;
-    register struct FCB *fcb;
+    register struct FCB_not *fcb;
     register unsigned filenum = (fid->fid$b_nmx << 16) + fid->fid$w_num;
 #ifdef DEBUG
     printk("Accessing file (%d,%d,%d)\n",(fid->fid$b_nmx << 16) +

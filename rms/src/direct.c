@@ -39,6 +39,7 @@
 #include "../../freevms/starlet/src/xabfhcdef.h"
 #include "../../freevms/starlet/src/xabprodef.h"
 #include "../../freevms/lib/src/fh2def.h"
+#include "../../freevms/lib/src/hm2def.h"
 #include "../../freevms/lib/src/dirdef.h"
 #include "../../freevms/lib/src/vmstime.h"
 
@@ -257,7 +258,7 @@ int name_match(char *spec,int spec_len,char *dirent,int dirent_len)
 
 /* insert_ent() - procedure to add a directory entry at record dr entry de */
 
-unsigned insert_ent(struct FCB * fcb,unsigned eofblk,unsigned curblk,
+unsigned insert_ent(struct FCB_not * fcb,unsigned eofblk,unsigned curblk,
                     struct VIOC * vioc,char *buffer,
                     struct _dir * dr,struct _dir1 * de,
                     char *filename,unsigned filelen,
@@ -424,7 +425,7 @@ unsigned insert_ent(struct FCB * fcb,unsigned eofblk,unsigned curblk,
 
 /* delete_ent() - delete a directory entry */
 
-unsigned delete_ent(struct FCB * fcb,struct VIOC * vioc,unsigned curblk,
+unsigned delete_ent(struct FCB_not * fcb,struct VIOC * vioc,unsigned curblk,
                     struct _dir * dr,struct _dir1 * de,
                     char *buffer,unsigned eofblk)
 {
@@ -470,7 +471,7 @@ unsigned delete_ent(struct FCB * fcb,struct VIOC * vioc,unsigned curblk,
 
 /* return_ent() - return information about a directory entry */
 
-unsigned return_ent(struct FCB * fcb,struct VIOC * vioc,unsigned curblk,
+unsigned return_ent(struct FCB_not * fcb,struct VIOC * vioc,unsigned curblk,
                     struct _dir * dr,struct _dir1 * de,struct _fibdef * fib,
                     unsigned short *reslen,struct dsc$descriptor * resdsc,
                     int wildcard)
@@ -509,7 +510,7 @@ unsigned return_ent(struct FCB * fcb,struct VIOC * vioc,unsigned curblk,
 
 /* search_ent() - search for a directory entry */
 
-unsigned search_ent(struct FCB * fcb,
+unsigned search_ent(struct FCB_not * fcb,
                     struct dsc$descriptor * fibdsc,struct dsc$descriptor * filedsc,
                     unsigned short *reslen,struct dsc$descriptor * resdsc,unsigned eofblk,unsigned action)
 {
@@ -772,7 +773,7 @@ unsigned direct(struct _vcb * vcb,struct dsc$descriptor * fibdsc,
                 struct dsc$descriptor * filedsc,unsigned short *reslen,
                 struct dsc$descriptor * resdsc,unsigned action)
 {
-    struct FCB *fcb;
+    struct FCB_not *fcb;
     register unsigned sts,eofblk;
     register struct _fibdef *fib = (struct _fibdef *) fibdsc->dsc$a_pointer;
     sts = accessfile(vcb,(struct _fiddef *) & fib->fib$w_did_num,&fcb,action);

@@ -23,6 +23,7 @@
 #include "../../freevms/lib/src/fh2def.h"
 #include "../../freevms/lib/src/fi2def.h"
 #include "../../freevms/lib/src/hm2def.h"
+#include "../../freevms/lib/src/fcbdef.h"
 #include "../../freevms/lib/src/vmstime.h"
 
 //#include "ssdef.h"
@@ -33,7 +34,7 @@ unsigned deaccesshead(struct VIOC *vioc,struct _fh2 *head,unsigned idxblk);
 unsigned accesshead(struct VCB *vcb,struct _fiddef *fid,unsigned seg_num,
                     struct VIOC **vioc,struct _fh2 **headbuff,
                     unsigned *retidxblk,unsigned wrtflg);
-unsigned getwindow(struct FCB * fcb,unsigned vbn,struct VCBDEV **devptr,
+unsigned getwindow(struct FCB_not * fcb,unsigned vbn,struct VCBDEV **devptr,
                    unsigned *phyblk,unsigned *phylen,struct _fiddef *hdrfid,
                    unsigned *hdrseq);
 struct VCBDEV *rvn_to_dev(struct VCB *vcb,unsigned rvn);
@@ -384,7 +385,7 @@ unsigned update_addhead(struct VCB *vcb,char *filename,struct _fiddef *back,
 /* update_create() will create a new file... */
 
 unsigned update_create(struct VCB *vcb,struct _fiddef *did,char *filename,
-                       struct _fiddef *fid,struct FCB **fcb)
+                       struct _fiddef *fid,struct FCB_not **fcb)
 {
     struct VIOC *vioc;
     struct _fh2 *head;
@@ -400,7 +401,7 @@ unsigned update_create(struct VCB *vcb,struct _fiddef *did,char *filename,
     return sts;
 }
 
-unsigned update_extend(struct FCB *fcb,unsigned blocks,unsigned contig)
+unsigned update_extend(struct FCB_not *fcb,unsigned blocks,unsigned contig)
 {
     register unsigned sts;
     struct VCBDEV *vcbdev;
@@ -474,7 +475,7 @@ unsigned update_extend(struct FCB *fcb,unsigned blocks,unsigned contig)
 It may be something simple but I haven't had time to look...
 So DON'T use mount/write!!!  */
 
-unsigned deallocfile(struct FCB *fcb)
+unsigned deallocfile(struct FCB_not *fcb)
 {
     register unsigned sts = 1;
     /*
@@ -557,7 +558,7 @@ unsigned deallocfile(struct FCB *fcb)
 
 unsigned accesserase(struct VCB * vcb,struct _fiddef * fid)
 {
-    struct FCB *fcb;
+    struct FCB_not *fcb;
     register int sts;
     sts = accessfile(vcb,fid,&fcb,1);
     if (sts & 1) {
@@ -572,7 +573,7 @@ unsigned accesserase(struct VCB * vcb,struct _fiddef * fid)
 
 
 #ifdef EXTEND
-unsigned extend(struct FCB *fcb,unsigned blocks)
+unsigned extend(struct FCB_not *fcb,unsigned blocks)
 {
     register unsigned sts;
     struct VCBDEV *vcbdev;
@@ -641,10 +642,10 @@ unsigned extend(struct FCB *fcb,unsigned blocks)
 
 #ifdef EXTEND
 
-unsigned access_create(struct VCB * vcb,struct FCB ** fcbadd,unsigned blocks) {
-    register struct FCB *fcb;
+unsigned access_create(struct VCB * vcb,struct FCB_not ** fcbadd,unsigned blocks) {
+    register struct FCB_not *fcb;
     struct _fiddef fid;
-    unsigned create = sizeof(struct FCB);
+    unsigned create = sizeof(struct FCB_not);
     if (wrtflg && ((vcb->status & VCB_WRITE) == 0)) return SS$_WRITLCK;
 
     sts = headmap_search(struct VCBDEV * vcbdev,struct _fiddef * fid,

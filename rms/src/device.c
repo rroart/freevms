@@ -42,6 +42,8 @@
 #include "../../freevms/starlet/src/xabfhcdef.h"
 #include "../../freevms/starlet/src/xabprodef.h"
 #include "../../freevms/lib/src/fh2def.h"
+#include "../../freevms/lib/src/hm2def.h"
+#include "../../freevms/lib/src/fcbdef.h"
 #include "../../freevms/lib/src/vmstime.h"
 
 #include "cache.h"
