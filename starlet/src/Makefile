@@ -1,4 +1,4 @@
-all:
+all: vmsopt.a
 	cc -c starlet.c
 
 vmsopt.a:	vmsopt.o
