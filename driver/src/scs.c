@@ -208,7 +208,7 @@ static void scs_dev_set_timer()
   timer->function = scs_dev_timer_func;
   timer->expires = jiffies + (10 * HZ);
 
-  add_timer(&timer);
+  add_timer(timer);
 }
 
 void __init scs_dev_init(void)
