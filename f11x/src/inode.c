@@ -96,6 +96,17 @@ void vms_read_inode(struct inode * inode)
 		inode->i_fop = &generic_ro_fops;
 		inode->i_nlink = 1;
 		inode->i_blksize = VMS_BLOCKSIZE;
+		{
+		  unsigned long secs;
+		  unsigned long long smith;
+		  struct _fh2 * head=&fileh;
+		  struct _fi2 * fi=(unsigned short *)head+head->fh2$b_idoffset;
+		  memcpy(&fi->fi2$q_credate,&smith,8);
+		  smith=smith/10000000;
+		  smith=smith-86400*40587;
+		  secs=smith;
+		  inode->i_atime=inode->i_ctime=inode->i_mtime=secs;
+		}
 	}
 /*	inode->i_op = */
 }
