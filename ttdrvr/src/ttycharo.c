@@ -3,11 +3,14 @@
 #include <system_data_cells.h>
 
 int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
-  struct _tty_ucb * tty=u;
-  struct _tt_type_ahd * ahd = tty->ucb$l_tt_typahd;
   *CC=0;
   *chr=0;
+  struct _tty_ucb * tty=u;
   tty->ucb$b_tt_outype=0;
+  tty->tty$v_st_read==1; // mark reader?
+  if (tty->ucb$l_tt_typahd==0)
+    return;
+  struct _tt_type_ahd * ahd = tty->ucb$l_tt_typahd;
 
   if (ahd->tty$w_ta_inahd==0)
     return;
