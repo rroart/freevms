@@ -298,7 +298,7 @@ int mb$fdt_read (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   if ((func&IO$M_WRITERCHECK) && mu->ucb$l_mb_writerrefc && u->ucb$w_msgcnt==0)
     insque(&i->irp$l_nopartnerqfl,mu->ucb$l_mb_nowriterwaitqfl);
   else
-    i->irp$l_nopartnerqfl=0;
+    i->irp$l_nopartnerqfl=0; // quick and dirty?
 
   //  if (m->mmb$w_msgsize)
   //    memcpy(m->mmb$t_data,i->irp$l_qio_p2,m->mmb$w_size);
@@ -361,7 +361,7 @@ void mb$finishread(struct _ucb * u) {
 	}
       }
 
-      if (i->irp$l_nopartnerqfl)
+      if (i->irp$l_nopartnerqfl) // quick and dirty?
 	remque(i->irp$l_nopartnerqfl,0);
       if (!aqempty(msg->mmb$l_noreaderwaitqfl))
 	remque(msg->mmb$l_noreaderwaitqfl,0);
@@ -427,7 +427,7 @@ void mb$finishread(struct _ucb * u) {
     case read_less:
       remque(i,0);
 
-      if (i->irp$l_nopartnerqfl)
+      if (i->irp$l_nopartnerqfl) // quick and dirty
 	remque(i->irp$l_nopartnerqfl,0);
 #if 0
       if (msg->mmb$l_nowriterwaitqfl)
@@ -485,7 +485,9 @@ void mb$finishread(struct _ucb * u) {
       if (sch$gl_resmask & (1<<RSN$_MAILBOX))
 	fork(create_fork_thread,0,0,u);
 
+      s=i->irp$l_svapte;
       memcpy(s->srb$l_datastart,msg->mmb$l_datastart,msg->mmb$w_datasize);
+
       i->irp$l_bcnt-=msg->mmb$w_datasize;
       s->srb$w_datasize+=msg->mmb$w_datasize;
       s->srb$l_datastart+=msg->mmb$w_datasize;
