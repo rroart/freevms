@@ -44,7 +44,6 @@
 #include <linux/sys.h>
 #include <linux/linkage.h>
 #include <asm/segment.h>
-#define ASSEMBLY
 #include <asm/smp.h>
 
 EBX		= 0x00
@@ -196,10 +195,10 @@ ENTRY(system_call)
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
-	cmpl $(NR_syscalls),%eax
-	jae badsys
 	testb $0x02,tsk_ptrace(%ebx)	# PT_TRACESYS
 	jne tracesys
+	cmpl $(NR_syscalls),%eax
+	jae badsys
 	call *SYMBOL_NAME(sys_call_table)(,%eax,4)
 	movl %eax,EAX(%esp)		# save the return value
 ENTRY(ret_from_sys_call)
@@ -620,6 +619,9 @@ ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_getdents64)	/* 220 */
 	.long SYMBOL_NAME(sys_fcntl64)
 	.long SYMBOL_NAME(sys_ni_syscall)	/* reserved for TUX */
+	.long SYMBOL_NAME(sys_ni_syscall)	/* Reserved for Security */
+	.long SYMBOL_NAME(sys_gettid)
+	.long SYMBOL_NAME(sys_readahead)	/* 225 */
 
 
 

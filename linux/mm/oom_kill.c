@@ -150,7 +150,7 @@ void oom_kill_task(struct task_struct *p)
 	 * exit() and clear out its resources quickly...
 	 */
 	p->pcb$b_pri = p->pcb$b_pri - 3; /* boost */
-	p->flags |= PF_MEMALLOC;
+	p->flags |= PF_MEMALLOC | PF_MEMDIE;
 
 	/* This process has hardware access, be more careful. */
 	if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_RAWIO)) {
@@ -168,7 +168,7 @@ void oom_kill_task(struct task_struct *p)
  * OR try to be smart about which process to kill. Note that we
  * don't have to be perfect here, we just have to be good.
  */
-void oom_kill(void)
+static void oom_kill(void)
 {
 	struct task_struct *p = select_bad_process(), *q;
 
@@ -191,4 +191,55 @@ void oom_kill(void)
 	current->policy |= SCHED_YIELD;
 	schedule();
 	return;
+}
+
+/**
+ * out_of_memory - is the system out of memory?
+ */
+void out_of_memory(void)
+{
+	static unsigned long first, last, count;
+	unsigned long now, since;
+
+	/*
+	 * Enough swap space left?  Not OOM.
+	 */
+	if (nr_swap_pages > 0)
+		return;
+
+	now = jiffies;
+	since = now - last;
+	last = now;
+
+	/*
+	 * If it's been a long time since last failure,
+	 * we're not oom.
+	 */
+	last = now;
+	if (since > 5*HZ)
+		goto reset;
+
+	/*
+	 * If we haven't tried for at least one second,
+	 * we're not really oom.
+	 */
+	since = now - first;
+	if (since < HZ)
+		return;
+
+	/*
+	 * If we have gotten only a few failures,
+	 * we're not really oom. 
+	 */
+	if (++count < 10)
+		return;
+
+	/*
+	 * Ok, really out of memory. Kill something.
+	 */
+	oom_kill();
+
+reset:
+	first = now;
+	count = 0;
 }

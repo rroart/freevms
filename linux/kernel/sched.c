@@ -1317,6 +1317,7 @@ void daemonize(void)
 
 	current->session = 1;
 	current->pgrp = 1;
+	current->tty = NULL;
 
 	/* Become as one with the init task */
 
@@ -1328,6 +1329,8 @@ void daemonize(void)
 	current->files = init_task.files;
 	atomic_inc(&current->files->count);
 }
+
+extern unsigned long wait_init_idle;
 
 void __init init_idle(void)
 {
@@ -1341,6 +1344,7 @@ void __init init_idle(void)
 	}
 	sched_data->curr = current;
 	sched_data->last_schedule = get_cycles();
+	clear_bit(current->processor, &wait_init_idle);
 }
 
 extern void init_timervecs (void);

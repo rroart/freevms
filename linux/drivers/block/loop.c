@@ -151,7 +151,7 @@ struct loop_func_table *xfer_funcs[MAX_LO_CRYPT] = {
 
 #define MAX_DISK_SIZE 1024*1024*1024
 
-static int compute_loop_size(struct loop_device *lo, struct dentry * lo_dentry, kdev_t lodev)
+static unsigned long compute_loop_size(struct loop_device *lo, struct dentry * lo_dentry, kdev_t lodev)
 {
 	if (S_ISREG(lo_dentry->d_inode->i_mode))
 		return (lo_dentry->d_inode->i_size - lo->lo_offset) >> BLOCK_SIZE_BITS;
@@ -719,7 +719,7 @@ static int loop_init_xfer(struct loop_device *lo, int type,struct loop_info *i)
 	return err;
 }  
 
-static int loop_clr_fd(struct loop_device *lo, kdev_t dev)
+static int loop_clr_fd(struct loop_device *lo, struct block_device *bdev)
 {
 	struct file *filp = lo->lo_backing_file;
 	int gfp = lo->old_gfp_mask;
@@ -752,7 +752,7 @@ static int loop_clr_fd(struct loop_device *lo, kdev_t dev)
 	memset(lo->lo_encrypt_key, 0, LO_KEY_SIZE);
 	memset(lo->lo_name, 0, LO_NAME_SIZE);
 	loop_sizes[lo->lo_number] = 0;
-	invalidate_buffers(dev);
+	invalidate_bdev(bdev, 0);
 	filp->f_dentry->d_inode->i_mapping->gfp_mask = gfp;
 	lo->lo_state = Lo_unbound;
 	fput(filp);
@@ -852,7 +852,7 @@ static int lo_ioctl(struct inode * inode, struct file * file,
 		err = loop_set_fd(lo, file, inode->i_rdev, arg);
 		break;
 	case LOOP_CLR_FD:
-		err = loop_clr_fd(lo, inode->i_rdev);
+		err = loop_clr_fd(lo, inode->i_bdev);
 		break;
 	case LOOP_SET_STATUS:
 		err = loop_set_status(lo, (struct loop_info *) arg);
@@ -865,7 +865,7 @@ static int lo_ioctl(struct inode * inode, struct file * file,
 			err = -ENXIO;
 			break;
 		}
-		err = put_user(loop_sizes[lo->lo_number] << 1, (long *) arg);
+		err = put_user((unsigned long)loop_sizes[lo->lo_number] << 1, (unsigned long *) arg);
 		break;
 	case BLKGETSIZE64:
 		if (lo->lo_state != Lo_bound) {
@@ -941,6 +941,7 @@ static int lo_release(struct inode *inode, struct file *file)
 }
 
 static struct block_device_operations lo_fops = {
+	owner:		THIS_MODULE,
 	open:		lo_open,
 	release:	lo_release,
 	ioctl:		lo_ioctl,
@@ -951,6 +952,7 @@ static struct block_device_operations lo_fops = {
  */
 MODULE_PARM(max_loop, "i");
 MODULE_PARM_DESC(max_loop, "Maximum number of loop devices (1-255)");
+MODULE_LICENSE("GPL");
 
 int loop_register_transfer(struct loop_func_table *funcs)
 {
