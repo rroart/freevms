@@ -33,7 +33,6 @@
 ================================================================================
 */
 
-
 #include "dcl.h"
 
 /*
@@ -51,9 +50,7 @@ commands_init(dcl$command **commands)
 	 */
 
 	if ((*commands = command_add_on(*commands,
-			"COPY", copy_function, DCL$VERB))
-			== NULL) return(DCL$FAILURE);
-	add_compatibility(*commands,
+			"COPY", copy_function, DCL$VERB,
 			DCL$COMP_Q_ALLOCATION, DCL$COMP_Q_BACKUP,
 			DCL$COMP_Q_BEFORE, DCL$COMP_Q_BY_OWNER,
 			DCL$COMP_Q_CONCATENATE, DCL$COMP_Q_CONFIRM,
@@ -66,239 +63,239 @@ commands_init(dcl$command **commands)
 			DCL$COMP_Q_REPLACE, DCL$COMP_Q_SINCE,
 			DCL$COMP_Q_STYLE, DCL$COMP_Q_TRUNCATE,
 			DCL$COMP_Q_VOLUME, DCL$COMP_Q_WRITE_CHECK,
-			DCL$COMP_END_OF_LIST);
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"DIRECTORY", directory_function, DCL$VERB))
-			== NULL) return(DCL$FAILURE);
+			"DIRECTORY", directory_function, DCL$VERB,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"HELP", help_function, DCL$VERB))
-			== NULL) return(DCL$FAILURE);
+			"HELP", help_function, DCL$VERB,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"LOGOUT", logout_function, DCL$VERB))
-			== NULL) return(DCL$FAILURE);
+			"LOGOUT", logout_function, DCL$VERB,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"SET", set_function, DCL$VERB))
-			== NULL) return(DCL$FAILURE);
+			"SET", set_function, DCL$VERB,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"SEARCH", NULL, DCL$VERB))
-			== NULL) return(DCL$FAILURE);
+			"SEARCH", NULL, DCL$VERB,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"SHOW", NULL, DCL$VERB))
-			== NULL) return(DCL$FAILURE);
+			"SHOW", NULL, DCL$VERB,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	/*
 	 * KEYWORDS
 	 */
 
 	if ((*commands = command_add_on(*commands,
-			"DEFAULT", NULL, DCL$KEYWORD))
-			== NULL) return(DCL$FAILURE);
+			"DEFAULT", NULL, DCL$KEYWORD,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	/*
 	 * QUALIFIERS
 	 */
 
 	if ((*commands = command_add_on(*commands,
-			"/ACL", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/ACL", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/ALLOCATION", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/ALLOCATION", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/BACKUP", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/BACKUP", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/BEFORE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/BEFORE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/BRIEF", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/BRIEF", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/BY_OWNER", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/BY_OWNER", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/COLUMNS", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/COLUMNS", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/CONCATENATE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/CONCATENATE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/CONFIRM", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/CONFIRM", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/CONTIGUOUS", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/CONTIGUOUS", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/CREATED", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/CREATED", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/DATE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/DATE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/EXACT", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/EXACT", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/EXCLUDE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/EXCLUDE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/EXPIRED", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/EXPIRED", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/EXTENSION", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/EXTENSION", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/FILE_ID", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/FILE_ID", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/FTP", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/FTP", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/FULL", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/FULL", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/GRAND_TOTAL", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/GRAND_TOTAL", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/HEADING", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/HEADING", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/HIGHLIGHT", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/HIGHLIGHT", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/LOG", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/LOG", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/MODIFIED", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/MODIFIED", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/OUTPUT", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/OUTPUT", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/OVERLAY", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/OVERLAY", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/OWNER", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/OWNER", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/PAGE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/PAGE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/PRINTER", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/PRINTER", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/PROTECTION", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/PROTECTION", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/RCP", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/RCP", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/READ_CHECK", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/READ_CHECK", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/REPLACE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/REPLACE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SEARCH", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/SEARCH", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SECURITY", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/SECURITY", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SELECT", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/SELECT", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SHELVED_STATE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/SHELVED_STATE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SINCE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/SINCE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SIZE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/SIZE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/STYLE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/STYLE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/TIME", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/TIME", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/TOTAL", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/TOTAL", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/TRAILING", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/TRAILING", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/TRUNCATE", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/TRUNCATE", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/VERSIONS", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/VERSIONS", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/VOLUME", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/VOLUME", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/WIDTH", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/WIDTH", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/WRAP", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/WRAP", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/WRITE_CHECK", NULL, DCL$QUALIFIER))
-			== NULL) return(DCL$FAILURE);
+			"/WRITE_CHECK", NULL, DCL$QUALIFIER,
+			DCL$COMP_END_OF_LIST)) == NULL) return(DCL$FAILURE);
 
 	return(DCL$SUCCESS);
 }
@@ -314,11 +311,15 @@ commands_init(dcl$command **commands)
 
 dcl$command *
 command_add_on(dcl$command *commands, unsigned char *name,
-		int (*function)(), int type)
+		int (*function)(), int type, ...)
 {
 	dcl$command			*new;
 
+	int					compatibility;
 	int					i;
+	int					nb_rotations;
+
+	va_list				list;
 
 	if ((new = malloc(sizeof(dcl$command))) != NULL)
 	{
@@ -329,6 +330,23 @@ command_add_on(dcl$command *commands, unsigned char *name,
 		(*new).function = function;
 
 		for(i = 0; i < DCL$NB_COMP; (*new).compat[i++] = 0);
+
+		va_start(list, type);
+
+		do
+		{
+			if ((compatibility = va_arg(list, int)) != DCL$COMP_END_OF_LIST)
+			{
+				nb_rotations = compatibility - 1;
+
+				if ((nb_rotations >= 0) && (nb_rotations < DCL$NB_COMP_FLAGS))
+				{
+					// mise à jour du drapeau !
+				}
+			}
+		} while(compatibility != DCL$COMP_END_OF_LIST);
+
+		va_end(list);
 	}
 	else
 	{
@@ -336,33 +354,6 @@ command_add_on(dcl$command *commands, unsigned char *name,
 	}
 
 	return(new);
-}
-
-
-void
-add_compatibility(dcl$command *command, ...)
-{
-	int			compatibility;
-	int			nb_rotations;
-
-	va_list		list;
-
-	va_start(list, command);
-
-	do
-	{
-		if ((compatibility = va_arg(list, int)) != DCL$COMP_END_OF_LIST)
-		{
-			nb_rotations = compatibility - 1;
-
-			if ((nb_rotations >= 0) && (nb_rotations < DCL$NB_COMP_FLAGS))
-			{
-				// mise à jour du drapeau !
-			}
-		}
-	} while(compatibility != DCL$COMP_END_OF_LIST);
-
-	va_end(list);
 }
 
 

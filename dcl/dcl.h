@@ -166,7 +166,7 @@
 */
 
 	dcl$command *command_add_on(dcl$command *commands,
-			unsigned char *name, int (*function)(), int type);
+			unsigned char *name, int (*function)(), int type, ...);
 
 	int commands_init(dcl$command **commands);
 	int loop(dcl$command *commands, dcl$env *env);
@@ -175,7 +175,6 @@
 
 	unsigned char *read_command(dcl$env *env);
 
-	void add_compatibility(dcl$command *command, ...);
 	void commands_freeing(dcl$command *commands);
 
 /*
