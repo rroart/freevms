@@ -648,7 +648,11 @@ int new_thread(int nr, unsigned long clone_flags, unsigned long esp,
 	struct pt_regs * childregs;
 
 	childregs = ((struct pt_regs *) (THREAD_SIZE + (unsigned long) p)) - 1;
+#if 0
 	struct_cpy(childregs, regs);
+#else
+	memset(childregs,0,sizeof(*childregs));
+#endif
 	childregs->eax = 0;
 	childregs->esp = esp;
 
