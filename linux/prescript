@@ -13,5 +13,4 @@ done
 		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
 )
 
-ln -s ../freevms/pal/src pal
-
+echo you have read the HOWTO and done a make in ../freevms?
