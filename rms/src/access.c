@@ -90,13 +90,17 @@ int f11b_read_writevb(struct _irp * i) {
   struct _fcb * fcb = xqp->primary_fcb; // ???? is this right
   struct _wcb * wcb = &fcb->fcb$l_wlfl;
   int blocks=(i->irp$l_qio_p2+511)/512;
-  lbn=f11b_map_vbn(i->irp$l_qio_p3,wcb);
-  if (i->irp$v_fcode==IO$_WRITEVBLK) {
-    f11b_write_block(vcb,i->irp$l_qio_p1,lbn,blocks,&iosb);
-  } else {
-    buffer=f11b_read_block(vcb,lbn,blocks,&iosb);
-    memcpy(i->irp$l_qio_p1,buffer,512);
-    kfree(buffer);
+  int j;
+  for(j=0; j<blocks; j++) {
+    lbn=f11b_map_vbn(j+i->irp$l_qio_p3,wcb);
+    if (i->irp$v_fcode==IO$_WRITEVBLK) {
+      f11b_write_block(vcb,512*j+i->irp$l_qio_p1,lbn,1,&iosb);
+    } else {
+      buffer=f11b_read_block(vcb,lbn,1,&iosb);
+      memcpy(512*j+i->irp$l_qio_p1,buffer,512);
+      kfree(buffer);
+    }
+    i->irp$l_iost2+=512;
   }
   //f11b_io_done(i);
 }
@@ -779,7 +783,7 @@ void *f11b_readvblock(struct _fcb * fcb,unsigned curvbn,unsigned *retsts)
 {
   struct _iosb iosb;
   int length;
-  char *address;
+  char *address = 0;
   length = fcb->fcb$l_efblk - curvbn + 1;
   length = 1;
   do {
@@ -809,7 +813,13 @@ void *f11b_readvblock(struct _fcb * fcb,unsigned curvbn,unsigned *retsts)
       //address += phylen * 512;
     }
   } while (length > 0);
-  *retsts = SS$_NORMAL;
+#if 0
+  // not yet?
+  if (address==0)
+    *retsts=0;
+  else
+#endif
+    *retsts = SS$_NORMAL;
   return address;
 }
 
@@ -827,8 +837,14 @@ unsigned accesschunk(struct _fcb *fcb,unsigned vbn,
   *retbuff = f11b_readvblock(fcb,vbn,&sts);
 
   if (retblocks) *retblocks=1;
+#if 0
+  // not yet? 
+  iosbret(irp,sts);
+  return sts;
+#else
   iosbret(irp,SS$_NORMAL);
   return SS$_NORMAL;
+#endif
 }
 
 
@@ -841,7 +857,6 @@ unsigned deaccessfile(struct _fcb *fcb)
   struct _iosb iosb;
   int sts;
   struct _fh2 * head;
-  return SS$_NORMAL;
 #ifdef DEBUG
   printk("Deaccessing file (%x) reference %d\n",fcb->cache.hashval,fcb->cache.refcount);
 #endif
@@ -932,9 +947,17 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
 
   xqp->current_vcb=vcb; // until I can place it somewhere else
 
+  if (xqp->primary_fcb) {
+    struct _fcb * fcb = xqp->primary_fcb;
+    if (fid->fid$w_num!=fcb->fcb$w_fid_num)
+      xqp->primary_fcb=0; //f11b_search_fcb(vcb,fid);
+  }
+
   if (fib->fib$w_did_num) {
     struct _fh2 * head;
     struct _fcb * fcb=xqp->primary_fcb;
+    if (fcb==0)
+      fcb=f11b_search_fcb(vcb,&fib->fib$w_did_num);
     head = f11b_read_header (vcb, 0, fcb, &iosb);  
     sts=iosb.iosb$w_status;
     if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
@@ -971,7 +994,11 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
   xqp->primary_fcb=fcb;
   xqp->current_window=&fcb->fcb$l_wlfl;
 
-  if (atrp) f11b_read_attrib(fcb,atrp);
+  if (atrp) {
+    if (action==0)
+      f11b_read_attrib(fcb,atrp);
+  }
+
   iosbret(irp,SS$_NORMAL);
   return SS$_NORMAL;
 }
@@ -1099,7 +1126,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       int chan;
       struct dsc$descriptor dsc;
       if (islocal)
-	sts = phyio_init(strlen(devnam[device])+1,devnam[device],&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
+	sts = phyio_init(strlen(devnam[device])+1,devnam[device],&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0,ucb);
       dsc.dsc$a_pointer=do_file_translate(devnam[device]);
       dsc.dsc$w_length=strlen(dsc.dsc$a_pointer);
 #if 0
