@@ -577,6 +577,38 @@ static Command intcmd[] = {
 	0, NULL, NULL, NULL, NULL };
 
 
+struct cli_struct {
+  char * cliroutine;
+  void (*fn)();
+};
+
+struct cli_struct cliroutines[]={
+{  "define",  int_create_logical_name,   },
+{  "create_name_table",  int_create_logical_table,   },
+{  "set_default",          int_set_default,           },
+{  "set_prompt",           int_set_prompt,            },
+{  "set_process",          int_set_process,           },
+{  "set_working_set",      int_set_working_set,       },
+{  "show_time",            int_show_datetime,         },
+{  "show_devices",         int_show_device,           },
+{  "show_default",         int_show_default,          },
+{  "show_working_set",     int_show_working_set,      },
+{  "show_logical",    int_show_logical_name,     },
+{  "show_system",          int_show_system,           },
+{ 0, 0 , },
+};
+
+void * get_cli_int(char * c) {
+  int i;
+  for (i=0;cliroutines[i].cliroutine;i++) {
+    if (0==strncmp(c,cliroutines[i].cliroutine,strlen(cliroutines[i].cliroutine)))
+      return cliroutines[i].fn;
+  }
+  return 0;
+}
+
+	// the following are really not internal
+
 const char oz_s_logname_defaulttables[] = "DEFAULT";
 
 const char oz_sys_copyright[] = "C";
