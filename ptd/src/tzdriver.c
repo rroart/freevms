@@ -486,7 +486,7 @@ void TZ$NULL()				// Null port routine
 //
 //	R2,R5 ARE PRESERVED.
 //--
-void TZ$INITLINE(struct _ucb * ucb)				// RESET SINGLE LINE
+void TZ$INITLINE(struct _idb * idb, struct _ucb * ucb)				// RESET SINGLE LINE
 {
   int R3,R4,R6,R7,R8,R9;
   struct _tt_class * R0;
@@ -883,6 +883,10 @@ struct _tt_port port_vector = {
   port_glyphload:TZ$NULL,
   port_maint:TZ$NULL,
   port_forkret:TZ$FORK,
+  port_start_read:TZ$NULL,
+  port_middle_read:TZ$NULL,
+  port_end_read:TZ$NULL,
+  port_cancel:TZ$NULL,
 };
  
 #include<crbdef.h>
@@ -1033,7 +1037,7 @@ int tz$unit_init (struct _idb * idb, struct _ucb * ucb) {
   
   ucb->ucb$v_online = 1;
 
-  TZ$INITLINE(ucb); // temp  placed
+  TZ$INITLINE(0, ucb); // temp  placed
 
   return SS$_NORMAL;
 }
