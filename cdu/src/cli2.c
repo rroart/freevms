@@ -84,8 +84,11 @@ unsigned int cli$present(void *entity_desc) {
   int dlen = desc->dsc$w_length;
   int min; 
   struct _cdu * cdu = *my_cdu;
-  int q = cdu->cdu$l_qualifiers;
-  int sts = my_cdu_search_next(q, CDU$C_QUALIFIER, name, dlen, 0);
+  int e = cdu->cdu$l_parameters;
+  int sts = my_cdu_search_next(e, CDU$C_PARAMETER, name, dlen, 0);
+  e = cdu->cdu$l_qualifiers;
+  if ((sts&1)==0)
+    sts = my_cdu_search_next(e, CDU$C_QUALIFIER, name, dlen, 0);
   if (sts&1)
     return CLI$_PRESENT;
   else
