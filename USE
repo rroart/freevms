@@ -1,0 +1,128 @@
+starting uml example:
+	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=/vms\$common/sysexe/dcl
+
+running commands:
+	DCL: typically command
+	/bin/sh: /vms\$common/sysexe/command
+	note: abbreviation may not work
+
+RUN/MCR:
+	use them as "usual"
+	no qualifiers
+	DCL only.
+	
+MOUNT:
+	Local file ODS2 image
+	Go to image directory
+	mount filename
+
+	Cluster mount
+	The other file image must be in /file
+	mount _filename
+	Then use as dir dua0 etc
+
+INIT: 
+	init filename volume-name size
+
+DIRECTORY:
+	directory
+	qualifiers: /file /size /date
+
+COPY:
+	copy/import/export
+
+DIFFERENCE/SEARCH/TYPE:
+	as is, no qualifiers
+
+SET PROCESS:
+	has some problems for now?
+	DCL only
+
+SET PROMPT:
+	set prompt string OR set prompt
+	DCL only
+
+SET DEFAULT:
+	does only a chdir (directory know nothing about this)
+	set default pathname
+	DCL only
+
+SHOW DEFAULT:
+	show default	
+	DCL only
+
+SHOW DEVICES:
+	at current only shows drivers
+	show devices
+	DCL only
+
+SHOW SYSTEM:
+	show system
+	DCL only
+
+SHOW TIME:
+	show time
+	DCL only
+
+STOP:
+	you will have to give it decimal numbers
+	It must be used with VMS PIDs if to be used         
+	in a cluster (the Unix pids can be used on the local node).
+
+	stop /id proc
+	stop
+	DCL only (unless you use /vms\$common/syshlp/examples/forcex)
+
+******************************
+
+Clustering:
+At least works on uml, problems on both bochs/i386 and ordinary i386.
+Does not work with CONFIG_VMS yet (mount /proc panics).
+Run net on one node and net2 on the other.
+Wait until you see a kernel message.
+
+******************************
+
+Only for CONFIG_VMS:
+
+UML ubd devices show up as daa0 etc.
+386 ide devices partitions show up as dqa0 etc. (hdb2 -> dqb2 etc)
+Ext2 root / is mounted under RMS, and it is possible to do dir [etc] etc.
+It is possible to do type [etc]group
+
+starting uml example:
+	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=[vms\$common.sysexe]dcl
+	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=[bin]sh
+
+MOUNT:
+	can mount daa0 and dqa0
+
+SHOW WORKING_SET:
+	show working_set
+	DCL only
+
+SET WORKING_SET:
+	adds or subtracts to working set quota
+	does not work exactly to specs
+	set working_set /quota delta
+	set working_set /extent delta
+	DCL only
+
+run a VMS image file:
+	do mcr/run on a file with name.exe
+
+******************************
+
+NOTES/bugs general:
+
+ODS2 write-support seems to have gotten some problems.
+Do not expect DECnet to work (collides with cluster code)
+
+******************************
+
+NOTES/bugs CONFIG_VMS:
+
+A more experimental config; do not boot to more than /bin/sh or DCL.
+Write support on ext2 has some (minor?) bugs or faults or shortcomings.
+RMS dir can not be done on ext2 root /.
+/bin/sh and other shellscripting does not work.

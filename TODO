@@ -1,0 +1,12 @@
+(with the risk of things here being outdated)
+
+Let RMS also use Ext2 with write support.
+Execute programs with execve and imgact on Ods-2.
+Get more/better write-support in.
+Do more SCA/SCS stuff.
+At least look at whatever "device" uml uses and NE2000.
+
+FIX pal
+better RMS compatibilty; check input and output RAB fields
+
+Logical support in the DCL and elsewhere
