@@ -3,12 +3,14 @@
 #include <descrip.h> 
 #include <jpidef.h>
 #include <starlet.h>
+#include <syidef.h>
 
 static char * states[]={"NONE","COLPG","MWAIT","CEF","PFW","LEF","LEFO","HIB","HIBO","SUSP","SUSPO","FPG","COM","COMO","CUR"};
 
 show_system(){
 int i;
-struct item_list_3 lst[14];
+struct item_list_3 lst[14], syilst[2];
+char scsnode[16];
 char procname[15];
 char proclen;
 unsigned long upid,epid;
@@ -19,6 +21,17 @@ unsigned long upidlen,epidlen;
  unsigned long pageg, pageglen;
  unsigned long pagef, pageflen;
 int jpistatus;
+ int sts;
+ int retscsnodelen;
+
+syilst[0].buflen=16;
+syilst[0].item_code=SYI$_SCSNODE;
+syilst[0].bufaddr=scsnode;
+syilst[0].retlenaddr=&retscsnodelen;
+syilst[1].buflen=0;
+syilst[1].item_code=0;
+
+ sts=sys$getsyi(0,0,0,syilst,0,0,0);
 
 lst[0].buflen=15;
 lst[0].item_code=JPI$_PRCNAM;
@@ -54,7 +67,7 @@ lst[7].bufaddr=&pageg;
 lst[7].retlenaddr=&pageglen;
 lst[8].buflen=0;
 lst[8].item_code=0;
- printf(" FreeVMS V0.0  on node ABCDEF  NN-OOO-2003 PP:QQ:RR.SS  Uptime  TT XX:YY:ZZ\n");
+ printf(" FreeVMS V0.0  on node %6s  NN-OOO-2003 PP:QQ:RR.SS  Uptime  TT XX:YY:ZZ\n",scsnode);
  printf("  Pid    Process Name    State  Pri      I/O       CPU       Page flts  Pages\n");
 
 do {
