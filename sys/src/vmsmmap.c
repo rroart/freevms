@@ -423,7 +423,7 @@ munmap_back:
 	  struct _fcb * fcb=file;
 	  if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)	  
 	    fcb=e2_search_fcb(file->f_dentry->d_inode);
-	  exe$crmpsc(&inadr,0,0,0,0,0,0,/*(unsigned short int)*/fcb,0,pgoff,0,0);
+	  exe$crmpsc(&inadr,0,0,0,0,0,0,/*(unsigned short int)*/fcb,0,pgoff<<3,0,0);
 	} else {
 	  exe$cretva(&inadr,0,0);
 	}
