@@ -362,6 +362,7 @@ unsigned copy(int argc,char *argv[],int qualc,char *qualv[])
 		  ofab.fab$b_rat=ifab.fab$b_rat;
 		  ofab.fab$b_rfm=ifab.fab$b_rfm;
 		  ofab.fab$w_mrs=ifab.fab$w_mrs;
+		  ofab.fab$l_alq=ifab.fab$l_alq;
 
 		  memcpy(name,argv[2],strlen(argv[2]));
 
@@ -785,6 +786,8 @@ unsigned del(int argc,char *argv[],int qualc,char *qualv[])
             nam.nam$b_rss = NAM$C_MAXRSS;
             fab.fab$l_fop = FAB$M_NAM;
             while ((sts = sys$search(&fab)) & 1) {
+	      sts = sys$open(&fab);
+	      sts = sys$close(&fab);
                 sts = sys$erase(&fab);
                 if ((sts & 1) == 0) {
                     printf("%%DELETE-F-DELERR, Delete error: %d\n",sts);
