@@ -111,6 +111,10 @@ MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
 	      OPTIMIZE,OPTLEVEL=3,ZIP)=
 #endif
 
+extern 	void OPR_FAO(int, ...);
+extern 	void ERROR_FAO(int, ...);
+extern 	void FATAL_FAO(int, ...);
+
 #include <starlet.h>
 //LIBRARY "SYS$LIBRARY:LIB";			// JC
 //not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";
@@ -128,6 +132,8 @@ MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
 #include <chfdef.h>
 
 #include <stdarg.h>
+#include <linux/config.h>
+#include <linux/mm.h>
 
 
 
@@ -411,12 +417,10 @@ struct _fabdef    LOGFAB_ = {   fab$l_fna : "INET$LOG:",
 struct _rabdef    LOGRAB_ = { rab$l_fab: &LOGFAB_ }, *LOGRAB=&LOGRAB_;
 
 signed long
-    log_state  = 0;
+log_state  = 0;
 
 #define    TRUE (0 == 0)
 #define    FALSE (0 == 1)
-
- void    OPR_FAO();
 
 LOG_OPEN (void)
 
@@ -500,7 +504,9 @@ void LOG_OUTPUT(OUTDESC)
 	LOGRAB->rab$w_rsz = OUTDESC->dsc$w_length;
 	LOGRAB->rab$l_rbf = OUTDESC->dsc$a_pointer;
 	logcount = logcount + OUTDESC->dsc$w_length ;
-
+#if 0
+	printk("L %s\n",OUTDESC->dsc$a_pointer);
+#endif
 #if 0
 	// not yet. no write support, and rms don't work here
 	RC = exe$put( LOGRAB);
@@ -743,8 +749,7 @@ extern struct dsc$descriptor *	myname;
     return exe$sndopr(MSG, 0);
     }
 
-void OPR_FAO(CSTR, args) 
-     va_list args;
+void OPR_FAO(int CSTR, ...) 
 // Send a message to the VMS operator, using $FAO for output formatting.
 
     {
@@ -753,10 +758,13 @@ void OPR_FAO(CSTR, args)
     DESC$STR_ALLOC(OUTDESC,1000);
 	DESC$STR_ALLOC(OPRDESC,1000);
 
+	va_list args;
+	va_start(args,CSTR);
     RC = exe$faol(CSTR,
 	        &OUTDESC->dsc$w_length,
 	       OUTDESC,
-		  &args); // check. was ap+8
+		  args); // check. was ap+8
+    va_end(args);
     if (BLISSIFNOT(RC))
 	exe$exit( RC);
 
@@ -774,8 +782,7 @@ signed long
 
 //SBTTL "Error processing routines - ERROR_FAO, FATAL_FAO"
 
-void ERROR_FAO(CSTR, args)
-     va_list args;
+void ERROR_FAO(int CSTR, ...)
 //
 // Send a message to the console & log the error (OPR_FAO + LOG_FAO)
 //
@@ -789,10 +796,13 @@ void ERROR_FAO(CSTR, args)
 
 // Format the message string
 
+	va_list args;
+	va_start(args,CSTR);
     RC = exe$faol(CSTR,
 	       &OUTDESC->dsc$w_length,
 	       OUTDESC,
-		  &args); // check. was ap+8
+		  args); // check. was ap+8
+    va_end(args);
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("ERROR_FAO failure, RC = !XL",RC);
@@ -823,8 +833,7 @@ void ERROR_FAO(CSTR, args)
     }
 
 
-void FATAL_FAO(CSTR, args)
-     va_list args;
+void FATAL_FAO(int CSTR, ...)
 //
 // Same as above, except also exit the ACP.
 //
@@ -838,10 +847,13 @@ void FATAL_FAO(CSTR, args)
 
 // Format the output string
 
+	va_list args;
+	va_start(args,CSTR);
     RC = exe$faol(CSTR,
 	       &OUTDESC->dsc$w_length,
 	       OUTDESC,
-		  &args); // check. was ap+8
+		  args); // check. was ap+8
+    va_end(args);
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("FATAL_FAO failure, RC = !XL",RC);
@@ -908,7 +920,8 @@ static struct QH$ERRHDR
     ERR_MSG_Q_ = { EM$QHEAD : &ERR_MSG_Q_,
 		   EM$QTAIL: & ERR_MSG_Q_},*ERR_MSG_Q=&ERR_MSG_Q_;
 
-void QL_FAO(CSTR)
+void QL_FAO(CSTR, args)
+     va_list args;
 //
 // Format and queue an error message using $FAO and the message queue.
 //
@@ -931,13 +944,19 @@ void QL_FAO(CSTR)
 // Allocate a queue block for the message
 
     QB = mm$qblk_get();
-    MDSC = QB->EMQ$MDSC;
+    MDSC = &QB->EMQ$MDSC;
 //    $INIT_DYNDESC(MDSC);
     INIT_DYNDESC(MDSC);
 
 // Format the message
 
+#if 0
+    // not yet
     RC = LIB$SYS_FAOL(CSTR, MDSC->dsc$w_length, MDSC, /*AP+*/8);
+#else
+    MDSC->dsc$a_pointer=kmalloc(256,GFP_KERNEL);
+    RC = exe$faol(CSTR, &MDSC->dsc$w_length, MDSC, &args); // check. was AP+etc
+#endif
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("QL_FAO failure, RC = !XL",RC);
@@ -970,7 +989,7 @@ extern	STR$FREE1_DX ();
 
     while (REMQUE(ERR_MSG_Q->EM$QHEAD,&QB) != EMPTY_QUEUE)
 	{
-	MDSC = QB->EMQ$MDSC;
+	MDSC = &QB->EMQ$MDSC;
 	LOG_OUTPUT(MDSC);
 	STR$FREE1_DX(MDSC);
 	mm$qblk_free(QB);
