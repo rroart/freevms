@@ -18,10 +18,11 @@ int jobctl_unsolicit(struct dsc$descriptor * term) {
   struct dsc$descriptor prcnam;
   char nam[16]="_";
 
-  prcnam.dsc$w_length=1+term->dsc$w_length;
+  prcnam.dsc$w_length=2+term->dsc$w_length;
   prcnam.dsc$a_pointer=nam;
 
   memcpy(&nam[1],term->dsc$a_pointer, term->dsc$w_length);
+  nam[term->dsc$w_length+1]=':';
 
   sts = exe$creprc(0, &log, term, term, term, &priv, 0, &prcnam, defpri, uic, 0, sts);
   return sts;
