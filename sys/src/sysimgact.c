@@ -31,12 +31,12 @@ asmlinkage int exe$imgact_wrap(struct struct_args * s) {
   return exe$imgact(s->s1,s->s2,s->s3,s->s4,s->s5,s->s6,s->s7,s->s8);
 }
 
-asmlinkage int exe$imgact(void * name, void * dflnam, void ** hdrbuf, unsigned long imgctl, unsigned long long * inadr, unsigned long long * retadr, unsigned long long * ident, unsigned long acmode) {
+asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned long imgctl, unsigned long long * inadr, unsigned long long * retadr, unsigned long long * ident, unsigned long acmode) {
 #ifdef CONFIG_VMS
   struct dsc$descriptor *dscname=name;
   struct dsc$descriptor *dscdflnam=dflnam;
   struct file * f;
-  struct _ihd * header=kmalloc(512,GFP_KERNEL);
+  struct _ihd * header=hdrbuf;
   struct _ihd * ehdr32=header;
   struct _iha * active;
   struct _isd * section;
@@ -52,7 +52,6 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void ** hdrbuf, unsigned l
   //  im->imcb$b_type
   f=rms_open_exec(dscdflnam->dsc$a_pointer);
   if (f==0) return 0;
-  *hdrbuf=header;
   im->imcb$l_context=f;//w_chan too small, temp place
   fs = get_fs();
   set_fs(KERNEL_DS);
@@ -84,7 +83,11 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void ** hdrbuf, unsigned l
 
     img_inadr.va_range$ps_start_va=section->isd$v_vpn<<PAGE_SHIFT;
     img_inadr.va_range$ps_end_va=img_inadr.va_range$ps_start_va+section->isd$w_pagcnt*PAGE_SIZE;
+#ifdef __arch_um__
     exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x51 ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
+#else
+    exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x45 ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
+#endif
     exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,section->isd$l_vbn,0,0);
 
     section=(unsigned long)section+section->isd$w_size;
