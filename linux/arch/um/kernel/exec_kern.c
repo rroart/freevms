@@ -46,7 +46,7 @@ void flush_thread(void)
 	}
 		
 	new_pid = start_fork_tramp((void *) current->thread.kernel_stack,
-				   stack, 0, exec_tramp);
+				   stack, 0, exec_tramp, 0);
 	if(new_pid < 0){
 		printk(KERN_ERR 
 		       "flush_thread : new thread failed, errno = %d\n",
