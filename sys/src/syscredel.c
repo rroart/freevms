@@ -157,7 +157,39 @@ asmlinkage int exe$deltva(struct _va_range *inadr, struct _va_range *retadr, uns
   mmg$credel(acmode, first, last, mmg$delpag, inadr, retadr, acmode, p, numpages);
 }
 
-asmlinkage void exe$expreg(void) {
+asmlinkage int exe$expreg(unsigned int pagcnt, struct _va_range *retadr,unsigned int acmode, char region) {
+#ifdef __arch_um__
+  int prot_pte=0x51|_PAGE_RW;
+#else
+  int prot_pte=0x45|_PAGE_RW;
+#endif
+  int sts;
+  // region is default 0, and region rde are not used like in vms
+
+  // select corresponding rde...
+  // here I have got to see or create a region starting at, like 0x20000000
+
+  struct _rde * rde=mmg$lookup_rde_va(0x20000000, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+  if (rde==0) {
+    int sts=exe$create_region_32(pagcnt*4096,prot_pte,0x187500,0,0,0,0x20000000);
+    rde=mmg$lookup_rde_va(0x20000000, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+    rde->rde$pq_first_free_va=0x20000000;
+
+    retadr->va_range$ps_start_va=0x20000000;
+    retadr->va_range$ps_end_va=0x20000000+pagcnt*4096-1;
+
+    goto out;
+    return sts;
+  }
+
+ out:
+  rde->rde$pq_first_free_va+=pagcnt*4096;
+
+  // if can create all at once:
+  mmg$fast_create(ctl$gl_pcb,rde,retadr->va_range$ps_start_va,retadr->va_range$ps_end_va,pagcnt,prot_pte);
+  // else when does this run?
+  //mmg$credel(acmode, first, last, mmg$crepag, inadr, retadr, acmode, p, numpages);
+  return sts;
 }
 
 
@@ -361,7 +393,7 @@ asmlinkage int exe$create_region_32  ( unsigned long length, unsigned int region
   rde->rde$l_flags=flags;
   rde->rde$r_regprot.regprt$l_region_prot = region_prot;
   insrde(rde,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
-
+  return SS$_NORMAL;
 }
 
 asmlinkage int exe$delete_region_32  (unsigned long long *region_id,  unsigned int acmode, void **return_va, unsigned long *return_length) {
