@@ -663,6 +663,20 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 	  make_fcb(f->f_dentry->d_inode);
 	filp_close(f,0);
       }
+      f=filp_open(name, O_RDONLY,0);
+      if (f>=0 && f<0xf0000000) {
+	if (f->f_dentry && f->f_dentry->d_inode)
+	  make_fcb(f->f_dentry->d_inode);
+	filp_close(f,0);
+      }
+      dir.d_name[strlen(dir.d_name)]='/';
+      strcpy(dir.d_name+strlen(dir.d_name),name);
+      f=filp_open(&dir.d_name, O_RDONLY,0);
+      if (f>=0 && f<0xf0000000) {
+	if (f->f_dentry && f->f_dentry->d_inode)
+	  make_fcb(f->f_dentry->d_inode);
+	filp_close(f,0);
+      }
     }
 
 #if 0
