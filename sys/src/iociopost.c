@@ -32,9 +32,10 @@ kfreebuf(void * d) {
 
   case DYN$C_CXB:
     while (cx) {
+      void * next=cx->cxb$l_link;
       kfree(cx->cxb$ps_pktdata);
       kfree(cx);
-      cx=cx->cxb$l_link;
+      cx=next;
     }
     break;
 
