@@ -9,6 +9,7 @@
 #include <pridef.h>
 #include<ipldef.h>
 #include<lkbdef.h>
+#include<phddef.h>
 #include<ipl.h>
 #include <linux/linkage.h>
 #include <linux/sched.h>
@@ -117,7 +118,7 @@ asmlinkage void exe$swtimint(void) {
   setipl(IPL$_TIMERFORK);
 
   times++;
-  if (current->phd$w_quant>=0 && current->phd$w_quant<128) 
+  if (current->pcb$w_quant>=0 && current->pcb$w_quant<128) 
     sch$qend(current);
 
   vmslock(&SPIN_TIMER,IPL$_TIMER);
@@ -274,7 +275,7 @@ int hwclkdone=1;
       //  printk(".");
       if (mydebug5 && !countme2--) { 
 	countme2=500; printk(",");
-	printk("timer %x %x %x\n",p->pid,p->phd$w_quant,p->pcb$b_pri);
+	printk("timer %x %x %x\n",p->pid,p->pcb$w_quant,p->pcb$b_pri);
       }
       //  printk(":");
       //	if (p->pid==2) { int i; for(i=0;i<1000000;i++) ; }
@@ -283,10 +284,10 @@ int hwclkdone=1;
       if (p->pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}  /* Will be removed in the future */
       if (p->pid==1) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}  /* Will be removed in the future */
       if (p->pid) {
-	p->phd$l_cputim++;
-	p->phd$w_quant+=QUANTADD;
-	if (++p->phd$w_quant  >= 0 ) {
-	  if (p->phd$w_quant<128) {
+	p->pcb$l_phd->phd$l_cputim++;
+	p->pcb$w_quant+=QUANTADD;
+	if (++p->pcb$w_quant  >= 0 ) {
+	  if (p->pcb$w_quant<128) {
 	    SOFTINT_TIMERFORK_VECTOR;
 	    //		    sch$resched();
 	  }

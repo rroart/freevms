@@ -25,7 +25,7 @@ int sch$qend(struct _pcb * p) {
   vmslock(&SPIN_SCHED,-1);
 
   p->pcb$l_pixhist=p->pcb$l_pixhist << 1;
-  p->phd$w_quant = -QUANTUM;
+  p->pcb$w_quant = -QUANTUM;
   p->pcb$l_onqtime=exe$gl_abstim_tics;
   p->pcb$l_sts=p->pcb$l_sts & ( ~ PCB$M_INQUAN );
   if (ffs(sch$gl_comoqs)) {

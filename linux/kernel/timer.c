@@ -27,6 +27,7 @@
 #include <asmlink.h>
 #include <asm/hw_irq.h>
 #include <sysgen.h>
+#include <phddef.h>
 #include <rse.h>
 #include <system_data_cells.h>
 
@@ -597,7 +598,7 @@ void update_process_times(int user_tick)
 	//  printk(".");
 	if (mydebug5 && !countme2--) { 
 	  countme2=500; printk(",");
-	  printk("timer %x %x %x\n",p->pid,p->phd$w_quant,p->pcb$b_pri);
+	  printk("timer %x %x %x\n",p->pid,p->pcb$w_quant,p->pcb$b_pri);
 	}
   //  printk(":");
 	//	if (p->pid==2) { int i; for(i=0;i<1000000;i++) ; }
@@ -606,9 +607,9 @@ void update_process_times(int user_tick)
 	if (p->pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}  /* Will be removed in the future */
 	if (p->pid==1) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}  /* Will be removed in the future */
 	if (p->pid) {
-	  p->phd$l_cputim++;
-		if (++p->phd$w_quant  >= 0 ) {
-		  if (p->phd$w_quant<128) {
+	  p->pcb$l_phd->phd$l_cputim++;
+		if (++p->pcb$w_quant  >= 0 ) {
+		  if (p->pcb$w_quant<128) {
 		    SOFTINT_TIMERFORK_VECTOR;
 		    //		    sch$resched();
 		  }

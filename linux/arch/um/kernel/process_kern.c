@@ -422,7 +422,7 @@ void cpu_idle(void)
 	  	  current->pcb$b_pri   = 24;
 	  current->pcb$b_prib  = 31;
 	  current->pcb$b_pri   = 31;
-	  current->phd$w_quant = 0;
+	  current->pcb$w_quant = 0;
 	} /* we might not need these settings */
 
  	if(CPU(current) == 0) idle_timer();
