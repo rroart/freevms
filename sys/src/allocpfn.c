@@ -59,6 +59,7 @@ signed long mmg$dallocpfn(unsigned long pfn) {
   struct _mypfn * m=&mem_map[pfn];
   //  mem_map[pfn].pfn$l_flink=0;
   //mem_map[pfn].pfn$l_blink=pfn$al_tail;
+  //return;
   m->pfn$l_flink=0;
   m->pfn$l_blink=pfn$al_tail;
   if (mem_map[pfn].pfn$l_flink) panic("dalloc\n");

@@ -119,6 +119,8 @@ struct page *_alloc_pages(unsigned int gfp_mask, unsigned int order)
 }
 #endif
 
+int inallocpfn=0;
+
 /*
  * This is the 'heart' of the zoned buddy allocator:
  */
@@ -135,10 +137,12 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
 	zone = &thezone;
 
 	spin_lock_irqsave(&zone->lock, flags);
+	if (inallocpfn++) panic("mooo\n");
 	if (order)
 	  pfn=mmg$allocontig_align(1 << order);
 	else
 	  pfn=mmg$allocpfn();
+	inallocpfn--;
 	spin_unlock_irqrestore(&zone->lock, flags);
 
 	//	printk("allocated pfn %x %x\n",pfn,1<<order);
@@ -160,10 +164,12 @@ rebalance:
 	try_to_free_pages(classzone, gfp_mask, order);
 
 	spin_lock_irqsave(&zone->lock, flags);
+	if (inallocpfn++) panic("mooo\n");
 	if (order)
 	  pfn=mmg$allocontig(1 << order);
 	else
 	  pfn=mmg$allocpfn();
+	inallocpfn--;
 	spin_unlock_irqrestore(&zone->lock, flags);
 
 	if (pfn>=0) {
