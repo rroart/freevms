@@ -21,6 +21,9 @@
 #include <tqedef.h>
 #include <dyndef.h>
 
+#undef VMS_MM_DEBUG 
+#define VMS_MM_DEBUG
+
 #if 0
 // fix these later? they are presumably dead 
 static const int irpsize = ((sizeof (struct _irp)>>4)+1)<<4;
@@ -514,6 +517,8 @@ int exe$allocate(int requestsize, void ** poolhead, int alignment, unsigned int 
     next=cur->gen$l_flink;
 
     if (requestsize<=next->gen$w_size) {
+      check_packet(next,requestsize,0);
+      poison_packet(next,requestsize,0);
       *allocatedsize=requestsize;
       *returnblock=next;
       nextnext=next->gen$l_flink;
@@ -554,25 +559,29 @@ int exe$deallocate(void * returnblock, void ** poolhead, int size) {
   if (next && nextnext && ((unsigned long)next+next->gen$w_size)==(unsigned long)middle && ((unsigned long)middle+middle->gen$w_size)==nextnext) {
     next->gen$w_size+=middle->gen$w_size+nextnext->gen$w_size;
     next->gen$l_flink=nextnext->gen$l_flink;
+    poison_packet(next,next->gen$w_size,1);
     return SS$_NORMAL;
   }
 
   if (next && ((unsigned long)next+next->gen$w_size)==(unsigned long)middle) {
     next->gen$w_size+=middle->gen$w_size;
     next->gen$l_flink=nextnext;
+    poison_packet(next,next->gen$w_size,1);
     return SS$_NORMAL;
   }
 
   if (next && nextnext && ((unsigned long)middle+middle->gen$w_size)==nextnext) {
     middle->gen$w_size+=nextnext->gen$w_size;
     next->gen$l_flink=middle;
+    poison_packet(middle,middle->gen$w_size,1);
     return SS$_NORMAL;
   }
 
   next->gen$l_flink=middle;
   middle->gen$l_flink=nextnext;
+  poison_packet(middle,size,1);
 
-  return SS$_INSFMEM;
+  return SS$_NORMAL;
 }
 
 int exe_std$alloctqe(int *alosize_p, struct _tqe **tqe_p) {
@@ -586,3 +595,37 @@ int exe_std$alloctqe(int *alosize_p, struct _tqe **tqe_p) {
   }
   // more remains
 }
+
+int poison_packet(char * packet, int size, int deall) {
+#ifdef VMS_MM_DEBUG
+  long * l = packet;
+  char poisonc=0x42;
+  int poison=0x12345678;
+  if (deall)
+    poison=0x87654321;
+  if (deall)
+    poisonc=0xbd;
+  l[2]=poison;
+  memset(packet+12,poisonc,size-12);
+#endif
+}
+
+int check_packet(char * packet, int size, int deall) {
+#ifdef VMS_MM_DEBUG
+  deall=!deall;
+  long * l = packet;
+  char poisonc=0x42;
+  int poison=0x12345678;
+  if (deall)
+    poison=0x87654321;
+  if (deall)
+    poisonc=0xbd;
+  if (l[2]!=poison) 
+    panic("poison %x %x != %x\n",l,l[2],poison);
+  char * c = packet + 12;
+  size-=12;
+  for(;size;size--,c++) 
+    if (*c!=poisonc) panic("poisonc %x %x %x\n",size,c,poisonc);
+#endif
+}
+
