@@ -11,6 +11,8 @@
 
 #include <asm/pgalloc.h>
 
+#include "../../freevms/sys/src/system_data_cells.h"
+
 struct mm_struct *swap_mm = &init_mm;
 
 DECLARE_WAIT_QUEUE_HEAD(kswapd_wait);
@@ -57,7 +59,7 @@ int kswapd(void *unused)
 	DECLARE_WAITQUEUE(wait, tsk);
 
 	daemonize();
-	strcpy(tsk->pcb$t_lname, "kswapd");
+	strcpy(tsk->pcb$t_lname, "SWAPPER");
 	sigfillset(&tsk->blocked);
 	
 	/*
