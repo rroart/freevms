@@ -23,7 +23,7 @@ CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconve
 
 STROBJ = str.o str__const.o str__is_string_class.o \
 	str__copy_fill.o str__resize.o \
-	str_analyze_sdesc.o \
+	str_analyze_sdesc.o stranalyze_sdesc_64.o \
 	str_append.o str_blind_compare.o \
 	str_compare.o str_compare_eql.o str_concat.o \
 	str_copy_dx.o str_copy_r.o \
@@ -33,7 +33,11 @@ STROBJ = str.o str__const.o str__is_string_class.o \
 	str_trim.o str_upcase.o str_find_first_in_set.o \
 	str_find_first_not_in_set.o str_position.o \
 	str_translate.o str_element.o \
-	str_len_extr.o str_prefix.o
+	str_len_extr.o str_prefix.o \
+	strcompare_multi.o strcopy_r_64.o strdivide.o \
+	strfind_first_substring.o strget1_dx_64.o \
+	strmatch_wild.o strmul.o strrecip.o strreplace.o \
+	strround.o strsub.o strutil.o stradd.o
 
 LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 	lib_cvt_otb.o lib_ichar.o lib_index.o lib_len.o \
@@ -45,7 +49,11 @@ LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 	lib_add_times.o lib_addx.o lib_cvt_vectim.o lib_day.o \
 	lib_day_of_week.o lib_mult_delta_time.o lib_sub_times.o \
 	lib_subx.o libcredir.o libgetinp.o libputout.o libgetef.o \
-	libffs.o libffc.o libinsv.o libextv.o libextzv.o
+	libffs.o libffc.o libinsv.o libextv.o libextzv.o \
+	libbuild_nodespec.o libcompare_nodename.o libconvert_date_string.o \
+	libdate_time.o libdigit_sep.o libutil.o libanalyze_sdesc_64.o \
+	libasnmbx.o lib_char.o \
+	sysgetmsg.o sysgeterrno.o
 
 SYSOBJ = sys__combine_date_time.o sys_asctim.o sys_bintim.o \
 	sys_gettim.o sys_numtim.o
@@ -66,13 +74,15 @@ clean :
 	- rm test_addx
 	- rm test_date
 
-tests: teststr test_str_element test_addx
+tests: teststr test_str_element test_addx rtl_lib_test rtl_str_test
 # not: test_date
 
 teststr : teststr.c $(STRLIB)
 test_str_element : test_str_element.c $(STRLIB)
 test_addx : test_addx.c $(STRLIB)
 test_date : test_date.c $(STRLIB)
+rtl_str_test : rtl_str_test.c $(STRLIB) $(SYSLIB)
+rtl_lib_test : rtl_lib_test.c $(STRLIB) $(SYSLIB)
 
 $(STRLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 	ar -rv $(STRLIB) $?
