@@ -3,14 +3,25 @@
 
 // Author. Roar Thronæs.
 
+#define __KERNEL_SYSCALLS__
+
 #include<linux/linkage.h>
 #include<linux/mm.h>
 #include<descrip.h>
 #include<dyndef.h>
+#include<ihddef.h>
+#include<ihadef.h>
 #include<lnmdef.h>
 #include<lnmstrdef.h>
 #include<misc.h>
+#include<pqbdef.h>
+#include<ssdef.h>
 #include<system_service_setup.h>
+
+#include "linux/unistd.h"
+#include "asm/ptrace.h"
+#include <asm/pgalloc.h>
+#include <asm/uaccess.h>
 
 struct _lnmth lnm_prc_dir_table_header;
 
@@ -117,7 +128,7 @@ void lnm_init_prc(struct _pcb * p) {
   memcpy(tab_lnmx, &lnm_prc_dir, sizeof(struct _lnmx));
   memcpy(tab_lnmth, &lnm_prc_dir, sizeof(struct _lnmth));
 
-  p->pcb$l_ns_reserved_q1 = dir_lnmb; // instead of ctl$gl_lnmdirect
+  ctl$gl_lnmdirect = dir_lnmb;
   p->pcb$l_affinity_callback = hash;
 
   // not yet ready for this?
@@ -167,7 +178,20 @@ void lnm_init_prc(struct _pcb * p) {
 }
 
 int exe$procstrt(struct _pcb * p) {
-  p=smp$gl_cpu_data[0]->cpu$l_curpcb;
+#if 0
+#ifdef __arch_um__
+  asm volatile ("movl 0x9ffffff0,%esp");
+#else
+  asm volatile ("movl 0xbffffff0,%esp");
+#endif
+#endif
+#ifdef __arch_um__
+  //  p=ctl$gl_pcb;
+  flush_tlb_mm(p->mm);
+#else
+  __asm__ ("movl %%edi,%0; ":"=r" (p));
+  // warning: very risky one, chance
+#endif
   // get pcb and copy pqb
   // store rms dispatcher address
   // initialize dispatch vector for system services
@@ -212,4 +236,65 @@ int exe$procstrt(struct _pcb * p) {
   // arg list
   // check hib stsflg
   // call inital image transfer address
+
+  mm_segment_t fs;
+  unsigned long sts;
+  struct dsc$descriptor aname;
+  struct dsc$descriptor dflnam;
+  struct _ihd * hdrbuf;
+  struct _iha * active;
+  // struct _va_range inadr;
+  void (*func)(void);
+
+  struct _pqb * pqb = p->pcb$l_pqb;
+
+  int len = strlen(pqb->pqb$t_image);
+
+#ifdef __arch_um__
+  struct pt_regs * regs = &p;
+  regs = &current->thread.regs;
+#else
+#endif
+
+  init_p1pp(p,p->pcb$l_phd);
+
+  if (strncmp(".exe",pqb->pqb$t_image+len-4,4)) goto do_execve;
+
+  lnm_init_prc(current);
+
+  aname.dsc$w_length=len-4;
+  aname.dsc$a_pointer=pqb->pqb$t_image;
+  dflnam.dsc$w_length=len;
+  dflnam.dsc$a_pointer=pqb->pqb$t_image;
+
+  sts=exe$imgact(&aname,&dflnam,&hdrbuf,0,0,0,0,0);
+  printk("imgact got sts %x\n",sts);
+
+  if (sts!=SS$_NORMAL) return sts;
+
+  active=(unsigned long)hdrbuf+hdrbuf->ihd$w_activoff;
+
+  func=active->iha$l_tfradr1;
+
+  printk("entering image? %x\n",func);
+  func();
+  printk("after image\n");
+
+  return SS$_NORMAL;
+
+ do_execve:
+  // set_fs(KERNEL_DS);
+  fs = get_fs();
+  set_fs(KERNEL_DS);
+ 
+  // this is an actual system call
+  execve(pqb->pqb$t_image,0,0); //(,regs);
+  set_fs(fs);
+
+  if (0) {
+    int (*fn)(int arg);
+    int arg;
+    //    fn = PT_REGS_IP(regs);
+    fn(0);
+  }
 }
