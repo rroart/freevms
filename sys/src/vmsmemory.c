@@ -51,8 +51,11 @@
 #include <asm/tlb.h>
 
 #include <ipldef.h>
+#include <phddef.h>
 #include <rdedef.h>
 #include <va_rangedef.h>
+#include <vmspte.h>
+#include <wsldef.h>
 
 pgprot_t x_to_prot(int x) {
   pgprot_t y;
@@ -284,6 +287,33 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				pte = pte_mkold(pte);
 				get_page(ptepage);
 				dst->rss++;
+
+				if ((ptepage->pfn$q_bak&PTE$M_TYP0)) {
+				    pte_t * mypte=&pte;
+				    signed long page = mmg$allocpfn();
+				    unsigned long address2 = (*(unsigned long *)src_pte)&0xfffff000;
+#if 0
+				    struct _wsl * wsl = srcphd->phd$l_wslist;
+				    struct _wsl * wsle = &wsl[ptepage->pfn$l_wslx_qw];
+#endif
+
+				    mem_map[page]=*ptepage;
+#if 0
+				    wsle->wsl$v_valid=1;
+				    wsle->wsl$v_pagtyp=mem_map[page].pfn$v_pagtyp;
+#endif
+				    mem_map[page].virtual=__va(page*PAGE_SIZE);
+#if 0
+				    ((unsigned long)wsle->wsl$pq_va)|=(unsigned long)mem_map[page].virtual;
+#endif
+				    *(unsigned long *)mypte=(__va(page*PAGE_SIZE));
+				    *(unsigned long *)mypte|=_PAGE_PRESENT;
+				    *(unsigned long *)mypte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+#ifdef __arch_um__				   
+				    flush_tlb_range(dst, address2, address2 + PAGE_SIZE);
+#endif
+				    bcopy(address2,__va(page*PAGE_SIZE),PAGE_SIZE);
+				  }
 
 cont_copy_pte_range:		set_pte(dst_pte, pte);
 				if (0) {
