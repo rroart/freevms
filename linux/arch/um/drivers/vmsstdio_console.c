@@ -247,6 +247,7 @@ int con_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&op$ucb*/,&newucb);
   exe$assign(dsc,&chan,0,0,0);
+  registerucbchan(newucb,chan);
   registerdevchan(MKDEV(TTY_MAJOR,unitno),chan);
 
 
