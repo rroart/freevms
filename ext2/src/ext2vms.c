@@ -633,6 +633,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
     fib->fib$w_fid_num=0;
     if (dir.d_ino!=2) {
+      fib->fib$w_fid_num=head->i_dev;
       *(unsigned long*)(&fib->fib$w_fid_seq)=dir.d_ino;
     } else {
       fib->fib$w_fid_num=4;
