@@ -298,7 +298,7 @@ struct _vcb {
   } vcb_0;
 };
 
-//#define		vcb$b_status		vcb_0.vcb$b_status
+#define		vcb$b_status		vcb_0.vcb_1_2.vcb$b_status
 #define		vcb$l_aqb		vcb_0.vcb_1_2.vcb$l_aqb
 #define		vcb$t_volname		vcb_0.vcb_1_2.vcb$t_volname
 #define		vcb$l_rvt		vcb_0.vcb_1_2.vcb$l_rvt
