@@ -107,7 +107,8 @@ int kswapd(void *unused)
 		__set_current_state(TASK_RUNNING);
 		remove_wait_queue(&kswapd_wait, &wait);
 
-		printk("doing the swap\n");
+		//printk("doing the swap\n");
+		exe$hiber(); // check if this should be here still
 
 		balance();
 		mmg$wrtmfypag();
