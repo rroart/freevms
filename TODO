@@ -66,3 +66,5 @@ use setpsli even in more interrupts/exceptions?
 Look at how ne2000 is probed
 
 Look at how simple and complex buffers are allocated and freed
+
+Make echoing work in putnextchar (right before reqcom)
