@@ -746,8 +746,10 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	      *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	      flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	      bzero(page,PAGE_SIZE); // must zero content also
-	      *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_USER|_PAGE_ACCESSED;
-	      flush_tlb_range(current->mm, page, page + PAGE_SIZE);
+	      if (is_write==0) {
+		*(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_USER|_PAGE_ACCESSED;
+		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
+	      }
 	      return;
 	    }
 	  } else {
