@@ -10,9 +10,17 @@
 
 O_TARGET := block.o
 
+ifneq ($(CONFIG_IO_VMS),y)
 export-objs	:= ll_rw_blk.o blkpg.o loop.o DAC960.o genhd.o
+else
+export-objs	:= ll_rw_blk.o blkpg.o loop.o genhd.o
+endif
 
+ifneq ($(CONFIG_IO_VMS),y)
 obj-y	:= ll_rw_blk.o blkpg.o genhd.o elevator.o
+else
+obj-y	:= ll_rw_blk.o blkpg.o genhd.o elevator.o
+endif
 
 ifeq ($(ARCH),i386)
 obj-$(CONFIG_IO_VMS)		+= pvdriver.o

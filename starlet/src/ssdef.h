@@ -528,6 +528,7 @@
 #define SS$_UNSUPVOLSET 0x26B4 /* 9908 */
 
 #define SS$_BADMEDIA 0x2784 /* 10116 */
+#define SS$_IVPARAM 0x27a4 /* 10148 */
 
 /* no privilege fatal error codes (hex 2800-2a00) */
 #define SS$_NOPRIVSTRT	0x2800	/* 10240 */

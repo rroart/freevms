@@ -1,0 +1,5 @@
+/sbin/ifconfig eth0 192.168.0.243 up
+/sbin/route add default eth0
+mount /proc
+hostname b222
+echo eth0 > /proc/sys/net/myscs/default_device
