@@ -272,7 +272,8 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
   //  p2=remque(p,dummy);
   //  sch$aq_wqhdr[p->pcb$w_state].wqh$l_wqcnt--;
   p->pcb$l_onqtime+=(exe$gl_abstim_tics-p->pcb$l_waitime);
-    sch$chse(p,class);
+  sch$unwait(p);
+  sch$chse(p,class);
   return;
 
  swpout:
@@ -322,10 +323,20 @@ int sch$waitm(struct _pcb * p, struct _wqh * wq) {
   /* do no phd stuff yet */
   p->pcb$l_waitime=exe$gl_abstim_tics;
   /* check queued ast */
-  if (p->phd$b_astlvl==4)
+  if (p->phd$b_astlvl==4) {
     sch$sched(0);
-  sch$sched(0); /* do it anyway until asts are implemented */
+    return;
+  }
+  // sch$sched(0); /* do it anyway until asts are implemented */
   /* check psl and ast stuff */
+  if (!(p->psl_cur_mod >= p->pr_astlvl)) {
+    sch$sched(0);
+    return;
+  }
+  if (p->psl_ipl!=0) {
+    sch$sched(0);
+    return;
+  }
   sch$rse(p,PRI$_NULL,EVT$_AST);
   sch$sched(0);
 }
@@ -406,3 +417,6 @@ void sch$chsep2(struct _pcb * p,unsigned char newpri) {
     sch$chsep2(p,newpri);
   }
 
+void sch$unwait(struct _pcb * p) {
+
+}
