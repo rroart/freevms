@@ -4612,10 +4612,15 @@ static void floppy_hardint2(struct _idb * idb)
 
 static int fd_request_irq2(void)
 {
-  if(can_use_virtual_dma)
+  struct _vec * v=&floppycrb.crb$l_intd;
+
+  if(can_use_virtual_dma) {
     printk("can_use_virtual_dma\n");
-  else
+    v->vec$ps_isr_code=floppy_hardint2;
+  } else {
     printk("not_can_use_virtual_dma\n");
+    v->vec$ps_isr_code=floppy_interrupt2;
+  }
 
   if(can_use_virtual_dma)
     return vms_request_irq(&floppyidb,FLOPPY_IRQ, floppy_hardint2,SA_INTERRUPT,
