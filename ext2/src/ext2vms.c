@@ -565,6 +565,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
     name=ext2_vms_to_unix(filedsc);
 
+    d.d_ino=0;
+    d.d_type=0;
+    d.d_name=resdsc->dsc$a_pointer;
+
     if (fib->fib$l_wcc!=0) {
       dir.d_off=fib->fib$l_wcc; //resdsc->dsc$a_pointer;
       dir.d_reclen=resdsc->dsc$w_length;
