@@ -31,6 +31,17 @@ asmlinkage int exe$getsyi(unsigned int efn, unsigned int *csidadr, void *nodenam
       bcopy(&mysb.sb$t_nodename,it->bufaddr,15);
       break;
 
+    case SYI$_LASTFLD:
+      {
+#ifdef CONFIG_VMS
+	int mem=1;
+#else
+	int mem=0;
+#endif
+	bcopy(&mem,it->bufaddr,4);
+      }
+      break;
+
     default:
       printk("unrecognized syi\n");
       break;
