@@ -117,7 +117,7 @@ static int start_kernel_proc(void *unused)
 	pid = getpid();
 
 	cpu_tasks[0].pid = pid;
-	cpu_tasks[0].task = current;
+	cpu_tasks[0].task = &init_task_union; // was: current;
 #ifdef CONFIG_SMP
  	cpu_online_map = 1;
 #endif
@@ -131,7 +131,7 @@ extern unsigned long high_physmem;
 #ifdef CONFIG_HOST_2G_2G
 #define START 0x60000000
 #else
-#define START 0xa0000000
+#define START 0x80000000
 #endif
 
 unsigned long host_task_size;
