@@ -343,7 +343,7 @@ int /*__init*/ scs_init(void) {
   char myinfo[]="directory srv";
 
   struct file * file;
-  int pos=0;
+  unsigned long long pos=0;
 
   bzero(cdtl,sizeof(cdtl));
   bzero(rdtl,sizeof(rdtl));
@@ -388,21 +388,22 @@ int /*__init*/ scs_init(void) {
   scs_std$listen(cf_listen,cf_myerr,"configure","hw conf",0); 
 
   file = filp_open("/vms$common/sysexe/params.dat",O_RDONLY,0);
-  if (file) {
-    char * c, *b;
+  if (!IS_ERR(file)) {
+    char * c, *b, *n;
     char buf[1024];
     int size=generic_file_read(file,buf,1024,&pos);
     int i=0;
     b=buf;
     while (b<(buf+size)) {
       c=strchr(b,'=');
+      n=strchr(b,'\n');
       if (0==strncmp(b, "SCSNODE", c-b)) {
-	memcpy(&mysb.sb$b_systemid, c+1, strlen(c+1));
+	memcpy(&mysb.sb$t_nodename, c+1, n-c-1);
 	goto end;
       }
-      b+=strlen(b)+1;
+      b=n+1;
     }
-    memcpy(&mysb.sb$b_systemid, "NONAME", 6);
+    memcpy(&mysb.sb$t_nodename, "NONAME", 6);
   end:
     filp_close(file,0);
   }
