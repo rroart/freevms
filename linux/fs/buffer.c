@@ -2781,8 +2781,10 @@ int writeout_one_page(struct page *page)
     BUG();
   bh = buffers[0];
 	do {
+#if 0
 		if (buffer_locked(bh) || !buffer_dirty(bh) || !buffer_uptodate(bh))
 			continue;
+#endif
 
 		bh->b_flushtime = jiffies;
 		vms_ll_rw_block(WRITE, 1, &bh,bh->b_dev);	
