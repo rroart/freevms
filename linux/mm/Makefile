@@ -23,6 +23,6 @@ obj-y += page_alloc.o bootmem.o slab.o vmscan.o
 endif
 
 obj-$(CONFIG_MM_VMS) += memoryalc.o vmsbootmem.o allocpfn.o ptalloc.o \
-			vmsslab.o swapper.o wrtmfypag.o
+			vmsslab.o swapper.o wrtmfypag.o syscredel.o
 
 include $(TOPDIR)/Rules.make
