@@ -10,9 +10,6 @@
  */
 
 #include <linux/config.h>
-
-#ifndef CONFIG_MM_VMS
-
 #include <linux/mm.h>
 #include <linux/swap.h>
 #include <linux/swapctl.h>
@@ -799,5 +796,3 @@ static int __init setup_mem_frac(char *str)
 }
 
 __setup("memfrac=", setup_mem_frac);
-
-#endif

@@ -154,10 +154,14 @@ void switch_mm(struct mm_struct *prev, struct mm_struct *next,
 
 void set_current(void *t)
 {
+	// the original bugs with vms mm?
 	struct task_struct *task = t;
+	int cpu=CPU(task);
+	cpu_tasks[cpu].pid= task->thread.extern_pid;
+	cpu_tasks[cpu].task= task;
+//        cpu_tasks[CPU(task)] = ((struct cpu_task) 
+//              { task->thread.extern_pid, task });
 
-	cpu_tasks[CPU(task)] = ((struct cpu_task) 
-		{ task->thread.extern_pid, task });
 }
 
 void *_switch_to(void *prev, void *next)

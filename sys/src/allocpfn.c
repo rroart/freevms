@@ -2,13 +2,19 @@
 #include <linux/mm.h>
 #include "../../freevms/lib/src/pfndef.h"
 
+struct _mypfn {
+  struct myq * pfn$l_flink;
+  struct myq * pfn$l_blink;
+};
+
 signed long mmg$allocpfn(void) {
   struct _pfn * p;
+  struct _mypfn * m, * h;
   if (!pfn$al_head)
     return -1;
-  p=pfn$al_head;
-  pfn$al_head=((struct _pfn *) pfn$al_head)->pfn$l_flink;
-  ((struct _pfn *) pfn$al_head + 4)->pfn$l_flink=0; // gcc bug?
+  m=p=pfn$al_head;
+  h=pfn$al_head=((struct _pfn *) pfn$al_head)->pfn$l_flink;
+  h->pfn$l_blink=0; // gcc bug?
   //  p->pfn$l_refcnt=0;
   if (p->pfn$l_refcnt)
     panic("refcnt\n");
@@ -17,6 +23,7 @@ signed long mmg$allocpfn(void) {
 
 signed long mmg$allocontig(unsigned long num) {
   struct _pfn * p, * first=pfn$al_head, * next;
+  struct _mypfn * h, * m;
   unsigned long done=0, c;
   if (!pfn$al_head)
     return -1;
@@ -31,11 +38,12 @@ signed long mmg$allocontig(unsigned long num) {
   }
 
   if (first==pfn$al_head) {
-    pfn$al_head=p->pfn$l_flink;
-    ((struct _pfn *) pfn$al_head+4)->pfn$l_flink=0; // gcc bug?
+    h=pfn$al_head=p->pfn$l_flink;
+    h->pfn$l_blink=0; // gcc bug?
   } else {
-    ((struct _pfn *)((first->pfn$l_flink)+4))->pfn$l_flink=p->pfn$l_flink;// gcc bug?
-    (((struct _pfn *)((struct _pfn *)((first->pfn$l_flink)+4))->pfn$l_flink)->pfn$l_blink)=first->pfn$l_blink;
+    h=first;
+    ((struct _mypfn *)h->pfn$l_blink)->pfn$l_flink=p->pfn$l_flink;// gcc bug?
+    ((struct _mypfn *)((struct _mypfn *)h->pfn$l_blink)->pfn$l_flink)->pfn$l_blink=h->pfn$l_blink; // gcc bug?
   }
 
   if (p->pfn$l_refcnt) // do more 
@@ -46,6 +54,7 @@ signed long mmg$allocontig(unsigned long num) {
 signed long mmg$dallocpfn(unsigned long pfn) {
   mem_map[pfn].pfn$l_flink=0;
   mem_map[pfn].pfn$l_blink=pfn$al_tail;
+  if (mem_map[pfn].pfn$l_flink) panic("dalloc\n");
   ((struct _pfn *)pfn$al_tail)->pfn$l_flink=&mem_map[pfn];
   pfn$al_tail=&mem_map[pfn];
 }

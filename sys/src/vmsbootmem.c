@@ -285,7 +285,8 @@ static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 
 	prev = 0;
 	page = pgdat->node_mem_map;
-	for (i = 0; i < idx; i++, page++) {
+	page++;
+	for (i = 1; i < idx; i++, page++) { // skip physical 0
 	  if (!PageReserved(page)) {
 	    if (prev) {
 	      prev->pfn$l_flink=page;

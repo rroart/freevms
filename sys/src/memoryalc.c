@@ -60,6 +60,8 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 	zone_t *zone;
 	unsigned long i,tmp;
 
+	zone = page->zone;
+
 	/* Yes, think what happens when other parts of the kernel take 
 	 * a reference to a page in order to pin it for io. -ben
 	 */
@@ -82,9 +84,12 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 		BUG();
 	page->flags &= ~((1<<PG_referenced) | (1<<PG_dirty));
 
+	spin_lock_irqsave(&zone->lock, flags);
 	if (!in_free_all_bootmem_core)
-	  for(i=0,tmp=((page-mem_map)/sizeof(struct _pfn));i<(2^order);i++,tmp++)
+	  for(i=0,tmp=((page-mem_map)/sizeof(struct _pfn));i<(1 << order);i++,tmp++)
 	    mmg$dallocpfn(tmp);
+
+	spin_unlock_irqrestore(&zone->lock, flags);
 
 	page->index = order;
 	current->nr_local_pages++;
@@ -106,16 +111,21 @@ struct page *_alloc_pages(unsigned int gfp_mask, unsigned int order)
  */
 struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_t *zonelist)
 {
+        unsigned long flags;
 	unsigned long min;
-	zone_t **zone, * classzone;
+	zone_t *zone, * classzone;
 	struct page * page;
 	int freed;
 	signed long pfn;
 
+	zone = zonelist->zones;
+
+	spin_lock_irqsave(&zone->lock, flags);
 	if (order)
-	  pfn=mmg$allocontig(2^order);
+	  pfn=mmg$allocontig(1 << order);
 	else
 	  pfn=mmg$allocpfn();
+	spin_unlock_irqrestore(&zone->lock, flags);
 
 	if (pfn>=0) {
 	  page=&mem_map[pfn];
@@ -130,10 +140,12 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
 rebalance:
 	try_to_free_pages(classzone, gfp_mask, order);
 
+	spin_lock_irqsave(zone->lock, flags);
 	if (order)
-	  pfn=mmg$allocontig(2^order);
+	  pfn=mmg$allocontig(1 << order);
 	else
 	  pfn=mmg$allocpfn();
+	spin_unlock_irqrestore(zone->lock, flags);
 
 	if (pfn>=0) {
 	  page=&mem_map[pfn];

@@ -19,8 +19,6 @@
 #include <linux/mmzone.h>
 #include <asm/dma.h>
 
-#ifndef CONFIG_MM_VMS
-
 /*
  * Access to this subsystem has to be serialized externally. (this is
  * true for the boot process anyway)
@@ -357,5 +355,3 @@ void * __init __alloc_bootmem_node (pg_data_t *pgdat, unsigned long size, unsign
 	panic("Out of memory");
 	return NULL;
 }
-
-#endif

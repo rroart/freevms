@@ -1941,7 +1941,7 @@ void __init vms_init(void) {
 
   for(i=0;i<32;i++) {
     smp$gl_cpu_data[i]=&vmscpus[i];
-    smp$gl_cpu_data[i]->cpu$l_cpuid_mask=2^i;
+    smp$gl_cpu_data[i]->cpu$l_cpuid_mask=1 << i;
     for(j=0;j<6;j++) {
       struct myq2 * q = &smp$gl_cpu_data[i]->cpu$q_swiqfl[j];
       q->flink=q;

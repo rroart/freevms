@@ -2915,7 +2915,7 @@ void __init cpu_init (void)
 	 */
 	atomic_inc(&init_mm.mm_count);
 	puts("puts 6_6\n");
-	current->active_mm = &init_mm;
+	cur_task->active_mm = &init_mm;
 	puts("puts 6_7\n");
 	if(cur_task->mm)
 		BUG();

@@ -135,8 +135,20 @@ void bus_handler(int sig, struct uml_pt_regs *regs)
 	else relay_signal(sig, regs);
 }
 
+static inline struct task_struct * get_cur_task(void)
+{
+        struct task_struct *cur_task;
+        __asm__("andl %%esp,%0; ":"=r" (cur_task) : "0" (~8191UL));
+        return cur_task;
+}
+ 
+#define cur_task get_cur_task()
+
 void trap_init(void)
 {
+//	atomic_inc(&init_mm.mm_count);
+//	cur_task->active_mm=&init_mm; // uml lacks something?
+//	init_task.mm=&init_mm; // what the?
 }
 
 spinlock_t trap_lock = SPIN_LOCK_UNLOCKED;
