@@ -26,7 +26,7 @@ kfreebuf(void * d) {
   switch (bd->bufio$b_type) {
   case DYN$C_BUFIO:
 
-    kfree(bd->bufio$ps_pktdata);
+    //    kfree(bd->bufio$ps_pktdata); not necessary?
     kfree(bd);
     break;
 
