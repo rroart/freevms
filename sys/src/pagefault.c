@@ -62,7 +62,8 @@ signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _
   }
   // wrong page=&((struct _pfn *)pfn$al_head[PFN$C_FREPAGLST])[pfn];
   page=&mem_map[pfn];
-  set_page_count(page, 1);
+  //  set_page_count(page, 1); bugged
+  mem_map[pfn].pfn$l_refcnt=1;
   // also set page type
   mem_map[pfn].pfn$v_pagtyp=((unsigned long)va)&PFN$M_PAGTYP;
   //  mem_map[pfn].virtual=__va(pfn*PAGE_SIZE); // not necessary
