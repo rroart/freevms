@@ -15,6 +15,7 @@
 #include<ucbdef.h>
 #include<irpdef.h>
 #include<ipldef.h>
+#include<ddbdef.h>
 
 void ioc$initiate(struct _irp * i, struct _ucb * u) {
   struct _ddt *d; 
@@ -97,3 +98,17 @@ void ioc$wfikpch(void * nextfunc, void * timeoutfunc, struct _irp * i, unsigned 
   /* release spinlock */
 }
 
+int ioc$scan_iodb_usrctx(struct _ddb **d) {
+  if ((*d)->ddb$ps_link) 
+    (*d)=(*d)->ddb$ps_link;
+  else
+    *d=0;
+}
+
+int ioc$cvt_devnam() {
+
+}
+
+int exe$match_name(struct _ddb * d, char * s) {
+
+}
