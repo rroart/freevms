@@ -45,6 +45,12 @@
 #include <asm/system.h>
 #include <asm/bitops.h>
 
+#include <ssdef.h>
+#include <system_data_cells.h>
+#include <ccbdef.h>
+#include <ucbdef.h>
+#include <irpdef.h>
+
 #define CONSOLE_DEV MKDEV(TTY_MAJOR,0)
 #define SYSCONS_DEV  MKDEV(TTYAUX_MAJOR,1)
 
@@ -786,7 +792,13 @@ static void n_tty_receive_buf(struct tty_struct *tty, const unsigned char *cp,
 		    tty->driver.throttle)
 			tty->driver.throttle(tty);
 	}
-	ioc$reqcom(SS$_NORMAL,0,u);
+	if (0) {	
+	  struct _ccb * ccb = &ctl$gl_ccbbase[dev2chan(tty->device)];
+	  struct _ucb * ucb = ccb->ccb$l_ucb;
+	  //	  ioc$reqcom(SS$_NORMAL,0,ucb);
+	  ucb->ucb$l_irp->irp$l_iost1 = SS$_NORMAL;
+	  com$post(ucb->ucb$l_irp,ucb);
+	}
 }
 
 int is_ignored(int sig)
@@ -1108,6 +1120,143 @@ do_it_again:
 			break;
 		if (time)
 			timeout = time;
+	}
+	clear_bit(TTY_DONT_FLIP, &tty->flags);
+	up(&tty->atomic_read);
+	remove_wait_queue(&tty->read_wait, &wait);
+
+	if (!waitqueue_active(&tty->read_wait))
+		tty->minimum_to_wake = minimum;
+
+	current->state = TASK_RUNNING;
+	size = b - buf;
+	if (size) {
+		retval = size;
+		if (nr)
+	       		clear_bit(TTY_PUSH, &tty->flags);
+	} else if (test_and_clear_bit(TTY_PUSH, &tty->flags))
+		 goto do_it_again;
+
+	return retval;
+}
+
+ssize_t vms_read_chan(struct tty_struct *tty, struct file *file,
+			 unsigned char *buf, size_t nr)
+{
+	unsigned char *b = buf;
+	DECLARE_WAITQUEUE(wait, current);
+	int c;
+	int minimum, time;
+	ssize_t retval = 0;
+	ssize_t size;
+	long timeout;
+	unsigned long flags;
+	signed long long sleeptime = -1000000;
+
+do_it_again:
+
+	if (!tty->read_buf) {
+		printk("n_tty_read_chan: called with read_buf == NULL?!?\n");
+		return -EIO;
+	}
+
+	add_wait_queue(&tty->read_wait, &wait);
+	set_bit(TTY_DONT_FLIP, &tty->flags);
+	while (nr) {
+		/* First test for status change. */
+		if (tty->packet && tty->link->ctrl_status) {
+			unsigned char cs;
+			if (b != buf)
+				break;
+			cs = tty->link->ctrl_status;
+			tty->link->ctrl_status = 0;
+			put_user(cs, b++);
+			nr--;
+			break;
+		}
+		/* This statement must be first before checking for input
+		   so that any interrupt will set the state back to
+		   TASK_RUNNING. */
+		set_current_state(TASK_INTERRUPTIBLE);
+		
+		if (((minimum - (b - buf)) < tty->minimum_to_wake) &&
+		    ((minimum - (b - buf)) >= 1))
+			tty->minimum_to_wake = (minimum - (b - buf));
+		
+		if (!input_available_p(tty, 0)) {
+			if (test_bit(TTY_OTHER_CLOSED, &tty->flags)) {
+				retval = -EIO;
+				break;
+			}
+			if (signal_pending(current)) {
+				retval = -ERESTARTSYS;
+				break;
+			}
+			clear_bit(TTY_DONT_FLIP, &tty->flags);
+			exe$schdwk(0, 0, &sleeptime, 0);
+			exe$hiber();
+			set_bit(TTY_DONT_FLIP, &tty->flags);
+			continue;
+		}
+		current->state = TASK_RUNNING;
+
+		/* Deal with packet mode. */
+		if (tty->packet && b == buf) {
+			put_user(TIOCPKT_DATA, b++);
+			nr--;
+		}
+
+		if (tty->icanon) {
+			/* N.B. avoid overrun if nr == 0 */
+			while (nr && tty->read_cnt) {
+ 				int eol;
+
+				eol = test_and_clear_bit(tty->read_tail,
+						&tty->read_flags);
+				c = tty->read_buf[tty->read_tail];
+				spin_lock_irqsave(&tty->read_lock, flags);
+				tty->read_tail = ((tty->read_tail+1) &
+						  (N_TTY_BUF_SIZE-1));
+				tty->read_cnt--;
+				if (eol) {
+					/* this test should be redundant:
+					 * we shouldn't be reading data if
+					 * canon_data is 0
+					 */
+					if (--tty->canon_data < 0)
+						tty->canon_data = 0;
+				}
+				spin_unlock_irqrestore(&tty->read_lock, flags);
+
+				if (!eol || (c != __DISABLED_CHAR)) {
+					put_user(c, b++);
+					nr--;
+				}
+				if (eol)
+					break;
+			}
+		} else {
+			int uncopied;
+			uncopied = copy_from_read_buf(tty, &b, &nr);
+			uncopied += copy_from_read_buf(tty, &b, &nr);
+			if (uncopied) {
+				retval = -EFAULT;
+				break;
+			}
+		}
+
+		/* If there is enough space in the read buffer now, let the
+		 * low-level driver know. We use n_tty_chars_in_buffer() to
+		 * check the buffer, as it now knows about canonical mode.
+		 * Otherwise, if the driver is throttled and the line is
+		 * longer than TTY_THRESHOLD_UNTHROTTLE in canonical mode,
+		 * we won't get any more characters.
+		 */
+		if (n_tty_chars_in_buffer(tty) <= TTY_THRESHOLD_UNTHROTTLE)
+			check_unthrottle(tty);
+
+		if (b - buf >= minimum)
+			break;
 	}
 	clear_bit(TTY_DONT_FLIP, &tty->flags);
 	up(&tty->atomic_read);

@@ -12,6 +12,7 @@
 #include<ipldef.h>
 #include<pridef.h>
 #include<ipl.h>
+#include<phddef.h>
 #include <system_data_cells.h>
 #include <internals.h>
 
@@ -21,14 +22,31 @@ dirpost(struct _irp * i) {
 
 bufpost(struct _irp * i) {
   struct _acb * a=(struct _acb *) i;
+  struct _pcb * pcb = smp$gl_cpu_data[0]->cpu$l_curpcb;
+  struct _phd * phd = pcb->pcb$l_phd;
   //printk("doing bufpost\n");
   /* do iosb soon? */
-  if (i->irp$l_iosb) {
-    bcopy(&i->irp$l_iost1,i->irp$l_iosb,8);
-  }
+  
   if (i->irp$l_bcnt) {
     bcopy(i->irp$l_svapte,i->useraddress,i->irp$l_bcnt);
   }
+
+  // dirpost to begin here
+
+  // should be either of these
+  phd->phd$l_biocnt++;
+  phd->phd$l_diocnt++;
+
+  // copy diagnostic
+
+  // decr ccb$w_ioc
+
+  if (i->irp$l_iosb) {
+    bcopy(&i->irp$l_iost1,i->irp$l_iosb,8);
+  }
+
+  // do an eventually setting of common event flag
+
   if (a->acb$l_ast) {
     a->acb$b_rmod&=~ACB$M_KAST;
     sch$qast(i->irp$l_pid,PRI$_NULL,i);

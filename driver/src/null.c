@@ -387,6 +387,9 @@ unsigned short dev2chan(kdev_t dev) {
   panic("dev2chan\n");
 }
 
+kdev_t chan2dev(unsigned short chan) {
+  return devchan[chan];
+}
 
 
 

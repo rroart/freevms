@@ -658,6 +658,8 @@ static ssize_t tty_read(struct file * file, char * buf, size_t count,
 	int i;
 	struct tty_struct * tty;
 	struct inode *inode;
+	int sts;
+	unsigned long long iosb;
 
 	/* Can't seek (pread) on ttys.  */
 	if (ppos != &file->f_pos)
@@ -693,8 +695,9 @@ static ssize_t tty_read(struct file * file, char * buf, size_t count,
 	else
 		i = -EIO;
 #else
-	sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_rdev),IO$_READPBLK,&iosb,0,0,
+	sts = exe$qiow(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_READPBLK,&iosb,0,0,
 				 buf,count,0,0,0,0);
+	i = count;
 #endif
 	unlock_kernel();
 	if (i > 0)
@@ -801,7 +804,7 @@ static ssize_t tty_write(struct file * file, const char * buf, size_t count,
 	if (!tty->ldisc.write)
 		return -EIO;
 
-	sts = exe$qio(0,(unsigned short)dev2chan(inode->i_rdev),IO$_WRITEPBLK,&iosb,0,0,
+	sts = exe$qio(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_WRITEPBLK,&iosb,0,0,
 				 buf,count,0,0,0,0);
 
 	return count;
@@ -1032,6 +1035,10 @@ release_mem_out:
 			 "clearing slot %d\n", idx);
 	release_mem(tty, idx);
 	goto end_init;
+}
+
+int init_dev2(kdev_t device, struct tty_struct **ret_tty) {
+  return init_dev(device, ret_tty);
 }
 
 /*
