@@ -1928,6 +1928,7 @@ vortex_open(struct net_device *dev)
 			skb_reserve(skb, 2);	/* Align IP on 16 byte boundaries */
 #endif
 			vp->rx_ring[i].addr = cpu_to_le32(pci_map_single(vp->pdev, buf, PKT_BUF_SZ, PCI_DMA_FROMDEVICE));
+			if (vp->rx_ring[i].addr&0xf) printk("<0>" "UNA1 %x\n",vp->rx_ring[i].addr);
 		}
 		if (i != RX_RING_SIZE) {
 			int j;
@@ -2356,6 +2357,7 @@ boomerang_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _
 		vp->tx_ring[entry].status = cpu_to_le32((i->irp$l_qio_p2 + 14) | TxIntrUploaded);
 		vp->tx_ring[entry].frag[0].addr = cpu_to_le32(pci_map_single(vp->pdev, buf,
 										buf, PCI_DMA_TODEVICE));
+		if (vp->tx_ring[entry].frag[0].addr&0xf) printk("<0>" "UNA2 %x\n",vp->tx_ring[entry].frag[0].addr);
 		vp->tx_ring[entry].frag[0].length = cpu_to_le32((i->irp$l_qio_p2 + 14) | LAST_FRAG);
 #if 0
 	} else {
@@ -2382,6 +2384,7 @@ boomerang_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _
 #endif
 #else
 	vp->tx_ring[entry].addr = cpu_to_le32(pci_map_single(vp->pdev, skb->data, skb->len, PCI_DMA_TODEVICE));
+	if (vp->tx_ring[entry].addr&0xf) printk("<0>" "UNA3 %x\n",vp->tx_ring[entry].addr);
 	vp->tx_ring[entry].length = cpu_to_le32(skb->len | LAST_FRAG);
 	vp->tx_ring[entry].status = cpu_to_le32(skb->len | TxIntrUploaded);
 #endif
@@ -2853,7 +2856,8 @@ boomerang_rx(struct net_device *dev)
 			skb->dev = dev;			/* Mark as being used by this device. */
 			skb_reserve(skb, 2);	/* Align IP on 16 byte boundaries */
 #endif
-			vp->rx_ring[entry].addr = cpu_to_le32(pci_map_single(vp->pdev, skb->tail, PKT_BUF_SZ, PCI_DMA_FROMDEVICE));
+			vp->rx_ring[entry].addr = cpu_to_le32(pci_map_single(vp->pdev, skb, PKT_BUF_SZ, PCI_DMA_FROMDEVICE));
+			if (vp->rx_ring[entry].addr&0xf) printk("<0>" "UNA4 %x\n",vp->rx_ring[entry].addr);
 			vp->rx_skbuff[entry] = skb;
 		}
 		vp->rx_ring[entry].status = 0;	/* Clear complete bit. */
