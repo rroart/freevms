@@ -81,6 +81,8 @@ void * find_hrb(int rspid) {
   return 0;
 }
 
+extern struct _ddt du$ddt;
+
 int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
   int sts;
   struct _iosb * iosb=vmalloc(sizeof(struct _iosb));
@@ -143,7 +145,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     if (basic->mscp$b_opcode == MSCP$K_OP_GTUNT) {
       $DESCRIPTOR(disk,"dqa0");
       char * str = disk.dsc$a_pointer;
-      str[3]+=basic->mscp$w_unit;
+      str[3]='0'+basic->mscp$w_unit;
       long long dummy;
       int sts=ioc$search(&dummy, &disk);
       struct _gtunt * gtunt = kmalloc(sizeof(struct _gtunt),GFP_KERNEL);
@@ -194,6 +196,8 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
 #ifdef CONFIG_VMS
 	  ddb=ide_iodb_vmsinit(1);
 	  du_iodb_clu_vmsinit(ddb->ddb$l_ucb);
+	  struct _ucb * ucb = ddb->ddb$l_ucb;
+	  ucb->ucb$l_ddt=&du$ddt;
 #endif
 #endif
 	  if (ddb)
@@ -208,8 +212,9 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
 	int i=basic->mscp$w_unit;
 	$DESCRIPTOR(d, "dqa0");
 	char * c= d.dsc$a_pointer;
-	c[3]+=i;
+	c[3]='0'+i;
 	ucb = ide_iodbunit_vmsinit(ddb,i,&d);
+	ucb->ucb$l_ddt=&du$ddt;
 	((struct _mscp_ucb *)ucb)->ucb$w_mscpunit=ucb->ucb$w_unit;
 	printk("UCB MSCPUNIT %x\n",((struct _mscp_ucb *)ucb)->ucb$w_mscpunit);
 #endif
@@ -319,6 +324,8 @@ int mscp(void) {
 void mscp_talk_with(char * node, char * sysap) {
   // both parameters are unused right now
   // we know they are the other node, and the second is mscp$disk
+
+  __du_init(); //temp placement?
 
   signed long long time=-100000000;
   int unit;
