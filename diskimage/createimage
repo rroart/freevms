@@ -1,5 +1,8 @@
 #!/bin/sh
 
+[ -f ../grub/src/build/grub/grub ] || ( echo build grub first; exit 1 )
+[ -f ../init/src/i386/init ] || ( echo build init first; exit 1 )
+
 # grub floppy
 
 dd if=/dev/zero count=2880 of=a.img
@@ -9,8 +12,7 @@ mount -t ext2 -o loop a.img /mnt
 mkdir -p /mnt/boot/grub
 cp -p grub.conf /mnt/boot/grub
 cp -p grub.conf /mnt/boot/grub/menu.lst
-[ -f /usr/share/grub/i386-redhat/stage1 ] && cp -p /usr/share/grub/i386-redhat/stage* /mnt/boot/grub
-[ -f /boot/grub/stage1 ] && cp -p /boot/grub/stage* /mnt/boot/grub
+[ -f ../grub/src/build/stage1/stage1 ] && cp -p ../grub/src/build/stage?/stage* /mnt/boot/grub
 
 umount /mnt
 
@@ -23,15 +25,16 @@ EOF
 
 # ext2 fs
 
-dd if=/dev/zero count=65536 of=c.img
+dd if=/dev/zero count=131072 of=c.img
 
-sfdisk -C 4 -H 255 -S 63 c.img  << EOF
+sfdisk -C 8 -H 255 -S 63 c.img  << EOF
 c.img1 : start=        0, size=        4, Id= 83
+c.img2 : start=        4, size=        4, Id= 2a
 EOF
 
 losetup -o 512 /dev/loop0 c.img
 
-mke2fs /dev/loop0
+mke2fs -b 1024 /dev/loop0 32130
 
 umount /mnt
 mount -t ext2 /dev/loop0 /mnt
@@ -65,6 +68,10 @@ cd -
 dd if=/dev/zero count=128 of=/mnt/vms\$common/sysexe/pagefile.sys
 
 umount /mnt
+losetup -d /dev/loop0
+
+losetup -o 32901120 /dev/loop0 c.img
+../init/src/init /dev/loop0 SYSDISK 64260
 losetup -d /dev/loop0
 
 cp -pi c.img c2.img
