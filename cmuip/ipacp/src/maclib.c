@@ -1561,7 +1561,7 @@ Odd_Word:
 	// Check for extra word
 	if ((Byte_Count&2)==0) goto Odd_Byte;
 	// was: R2 =	*( ((short *)R1)++);		// get next word
-	R2 =	*(short *)R1);		// get next word
+	R2 =	*(short *)R1;		// get next word
 	R1 = (long)R1 +2;
 	R0=R0+R2+C;			// add it in (and the Carry)
 	C = R0 >> 31;
