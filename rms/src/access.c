@@ -26,6 +26,7 @@
 #include<linux/config.h>
 #include<linux/linkage.h>
 #include<linux/mm.h>
+#include<linux/pagemap.h>
 
 //#include <stdio.h>
 #include <linux/string.h>
@@ -71,6 +72,7 @@
 #include "../../f11x/src/xqp.h"
 #include "cache.h"
 #include "access.h"
+#include <misc.h>
 
 void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb);
 void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb);
@@ -81,6 +83,164 @@ void * f11b_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb,
 
 
 #define DEBUGx
+
+void vms2_mount(void) {
+        int sts;
+        struct VCB *vcb;
+	struct item_list_3 it[3];
+	it[0].item_code=1; /*not yet */
+	it[0].buflen=strlen(root_device_name);
+	it[0].bufaddr=root_device_name;
+	it[1].item_code=0;
+	it[2].item_code=0;
+	//        sts = mount(options,devices,devs,labs,&vcb);
+        sts = exe$mount(it);
+}
+
+unsigned long get_xqp_prim_fcb() {
+  return 	  xqp->primary_fcb;
+}
+
+int ods2_block_read_full_page3(struct _wcb * wcb,struct page *page, unsigned long pageno)
+{
+	 struct _fcb * fcb = wcb->wcb$l_fcb;
+	 struct _vcb * vcb=xqp->current_vcb;
+	 unsigned long iblock, lblock;
+	 unsigned int blocksize, blocks;
+	 int nr, i;
+	 int sts;
+	 unsigned long long iosb;
+	 int turns;
+	 unsigned long blocknr;
+
+	 blocksize = 512;
+
+	 blocks = PAGE_CACHE_SIZE >> 9;
+	 iblock = pageno << (PAGE_CACHE_SHIFT - 9);
+	 lblock = iblock + 8; //not yet fcb->fcb$l_efblk+1;
+
+	 nr = 0;
+	 i = 0;
+	 turns = 0;
+
+	 do {
+	   if (iblock < lblock) {
+	     if (fcb)
+	       blocknr=f11b_map_vbn(1+iblock,&fcb->fcb$l_wlfl);
+	     else
+	       blocknr=iblock;
+	   } else {
+	     continue;
+	   }
+
+	   nr++;
+
+	   sts = exe$qiow(0,(unsigned short)xqp->io_channel,IO$_READPBLK,&iosb,0,0,
+			  page_address(page) + i*blocksize,blocksize, blocknr,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+
+	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
+
+	 return 0;
+}
+
+static int __ods2_block_write_full_page2(struct _wcb *wcb, struct page *page, unsigned long pageno)
+{
+	struct _fcb * fcb = wcb->wcb$l_fcb;
+	struct _vcb * vcb=xqp->current_vcb;
+	unsigned long iblock, lblock;
+	int err, i;
+	unsigned long block;
+	int need_unlock;
+	int sts;
+	unsigned long long iosb;
+	int turns=0;
+	signed int blocknr;
+	unsigned long blocksize;
+
+	blocksize = 512;
+
+	block = pageno << (PAGE_CACHE_SHIFT - 9);
+	iblock = pageno << (PAGE_CACHE_SHIFT - 9);
+
+	i = 0;
+
+	/* Stage 1: make sure we have all the buffers mapped! */
+	do {
+		/*
+		 * If the buffer isn't up-to-date, we can't be sure
+		 * that the buffer has been initialized with the proper
+		 * block number information etc..
+		 *
+		 * Leave it to the low-level FS to make all those
+		 * decisions (block #0 may actually be a valid block)
+		 */
+	  if (fcb)
+	    blocknr=f11b_map_vbn(1+iblock,&fcb->fcb$l_wlfl);
+	  else
+	    blocknr=iblock;
+	  if (blocknr==-1) {
+	    panic("...page2\n");
+	  }
+	  sts = exe$qiow(0,(unsigned short)xqp->io_channel,IO$_WRITEPBLK,&iosb,0,0,
+			 page_address(page)+turns*blocksize,blocksize, blocknr,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+
+	  turns++;
+	  block++;
+	  iblock++;
+	} while (turns<(PAGE_SIZE/blocksize));
+
+	/* Done - end_buffer_io_async will unlock */
+#if 0
+	SetPageUptodate(page);
+#endif
+	return 0;
+
+out:
+	/*
+	 * ENOSPC, or some other error.  We may already have added some
+	 * blocks to the file, so we need to write these out to avoid
+	 * exposing stale data.
+	 */
+#if 0
+	ClearPageUptodate(page);
+#endif
+	return err;
+}
+
+int ods2_block_write_full_page3(struct _wcb * wcb, struct page *page, unsigned long pageno)
+{
+	struct _fcb * fcb = wcb->wcb$l_fcb;
+	unsigned long end_index = pageno + 8; // not yet fcb->fcb$l_efblk+1;
+	unsigned offset;
+	int err;
+
+	/* easy case */
+	if (pageno < end_index)
+		return __ods2_block_write_full_page2(wcb, page, pageno);
+
+	panic("should not be here in ...page3\n");
+
+#if 0
+	/* things got complicated... */
+	offset = inode->i_size & (PAGE_CACHE_SIZE-1);
+	/* OK, are we completely out? */
+	if (pageno >= end_index+1 || !offset) {
+		return -EIO;
+	}
+
+	/* Sigh... will have to work, then... */
+	err = __block_prepare_write(inode, page, 0, offset, pageno);
+	if (!err) {
+		memset(page_address(page) + offset, 0, PAGE_CACHE_SIZE - offset);
+		flush_dcache_page(page);
+		__block_commit_write(inode,page,0,offset,pageno);
+done:
+		kunmap(page);
+		return err;
+	}
+	goto done;
+#endif
+}
 
 int f11b_read_writevb(struct _irp * i) {
   int lbn;
@@ -876,10 +1036,12 @@ static void *fcb_create(unsigned filenum,unsigned *retsts)
     if (retsts) *retsts = SS$_INSFMEM;
   } else {
     qhead_init(&fcb->fcb$l_wlfl);
+    fcb->fcb$b_type=DYN$C_FCB;
     fcb->fcb$l_efblk = 100000;
     fcb->fcb$l_highwater = 0;
     fcb->fcb$l_status = 0;
     fcb->fcb$b_fid_rvn = 0;
+    fcb->fcb$l_fill_5 = 0;
   }
   return fcb;
 }
@@ -894,6 +1056,7 @@ void *fcb_create2(struct _fh2 * head,unsigned *retsts)
     return;
   } 
   fcb->fcb$b_type=DYN$C_FCB;
+  fcb->fcb$l_fill_5 = 0;
   qhead_init(&fcb->fcb$l_wlfl);
 
   fcb->fcb$w_fid_num=head->fh2$w_fid.fid$w_num;
@@ -1068,6 +1231,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
   struct _hm2 home;
   struct _aqb *aqb;
   int islocal;
+  int isfile=0;
   if (sizeof(struct _hm2) != 512 || sizeof(struct _fh2) != 512) return SS$_NOTINSTALL;
   for (device = 0; device < devices; device++) {
     //printk("Trying to mount %s\n",devnam[device]);
@@ -1097,6 +1261,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       //printk("sts %x\n",sts);
       if ((sts & 1)==0) {
 	ucb = fl_init(devnam[device]);
+	isfile=1;
       } else {
 	extern struct _ccb ctl$ga_ccb_table[];
 	ucb = ctl$ga_ccb_table[chan].ccb$l_ucb;
@@ -1125,7 +1290,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       int hba;
       int chan;
       struct dsc$descriptor dsc;
-      if (islocal)
+      if (islocal && isfile)
 	sts = phyio_init(strlen(devnam[device])+1,devnam[device],&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0,ucb);
       dsc.dsc$a_pointer=do_file_translate(devnam[device]);
       dsc.dsc$w_length=strlen(dsc.dsc$a_pointer);
