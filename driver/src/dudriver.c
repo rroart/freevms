@@ -2304,7 +2304,7 @@ void  du_startio (struct _irp * i, struct _ucb * u) {
     /* not local? */
     struct _cdrp * c;
     c=(struct _cdrp *) i->irp$l_fqfl;
-    c->cdrp$l_cdt=u->ucb$l_cdt;
+    //    c->cdrp$l_cdt=u->ucb$l_cdt;
     
   } else {
     /* local */
