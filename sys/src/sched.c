@@ -73,14 +73,54 @@ int mydebug6 = 1;
 
 mycheckaddr(){
 #if 1
+  int i,n=0,m=0;
+  struct _pcb  *tmp2;
+  unsigned long tmp;
+  for(i=0;i<32;i++) {
+    tmp=&sch$aq_comh[i];
+    if(*(unsigned long *)tmp == tmp) {; } else {
+      tmp2=tmp;
+      do {
+	n++;
+	if (tmp2!=(tmp2->pcb$l_sqfl->pcb$l_sqbl)) goto mypanic;
+	if (tmp2!=(tmp2->pcb$l_sqbl->pcb$l_sqfl)) goto mypanic;
+	tmp2=tmp2->pcb$l_sqfl;
+      } while (tmp2!=tmp);
+      n--;
+    }
+  }
+  for(i=0;i<32;i++) {
+    tmp=&sch$aq_comh[i];
+    if(*(unsigned long *)tmp == tmp) {; } else {
+      tmp2=tmp;
+      do {
+	m++;
+	tmp2=tmp2->pcb$l_sqbl;
+	if (tmp2!=(tmp2->pcb$l_sqfl->pcb$l_sqbl)) goto mypanic;
+	if (tmp2!=(tmp2->pcb$l_sqbl->pcb$l_sqfl)) goto mypanic;
+      } while (tmp2!=tmp);
+      m--;
+    }
+  }
+  if (n!=m) goto mypanic;
+#if 0
   unsigned long * f=&sch$aq_comh[31];
   unsigned long * b=&sch$aq_comt[31];
-  if (*f==0xa01c8598 && *b!=0xa01c8598)
-    panic("mypanic\n");
-  if (*b==0xa01c8598 && *f!=0xa01c8598)
-    panic("mypanic\n");
+  if (*f==f && *b!=f)
+    goto mypanic;
+  if (*b==f && *f!=f)
+    goto mypanic;
   if (nr_running<2 && *b!=*f)
-    panic("mypanic\n");
+    goto mypanic;
+  printk("mypanic %x %x %x %x %x\n",nr_running,f,b,*f,*b);
+#endif
+  return;
+ mypanic:
+  printk("mypanic %x %x %x %x %x\n",i,n,m,tmp,tmp2);
+  printk("mypanic %x %x %x %x %x\n",tmp2->pcb$l_sqfl,tmp2->pcb$l_sqfl->pcb$l_sqbl,tmp2->pcb$l_sqbl,tmp2->pcb$l_sqbl->pcb$l_sqfl,42);
+  cli();
+  while(1) {; };
+  sickinsque(0x11111111,0x22222222);
 #endif 
 }
 
