@@ -2901,6 +2901,7 @@ static struct block_device_operations md_fops=
 	ioctl:		md_ioctl,
 };
 
+extern int mdthreadpid;
 
 int md_thread(void * arg)
 {
@@ -2932,6 +2933,9 @@ int md_thread(void * arg)
 	 */
 	current->policy = SCHED_OTHER;
 	current->pcb$b_prib = 27;
+
+	mdthreadpid=current->pid;
+
 	md_unlock_kernel();
 
 	complete(thread->event);
@@ -3398,7 +3402,7 @@ recheck:
 	/*
 	 * Tune reconstruction:
 	 */
-	window = MAX_READAHEAD*(PAGE_SIZE/512);
+	window = vm_max_readahead*(PAGE_SIZE/512);
 	printk(KERN_INFO "md: using %dk window, over a total of %d blocks.\n",
 	       window/2,max_sectors/2);
 
