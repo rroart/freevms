@@ -89,12 +89,12 @@ int STR$CASE_BLIND_COMPARE(x,y)
 
 int CH$EQL(n1,ptr1,n2,ptr2) {
   int n = ( n1 < n2 ? n1 : n2);
-  return (0==strncmp(ptr1,ptr2,n));
+  return (0==memcmp(ptr1,ptr2,n));
 }
 
 int CH$NEQ(n1,ptr1,n2,ptr2) {
   int n = ( n1 < n2 ? n1 : n2);
-  return (strncmp(ptr1,ptr2,n));
+  return (memcmp(ptr1,ptr2,n));
 }
 
 CH$NEQ_not() {
