@@ -519,6 +519,7 @@ unsigned return_ent(struct _fcb * fcb,unsigned curblk,
     return deaccesschunk(0,0,1);
 }
 
+// equivalent of FIND
 
 /* search_ent() - search for a directory entry */
 

@@ -297,7 +297,19 @@ unsigned do_search(struct _fabdef *fab,struct WCCFILE *wccfile)
                    fibblk.fib$w_did_seq,fibblk.fib$b_did_rvn,
                    wcc->wcd_wcc,wcc->wcd_prelen,wccfile->wcf_result + wcc->wcd_prelen);
 #endif
+            fibblk.fib$w_fid_num = fibblk.fib$w_did_num;
+            fibblk.fib$w_fid_seq = fibblk.fib$w_did_seq;
+            fibblk.fib$w_did_num = 0;
+            fibblk.fib$w_did_seq = 0;
 	    sts = exe_qiow(0,getchan(wccfile->wcf_vcb),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
+			   &fibdsc,&wcc->wcd_serdsc,&wcc->wcd_reslen,&resdsc,0,0);
+	    sts = iosb.iosb$w_status;
+
+            fibblk.fib$w_did_num = fibblk.fib$w_fid_num;
+            fibblk.fib$w_did_seq = fibblk.fib$w_fid_seq;
+            fibblk.fib$w_fid_num = 0;
+            fibblk.fib$w_fid_seq = 0;
+	    sts = exe_qiow(0,getchan(wccfile->wcf_vcb),IO$_ACCESS,&iosb,0,0,
 			   &fibdsc,&wcc->wcd_serdsc,&wcc->wcd_reslen,&resdsc,0,0);
 	    sts = iosb.iosb$w_status;
         } else {

@@ -115,7 +115,7 @@ void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lb
   return buf;
 }
 
-void * findfcb(struct _vcb * vcb,int filenum)
+void * f11b_search_fcb(struct _vcb * vcb,int filenum)
 {
     struct _fcb * head = &vcb->vcb$l_fcbfl;
     struct _fcb * tmp = head->fcb$l_fcbfl;
@@ -686,7 +686,7 @@ void *fcb_create(unsigned filenum,unsigned *retsts)
 
 unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
 {
-  unsigned sts;
+  unsigned sts=SS$_NORMAL;
   unsigned wrtflg=1;
   struct _fcb *fcb;
   struct _fh2 *head;
@@ -697,19 +697,40 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
   void * atrp=irp->irp$l_qio_p5;
   struct _fibdef * fib=(struct _fibdef *)fibdsc->dsc$a_pointer;
   struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
-  unsigned filenum = (fid->fid$b_nmx << 16) + fid->fid$w_num;
+  unsigned filenum;
   unsigned action=0;
-  if (irp->irp$v_fmod == IO$M_ACCESS) action=0;
-  if (irp->irp$v_fmod == IO$M_CREATE) action=2;
-  if (irp->irp$v_fmod == IO$M_DELETE) action=1;
+  if (irp->irp$l_func & IO$M_ACCESS) action=0;
+  if (irp->irp$l_func & IO$M_CREATE) action=2;
+  if (irp->irp$l_func & IO$M_DELETE) action=1;
 #ifdef DEBUG
   printk("Accessing file (%d,%d,%d)\n",(fid->fid$b_nmx << 16) +
 	 fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn);
 #endif
-  if (filenum < 1) { iosbret(irp,SS$_BADPARAM); return SS$_BADPARAM; }
+
+
+  if (fib->fib$w_did_num) {
+    struct _fh2 * head;
+    struct _fcb * fcb=xqp->primary_fcb;
+    gethead(fcb,&head);
+    if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
+      unsigned eofblk = VMSSWAP(head->fh2$w_recattr.fat$l_efblk);
+      if (VMSWORD(head->fh2$w_recattr.fat$w_ffbyte) == 0) --eofblk;
+      sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
+    } else {
+      sts = SS$_BADIRECTORY;
+    }
+  }
+
+  if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
+
+  if ((irp->irp$l_func & IO$M_ACCESS) == 0 && irp->irp$l_qio_p5 == 0)
+    return SS$_NORMAL;
+
+  filenum = (fid->fid$b_nmx << 16) + fid->fid$w_num;
+  //if (filenum < 1) { iosbret(irp,SS$_BADPARAM); return SS$_BADPARAM; }
   if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) { iosbret(irp,SS$_WRITLCK);  return SS$_WRITLCK; }
   if (fid->fid$b_rvn > 1) filenum |= fid->fid$b_rvn << 24;
-  fcb=findfcb(vcb,filenum);
+  fcb=f11b_search_fcb(vcb,filenum);
   if (fcb==NULL) {
     fcb=fcb_create(filenum,&sts);
     if (fcb) {
@@ -903,6 +924,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	    bzero(dummyirp,sizeof(struct _irp));
 	    dummyirp->irp$l_qio_p1=&mapdsc;
 	    dummyirp->irp$l_ucb=ucb;
+	    dummyirp->irp$l_func=IO$_ACCESS|IO$M_ACCESS;
 	    sts = f11b_access(vcb,dummyirp);
 	    mapfcb=getmapfcb(vcb);
 	    if (sts & 1) {

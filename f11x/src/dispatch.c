@@ -66,10 +66,11 @@ void f11b$dispatcher(void) {
 	void * atrp=i->irp$l_qio_p5;
 	struct _fibdef * fib=(struct _fibdef *)fibdsc->dsc$a_pointer;
 	unsigned action=0;
-	if (i->irp$v_fmod == IO$M_ACCESS) action=0;
-	if (i->irp$v_fmod == IO$M_CREATE) action=2;
-	if (i->irp$v_fmod == IO$M_DELETE) action=1;
-	if (fib->fib$w_did_num>0) 
+	if (i->irp$l_func & IO$M_ACCESS) action=0;
+	if (i->irp$l_func & IO$M_CREATE) action=2;
+	if (i->irp$l_func & IO$M_DELETE) action=1;
+	//if (fib->fib$w_did_num>0) 
+	if (0) 
 	  sts=direct(vcb,fibdsc,filedsc,reslen,resdsc,atrp,action,i);
 	else
 	  sts=f11b_access(vcb,i);
