@@ -1,74 +1,74 @@
 #ifndef vcbdef_h
 #define vcbdef_h
  
-#define VCB$K_MRKLEN 11
-#define VCB$C_MRKLEN 11
-#define VCB$M_WRITE_IF 0x1
-#define VCB$M_WRITE_SM 0x2
-#define VCB$M_HOMBLKBAD 0x4
-#define VCB$M_IDXHDRBAD 0x8
-#define VCB$M_NOALLOC 0x10
-#define VCB$M_EXTFID 0x20
-#define VCB$M_GROUP 0x40
-#define VCB$M_SYSTEM 0x80
-#define VCB$M_HIGH_SIERRA 0x1
-#define VCB$M_NOSWITCH 0x2
-#define VCB$M_DSI 0x4
-#define VCB$M_XAR 0x8
-#define VCB$M_UNUSED_1 0x10
-#define VCB$M_UNUSED_2 0x20
-#define VCB$M_PARTFILE 0x1
-#define VCB$M_LOGICEOVS 0x2
-#define VCB$M_WAIMOUVOL 0x4
-#define VCB$M_WAIREWIND 0x8
-#define VCB$M_WAIUSRLBL 0x10
-#define VCB$M_CANCELIO 0x20
-#define VCB$M_MUSTCLOSE 0x40
-#define VCB$M_NOWRITE 0x80
-#define VCB$M_SHADMAST 0x1
-#define VCB$M_FAILED 0x2
-#define VCB$M_REBLDNG 0x8
-#define VCB$M_BLKASTREC 0x10
-#define VCB$M_MVBEGUN 0x20
-#define VCB$M_ADDING 0x40
-#define VCB$M_PACKACKED 0x80
-#define VCB$K_COMLEN 40
-#define VCB$C_COMLEN 40
-#define VCB$S_VCBDEF_COMMON 40
-#define VCB$M_SUBSYSTEM 0x1
-#define VCB$M_STRUC_ODS5 0x2
-#define VCB$K_LENGTH 304
-#define VCB$C_LENGTH 304
-#define VCB$S_VCBDEF_DISKS 304
-#define VCB$M_FILE_ATTRIBUTES 0xF
-#define VCB$M_FILE_CONTENTS 0xF0
-#define VCB$C_DEFAULT 0
-#define VCB$C_WRITETHROUGH 1
-#define VCB$C_WRITEBEHIND 2
-#define VCB$M_FLUSH_ON_CLOSE 0xF00
-#define VCB$C_FLUSH 1
-#define VCB$C_NOFLUSH 2
-#define VCB$M_CACHING_OPTIONS_MBZ 0xFFFFF000
-#define VCB$K_F64_LEN 304
-#define VCB$C_F64_LEN 304
-#define VCB$S_VCBDEF_F64 304
-#define VCB$K_SHAD_LEN 76
-#define VCB$S_VCBDEF_SHADOW 76
-#define VCB$S_VCBDEF_CDROM 128
-#define VCB$S_VCBDEF2 184
-#define VCB$S_VCBDEF3 32
+#define		VCB$K_MRKLEN		11
+#define		VCB$C_MRKLEN		11
+#define		VCB$M_WRITE_IF		0x1
+#define		VCB$M_WRITE_SM		0x2
+#define		VCB$M_HOMBLKBAD		0x4
+#define		VCB$M_IDXHDRBAD		0x8
+#define		VCB$M_NOALLOC		0x10
+#define		VCB$M_EXTFID		0x20
+#define		VCB$M_GROUP		0x40
+#define		VCB$M_SYSTEM		0x80
+#define		VCB$M_HIGH_SIERRA	0x1
+#define		VCB$M_NOSWITCH		0x2
+#define		VCB$M_DSI		0x4
+#define		VCB$M_XAR		0x8
+#define		VCB$M_UNUSED_1		0x10
+#define		VCB$M_UNUSED_2		0x20
+#define		VCB$M_PARTFILE		0x1
+#define		VCB$M_LOGICEOVS		0x2
+#define		VCB$M_WAIMOUVOL		0x4
+#define		VCB$M_WAIREWIND		0x8
+#define		VCB$M_WAIUSRLBL		0x10
+#define		VCB$M_CANCELIO		0x20
+#define		VCB$M_MUSTCLOSE		0x40
+#define		VCB$M_NOWRITE		0x80
+#define		VCB$M_SHADMAST		0x1
+#define		VCB$M_FAILED		0x2
+#define		VCB$M_REBLDNG		0x8
+#define		VCB$M_BLKASTREC		0x10
+#define		VCB$M_MVBEGUN		0x20
+#define		VCB$M_ADDING		0x40
+#define		VCB$M_PACKACKED		0x80
+#define		VCB$K_COMLEN		40
+#define		VCB$C_COMLEN		40
+#define		VCB$S_VCBDEF_COMMON	40
+#define		VCB$M_SUBSYSTEM		0x1
+#define		VCB$M_STRUC_ODS5	0x2
+#define		VCB$K_LENGTH		304
+#define		VCB$C_LENGTH		304
+#define		VCB$S_VCBDEF_DISKS	304
+#define		VCB$M_FILE_ATTRIBUTES	0xF
+#define		VCB$M_FILE_CONTENTS	0xF0
+#define		VCB$C_DEFAULT		0
+#define		VCB$C_WRITETHROUGH	1
+#define		VCB$C_WRITEBEHIND	2
+#define		VCB$M_FLUSH_ON_CLOSE	0xF00
+#define		VCB$C_FLUSH		1
+#define		VCB$C_NOFLUSH		2
+#define		VCB$M_CACHING_OPTIONS_MBZ	0xFFFFF000
+#define		VCB$K_F64_LEN		304
+#define		VCB$C_F64_LEN		304
+#define		VCB$S_VCBDEF_F64	304
+#define		VCB$K_SHAD_LEN		76
+#define		VCB$S_VCBDEF_SHADOW	76
+#define		VCB$S_VCBDEF_CDROM	128
+#define		VCB$S_VCBDEF2		184
+#define		VCB$S_VCBDEF3		32
 	
 struct _vcb {
   union  {
     struct _fcb *vcb$l_fcbfl;
     void *vcb$l_blockfl;
     struct _ucb *vcb$l_memqfl;
-  } vcb$r_forward_link;
+  };
   union  {
     struct _fcb *vcb$l_fcbbl;
     void *vcb$l_blockbl;
     struct _ucb *vcb$l_memqbl;
-  } vcb$r_backward_link;
+  };
   unsigned short int vcb$w_size;
   unsigned char vcb$b_type;
   union  {
@@ -84,7 +84,7 @@ struct _vcb {
 	  unsigned vcb$v_extfid : 1;
 	  unsigned vcb$v_group : 1;
 	  unsigned vcb$v_system : 1;
-	} vcb$r_disk_bits;
+	};
 	struct  {
 	  unsigned vcb$v_high_sierra : 1;
 	  unsigned vcb$v_noswitch : 1;
@@ -92,9 +92,8 @@ struct _vcb {
 	  unsigned vcb$v_xar : 1;
 	  unsigned vcb$v_unused_1 : 1;
 	  unsigned vcb$v_unused_2 : 1;
-
 	  unsigned vcb$v_fill_2_ : 2;
-	} vcb$r_cdrom_bits;
+	};
 	struct  {
 	  unsigned vcb$v_partfile : 1;
 	  unsigned vcb$v_logiceovs : 1;
@@ -104,7 +103,7 @@ struct _vcb {
 	  unsigned vcb$v_cancelio : 1;
 	  unsigned vcb$v_mustclose : 1;
 	  unsigned vcb$v_nowrite : 1;
-	} vcb$r_tape_bits;
+	};
 	struct  {
 	  unsigned vcb$v_shadmast : 1;
 	  unsigned vcb$v_failed : 1;
@@ -114,8 +113,8 @@ struct _vcb {
 	  unsigned vcb$v_mvbegun : 1;
 	  unsigned vcb$v_adding : 1;
 	  unsigned vcb$v_packacked : 1;
-	} vcb$r_shadow_bits;
-      } vcb$r_volsts;
+	};
+      };
       unsigned int vcb$l_trans;
       unsigned int vcb$l_rvn;
       struct _aqb *vcb$l_aqb;
@@ -155,9 +154,9 @@ struct _vcb {
 	      unsigned vcb$v_noshare : 1;
 	      unsigned vcb$v_cluslock : 1;
 	      unsigned vcb$v_subset0 : 1;
-	    } vcb$r_status2_bits;
+	    };
 	    char vcb$b_fill_6 [4];
-	  } vcb$r_status2_overlay;
+	  };
 	  struct _fcb *vcb$l_quotafcb;
 	  void *vcb$l_cache;
 	  void *vcb$l_quocache;
@@ -170,8 +169,8 @@ struct _vcb {
 	      unsigned vcb$v_subsystem : 1;
 	      unsigned vcb$v_struc_ods5 : 1;
 	      unsigned vcb$v_fill_3_ : 6;
-	    } vcb$r_fill_1_;
-	  } vcb$r_fill_0_;
+	    };
+	  };
 	  unsigned int vcb$l_vollkid;
 	  char vcb$t_volcknam [12];
 	  unsigned int vcb$l_blockid;
@@ -190,11 +189,11 @@ struct _vcb {
 	    union  {
 	      char vcb$b_fill_2 [20];
 	      struct _orb *vcb$l_orb;
-	    } vcb$r_min_class;
+	    };
 	    struct  {
 	      char vcb$b_fill_3 [20];
-	    } vcb$r_max_class;
-	  } vcb$r_security_overlay;
+	    };
+	  };
 	  union  {
 	    unsigned int vcb$l_caching_options;
 	    struct  {
@@ -202,9 +201,9 @@ struct _vcb {
 	      unsigned vcb$v_file_contents : 4;
 	      unsigned vcb$v_flush_on_close : 4;
 	      unsigned vcb$v_caching_options_mbz : 20;
-	    } vcb$r_caching_options_bits;
-	  } vcb$r_caching_options_overlay;
-	} vcb$r_vcb_disks;
+	    };
+	  };
+	};
 	struct  {
 	  struct _ucb *vcb$l_mem_ucb;
 	  struct _ucb *vcb$l_mast_ucb;
@@ -214,9 +213,8 @@ struct _vcb {
 	  int vcb$l_fill_1;
 	  unsigned long long vcb$q_work;
 	  unsigned long long vcb$q_shdm_resv;
-	} vcb$r_vcb_shadow;
+	};
 	struct  {
-
 	  unsigned int vcb$l_voldesc;
 	  struct _vcb *vcb$l_orphaned_vcb;
 	  void *vcb$l_ptvector;
@@ -241,23 +239,23 @@ struct _vcb {
 	  union  {
 	    unsigned char vcb$b_cd_status2;
 	    char vcb$b_fill_8 [4];
-	  } vcb$r_cd_status2_overlay;
-	} vcb$r_vcb_cdrom;
+	  };
+	};
 	struct  {
 	  union  {
 	    unsigned int vcb$l_cur_fid;
 	    struct  {
 	      unsigned short int vcb$w_cur_num;
 	      unsigned short int vcb$w_cur_seq;
-	    } vcb$r_cur_fid_fields;
-	  } vcb$r_cur_fid_overlay;
+	    };
+	  };
 	  union  {
 	    unsigned int vcb$l_start_fid;
 	    struct  {
 	      unsigned short int vcb$w_start_num;
 	      unsigned short int vcb$w_start_seq;
-	    } vcb$r_start_fid_fields;
-	  } vcb$r_start_fid_overlay;
+	    };
+	  };
 	  union  {
 	    unsigned short int vcb$w_mode;
 	    struct  {
@@ -277,8 +275,8 @@ struct _vcb {
 	      unsigned vcb$v_ovrvolo : 1;
 	      unsigned vcb$v_fil_access : 1;
 	      unsigned vcb$v_fill_4_ : 1;
-	    } vcb$r_mode_bits;
-	  } vcb$r_mode_overlay;
+	    };
+	  };
 	  unsigned char vcb$b_tm;
 	  unsigned char vcb$b_cur_rvn;
 	  unsigned int vcb$l_st_record;
@@ -290,16 +288,17 @@ struct _vcb {
 	  unsigned char vcb$b_lblcnt;
 	  char vcb$t_fill_5 [99];
 	  unsigned long long vcb$q_exp_date;
-	} vcb$r_vcb_mtaacp;
-      } vcb$r_vcb_extensions;
-    } vcb$r_vcb_union_member;
+	};
+      };
+    };
     struct  {
       unsigned char vcb$b_qnamecnt;
       char vcb$t_qname [20];
-    } vcb$r_vcb_jacp;
-  } vcb$r_vcb_union;
+    };
+  };
 };
- 
+
+#if 0 
 #define		vcb$b_acb		vcb$r_vcb_disks.vcb$b_acb
 #define		vcb$b_cd_status2	vcb$r_vcb_cdrom.vcb$r_cd_status2_overlay.vcb$b_cd_status2
 #define		vcb$b_cur_rvn		vcb$r_vcb_mtaacp.vcb$b_cur_rvn
@@ -469,5 +468,6 @@ struct _vcb {
 #define		vcb$w_mode		vcb$r_vcb_mtaacp.vcb$r_mode_overlay.vcb$w_mode
 #define		vcb$w_start_num		vcb$r_vcb_mtaacp.vcb$r_start_fid_overlay.vcb$r_start_fid_fields.vcb$w_start_num
 #define		vcb$w_start_seq		vcb$r_vcb_mtaacp.vcb$r_start_fid_overlay.vcb$r_start_fid_fields.vcb$w_start_seq
+#endif
 		
 #endif

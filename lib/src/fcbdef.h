@@ -61,14 +61,14 @@ struct _fcb {
 	struct  {
 	  unsigned char fcb$b_fid_rvn;
 	  unsigned char fcb$b_fid_nmx;
-	};
-      };
-    };
+	} fcb_fid_3;
+      } fcb_fid_2;
+    } fcb_fid_1_1;
     struct  { // this is supposedly for 9660. can be used anyway 
       unsigned short int fcb$w_fid_dirnum;
       unsigned int fcb$l_fid_recnum;
-    };
-  };
+    } fcb_fid_1_2;
+  } fcb_fid_0;
   unsigned short int fcb$w_segn;
   unsigned int fcb$l_stvbn;
   unsigned int fcb$l_stlbn;
@@ -172,5 +172,14 @@ struct _fcb {
   struct _fcb *fcb$l_primfcb;
   unsigned int fcb$l_dirlckid;
 };
+
+#define fcb$w_fid fcb_fid_0.fcb$w_fid
+#define fcb$w_fid_num fcb_fid_0.fcb_fid_1_1.fcb$w_fid_num
+#define fcb$w_fid_seq fcb_fid_0.fcb_fid_1_1.fcb$w_fid_seq
+#define fcb$w_fid_rvn fcb_fid_0.fcb_fid_1_1.fcb_fid_2.fcb$w_fid_rvn
+#define fcb$b_fid_rvn fcb_fid_0.fcb_fid_1_1.fcb_fid_2.fcb_fid_3.fcb$b_fid_rvn
+#define fcb$b_fid_nmx fcb_fid_0.fcb_fid_1_1.fcb_fid_2.fcb_fid_3.fcb$b_fid_nmx
+#define fcb$w_fid_dirnum fcb_fid_0.fcb_fid_1_2.fcb$w_fid_dirnum
+#define fcb$l_fid_recnum fcb_fid_0.fcb_fid_1_2.fcb$l_fid_recnum
  
 #endif

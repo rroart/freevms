@@ -32,6 +32,7 @@ asmlinkage int exe$imgact_wrap(struct struct_args * s) {
 }
 
 asmlinkage int exe$imgact(void * name, void * dflnam, void ** hdrbuf, unsigned long imgctl, unsigned long long * inadr, unsigned long long * retadr, unsigned long long * ident, unsigned long acmode) {
+#ifdef CONFIG_VMS
   struct dsc$descriptor *dscname=name;
   struct dsc$descriptor *dscdflnam=dflnam;
   struct file * f;
@@ -88,7 +89,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void ** hdrbuf, unsigned l
 
     section=(unsigned long)section+section->isd$w_size;
   }
-
+#endif
   return SS$_NORMAL;
 
 }
