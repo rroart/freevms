@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /*
  * linux/ipc/sem.c
  * Copyright (C) 1992 Krishna Balasubramanian

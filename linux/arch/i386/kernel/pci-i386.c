@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /*
  *	Low-Level PCI Access for i386 machines
  *

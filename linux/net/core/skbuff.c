@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /*
  *	Routines having to do with the 'struct sk_buff' memory handlers.
  *

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004. Based on pc_keybd.c.
+
 #include<crbdef.h>
 #include<cdtdef.h>
 #include<dcdef.h>

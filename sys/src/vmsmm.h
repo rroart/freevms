@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004. Based on mm.h.
+
 #ifndef _LINUX_MM_H
 #define _LINUX_MM_H
 

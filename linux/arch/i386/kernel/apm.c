@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /* -*- linux-c -*-
  * APM BIOS driver for Linux
  * Copyright 1994-2001 Stephen Rothwell (sfr@canb.auug.org.au)

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /*
  *  linux/drivers/ide/ide-probe.c	Version 1.07	March 18, 2001
  *

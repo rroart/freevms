@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /*
  * Herein lies all the functions/variables that are "exported" for linkage
  * with dynamically loaded kernel modules.

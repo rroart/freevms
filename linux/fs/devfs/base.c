@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /*  devfs (Device FileSystem) driver.
 
     Copyright (C) 1998-2002  Richard Gooch

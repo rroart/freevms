@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified User Mode Linux source file, 2001-2004.
+
 #include "linux/kernel.h"
 #include "linux/stddef.h"
 #include "linux/init.h"

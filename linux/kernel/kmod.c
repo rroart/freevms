@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /*
 	kmod, the new module loader (replaces kerneld)
 	Kirk Petersen

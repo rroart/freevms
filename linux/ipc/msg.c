@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /*
  * linux/ipc/msg.c
  * Copyright (C) 1992 Krishna Balasubramanian 

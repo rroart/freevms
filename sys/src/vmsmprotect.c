@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004. Based on mprotect.c.
+
 /*
  *	linux/mm/mprotect.c
  *

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified User Mode Linux source file, 2001-2004.
+
 /*
  * Copyright (C) 2001 Lennert Buytenhek (buytenh@gnu.org)
  * Licensed under the GPL

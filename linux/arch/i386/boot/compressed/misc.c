@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Bertrand Joël.
+// Modified Linux source file, 2001-2004.
+
 /*
  * misc.c
  * 

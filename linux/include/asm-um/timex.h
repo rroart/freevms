@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified User Mode Linux source file, 2001-2004.
+
 #ifndef __UM_TIMEX_H
 #define __UM_TIMEX_H
 

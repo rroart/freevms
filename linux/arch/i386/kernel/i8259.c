@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 #include <linux/config.h>
 #include <linux/ptrace.h>
 #include <linux/errno.h>

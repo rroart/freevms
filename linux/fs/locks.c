@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 #define MSNFS	/* HACK HACK */
 /*
  *  linux/fs/locks.c

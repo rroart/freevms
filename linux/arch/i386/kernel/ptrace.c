@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /* ptrace.c */
 /* By Ross Biro 1/23/92 */
 /*

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 #ifndef _ASM_I386_UNISTD_H_
 #define _ASM_I386_UNISTD_H_
 

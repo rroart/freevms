@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 #ifndef __LINUX_COMPILER_H
 #define __LINUX_COMPILER_H
 

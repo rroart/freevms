@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004. Based on mremap.c.
+
 /*
  *	linux/mm/remap.c
  *

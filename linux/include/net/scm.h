@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 #ifndef __LINUX_NET_SCM_H
 #define __LINUX_NET_SCM_H
 

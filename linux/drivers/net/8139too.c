@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /*
 
 	8139too.c: A RealTek RTL-8139 Fast Ethernet driver for Linux.

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /*
  *  linux/drivers/ide/ide-disk.c	Version 1.10	June 9, 2000
  *

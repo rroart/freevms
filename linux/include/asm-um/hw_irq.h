@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified User Mode Linux source file, 2001-2004.
+
 #ifndef _ASM_UM_HW_IRQ_H
 #define _ASM_UM_HW_IRQ_H
 

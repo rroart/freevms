@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Author. Linux people.
+// Modified Linux source file, 2001-2004. Based on timer.c. 
 
 #include<queue.h>
 #include <asmlink.h>

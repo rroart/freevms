@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004.
+
 /* ne2k-pci.c: A NE2000 clone on PCI bus driver for Linux. */
 /*
 	A Linux device driver for PCI NE2000 clones.
