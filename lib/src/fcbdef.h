@@ -171,8 +171,6 @@ struct _fcb {
   void *fcb$l_cfcb;
   struct _fcb *fcb$l_primfcb;
   unsigned int fcb$l_dirlckid;
-
-  unsigned int headvbn; // until I can remove it
 };
  
 #define		fcb$b_fid_nmx		fcb$r_fid_overlay.fcb$r_fid_fields.fcb$r_fid_rvn_overlay.fcb$r_fid_rvn_fields.fcb$b_fid_nmx
