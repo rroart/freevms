@@ -1228,6 +1228,7 @@ struct buffer_head * bread(kdev_t dev, int block, int size)
 	 sts = exe_qiow(0,dev2chan(dev),IO$_READPBLK,&iosb,0,0,
 			bh -> b_data,size,block,MINOR(dev)&31,0,0);
 
+	 set_bit(BH_Uptodate, &bh->b_state);
 	 return bh;
 }
 #endif
@@ -1872,7 +1873,7 @@ int block_read_full_page(struct page *page, get_block_t *get_block)
 	 unsigned long long iosb;
 	 int turns;
 
-	 //	printk("bl r f p\n");
+	 // printk("bl r f p\n");
 
 	 blocksize = 1 << inode->i_blkbits;
 
