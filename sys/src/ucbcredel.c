@@ -113,3 +113,51 @@ int init_crb(struct _crb * crb) {
   crb->crb$b_type=DYN$C_CRB;
   return SS$_NORMAL;
 }
+
+// temporary stuff for dua
+
+int ioc_std$copy_mscp_ucb (struct _ucb *src_ucb, struct _ucb **new_ucb) {
+  int status;
+  struct _ucb * u=kmalloc(sizeof(struct _mscp_ucb),GFP_KERNEL);
+  memcpy(u,src_ucb,sizeof(struct _mscp_ucb));
+
+  qhead_init(&u->ucb$l_fqfl);
+  u->ucb$l_fr3=0;
+  u->ucb$l_fr4=0;
+  u->ucb$l_fpc=0;
+  u->ucb$w_bufquo=0;
+  // u->ucb$l_link=something
+  qhead_init(&u->ucb$l_ioqfl);
+  u->ucb$l_devsts=0;
+  u->ucb$l_opcnt=0;
+  u->ucb$l_svapte=0;
+  u->ucb$l_boff=0;
+  u->ucb$l_bcnt=0;
+
+  u->ucb$l_refc=1;
+  u->ucb$l_sts|=UCB$M_ONLINE;
+  u->ucb$l_sts&=~UCB$M_TEMPLATE;
+  // u->ucb$l_charge
+  qhead_init(&u->ucb$l_mb_msgqfl); // probably this too?
+
+  *new_ucb = u;
+  return SS$_NORMAL;
+};
+
+int ioc_std$clone_mscp_ucb (struct _ucb *tmpl_ucb, struct _ucb **new_ucb) {
+  int status;
+  struct _ucb * u;
+  status=ioc_std$copy_mscp_ucb(tmpl_ucb,new_ucb);
+  u=*new_ucb;
+
+  u->ucb$w_unit=tmpl_ucb->ucb$w_unit_seed;
+
+ again:
+  if (++tmpl_ucb->ucb$w_unit_seed>9999) tmpl_ucb->ucb$w_unit_seed=0;
+  status=ioc_std$link_ucb(u);
+  if (status!=SS$_NORMAL) goto again; // original weakness?
+
+
+  return SS$_NORMAL;
+}
+
