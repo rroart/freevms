@@ -2318,7 +2318,7 @@ int dumscp(void) {
   dudaemonize(); /* find out what this does */
   
   //  listen(msgbuf,err,cdt,pdt,cdt);
-  scs$listen(dulisten,dumyerr,myname,myinfo);
+  scs$listen(dulisten,dumyerr,myname,myinfo,0);
 }
 
 struct _pdt dupdt;
@@ -2471,8 +2471,8 @@ void * find_free_cdt(void);
 extern struct _pb mypb;
 extern struct _sb mysb;
 
-void du_msg() {
-
+void du_msg(void * packet, struct _cdt * c, struct _pdt * p) {
+  du_dg(packet,c,p);
 }
 void du_dg(void * packet, struct _cdt * c, struct _pdt * p) {
   int sts;
