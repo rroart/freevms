@@ -4,6 +4,8 @@ EXE =
 LIB = ../../starlet/src/starlet.a
 LIBUM = ../../starlet/src/starletum.a
 
+FLAGS = -static
+
 all: directory${EXE} directoryum${EXE}
 
 install: all
@@ -13,7 +15,7 @@ install: all
 	cp -p i386/* ../../rooti386/vms"$$"common/sysexe
 
 directory${EXE}: directory.c $(LIB)
-	gcc -g -I../../starlet/src -I../../librtl/src/ -I../../lib/src directory.c ../../starlet/src/starlet.a -o directory${EXE}
+	gcc $(FLAGS) -g -I../../starlet/src -I../../librtl/src/ -I../../lib/src directory.c ../../starlet/src/starlet.a -o directory${EXE}
 	mkdir i386 || echo i386 exists
 	cp -p directory i386/copy
 	cp -p directory i386/import
@@ -30,7 +32,7 @@ directory${EXE}: directory.c $(LIB)
 UMDEF=-Dcompile_um -I.
 
 directoryum${EXE}: directory.c $(LIBUM)
-	gcc -g $(UMDEF) -I../../starlet/src -I../../librtl/src/ -I../../lib/src directory.c ../../starlet/src/starletum.a -o directoryum${EXE}
+	gcc $(FLAGS) -g $(UMDEF) -I../../starlet/src -I../../librtl/src/ -I../../lib/src directory.c ../../starlet/src/starletum.a -o directoryum${EXE}
 	mkdir um || echo um exists
 	cp -p directoryum um/copy
 	cp -p directoryum um/import
