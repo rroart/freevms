@@ -37,7 +37,7 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
     }
     it++;
   }
-  return 1;
+  return SS$_NORMAL;
 }
 
 asmlinkage int exe$getjpi_wrap(struct struct_getjpi *s) {
