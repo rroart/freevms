@@ -1032,6 +1032,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
   int islocal;
   if (sizeof(struct _hm2) != 512 || sizeof(struct _fh2) != 512) return SS$_NOTINSTALL;
   for (device = 0; device < devices; device++) {
+    //printk("Trying to mount %s\n",devnam[device]);
     if (strchr(devnam[device],'_')) {
       ucb = du_init(devnam[device]);
       islocal=0;
@@ -1047,6 +1048,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 
       sts=exe$assign(&dsc,&chan,0,0,0);
 
+      //printk("sts %x\n",sts);
       if ((sts & 1)==0) {
 	ucb = fl_init(devnam[device]);
       } else {
@@ -1081,8 +1083,10 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	sts = phyio_init(strlen(devnam[device])+1,devnam[device],&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
       dsc.dsc$a_pointer=do_file_translate(devnam[device]);
       dsc.dsc$w_length=strlen(dsc.dsc$a_pointer);
+#if 0
       if (!islocal)
 	dsc.dsc$a_pointer=((char *) dsc.dsc$a_pointer)+1;
+#endif
       sts=exe$assign(&dsc,&chan,0,0,0);
       xqp->io_channel=chan;
       ucb->ucb$ps_adp=chan; //wrong field and use, but....

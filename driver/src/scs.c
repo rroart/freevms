@@ -1885,6 +1885,29 @@ void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgf
 	memcpy(&nisca->nisca$t_nodename,&mysb.sb$t_nodename,8);
 }
 
+void printscs(void * skbdata) {
+	struct _nisca *nisca;
+	struct _ppd * ppd;
+	struct _scs * scs;
+	struct _nisca *dx;
+	void * data;
+	data = (int)skbdata/*+14*/;
+	nisca=gettr(data);
+	ppd=getppdscs(data);
+	scs=getppdscs(data);
+
+	return;
+
+	printk("\nSCS\n");
+	printk("dx %x %x %x %x %x\n",nisca->nisca$w_dx_group,nisca->nisca$w_dx_dst_hi, nisca->nisca$l_dx_dst_lo,nisca->nisca$w_dx_src_hi,nisca->nisca$l_dx_src_lo);
+	printk("ni %x %x %x %x %x\n",nisca->nisca$b_msg,nisca->nisca$l_maint,nisca->nisca$b_tr_flag,nisca->nisca$b_tr_pad,nisca->nisca$b_tr_pad_data_len);
+	printk("na %s\n",&nisca->nisca$t_nodename[1]);
+	printk("pp %x\n",ppd->ppd$b_opc); 
+	printk("na %s %s %s\n",&scs->scs$t_dst_proc,&scs->scs$t_src_proc,&scs->scs$b_con_dat);
+	printk("sc %x %x %x\n",scs->scs$w_mtype,scs->scs$l_dst_conid,scs->scs$l_src_conid);
+
+}
+
 
 void scs_msg_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg, struct _scs * newscs)
 {
@@ -2139,6 +2162,8 @@ int opc_msgrec(struct sk_buff *skb) {
 
   switch (scs->scs$w_mtype) {
   case SCS$C_CON_REQ: 
+    //printk("CON_REQ src dst %x %x\n",scs->scs$l_src_conid,scs->scs$l_dst_conid);
+    //printk("CON_REQ l r %x %x\n",cdt->cdt$l_lconid,cdt->cdt$l_rconid);
     cdt->cdt$l_rconid=scs->scs$l_src_conid;
     scs_msg_ctl_comm(cdt,SCS$C_CON_RSP);
     cdt->cdt$w_state=CDT$C_CON_REC;
@@ -2158,6 +2183,8 @@ int opc_msgrec(struct sk_buff *skb) {
     scs_msg_ctl_comm(cdt,SCS$C_ACCP_REQ);
     break;
   case SCS$C_CON_RSP: 
+    //printk("CON_RSP src dst %x %x\n",scs->scs$l_src_conid,scs->scs$l_dst_conid);
+    //printk("CON_RSP l r %x %x\n",cdt->cdt$l_lconid,cdt->cdt$l_rconid);
     cdt->cdt$l_rconid=scs->scs$l_src_conid;
     cdt->cdt$w_state=CDT$C_CON_ACK;
     break;
@@ -2207,9 +2234,14 @@ int nisca_snt_dg (struct sk_buff * skb) {
   // shortcut
   struct _mscp_basic_pkt * basic = ((unsigned long)addr) + sizeof(*scs);
 
-  struct _sbnb * sbnb = scs_find_name(&scs->scs$t_dst_proc);
+#if 0
+  // why did I add these?
+  //struct _sbnb * sbnb = scs_find_name(&scs->scs$t_dst_proc);
 
-  struct _cdt * acdt = &cdtl[sbnb->sbnb$w_local_index];
+  //struct _cdt * acdt = &cdtl[sbnb->sbnb$w_local_index];
+#endif
+
+  //printk("in nisca_snt_dg %s %x\n",&scs->scs$t_dst_proc,cdt);
 
   {
     void (*fn)(void *,void *,void *);
@@ -2219,6 +2251,7 @@ int nisca_snt_dg (struct sk_buff * skb) {
     current->psl_is=0;
 #endif
     fn=cdt->cdt$l_msginput;
+    //printk("fn %x\n",fn);
     fn(addr,cdt,0);
 #if 0
     if (savis) current->psl_is=1;
@@ -2447,6 +2480,8 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
 	//printk("discarding packet from myself (mcast...?)\n");
 	goto dump_it;
       }
+
+  printscs(skb->data);
 
       tr_flag=nisca->nisca$b_tr_flag;
       tr_pad=nisca->nisca$b_tr_pad;
