@@ -65,6 +65,8 @@ int lnm$hash(const int length, const unsigned char * log, const unsigned long ma
 
 int lnm$searchlog(int loglen, char * logical, int tabnamlen, char * tablename,struct lnmb ** mylnmb) {
   int status;
+  struct struct_nt * NT=lnmmalloc(sizeof(struct struct_nt));
+
   /* local stack */
   /*
     no process table yet
@@ -76,7 +78,7 @@ int lnm$searchlog(int loglen, char * logical, int tabnamlen, char * tablename,st
   // lnm$setup();
   // lnm$table();
   lnmprintf("searchlogexit\n");
-  exit(1);
+  return status;
 }
 
 int lnm$search_one(int loglen, char * logical, int tabnamlen, char * tablename, char * result) {
@@ -213,3 +215,4 @@ int lnm$inslogtab(int tabnamlen,  char * tablename,struct lnmb ** mylnmb,struct 
   ; }
 
 int lnm$check_prot() { ; }
+

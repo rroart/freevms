@@ -80,6 +80,7 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
   struct lnmb * mylnmb;
   struct lnmth * mylnmth;
   struct dsc$descriptor * mytabnam=tabnam;
+  struct dsc$descriptor * mylognam=lognam;
   struct item_list_3 * i,j;
   struct struct_rt * RT;
 
@@ -106,12 +107,14 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
     mylnmb->lnmb$b_acmode=0;
     mylnmb->lnmb$l_table=0;
     mylnmb->lnmb$b_flags=0;
-    mylnmb->lnmb$b_count=i->buflen;
-    strncpy( &(mylnmb->lnmb$t_name[0]),i->bufaddr,i->buflen);
+    mylnmb->lnmb$b_count=mylognam->dsc$w_length;
+    strncpy( &(mylnmb->lnmb$t_name[0]),mylognam->dsc$a_pointer,mylognam->dsc$w_length);
+    mylnmb->lnmxs[0].lnmx$b_count=i->buflen;
+    strncpy( &(mylnmb->lnmxs[0].lnmx$t_xlation[0]),i->bufaddr,i->buflen);
     mylnmb->lnmxs[0].lnmx$b_flags=LNM$M_MYTERMINAL;
     mylnmb->lnmxs[1].lnmx$b_flags=LNM$M_MYXEND;
 
-    status=lnm$inslogtab(i->buflen,i->bufaddr,mylnmb,mylnmth);
+    status=lnm$inslogtab(mylognam->dsc$w_length,mylognam->dsc$a_pointer,mylnmb,mylnmth);
 
   }
   
@@ -253,17 +256,27 @@ asmlinkage sys$dellnm  (void *tabnam, void *lognam, unsigned char *acmode) {
 }
 
 asmlinkage sys_$TRNLNM() {;}
-asmlinkage sys$trnlnm  (unsigned int *attr, void *tabnam, void
+asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
 			*lognam, unsigned char *acmode, void *itmlst) {
   int status;
+  struct dsc$descriptor *mytabnam, *mylognam;
+  struct lnmb ** amylnmb;
+  struct item_list_3 * i=itmlst;
+
+  amylnmb = lnmmalloc((sizeof(void *)));
+  mylognam=lognam;
+  mytabnam=tabnam;
   if (!(tabnam && itmlst)) return -1;
   /* lock mutex */
-  //      status=lnm$searchlog();
-  if (status==SS$_NOLOGNAM) {
+  status=lnm$searchlog(mylognam->dsc$w_length,mylognam->dsc$a_pointer,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer,amylnmb);
+  if (status==SS$_NOLOGNAM || status!=SS$_NORMAL) {
     /* unlock mutex */
     return status;
   }
-
+  i->buflen=(*amylnmb)->lnmxs[0].lnmx$b_count;
+  i->bufaddr=(*amylnmb)->lnmxs[0].lnmx$t_xlation;
+  lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
+  return status;
 }
 
 #ifdef USERLAND
@@ -332,6 +345,7 @@ main(){
   i[0].bufaddr="mylog";
   bzero(&i[1],sizeof(struct item_list_3));
   status=exe$crelnm(0,&mytabnam2,&mynam,0,i);
+  status=exe$trnlnm(0,&mytabnam2,&mynam,0,i);
   lnmprintf("end status %x\n",status);
   for (c=0;c<LNMSHASHTBL;c++) {
     if (lnmhshs.entry[2*c]) { 
