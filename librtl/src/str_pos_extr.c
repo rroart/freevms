@@ -1,5 +1,35 @@
 /*
- * str_right.c
+ *	strpos_extr
+ *
+ *	Copyright (C) 2003 Andrew Allison
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *The authors may be contacted at:
+ *
+ *	Andrew Allison		freevms@sympatico.ca
+ *
+ *				Andrew Allison
+ *				50 Denlaw Road
+ *				London, Ont
+ *				Canada 
+ *				N6G 3L4
+ *
+ */
+
+ /* str_right.c
  *
  *	Code for VAX STR$POS_EXTR routine
  *
@@ -15,6 +45,9 @@
  *
  *	Feb 7, 1997 - Christof Zeile
  *		Change 'short' to 'unsigned short' in several places
+ *
+ *	Feb 26, 2004 - Andrew Allison
+ *		Added GNU License
  */
 
 #include <stdio.h>
@@ -46,7 +79,7 @@ unsigned long str$pos_extr(struct dsc$descriptor_s* destination_string,
 	if (start_offset <= 0)
 	{
 		start_offset = 1;
-		second_result = STR$_STRTOOLON;
+		second_result = STR$_ILLSTRPOS;
 	}
 
 	/*
