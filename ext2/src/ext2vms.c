@@ -934,7 +934,7 @@ char * ext2_vms_to_unix(struct dsc$descriptor * dsc) {
   d=strstr(c,".DIR");
   if (d)
     *d=0;
-  d=strchr(c,";");
+  d=strchr(c,';');
   if (d)
     *d=0;
   if (c[strlen(c)]=='.')
