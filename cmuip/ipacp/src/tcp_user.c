@@ -195,6 +195,7 @@ MODULE TCP_USER(IDENT="3.7",LANGUAGE(BLISS32),
 #include "tcp.h"			// TCP related definitions
 
 #include <ssdef.h>
+#include <descrip.h>
 
 #if 0
 XQDEFINE			// (maybe) define queue debugging externals
@@ -216,12 +217,12 @@ extern signed long /*LITERAL*/
 
 extern signed long
     Default_MSS,
-    ACK_THRESHOLD,
-    WINDOW_DEFAULT,
+    ack_threshold,
+    window_default,
     AST_IN_PROGRESS,
     INTDF,
     TCP_User_LP,
-    Log_State,
+    log_state,
     ts$dbr,
     ts$aco,
     ts$pco;
@@ -1018,13 +1019,14 @@ Side Effects:
 void TCP$Deliver_User_Data(struct tcb_structure * TCB)
     {
     register
-	struct queue_blk_structure(qb_ur_fields) * UQB, // User rcv request queue.
+	struct queue_blk_structure(qb_ur_fields) * UQB; // User rcv request queue.
+    register
 	datasize,		// Size of data written to users VAS.
 	Usize,			// Size requested by user.
 	Uadrs;			// Address of user's system buffer.
     signed long
 	Uflags,			// Flag bits to return to user
-	Args: VECTOR[4];	// CMKRNL arg blk.
+	Args[4];	// CMKRNL arg blk.
 
     UQB = TCB->ur_qhead;	// Point at User receive request list.
 
@@ -1048,26 +1050,33 @@ void TCP$Deliver_User_Data(struct tcb_structure * TCB)
 #define		maxhex 20
 #define		maxasc 50
 	    signed long
-		DESC$STR_ALLOC(hexstr,maxhex*3),
 		nhex,nasc;
 	    nhex = MIN(datasize,maxhex);
 	    nasc = MIN(datasize,maxasc);
-	    ASCII_Hex_Bytes(hexstr,nhex,TCB->RCV_Q_DEQP,
-			    hexstr->DSC$W_LENGTH);
-	    LOG$FAO(%STRING("!%T Deliver user data: DQ=!XL,EQ=!XL,RCQ=!XL/!XL,Size=!SL!/",
+	    char hexstr_str[maxhex*3];
+	    struct dsc$descriptor hexstr={dsc$w_length:maxhex*3,dsc$a_pointer:hexstr_str};
+#if 0
+	    DESC$STR_ALLOC(hexstr,maxhex*3),
+#endif
+	    ASCII_Hex_Bytes(&hexstr,nhex,TCB->rcv_q_deqp,
+			    hexstr.dsc$w_length);
+	    LOG$FAO(/*%STRING*/("!%T Deliver user data: DQ=!XL,EQ=!XL,RCQ=!XL/!XL,Size=!SL!/",
 			    "!_HEX:   !AS!/",
 			    "!_ASCII: !AF!/"),
-		    0,TCB->RCV_Q_DEQP,TCB->rcv_q_enqp,TCB->RCV_Q_BASE,
-		    TCB[RCV_Q_}],Datasize,hexstr,nasc,TCB->RCV_Q_DEQP);
+		    0,TCB->rcv_q_deqp,TCB->rcv_q_enqp,TCB->rcv_q_base,
+		    TCB->rcv_q_end,datasize,&hexstr,nasc,TCB->rcv_q_deqp);
 	    };
 
 // Dequeue from TCB queue into user buffer
 
-	$$KCALL(CQ_Dequeue,TCB->rcv_q_queue,Uadrs,Datasize);
+#if 0
+	// check wait
+	$$KCALL(CQ_Dequeue,TCB->rcv_q_queue,Uadrs,datasize);
+#endif
   
 // Update user/TCB data pointers
 
-	TCB->rcv_duptr = TCB->rcv_duptr + Datasize;
+	TCB->rcv_duptr = TCB->rcv_duptr + datasize;
 	if (TCB->rcv_push_flag)
 	    if ((TCB->rcv_duptr - TCB->rcv_pptr) > 0)
 		TCB->rcv_push_flag = FALSE;
@@ -1087,27 +1096,27 @@ void TCP$Deliver_User_Data(struct tcb_structure * TCB)
 	REMQUE(TCB->ur_qhead,UQB); // remove the entry
 
 	// post the IRP and release the Uargs
-	User$Post_IO_Status(UQB->ur$uargs,SS$_Normal,DataSize,Uflags,0);
+	User$Post_IO_Status(UQB->ur$uargs,SS$_NORMAL,datasize,Uflags,0);
 	MM$UArg_Free(UQB->ur$uargs); // release user arg blk.
 
-	ts$dbr = ts$dbr + DataSize; // total data bytes delivered to users.
+	ts$dbr = ts$dbr + datasize; // total data bytes delivered to users.
 
 // attempt to beat the silly window syndrome, should we give a window update?
 
-	tcb->ack_size = tcb->ack_size + datasize;
-	if (tcb->ack_size GEQU TCB->SND_ack_threshold)
+	TCB->ack_size = TCB->ack_size + datasize;
+	if (TCB->ack_size >= TCB->snd_ack_threshold)
 	    {
 
  // Return window resources.
 
-	    tcb->rcv_wnd = tcb->rcv_wnd + tcb->ack_size;
-	    tcb->ack_size = 0;
+	    TCB->rcv_wnd = TCB->rcv_wnd + TCB->ack_size;
+	    TCB->ack_size = 0;
 	    };
 
 // Only flag an ACK if something has really changed.
 
-	IF (tcb->old_rcv_nxt NEQU tcb->rcv_nxt) OR
-	   (tcb->old_rcv_wnd NEQU tcb->rcv_wnd) THEN
+	if ((TCB->old_rcv_nxt != TCB->rcv_nxt) ||
+	    (TCB->old_rcv_wnd != TCB->rcv_wnd))
 //	    tcb->pending_ack = True; // Indicate we need an ack sent.
 	    TCP$Enqueue_Ack(TCB) ;	// Indicate we need an ack sent.
 	MM$QBlk_Free(UQB);	// Release Queue blk.
@@ -1203,23 +1212,23 @@ void TCP$RECEIVE(struct user_recv_args * Uargs)
     register
 	struct tcb_structure * TCB;
 
-    if ((TCB=tcb_ok(Uargs->RE$Local_Conn_ID,RC,Uargs)) == 0)
+    if ((TCB=tcb_ok(Uargs->re$local_conn_id,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Connection doesn't exist.
 	return;
 	};
 
     XLOG$FAO(LOG$USER,"!%T TCP$RECEIVE: Conn=!XL, TCB=!XL, Size=!SL!/",
-	     0,Uargs->RE$Local_Conn_ID,TCB,Uargs->RE$Buf_size);
+	     0,Uargs->re$local_conn_id,TCB,Uargs->re$buf_size);
 
-    if (Uargs->RE$Buf_size <= 0)
+    if (Uargs->re$buf_size <= 0)
 	{
 	USER$Err(Uargs,NET$_BTS);
 	return;
 	};
 
     if (TCB->user_timeout != 0)
-	TCB->User_Timeout = TCB->User_timeval + Time_stamp();
+	TCB->user_timeout = TCB->user_timeval + Time_stamp();
 
 	switch (TCB->state)
 {
@@ -1233,7 +1242,7 @@ break;
 // If network data available then deliver it to the user.
 
 	Queue_Receive_Request(TCB,Uargs); // Must maintain FIFO queue.
-	if (TCB->rcv_q_Count > 0)
+	if (TCB->rcv_q_count > 0)
 	    TCP$Deliver_User_Data(TCB);
 
 // If FIN_RCVD set, we are in FIN-WAIT-2 waiting for pending data to be
@@ -1245,7 +1254,7 @@ break;
 	    if (! TCB->close_nowait)
 		{
 		TCP$Post_User_Close_IO_Status(TCB,SS$_NORMAL);
-		TCB->time_wait_timer = Time_Stamp() + Max_Seg_LifeTime;
+		TCB->time_wait_timer = Time_Stamp() + MAX_SEG_LIFETIME;
 		}
 	    else
 		{
@@ -1366,14 +1375,14 @@ void Queue_Send_Data(Uargs,TCB)
 
 // Append as much user data as we can to the queue.
 
-    Uaddr = Uargs->SE$Data_Start;
-    Ucount = Uargs->SE$Buf_Size;
+    Uaddr = Uargs->se$data_start;
+    Ucount = Uargs->se$buf_size;
     if ((TCB->snd_q_count+TCB->srx_q_count) < TCB->snd_q_size)
 	{
 
 // Enqueue as much as we can.
 
-	TCP$Send_Enqueue(TCB,Ucount,Uaddr,Uargs->SE$EOL);
+	TCP$Send_Enqueue(TCB,Ucount,Uaddr,Uargs->se$eol);
 	if (Ucount == 0)
 	    {
 
@@ -1399,8 +1408,8 @@ void Queue_Send_Data(Uargs,TCB)
 
 //~~~ This may not be used any more - check
 
-	if (TCB->User_timeval != 0)
-	    QB->sn$timeout = TCB->user_timeval + Time_Stamp()
+	if (TCB->user_timeval != 0)
+	  QB->sn$timeout = TCB->user_timeval + Time_Stamp();
 	else
 	    QB->sn$timeout = CONN_TIMEVAL + Time_Stamp();
 
@@ -1409,7 +1418,7 @@ void Queue_Send_Data(Uargs,TCB)
 
 // Flag we have user data which needs to be sent over the network.
 
-    TCB->Data_2_Send = True;
+    TCB->data_2_send = TRUE;
     }
 
 //SBTTL "TCP$SEND: User call to send data over network"
@@ -1459,45 +1468,47 @@ void TCP$SEND(struct user_send_args * Uargs)
     register
 	struct tcb_structure * TCB;
 
-    if ((TCB=TCB_OK(Uargs->SE$Local_Conn_ID,RC,Uargs)) == 0)
+    if ((TCB=TCB_OK(Uargs->se$local_conn_id,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Connection does not exist.
 	return;
 	};
 
     XLOG$FAO(LOG$USER,"!%T TCP$SEND: Conn=!XL, TCB=!XL, Size=!SL!/",
-		0,Uargs->SE$Local_Conn_ID,TCB,Uargs->SE$Buf_size);
+		0,Uargs->se$local_conn_id,TCB,Uargs->se$buf_size);
 
-    if (TCB->User_timeout != 0)
-	TCB->User_TimeOut = TCB->User_Timeval + Time_Stamp();
+    if (TCB->user_timeout != 0)
+	TCB->user_timeout = TCB->user_timeval + Time_Stamp();
 
-    SELECTONE TCB->State OF
-    SET
-    [CS$NAMELOOK]:
+    switch (TCB->state)
+      {
+    case CS$NAMELOOK:
 	USER$Err(Uargs,NET$_NOADR); // Connection not yet open
+	break;
 
-    [CS$Listen]:
+    case CS$LISTEN:
 	{
-	if ((TCB->foreign_host == Wild) || (TCB->foreign_port == Wild))
-	    USER$Err(Uargs,NET$_FSU) // Foreign Socket unspecified.
+	if ((TCB->foreign_host == WILD) || (TCB->foreign_port == WILD))
+	    USER$Err(Uargs,NET$_FSU); // Foreign Socket unspecified.
 	else
 	    {
-	    TCB->Active_Open = True; // change connection  passive --> active
+	    TCB->active_open = TRUE; // change connection  passive --> active
 	    if (! Send_SYN(TCB)) // Try to initiate open...
-		USER$Err(Uargs,NET$_NRT) // No route to host
+		USER$Err(Uargs,NET$_NRT); // No route to host
 	    else
 		{
 		Queue_Send_Data(Uargs,TCB); // Always have data.
-		TCP$SET_TCB_STATE(TCB,CS$SYN_Sent);
+		TCP$SET_TCB_STATE(TCB,CS$SYN_SENT);
 		};
 	    };
 	};
+	break;
 
-    [CS$SYN_Sent,CS$SYN_RECV,CS$Close_Wait,CS$Established]:
+    case CS$SYN_SENT: case CS$SYN_RECV: case CS$CLOSE_WAIT: case CS$ESTABLISHED:
 	Queue_Send_Data(Uargs,TCB);
-
+	break;
 /*~~~~~ Don't do SEND_DATA here - main processing loop can handle it
-    [CS$Close_Wait,CS$Established]:
+    case CS$CLOSE_WAIT: case CS$ESTABLISHED:
 	{
 
 // Queue the SEND request to maintain the FIFO ordering.
@@ -1505,11 +1516,13 @@ void TCP$SEND(struct user_send_args * Uargs)
 	Queue_Send_Data(Uargs,TCB);
 	Send_Data(TCB);
 	};
+	break;
 ~~~~~*/
 
-    [CS$Fin_Wait_1,CS$Fin_Wait_2,CS$Time_Wait,CS$Closing,CS$Last_Ack]:
+    case CS$FIN_WAIT_1: case CS$FIN_WAIT_2: case CS$TIME_WAIT: case CS$CLOSING: case CS$LAST_ACK:
 	USER$Err(Uargs,NET$_CC);	// Connection Closed.
-    TES;
+	break;
+      }
     }
 
 //SBTTL "User Call: (TCP$CLOSE) CLOSE a network connection"
@@ -1543,18 +1556,18 @@ void TCP$CLOSE(struct user_close_args * Uargs)
     register
 	struct tcb_structure * TCB;
 
-    if ((TCB=TCB_OK(Uargs->CL$Local_Conn_ID,RC,Uargs)) == 0)
+    if ((TCB=TCB_OK(Uargs->cl$local_conn_id,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Connection Does NOT exist.
 	return;
 	};
 
     XLOG$FAO(LOG$USER,"!%T TCP$CLOSE: conn=!XL, TCB=!XL!/",
-	     0,Uargs->CL$Local_Conn_ID,TCB);
+	     0,Uargs->cl$local_conn_id,TCB);
 
 // Set close mode
 
-    TCB->Close_NoWait = Uargs->CL$NoWait;
+    TCB->close_nowait = Uargs->cl$nowait;
 
 // Initiate close at TCP level.
 
@@ -1567,13 +1580,13 @@ void TCP$CLOSE(struct user_close_args * Uargs)
 
 // If this close can complete now, post user else remember Uargs for later.
 
-    IF (XTCB == 0) || (TCB->Close_NoWait) || (TCB->is_aborted) OR
-       (TCB->State == CS$Time_Wait) THEN
-	USER$Post_Function_OK(Uargs)
+    if ((XTCB == 0) || (TCB->close_nowait) || (TCB->is_aborted) ||
+	(TCB->state == CS$TIME_WAIT))
+      USER$Post_Function_OK(Uargs);
     else
 	{
-	TCB->pending_io = True;
-	TCB->Curr_User_Function = U$CLOSE;
+	TCB->pending_io = TRUE;
+	TCB->curr_user_function = U$CLOSE;
 	TCB->function_timer = Time_Stamp() + CLOSE_TIMEOUT;
 	TCB->argblk = Uargs;
 	};
@@ -1618,23 +1631,22 @@ Side Effects:
 
 
 void TCP$Post_User_Close_IO_Status(struct tcb_structure * TCB,
-					 VMS_RC)
+					 signed long VMS_RC)
     {
     register
 	struct User_close_args * Uargs;
-    signed long
-	IOSB: NetIO_status_Block;
+	 netio_status_block iosb, *IOSB=&iosb;
 
 // Check for pending_io flagged...
 
     if (TCB->pending_io)
 	{
-	TCB->pending_io = False;
+	TCB->pending_io = FALSE;
 	if (TCB->argblk == 0)
 	    return;
 	IOSB->nsb$byte_count = 0;
 	IOSB->nsb$status = VMS_RC;
-	IOSB->nsb$xstatus = 0;
+	IOSB->net_status.nsb$xstatus = 0;
 	Uargs = TCB->argblk;	// point at user's TCP arg block.
 	IO$POST(IOSB,Uargs);
 	MM$UArg_Free(Uargs);	// Free user arg blk memory.
@@ -1674,8 +1686,8 @@ void TCP$TCB_Init(TCB)
 // ptrs & counters.
 
     TCB->snd_nxt = TCB->snd_una = TCB->iss = ISN_GEN();
-    TCB->snd_wnd = TCB->rcv_wnd = Window_Default;
-    TCB->snd_ack_Threshold = ACK_Threshold ;
+    TCB->snd_wnd = TCB->rcv_wnd = window_default;
+    TCB->snd_ack_threshold = ack_threshold ;
     TCB->tcb$flags = FALSE;	// clear all flags
 //    TCB->max_seg_data_size = Default_Data_Size; // default: max data per seg
 //   TCB->max_eff_data_size = Default_Data_Size; // default: max data per seg
@@ -1689,7 +1701,7 @@ void TCP$TCB_Init(TCB)
     TCB->rf_qhead = TCB->rf_qtail = TCB->rf_qhead; // Received future segments.
     TCB->snd_qhead = TCB->snd_qtail = TCB->snd_qhead; // Segment send.
     TCB->ur_qhead = TCB->ur_qtail = TCB->ur_qhead; // user receive request.
-    TCB->state = TCB->last_state = CS$Closed; // Set a known Connection state.
+    TCB->state = TCB->last_state = CS$CLOSED; // Set a known Connection state.
 
 // Initialize circular queue pointers. TCB$Create already set queue addresses.
 // Note that the "retransmission queue" is a clone of the send queue, and only
@@ -1714,10 +1726,10 @@ void TCP$TCB_Init(TCB)
 // timeout expires, the connection is assumed dead and is aborted.
 
     TCB->connection_timeout = CONN_TIMEVAL + Time_Stamp();
-    TCB->round_trip_time = Base_RT_TimeOut; // base for round trip timer.
-    TCB->calculated_rto = Base_RT_TimeOut; // Initial retransmission timer
-    TCB->snd_delay_timer	=	Base_RT_TimeOut + Time_Stamp() ;
-    TCB->delayed_ack_timer	=	Base_RT_TimeOut + Time_Stamp() ;
+    TCB->round_trip_time = BASE_RT_TIMEOUT; // base for round trip timer.
+    TCB->calculated_rto = BASE_RT_TIMEOUT; // Initial retransmission timer
+    TCB->snd_delay_timer	=	BASE_RT_TIMEOUT + Time_Stamp() ;
+    TCB->delayed_ack_timer	=	BASE_RT_TIMEOUT + Time_Stamp() ;
     XLOG$FAO(LOG$TCP,"!%T TCB_INIT TCB !XL!/",0,TCB);
     }
 
@@ -1750,39 +1762,38 @@ Side Effects:
 void    TCP_NMLOOK_DONE();
 void    TCP$Adlook_Done();
 
-extern  void    NML$GETALST(),
+extern  void    NML$GETALST();
 extern void    NML$GETNAME();
 
-void TCP$OPEN(struct User_open_args * Uargs)
+void TCP$OPEN(struct user_open_args * Uargs)
     {
     register
-    struct IPADR$Address_Block * ProtoHdr,
+      ipadr$address_block * ProtoHdr;
+    register
 	struct tcb_structure * TCB;
     signed long
-	Args : VECTOR[4],
+	Args[4],
 	HostWild,
-	Ucbptr,
+	ucbptr,
 	LP,
 	FP,
 	IPADDR;
-    LABEL
-	X;
 
     XLOG$FAO(LOG$USER,"!%T TCP$OPEN: PID=!XL,CHAN=!XL,FLAGS=!XL!/",
-	     0,Uargs->OP$PID,Uargs->OP$PIOChan,Uargs->OP$FLAGS);
+	     0,Uargs->op$pid,Uargs->op$piochan,Uargs->op$flags);
 
-    ProtoHdr = Uargs->OP$ProtoHdrBLK;
+    ProtoHdr = Uargs->op$protohdrblk;
 
 // Handle easy errors before creating TCB, etc...
 
-    HostWild = (! Uargs->OP$ADDR_FLAG) && 
-	       (CH$RCHAR(CH$PTR(Uargs->OP$foreign_host)) == WILD);
-    if (Uargs->OP$Active_Open)
+    HostWild = (! Uargs->op$addr_flag) && 
+	       (CH$RCHAR(CH$PTR(Uargs->op$foreign_host)) == WILD);
+    if (Uargs->op$active_open)
 	{			// Active case
 
 // For active open, wildcard foreign host or foreign port makes no sense.
 
-	if (HostWild || (ProtoHdr->IPADR$Dst_Port == Wild))
+	if (HostWild || (ProtoHdr->ipadr$dst_port == WILD))
 	    {
 	    USER$Err(Uargs,NET$_FSU);
 	    return;
@@ -1793,7 +1804,7 @@ void TCP$OPEN(struct User_open_args * Uargs)
 
 // For passive open, wildcard local port makes no sense...
 
-	if (ProtoHdr->IPADR$Src_Port == WILD)
+	if (ProtoHdr->ipadr$src_port == WILD)
 	    {
 	    USER$Err(Uargs,NET$_ILP);
 	    return;
@@ -1802,7 +1813,7 @@ void TCP$OPEN(struct User_open_args * Uargs)
 
 // Create a TCB (Transmission Control Blk) for this connection
 
-    if ((TCB = TCB$Create()) == Error)
+    if ((TCB = TCB$Create()) == ERROR)
 	{
 	USER$Err(Uargs,NET$_UCT);// Error: Unable to create TCB.
 	return;			// punt
@@ -1820,13 +1831,13 @@ void TCP$OPEN(struct User_open_args * Uargs)
 // the upper-level routine to determine this, so it can give a reasonable
 // error code to the user.
 
-    TCB->Active_OPEN = Uargs->OP$Active_Open;
-    TCB->Open_NoWait = Uargs->OP$NoWait;
-    LP = ProtoHdr->IPADR$Src_Port ;
-    FP = ProtoHdr->IPADR$Dst_Port ;
-    TCB->Local_Port = (LP && %X"FFFF") ;
-    TCB->foreign_port = (FP && %X"FFFF") ;
-    TCB->UCB_ADRS = Uargs->OP$UCB_Adrs;
+    TCB->active_open = Uargs->op$active_open;
+    TCB->open_nowait = Uargs->op$nowait;
+    LP = ProtoHdr->ipadr$src_port ;
+    FP = ProtoHdr->ipadr$dst_port ;
+    TCB->local_port = (LP && 0xFFFF) ;
+    TCB->foreign_port = (FP && 0xFFFF) ;
+    TCB->ucb_adrs = Uargs->op$ucb_adrs;
 
 // Set user specified connection time-out in seconds.
 // TCB->User_timeout is a timeout for idle connections at the user level.
@@ -1835,21 +1846,24 @@ void TCP$OPEN(struct User_open_args * Uargs)
 //	handling is performed, otherwise this value is saved in the cell
 //	TCB->user_timeval and is used to compute this idle timeout.
 
-    TCB->User_Timeval = Uargs->op$timeout*csec;
-    if (TCB->User_Timeval != 0)
-	TCB->User_timeout = TCB->User_timeval + Time_Stamp()
+    TCB->user_timeval = Uargs->op$timeout*CSEC;
+    if (TCB->user_timeval != 0)
+      TCB->user_timeout = TCB->user_timeval + Time_Stamp();
     else
-	TCB->User_timeout = 0;
+	TCB->user_timeout = 0;
 // Reset the TCP connection timeout for passive open case
-    if (! TCB->Active_OPEN)
-        TCB->connection_timeout = Time_Stamp() + Passive_OPEN_TimeOut;
-    TCB->User_ID = Uargs->OP$PID;
-    TCB->Process_IO_Chan = Uargs->OP$PIOchan; // user's IO channel.
+    if (! TCB->active_open)
+        TCB->connection_timeout = Time_Stamp() + PASSIVE_OPEN_TIMEOUT;
+    TCB->user_id = Uargs->op$pid;
+    TCB->process_io_chan = Uargs->op$piochan; // user's IO channel.
 
 // Setup TCB ID in UCB - move 4-byte TCB index into system UCB
 
-    ucbptr = Uargs->OP$UCB_Adrs + UCB$L_CBID;
-    $$KCALL(MOVBYT,4,TCB->VTCB_INDEX,ucbptr);
+    ucbptr = Uargs->op$ucb_adrs + UCB$L_CBID;
+#if 0
+	// check wait
+    $$KCALL(MOVBYT,4,TCB->vtcb_index,ucbptr);
+#endif
 
 // Remember Uargs for TCP_NMLOOK_DONE
 
@@ -1859,8 +1873,8 @@ void TCP$OPEN(struct User_open_args * Uargs)
 
     if (HostWild)
 	{
-	TCB->foreign_host = Wild;
-//	TCB->local_host = Wild;
+	TCB->foreign_host = WILD;
+//	TCB->local_host = WILD;
         TCB->pending_io = TRUE;                 //[VU] Satisfy new validity test
     	TCP_NMLOOK_DONE(TCB,SS$_NORMAL,0,0,0,0);
 	return;
@@ -1869,35 +1883,36 @@ void TCP$OPEN(struct User_open_args * Uargs)
 // Check for user open with IP address.
 
 X:  {			// *** Block X ***
-    if (Uargs->OP$Addr_Flag)
-	IPADDR = Uargs->OP$Foreign_Address
+    if (Uargs->op$addr_flag)
+      IPADDR = Uargs->op$foreign_address;
     else
 	{
 	signed long
 	    NAMPTR;
-	NAMPTR = CH$PTR(Uargs->OP$foreign_host);
-	if (GET_IP_ADDR(NAMPTR,IPADDR) LSS 0)
-	    LEAVE X;
+	NAMPTR = CH$PTR(Uargs->op$foreign_host);
+	if (GET_IP_ADDR(NAMPTR,IPADDR) < 0)
+	goto leave;
         };
 
 // Have an IP address - finish the open now & start address translation
 
-    TCB->Foreign_Hnlen = 0;
+    TCB->foreign_hnlen = 0;
     TCB->pending_io = TRUE;                 //[VU] Satisfy new validity test
     TCP_NMLOOK_DONE(TCB,SS$_NORMAL,1,IPADDR,0,0);
-    TCB->NMlook_Flag = TRUE;
+    TCB->nmlook_flag = TRUE;
     NML$GETNAME(IPADDR,TCP$Adlook_Done,TCB);
     return;
     }			// *** Block X ***
+    leave:
 
 // Have a host name. Start name lookup which will finish the open when done.
 
-    TCB->State = CS$NAMELOOK;
+    TCB->state = CS$NAMELOOK;
     TCB->pending_io = TRUE;
-    TCB->Curr_User_Function = U$OPEN;
-    TCB->function_timer = Time_Stamp() + NameLook_Timeout;
-    TCB->NMLook_Flag = TRUE;
-    NML$GETALST(CH$PTR(Uargs->OP$foreign_host),Uargs->OP$Foreign_Hlen,
+    TCB->curr_user_function = U$OPEN;
+    TCB->function_timer = Time_Stamp() + NAMELOOK_TIMEOUT;
+    TCB->nmlook_flag = TRUE;
+    NML$GETALST(CH$PTR(Uargs->op$foreign_host),Uargs->op$foreign_hlen,
 		TCP_NMLOOK_DONE,TCB);
     }
 
@@ -1910,31 +1925,31 @@ X:  {			// *** Block X ***
 void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 	struct tcb_structure * TCB;
     {
+      struct user_open_args * Uargs;
     signed long
 	ISWILD,
-	struct User_open_args * Uargs,
 	OpenErr,
 	LP,
         Count,
 	CN_Index,
-	IOSB: NetIO_Status_Block,
-	OK;
+	ok;
+       netio_status_block iosb, *IOSB=&iosb;
 
    //[VU] Insure TCB valid before modifying.  This protects against case
    //[VU] where Service_Connections first times-out pending I/O functions
    //[VU] and later times-out and deletes the resulting inactive connection.
 
-    if (! VTCB_Indx_OK(TCB->VTCB_Index))
+    if (! VTCB_Indx_OK(TCB->vtcb_index))
 	{
-	WARN$FAO ("!%T VTCB Index out of range (!XL)",0,TCB->VTCB_Index);
-        return
+	WARN$FAO ("!%T VTCB Index out of range (!XL)",0,TCB->vtcb_index);
+        return;
 	};
 
 // Clear name lookup flag and pending name lookup I/O
 
     NOINT;
-    TCB->NMLook_Flag = FALSE;
-    OK = TCB->pending_io;     //[VU] Save for validity check.
+    TCB->nmlook_flag = FALSE;
+    ok = TCB->pending_io;     //[VU] Save for validity check.
     TCB->pending_io = FALSE;
     Uargs = TCB->argblk;
     TCB->argblk = 0;
@@ -1956,44 +1971,44 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
     //[VU] to support this validity test.  This should be safe since new sites
     //[VU] which set Pending_IO call TCP_NMLOOK_DONE immediately, which clears
     //[VU] the flag.
-    if (OK == 0) return;           //[VU] No pending I/O
+    if (ok == 0) return;           //[VU] No pending I/O
     if (Uargs == 0) return;        //[VU] No ARGBLK
 
 // Name lookup succeded. Set the host numbers and host name.
 
     if (ADRLST != 0)
 	{
-	IP$SET_HOSTS(ADRCNT,ADRLST,TCB->local_host,TCB->Foreign_host);
-	TCB->Foreign_Hnlen = NAMLEN;
+	IP$SET_HOSTS(ADRCNT,ADRLST,TCB->local_host,TCB->foreign_host);
+	TCB->foreign_hnlen = NAMLEN;
 	if (NAMLEN != 0)
-	    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(TCB->Foreign_Hname));
+	    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(TCB->foreign_hname));
 	};
 
 // Finish opening the connection
 
-    OK = OpenErr = False;
+    ok = OpenErr = FALSE;
 
 // Check access to the specified hosts/ports
 
-    OK = USER$CHECK_ACCESS(TCB->USER_ID,TCB->local_host,TCB->Local_Port,
+    ok = USER$CHECK_ACCESS(TCB->user_id,TCB->local_host,TCB->local_port,
 		      TCB->foreign_host,TCB->foreign_port);
-    if (! OK)
+    if (! ok)
 	{
 	TCB$Delete(TCB);
-	USER$Err(Uargs,OK);
+	USER$Err(Uargs,ok);
 	return;
 	};
 
 // Set current function for timeout
 
-    TCB->Curr_User_Function = U$OPEN;
+    TCB->curr_user_function = U$OPEN;
     NOINT;
-    if (TCB->Active_Open)
+    if (TCB->active_open)
 	{
 
 // Process an "ACTIVE" open.
 
-	if ((TCB->Local_Port != Wild))
+	if ((TCB->local_port != WILD))
 	    {		// user specified local port?
 
 // make sure it's a unique connection request.
@@ -2002,12 +2017,12 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 
 	    XLOG$FAO(LOG$USER,
 		     "!%T ACTIVE Open, LP = !XL (!UL), FP = !XL (!UL)!/",
-		     0,tcb->local_port,tcb->local_port,
-		     tcb->foreign_port,tcb->foreign_port);
+		     0,TCB->local_port,TCB->local_port,
+		     TCB->foreign_port,TCB->foreign_port);
 
-	    OK =Check_Unique_Conn(TCB->Local_Port, TCB->foreign_host,
+	    ok =Check_Unique_Conn(TCB->local_port, TCB->foreign_host,
 				   TCB->foreign_port, CN_Index);
-	    if (OK == Error)
+	    if (ok == ERROR)
 		{		// Error: Connection Tbl space Exhausted.
 		TCB$Delete(TCB);
 		USER$Err(Uargs,NET$_CSE);
@@ -2015,7 +2030,7 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 		return;
 		}
 	    else
-		if (! OK)
+		if (! ok)
 		    {	// Error: Non-Unique Connection
 		    TCB$Delete(TCB);
 		    USER$Err(Uargs,NET$_NUC);
@@ -2031,13 +2046,13 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 
 	    XLOG$FAO(LOG$USER,
 		     "!%T ACTIVE Open, wild LP, FP = !XL (!UL)!/",
-		     0,tcb->foreign_port,tcb->foreign_port);
-	    REPEAT
+		     0,TCB->foreign_port,TCB->foreign_port);
+	    do
 		{
 		LP = USER$GET_LOCAL_PORT(TCP_User_LP);
-		OK =Check_Unique_Conn(LP,TCB->foreign_host,
+		ok =Check_Unique_Conn(LP,TCB->foreign_host,
 				       TCB->foreign_port,CN_Index);
- 		if (OK == Error)
+ 		if (ok == ERROR)
 		    {	// Connection table Space Exhausted
 		    TCB$Delete(TCB);
 		    USER$Err(Uargs,NET$_CSE);
@@ -2045,8 +2060,8 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 		    return;
 		    }
 		}
-	    UNTIL (ok);
-	    TCB->Local_Port = (LP && %X"FFFF") ;
+	    while (!ok);
+	    TCB->local_port = (LP && 0xFFFF) ;
 	    };
 
 // Set initial state for active open
@@ -2058,18 +2073,18 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 	    OKINT;
 	    return;
 	    };
-	TCP$SET_TCB_STATE(TCB,CS$SYN_Sent);
+	TCP$SET_TCB_STATE(TCB,CS$SYN_SENT);
 
 // Set function timer for active open timeout
 
-	TCB->function_timer = Time_Stamp() + Active_OPEN_TimeOut;
+	TCB->function_timer = Time_Stamp() + ACTIVE_OPEN_TIMEOUT;
 	ts$aco = ts$aco + 1;
 	}
     else			// Passive Open
 	{
 	XLOG$FAO(LOG$USER,
 		 "!%T Passive open on LP=!XL (!UL), FP=!XL (!UL)!/",
-		 0,TCB->Local_Port,TCB->Local_Port,
+		 0,TCB->local_port,TCB->local_port,
 		 TCB->foreign_port,TCB->foreign_port);
 
 // Check for uniqueness of host/port set. This has the side effect of obtaining
@@ -2077,12 +2092,12 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 
 	ISWILD=(TCB->foreign_port == WILD) || (TCB->foreign_host == WILD);
 
-	OK =Check_Unique_Conn(TCB->Local_Port,TCB->foreign_host,
+	ok =Check_Unique_Conn(TCB->local_port,TCB->foreign_host,
 			       TCB->foreign_port,CN_Index);
 
 // OK = Error means that the connection table was full - punt.
 
-	if (OK == Error)
+	if (ok == ERROR)
 	    {
 	    TCB$Delete(TCB);
 	    USER$Err(Uargs,NET$_CSE);
@@ -2093,7 +2108,7 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 // OK = FALSE means the connection was non-unique. This is NOT an error if the
 // foreign host or port is wildcarded.
 
-	if ((! OK) && (! ISWILD))
+	if ((! ok) && (! ISWILD))
 	    {
 	    TCB$Delete(TCB);
 	    USER$Err(Uargs,NET$_NUC);
@@ -2103,36 +2118,36 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 
 // Set initial state for Passive Open
 
-	TCP$SET_TCB_STATE(TCB,CS$Listen);
+	TCP$SET_TCB_STATE(TCB,CS$LISTEN);
 
 // Indicate which function we're timing.
 
-	TCB->function_timer = Time_Stamp() + Passive_OPEN_TimeOut;
+	TCB->function_timer = Time_Stamp() + PASSIVE_OPEN_TIMEOUT;
 	ts$pco = ts$pco + 1; // count passive opens.
 	};
 
 // Save connection table index and insert into the connection table
 
-    TCB->Con_Index = CN_Index;
+    TCB->con_index = CN_Index;
     Conect_Insert(TCB,CN_Index);
     OKINT;
 	
 // Log successful open
 
     XLOG$FAO(LOG$USER,"!%T TCP$OPEN: Conn idx = !XL, TCB = !XL!/",
-	     0,TCB->VTCB_INDEX,TCB);
+	     0,TCB->vtcb_index,TCB);
 
 // Check for immediate-return mode
 
-    if (tcb->Open_NoWait)
+    if (TCB->open_nowait)
 	{
 
 // Return Local-Connection-ID (Actually the TCB's address).
 // 2nd fullword of the user's Net IO status block is the Local conn ID.
 
-	IOSB->NSB$STATUS = SS$_Normal; // indicate success.
-	IOSB->NSB$Byte_Count = 0;
-	IOSB->NSB$XSTATUS = 0;
+	IOSB->nsb$status = SS$_NORMAL; // indicate success.
+	IOSB->nsb$byte_count = 0;
+	IOSB->net_status.nsb$xstatus = 0;
 	IO$POST(IOSB,Uargs); // Tell em.
 	MM$UArg_Free(Uargs);	// Release user arg blk.
 	}
@@ -2142,15 +2157,15 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 // He wants to wait. Set up for I/O posting in SEGIN when connection becomes
 // established.
 
-	tcb->pending_io = True;	// indicate we have IO to post later.
-	tcb->argblk = Uargs;	// save pointer to user argument blk.
+	TCB->pending_io = TRUE;	// indicate we have IO to post later.
+	TCB->argblk = Uargs;	// save pointer to user argument blk.
 	};
 
 // Check SYN wait list for passive connection.
 // It is important that this step be done last, since the pending I/O
 // information must be set up for the callback to Post_User_Active_Open.
 
-    if (! TCB->Active_Open)
+    if (! TCB->active_open)
 	SEG$Check_SYN_Wait_List(TCB);
     }
 
@@ -2159,8 +2174,6 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 void TCP$ADLOOK_DONE(TCB,STATUS,NAMLEN,NAMPTR)
      struct tcb_structure * TCB;
     {
-    LABEL
-	X;
 
 // Check status
 
@@ -2168,15 +2181,15 @@ void TCP$ADLOOK_DONE(TCB,STATUS,NAMLEN,NAMPTR)
 	return;
 
 // Make sure the TCB is still valid
-    if ( ! VTCB_Indx_OK (TCB->VTCB_Index))
+    if ( ! VTCB_Indx_OK (TCB->vtcb_index))
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T ADLOOK-DONE for nonexist. TCB !XL!/",0,TCB);
-	return
+	return;
 	};
 
 // Make sure it is really waiting for this to happen...
 
-    if (! TCB->NMLook_Flag)
+    if (! TCB->nmlook_flag)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T ADLOOK-DONE unexpected for TCB !XL!/",0,TCB);
 	return;
@@ -2184,12 +2197,12 @@ void TCP$ADLOOK_DONE(TCB,STATUS,NAMLEN,NAMPTR)
 
 // Clear name lookup flag
 
-    TCB->NMLook_Flag = FALSE;
+    TCB->nmlook_flag = FALSE;
 
 // Copy the host name into the TCB
 
-    TCB->Foreign_Hnlen = NAMLEN;
-    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(TCB->Foreign_Hname));
+    TCB->foreign_hnlen = NAMLEN;
+    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(TCB->foreign_hname));
     }
 
 //Sbttl "Post Users Active Open User IO Status"
@@ -2230,13 +2243,12 @@ Side Effects:
 */
 
 
-TCP$Post_Active_Open_IO_Status(struct tcb_structure * TCB,
-					  VMS_RC): NOVALUE (void)
+void TCP$Post_Active_Open_IO_Status(struct tcb_structure * TCB,
+					  signed long VMS_RC)
     {
     register
 	struct user_open_args * Uargs;
-    signed long
-	IOSB: NetIO_status_Block;
+	netio_status_block iosb, *IOSB=&iosb;
 
     if (TCB->pending_io)
 	{
@@ -2245,12 +2257,11 @@ TCP$Post_Active_Open_IO_Status(struct tcb_structure * TCB,
 	    {
 	    IOSB->nsb$status = VMS_RC;
 	    IOSB->nsb$byte_count = 0;
-	    IOSB->nsb$xstatus = 0;
+	    IOSB->net_status.nsb$xstatus = 0;
 	    Uargs = TCB->argblk; // point at user's TCP arg block.
 	    IO$POST(IOSB,Uargs);
 	    MM$UArg_Free(Uargs);	// Free user arg blk memory.
 	    };
 	};
     }
-}
 

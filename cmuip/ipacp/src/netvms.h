@@ -11,4 +11,8 @@ struct queue_header_structure * si_qhead;
 struct queue_header_structure * si_qtail;
 };
 
+#define DESC$STR_ALLOC(x,y) /* check */ \
+char x##_str[y];\
+struct dsc$descriptor x##_act={dsc$w_length:y,dsc$a_pointer:x##_str}, *x = &x##_act
+
 #endif

@@ -317,7 +317,7 @@ struct connection_table_structure {
 
 //SBTTL 'Definition of structure for WKS server process table & SYN-wait list'
 
-struct  wk_server_structure {
+struct  wks_structure {
     long int WKS$Port;
     unsigned long long WKS$Process;		// ASCID descriptor.
     unsigned long long WKS$IMAGE;
@@ -334,5 +334,5 @@ struct  wk_server_structure {
   void * WKS$SYN_Qtail;
 };
 
-#define WKS_BLOCK_SIZE sizeof(struct  wk_server_structure)
+#define WKS_BLOCK_SIZE sizeof(struct  wks_structure)
 #define WKS_TABLE_SIZE 20

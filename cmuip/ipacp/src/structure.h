@@ -480,7 +480,7 @@ struct user_recv_args
 
 // User Call: CLOSE
 
-struct u$close_fields
+struct user_close_args
 {
   Static_Fields(cl);			// Define the standard fields
   union {
@@ -494,7 +494,7 @@ struct u$close_fields
   void *    cl$local_conn_id;	// Connection ID
 };
 
-#define    Close_Arg_Length sizeof(struct U$Close_Fields)
+#define    CLOSE_ARG_LENGTH sizeof(struct user_close_args)
 
 // User Call: STATUS
 
