@@ -94,7 +94,7 @@ void __free_pte(pte_t pte)
 		return;
 	if (pte_dirty(pte))
 		set_page_dirty(page);		
-	free_page_and_swap_cache(page);
+	//	free_page_and_swap_cache(page);
 }
 
 
@@ -1010,7 +1010,7 @@ static inline void break_cow(struct _rde * vma, struct page * new_page, unsigned
 		if (PageReserved(old_page))
 			++mm->rss;
 		break_cow(vma, new_page, address, page_table);
-		lru_cache_add(new_page);
+		//lru_cache_add(new_page);
 
 		/* Free the old page.. */
 		new_page = old_page;
@@ -1241,7 +1241,7 @@ static int do_anonymous_page(struct mm_struct * mm, struct _rde * vma, pte_t *pa
 		mm->rss++;
 		flush_page_to_ram(page);
 		entry = pte_mkwrite(pte_mkdirty(mk_pte(page, (x_to_prot(vma->rde$r_regprot.regprt$l_region_prot)))));
-		lru_cache_add(page);
+		//lru_cache_add(page);
 		mark_page_accessed(page);
 	}
 
@@ -1299,7 +1299,7 @@ static int do_no_page(struct mm_struct * mm, struct _rde * vma,
 		}
 		copy_user_highpage(page, new_page, address);
 		page_cache_release(new_page);
-		lru_cache_add(page);
+		//lru_cache_add(page);
 		new_page = page;
 	}
 
