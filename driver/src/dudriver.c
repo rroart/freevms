@@ -233,7 +233,7 @@ void du_dg(void * packet, struct _cdt * c, struct _pdt * p) {
   struct _cdrp * cdrp = rd->rd$l_cdrp;
   struct _irp dummyirp;
   struct _irp * irp = ((unsigned long)cdrp)-((unsigned long)((unsigned long)&dummyirp.irp$l_fqfl-(unsigned long)&dummyirp));
-  struct _acb * a=vmalloc(sizeof(struct _acb));
+  struct _acb * a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
   bzero(a,sizeof(struct _acb));
 
   if (ppd->ppd$b_opc==PPD$C_SNDDAT) {
