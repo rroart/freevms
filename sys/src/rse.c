@@ -11,10 +11,6 @@
 #include"../../freevms/lib/src/statedef.h"
 #include"../../freevms/lib/src/cpudef.h"
 
-/* don't want to recompile all yet */
-#define        PCB$M_INQUAN    0x8
-#define PCB$M_WAKEPEN   0x1000
-
 extern int mydebug;
 
 int sch$qend(struct _pcb * p) {

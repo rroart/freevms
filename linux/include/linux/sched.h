@@ -27,6 +27,8 @@ extern unsigned long event;
 #include <linux/securebits.h>
 #include <linux/fs_struct.h>
 
+#include "../../freevms/lib/src/pcbdef.h"
+
 struct exec_domain;
 
 /*
@@ -321,10 +323,11 @@ struct task_struct {
   unsigned long pcb$l_efcs;            
   unsigned long pcb$l_efcu;            
   unsigned long pcb$l_efc2p;            
+  unsigned long pcb$l_efc3p;            
+  /* why do the next 3 overlap with efc? */
   unsigned short pcb$w_pgflchar;
   unsigned char pcb$b_pgflindex;
   unsigned char pcb$reserved1;
-  unsigned long pcb$l_efc3p;            
   unsigned long pcb$l_pid;             
   unsigned long pcb$l_epid;             
   unsigned long pcb$l_eowner;

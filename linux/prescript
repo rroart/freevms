@@ -10,6 +10,9 @@ done
 		ln -s ../../freevms/sys/src/rse.c .;
 		ln -s ../../freevms/sys/src/system_data_cells.c .;
 		ln -s ../../freevms/sys/src/timeschdl.c .;
+		ln -s ../../freevms/sys/src/exsubrout.c .;
+		ln -s ../../freevms/sys/src/syswait.c .;
+		ln -s ../../freevms/sys/src/exception_init.c .;
 		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
 )
 

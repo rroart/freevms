@@ -4,6 +4,9 @@
 struct iosb { unsigned short iostat; unsigned short iolen; unsigned int device_info; 
 };
 
+struct _iosb { unsigned short iostat; unsigned short iolen; unsigned int device_info; 
+};
+
 struct item_list_2 { short complen, item_code;
          void *compaddr;
 };

@@ -1,5 +1,5 @@
-# $Id$
-# $Locker$
+// $Id$
+// $Locker$
 
 #ifndef pcbdef_h
 #define pcbdef_h
@@ -130,6 +130,7 @@
 #define	KTB$C_LENGTH	952
 #define	KTB$S_KTBDEF	952 
  
+/* do not use this */
 struct pcb {
   struct pcb *pcb$l_sqfl;            
   struct pcb *pcb$l_sqbl;            
@@ -349,14 +350,14 @@ struct pcb {
       unsigned pcb$v_psx_flags_fill : 31;
     } pcb$r_fill_15_;
   } pcb$r_fill_14_;
-  void (*pcb$l_psx_actrtn)();         
+  void (*pcb$l_psx_actrtn)(void);         
   unsigned long pcb$q_psx_actprm;  
   unsigned int pcb$l_kernel_counter;  
   unsigned int pcb$l_exec_counter;    
   unsigned int pcb$l_super_counter;   
   unsigned int pcb$l_user_counter;    
   unsigned int pcb$l_sched_policy;    
-  int (*pcb$a_frewsle_callout)();     
+  int (*pcb$a_frewsle_callout)(void);     
   union  {
     unsigned int pcb$l_frewsle_param; 
     int pcb$l_pqb;                  
