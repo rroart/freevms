@@ -1,5 +1,6 @@
 #include"../../freevms/pal/src/queue.h"
 #include "../../freevms/sys/src/asmlink.h"
+#include "../../freevms/lib/src/pridef.h"
 #include <linux/linkage.h>
 #include <linux/sched.h>
 
@@ -79,27 +80,43 @@ void exe$timeout(void) {
   printk("exe$timeout\n");
 }
 
+extern int vmstimerconf;
+
+void printtq(struct _tqe * t) {
+  printk("%x %x %x %x\n",t,t->tqe$l_tqfl,t->tqe$q_delta,t->tqe$q_time);
+}
+
 asmlinkage void exe$swtimint(void) {
+  static signed int times=0;
+  times++;
   if (current->phd$w_quant>=0 && current->phd$w_quant<128) 
     sch$qend(current);
+  //  printk(".");
   /* check tqe from EXE$GL_TQFL */
   if (smp_processor_id()==0) {
-    if (exe$gq_systime>=exe$gq_1st_time) {
+    if (vmstimerconf && exe$gq_systime>=exe$gq_1st_time) {
       struct _tqe * t, * dummy;
       //    printk(".");
-      t=remque(exe$gl_tqfl,dummy);
+      //if (times>=0 && times<5)   printtq(exe$gl_tqfl);
+      //if (times>=0 && times<5)   printtq(exe$gl_tqfl->tqe$l_tqfl);
+      t=remque(exe$gl_tqfl->tqe$l_tqfl,dummy);
+      //if (times>=0 && times<5)   printtq(t);
+      //if (times>=0 && times<5)   printtq(exe$gl_tqfl);
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_TMSNGL) {
-	void (*f)(void);
-	f=t->tqe$l_fpc;
+	sch$postef(t->tqe$l_pid,PRI$_TIMER,t->tqe$b_efn);
+	sch$qast(t->tqe$l_pid,PRI$_TIMER,(struct _acb *) t);
+	//	void (*f)(void);
+	//	f=t->tqe$l_fpc;
+	//	if (f) f();
 	//	printk("herexxx\n");
 	//		printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
       }
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_SSSNGL) {
 	void (*f)(void);
 	f=t->tqe$l_fpc;
-		printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
-	f();
-		printk(KERN_EMERG "after f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
+	//		printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
+	if (f) f();
+	//		printk(KERN_EMERG "after f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
       }
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_WKSNGL) {
 	void (*f)(void);
@@ -108,12 +125,37 @@ asmlinkage void exe$swtimint(void) {
       }
       if (t->tqe$b_rqtype & TQE$M_REPEAT) {
 	t->tqe$q_time=exe$gq_systime+t->tqe$q_delta;
+	//	if (times>=0 && times<5) printk("i\n");
+	//      if (times>=0 && times<5)   printtq(t);
+	//if (times>=0 && times<5)   printtq(exe$gl_tqfl);
+	//	printk(":");
+	if (times>1000 && times<1200) {
+	  printtq(t);
+	  printtq(exe$gl_tqfl);
+	  printtq(exe$gl_tqfl->tqe$l_tqfl);
+	  printtq(exe$gl_tqfl->tqe$l_tqfl->tqe$l_tqfl);
+	}
 	exe$instimq(t);
+	if (times>1000 && times<1200) {
+	  printtq(t);
+	  printtq(exe$gl_tqfl);
+	  printtq(exe$gl_tqfl->tqe$l_tqfl);
+	  printtq(exe$gl_tqfl->tqe$l_tqfl->tqe$l_tqfl);
+	  printk("i");
+	}
+	//printk(";");
+	//if (times>=0 && times<5)   printtq(t);
+	//if (times>=0 && times<5)   printtq(exe$gl_tqfl);
+	//if (times>=0 && times<5) printk("i\n");
 	//	insque(t,exe$gl_tqfl); /* move this to a sort */
       }
-      exe$gq_1st_time=exe$gl_tqfl->tqe$q_time;
+      exe$gq_1st_time=exe$gl_tqfl->tqe$l_tqfl->tqe$q_time;
     }
   }
+  //	if (times==4) { unsigned long long i=1;
+  //	cli();
+  //	for(i=1;i!=0;i++) ;}
+  //printk(",");
 }
 
 /* vax has 100 Hz clock interrupts. Quantum is in those 10 ns units */

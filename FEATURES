@@ -1,0 +1,25 @@
+partly VMS-style scheduling
+
+syscalls:
+$asctim
+$bintim
+$dclast
+$gettim
+$numtim
+$setpri
+$setprn
+$setimr
+$setime
+
+cli:
+DCL
+
+utilities:
+backup
+set process
+
+librtl:
+strings routines
+
+loader:
+srm

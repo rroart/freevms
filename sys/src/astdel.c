@@ -19,11 +19,15 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   }
   /* lck */
   insque(a,p->pcb$l_astqfl);
-  /* just simple insert , no pris */
+  /* just simple insert , no pris yet */
   if (p->pcb$w_state!=SCH$C_CUR)
     status=sch$rse(p, priclass, EVT$_AST);
   /* unlock */
   return status;
+}
+
+printast(struct _acb * acb) {
+  printk("acb %x %x %x %x\n",acb,acb->acb$l_pid,acb->acb$l_ast,acb->acb$l_astprm);
 }
 
 asmlinkage void sch$astdel(void) {
@@ -42,16 +46,18 @@ asmlinkage void sch$astdel(void) {
   for (j=0; j<20; j++) for (i=0; i<1000000000; i++) ;
   } */
   acb=remque(p->pcb$l_astqfl,dummy);
+  printk("here ast2 %x %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl,acb);
+  printast(acb);
   //  mydebug5=1;
   //  printk(KERN_EMERG "astdel %x\n",acb);
   if (acb->acb$b_rmod & ACB$V_KAST) {
     acb->acb$b_rmod&=~ACB$V_KAST;
     /* unlock */
-    //printk(KERN_EMERG "astdel1 %x \n",acb->acb$l_kast);
+    printk("astdel1 %x \n",acb->acb$l_kast);
     acb->acb$l_kast();
     goto more;
   }
-  //printk(KERN_EMERG "astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
+  printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
   acb->acb$l_ast(acb->acb$l_astprm); /* ? */
   /*unlock*/
 }

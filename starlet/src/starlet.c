@@ -67,7 +67,7 @@ int sys$setime  (unsigned long long  *timadr) {
   return INLINE_SYSCALL($setime,1,timadr);
 }
 
-int sys$setimr  (unsigned int efn, unsigned long long *daytim,
+int sys$setimr  (unsigned int efn, signed long long *daytim,
 		 void (*astadr)(long), unsigned
 		 long reqidt, unsigned int flags) {
   return INLINE_SYSCALL($setimr,5,efn,daytim,astadr,reqidt,flags);

@@ -127,7 +127,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
   //  SOFTINT_RESCHED_VECTOR; not yet?
   p2->pcb$w_state=SCH$C_COM;
   p2->state=TASK_RUNNING;
-  insque(p2,sch$aq_comt[newpri]);
+  if (!task_on_comqueue(p2)) insque(p2,sch$aq_comt[newpri]);
   sch$gl_comqs|=(1 << newpri);
 }
 

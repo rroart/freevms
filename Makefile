@@ -1,5 +1,5 @@
 SUBDIRS = starlet librtl cliutl backup pal
-SUBDIRS2 = dcl
+SUBDIRS2 = examples dcl
 
 all:
 	for X in $(SUBDIRS); do \

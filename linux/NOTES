@@ -22,3 +22,6 @@ VMS driver structures if you can use existing ones). Many VMS facilities
 can be done more cleanly with such layering than DEC ever did them
 with special purpose code all over the place.
 Meaning having DKDRIVER as layer, and not putting every driver in it?
+I am not sure all of the above I/O things can be done.
+
+Remember: bzero following alloc

@@ -19,7 +19,7 @@ int sys$clref  (unsigned int efn);
 
 int sys$setime  (unsigned long long  *timadr);
 
-int sys$setimr  (unsigned int efn, unsigned long long *daytim,
+int sys$setimr  (unsigned int efn, signed long long *daytim,
 		 void (*astadr)(long), unsigned
 		 long reqidt, unsigned int flags);
 

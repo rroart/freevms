@@ -555,6 +555,7 @@ unsigned long exe$gl_timeadjust;
 unsigned long exe$gl_tmv_svabuf;
 unsigned long exe$gl_tmv_svapte;
 struct _tqe * exe$gl_tqfl;
+unsigned long long tqehead;
 unsigned long exe$gl_transition_year;
 unsigned long exe$gl_ubdelay;
 unsigned long exe$gl_unicode_upcase_version;
@@ -1896,7 +1897,7 @@ unsigned long xqp$gl_sections;
 struct lnmhshs lnmhshs; /* should be one struct, will be solved later */
 struct lnmhshp lnmhshp;
 
-struct _tqe tqehead,tqe2;
+struct _tqe tqe,tqe2;
 
 struct _cpu vmscpus[32]; /* max. this number should be defined */
 
@@ -1907,6 +1908,8 @@ void qhead_init(void * l) {
   tmp->pcb$l_sqfl=tmp;
   tmp->pcb$l_sqbl=tmp;
 }
+
+int vmstimerconf=0;
 
 void __init vms_init(void) {
   int i,j;
@@ -1953,15 +1956,19 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   exe$gq_systime+=xtime.tv_sec;
   exe$gq_systime*=10000000;
 
-  exe$gl_tqfl=&tqehead;
-  exe$gl_tqfl->tqe$l_tqfl=exe$gl_tqfl; 
+  exe$gl_tqfl=(void *)&tqehead;
+  exe$gl_tqfl->tqe$l_tqfl=exe$gl_tqfl;
   exe$gl_tqfl->tqe$l_tqbl=exe$gl_tqfl;
-  exe$gl_tqfl->tqe$w_size=0;
-  exe$gl_tqfl->tqe$b_type=DYN$C_TQE;
-  exe$gl_tqfl->tqe$b_rqtype=TQE$C_TMSNGL|TQE$M_REPEAT; /* ???? */
-  exe$gl_tqfl->tqe$l_rqpid=0xffffffff;
-  exe$gl_tqfl->tqe$l_cputim=0xffffffff;
-  exe$gl_tqfl->tqe$q_time=0x4000000000000000;
+
+  tqe.tqe$l_tqfl=0;
+  tqe.tqe$l_tqbl=0;
+  tqe.tqe$w_size=0;
+  tqe.tqe$b_type=DYN$C_TQE;
+  tqe.tqe$b_rqtype=TQE$C_TMSNGL|TQE$M_REPEAT; /* ???? */
+  tqe.tqe$l_rqpid=0xffffffff;
+  tqe.tqe$l_cputim=0xffffffff;
+  tqe.tqe$q_time=0x4000000000000000;
+  insque(&tqe,exe$gl_tqfl);
 
   tqe2.tqe$l_tqfl=0;
   tqe2.tqe$l_tqbl=0;
@@ -1974,7 +1981,9 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   tqe2.tqe$q_time=0;
   tqe2.tqe$q_delta=10000000;
 
-  insque(&tqe2,exe$gl_tqfl);
+  exe$instimq(&tqe2);
+
+  vmstimerconf=1;
 
   qhead_init(&ioc$gq_postiq);
 
