@@ -28,7 +28,7 @@ struct lnmhshp lnmhshp;
 #include<sysgen.h> 
 #include<system_data_cells.h>
 #else
-#include<linux/vmalloc.h>
+#include<linux/mm.h>
 #include<starlet.h>
 #include<lnmdef.h>
 #include<ssdef.h>
@@ -144,10 +144,12 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
     mylnmx->lnmx$l_flags=LNMX$M_TERMINAL;
     mylnmx->lnmx$l_flags|=LNMX$M_XEND;
 
-    status=lnm$inslogtab(&ret,mylognam->dsc$w_length,mylognam->dsc$a_pointer,mylnmb);
+    status=lnm$inslogtab(&ret,mylnmb);
 
   }
   
+  setipl(0);
+  return status;
 }
 
 asmlinkage sys_$CRELNT();
@@ -205,6 +207,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
     lnmfree(trailer);
     /* unlock mutex */
     lnm$unlock();
+    setipl(0);
     return status;
   }
 
@@ -229,6 +232,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
       lnmfree(trailer);
       /* unlock mutex */
       lnm$unlock();
+      setipl(0);
       return SS$_NOPRIV;
     }
   }
@@ -241,6 +245,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
      lnmfree(trailer);
      unlock mutex 
      lnm$unlock();
+     setipl(0);
      return SS$_EXLNMQUOTA;
 
   */
@@ -263,6 +268,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   mylnmth->lnmth$l_flags=LNMTH$M_SHAREABLE|LNMTH$M_DIRECTORY;
   mylnmth->lnmth$l_name=mylnmb;
   mylnmth->lnmth$l_parent=ret.mylnmb;
+  mylnmth->lnmth$l_hash=ret.mylnmb->lnmb$l_table->lnmth$l_hash;
   mylnmth->lnmth$l_sibling=0;
   mylnmth->lnmth$l_child=0;
   mylnmth->lnmth$l_qtable=0;
@@ -272,7 +278,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   mylnmth->lnmth$l_bytes=0;
 
   lnmprintf("bef inslogtab %x %s\n",mylnmb->lnmb$b_count,mytabnam->dsc$a_pointer);
-  status=lnm$inslogtab(&ret,mylnmb->lnmb$b_count,mytabnam->dsc$a_pointer,mylnmb);
+  status=lnm$inslogtab(&ret,mylnmb);
   //  lnmprintf("exit here\n");
   //  exit(1);
   lnmprintf("so far %x\n",status);
@@ -280,6 +286,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   /* unlock mutex */
   lnm$unlock();
 
+  setipl(0);
   return status;
 }
 
@@ -315,13 +322,15 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
   status=lnm$searchlog(&ret,mylognam->dsc$w_length,mylognam->dsc$a_pointer,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
   if (status==SS$_NOLOGNAM || status!=SS$_NORMAL) {
     /* unlock mutex */
-    lnm$unlock();
+    lnm$unlock(); 
+    setipl(0);
     return status;
   }
   i->buflen=(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_xlen;
   bcopy((ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,i->bufaddr,i->buflen);
   lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
   lnm$unlock();
+  setipl(0);
   return status;
 }
 
