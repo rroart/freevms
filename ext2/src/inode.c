@@ -1005,17 +1005,14 @@ void ext2_read_inode (struct inode * inode)
 	else if (S_ISREG(inode->i_mode)) {
 		inode->i_op = &ext2_file_inode_operations;
 		inode->i_fop = &ext2_file_operations;
-		inode->i_mapping->a_ops = &ext2_aops;
 	} else if (S_ISDIR(inode->i_mode)) {
 		inode->i_op = &ext2_dir_inode_operations;
 		inode->i_fop = &ext2_dir_operations;
-		inode->i_mapping->a_ops = &ext2_aops;
 	} else if (S_ISLNK(inode->i_mode)) {
 		if (!inode->i_blocks)
 			inode->i_op = &ext2_fast_symlink_inode_operations;
 		else {
 			inode->i_op = &page_symlink_inode_operations;
-			inode->i_mapping->a_ops = &ext2_aops;
 		}
 	} else 
 		init_special_inode(inode, inode->i_mode,

@@ -101,7 +101,6 @@ static int ext2_create (struct inode * dir, struct dentry * dentry, int mode)
 	if (!IS_ERR(inode)) {
 		inode->i_op = &ext2_file_inode_operations;
 		inode->i_fop = &ext2_file_operations;
-		inode->i_mapping->a_ops = &ext2_aops;
 		//		mark_inode_dirty(inode);
 		ext2_sync_inode (inode);
 		err = ext2_add_nondir(dentry, inode);
@@ -141,7 +140,6 @@ static int ext2_symlink (struct inode * dir, struct dentry * dentry,
 	if (l > sizeof (inode->u.ext2_i.i_data)) {
 		/* slow symlink */
 		inode->i_op = &page_symlink_inode_operations;
-		inode->i_mapping->a_ops = &ext2_aops;
 		err = block_symlink(inode, symname, l);
 		if (err)
 			goto out_fail;
@@ -199,7 +197,6 @@ static int ext2_mkdir(struct inode * dir, struct dentry * dentry, int mode)
 
 	inode->i_op = &ext2_dir_inode_operations;
 	inode->i_fop = &ext2_dir_operations;
-	inode->i_mapping->a_ops = &ext2_aops;
 
 	ext2_inc_count(inode);
 
@@ -235,7 +232,7 @@ static int ext2_unlink(struct inode * dir, struct dentry *dentry)
 	if (!de)
 		goto out;
 
-	err = ext2_delete_entry (de, page);
+	err = ext2_delete_entry2 (de, page, dir);
 	if (err)
 		goto out;
 
@@ -318,7 +315,7 @@ static int ext2_rename (struct inode * old_dir, struct dentry * old_dentry,
 			ext2_inc_count(new_dir);
 	}
 
-	ext2_delete_entry (old_de, old_page);
+	ext2_delete_entry2 (old_de, old_page, old_inode);
 	ext2_dec_count(old_inode);
 
 	if (dir_de) {
