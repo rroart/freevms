@@ -768,7 +768,7 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
 	f->fat$b_rtype=FAT$C_SEQUENTIAL << 4;
 	f->fat$b_rattrib=0;
 	f->fat$w_rsize=0;
-	f->fat$l_hiblk=VMSSWAP(1+head->i_blocks*2);
+	f->fat$l_hiblk=VMSSWAP(1+head->i_blocks);
 	f->fat$l_efblk=VMSSWAP(1+head->i_size/512);
 	f->fat$w_ffbyte=head->i_size%512;
 	f->fat$b_bktsize=0;
