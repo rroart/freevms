@@ -13,6 +13,7 @@
 #include<descrip.h>
 #include<iodef.h>
 #include<iosbdef.h>
+#include<hrbdef.h>
 #include<irpdef.h>
 #include<misc.h>
 #include<mscpdef.h>
@@ -64,84 +65,149 @@ static in_workaround=0;
 
 void returnsome(struct _irp *i);
 
+unsigned long long hrbq = 0;
+
+void * find_hrb(int rspid) {
+  struct _hrb * head=&hrbq;
+  struct _hrb * tmp=head->hrb$l_flink;
+  while (tmp!=head) {
+    if (rspid==tmp->hrb$l_cmd_time) return tmp;
+    tmp=tmp->hrb$l_flink;
+  }
+  return 0;
+}
+
 int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
   int sts;
   struct _iosb * iosb=vmalloc(sizeof(struct _iosb));
   struct _cdrp * cdrp;
   struct _scs * scs = packet;
+  struct _scs1 * scs1 = scs;
+  struct _ppd * ppd = scs;
   struct _cdt * cdt = &cdtl[scs->scs$l_dst_conid];
   struct _mscp_basic_pkt * basic = ((unsigned long)packet) + sizeof(*scs);
+  void * next = basic;
   struct _transfer_commands * trans = basic;
   int chan=get_mscp_chan(cdt->cdt$l_condat);
-  unsigned long lbn=trans->mscp$l_lbn;
-  char * buf;
-#if 0
-  int savipl=setipl(0); // still something funny someplace
-  int savis=current->psl_is;
-  current->psl_is=0;
-  in_workaround=1;
-#endif
-  cdrp = vmalloc(sizeof(struct _cdrp));
-  bzero(cdrp,sizeof(struct _cdrp));
-  if (basic->mscp$b_opcode == MSCP$K_OP_WRITE) {
-    buf = trans + sizeof(*trans);
-    sts = sys$qiow(0,chan,IO$_WRITELBLK,iosb,0,0,buf,512,lbn,0,0,0);
-    basic->mscp$b_caa=basic->mscp$b_opcode;
-    basic->mscp$b_opcode = MSCP$K_OP_END;
-    cdrp->cdrp$w_cdrpsize=600;
-    cdrp->cdrp$l_cdt=c;
-    cdrp->cdrp$l_msg_buf=basic;
-    scs_std$senddg(0,0,cdrp);
+
+  if (hrbq==0) qhead_init(&hrbq);
+
+  switch (ppd->ppd$b_opc) {
+  case PPD$C_REQDAT:
+    goto read;
+    break;
+  case PPD$C_SNDDAT:
+    goto write;
+    break;
+  case PPD$C_SNDDG:
+    goto mscp;
+    break;
+  default:
+    panic("ppdopc\n");
+
   }
-  if (basic->mscp$b_opcode == MSCP$K_OP_READ) {
-    buf = vmalloc(1024);
-    trans = basic = buf;
-#if 0
-    sts = sys$qiow(0,chan,IO$_READLBLK,iosb,0,0,(unsigned long)buf+sizeof(*trans),512,lbn,0,0,0);
-#else
-    {
-      struct _irp * i=vmalloc(sizeof(struct _irp));
-      struct _ucb * u;
-      bzero(i,sizeof(struct _irp));
-      iosb->iosb$w_status=0;
-      i->irp$b_type=DYN$C_IRP;
-      i->irp$w_chan=chan;
-      i->irp$l_func=IO$_READLBLK;
-      i->irp$l_iosb=iosb;
-      i->irp$l_qio_p1=(unsigned long)buf+sizeof(*trans);
-      i->irp$l_qio_p2=512;
-      i->irp$l_qio_p3=lbn;
-      //printk("chan %x\n",chan);
-      u=ctl$gl_ccbbase[chan].ccb$l_ucb;
-      i->irp$l_ucb=u;
-      i->irp$l_pid=current->pid;
-      i->irp$l_sts|=IRP$M_BUFIO;
-      i->irp$l_astprm=i;
-      i->irp$l_ast=returnsome;
-      i->irp$l_cdt=c;
-      exe$insioq(i,u);
+
+ mscp:
+  {
+    unsigned long lbn=trans->mscp$l_lbn;
+    struct _hrb * hrb=vmalloc(sizeof(struct _hrb));
+    cdrp = vmalloc(sizeof(struct _cdrp));
+    bzero(cdrp,sizeof(struct _cdrp));
+    bzero(hrb,sizeof(struct _hrb));
+    hrb->hrb$l_lbn=lbn;
+    hrb->hrb$l_cmd_time=scs1->scs$l_rspid; // wrong, but have to have some id...
+    insque(hrb,&hrbq);
+    if (basic->mscp$b_opcode == MSCP$K_OP_WRITE) {
+      basic->mscp$b_opcode = MSCP$K_OP_END;
+      cdrp->cdrp$w_cdrpsize=600;
+      cdrp->cdrp$l_cdt=c;
+      cdrp->cdrp$l_msg_buf=basic;
+      cdrp->cdrp$l_xct_len=512;
+      //scs_std$senddg(0,600,cdrp);
     }
-#endif
+    if (basic->mscp$b_opcode == MSCP$K_OP_READ) {
+    }
   }
+  return;
+
+ read:
+  {
+    char * buf = vmalloc(1024);
+    struct _irp * i=vmalloc(sizeof(struct _irp));
+    struct _ucb * u;
+    struct _hrb * hrb = find_hrb(scs1->scs$l_rspid);
+    remque(hrb,hrb);
+    bzero(i,sizeof(struct _irp));
+    iosb->iosb$w_status=0;
+    i->irp$b_type=DYN$C_IRP;
+    i->irp$w_chan=chan;
+    i->irp$l_func=IO$_READLBLK;
+    i->irp$l_iosb=iosb;
+    i->irp$l_qio_p1=buf;
+    i->irp$l_qio_p2=512;
+    i->irp$l_qio_p3=hrb->hrb$l_lbn;
+    //printk("chan %x\n",chan);
+    u=ctl$gl_ccbbase[chan].ccb$l_ucb;
+    i->irp$l_ucb=u;
+    i->irp$l_pid=current->pid;
+    i->irp$l_sts|=IRP$M_BUFIO;
+    i->irp$l_astprm=i;
+    i->irp$l_ast=returnsome;
+    i->irp$l_cdt=c;
+    i->irp$l_rspid=scs1->scs$l_rspid;
+    exe$insioq(i,u);
+  }
+  return;
+ write:
+  {
+    struct _irp * i=vmalloc(sizeof(struct _irp));
+    struct _ucb * u;
+    struct _hrb * hrb = find_hrb(scs1->scs$l_rspid);
+    remque(hrb,hrb);
+    bzero(i,sizeof(struct _irp));
+    iosb->iosb$w_status=0;
+    i->irp$b_type=DYN$C_IRP;
+    i->irp$w_chan=chan;
+    i->irp$l_func=IO$_WRITELBLK;
+    i->irp$l_iosb=iosb;
+    i->irp$l_qio_p1=next;
+    i->irp$l_qio_p2=512;
+    i->irp$l_qio_p3=hrb->hrb$l_lbn;
+    //printk("chan %x\n",chan);
+    u=ctl$gl_ccbbase[chan].ccb$l_ucb;
+    i->irp$l_ucb=u;
+    i->irp$l_pid=current->pid;
+    i->irp$l_sts|=IRP$M_BUFIO;
+    i->irp$l_astprm=i;
+    i->irp$l_ast=returnsome;
+    i->irp$l_cdt=c;
+    i->irp$l_rspid=scs1->scs$l_rspid;
+    exe$insioq(i,u);
+  }
+  return;
 }
+
+extern struct _pdt dupdt;
 
 void returnsome(struct _irp * i) {
   struct _cdrp * cdrp = vmalloc(sizeof(struct _cdrp));
-  struct _mscp_basic_pkt * basic = vmalloc(1024);
+  struct _mscp_basic_pkt * basic = vmalloc(sizeof(struct _mscp_basic_pkt));
   bzero(cdrp,sizeof(struct _cdrp));
-  bzero(basic,1024);
-  basic->mscp$b_caa=MSCP$K_OP_READ;
+  bzero(basic,sizeof(struct _mscp_basic_pkt));
+  //basic->mscp$b_caa=MSCP$K_OP_READ;
   basic->mscp$b_opcode = MSCP$K_OP_END;
-  bcopy(i->irp$l_qio_p1,(unsigned long)basic + sizeof(struct _transfer_commands),512);
+  basic->mscp$l_cmd_ref=0;
+  //bcopy(i->irp$l_qio_p1,(unsigned long)basic + sizeof(struct _transfer_commands),512);
   cdrp->cdrp$w_cdrpsize=600;
+  cdrp->cdrp$l_rspid=i->irp$l_rspid;
   cdrp->cdrp$l_cdt=i->irp$l_cdt;
+  cdrp->cdrp$l_msg_buf=i->irp$l_qio_p1;
+  cdrp->cdrp$l_xct_len=512;
+  scs_std$senddata(&dupdt,cdrp,0);
+  return;
   cdrp->cdrp$l_msg_buf=basic;
-  scs_std$senddg(0,0,cdrp);
-#if 0
-  if (savis) current->psl_is=1;
-  setipl(savipl);
-  in_workaround=0;
-#endif
+  cdrp->cdrp$l_xct_len=sizeof(struct _mscp_basic_pkt);
+  scs_std$senddg(0,600,cdrp);
 }
 
 void mscpdaemonize() { }
@@ -153,7 +219,7 @@ int mscp(void) {
   mscpdaemonize(); /* find out what this does */
 
   //  listen(msgbuf,err,cdt,pdt,cdt);
-  scs$listen(mscplisten,mscpmyerr,myname,myinfo,0);
+  scs_std$listen(mscplisten,mscpmyerr,myname,myinfo,0);
 }
 
 

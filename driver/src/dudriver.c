@@ -28,6 +28,7 @@
 #include<scsdef.h>
 #include<ssdef.h>
 #include<ucbdef.h>
+#include<rddef.h>
 
 int acp_std$modify(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
@@ -54,7 +55,7 @@ int dumscp(void) {
   dudaemonize(); /* find out what this does */
   
   //  listen(msgbuf,err,cdt,pdt,cdt);
-  scs$listen(dulisten,dumyerr,myname,myinfo,0);
+  scs_std$listen(dulisten,dumyerr,myname,myinfo,0);
 }
 
 struct _pdt dupdt;
@@ -85,16 +86,20 @@ void  du_startio (struct _irp * i, struct _ucb * u) {
   if (1 || u->ucb$l_devchar2&DEV$M_CDP) { // does this anyway
     /* not local? */
     struct _cdrp * c;
+    struct _scs_rd *r;
     c=(struct _cdrp *) & i->irp$l_fqfl;
     c->cdrp$l_rwcptr=&u->ucb$w_rwaitcnt;
     c->cdrp$l_cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
-    c->cdrp$l_rspid=rspid_alloc(c);
+    c->cdrp$l_rspid=scs_std$alloc_rspid(0,0,c,0);
+    scs_std$find_rdte( c->cdrp$l_rspid, &r);
+    r->rd$l_cdrp=c;
     m=vmalloc(1000 /*sizeof(struct _transfer_commands)*/);
     bzero(m,1000 /*sizeof(struct _transfer_commands)*/);
     ((struct _mscp_basic_pkt *)m)->mscp$l_cmd_ref=c->cdrp$l_rspid;
     ((struct _mscp_basic_pkt *)m)->mscp$w_unit=((struct _mscp_ucb *)u)->ucb$w_mscpunit;
     c->cdrp$w_cdrpsize=600; //wrong, but we do not use a bufferdescriptor
     c->cdrp$l_msg_buf=m; // ??
+    c->cdrp$l_xct_len=512;
     c->cdrp$l_cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
     ioc$wfikpch(du_startio2,0,i,current,u,2,0);
     switch (i->irp$v_fcode) {
@@ -210,20 +215,30 @@ extern struct _sb mysb;
 void du_msg(void * packet, struct _cdt * c, struct _pdt * p) {
   du_dg(packet,c,p);
 }
+
+extern struct _scs_rd rdtl[128];
+
 void du_dg(void * packet, struct _cdt * c, struct _pdt * p) {
   int sts;
   struct _iosb iosb;
   struct _cdrp * cdrp;
   struct _scs * scs = packet;
+  struct _scs1 * scs1 = scs;
+  struct _ppd * ppd = scs;
   struct _mscp_basic_pkt * basic = ((unsigned long)packet) + sizeof(*scs);
   struct _transfer_commands * trans = basic;
+  void * next = basic;
   unsigned long lbn=trans->mscp$l_lbn;
   char * buf;
   struct _acb * a=vmalloc(sizeof(struct _acb));
   bzero(a,sizeof(struct _acb));
-  if (basic->mscp$b_caa==MSCP$K_OP_READ) {
-    bcopy((unsigned long)basic+sizeof(*trans),c->cdt$l_reserved4,512);
+
+  if (ppd->ppd$b_opc==PPD$C_SNDDAT) {
+    struct _scs_rd * rd=&rdtl[scs1->scs$l_rspid];
+    struct _cdrp * cdrp = rd->rd$l_cdrp;
+    bcopy(next,cdrp->cdrp$l_msg_buf,512);
   }
+
   a->acb$l_ast=((struct _cdrp *)c->cdt$l_fp_scs_norecv)->cdrp$l_fpc;
   a->acb$l_astprm=((struct _cdrp *)c->cdt$l_fp_scs_norecv)->cdrp$l_fr3;
   sch$qast(c->cdt$l_reserved3,PRI$_IOCOM,a);
@@ -356,7 +371,7 @@ void * du_init(char *s) {
   mypb.pb$w_state=PB$C_CLOSED;
   mysb.sb$b_type=DYN$C_SCS_SB;
 
-  scs$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drvr",0,0,0,0,s);
+  scs_std$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drvr",0,0,0,0,s);
 
   return u;
 }
@@ -392,7 +407,12 @@ int du_rw(struct _irp * i, struct _mscp_ucb * u, struct _transfer_commands * m) 
   insque(&i->irp$l_fqfl,&u->ucb$l_cddb->cddb$l_cdrpqfl);
   i->irp$l_fpc=du_rw_more;
   i->irp$l_fr3=i;
-  u->ucb$l_cddb->cddb$l_pdt->pdtvec$l_senddg(0,0,&i->irp$l_fqfl);
+  u->ucb$l_cddb->cddb$l_pdt->pdtvec$l_senddg(0,600,&i->irp$l_fqfl);
+  if (((struct _mscp_basic_pkt *)m)->mscp$b_opcode==MSCP$K_OP_WRITE) { 
+    scs_std$senddata(&dupdt,&i->irp$l_fqfl,0);
+  } else {
+    scs_std$reqdata(&dupdt,&i->irp$l_fqfl,0);
+  }
 }
 
 void du_rw_more(struct _irp * i) {
