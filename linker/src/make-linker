@@ -1,0 +1,22 @@
+#!/bin/sh
+CFLAGS=
+CPPFLAGS=
+CC=
+rm -rf binutils-2.15
+tar xzf binutils-2.15.tar.gz
+cd binutils-2.15
+patch -p1 < ../linker-0_0_57
+cd ..
+mkdir build
+cd build
+../binutils-2.15/configure --target=i386-free-vms
+make
+cd ..
+[ -f build/ld/ld-new ] && ln -sf build/ld/ld-new linker
+[ -f build/ld/ld-new ] || (touch linker; chmod +x linker;)
+# rename ld/ld-new to linker/src/link
+# link with: link infile /usr/lib/crt*.o /usr/lib/libc.a -o outfile etc
+# anal/image - like program readnisse. use with readnisse -h file
+# go to examples and gcc -c hi.c
+# do something like
+# ../linker/src/link hi.o /usr/lib/crt*.o /usr/lib/libc.a /usr/lib/gcc-lib/i386-redhat-linux/2.96/libgcc.a -o hi.exe
