@@ -1,4 +1,4 @@
-all: timer ast time eftim schdwk forcex ef wake synch enq lnm lnm2 qio1 qio2 cef cefw mem memf
+all: timer ast time eftim schdwk forcex ef wake synch enq lnm lnm2 qio1 qio2 cef cefw mem memf getjpi crec
 
 timer: timer.c
 	gcc -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.o -o timer
@@ -55,7 +55,13 @@ mem: mem.c
 memf: memf.c
 	gcc -static -I../starlet/src -I../librtl/src/ memf.c ../starlet/src/starlet.o -o memf
 
-allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum lnmum lnm2um qio1um qio2um cef cefwum mem memfum
+getjpi: getjpi.c
+	gcc -static -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starlet.o -o getjpi
+
+crec: crec.c
+	gcc -static -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.o -o crec
+
+allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum lnmum lnm2um qio1um qio2um cef cefwum mem memfum getjpium crecum
 
 UMDEF=-Dcompile_um -I.
 
@@ -113,4 +119,11 @@ memum: mem.c
 
 memfum: memf.c
 	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ memf.c ../starlet/src/starlet.c -o memfum
+
+getjpium: getjpi.c
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starlet.c -o getjpium
+
+
+crecum: crec.c
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.c -o crecum
 
