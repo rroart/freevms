@@ -39,7 +39,7 @@ ifeq ($(CONFIG_GCOV), y)
 endif
 
 CFLAGS_user_syms.o = -D__AUTOCONF_INCLUDED__ $(DMODULES) $(DMODVERSIONS) -I- \
-	-I../include -I$(TOPDIR)/../freevms/sys/src
+	-I../include -I$(TOPDIR)/../freevms/sys/src -I$(TOPDIR)/include2
 
 CFLAGS_frame.o := $(patsubst -fomit-frame-pointer,,$(USER_CFLAGS))
 
