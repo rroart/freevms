@@ -131,6 +131,17 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **ret
     }
     colon=strchr(devnam,':');
     if (colon) devlen=colon-devnam;
+    if (myfilelistptr==0) { 
+      // real disk
+      extern char root_device_name[];
+      int chan=0;
+      struct dsc$descriptor d;
+      d.dsc$w_length=strlen(root_device_name);
+      d.dsc$a_pointer=root_device_name;
+      sts=exe$assign(&d,&chan,0,0,0);
+      dev= ctl$ga_ccb_table[chan].ccb$l_ucb;
+      goto end;
+    }
     for (i=0;i<myfilelistptr;i++) {
       dev=myfilelist[i];
       if (strlen(dev->ucb$l_ddb->ddb$t_name)==devlen && strncmp(dev->ucb$l_ddb->ddb$t_name,devnam,devlen)==0) goto end;
