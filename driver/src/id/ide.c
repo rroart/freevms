@@ -240,31 +240,32 @@ int ide$init_tables() {
   return SS$_NORMAL;
 }
 
-int ide_vmsinit(void) {
-  //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
-
-  unsigned short chan0, chan1, chan2;
-  $DESCRIPTOR(u0,"dqa0");
-  $DESCRIPTOR(u1,"dqa1");
-  $DESCRIPTOR(u2,"dqa2");
+int ide_iodb_vmsinit(void) {
+#if 0
   struct _ucb * ucb=&ide$ucb;
   struct _ddb * ddb=&ide$ddb;
   struct _crb * crb=&ide$crb;
+#endif 
+  struct _ucb * ucb=kmalloc(sizeof(struct _ucb),GFP_KERNEL);
+  struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
+  struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
-  struct _ccb * ccb;
-  struct _ucb * newucb0,*newucb1,*newucb2;
 
-  printk(KERN_INFO "dev here pre\n");
-
-//  ioc_std$clone_ucb(&ide$ucb,&ucb);
   bzero(ucb,sizeof(struct _ucb));
   bzero(ddb,sizeof(struct _ddb));
   bzero(crb,sizeof(struct _crb));
 
+#if 0
   init_ddb(&ide$ddb,&ide$ddt,&ide$ucb,"dqa");
   init_ucb(&ide$ucb, &ide$ddb, &ide$ddt, &ide$crb);
   init_crb(&ide$crb);
+#endif
 
+  init_ddb(ddb,&ide$ddt,ucb,"dqa");
+  init_ucb(ucb, ddb, &ide$ddt, crb);
+  init_crb(crb);
+
+//  ioc_std$clone_ucb(&ide$ucb,&ucb);
   ide$init_tables();
   ide$struc_init (crb, ddb, idb, orb, ucb);
   ide$struc_reinit (crb, ddb, idb, orb, ucb);
@@ -272,21 +273,46 @@ int ide_vmsinit(void) {
 
   insertdevlist(ddb);
 
+  return ddb;
+
+}
+
+int ide_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+  unsigned short int chan;
+  struct _ucb * newucb;
+  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&ide$ucb*/,&newucb);
+  exe$assign(dsc,&chan,0,0,0);
+  registerdevchan(MKDEV(IDE0_MAJOR,unitno),chan);
+
+  return newucb;
+}
+
+int ide_vmsinit(void) {
+  //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
+
+  unsigned short chan0, chan1, chan2;
+  $DESCRIPTOR(u0,"dqa0");
+  $DESCRIPTOR(u1,"dqa1");
+  $DESCRIPTOR(u2,"dqa2");
+  unsigned long idb=0,orb=0;
+  struct _ccb * ccb;
+  struct _ucb * newucb0,*newucb1,*newucb2;
+  struct _ddb * ddb;
+
+  printk(KERN_INFO "dev here pre\n");
+
+  ddb=ide_iodb_vmsinit();
+
   /* for the fdt init part */
   /* a lot of these? */
 
-  ioc_std$clone_ucb(&ide$ucb,&newucb0);
-  ioc_std$clone_ucb(&ide$ucb,&newucb1);
-  ioc_std$clone_ucb(&ide$ucb,&newucb2);
-  exe$assign(&u0,&chan0,0,0,0);
-  exe$assign(&u1,&chan1,0,0,0);
-  exe$assign(&u2,&chan2,0,0,0);
-  registerdevchan(MKDEV(IDE0_MAJOR,0),chan0);
-  registerdevchan(MKDEV(IDE0_MAJOR,1),chan1);
-  registerdevchan(MKDEV(IDE0_MAJOR,2),chan2);
+  ide_iodbunit_vmsinit(ddb,0,&u0);
+  ide_iodbunit_vmsinit(ddb,1,&u1);
+  ide_iodbunit_vmsinit(ddb,2,&u2);
+
   printk(KERN_INFO "dev here\n");
 
-  return chan0;
+  // return chan0;
 
 }
 
