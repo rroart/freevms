@@ -78,7 +78,6 @@ flags		= 16
 sigpending	= 20
 addr_limit	= 24
 exec_domain	= 28
-need_resched	= 32
 tsk_ptrace	= 36
 /*
 processor	= 52
@@ -214,11 +213,7 @@ ENTRY(lcall27)
 	popl %eax
 	jmp ret_from_sys_call
 
-
 ENTRY(ret_from_fork)
-	pushl %ebx
-	call SYMBOL_NAME(schedule_tail)
-	addl $4, %esp
 	GET_CURRENT(%ebx)
 	testb $0x02,tsk_ptrace(%ebx)	# PT_TRACESYS
 	jne tracesys_exit
@@ -244,8 +239,6 @@ ENTRY(system_call)
 	movl %eax,EAX(%esp)		# save the return value
 ENTRY(ret_from_sys_call)
 	cli				# need_resched and signals atomic test
-#	cmpl $0,need_resched(%ebx)
-#	jne reschedule
 	cmpl $0,sigpending(%ebx)
 	jne signal_return
 restore_all:
@@ -296,11 +289,6 @@ ret_from_exception:
 	jne ret_from_sys_call
 	jmp restore_all
 
-ALIGN
-reschedule_not:
-	call SYMBOL_NAME(schedule)    # test
-	jmp ret_from_sys_call
-
 
 ENTRY(vmssystem_call3)
         PUSHPSL
@@ -340,8 +328,6 @@ syscall_common:
         movl %eax,EAX(%esp)		# save the return value
 ENTRY(vmsret_from_sys_call)
 	cli				# need_resched and signals atomic test
-#	cmpl $0,need_resched(%ebx)
-#	jne vmsreschedule
 	cmpl $0,sigpending(%ebx)
 	jne vmssignal_return
 vmsrestore_all:
@@ -390,11 +376,6 @@ vmsret_from_exception:
 	testl $(VM_MASK | 3),%eax	# return to VM86 mode or non-supervisor?
 	jne vmsret_from_sys_call
 	jmp vmsrestore_all
-
-	ALIGN
-vmsreschedule_not:
-	call SYMBOL_NAME(schedule)    # test
-	jmp vmsret_from_sys_call
 
 ENTRY(divide_error)
         PUSHPSL
