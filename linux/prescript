@@ -142,6 +142,8 @@ cd ../..;
 
 cd drivers/ide;
 		ln -s ../../../freevms/driver/src/dq/*.[hc] .;
+		ln -sf ../../../freevms/driver/src/id/ide.c myide.c;
+		ln -sf ../../../freevms/driver/src/id/ide-disk.c myide-disk.c;
 cd ../..;
 
 cd arch/i386/kernel;
