@@ -163,6 +163,8 @@ void do_BUG(const char *file, int line)
 asmlinkage void do_invalid_op(struct pt_regs *, unsigned long);
 extern unsigned long idt;
 
+extern int in_atomic;
+
 #ifndef CONFIG_MM_VMS
 /*
  * This routine handles page faults.  It determines the address,
@@ -193,6 +195,11 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 		local_irq_enable();
 
 	tsk = current;
+
+	if (in_atomic) { 
+	  printk("atomic addr %x\n",address);
+	  address=0x11111111;
+	}
 
 	/*
 	 * We fault-in kernel-space virtual memory on-demand. The
