@@ -80,3 +80,7 @@ sysimgact use PAGE_ instead of numbers.
 Look at having images as ELF? (Itanic is going to use ELF, it seems)
 
 Check waitall and wait
+
+Rename librtl/src/starlet.a to librtl.a
+
+Get getdx to add 2?

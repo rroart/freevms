@@ -101,7 +101,6 @@ At least works on uml, problems on both bochs/i386 and ordinary i386.
 Does not work with CONFIG_VMS yet (mount /proc panics).
 You need to have the nodename in params.dat.
 The two first letters in the nodename must be different.
-Start networking with "/sbin/ifconfig eth0 up".
 Within 10 secs, you will see a "scs received hello"
 After 10 secs, you will see starting cluster connects and some CON_RSPs.
 10 secs later you may see some maybes and ddb transfers.
