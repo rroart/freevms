@@ -148,7 +148,20 @@ asmlinkage void sch$astdel(void) {
 #ifdef __i386__
   //  printk("a3 ");
 #endif
+  if (acb->acb$b_rmod&ACB$M_PKAST) {
+    acb->acb$b_rmod&=~ACB$M_PKAST;
+    if(acb->acb$l_kast) acb->acb$l_kast(acb->acb$l_astprm); /* ? */
+  }
+#ifdef __arch_um__
+  if (((unsigned long)acb->acb$l_ast<0xa0000000)) {
+    // funny, this printk resulted in tracing too
+    // printk("no user ast, avoiding tracing against myself. ast astprm pid %x %x %x %x\n",acb->acb$l_ast,acb->acb$l_astprm,p->pcb$l_pid,p->pid);
+  } else {
+    if(acb->acb$l_ast) acb->acb$l_ast(acb->acb$l_astprm); /* ? */
+  }
+#else
   if(acb->acb$l_ast) acb->acb$l_ast(acb->acb$l_astprm); /* ? */
+#endif
 #ifdef __i386__
   //      printk("a4 ");
 #endif
