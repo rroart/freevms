@@ -51,7 +51,7 @@ ARCH_INCLUDE = $(TOPDIR)/$(ARCH_DIR)/include
 
 CFLAGS += $(DEBUG) $(PROFILE) $(ARCH_CFLAGS) -D__arch_um__ \
 	-DSUBARCH=\"$(SUBARCH)\" -DNESTING=$(NESTING) -D_LARGEFILE64_SOURCE \
-	-I$(ARCH_INCLUDE) -I$(TOPDIR)/../freevms/sys/src -I$(TOPDIR)/../freevms/lib/src -I$(TOPDIR)/../freevms/librtl/src -I$(TOPDIR)/../freevms/starlet/src -I$(TOPDIR)/../freevms/pal/src -Derrno=kernel_errno
+	-I$(ARCH_INCLUDE) -I$(TOPDIR)/../sys/src -I$(TOPDIR)/../lib/src -I$(TOPDIR)/../librtl/src -I$(TOPDIR)/../starlet/src -I$(TOPDIR)/../pal/src -Derrno=kernel_errno
 
 LINKFLAGS += -r
 
@@ -75,7 +75,7 @@ linux: $(ARCH_SYMLINKS) $(SYS_HEADERS) $(GEN_HEADERS) $(ARCH_DIR)/main.o \
 	$(CC) -Wl,-T,$(ARCH_DIR)/link.ld $(LINK_PROFILE) $(LINK_WRAPS) \
 		-o linux -static $(ARCH_DIR)/main.o vmlinux.o -L/usr/lib
 
-USER_CFLAGS := $(patsubst -I%,,$(CFLAGS)) -I$(TOPDIR)/../freevms/sys/src -I$(TOPDIR)/../freevms/lib/src
+USER_CFLAGS := $(patsubst -I%,,$(CFLAGS)) -I$(TOPDIR)/../sys/src -I$(TOPDIR)/../lib/src
 USER_CFLAGS := $(patsubst -Derrno=kernel_errno,,$(USER_CFLAGS))
 USER_CFLAGS := $(patsubst -D__KERNEL__,,$(USER_CFLAGS)) -I$(ARCH_INCLUDE)
 

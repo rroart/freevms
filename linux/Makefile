@@ -23,7 +23,7 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 TOPDIR	:= $(shell /bin/pwd)
 
 HPATH   	= $(TOPDIR)/include
-FINDHPATH	= $(HPATH)/asm $(HPATH)/linux $(HPATH)/scsi $(HPATH)/net $(TOPDIR)/../freevms/sys/src $(TOPDIR)/../freevms/lib/src $(TOPDIR)/../freevms/librtl/src $(TOPDIR)/../freevms/starlet/src $(TOPDIR)/../freevms/pal/src
+FINDHPATH	= $(HPATH)/asm $(HPATH)/linux $(HPATH)/scsi $(HPATH)/net $(TOPDIR)/../sys/src $(TOPDIR)/../lib/src $(TOPDIR)/../librtl/src $(TOPDIR)/../starlet/src $(TOPDIR)/../pal/src
 
 HOSTCC  	= gcc
 HOSTCFLAGS	= -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer
@@ -95,7 +95,7 @@ export MODLIB
 # standard CFLAGS
 #
 
-CPPFLAGS := -D__KERNEL__ -I$(HPATH) -I$(TOPDIR)/../freevms/sys/src -I$(TOPDIR)/../freevms/lib/src -I$(TOPDIR)/../freevms/librtl/src -I$(TOPDIR)/../freevms/starlet/src -I$(TOPDIR)/../freevms/pal/src
+CPPFLAGS := -D__KERNEL__ -I$(HPATH) -I$(TOPDIR)/../sys/src -I$(TOPDIR)/../lib/src -I$(TOPDIR)/../librtl/src -I$(TOPDIR)/../starlet/src -I$(TOPDIR)/../pal/src
 
 CFLAGS := $(CPPFLAGS) -Wall -Wstrict-prototypes -Wno-trigraphs -O2 \
 	  -fomit-frame-pointer -fno-strict-aliasing -fno-common

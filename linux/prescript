@@ -4,163 +4,163 @@
 #	(cd net; ln -s ../../freevms .)
 #	(cd drivers; ln -s ../../freevms .)
 #	ln -s ../freevms .
-	mkdir -p include/asm-um arch/um/{kernel,lib,mm,include}
-	(cd ../freevms/starlet/src; ln -s sys\$routines.h sysoutines.h)
-	(cd ../freevms/starlet/src; ln -s lib\$routines.h liboutines.h)
-	(cd ../freevms/starlet/src; ln -s cli\$routines.h clioutines.h)
-	(cd ../freevms/starlet/src; ln -s lbr\$routines.h lbroutines.h)
+#	mkdir -p include/asm-um arch/um/{kernel,lib,mm,include}
+	(cd ../starlet/src; ln -s sys\$routines.h sysoutines.h)
+	(cd ../starlet/src; ln -s lib\$routines.h liboutines.h)
+	(cd ../starlet/src; ln -s cli\$routines.h clioutines.h)
+	(cd ../starlet/src; ln -s lbr\$routines.h lbroutines.h)
 
-for X in `cd ../freevms/linux; find . -path './arch/um' -prune -o -path './include/asm-um' -prune -o \( -name CVS -prune \) -o -type f`; do
-	[ -f $X ] && rm $X
-	[ -L $X ] && rm $X
-	[ -f ../freevms/linux/$X ] && ln -s `pwd`/../freevms/linux/$X $X;
-done
+#for X in `cd ../freevms/linux; find . -path './arch/um' -prune -o -path './include/asm-um' -prune -o \( -name CVS -prune \) -o -type f`; do
+#	[ -f $X ] && rm $X
+#	[ -L $X ] && rm $X
+#	[ -f ../freevms/linux/$X ] && ln -s `pwd`/../freevms/linux/$X $X;
+#done
 
-(cd kernel; 	ln -s ../../freevms/sys/src/syssetpri.c .;
-		ln -s ../../freevms/sys/src/syspcntrl.c; 
-		ln -s ../../freevms/sys/src/rse.c .;
-		ln -s ../../freevms/sys/src/system_data_cells.c .;
-		ln -s ../../freevms/sys/src/timeschdl.c .;
-		ln -s ../../freevms/sys/src/exsubrout.c .;
-		ln -s ../../freevms/sys/src/syswait.c .;
-		ln -s ../../freevms/sys/src/sysevtsrv.c .;
-		ln -s ../../freevms/sys/src/exception_init.c .;
-		ln -s ../../freevms/sys/src/postef.c .;
-		ln -s ../../freevms/sys/src/iociopost.c .;
-		ln -s ../../freevms/sys/src/astdel.c;
-		ln -s ../../freevms/sys/src/forkcntrl.c .;
-		ln -s ../../freevms/sys/src/iosubnpag.c .;
-		ln -s ../../freevms/sys/src/sysastcon.c .;
-		ln -s ../../freevms/sys/src/sysgettim.c .;
-		ln -s ../../freevms/sys/src/syssetime.c .;
-		ln -s ../../freevms/sys/src/syscvrtim.c .;
-		ln -s ../../freevms/sys/src/sysschevt.c .;
-		ln -s ../../freevms/sys/src/syscanevt.c .;
-		ln -s ../../freevms/sys/src/sysdelprc.c .;
-		ln -s ../../freevms/sys/src/sysforcex.c .;
-		ln -s ../../freevms/sys/src/sysexit.c .;
-		ln -s ../../freevms/sys/src/syssetmod.c .;
-		ln -s ../../freevms/sys/src/sysenqdeq.c .;
-		ln -s ../../freevms/sys/src/sysqioreq.c .;
-		ln -s ../../freevms/sys/src/sysqiofdt.c .;
-		ln -s ../../freevms/sys/src/sysacpfdt.c .;
-		ln -s ../../freevms/sys/src/sysassign.c .;
-		ln -s ../../freevms/sys/src/sysdassgn.c .;
-		ln -s ../../freevms/sys/src/iosubpagd.c .;
-		ln -s ../../freevms/sys/src/sysgetlki.c .;
-		ln -s ../../freevms/sys/src/syslnm.c .;
-		ln -s ../../freevms/sys/src/lnmsub.c .;
-		ln -s ../../freevms/sys/src/init.c vmsinit.c;
-		ln -s ../../freevms/driver/src/random.c .;
-		ln -s ../../freevms/driver/src/null.c .;
-		ln -s ../../freevms/driver/src/dudriver.c .;
-		ln -s ../../freevms/mscp/src/mscp.c .;
-		ln -s ../../freevms/sysloa/src/sys_scs.c .;
-		ln -s ../../freevms/sys/src/mutex.c .;
-		ln -s ../../freevms/sys/src/sysascefc.c .;
-		ln -s ../../freevms/sys/src/deadlock.c .;
-		ln -s ../../freevms/sys/src/sysmailbx.c .;
-		ln -s ../../freevms/sys/src/mbdriver.c .;
-		ln -s ../../freevms/rms/src/rms.c .;
-		ln -s ../../freevms/rms/src/rms2.c .;
-		ln -s ../../freevms/rms/src/direct.h .;
-		ln -s ../../freevms/rms/src/access.h .;
-		ln -s ../../freevms/rms/src/cache.h .;
-		ln -s ../../freevms/rms/src/update.c .;
-		ln -s ../../freevms/rms/src/access.c .;
-		ln -s ../../freevms/rms/src/cache.c .;
-		ln -s ../../freevms/rms/src/direct.c .;
-		ln -s ../../freevms/rms/src/device.c .;
-		ln -s ../../freevms/rms/src/phyvms.c .;
-		ln -s ../../freevms/rms/src/phyunix.c .;
-		ln -s ../../freevms/mount/src/mountdsp.c .;
-		ln -s ../../freevms/sys/src/ucbcredel.c .;
-		ln -s ../../freevms/f11x/src/dispatch.c .;
-		ln -s ../../freevms/driver/src/file.c .;
-		ln -s ../../freevms/sys/src/iosubrams.c .;
-		ln -s ../../freevms/driver/src/pedriver.c .;
-		ln -s ../../freevms/driver/src/scs.c .;
-		ln -s ../../freevms/sys/src/pagefault.c .;
-		ln -s ../../freevms/sys/src/sysadjwsl.c .;
-		ln -s ../../freevms/sys/src/syslkwset.c .;
-		ln -s ../../freevms/sys/src/syscrmpsc.c .;
-		ln -s ../../freevms/sys/src/sysdgblsc.c .;
-		ln -s ../../freevms/sys/src/phdutl.c .;
-		ln -s ../../freevms/sys/src/syscredel.c .;
-		ln -s ../../freevms/sys/src/sysdclexh.c .;
-		ln -s ../../freevms/sys/src/sysimgfix.c .;
-		ln -s ../../freevms/sys/src/sysimgsta.c .;
-		ln -s ../../freevms/sys/src/sysimgact.c .;
-		ln -s ../../freevms/sys/src/sysfao.c .;
-		ln -s ../../freevms/sys/src/sysgetdvi.c .;
-		ln -s ../../freevms/sys/src/exceptmsg.c .;
-		ln -s ../../freevms/sys/src/sysputmsg.c .;
-		ln -s ../../freevms/sys/src/sysgetmsg.c .;
-		ln -s ../../freevms/sys/src/syssndjbc.c .;
-		ln -s ../../freevms/sys/src/sysgetsyi.c .;
-		ln -s ../../freevms/sys/src/sysrundwn.c .;
-		ln -s ../../freevms/sys/src/syscreprc.c .;
-		ln -s ../../freevms/sys/src/procstrt.c .;
-		ln -s ../../freevms/sys/src/syssetprt.c .;
-		ln -s ../../freevms/sys/src/syssetprv.c .;
-		ln -s ../../freevms/sys/src/syspurgws.c .;
-		ln -s ../../freevms/sys/src/sysparprc.c .;
-		ln -s ../../freevms/sys/src/syssetexv.c .;
-		ln -s ../../freevms/sys/src/sysupdsec.c .;
-		ln -s ../../freevms/sys/src/sysgetjpi.c .;
-		ln -s ../../freevms/sys/src/uai.c .;
-		ln -s ../../freevms/sys/src/process_scan.c .;
-		ln -s ../../freevms/sys/src/pagefile.c .;
-		ln -s ../../freevms/rms/src/rm3get.c ;
-		ln -s ../../freevms/rms/src/rmsmisc.h ;
+(cd kernel; 	ln -s ../../sys/src/syssetpri.c .;
+		ln -s ../../sys/src/syspcntrl.c; 
+		ln -s ../../sys/src/rse.c .;
+		ln -s ../../sys/src/system_data_cells.c .;
+		ln -s ../../sys/src/timeschdl.c .;
+		ln -s ../../sys/src/exsubrout.c .;
+		ln -s ../../sys/src/syswait.c .;
+		ln -s ../../sys/src/sysevtsrv.c .;
+		ln -s ../../sys/src/exception_init.c .;
+		ln -s ../../sys/src/postef.c .;
+		ln -s ../../sys/src/iociopost.c .;
+		ln -s ../../sys/src/astdel.c;
+		ln -s ../../sys/src/forkcntrl.c .;
+		ln -s ../../sys/src/iosubnpag.c .;
+		ln -s ../../sys/src/sysastcon.c .;
+		ln -s ../../sys/src/sysgettim.c .;
+		ln -s ../../sys/src/syssetime.c .;
+		ln -s ../../sys/src/syscvrtim.c .;
+		ln -s ../../sys/src/sysschevt.c .;
+		ln -s ../../sys/src/syscanevt.c .;
+		ln -s ../../sys/src/sysdelprc.c .;
+		ln -s ../../sys/src/sysforcex.c .;
+		ln -s ../../sys/src/sysexit.c .;
+		ln -s ../../sys/src/syssetmod.c .;
+		ln -s ../../sys/src/sysenqdeq.c .;
+		ln -s ../../sys/src/sysqioreq.c .;
+		ln -s ../../sys/src/sysqiofdt.c .;
+		ln -s ../../sys/src/sysacpfdt.c .;
+		ln -s ../../sys/src/sysassign.c .;
+		ln -s ../../sys/src/sysdassgn.c .;
+		ln -s ../../sys/src/iosubpagd.c .;
+		ln -s ../../sys/src/sysgetlki.c .;
+		ln -s ../../sys/src/syslnm.c .;
+		ln -s ../../sys/src/lnmsub.c .;
+		ln -s ../../sys/src/init.c vmsinit.c;
+		ln -s ../../driver/src/random.c .;
+		ln -s ../../driver/src/null.c .;
+		ln -s ../../driver/src/dudriver.c .;
+		ln -s ../../mscp/src/mscp.c .;
+		ln -s ../../sysloa/src/sys_scs.c .;
+		ln -s ../../sys/src/mutex.c .;
+		ln -s ../../sys/src/sysascefc.c .;
+		ln -s ../../sys/src/deadlock.c .;
+		ln -s ../../sys/src/sysmailbx.c .;
+		ln -s ../../sys/src/mbdriver.c .;
+		ln -s ../../rms/src/rms.c .;
+		ln -s ../../rms/src/rms2.c .;
+		ln -s ../../rms/src/direct.h .;
+		ln -s ../../rms/src/access.h .;
+		ln -s ../../rms/src/cache.h .;
+		ln -s ../../rms/src/update.c .;
+		ln -s ../../rms/src/access.c .;
+		ln -s ../../rms/src/cache.c .;
+		ln -s ../../rms/src/direct.c .;
+		ln -s ../../rms/src/device.c .;
+		ln -s ../../rms/src/phyvms.c .;
+		ln -s ../../rms/src/phyunix.c .;
+		ln -s ../../mount/src/mountdsp.c .;
+		ln -s ../../sys/src/ucbcredel.c .;
+		ln -s ../../f11x/src/dispatch.c .;
+		ln -s ../../driver/src/file.c .;
+		ln -s ../../sys/src/iosubrams.c .;
+		ln -s ../../driver/src/pedriver.c .;
+		ln -s ../../driver/src/scs.c .;
+		ln -s ../../sys/src/pagefault.c .;
+		ln -s ../../sys/src/sysadjwsl.c .;
+		ln -s ../../sys/src/syslkwset.c .;
+		ln -s ../../sys/src/syscrmpsc.c .;
+		ln -s ../../sys/src/sysdgblsc.c .;
+		ln -s ../../sys/src/phdutl.c .;
+		ln -s ../../sys/src/syscredel.c .;
+		ln -s ../../sys/src/sysdclexh.c .;
+		ln -s ../../sys/src/sysimgfix.c .;
+		ln -s ../../sys/src/sysimgsta.c .;
+		ln -s ../../sys/src/sysimgact.c .;
+		ln -s ../../sys/src/sysfao.c .;
+		ln -s ../../sys/src/sysgetdvi.c .;
+		ln -s ../../sys/src/exceptmsg.c .;
+		ln -s ../../sys/src/sysputmsg.c .;
+		ln -s ../../sys/src/sysgetmsg.c .;
+		ln -s ../../sys/src/syssndjbc.c .;
+		ln -s ../../sys/src/sysgetsyi.c .;
+		ln -s ../../sys/src/sysrundwn.c .;
+		ln -s ../../sys/src/syscreprc.c .;
+		ln -s ../../sys/src/procstrt.c .;
+		ln -s ../../sys/src/syssetprt.c .;
+		ln -s ../../sys/src/syssetprv.c .;
+		ln -s ../../sys/src/syspurgws.c .;
+		ln -s ../../sys/src/sysparprc.c .;
+		ln -s ../../sys/src/syssetexv.c .;
+		ln -s ../../sys/src/sysupdsec.c .;
+		ln -s ../../sys/src/sysgetjpi.c .;
+		ln -s ../../sys/src/uai.c .;
+		ln -s ../../sys/src/process_scan.c .;
+		ln -s ../../sys/src/pagefile.c .;
+		ln -s ../../rms/src/rm3get.c ;
+		ln -s ../../rms/src/rmsmisc.h ;
 
-		ln -s ../../freevms/pal/src/ipl.c .;
-		ln -s ../../freevms/pal/src/ast.c .;
-		ln -s ../../freevms/pal/src/queue.c .;
+		ln -s ../../pal/src/ipl.c .;
+		ln -s ../../pal/src/ast.c .;
+		ln -s ../../pal/src/queue.c .;
 cd ..;
 cd mm;
-		ln -s ../../freevms/sys/src/memoryalc.c .;
-		ln -s ../../freevms/sys/src/vmsbootmem.c .;
-		ln -s ../../freevms/sys/src/vmsslab.c .;
-		ln -s ../../freevms/sys/src/allocpfn.c .;
-		ln -s ../../freevms/sys/src/ptalloc.c .;
-		ln -s ../../freevms/sys/src/swapper.c .;
-		ln -s ../../freevms/sys/src/wrtmfypag.c .;
-		ln -s ../../freevms/sys/src/vmsmmap.c .;
-		ln -s ../../freevms/sys/src/vmsfilemap.c .;
-		ln -s ../../freevms/sys/src/vmsmemory.c .;
-		ln -s ../../freevms/sys/src/vmsmremap.c .;
-		ln -s ../../freevms/sys/src/vmsmprotect.c .;
-		ln -s ../../freevms/sys/src/vmsmlock.c .;
-		ln -s ../../freevms/sys/src/vmsvmalloc.c .;
-		ln -s ../../freevms/sys/src/vmsswapfile.c .;
-		ln -s ../../freevms/sys/src/vmsshmem.c .;
+		ln -s ../../sys/src/memoryalc.c .;
+		ln -s ../../sys/src/vmsbootmem.c .;
+		ln -s ../../sys/src/vmsslab.c .;
+		ln -s ../../sys/src/allocpfn.c .;
+		ln -s ../../sys/src/ptalloc.c .;
+		ln -s ../../sys/src/swapper.c .;
+		ln -s ../../sys/src/wrtmfypag.c .;
+		ln -s ../../sys/src/vmsmmap.c .;
+		ln -s ../../sys/src/vmsfilemap.c .;
+		ln -s ../../sys/src/vmsmemory.c .;
+		ln -s ../../sys/src/vmsmremap.c .;
+		ln -s ../../sys/src/vmsmprotect.c .;
+		ln -s ../../sys/src/vmsmlock.c .;
+		ln -s ../../sys/src/vmsvmalloc.c .;
+		ln -s ../../sys/src/vmsswapfile.c .;
+		ln -s ../../sys/src/vmsshmem.c .;
 cd ..;
 
 cd drivers/block;
-		ln -s ../../../freevms/driver/src/pvdriver.c .;
+		ln -s ../../../driver/src/pvdriver.c .;
 cd ../..;
 
 cd drivers/ide;
-		ln -s ../../../freevms/driver/src/dq/*.[hc] .;
-		ln -sf ../../../freevms/driver/src/id/ide.c myide.c;
-		ln -sf ../../../freevms/driver/src/id/ide-disk.c myide-disk.c;
+		ln -s ../../../driver/src/dq/*.[hc] .;
+		ln -sf ../../../driver/src/id/ide.c myide.c;
+		ln -sf ../../../driver/src/id/ide-disk.c myide-disk.c;
 cd ../..;
 
 cd arch/i386/kernel;
-		ln -s ../../../../freevms/sys/src/vmsirq.c .;
+		ln -s ../../../../sys/src/vmsirq.c .;
 cd ../../..;
 
 cd fs
-		ln -s ../../freevms/sys/src/vmsbuffer.c .;
+		ln -s ../../sys/src/vmsbuffer.c .;
 mkdir ods2
 cd ods2
-		ln -s ../../../freevms/f11x/src/[Ma-z]* .;
+		ln -s ../../../f11x/src/[Ma-z]* .;
 cd ..
 mkdir exttwo
 cd exttwo
-		ln  -s ../../../freevms/ext2/src/[Ma-z]* .;
+		ln  -s ../../../ext2/src/[Ma-z]* .;
 cd ../..
 )
 
-echo you have read the HOWTO and done a make in ../freevms?
+echo you have read the HOWTO and done a make in ..?
