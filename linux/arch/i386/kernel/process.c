@@ -639,6 +639,33 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long esp,
 	return 0;
 }
 
+int exe$procstrt(struct _pcb * p);
+
+int new_thread(int nr, unsigned long clone_flags, unsigned long esp,
+	unsigned long unused,
+	struct task_struct * p, struct pt_regs * regs)
+{
+	struct pt_regs * childregs;
+
+	childregs = ((struct pt_regs *) (THREAD_SIZE + (unsigned long) p)) - 1;
+	struct_cpy(childregs, regs);
+	childregs->eax = 0;
+	childregs->esp = esp;
+
+	p->thread.esp = (unsigned long) childregs;
+	p->thread.esp0 = (unsigned long) (childregs+1);
+
+	p->thread.eip = (unsigned long) exe$procstrt; // or like ret_from_fork;
+
+	savesegment(fs,p->thread.fs);
+	savesegment(gs,p->thread.gs);
+
+	unlazy_fpu(current);
+	struct_cpy(&p->thread.i387, &current->thread.i387);
+
+	return 0;
+}
+
 /*
  * fill in the user structure for a core dump..
  */

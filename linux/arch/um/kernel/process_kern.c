@@ -334,6 +334,63 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long sp,
 	return(0);
 }
 
+int exe$procstrt(struct _pcb * p);
+
+int new_thread(int nr, unsigned long clone_flags, unsigned long sp,
+		unsigned long stack_top, struct task_struct * p, 
+		struct pt_regs *regs)
+{
+	int new_pid;
+	unsigned long stack;
+	int (*tramp)(void *);
+
+	p->thread = (struct thread_struct) INIT_THREAD;
+	p->thread.kernel_stack = (unsigned long) p + 2 * PAGE_SIZE;
+
+	if(current->thread.forking)
+		tramp = fork_tramp;
+	else {
+		tramp = new_thread_proc;
+		p->thread.request.u.thread = current->thread.request.u.thread;
+	}
+
+	if(pipe(p->thread.switch_pipe) < 0)
+		panic("copy_thread : pipe failed");
+
+	stack = alloc_stack();
+	if(stack == 0){
+		printk(KERN_ERR "copy_thread : failed to allocate "
+		       "temporary stack\n");
+		return(-ENOMEM);
+	}
+
+	clone_flags &= CLONE_VM;
+	p->thread.temp_stack = stack;
+	new_pid = start_fork_tramp((void *) p->thread.kernel_stack, stack,
+				   clone_flags, tramp);
+	if(new_pid < 0){
+		printk(KERN_ERR "copy_thread : clone failed - errno = %d\n", 
+		       -new_pid);
+		return(new_pid);
+	}
+
+	if(current->thread.forking){
+		sc_to_sc(p->thread.regs.regs.sc, current->thread.regs.regs.sc);
+		PT_REGS_SET_SYSCALL_RETURN(&p->thread.regs, 0);
+		if(sp != 0) PT_REGS_SP(&p->thread.regs) = sp;
+	}
+	else {
+		p->mm = NULL;
+		p->active_mm = NULL;
+	}
+	p->thread.extern_pid = new_pid;
+
+	current->thread.request.op = OP_FORK;
+	current->thread.request.u.fork.pid = new_pid;
+	usr1_pid(getpid());
+	return(0);
+}
+
 void tracing_reboot(void)
 {
 	current->thread.request.op = OP_REBOOT;
