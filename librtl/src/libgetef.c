@@ -23,12 +23,13 @@ int lib$get_ef(long * l) {
   return SS$_NORMAL;
 }
 
-int lib$free_ef(int event) {
+int lib$free_ef(int * event) {
   int flag;
-  if (event<32)
+  int ev=*event;
+  if (ev<32)
     return LIB$_EF_RESSYS;
-  event-=32;
-  flag=test_and_clear_bit(event,&my_event_flags);
+  ev-=32;
+  flag=test_and_clear_bit(ev,&my_event_flags);
   if (flag==0)
     return LIB$_EF_ALRFRE;
   return SS$_NORMAL;
