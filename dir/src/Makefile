@@ -19,6 +19,7 @@ directory${EXE}: directory.c $(LIB)
 	mkdir i386 || echo i386 exists
 	cp -p directory i386/copy
 	cp -p directory i386/import
+	cp -p directory i386/export
 	cp -p directory i386/delete
 	cp -p directory i386/difference
 	cp -p directory i386/directory
@@ -36,6 +37,7 @@ directoryum${EXE}: directory.c $(LIBUM)
 	mkdir um || echo um exists
 	cp -p directoryum um/copy
 	cp -p directoryum um/import
+	cp -p directoryum um/export
 	cp -p directoryum um/delete
 	cp -p directoryum um/difference
 	cp -p directoryum um/directory
