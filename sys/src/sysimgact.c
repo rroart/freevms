@@ -46,7 +46,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void ** hdrbuf, unsigned l
   struct _va_range inadr;
   char * buffer;
   mm_segment_t fs;
-  int pos=0;
+  loff_t pos=0;
   struct _imcb * im = kmalloc(sizeof(struct _imcb),GFP_KERNEL);
   bzero(im,sizeof(struct _imcb));
   //  im->imcb$b_type
