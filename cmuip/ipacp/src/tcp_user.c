@@ -268,7 +268,7 @@ extern  void    IP$SET_HOSTS();
 
 extern     void set_ip_device_offline();
 extern     User_Requests_Avail();
-extern     void MovByt();
+extern     void MOVBYT();
 extern     void swapbytes();
 extern     Time_Stamp();
 
@@ -280,7 +280,7 @@ extern  void    tcp$send_data();
 extern  void    tcp$set_tcb_state();
 extern  void    tcp$inactivate_tcb();
 extern     tcp$tcb_close();
-extern  void    CQ_Dequeue();
+extern  void    cq_dequeue();
 
 // USER.BLI
 
@@ -708,10 +708,8 @@ void tcp$status(struct user_status_args * Uargs)
 // Copy TCP local status return arg blk to system IO buffer for IO completion.
 // Fill in MOVBYT arguments.
 
-#if 0
-    // check wait
+    // check
     $$KCALL(MOVBYT,SR_BLK_SIZE*4,CS,Uargs->st$data_start);
-#endif
   
 // Return the Connection Status to the user by posting the IO request.
   
@@ -1069,10 +1067,8 @@ void tcp$deliver_user_data(struct tcb_structure * TCB)
 
 // Dequeue from TCB queue into user buffer
 
-#if 0
-	// check wait
-	$$KCALL(CQ_Dequeue,TCB->rcv_q_queue,Uadrs,datasize);
-#endif
+	// check
+	$$KCALL(cq_dequeue,&TCB->rcv_q_queue,Uadrs,datasize);
   
 // Update user/TCB data pointers
 
@@ -1860,10 +1856,9 @@ void tcp$open(struct user_open_args * Uargs)
 // Setup TCB ID in UCB - move 4-byte TCB index into system UCB
 
     ucbptr = Uargs->op$ucb_adrs ; // not yet+ UCB$L_CBID;
-#if 0
-	// check wait
+
+	// check
     $$KCALL(MOVBYT,4,TCB->vtcb_index,ucbptr);
-#endif
 
 // Remember Uargs for TCP_NMLOOK_DONE
 
