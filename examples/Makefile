@@ -99,6 +99,7 @@ hi.o: hi.c
 
 i386/hi: hi.o $(LIB) $(LIBRTL)
 	../linker/src/linker -L../linker/src/build/ld -melf_i386 -Bstatic hi.o $(LINKPOST) -o i386/hi
+	ld -Bshareable hi.o $(LIBC) -o i386/hi.exe2
 
 i386/hi.exe: hi.o $(LIB) $(LIBRTL)
 	../linker/src/linker $(LINKPRE) hi.o $(LINKPOST) -o i386/hi.exe
