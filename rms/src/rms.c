@@ -28,7 +28,6 @@
 #define DEBUGx x
 
 #include<linux/config.h>
-#include<linux/vmalloc.h>
 #include<linux/linkage.h>
 #include<linux/mm.h>
 
@@ -217,12 +216,12 @@ void cleanup_wcf(struct WCCFILE *wccfile)
         wccfile->wcf_wcd.wcd_next = NULL;
         wccfile->wcf_wcd.wcd_prev = NULL;
         /* should deaccess volume */
-        vfree(wccfile);
+        kfree(wccfile);
         while (wcc != NULL) {
             struct WCCDIR *next = wcc->wcd_next;
             wcc->wcd_next = NULL;
             wcc->wcd_prev = NULL;
-            vfree(wcc);
+            kfree(wcc);
             wcc = next;
         }
     }
@@ -237,6 +236,7 @@ unsigned do_search(struct _fabdef *fab,struct WCCFILE *wccfile)
     int sts;
     unsigned short dummy;
     struct _fibdef fibblk;
+    memset(&fibblk, 0, sizeof(struct _fibdef));
     struct WCCDIR *wcc;
     struct dsc$descriptor fibdsc,resdsc;
     struct _namdef *nam = fab->fab$l_nam;
@@ -356,11 +356,11 @@ unsigned do_search(struct _fabdef *fab,struct WCCFILE *wccfile)
                     if (wcc->wcd_prev != NULL) wcc->wcd_prev->wcd_next = wcc->wcd_next;
                     wcc = wcc->wcd_next;
                     memcpy(wccfile->wcf_result + wcc->wcd_prelen + wcc->wcd_reslen - 6,".DIR;1",6);
-                    vfree(savwcc);
+                    kfree(savwcc);
                 } else {
                     if ((wccfile->wcf_status & STATUS_RECURSE) && wcc->wcd_prev == NULL) {
                         struct WCCDIR *newwcc;
-                        newwcc = (struct WCCDIR *) vmalloc(sizeof(struct WCCDIR) + 8);
+                        newwcc = (struct WCCDIR *) kmalloc(sizeof(struct WCCDIR) + 8,GFP_KERNEL);
 			bzero(newwcc,sizeof(struct WCCDIR) + 8);
                         newwcc->wcd_next = wcc->wcd_next;
                         newwcc->wcd_prev = wcc;
@@ -457,7 +457,7 @@ unsigned do_parse(struct _fabdef *fab,struct WCCFILE **wccret)
     /* Make WCCFILE entry for rest of processing */
 
     {
-        wccfile = (struct WCCFILE *) vmalloc(sizeof(struct WCCFILE) + 256);
+        wccfile = (struct WCCFILE *) kmalloc(sizeof(struct WCCFILE) + 256, GFP_KERNEL);
 	bzero(wccfile,sizeof(struct WCCFILE) + 256);
         if (wccfile == NULL) return SS$_INSFMEM;
 memset(wccfile,0,sizeof(struct WCCFILE)+256);
@@ -619,7 +619,7 @@ memset(wccfile,0,sizeof(struct WCCFILE)+256);
                 if (char_delim[*dirptr++ & 127]) break;
                 seglen++;
             } while (dirsiz + seglen < dirlen);
-            wcd = (struct WCCDIR *) vmalloc(sizeof(struct WCCDIR) + seglen + 8);
+            wcd = (struct WCCDIR *) kmalloc(sizeof(struct WCCDIR) + seglen + 8, GFP_KERNEL);
 	    bzero(wcd,sizeof(struct WCCDIR) + seglen + 8);
             wcd->wcd_wcc = 0;
             wcd->wcd_status = 0;
@@ -1195,7 +1195,7 @@ unsigned exe$close(struct _fabdef *fab)
     int sts=SS$_NORMAL;
     int ifi_no = fab->fab$w_ifi;
     if (ifi_no < 1 || ifi_no >= IFI_MAX) return RMS$_IFI;
-    sts = deaccessfile(0);
+    //sts = deaccessfile(0);
     if (sts & 1) {
         if (ifi_table[ifi_no]->wcf_status & STATUS_TMPWCC) {
             cleanup_wcf(ifi_table[ifi_no]);
@@ -1377,6 +1377,7 @@ unsigned exe$erase(struct _fabdef *fab)
     }
     if (sts & 1) {
         struct _fibdef fibblk;
+	memset(&fibblk, 0, sizeof(struct _fibdef));
         struct dsc$descriptor fibdsc,serdsc;
         fibdsc.dsc$w_length = sizeof(struct _fibdef);
         fibdsc.dsc$a_pointer = (char *) &fibblk;
@@ -1390,12 +1391,18 @@ unsigned exe$erase(struct _fabdef *fab)
         fibblk.fib$b_fid_rvn = 0;
         fibblk.fib$b_fid_nmx = 0;
         fibblk.fib$l_wcc = 0;
-	sts = sys$qiow(0,getchan(wccfile->wcf_vcb),IO$_ACCESS|IO$M_DELETE,&iosb,0,0,
-		       &fibdsc,&serdsc,0,0,0,0);
+	// res not really needed? and serdsc?
+	int reslen;
+	struct dsc$descriptor resdsc;
+	char c[256];
+	resdsc.dsc$w_length = 256; // - wcc->wcd_prelen;
+	resdsc.dsc$a_pointer = c; //wccfile->wcf_result + wcc->wcd_prelen;
+	sts = sys$qiow(0,getchan(wccfile->wcf_vcb),IO$_ACCESS/*|IO$M_ACCESS*/,&iosb,0,0,
+		       &fibdsc,&serdsc,&reslen,&resdsc,0,0);
 	sts = iosb.iosb$w_status;
         if (sts & 1) {
 	  sts = sys$qiow(0,getchan(wccfile->wcf_vcb),IO$_DELETE|IO$M_DELETE,&iosb,0,0,
-			 &fibdsc,&serdsc,0,0,0,0);
+			 &fibdsc,&serdsc,&reslen,&resdsc,0,0);
 	  sts = iosb.iosb$w_status;
 	  //sts = accesserase(wccfile->wcf_vcb,&wccfile->wcf_fib);
 	} else {
@@ -1417,6 +1424,8 @@ unsigned exe$create(struct _fabdef *fab)
   int wcc_flag = 0;
   struct WCCFILE *wccfile = NULL;
   struct _namdef *nam = fab->fab$l_nam;
+  struct _atrdef atr[2];
+  struct _fatdef recattr;
   if (fab->fab$w_ifi != 0) return RMS$_IFI;
   while (ifi_table[ifi_no] != NULL && ifi_no < IFI_MAX) ifi_no++;
   if (ifi_no >= IFI_MAX) return RMS$_IFI;
@@ -1439,6 +1448,7 @@ unsigned exe$create(struct _fabdef *fab)
   }
   if (sts & 1) {
     struct _fibdef fibblk;
+    memset(&fibblk, 0, sizeof(struct _fibdef));
     struct dsc$descriptor fibdsc,serdsc;
     fibdsc.dsc$w_length = sizeof(struct _fibdef);
     fibdsc.dsc$a_pointer = (char *) &fibblk;
@@ -1453,9 +1463,25 @@ unsigned exe$create(struct _fabdef *fab)
     //fibblk.fib$b_did_nmx = 0;
     fibblk.fib$l_wcc = 0;
     fibblk.fib$w_exctl|=FIB$M_EXTEND;
-    fibblk.fib$l_exsz=10;
+    fibblk.fib$l_exsz=fab->fab$l_alq;
+
+    atr[0].atr$w_type=ATR$C_RECATTR;
+    atr[0].atr$w_size=ATR$S_RECATTR;
+    atr[0].atr$l_addr=&recattr;
+    atr[1].atr$w_type=0;
+
+    memset(&recattr, 0, sizeof(recattr));
+    // alq set by extend?
+    recattr.fat$b_bktsize = fab->fab$b_bks;
+    recattr.fat$w_defext = VMSWORD(fab->fab$w_deq);
+    recattr.fat$b_vfcsize = fab->fab$b_fsz;
+    recattr.fat$w_gbc = VMSWORD(fab->fab$w_gbc);
+    recattr.fat$w_maxrec = VMSWORD(fab->fab$w_mrs);
+    recattr.fat$b_rtype = fab->fab$b_rfm | fab->fab$b_org;
+    recattr.fat$b_rattrib = fab->fab$b_rat;
+
     sts = sys$qiow(0,getchan(wccfile->wcf_vcb),IO$_CREATE|IO$M_ACCESS,&iosb,0,0,
-		   &fibdsc,&wccfile->wcf_wcd.wcd_serdsc,0,0,0,0);
+		   &fibdsc,&wccfile->wcf_wcd.wcd_serdsc,0,0,&atr[0],0);
     if (sts == SS$_ILLIOFUNC) {
       sts = 1;
       goto go;
@@ -1479,6 +1505,7 @@ unsigned exe$extend(struct _fabdef *fab)
   unsigned sts;
   int wcc_flag = 0;
   struct _fibdef fibblk;
+  memset(&fibblk, 0, sizeof(struct _fibdef));
   struct dsc$descriptor fibdsc,serdsc;
   struct _atrdef atr[2];
   struct _fatdef recattr;
