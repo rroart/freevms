@@ -119,6 +119,7 @@ inline void regtrap(char type, char param) {
   case REG_INTR:
     current->psl_cur_mod=0;
     current->psl_prv_mod=0;
+    current->psl_is=1;
     /*  not fully implemented */
     current->psl_ipl=param;
     smp$gl_cpu_data[cpu]->cpu$b_ipl=current->psl_ipl;

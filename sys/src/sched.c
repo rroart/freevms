@@ -869,6 +869,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   if (mydebug4) printk("bef swto\n");
   //  if (mydebug6) printk("bef swto %x %x\n",curpcb,next);
 
+  next->pr_astlvl=next->phd$b_astlvl;
   switch_to(curpcb, next, curpcb);
 
   /* does not get here */
@@ -1561,7 +1562,10 @@ void __init init_idle(void)
 	//	sched_data->last_schedule = get_cycles();
 	clear_bit(current->pcb$l_cpu_id, &wait_init_idle);
 	current->psl=0;
-	//	current->pslindex=0;
+	current->pslindex=0;
+	current->pcb$b_asten=15;
+	current->phd$b_astlvl=4;
+	current->pr_astlvl=4;
 	printk("done init_idle\n");
 	done_init_idle=1;
 }

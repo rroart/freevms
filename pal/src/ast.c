@@ -16,10 +16,12 @@ asmlinkage void sw_ast(void) {
   //{ int i; for (i=0;i<10000000;i++) ; }
   //return;
   // varm stuff here REI
-  // should reaaly be if (cpu->cpu$b_cur_mod > p->pr_astlvl) etc
+  // should reaaly be if (cpu->cpu$b_cur_mod >= p->pr_astlvl) etc
   //if (p->phd$b_astlvl<4)
-  if (cpu->cpu$b_cur_mod > p->pr_astlvl)
-    SOFTINT_ASTDEL_VECTOR;
+  //if (p->psl_is) printk("dropping sw_ast\n");
+  if (!p->oldpsl_is)
+    if (p->psl_cur_mod >= p->pr_astlvl)
+      SOFTINT_ASTDEL_VECTOR;
   /* check sw interrupts */
   //in_sw_ast=0;
 }

@@ -706,8 +706,8 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	qhead_init(&p->pcb$l_astqfl);
 	p->pcb$b_asten=15;
-	p->phd$b_astlvl=0;
-	p->pr_astlvl=0;
+	p->phd$b_astlvl=4;
+	p->pr_astlvl=4;
 
 	p->psl=0;
 	//	p->pslindex=0;

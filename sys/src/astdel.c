@@ -90,7 +90,12 @@ asmlinkage void sch$astdel(void) {
     goto more;
   }
   printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
-  setipl(0);
+  setipl(IPL$_ASTDEL);
+  if (p->pcb$b_asten!=15 || p->pcb$b_astact) { // 15 because no modes yet
+    insque(acb,p->pcb$l_astqfl);
+    p->phd$b_astlvl=p->pr_astlvl=(acb->acb$b_rmod & 3) + 1;
+    return;
+  }
   p->pcb$b_astact=1;
   if(acb->acb$l_ast) acb->acb$l_ast(acb->acb$l_astprm); /* ? */
   p->pcb$b_astact=0;

@@ -243,7 +243,7 @@ int sys$clrast(void) {
 }
 
 int sys$setast(char enbflg) {
-  return INLINE_SYSCALL($setast,1,((unsigned long)s));
+  return INLINE_SYSCALL($setast,1,((unsigned long)enbflg));
 }
 
 int sys$asctim  (unsigned short int *timlen, void *timbuf,

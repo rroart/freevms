@@ -15,6 +15,7 @@
 #include"../../freevms/starlet/src/iodef.h"
 #include"../../freevms/starlet/src/devdef.h"
 #include"../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/pal/src/ipl.h"
 #include<linux/vmalloc.h>
 
 struct _fdt fdt_null = {
@@ -30,6 +31,10 @@ void nl_isr (void) {
   struct _irp * i;
   struct _ucb * u;
 
+  if (intr_blocked(20))
+    return;
+  regtrap(REG_INTR,20);
+  setipl(20);
   printk("isr\n");
 
   /* have to do this until we get things more in order */
@@ -38,6 +43,7 @@ void nl_isr (void) {
 
   func=u->ucb$l_fpc;
   func(i,u);
+  myrei();
 }
 
 void  null_startio2 (struct _irp * i, struct _ucb * u);
