@@ -435,11 +435,17 @@ int default_size[] = {7,8,0,1,1};
 
 unsigned do_parse(struct _fabdef *fab,struct WCCFILE **wccret)
 {
+    int sts;
     struct WCCFILE *wccfile;
-    char *fna = search_log_prc(fab->fab$l_fna);
+    char *fna;
+    int fns;
+    sts = search_log_repl(fab->fab$l_fna,&fna,&fns);
+    if ((sts&1)==0) {
+      fna=fab->fab$l_fna;
+      fns=fab->fab$b_fns;
+    }
     char *dna = fab->fab$l_dna;
     struct _namdef *nam = fab->fab$l_nam;
-    int sts;
     int fna_size[5] = {0, 0, 0, 0, 0},dna_size[5] = {0, 0, 0, 0, 0};
     if (fab->fab$w_ifi != 0) return RMS$_IFI;
         if (nam != NULL) if (nam->nam$l_wcc == 0) {
@@ -448,7 +454,7 @@ unsigned do_parse(struct _fabdef *fab,struct WCCFILE **wccret)
         }
     /* Break up file specifications... */
 
-    sts = name_delim(fna,fab->fab$b_fns,fna_size);
+	sts = name_delim(fna,fns/*fab->fab$b_fns*/,fna_size);
     if ((sts & 1) == 0) return sts;
     if (dna) {
         sts = name_delim(dna,fab->fab$b_dns,dna_size);

@@ -1314,8 +1314,15 @@ int main(int argc,char *argv[])
       memcpy(&str[i],argv[c],strlen(argv[c]));
       i+=strlen(argv[c]);
     } else {
-      memcpy(&str[i],basename(argv[c]),strlen(basename(argv[c])));
-      i+=strlen(basename(argv[c]));
+      char * base=strchr(argv[c],':');
+      if (base) {
+	base++;
+	memcpy(&str[i],base,strlen(base));
+	i+=strlen(base);
+      } else {
+	memcpy(&str[i],basename(argv[c]),strlen(basename(argv[c])));
+	i+=strlen(basename(argv[c]));
+      }
     }
     str[i++]=32;
   }

@@ -898,6 +898,7 @@ static int init(void * unused)
 	extern char * default_name;
 	char * vmsdev = do_translate(root_device_name);
 	memcpy(default_name,vmsdev,strlen(vmsdev));
+	cre_syscommon(vmsdev);
 #endif
 	prepare_namespace();
 	printk("%%KERNEL-I-DEBUG, After prepare_namspace\n");
@@ -916,7 +917,7 @@ static int init(void * unused)
 	unlock_kernel();
 	//	mydebug5=1;
 	//	mydebug6=1;
-	printk("%%KERNEL-I-DEBUG, After unlock_kernel %x %x %x %x %x %x %x %x\n",current,current->pcb$l_pid,current->mm,current->active_mm,&init_task,init_task.pcb$l_pid,init_task.mm,init_task.active_mm);
+	printk("%%KERNEL-I-DEBUG, After unlock_kernel\n");
 #ifndef CONFIG_VMS
 	if (mount_root_vfs && open("/dev/console", O_RDWR, 0) < 0)
 		printk("Warning: unable to open an initial console.\n");
@@ -946,14 +947,14 @@ static int init(void * unused)
 	extern char * mydevice;
 	probe_units();
 	if (mydevice==0)
-	  printk("No network module. Can not start IPACP.\n");
+	  printk("%%KERNEL-I-DEBUG, No network module. Can not start IPACP.\n");
 	else
 	  kernel_thread(Main, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	if (mydevice==0)
-	  printk("No network module. Can not start clustering.\n");
+	  printk("%%KERNEL-I-DEBUG, No network module. Can not start clustering.\n");
 	else {
 	  if (scs_init_done==0)
-	    printk("Nothing in params.dat. Can not start clustering.\n");
+	    printk("%%KERNEL-I-DEBUG, Nothing in params.dat. Can not start clustering.\n");
 	  else
 	    scs_init2();
 	}
