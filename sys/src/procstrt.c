@@ -167,6 +167,7 @@ void lnm_init_prc(struct _pcb * p) {
 }
 
 int exe$procstrt(struct _pcb * p) {
+  p=smp$gl_cpu_data[0]->cpu$l_curpcb;
   // get pcb and copy pqb
   // store rms dispatcher address
   // initialize dispatch vector for system services
