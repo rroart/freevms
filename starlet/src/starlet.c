@@ -387,6 +387,10 @@ int sys$imgsta(void * transfer, void * parseinfo, void * header, void * file, un
   return INLINE_SYSCALL($imgsta,1,&s);
 }
 
+int sys$rundwn(int mode) {
+  return INLINE_SYSCALL($rundwn,1,mode);
+}
+
 int sys$purgws  (struct _va_range *inadr) { 
   return INLINE_SYSCALL($purgws,1,inadr);
 }
