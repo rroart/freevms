@@ -54,6 +54,11 @@
 #include <asm-i386/hw_irq.h>
 #endif
 
+/* try to cut out wake_up_process schedule_timeout __wake_up __wake_up_sync 
+   complete wait_for_completion interruptible_sleep_on 
+   interruptible_sleep_on_timeout sleep_on sleep_on_timeout 
+*/ 
+
 extern void timer_bh(void);
 extern void tqueue_bh(void);
 extern void immediate_bh(void);
@@ -467,6 +472,7 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   return success;
 }
 
+#if 0
 static inline int try_to_wake_up2(struct task_struct * p, int synchronous, int priclass)
 {
   unsigned long flags;
@@ -495,16 +501,19 @@ static inline int try_to_wake_up2(struct task_struct * p, int synchronous, int p
   spin_unlock_irqrestore(&runqueue_lock, flags);
   return success;
 }
+#endif
 
 inline int wake_up_process(struct task_struct * p)
 {
 	return try_to_wake_up(p, 0);
 }
 
+#if 0
 inline int wake_up_process2(struct task_struct * p,int priclass)
 {
 	return try_to_wake_up2(p, 0, priclass);
 }
+#endif
 
 static void process_timeout(unsigned long __data)
 {
@@ -725,24 +734,30 @@ asmlinkage void sch$resched(void) {
     //    curpcb->state=TASK_INTERRUPTIBLE; /* soon SCH$C_COM ? */
     //    curpcb->pcb$w_state=SCH$C_COM;
     qhead=*(unsigned long *)&sch$aq_comt[curpri];
+#ifdef DEBUG_SCHED
     before=numproc();
     //    printcom();
     //if (curpcb==0xa018c000 && qhead==0xa018c000)
     //  panic("aieeeeeh\n");
     mycheckaddr();
     //if (curpcb==qhead) panic(" a panic\n");
+#endif
     if (!task_on_comqueue(curpcb)) {
       if (curpcb==qhead) panic(" a panic\n");
       insque(curpcb,qhead);
     }
+#ifdef DEBUG_SCHED
     mycheckaddr();
+#endif
     nr_running++;
+#ifdef DEBUG_SCHED
     after=numproc();
     if(after-before!=1) {
       //printk("entry qhead %x %x\n",curpcb,qhead);
       printcom();
       panic("insq2 %x %x\n",before,after);
     }
+#endif
 
     sch$gl_idle_cpus=0;
   }
@@ -826,8 +841,10 @@ asmlinkage void sch$sched(int from_sch$resched) {
   affinity=0;
 
   tmppri=ffs(sch$gl_comqs);
+#ifdef DEBUG_SCHED
   if (mydebug5)
     printk("ffs %x %x\n",tmppri,sch$gl_comqs);
+#endif
 
   if (!tmppri) {
     //    goto sch$idle;
@@ -836,6 +853,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   } else {
     tmppri--;
     qhead=*(unsigned long *)&sch$aq_comh[tmppri];
+#ifdef DEBUG_SCHED
     if (mydebug4) printk("eq qhead %x %x %x %x\n",
 			 (unsigned long *)qhead,(unsigned long *)(qhead+4),
 			 *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
@@ -845,9 +863,13 @@ asmlinkage void sch$sched(int from_sch$resched) {
     if (mydebug4) printk("next %x %x %x %x\n",qhead,*(void**)qhead,next,sch$aq_comh[tmppri]);
     before=numproc();
     mycheckaddr();
+#endif
     next=(struct _pcb *) remque(qhead,next);
+#ifdef DEBUG_SCHED
     mycheckaddr();
+#endif
     nr_running--;
+#ifdef DEBUG_SCHED
     after=numproc();
     if(before-after!=1) {
       int i;
@@ -856,6 +878,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
     }
     if (mydebug4) printk("next %x %x %x %x\n",qhead,*(void**)qhead,next,sch$aq_comh[tmppri]);
     if (mydebug4) printk("comh %x %x\n",sch$aq_comh[tmppri],((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl);
+#endif
     if (sch$aq_comh[tmppri]==((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl)
       sch$gl_comqs=sch$gl_comqs & (~(1 << tmppri));
     //    if(*(unsigned long *)qhead == qhead)
@@ -888,15 +911,19 @@ asmlinkage void sch$sched(int from_sch$resched) {
   
   sch$gl_active_priority=sch$gl_active_priority | (1 << (31-cpu->cpu$b_cur_pri));
 
+#ifdef DEBUG_SCHED
   if (mydebug5) { 
     printk("pri %x %x %x %x %x %x\n",curpcb,curpcb->pid,curpcb->pcb$b_pri,next,next->pid,next->pcb$b_pri);
     printk("cpusch %x %x\n",cpu->cpu$b_cur_pri,sch$gl_comqs);
     printcom();
   }
+#endif
 
   curpcb->need_resched = 0;
 
+#ifdef DEBUG_SCHED
   if (mydebug4) { int i; for(i=0;i<100000000;i++) ; }
+#endif
   if (next == curpcb) { /* does not belong in vms, but must be here */
     spin_unlock_irq(&runqueue_lock);
     spin_unlock(&SPIN_SCHED);
@@ -954,8 +981,10 @@ asmlinkage void sch$sched(int from_sch$resched) {
    * stack.
    */
 
+#ifdef DEBUG_SCHED
   if (mydebug4) printk("bef swto\n");
   //  if (mydebug6) printk("bef swto %x %x\n",curpcb,next);
+#endif
 
   next->pr_astlvl=next->phd$b_astlvl;
   if (from_sch$resched==0) {
@@ -1017,6 +1046,7 @@ static inline void __wake_up_common (wait_queue_head_t *q, unsigned int mode,
 	}
 }
 
+#if 0
 static inline void __wake_up_common2 (wait_queue_head_t *q, unsigned int mode,
 			 	     int nr_exclusive, const int sync, int priclass)
 {
@@ -1040,6 +1070,7 @@ static inline void __wake_up_common2 (wait_queue_head_t *q, unsigned int mode,
 		}
 	}
 }
+#endif
 
 void __wake_up(wait_queue_head_t *q, unsigned int mode, int nr)
 {
@@ -1092,6 +1123,7 @@ void wait_for_completion(struct completion *x)
 	spin_unlock_irq(&x->wait.lock);
 }
 
+#if 0
 void __wake_up2(wait_queue_head_t *q, unsigned int mode, int nr, int priclass)
 {
 	if (q) {
@@ -1143,6 +1175,7 @@ void wait_for_completion2(struct completion *x)
 	x->done--;
 	spin_unlock_irq(&x->wait.lock);
 }
+#endif
 
 #define	SLEEP_ON_VAR				\
 	unsigned long flags;			\
