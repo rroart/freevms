@@ -51,12 +51,14 @@ signed long mmg$rempfn(unsigned long type, struct _pfn * pfn) {
   if (pfn==pfn$al_head[type]) {
     h=pfn$al_head[type]=((struct _pfn *) pfn$al_head[type])->pfn$l_flink;
     h->pfn$l_blink=0; // gcc bug?
+    pfn$al_head[type]=h;
     goto out;
   }
 
   if (pfn==pfn$al_tail[type]) {
     h=pfn$al_tail[type]=((struct _pfn *) pfn$al_tail[type])->pfn$l_blink;
     h->pfn$l_flink=0; // gcc bug?
+    pfn$al_tail[type]=h;
     goto out;
   }
 
@@ -125,6 +127,7 @@ signed long mmg$allocontig(unsigned long num) {
   return (((unsigned long)first-(unsigned long)mem_map)/sizeof(struct _pfn));
 }
 
+// drop doing this sorted some time later
 signed long mmg$inspfn(unsigned long type, struct _pfn * pfn, struct _pfn * list) {
   struct _mypfn * m=pfn, * tmp;
 
@@ -161,21 +164,21 @@ signed long mmg$inspfn(unsigned long type, struct _pfn * pfn, struct _pfn * list
     goto out;
   }
 
-  // ordinary case?
-  if (m>tmp && m<tmp->pfn$l_flink) { 
-    m->pfn$l_flink=tmp->pfn$l_flink;
-    m->pfn$l_blink=tmp;
-    ((struct _mypfn *)tmp->pfn$l_flink)->pfn$l_blink=m;
-    tmp->pfn$l_flink=m;
-    goto out;
-  }
-
   // new tail?
   if (m>tmp && tmp->pfn$l_flink==0) {
     tmp->pfn$l_flink=m;
     m->pfn$l_flink=0;
     m->pfn$l_blink=pfn$al_tail[type];
     pfn$al_tail[type]=m;
+    goto out;
+  }
+
+  // ordinary case?
+  if (m>tmp && m<tmp->pfn$l_flink) { 
+    m->pfn$l_flink=tmp->pfn$l_flink;
+    m->pfn$l_blink=tmp;
+    ((struct _mypfn *)tmp->pfn$l_flink)->pfn$l_blink=m;
+    tmp->pfn$l_flink=m;
     goto out;
   }
 
@@ -301,7 +304,7 @@ int mmg$relpfn(signed int pfn) {
   if (mem_map[pfn].pfn$l_page_state&PFN$M_MODIFY) {
     // do more dealloc
     // maybe backingstore related?
-    mmg$inspfnt(PFN$C_MFYPAGLST,&mem_map[pfn]);
+    mmg$inspfn/* really t*/(PFN$C_MFYPAGLST,&mem_map[pfn],0);
 
   } else {
     mmg$inspfn(PFN$C_FREPAGLST,&mem_map[pfn],0); // really inspfnh
