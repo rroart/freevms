@@ -279,7 +279,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	void * regs = &p->thread.regs;
 #else
 	struct pt_regs * regs = &pidadr;
-	printk("newthread %x\n",p),
+	//printk("newthread %x\n",p),
 	retval = new_thread(0, clone_flags, 0, 0, p, 0);
 #endif
 
