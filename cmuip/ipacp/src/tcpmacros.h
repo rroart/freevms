@@ -248,23 +248,21 @@ MACRO
 	    ENABLE_AST \
 }
 
-#if 0
 // Wake sleeping ACP from $HIBER call. This is used when an AST routine wants
 // the mainline ACP code to do something at non-AST level.
 
-    $ACPWAKE =
-	BEGIN
-	$QEXT(SLEEPING)
-	IF .SLEEPING THEN
-	    BEGIN
-	    SLEEPING = FALSE;
-	    $WAKE();
-	    END
-	END
-    %,
+#define    $ACPWAKE \
+	{ \
+	extern sleeping; \
+	if (sleeping) \
+	    { \
+	    sleeping = FALSE; \
+	    exe$wake(); \
+	} \
+	}
 
 // Macros to do word and longword byte swapping.
-#endif
+
 #define    SWAPWORD(ADDR) \
 	{ \
 	char * XX = ADDR;\
@@ -409,11 +407,11 @@ MACRO
 #define    LOG$DEBUG	 0x2000	// Temporary statements
 #define    LOG$MEM	 0x4000	// Memory Allocation
 #define    LOG$MSG	 0x8000	// Name Lookup
-#define    LOG$Telnet	 0x10000	// Log Telnet activity
-#define    LOG$TelNeg	 0x20000	// Log Telnet negotiations
-#define    LOG$TelERR	 0x40000	// Log Telnet errors
-#define    LOG$Snoop	 0x80000	// SNOOP activity
-#define    LOG$Flush	 0x100000	// Dump each line
+#define    LOG$TELNET	 0x10000	// Log Telnet activity
+#define    LOG$TELNEG	 0x20000	// Log Telnet negotiations
+#define    LOG$TELERR	 0x40000	// Log Telnet errors
+#define    LOG$SNOOP	 0x80000	// SNOOP activity
+#define    LOG$FLUSH	 0x100000	// Dump each line
 
 // Define QBLK/Input segment queue flags.
 

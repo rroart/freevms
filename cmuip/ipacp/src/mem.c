@@ -19,6 +19,7 @@
 
 	****************************************************************
 */
+#if 0
 MODULE
     Memory (
 	ADDRESSING_MODE (
@@ -27,47 +28,48 @@ MODULE
 	LANGUAGE (BLISS32),
 	LIST (NOBINARY, ASSEMBLY, NOEXPAND)
 	)
-{
+#endif
 
-!++
+//++
 // Mem.B32	Copyright (c) 1986	Carnegie Mellon University
-!
+//
 // Description:
-!
-!	A few routines to aid with dynamic memory manegment.
-!
+//
+//	A few routines to aid with dynamic memory manegment.
+//
 // Written By:	Dale Moore	CMU-CS/RI
-!
+//
 // Modifications:
-!
-!--
+//
+//--
 
-!LIBRARY "SYS$LIBRARY:XPORT";
-#include "SYS$LIBRARY:STARLET";
-#include	"TCP" ;
-#include	"TCPMACROS" ;
+//LIBRARY "SYS$LIBRARY:XPORT";
+#include <starlet.h>
+#include	"tcp.h" 
+#include	"tcpmacros.h" 
+
+#include <ssdef.h>
 
 extern
-    LIB$GET_VM	: BLISS ADDRESSING_MODE (GENERAL),
-    LIB$FREE_VM	: BLISS ADDRESSING_MODE (GENERAL),
-    LIB$RESET_VM_ZONE	: BLISS ADDRESSING_MODE (GENERAL),
-    LIB$STAT_VM	: BLISS ADDRESSING_MODE (GENERAL) ;
+LIB$GET_VM(),
+  LIB$FREE_VM(),
+  LIB$RESET_VM_ZONE(),
+  LIB$STAT_VM();
 
 extern signed long
-    LOG_STATE ;
+    log_state ;
 
-FORWARD	ROUTINE
-    GET_MEM,
-    FREE_MEM,
-    RESET_MEM,
- VOID    MEM_STAT;
+Get_Mem();
+Free_Mem();
+Reset_Mem();
+ void    MEM_STAT();
 
-Make_Zone : NOVALUE (void)
+void Make_Zone (void)
     {
-    EXTERNAL ROUTINE
-	LIB$CREATE_USER_VM_ZONE	: BLISS ADDRESSING_MODE (GENERAL),
-	LIB$CREATE_VM_ZONE	: BLISS ADDRESSING_MODE (GENERAL),
-	LIB$DELETE_VM_ZONE	: BLISS ADDRESSING_MODE (GENERAL);
+    extern
+      LIB$CREATE_USER_VM_ZONE(),
+      LIB$CREATE_VM_ZONE(),
+      LIB$DELETE_VM_ZONE;
     signed long
 	Real_Zone,
 	User_Zone,
@@ -76,7 +78,7 @@ Make_Zone : NOVALUE (void)
     Status = LIB$CREATE_VM_ZONE(Real_Zone) ;
     XLOG$FAO(LOG$MEM,"!%T MAKE_ZONE: Status: !SL, Zone: !SL!/",
 	0, Status, Real_Zone) ;
-    if (NOT Status)
+    if (! Status)
 	{
 	Signal (Status);
 	};
@@ -88,12 +90,12 @@ Make_Zone : NOVALUE (void)
 	LIB$DELETE_VM_ZONE) ;
     XLOG$FAO(LOG$MEM,"!%T MAKE_ZONE: Status: !SL, Zone: !SL UZone: !SL!/",
 	0, Status, Real_Zone, User_Zone) ;
-    if (NOT Status)
+    if (! Status)
 	{
 	Signal (Status);
 	};
     Mem_Stat();
-    return (User_Zone)
+    return (User_Zone);
     }
 
 Get_Mem (Size, Block_A, Zone)
@@ -102,12 +104,12 @@ Get_Mem (Size, Block_A, Zone)
 	Status;
 
     XLOG$FAO(LOG$MEM,"!%T GET_MEM: Size: !SL, Addr: !SL, Zone: !SL!/",
-	0, size, Block_A, Zone) ;
+	0, Size, Block_A, Zone) ;
     Status = LIB$GET_VM(Size, Block_A, Zone) ;
     XLOG$FAO(LOG$MEM,"!%T GET_MEM: Status: !SL, Size: !SL, Addr: !SL, Zone: !SL!/",
-	0, status, size, Block_A, Zone) ;
+	0, Status, Size, Block_A, Zone) ;
     Mem_Stat();
-    return (Status)
+    return (Status);
     }
 
 Free_Mem (Size, Block_A, Zone)
@@ -117,9 +119,9 @@ Free_Mem (Size, Block_A, Zone)
 
     Status = LIB$GET_VM(Size, Block_A, Zone) ;
     XLOG$FAO(LOG$MEM,"!%T FREE_MEM: Status: !SL, Size: !SL, Addr: !SL, Zone: !SL!/",
-	0, status, size, Block_A, Zone) ;
+	0, Status, Size, Block_A, Zone) ;
     Mem_Stat() ;
-    return (Status)
+    return (Status);
     }
 
 Reset_Mem (Size, Block_A, Zone)
@@ -129,12 +131,12 @@ Reset_Mem (Size, Block_A, Zone)
 
     Status = LIB$RESET_VM_ZONE(Zone) ;
     XLOG$FAO(LOG$MEM,"!%T RESET_MEM: Status: !SL Size: !SL, Addr: !SL, Zone: !SL!/",
-	0, status, size, Block_A, Zone) ;
+	0, Status, Size, Block_A, Zone) ;
     Mem_Stat() ;
-    return (Status)
+    return (Status);
     }
 
-Mem_Stat : NOVALUE (void)
+void Mem_Stat (void)
     {
     signed long
 	ngets,
@@ -142,14 +144,12 @@ Mem_Stat : NOVALUE (void)
 	nbytes,
 	Status;
 
-    Status = LIB$STAT_VM(%REF(1), ngets) ;
-    if (NOT Status) Signal (Status);
-    Status = LIB$STAT_VM(%REF(2), nfrees) ;
-    if (NOT Status) Signal (Status);
-    Status = LIB$STAT_VM(%REF(3), nbytes) ;
+    Status = LIB$STAT_VM(/*%REF*/(1), ngets) ;
+    if (! Status) Signal (Status);
+    Status = LIB$STAT_VM(/*%REF*/(2), nfrees) ;
+    if (! Status) Signal (Status);
+    Status = LIB$STAT_VM(/*%REF*/(3), nbytes) ;
     XLOG$FAO(LOG$MEM,"!%T MEM_STAT: Gets: !SL, Frees: !SL, Bytes: !SL!/",
 	0,ngets, nfrees, nbytes);
-    if (NOT Status) Signal (Status);
+    if (! Status) Signal (Status);
     }
-}
-ELUDOM

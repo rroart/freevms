@@ -6,10 +6,21 @@
 #define OFF 0
 #define ON 1
 
-struct queue_header_structure {
-struct queue_header_structure * si_qhead;
-struct queue_header_structure * si_qtail;
+// a few ascii characters.
+
+#define     CH_NUL	  0
+#define     CH_tab	  9
+#define     CH_sp	  32
+#define     CH_FF	  12		// formFeed
+#define     CH_LF	  10		// Line-Feed
+#define     CH_CR	  13		// Carriage-Return
+
+struct queue_header_fields {
+struct queue_header_fields * qhead;
+struct queue_header_fields * qtail;
 };
+
+#define queue_header_structure(x) x
 
 #define DESC$STR_ALLOC(x,y) /* check */ \
 char x##_str[y];\

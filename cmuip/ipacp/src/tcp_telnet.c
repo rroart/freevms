@@ -58,7 +58,7 @@ Module Modification History:
 	New routine NET_TO_PTY() now fills the PTY buffer from the TCP buffer,
 	and handles buffer wrapping and overflow properly.
 	PTY_WRITE() now handles buffer wrapping and overflow properly.
-	Call TCP$Enqueue_ACK() rather than setting P}ING_ACK.
+	Call TCP$Enqueue_ACK() rather than setting PENDING_ACK.
 
 1.8	13-Nov-1991 Edit by John M. Clement(JC)	Rice University
 	Modified to make Negotiations work.
@@ -113,6 +113,8 @@ MODULE TELNET(IDENT="1.11",LANGUAGE(BLISS32),
 
 //!!HACK!!// why does this module make so many refs to AST_in_Progress?
 
+#include<descrip.h> 
+
 #include <starlet.h>	// VMS system definitions
 // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS common definitions
 #include <cmuip/central/include/neterror.h>	// Network error codes
@@ -124,38 +126,38 @@ MODULE TELNET(IDENT="1.11",LANGUAGE(BLISS32),
 #include "telnet.h"		// TELNET protocol definitions
 
 #include<ssdef.h>
-#include<descrip.h> 
+#include<iodef.h>
+#include<dvidef.h>
+#include<iosbdef.h>
+#include<msgdef.h>
 
-extern signed long
+extern signed long log_state,
     local_name,
     ast_in_progress;
 
-extern signed long LITERAL
-    M$INTERNAL : UNSIGNED(8);
+extern signed long
+    M$INTERNAL;
 
-extern
-    TCP$TCB_CLOSE,
-    TCB$Create,
- void    TCB$Delete,
- void    TCP$Enqueue_Ack,
- void    TCP$Send_Ack,
-    TCP$Send_Data,
-    TCP$TCB_Init,
-    TIME_STAMP,
-    Check_Unique_Conn,
- void    Conect_Insert;
+extern     TCP$TCB_CLOSE();
+extern     TCB$Create();
+extern  void    TCB$Delete();
+extern  void    TCP$Enqueue_Ack();
+extern  void    TCP$Send_Ack();
+extern     TCP$Send_Data();
+extern     TCP$TCB_Init();
+extern     TIME_STAMP();
+extern     Check_Unique_Conn();
+ void    Conect_Insert();
 
-LITERAL
-    TVT_OPEN_TIMEOUT = 120*CSEC; // Amount of time to wait for TVT to open
+#define    TVT_OPEN_TIMEOUT 120*CSEC // Amount of time to wait for TVT to open
 
-LITERAL		!
-    Telnet$K_Char_AO	= %O"17",	// Control-O
-    Telnet$K_Char_AYT	= %O"24",	// Control-T
-    Telnet$K_Char_Brk	= %O"31",	// Control-Y
-    Telnet$K_Char_EC	= %O"177",	// DEL
-    Telnet$K_Char_Purge	= %X"18",	// Control-X
-    Telnet$K_Char_EL	= %O"25",	// Control-U
-    Telnet$K_Char_IP	= %O"03";	// Control-C.
+#define     Telnet$K_Char_AO	  017	// Control-O
+#define     Telnet$K_Char_AYT	  024	// Control-T
+#define     Telnet$K_Char_Brk	  031	// Control-Y
+#define     Telnet$K_Char_EC	  0177	// DEL
+#define     Telnet$K_Char_Purge	  0x18	// Control-X
+#define     Telnet$K_Char_EL	  025	// Control-U
+#define     Telnet$K_Char_IP	  003	// Control-C.
 
 
 
@@ -163,13 +165,13 @@ LITERAL		!
 
 // Define the structure of a PTY status block
 
-struct pty$iosb 
+struct PTY$IOSB 
 {
 unsigned short    PTSB$STATUS;	// $QIO status
 unsigned short    PTSB$NBYTES;	// Number of bytes transferred
 unsigned short    PTSB$EXTRA1;	// Extra information
 unsigned short    PTSB$EXTRA2;	// Extra information
-  }
+};
 #if 0
 LITERAL
     PTY$IOSB_SIZE = $FIELD_SET_SIZE;
@@ -180,80 +182,110 @@ MACRO
 // USE_ASTS nonzero means we should do all TCP I/O at AST level and thus it is
 // OK to directly call TCP_READ and TCP_WRITE in AST routines.
 
+#define  USE_ASTS 1
 
-const    USE_ASTS = 1;
 
 //SBTTL "Module data"
 
-BIND
-    PTY_NAME = %ASCID"INET$PTY",
-    AYT_RESPONSE = %ASCID"[definitely]";
+struct dsc$descriptor PTY_NAME = ASCID2(8,"INET$PTY");
+struct dsc$descriptor AYT_RESPONSE = ASCID2(12,"[definitely]");
 
 // Define the default options state for new TVTs
 
 extern
-    Timing_Mark_On,
-    Terminal_Type_On,
-    Terminal_Type_Sub,
-    Window_Size_On,
-    Window_Size_Sub,
-    Set_DEVDEP,				// JC
-    LineMode_Sub;
+    Timing_Mark_On(),
+    Terminal_Type_On(),
+    Terminal_Type_Sub(),
+    Window_Size_On(),
+    Window_Size_Sub(),
+    Set_DEVDEP(),				// JC
+    LineMode_Sub();
 
-static signed long
-    DEFAULT_OPTION_BLOCK : OPT$BLOCK
+struct OPT$BLOCK  DEFAULT_OPTION_BLOCK[TELNET$K_X_DISPLAY_LOCATION];
+#if 0
 	PRESET(
 	    [OPT$STATE]		= OPT$STATE_OFF,
 	    [OPT$CURRENT]	= FALSE,
 	    [OPT$PREFER]	= OPT$STATE_OFF),
-    TVT_DEF_LOCAL : OPT$LIST
+#endif
+  struct OPT$BLOCK    TVT_DEF_LOCAL[TELNET$K_X_DISPLAY_LOCATION] =
 { 
   {
 	    /* TELNET$K_BINARY */ OPT$STATE : OPT$STATE_OFF,
 	    /* TELNET$K_BINARY */ OPT$CURRENT : FALSE,
 	    /* TELNET$K_BINARY */ OPT$PREFER : OPT$DONT_CARE,
-	    /* TELNET$K_BINARY */ OPT$ON_RTN : Set_DEVDEP,		!JC
-	    /* TELNET$K_BINARY */ OPT$OFF_RTN : Set_DEVDEP,		!JC
+	    /* TELNET$K_BINARY */ OPT$ON_RTN : Set_DEVDEP,		//JC
+	    /* TELNET$K_BINARY */ OPT$OFF_RTN : Set_DEVDEP,		//JC
 				    }, {
-	    /* TELNET$K_ECHO */ OPT$STATE : OPT$STATE_OFF,	!JC
-	    /* TELNET$K_ECHO */ OPT$CURRENT : FALSE,		!JC
-	    /* TELNET$K_ECHO */ OPT$PREFER : OPT$STATE_ON,		!JC
-	    /* TELNET$K_ECHO */ OPT$ON_RTN : Set_DEVDEP,		!JC
-	    /* TELNET$K_ECHO */ OPT$OFF_RTN : Set_DEVDEP,		!JC
+	    /* TELNET$K_ECHO */ OPT$STATE : OPT$STATE_OFF,	//JC
+	    /* TELNET$K_ECHO */ OPT$CURRENT : FALSE,		//JC
+	    /* TELNET$K_ECHO */ OPT$PREFER : OPT$STATE_ON,		//JC
+	    /* TELNET$K_ECHO */ OPT$ON_RTN : Set_DEVDEP,		//JC
+	    /* TELNET$K_ECHO */ OPT$OFF_RTN : Set_DEVDEP,		//JC
+				    }, {
+				      /* reconn */
 				    }, {
 	    /* TELNET$K_SUPRGA */ OPT$STATE : OPT$STATE_OFF,
 	    /* TELNET$K_SUPRGA */ OPT$CURRENT : FALSE,
 	    /* TELNET$K_SUPRGA */ OPT$PREFER : OPT$STATE_ON,
+				    }, {
+				    }, {
 				    }, {
 	    /* TELNET$K_Timing_Mark */ OPT$STATE : OPT$STATE_OFF,
 	    /* TELNET$K_Timing_Mark */ OPT$CURRENT : FALSE,
 	    /* TELNET$K_Timing_Mark */ OPT$ON_RTN : Timing_Mark_On,
 	    /* TELNET$K_Timing_Mark */ OPT$PREFER : OPT$DONT_CARE,
 				    }, {
-	    /* TELNET$K_Extended_Ascii */ OPT$STATE : OPT$STATE_OFF,!JC
-	    /* TELNET$K_Extended_Ascii */ OPT$CURRENT : FALSE,	!JC
-	    /* TELNET$K_Extended_Ascii */ OPT$PREFER : OPT$DONT_CARE,!JC
-	    /* TELNET$K_Extended_Ascii */ OPT$ON_RTN : Set_DEVDEP,	!JC
-	    /* TELNET$K_Extended_Ascii */ OPT$OFF_RTN : Set_DEVDEP,	!JC
 				    }, {
-//!!JC	    /* TELNET$K_Window_Size */ OPT$STATE : OPT$STATE_OFF,
-//!!JC	    /* TELNET$K_Window_Size */ OPT$CURRENT : FALSE,
-//!!JC	    /* TELNET$K_Window_Size */ OPT$PREFER : OPT$STATE_ON,
-//!!JC	    /* TELNET$K_Window_Size */ OPT$SUB_RTN : Window_Size_Sub,
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+	    /* TELNET$K_Extended_Ascii */ OPT$STATE : OPT$STATE_OFF,//JC
+	    /* TELNET$K_Extended_Ascii */ OPT$CURRENT : FALSE,	//JC
+	    /* TELNET$K_Extended_Ascii */ OPT$PREFER : OPT$DONT_CARE,//JC
+	    /* TELNET$K_Extended_Ascii */ OPT$ON_RTN : Set_DEVDEP,	//JC
+	    /* TELNET$K_Extended_Ascii */ OPT$OFF_RTN : Set_DEVDEP,	//JC
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+				    }, {
+//!//JC	    /* TELNET$K_Window_Size */ OPT$STATE : OPT$STATE_OFF,
+//!//JC	    /* TELNET$K_Window_Size */ OPT$CURRENT : FALSE,
+//!//JC	    /* TELNET$K_Window_Size */ OPT$PREFER : OPT$STATE_ON,
+//!//JC	    /* TELNET$K_Window_Size */ OPT$SUB_RTN : Window_Size_Sub,
+				    }, {
+				    }, {
 				    }, {
 	    /* TELNET$K_LineMode */ OPT$STATE : OPT$STATE_OFF,
 	    /* TELNET$K_LineMode */ OPT$CURRENT : FALSE,
-	    /* TELNET$K_LineMode */ OPT$PREFER : OPT$STATE_Off),
-					 };
-    TVT_DEF_REMOTE : OPT$LIST
-	PRESET(
+	    /* TELNET$K_LineMode */ OPT$PREFER : OPT$STATE_OFF,
+				    }
+					}  ;
+
+struct OPT$BLOCK TVT_DEF_REMOTE[TELNET$K_X_DISPLAY_LOCATION] = {
+  {
 	    /* TELNET$K_BINARY */ OPT$STATE : OPT$STATE_OFF,
 	    /* TELNET$K_BINARY */ OPT$CURRENT : FALSE,
 	    /* TELNET$K_BINARY */ OPT$PREFER : OPT$DONT_CARE,
 				    }, {
-//!!JC	    /* TELNET$K_ECHO */ OPT$STATE : OPT$STATE_OFF,	!JC
-//!!JC	    /* TELNET$K_ECHO */ OPT$CURRENT : FALSE,		!JC
-//!!JC	    /* TELNET$K_ECHO */ OPT$PREFER : OPT$DONT_CARE,	!JC
+//!//JC	    /* TELNET$K_ECHO */ OPT$STATE : OPT$STATE_OFF,	//JC
+//!//JC	    /* TELNET$K_ECHO */ OPT$CURRENT : FALSE,		//JC
+//!//JC	    /* TELNET$K_ECHO */ OPT$PREFER : OPT$DONT_CARE,	//JC
 				    }, {
       /* reconn */
 				    }, {
@@ -269,21 +301,67 @@ static signed long
 	    /* TELNET$K_Timing_Mark */ OPT$CURRENT : FALSE,
 	    /* TELNET$K_Timing_Mark */ OPT$PREFER : OPT$DONT_CARE,
 				    }, {
-	    /* TELNET$K_Extended_Ascii */ OPT$STATE : OPT$STATE_OFF,!JC
-	    /* TELNET$K_Extended_Ascii */ OPT$CURRENT : FALSE,	!JC
-	    /* TELNET$K_Extended_Ascii */ OPT$PREFER : OPT$DONT_CARE,!JC
+				      /* remote */
+				    }, {
+				      /* line */
+				    }, {
+				      /* page */
+				    }, {
+				      /* cr */
+				    }, {
+				      /* tab st */
+				    }, {
+				      /* tab di */
+				    }, {
+				      /* ff */
+				    }, {
+				      /* vert */
+				    }, {
+				      /* vt */
+				    }, {
+				      /* lf */
+				    }, {
+	    /* TELNET$K_Extended_Ascii */ OPT$STATE : OPT$STATE_OFF,//JC
+	    /* TELNET$K_Extended_Ascii */ OPT$CURRENT : FALSE,	//JC
+	    /* TELNET$K_Extended_Ascii */ OPT$PREFER : OPT$DONT_CARE,//JC
+				    }, {
+				      /* logout */
+				    }, {
+				      /* byte */
+				    }, {
+				      /* data */
+				    }, {
+				      /* supdup */
+				    }, {
+				      /* supout */
+				    }, {
+				      /* loc */
 				    }, {
 	    /* TELNET$K_Terminal_Type */ OPT$STATE : OPT$STATE_OFF,
 	    /* TELNET$K_Terminal_Type */ OPT$CURRENT : FALSE,
-	    /* TELNET$K_Terminal_Type */ OPT$PREFER : OPT$STATE_ON,	!!// JC
+	    /* TELNET$K_Terminal_Type */ OPT$PREFER : OPT$STATE_ON,	//!// JC
 	    /* TELNET$K_Terminal_Type */ OPT$ON_RTN : Terminal_Type_On,
 	    /* TELNET$K_Terminal_Type */ OPT$SUB_RTN : Terminal_Type_Sub,
 				    }, {
+				      /* eor */
+				    }, {
+				      /* uid */
+				    }, {
+				      /* out mark */
+				    }, {
+				      /* loc no */
+				    }, {
+				      /* 3270 */
+				    }, {
+				      /* x3 */
+				    }, {
 	    /* TELNET$K_Window_Size */ OPT$STATE : OPT$STATE_OFF,
 	    /* TELNET$K_Window_Size */ OPT$CURRENT : FALSE,
-	    /* TELNET$K_Window_Size */ OPT$PREFER : OPT$STATE_ON,		!!// JC
+	    /* TELNET$K_Window_Size */ OPT$PREFER : OPT$STATE_ON,		//!// JC
 	    /* TELNET$K_Window_Size */ OPT$ON_RTN : Window_Size_On,
 	    /* TELNET$K_Window_Size */ OPT$SUB_RTN : Window_Size_Sub,
+				    }, {
+				      /* speed */
 				    }, {
 	    /* TELNET$K_Toggle_Flow_Control */ OPT$STATE : OPT$STATE_OFF,
 	    /* TELNET$K_Toggle_Flow_Control */ OPT$CURRENT : FALSE,
@@ -292,8 +370,11 @@ static signed long
 	    /* TELNET$K_LineMode */ OPT$STATE : OPT$STATE_OFF,
 	    /* TELNET$K_LineMode */ OPT$CURRENT : FALSE,
 	    /* TELNET$K_LineMode */ OPT$PREFER : OPT$STATE_OFF,
-	    /* TELNET$K_LineMode */ OPT$SUB_RTN : LineMode_Sub);
-};
+	    /* TELNET$K_LineMode */ OPT$SUB_RTN : LineMode_Sub,
+				    }, {
+				      { /* x_disp */ }
+}
+} ;
 
 
 //SBTTL "TELNET_CREATE - Initialize a TCP connection for a TVT"
@@ -303,13 +384,13 @@ static signed long
     well-known TELNET port (WKS$TELNET).
 */
 
-FORWARD ROUTINE
- VOID    TELNET_OPEN_TIMEOUT;
+
+ void    TELNET_OPEN_TIMEOUT();
 
 TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
     {
+      struct tcb_structure * TCB;
     signed long
-	STRUCT TCB_STRUCTURE * TCB,
 	CIDX;
 
 // Check for unique connection. We actually know that the connection is already
@@ -327,7 +408,7 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
 
 // Create and initialize a new TCB
 
-    if ((TCB = TCB$Create()) == Error)
+    if ((TCB = TCB$Create()) == ERROR)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT TCB creation failed!/",0);
 	OKINT;
@@ -341,23 +422,23 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
 // Setup standard TVT TCB fields. Note that segment input processing code will
 // setup wild foreign host/port and local host when this routine returns.
 
-    TCB->IS_TVT = TRUE;		// This is a TVT
-    TCB->TVTDATA = 0;		// No TVT data block yet
-    TCB->Local_Host = LHOST;	// Set local host and port
-    TCB->Local_Port = LPORT;
-    TCB->Foreign_Host = FHOST;	// Set foreign host and port
-    TCB->Foreign_Port = FPORT;
-    TCB->UCB_ADRS = 0;		// No UCB for this, since no user process
-    TCB->STATE = CS$LISTEN;	// Initial state is listening for SYN
-    TCB->CON_INDEX = CIDX;
+    TCB->is_tvt = TRUE;		// This is a TVT
+    TCB->tvtdata = 0;		// No TVT data block yet
+    TCB->local_host = LHOST;	// Set local host and port
+    TCB->local_port = LPORT;
+    TCB->foreign_host = FHOST;	// Set foreign host and port
+    TCB->foreign_port = FPORT;
+    TCB->ucb_adrs = 0;		// No UCB for this, since no user process
+    TCB->state = CS$LISTEN;	// Initial state is listening for SYN
+    TCB->con_index = CIDX;
     Conect_Insert(TCB,CIDX);	// Insert into connection table
 
 // Setup a handler if the open times-out
 
-    TCB->Pending_IO = TRUE;
-    TCB->Curr_User_Function = M$INTERNAL;
-    TCB->Timeout_Routine = TELNET_OPEN_TIMEOUT;
-    TCB->Function_Timer = Time_Stamp() + TVT_Open_Timeout;
+    TCB->pending_io = TRUE;
+    TCB->curr_user_function = M$INTERNAL;
+    TCB->timeout_routine = TELNET_OPEN_TIMEOUT;
+    TCB->function_timer = Time_Stamp() + TVT_OPEN_TIMEOUT;
 
 // And return the TCB address
 
@@ -365,15 +446,14 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
     return TCB;
     }
 
-TELNET_OPEN_TIMEOUT(TCB) : NOVALUE (void)
+void TELNET_OPEN_TIMEOUT(TCB)
+	struct tcb_structure * TCB;
     {
 //
 //   Come here from user function timeout code if a TVT connection does not
 //   become established soon enough after we first see the SYN for it. We
 //   simply flush the TCB.
 //
-    MAP
-	STRUCT TCB_STRUCTURE * TCB;
 
 //~~~ Maybe we should do something better here?
 
@@ -389,60 +469,59 @@ TELNET_OPEN_TIMEOUT(TCB) : NOVALUE (void)
     when TCP connection goes into the ESTABLISHED state.
 */
 
-FORWARD ROUTINE
- VOID    TVT_NEGOTIATE,
- VOID    TCP_READ,
- VOID    TCP_ADD_STRING,
- VOID    TCP_WRITE,
- VOID    PTY_READ,
- VOID    PTY_WRITE,
- VOID    NET_TO_PTY,
- VOID    PTY_TO_NET,
-    MBX_READ,
- VOID    MBX_READ_DONE;
+ void    TVT_NEGOTIATE ();
+ void    TCP_READ ();
+ void    TCP_ADD_STRING ();
+ void    TCP_WRITE ();
+ void    PTY_READ ();
+ void    PTY_WRITE ();
+ void    NET_TO_PTY ();
+ void    PTY_TO_NET ();
+    MBX_READ ();
+ void    MBX_READ_DONE ();
 
-namelook_done(tvt,rc,namlen,name) : NOVALUE (void)
+void namelook_done(TVT,rc,namlen,name)
 //+
 //	Fills in the name of the remote port
 //-
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    signed long
-	STRUCT TCB_STRUCTURE * TCB,
-	nambuf : VECTOR[100,BYTE],
-	nam	: $BBLOCK->DSC$K_S_BLN PRESET (
-		[dsc$w_length] = sizeof(nambuf),
-		[dsc$b_dtype] = DSC$K_DTYPE_Z,
-		[dsc$b_class] = DSC$K_CLASS_Z,
-		[dsc$a_pointer] = nambuf),
-	accporbuf : VECTOR[100,BYTE],
-	accpornam : $BBLOCK->DSC$K_S_BLN PRESET (
-		[dsc$w_length] = sizeof(accporbuf),
-		[dsc$b_dtype] = DSC$K_DTYPE_Z,
-		[dsc$b_class] = DSC$K_CLASS_Z,
-		[dsc$a_pointer] = accporbuf);
+    {
+      struct tcb_structure * TCB;
+      unsigned char 	nambuf[100];
+      struct dsc$descriptor nam = {
+		dsc$w_length : sizeof(nambuf),
+		dsc$b_dtype : DSC$K_DTYPE_Z,
+		dsc$b_class : DSC$K_CLASS_Z,
+		dsc$a_pointer : nambuf};
+      unsigned char 	accporbuf[100];
+      struct dsc$descriptor accpornam_ = {
+		dsc$w_length : sizeof(accporbuf),
+		dsc$b_dtype : DSC$K_DTYPE_Z,
+		dsc$b_class : DSC$K_CLASS_Z,
+		dsc$a_pointer : accporbuf}, *accpornam = &accpornam;
+      $DESCRIPTOR(lnm_table,"LNM$SYSTEM_TABLE");
+      $DESCRIPTOR(lnm_nam,"TELNET_PASS_PORT");
+      struct item_list_3 itm[2]={ {buflen:100, item_code:1, bufaddr: nambuf, &nam.dsc$w_length }, {0,0,0,0} };
 
-    if ((! RC)) return;
+    if ((! rc)) return;
 
     TCB = TVT->TVT$TCB;				// get TCB
 
-    IF $TRNLOG(						// JC Get logical
-		LOGNAM=%ASCID"TELNET_PASS_PORT",	// Pass on port number
-		RSLLEN=nam->dsc$w_length,		// JC
-		RSLBUF=nam)				// JC
-	    == SS$_Normal
-    THEN
-	RC = $FAO(%ASCID"!AF!AS!UL",
+    if (exe$trnlnm(0,&lnm_table,			// JC Get logical
+		&lnm_nam,				// Pass on port number
+		0,					// JC
+		itm)					// JC
+	== SS$_NORMAL)
+      rc = exe$fao(/*%ASCID*/"!AF!AS!UL",
 		accpornam->dsc$w_length,accpornam,
-		.namlen,name,
+		namlen,name,
 		nam,
-		TCB->Foreign_PORT
-		)
+		TCB->foreign_port
+			     );
     else
-	RC = $FAO(%ASCID"!AF",
+	rc = exe$fao(/*%ASCID*/"!AF",
 		accpornam->dsc$w_length,accpornam,
-		.namlen,name
+		namlen,name
 		);
     XLOG$FAO(LOG$TELNET
 	,"!%T Namelook_done: Access port=!AS!/",0
@@ -452,59 +531,62 @@ namelook_done(tvt,rc,namlen,name) : NOVALUE (void)
 //
     if (accpornam->dsc$w_length > 30)
 	return(SS$_NORMAL);				// JC IF too long skip it
-//!!JC	accpornam->dsc$w_length = 30;
-    if (RC)
-	RC = $QIOW (CHAN=TVT->TVT$PTY_CHN,FUNC=IO$_SETMODE,
-			P1=accpornam->dsc$a_pointer,	// Buffer
-			P2=accpornam->dsc$w_length,	// Size
-			P4=4				// Sub-func #4
+//!//JC	accpornam->dsc$w_length = 30;
+    if (rc)
+      rc = exe$qiow (0,TVT->TVT$PTY_CHN,IO$_SETMODE,0,
+		     accpornam->dsc$a_pointer,	// Buffer
+		     accpornam->dsc$w_length,	// Size
+		     0,
+		     4,0,0,0,0				// Sub-func #4
 			);
 
     }
 
 TELNET_OPEN(TCB)
+	struct tcb_structure * TCB;
     {
-    EXTERNAL ROUTINE
-	LIB$GET_VM_PAGE : BLISS ADDRESSING_MODE(GENERAL),
-	LIB$ASN_WTH_MBX : BLISS ADDRESSING_MODE(GENERAL),
-	LIB$GETDVI	: BLISS ADDRESSING_MODE(GENERAL),
-	Print,
-	Line_Changed_AST;
-   EXTERNAL ROUTINE
-	NML$GETNAME;
-    MAP
-	STRUCT TCB_STRUCTURE * TCB;
-    signed long
-	nambuf : VECTOR[256,BYTE],
-	nam	: $BBLOCK->DSC$K_S_BLN PRESET (
-		[dsc$w_length] = sizeof(nambuf),
-		[dsc$b_dtype] = DSC$K_DTYPE_Z,
-		[dsc$b_class] = DSC$K_CLASS_Z,
-		[dsc$a_pointer] = nambuf),
-	accporbuf : VECTOR[100,BYTE],
-	accpornam : $BBLOCK->DSC$K_S_BLN PRESET (
-		[dsc$w_length] = sizeof(accporbuf),
-		[dsc$b_dtype] = DSC$K_DTYPE_Z,
-		[dsc$b_class] = DSC$K_CLASS_Z,
-		[dsc$a_pointer] = accporbuf),
-	struct TVT$BLOCK * TVT,
+      extern	LIB$GET_VM_PAGE();
+      extern LIB$ASN_WTH_MBX();
+      extern LIB$GETDVI();
+      extern Print();
+      extern Line_Changed_AST();
+      extern NML$GETNAME();
+
+      unsigned char 	nambuf[256];
+      struct dsc$descriptor nam_ = {
+		dsc$w_length : sizeof(nambuf),
+		dsc$b_dtype : DSC$K_DTYPE_Z,
+		dsc$b_class : DSC$K_CLASS_Z,
+		dsc$a_pointer : nambuf}, * nam=&nam;
+      unsigned char 	accporbuf[100];
+      struct dsc$descriptor  accpornam_ = {
+		dsc$w_length : sizeof(accporbuf),
+		dsc$b_dtype : DSC$K_DTYPE_Z,
+		dsc$b_class : DSC$K_CLASS_Z,
+		dsc$a_pointer : accporbuf}, *accpornam=&accpornam_;
+      struct TVT$BLOCK * TVT;
+      struct _iosb io_stats;
+      signed long
 	PTYCHAN,
 	MBXCHAN,
 	Status,
 	RC,
-	IO_STATS : BLOCK[8,BYTE],
-	tmp : SIGNED LONG,
-	TMPBUF : BLOCK[TVT_TTY_BUFLEN, BYTE],
-	TMPDSC : BLOCK[DSC$K_Z_BLN,BYTE];
+	tmp;
+      unsigned char TMPBUF[TVT_TTY_BUFLEN];
+	  struct dsc$descriptor tmpdsc_, * TMPDSC=&tmpdsc_;
+      $DESCRIPTOR(lnm_table,"LNM$SYSTEM_TABLE");
+      $DESCRIPTOR(lnm_nam,"TELNET_PASS_PORT");
+      $DESCRIPTOR(lnm_nam2,"TELNET_ANNOUNCE");
+      struct item_list_3 itm[2]={ {buflen:256, item_code:1, bufaddr: nambuf, &nam->dsc$w_length }, {0,0,0,0} };
 
 // Clear the pending open that we were waiting for.
 
-    TCB->Pending_IO = FALSE;
+    TCB->pending_io = FALSE;
 
 // Assign a chunk of memory for the TVT data block
 
 //    RC = LIB$GET_VM(%REF(TVT$SIZE*4),TVT);
-    RC = LIB$GET_VM_PAGE(%REF(((TVT$SIZE * 4) / 512) + 1),TVT);
+    RC = LIB$GET_VM_PAGE(/*%REF*/(((TVT$SIZE * 4) / 512) + 1),TVT);
     if (! RC)
 	{
 //~~~ Should we do anything better here?
@@ -528,8 +610,8 @@ TELNET_OPEN(TCB)
 // Assign the PTY device and start it up.
 
     RC = LIB$ASN_WTH_MBX(PTY_NAME,
-			 %REF(TVT_MBX_BUFLEN),
-			 %REF(TVT_MBX_BUFLEN),
+			 /*%REF*/(TVT_MBX_BUFLEN),
+			 /*%REF*/(TVT_MBX_BUFLEN),
 			 PTYCHAN,
 			 MBXCHAN);
     if (! RC)
@@ -546,46 +628,50 @@ TELNET_OPEN(TCB)
 
     TVT->TVT$PTY_CHN = PTYCHAN;
     TVT->TVT$MBX_CHN = MBXCHAN;
-    TCB->TVTDATA = TVT;
+    TCB->tvtdata = TVT;
 
 // Fill in the access port as [n.n.n.n]
-    IF $TRNLOG(						// JC Get logical
-		LOGNAM=%ASCID"TELNET_PASS_PORT",	// Pass on port number
-		RSLLEN=nam->dsc$w_length,		// JC
-		RSLBUF=nam)				// JC
-	    == SS$_Normal
-    THEN						// JC If got it
-	RC = $FAO(%ASCID"!UB.!UB.!UB.!UB!AS!UL",
+    if (exe$trnlnm(0,&lnm_table,			// JC Get logical
+		&lnm_nam,	// Pass on port number
+		0,		// JC
+		&itm)				// JC
+	== SS$_NORMAL)
+#if 0
+	RC = exe$fao(/*%ASCID*/"!UB.!UB.!UB.!UB!AS!UL",
 		accpornam->dsc$w_length,accpornam,
-		.(TCB->Foreign_Host)< 0,8,0>,
-		.(TCB->Foreign_Host)< 8,8,0>,
-		.(TCB->Foreign_Host)<16,8,0>,
-		.(TCB->Foreign_Host)<24,8,0>,
+		.(TCB->foreign_host)< 0,8,0>,
+		.(TCB->foreign_host)< 8,8,0>,
+		.(TCB->foreign_host)<16,8,0>,
+		.(TCB->foreign_host)<24,8,0>,
 		nam,
-		TCB->Foreign_PORT
+		TCB->foreign_port
 		)
     else
-	RC = $FAO(%ASCID"!UB.!UB.!UB.!UB",
+	RC = exe$fao(/*%ASCID*/"!UB.!UB.!UB.!UB",
 		accpornam->dsc$w_length,accpornam,
-		.(TCB->Foreign_Host)< 0,8,0>,
-		.(TCB->Foreign_Host)< 8,8,0>,
-		.(TCB->Foreign_Host)<16,8,0>,
-		.(TCB->Foreign_Host)<24,8,0>
+		.(TCB->foreign_host)< 0,8,0>,
+		.(TCB->foreign_host)< 8,8,0>,
+		.(TCB->foreign_host)<16,8,0>,
+		.(TCB->foreign_host)<24,8,0>
 		);
+#else
+    { }
+#endif
     XLOG$FAO(LOG$TELNET
 	,"!%T Telnet_Open: Remote host=!AS!/",0
 	,accpornam);
     if (accpornam->dsc$w_length > 30)		// IF too long
 	accpornam->dsc$w_length = 30;			// Adjust it
     if (RC)
-	RC = $QIOW (CHAN=TVT->TVT$PTY_CHN,FUNC=IO$_SETMODE,
-			P1=accpornam->dsc$a_pointer,	// Buffer
-			P2=accpornam->dsc$w_length,	// Size
-			P4=4				// Sub-func #4
+      RC = exe$qiow (0,TVT->TVT$PTY_CHN,IO$_SETMODE,0,0,0,
+		     accpornam->dsc$a_pointer,	// Buffer
+		     accpornam->dsc$w_length,	// Size
+		     0,
+		     4,0,0,0,0				// Sub-func #4
 			);
 
 // Fill in the actual name after name resolution
-    NML$GETNAME(TCB->Foreign_Host, namelook_done, TVT);
+    NML$GETNAME(TCB->foreign_host, namelook_done, TVT);
 
 // Start a receive on the PTY mailbox.
 
@@ -618,17 +704,17 @@ TELNET_OPEN(TCB)
 //    $FAO(%ASCID"!/!AS VAX/VMS (CMU) TELNET Service!/",
 //	TMPDSC->dsc$w_length, TMPDSC, LOCAL_NAME);
 
-    NAM [dsc$w_length] = sizeof(nambuf);
-    IF $TRNLOG(						// JC Get logical
-		LOGNAM=%ASCID"TELNET_ANNOUNCE",		// JC name for banner
-		RSLLEN=nam->dsc$w_length,		// JC
-		RSLBUF=nam)				// JC
-	    == SS$_Normal THEN				// JC If got it
+    nam->dsc$w_length = sizeof(nambuf);
+    if (exe$trnlnm(0,&lnm_table,				// JC Get logical
+		&lnm_nam2,		// JC name for banner
+		0,		// JC
+		&itm)				// JC
+	    == SS$_NORMAL)				// JC If got it
 	{
-	$FAO(%ASCID"!AS!/"				// JC Put into output
+	  exe$fao(/*%ASCID*/"!AS!/"				// JC Put into output
 		,TMPDSC->dsc$w_length			// JC buffer
 		,TMPDSC					// JC
-		,NAM);					// JC
+		,nam);					// JC
 	TCP_Add_String(TVT, TMPDSC) ;
 	} ;
 
@@ -656,7 +742,7 @@ TELNET_OPEN(TCB)
     PTY_READ(TVT);
 
 // And give success return.
-    TRUE
+    return TRUE;
     }
 
 //SBTTL "TELNET_CLOSE - Handle close of TELNET connection"
@@ -665,31 +751,30 @@ TELNET_OPEN(TCB)
     Called from TCB$Delete just before TCB is deallocated.
 */
 
-FORWARD ROUTINE
- VOID    TELNET_CLOSE_DONE;
+ void    TELNET_CLOSE_DONE();
 
-TELNET_CLOSE(TCB) : NOVALUE (void)
+void TELNET_CLOSE(TCB)
+	struct tcb_structure * TCB;
     {
-    MAP
-	STRUCT TCB_STRUCTURE * TCB;
-    EXTERNAL ROUTINE
-	NML$CANCEL;
+	extern NML$CANCEL();
     signed long
-	FHOST  = TCB->Foreign_Host,
-	FPORT  = TCB->Foreign_Port,
+	FHOST  = TCB->foreign_host,
+      FPORT  = TCB->foreign_port;
 	struct TVT$BLOCK * TVT;
 
 // Log this.
 
     XLOG$FAO(LOG$TCBSTATE,"!%T TVT TCB x!XL closing, TVT=x!XL!/",
-	     0,TCB,TCB->TVTDATA);
+	     0,TCB,TCB->tvtdata);
+#if 0
     ACT$FAO("!%D Telnet-in closed to IP addr !UB.!UB.!UB.!UB port=!UW!/",0,
 	    FHOST<0,8>,FHOST<8,8>,FHOST<16,8>,FHOST<24,8>,
 	    FPORT);
+#endif
 
 // Make sure we have a TVT and it isn't already being cancelled.
 
-    TVT = TCB->TVTDATA;
+    TVT = TCB->tvtdata;
     if ((TVT != 0) && (! TVT->TVT$CANCEL))
 	{
 
@@ -699,29 +784,27 @@ TELNET_CLOSE(TCB) : NOVALUE (void)
 
 	NOINT;
 	TVT->TVT$CANCEL = TRUE;
-	$DASSGN(CHAN = TVT->TVT$PTY_CHN);
-	$DASSGN(CHAN = TVT->TVT$MBX_CHN);
-	$DCLAST(ASTADR = TELNET_CLOSE_DONE,
-		ASTPRM = TVT);
+	exe$dassgn(TVT->TVT$PTY_CHN);
+	exe$dassgn(TVT->TVT$MBX_CHN);
+	exe$dclast(TELNET_CLOSE_DONE,
+		TVT);
 	OKINT;
 	};
     }
 
-TELNET_CLOSE_DONE(TVT) : NOVALUE (void)
+void TELNET_CLOSE_DONE(TVT)
 //
 // Finish deallocation of a TVT, after all AST's have been delivered.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    EXTERNAL ROUTINE
-	LIB$FREE_VM		: BLISS ADDRESSING_MODE(GENERAL),
-	LIB$FREE_VM_PAGE	: BLISS ADDRESSING_MODE(GENERAL);
+    {
+    extern	LIB$FREE_VM();
+    extern LIB$FREE_VM_PAGE();
 
 // Just deallocate the TVT structure and return.
 
 //    LIB$FREE_VM(%REF(TVT$SIZE*4),TVT);
-    LIB$FREE_VM_PAGE(%REF(((TVT$SIZE * 4) / 512) + 1),TVT);
+    LIB$FREE_VM_PAGE(/*%REF*/(((TVT$SIZE * 4) / 512) + 1),TVT);
     }
 
 //SBTTL "TELNET_INPUT - Do TCP input for TELNET connection"
@@ -732,19 +815,18 @@ TELNET_CLOSE_DONE(TVT) : NOVALUE (void)
     TCP receive window becomes non-empty.
 */
 
-TELNET_INPUT(TCB) : NOVALUE (void)
+void TELNET_INPUT(TCB)
+	struct tcb_structure * TCB;
     {
-    MAP
-	STRUCT TCB_STRUCTURE * TCB;
 
 // Call TCP input routine
 
-//IF USE_ASTS %THEN
-    $DCLAST(ASTADR = PTY_WRITE,
-	    ASTPRM = TCB->TVTDATA);
-//else
-    PTY_WRITE(TCB->TVTDATA);
-//FI
+#ifdef USE_ASTS
+    exe$dclast(PTY_WRITE,
+	    TCB->tvtdata);
+#else
+    PTY_WRITE(TCB->tvtdata);
+#endif
     }
 
 //SBTTL "TELNET_OUTPUT - Do TCP output for TELNET connection"
@@ -756,44 +838,39 @@ TELNET_INPUT(TCB) : NOVALUE (void)
     PTY reads, until the queue becomes non-full (i.e. the send window opens).
 */
 
-TELNET_OUTPUT(TCB) : NOVALUE (void)
+void TELNET_OUTPUT(TCB)
+	struct tcb_structure * TCB;
     {
-    MAP
-	STRUCT TCB_STRUCTURE * TCB;
 
 // Just call TCP write with the TVT's TCB
 
-//IF USE_ASTS %THEN
-    $DCLAST(ASTADR = PTY_READ,
-	    ASTPRM = TCB->TVTDATA);
-//else
-    PTY_READ(TCB->TVTDATA);
-//FI
+#ifdef USE_ASTS
+    exe$dclast(PTY_READ,
+	    TCB->tvtdata);
+#else
+    PTY_READ(TCB->tvtdata);
+#endif
     }
 
 //SBTTL "Routines to interface to the network"
 
-FORWARD ROUTINE
- VOID    TVT_READ_WILL,
- VOID    TVT_READ_WONT,
- VOID    TVT_READ_DO,
- VOID    TVT_READ_DONT,
- VOID    TVT_READ_SUB ;
+ void    TVT_READ_WILL();
+ void    TVT_READ_WONT();
+ void    TVT_READ_DO();
+ void    TVT_READ_DONT();
+void    TVT_READ_SUB ();
 
-TCP_READ(TVT) : NOVALUE (void)
+void TCP_READ(TVT)
 //
 // TCP_READ - Read as much data as possible from the network into the PTY write
 // buffer. If no write is yet in progress, start a write now.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	LCLOPTS = TVT->TVT$LCLOPTS : OPT$LIST ;
-    EXTERNAL ROUTINE
-	IS_CNTRLT_GOOD;
+    {
+struct OPT$BLOCK * LCLOPTS = &TVT->TVT$LCLOPTS ;
+    extern	IS_CNTRLT_GOOD();
+    struct tcb_structure * TCB;
     signed long
-	STRUCT TCB_STRUCTURE * TCB,
 	Byte_Count,
 	Byte_Limit,
 	Prev_Char,
@@ -802,8 +879,6 @@ TCP_READ(TVT) : NOVALUE (void)
 	CHWPTR,
 	CHR,
 	NEGCNT ;
-    LABEL
-	X;
 
 // Empty out PTY, so we can accept more input
 
@@ -817,7 +892,7 @@ TCP_READ(TVT) : NOVALUE (void)
 // Is there any data to write?
 
     TCB = TVT->TVT$TCB;
-    if (TCB->RCV_Q_COUNT <= 0)
+    if (TCB->rcv_q_count <= 0)
 	return;
 
 // If already doing a net read, then don't run here.
@@ -833,16 +908,16 @@ TCP_READ(TVT) : NOVALUE (void)
 // We have some data to write. Copy from network to the PTY buffer
 // N.B. Need to be careful of synchonization problem with CQ_xxx routines.
 
-    CHRCNT = TCB->RCV_Q_COUNT;
-    CHRPTR = TCB->RCV_Q_DEQP;
+    CHRCNT = TCB->rcv_q_count;
+    CHRPTR = TCB->rcv_q_deqp;
 //    CHWPTR = TVT->TVT$WR_PTR; // = CH$PTR(TVT->TVT$WR_BUF);
     Byte_Limit = MIN(CHRCNT, (TVT_TTY_BUFLEN - TVT->TVT$WR_BCNT)) ;
     CHR = CH_NUL ;
 
 //   Check to see if there is enough buffer space remaining
 
-//    if ((TVT->TVT$WR_BCNT GEQ (TVT_TTY_BUFLEN - PTY_BUFFER_SIZE)))
-    if ((TVT->TVT$WR_BCNT GEQ (TVT_TTY_BUFLEN - 2)))
+//    if ((TVT->TVT$WR_BCNT >= (TVT_TTY_BUFLEN - PTY_BUFFER_SIZE)))
+    if ((TVT->TVT$WR_BCNT >= (TVT_TTY_BUFLEN - 2)))
 	{
 	TVT->TVT$GAG = TRUE ;
 	}
@@ -867,8 +942,8 @@ TCP_READ(TVT) : NOVALUE (void)
 
 	Prev_Char = CHR ;
 	CHR = CH$RCHAR_A(CHRPTR);
-	if (CHRPTR GEQ TCB[RCV_Q_}])
-	    CHRPTR = TCB->RCV_Q_BASE;
+	if (CHRPTR >= TCB->rcv_q_end)
+	    CHRPTR = TCB->rcv_q_base;
 	CHRCNT = CHRCNT - 1;
 	Byte_Limit = Byte_Limit - 1 ;
 
@@ -880,9 +955,12 @@ TCP_READ(TVT) : NOVALUE (void)
 
 // Handle this character based on the current state
 
+#if 0
 	CASE TVT->TVT$NRSTATE FROM TVT$STATE_MIN TO TVT$STATE_MAX OF
 	SET
-	[TVT$STATE_NORMAL]:	// Normal state
+#endif
+	  if (TVT->TVT$NRSTATE>=TVT$STATE_MIN && TVT->TVT$NRSTATE<=TVT$STATE_MAX) switch (TVT->TVT$NRSTATE) {
+	case TVT$STATE_NORMAL:	// Normal state
 X:	    {
 	    if (CHR == TELNET$K_IAC)
 		{
@@ -890,24 +968,24 @@ X:	    {
 // Have an IAC - enter IAC state.
 
 		TVT->TVT$NRSTATE = TVT$STATE_IAC;
-		LEAVE X;
+		goto leave_x;
 		};
 
 // If reading subnegotiation string, then append byte to subnegotiation buffer
 
 	    if (TVT->TVT$NR_SB)
 		{
-		if (TVT->TVT$SUB_CNT LSS TVT_SUB_BUFLEN)
+		if (TVT->TVT$SUB_CNT < TVT_SUB_BUFLEN)
 		    {
 		    CH$WCHAR_A(CHR,TVT->TVT$SUB_PTR);
-		    TVT->TVT$SUB_CNT = TVT->TVT$SUB_CNT + 1
+		    TVT->TVT$SUB_CNT = TVT->TVT$SUB_CNT + 1;
 		    };
-		LEAVE X;
+		goto leave_x;
 		};
 
 // If we're in BINARY mode, just output the character
 
-	    if (LCLOPTS[TELNET$K_BINARY].OPT$STATE)
+	    if (LCLOPTS[Telnet$K_Binary].OPT$STATE)
 		{
 		Net_To_PTY(TVT, CHR) ;
 		}
@@ -922,20 +1000,22 @@ X:	    {
 // If we had a CR as the last character, then do special processing of char
 
 
-		    SELECTONE CHR OF
-		    SET
-		    [CH_NUL]:	// Null - fake a LF
+		      switch (CHR)
+			{
+		    case CH_NUL:	// Null - fake a LF
 			{
 //!!HWM			Net_To_PTY(TVT, CH_LF) ;
 			TVT->TVT$NR_CR = FALSE;
 			};
+			break;
 
-		    [CH_CR]:	// Another CR - append it & retain CR state
+		    case CH_CR:	// Another CR - append it & retain CR state
 			{
 			Net_To_PTY(TVT, CHR) ;
 			};
+		      break;
 
-		    [CH_LF]:	// LF after CR - drop LF and reset CR state
+		    case CH_LF:	// LF after CR - drop LF and reset CR state
 			{
 
 //~~~ This code actually violates RFC 854, but is necessary to deal with many
@@ -946,30 +1026,31 @@ X:	    {
 			TVT->TVT$NR_CR = FALSE;
 			TVT->TVT$NR_LF = TRUE ;
 			};
+			break;
 
-		    [OTHERWISE]: // Funny state - append and reset CR state
+		    default: // Funny state - append and reset CR state
 			{
 			Net_To_PTY(TVT, CHR) ;
 			TVT->TVT$NR_CR = FALSE;
 			TVT->TVT$NR_LF = FALSE ;
 			};
-		    TES;
+		    };
 		    }
 		else
 		    {
 
 //!// Didn't have a previous CR. Check for LF now and prepend a CR
 
-//!!JC                    if (CHR == CH_LF)
-//!!JC 			{
-//!!JC 			TVT->TVT$NR_LF = TRUE ;
-//!!JC !!!HWM			Net_To_PTY(TVT, CH_CR) ;
-//!!JC 			if ($$LOGF(LOG$TVT))
-//!!JC 			    {
-//!!JC 			    LOG$FAO("!%T TCB x!XL TCP_READ: ADD CR, BCNT = !SL!/",
-//!!JC 				0, TVT->TVT$TCB, TVT->TVT$WR_BCNT) ;
-//!!JC 			    };
-//!!JC 			} ;
+//!//JC                    if (CHR == CH_LF)
+//!//JC 			{
+//!//JC 			TVT->TVT$NR_LF = TRUE ;
+//!//JC !!!HWM			Net_To_PTY(TVT, CH_CR) ;
+//!//JC 			if ($$LOGF(LOG$TVT))
+//!//JC 			    {
+//!//JC 			    LOG$FAO("!%T TCB x!XL TCP_READ: ADD CR, BCNT = !SL!/",
+//!//JC 				0, TVT->TVT$TCB, TVT->TVT$WR_BCNT) ;
+//!//JC 			    };
+//!//JC 			} ;
 
 // Didn't have a previous CR. Check for one now and output the byte.
 
@@ -982,51 +1063,59 @@ X:	    {
 		    };
 		};
 	    };
-
-	[TVT$STATE_IAC]:	// IAC - Start negotiation
+	  leave_x:
+ break; 
+	case TVT$STATE_IAC:	// IAC - Start negotiation
 	    {
 
 // Select the different types of negotiations
 
 	    XLOG$FAO(LOG$TELNEG,"!%T Negotiate !UB/",0,CHR);
 
-	    SELECTONE CHR OF
-	    SET
-	    [TELNET$K_IAC]:	// Another IAC. Send one IAC to terminal
+	    switch (CHR)
+	      {
+	    case TELNET$K_IAC:	// Another IAC. Send one IAC to terminal
 		{
 		Net_To_PTY(TVT, CHR) ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
+		break;
 
-	    [TELNET$K_WILL]:	// Remote WILL handle an option
+	    case TELNET$K_WILL:	// Remote WILL handle an option
 		TVT->TVT$NRSTATE = TVT$STATE_WILL;
+		break;
 
-	    [TELNET$K_WONT]:	// Remote WONT handle an option
+	    case TELNET$K_WONT:	// Remote WONT handle an option
 		TVT->TVT$NRSTATE = TVT$STATE_WONT;
+		break;
 
-	    [TELNET$K_DO]:	// Remote tells us DO an option
+	    case TELNET$K_DO:	// Remote tells us DO an option
 		TVT->TVT$NRSTATE = TVT$STATE_DO;
+		break;
 
-	    [TELNET$K_DONT]:	// Remote tells us DONT do an option
+	    case TELNET$K_DONT:	// Remote tells us DONT do an option
 		TVT->TVT$NRSTATE = TVT$STATE_DONT;
+		break;
 
-	    [TELNET$K_SB]:	// Remote is starting subnegotiation
+	    case TELNET$K_SB:	// Remote is starting subnegotiation
 		{
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		TVT->TVT$NR_SB = TRUE;
 		TVT->TVT$SUB_PTR = TVT->TVT$SUB_BUF;
 		TVT->TVT$SUB_CNT = 0;
 		};
+		break;
 
-	    [TELNET$K_SE]:	// Remote is finished with subnegotiation
+	    case TELNET$K_SE:	// Remote is finished with subnegotiation
 		{
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		TVT->TVT$NR_SB = FALSE;
 		TVT->TVT$SUB_PTR = TVT->TVT$SUB_BUF;
-		TVT_READ_SUB(TVT)
+		TVT_READ_SUB(TVT);
 		};
+		break;
 
-	    [TELNET$K_AYT]:	// User is nervous.  Comfort them.
+	    case TELNET$K_AYT:	// User is nervous.  Comfort them.
 		{
 		if (! IS_CNTRLT_GOOD(TVT))
 		    {
@@ -1034,94 +1123,110 @@ X:	    {
 		    } ;
 		Net_To_PTY(TVT, Telnet$K_Char_AYT) ;
 		TVT->TVT$CTRL = TRUE ;
-		TVT->TVT$NRSTATE = TVT$STATE_NORMAL
+		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
+		break;
 
-	    [TELNET$K_Brk]:	// I think VMS ignores the break key.
+	    case TELNET$K_BRK:	// I think VMS ignores the break key.
 		{
 		Net_To_PTY(TVT, Telnet$K_Char_Brk) ;
 		TVT->TVT$CTRL = TRUE ;
-		TVT->TVT$NRSTATE = TVT$STATE_NORMAL
+		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
+		break;
 
-	    [TELNET$K_IP]:	// Interrupt process
+	    case TELNET$K_IP:	// Interrupt process
 		{
 		Net_To_PTY(TVT, Telnet$K_Char_IP) ;
 		TVT->TVT$CTRL = TRUE ;
-		TVT->TVT$NRSTATE = TVT$STATE_NORMAL
+		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
+		break;
 
-	    [TELNET$K_AO]:	// Abort Output
+	    case TELNET$K_AO:	// Abort Output
 		{
 		Net_To_PTY(TVT, Telnet$K_Char_AO) ;
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
+		break;
 
-	    [TELNET$K_EC]:	// Erase Character
+	    case TELNET$K_EC:	// Erase Character
 		{
 		Net_To_PTY(TVT, Telnet$K_Char_EC) ;
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
+		break;
 
-	    [TELNET$K_EL]:	// Erase Line
+	    case TELNET$K_EL:	// Erase Line
 		{
 		Net_To_PTY(TVT, Telnet$K_Char_EL) ;
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
+		break;
 
-	    [TELNET$K_EOR]:	// End of Record
+	    case TELNET$K_EOR:	// End of Record
 		{
 		Net_To_PTY(TVT, CH_CR) ;	// Fake it by stuffing a CR
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
-
-	    [TELNET$K_Data_Mark]:		// Data Mark
+		break;
+		
+	    case TELNET$K_DATA_MARK:		// Data Mark
 		{
-		Net_To_PTY(TVT, Telnet$K_Char_PURGE) ;	// Purge typeahead
+		Net_To_PTY(TVT, Telnet$K_Char_Purge) ;	// Purge typeahead
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
-
-	    [OTHERWISE]:	// Garbage to us
+		break;
+		
+	    default:	// Garbage to us
 		{
 		XLOG$FAO(LOG$TELNEG,"!%T Garbage !UB/",0,CHR);
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
-	    TES;
+	    };
 	    };
 
-	[TVT$STATE_WILL]:	// Process the WILL according to option state
+	case TVT$STATE_WILL:	// Process the WILL according to option state
 	    TVT_READ_WILL(TVT,CHR);
+	    break;
 
-	[TVT$STATE_WONT]:	// Process the WONT
+	case TVT$STATE_WONT:	// Process the WONT
 	    TVT_READ_WONT(TVT,CHR);
+	    break;
 
-	[TVT$STATE_DO]:		// Process the DO
+	case TVT$STATE_DO:		// Process the DO
 	    TVT_READ_DO(TVT,CHR);
+	    break;
 
-	[TVT$STATE_DONT]:	// Process the DONT
+	case TVT$STATE_DONT:	// Process the DONT
 	    TVT_READ_DONT(TVT,CHR);
+	    break;
 
+    default:
+#if 0
+      // check
 	[INRANGE,OUTRANGE]:	// Shouldn't ever get here.
+#endif
 	    0;
-	TES;
+	};
 
 //~~~ Update receive window information.
 
-	TCB->RCV_WND = TCB->RCV_WND + 1 ;
-	TCB[P}ING_ACK] = TRUE;
+	TCB->rcv_wnd = TCB->rcv_wnd + 1 ;
+	TCB->pending_ack = TRUE;
 
 // Update network receive queue pointer and count.
 
-	TCB->RCV_Q_DEQP = CHRPTR;
-	TCB->RCV_Q_COUNT = TCB->RCV_Q_COUNT - 1 ;
+	TCB->rcv_q_deqp = CHRPTR;
+	TCB->rcv_q_count = TCB->rcv_q_count - 1 ;
 
 	if ((TVT->TVT$CTRL))
-	    EXITLOOP ;
+	    break ;
 	};
 
     if ($$LOGF(LOG$TVT))
@@ -1136,7 +1241,7 @@ X:	    {
 
 // If we moved some data, then force a ACK now
 
-    if ((TCB[P}ING_ACK]))
+    if ((TCB->pending_ack))
 	{
 	TCP$Enqueue_Ack(TCB) ;
 	} ;
@@ -1144,15 +1249,14 @@ X:	    {
     }
 
 
-VOID PTY_TO_NET(TVT, CHR) (void)
+void PTY_TO_NET(TVT, CHR)
 //
 // PTY_TO_NET - Write a byte of data as to the network buffer.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
+    {
+struct tcb_structure * TCB;
     signed long
-	STRUCT TCB_STRUCTURE * TCB,
 	CHWMAX,
 	CHWCNT,
 	CHWPTR ;
@@ -1160,7 +1264,7 @@ VOID PTY_TO_NET(TVT, CHR) (void)
 // Make sure there is some room in the network output queue
 
     TCB = TVT->TVT$TCB;
-    CHWMAX = TCB->SND_Q_SIZE-TCB->SND_Q_COUNT-TCB->SRX_Q_COUNT;
+    CHWMAX = TCB->snd_q_size-TCB->snd_q_count-TCB->srx_q_count;
 
 //    if ($$LOGF(LOG$TVT))
 //	{
@@ -1183,26 +1287,26 @@ VOID PTY_TO_NET(TVT, CHR) (void)
 // Copy bytes from the PTY read buffer to the network, quoting IAC's as needed.
 
     CHWCNT = 0;
-    CHWPTR = CH$PTR(TCB->SND_Q_ENQP);
+    CHWPTR = CH$PTR(TCB->snd_q_enqp);
 
 // Write a character to the output buffer, taking care to wrap the pointer
 
     CH$WCHAR_A(CHR,CHWPTR);
-    if (CHWPTR GEQU TCB[SND_Q_}])
-	CHWPTR = TCB->SND_Q_BASE;
+    if (CHWPTR >= TCB->snd_q_end)
+	CHWPTR = TCB->snd_q_base;
 
 // Update the network queue pointer and counter
 
-    TCB->SND_Q_ENQP = CHWPTR;
-    TCB->SND_Q_COUNT = TCB->SND_Q_COUNT + 1 ;
-    TCB->SND_PPTR = TCB->SND_NXT + TCB->SND_Q_COUNT;
-    TCB->SND_PUSH_FLAG = TRUE;
+    TCB->snd_q_enqp = CHWPTR;
+    TCB->snd_q_count = TCB->snd_q_count + 1 ;
+    TCB->snd_pptr = TCB->snd_nxt + TCB->snd_q_count;
+    TCB->snd_push_flag = TRUE;
 
 // If the send queue just became nonempty, then schedule a wakeup so that this
 // TCB will be serviced soon.
 
-//    if (TCB->SND_Q_COUNT == CHWCNT)
-    if (TCB->SND_Q_COUNT == TCB->MAX_EFF_DATA_SIZE)
+//    if (TCB->snd_q_count == CHWCNT)
+    if (TCB->snd_q_count == TCB->max_eff_data_size)
 	$ACPWAKE;
 
 // Indicate that we're not in the network write code any more
@@ -1211,18 +1315,17 @@ VOID PTY_TO_NET(TVT, CHR) (void)
     }
 
 
-TCP_WRITE(TVT) : NOVALUE (void)
+void TCP_WRITE(TVT)
 //
 // TCP_WRITE - Write as much data as possible from the PTY read buffer to the
 // network.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    signed long
-	STRUCT TCB_STRUCTURE * TCB,
-	Now	:	UNSIGNED,
-	CHWMAX,
+    {
+      struct tcb_structure * TCB;
+    unsigned long
+      Now;
+signed long	CHWMAX,
 	CHWCNT,
 	CHWPTR,
 	CHR;
@@ -1230,7 +1333,7 @@ TCP_WRITE(TVT) : NOVALUE (void)
 // Make sure there is some room in the network output queue
 
     TCB = TVT->TVT$TCB;
-    CHWMAX = TCB->SND_Q_SIZE-TCB->SND_Q_COUNT-TCB->SRX_Q_COUNT;
+    CHWMAX = TCB->snd_q_size-TCB->snd_q_count-TCB->srx_q_count;
     if ($$LOGF(LOG$TVT))
 	{
 	LOG$FAO("!%T TCB !XL TCP_WRITE: CHWMAX = !SL NWRITE=!UB!/",
@@ -1257,7 +1360,7 @@ TCP_WRITE(TVT) : NOVALUE (void)
 
 
     CHWCNT = 0;
-    CHWPTR = CH$PTR(TCB->SND_Q_ENQP);
+    CHWPTR = CH$PTR(TCB->snd_q_enqp);
     while (TRUE)
 	{
 
@@ -1273,7 +1376,7 @@ TCP_WRITE(TVT) : NOVALUE (void)
 
 // If there are negotiation bytes to send, then do them first.
 
-	    if (TVT->TVT$NEG_CNT NEQU 0)
+	    if (TVT->TVT$NEG_CNT != 0)
 		{
 
 // Get next byte from negotiation buffer and send to net
@@ -1299,18 +1402,18 @@ TCP_WRITE(TVT) : NOVALUE (void)
 // Write a character to the output buffer, taking care to wrap the pointer
 
 	CH$WCHAR_A(CHR,CHWPTR);
-	if (CHWPTR GEQU TCB[SND_Q_}])
-	    CHWPTR = TCB->SND_Q_BASE;
-	if ((CHWCNT = CHWCNT + 1) GEQ CHWMAX)
+	if (CHWPTR >= TCB->snd_q_end)
+	    CHWPTR = TCB->snd_q_base;
+	if ((CHWCNT = CHWCNT + 1) >= CHWMAX)
 	    break;
 	};
 
 // Update the network queue pointer and counter
 
-    TCB->SND_Q_ENQP = CHWPTR;
-    TCB->SND_Q_COUNT = TCB->SND_Q_COUNT + CHWCNT;
-    TCB->SND_PPTR = TCB->SND_NXT + TCB->SND_Q_COUNT;
-    TCB->SND_PUSH_FLAG = TRUE;
+    TCB->snd_q_enqp = CHWPTR;
+    TCB->snd_q_count = TCB->snd_q_count + CHWCNT;
+    TCB->snd_pptr = TCB->snd_nxt + TCB->snd_q_count;
+    TCB->snd_push_flag = TRUE;
 
 // If the send queue just became nonempty, then schedule a wakeup so that this
 // TCB will be serviced soon.
@@ -1319,14 +1422,14 @@ TCP_WRITE(TVT) : NOVALUE (void)
     if ($$LOGF(LOG$TVT || LOG$TCP))
 	{
 	LOG$FAO("!%T TCB !XL TCP_WRITE: SNDQCNT= !SL SRXQCNT=!SL!/",
-		0, TVT->TVT$TCB, TCB->SND_Q_COUNT, TCB->SRX_Q_COUNT) ;
+		0, TVT->TVT$TCB, TCB->snd_q_count, TCB->srx_q_count) ;
 	LOG$FAO("!%T TCB !XL TCP_WRITE: NOW= !SL Delay=!SL!/",
-		0, TVT->TVT$TCB, Now, TCB->SND_Delay_Timer) ;
+		0, TVT->TVT$TCB, Now, TCB->snd_delay_timer) ;
 	};
 
-//    if (TCB->SND_Q_COUNT == CHWCNT)
-    IF (((TCB->SND_Q_COUNT + TCB->SRX_Q_COUNT) GEQ TCB->MAX_EFF_DATA_SIZE) OR
-	(Now GEQU TCB->SND_Delay_Timer)) THEN
+//    if (TCB->snd_q_count == CHWCNT)
+    if ((((TCB->snd_q_count + TCB->srx_q_count) >= TCB->max_eff_data_size) ||
+	 (Now >= TCB->snd_delay_timer)))
 	$ACPWAKE;
 //	TCP$Send_Data(TCB) ;
 
@@ -1337,18 +1440,16 @@ TCP_WRITE(TVT) : NOVALUE (void)
 
 
 
-TCP_ADD_STRING(TVT,STRDESC_A) : NOVALUE (void)
+void TCP_ADD_STRING(TVT,STRDESC_A)
 //
 // TCP_ADD_STRING - Write as much data as possible from the supplied string
 // to the network write buffer via PTY_TO_NET.
 //
-    {
-    BIND
-	STRDESC = STRDESC_A : $BBLOCK;
-    MAP
 	struct TVT$BLOCK * TVT;
-    signed long
-	STRUCT TCB_STRUCTURE * TCB,
+    {
+	struct dsc$descriptor * STRDESC = STRDESC_A;
+	struct tcb_structure * TCB;
+	signed long
 	CHWMAX,
 	CHWCNT,
 	CHWPTR,
@@ -1367,7 +1468,7 @@ TCP_ADD_STRING(TVT,STRDESC_A) : NOVALUE (void)
 
 // Make sure there is some room in the PTY read queue
 
-    if (TVT->TVT$RD_BCNT GEQ (TVT_TTY_BUFLEN-.CHRCNT))
+    if (TVT->TVT$RD_BCNT >= (TVT_TTY_BUFLEN-CHRCNT))
 	return;
 
     CHWPTR = TVT->TVT$RD_PTR = CH$PTR(TVT->TVT$RD_BUF);
@@ -1381,16 +1482,14 @@ TCP_ADD_STRING(TVT,STRDESC_A) : NOVALUE (void)
 
     }
 
-VOID NET_TO_PTY(TVT, CHR) (void)
+void NET_TO_PTY(TVT, CHR)
 //
 // NET_TO_PTY - Move a byte from the net buffer to PTY buffer and force a
 // write, if possible
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	IO_Status = TVT->TVT$WR_IOSB : PTY$IOSB ;
+    {
+struct PTY$IOSB * IO_Status = &TVT->TVT$WR_IOSB ;
     signed long
 	Byte_Count,
 	Bytes_Remaining,
@@ -1403,8 +1502,8 @@ VOID NET_TO_PTY(TVT, CHR) (void)
 
 //   Check to see if there is enough buffer space remaining
 
-//    if ((TVT->TVT$WR_BCNT GEQ (TVT_TTY_BUFLEN - PTY_BUFFER_SIZE)))
-    if ((TVT->TVT$WR_BCNT GEQ (TVT_TTY_BUFLEN - 2)))
+//    if ((TVT->TVT$WR_BCNT >= (TVT_TTY_BUFLEN - PTY_BUFFER_SIZE)))
+    if ((TVT->TVT$WR_BCNT >= (TVT_TTY_BUFLEN - 2)))
 	{
 	TVT->TVT$GAG = TRUE ;
 	}
@@ -1413,7 +1512,7 @@ VOID NET_TO_PTY(TVT, CHR) (void)
 	TVT->TVT$GAG = FALSE ;
 	} ;
 
-    if ((TVT->TVT$WR_BCNT GEQ (TVT_TTY_BUFLEN - 1)))
+    if ((TVT->TVT$WR_BCNT >= (TVT_TTY_BUFLEN - 1)))
 	{
 	if ($$LOGF(LOG$TVT))
 	    {
@@ -1431,7 +1530,7 @@ VOID NET_TO_PTY(TVT, CHR) (void)
     TVT->TVT$WR_BCNT = TVT->TVT$WR_BCNT + 1 ;
     TVT->TVT$WR_IPTR = TVT->TVT$WR_IPTR + 1 ;
 
-    if ((TVT->TVT$WR_IPTR GEQ TVT_TTY_BUFLEN))
+    if ((TVT->TVT$WR_IPTR >= TVT_TTY_BUFLEN))
 	{
 	TVT->TVT$WR_IPTR = 0 ;
 	} ;
@@ -1462,7 +1561,7 @@ VOID NET_TO_PTY(TVT, CHR) (void)
 
 //SBTTL "Routines to interface to the PTY"
 
-PTY_SET_OWNER_PID(TVT) : NOVALUE (void)
+void PTY_SET_OWNER_PID(TVT)
 //
 // PTY_SET_OWNER_PID : Fill in the User_ID field of the associated TCB
 //	by interrogating the appropriate device for the TELNET session.
@@ -1470,45 +1569,49 @@ PTY_SET_OWNER_PID(TVT) : NOVALUE (void)
 // While we're here, we call POKEADDR to give it the information we would
 // like (also to the VMS accounting file).
 //
-   {
-   MAP
 	struct TVT$BLOCK * TVT;
-   signed long
-	STRUCT TCB_STRUCTURE * TCB,
-	devstr : VECTOR[20,Byte],
-	devnam : $BBLOCK->DSC$K_S_BLN,
+   {
+     struct tcb_structure * TCB;
+     unsigned char 	devstr[20];
+     struct dsc$descriptor devnam_, *devnam=&devnam;
 //!!	devsln,
-	ptynambuf : VECTOR[20,BYTE],
-	ptynam : $BBLOCK->DSC$K_S_BLN PRESET (
-		[dsc$w_length] = sizeof(ptynambuf),
-		[dsc$b_dtype] = DSC$K_DTYPE_Z,
-		[dsc$b_class] = DSC$K_CLASS_Z,
-		[dsc$a_pointer] = ptynambuf),
+     unsigned char 	ptynambuf[20];
+     struct dsc$descriptor ptynam_ = {
+		dsc$w_length : sizeof(ptynambuf),
+		dsc$b_dtype : DSC$K_DTYPE_Z,
+		dsc$b_class : DSC$K_CLASS_Z,
+		dsc$a_pointer : ptynambuf}, *ptynam=&ptynam_;
+signed long
 	RC,
 	Unit_Number,
 	Owner_PID,
 	Owner_UIC,
-	FHost,FPort,
-	Item_List		: $ITMLST_DECL (Items = 3);
-    EXTERNAL ROUTINE
-	PokeAddr : ADDRESSING_MODE(GENERAL);
+  FHost,FPort;
+    extern	PokeAddr();
+ struct item_list_3 Item_List[3];
+ $DESCRIPTOR(lnm_table,"LNM$PROCESS_TABLE");
+ $DESCRIPTOR(lnm_nam,"INET$PTY_TERM");
+ struct item_list_3 itm[2]={ {buflen:20, item_code:1, bufaddr: ptynambuf, &ptynam->dsc$w_length }, {0,0,0,0} };
 
 // point at the TCB for this TVT.
     TCB = TVT->TVT$TCB;
-    FHost = TCB->Foreign_Host;
+    FHost = TCB->foreign_host;
 
 // fill in the owner pid. First get the unit number of the pty device,
 // then build a request for the owner pid of the device associated with it.
 
-    $ITMLST_INIT (ITMLST = Item_List,
-	(ITMCOD = DVI$_UNIT, BUFADR = Unit_Number));
+    Item_List[0].item_code=DVI$_UNIT;
+    Item_List[0].bufaddr=&Unit_Number;
+    Item_List[1].item_code=0; // check
 
-    RC = $GETDVIW (ITMLST = Item_List,CHAN=TVT->TVT$PTY_CHN);
+    RC = exe$getdviw (0,TVT->TVT$PTY_CHN,0,Item_List);
     if (RC)
 	{
-	$ITMLST_INIT(ITMLST = Item_List,
-	    (ITMCOD = DVI$_PID, BUFADR = Owner_Pid),
-	    (ITMCOD = DVI$_OWNUIC, BUFADR = Owner_UIC));
+	  Item_List[0].item_code=DVI$_PID;
+	  Item_List[0].bufaddr=&Owner_PID;
+	  Item_List[1].item_code=DVI$_OWNUIC;
+	  Item_List[1].bufaddr=&Owner_UIC;
+	  Item_List[2].item_code=0; // check
 
 // make a descriptor to hold the device name:
 
@@ -1521,40 +1624,44 @@ PTY_SET_OWNER_PID(TVT) : NOVALUE (void)
 
 	ptynam->dsc$w_length = sizeof(ptynambuf);
 
-	RC = $TRNLOG(
-		LOGNAM=%ASCID"INET$PTY_TERM",		// JC
-		RSLLEN=ptynam->dsc$w_length,		// JC
-		RSLBUF=ptynam);				// JC
+	RC = exe$trnlnm(0, &lnm_table,
+		&lnm_nam,		// JC
+		0,		// JC
+		&itm);				// JC
 	if (! RC) TVT->TVT$DO_PID = 0;		// Cancel
-	if (RC == SS$_Normal)
-	    RC = $FAO(%ASCID"_!ASA!UL:",devnam,devnam,ptynam,Unit_Number);
+	if (RC == SS$_NORMAL)
+	    RC = exe$fao(/*%ASCID*/"_!ASA!UL:",devnam,devnam,ptynam,Unit_Number);
 	    if (RC)
-		RC = $GETDVIW (ITMLST = Item_List, DEVNAM = devnam);
+		RC = exe$getdviw (0,0,devnam,Item_List,0);
 
+#if 0
     xlog$fao(LOG$TELNET,"!%T PTY_Set_owner_PID: TTY_TERM="!AS"!/",0,devnam);
+#endif
 
 // free the string descriptor, we don't need it any more.
 //	LIB$FREE_VM(devsln,devstr);
 
 // check return status from the $GETDVIW & $FAO calls.
-	if (RC && (Owner_Pid != 0))
+	if (RC && (Owner_PID != 0))
 	    {
 
 	    // finally, we know the PID, so we can fill in the owner field
 	    // of the appropriate TCB.
-	    TCB->User_ID=.Owner_Pid;
+	    TCB->user_id=Owner_PID;
 	    TVT->TVT$DO_PID = 0;
 
 	    // Also, set up the information in the remote process'
 	    // P1 space...
-	    PokeAddr(Owner_Pid,  TCB->Foreign_Host, TCB->Foreign_Port);
+	    PokeAddr(Owner_PID,  TCB->foreign_host, TCB->foreign_port);
 
 	    // Note the connection in the activity log file.
+#if 0
 	    ACT$FAO(
 		"!%D Telnet-in (PID:x!XW UIC:!%U) <!UB.!UB.!UB.!UB/!UW>!/",0,
 		.Owner_PID<0,16,0>, Owner_UIC,
 		.FHost<0,8>,FHost<8,8>,FHost<16,8>,FHost<24,8>,
-		TCB->Foreign_Port);
+		TCB->foreign_port);
+#endif
 //
 //	Now set any delayed device dependent
 //
@@ -1566,26 +1673,24 @@ PTY_SET_OWNER_PID(TVT) : NOVALUE (void)
 
 
 
-FORWARD ROUTINE
- VOID    PTY_READ_DONE;
+ void    PTY_READ_DONE();
 
-PTY_READ(TVT) : NOVALUE (void)
+void PTY_READ(TVT)
 //
 // PTY_READ - Initiate a read on the PTY device, if there is room in the PTY
 // read buffer.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
+    {
+      struct tcb_structure * TCB;
     signed long
-	STRUCT TCB_STRUCTURE * TCB,
 	Byte_Count,
 	RC;
 
 // Make sure there is some room in the network output queue
 
     TCB = TVT->TVT$TCB;
-    Byte_Count = TCB->SND_Q_SIZE-TCB->SND_Q_COUNT-TCB->SRX_Q_COUNT;
+    Byte_Count = TCB->snd_q_size-TCB->snd_q_count-TCB->srx_q_count;
 
     XLOG$FAO(LOG$TVT,
 	"!%T TVT PTY_read: TCB x!XL, BC=!SL, RDCNT=!SL, NGCNT=!SL!/",
@@ -1610,14 +1715,14 @@ PTY_READ(TVT) : NOVALUE (void)
 
 // Initiate a read on the PTY device
 
-    RC = $QIO(
-	    CHAN	= TVT->TVT$PTY_CHN,
-	    FUNC	= IO$_READVBLK,
-	    IOSB	= TVT->TVT$RD_IOSB,
-	    ASTADR	= PTY_READ_DONE,
-	    ASTPRM	= TVT,
-	    P1		= TVT->TVT$RD_BUF,
-	    P2		= Byte_Count);
+    RC = exe$qio(0,
+		 TVT->TVT$PTY_CHN,
+		 IO$_READVBLK,
+		 TVT->TVT$RD_IOSB,
+		 PTY_READ_DONE,
+		 TVT,
+		 TVT->TVT$RD_BUF,
+		 Byte_Count,0,0,0,0);
     if (! RC)
 	{
 	XLOG$FAO(LOG$TCPERR,
@@ -1627,18 +1732,16 @@ PTY_READ(TVT) : NOVALUE (void)
 	};
     }
 
-PTY_READ_DONE(TVT) : NOVALUE (void)
+void PTY_READ_DONE(TVT)
 //
 // AST routine when PTY read operation finishes. Attempt to write the new data
 // to the network, via TCP_WRITE.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	IOSB = TVT->TVT$RD_IOSB : PTY$IOSB;
+    {
+struct PTY$IOSB * IOSB = &TVT->TVT$RD_IOSB;
+ struct tcb_structure * TCB;
     signed long
-        STRUCT TCB_STRUCTURE * TCB,
 	Byte_Count,
 	CHR,
 	RC;
@@ -1687,9 +1790,9 @@ PTY_READ_DONE(TVT) : NOVALUE (void)
 //  In particular data written to PTY before the prompt is "promptly" lost!!!
 //JC ----------------- Kludge -------------------------
 
-	IF (TVT->TVT$RD_BCNT > 7) AND		// JC Kludge
-	   (TVT->TVT$RD_BCNT LSS 15)			// JC Kludge
-	THEN						// JC Kludge
+	if ((TVT->TVT$RD_BCNT > 7) &&		// JC Kludge
+	   (TVT->TVT$RD_BCNT < 15))			// JC Kludge
+							// JC Kludge
 		PTY_SET_OWNER_PID(TVT);
 	};
 
@@ -1713,40 +1816,38 @@ PTY_READ_DONE(TVT) : NOVALUE (void)
 
     if (! TVT->TVT$NWRITE)
 	{
-//IF USE_ASTS %THEN
+#ifdef USE_ASTS
 	TCP_WRITE(TVT);
-	Byte_Count = TCB->SND_Q_SIZE-TCB->SND_Q_COUNT-TCB->SRX_Q_COUNT;
+	Byte_Count = TCB->snd_q_size-TCB->snd_q_count-TCB->srx_q_count;
 	if (((TVT->TVT$RD_BCNT > 0) || (Byte_Count > 0)))
 	    {
-	    $DCLAST(ASTADR = PTY_READ,
-		ASTPRM = TVT);
+	    exe$dclast(PTY_READ,
+		TVT);
 	    } ;
-//else
+#else
 	$ACPWAKE;
-//FI
+#endif
 	} ;
 
     }
 
-FORWARD ROUTINE
- VOID    PTY_WRITE_DONE;
 
-PTY_WRITE(TVT) : NOVALUE (void)
+ void    PTY_WRITE_DONE();
+
+void PTY_WRITE(TVT)
 //
 // PTY_WRITE - Initiate a write to the PTY device, if there is data in the PTY
 // write buffer.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	IO_Status = TVT->TVT$WR_IOSB : PTY$IOSB;
+    {
+      struct PTY$IOSB * IO_Status = &TVT->TVT$WR_IOSB;
     signed long
 	Byte_Count,
 	Bytes_Remaining,
 	TT_WR_PTR,
-	PTY_Char	: BLOCK[8,BYTE],
 	RC;
+    unsigned char PTY_Char[8];
 
     if ($$LOGF(LOG$TVT))
 	{
@@ -1759,8 +1860,8 @@ PTY_WRITE(TVT) : NOVALUE (void)
     if (TVT->TVT$PWRITE)
 	return;
 
-    IF TVT->TVT$DO_PID
-    THEN {		!!// JC hold off till proc ready
+    if (TVT->TVT$DO_PID)
+     {		//!// JC hold off till proc ready
 	if (TVT->TVT$HOLD) return;
 	TVT->TVT$HOLD = 1;
 	};
@@ -1805,7 +1906,7 @@ PTY_WRITE(TVT) : NOVALUE (void)
 
 //   Compute realistic byte count
 
-    if ((TVT->TVT$WR_OPTR LSS TVT->TVT$WR_IPTR))
+    if ((TVT->TVT$WR_OPTR < TVT->TVT$WR_IPTR))
 	{
 	// OPTR trailing IPTR, expected case, compute distance
 	Byte_Count = (TVT->TVT$WR_IPTR - TVT->TVT$WR_OPTR) ;
@@ -1833,20 +1934,20 @@ PTY_WRITE(TVT) : NOVALUE (void)
 	{
 	LOG$FAO("!%T TCB x!XL PTY_WRITE: #bytes=!SL, Byte Count = !SL,Data=[!AD]!/",
 		0,TVT->TVT$TCB, TVT->TVT$WR_BCNT, Byte_Count,
-		.Byte_Count, TVT->TVT$WR_BUF) ;
+		Byte_Count, TVT->TVT$WR_BUF) ;
 	};
 
 // Initiate the write on the PTY
 
 //    opr$fao("pty_write !SL bytes (x!XL,x!XL)",TVT->TVT$WR_BCNT,TVT->TVT$WR_BUF,TVT->TVT$WR_PTR);
-    RC = $QIO(
-	    FUNC   = IO$_WRITEVBLK,
-	    CHAN   = TVT->TVT$PTY_CHN,
-	    IOSB   = TVT->TVT$WR_IOSB,
-	    ASTADR = PTY_WRITE_DONE,
-	    ASTPRM = TVT,
-	    P1     = TT_WR_PTR,
-	    P2     = Byte_Count);
+    RC = exe$qio(0,
+		 TVT->TVT$PTY_CHN,
+		 IO$_WRITEVBLK,
+		 TVT->TVT$WR_IOSB,
+		 PTY_WRITE_DONE,
+		 TVT,
+		 TT_WR_PTR,
+		 Byte_Count,0,0,0,0);
     if (! RC)
 	{
 	XLOG$FAO(LOG$TCPERR,
@@ -1860,21 +1961,19 @@ PTY_WRITE(TVT) : NOVALUE (void)
 
     }
 
-PTY_WRITE_DONE(TVT) : NOVALUE (void)
+void PTY_WRITE_DONE(TVT)
 //
 // PTY_WRITE_DONE - AST routine when PTY write operation finishes. Try to get
 // more data for the pty via TCP_READ.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	IOSB = TVT->TVT$WR_IOSB : PTY$IOSB;
+    {
+      struct PTY$IOSB * IOSB = &TVT->TVT$WR_IOSB;
     signed long
 	bytes_left,
 	bytes_written,
-	RC,
-	STRUCT TCB_STRUCTURE * TCB;
+      RC;
+	struct tcb_structure * TCB;
 
 // Make sure the TVT is still valid
 
@@ -1899,7 +1998,7 @@ PTY_WRITE_DONE(TVT) : NOVALUE (void)
 	if (RC != SS$_DATAOVERUN)
 	    {
 	    TCB$DELETE(TVT->TVT$TCB);
-	    return
+	    return;
 	    };
 	};
 
@@ -1909,11 +2008,11 @@ PTY_WRITE_DONE(TVT) : NOVALUE (void)
 //   Update counters and pointers
 
     bytes_written = IOSB->PTSB$NBYTES;
-    bytes_left = TVT->TVT$WR_BCNT - Bytes_written ;
-    TVT->TVT$WR_OPTR = TVT->TVT$WR_OPTR + bytes_Written ;
-    TVT->TVT$WR_OCNT = TVT->TVT$WR_OCNT + Bytes_Written ;
-    TVT->TVT$WR_BCNT = TVT->TVT$WR_BCNT - Bytes_Written ;
-    if ((TVT->TVT$WR_OPTR GEQ TVT_TTY_BUFLEN))
+    bytes_left = TVT->TVT$WR_BCNT - bytes_written ;
+    TVT->TVT$WR_OPTR = TVT->TVT$WR_OPTR + bytes_written ;
+    TVT->TVT$WR_OCNT = TVT->TVT$WR_OCNT + bytes_written ;
+    TVT->TVT$WR_BCNT = TVT->TVT$WR_BCNT - bytes_written ;
+    if ((TVT->TVT$WR_OPTR >= TVT_TTY_BUFLEN))
 	{
 	TVT->TVT$WR_OPTR = 0 ;
 	} ;
@@ -1934,22 +2033,22 @@ PTY_WRITE_DONE(TVT) : NOVALUE (void)
     if ($$LOGF(LOG$TVT))
 	{
 	LOG$FAO("!%T TCB x!XL PTY_WRITE_DONE: #bytes left=!SL, written = !SL!/",
-		0, TVT->TVT$TCB, bytes_left, Bytes_written) ;
+		0, TVT->TVT$TCB, bytes_left, bytes_written) ;
 	};
 
 // Empty PTY buffers
 
     PTY_READ(TVT) ;
 
-//    if ((! TVT->TVT$NREAD) && (TCB->RCV_Q_COUNT > 0))
-//IF USE_ASTS %THEN
+//    if ((! TVT->TVT$NREAD) && (TCB->rcv_q_count > 0))
+#ifdef USE_ASTS
 //	TCP_READ(TVT);
 //	$DCLAST(ASTADR = PTY_WRITE,
 //		ASTPRM = TVT);
 //	PTY_WRITE(TVT) ;
-//else
+#else
 	$ACPWAKE;
-//FI
+#endif
 
     }
 
@@ -1959,21 +2058,21 @@ MBX_READ(TVT)
 //
 // MBX_READ - Initiate a read on the PTY's associated mailbox.
 //
-    {
-    MAP
-	struct TVT$BLOCK * TVT;
-    signed long
-	RC;
+     struct TVT$BLOCK * TVT;
+{
+  signed long
+    RC;
 
 // Issue the read $QIO
 
-    RC = $QIO(FUNC	= IO$_READVBLK,
-	      CHAN	= TVT->TVT$MBX_CHN,
-	      IOSB	= TVT->TVT$MBX_IOSB,
-	      ASTADR	= MBX_READ_DONE,
-	      ASTPRM	= TVT,
-	      P1	= TVT->TVT$MBX_BUF,
-	      P2	= TVT_MBX_BUFLEN);
+    RC = exe$qio(0, 
+		 TVT->TVT$MBX_CHN,
+		 IO$_READVBLK,
+		 TVT->TVT$MBX_IOSB,
+		 MBX_READ_DONE,
+		 TVT,
+		 TVT->TVT$MBX_BUF,
+		 TVT_MBX_BUFLEN, 0,0,0,0);
     if (! RC)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT MBX Read failure for TCB x!XL, RC=x!XL!/",
@@ -1983,17 +2082,15 @@ MBX_READ(TVT)
     return TRUE;
     }
 
-MBX_READ_DONE(TVT) : NOVALUE (void)
+void MBX_READ_DONE(TVT)
 //
 // Here when we receive a message on the mailbox associated with the PTY. If we
 // receive the terminal hangup signal (i.e. PTY has gone away).
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	IOSB = TVT->TVT$MBX_IOSB : $BBLOCK,
-	MBLOCK = TVT->TVT$MBX_BUF : $BBLOCK;
+    {
+      struct _iosb * IOSB = &TVT->TVT$MBX_IOSB;
+      struct _iosb * MBLOCK = &TVT->TVT$MBX_BUF; // check
     signed long
 	MTYPE,
 	RC;
@@ -2005,7 +2102,7 @@ MBX_READ_DONE(TVT) : NOVALUE (void)
 
 // Check the status - ignore cancel/abort
 
-    RC = IOSB.iosb$w_status;
+    RC = IOSB->iosb$w_status;
     if (RC == SS$_ABORT)
 	return;
     if (RC == SS$_CANCEL)
@@ -2037,10 +2134,10 @@ MBX_READ_DONE(TVT) : NOVALUE (void)
 
 // Get the message type and dispatch it.
 
-    MTYPE = MBLOCK[0,0,16,0];
-    SELECTONE MTYPE OF
-	SET
-	[MSG$_TRMHANGUP]:
+    MTYPE = MBLOCK->iosb$w_status; // check
+    switch (MTYPE)
+      {
+	case MSG$_TRMHANGUP:
 	    {
 	    XLOG$FAO(LOG$TCPERR,"!%T TVT hangup signal for TCB x!XL!/",
 		     0,TVT->TVT$TCB);
@@ -2049,7 +2146,8 @@ MBX_READ_DONE(TVT) : NOVALUE (void)
 //	    OKINT ;
 	    return;
 	    };
-	TES;
+break;
+	};
 
 // If we didn't handle it, it was ignored. Requeue the read.
 
@@ -2060,57 +2158,52 @@ MBX_READ_DONE(TVT) : NOVALUE (void)
 
 //SBTTL "Option negotiation routines"
 
-Void Set_State_ON (TVT, OPTBLK) (void)
-    {
-    MAP
-	struct TVT$BLOCK * TVT,
+void Set_State_ON (TVT, OPTBLK)
+     struct TVT$BLOCK * TVT;
 	struct OPT$BLOCK * OPTBLK;
+    {
 
     if (OPTBLK->OPT$STATE != OPT$STATE_ON)
 	{
 	OPTBLK->OPT$STATE = OPT$STATE_ON;
 	if ((OPTBLK->OPT$ON_RTN != 0))
-	    (OPTBLK->OPT$ON_RTN)(TVT)
+	  (OPTBLK->OPT$ON_RTN)(TVT);
 	}
     }
 
-Void Set_State_OFF (TVT, OPTBLK) (void)
-    {
-    MAP
-	struct TVT$BLOCK * TVT,
+void Set_State_OFF (TVT, OPTBLK)
+     struct TVT$BLOCK * TVT;
 	struct OPT$BLOCK * OPTBLK;
+    {
 
     if (OPTBLK->OPT$STATE != OPT$STATE_OFF)
 	{
 	OPTBLK->OPT$STATE = OPT$STATE_OFF;
 	if ((OPTBLK->OPT$OFF_RTN != 0))
-	    (OPTBLK->OPT$OFF_RTN)(TVT)
+	  (OPTBLK->OPT$OFF_RTN)(TVT);
 	}
     }
 
 
 
-FORWARD ROUTINE
- VOID    TVT_S};
+ void    TVT_SEND();
 
-TVT_READ_WILL(TVT,OPTION) : NOVALUE (void)
+void TVT_READ_WILL(TVT,OPTION)
 //
 // Received a WILL for an option. Handle according to the option table.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	REMOPTS = TVT->TVT$REMOPTS : OPT$LIST,
-	OPTBLK = (
-	    if (OPTION LEQU TELNET$K_MAXOPT)
-		REMOPTS[OPTION].OPT$BASE
-	    else
-		DEFAULT_OPTION_BLOCK) : OPT$BLOCK;
+    {
+      struct OPT$BLOCK * REMOPTS = &TVT->TVT$REMOPTS;
+      struct OPT$BLOCK * OPTBLK;
+      if (OPTION <= TELNET$K_MAXOPT)
+	OPTBLK = REMOPTS[OPTION].OPT$BASE;
+      else
+	OPTBLK = DEFAULT_OPTION_BLOCK;
 
 // Reset TVT read state
 
-    XLOG$FAO(LOG$TELNEG,"!%T READ_Will !UB!/",0,Option);
+    XLOG$FAO(LOG$TELNEG,"!%T READ_Will !UB!/",0,OPTION);
     TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 
 // If currently doing the option, then turn it on
@@ -2126,36 +2219,34 @@ TVT_READ_WILL(TVT,OPTION) : NOVALUE (void)
 
 	if (! OPTBLK->OPT$STATE)
 	    {
-	    IF (OPTBLK->OPT$PREFER == OPT$STATE_ON) OR
-	       (OPTBLK->OPT$PREFER == OPT$DONT_CARE) THEN
+	    if ((OPTBLK->OPT$PREFER == OPT$STATE_ON) ||
+		(OPTBLK->OPT$PREFER == OPT$DONT_CARE))
 		{
-//!!JC		OPTBLK [OPT$STATE] = OPT$STATE_ON;
+//!//JC		OPTBLK [OPT$STATE] = OPT$STATE_ON;
 		Set_State_ON(TVT, OPTBLK);		// JC
-		TVT_S}(TVT,TELNET$K_DO,OPTION);
+		TVT_SEND(TVT,TELNET$K_DO,OPTION);
 		}
 	    else
-		TVT_S}(TVT,TELNET$K_DONT,OPTION);
+		TVT_SEND(TVT,TELNET$K_DONT,OPTION);
 	    }
     }
 
-TVT_READ_WONT(TVT,OPTION) : NOVALUE (void)
+void TVT_READ_WONT(TVT,OPTION)
 //
 // Received a WONT for an option. Handle according to the option table.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	REMOPTS = TVT->TVT$REMOPTS : OPT$LIST,
-	OPTBLK = (
-	    if (OPTION LEQU TELNET$K_MAXOPT)
-		REMOPTS[OPTION].OPT$BASE
+    {
+      struct OPT$BLOCK * REMOPTS = &TVT->TVT$REMOPTS;
+      struct OPT$BLOCK * OPTBLK;
+	    if (OPTION <= TELNET$K_MAXOPT)
+	      OPTBLK = REMOPTS[OPTION].OPT$BASE;
 	    else
-		DEFAULT_OPTION_BLOCK) : OPT$BLOCK;
+	      OPTBLK = DEFAULT_OPTION_BLOCK;
 
 // Reset TVT read state
 
-    XLOG$FAO(LOG$TELNEG,"!%T READ_Wont !UB!/",0,Option);
+    XLOG$FAO(LOG$TELNEG,"!%T READ_Wont !UB!/",0,OPTION);
     TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 
 // If currently doing the option, then turn it off
@@ -2172,32 +2263,30 @@ TVT_READ_WONT(TVT,OPTION) : NOVALUE (void)
 
 	if (OPTBLK->OPT$STATE)
 		{
-//!!JC		OPTBLK->OPT$STATE = OPT$STATE_OFF;
+//!//JC		OPTBLK->OPT$STATE = OPT$STATE_OFF;
 		Set_State_OFF(TVT, OPTBLK);		// JC
-		TVT_S}(TVT,TELNET$K_DONT,OPTION);
+		TVT_SEND(TVT,TELNET$K_DONT,OPTION);
 		}
     }
 
 
 
-TVT_READ_DO(TVT,OPTION) : NOVALUE (void)
+void TVT_READ_DO(TVT,OPTION)
 //
 // Received a DO for an option. Handle according to the option table.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	LCLOPTS = TVT->TVT$LCLOPTS : OPT$LIST,
-	OPTBLK = (
-	    if (OPTION LEQU TELNET$K_MAXOPT)
-		LCLOPTS[OPTION].OPT$BASE
+    {
+      struct OPT$BLOCK * LCLOPTS = &TVT->TVT$LCLOPTS;
+      struct OPT$BLOCK * OPTBLK;
+	    if (OPTION <= TELNET$K_MAXOPT)
+	      OPTBLK = LCLOPTS[OPTION].OPT$BASE;
 	    else
-		DEFAULT_OPTION_BLOCK) : OPT$BLOCK;
+	      OPTBLK = DEFAULT_OPTION_BLOCK;
 
 // Reset TVT read state
 
-    XLOG$FAO(LOG$TELNEG,"!%T READ_Do !UB!/",0,Option);
+    XLOG$FAO(LOG$TELNEG,"!%T READ_Do !UB!/",0,OPTION);
     TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 
 // If currently doing the option, then turn it on
@@ -2205,7 +2294,7 @@ TVT_READ_DO(TVT,OPTION) : NOVALUE (void)
     if (OPTBLK->OPT$CURRENT)
 	{
 	OPTBLK->OPT$CURRENT = FALSE;
-//!!JC	OPTBLK->OPT$STATE = OPT$STATE_ON;	// Redundant
+//!//JC	OPTBLK->OPT$STATE = OPT$STATE_ON;	// Redundant
 	Set_State_ON(TVT, OPTBLK);		// JC Must set on
 	}
     else
@@ -2214,38 +2303,36 @@ TVT_READ_DO(TVT,OPTION) : NOVALUE (void)
 
 	if (! OPTBLK->OPT$STATE)
 	    {
-	    IF (OPTBLK->OPT$PREFER == OPT$STATE_ON) OR
-	       (OPTBLK->OPT$PREFER == OPT$DONT_CARE) THEN
+	    if ((OPTBLK->OPT$PREFER == OPT$STATE_ON) ||
+		(OPTBLK->OPT$PREFER == OPT$DONT_CARE)) 
 		{
-//!!JC		OPTBLK [OPT$STATE] = OPT$STATE_ON;
+//!//JC		OPTBLK [OPT$STATE] = OPT$STATE_ON;
 		Set_State_ON(TVT, OPTBLK);		// JC
-		TVT_S}(TVT,TELNET$K_WILL,OPTION);
+		TVT_SEND(TVT,TELNET$K_WILL,OPTION);
 		}
 	    else
-		TVT_S}(TVT,TELNET$K_WONT,OPTION);
+		TVT_SEND(TVT,TELNET$K_WONT,OPTION);
 	    };
     }
 
 
 
-TVT_READ_DONT(TVT,OPTION) : NOVALUE (void)
+void TVT_READ_DONT(TVT,OPTION)
 //
 // Received a DONT for an option. Handle according to the option table.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	LCLOPTS = TVT->TVT$LCLOPTS : OPT$LIST,
-	OPTBLK = (
-	    if (OPTION LEQU TELNET$K_MAXOPT)
-		LCLOPTS[OPTION].OPT$BASE
-	    else
-		DEFAULT_OPTION_BLOCK) : OPT$BLOCK;
+    {
+      struct OPT$BLOCK * LCLOPTS = &TVT->TVT$LCLOPTS;
+      struct OPT$BLOCK * OPTBLK;
+      if (OPTION <= TELNET$K_MAXOPT)
+	OPTBLK = LCLOPTS[OPTION].OPT$BASE;
+      else
+	OPTBLK = DEFAULT_OPTION_BLOCK;
 
 // Reset TVT read state
 
-    XLOG$FAO(LOG$TELNEG,"!%T READ_Dont !UB!/",0,Option);
+    XLOG$FAO(LOG$TELNEG,"!%T READ_Dont !UB!/",0,OPTION);
     TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 
 // If currently doing the option, then turn it off
@@ -2253,7 +2340,7 @@ TVT_READ_DONT(TVT,OPTION) : NOVALUE (void)
     if (OPTBLK->OPT$CURRENT)
 	{
 	OPTBLK->OPT$CURRENT = FALSE;
-//!!JC	OPTBLK->OPT$STATE = OPT$STATE_OFF;
+//!//JC	OPTBLK->OPT$STATE = OPT$STATE_OFF;
 	Set_State_OFF(TVT, OPTBLK);		// JC
 	}
     else
@@ -2264,33 +2351,31 @@ TVT_READ_DONT(TVT,OPTION) : NOVALUE (void)
 	{
 	if (OPTBLK->OPT$STATE)
 		{
-//!!JC		OPTBLK->OPT$STATE = OPT$STATE_OFF;
-//!!JC		OPTBLK->OPT$STATE = OPT$STATE_OFF;
+//!//JC		OPTBLK->OPT$STATE = OPT$STATE_OFF;
+//!//JC		OPTBLK->OPT$STATE = OPT$STATE_OFF;
 		Set_State_OFF(TVT, OPTBLK);		// JC
-		TVT_S}(TVT,TELNET$K_WONT,OPTION);
+		TVT_SEND(TVT,TELNET$K_WONT,OPTION);
 		} ;
 	} ;
     }
 
 
 
-TVT_S}(TVT,OPR,OPTION) : NOVALUE (void)
+void TVT_SEND(TVT,OPR,OPTION)
 //
 // Send a TVT option negotiation. We queue the bytes needed to implement the
 // option negotiation in the option buffer, and attempt a network write if
 // none is currently happening.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    LITERAL
-	TVT_OPTION_LEN = 3;
+    {
+#define	TVT_OPTION_LEN 3
 
 // Make sure there is room for the bytes we need to send.
 
-    XLOG$FAO(LOG$TELNEG,"!%T Send !UB!/",0,Option);
+    XLOG$FAO(LOG$TELNEG,"!%T Send !UB!/",0,OPTION);
 
-    if (TVT->TVT$NEG_CNT GEQ (TVT_NEG_BUFLEN-TVT_OPTION_LEN))
+    if (TVT->TVT$NEG_CNT >= (TVT_NEG_BUFLEN-TVT_OPTION_LEN))
 	return;
 
 // Insert the option negotiation bytes into the buffer
@@ -2305,24 +2390,23 @@ TVT_S}(TVT,OPR,OPTION) : NOVALUE (void)
 
 
 
-TVT_S}_SUBOP(TVT,OPTION,DATA_A,SIZE) : NOVALUE (void)
+void TVT_SEND_SUBOP(TVT,OPTION,DATA_A,size)
 //
 // Send a TVT suboption negotiation. We queue the bytes needed to implement the
 // option negotiation in the option buffer, and attempt a network write if
 // none is currently happening.
 //
-    {
-    BIND
-	DATA = DATA_A;
-    MAP
 	struct TVT$BLOCK * TVT;
-    signed long
-	Char : UNSIGNED BYTE;
+    {
+      long i,
+	data = DATA_A;
+unsigned char
+	Char ;
 
 // Make sure there is room for the bytes we need to send.
 
-    XLOG$FAO(LOG$TELNEG,"!%T Send_Subop !UB!/",0,Option);
-    if (TVT->TVT$NEG_CNT GEQ (TVT_NEG_BUFLEN-(Size+5)))
+    XLOG$FAO(LOG$TELNEG,"!%T Send_Subop !UB!/",0,OPTION);
+    if (TVT->TVT$NEG_CNT >= (TVT_NEG_BUFLEN-(size+5)))
 	return;
 
 // Insert the option negotiation bytes into the buffer
@@ -2338,114 +2422,107 @@ TVT_S}_SUBOP(TVT,OPTION,DATA_A,SIZE) : NOVALUE (void)
     // Write the suboption data
 
 //    CH$WCHAR_A(Option$K_Tog_Flow_Cntl_OFF,TVT->TVT$NEG_EQP);
-    for (i=0;i<=Size-1;i++)
+    for (i=0;i<=size-1;i++)
 	{
-	Char = CH$RCHAR_A(Data);
-	CH$WCHAR_A(Char,TVT->TVT$NEG_EQP)
+	Char = CH$RCHAR_A(data);
+	CH$WCHAR_A(Char,TVT->TVT$NEG_EQP);
 	};
 
     // Write the suboption trailer
     CH$WCHAR_A(TELNET$K_IAC,TVT->TVT$NEG_EQP);
     CH$WCHAR_A(TELNET$K_SE,TVT->TVT$NEG_EQP);
 
-    TVT->TVT$NEG_CNT = TVT->TVT$NEG_CNT + (Size+5);
+    TVT->TVT$NEG_CNT = TVT->TVT$NEG_CNT + (size+5);
     }
 
 
 
-TVT_READ_SUB(TVT) : NOVALUE (void)
+void TVT_READ_SUB(TVT)
 //
 // Received a Suboption for an option. Handle according to the option table.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
-    BIND
-	OPTS = TVT->TVT$REMOPTS : OPT$LIST;
+    {
+      struct OPT$BLOCK * OPTS = &TVT->TVT$REMOPTS;
     signed long
-	sub_func,
-	opt : UNSIGNED BYTE;
+      sub_func;
+	unsigned char opt;
 
     opt = CH$RCHAR_A(TVT->TVT$SUB_PTR);
-    XLOG$FAO(LOG$TELNEG,"!%T READ_Sub !UB!/",0,Opt);
+    XLOG$FAO(LOG$TELNEG,"!%T READ_Sub !UB!/",0,opt);
     TVT->TVT$SUB_CNT = TVT->TVT$SUB_CNT -1 ;
 
      // If everything is kosher, execute the suboption handler.
-     if (opt LEQU TELNET$K_MAXOPT)
-	IF (OPTS[opt].OPT$SUB_RTN != 0) AND
-	   (OPTS[opt].OPT$STATE == OPT$STATE_ON) THEN
-		(OPTS[opt].OPT$SUB_RTN)(TVT)
+     if (opt <= TELNET$K_MAXOPT)
+	if ((OPTS[opt].OPT$SUB_RTN != 0) &&
+	    (OPTS[opt].OPT$STATE == OPT$STATE_ON))
+	  (OPTS[opt].OPT$SUB_RTN)(TVT);
     }
 
 
 
-TVT_NEGOTIATE(TVT) : NOVALUE (void)
+void TVT_NEGOTIATE(TVT)
 //
 // Initiate option negotiation for all of the negotiations that we prefer to be
 // in the ON state. Loops through LCLOPTS, sending WILLs and REMOPTS sending
 // DOs for them.
 //
-    {
-    MAP
 	struct TVT$BLOCK * TVT;
+    {
     signed long
 	OPTION;
-    BIND
-	LCLOPTS = TVT->TVT$LCLOPTS : OPT$LIST,
-	REMOPTS = TVT->TVT$REMOPTS : OPT$LIST;
+    struct OPT$BLOCK * LCLOPTS = &TVT->TVT$LCLOPTS;
+struct OPT$BLOCK * REMOPTS = &TVT->TVT$REMOPTS;
 
 // First, do local options (offer to WILL them)
 
-    for (OPTION=TELNET$K_MINOPT;OPTION<=TELNET$K_MAXOPT;OPTION++)
+    for (OPTION=Telnet$K_MINOPT;OPTION<=TELNET$K_MAXOPT;OPTION++)
 	{
-	BIND
-	    OPTBLK = LCLOPTS[OPTION].OPT$BASE : OPT$BLOCK;
+	  struct OPT$BLOCK * OPTBLK = &LCLOPTS[OPTION].OPT$BASE;
 
 // If off and we prefer on, send a WILL
 
-	IF (! OPTBLK->OPT$STATE) AND
-	   (OPTBLK->OPT$PREFER == OPT$STATE_ON) THEN
+	if ((! OPTBLK->OPT$STATE) &&
+	    (OPTBLK->OPT$PREFER == OPT$STATE_ON))
 	    {
 	    OPTBLK->OPT$CURRENT = TRUE;
-	    TVT_S}(TVT,TELNET$K_WILL,OPTION);
+	    TVT_SEND(TVT,TELNET$K_WILL,OPTION);
 	    };
 
 // If on and we prefer it off, send a WONT
 
-	IF OPTBLK->OPT$STATE AND
-	   (OPTBLK->OPT$PREFER == OPT$STATE_OFF) THEN
+	if (OPTBLK->OPT$STATE &&
+	    (OPTBLK->OPT$PREFER == OPT$STATE_OFF))
 	    {
 	    OPTBLK->OPT$CURRENT = TRUE;
-	    TVT_S}(TVT,TELNET$K_WONT,OPTION);
+	    TVT_SEND(TVT,TELNET$K_WONT,OPTION);
 	    };
 	};
 
 // Then, do remote options (ask remote to DO them)
 
-    for (OPTION=TELNET$K_MINOPT;OPTION<=TELNET$K_MAXOPT;OPTION++)
+    for (OPTION=Telnet$K_MINOPT;OPTION<=TELNET$K_MAXOPT;OPTION++)
 	{
-	BIND
-	    OPTBLK = REMOPTS[OPTION].OPT$BASE : OPT$BLOCK;
+	  struct OPT$BLOCK* OPTBLK = &REMOPTS[OPTION].OPT$BASE;
 
 // If off and we prefer on, send a DO
 
-	IF (! OPTBLK->OPT$STATE) AND
-	   (OPTBLK->OPT$PREFER == OPT$STATE_ON) THEN
+	if ((! OPTBLK->OPT$STATE) &&
+	    (OPTBLK->OPT$PREFER == OPT$STATE_ON))
 	    {
 	    OPTBLK->OPT$CURRENT = TRUE;
-	    TVT_S}(TVT,TELNET$K_DO,OPTION);
+	    TVT_SEND(TVT,TELNET$K_DO,OPTION);
 	    };
 
 // If on and we prefer it off, send a DONT
 
-	IF OPTBLK->OPT$STATE AND
-	   (OPTBLK->OPT$PREFER == OPT$STATE_OFF) THEN
+	if (OPTBLK->OPT$STATE &&
+	    (OPTBLK->OPT$PREFER == OPT$STATE_OFF))
 	    {
 	    OPTBLK->OPT$CURRENT = TRUE;
-	    TVT_S}(TVT,TELNET$K_DONT,OPTION);
+	    TVT_SEND(TVT,TELNET$K_DONT,OPTION);
 	    };
 	};
     }
-}
-ELUDOM
+
 

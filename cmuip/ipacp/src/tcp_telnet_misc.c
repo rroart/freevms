@@ -76,6 +76,7 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 #include<tt2def.h>
 #include<iodef.h>
 #include<iosbdef.h>
+#include<dvidef.h>
 
 
 
@@ -588,11 +589,12 @@ void Line_Changed_AST (Parm)
 	}
     else
     {
-	if (Charistics->TT$V_TTSYNC != Old_Chars->TT$V_TTSYNC)
+	if (Charistics->tt$v_ttsync != Old_Chars->tt$v_ttsync)
 	    TVT_SEND_SUBOP(TVT,Telnet$K_Toggle_Flow_Control,
-		%REF(IF (Charistics->TT$V_TTSYNC)
-			THEN Option$K_Tog_Flow_Cntl_ON
-			else Option$K_Tog_Flow_Cntl_OFF),
+			   ((Charistics->tt$v_ttsync) ?
+			    Option$K_Tog_Flow_Cntl_ON
+			    :
+			    Option$K_Tog_Flow_Cntl_OFF),
 		1);
 	Old_Chars = Charistics;
 	TVT->TVT$TTYDEPEND2 = Extend_Char;
@@ -692,9 +694,9 @@ void Set_PTY_Window_Size (TVT, pag, width)
 	struct TVT$BLOCK * TVT;
     {
       long pty_chan	= TVT->TVT$PTY_CHN;
-      struct _qcbdef PTY_Char;
-      union _ttdef * Charistics = &PTY_Char.QCB$L_CHARISTICS;
-      union _tt2def * Extend_Char = &PTY_Char.QCB$L_EXTEND_CHAR;   // JC
+      struct _qcbdef * PTY_Char;
+      union _ttdef * Charistics = &PTY_Char->QCB$L_CHARISTICS;
+      union _tt2def * Extend_Char = &PTY_Char->QCB$L_EXTEND_CHAR;   // JC
 
     struct _iosb io_stats;
     signed long
@@ -702,7 +704,7 @@ void Set_PTY_Window_Size (TVT, pag, width)
 
     Status = exe$qiow (
 0,
-	PTY_CHAN,
+	pty_chan,
 	IO$_SENSEMODE,
 	io_stats,
   0,0,
@@ -712,7 +714,7 @@ void Set_PTY_Window_Size (TVT, pag, width)
     if (! Status)
         {
 	    XLOG$FAO(LOG$TELERR
-		,"!%T Set_PTY_Window_size: SENSEMODE status=!UL!/",0,status);
+		,"!%T Set_PTY_Window_size: SENSEMODE status=!UL!/",0,Status);
 	}
     else if (! io_stats.iosb$w_status)
         {
@@ -722,13 +724,13 @@ void Set_PTY_Window_Size (TVT, pag, width)
 	}
     else
     {
-	if (Width > 0)
+	if (width > 0)
 		PTY_Char->QCB$W_PAGE_WIDTH = width;
-	if (Pag > -1)
+	if (pag > -1)
 		PTY_Char->QCB$B_PAGE_LENGTH = pag;
 	Status = exe$qiow (
 0,
-		PTY_Chan,
+		pty_chan,
 		IO$_SETMODE,
 		io_stats,
   0,0,
@@ -738,7 +740,7 @@ void Set_PTY_Window_Size (TVT, pag, width)
 	if (! Status)
 	{
 	    XLOG$FAO(LOG$TELERR
-		,"!%T Set_PTY_Window_size: SETMODE status=!UL!/",0,status);
+		,"!%T Set_PTY_Window_size: SETMODE status=!UL!/",0,Status);
 	}
 	else if (! io_stats.iosb$w_status)
 	{
@@ -762,7 +764,7 @@ void Window_Size_Sub (TVT)
 	Width,
 	Length;
 
-    if (TVT->TVT$SUB_CNT LSS 4) return;
+    if (TVT->TVT$SUB_CNT < 4) return;
 
     Width = 255 * CH$RCHAR_A(TVT->TVT$SUB_PTR);
     Width = Width + CH$RCHAR_A(TVT->TVT$SUB_PTR);
@@ -774,11 +776,11 @@ void Window_Size_Sub (TVT)
 
     Set_PTY_Window_Size(TVT, Length, Width);
 
-    SS$_NORMAL
+    return SS$_NORMAL;
     }
 
 
-void Set_PTY_Term_Type (TVT, type, devdep) (void)
+void Set_PTY_Term_Type (TVT, type, devdep)
 //--
 // Functional Description:
 //
@@ -786,26 +788,26 @@ void Set_PTY_Term_Type (TVT, type, devdep) (void)
 //--
 //	Rewritten by JC to make it work
 //
-	struct VECTOR * devdep[2];
+	unsigned long devdep[2];
 	struct TVT$BLOCK * TVT;
     {
       extern SET_DEVDEP();
       long pty_chan	= TVT->TVT$PTY_CHN;
       long tty_chan	= TVT->TVT$TTY_CHN;
-      struct _qcbdef PTY_Char;
-      union _ttdef * Charistics = &PTY_Char.QCB$L_CHARISTICS;
-      union _tt2def * Extend_Char = &PTY_Char.QCB$L_EXTEND_CHAR;   // JC
-	 LCLOPTS		= TVT->TVT$LCLOPTS : OPT$LIST,
-	State_Echo	= LCLOPTS[Telnet$K_Echo].Opt$State,
-	State_Binary	= LCLOPTS[Telnet$K_Binary].Opt$State,
-	State_Eightbit	= LCLOPTS[Telnet$K_Extended_ASCII].Opt$State;
+      struct _qcbdef * PTY_Char;
+      union _ttdef * Charistics = &PTY_Char->QCB$L_CHARISTICS;
+      union _tt2def * Extend_Char = &PTY_Char->QCB$L_EXTEND_CHAR;   // JC
+      struct OPT$BLOCK * LCLOPTS		= &TVT->TVT$LCLOPTS;
+      long State_Echo	= LCLOPTS[Telnet$K_Echo].OPT$STATE;
+      long State_Binary	= LCLOPTS[Telnet$K_Binary].OPT$STATE;
+      long State_Eightbit	= LCLOPTS[Telnet$K_Extended_Ascii].OPT$STATE;
     struct _iosb io_stats;
     signed long
 	Status	;
 
     Status = exe$qiow (
 0,
-	PTY_CHAN,
+	pty_chan,
 	IO$_SENSEMODE,
 	io_stats,
   0,0,
@@ -815,7 +817,7 @@ void Set_PTY_Term_Type (TVT, type, devdep) (void)
     if (! Status)
 	{
 	    XLOG$FAO(LOG$TELERR
-		,"!%T Set_PTY_Term_Type: SENSEMODE status=!UL!/",0,status);
+		,"!%T Set_PTY_Term_Type: SENSEMODE status=!UL!/",0,Status);
 	}
     else if (! io_stats.iosb$w_status)
 	{
@@ -831,16 +833,24 @@ void Set_PTY_Term_Type (TVT, type, devdep) (void)
 //
 //	Set the new terminal characteristics JC
 //
-	PTY_Char->QCB$L_CHARISTICS = (PTY_Char->QCB$L_CHARISTICS AND
-		(NOT	(   TT$M_LOWER
+
+	long temp = PTY_Char->QCB$L_CHARISTICS[0] + ( PTY_Char->QCB$L_CHARISTICS[1] << 8) + (PTY_Char->QCB$L_CHARISTICS[2] << 16);
+#if 0 	
+	PTY_Char->QCB$L_CHARISTICS = (PTY_Char->QCB$L_CHARISTICS &&
+#endif
+				      temp = (temp &
+		(!	(   TT$M_LOWER
 			 || TT$M_EIGHTBIT
 			 || TT$M_MECHFORM
 			 || TT$M_MECHTAB
 			 || TT$M_WRAP
 			 || TT$M_SCOPE)))
-		OR		devdep[0];
-	PTY_Char[QCB$L_EXTEND_CHAR]= (PTY_Char[QCB$L_EXTEND_CHAR] AND
-		(NOT	(   TT2$M_PRINTER
+	  ||		devdep[0];
+	PTY_Char->QCB$L_CHARISTICS[0]=temp & 0xff;
+	PTY_Char->QCB$L_CHARISTICS[1]=(temp & 0x00ff00) >> 8;
+	PTY_Char->QCB$L_CHARISTICS[2]=(temp & 0xff0000) >> 16;
+	PTY_Char->QCB$L_EXTEND_CHAR= (PTY_Char->QCB$L_EXTEND_CHAR &&
+		(!	(   TT2$M_PRINTER
 			 || TT2$M_REGIS
 			 || TT2$M_SIXEL
 //!!JC			 || TT2$M_PASTHRU
@@ -851,12 +861,12 @@ void Set_PTY_Term_Type (TVT, type, devdep) (void)
 			 || TT2$M_DECCRT
 			 || TT2$M_DECCRT2
 			 || TT2$M_DECCRT3)))
-	OR		devdep[1];
+	||		devdep[1];
 
-	Charistics [TT$V_EIGHTBIT] = State_Binary || State_Eightbit;
+	Charistics ->tt$v_eightbit = State_Binary || State_Eightbit;
 	Status = exe$qiow (
 0,
-		PTY_Chan,
+		pty_chan,
 		IO$_SETMODE,
 		io_stats,
   0,0,
@@ -867,7 +877,7 @@ void Set_PTY_Term_Type (TVT, type, devdep) (void)
         {
 	    XLOG$FAO(LOG$TELERR
 		,"!%T Set_PTY_Term_Type: SETMODE status=!UL!/",
-		0,status);
+		0,Status);
 	}
 	else if (! io_stats.iosb$w_status)
         {
@@ -878,47 +888,45 @@ void Set_PTY_Term_Type (TVT, type, devdep) (void)
 	TVT->TVT$TTSET = 1;		// Set TTSET flag
 	SET_DEVDEP(TVT);
     }
-    SS$_NORMAL
+    return SS$_NORMAL;
     }
 
-Void Terminal_Type_On (TVT) (void)
+void Terminal_Type_On (TVT)
 //++
 // Functional Description:
 //
 //	We've agreed to talk about terminal types.
 //--
-    {
-    EXTERNAL ROUTINE
-	TVT_SEND_SUBOP;
-    MAP
 	struct TVT$BLOCK * TVT;
+    {
+    extern
+	TVT_SEND_SUBOP();
 
     // Ask for the terminal type.
     TVT_SEND_SUBOP(TVT,Telnet$K_Terminal_Type,
-        %REF(Option$K_Terminal_Type_Send), 1);
+		   /*%REF*/(Option$K_Terminal_Type_Send), 1);
 
     }
 
-Void Window_Size_On (TVT) (void)
+void Window_Size_On (TVT)
 //++
 // Functional Description:
 //
 //	We've agreed to talk about terminal types.
 //--
 //	Added by JC
-    {
-    EXTERNAL ROUTINE
-	TVT_SEND_SUBOP;
-    MAP
 	struct TVT$BLOCK * TVT;
+    {
+extern
+	TVT_SEND_SUBOP();
 
     // Ask for the terminal type.
     TVT_SEND_SUBOP(TVT,Telnet$K_Window_Size,
-        %REF(Option$K_Terminal_Type_Send), 1);
+		   /*%REF*/(Option$K_Terminal_Type_Send), 1);
 
     }
 
-Lookup_terminal(Term_Desc, Devdep)
+Lookup_terminal(Term_Desc, devdep)
 //++
 // Functional Description:
 //
@@ -926,18 +934,18 @@ Lookup_terminal(Term_Desc, Devdep)
 //	term_desc.  If none found, return -1,
 //	Otherwise return(SS$_NORMAL) and set Type_id = term type number.
 //--
+     unsigned long * devdep[2];
+struct dsc$descriptor *	Term_Desc;
 {
-    MAP
-        struct VECTOR * Devdep[2],
-	Term_Desc	: REF Block[8,BYTE];
-    EXTERNAL ROUTINE
-	STR$UPCASE		: BLISS ADDRESSING_MODE(GENERAL),
-	STR$TRIM		: BLISS ADDRESSING_MODE(GENERAL),
-	STR$MATCH_WILD		: BLISS ADDRESSING_MODE(GENERAL),
-	STR$CASE_BLIND_COMPARE	: BLISS ADDRESSING_MODE(GENERAL);
+    extern
+      STR$UPCASE(),
+      STR$TRIM(),
+      STR$MATCH_WILD(),
+      STR$CASE_BLIND_COMPARE();
+    
+    unsigned char Buffer [32];
+    struct dsc$descriptor typdsc_, * TYPDSC =&typdsc_;
     signed long
-	Buffer : VECTOR[32, BYTE],
-	TYPDSC : BLOCK[8,BYTE],
 	i,
 	Status;
 
@@ -960,8 +968,8 @@ Lookup_terminal(Term_Desc, Devdep)
 //	Now add the * to the string for a wild match
 //
 	TYPDSC->dsc$w_length = TYPDSC->dsc$w_length +1;
-	Buffer[0] = TERM_DESC->dsc$w_length+1;
-    INCR i FROM 1 TO Term_Table[0] DO
+	Buffer[0] = Term_Desc->dsc$w_length+1;
+	for ( i = 1; i < Term_Table[0]; i ++)
 	{
 
 //!!	Status =  STR$CASE_BLIND_COMPARE(
@@ -969,17 +977,17 @@ Lookup_terminal(Term_Desc, Devdep)
 //	Make a wild match
 //
 	Status =  STR$MATCH_WILD(
-			.Term_Table[Term_Table[1]*.i+0],
+			Term_Table[Term_Table[1]*i+0],
 			TYPDSC);
 	    if ((Status && 1) == 1)
 	    {
-		devdep[0] = Term_Table[Term_Table[1]*.i+2];
-		devdep[1] = Term_Table[Term_Table[1]*.i+3];
-		return(Term_Table[Term_Table[1]*.i+1]);
+		devdep[0] = Term_Table[Term_Table[1]*i+2];
+		devdep[1] = Term_Table[Term_Table[1]*i+3];
+		return(Term_Table[Term_Table[1]*i+1]);
 	    };
 	};
 
-    -1
+	return -1;
     }
 
 void Terminal_Type_Sub (TVT) 
@@ -992,17 +1000,18 @@ void Terminal_Type_Sub (TVT)
       STR$COPY_DX(),
       STR$CASE_BLIND_COMPARE(),
 	TVT_SEND_SUBOP();
-    BIND
-	LCLOPTS = TVT->TVT$LCLOPTS : OPT$LIST,
-	REMOPTS = TVT->TVT$REMOPTS : OPT$LIST,
-	OPTBLK = (
-		REMOPTS[Telnet$K_Terminal_type].OPT$BASE) : OPT$BLOCK;
+
+    struct OPT$BLOCK * LCLOPTS = &TVT->TVT$LCLOPTS;
+    struct OPT$BLOCK * REMOPTS = &TVT->TVT$REMOPTS;
+	long OPTBLK = 
+		REMOPTS[Telnet$K_Terminal_Type].OPT$BASE;
     signed long
-	Type_id  = %X"FFFF",
-	devdep  : VECTOR[2],
-	Status,
-	OLDTYPDSC : BLOCK[DSC$K_Z_BLN,BYTE],
-	TYPDSC : BLOCK[DSC$K_Z_BLN,BYTE];
+      type_id  = 0xFFFF;
+    unsigned long devdep[2];
+    signed long
+      Status;
+    struct dsc$descriptor oldtypdsc_, * OLDTYPDSC = &oldtypdsc_;
+    struct dsc$descriptor typdsc_, *TYPDSC = & typdsc_;
 
     CH$RCHAR_A(TVT->TVT$SUB_PTR);
     TYPDSC->dsc$w_length = TVT->TVT$SUB_CNT - 1;	// current string
@@ -1017,29 +1026,29 @@ void Terminal_Type_Sub (TVT)
     TVT->TVT$SUB_PTR = TVT->TVT$SUB_BUF;
     TVT->TVT$SUB_CNT = 0;
 
-    Type_ID = Lookup_terminal(TYPDSC,devdep);	// Get terminal type
+    type_id = Lookup_terminal(TYPDSC,devdep);	// Get terminal type
 
-    if (Type_ID > 0)			// Is it OK ?
+    if (type_id > 0)			// Is it OK ?
 	{
 //
 //		Setup the device dependent bits
 //
 	    Set_PTY_Term_Type(TVT,type_id,devdep);
 	}
-    else IF	STR$CASE_BLIND_COMPARE(OLDTYPDSC,TYPDSC)	// Not same ?
-		AND (TVT->TVT$KILL_TERMINAL_TYPE LEQU 6)	// Not 6 tries ?
-		AND (Type_ID != 0)
-	THEN {
+    else if	(STR$CASE_BLIND_COMPARE(OLDTYPDSC,TYPDSC)	// Not same ?
+		&& (TVT->TVT$KILL_TERMINAL_TYPE <= 6)	// Not 6 tries ?
+	   && (type_id != 0))
+	{
 	    TVT_SEND_SUBOP(TVT,Telnet$K_Terminal_Type,
-		%REF(Option$K_Terminal_Type_Send), 1);
+			   /*%REF*/(Option$K_Terminal_Type_Send), 1);
 //!!	    OPTBLK->OPT$PREFER = OPT$DONT_CARE;
 	};
 	TVT->TVT$KILL_TERMINAL_TYPE = TVT->TVT$KILL_TERMINAL_TYPE+1;
 	Status = STR$COPY_DX(OLDTYPDSC,TYPDSC);
-    SS$_NORMAL
+    return SS$_NORMAL;
     }
 
-Set_DEVDEP_DONE(TVT) : NOVALUE (void)
+void Set_DEVDEP_DONE(TVT)
 	struct TVT$BLOCK * TVT;
     {
 	short int tty_chan	= &TVT->TVT$TTY_CHN;
@@ -1047,13 +1056,13 @@ Set_DEVDEP_DONE(TVT) : NOVALUE (void)
 	Status;
 
 	XLOG$FAO(LOG$TELNEG,"!%T Set_DEVDEP_Done:!/",0);
-	if tty_chan == 0 then return(SS$_Normal);
-	Status = $DASSGN (CHAN = tty_chan);
+	if (tty_chan == 0) return(SS$_NORMAL);
+	Status = exe$dassgn (tty_chan);
 	if (! Status)
 		    XLOG$FAO(LOG$TELERR
-		    ,"!%T Set_DEVDEP_Done: DASSGN status=!UL!/",0,status);
+		    ,"!%T Set_DEVDEP_Done: DASSGN status=!UL!/",0,Status);
 	tty_chan = 0;
-    ss$_normal
+	return SS$_NORMAL;
 };
 
 void Set_DEVDEP(TVT)
@@ -1066,35 +1075,41 @@ void Set_DEVDEP(TVT)
 	struct TVT$BLOCK * TVT;
     {
       struct _iosb io_stats;
+      unsigned char devstr[20];
     signed long
-	Telnet_Passall,
+	telnet_passall,
 	Changed,
-	Unit_Number,
-	devstr : VECTOR[20,BYTE],
-	devnam : $BBLOCK->DSC$K_S_BLN PRESET (
-		[dsc$w_length] = sizeof(devstr),
-		[dsc$b_dtype] = DSC$K_DTYPE_Z,
-		[dsc$b_class] = DSC$K_CLASS_Z,
-		[dsc$a_pointer] = devstr),
-	ptystr : VECTOR[20,BYTE],
-	ptynam : $BBLOCK->DSC$K_S_BLN PRESET (
-		[dsc$w_length] = sizeof(ptystr),
-		[dsc$b_dtype] = DSC$K_DTYPE_Z,
-		[dsc$b_class] = DSC$K_CLASS_Z,
-		[dsc$a_pointer] = ptystr),
-	Item_List		: $ITMLST_DECL (Items = 3),
-	Status		: LONG;
-	short * pty_chan	= &TVT->TVT$PTY_CHN,
-	short * tty_chan	= &TVT->TVT$TTY_CHN,
+      Unit_Number;
+    struct dsc$descriptor devnam_ = {
+		dsc$w_length : sizeof(devstr),
+		dsc$b_dtype : DSC$K_DTYPE_Z,
+		dsc$b_class : DSC$K_CLASS_Z,
+		dsc$a_pointer : devstr};
+    struct dsc$descriptor *devnam=&devnam;
+    unsigned char ptystr[20];
+	  struct dsc$descriptor ptynam_={
+		dsc$w_length : sizeof(ptystr),
+		dsc$b_dtype : DSC$K_DTYPE_Z,
+		dsc$b_class : DSC$K_CLASS_Z,
+		dsc$a_pointer : ptystr};
+	struct dsc$descriptor * ptynam = &ptynam_;
+	struct item_list_3 Item_List[3];
+	unsigned long Status;
+	short * pty_chan	= &TVT->TVT$PTY_CHN;
+	short * tty_chan	= &TVT->TVT$TTY_CHN;
 	  struct _qcbdef * PTY_Char= &TVT->TVT$TTY_CHAR;
 	union _ttdef * Charistics = PTY_Char->QCB$L_CHARISTICS;
 	union _tt2def * Extend_Char = PTY_Char->QCB$L_EXTEND_CHAR;   // JC
 
-	LCLOPTS		= TVT->TVT$LCLOPTS 		: OPT$LIST,
-	Echo_opt	= LCLOPTS[Telnet$K_Echo].OPT$BASE : OPT$BLOCK,
-	State_Echo	= LCLOPTS[Telnet$K_Echo].Opt$State,
-	State_Binary	= LCLOPTS[Telnet$K_Binary].Opt$State,
-	State_Eightbit	= LCLOPTS[Telnet$K_Extended_ASCII].Opt$State;
+	struct OPT$BLOCK * LCLOPTS		= &TVT->TVT$LCLOPTS;
+	struct OPT$BLOCK * Echo_opt	= LCLOPTS[Telnet$K_Echo].OPT$BASE;
+	long State_Echo	= LCLOPTS[Telnet$K_Echo].OPT$STATE;
+	long State_Binary	= LCLOPTS[Telnet$K_Binary].OPT$STATE;
+	long State_Eightbit	= LCLOPTS[Telnet$K_Extended_Ascii].OPT$STATE;
+	$DESCRIPTOR(lnm_proc,"LNM$PROCESS_TABLE");
+	$DESCRIPTOR(lnm_pty,"INET$PTY_TERM");
+	$DESCRIPTOR(lnm_pass,"TELNET_PASSALL");
+	struct item_list_3 itm[2]={ {buflen:20, item_code:1, bufaddr: ptystr, &ptynam->dsc$w_length }, {0,0,0,0} };
 
 //
 //	If user is not yet setup we must exit to prevent conflicts.
@@ -1107,18 +1122,18 @@ void Set_DEVDEP(TVT)
 		IO$_SENSEMODE,
 		io_stats,
   0,0,
-		PTY_char,
+		PTY_Char,
 		QCB$K_SIZE,
 0,0,0,0);
 
-    IF ! Status
-	THEN {
+    if (! Status)
+	 {
 	    XLOG$FAO(LOG$TELERR
-		,"!%T Set_DEVDEP: SENSEMODE PTY status=!UL!/",0,status);
+		,"!%T Set_DEVDEP: SENSEMODE PTY status=!UL!/",0,Status);
 	}
 
-    else IF ! io_stats.iosb$w_status
-	THEN {
+    else if (! io_stats.iosb$w_status)
+	 {
 	    XLOG$FAO(LOG$TELERR
 		,"!%T Set_DEVDEP: SENSEMODE PTY status=!UL!/"
 		,0,io_stats.iosb$w_status);
@@ -1126,29 +1141,26 @@ void Set_DEVDEP(TVT)
     else {
 	XLOG$FAO(LOG$TELNEG
 		,"!%T Set_DEVDEP: Before Class=!UB Type=!UB Char:x!XL x!XL Size=!UW !UB!/",0
-		,PTY_Char->QCB$B_Class
-		,PTY_Char->QCB$B_Type
-		,(PTY_Char->QCB$L_CHARISTICS && %X"FFFFFF")
-		,PTY_Char[QCB$L_EXTEND_CHAR]
+		,PTY_Char->QCB$B_CLASS
+		,PTY_Char->QCB$B_TYPE
+		,(PTY_Char->QCB$L_CHARISTICS && 0xFFFFFF)
+		,PTY_Char->QCB$L_EXTEND_CHAR
 		,PTY_Char->QCB$W_PAGE_WIDTH
 		,PTY_Char->QCB$B_PAGE_LENGTH);
 
-	Telnet_passall = $TRNLOG(
-		LOGNAM=%ASCID"TELNET_PASSALL",		// JC
-		RSLLEN=ptynam->dsc$w_length,		// JC
-		RSLBUF=ptynam);				// JC
+	telnet_passall = exe$trnlnm(0, &lnm_proc, &lnm_pass, 0, itm); // JC
 
 	Changed = 0;
 	Changed = TVT->TVT$TTSET;
-	if Telnet_Passall == 1 THEN
-	    Changed = Changed OR
-		(Charistics [TT$V_PASSALL] XOR State_Binary);
+	if (telnet_passall == 1)
+	    Changed = Changed ||
+		(Charistics ->tt$v_passall ^ State_Binary);
 
-	IF ! Echo_OPT->OPT$CURRENT		// Echo being negotiated ??
-	THEN {
-	    Changed = Changed OR
-		(Charistics [TT$V_NOECHO] XOR (! State_Echo));
-	    Charistics [TT$V_NOECHO] = 1 && (! State_Echo);
+	if (! Echo_opt->OPT$CURRENT)		// Echo being negotiated ??
+	 {
+	    Changed = Changed ||
+		(Charistics ->tt$v_noecho ^ (! State_Echo));
+	    Charistics ->tt$v_noecho = 1 && (! State_Echo);
 	    };
 
 
@@ -1156,23 +1168,23 @@ void Set_DEVDEP(TVT)
 		,"!%T Set_DEVDEP: Changed=x!XL!/",0
 		,Changed);
 
-	If	! (Changed OR
-		(Charistics->TT$V_EIGHTBIT XOR
-			(State_Binary || State_Eightbit)))
-		THEN return(SS$_NORMAL);	// No changes to be made
+	if	(! (Changed ||
+		(Charistics->tt$v_eightbit ^
+		 (State_Binary || State_Eightbit))))
+		 return(SS$_NORMAL);	// No changes to be made
 
-	Charistics [TT$V_EIGHTBIT] = State_Binary || State_Eightbit;
-	if Telnet_Passall == 1 THEN
-		Charistics [TT$V_PASSALL] = State_Binary;
+	Charistics ->tt$v_eightbit = State_Binary || State_Eightbit;
+	if (telnet_passall == 1)
+		Charistics ->tt$v_passall = State_Binary;
 
-        TVT[TVT$TTYDEPEND] =  PTY_Char->QCB$L_CHARISTICS;
-        TVT[TVT$TTYDEPEND2] = PTY_Char[QCB$L_EXTEND_CHAR];
+        TVT->TVT$TTYDEPEND =  PTY_Char->QCB$L_CHARISTICS;
+        TVT->TVT$TTYDEPEND2 = PTY_Char->QCB$L_EXTEND_CHAR;
 	XLOG$FAO(LOG$TELNEG
 		,"!%T Set_DEVDEP: After  Class=!UB Type=!UB Char:x!XL x!XL Size=!UW !UB!/",0
-		,PTY_Char->QCB$B_Class
-		,PTY_Char->QCB$B_Type
-		,(PTY_Char->QCB$L_CHARISTICS && %X"FFFFFF")
-		,PTY_Char[QCB$L_EXTEND_CHAR]
+		,PTY_Char->QCB$B_CLASS
+		,PTY_Char->QCB$B_TYPE
+		,(PTY_Char->QCB$L_CHARISTICS && 0xFFFFFF)
+		,PTY_Char->QCB$L_EXTEND_CHAR
 		,PTY_Char->QCB$W_PAGE_WIDTH
 		,PTY_Char->QCB$B_PAGE_LENGTH);
 
@@ -1182,18 +1194,18 @@ void Set_DEVDEP(TVT)
 		IO$_SETMODE,
 		io_stats,
   0, 0,
-		PTY_char,
+		PTY_Char,
 		QCB$K_SIZE,
 0,0,0,0);
 
-	IF ! Status
-	THEN {
+	if (! Status)
+	 {
 	    XLOG$FAO(LOG$TELERR
-		,"!%T Set_DEVDEP: SETMODE PTY status=!UL!/",0,status);
+		,"!%T Set_DEVDEP: SETMODE PTY status=!UL!/",0,Status);
 	}
 
-	else IF ! io_stats.iosb$w_status
-	THEN {
+	else if (! io_stats.iosb$w_status)
+	 {
 	    XLOG$FAO(LOG$TELERR
 		,"!%T Set_DEVDEP: SETMODE PTY status=!UL!/",
 		0,io_stats.iosb$w_status);
@@ -1201,14 +1213,14 @@ void Set_DEVDEP(TVT)
     }
 
     TVT->TVT$TTSET = Changed;
-    if (! Changed) return(SS$_Normal);
+    if (! Changed) return(SS$_NORMAL);
 
 //
 //	If we changed some vital stuff, change it through front end.
 //	JC
 //
 
-    if (tty_chan != 0) return(SS$_Normal);		// Front end in use ?
+    if (tty_chan != 0) return(SS$_NORMAL);		// Front end in use ?
 //
 //	We find the correct terminal by:
 //	1.	Get unit number
@@ -1218,57 +1230,53 @@ void Set_DEVDEP(TVT)
 
 	devnam->dsc$a_pointer = TVT->TVT$TTY_DEVSTR;
 
-	$ITMLST_INIT (ITMLST = Item_List,
-		(ITMCOD = DVI$_UNIT, BUFADR = Unit_Number));
-	Status = $GETDVIW (ITMLST = Item_List
-			,CHAN=.PTY_chan);		// Get unit
+	Item_List[0].item_code=DVI$_UNIT;
+	Item_List[0].bufaddr=&Unit_Number;
+	Item_List[1].item_code=0; // check
+	Status = exe$getdviw (0,pty_chan,0,Item_List);		// Get unit
 
 //!!JC	XLOG$FAO(LOG$TELNEG
 //!!JC		,"!%T Set_DEVDEP: Unit_Number=x!XL!/",0
 //!!JC		,Unit_Number);
 
 	ptynam->dsc$w_length = sizeof(ptystr);
-	Status = $TRNLOG(
-		LOGNAM=%ASCID"INET$PTY_TERM",		// JC
-		RSLLEN=ptynam->dsc$w_length,		// JC
-		RSLBUF=ptynam);				// JC
+	Status = exe$trnlnm (0, &lnm_proc, &lnm_pty, 0, itm); // JC
 
 	Status = Status == SS$_NORMAL;
 	if (Status)
-	    Status = $FAO(%ASCID"_!ASA!UL:",devnam,devnam,ptynam,Unit_Number);
+	  Status = exe$fao(/*%ASCID*/"_!ASA!UL:",devnam,devnam,ptynam,Unit_Number);
 	if (Status)
-		Status = $GETDVIW (ITMLST = Item_List, DEVNAM = devnam);
+	  Status = exe$getdviw (0,0,devnam,Item_List,0,0);
 
 //!!JC	xlog$fao(LOG$TELNEG
 //!!JC			,"!%T Set_DEVDEP: TTY_TERM == "!AS""
 //!!JC			,0,devnam);			// Concatonate
 
-	Status = $ASSIGN( DEVNAM=devnam
-			,CHAN=tty_chan);		// Open new channel
+	Status = exe$assign(devnam,tty_chan,0,0,0);		// Open new channel
 
 
-	IF ! Status					// No channel ?
-	    THEN {
+	if (! Status)					// No channel ?
+	     {
 		tty_chan = 0;
 		XLOG$FAO(LOG$TELERR
-		,"!%T Set_DEVDEP: ASSIGN status=!UL!/",0,status);
+		,"!%T Set_DEVDEP: ASSIGN status=!UL!/",0,Status);
 	    }
 	    else {
-		Status = $QIO (
+		Status = exe$qio (
 0,
 			tty_chan,
 			IO$_SETMODE,
   0,
-			Set_DEVDEP_done,
+			Set_DEVDEP_DONE,
 		        TVT,
-			PTY_char,
+			PTY_Char,
 			QCB$K_SIZE,
 0,0,0,0);		// Set front end
-		IF ! Status
-		THEN {
+		if (! Status)
+		 {
 		    XLOG$FAO(LOG$TELERR
-			,"!%T Set_DEVDEP: SETMODE TTY status=!UL!/",0,status);
-		    Status = $DASSGN (CHAN = tty_chan);
+			,"!%T Set_DEVDEP: SETMODE TTY status=!UL!/",0,Status);
+		    Status = exe$dassgn ( tty_chan);
 		    tty_chan = 0;
 		};
 	    };
@@ -1279,39 +1287,38 @@ void Set_DEVDEP(TVT)
 //!!JC	    XLOG$FAO(LOG$TELNEG
 //!!JC		,"!%T Set_DEVDEP: pty_chan=!UL!/",0,PTY_chan);
 
-    SS$_NORMAL
+    return SS$_NORMAL;
     }
 
 
-Void LineMode_Sub (TVT) (void)
-    {
-    MAP
+void LineMode_Sub (TVT)
 	struct TVT$BLOCK * TVT;
+    {
     signed long
 	b1,b2;
 
     // Do we have enough data
-    if (TVT->TVT$SUB_CNT LSS 2) return;
+    if (TVT->TVT$SUB_CNT < 2) return;
 
     // What kind of sub-option is it?
     b1 = CH$RCHAR_A(TVT->TVT$SUB_PTR);
 
-    !++
+    //++
     // What kind of suboption is it?
-    !--
+    //--
 /*    if (b1 == Option$K_LineMode_Mode)
-        Linemode_SubOp_Mode (CH$RCHAR_A(TVT->TVT$SUB_PTR))
+        Linemode_SubOp_Mode (CH$RCHAR_A(TVT->TVT$SUB_PTR));
     else if (b1 == Option$K_LineMode_SLC)
-        Linemode_SubOp_SLC (TVT->TVT$SUB_PTR, TVT->TVT$SUB_CNT-1)
+        Linemode_SubOp_SLC (TVT->TVT$SUB_PTR, TVT->TVT$SUB_CNT-1);
     else
 	{
 	b2 = CH$RCHAR_A(TVT->TVT$SUB_PTR);
 	if (b2 == Option$K_LineMode_Forwardmask)
 	    Linemode_SubOp_Forwardmask(b1,
-		TVT->TVT$SUB_PTR,TVT->TVT$SUB_CNT-2)
+		TVT->TVT$SUB_PTR,TVT->TVT$SUB_CNT-2);
 	}
 */
-    SS$_NORMAL
+    return SS$_NORMAL;
     }
 
 
@@ -1398,11 +1405,11 @@ Process_SLC(Code,Modifier,Value,Reply_Desc)
     if ((Value == Char_Def->SLC$B_CURRENT)) return(SS$_NORMAL);
 
     // 2) Same level / different value
-    IF ((Level == (Char_Def->SLC$B_STATUS)<SLC$F_Level>) AND
-	(Modifier<SLC$F_Ack)) THEN
+    if (((Level == (Char_Def->SLC$B_STATUS)<SLC$F_Level>) &&
+	(Modifier<SLC$F_Ack)))
 	{
 	Char_Def->SLC$B_CURRENT = Value;
-	return SS$_NORMAL
+	return SS$_NORMAL;
 	};
 
     // 3) "Do we agree?"
@@ -1438,7 +1445,7 @@ Linemode_SubOp_SLC(Data_A, Length)
     if (Reply_Desc->dsc$w_length > 0)
 	Send_TCP_SubOpt ( Option$K_Linemode , &Reply_Desc );
 
-    return SS$_NORMAL
+    return SS$_NORMAL;
     }
 */
 

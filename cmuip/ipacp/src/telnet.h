@@ -65,46 +65,46 @@ Modification history:
 // Constants from RFC855
 //--
 
-#define     Telnet$K_EOR	  239	// End of Record marker
-#define     Telnet$K_SE		  240	// End of subnegotiation parameters
-#define     Telnet$K_NOP	  241	// No operation
-#define     Telnet$K_Data_Mark	  242	// The data stream portion of a Synch
+#define     TELNET$K_EOR	  239	// End of Record marker
+#define     TELNET$K_SE		  240	// End of subnegotiation parameters
+#define     TELNET$K_NOP	  241	// No operation
+#define     TELNET$K_DATA_MARK	  242	// The data stream portion of a Synch
 			 	// This should always be accompanied
 				// by a TCP Urgent notification.
-#define     Telnet$K_Brk	  243 	// NVT character BRK
-#define     Telnet$K_IP		  244	// The function IP Interrupt Process
-#define     Telnet$K_AO		  245	// The function AO Abort output
-#define     Telnet$K_AYT	  246	// The function AYT Are You There
-#define     Telnet$K_EC		  247	// The function EC Erase character
-#define     Telnet$K_EL		  248	// The function EL Erase Line
-#define     Telnet$K_GA		  249	// The function GA Go Ahead
-#define     Telnet$K_SB		  250	// Indicates that what follows is
+#define     TELNET$K_BRK	  243 	// NVT character BRK
+#define     TELNET$K_IP		  244	// The function IP Interrupt Process
+#define     TELNET$K_AO		  245	// The function AO Abort output
+#define     TELNET$K_AYT	  246	// The function AYT Are You There
+#define     TELNET$K_EC		  247	// The function EC Erase character
+#define     TELNET$K_EL		  248	// The function EL Erase Line
+#define     TELNET$K_GA		  249	// The function GA Go Ahead
+#define     TELNET$K_SB		  250	// Indicates that what follows is
 				// subnegotiation of the indicated
 				// option
-#define     Telnet$K_WILL	  251	// Indicates the desire to begin
+#define     TELNET$K_WILL	  251	// Indicates the desire to begin
 				// performing, or confirmation that
 				// you are now performing, the
 				// indicated option
-#define     Telnet$K_WONT	  252	// Indicates the refusal to perform
+#define     TELNET$K_WONT	  252	// Indicates the refusal to perform
 			 	// or continue performing, the
 			 	// indicated option.
-#define     Telnet$K_DO		  253	// Indicates the request that the
+#define     TELNET$K_DO		  253	// Indicates the request that the
 			 	// other party perform, or
 			 	// confirmation that you are expecting
 			 	// the other party to perform, the
 			 	// indicated option.
-#define     Telnet$K_DONT	  254	// Indicates the demand that the
+#define     TELNET$K_DONT	  254	// Indicates the demand that the
 			 	// other party stop performing,
 			 	// or confirmation that you are no
 			 	// longer expecting the other party
 			 	// to perform, the indicated option.
-#define     Telnet$K_IAC	  255	// Data Byte 255.
+#define     TELNET$K_IAC	  255	// Data Byte 255.
 
 //++
 //   Constants from RFC946.
 //--
 
-#define     Telnet$K_TTLFMT	  0
+#define     TELNET$K_TTLFMT	  0
 
 
 //++
@@ -243,7 +243,7 @@ struct _qcbdef {
 
 // Define the format of a TELNET option block
 
-struct opt$block {
+struct OPT$BLOCK {
   unsigned char     OPT$BASE[0]	;	// Base address of block
   unsigned     OPT$STATE	 : 1;	// Option state (TRUE=on,FALSE=off)
   unsigned     OPT$CURRENT	 : 1;	// Nonzero if currently negotiating the option
@@ -251,12 +251,12 @@ struct opt$block {
 #if 0
   $ALIGN(FULLWORD)
 #endif
-       void *     OPT$ON_RTN;		// Routine to turn the option on
-       void *     OPT$OFF_RTN;		// Routine to turn the option off
-       void *     OPT$SUB_RTN;	// Routine to handle subnegotiation
+       void (*     OPT$ON_RTN)();		// Routine to turn the option on
+       void (*     OPT$OFF_RTN)();		// Routine to turn the option off
+       void (*     OPT$SUB_RTN)();	// Routine to handle subnegotiation
 };
 
-#define     OPT$SIZE   sizeof(struct opt$block)
+#define     OPT$SIZE   sizeof(struct OPT$BLOCK)
 #define     OPT$BLEN   OPT$SIZE*4
 
 #if 0
@@ -328,7 +328,7 @@ struct TVT$BLOCK
       unsigned 	TVT$GAG		 : 1;	// PTY buffer too full, must write or die
       unsigned 	TVT$CTRL	 : 1;	// Special control character seen
       unsigned 	TVT$JAM		 : 1;	// Network output currently jammed
-      unsigned 	TVT$Hold	 : 1;	// Hold off PTY_Write until PID created
+      unsigned 	TVT$HOLD	 : 1;	// Hold off PTY_Write until PID created
       unsigned 	TVT$TTSET	 : 1;	// TTY device changed.
     };
   };
@@ -348,16 +348,16 @@ struct TVT$BLOCK
   };
   unsigned char    TVT$Type_descr	 [DSC$K_Z_BLN];
   unsigned char    TVT$TERMINAL_TYPE	 [16];		// Terminal type string JC Beg
-  unsigned char    TVT$KILL_TERMINAL_TYPE	 [1];	// Terminal Negotiation count
+  unsigned char    TVT$KILL_TERMINAL_TYPE	 ;	// Terminal Negotiation count
   unsigned char    TVT$Device_Descr	 [DSC$K_Z_BLN];
   unsigned char    TVT$TTY_DEVSTR	 [20];		// Terminal name string
   unsigned int     TVT$TTY_CHN		;		// The TTY channel
   unsigned long long     TVT$TTY_IOSTAT	;		// The TTY IO status
-  unsigned char    TVT$TTY_Char	 [QCB$K_SIZE];	// The TTY DevDEP char JC End
+  unsigned char    TVT$TTY_CHAR	 [QCB$K_SIZE];	// The TTY DevDEP char JC End
   unsigned char    TVT$DATA_END[0];
 }; 
 
-#define     TVT$SIZE   $Field_Set_Size
+#define     TVT$SIZE   sizeof(struct TVT$BLOCK)
 #if 0
 MACRO
     TVT$BLOCK = BLOCK[TVT$SIZE] FIELD(TVT$FIELDS) %;

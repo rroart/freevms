@@ -307,7 +307,7 @@ struct qb_ur_fields
 
 #define    QB_UR_SIZE sizeof(struct qb_ur_fields)
 
-#define QB_Size 0
+#define qb_size 0
       // check $MAXLIT(QB_Size,QB_SN_SIZE,QB_RT_SIZE,QB_NR_SIZE,QB_UR_SIZE);
 
 #define	queue_blk_structure(F) F
@@ -423,7 +423,7 @@ struct user_open_args
 };
 
 #define    OPEN_ARG_LENGTH sizeof(struct user_open_args)
-#define    Max_User_ArgBlk_Size Open_Arg_Length	// used by Uarg rtns (MEMGR.BLI)
+#define    Max_User_ArgBlk_Size OPEN_ARG_LENGTH	// used by Uarg rtns (MEMGR.BLI)
 
 #define     OP$MODE_PASSIVE   0	// OP$MODE value for TCP passive open
 #define     OP$MODE_ACTIVE   1		// OP$MODE value for TCP active open (default)

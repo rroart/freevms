@@ -138,30 +138,33 @@ Modification History:
 
 //SBTTL "Module & Environment Definition"
 
+#if 0
 MODULE MEMGR(Ident="2.8",LANGUAGE(BLISS32),
 	     ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 			     NONEXTERNAL=LONG_RELATIVE),
 	     LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
 	     OPTIMIZE,OPTLEVEL=3,ZIP)=
-{
+#endif
 
-#include "SYS$LIBRARY:STARLET";	// Include VMS systems definitions
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// Include transportablity package
-#include "CMUIP_SRC:[CENTRAL]NETVMS";			// VMS specifics
-#include "TCP";			// TCP related definitions
-#include "TCPMACROS";		// Local Macros
-#include "STRUCTURE";		// Structure & Field definitions
+#include <starlet.h>	// Include VMS systems definitions
+  // not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// Include transportablity package
+#include "netvms.h"			// VMS specifics
+#include "tcp.h"			// TCP related definitions
+#include "tcpmacros.h"		// Local Macros
+#include "structure.h"		// Structure & Field definitions
+
+#include <ssdef.h>
+#include "nettcpip.h" // for some min max defines
 
 //SBTTL "External: Routines, Literals and data"
 
-extern
-    LIB$GET_VM : ADDRESSING_MODE(GENERAL),
-    LIB$FREE_VM : ADDRESSING_MODE(GENERAL),
-    LIB$GET_VM_PAGE : ADDRESSING_MODE(GENERAL),
-    LIB$FREE_VM_PAGE : ADDRESSING_MODE(GENERAL),
+extern    LIB$GET_VM();
+extern    LIB$FREE_VM();
+extern    LIB$GET_VM_PAGE();
+extern    LIB$FREE_VM_PAGE();
 //    TCP$Find_Local_Port,	// USER.BLI
- VOID    TELNET_CLOSE,	// TCP_TELNET.BLI
-    MovByt;			// MACLIB.MAR
+extern void    TELNET_CLOSE();
+extern    MovByt();
 
 // External Data Segements
 
@@ -171,39 +174,52 @@ extern signed long
 //    VTCB_Size,
 //    Max_TCB,
     ast_in_progress,		// Flag if running at AST level
-    INTDF,			// interrupt deferral count
+    INTDF;			// interrupt deferral count
+
+  /* making doubles */
+#if 0
     MIN_PHYSICAL_BUFSIZE,
     MAX_PHYSICAL_BUFSIZE;
+#endif
+#define    MAX_PHYSICAL_BUFSIZE (DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+OPT$MAX_RECV_DATASIZE)
+#define    MIN_PHYSICAL_BUFSIZE (DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+DEFAULT_DATA_SIZE)
+
 
 //SBTTL "Memory manager header structure"
 
-$FIELD MEM$HDR_FIELDS (void)
-SET
-  MEM$QNEXT	= [$Address],	// Next item on queue
-  MEM$QPREV	= [$Address],	// Previous item on queue
-//IF QDEBUG %THEN
-  MEM$CURQUEUES	= [$Ulong],	// Queues this block is on
-  MEM$ALLQUEUES = [$Ulong],	// Queues this block has been on
-  MEM$ALLOCRTN	= [$Address],	// Routine which allocated most recently
-  MEM$FREERTN	= [$Address],	// Routine which freed most recently
-  MEM$INSQUERTN	= [$Address],	// Routine which INSQUE'd most recently
-  MEM$INSQUEHDR	= [$Address],	// Queue header where most recently INSQUE'd
-  MEM$INSQUEVAL	= [$Address],	// Additional value when INSQUE'd
-  MEM$REMQUERTN	= [$Address],	// Routine which REMQUE'd most recently
-  MEM$REMQUEHDR	= [$Address],	// Queue header where most recently REMQUE'd
-  MEM$REMQUEVAL	= [$Address],	// Additional value when REMQUE'd
-//FI
-  MEM$FLAGS	= [$Ulong],	// Flags defining free, prealloc, etc.
-  $OVERLAY(MEM$FLAGS)
-      MEM$ISFREE = [$BIT],	// This block is free
-      MEM$ISPERM = [$BIT]	// This block is permanent (preallocated)
-  $CONTINUE
-TES;
+struct MEM$HDR_STRUCT
+{
+void *   MEM$QNEXT	;	// Next item on queue
+void *   MEM$QPREV	;	// Previous item on queue
+#ifdef QDEBUG
+unsigned long   MEM$CURQUEUES	;	// Queues this block is on
+unsigned long   MEM$ALLQUEUES ;	// Queues this block has been on
+void *   MEM$ALLOCRTN	;	// Routine which allocated most recently
+void *   MEM$FREERTN	;	// Routine which freed most recently
+void *   MEM$INSQUERTN	;	// Routine which INSQUE'd most recently
+void *   MEM$INSQUEHDR	;	// Queue header where most recently INSQUE'd
+void *   MEM$INSQUEVAL	;	// Additional value when INSQUE'd
+void *   MEM$REMQUERTN	;	// Routine which REMQUE'd most recently
+void *   MEM$REMQUEHDR	;	// Queue header where most recently REMQUE'd
+void *   MEM$REMQUEVAL	;	// Additional value when REMQUE'd
+#endif
+  union {
+unsigned long   MEM$FLAGS	;	// Flags defining free, prealloc, etc.
+    struct {
 
+ unsigned     MEM$ISFREE :1 ;	// This block is free
+unsigned      MEM$ISPERM :1 ; // This block is permanent (preallocated)
+    };
+  };
+};
+
+#define MEM$HDR_SIZE sizeof(struct  MEM$HDR_STRUCT)
+#if 0
 LITERAL
     MEM$HDR_SIZE = $FIELD_SET_SIZE;
 MACRO
     MEM$HDR_STRUCT = BLOCK->MEM$HDR_SIZE FIELD(MEM$HDR_FIELDS) %;
+#endif
 
 //Sbttl "Preallocated dynamic data structures."
 /*
@@ -216,51 +232,50 @@ A little faster execution is what we are after.
 
 // Define and initialize free lists to "empty".
 
-static signed long
-    FREE_Qblks : Queue_Header_Structure(Queue_Header_Fields)
-		 PRESET(
-			[Qhead] = Free_Qblks,
-			[Qtail]	= Free_Qblks
-			),
-    USED_Qblks : Queue_Header_Structure(Queue_Header_Fields)
-		 PRESET(
-			[Qhead] = Used_Qblks,
-			[Qtail] = Used_Qblks
-		       ),
+static struct queue_header_structure(queue_header_fields) FREE_Qblks = 
+  {
+			qhead : &FREE_Qblks,
+			qtail : &FREE_Qblks
+  };
+static struct queue_header_structure(queue_header_fields) USED_Qblks =
+  {
+			qhead : &USED_Qblks,
+			qtail : &USED_Qblks
+  };
 
-    FREE_Uargs : Queue_Header_Structure(Queue_Header_Fields)
-		 PRESET(
-			[Qhead]	= Free_Uargs,
-			[Qtail]	= Free_Uargs
-			),
+static struct queue_header_structure(queue_header_fields) FREE_Uargs =
+  {
+			qhead : &FREE_Uargs,
+			qtail : &FREE_Uargs
+  };
 
-    Free_Minsize_Segs : Queue_Header_Structure(Queue_Header_Fields)
-			PRESET (
-				[Qhead]	= Free_Minsize_Segs,
-				[Qtail]	= Free_Minsize_Segs
-				),
+static struct queue_header_structure(queue_header_fields) Free_Minsize_Segs =
+  {
+				qhead : &Free_Minsize_Segs,
+				qtail : &Free_Minsize_Segs
+  };
 
-    Free_Maxsize_Segs : Queue_Header_Structure(Queue_Header_Fields)
-			    PRESET (
-				[Qhead] = Free_Maxsize_Segs,
-				[Qtail] = Free_Maxsize_Segs
-				);
+static struct queue_header_structure(queue_header_fields) Free_Maxsize_Segs =
+  {
+				qhead : &Free_Maxsize_Segs,
+				qtail : &Free_Maxsize_Segs
+  };
 
 // "count_base" items are initialized in conifg_acp routine during startup.
 // they provide the base number of items on a free list.
 
-signed long
-    QBLK_Count_base : UNSIGNED BYTE INITIAL(0),	// #Qblks on free list.
-    Uarg_Count_base : UNSIGNED BYTE INITIAL(0),	// #Uarg blks on free list.
-    Min_Seg_Count_base: UNSIGNED BYTE INITIAL(0), // #Min-size segs
-    Max_Seg_Count_base: UNSIGNED BYTE INITIAL(0), // #Max-size segs
+unsigned char
+    QBLK_Count_base  = 0,	// #Qblks on free list.
+    Uarg_Count_base  = 0,	// #Uarg blks on free list.
+    Min_Seg_Count_base = 0, // #Min-size segs
+    Max_Seg_Count_base = 0, // #Max-size segs
 
 // Counters for the number of items on a specific queue.
 
-    QBLK_Count: UNSIGNED BYTE INITIAL(0),	// #Qblks on free list.
-    Uarg_Count: UNSIGNED BYTE INITIAL(0),	// #Uarg blks on free list.
-    Min_Seg_Count: UNSIGNED BYTE INITIAL(0),	// #Min-size segs
-    Max_Seg_Count: UNSIGNED BYTE INITIAL(0);	// #Max-size segs
+    QBLK_Count = 0,	// #Qblks on free list.
+    Uarg_Count = 0,	// #Uarg blks on free list.
+    Min_Seg_Count = 0,	// #Min-size segs
+    Max_Seg_Count = 0;	// #Max-size segs
 
 /*
 Here we keep track of what kind of data structures are being dynamically 
@@ -302,10 +317,10 @@ Side Effects:
 */
 
 
-Memgr_Fault_Handler(Caller,Primary_CC,Sec_CC) : NOVALUE (void)
+void Memgr_Fault_Handler(Caller,Primary_CC,Sec_CC)
     {
-    Signal(Primary_cc);
-    Fatal_Error("Memory Mgmt. Fault detected.",Primary_cc);
+    Signal(Primary_CC);
+    Fatal_Error("Memory Mgmt. Fault detected.",Primary_CC);
     }
 
 
@@ -340,16 +355,16 @@ MM$Get_Mem (Addr, Size)
     Pages = Size / 512 ;
     Pages = Pages + 1 ;
     NOINT;			// Hold AST's please...
-//    if (NOT (RC = LIB$GET_VM(Size,Addr)))
-    if (NOT (RC = LIB$GET_VM_PAGE(Pages,Addr)))
+//    if (! (RC = LIB$GET_VM(Size,Addr)))
+    if (! (RC = LIB$GET_VM_PAGE(Pages,Addr)))
 	Memgr_Fault_Handler(0,RC,0);
     OKINT;
 
-	XLOG$FAO(LOG$MEM,"!%T MM$Get_Mem !XL size !SL!/",0,..ADDR, Size);
+	XLOG$FAO(LOG$MEM,"!%T MM$Get_Mem !XL size !SL!/",0,Addr, Size);
 
-    CH$FILL(0,Size,..Addr);	// clean house.....zero fill.
+    CH$FILL(0,Size,Addr);	// clean house.....zero fill.
 
-    RC
+    return RC;
     }
 
 
@@ -371,7 +386,7 @@ Side Effects:
 
 */
 
-MM$Free_Mem(Mem,Size) : NOVALUE (void)
+void MM$Free_Mem(Mem,Size)
     {
     signed long
 	Pages,
@@ -380,11 +395,11 @@ MM$Free_Mem(Mem,Size) : NOVALUE (void)
     Pages = Size / 512 ;
     Pages = Pages + 1 ;
 
-    XLOG$FAO(LOG$MEM,"!%T MM$Free_Mem !XL size !SL!/",0,..Mem, Size);
+    XLOG$FAO(LOG$MEM,"!%T MM$Free_Mem !XL size !SL!/",0,Mem, Size);
 
     NOINT;			// Hold AST's
-//    if (NOT ( RC = LIB$FREE_VM ( Size , Mem ) ))
-    if (NOT ( RC = LIB$FREE_VM_PAGE ( Pages , Mem ) ))
+//    if (! ( RC = LIB$FREE_VM ( Size , Mem ) ))
+    if (! ( RC = LIB$FREE_VM_PAGE ( Pages , Mem ) ))
 	    Memgr_Fault_Handler(0,RC,0);
     OKINT;
     }
@@ -418,17 +433,21 @@ Side Effects:
 
 */
 
-MM$QBLK_GET=
+void MM$QBLK_GET (void)
     {
+      long R0=0;
+#if 0
+      // check
     BUILTIN
 	R0;	// standard vax/vms routine return value register.
+#endif
+    struct MEM$HDR_STRUCT * Hptr;
     signed long
-	Ptr,
-	struct MEM$HDR_STRUCT * Hptr,
-	Pages 	:	initial(0);
+	ptr,
+    Pages =0;
 
-    if (REMQUE(Free_QBlks->QHead,Hptr) != Empty_Queue)
-	QBlk_Count = QBlk_Count - 1 // Say there is 1 less avail.
+    if (REMQUE(&FREE_Qblks.qhead,Hptr) != EMPTY_QUEUE) // check
+	QBLK_Count = QBLK_Count - 1; // Say there is 1 less avail.
     else			// allocate a new qb.
 	{
 
@@ -436,26 +455,26 @@ MM$QBLK_GET=
 
 	NOINT;
 
-!	if (NOT (LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr)))
+//	if (! (LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr)))
 	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1 ) ;
-	if (NOT (LIB$GET_VM_PAGE(Pages, Hptr)))
+	if (! (LIB$GET_VM_PAGE(Pages, Hptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 
 	OKINT;
-	CH$FILL(%CHAR(0),MEM$HDR_SIZE*4,Hptr);
+	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE*4,Hptr);
 	Hptr->MEM$ISPERM = FALSE; // Not a permanent qblk
-	QB_Gets = QB_gets + 1;	// track this event.
+	QB_gets = QB_gets + 1;	// track this event.
 	if (QB_gets > QB_max)
 	    QB_max = QB_gets;
 	};
 
     ptr = Hptr + MEM$HDR_SIZE*4; // Point at data area
-    CH$FILL(%CHAR(0),qb_size*4,ptr);	// fresh qb.
-!!!HACK!!!~~~ Should record allocator here ~~~
+    CH$FILL(/*%CHAR*/(0),qb_size*4,ptr);	// fresh qb.
+//!!HACK!!!~~~ Should record allocator here ~~~
     XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Get !XL size !SL!/",0,Hptr, Pages);
     Hptr->MEM$ISFREE = FALSE;	// QB is no longer free
-    INSQUE(Hptr,USED_Qblks->QTail); // Insert on used queue
-    RETURN(Ptr);
+    INSQUE(Hptr,&USED_Qblks.qtail); // Insert on used queue
+    return(ptr);
     }
 
 /*
@@ -483,12 +502,16 @@ Side Effects:
 
 */
 
-MM$QBLK_Free(Ptr): NOVALUE (void)
+void MM$QBLK_Free(Ptr)
     {
+      long R0=0;
+#if 0
+      // check
     BUILTIN
 	R0;	// standard vax/vms routine return value register.
+#endif
+    struct MEM$HDR_STRUCT * Hptr;
     signed long
-	struct MEM$HDR_STRUCT * Hptr,
 	Pages	 = 0;
 
     Hptr = Ptr - MEM$HDR_SIZE*4; // Point at header
@@ -498,21 +521,21 @@ MM$QBLK_Free(Ptr): NOVALUE (void)
     OKINT;
     if (Hptr->MEM$ISPERM)
 	{			// Free a permanent block - just put on free Q
-!~~~ Record deallocator here ~~~
+//~~~ Record deallocator here ~~~
 	Hptr->MEM$ISFREE = TRUE;
-	INSQUE(Hptr,Free_QBlks->QTail);
-	QBlk_Count = QBlk_Count + 1;
+	INSQUE(Hptr,&FREE_Qblks.qtail);
+	QBLK_Count = QBLK_Count + 1;
 	}
     else
 	{
 	NOINT;			// Disable AST's
-!!!HACK!!// Why?
-!	if (NOT (LIB$FREE_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr)))
+//!!HACK!!// Why?
+//	if (! (LIB$FREE_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr)))
 	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1) ;
-	if (NOT (LIB$FREE_VM_PAGE(Pages, Hptr)))
+	if (! (LIB$FREE_VM_PAGE(Pages, Hptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
-	QB_Gets = QB_gets - 1;		// track this event.
+	QB_gets = QB_gets - 1;		// track this event.
 	};
     }
 /*
@@ -535,25 +558,25 @@ Side Effects:
 
 */
 
-QBLK_Init: NOVALUE (void)
+void QBLK_Init (void)
     {
-    signed long
-	struct MEM$HDR_STRUCT * Hptr,
+      struct MEM$HDR_STRUCT * Hptr;
+      signed long J,
 	Pages,
 	RC ;
 
-    QBLK_Count = Qblk_count_base;
-    for (J=1;J<=QBlk_count;J++)
+    QBLK_Count = QBLK_Count_base;
+    for (J=1;J<=QBLK_Count;J++)
 	{
-!	LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr);
+//	LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr);
 	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1) ;
-	if (NOT (RC = (LIB$GET_VM_PAGE(Pages, Hptr))))
+	if (! (RC = (LIB$GET_VM_PAGE(Pages, Hptr))))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Init !XL size !SL!/",0,Hptr, Pages);
-	CH$FILL(%CHAR(0),MEM$HDR_SIZE*4,Hptr);
+	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE*4,Hptr);
 	Hptr->MEM$ISFREE = TRUE;
 	Hptr->MEM$ISPERM = TRUE;
-	INSQUE(Hptr,Free_QBlks->QTail);
+	INSQUE(Hptr,&FREE_Qblks.qtail);
 	};
     }
 
@@ -590,31 +613,35 @@ Side Effects:
 */
 
 
-MM$UARG_GET=
+void MM$UARG_GET (void)
     {
+      long R0 = 0;
+#if 0
+      // check
     BUILTIN
 	R0;	// standard vax/vms routine return value register.
+#endif
     signed long
 	Ptr,
 	Pages ;
 
-    if (REMQUE(FREE_Uargs->QHead,Ptr) != Empty_Queue)
-	Uarg_Count = Uarg_Count - 1
+    if (REMQUE(&FREE_Uargs.qhead,Ptr) != EMPTY_QUEUE) // check
+      Uarg_Count = Uarg_Count - 1;
     else
 	{
 	NOINT;			// Disable interrupts, do allocation
-!	if (NOT (LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),ptr)))
+//	if (! (LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),Ptr)))
 	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
-	if (NOT (LIB$GET_VM_PAGE(Pages, ptr)))
+	if (! (LIB$GET_VM_PAGE(Pages, Ptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Get !XL size !SL!/",0,Ptr, Pages);
-	UA_Gets = UA_gets + 1;
+	UA_gets = UA_gets + 1;
 	if (UA_gets > UA_max)
 	    UA_max = UA_gets;
 	};
-    CH$FILL(%CHAR(0),Max_User_ArgBlk_Size*4,Ptr);
-    RETURN(Ptr);
+    CH$FILL(/*%CHAR*/(0),Max_User_ArgBlk_Size*4,Ptr);
+    return(Ptr);
     }
 
 /*
@@ -638,31 +665,34 @@ Side Effects:
 */
 
 
-MM$UARG_Free(Ptr): NOVALUE (void)
+void MM$UARG_Free(Ptr)
     {
+      long R0=0;
     signed long
 	queptr,
 	Pages ;
+#if 0
     BUILTIN
 	R0;	// standard vax/vms routine return value register.
+#endif
 
-    if (Uarg_Count LSS Uarg_Count_base)
+    if (Uarg_Count < Uarg_Count_base)
 	{
-!!!HACK!!// can an exception right here cause 
-!!!HACK!!// CPU 00 -- DOUBLDEALO, Double deallocation of memory block????
-	INSQUE(Ptr,Free_Uargs->QTail);
+//!!HACK!!// can an exception right here cause 
+//!!HACK!!// CPU 00 -- DOUBLDEALO, Double deallocation of memory block????
+	INSQUE(Ptr,&FREE_Uargs.qtail);
 	Uarg_Count = Uarg_Count + 1;
 	}
     else
 	{
 	NOINT;
-!	if (NOT (LIB$FREE_VM(%REF(Max_User_ArgBlk_Size*4),ptr)))
+//	if (! (LIB$FREE_VM(%REF(Max_User_ArgBlk_Size*4),ptr)))
 	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
-	if (NOT (LIB$FREE_VM_PAGE(Pages, ptr)))
+	if (! (LIB$FREE_VM_PAGE(Pages, Ptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Free !XL size !SL!/",0,Ptr, Pages);
-	UA_Gets = UA_gets - 1;
+	UA_gets = UA_gets - 1;
 	};
     }
 
@@ -686,22 +716,22 @@ Side Effects:
 
 */
 
-Uarg_Init: NOVALUE (void)
+void Uarg_Ini (void)
     {
-    signed long
+      signed long J,
 	Ptr,
 	Pages,
 	RC ;
 
-    Uarg_count = Uarg_count_base;
-    for (J=1;J<=Uarg_count;J++)
+    Uarg_Count = Uarg_Count_base;
+    for (J=1;J<=Uarg_Count;J++)
 	{
-!	LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),ptr);
+//	LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),Ptr);
 	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
-	if (NOT (RC = (LIB$GET_VM_PAGE(Pages, ptr))))
+	if (! (RC = (LIB$GET_VM_PAGE(Pages, Ptr))))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Init !XL size !SL!/",0,Ptr, Pages);
-	INSQUE(Ptr,Free_Uargs->QTail);
+	INSQUE(Ptr,&FREE_Uargs.qtail);
 	};
     }
 
@@ -739,43 +769,48 @@ Side Effects:
 
 MM$SEG_GET(Size)
     {
+      long R0=0;
+#if 0
+      // check
     BUILTIN
 	R0;	// standard vax/vms routine return value register.
+#endif
     signed long
-	Alloc = False,	// no seg allocation yet.
+	Alloc = FALSE,	// no seg allocation yet.
 	Ptr,
 	Pages ;
 
 // Respond to various size segments (ie, some may be preallocated.)
 
-    SELECTONE Size OF
-    SET
+    switch (Size)
+      {
 
 // Minimum-sized segment buffer (control segs & small segs)
 
-    [MIN_PHYSICAL_BUFSIZE]:
+    case MIN_PHYSICAL_BUFSIZE:
 	{
-	if (REMQUE(Free_Minsize_Segs->QHead,Ptr) != Empty_Queue)
+	  if (REMQUE(&Free_Minsize_Segs.qhead,Ptr) != EMPTY_QUEUE) // check
 	    {
-	    MIN_Seg_Count = MIN_Seg_Count - 1;
-	    Alloc = True;
+	    Min_Seg_Count = Min_Seg_Count - 1;
+	    Alloc = TRUE;
 	    }
 	else
 	    {
 	    MIN_gets = MIN_gets + 1;
-	    if (MIN_gets gtr MIN_max)
+	    if (MIN_gets > MIN_max)
 		MIN_max = MIN_gets;
 	    };
 	};
+	break;
 
 // Max size segment - big segments to transmit & all receive buffers
 
-    [MAX_PHYSICAL_BUFSIZE]:
+    case MAX_PHYSICAL_BUFSIZE:
 	{
-	if (REMQUE(Free_Maxsize_Segs->QHead,Ptr) != Empty_Queue)
+	  if (REMQUE(&Free_Maxsize_Segs.qhead,Ptr) != EMPTY_QUEUE) // check
 	    {
 	    Max_Seg_Count = Max_Seg_Count - 1;
-	    Alloc = True;
+	    Alloc = TRUE;
 	    }
 	else
 	    {
@@ -784,16 +819,16 @@ MM$SEG_GET(Size)
 		MAX_max = MAX_gets;
 	    };
 	};
-    TES;
+    };
 
 // Did we Allocate a segment yet?  If not then better get one before we leave.
 
-    if (NOT Alloc)
+    if (! Alloc)
 	{
 	NOINT;
-!	if (NOT (LIB$GET_VM(size,ptr)))
+//	if (! (LIB$GET_VM(size,Ptr)))
 	Pages = ((Size / 512) + 1) ;
-	if (NOT (LIB$GET_VM_PAGE(Pages, ptr)))
+	if (! (LIB$GET_VM_PAGE(Pages, Ptr)))
 	    {
 	    OKINT ;
 	    Memgr_Fault_Handler(0,R0,0);
@@ -801,8 +836,8 @@ MM$SEG_GET(Size)
 	OKINT;
 	};
 
-    XLOG$FAO(LOG$MEM,"!%T MM$Seg_Get !XL size !SL!/", 0,PTR, Size);
-    RETURN(Ptr);
+    XLOG$FAO(LOG$MEM,"!%T MM$Seg_Get !XL size !SL!/", 0,Ptr, Size);
+    return(Ptr);
     }
 
 /*
@@ -831,53 +866,57 @@ Side Effects:
 */
 
 
-MM$SEG_FREE(Size,Ptr) : NOVALUE (void)
+void MM$SEG_FREE(Size,Ptr)
     {
+      long R0=0;
+#if 0
     BUILTIN
 	R0;	// standard vax/vms routine return value register.
+#endif
     signed long
-	Released = False,
+	Released = FALSE,
 	Pages ;
 
 // Check if segment is of a preallocated size.
 
-    XLOG$FAO(LOG$MEM,"!%T MM$Seg_Free !XL size !SL!/", 0,PTR, Size);
-    SELECTONE Size OF
-    SET
+    XLOG$FAO(LOG$MEM,"!%T MM$Seg_Free !XL size !SL!/", 0,Ptr, Size);
+    switch (Size)
+      {
 
-    [MIN_PHYSICAL_BUFSIZE]:
+    case MIN_PHYSICAL_BUFSIZE:
 	{
-	if (MIN_Seg_Count LSS MIN_Seg_Count_base)
+	if (Min_Seg_Count < Min_Seg_Count_base)
 	    {
-	    INSQue(Ptr,Free_Minsize_Segs->QTail);
-	    MIN_Seg_Count = MIN_Seg_Count + 1;
-	    Released = True;
+	    INSQue(Ptr,&Free_Minsize_Segs.qtail);
+	    Min_Seg_Count = Min_Seg_Count + 1;
+	    Released = TRUE;
 	    }
 	else
 	    MIN_gets = MIN_gets - 1;
 	};
+	break;
 
-    [MAX_PHYSICAL_BUFSIZE]:
+    case MAX_PHYSICAL_BUFSIZE:
 	{
-	if (Max_Seg_Count LSS Max_Seg_Count_base)
+	if (Max_Seg_Count < Max_Seg_Count_base)
 	    {
-	    INSQUE(Ptr,Free_Maxsize_Segs->QTail);
+	    INSQUE(Ptr,&Free_Maxsize_Segs.qtail);
 	    Max_Seg_Count = Max_Seg_Count + 1;
-	    Released = True;
+	    Released = TRUE;
 	    }
 	else
 	    MAX_gets = MAX_gets - 1;
 	};
-    TES;
+    };
 
 // Did we actually release the segment?  If not then do so.
 
-    if (NOT Released)
+    if (! Released)
 	{
 	NOINT;
-!	if (NOT (LIB$FREE_VM(size,ptr)))
+//	if (! (LIB$FREE_VM(size,ptr)))
 	Pages = ((Size / 512) + 1) ;
-	if (NOT (LIB$FREE_VM_PAGE(Pages, ptr)))
+	if (! (LIB$FREE_VM_PAGE(Pages, Ptr)))
 	    {
 	    OKINT ;
 	    Memgr_Fault_Handler(0,R0,0);
@@ -907,39 +946,41 @@ Side Effects:
 
 */
 
-SEG_INIT : NOVALUE (void)
+void SEG_INIT (void)
     {
+#if 0
     BUILTIN
 	R0;	// standard vax/vms routine return value register.
-    signed long
+#endif
+    signed long J,
 	Ptr,
 	RC,
 	Pages ;
 
 // Allocate minimum (default) size segments.
 
-    MIN_seg_count = MIN_seg_count_base;
-    for (J=0;J<=MIN_Seg_count-1;J++)
+    Min_Seg_Count = Min_Seg_Count_base;
+    for (J=0;J<=Min_Seg_Count-1;J++)
 	{
-!	LIB$GET_VM(MIN_PHYSICAL_BUFSIZE,ptr);
+//	LIB$GET_VM(MIN_PHYSICAL_BUFSIZE,Ptr);
 	Pages = ((MIN_PHYSICAL_BUFSIZE / 512) + 1) ;
-	if (NOT (RC = LIB$GET_VM_PAGE(Pages, ptr)))
+	if (! (RC = LIB$GET_VM_PAGE(Pages, Ptr)))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
-	INSQUE(Ptr,Free_Minsize_Segs->QTail);
+	INSQUE(Ptr,&Free_Minsize_Segs.qtail);
 	};
 
 // Allocate maximum size segments
 
-    MAX_seg_count = MAX_seg_count_base;
-    for (J=MAX_Seg_count;J>=1;J--)
+    Max_Seg_Count = Max_Seg_Count_base;
+    for (J=Max_Seg_Count;J>=1;J--)
 	{
-!	LIB$GET_VM(MAX_PHYSICAL_BUFSIZE,ptr);
+//	LIB$GET_VM(MAX_PHYSICAL_BUFSIZE,ptr);
 	Pages = ((MAX_PHYSICAL_BUFSIZE / 512) + 1) ;
-	if (NOT (RC = LIB$GET_VM_PAGE(Pages, ptr)))
+	if (! (RC = LIB$GET_VM_PAGE(Pages, Ptr)))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
-	INSQUE(Ptr,Free_Maxsize_Segs->QTail);
+	INSQUE(Ptr,&Free_Maxsize_Segs.qtail);
 	};
     }
 
@@ -965,7 +1006,7 @@ Side Effects:
 */
 
 
-MM$INIT : NOVALUE (void)
+void MM$INIT (void)
     {
     QBLK_Init();
     Uarg_Init();
@@ -985,12 +1026,11 @@ them. Use of XINSQUE or XREMQUE with other dynamic memory objects will cause
 memory to be trashed.
 */
 
-//IF QDEBUG %THEN
+#ifdef QDEBUG
 
 MM$INSQUE(QBLK,QHDR,QRTN,QID,QVAL)
     {
-    signed long
-	struct MEM$HDR_STRUCT * HPTR;
+      struct MEM$HDR_STRUCT * HPTR;
     HPTR = QBLK - MEM$HDR_SIZE*4;
     HPTR->MEM$INSQUERTN = QRTN;
     HPTR->MEM$INSQUEHDR = QHDR;
@@ -1001,21 +1041,21 @@ MM$INSQUE(QBLK,QHDR,QRTN,QID,QVAL)
     }
 
 MM$REMQUE(QHDR,QBLK,QRTN,QID,QVAL)
+     signed long * QBLK;
     {
+      struct MEM$HDR_STRUCT * HPTR;
     signed long
-	struct MEM$HDR_STRUCT * HPTR,
 	RVAL;
-    if ((RVAL = REMQUE(QHDR,QBLK)) != Empty_Queue)
+    if ((RVAL = REMQUE(QHDR,QBLK)) != EMPTY_QUEUE) // check
 	{
-	HPTR = ..QBLK - MEM$HDR_SIZE*4;
+	HPTR = *QBLK - MEM$HDR_SIZE*4;
 	HPTR->MEM$REMQUERTN = QRTN;
 	HPTR->MEM$REMQUEHDR = QHDR;
 	HPTR->MEM$REMQUEVAL = QVAL;
-	HPTR->MEM$CURQUEUES = HPTR->MEM$CURQUEUES && (NOT QID);
+	HPTR->MEM$CURQUEUES = HPTR->MEM$CURQUEUES && (! QID);
 	};
     return RVAL;
     }
-//FI
+#endif
 
-}
-ELUDOM
+
