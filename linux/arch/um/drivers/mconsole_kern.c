@@ -96,17 +96,7 @@ void mconsole_version(struct mc_request *req)
 }
 
 #define UML_MCONSOLE_HELPTEXT \
-"Commands:
-    version - Get kernel version
-    help - Print this message
-    halt - Halt UML
-    reboot - Reboot UML
-    config <dev>=<config> - Add a new device to UML; 
-	same syntax as command line
-    remove <dev> - Remove a device from the client
-    sysrq <letter> - Performs the SysRq action controlled by the letter
-    cad - invoke the Ctl-Alt-Del handler
-"
+"Commands:\n    version - Get kernel version\n    help - Print this message\n    halt - Halt UML\n    reboot - Reboot UML\n    config <dev>=<config> - Add a new device to UML;\n 	same syntax as command line\n    remove <dev> - Remove a device from the client\n    sysrq <letter> - Performs the SysRq action controlled by the letter\n    cad - invoke the Ctl-Alt-Del handler\n"
 
 void mconsole_help(struct mc_request *req)
 {

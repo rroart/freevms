@@ -1374,8 +1374,7 @@ mca_probe(struct net_device *dev, u_long ioaddr)
 		** If the MCA configuration says the card should be here,
 		** it really should be here.
 		*/
-		printk(KERN_ERR "%s: MCA reports card at 0x%lx but it is not
-responding.\n", dev->name, iobase);
+		printk(KERN_ERR "%s: MCA reports card at 0x%lx but it is not\nresponding.\n", dev->name, iobase);
 	    }
        
 	    if (check_region(iobase, DEPCA_TOTAL_SIZE) == 0) {

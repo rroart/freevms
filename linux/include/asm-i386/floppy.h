@@ -75,28 +75,28 @@ static void floppy_hardint(int irq, void *dev_id, struct pt_regs * regs)
 
 #ifndef NO_FLOPPY_ASSEMBLER
 	__asm__ (
-       "testl %1,%1
-	je 3f
-1:	inb %w4,%b0
-	andb $160,%b0
-	cmpb $160,%b0
-	jne 2f
-	incw %w4
-	testl %3,%3
-	jne 4f
-	inb %w4,%b0
-	movb %0,(%2)
-	jmp 5f
-4:     	movb (%2),%0
-	outb %b0,%w4
-5:	decw %w4
-	outb %0,$0x80
-	decl %1
-	incl %2
-	testl %1,%1
-	jne 1b
-3:	inb %w4,%b0
-2:	"
+"	testl %1,%1;\n"
+"	je 3f;\n"
+"1:	inb %w4,%b0;\n"
+"	andb $160,%b0;\n"
+"	cmpb $160,%b0;\n"
+"	jne 2f;\n"
+"	incw %w4;\n"
+"	testl %3,%3;\n"
+"	jne 4f;\n"
+"	inb %w4,%b0;\n"
+"	movb %0,(%2);\n"
+"	jmp 5f;\n"
+"4:     	movb (%2),%0;\n"
+"	outb %b0,%w4;\n"
+"5:	decw %w4;\n"
+"	outb %0,$0x80;\n"
+"	decl %1;\n"
+"	incl %2;\n"
+"	testl %1,%1;\n"
+"	jne 1b;\n"
+"3:	inb %w4,%b0;\n"
+"2:	;\n"
        : "=a" ((char) st), 
        "=c" ((long) virtual_dma_count), 
        "=S" ((long) virtual_dma_addr)
