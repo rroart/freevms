@@ -597,6 +597,7 @@ static Command intcmd[] = {
 	0, "_init", 1, 0, "/vms$common/sysexe/init",
 	0, "_create", 1, 0, "/vms$common/sysexe/create",
 	0, "_edt", 1, 0, "/vms$common/sysexe/edt",
+	0, "_dfu", 1, 0, "/vms$common/sysexe/dfu",
 	0, "mount", 1, 0, "/vms$common/sysexe/mount.exe",
 	0, "directory", 1, 0, "/vms$common/sysexe/directory.exe",
 	0, "copy", 1, 0, "/vms$common/sysexe/copy.exe",

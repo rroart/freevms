@@ -28,6 +28,7 @@ Cluster networking on a real PC hangs one of them.
 Creprc has some output problems.
 Process sessions has some problems.
 The 60 sec limit and one login only for loginout. (panics).
+Ods-2 may get problems with directory file > 1.
 
 For CONFIG_VMS:
 RMS $get does not work in IPACP CNF$Configure_ACP.

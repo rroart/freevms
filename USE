@@ -94,6 +94,9 @@ SHOW LOGICAL:
 	show logical /table table logical
 	DCL only
 
+DFU:
+	dfu
+
 ******************************
 
 Clustering:
