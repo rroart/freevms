@@ -80,13 +80,17 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
       section=buffer+512*(no+1);
       continue;
     }
+    int rw = section->isd$l_flags&ISD$M_WRT;
 
     img_inadr.va_range$ps_start_va=section->isd$v_vpn<<PAGE_SHIFT;
     img_inadr.va_range$ps_end_va=img_inadr.va_range$ps_start_va+section->isd$w_pagcnt*PAGE_SIZE;
 #ifdef __arch_um__
     exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x51 ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
 #else
-    exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x45 ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
+    int rwfl=0;
+    if (rw)
+      rwfl=_PAGE_RW;
+    exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x45|rwfl ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
 #endif
     exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,section->isd$l_vbn,0,0);
 
