@@ -550,8 +550,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   x2p->current_vcb=vcb; // until I can place it somewhere else
 
   if (fib->fib$w_did_num) {
+    int fd;
     char * name;
     int error=0;
+    struct dirent dir;
     struct nameidata nd;
     struct inode * head;
     struct _fcb * fcb=x2p->primary_fcb;
@@ -560,8 +562,22 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
     name=ext2_vms_to_unix(filedsc);
 
-    if (path_init(name,LOOKUP_POSITIVE|LOOKUP_FOLLOW|LOOKUP_DIRECTORY,&nd))
-      error = path_walk(name, &nd);
+    if (fib->fib$l_wcc!=0) {
+      dir.d_off=fib->fib$l_wcc; //resdsc->dsc$a_pointer;
+      dir.d_reclen=resdsc->dsc$w_length;
+    } else {
+      dir.d_off=0;
+      dir.d_reclen=0;
+    }
+
+    fd=sys_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY, 0);
+    sys_getdents64(fd,&dir,1);
+    sys_close(fd);
+
+    resdsc->dsc$a_pointer=strdup(dir.d_name);
+    resdsc->dsc$w_length=strlen(resdsc->dsc$a_pointer);
+
+    fib->fib$l_wcc=dir.d_off;
 
 #if 0
     if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
