@@ -153,18 +153,26 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 	file = fget(fd);
 	if (file) {
 		if (file->f_mode & FMODE_READ) {
+#ifdef CONFIG_VMS
+		  if (fd<3) goto skip;
+#endif
 			ret = locks_verify_area(FLOCK_VERIFY_READ, file->f_dentry->d_inode,
 						file, file->f_pos, count);
 			if (!ret) {
+			skip: {}
 				ssize_t (*read)(struct file *, char *, size_t, loff_t *);
 				ret = -EINVAL;
 				if (file->f_op && (read = file->f_op->read) != NULL)
 					ret = read(file, buf, count, &file->f_pos);
 			}
 		}
+#ifdef CONFIG_VMS
+		  if (fd<3) goto skip2;
+#endif
 		if (ret > 0)
 			dnotify_parent(file->f_dentry, DN_ACCESS);
 		fput(file);
+	skip2: {}
 	}
 	return ret;
 }
@@ -178,19 +186,27 @@ asmlinkage ssize_t sys_write(unsigned int fd, const char * buf, size_t count)
 	file = fget(fd);
 	if (file) {
 		if (file->f_mode & FMODE_WRITE) {
+#ifdef CONFIG_VMS
+		  if (fd<3) goto skip;
+#endif
 			struct inode *inode = file->f_dentry->d_inode;
 			ret = locks_verify_area(FLOCK_VERIFY_WRITE, inode, file,
 				file->f_pos, count);
 			if (!ret) {
+			skip: {}
 				ssize_t (*write)(struct file *, const char *, size_t, loff_t *);
 				ret = -EINVAL;
 				if (file->f_op && (write = file->f_op->write) != NULL)
 					ret = write(file, buf, count, &file->f_pos);
 			}
 		}
+#ifdef CONFIG_VMS
+		  if (fd<3) goto skip2;
+#endif
 		if (ret > 0)
 			dnotify_parent(file->f_dentry, DN_MODIFY);
 		fput(file);
+	skip2: {}
 	}
 	return ret;
 }

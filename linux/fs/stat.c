@@ -367,6 +367,16 @@ asmlinkage long sys_lstat64(char * filename, struct stat64 * statbuf, long flags
 
 asmlinkage long sys_fstat64(unsigned long fd, struct stat64 * statbuf, long flags)
 {
+#ifdef CONFIG_VMS
+#if 0
+  extern int mount_root_vfs;
+  if (mount_root_vfs==0) {
+    return 0;
+  }
+#endif
+  if (fd<3)
+    return 0;
+#endif
 	struct file * f;
 	int err = -EBADF;
 
