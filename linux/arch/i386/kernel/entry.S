@@ -288,7 +288,7 @@ badsys:
 
 	ALIGN
 ENTRY(ret_from_intr)
-        PUSHPSL                         # bad place. do better for new I/O
+#        PUSHPSL                         # bad place. do better for new I/O
         GET_CURRENT(%ebx)
 ret_from_exception:
 	movl EFLAGS(%esp),%eax		# mix EFLAGS and CS
