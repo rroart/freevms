@@ -871,6 +871,8 @@ static void prepare_namespace(void)
 extern int mydebug5;
 extern int mydebug6;
 
+int scs_init_done = 0;
+
 static int init(void * unused)
 {
 	lock_kernel();
@@ -927,8 +929,12 @@ static int init(void * unused)
 	  kernel_thread(Main, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	if (mydevice==0)
 	  printk("No network module. Can not start clustering.\n");
-	else
-	  scs_init2();
+	else {
+	  if (scs_init_done==0)
+	    printk("Nothing in params.dat. Can not start clustering.\n");
+	  else
+	    scs_init2();
+	}
 #endif
 
 #ifdef CONFIG_VMS
