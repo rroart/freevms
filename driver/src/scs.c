@@ -3649,12 +3649,14 @@ int opc_msgrec(struct sk_buff *skb) {
     //cdt->cdt$w_state=CDT$C_REJ_SENT
     //scs_msg_ctl_comm(cdt,SCS$C_REJ_REQ);
     scs$accept(0,0,0,0,0,0,0,0,0,0,0,0,cdt,0);
-    //sbnb=scs_find_name(&scs->scs$t_dst_proc);
-    //    cdt->cdt$l_lconid=sbnb->sbnb$w_local_index;
     cdt->cdt$l_condat=vmalloc(16);
     cdt->cdt$l_lprocnam=vmalloc(16);
     bcopy(&scs->scs$b_con_dat,cdt->cdt$l_condat,16);
     bcopy(&scs->scs$t_dst_proc,cdt->cdt$l_lprocnam,16);
+    sbnb=scs_find_name(cdt->cdt$l_lprocnam);
+    //    cdt->cdt$l_lconid=sbnb->sbnb$w_local_index;
+    cdt->cdt$l_msginput=cdtl[sbnb->sbnb$w_local_index].cdt$l_msginput;
+    cdt->cdt$l_dginput=cdtl[sbnb->sbnb$w_local_index].cdt$l_dginput;
     cdt->cdt$w_state=CDT$C_ACCP_SENT;
     scs_msg_ctl_comm(cdt,SCS$C_ACCP_REQ);
     break;
@@ -3699,13 +3701,35 @@ int opc_msgrec(struct sk_buff *skb) {
   }
 }
 
-int nisca_snt_dg (struct sk_buff * skb, void * addr) { 
+//int nisca_snt_dg (struct sk_buff * skb, void * addr) 
+int nisca_snt_dg (struct sk_buff * skb) { 
   //  return do_opc_dispatch(skb);
+  void * addr = getppdscs(skb->data);
   struct _scs * scs = addr;
   struct _cdt * cdt = &cdtl[scs->scs$l_dst_conid];
   // shortcut
   struct _mscp_basic_pkt * basic = ((unsigned long)addr) + sizeof(*scs);
-  
+
+  struct _sbnb * sbnb = scs_find_name(&scs->scs$t_dst_proc);
+
+  struct _cdt * acdt = &cdtl[sbnb->sbnb$w_local_index];
+
+  {
+    void (*fn)(void *,void *,void *);
+#if 0
+    int savipl=setipl(0); // still something funny someplace
+    int savis=current->psl_is;
+    current->psl_is=0;
+#endif
+    fn=cdt->cdt$l_msginput;
+    fn(addr,cdt,0);
+#if 0
+    if (savis) current->psl_is=1;
+    setipl(savipl);
+#endif
+  }
+
+#if 0  
   if (basic->mscp$b_opcode == MSCP$K_OP_END) {
     du_dg(addr,cdt,0);
   } else {
@@ -3716,6 +3740,7 @@ int nisca_snt_dg (struct sk_buff * skb, void * addr) {
     if (savis) current->psl_is=1;
     setipl(savipl);
   }
+#endif
 }
 
 int nisca_snt_lb (struct sk_buff * skb, void * addr) { }
@@ -3962,7 +3987,8 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
 	func=nisca_dispatch[scs->scs$w_mtype];
 	return func(skb,scs);
 #endif
-	nisca_snt_dg(skb,scs);
+	//	nisca_snt_dg(skb,scs);
+	return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, nisca_snt_dg);
 dump_it:
 kfree_skb(skb);
 out:
