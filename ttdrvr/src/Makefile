@@ -3,11 +3,11 @@ O_TARGET := ttdrvr.o
 obj-y := ttyfdt.o ttychari.o ttycharo.o ttydrvdat.o ttysub.o ttystrstp.o
 
 ifdef CONFIG_VMS
-export-objs := console.o tty_io.o tty_ioctl.o 
-obj-y += tty_io.o tty_ioctl.o n_tty.o
+export-objs := console.o tty_io.o tty_ioctl.o keyboard.o 
+obj-y += tty_io.o tty_ioctl.o n_tty.o keyboard.o
 endif
 
-KEYMAP   =defkeymap.o
+KEYMAP   =../../linux/drivers/char/defkeymap.o
 ifdef CONFIG_VMS
 KEYBD    =pc_keyb.o
 CONSOLE  =console.o
@@ -23,9 +23,9 @@ ifeq ($(ARCH),um)
   CONSOLE  =
 endif
 
-obj-$(CONFIG_VT) += $(CONSOLE) $(KEYBD)
-ifdef CONFIG_VMS
-obj-$(CONFIG_VT) += vmspc_keybd.o vmsconsole.o
+obj-y += $(CONSOLE) $(KEYBD)
+ifneq ($(ARCH),um)
+obj-y += vmsconsole.o $(KEYMAP) 
 endif
 
 include $(TOPDIR)/Rules.make
