@@ -129,7 +129,7 @@ void lnm_init_prc(struct _pcb * p) {
   memcpy(tab_lnmth, &lnm_prc_dir, sizeof(struct _lnmth));
 
   ctl$gl_lnmdirect = dir_lnmb;
-  p->pcb$l_affinity_callback = hash;
+  ctl$gl_lnmhash = hash;
 
   // not yet ready for this?
   //lnm$inslogtab(ret_lnm, &sys_table);

@@ -340,6 +340,8 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 #endif
 
   init_p1pp_data(pcb,phd,-4096);
+  init_p1pp_long(&ctl$gl_lnmhash,-4096,ctl$gl_lnmhash);
+  init_p1pp_long(&ctl$gl_lnmdirect,-4096,ctl$gl_lnmdirect);
   //printk("init p1pp data\n");
   return uml_map;
 }
