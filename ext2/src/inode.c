@@ -406,7 +406,7 @@ static int ext2_alloc_branch(struct inode *inode,
 		 * Get buffer_head for parent block, zero it out and set 
 		 * the pointer to new one, then send parent to disk.
 		 */
-		bh = sb_getblk(inode->i_sb, parent);
+		bh = sb_getblk(inode->i_sb, parent*vms_block_factor(inode->i_sb->s_blocksize_bits));
 		lock_buffer(bh);
 		memset(bh->b_data, 0, blocksize);
 		branch[n].bh = bh;
