@@ -619,10 +619,13 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 #endif
     buf.count = 0;
     buf.dirent = &dir;
-    generic_file_llseek(f, fib->fib$l_wcc/*dir.d_off*/, 0);
+    error=generic_file_llseek(f, fib->fib$l_wcc/*dir.d_off*/, 0);
+    if (error<0)
+      goto err;
     error=vfs_readdir(f, fillonedir64, &buf);
     if (error >= 0)
       error = buf.count;
+  err:
     if (error < 0)
       sts = SS$_NOMOREFILES;
     fib->fib$l_wcc = f->f_pos;
