@@ -1999,6 +1999,11 @@ typedef unsigned int       UINT;		/* Usigned int (32 bits) */
 /* External references */
 
 #include "mytypedefs.h"
+extern unsigned long mmg$gl_bwp_mask;
+DDT   driver$ddt;			/* Prototype DDT */
+DPT   driver$dpt;			/* Prototype DPT */
+FDT   driver$fdt;			/* Prototype FDT */
+
 
 extern int   MMG$GL_PAGE_SIZE;			/* Page size in bytes */
 extern int   MMG$GL_VPN_TO_VA;			/* Page to byte shift count */
@@ -2445,12 +2450,12 @@ typedef struct
 #define WT_DMA_AD3     37
 
 
-#define cram_def(cmd,csr) CRAMCMD$K_##cmd##32, ##csr, ((##csr & 3) <<3)
+#define cram_def(cmd,csr) CRAMCMD$K_##cmd##32, csr, ((csr & 3) <<3)
 
 cram_item cram_init[NUMBER_OF_CRAMS] =
   {
 
-    cram_def(RDBYTE,REG_ALT_STS),
+    cram_def(RDBYTE,REG_ALT_STS), 
     cram_def(WTBYTE,REG_DEV_CTL),
 
     cram_def(RDBYTE,REG_DRV_ADDR),		/* Belongs to FDC ------ Don't read!  */
@@ -2955,8 +2960,8 @@ void call_ini$brk( int code, int p1, int p2, int p3 )
 
 #endif
 
-#define insque(x,y) (__PAL_INSQUEL_D((void **)(x),(void *)(y)))
-#define remque(x,y) (__PAL_REMQUEL_D((void **)(x),(void **)(y))>=0)
+//#define insque(x,y) (__PAL_INSQUEL_D((void **)(x),(void *)(y)))
+//#define remque(x,y) (__PAL_REMQUEL_D((void **)(x),(void **)(y))>=0)
 
 
 /* DRIVER$INIT_TABLES - Initialize Driver Tables
@@ -5664,7 +5669,8 @@ int read_dispatcher( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
 
           }
 
-    bug_check( INCONSTATE, FATAL, COLD );				/* So be it */
+    //    bug_check( INCONSTATE, FATAL, COLD );				/* So be it */
+    panic("INCONSTATE, FATAL, COLD\n");
     return( SS$_ABORT );						/* (You should live so long as to get here) */
 
       }
@@ -6329,7 +6335,8 @@ int write_dispatcher( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
 
           }
 
-    bug_check( INCONSTATE, FATAL, COLD );				/* So be it */
+    //bug_check( INCONSTATE, FATAL, COLD );				/* So be it */
+    panic(" INCONSTATE, FATAL, COLD \n");				/* So be it */
     return( SS$_ABORT );						/* (You should live so long as to get here) */
 
       }
@@ -7281,7 +7288,8 @@ int atapi_packet_command( DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt
             default:					/* Out-of-range combination? */
               {						/* *THAT* would *REALLY* be a surprise! */
                 BPTRACE( 0x020400FF );			/* BREAK: ATAPI error: Out-of-bounds Reason */
-                bug_check( INCONSTATE, FATAL, COLD );	/* So be it */
+                //bug_check( INCONSTATE, FATAL, COLD );	/* So be it */
+                panic(" INCONSTATE, FATAL, COLD \n");	/* So be it */
                 return( SS$_DRVERR );			/* Then, make that an error */
                 break;
                   }

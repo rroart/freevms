@@ -42,32 +42,34 @@
 /*									*/
 /************************************************************************/
 
-#include	adpdef			/* Define the ADP */
-#include	dcdef			/* Define device and ADP codes */
-#include	descrip			/* Define descriptors */
-#include	iocdef			/* Add I/O constants */
-#include	iogendef		/* IOGEN symbols (load driver) */
-#include	ipldef			/* Define IPLs */
-#include	lib$routines		/* Define LIB$ routines */
-#include	pcbdef			/* Define the PCB */
-#include	ssdef			/* System service statys codes */
-#include	starlet			/* Define SYS$ routines */
-#include	stdio			/* Standard I/O */
-#include	stdlib			/* Define standard definitions */
-#include	string			/* Define string handling routines */
-#include	stsdef			/* Define status codes */
-#include	varargs			/* Handle variable argument lists */
+#include	"../../../freevms/lib/src/adpdef.h"			/* Define the ADP */
+#include	"../../../freevms/starlet/src/dcdef.h"			/* Define device and ADP codes */
+#include	"../../../freevms/librtl/src/descrip.h"			/* Define descriptors */
+#include	"../../../freevms/lib/src/iocdef.h"			/* Add I/O constants */
+#include	"../../../freevms/lib/src/iogendef.h"		/* IOGEN symbols (load driver) */
+#include	"../../../freevms/lib/src/ipldef.h"			/* Define IPLs */
+#include	"../../../freevms/starlet/src/lib$routines.h"		/* Define LIB$ routines */
+#include	"../../../freevms/lib/src/pcbdef.h"			/* Define the PCB */
+#include	"../../../freevms/starlet/src/ssdef.h"			/* System service statys codes */
+#include	"../../../freevms/starlet/src/starlet.h"			/* Define SYS$ routines */
+#include	<stdio.h>			/* Standard I/O */
+#include	<stdlib.h>			/* Define standard definitions */
+#include	<string.h>			/* Define string handling routines */
+#include	"../../../freevms/starlet/src/stsdef.h"			/* Define status codes */
+#include	"../../../freevms/starlet/src/varargs.h"			/* Handle variable argument lists */
 
-#include	ioc_routines		/* Define the IOC$ routines */
-#include	sch_routines		/* Deinf the SCH$ routines */
-#include	vms_macros		/* Include the VMS macros */
+#include	"../../../freevms/lib/src/ioc_routines.h"		/* Define the IOC$ routines */
+#include	"../../../freevms/lib/src/sch_routines.h"		/* Deinf the SCH$ routines */
+#include	"../../../freevms/lib/src/vms_macros.h"		/* Include the VMS macros */
+
+#include "mytypedefs.h"
 
 int sys$load_driver(__unknown_params);
 
 static ADP	*isa_adp;		/* ISA ADP address */
 static __int64	isa_base;		/* ISA base address */
 static int	isa_tr;			/* ISA TR number */
-static unsigned __int64 iohandle;	/* I/O handle */
+static uint64   iohandle;	/* I/O handle */
 static int	isa_offset;		/* Offset to 87312 register */
 
 extern ADP	*IOC$GL_ADPLIST;	/* Start of ADP list */
@@ -139,7 +141,7 @@ int	check_system_type() {
 /*	status		SS$_NORMAL	system is supported		*/
 /*			SS$_UNSUPPORTED	no support on this system	*/
 
-#include	syidef			/* Define GETSYI items */
+#include	"../../../freevms/starlet/src/syidef.h"			/* Define GETSYI items */
 
 IOSB_T	iosb;				/* IOSB for $GETSYI */
 static int cpu_type;			/* CPU type code */
@@ -190,7 +192,7 @@ int	idx_shift;			/* Index register shift */
 int	data_shift;			/* Data register shift */
 int	i;				/* Loop counter */
 int	saved_ipl;			/* Saved IPL value */
-unsigned __int64 ofs;			/* ISA Offset value */
+uint64 ofs;			/* ISA Offset value */
 
 /* Precompute some values */
 
