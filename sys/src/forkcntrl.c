@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<linux/linkage.h>
 #include"../../freevms/sys/src/system_data_cells.h"
 #include"../../freevms/sys/src/internals.h"
@@ -76,14 +81,23 @@ asmlinkage void exe$forkdspth(int i) {
 }
 
 void exe$iofork(struct _irp * i, struct _ucb * u) {
+  u->ucb$l_sts&=~UCB$M_TIM;
+  exe$fork(i,u);
+}
+
+void exe$fork(struct _irp * i, struct _ucb * u) {
+  u->ucb$l_fr3=i;
+  /* should also popl fkb$l_fpc(r5) according to the book. */
+  exe$queue_fork(i,u);
+}
+
+void exe$queue_fork(struct _irp * i, struct _ucb * u) {
   int curipl;
   int newipl;
   int isempty;
   struct _fkb * f=u;
   /* I think that the below is really an fkb */
   /* need caller and caller's caller address of return again */
-  u->ucb$l_sts&=~UCB$M_TIM;
-  u->ucb$l_fr3=i;
   u->ucb$l_fr4=current;
   newipl=u->ucb$b_dipl;
   f=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[newipl-6];
