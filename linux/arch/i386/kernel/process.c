@@ -125,9 +125,11 @@ void cpu_idle (void)
 	/* endless idle loop with no priority at all */
 	init_idle();
 	printk("id %x\n",current->pid);
-	//	current->pcb$b_prib = 0; /* should really be the opposite */
-	//	current->pcb$b_pri = 31;
-	//	current->phd$w_quant = 0;
+	if (current->pid==0) { /* just to be sure */
+	current->pcb$b_prib  = 31;
+	current->pcb$b_pri   = 31;
+	current->phd$w_quant = 0;
+	}
 
 	while (1) {
 		void (*idle)(void) = pm_idle;

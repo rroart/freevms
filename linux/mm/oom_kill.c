@@ -188,7 +188,8 @@ static void oom_kill(void)
 	 * killing itself before someone else gets the chance to ask
 	 * for more memory.
 	 */
-	current->policy |= SCHED_YIELD;
+	//	current->policy |= SCHED_YIELD;
+	current->need_resched=1;
 	schedule();
 	return;
 }

@@ -7,6 +7,8 @@
 #include"../../freevms/sys/src/sysgen.h"
 #include"../../freevms/sys/src/rse.h"
 
+extern int mydebug;
+
 int sch$qend(struct _pcb * p) {
   //	{ int i; for (i=0;i<1000000;i++) ; }
   //	set_intr_gate(TEST_VECTOR,&test_code);
@@ -17,7 +19,7 @@ int sch$qend(struct _pcb * p) {
   p->phd$w_quant = -QUANTUM/10;
   /* p->pcb$b_pri++; why must we have this? */
   p->need_resched = 1;
-  //    printk("quend %x %x\n",p->pid,p->need_resched);
+  if (mydebug) printk("quend %x %x\n",p->pid,p->need_resched);
   {
     struct list_head * tmp;
     struct _pcb * e, * next;

@@ -260,7 +260,8 @@ void tasklet_kill(struct tasklet_struct *t)
 	while (test_and_set_bit(TASKLET_STATE_SCHED, &t->state)) {
 		current->state = TASK_RUNNING;
 		do {
-			current->policy |= SCHED_YIELD;
+		  //			current->policy |= SCHED_YIELD;
+			  current->need_resched=1;
 			schedule();
 		} while (test_bit(TASKLET_STATE_SCHED, &t->state));
 	}
@@ -406,7 +407,8 @@ static __init int spawn_ksoftirqd(void)
 			printk("spawn_ksoftirqd() failed for cpu %d\n", cpu);
 		else {
 			while (!ksoftirqd_task(cpu_logical_map(cpu))) {
-				current->policy |= SCHED_YIELD;
+			  //				current->policy |= SCHED_YIELD;
+			  current->need_resched=1;
 				schedule();
 			}
 		}

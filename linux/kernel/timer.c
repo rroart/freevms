@@ -578,7 +578,10 @@ void update_one_process(struct task_struct *p, unsigned long user,
  * Called from the timer interrupt handler to charge one tick to the current 
  * process.  user_tick is 1 if the tick is user time, 0 for system.
  */
-static int xyzxyz=0;
+
+pid1count=0;
+pid0count=0;
+
 void update_process_times(int user_tick)
 {
 	struct task_struct *p = current;
@@ -588,6 +591,8 @@ void update_process_times(int user_tick)
 	//{printk("timer %x %x %x\n",p->pid,p->phd$w_quant,p->pcb$b_pri);}
 	//	{ int i; for (i=0; i<1000000; i++ ) ; }}
 	update_one_process(p, user_tick, system, cpu);
+	if (p->pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}
+	if (p->pid==1) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}
 	if (p->pid) {
 		if (++p->phd$w_quant  >= 0 ) {
 		  //			sch$qend(p);

@@ -252,7 +252,7 @@ send_now_idle:
 	struct task_struct *tsk;
 
 	tsk = cpu_curr(this_cpu);
-	if (p->pcb$b_pri > tsk->pcb$b_pri) /* previous was meaningless */
+	if (p->pcb$b_pri >= tsk->pcb$b_pri) /* previous was meaningless */
 		tsk->need_resched = 1;
 #endif
 }
@@ -306,6 +306,7 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
 	if (!synchronous || !(p->cpus_allowed & (1 << smp_processor_id())))
 		reschedule_idle(p);
 	success = 1;
+	p->pcb$b_pri=p->pcb$b_prib-3; /* boost */
 out:
 	spin_unlock_irqrestore(&runqueue_lock, flags);
 	return success;
@@ -406,7 +407,7 @@ signed long schedule_timeout(signed long timeout)
  * cleans up all remaining scheduler things, without impacting the
  * common case.
  */
-static inline void __schedule_tail(struct task_struct *prev)
+static inline void __schedule_tail_not(struct task_struct *prev)
 {
 #ifdef CONFIG_SMP
 	int policy;
@@ -475,7 +476,7 @@ needs_resched:
 
 asmlinkage void schedule_tail(struct task_struct *prev)
 {
-	__schedule_tail(prev);
+  //	__schedule_tail_not(prev);
 }
 
 static struct _pcb * pid1;
@@ -515,7 +516,12 @@ int this_cpu = smp_processor_id();
  * information in task[0] is never used.
  */
 
+//int mdthreadpid=0;
+
 int mydebug=0;
+int mydebug2=0;
+int mycount=0;
+int delfromrunq=0;
 
 #define sch$sched schedule
 asmlinkage void schedule(void)
@@ -524,6 +530,7 @@ asmlinkage void schedule(void)
 	struct task_struct *prev, *next, *p;
 	struct list_head *tmp;
 	int this_cpu, c;
+	unsigned char weight;
 
 	if (from_sch$resched == 1) goto try_for_process;
 
@@ -532,6 +539,9 @@ asmlinkage void schedule(void)
 	if (!current->active_mm) BUG();
 need_resched_back:
 	prev = current;
+	if (prev->pid==3) printk("pid3 was here\n");
+	if (prev->run_list.next==0) printk("n next error %x\n",prev->pid);
+	if (prev->run_list.prev==0) printk("n prev error %x\n",prev->pid);
 	this_cpu = prev->pcb$l_cpu_id;
 
 	if (unlikely(in_interrupt())) {
@@ -553,9 +563,28 @@ need_resched_back:
 	 * this is the scheduler proper:
 	 */
 	if (!pid1 && current->pid == 1) { pid1=current;
-	pid1->pcb$b_pri=20; pid1->pcb$b_prib=24; printk("pid1 first\n"); }
+	pid1->pcb$b_pri=20; pid1->pcb$b_prib=24; printk("pid1 first\n"); 
+	mydebug=0; }
 	//	printk("rep %x %x\n",current,current->pid);
 	if (mydebug) printk("rep %x %x %x %x %x\n",current,current->pid,current->need_resched,current->pcb$b_pri,current->phd$w_quant);
+	if (mydebug2) printk("rep %x %x %x %x %x\n",current,current->pid,current->need_resched,current->pcb$b_pri,current->phd$w_quant);
+
+	delfromrunq=0;
+	switch (prev->state) {
+		case TASK_INTERRUPTIBLE:
+			if (signal_pending(prev)) {
+				prev->state = TASK_RUNNING;
+				break;
+			}
+		default:
+		  if (mydebug2) printk("in del from\n");
+		  if (prev->run_list.next==0) { int i; printk("next error %x\n",prev->pid); /*for (i=0;i<1000000000; i++) ;*/ }
+		  if (prev->run_list.prev==0) printk("prev error %x\n",prev->pid);
+		  del_from_runqueue(prev);
+
+		case TASK_RUNNING:;
+	}
+	//			prev->need_resched = 0;
 
  try_for_process:
 	from_sch$resched=0;
@@ -567,41 +596,39 @@ repeat_schedule:
 	c = 100;
 	list_for_each(tmp, &runqueue_head) {
 		p = list_entry(tmp, struct task_struct, run_list);
+		if (mydebug2) printk("run %x %x %x %x %x\n",p,p->pid,p->run_list.next,p->run_list.prev,p->need_resched);
 		if (p->pcb$b_prib & 224) p->pcb$b_prib=27;
 		if (p->pcb$b_pri & 224) p->pcb$b_pri=27;
-		if (can_schedule(p, this_cpu)) {
-		  unsigned char weight = goodness(p);
+		   weight = goodness(p);
 		  if (mydebug) printk("wei2 %x %x %x %x %x %x\n",p,p->pid,weight,p->need_resched,p->pcb$b_pri,p->phd$w_quant);
-		  if (c==100 && prev!=p) c=weight, next=p;
+		  //		  if (c==100 && prev!=p) c=weight, next=p;
 		  if (weight < c && p->need_resched==0)
 				c = weight, next = p;
-		}
+		  if (c==100 && weight < c) c=weight, next=p;
 	}
 	//	{ int i; for (i=0; i<10000000; i++ ) ; }
 
-	if (c==100) goto sch$idle;
+	//	if (c==100) { spin_unlock_irq(&runqueue_lock); goto sch$idle; }
 	if (mydebug) printk("wei %x %x\n",next->pid,c);
-	if (mydebug) { int i; for (i=0; i<100000000; i++ ) ; }
-
+	if (mydebug2) printk("wei %x %x\n",next->pid,c);
+	if (mydebug && ++mycount==500) { int i; __cli(); for (i=0; i<100000000; i++ ) ; mycount=0; __sti(); }
+	if (mydebug2 && ++mycount==500) { int i; __cli(); for (i=0; i<1000000000; i++ ) ; mycount=0; __sti(); }
 	/*
 	 * from this point on nothing can prevent us from
 	 * switching to the next task, save this fact in
 	 * sched_data.
 	 */
 	prev->need_resched = 0;
-	if (next->pid != 1 && pid1->need_resched==1) { pid1->need_resched=0; pid1->pcb$b_pri=24; pid1->pcb$b_prib=25; printk("pid1\n"); }
+	if (next->pid > 1 && pid1->need_resched==1) { pid1->need_resched=0; pid1->pcb$b_pri=24; pid1->pcb$b_prib=25; printk("pid1\n"); }
+
+	//	if (next == prev) { next->need_resched=1; goto repeat_schedule; }
+	if (next == prev) {/* printk("next == prev\n");*/ spin_unlock_irq(&runqueue_lock); return; } 
 
 	sched_data->curr = next;
 	//if (prev->pid>1) move_last_runqueue(prev);
 
 	task_set_cpu(next, this_cpu);
 	spin_unlock_irq(&runqueue_lock);
-
-	if (unlikely(prev == next)) {
-		/* We won't go through the normal tail, so do this by hand */
-		prev->policy &= ~SCHED_YIELD;
-		goto same_process;
-	}
 
 	 	if (next->pcb$b_pri<next->pcb$b_prib) next->pcb$b_pri++;
 		SCH$GL_IDLE_CPUS=0;
@@ -623,6 +650,8 @@ repeat_schedule:
 	 */
 
 #endif /* CONFIG_SMP */
+	if (prev->pid==2 && prev->run_list.next==0) { int i; printk("o next error %x\n",prev->pid); mydebug=1; /* for(i=0;i<1000000000;i++); */ }
+	if (prev->run_list.prev==0) printk("o prev error %x\n",prev->pid);
 
 	kstat.context_swtch++;
 	/*
@@ -659,13 +688,6 @@ repeat_schedule:
 	 * stack.
 	 */
 	switch_to(prev, next, prev);
-	__schedule_tail(prev);
-
-same_process:
-	reacquire_kernel_lock(current);
-	if (current->need_resched)
-		goto need_resched_back;
-	return;
 
  sch$idle:
 	//	printk("sch$idle\n");
@@ -1032,8 +1054,8 @@ asmlinkage long sys_sched_yield(void)
 		 * This process can only be rescheduled by us,
 		 * so this is safe without any locking.
 		 */
-		if (current->policy == SCHED_OTHER)
-			current->policy |= SCHED_YIELD;
+	  //		if (current->policy == SCHED_OTHER)
+	  //			current->policy |= SCHED_YIELD;
 		current->need_resched = 1;
 
 		spin_lock_irq(&runqueue_lock);
@@ -1285,7 +1307,7 @@ void __init init_idle(void)
 	}
 	sched_data->curr = current;
 	sched_data->last_schedule = get_cycles();
-	clear_bit(current->processor, &wait_init_idle);
+	clear_bit(current->pcb$l_cpu_id, &wait_init_idle);
 }
 
 extern void init_timervecs (void);

@@ -143,7 +143,7 @@ void show_trace(unsigned long * stack)
 
 	if (!stack)
 		stack = (unsigned long*)&stack;
-
+	{ int i; for (i=0;i<1000000000;i++) ; }
 	printk("Call Trace: ");
 	i = 1;
 	while (((long) stack & (THREAD_SIZE-1)) != 0) {
@@ -151,7 +151,7 @@ void show_trace(unsigned long * stack)
 		if (kernel_text_address(addr)) {
 			if (i && ((i % 6) == 0))
 				printk("\n   ");
-			printk("[<%08lx>] ", addr);
+			printk("[%08lx] ", addr);
 			i++;
 		}
 	}
