@@ -1736,6 +1736,7 @@ void PTY_READ_DONE(TVT)
 //
 	struct TVT$BLOCK * TVT;
     {
+      long long dummy; // check. need something so TVT is not destroyed for some reason
 struct PTY$IOSB * IOSB = &TVT->TVT$RD_IOSB;
  struct tcb_structure * TCB;
     signed long
