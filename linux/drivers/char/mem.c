@@ -726,7 +726,7 @@ int __init chr_dev_init(void)
 #ifdef CONFIG_M68K_PRINTER
 	lp_m68k_init();
 #endif
-	//misc_init();
+	misc_init();
 #if CONFIG_QIC02_TAPE
 	qic02_tape_init();
 #endif
