@@ -671,6 +671,9 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	// 1 0 pfn=misc page is in page file
 	// 1 1 page is in image file
 
+	if (address<PAGE_SIZE)
+	  goto skip;
+
 	if (address>0xc0000000)
 	  goto skip;
 
