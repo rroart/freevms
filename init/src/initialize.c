@@ -12,6 +12,10 @@
  *      Initiale version. Device size hardcoded, geometry not set, and many
  *      other things :-)        Usage: init /dev/hdb4
  *
+ *   20-OCT-2003        Zakaria Yassine <zakaria@sympatico.ca>
+ *      some bugs corrected. support write. add params: device-size (in blocks), volume-label
+ *              Usage: init /dev/hdb4 VOLNAME 40000
+ *
  * Report Bugs:
  *   To: FreeVMS project mailing list <http://freevms.nvg.org/>
  *       or directely to me.
@@ -26,9 +30,9 @@ unsigned char in_line[512];
 int main(int argc, char *argv[])
 {
     int i;
-    if (argc>1){
+    if (argc>3){
         FILE *fout = fopen(argv[1],"wb");
-        create_ods2(fout);
+        create_ods2(fout,argv[2],atoi(argv[3]));
         close(fout);
 	return 0;
     }
