@@ -83,7 +83,7 @@ asmlinkage int exe$cretva (struct _va_range *inadr, struct _va_range *retadr, un
   void * last=inadr->va_range$ps_end_va;
   struct _pcb * p=current;
   struct _rde * rde;
-  unsigned long numpages=(last-first)/PAGE_SIZE+1;
+  unsigned long numpages=(last-first)/PAGE_SIZE;
   rde=vmalloc(sizeof(struct _rde));
   bzero(rde,sizeof(struct _rde));
   rde->rde$pq_start_va=first;
@@ -110,6 +110,7 @@ int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection
     pte = pte_alloc(mm, pmd, address);
   }
 
+  *(unsigned long *)pte=newpte; // do this anyway
   if ((long)(*(long *)pte)) {
     return SS$_VA_IN_USE;
   } else {
