@@ -14,7 +14,9 @@ export-objs	:= ll_rw_blk.o blkpg.o loop.o DAC960.o genhd.o
 
 obj-y	:= ll_rw_blk.o blkpg.o genhd.o elevator.o
 
+ifeq ($(ARCH),i386)
 obj-$(CONFIG_IO_VMS)		+= pvdriver.o
+endif
 
 ifneq ($(CONFIG_IO_VMS),y)
 obj-$(CONFIG_MAC_FLOPPY)	+= swim3.o
