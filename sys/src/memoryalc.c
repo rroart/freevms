@@ -20,6 +20,7 @@
 #include <irpdef.h>
 #include <tqedef.h>
 #include <dyndef.h>
+#include <cebdef.h>
 
 #undef VMS_MM_DEBUG 
 #define VMS_MM_DEBUG
@@ -584,16 +585,36 @@ int exe$deallocate(void * returnblock, void ** poolhead, int size) {
   return SS$_NORMAL;
 }
 
-int exe_std$alloctqe(int *alosize_p, struct _tqe **tqe_p) {
-  int size=sizeof(struct _tqe);
+int exe_std$allocxyz(int *alosize_p, struct _tqe **tqe_p, int type, int size) {
   int sts=exe_std$alononpaged(size,alosize_p,tqe_p);
   if (sts==SS$_NORMAL) {
     struct _tqe * tqe=*tqe_p;
     tqe->tqe$w_size=*alosize_p;
-    tqe->tqe$b_type=DYN$C_TQE;
+    tqe->tqe$b_type=type;
     return sts;
   }
-  // more remains
+  // more remains RSN and such
+
+}
+
+int exe_std$allocbuf (int reqsize, int *alosize_p, void **bufptr_p) {
+  return exe_std$allocxyz(alosize_p,bufptr_p,DYN$C_BUFIO,reqsize);
+}
+
+int exe_std$allocceb(int *alosize_p, struct _tqe **ceb_p) {
+  int size=sizeof(struct _ceb);
+  return exe_std$allocxyz(alosize_p,ceb_p,DYN$C_CEB,size);
+}
+
+int exe_std$allocirp(struct _tqe **irp_p) {
+  int alosize_p;
+  int size=sizeof(struct _irp);
+  return exe_std$allocxyz(&alosize_p,irp_p,DYN$C_IRP,size);
+}
+
+int exe_std$alloctqe(int *alosize_p, struct _tqe **tqe_p) {
+  int size=sizeof(struct _tqe);
+  return exe_std$allocxyz(alosize_p,tqe_p,DYN$C_TQE,size);
 }
 
 int poison_packet(char * packet, int size, int deall) {
