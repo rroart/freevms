@@ -474,7 +474,7 @@ int ide_vmsinit(void) {
 #include <asm/io.h>
 #include <asm/bitops.h>
 
-#include "ide_modes.h"
+#include "../../../linux/drivers/ide/ide_modes.h"
 
 #ifdef CONFIG_KMOD
 #include <linux/kmod.h>
