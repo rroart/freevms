@@ -593,7 +593,7 @@ ENTRY(astdel_vector)
 ENTRY(queueast_vector)
         PUSHR_ALL
 #        call pushpsl
-        call SYMBOL_NAME(exe$forkdspth)
+        call SYMBOL_NAME(exe$frkipl6dsp)
         POPR_ALL
         REI
 
