@@ -206,6 +206,7 @@ void swap_free(swp_entry_t entry)
  */
 static int exclusive_swap_page(struct page *page)
 {
+  return  0;
 #if 0
 	int retval = 0;
 	struct _pfl * p;
