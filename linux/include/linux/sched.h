@@ -545,6 +545,7 @@ unsigned long pcb$l_capability_seq;
   };
   unsigned short pslstk[32];
   unsigned char pslindex;
+  int pcb$l_pqb;
 };
 /* will need a PCB. PCB is a null PCB placeholder */
 
@@ -607,7 +608,7 @@ extern struct exec_domain	default_exec_domain;
     exec_domain:	&default_exec_domain,				\
     lock_depth:		-1,						\
     pcb$l_sched_policy:		SCHED_OTHER,					\
-    mm:			NULL,						\
+    mm:			&init_mm,						\
     active_mm:		&init_mm,					\
     cpus_runnable:	-1,						\
     cpus_allowed:	-1,						\
