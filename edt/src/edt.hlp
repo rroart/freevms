@@ -1,0 +1,1107 @@
+You can get help on a topic by typing:
+
+    HELP topic subtopic subsubtopic...
+
+Examples: HELP SUBSTITUTE NEXT
+          HELP CHANGE SUBCOMMAND
+          HELP CH
+
+If a topic is abbreviated, HELP displays the text for all topics that
+match the abbreviation.
+1 CHANGE
+The CHANGE command puts EDT in change mode.  Use change mode to edit at
+the character level rather than the line level.
+ 
+Format: CHANGE [range]
+ 
+The optional range specifies the cursor position when you enter change
+mode.  If you omit range, the current position is used.
+ 
+2 ENTITIES
+Entities are used in changemode commands to specify the text on
+which a command will operate.  Each entity represents a portion of
+text, which may be anything from a single character to an entire text
+buffer.  Most entities can be preceded by a count, which indicates the
+number of entities to be affected.
+3 CHARACTER
+The character entity is specified by the letter C.  It selects a single
+character of text.
+3 WORD
+A word consists of a string of characters terminated by a set of
+delimiter characters.  The delimiter characters are spaces,
+tabs, carriage returns, line feeds, formfeeds, and
+vertical tabs. Spaces are handled in a special way:  all spaces
+following a word up to the first non-space character are considered part
+of a word.  Other delimiters are not considered  part of the word they
+terminate.  Rather, they are considered to be words by themselves.
+
+    +W  Speicifes the rest of the characters in the word
+    -W  Specifies all characters to the beginning of the word
+
+3 LINE
+The line entities are:
+ 
+    +L  Specifies the rest of the characters in the line up to and including the terminator
+    -L  Specifies the preceding characters in the line up to but excluding the terminator
+        (+L, -L stop at the beginning of a line)
+
+    +EL Specifies the rest of the characters in the line up to but excluding the terminator
+    -EL Specifies the preceding characters in the line up to and including the terminator
+        (+EL, -L stop at the end of a line)
+3 RANGE
+The range entities specify all text in the buffer either before or after
+the cursor.  The two range entities are:
+ 
+    +R  to the end of the buffer
+    -R  to the beginning of the buffer
+3 PAGE
+A page consists of all the text between two page delimiters, including
+the trailing page delimiter.  The page delimiter is the formfeed
+character.  The page entities are:
+ 
+    -PAGE Specifies all characters in the current page from the character
+          preceding the cursor to the beginning of the page, not including 
+          the delimiter.
+    +PAGE Specifies all characters in the current page from the cursor to
+          (and including) the page delimiter.
+3 FOUND-STRING
+The found-string entity consists of the characters at the cursor position 
+that match the current search string.  If the characters at the cursor 
+position do not match the current search string, this entity is invalid.
+The found-string entity is specified by FS.
+3 SELECT
+The select entity consists of all characters between the cursor and the
+select mark.  The select mark must have been specified previously by a
+SEL command.  The select range entity is specified by SR.
+3 VERTICAL
+The vertical entity is the same as the line entity, except that with the
+V entity, the cursor stays in the same column.  You specify the vertical
+entity with V.
+3 STRING
+The string entity consists of all the characters between the cursor and
+the next occurrence of a specified search string.  Specify the string
+entity by enclosing the desired search string in single or double
+quotation marks. If the string is null (specified by '' or ""), the
+previous search string is used again.
+2 KEYPAD
+You enter the keypad mode of change mode when your terminal is a
+VT100-type.  In this mode the terminal screen is used to view the text 
+buffer.  Characters typed using the main keyboard are inserted into the 
+buffer at the cursor position.  You enter editing commands by using keys 
+on the auxiliary keypad, function keys, or control keys on the main 
+keyboard.
+ 
+For more help on keypad mode, type CHANGE to enter that mode.  Use the
+keypad HELP facility by pressing PF2.
+2 SUBCOMMANDS
+When EDT is in change mode EDT accepts a distinct set of commands
+called the changemode commands.  You may concatenate a string of
+these commands with or without spaces separating them.
+ 
+Changemode commands take one of the following forms, depending on the
+particular command:
+ 
+    1.  command
+    2.  [+|-][count]command
+    3.  [+|-][count][command]entity[=buffer]
+ 
+Whenever a sign can appear in more than one place, the last sign
+specified determines the direction.
+3 ADV
+The ADV (advance) command sets the cursor direction to advance.  Many
+changemode commands use the current direction to determine whether
+entities to the left or to the right of the cursor are to be affected.
+When the direction is forward, changemode commands affect the cursor
+character and characters to the right.
+ 
+Format: ADV
+3 APPEND
+The APPEND command works in the same way as the CUT command (see CUT)
+except that it adds the new text to the end of the alternate buffer
+instead of replacing its contents.
+ 
+Format: [+|-][count]APPENDentity[=buffer]
+3 ASC
+The ASC changemode command inserts a specified character into the buffer
+at the cursor position.  Use the count field to indicate the decimal
+code of the character you want to insert.  Characters are coded using
+the DEC Multinational Character Set; codes 0 to 127 are the same as
+ASCII.
+ 
+Format: [count]ASC
+ 
+The following command would insert a carriage return:
+ 
+    13ASC   (13 is the code for carriage return)
+3 BACK
+The BACK command sets the cursor direction to backward.  Many changemode
+commands use the current direction to determine whether entities to the
+left or to the right of the cursor are to be affected.  When the
+direction is backward, changemode commands affect characters to the left
+of the cursor.
+ 
+Format: BACK
+3 CHGC
+The CHGC command changes the case of every letter in the specified
+number of entities: lowercase letters become uppercase and uppercase
+become lowercase.
+ 
+Format: [+|-][count]CHGCentity
+ 
+3 CLSS
+The CLSS command clears the search string buffer.
+Format: CLSS
+3 CUT
+The CUT command deletes a specified number of entities and saves all the
+deleted text in an alternate text buffer.  The command works exactly
+like the DELETE command except that the text is saved in either the given 
+buffer or the PASTE buffer.
+ 
+Format: [+|-][count]CUTentity[=buffer]
+ 
+If you do not specify a buffer, the buffer named PASTE is used.
+ 
+Ex: CUTSR   Cut the selected range
+    CUTPAGE Cut the current page of text
+3 D
+The D changemode command deletes a specified number of entities.
+ 
+Format: [+|-][count]Dentity
+ 
+If the entity is C, W, L, or EL, the last entity deleted
+by the command is saved in the delete buffer associated with the entity
+and can be restored with the UNDC, UNDW, or UNDL changemode command.
+ 
+Ex: 15DC    Deletes 15 characters in the current direction.
+    DSR     Deletes the select range.
+    DBR     Deletes to the beginning of the buffer.
+3 DEFK
+The DEFK command can be used to reassign the define key function to
+another redefinable keypad mode function key.  The user is prompted 
+to enter the key definition.
+Format: DEFK
+3 DESEL
+The DESEL command cancels the current select range if one is active.  If
+no select range is active the command has no effect.
+ 
+Format: DESEL
+3 EX
+The EX (exit) command exits from change mode to line mode.
+ 
+Format: EX
+3 EXT
+The EXT (extend) command executes a line mode command while you are in
+change mode.  EDT interprets the remainder of the command line as a line
+mode command, executes the command, and reenters change mode
+automatically. The EXT command may not be used inside parentheses.
+ 
+Format: EXT line mode command
+3 HELP
+The HELP command can be used to reassign the help function to another
+redefinable keypad mode function key.
+3 I
+The I command inserts new text into the buffer at the current cursor
+position.
+ 
+Format: Itext to be inserted^Z or ^D
+3 MOVE
+The "MOVE" command moves the cursor a specified number of entities. 
+The "MOVE" command uses no command word.
+ 
+Format: [+|-][count]entity
+ 
+If you use an explicit sign, the direction of the move is determined by
+that sign (+ for forward, - for backward); otherwise, the current
+direction mode (set by the ADV or BACK command) is used to determine the
+direction.
+ 
+Ex: +3W     Moves the cursor 3 words forward.
+    L       Moves the cursor 1 line in the current direction.
+    -PAGE   Moves the cursor backward to a page delimiter.
+3 PASTE
+The PASTE command copies the contents of an alternate buffer into the
+current buffer at the cursor position.
+ 
+Format: [count]PASTE[=buffer]
+ 
+If you omit the buffer name, the PASTE buffer is used.
+3 REF
+The REF command refreshes the screen.
+ 
+Format: REF
+3 SEL
+The SEL command marks a portion of text that will be one end of a select
+range. You create a select range by positioning to one end of the
+desired text (either end will do), executing the SEL command, moving to
+the other end of the desired text, and performing an operation on the SR
+(select range) entity.  On VT100-type terminals the select range is
+displayed in reverse video.
+ 
+Format: SEL
+3 SHIFT
+Use the SHL (shift left) and SHR (shift right) commands to alter the
+left margin when in change mode.  The left margin is the position of the
+first character in each line on the screen.  Normally, the left margin
+is 0, which means all characters are displayed.  If you use a SHL
+command, the left margin can be changed by an integral number of tab
+stops (8 characters).  If SHL is used once, the first 8 columns will not
+be displayed on the screen.  This shifts the screen window horizontally.
+ 
+Format: countSHL  (Shift left by count*8 columns)
+        countSHR  (Shift right by count*8 columns)
+3 UNDELETE
+The UNDELETE commands restore the last entity deleted by a delete
+command.
+ 
+Format: UNDC  (undelete character)
+        UNDW  (undelete word)
+        UNDL  (undelete line)
+3 ()
+A sequence of changemode commands can also be enclosed in parentheses to
+form a single unit.  A number preceding the left parenthesis indicates
+the number of times to repeat the entire sequence.  The EXT changemode
+command cannot appear inside parentheses.
+1 COPY
+The COPY (abbreviated CO) command copies text from one location to
+another within a buffer or between buffers.  When text is copied, the
+source text remains intact.
+ 
+Format: COPY [range-1] TO [range-2]
+ 
+The lines specified by range-1 are copied above the first line specified
+by range-2.  Either range defaults to the current line. Either range may
+include a buffer specification.
+ 
+If the destination is not the current buffer, put the name of the
+receiving buffer immediately after TO (=buffer). Give the full name of
+the buffer.
+
+To copy text from an external file, see INCLUDE and OPEN.
+1 DEFK
+The DEFine Key command can be used to (re)define keypad keys for 
+keypad mode editing.  
+  Format:  DEFK <keyname> <commands>
+2 KEYNAMES
+  DEL - the delete key
+  ESC - two escapes in a row
+  KP0..KP9 - keypad numeric digits (0-9)
+  KPC - keypad 'comma' (keypad 'plus' on idiot PC's)
+  KPE - keypad 'enter'
+  KPH - keypad 'hyphen' (missing on idiot PC's)
+  KPD - keypad 'dot'
+  PF1..PF4 - program function 1-4 keys
+             PF1 - 'numlock' on idiot PC's
+             PF2 - 'slash (/)' on idiot PC's
+             PF3 - 'star (*)' on idiot PC's
+             PF4 - 'dash (-)' on idiot PC's
+  DN, LF, RT, UP - arrow keys
+  CTLA..CTLZ - control keys
+
+Special supplemental keys on PC keyboards:
+  KINS - Insert
+  KHOM - Home
+  KPGU - Page Up
+  KDEL - Delete
+  KEND - End
+  KPGD - Page Down
+
+All the above (except DEL) can be prefixed by G indicating the 
+key prefixed with the GOLD key.
+2 COMMANDS
+Use any string of changemode commands.  No need to terminate with 
+a dot like the original EDT.
+
+In addition, the following commands are available:
+
+The '.' command is used to identify the key used to terminate 
+prompted input (like searches or external commands).
+
+The 'GOLD' command is used to identify the key used for GOLD.
+1 DELETE
+The DELETE (abbreviated D) command deletes the lines specified by the range.
+ 
+Format: DELETE [range]
+ 
+If you do not specify the range, the default is the current line.
+1 EDT
+This section describes the command line parameters for invoking EDT.
+
+  EDT [-INIT <file>] [-JOURNAL <file>] [-NOINIT] [-OUTPUT <file>] 
+      [-READONLY] [-RECOVER [<file>]] [<inputfile>]
+2 GENERAL-INFO
+All commands, options and buffer names are case-insensitive.
+
+On Linux, when writing an output file, if the file already exists on disk, it is 
+renamed to the same thing only with .<n> appended, where <n> is the lowest unused 
+number.  Then the new file is written with its normal name.  This gives the effect 
+somewhat of file version numbers like in VMS and OZONE.
+
+The buffer used for the input file of the command line is named after the file.  
+However, for convienience, it can also be referenced by the name 'MAIN'.
+2 INIT
+causes the specified file to be opened and commands read from it on 
+startup.  By default, the file used depends on the OS.
+3 VMS
+First, logical EDT_INITFILE is checked, and if not found, SYS$LOGIN:EDT_INIT.EDT is used.
+3 OZONE
+Logical EDT_INITFILE is checked
+3 Linux
+Environmental variable EDT_INITFILE is checked, then $HOME/.edt_init is used.
+2 INPUTFILE
+Specifies the initial file to be read in for editing.  By default, this file 
+will also be written on exit if modifications are made to the buffer.  If not 
+specified, an empty buffer is created.
+2 JOURNAL
+Specifies an alternate journal file.  By default, the name of the input file 
+is used with _EDTJ or .edtj (os dependent) appended.
+2 NOINIT
+Specifies that no initialization file is to be used, not even the default.
+2 OUTPUT
+Specifies an alternate output file to be written on exit if modifications 
+are made.  By default, the same file as specified for input is used.
+2 READONLY
+Specifies that no file is to be written on exit, even if modifications 
+are made.
+2 RECOVER
+Specifies that the indicated journal file is to be applied to the input 
+file, effecting a recovery from an aborted editing session.  All input 
+files must be exactly as they were when the aborted editing session was 
+started in order for this to be successful.
+1 EXIT
+The EXIT (abbreviated EX) command terminates all action in the editor
+and saves a copy of the MAIN text buffer in the output file.  It also 
+writes other buffers to their respective files.
+ 
+Format: EXIT [file-spec] [-SAVE]
+ 
+If you omit the file specification, the output file name from the
+command line that invoked EDT is used.  If no output file name has been
+specified, and if -READONLY had not been specified on the command line, 
+then the input file name is used.
+2 -SAVE
+When you use the -SAVE qualifier, the journal file is saved.  The
+journal file is called 'name.type_EDTJ', where name is the output file 
+name from the command line. For information about the journal facility, 
+see HELP JOURNAL.
+1 FIND
+The FIND (abbreviated F) command places the cursor at the first line
+specified by range.
+ 
+Format: FIND [range]
+ 
+The located line is not displayed.  To find and display a line, use the
+TYPE command.
+ 
+Ex: F=X.   Returns EDT to buffer X, to the line EDT was on when you last
+           left buffer X.  Note the dot (.) after the buffer name.  This
+           specifies the line that EDT was on when you last left buffer
+           X.
+1 INCLUDE
+The INCLUDE (abbreviated INC) command copies external files into text
+buffers.
+ 
+Format: INCLUDE file-spec [range]
+ 
+The specified file is copied to the location before the first line of
+the range. Note that range specifies the position to which the file will
+be copied; it does not restrict the portion of the file which will be
+included.  To include part of a file, first INCLUDE the file into a
+buffer; then COPY the desired portion of the included text into the
+appropriate buffer.
+
+Files read with the INCLUDE command are not automatically written back 
+on exit.  See the OPEN command.
+1 INSERT
+The INSERT (abbreviated I) command inserts new text into a text
+buffer.
+ 
+Format: INSERT [range] ;line to be inserted
+    Or: INSERT [range]
+        text to be inserted
+        ^Z or ^D
+ 
+The new text is inserted above the first line specified by range.  If
+you omit range, new text is inserted above the current line.
+ 
+If you choose the first form of the INSERT command, the text on the line
+following the semicolon is inserted and the editor does not enter insert
+mode.  This is the only form of the INSERT command that should be used
+in a startup command file or macro.
+ 
+If you choose the second form, EDT enters insert mode.  In insert mode,
+you can enter as many lines of text as you wish, terminating each line
+by pressing return.  Terminate insert mode by pressing CTRL/Z.
+ 
+The line following the last line inserted becomes the current line.
+1 JOURNAL
+EDT saves all input from the terminal during an editing session in a
+file called the journal file.   The journal file is deleted when you
+exit the editor with an EXIT or QUIT command (without the -SAVE option).
+If the editor is left involuntarily, the journal file is saved.
+ 
+The journal file can be used to redo all the operations of an editing
+session. The edited file is thereby recreated.  Type the same command
+line used previously with the addition of the -RECOVER qualifier.  All
+input files used in the original session must be available under the
+same names as when they were first read.
+ 
+Unless explicitly overridden by the -JOURNAL qualifier on the command
+line, the journal file will have the same name as the output file,
+except that the file type will have _EDTJ added to the end and the file 
+will be written in the current default directory.
+1 KEYPAD
+Enter the keypad editor through the CHANGE command with the keypad
+option set (see SET KEYPAD command).  See HELP CHANGE KEYPAD for more
+information.
+2 VT100
+[H[Jlqqqqqqqqwqqqqqqqqwqqqqqqqqwqqqqqqqqk      lqqqqqqqqwqqqqqqqqwqqqqqqqqwqqqqqqqqk
+x   ^    x  DOWN  x        x        x      x[7m        [mx        x FNDNXT x DEL L  x
+x   x    x   x    x <qqqq  x  qqqq> x      x[7m  GOLD  [mx  HELP  x        x        x
+x   x    x   x    x  LEFT  x  RIGHT x      x[7m        [mx        x[7m  FIND  [mx[7m UND L  [mx
+x   UP   x   v    x        x        x      tqqqqqqqqnqqqqqqqqnqqqqqqqqnqqqqqqqqu
+mqqqqqqqqvqqqqqqqqvqqqqqqqqvqqqqqqqqj      x  PAGE  x  SECT  x APPEND x DEL W  x
+DELETE      Delete character               x        x        x        x        x
+LINEFEED    Delete to beginning of word    x[7m COMMAND[mx        x[7m REPLACE[mx[7m UND W  [mx
+BACKSPACE   Backup to beginning of line    tqqqqqqqqnqqqqqqqqnqqqqqqqqnqqqqqqqqu
+CTRL/D      Exit to line mode              x ADVANCEx BACKUP x  CUT   x DEL C  x
+CTRL/K      Define key                     x        x        x        x        x
+CTRL/R      Refresh screen                 x[7m BOTTOM [mx[7m  TOP   [mx[7m PASTE  [mx[7m UND C  [mx
+CTRL/U      Delete to beginning of line    tqqqqqqqqnqqqqqqqqnqqqqqqqqnqqqqqqqqu
+CTRL/W      Refresh screen                 x  WORD  x  EOL   x  CHAR  x        x
+CTRL/Z      Exit to line mode              x        x        x        x ENTER  x
+                                           x[7mCHNGCASE[mx[7m DEL EOL[mx[7m SPECINS[mx        x
+                                           tqqqqqqqqvqqqqqqqqnqqqqqqqqu        x
+                                           x      LINE       x SELECT x        x
+                                           x                 x        x[7m  SUBS  [mx
+[1mPress a key for help on that key.[m          x[7m    OPEN LINE    [mx[7m RESET  [mx        x
+[1mTo exit, press the spacebar.[m               mqqqqqqqqqqqqqqqqqvqqqqqqqqvqqqqqqqqj[22H[K
+3 DEL
+[H[J[7mDELETE[m
+ 
+Deletes the character preceding the cursor and stores it in the delete character
+buffer.  When the cursor is at the leftmost character position on a line, the
+line terminator to the left is deleted and the text on that line is moved to the
+right of the text in the line above.
+3 KP0
+[H[J[7mLINE - (0)[m
+ 
+Moves the cursor forward or backward to the nearest beginning of a line,
+depending on the current direction (see ADVANCE and BACKUP).
+ 
+ 
+[7mOPEN LINE - (GOLD 0)[m
+ 
+Breaks the current line into two lines.  The break is placed after the cursor
+and leaves the cursor position unchanged.  Pressing the OPEN LINE key when the
+cursor is at the beginning of a line creates a new blank line.
+3 KP1
+[H[J[7mWORD - (1)[m
+Moves the cursor forward or backward by a word, depending on the current
+direction (see ADVANCE and BACKUP).
+ 
+[7mCHNGCASE - (GOLD 1)[m
+Changes the case of a range of characters as follows:
+ 
+    1.  If the select range is active, the case of each letter in the select
+        range is changed.
+    2.  If 1 does not apply and the cursor is positioned on the current search
+        string, the case of each letter in the search string is changed.
+        This does not apply if a repeat count greater than 1 is given.
+    3.  If 1 and 2 do not apply, then the case of one letter is changed.
+        If the current direction is ADVANCE, the cursor moves forward one
+        character after the change of case occurs.  If the current direction is
+        BACKUP, the cursor moves backward one character before the case change
+        occurs.
+3 KP2
+[H[J[7mEOL - (2)[m
+ 
+Moves the cursor forward or backward to the nearest end of line, depending on
+current direction (see ADVANCE and BACKUP).
+ 
+ 
+[7mDEL EOL - (GOLD 2)[m
+ 
+Deletes all characters to the right of the cursor in the current line, including
+the character on which the cursor is positioned, up to, but not including the
+line terminator.
+3 KP3
+[H[J[7mCHAR - (3)[m
+ 
+Moves the cursor forward or backward one character, depending on the current
+direction (see ADVANCE and BACKUP).
+ 
+ 
+[7mSPECINS - (GOLD 3)[m
+ 
+Inserts any character from the DEC Multinational Character Set by using its
+decimal value.  Press the GOLD key, enter the code for the character in decimal,
+press the GOLD key again, and press SPECINS (special insert).
+3 KP4
+[H[J[7mADVANCE - (4)[m
+ 
+Sets the current direction to forward for the CHAR, WORD, LINE, EOL, PAGE, SECT,
+SUBS, FIND, and FNDNXT keys.  ADVANCE means that movement will be toward the end
+of the buffer; that is, to the right and down.
+ 
+ 
+[7mBOTTOM - (GOLD 4)[m
+ 
+Positions the cursor at the end of the text buffer.
+3 KP5
+[H[J[7mBACKUP - (5)[m
+ 
+Sets the cursor direction to backward for the CHAR, WORD, LINE, EOL, PAGE, SECT,
+SUBS, FIND, and FNDNXT keys.  BACKUP means that movement will be toward the
+beginning of the buffer; that is, to the left and up.
+ 
+ 
+[7mTOP - (GOLD 5)[m
+ 
+Positions the cursor at the beginning of the text buffer.
+3 KP6
+[H[J[7mCUT - (6)[m
+ 
+Moves the select range to the PASTE buffer.  The select range is all the text
+between the selected position (see SELECT) and the current cursor position.  If
+no SELECT has been made and the cursor is positioned on the current search
+string, that string is cut.  Each time CUT is used, the previous contents of the
+PASTE buffer are discarded.
+ 
+ 
+[7mPASTE - (GOLD 6)[m
+ 
+Inserts the contents of the PASTE buffer directly to the left of the cursor.
+3 KP7
+[H[J[7mPAGE - (7)[m
+ 
+Moves the cursor to the top of a page.  A page is defined by a delimiter string,
+which can be set by the SET ENTITY command.  The default page delimiter is the
+formfeed character (CTRL/L).
+ 
+ 
+[7mCOMMAND - (GOLD 7)[m
+ 
+Allows you to enter a line mode command to be executed without exiting from
+keypad mode.  The command is processed when you press the ENTER key on the
+keypad.  Use the DELETE key to edit the command, use Control-U to abandon and 
+return to keypad mode.
+3 KP8
+[H[J[7mSECT - (8)[m
+ 
+Moves the cursor 16 lines (one section) forward or backward, depending on the
+current direction (see ADVANCE and BACKUP).  The cursor is moved to the
+beginning of the appropriate line.
+3 KP9
+[H[J[7mAPPEND - (9)[m
+ 
+Moves the select range to the end of the PASTE buffer.  The select range is all
+the text between the selected position (see SELECT) and the current cursor
+position.  If no SELECT has been made and the cursor is positioned on the
+current search string, that string is appended.
+ 
+ 
+[7mREPLACE - (GOLD 9)[m
+ 
+Deletes the select range and replaces it with the contents of the PASTE buffer.
+3 PF2
+[H[Jlqqqqqqqqwqqqqqqqqwqqqqqqqqwqqqqqqqqk      lqqqqqqqqwqqqqqqqqwqqqqqqqqwqqqqqqqqk
+x   ^    x  DOWN  x        x        x      x[7m        [mx        x FNDNXT x DEL L  x
+x   x    x   x    x <qqqq  x  qqqq> x      x[7m  GOLD  [mx  HELP  x        x        x
+x   x    x   x    x  LEFT  x  RIGHT x      x[7m        [mx        x[7m  FIND  [mx[7m UND L  [mx
+x   UP   x   v    x        x        x      tqqqqqqqqnqqqqqqqqnqqqqqqqqnqqqqqqqqu
+mqqqqqqqqvqqqqqqqqvqqqqqqqqvqqqqqqqqj      x  PAGE  x  SECT  x APPEND x DEL W  x
+DELETE      Delete character               x        x        x        x        x
+LINEFEED    Delete to beginning of word    x[7m COMMAND[mx[7m  FILL  [mx[7m REPLACE[mx[7m UND W  [mx
+BACKSPACE   Backup to beginning of line    tqqqqqqqqnqqqqqqqqnqqqqqqqqnqqqqqqqqu
+CTRL/D      Exit to line mode              x ADVANCEx BACKUP x  CUT   x DEL C  x
+CTRL/K      Define key                     x        x        x        x        x
+CTRL/R      Refresh screen                 x[7m BOTTOM [mx[7m  TOP   [mx[7m PASTE  [mx[7m UND C  [mx
+CTRL/U      Delete to beginning of line    tqqqqqqqqnqqqqqqqqnqqqqqqqqnqqqqqqqqu
+CTRL/W      Refresh screen                 x  WORD  x  EOL   x  CHAR  x        x
+CTRL/Z      Exit to line mode              x        x        x        x ENTER  x
+                                           x[7mCHNGCASE[mx[7m DEL EOL[mx[7m SPECINS[mx        x
+                                           tqqqqqqqqvqqqqqqqqnqqqqqqqqu        x
+                                           x      LINE       x SELECT x        x
+                                           x                 x        x[7m  SUBS  [mx
+[1mPress a key for help on that key.[m          x[7m    OPEN LINE    [mx[7m RESET  [mx        x
+[1mTo exit, press the spacebar.[m               mqqqqqqqqqqqqqqqqqvqqqqqqqqvqqqqqqqqj[22H[K
+3 PF3
+[H[J[7mFNDNXT - (PF3)[m
+ 
+Searches for the next occurrence of the search string previously entered with
+the FIND key.  The direction of the search is the current one (ADVANCE or
+BACKUP).
+ 
+ 
+[7mFIND - (GOLD PF3)[m
+ 
+Searches for an occurrence of a string.  Press the FIND key and then enter the
+string using the main keyboard.  End the string by pressing either the ADVANCE
+or BACKUP key to set the direction of the search, or the ENTER key to search in
+the current direction.
+3 UP
+[H[J[7mUP-ARROW[m
+ 
+The ^ (up-arrow) key moves the cursor to the character above.
+3 DN
+[H[J[7mDOWN-ARROW[m
+ 
+The v (down-arrow) key moves the cursor to the character below.
+3 RT
+[H[J[7mRIGHT-ARROW[m
+ 
+The --> (right-arrow) key moves the cursor to the next character.
+3 LF
+[H[J[7mLEFT-ARROW[m
+ 
+The <-- (left-arrow) key moves the cursor to the preceding character.
+3 KPD
+[H[J[7mSELECT - (.)[m
+ 
+Marks one end of a select range.  A select range is a block of text on which
+various operations (such as CUT, APPEND, or FILL) can be performed.  To create a
+select range:
+ 
+    1.  Move the cursor to either the beginning or end of the text you
+        wish to select.
+    2.  Press the SELECT key.
+    3.  Move the cursor to the opposite end of the text.
+ 
+You can then perform the desired operation on the range.
+ 
+ 
+[7mRESET - (GOLD .)[m
+ 
+Cancels the effect of the GOLD key if it was pressed by mistake, cancels a
+select range, or cancels any partly entered command string. Also sets the
+current direction to forward.
+3 PF4
+[H[J[7mDEL L - (PF4)[m
+ 
+Deletes text from the cursor position to the end of the current line, including
+the line terminator.  If the cursor is positioned at the beginning of a line,
+the entire line is deleted.  The deleted text is saved in the delete line
+buffer.
+ 
+ 
+[7mUND L - (GOLD PF4)[m
+ 
+Inserts the contents of the delete line buffer directly to the left of the
+cursor.
+3 KPH
+[H[J[7mDEL W - (-)[m
+ 
+Deletes text from the cursor to the beginning of the next word, storing the text
+in the delete word buffer.
+ 
+ 
+[7mUND W - (GOLD -)[m
+ 
+Inserts the contents of the delete word buffer directly to the left of the
+cursor.
+3 KPC
+[H[J[7mDEL C - (,)[m
+ 
+Deletes the character on which the cursor is positioned and saves it in the
+delete character buffer.
+ 
+ 
+[7mUND C - (GOLD ,)[m
+ 
+Inserts the contents of the delete character buffer directly to the left of the
+cursor.
+3 PF1
+[H[J[7mGOLD - (PF1)[m
+ 
+Lets you use the lower (alternate) function of the editing keys. Press the GOLD
+key, then the key you wish to use.
+ 
+You can also use the GOLD key to enter counts.  Press GOLD and then the main
+keyboard numeric keys, followed by the key to which the count should apply.
+The DELETE key and CTRL/U can be used to edit the number, and thus cannot have
+a count applied to them in this manner.  The SPECINS key treats the count as
+the code for a character to be inserted.
+ 
+The GOLD key is used with main keyboard keys for additional editing functions.
+For help on "GOLD character" (for example, GOLD Control-M), press the 
+character's key on the main keyboard.
+
+For all control characters, it allows them to pass through without 
+interpretation.  So, for example, to enter a control-D in the text, 
+use GOLD Control-D.
+3 KPE
+[H[J[7mENTER[m
+Sends information to EDT for functions such as FIND and COMMAND.
+ 
+ 
+[7mSUBS - (GOLD ENTER)[m
+Deletes the search string, replaces it with the contents of the PASTE buffer,
+and finds the next occurrence of the string.  To use:
+ 
+    1.  Press SELECT.
+    2.  Type the new text.
+    3.  Press CUT.
+    4.  Press FIND.
+    5.  Enter the text you wish to replace.
+ 
+Each time you press SUBS, EDT makes one substitution and finds the next
+occurrence of the search string.  You can use a repeat count for multiple
+substitutions.
+3 CTLD
+[H[J[7mEXIT - (CTRL/D)[m
+ 
+Shifts EDT to line editing.
+3 CTLH
+[H[J[7mBEGINNING OF LINE - (CTRL/H or BACKSPACE)[m
+ 
+Moves the cursor to the beginning of the current line.  If the cursor is already
+at the beginning of a line, it moves to the beginning of the previous line.
+3 CTLI
+[H[J[7mTAB INSERT - (CTRL/I or TAB)[m
+
+Inserts a tab character at the current cursor position
+3 CTLJ
+[H[J[7mDELETE TO BEGINNING OF WORD - (CTRL/J or LINEFEED)[m
+ 
+Used to delete all characters from the cursor position to the beginning of the
+word containing the cursor.  If the cursor is on the first character of a word,
+the previous word is deleted.
+
+[7mINSERT LINEFEED - (GOLD CTRL/J or LINEFEED)[m
+
+Inserts a linefeed character, causing the line to be split.
+
+3 CTLM
+[H[J[7mINSERT LINEFEED - (CTRL/M or RETURN)[m
+
+Inserts a linefeed character, causing the line to be split.
+
+[7mINSERT CARRIAGERETURN - (GOLD CTRL/M or RETURN)[m
+
+Inserts a carriage return character at the cursor position. 
+3 CTLK
+[H[J[7mDEFINE KEY - (CTRL/K)[m
+ 
+Used to define a new keypad function for an editing key.  You are prompted first
+to press the key to be defined, then to enter the definition.  You can define
+the key either in terms of other editing keys or with changemode mode commands.
+If you press an editing key, its definition appears at the bottom of the screen
+in the definition line.  Terminate the definition by pressing the keypad Enter 
+key.  Abort the definition by pressing Control-U.
+3 CTLL
+[H[J[7mINSERT FORMFEED - (CTRL/L)[m
+ 
+Inserts a formfeed character (<FF>) at the cursor position.
+3 CTLR
+[H[J[7mREFRESH - (CTRL/R)[m
+ 
+Refreshes the screen display.  The screen becomes blank and then the characters
+in the buffer reappear, minus extraneous characters, such as system messages.
+The cursor remains in the same location.
+3 CTLU
+[H[J[7mDELETE TO BEGINNING OF LINE - (CTRL/U)[m
+ 
+Used to delete all characters in the current line to the left of the cursor.  If
+the cursor is on the first character of a line, the entire previous line is
+deleted.
+3 CTLW
+[H[J[7mREFRESH - (CTRL/W)[m
+ 
+Refreshes the screen display.  The screen becomes blank and then the characters
+in the buffer reappear, minus extraneous characters, such as system messages.
+The cursor remains in the same location.
+3 CTLZ
+[H[J[7mEXIT - (CTRL/Z)[m
+ 
+Shifts EDT to line editing.
+1 MOVE
+The MOVE (abbreviated M) command moves text from one location to
+another, deleting it from the original location.
+ 
+Format: MOVE [range-1] TO [range-2]
+ 
+The lines specified by range-1 are moved to a location immediately
+above the first line specified by range-2.  The lines are deleted from
+the original location.  If you omit either of the range specifications,
+the current line is used.  The first line of range-2 becomes the new
+current line.  To move lines of text without deleting them from  the
+original location, see the COPY command.
+1 OPEN
+The OPEN command opens a file and reads it into an empty buffer.  The 
+file is, by default, written back out on exit.
+
+  Format:  OPEN <file> [=<buffer>] [-READONLY] [-OUTPUT <file>]
+2 FILE
+specifies the name of the file to be opened and read
+2 BUFFER
+specifies the name of the buffer to read into.  If the buffer already 
+exists, it must be empty.  By default, a buffer name is made from the 
+filename, replacing all but the alphanumerics with underscores.
+2 READONLY
+specifies that the file shall not be written on exit, even if 
+modifications are made to the buffer.  By default, the buffer is 
+written back to the file on exit if modifications are made to the 
+buffer.
+2 OUTPUT
+specifies that the buffer be written to the indicated file instead 
+of the original file on exit
+1 QUIT
+The QUIT command exits the editor without saving the contents of the
+MAIN buffer.
+ 
+Format: QUIT [-SAVE]
+ 
+Use the QUIT command only if you have made no changes to the buffer you
+are editing or if you have decided you do not wish to save the changes
+you have made.  All edits will be discarded when you QUIT from the
+editor.  EDT will give you a warning and prompt if you are discarding 
+changes.
+2 -SAVE
+The SAVE qualifier specifies that the journal file should be saved.
+Normally, the journal file is deleted when you QUIT.
+1 RANGE
+Range specifications select the exact lines of text on which the line
+editing command will operate.
+ 
+There are several general classes of range specifications:
+ 
+    1.  Single line ranges specify a single line of text.
+    2.  Multiple line ranges specify blocks of text, such as an entire buffer
+        or all lines from the current line to the end of the buffer.
+    3.  Compound ranges combine single line ranges with operators to specify
+        multiple lines of text.
+    4.  Noncontiguous ranges specify multiple lines that are not necessarily
+        adjacent to one another.
+2 ALL
+The ALL range further refines a general range specification.
+ 
+Format: [range] ALL 'string'
+ 
+While range can be a single, multiple, or compound range, the command
+being performed will only apply to those lines of text containing the
+given string. This string can be enclosed in single or double quotation
+marks.
+ 
+Ex: TYPE ALL 'EDT'          When ALL is used, the default for range is
+                            WHOLE.  This command will type all the lines
+                            in the current buffer containing the string
+                            'EDT'.
+ 
+    SUBS/A/B/50:100 ALL '1' Substitute B for A in all lines from 50 to
+                            100 which include the string 1.
+2 AND
+The AND range selects a group of single lines.
+ 
+Format: range-1 AND range-2 AND range3 ...
+    Or: range-1 , range-2 , range3 ...
+ 
+Each of the ranges must be a single line range.  Each of the single
+lines is operated on.
+ 
+Ex: TYPE 4 AND 7     Lines 4 and 7 are displayed on the terminal
+ 
+    TYPE BEGIN,END-1 The first and last lines are displayed on the
+                     terminal
+2 BEGIN
+The BEGIN range (abbreviated B) is a single line range that specifies
+the first line in the buffer.
+2 BEFORE
+The BEFORE range (abbreviated BEF) is a multiple line range that
+specifies all the lines in the buffer preceding the current line.
+2 BUFFER
+The BUFFER (abbreviated BU) specification may precede any other range
+specification and indicates that the range is to be applied to a named
+buffer.
+ 
+Format: BUFFER name [range]
+    Or: =name [range]
+ 
+The two forms are equivalent.  Name is the name of the buffer in which
+the text resides.  If you leave out the range, the entire buffer is
+selected.
+2 DOT
+The dot (.) is a single line range that refers to the current line of
+text. For many commands, dot is the default range.  See the help text
+for a command if you are unsure of the default.
+ 
+Ex: TYPE .    Display the current line.
+2 END
+The END (abbreviated E) range specifies an imaginary line following the
+last line in the buffer.  END does not specify the last line in the
+buffer.  The last line can be referred to by E-1 (that is, the line
+preceding END).  When the END line is typed, it looks like:
+ 
+[EOB]
+2 FOR
+The FOR range is a multiple line range that selects a specified number
+of lines starting at a specified location.
+ 
+Format: [range] FOR n
+    Or: [range] # n
+ 
+The two forms are equivalent.  Range is a single line range that
+specifies the starting position, and n is an integer number.  If range
+is omitted, the current line is the starting position.
+ 
+Ex: TYPE . FOR 5      Display 5 lines, starting with the current line
+ 
+    TYPE #5           Equivalent to the previous example
+ 
+    TYPE BEGIN FOR 10 Display the first 10 lines in the buffer
+2 LAST
+The LAST (abbreviated L) range is a single line range that refers to the
+line in the previous buffer which was the current line when you switched
+to the current buffer.
+2 MINUS
+The minus sign (-) in ranges selects a single line that is a specified
+number of lines before a specified line.
+ 
+Format: [range] - [n]
+ 
+Range is a single line range, and n is an integer.  The line selected is
+the line that is n lines before the line specified by range.  If you
+omit range, the current line is used; if you omit n, 1 is used.
+ 
+Ex: TYPE 15 - 3     Display the third line before the line numbered 15.
+ 
+    TYPE END -1     Display the last line in the buffer.
+ 
+    TYPE -          Display the previous line.
+2 NUMBER
+A line number is a single line range that refers to the line having the
+specified number.  The line number may contain a decimal point.
+ 
+Ex: TYPE 10     Display line number 10.
+ 
+    INSERT 65.3 Insert above line 65.3.
+ 
+The maximum allowable line number is 2814749767.  A line number may have
+up to five digits to the right of the decimal point.
+ 
+You can change the line number with the RESEQUENCE command.  In
+addition, the INSERT and INCLUDE commands will automatically change the
+numbers of existing lines if necessary to make each line in a buffer to
+have a line number larger than the previous line.
+ 
+When lines are read from the primary input file and that file has
+sequence numbers, the line number assigned is the sequence number from
+the file, plus N*100000, where N is large enough to ensure that each
+line in the buffer has a line number larger than the previous line.
+File sequence numbers range in value from 0 to 65535.
+2 PLUS
+The plus sign selects, in ranges, a single line that is a specified
+number of lines after a specified line.
+ 
+Format: [range] + [n]
+ 
+Range is a single line range, and n is an integer.  The line selected is
+the line that is n lines after the line specified by range.  If you omit
+range, the current line is used.  If you omit n, 1 is used.
+ 
+Ex: TYPE 15 + 3     Display the third line after the line numbered 15.
+ 
+    TYPE BEGIN +1   Display the second line in the buffer.
+ 
+    TYPE +          Display the line following the current line.
+ 
+    TYPE 'string'+2 Display the second line following the next line
+                    continaing 'string'.
+2 REST
+The REST (abbreviated R) range is a multiple line range that refers to
+the current line and all lines following in the buffer.
+2 SELECT
+The SELECT range is a multiple line range that contains all lines
+between the current line and the SELECT mark.  The SELECT mark is set by
+the changemode SEL command or the keypad SELECT function.
+2 STRING
+A quoted string specifies a single line that contains the  specified
+string. You can enclose the string in either single or double quotation
+marks (' or ").  When you use a string as a range, EDT will search
+forward, starting with the current line, until it locates a line with
+the specified string.  If a minus sign (-) precedes the string, the
+search will be backward.
+ 
+Ex: TYPE 'abc'  Locate and display the first line forward that contains
+                the string 'abc'.
+ 
+    TYPE -"abc" Same, except the search will be backward.
+2 THRU
+The THRU range is a compound range that specifies all lines between two
+single line ranges.
+ 
+Format: range-1 THRU range-2
+    Or: range-1 : range-2
+ 
+Both forms are equivalent.  Starting with range-1, EDT selects all the
+lines up to and including the line specified by range-2.
+ 
+Ex: TYPE 15:30       Display all lines with numbers between 15 and 30.
+ 
+    TYPE 'glorp':END Display all lines from the first line forward
+                     containing 'glorp' to the end.
+2 WHOLE
+The WHOLE (abbreviated W) range refers to the entire text buffer.
+1 RESEQUENCE
+The RESEQUENCE (abbreviated RES) command assigns new line numbers to a
+range of lines.
+ 
+Format: RESEQUENCE [range]
+ 
+The specified range of lines must be contiguous. When you do not specify
+a range, all lines in the  current buffer are resequenced.  If the new
+numbers assigned would cause duplicate or nonsequential line numbers,
+EDT will either disallow the command or renumber lines beyond the
+specified range.
+ 
+Note that the total count of lines resequenced (which is displayed upon
+completion of the command), may differ from the number of lines
+originally specified in the range, due to the possibility of extra
+renumbering.
+1 SET
+Formats:
+
+  SET LFS {HIDE | SHOW}
+
+  SET NUMBERS {AUTO | HIDE | SHOW}
+
+  SET SEARCH {EXACT | GENERIC}
+
+  SET =<buffer> -OUTPUT <filename>
+                -READONLY
+1 SHOW
+Format: SHOW parameter
+ 
+The SHOW (abbreviated SH) command displays selected information on the
+current state of the editor.
+1 SUBSTITUTE
+The SUBSTITUTE (abbreviated S) command replaces occurrences of one
+string of characters with another string.
+ 
+Format: SUBSTITUTE/string-1/string-2/ [range]
+ 
+Any nonalphanumeric character except % can be used as string delimiters.
+ 
+All occurrences of string-1 within the specified range are replaced with
+string-2.  If you do not specify range, a single occurrence in the
+current line is substituted.  The line in which the substitution
+occurred is typed after each substitution.
+1 TYPE
+The TYPE (abbreviated T) command displays the specified range of lines
+on the terminal.
+ 
+Format: TYPE [range]
+ 
+The first line in the specified range becomes the current line.
+ 
+If the range specification starts with a nonalphabetic character, the
+keyword TYPE may be omitted completely.
+1 WRITE
+The WRITE (abbreviated WR) command creates a file from a specified range
+of lines.
+ 
+Format: WRITE file-spec [range]
+ 
+When you specify a range, the text contained in that range becomes the
+file. When you do not specify a range, the contents of the current text
+buffer becomes the new file.  The cursor position is not affected by the
+WRITE command.

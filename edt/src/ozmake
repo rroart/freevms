@@ -1,0 +1,2 @@
+export PATH=`pwd`/../../linux_utils/486:$PATH
+make -f makefile.ozone "ELFC=./elfc.bash" $1 $2 $3 $4 $5 $6 $7
