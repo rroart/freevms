@@ -1,4 +1,4 @@
-#ifndef rdefef_h
+#ifndef rdedef_h
 #define rdedef_h
 
 #define REGPRT$M_OWNER_MODE         0xF
