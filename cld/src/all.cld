@@ -1,0 +1,7 @@
+define verb dir2
+	image directory
+	routine dir
+
+define verb dfu
+	image dfu
+	routine verifycommand
