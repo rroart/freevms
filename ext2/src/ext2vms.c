@@ -702,8 +702,9 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   }
 
   // has to reset context_save somewhere? this is a trial place
-  if ((irp->irp$l_func & IO$M_ACCESS) == 0 && wild == 0)
+  if ((irp->irp$l_func & IO$M_ACCESS) == 0 && wild == 0) {
     memset(&x2p->context_save,0,54);
+  }
 
   if ((irp->irp$l_func & IO$M_ACCESS) == 0 && irp->irp$l_qio_p5 == 0)
     return SS$_NORMAL;
