@@ -191,18 +191,18 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   *(unsigned long *)pte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
   ctl$gl_pcb=pcb;
   ctl$gl_chindx=42;
-  printk("pte content\n");
+  //printk("pte content\n");
   flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
-  printk("flush\n");
+  //printk("flush\n");
   ctl$gl_chindx=42;
-  printk("42\n");
+  //printk("42\n");
   if ( (*(unsigned long*)0x7ffff000)==42)
-    printk("still 42\n");
+    //printk("still 42\n");
   memset(page,0,PAGE_SIZE); // must zero content also
   ctl$gl_pcb=pcb;
-  printk("memset page\n");
+  //printk("memset page\n");
   if ( (*(unsigned long*)0x7ffff000)==0)
-    printk("not 42\n");
+    //printk("not 42\n");
 #endif
 #if 0
   do_mmap_pgoff(0,page,4096,PROT_READ | PROT_WRITE,MAP_FIXED | MAP_PRIVATE,0);
@@ -231,8 +231,8 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
   struct mm_struct * mm=pcb->mm;
   struct mm_struct * oldmm=oldpcb->mm;
 
-  printk("%x %x %x %x ",page,pcb,phd,mm);
-  printk("%x %x %x %x\n",oldpage,oldpcb,oldphd,oldmm);
+  //printk("%x %x %x %x ",page,pcb,phd,mm);
+  //printk("%x %x %x %x\n",oldpage,oldpcb,oldphd,oldmm);
 
   if (oldmm==0)
     oldmm=&init_mm;
@@ -302,8 +302,8 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 #endif
   }
 
-  printk("%x %x %x %x\n",swapper_pg_dir,pgd,pmd,pte);
-  printk("%x %x %x %x\n",swapper_pg_dir,oldpgd,oldpmd,oldpte);
+  //printk("%x %x %x %x\n",swapper_pg_dir,pgd,pmd,pte);
+  //printk("%x %x %x %x\n",swapper_pg_dir,oldpgd,oldpmd,oldpte);
 
 #ifdef CONFIG_VMS
   int pfn=mmg$ininewpfn(pcb,phd,page,pte);
@@ -325,22 +325,22 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 #define _PAGE_NEWPAGE 0
   *(unsigned long *)pte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
   *(unsigned long *)oldpte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-  printk("pte content\n");
+  //printk("pte content\n");
   flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
   flush_tlb_range(oldpcb->mm, oldpage, oldpage + PAGE_SIZE);
-  printk("flush\n");
+  //printk("flush\n");
   init_p1pp_long(&ctl$gl_chindx,-4096,42);
-  printk("42\n");
+  //printk("42\n");
   if ( (*(unsigned long*)0x7fffe000)==42)
-    printk("still 42\n");
+    //printk("still 42\n");
   memset(oldpage,0,PAGE_SIZE); // must zero content also
-  printk("memset page\n");
+  //printk("memset page\n");
   if ( (*(unsigned long*)0x7fffe000)==0)
-    printk("not 42\n");
+    //printk("not 42\n");
 #endif
 
   init_p1pp_data(pcb,phd,-4096);
-  printk("init p1pp data\n");
+  //printk("init p1pp data\n");
   return uml_map;
 }
 
