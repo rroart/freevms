@@ -15,8 +15,10 @@ sca/scs/cluster (barely)
 locks/dlm (barely)
 cwps (forcex only)
 dcl (or something like it)
+vms images
 
 syscalls/services:
+$adjwsl
 $ascefc
 $asctim
 $assign
@@ -41,6 +43,7 @@ $getdvi
 $getjpi
 $gettim
 $hiber
+$imgact
 $mgblsc
 $mount
 $numtim
@@ -68,9 +71,13 @@ some RMS syscalls
 cli:
 DCL
     mcr, run
-    set default
-    show default/time/devices/system
+    set default/prompt/process/working_set
+    show default/time/devices/system/working_set
+    stop
+    goto, exit
+    logout
     directory, mount and a few more
+    simple @ scripts
 
 utilities:
 backup
