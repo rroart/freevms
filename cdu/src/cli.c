@@ -609,6 +609,7 @@ int gencode(tree t) {
       module_name = IDENTIFIER_POINTER(TREE_OPERAND(t, 0));
       break;
     default:
+      { }
     }
     t=TREE_CHAIN(t);
   }
