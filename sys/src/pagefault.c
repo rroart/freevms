@@ -181,8 +181,8 @@ void pagefaultast(struct pfast * p) {
 
 #ifdef __arch_um__
   *(unsigned long *)(p->pte)|=_PAGE_NEWPAGE;
-  flush_tlb_range(current->mm, p->address, p->address + PAGE_SIZE);
 #endif
+  flush_tlb_range(current->mm, p->address, p->address + PAGE_SIZE);
   kfree(p);
   set_fs(fs);
 }
@@ -369,6 +369,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	      //printk(" pfn pte %x %x ",pfn,*(unsigned long *)pte);
 	    }
 	    //printk(" b ");
+	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
 	    makereadast(file,address,pte,offset,error_code&2);	
 	    //printk(" a ");
 	    return;
@@ -381,18 +382,27 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    if ((*(unsigned long *)pte)&0xfffff000) {
 	    } else { // zero page demand?
 	      {
-		signed long pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
-		mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
-		*(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-		if (page==0) {
-		  printk("wrong %x %x %x %x\n",address,page,pte,*pte);
-		  die("Wrong\n",regs,error_code);
-		  panic("Wrong\n");
+		struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_HIGHER, IPL$_ASTDEL);
+		if (address<rde->rde$ps_start_va && address>=(rde->rde$ps_start_va-PAGE_SIZE)) {
+		  rde->rde$ps_start_va-=PAGE_SIZE;
+		  rde->rde$l_region_size+=PAGE_SIZE;
 		}
-		memset(page,0,PAGE_SIZE); // must zero content also
-		if ((error_code&2)==0) {
-		  *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_USER|_PAGE_ACCESSED;
-	      }
+		{
+		  signed long pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+		  mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
+		  *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+		  if (page==0) {
+		    printk("wrong %x %x %x %x\n",address,page,pte,*pte);
+		    die("Wrong\n",regs,error_code);
+		    panic("Wrong\n");
+		  }
+		  flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
+		  memset(page,0,PAGE_SIZE); // must zero content also
+		  if ((error_code&2)==0) {
+		    *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_USER|_PAGE_ACCESSED;
+		    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
+		  }
+		}
 	      }
 	      return;
 	    }
@@ -1044,12 +1054,10 @@ int mmg$frewslx(struct _pcb * p, void * va,unsigned long * pte, unsigned long in
   }
 
 #ifdef __arch_um__
-#if 1
   //forget it?
   *pte|=_PAGE_NEWPAGE;
+#endif
   flush_tlb_range(p->mm, va, va + PAGE_SIZE);
-#endif
-#endif
 
   wsl[index].wsl$pq_va=0;
 
