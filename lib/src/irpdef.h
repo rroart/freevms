@@ -1,7 +1,7 @@
 #ifndef irpdef_h
 #define irpdef_h
 
-#include"../../freevms/lib/src/cdrpdef.h"
+#include<cdrpdef.h>
 
 //#include "../../freevms/lib/src/diobmdef.h"
 

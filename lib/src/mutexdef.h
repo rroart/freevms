@@ -1,7 +1,7 @@
 #ifndef mutexdef_h
 #define mutexdef_h
 
-#include "../../../freevms/lib/src/cpudef.h"           
+#include <cpudef.h>
 
 #define MUTEX$M_WRT 0x1
 #define MUTEX$M_INTERLOCK 0x1

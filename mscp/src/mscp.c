@@ -3,8 +3,8 @@
 
 // Author. Roar Thronæs.
 
-#include"../../freevms/lib/src/cdtdef.h"
-#include"../../freevms/lib/src/pdtdef.h"
+#include<cdtdef.h>
+#include<pdtdef.h>
 
 #include<acbdef.h>
 #include<aqbdef.h>
