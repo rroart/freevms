@@ -11,6 +11,7 @@ done
 		ln -s ../../freevms/sys/src/system_data_cells.c .;
 		ln -s ../../freevms/sys/src/timeschdl.c .;
 		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
-		ln -s ../../freevms/pal/src ../pal
 )
+
+ln -s ../freevms/pal/src pal
 
