@@ -456,9 +456,9 @@ void TZ$NULL()				// Null port routine
      struct _crb * R8;
 {
  
-  //	CLASS_CTRL_INIT TZ$DPT,PORT_VECTOR // check
+  //	CLASS_CTRL_INIT TZ$DPT,PORT_VECTOR // check. do not need relocs?
   extern struct _dpt tz$dpt;
-  tz$dpt.dpt$ps_vector=&port_vector; // already done?
+  tz$dpt.dpt$ps_vector=&port_vector; // does CLASS... do this? already done?
   R8->crb$b_tt_type=DT$_TZ;
 }
 
@@ -490,7 +490,7 @@ void TZ$INITLINE(struct _ucb * ucb)				// RESET SINGLE LINE
   struct _tty_ucb * tty;
   struct _tt_class * R2;
   R0=&port_vector; // check TZ$VEC?		// Set TZ port vector table 
-  CLASS_UNIT_INIT();			
+  CLASS_UNIT_INIT(ucb,R0);			
   if	(ucb->ucb$w_unit==0)	// Skip initialization of TEMPLATE
     	return;			// Unit #0 = Template: Skip everything!
  

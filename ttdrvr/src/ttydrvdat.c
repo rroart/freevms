@@ -161,6 +161,8 @@ int tt$init_tables() {
   ini_dpt_vector(&tt$dpt, &tt$class);
   ini_dpt_end(&tt$dpt);
 
+  tty$gl_dpt = &tt$dpt; // place here temporarily?
+
   ini_ddt_unitinit(&tt$ddt, tt$unit_init);
   ini_ddt_start(&tt$ddt, tty$startio);
   ini_ddt_cancel(&tt$ddt, ioc_std$cancelio);

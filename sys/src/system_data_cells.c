@@ -1875,7 +1875,7 @@ unsigned long tty$gl_defchar;
 unsigned long tty$gl_defchar2;
 unsigned long tty$gl_defport;
 unsigned long tty$gl_delta;
-unsigned long tty$gl_dpt;
+unsigned long tty$gl_dpt = 0;
 unsigned long tty$gl_jobctlmb;
 unsigned long tty$gl_timeout;
 unsigned long tty$gw_altalarm;
