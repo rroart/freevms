@@ -156,6 +156,7 @@ asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int f
   /*check func code*/
   /*check iosb*/
   if (iosb) *((unsigned long long *)iosb)=0;
+  int oldipl=getipl(); // unstandard and temporary measure
   setipl(IPL$_ASTDEL);
   /*check proc quota*/
   i=kmalloc(sizeof(struct _irp),GFP_KERNEL);
@@ -188,11 +189,11 @@ asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int f
     goto earlyerror;
   }
   retval = ctl$ga_ccb_table[chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[i->irp$v_fcode](i,p,i->irp$l_ucb,&ctl$gl_ccbbase[chan]); // a real beauty, isn't it :)
-  setipl(0); // temporary measure
+  setipl(oldipl); // temporary measure. should be 0 again?
   return retval;
       //  }
  earlyerror:
-  setipl(0);
+  setipl(oldipl);
   sch$postef(current->pcb$l_pid,PRI$_NULL,efn);
   return retval;
 }
