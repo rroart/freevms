@@ -85,6 +85,8 @@ int ioc$search(struct return_values *r, void * devnam) {
     struct _sb * sb=d->ddb$ps_sb;
     if ((node==0) && sb)
       goto next;
+    if (node && (sb==0))
+      goto next;
     if (sb && 0!=strncmp(&sb->sb$t_nodename[1],node,nodelen))
       goto next;
     if (!bcmp(&d->ddb$t_name[1],device,3/* was s->dsc$w_length*/)) {
