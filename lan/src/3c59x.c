@@ -3179,7 +3179,9 @@ static int mdio_read(struct net_device *dev, int phy_id, int location)
 	unsigned int retval = 0;
 	long mdio_addr = ioaddr + Wn4_PhysicalMgmt;
 
+#if 0
 	spin_lock_bh(&vp->mdio_lock);
+#endif
 
 	if (mii_preamble_required)
 		mdio_sync(ioaddr, 32);
@@ -3200,7 +3202,9 @@ static int mdio_read(struct net_device *dev, int phy_id, int location)
 		outw(MDIO_ENB_IN | MDIO_SHIFT_CLK, mdio_addr);
 		mdio_delay();
 	}
+#if 0
 	spin_unlock_bh(&vp->mdio_lock);
+#endif
 	return retval & 0x20000 ? 0xffff : retval>>1 & 0xffff;
 }
 
@@ -3212,7 +3216,9 @@ static void mdio_write(struct net_device *dev, int phy_id, int location, int val
 	long mdio_addr = ioaddr + Wn4_PhysicalMgmt;
 	int i;
 
+#if 0
 	spin_lock_bh(&vp->mdio_lock);
+#endif
 
 	if (mii_preamble_required)
 		mdio_sync(ioaddr, 32);
@@ -3232,7 +3238,9 @@ static void mdio_write(struct net_device *dev, int phy_id, int location, int val
 		outw(MDIO_ENB_IN | MDIO_SHIFT_CLK, mdio_addr);
 		mdio_delay();
 	}
+#if 0
 	spin_unlock_bh(&vp->mdio_lock);
+#endif
 	return;
 }
 
