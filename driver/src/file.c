@@ -186,7 +186,7 @@ void file$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, s
   ucb->ucb$l_devchar = DEV$M_REC | DEV$M_AVL | DEV$M_CCL /*| DEV$M_OOV*/;
 
   ucb->ucb$l_devchar2 = DEV$M_NNM;
-  ucb->ucb$b_devclass = DC$_MISC;
+  ucb->ucb$b_devclass = DC$_DISK;
   ucb->ucb$b_devtype = DT$_TTYUNKN;
   ucb->ucb$w_devbufsiz = 132;
 
