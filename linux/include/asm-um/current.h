@@ -10,16 +10,12 @@
 
 #include "linux/config.h"
 #include "asm/page.h"
-#include "linux/smp.h"
-#include "asm-i386/current.h"
 
 struct task_struct;
 
 #define CURRENT_TASK(dummy) (((unsigned long) &dummy) & (PAGE_MASK << 2))
 
-#if 0
 #define current ({ int dummy; (struct task_struct *) CURRENT_TASK(dummy); })
-#endif
 
 #endif /* __ASSEMBLY__ */
 

@@ -233,7 +233,7 @@ void finish_fork_handler(int sig)
 	set_user_mode(current, 1);
 }
 
-void *get_current2(void)
+void *get_current(void)
 {
 	return(current);
 }
