@@ -1019,11 +1019,13 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	if (ctl$gl_pcb->pcb$t_terminal[0]==0) {
 	  memcpy(&ctl$gl_pcb->pcb$t_terminal,"opa0",4);
 	} else {
+#if 0
 	  short int chan;
 	  int sts = ptd$create(&chan,0,0,0,0,0,0,0);
 	  memcpy(&ctl$gl_pcb->pcb$t_terminal,"opa",3);
 	  struct _ccb * c=&ctl$gl_ccbbase[chan];
 	  ctl$gl_pcb->pcb$t_terminal[3]=48+(char)c->ccb$l_ucb->ucb$w_unit;
+#endif
 	}
 
 	//printk("execve %s\n",filename);
