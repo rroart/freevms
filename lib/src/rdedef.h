@@ -40,6 +40,7 @@ struct _rde {
   union  {
     unsigned int rde$l_flags;       
     struct  {
+      unsigned rde$v_reserved_flags : 25; // really belongs at the bottom
       unsigned rde$v_descend : 1; 
       unsigned rde$v_p0_space : 1; 
       unsigned rde$v_p1_space : 1; 
@@ -47,7 +48,6 @@ struct _rde {
       unsigned rde$v_expand_on_accvio : 1; 
       unsigned rde$v_no_clone : 1; 
       unsigned rde$v_shared_pts : 1; 
-      unsigned rde$v_reserved_flags : 25;
     };
   };
   union _region_prot rde$r_regprot;          
