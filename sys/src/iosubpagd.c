@@ -44,6 +44,7 @@ int ioc$search(struct return_values *r, void * devnam) {
   char out[255];
   int outlen;
   char * outagain;
+  memset(out,0,255); // suspect outlen is not quite operative
   int sts = ioc_std$trandevnam(devnam, 0, out, outlen, &outagain);
   /* ddb d not needed? */
   /* real device, no logical. do not have logicals yet */
@@ -53,12 +54,18 @@ int ioc$search(struct return_values *r, void * devnam) {
   char * node = 0;
   int nodelen = 0;
   char * devstr;
+  int devstrlen;
   if ((sts&1)==1) {
     devstr=out;
+    devstrlen=outlen; // not quite there yet?
+    devstrlen=strlen(out);
   } else {
     devstr=s->dsc$a_pointer;
+    devstrlen=s->dsc$w_length;
   }
   char * device = strchr(devstr,'$');
+  if (device>=(devstr+devstrlen))
+    device=0;
   if (device) {
     node=devstr;
     nodelen=device-node;
