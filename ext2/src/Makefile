@@ -10,7 +10,7 @@
 O_TARGET := exttwo.o
 
 obj-y    := balloc.o bitmap.o dir.o file.o fsync.o ialloc.o inode.o \
-		ioctl.o namei.o super.o symlink.o
+		ioctl.o namei.o super.o symlink.o ext2vms.o
 obj-m    := $(O_TARGET)
 
 include $(TOPDIR)/Rules.make
