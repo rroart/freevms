@@ -1116,7 +1116,7 @@ unsigned exe$display(struct _fabdef *fab)
     atr[7].atr$w_type=0;
     fibdsc.dsc$w_length=sizeof(struct _fibdef);
     fibdsc.dsc$a_pointer=&ifi_table[fab->fab$w_ifi]->wcf_fib;
-    sts = sys$qiow(0,getchan(getvcb()),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
+    sts = sys$qiow(0,getchan(ifi_table[fab->fab$w_ifi]->wcf_vcb),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
 		   &fibdsc,0,0,0,atr,0);
     sts = iosb.iosb$w_status;
     if (ifi_no == 0 || ifi_no >= IFI_MAX) return RMS$_IFI;
