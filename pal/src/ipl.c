@@ -15,6 +15,7 @@
 #include<asm/current.h>
 
 int in_atomic=0;
+unsigned long prev1[20];
 
 extern int timer_on;
 
@@ -299,7 +300,7 @@ asmlinkage void myrei (void) {
 
 #ifdef __i386__
 void inline mysti(int flags) {
-  in_atomic--;
+  in_atomic=0;
   if (flags) __sti();
   spin_unlock(SPIN_ATOMIC);
   //printk("mysti\n");
@@ -318,9 +319,11 @@ int inline mycli(void) {
   spin_lock(SPIN_ATOMIC);
   __save_flags(flags);
   retval=flags&0x00000200; /* interrupt enable/disable flag */
-  if (in_atomic) {
+  if (in_atomic && in_atomic==current->pid) {
 #ifdef __i386__
     long long l;
+    for(l=0;l<20;l++) printk("%x ",prev1[l]);
+    printk("\n");
     sickinsque(0x10000000,0x20000000);
     __cli();
     for(l=0;l;l++) ;
@@ -328,15 +331,20 @@ int inline mycli(void) {
     sickinsque(0x10000000,0x20000000);
     panic("test\n");
   }
+  if (in_atomic && in_atomic!=current->pid) printk("halfpancimycli\n");
   __cli();
-  in_atomic++;
+  in_atomic=current->pid;
+  { unsigned long *l=&flags;
+  int i;
+  for(i=0;i<20;i++) prev1[i]=l[i];
+  }
   return retval;
 }
 #endif
 
 #ifdef __arch_um__
 void inline mysti(int flags) { 
-  in_atomic--;
+  in_atomic=0;
   if (flags) unblock_signals();
   spin_unlock(SPIN_ATOMIC);
 }
@@ -344,9 +352,10 @@ void inline mysti(int flags) {
 int inline mycli(void) {
   int retval=timer_on;
   spin_lock(SPIN_ATOMIC);
-  if (in_atomic) panic("test\n");
+  if (in_atomic && in_atomic==current->pid) panic("test\n");
+  if (in_atomic && in_atomic!=current->pid) printk("halfpancimycli\n");
   block_signals();
-  in_atomic++;
+  in_atomic=current->pid;
   return retval;
 }
 #endif
