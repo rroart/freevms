@@ -30,7 +30,6 @@
 #include <linux/rtnetlink.h>
 #include <asm/uaccess.h>
 
-#include <linux/utsname.h>
 #include <linux/vmalloc.h>
 #include <linux/netfilter.h>
 
@@ -43,8 +42,10 @@
 #include <ddbdef.h>
 #include <descrip.h>
 #include <dyndef.h>
+#include <iodef.h>
 #include <mscpdef.h> // does not belong?
 #include <nisca.h>
+#include <nmadef.h>
 #include <pbdef.h>
 #include <pdtdef.h>
 #include <rddef.h>
@@ -57,7 +58,11 @@
 #include <ucbdef.h>
 #include <vcdef.h>
 
+#include "../../cmuip/ipacp/src/xedrv.h"
+
 extern struct _pb mypb;
+extern struct _sb mysb;
+extern struct _pdt mypdt;
 extern struct _sb othersb;
 
 extern struct _cdt cdtl[1024];
@@ -75,6 +80,7 @@ static char scs_hiord[ETH_ALEN]            = {0xAB,0x00,0x04,0x01,0x00,0x00}; //
 static unsigned char scs_eco_version[3]    = {0x02,0x00,0x00};
 
 struct net_device *scs_default_device = 0;
+short scs_chan = 0;
 
 int is_cluster_on() {
   return mypb.pb$w_state==PB$C_OPEN;
@@ -151,16 +157,16 @@ static void scs_send_endnode_hello(struct net_device *dev)
 
 	dx=getdx(msg);
 
-	scs_fill_dx(msg,0xab00,0x04010000,0xaa00,(system_utsname.nodename[0]<<16)+system_utsname.nodename[1]);
+	scs_fill_dx(msg,0xab00,0x04010000,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1]);
 
 	nisca=getcc(msg);
 
         nisca->nisca$b_msg  = NISCA$C_HELLO;
         nisca->nisca$b_msg  |= NISCA$M_TR_CTL|NISCA$M_TR_CCFLG;
 	nisca->nisca$l_maint  = NISCA$M_MAINT;
-	if (strlen(system_utsname.nodename)) {
+	if (strlen(&mysb.sb$t_nodename)) {
 	  nisca->nisca$t_nodename[0]=4; //strlen(system_utsname.nodename);
-	  memcpy(&nisca->nisca$t_nodename[1],system_utsname.nodename,4);
+	  memcpy(&nisca->nisca$t_nodename[1],&mysb.sb$t_nodename,4);
 	  memcpy(&nisca->nisca$ab_lan_hw_addr,dev->dev_addr,6);
 	  
 	} else {
@@ -168,6 +174,9 @@ static void scs_send_endnode_hello(struct net_device *dev)
 	  memcpy(&nisca->nisca$t_nodename[1],"NODNAM",6);
 	}
 
+#ifndef CONFIG_VMS
+	pktlen = (unsigned short *)skb_push(skb,2);
+#endif
         *pktlen = htons(skb->len - 2);
 
 	skb->nh.raw = skb->data;
@@ -239,7 +248,7 @@ int scs_neigh_endnode_hello(struct sk_buff *skb)
  	if (0==strncmp("NODNAM",&msg->nisca$t_nodename[1],6))
 	  return 1;
 
- 	if (0==strncmp(&system_utsname.nodename,&msg->nisca$t_nodename[1],4))
+ 	if (0==strncmp(&mysb.sb$t_nodename,&msg->nisca$t_nodename[1],4))
 	  return 1;
 
 	if (!first_hello) {
@@ -350,7 +359,7 @@ void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgf
 #ifndef CONFIG_VMS
 	data = skb_put(skb,sizeof(*nisca));
 #endif
-	scs_fill_dx(data,0xab00,0x04010000,0xaa00,(system_utsname.nodename[0]<<16)+system_utsname.nodename[1]);
+	scs_fill_dx(data,0xab00,0x04010000,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1]);
 	nisca=gettr(data);
 	nisca->nisca$b_tr_flag=NISCA$M_TR_CTL;
 	nisca->nisca$b_tr_pad=0x13;
@@ -402,7 +411,7 @@ void scs_msg_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg, 
 #ifndef CONFIG_VMS
 	data = skb_put(skb,sizeof(*nisca));
 #endif
-	scs_fill_dx(data,0xab00,0x04010000,0xaa00,(system_utsname.nodename[0]<<16)+system_utsname.nodename[1]);
+	scs_fill_dx(data,0xab00,0x04010000,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1]);
 	nisca=gettr(data);
 	nisca->nisca$b_tr_flag=0;
 	nisca->nisca$b_tr_pad=0x13;
@@ -873,7 +882,7 @@ int scs_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt)
       ppd=getppdscs(msg);
       dx=getdx(msg);
 
-      if (scs_from_myself(dx,0xaa00,(system_utsname.nodename[0]<<16)+system_utsname.nodename[1])) {
+      if (scs_from_myself(dx,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1])) {
 	//printk("discarding packet from myself (mcast...?)\n");
 	goto dump_it;
       }
@@ -921,3 +930,112 @@ int do_opc_dispatch(struct sk_buff *skb)
   func=opc_dispatch[ppd->ppd$b_opc];
   return func(skb,ppd);
 }
+
+#ifdef CONFIG_VMS
+scs_startdev ( XE_Int , setflag , setaddr)
+
+// This routine initializes the ethernet device to receive SCS packets.
+// Issue start command to the controller.
+// Accepts:
+//   XE_INT	EtherNet interface info block
+//   SETFLAG	TRUE if device physical address needs to be set
+//   SETADDR	If SETFLAG, then physical address to set
+// Returns:
+//   0 (false) on failure, device not started
+//  -1 (true) on success, device ready, reads queued
+
+	struct XE_Interface_Structure * XE_Int;
+    {
+#if 0
+    signed long
+	RC,
+	plen;
+	struct XE_iosb_structure IOS_ , * IOS = &IOS_;
+	struct XE_setup_structure Setup_, * Setup= &Setup_;
+	struct XE_sdesc_structure Paramdescr_, * Paramdescr= &Paramdescr_;
+
+	bzero(Setup,sizeof(struct XE_setup_structure));
+
+	XE_Int = 0;
+
+// Build the nasty setup block required by the ethernet device
+
+    Setup->XE$c_pcli_bus      = NMA$C_PCLI_BUS;
+    Setup->XE$l_buffer_length = 1500; // was: DRV$MAX_PHYSICAL_BUFSIZE;
+    Setup->XE$c_pcli_bfn      = NMA$C_PCLI_BFN;
+    Setup->XE$l_number_buff   = 1500; // was: MAX_RCV_BUF;
+    Setup->XE$c_pcli_pad      = NMA$C_PCLI_PAD;
+    Setup->XE$l_padding       = NMA$C_STATE_OFF;
+    Setup->XE$c_pcli_pty      = NMA$C_PCLI_PTY;
+    Setup->XE$c_pcli_prm      = NMA$C_PCLI_PRM;
+    Setup->XE$l_promiscuous   = NMA$C_STATE_OFF;
+    Setup->XE$c_pcli_dch      = NMA$C_PCLI_DCH;
+    Setup->XE$l_data_chain    = NMA$C_STATE_OFF;
+    Setup->XE$c_pcli_con      = NMA$C_PCLI_CON;
+    Setup->XE$l_control_mode  = NMA$C_LINCN_NOR;
+
+
+// Change XE$W_mca_mode to NMA$C_LINMC_SET if you want IP broadcasts.
+
+    Setup ->XE$c_pcli_mca     = NMA$C_PCLI_MCA;
+    Setup ->XE$w_mca_length   = 2 + XE_ADR_SIZE;
+    Setup ->xe$w_mca_mode     = NMA$C_LINMC_CLR;
+#if 0
+    // not yet?
+    CH$MOVE (XE_ADR_SIZE, XE_BROADCAST, Setup ->XE$L_mca_address);
+#endif
+
+// If he wants us to set the physical address, then do so.
+
+    if (setflag)
+	{
+	Setup->XE$c_pcli_pha = NMA$C_PCLI_PHA;
+	Setup->XE$w_pcli_phlen = XE_ADR_SIZE+2;
+	Setup->XE$w_pcli_phmode = NMA$C_LINMC_SET;
+	CH$MOVE(XE_ADR_SIZE,CH$PTR(setaddr),CH$PTR(Setup->XE$l_pcli_phaddr));
+	plen = (long)Setup->xe$setup_pha_end - (long)Setup;
+	}
+    else
+	plen = (long)Setup->xe$setup_end - (long)Setup;
+
+// Set up for SCS protocol on this channel
+
+    Setup->XE$l_protocol      = ETH_P_MYSCS ;
+    swapbytes(1,&Setup->XE$l_protocol);
+
+    Paramdescr->xe$setup_length = plen;
+    Paramdescr->xe$setup_address = Setup;
+
+    $DESCRIPTOR(dev_desc, mysb.sb$t_hwtype);
+
+    // Assign Ethernet Controller
+    if (! (RC=exe$assign (&dev_desc, &scs_chan, 0, 0, 0)))
+         // Ethernet controller assign failed
+	{
+	printk("SCS $ASSIGN failure (dev=%s), EC = %x\n",
+		    dev_desc.dsc$a_pointer,RC);
+	return;
+	};
+
+// Issue the startup command to controller
+
+    RC = exe$qiow (1, scs_chan,
+		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr);
+    if (!( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
+	{
+	if (IOS->xe$vms_code == SS$_BADPARAM)
+	   printk("SCS startup failure, RC=%x,VMS_code=%x,Param=%x",
+		  RC,IOS->xe$vms_code,((long *)IOS)[1]);
+	else
+	   printk("SCS startup failure, RC=%x,VMS_code=%x,Xfer size=%x",
+	       RC,IOS->xe$vms_code,IOS->xe$tran_size);
+	return 0;
+	};
+
+// Everything OK - return TRUE value
+
+    return -1;
+#endif
+    }
+
+#endif
