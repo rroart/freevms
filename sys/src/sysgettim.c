@@ -81,7 +81,9 @@ asmlinkage int exe$gettim(unsigned long long *timadr)
     return SS$_ACCVIO;
   }
   bcopy(&exe$gq_systime,timadr,8);
+#if 0
   printk("setime %x %x\n",tmp[0],tmp[1]);
   printk("setime %x %x\n",tmp2[0],tmp2[1]);
+#endif
   return SS$_NORMAL;
 }
