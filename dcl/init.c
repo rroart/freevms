@@ -52,6 +52,20 @@ commands_init(dcl$command **commands)
 		return(DCL$FAILURE);
 	}
 
+	if ((*commands = command_add_on(*commands,
+			"LOGOUT", "", logout_function, DCL$VERB))
+			== NULL)
+	{
+		return(DCL$FAILURE);
+	}
+
+	if ((*commands = command_add_on(*commands,
+			"SET", "", set_function, DCL$VERB))
+			== NULL)
+	{
+		return(DCL$FAILURE);
+	}
+
 	return(DCL$SUCCESS);
 }
 

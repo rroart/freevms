@@ -37,7 +37,7 @@
 #include "dcl.h"
 
 int
-directory_function(unsigned char *argument)
+directory_function(unsigned char *argument, dcl$env *env)
 {
 	return(0);
 }

@@ -28,9 +28,13 @@
 VERSION_DCL=0.00
 
 SRCC=\
+	analyse.c \
 	builtins_d.c \
+	builtins_l.c \
+	builtins_s.c \
 	dcl.c \
-	init.c
+	init.c \
+	readcommand.c
 
 SRCH=\
 	dcl.h
@@ -83,7 +87,7 @@ tags: $(SRCC)
 #-------------------------------------------------------------------------------
 
 dcl: $(OBJC)
-	$(LD) $(LD_FLAGS) -o $@ $+
+	$(LD) $(LD_FLAGS) -o $@ $+ -lreadline -lncurses
 
 
 #-------------------------------------------------------------------------------

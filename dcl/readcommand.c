@@ -36,47 +36,26 @@
 
 #include "dcl.h"
 
-int
-main(int argc, char *argv[])
+unsigned char *
+read_command(dcl$env *env)
 {
-	dcl$command		*commands;
-	dcl$env			env;
+	int					i;
 
-	/*
-	 * dcl$env struct initialization
-	 */
+	unsigned char		*command_line;
+	unsigned char		*effective_prompt;
 
-	if ((env.prompt = malloc(3 * sizeof(unsigned char))) == NULL)
+	effective_prompt = (*env).prompt;
+
+	do
 	{
-		return(DCL$FAILURE);
-	}
+		if ((command_line = readline(effective_prompt)) == NULL)
+		{
+			for(i = 0; i < strlen(effective_prompt); i++)
+			{
+				printf("\b");
+			}
+		}
+	} while(command_line == NULL);
 
-	strcpy(env.prompt, "$ ");
-	env.end_flag = 0;
-
-	/*
-	 * dcl$command struct initialization
-	 */
-
-	commands = NULL;
-	if (commands_init(&commands) != 0)
-	{
-		return(DCL$FAILURE);
-	}
-
-	/*
-	 * Loop
-	 */
-
-	while(env.end_flag == 0)
-	{
-		read_command(&env);
-	}
-
-	/*
-	 * dcl$command list is freed
-	 */
-
-	commands_freeing(commands);
-	return(DCL$SUCCESS);
+	return(command_line);
 }

@@ -38,6 +38,10 @@
 
 #	include <stdio.h>
 #	include <stdlib.h>
+#	include <string.h>
+
+#	include <readline/readline.h>
+#	include <readline/history.h>
 
 /*
 --------------------------------------------------------------------------------
@@ -67,6 +71,13 @@
 		struct dcl_command		*next;
 	} dcl$command;
 
+	typedef struct dcl_env
+	{
+		int						end_flag;
+		unsigned char			*prompt;
+	} dcl$env;
+
+
 /*
 --------------------------------------------------------------------------------
   Protoypes
@@ -79,6 +90,8 @@
 
 	int commands_init(dcl$command **commands);
 
+	unsigned char *read_command(dcl$env *env);
+
 	void commands_freeing(dcl$command *commands);
 
 /*
@@ -87,5 +100,9 @@
 --------------------------------------------------------------------------------
 */
 
-	int directory_function(unsigned char *argument);
+	int directory_function(unsigned char *argument, dcl$env *env);
+
+	int logout_function(unsigned char *argument, dcl$env *env);
+
+	int set_function(unsigned char *argument, dcl$env *env);
 #endif
