@@ -1309,7 +1309,7 @@ unsigned exe$open(struct _fabdef *fab)
     sts = iosb.iosb$w_status;
     {
       struct _bkt * buck = buffer;
-      printf("buck\n");
+      printk("buck\n");
     }
  
     block=datavbn;
