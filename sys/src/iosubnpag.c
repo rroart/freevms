@@ -17,6 +17,8 @@
 #include<ipldef.h>
 #include<ddbdef.h>
 
+#include <linux/sched.h>
+
 void ioc$initiate(struct _irp * i, struct _ucb * u) {
   struct _ddt *d; 
   void (*f)(void *,void *);
@@ -115,10 +117,8 @@ int exe$match_name(struct _ddb * d, char * s) {
 
 }
 
-void ioc_std$cancelio (signed int chan, struct _irp *irp, struct _pcb *pcb, str\
-		       uct _ucb *ucb) {
-  if (u->ucb$l_sts&UCB$M_BSY && i->irp$l_pid==p->pcb$l_pid && (-chan)==i->irp$w\
-      _chan) {
-    u->ucb$l_sts|=UCB$M_CANCEL; // check. had to add extra - before chan
+void ioc_std$cancelio (signed int chan, struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb) {
+  if (ucb->ucb$l_sts&UCB$M_BSY && irp->irp$l_pid==pcb->pcb$l_pid && (-chan)==irp->irp$w_chan) {
+    ucb->ucb$l_sts|=UCB$M_CANCEL; // check. had to add extra - before chan
   }
 }
