@@ -99,7 +99,6 @@ struct _va_flags {
 };
 
 typedef struct _regsum *regsum_pq;
-typedef unsigned long long regsum_pq;
  
 #endif 
  

@@ -1,15 +1,15 @@
 #ifndef vms_drivers_h
 #define vms_drivers_h
 
-#include "../../../freevms/lib/src/builtins.h"
+//#include "../../../freevms/lib/src/builtins.h"
 
 #include "../../../freevms/lib/src/fkbdef.h"
 #include "../../../freevms/lib/src/irpdef.h"
-#include "../../../freevms/lib/src/pdscdef.h"
+#include "../../../freevms/starlet/src/pdscdef.h"
 #include "../../../freevms/lib/src/splcoddef.h"
 #include "../../../freevms/lib/src/spldef.h"
 #include "../../../freevms/starlet/src/ssdef.h"
-#include "../../../freevms/lib/src/stsdef.h"
+#include "../../../freevms/starlet/src/stsdef.h"
 #include "../../../freevms/lib/src/ucbdef.h"
 #include "../../../freevms/lib/src/vecdef.h"
 

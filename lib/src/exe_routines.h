@@ -10,7 +10,7 @@
 #include "../../../freevms/lib/src/chpctldef.h"
 #include "../../../freevms/lib/src/chpretdef.h"
 #include "../../../freevms/lib/src/cpudef.h"
-#include "../../../freevms/lib/src/far_pointers.h"
+#include "../../../freevms/starlet/src/far_pointers.h"
 #include "../../../freevms/lib/src/fkbdef.h"
 #include "../../../freevms/lib/src/irpdef.h"
 #include "../../../freevms/lib/src/jibdef.h"
@@ -42,7 +42,7 @@ int   exe_std$alophycntg_color_s2 (int npages, int rad, int byte_align, VOID_PPQ
 void  exe_std$altquepkt (struct _irp *irp, struct _ucb *ucb);
 int	  exe$bugchk_cancel_remove_va (VOID_PQ start_va, unsigned long long size_in_bytes);
 int	  exe$bugchk_remove_va (VOID_PQ start_va, unsigned long long size_in_bytes);
-int       exe$bus_delay (ADP *adp);
+int       exe$bus_delay (struct _adp *adp);
 int       exe$delay (long long *delay_nanos);
 void  exe_std$carriage (struct _irp *irp);
 int       exe$cbb_allocate (CBB_PPQ cbb, int unitsize, int bits, int ipl, unsigned long long flags, int timeout_value);
@@ -60,12 +60,12 @@ int       exe$cbb_unlock (CBB_PQ cbb);
 int	  exe$cbb_copy( CBB_PQ src, CBB_PQ dst, int length, int flags);
 int   exe$cbb_extract_bitmask( CBB_PQ src, int start, int length, int flags, VOID_PQ bitmask_addr);
 int   exe$cbb_insert_bitmask( int start, int length, int flags, VOID_PQ bitmask_addr, CBB_PQ cbb);
-int   exe$cbb_validate (CBB_PQ cbb, int unitsize, int bits, int ipl, unsigned long long flags, int timeout_value, UNSIGNED LONG LONG_PQ ret_flags);
+int   exe$cbb_validate (CBB_PQ cbb, int unitsize, int bits, int ipl, unsigned long long flags, int timeout_value, UINT64_PQ ret_flags);
 int   exe$cbb_zero (CBB_PQ cbb, int flags);
 int   exe$cbb_boolean_oper (int flags, int function, CBB_PQ cbb1, CBB_PQ cbb2, CBB_PQ dst, INT_PQ ccode);
 int   exe_std$check_device_access(int, int, struct _pcb *pcb, struct _ucb *ucb);
 int   exe_std$chkflupages (void);
-int   exe_std$chkpro_int (struct _arb *arb, struct _orb *orb, CHPCTL *chpctl, CHPRET *chpret);
+int   exe_std$chkpro_int (struct _arb *arb, struct _orb *orb, struct _chpctl *chpctl, struct _chpret *chpret);
 int   exe_std$chkcreacces (struct _arb *arb, struct _orb *orb, struct _pcb *pcb, struct _ucb *ucb);
 int   exe_std$chkdelacces (struct _arb *arb, struct _orb *orb, struct _pcb *pcb, struct _ucb *ucb);
 int   exe_std$chkexeacces (struct _arb *arb, struct _orb *orb, struct _pcb *pcb, struct _ucb *ucb);
@@ -134,10 +134,10 @@ int   exe_std$mount_ver (int iost1, int iost2, struct _irp *irp, struct _ucb *uc
 
 #ifdef  __INITIAL_POINTER_SIZE	
 int   exe_std$nam_to_pcb(INT_PQ pid_p,VOID_PQ prcnam_p,int nsa_id,struct _pcb *pcb,
-			 int *rpid_p,KTB **rktb_p,struct _pcb **rpcb_p);
+			 int *rpid_p,struct _ktb **rktb_p,struct _pcb **rpcb_p);
 #else
 int   exe_std$nam_to_pcb(int *pid_p,void *prcnam_p,int nsa_id,struct _pcb *pcb,
-			 int *rpid_p,KTB **rktb_p,struct _pcb **rpcb_p);
+			 int *rpid_p,struct _ktb **rktb_p,struct _pcb **rpcb_p);
 #endif 
 
 int   exe_std$oneparm (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
@@ -149,9 +149,9 @@ int   exe_std$prober_dsc (void *dsc_p);
 int   exe_std$probew (VOID_PQ buf, int bufsiz, int acmode);
 int   exe_std$probew_dsc (void *dsc_p);
 
-int   exe_std$prober_dsc64 (VOID_PQ dsc_p, UNSIGNED LONG LONG_PQ ret_length, 
+int   exe_std$prober_dsc64 (VOID_PQ dsc_p, UINT64_PQ ret_length, 
 			    CHAR_PPQ ret_bufadr);
-int   exe_std$probew_dsc64 (VOID_PQ dsc_p, UNSIGNED LONG LONG_PQ ret_length,
+int   exe_std$probew_dsc64 (VOID_PQ dsc_p, UINT64_PQ ret_length,
 			    CHAR_PPQ ret_bufadr);
 
 int   exe_std$qioacppkt (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb);
@@ -217,7 +217,7 @@ void  ini$brk (void);
 #if !defined(MEMORYALC_POOL_SRC)
 #ifdef  __INITIAL_POINTER_SIZE	
 int exe$allocate_pool(int requestSize, MMG$POOL_TYPE poolType, int alignment,
-		      UNSIGNED LONG LONG_PQ allocatedSize, VOID_PPQ returnBlock,...);
+		      UINT64_PQ allocatedSize, VOID_PPQ returnBlock,...);
 void exe$deallocate_pool(VOID_PQ returnBlock, MMG$POOL_TYPE poolType, int size,...);
 int exe$trim_pool_list(int reqSize, MMG$POOL_TYPE poolType, int percent,...);
 

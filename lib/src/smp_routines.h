@@ -2,7 +2,7 @@
 #define smp_routines_h
 
 #include "../../../freevms/lib/src/ctddef.h"
-#include "../../../freevms/lib/src/iosbdef.h"
+#include "../../../freevms/starlet/src/iosbdef.h"
 #include "../../../freevms/lib/src/spldef.h"
 
 void  smp_std$acqnoipl (struct _spl *spl);
@@ -32,7 +32,7 @@ int   smp_std$setup_cpu(int);
 
 int	  smp$cpu_orphan_check(int,unsigned long long,unsigned long long);
 int	  smp$request_shutdown_cpu(int, int);
-int       smp$system_event_notify(CTD_PQ ctd, int event);
+int       smp$system_event_notify(struct _ctd_pq ctd, int event);
 void      smp$timeout (void);
 int	  smp$validate_hw_configuration(int, char **, char **);
 

@@ -227,7 +227,7 @@ struct _pcierr {
   struct _pci pcierr$r_pci;
 };
 
-typedef struct _pciflags {
+struct _pciflags {
   union  {
     struct  {
       unsigned char pciflags$b_pciflags;

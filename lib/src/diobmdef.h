@@ -1,7 +1,7 @@
 #ifndef diobmdef_h
 #define diobmdef_h
 
-//#include <ptedef.h>		
+#include "../../../freevms/lib/src/ptedef.h"
 
 #define DIOBM$M_REL_DEALLOC 0x1
 #define DIOBM$M_PTE_WINDOW 0x2
@@ -35,10 +35,9 @@ struct _diobm {
     };
   };
   union  {
-    PTE diobm$q_pte_vector [9];
+    struct _pte diobm$q_pte_vector [9];
     struct  {
       struct _pte *diobm$pq_ptew_va_spte;
-      unsigned long long diobm$pq_ptew_va_spte;
       void *diobm$ps_ptew_s0va;
     };
   };

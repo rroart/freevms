@@ -1,9 +1,15 @@
 #ifndef far_pointers_h
 #define far_pointers_h
 
+/* these few does not belong here really */
+typedef int int32;
+typedef short int int16;
+typedef unsigned int uint32;
+typedef unsigned short int uint16;
+
 typedef int     	 * INT_PQ;	
 typedef unsigned int	 * UINT_PQ;	
-typedef unsigned int32 * UINT32_PQ;	
+typedef unsigned int     * UINT32_PQ;	
 typedef void             * VOID_PQ;	
 typedef void            ** VOID_PPQ;	
 typedef long long          * INT64_PQ;	
