@@ -134,6 +134,7 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **ret
     if (myfilelistptr==0) { 
       // real disk
       extern char root_device_name[];
+      extern struct _ccb ctl$ga_ccb_table[];
       int chan=0;
       struct dsc$descriptor d;
       d.dsc$w_length=strlen(root_device_name);
