@@ -41,27 +41,35 @@ Note for the experimental CONFIG_VMS (must be more stripped down):
 	IDE support only, and with only one disk and partition.
 	
 Example build i386:
-tar xzf freevms-0_0_46.tgz
+tar xzf freevms-0_0_51.tgz
 cd freevms/linux
 ./prescript
-cp -p ~/.config .		(or wherever a pre-existing .config may be)
-make menuconfig
-make dep			(and ignore make dep errors)
+make symlinks
+make linux/include/linux/compile.h
+maybe do make update-modverfile
 make bzImage
 
 Example build um:
-tar xzf freevms-0_0_46.tgz
+tar xzf freevms-0_0_51.tgz
 cd freevms/linux
 ./prescript
-cp -p ~/.config .		(or wherever a pre-existing .config may be)
-make menuconfig ARCH=um
-make dep ARCH=um		(and ignore make dep errors)
-make linux ARCH=um
+make symlinks ARCH=um
+make linux/include/linux/compile.h ARCH=um
+maybe do make update-modverfile ARCH=um
+make linux/linux ARCH=um
+
+For VMS I/O and MM:
+Add
+CONFIG_VMS=y
+CONFIG_IO_VMS=y
+CONFIG_MM_VMS=y
+to a suitable linux/arch/*/config
+Edit linux/include/linux/autoconf.h to have CONFIG_VMS defined
 
 Example build of user environment:
 cd .. or cd freevms
-make
-make install
+make vmsall
+make vmsinstall
 cp -rpv rooti386/. /		(if you are using the same computer)
 (The resulting VFS root should have /vms$common)
 
