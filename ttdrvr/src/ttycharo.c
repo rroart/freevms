@@ -10,6 +10,7 @@
 #include <ttyrbdef.h>
 #include <ssdef.h>
 #include <irpdef.h>
+#include <dyndef.h>
 
 int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
  again:
@@ -34,7 +35,8 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
       // temp_irp is nonzero when telnetted. some other times too. fix later.
       if (temp_irp==0) 
 	temp_irp=((struct _tty_ucb *)lt->ucb$l_tl_phyucb)->ucb$l_tt_wrtbuf->tty$l_wb_irp;
-      kfree(temp_irp->irp$l_svapte); // have to get rid of this first?
+      // kfree(temp_irp->irp$l_svapte); // have to get rid of this first?
+      // or maybe not? got double kfree?
       temp_irp->irp$l_svapte=0;
       temp_irp->irp$l_iost1=SS$_NORMAL;
       // int status = com$post(temp_irp,lt->ucb$l_tl_phyucb);

@@ -52,6 +52,8 @@
 #include <pridef.h>
 #include <ttydef.h>
 
+#include <ssdef.h>
+
 #include <linux/reboot.h>
 
 #define SIZE(x) (sizeof(x)/sizeof((x)[0]))
@@ -355,6 +357,7 @@ void put_queue(int ch)
     sys_reboot(LINUX_REBOOT_MAGIC1,LINUX_REBOOT_MAGIC2,LINUX_REBOOT_CMD_RESTART,0);
   int cc;
   tty$putnextchar(&ch,&cc,con_ucb); // do this as con_ucb->tt_class->putnxt
+  //  ioc$reqcom(SS$_NORMAL,0,con_ucb); // not needed here?
 }
 
 void put_queue_not(int ch)
