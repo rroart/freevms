@@ -591,8 +591,8 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     dir.d_type=0;
     memset(dir.d_name,0,256);
 
-    dir.d_off=fib->fib$w_exctl;
-    dir.d_reclen=fib->fib$w_nmctl;
+    dir.d_off=fib->fib$w_file_hdrseq_incr; // borrow and use wrong
+    dir.d_reclen=fib->fib$w_dir_hdrseq_incr;
 
 #if 0
     if (fib->fib$l_wcc!=0) {
@@ -627,8 +627,8 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     bcopy(dir.d_name,resdsc->dsc$a_pointer,*reslen);
 
     //    fib->fib$l_wcc=dir.d_off;
-    fib->fib$w_exctl=dir.d_off;
-    fib->fib$w_nmctl=*reslen;
+    fib->fib$w_file_hdrseq_incr=dir.d_off;
+    fib->fib$w_dir_hdrseq_incr=*reslen;
 
     fib->fib$l_wcc = 1;
 
