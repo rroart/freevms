@@ -159,7 +159,7 @@ void nl_init(void) {
   c=vmalloc(sizeof(struct _crb));
   bzero(c,sizeof(struct _crb));
 #endif
-  c=&nullccb;
+  c=&nullcrb;
   d=&nullddb;
   u=&nullucb;
   bzero(u,sizeof(struct _ucb));
