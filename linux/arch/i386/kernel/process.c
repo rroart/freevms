@@ -143,14 +143,21 @@ void cpu_idle (void)
 	} /* we might not need these settings */
 
 	while (1) {
+	  int myvar=0;
 		void (*idle)(void) = pm_idle;
 		//		 printk("cpu_idle\n");
 		if (!idle)
 			idle = default_idle;
 		// printk("bef while\n");
 		in_idle_while=1;
-		while (!current->need_resched)
+		//		while (!current->need_resched)
+		//  idle();
+		while (!current->need_resched) {
+		  myvar++;
+		  if (myvar>100) printk("idlingg\n");
 		  idle();
+		}
+		myvar=0;
 		//round_and_round=1;
 		//while (!current->need_resched && round_and_round++)
 		//			idle();

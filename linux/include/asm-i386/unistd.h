@@ -274,6 +274,41 @@
 #define __NR_$enq              28
 #define __NR_$deq              29
 
+#define __NR_$close 1
+#define __NR_$connect 2
+#define __NR_$create 3
+#define __NR_$delete 4
+#define __NR_$disconnect 5
+#define __NR_$display 6
+#define __NR_$enter 7
+#define __NR_$erase 8
+#define __NR_$extend 9
+#define __NR_$find 10
+#define __NR_$flush 11
+#define __NR_$free 12
+#define __NR_$get 13
+#define __NR_$modify 14
+#define __NR_$nxtvol 15
+#define __NR_$open 16
+#define __NR_$parse 17
+#define __NR_$put 18
+#define __NR_$read 19
+#define __NR_$release 20
+#define __NR_$remove 21
+#define __NR_$rename 22
+#define __NR_$rewind 23
+#define __NR_$search 24
+#define __NR_$space 25
+#define __NR_$truncate 26
+#define __NR_$update 27
+#define __NR_$wait 28
+#define __NR_$write 29
+#define __NR_$filescan 30
+#define __NR_$setddir 31
+#define __NR_$setdfprot 32
+#define __NR_$ssvexc 33
+#define __NR_$rmsrundwn 34
+
 #define __NR_$asctim            1
 #define __NR_$bintim            2
 
