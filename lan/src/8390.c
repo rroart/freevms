@@ -1,6 +1,7 @@
 #include <irpdef.h>
 #include <ucbdef.h>
 #include <ucbnidef.h>
+#include <ssdef.h>
 
 int er$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   return lan$readblk(i,p,u,c);
