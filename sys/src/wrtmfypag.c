@@ -42,7 +42,7 @@ void mmg$wrtmfypag(void) {
   if (1>sch$gl_mfycnt)
     return;
 #endif
-  if (test_and_set_bit(SCH$V_MPW,sch$gl_sip))
+  if (test_and_set_bit(SCH$V_MPW,&sch$gl_sip))
     return;
 #if 0
   setipl(IPL$_MMG);
@@ -50,7 +50,7 @@ void mmg$wrtmfypag(void) {
 #endif
   mmg$purgempl(MPW$C_MAINTAIN);
 
-  test_and_clear_bit(SCH$V_MPW,sch$gl_sip);
+  test_and_clear_bit(SCH$V_MPW,&sch$gl_sip);
 }
 
 void mmg$purgempl(unsigned long command) {
@@ -117,9 +117,12 @@ void mmg$purgempl(unsigned long command) {
 
   block_write_full_page3(pfl->pfl$l_window->wcb$l_fcb, &mem_map[pfnno], pfl_page);
   pfn->virtual=old_va;
-  printk("Wrote to pfl_page %x\n",pfl_page);
+  printk("Wrote to pfl_page %x %x %x\n",pfl_page,otherpte,*(long*)otherpte);
 
   *pte=oldpte;
+#ifndef __arch_um__
+  __flush_tlb();
+#endif
   vfree(mypage);
 
   long * tmp=otherpte;
