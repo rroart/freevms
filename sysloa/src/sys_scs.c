@@ -438,8 +438,8 @@ static int __init scs_init2(void)
 {
         printk(banner);
 
-	sock_register(&scs_family_ops);
 #ifndef CONFIG_VMS
+	sock_register(&scs_family_ops);
 	dev_add_pack(&scs_dix_packet_type);
 	register_netdevice_notifier(&scs_dev_notifier);
 #endif
