@@ -125,7 +125,7 @@ struct _port {
   unsigned short port$w_eco;
   unsigned long port$l_port_fcn;
   unsigned long port$l_sta_info;
-  unsigned char port$t_rstport[8]  /*?*/;
+  unsigned char port$t_rstport[8]  /* really 6? */;
   unsigned char port$t_mask_sbuf[32] /*?*/;
   unsigned char port$t_mask_xack[32] /*?*/;
   unsigned char port$t_mask_xseq[32] /*?*/;

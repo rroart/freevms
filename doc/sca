@@ -1,0 +1,94 @@
+protocol?: (very coarsely. no counter use)
+
+hello:		I am alive!
+
+bye: 		Going away.
+
+ccstart: 	Channel init (chan_start) with auth data.
+
+verf:		Response to ccstart.
+
+vack:		Response to verf.
+
+solicit_srv: 	Satellite multicast (sol_srv).
+
+ccstart_send == ccs_sen
+ccstart_rec  == ccs_rec
+solicit_rec  == sol_rec
+solicit_dly  == sol_dly
+hello_dly    == hel_dly
+
+state:	gets:		does:				next state:
+any	bad multicast	bad multicast msg		the same
+any	too short msg	wrong msg msg and ignore(?)	the same
+any	wrong auth	wrong auth msg and ignore(?)	the same
+any	wrong channel	wrong channel msg, shut it down	the same
+any	wrong eco	wrong eco msg and ignore(?)	the same
+
+open	TR stuff	restart a timer			the same
+
+closed,
+sol_rec	hello		do ccssnd, wait a bit		hel_dly
+
+ccs_sen	hello		ccssnd: send ccstart		ccs_sen
+
+sol_rec	hello		start listen timer		sta_open
+
+sol_dly	hello						hel_dly
+
+ccs_sen,
+ccs_rec,
+sol_rec	bye		shutdown			closed
+
+hel_dly,
+sol_dly	bye		shutdown			closed
+
+open	bye		wait for a timeout		the same
+
+closed,
+ccs_sen,
+ccs_rec,
+sol_rec,
+sol_dly,
+hel_dly	ccstart		send verf			ccs_rec
+
+open	ccstart		restart chan, send verf		ccs_rec
+
+ccs_sen,
+ccs_rec,
+open	verf		update info, send vack, timer	open
+
+sol_rec	verf		panic!
+
+ccs_sen	vack		panic!
+
+ccs_rec,
+sol_rec	vack		update info, timer		open
+
+closed,
+ccs_sen,
+ccs_rec	sol_srv		shutdown			closed
+
+hel_dly	sol_srv						sol_dly
+
+sol_rec	sol_srv		send verf			sol_rec
+
+open	sol_srv		restart, send verf		sol_rec
+
+ccs_sen,
+ccs_rec,
+sol_rec	timer		shutdown			closed
+
+open	timer		shutdown			closed
+
+hel_dly	timer		send verf			sol_rec
+
+sol_dly	timer		send ccs_sen			ccs_sen
+
+packets?:
+
+hello/multicast:
+unsigned short length
+unsigned char dst[6] ab000401+word
+unsigned char src[6] i think
+unsigned word scssystemid
