@@ -2370,8 +2370,14 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
     b+=16;
     printk("maybe creating remote ddb %s on other node\n",devnam);
 #ifdef CONFIG_VMS
+#ifdef __arch_um__
     if (0==strncmp(devnam,"daa",3)) 
       ddb=ubd_iodb_vmsinit();
+#endif
+#ifdef __arch_i386__
+    if (0==strncmp(devnam,"dqa",3)) 
+      ddb=ide_iodb_vmsinit();
+#endif
 #endif
     if (0==strncmp(devnam,"dua",3)) 
       ddb=du_iodb_vmsinit();
@@ -2389,8 +2395,14 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
       devnam[3]=48+i;
       ucb=0;
 #ifdef CONFIG_VMS
+#ifdef __arch_um__
       if (0==strncmp(devnam,"daa",3)) 
 	ucb = ubd_iodbunit_vmsinit(ddb,i,&d);
+#endif
+#ifdef __arch_i386__
+      if (0==strncmp(devnam,"dqa",3)) 
+	ucb = ide_iodbunit_vmsinit(ddb,i,&d);
+#endif
 #endif
       if (0==strncmp(devnam,"dua",3)) 
 	ucb = du_iodbunit_vmsinit(ddb,i,&d);
