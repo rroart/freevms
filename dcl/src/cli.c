@@ -489,7 +489,7 @@ static unsigned long wait_events (unsigned long nevents, unsigned long *h_events
 
 static unsigned long int_allocate_device      (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_change_password      (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_create_logical_name  (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_create_logical_name  (int userarg);
 static unsigned long int_create_logical_table (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_create_symbol        (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_deallocate_device    (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
@@ -502,11 +502,11 @@ static unsigned long int_goto                 (unsigned long h_input, unsigned l
 static unsigned long int_help                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_if                   (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_script               (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_set_default          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_set_prompt          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_set_default          (int userarg);
+static unsigned long int_set_prompt          (int userarg);
 static unsigned long int_set_process          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_set_working_set          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_stop          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_stop          (int userarg);
 static unsigned long int_show_datetime        (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_device          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_default         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
@@ -516,59 +516,17 @@ static unsigned long int_show_logical_name    (unsigned long h_input, unsigned l
 //static unsigned long int_show_system          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 
 static Command intcmd[] = {
-	0, "define",  int_create_logical_name,  NULL, "<logical_name>", 
-	0, "delete logical name",  int_delete_logical_name,  NULL, "<logical_name>", 
-	0, "delete logical table", int_delete_logical_table, NULL, "<table_name>", 
-	1, "echo",                 int_echo,                 NULL, "<string> ...", 
 	0, "logout",               int_logout,                 NULL, "[<status>]", 
 	0, "exit"  ,               int_exit,                 NULL, "[<status>]", 
 	0, "goto",                 int_goto,                 NULL, "<label>",
-	1, "help",                 int_help,                 NULL, "", 
 	0, "if",                   int_if,                   NULL, "<integervalue> <statement ...>", 
 	0, "@",               int_script,               NULL, "<script_name> [<args> ...]", 
-#if 0
-	0, "set default",          int_set_default,          NULL, "<directory>", 
-	0, "oset prompt",           int_set_prompt,           NULL, "<prompt>", 
-	0, "oset process",          int_set_process,          NULL, "<name>", 
-	0, "set working_set",      int_set_working_set,      NULL, "", 
-#endif
-	0, "oshow time",            int_show_datetime,        NULL, "", 
-	0, "oshow devices",         int_show_device,          NULL, "[<device_logical_name> ...] [-iochans] [-objaddr] [-security]", 
-	0, "oshow default",         int_show_default,         NULL, "", 
-#if 0
-	0, "show working_set",     int_show_working_set,     NULL, "", 
-	0, "show logical",    int_show_logical_name,    NULL, "<logical_name> [-security]", 
-	0, "show system",          int_show_system,          NULL, "[-devices] [-iochans] [-job] [-processes] [-security] [-threads]", 
-	0, "stop",                 int_stop,                 NULL, "[/id <pid>] <name>", 
-#endif
 	// the following are really not internal
 	// waiting for dcltables.exe
-	0, "_omount", 1, 0, "/vms$common/sysexe/mount",
-	0, "_odirectory", 1, 0, "/vms$common/sysexe/directory",
-	0, "_ocopy", 1, 0, "/vms$common/sysexe/copy",
-	0, "_oexport", 1, 0, "/vms$common/sysexe/export",
-	0, "_oimport", 1, 0, "/vms$common/sysexe/import",
-	0, "_odelete", 1, 0, "/vms$common/sysexe/delete",
-	0, "_odifference", 1, 0, "/vms$common/sysexe/difference",
-	0, "_oextend", 1, 0, "/vms$common/sysexe/extend",
-	0, "_osearch", 1, 0, "/vms$common/sysexe/search",
-	0, "_otype", 1, 0, "/vms$common/sysexe/type",
 	0, "_oinit", 1, 0, "/vms$common/sysexe/init",
-	0, "_ocreate /directory", 1, 0, "/vms$common/sysexe/create",
 	0, "_oedt", 1, 0, "/vms$common/sysexe/edt",
 	0, "_odfu", 1, 0, "/vms$common/sysexe/dfu",
-	0, "omount", 1, 0, "SYS$SYSTEM:mount.exe",
-	0, "odirectory", 1, 0, "SYS$SYSTEM:directory.exe",
-	0, "ocopy", 1, 0, "SYS$SYSTEM:copy.exe",
-	0, "oexport", 1, 0, "SYS$SYSTEM:export.exe",
-	0, "oimport", 1, 0, "SYS$SYSTEM:import.exe",
-	0, "odelete", 1, 0, "SYS$SYSTEM:delete.exe",
-	0, "odifference", 1, 0, "SYS$SYSTEM:difference.exe",
-	0, "oextend", 1, 0, "SYS$SYSTEM:extend.exe",
-	0, "osearch", 1, 0, "SYS$SYSTEM:search.exe",
-	0, "type", 1, 0, "SYS$SYSTEM:type.exe",
 	0, "oinit", 1, 0, "SYS$SYSTEM:init.exe",
-	0, "ocreate /directory", 1, 0, "SYS$SYSTEM:create.exe",
 	0, "oedt", 1, 0, "SYS$SYSTEM:edt.exe",
 	0, "odfu", 1, 0, "SYS$SYSTEM:dfu.exe",
 	0, NULL, NULL, NULL, NULL };
@@ -3270,7 +3228,7 @@ typedef struct Handleclose { struct Handleclose *next;
 
 static unsigned long crelognam (unsigned long cprocmode, void *crelognamparv);
 
-static unsigned long int_create_logical_name (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+static unsigned long int_create_logical_name (int userarg)
 
 {
   unsigned long sts;
@@ -3278,23 +3236,60 @@ static unsigned long int_create_logical_name (unsigned long h_input, unsigned lo
   char * table;
   struct dsc$descriptor mytabnam, mynam;
   struct item_list_3 itm[2];
-  int argvadd = 0;
 
-  if (argc>1 && 0==strncmp(argv[0],"/table",strlen(argv[0]))) {
-    table=argv[1];
-    argvadd=2;
+  $DESCRIPTOR(p, "p1");
+  $DESCRIPTOR(p2, "p2");
+  $DESCRIPTOR(d, "table");
+
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+  memset (c, 0, 80);
+
+  char e[80];
+  struct dsc$descriptor o2;
+  o2.dsc$a_pointer=e;
+  o2.dsc$w_length=80;
+  memset (e, 0, 80);
+
+  char f[80];
+  struct dsc$descriptor o3;
+  o3.dsc$a_pointer=f;
+  o3.dsc$w_length=80;
+  memset (f, 0, 80);
+
+  int retlen;
+
+  sts = cli$present(&p);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = cli$present(&p2);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = cli$present(&d);
+
+  if (sts&1) {
+    sts = cli$get_value(&d, &o, &retlen);
+    table=c;
   } else {
     table=default_table;
   }
 
-  mynam.dsc$w_length=strlen(argv[0+argvadd]);
-  mynam.dsc$a_pointer=argv[0+argvadd];
+  sts = cli$get_value(&p, &o2, &retlen);
+
+  sts = cli$get_value(&p2, &o3, &retlen);
+
+  mynam.dsc$w_length=strlen(e);
+  mynam.dsc$a_pointer=e;
   mytabnam.dsc$w_length=strlen(table);
   mytabnam.dsc$a_pointer=table;
 
   itm[0].item_code=LNM$_STRING;
-  itm[0].buflen=strlen(argv[1+argvadd]);
-  itm[0].bufaddr=argv[1+argvadd];
+  itm[0].buflen=strlen(f);
+  itm[0].bufaddr=f;
   bzero(&itm[1],sizeof(struct item_list_3));
 
   sts=sys$crelnm(0,&mytabnam,&mynam,0,itm);
@@ -3926,7 +3921,7 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
   void (*func)();
   int len = strlen(argv[0]);
   //  if (strcasecmp (argv[-1], "creprc") == 0) goto do_creprc;
-  if (0==strncmp(".exe2",argv[0]+len-5,5)) goto do_dl;
+  if (0==strncmp(".ele",argv[0]+len-4,4)) goto do_dl;
   if (strncmp(".exe",argv[0]+len-4,4)) goto do_fork;
 
   aname.dsc$w_length=len-4;
@@ -4376,7 +4371,7 @@ static unsigned long int_script (unsigned long h_input, unsigned long h_output, 
   return (SS$_NORMAL);
 }
 
-static unsigned long int_set_prompt (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+static unsigned long int_set_prompt (int userarg)
 
 {
   unsigned long sts;
@@ -4400,12 +4395,6 @@ static unsigned long int_set_prompt (unsigned long h_input, unsigned long h_outp
     memcpy(prompt, "$ ", 2);
     prompt[2]=0;
   }
-  return SS$_NORMAL;
-
-  if (argc == 0) {
-  } else {
-  }
-
   return SS$_NORMAL;
 }
 
@@ -4454,7 +4443,7 @@ static unsigned long int_set_process (unsigned long h_input, unsigned long h_out
 /*									*/
 /************************************************************************/
 
-static unsigned long int_set_default (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+static unsigned long int_set_default (int userarg)
 
 {
   unsigned long sts;
@@ -4640,7 +4629,7 @@ static unsigned long int_show_system (unsigned long h_input, unsigned long h_out
 }
 #endif
 
-static unsigned long int_stop (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+static unsigned long int_stop (int userarg)
 
 {
   unsigned long sts;
