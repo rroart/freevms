@@ -408,7 +408,7 @@ unsigned int cli$dispatch(int userarg){
     goto skip;
   }
 
-  if (vms_mm==0) goto exe2;
+  if (vms_mm==0) goto ele;
 
   path="SYS$SYSTEM:";
   pathlen=strlen(path);
@@ -515,7 +515,7 @@ unsigned int cli$dispatch(int userarg){
 
   goto skip;
 
- exe2:
+ ele:
   {}
 
   path="/vms$common/sysexe/";
@@ -525,8 +525,8 @@ unsigned int cli$dispatch(int userarg){
 
   memcpy(image,path,pathlen);
   memcpy(image+pathlen,imagebase,strlen(imagebase));
-  memcpy(image+pathlen+strlen(imagebase),".exe2",5);
-  image[pathlen+strlen(imagebase)+5]=0;
+  memcpy(image+pathlen+strlen(imagebase),".ele",4);
+  image[pathlen+strlen(imagebase)+4]=0;
   printf("Opening %s\n",image);
   handle = dlopen(image,RTLD_NOW);
   if (handle==0) {
