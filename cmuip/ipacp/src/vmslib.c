@@ -239,10 +239,12 @@ LIB$FREE_VM_PAGE(size, addr) {
 }
 
 FORKLOCK() {
+  return;
   printk("FORKLOCK not implemented\n");
 }
 
 FORKUNLOCK () {
+  return;
   printk("FORKUNLOCK not implemented\n");
 }
 
