@@ -747,3 +747,7 @@ struct net_device *alloc_etherdev(int sizeof_priv)
 	return alloc_netdev(sizeof_priv, "eth%d", ether_setup);
 }
 
+// maybe the wrong place, but temporary
+
+irq_cpustat_t irq_stat[NR_CPUS];
+
