@@ -299,6 +299,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    unsigned long vbn=sec->sec$l_vbn;
 	    struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	    unsigned long offset;// in PAGE_SIZE units
+	    if (rde==0) printk("vma0 address %x\n",address);
 	    //printk(" i pstl sec file vbn rde %x %x %x %x %x %x\n",index,pstl,sec,file,vbn,rde);
 	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+vbn;
 	    //printk(" offs %x ",offset);
@@ -365,12 +366,12 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	return;
 #endif
 
-	printk("fault2 %x ",address);
+	//	printk("fault2 %x ",address);
 	down_read(&mm->mmap_sem);
 
 	//	vma = find_vma(mm, address);
 	vma = mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
-	printk("err %x vma %x\n",error_code,vma);
+	//	printk("err %x vma %x\n",error_code,vma);
 	if (!vma)
 		goto bad_area;
 	if (vma->rde$ps_start_va <= address)
@@ -421,9 +422,9 @@ good_area:
 	 * make sure we exit gracefully rather than endlessly redo
 	 * the fault.
 	 */
-	printk("ha mm 1\n");
-	switch (handle_mm_fault(mm, vma, address, write)) {
-	printk("ha mm 2\n");
+	//	printk("ha mm 1\n");
+	//	switch (handle_mm_fault(mm, vma, address, write))
+	switch (do_wp_page(mm, vma, address, pte, *pte)) {
 	case 1:
 		tsk->min_flt++;
 		break;
