@@ -1,6 +1,8 @@
 #include<linux/sched.h>
 #include"../../freevms/lib/src/irpdef.h"
 #include"../../freevms/lib/src/acbdef.h"
+#include"../../freevms/lib/src/ipldef.h"
+#include"../../freevms/pal/src/ipl.h"
 
 dirpost(void) { }
 
@@ -9,6 +11,14 @@ bufpost(void) { }
 asmlinkage void ioc$iopost(void) {
   struct _irp * i;
   struct _pcb * p;
+  
+  if (intr_blocked(IPL$_IOPOST))
+    return;
+  
+  regtrap(REG_INTR, IPL$_IOPOST);
+
+  setipl(IPL$_IOPOST);
+
  again:
   if (!rqempty(ioc$gq_postiq)) {
     i=remqhi(ioc$gq_postiq,i);

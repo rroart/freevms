@@ -73,7 +73,8 @@
 struct _cpu {
   struct _pcb *cpu$l_curpcb;
   // struct _ktb *cpu$l_curktb;
-  unsigned char cpu$b_ipl; /* some cpus lack something. PSL IPL */  
+  unsigned char cpu$b_ipl; /* some cpus lack something. what is the connnection to PSL IPL? */  
+  unsigned short cpu$w_sisr; /* some cpus lacks... pending interrupts */
   unsigned char iplnr;
   unsigned char previpl[32];
 struct {

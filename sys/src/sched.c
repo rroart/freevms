@@ -45,6 +45,7 @@
 #include "../../freevms/lib/src/ipldef.h"
 #include "../../freevms/pal/src/ipl.h"
 #include "../../freevms/pal/src/queue.h"
+#include"../../freevms/lib/src/system_service_setup.h"
 
 extern void timer_bh(void);
 extern void tqueue_bh(void);
@@ -622,7 +623,14 @@ asmlinkage void sch$resched(void) {
   //    old=spl(IPL$_SCHED);
   // svpctx, do not think we need to do this here
 
-  spin_lock_irq(&runqueue_lock);
+  if (intr_blocked(IPL$_RESCHED))
+    return;
+
+  regtrap(REG_INTR,IPL$_RESCHED);
+
+  setipl(IPL$_SCHED);
+
+  spin_lock_irq(&runqueue_lock); /* eventually change to sched? */
   release_kernel_lock(curpcb, cpuid);
 
   curpcb=cpu->cpu$l_curpcb;
@@ -679,9 +687,9 @@ int mycount=0;
    aboutish implemented */
 
 asmlinkage void schedule(void) {
-  //  SOFTINT_RESCHED_VECTOR;
+  SOFTINT_RESCHED_VECTOR;
   //__asm__ __volatile__ ("int $0x93\n");
-  sch$resched();
+  //  sch$resched();
 }
 
 asmlinkage void sch$sched(int from_sch$resched) {
@@ -700,6 +708,14 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
   if (from_sch$resched == 1)
     goto label30$;
+
+  if (intr_blocked(IPL$_SCHED))
+    return;
+
+  regtrap(REG_INTR,IPL$_SCHED);
+
+  setipl(IPL$_SCHED);
+
   sch$al_cpu_priority[curpri]=sch$al_cpu_priority[curpri] & (~ cpu->cpu$l_cpuid_mask );
   if (sch$al_cpu_priority[curpri]) 
     goto label30$;

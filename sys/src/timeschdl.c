@@ -1,6 +1,8 @@
 #include"../../freevms/pal/src/queue.h"
 #include "../../freevms/sys/src/asmlink.h"
 #include "../../freevms/lib/src/pridef.h"
+#include"../../freevms/lib/src/ipldef.h"
+#include"../../freevms/pal/src/ipl.h"
 #include <linux/linkage.h>
 #include <linux/sched.h>
 
@@ -88,6 +90,14 @@ void printtq(struct _tqe * t) {
 
 asmlinkage void exe$swtimint(void) {
   static signed int times=0;
+
+  if (intr_blocked(IPL$_TIMER))
+      return;
+
+  regtrap(REG_INTR, IPL$_TIMER);
+
+  setipl(IPL$_TIMER);
+
   times++;
   if (current->phd$w_quant>=0 && current->phd$w_quant<128) 
     sch$qend(current);

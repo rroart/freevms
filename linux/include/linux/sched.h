@@ -518,8 +518,28 @@ unsigned long pcb$l_capability_seq;
   unsigned char phd$b_type;
   unsigned char phd$b_spare_1;
   unsigned long pdg$l_pcb;
-  unsigned char phd$b_astlvl;
+  unsigned char phd$b_astlvl; /* some cpus lack something */
   unsigned short phd$w_flags;
+  union {
+    struct {
+      unsigned psl_cur_mod:2;
+      unsigned psl_prv_mod:2;
+      unsigned psl_ipl:5;
+      unsigned psl_is:1;
+    };
+    unsigned short psl;
+  };
+  union {
+    struct {
+      unsigned oldpsl_cur_mod:2;
+      unsigned oldpsl_prv_mod:2;
+      unsigned oldpsl_ipl:5;
+      unsigned oldpsl_is:1;
+    };
+    unsigned short oldpsl;
+  };
+  unsigned short pslstk[16];
+  unsigned char pslindex;
 };
 /* will need a PCB. PCB is a null PCB placeholder */
 

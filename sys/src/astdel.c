@@ -6,6 +6,8 @@
 #include "../../freevms/lib/src/evtdef.h"
 #include "../../freevms/lib/src/statedef.h"
 #include "../../freevms/pal/src/queue.h"
+#include"../../freevms/lib/src/ipldef.h"
+#include"../../freevms/pal/src/ipl.h"
 #include <linux/sched.h>
 #include <linux/smp.h>
 
@@ -36,11 +38,19 @@ asmlinkage void sch$astdel(void) {
   struct _acb * dummy, *acb;
  more:
   /*lock*/
+  if (intr_blocked(IPL$_ASTDEL))
+    return;
+
+  regtrap(REG_INTR, IPL$_ASTDEL);
+
+  setipl(IPL$_SYNCH);
+
   /* { int i;
   printk("here ast\n");
   for (i=0; i<1000000; i++) ;
   } */
-  if (aqempty(&p->pcb$l_astqfl)) return;
+  if (aqempty(&p->pcb$l_astqfl)) 
+    return;
   /* { int i,j;
   printk("here ast2 %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl);
   for (j=0; j<20; j++) for (i=0; i<1000000000; i++) ;

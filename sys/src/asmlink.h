@@ -12,5 +12,6 @@ asmlinkage void sch$sched(int);
 asmlinkage void sch$resched(void);
 asmlinkage void schedule(void);
 asmlinkage void exe$swtimint(void);
+asmlinkage void exe$forkdspth(void);
 asmlinkage int system_call(void);
 asmlinkage int vmssystem_call(void);

@@ -3,10 +3,16 @@
 #include"../../freevms/lib/src/ucbdef.h"
 #include"../../freevms/lib/src/irpdef.h"
 #include"../../freevms/lib/src/fkbdef.h"
+#include"../../freevms/lib/src/ipldef.h"
+#include"../../freevms/pal/src/ipl.h"
 #include <linux/smp.h>
 #include <asm/current.h>
 
 asmlinkage void exe$forkdspth(void) {
+  if (intr_blocked(IPL$_QUEUEAST))
+    return;
+  regtrap(REG_INTR, IPL$_QUEUEAST);
+  setipl(IPL$_TIMER);
 }
 
 void exe$iofork(struct _ucb * u, struct _irp * i) {

@@ -2027,6 +2027,7 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
 
   /* take lnm stuff from syslnm.c etc */
 
+  printk("Done system data cells\n");
 }
 
 

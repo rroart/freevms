@@ -108,12 +108,19 @@ ENOSYS = 38
 	popl %ds;	\
 	popl %es;
 
+#define PUSHPSL \
+        PUSHR_ALL; \
+        call pushpsl; \
+        POPR_ALL; 
+
 #define REI \
         PUSHR_ALL; \
-        call sw_ast; \
+        call myrei; \
         POPR_ALL; \
         iret;
-
+/* also need to do stack changes */
+/* and astlvl checks */
+  
 #define SAVE_ALL \
 	cld; \
 	pushl %es; \
@@ -165,7 +172,8 @@ ENOSYS = 38
 	andl %esp, reg
 
 ENTRY(lcall7)
-	pushfl			# We get a different stack layout with call gates,
+        PUSHPSL
+        pushfl			# We get a different stack layout with call gates,
 	pushl %eax		# which has to be cleaned up later..
 	SAVE_ALL
 	movl EIP(%esp),%eax	# due to call gates, this is eflags, not eip..
@@ -186,6 +194,7 @@ ENTRY(lcall7)
 	jmp ret_from_sys_call
 
 ENTRY(lcall27)
+        PUSHPSL
 	pushfl			# We get a different stack layout with call gates,
 	pushl %eax		# which has to be cleaned up later..
 	SAVE_ALL
@@ -224,6 +233,7 @@ ENTRY(ret_from_fork)
  */
 
 ENTRY(system_call)
+        PUSHPSL
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -278,7 +288,8 @@ badsys:
 
 	ALIGN
 ENTRY(ret_from_intr)
-	GET_CURRENT(%ebx)
+        PUSHPSL                         # bad place. do better for new I/O
+        GET_CURRENT(%ebx)
 ret_from_exception:
 	movl EFLAGS(%esp),%eax		# mix EFLAGS and CS
 	movb CS(%esp),%al
@@ -293,6 +304,7 @@ reschedule:
 
 
 ENTRY(vmssystem_call3)
+        PUSHPSL
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -304,6 +316,7 @@ ENTRY(vmssystem_call3)
         jmp syscall_common
 
 ENTRY(vmssystem_call)
+        PUSHPSL
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -373,6 +386,7 @@ vmsreschedule:
 	jmp vmsret_from_sys_call
 
 ENTRY(divide_error)
+        PUSHPSL
 	pushl $0		# no error code
 	pushl $ SYMBOL_NAME(do_divide_error)
 	ALIGN
@@ -405,16 +419,19 @@ error_code:
 	jmp ret_from_exception
 
 ENTRY(coprocessor_error)
+        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_coprocessor_error)
 	jmp error_code
 
 ENTRY(simd_coprocessor_error)
+        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_simd_coprocessor_error)
 	jmp error_code
 
 ENTRY(device_not_available)
+        PUSHPSL
 	pushl $-1		# mark this as an int
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -430,11 +447,13 @@ device_not_available_emulate:
 	jmp ret_from_exception
 
 ENTRY(debug)
+        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_debug)
 	jmp error_code
 
 ENTRY(nmi)
+        PUSHPSL
 	pushl %eax
 	SAVE_ALL
 	movl %esp,%edx
@@ -445,95 +464,128 @@ ENTRY(nmi)
 	RESTORE_ALL
 
 ENTRY(int3)
+        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_int3)
 	jmp error_code
 
 ENTRY(overflow)
+        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_overflow)
 	jmp error_code
 
 ENTRY(bounds)
+        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_bounds)
 	jmp error_code
 
 ENTRY(invalid_op)
+        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_invalid_op)
 	jmp error_code
 
 ENTRY(coprocessor_segment_overrun)
+        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_coprocessor_segment_overrun)
 	jmp error_code
 
 ENTRY(double_fault)
+        PUSHPSL
 	pushl $ SYMBOL_NAME(do_double_fault)
 	jmp error_code
 
 ENTRY(invalid_TSS)
+        PUSHPSL
 	pushl $ SYMBOL_NAME(do_invalid_TSS)
 	jmp error_code
 
 ENTRY(segment_not_present)
+        PUSHPSL
 	pushl $ SYMBOL_NAME(do_segment_not_present)
 	jmp error_code
 
 ENTRY(stack_segment)
+        PUSHPSL
 	pushl $ SYMBOL_NAME(do_stack_segment)
 	jmp error_code
 
 ENTRY(general_protection)
+        PUSHPSL
 	pushl $ SYMBOL_NAME(do_general_protection)
 	jmp error_code
 
 ENTRY(alignment_check)
+        PUSHPSL
 	pushl $ SYMBOL_NAME(do_alignment_check)
 	jmp error_code
 
 ENTRY(page_fault)
+        PUSHPSL
 	pushl $ SYMBOL_NAME(do_page_fault)
 	jmp error_code
 
 ENTRY(machine_check)
+        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_machine_check)
 	jmp error_code
 
 ENTRY(spurious_interrupt_bug)
+        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_spurious_interrupt_bug)
 	jmp error_code
 
 ENTRY(test_code)
         PUSHR_ALL
+        call pushpsl
         call SYMBOL_NAME(do_test_code)
         POPR_ALL
         REI
 
 ENTRY(sched_vector)
         PUSHR_ALL
+#        call pushpsl
         call SYMBOL_NAME(schedule)
         POPR_ALL
         REI
 
 ENTRY(resched_vector)
         PUSHR_ALL
+#        call pushpsl
         call SYMBOL_NAME(sch$resched)
         POPR_ALL
         REI
 
 ENTRY(timer_vector)
         PUSHR_ALL
+#        call pushpsl
         call SYMBOL_NAME(exe$swtimint)
         POPR_ALL
         REI
 
 ENTRY(iopost_vector)
         PUSHR_ALL
+#        call pushpsl
         call SYMBOL_NAME(ioc$iopost)
+        POPR_ALL
+        REI
+
+ENTRY(astdel_vector)
+        PUSHR_ALL
+#        call pushpsl
+        call SYMBOL_NAME(sch$astdel)
+        POPR_ALL
+        REI
+
+ENTRY(queueast_vector)
+        PUSHR_ALL
+#        call pushpsl
+        call SYMBOL_NAME(exe$forkdspth)
         POPR_ALL
         REI
 

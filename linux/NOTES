@@ -15,7 +15,7 @@ Find out how to implement system calls/services with more than 6 params.
 
 PAL:
 INSQUE, REMQUE are uninterruptible: not implemented yet.
-IPL/Interrupt system: not implemented yet.
+IPL/Interrupt system: not implemented yet? Have tried...
 ADAWI, BBCCI, BBSSI, INSQHI, INSQTI, REMQHI, REMTQI are interlocked: niy.
 PROBE: not implemented yet.
 CHMx: not implemented yet.
