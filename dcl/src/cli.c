@@ -4327,7 +4327,7 @@ static unsigned long int_create_logical_name (unsigned long h_input, unsigned lo
   mytabnam.dsc$a_pointer=argv[1];
 
 
-  itm[0].item_code=1;
+  itm[0].item_code=LNM$_STRING;
   itm[0].buflen=strlen(argv[3]);
   itm[0].bufaddr=argv[3];
   bzero(&itm[1],sizeof(struct item_list_3));
