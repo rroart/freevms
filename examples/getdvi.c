@@ -18,9 +18,9 @@ lst[0].retlenaddr=&devlen;
 lst[1].buflen=0;
 lst[1].item_code=0;
 do {
-dvistatus=sys$device_scan(0,0,0,lst,0,0,0);
+dvistatus=sys$getdvi(0,0,0,lst,0,0,0,0);
 printf("%s\n",devname);
-} while (jpistatus == SS$_NORMAL);
+} while (dvistatus == SS$_NORMAL);
 //} while (jpistatus != SS$_NOMOREPROC);
-printf("jpistatus %x\n",dvistatus);
+printf("dvistatus %x\n",dvistatus);
 }
