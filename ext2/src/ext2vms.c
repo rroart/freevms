@@ -823,7 +823,9 @@ void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
   qhead_init(&fcb->fcb$l_wlfl);
 
   fcb->fcb$w_fid_dirnum=inode->i_dev;
-  *(unsigned long*)(&fcb->fcb$l_fid_recnum)=inode->i_ino;
+  //fcb->fcb$l_fid_recnum=inode->i_ino; // bugged
+  fcb->fcb$w_fid [1] = inode->i_ino & 0xffff;
+  fcb->fcb$w_fid [2] = inode->i_ino >> 16;
 
   insque(fcb,&vcb->vcb$l_fcbfl);
 
