@@ -16,10 +16,10 @@ clean:
 install: all
 	install -d ../../rootum/vms"$$"common/sysexe
 	install -d ../../rooti386/vms"$$"common/sysexe
-	install um/* ../../rootum/vms"$$"common/sysexe/
-	install i386/* ../../rooti386/vms"$$"common/sysexe
+	install um/*.* ../../rootum/vms"$$"common/sysexe/
+	install i386/*.* ../../rooti386/vms"$$"common/sysexe
 
-%.o: %.c
+vmount.o: vmount.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 i386/vmount${NOEXE}: vmount.o $(VMSLIBS) $(EXTERNAL2)
