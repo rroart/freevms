@@ -350,7 +350,7 @@ struct _opcfao {
   unsigned int opcf$l_opc_class_msk;
   unsigned int opcf$l_arg_count;
   union  {
-    OPCF_ARG opcf$r_item_arg [60];
+    union _opcf_arg opcf$r_item_arg [60];
     char opcf$t_item_cd [240];
     unsigned int opcf$l_item_ld [60];
   };

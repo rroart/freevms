@@ -78,31 +78,34 @@ MODULE ICMP(IDENT="1.0B",LANGUAGE(BLISS32),
 #include "tcpmacros.h"		// Local macros
 #include "snmp.h"
 
+#include <descrip.h>
+
 // Memgr.bli
 extern     MM$Seg_Get();
 extern  void    MM$Seg_Free();
 
 // IOUTIL.BLI
-extern  VOID    ASCII_DEC_BYTES();
+extern  void    ASCII_DEC_BYTES();
 
 // MacLib.mar
 extern     CALC_CHECKSUM();		// MacLib
 extern  void    SwapBytes();	// MacLib
 
 // IP.bli
-extern  VOID    IP$S}();
+extern  void    IP$SEND();
 extern  void    IP$Log();
 
 // TCP_Segin
-extern  VOID    SEG$ICMP();
+extern  void    SEG$ICMP();
 
 // UDP_Segin
-extern  VOID    UDP$ICMP();
+extern  void    UDP$ICMP();
 
 extern signed long
+log_state,
     ICMPTTL,
-    Min_Physical_Bufsize,	// Size of "small" device buffers
-    Max_Physical_Bufsize;	// Size of "large" device buffers
+    min_physical_bufsize,	// Size of "small" device buffers
+    max_physical_bufsize;	// Size of "large" device buffers
 
 
 
@@ -120,26 +123,24 @@ extern signed long
 
 struct ICM_DBLOCK
 {
-void *     ICM$Next	;
-unsigned long     ICM$Address	;
-unsigned long    ICM$Gwy
+void *     icm$next	;
+unsigned long     icm$address	;
+unsigned long    icm$gwy
 };
 
-#define    ICM_Dsize sizeof (struct ICM_DBLOCK)
+#define    ICM_DSIZE sizeof (struct ICM_DBLOCK)
 #if 0
 MACRO
     ICM_DBLOCK = BLOCK->ICM_Dsize FIELD(ICM_Dblock_Fields) %;
 #endif
 
-LITERAL
-    ICM_HSHLEN = 128,		// Length of hash table
-    ICM_HSHAND = ICM_HSHLEN-1;	// && value for forming hash values
+#define    ICM_HSHLEN 128		// Length of hash table
+#define    ICM_HSHAND ICM_HSHLEN-1	// && value for forming hash values
 
 static signed long
-    ICMHTB : VECTOR->ICM_HSHLEN; // ICMP database hash table
+    ICMHTB [ICM_HSHLEN]; // ICMP database hash table
 
-signed long
-    ICMP_MIB : ICMP_MIB_struct;	// ICMP Management Information Block
+    struct ICMP_MIB_struct * ICMP_MIB ;	// ICMP Management Information Block
 
 
 //SBTTL "ICMP routing code"
@@ -151,8 +152,9 @@ ICMP_Hash(IPA)
 
 //Hash an IP address. Returns hash value (index into ICMHTB)
 
+     char * IPA;
     {
-    return (IPA<0,8>+.IPA<8,8>+.IPA<16,8>+.IPA<24,8>) && ICM_HSHAND;
+    return (IPA[0]+IPA[1]+IPA[2]+IPA[3]) && ICM_HSHAND;
     }
 
 ICMP_Find(IPADDR)
@@ -165,18 +167,17 @@ ICMP_Find(IPADDR)
 //with AST's disabled.
 
     {
-    signed long
 	struct ICM_DBLOCK * ICPTR;
     ICPTR = ICMHTB[ICMP_HASH(IPADDR)];
     while (ICPTR != 0)
-	if (ICPTR->ICM$Address == IPADDR)
-	    return ICPTR
+	if (ICPTR->icm$address == IPADDR)
+	  return ICPTR;
 	else
-	    ICPTR = ICPTR->ICM$Next;
+	    ICPTR = ICPTR->icm$next;
     return 0;
     }
 
-void ICMP_Add(GWY_Addr,struct IP_Structure * IP_Pkt)
+void ICMP_Add(long GWY_Addr,struct ip_structure * IP_Pkt)
 
 //Here to add an entry to the ICMP routing table.
 //   GWY_Addr has the IP address of a gateway
@@ -184,24 +185,23 @@ void ICMP_Add(GWY_Addr,struct IP_Structure * IP_Pkt)
 //   the ICMP redirect to be generated.
 
     {
-    EXTERNAL ROUTINE
-	LIB$GET_VM : ADDRESSING_MODE(GENERAL);
+extern	LIB$GET_VM();
     signed long
-	IPdest,
+    IPdest;
 	struct ICM_DBLOCK * ICMblock;
-    IPdest = IP_pkt->IPH$Dest;
+    IPdest = IP_Pkt->iph$dest;
     ICMblock = ICMP_Find(IPdest);
     if (ICMblock == 0)
 	{
 	signed long
 	    HSHVAL;
-	LIB$GET_VM(%REF(ICM_DSIZE*4),ICMblock);
+	LIB$GET_VM(/*%REF*/(ICM_DSIZE*4),ICMblock);
 	HSHVAL = ICMP_Hash(IPdest);
-	ICMblock->ICM$Next = ICMHTB[HSHVAL];
+	ICMblock->icm$next = ICMHTB[HSHVAL];
 	ICMHTB[HSHVAL] = ICMblock;
 	};
-    ICMblock->ICM$Address = IPdest;
-    ICMblock->ICM$GWY = GWY_addr;
+    ICMblock->icm$address = IPdest;
+    ICMblock->icm$gwy = GWY_Addr;
     }
 
 ICMP$Check(IPaddr)
@@ -212,12 +212,11 @@ ICMP$Check(IPaddr)
 //  !=0	IP address of gateway from ICMP info.
 
     {
-    signed long
 	struct ICM_DBLOCK * ICMptr;
     if ((ICMptr = ICMP_Find(IPaddr)) == 0)
-	return 0
+      return 0;
     else
-	return ICMptr->ICM$GWY;
+	return ICMptr->icm$gwy;
     }
 
 
@@ -226,171 +225,179 @@ ICMP$Check(IPaddr)
     Decode input ICMP packet and dispatch according to packet type.
     Also, pass packet up to protocol-specific ICMP handler if we think
     that a higher-level protocol wants to know about it.
- )%
+ */
 
-FORWARD ROUTINE
- void    ICMP_Pproblem,
- void    ICMP_Tstamp,
- void    ICMP_Info,
- void    ICMP_Echo;
+void    ICMP_Pproblem();
+void    ICMP_Tstamp();
+void    ICMP_Info();
+ void    ICMP_Echo();
 
 void ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf)
 
 // Main ICMP input routine.
 // Verify ICMP checksum and dispatch according to function code.
 
+     struct ip_structure * IPptr;
+	struct icmp_header * ICMptr;
     {
-    EXTERNAL ROUTINE
-	ICMP$User_Input;
+extern	ICMP$User_Input();
     signed long
 	ICMP_swapped  = 0,
 	ICMdat,ICMtype,
 	Sum,
 	DataSize ;
-    MAP
-	struct IP_Structure * IPptr,
-	struct ICMP_Structure * ICMptr;
 
     // Keep count of incoming packets
-    ICMP_MIB->MIB$icmpInMsgs = ICMP_MIB->mib$icmpInMsgs + 1;
+    ICMP_MIB->MIB$icmpInMsgs = ICMP_MIB->MIB$icmpInMsgs + 1;
 
     Sum = Calc_checksum(ICMlen,ICMptr);
-    if (sum NEQU %X"FFFF")
+    if (Sum != 0xFFFF)
 	{
-	ICMP_MIB->MIB$icmpInErrors = ICMP_MIB->mib$icmpInErrors + 1;
+	ICMP_MIB->MIB$icmpInErrors = ICMP_MIB->MIB$icmpInErrors + 1;
 	if ($$LOGF(LOG$ICMP))
 	    QL$FAO("!%T ICMP recv checksum error, cksum=!XL!/",0,Sum);
-	MM$Seg_Free(Bufsize,Buf);
+	MM$Seg_Free(bufsize,buf);
 	return;
 	};
 
     // Fix-up the ICMP word ordering
-    SwapBytes(ICMP_Header_Size/2,ICMptr);
+    SwapBytes(ICMP_HEADER_SIZE/2,ICMptr);
     ICMdat = 0;
-    ICMtype = ICMptr->ICM$TYPE;
+    ICMtype = ICMptr->icm$type;
 
     if ($$LOGF(LOG$ICMP))
 	QL$FAO("!%T ICMP recv: type=!SL,code=!SL,var=!XL!/",
-		0,ICMtype,ICMptr->ICM$CODE,ICMptr->ICM$VAR);
+		0,ICMtype,ICMptr->icm$code,ICMptr->icm$var);
 
     // Now check to see if any users are looking at ICMP packets...
-    ICMP$User_Input(IPptr->IPH$Source,IPptr->IPH$Dest,
+    ICMP$User_Input(IPptr->iph$source,IPptr->iph$dest,
 		    bufsize,buf,
 		    ICMlen,ICMptr);
 
     // Do IP/ICMP level processing for ICMP packet
 
-    SELECTONE ICMtype OF
-	SET
+    switch ( ICMtype) 
+      {
 
 	// First are "special" ICMP message - not in reply to IP packet
-	[ICM_ECHO]:
+	case ICM_ECHO:
 	    {
 	    ICMP_MIB->MIB$icmpInEchos =
-		ICMP_MIB->mib$icmpInEchos + 1;
+		ICMP_MIB->MIB$icmpInEchos + 1;
 
 	    ICMP_Echo(ICMptr,ICMlen,IPptr,IPlen);
 	    };
-	[ICM_TSTAMP]:
+	    break;
+
+	case ICM_TSTAMP:
 	    {
 	    ICMP_MIB->MIB$icmpInTimeStamps =
-		ICMP_MIB->mib$icmpInTimeStamps + 1;
+		ICMP_MIB->MIB$icmpInTimeStamps + 1;
 
 	    ICMP_Tstamp(ICMptr,ICMlen,IPptr,IPlen);
 	    };
-	[ICM_IREQUEST]:
+	    break;
+
+	case ICM_IREQUEST:
 	    {
 	    ICMP_Info(ICMptr,ICMlen,IPptr,IPlen);
 	    };
+	    break;
 
-	[ICM_AMREQUEST]:
+	case ICM_AMREQUEST:
 	    {
 	    ICMP_MIB->MIB$icmpInAddrMasks =
-		ICMP_MIB->mib$icmpInAddrMasks + 1;
+		ICMP_MIB->MIB$icmpInAddrMasks + 1;
 
 	    ICMP_Tstamp(ICMptr,ICMlen,IPptr,IPlen);
 	    };
+	    break;
 
 	// Others are "standard" ICMP messages,
 	// and contain the header of the offending packet
-	[ICM_DUNREACH,ICM_SQUENCH,ICM_REDIRECT,ICM_TEXCEED,ICM_PPROBLEM]:
+	case ICM_DUNREACH: case ICM_SQUENCH: case ICM_REDIRECT: case ICM_TEXCEED: case ICM_PPROBLEM:
 	    {
+	      struct ip_structure * IPhdr;
 	    signed long
-		ptype,struct IP_Structure * IPhdr,IPdat,IPhlen,IPlen,passup;
+		ptype,IPdat,IPhlen,IPlen,passup;
 	    passup = TRUE;
-	    IPhdr = ICMptr->ICM$Data;
-	    IPhlen = IPhdr->IPH$Swap_IHL*4;
+	    IPhdr = ICMptr->icm$data;
+	    IPhlen = IPhdr->iph$swap_ihl*4;
 
 // Fix the byteswapped packet
 
-	    Swapbytes(IP_hdr_swap_size,IPhdr);
+	    Swapbytes(IP_HDR_SWAP_SIZE,IPhdr);
 	    if ($$LOGF(LOG$ICMP))
-		IP$Log(%ASCID"ICMrcv/IP",IPhdr);
+		IP$Log(ASCID("ICMrcv/IP"),IPhdr);
 
 // Calculate lengths, pointer to protocol data
 
-	    ptype = IPhdr->IPH$Protocol;
-	    IPdat = IPhdr+.IPhlen;
-	    IPlen = IPhdr->IPH$Total_Length;
-	    SELECTONE ICMtype OF
-	    SET
-	    [ICM_DUNREACH]:
+	    ptype = IPhdr->iph$protocol;
+	    IPdat = IPhdr+IPhlen;
+	    IPlen = IPhdr->iph$total_length;
+	    switch ( ICMtype)
+	      {
+	    case ICM_DUNREACH:
 		{
 		ICMP_MIB->MIB$icmpInDestUnreachs =
-			ICMP_MIB->mib$icmpInDestUnreachs + 1;
+			ICMP_MIB->MIB$icmpInDestUnreachs + 1;
 
 		if ($$LOGF(LOG$ICMP))
 			QL$FAO("!%T ICMP recv: Destination Unreachable!/",0);
 		};
+		  break;
 
-	    [ICM_SQUENCH]:
+	    case ICM_SQUENCH:
 		{
 		ICMP_MIB->MIB$icmpInSrcQuenchs =
-			ICMP_MIB->mib$icmpInSrcQuenchs + 1;
+			ICMP_MIB->MIB$icmpInSrcQuenchs + 1;
 
 		if ($$LOGF(LOG$ICMP))
 			QL$FAO("!%T ICMP recv: Source Quench!/",0);
 		};
+		break;
 
-	    [ICM_REDIRECT]:
+	    case ICM_REDIRECT:
 		{
 		ICMP_MIB->MIB$icmpInRedirects =
-			ICMP_MIB->mib$icmpInRedirects + 1;
+			ICMP_MIB->MIB$icmpInRedirects + 1;
 
-		Swapbytes(2,ICMptr->ICM$R_GWY);
-		ICMP_Add(ICMptr->ICM$R_GWY,ICMptr->ICM$Data)
+		Swapbytes(2,ICMptr->icm$r_gwy);
+		ICMP_Add(ICMptr->icm$r_gwy,ICMptr->icm$data);
 		};
+		break;
 
-	    [ICM_TEXCEED]:
+	    case ICM_TEXCEED:
 		{
 		ICMP_MIB->MIB$icmpInTimeExcds =
-			ICMP_MIB->mib$icmpInTimeExcds + 1;
+			ICMP_MIB->MIB$icmpInTimeExcds + 1;
 		};
+		break;
 
-	    [ICM_PPROBLEM]:
+	    case ICM_PPROBLEM:
 		{
 		ICMP_MIB->MIB$icmpInParamProbs =
-			ICMP_MIB->mib$icmpInParamProbs + 1;
+			ICMP_MIB->MIB$icmpInParamProbs + 1;
 
-		if (ICMptr->ICM$Code != 0)
-		    ICMdat = ICMptr->ICM$P_Ptr
+		if (ICMptr->icm$code != 0)
+		  ICMdat = ICMptr->icm$p_ptr;
 		else
 		    ICMdat = 0;
-		if (ICMdat LSS IPdat) // IP-level problem
+		if (ICMdat < IPdat) // IP-level problem
 		    {
 		    ICMP_Pproblem(ICMptr,ICMlen,IPptr,IPlen,ICMdat);
 		    passup = FALSE;
 		    };
 		};
-	    TES;
+	    };
 
 // Do higher-level processing for ICMP packet
 
 	    DataSize = IPlen - IPhlen ;
 	    if (passup)
-		SELECTONE ptype OF
-		SET
-		[TCP_Protocol]:
+	      switch ( ptype)
+		{
+		case TCP_PROTOCOL:
 		    {
 		    if ((DataSize > bufsize))
 			{
@@ -398,14 +405,15 @@ void ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf)
 			}
 		    else
 			{
-			SEG$ICMP(ICMtype,ICMdat,IPhdr->IPH$Source,
-			     IPhdr->IPH$Dest,IPdat,DataSize,
+			SEG$ICMP(ICMtype,ICMdat,IPhdr->iph$source,
+			     IPhdr->iph$dest,IPdat,DataSize,
 			     buf,bufsize);
 			} ;
 		    return;
 		    };
+		    break;
 
-		[UDP_Protocol]:
+		case UDP_PROTOCOL:
 		    {
 		    if ((DataSize > bufsize))
 			{
@@ -413,55 +421,60 @@ void ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf)
 			}
 		    else
 			{
-			UDP$ICMP(ICMtype,ICMdat,IPhdr->IPH$Source,
-			     IPhdr->IPH$Dest,IPdat,DataSize,
+			UDP$ICMP(ICMtype,ICMdat,IPhdr->iph$source,
+			     IPhdr->iph$dest,IPdat,DataSize,
 			     buf,bufsize);
 			} ;
 		    return;
 		    };
+		    break;
 
-		[OTHERWISE]:
+		default:
 		    if ($$LOGF(LOG$ICMP))
 			QL$FAO("!%T ICMP - Unknown protocol !XL!/",0,ptype);
-		TES;
+		};
 	    };
 
-	[ICM_TSREPLY] :
+	case ICM_TSREPLY :
 	    {
-	    ICMP_MIB->MIB$icmpInTimestampReps =
-		ICMP_MIB->mib$icmpInTimestampReps + 1;
-	    QL$FAO("!%T ICMP recv: Time Stamp reply. how did this happen?!/",0)
+	    ICMP_MIB->MIB$icmpInTimeStampreps =
+		ICMP_MIB->MIB$icmpInTimeStampreps + 1;
+	    QL$FAO("!%T ICMP recv: Time Stamp reply. how did this happen?!/",0);
 	    };
+	    break;
 
-	[ICM_IREPLY] :
+	case ICM_IREPLY :
 	    {
-	    QL$FAO("!%T ICMP recv: Info reply. how did this happen?!/",0)
+	      QL$FAO("!%T ICMP recv: Info reply. how did this happen?!/",0);
 	    };
+	    break;
 
-	[ICM_AMREPLY] :
+	case ICM_AMREPLY :
 	    {
 	    ICMP_MIB->MIB$icmpInAddrMaskReps =
-		ICMP_MIB->mib$icmpInAddrMaskReps + 1;
-	    QL$FAO("!%T ICMP recv: AddrMask reply. how did this happen?!/",0)
+		ICMP_MIB->MIB$icmpInAddrMaskReps + 1;
+	    QL$FAO("!%T ICMP recv: AddrMask reply. how did this happen?!/",0);
 	    };
+	    break;
 
-	[ICM_EREPLY]:
+	case ICM_EREPLY:
 	    {
 	    ICMP_MIB->MIB$icmpInEchoReps =
-		ICMP_MIB->mib$icmpInEchoReps + 1;
-	    QL$FAO("!%T ICMP recv: Echo reply!/",0)
+		ICMP_MIB->MIB$icmpInEchoReps + 1;
+	    QL$FAO("!%T ICMP recv: Echo reply!/",0);
 	    };
+	    break;
 
-	[OTHERWISE]:
+	default:
 	    {
-	    ICMP_MIB->MIB$icmpInErrors = ICMP_MIB->mib$icmpInErrors + 1;
+	    ICMP_MIB->MIB$icmpInErrors = ICMP_MIB->MIB$icmpInErrors + 1;
 	    if ($$LOGF(LOG$ICMP))
 		QL$FAO("!%T ICMP recv: unknown ICMP type !XL!/",0,ICMtype);
 	    };
-    TES;
+    };
 
     // Release the buffer
-    MM$Seg_Free(BUFSIZE,BUF);
+    MM$Seg_Free(bufsize,buf);
     }
 
 void ICMP_Pproblem(ICMpkt,ICMlen,IPpkt,IPlen,ICMpptr)
@@ -474,65 +487,64 @@ void ICMP_Pproblem(ICMpkt,ICMlen,IPpkt,IPlen,ICMpptr)
     XQL$FAO(LOG$ICMP,"!%T ICMP recv: IP param=!XL!/",ICMpptr);
     }
 
-void ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen)
+void ICMP_Echo(ICMpkt,ICMlen,IPPKT,IPlen)
 
 // Handle ICMP echo request.
 // Copy packet, convert to echo reply, queue for output.
 //~~~ This routine should be simpler - should just reverse the packet and
 //~~~ queue for output, instead of creating new packet, etc.
 
+     struct icmp_header * ICMpkt;
+	struct ip_structure * IPPKT;
     {
-    MAP
-	struct ICMP_Structure * ICMpkt,
-	struct IP_Structure * IPpkt;
     signed long
 	Buf,
 	Bufsize,
-	struct ICMP_Structure * Seg,
-	Segsize,
-	DESC$STR_ALLOC(srcstr,20),
+      Segsize;
+    struct icmp_header * Seg;
+    DESC$STR_ALLOC(srcstr,20);
 	DESC$STR_ALLOC(dststr,20);
 
 // Check the TTL to see if this packet has expired
 
-    IPPKT->IPH$TTL = IPPKT->IPH$TTL - 1;
-    if (IPPKT->IPH$TTL <= 0)
+    IPPKT->iph$ttl = IPPKT->iph$ttl - 1;
+    if (IPPKT->iph$ttl <= 0)
 	{
 	if ($$LOGF(LOG$ICMP))
 	    {
-	    ASCII_DEC_BYTES(srcstr,4,IPPKT->IPH$SOURCE,
+	    ASCII_DEC_BYTES(srcstr,4,IPPKT->iph$source,
 			    srcstr->dsc$w_length);
-	    ASCII_DEC_BYTES(dststr,4,IPPKT->IPH$DEST,
+	    ASCII_DEC_BYTES(dststr,4,IPPKT->iph$dest,
 			    dststr->dsc$w_length);
 	    ICMP_MIB->MIB$icmpOutErrors =
-		ICMP_MIB->mib$icmpOutErrors + 1;
+		ICMP_MIB->MIB$icmpOutErrors + 1;
 	    QL$FAO("!%T ICMP_ECHO: TTL exceeded, SRC=!AS,DST=!AS,ID=!UL!/",
-		   0,srcstr,dststr,IPPKT->IPH$Ident);
+		   0,srcstr,dststr,IPPKT->iph$ident);
 	    };
 	return;
 	};
 
 // Calculate size of physical buffer to use
 
-    Bufsize = Device_Header + IPlen;
-    if (Bufsize <= MIN_PHYSICAL_BUFSIZE)
-	Bufsize = MIN_PHYSICAL_BUFSIZE
+    Bufsize = DEVICE_HEADER + IPlen;
+    if (Bufsize <= min_physical_bufsize)
+      Bufsize = min_physical_bufsize;
     else
-	if (Bufsize <= MAX_PHYSICAL_BUFSIZE)
-	    Bufsize = MAX_PHYSICAL_BUFSIZE
+	if (Bufsize <= max_physical_bufsize)
+	  Bufsize = max_physical_bufsize;
 	else
 	    {
 	    if ($$LOGF(LOG$ICMP))
 		{
-		ASCII_DEC_BYTES(srcstr,4,IPPKT->IPH$SOURCE,
+		ASCII_DEC_BYTES(srcstr,4,IPPKT->iph$source,
 			        srcstr->dsc$w_length);
-		ASCII_DEC_BYTES(dststr,4,IPPKT->IPH$DEST,
+		ASCII_DEC_BYTES(dststr,4,IPPKT->iph$dest,
 				dststr->dsc$w_length);
 
 		ICMP_MIB->MIB$icmpOutErrors =
-			ICMP_MIB->mib$icmpOutErrors + 1;
+			ICMP_MIB->MIB$icmpOutErrors + 1;
 		QL$FAO("!%T ICMP_ECHO: PKT too large,SRC=!AS,DST=!AS,ID=!UL!/",
-		   0,srcstr,dststr,IPPKT->IPH$Ident);
+		   0,srcstr,dststr,IPPKT->iph$ident);
 		};
 	    return;
 	    };
@@ -540,7 +552,7 @@ void ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen)
 // Allocate the segment.
 
     Buf = MM$Seg_Get(Bufsize);
-    Seg = Buf + Device_header + IP_hdr_byte_size;
+    Seg = Buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
     Segsize = ICMlen;
 
 // Copy the packet
@@ -549,35 +561,35 @@ void ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen)
 
 // Turn it into an echo reply
 
-    Seg->ICM$TYPE = ICM_EREPLY;
+    Seg->icm$type = ICM_EREPLY;
 
 // Calculate ICMP checksum
 
-    Seg->ICM$CKSUM = 0;
+    Seg->icm$cksum = 0;
 
 // Do logging, if necessary
 
     if ($$LOGF(LOG$ICMP))
 	QL$FAO("!%T ICMP echo rply: id=!SL, seq=!SL!/",
-	       0, Seg->ICM$E_ID, Seg->ICM$E_SEQ);
+	       0, Seg->icm$e_id, Seg->icm$e_seq);
 
 // Swap the header bytes and compute the checksum
 
-    SwapBytes(ICMP_Header_Size/2,Seg);
-    Seg->ICM$CKSUM = Calc_Checksum(Segsize, Seg);
+    SwapBytes(ICMP_HEADER_SIZE/2,Seg);
+    Seg->icm$cksum = Calc_Checksum(Segsize, Seg);
 
 // Send packet, preserving ID, TOS, TTL, etc.
-//!!HACK!!// IPPKT->IPH$DEST is wrong//  what about broadcasts?
+//!!HACK!!// IPPKT->iph$dest is wrong//  what about broadcasts?
 
-    IP$S}(IPPKT->IPH$DEST, IPPKT->IPH$SOURCE, IPPKT->IPH$Type_Service,
-	    IPPKT->IPH$TTL, Seg, Segsize, IPPKT->IPH$IDent,
-	    False, True, ICMP_Protocol, Buf, Bufsize);
+    IP$SEND(IPPKT->iph$dest, IPPKT->iph$source, IPPKT->iph$type_service,
+	    IPPKT->iph$ttl, Seg, Segsize, IPPKT->iph$ident,
+	    FALSE, TRUE, ICMP_Protocol, Buf, Bufsize);
 
     // Keep count of outgoing packets
-    ICMP_MIB->MIB$icmpOutMsgs = ICMP_MIB->mib$icmpOutMsgs + 1;
+    ICMP_MIB->MIB$icmpOutMsgs = ICMP_MIB->MIB$icmpOutMsgs + 1;
 
     ICMP_MIB->MIB$icmpOutEchoReps =
-	ICMP_MIB->mib$icmpOutEchoReps + 1;
+	ICMP_MIB->MIB$icmpOutEchoReps + 1;
     }
 
 void ICMP_Tstamp(ICMpkt,ICMlen,IPpkt,IPlen)
@@ -600,44 +612,43 @@ void ICMP_Info(ICMpkt,ICMlen,IPpkt,IPlen)
     return;
     }
 
-void ICMP_Send_DUNR(ICMpkt,ICMlen,IPpkt,IPlen,Code)
+void ICMP_Send_DUNR(ICMpkt,ICMlen,IPPKT,IPlen,code)
 
 // Send ICMP Destination Unreachable
 // Copy packet, queue for output.
 
+     struct icmp_header * ICMpkt;
+	struct ip_structure * IPPKT;
     {
-    MAP
-	struct ICMP_Structure * ICMpkt,
-	struct IP_Structure * IPpkt;
     signed long
 	Buf,
 	Bufsize,
-	struct ICMP_Structure * Seg,
-	Segsize,
-	DESC$STR_ALLOC(srcstr,20),
+      Segsize;
+    struct icmp_header * Seg;
+    DESC$STR_ALLOC(srcstr,20);
 	DESC$STR_ALLOC(dststr,20);
 
 // Calculate size of physical buffer to use
 
-    Bufsize = Device_Header + IPlen;
-    if (Bufsize <= MIN_PHYSICAL_BUFSIZE)
-	Bufsize = MIN_PHYSICAL_BUFSIZE
+    Bufsize = DEVICE_HEADER + IPlen;
+    if (Bufsize <= min_physical_bufsize)
+      Bufsize = min_physical_bufsize;
     else
-	if (Bufsize <= MAX_PHYSICAL_BUFSIZE)
-	    Bufsize = MAX_PHYSICAL_BUFSIZE
+	if (Bufsize <= max_physical_bufsize)
+	  Bufsize = max_physical_bufsize;
 	else
 	    {
 	    if ($$LOGF(LOG$ICMP))
 		{
-		ASCII_DEC_BYTES(srcstr,4,IPPKT->IPH$SOURCE,
+		ASCII_DEC_BYTES(srcstr,4,IPPKT->iph$source,
 			        srcstr->dsc$w_length);
-		ASCII_DEC_BYTES(dststr,4,IPPKT->IPH$DEST,
+		ASCII_DEC_BYTES(dststr,4,IPPKT->iph$dest,
 				dststr->dsc$w_length);
 
 		ICMP_MIB->MIB$icmpOutErrors =
-			ICMP_MIB->mib$icmpOutErrors + 1;
+			ICMP_MIB->MIB$icmpOutErrors + 1;
 		QL$FAO("!%T ICMP_ECHO: PKT too large,SRC=!AS,DST=!AS,ID=!UL!/",
-		   0,srcstr,dststr,IPPKT->IPH$Ident);
+		   0,srcstr,dststr,IPPKT->iph$ident);
 		};
 	    return;
 	    };
@@ -645,7 +656,7 @@ void ICMP_Send_DUNR(ICMpkt,ICMlen,IPpkt,IPlen,Code)
 // Allocate the segment.
 
     Buf = MM$Seg_Get(Bufsize);
-    Seg = Buf + Device_header + IP_hdr_byte_size;
+    Seg = Buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
     Segsize = ICMlen;
 
 // Copy the packet
@@ -654,36 +665,34 @@ void ICMP_Send_DUNR(ICMpkt,ICMlen,IPpkt,IPlen,Code)
 
 // Set Type and Code
 
-    Seg->ICM$TYPE = ICM_DUNREACH ;
-    Seg->ICM$CODE = code ;
+    Seg->icm$type = ICM_DUNREACH ;
+    Seg->icm$code = code ;
 
 // Calculate ICMP checksum
 
-    Seg->ICM$CKSUM = 0;
+    Seg->icm$cksum = 0;
 
 // Do logging, if necessary
 
     if ($$LOGF(LOG$ICMP))
 	QL$FAO("!%T ICMP send DUNR: id=!SL, seq=!SL, code=!SL!/",
-	       0, Seg->ICM$E_ID, Seg->ICM$E_SEQ, Seg->ICM$CODE);
+	       0, Seg->icm$e_id, Seg->icm$e_seq, Seg->icm$code);
 
 // Swap the header bytes and compute the checksum
 
-    SwapBytes(ICMP_Header_Size/2,Seg);
-    Seg->ICM$CKSUM = Calc_Checksum(Segsize, Seg);
+    SwapBytes(ICMP_HEADER_SIZE/2,Seg);
+    Seg->icm$cksum = Calc_Checksum(Segsize, Seg);
 
 // Send packet, preserving ID, TOS, TTL, etc.
-//!!HACK!!// IPPKT->IPH$DEST is wrong//  what about broadcasts?
+//!!HACK!!// IPPKT->iph$dest is wrong//  what about broadcasts?
 
-    IP$S}(IPPKT->IPH$DEST, IPPKT->IPH$SOURCE, IPPKT->IPH$Type_Service,
-	    ICMPTTL, Seg, Segsize, IPPKT->IPH$IDent,
-	    False, True, ICMP_Protocol, Buf, Bufsize);
+    IP$SEND(IPPKT->iph$dest, IPPKT->iph$source, IPPKT->iph$type_service,
+	    ICMPTTL, Seg, Segsize, IPPKT->iph$ident,
+	    FALSE, TRUE, ICMP_Protocol, Buf, Bufsize);
 
     // Keep count of outgoing packets
-    ICMP_MIB->MIB$icmpOutMsgs = ICMP_MIB->mib$icmpOutMsgs + 1;
+    ICMP_MIB->MIB$icmpOutMsgs = ICMP_MIB->MIB$icmpOutMsgs + 1;
 
     ICMP_MIB->MIB$icmpOutDestUnreachs =
-	ICMP_MIB->mib$icmpOutDestUnreachs + 1;
+	ICMP_MIB->MIB$icmpOutDestUnreachs + 1;
     }
-
-} ELUDOM

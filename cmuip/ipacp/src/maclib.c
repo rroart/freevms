@@ -395,12 +395,12 @@ l2:
 l25:	R0 = SS$_VOLINV;		// assume error
 	R1 = R5->ucb$l_vcb;	// get VCB address
 	if (R1) goto	l3;			// OK
-	return	dismount();		// oops, clean up.
+	return	Dismount();		// oops, clean up.
 l3:
 	vcb_adrs = R1;		// save VCB address.
 	R2 = R1->vcb$l_aqb;	// get AQB address
 	if (R2) goto	l4;
-	return	dismount();		// Error: Clean up
+	return	Dismount();		// Error: Clean up
 l4:
 	acp_qb_adrs = R2;		// save AQB address
 
@@ -476,7 +476,7 @@ Not_Mounted:
 	R8 = acp_qb_adrs;		// for build_VCB
 	R0 = Build_VCB(R5,R8);
 	if ((R0&1)==1) goto all_done;
-	return	dismount();		// lbs = Error.
+	return	Dismount();		// lbs = Error.
 }
 
 //SBTTL	LOCK_IODB - Lock the I/O Database
@@ -842,7 +842,7 @@ l15:
 //
 //--
 
-int dismount() {
+int Dismount() {
   int R1,R2,R3,R4,R6,R7,R9;
   struct _ucb * R5;
   struct _aqb * R0,* R8;

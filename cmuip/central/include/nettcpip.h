@@ -801,14 +801,14 @@ struct icmp_header
       struct {
 	unsigned char 	icm$type	;	// ICMP packet type
 	unsigned char 	icm$code	;	// Type-specific code
-	unsigned char 	icm$cksum	[2];	// Checksum of ICMP portion
+	unsigned short 	icm$cksum	;	// Checksum of ICMP portion
       };
       unsigned char     icm$ext1	[4];	// Blanket for first longword.
     };
 
 // Type-specific fields:
     union {
-      unsigned char     icm$var	[4];	// Type-specific data
+      unsigned long     icm$var	;	// Type-specific data
 
 // Echo request and reply (0,8)
       struct {

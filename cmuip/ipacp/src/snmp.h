@@ -93,11 +93,11 @@ SOFTWARE.
 #define NULLOBJ	 ASN_NULL 
 
 // defined types (from the SMI, RFC 1065)
-#define IPADDRESS	 (ASN_APPLICATION OR 0) 
-#define COUNTER	 (ASN_APPLICATION OR 1) 
-#define GAUGE	 (ASN_APPLICATION OR 2) 
-#define TIMETICKS	 (ASN_APPLICATION OR 3) 
-#define    OPAQUE	 (ASN_APPLICATION OR 4)
+#define IPADDRESS	 (ASN_APPLICATION | 0) 
+#define COUNTER	 (ASN_APPLICATION | 1) 
+#define GAUGE	 (ASN_APPLICATION | 2) 
+#define TIMETICKS	 (ASN_APPLICATION | 3) 
+#define    OPAQUE	 (ASN_APPLICATION | 4)
 
 
 
@@ -286,25 +286,25 @@ signed long MIB$tcpRetransSegs	 ;
 #define ICMPOUTADDRMASKREPS	 26 
 
     // TCP group magic
-#define tcpRtoAlgorithm	 1 
-#define tcpRtoMin		 2 
-#define tcpRtoMax		 3 
-#define tcpMaxConn		 4 
-#define tcpActiveOpens	 5 
-#define tcpPassiveOpens	 6 
-#define tcpAttemptFails	 7 
-#define tcpEstabResets	 8 
-#define tcpCurrEstab	 9 
-#define tcpInSegs		 10 
-#define tcpOutSegs		 11 
-#define tcpRetransSegs	 12 
+#define TCPRTOALGORITHM	 1 
+#define TCPRTOMIN		 2 
+#define TCPRTOMAX		 3 
+#define TCPMAXCONN		 4 
+#define TCPACTIVEOPENS	 5 
+#define TCPPASSIVEOPENS	 6 
+#define TCPATTEMPTFAILS	 7 
+#define TCPESTABRESETS	 8 
+#define TCPCURRESTAB	 9 
+#define TCPINSEGS		 10 
+#define TCPOUTSEGS		 11 
+#define TCPRETRANSSEGS	 12 
 
     // TCP Connection Table magic
-#define tcpConnState	 1 
-#define tcpConnLocalAddress	 2 
-#define tcpConnLocalPort	 3 
-#define tcpConnRemAddress	 4 
-#define tcpConnRemPort	 5 
+#define TCPCONNSTATE	 1 
+#define TCPCONNLOCALADDRESS	 2 
+#define TCPCONNLOCALPORT	 3 
+#define TCPCONNREMADDRESS	 4 
+#define TCPCONNREMPORT	 5 
 
     // UDP group magic
 #define UDPINDATAGRAMS	 1 

@@ -298,7 +298,7 @@ struct qb_ur_fields
       void *     ur$ucb_adrs;		// Unit Control Blk adrs.
     };
     struct {
-      void * 	ur$astadr;		// AST address for internal conn
+      int ( * 	ur$astadr)();		// AST address for internal conn
       void *	ur$astprm;		// AST param for internal conn
     };
   };

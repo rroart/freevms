@@ -111,17 +111,21 @@ MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
 	      OPTIMIZE,OPTLEVEL=3,ZIP)=
 #endif
 
-#include "SYS$LIBRARY:STARLET";
+#include <starlet.h>
 //LIBRARY "SYS$LIBRARY:LIB";			// JC
 //not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";
 #include <cmuip/central/include/netcommon.h>
 #include "tcpmacros.h"
 #include "structure.h"
 
+#include "netvms.h"
+
 #include <ssdef.h>
 #include <descrip.h>
 #include <fabdef.h>
 #include <rabdef.h>
+#include <opcdef.h>
+#include <chfdef.h>
 
 
 
@@ -383,13 +387,13 @@ GET_HEX_NUM(INPTR,VAL)
 
 //SBTTL "Log file handling routines"
 
-struct _fabdef    LOGFAB_ = { fab$l_fna : "INET$LOG:",
-    		  fab$b_fac : FAB$M_PUT,
-		  fab$b_shr : FAB$M_GET,
-		  fab$l_fop : (FAB$M_SQO),
-		  fab$b_rfm : FAB$C_STMLF,			// JC
-		  fab$b_org : FAB$C_SEQ}, *LOGFAB=&LOGFAB_;
-struct _rabdef    LOGRAB_ = { rab$l_fab: &LOGFAB_}, *LOGRAB=&LOGRAB_;
+struct _fabdef    LOGFAB_ = {   fab$l_fna : "INET$LOG:",
+				// not yet ; buggy gcc 		fab$b_fac : FAB$M_PUT,
+				// not yet	fab$b_shr : FAB$M_GET,
+				// not yet	fab$l_fop : (FAB$M_SQO),
+				fab$b_rfm : FAB$C_STMLF,			// JC
+				/* not yet fab$b_org : FAB$C_SEQ */ }, *LOGFAB=&LOGFAB_;
+struct _rabdef    LOGRAB_ = { rab$l_fab: &LOGFAB_ }, *LOGRAB=&LOGRAB_;
 
 signed long
     log_state  = 0;
@@ -412,14 +416,14 @@ LOG_OPEN (void)
     if (! RC)
 	{
 	OPR$FAO("Log file $CREATE failed, RC = !XL, STV = !XL",
-	    RC, LOGFAB->FAB$L_STV);
+	    RC, LOGFAB->fab$l_stv);
 	return FALSE;
 	};
     RC = exe$connect( LOGRAB);
     if (! RC)
 	{
 	OPR$FAO("Log file $CONNECT failed, RC = !XL, STV = !XL",
-	    RC, LOGRAB->FAB$L_STV);
+	    RC, LOGRAB->rab$l_stv);
 	return FALSE;
 	};
     return TRUE;
@@ -437,8 +441,7 @@ LOG_CLOSE (void)
 	return FALSE;
     }
 
-FORWARD ROUTINE
- VOID    LOG_FAO;
+ void    LOG_FAO();
 
 void LOG_CHANGE(STATE)
     {
@@ -452,7 +455,7 @@ void LOG_CHANGE(STATE)
 		LOG$FAO("!%T Logging enabled!/",0);
 		};
 	    };
-	LOG$FAO("!%T Log event mask set to !XL!/",0,state);
+	LOG$FAO("!%T Log event mask set to !XL!/",0,STATE);
 	}
     else
 	{			// He wants it closed
@@ -470,27 +473,26 @@ void LOG_OUTPUT(OUTDESC)
 // Output a string to the log file.
 // OUTDESC is the address of a string descriptor.
 
+	struct dsc$descriptor * OUTDESC;
     {
-    OWN
-	logcount	:	initial(0) ;
-    MAP
-	struct DESC$STR * OUTDESC;
+    static
+	logcount=0 ;
     if (log_state != 0)
 	{
 	signed long
 	    RC;
 
-	LOGRAB->RAB$W_RSZ = OUTDESC->dsc$w_length;
-	LOGRAB->RAB$L_RBF = OUTDESC->dsc$a_pointer;
-	LOGCOUNT = LOGCOUNT + OUTDESC->dsc$w_length ;
+	LOGRAB->rab$w_rsz = OUTDESC->dsc$w_length;
+	LOGRAB->rab$l_rbf = OUTDESC->dsc$a_pointer;
+	logcount = logcount + OUTDESC->dsc$w_length ;
 
 	RC = exe$put( LOGRAB);
 //!!HACK!!// Take out this Flush!
-	IF ( 	(LOGCOUNT > LOG_THRESHOLD)
-	   OR	(log_state && LOG$FLUSH) )	// JC
-	THEN {
-	    RC = exe$flush(RAB = LOGRAB);
-	    LOGCOUNT = 0 ;
+	if (( 	(logcount > LOG_THRESHOLD)
+	   ||	(log_state && LOG$FLUSH) ))	// JC
+	 {
+	    RC = exe$flush(LOGRAB);
+	    logcount = 0 ;
 	    } ;
 	};
 
@@ -510,7 +512,7 @@ void LOG_FAO(CSTR)
 	       OUTDESC,
 		  /*AP+*/8);
     if (RC)
-	LOG_OUTPUT(OUTDESC)
+      LOG_OUTPUT(OUTDESC);
     else
 	OPR$FAO("LOG_FAO failure, error code is !XL",RC);
     }
@@ -531,11 +533,11 @@ void LOG_Time_Stamp (void)
 //SBTTL "Activity file handling routines"
 
 struct _fabdef    ACTFAB_ = { fab$l_fna : "INET$ACTIVITY:",
-    		  fab$b_fac : FAB$M_PUT,
-		  fab$b_shr : FAB$M_GET,
-		  fab$l_fop : (FAB$M_SQO),
-			fab$b_org : FAB$C_SEQ}, *ACTFAB=&ACTFAB_;
-struct _rabdef *    ACTRAB_ = {rab$l_fab : &ACTFAB_), *ACTRAB = &ACTRAB_;
+			      // not yet ; buggy gcc fab$b_fac : FAB$M_PUT,
+			      // not yet fab$b_shr : FAB$M_GET,
+			      // not yet fab$l_fop : (FAB$M_SQO),
+			      /* not yet fab$b_org : FAB$C_SEQ*/}, *ACTFAB=&ACTFAB_;
+struct _rabdef     ACTRAB_ = {rab$l_fab : &ACTFAB_}, *ACTRAB = &ACTRAB_;
 
 signed long
     act_state  = 0;
@@ -576,8 +578,7 @@ ACT_CLOSE (void)
 	return FALSE;
     }
 
-FORWARD ROUTINE
- VOID    ACT_FAO;
+ void    ACT_FAO();
 
 void ACT_CHANGE(STATE)
     {
@@ -591,7 +592,7 @@ void ACT_CHANGE(STATE)
 		ACT$FAO("!%T Logging enabled!/",0);
 		};
 	    };
-	ACT$FAO("!%T Log event mask set to !XL!/",0,state);
+	ACT$FAO("!%T Log event mask set to !XL!/",0,STATE);
 	}
     else
 	{			// e wants it closed
@@ -609,17 +610,16 @@ void ACT_OUTPUT(OUTDESC)
 // Output a string to the activity log file.
 // OUTDESC is the address of a string descriptor.
 
+	struct dsc$descriptor * OUTDESC;
     {
-    OWN
+    static
 	ACTCOUNT	 = 0 ;
-    MAP
-	struct DESC$STR * OUTDESC;
     if (act_state != 0)
 	{
 	signed long
 	    RC;
-	ACTRAB->RAB$W_RSZ = OUTDESC->dsc$w_length;
-	ACTRAB->RAB$L_RBF = OUTDESC->dsc$a_pointer;
+	ACTRAB->rab$w_rsz = OUTDESC->dsc$w_length;
+	ACTRAB->rab$l_rbf = OUTDESC->dsc$a_pointer;
 	ACTCOUNT = ACTCOUNT + OUTDESC->dsc$w_length ;
 
 	RC = exe$put(ACTRAB);
@@ -645,7 +645,7 @@ void ACT_FAO(CSTR)
 	       OUTDESC,
 		  /*AP+*/8);
     if (RC)
-	ACT_OUTPUT(OUTDESC)
+      ACT_OUTPUT(OUTDESC);
     else
 	OPR$FAO("ACT_FAO failure, error code is !XL",RC);
     }
@@ -691,29 +691,26 @@ Side Effects:
 	be truncated.
 */
 
-Send_2_Operator(Text)
+Send_2_Operator(TEXT)
+	struct dsc$descriptor * TEXT;
     {
-    MAP
-	struct DESC$STR * text;
-    EXTERNAL
-	MYNAME : DESC$STR;
-    OWN
-	Request_ID : LONG INITIAL(0);
-    LITERAL
-	MAXCHR = 1024;
+extern struct dsc$descriptor *	myname;
+    static
+      Request_ID = 0;
+#define	MAXCHR 1024
     signed long
 	MSGLEN,
-	PTR,
-	MSG : $BBLOCK->DSC$K_Z_BLN,
-	MSGBUF : $BBLOCK->MAXCHR;
-    BIND
-	MSGTEXT = MSGBUF->OPC$L_MS_TEXT : VECTOR[,BYTE],
-	NAMPTR = MYNAME->dsc$a_pointer,
-	NAMLEN = MYNAME->dsc$w_length;
+      PTR;
+    struct dsc$descriptor *MSG;
+	struct _opcdef * MSGBUF ;
+    char *MSGTEXT = &MSGBUF->opc$l_ms_text;
+    signed long
+	NAMPTR = myname->dsc$a_pointer,
+	NAMLEN = myname->dsc$w_length;
 
-    MSGBUF->OPC$B_MS_TYPE = OPC$_RQ_RQST;
-    MSGBUF->OPC$B_MS_TARGET = OPC$M_NM_CENTRL;
-    MSGBUF->OPC$L_MS_RQSTID = Request_ID;
+    MSGBUF->opc$b_ms_type = OPC$_RQ_RQST;
+    MSGBUF->opc$b_ms_target = OPC$M_NM_CENTRL;
+    MSGBUF->opc$l_ms_rqstid = Request_ID;
     Request_ID = Request_ID + 1;
     MSGLEN = TEXT->dsc$w_length;
     if (MSGLEN > MAXCHR)
@@ -751,7 +748,7 @@ void OPR_FAO(CSTR)
     SEND_2_OPERATOR(OPRDESC);
     }
 
-signed long BIND
+signed long
     PRINT_MSG = OPR_FAO;	// Synonym for host table module to use
 
 //SBTTL "Error processing routines - ERROR_FAO, FATAL_FAO"
@@ -880,9 +877,9 @@ MACRO
     QH$ERRHDR = BLOCK->QH$ERRHDR_SIZE FIELD(QH$ERRHDR_FIELDS) %;
 #endif
 
-static signed long
-    ERR_MSG_Q : QH$ERRHDR PRESET([EM$QHEAD] = ERR_MSG_Q,
-				 [EM$QTAIL] = ERR_MSG_Q);
+static struct QH$ERRHDR
+    ERR_MSG_Q_ = { EM$QHEAD : &ERR_MSG_Q_,
+		   EM$QTAIL: & ERR_MSG_Q_},*ERR_MSG_Q=&ERR_MSG_Q_;
 
 void QL_FAO(CSTR)
 //
@@ -897,7 +894,7 @@ void QL_FAO(CSTR)
     signed long
 	RC;
     struct dsc$descriptor * MDSC;
-    struct queue_blk_structure(qb$errmsg_fields) * QB;
+    struct queue_blk_structure(QB$ERRMSG) * QB;
 
 // Make sure logging is enabled
 
@@ -913,7 +910,7 @@ void QL_FAO(CSTR)
 
 // Format the message
 
-    RC = LIB$SYS_FAOL(CSTR, MDSC->dsc$w_length, MDSC, AP+8);
+    RC = LIB$SYS_FAOL(CSTR, MDSC->dsc$w_length, MDSC, /*AP+*/8);
     if (! RC)
 	{
 	OPR$FAO("QL_FAO failure, RC = !XL",RC);
@@ -937,9 +934,9 @@ void CHECK_ERRMSG_Q (void)
 // Called from main TCP processing loop after all useful work has been done.
 //
     {
-extern      void	MM$QBlk_Free ()
+      extern      void	MM$QBlk_Free ();
 extern	STR$FREE1_DX ();
- struct queue_blk_structure(qb$errmsg_fields) * QB;
+ struct queue_blk_structure(QB$ERRMSG) * QB;
 	struct dsc$descriptor * MDSC;
 
 // Scan the error message queue, writing each entry to the log file.
@@ -977,9 +974,8 @@ Side Effects:
 
 void Exit_Handler (void)
     {
-    EXTERNAL ROUTINE
-void	USER$Purge_All_IO ,
-void	RESET_PROCNAME ;
+      extern      void	USER$Purge_All_IO ();
+extern void	RESET_PROCNAME() ;
 
     ERROR$FAO("Exit handler: Exit requested, cleaning up...");
 
@@ -1020,15 +1016,13 @@ Side Effects:
 */
 
 Exception_Handler(SIG,MECH)
+     struct  _chfdef1 * SIG;
     {
-    MAP
-	struct BLOCK * SIG[,BYTE],
-	struct BLOCK * MECH[,BYTE];
 extern void	USER$Purge_All_IO ();
 
-    ERROR$FAO("Exception handler: signal name !XL",SIG->CHF$L_SIG_NAME);
+    ERROR$FAO("Exception handler: signal name !XL",SIG->chf$l_sig_name);
     USER$Purge_All_IO();
     exe$flush( LOGRAB);
     exe$flush( ACTRAB);
-    return(SS$_Resignal);
+    return(SS$_RESIGNAL);
     }
