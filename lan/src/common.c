@@ -56,7 +56,7 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
       switch (*addr++) {
       case NMA$C_PCLI_PTY:
 	//lsb->lsb$l_valid_pty=*addr++;
-	ni->ucb$l_ni_pty=htonl(*addr++);
+	ni->ucb$l_ni_pty=(*addr++)>>16;
 	break;
       default:
       }
