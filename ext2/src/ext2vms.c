@@ -358,8 +358,34 @@ int ext2_wcb_create_all(struct _fcb * fcb, struct inode * inode)
 	}
       }
       if (i==14) {
-	// 3rd not supported yet
-	i++;
+	// 3rd not supported yet?
+	//i++;
+	printk("beware 3rd level\n");
+	if (l2==0) {
+	  l2=b1[l1p];
+	  myqio(READ,b2,EXT2_BLOCK_SIZE(s),l2,inode->i_dev,vms_block_factor(inode->i_blkbits));
+	}
+	if (l3==0) {
+	  l3=b2[l2p];
+	  myqio(READ,b2,EXT2_BLOCK_SIZE(s),l3,inode->i_dev,vms_block_factor(inode->i_blkbits));
+	}
+	nextphyblk=b3[l3p];
+	l3p++;
+	if (l3p==ptrs) {
+	  l3p=0;
+	  l3=0;
+	  l2p++;
+	}
+	if (l2p==ptrs) {
+	  l2p=0;
+	  l2=0;
+	  l1p++;
+	}
+	if (l1p==ptrs) {
+	  l1p=0;
+	  l1=0;
+	  i++;
+	}
       }
     }
 
