@@ -19,11 +19,11 @@
 #include<secdef.h>
 #include<ssdef.h>
 
-asmlinkage void exe$creprc(void) {
+asmlinkage void exe$creprc_wrap(void) {
 
 }
 
-asmlinkage void exe$creprc_real(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr, unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, unsigned short int mbxunt, unsigned int stsflg,...) {
+asmlinkage void exe$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr, unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, unsigned short int mbxunt, unsigned int stsflg,...) {
   struct _pcb * p, * cur;
   int retval;
   //check pidadr
@@ -147,30 +147,6 @@ asmlinkage void exe$creprc_real(unsigned int *pidadr, void *image, void *input, 
 
 	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
 	bzero(p->pcb$l_phd,sizeof(struct _phd));
-
-#ifdef CONFIG_MM_VMS
-	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
-	{
-	  struct _rde * rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
-	  bzero(rde,sizeof(struct _rde));
-	  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
-	  //insque(rde,p->pcb$l_phd->phd$ps_p0_va_list_flink);
-	  rde->rde$ps_start_va=0x1000;
-	  rde->rde$l_region_size=0x1000;
-	  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
-	  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
-	  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-	  bzero((void*)p->pcb$l_phd->phd$l_wslist,4*512);
-	  bzero((void*)p->pcb$l_phd->phd$l_wslock,4*512);
-	  bzero((void*)p->pcb$l_phd->phd$l_wsdyn,4*512);
-	  p->pcb$l_phd->phd$l_wsnext=0;
-	  p->pcb$l_phd->phd$l_wslast=511;
-	  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
-	  bzero((void*)p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
-	  p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
-	  p->pcb$l_phd->phd$l_pst_free=0;
-	}
-#endif
 
 	// now a hole
 
