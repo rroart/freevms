@@ -735,8 +735,8 @@ void user$net_connection_info(struct user_info_args * uargs,
 
 // Local and foreign port numbers.
 
-    CS->ci$local_port = (Lcl_Port && 0xFFFF) ;
-    CS->ci$foreign_port = (Frn_Port && 0xFFFF) ;
+    CS->ci$local_port = (Lcl_Port & 0xFFFF) ;
+    CS->ci$foreign_port = (Frn_Port & 0xFFFF) ;
   
   
 // Local and remote internet addresses
@@ -769,7 +769,7 @@ user$clock_base (void)
 	Now[2];
 
     exe$gettim(Now);
-    return (Now[0]>>20+Now[1]<<12) && 0x7FFF; // check
+    return (Now[0]>>20+Now[1]<<12) & 0x7FFF; // check
     }
 
 //SBTTL "Allocate a USER Local Port"
@@ -808,7 +808,7 @@ user$get_local_port(Pbase)
     rval = *Pbase % USER_LP_END; // check
     if (rval < USER_LP_START)
 	rval = rval+USER_LP_START;
-    return rval && 0x7FFF;
+    return rval & 0x7FFF;
     }
 
  void    ACCESS_INIT();
@@ -1645,7 +1645,7 @@ X:	{
 // If the foreign host is in the "local hosts" list, then allow it.
 
 	for (I=(ACHOST_COUNT-1);I>=0;I--)
-	    if ((FRNHST && ACHOSTS[I].AC$MASK) == ACHOSTS[I].AC$HOST)
+	    if ((FRNHST & ACHOSTS[I].AC$MASK) == ACHOSTS[I].AC$HOST)
 		goto leave_x;
 	if (! check_id(PID,ARPANET_ID))
 	    return NET$_NOANA;
@@ -1655,8 +1655,8 @@ X:	{
 // If the local port is privileged, then require special privilege
 
     if (access_flags&ACF_PRIVPORT)
-	if ((((LCLPRT && 0xFFFF) >= WELL_KNOWN_LP_START) &&
-	    ((LCLPRT && 0xFFFF) <= WELL_KNOWN_LP_END) && FRNPRT == 0) ||
+	if ((((LCLPRT & 0xFFFF) >= WELL_KNOWN_LP_START) &&
+	    ((LCLPRT & 0xFFFF) <= WELL_KNOWN_LP_END) && FRNPRT == 0) ||
 	   (FRNPRT == WKS$SMTP))
 	    if (! user$privileged(PID))
 		return NET$_NOPRV;

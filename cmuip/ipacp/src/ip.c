@@ -512,7 +512,7 @@ ip_find_dev(IPADDR)
     {
       signed long IDX;
     for (IDX=0;IDX<=(dev_count-1);IDX++)
-	if (((IPADDR && dev_config_tab[IDX].dc_ip_netmask) ==
+	if (((IPADDR & dev_config_tab[IDX].dc_ip_netmask) ==
 	   dev_config_tab[IDX].dc_ip_network) ||
 	    (IPADDR == 0xFFFFFFFF))
 	    {
@@ -542,7 +542,7 @@ IP_FIND_GWY(IPADDR)
     {
       long IDX;
     for (IDX=0;IDX<=(gwy_count-1);IDX++)
-	if ((IPADDR && gwy_table_ptr[IDX].gwy_netmask) ==
+	if ((IPADDR & gwy_table_ptr[IDX].gwy_netmask) ==
 	   gwy_table_ptr[IDX].gwy_network)
 	    if (gwy_table_ptr[IDX].gwy_status > 0)
 		return gwy_table_ptr[IDX].gwy_address;
@@ -629,9 +629,9 @@ long IDX;
 	    return IDX;
 // Check for a wildcard match (only if strict was passed as false (0))
 	if (STRICT == 0)
-	 if (((((IPADDR && dev_config_tab[IDX].dc_ip_netmask) ==
+	 if (((((IPADDR & dev_config_tab[IDX].dc_ip_netmask) ==
 	    dev_config_tab[IDX].dc_ip_network) &&
-	    ((IPADDR || dev_config_tab[IDX].dc_ip_netmask) == -1)) ||
+	    ((IPADDR | dev_config_tab[IDX].dc_ip_netmask) == -1)) ||
 	   (IPADDR == -1) ||
 	   (IPADDR == 0) ||
 	      (IPADDR == dev_config_tab[IDX].dc_ip_network)))
@@ -1246,9 +1246,9 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 
 // Adjust checksum for decremented lifetime
 
-	    if ((iphdr->iph$checksum && 0xFF00) == 0xFF00)
+	    if ((iphdr->iph$checksum & 0xFF00) == 0xFF00)
 		// Wrap around checksum overflow bit
-	      iphdr->iph$checksum = (iphdr->iph$checksum && 0xFF) + 1;
+	      iphdr->iph$checksum = (iphdr->iph$checksum & 0xFF) + 1;
 	    else
 		// Just add one to upper half of field
 		iphdr->iph$checksum = iphdr->iph$checksum + 0x100;
@@ -1304,7 +1304,7 @@ void IP_DISPATCH(iphdr,iplen,HDRLEN,BUF,BUFSIZE)
       {
     case ICMP_PROTOCOL:
 	{
-	if ($$LOGF(LOG$ICMP) && (! $$LOGF(LOG$IP)))
+	if ($$LOGF(LOG$ICMP) & (! $$LOGF(LOG$IP)))
 	    ip$log(ASCIDNOT("ICMRecv"),iphdr);
 	icmp$input (SEG,SEGSIZE,iphdr,iplen,BUFSIZE,BUF);
 	};

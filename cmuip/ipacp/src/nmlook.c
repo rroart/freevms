@@ -334,7 +334,7 @@ void NML$INIT (void)
 	ERROR$FAO("$TRNLNM failed for ACP mailbox, RC = !XL",RC);
 	return;
 	};
-    if ((MYMBA_ATTR && LNM$M_EXISTS) == 0)
+    if ((MYMBA_ATTR & LNM$M_EXISTS) == 0)
 	{
 	ERROR$FAO("$TRNLNM claims mailbox name nonexistant!!");
 	return;
@@ -760,7 +760,7 @@ void SEND_CONTROL(CCODE,CVALUE)
 
 // Send the message off to the name resolver
 
-    RC = exe$qio(0, SRVMBXCHN,	IO$_WRITEVBLK || IO$M_NOW, 0,
+    RC = exe$qio(0, SRVMBXCHN,	IO$_WRITEVBLK | IO$M_NOW, 0,
 		MSBUF,
 		CONTROL_MSGSIZE);
     if (! RC)

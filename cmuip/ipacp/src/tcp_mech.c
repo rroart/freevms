@@ -404,7 +404,7 @@ Find_Local_Port(Port)
 	LP;
 
     LP = NOT_FOUND;
-    P = Port && 0xFFFF ;
+    P = Port & 0xFFFF ;
     NOINT;
     for (J=0;J<=ConectSize - 1 ;J++)
 	if (ConectPtr[J].CN$Local_Port == P)
@@ -451,7 +451,7 @@ Inputs:
 void Init_LP_Entry (Index, LPort)
     {
     NOINT;
-    ConectPtr[Index].CN$Local_Port = (LPort && 0xFFFF) ;
+    ConectPtr[Index].CN$Local_Port = (LPort & 0xFFFF) ;
     ConectPtr[Index].CN$TCB_List = ConectPtr[Index].CN$TCB_List;
     ConectPtr[Index].CN$TCB_Tail = ConectPtr[Index].CN$TCB_List;
     OKINT;
@@ -540,7 +540,7 @@ void Conect_Insert(struct tcb_structure * TCB,signed long CN_Index)
 
     NOINT;
     OTCB = ConectPtr[CN_Index].CN$TCB_List;
-    if (OTCB == ConectPtr[CN_Index].CN$TCB_List)
+    if (OTCB == &ConectPtr[CN_Index].CN$TCB_List)
 	// Empty Local Port List
 	IN = ConectPtr[CN_Index].CN$TCB_List;  // Inset into Empty list.
     else
@@ -564,7 +564,7 @@ void Conect_Insert(struct tcb_structure * TCB,signed long CN_Index)
 		ok;
 	    ok = FALSE;
 	    IN = ConectPtr[CN_Index].CN$TCB_Tail; // Default: add to tail.
-	    while ((OTCB != ConectPtr[CN_Index].CN$TCB_List) &&
+	    while ((OTCB != &ConectPtr[CN_Index].CN$TCB_List) &&
 		   (! ok))
 		{
 		if ((OTCB->foreign_host == WILD) ||
@@ -639,8 +639,8 @@ check_unique_conn(LPort,Fhost,FPort,IDX)
 	Unique;
 
     NOINT;
-    FP = (FPort && 0xFFFF) ;
-    LP = (LPort && 0xFFFF) ;
+    FP = (FPort & 0xFFFF) ;
+    LP = (LPort & 0xFFFF) ;
     if ((Index = Find_Local_Port (LP) ) == NOT_FOUND)
 	{			// Insert local port into connection table
 	Index = Find_Free_LP_Entry(LP);
@@ -668,10 +668,10 @@ check_unique_conn(LPort,Fhost,FPort,IDX)
 	*IDX = Index;		// return conect index.
 	Unique = TRUE;		// assume a good attitude!
 	TCB = ConectPtr[Index].CN$TCB_List; //point at 1st TCB is list.
-	while ((TCB != ConectPtr[Index].CN$TCB_List) && (Unique == TRUE))
+	while ((TCB != &ConectPtr[Index].CN$TCB_List) && (Unique == TRUE))
 	    {
 	    if ((TCB->foreign_host == Fhost) &&
-	       ((TCB->foreign_port && 0xFFFF) == FP) &&
+	       ((TCB->foreign_port & 0xFFFF) == FP) &&
 		(TCB->state != CS$INACTIVE))
 	      Unique = FALSE;
 	    else
@@ -712,7 +712,7 @@ TCB_Find(lclport,frnaddr,frnport)
     {
     register
     struct tcb_structure * TCB;
-	register signed long result;
+    signed long result;
     signed long
 	LP,
 	FP,
@@ -721,14 +721,15 @@ TCB_Find(lclport,frnaddr,frnport)
 // Find the connection this segment was destined for.
 
     NOINT;
-    LP = lclport && 0xFFFF ;
-    FP = frnport && 0xFFFF ;
+    LP = lclport & 0xFFFF ;
+    FP = frnport & 0xFFFF ;
     result=0;
+    cn_idx = Find_Local_Port(LP);
     if ((cn_idx = Find_Local_Port(LP)) != ERROR)
 	{
 	TCB = ConectPtr[cn_idx].CN$TCB_List; // point at TCB.
 //    LOG$FAO ( "cn_idx = !XL (!XW !XL !XW) TCB=!XL !/", cn_idx ,lclport,frnaddr,frnport,TCB);
-	while ((TCB != ConectPtr[cn_idx].CN$TCB_List))
+	while ((TCB != &ConectPtr[cn_idx].CN$TCB_List))
 	    {
 
 // Check seg source-address aginst TCB foreign-host or a WILD foreign-host.
@@ -741,8 +742,8 @@ TCB_Find(lclport,frnaddr,frnport)
 // Check seg source-port aginst TCB foreign-port or a WILD foreign-port
 // If a match make sure TCB has NOT been inactivated.
 
-		if ((FP == (TCB->foreign_port && 0xFFFF)) ||
-		    ((TCB->foreign_port && 0xFFFF) == WILD))
+		if ((FP == (TCB->foreign_port & 0xFFFF)) ||
+		    ((TCB->foreign_port & 0xFFFF) == WILD))
 		    if (TCB->state != CS$INACTIVE)
 		      { result = TCB; break; }
 		};

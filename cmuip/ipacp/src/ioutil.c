@@ -504,7 +504,7 @@ void LOG_OUTPUT(OUTDESC)
 	RC = exe$put( LOGRAB);
 //!!HACK!!// Take out this Flush!
 	if (( 	(logcount > log_threshold)
-	   ||	(log_state && LOG$FLUSH) ))	// JC
+	   ||	(log_state & LOG$FLUSH) ))	// JC
 	 {
 	    RC = exe$flush(LOGRAB);
 	    logcount = 0 ;
@@ -808,7 +808,7 @@ void ERROR_FAO(CSTR)
 // Make sure we are logging something & log it
 
     OLDSTATE = log_state;
-    LOG_CHANGE(0x80000000 || log_state);
+    LOG_CHANGE(0x80000000 | log_state);
     LOG_OUTPUT(LOGDESC);
     LOG_CHANGE(OLDSTATE);
     }
@@ -853,7 +853,7 @@ void FATAL_FAO(CSTR)
 // Make sure we are logging something & log it
 
     OLDSTATE = log_state;
-    LOG_CHANGE(0x80000000 || log_state);
+    LOG_CHANGE(0x80000000 | log_state);
     LOG_OUTPUT(LOGDESC);
     LOG_CHANGE(OLDSTATE);
     exe$exit( SS$_ABORT);

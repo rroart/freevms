@@ -840,30 +840,30 @@ void Set_PTY_Term_Type (TVT, type, devdep)
 #endif
 				      temp = (temp &
 		(!	(   TT$M_LOWER
-			 || TT$M_EIGHTBIT
-			 || TT$M_MECHFORM
-			 || TT$M_MECHTAB
-			 || TT$M_WRAP
-			 || TT$M_SCOPE)))
+			 | TT$M_EIGHTBIT
+			 | TT$M_MECHFORM
+			 | TT$M_MECHTAB
+			 | TT$M_WRAP
+			 | TT$M_SCOPE)))
 	  ||		devdep[0];
 	PTY_Char->QCB$L_CHARISTICS[0]=temp & 0xff;
 	PTY_Char->QCB$L_CHARISTICS[1]=(temp & 0x00ff00) >> 8;
 	PTY_Char->QCB$L_CHARISTICS[2]=(temp & 0xff0000) >> 16;
-	PTY_Char->QCB$L_EXTEND_CHAR= (PTY_Char->QCB$L_EXTEND_CHAR &&
+	PTY_Char->QCB$L_EXTEND_CHAR= (PTY_Char->QCB$L_EXTEND_CHAR &
 		(!	(   TT2$M_PRINTER
-			 || TT2$M_REGIS
-			 || TT2$M_SIXEL
-//!!JC			 || TT2$M_PASTHRU
-			 || TT2$M_ANSICRT
-			 || TT2$M_BLOCK
-			 || TT2$M_AVO
-			 || TT2$M_EDIT
-			 || TT2$M_DECCRT
-			 || TT2$M_DECCRT2
-			 || TT2$M_DECCRT3)))
+			 | TT2$M_REGIS
+			 | TT2$M_SIXEL
+//!!JC			 | TT2$M_PASTHRU
+			 | TT2$M_ANSICRT
+			 | TT2$M_BLOCK
+			 | TT2$M_AVO
+			 | TT2$M_EDIT
+			 | TT2$M_DECCRT
+			 | TT2$M_DECCRT2
+			 | TT2$M_DECCRT3)))
 	||		devdep[1];
 
-	Charistics ->tt$v_eightbit = State_Binary || State_Eightbit;
+	Charistics ->tt$v_eightbit = State_Binary | State_Eightbit;
 	Status = exe$qiow (
 0,
 		pty_chan,
@@ -979,7 +979,7 @@ struct dsc$descriptor *	Term_Desc;
 	Status =  STR$MATCH_WILD(
 			Term_Table[Term_Table[1]*i+0],
 			TYPDSC);
-	    if ((Status && 1) == 1)
+	    if ((Status & 1) == 1)
 	    {
 		devdep[0] = Term_Table[Term_Table[1]*i+2];
 		devdep[1] = Term_Table[Term_Table[1]*i+3];
@@ -1143,7 +1143,7 @@ void set_devdep(TVT)
 		,"!%T Set_DEVDEP: Before Class=!UB Type=!UB Char:x!XL x!XL Size=!UW !UB!/",0
 		,PTY_Char->QCB$B_CLASS
 		,PTY_Char->QCB$B_TYPE
-		,(PTY_Char->QCB$L_CHARISTICS && 0xFFFFFF)
+		 ,(PTY_Char->QCB$L_CHARISTICS[0] + PTY_Char->QCB$L_CHARISTICS[1] << 8 + PTY_Char->QCB$L_CHARISTICS[2] << 16 /* was: & 0xFFFFFF*/)
 		,PTY_Char->QCB$L_EXTEND_CHAR
 		,PTY_Char->QCB$W_PAGE_WIDTH
 		,PTY_Char->QCB$B_PAGE_LENGTH);
@@ -1153,7 +1153,7 @@ void set_devdep(TVT)
 	Changed = 0;
 	Changed = TVT->TVT$TTSET;
 	if (telnet_passall == 1)
-	    Changed = Changed ||
+	    Changed = Changed |
 		(Charistics ->tt$v_passall ^ State_Binary);
 
 	if (! Echo_opt->OPT$CURRENT)		// Echo being negotiated ??
@@ -1170,10 +1170,10 @@ void set_devdep(TVT)
 
 	if	(! (Changed ||
 		(Charistics->tt$v_eightbit ^
-		 (State_Binary || State_Eightbit))))
+		 (State_Binary | State_Eightbit))))
 		 return(SS$_NORMAL);	// No changes to be made
 
-	Charistics ->tt$v_eightbit = State_Binary || State_Eightbit;
+	Charistics ->tt$v_eightbit = State_Binary | State_Eightbit;
 	if (telnet_passall == 1)
 		Charistics ->tt$v_passall = State_Binary;
 
@@ -1183,7 +1183,7 @@ void set_devdep(TVT)
 		,"!%T Set_DEVDEP: After  Class=!UB Type=!UB Char:x!XL x!XL Size=!UW !UB!/",0
 		,PTY_Char->QCB$B_CLASS
 		,PTY_Char->QCB$B_TYPE
-		,(PTY_Char->QCB$L_CHARISTICS && 0xFFFFFF)
+		 ,(PTY_Char->QCB$L_CHARISTICS[0] + PTY_Char->QCB$L_CHARISTICS[1] << 8 + PTY_Char->QCB$L_CHARISTICS[2] << 16 /* was: & 0xFFFFFF*/)
 		,PTY_Char->QCB$L_EXTEND_CHAR
 		,PTY_Char->QCB$W_PAGE_WIDTH
 		,PTY_Char->QCB$B_PAGE_LENGTH);
@@ -1339,7 +1339,7 @@ Linemode_SubOp_Mode ( Mask )
     // If the ACK bit is set, don't do anything.
     if (Mask<Option$K_LineMode_MODE_ACK,1>) return SS$_NORMAL;
 
-    Mask = Mask && 3;	// mask the mask.
+    Mask = Mask & 3;	// mask the mask.
 
     // Is the new mask different?
     if (Mask != Linemode_Modeflags)

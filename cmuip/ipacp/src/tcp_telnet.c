@@ -1418,7 +1418,7 @@ signed long	CHWMAX,
 // TCB will be serviced soon.
 
     Now = Time_Stamp() ;
-    if ($$LOGF(LOG$TVT || LOG$TCP))
+    if ($$LOGF(LOG$TVT | LOG$TCP))
 	{
 	LOG$FAO("!%T TCB !XL TCP_WRITE: SNDQCNT= !SL SRXQCNT=!SL!/",
 		0, TVT->TVT$TCB, TCB->snd_q_count, TCB->srx_q_count) ;

@@ -807,7 +807,7 @@ tcp$tcb_dump(LCID,RB)
 
     QB = TCB->ur_qhead;
     RB->dm$user_recv_qe = 0;
-    while (QB != TCB->ur_qhead)
+    while (QB != &TCB->ur_qhead)
 	{
 	RB->dm$user_recv_qe = RB->dm$user_recv_qe + 1;
 	QB = QB->ur$next;
@@ -817,7 +817,7 @@ tcp$tcb_dump(LCID,RB)
 
     RB->dm$user_send_qe = 0;
     QB = TCB->snd_qhead;
-    while (QB != TCB->snd_qhead)
+    while (QB != &TCB->snd_qhead)
 	{
 	RB->dm$user_send_qe = RB->dm$user_send_qe + 1;
 	QB = QB->ur$next; // was: sn$next, but the same place
@@ -831,7 +831,7 @@ tcp$tcb_dump(LCID,RB)
 
     RB->dm$future_qe = 0;
     QB = TCB->rf_qhead;
-    while (QB != TCB->rf_qhead)
+    while (QB != &TCB->rf_qhead)
 	{
 	RB->dm$future_qe = RB->dm$future_qe + 1;
 	QB = QB->ur$next; // was: nr$next, but at same place 
@@ -1033,11 +1033,11 @@ void tcp$deliver_user_data(struct tcb_structure * TCB)
 // Process User receive requests (UR_Qhead) until all have been processed
 // or all the user-data bearing network segments have been exhausted.
 
-    while ((UQB != TCB->ur_qhead) && (TCB->rcv_q_count > 0))
+    while ((UQB != &TCB->ur_qhead) && (TCB->rcv_q_count > 0))
 	{
 	Uflags = 0;
 	if (TCB->rcv_push_flag)
-	    Uflags = Uflags || NSB$PUSHBIT;
+	    Uflags = Uflags | NSB$PUSHBIT;
 	Usize = UQB->ur$size;	// Size of data requested.
 	Uadrs = UQB->ur$data;	// User's System buffer address.
 	datasize = MIN(Usize,TCB->rcv_q_count);
@@ -1058,7 +1058,7 @@ void tcp$deliver_user_data(struct tcb_structure * TCB)
 #if 0
 	    DESC$STR_ALLOC(hexstr,maxhex*3),
 #endif
-	    ASCII_Hex_Bytes(&hexstr,nhex,TCB->rcv_q_deqp,
+	    ASCII_HEX_BYTES(&hexstr,nhex,TCB->rcv_q_deqp,
 			    hexstr.dsc$w_length);
 	    LOG$FAO(/*%STRING*/("!%T Deliver user data: DQ=!XL,EQ=!XL,RCQ=!XL/!XL,Size=!SL!/",
 			    "!_HEX:   !AS!/",
@@ -1283,7 +1283,7 @@ break;
 		{
 		TCB->eof = TRUE;
 		user$post_io_status(Uargs,SS$_NORMAL,0,
-				    NSB$PUSHBIT || NSB$EOFBIT,0);
+				    NSB$PUSHBIT | NSB$EOFBIT,0);
 		mm$uarg_free(Uargs); // cleanup.
 		}
 	    else
@@ -1835,8 +1835,8 @@ void tcp$open(struct user_open_args * Uargs)
     TCB->open_nowait = Uargs->op$nowait;
     LP = ProtoHdr->ipadr$src_port ;
     FP = ProtoHdr->ipadr$dst_port ;
-    TCB->local_port = (LP && 0xFFFF) ;
-    TCB->foreign_port = (FP && 0xFFFF) ;
+    TCB->local_port = (LP & 0xFFFF) ;
+    TCB->foreign_port = (FP & 0xFFFF) ;
     TCB->ucb_adrs = Uargs->op$ucb_adrs;
 
 // Set user specified connection time-out in seconds.
@@ -2061,7 +2061,7 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 		    }
 		}
 	    while (!ok);
-	    TCB->local_port = (LP && 0xFFFF) ;
+	    TCB->local_port = (LP & 0xFFFF) ;
 	    };
 
 // Set initial state for active open

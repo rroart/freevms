@@ -1167,7 +1167,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 	Error_Flag = 1;
 	// Error from board
 	DRV$OPR_FAO("XE status error.  Status = !XL",
-		     Rbuf->XERCV$cmd_status && 0x0FF00);
+		     Rbuf->XERCV$cmd_status & 0x0FF00);
 	};
 
     if (Error_Flag)

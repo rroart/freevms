@@ -701,9 +701,9 @@ void reset_unknown_connection(Seg,QB)
 
     TCB = tcb$create();
     TCB->lp_next = TCB->lp_back = &TCB->lp_next;	// Init Local Port queue.
-    TCB->local_port = Seg->sh$dest_port && 0xffff ;
+    TCB->local_port = Seg->sh$dest_port & 0xffff ;
     TCB->local_host = QB->nr$dest_adrs;
-    TCB->foreign_port = Seg->sh$source_port && 0xffff ;
+    TCB->foreign_port = Seg->sh$source_port & 0xffff ;
     TCB->foreign_host = QB->nr$src_adrs;
     TCB->state = CS$ESTABLISHED;
     TCB->rcv_wnd = TCB->snd_wnd = TCB->rcv_nxt = 100;
@@ -968,7 +968,7 @@ struct segment_structure * Seg;
 
 // Find the WKS entry for the port
 
-    LP = TCB->local_port && 0xffff ;
+    LP = TCB->local_port & 0xffff ;
 X:  {
     for (I=0;I<=(wks_count-1);I++)
 	if (LP == WKS_LIST[I].WKS$Port)
@@ -988,7 +988,7 @@ X:  {
 // Handle wild-card foreign host & port cases.
 
 Y:  {
-    while ((QB != WKS_LIST[WIX].WKS$SYN_Qhead))
+    while ((QB != &WKS_LIST[WIX].WKS$SYN_Qhead))
 	{
 	if ((TCB->foreign_host == WILD) ||
 	    (TCB->foreign_host == QB->nr$src_adrs))
@@ -1059,7 +1059,7 @@ Fork_Server(Idx, IP_Address, Remote_Port)
 extern	PokeAddr ();
 
 
-    RP = (Remote_Port && 0xffff) ;
+    RP = (Remote_Port & 0xffff) ;
 
 // Try a bunch of times to find one with a non-duplicate name.
 
@@ -1166,8 +1166,8 @@ struct segment_structure * Seg;
 	SP,
 	WIX;
 
-    DP = DPort && 0xffff ;
-    SP = SPort && 0xffff ;
+    DP = DPort & 0xffff ;
+    SP = SPort & 0xffff ;
 
 // See if we know about the port
 
@@ -1203,7 +1203,7 @@ X:  {
 
     XLOG$FAO(LOG$TCP,"!%T SYN for WKS !SL received!/",0,DPort);
     QB = WKS_LIST[WIX].WKS$SYN_Qhead;
-    while ((QB != WKS_LIST[WIX].WKS$SYN_Qhead))
+    while ((QB != &WKS_LIST[WIX].WKS$SYN_Qhead))
 	{
 
 // Check IP addresses.
@@ -1261,7 +1261,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
     for (WIX=0;WIX<=(wks_count-1);WIX++)
 	{
 	QB = WKS_LIST[WIX].WKS$SYN_Qhead;
-	while (QB != WKS_LIST[WIX].WKS$SYN_Qhead)
+	while (QB != &WKS_LIST[WIX].WKS$SYN_Qhead)
 	    {
 	    if (QB->nr$timeout < Now)
 		{		// Timed-out
@@ -1576,7 +1576,7 @@ void Check_Future_Q(struct tcb_structure * TCB)
 // Handle segments on the future queue that are no longer in the future.
 
     NQB = TCB->rf_qhead;
-    while (NQB != TCB->rf_qhead)
+    while (NQB != &TCB->rf_qhead)
 	{
 	signed long
 	    SEQoffset,
@@ -1833,7 +1833,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 		    };
 
 		if (TCB->foreign_port == WILD)
-		    TCB->foreign_port = (seg->sh$source_port && 0xffff) ;
+		    TCB->foreign_port = (seg->sh$source_port & 0xffff) ;
 
 // Move TCB to head of local port list as now it's fully specified.
 		TCB_Promote ( TCB );

@@ -1285,7 +1285,7 @@ icmp$icmpcb_dump(ICMPCBIX,RB)
 
     QB = ICMPCB->ICMPCB$NR_Qhead;
     Qcount = 0;
-    while ((QB != ICMPCB->ICMPCB$NR_Qhead))
+    while ((QB != &ICMPCB->ICMPCB$NR_Qhead))
 	{
 	Qcount = Qcount + 1;
 	QB = QB->nr$next;
@@ -1296,7 +1296,7 @@ icmp$icmpcb_dump(ICMPCBIX,RB)
 
     QB = ICMPCB->ICMPCB$USR_Qhead;
     Qcount = 0;
-    while ((QB != ICMPCB->ICMPCB$USR_Qhead))
+    while ((QB != &ICMPCB->ICMPCB$USR_Qhead))
 	{
 	Qcount = Qcount + 1;
 	QB = QB->nr$next; // was: ur$next, but the same

@@ -1234,7 +1234,7 @@ ipu$ipcb_dump(IPCBIX,RB)
 
     QB = IPCB->ipcb$nr_qhead;
     Qcount = 0;
-    while ((QB != IPCB->ipcb$nr_qhead))
+    while ((QB != &IPCB->ipcb$nr_qhead))
 	{
 	Qcount = Qcount + 1;
 	QB = QB->nr$next;
@@ -1245,7 +1245,7 @@ ipu$ipcb_dump(IPCBIX,RB)
 
     QB = IPCB->ipcb$usr_qhead;
     Qcount = 0;
-    while ((QB != IPCB->ipcb$usr_qhead))
+    while ((QB != &IPCB->ipcb$usr_qhead))
 	{
 	Qcount = Qcount + 1;
 	QB = QB->nr$next; // was: ur$next, but same

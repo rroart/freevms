@@ -735,7 +735,7 @@ extern		mm$qblk_get();
 	    case ICM_DUNREACH:	// Destination Unreachable - abort connection
 		{
 		UDPCB_Abort(UDPCB,NET$_URC);
-		if ($$LOGF(LOG$ICMP || LOG$UDP))
+		if ($$LOGF(LOG$ICMP | LOG$UDP))
 		    QL$FAO(
 		       "!%T UDPCB !XL killed by ICMP Destination Unreachable!/",
 		       0,UDPCB);
@@ -745,7 +745,7 @@ extern		mm$qblk_get();
 	    case ICM_TEXCEED:	// Time exceeded - abort
 		{
 		UDPCB_Abort(UDPCB,NET$_CTO);
-		if ($$LOGF(LOG$ICMP || LOG$UDP))
+		if ($$LOGF(LOG$ICMP | LOG$UDP))
 		    QL$FAO("!%T UDPCB !XL killed by ICMP Time Exceeded!/",
 			   0,UDPCB);
 		};
@@ -890,7 +890,7 @@ void Deliver_UDP_Data(UDPCB,QB,URQ)
     if (QB->nr$icmp)
 	{
 	ICMTYPE = QB->nr$icm_type;
-	FLAGS = FLAGS || NSB$ICMPBIT;
+	FLAGS = FLAGS | NSB$ICMPBIT;
 	};
     user$post_io_status(URQ->ur$uargs,SS$_NORMAL,
 			Ucount,FLAGS,ICMTYPE);
@@ -1803,7 +1803,7 @@ udp$udpcb_dump(UDPCBIX,RB)
 
     QB = UDPCB->udpcb$nr_qhead;
     Qcount = 0;
-    while ((QB != UDPCB->udpcb$nr_qhead))
+    while ((QB != &UDPCB->udpcb$nr_qhead))
 	{
 	Qcount = Qcount + 1;
 	QB = QB->nr$next;
@@ -1814,7 +1814,7 @@ udp$udpcb_dump(UDPCBIX,RB)
 
     QB = UDPCB->udpcb$usr_qhead;
     Qcount = 0;
-    while ((QB != UDPCB->udpcb$usr_qhead))
+    while ((QB != &UDPCB->udpcb$usr_qhead))
 	{
 	Qcount = Qcount + 1;
 	QB = QB->nr$next; // was: UR$NEXT, but the same plade
