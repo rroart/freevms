@@ -3,6 +3,7 @@
  *
  *  (C) Copyright 1995 Linus Torvalds
  */
+#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/shm.h>
 #include <linux/mman.h>
