@@ -575,7 +575,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   if (fib->fib$w_did_num) {
     //    struct getdents_callback64 buf;
     int wildcard=0;
-    static int mywcc=0;
     struct readdir_callback2 buf;
     int fd=0;
     struct file * f;
@@ -587,41 +586,26 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     struct _fcb * fcb=x2p->primary_fcb;
     head = fcb->fcb$l_primfcb;
 
-    name=ext2_vms_to_unix(filedsc);
+    if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
+      wildcard=1;
+
+    if (wildcard || (fib->fib$w_nmctl & FIB$M_WILD)) {
+        fib->fib$l_wcc = 1/*curblk*/;
+	strcpy(name,&x2p->context_save);
+    } else {
+        fib->fib$l_wcc = 0;
+	name=ext2_vms_to_unix(filedsc);
+	strcpy(&x2p->context_save,name);
+    }
 
     dir.d_ino=0;
     dir.d_type=0;
     memset(dir.d_name,0,256);
 
-    dir.d_off=fib->fib$w_file_hdrseq_incr; // borrow and use wrong
-    dir.d_reclen=fib->fib$w_dir_hdrseq_incr;
-
-#if 0
-    if (fib->fib$l_wcc!=0) {
-      dir.d_off=fib->fib$l_wcc; //resdsc->dsc$a_pointer;
-      dir.d_reclen=resdsc->dsc$w_length;
-    } else {
-      dir.d_off=0;
-      dir.d_reclen=0;
-    }
-#endif
-
     f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY, 0);
-#if 0
-    fd = get_unused_fd();
-    fd_install(fd, f);
-    {
-      struct files_struct * files = current->files;
-      while (fd < files->max_fds) {
-	if (f == files->fd[fd]) break;
-	fd++;
-      }
-    }
-    sys_getdents64(fd,&dir,64);
-#endif
     buf.count = 0;
     buf.dirent = &dir;
-    error=generic_file_llseek(f, mywcc /*fib->fib$l_wcc*//*dir.d_off*/, 0);
+    error=generic_file_llseek(f, x2p->prev_fp /*fib->fib$l_wcc*//*dir.d_off*/, 0);
     if (error<0)
       goto err;
     error=vfs_readdir(f, fillonedir64, &buf);
@@ -631,13 +615,12 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     if (error < 0)
       sts =  SS$_NOMOREFILES;
     //fib->fib$l_wcc = f->f_pos;
-    mywcc = f->f_pos;
+    x2p->prev_fp = f->f_pos;
     if (sts!=SS$_NORMAL)
       mywcc=0;
 
     filp_close(f,0);
 
-    //    resdsc->dsc$a_pointer=strdup(dir.d_name);
     if (0==strcmp(name,"/") && 0==strcmp(dir.d_name,"."))
       strcpy(dir.d_name,"000000.DIR");
     if (0==strcmp(dir.d_name,".."))
@@ -649,10 +632,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     dir.d_name[(*reslen)++]='1';
     bcopy(dir.d_name,resdsc->dsc$a_pointer,*reslen);
 
-    //    fib->fib$l_wcc=dir.d_off;
-    fib->fib$w_file_hdrseq_incr=f->f_pos;//dir.d_off+*reslen;
-    fib->fib$w_dir_hdrseq_incr=*reslen;
-
     fib->fib$w_fid_num=0;
     if (dir.d_ino!=2) {
       *(unsigned long*)(&fib->fib$w_fid_seq)=dir.d_ino;
@@ -663,21 +642,9 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       fib->fib$b_fid_nmx=0;
     }
 
-    if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
-      wildcard=1;
-
-    if (wildcard || (fib->fib$w_nmctl & FIB$M_WILD)) {
-        fib->fib$l_wcc = 1/*curblk*/;
-    } else {
-        fib->fib$l_wcc = 0;
-    }
-
 #if 0
-    if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
       sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
-    } else {
-      sts = SS$_BADIRECTORY;
-    }
+      // readdir should be replaced with something like search_ent
 #endif
   }
 
