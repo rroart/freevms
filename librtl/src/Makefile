@@ -18,7 +18,7 @@
 #		Merged together my basic and string libraries, so I
 #		only has one subdirectory to worry about.
 #
-CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion
+CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -I. -I../../starlet/src
 
 
 STROBJ = str.o str__const.o str__is_string_class.o \
@@ -71,32 +71,32 @@ test_date : test_date.c $(STRLIB)
 $(STRLIB) : $(STROBJ) $(LIBOBJ) $(SYSOBJ)
 	ar -rv $(STRLIB) $?
 
-str.o : str.c strdef.h
-str__const.o : str__const.c strdef.h
-str__is_string_class.o : str__is_string_class.c strdef.h
-str__copy_fill.o : str__copy_fill.c strdef.h
-str__resize.o : str__resize.c strdef.h
-str_analyze_sdesc.o : str_analyze_sdesc.c strdef.h
-str_append.o : str_append.c strdef.h
-str_blind_compare.o : str_blind_compare.c strdef.h
-str_compare.o : str_compare.c strdef.h
-str_compare_eql.o : str_compare_eql.c strdef.h
-str_concat.o : str_concat.c strdef.h
-str_copy_dx.o : str_copy_dx.c strdef.h
-str_copy_r.o : str_copy_r.c strdef.h
-str_dupl_char.o : str_dupl_char.c strdef.h
-str_element.o : str_element.c strdef.h
-str_free1_dx.o : str_free1_dx.c strdef.h
-str_get1_dx.o : str_get1_dx.c strdef.h
-str_left.o : str_left.c strdef.h
-str_len_extr.o : str_len_extr.c strdef.h
-str_pos_extr.o : str_pos_extr.c strdef.h
-str_position.o : str_position.c strdef.h
-str_prefix.o : str_prefix.c strdef.h
-str_right.o : str_right.c strdef.h
-str_find_first_in_set.o : str_find_first_in_set.c strdef.h
-str_find_first_not_in_set.o : str_find_first_not_in_set.c strdef.h
-str_translate.o : str_translate.c strdef.h
-str_trim.o : str_trim.c strdef.h
-str_upcase.o : str_upcase.c strdef.h
+str.o : str.c ../../starlet/src/strdef.h
+str__const.o : str__const.c ../../starlet/src/strdef.h
+str__is_string_class.o : str__is_string_class.c ../../starlet/src/strdef.h
+str__copy_fill.o : str__copy_fill.c ../../starlet/src/strdef.h
+str__resize.o : str__resize.c ../../starlet/src/strdef.h
+str_analyze_sdesc.o : str_analyze_sdesc.c ../../starlet/src/strdef.h
+str_append.o : str_append.c ../../starlet/src/strdef.h
+str_blind_compare.o : str_blind_compare.c ../../starlet/src/strdef.h
+str_compare.o : str_compare.c ../../starlet/src/strdef.h
+str_compare_eql.o : str_compare_eql.c ../../starlet/src/strdef.h
+str_concat.o : str_concat.c ../../starlet/src/strdef.h
+str_copy_dx.o : str_copy_dx.c ../../starlet/src/strdef.h
+str_copy_r.o : str_copy_r.c ../../starlet/src/strdef.h
+str_dupl_char.o : str_dupl_char.c ../../starlet/src/strdef.h
+str_element.o : str_element.c ../../starlet/src/strdef.h
+str_free1_dx.o : str_free1_dx.c ../../starlet/src/strdef.h
+str_get1_dx.o : str_get1_dx.c ../../starlet/src/strdef.h
+str_left.o : str_left.c ../../starlet/src/strdef.h
+str_len_extr.o : str_len_extr.c ../../starlet/src/strdef.h
+str_pos_extr.o : str_pos_extr.c ../../starlet/src/strdef.h
+str_position.o : str_position.c ../../starlet/src/strdef.h
+str_prefix.o : str_prefix.c ../../starlet/src/strdef.h
+str_right.o : str_right.c ../../starlet/src/strdef.h
+str_find_first_in_set.o : str_find_first_in_set.c ../../starlet/src/strdef.h
+str_find_first_not_in_set.o : str_find_first_not_in_set.c ../../starlet/src/strdef.h
+str_translate.o : str_translate.c ../../starlet/src/strdef.h
+str_trim.o : str_trim.c ../../starlet/src/strdef.h
+str_upcase.o : str_upcase.c ../../starlet/src/strdef.h
 
