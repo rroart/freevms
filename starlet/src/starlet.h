@@ -138,7 +138,7 @@ int sys$update (struct _fab * fab, void * err, void * suc);
 int sys$wait (struct _fab * fab, void * err, void * suc);
 int sys$write (struct _fab * fab, void * err, void * suc);
 int sys$filescan (struct _fab * fab, void * err, void * suc);
-int sys$setddir (struct _fab * fab, void * err, void * suc);
+int sys$setddir2 (struct _fab * fab, void * err, void * suc);
 int sys$setdfprot (struct _fab * fab, void * err, void * suc);
 int sys$ssvexc (struct _fab * fab, void * err, void * suc);
 int sys$rmsrundwn (struct _fab * fab, void * err, void * suc);

@@ -487,6 +487,7 @@ int sys$getsyiw(unsigned int efn, unsigned int *csidadr, void *nodename, void *i
   return INLINE_SYSCALL($getsyiw,1,&s);
 }
 
+int sys$setddir (struct dsc$descriptor *newdir,unsigned short *oldlen, struct dsc$descriptor *olddir) { return INLINE_SYSCALL1($setddir,3,newdir,oldlen,olddir); }
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
 int sys$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }
 int sys$create (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($create,3,fab,err,suc); }
@@ -517,7 +518,7 @@ int sys$update (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCA
 int sys$wait (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($wait,3,fab,err,suc); }
 int sys$write (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($write,3,fab,err,suc); }
 int sys$filescan (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($filescan,3,fab,err,suc); }
-int sys$setddir (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($setddir,3,fab,err,suc); }
+int sys$setddir2 (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($setddir,3,fab,err,suc); }
 int sys$setdfprot (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($setdfprot,3,fab,err,suc); }
 int sys$ssvexc (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($ssvexc,3,fab,err,suc); }
 int sys$rmsrundwn (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($rmsrundwn,3,fab,err,suc); }
