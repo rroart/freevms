@@ -701,18 +701,19 @@ Modification History:
 
 struct ip_structure
   {
-    union {
+    unsigned char iph$ihl:4,
+      iph$version:4;
+    //    union {
       unsigned char     iph$type_service		;
-      unsigned       iph$swap_ihl		 : 4;  // check
-    };
-    unsigned iph$ihl:4;
-    unsigned iph$version:4;
+      //      unsigned       iph$swap_ihl		 : 4;  // check
+    //    };
     unsigned short     iph$total_length;
     unsigned short     iph$ident;
     union {
       unsigned short     iph$fragmentation_data;
       struct {
-	unsigned       iph$fragment_offset	 : 13;
+	unsigned short      iph$fragment_offset	 : 13;
+#if 0
 	union {
 	  unsigned       iph$flags		 	 : 3;
 	  struct {
@@ -721,6 +722,7 @@ struct ip_structure
 	    unsigned           iph$unused		 : 1;	// Unused bit
 	  };
 	};
+#endif
       };
     };
     unsigned char     iph$ttl			;
@@ -856,7 +858,7 @@ struct icmp_header
   };
 
 #define    ICMP_SIZE   sizeof(struct icmp_header)
-#define    ICMP_HEADER_SIZE   ICMP_SIZE*4
+#define    ICMP_HEADER_SIZE   ICMP_SIZE
 
 #define    MAX_ICMP_DATA_SIZE  512	// Max ICMP data size
 //    ICMPTTL = 60,		// Time-to-live
@@ -881,7 +883,7 @@ unsigned char     up$data		[0];  // UDP data start
     };
 
 #define    UDPKT_LENGTH  sizeof(struct udpkt_structure)
-#define    UDP_HEADER_SIZE  UDPKT_LENGTH*4
+#define    UDP_HEADER_SIZE  UDPKT_LENGTH
 
 
 
@@ -915,40 +917,50 @@ struct segment_structure // check
   unsigned short     sh$dest_port		;	// Destination port
   unsigned int     sh$seq			;	// Sequence number
   unsigned int     sh$ack			;	// ACK number
+#if 0
   union {
     unsigned short int     sh$control_flags;	// For Fast flag clear.
-    struct {
-      unsigned 	sh$data_offset		 : 4;
-      union {
-	unsigned 	sh$c_all_flags		 : 12;
-	struct {
-	  unsigned 	sh$c_fin		 : 1;	// FIN (close) control
-	  unsigned 	sh$c_syn		 : 1;	// SYN (open) control
-	  unsigned 	sh$c_rst		 : 1;	// RESET control
-	  unsigned 	sh$c_eol		 : 1;	// PUSH control
-	  unsigned 	sh$c_ack		 : 1;	// ACK control (ACK valid)
-	  unsigned 	sh$c_urg		 : 1;	// URG control (URG valid)
-	  unsigned 	sh$rsvrd		 : 6;	// Unused bits
-	};
-      };
-    };
-    struct {
-      unsigned 	sh$bs_c_rsvrd1		 : 4;
-      unsigned 	sh$bs_data_offset	 : 4;
-      unsigned 	sh$bs_c_fin		 : 1;
-      unsigned 	sh$bs_c_syn		 : 1;
-      unsigned 	sh$bs_c_rst		 : 1;
-      unsigned 	sh$bs_c_eol		 : 1;
-      unsigned 	sh$bs_c_ack		 : 1;
-      unsigned 	sh$bs_c_urg		 : 1;
-      unsigned 	sh$bs_c_rsvrd2		 : 2;
-    };
-  };
+    unsigned short int	sh$c_all_flags,		 : 12, sh$dummy: 4;
+#endif
+    unsigned short int	sh$rsvrd	 : 4,	// Unused bits
+      		sh$data_offset		 : 4,
+    		sh$c_fin		 : 1,	// FIN (close) control
+      		sh$c_syn		 : 1,	// SYN (open) control
+		sh$c_rst		 : 1,	// RESET control
+	   	sh$c_eol		 : 1,	// PUSH control
+	   	sh$c_ack		 : 1,	// ACK control (ACK valid)
+	   	sh$c_urg		 : 1,	// URG control (URG valid)
+	   	sh$rsvrd2		 : 2;	// Unused bits
+#if 0
+    unsigned short int
+       	sh$bs_c_rsvrd1		 : 4,
+       	sh$bs_data_offset	 : 4,
+       	sh$bs_c_fin		 : 1,
+       	sh$bs_c_syn		 : 1,
+       	sh$bs_c_rst		 : 1,
+       	sh$bs_c_eol		 : 1,
+       	sh$bs_c_ack		 : 1,
+       	sh$bs_c_urg		 : 1,
+       	sh$bs_c_rsvrd2		 : 2;
+  } mustbenamedbecausegccbugs;
+#endif
   unsigned short int sh$window;	// Window beyond this seq #
   signed short int sh$checksum;	// Segment TCP checksum
   unsigned short int sh$urgent;	// Urgent pointer if URG set
   unsigned char     sh$data			[0];	// Start of segment data
 };
+
+#if 0
+#define sh$control_flags mustbenamedbecausegccbugs.sh$control_flags
+#define sh$c_all_flags mustbenamedbecausegccbugs.sh$c_all_flags
+#define sh$data_offset mustbenamedbecausegccbugs.sh$data_offset
+#define sh$c_fin mustbenamedbecausegccbugs.sh$c_fin
+#define sh$c_syn mustbenamedbecausegccbugs.sh$c_syn
+#define sh$c_rst mustbenamedbecausegccbugs.sh$c_rst
+#define sh$c_eol mustbenamedbecausegccbugs.sh$c_eol
+#define sh$c_ack mustbenamedbecausegccbugs.sh$c_ack
+#define sh$c_urg mustbenamedbecausegccbugs.sh$c_urg
+#endif
 
 // Segment TCP options
 
