@@ -52,6 +52,7 @@
 
 asmlinkage int system_call(void);
 asmlinkage int vmssystem_call(void);
+asmlinkage int vmssystem_call1(void);
 asmlinkage int vmssystem_call3(void);
 asmlinkage void lcall7(void);
 asmlinkage void lcall27(void);
