@@ -36,27 +36,52 @@ signed long mmg$rempfnh(unsigned long type) {
 
 signed long mmg$rempfn(unsigned long type, struct _pfn * pfn) {
   struct _mypfn * h;
-  if (sch$gl_freecnt<(1+4)) return -1;
-  if (!pfn$al_head[type])
+  if (type==PFN$C_FREPAGLST)
+    if (sch$gl_freecnt<(1+4)) return -1;
+  if (type==PFN$C_MFYPAGLST)
+    if (sch$gl_mfycnt<1) return -1;
+  if (pfn$al_head[type]==0)
     return -1;
-  if (pfn$al_head[type]==pfn$al_tail[type]) panic("eech2\n");
+  if (pfn && pfn$al_head[type]==pfn$al_tail[type]) {
+    pfn$al_head[type]=pfn$al_tail[type]=0;
+    goto out;
+  }
+
   // no tail check yet
   if (pfn==pfn$al_head[type]) {
     h=pfn$al_head[type]=((struct _pfn *) pfn$al_head[type])->pfn$l_flink;
     h->pfn$l_blink=0; // gcc bug?
+    goto out;
   }
+
+  if (pfn==pfn$al_tail[type]) {
+    h=pfn$al_tail[type]=((struct _pfn *) pfn$al_tail[type])->pfn$l_blink;
+    h->pfn$l_flink=0; // gcc bug?
+    goto out;
+  }
+
+  // ordinary case
+  struct _mypfn * cur=pfn;
+  struct _mypfn * prev=cur->pfn$l_blink;
+  struct _mypfn * next=cur->pfn$l_flink;
+  prev->pfn$l_flink=next;
+  next->pfn$l_blink=prev;
+
   //  pfn->pfn$l_refcnt=0;
-  if (h->pfn$l_flink==0) panic("eech %x\n",lasteech);
 #if 0
+  if (h->pfn$l_flink==0) panic("eech %x\n",lasteech);
   // not yet, struct bugs
   if (pfn->pfn$l_refcnt)
     panic("refcnt\n");
 #endif
+ out:
   if (type==PFN$C_FREPAGLST) sch$gl_freecnt--;
   if (type==PFN$C_MFYPAGLST) sch$gl_mfycnt--;
+#if 0
   if (((struct _pfn *) pfn$al_head[type])->pfn$l_flink==0) {
     panic("eech4\n");
   }
+#endif
   lasteech=1;
   return (((unsigned long)pfn-(unsigned long)mem_map)/sizeof(struct _pfn));
 }
@@ -105,7 +130,7 @@ signed long mmg$inspfn(unsigned long type, struct _pfn * pfn, struct _pfn * list
 
   lasteech=3;
 
-  pfn->pfn$v_pagtyp=type;
+  pfn->pfn$v_loc=type;
 
   if (list) {
     tmp=list; 
