@@ -49,13 +49,13 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
     /* unlock sched */
     return SS$_NORMAL;
   }
+
   if (waitallflag && ((mask & *clusteraddr) == mask))
     goto out;
-  if (waitallflag) {
-    p->pcb$l_sts|=PCB$M_WALL;
-    p->pcb$l_efwm|=~mask;
-  } else 
-    p->pcb$l_efwm|=~mask;
+
+  if (waitallflag)
+    p->pcb$l_sts|=PCB$M_WALL; // maybe reset if this is not the case?
+  p->pcb$l_efwm=~mask;
 
   insque(p,&wq->wqh$l_wqfl); // temporary... see about corruption in rse.c
   sch$wait(p,wq);
