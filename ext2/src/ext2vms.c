@@ -638,7 +638,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
   if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) { iosbret(irp,SS$_WRITLCK);  return SS$_WRITLCK; }
 
-  ext2_translate_fid(vcb,fid);
+  //ext2_translate_fid(vcb,fid);
   fcb=exttwo_search_fcb2(vcb,fid); // can actually use most of the f11b routine
 #if 0
   //head = f11b_read_header(vcb,fid,fcb,&iosb);
@@ -705,6 +705,7 @@ exttwo_read_attrib(){}
 void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
 {
   struct _vcb * vcb=x2p->current_vcb;
+  struct _fcb *fcb4;
   struct _fcb *fcb = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
   bzero(fcb,sizeof(struct _fcb));
   if (fcb == NULL) {
@@ -729,6 +730,19 @@ void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
   fcb->fcb$l_primfcb = inode; // put this somewhere?
 
   *retsts=SS$_NORMAL;
+  if (inode->i_ino!=2) return fcb;
+
+  struct _fcb *fcb4 = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
+  bzero(fcb,fcb4,sizeof(struct _fcb));
+  if (fcb == NULL) {
+    if (retsts) *retsts = SS$_INSFMEM;
+    return;
+  } 
+
+  fcb->fcb$w_fid_num=4;
+  fcb->fcb$w_seq_num=4;
+  fcb->fcb$w_fid_rvn=0;
+
   return fcb;
 }
 
