@@ -36,14 +36,16 @@ int ioc_std$link_ucb (struct _ucb *ucb) {
 int ioc_std$copy_ucb (struct _ucb *src_ucb, struct _ucb **new_ucb) {
   int status;
   struct _ucb * u;
+  int size;
 
   if (src_ucb->ucb$w_size) {
-    u=kmalloc(src_ucb->ucb$w_size,GFP_KERNEL);
+    size=src_ucb->ucb$w_size;
   } else {
-    u=kmalloc(sizeof(struct _ucb),GFP_KERNEL);
+    size=sizeof(struct _ucb);
     printk("ucb %x size zero\n");
   }
-  memcpy(u,src_ucb,sizeof(struct _ucb));
+  u=kmalloc(size,GFP_KERNEL);
+  memcpy(u,src_ucb,size);
 
   qhead_init(&u->ucb$l_fqfl);
   u->ucb$l_fr3=0;
