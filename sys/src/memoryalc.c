@@ -70,8 +70,10 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 	/* Yes, think what happens when other parts of the kernel take 
 	 * a reference to a page in order to pin it for io. -ben
 	 */
+#if 0
 	if (PageLRU(page))
 		lru_cache_del(page);
+#endif
 
 #if 0
 	if (page->buffers)
