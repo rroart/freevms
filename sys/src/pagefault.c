@@ -424,6 +424,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 
 	if ((*(unsigned long *)pte)&_PAGE_TYP1) { // page or image file
 	  if ((*(unsigned long *)pte)&_PAGE_TYP0) { // image file
+	    
 	  } else { // page file
 	  }
 	}
