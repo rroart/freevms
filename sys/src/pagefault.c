@@ -639,6 +639,12 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	  //check if another process phd
 	}
 
+	if (address<PAGE_SIZE)
+	  goto skip;
+
+	if (address>0xc0000000)
+	  goto skip;
+
 	if (in_atomic) { 
 	  printk("atomic addr %x\n",address);
 	  address=0x11111111;
@@ -655,7 +661,11 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	  printk("transform it\n");
 	}
 	pte = pte_offset(pmd, page);
+
 	mypte = pte;
+	if (((unsigned long)mypte)<0xa0000000)
+	  goto skip;
+
 	mmg$frewsle(current,address);
 
 	// different forms of invalid ptes?
@@ -670,15 +680,6 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	// 0 1 pfn=gpti invalid global page
 	// 1 0 pfn=misc page is in page file
 	// 1 1 page is in image file
-
-	if (address<PAGE_SIZE)
-	  goto skip;
-
-	if (address>0xc0000000)
-	  goto skip;
-
-	if (((unsigned long)mypte)<0xa0000000)
-	  goto skip;
 
 	if (mypte->pte$v_typ1) { // page or image file
 	  if (mypte->pte$v_typ0) { // image file
