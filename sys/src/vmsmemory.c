@@ -196,6 +196,7 @@ int copy_page_range(struct mm_struct *dst, struct mm_struct *src,
 	unsigned long address = ((struct _rde *)vma)->rde$pq_start_va;
 	unsigned long end = ((struct _rde *)vma)->rde$pq_start_va + ((struct _rde *)vma)->rde$q_region_size;
 	unsigned long cow = (((struct _rde *)vma)->rde$l_flags & (VM_SHARED | VM_MAYWRITE)) == VM_MAYWRITE;
+	unsigned long did_cow=0;
 
 	src_pgd = pgd_offset(src, address)-1;
 	dst_pgd = pgd_offset(dst, address)-1;
@@ -266,6 +267,7 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				if (cow && pte_write(pte)) {
 				  ptep_set_wrprotect(src_pte);// drop this a while because it makes the stack readonly
 				  pte = *src_pte;
+				  did_cow=1;
 				  if (0) {
 				    pte_t * mypte=&pte;
 				    signed long page = mmg$allocpfn();
@@ -279,6 +281,8 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				    //map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
 				    //*(unsigned long *)pte|=1;
 				  }
+				} else {
+				  did_cow=0;
 				}
 
 				/* If it's a shared mapping, mark it clean in the child */
@@ -288,7 +292,7 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				get_page(ptepage);
 				dst->rss++;
 
-				if (cow==0 && (ptepage->pfn$q_bak&PTE$M_TYP0)) {
+				if (did_cow==0 && (ptepage->pfn$q_bak&PTE$M_TYP0)) {
 				    pte_t * mypte=&pte;
 				    signed long page = mmg$allocpfn();
 				    unsigned long address2 = (*(unsigned long *)src_pte)&0xfffff000;
@@ -331,7 +335,7 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				    bcopy(__va(address2),__va(page*PAGE_SIZE),PAGE_SIZE);
 #endif
 				} else {
-				  static int mydebugg = 0;
+				  static int mydebugg = 1;
 				  if (mydebugg) {
 				    printk("%x %x %x %x\n",address,*dst_pte,*src_pte,src_pte);
 				  }
