@@ -22,6 +22,7 @@
 #include<wsldef.h>
 
 asmlinkage int exe$crmpsc_wrap(struct struct_crmpsc * s) {
+#ifdef CONFIG_VMS
   int ret;
   int chan=s->chan;
   struct file * file=0;
@@ -34,6 +35,7 @@ asmlinkage int exe$crmpsc_wrap(struct struct_crmpsc * s) {
   ret=exe$crmpsc(s->inadr,s->retadr,s->acmode,s->flags,s->gsdnam,s->ident,s->relpag,fcb,s->pagcnt,s->vbn,s->prot,s->pfc);
   if (file) fput(file);
   return ret;
+#endif
 }
 
 asmlinkage int exe$mgblsc_wrap(struct struct_mgblsc * s) {
