@@ -112,7 +112,9 @@ asmlinkage int exe$hiber(void) {
     return SS$_NORMAL;
   }
   /* cwps stuff not yet */
-  return sch$wait(p,sch$gq_hibwq);
+  int ret = sch$wait(p,sch$gq_hibwq);
+  setipl(0); // unstandard, but sch$wait might leave at ipl 8
+  return ret;
 }
 
 /* return params not as specified */

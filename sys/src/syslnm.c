@@ -148,7 +148,7 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
 
   }
 
-  setipl(0);
+  setipl(0); // simulate return int
   return status;
 }
 
@@ -213,7 +213,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
     lnmfree(trailer);
     /* unlock mutex */
     lnm$unlock();
-    setipl(0);
+    setipl(0); // simulate return int
     return status;
   }
 
@@ -238,7 +238,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
       lnmfree(trailer);
       /* unlock mutex */
       lnm$unlock();
-      setipl(0);
+      setipl(0); // simulate return int
       return SS$_NOPRIV;
     }
   }
@@ -251,7 +251,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
      lnmfree(trailer);
      unlock mutex 
      lnm$unlock();
-     setipl(0);
+     setipl(0); // simulate return int
      return SS$_EXLNMQUOTA;
 
   */
@@ -296,7 +296,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   /* unlock mutex */
   lnm$unlock();
 
-  setipl(0);
+  setipl(0); // simulate return int
   return status;
 }
 
@@ -342,7 +342,7 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
   lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
 #endif
   lnm$unlock();
-  setipl(0);
+  setipl(0); // simulate return int
   return status;
 }
 
