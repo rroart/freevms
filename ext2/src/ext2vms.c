@@ -674,7 +674,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   x2p->primary_fcb=fcb;
   x2p->current_window=&fcb->fcb$l_wlfl;
 
-  if (atrp) exttwo_read_attrib(fcb,atrp);
+  if (atrp) exttwo_read_attrib(fcb,head,atrp);
   iosbret(irp,SS$_NORMAL);
   return SS$_NORMAL;
 }
@@ -715,8 +715,87 @@ void * exttwo_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long 
   return buf;
 }
 
-exttwo_read_attrib(){}
+void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef * atrp) {
+  struct _iosb iosb;
+  int sts=SS$_NORMAL;
+  struct inode * head=inode;
 
+  while(atrp->atr$w_type!=0) {
+    switch (atrp->atr$w_type) {
+    case ATR$C_RECATTR:
+      {
+	struct _fatdef * f=atrp->atr$l_addr;
+	f->fat$b_rtype=FAT$C_SEQUENTIAL << 4;
+	f->fat$b_rattrib=0;
+	f->fat$w_rsize=0;
+	f->fat$l_hiblk=VMSSWAP(head->i_iblocks);
+	f->fat$l_efblk=VMSSWAP(head->i_size/1024);
+	f->fat$w_ffbyte=head->i_size%1024;
+	f->fat$b_bktsize=0;
+	f->fat$b_vfcsize=0;
+	f->fat$w_maxrec=0;
+	f->fat$w_defext=0;
+	f->fat$w_gcb=0;
+	f->fat$w_versions=1;
+	//memcpy(atrp->atr$l_addr,&head->fh2$w_recattr,atrp->atr$w_size);
+      }
+      break;
+    case ATR$C_STATBLK:
+      {
+	struct _sbkdef * s=atrp->atr$l_addr;
+	s->sbk$l_fcb=fcb;
+      }
+      break;
+#if 0
+      //not now
+      //change to ext2 inode later
+    case ATR$C_HEADER:
+      {
+	struct _fh2 * head;
+	head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);  
+	sts=iosb.iosb$w_status;
+	memcpy(atrp->atr$l_addr,head,atrp->atr$w_size);
+	vfree(head); // wow. freeing something
+      }
+#endif
+      break;
+    case ATR$C_CREDATE:
+      {
+	*(unsigned long long*)atrp->atr$l_addr=unix_to_vms_time(head->i_ctime);
+      }  
+	break;
+    case ATR$C_REVDATE:
+      {
+	*(unsigned long long*)atrp->atr$l_addr=unix_to_vms_time(head->i_mtime);
+      }  
+	break;
+    case ATR$C_EXPDATE:
+      {
+	*(unsigned long long*)atrp->atr$l_addr=0;
+      }  
+	break;
+    case ATR$C_BAKDATE:
+      {
+	*(unsigned long long*)atrp->atr$l_addr=0;
+      }  
+	break;
+	
+    case ATR$C_UIC:
+	memcpy(atrp->atr$l_addr,&head->i_uid,atrp->atr$w_size);
+	break;
+
+    case ATR$C_FPRO:
+	memcpy(atrp->atr$l_addr,&head->i_mode,atrp->atr$w_size);
+	break;
+
+    default:
+      printk("atr %x not supported\n",atrp->atr$w_type);
+      break;
+    }
+    atrp++;
+  }
+  vfree(head);
+}
 
 void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
 {
