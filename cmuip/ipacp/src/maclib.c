@@ -488,7 +488,7 @@ bye:
 // R5 = UCB address
 
 Not_Mounted:
-	R0 = Build_ACP_QB();		// build & link ACP Queue blk.
+	R0 = Build_ACP_QB(R5);		// build & link ACP Queue blk.
 	if	(SS$_INSFMEM==R0)		// OK?
 	goto	bye;			// EQL means Error.
 	R8 = acp_qb_adrs;		// for build_VCB
