@@ -85,13 +85,15 @@
 #define SOFTINT_IOLOCK8_VECTOR do { __asm__ __volatile__ ("int $0x98\n"); } while (0);
 #define SOFTINT_PORT_VECTOR do { __asm__ __volatile__ ("int $0x97\n"); } while (0);
 #define SOFTINT_TIMERFORK_VECTOR do { __asm__ __volatile__ ("int $0x96\n"); } while (0);
-#define SOFTINT_QUEUEAST_VECTOR do { __asm__ __volatile__ ("int $0x95\n"); } while (0);
-#define SOFTINT_IOPOST_VECTOR do ioc$iopost();
+#define SOFTINT_QUEUEAST_VECTOR exe$forkdspth();
+//#define SOFTINT_QUEUEAST_VECTOR do { __asm__ __volatile__ ("int $0x95\n"); } while (0);
+#define SOFTINT_IOPOST_VECTOR ioc$iopost();
 
 //#define SOFTINT_IOPOST_VECTOR do { __asm__ __volatile__ ("int $0x94\n"); } while (0);
 //#define SOFTINT_RESCHED_VECTOR do { __asm__ __volatile__ ("int $0x93\n"); } while (0);
 #define SOFTINT_RESCHED_VECTOR sch$resched();
-#define SOFTINT_ASTDEL_VECTOR do { __asm__ __volatile__ ("int $0x92\n"); } while (0);
+//#define SOFTINT_ASTDEL_VECTOR do { __asm__ __volatile__ ("int $0x92\n"); } while (0);
+#define SOFTINT_ASTDEL_VECTOR sch$astdel();
 
 /*
  * Vectors 0x20-0x2f are used for ISA interrupts.

@@ -88,3 +88,18 @@ myaddr=(signed long *) addr;
 return (unsigned long) myaddr;
 /* sti() */
 }
+
+struct myq {
+unsigned long flink;
+unsigned long blink;
+};
+
+inline int aqempty(void * q) {
+struct myq *m=(struct myq *) q;
+return (q==m->flink);
+}
+
+inline int rqempty(void * q) {
+struct myq *m=(struct myq *) q;
+return (m->flink==0 && m->blink==0);
+}

@@ -8,4 +8,7 @@ unsigned long remqhi(void * header, void * addr);
 void insqti(void * entry, void * header);
 unsigned long remqti(void * header, void * addr);
 
+int aqempty(void * q);
+int rqempty(void * q);
+
 #endif

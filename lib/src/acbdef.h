@@ -7,6 +7,7 @@
 #define	ACB$M_NODELETE	0x20
 #define	ACB$M_QUOTA	0x40
 #define	ACB$M_KAST	0x80
+#define	ACB$V_KAST	0x80
 #define	ACB$M_THREAD_SAFE	0x1
 #define	ACB$M_THREAD_PID_VALID	0x2
 #define	ACB$M_UPCALL	0x4
@@ -34,16 +35,16 @@
 #define	__RELEASE_AST_ERROR	183369728
 #define	__RELEASE_ASTFAULT	183435264
 	
-typedef struct _acb {
+struct _acb {
     struct _acb *acb$l_astqfl;          
     struct _acb *acb$l_astqbl;          
     unsigned short int acb$w_size;      
     unsigned char acb$b_type;           
     unsigned char acb$b_rmod;       
     unsigned long acb$l_pid;             
-    void (*acb$l_ast)();            
+    void (*acb$l_ast)(void);            
     unsigned long acb$l_astprm;          
-    void (*acb$l_kast)();               
+    void (*acb$l_kast)(void);               
     };
  
 #endif 

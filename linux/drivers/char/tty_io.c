@@ -617,7 +617,8 @@ void stop_tty(struct tty_struct *tty)
 	if (tty->link && tty->link->packet) {
 		tty->ctrl_status &= ~TIOCPKT_START;
 		tty->ctrl_status |= TIOCPKT_STOP;
-		wake_up_interruptible2(&tty->link->read_wait,PRI$_TICOM);
+		wake_up_interruptible(&tty->link->read_wait);
+		//		wake_up_interruptible2(&tty->link->read_wait,PRI$_TICOM);
 	}
 	if (tty->driver.stop)
 		(tty->driver.stop)(tty);
@@ -631,14 +632,16 @@ void start_tty(struct tty_struct *tty)
 	if (tty->link && tty->link->packet) {
 		tty->ctrl_status &= ~TIOCPKT_STOP;
 		tty->ctrl_status |= TIOCPKT_START;
-		wake_up_interruptible2(&tty->link->read_wait,PRI$_TICOM);
+		wake_up_interruptible(&tty->link->read_wait);
+		//		wake_up_interruptible2(&tty->link->read_wait,PRI$_TICOM);
 	}
 	if (tty->driver.start)
 		(tty->driver.start)(tty);
 	if ((test_bit(TTY_DO_WRITE_WAKEUP, &tty->flags)) &&
 	    tty->ldisc.write_wakeup)
 		(tty->ldisc.write_wakeup)(tty);
-	wake_up_interruptible2(&tty->write_wait,PRI$_TOCOM);
+	wake_up_interruptible(&tty->write_wait);
+	//	wake_up_interruptible2(&tty->write_wait,PRI$_TOCOM);
 }
 
 static ssize_t tty_read(struct file * file, char * buf, size_t count, 

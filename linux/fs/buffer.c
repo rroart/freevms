@@ -129,7 +129,8 @@ void unlock_buffer(struct buffer_head *bh)
 	clear_bit(BH_Lock, &bh->b_state);
 	smp_mb__after_clear_bit();
 	if (waitqueue_active(&bh->b_wait))
-		wake_up2(&bh->b_wait,PRI$_IOCOM);
+		wake_up(&bh->b_wait);
+	//		wake_up2(&bh->b_wait,PRI$_IOCOM);
 }
 
 /*
@@ -1331,7 +1332,8 @@ no_grow:
 		spin_unlock(&unused_list_lock);
 
 		/* Wake up any waiters ... */
-		wake_up2(&buffer_wait,PRI$_IOCOM);
+		wake_up(&buffer_wait);
+		//wake2 etc,PRI$_IOCOM
 	}
 
 	/*
@@ -2524,7 +2526,8 @@ cleaned_buffers_try_again:
 	spin_unlock(&unused_list_lock);
 
 	/* Wake up anyone waiting for buffer heads */
-	wake_up2(&buffer_wait,PRI$_IOCOM);
+	wake_up(&buffer_wait);
+	//	wake_up2(&buffer_wait,PRI$_IOCOM);
 
 	/* And free the page */
 	page->buffers = NULL;

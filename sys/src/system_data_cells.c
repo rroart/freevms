@@ -747,7 +747,7 @@ unsigned long ioc$gq_dev_wwid_list;
 unsigned long ioc$gq_min_bap_window;
 unsigned long ioc$gq_mountlst;
 unsigned long ioc$gq_mutex;
-unsigned long ioc$gq_postiq;
+unsigned long long ioc$gq_postiq;
 unsigned long ioc$gw_lamapreg;
 unsigned long ioc$gw_maxbuf;
 unsigned long ioc$gw_mbxbfquo;
@@ -1899,6 +1899,12 @@ struct _cpu vmscpus[32]; /* max. this number should be defined */
 
 extern void exe$timeout(void);
 
+qhead_init(void * l) {
+  struct _pcb * tmp=(struct _pcb *)l; /* could be anything */
+  tmp->pcb$l_sqfl=tmp;
+  tmp->pcb$l_sqbl=tmp;
+}
+
 void __init vms_init(void) {
   int i,j;
 
@@ -1959,8 +1965,13 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   tqe2.tqe$q_time=0;
   tqe2.tqe$q_delta=10000000;
 
-    insque(&tqe2,exe$gl_tqfl);
+  insque(&tqe2,exe$gl_tqfl);
+
+  qhead_init(&ioc$gq_postiq);
 
   /* take lnm stuff from syslnm.c etc */
 
 }
+
+
+

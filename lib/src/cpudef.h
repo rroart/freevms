@@ -73,7 +73,7 @@
 struct _cpu {
   struct _pcb *cpu$l_curpcb;
   // struct _ktb *cpu$l_curktb;
-  unsigned char cpu$b_ipl; /* some cpus lack something */  
+  unsigned char cpu$b_ipl; /* some cpus lack something. PSL IPL */  
   unsigned char iplnr;
   unsigned char previpl[32];
 struct {
@@ -82,7 +82,10 @@ struct {
   void * address;
 } cpu$t_ipending[256];
 
-  unsigned char cpu$b_astlvl; /* some cpus lack something */
+  //  unsigned char cpu$b_astlvl; /* some cpus lack something. pcb stuff. */
+  unsigned char cpu$b_intstk; /* PSL IS. not yet used */
+  unsigned char cpu$b_cur_mod; /* PSL CUR_MOD */
+  unsigned char cpu$b_prv_mod; /* PSL PRV_MOD */
 
   unsigned long cpu$l_realstack;
   unsigned short int cpu$w_size;

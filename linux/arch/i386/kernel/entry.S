@@ -85,6 +85,10 @@ processor	= 52
 */
 ENOSYS = 38
 
+#define REI \
+        call sw_ast; \
+        iret;
+
 #define PUSHR_ALL \
 	cld; \
 	pushl %es; \
@@ -134,7 +138,7 @@ ENOSYS = 38
 1:	popl %ds;	\
 2:	popl %es;	\
 	addl $4,%esp;	\
-3:	iret;		\
+3:	REI;		\
 .section .fixup,"ax";	\
 4:	movl $0,(%esp);	\
 	jmp 1b;		\
@@ -493,31 +497,31 @@ ENTRY(test_code)
         PUSHR_ALL
         call SYMBOL_NAME(do_test_code)
         POPR_ALL
-        iret
+        REI
 
 ENTRY(sched_vector)
         PUSHR_ALL
         call SYMBOL_NAME(schedule)
         POPR_ALL
-        iret
+        REI
 
 ENTRY(resched_vector)
         PUSHR_ALL
         call SYMBOL_NAME(sch$resched)
         POPR_ALL
-        iret
+        REI
 
 ENTRY(timer_vector)
         PUSHR_ALL
         call SYMBOL_NAME(exe$swtimint)
         POPR_ALL
-        iret
+        REI
 
 ENTRY(iopost_vector)
         PUSHR_ALL
         call SYMBOL_NAME(ioc$iopost)
         POPR_ALL
-        iret
+        REI
 
 .data
 ENTRY(sys_call_table)

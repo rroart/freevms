@@ -690,9 +690,12 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	/* pcb stuff */
 
 	p->pcb$b_prib=31-DEFPRI;
-	p->pcb$b_pri=31-DEFPRI;
+	p->pcb$b_pri=31-DEFPRI-6;
 	//	if (p->pcb$b_pri<16) p->pcb$b_pri=16;
 	p->phd$w_quant=-QUANTUM/10;
+
+	qhead_init(&p->pcb$l_astqfl);
+	p->pcb$b_asten=15;
 
 	/*
 	 * "share" dynamic priority between parent and child, thus the
@@ -736,7 +739,8 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	if (p->ptrace & PT_PTRACED)
 		send_sig(SIGSTOP, p, 1);
 	//	printk("fork befwak\n");
-	wake_up_process2(p,PRI$_TICOM);		/* do this last */
+	wake_up_process(p);		/* do this last */
+	//	wake_up_process2(p,PRI$_TICOM);		/* do this last */
 	++total_forks;
 	if (clone_flags & CLONE_VFORK)
 		wait_for_completion(&vfork);

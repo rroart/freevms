@@ -7,5 +7,5 @@ libqueue.a: queue.o
 	ar cr $@ queue.o
 	ranlib $@ 
 
-queue.o:
+queue.o: queue.c
 	cc -c queue.c

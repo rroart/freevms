@@ -637,6 +637,7 @@ void sch$resched(void) {
 
   //  if (curpcb->pid>0 && curpcb->state==TASK_RUNNING) {
   // Need pid 0 in the queue, this is more a linux thingie
+  if (!task_on_comqueue(curpcb)) // why???
   if (curpcb->state==TASK_RUNNING) {
     sch$gl_comqs=sch$gl_comqs | (1 << curpri);
     //    curpcb->state=TASK_INTERRUPTIBLE; /* soon SCH$C_COM ? */
@@ -740,9 +741,11 @@ asmlinkage void sch$sched(int from_sch$resched) {
     next=(struct _pcb *) remque(qhead,next);
     nr_running--;
     after=numproc();
-    if(before-after!=1)
+    if(before-after!=1) {
+      int i;
+      for (i=0;i<2000000000;i++) ;
       panic("remq1 %x %x\n",before,after);
-
+    }
     if (mydebug4) printk("next %x %x %x %x\n",qhead,*(void**)qhead,next,sch$aq_comh[tmppri]);
     if (mydebug4) printk("comh %x %x\n",sch$aq_comh[tmppri],((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl);
     if (sch$aq_comh[tmppri]==((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl)
@@ -1551,6 +1554,7 @@ void __init sched_init(void)
   cpu=smp$gl_cpu_data[cpuid];
   init_task.pcb$b_pri=16;
   init_task.pcb$b_prib=31;
+  qhead_init(&init_task.pcb$l_astqfl);
   cpu->cpu$l_curpcb=&init_task;
   cpu->cpu$b_cur_pri=16;
 

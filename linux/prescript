@@ -16,7 +16,12 @@ done
 		ln -s ../../freevms/sys/src/exception_init.c .;
 		ln -s ../../freevms/sys/src/postef.c .;
 		ln -s ../../freevms/sys/src/iociopost.c .;
+		ln -s ../../freevms/sys/src/astdel.c;
+		ln -s ../../freevms/sys/src/forkcntrl.c .;
+		ln -s ../../freevms/sys/src/iosubnpag.c .;
+		ln -s ../../freevms/sys/src/sysastcon.c .;
 		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
+		rm ast.c; ln -s ../../freevms/pal/src/ast.c .;
 )
 
 echo you have read the HOWTO and done a make in ../freevms?

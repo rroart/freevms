@@ -14,10 +14,10 @@ export-objs = signal.o sys.o kmod.o context.o ksyms.o pm.o exec_domain.o printk.
 obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \
 	    module.o exit.o itimer.o info.o time.o softirq.o resource.o \
 	    sysctl.o acct.o capability.o ptrace.o timer.o user.o \
-	    signal.o sys.o kmod.o context.o \
+	    signal.o sys.o kmod.o context.o ast.o \
 	    syssetpri.o system_data_cells.o ipl.o syspcntrl.o timeschdl.o \
 	    exception_init.o syswait.o sysevtsrv.o rse.o exsubrout.o \
-	    iociopost.o postef.o \
+	    iociopost.o postef.o astdel.o forkcntrl.o iosubnpag.o sysastcon.o \
 	    ../../freevms/pal/src/libqueue.a
 
 obj-$(CONFIG_UID16) += uid16.o

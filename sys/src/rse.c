@@ -116,12 +116,14 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
   if (!(p->pcb$l_sts & PCB$M_RES)) {
     sch$swpwake();
     p2->pcb$w_state=SCH$C_COMO;
+    p2->state=TASK_RUNNING;
     insque(p2,sch$aq_comot[newpri]);
     sch$gl_comoqs|=(1 << newpri);
     return;
   }
   SOFTINT_RESCHED_VECTOR;
   p2->pcb$w_state=SCH$C_COM;
+  p2->state=TASK_RUNNING;
   insque(p2,sch$aq_comt[newpri]);
   sch$gl_comqs|=(1 << newpri);
 }
@@ -326,6 +328,7 @@ int sch$waitl(struct _pcb * p, struct _wqh * wq) {
 
 int sch$waitk(struct _pcb * p, struct _wqh * wq) {
   p->pcb$w_state=wq->wqh$l_wqstate;
+  p->state=TASK_UNINTERRUPTIBLE;
   insque(p,wq->wqh$l_wqfl);
   wq->wqh$l_wqcnt++;
   return sch$waitl(p,wq);
@@ -354,6 +357,7 @@ void sch$chsep2(struct _pcb * p,unsigned char newpri) {
   if (!(p->pcb$l_sts & PCB$M_RES)) {
     sch$swpwake();
     p2->pcb$w_state=SCH$C_COMO;
+    p2->state=TASK_RUNNING;
     insque(p2,sch$aq_comot[newpri]);
     sch$gl_comoqs|=(1 << newpri);
     return;

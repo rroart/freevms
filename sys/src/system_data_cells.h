@@ -745,7 +745,7 @@ extern unsigned long ioc$gq_dev_wwid_list;
 extern unsigned long ioc$gq_min_bap_window;
 extern unsigned long ioc$gq_mountlst;
 extern unsigned long ioc$gq_mutex;
-extern unsigned long ioc$gq_postiq;
+extern unsigned long long ioc$gq_postiq;
 extern unsigned long ioc$gw_lamapreg;
 extern unsigned long ioc$gw_maxbuf;
 extern unsigned long ioc$gw_mbxbfquo;

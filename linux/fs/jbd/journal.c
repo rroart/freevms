@@ -889,7 +889,6 @@ int journal_create (journal_t *journal)
 		BUFFER_TRACE(bh, "marking dirty");
 		mark_buffer_dirty(bh);
 		BUFFER_TRACE(bh, "marking uptodate");
-
 		mark_buffer_uptodate(bh, 1);
 		__brelse(bh);
 	}
