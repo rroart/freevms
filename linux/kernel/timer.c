@@ -584,12 +584,14 @@ void update_process_times(int user_tick)
 	struct task_struct *p = current;
 	int cpu = smp_processor_id(), system = user_tick ^ 1;
 
-//printk("timer %x %x %x\n",p->phd$w_quant,p->pcb$b_pri);
+	//if (p->pid==0) p->need_resched=1;
+	//{printk("timer %x %x %x\n",p->pid,p->phd$w_quant,p->pcb$b_pri);}
+	//	{ int i; for (i=0; i<1000000; i++ ) ; }}
 	update_one_process(p, user_tick, system, cpu);
 	if (p->pid) {
-		if (++p->phd$w_quant >= 0 ) {
-//			sch$qend(p);
-			if (p->phd$w_quant<128) sch$qend(p);
+		if (++p->phd$w_quant  >= 0 ) {
+		  //			sch$qend(p);
+		  			if (p->phd$w_quant<128) sch$qend(p);
 		}
 		if (p->pcb$b_prib == 31)
 			kstat.per_cpu_nice[cpu] += user_tick;

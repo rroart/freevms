@@ -46,6 +46,10 @@ unsigned securebits = SECUREBITS_DEFAULT; /* systemwide security settings */
 
 extern void mem_use(void);
 
+static unsigned char from_sch$resched=0;
+static struct _pcb PCB;
+static unsigned long SCH$GL_IDLE_CPUS=0;
+
 /*
  * Scheduling quanta.
  *
@@ -140,76 +144,19 @@ void scheduling_functions_start_here(void) { }
  *	   +: "goodness" value (the smaller the better)
  */
 
-static inline unsigned char goodness(struct task_struct * p, int this_cpu, struct mm_struct *this_mm)
+static inline unsigned char goodness(struct task_struct * p)
 {
-	int weight;
-
-	/*
-	 * select the current process after every other
-	 * runnable process, but before the idle thread.
-	 * Also, dont trigger a counter recalculation.
-	 */
-//	if (p->pcb$b_pri>32) {
-//printk("goodness pid %x %x\n",p->pid,p->pcb$b_pri);
-//{ int i; for (i=0;i<100000; i++);  }
-//	p->pcb$b_pri=p->pcb$b_prib;
-//	}
-	if (p->phd$w_quant >= 0)  {
-		p->phd$w_quant=-QUANTUM; /* trying this to make things work */
-printk("goodness do we ever get here?\n");
-		return 0;
-	}
+	return (1 + p->pcb$b_pri);
 	return (1 + p->pcb$b_pri + 31 - p->pcb$b_prib); /* due to high pris */
-	weight = -1;
-	if (p->policy & SCHED_YIELD)
-		goto out;
-
-	/*
-	 * Non-RT process - normal case first.
-	 */
-	if (p->policy == SCHED_OTHER) {
-		/*
-		 * Give the process a first-approximation goodness value
-		 * according to the number of clock-ticks it has left.
-		 *
-		 * Don't do any other calculations if the time slice is
-		 * over..
-		 */
-		weight = p->phd$w_quant;
-		if (weight>=0)
-			goto out;
-			
-#ifdef CONFIG_SMP
-		/* Give a largish advantage to the same processor...   */
-		/* (this is equivalent to penalizing other processors) */
-		if (p->pcb$l_cpu_id == this_cpu)
-			weight += PROC_CHANGE_PENALTY;
-#endif
-
-		/* .. and a slight advantage to the current MM */
-		if (p->mm == this_mm || !p->mm)
-			weight += 1;
-		weight += 20 - p->pcb$b_prib;
-		goto out;
-	}
-
-	/*
-	 * Realtime process, select the first one on the
-	 * runqueue (taking priorities within processes
-	 * into account).
-	 */
-	weight = 1000 + p->rt_priority;
-out:
-	return weight;
 }
 
 /*
  * the 'goodness value' of replacing a process on a given CPU.
  * positive value means 'replace', zero or negative means 'dont'.
  */
-static inline int preemption_goodness(struct task_struct * prev, struct task_struct * p, int cpu)
+static inline int preemption_goodness_not(struct task_struct * prev, struct task_struct * p, int cpu)
 {
-	return goodness(p, cpu, prev->active_mm) - goodness(prev, cpu, prev->active_mm);
+  //	return goodness(p, cpu, prev->active_mm) - goodness(prev, cpu, prev->active_mm);
 }
 
 /*
@@ -305,7 +252,7 @@ send_now_idle:
 	struct task_struct *tsk;
 
 	tsk = cpu_curr(this_cpu);
-	if (preemption_goodness(tsk, p, this_cpu) > 0)
+	if (p->pcb$b_pri > tsk->pcb$b_pri) /* previous was meaningless */
 		tsk->need_resched = 1;
 #endif
 }
@@ -531,6 +478,32 @@ asmlinkage void schedule_tail(struct task_struct *prev)
 	__schedule_tail(prev);
 }
 
+static struct _pcb * pid1;
+
+void sch$resched() {
+int this_cpu = smp_processor_id();
+	struct list_head *tmp;
+	unsigned int c, weight;
+	struct _pcb *p,*next,*prev;
+  // old=spl(IPL$_SCHED)
+  // svpctx
+  // has got no cpu$ yet, but current is here
+	c=current->pcb$b_pri;
+	list_for_each(tmp,&runqueue_head) {
+	  p = list_entry(tmp, struct task_struct, run_list);
+	  if (can_schedule(p, this_cpu)) {
+	    unsigned char weight = goodness(p);
+	    if (weight<c) c=weight, next=p;
+	  }
+	}
+	current->state=TASK_INTERRUPTIBLE;
+	SCH$GL_IDLE_CPUS=0;
+	// moved:	move_last_runqueue(current);
+	current->need_resched=1;
+	from_sch$resched=1;
+	schedule();
+}
+
 /*
  *  'schedule()' is the scheduler function. It's a very simple and nice
  * scheduler: it's not perfect, but certainly works for most things.
@@ -542,6 +515,8 @@ asmlinkage void schedule_tail(struct task_struct *prev)
  * information in task[0] is never used.
  */
 
+int mydebug=0;
+
 #define sch$sched schedule
 asmlinkage void schedule(void)
 {
@@ -550,7 +525,8 @@ asmlinkage void schedule(void)
 	struct list_head *tmp;
 	int this_cpu, c;
 
-//printk("schsch\n");
+	if (from_sch$resched == 1) goto try_for_process;
+
 	spin_lock_prefetch(&runqueue_lock);
 
 	if (!current->active_mm) BUG();
@@ -573,31 +549,16 @@ need_resched_back:
 
 	spin_lock_irq(&runqueue_lock);
 
-	/* move an exhausted RR process to be last.. */
-	if (unlikely(prev->policy == SCHED_RR))
-		if ((prev->phd$w_quant&31)>=0) {
-			prev->phd$w_quant=-QUANTUM/10;
-			prev->pcb$b_pri=prev->pcb$b_prib;
-			move_last_runqueue(prev);
-		}
-
-	switch (prev->state) {
-		case TASK_INTERRUPTIBLE:
-			if (signal_pending(prev)) {
-				prev->state = TASK_RUNNING;
-				break;
-			}
-		default:
-			del_from_runqueue(prev);
-		case TASK_RUNNING:;
-	}
-	prev->need_resched = 0;
-
 	/*
 	 * this is the scheduler proper:
 	 */
+	if (!pid1 && current->pid == 1) { pid1=current;
+	pid1->pcb$b_pri=20; pid1->pcb$b_prib=24; printk("pid1 first\n"); }
+	//	printk("rep %x %x\n",current,current->pid);
+	if (mydebug) printk("rep %x %x %x %x %x\n",current,current->pid,current->need_resched,current->pcb$b_pri,current->phd$w_quant);
 
-//printk("rep\n");
+ try_for_process:
+	from_sch$resched=0;
 repeat_schedule:
 	/*
 	 * Default process to select..
@@ -606,35 +567,33 @@ repeat_schedule:
 	c = 100;
 	list_for_each(tmp, &runqueue_head) {
 		p = list_entry(tmp, struct task_struct, run_list);
+		if (p->pcb$b_prib & 224) p->pcb$b_prib=27;
+		if (p->pcb$b_pri & 224) p->pcb$b_pri=27;
 		if (can_schedule(p, this_cpu)) {
-			unsigned char weight = goodness(p, this_cpu, prev->active_mm);
-//printk("wei2 %x\n",weight);
-			if (weight < c)
+		  unsigned char weight = goodness(p);
+		  if (mydebug) printk("wei2 %x %x %x %x %x %x\n",p,p->pid,weight,p->need_resched,p->pcb$b_pri,p->phd$w_quant);
+		  if (c==100 && prev!=p) c=weight, next=p;
+		  if (weight < c && p->need_resched==0)
 				c = weight, next = p;
 		}
 	}
+	//	{ int i; for (i=0; i<10000000; i++ ) ; }
 
-//printk("wei %x\n",c);
-//{ int i; for (i=0; i<100000; i++ ) ; }
-	/* Do we need to re-calculate counters? */
-	if (unlikely(!c)) {
-		struct task_struct *p;
-
-		spin_unlock_irq(&runqueue_lock);
-		read_lock(&tasklist_lock);
-//		for_each_task(p)
-//			p->counter = (p->counter >> 1) + NICE_TO_TICKS(p->nice);
-		read_unlock(&tasklist_lock);
-		spin_lock_irq(&runqueue_lock);
-		goto repeat_schedule;
-	}
+	if (c==100) goto sch$idle;
+	if (mydebug) printk("wei %x %x\n",next->pid,c);
+	if (mydebug) { int i; for (i=0; i<100000000; i++ ) ; }
 
 	/*
 	 * from this point on nothing can prevent us from
 	 * switching to the next task, save this fact in
 	 * sched_data.
 	 */
+	prev->need_resched = 0;
+	if (next->pid != 1 && pid1->need_resched==1) { pid1->need_resched=0; pid1->pcb$b_pri=24; pid1->pcb$b_prib=25; printk("pid1\n"); }
+
 	sched_data->curr = next;
+	//if (prev->pid>1) move_last_runqueue(prev);
+
 	task_set_cpu(next, this_cpu);
 	spin_unlock_irq(&runqueue_lock);
 
@@ -643,9 +602,10 @@ repeat_schedule:
 		prev->policy &= ~SCHED_YIELD;
 		goto same_process;
 	}
-	if (prev != next) {
+
 	 	if (next->pcb$b_pri<next->pcb$b_prib) next->pcb$b_pri++;
-	}
+		SCH$GL_IDLE_CPUS=0;
+
 #ifdef CONFIG_SMP
  	/*
  	 * maintain the per-process 'last schedule' value.
@@ -706,6 +666,14 @@ same_process:
 	if (current->need_resched)
 		goto need_resched_back;
 	return;
+
+ sch$idle:
+	//	printk("sch$idle\n");
+	SCH$GL_IDLE_CPUS=1;
+	//	for (; SCH$GL_IDLE_CPUS ;) ;
+
+	//	goto try_for_process;
+
 }
 
 /*
@@ -1350,3 +1318,4 @@ void __init sched_init(void)
 }
 
 #include "/usr/src/freevms/sys/src/rse.c"
+

@@ -124,17 +124,20 @@ void cpu_idle (void)
 {
 	/* endless idle loop with no priority at all */
 	init_idle();
-	current->pcb$b_prib = 0; /* should really be the opposite */
-	current->pcb$b_pri = 31;
-	current->phd$w_quant = 0;
+	printk("id %x\n",current->pid);
+	//	current->pcb$b_prib = 0; /* should really be the opposite */
+	//	current->pcb$b_pri = 31;
+	//	current->phd$w_quant = 0;
 
 	while (1) {
 		void (*idle)(void) = pm_idle;
-//printk("cpu_idle\n");
+		//		printk("cpu_idle\n");
 		if (!idle)
 			idle = default_idle;
-/*		while (!current->need_resched)
-			idle(); this has to go for now */
+		//		printk("bef while\n");
+		while (!current->need_resched)
+			idle();
+		//		printk("aft while\n");
 		schedule();
 		check_pgt_cache();
 	}
