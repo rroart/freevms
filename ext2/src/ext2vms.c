@@ -725,12 +725,14 @@ int exttwo_read_writevb(struct _irp * i) {
   struct _fcb * fcb = x2p->primary_fcb; // ???? is this right
   struct _wcb * wcb = &fcb->fcb$l_wlfl;
   int blocks=(i->irp$l_qio_p2+511)/512;
-  lbn=f11b_map_vbn(i->irp$l_qio_p3-1,wcb);
+  int kbn=(i->irp$l_qio_p3-1)>>1;
+  int rest=(i->irp$l_qio_p3-1)&1;
+  lbn=f11b_map_vbn(kbn,wcb);
   if (i->irp$v_fcode==IO$_WRITEVBLK) {
     exttwo_write_block(vcb,i->irp$l_qio_p1,lbn,blocks,&iosb);
   } else {
     buffer=exttwo_read_block(vcb,lbn,blocks,&iosb);
-    memcpy(i->irp$l_qio_p1,buffer,512);
+    memcpy(i->irp$l_qio_p1,buffer+512*rest,512);
     vfree(buffer);
   }
   //exttwo_io_done(i);
@@ -738,9 +740,9 @@ int exttwo_read_writevb(struct _irp * i) {
 
 void * exttwo_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
   struct _iosb myiosb;
-  unsigned char * buf = vmalloc(1024*count);
+  unsigned char * buf = vmalloc(512*count);
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(buf[0]=0,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,1024*count,phyblk,0,0,0);
+  unsigned long sts=sys$qiow(buf[0]=0,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -766,9 +768,9 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
 	f->fat$b_rtype=FAT$C_SEQUENTIAL << 4;
 	f->fat$b_rattrib=0;
 	f->fat$w_rsize=0;
-	f->fat$l_hiblk=VMSSWAP(1+head->i_blocks);
-	f->fat$l_efblk=VMSSWAP(1+head->i_size/1024);
-	f->fat$w_ffbyte=head->i_size%1024;
+	f->fat$l_hiblk=VMSSWAP(1+head->i_blocks*2);
+	f->fat$l_efblk=VMSSWAP(1+head->i_size/512);
+	f->fat$w_ffbyte=head->i_size%512;
 	f->fat$b_bktsize=0;
 	f->fat$b_vfcsize=0;
 	f->fat$w_maxrec=0;
