@@ -2,7 +2,7 @@ VMSSUBDIRS = starlet librtl cliutl backup dir init login dcl edt
 VMSSUBDIRSINST = dir dcl login init edt
 VMSSUBDIRS2 = examples
 
-export LIBGCC = `find /usr/lib -name libgcc.a`
+export LIBGCC = `gcc -print-libgcc-file-name`
 
 export LIBC = /usr/lib/libc.a
 
