@@ -885,7 +885,7 @@ int /*__init*/ scs_init(void) {
   for(i=0;i<scs$gw_cdtcnt-1;i++) {
     cdtl[i].cdt$b_type=DYN$C_SCS;
     cdtl[i].cdt$b_subtyp=DYN$C_SCS_CDT;
-    cdtl[i].cdt$l_link=&cdtl[i+i];
+    cdtl[i].cdt$l_link=&cdtl[i+1];
     cdtl[i].cdt$l_lconid=i;
     cdtl[i].cdt$l_rconid=i;
     cdtl[i].cdt$w_state=0;
