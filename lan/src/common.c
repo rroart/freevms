@@ -23,10 +23,14 @@
 #include<system_service_setup.h>
 #include<descrip.h>
 
+#include <iosbdef.h>
+
 #include<linux/mm.h>
 #include<linux/if_ether.h>
 
 #include <linux/netdevice.h>
+
+#include "../../cmuip/ipacp/src/xedrv.h"
 
 int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c){ 
   if ((i->irp$l_func&(IO$M_CTRL|IO$M_STARTUP))==(IO$M_CTRL|IO$M_STARTUP)) {
@@ -65,23 +69,25 @@ int lan$sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
     struct dsc$descriptor * d=i->irp$l_qio_p2;
     long * l=d;
     long len=l[0]/(2*sizeof(long));
-    long *addr = d->dsc$a_pointer;
 
-    struct _ucbnidef * ni=newucb;
+    char *addr = d->dsc$a_pointer;
+    struct XE_Sense * sense=addr;
 
-    for(;len;len--) {
-      switch (*addr++) {
-      case NMA$C_PCLI_PTY:
-	//lsb->lsb$l_valid_pty=*addr++;
-	ni->ucb$l_ni_pty=*addr++;
-	break;
-      default:
-      }
-    }
-    //lsb->lsb$l_next_lsb=ni->ucb$l_ni_lsb;
-    //ni->ucb$l_ni_lsb=lsb;
+    struct _ucbnidef * ni=u;
+
+    struct net_device * dev = ni -> ucb$l_extra_l_1;
+
+    sense->XE_Sense_Param = NMA$C_PCLI_HWA;
+    sense->XE_Sense_Type = 1;
+    sense->XE_Sense_Length=6;
+    
+    memcpy(sense->XE_Sense_String,dev->dev_addr,6);
   }
-  if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL;
+  if (i->irp$l_iosb) {
+    struct XE_iosb_structure * iosb = i->irp$l_iosb;
+    iosb->xe$tran_size=4+6;
+    iosb->xe$vms_code=SS$_NORMAL;
+  }
   return SS$_NORMAL;
 }
 

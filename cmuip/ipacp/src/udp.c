@@ -968,7 +968,7 @@ X:  {			// ** Block X **
 // Allocate some space for the UDPCB
 
 //    LIB$GET_VM(%REF(UDPCB_Size*4),UDPCB);
-    RC = LIB$GET_VM_PAGE(/*%REF*/(((UDPCB_Size * 4) / 512) + 1),UDPCB);
+    RC = LIB$GET_VM_PAGE(/*%REF*/(((UDPCB_Size * 4) / 512) + 1),&UDPCB);
     if (! RC)
 	FATAL$FAO("UDPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 

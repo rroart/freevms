@@ -475,11 +475,4 @@ static int inline $$KCALL(int (*func)(), ...) {
 
 #define LIB$CALLG(X,Y) Y()
 
-#include <descrip.h>
-
-static int STR$CASE_BLIND_COMPARE(x,y)
-     struct dsc$descriptor *x, * y;
-{
-     return strncmp(x->dsc$a_pointer,y->dsc$a_pointer,y->dsc$w_length);
-}
 

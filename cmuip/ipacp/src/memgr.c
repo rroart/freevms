@@ -356,7 +356,7 @@ mm$get_mem (Addr, Size)
     Pages = Pages + 1 ;
     NOINT;			// Hold AST's please...
 //    if (! (RC = LIB$GET_VM(Size,Addr)))
-    if (! (RC = LIB$GET_VM_PAGE(Pages,Addr)))
+    if (! (RC = LIB$GET_VM_PAGE(Pages,&Addr)))
 	Memgr_Fault_Handler(0,RC,0);
     OKINT;
 
@@ -457,7 +457,7 @@ void mm$qblk_get (void)
 
 //	if (! (LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr)))
 	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1 ) ;
-	if (! (LIB$GET_VM_PAGE(Pages, Hptr)))
+	if (! (LIB$GET_VM_PAGE(Pages, &Hptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 
 	OKINT;
@@ -570,7 +570,7 @@ void QBLK_Init (void)
 	{
 //	LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr);
 	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1) ;
-	if (! (RC = (LIB$GET_VM_PAGE(Pages, Hptr))))
+	if (! (RC = (LIB$GET_VM_PAGE(Pages, &Hptr))))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Init !XL size !SL!/",0,Hptr, Pages);
 	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE*4,Hptr);
@@ -632,7 +632,7 @@ void mm$uarg_get (void)
 	NOINT;			// Disable interrupts, do allocation
 //	if (! (LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),Ptr)))
 	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
-	if (! (LIB$GET_VM_PAGE(Pages, Ptr)))
+	if (! (LIB$GET_VM_PAGE(Pages, &Ptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Get !XL size !SL!/",0,Ptr, Pages);
@@ -728,7 +728,7 @@ void uarg_init (void)
 	{
 //	LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),Ptr);
 	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
-	if (! (RC = (LIB$GET_VM_PAGE(Pages, Ptr))))
+	if (! (RC = (LIB$GET_VM_PAGE(Pages, &Ptr))))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Init !XL size !SL!/",0,Ptr, Pages);
 	INSQUE(Ptr,&FREE_Uargs.qtail);
@@ -828,7 +828,7 @@ mm$seg_get(Size)
 	NOINT;
 //	if (! (LIB$GET_VM(size,Ptr)))
 	Pages = ((Size / 512) + 1) ;
-	if (! (LIB$GET_VM_PAGE(Pages, Ptr)))
+	if (! (LIB$GET_VM_PAGE(Pages, &Ptr)))
 	    {
 	    OKINT ;
 	    Memgr_Fault_Handler(0,R0,0);
@@ -964,7 +964,7 @@ void seg_init (void)
 	{
 //	LIB$GET_VM(MIN_PHYSICAL_BUFSIZE,Ptr);
 	Pages = ((MIN_PHYSICAL_BUFSIZE / 512) + 1) ;
-	if (! (RC = LIB$GET_VM_PAGE(Pages, Ptr)))
+	if (! (RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
 	INSQUE(Ptr,&Free_Minsize_Segs.qtail);
@@ -977,7 +977,7 @@ void seg_init (void)
 	{
 //	LIB$GET_VM(MAX_PHYSICAL_BUFSIZE,ptr);
 	Pages = ((MAX_PHYSICAL_BUFSIZE / 512) + 1) ;
-	if (! (RC = LIB$GET_VM_PAGE(Pages, Ptr)))
+	if (! (RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
 	INSQUE(Ptr,&Free_Maxsize_Segs.qtail);

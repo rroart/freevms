@@ -250,7 +250,7 @@ struct dsc$descriptor	* QUOTAS;
 
 // Allocate the block for the process quota list
 
-    RC = LIB$GET_VM(/*%REF*/(QUOTAS->dsc$w_length),QUOPTR);
+    RC = LIB$GET_VM(/*%REF*/(QUOTAS->dsc$w_length),&QUOPTR);
     if (! RC)
 	FATAL$FAO("NML$CONFIG - failed to allocate quolst, RC = !XL",RC);
     CH$MOVE(QUOTAS->dsc$w_length,QUOTAS->dsc$a_pointer,QUOPTR);
@@ -787,7 +787,7 @@ NQE_ALLOC(NQE)
 
     NQE_COUNT = NQE_COUNT + 1;
 //    RC = LIB$GET_VM(%REF(NQE_MAXSIZE),NQE);
-    RC = LIB$GET_VM_PAGE(/*%REF*/((NQE_MAXSIZE / 512) + 1),NQE);
+    RC = LIB$GET_VM_PAGE(/*%REF*/((NQE_MAXSIZE / 512) + 1),&NQE);
     XQL$FAO(LOG$MSG,"!%T NQE_ALLOC, NQE=!XL, RC=!XL!/",0,NQE,RC);
     return RC;
     }

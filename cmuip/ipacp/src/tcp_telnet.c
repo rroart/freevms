@@ -585,7 +585,7 @@ TELNET_OPEN(TCB)
 // Assign a chunk of memory for the TVT data block
 
 //    RC = LIB$GET_VM(%REF(TVT$SIZE*4),TVT);
-    RC = LIB$GET_VM_PAGE(/*%REF*/(((TVT$SIZE * 4) / 512) + 1),TVT);
+    RC = LIB$GET_VM_PAGE(/*%REF*/(((TVT$SIZE * 4) / 512) + 1),&TVT);
     if (! RC)
 	{
 //~~~ Should we do anything better here?

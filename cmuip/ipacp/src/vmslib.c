@@ -57,7 +57,7 @@ STR$APPEND(x , y)
   printk("STR$APPEND not implemented\n");
 }
 
-STR$CASE_BLIND_COMPARE() {
+STR$CASE_BLIND_COMPARE_not() {
   printk("STR$CASE_BLIND_COMPARE not implemented\n");
 }
 
@@ -81,11 +81,27 @@ CH$PTR_not() {
   printk("CH$PTR not implemented\n");
 }
 
-CH$NEQ() {
+int STR$CASE_BLIND_COMPARE(x,y)
+     struct dsc$descriptor *x, * y;
+{
+     return strncmp(x->dsc$a_pointer,y->dsc$a_pointer,y->dsc$w_length);
+}
+
+int CH$EQL(n1,ptr1,n2,ptr2) {
+  int n = ( n1 < n2 ? n1 : n2);
+  return (0==strncmp(ptr1,ptr2,n));
+}
+
+int CH$NEQ(n1,ptr1,n2,ptr2) {
+  int n = ( n1 < n2 ? n1 : n2);
+  return (strncmp(ptr1,ptr2,n));
+}
+
+CH$NEQ_not() {
   printk("CH$NEQ not implemented\n");
 }
 
-CH$EQL() {
+CH$EQL_not() {
   printk("CH$EQL not implemented\n");
 }
 
@@ -187,7 +203,11 @@ ERROR$FAO() {
   printk("ERROR$FAO not implemented\n");
 }
 
-LIB$GET_VM() {
+LIB$GET_VM(size, addr) 
+     long * addr;
+{
+  *addr=kmalloc(size,GFP_KERNEL);
+  return SS$_NORMAL;
   printk("LIB$GET_VM not implemented\n");
 }
 
@@ -195,7 +215,9 @@ CH$DIFF() {
   printk("CH$DIFF not implemented\n");
 }
 
-LIB$FREE_VM_PAGE() {
+LIB$FREE_VM_PAGE(size, addr) {
+  kfree(addr);
+  return SS$_NORMAL;
   printk("LIB$FREE_VM_PAGE not implemented\n");
 }
 
@@ -220,7 +242,7 @@ ch$move(a,b,c) {
   printk("ch$move not implemented\n");
 }
 
-DRV$Fatal_FAO() {
+DRV$Fatal_FAO_not() {
   printk("DRV$Fatal_FAO not implemented\n");
 }
 
@@ -334,11 +356,11 @@ rpc_service() {
   printk("rpc_service not implemented\n");
 }
 
-drv$qblk_free() {
+drv$qblk_free_not() {
   printk("drv$qblk_free not implemented\n");
 }
 
-drv$seg_free() {
+drv$seg_free_not() {
   printk("drv$seg_free not implemented\n");
 }
 
@@ -374,23 +396,23 @@ Fatal_Error() {
   printk("Fatal_Error not implemented\n");
 }
 
-DRV$Warn_FAO() {
+DRV$Warn_FAO_not() {
   printk("DRV$Warn_FAO not implemented\n");
 }
 
-DRV$WARN_FAO() {
+DRV$WARN_FAO_not() {
   printk("DRV$WARN_FAO not implemented\n");
 }
 
-DRV$QL_FAO() {
+DRV$QL_FAO_not() {
   printk("DRV$QL_FAO not implemented\n");
 }
 
-DRV$OPR_FAO() {
+DRV$OPR_FAO_not() {
   printk("DRV$OPR_FAO not implemented\n");
 }
 
-DRV$Error_FAO() {
+DRV$Error_FAO_not() {
   printk("DRV$Error_FAO not implemented\n");
 }
 
@@ -398,11 +420,11 @@ exe$finish_rdb() {
   printk("exe$finish_rdb not implemented\n");
 }
 
-drv$seg_get() {
+drv$seg_get_not() {
   printk("drv$seg_ge not implemented\n");
 }
 
-drv$device_error() {
+drv$device_error_not() {
   printk("drv$device_error not implemented\n");
 }
 
@@ -414,15 +436,15 @@ CH$RCHAR() {
   printk("CH$RCHAR not implemented\n");
 }
 
-DRV$FATAL_FAO() {
+DRV$FATAL_FAO_not() {
   printk("DRV$FATAL_FAO not implemented\n");
 }
 
-DRV$QBLK_Free() {
+DRV$QBLK_Free_not() {
   printk("DRV$QBLK_Free not implemented\n");
 }
 
-DRV$XLOG_FAO() {
+DRV$XLOG_FAO_not() {
   printk("DRV$XLOG_FAO not implemented\n");
 }
 
@@ -430,7 +452,7 @@ RPC$INPUT() {
   printk("RPC$INPUT not implemented\n");
 }
 
-drv$ip_receive() {
+drv$ip_receive_not() {
   printk("drv$ip_receive not implemented\n");
 }
 
@@ -438,7 +460,7 @@ SEG$LOG_Segment() {
   printk("SEG$LOG_Segment not implemented\n");
 }
 
-DRV$XQL_FAO() {
+DRV$XQL_FAO_not() {
   printk("DRV$XQL_FAO not implemented\n");
 }
 

@@ -1393,7 +1393,7 @@ X:  {			// *** Block X ***
 // RA data doesn't exist yet. Allocate it & fill in the IP parameters.
 
 //	    RC = LIB$GET_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
-	    RC = LIB$GET_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),RAPTR);
+	    RC = LIB$GET_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),&RAPTR);
 	    if (! RC)
 		FATAL$FAO("IP_FRAGMENT - LIB$GET_VM failure, RC=!XL",RC);
 	    RAPTR->ra$ident = iphdr->iph$ident;

@@ -240,7 +240,8 @@ extern  void    xearp$input();
 void    XE_receive();
     void xe_arprcv();
 
-    char *   XE_BROADCAST = "FFFFFFFFFFFF"; // check
+signed long XE_BROADCAST[3]= { -1 , -1 , -1};
+//    char *   XE_BROADCAST = "FFFFFFFFFFFF"; // check
 
     // Description of this device
 #define    XE_description "Digital Ethernet Card"
@@ -459,8 +460,8 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 //!!HACK!!// What's wrong with XE_sense_blk?
 //	Sense: 	XE_sense_blk,	
     char Sense [512];
-    struct XE_sdesc_structure * Paramdescr;
-	struct XE_iosb_structure * IOS;
+    struct XE_sdesc_structure Paramdescr_, * Paramdescr=&Paramdescr_;
+	struct XE_iosb_structure IOS_, * IOS= &IOS_;
 
 // Get info from controller
 
@@ -521,10 +522,10 @@ xe_startall ( XE_Int , restart )
     signed long
       online;
      Device_Configuration_Entry * dev_config;
-    struct xe_addrs_structure * addrs;
-	struct xe_addrs_structure * hwaddr;
-	struct xe_addrs_structure * phaddr;
-	struct xe_addrs_structure * useaddr;
+    struct XE_addrs_structure addrs_, * addrs=&addrs_;
+	struct XE_addrs_structure hwaddr_, * hwaddr = &hwaddr_;
+	struct XE_addrs_structure phaddr_, * phaddr= &phaddr_;
+	struct XE_addrs_structure useaddr_, * useaddr = &useaddr_;
 
 // Point at out current idea of the device address
 

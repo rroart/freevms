@@ -1361,7 +1361,7 @@ extern	STR$COPY_DX	();
     // Allocate the block for the process quota list
     if (Quotas->dsc$w_length > 0)
 	    {
-	      Status = LIB$GET_VM(/*%REF*/(Quotas->dsc$w_length),QUOPTR);
+	      Status = LIB$GET_VM(/*%REF*/(Quotas->dsc$w_length),&QUOPTR);
     	    if (! Status)
 		FATAL$FAO("Seg$WKS_Config - failed to allocate quolst, RC = !XL",Status);
 	    CH$MOVE(Quotas->dsc$w_length,Quotas->dsc$a_pointer,QUOPTR);

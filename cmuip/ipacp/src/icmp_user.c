@@ -527,7 +527,7 @@ X:  {			// ** Block X **
 
 //    LIB$GET_VM(%REF(ICMPCB_Size*4),ICMPCB);
     Pages = ((ICMPCB_Size * 4) / 512) + 1 ;
-    RC = LIB$GET_VM_PAGE(Pages, ICMPCB);
+    RC = LIB$GET_VM_PAGE(Pages, &ICMPCB);
     if (! RC)
 	FATAL$FAO("ICMPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 

@@ -105,7 +105,7 @@ Get_Mem (Size, Block_A, Zone)
 
     XLOG$FAO(LOG$MEM,"!%T GET_MEM: Size: !SL, Addr: !SL, Zone: !SL!/",
 	0, Size, Block_A, Zone) ;
-    Status = LIB$GET_VM(Size, Block_A, Zone) ;
+    Status = LIB$GET_VM(Size, &Block_A, Zone) ;
     XLOG$FAO(LOG$MEM,"!%T GET_MEM: Status: !SL, Size: !SL, Addr: !SL, Zone: !SL!/",
 	0, Status, Size, Block_A, Zone) ;
     Mem_Stat();
@@ -117,7 +117,7 @@ Free_Mem (Size, Block_A, Zone)
     signed long
 	Status;
 
-    Status = LIB$GET_VM(Size, Block_A, Zone) ;
+    Status = LIB$GET_VM(Size, &Block_A, Zone) ;
     XLOG$FAO(LOG$MEM,"!%T FREE_MEM: Status: !SL, Size: !SL, Addr: !SL, Zone: !SL!/",
 	0, Status, Size, Block_A, Zone) ;
     Mem_Stat() ;

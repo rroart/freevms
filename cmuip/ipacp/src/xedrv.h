@@ -218,9 +218,11 @@ struct XE_Sense // check
     // If the Type bit EQL 0
     long XE_Sense_Value; //	= [2,  0, 32, 0],
     // If the Type bit EQL 1
-    short XE_Sense_Length; //	= [2,  0, 16, 0],
+    struct {
+      short XE_Sense_Length; //	= [2,  0, 16, 0],
+      unsigned char XE_Sense_String[0]; //	= [4,  0,  0, 0]
+    };
   };
-  unsigned char XE_Sense_String[0]; //	= [4,  0,  0, 0]
 };
 
 #define     XE_SS_BYTEOFF   4
@@ -290,3 +292,23 @@ struct XERCV_structure
 #if 0
 MACRO XERCV_structure = BLOCK[XESND_len] FIELD(XE_recv)%;
 #endif
+
+#define DRV$OPR_FAO printk
+#define DRV$Error_FAO printk
+#define DRV$QL_FAO printk
+#define DRV$Warn_FAO printk
+#define DRV$WARN_FAO printk
+#define DRV$XQL_FAO printk
+#define DRV$XLOG_FAO printk 
+#define DRV$FATAL_FAO panic
+#define DRV$Fatal_FAO panic
+
+#define drv$ip_receive(Buf,Buf_size,IPHdr,devlen,dev_config) IPACP_Interface->ACPI$IP_Receive(Buf,Buf_size,IPHdr,devlen,dev_config)
+
+#define drv$qblk_free(Pntr) IPACP_Interface->ACPI$QBlk_Free(Pntr) 
+
+#define drv$seg_free IPACP_Interface->ACPI$Seg_Free
+
+#define drv$seg_get(Size) IPACP_Interface->ACPI$Seg_Get(Size)
+
+#define drv$device_error IPACP_Interface->ACPI$Device_Error

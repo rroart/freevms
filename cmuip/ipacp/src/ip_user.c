@@ -516,7 +516,7 @@ X:  {			// ** Block X **
 // Allocate some space for the IPCB
 
 //    LIB$GET_VM(%REF(IPCB_Size*4),IPCB);
-    RC = LIB$GET_VM_PAGE(/*%REF*/(((IPCB_Size * 4) / 512) + 1),IPCB);
+    RC = LIB$GET_VM_PAGE(/*%REF*/(((IPCB_Size * 4) / 512) + 1),&IPCB);
     if (! RC)
 	FATAL$FAO("IPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 
