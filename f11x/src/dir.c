@@ -43,6 +43,9 @@ vms_readdir (struct file * filp, void * dirent, filldir_t filldir)
 	vii = (struct vms_inode_info *)inode->u.generic_ip;
 	dh = &vii->header;
 
+	if (filp->f_pos>1)
+	  if (strncmp("000000",&dh->fh2$b_reserved3,6)==0) return 0;
+
 	offset = filp->f_pos & (VMS_BLOCKSIZE-1);
 
 	entries = 0;
