@@ -29,17 +29,7 @@ Warning: It might be a risky destructive option. FS write may be destructive.
 VMS IO works so far only on blockdevices, and the only blockdevices supported
 is the uml "harddisk" and on i386 only ide.
 Boot with init=/bin/sh or init=/vms\$common/sysexe/dcl
-Note that with some kernel options it might not compile, so in case strip away some configs.
 
-About make config/menuconfig/xconfig:
-If it does not compile, you have to strip down the config.
-Note:
-	There must be no support for:
-	SMP, IDE/ATAPI CDROM, ext3, highmem, IPv6, DECnet and much more.
-	Not sure about modules.
-Note for the experimental CONFIG_VMS (must be more stripped down):
-	IDE support only, and with only one disk and partition.
-	
 Example build i386:
 tar xzf freevms-0_0_51.tgz
 cd freevms/linux
