@@ -20,6 +20,9 @@
 #include "kern.h"
 #include "tlb.h"
 
+#define STACK_TOP 0x7fffe000
+#define STACK_TOP 0x7fc00000
+
 static void fix_range(struct mm_struct *mm, unsigned long start_addr, 
 		      unsigned long end_addr, int force)
 {
@@ -82,6 +85,10 @@ static void fix_range(struct mm_struct *mm, unsigned long start_addr,
 			addr += PMD_SIZE;
 		}
 	}
+}
+
+void my_fix_range(int a, int b, int c, int d) {
+	fix_range(a,b,c,d);
 }
 
 atomic_t vmchange_seq = ATOMIC_INIT(1);
