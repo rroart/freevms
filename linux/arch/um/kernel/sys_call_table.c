@@ -344,6 +344,7 @@ extern syscall_handler_t exe$getsyi_wrap           ;
 extern syscall_handler_t exe$getsyiw_wrap          ;
 extern syscall_handler_t exe$device_scan      ;
 extern syscall_handler_t exe$getdvi_wrap      ;
+extern syscall_handler_t exe$getdviw_wrap      ;
 extern syscall_handler_t exe$fao              ;
 extern syscall_handler_t exe$faol             ;
 extern syscall_handler_t exe$cmkrnl           ;
@@ -368,7 +369,7 @@ extern syscall_handler_t exe$cmexec       ;
 extern syscall_handler_t exe$create_region_32_wrap;
 extern syscall_handler_t exe$delete_region_32;
 extern syscall_handler_t exe$get_region_info;
-#define LAST_GENERIC_SYSCALL __NR_$get_region_info
+#define LAST_GENERIC_SYSCALL __NR_$getdviw
 
 #if LAST_GENERIC_SYSCALL > LAST_ARCH_SYSCALL
 #define LAST_SYSCALL LAST_GENERIC_SYSCALL
@@ -731,6 +732,7 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$create_region_32 ] = exe$create_region_32_wrap,
 	[ __NR_$delete_region_32 ] = exe$delete_region_32,
 	[ __NR_$get_region_info ] = exe$get_region_info,
+	[ __NR_$getdviw ] = exe$getdviw_wrap,
 	
 	ARCH_SYSCALLS
 	[ LAST_SYSCALL + 1 ... NR_syscalls ] = 

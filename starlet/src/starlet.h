@@ -211,6 +211,7 @@ struct struct_crembx {
  unsigned int promsk;
  unsigned int acmode;
   void *lognam;
+  long flags;
 };
 
 struct struct_mgblsc {
