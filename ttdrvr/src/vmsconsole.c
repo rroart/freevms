@@ -53,6 +53,7 @@
 #include<ttdef.h>
 #include<tt2def.h>
 #include<ttyvecdef.h>
+#include<ttydef.h>
 
 #include<linux/blkdev.h>
 #include<linux/console.h>
@@ -80,11 +81,17 @@ void con$startio(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UN
     SAVIPL=-(SP),	-	;
     PRESERVE=NO
 #endif
+#if 0
       if (ucb->ucb$l_irp->irp$l_func==IO$_WRITEPBLK) {
+#else
+      if (tty->tty$v_st_write) {
+#endif
+#if 0
 	kfree(ucb->ucb$l_irp->irp$l_svapte);
 	ucb->ucb$l_irp->irp$l_svapte=0;
 	ucb->ucb$l_svapte=0;
 	ucb->ucb$l_sts&=~UCB$M_BSY; // reset this somewhere?
+#endif
 	return con$fdtwrite(ucb->ucb$l_irp,ctl$gl_pcb,ucb,0);
 	// return ioc$reqcom(SS$_NORMAL,0,u); // not needed
       } else {
@@ -273,7 +280,7 @@ int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   //  return write(1,i->irp$l_qio_p1,i->irp$l_qio_p2);
   //puts("test\n");
   //puts(i->irp$l_qio_p1);
-  struct tty_struct * tty ;
+  struct _tty_ucb * tty = u;
 
   //  init_dev2(chan2dev(i->irp$w_chan ,&tty));
   //printk("dev %x %x\n",chan2dev(i->irp$w_chan),i->irp$w_chan);
@@ -281,9 +288,21 @@ int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   console_driver.write(i,p,u,c);
 #if 1
   // this must be put back sometime
+#if 0
   u->ucb$l_irp=i;
   u->ucb$l_irp->irp$l_iost1 = SS$_NORMAL;
+#else
+  tty->ucb$l_tt_wrtbuf->tty$l_wb_irp->irp$l_iost1 = SS$_NORMAL;
+  i=tty->ucb$l_tt_wrtbuf->tty$l_wb_irp;
+  if (i->irp$l_func!=11)
+    printk("XXX\n");
+  i->irp$l_svapte=0;
+#endif
+#if 0
   com$post(u->ucb$l_irp,u);
+#else
+  com$post(tty->ucb$l_tt_wrtbuf->tty$l_wb_irp,u);
+#endif
 #endif
   return SS$_NORMAL;
 }

@@ -107,9 +107,10 @@ int tty$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
 
   // not yet
   // no full duplex with untested altquepkt, using qiodrvpkt instead
-  //  sts = exe$altquepkt (i,p,u);
+  tty->ucb$l_tt_wrtbuf = wb;
+  sts = exe$altquepkt (i,p,u);
 
-  sts = exe$qiodrvpkt (i,p,u);
+  // sts = exe$qiodrvpkt (i,p,u); // seems duplex is needed to avoid crashes
   return sts;
 }
 
