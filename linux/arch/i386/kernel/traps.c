@@ -168,6 +168,7 @@ void show_trace(unsigned long * stack)
 		}
 	}
 	printk("\n");
+	{ long long i; cli(); for (i=1;i;i++) ; }
 }
 
 void show_trace_task(struct task_struct *tsk)
