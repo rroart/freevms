@@ -1483,7 +1483,6 @@ int writeout_one_page(struct page *page)
 		bh->b_flushtime = jiffies;
 		vms_ll_rw_block(WRITE, 1, &bh,bh->b_dev);	
 		turns++;
-		bh=buffers[turns];
 	} while (bh);
 	return 0;
 }
