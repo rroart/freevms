@@ -11,8 +11,8 @@ clean:
 install: all
 	install -d ../../rootum/vms$$common/sysexe
 	install -d ../../rooti386/vms$$common/sysexe
-	install i386/* ../../rooti386/vms"$$"common/sysexe
-	install um/* ../../rootum/vms"$$"common/sysexe
+	install i386/*.* ../../rooti386/vms"$$"common/sysexe
+	install um/*.* ../../rootum/vms"$$"common/sysexe
 
 OBJS = directory.o
 
@@ -36,7 +36,7 @@ um/directory${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
 	install -d um
 	gcc -g -static $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) -o um/directory${NOEXE}
 um/directory${EXE_ELF}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
-	ld -Bshareable $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/directory${EXE_ELF}
+	ld -Bshareable $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o um/directory${EXE_ELF}
 
 um/directory${EXE}: $(VMSLIBSUM) $(OBJS)
 	install -d um
