@@ -1,5 +1,6 @@
 #include <descrip.h>
 #include <ddbdef.h>
+#include <dyndef.h>
 #include <ttdef.h>
 #include <tt2def.h>
 #include <ttyucbdef.h>
@@ -58,6 +59,8 @@ int tty$putnextchar(int * chr, struct _ucb * u) {
   if (tty->ucb$l_tt_typahd==0) {  // this is duplicated -> own routine?
     tty->ucb$l_tt_typahd = kmalloc (sizeof (struct _tt_type_ahd),GFP_KERNEL);
     struct _tt_type_ahd * ahd = tty->ucb$l_tt_typahd;
+    memset(ahd, 0, sizeof(struct _tt_type_ahd));
+    ahd->tty$b_ta_type = DYN$C_TYPAHD;
     ahd->tty$l_ta_data=kmalloc(1024,GFP_KERNEL);
     ahd->tty$l_ta_get=ahd->tty$l_ta_put=ahd->tty$l_ta_data;
     ahd->tty$l_ta_end=(long)ahd->tty$l_ta_data+1024;
