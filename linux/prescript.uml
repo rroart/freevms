@@ -4,3 +4,5 @@ for X in `cd ../freevms/linux; find arch/um include/asm-um \( -name CVS -prune \
 	[ -f $X ] && rm $X
 	[ -f ../freevms/linux/$X ] && cp -p ../freevms/linux/$X $X;
 done
+
+( cd ../freevms/examples; rm asm; ln -s . asm )

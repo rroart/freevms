@@ -31,3 +31,39 @@ synch: synch.c
 enq: enq.c
 	gcc -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.o -o enq
 
+allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum
+
+UMDEF=-Dcompile_um -I.
+
+timerum: timer.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.c -o timerum
+timeum: gettim.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ gettim.c ../starlet/src/starlet.c -o timeum
+
+astum: astdel.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ astdel.c ../starlet/src/starlet.c -o astum
+
+eftimum: eftim.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ eftim.c ../starlet/src/starlet.c -o eftimum
+
+schdwkum: schdwk.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ schdwk.c ../starlet/src/starlet.c -o schdwkum
+
+forcexum: forcex.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ forcex.c ../starlet/src/starlet.c -o forcexum
+
+efum: ef.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ ef.c ../starlet/src/starlet.c -o efum
+
+wakeum: wake.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ wake.c ../starlet/src/starlet.c -o wakeum
+
+
+synchum: synch.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ synch.c ../starlet/src/starlet.c -o synchum
+
+
+enqum: enq.c
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.c -o enqum
+
+

@@ -49,6 +49,10 @@ inline int savipl(void) {
 }
 #endif
 
+inline int getipl() {
+  return current->psl_ipl;
+}
+
 /* no smp yet */
 inline void setipl(unsigned char i) {
   int this_cpu = smp_processor_id();

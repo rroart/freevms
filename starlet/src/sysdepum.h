@@ -17,10 +17,6 @@
    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
    02111-1307 USA.  */
 
-#ifdef compile_um
-#include "sysdepum.h"
-#else
-
 #ifndef _LINUX_I386_SYSDEP_H
 #define _LINUX_I386_SYSDEP_H 1
 
@@ -161,7 +157,7 @@
     PUSHARGS_##args							      \
     DOARGS_##args							      \
     movl $SYS_ify (syscall_name), %eax;					      \
-    int $0x81								      \
+    int $0x80								      \
     POPARGS_##args
 
 #define PUSHARGS_0	/* No arguments to push.  */
@@ -255,7 +251,7 @@ extern int errno;
     asm volatile (							      \
     LOADARGS_##nr							      \
     "movl %1, %%eax\n\t"						      \
-    "int $0x81\n\t"							      \
+    "int $0x80\n\t"							      \
     RESTOREARGS_##nr							      \
     : "=a" (resultvar)							      \
     : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");		      \
@@ -273,7 +269,7 @@ extern int errno;
     asm volatile (							      \
     LOADARGS_##nr							      \
     "movl %1, %%eax\n\t"						      \
-    "int $0x82\n\t"							      \
+    "int $0x80\n\t"							      \
     RESTOREARGS_##nr							      \
     : "=a" (resultvar)							      \
     : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");		      \
@@ -291,7 +287,7 @@ extern int errno;
     asm volatile (							      \
     LOADARGS_##nr							      \
     "movl %1, %%eax\n\t"						      \
-    "int $0x84\n\t"							      \
+    "int $0x80\n\t"							      \
     RESTOREARGS_##nr							      \
     : "=a" (resultvar)							      \
     : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");		      \
@@ -352,4 +348,3 @@ extern int errno;
 #endif	/* __ASSEMBLER__ */
 
 #endif /* linux/i386/sysdep.h */
-#endif /* compile_um */

@@ -14,17 +14,21 @@
 extern int mydebug5;
 
 int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
+  int savipl;
   struct _pcb * p=find_process_by_pid(pid);
   int status;
   if (!p) {
     return SS$_NONEXPR;
   }
-  /* lck */
+  /* lock */
+  savipl=getipl();
+  setipl(IPL$_SYNCH);
   insque(a,p->pcb$l_astqfl);
   /* just simple insert , no pris yet */
   if (p->pcb$w_state!=SCH$C_CUR)
     status=sch$rse(p, priclass, EVT$_AST);
   /* unlock */
+  setipl(savipl);
   return status;
 }
 

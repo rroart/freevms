@@ -228,7 +228,75 @@ extern syscall_handler_t um_mount;
 extern syscall_handler_t um_time;
 extern syscall_handler_t um_stime;
 
-#define LAST_GENERIC_SYSCALL __NR_fremovexattr
+extern syscall_handler_t  exe$testtest           ;
+extern syscall_handler_t  exe$setpri		 ;
+extern syscall_handler_t  exe$crelnt             ;
+extern syscall_handler_t  exe$setprn             ;
+extern syscall_handler_t  exe$dclast             ;
+extern syscall_handler_t  exe$waitfr             ;
+extern syscall_handler_t  exe$wflor              ;
+extern syscall_handler_t  exe$wfland             ;
+extern syscall_handler_t  exe$clref              ;
+extern syscall_handler_t  exe$setime            ;
+extern syscall_handler_t  exe$setimr            ;
+extern syscall_handler_t  exe$cantim            ;
+extern syscall_handler_t  exe$numtim ;
+extern syscall_handler_t  exe$gettim            ;
+extern syscall_handler_t  exe$hiber             ;
+extern syscall_handler_t  exe$wake              ;
+extern syscall_handler_t  exe$schdwk            ;
+extern syscall_handler_t  exe$canwak            ;
+extern syscall_handler_t  exe$suspnd            ;
+extern syscall_handler_t  exe$resume            ;
+extern syscall_handler_t  exe$exit              ;
+extern syscall_handler_t  exe$forcex             ;
+extern syscall_handler_t  exe$setrwm            ;
+extern syscall_handler_t  exe$delprc            ;
+extern syscall_handler_t  exe$readef            ;
+extern syscall_handler_t  exe$setef             ;
+extern syscall_handler_t  exe$synch             ;
+extern syscall_handler_t  exe$enq               ;
+extern syscall_handler_t  exe$deq               ;
+
+extern syscall_handler_t  exe$close  ;
+extern syscall_handler_t  exe$connect  ;
+extern syscall_handler_t  exe$create  ;
+extern syscall_handler_t  exe$delete  ;
+extern syscall_handler_t  exe$disconnect  ;
+extern syscall_handler_t  exe$display  ;
+extern syscall_handler_t  exe$enter  ;
+extern syscall_handler_t  exe$erase  ;
+extern syscall_handler_t  exe$extend  ;
+extern syscall_handler_t  exe$find  ;
+extern syscall_handler_t  exe$flush  ;
+extern syscall_handler_t  exe$free  ;
+extern syscall_handler_t  exe$get  ;
+extern syscall_handler_t  exe$modify  ;
+extern syscall_handler_t  exe$nxtvol  ;
+extern syscall_handler_t  exe$open  ;
+extern syscall_handler_t  exe$parse  ;
+extern syscall_handler_t  exe$put  ;
+extern syscall_handler_t  exe$read  ;
+extern syscall_handler_t  exe$release  ;
+extern syscall_handler_t  exe$remove  ;
+extern syscall_handler_t  exe$rename  ;
+extern syscall_handler_t  exe$rewind  ;
+extern syscall_handler_t  exe$search  ;
+extern syscall_handler_t  exe$space  ;
+extern syscall_handler_t  exe$truncate  ;
+extern syscall_handler_t  exe$update  ;
+extern syscall_handler_t  exe$wait  ;
+extern syscall_handler_t  exe$write  ;
+extern syscall_handler_t  exe$filescan  ;
+extern syscall_handler_t  exe$setddir  ;
+extern syscall_handler_t  exe$setdfprot  ;
+extern syscall_handler_t  exe$ssvexc  ;
+extern syscall_handler_t  exe$rmsrundwn  ;
+
+extern syscall_handler_t  exe$asctim             ;
+extern syscall_handler_t  exe$bintim             ;
+
+#define LAST_GENERIC_SYSCALL __NR_$bintim
 
 #if LAST_GENERIC_SYSCALL > LAST_ARCH_SYSCALL
 #define LAST_SYSCALL LAST_GENERIC_SYSCALL
@@ -454,6 +522,72 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_removexattr ] = sys_ni_syscall,
 	[ __NR_lremovexattr ] = sys_ni_syscall,
 	[ __NR_fremovexattr ] = sys_ni_syscall,
+
+	[ __NR_$testtest ] = sys_ni_syscall          ,
+	[ __NR_$setpri ] = exe$setpri		,
+	[ __NR_$crelnt ] = sys_ni_syscall            ,
+	[ __NR_$setprn ] = exe$setprn            ,
+	[ __NR_$dclast ] = exe$dclast            ,
+	[ __NR_$waitfr ] = exe$waitfr            ,
+	[ __NR_$wflor ] = exe$wflor             ,
+	[ __NR_$wfland ] = exe$wfland            ,
+	[ __NR_$clref ] = exe$clref             ,
+	[ __NR_$setime ] = exe$setime           ,
+	[ __NR_$setimr ] = exe$setimr           ,
+	[ __NR_$cantim ] = exe$cantim           ,
+	[ __NR_$numtim ] = exe$numtim,
+	[ __NR_$gettim ] = exe$gettim           ,
+	[ __NR_$hiber ] = exe$hiber            ,
+	[ __NR_$wake ] = exe$wake             ,
+	[ __NR_$schdwk ] = exe$schdwk           ,
+	[ __NR_$canwak ] = exe$canwak           ,
+	[ __NR_$suspnd ] = exe$suspnd           ,
+	[ __NR_$resume ] = exe$resume           ,
+	[ __NR_$exit ] = exe$exit             ,
+	[ __NR_$forcex ] = exe$forcex            ,
+	[ __NR_$setrwm ] = exe$setrwm           ,
+	[ __NR_$delprc ] = exe$delprc           ,
+	[ __NR_$readef ] = exe$readef           ,
+	[ __NR_$setef ] = exe$setef            ,
+	[ __NR_$synch ] = exe$synch            ,
+	[ __NR_$enq ] = exe$enq              ,
+	[ __NR_$deq ] = exe$deq              ,
+	[ __NR_$close ] = sys_ni_syscall,
+	[ __NR_$connect ] = sys_ni_syscall,
+	[ __NR_$create ] = sys_ni_syscall,
+	[ __NR_$delete ] = sys_ni_syscall,
+	[ __NR_$disconnect ] = sys_ni_syscall,
+	[ __NR_$display ] = sys_ni_syscall,
+	[ __NR_$enter ] = sys_ni_syscall,
+	[ __NR_$erase ] = sys_ni_syscall,
+	[ __NR_$extend ] = sys_ni_syscall,
+	[ __NR_$find ] = sys_ni_syscall,
+	[ __NR_$flush ] = sys_ni_syscall,
+	[ __NR_$free ] = sys_ni_syscall,
+	[ __NR_$get ] = sys_ni_syscall,
+	[ __NR_$modify ] = sys_ni_syscall,
+	[ __NR_$nxtvol ] = sys_ni_syscall,
+	[ __NR_$open ] = sys_ni_syscall,
+	[ __NR_$parse ] = sys_ni_syscall,
+	[ __NR_$put ] = sys_ni_syscall,
+	[ __NR_$read ] = sys_ni_syscall,
+	[ __NR_$release ] = sys_ni_syscall,
+	[ __NR_$remove ] = sys_ni_syscall,
+	[ __NR_$rename ] = sys_ni_syscall,
+	[ __NR_$rewind ] = sys_ni_syscall,
+	[ __NR_$search ] = sys_ni_syscall,
+	[ __NR_$space ] = sys_ni_syscall,
+	[ __NR_$truncate ] = sys_ni_syscall,
+	[ __NR_$update ] = sys_ni_syscall,
+	[ __NR_$wait ] = sys_ni_syscall,
+	[ __NR_$write ] = sys_ni_syscall,
+	[ __NR_$filescan ] = sys_ni_syscall,
+	[ __NR_$setddir ] = sys_ni_syscall,
+	[ __NR_$setdfprot ] = sys_ni_syscall,
+	[ __NR_$ssvexc ] = sys_ni_syscall,
+	[ __NR_$rmsrundwn ] = sys_ni_syscall,
+	[ __NR_$asctim ] = exe$asctim            ,
+	[ __NR_$bintim ] = exe$bintim            ,
 
 	ARCH_SYSCALLS
 	[ LAST_SYSCALL + 1 ... NR_syscalls ] = 
