@@ -574,6 +574,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
   if (fib->fib$w_did_num) {
     //    struct getdents_callback64 buf;
+    static int mywcc=0;
     struct readdir_callback2 buf;
     int fd=0;
     struct file * f;
@@ -609,7 +610,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     fd = get_unused_fd();
     fd_install(fd, f);
     {
-      static int mywcc=0;
       struct files_struct * files = current->files;
       while (fd < files->max_fds) {
 	if (f == files->fd[fd]) break;
