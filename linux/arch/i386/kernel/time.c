@@ -390,6 +390,8 @@ int timer_ack;
  * timer_interrupt() needs to keep up the real-time clock,
  * as well as call the "do_timer()" routine every clocktick
  */
+/* change to exe$hwclkint sometime ? */
+/* do it here instead */
 static inline void do_timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
 #ifdef CONFIG_X86_IO_APIC
@@ -465,6 +467,7 @@ static int use_tsc;
  * Time Stamp Counter value at the time of the timer interrupt, so that
  * we later on can estimate the time of day more exactly.
  */
+/* change to exe$hwclkint sometime ? */
 static void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
 	int count;
@@ -555,6 +558,7 @@ unsigned long get_cmos_time(void)
 	return mktime(year, mon, day, hour, min, sec);
 }
 
+/* change to exe$hwclkint sometime ? */
 static struct irqaction irq0  = { timer_interrupt, SA_INTERRUPT, 0, "timer", NULL, NULL};
 
 /* ------ Calibrate the TSC ------- 

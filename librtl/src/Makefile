@@ -51,6 +51,8 @@ SYSOBJ = sys__combine_date_time.o sys_asctim.o sys_bintim.o \
 
 CVTOBJ = cvt_convert_float.o
 
+QUELIB = libinsqhi.o
+
 STRLIB = starlet.a
 
 all : $(STRLIB) tests
@@ -70,7 +72,7 @@ test_str_element : test_str_element.c $(STRLIB)
 test_addx : test_addx.c $(STRLIB)
 test_date : test_date.c $(STRLIB)
 
-$(STRLIB) : $(STROBJ) $(LIBOBJ) $(SYSOBJ) $(CVTOBJ)
+$(STRLIB) : $(STROBJ) $(LIBOBJ) $(SYSOBJ) $(CVTOBJ) $(QUELIB)
 	ar -rv $(STRLIB) $?
 
 str.o : str.c ../../starlet/src/strdef.h
@@ -102,3 +104,4 @@ str_translate.o : str_translate.c ../../starlet/src/strdef.h
 str_trim.o : str_trim.c ../../starlet/src/strdef.h
 str_upcase.o : str_upcase.c ../../starlet/src/strdef.h
 cvt_convert_float.o: cvt_convert_float.c
+libinsqhi.o: libinsqhi.c

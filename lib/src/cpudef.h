@@ -74,6 +74,8 @@ struct _cpu {
   struct _pcb *cpu$l_curpcb;
   // struct _ktb *cpu$l_curktb;
   unsigned char cpu$b_ipl; /* some cpus lack something */  
+  unsigned char iplnr;
+  unsigned char previpl[32];
 struct {
   unsigned char interrupt;
   unsigned char at_level;

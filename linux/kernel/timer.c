@@ -681,6 +681,8 @@ void timer_bh(void)
 	run_timer_list();
 }
 
+/* maybe change to exe$hwclkint sometime ? */
+/* the main loop described might be here */  
 void do_timer(struct pt_regs *regs)
 {
 	(*(unsigned long *)&jiffies)++;
