@@ -34,6 +34,7 @@
 #include <secdef.h>
 #include <ssdef.h>
 #include <vmspte.h>
+#include <wcbdef.h>
 #include <wsldef.h>
 #include <va_rangedef.h>
 
@@ -155,8 +156,9 @@ static inline int expand_stack2(struct _rde * vma, unsigned long address)
 }
 
 struct pfast {
-  struct file * file;
+  struct _wcb * window;
   unsigned long offset;
+  unsigned long pfn;
   unsigned long address;
   pte_t * pte;
   unsigned long pteentry;
@@ -164,12 +166,8 @@ struct pfast {
 };
 
 void pagefaultast(struct pfast * p) {
-  mm_segment_t fs;
   int res;
-  fs = get_fs();
-  set_fs(KERNEL_DS);
-  generic_file_llseek(p->file,p->offset<<PAGE_SHIFT,0);
-  p->file->f_op->read(p->file, p->address, PAGE_SIZE, &p->file->f_pos);
+  block_read_full_page3(p->window->wcb$l_fcb, &mem_map[p->pfn], p->offset);
   *(unsigned long *)(p->pte)&=0xfffff000;
   *(unsigned long *)(p->pte)|=p->pteentry;
 
@@ -184,18 +182,18 @@ void pagefaultast(struct pfast * p) {
 #endif
   flush_tlb_range(current->mm, p->address, p->address + PAGE_SIZE);
   kfree(p);
-  set_fs(fs);
 }
 
 extern int astdeb;
 
 extern int in_atomic;
 
-int makereadast(unsigned long file, unsigned long address, unsigned long pte, unsigned long offset, unsigned long write_flag) {
+int makereadast(unsigned long window, unsigned long pfn, unsigned long address, unsigned long pte, unsigned long offset, unsigned long write_flag) {
   struct _acb * a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
   struct pfast * pf=kmalloc(sizeof(struct pfast),GFP_KERNEL);
   struct _rde * rde;
-  pf->file=file;
+  pf->window=window;
+  pf->pfn=pfn;
   pf->address=address&0xfffff000;
   pf->offset=offset;
   pf->pte=pte;
@@ -224,6 +222,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	struct _rde * vma;
 	unsigned long address;
 	unsigned long page;
+	signed long pfn;
 	unsigned long fixup;
 	int write;
 	siginfo_t info;
@@ -333,13 +332,13 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    struct _secdef *pstl=current->pcb$l_phd->phd$l_pst_base_offset;
 #if 0
 	    struct _secdef *sec=&pstl[index];
-	    struct file * file=sec->sec$l_window;
+	    struct _wcb * window=sec->sec$l_window;
 	    unsigned long vbn=sec->sec$l_vbn;
 	    struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	    unsigned long offset;// in PAGE_SIZE units
 #else
 	    struct _secdef *sec;
-	    struct file * file;
+	    struct _wcb * window;
 	    unsigned long vbn;
 	    struct _rde * rde;
 	    unsigned long offset;// in PAGE_SIZE units
@@ -350,27 +349,27 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	      panic("Wrong\n");
 	    }
 	    sec=&pstl[index];
-	    file=sec->sec$l_window;
+	    window=sec->sec$l_window;
 	    vbn=sec->sec$l_vbn;
 	    rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 #endif
 	    if (rde==0) printk("vma0 address %x\n",address);
-	    //printk(" i pstl sec file vbn rde %x %x %x %x %x %x\n",index,pstl,sec,file,vbn,rde);
+	    //printk(" i pstl sec window vbn rde %x %x %x %x %x %x\n",index,pstl,sec,window,vbn,rde);
 	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+vbn;
 	    //printk(" offs %x ",offset);
-	    //page_cache_read(file, offset);
+	    //page_cache_read(window, offset);
 	    //file->f_dentry->d_inode->i_mapping->a_ops->readpage(file, page);
 
 	    //printk(" a ");
 	    {
-	      signed long pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+	      pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
 	      mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 	      *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	      //printk(" pfn pte %x %x ",pfn,*(unsigned long *)pte);
 	    }
 	    //printk(" b ");
 	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
-	    makereadast(file,address,pte,offset,error_code&2);	
+	    makereadast(window,pfn,address,pte,offset,error_code&2);	
 	    //printk(" a ");
 	    return;
 	  } else { // page file
@@ -388,7 +387,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 		  rde->rde$l_region_size+=PAGE_SIZE;
 		}
 		{
-		  signed long pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+		  pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
 		  mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 		  *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 		  if (page==0) {
@@ -751,7 +750,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    unsigned long index=(*(unsigned long *)pte)>>PAGE_SHIFT;
 	    struct _secdef *pstl=current->pcb$l_phd->phd$l_pst_base_offset;
 	    struct _secdef *sec=&pstl[index];
-	    struct file * file=sec->sec$l_window;
+	    struct _wcb * window=sec->sec$l_window;
 	    unsigned long vbn=sec->sec$l_vbn;
 	    struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	    unsigned long offset;// in PAGE_SIZE units
@@ -762,7 +761,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	    flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	    
-	    makereadast(file,address,pte,offset,is_write);
+	    makereadast(window,pfn,address,pte,offset,is_write);
 	    return;
 	  } else { // page file
 	  }
@@ -814,7 +813,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 		struct _secdef * pstl=((struct _phd *)mmg$gl_sysphd)->phd$l_pst_base_offset;
 		unsigned long index=gpte->pte$v_stx;
 		struct _secdef *sec=&pstl[index];
-		struct file * file=sec->sec$l_window;
+		struct _wcb * window=sec->sec$l_window;
 		unsigned long vbn=sec->sec$l_vbn;
 		unsigned long offset=gptx-sec->sec$l_vpx;// in PAGE_SIZE units
 		pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page|PFN$C_GLOBAL,pte);
@@ -825,7 +824,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 		mypte->pte$v_gblwrt=0;	
 		*(unsigned long *)pte|=_PAGE_DIRTY;//collided with gblwrt
 		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
-		makereadast(file,address,pte,offset,is_write);
+		makereadast(window,pfn,address,pte,offset,is_write);
 	      } else { // global zero
 		pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page|PFN$C_GLOBAL,pte);
 		*(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
