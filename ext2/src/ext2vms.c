@@ -630,6 +630,8 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     fib->fib$w_exctl=dir.d_off;
     fib->fib$w_nmctl=dir.d_reclen;
 
+    fib->fib$l_wcc = 1;
+
 #if 0
     if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
       sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
