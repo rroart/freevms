@@ -15,6 +15,8 @@
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
 
+#include <descrip.h>
+
 asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam, int flags) {
   int status;
   /* probe chan */
@@ -54,15 +56,15 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
     struct _ddt * ddt=u->ucb$l_ddt;
     int sts=ioc_std$clone_ucb(u, &new);
     u=new;
-    printk("ucb cloned in assign\n");
+    printk("ucb cloned in assign %x\n",ddt->ddt$l_cloneducb);
     if (ddt->ddt$l_cloneducb) { 
      int (*fn)() = ddt->ddt$l_cloneducb;
-     int u = fn(u, &new);
-   }
-  } else {
-    c->ccb$l_ucb=u;
-    c->ccb$l_ucb->ucb$l_refc++;
+     fn(u);
+    }
   }
+
+  c->ccb$l_ucb=u;
+  c->ccb$l_ucb->ucb$l_refc++;
 
   sch$iounlock();
   return status;
