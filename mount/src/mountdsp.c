@@ -12,8 +12,8 @@
 #include <uicdef.h>
 #include <vcbdef.h>
 #include <hm2def.h>
-#include "../../freevms/rms/src/cache.h"
-#include "../../freevms/rms/src/access.h"
+#include "../../rms/src/cache.h"
+#include "../../rms/src/access.h"
 
 asmlinkage int exe$mount(void *itmlst) {
   int i;

@@ -21,7 +21,7 @@
 #include<uicdef.h>
 #include<vcbdef.h>
 #include<fh2def.h>
-#include"../../freevms/f11x/src/xqp.h"
+#include"../../f11x/src/xqp.h"
 
 #include<linux/init.h>
 #include<linux/sched.h>

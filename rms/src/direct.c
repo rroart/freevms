@@ -58,7 +58,7 @@
 #include <hm2def.h>
 #include <dirdef.h>
 #include <vmstime.h>
-#include "../../freevms/f11x/src/xqp.h"
+#include "../../f11x/src/xqp.h"
 #include "cache.h"
 #include "access.h"
 #include "direct.h"

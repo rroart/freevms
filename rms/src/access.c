@@ -67,7 +67,7 @@
 #include <scbdef.h>
 #include <wcbdef.h>
 #include <vmstime.h>
-#include "xqp.h"
+#include "../../f11x/src/xqp.h"
 #include "cache.h"
 #include "access.h"
 
