@@ -11,7 +11,7 @@
 
 void ioc$initiate(struct _ucb * u, struct _irp * i) {
   struct _ddt *d; 
-  void (*f)(void);
+  void (*f)(void *,void *);
   /* no  smp affinity check yet */
   u->ucb$l_irp=i;
   u->ucb$l_svapte=i->irp$l_svapte;
@@ -21,7 +21,7 @@ void ioc$initiate(struct _ucb * u, struct _irp * i) {
   /* no diagnostic buf */
   d=u->ucb$l_ddt;
   f=d->ddt$l_start;
-  f();
+  f(i,u);
   
 }
 

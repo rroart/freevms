@@ -5,7 +5,7 @@
  * system call entry points ... but not all are defined
  */
 #ifdef __arch_um__
-#define NR_syscalls 306
+#define NR_syscalls 512
 #else
 #define NR_syscalls 256
 #endif

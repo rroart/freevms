@@ -79,11 +79,11 @@ asmlinkage int exe$qio (struct struct_qio * q) {
 void exe$qioacppkt (void) {
 }
 
-void exe$qiodrvpkt (struct _pcb * p, struct _ucb * u, struct _irp * i) {
+int exe$qiodrvpkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
 
   exe$insioq(u,i);
   /* restore ipl to 0 */
-
+  return SS$_NORMAL;
 }
 
 void exe$qioqxqppkt (void) {

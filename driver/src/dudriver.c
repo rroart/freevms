@@ -2269,7 +2269,10 @@ mscp_requeue(mi)
 #include"../../freevms/lib/src/dptdef.h"
 #include"../../freevms/lib/src/fdtdef.h"
 #include"../../freevms/lib/src/pdtdef.h"
+#include"../../freevms/lib/src/irpdef.h"
+#include"../../freevms/lib/src/ucbdef.h"
 #include"../../freevms/starlet/src/iodef.h"
+#include"../../freevms/starlet/src/devdef.h"
 
 void dumyerr(void) {
   /* do nothing yet */
@@ -2296,8 +2299,17 @@ struct _fdt fdt_du = {
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
 
+void  du_startio (struct _irp * i, struct _ucb * u) { 
+  if (u->ucb$q_devchar2&DEV$M_CDP) {
+    /* not local? */
+  } else {
+    /* local */
+    /* error if it gets here, got no real mscp */
+    panic("no real mscp\n");
+  }
+};
+
 /* more yet undefined dummies */
-void  du_startio (void) { };
 void  du_unsolint (void) { };
 void  du_functb (void) { };
 void  du_cancel (void) { };
