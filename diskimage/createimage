@@ -9,7 +9,8 @@ mount -t ext2 -o loop a.img /mnt
 mkdir -p /mnt/boot/grub
 cp -p grub.conf /mnt/boot/grub
 cp -p grub.conf /mnt/boot/grub/menu.lst
-cp -p /usr/share/grub/i386-redhat/stage* /mnt/boot/grub
+[ -f /usr/share/grub/i386-redhat/stage1 ] && cp -p /usr/share/grub/i386-redhat/stage* /mnt/boot/grub
+[ -f /boot/grub/stage1 ] && cp -p /boot/grub/stage* /mnt/boot/grub
 
 umount /mnt
 
