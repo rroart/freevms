@@ -473,9 +473,11 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	      unsigned long address2 = address & PAGE_MASK;
 	      mem_map[page].virtual=__va(page*PAGE_SIZE);
 	      *(unsigned long *)pte=(__va(page*PAGE_SIZE));
-	      //flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
-	      map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
-	      *(unsigned long *)pte|=1;
+	      *(unsigned long *)pte|=_PAGE_NEWPAGE|_PAGE_PRESENT;
+	      *(unsigned long *)pte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	      flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
+	      //map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
+	      //*(unsigned long *)pte|=1;
 	    }
 	    
 	    {
@@ -503,9 +505,11 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 		unsigned long address2 = address & PAGE_MASK;
 		mem_map[page].virtual=__va(page*PAGE_SIZE);
 		*(unsigned long *)pte=(__va(page*PAGE_SIZE));
-		//flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
-		map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
-		*(unsigned long *)pte|=1;
+		*(unsigned long *)pte|=_PAGE_NEWPAGE|_PAGE_PRESENT;
+		*(unsigned long *)pte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+		flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
+		//map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
+		//*(unsigned long *)pte|=1;
 	      }
 	      return;
 	    }
@@ -515,6 +519,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 
 	}
 
+	return;
 	// mmg$ininewpfn(p,va,pte); // put this somewhere?
 
 
