@@ -24,7 +24,13 @@ asmlinkage int exe$mount(void *itmlst) {
 
   devs[0]=it[0].bufaddr;
 
-  status=mount(1,1,devs,labs,&vcb);
+  if (it[1].item_code) {
+#ifdef CONFIG_VMS
+    status=mounte2(1,1,devs,labs,&vcb);
+#endif
+  } else {
+    status=mount(1,1,devs,labs,&vcb);
+  }
 
   if (status&1==0) return;
 

@@ -855,8 +855,12 @@ static int init(void * unused)
 	lock_kernel();
 	do_basic_setup();
 	printk("after dobasic\n");
+#ifdef CONFIG_VMS
+	vms_mount();
+#endif
 	prepare_namespace();
 	printk("after prepnamspac\n");
+
 	/*
 	 * Ok, we have completed the initial bootup, and
 	 * we're essentially up and running. Get rid of the
