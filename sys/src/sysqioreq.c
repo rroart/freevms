@@ -20,10 +20,10 @@ void exe$abortio(void) {
 void exe$altqueuepkt (void) {
 }
 
-void exe$finishio (void) {
+void exe$finishio (long long * iosb, struct _irp * i, struct _pcb * p, struct _ucb * u) {
 }
 
-void exe$finishioc (void) {
+void exe$finishioc (long long * iosb, struct _irp * i, struct _pcb * p, struct _ucb * u) {
 }
 
 int exe$insioq (struct _ucb * u, struct _irp * i) {

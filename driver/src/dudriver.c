@@ -2342,8 +2342,8 @@ inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn) {
 
 static struct _fdt du_fdt;
 
-void acp$readblk(void) { }
-/* acp stuff not finished. this is a dummy */
+void acp$readblk();
+void acp$writeblk();
 
 void du_init(void) {
   /* a lot of these? */
