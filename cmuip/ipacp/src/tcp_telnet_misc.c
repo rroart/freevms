@@ -78,6 +78,7 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 #include<iosbdef.h>
 #include<dvidef.h>
 #include<lnmdef.h>
+#include<misc.h>
 
 
 
@@ -568,7 +569,7 @@ void Line_Changed_AST (Parm)
     if (TVT->TVT$CANCEL)
 	return;
 
-	RC = exe$qiow (0,
+	RC = sys$qiow (0,
 	 TVT->TVT$PTY_CHN,
 	 IO$_SENSEMODE,
 	io_stats,
@@ -601,7 +602,7 @@ void Line_Changed_AST (Parm)
 	TVT->TVT$TTYDEPEND2 = Extend_Char;
 	};
 
-	RC = exe$qiow (
+	RC = sys$qiow (
 0,
 		TVT->TVT$PTY_CHN,
 		IO$_SETMODE,
@@ -650,7 +651,7 @@ IS_CNTRLT_GOOD (TVT)
 	RC,
 	Status;
 
-    RC = exe$qiow (
+    RC = sys$qiow (
 0,
 	TVT->TVT$PTY_CHN,
 	IO$_SENSEMODE,
@@ -703,7 +704,7 @@ void Set_PTY_Window_Size (TVT, pag, width)
     signed long
 	Status;
 
-    Status = exe$qiow (
+    Status = sys$qiow (
 0,
 	pty_chan,
 	IO$_SENSEMODE,
@@ -729,7 +730,7 @@ void Set_PTY_Window_Size (TVT, pag, width)
 		PTY_Char->QCB$W_PAGE_WIDTH = width;
 	if (pag > -1)
 		PTY_Char->QCB$B_PAGE_LENGTH = pag;
-	Status = exe$qiow (
+	Status = sys$qiow (
 0,
 		pty_chan,
 		IO$_SETMODE,
@@ -806,7 +807,7 @@ void Set_PTY_Term_Type (TVT, type, devdep)
     signed long
 	Status	;
 
-    Status = exe$qiow (
+    Status = sys$qiow (
 0,
 	pty_chan,
 	IO$_SENSEMODE,
@@ -865,7 +866,7 @@ void Set_PTY_Term_Type (TVT, type, devdep)
 	||		devdep[1];
 
 	Charistics ->tt$v_eightbit = State_Binary | State_Eightbit;
-	Status = exe$qiow (
+	Status = sys$qiow (
 0,
 		pty_chan,
 		IO$_SETMODE,
@@ -1117,7 +1118,7 @@ void set_devdep(TVT)
 //
     if (TVT->TVT$DO_PID) return(0);
 
-    Status = exe$qiow (
+    Status = sys$qiow (
 0,
 		pty_chan,
 		IO$_SENSEMODE,
@@ -1189,7 +1190,7 @@ void set_devdep(TVT)
 		,PTY_Char->QCB$W_PAGE_WIDTH
 		,PTY_Char->QCB$B_PAGE_LENGTH);
 
-	Status = exe$qiow (
+	Status = sys$qiow (
 0,
 		pty_chan,
 		IO$_SETMODE,
@@ -1264,7 +1265,7 @@ void set_devdep(TVT)
 		,"!%T Set_DEVDEP: ASSIGN status=!UL!/",0,Status);
 	    }
 	    else {
-		Status = exe$qio (
+		Status = sys$qio (
 0,
 			tty_chan,
 			IO$_SETMODE,
