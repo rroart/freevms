@@ -239,7 +239,7 @@ int er$init_tables() {
   return SS$_NORMAL;
 }
 
-int er_iodb_vmsinit(void) {
+int er_iodb_vmsinit(int dev) {
 #if 0
   struct _ucb * ucb=&er$ucb;
   struct _ddb * ddb=&er$ddb;
@@ -259,6 +259,9 @@ int er_iodb_vmsinit(void) {
   init_ucb(&er$ucb, &er$ddb, &er$ddt, &er$crb);
   init_crb(&er$crb);
 #endif
+
+  ucb -> ucb$w_size = sizeof(struct _ucbnidef); // temp placed
+  ((struct _ucbnidef *)ucb)->ucb$l_extra_l_1=dev;
 
   init_ddb(ddb,&er$ddt,ucb,"era");
   init_ucb(ucb, ddb, &er$ddt, crb);
@@ -288,7 +291,7 @@ int er_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   return newucb;
 }
 
-int er_vmsinit(void) {
+int er_vmsinit(int dev) {
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
 
   unsigned short chan0, chan1, chan2;
@@ -300,7 +303,7 @@ int er_vmsinit(void) {
 
   printk(KERN_INFO "dev here pre\n");
 
-  ddb=er_iodb_vmsinit();
+  ddb=er_iodb_vmsinit(dev);
 
   /* for the fdt init part */
   /* a lot of these? */
@@ -778,8 +781,7 @@ static int __init ne_probe1(struct net_device *dev, int ioaddr)
 	dev->stop = &ne_close;
 	NS8390_init(dev, 0);
 
-	struct _ucbnidef * ucb = er_vmsinit();
-	ucb -> ucb$l_extra_l_1 = dev;
+	er_vmsinit(dev);
 
 	return 0;
 

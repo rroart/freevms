@@ -775,7 +775,7 @@ int __init uml_net_probe(void)
 		if(devices[i].user == NULL) continue;
 		eth_configure(&devices[i], i);
 		if (i==0) {
-			eu_vmsinit(dev);
+			eu_vmsinit(devices[0].dev);
 		}
 	}
 	return(0);
