@@ -78,8 +78,6 @@ signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _
   //set_page_count(page, 1);
   mem_map[pfn].pfn$l_refcnt=1; // aah bug
 
-
-
   mmg$makewsle(p,p->pcb$l_phd,va,pte,pfn);
   return pfn;
 }
@@ -1160,39 +1158,48 @@ int mmg$frewslx(struct _pcb * p, void * va,unsigned long * pte, unsigned long in
 
   // has pagefile backing store?
 
-  if ((((unsigned long)wsl[index].wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_GLOBAL) {
-    //*pte = mem_map[pfn].pfn$q_bak;
-    mmg$decptref(p->pcb$l_phd,pte);
-    p->pcb$l_gpgcnt--;
-  }
-
-  if ((((unsigned long)wsl[index].wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_PROCESS) {
-    //*pte = mem_map[pfn].pfn$q_bak; // need this  here too?
-    p->pcb$l_ppgcnt--;
-  }
-
 #ifdef __arch_um__
   //forget it?
   *pte|=_PAGE_NEWPAGE;
 #endif
   flush_tlb_range(p->mm, va, va + PAGE_SIZE);
 
-  wsl[index].wsl$pq_va=0;
+  //wsl[index].wsl$pq_va=0;
+  mmg$delwslx(p,p->pcb$l_phd,index,pte);
 
   mmg$relpfn(pfn);
 
   return SS$_NORMAL;
 }
 
+mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index,int pte) {
+  struct _wsl * wsl = phd->phd$l_wslist;
+
+  if ((((unsigned long)wsl[index].wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_GLOBAL) {
+    //*pte = mem_map[pfn].pfn$q_bak;
+    mmg$decptref(pcb->pcb$l_phd,pte);
+    pcb->pcb$l_gpgcnt--;
+  }
+
+  if ((((unsigned long)wsl[index].wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_PROCESS) {
+    //*pte = mem_map[pfn].pfn$q_bak; // need this  here too?
+    pcb->pcb$l_ppgcnt--;
+  }
+
+  wsl[index].wsl$pq_va=0;
+
+}
+
 unsigned long findpte_new(struct mm_struct *mm, unsigned long address) {
   unsigned long page;
-  pgd_t *pgd;
-  pmd_t *pmd;
-  pte_t *pte;
+  pgd_t *pgd = 0;
+  pmd_t *pmd = 0;
+  pte_t *pte = 0;
   page = address & PAGE_MASK;
   pgd = pgd_offset(mm, page);
   pmd = pmd_offset(pgd, page);
-  pte = pte_offset(pmd, page);
+  if (pmd && *(long *)pmd)
+    pte = pte_offset(pmd, page);
   return pte;
 }
 
