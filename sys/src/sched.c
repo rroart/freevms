@@ -510,6 +510,10 @@ void sch$resched(void) {
   if (!sch$al_cpu_priority[curpri])
     sch$gl_active_priority=sch$gl_active_priority & (~ (1 << (31-curpri)));
 
+  if (curpcb->state==TASK_INTERRUPTIBLE)
+    if (signal_pending(curpcb))
+      curpcb->state = TASK_RUNNING;
+
   //  if (curpcb->pid>0 && curpcb->state==TASK_RUNNING) {
   // Need pid 0 in the queue, this is more a linux thingie
   if (curpcb->state==TASK_RUNNING) {
