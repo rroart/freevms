@@ -686,8 +686,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 #endif
   }
 
-  x2p->context_save[0]=0;
-
   if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
 
   if ((irp->irp$l_func & IO$M_ACCESS) == 0 && irp->irp$l_qio_p5 == 0)
