@@ -521,7 +521,7 @@ dsc$a_pointer:local_namestr};
 // Segment Input from IP Queue header.
 // Initialize Queue header to point at itself (ie, empty state).
 
-   struct queue_header_structure segin = { 
+   struct queue_header_structure(si_fields) segin = { 
     si_qhead: &segin,
     si_qtail: &segin
    };

@@ -50,12 +50,6 @@ typedef union {
 
 #endif _CMU_TYPES
 
-#define word short
-#define uword unsigned short	
-#define ushort unsigned short
-#define ulong unsigned long
-#define uchar unsigned char
-
 /* 'Network Device Configuration blockvector Entry Fields.' */
 
 /*
@@ -68,7 +62,6 @@ devconfig.bli) at compile time and from the file devconfig.txt during acp initia
 */
 
 typedef struct {
-  unsigned char dc_begin[0];
     quadword	dc_devname;
     quadword	dc_devspec;
     int		*dc_dev_interface;
@@ -86,8 +79,6 @@ typedef struct {
     unsigned	dc_valid_device:1;
     unsigned	dc_Online:1;
     unsigned	dc_unused1:1;
-
-  unsigned long int dc_clone_dev;
 
     /* MIB data */
     ulong	dcmib_ifIndex;		/* Interface index number */

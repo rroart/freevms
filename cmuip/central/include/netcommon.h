@@ -56,6 +56,12 @@ typedef union {
     struct {int l1,l2; } l;
     } quadword;
 
+#define word short
+#define uword unsigned short	
+#define ushort unsigned short
+#define ulong unsigned long
+#define uchar unsigned char
+
 
 #endif _CMU_TYPES
 
@@ -165,6 +171,8 @@ typedef struct {
 	    };
 	};
     } ipadr$address_block;
+
+#define IPADR$UDP_ADDRESS_BLEN 12
 
 /* NET$INFO - return block structure. */
 

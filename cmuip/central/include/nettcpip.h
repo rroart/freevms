@@ -699,16 +699,18 @@ Modification History:
 // This section defines the Internet Protcol (IP) header.  This protocol
 // header is placed in front of the protocol and data from higher layers.
 
-struct ip_header
+struct ip_structure
   {
     union {
       unsigned char     iph$type_service		;
       unsigned       iph$swap_ihl		 : 4;  // check
     };
-    unsigned char     iph$total_length		[2];
-    unsigned char     iph$ident			[2];
+    unsigned iph$ihl:4;
+    unsigned iph$version:4;
+    unsigned short     iph$total_length;
+    unsigned short     iph$ident;
     union {
-      unsigned char     iph$fragmentation_data	[2];
+      unsigned short     iph$fragmentation_data;
       struct {
 	unsigned       iph$fragment_offset	 : 13;
 	union {
@@ -723,9 +725,9 @@ struct ip_header
     };
     unsigned char     iph$ttl			;
     unsigned char     iph$protocol		;
-    unsigned char     iph$checksum		[2];
-    unsigned char     iph$source			[4];
-    unsigned char     iph$dest			[4];
+    unsigned short     iph$checksum		;
+    unsigned long     iph$source			;
+    unsigned long     iph$dest			;
   };
 
 #define    IP_SIZE   sizeof(struct IP_Header)
@@ -871,10 +873,10 @@ struct icmp_header
 
 struct udpkt_structure
     {
-unsigned char     up$source_port	[2]; // UDP source port
-unsigned char     up$dest_port	[2]; // UDP destination port
-unsigned char     up$length		[2]; // UDP length (including UDP header)
-unsigned char     up$checksum		[2]; // UDP checksum (including pseudo-header)
+unsigned short     up$source_port; // UDP source port
+unsigned short     up$dest_port; // UDP destination port
+unsigned short     up$length	; // UDP length (including UDP header)
+unsigned short     up$checksum; // UDP checksum (including pseudo-header)
 unsigned char     up$data		[0];  // UDP data start
     };
 

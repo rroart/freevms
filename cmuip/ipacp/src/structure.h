@@ -323,8 +323,8 @@ has verified the datagram.
 
 struct si_fields
 {
-  void *     si_qhead;
-  void *     si_qtail;
+struct si_fields *     si_qhead;
+struct si_fields *     si_qtail;
 };
 
 #define    SI_Qheader_Size sizeof(struct si_fields)

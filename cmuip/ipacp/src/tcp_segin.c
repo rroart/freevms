@@ -421,7 +421,7 @@ extern  void    ACT_FAO();
 extern  void    ACT_OUTPUT();
 
 extern unsigned long CONN_TIMEVAL;
-extern  struct queue_header_structure  *  Segin ;
+extern  struct queue_header_structure(si_fields)  *  Segin ;
 extern signed long
     INTDF,
     AST_IN_PROGRESS,
@@ -1060,7 +1060,7 @@ extern	PokeAddr ();
     for (J=GLOBAL_MINSRV;J<=WKS_LIST[Idx].WKS$MaxSrv;J++)
 	{
 	ProcName->dsc$w_length = PNAMLEN;
-	$FAO(/*%ASCID*/"!AS.!SL",ProcName->dsc$w_length,ProcName,
+	exe$fao(/*%ASCID*/"!AS.!SL",ProcName->dsc$w_length,ProcName,
 	     WKS_LIST[Idx].WKS$Process,J);
 
 #if 0
@@ -2562,7 +2562,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 Check_Cum_Ack ( struct tcb_structure * TCB , signed long Idx , signed long P1 , signed long P2 )
     {
 
-    if (TCB->Pending_ACK)
+    if (TCB->pending_ack)
 	{
 	if (! TCB->is_tvt)
 	    TCP$Deliver_User_Data(TCB); // Try to give the user data.

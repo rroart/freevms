@@ -217,14 +217,15 @@ MODULE IP(IDENT="4.5c",LANGUAGE(BLISS32),
 #include <starlet.h>	// VMS system definitions
 // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";		// BLISS transportablity package
 #include <cmuip/central/include/netcommon.h>	// CMU-OpenVMS/IP common decls
-#include <cmuip_src/central/include/netconfig.h> 	// Tranport devices interface
-#include "netvms.h"		// VMS specifics
+#include <cmuip/central/include/netconfig.h> 	// Tranport devices interface
 #include <cmuip/central/include/nettcpip.h>		// IP definitions
+#include "netvms.h"		// VMS specifics
 #include "structure.h"		// TCB & Segment Structure definition
 #include "tcpmacros.h"		// Local macros
 #include "snmp.h"
 
 #include <ssdef.h>
+#include <descrip.h>
 
 extern     TIME_STAMP();
 extern  void    LOG_FAO();
@@ -266,30 +267,34 @@ extern  void    UDP$Input();
 
 // ICMP.BLI
 extern     ICMP$Check();
- void    ICMP$Input;
+ void    ICMP$Input();
 
 
 // External data
 
+extern   struct queue_header_structure(si_fields)  SegIN;
+extern   Device_Configuration_Entry  dev_config_tab[];
+
 extern signed long
-    SegIN : Queue_Header_Structure(SI_Fields),
-    Dev_config_Tab : Device_configuration_Table,
-    Dev_count,			// Number of devices known
+    dev_count,			// Number of devices known
     Min_Physical_Bufsize,	// Size of "small" device buffers
     Max_Physical_Bufsize;	// Size of "large" device buffers
+
+extern signed long log_state;
 
 
 //SBTTL "Gateway table definition"
 
-struct Gateway_Structure
+struct gateway_structure
 {
-unsigned char    GWY_Name[8];		// Gateway name
-long int     GWY_Address		;	// Gateway IP address
-long int     GWY_Network		;	// IP network served
-long int     GWY_Netmask		;	// Mask for that network
-char    GWY_Status;		// Status (nonzero is "up")
+unsigned char    gwy_name[8];		// Gateway name
+long int     gwy_address		;	// Gateway IP address
+long int     gwy_network		;	// IP network served
+long int     gwy_netmask		;	// Mask for that network
+char    gwy_status;		// Status (nonzero is "up")
     };
 
+#define MAX_GWY 10
 #if 0
 LITERAL
     GWY_Size = $Field_Set_Size,
@@ -309,32 +314,32 @@ MACRO
 
 struct RA$DATA_BLOCK
 {
-void *     RA$Next	;	// Next block on queue
-void *     RA$Prev	;	// Previous block on queue
-unsigned char     RA$Source	[4];	// Source IP address
-unsigned char     RA$Dest	[4];	// Destination IP address
-unsigned short     RA$Ident	;	// IP identifier
-void *     RA$Buf	;	// Pointer to buffer (first fragment pkt buffer)
-unsigned short     RA$Bufsize	;	// Size of buffer
-void *     RA$Data	;	// Pointer to start of protocol data in buffer
-void *     RA$Datend	;	// Pointer to first free byte in buffer
-unsigned long     RA$Octet	;	// Fragment octet offset we are waiting for
-unsigned long     RA$Timeout	;// Timer for how long to wait for fragments
+void *     ra$next	;	// Next block on queue
+void *     ra$prev	;	// Previous block on queue
+unsigned long     ra$source;	// Source IP address
+unsigned long     ra$dest;	// Destination IP address
+unsigned short     ra$ident	;	// IP identifier
+void *     ra$buf	;	// Pointer to buffer (first fragment pkt buffer)
+unsigned short     ra$bufsize	;	// Size of buffer
+void *     ra$data	;	// Pointer to start of protocol data in buffer
+void *     ra$datend	;	// Pointer to first free byte in buffer
+unsigned long     ra$octet	;	// Fragment octet offset we are waiting for
+unsigned long     ra$timeout	;// Timer for how long to wait for fragments
     };
+
+#define    RA$DATA_SIZE sizeof(struct RA$DATA_BLOCK)
+#define    RA$DATA_BLEN RA$DATA_SIZE*4
+
 #if 0
-LITERAL
-    RA$DATA_SIZE = $FIELD_SET_SIZE,
-    RA$DATA_BLEN = RA$DATA_SIZE*4;
 MACRO
     RA$DATA_BLOCK = BLOCK->RA$DATA_SIZE FIELD(RA$DATA_FIELDS) %;
 #endif
 
 //SBTTL "Data and definitions associated with IP and ICMP"
 
-LITERAL
-    RA_EXPIRE_TIME = 5;		// Reassembly-expire time - multiply by TTL*CSEC
-BIND
-    RA_CHECK_TIMESTR = %ASCID"0 00:00:30.00";
+#define    RA_EXPIRE_TIME 5		// Reassembly-expire time - multiply by TTL*CSEC
+
+struct dsc$descriptor    RA_CHECK_TIMESTR = ASCID2(13,"0 00:00:30.00");
 
 // Internet Protocol counters and states
 
@@ -343,76 +348,72 @@ signed long
 				// Setable through the config file.
     IPTTL  = 32,	// Default time-to-live
 				// Setable through the config file.
-    Max_Gateways,
-    IP_group_MIB : IP_group_MIB_struct;
+  Max_Gateways;
+    struct IP_group_MIB_struct * IP_group_MIB ;
 
+static   struct gateway_structure  gwy_table[MAX_GWY]; // space for list of known gateways
 static signed long
 //!!HACK!!// Make this dynamic
-    GWY_table: Gateway_structure, // space for list of known gateways
-    GWY_count,			// Count of gateways
-    RA_QUEUE : QUEUE_HEADER
-	       PRESET([QHEAD] = RA_QUEUE,
-		      [QTAIL] = RA_QUEUE),
-    RA_CHECK_TIME : VECTOR[2];	// Quadword time value for checking RA queue
+    gwy_count;			// Count of gateways
+static  struct queue_header_fields   RA_QUEUE_ = {
+	       qhead: &RA_QUEUE_,
+	       qtail: &RA_QUEUE_}, *RA_QUEUE=&RA_QUEUE_;
+static    RA_CHECK_TIME[2];	// Quadword time value for checking RA queue
 
-static signed long
-    struct Gateway_structure * GWY_table_ptr INITIAL(GWY_table); // Known gateways
+    struct gateway_structure * gwy_table_ptr = gwy_table; // Known gateways
 
 
 //SBTTL "IP$Gwy_Config - Add a gateway entry to the table"
 
-IP$GWY_CONFIG(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK) : NOVALUE (void)
+void IP$GWY_CONFIG(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK)
     {
-    BIND
-	GWYNAME	= GWYNAME_A		: $BBLOCK;
-    EXTERNAL ROUTINE
-	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL);
+    long
+      GWYNAME	= GWYNAME_A;
+extern      STR$COPY_DX();
     signed long
 	gwyidx,
 	Status;
 
 // Make sure there is room for this entry
 
-    if ((GWY_COUNT GEQ MAX_GWY))
+    if ((gwy_count > MAX_GWY))
 	{
 	OPR$FAO("Too many gateways in INET$CONFIG - entry for !AS ignored",
 		GWYNAME);
-	RETURN;
+	return;
 	};
-    GWYIDX = GWY_COUNT;
-    GWY_COUNT = GWY_COUNT + 1;
+    gwyidx = gwy_count;
+    gwy_count = gwy_count + 1;
 
 //!!HACK!!// just do it!
 // Allocate virtual string and copy it
 //    GWY_table_ptr = GWY_table;
 
     {
-    BIND
-	Gateway = GWY_table_ptr[GWYIDX, GWY_Name]
-		    : BLOCK->GWY_Size FIELD(GWY_Fields),
-	Gateway_name = Gateway [GWY_Name] : $BBLOCK[8];
+      struct gateway_structure * Gateway = gwy_table_ptr[gwyidx].gwy_name;
+    struct dsc$descriptor * Gateway_name = Gateway ->gwy_name ;
 
-    Gateway_name->DSC$W_LENGTH = 0;
-    Gateway_name->DSC$B_DTYPE = DSC$K_DTYPE_T;
-    Gateway_name->DSC$B_CLASS = DSC$K_CLASS_D;
-    Gateway_name->DSC$A_POINTER = 0;
+    Gateway_name->dsc$w_length = 0;
+    Gateway_name->dsc$b_dtype = DSC$K_DTYPE_T;
+    Gateway_name->dsc$b_class = DSC$K_CLASS_D;
+    Gateway_name->dsc$a_pointer = 0;
 
-    Status = STR$COPY_DX (GWY_Table [GWYIDX, GWY_NAME], GWYNAME);
-    if (NOT Status) Signal (Status);
+    Status = STR$COPY_DX (gwy_table [gwyidx]. gwy_name, GWYNAME);
+    if (! Status) Signal (Status);
 
 // Make the gateway table entry
 
-    Gateway [GWY_ADDRESS] = GWYADDR;
-    Gateway [GWY_NETWORK] = GWYNET;
-    Gateway [GWY_NETMASK] = GWYNETMASK;
-    Gateway [GWY_STATUS] = 1;
+    Gateway ->gwy_address = GWYADDR;
+    Gateway ->gwy_network = GWYNET;
+    Gateway ->gwy_netmask = GWYNETMASK;
+    Gateway ->gwy_status = 1;
     }
 
     }
 
 //SBTTL "IP_INIT - Initialize state of IP"
 
-IP$INIT : NOVALUE (void)
+void IP$INIT  (void)
 //
 // Initialize the IP reassembly queue and the time value for checking it.
 //
@@ -422,13 +423,12 @@ IP$INIT : NOVALUE (void)
 
 // Set the queue to empty.
 
-    RA_QUEUE->QHEAD = RA_QUEUE->QTAIL = RA_QUEUE->QHEAD;
+    RA_QUEUE->qhead = RA_QUEUE->qtail = RA_QUEUE->qhead;
 
 // Translate time string to quadword value
 
-    RC = $BINTIM(TIMBUF = RA_CHECK_TIMESTR,
-		 TIMADR = RA_CHECK_TIME);
-    if (NOT RC)
+    RC = exe$bintim( RA_CHECK_TIMESTR,RA_CHECK_TIME);
+    if (! RC)
 	FATAL$FAO("$BINTIM failed for RA_CHECK_TIMSTR, RC = !XL",RC);
 
     // Initial the IP group MIB
@@ -456,31 +456,31 @@ IP$INIT : NOVALUE (void)
 
 //SBTTL "IP$LOG - make a logging entry for an IP packet"
 
-void IP$LOG(NAME,struct IP_Structure * IPHDR) (void)
+void IP$LOG(long NAME,struct ip_structure * IPHDR)
 
 // IP logging routine.
 // Compose message from IP header contents, give to QL_FAO.
 // Also called from ICMP.BLI
 
     {
+DESC$STR_ALLOC(SRCSTR,20);
+DESC$STR_ALLOC(DSTSTR,20);
     signed long
-	DESC$STR_ALLOC(SRCSTR,20),
-	DESC$STR_ALLOC(DSTSTR,20),
 	DATAPTR;
     
 // Build IP source and dest strings
 
-    ASCII_DEC_BYTES(SRCSTR,4,IPHDR->IPH$SOURCE,SRCSTR->DSC$W_LENGTH);
-    ASCII_DEC_BYTES(DSTSTR,4,IPHDR->IPH$DEST,DSTSTR->DSC$W_LENGTH);
+    ASCII_DEC_BYTES(SRCSTR,4,IPHDR->iph$source,SRCSTR->dsc$w_length);
+    ASCII_DEC_BYTES(DSTSTR,4,IPHDR->iph$dest,DSTSTR->dsc$w_length);
 
 // Queue up the message
 
-    DATAPTR = IPHDR+IPHDR->IPH$IHL*4;
-    QL$FAO(%STRING("!%T !AS: S=!AS,D=!AS,HL=!SL,PR=!SL,TL=!SL,ID=!SL,FL=!SL,FR=!SL,TTL=!SL!/",
+    DATAPTR = IPHDR+IPHDR->iph$ihl*4;
+    QL$FAO(/*%STRING*/("!%T !AS: S=!AS,D=!AS,HL=!SL,PR=!SL,TL=!SL,ID=!SL,FL=!SL,FR=!SL,TTL=!SL!/",
 		   "!_    !AS: HDR=!XL,DATA=!XL!/"),
-	   0,NAME,SRCSTR,DSTSTR,IPHDR->IPH$IHL,IPHDR->IPH$PROTOCOL,
-	   IPHDR->IPH$TOTAL_LENGTH,IPHDR->IPH$IDENT,IPHDR->IPH$FLAGS,
-	   IPHDR->IPH$FRAGMENT_OFFSET,IPHDR->IPH$TTL,NAME,IPHDR,DATAPTR);
+	   0,NAME,SRCSTR,DSTSTR,IPHDR->iph$ihl,IPHDR->iph$protocol,
+	   IPHDR->iph$total_length,IPHDR->iph$ident,IPHDR->iph$flags,
+	   IPHDR->iph$fragment_offset,IPHDR->iph$ttl,NAME,IPHDR,DATAPTR);
     }
 
 //SBTTL "IP routing code"
@@ -504,20 +504,20 @@ IP_FIND_DEV(IPADDR)
 //Returns:
 //   -1	Failure, IP address is not on local network
 //  >=0	Success, device index to use is returned
-
     {
-    for (IDX=0;IDX<=(DEV_COUNT-1);IDX++)
-	IF ((IPADDR && DEV_CONFIG_TAB[IDX,DC_IP_NETMASK]) EQL
-	   DEV_CONFIG_TAB[IDX,DC_IP_NETWORK]) OR
-	    (IPADDR == %X"FFFFFFFF") THEN
+      signed long IDX;
+    for (IDX=0;IDX<=(dev_count-1);IDX++)
+	if (((IPADDR && dev_config_tab[IDX].dc_ip_netmask) ==
+	   dev_config_tab[IDX].dc_ip_network) ||
+	    (IPADDR == 0xFFFFFFFF))
 	    {
 	    signed long
 		temp;
 
 	    // If this is a clone device return
-	    !	number of device from which it was cloned.
-	    temp = dev_config_tab[idx,dc_clone_dev];
-	    if ((temp GEQ 0)) return temp;
+	    //	number of device from which it was cloned.
+	    temp = dev_config_tab[IDX].dc_clone_dev;
+	    if ((temp > 0)) return temp;
 	    return IDX;
 	    };
 
@@ -535,11 +535,12 @@ IP_FIND_GWY(IPADDR)
 //Returns address of connected gateway or 0 if none defined (or all down)
 
     {
-    for (IDX=0;IDX<=(GWY_COUNT-1);IDX++)
-	IF (IPADDR && GWY_table_ptr[IDX,GWY_NETMASK]) EQL
-	   GWY_table_ptr[IDX,GWY_NETWORK] THEN
-	    if (GWY_table_ptr[IDX,GWY_STATUS] > 0)
-		return GWY_table_ptr[IDX,GWY_ADDRESS];
+      long IDX;
+    for (IDX=0;IDX<=(gwy_count-1);IDX++)
+	if ((IPADDR && gwy_table_ptr[IDX].gwy_netmask) ==
+	   gwy_table_ptr[IDX].gwy_network)
+	    if (gwy_table_ptr[IDX].gwy_status > 0)
+		return gwy_table_ptr[IDX].gwy_address;
     return 0;
     }
 
@@ -555,25 +556,25 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 //   -1 on failure, no route known to that address
 //  >=0 on success, with device index
 
+     long * IPDEST, * NEWIPDEST; // check
     {
     signed long
 	IDX,GWY;
-    LITERAL
-	MAX_LEV = 10;
+#define	MAX_LEV 10
 
 // If this address is on same network, use it
 
-    if ((IDX = IP_FIND_DEV(..IPDEST)) GEQ 0)
+    if ((IDX = IP_FIND_DEV(*IPDEST)) > 0)
 	{
-	if ((..IPDEST == %X"FFFFFFFF"))
+	if ((*IPDEST == 0xFFFFFFFF))
 	    {
-	    NEWIPDEST = (NOT DEV_CONFIG_TAB[IDX,DC_IP_NETMASK])
-		OR DEV_CONFIG_TAB[IDX,DC_IP_NETWORK];
-	    IPDEST = ..NEWIPDEST;
+	    NEWIPDEST = (! dev_config_tab[IDX].dc_ip_netmask)
+		| dev_config_tab[IDX].dc_ip_network;
+	    IPDEST = *NEWIPDEST;
 	    }
 	else
-	    NEWIPDEST = ..IPDEST;
-	.IPSRC = DEV_CONFIG_TAB[IDX,DC_IP_ADDRESS];
+	    NEWIPDEST = *IPDEST;
+	IPSRC = dev_config_tab[IDX].dc_ip_address;
 	return IDX;
 	};
 
@@ -581,9 +582,8 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 
     if (LEV > MAX_LEV)
 	{
-	signed long
 	    DESC$STR_ALLOC(DSTSTR,20);
-	ASCII_DEC_BYTES(DSTSTR,4,IPDEST,DSTSTR->DSC$W_LENGTH);
+	ASCII_DEC_BYTES(DSTSTR,4,IPDEST,DSTSTR->dsc$w_length);
 	XQL$FAO(LOG$IP+LOG$IPERR,
 		"!%T IP_ROUTE max recursion depth exceeded, DEST=!AS!/",
 		0,DSTSTR);
@@ -592,12 +592,12 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 
 // Check for ICMP information, and try again
 
-    if ((GWY = ICMP$Check(..IPDEST)) NEQU 0)
+    if ((GWY = ICMP$Check(*IPDEST)) != 0)
 	return IP_ROUTE(GWY,IPSRC,NEWIPDEST,LEV+1);
 
 // Check for gateway table and try again.
 
-    if ((GWY = IP_FIND_GWY(..IPDEST)) != 0)
+    if ((GWY = IP_FIND_GWY(*IPDEST)) != 0)
 	return IP_ROUTE(GWY,IPSRC,NEWIPDEST,LEV+1);
 
 // None of the above - no route exists.
@@ -613,25 +613,24 @@ IP$ISME(IPADDR, STRICT)
 //  >=0 - address is local, device index is returned
 
     {
-
+long IDX;
 // 127.x.x.x is a loopback address
-    if (IPADDR<0,8,0> == 127) return 0;
+    if ((IPADDR&0x7f000000) == 127) return 0;
 
-    for (IDX=0;IDX<=(DEV_COUNT-1);IDX++)
+    for (IDX=0;IDX<=(dev_count-1);IDX++)
 	{
 // Check for exact address match
-	if (IPADDR == DEV_CONFIG_TAB[IDX,DC_IP_ADDRESS])
+	if (IPADDR == dev_config_tab[IDX].dc_ip_address)
 	    return IDX;
 // Check for a wildcard match (only if strict was passed as false (0))
 	if (STRICT == 0)
-	 IF ((((IPADDR && DEV_CONFIG_TAB[IDX,DC_IP_NETMASK]) EQL
-	    DEV_CONFIG_TAB[IDX,DC_IP_NETWORK]) AND
-	    ((IPADDR || DEV_CONFIG_TAB[IDX, DC_IP_NETMASK]) == -1)) OR
-	   (IPADDR == -1) OR
-	   (IPADDR == 0) OR
-	   (IPADDR == DEV_CONFIG_TAB[IDX,DC_IP_NETWORK]))
-	    THEN
-	     return IDX;
+	 if (((((IPADDR && dev_config_tab[IDX].dc_ip_netmask) ==
+	    dev_config_tab[IDX].dc_ip_network) &&
+	    ((IPADDR || dev_config_tab[IDX].dc_ip_netmask) == -1)) ||
+	   (IPADDR == -1) ||
+	   (IPADDR == 0) ||
+	      (IPADDR == dev_config_tab[IDX].dc_ip_network)))
+	   return IDX;
 	};
 
     // Check for proxy ARP
@@ -642,24 +641,22 @@ IP$ISME(IPADDR, STRICT)
 		temp;
 
 	    temp = IP_Find_Dev (IPADDR);
-	    IF (temp GEQ 0) AND
-		(Strict != Dev_Config_Tab[temp,dc_dev_interface]) THEN
+	    if ((temp > 0) &&
+		(STRICT != dev_config_tab[temp].dc_dev_interface))
 		return temp;		// yes, make sure it's not
 	    };			// device thaqt rcvd the ARP rqst.
     return -1;
     }
 
-signed long BIND ROUTINE
-    IP_ISLOCAL = IP_FIND_DEV;
+int (*    IP_ISLOCAL)(int) = IP_FIND_DEV;
 
-IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR) : NOVALUE (void)
+void IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR)
 //
 // Set local/foreign hosts pair given list of foreign addresses.
 //
+	long * ADRLST;	// Assume 32-bit IP addr
     {
-    MAP
-	struct VECTOR * ADRLST;	// Assume 32-bit IP addr
-    signed long
+signed long I,
 	LIDX,
 	FIDX;
 
@@ -673,7 +670,7 @@ IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR) : NOVALUE (void)
 	{
 	signed long
 	    J;
-	if ((J = IP_ISLOCAL(ADRLST[I])) GEQ 0)
+	if ((J = IP_ISLOCAL(ADRLST[I])) > 0)
 	    {
 	    FIDX = I;
 	    LIDX = J;
@@ -681,7 +678,7 @@ IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR) : NOVALUE (void)
 	    };
 	};
     FRNPTR = ADRLST[FIDX];
-    LCLPTR = DEV_CONFIG_TAB[LIDX,DC_IP_ADDRESS];
+    LCLPTR = dev_config_tab[LIDX].dc_ip_address;
     }
 
 //SBTTL "IP$SEND_RAW:  Send TCP segment to IP for transmission."
@@ -716,15 +713,13 @@ Side Effects:
 *******************************************************************************
 */
 
-FORWARD ROUTINE
- void    IP$RECEIVE;
+ void    IP$RECEIVE();
 
 IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
+	struct segment_structure * Seg;
     {
-    MAP
-	struct segment_Structure * SEG;
+      Net_Send_Queue_Element * QB;
     signed long
-        struct queue_blk_structure(QB_net_send) * QB,
 	ip_src,
 	newip_dest,
         dev;
@@ -737,8 +732,8 @@ IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 // Find interface and addresses for routing this packet.
 // If no route, then flush the packet and return failure.
 
-    !!!HACK!!// IP$ISME takes way too long
-    if ((IP$ISME(IP$dest, TRUE) GEQ 0))
+    //!!HACK!!// IP$ISME takes way too long
+    if ((IP$ISME(IP$Dest, TRUE) > 0))
 	{
 	dev = -1;		// Loopback
 	}
@@ -746,11 +741,10 @@ IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	{
 	signed long
 	    newip_src;
-	if ((dev = IP_ROUTE(IP$Dest,newip_src,newip_dest,0)) LSS 0)
+	if ((dev = IP_ROUTE(IP$Dest,newip_src,newip_dest,0)) < 0)
 	    {
-	    signed long
 		DESC$STR_ALLOC(dststr,20);
-	    ASCII_DEC_BYTES(dststr,4,IP$Dest,dststr->DSC$W_LENGTH);
+	    ASCII_DEC_BYTES(dststr,4,IP$Dest,dststr->dsc$w_length);
 	    XQL$FAO(LOG$IP+LOG$IPERR,
 		    "!%T IP send failure - no route to !AS!/",
 		    0,dststr);
@@ -769,58 +763,56 @@ IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 
     if ($$LOGF(LOG$IP))
 	{
-	IP$LOG(%ASCID"IPSend",Seg);
+	IP$LOG(ASCIDNOT("IPSend"),Seg);
 	if (IP$Dest != newip_dest)
 	    {
-	    signed long
 		DESC$STR_ALLOC(dststr,20);
-	    ASCII_DEC_BYTES(dststr,4,newip_dest,dststr->DSC$W_LENGTH);
+	    ASCII_DEC_BYTES(dststr,4,newip_dest,dststr->dsc$w_length);
 	    QL$FAO("!%T IPsend: route is !AS!/",0,dststr);
 	    };
 //	QL$FAO("!%T IPsend: dev index=",1,dev,0)
 	};
 
-    if (dev LSS 0)
+    if (dev < 0)
 	// Packet is for local host - use loopback
 
-	if (delete_seg)	// If deleting, then no copy needed
-	    IP$Receive(buf,bufsize,Seg,SegSize,0)
+	if (Delete_Seg)	// If deleting, then no copy needed
+	  IP$Receive(Buf,Bufsize,Seg,SegSize,0);
 	else
 	    {		// e wants the seg - need to copy it, then
 	    signed long
-		buf2,
-		seg2 : REF segment_Structure;
+	      Buf2;
+		struct segment_structure * Seg2;
 
-	    buf2 = MM$Seg_Get(bufsize);
-	    seg2 = seg-.buf+.buf2;
-	    CH$MOVE(bufsize,buf,buf2);
-	    IP$Receive(buf2,bufsize,Seg2,SegSize,0)
+	    Buf2 = MM$Seg_Get(Bufsize);
+	    Seg2 = Seg-Buf+Buf2;
+	    CH$MOVE(Bufsize,Buf,Buf2);
+	    IP$Receive(Buf2,Bufsize,Seg2,SegSize,0);
 	    }
     else
 	{
-	signed long
-	    struct Device_Configuration_Entry * dev_config;
+	    Device_Configuration_Entry * dev_config;
 
-	dev_config = Dev_config_tab[dev,dc_begin];
+	dev_config = dev_config_tab[dev].dc_begin;
 
 // Build a Net_send_q entry for the device handler
 
 	QB = MM$QBLK_get();
 	QB->NSQ$Driver = dev_config;
 	QB->NSQ$Data = Seg;
-	QB->NSQ$Datasize = Segsize;
+	QB->NSQ$Datasize = SegSize;
 	QB->NSQ$IP_Dest = newip_dest;
 	QB->NSQ$Retry = 0;
-	QB->NSQ$Del_buf = Buf;
-	QB->NSQ$Del_buf_size = BufSize;
+	QB->NSQ$Del_Buf = Buf;
+	QB->NSQ$Del_buf_size = Bufsize;
 	QB->NSQ$Delete = Delete_Seg;
 
 // Insert this entry into the appropriate Net_Send_Q
 
-	INSQUE(QB,Dev_config->dc_send_Qtail);
+	INSQUE(QB,dev_config->dc_send_Qtail);
 
 // Call appropriate device driver
-	(Dev_config->dc_rtn_Xmit)(dev_config);
+	(dev_config->dc_rtn_Xmit)(dev_config);
 	};	// Give success return
 
     return -1;
@@ -867,19 +859,18 @@ Side Effects:
 
 IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 		       ID,Frag,Delete_Seg,Protocol,Buf,Bufsize)
+ struct udpkt_structure * Seg;
     {
-    MAP
-	struct segment_Structure * SEG;
+      Net_Send_Queue_Element * QB;
+      struct ip_structure * IPHDR;
     signed long
-        struct IP_Structure * IPHDR,
 	iplen,
-        struct queue_blk_structure(QB_net_send) * QB,
 	ip_src,
 	newip_dest,
         dev;
-    OWN
-	fragmentation_data,
-	fragmenting : LONG INITIAL(0);
+    static
+      fragmentation_data;
+    static fragmenting =0;
 
 
 // Keep track of requests
@@ -889,9 +880,9 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 // Check to see if fragmentation is necessary and, if so, fragment the
 // packet and send it out.
 
-    IF (Frag == 0) AND
-	(SegSize > Opt$Max_Recv_Datasize + IP_hdr_byte_size) AND
-       (NOT fragmenting) THEN
+    if ((Frag == 0) &&
+	(SegSize > OPT$MAX_RECV_DATASIZE + IP_HDR_BYTE_SIZE) &&
+       (! fragmenting))
 	{
 	signed long
 	    subbuff,
@@ -902,20 +893,20 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	fragmenting = 1;	// Let us know we are fragmenting the packet
 	frag_offset = 0;
 
-	DO
+	do
 	    {
-	    frag_size = MIN(Opt$Max_Recv_Datasize, SegSize - frag_offset);
+	    frag_size = MIN(OPT$MAX_RECV_DATASIZE, SegSize - frag_offset);
 	    subbuff = MM$Seg_Get(Max_Physical_Bufsize);
-	    subseg = subbuff + device_header + IP_hdr_byte_size;
+	    subseg = subbuff + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
 	    CH$MOVE(frag_size, Seg + frag_offset, subseg);
 	    fragmentation_data = (frag_offset / 8);
-	    if ((frag_offset + frag_size) LSS SegSize)
-		fragmentation_data = fragmentation_data + %X"2000"; !more frags
+	    if ((frag_offset + frag_size) < SegSize)
+	      fragmentation_data = fragmentation_data + 0x2000; //more frags
 	    IP$SEND(IP$Src, IP$Dest, Service, Life, subseg, frag_size,
 	            ID, Frag, 1, Protocol, subbuff, Max_Physical_Bufsize);
 	    frag_offset = frag_offset + frag_size;
 	    }
-	WHILE frag_offset LSS SegSize;
+	while (frag_offset < SegSize);
 
 	fragmenting = 0;	// All done fragmenting
 	if (Delete_Seg != 0)
@@ -927,21 +918,20 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 // Find interface and addresses for routing this packet.
 // If no route, then flush the packet and return failure.
 
-    IP_Src = IP$Src;
-    if ((IP$ISME(IP$dest, TRUE) GEQ 0))
+    ip_src = IP$Src;
+    if ((IP$ISME(IP$Dest, TRUE) > 0))
 	{
-	newip_dest = IP$dest;
+	newip_dest = IP$Dest;
 	dev = -1;		// Loopback
 	}
     else
 	{
 	signed long
 	    newip_src;
-	if ((dev = IP_ROUTE(IP$Dest,newip_src,newip_dest,0)) LSS 0)
+	if ((dev = IP_ROUTE(IP$Dest,newip_src,newip_dest,0)) < 0)
 	    {
-	    signed long
 		DESC$STR_ALLOC(dststr,20);
-	    ASCII_DEC_BYTES(dststr,4,IP$Dest,dststr->DSC$W_LENGTH);
+	    ASCII_DEC_BYTES(dststr,4,IP$Dest,dststr->dsc$w_length);
 	    XQL$FAO(LOG$IP+LOG$IPERR,
 		    "!%T IP send failure - no route to !AS!/",
 		    0,dststr);
@@ -951,17 +941,16 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 		MM$Seg_Free(Bufsize,Buf);
 	    return 0;		// No route exists
 	    };
-	if (IP_Src == 0)
-	    IP_Src = newip_src;
+	if (ip_src == 0)
+	    ip_src = newip_src;
 	};
 
 // Regenerate the UDP checksum just in case...
-    IF Protocol == UDP_Protocol Then
+    if (Protocol == UDP_PROTOCOL)
 	{
-	MAP struct UDPkt_Structure * Seg;
-	Seg->UP$Checksum = 0;
-	Seg->UP$Checksum = Gen_Checksum(Segsize, Seg, IP_Src, IP$Dest,
-					UDP_Protocol);
+	Seg->up$checksum = 0;
+	Seg->up$checksum = Gen_Checksum(SegSize, Seg, ip_src, IP$Dest,
+					UDP_PROTOCOL);
 	};
 
 //*********************************
@@ -970,38 +959,37 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 
 // Position buffer for IP header
 
-    IPHDR = Seg - IP_hdr_byte_size;
-    iplen = IP_hdr_byte_size + segsize;
+    IPHDR = Seg - IP_HDR_BYTE_SIZE;
+    iplen = IP_HDR_BYTE_SIZE + SegSize;
 //!!HACK!!// Check to see if IPHDR < Buf 
 
 // Fill in the IP header fields
 
-    IPHDR->IPH$Version = IP_Version;
-    IPHDR->IPH$IHL = IP_hdr_wd_size;
-    IPHDR->IPH$Type_service = Service;
-    IPHDR->IPH$Total_length = iplen;
-    IPHDR->IPH$Ident = ID;
-    if (NOT fragmenting)
+    IPHDR->iph$version = IP_VERSION;
+    IPHDR->iph$ihl = IP_HDR_WD_SIZE;
+    IPHDR->iph$type_service = Service;
+    IPHDR->iph$total_length = iplen;
+    IPHDR->iph$ident = ID;
+    if (! fragmenting)
 	{
-	IPHDR->IPH$Flags = 0;
-	IPHDR->IPH$Fragment_offset = 0;
+	IPHDR->iph$flags = 0;
+	IPHDR->iph$fragment_offset = 0;
 	}
     else
-	IPHDR->IPH$Fragmentation_Data = fragmentation_data;
-    IPHDR->IPH$TTL = Life;
-    IPHDR->IPH$Protocol = Protocol;
-    IPHDR->IPH$Checksum = 0;
-    IPHDR->IPH$Source = IP_Src;
-    IPHDR->IPH$Dest = IP$Dest;
+	IPHDR->iph$fragmentation_data = fragmentation_data;
+    IPHDR->iph$ttl = Life;
+    IPHDR->iph$protocol = Protocol;
+    IPHDR->iph$checksum = 0;
+    IPHDR->iph$source = ip_src;
+    IPHDR->iph$dest = IP$Dest;
 
     if ($$LOGF(LOG$IP))
 	{
-	IP$LOG(%ASCID"IPSend",IPHDR);
+	IP$LOG(ASCIDNOT("IPSend"),IPHDR);
 	if (IP$Dest != newip_dest)
 	    {
-	    signed long
 		DESC$STR_ALLOC(dststr,20);
-	    ASCII_DEC_BYTES(dststr,4,newip_dest,dststr->DSC$W_LENGTH);
+	    ASCII_DEC_BYTES(dststr,4,newip_dest,dststr->dsc$w_length);
 	    QL$FAO("!%T IPsend: route is !AS!/",0,dststr);
 	    };
 //	QL$FAO("!%T IPsend: dev index=",1,dev,0)
@@ -1009,59 +997,58 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 
 // Re-arrange bytes and words in IP header
 
-    SwapBytes(IP_hdr_swap_size,IPHDR);
+    SwapBytes(IP_HDR_SWAP_SIZE,IPHDR);
 
 // Compute checksum for IP header
 
-    IPHDR->IPH$Checksum = Calc_Checksum(IP_hdr_byte_size,IPHDR);
+    IPHDR->iph$checksum = Calc_Checksum(IP_HDR_BYTE_SIZE,IPHDR);
 
-    if (dev LSS 0)
+    if (dev < 0)
 	{
 
 // Packet is for local host - use loopback
 
-	if (delete_seg)	// If deleting, then no copy needed
-	    IP$Receive(buf,bufsize,iphdr,iplen,0)
+	if (Delete_Seg)	// If deleting, then no copy needed
+	  IP$Receive(Buf,Bufsize,IPHDR,iplen,0);
 	else
 	    {		// e wants the seg - need to copy it, then
 	    signed long
 		iphdr2,
-		buf2,
-		seg2 : REF segment_Structure;
-	    buf2 = MM$Seg_Get(bufsize);
-	    seg2 = seg-.buf+.buf2;
-	    CH$MOVE(bufsize,buf,buf2);
-	    iphdr2 = iphdr-.seg+.seg2;
-	    IP$Receive(buf2,bufsize,iphdr2,iplen,0)
+	      buf2;
+	    struct segment_structure * seg2;
+	    buf2 = MM$Seg_Get(Bufsize);
+	    seg2 = Seg-Buf+buf2;
+	    CH$MOVE(Bufsize,Buf,buf2);
+	    iphdr2 = (long)IPHDR-(long)Seg+(long)seg2;
+	    IP$Receive(buf2,Bufsize,iphdr2,iplen,0);
 	    };
 	}
     else
 	{
 //	BIND
-//	    dev_config = Dev_config_tab[dev,dc_begin] : Device_Configuration_Entry;
-	signed long
-	    struct Device_Configuration_Entry * dev_config;
+//	    dev_config = dev_config_tab[dev].dc_begin : Device_Configuration_Entry;
+	    Device_Configuration_Entry * dev_config;
 
-	dev_config = Dev_config_tab[dev,dc_begin];
+	dev_config = dev_config_tab[dev].dc_begin;
 
 // Build a Net_send_q entry for the device handler
 
 	QB = MM$QBLK_get();
 	QB->NSQ$Driver = dev_config;
 	QB->NSQ$Data = IPHDR;
-	QB->NSQ$Datasize = IP_hdr_byte_size + Segsize;
+	QB->NSQ$Datasize = IP_HDR_BYTE_SIZE + SegSize;
 	QB->NSQ$IP_Dest = newip_dest;
 	QB->NSQ$Retry = 0;
-	QB->NSQ$Del_buf = Buf;
-	QB->NSQ$Del_buf_size = BufSize;
+	QB->NSQ$Del_Buf = Buf;
+	QB->NSQ$Del_buf_size = Bufsize;
 	QB->NSQ$Delete = Delete_Seg;
 
 // Insert this entry into the appropriate Net_Send_Q
 
-	INSQUE(QB,Dev_config->dc_send_Qtail);
+	INSQUE(QB,dev_config->dc_send_Qtail);
 
 // Call appropriate device driver
-	(Dev_config->dc_rtn_Xmit)(dev_config);
+	(dev_config->dc_rtn_Xmit)(dev_config);
 	};// Give success return
 
     }
@@ -1097,27 +1084,24 @@ Outputs:
 *******************************************************************************
 */
 
-FORWARD ROUTINE
- void    IP_FRAGMENT,
- void    IP_DISPATCH;
+void    IP_FRAGMENT();
+ void    IP_DISPATCH();
 
-void IP$Receive (Buf,Buf_size,IPHdr,devlen,dev_config) (void)
+void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
+     Device_Configuration_Entry * dev_config;
+	struct ip_structure * iphdr;
     {
-    EXTERNAL
+    extern
 	IPCB_Count;
-    EXTERNAL ROUTINE
-	IPU$User_Input;
-    MAP
-	struct Device_Configuration_Entry * dev_config,
-	struct IP_Structure * Iphdr;
+    extern	IPU$User_Input();
+    Net_Send_Queue_Element * QB;
     signed long
-	struct queue_blk_structure(QB_net_send) * QB,
  	Sum,
 	hdrlen,
-	IP_src,
+	ip_src,
 	newip_dest,
-	IPlen,
-	Dev,
+	iplen,
+	dev,
 	I;
 
 // Keep count of received datagrams.
@@ -1126,31 +1110,31 @@ void IP$Receive (Buf,Buf_size,IPHdr,devlen,dev_config) (void)
 
 // Compute and verify checksum of IP header
 
-    hdrlen = IPhdr->IPH$swap_IHL * 4;
-    Sum = Calc_checksum(hdrlen,IPhdr);
-    if (Sum NEQU %X"FFFF")
+    hdrlen = iphdr->iph$swap_ihl * 4;
+    Sum = Calc_checksum(hdrlen,iphdr);
+    if (Sum != 0xFFFF)
 	{			// Checksum error
 	IP_group_MIB->IPMIB$ipInHdrErrors =	// Ooops// another error...
 		IP_group_MIB->IPMIB$ipInHdrErrors + 1;
 	if ($$LOGF(LOG$IP+LOG$IPERR))
 	    {
 	    QL$FAO("!%T IP Receive checksum error, sum=!XL!/",0,Sum);
-	    Swapbytes(IP_hdr_swap_size,Iphdr);
-	    IP$LOG(%ASCID"(IPrecv)",IPHDR);
+	    Swapbytes(IP_HDR_SWAP_SIZE,iphdr);
+	    IP$LOG(ASCIDNOT("(IPrecv)"),iphdr);
 	    };
         MM$Seg_Free(Buf_size,Buf);
-	RETURN;
+	return;
 	};
 
 // Do byteswap of word fields in IP header (not including options or addresses).
 
-    Swapbytes(IP_hdr_swap_size,Iphdr);
+    Swapbytes(IP_HDR_SWAP_SIZE,iphdr);
 
 // Make sure datagram length computed from "Total Length" field of IP header
 // is consistent with length actually transferred from device.
 
-    IPlen = IPhdr->IPH$Total_Length;
-    if (IPlen > devlen)
+    iplen = iphdr->iph$total_length;
+    if (iplen > devlen)
 	{			// inconsistent length - drop segment
 	IP_group_MIB->IPMIB$ipInHdrErrors =	// Ooops// another error...
 		IP_group_MIB->IPMIB$ipInHdrErrors + 1;
@@ -1158,43 +1142,43 @@ void IP$Receive (Buf,Buf_size,IPHdr,devlen,dev_config) (void)
 	    {
 	    XQL$FAO(LOG$IP+LOG$IPERR,
 		    "!%T IP discarded: device length=!SL, IP length=!SL!/",
-		    0,devlen,IPlen);
-	    if (NOT $$LOGF(LOG$IP))
-		IP$LOG(%ASCID"(IPRecv)",IPHDR);
+		    0,devlen,iplen);
+	    if (! $$LOGF(LOG$IP))
+		IP$LOG(ASCIDNOT("(IPRecv)"),iphdr);
 	    };
 	MM$Seg_Free(Buf_size,Buf);
-	RETURN;
+	return;
 	};
 
 // Check to see if any one wants to peek at IP packets.
 
     if (IPCB_Count > 0)
-	IPU$User_Input (Iphdr->IPH$Dest , Iphdr->IPH$Source ,
-			Iphdr->IPH$Protocol ,
-			.Buf_size , Buf ,
-			.IPlen , IPHdr );
+	IPU$User_Input (iphdr->iph$dest , iphdr->iph$source ,
+			iphdr->iph$protocol ,
+			Buf_size , Buf ,
+			iplen , iphdr );
 
 // Check if segment destination is local host
 
-    !!!HACK!!// IP$ISME too slow?
-    if (IP$ISME(Iphdr->IPH$Dest, FALSE) GEQ 0)
+    //!!HACK!!// IP$ISME too slow?
+    if (IP$ISME(iphdr->iph$dest, FALSE) > 0)
 	{
 	if ($$LOGF(LOG$IP))
-	    IP$LOG(%ASCID"IPrecv",IPHDR);
+	    IP$LOG(ASCIDNOT("IPrecv"),iphdr);
 
 // If this packet is a fragment, then hand it to the reassembly code.
 
-	if (IPHdr->IPH$MF || (IPHdr->IPH$Fragment_Offset != 0))
-	    IP_FRAGMENT(IPHdr,IPlen,hdrlen,Buf,Buf_Size)
+	if (iphdr->iph$mf || (iphdr->iph$fragment_offset != 0))
+	  IP_FRAGMENT(iphdr,iplen,hdrlen,Buf,Buf_size);
 	else
-	    IP_DISPATCH(IPHdr,IPLen,hdrlen,Buf,Buf_Size);
+	    IP_DISPATCH(iphdr,iplen,hdrlen,Buf,Buf_size);
 	}
     else
 	if (IP_group_MIB->IPMIB$ipForwarding != 1)
 	    {		// Drop the packet - not allowed to forward
 	    IP_group_MIB->IPMIB$ipInAddrErrors =
 		IP_group_MIB->IPMIB$ipInAddrErrors + 1;
-	    MM$Seg_Free(Buf_size,Buf)
+	    MM$Seg_Free(Buf_size,Buf);
 	    }
 	else
 	    {		// Try to forward the packet
@@ -1206,8 +1190,8 @@ void IP$Receive (Buf,Buf_size,IPHdr,devlen,dev_config) (void)
 
 // Now handle Store and Forward - look up destination of next hop
 
-	    dev = IP_ROUTE(Iphdr->IPH$Dest,ip_src,newip_dest,0);
-	    if (dev LSS 0)
+	    dev = IP_ROUTE(iphdr->iph$dest,ip_src,newip_dest,0);
+	    if (dev < 0)
 		{
 		IP_group_MIB->IPMIB$ipOutNoRoutes = 
 			IP_group_MIB->IPMIB$ipOutNoRoutes + 1;
@@ -1216,16 +1200,16 @@ void IP$Receive (Buf,Buf_size,IPHdr,devlen,dev_config) (void)
 		if ($$LOGF(LOG$IP+LOG$IPERR))
 		    {
 		    QL$FAO("!%T IPfwd: Cannot route IP destination!/",0);
-		    if (NOT $$LOGF(LOG$IP))
-			IP$LOG(%ASCID"IPfwd",IPHDR);
+		    if (! $$LOGF(LOG$IP))
+			IP$LOG(ASCIDNOT("IPfwd"),iphdr);
 		    };
 		MM$Seg_Free(Buf_size,Buf);
-		RETURN;
+		return;
 		};
 
 // Don't forward a packet back out through the same interface
 
-	    if (dev_config_tab[dev,dc_begin] == dev_config)
+	    if (dev_config_tab[dev].dc_begin == dev_config)
 		{
 		IP_group_MIB->IPMIB$ipInAddrErrors =
 			IP_group_MIB->IPMIB$ipInAddrErrors + 1;
@@ -1233,113 +1217,115 @@ void IP$Receive (Buf,Buf_size,IPHdr,devlen,dev_config) (void)
 		    {
 		    QL$FAO("!%T struct used * IPfwd to forward to device !SL!/",
 			   0,dev);
-		    if (NOT $$LOGF(LOG$IP))
-			IP$LOG(%ASCID"IPfwd",IPHDR);
+		    if (! $$LOGF(LOG$IP))
+			IP$LOG(ASCIDNOT("IPfwd"),iphdr);
 		    };
-		MM$Seg_Free(Buf_Size,Buf);
-		RETURN;
+		MM$Seg_Free(Buf_size,Buf);
+		return;
 		};
 
 // Decrement time-to-live and check for expiration
 
-	    Iphdr->IPH$TTL = Iphdr->IPH$TTL - 1;
-	    if (Iphdr->IPH$TTL == 0)
+	    iphdr->iph$ttl = iphdr->iph$ttl - 1;
+	    if (iphdr->iph$ttl == 0)
 		{
 		if ($$LOGF(LOG$IP))
 		    {
 		    QL$FAO("!%T IPfwd: packet TTL expired!/",0);
-		    if (NOT $$LOGF(LOG$IP))
-			IP$LOG(%ASCID"IPfwd",IPHDR);
+		    if (! $$LOGF(LOG$IP))
+			IP$LOG(ASCIDNOT("IPfwd"),iphdr);
 		    };
 		MM$Seg_Free(Buf_size,Buf);
-		RETURN;
+		return;
 		};
 
 // Adjust checksum for decremented lifetime
 
-	    if ((Iphdr->IPH$Checksum && %X"FF00') == %X'FF00")
+	    if ((iphdr->iph$checksum && 0xFF00) == 0xFF00)
 		// Wrap around checksum overflow bit
-		Iphdr->IPH$Checksum = (Iphdr->IPH$Checksum && %X"FF") + 1
+	      iphdr->iph$checksum = (iphdr->iph$checksum && 0xFF) + 1;
 	    else
 		// Just add one to upper half of field
-		Iphdr->IPH$Checksum = Iphdr->IPH$Checksum + %X"100";
+		iphdr->iph$checksum = iphdr->iph$checksum + 0x100;
 
 // Swap bytes and words in IP header
 
-	    Swapbytes(IP_hdr_swap_size,Iphdr);
+	    Swapbytes(IP_HDR_SWAP_SIZE,iphdr);
 
 // Put this datagram in net send queue
 
-	    dev_config = Dev_config_tab[dev,dc_begin];
+	    dev_config = dev_config_tab[dev].dc_begin;
 
 	    QB = MM$QBLK_get();
 	    QB->NSQ$Driver = dev_config;
-	    QB->NSQ$Data = IPhdr;
-	    QB->NSQ$Datasize = IPlen;
+	    QB->NSQ$Data = iphdr;
+	    QB->NSQ$Datasize = iplen;
 	    QB->NSQ$IP_Dest = newip_dest;
 	    QB->NSQ$Retry = 0;
 	    QB->NSQ$Delete = TRUE;
-	    QB->NSQ$Del_buf = Buf;
+	    QB->NSQ$Del_Buf = Buf;
 	    QB->NSQ$Del_buf_size = Buf_size;
 
 // Put on the send queue for the device and call device send routine.
 
-	    INSQUE(QB,Dev_config->dc_send_Qtail);
-	    (Dev_config->dc_rtn_xmit)(dev_config);
+	    INSQUE(QB,dev_config->dc_send_Qtail);
+	    (dev_config->dc_rtn_Xmit)(dev_config);
 	    };
     }
 
 //SBTTL "Dispatch IP packet to protocol routine"
 
-IP_DISPATCH(IPHDR,IPLEN,HDRLEN,BUF,BUFSIZE) : NOVALUE (void)
+void IP_DISPATCH(iphdr,iplen,HDRLEN,BUF,BUFSIZE)
 //
 // Hand a complete protocol segment off to it's handling routine.
 // Called from both IP$RECEIVE when it receives a complete packet and from
 // IP_FRAGMENT when it receives the last fragment for a segment.
 //
+	struct ip_structure * iphdr;
     {
-    MAP
-	struct IP_Structure * IPHDR;
     signed long
-	Unknown_flag  = 0,
+	unknown_flag  = 0,
 	SEG,
 	SEGSIZE;
 
 // Calculate pointer & size of data
 
-    SEG = IPHDR + HDRLEN;
-    SEGSIZE = IPLEN - HDRLEN;
+    SEG = iphdr + HDRLEN;
+    SEGSIZE = iplen - HDRLEN;
 
 // Dispatch according to protocol type
 
-    SELECTONE IPHDR->IPH$Protocol OF
-    SET
-    [ICMP_Protocol]:
+    switch (iphdr->iph$protocol)
+      {
+    case ICMP_PROTOCOL:
 	{
-	if ($$LOGF(LOG$ICMP) && (NOT $$LOGF(LOG$IP)))
-	    IP$LOG(%ASCID"ICMRecv",IPHDR);
-	ICMP$Input (SEG,SEGSIZE,IPHDR,IPLEN,BUFSIZE,BUF);
+	if ($$LOGF(LOG$ICMP) && (! $$LOGF(LOG$IP)))
+	    IP$LOG(ASCIDNOT("ICMRecv"),iphdr);
+	ICMP$Input (SEG,SEGSIZE,iphdr,iplen,BUFSIZE,BUF);
 	};
+	break;
 
-    [TCP_protocol]:
-	Seg$Input(IPHDR->IPH$Source,IPHDR->IPH$Dest,BUFSIZE,BUF,
+    case TCP_PROTOCOL:
+	Seg$Input(iphdr->iph$source,iphdr->iph$dest,BUFSIZE,BUF,
 		  SEGSIZE,SEG);
+	break;
 
-    [UDP_Protocol]:
-	UDP$Input(IPHDR->IPH$Source,IPHDR->IPH$Dest,BUFSIZE,BUF,
+    case UDP_PROTOCOL:
+	UDP$Input(iphdr->iph$source,iphdr->iph$dest,BUFSIZE,BUF,
 		  SEGSIZE,SEG);
+	break;
 
-    [OTHERWISE]:	// Unknown protocol
+    default:	// Unknown protocol
 	{
 	IP_group_MIB->IPMIB$ipInUnknownProtos =
 		IP_group_MIB->IPMIB$ipInUnknownProtos + 1;
-	Unknown_Flag = 1;
+	unknown_flag = 1;
 	MM$Seg_Free(BUFSIZE,BUF);
 	};
-    TES;
+    };
 
     // Successfully delivered?
-    if (Unknown_Flag) IP_group_MIB->IPMIB$ipInDelivers =
+    if (unknown_flag) IP_group_MIB->IPMIB$ipInDelivers =
 				IP_group_MIB->IPMIB$ipInDelivers + 1;
 
 // Wake up mainline procedure if sleeping
@@ -1349,28 +1335,24 @@ IP_DISPATCH(IPHDR,IPLEN,HDRLEN,BUF,BUFSIZE) : NOVALUE (void)
 
 //SBTTL "Handle reception of IP packet fragment"
 
-FORWARD ROUTINE
- void    IP_FRAGMENT_CHECK;
+ void    IP_FRAGMENT_CHECK();
 
-IP_FRAGMENT(IPHDR,IPLEN,HDRLEN,BUF,BUFSIZE) : NOVALUE (void)
+void IP_FRAGMENT(iphdr,iplen,HDRLEN,BUF,BUFSIZE) 
 //
 // Match the fragment with appropriate entry on the fragment reassembly queue.
 // If last fragment, then recursively call IP$RECEIVE to re-handle the packet.
 //
+	struct ip_structure * iphdr;
     {
-    MAP
-	struct IP_Structure * IPHDR;
+ struct RA$DATA_BLOCK * RAPTR;
     signed long
 	RC,
-	struct RA$DATA_BLOCK * RAPTR,
 	IPDATA,
 	OFFSET,
 	DATLEN,
 	MAXDAT,
 	FIRST,
 	COPY_MF;
-    LABEL
-	X,Y;
 
 // Keep count of fragments
     IP_group_MIB->IPMIB$ipReasmReqds = 
@@ -1379,85 +1361,82 @@ IP_FRAGMENT(IPHDR,IPLEN,HDRLEN,BUF,BUFSIZE) : NOVALUE (void)
 // See if we can find this fragment's header on the queue
 
 X:  {			// *** Block X ***
-    RAPTR = RA_QUEUE->QHEAD;
-    while (RAPTR != RA_QUEUE->QHEAD)
+    RAPTR = RA_QUEUE->qhead;
+    while (RAPTR != RA_QUEUE->qhead)
 	{
-	IF (RAPTR->RA$Source == IPHDR->IPH$Source) AND
-	   (RAPTR->RA$Dest == IPHDR->IPH$Dest) AND
-	   (RAPTR->RA$Ident == IPHDR->IPH$Ident) THEN
-	    LEAVE X;
-	RAPTR = RAPTR->RA$Next;
+	if ((RAPTR->ra$source == iphdr->iph$source) &&
+	   (RAPTR->ra$dest == iphdr->iph$dest) &&
+	   (RAPTR->ra$ident == iphdr->iph$ident))
+	    goto leave_x;
+	RAPTR = RAPTR->ra$next;
 	};
     RAPTR = 0;
     }			// *** Block X ***
-	
-// Handle the fragment according to the case.
+    leave_x:
 
-    SELECTONE TRUE OF
-    SET
+// Handle the fragment according to the case.
 
 // First fragment case. Flush old fragment and add this one.
 
-    [IPHDR->IPH$MF && (IPHDR->IPH$Fragment_Offset == 0)]:
+    if (iphdr->iph$mf && (iphdr->iph$fragment_offset == 0))
 	{
 	if (RAPTR != 0)
 	    {
 
 // RA data already exists - just flush the old buffer.
 
-	    MM$Seg_Free(RAPTR->RA$Bufsize,RAPTR->RA$Buf);
+	    MM$Seg_Free(RAPTR->ra$bufsize,RAPTR->ra$buf);
 	    }
 	else
 	    {
 
 // RA data doesn't exist yet. Allocate it & fill in the IP parameters.
 
-//	    RC = LIB$GET_VM(%REF(RA$Data_BLEN),RAPTR);
-	    RC = LIB$GET_VM_PAGE(%REF((RA$Data_BLEN / 512) + 1),RAPTR);
-	    if (NOT RC)
+//	    RC = LIB$GET_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
+	    RC = LIB$GET_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),RAPTR);
+	    if (! RC)
 		FATAL$FAO("IP_FRAGMENT - LIB$GET_VM failure, RC=!XL",RC);
-	    RAPTR->RA$Ident = IPHDR->IPH$Ident;
-	    RAPTR->RA$Source = IPHDR->IPH$Source;
-	    RAPTR->RA$Dest = IPHDR->IPH$Dest;
-	    RAPTR->RA$Timeout = Time_Stamp()+IPHDR->IPH$TTL*RA_EXPIRE_TIME*CSEC;
+	    RAPTR->ra$ident = iphdr->iph$ident;
+	    RAPTR->ra$source = iphdr->iph$source;
+	    RAPTR->ra$dest = iphdr->iph$dest;
+	    RAPTR->ra$timeout = Time_Stamp()+iphdr->iph$ttl*RA_EXPIRE_TIME*CSEC;
 	    XQL$FAO(LOG$IP,"!%T New reassambly block !XL, Timeout=!UL!/",
-		    0,RAPTR,RAPTR->RA$Timeout);
+		    0,RAPTR,RAPTR->ra$timeout);
 
 // Insert on the queue and start RA purge timer, if first entry on queue.
 
 	    FIRST = QUEUE_EMPTY(RA_QUEUE);
-	    INSQUE(RAPTR,RA_QUEUE->QTAIL);
+	    INSQUE(RAPTR,RA_QUEUE->qtail);
 	    if (FIRST)
-		$SETIMR(DAYTIM = RA_CHECK_TIME,
-			ASTADR = IP_FRAGMENT_CHECK);
+		exe$setimr(0, RA_CHECK_TIME, IP_FRAGMENT_CHECK, 0, 0);
 	    };
-	RAPTR->RA$BUF = MM$Seg_Get(16384);
-	RAPTR->RA$Bufsize = 16384;
-	RAPTR->RA$Data = RAPTR->RA$BUF;
-	RAPTR->RA$Datend = CH$MOVE(IPLEN,IPHDR,RAPTR->RA$DATA);
-	RAPTR->RA$Octet = IPLEN - HDRLEN;
+	RAPTR->ra$buf = MM$Seg_Get(16384);
+	RAPTR->ra$bufsize = 16384;
+	RAPTR->ra$data = RAPTR->ra$buf;
+	RAPTR->ra$datend = CH$MOVE(iplen,iphdr,RAPTR->ra$data);
+	RAPTR->ra$octet = iplen - HDRLEN;
 	XQL$FAO(LOG$IP,
 		"!%T Fragment at !XL for RA !XL, IPLEN=!SL, next octet=!SL!/",
-		0,IPHDR,RAPTR,IPLEN,RAPTR->RA$Octet);
+		0,iphdr,RAPTR,iplen,RAPTR->ra$octet);
 	MM$Seg_Free(BUFSIZE,BUF);
-	RETURN;
-	};
+	return;
+	}
 
 // Not first fragment. Check for validity of this fragment & append its data.
-
-    [(IPHDR->IPH$Fragment_Offset != 0) && (RAPTR != 0)]:
+    else
+      if ((iphdr->iph$fragment_offset != 0) && (RAPTR != 0))
 Y:	{
 
 // Check for match of fragment octet offset
 
-	OFFSET = IPHDR->IPH$Fragment_Offset*8;
-	if (OFFSET != RAPTR->RA$OCTET)
-	    LEAVE Y;
+	OFFSET = iphdr->iph$fragment_offset*8;
+	if (OFFSET != RAPTR->ra$octet)
+	    goto leave_y;
 
 // Fragment matches. Verify that we can store it or punt.
 
-	DATLEN = IPLEN - HDRLEN;
-	MAXDAT = RAPTR->RA$Bufsize - (RAPTR->RA$Datend-RAPTR->RA$Buf);
+	DATLEN = iplen - HDRLEN;
+	MAXDAT = RAPTR->ra$bufsize - (RAPTR->ra$datend-RAPTR->ra$buf);
 	if (DATLEN > MAXDAT)
 	    {
 	    signed long
@@ -1467,27 +1446,27 @@ Y:	{
 // old buffer into the new one, and update the two other pointers into
 // the innards of the data.
 
-	    NewBUFsize = RAPTR->RA$Bufsize * 2;
+	    NewBUFsize = RAPTR->ra$bufsize * 2;
 	    NewBUF = MM$Seg_Get(NewBUFsize);
-	    CH$MOVE(RAPTR->RA$Bufsize, RAPTR->RA$BUF, NewBUF);
-	    RAPTR->RA$Data = RAPTR->RA$Data + (NewBUF - RAPTR->RA$BUF);
-	    RAPTR->RA$Datend = RAPTR->RA$Datend + (NewBUF - RAPTR->RA$BUF);
-	    MM$Seg_Free(RAPTR->RA$Bufsize, RAPTR->RA$BUF);
-	    RAPTR->RA$Bufsize = NewBUFsize;
-	    RAPTR->RA$BUF = NewBUF;
+	    CH$MOVE(RAPTR->ra$bufsize, RAPTR->ra$buf, NewBUF);
+	    RAPTR->ra$data = (long)RAPTR->ra$data + ((long)NewBUF - (long)RAPTR->ra$buf);
+	    RAPTR->ra$datend = (long)RAPTR->ra$datend + ((long)NewBUF - (long)RAPTR->ra$buf);
+	    MM$Seg_Free(RAPTR->ra$bufsize, RAPTR->ra$buf);
+	    RAPTR->ra$bufsize = NewBUFsize;
+	    RAPTR->ra$buf = NewBUF;
 	    };
 
 // Append the data from this fragment to our current buffer.
 
 	XQL$FAO(LOG$IP,"!%T Append fragment at !XL to RA !XL, LEN=!SL!/",
-		0,IPHDR,RAPTR,DATLEN);
-	IPDATA = IPHDR + HDRLEN;
-	RAPTR[RA$DAT}] = CH$MOVE(DATLEN,IPDATA,RAPTR[RA$DAT}]);
-	RAPTR->RA$OCTET = RAPTR->RA$OCTET + DATLEN;
+		0,iphdr,RAPTR,DATLEN);
+	IPDATA = iphdr + HDRLEN;
+	RAPTR->ra$datend = CH$MOVE(DATLEN,IPDATA,RAPTR->ra$datend);
+	RAPTR->ra$octet = RAPTR->ra$octet + DATLEN;
 
 // Copy the MF bit to preserve it from Seg_Free
 
-	COPY_MF = IPHDR->IPH$MF;
+	COPY_MF = iphdr->iph$mf;
 
 // Flush the buffer
 
@@ -1495,7 +1474,7 @@ Y:	{
 
 // If this is the last fragment, then dispatch the datagram.
 
-	if (NOT COPY_MF)
+	if (! COPY_MF)
 	    {
 
 // Remove from the queue
@@ -1504,24 +1483,24 @@ Y:	{
 
 // Calculate sizes of entire, reassembled packet & dispatch it.
 
-	    IPHDR = RAPTR->RA$DATA;
-	    HDRLEN = IPHDR->IPH$IHL*4;
-	    IPLEN = RAPTR[RA$DAT}]-RAPTR->RA$DATA;
+	    iphdr = RAPTR->ra$data;
+	    HDRLEN = iphdr->iph$ihl*4;
+	    iplen = RAPTR->ra$datend-RAPTR->ra$data;
 	    XQL$FAO(LOG$IP,"!%T Last fragment received, IPLEN=!SL, DLEN=!SL!/",
-		    0,IPLEN,IPLEN-.HDRLEN);
+		    0,iplen,iplen-HDRLEN);
 	    IP_group_MIB->IPMIB$ipReasmOKs = 
 		IP_group_MIB->IPMIB$ipReasmOKs + 1;
-	    IP_DISPATCH(IPHDR,IPLEN,HDRLEN,RAPTR->RA$BUF,
-			RAPTR->RA$BUFSIZE);
+	    IP_DISPATCH(iphdr,iplen,HDRLEN,RAPTR->ra$buf,
+			RAPTR->ra$bufsize);
 
 // Deallocate the queue block.
 
-//	    LIB$FREE_VM(%REF(RA$Data_BLEN),RAPTR);
-	    LIB$FREE_VM_PAGE(%REF((RA$Data_BLEN / 512) + 1),RAPTR);
+//	    LIB$FREE_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
+	    LIB$FREE_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),RAPTR);
 	    };
-	RETURN;
+	return;
 	};
-    TES;
+    leave_y:
 
 // If we got here, it means the fragment was unacceptable for some reason.
 // Log this fact, release the buffer, and ignore the fragment.
@@ -1531,43 +1510,43 @@ Y:	{
     if ($$LOGF(LOG$IP+LOG$IPERR))
 	{
 	QL$FAO("!%T IP Fragment unusable!/",0);
-	if (NOT $$LOGF(LOG$IP))
-	    IP$LOG(%ASCID"IPfrag",IPHDR);
+	if (! $$LOGF(LOG$IP))
+	    IP$LOG(ASCIDNOT("IPfrag"),iphdr);
 	};
     MM$Seg_Free(BUFSIZE,BUF);
     }
 
-IP_FRAGMENT_CHECK : NOVALUE (void)
+void IP_FRAGMENT_CHECK  (void)
 //
 // Routine to periodically check the reassembly queue, purging any entries
 // which have expired.
 //
     {
+      struct RA$DATA_BLOCK * RAPTR;
     signed long
 	NOW,
-	struct RA$DATA_BLOCK * RAPTR,
 	RANXT;
 
 // Scan the entire queue, looking for expired entries.
 
     NOW = Time_Stamp();
-    RAPTR = RA_QUEUE->QHEAD;
-    while (RAPTR != RA_QUEUE->QHEAD)
+    RAPTR = RA_QUEUE->qhead;
+    while (RAPTR != RA_QUEUE->qhead)
 	{
-	RANXT = RAPTR->RA$Next;
+	RANXT = RAPTR->ra$next;
 
 // If this entry has expired, then flush it.
 
-	if (RAPTR->RA$Timeout LSS NOW)
+	if (RAPTR->ra$timeout < NOW)
 	    {
 
 // Flush the buffer & free the block
 
 	    XQL$FAO(LOG$IP,"!%T Flushing expired IP RA block !XL!/",0,RAPTR);
 	    REMQUE(RAPTR,RAPTR);
-	    MM$Seg_Free(RAPTR->RA$Bufsize,RAPTR->RA$Buf);
-//	    LIB$FREE_VM(%REF(RA$Data_BLEN),RAPTR);
-	    LIB$FREE_VM_PAGE(%REF((RA$Data_BLEN / 512) + 1),RAPTR);
+	    MM$Seg_Free(RAPTR->ra$bufsize,RAPTR->ra$buf);
+//	    LIB$FREE_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
+	    LIB$FREE_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),RAPTR);
 	    IP_group_MIB->IPMIB$ipReasmFails = 
 			IP_group_MIB->IPMIB$ipReasmFails + 1;
 
@@ -1580,9 +1559,6 @@ IP_FRAGMENT_CHECK : NOVALUE (void)
 
 // If there are still entries on the reassembly queue, then requeue us
 
-    if (NOT QUEUE_EMPTY(RA_QUEUE))
-	$SETIMR(DAYTIM = RA_CHECK_TIME,
-		ASTADR = IP_FRAGMENT_CHECK);
+    if (! QUEUE_EMPTY(RA_QUEUE))
+	exe$setimr(0, RA_CHECK_TIME, IP_FRAGMENT_CHECK, 0, 0);
     }
-}
-ELUDOM
