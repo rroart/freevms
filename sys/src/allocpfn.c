@@ -250,7 +250,7 @@ mypfncheckaddr(){
 #endif 
 }
 
-#if CONFIG_VMS
+#ifdef CONFIG_VMS
 
 int mmg$relpfn(signed int pfn) {
   if (mem_map[pfn].pfn$l_page_state&PFN$M_MODIFY) {
