@@ -70,7 +70,7 @@ static int ext2_commit_chunk(struct inode *dir, struct page *page, unsigned from
 
 static void ext2_check_page(struct page *page, struct inode *inode, unsigned long pageno)
 {
-	struct inode *dir = inode; //page->mapping->host;
+	struct inode *dir = inode;
 	struct super_block *sb = dir->i_sb;
 	unsigned chunk_size = ext2_chunk_size(dir);
 	char *kaddr = page_address(page);
@@ -155,7 +155,6 @@ fail:
 
 static struct page * ext2_get_page(struct inode *dir, unsigned long n)
 {
-	struct address_space *mapping = dir->i_mapping;
 	struct page *page = alloc_pages(GFP_KERNEL, 0);
 	block_read_full_page2(dir,page,n);
 	// read_cache_page(mapping, n, (filler_t*)ext2_aops.readpage, NULL);
@@ -478,10 +477,8 @@ out:
  * ext2_delete_entry deletes a directory entry by merging it with the
  * previous entry. Page is up-to-date. Releases the page.
  */
-int ext2_delete_entry (struct ext2_dir_entry_2 * dir, struct page * page )
+int ext2_delete_entry2 (struct ext2_dir_entry_2 * dir, struct page * page, struct inode * inode )
 {
-	struct address_space *mapping = page->mapping;
-	struct inode *inode = mapping->host;
 	char *kaddr = page_address(page);
 	unsigned from = ((char*)dir - kaddr) & ~(ext2_chunk_size(inode)-1);
 	unsigned to = ((char*)dir - kaddr) + le16_to_cpu(dir->rec_len);
@@ -516,7 +513,6 @@ int ext2_delete_entry (struct ext2_dir_entry_2 * dir, struct page * page )
  */
 int ext2_make_empty(struct inode *inode, struct inode *parent)
 {
-	struct address_space *mapping = inode->i_mapping;
 	struct page *page = alloc_pages(GFP_KERNEL, 0);// was grab_cache_page
 	unsigned chunk_size = ext2_chunk_size(inode);
 	struct ext2_dir_entry_2 * de;
