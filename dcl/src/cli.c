@@ -680,11 +680,15 @@ static Command intcmd[] = {
 	0, "mount", 1, 0, "/vms$common/sysexe/mount",
 	0, "directory", 1, 0, "/vms$common/sysexe/directory",
 	0, "copy", 1, 0, "/vms$common/sysexe/copy",
+	0, "export", 1, 0, "/vms$common/sysexe/export",
+	0, "import", 1, 0, "/vms$common/sysexe/import",
 	0, "delete", 1, 0, "/vms$common/sysexe/delete",
 	0, "difference", 1, 0, "/vms$common/sysexe/difference",
 	0, "extend", 1, 0, "/vms$common/sysexe/extend",
 	0, "search", 1, 0, "/vms$common/sysexe/search",
 	0, "type", 1, 0, "/vms$common/sysexe/type",
+	0, "init", 1, 0, "/vms$common/sysexe/init",
+	0, "create", 1, 0, "/vms$common/sysexe/create",
 	0, NULL, NULL, NULL, NULL };
 
 
