@@ -1,9 +1,0 @@
-%DCL-W-IVVERB, unrecognized command verb - check validity and spelling
- \QUIT\
-$ set ert
-%DCL-W-IVKEYW, unrecognized keyword - check validity and spelling
- \ERT\
-$ dir /sdf
-%DCL-W-IVQUAL, unrecognized qualifier - check validity, spelling, and placement
- \SDF\
-
