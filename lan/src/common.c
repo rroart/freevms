@@ -307,6 +307,8 @@ int lan$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 void * lan$alloc_cxb(int len) {
   struct _cxb * cb1 = kmalloc(sizeof(struct _cxb),GFP_KERNEL);
   struct _cxb * cb2 = kmalloc(sizeof(struct _cxb),GFP_KERNEL);
+  memset(cb1, 0, sizeof(struct _cxb));
+  memset(cb2, 0, sizeof(struct _cxb));
   char * buf1 = kmalloc(14,GFP_KERNEL);
   char * buf2 = kmalloc(len-14,GFP_KERNEL);
   cb1->cxb$b_type=DYN$C_CXB;
