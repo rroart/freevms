@@ -325,7 +325,9 @@ void chan_interrupt(struct list_head *chans, struct tty_struct *tty)
 		if(c == 0) reactivate_fd(chan->fd);
 		if(c == -EIO){
 			if(chan->primary){
+#ifndef CONFIG_VMS
 				if(tty != NULL) tty_hangup(tty);
+#endif
 				close_chan(chans);
 				free_chan(chans);
 				return;
@@ -336,7 +338,9 @@ void chan_interrupt(struct list_head *chans, struct tty_struct *tty)
 			}
 		}
 	}
+#ifndef CONFIG_VMS
 	if(tty) tty_flip_buffer_push(tty);
+#endif
 }
 
 /*

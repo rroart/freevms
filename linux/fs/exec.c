@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /*
  *  linux/fs/exec.c
  *
@@ -53,6 +59,8 @@
 #include<dyndef.h>
 #include<fcbdef.h>
 #include<fabdef.h>
+#include<ccbdef.h>
+#include<ucbdef.h>
 
 int core_uses_pid;
 
@@ -1007,6 +1015,16 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	struct file *file=0;
 	int retval=0;
 	int i;
+
+	if (ctl$gl_pcb->pcb$t_terminal[0]==0) {
+	  memcpy(&ctl$gl_pcb->pcb$t_terminal,"opa0",4);
+	} else {
+	  short int chan;
+	  int sts = ptd$create(&chan,0,0,0,0,0,0,0);
+	  memcpy(&ctl$gl_pcb->pcb$t_terminal,"opa",3);
+	  struct _ccb * c=&ctl$gl_ccbbase[chan];
+	  ctl$gl_pcb->pcb$t_terminal[3]=48+(char)c->ccb$l_ucb->ucb$w_unit;
+	}
 
 	//printk("execve %s\n",filename);
 	//	mydebug=1;
