@@ -21,6 +21,10 @@
 #include<ssdef.h>
 #include<starlet.h>
 
+#ifndef __arch_um__
+#include<asm/uaccess.h>
+#endif
+
 asmlinkage int exe$creprc_wrap(struct struct_args *s) {
   return exe$creprc(s->s1,s->s2,s->s3,s->s4,s->s5,s->s6,s->s7,s->s8,s->s9,s->s10,s->s11,s->s12);
 }
@@ -221,12 +225,12 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
 	// wait, better do execve itself
 
-	retval = new_thread(0, clone_flags, 0, 0, p, 0);
-
 #ifdef __arch_um__
+	//what:?	retval = new_thread(0, clone_flags, 0, 0, p, 0);
+
 	void * regs = &p->thread.regs;
 #else
-	void * regs = &pidadr;
+	struct pt_regs * regs = &pidadr;
 #endif
 
 	int eip=0,esp=0;
