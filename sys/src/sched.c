@@ -643,8 +643,8 @@ int mycount=0;
 
 asmlinkage void schedule(void) {
   //  SOFTINT_RESCHED_VECTOR;
-__asm__ __volatile__ ("int $0x93\n");
-//  sch$resched();
+  //__asm__ __volatile__ ("int $0x93\n");
+  sch$resched();
 }
 
 asmlinkage void sch$sched(int from_sch$resched) {
