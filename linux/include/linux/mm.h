@@ -25,8 +25,6 @@ extern struct list_head inactive_list;
 #include <asm/pgtable.h>
 #include <asm/atomic.h>
 
-#include <pfndef.h>
-
 /*
  * Linux kernel virtual memory manager primitives.
  * The idea being to have a "virtual" mm in the same way
@@ -150,10 +148,7 @@ struct vm_operations_struct {
  *
  * TODO: make this structure smaller, it could be as small as 32 bytes.
  */
-
-// renaming a bit
-
-typedef struct not_use_page {
+typedef struct page {
 	struct list_head list;		/* ->mapping has some page lists. */
 	struct address_space *mapping;	/* The inode (or ...) we belong to. */
 	unsigned long index;		/* Our offset within mapping. */
@@ -170,7 +165,7 @@ typedef struct not_use_page {
 	void *virtual;			/* Kernel virtual address (NULL if
 					   not kmapped, ie. highmem) */
 	struct zone_struct *zone;	/* Memory zone we are in. */
-} not_mem_map_t;
+} mem_map_t;
 
 /*
  * Methods to modify the page usage count.
