@@ -81,8 +81,44 @@ int sys$numtim  (unsigned short int timbuf [7], unsigned long long * timadr) {
   return INLINE_SYSCALL($numtim,2,timbuf,timadr);
 }
 
+int sys$schdwk(unsigned int *pidadr, void *prcnam, signed long long * daytim, signed long long * reptim) {
+  return INLINE_SYSCALL($schdwk,4,pidadr,prcnam,daytim,reptim);
+}
+
 int sys$gettim (unsigned long long * timadr) {
   return INLINE_SYSCALL($gettim,1,timadr);
+}
+
+int sys$hiber(void) {
+  return INLINE_SYSCALL($hiber,0);
+}
+
+int sys$wake(unsigned long *pidadr, void *prcnam) {
+  return INLINE_SYSCALL($wake,2,pidadr,prcnam);
+}
+
+int sys$resume (unsigned int *pidadr, void *prcnam) {
+  return INLINE_SYSCALL($resume,2,pidadr,prcnam);
+}
+
+int sys$exit(unsigned int code) {
+  return INLINE_SYSCALL($exit,1,code);
+}
+
+int sys$forcex(unsigned int *pidadr, void *prcnam, unsigned int code) {
+  return INLINE_SYSCALL($forcex,3,pidadr,prcnam,code);
+}
+
+int sys$setef(unsigned int efn) {
+  return INLINE_SYSCALL($setef,1,efn);
+}
+
+int sys$readef(unsigned int efn, unsigned int *state) {
+  return INLINE_SYSCALL($readef,2,efn,state);
+}
+
+int sys$synch(unsigned int efn, struct _iosb *iosb) {
+  return INLINE_SYSCALL($synch,2,efn,iosb);
 }
 
 int sys$asctim  (unsigned short int *timlen, void *timbuf,

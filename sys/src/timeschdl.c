@@ -119,9 +119,10 @@ asmlinkage void exe$swtimint(void) {
 	//		printk(KERN_EMERG "after f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
       }
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_WKSNGL) {
-	void (*f)(void);
-	f=t->tqe$l_fpc;
-		printk(KERN_EMERG "xbefore f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
+	sch$wake(t->tqe$l_pid);
+	//	void (*f)(void);
+	//	f=t->tqe$l_fpc;
+	//	printk(KERN_EMERG "xbefore f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
       }
       if (t->tqe$b_rqtype & TQE$M_REPEAT) {
 	t->tqe$q_time=exe$gq_systime+t->tqe$q_delta;

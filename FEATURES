@@ -5,13 +5,21 @@ timing (partly)
 syscalls:
 $asctim
 $bintim
+$clref
 $dclast
+$forcex
 $gettim
 $numtim
+$readef
+$schdwk
+$setef
+$setime
+$setimr
 $setpri
 $setprn
-$setimr
-$setime
+$synch
+$waitfr
+$wake
 
 cli:
 DCL

@@ -25,6 +25,11 @@ done
 		ln -s ../../freevms/sys/src/syscvrtim.c .;
 		ln -s ../../freevms/sys/src/sysschevt.c .;
 		ln -s ../../freevms/sys/src/syscanevt.c .;
+		ln -s ../../freevms/sys/src/sysdelprc.c .;
+		ln -s ../../freevms/sys/src/sysforcex.c .;
+		ln -s ../../freevms/sys/src/sysexit.c .;
+		ln -s ../../freevms/sys/src/syssetmod.c .;
+
 		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
 		rm ast.c; ln -s ../../freevms/pal/src/ast.c .;
 )

@@ -246,7 +246,20 @@
 #define __NR_$cantim           12
 #define __NR_$numtim           13 /* really in exec mode */
 #define __NR_$gettim           14
- 
+#define __NR_$hiber            15
+#define __NR_$wake             16
+#define __NR_$schdwk           17
+#define __NR_$canwak           18
+#define __NR_$suspnd           19
+#define __NR_$resume           20
+#define __NR_$exit             21
+#define __NR_$forcex           22 
+#define __NR_$setrwm           23
+#define __NR_$delprc           24
+#define __NR_$readef           25
+#define __NR_$setef            26
+#define __NR_$synch            27
+
 #define __NR_$asctim            1
 #define __NR_$bintim            2
 

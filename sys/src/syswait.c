@@ -14,6 +14,7 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   p->pcb$b_wefc=efncluster;
   if (efncluster==0 || efncluster==1) goto notcommon;
   /* not impl */
+  printk("in a wait non impl routine %x %x %x %x\n",efn,mask,clusteraddr,efncluster);
   return;
  notcommon:
   wq=sch$gq_lefwq;
@@ -35,7 +36,7 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
 }
 
 int exe$waitfr(unsigned int efn) {
-  return exe$wait(efn,1<<efn,0);
+  return exe$wait(efn,1<<(efn&31),0);
 }
 
 int exe$wflor(unsigned int efn, unsigned int mask) {
