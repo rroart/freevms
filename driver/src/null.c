@@ -258,6 +258,11 @@ inline void ini_dpt_defunits(struct _dpt * d, unsigned long type) {
 }
 
 
+inline void ini_dpt_unload(struct _dpt * d, unsigned long type) {
+  d->dpt$ps_unload=type;
+}
+
+
 inline void ini_dpt_end(struct _dpt * d) {
   //  d->dpt$_=type; ??
 }
