@@ -155,7 +155,6 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
       mylnmx->lnmx$l_flags=LNMX$M_TERMINAL;
       mylnmx->lnmx$l_flags|=LNMX$M_XEND;
 
-      status=lnm$inslogtab(&ret,mylnmb);
       break;
     case LNM$_LNMB_ADDR:
       memcpy(i->bufaddr,&mylnmb,i->buflen);
@@ -164,6 +163,8 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
       printk("yet unknown LNM param %x\n",i->item_code);
     }
   }
+
+  status=lnm$inslogtab(&ret,mylnmb);
 
   setipl(0); // simulate return int
   return status;
@@ -188,7 +189,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   long * trailer;
   struct struct_rt * RT;
   struct dsc$descriptor_s * mytabnam, * mypartab;
-  if (!(partab)) return -1;
+  if (!(partab)) return 0;
   mypartab=partab;
 #ifdef LNM_DEBUG 
   lnmprintf("partab %s\n",mypartab->dsc$a_pointer);
@@ -341,7 +342,7 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
 
   mylognam=lognam;
   mytabnam=tabnam;
-  if (!(tabnam && itmlst)) return -1;
+  if (!(tabnam && itmlst)) return 0;
   /* lock mutex */
   setipl(IPL$_ASTDEL);
   lnm$lockr();
