@@ -946,6 +946,9 @@ ENTRY(vmssys_call_table)
 	.long SYMBOL_NAME(exe$mod_holder      )
 	.long SYMBOL_NAME(exe$grantid      )
 	.long SYMBOL_NAME(exe$revokid      )
+	.long SYMBOL_NAME(exe$create_region_32)
+	.long SYMBOL_NAME(exe$delete_region_32)
+	.long SYMBOL_NAME(exe$get_region_info)
 
 	.rept NR_vmssyscalls-(.-vmssys_call_table)/4
 		.long SYMBOL_NAME(sys_$ni_syscall)

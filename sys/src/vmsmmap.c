@@ -405,14 +405,17 @@ munmap_back:
 	prot=prot; //translate later?
 	flags=flags; //translate later?
 
+	exe$create_region_32 (len,*(unsigned long*)&protection_map[(rde$l_flags>>8) & 0x0f] ,rde$l_flags   ,0,0,0,addr);
 	if (file) {
-	  exe$crmpsc(&inadr,0,0,flags,0,0,/*(unsigned short int)*/file,0,pgoff,*(unsigned long*)&protection_map[(rde$l_flags>>8) & 0x0f],rde$l_flags);
+	  exe$crmpsc(&inadr,0,0,flags,0,0,/*(unsigned short int)*/file,0,pgoff,0,0);
 	} else {
 	  struct _rde * rde;
 	  exe$cretva(&inadr,0,0);
+#if 0
 	  rde=mmg$lookup_rde_va(addr,current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	  rde->rde$l_flags=rde$l_flags;
 	  rde->rde$r_regprot.regprt$l_region_prot = *(unsigned long*)&protection_map[(rde$l_flags>>8) & 0x0f];
+#endif
 	}
 	return addr;
 
