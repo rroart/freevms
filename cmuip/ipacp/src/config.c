@@ -246,6 +246,8 @@ MODULE CONFIG(IDENT="6.6",ZIP,OPTIMIZE,
 #include <prvdef.h>
 #include <pqldef.h>
 
+#include <asm/uaccess.h>
+
 extern  void    OPR_FAO();
 extern  void    send_2_operator();
 extern     LIB$GET_VM ();
@@ -554,6 +556,7 @@ void CNF$Configure_ACP (void)
 	cfield [STRSIZ],
 	cflen,
 	cptr;
+      mm_segment_t fs;
 
 // Initialize all the variables before they are set by the config script
 
@@ -561,6 +564,9 @@ void CNF$Configure_ACP (void)
 
 // OPEN the file "config.TXT" & read/decode network device data into blockvector
 // dev_config and memory management info.
+
+    fs = get_fs();
+    set_fs(get_ds());
 
     if (BLISSIFNOT((RC = exe$open(CFFAB)) &&
 	    BLISSIF(RC = exe$connect(CFRAB))))
@@ -573,7 +579,16 @@ void CNF$Configure_ACP (void)
 
     dev_count = 0;		// No devices
 
+#ifdef CONFIG_VMS
+#define RMS_WORKAROUND
+#endif
+#ifdef RMS_WORKAROUND
+    struct file * filp = get_prim_fcb();
+    int offs = 0;
+    while ((offs=CFRAB->rab$w_rsz=rms_kernel_read(filp,offs,CFBUF,512))>0)
+#else
     while (exe$get(CFRAB)&1)
+#endif
 	{
 	signed long
 	    chr;
@@ -600,12 +615,9 @@ void CNF$Configure_ACP (void)
 
 // roart: had to add a label and goto, since $get here read all
 	    again:
-	    printk("linptr %x %s\n",linptr,linptr);
-	    printk("ptr %x %s\n",cptr,cptr);
 
 	    cflen = GETFIELD(cfield);
 	    cptr = CH$PTR(cfield,0);
-	    printk("cf %x %x %s %x %s\n",cflen,cptr,cptr,cfield,cfield);
 	    if (STREQLZ(cptr,"DEVICE_INIT"))
 		    Init_Device();
 		else if (STREQLZ(cptr,"MEMGR_INIT"))
@@ -644,6 +656,8 @@ void CNF$Configure_ACP (void)
 
     exe$disconnect(CFRAB);
     exe$close(CFFAB);
+
+    set_fs(fs);
 
 // make sure we did some device configuration here as networks without devices
 // are not really very interesting.
