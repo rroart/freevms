@@ -12,24 +12,27 @@ install: all
 	install um/* ../../rootum/vms"$$"common/sysexe
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
-dcl.o: cli.c $(VMSLIBS) $(EXTERNAL)
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ cli.c -o dcl.o
+OBJS = cli.o clicall.o
 
-i386/dcl${NOEXE}: dcl.o $(VMSLIBS) $(EXTERNAL)
+%.o: %.c
+	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+
+
+i386/dcl${NOEXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL)
 	install -d i386
-	gcc -s -static dcl.o $(EXTERNAL) $(VMSLIBS) -ldl -o i386/dcl${NOEXE}
-	gcc -static dcl.o $(EXTERNAL) $(VMSLIBS) -ldl -o i386/dcld${NOEXE}
+	gcc -s -static $(OBJS) $(EXTERNAL) $(VMSLIBS) -ldl -o i386/dcl${NOEXE}
+	gcc -g -static $(OBJS) $(EXTERNAL) $(VMSLIBS) -ldl -o i386/dcld${NOEXE}
 
-i386/dcl${EXE}: dcl.o $(VMSLIBS) $(EXTERNAL)
-	$(LINKER) $(LINKPRE) dcl.o $(EXTERNAL) $(VMSLIBS) /usr/lib/libdl.a /usr/lib/libiberty.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dcl${EXE}
+i386/dcl${EXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL)
+	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(VMSLIBS) /usr/lib/libdl.a /usr/lib/libiberty.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dcl${EXE}
 # DCL linked like this is just for testing (DCL is really special)
 
-um/dcl${NOEXE}: dcl.o $(VMSLIBSUM) $(EXTERNAL)
+um/dcl${NOEXE}: $(OBJS) $(VMSLIBSUM) $(EXTERNAL)
 	install -d um
-	gcc -s -static dcl.o $(EXTERNAL) $(VMSLIBSUM) -ldl -o um/dcl${NOEXE}
-	gcc -static dcl.o $(EXTERNAL) $(VMSLIBSUM) -ldl -o um/dcld${NOEXE}
+	gcc -s -static $(OBJS) $(EXTERNAL) $(VMSLIBSUM) -ldl -o um/dcl${NOEXE}
+	gcc -static $(OBJS) $(EXTERNAL) $(VMSLIBSUM) -ldl -o um/dcld${NOEXE}
 
-um/dcl${EXE}: dcl.o $(VMSLIBSUM) $(EXTERNAL)
-	$(LINKER) $(LINKPRE) dcl.o $(EXTERNAL) $(VMSLIBSUM) /usr/lib/libdl.a /usr/lib/libiberty.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/dcl${EXE}
+um/dcl${EXE}: $(OBJS) $(VMSLIBSUM) $(EXTERNAL)
+	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(VMSLIBSUM) /usr/lib/libdl.a /usr/lib/libiberty.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/dcl${EXE}
 # DCL linked like this is just for testing (DCL is really special)
 
