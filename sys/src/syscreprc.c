@@ -12,6 +12,7 @@
 
 #include<system_data_cells.h>
 #include<descrip.h>
+#include<dyndef.h>
 #include<ipldef.h>
 #include<phddef.h>
 #include<pqbdef.h>
@@ -61,6 +62,9 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
   qhead_init(&p->pcb$l_astqfl);
   // and enable ast del to all modes
+
+  p->pcb$b_type = DYN$C_PCB;
+
   p->pcb$b_asten=15;
   p->phd$b_astlvl=4;
   p->pr_astlvl=4;
