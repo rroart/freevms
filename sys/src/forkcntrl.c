@@ -17,11 +17,14 @@ asmlinkage void exe$forkdspth(void) {
     return;
   regtrap(REG_INTR, IPL$_QUEUEAST);
   setipl(IPL$_TIMER);
+  printk("forkdspth\n");
   fq=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[0]; /* so far */
   while (!aqempty(fq)) {
     f=remque(fq,dummy);
+    printk("forking entry %x\n",f);
     func=f->fkb$l_fpc;
-    func(0,f);
+    func(f->fkb$q_fr3,f); /* change q to l later */
+    fq=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[0]; /* so far */
   }
 }
 

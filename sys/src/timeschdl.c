@@ -68,6 +68,8 @@ extern long last_rtc_update;
 
 extern int use_tsc;
 
+int exetimeout=0;
+
 void exe$timeout(void) {
   /* do sch$swpwake() if appropiate ???? */
   exe$gl_abstim++;
@@ -80,7 +82,7 @@ void exe$timeout(void) {
   /* scan lock mgr etc */
   sch$one_sec();
   /* sch$ravail() */
-  printk("exe$timeout\n");
+  if (exetimeout) printk("exe$timeout\n");
 }
 
 extern int vmstimerconf;

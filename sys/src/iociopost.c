@@ -25,6 +25,7 @@ asmlinkage void ioc$iopost(void) {
 
   setipl(IPL$_IOPOST);
 
+  printk("iopost %x %x %x %x\n",&ioc$gq_postiq,ioc$gq_postiq,current->pid,ioc$gq_postiq>>32); //,&ioc$gq_postiq,ioc$gq_postiq &ioc$gq_postiq,ioc$gq_postiq);
  again:
   if (!rqempty(&ioc$gq_postiq)) {
     i=remqhi(&ioc$gq_postiq,i);

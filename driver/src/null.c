@@ -42,15 +42,30 @@ void nl_isr (void) {
 }
 
 void  null_startio (struct _irp * i, struct _ucb * u) { 
+  static int first=0;
   signed long long step1=-10000000;
-  globali=i;
-  globalu=u;
   u->ucb$l_fpc=null_startio;
 
-  if (u->ucb$b_second_time_in_startio) goto secondtime;
-  if (u->ucb$b_third_time_in_startio) goto thirdtime;
+  printk("times %x %x\n",u->ucb$b_second_time_in_startio,u->ucb$b_third_time_in_startio);
+  //  { int j; for(j=100000000;j;j--);}
 
-  printk("firsttime\n");
+  if (u->ucb$b_third_time_in_startio) goto thirdtime;
+  if (u->ucb$b_second_time_in_startio) goto secondtime;
+
+#if 0
+  if (first) {
+    int a=*(int *)0x88888888;
+    int b=*(int *)0x82888888;
+    int c=*(int *)0x98888888;
+    int d=*(int *)0xb8888888;
+    insque(0,0);
+  }
+  first++;
+#endif
+
+  printk("firsttime %x %x\n",i,u);
+  globali=i;
+  globalu=u;
   exe$setimr(0, &step1, nl_isr,0,0);
 
   u->ucb$b_second_time_in_startio=1;
@@ -62,9 +77,16 @@ void  null_startio (struct _irp * i, struct _ucb * u) {
 
   u->ucb$b_third_time_in_startio=1;
   exe$iofork(i,u);
+  return;
 
  thirdtime:
-  printk("thirdtime\n");
+  printk("thirdtime %x %x\n",i,u);
+  i=globali;
+  u=globalu; 
+  printk("thirdtime %x %x\n",i,u);
+
+  u->ucb$b_third_time_in_startio=0;
+  u->ucb$b_second_time_in_startio=0;
   ioc$reqcom(i,u);
 
 };
@@ -169,10 +191,10 @@ void nl_init(void) {
   /* for the ucb init part */
   qhead_init(&u->ucb$l_ioqfl);
   u->ucb$b_type=DYN$C_UCB;
-  u->ucb$b_flck=IPL$_IOLOCK8;
+  u->ucb$b_flck=IPL$_QUEUEAST; /* should be IOLOCK8 */
   /* devchars? */
   u->ucb$b_devclass=DEV$M_RND; /* just maybe? */
-  u->ucb$b_dipl=IPL$_IOLOCK8;
+  u->ucb$b_dipl=IPL$_QUEUEAST; /* should be IPL$_IOLOCK8 */
   //  bcopy("nla0",u->ucb$t_name,4);
   u->ucb$l_ddb=d;
   u->ucb$l_crb=c;

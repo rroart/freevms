@@ -23,7 +23,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   /* lock */
   savipl=getipl();
   setipl(IPL$_SYNCH);
-  insque(a,p->pcb$l_astqfl);
+  insque(a,&p->pcb$l_astqfl);
   /* just simple insert , no pris yet */
   //printk("bef rse\n");
   if (p->pcb$w_state!=SCH$C_CUR)
