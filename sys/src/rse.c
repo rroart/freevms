@@ -331,7 +331,7 @@ int sch$waitm(struct _pcb * p, struct _wqh * wq) {
   }
   // sch$sched(0); /* do it anyway until asts are implemented */
   /* check psl and ast stuff */
-  if (!(p->psl_cur_mod >= p->pr_astlvl)) {
+  if (!(p->psl_cur_mod >= p->pr_astlvl)) { // change to phd?
     sch$sched(0);
     return;
   }
@@ -351,6 +351,13 @@ int sch$waitl(struct _pcb * p, struct _wqh * wq) {
 int sch$waitk(struct _pcb * p, struct _wqh * wq) {
   p->pcb$w_state=wq->wqh$l_wqstate;
   p->state=TASK_UNINTERRUPTIBLE;
+  if (task_on_comqueue(p)) {  // scheduling bug fix that may be removed sometime
+    struct _pcb * p3=p->pcb$l_sqfl;
+    remque(p,0);
+    if (p3==p3->pcb$l_sqfl) {
+      sch$gl_comqs&=(~(1 << p->pcb$b_pri));
+    }
+  }
   insque(p,wq->wqh$l_wqfl);
   wq->wqh$l_wqcnt++;
   return sch$waitl(p,wq);
@@ -380,6 +387,7 @@ void sch$chsep2(struct _pcb * p,unsigned char newpri) {
     sch$swpwake();
     p2->pcb$w_state=SCH$C_COMO;
     p2->state=TASK_RUNNING;
+    p2->pcb$w_state = SCH$C_CUR;
     insque(p2,sch$aq_comot[newpri]);
     sch$gl_comoqs|=(1 << newpri);
     return;
@@ -387,6 +395,7 @@ void sch$chsep2(struct _pcb * p,unsigned char newpri) {
   */
   //SOFTINT_RESCHED_VECTOR;
   p2->state=TASK_RUNNING;
+  p2->pcb$w_state = SCH$C_CUR;
   insque(p2,sch$aq_comt[newpri]);
   sch$gl_comqs|=(1 << newpri);
 }
