@@ -61,15 +61,15 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   
   qemp=rqempty(&ioc$gq_postiq);
   insqti(i,&ioc$gq_postiq);
+  if (!qemp) goto notempty;
 
   if (smp_processor_id()==0) {
     SOFTINT_IOPOST_VECTOR;
   } else {
     /* request interprocessor interrupt */
-    if (!qemp) goto notempty;
-  notempty:
-    {
-    }
+  }
+ notempty:
+  {
   }
 
   setipl(savipl);
@@ -79,7 +79,7 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   //printk("ioq %x %x",i,u->ucb$l_ioqfl);
   i=remque(u->ucb$l_ioqfl,i);
   //printk("ioq %x %x",i,u->ucb$l_ioqfl);
-  ioc$initiate(i,u);
+  return ioc$initiate(i,u);
  end:
   if (aqempty(u->ucb$l_ioqfl))
     u->ucb$l_sts&=~UCB$M_BSY;
