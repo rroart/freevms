@@ -3,6 +3,7 @@
  *
  *  (C) Copyright 1994 Linus Torvalds
  */
+#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/smp_lock.h>
 #include <linux/shm.h>
@@ -293,7 +294,7 @@ static int mprotect_fixup(struct _rde * vma, struct _rde ** pprev,
 		*pprev = vma;
 		return 0;
 	}
-	newprot = protection_map[newflags & 0xf];
+	newprot = protection_map[(newflags>>8) & 0xf];
 	if (start == vma->rde$pq_start_va) {
 		if (end == (vma->rde$pq_start_va + vma->rde$q_region_size))
 			error = mprotect_fixup_all(vma, pprev, newflags, newprot);
