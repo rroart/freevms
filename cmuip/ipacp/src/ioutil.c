@@ -20,101 +20,103 @@
 	****************************************************************
 */
 //TITLE "Input/Output Utilities"
-!++
-!
+//++
+//
 // Module:
-!
-!	IOUTIL
-!
+//
+//	IOUTIL
+//
 // Facility:
-!
-!	Input and Output utility routines
-!
+//
+//	Input and Output utility routines
+//
 // Abstract:
-!
-!	Provides a standard library of routines for input and output of
-!	addresses as decimal and hexidecimal strings.
-!
+//
+//	Provides a standard library of routines for input and output of
+//	addresses as decimal and hexidecimal strings.
+//
 // Author:
-!
-!	Vince Fuller, CMU-CSD, April 1986
-!	Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
-!
+//
+//	Vince Fuller, CMU-CSD, April 1986
+//	Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
+//
 // Modification history:
-!
+//
 // 2.2	7-Jan-1992	John Clement
-!	Added LOG$Flush for immediate output
-!
+//	Added LOG$Flush for immediate output
+//
 // 2.1	24-Dec-1991	Henry W. Miller		USBR
-!	In LOG_OUTPUT and ACT_OUTPUT, use configurable variables LOG_THRESHOLD
-!	and ACT_THRESHOLD to decide when to $FLUSH.  After all, we are
-!	having a drought.
-!
+//	In LOG_OUTPUT and ACT_OUTPUT, use configurable variables LOG_THRESHOLD
+//	and ACT_THRESHOLD to decide when to $FLUSH.  After all, we are
+//	having a drought.
+//
 // 2.0D	05-Aug-1991	Henry W. Miller		USBR
-!	In LOG_OUTPUT and ACT_OUTPUT, only $FLUSH() when a threshold of
-!	2048 bytes has been hit.  Should speed up logging considerably.
-!	Please excuse disgusting imagery.
-!
+//	In LOG_OUTPUT and ACT_OUTPUT, only $FLUSH() when a threshold of
+//	2048 bytes has been hit.  Should speed up logging considerably.
+//	Please excuse disgusting imagery.
+//
 // 2.0C	09-Jul-1991	Henry W. Miller		USBR
-!	Added LIB for VMS 5.4.
-!
+//	Added LIB for VMS 5.4.
+//
 // 2.0B	25-Mar-1991	Henry W. Miller		USBR
-!	In LOG_OPEN(), print out FAB or RAB STV if error.
-!	Define INIT_DYNDESC macro locally - $INIT_DYNDESC not working for
-!	some reason!!
-!
+//	In LOG_OPEN(), print out FAB or RAB STV if error.
+//	Define INIT_DYNDESC macro locally - $INIT_DYNDESC not working for
+//	some reason!!
+//
 // 2.0  20-Oct-1989	Bruce R. Miller		CMU NetDev
-!	Added code for doing activity file logging by basically
-!	duplicating the LOG file code.
-!
+//	Added code for doing activity file logging by basically
+//	duplicating the LOG file code.
+//
 // 1.9  19-Nov-87, Edit by VAF
-!	Use new $ACPWAKE macro.
-!
+//	Use new $ACPWAKE macro.
+//
 // 1.8  24-Mar-87, Edit by VAF
-!	Call RESET_PROCNAME to reset process name in exit handler.
-!
+//	Call RESET_PROCNAME to reset process name in exit handler.
+//
 // 1.7  24-Feb-87, Edit by VAF
-!	Move QL_FAO and message queue management routines in here.
-!	Fix a couple of misuses of LOG_STATE.
-!
+//	Move QL_FAO and message queue management routines in here.
+//	Fix a couple of misuses of LOG_STATE.
+//
 // 1.6  17-Feb-87, Edit by VAF
-!	Fix a bunch of problems with error logging.
-!
+//	Fix a bunch of problems with error logging.
+//
 // 1.5  16-Feb-87, Edit by VAF
-!	Fix ERROR_FAO/FATAL_FAO to add time+date and EOL before writing to
-!	the log file.
-!
+//	Fix ERROR_FAO/FATAL_FAO to add time+date and EOL before writing to
+//	the log file.
+//
 // 1.4   9-Feb-87, Edit by VAF
-!	Flush Error_Processor. New error handling routines are ERROR_FAO and
-!	FATAL_FAO. TCPMACROS updated to use these for references to old macros.
-!
+//	Flush Error_Processor. New error handling routines are ERROR_FAO and
+//	FATAL_FAO. TCPMACROS updated to use these for references to old macros.
+//
 // 1.3   6-Feb-87, Edit by VAF
-!	Change exiting message.
-!
+//	Change exiting message.
+//
 // 1.2  30-Sep-86, Edit by VAF
-!	Have exception handler send message to opr in addition to logging it
-!	to the log file.
-!	Have error handler always append message to log file.
-!	Have exit handler close log file if it is open.
-!
+//	Have exception handler send message to opr in addition to logging it
+//	to the log file.
+//	Have error handler always append message to log file.
+//	Have exit handler close log file if it is open.
+//
 // 1.1  30-May-86, Edit by VAF
-!	Get rid of PRINT_MSG routine - make synonymous with OPR_FAO.
-!
-!--
+//	Get rid of PRINT_MSG routine - make synonymous with OPR_FAO.
+//
+//--
 
 
+#if 0
 MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
 	      ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 			      NONEXTERNAL=LONG_RELATIVE),
 	      LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
 	      OPTIMIZE,OPTLEVEL=3,ZIP)=
-{
+#endif
+
 #include "SYS$LIBRARY:STARLET";
-!LIBRARY "SYS$LIBRARY:LIB";			// JC
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";
-#include "CMUIP_SRC:[CENTRAL]NETCOMMON";
-#include "TCPMACROS";
-#include "STRUCTURE";
+//LIBRARY "SYS$LIBRARY:LIB";			// JC
+//not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";
+#include <cmuip/central/include/netcommon.h>
+#include "tcpmacros.h"
+#include "structure.h"
 
 
 MACRO APPCHR(CHR,DPTR,DCNT,OCNT)
@@ -127,10 +129,10 @@ MACRO APPCHR(CHR,DPTR,DCNT,OCNT)
 MACRO
     Init_DynDesc (D)
 	{
-	$BBLOCK [D, DSC$W_Length]	= 0;
-	$BBLOCK [D, DSC$B_DType]	= DSC$K_DTYPE_T;
-	$BBLOCK [D, DSC$B_Class]	= DSC$K_CLASS_D;
-	$BBLOCK [D, DSC$A_Pointer]	= 0;
+	$BBLOCK [D, dsc$w_length]	= 0;
+	$BBLOCK [D, dsc$b_dtype]	= DSC$K_DTYPE_T;
+	$BBLOCK [D, dsc$b_class]	= DSC$K_CLASS_D;
+	$BBLOCK [D, dsc$a_pointer]	= 0;
 	}%;
 
 signed long
@@ -138,7 +140,7 @@ signed long
 	LOG_THRESHOLD	 = 512 ;
 
 
-APP}_DEC(DPTR,DCNT,NUM,OUTCNT) : NOVALUE (void)
+void APP}_DEC(DPTR,DCNT,NUM,OUTCNT)
 
 // Append a decimal value to a string
 //   DPTR - Address of pointer to destination string (updated on return)
@@ -152,7 +154,7 @@ APP}_DEC(DPTR,DCNT,NUM,OUTCNT) : NOVALUE (void)
     if (NUM == 0)
 	{
 	APPCHR(%C"0",DPTR,DCNT,OUTCNT);
-	RETURN;
+	return;
 	};
     DIV = 1000000000;			// Highest pwr of 10 in 32 bits
     VAL = NUM;
@@ -176,7 +178,7 @@ APP}_DEC(DPTR,DCNT,NUM,OUTCNT) : NOVALUE (void)
 	};
     }
 
-VOID ASCII_DEC_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
+VOID ASCII_DEC_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN)
 
 // Write a string of decimal bytes to a string descriptor.
 
@@ -185,8 +187,8 @@ VOID ASCII_DEC_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
 	CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
     OUTCNT = 0;
     CPTR = CH$PTR(SOURCE);
-    DCNT = DESC->DSC$W_LENGTH;
-    DPTR = CH$PTR(DESC->DSC$A_POINTER);
+    DCNT = DESC->dsc$w_length;
+    DPTR = CH$PTR(DESC->dsc$a_pointer);
     for (I=(COUNT-1);I>=0;I--)
 	{
 	CURBYTE = CH$RCHAR_A(CPTR);
@@ -195,7 +197,7 @@ VOID ASCII_DEC_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
 	    APPCHR(%C".",DPTR,DCNT,OUTCNT);
 	};
     if (LEN != 0)
-	.LEN = MIN(OUTCNT,DESC->DSC$W_LENGTH);
+	.LEN = MIN(OUTCNT,DESC->dsc$w_length);
     }
 
 APP}_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
@@ -220,7 +222,7 @@ APP}_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
 	}
     }
 
-VOID ASCII_HEX_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
+void ASCII_HEX_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN)
 
 // Write a string of hexidecimal bytes to a string descriptor.
 
@@ -228,8 +230,8 @@ VOID ASCII_HEX_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
     signed long
 	CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
     CPTR = CH$PTR(SOURCE);
-    DCNT = DESC->DSC$W_LENGTH;
-    DPTR = CH$PTR(DESC->DSC$A_POINTER);
+    DCNT = DESC->dsc$w_length;
+    DPTR = CH$PTR(DESC->dsc$a_pointer);
     OUTCNT = 0;
     for (I=(COUNT-1);I>=0;I--)
 	{
@@ -239,7 +241,7 @@ VOID ASCII_HEX_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
 	    APPCHR(%C"-",DPTR,DCNT,OUTCNT);
 	};
     if (LEN != 0)
-	.LEN = MIN(OUTCNT,DESC->DSC$W_LENGTH);
+	.LEN = MIN(OUTCNT,DESC->dsc$w_length);
     }
 
 FORWARD ROUTINE
@@ -405,14 +407,14 @@ LOG_OPEN (void)
     signed long
 	RC;
     RC = $CREATE(FAB = LOGFAB);
-    if (NOT RC)
+    if (! RC)
 	{
 	OPR$FAO("Log file $CREATE failed, RC = !XL, STV = !XL",
 	    RC, LOGFAB->FAB$L_STV);
 	return FALSE;
 	};
     RC = $CONNECT(RAB = LOGRAB);
-    if (NOT RC)
+    if (! RC)
 	{
 	OPR$FAO("Log file $CONNECT failed, RC = !XL, STV = !XL",
 	    RC, LOGRAB->FAB$L_STV);
@@ -436,7 +438,7 @@ LOG_CLOSE (void)
 FORWARD ROUTINE
  VOID    LOG_FAO;
 
-LOG_CHANGE(STATE) : NOVALUE (void)
+void LOG_CHANGE(STATE)
     {
     if (STATE != 0)
 	{			// He wants it open now
@@ -461,7 +463,7 @@ LOG_CHANGE(STATE) : NOVALUE (void)
 	};
     }
 
-LOG_OUTPUT(OUTDESC) : NOVALUE (void)
+void LOG_OUTPUT(OUTDESC)
 
 // Output a string to the log file.
 // OUTDESC is the address of a string descriptor.
@@ -476,12 +478,12 @@ LOG_OUTPUT(OUTDESC) : NOVALUE (void)
 	signed long
 	    RC;
 
-	LOGRAB->RAB$W_RSZ = OUTDESC->DSC$W_LENGTH;
-	LOGRAB->RAB$L_RBF = OUTDESC->DSC$A_POINTER;
-	LOGCOUNT = LOGCOUNT + OUTDESC->DSC$W_LENGTH ;
+	LOGRAB->RAB$W_RSZ = OUTDESC->dsc$w_length;
+	LOGRAB->RAB$L_RBF = OUTDESC->dsc$a_pointer;
+	LOGCOUNT = LOGCOUNT + OUTDESC->dsc$w_length ;
 
 	RC = $PUT(RAB = LOGRAB);
-!!!HACK!!// Take out this Flush!
+//!!HACK!!// Take out this Flush!
 	IF ( 	(LOGCOUNT > LOG_THRESHOLD)
 	   OR	(LOG_STATE && LOG$FLUSH) )	// JC
 	THEN {
@@ -492,7 +494,7 @@ LOG_OUTPUT(OUTDESC) : NOVALUE (void)
 
     }
 
-LOG_FAO(CSTR) : NOVALUE (void)
+void LOG_FAO(CSTR)
 
 // Do output to log file using $FAO to format parameters.
 
@@ -504,7 +506,7 @@ LOG_FAO(CSTR) : NOVALUE (void)
 	DESC$STR_ALLOC(OUTDESC,1000);
 
     RC = $FAOL(CTRSTR = CSTR,
-	       OUTLEN = OUTDESC->DSC$W_LENGTH,
+	       OUTLEN = OUTDESC->dsc$w_length,
 	       OUTBUF = OUTDESC,
 	       PRMLST = AP+8);
     if (RC)
@@ -513,7 +515,7 @@ LOG_FAO(CSTR) : NOVALUE (void)
 	OPR$FAO("LOG_FAO failure, error code is !XL",RC);
     }
 
-LOG_Time_Stamp: NOVALUE (void)
+void LOG_Time_Stamp (void)
 
 // Output to the LOG device/file the current time.  Char string ends
 // in a space (no crlf).
@@ -549,13 +551,13 @@ ACT_OPEN (void)
     signed long
 	RC;
     RC = $CREATE(FAB = ACTFAB);
-    if (NOT RC)
+    if (! RC)
 	{
 	OPR$FAO("Activity file $CREATE failed, RC = !XL",RC);
 	return FALSE;
 	};
     RC = $CONNECT(RAB = ACTRAB);
-    if (NOT RC)
+    if (! RC)
 	{
 	OPR$FAO("Activity file $CONNECT failed, RC = !XL",RC);
 	return FALSE;
@@ -578,7 +580,7 @@ ACT_CLOSE (void)
 FORWARD ROUTINE
  VOID    ACT_FAO;
 
-ACT_CHANGE(STATE) : NOVALUE (void)
+void ACT_CHANGE(STATE)
     {
     if (STATE != 0)
 	{			// e wants it open now
@@ -603,7 +605,7 @@ ACT_CHANGE(STATE) : NOVALUE (void)
 	};
     }
 
-ACT_OUTPUT(OUTDESC) : NOVALUE (void)
+void ACT_OUTPUT(OUTDESC)
 
 // Output a string to the activity log file.
 // OUTDESC is the address of a string descriptor.
@@ -617,9 +619,9 @@ ACT_OUTPUT(OUTDESC) : NOVALUE (void)
 	{
 	signed long
 	    RC;
-	ACTRAB->RAB$W_RSZ = OUTDESC->DSC$W_LENGTH;
-	ACTRAB->RAB$L_RBF = OUTDESC->DSC$A_POINTER;
-	ACTCOUNT = ACTCOUNT + OUTDESC->DSC$W_LENGTH ;
+	ACTRAB->RAB$W_RSZ = OUTDESC->dsc$w_length;
+	ACTRAB->RAB$L_RBF = OUTDESC->dsc$a_pointer;
+	ACTCOUNT = ACTCOUNT + OUTDESC->dsc$w_length ;
 
 	RC = $PUT(RAB = ACTRAB);
 	if ((ACTCOUNT > ACT_THRESHOLD))
@@ -630,7 +632,7 @@ ACT_OUTPUT(OUTDESC) : NOVALUE (void)
 	};
     }
 
-ACT_FAO(CSTR) : NOVALUE (void)
+void ACT_FAO(CSTR)
 
 // Do output to activity log file using $FAO to format parameters.
 
@@ -642,7 +644,7 @@ ACT_FAO(CSTR) : NOVALUE (void)
 	DESC$STR_ALLOC(OUTDESC,1000);
 
     RC = $FAOL(CTRSTR = CSTR,
-	       OUTLEN = OUTDESC->DSC$W_LENGTH,
+	       OUTLEN = OUTDESC->dsc$w_length,
 	       OUTBUF = OUTDESC,
 	       PRMLST = AP+8);
     if (RC)
@@ -651,7 +653,7 @@ ACT_FAO(CSTR) : NOVALUE (void)
 	OPR$FAO("ACT_FAO failure, error code is !XL",RC);
     }
 
-ACT_Time_Stamp: NOVALUE (void)
+void ACT_Time_Stamp (void)
 
 // Output to the activity log device/file the current time.  Char string ends
 // in a space (no crlf).
@@ -709,25 +711,25 @@ Send_2_Operator(Text)
 	MSGBUF : $BBLOCK->MAXCHR;
     BIND
 	MSGTEXT = MSGBUF->OPC$L_MS_TEXT : VECTOR[,BYTE],
-	NAMPTR = MYNAME->DSC$A_POINTER,
-	NAMLEN = MYNAME->DSC$W_LENGTH;
+	NAMPTR = MYNAME->dsc$a_pointer,
+	NAMLEN = MYNAME->dsc$w_length;
 
     MSGBUF->OPC$B_MS_TYPE = OPC$_RQ_RQST;
     MSGBUF->OPC$B_MS_TARGET = OPC$M_NM_CENTRL;
     MSGBUF->OPC$L_MS_RQSTID = Request_ID;
     Request_ID = Request_ID + 1;
-    MSGLEN = TEXT->DSC$W_LENGTH;
+    MSGLEN = TEXT->dsc$w_length;
     if (MSGLEN > MAXCHR)
 	.MSGLEN = MAXCHR;
-    CH$MOVE(MSGLEN,TEXT->DSC$A_POINTER,MSGTEXT);
-    MSG->DSC$W_LENGTH = 8+.MSGLEN;
-    MSG->DSC$B_CLASS = DSC$K_CLASS_Z;
-    MSG->DSC$B_DTYPE = DSC$K_DTYPE_Z;
-    MSG->DSC$A_POINTER = MSGBUF;
+    CH$MOVE(MSGLEN,TEXT->dsc$a_pointer,MSGTEXT);
+    MSG->dsc$w_length = 8+.MSGLEN;
+    MSG->dsc$b_class = DSC$K_CLASS_Z;
+    MSG->dsc$b_dtype = DSC$K_DTYPE_Z;
+    MSG->dsc$a_pointer = MSGBUF;
     return $SNDOPR(MSGBUF=MSG);
     }
 
-OPR_FAO(CSTR) : NOVALUE (void)
+void OPR_FAO(CSTR) 
 
 // Send a message to the VMS operator, using $FAO for output formatting.
 
@@ -740,16 +742,16 @@ OPR_FAO(CSTR) : NOVALUE (void)
 	DESC$STR_ALLOC(OPRDESC,1000);
 
     RC = $FAOL(CTRSTR = CSTR,
-	       OUTLEN = OUTDESC->DSC$W_LENGTH,
+	       OUTLEN = OUTDESC->dsc$w_length,
 	       OUTBUF = OUTDESC,
 	       PRMLST = AP+8);
-    if (NOT RC)
+    if (! RC)
 	$EXIT(CODE = RC);
 
 // Reformat for console output
 
-    RC = $FAO(%ASCID"IPACP: !AS",OPRDESC->DSC$W_LENGTH,OPRDESC,OUTDESC);
-    if (NOT RC)
+    RC = $FAO(%ASCID"IPACP: !AS",OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    if (! RC)
 	$EXIT(CODE = RC);
     S}_2_OPERATOR(OPRDESC);
     }
@@ -759,10 +761,10 @@ signed long BIND
 
 //SBTTL "Error processing routines - ERROR_FAO, FATAL_FAO"
 
-ERROR_FAO(CSTR) : NOVALUE (void)
-!
+void ERROR_FAO(CSTR)
+//
 // Send a message to the console & log the error (OPR_FAO + LOG_FAO)
-!
+//
     {
     BUILTIN
 	AP;
@@ -776,10 +778,10 @@ ERROR_FAO(CSTR) : NOVALUE (void)
 // Format the message string
 
     RC = $FAOL(CTRSTR = CSTR,
-	       OUTLEN = OUTDESC->DSC$W_LENGTH,
+	       OUTLEN = OUTDESC->dsc$w_length,
 	       OUTBUF = OUTDESC,
 	       PRMLST = AP+8);
-    if (NOT RC)
+    if (! RC)
 	{
 	OPR$FAO("ERROR_FAO failure, RC = !XL",RC);
 	$EXIT(CODE = RC);
@@ -787,15 +789,15 @@ ERROR_FAO(CSTR) : NOVALUE (void)
 
 // Format and send message to the operator
 
-    RC = $FAO(%ASCID"?IPACP: !AS",OPRDESC->DSC$W_LENGTH,OPRDESC,OUTDESC);
-    if (NOT RC)
+    RC = $FAO(%ASCID"?IPACP: !AS",OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    if (! RC)
 	$EXIT(CODE = RC);
     S}_2_OPERATOR(OPRDESC);
 
 // Format the message for logging - add time+date and EOL
 
-    RC = $FAO(%ASCID"!%T !AS!/",LOGDESC->DSC$W_LENGTH,LOGDESC,0,OUTDESC);
-    if (NOT RC)
+    RC = $FAO(%ASCID"!%T !AS!/",LOGDESC->dsc$w_length,LOGDESC,0,OUTDESC);
+    if (! RC)
 	$EXIT(CODE = RC);
 
 // Make sure we are logging something & log it
@@ -807,10 +809,10 @@ ERROR_FAO(CSTR) : NOVALUE (void)
     }
 
 
-FATAL_FAO(CSTR) : NOVALUE (void)
-!
+void FATAL_FAO(CSTR)
+//
 // Same as above, except also exit the ACP.
-!
+//
     {
     BUILTIN
 	AP;
@@ -824,10 +826,10 @@ FATAL_FAO(CSTR) : NOVALUE (void)
 // Format the output string
 
     RC = $FAOL(CTRSTR = CSTR,
-	       OUTLEN = OUTDESC->DSC$W_LENGTH,
+	       OUTLEN = OUTDESC->dsc$w_length,
 	       OUTBUF = OUTDESC,
 	       PRMLST = AP+8);
-    if (NOT RC)
+    if (! RC)
 	{
 	OPR$FAO("FATAL_FAO failure, RC = !XL",RC);
 	$EXIT(CODE = RC);
@@ -835,14 +837,14 @@ FATAL_FAO(CSTR) : NOVALUE (void)
 
 // Format & send message to the operator
 
-    RC = $FAO(%ASCID"?IPACP: !AS",OPRDESC->DSC$W_LENGTH,OPRDESC,OUTDESC);
-    if (NOT RC)
+    RC = $FAO(%ASCID"?IPACP: !AS",OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    if (! RC)
 	$EXIT(CODE = RC);
     S}_2_OPERATOR(OPRDESC);
 
 // Format it for logging
 
-    RC = $FAO(%ASCID"!%T !AS!/",LOGDESC->DSC$W_LENGTH,LOGDESC,
+    RC = $FAO(%ASCID"!%T !AS!/",LOGDESC->dsc$w_length,LOGDESC,
 	      0,OUTDESC);
 
 // Make sure we are logging something & log it
@@ -862,42 +864,46 @@ FATAL_FAO(CSTR) : NOVALUE (void)
     log messages are queued and later written in non-AST context.
 */
 
-$FIELD QB$ERRMSG_FIELDS (void)
-    SET
-    EMQ$NEXT	= [$Address],	// Next item on queue
-    EMQ$LAST	= [$Address],	// Previous item on queue
-    EMQ$MDSC	= [$BYTES(8)]	// Message descriptor
-    TES;
-LITERAL
-    QB$ERRMSG_SIZE = $FIELD_SET_SIZE;
+struct QB$ERRMSG
+{
+void *     EMQ$NEXT	;	// Next item on queue
+void *     EMQ$LAST	;	// Previous item on queue
+long long    EMQ$MDSC	;	// Message descriptor
+    };
+
+#define    QB$ERRMSG_SIZE sizeof(struct QB$ERRMSG)
+#if 0
 MACRO
     QB$ERRMSG = BLOCK->QB$ERRMSG_SIZE FIELD(QB$ERRMSG_FIELDS) %;
+#endif
 
-$FIELD QH$ERRHDR_FIELDS (void)
-    SET
-    EM$QHEAD	= [$Address],
-    EM$QTAIL	= [$Address]
-    TES;
-LITERAL
-    QH$ERRHDR_SIZE = $FIELD_SET_SIZE;
+struct QH$ERRHDR 
+{
+void *     EM$QHEAD	;
+void *    EM$QTAIL;
+    };
+
+#define ERRHDR_SIZE sizeof(struct QH$ERRHDR)
+#if 0
 MACRO
     QH$ERRHDR = BLOCK->QH$ERRHDR_SIZE FIELD(QH$ERRHDR_FIELDS) %;
+#endif
 
 static signed long
     ERR_MSG_Q : QH$ERRHDR PRESET([EM$QHEAD] = ERR_MSG_Q,
 				 [EM$QTAIL] = ERR_MSG_Q);
 
-QL_FAO(CSTR) : NOVALUE (void)
-!
+void QL_FAO(CSTR)
+//
 // Format and queue an error message using $FAO and the message queue.
-!
+//
     {
     EXTERNAL
 	SLEEPING;
     EXTERNAL ROUTINE
 	MM$QBLK_GET,
-	MM$QBlk_Free : NOVALUE,
-	LIB$SYS_FAOL : BLISS ADDRESSING_MODE(GENERAL);
+void	MM$QBlk_Free ,
+	LIB$SYS_FAOL ;
     BUILTIN
 	AP,
 	INSQUE;
@@ -909,7 +915,7 @@ QL_FAO(CSTR) : NOVALUE (void)
 // Make sure logging is enabled
 
     if (LOG_STATE == 0)
-	RETURN;
+	return;
 
 // Allocate a queue block for the message
 
@@ -920,12 +926,12 @@ QL_FAO(CSTR) : NOVALUE (void)
 
 // Format the message
 
-    RC = LIB$SYS_FAOL(CSTR, MDSC->DSC$W_LENGTH, MDSC, AP+8);
-    if (NOT RC)
+    RC = LIB$SYS_FAOL(CSTR, MDSC->dsc$w_length, MDSC, AP+8);
+    if (! RC)
 	{
 	OPR$FAO("QL_FAO failure, RC = !XL",RC);
 	MM$QBlk_Free(QB);
-	RETURN;
+	return;
 	};
 
 // Insert the entry onto the queue
@@ -938,15 +944,15 @@ QL_FAO(CSTR) : NOVALUE (void)
     $ACPWAKE;
     }
 
-CHECK_ERRMSG_Q : NOVALUE (void)
-!
+void CHECK_ERRMSG_Q (void)
+//
 // Write all of the messages pending on the error message queue.
 // Called from main TCP processing loop after all useful work has been done.
-!
+//
     {
     EXTERNAL ROUTINE
-	MM$QBlk_Free : NOVALUE,
-	STR$FREE1_DX : BLISS ADDRESSING_MODE(GENERAL);
+void	MM$QBlk_Free ,
+	STR$FREE1_DX ;
     BUILTIN
 	REMQUE;
     signed long
@@ -986,11 +992,11 @@ Side Effects:
 	All user IO is posted with the TCP error "TCP is Exiting".
 */
 
- Exit_Handler: NOVALUE (void)
+void Exit_Handler (void)
     {
     EXTERNAL ROUTINE
-	USER$Purge_All_IO : NOVALUE,
-	RESET_PROCNAME : NOVALUE;
+void	USER$Purge_All_IO ,
+void	RESET_PROCNAME ;
 
     ERROR$FAO("Exit handler: Exit requested, cleaning up...");
 
@@ -1035,14 +1041,11 @@ Exception_Handler(SIG,MECH)
     MAP
 	struct BLOCK * SIG[,BYTE],
 	struct BLOCK * MECH[,BYTE];
-    EXTERNAL ROUTINE
-	USER$Purge_All_IO : NOVALUE;
+extern void	USER$Purge_All_IO ();
 
     ERROR$FAO("Exception handler: signal name !XL",SIG->CHF$L_SIG_NAME);
     USER$Purge_All_IO();
     $FLUSH(RAB = LOGRAB);
     $FLUSH(RAB = ACTRAB);
-    RETURN(SS$_Resignal);
+    return(SS$_Resignal);
     }
-}
-ELUDOM

@@ -58,28 +58,29 @@ Modification History:
 
 //SBTTL "Module definition"	
 
+#if 0
 MODULE ICMP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 	    ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 			    NONEXTERNAL=LONG_RELATIVE),
 	    LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
 	    OPTIMIZE,OPTLEVEL=3,ZIP)=
 
-{
+#endif
 
 // Include standard definition files
 
-!LIBRARY "SYS$LIBRARY:STARLET";
-#include "SYS$LIBRARY:LIB";
-#include "CMUIP_SRC:[CENTRAL]NETERROR";
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";
-#include "CMUIP_SRC:[CENTRAL]NETVMS";
-#include "CMUIP_SRC:[CENTRAL]NETCOMMON";
-#include "CMUIP_SRC:[CENTRAL]NetTCPIP";	// IP & ICMP definitions
-#include "STRUCTURE";
-#include "TCPMACROS";
-#include "SNMP";
+//LIBRARY "SYS$LIBRARY:STARLET";
+// not yet#include "SYS$LIBRARY:LIB";
+#include <cmuip/central/include/NETERROR";
+//not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";
+#include "netvms.h"
+#include <cmuip/central/include/netcommon.h>
+#include <cmuip/central/include/nettcpip.h>	// IP & ICMP definitions
+#include "structure.h"
+#include "tcpmacros.h"
+#include "snmp.h"
 
-!*** Special literals from USER.BLI ***
+//*** Special literals from USER.BLI ***
 
 extern signed long LITERAL
     UCB$Q_DDP,
@@ -100,85 +101,86 @@ extern signed long
 
 // External routines
 
-extern
-
 // MACLIB.MAR
 
- void    Swapbytes,
- void    Movbyt,
-    Calc_Checksum,
+extern  void    Swapbytes();
+extern  void    Movbyt();
+extern     Calc_Checksum();
 
 // MEMGR.BLI
 
- void    MM$UArg_Free,
-    MM$QBLK_Get,
- void    MM$QBLK_Free,
-    MM$Seg_Get,
- void    MM$Seg_Free,
+extern  void    MM$UArg_Free();
+extern     MM$QBLK_Get();
+extern  void    MM$QBLK_Free();
+extern     MM$Seg_Get();
+extern  void    MM$Seg_Free();
 
 // USER.BLI
 
-    USER$CHECK_ACCESS,
-    USER$Err,
- VOID    IO$POST,
- void    User$Post_IO_Status,
+extern     USER$CHECK_ACCESS();
+extern     USER$Err();
+extern  VOID    IO$POST();
+extern  void    User$Post_IO_Status();
 
 // IP.BLI
 
- VOID    IP$SET_HOSTS,
-    IP$S},
+extern  VOID    IP$SET_HOSTS();
+extern     IP$S}();
 
 // NMLOOK.BLI
 
- VOID    NML$CANCEL,
- VOID    NML$GETALST,
- VOID    NML$GETNAME,
+extern  VOID    NML$CANCEL();
+extern  VOID    NML$GETALST();
+extern  VOID    NML$GETNAME();
 
 // IOUTIL.BLI
 
-    GET_IP_ADDR,
- VOID    ASCII_DEC_BYTES,
- VOID    ASCII_HEX_BYTES,
- VOID    LOG_FAO,
- VOID    QL_FAO;
+extern     GET_IP_ADDR();
+extern  VOID    ASCII_DEC_BYTES();
+extern  VOID    ASCII_HEX_BYTES();
+extern  VOID    LOG_FAO();
+extern  VOID    QL_FAO();
 
 
 //SBTTL "ICMP data structures"
 
 // Define the "ICMPCB" - ICMP analogue of TCB.
 
-$FIELD  ICMPCB_Fields (void)
-    SET
-    ICMPCB$Foreign_Host	= [$Ulong],	// ICMP foreign host number
-    ICMPCB$Local_Host	= [$Ulong],	//     local host
-    ICMPCB$Foreign_Hname	= [$Bytes(MAX_HNAME)],
-    ICMPCB$Foreign_Hnlen	= [$Short_Integer],
-    ICMPCB$USR_Qhead	= [$Address],	// User receive request queue
-    ICMPCB$USR_Qtail	= [$Address],
-    ICMPCB$NR_Qhead	= [$Address],	// Net receive queue
-    ICMPCB$NR_Qtail	= [$Address],
-    ICMPCB$NR_Qcount	= [$Short_Integer],
-    ICMPCB$Flags		= [$Bytes(2)],
-    $OVERLAY(ICMPCB$Flags)
-	ICMPCB$Wildcard	= [$Bit],	// ICMPCB opened with wild FH/FP/LH
-!	ICMPCB$Addr_Mode	= [$Bit],	// User wants IP addresses
-	ICMPCB$Aborting	= [$Bit],	// ICMPCB is closing
-	ICMPCB$NMLook	= [$Bit],	// ICMPCB has an outstanding name lookup
-	ICMPCB$Internal	= [$Bit],	// ICMPCB is open by ACP not user
-    $CONTINUE
-    ICMPCB$ICMPCBID		= [$Address],	// ICMPCB_Table index for this connection
-    ICMPCB$UCB_Adrs	= [$Address],	// Connection UCB address
-    ICMPCB$UARGS	= [$Address],	// Uarg block in pending open
-    ICMPCB$User_ID	= [$Bytes(4)],	// Process ID of owner
-    ICMPCB$PIOchan	= [$Bytes(2)]	// Process IO channel
-    TES;
+struct  ICMPCB
+    {
+unsigned long     ICMPCB$Foreign_Host	;	// ICMP foreign host number
+unsigned long     ICMPCB$Local_Host	;	//     local host
+char    ICMPCB$Foreign_Hname[MAX_HNAME];
+short    ICMPCB$Foreign_Hnlen;
+void *     ICMPCB$USR_Qhead	;	// User receive request queue
+void *     ICMPCB$USR_Qtail	;
+void *     ICMPCB$NR_Qhead	;	// Net receive queue
+void *     ICMPCB$NR_Qtail	;
+short    ICMPCB$NR_Qcount;
+union {
+short    ICMPCB$Flags;
+struct {
+unsigned 	ICMPCB$Wildcard	 : 1;	// ICMPCB opened with wild FH/FP/LH
+unsigned //	ICMPCB$Addr_Mode	 : 1;	// User wants IP addresses
+unsigned 	ICMPCB$Aborting	 : 1;	// ICMPCB is closing
+unsigned 	ICMPCB$NMLook	 : 1;	// ICMPCB has an outstanding name lookup
+unsigned 	ICMPCB$Internal	 : 1;	// ICMPCB is open by ACP not user
+};
+};
+void *     ICMPCB$ICMPCBID		;	// ICMPCB_Table index for this connection
+void *     ICMPCB$UCB_Adrs	;	// Connection UCB address
+void *     ICMPCB$UARGS	;	// Uarg block in pending open
+long    ICMPCB$User_ID	;	// Process ID of owner
+short    ICMPCB$PIOchan	;	// Process IO channel
+    };
 
-LITERAL
-    ICMPCB_Size = $Field_Set_Size;
+
+#define    ICMPCB_Size sizeof(struct  ICMPCB_Structure)
+#if 0
 MACRO
     ICMPCB_Structure = BLOCK->ICMPCB_Size FIELD(ICMPCB_Fields) %;
 //MESSAGE(%NUMBER(ICMPCB_Size)," longwords per ICMPCB")
-
+#endif
 
 
 //SBTTL "ICMP data storage"
@@ -198,7 +200,7 @@ static signed long
     Queue up a log entry to dump out a ICMP packet.
  )%
 
-Log_ICMP_Packet(Seg,SwapFlag,SendFlag) : NOVALUE (void)
+void Log_ICMP_Packet(Seg,SwapFlag,SendFlag)
     {
     MAP
 	struct ICMP_Structure * Seg;
@@ -267,7 +269,7 @@ ICMPCB_Find(Src$Adrs)
 FORWARD ROUTINE
     Queue_User_ICMP;
 
-ICMP$User_Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg): NOvalue=
+void ICMP$User_Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
     {
     MAP
 	struct ICMP_Structure * Seg;
@@ -291,14 +293,14 @@ ICMP$User_Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg): NOvalue=
     if ($$LOGF(LOG$ICMP))
 	Log_ICMP_Packet(Seg,TRUE,FALSE);
 
-!!!HACK!!// I deleted this.  It should be done 
+//!!HACK!!// I deleted this.  It should be done 
 
 // Try to match the input packet up with a ICMPCB
-!!!HACK!!// What if there's more than one ICMPCB for this address?
+//!!HACK!!// What if there's more than one ICMPCB for this address?
     ICMPCB = ICMPCB_Find(Src$Adrs);
     if (ICMPCB == 0)
 	{
-!!!HACK!!// Don"t worry if there"e no ICMPCB.
+//!!HACK!!// Don"t worry if there"e no ICMPCB.
 	if ($$LOGF(LOG$ICMP))
 	    QL$FAO("!%T No ICMPCB found for segment !XL!/",0,Seg);
 	}
@@ -322,7 +324,7 @@ X:	{
 
 	Buf2 = MM$Seg_Get(Bufsize);	// Get a buffer
 	Seg = Buf2 + (Seg - Buf);
-!!!HACK!!// There's no need to copy the whole buffer, only Usize worth...
+//!!HACK!!// There's no need to copy the whole buffer, only Usize worth...
 	MOVBYT(Bufsize,Buf,Buf2);
 
 // Setup pointer to ICMP data and ICMP data size
@@ -416,7 +418,7 @@ Queue_User_ICMP(ICMPCB,Uptr,Usize,Buf,Bufsize,QB)
     is posted.
  )%
 
-Deliver_ICMP_Data(ICMPCB,QB,URQ) : NOVALUE (void)
+void Deliver_ICMP_Data(ICMPCB,QB,URQ)
     {
     MAP
 	struct ICMPCB_Structure * ICMPCB,
@@ -534,7 +536,7 @@ X:  {			// ** Block X **
 //    LIB$GET_VM(%REF(ICMPCB_Size*4),ICMPCB);
     Pages = ((ICMPCB_Size * 4) / 512) + 1 ;
     RC = LIB$GET_VM_PAGE(Pages, ICMPCB);
-    if (NOT RC)
+    if (! RC)
 	FATAL$FAO("ICMPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 
 // Clear it out and set it in the table
@@ -560,7 +562,7 @@ X:  {			// ** Block X **
 
 //SBTTL "ICMPCB_Free - Deallocate a ICMPCB"
 
-void ICMPCB_Free(ICMPCBIX,struct ICMPCB_Structure * ICMPCB) (void)
+void ICMPCB_Free(ICMPCBIX,struct ICMPCB_Structure * ICMPCB)
     {
     EXTERNAL ROUTINE
 	LIB$FREE_VM 		: ADDRESSING_MODE(GENERAL),
@@ -579,23 +581,23 @@ void ICMPCB_Free(ICMPCBIX,struct ICMPCB_Structure * ICMPCB) (void)
 //    LIB$FREE_VM(%REF(ICMPCB_Size*4),ICMPCB);
     Pages = ((ICMPCB_Size * 4) / 512) + 1 ;
     RC = LIB$FREE_VM_PAGE(Pages, ICMPCB);
-    if (NOT RC)
+    if (! RC)
 	FATAL$FAO("ICMPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     ICMPCB_Count = ICMPCB_Count-1;
     }
 
 //SBTTL "Kill_ICMP_Requests - purge all I/O requests for a connection"
 
-void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,RC) (void)
+void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,RC)
     {
     signed long
 	struct queue_blk_structure(QB_UR_Fields) * URQ,
 	struct queue_blk_structure(QB_NR_Fields) * QB;
 
 // Make sure we aren't doing this more than once
-!
+//
 //   if (ICMPCB->ICMPCB$Aborting)
-!	RETURN;
+//	return;
 
 // Say that this connection is aborting (prevent future requests)
 
@@ -644,16 +646,16 @@ void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,RC) (void)
 
 //SBTTL "ICMPCB_Close - Close/deallocate a ICMPCB"
 
-void ICMPCB_Close(UIDX,struct ICMPCB_Structure * ICMPCB,RC) (void)
+void ICMPCB_Close(UIDX,struct ICMPCB_Structure * ICMPCB,RC)
     {
     Kill_ICMP_Requests(ICMPCB,RC);
     ICMPCB_FREE(UIDX,ICMPCB);
     }
 
-void ICMPCB_Abort(struct ICMPCB_Structure * ICMPCB,RC) (void)
-!
+void ICMPCB_Abort(struct ICMPCB_Structure * ICMPCB,RC)
+//
 // Abort a ICMPCB - called by ICMP code.
-!
+//
     {
     if (ICMPCB->ICMPCB$Internal)
 	Kill_ICMP_Requests(ICMPCB,RC)
@@ -664,7 +666,7 @@ void ICMPCB_Abort(struct ICMPCB_Structure * ICMPCB,RC) (void)
 
 //SBTTL "ICMP$Purge_All_IO - delete ICMP database before network exits"
 
-ICMP$Purge_All_IO : NOVALUE (void)
+void ICMP$Purge_All_IO (void)
     {
     signed long
 	ICMPCBIDX,
@@ -689,7 +691,7 @@ FORWARD ROUTINE
  VOID    ICMP_NMLOOK_DONE,
  VOID    ICMP_ADLOOK_DONE;
 
-void ICMP$OPEN(struct User_Open_Args * Uargs) (void)
+void ICMP$OPEN(struct User_Open_Args * Uargs)
     {
     signed long
 	IPADDR,
@@ -711,7 +713,7 @@ void ICMP$OPEN(struct User_Open_Args * Uargs) (void)
     if ((ICMPCB = ICMPCB_Get(UIDX)) <= 0)
 	{
 	USER$Err(Uargs,NET$_UCT);
-	RETURN;
+	return;
 	};
 
 // Initialize user mode values
@@ -737,7 +739,7 @@ void ICMP$OPEN(struct User_Open_Args * Uargs) (void)
 
     NAMPTR = CH$PTR(Uargs->OP$Foreign_Host);
     NAMLEN = Uargs->OP$Foreign_Hlen;
-    if ((NOT Uargs->OP$ADDR_FLAG) && (NAMLEN == 0))
+    if ((! Uargs->OP$ADDR_FLAG) && (NAMLEN == 0))
 	{
 	ICMPCB->ICMPCB$Wildcard = TRUE;
 	ICMPCB->ICMPCB$Foreign_Host = WILD;
@@ -745,7 +747,7 @@ void ICMP$OPEN(struct User_Open_Args * Uargs) (void)
 	ICMPCB->ICMPCB$Local_Host = WILD;
 	ICMPCB->ICMPCB$Uargs = Uargs;
 	ICMP_NMLOOK_DONE(ICMPCB,SS$_NORMAL,0,0,0,0);
-	RETURN;
+	return;
 	};
 
 // Check for supplied IP address instead of name
@@ -761,7 +763,7 @@ X:  {			// *** Block X ***
     ICMP_NMLOOK_DONE(ICMPCB,SS$_NORMAL,1,IPADDR,0,0);
     ICMPCB->ICMPCB$NMLook = TRUE;
     NML$GETNAME(IPADDR,ICMP_ADLOOK_DONE,ICMPCB);
-    RETURN;
+    return;
     }			// *** Block X ***
 
 // "standard" case, host name is supplied - start name lookup for it
@@ -780,7 +782,7 @@ X:  {			// *** Block X ***
     and post the users open request.
 */
 
-ICMP_NMLOOK_DONE(ICMPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE (void)
+void ICMP_NMLOOK_DONE(ICMPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
     {
     MAP
 	struct ICMPCB_Structure * ICMPCB;
@@ -793,7 +795,7 @@ ICMP_NMLOOK_DONE(ICMPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE (void)
 	    {
 	    USER$Err(Uargs,EC);
 	    ICMPCB_FREE(ICMPCB->ICMPCB$ICMPCBID,ICMPCB);
-	    RETURN;
+	    return;
 	    } %;
 
 // Clear name lookup flag and get uargs
@@ -806,22 +808,22 @@ ICMP_NMLOOK_DONE(ICMPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE (void)
 
 // Check status of the name lookup
 
-    if (NOT STATUS)
+    if (! STATUS)
 	UOP_ERROR(STATUS);
 
 // Finish up the common part of the open
 
     RC = ICMP_COPEN_DONE(ICMPCB,ADRCNT,ADRLST);
-    if (NOT RC)
+    if (! RC)
 	UOP_ERROR(RC);
 
 // Verify that we have access to the host set
 
-!!!HACK!!// Should we do this or not??
+//!!HACK!!// Should we do this or not??
 //    RC = USER$CHECK_ACCESS(ICMPCB->ICMPCB$USER_ID,ICMPCB->ICMPCB$Local_Host,
-!		      0,ICMPCB->ICMPCB$Foreign_Host,0);
-//    if (NOT RC)
-!	UOP_ERROR(RC);
+//		      0,ICMPCB->ICMPCB$Foreign_Host,0);
+//    if (! RC)
+//	UOP_ERROR(RC);
 
 // Set the foreign host name in the ICMPCB
 
@@ -860,7 +862,7 @@ ICMP_COPEN_DONE(ICMPCB,ADRCNT,ADRLST)
 
 //SBTTL "ICMP_ADLOOK_DONE - Finish ICMP address to name lookup"
 
-ICMP_ADLOOK_DONE(ICMPCB,STATUS,NAMLEN,NAMPTR) : NOVALUE (void)
+void ICMP_ADLOOK_DONE(ICMPCB,STATUS,NAMLEN,NAMPTR)
     {
     MAP
 	struct ICMPCB_Structure * ICMPCB;
@@ -871,8 +873,8 @@ ICMP_ADLOOK_DONE(ICMPCB,STATUS,NAMLEN,NAMPTR) : NOVALUE (void)
 
 // Check status
 
-    if (NOT STATUS)
-	RETURN;
+    if (! STATUS)
+	return;
 
 // Copy the hostname into the ICMPCB
 
@@ -887,7 +889,7 @@ ICMP_ADLOOK_DONE(ICMPCB,STATUS,NAMLEN,NAMPTR) : NOVALUE (void)
     associated with a connection.
 */
 
-void ICMP$CLOSE(struct User_Close_Args * Uargs) (void)
+void ICMP$CLOSE(struct User_Close_Args * Uargs)
     {
     signed long
 	struct ICMPCB_Structure * ICMPCB,
@@ -898,7 +900,7 @@ void ICMP$CLOSE(struct User_Close_Args * Uargs) (void)
     if ((ICMPCB = ICMPCB_OK(Uargs->CL$Local_Conn_ID,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);
-	RETURN;
+	return;
 	};
 
 // Use common routine for closing
@@ -916,7 +918,7 @@ void ICMP$CLOSE(struct User_Close_Args * Uargs) (void)
     Abort a ICMP "connection". Identical in functionality to ICMP$CLOSE.
  )%
 
-void ICMP$ABORT(struct User_Abort_Args * Uargs) (void)
+void ICMP$ABORT(struct User_Abort_Args * Uargs)
     {
     signed long
 	struct ICMPCB_Structure * ICMPCB,
@@ -927,7 +929,7 @@ void ICMP$ABORT(struct User_Abort_Args * Uargs) (void)
     if ((ICMPCB = ICMPCB_OK(Uargs->AB$Local_Conn_ID,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);
-	RETURN;
+	return;
 	};
 
 // Use common routine for closing
@@ -946,7 +948,7 @@ void ICMP$ABORT(struct User_Abort_Args * Uargs) (void)
     user's data buffer and hand it to IP layer for transmission.
  )%
 
-void ICMP$S}(struct User_Send_Args * Uargs) (void)
+void ICMP$S}(struct User_Send_Args * Uargs)
     {
     signed long
 	RC,
@@ -966,7 +968,7 @@ void ICMP$S}(struct User_Send_Args * Uargs) (void)
 	USER$Err(Uargs,RC);	// No such connection
 	ICMP_MIB->MIB$icmpOutErrors =
 		ICMP_MIB->mib$icmpOutErrors + 1;
-	RETURN;
+	return;
 	};
     XLOG$FAO(LOG$USER,"!%T ICMP$S}: Conn=!XL, ICMPCB=!XL, Size=!SL!/",
 	     0,Uargs->SE$Local_Conn_ID,ICMPCB,Uargs->SE$Buf_size);
@@ -979,7 +981,7 @@ void ICMP$S}(struct User_Send_Args * Uargs) (void)
 	USER$Err(Uargs,NET$_CC);
 	ICMP_MIB->MIB$icmpOutErrors =
 		ICMP_MIB->mib$icmpOutErrors + 1;
-	RETURN;
+	return;
 	};
 
 // Check for invalid buffer size
@@ -989,7 +991,7 @@ void ICMP$S}(struct User_Send_Args * Uargs) (void)
 	USER$Err(Uargs,NET$_BTS);
 	ICMP_MIB->MIB$icmpOutErrors =
 		ICMP_MIB->mib$icmpOutErrors + 1;
-	RETURN;
+	return;
 	};
 
 // Check for "address mode" connection and set host addresses from user buffer
@@ -1008,7 +1010,7 @@ void ICMP$S}(struct User_Send_Args * Uargs) (void)
 	USER$Err(Uargs,NET$_NOPN);
 	ICMP_MIB->MIB$icmpOutErrors =
 		ICMP_MIB->mib$icmpOutErrors + 1;
-	RETURN;
+	return;
 	};
 
 // Allocate an output buffer and build an IP packet
@@ -1043,7 +1045,7 @@ void ICMP$S}(struct User_Send_Args * Uargs) (void)
 // Swap the header bytes and compute the checksum
 
     SwapBytes(ICMP_Header_Size/2,Seg);
-!!!HACK!!// Hardwired in ICMP Header size of 8.
+//!!HACK!!// Hardwired in ICMP Header size of 8.
     Seg->ICM$CkSum=Calc_Checksum(USize+ICMP_Header_Size,Seg);
 
 // Log the ICMP packet if desired
@@ -1107,7 +1109,7 @@ void ICMP$S}(struct User_Send_Args * Uargs) (void)
     immediately. Otherwise, queue up the user receive for later.
  )%
 
-void ICMP$RECEIVE(struct User_Recv_Args * Uargs) (void)
+void ICMP$RECEIVE(struct User_Recv_Args * Uargs)
     {
     signed long
 	struct ICMPCB_Structure * ICMPCB,
@@ -1120,7 +1122,7 @@ void ICMP$RECEIVE(struct User_Recv_Args * Uargs) (void)
     if ((ICMPCB = ICMPCB_OK(Uargs->RE$Local_Conn_ID,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// No such connection
-	RETURN;
+	return;
 	};
     XLOG$FAO(LOG$USER,"!%T ICMP$RECEIVE: Conn=!XL, ICMPCB=!XL, Size=!SL!/",
 	     0,Uargs->RE$Local_Conn_ID,ICMPCB,Uargs->RE$Buf_size);
@@ -1131,7 +1133,7 @@ void ICMP$RECEIVE(struct User_Recv_Args * Uargs) (void)
 	{
 	XLOG$FAO(LOG$USER,"!%T ICMP$RECEIVE for aborted ICMPCB !XL!/",0,ICMPCB);
 	USER$Err(Uargs,NET$_CC);
-	RETURN;
+	return;
 	};
 
 // Check for invalid buffer size
@@ -1139,7 +1141,7 @@ void ICMP$RECEIVE(struct User_Recv_Args * Uargs) (void)
     if (Uargs->RE$Buf_Size <= 0)
 	{
 	USER$Err(Uargs,NET$_BTS);
-	RETURN;
+	return;
 	};
 
 // Make a request block for the receive
@@ -1168,10 +1170,9 @@ void ICMP$RECEIVE(struct User_Recv_Args * Uargs) (void)
     Read the host names/numbers for a ICMP connection.
  )%
 
-void ICMP$INFO(struct User_Info_Args * Uargs) (void)
+void ICMP$INFO(struct User_Info_Args * Uargs)
     {
-    EXTERNAL ROUTINE
-	USER$Net_Connection_Info : NOVALUE;
+extern	void USER$Net_Connection_Info();
     signed long
 	struct ICMPCB_Structure * ICMPCB,
 	RC;
@@ -1181,7 +1182,7 @@ void ICMP$INFO(struct User_Info_Args * Uargs) (void)
     if ((ICMPCB = ICMPCB_OK(Uargs->IF$Local_Conn_ID,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Bad connection ID
-	RETURN;
+	return;
 	};
 
 // Give the information back (common TCP/ICMP routine in USER.BLI)
@@ -1200,7 +1201,7 @@ void ICMP$INFO(struct User_Info_Args * Uargs) (void)
     currently implemented for the TCP protocol.
  )%
 
-void ICMP$STATUS(struct User_Status_Args * Uargs) (void)
+void ICMP$STATUS(struct User_Status_Args * Uargs)
     {
     USER$Err(Uargs,NET$_NYI);
     }
@@ -1240,10 +1241,10 @@ ICMP$CANCEL(struct VMS$Cancel_Args * Uargs)
 
 //SBTTL "ICMP dump routines"
 
-ICMP$Connection_List(RB) : NOVALUE (void)
-!
+void ICMP$Connection_List(RB)
+//
 // Dump out the list of ICMP connections.
-!
+//
     {
     MAP
 	struct D$ICMP_List_Return_Blk * RB;
@@ -1260,9 +1261,9 @@ ICMP$Connection_List(RB) : NOVALUE (void)
     }
 
 ICMP$ICMPCB_Dump(ICMPCBIX,RB)
-!
+//
 // Dump out a single ICMP connection
-!
+//
     {
     MAP
 	struct D$ICMPCB_Dump_Return_BLK * RB;

@@ -61,43 +61,43 @@ Modifications:
 
 //SBTTL "Module Definition"
 
+#if 0
 MODULE ICMP(IDENT="1.0B",LANGUAGE(BLISS32),
 	  ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 			  NONEXTERNAL=LONG_RELATIVE),
 	  LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
 	  OPTIMIZE,OPTLEVEL=3,ZIP)=
-{
+#endif
 
-#include "SYS$LIBRARY:STARLET";	// VMS system definitions
-#include "CMUIP_SRC:[CENTRAL]NETCOMMON";	// Common decls
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";		// BLISS transportablity package
-#include "CMUIP_SRC:[CENTRAL]NETVMS";		// VMS specific
-#include "CMUIP_SRC:[CENTRAL]NetTCPIP";		// IP & ICMP definitions
-#include "STRUCTURE";		// TCB & Segment Structure definition
-#include "TCPMACROS";		// Local macros
-#include "SNMP";
+#include <starlet.h>	// VMS system definitions
+#include <cmuip/central/include/netcommon.h>	// Common decls
+// not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";		// BLISS transportablity package
+#include "netvms.h">		// VMS specific
+#include <cmuip/central/include/nettcpip.h>		// IP & ICMP definitions
+#include "structure.h"		// TCB & Segment Structure definition
+#include "tcpmacros.h"		// Local macros
+#include "snmp.h"
 
-extern
 // Memgr.bli
-    MM$Seg_Get,
- void    MM$Seg_Free,
+extern     MM$Seg_Get();
+extern  void    MM$Seg_Free();
 
 // IOUTIL.BLI
- VOID    ASCII_DEC_BYTES,
+extern  VOID    ASCII_DEC_BYTES();
 
 // MacLib.mar
-    CALC_CHECKSUM,		// MacLib
- void    SwapBytes,	// MacLib
+extern     CALC_CHECKSUM();		// MacLib
+extern  void    SwapBytes();	// MacLib
 
 // IP.bli
- VOID    IP$S},
- void    IP$Log,
+extern  VOID    IP$S}();
+extern  void    IP$Log();
 
 // TCP_Segin
- VOID    SEG$ICMP,
+extern  VOID    SEG$ICMP();
 
 // UDP_Segin
- VOID    UDP$ICMP;
+extern  VOID    UDP$ICMP();
 
 extern signed long
     ICMPTTL,
@@ -116,19 +116,20 @@ extern signed long
 // At present, the ICMP information is never flushed, and therefore no locking
 // is needed to maintain database integrity.
 
-!Format of a host ICMP status block.
+//Format of a host ICMP status block.
 
-$FIELD ICM_DBLOCK_FIELDS (void)
-    SET
-    ICM$Next	= [$Address],
-    ICM$Address	= [$Bytes(4)],
-    ICM$Gwy	= [$Bytes(4)]
-    TES;
+struct ICM_DBLOCK
+{
+void *     ICM$Next	;
+unsigned long     ICM$Address	;
+unsigned long    ICM$Gwy
+};
 
-LITERAL
-    ICM_Dsize = $Field_Set_Size;
+#define    ICM_Dsize sizeof (struct ICM_DBLOCK)
+#if 0
 MACRO
     ICM_DBLOCK = BLOCK->ICM_Dsize FIELD(ICM_Dblock_Fields) %;
+#endif
 
 LITERAL
     ICM_HSHLEN = 128,		// Length of hash table
@@ -148,7 +149,7 @@ signed long
 
 ICMP_Hash(IPA)
 
-!Hash an IP address. Returns hash value (index into ICMHTB)
+//Hash an IP address. Returns hash value (index into ICMHTB)
 
     {
     return (IPA<0,8>+.IPA<8,8>+.IPA<16,8>+.IPA<24,8>) && ICM_HSHAND;
@@ -156,12 +157,12 @@ ICMP_Hash(IPA)
 
 ICMP_Find(IPADDR)
 
-!Search ICMP hash chains for entry for this address.
-!Returns:
+//Search ICMP hash chains for entry for this address.
+//Returns:
 //   0 - No entry exists for this IP address.
 //   nonzero - pointer to ICMP data block for this address.
-!N.B. If ICMP entries are ever timed out, this routine should only be called
-!with AST's disabled.
+//N.B. If ICMP entries are ever timed out, this routine should only be called
+//with AST's disabled.
 
     {
     signed long
@@ -175,9 +176,9 @@ ICMP_Find(IPADDR)
     return 0;
     }
 
-void ICMP_Add(GWY_Addr,struct IP_Structure * IP_Pkt) (void)
+void ICMP_Add(GWY_Addr,struct IP_Structure * IP_Pkt)
 
-!Here to add an entry to the ICMP routing table.
+//Here to add an entry to the ICMP routing table.
 //   GWY_Addr has the IP address of a gateway
 //   IP_Pkt has the header and first 64-bits of the IP packet which caused
 //   the ICMP redirect to be generated.
@@ -205,8 +206,8 @@ void ICMP_Add(GWY_Addr,struct IP_Structure * IP_Pkt) (void)
 
 ICMP$Check(IPaddr)
 
-!Check if the ICMP routing table has an entry for this IP address.
-!Returns:
+//Check if the ICMP routing table has an entry for this IP address.
+//Returns:
 //   0	No ICMP routing info
 //  !=0	IP address of gateway from ICMP info.
 
@@ -233,7 +234,7 @@ FORWARD ROUTINE
  void    ICMP_Info,
  void    ICMP_Echo;
 
-ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf): NOVALUE (void)
+void ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf)
 
 // Main ICMP input routine.
 // Verify ICMP checksum and dispatch according to function code.
@@ -260,7 +261,7 @@ ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf): NOVALUE (void)
 	if ($$LOGF(LOG$ICMP))
 	    QL$FAO("!%T ICMP recv checksum error, cksum=!XL!/",0,Sum);
 	MM$Seg_Free(Bufsize,Buf);
-	RETURN
+	return;
 	};
 
     // Fix-up the ICMP word ordering
@@ -401,7 +402,7 @@ ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf): NOVALUE (void)
 			     IPhdr->IPH$Dest,IPdat,DataSize,
 			     buf,bufsize);
 			} ;
-		    RETURN;
+		    return;
 		    };
 
 		[UDP_Protocol]:
@@ -416,7 +417,7 @@ ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf): NOVALUE (void)
 			     IPhdr->IPH$Dest,IPdat,DataSize,
 			     buf,bufsize);
 			} ;
-		    RETURN;
+		    return;
 		    };
 
 		[OTHERWISE]:
@@ -463,7 +464,7 @@ ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf): NOVALUE (void)
     MM$Seg_Free(BUFSIZE,BUF);
     }
 
-ICMP_Pproblem(ICMpkt,ICMlen,IPpkt,IPlen,ICMpptr) : NOVALUE (void)
+void ICMP_Pproblem(ICMpkt,ICMlen,IPpkt,IPlen,ICMpptr)
 
 // Handle ICMP Parameter Problem packet.
 // Called if problem is at the IP level. This is unexpected and is probably
@@ -473,12 +474,12 @@ ICMP_Pproblem(ICMpkt,ICMlen,IPpkt,IPlen,ICMpptr) : NOVALUE (void)
     XQL$FAO(LOG$ICMP,"!%T ICMP recv: IP param=!XL!/",ICMpptr);
     }
 
-ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
+void ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen)
 
 // Handle ICMP echo request.
 // Copy packet, convert to echo reply, queue for output.
-!~~~ This routine should be simpler - should just reverse the packet and
-!~~~ queue for output, instead of creating new packet, etc.
+//~~~ This routine should be simpler - should just reverse the packet and
+//~~~ queue for output, instead of creating new packet, etc.
 
     {
     MAP
@@ -500,15 +501,15 @@ ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
 	if ($$LOGF(LOG$ICMP))
 	    {
 	    ASCII_DEC_BYTES(srcstr,4,IPPKT->IPH$SOURCE,
-			    srcstr->DSC$W_LENGTH);
+			    srcstr->dsc$w_length);
 	    ASCII_DEC_BYTES(dststr,4,IPPKT->IPH$DEST,
-			    dststr->DSC$W_LENGTH);
+			    dststr->dsc$w_length);
 	    ICMP_MIB->MIB$icmpOutErrors =
 		ICMP_MIB->mib$icmpOutErrors + 1;
 	    QL$FAO("!%T ICMP_ECHO: TTL exceeded, SRC=!AS,DST=!AS,ID=!UL!/",
 		   0,srcstr,dststr,IPPKT->IPH$Ident);
 	    };
-	RETURN;
+	return;
 	};
 
 // Calculate size of physical buffer to use
@@ -524,16 +525,16 @@ ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
 	    if ($$LOGF(LOG$ICMP))
 		{
 		ASCII_DEC_BYTES(srcstr,4,IPPKT->IPH$SOURCE,
-			        srcstr->DSC$W_LENGTH);
+			        srcstr->dsc$w_length);
 		ASCII_DEC_BYTES(dststr,4,IPPKT->IPH$DEST,
-				dststr->DSC$W_LENGTH);
+				dststr->dsc$w_length);
 
 		ICMP_MIB->MIB$icmpOutErrors =
 			ICMP_MIB->mib$icmpOutErrors + 1;
 		QL$FAO("!%T ICMP_ECHO: PKT too large,SRC=!AS,DST=!AS,ID=!UL!/",
 		   0,srcstr,dststr,IPPKT->IPH$Ident);
 		};
-	    RETURN;
+	    return;
 	    };
 
 // Allocate the segment.
@@ -566,7 +567,7 @@ ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
     Seg->ICM$CKSUM = Calc_Checksum(Segsize, Seg);
 
 // Send packet, preserving ID, TOS, TTL, etc.
-!!!HACK!!// IPPKT->IPH$DEST is wrong//  what about broadcasts?
+//!!HACK!!// IPPKT->IPH$DEST is wrong//  what about broadcasts?
 
     IP$S}(IPPKT->IPH$DEST, IPPKT->IPH$SOURCE, IPPKT->IPH$Type_Service,
 	    IPPKT->IPH$TTL, Seg, Segsize, IPPKT->IPH$IDent,
@@ -579,27 +580,27 @@ ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
 	ICMP_MIB->mib$icmpOutEchoReps + 1;
     }
 
-ICMP_Tstamp(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
+void ICMP_Tstamp(ICMpkt,ICMlen,IPpkt,IPlen)
 
 // Handle ICMP Timestamp request.
 // Copy packet, convert to Timestamp Reply, queue for output.
 // Not yet implemented.
 
     {
-    RETURN;
+    return;
     }
 
-ICMP_Info(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
+void ICMP_Info(ICMpkt,ICMlen,IPpkt,IPlen)
 
 // Handle ICMP Information request
 // Copy packet, convert to Information Reply, queue for output.
 // Not yet implemented.
 
     {
-    RETURN;
+    return;
     }
 
-ICMP_Send_DUNR(ICMpkt,ICMlen,IPpkt,IPlen,Code) : NOVALUE (void)
+void ICMP_Send_DUNR(ICMpkt,ICMlen,IPpkt,IPlen,Code)
 
 // Send ICMP Destination Unreachable
 // Copy packet, queue for output.
@@ -629,16 +630,16 @@ ICMP_Send_DUNR(ICMpkt,ICMlen,IPpkt,IPlen,Code) : NOVALUE (void)
 	    if ($$LOGF(LOG$ICMP))
 		{
 		ASCII_DEC_BYTES(srcstr,4,IPPKT->IPH$SOURCE,
-			        srcstr->DSC$W_LENGTH);
+			        srcstr->dsc$w_length);
 		ASCII_DEC_BYTES(dststr,4,IPPKT->IPH$DEST,
-				dststr->DSC$W_LENGTH);
+				dststr->dsc$w_length);
 
 		ICMP_MIB->MIB$icmpOutErrors =
 			ICMP_MIB->mib$icmpOutErrors + 1;
 		QL$FAO("!%T ICMP_ECHO: PKT too large,SRC=!AS,DST=!AS,ID=!UL!/",
 		   0,srcstr,dststr,IPPKT->IPH$Ident);
 		};
-	    RETURN;
+	    return;
 	    };
 
 // Allocate the segment.
@@ -672,7 +673,7 @@ ICMP_Send_DUNR(ICMpkt,ICMlen,IPpkt,IPlen,Code) : NOVALUE (void)
     Seg->ICM$CKSUM = Calc_Checksum(Segsize, Seg);
 
 // Send packet, preserving ID, TOS, TTL, etc.
-!!!HACK!!// IPPKT->IPH$DEST is wrong//  what about broadcasts?
+//!!HACK!!// IPPKT->IPH$DEST is wrong//  what about broadcasts?
 
     IP$S}(IPPKT->IPH$DEST, IPPKT->IPH$SOURCE, IPPKT->IPH$Type_Service,
 	    ICMPTTL, Seg, Segsize, IPPKT->IPH$IDent,

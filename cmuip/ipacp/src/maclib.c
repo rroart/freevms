@@ -37,7 +37,7 @@
 	.PSECT	Locked_Section,LONG
 #endif
 
-#define MOVC3 (count,src,dest) memcpy(dest,src,count)
+#define MOVC3(c,s,d) memcpy(d,s,c)
 
 //++
 //
@@ -216,9 +216,26 @@
 #include <pcbdef.h>
 	  // not yet PR780DEF
 
+#include <linux/sched.h>
+
+#include <system_data_cells.h>
+
 #include <descrip.h>
 
 #include "netvms.h"
+
+#include "structure.h"
+
+#include <asm/hw_irq.h>
+
+	  // inconsistent naming. avoiding and working around
+#define ab$l_pid vc$pid
+#define ab$l_ucb_adrs vc$ucb_adrs
+#define ab$w_uargsize vc$uargsize
+#define ab$b_funct vc$funct
+#define ab$l_tcbid vc$conn_id
+#define ab$b_protocol vc$protocol
+#define ab$w_iochan vc$piochan
 
 // Local symbols
 
@@ -231,9 +248,10 @@
 // definied in the SB block.  The IP ACP reads these fields as arguments
 // to a user network I/O request. This block defines a CANCEL request only.
 
+#define ucb$l_tcbid ucb$l_devdepend
+#define ucb$l_protocol ucb$l_devdepnd2
+
 #if 0
-UCB$L_TCBID	= UCB$Q_DEVDEPEND
-UCB$L_PROTOCOL	= UCB$Q_DEVDEPEND+4
 
 	$DEFINI	AB			// ARGUMENT BLOCK
 
@@ -346,7 +364,11 @@ long funct=0;
 //ENTRY	Mount_ip_Device,^M<R2,R3,R4,R5,R6,R7,R8>
 
 void Mount_ip_Device() {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  int R0,R3,R6,R7,R8,R9;
+  struct _vcb * R1;
+  struct _aqb * R2;
+  struct _pcb * R4;
+  struct _ucb * R5;
 Begin_Lock:
   // not yet	$LKWSET_S	Locked_Range	// lock us in the working set.	
 	R1 = &Shared_Device;	// point @ Pseudo device desc.
@@ -364,23 +386,23 @@ Begin_Lock:
 l2:
 	ucb_adrs = R1;			// save UCB address
 	R5 = R1;				// UCB ptr.
-	R5->UCB$L_DevChar &= ~#DEV$M_AVL;	// disallow any user io.
-	BBS	#Dev$V_MNT,R5->UCB$L_DevChar,l25;
+	R5->ucb$l_devchar &= ~DEV$M_AVL;	// disallow any user io.
+	if	(DEV$M_MNT&R5->ucb$l_devchar) goto l25;
 	goto	Not_Mounted;
 
 // Volume is mounted, Set globals & leave
 
-l25:	R0 = #SS$_VOLINV;		// assume error
-	R1 = R5->UCB$L_VCB;	// get VCB address
+l25:	R0 = SS$_VOLINV;		// assume error
+	R1 = R5->ucb$l_vcb;	// get VCB address
 	if (R1) goto	l3;			// OK
-	goto	Dismount;		// oops, clean up.
+	return	dismount();		// oops, clean up.
 l3:
-	VCB_Adrs = R1;		// save VCB address.
-	R2 = R1->VCB$L_AQB;	// get AQB address
+	vcb_adrs = R1;		// save VCB address.
+	R2 = R1->vcb$l_aqb;	// get AQB address
 	if (R2) goto	l4;
-	goto	Dismount;		// Error: Clean up
+	return	dismount();		// Error: Clean up
 l4:
-	ACP_QB_Adrs = R2;		// save AQB address
+	acp_qb_adrs = R2;		// save AQB address
 
 // Indicate we now own the device, set my PID in ACP queue blk.
 
@@ -389,20 +411,16 @@ l4:
 #ifdef VMS_V4
 	SETIPL	#IPL$_SYNCH		// synchronize with VMS
 #else
-	FORKLOCK -			// R5->UCB$B_FLCK
-		SAVIPL=-(SP), -
-		PRESERVE=NO
+	FORKLOCK(R5->ucb$b_flck,-1);			// R5->UCB$B_FLCK
 #endif
 
-	R2->AQB$L_ACPPID = R4->PCB$L_PID;	// set new owner PID.
-	mypid = R4->PCB$L_PID;	// save for net$dump rtn.
-	R1 = R4->PCB$L_ARB;	// adrs of ARB
-	MyUIC = R1->ARB$L_UIC;	// save my UIC.
+	R2->aqb$l_acppid = R4->pcb$l_pid;	// set new owner PID.
+	mypid = R4->pcb$l_pid;	// save for net$dump rtn.
+	R1 = R4->pcb$l_arb;	// adrs of ARB
+	myuic = ((struct _arb *)R1)->arb$l_uic;	// save my UIC.
 
 #ifndef VMS_V4
-	FORKUNLOCK -			// R5->UCB$B_FLCK
-		NEWIPL=(SP)+, -
-		PRESERVE=NO
+	FORKUNLOCK(R5->ucb$b_flck,-1);			// R5->ucb$b_flck
 #endif
 	R0 = UnLock_IODB();
 
@@ -410,7 +428,7 @@ l4:
 	SETIPL	#0				// timeshare
 #endif
 
-ALL_Done:
+all_done:
 
 // Mark device "ip0:" as ONline, mounted & Available.
 // Check for any cloned ip devices & mark them also.  Case of ACP crash
@@ -423,25 +441,29 @@ ALL_Done:
 #endif
 l10:
 #ifndef VMS_V4
+#if 0
 	DEVICELOCK	-			;
 		SAVIPL=-(SP),-			;
 		PRESERVE=NO			;
 #endif
-	R5->UCB$W_STS |= #UCB$M_ONline;
-	R5->UCB$L_DevChar |= #DEV$M_AVL|DEV$M_MNT;
-	R1 = R5->UCB$L_LINK;		// Get next UCB
+#endif
+	R5->ucb$l_sts |= UCB$M_ONLINE;
+	R5->ucb$l_devchar |= DEV$M_AVL|DEV$M_MNT;
+	R1 = R5->ucb$l_link;		// Get next UCB
 #ifndef VMS_V4
+#if 0
 	DEVICEUNLOCK -
 		NEWIPL=(SP)+, -
 		PRESERVE=NO
+#endif
 #endif
 	  R5 = R1;
 	if (R5) goto	l10;
 #ifdef VMS_V4
 	ENBINT					// reset IPL
 #endif
-	R0 = #SS$_NORMAL;
-BYE:
+	R0 = SS$_NORMAL;
+bye:
 	return R0;
 
 // Device is NOT Mounted, Mount it.
@@ -449,12 +471,13 @@ BYE:
 
 Not_Mounted:
 	R0 = Build_ACP_QB();		// build & link ACP Queue blk.
-	CMPL	#SS$_INSFMEM,R0		// OK?
-	BEQL	Bye			// EQL means Error.
-	R8 = Acp_QB_Adrs;		// for build_VCB
-	R0 = Build_VCB();
-	if ((R0&1)==1) goto All_Done
-	goto	dismount;		// lbs = Error.
+	if	(SS$_INSFMEM==R0)		// OK?
+	goto	bye;			// EQL means Error.
+	R8 = acp_qb_adrs;		// for build_VCB
+	R0 = Build_VCB(R5,R8);
+	if ((R0&1)==1) goto all_done;
+	return	dismount();		// lbs = Error.
+}
 
 //SBTTL	LOCK_IODB - Lock the I/O Database
 
@@ -482,9 +505,11 @@ Not_Mounted:
 //
 //--
 
-LOCK_IODB:
-	R4 = G^CTL$GL_PCB;		// get my PCB address
-	JMP	G^SCH$IOLOCKW		// lock & return
+LOCK_IODB() {
+  int R4;
+	R4 = ctl$gl_pcb;		// get my PCB address
+	return	SCH$IOLOCKW();		// lock & return
+	}
 
 //SBTTL	UNLOCK_IODB - Unlock the I/O Database
 
@@ -513,13 +538,15 @@ LOCK_IODB:
 //
 //--
 
-UNLOCK_IODB:
-	R4 = G^CTL$GL_PCB;
-	G^SCH$IOUNLOCK();			// unlock I/O database
+UNLOCK_IODB() {
+  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+	R4 = ctl$gl_pcb;
+	R0 = SCH$IOUNLOCK();			// unlock I/O database
 #ifdef VMS_V4
 	SETIPL	#0				// timeshare
 #endif
 	return R0;
+}
 
 //SBTTL	FIND_UCB - Locate specified Unit Control Block.
 
@@ -550,10 +577,10 @@ int FIND_UCB(R1)
   int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
 
 	R0 = Lock_IODB();
-	G^IOC$SearchDev(R1);		// find the UCB
-	-(SP) = R0;		// save return info
+	ioc$searchdev(R1);		// find the UCB
+	// not yet	-(SP) = R0;		// save return info
 	R0 = UNlock_IODB();
-	MOVQ	(SP)+,R0		// restore info
+	// not yet	MOVQ	(SP)+,R0		// restore info
 	return R0;				// return
 }
 
@@ -587,35 +614,41 @@ int FIND_UCB(R1)
 //
 //--
 
-Build_ACP_QB:
-	R1 = #AQB$C_Length;
-	R0 = G^Exe$Alononpaged();		// get chunck of non-paged pool.
+Build_ACP_QB(R5)
+  struct _ucb * R5;
+ {
+  int R0,R3,R6,R7,R9;
+  struct _arb * R1;
+  struct _aqb * R2, *R8;
+  struct _pcb * R4;
+	R1 = AQB$C_LENGTH;
+	R0 = exe$alononpaged();		// get chunck of non-paged pool.
 	if ((R0&1)==1) goto l5;				// Error?
 
 // Return error, unable to allocate non-paged pool.
 
-	R0 = #SS$_INSFMEM;
+	R0 = SS$_INSFMEM;
 	return R0;
 
 // Fill in AQB.
 // R2 = address of AQB
 
 l5:
-	ACP_QB_Adrs = R2;			// save address
-	R2->AQB$W_Size = #AQB$C_Length;	// set block size.
-	R2->AQB$B_Type = #DYN$C_AQB;	// blk type
-	R2->AQB$B_ACPType = #AQB$K_NET;	// say its a Network AQB
-	R2->AQB$B_Class = 0;			// ACP class (noclass...)
-	R2->AQB$B_Status = #AQB$M_Unique;	// ACP unique to this device.
+	acp_qb_adrs = R2;			// save address
+	R2->aqb$w_size = AQB$C_LENGTH;	// set block size.
+	R2->aqb$b_type = DYN$C_AQB;	// blk type
+	R2->aqb$b_acptype = AQB$K_NET;	// say its a Network AQB
+	R2->aqb$b_class = 0;			// ACP class (noclass...)
+	R2->aqb$b_status = AQB$M_UNIQUE;	// ACP unique to this device.
 #ifdef VMS_V4
-	R2->AQB$L_ACPQFL = R2;		// set IRP queue ptrs.
-	R2->AQB$L_ACPQBL = R2;		// & back link.
+	R2->aqb$l_acpqfl = R2;		// set IRP queue ptrs.
+	R2->aqb$l_acpqbl = R2;		// & back link.
 #else
 // WARNING: V5 change! V5 uses self-relative ACP queues!
-	R2->AQB$L_ACPQFL = 0;		// Init IRP queue ptrs
-	R2->AQB$L_ACPQBL = 0;		// & back link.
+	R2->aqb$l_acpqfl = 0;		// Init IRP queue ptrs
+	R2->aqb$l_acpqbl = 0;		// & back link.
 #endif
-	R2->AQB$B_MntCnt = 0;		// init mount count
+	R2->aqb$b_mntcnt = 0;		// init mount count
 
 // Link this AQB into the system list.  Instert at front of list
 
@@ -625,28 +658,25 @@ l5:
 #ifdef VMS_V4
 	SETIPL	#IPL$_SYNCH			// Synchronize with VMS
 #else
-	FORKLOCK	-			;
-		SAVIPL=-(SP),-		;
-		PRESERVE=NO		;
+	FORKLOCK(R5->ucb$b_flck,-1);			;
 #endif
 
-	R2->AQB$L_ACPPID = R4->PCB$L_PID;	// set owner PID
-	mypid = R4->PCB$L_PID;		// save for net$dump rtn.
-	R1 = &G^IOC$GL_AQBList;		// adrs of system list
-	R8->AQB$L_Link = (R1);		// set forward link
+	R2->aqb$l_acppid = R4->pcb$l_pid;	// set owner PID
+	mypid = R4->pcb$l_pid;		// save for net$dump rtn.
+	R1 = ioc$gl_aqblist;		// adrs of system list
+	R8->aqb$l_link = (R1);		// set forward link
 	(R1) = R8;				// set list head.
 
 // Save my UIC
 
-	R1 = R4->PCB$L_ARB;		// addres ARB
-	MyUIC = R1->ARB$L_UIC;		// my uic.
+	R1 = R4->pcb$l_arb;		// addres ARB
+	myuic = R1->arb$l_uic;		// my uic.
 #ifndef	VMS_V4
-	FORKUNLOCK	-
-		NEWIPL=(SP)+,-		;
-		PRESERVE=NO		;
+	FORKUNLOCK(R5->ucb$b_flck,-1);
 #endif
 	R0 = Unlock_IODB();			// unlock & return
 	return R0;
+}
 
 //SBTTL	BUILD_VCB - Build A volume Control block.
 
@@ -676,39 +706,44 @@ l5:
 //
 //--
 
-BUILD_VCB:
-	R1 = #VCB$C_Length;		// size of VCB
-	R0 = G^EXE$Alononpaged();		// allocate nonpaged pool.
+	BUILD_VCB(R5,R8)
+     struct _ucb * R5;
+     struct _aqb * R8;
+{
+  int R0,R1,R3,R4,R6,R7,R9;
+  struct _vcb * R2;
+	R1 = VCB$C_LENGTH;		// size of VCB
+	R0 = exe$alononpaged();		// allocate nonpaged pool.
 	if ((R0&1)==0) goto l10;				// Error? punt if yes.
 
 // Fill in the VCB
 // R2 = address of VCB
 
-	VCB_Adrs = r2;			// save address.
-	R2->VCB$B_Type = #DYN$C_VCB;	// set blk type
-	R2->VCB$W_Size = #VCB$C_Length;	// set blk size
-	R2->VCB$W_Trans = #1;		// Traditional ACP idle count
-	R2->VCB$W_RVN = 0;			// Clear number of rel. volumes
-	R2->VCB$B_Status = 0;
-	R2->VCB$W_Mcount = #1;		// 1 volume mounted.
-	MOVL	#^A/Net /,R2->VCB$T_VolName	// set volume name
-	MOVL	#^A/Devi/,VCB$T_Volname+4(R2)	// 2nd part of name.
-	MOVL	#^A/ce  /,VCB$T_Volname+8(R2)	// blank filled (12 chars total).
-	R8->AQB$B_MntCnt++;		// say volume is mounted.
+	vcb_adrs = R2;			// save address.
+	R2->vcb$b_type = DYN$C_VCB;	// set blk type
+	R2->vcb$w_size = VCB$C_LENGTH;	// set blk size
+	// not yet?	R2->vcb$w_trans = 1;		// Traditional ACP idle count
+	// not yet?	R2->vcb$w_rvn = 0;			// Clear number of rel. volumes
+	R2->vcb$b_status = 0;
+	// not yet?	R2->vcb$w_mcount = 1;		// 1 volume mounted.
+	memcpy(&R2->vcb$t_volname,"Net ",4);	// set volume name
+	memcpy(&R2->vcb$t_volname[4],"Devi",4);	// 2nd part of name.
+	memcpy(&R2->vcb$t_volname[8],"ce  ",4);	// blank filled (12 chars total).
+	R8->aqb$b_mntcnt++;		// say volume is mounted.
 
 // Link AQB to VCB
 
-	R2->VCB$L_AQB = R8;		// VCB ==> AQB
+	R2->vcb$l_aqb = R8;		// VCB ==> AQB
 
 // Link UCB into the UCB$L_RVT to prevent crashes from users requesting
 // DVI$_LOGVOLNAM
 
-	R2->VCB$L_RVT = R5;		// VCB$L_RVT ==> UCB (?)
+	R2->vcb$l_rvt = R5;		// VCB$L_RVT ==> UCB (?)
 
 // link VCB to UCB
 
-	R5->UCB$L_VCB = R2;		// UCB ==> VCB
-	R0 = #SS$_Normal;
+	R5->ucb$l_vcb = R2;		// UCB ==> VCB
+	R0 = SS$_NORMAL;
 l10:
 	return R0;
 }
@@ -717,7 +752,7 @@ l10:
 
 //++
 //
-Function:
+//Function:
 //
 //	Mark the ip0 device as offline & unavailable.
 //	routine called at Kernel mode access.
@@ -745,28 +780,33 @@ Function:
 //Entry	Set_ip_Device_OffLine,^M<R5>
 int Set_ip_Device_OffLine(UCB_Adrs)
 {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  int R0,R1,R2,R3,R4,R6,R7,R8,R9;
+  struct _ucb * R5;
 	R5 = UCB_Adrs;			// adrs of ip0: (base device).
-	BGEQ	l15;				// good UCB address? must be system address
+	if (R5>=0)	goto l15;				// good UCB address? must be system address
 #ifdef VMS_V4
 	DSBINT	R5->UCB$B_DIPL			// synch UCB access.
 #endif
 l10:
 #ifndef VMS_V4
+#if 0
 	DEVICELOCK		-		;
 		SAVIPL=-(SP),-			;
 		PRESERVE=NO			;
 #endif
-	R5->UCB$W_STS &= ~#UCB$M_ONline;	// for show dev, mark offline.
-	R5->UCB$L_DevChar &= ~#DEV$M_AVL;
-	R1 = R5->UCB$L_LINK;		// get next UCB
+#endif
+	R5->ucb$l_sts &= ~UCB$M_ONLINE;	// for show dev, mark offline.
+	R5->ucb$l_devchar &= ~DEV$M_AVL;
+	R1 = R5->ucb$l_link;		// get next UCB
 #ifndef VMS_V4
+#if 0
 	DEVICEUNLOCK -
 		NEWIPL=(SP)+, -
 		PRESERVE=NO
 #endif
+#endif
 	R5 = R1;
-	BNEQ	l10;
+	if (R5) goto	l10;
 #ifdef VMS_V4
 	ENBINT					// restore previous IPL.
 #endif
@@ -803,37 +843,43 @@ l15:
 //--
 
 int dismount() {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  int R1,R2,R3,R4,R6,R7,R9;
+  struct _ucb * R5;
+  struct _aqb * R0,* R8;
 DISMOUNT:
-	PUSHL	R0			// save the return code
+  /*PUSHL	R0*/			// save the return code
 #ifdef VMS_V4
-	DSBINT	R5->UCB$B_DIPL		// Save IPL & set new IPL to Device IPL.
+	DSBINT	R5->ucb$b_dipl		// Save IPL & set new IPL to Device IPL.
 #else
+#if 0
 	DEVICELOCK		-		;
 		SAVIPL=-(SP),-			;
 		PRESERVE=NO			;
 #endif
-	BICL	#DEV$M_MNT!DEV$M_AVL,R5->UCB$L_DevChar	// clear Avail & mounted.
-	R5->UCB$W_REFC = 0;		// no references
-//	R5->UCB$L_OWNUIC = 0;
-	R5->UCB$L_PID = 0;
-	R5->UCB$L_VCB = 0;		// clean up UCB link
+#endif
+	R5->ucb$l_devchar&=~(DEV$M_MNT|DEV$M_AVL);	// clear Avail & mounted.
+	R5->ucb$l_refc = 0;		// no references
+//	R5->ucb$l_ownuic = 0;
+	R5->ucb$l_pid = 0;
+	R5->ucb$l_vcb = 0;		// clean up UCB link
 #ifdef VMS_V4
 	ENBINT				// reset IPL level.
 #else
+#if 0
 	DEVICEUNLOCK			-	;
 		NEWIPL=(SP)+,		-	;
 		PRESERVE=NO
 #endif
-	R0 = VCB_Adrs;		// get VCB adrs
-	BEQL	l5;			// OK ?
-	R0 = G^EXE$Deanonpaged();	// dealllocate space.
+#endif
+	R0 = vcb_adrs;		// get VCB adrs
+	if (R0==0) goto	l5;			// OK ?
+	R0 = exe$deanonpaged();	// dealllocate space.
 
 // Deallocate ACP Queue blk
 
 l5:
-	R8 = ACP_QB_Adrs;
-	BEQL	l100;			// OK?
+	R8 = acp_qb_adrs;
+	if (R8==0) goto	l100;			// OK?
 
 // Unhook AQB from system list
 // AQB list is a singly linked list.
@@ -842,50 +888,46 @@ l5:
 #ifdef VMS_V4
 	DSBINT	#IPL$_SYNCH		// Save Current IPL & set new IPL.
 #else
-	FORKLOCK	-		;
-		SAVIPL=-(SP),-		;
-		PRESERVE=NO		;
+	FORKLOCK(R5->ucb$b_flck,-1);
 #endif
-	R1 = &G^IOC$GL_AQBLIST;	// system AQB list head
+	R1 = ioc$gl_aqblist;	// system AQB list head
 	R0 = (R1);			// 1st AQB pointer.
-	CMPL	R8,R0			// 1st AQB?
-	BNEQ	l70;			// IF NEQ THEN "NO"
+	if 	(R8!=R0)			// 1st AQB?
+	goto	l70;			// IF NEQ THEN "NO"
 
 // 1st AQB in system list.
 
-	(R1) = R8->AQB$L_LINK;	// link it in
-	BRB	l90;			// done
+	(R1) = R8->aqb$l_link;	// link it in
+	goto	l90;			// done
 
 // try next AQB in list
 
 l70:
-	CMPL	R0->AQB$L_Link,R8	// is this it?
-	BEQL	l80;			// EQl = yes.
+	if	(R0->aqb$l_link==R8)	// is this it?
+	goto	l80;			// EQl = yes.
 
 // advance to next AQB
 
-	R0 = R0->AQB$L_LINK;	// get next link
-	BRB	l70;			// loop
+	R0 = R0->aqb$l_link;	// get next link
+	goto	l70;			// loop
 
 //
 
 l80:
-	R0->AQB$L_LINK = R8->AQB$L_LINK;	// relink
+	R0->aqb$l_link = R8->aqb$l_link;	// relink
 l90:
 #ifdef VMS_V4
 	ENBINT				// restore IPL
 #endif
 	R0 = R8;			// for deallocation rtn.
-	R0 = G^EXE$DEANONPAGED();
+	R0 = exe$deanonpaged();
 #ifndef VMS_V4
-	FORKUNLOCK	-
-		NEWIPL=(SP)+,-		;
-		PRESERVE=NO		;
+	FORKUNLOCK(R5->ucb$b_flck,-1);
 #endif
 	R0 = Unlock_IODB();		// unlock IO database.
 // all done
 
-l100:	POPL	r0			// get return code
+ l100:	/*POPL	r0*/			// get return code
 	return R0;
 }
 
@@ -935,16 +977,20 @@ l100:	POPL	r0			// get return code
 //Entry USER_Requests_Avail,^M<R2,R3,R4,R5>
 	int USER_Requests_Avail()
 	  {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  int R1,R3,R4,R6,R7,R8,R9;
+  struct _aqb * R0;
+  struct _irp * R2;
+  struct vms$cancel_args * R5;
 Try_Again:
-	R0 = ACP_QB_Adrs;		// Network AQB address
-	BGEQ	l1;			// Valid system address? < 0 = OK.
+	R0 = acp_qb_adrs;		// Network AQB address
+	if (R0>=0) goto	l1;			// Valid system address? < 0 = OK.
 #ifdef VMS_V4
-	REMQUE	@R0->AQB$L_ACPQFL,R2
+	REMQUE	@R0->aqb$l_acpqfl,R2
 #else
-	REMQHI	R0->AQB$L_ACPQFL,R2
+	  int wasempty=aqempty(R0->aqb$l_acpqfl);
+	  REMQHI	(R0->aqb$l_acpqfl,R2);
 #endif
-	BVC	l5;
+	if (!wasempty) goto	l5;
 
 // Queue was empty, return false(0)
 
@@ -955,8 +1001,8 @@ l1:	R0 = 0;
 // R2 = address of IRP
 
 l5:
-	R0 = R2->IRP$L_SVAPTE;	// get address of system IPACP argblk.
-	BEQL	NO_IPACP_Arg_Blk		// EQL means we have an error.
+	R0 = R2->irp$l_svapte;	// get address of system IPACP argblk.
+	if (R0==0) goto	NO_IPACP_Arg_Blk;		// EQL means we have an error.
 
 // Copy IPACP argument block from the system buffer (Kernel mode access) to
 // IP local process space.  Entire idea is to execute at user level & only
@@ -968,15 +1014,15 @@ l5:
 // R2 = IRP address
 
 	R2 = R0;			// save system argblk adrs.
-	CALLS	#0,MM$UArg_Get		// allocate IP process space
+	R0 = MM$UArg_Get();		// allocate IP process space
 					// Returns in R0
 
 // copy the argblk system-space ==> IP-Local-space.
 
-	PUSHL	R0			// Save the argument block address
-	R1 = R2->AB$W_UARGSIZE;	// Get fullword count value
-	MOVC3	R1,(R2),(R0)		// Copy data from system to local copy
-	POPL	R0			// Return local copy pointer
+	/*PUSHL	R0*/			// Save the argument block address
+	R1 = ((struct vms$cancel_args *)R2)->ab$w_uargsize;	// Get fullword count value
+	MOVC3	(R1,(R2),(R0));		// Copy data from system to local copy
+	/*POPL	R0*/			// Return local copy pointer
 	return R0;
 
 // IRP has no associated system buffer (ACP argument block).  This indicates
@@ -986,14 +1032,14 @@ l5:
 // a Connection for this PID & IO channel.  Build a fake ACP argblk with the
 // IP function M$Cancel which will RESET the connection for the specified PID
 // & channel #. IF the check was false then just return the IRP to VMS IO
-// post-processing with an SS$_Normal return code.
+// post-processing with an SS$_NORMAL return code.
 
 NO_IPACP_Arg_Blk:
-	NO_ArgBlk++;
-	R4 = R2->IRP$W_Func;	// Get IO function code.
-	Funct = R4;
-	CMPW	#IO$_CLEAN,R4		// ACP cancel?
-	BNEQ	UR$Post			// No, post IO as SS$_Normal
+	no_argblk++;
+	R4 = R2->irp$l_func;	// Get IO function code.
+	funct = R4;
+	if	(IO$_CLEAN!=R4)		// ACP cancel?
+	goto	UR$Post;			// No, post IO as SS$_NORMAL
 
 // User image is in rundown (exit) state & has canceled IO
 // Build an IPACP user argblk & return it with the IP function code M$CANCEL.
@@ -1002,36 +1048,36 @@ NO_IPACP_Arg_Blk:
 // Remember: This fake IRP Must NOT be posted to VMS IO post rtns.  System crash
 // will occur.
 
-	CALLS	#0,MM$UArg_Get		// get a IPACP user argument blk.
+	R0 = MM$UArg_Get();		// get a IPACP user argument blk.
 	R5 = R0;			// save argblk adrs
-//;;	R5->AB$L_PID = R2->IRP$L_PID;	// set PID in IPACP argblk.
-	R0 = R2->IRP$L_PID;	// Transform internal PID
-	R0 = G^EXE$IPID_TO_EPID();	// to external PID format
-	R5->AB$L_PID = R0;		// Set in argument block
-	R0 = R2->IRP$L_UCB;	// Get UCB address
-	R5->AB$L_UCB_ADRS = R0;	// Set UCB address in argblk
-//	R5->AB$B_Protocol = R0->UCB$L_Protocol; // Set protocol code
-	R5->AB$L_TCBID = R0->UCB$L_TCBID;	// Connection ID
-	R5->AB$B_Funct = #M$Cancel;	// IP function code
-	R5->AB$W_UARGSIZE = #AB$SIZE;	// Size of the argblk
-	R5->AB$W_IOchan = R2->IRP$W_Chan;	// include channel #.
+//;;	R5->ab$l_pid = R2->irp$l_pid;	// set PID in IPACP argblk.
+	R0 = R2->irp$l_pid;	// Transform internal PID
+	R0 = exe$ipid_to_epid();	// to external PID format
+	R5->ab$l_pid = R0;		// Set in argument block
+	R0 = R2->irp$l_ucb;	// Get UCB address
+	R5->ab$l_ucb_adrs = R0;	// Set UCB address in argblk
+//	R5->ab$b_protocol = R0->ucb$l_protocol; // Set protocol code
+	R5->ab$l_tcbid = ((struct _ucb *)R0)->ucb$l_tcbid;	// Connection ID
+	R5->ab$b_funct = M$CANCEL;	// IP function code
+	R5->ab$w_uargsize = sizeof(struct vms$cancel_args)/*AB$SIZE*/;	// Size of the argblk
+	R5->ab$w_iochan = R2->irp$w_chan;	// include channel #.
 
-	R5->AB$B_Protocol = R2->IRP$L_EXTEND; ;
+	R5->ab$b_protocol = R2->irp$l_extend; ;
 
 	R0 = R2;			// point at Fake IRP.
-	R0 = G^COM$DRVDEALMEM();	// release Fake IRP.
+	R0 = com$drvdealmem();	// release Fake IRP.
 	R0 = R5;			// return IPACP argblk pointer.
 	return R0;
 
-// Release/post the IO as SS$_Normal
+// Release/post the IO as SS$_NORMAL
 // R2 = IRP address.
 
 UR$Post:
-	PUSHL	R2->IRP$L_UCB		// UCB address
-	PUSHL	R2			// IRP address
-	IOSB = #SS$_Normal;	// set return status
-	PUSHAQ	IOSB			// address of IOSB
-	CALLS	#3,VMS_IO$POST
+	/*PUSHL	R2->IRP$L_UCB*/		// UCB address
+	/*PUSHL	R2*/			// IRP address
+	IOSB = SS$_NORMAL;	// set return status
+	/*PUSHAQ	IOSB*/			// address of IOSB
+	  R0 = VMS_IO$POST(IOSB,R2,R2->irp$l_ucb);
 	goto	Try_Again;		// dismiss this & look for more.
 }
 
@@ -1078,37 +1124,42 @@ UR$Post:
 
 // Local stack (AP) offsets, CALLS sets stack in this fashion.
 
+#if 0
 #define IOSB$Adrs	  4
 #define IRP$Adrs	  8
 #define UCB$Adrs	 12
+#endif
 
 
 //ENTRY	VMS_IO$POST,^M<R2>
-	int VMS_IO$POST(IOSB$Adrs,IRP$Adrs, UCB$Adrs)
+	int VMS_IO$POST(IOSB$ADRS,IRP$ADRS, UCB$ADRS)
 	  {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
-	R1 = IRP$Adrs;		// get IRP address
-	R2 = UCB$Adrs;		// UCB address
-	R2->UCB$L_OPCNT++;		// increase operation count
+  int R3,R4,R5,R6,R7,R8,R9;
+  struct _vcb * R0;
+  struct _irp * R1;
+  struct _ucb * R2;
+	R1 = IRP$ADRS;		// get IRP address
+	R2 = UCB$ADRS;		// UCB address
+	R2->ucb$l_opcnt++;		// increase operation count
 
 // Adjust volume transaction count.
 
-	R0 = VCB_Adrs;		// adrs Volume control blk.
-	DECW	R0->VCB$W_Trans		// indicate transaction has finished.
-	MOVQ	@IOSB$Adrs,R1->IRP$L_IOST1	// set IOST1 & 2
+	R0 = vcb_adrs;		// adrs Volume control blk.
+	// not yet	R0->vcb$w_trans--;		// indicate transaction has finished.
+	R1->irp$l_iost1=IOSB$ADRS;	// set IOST1 & 2
 
 // if lbc (low bit clear) {error indicator} then clear irp$v_func in
 // irp$w_sts to prevent useless copy by kernel mode iopost ast routine
 
-	if ((R1->IRP$L_IOST1&1)==1) goto l1;
-	BICW2	#IRP$M_FUNC,R1->IRP$W_STS // error - fake a write function.
-	BRB	l5;			// time to post!
+	if ((R1->irp$l_iost1&1)==1) goto l1;
+	R1->irp$l_sts&=~IRP$M_FUNC; // error - fake a write function.
+	goto	l5;			// time to post!
 l1:
 
 // set actual bytes number transfered if this is a read function
 
-	BBC	#IRP$V_FUNC,R1->IRP$W_STS,l5;
-	MOVW	IRP$L_IOST1+2(R1),R1->IRP$W_BCNT  // set bytes to give user.
+	if	(0==(IRP$M_FUNC&R1->irp$l_sts)) goto l5;
+	R1->irp$l_bcnt= ((short *) &R1->irp$l_iost1)[1];  // set bytes to give user.
 l5:
 
 // insert IRP into I/O post process queue.
@@ -1116,19 +1167,20 @@ l5:
 #ifdef VMS_V4
 	INSQUE	(R1),@L^IOC$GL_PSBL	// in it goes
 #else
-	FIND_CPU_DATA R2
-	INSQUE	(R1),@R2->CPU$L_PSBL	// in it goes
+	  find_cpu_data(R2);
+	  int wasempty=aqempty(((struct _cpu *)R2)->cpu$l_psbl);
+	INSQUE	((R1),((struct _cpu *)R2)->cpu$l_psbl);	// in it goes
 #endif
-	BNEQ	l10;			// Neq = not 1st in queue
+	if (!wasempty) goto	l10;			// Neq = not 1st in queue
 
 // 1st IRP in queue, request IOPOST interrupt
 
-	SOFTINT	#IPL$_IOPOST
+	SOFTINT_IOPOST_VECTOR;
 l10:
 	return R0;
 }
 
-End_Lock::		// end of locked pages
+//End_Lock::		// end of locked pages
 
 //SBTTL	Move Bytes "FAST" with movc3 instruction.
 
@@ -1160,9 +1212,11 @@ End_Lock::		// end of locked pages
 
 // "AP" pointer offsets, calls arguments
 
+#if 0
 #define Size	  4
 #define Src	  8
 #define Dest	  12
+#endif
 
   //MovByt::
   int MOVBYT(Size,Src,Dest) {
@@ -1200,14 +1254,15 @@ End_Lock::		// end of locked pages
 //Entry	Time_Stamp, 0
  int TimeStamp()
    {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
-//	R0 = @#EXE$GL_ABSTIM;	// Get system interval timer
-//	MULL2	#100, R0		// Convert seconds to 100ths
-	PUSHL	R1			// Save R1 from being tromped on
-	R0 = @#EXE$GQ_SYSTIME;	// copy the current time into R0/R1
-	BICL2	#^XFFFF8000, R1
-	EDIV	#100000, R0, R0, R1 // Convert with R0 in 100ths
-	POPL	R1
+  int R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  long long R0;
+//	R0 = @EXE$GL_ABSTIM;	// Get system interval timer
+//	MULL2	100, R0		// Convert seconds to 100ths
+  /*PUSHL	R1*/			// Save R1 from being tromped on
+	R0 = exe$gq_systime;	// copy the current time into R0/R1
+	R0 &=	~0xFFFF8000;
+	R0 = R0/100000; // Convert with R0 in 100ths
+	  /*POPL	R1*/
 	return R0;
 }
 
@@ -1241,19 +1296,21 @@ End_Lock::		// end of locked pages
 //
 //--
 
+#if 0
 #define WrdCnt	  4					// AP offset to # of words to swap
 #define Start	  8					// start address.
+#endif
 
 //ENTRY  SWAPBYTES,^M<>
 	int SWAPBYTES(WrdCnt,Start)
 {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  int *R0,*R1,*R2,*R3,*R4,*R5,*R6,*R7,*R8,*R9;
 	R1 = Start;			// starting word address.
 Swp_Loop:
-	R0 = (R1);				// low ==> temp
-	(R1) = 1(R1);+			// high ==> low
-	(R1) = R0;+			// temp ==> High
-	SOBGTR	WrdCnt,Swp_Loop		// decr word's left to do
+	R0 = *R1;				// low ==> temp
+	*R1 = (R1++)[1];			// high ==> low
+	*R1++ = R0;			// temp ==> High
+	if	(--WrdCnt) goto Swp_Loop;		// decr word's left to do
 	return R0;
 }
 
@@ -1280,15 +1337,18 @@ Swp_Loop:
 //
 //--
 
+#if 0
 #define Count	  0
 #define Size	  4
 #define Adrs	  8
+#endif
 
 //ENTRY	Zero_Blk,^M<R2,R3,R4,R5>
 	int Zero_Blk(Count,Size,Adrs)
 	  {
   int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
-	MOVC5	#0,@Adrs,#0,Size,@Adrs
+  /*	MOVC5	0,@Adrs,0,Size,@Adrs*/
+  // not yet
 	return R0;
 }
 
@@ -1406,6 +1466,7 @@ Swp_Loop:
 
 // Argument Point stack offsets.
 
+#if 0
 #define Byte_Count	  4
 #define Start		  8
 #define Srca	  12				// Source IP address
@@ -1415,6 +1476,7 @@ Swp_Loop:
 #define   Dsta0	  16				// First 16-bit word
 #define   Dsta1	  18				// Second 16-bit word
 #define PtclT	  20				// Protocol type
+#endif
 
 //++
 // Gen_Checksum - Generate checksum for UDP and TCP.
@@ -1424,20 +1486,24 @@ Swp_Loop:
 // Calc_Checksum uses.
 //--
 
+#if 0
+// Take checksum from elsewhere
+
 //Entry	Gen_Checksum,^M<R2>
 int Gen_Checksum(Byte_Count,Start,Srca,Dsta,PtclT)
   {
   int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
 	R0 = Byte_Count;	// Put byte count in R0
-	ASHL	#-2,R0,R2		// Put fullword count in R2
+	ASHL	-2,R0,R2		// Put fullword count in R2
 	;// Must use byte count rotated +/- 8 bits
 	;// Must use protocol rotated +/- 8 bits
 	;// (Because net stuff wants Big Endian byte order)
-	ASHL	#8,R0,R0		// Start with byte count
-	INSV	Ptclt,#24,#8,R0	// Add in protocol (only 8 bits wide)
-	ADDL	Srca,R0		// Add in source addr
-	ADWC	Dsta,R0		// Add in dest addr (and carry)
-	BRB	Calc_Check0		// Join Calc_Checksum routine
+	R0<<=8;		// Start with byte count
+	R0=R0&0x00ffffff;
+	R0=R0+	((Ptclt&0xff)<<24);	// Add in protocol (only 8 bits wide)
+	R0 +=	Srca;		// Add in source addr
+	R0 +=	Dsta;		// Add in dest addr (and carry)
+	goto	Calc_Check0;		// Join Calc_Checksum routine
 	  }
 
 //++
@@ -1450,7 +1516,7 @@ int Calc_Checksum(Byte_Count,Start,Srca,Dsta,PtclT)
   int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
 	R0 = 0;			// Start with a zero checksum
 	R2 = Byte_Count;
-	ASHL	#-2,R2,R2		// Put fullword count in R2
+	R2>>=2;		// Put fullword count in R2
 					// (and clear Carry)
 Calc_Check0:				// Point where Gen_Checksum joins in
 	;// R0 and PSW-Carry contain initial 32 bit checksum
@@ -1459,28 +1525,28 @@ Calc_Check0:				// Point where Gen_Checksum joins in
 	;// Byte_Count(AP) contains byte count
 	R1 = Start;		// starting address.
 	SOBGEQ	R2,CLop			// enter loop
-	BRB	Odd_Word		// (no fullwords)
+	goto	Odd_Word;		// (no fullwords)
 Clop:	ADWC	(R1)+,R0		// add in next fullword and Carry
 	SOBGEQ	R2,CLop			// get next one
 Odd_Word:
 	;// Check for extra word
-	BBC	#1,Byte_Count,Odd_Byte
-	MOVZWL	(R1)+,R2		// get next word
+	BBC	1,Byte_Count,Odd_Byte
+	R2 =	*(R1++);		// get next word
 	ADWC	R2,R0			// add it in (and the Carry)
 Odd_Byte:
 	;// Check for extra byte
 	if ((Byte_Count&1)==0) goto Reduce16
-	MOVZBL	(R1)+,R2		// get next byte
+	R2 =	*(R1++);		// get next byte
 	ADWC	R2,R0			// add it in (and the Carry)
 Reduce16:
 	;// We have the sum modulo 2**32-1 (actually: protocol and bytecount
 	;// from Gen_Checksum are strange, but are eqv mod 2**16-1)
 	;// Now reduce mod 2**16-1
-	EXTZV	#16,#16,R0,R2		// extract HO word
-//	INSV	#0,#16,#16,R0		// clear HO word
+	EXTZV	16,16,R0,R2		// extract HO word
+//	INSV	0,16,16,R0		// clear HO word
 	R0 = R0;
 	ADWC	R2,R0			// add HO and LO words (and Carry)
-	BBCC	#16, R0, Comp		// clear carry out of LO word
+	BBCC	16, R0, Comp		// clear carry out of LO word
 					// (and branch if short word result)
 	R0++;			// add carry in
 	BCC	Comp			// branch if no more carry
@@ -1494,6 +1560,7 @@ ZSum:	;// Return 0 as FFFF
 	MCOMW	R0,R0
 	return R0;
 }
+#endif
 //.Entry	Gen_Checksum,^M<R3,R4>
 //
 //	R0 = PtclT;		// Start with the protocol code
@@ -1581,38 +1648,41 @@ short	CQ$SIZE;		// Size of the queue
 short	CQ$COUNT;	// Number of bytes on the queue
 long	CQ$ENQP;	// Pointer to first free byte on queue
 long	CQ$DEQP;	// Pointer to first used byte on queue
-} CQ;
+};
 
 
 // CQ_Enqueue(CQ,SRC,Scount)
 // Enqueue bytes onto a circular queue. Called via $CMKRNL when enqueueing from
 // user's system buffer.
 
+#if 0
 #define CQ	  4				// Queue header
 #define SRC	  8				// Destination address
 #define SCOUNT	  12				// Number of bytes
+#endif
 
 //ENTRY CQ_Enqueue,^M<R2,R3,R4,R5,R6,R7>
 int CQ_Enqueue(CQ,SRC,SCOUNT)
  {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  int R0,R1,R2,R3,R4,R5,R6,R8,R9;
+  struct _CQ * R7;
 	R7 = CQ;		// Get queue address
-	SUBL3	R7->CQ$ENQP,R7->CQ$END,R6 // Find space left to end
-	CMPL	R6,SCOUNT		// Does he want all we have till end?
-	BLEQ	l10;			// Yes - need two moves, then
-	MOVC3	SCOUNT,@SRC,@R7->CQ$ENQP // Do the move
+	R6  = R7->CQ$END - R7->CQ$ENQP;	// Find space left to end
+	if	(R6<=SCOUNT)		// Does he want all we have till end?
+	goto	l10;			// Yes - need two moves, then
+	MOVC3	(SCOUNT,SRC,R7->CQ$ENQP); // Do the move
 	R7->CQ$ENQP = R3;		// Update the queue pointer
-	ADDW2	SCOUNT,R7->CQ$COUNT // And update the count
+	R7->CQ$COUNT+=SCOUNT; // And update the count
 	return R0;
 l10:					// Here on pointer-wrap case
-	MOVC3	R6,@SRC,@R7->CQ$ENQP // Move till end of queue
+	MOVC3	(R6,SRC,R7->CQ$ENQP); // Move till end of queue
 	R3 = R7->CQ$BASE;		// Reset pointer to start of queue
-	SUBL3	R6,SCOUNT,R6	// Compute how much we need from Q base
-	BLEQ	l20;			// Have anything left?
-	MOVC3	R6,(R1),(R3)		// Yes - finish the copy
+	R6 = SCOUNT - R6;// Compute how much we need from Q base
+	if (R6<0) goto	l20;			// Have anything left?
+	MOVC3	(R6,(R1),(R3));		// Yes - finish the copy
 l20:
 	R7->CQ$ENQP = R3;		// Update the queue pointer
-	ADDW2	SCOUNT,R7->CQ$COUNT // And update the count
+	R7->CQ$COUNT+=SCOUNT; // And update the count
 	return R0;				// And done.
 }
 
@@ -1620,49 +1690,53 @@ l20:
 // Dequeue bytes from a cirucular queue. Called via $CMKRNL when dequeuing to
 // user's system buffer.
 
+#if 0
 #define CQ	  4				// Queue header
 #define DEST	  8				// Destination address
 #define DCOUNT	  12				// Number of bytes
+#endif
 
 //ENTRY CQ_Dequeue,^M<R2,R3,R4,R5,R6,R7>
 	  void CQ_Dequeue(CQ,DEST ,DCOUNT) 
 {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
-  CQ * R7;
+  int R0,R1,R2,R3,R4,R5,R6,R8,R9;
+  struct _CQ * R7;
   // check all
 
 	R7 = CQ;		// Get queue address
-	SUBL3	R7->CQ$DEQP,R7->CQ$END,R6 // Find space left to end
-	CMPL	R6,DCOUNT		// Does he want all we have till end?
-	BLEQ	l10;			// Yes - need two moves, then
-	MOVC3	DCOUNT,@R7->CQ$DEQP,@DEST // Do the move
+	R6  = R7->CQ$END - R7->CQ$DEQP;	// Find space left to end
+	if	(R6<=DCOUNT)		// Does he want all we have till end?
+	goto	l10;			// Yes - need two moves, then
+	MOVC3	(DCOUNT,R7->CQ$DEQP,DEST); // Do the move
 	R7->CQ$DEQP = R1;		// Update the queue pointer
-	SUBW2	DCOUNT,R7->CQ$COUNT // And update the count
+	R7->CQ$COUNT  -= DCOUNT;	// And update the count
 	return R0;
 l10:					// Here on pointer-wrap case
-	MOVC3	R6,@R7->CQ$DEQP,@DEST // Move till end of queue
+	MOVC3	(R6,R7->CQ$DEQP,DEST); // Move till end of queue
 	R1 = R7->CQ$BASE;		// Reset pointer to start of queue
-	SUBL3	R6,DCOUNT,R6	// Compute count we need from Q base
-	BLEQ	l20;			// Have anything left?
-	MOVC3	R6,(R1),(R3)		// Yes - finish the copy
+	R6 = DCOUNT - R6;// Compute count we need from Q base
+	if (R6<=0) goto	l20;			// Have anything left?
+	MOVC3	(R6,(R1),(R3));		// Yes - finish the copy
 l20:
 	R7->CQ$DEQP = R1;		// Update the queue pointer
-	SUBW2	DCOUNT,R7->CQ$COUNT // And update the count
+	R7->CQ$COUNT  -= DCOUNT;	// And update the count
 	return R0;				// And done.
 	  }
 
 // CQ_DeqCopy(CQ,Dest,Dcount)
 // Same as CQ_Dequeue, except queue pointer/count is not updated.
 
+#if 0
 #define CQ	  4				// Queue header
 #define DEST	  8				// Destination address
 #define DCOUNT	  12				// Number of bytes
+#endif
 
 //ENTRY CQ_DeqCopy,^M<R2,R3,R4,R5,R6,R7>
 	  void CQ_DeqCopy(CQ,DEST ,DCOUNT) 
 {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
-  CQ * R7;
+  int R0,R1,R2,R3,R4,R5,R6,R8,R9;
+  struct _CQ * R7;
   // check all
 	R7=CQ;		// Get queue address
 	R6=R7->CQ$END-R7->CQ$DEQP; // Find space left to end
@@ -1670,17 +1744,17 @@ l20:
 	goto 	l10;			// Yes - need two moves, then
 	MOVC3	(DCOUNT,R7->CQ$DEQP,DEST); // Do the move
 //;;	R7->CQ$DEQP = R1;		// Update the queue pointer
-//;;	SUBW2	DCOUNT,R7->CQ$COUNT // And update the count
+//;;	R7->CQ$COUNT  -= DCOUNT;	// And update the count
 	return R0;
 l10:					// Here on pointer-wrap case
-	MOVC3	(R6,R7->CQ$DEQP,DEST) // Move till end of queue
+	MOVC3	(R6,R7->CQ$DEQP,DEST); // Move till end of queue
 	R1=	R7->CQ$BASE;		// Reset pointer to start of queue
 	R6=	DCOUNT-R6;	// Compute count we need from Q base
 	if     	(R6<0) goto l20;			// Have anything left?
 	MOVC3	(R6,R1,R3);		// Yes - finish the copy
 l20:
 //;;	R7->CQ$DEQP = R1;		// Update the queue pointer
-//;;	SUBW2	DCOUNT,R7->CQ$COUNT // And update the count
+//;;	R7->CQ$COUNT  -= DCOUNT;	// And update the count
 	return R0;				// And done.
 }
 //END
