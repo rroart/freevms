@@ -377,7 +377,9 @@ extern  void    LOG_OUTPUT();
 extern  void    LOG_TIME_STAMP();
 extern  void    ACT_FAO();
 extern  void    LOG_FAO();
+#if 0
 extern  void    OPR_FAO();
+#endif
 
 // Routines From:  MACLIB.MAR
 
@@ -2179,7 +2181,7 @@ struct dsc$descriptor
 		    func = *funcstr;
 		    };
 	    };
-	    LOG$FAO("!%T !AS (Proto:!XB), uargs=!XL,VMSID=!XL,IRP=!XL,UCB=!XL!/",		    0, func, argblk->ud$protocol,
+	    LOG$FAO("!%T !AS (Proto:!XB), uargs=!XL,VMSID=!XL,IRP=!XL,UCB=!XL!/",		    0, &func, argblk->ud$protocol,
 		    argblk, argblk->ud$vms_blk_id,
 		    argblk->ud$irp_adrs, argblk->ud$ucb_adrs,
 		    argblk->ud$pid);

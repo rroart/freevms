@@ -232,7 +232,7 @@ extern signed long
 // MACLIB.MAR
 
 extern  void    swapbytes();
-extern  void    Movbyt();
+extern  void    MOVBYT();
 
 // MEMGR.BLI
 
@@ -376,7 +376,7 @@ void Log_UDP_Packet(Seg,SwapFlag,SendFlag)
     QL$FAO(/*%STRING*/("!%T !AS UDP packet, SEG=!XL, DATA=!XL!/",
 		   "!_SrcPrt:!_!XL (!UL)!_DstPrt:!_!XL (!UL)!/",
 		   "!_Length:!_!SL!_CKsum:!_!SL!/"),
-	    0,sptr,Seg,segdata,
+	    0,&sptr,Seg,segdata,
 	   seghdr->up$source_port,seghdr->up$source_port,
 	   seghdr->up$dest_port,seghdr->up$dest_port,
 	   seghdr->up$length,seghdr->up$checksum);
@@ -841,8 +841,8 @@ void Deliver_UDP_Data(UDPCB,QB,URQ)
      struct queue_blk_structure(qb_nr_fields) * QB;
 	struct queue_blk_structure(qb_ur_fields) * URQ;
     {
-      struct User_RECV_Args * UArgs;
-      struct User_RECV_Args * Sargs;
+      struct user_recv_args * UArgs;
+      struct user_recv_args * Sargs;
       void * IRP;
       signed long
 	FLAGS,
@@ -870,20 +870,16 @@ void Deliver_UDP_Data(UDPCB,QB,URQ)
 
 // Copy from our buffer to the user system buffer
 
-#if 0
     // check
     $$KCALL(MOVBYT,Ucount,Uptr,URQ->ur$data);
-#endif
 
 // Copy UDP Source and destination addresses to system space Diag Buff
 
     UArgs = URQ->ur$uargs;
     IRP = URQ->ur$irp_adrs;
-#if 0
-    if (Uargs->re$ph_buff != 0)
+    if (UArgs->re$ph_buff != 0)
 	$$KCALL(MOVBYT,IPADR$UDP_ADDRESS_BLEN,
-		.Aptr,Uargs->re$ph_buff);
-#endif
+		Aptr,UArgs->re$ph_buff);
 
 // Post the I/O and free up memory
 
@@ -1180,10 +1176,8 @@ void udp$open(struct user_open_args * Uargs)
 // At this point, the connection exists. Write the connection ID
 // back into the Unit Control Block for this connection.
 
-    udpcbptr = Uargs->op$ucb_adrs + UCB$L_CBID;
-#if 0
+    udpcbptr = Uargs->op$ucb_adrs; // not yet + UCB$L_CBID;
     $$KCALL(MOVBYT,4,UIDX,udpcbptr);
-#endif
 
 // Initialize queue headers for the UDPCB
 
@@ -1357,14 +1351,12 @@ UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST)
     XLOG$FAO(LOG$USER,"!%T UDB_COPEN: Conn idx = !XL, UDPCB = !XL!/",
 	     0,UDPCB->udpcb$udpcbid,UDPCB);
     IP_Address = UDPCB->udpcb$foreign_host ;
-#if 0
     ACT$FAO("!%D Open UDP Port !UW (!UW) <!UB.!UB.!UB.!UB>!/",0,
 	UDPCB->udpcb$local_port,
 	UDPCB->udpcb$foreign_port,
-	.IP_Address<0,8>,IP_Address<8,8>,
-	.IP_Address<16,8>,IP_Address<24,8>
+	IP_Address&0xff,(IP_Address>>8)&0xff,
+	    (IP_Address>>16)&0xff,(IP_Address>>24)&0xff
 		   );
-#endif
     return SS$_NORMAL;
     }
 
@@ -1579,10 +1571,7 @@ UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
 
 // Copy the user data into the data area
 
-#if 0
-    // not yet
     $$KCALL(MOVBYT,Usize,UData,Seg->up$data);
-#endif
 
 // Log the UDP packet if desired
 
