@@ -31,4 +31,4 @@ NOTE on kernel config:
 VMS MM works only on uml
 VMS IO works so far only on blockdevices, and the only blockdevices supported
 is the uml "harddisk" and on i386 only ide (booted only on bochs and may
-not work with all fs blocksizes). It leeks lots of memory, so configure lots.
+not work with all fs blocksizes). It leaks lots of memory, so configure lots.
