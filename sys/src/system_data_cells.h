@@ -7,6 +7,7 @@
 #include"../../lib/src/cpudef.h"
 #include"../../lib/src/tqedef.h"
 #include"../../lib/src/wqhdef.h"
+#include"../../lib/src/rsbdef.h"
 
 extern unsigned long acme$gq_mutex;
 extern unsigned long acme$gq_request_queue;
@@ -792,8 +793,8 @@ extern unsigned long lck$gl_waittime;
 extern unsigned long lck$gq_bitmap_exp;
 extern unsigned long lck$gq_bitmap_explcl;
 extern unsigned long lck$gq_debug;
-extern unsigned long lck$gq_hashtbl;
-extern unsigned long lck$gq_idtbl;
+extern void * lck$gl_hashtbl;
+extern void * lck$gl_idtbl;
 extern unsigned long lck$gq_lckcpu_list;
 extern unsigned long lck$gq_lkb_head;
 extern unsigned long lck$gq_lkb_tail;
@@ -805,7 +806,7 @@ extern unsigned long lck$gq_reserved3;
 extern unsigned long lck$gq_reserved4;
 extern unsigned long lck$gq_reserved5;
 extern unsigned long lck$gq_reserved6;
-extern unsigned long lck$gq_rrsfl;
+extern unsigned long lck$gl_rrsfl;
 extern unsigned long lck$gq_rsb_head;
 extern unsigned long lck$gq_rsb_tail;
 extern unsigned long lck$gq_shared_anchor;

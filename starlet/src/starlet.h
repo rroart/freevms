@@ -2,6 +2,7 @@
 #define starlet_h
 
 #include"misc.h"
+#include"lksbdef.h"
 
 /* rename eventually to sys$routines.h */
 
@@ -46,6 +47,10 @@ int sys$setef(unsigned int efn);
 int sys$synch(unsigned int efn, struct _iosb *iosb);
 
 int sys$readef(unsigned int efn, unsigned int *state);
+
+int sys$enq  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id);
+
+int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags);
 
 int sys$asctim  (unsigned short int *timlen, void *timbuf,
 		 unsigned long long *timadr, char cvtflg);
@@ -99,3 +104,18 @@ struct struct_qio {
 };
 
 #endif
+
+struct struct_enq {
+  unsigned int efn;
+  unsigned int lkmode;
+  struct _lksb *lksb;
+  unsigned int flags;
+  void *resnam;
+  unsigned int parid;
+  void (*astadr)();
+  unsigned long astprm;
+  void (*blkastadr)();
+  unsigned int acmode;
+  unsigned int rsdm_id;
+  unsigned long null_arg;
+};

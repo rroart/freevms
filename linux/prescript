@@ -29,6 +29,9 @@ done
 		ln -s ../../freevms/sys/src/sysforcex.c .;
 		ln -s ../../freevms/sys/src/sysexit.c .;
 		ln -s ../../freevms/sys/src/syssetmod.c .;
+		ln -s ../../freevms/sys/src/sysenqdeq.c .;
+		ln -s ../../freevms/sys/src/sysqioreq.c .;
+		ln -s ../../freevms/sys/src/sysqiofdt.c .;
 
 		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
 		rm ast.c; ln -s ../../freevms/pal/src/ast.c .;

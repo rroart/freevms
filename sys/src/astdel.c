@@ -50,8 +50,8 @@ asmlinkage void sch$astdel(void) {
   printast(acb);
   //  mydebug5=1;
   //  printk(KERN_EMERG "astdel %x\n",acb);
-  if (acb->acb$b_rmod & ACB$V_KAST) {
-    acb->acb$b_rmod&=~ACB$V_KAST;
+  if (acb->acb$b_rmod & ACB$M_KAST) {
+    acb->acb$b_rmod&=~ACB$M_KAST;
     /* unlock */
     printk("astdel1 %x \n",acb->acb$l_kast);
     acb->acb$l_kast();

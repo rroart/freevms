@@ -1,4 +1,4 @@
-all: timer ast time eftim schdwk forcex ef wake synch
+all: timer ast time eftim schdwk forcex ef wake synch enq
 
 timer: timer.c
 	gcc -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.o -o timer
@@ -26,4 +26,8 @@ wake: wake.c
 
 synch: synch.c
 	gcc -I../starlet/src -I../librtl/src/ synch.c ../starlet/src/starlet.o -o synch
+
+
+enq: enq.c
+	gcc -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.o -o enq
 

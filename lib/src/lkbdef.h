@@ -54,7 +54,7 @@
 #define LKB$C_LENGTH 248
 #define LKB$S_LKBDEF 248
 	
-struct _lkb$r_lkb {
+struct _lkb {
   struct _acb *lkb$l_astqfl;
   struct _acb *lkb$l_astqbl;
   unsigned short int lkb$w_size;

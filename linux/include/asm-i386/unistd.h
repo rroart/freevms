@@ -259,6 +259,8 @@
 #define __NR_$readef           25
 #define __NR_$setef            26
 #define __NR_$synch            27
+#define __NR_$enq              28
+#define __NR_$deq              29
 
 #define __NR_$asctim            1
 #define __NR_$bintim            2

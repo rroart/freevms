@@ -798,8 +798,8 @@ unsigned long lck$gl_waittime;
 unsigned long lck$gq_bitmap_exp;
 unsigned long lck$gq_bitmap_explcl;
 unsigned long lck$gq_debug;
-unsigned long lck$gq_hashtbl;
-unsigned long lck$gq_idtbl;
+void * lck$gl_hashtbl;
+void * lck$gl_idtbl;
 unsigned long lck$gq_lckcpu_list;
 unsigned long lck$gq_lkb_head;
 unsigned long lck$gq_lkb_tail;
@@ -811,7 +811,8 @@ unsigned long lck$gq_reserved3;
 unsigned long lck$gq_reserved4;
 unsigned long lck$gq_reserved5;
 unsigned long lck$gq_reserved6;
-unsigned long lck$gq_rrsfl;
+unsigned long lck$gl_rrsfl;
+unsigned long lck$gl_rrsbl; /* unofficial */
 unsigned long lck$gq_rsb_head;
 unsigned long lck$gq_rsb_tail;
 unsigned long lck$gq_shared_anchor;
@@ -1903,6 +1904,11 @@ struct _cpu vmscpus[32]; /* max. this number should be defined */
 
 //long long forklistheads[32][6];
 
+struct _rsb * reshashtbl[RESHASHTBL];
+unsigned long lockidtbl[LOCKIDTBL];
+unsigned long lockmaxid;
+unsigned long locknxtid;
+
 extern void exe$timeout(void);
 
 void qhead_init(void * l) {
@@ -1998,6 +2004,15 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   vmstimerconf=1;
 
   qhead_init(&ioc$gq_postiq);
+
+  qhead_init(&lck$gl_rrsfl);
+
+  for(i=0;i<RESHASHTBL;i++)
+    reshashtbl[i]=0;
+  lck$gl_hashtbl=&reshashtbl;
+  lck$gl_idtbl=&lockidtbl;
+  lck$gl_nxtid=&locknxtid;
+  lck$gl_maxid=&lockmaxid;
 
   /* take lnm stuff from syslnm.c etc */
 

@@ -121,6 +121,27 @@ int sys$synch(unsigned int efn, struct _iosb *iosb) {
   return INLINE_SYSCALL($synch,2,efn,iosb);
 }
 
+int sys$enq  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id) {
+  struct struct_enq s;
+  s.efn=efn;
+  s.lkmode=lkmode;
+  s.lksb=lksb;
+  s.flags=flags;
+  s.resnam=resnam;
+  s.parid=parid;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.blkastadr=blkastadr;
+  s.acmode=acmode;
+  s.rsdm_id=rsdm_id;
+  //  s.null_arg=null_arg;
+  return INLINE_SYSCALL($enq,1,&s);
+}
+
+int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags) {
+  return INLINE_SYSCALL($deq,4,lkid,valblk,acmode,flags);
+}
+
 int sys$asctim  (unsigned short int *timlen, void *timbuf,
 		 unsigned long long *timadr, char cvtflg) {
   return INLINE_SYSCALL3($asctim,4,timlen,timbuf,timadr,(unsigned long)cvtflg);

@@ -16,8 +16,8 @@ void exe$iofork(struct _ucb * u, struct _irp * i) {
   struct _fkb * f;
   /* need caller and caller's caller address of return again */
   u->ucb$l_sts&=~UCB$M_TIM;
-  u->ucb$q_fr3=i;
-  u->ucb$q_fr4=current;
+  u->ucb$l_fr3=i;
+  u->ucb$l_fr4=current;
   newipl=u->ucb$b_dipl;
   f=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[newipl-6];
   isempty=aqempty(f);

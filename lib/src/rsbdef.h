@@ -41,8 +41,6 @@ struct _rsb {
   unsigned char rsb$b_cgmode;
   unsigned int rsb$l_status;
   unsigned int rsb$l_refcnt;
-  unsigned int rsb$l_csid;
-  unsigned int rsb$l_rm_csid;
   void *rsb$l_grqfl;
   void *rsb$l_grqbl;
   void *rsb$l_cvtqfl;

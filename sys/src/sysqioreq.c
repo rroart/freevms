@@ -27,10 +27,10 @@ void exe$finishioc (void) {
 
 int exe$insioq (struct _ucb * u, struct _irp * i) {
   /* raise ipl */
-  if (u->ucb$l_sts & UCB$V_BSY)
+  if (u->ucb$l_sts & UCB$M_BSY)
     exe$insertirp(&u->ucb$l_ioqfl,i);
   else {
-    u->ucb$l_sts|=UCB$V_BSY;
+    u->ucb$l_sts|=UCB$M_BSY;
     ioc$initiate(u,i);
   }
   /* restore ipl */
@@ -43,7 +43,7 @@ int exe$qio (struct struct_qio * q) {
   int func;
   struct _irp * i;
   exe$clref(q->efn);
-  if (q->chan<0 || q->chan>ctl$gw_chindx) return SS$_IVCHAN;
+  if (q->chan<0 || q->chan>ctl$gl_chindx) return SS$_IVCHAN;
   /*ccb$l_wind stuff*/
   func=q->func;
   /*spooled?*/
@@ -60,7 +60,7 @@ int exe$qio (struct struct_qio * q) {
   i->irp$l_astprm=q->astprm;
   i->irp$l_iosb=q->iosb;
   i->irp$w_chan=q->chan;
-  i->irp$b_func=q->func;
+  i->irp$w_func=q->func;
   /* do preprocessing */
 
   

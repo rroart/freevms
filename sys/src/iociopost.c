@@ -19,7 +19,7 @@ asmlinkage void ioc$iopost(void) {
   if (i->irp$w_sts & IRP$M_BUFIO) goto bufio;
 
  dirio:
-  //  i->irp$b_rmod|=ACB$V_KAST;
+  //  i->irp$b_rmod|=ACB$M_KAST;
   ((struct _acb *) i)->acb$l_kast=dirpost;
   /* find other class than 1 */
   sch$postef(p->pid,1,i->irp$b_efn);
@@ -28,7 +28,7 @@ asmlinkage void ioc$iopost(void) {
 
  bufio:
 
-  //  i->irp$b_rmod|=ACB$V_KAST;
+  //  i->irp$b_rmod|=ACB$M_KAST;
   ((struct _acb *) i)->acb$l_kast=bufpost;
   /* find other class than 1 */
   sch$postef(p->pid,1,i->irp$b_efn);

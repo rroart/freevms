@@ -16,4 +16,9 @@ struct item_list_3 { short buflen, item_code;
          void *retlenaddr;
 };
 
+struct lock_blk { 
+                   unsigned short  condition,reserved; 
+                   unsigned int lock_id; 
+};
+
 #endif

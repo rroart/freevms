@@ -7,7 +7,6 @@
 #define	ACB$M_NODELETE	0x20
 #define	ACB$M_QUOTA	0x40
 #define	ACB$M_KAST	0x80
-#define	ACB$V_KAST	0x80
 #define	ACB$M_THREAD_SAFE	0x1
 #define	ACB$M_THREAD_PID_VALID	0x2
 #define	ACB$M_UPCALL	0x4
