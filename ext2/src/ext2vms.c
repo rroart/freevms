@@ -679,13 +679,14 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 	filp_close(f,0);
       }
     }
-    x2p->context_save[0]=0;
 
 #if 0
       sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
       // readdir should be replaced with something like search_ent
 #endif
   }
+
+  x2p->context_save[0]=0;
 
   if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
 
