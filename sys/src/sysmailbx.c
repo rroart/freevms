@@ -18,10 +18,10 @@
 #include <ucbdef.h>
 
 int clone_init_ucb() {
-  extern struct _mb_ucb mb$ucb;
-  struct _ucb * mb$ar_ucb0 = &mb$ucb;
+  extern struct _mb_ucb * mbucb0;
+  //  struct _ucb * mb$ar_ucb0 = &mb$ucb;
   struct _ucb * u;
-  ioc_std$clone_ucb(mb$ar_ucb0,&u);
+  ioc_std$clone_ucb(mbucb0,&u);
   struct _mb_ucb * m = u;
   qhead_init(&m->ucb$l_mb_readqfl);
   qhead_init(&m->ucb$l_mb_writerwaitqfl);
@@ -48,14 +48,14 @@ int find_mb_log(void * lognam) {
   i[1].bufaddr=&back;
   i[1].retlenaddr=&retlenu;
   i[2].item_code=0;
-  status=exe$trnlnm(0,mytabnam,lognam,0,i);
+  status=exe$trnlnm(0,&mytabnam,lognam,0,i);
   if (status&1)
     return u;
   else 
     return 0;
 }
 
-int create_mb_log(void * lognam, long bufquo) {
+int create_mb_log(void * lognam, long bufquo, struct _ucb * u) {
   $DESCRIPTOR(mytabnam,"LNM$SYSTEM_TABLE");
   struct item_list_3 i[6];
   int status;
@@ -63,8 +63,8 @@ int create_mb_log(void * lognam, long bufquo) {
     char c[64];
     int retlen, retlenu;
     int index=0;
+    long back = LNMX$C_BACKPTR;
 
-    struct _ucb * u=clone_init_ucb();
     u->ucb$w_bufquo=bufquo;
     u->ucb$w_iniquo=bufquo;
 
@@ -76,22 +76,22 @@ int create_mb_log(void * lognam, long bufquo) {
     i[0].retlenaddr=&retlen;
     i[1].item_code=LNM$_INDEX;
     i[1].buflen=4;
-    i[1].bufaddr=index;
+    i[1].bufaddr=&back;
     i[1].retlenaddr=&retlenu;
     i[2].item_code=LNM$_LNMB_ADDR;
     i[2].buflen=4;
     i[2].bufaddr=&((struct _mb_ucb *)u)->ucb$l_logadr;
     i[2].retlenaddr=&retlenu;
     i[3].item_code=LNM$_STRING;
-    i[3].buflen=c;
-    i[3].bufaddr=strlen(c);
+    i[3].buflen=strlen(c);
+    i[3].bufaddr=c;
     i[3].retlenaddr=&retlenu;
     i[4].item_code=LNM$_INDEX;
     i[4].buflen=4;
     i[4].bufaddr=&index;
     i[4].retlenaddr=&retlenu;
     i[5].item_code=0;
-    status=exe$crelnm(0,mytabnam,lognam,0,i);
+    status=exe$crelnm(0,&mytabnam,lognam,0,i);
   }
 }
 
@@ -145,7 +145,7 @@ asmlinkage int exe$crembx  (char prmflg, unsigned short int *chan, unsigned int 
       }
     }
     c->ccb$l_ucb=u;
-    create_mb_log(lognam,bufquo);
+    create_mb_log(lognam,bufquo,u);
     goto out;
   }
 
