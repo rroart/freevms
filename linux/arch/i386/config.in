@@ -170,8 +170,7 @@ tristate '/dev/cpu/microcode - Intel IA32 CPU microcode support' CONFIG_MICROCOD
 tristate '/dev/cpu/*/msr - Model-specific register support' CONFIG_X86_MSR
 tristate '/dev/cpu/*/cpuid - CPU information support' CONFIG_X86_CPUID
 
-bool 'VMS Memory Management' CONFIG_MM_VMS
-bool 'VMS I/O' CONFIG_IO_VMS
+bool 'VMS Memory Management and I/O' CONFIG_VMS
 
 choice 'High Memory Support' \
 	"off    CONFIG_NOHIGHMEM \
@@ -293,11 +292,17 @@ fi
 
 endmenu
 
-if [ "$CONFIG_IO_VMS" != "n" ]; then
+if [ "$CONFIG_VMS" != "n" ]; then
 define_bool CONFIG_IDE y
 define_bool CONFIG_BLK_DEV_IDE y
 define_bool CONFIG_BLK_DEV_IDEDISK y
 define_bool CONFIG_BLK_DEV_FD y
+define_bool CONFIG_IO_VMS y
+define_bool CONFIG_MM_VMS y
+define_bool CONFIG_MSDOS_PARTITION y
+define_bool CONFIG_EXTTWO_FS y
+define_bool CONFIG_PROC_FS y
+define_bool CONFIG_DEVPTS_FS y
 fi
 
 if [ "$CONFIG_IO_VMS" != "y" ]; then
@@ -398,7 +403,9 @@ if [ "$CONFIG_IO_VMS" != "y" ]; then
 source drivers/media/Config.in
 fi
 
+if [ "$CONFIG_VMS" != "y" ]; then
 source fs/Config.in
+fi
 
 if [ "$CONFIG_VT" = "y" ]; then
    mainmenu_option next_comment

@@ -22,8 +22,18 @@ bool 'Networking support' CONFIG_NET
 bool 'System V IPC' CONFIG_SYSVIPC
 bool 'BSD Process Accounting' CONFIG_BSD_PROCESS_ACCT
 bool 'Sysctl support' CONFIG_SYSCTL
-bool 'VMS Memory Management' CONFIG_MM_VMS
-bool 'VMS I/O' CONFIG_IO_VMS
+bool 'VMS Memory Management and I/O' CONFIG_VMS
+
+if [ "$CONFIG_VMS" = "y" ]; then
+define_bool CONFIG_IO_VMS y
+define_bool CONFIG_MM_VMS y
+define_bool CONFIG_EXTTWO_FS y
+define_bool CONFIG_MSDOS_PARTITION y
+define_bool CONFIG_PROC_FS y
+define_bool CONFIG_DEVFS_FS y
+define_bool CONFIG_DEVFS_MOUNT y
+define_bool CONFIG_DEVPTS_FS y
+fi
 
 tristate 'Kernel support for a.out binaries' CONFIG_BINFMT_AOUT
 tristate 'Kernel support for ELF binaries' CONFIG_BINFMT_ELF
@@ -106,7 +116,9 @@ if [ "$CONFIG_NET" = "y" ]; then
    endmenu
 fi
 
+if [ "$CONFIG_VMS" != "y" ]; then
 source fs/Config.in
+fi
 
 source drivers/md/Config.in
 

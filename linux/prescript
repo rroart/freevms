@@ -154,6 +154,10 @@ cd fs
 mkdir ods2
 cd ods2
 		ln -s ../../../freevms/f11x/src/[Ma-z]* .;
+cd ..
+mkdir exttwo
+cd exttwo
+		ln  -s ../../../freevms/ext2/src/[Ma-z]* .;
 cd ../..
 )
 

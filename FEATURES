@@ -14,6 +14,7 @@ xqp (barely)
 sca/scs/cluster (barely)
 locks/dlm (barely)
 cwps (forcex only)
+dcl (or something like it)
 
 syscalls/services:
 $ascefc
@@ -66,6 +67,10 @@ some RMS syscalls
 
 cli:
 DCL
+    mcr, run
+    set default
+    show default/time/devices/system
+    directory, mount and a few more
 
 utilities:
 backup
