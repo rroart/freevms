@@ -25,113 +25,34 @@ endif
 # All of the (potential) objects that export symbols.
 # This list comes from 'grep -l EXPORT_SYMBOL *.[hc]'.
 
+ifndef CONFIG_VMS
 export-objs     :=	console.o keyboard.o sysrq.o \
 			misc.o pty.o random.o selection.o serial.o \
 			tty_io.o tty_ioctl.o generic_serial.o
+else
+export-objs     :=	keyboard.o sysrq.o \
+			misc.o pty.o random.o selection.o serial.o \
+			generic_serial.o
+endif
 
 mod-subdirs	:=	
 
 list-multi	:=	
 
 KEYMAP   =defkeymap.o
+ifndef CONFIG_VMS
 KEYBD    =pc_keyb.o
 CONSOLE  =console.o
+else
+KEYBD    =
+CONSOLE  =
+endif
 SERIAL   =serial.o
-
-ifeq ($(ARCH),s390)
-  KEYMAP   =
-  KEYBD    =
-  CONSOLE  =
-  SERIAL   =
-endif
-
-ifeq ($(ARCH),mips)
-  ifneq ($(CONFIG_PC_KEYB),y)
-    KEYBD    =
-  endif
-endif
-
-ifeq ($(ARCH),s390x)
-  KEYMAP   =
-  KEYBD    =
-  CONSOLE  =
-  SERIAL   =
-endif
-
-ifeq ($(ARCH),m68k)
-   ifdef CONFIG_AMIGA
-      KEYBD = amikeyb.o
-   else
-      KEYBD =
-   endif
-   SERIAL   =
-endif
-
-ifeq ($(ARCH),arm)
-  ifneq ($(CONFIG_PC_KEYMAP),y)
-    KEYMAP   =
-  endif
-  ifneq ($(CONFIG_PC_KEYB),y)
-    KEYBD    =
-  endif
-endif
 
 ifeq ($(ARCH),um)
   KEYMAP   =
   KEYBD    =
   CONSOLE  =
-endif
-
-ifeq ($(ARCH),sh)
-  KEYMAP   =
-  KEYBD    =
-  CONSOLE  =
-  ifeq ($(CONFIG_SH_HP600),y)
-  KEYMAP   = defkeymap.o
-  KEYBD    = scan_keyb.o hp600_keyb.o
-  CONSOLE  = console.o
-  endif
-  ifeq ($(CONFIG_SH_DMIDA),y)
-  # DMIDA does not connect the HD64465 PS/2 keyboard port
-  # but we allow for USB keyboards to be plugged in.
-  KEYMAP   = defkeymap.o
-  KEYBD    = # hd64465_keyb.o pc_keyb.o
-  CONSOLE  = console.o
-  endif
-  ifeq ($(CONFIG_SH_EC3104),y)
-  KEYMAP   = defkeymap.o
-  KEYBD    = ec3104_keyb.o
-  CONSOLE  = console.o
-  endif
-  ifeq ($(CONFIG_SH_DREAMCAST),y)
-  KEYMAP   = defkeymap.o
-  KEYBD    =
-  CONSOLE  = console.o
-  endif
-endif
-
-ifeq ($(CONFIG_DECSTATION),y)
-  KEYMAP   =
-  KEYBD    =
-  SERIAL   = decserial.o
-endif
-
-ifeq ($(CONFIG_BAGET_MIPS),y)
-  KEYBD    =
-  SERIAL   =
-endif
-
-ifeq ($(CONFIG_NINO),y)
-  SERIAL   =
-endif
-
-ifneq ($(CONFIG_SUN_SERIAL),)
-  SERIAL   =
-endif
-
-ifeq ($(CONFIG_QTRONIX_KEYBOARD),y)
-  KEYBD    = qtronix.o
-  KEYMAP   = qtronixmap.o
 endif
 
 obj-$(CONFIG_VT) += vt.o vc_screen.o consolemap.o consolemap_deftbl.o $(CONSOLE) selection.o
@@ -179,10 +100,6 @@ obj-$(CONFIG_ATIXL_BUSMOUSE) += atixlmouse.o
 obj-$(CONFIG_LOGIBUSMOUSE) += logibusmouse.o
 obj-$(CONFIG_PRINTER) += lp.o
 
-ifeq ($(CONFIG_INPUT),y)
-obj-y += joystick/js.o
-endif
-
 obj-$(CONFIG_BUSMOUSE) += busmouse.o
 obj-$(CONFIG_DTLK) += dtlk.o
 obj-$(CONFIG_R3964) += n_r3964.o
@@ -205,10 +122,6 @@ obj-$(CONFIG_DS1620) += ds1620.o
 obj-$(CONFIG_INTEL_RNG) += i810_rng.o
 
 obj-$(CONFIG_QIC02_TAPE) += tpqic02.o
-
-ifeq ($(CONFIG_FTAPE),y)
-obj-y       += ftape/ftape.o
-endif
 
 obj-$(CONFIG_H8) += h8.o
 obj-$(CONFIG_PPDEV) += ppdev.o
