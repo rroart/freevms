@@ -18,6 +18,7 @@ cwps (forcex only)
 dcl (or something like it)
 vms images
 mailboxes
+P1 space (a little bit)
 
 syscalls/services:
 $adjwsl
@@ -32,6 +33,7 @@ $create
 $create_region_32
 $crelnm
 $crelnt
+$creprc
 $crmpsc
 $dclast
 $disconnect
