@@ -20,8 +20,8 @@ dcl.o: cli.c $(LIB) $(EXTERNAL)
 
 i386/dcl${EXE}: dcl.o $(LIB) $(EXTERNAL)
 	mkdir i386 || echo i386 exists
-	gcc -s -static dcl.o $(EXTERNAL) ../../starlet/src/starlet.a -ldl -o i386/dcl${EXE}
-	gcc -static dcl.o $(EXTERNAL) ../../starlet/src/starlet.a -ldl -o i386/dcld${EXE}
+	gcc -s -static dcl.o $(EXTERNAL) ../../starlet/src/starlet.a ../../librtl/src/starlet.a -ldl -o i386/dcl${EXE}
+	gcc -static dcl.o $(EXTERNAL) ../../starlet/src/starlet.a ../../librtl/src/starlet.a -ldl -o i386/dcld${EXE}
 #	../../linker/src/linker $(LINKPRE) dcl.o $(EXTERNAL) ../../starlet/src/starlet.a /usr/lib/libdl.a $(LINKPOST) -o i386/dcl.exe
 # DCL linked like this is just for testing (DCL is really special)
 
@@ -29,5 +29,5 @@ UMDEF=-Dcompile_um -I.
 
 um/dcl${EXE}: dcl.o $(LIBUM) $(EXTERNAL)
 	mkdir um || echo um exists
-	gcc -s -static dcl.o $(EXTERNAL) ../../starlet/src/starletum.a -ldl -o um/dcl${EXE}
-	gcc -static dcl.o $(EXTERNAL) ../../starlet/src/starletum.a -ldl -o um/dcld${EXE}
+	gcc -s -static dcl.o $(EXTERNAL) ../../starlet/src/starletum.a ../../librtl/src/starlet.a -ldl -o um/dcl${EXE}
+	gcc -static dcl.o $(EXTERNAL) ../../starlet/src/starletum.a ../../librtl/src/starlet.a -ldl -o um/dcld${EXE}

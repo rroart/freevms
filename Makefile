@@ -68,4 +68,14 @@ build-linker:
 	make build-linker; \
 	cd ../..
 
+download-bliss:
+	cd bliss/src; \
+	make download-bliss; \
+	cd ../..
+
+build-bliss:
+	cd bliss/src; \
+	make build-bliss; \
+	cd ../..
+
 include Makefile.kernel
