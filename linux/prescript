@@ -101,6 +101,14 @@ cd mm;
 		ln -s ../../freevms/sys/src/wrtmfypag.c .;
 		ln -s ../../freevms/sys/src/syscredel.c .;
 		ln -s ../../freevms/sys/src/vmsmmap.c .;
+		ln -s ../../freevms/sys/src/vmsfilemap.c .;
+		ln -s ../../freevms/sys/src/vmsmemory.c .;
+		ln -s ../../freevms/sys/src/vmsmremap.c .;
+		ln -s ../../freevms/sys/src/vmsmprotect.c .;
+		ln -s ../../freevms/sys/src/vmsmlock.c .;
+		ln -s ../../freevms/sys/src/vmsvmalloc.c .;
+		ln -s ../../freevms/sys/src/vmsswapfile.c .;
+		ln -s ../../freevms/sys/src/vmsshmem.c .;
 cd ..;
 
 cd drivers/block;
