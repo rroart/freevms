@@ -166,7 +166,7 @@ union {
 short    ICMPCB$Flags;
 struct {
 unsigned 	ICMPCB$Wildcard	 : 1;	// ICMPCB opened with wild FH/FP/LH
-unsigned //	ICMPCB$Addr_Mode	 : 1;	// User wants IP addresses
+  //unsigned 	ICMPCB$Addr_Mode	 : 1;	// User wants IP addresses
 unsigned 	ICMPCB$Aborting	 : 1;	// ICMPCB is closing
 unsigned 	icmpcb$nmlook	 : 1;	// ICMPCB has an outstanding name lookup
 unsigned 	ICMPCB$Internal	 : 1;	// ICMPCB is open by ACP not user
