@@ -142,7 +142,9 @@ void startio (struct _irp * i, struct _ucb * u) {
     }
 }
 
+int acp_std$access();
 int acp_std$readblk();
+int acp_std$writeblk();
 
 extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
 
@@ -607,9 +609,9 @@ int ubd_vmsinit(void) {
   ini_fdt_act(&fdt,IO$_READLBLK,acp_std$readblk,1);
   ini_fdt_act(&fdt,IO$_READPBLK,acp_std$readblk,1);
   ini_fdt_act(&fdt,IO$_READVBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt,IO$_WRITELBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt,IO$_WRITEPBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt,IO$_WRITEVBLK,acp_std$readblk,1);
+  ini_fdt_act(&fdt,IO$_WRITELBLK,acp_std$writeblk,1);
+  ini_fdt_act(&fdt,IO$_WRITEPBLK,acp_std$writeblk,1);
+  ini_fdt_act(&fdt,IO$_WRITEVBLK,acp_std$writeblk,1);
   exe$assign(&u0,&chan,0,0,0);
   registerdevchan(MKDEV(UBD_MAJOR,0),chan);
   return chan;

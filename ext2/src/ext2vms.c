@@ -430,6 +430,7 @@ unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],s
     bzero(aqb,sizeof(struct _aqb));
     aqb->aqb$b_type=DYN$C_AQB;
     qhead_init(&aqb->aqb$l_acpqfl);
+    aqb->aqb$l_acppid=1;
     ucb->ucb$l_vcb=vcb;
     vcb->vcb$l_aqb=aqb;
     if (vcb == NULL) return SS$_INSFMEM;
