@@ -218,7 +218,7 @@ struct dsc$descriptor sptr;
     segdata = Seg + ICMP_HEADER_SIZE;
     if (SwapFlag)		// Need to byteswap header?
 	{
-	CH$MOVE(ICMP_HEADER_SIZE,CH$PTR(Seg),CH$PTR(segcopy)); // Make a copy
+	CH$MOVE(ICMP_HEADER_SIZE,CH$PTR(Seg,0),CH$PTR(segcopy,0)); // Make a copy
 	seghdr = segcopy;	// Point at this version...
 	SwapBytes(ICMP_HEADER_SIZE/2,seghdr); // Swap header bytes
 	};
@@ -724,7 +724,7 @@ void icmp$open(struct user_open_args * uargs)
 
 // Handle wildcard host
 
-    NAMPTR = CH$PTR(uargs->op$foreign_host);
+    NAMPTR = CH$PTR(uargs->op$foreign_host,0);
     NAMLEN = uargs->op$foreign_hlen;
     if ((! uargs->op$addr_flag) && (NAMLEN == 0))
 	{
@@ -743,7 +743,7 @@ X:  {			// *** Block X ***
     if (uargs->op$addr_flag)
 	IPADDR = uargs->op$foreign_address;
     else
-	if (GET_IP_ADDR(NAMPTR,IPADDR) < 0)
+	if (GET_IP_ADDR(&NAMPTR,&IPADDR) < 0)
 	    goto leave_x;
     ICMPCB->ICMPCB$Foreign_Hnlen = 0;
     ICMPCB->icmpcb$uargs = uargs;
@@ -816,7 +816,7 @@ void ICMP_NMLOOK_DONE(ICMPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 
     ICMPCB->ICMPCB$Foreign_Hnlen = NAMLEN;
     if (NAMLEN != 0)
-	CH$MOVE(NAMLEN,NAMPTR,CH$PTR(ICMPCB->ICMPCB$Foreign_Hname));
+	CH$MOVE(NAMLEN,NAMPTR,CH$PTR(ICMPCB->ICMPCB$Foreign_Hname,0));
 
 // Finally, post the status
 
@@ -864,7 +864,7 @@ void ICMP_ADLOOK_DONE(ICMPCB,STATUS,NAMLEN,NAMPTR)
 // Copy the hostname into the ICMPCB
 
     ICMPCB->ICMPCB$Foreign_Hnlen = NAMLEN;
-    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(ICMPCB->ICMPCB$Foreign_Hname));
+    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(ICMPCB->ICMPCB$Foreign_Hname,0));
     }
 
 //SBTTL "ICMP$CLOSE - close ICMP "connection""

@@ -127,6 +127,8 @@ MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
 #include <opcdef.h>
 #include <chfdef.h>
 
+#include <stdarg.h>
+
 
 
 #define APPCHR(CHR,DPTR,DCNT,OCNT) \
@@ -196,9 +198,9 @@ void ASCII_DEC_BYTES(DESC,COUNT,SOURCE,LEN)
       signed long I,
 	CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
     OUTCNT = 0;
-    CPTR = CH$PTR(SOURCE);
+    CPTR = CH$PTR(SOURCE,0);
     DCNT = DESC->dsc$w_length;
-    DPTR = CH$PTR(DESC->dsc$a_pointer);
+    DPTR = CH$PTR(DESC->dsc$a_pointer,0);
     for (I=(COUNT-1);I>=0;I--)
 	{
 	CURBYTE = CH$RCHAR_A(CPTR);
@@ -238,9 +240,9 @@ void ASCII_HEX_BYTES(DESC,COUNT,SOURCE,LEN)
     {
       signed long I,
 	CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
-    CPTR = CH$PTR(SOURCE);
+    CPTR = CH$PTR(SOURCE,0);
     DCNT = DESC->dsc$w_length;
-    DPTR = CH$PTR(DESC->dsc$a_pointer);
+    DPTR = CH$PTR(DESC->dsc$a_pointer,0);
     OUTCNT = 0;
     for (I=(COUNT-1);I>=0;I--)
 	{
@@ -264,17 +266,18 @@ GET_IP_ADDR(CPTR,VAL)
 // Returns -1 on failure, or terminating character (GEQ 0)
 // N.B. Assumes that Internet addresses are 4 bytes long.
 
+     char ** CPTR;
     {
       signed long I,
     	DPTR,NVAL,CHR;
-    DPTR = CH$PTR(VAL);
+    DPTR = CH$PTR(VAL,0);
     for (I=3;I>=0;I--)
 	{
-	if ((CHR = GET_DEC_NUM(CPTR,NVAL)) < 0)
+	if ((CHR = GET_DEC_NUM(CPTR,&NVAL)) < 0)
 	    return -1;
 	CH$WCHAR_A(NVAL,DPTR);
 	if (I != 0)
-	    if (CH$RCHAR_A(CPTR) != '.')
+	    if (CH$RCHAR_A(*CPTR) != '.')
 		return -1;
 	};
     return CHR;
@@ -291,10 +294,12 @@ GET_DEC_NUM(CPTR,VAL)
 // CPTR is updated to point at the terminating character.
 // Currently only handles unsigned decimal values.
 
+     char ** CPTR;
+     int * VAL;
     {
     signed long
     	CHR,RVAL,LPTR;
-    LPTR = CPTR;
+    LPTR = *CPTR;
     do {
       CHR = CH$RCHAR_A(LPTR);
     } while (CHR == ' ');
@@ -304,10 +309,10 @@ GET_DEC_NUM(CPTR,VAL)
     while ((CHR >= '0') && (CHR <= '9'))
 	{
 	RVAL = RVAL*10+(CHR-'0');
-	CPTR = LPTR;
+	*CPTR = LPTR;
 	CHR = CH$RCHAR_A(LPTR);
 	};
-    VAL = RVAL;
+    *VAL = RVAL;
     return CHR;
     }
 
@@ -327,7 +332,7 @@ GET_HEX_BYTES(NUMBYT,CPTR,DEST)
 	LPTR,
 	TCHR,
 	DPTR;
-    DPTR = CH$PTR(DEST);
+    DPTR = CH$PTR(DEST,0);
     for (I=(NUMBYT-1);I>=0;I--)
 	{
 	if ((TCHR=GET_HEX_NUM(CPTR,CVAL)) < 0)

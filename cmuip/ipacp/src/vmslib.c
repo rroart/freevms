@@ -1,5 +1,13 @@
 #include <ssdef.h>
 
+#include <descrip.h>
+
+#include <linux/config.h>
+#include <linux/kernel.h>
+#include <linux/mm.h>
+
+#include <stdarg.h>
+
 CH$FILL() {
   printk("CH$FILL not implemented\n");
 }
@@ -12,8 +20,14 @@ CH$ALLOCATION() {
   printk("CH$ALLOCATION not implemented\n");
 }
 
-STR$COPY_DX() {
-  printk("STR$COPY_DX not implemented\n");
+STR$COPY_DX(x,y)
+     struct dsc$descriptor * x, *y;
+{
+  //  printk("STR$COPY_DX not implemented\n");
+  if (0==x->dsc$a_pointer) x->dsc$a_pointer=kmalloc(y->dsc$w_length,GFP_KERNEL);
+  memcpy(x->dsc$a_pointer,y->dsc$a_pointer,y->dsc$w_length);
+  x->dsc$w_length=y->dsc$w_length;
+  return SS$_NORMAL;
 }
 
 LIB$CALLG() {
@@ -28,7 +42,16 @@ Signal() {
   printk("Signal not implemented\n");
 }
 
-STR$APPEND() {
+STR$APPEND(x , y)
+     struct dsc$descriptor * x, *y;
+{
+  char * s=kmalloc(x->dsc$w_length+y->dsc$w_length,GFP_KERNEL);
+  memcpy(s,x->dsc$a_pointer,x->dsc$w_length);
+  memcpy(&s[x->dsc$w_length],y->dsc$a_pointer,y->dsc$w_length);
+  kfree( x->dsc$a_pointer);
+  x->dsc$a_pointer=s;
+  x->dsc$w_length=x->dsc$w_length+y->dsc$w_length;
+  return SS$_NORMAL;
   printk("STR$APPEND not implemented\n");
 }
 
@@ -36,7 +59,23 @@ STR$CASE_BLIND_COMPARE() {
   printk("STR$CASE_BLIND_COMPARE not implemented\n");
 }
 
-CH$PTR() {
+CH$PTR(int X) {
+  return X;
+}
+
+CH$PTR_not_again(int X, int par) {
+#if 0
+  int par;
+  va_list args;
+  va_start(args,X);
+  par=va_arg(args,int);
+  va_end(args);
+  printk("ch$ptr %x\n",par);
+#endif
+  return X+par;
+}
+
+CH$PTR_not() {
   printk("CH$PTR not implemented\n");
 }
 

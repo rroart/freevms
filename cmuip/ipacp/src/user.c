@@ -724,13 +724,13 @@ void user$net_connection_info(struct user_info_args * uargs,
 
 // Do Foreign Host Name (ASCIZ string).
 
-    CH$MOVE(Frn_Nlen,Frn_Name,CH$PTR(CS->ci$foreign_host));
+    CH$MOVE(Frn_Nlen,Frn_Name,CH$PTR(CS->ci$foreign_host,0));
     CS->ci$fhost_name_size = Frn_Nlen;
 
 // Local host name
 
     CH$MOVE(Local_Name->dsc$w_length,Local_Name->dsc$a_pointer,
-	    CH$PTR(CS->ci$local_host));
+	    CH$PTR(CS->ci$local_host,0));
     CS->ci$lhost_name_size = Local_Name->dsc$w_length;
 
 // Local and foreign port numbers.
@@ -1799,7 +1799,7 @@ void net$gthst(struct gthst_args * uargs)
 // Copy the name of the local host from the local info
 
 	CH$MOVE(Local_Name->dsc$w_length,Local_Name->dsc$a_pointer,
-		CH$PTR(RBLOCK->ghn$namstr));
+		CH$PTR(RBLOCK->ghn$namstr,0));
 	RBLOCK->ghn$namlen = Local_Name->dsc$w_length;
 
 // Return data to the user
@@ -1825,7 +1825,7 @@ void net$gthst(struct gthst_args * uargs)
 	    return;
 	    };
 
-	NML$GETALST(CH$PTR(uargs2->ghn$hstnam),uargs2->ghn$hstlen,
+	NML$GETALST(CH$PTR(uargs2->ghn$hstnam,0),uargs2->ghn$hstlen,
 		    GTHST_NMLOOK_DONE,uargs2);
 	};
 	break;
@@ -1866,7 +1866,7 @@ void net$gthst(struct gthst_args * uargs)
 	    };
 
 	NML$GETRR(uargs2->grr$rrtype,
-		    CH$PTR(uargs2->grr$hstnam),uargs2->grr$hstlen,
+		    CH$PTR(uargs2->grr$hstnam,0),uargs2->grr$hstlen,
 		    GTHST_RRLOOK_DONE,uargs2);
 	};
 	break;

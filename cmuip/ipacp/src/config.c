@@ -257,12 +257,6 @@ extern     GET_HEX_NUM();
 extern  void    ASCII_DEC_BYTES();
 extern  void    ASCII_HEX_BYTES();
 
-#define CH$PTR(X) ((long)X) // check + 1?
-#define CH$RCHAR(X) *((char *)X) // check or ++ char?
-#define CH$PLUS(X,Y) ((long)X+(long)Y)
-#define CH$WCHAR_A(X,Y) *(char*)Y++=X
-#define CH$RCHAR_A(X) *(((char *)X)++)  // not yet? *((*(char **)X)++) 
- 
 #if 0
     STR[] = CH$PTR(UPLIT(%ASCIZ %STRING(%REMAINING))) %,
     STRMOVE(THESTR,DPTR) =		// Strmove - STRMOVE(STRING,BP)
@@ -579,17 +573,17 @@ void CNF$Configure_ACP (void)
 
     dev_count = 0;		// No devices
 
-    while (exe$get(CFRAB))
+    while (exe$get(CFRAB)&1)
 	{
 	signed long
 	    chr;
-	linptr = CH$PTR(CFRAB->rab$l_ubf);
+	linptr = CH$PTR(CFRAB->rab$l_ubf,0);
 	linlen = CFRAB->rab$w_rsz;
 
 // if (1st char of line is a "!" then is it a comment & we ignore it.
 
 #if 1	
-	chr = CH$RCHAR(CH$PTR(CFRAB->rab$l_ubf));
+	chr = CH$RCHAR(CH$PTR(CFRAB->rab$l_ubf,0));
 #else
 	int d=CH$PTR(CFRAB->rab$l_ubf);  // check
 	chr = CH$RCHAR(d);
@@ -605,7 +599,7 @@ void CNF$Configure_ACP (void)
 // routine.
 
 	    cflen = GETFIELD(cfield);
-	    cptr = CH$PTR(cfield);
+	    cptr = CH$PTR(cfield,0);
 	    if (STREQLZ(cptr,"DEVICE_INIT"))
 		    Init_Device();
 		else if (STREQLZ(cptr,"MEMGR_INIT"))
@@ -662,20 +656,20 @@ void Init_Device (void)
 // Parses the device description and adds to DEV_CONFIG table.
 
     {
-extern 	LIB$CALLG();
+      //extern 	LIB$CALLG();
 extern 	LIB$FIND_IMAGE_SYMBOL();
 extern 	STR$APPEND		();
 extern 	STR$CASE_BLIND_COMPARE	();
 extern 	STR$COPY_DX		();
  Device_Info_Structure * devinfo;
  Device_Configuration_Entry * dev_config;
+ int (*Image_Init)();
  signed long I,
 //	tmp,
 	rc,
 	ipaddr,
 	ipmask,
 	argv[1],
-	Image_Init,
 	devtype[STRSIZ],
 	devtlen,
 	devstr[STRSIZ],
@@ -729,7 +723,8 @@ struct dsc$descriptor	dev_spec_desc_  = {
 // it more easily (all symbols included, plus code is now in main image PSECT)
 
 
-    if ((STR$CASE_BLIND_COMPARE(devtyp_desc,ASCID("ETHER")) == 0))
+    $DESCRIPTOR(ether,"ETHER");
+    if ((STR$CASE_BLIND_COMPARE(devtyp_desc,&ether) == 0))
 	{
 extern	    drv$transport_init();
 
@@ -763,8 +758,9 @@ extern	    drv$transport_init();
     dev_desc -> dsc$w_length  = GETFIELD(dev_desc -> dsc$a_pointer );
 //    $INIT_DYNDESC( dev_config ->dc_devname );
     INIT_DYNDESC( dev_config ->dc_devname );
-    STR$COPY_DX (dev_config ->dc_devname, dev_desc);
-    STR$APPEND (dev_config ->dc_devname, ASCID( ":"));
+    STR$COPY_DX (&dev_config ->dc_devname, dev_desc);
+    $DESCRIPTOR(colon,":");
+    STR$APPEND (&dev_config ->dc_devname, &colon);
 // skip over field terminator.
     SKIPTO(':');
 
@@ -773,7 +769,7 @@ extern	    drv$transport_init();
     dev_desc -> dsc$w_length  = GETFIELD(dev_desc -> dsc$a_pointer );
 //    $INIT_DYNDESC( dev_config->dc_devspec );
     INIT_DYNDESC( dev_config ->dc_devspec );
-    STR$COPY_DX (dev_config ->dc_devspec, dev_desc);
+    STR$COPY_DX (&dev_config ->dc_devspec, dev_desc);
 // skip over field terminator.
     SKIPTO(':');
 
@@ -785,14 +781,14 @@ extern	    drv$transport_init();
 
 // Get device IP address
 
-    if (GET_IP_ADDR(linptr,ipaddr) < 0)
+    if (GET_IP_ADDR(&linptr,&ipaddr) < 0)
 	config_err(ASCID("Bad device IP address"));
     dev_config->dc_ip_address = ipaddr;
     SKIPTO(':');
 
 // Get device IP network mask
 
-    if (GET_IP_ADDR(linptr,ipmask) < 0)
+    if (GET_IP_ADDR(&linptr,&ipmask) < 0)
 	config_err(ASCID("Bad device IP mask"));
     dev_config->dc_ip_netmask = ipmask;
 
@@ -817,8 +813,8 @@ extern	    drv$transport_init();
 	for (I=0;I<=(devidx-1);I++)
 	    {
 	    // If match, then mark this device as a clone of the it.
-	    if (STR$CASE_BLIND_COMPARE(dev_config_tab[I].dc_devname,
-			dev_config_tab[devidx].dc_devname) == 0)
+	    if (STR$CASE_BLIND_COMPARE(&dev_config_tab[I].dc_devname,
+			&dev_config_tab[devidx].dc_devname) == 0)
 		{
 		dev_config->dc_is_clone = TRUE;
 		dev_config->dc_clone_dev = I;
@@ -865,19 +861,19 @@ struct dsc$descriptor 	GWY_Name_Desc_ = {
 // Next, the gateway address
 
     SKIPTO(':');
-    if (GET_IP_ADDR(linptr,GWYaddr) < 0)
+    if (GET_IP_ADDR(&linptr,&GWYaddr) < 0)
 	config_err(ASCID("Bad gateway address"));
 
 // Next, the network number behind the gateway
 
     SKIPTO(':');
-    if (GET_IP_ADDR(linptr,GWYnet) < 0)
+    if (GET_IP_ADDR(&linptr,&GWYnet) < 0)
 	config_err(ASCID("Bad gateway network number"));
 
 // Next, the network mask for that network
 
     SKIPTO(':');
-    if (GET_IP_ADDR(linptr,GWYnetmask) < 0)
+    if (GET_IP_ADDR(&linptr,&GWYnetmask) < 0)
 	config_err(ASCID("Bad gateway mask"));
 
 // Tell IP about this gateway
@@ -914,7 +910,7 @@ void Init_NameServer (void)
 // Next, the name server address
 
     SKIPTO(':');
-    if (GET_IP_ADDR(linptr,NSaddr) < 0)
+    if (GET_IP_ADDR(&linptr,&NSaddr) < 0)
 	config_err(ASCID("Bad name server address"));
 
 // Add this entry to the name server database
@@ -937,25 +933,25 @@ void init_memgr (void)
 // Get # of Queue blocks to preallocate
 
     SKIPTO(':');
-    if (GET_DEC_NUM(linptr,qblk_count_base) < 0)
+    if (GET_DEC_NUM(&linptr,&qblk_count_base) < 0)
 	config_err(ASCID("Bad integer value"));
 
 // Get # of UARG blocks to preallocate
 
     SKIPTO(':');
-    if (GET_DEC_NUM(linptr,uarg_count_base) < 0)
+    if (GET_DEC_NUM(&linptr,&uarg_count_base) < 0)
 	config_err(ASCID("Bad integer value"));
 
 // Get # of minimum-size packet buffers to preallocate
 
     SKIPTO(':');
-    if (GET_DEC_NUM(linptr,min_seg_count_base) < 0)
+    if (GET_DEC_NUM(&linptr,&min_seg_count_base) < 0)
 	config_err(ASCID("Bad integer value"));
 
 // get # of maximum-size packet buffers to preallocate
 
     SKIPTO(':');
-    if (GET_DEC_NUM(linptr,max_seg_count_base) < 0)
+    if (GET_DEC_NUM(&linptr,&max_seg_count_base) < 0)
 	config_err(ASCID("Bad integer value"));
     }
 
@@ -1076,7 +1072,7 @@ extern	struct IP_group_MIB_struct * IP_group_MIB;
 // Get the variable name
 
     varlen = GETFIELD(varname);
-    varptr = CH$PTR(varname);
+    varptr = CH$PTR(varname,0);
 
 // Skip the terminator
 
@@ -1084,7 +1080,7 @@ extern	struct IP_group_MIB_struct * IP_group_MIB;
 
 // Get the variable value
 
-    if (GET_DEC_NUM(linptr,varval) < 0)
+    if (GET_DEC_NUM(&linptr,&varval) < 0)
 	config_err(ASCIDNOT("Bad variable value"));
 
 // Check the variable name & set it.
@@ -1292,7 +1288,7 @@ PARSE_PRCPRIVS(PRVBLK)
 	if (PLEN == 0)
 	    break;
 	PRIVCNT = PRIVCNT + 1;
-	PRIVPTR = KEY_VALUE(PRIVNAMES,PLEN,CH$PTR(PRIVBUF));
+	PRIVPTR = KEY_VALUE(PRIVNAMES,PLEN,CH$PTR(PRIVBUF,0));
 	if (PRIVPTR == -1)
 	    {
 	    PRVBLK[0] = -1;
@@ -1346,7 +1342,7 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 
 // Parse the keyword
 
-	QUOTYPE = KEY_VALUE(QUOTANAMES,QUOTLEN,CH$PTR(QUOTBUF));
+	QUOTYPE = KEY_VALUE(QUOTANAMES,QUOTLEN,CH$PTR(QUOTBUF,0));
 	SKIPWHITE();
 
 // Parse the separator - must be an equal sign
@@ -1358,7 +1354,7 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 
 // Parse the quota value
 
-	if (GET_DEC_NUM(linptr,QUOTVAL) < 0)
+	if (GET_DEC_NUM(&linptr,&QUOTVAL) < 0)
 	    config_err(ASCID("Missing or bad quota value"));
 	SKIPWHITE();
 
@@ -1415,7 +1411,7 @@ PARSE_PRCSTATUS (void)
 	STATLEN = GETFIELD(STATBUF);
 	if (STATLEN == 0)
 	    break;
-	STATVAL = STATVAL || KEY_VALUE(STATNAMES,STATLEN,CH$PTR(STATBUF));
+	STATVAL = STATVAL || KEY_VALUE(STATNAMES,STATLEN,CH$PTR(STATBUF,0));
 	SKIPWHITE();
 	CHR = CH$RCHAR_A(linptr);
 	if (CHR == ':')
@@ -1489,7 +1485,7 @@ struct dsc$descriptor WKSError_Desc_ = {
     SKIPTO(':');
 
 // First, get the port number
-    if (GET_DEC_NUM(linptr,WKSport) < 0)
+    if (GET_DEC_NUM(&linptr,&WKSport) < 0)
 	config_err(ASCID("Bad WKS port value"));
     SKIPTO(':');
 
@@ -1516,8 +1512,9 @@ struct dsc$descriptor WKSError_Desc_ = {
 // Parse the process INPUT file
     if (PARSE_NULLFIELD())
 	{
-	SKIPTO(':');
-STR$COPY_DX ( WKSInput_Desc , ASCID("_NLA0:") );
+	  $DESCRIPTOR(nla0,"_NLA0:");	
+SKIPTO(':');
+STR$COPY_DX ( WKSInput_Desc , &nla0 );
 	}
     else
 	{
@@ -1528,8 +1525,9 @@ SKIPTO(':');
 // Parse the process OUTPUT file
     if (PARSE_NULLFIELD())
 	{
+	  $DESCRIPTOR(nla0,"_NLA0:");
 	SKIPTO(':');
-STR$COPY_DX ( WKSOutput_Desc , ASCID("_NLA0:") );
+STR$COPY_DX ( WKSOutput_Desc , &nla0 );
 	}
     else
 	{
@@ -1550,12 +1548,12 @@ SKIPTO(':');
 	};
 
 // Next, priority value
-    if (GET_DEC_NUM(linptr,WKSprior) < 0)
+    if (GET_DEC_NUM(&linptr,&WKSprior) < 0)
 	config_err(ASCID("Bad priority value"));
     SKIPTO(':');
 
 // Next the number of outstanding SYN's we will allow for this server.
-    if (GET_DEC_NUM(linptr,WKSqlim) < 0)
+    if (GET_DEC_NUM(&linptr,&WKSqlim) < 0)
 	config_err(ASCID("Bad queue limit value"));    
 
 // Now, find out what the maximum number of servers permitted is.  If zero
@@ -1564,7 +1562,7 @@ SKIPTO(':');
 //
 	WKSmaxsrv = 0;
 	if ((CH$RCHAR_A(linptr) == ':'))
-	    if (GET_DEC_NUM(linptr,WKSmaxsrv) < 0)
+	    if (GET_DEC_NUM(&linptr,&WKSmaxsrv) < 0)
 		WKSmaxsrv = 0;
 
 // Tell the configuration routine in SEGIN about this guy.
@@ -1614,22 +1612,22 @@ struct dsc$descriptor RPCimname_Desc_ = {
     SKIPTO(':');
 
 // Next, get the program number
-    if (GET_DEC_NUM(linptr,RPCprog) < 0)
+    if (GET_DEC_NUM(&linptr,&RPCprog) < 0)
 	config_err(ASCID("Bad RPC program number"));
     SKIPTO(':');
 
 // Next, get the version number
-    if (GET_DEC_NUM(linptr,RPCvers) < 0)
+    if (GET_DEC_NUM(&linptr,&RPCvers) < 0)
 	config_err(ASCID("Bad RPC version number"));
     SKIPTO(':');
 
 // Next, get the protocol number
-    if (GET_DEC_NUM(linptr,RPCprot) < 0)
+    if (GET_DEC_NUM(&linptr,&RPCprot) < 0)
 	config_err(ASCID("Bad RPC protocol number"));
     SKIPTO(':');
 
 // Next, get the port number
-    if (GET_DEC_NUM(linptr,RPCport) < 0)
+    if (GET_DEC_NUM(&linptr,&RPCport) < 0)
 	config_err(ASCID("Bad RPC port number"));
     SKIPTO(':');
 
@@ -1677,7 +1675,7 @@ struct dsc$descriptor AUTHhostname_Desc_ = {
     SKIPTO(':');
 
 // Next, get the net uid number
-    if (GET_DEC_NUM(linptr,AUTHuid) < 0)
+    if (GET_DEC_NUM(&linptr,&AUTHuid) < 0)
 	config_err(ASCID("Bad AUTH uid number"));
     SKIPTO(':');
 
@@ -1728,7 +1726,7 @@ struct dsc$descriptor Quota_Desc_ = {
 
 // Parse the priority value
 
-    if (GET_DEC_NUM(linptr,PRIORITY) < 0)
+    if (GET_DEC_NUM(&linptr,&PRIORITY) < 0)
 	config_err(ASCID("Bad priority value"));
     SKIPTO(':');
 
@@ -1766,13 +1764,13 @@ extern	void user$access_config();
 // First, read the host address
 
     SKIPTO(':');
-    if (GET_IP_ADDR(linptr,hostaddr) < 0)
+    if (GET_IP_ADDR(&linptr,&hostaddr) < 0)
 	config_err(ASCID("Bad host address"));
 
 // Then, the host mask
 
     SKIPTO(':');
-    if (GET_IP_ADDR(linptr,hostmask) < 0)
+    if (GET_IP_ADDR(&linptr,&hostmask) < 0)
 	config_err(ASCID("Bad host mask"));
 
 // Got the info. Call routine to add to the list
@@ -1826,7 +1824,7 @@ GETFIELD(FLDADR)
 
     SKIPWHITE();
     PTR = linptr;
-    DSTPTR = CH$PTR(FLDADR);
+    DSTPTR = CH$PTR(FLDADR,0);
     CNT = 0;
     while (((CHR = CH$RCHAR_A(PTR)) != 0) &&
 	  (CHR != ',') && (CHR != ':') && (CHR != ' ') &&

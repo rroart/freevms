@@ -466,3 +466,20 @@ static int inline $$KCALL(int (*func)(), ...) {
 
 #endif
 #endif
+
+#define CH$PTR(X,Y) ((long)X+(long)Y)
+#define CH$RCHAR(X) *((char *)X) // check or ++ char?
+#define CH$PLUS(X,Y) ((long)X+(long)Y)
+#define CH$WCHAR_A(X,Y) *(char*)Y++=X
+#define CH$RCHAR_A(X) *(((char *)X)++)  // not yet? *((*(char **)X)++) 
+
+#define LIB$CALLG(X,Y) Y()
+
+#include <descrip.h>
+
+static int STR$CASE_BLIND_COMPARE(x,y)
+     struct dsc$descriptor *x, * y;
+{
+     return strncmp(x->dsc$a_pointer,y->dsc$a_pointer,y->dsc$w_length);
+}
+

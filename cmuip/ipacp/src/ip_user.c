@@ -217,7 +217,7 @@ void Log_IP_Packet(seg,SwapFlag,SendFlag)
     segdata = seg + Header_Size;
     if (SwapFlag)		// Need to byteswap header?
 	{
-	CH$MOVE(Header_Size,CH$PTR(seg),CH$PTR(segcopy)); // Make a copy
+	CH$MOVE(Header_Size,CH$PTR(seg,0),CH$PTR(segcopy,0)); // Make a copy
 	seghdr = segcopy;	// Point at this version...
 	SwapBytes(Header_Size/2,seghdr); // Swap header bytes
 	};
@@ -706,7 +706,7 @@ void ipu$open(struct user_open_args * Uargs)
 
 // Handle wildcard host
 
-    NAMPTR = CH$PTR(Uargs->op$foreign_host);
+    NAMPTR = CH$PTR(Uargs->op$foreign_host,0);
     NAMLEN = Uargs->op$foreign_hlen;
     if ((! Uargs->op$addr_flag) && (NAMLEN == 0))
 	{
@@ -723,7 +723,7 @@ X:  {			// *** Block X ***
     if (Uargs->op$addr_flag)
       IPADDR = Uargs->op$foreign_address;
     else
-	if (GET_IP_ADDR(NAMPTR,IPADDR) < 0)
+	if (GET_IP_ADDR(&NAMPTR,&IPADDR) < 0)
 	    goto leave_x;
     IPCB->ipcb$foreign_hnlen = 0;
     IPCB->ipcb$foreign_host = IPADDR;
@@ -799,7 +799,7 @@ void IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 
     IPCB->ipcb$foreign_hnlen = NAMLEN;
     if (NAMLEN != 0)
-	CH$MOVE(NAMLEN,NAMPTR,CH$PTR(IPCB->ipcb$foreign_hname));
+	CH$MOVE(NAMLEN,NAMPTR,CH$PTR(IPCB->ipcb$foreign_hname,0));
 
 // Finally, post the status
 
@@ -830,7 +830,7 @@ void IP_ADLOOK_DONE(IPCB,STATUS,NAMLEN,NAMPTR)
 // Copy the hostname into the IPCB
 
     IPCB->ipcb$foreign_hnlen = NAMLEN;
-    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(IPCB->ipcb$foreign_hname));
+    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(IPCB->ipcb$foreign_hname,0));
     }
 
 

@@ -598,13 +598,13 @@ TELNET_OPEN(TCB)
 
 // Clear out the TVT data block
 
-    CH$FILL(0,TVT$SIZE*4,CH$PTR(TVT));
+    CH$FILL(0,TVT$SIZE*4,CH$PTR(TVT,0));
     TVT->TVT$TCB = TCB;
 
 // Initialize the options block to the standard initial state
 
-    CH$MOVE(OPT$LSTBLEN,CH$PTR(TVT_DEF_LOCAL),CH$PTR(TVT->TVT$LCLOPTS));
-    CH$MOVE(OPT$LSTBLEN,CH$PTR(TVT_DEF_REMOTE),CH$PTR(TVT->TVT$REMOPTS));
+    CH$MOVE(OPT$LSTBLEN,CH$PTR(TVT_DEF_LOCAL,0),CH$PTR(TVT->TVT$LCLOPTS,0));
+    CH$MOVE(OPT$LSTBLEN,CH$PTR(TVT_DEF_REMOTE,0),CH$PTR(TVT->TVT$REMOPTS,0));
 
 // Assign the PTY device and start it up.
 
@@ -682,11 +682,11 @@ TELNET_OPEN(TCB)
 
 // Initialize buffer pointers
 
-    TVT->TVT$RD_PTR = CH$PTR(TVT->TVT$RD_BUF);
+    TVT->TVT$RD_PTR = CH$PTR(TVT->TVT$RD_BUF,0);
 //    TVT->TVT$WR_PTR = CH$PTR(TVT->TVT$WR_BUF);
     TVT->TVT$WR_IPTR = 0 ;
     TVT->TVT$WR_OPTR = 0 ;
-    TVT->TVT$NEG_EQP = TVT->TVT$NEG_DQP = CH$PTR(TVT->TVT$NEG_BUF);
+    TVT->TVT$NEG_EQP = TVT->TVT$NEG_DQP = CH$PTR(TVT->TVT$NEG_BUF,0);
     TVT->TVT$WR_ICNT = 0 ;
     TVT->TVT$WR_OCNT = 0 ;
 
@@ -1286,7 +1286,7 @@ struct tcb_structure * TCB;
 // Copy bytes from the PTY read buffer to the network, quoting IAC's as needed.
 
     CHWCNT = 0;
-    CHWPTR = CH$PTR(TCB->snd_q_enqp);
+    CHWPTR = CH$PTR(TCB->snd_q_enqp,0);
 
 // Write a character to the output buffer, taking care to wrap the pointer
 
@@ -1359,7 +1359,7 @@ signed long	CHWMAX,
 
 
     CHWCNT = 0;
-    CHWPTR = CH$PTR(TCB->snd_q_enqp);
+    CHWPTR = CH$PTR(TCB->snd_q_enqp,0);
     while (TRUE)
 	{
 
@@ -1382,7 +1382,7 @@ signed long	CHWMAX,
 
 		CHR = CH$RCHAR_A(TVT->TVT$NEG_DQP);
 		if ((TVT->TVT$NEG_CNT = TVT->TVT$NEG_CNT-1) == 0)
-		    TVT->TVT$NEG_DQP = CH$PTR(TVT->TVT$NEG_BUF);
+		    TVT->TVT$NEG_DQP = CH$PTR(TVT->TVT$NEG_BUF,0);
 		}
 	    else
 		{
@@ -1457,7 +1457,7 @@ void tcp_add_string(TVT,STRDESC_A)
 	CHR;
 
     CHRCNT = STRDESC->dsc$w_length;
-    CHRPTR = CH$PTR(STRDESC->dsc$a_pointer);
+    CHRPTR = CH$PTR(STRDESC->dsc$a_pointer,0);
 
     if ($$LOGF(LOG$TVT))
 	{
@@ -1470,7 +1470,7 @@ void tcp_add_string(TVT,STRDESC_A)
     if (TVT->TVT$RD_BCNT >= (TVT_TTY_BUFLEN-CHRCNT))
 	return;
 
-    CHWPTR = TVT->TVT$RD_PTR = CH$PTR(TVT->TVT$RD_BUF);
+    CHWPTR = TVT->TVT$RD_PTR = CH$PTR(TVT->TVT$RD_BUF,0);
 
     while ((CHRCNT > 0))
 	{
@@ -1769,7 +1769,7 @@ struct PTY$IOSB * IOSB = &TVT->TVT$RD_IOSB;
 // Clear read-in-progress and set number of bytes read.
 
     TVT->TVT$RD_BCNT = IOSB->PTSB$NBYTES;
-    TVT->TVT$RD_PTR = CH$PTR(TVT->TVT$RD_BUF);
+    TVT->TVT$RD_PTR = CH$PTR(TVT->TVT$RD_BUF,0);
     TVT->TVT$PREAD = FALSE;
 
 //    AST_IN_PROGRESS = FALSE;
@@ -2380,7 +2380,7 @@ void TVT_SEND(TVT,OPR,OPTION)
 // Insert the option negotiation bytes into the buffer
 
     if (TVT->TVT$NEG_CNT == 0)
-	TVT->TVT$NEG_EQP = CH$PTR(TVT->TVT$NEG_BUF);
+	TVT->TVT$NEG_EQP = CH$PTR(TVT->TVT$NEG_BUF,0);
     CH$WCHAR_A(TELNET$K_IAC,TVT->TVT$NEG_EQP);
     CH$WCHAR_A(OPR,TVT->TVT$NEG_EQP);
     CH$WCHAR_A(OPTION,TVT->TVT$NEG_EQP);
@@ -2411,7 +2411,7 @@ unsigned char
 // Insert the option negotiation bytes into the buffer
 
     if (TVT->TVT$NEG_CNT == 0)
-	TVT->TVT$NEG_EQP = CH$PTR(TVT->TVT$NEG_BUF);
+	TVT->TVT$NEG_EQP = CH$PTR(TVT->TVT$NEG_BUF,0);
 
     // Write the suboption header.
     CH$WCHAR_A(TELNET$K_IAC,TVT->TVT$NEG_EQP);

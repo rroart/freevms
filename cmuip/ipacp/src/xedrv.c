@@ -255,7 +255,7 @@ long    XE_descriptor[2];
 static 
     // DRV$Device_Info is a list of everything we want the IPACP
     // to know about us...  Initialized by ROUTINE DRV$TRANSPORT_INIT.
-     Device_Info_Structure * DRV$Device_Info;
+     Device_Info_Structure DRV$Device_Info_, * DRV$Device_Info = &DRV$Device_Info_;
 
     // The IPACP_Interface tells us all about the IPACP.  It gives us
     // entry points, literals and global pointers.  See NETDEVICES.REQ
@@ -1370,7 +1370,7 @@ drv$transport_init (void)
 
     // Fill in the EtherNet description string
     XE_descriptor[0] = strlen(XE_description);
-    XE_descriptor[1] = UPLIT(XE_description);
+    XE_descriptor[1] = XE_description;
 
     // Provide the XEDRV entry points
     DRV$Device_Info->DI$Init	= XE$init;

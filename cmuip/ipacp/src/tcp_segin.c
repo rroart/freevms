@@ -1414,7 +1414,7 @@ struct segment_structure * seghdr;
     seghdr = seg;
     if (BS_Flag)		// Need to byteswap the header...
 	{
-	CH$MOVE(TCP_HEADER_SIZE,CH$PTR(seg),CH$PTR(segcopy));
+	CH$MOVE(TCP_HEADER_SIZE,CH$PTR(seg,0),CH$PTR(segcopy,0));
 	seghdr = segcopy;
 	SwapBytes(TCP_HEADER_SIZE/2,seghdr); // Swap header bytes back
 	seghdr->sh$seq = ROT(seghdr->sh$seq,16);

@@ -352,7 +352,7 @@ void Log_UDP_Packet(Seg,SwapFlag,SendFlag)
     segdata = Seg + UDP_HEADER_SIZE;
     if (SwapFlag)		// Need to byteswap header?
 	{
-	CH$MOVE(UDP_HEADER_SIZE,CH$PTR(Seg),CH$PTR(segcopy)); // Make a copy
+	CH$MOVE(UDP_HEADER_SIZE,CH$PTR(Seg,0),CH$PTR(segcopy,0)); // Make a copy
 	seghdr = segcopy;	// Point at this version...
 	SwapBytes(UDP_HEADER_SIZE/2,seghdr); // Swap header bytes
 	};
@@ -1194,7 +1194,7 @@ void udp$open(struct user_open_args * Uargs)
 
 // Handle wildcard host
 
-    NAMPTR = CH$PTR(Uargs->op$foreign_host);
+    NAMPTR = CH$PTR(Uargs->op$foreign_host,0);
     NAMLEN = Uargs->op$foreign_hlen;
     if ((NAMLEN == 0) && (! Uargs->op$addr_flag))
 	{
@@ -1213,7 +1213,7 @@ X:  {			// *** Block X ***
     if (Uargs->op$addr_flag)
       IPADDR = Uargs->op$foreign_address;
     else
-	if (GET_IP_ADDR(NAMPTR,IPADDR) < 0)
+	if (GET_IP_ADDR(&NAMPTR,&IPADDR) < 0)
 	    goto leave_x;
     UDPCB->udpcb$foreign_hnlen = 0;
     UDPCB->udpcb$uargs = Uargs;
@@ -1285,7 +1285,7 @@ void UDP_NMLOOK_DONE(UDPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 
     UDPCB->udpcb$foreign_hnlen = NAMLEN;
     if (NAMLEN != 0)
-	CH$MOVE(NAMLEN,NAMPTR,CH$PTR(UDPCB->udpcb$foreign_hname));
+	CH$MOVE(NAMLEN,NAMPTR,CH$PTR(UDPCB->udpcb$foreign_hname,0));
 
 // Finally, post the status
 
@@ -1378,7 +1378,7 @@ void UDP_ADLOOK_DONE(UDPCB,STATUS,NAMLEN,NAMPTR)
 // Copy the hostname into the UDPCB
 
     UDPCB->udpcb$foreign_hnlen = NAMLEN;
-    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(UDPCB->udpcb$foreign_hname));
+    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(UDPCB->udpcb$foreign_hname,0));
     }
 
 //SBTTL "UDP$CLOSE - close UDP "connection""

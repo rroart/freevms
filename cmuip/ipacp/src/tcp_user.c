@@ -1787,7 +1787,7 @@ void tcp$open(struct user_open_args * Uargs)
 // Handle easy errors before creating TCB, etc...
 
     HostWild = (! Uargs->op$addr_flag) && 
-	       (CH$RCHAR(CH$PTR(Uargs->op$foreign_host)) == WILD);
+	       (CH$RCHAR(CH$PTR(Uargs->op$foreign_host,0)) == WILD);
     if (Uargs->op$active_open)
 	{			// Active case
 
@@ -1889,8 +1889,8 @@ X:  {			// *** Block X ***
 	{
 	signed long
 	    NAMPTR;
-	NAMPTR = CH$PTR(Uargs->op$foreign_host);
-	if (GET_IP_ADDR(NAMPTR,IPADDR) < 0)
+	NAMPTR = CH$PTR(Uargs->op$foreign_host,0);
+	if (GET_IP_ADDR(&NAMPTR,&IPADDR) < 0)
 	goto leave;
         };
 
@@ -1912,7 +1912,7 @@ X:  {			// *** Block X ***
     TCB->curr_user_function = U$OPEN;
     TCB->function_timer = Time_Stamp() + NAMELOOK_TIMEOUT;
     TCB->nmlook_flag = TRUE;
-    NML$GETALST(CH$PTR(Uargs->op$foreign_host),Uargs->op$foreign_hlen,
+    NML$GETALST(CH$PTR(Uargs->op$foreign_host,0),Uargs->op$foreign_hlen,
 		TCP_NMLOOK_DONE,TCB);
     }
 
@@ -1981,7 +1981,7 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 	IP$SET_HOSTS(ADRCNT,ADRLST,TCB->local_host,TCB->foreign_host);
 	TCB->foreign_hnlen = NAMLEN;
 	if (NAMLEN != 0)
-	    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(TCB->foreign_hname));
+	    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(TCB->foreign_hname,0));
 	};
 
 // Finish opening the connection
@@ -2202,7 +2202,7 @@ void tcp$adlook_done(TCB,STATUS,NAMLEN,NAMPTR)
 // Copy the host name into the TCB
 
     TCB->foreign_hnlen = NAMLEN;
-    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(TCB->foreign_hname));
+    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(TCB->foreign_hname,0));
     }
 
 //Sbttl "Post Users Active Open User IO Status"
