@@ -1,3 +1,4 @@
+#include <cxbdef.h>
 #include <irpdef.h>
 #include <ucbdef.h>
 #include <ucbnidef.h>
@@ -8,6 +9,7 @@ int er$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
 }
 
 int er$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL|0x080000000000;
   int sts = ei_start_xmit  (i, p, u, c); 
   return sts = SS$_NORMAL;
 }
@@ -287,7 +289,7 @@ static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
 	int length, send_length, output_page;
 	unsigned long flags;
 
-	length = i->irp$l_qio_p2;
+	length = i->irp$l_qio_p2 + 14;
 
 	/* Mask interrupts from the ethercard. 
 	   SMP: We have to grab the lock here otherwise the IRQ handler
@@ -357,7 +359,9 @@ static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
 	 * trigger the send later, upon receiving a Tx done interrupt.
 	 */
 
-	ei_block_output(dev, length, i->irp$l_qio_p1, output_page);
+	char * buf = lan$alloc_xmit_buf(i,u,dev->dev_addr);
+
+	ei_block_output(dev, length, buf, output_page);
 	if (! ei_local->txing) 
 	{
 		ei_local->txing = 1;
@@ -389,7 +393,7 @@ static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
 	 * reasonable hardware if you only use one Tx buffer.
 	 */
 
-	ei_block_output(dev, length, i->irp$l_qio_p1, ei_local->tx_start_page);
+	ei_block_output(dev, length, buf, ei_local->tx_start_page);
 	ei_local->txing = 1;
 	NS8390_trigger_send(dev, send_length, ei_local->tx_start_page);
 	dev->trans_start = jiffies;
@@ -405,6 +409,7 @@ static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
 	enable_irq(dev->irq);
 
 	// check	dev_kfree_skb (skb);
+	kfree(buf);
 	ei_local->stat.tx_bytes += send_length;
     
 	return 0;
@@ -766,12 +771,19 @@ static void ei_receive(struct net_device *dev)
 				skb->dev = dev;
 				skb_put(skb, pkt_len);	/* Make room */
 #endif
-				char * buf = kmalloc(4096,GFP_KERNEL);
+				struct _cxb * cb1 = lan$alloc_cxb(pkt_len);
+				struct _cxb * cb2 = cb1->cxb$l_link;
+				char * buf=kmalloc(4096,GFP_KERNEL);
 				ei_block_input(dev, pkt_len, buf, current_offset + sizeof(rx_frame));
+				memcpy(cb1->cxb$ps_pktdata, buf, 14);
+				memcpy(cb2->cxb$ps_pktdata, &buf[14], pkt_len - 14, lp);
+				kfree(buf);
+				cb2->cxb$w_length=pkt_len - 14;
+
 #if 0
 				skb->protocol=eth_type_trans(skb,dev);
 #endif
-				lan$netif_rx(u, buf, pkt_len);
+				lan$netif_rx(u, cb1);
 				dev->last_rx = jiffies;
 				ei_local->stat.rx_packets++;
 				ei_local->stat.rx_bytes += pkt_len;

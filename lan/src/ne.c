@@ -291,11 +291,14 @@ int er_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   return newucb;
 }
 
+extern char * mydevice;
+
 int er_vmsinit(int dev) {
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
 
   unsigned short chan0, chan1, chan2;
   $DESCRIPTOR(u0,"era0");
+  mydevice="era0";
   unsigned long idb=0,orb=0;
   struct _ccb * ccb;
   struct _ucb * newucb0,*newucb1,*newucb2;

@@ -1,3 +1,4 @@
+#include<cxbdef.h>
 #include<crbdef.h>
 #include<cdtdef.h>
 #include<dcdef.h>
@@ -295,11 +296,14 @@ int eu_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   return newucb;
 }
 
+extern char * mydevice;
+
 int eu_vmsinit(int dev) {
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
 
   unsigned short chan0, chan1, chan2;
   $DESCRIPTOR(u0,"eua0");
+  mydevice="eua0";
   unsigned long idb=0,orb=0;
   struct _ccb * ccb;
   struct _ucb * newucb0,*newucb1,*newucb2;
@@ -326,6 +330,7 @@ int eu$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
 }
 
 int eu$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL|0x080000000000;
   int sts = uml_net_start_xmit  (i, p, u, c); 
   return sts = SS$_NORMAL;
 }
@@ -516,12 +521,19 @@ static int uml_net_rx(struct net_device *dev)
 	skb_put(skb, dev->mtu);
 	skb->mac.raw = skb->data;
 #endif
-	char * buf = kmalloc(4096,GFP_KERNEL);
+	struct _cxb * cb1 = lan$alloc_cxb(4096);
+	struct _cxb * cb2 = cb1->cxb$l_link;
+	char * buf=kmalloc(4096,GFP_KERNEL);
 	pkt_len = (*lp->read)(lp->fd, buf, dev->mtu, lp);
+	memcpy(cb1->cxb$ps_pktdata, buf, 14);
+	if (pkt_len>=14)
+		memcpy(cb2->cxb$ps_pktdata, &buf[14], pkt_len - 14);
+	kfree(buf);
+	cb2->cxb$w_length=pkt_len - 14;
 
 	reactivate_fd(lp->fd);
 	if (pkt_len > 0) {
-		lan$netif_rx(u, buf, pkt_len);
+		lan$netif_rx(u, cb1);
 
 		lp->stats.rx_bytes += pkt_len;
 		lp->stats.rx_packets++;
@@ -618,9 +630,11 @@ static int uml_net_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u,
 
 	spin_lock_irqsave(&lp->lock, flags);
 
-	len = (*lp->write)(lp->fd, i->irp$l_qio_p1, i->irp$l_qio_p2, lp);
+	char * buf = lan$alloc_xmit_buf(i,u,dev->dev_addr);
 
-	if(len == i->irp$l_qio_p2) {
+	len = (*lp->write)(lp->fd, buf, i->irp$l_qio_p2 + 14, lp);
+
+	if(len == (i->irp$l_qio_p2 + 14)) {
 		lp->stats.tx_packets++;
 		lp->stats.tx_bytes += len;
 		dev->trans_start = jiffies;
@@ -640,6 +654,7 @@ static int uml_net_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u,
 
 	spin_unlock_irqrestore(&lp->lock, flags);
 
+	kfree(buf);
 	// check dev_kfree_skb(skb);
 
 	return 0;
