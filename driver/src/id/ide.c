@@ -70,12 +70,12 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
 static struct _irp * globali;
 static struct _ucb * globalu;
 
-void  startio3 (struct _irp * i, struct _ucb * u) { 
+static void  startio3 (struct _irp * i, struct _ucb * u) { 
   ioc$reqcom(SS$_NORMAL,0,u);
   return;
 };
 
-void  startio2 (struct _irp * i, struct _ucb * u) { 
+static void  startio2 (struct _irp * i, struct _ucb * u) { 
   u->ucb$l_fpc=startio3;
   exe$iofork(i,u);
   return;
@@ -123,7 +123,7 @@ static void  mntv_sqd (void) { };
 static void  aux_storage (void) { };
 static void  aux_routine (void) { };
 
-struct _ddt ddt = {
+static struct _ddt ddt = {
   ddt$l_start: startio,
   ddt$l_unsolint: unsolint,
   ddt$l_functb: functb,
