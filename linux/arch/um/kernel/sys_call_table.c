@@ -299,9 +299,11 @@ extern syscall_handler_t  exe$assign             ;
 extern syscall_handler_t  exe$dassgn             ;
 extern syscall_handler_t  exe$qio             ;
 extern syscall_handler_t  exe$qiow             ;
+extern syscall_handler_t  exe$getlki ;
+extern syscall_handler_t  exe$getlkiw ;
+extern syscall_handler_t  exe$enqw ;
 
-
-#define LAST_GENERIC_SYSCALL __NR_$qiow
+#define LAST_GENERIC_SYSCALL __NR_$enqw
 
 #if LAST_GENERIC_SYSCALL > LAST_ARCH_SYSCALL
 #define LAST_SYSCALL LAST_GENERIC_SYSCALL
@@ -597,7 +599,10 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$dassgn ] = exe$dassgn            ,
 	[ __NR_$qio ] = exe$qio            ,
 	[ __NR_$qiow ] = exe$qiow            ,
-
+	[ __NR_$getlki ] = exe$getlki            ,
+	[ __NR_$getlkiw ] = exe$getlkiw            ,
+	[ __NR_$enqw ] = exe$enqw ,
+	
 	ARCH_SYSCALLS
 	[ LAST_SYSCALL + 1 ... NR_syscalls ] = 
 	        (syscall_handler_t *) sys_ni_syscall

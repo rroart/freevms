@@ -277,6 +277,9 @@
 #define __NR_$dassgn           31
 #define __NR_$qio              32
 #define __NR_$qiow             33
+#define __NR_$getlki           34
+#define __NR_$getlkiw          35
+#define __NR_$enqw             36
 
 #define __NR_$close 1
 #define __NR_$connect 2

@@ -229,7 +229,9 @@ static inline pid_t setsid(void)
 #define __NR_$dassgn 304
 #define __NR_$qio 305
 #define __NR_$qiow 307
-
+#define __NR_$getlki 308
+#define __NR_$getlkiw 309
+#define __NR_$enqw 310
 
 #endif
 

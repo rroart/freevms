@@ -1181,6 +1181,9 @@ void * find_free_cdt(void) {
   return c;
 }
 
+int rspid_alloc(void) {
+}
+
 void * register_name(char * c1, char * c2) {
   struct _sbnb * s=vmalloc(sizeof(struct _sbnb));
   bzero(s,sizeof(struct _sbnb));

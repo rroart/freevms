@@ -44,6 +44,8 @@ int insert_lck(struct _lkb * l) {
   return i;
 }
 
+asmlinkage int exe$enqw(struct struct_enq * s) {}
+
 asmlinkage int exe$enq(struct struct_enq * s) {
   int convert;
 
