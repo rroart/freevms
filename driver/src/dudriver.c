@@ -368,6 +368,8 @@ int du_iodb_vmsinit(void) {
   bzero(ddb,sizeof(struct _ddb));
   bzero(crb,sizeof(struct _crb));
 
+  ucb -> ucb$w_size = sizeof(struct _mscp_ucb); // temp placed // check
+
 #if 0
   init_ddb(&du$ddb,&du$ddt,&du$ucb,"dua");
   init_ucb(&du$ucb, &du$ddb, &du$ddt, &du$crb);
@@ -423,7 +425,10 @@ void  du_iodb_clu_vmsinit(struct _ucb * u) {
   pb->pb$l_pdt=&dupdt;
   ((struct _mscp_ucb *)u)->ucb$l_cdt=find_mscp_cdt(); // should be find_free_cdt();
   cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
-  cdt->cdt$l_pb=pb;
+  if (cdt)
+    cdt->cdt$l_pb=pb;
+  else
+    printk("cdt should not be zero. no crisis yet?\n");
 }
 
 void __du_init(void) {
@@ -492,6 +497,7 @@ void du_rw_more(struct _irp * i);
 
 int du_rw(struct _irp * i, struct _mscp_ucb * u, struct _transfer_commands * m) {
   int sts;
+
   unsigned long *l = &m->mscp$b_buffer;
   m->mscp$l_byte_cnt = i->irp$l_qio_p2;  // change later
   *l= i->irp$l_qio_p1;
