@@ -136,6 +136,9 @@ int do_syscall(void *task, int pid)
 			printk("segf is_write %x\n",segfault_record[i].is_write);
 			printk("segf sp %x\n",segfault_record[i].sp);
 			printk("segf is_user %x\n",segfault_record[i].is_user);
+			i=syscall_index-1;
+			printk("sysc sysc %x\n",syscall_record[i].syscall);
+			printk("sysc pid %x\n",syscall_record[i].pid);
 		}
 		for(l=&i; j; j--, l++) printk("%x ",*l); 
 		printk("\n");
