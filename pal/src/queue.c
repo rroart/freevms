@@ -123,6 +123,21 @@ inline int rqempty(void * q) {
   return (m->flink==0 && m->blink==0);
 }
 
+void boot_insqti (void * entry, void * header) {
+  signed long tmp1=*(signed long *)header;
+  signed long tmp2=*(signed long *)(header+4);
+  signed long tmp3=(signed long)(header-entry);
+  /* cli() or a semaphore/mutex? */
+  *(signed long *)entry=tmp3;
+  *(signed long *)(entry+4)=tmp2+tmp3;
+  if (tmp2)
+    *(signed long *)(header+(signed long)(tmp2))=-tmp2-tmp3;
+  else
+    tmp1=-tmp3-tmp2;
+  *(signed long *)(header+4)=-tmp3;
+  *(signed long *)header=tmp1;
+}
+
 //__PAL_INSQUEL_D
 
 //__PAL_REMQUEL_D
