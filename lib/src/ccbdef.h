@@ -11,6 +11,9 @@
 #define CCB$M_NOWRITEACC 0x80
 #define CCB$M_CLONE      0x100
 	
+#define CCB$V_RDCHKDON  2
+#define CCB$V_WRTCHKDON 3
+
 #define CCB$K_LENGTH 32
 #define CCB$S_CCBDEF 32
 
