@@ -68,7 +68,7 @@ extern long last_rtc_update;
 
 extern int use_tsc;
 
-int exetimeout=0;
+int exetimeout=1;
 
 void exe$timeout(void) {
   /* do sch$swpwake() if appropiate ???? */
@@ -82,7 +82,11 @@ void exe$timeout(void) {
   /* scan lock mgr etc */
   sch$one_sec();
   /* sch$ravail() */
-  if (exetimeout) printk("exe$timeout\n");
+#ifdef __i386__
+  if (exetimeout) printk("exe$timeout %x %x %x\n",cur_task->pid,current->pid,current->thread.eip);
+#else
+  if (exetimeout) printk("exe$timeout %x\n",current->pid);
+#endif
 }
 
 extern int vmstimerconf;

@@ -60,8 +60,6 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 	zone_t *zone;
 	unsigned long i,tmp;
 
-	zone = page->zone;
-
 	/* Yes, think what happens when other parts of the kernel take 
 	 * a reference to a page in order to pin it for io. -ben
 	 */
@@ -84,6 +82,68 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 		BUG();
 	page->flags &= ~((1<<PG_referenced) | (1<<PG_dirty));
 
+	if (current->flags & PF_FREE_PAGES)
+		goto local_freelist;
+ back_local_freelist:
+
+	zone = page->zone;
+
+	mask = (~0UL) << order;
+	base = zone->zone_mem_map;
+	page_idx = page - base;
+	if (page_idx & ~mask)
+		BUG();
+	index = page_idx >> (1 + order);
+
+	area = zone->free_area + order;
+
+	spin_lock_irqsave(&zone->lock, flags);
+
+	zone->free_pages -= mask;
+
+	while (mask + (1 << (MAX_ORDER-1))) {
+		struct page *buddy1, *buddy2;
+
+		if (area >= zone->free_area + MAX_ORDER)
+			BUG();
+		if (!__test_and_change_bit(index, area->map))
+			/*
+			 * the buddy page is still allocated.
+			 */
+			break;
+		/*
+		 * Move the buddy up one level.
+		 */
+		buddy1 = base + (page_idx ^ -mask);
+		buddy2 = base + page_idx;
+		if (BAD_RANGE(zone,buddy1))
+			BUG();
+		if (BAD_RANGE(zone,buddy2))
+			BUG();
+
+		memlist_del(&buddy1->list);
+		mask <<= 1;
+		area++;
+		index >>= 1;
+		page_idx &= mask;
+	}
+	memlist_add_head(&(base + page_idx)->list, &area->free_list);
+
+	spin_unlock_irqrestore(&zone->lock, flags);
+	spin_lock_irqsave(&zone->lock, flags);
+	if (!in_free_all_bootmem_core)
+	  for(i=0,tmp=((page-mem_map)/sizeof(struct _pfn));i<(1 << order);i++,tmp++)
+	    mmg$dallocpfn(tmp);
+
+	spin_unlock_irqrestore(&zone->lock, flags);
+	return;
+
+ local_freelist:
+	if (current->nr_local_pages)
+		goto back_local_freelist;
+		if (in_interrupt())
+			goto back_local_freelist;		
+
 	spin_lock_irqsave(&zone->lock, flags);
 	if (!in_free_all_bootmem_core)
 	  for(i=0,tmp=((page-mem_map)/sizeof(struct _pfn));i<(1 << order);i++,tmp++)
@@ -91,6 +151,7 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 
 	spin_unlock_irqrestore(&zone->lock, flags);
 
+	list_add(&page->list, &current->local_pages);
 	page->index = order;
 	current->nr_local_pages++;
 }
@@ -114,9 +175,10 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
         unsigned long flags;
 	unsigned long min;
 	zone_t *zone, * classzone;
-	struct page * page;
+	struct page * page, *tmp;
 	int freed;
 	signed long pfn;
+	unsigned long i;
 
 	zone = zonelist->zones;
 
@@ -127,11 +189,16 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
 	  pfn=mmg$allocpfn();
 	spin_unlock_irqrestore(&zone->lock, flags);
 
+	printk("allocated pfn %x %x\n",pfn,1<<order);
+
 	if (pfn>=0) {
 	  page=&mem_map[pfn];
+	  for(i=0,tmp=page;i<(1<<order);i++,tmp++)
+	    set_page_count(tmp, 1);
 	  return page;
 	}
 
+	printk("should not be here now\n");
 	classzone->need_balance = 1;
 	mb();
 	if (waitqueue_active(&kswapd_wait))
@@ -149,6 +216,8 @@ rebalance:
 
 	if (pfn>=0) {
 	  page=&mem_map[pfn];
+	  for(i=0,tmp=page;i<(1<<order);i++,tmp++)
+	    set_page_count(tmp, 1);
 	  return page;
 	}
 
@@ -382,7 +451,6 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	pgdat->node_start_paddr = zone_start_paddr;
 	pgdat->node_start_mapnr = (lmem_map - mem_map);
 	pgdat->nr_zones = 0;
-
 
 	mmg$gl_npagedyn=alloc_bootmem_node(pgdat,sgn$gl_npagedyn);
 	exe$gl_npagedyn=mmg$gl_npagedyn;

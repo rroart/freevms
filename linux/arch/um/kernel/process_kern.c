@@ -39,6 +39,15 @@
 #include "sigcontext.h"
 #include "2_5compat.h"
 
+static inline struct task_struct * get_cur_task(void)
+{
+        struct task_struct *cur_task;
+        __asm__("andl %%esp,%0; ":"=r" (cur_task) : "0" (~8191UL));
+        return cur_task;
+}
+ 
+#define cur_task get_cur_task()
+
 struct cpu_task cpu_tasks[NR_CPUS] = { [0 ... NR_CPUS - 1] = { -1, NULL } };
 
 int external_pid(void *t)
@@ -199,7 +208,7 @@ void *_switch_to(void *prev, void *next)
 	flush_tlb_all();
 	unblock_signals();
 
-	return(current->thread.prev_sched);
+	return(cur_task->thread.prev_sched);
 }
 
 void ret_from_sys_call(void)
