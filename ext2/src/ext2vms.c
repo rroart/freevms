@@ -602,6 +602,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 	strcpy(&x2p->context_save,name);
 	if (strstr(filedsc->dsc$a_pointer,".DIR"))
 	  dirflg=O_DIRECTORY;
+	x2p->context_save[0]=0;
     }
 
     dir.d_ino=0;
