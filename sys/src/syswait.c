@@ -57,6 +57,7 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   } else 
     p->pcb$l_efwm|=~mask;
 
+  insque(p,&wq->wqh$l_wqfl); // temporary... see about corruption in rse.c
   sch$wait(p,wq);
   return SS$_NORMAL;
 }
