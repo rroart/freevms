@@ -888,7 +888,7 @@ int mmg$frewsle(struct _pcb * p, void * va) {
   struct _phd * phd = p->pcb$l_phd;
   struct _wsl * wsl = phd->phd$l_wslist;
   struct _wsl wsle ;
-  unsigned long pte;
+  unsigned long * pte;
   unsigned long index;
   unsigned long va2;
   unsigned long sts;
@@ -920,6 +920,18 @@ int mmg$frewsle(struct _pcb * p, void * va) {
   index=phd->phd$l_wsnext;
   va2=((unsigned long)wsle.wsl$pq_va)&0xfffff000;
   pte=findpte(p,va2);
+
+  {
+    signed long pfn=__pa(((struct _mypte*)pte)->pte$v_pfn << PAGE_SHIFT) >> PAGE_SHIFT ;
+
+    //if dem zero (data page)?
+    if ((mem_map[pfn].pfn$q_bak&PTE$M_TYP0)==0)
+      goto more;
+
+    if (*pte&_PAGE_DIRTY)
+      goto more;
+  }
+
   sts=mmg$frewslx(p, va2,pte,index);
   if (sts==SS$_NORMAL)
     return SS$_NORMAL;
@@ -935,13 +947,6 @@ int mmg$frewsle(struct _pcb * p, void * va) {
 int mmg$frewslx(struct _pcb * p, void * va,unsigned long * pte, unsigned long index) {
   signed long pfn=__pa(((struct _mypte*)pte)->pte$v_pfn << PAGE_SHIFT) >> PAGE_SHIFT ;
   struct _wsl * wsl = p->pcb$l_phd->phd$l_wslist;
-
-  //if dem zero (data page)?
-  if ((mem_map[pfn].pfn$q_bak&PTE$M_TYP0)==0)
-    return 0;
-
-  if (*pte&_PAGE_DIRTY)
-    return 0;
 
 #if 0
   // not yet?
