@@ -44,6 +44,11 @@
 #define FAB$C_STMLF 5
 #define FAB$C_STMCR 6
 
+#define FAB$M_SHRPUT 0x1
+#define FAB$M_SHRGET 0x2
+#define FAB$M_SHRDEL 0x4
+#define FAB$M_SHRUPD 0x8
+
 struct _fabdef {
     struct _namdef *fab$l_nam;
     int fab$w_ifi;
@@ -63,6 +68,8 @@ struct _fabdef {
     int fab$b_rfm;
     int fab$b_fac;
     void *fab$l_xab;
+  char fab$b_shr;
+  unsigned long fab$l_stv;
 };
 
 #endif

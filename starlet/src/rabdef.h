@@ -16,7 +16,9 @@
 */
 
 #define RAB$C_SEQ 0
+#define RAB$C_KEY 1
 #define RAB$C_RFA 2
+#define RAB$C_STM 3
 
 struct _rabdef {
     struct _fabdef *rab$l_fab;
@@ -27,6 +29,10 @@ struct _rabdef {
     unsigned rab$w_rsz;
     int rab$b_rac;
     unsigned short rab$w_rfa[3];
+  char rab$b_krf;
+  unsigned long rab$l_kbf;
+  unsigned long rab$l_stv;
+  unsigned char rab$b_ksz;
 };
 
 #endif

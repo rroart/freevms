@@ -22,7 +22,7 @@ If having user mode linux, patch in now, and do ../freevms/linux/prescript.uml.
 Make symlinks from the 'kernel directory'/include/linux to /usr/include/linux
 and the same with asm-i386 to /usr/include/asm.
 
-Go to /usr/src/freevms and do a make.
+Go to /usr/src/freevms and do a make (if uml, see Makefiles for how to compile)
 (Sorry, got no make install yet)
 
 Go back and make the kernel.

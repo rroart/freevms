@@ -32,7 +32,8 @@ obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \
 	    exceptmsg.o sysputmsg.o sysgetmsg.o syssndjbc.o \
 	    sysgetsyi.o sysrundwn.o syscreprc.o procstrt.o sysimgact.o \
 	    syssetprt.o syssetprv.o syspurgws.o uai.o sysparprc.o \
-	    sysupdsec.o sysgetjpi.o syssetexv.o
+	    sysupdsec.o sysgetjpi.o syssetexv.o process_scan.o \
+	    rm3get.o
 
 obj-$(CONFIG_UID16) += uid16.o
 obj-$(CONFIG_MODULES) += ksyms.o

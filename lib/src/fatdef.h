@@ -17,7 +17,32 @@
 
 #define NO_DOLLAR
 
-/* handling funny byte order */
+#define		FAT$C_UNDEFINED		0
+#define		FAT$C_FIXED		1
+#define		FAT$C_VARIABLE		2
+#define		FAT$C_VFC		3
+#define		FAT$C_STREAM		4
+#define		FAT$C_STREAMLF		5
+#define		FAT$C_STREAMCR		6
+#define		FAT$C_SEQUENTIAL	0
+#define		FAT$C_RELATIVE		1
+#define		FAT$C_INDEXED		2
+#define		FAT$C_DIRECT		3
+#define		FAT$C_SPECIAL		4
+#define		FAT$M_FORTRANCC		0x1
+#define		FAT$M_IMPLIEDCC		0x2
+#define		FAT$M_PRINTCC		0x4
+#define		FAT$M_NOSPAN		0x8
+#define		FAT$M_MSBRCW		0x10
+#define		FAT$C_FIFO		1
+#define		FAT$C_CHAR_SPECIAL	2
+#define		FAT$C_BLOCK_SPECIAL	3
+#define		FAT$C_SYMLINK		4
+#define		FAT$K_LENGTH		32
+#define		FAT$C_LENGTH		32
+#define		FAT$S_FATDEF		32
+
+/*		handling funny byte order */
 /* socalled
 Inverted format field. The high- and low-order 16 bits are transposed for compatibility with PDP-11 software.
 */
