@@ -136,5 +136,6 @@ Low priority:
 CURRENT/ACTIVE PEOPLE:
 
 Bertrand Joël: srm
+JDWTopGuy: bcopy->memcpy, cleanups to remove warnings
 Roar Thronæs: CPU/PAL, Kernel, Cluster, the rest practically
 Zakaria Yassine: init

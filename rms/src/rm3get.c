@@ -144,8 +144,8 @@ int rms$get_idx(struct _rabdef * rab) {
     count=min(primkeylen,rab->rab$b_ksz);
 
     if (0==strncmp(key,rab->rab$l_kbf,count)) {
-      bcopy(key,rab->rab$l_ubf,primkeylen);
-      bcopy(rest+2,primkeylen+rab->rab$l_ubf,restlen);
+      memcpy(key,rab->rab$l_ubf,primkeylen);
+      memcpy(rest+2,primkeylen+rab->rab$l_ubf,restlen);
       rab->rab$w_rsz=primkeylen+restlen;
       return SS$_NORMAL;
     }

@@ -80,7 +80,7 @@ asmlinkage int exe$gettim(unsigned long long *timadr)
     printk("gettim got accvio addr\n");
     return SS$_ACCVIO;
   }
-  bcopy(&exe$gq_systime,timadr,8);
+  memcpy(&exe$gq_systime,timadr,8);
   printk("setime %x %x\n",tmp[0],tmp[1]);
   printk("setime %x %x\n",tmp2[0],tmp2[1]);
   return SS$_NORMAL;

@@ -335,7 +335,7 @@ include/linux/compile.h: $(CONFIGURATION) include/linux/version.h newversion
 include/linux/version.h: ./Makefile
 	@echo \#define UTS_RELEASE \"$(KERNELRELEASE)\" > .ver
 	@echo \#define LINUX_VERSION_CODE `expr $(VERSION) \\* 65536 + $(PATCHLEVEL) \\* 256 + $(SUBLEVEL)` >> .ver
-	@echo '#define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))' >>.ver
+	@echo \#define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))' >>.ver
 	@mv -f .ver $@
 
 comma	:= ,
@@ -427,13 +427,13 @@ clean:	archclean
 		| grep -v lxdialog/ | xargs rm -f
 	rm -f $(CLEAN_FILES)
 	rm -rf $(CLEAN_DIRS)
-	$(MAKE) -C Documentation/DocBook clean
+#	$(MAKE) -C Documentation/DocBook clean
 
 mrproper: clean archmrproper
 	find . \( -size 0 -o -name .depend \) -type f -print | xargs rm -f
 	rm -f $(MRPROPER_FILES)
 	rm -rf $(MRPROPER_DIRS)
-	$(MAKE) -C Documentation/DocBook mrproper
+#	$(MAKE) -C Documentation/DocBook mrproper
 
 distclean: mrproper
 	rm -f core `find . \( -not -type d \) -and \
@@ -445,20 +445,20 @@ backup: mrproper
 	cd .. && tar cf - linux/ | gzip -9 > backup.gz
 	sync
 
-sgmldocs: 
-	chmod 755 $(TOPDIR)/scripts/docgen
-	chmod 755 $(TOPDIR)/scripts/gen-all-syms
-	chmod 755 $(TOPDIR)/scripts/kernel-doc
-	$(MAKE) -C $(TOPDIR)/Documentation/DocBook books
+#sgmldocs: 
+#	chmod 755 $(TOPDIR)/scripts/docgen
+#	chmod 755 $(TOPDIR)/scripts/gen-all-syms
+#	chmod 755 $(TOPDIR)/scripts/kernel-doc
+#	$(MAKE) -C $(TOPDIR)/Documentation/DocBook books
 
-psdocs: sgmldocs
-	$(MAKE) -C Documentation/DocBook ps
+#psdocs: sgmldocs
+#	$(MAKE) -C Documentation/DocBook ps
 
-pdfdocs: sgmldocs
-	$(MAKE) -C Documentation/DocBook pdf
+#pdfdocs: sgmldocs
+#	$(MAKE) -C Documentation/DocBook pdf
 
-htmldocs: sgmldocs
-	$(MAKE) -C Documentation/DocBook html
+#htmldocs: sgmldocs
+#	$(MAKE) -C Documentation/DocBook html
 
 sums:
 	find . -type f -print | sort | xargs sum > .SUMS

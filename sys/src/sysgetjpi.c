@@ -24,15 +24,15 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
   while (it->item_code) {
     switch (it->item_code) {
     case JPI$_PRCNAM:
-      bcopy(&p->pcb$t_lname,it->bufaddr,15);
+      memcpy(&p->pcb$t_lname,it->bufaddr,15);
       break;
 
     case JPI$_PID:
-      bcopy(&p->pcb$l_epid,it->bufaddr,4);
+      memcpy(&p->pcb$l_epid,it->bufaddr,4);
       break;
 
     case JPI$_MASTER_PID:
-      bcopy(&p->pid,it->bufaddr,4);
+      memcpy(&p->pid,it->bufaddr,4);
       break;
 
     case JPI$_STATE:

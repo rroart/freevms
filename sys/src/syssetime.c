@@ -15,7 +15,7 @@ asmlinkage int exe$setime(unsigned long long *timadr)
   long * tmp=(long *)&exe$gq_systime;
   if (!timadr) return SS$_ACCVIO;
   printk("setime %x %x\n",tmp[0],tmp[1]);
-  bcopy(timadr,&exe$gq_systime,8);
+  memcpy(timadr,&exe$gq_systime,8);
   printk("setime %x %x\n",tmp[0],tmp[1]);
   return SS$_NORMAL;
 }

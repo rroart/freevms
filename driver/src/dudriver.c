@@ -321,7 +321,7 @@ void du_dg(void * packet, struct _cdt * c, struct _pdt * p) {
   if (ppd->ppd$b_opc==PPD$C_SNDDAT) {
     struct _scs_rd * rd=&rdtl[scs1->scs$l_rspid];
     struct _cdrp * cdrp = rd->rd$l_cdrp;
-    bcopy(next,cdrp->cdrp$l_msg_buf,512);
+    memcpy(next,cdrp->cdrp$l_msg_buf,512);
   }
 
   //a->acb$l_ast=((struct _cdrp *)c->cdt$l_fp_scs_norecv)->cdrp$l_fpc;
@@ -509,7 +509,7 @@ void du_rw_more(struct _irp * i) {
   struct _cdrp * cdrp = &i->irp$l_fqfl;
   unsigned int sts;
   void (*func)(void *,void *);
-  bcopy((unsigned long)cdrp->cdrp$l_msg_buf, i->irp$l_qio_p1,i->irp$l_qio_p2);
+  memcpy((unsigned long)cdrp->cdrp$l_msg_buf, i->irp$l_qio_p1,i->irp$l_qio_p2);
   // receive something
   func=i->irp$l_ucb->ucb$l_fpc;
   func(i,i->irp$l_ucb);
