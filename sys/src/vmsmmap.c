@@ -1033,7 +1033,7 @@ void exit_mmap(struct mm_struct * mm)
 		BUG();
 #endif
 
-	clear_page_tables(mm, FIRST_USER_PGD_NR, USER_PTRS_PER_PGD);
+	clear_page_tables(mm, FIRST_USER_PGD_NR, USER_PTRS_PER_PGD -1 ); // don't clobber P1
 }
 
 /* Insert vm structure into process list sorted by address
