@@ -77,7 +77,7 @@ done
 		ln -s ../../freevms/sys/src/ucbcredel.c .;
 		ln -s ../../freevms/f11x/src/dispatch.c .;
 		ln -s ../../freevms/driver/src/file.c .;
-		ln -s ../../freevms/driver/src/iosubrams.c .;
+		ln -s ../../freevms/sys/src/iosubrams.c .;
 
 		ln -s ../../freevms/pal/src/ipl.c .;
 		ln -s ../../freevms/pal/src/ast.c .;
