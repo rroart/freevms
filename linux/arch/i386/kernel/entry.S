@@ -1,6 +1,9 @@
 # $Id$
 # $Locker$
 
+# Author. Roar Thronæs.
+# Modified Linux source file, 2001-2004  
+
 /*
  *  linux/arch/i386/entry.S
  *
@@ -110,6 +113,12 @@ ENOSYS = 38
 #define PUSHPSL \
         PUSHR_ALL; \
         call pushpsl; \
+        POPR_ALL; 
+
+#define PUSHPSLINTR \
+        PUSHR_ALL; \
+        call pushpsl; \
+	call setpsli; \
         POPR_ALL; 
 
 #define REI \
@@ -227,7 +236,7 @@ ENTRY(ret_from_fork)
  */
 
 ENTRY(system_call)
-        PUSHPSL
+        PUSHPSLINTR
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -291,7 +300,7 @@ ret_from_exception:
 
 
 ENTRY(vmssystem_call3)
-        PUSHPSL
+        PUSHPSLINTR
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -303,7 +312,7 @@ ENTRY(vmssystem_call3)
         jmp syscall_common
 
 ENTRY(vmssystem_call1)
-        PUSHPSL
+        PUSHPSLINTR
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -315,7 +324,7 @@ ENTRY(vmssystem_call1)
         jmp syscall_common
 
 ENTRY(vmssystem_call)
-        PUSHPSL
+        PUSHPSLINTR
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -516,7 +525,7 @@ ENTRY(alignment_check)
 	jmp error_code
 
 ENTRY(page_fault)
-        PUSHPSL
+        PUSHPSLINTR
 	pushl $ SYMBOL_NAME(do_page_fault)
 	jmp error_code
 

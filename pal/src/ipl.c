@@ -32,6 +32,10 @@ inline asmlinkage void pushpsl(void);
 void inline mysti(int flags);
 asmlinkage void myrei (void);
 
+inline asmlinkage void setpsli(void) {
+  ctl$gl_pcb->psl_intr=1;
+}
+
 inline asmlinkage void pushpsli(void) {
   pushpsl();
 #if 0
@@ -51,7 +55,8 @@ inline asmlinkage void pushpsl(void) {
   //  panic("xyz\n");
   current->pslstk[current->pslindex++]=current->psl;
   if(current->pslindex<0 || current->pslindex>30) {
-    printk("push %x %x\n",current->pcb$l_pid,current->pslindex);
+    printk("push %x %x %x\n",current->pcb$l_pid,current->pslindex,&this_cpu);
+    insque(33333,44343);
     panic("push\n");
   }
 #if 0
