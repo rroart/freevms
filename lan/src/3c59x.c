@@ -2351,7 +2351,9 @@ boomerang_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _
 			vp->tx_ring[entry].status = cpu_to_le32(skb->len | TxIntrUploaded);
 	else
 #endif
+#if 0
 			vp->tx_ring[entry].status = cpu_to_le32(skb->len | TxIntrUploaded | AddTCPChksum);
+#endif
 #if 0
 	if (!skb_shinfo(skb)->nr_frags) {
 #endif
