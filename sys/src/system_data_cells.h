@@ -9,6 +9,7 @@
 #include"../../lib/src/wqhdef.h"
 #include"../../lib/src/rsbdef.h"
 #include"../../lib/src/ccbdef.h"
+#include<linux/spinlock.h>
 
 extern unsigned long acme$gq_mutex;
 extern unsigned long acme$gq_request_queue;
@@ -1895,6 +1896,34 @@ extern struct lnmhshs lnmhshs;
 extern struct lnmhshp lnmhshp;
 
 extern struct _cpu vmscpus[32];
+
+/* spinlocks */
+
+extern spinlock_t SPIN_ATOMIC;
+
+/* corresponding to ipls */
+
+extern spinlock_t SPIN_EMB;
+extern spinlock_t SPIN_MCHECK;
+extern spinlock_t SPIN_MEGA;
+extern spinlock_t SPIN_HWCLK;
+extern spinlock_t SPIN_VIRTCONS;
+extern spinlock_t SPIN_INVALIDATE;
+extern spinlock_t SPIN_PERFMON;
+extern spinlock_t SPIN_POOL;
+extern spinlock_t SPIN_MAILBOX;
+extern spinlock_t SPIN_PR_LK11;
+extern spinlock_t SPIN_IOLOCK11;
+extern spinlock_t SPIN_PR_LK10;
+extern spinlock_t SPIN_IOLOCK10;
+extern spinlock_t SPIN_PR_LK9;
+extern spinlock_t SPIN_IOLOCK9;
+extern spinlock_t SPIN_SCHED;
+extern spinlock_t SPIN_MMG;
+extern spinlock_t SPIN_JIB;
+extern spinlock_t SPIN_TIMER;
+extern spinlock_t SPIN_PR_LK8;
+extern spinlock_t SPIN_IOLOCK8;
 
 #endif
  

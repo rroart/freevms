@@ -4,10 +4,12 @@
 #include <asm/hw_irq.h>
 #include <asm/current.h>
 #include "../../freevms/sys/src/system_data_cells.h"
+#include "../../freevms/sys/src/internals.h"
 #include"../../freevms/pal/src/queue.h"
 #include"../../freevms/lib/src/ddtdef.h"
 #include"../../freevms/lib/src/ucbdef.h"
 #include"../../freevms/lib/src/irpdef.h"
+#include"../../freevms/lib/src/ipldef.h"
 
 void ioc$initiate(struct _irp * i, struct _ucb * u) {
   struct _ddt *d; 
@@ -33,6 +35,7 @@ extern int exetimeout;
 
 void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   int qemp;
+  int savipl;
   struct _irp * i=u->ucb$l_irp;
   i->irp$l_iost1=iosb1; /* ok? */
   i->irp$l_iost2=iosb2;
@@ -44,6 +47,10 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
     printk("i should not be 0\n");
     goto end;
   }
+
+  savipl=getipl();
+  setipl(IPL$_IOPOST);
+  
   qemp=rqempty(&ioc$gq_postiq);
   insqti(i,&ioc$gq_postiq);
 
@@ -54,6 +61,9 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
     if (!qemp) goto notempty;
   notempty:
   }
+
+  setipl(savipl);
+
   qemp=aqempty(u->ucb$l_ioqfl);
   if (qemp) goto end;
   printk("ioq %x %x",i,u->ucb$l_ioqfl);

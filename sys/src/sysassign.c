@@ -22,6 +22,7 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   status=ioc$ffchan(chan);
   if (status!=SS$_NORMAL) return status;
   /* lock i/o db */
+  sch$iolockw();
   // printk("here assign %x\n", chan);
   c=&ctl$gl_ccbbase[*chan];
   c->ccb$b_amod=1; /* wherever this gets set */
@@ -29,7 +30,10 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   if (mbxnam) ioc$searchdev();
   status=ioc$search(&r,devnam);
   //printk("here assign\n");
-  if (status!=SS$_NORMAL) return status;
+  if (status!=SS$_NORMAL) {
+    sch$iounlock();
+    return status;
+  }
   u=r.val1;
 
   /* not yet?
@@ -38,6 +42,7 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   */
 
   c->ccb$l_ucb=u;
+  sch$iounlock();
   return status;
 }
 

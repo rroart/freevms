@@ -230,4 +230,62 @@ int lnm$inslogtab(struct struct_lnm_ret * r,int tabnamlen,  char * tablename, st
 
 int lnm$check_prot() { ; }
 
+#ifdef USERLAND
 
+void lnm$lock(void) {
+}
+
+void lnm$unlock(void) {
+}
+
+void lnm$lockr(void) {
+}
+
+void lnm$unlockr(void) {
+}
+
+void lnm$lockw(void) {
+}
+
+void lnm$unlockw(void) {
+}
+
+void getipl(void) {
+}
+
+void setipl(void) {
+}
+
+void mycli(void) {
+}
+
+void mysti(void) {
+}
+
+#else
+
+void lnm$lock(void) {
+  sch$lockw(&lnm$aq_mutex);
+}
+
+void lnm$unlock(void) {
+  sch$unlockw(&lnm$aq_mutex);
+}
+
+void lnm$lockr(void) {
+  sch$lockw(&lnm$aq_mutex);
+}
+
+void lnm$unlockr(void) {
+  sch$unlockw(&lnm$aq_mutex);
+}
+
+void lnm$lockw(void) {
+  sch$lockw(&lnm$aq_mutex);
+}
+
+void lnm$unlockw(void) {
+  sch$unlockw(&lnm$aq_mutex);
+}
+
+#endif

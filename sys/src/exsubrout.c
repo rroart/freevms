@@ -1,8 +1,11 @@
 #include "../../freevms/sys/src/system_data_cells.h"
+#include "../../freevms/sys/src/internals.h"
+#include "../../freevms/lib/src/ipldef.h"
 
 void exe$instimq(struct _tqe * t) {
   static signed int times=-500;
   struct _tqe *tmp=exe$gl_tqfl->tqe$l_tqfl;
+  int savipl=vmslock(&SPIN_TIMER,IPL$_TIMER);
   times++;
   if (times>=0 && times<5)     printk("%x %x %x\n",t,t->tqe$q_delta,t->tqe$q_time);
   if (times>=0 && times<5)     printk("%x %x %x\n",exe$gl_tqfl,exe$gl_tqfl->tqe$q_delta,exe$gl_tqfl->tqe$q_time);
@@ -13,6 +16,7 @@ void exe$instimq(struct _tqe * t) {
   insque(t,tmp);
   //  printk("0");
   if (times>=0 && times<5)  printk("%x %x %x\n",exe$gl_tqfl,exe$gl_tqfl->tqe$q_delta,exe$gl_tqfl->tqe$q_time);
+  vmsunlock(&SPIN_TIMER,savipl);
 }
 
 void exe$rmvtimq(struct _tqe * t) {

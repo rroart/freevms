@@ -23,6 +23,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   }
   /* lock */
   savipl=getipl();
+  spin_lock(&SPIN_SCHED);
   setipl(IPL$_SYNCH);
   insque(a,&p->pcb$l_astqfl);
   if ((a->acb$b_rmod & ACB$M_KAST)==0)
@@ -42,6 +43,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   }
   //printk("aft rse\n");
   /* unlock */
+  spin_unlock(&SPIN_SCHED);
   setipl(savipl);
   return status;
 }
@@ -61,6 +63,7 @@ asmlinkage void sch$astdel(void) {
 
   regtrap(REG_INTR, IPL$_ASTDEL);
 
+  spin_lock(&SPIN_SCHED);
  more:
   setipl(IPL$_SYNCH);
 
@@ -68,8 +71,10 @@ asmlinkage void sch$astdel(void) {
      printk("here ast\n");
      for (i=0; i<1000000; i++) ;
      } */
-  if (aqempty(&p->pcb$l_astqfl)) 
+  if (aqempty(&p->pcb$l_astqfl)) {
+    spin_unlock(&SPIN_SCHED);
     return;
+  }
   /* { int i,j;
      printk("here ast2 %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl);
      for (j=0; j<20; j++) for (i=0; i<1000000000; i++) ;
@@ -94,6 +99,7 @@ asmlinkage void sch$astdel(void) {
   if (p->pcb$b_asten!=15 || p->pcb$b_astact) { // 15 because no modes yet
     insque(acb,p->pcb$l_astqfl);
     p->phd$b_astlvl=p->pr_astlvl=(acb->acb$b_rmod & 3) + 1;
+    spin_unlock(&SPIN_SCHED);
     return;
   }
   p->pcb$b_astact=1;
@@ -106,7 +112,8 @@ asmlinkage void sch$astdel(void) {
 void sch$newlvl(struct _pcb *p) {
   int newlvl;
   int oldipl=getipl();
-  
+
+  spin_lock(&SPIN_SCHED);
   setipl(IPL$_SYNCH);
 
   if (aqempty(p->pcb$l_astqfl))
@@ -120,6 +127,7 @@ void sch$newlvl(struct _pcb *p) {
     
   p->phd$b_astlvl=newlvl;
   p->pr_astlvl=newlvl;
+  spin_unlock(&SPIN_SCHED);
   setipl(oldipl);
 }
 

@@ -632,6 +632,7 @@ asmlinkage void sch$resched(void) {
   regtrap(REG_INTR,IPL$_RESCHED);
 
   setipl(IPL$_SCHED);
+  spin_lock(&SPIN_SCHED);
 
   spin_lock_irq(&runqueue_lock); /* eventually change to sched? */
   release_kernel_lock(curpcb, cpuid);
@@ -722,6 +723,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   regtrap(REG_INTR,IPL$_SCHED);
 
   setipl(IPL$_SCHED);
+  spin_lock(&SPIN_SCHED);
 #endif
 
   sch$al_cpu_priority[curpri]=sch$al_cpu_priority[curpri] & (~ cpu->cpu$l_cpuid_mask );
@@ -814,6 +816,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   if (mydebug4) { int i; for(i=0;i<100000000;i++) ; }
   if (next == curpcb) { /* does not belong in vms, but must be here */
     spin_unlock_irq(&runqueue_lock);
+    spin_unlock(&SPIN_SCHED);
     reacquire_kernel_lock(curpcb);
     //splret();
     return;
@@ -821,6 +824,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
   task_set_cpu(next, cpuid);
   spin_unlock_irq(&runqueue_lock);
+  spin_unlock(&SPIN_SCHED);
 
   //      if (mydebug5) { int j; for(j=0;j<1000000000;j++) ; }
 

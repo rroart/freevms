@@ -10,6 +10,8 @@
 #include"../../freevms/lib/src/lkbdef.h"
 #include"../../freevms/librtl/src/descrip.h"
 
+// no vmslock etc here yet
+
 extern struct _rsb * reshashtbl[];
 extern unsigned long lockidtbl[];
 

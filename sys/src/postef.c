@@ -1,6 +1,9 @@
 #include<linux/sched.h>
 #include"../../freevms/starlet/src/ssdef.h"
 #include"../../freevms/lib/src/evtdef.h"
+#include"../../freevms/lib/src/ipldef.h"
+#include"../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/sys/src/internals.h"
 
 int waitcheck(struct _pcb *p, unsigned long priclass, unsigned long * efp, unsigned long * clusteraddr) {
   unsigned long tmp;
@@ -14,6 +17,7 @@ int waitcheck(struct _pcb *p, unsigned long priclass, unsigned long * efp, unsig
 }
 
 int sch$postef(unsigned long ipid, unsigned long priclass, unsigned long efn) {
+  int savipl=vmslock(&SPIN_SCHED,IPL$_SYNCH);
   struct _pcb * p;
   int efncluster=(efn&224)>>5;
   int retval;
@@ -28,5 +32,6 @@ int sch$postef(unsigned long ipid, unsigned long priclass, unsigned long efn) {
     retval=SS$_WASCLR;
   (*clusteraddr)|=(1<<(efn&31));
   waitcheck(p,priclass,&p->pcb$l_efcs+4*p->pcb$b_wefc,clusteraddr);
+  vmsunlock(&SPIN_SCHED,savipl);
   return retval;
 }

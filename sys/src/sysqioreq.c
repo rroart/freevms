@@ -5,7 +5,9 @@
 #include"../../freevms/lib/src/ucbdef.h"
 #include"../../freevms/lib/src/ddtdef.h"
 #include"../../freevms/lib/src/fdtdef.h"
+#include"../../freevms/lib/src/ipldef.h"
 #include"../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/sys/src/internals.h"
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
 
@@ -33,6 +35,7 @@ void exe$finishioc (long long * iosb, struct _irp * i, struct _pcb * p, struct _
 
 int exe$insioq (struct _irp * i, struct _ucb * u) {
   /* raise ipl */
+  int savipl=forklock(u->ucb$b_flck,u->ucb$b_flck);
   if (u->ucb$l_sts & UCB$M_BSY)
     exe$insertirp(&u->ucb$l_ioqfl,i);
   else {
@@ -41,6 +44,7 @@ int exe$insioq (struct _irp * i, struct _ucb * u) {
   }
   /* restore ipl */
   /* release fork lock */
+  forkunlock(u->ucb$b_flck,savipl);
   return;
 }
 
@@ -69,7 +73,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   /*check fdt mask*/
   /*check func code*/
   /*check iosb*/
-  /*set ipl 2*/
+  setipl(IPL$_ASTDEL);
   /*check proc quota*/
   i=vmalloc(sizeof(struct _irp));
   bzero(i,sizeof(struct _irp));

@@ -16,6 +16,7 @@ struct lnmhshp lnmhshp;
 #include"../../librtl/src/descrip.h"
 #include"../../lib/src/lnmstrdef.h"
 #include"../../lib/src/orbdef.h"
+#include"../../lib/src/ipldef.h"
 #include"../../lib/src/dyndef.h"
 #include"../../lib/src/system_service_setup.h"
 #include"lnmsub.h"
@@ -31,11 +32,13 @@ struct lnmhshp lnmhshp;
 #include"../../freevms/librtl/src/descrip.h"
 #include"../../freevms/lib/src/lnmstrdef.h"
 #include"../../freevms/lib/src/orbdef.h"
+#include"../../freevms/lib/src/ipldef.h"
 #include"../../freevms/lib/src/dyndef.h"
 #include"../../freevms/lib/src/system_service_setup.h"
 #include"../../freevms/sys/src/lnmsub.h"
 #include"../../freevms/sys/src/sysgen.h" 
 #include"../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/sys/src/internals.h"
 #endif
 
 /* Author: Roar Thronæs */
@@ -102,6 +105,8 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
   struct item_list_3 * i,j;
   struct struct_rt * RT;
 
+  setipl(IPL$_ASTDEL);
+
   mylnmb=lnmmalloc(sizeof(struct lnmb));
   bzero(mylnmb,sizeof(struct lnmb));
   mylnmth=lnmmalloc(sizeof(struct lnmth));
@@ -109,6 +114,8 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
 
   RT=(struct struct_rt *) lnmmalloc(sizeof(struct struct_rt));
   bzero(RT,sizeof(struct struct_rt));
+
+  lnm$lockw();
 
   status=lnm$firsttab(&ret,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
 
@@ -160,7 +167,7 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   else {
     /*    mytabnam="LNM$something";*/
   }
-  /* set ipl 2*/
+  setipl(IPL$_ASTDEL);
   mylnmb=lnmmalloc(sizeof(struct lnmb));
   bzero(mylnmb,sizeof(struct lnmb));
   mylnmx=lnmmalloc(sizeof(struct lnmx));
@@ -172,6 +179,7 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   trailer=lnmmalloc(sizeof(long));
 
   /* mutex lock */
+  lnm$lockw();
   RT=(struct struct_rt *) lnmmalloc(sizeof(struct struct_rt));
   bzero(RT,sizeof(struct struct_rt));
   //      lnmprintf("");/* this makes a difference somehow */
@@ -187,6 +195,7 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
     lnmfree(myorb);
     lnmfree(trailer);
     /* unlock mutex */
+    lnm$unlock();
     return status;
   }
 
@@ -210,6 +219,7 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
       lnmfree(myorb);
       lnmfree(trailer);
       /* unlock mutex */
+      lnm$unlock();
       return SS$_NOPRIV;
     }
   }
@@ -221,6 +231,7 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
      lnmfree(myorb);
      lnmfree(trailer);
      unlock mutex 
+     lnm$unlock();
      return SS$_EXLNMQUOTA;
 
   */
@@ -259,12 +270,23 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   lnmprintf("so far %x\n",status);
 
   /* unlock mutex */
+  lnm$unlock();
 
   return status;
 }
 
 asmlinkage sys_$DELLNM() {;}
 asmlinkage exe$dellnm  (void *tabnam, void *lognam, unsigned char *acmode) {
+
+#if 0
+needs these
+
+  setipl(IPL$_ASTDEL);
+ lnm$lockw(); 
+
+#endif
+
+
 }
 
 asmlinkage sys_$TRNLNM() {;}
@@ -279,14 +301,19 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
   mytabnam=tabnam;
   if (!(tabnam && itmlst)) return -1;
   /* lock mutex */
+  setipl(IPL$_ASTDEL);
+  lnm$lockr();
+
   status=lnm$searchlog(&ret,mylognam->dsc$w_length,mylognam->dsc$a_pointer,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
   if (status==SS$_NOLOGNAM || status!=SS$_NORMAL) {
     /* unlock mutex */
+    lnm$unlock();
     return status;
   }
   i->buflen=(ret.mylnmb)->lnmxs[0].lnmx$b_count;
   bcopy((ret.mylnmb)->lnmxs[0].lnmx$t_xlation,i->bufaddr,i->buflen);
   lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
+  lnm$unlock();
   return status;
 }
 
@@ -305,6 +332,8 @@ main(){
   $DESCRIPTOR(mytabnam2,"MYTEST2");
   $DESCRIPTOR(mytabnam,"MYTEST");
   $DESCRIPTOR(mypartab,"LNM$SYSTEM_DIRECTORY");
+  char resstring[LNM$C_NAMLENGTH];
+
   /*    lnm$system_directory_b=lnmmalloc(sizeof(struct lnmth));*/
   lnm$system_directory=lnmmalloc(sizeof(struct lnmb));
   bzero(lnm$system_directory,sizeof(struct lnmb));
@@ -361,7 +390,11 @@ main(){
   i[0].buflen=6;
   i[0].bufaddr="mylog3";
   bzero(&i[1],sizeof(struct item_list_3));
-  status=exe$crelnm(0,&mytabnam2,&mynam2,0,i);
+  status=exe$crelnm(0,&mytabnam2,&mynam2,0,i); 
+  i[0].item_code=1;
+  i[0].buflen=6;
+  i[0].bufaddr=resstring;
+  bzero(&i[1],sizeof(struct item_list_3));
   status=exe$trnlnm(0,&mytabnam2,&mynam,0,i);
   lnmprintf("end status %x\n",status);
   for (c=0;c<LNMSHASHTBL;c++) {

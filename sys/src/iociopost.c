@@ -5,6 +5,7 @@
 #include"../../freevms/lib/src/pridef.h"
 #include"../../freevms/pal/src/ipl.h"
 #include "../../freevms/sys/src/system_data_cells.h"
+#include "../../freevms/sys/src/internals.h"
 
 dirpost(struct _irp * i) {
   printk("doing dirpost\n");

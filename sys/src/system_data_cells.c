@@ -758,7 +758,7 @@ unsigned long ioc$gq_ddma_base_pa;
 unsigned long ioc$gq_dev_wwid_list;
 unsigned long ioc$gq_min_bap_window;
 unsigned long ioc$gq_mountlst;
-unsigned long ioc$gq_mutex;
+unsigned long ioc$gq_mutex=0;
 unsigned long long ioc$gq_postiq=0;
 unsigned long ioc$gw_lamapreg;
 unsigned long ioc$gw_maxbuf;
@@ -833,7 +833,7 @@ unsigned long lmf$ar_grouptbl;
 unsigned long lmf$gl_reserved;
 void * lnm$al_dirtbl[2];
 unsigned long lnm$al_hashtbl;
-unsigned long lnm$aq_mutex;
+unsigned long lnm$aq_mutex=0;
 unsigned long lnm$ar_cluster_lnmb;
 unsigned long lnm$ar_syscluster_lnmb;
 unsigned long lnm$ar_system_directory;
@@ -1920,6 +1920,34 @@ unsigned long locknxtid;
 
 struct _cdt cdtl[1024]; //scs$gw_cdtcnt];
 struct _rdt rdtl[128]; //[scs$gw_rdtcnt];
+
+/* spinlocks */
+
+spinlock_t SPIN_ATOMIC __cacheline_aligned = SPIN_LOCK_UNLOCKED; /* for atomic operations */
+
+/* corresponding to ipls */
+
+spinlock_t SPIN_EMB __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_MCHECK __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_MEGA __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_HWCLK __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_VIRTCONS __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_INVALIDATE __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_PERFMON __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_POOL __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_MAILBOX __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_PR_LK11 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_IOLOCK11 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_PR_LK10 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_IOLOCK10 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_PR_LK9 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_IOLOCK9 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_SCHED __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_MMG __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_JIB __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_TIMER __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_PR_LK8 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+spinlock_t SPIN_IOLOCK8 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
 
 extern void exe$timeout(void);
 

@@ -25,6 +25,7 @@ $qio
 $qiow
 $readef
 $schdwk
+$setast
 $setef
 $setime
 $setimr

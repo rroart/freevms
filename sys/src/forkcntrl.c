@@ -1,5 +1,6 @@
 #include<linux/linkage.h>
 #include"../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/sys/src/internals.h"
 #include"../../freevms/lib/src/ucbdef.h"
 #include"../../freevms/lib/src/irpdef.h"
 #include"../../freevms/lib/src/fkbdef.h"
@@ -9,6 +10,30 @@
 #include <asm/current.h>
 #include <linux/kernel.h>
 #include <asm/hw_irq.h>
+
+struct fork_lock_struct {
+  spinlock_t * spin;
+  int ipl;
+};
+
+// call this smp$al_iplvec?
+static struct fork_lock_struct forklock_table[7]={
+  { &SPIN_IOLOCK8, IPL$_IOLOCK8 },
+  { 0, 0 },
+  { &SPIN_IOLOCK8, IPL$_IOLOCK8 },
+  { &SPIN_IOLOCK9, IPL$_IOLOCK9 },
+  { &SPIN_IOLOCK10, IPL$_IOLOCK10 },
+  { &SPIN_IOLOCK11, IPL$_IOLOCK11 },
+  { &SPIN_MAILBOX, IPL$_MAILBOX }
+};
+
+int inline forklock(int i, signed int j) {
+  return vmslock(forklock_table[i-6].spin, j);
+}
+
+void inline forkunlock(int i, signed int j) {
+  vmsunlock(forklock_table[i-6].spin, j);
+}
 
 asmlinkage void exe$frkipl6dsp(void) {
   exe$forkdspth(6);
@@ -43,7 +68,9 @@ asmlinkage void exe$forkdspth(int i) {
     f=remque(fq,dummy);
     printk("forking entry %x\n",f);
     func=f->fkb$l_fpc;
+    vmslock(forklock_table[i-6].spin, -1);
     func(f->fkb$l_fr3,f);
+    vmsunlock(forklock_table[i-6].spin, -1);
     fq=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[0]; /* so far */
   }
 }

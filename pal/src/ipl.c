@@ -9,7 +9,11 @@
 #include<linux/sched.h>
 #include<asm/current.h>
 
-static mydebugi = 1;
+int in_atomic=0;
+
+extern int timer_on;
+
+static mydebugi = 0;  // should have no printk in a non-interruptable zone
 
 inline asmlinkage void pushpsl(void) {
   int this_cpu=smp_processor_id();
@@ -113,6 +117,7 @@ inline void chm(char mode) {
 
 inline void regtrap(char type, char param) {
   /* remember to disable interrupt during this */
+  int flag=mycli();
   int cpu=smp_processor_id();
   pushpsl(); /* should be at the end of this  */
   switch (type) {
@@ -143,11 +148,13 @@ inline void regtrap(char type, char param) {
     smp$gl_cpu_data[cpu]->cpu$w_sisr&=~(1<<param);
   }
   if (mydebugi>1) printk("%x\n",smp$gl_cpu_data[cpu]->cpu$w_sisr);
+  mysti(flag);
 }
 
 int block3=0;
 
 inline char intr_blocked(unsigned char this) {
+  int flag=mycli();
   int this_cpu = smp_processor_id();
   struct _pcb * p=current;
   if (mydebugi>1) printk("bl %x %x %x %x\n",p->pid,this,smp$gl_cpu_data[this_cpu]->cpu$w_sisr,p->pslindex);
@@ -178,9 +185,11 @@ inline char intr_blocked(unsigned char this) {
 #endif
     }
     pushpsl();
+    mysti(flag);
     return 1;
   }
   block3=0;
+  mysti(flag);
   return 0;
 }
 
@@ -232,6 +241,7 @@ extern int in_sw_ast;
 
 asmlinkage void myrei (void) {
   /* look at REI for this */
+  int flag=mycli();
   struct _pcb *p=current;
   int this_cpu=smp_processor_id();
   if (mydebugi>1) printk("bl %x %x %x\n",p->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
@@ -246,7 +256,56 @@ asmlinkage void myrei (void) {
   if (p->psl_ipl > p->oldpsl_ipl) panic("rei to higher ipl\n");
   setipl(current->psl_ipl);
   //  if (!in_sw_ast) sw_ast();
+  mysti(flag);
   sw_ast();
   do_sw_int();
   /* also needs some changing mode stacks */
 }
+
+#ifdef __i386__
+void inline mysti(int flags) {
+  in_atomic--;
+  if (flags) __sti();
+  spin_unlock(SPIN_ATOMIC);
+  //printk("mysti\n");
+}
+
+void sickinsque(void * entry, void * pred) {
+  *(void **)entry=*(void **)pred;
+  *(void **)(entry+4)=pred;
+  *(void **)((*(void **)pred)+4)=entry;
+  *(void **)pred=entry;
+}
+
+int inline mycli(void) {
+  int flags, retval;
+  //printk("mycli\n");
+  spin_lock(SPIN_ATOMIC);
+  __save_flags(flags);
+  retval=flags&0x00000200; /* interrupt enable/disable flag */
+  if (in_atomic) {
+    sickinsque(0x10000000,0x20000000);
+    panic("test\n");
+  }
+  __cli();
+  in_atomic++;
+  return retval;
+}
+#endif
+
+#ifdef __arch_um__
+void inline mysti(int flags) { 
+  in_atomic--;
+  if (flags) unblock_signals();
+  spin_unlock(SPIN_ATOMIC);
+}
+
+int inline mycli(void) {
+  int retval=timer_on;
+  spin_lock(SPIN_ATOMIC);
+  if (in_atomic) panic("test\n");
+  block_signals();
+  in_atomic++;
+  return retval;
+}
+#endif

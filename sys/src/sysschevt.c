@@ -4,6 +4,7 @@
 #include"../../freevms/lib/src/tqedef.h"
 #include"../../freevms/lib/src/cpudef.h"
 #include"../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/sys/src/internals.h"
 #include "../../freevms/lib/src/statedef.h"
 #include<linux/vmalloc.h>
 #include<linux/smp.h>
@@ -38,6 +39,7 @@ asmlinkage int exe$setimr  (unsigned int efn, signed long long *daytim,
 
 asmlinkage int exe$schdwk(unsigned int *pidadr, void *prcnam, signed long long * daytim, signed long long * reptim) {
   struct _pcb * p=exe$nampid2(current,pidadr,prcnam);
+  vmsunlock(&SPIN_SCHED,0);
   /* no cwps here either. snif. */
   if (!p) return;
   {

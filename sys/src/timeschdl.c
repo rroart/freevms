@@ -46,6 +46,7 @@
 #include "../../freevms/sys/src/sysgen.h"
 #include "../../freevms/sys/src/rse.h"
 #include "../../freevms/sys/src/system_data_cells.h"
+#include "../../freevms/sys/src/internals.h"
 
 extern int pid1count; /* Will be removed in the future */
 extern int pid0count; /* Will be removed in the future */
@@ -108,6 +109,10 @@ asmlinkage void exe$swtimint(void) {
   times++;
   if (current->phd$w_quant>=0 && current->phd$w_quant<128) 
     sch$qend(current);
+
+  vmslock(&SPIN_TIMER,IPL$_TIMER);
+  vmslock(&SPIN_HWCLK,IPL$_HWCLK);
+
   //  printk(".");
   /* check tqe from EXE$GL_TQFL */
   if (smp_processor_id()==0) {
@@ -174,6 +179,8 @@ asmlinkage void exe$swtimint(void) {
   //	cli();
   //	for(i=1;i!=0;i++) ;}
   //printk(",");
+  vmsunlock(&SPIN_HWCLK,IPL$_TIMER);
+  vmsunlock(&SPIN_TIMER,-1);
 }
 
 /* vax has 100 Hz clock interrupts. Quantum is in those 10 ns units */

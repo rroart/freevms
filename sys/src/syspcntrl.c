@@ -5,18 +5,24 @@
 #include"../../freevms/lib/src/pridef.h"
 #include"../../freevms/lib/src/statedef.h"
 #include"../../freevms/lib/src/evtdef.h"
+#include"../../freevms/lib/src/ipldef.h"
 #include"../../freevms/librtl/src/descrip.h"
 #include "../../freevms/sys/src/system_data_cells.h"
+#include "../../freevms/sys/src/internals.h"
 
 /* Author: Roar Thronæs */
 
 asmlinkage int exe$hiber(void) {
   /* spinlock sched */
   struct _pcb * p=current;
+  vmslock(&SPIN_SCHED,IPL$_SCHED);
   if (p->pcb$l_sts & PCB$M_WAKEPEN) {
     p->pcb$l_sts&=~PCB$M_WAKEPEN;
     /* release spin */
     /* set ipl 0 ? */
+    vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
+    /* cwps stuff not yet */
+    setipl(0);
     return;
   }
   p->pcb$l_sts&=~PCB$M_WAKEPEN;
@@ -26,6 +32,7 @@ asmlinkage int exe$hiber(void) {
 /* return params not as specified */
 void * exe$nampid2(struct _pcb *p, unsigned long *pidadr, void *prcnam) {
   /* sched spinlock */
+  vmslock(&SPIN_SCHED,IPL$_SCHED);
   if (pidadr==0 && prcnam==0) return p;
   if (pidadr) {
     struct _pcb * tmp, **htable = &pidhash[pid_hashfn(*pidadr)];
@@ -44,9 +51,14 @@ void * exe$nampid2(struct _pcb *p, unsigned long *pidadr, void *prcnam) {
 
 asmlinkage int exe$wake(unsigned long *pidadr, void *prcnam) {
   struct _pcb *p;
-   p=exe$nampid2(current,pidadr,prcnam);
-   if (p) return sch$wake(p->pid);
-   /* no cwps stuff yet */
+  p=exe$nampid2(current,pidadr,prcnam);
+  vmsunlock(&SPIN_SCHED,0);
+  if (p) {
+    sch$wake(p->pid);
+    vmsunlock(&SPIN_SCHED,0);
+    return;
+  }
+  /* no cwps stuff yet */
 }
 
 asmlinkage int exe$suspnd(unsigned int *pidadr, void *prcnam, unsigned int flags ) {
@@ -56,6 +68,7 @@ asmlinkage int exe$suspnd(unsigned int *pidadr, void *prcnam, unsigned int flags
 asmlinkage int exe$resume (unsigned int *pidadr, void *prcnam) {
   struct _pcb *p;
   p=exe$nampid2(current,pidadr,prcnam);
+  vmsunlock(&SPIN_SCHED,0);
   if (p) return sch$rse(p,PRI$_RESAVL,EVT$_RESUME);
   /* no cwps here either */
 }

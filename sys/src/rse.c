@@ -12,6 +12,7 @@
 #include"../../freevms/lib/src/statedef.h"
 #include"../../freevms/lib/src/cpudef.h"
 #include"../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/sys/src/internals.h"
 #include"../../freevms/pal/src/queue.h"
 
 extern int mydebug;
@@ -19,6 +20,7 @@ extern int mydebug;
 int sch$qend(struct _pcb * p) {
   int cpuid=smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid];
+  vmslock(&SPIN_SCHED,-1);
 
   p->pcb$l_pixhist=p->pcb$l_pixhist << 1;
   p->phd$w_quant = -QUANTUM;
@@ -58,6 +60,7 @@ int sch$qend(struct _pcb * p) {
 	//	SOFTINT_RESCHED_VECTOR; a bit too early. get scheduling in interrupt and crash
       }
   }
+  vmsunlock(&SPIN_SCHED,-1);
   return 1;
 }
 
@@ -71,6 +74,7 @@ int sch$pixscan(void) {
 
   if (!sgn$gw_pixscan) return;
   /* get sched spinlock */
+  vmslock(&SPIN_SCHED,-1);
   if (!((sch$gl_comqs & 0x7fff0000) || (sch$gl_comoqs & 0x7fff0000))) goto out;
   tmppri=ffs(comqs);
   tmppri--;
@@ -100,7 +104,8 @@ int sch$pixscan(void) {
   out:
     /* release spinlock */
   //printk("\n2\n");
-    return;
+  vmsunlock(&SPIN_SCHED,-1);
+  return;
 }
 
 void sch$chsep(struct _pcb * p,unsigned char newpri) {
