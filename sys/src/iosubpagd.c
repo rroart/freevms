@@ -29,8 +29,9 @@ int ioc$ffchan(unsigned short int *chan) {
   }
 }
 
-int ioc$searchdev() {
-  /* implement later */
+int ioc$searchdev(struct return_values *r, void * devnam) {
+  /* implement exact later */
+  return ioc$search(r,devnam);
 }
 
 extern struct _sb othersb;
@@ -39,6 +40,10 @@ extern struct _sb othersb;
 
 int ioc$search(struct return_values *r, void * devnam) {
   // no use of ioc$trandevnam yet 
+  char out[255];
+  int outlen;
+  char * outagain;
+  int sts = ioc_std$trandevnam(devnam, 0, out, outlen, &outagain);
   /* ddb d not needed? */
   /* real device, no logical. do not have logicals yet */
   /* return ucb or 0 */
@@ -46,13 +51,19 @@ int ioc$search(struct return_values *r, void * devnam) {
   struct _ddb * d=ioc$gl_devlist;
   char * node = 0;
   int nodelen = 0;
-  char * device = strchr(s->dsc$a_pointer,'$');
+  char * devstr;
+  if ((sts&1)==1) {
+    devstr=out;
+  } else {
+    devstr=s->dsc$a_pointer;
+  }
+  char * device = strchr(devstr,'$');
   if (device) {
-    node=s->dsc$a_pointer;
+    node=devstr;
     nodelen=device-node;
     device++;
   } else {
-    device=s->dsc$a_pointer;
+    device=devstr;
   }
   do {
     //    printk("bcmp %s %s\n",d->ddb$t_name,s->dsc$a_pointer);
@@ -91,3 +102,27 @@ int ioc$verify_chan(unsigned short int chan, struct _ccb ** ccbp) {
   } else 
     return 0;
 }
+
+int ioc_std$trandevnam (void * descr_p, int flags, char *buf, int *outlen, void **out_p) {
+  int sts;
+  $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
+  struct dsc$descriptor * mytabnam = &mytabnam_;
+  struct item_list_3 itm[2];
+  itm[0].item_code=1;
+  itm[0].buflen=4;
+  itm[0].retlenaddr=outlen;
+  itm[0].bufaddr=buf;
+  bzero(&itm[1],sizeof(struct item_list_3));
+  *out_p=buf;
+  sts=exe$trnlnm(0,mytabnam,descr_p,0,itm);
+  return sts;
+}
+
+int ioc_std$search (void * descr_p, int flags, void *lock_val_p, struct _ucb **ucb_p, struct _ddb **ddb_p, struct _sb **sb_p) {
+
+}
+
+int ioc_std$searchdev (void * descr_p, struct _ucb **ucb_p, struct _ddb **ddb_p, struct _sb **sb_p) {
+
+}
+
