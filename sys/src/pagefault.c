@@ -825,7 +825,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	pmd = pmd_offset(pgd, page);
 	do {
 	survive:
-	        switch (handle_mm_fault(mm, vma, address, is_write)) {
+	        switch (do_wp_page(mm, vma, address, pte, *pte)) {
 		case 1:
 			current->min_flt++;
 			break;
