@@ -23,9 +23,11 @@
 #ifndef USERLAND
 #define lnmmalloc vmalloc
 #define lnmfree vfree
+#define lnmprintf printk
 #else
 #define lnmmalloc malloc
 #define lnmfree free
+#define lnmprintf printf
 #endif
 
 struct lnmth {
@@ -109,6 +111,7 @@ char * context[10];
 };
 
 struct struct_rt {
+  int flags;
 int depth;
 int tries;
 int acmode;

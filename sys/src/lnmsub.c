@@ -1,3 +1,10 @@
+#ifdef USERLAND
+#define __LINUX_VMALLOC_H
+#define _LINUX_VMALLOC_H
+#define LINUX_VMALLOC_H
+inline void panic(char * c) { }
+#endif 
+
 #include"sysgen.h"
 #include"lnmsub.h"
 #include"system_data_cells.h"
@@ -13,46 +20,46 @@ int lnm$hash(const int length, const unsigned char * log, const unsigned long ma
   unsigned char *tmp=log;
   unsigned char count=length;
   unsigned long hash=count;
-  printf("count %x %x %s\n",count,tmp,tmp);
+  lnmprintf("count %x %x %s\n",count,tmp,tmp);
   while (count>3) {
-    //  printf("here %x %x\n",tmp[0],count);
+    //  lnmprintf("here %x %x\n",tmp[0],count);
     //tmp[0]=tmp[0]&223;
     //tmp[0]&=223;
-    //  printf("here %x %x\n",tmp[0],count);
+    //  lnmprintf("here %x %x\n",tmp[0],count);
     //tmp[1]&=223;
-    //  printf("here %x %x\n",tmp[0],count);
+    //  lnmprintf("here %x %x\n",tmp[0],count);
     //tmp[2]&=223;
-    //  printf("here %x %x\n",tmp[0],count);
+    //  lnmprintf("here %x %x\n",tmp[0],count);
     //tmp[3]&=223;
-    //  printf("here %x %x\n",tmp[0],count);
+    //  lnmprintf("here %x %x\n",tmp[0],count);
     hash=hash^(tmp[0]&223)^(tmp[1]&223)^(tmp[2]&223)^(tmp[3]&223);
-    //  printf("here %x %x\n",tmp[0],count);
+    //  lnmprintf("here %x %x\n",tmp[0],count);
     count-=4;
     tmp+=4;
     hash=hash<<9;
   };
-  //printf("here4 %x\n",hash);
+  //lnmprintf("here4 %x\n",hash);
   while (count) {
     //*tmp&=223;
     hash=hash^((*tmp)&223);
     count--;
     tmp++;
     //hash=hash<<13;
-    //printf("here5 %x\n",hash);
+    //lnmprintf("here5 %x\n",hash);
   };
   hash*=0x71279461;
   hash/=3;
-  //printf("here6 %x\n",hash);
+  //lnmprintf("here6 %x\n",hash);
   /* 
      hash&=something.LNMHSH$L_MASK;
      Not implemented yet
      */
  hash=hash%LNMSHASHTBL;
- //printf("herei7 %x\n",hash);
+ //lnmprintf("herei7 %x\n",hash);
  hash=hash&mask;
- //printf("here3 %x\n",hash);
+ //lnmprintf("here3 %x\n",hash);
  *myhash=hash;
- //printf("here2 %x %x\n",myhash,hash);
+ //lnmprintf("here2 %x %x\n",myhash,hash);
  return SS$_NORMAL;
 }
 
@@ -63,19 +70,19 @@ int lnm$searchlog(int loglen, char * logical, int tabnamlen, char * tablename,st
     no process table yet
     lnm$presearch();
   */
-  printf("searchlog\n");
+  lnmprintf("searchlog\n");
   status=lnm$presearch(&lnmhshs, loglen, logical,mylnmb);
   if (status==SS$_NOLOGNAM) return status;
   // lnm$setup();
   // lnm$table();
-  printf("searchlogexit\n");
+  lnmprintf("searchlogexit\n");
   exit(1);
 }
 
 int lnm$search_one(int loglen, char * logical, int tabnamlen, char * tablename, char * result) {
   /* lock mutex */
   // lnm$searchlog();
-  printf("searchoneexit\n");
+  lnmprintf("searchoneexit\n");
   exit(1);
   /* unlock */
 }
@@ -85,12 +92,12 @@ int lnm$presearch(struct lnmhshs * hashtable,int loglen,  char * logical, struct
   unsigned long * myhash;
   struct lnmb * mylnmb;
   myhash=lnmmalloc(sizeof(unsigned long));
-  printf("presearch %x %s\n",loglen,logical);
-  printf("presearch %x %s\n",loglen,logical);
+  lnmprintf("presearch %x %s\n",loglen,logical);
+  lnmprintf("presearch %x %s\n",loglen,logical);
   status=lnm$hash(loglen,logical,0xffff,myhash);
-  printf("presearch %s\n",logical);
+  lnmprintf("presearch %s\n",logical);
   status=lnm$contsearch(loglen,logical,*myhash,hashtable,&mylnmb);
-  printf("presearch %s\n",logical);
+  lnmprintf("presearch %s\n",logical);
   *alnmb=mylnmb;
   lnmfree(myhash);
   return status;
@@ -122,7 +129,8 @@ int lnm$contsearch(int loglen, char * logical, int hash, struct lnmhshs * hashta
 int lnm$firsttab(int  tabnamlen,  char * tablename, struct lnmb ** mylnmb, struct lnmth ** mylnmth) {
   struct struct_rt * MYRT;
   MYRT=(struct struct_rt *)lnmmalloc(sizeof(struct struct_rt));
-  printf("firstab %s\n",tablename);
+  bzero(MYRT,sizeof(struct struct_rt));
+  lnmprintf("firstab %s\n",tablename);
   lnm$setup(MYRT,tabnamlen,tablename,mylnmb,mylnmth);
   lnmfree(MYRT);
 }
@@ -131,9 +139,9 @@ int lnm$setup(struct struct_rt * RT, int tabnamlen,  char * tablename, struct ln
   int status;
   RT->depth=0;
   RT->tries=255;
-  printf("lnm$setup %x %s\n",tabnamlen, tablename);
+  lnmprintf("lnm$setup %x %s\n",tabnamlen, tablename);
   status=lnm$lookup(RT, tabnamlen, tablename, mylnmb,mylnmth);
-  if (status==SS$_NORMAL) RT->context[RT->depth]=(*mylnmb)->lnmb$t_name;
+  if (status==SS$_NORMAL) RT->context[RT->depth]=(*mylnmb);
   else return status;
   /* cache not implemented */
   status=lnm$table(RT,tabnamlen,tablename,mylnmb,mylnmth);
@@ -149,7 +157,7 @@ int lnm$table(struct struct_rt * RT, int tabnamlen, char * tablename, struct lnm
 
 int lnm$lookup(struct struct_rt * RT,int loglen, char * logical, struct lnmb ** mylnmb, struct lnmth ** mylnmth) {
   int status;
-  printf("lookup %s %x\n",logical,loglen);
+  lnmprintf("lookup %s %x\n",logical,loglen);
   status=lnm$presearch(&lnmhshs,loglen,logical,mylnmb);
   if (status!=SS$_NOLOGNAM) return status;
   return status;
@@ -157,18 +165,24 @@ int lnm$lookup(struct struct_rt * RT,int loglen, char * logical, struct lnmb ** 
 
 int lnm$table_srch(struct struct_rt *RT, int tabnamlen,  char * tablename, struct lnmb ** mylnmb, struct lnmth ** mylnmth) {
   int xname=0;
-  int len;
+  int len, status;
   do {
     RT->tries--;
     if (!RT->tries) return SS$_TOOMANYLNAM;
-    if (((*mylnmb)->lnmxs[xname].lnmx$b_flags)&LNM$M_MYTERMINAL) {
-      RT->context[RT->depth]=&((*mylnmb)->lnmxs[xname].lnmx$b_count);
-    }
+    if (((*mylnmb)->lnmxs[xname].lnmx$b_flags)&LNM$M_MYTERMINAL)
+      RT->flags|=LNM$M_MYTERMINAL;
+    else
+      RT->flags&=~LNM$M_MYTERMINAL;
+
     if (RT->depth>10) return SS$_TOOMANYLNAM;
+    RT->context[RT->depth]=(*mylnmb);
+    if ((*mylnmb)->lnmxs[xname].lnmx$b_index==LNM$C_TABLE) {
+      return SS$_NORMAL;
+    }
     RT->depth++;
     len=(*mylnmb)->lnmxs[xname].lnmx$b_count;
-    printf("tsr %x %s \n",(*mylnmb)->lnmxs[xname].lnmx$t_xlation,(*mylnmb)->lnmxs[xname].lnmx$t_xlation);
-    lnm$lookup(RT,len,(*mylnmb)->lnmxs[xname].lnmx$t_xlation,mylnmb,mylnmth);
+    lnmprintf("tsr %x %s \n",(*mylnmb)->lnmxs[xname].lnmx$t_xlation,(*mylnmb)->lnmxs[xname].lnmx$t_xlation);
+    status=lnm$lookup(RT,len,(*mylnmb)->lnmxs[xname].lnmx$t_xlation,mylnmb,mylnmth);
     xname++;
   } while (xname<20 && !((*mylnmb)->lnmxs[xname].lnmx$b_flags)&LNM$M_MYXEND);
   if ((*mylnmb)->lnmxs[xname].lnmx$b_index==LNM$C_TABLE) {
@@ -183,18 +197,18 @@ int lnm$inslogtab(int tabnamlen,  char * tablename,struct lnmb ** mylnmb,struct 
   int status;
   unsigned long * myhash;
   myhash=lnmmalloc(sizeof(unsigned long));
-  printf("inslog\n");
-  printf("%x %s\n",tabnamlen,tablename);
+  lnmprintf("inslog\n");
+  lnmprintf("%x %s\n",tabnamlen,tablename);
   status=lnm$hash(tabnamlen,tablename,0xffff,myhash);
-  printf("inslog\n");
-  printf("inslog myhash %x\n",*myhash);
+  lnmprintf("inslog\n");
+  lnmprintf("inslog myhash %x\n",*myhash);
   if (lnmhshs.entry[2*(*myhash)])
     insque(mylnmb,lnmhshs.entry[2*(*myhash)]);
   else {
     lnmhshs.entry[2*(*myhash)]=mylnmb;
     lnmhshs.entry[2*(*myhash)+1]=mylnmb;
   }
-  printf("inslog\n");
+  lnmprintf("inslog\n");
   
   ; }
 
