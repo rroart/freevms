@@ -80,6 +80,8 @@
 
 #include <string.h>
 
+#include<dlfcn.h>
+
 #define oz_util_h_console stdout
 
 #define CMDSIZ 4096
@@ -5627,9 +5629,10 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
   struct _ihd * hdrbuf;
   struct _iha * active;
   struct _va_range inadr;
-  void (*func)(void);
+  void (*func)();
   int len = strlen(argv[0]);
   //  if (strcasecmp (argv[-1], "creprc") == 0) goto do_creprc;
+  if (0==strncmp(".exe2",argv[0]+len-5,5)) goto do_dl;
   if (strncmp(".exe",argv[0]+len-4,4)) goto do_fork;
 
   aname.dsc$w_length=len-4;
@@ -5647,11 +5650,35 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
 
   active=(unsigned long)hdrbuf+hdrbuf->ihd$w_activoff;
 
+  char * str = argv[0];
+  str[len-4]=0;
+
   func=active->iha$l_tfradr1;
 
   printf("entering image? %x\n",func);
-  func();
+  func(argc,argv++);
   printf("after image\n");
+
+  return SS$_NORMAL;
+
+ do_dl:
+  {}
+  void * handle = dlopen(argv[0],RTLD_NOW);
+  if (handle==0) {
+    printf("dlopen: %s\n",dlerror());
+    return 0;
+  }
+  dlerror(); // clear error
+  int(*fn)() = dlsym(handle,"main");
+  int error=dlerror();
+  if (error) {
+    printf("dlsym: %s\n",error);
+    dlclose(handle);
+    return 0;
+  }
+  fn(argc,argv++);
+  
+  dlclose(handle);
 
   return SS$_NORMAL;
 
