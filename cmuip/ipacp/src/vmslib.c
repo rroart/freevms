@@ -212,7 +212,7 @@ WARN$FAO() {
   printk("WARN$FAO not implemented\n");
 }  
  
-LIB$SYS_FAOL() {
+LIB$SYS_FAOL_not() {
   printk("LIB$SYS_FAOL not implemented\n");
 }
 
@@ -334,7 +334,9 @@ SCH$IOUNLOCK() {
   return SS$_NORMAL;
 }
 
-STR$FREE1_DX() {
+STR$FREE1_DX(struct dsc$descriptor * d) {
+  kfree(d->dsc$a_pointer);
+  return;
   printk("STR$FREE1_DX not implemented\n");
 }
 
@@ -525,23 +527,13 @@ malloc_not(size)
   return kmalloc(size,GFP_KERNEL);
 }
 
-inline EXE$READCHK() {
-  //printk("exe$readchk not impl\n");
-}
-
-inline EXE$WRITECHK() {
-  //printk("exe$writechk not impl\n");
-}
-
-inline EXE$DEBIT_BYTCNT_ALO() {
-  printk("EXE$DEBIT_BYTCNT_ALO not impl\n");
-}
-
 inline DEVICELOCK(){
+  return;
   printk("DEVICELOCK not impl\n");
 }
 
 inline DEVICEUNLOCK(){
+  return;
   printk("DEVICEUNLOCK not impl\n");
 }
 
