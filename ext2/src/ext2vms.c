@@ -579,7 +579,8 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
   if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) { iosbret(irp,SS$_WRITLCK);  return SS$_WRITLCK; }
 
-  fcb=f11b_search_fcb(vcb,0/*fid*/);
+  ext2_translate_fid(vcb,fid);
+  fcb=exttwo_search_fcb2(vcb,fid); // can actually use most of the f11b routine
   //head = f11b_read_header(vcb,fid,fcb,&iosb);
   sts=iosb.iosb$w_status;
   if (sts & 1) {
@@ -752,3 +753,23 @@ char * ext2_vms_to_unix(struct dsc$descriptor * d) {
     *d=0;
   return c;
 }
+
+void ext2_translate_fid (struct _vcb * vcb, struct _fiddef * fid) {
+  if (fid$w_num==4 && fid$w_seq==4 && fid$w_rvn==0) {
+    fid$w_num=vcb->vcb$l_fcbfl->fcb$w_fid_dirnum; // i_dev
+    fid$w_seq=0;
+    fid$w_rvn=2; // EXT2 root ino
+  }
+}
+
+void * exttwo_search_fcb2(struct _vcb * vcb,struct _fiddef * fid)
+{
+    struct _fcb * head = &vcb->vcb$l_fcbfl;
+    struct _fcb * tmp = head->fcb$l_fcbfl;
+    while(tmp!=head) {
+      if ((tmp->fcb$w_fid_seq==fid->fid$w_seq) && (tmp->fcb$w_fid_num==fid->fid$w_num)&& (tmp->fcb$w_fid_rvn==fid->fid$w_rvn)) return tmp;
+      tmp=tmp->fcb$l_fcbfl;
+    }
+    return 0;
+}
+
