@@ -1,39 +1,48 @@
 define verb copy
-	image directory
+	image copy
 	routine copy
+	parameter p1
+	parameter p2
 
 define syntax delete_symbol
 	cliroutine delete_symbol
 	parameter p1
 
 define verb delete
-	image directory
+	image delete
 	routine del
+	parameter p1
 	qualifier symbol,syntax=delete_symbol
 
 define verb difference
-	image directory
+	image diff
 	routine diff
+	parameter p1
+	parameter p2
 
 define verb directory
 	image directory
 	routine dir
 	parameter p1
 	qualifier date
-	qualifier file
+	qualifier file_id
 	qualifier size
 
 define verb mount
-	image directory
+	image vmount
 	routine domount
-
-define verb ctype
-	image directory
-	routine typ
+	parameter p1
 
 define verb search
-	image directory
+	image search
 	routine search
+	parameter p1
+	parameter p2
+
+define verb type
+	image type
+	routine typ
+	parameter p1
 
 define syntax show_default
 	cliroutine show_default
@@ -107,11 +116,31 @@ define verb create
 	routine main
 	qualifier directory
 	qualifier name_table,syntax=name_table
+	parameter p1
 
 define verb stop
 	cliroutine stop
 	parameter p1
 	qualifier identification, value(required)
+
+define verb define
+	cliroutine define
+	qualifier table, value(required)
+	parameter p1
+	parameter p2
+
+define verb export
+	image copy
+	routine export
+	qualifier binary
+	parameter p1
+	parameter p2
+
+define verb import
+	image copy
+	routine import
+	parameter p1
+	parameter p2
 
 define verb dfu
 	image dfu
