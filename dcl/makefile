@@ -28,7 +28,9 @@
 VERSION_DCL=0.00
 
 SRCC=\
+	builtins_c.c \
 	builtins_d.c \
+	builtins_h.c \
 	builtins_l.c \
 	builtins_s.c \
 	dcl.c \

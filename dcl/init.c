@@ -51,27 +51,45 @@ commands_init(dcl$command **commands)
 	 */
 
 	if ((*commands = command_add_on(*commands,
-			"COPY", "", NULL, DCL$VERB))
+			"COPY", copy_function, DCL$VERB))
+			== NULL) return(DCL$FAILURE);
+	add_compatibility(*commands,
+			DCL$COMP_Q_ALLOCATION, DCL$COMP_Q_BACKUP,
+			DCL$COMP_Q_BEFORE, DCL$COMP_Q_BY_OWNER,
+			DCL$COMP_Q_CONCATENATE, DCL$COMP_Q_CONFIRM,
+			DCL$COMP_Q_CONTIGUOUS, DCL$COMP_Q_CREATED,
+			DCL$COMP_Q_EXCLUDE, DCL$COMP_Q_EXPIRED,
+			DCL$COMP_Q_EXTENSION, DCL$COMP_Q_FTP,
+			DCL$COMP_Q_LOG, DCL$COMP_Q_MODIFIED,
+			DCL$COMP_Q_OVERLAY, DCL$COMP_Q_PROTECTION,
+			DCL$COMP_Q_RCP, DCL$COMP_Q_READ_CHECK,
+			DCL$COMP_Q_REPLACE, DCL$COMP_Q_SINCE,
+			DCL$COMP_Q_STYLE, DCL$COMP_Q_TRUNCATE,
+			DCL$COMP_Q_VOLUME, DCL$COMP_Q_WRITE_CHECK,
+			DCL$COMP_END_OF_LIST);
+
+	if ((*commands = command_add_on(*commands,
+			"DIRECTORY", directory_function, DCL$VERB))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"DIRECTORY", "", directory_function, DCL$VERB))
+			"HELP", help_function, DCL$VERB))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"LOGOUT", "", logout_function, DCL$VERB))
+			"LOGOUT", logout_function, DCL$VERB))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"SET", "", set_function, DCL$VERB))
+			"SET", set_function, DCL$VERB))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"SEARCH", "", NULL, DCL$VERB))
+			"SEARCH", NULL, DCL$VERB))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"SHOW", "", NULL, DCL$VERB))
+			"SHOW", NULL, DCL$VERB))
 			== NULL) return(DCL$FAILURE);
 
 	/*
@@ -79,7 +97,7 @@ commands_init(dcl$command **commands)
 	 */
 
 	if ((*commands = command_add_on(*commands,
-			"DEFAULT", "", NULL, DCL$KEYWORD))
+			"DEFAULT", NULL, DCL$KEYWORD))
 			== NULL) return(DCL$FAILURE);
 
 	/*
@@ -87,147 +105,199 @@ commands_init(dcl$command **commands)
 	 */
 
 	if ((*commands = command_add_on(*commands,
-			"/ACL", "", NULL, DCL$QUALIFIER))
+			"/ACL", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/BACKUP", "", NULL, DCL$QUALIFIER))
+			"/ALLOCATION", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/BEFORE", "", NULL, DCL$QUALIFIER))
+			"/BACKUP", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/BRIEF", "", NULL, DCL$QUALIFIER))
+			"/BEFORE", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/BY_OWNER", "", NULL, DCL$QUALIFIER))
+			"/BRIEF", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/COLUMNS", "", NULL, DCL$QUALIFIER))
+			"/BY_OWNER", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/CREATED", "", NULL, DCL$QUALIFIER))
+			"/COLUMNS", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/DATE", "", NULL, DCL$QUALIFIER))
+			"/CONCATENATE", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/EXACT", "", NULL, DCL$QUALIFIER))
+			"/CONFIRM", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/EXCLUDE", "", NULL, DCL$QUALIFIER))
+			"/CONTIGUOUS", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/EXPIRE", "", NULL, DCL$QUALIFIER))
+			"/CREATED", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/FILE_ID", "", NULL, DCL$QUALIFIER))
+			"/DATE", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/FTP", "", NULL, DCL$QUALIFIER))
+			"/EXACT", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/FULL", "", NULL, DCL$QUALIFIER))
+			"/EXCLUDE", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/GRAND_TOTAL", "", NULL, DCL$QUALIFIER))
+			"/EXPIRED", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/HEADING", "", NULL, DCL$QUALIFIER))
+			"/EXTENSION", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/HIGHLIGHT", "", NULL, DCL$QUALIFIER))
+			"/FILE_ID", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/MODIFIED", "", NULL, DCL$QUALIFIER))
+			"/FTP", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/OUTPUT", "", NULL, DCL$QUALIFIER))
+			"/FULL", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/OWNER", "", NULL, DCL$QUALIFIER))
+			"/GRAND_TOTAL", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/PAGE", "", NULL, DCL$QUALIFIER))
+			"/HEADING", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/PRINTER", "", NULL, DCL$QUALIFIER))
+			"/HIGHLIGHT", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/PROTECTION", "", NULL, DCL$QUALIFIER))
+			"/LOG", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SEARCH", "", NULL, DCL$QUALIFIER))
+			"/MODIFIED", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SECURITY", "", NULL, DCL$QUALIFIER))
+			"/OUTPUT", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SELECT", "", NULL, DCL$QUALIFIER))
+			"/OVERLAY", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SHELVED_STATE", "", NULL, DCL$QUALIFIER))
+			"/OWNER", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SINCE", "", NULL, DCL$QUALIFIER))
+			"/PAGE", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/SIZE", "", NULL, DCL$QUALIFIER))
+			"/PRINTER", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/STYLE", "", NULL, DCL$QUALIFIER))
+			"/PROTECTION", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/TIME", "", NULL, DCL$QUALIFIER))
+			"/RCP", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/TOTAL", "", NULL, DCL$QUALIFIER))
+			"/READ_CHECK", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/TRAILING", "", NULL, DCL$QUALIFIER))
+			"/REPLACE", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/VERSIONS", "", NULL, DCL$QUALIFIER))
+			"/SEARCH", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/WIDTH", "", NULL, DCL$QUALIFIER))
+			"/SECURITY", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	if ((*commands = command_add_on(*commands,
-			"/WRAP", "", NULL, DCL$QUALIFIER))
+			"/SELECT", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/SHELVED_STATE", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/SINCE", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/SIZE", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/STYLE", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/TIME", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/TOTAL", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/TRAILING", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/TRUNCATE", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/VERSIONS", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/VOLUME", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/WIDTH", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/WRAP", NULL, DCL$QUALIFIER))
+			== NULL) return(DCL$FAILURE);
+
+	if ((*commands = command_add_on(*commands,
+			"/WRITE_CHECK", NULL, DCL$QUALIFIER))
 			== NULL) return(DCL$FAILURE);
 
 	return(DCL$SUCCESS);
@@ -244,18 +314,21 @@ commands_init(dcl$command **commands)
 
 dcl$command *
 command_add_on(dcl$command *commands, unsigned char *name,
-		unsigned char *help, int (*function)(), int type)
+		int (*function)(), int type)
 {
 	dcl$command			*new;
+
+	int					i;
 
 	if ((new = malloc(sizeof(dcl$command))) != NULL)
 	{
 		(*new).next = commands;
 		(*new).name = name;
 		(*new).length = strlen(name);
-		(*new).help = help;
 		(*new).type = type;
 		(*new).function = function;
+
+		for(i = 0; i < DCL$NB_COMP; (*new).compat[i++] = 0);
 	}
 	else
 	{
@@ -263,6 +336,33 @@ command_add_on(dcl$command *commands, unsigned char *name,
 	}
 
 	return(new);
+}
+
+
+void
+add_compatibility(dcl$command *command, ...)
+{
+	int			compatibility;
+	int			nb_rotations;
+
+	va_list		list;
+
+	va_start(list, command);
+
+	do
+	{
+		if ((compatibility = va_arg(list, int)) != DCL$COMP_END_OF_LIST)
+		{
+			nb_rotations = compatibility - 1;
+
+			if ((nb_rotations >= 0) && (nb_rotations < DCL$NB_COMP_FLAGS))
+			{
+				// mise à jour du drapeau !
+			}
+		}
+	} while(compatibility != DCL$COMP_END_OF_LIST);
+
+	va_end(list);
 }
 
 

@@ -125,6 +125,17 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 			{
 				status = (*first_target).function(ptr2, env);
 			}
+			else
+			{
+				if (fprintf(stderr, "Function not writted yet !\n") < 0)
+				{
+					status = DCL$FAILURE;
+				}
+				else
+				{
+					status = DCL$SUCCESS;
+				}
+			}
 		}
 		else
 		{
