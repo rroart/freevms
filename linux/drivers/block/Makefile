@@ -45,7 +45,6 @@ obj-$(CONFIG_BLK_DEV_DAC960)	+= DAC960.o
 
 obj-$(CONFIG_BLK_DEV_NBD)	+= nbd.o
 
-subdir-$(CONFIG_PARIDE) += paride
 endif
 
 include $(TOPDIR)/Rules.make

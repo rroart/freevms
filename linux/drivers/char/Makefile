@@ -25,7 +25,7 @@ export-objs     :=	console.o keyboard.o sysrq.o \
 			misc.o pty.o random.o selection.o serial.o \
 			tty_io.o tty_ioctl.o generic_serial.o
 
-mod-subdirs	:=	joystick ftape drm drm-4.0 pcmcia
+mod-subdirs	:=	
 
 list-multi	:=	
 
@@ -171,9 +171,6 @@ obj-$(CONFIG_MVME162_SCC) += generic_serial.o vme_scc.o
 obj-$(CONFIG_BVME6000_SCC) += generic_serial.o vme_scc.o
 obj-$(CONFIG_SERIAL_TX3912) += generic_serial.o serial_tx3912.o
 
-subdir-$(CONFIG_RIO) += rio
-subdir-$(CONFIG_INPUT) += joystick
-
 obj-$(CONFIG_ATIXL_BUSMOUSE) += atixlmouse.o
 obj-$(CONFIG_LOGIBUSMOUSE) += logibusmouse.o
 obj-$(CONFIG_PRINTER) += lp.o
@@ -205,12 +202,6 @@ obj-$(CONFIG_INTEL_RNG) += i810_rng.o
 
 obj-$(CONFIG_QIC02_TAPE) += tpqic02.o
 
-subdir-$(CONFIG_FTAPE) += ftape
-subdir-$(CONFIG_DRM_OLD) += drm-4.0
-subdir-$(CONFIG_DRM_NEW) += drm
-subdir-$(CONFIG_PCMCIA) += pcmcia
-subdir-$(CONFIG_AGP) += agp
-
 ifeq ($(CONFIG_FTAPE),y)
 obj-y       += ftape/ftape.o
 endif
@@ -241,11 +232,6 @@ obj-$(CONFIG_MACHZ_WDT) += machzwd.o
 obj-$(CONFIG_SH_WDT) += shwdt.o
 obj-$(CONFIG_EUROTECH_WDT) += eurotechwdt.o
 obj-$(CONFIG_SOFT_WATCHDOG) += softdog.o
-
-subdir-$(CONFIG_MWAVE) += mwave
-ifeq ($(CONFIG_MWAVE),y)
-  obj-y += mwave/mwave.o
-endif
 
 include $(TOPDIR)/Rules.make
 
