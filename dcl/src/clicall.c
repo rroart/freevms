@@ -19,10 +19,12 @@ int set_symbol(char * symstr, char * valstr) {
 int show_symbol() {
   $DESCRIPTOR(p, "p1");
   char c[80];
+  memset(c, 0, 80);
   struct dsc$descriptor o;
   o.dsc$a_pointer=c;
   o.dsc$w_length=80;
   char d[80];
+  memset(d, 0, 80);
   struct dsc$descriptor q;
   q.dsc$a_pointer=d;
   q.dsc$w_length=80;
