@@ -655,7 +655,9 @@ asmlinkage void __init start_kernel(void)
 	ipc_init();
 #endif
 	check_bugs();
+	lnm_init_prc(current); // put this later than lnm_init_sys
 	printk("POSIX conformance testing by UNIFIX\n");
+	printk("Popular Organization for the Suppression of Individual eXpression\n");
 
 	/* 
 	 *	We count on the initial thread going ok 
