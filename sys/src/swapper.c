@@ -17,7 +17,12 @@
 
 #include <asm/pgalloc.h>
 
+#include <system_service_setup.h>
 #include <system_data_cells.h>
+#include <lnmstrdef.h>
+#include <dyndef.h>
+#include <lnmdef.h>
+#include <descrip.h>
 
 struct mm_struct *swap_mm = &init_mm;
 
@@ -120,11 +125,120 @@ static int __init kswapd_init(void)
 
 module_init(kswapd_init)
 
+struct _lnmth lnm_sys_dir_table_header;
+
+struct _lnmx lnm_sys_dir_xlat = {
+  lnmx$l_flags : LNMX$M_TERMINAL,
+  lnmx$l_index : LNMX$C_TABLE,
+  lnmx$l_next : 0
+};
+
+struct _lnmb lnm_sys_dir = {
+  lnmb$l_flink: &lnm_sys_dir,
+  lnmb$l_blink: &lnm_sys_dir,
+  lnmb$w_size: sizeof(struct _lnmb),
+  lnmb$b_type: DYN$C_LNM,
+  lnmb$b_acmode: MODE_K_KERNEL,
+  lnmb$l_lnmx : &lnm_sys_dir_xlat,
+  lnmb$l_table : &lnm_sys_dir_table_header,
+  lnmb$b_flags : LNM$M_NO_ALIAS|LNM$M_TABLE|LNM$M_NO_DELETE,
+  lnmb$b_count : 21,
+  lnmb$t_name : "LNM$SYSTEM_DIRECTORY",
+};
+
+struct _lnmth lnm_sys_dir_table_header={
+  lnmth$l_flags:LNMTH$M_SHAREABLE|LNMTH$M_DIRECTORY,
+  lnmth$l_hash : 0,
+  lnmth$l_orb  : 0,
+  lnmth$l_name : &lnm_sys_dir,
+  lnmth$l_parent : 0,
+  lnmth$l_child : 0,
+  lnmth$l_sibling : 0,
+  lnmth$l_qtable : 0,
+  lnmth$l_byteslm : 0x7fffffff,
+  lnmth$l_bytes : 0x7fffffff
+};
+
+struct _lnmth lnm_sys_table_header;
+
+struct _lnmx lnm_sys_xlat = {
+  lnmx$l_flags : LNMX$M_TERMINAL,
+  lnmx$l_index : LNMX$C_TABLE,
+  lnmx$l_next : 0
+};
+
+struct _lnmb lnm_sys = {
+  lnmb$l_flink: &lnm_sys,
+  lnmb$l_blink: &lnm_sys,
+  lnmb$w_size: sizeof(struct _lnmb),
+  lnmb$b_type: DYN$C_LNM,
+  lnmb$b_acmode: MODE_K_KERNEL,
+  lnmb$l_lnmx : &lnm_sys_xlat,
+  lnmb$l_table : &lnm_sys_table_header,
+  lnmb$b_flags : LNM$M_NO_ALIAS|LNM$M_TABLE,
+  lnmb$b_count : 17,
+  lnmb$t_name : "LNM$SYSTEM_TABLE",
+};
+
+struct _lnmth lnm_sys_table_header={
+  lnmth$l_flags: LNMTH$M_SYSTEM|LNMTH$M_SHAREABLE,
+  lnmth$l_hash : 0,
+  lnmth$l_orb  : 0,
+  lnmth$l_name : &lnm_sys,
+  lnmth$l_parent : 0,
+  lnmth$l_child : 0,
+  lnmth$l_sibling : 0,
+  lnmth$l_qtable : 0,
+  lnmth$l_byteslm : 0x7fffffff,
+  lnmth$l_bytes : 0x7fffffff
+};
+
+void lnm_init_sys(void) {
+
+  /* this has to be done after malloc has been initialized */
+  /* can possibly done with mallocs */
+
+  unsigned long ahash;
+  unsigned long * myhash;
+  int status;
+  struct _lnmb * lnm$system_directory=&lnm_sys_dir;
+  struct _lnmth * lnm$system_directory_table_header=&lnm_sys_dir_table_header;
+
+  $DESCRIPTOR(mypartab,"LNM$SYSTEM_DIRECTORY");
+
+  $DESCRIPTOR(mytabnam,"LNM$SYSTEM_TABLE");
+
+  // not yet ready for this?
+  //lnm$inslogtab(ret_lnm, &sys_table);
+  // then do it manually?
+
+  lnm_sys_dir_table_header.lnmth$l_child = &lnm_sys_table_header;
+  lnm_sys_table_header.lnmth$l_parent = &lnm_sys_dir_table_header;
+  lnm_sys.lnmb$l_table=&lnm_sys_dir_table_header; // beware this and over
+
+  lnm$al_dirtbl[0]=&lnm_sys_dir;
+
+  /*ctl$gl_lnmdirect=LNM$PROCESS_DIRECTORY;
+    lnm$al_dirtbl[0]=LNM$SYSTEM_DIRECTORY;
+    lnm$al_dirtbl[1]=ctl$gl_lnmdirect;*/
+  myhash=&ahash; //lnmmalloc(sizeof(unsigned long));
+  status=lnm$hash(mypartab.dsc$w_length,mypartab.dsc$a_pointer,0xffff,myhash);
+  lnmprintf("here %x %x\n",myhash,*myhash);
+  lnmhshs.entry[2*(*myhash)]=lnm$system_directory;
+  lnmhshs.entry[2*(*myhash)+1]=lnm$system_directory;
+  status=lnm$hash(mytabnam.dsc$w_length,mytabnam.dsc$a_pointer,0xffff,myhash);
+  lnmprintf("here %x %x\n",myhash,*myhash);
+  lnmhshs.entry[2*(*myhash)]=&lnm$sys;
+  lnmhshs.entry[2*(*myhash)+1]=&lnm$sys;
+}
+
 void exe$swapinit(void) {
 
   /* allocate and initialize lnm stuff */
 
   /* do sysinit, but init-like stuff is done i main.c */
+
+
 
  mainloop:
   goto mainloop;
