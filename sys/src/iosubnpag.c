@@ -114,3 +114,11 @@ int ioc$cvt_devnam() {
 int exe$match_name(struct _ddb * d, char * s) {
 
 }
+
+void ioc_std$cancelio (signed int chan, struct _irp *irp, struct _pcb *pcb, str\
+		       uct _ucb *ucb) {
+  if (u->ucb$l_sts&UCB$M_BSY && i->irp$l_pid==p->pcb$l_pid && (-chan)==i->irp$w\
+      _chan) {
+    u->ucb$l_sts|=UCB$M_CANCEL; // check. had to add extra - before chan
+  }
+}
