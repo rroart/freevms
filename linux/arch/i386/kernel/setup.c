@@ -2915,14 +2915,17 @@ void __init cpu_init (void)
 	 */
 	atomic_inc(&init_mm.mm_count);
 	puts("puts 6_6\n");
-	cur_task->active_mm = &init_mm;
+	init_task_union.task.active_mm = &init_mm; // was: cur_task
 	puts("puts 6_7\n");
-	if(cur_task->mm)
+#if 0
+// not wrong anymore?
+ 	if(init_task_union.task.mm) // was: cur_task
 		BUG();
+#endif
 	puts("puts 6_8\n");
-	enter_lazy_tlb(&init_mm, current, nr);
+	enter_lazy_tlb(&init_mm, &init_task_union, nr); // was: current
 
-	t->esp0 = current->thread.esp0;
+	t->esp0 = init_task_union.task.thread.esp0; // was: current
 	set_tss_desc(nr,t);
 	gdt_table[__TSS(nr)].b &= 0xfffffdff;
 	puts("puts 6_9\n");
@@ -2944,8 +2947,8 @@ void __init cpu_init (void)
 	 * Force FPU initialization:
 	 */
 	puts("puts 6_11\n");
-	current->flags &= ~PF_USEDFPU;
-	current->used_math = 0;
+	init_task_union.task.flags &= ~PF_USEDFPU; // was: current
+	init_task_union.task.used_math = 0; // was: current
 	stts();
 	puts("puts 6_12\n");
 }
