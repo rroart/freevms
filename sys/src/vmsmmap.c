@@ -3,6 +3,7 @@
  *
  * Written by obz.
  */
+#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/shm.h>
 #include <linux/mman.h>
@@ -194,7 +195,7 @@ static inline unsigned long calc_rde$l_flags(unsigned long prot, unsigned long f
 		_trans(flags, MAP_GROWSDOWN, VM_GROWSDOWN) |
 		_trans(flags, MAP_DENYWRITE, VM_DENYWRITE) |
 		_trans(flags, MAP_EXECUTABLE, VM_EXECUTABLE);
-	return prot_bits | flag_bits;
+	return (prot_bits | flag_bits);
 #undef _trans
 }
 
@@ -405,13 +406,13 @@ munmap_back:
 	flags=flags; //translate later?
 
 	if (file) {
-	  exe$crmpsc(&inadr,0,0,flags,0,0,/*(unsigned short int)*/file,0,pgoff,*(unsigned long*)&protection_map[rde$l_flags & 0x0f],rde$l_flags);
+	  exe$crmpsc(&inadr,0,0,flags,0,0,/*(unsigned short int)*/file,0,pgoff,*(unsigned long*)&protection_map[(rde$l_flags>>8) & 0x0f],rde$l_flags);
 	} else {
 	  struct _rde * rde;
 	  exe$cretva(&inadr,0,0);
 	  rde=mmg$lookup_rde_va(addr,current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	  rde->rde$l_flags=rde$l_flags;
-	  rde->rde$r_regprot.regprt$l_region_prot = *(unsigned long*)&protection_map[rde$l_flags & 0x0f];
+	  rde->rde$r_regprot.regprt$l_region_prot = *(unsigned long*)&protection_map[(rde$l_flags>>8) & 0x0f];
 	}
 	return addr;
 
@@ -427,7 +428,7 @@ munmap_back:
 	vma->rde$pq_start_va = addr;
 	vma->rde$q_region_size = len;
 	vma->rde$l_flags = rde$l_flags;
-	vma->rde$r_regprot.regprt$l_region_prot = *(unsigned long*)&protection_map[rde$l_flags & 0x0f];
+	vma->rde$r_regprot.regprt$l_region_prot = *(unsigned long*)&protection_map[(rde$l_flags>>8) & 0x0f];
 #if 0
 	vma->vm_ops = NULL;
 	vma->vm_pgoff = pgoff;
@@ -954,7 +955,7 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
 	vma->rde$pq_start_va = addr;
 	vma->rde$q_region_size = len;
 	vma->rde$l_flags = flags;
-	vma->rde$r_regprot.regprt$l_region_prot = *(unsigned long*)&protection_map[flags & 0x0f];
+	vma->rde$r_regprot.regprt$l_region_prot = *(unsigned long*)&protection_map[(flags>>8) & 0x0f];
 #if 0
 	vma->vm_ops = NULL;
 	vma->vm_pgoff = 0;
@@ -981,7 +982,9 @@ void exit_mmap(struct mm_struct * mm)
 
 	release_segments(mm);
 	spin_lock(&mm->page_table_lock);
-	mpnt = mm->mmap;
+	mpnt = current->pcb$l_phd->phd$ps_p0_va_list_flink;
+	mpnt = 0;
+	// find right phd, otherwise we have got some leak
 	mm->mmap = mm->mmap_cache = NULL;
 	mm->mm_rb = RB_ROOT;
 	mm->rss = 0;
@@ -990,7 +993,8 @@ void exit_mmap(struct mm_struct * mm)
 	mm->locked_vm = 0;
 
 	flush_cache_mm(mm);
-	while (mpnt) {
+	while(0) {
+	//while (mpnt!=&current->pcb$l_phd->phd$ps_p0_va_list_flink) {
 		struct _rde * next = mpnt->rde$ps_va_list_flink;
 		unsigned long start = mpnt->rde$pq_start_va;
 		unsigned long end = (mpnt->rde$pq_start_va + mpnt->rde$q_region_size);
