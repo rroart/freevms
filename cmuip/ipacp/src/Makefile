@@ -1,4 +1,4 @@
-O_TARGET := ip4acp.o
+O_TARGET := ipacp.o
 
 override CFLAGS += -I$(TOPDIR)/cmuip/central/include -I$(TOPDIR)
 

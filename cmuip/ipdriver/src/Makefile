@@ -1,5 +1,5 @@
-O_TARGET := ip4driver_.o
+O_TARGET := ipdriver_.o
 
-obj-y := ip4driver.o
+obj-y := ipdriver.o
 
 include $(TOPDIR)/Rules.make
