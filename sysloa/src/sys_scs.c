@@ -4,7 +4,6 @@
 // Author. Roar Thronæs.
 // Author. Linux people.
 
-#if 1
 #define ETH_P_MYSCS 0x6009
 
 //#if 0
@@ -66,6 +65,7 @@
 
 struct _pb mypb;
 struct _sb mysb;
+struct _pdt mypdt;
 struct _pb otherpb;
 struct _sb othersb;
 
@@ -134,7 +134,6 @@ out:
 int scs_std$accept (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsysid, void *rstadr, void *rprnam, void *lprnam, int initcr, int minscr, int initdg, int blkpri, void *condat, void *auxstr, void (*badrsp)(), void (*movadr)(), int load_rating,int (*req_fast_recvmsg)(), void (*fast_recvmsg_pm)(), void (*change_aff)(), void (*complete)(), struct _cdt * cdt, int connect_parameter)
 {
 	struct _cdt *sk = cdt, *newsk, *newsock;
-	struct sk_buff *skb = NULL;
 	struct _cdt *cb;
 	unsigned char menuver;
 	int err = 0;
@@ -339,13 +338,17 @@ int /*__init*/ scs_init(void) {
 	memcpy(&mysb.sb$t_nodename, c+1, n-c-1);
 	goto end;
       }
+      if (0==strncmp(b, "SCSDEVICE", c-b)) {
+	memcpy(&mysb.sb$t_hwtype, c+1, n-c-1); // borrowing t_hwtype
+	goto end;
+      }
       b=n+1;
     }
     memcpy(&mysb.sb$t_nodename, "NONAME", 6);
   end:
     filp_close(file,0);
   }
-
+  mypb.pb$l_pdt=&mypdt;
 }
 
 //static int scs_sendmsg(struct _cdt *sock, struct msghdr *msg, int size,struct scm_cookie *scm)
@@ -395,7 +398,6 @@ static int scs_std$sendmsg(int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cd
 	int sent = 0;
 	int addr_len = msg->msg_namelen;
 	struct sockaddr_dn *addr = (struct sockaddr_dn *)msg->msg_name;
-	struct sk_buff *skb = NULL;
 	struct _cdt *cb;
 	unsigned char msgflg;
 	unsigned char *ptr;
@@ -442,6 +444,8 @@ static int __init scs_init2(void)
 	sock_register(&scs_family_ops);
 	dev_add_pack(&scs_dix_packet_type);
 	register_netdevice_notifier(&scs_dev_notifier);
+#else
+	scs_startdev(0,0,0);
 #endif
 
 	scs_dev_init();
@@ -469,8 +473,6 @@ static void __exit scs_exit(void)
 module_init(scs_init2);
 module_exit(scs_exit);
 //#endif /* #if 0 second one */
-
-#endif
 
 int   scs_std$reqdata( struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (*complete)() ) {
   struct _scs * scs = vmalloc(sizeof(struct _scs));
