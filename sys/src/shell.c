@@ -200,7 +200,8 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   if ( (*(unsigned long*)0x7ffff000)==42)
     printk("still 42\n");
 #endif
-  memset(page,0,PAGE_SIZE); // must zero content also
+  memset(page,0,(long)&ctl$gl_pcb-page); // must zero content also, but not ctl$gl_pcb
+  memset((long)&ctl$gl_pcb+4,0,PAGE_SIZE+4-((long)&ctl$gl_pcb-page)); // must zero content also
   ctl$gl_pcb=pcb;
 #if 0
   printk("memset page\n");
