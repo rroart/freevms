@@ -17,6 +17,7 @@ show_logical(int argc, char**argv){
   struct item_list_3 itm[2];
   struct dsc$descriptor mytabnam, mynam;
   char resstring[LNM$C_NAMLENGTH];
+  memset(resstring, 0, LNM$C_NAMLENGTH);
 
   char * default_table = "LNM$PROCESS_TABLE";
   char * table;
@@ -55,13 +56,14 @@ show_logical(int argc, char**argv){
 
   mynam.dsc$w_length=strlen(e);
   mynam.dsc$a_pointer=e;
-  mytabnam.dsc$w_length=strlen(c);
-  mytabnam.dsc$a_pointer=c;
+  mytabnam.dsc$w_length=strlen(table);
+  mytabnam.dsc$a_pointer=table;
 
+  memset(&itm[0],0,sizeof(struct item_list_3));
   itm[0].item_code=LNM$_STRING;
   itm[0].buflen=LNM$C_NAMLENGTH;
   itm[0].bufaddr=resstring;
-  bzero(&itm[1],sizeof(struct item_list_3));
+  memset(&itm[1],0,sizeof(struct item_list_3));
 
   sts = sys$trnlnm(0,&mytabnam,&mynam,0,itm);
 
