@@ -7,10 +7,14 @@
 #include <ttytadef.h>
 #include <ucbdef.h>
 #include <system_data_cells.h>
+#include <ssdef.h>
+
+#include <ddbdef.h>
 
 #include <linux/mm.h>
 
-int tty$putnextchar(int * chr, struct _ucb * u) {
+int tty$putnextchar(int * chr, int * CC, struct _ucb * u) {
+  *CC=0;
   struct _tty_ucb * tty=u;
   struct _tt_type_ahd * ahd = tty->ucb$l_tt_typahd;
 
@@ -69,6 +73,7 @@ int tty$putnextchar(int * chr, struct _ucb * u) {
     return;
   }
 
+  *CC=1;
   tty->ucb$b_tt_outype=1;
   char * c=ahd->tty$l_ta_put;
   *c=(char)*chr;
@@ -79,6 +84,8 @@ int tty$putnextchar(int * chr, struct _ucb * u) {
 
   int cc;
   tty$getnextchar(chr,&cc,u); // manual said echoing is needed, too
+
+  //ioc$reqcom(SS$_NORMAL,0,u);
 
   return 1;
 }
