@@ -28,21 +28,24 @@
 #include "cli.h"
 
 #define CDU_ROOT_SIZE 1000
-struct _cdu cdu_root[CDU_ROOT_SIZE];
+static struct _cdu parse_cdu_root[CDU_ROOT_SIZE];
 int cdu_free = 0;
 
 insert_cdu(int c) {
 #if 0
-  c->cdu$l_next=cdu_root;
-  cdu_root=c;
+  c->cdu$l_next=parse_cdu_root;
+  parse_cdu_root=c;
 #endif
-  cdu_root[c].cdu$l_next=cdu_root[0].cdu$l_next;
-  cdu_root[0].cdu$l_next=c;
+  parse_cdu_root[c].cdu$l_next=parse_cdu_root[0].cdu$l_next;
+  parse_cdu_root[0].cdu$l_next=c;
 }
 
+#if 0
 get_cdu_root() {
+  extern struct _cdu cdu_root[];
   return &cdu_root[0];
 }
+#endif
 
 my_cdu_free = 0;
 struct _cdu my_cdu_root[50];
@@ -68,23 +71,26 @@ alloc_cdu(int t) {
     printf("cdu_root overflow\n");
     exit(0);
   }
-  int a = &cdu_root[b];
+  int a = &parse_cdu_root[b];
   memset(a,0,sizeof(struct _cdu));
-  cdu_root[b].cdu$b_type=t;
+  parse_cdu_root[b].cdu$b_type=t;
   return b;
 }
 
 alloc_name(char * n) {
   int name = alloc_cdu(CDU$C_NAME);
-  struct _cdu * np = &cdu_root[name];
+  struct _cdu * np = &parse_cdu_root[name];
   memcpy(np->cdu$t_name,n,strlen(n));
   return name;
 }
 
+#if 0
 cdu_strncmp(int cdu, char * n, int size) {
+  extern struct _cdu * cdu_root; // not used. check
   struct _cdu * np = &cdu_root[cdu];
   return strncmp(np->cdu$t_name, n, size);
 }
+#endif
 
 int cdu_search_next(int i, int type, char * s, int size, int * retval) {
   struct _cdu * cdu_root = *root_cdu;
@@ -375,6 +381,19 @@ unsigned int cli$dispatch(int userarg){
   char * imagebase;
   struct _cdu * cdu;
   struct _cdu * cdu_root = *root_cdu;
+  void (*func)();
+  void * handle = 0;
+  int value = 0;
+
+  cdu= &cdu_root[(*cur_cdu)->cdu$l_routine];
+  if (cdu->cdu$t_name[0])
+    routine = cdu->cdu$t_name;
+
+  if ((*cur_cdu)->cdu$l_flags&CDU$M_INTERNAL) {
+    value=get_cli_int(routine);
+    func=value;
+    goto skip;
+  }
 
   if (vms_mm==0) goto exe2;
 
@@ -394,7 +413,6 @@ unsigned int cli$dispatch(int userarg){
   struct _ihd * hdrbuf;
   struct _iha * active;
   struct _va_range inadr;
-  void (*func)();
   char * imgnam = imagebase;
   int len = strlen(imgnam);
 
@@ -464,14 +482,6 @@ unsigned int cli$dispatch(int userarg){
   memset(symtab,0,symtabsize<<12);
 #endif
 
-  int value = 0;
-  cdu= &cdu_root[(*cur_cdu)->cdu$l_routine];
-  routine = cdu->cdu$t_name;
-  if ((*cur_cdu)->cdu$l_flags&CDU$M_INTERNAL) {
-    value=get_cli_int(routine);
-    goto skip;
-  }
-
   while (1) {
     Elf_External_Sym * src = symtab;
     if (src->st_name[0]==0 && src->st_name[1]==0) break;
@@ -490,43 +500,13 @@ unsigned int cli$dispatch(int userarg){
   else
     printf("routine %s not found, going for main in %x tfradr\n",routine,func);
 
- skip:
-
-  printf("entering image? %x\n",func);
-  if ((*my_cdu)->cdu$l_parameters) {
-    int i=(*my_cdu)->cdu$l_parameters;
-    while (i) {
-      struct _cdu * p = &my_cdu_root[i];
-      struct _cdu * n = &my_cdu_root[p->cdu$l_value];
-      myargv[my_cdu_root[my_cdu_root[i].cdu$l_name].cdu$t_name[1]-'0'] = n->cdu$t_name;
-      i=my_cdu_root[i].cdu$l_next;
-    }
-  }
-  //  func(argc,argv++);
-  func(userarg,myargv,0,0);
-  printf("after image\n");
-
-  sys$rundwn();
-
-  return SS$_NORMAL;
+  goto skip;
 
  exe2:
   {}
 
   char * mainp="main";
   routine=mainp;
-
-  int(*fn)();
-  void * handle = 0;
-  cdu = &cdu_root[(*cur_cdu)->cdu$l_routine];
-  if (cdu->cdu$t_name[0])
-    routine = cdu->cdu$t_name;
-
-  if ((*cur_cdu)->cdu$l_flags&CDU$M_INTERNAL) {
-    value=get_cli_int(routine);
-    fn=value;
-    goto skip2;
-  }
 
   path="/vms$common/sysexe/";
   pathlen=strlen(path);
@@ -545,16 +525,20 @@ unsigned int cli$dispatch(int userarg){
   }
   dlerror(); // clear error
   printf("Find routine %s\n",routine);
-  fn = dlsym(handle,routine);
-  printf("Got function address %x\n",fn);
+  func = dlsym(handle,routine);
+  printf("Got function address %x\n",func);
   int error=dlerror();
   if (error) {
     printf("dlsym: %s\n",error);
     dlclose(handle);
     return 0;
   }
- skip2:
-  // not yet  fn(userarg);
+
+ skip:
+  if (handle==0)
+    printf("entering image? %x\n",func);
+
+  // not yet  func(userarg);
   if ((*my_cdu)->cdu$l_parameters) {
     int i=(*my_cdu)->cdu$l_parameters;
     while (i) {
@@ -564,11 +548,14 @@ unsigned int cli$dispatch(int userarg){
       i=my_cdu_root[i].cdu$l_next;
     }
   }
-  fn(userarg,myargv,0,0);
-  //fn(argc,argv++);
-
-  if (handle)
+  func(userarg,myargv,0,0);
+  //func(argc,argv++);
+  if (handle==0) {
+    printf("after image\n");
+    sys$rundwn();
+  } else {
     dlclose(handle);
+  }
 
   return SS$_NORMAL;
 }
@@ -581,28 +568,28 @@ int gencode(tree t) {
     case DEFINE_VERB_STMT:
       {
 	int cdu = alloc_cdu(CDU$C_VERB);
-	cdu_root[cdu].cdu$l_verb = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
+	parse_cdu_root[cdu].cdu$l_verb = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
 	insert_cdu(cdu);
 	tree verb = TREE_OPERAND(t, 1);
-	gencode_verb(verb, &cdu_root[cdu]);
+	gencode_verb(verb, &parse_cdu_root[cdu]);
       }
       break;
     case DEFINE_SYNTAX_STMT:
       {
 	int cdu = alloc_cdu(CDU$C_SYNTAX);
-	cdu_root[cdu].cdu$l_syntax = alloc_name (IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
+	parse_cdu_root[cdu].cdu$l_syntax = alloc_name (IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
 	insert_cdu(cdu);
 	tree verb = TREE_OPERAND(t, 1);
-	gencode_verb(verb, &cdu_root[cdu]);
+	gencode_verb(verb, &parse_cdu_root[cdu]);
       }
       break;
     case DEFINE_TYPE_STMT:
       {
 	int cdu = alloc_cdu(CDU$C_TYPE);
-	cdu_root[cdu].cdu$l_type = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
+	parse_cdu_root[cdu].cdu$l_type = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
 	insert_cdu(cdu);
 	tree type = TREE_OPERAND(t, 1);
-	gencode_type(type, &cdu_root[cdu]);
+	gencode_type(type, &parse_cdu_root[cdu]);
       }
       break;
     case MODULE_STMT:
@@ -634,18 +621,18 @@ int gencode_verb(tree t,struct _cdu * cdu) {
     case QUALIFIER_CLAUSE:
       {
 	int q = alloc_cdu(CDU$C_QUALIFIER);
-	cdu_root[q].cdu$l_name = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
-	gencode_qual_clauses(TREE_OPERAND(t, 1),&cdu_root[q]);
-	cdu_root[q].cdu$l_next=cdu->cdu$l_qualifiers;
+	parse_cdu_root[q].cdu$l_name = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
+	gencode_qual_clauses(TREE_OPERAND(t, 1),&parse_cdu_root[q]);
+	parse_cdu_root[q].cdu$l_next=cdu->cdu$l_qualifiers;
 	cdu->cdu$l_qualifiers=q;
       }
       break;
     case PARAMETER_CLAUSE:
       {
 	int p = alloc_cdu(CDU$C_PARAMETER);
-	cdu_root[p].cdu$l_name=alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));;
-	gencode_para_clauses(TREE_OPERAND(t, 1),&cdu_root[p]);
-	cdu_root[p].cdu$l_next=cdu->cdu$l_parameters;
+	parse_cdu_root[p].cdu$l_name=alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));;
+	gencode_para_clauses(TREE_OPERAND(t, 1),&parse_cdu_root[p]);
+	parse_cdu_root[p].cdu$l_next=cdu->cdu$l_parameters;
 	cdu->cdu$l_parameters=p;
       }
       break;
@@ -662,9 +649,9 @@ int gencode_type(tree t,struct _cdu * cdu) {
     case KEYWORD_CLAUSE:
       {
 	int k = alloc_cdu(CDU$C_KEYWORD);
-	cdu_root[k].cdu$l_name = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
-	gencode_keyw_clauses(TREE_OPERAND(t, 1),&cdu_root[k]);
-	cdu_root[k].cdu$l_next=cdu->cdu$l_keywords;
+	parse_cdu_root[k].cdu$l_name = alloc_name(IDENTIFIER_POINTER(TREE_OPERAND(t, 0)));
+	gencode_keyw_clauses(TREE_OPERAND(t, 1),&parse_cdu_root[k]);
+	parse_cdu_root[k].cdu$l_next=cdu->cdu$l_keywords;
 	cdu->cdu$l_keywords=k;
       }
       break;
@@ -766,7 +753,7 @@ int gencode_single_clause(tree t,struct _cdu * cdu) {
     {
       int n = alloc_cdu(CDU$C_VALUE);
       cdu->cdu$l_value=n;
-      gencode_value_clauses(TREE_OPERAND(t, 0), &cdu_root[n]);
+      gencode_value_clauses(TREE_OPERAND(t, 0), &parse_cdu_root[n]);
     }
     break;
   default:
@@ -821,7 +808,7 @@ genwrite() {
   else
     fprintf(out, "struct _cdu cdu_root[] = {\n");
   int i = 0;
-  struct _cdu * cdu = &cdu_root[0];
+  struct _cdu * cdu = &parse_cdu_root[0];
 
   while (i<cdu_free) {
     fprintf(out, "// element %x\n",i);
