@@ -513,18 +513,12 @@ unsigned long pcb$l_capability_seq;
   unsigned long pcb$l_sched_policy;
   // more phd
 
-  unsigned long phd$l_cputim;
-  signed short phd$w_quant; /* really belongs in phd */
-  unsigned short phd$w_prclm; /* ditto */
+  signed short pcb$w_quant; /* really belongs in phd, but seems to have moved. ktb stuff? */
+  unsigned short phd$w_prclm; /* ditto? */
 
-  unsigned long long phd$q_privmsk;
-  unsigned short phd$w_size;
-  unsigned char phd$b_type;
-  unsigned char phd$b_spare_1;
   unsigned long pdg$l_pcb;
   unsigned char phd$b_astlvl; /* some cpus lack something */
   unsigned char pr_astlvl; /* some cpus lack something */
-  unsigned short phd$w_flags;
 
   union {
     struct {
