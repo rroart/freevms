@@ -124,12 +124,14 @@ void startio (struct _irp * i, struct _ucb * u) {
     case IO$_WRITELBLK :
       fd=u->ucb$l_orb;
       lseek(fd,i->irp$l_qio_p3,SEEK_SET);
-      return write_ubd_fs(fd,i->irp$l_qio_p1,i->irp$l_qio_p2);
+      write_ubd_fs(fd,i->irp$l_qio_p1,i->irp$l_qio_p2);
+      return ioc$reqcom(SS$_NORMAL,0,u);
       break;
     case IO$_WRITEPBLK :
       fd=u->ucb$l_orb;
       lseek(fd,i->irp$l_qio_p3,SEEK_SET);
-      return write_ubd_fs(fd,i->irp$l_qio_p1,i->irp$l_qio_p2);
+      write_ubd_fs(fd,i->irp$l_qio_p1,i->irp$l_qio_p2);
+      return ioc$reqcom(SS$_NORMAL,0,u);
       break;
     case IO$_WRITEVBLK :
       printk("should not be here in startio\n");
@@ -598,6 +600,9 @@ int ubd_vmsinit(void) {
   ini_fdt_act(&fdt,IO$_READLBLK,acp_std$readblk,1);
   ini_fdt_act(&fdt,IO$_READPBLK,acp_std$readblk,1);
   ini_fdt_act(&fdt,IO$_READVBLK,acp_std$readblk,1);
+  ini_fdt_act(&fdt,IO$_WRITELBLK,acp_std$readblk,1);
+  ini_fdt_act(&fdt,IO$_WRITEPBLK,acp_std$readblk,1);
+  ini_fdt_act(&fdt,IO$_WRITEVBLK,acp_std$readblk,1);
   exe$assign(&u0,&chan,0,0,0);
   registerdevchan(MKDEV(UBD_MAJOR,0),chan);
   return chan;
