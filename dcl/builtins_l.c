@@ -37,7 +37,8 @@
 #include "dcl.h"
 
 int
-logout_function(unsigned char *argument, dcl$env *env)
+logout_function(unsigned char *argument, dcl$command *self,
+		dcl$command *commands, dcl$env *env)
 {
 	(*env).end_flag = -1;
 	return(DCL$SUCCESS);

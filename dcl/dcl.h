@@ -40,9 +40,14 @@
 #	include <stdlib.h>
 #	include <string.h>
 #	include <stdarg.h>
+#	include <signal.h>
+#	include <unistd.h>
 
 #	include <readline/readline.h>
 #	include <readline/history.h>
+
+#	include <sys/types.h>
+#	include <sys/wait.h>
 
 /*
 --------------------------------------------------------------------------------
@@ -152,7 +157,11 @@
 	{
 		unsigned char		*name;		// static not allocated by malloc()
 		unsigned char		compat[DCL$NB_COMP];
-		int					(*function)(unsigned char *argument, dcl$env *env);
+		int					(*function)(unsigned char *argument,
+									struct dcl_command *self,
+								   	struct dcl_command *commands,
+									dcl$env *env);
+		int					qualifier;
 		int					type;
 		int					length;
 		struct dcl_command	*next;
@@ -166,16 +175,20 @@
 */
 
 	dcl$command *command_add_on(dcl$command *commands,
-			unsigned char *name, int (*function)(), int type, ...);
+			unsigned char *name, int (*function)(), int type,
+			int qualifier,...);
 
 	int commands_init(dcl$command **commands);
+	int get_compat_flag(dcl$command *command, int flag);
 	int loop(dcl$command *commands, dcl$env *env);
 	int parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
-			int required_type);
+			int required_type, dcl$command *parent);
 
+	unsigned char *next_argument(unsigned char *ptr);
 	unsigned char *read_command(dcl$env *env);
 
 	void commands_freeing(dcl$command *commands);
+	void set_compat_flag(dcl$command *command, int flag);
 
 /*
 --------------------------------------------------------------------------------
@@ -183,14 +196,23 @@
 --------------------------------------------------------------------------------
 */
 
-	int copy_function(unsigned char *argument, dcl$env *env);
+	int copy_function(unsigned char *argument, dcl$command *self,
+			dcl$command *commands, dcl$env *env);
 
-	int directory_function(unsigned char *argument, dcl$env *env);
+	int directory_function(unsigned char *argument, dcl$command *self,
+			dcl$command *commands, dcl$env *env);
 
-	int help_function(unsigned char *argument, dcl$env *env);
+	int help_function(unsigned char *argument, dcl$command *self,
+			dcl$command *commands, dcl$env *env);
 
-	int logout_function(unsigned char *argument, dcl$env *env);
+	int logout_function(unsigned char *argument, dcl$command *self,
+			dcl$command *commands, dcl$env *env);
 
-	int set_function(unsigned char *argument, dcl$env *env);
-	int show_function(unsigned char *argument, dcl$env *env);
+	int run_function(unsigned char *argument, dcl$command *self,
+			dcl$command *commands, dcl$env *env);
+
+	int set_function(unsigned char *argument, dcl$command *self,
+			dcl$command *commands, dcl$env *env);
+	int show_function(unsigned char *argument, dcl$command *self,
+			dcl$command *commands, dcl$env *env);
 #endif

@@ -32,6 +32,7 @@ SRCC=\
 	builtins_d.c \
 	builtins_h.c \
 	builtins_l.c \
+	builtins_r.c \
 	builtins_s.c \
 	dcl.c \
 	init.c \
@@ -79,7 +80,7 @@ LD_FLAGS=-O2 -g
 #-------------------------------------------------------------------------------
 
 %.o: %.c makefile
-	$(CC) -c $(GCC_FLAGS) $< -I. -D DCL$$VERSION="\"$(VERSION_DCL)\""
+	$(CC) -c $(GCC_FLAGS) $< -I. -D DCL\$$VERSION="\"$(VERSION_DCL)\""
 
 objects: $(SRCD) $(OBJC)
 
@@ -103,9 +104,8 @@ dcl: $(OBJC)
 
 dcl.o: dcl.c makefile
 	$(CC) -c $(GCC_FLAGS) $< -I. \
-			-D DCL$$DATE="\"$(shell LANG=fr_FR date +'%A %x à %X %Z')\"" \
-			-D DCL$$ENDATE="\"$(shell LANG=en date +'%A %x, %X %Z')\"" \
-			-D DCL$$VERSION="\"$(VERSION_RPL)\""
+			-D DCL\$$DATE="\"$(shell LANG=en date +'%A %x, %X %Z')\"" \
+			-D DCL\$$VERSION="\"$(VERSION_DCL)\""
 	
 
 #-------------------------------------------------------------------------------

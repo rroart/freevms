@@ -47,7 +47,7 @@ loop(dcl$command *commands, dcl$env *env)
 	{
 		command_line = read_command(env);
 
-		if ((status = parsing(command_line, commands, env, DCL$VERB))
+		if ((status = parsing(command_line, commands, env, DCL$VERB, NULL))
 				== DCL$FAILURE)
 		{
 			return(DCL$FAILURE);
@@ -69,6 +69,24 @@ loop(dcl$command *commands, dcl$env *env)
 			case DCL$WIVVERB :
 				if (fprintf(stderr, "%%DCL-W-IVVERB, unrecognized command "
 						"verb - check validity and spelling\n") < 0)
+					return(DCL$FAILURE);
+				if (fprintf(stderr, " \\%s\\\n", (*env).last_error) < 0)
+					return(DCL$FAILURE);
+				free((*env).last_error);
+				break;
+
+			case DCL$WIVKEYW :
+				if (fprintf(stderr, "%%DCL-W-IVKEYW, unrecognized keyword - "
+						"check validity and spelling\n") < 0)
+					return(DCL$FAILURE);
+				if (fprintf(stderr, " \\%s\\\n", (*env).last_error) < 0)
+					return(DCL$FAILURE);
+				free((*env).last_error);
+				break;
+
+			case DCL$WIVQUAL :
+				if (fprintf(stderr, "%%DCL-W-IVQUAL, unrecognized qualifier - "
+						"check validity, spelling, and placement\n") < 0)
 					return(DCL$FAILURE);
 				if (fprintf(stderr, " \\%s\\\n", (*env).last_error) < 0)
 					return(DCL$FAILURE);

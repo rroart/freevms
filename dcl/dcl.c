@@ -39,9 +39,32 @@
 int
 main(int argc, char *argv[])
 {
-	dcl$command		*commands;
-	dcl$env			env;
+	dcl$command				*commands;
+	dcl$env					env;
 
+	int						flag;
+	int						i;
+	int						length;
+	int						nb_options = 3;
+	int						options[nb_options];
+
+	struct sigaction		action;
+
+	unsigned char			*ptr;
+	unsigned char			*qualifier;
+
+	/*
+	 * SIGINT management
+	 */
+
+	action.sa_handler = SIG_IGN;
+	action.sa_flags = SA_NOMASK;
+
+	if (sigaction(SIGINT, &action, NULL) != 0)
+	{
+		return(DCL$FAILURE);
+	}
+	
 	/*
 	 * dcl$env struct initialization
 	 */
@@ -67,7 +90,112 @@ main(int argc, char *argv[])
 	}
 
 	/*
-	 * Loop
+	 * Command line
+	 */
+
+	for(i = 0; i < nb_options; options[i++] = 0);
+
+	if (argc > 1)
+	{
+		while((--argc) > 0)
+		{
+			if ((*(++argv))[0] == '/')
+			{
+				ptr = (*argv)++;
+				flag = 0;
+
+				while((*ptr) != 0)
+				{
+					if (((*ptr) >= 'a') && ((*ptr) <= 'z')) (*ptr) -= 'a' - 'A';
+					ptr++;
+				}
+
+				qualifier = "VERSION";
+				length = (strlen(*argv) < strlen(qualifier))
+						? strlen(*argv) : strlen(qualifier);
+
+				if (strncmp(*argv, qualifier, length) == 0)
+				{
+					if (strlen(*argv) <= strlen(qualifier))
+					{
+						options[0] = 1;
+						flag = 1;
+					}
+				}
+
+				qualifier = "COPYRIGHT";
+				length = (strlen(*argv) < strlen(qualifier))
+						? strlen(*argv) : strlen(qualifier);
+
+				if (strncmp(*argv, qualifier, length) == 0)
+				{
+					if (strlen(*argv) <= strlen(qualifier))
+					{
+						options[1] = 1;
+						flag = 1;
+					}
+				}
+
+				qualifier = "HELP";
+				length = (strlen(*argv) < strlen(qualifier))
+						? strlen(*argv) : strlen(qualifier);
+
+				if (strncmp(*argv, qualifier, length) == 0)
+				{
+					if (strlen(*argv) <= strlen(qualifier))
+					{
+						options[2] = 1;
+						flag = 1;
+					}
+				}
+
+				if (flag == 0)
+				{
+					return(DCL$FAILURE);
+				}
+			}
+			else
+			{
+				return(DCL$FAILURE);
+			}
+		}
+	}
+
+	for(i = 0; i < nb_options; i++)
+	{
+		if (options[i])
+		{
+			switch(i)
+			{
+				case 0 :
+				if (fprintf(stdout, "DCL/2 Version %s (%s)\n",
+						DCL$VERSION, DCL$DATE) < 0)
+					return(DCL$FAILURE);
+				break;
+
+				case 1 :
+				if (fprintf(stdout, "Copyright (C) 2001 BERTRAND Joël\n") < 0)
+					return(DCL$FAILURE);
+				break;
+
+				case 2 :
+				if (fprintf(stdout, "Avalaible options for DCL/2\n") < 0)
+					return(DCL$FAILURE);
+				if (fprintf(stdout, "  /COPYRIGHT\n") < 0)
+					return(DCL$FAILURE);
+				if (fprintf(stdout, "  /HELP\n") < 0)
+					return(DCL$FAILURE);
+				if (fprintf(stdout, "  /VERSION\n") < 0)
+					return(DCL$FAILURE);
+
+				return(DCL$SUCCESS);
+				break;
+			}
+		}
+	}
+
+	/*
+	 * Main loop
 	 */
 
 	if (loop(commands, &env) != DCL$SUCCESS)

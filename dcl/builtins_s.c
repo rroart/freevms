@@ -37,7 +37,8 @@
 #include "dcl.h"
 
 int
-set_function(unsigned char *argument, dcl$env *env)
+set_function(unsigned char *argument, dcl$command *self,
+		dcl$command *commands, dcl$env *env)
 /*
 SET
 

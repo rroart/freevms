@@ -37,7 +37,8 @@
 #include "dcl.h"
 
 int
-directory_function(unsigned char *argument, dcl$env *env)
+directory_function(unsigned char *argument, dcl$command *self,
+		dcl$command *commands, dcl$env *env)
 /*
 DIRECTORY
 
@@ -69,5 +70,20 @@ DIRECTORY
   /TRAILING  /VERSIONS  /WIDTH     /WRAP
 */
 {
-	return(DCL$SUCCESS);
+	int					status;
+
+	argument = next_argument(argument);
+
+	if (strlen(argument) == 0)
+	{
+		/*
+		 * To few arguments
+		 */
+
+		return(DCL$SUCCESS);
+	}
+
+	status = parsing(argument, commands, env, DCL$QUALIFIER, self);
+
+	return(status);
 }

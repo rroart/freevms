@@ -37,7 +37,8 @@
 #include "dcl.h"
 
 int
-help_function(unsigned char *argument, dcl$env *env)
+help_function(unsigned char *argument, dcl$command *self,
+		dcl$command *commands, dcl$env *env)
 /*
 HELP
 

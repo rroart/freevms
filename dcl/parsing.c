@@ -38,7 +38,7 @@
 
 int
 parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
-		int required_type)
+		int required_type, dcl$command *parent)
 {
 	dcl$command		*current_command;
 	dcl$command		*first_target;
@@ -54,8 +54,7 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 	unsigned char	*ptr3;
 	unsigned char	*string;
 
-	ptr1 = line;
-	while((*ptr1) == ' ') ptr1++;
+	ptr1 = next_argument(line);
 	ptr2 = ptr1;
 
 	string_flag = 0;
@@ -97,20 +96,25 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 
 	while(current_command != NULL)
 	{
-		if ((*current_command).length > length)
+		if ((*current_command).length >= length)
 		{
-			if (strncmp((*current_command).name, string, length) == 0)
+			if (required_type == (*current_command).type)
 			{
-				first_target = current_command;
-				number_of_targets++;
-			}
-		}
-		else if ((*current_command).length == length)
-		{
-			if (strcmp((*current_command).name, string) == 0)
-			{
-				first_target = current_command;
-				number_of_targets++;
+				if (strncmp((*current_command).name, string, length) == 0)
+				{
+					if (parent == NULL)
+					{
+						first_target = current_command;
+						number_of_targets++;
+					}
+					else if (get_compat_flag(parent,
+							(*current_command).qualifier) != 0)
+					{
+						printf("Found ! (%s)\n", (*current_command).name);
+						first_target = current_command;
+						number_of_targets++;
+					}
+				}
 			}
 		}
 
@@ -119,50 +123,48 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 
 	if (number_of_targets == 1)
 	{
-		if ((*first_target).type == DCL$VERB)
+		if ((*first_target).function != NULL)
 		{
-			if ((*first_target).function != NULL)
-			{
-				status = (*first_target).function(ptr2, env);
-			}
-			else
-			{
-				if (fprintf(stderr, "Function not writted yet !\n") < 0)
-				{
-					status = DCL$FAILURE;
-				}
-				else
-				{
-					status = DCL$SUCCESS;
-				}
-			}
+			status = (*first_target).function(ptr2, first_target,
+					commands, env);
 		}
 		else
 		{
-			(*env).last_error = string;
-			return(DCL$WIVVERB);
+			if (fprintf(stderr, "Function not written yet !\n") < 0)
+			{
+				status = DCL$FAILURE;
+			}
+			else
+			{
+				status = DCL$SUCCESS;
+			}
 		}
 	}
 	else if (number_of_targets > 1)
 	{
 		(*env).last_error = string;
+		/* Vérifier le message pour les keywords et qualifiers */
 		return(DCL$WABVERB);
 	}
 	else
 	{
 		(*env).last_error = string;
-		return(DCL$WIVVERB);
+
+		if (required_type == DCL$VERB)
+		{
+			return(DCL$WIVVERB);
+		}
+		else if (required_type == DCL$KEYWORD)
+		{
+			return(DCL$WIVKEYW);
+		}
+		else
+		{
+			return(DCL$WIVQUAL);
+		}
 	}
 
 	free(string);
-
-	/*
-	 *   %DCL-W-IVKEYW, unrecognized keyword - check validity and spelling
-	 *    \DLGJDLFJG\
-	 *    %DCL-W-IVQUAL, unrecognized qualifier - check validity, spelling, and placement
-	 *     \DSFLGKJDFLGJ\
-	 *
-	 */
 
 	return(status);
 }

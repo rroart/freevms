@@ -37,52 +37,53 @@
 #include "dcl.h"
 
 int
-copy_function(unsigned char *argument, dcl$command *self,
+run_function(unsigned char *argument, dcl$command *self,
 		dcl$command *commands, dcl$env *env)
 /*
-COPY
+RUN
 
-     Creates a new file from one or more existing files. The COPY
-     command can do the following:
+     Executes an image within the context of your process (see Image).
 
-     o  Copy an input file to an output file.
-
-     o  Concatenate two or more input files into a single output file.
-
-     o  Copy a group of input files to a group of output files.
-
-     Format
-
-       COPY  input-filespec[,...] output-filespec
-   
-
-
-
-  Additional information available:
-
-  Parameters Qualifiers
-  /ALLOCATION           /BACKUP    /BEFORE    /BY_OWNER  /CONCATENATE
-  /CONFIRM   /CONTIGUOUS           /CREATED   /EXCLUDE   /EXPIRED
-  /EXTENSION /LOG       /MODIFIED  /OVERLAY   /PROTECTION
-  /READ_CHECK           /REPLACE   /SINCE     /STYLE     /TRUNCATE  /VOLUME
-  /WRITE_CHECK
-  /FTP       /RCP
+     Creates a subprocess or a detached process to run an image and
+     deletes the process when the image completes execution (see
+     Process).
 */
 {
-	int					status;
+	char			*argv[4];
+
+	int				status;
+
+	pid_t			pid;
 
 	argument = next_argument(argument);
 
-	if (strlen(argument) == 0)
+	if ((pid = fork()) < 0)
 	{
-		/*
-		 * To few arguments
-		 */
-
-		return(DCL$SUCCESS);
+		return(DCL$FAILURE);
 	}
 
-	status = parsing(argument, commands, env, DCL$QUALIFIER, self);
+	if (pid == 0)
+	{
+		argv[0] = "sh";
+		argv[1] = "-c";
+		argv[2] = argument;
+		argv[3] = NULL;
 
-	return(status);
+		execvp("/bin/sh", argv);
+
+		/*
+		 * Child process has returned an error.
+		 */
+
+		return(DCL$FAILURE);
+	}
+	else
+	{
+		if (waitpid(pid, &status, 0) == -1)
+		{
+			return(DCL$FAILURE);
+		}
+	}
+
+	return(DCL$SUCCESS);
 }
