@@ -392,6 +392,35 @@ kdev_t chan2dev(unsigned short chan) {
 }
 
 
+static unsigned long ucbchan[256];
+
+registerucbchan(unsigned long dev,unsigned short chan) {
+  //  devchan[chan]=MAJOR(dev);
+  ucbchan[chan]=dev;
+  printk("registerucbchan dev %x at chan %x\n",devchan[chan],chan);
+  //{ int i; for(i=0;i<10000000;i++) ; }
+}
+
+int ucb2chan(unsigned long dev,  unsigned short * chan) {
+  int i;
+  //printk("dev2chan %x %x\n", dev, MAJOR(dev));
+  for (i=0;i<256;i++)
+    if (ucbchan[i]==dev) {
+      *chan=i;
+      return 1;
+    }
+  //    if (devchan[i]==MAJOR(dev)) return i;
+  return 0;
+ mypanic:
+  printk("ucb2chan failed\n");
+  for (i=0;i<4;i++)
+    printk("%x %x\n",devchan[i],dev);
+  panic("ucb2chan\n");
+}
+
+unsigned long chan2ucb(unsigned short chan) {
+  return ucbchan[chan];
+}
 
 
 void null$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
