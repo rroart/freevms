@@ -179,7 +179,11 @@ unsigned f11b_modify(struct _vcb * vcb, struct _irp * irp)
 
   if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) { iosbret(irp,SS$_WRITLCK);  return SS$_WRITLCK; }
 
-  fcb=f11b_search_fcb(vcb,fid);
+  if (fib->fib$w_fid_num == 0 && fib->fib$w_fid_seq == 0  && fib->fib$b_fid_nmx == 0) {
+    fcb=xqp->primary_fcb;
+    printk("in create dir workaround? %x\n",fcb);
+  } else
+    fcb=f11b_search_fcb(vcb,fid);
   head = f11b_read_header(vcb,fid,fcb,&iosb);
   sts=iosb.iosb$w_status;
   if (sts & 1) {
