@@ -339,7 +339,7 @@ struct _ucb * fl_init(char * s) {
 
   while(ddb) {
     if (ddb->ddb$ps_sb==0 || ddb->ddb$ps_sb==&mysb)
-      if (!bcmp(ddb->ddb$t_name,"dfa",3)) 
+      if (!bcmp(&ddb->ddb$t_name[1],"dfa",3)) 
 	goto out;
     ddb=ddb->ddb$ps_link;
   }

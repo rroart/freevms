@@ -50,10 +50,10 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
 	struct _ccb * c = &ctl$gl_ccbbase[chan];
 	struct _ucb * u = c->ccb$l_ucb;
 	struct _ddb * d = u->ucb$l_ddb;
-	memcpy(it->bufaddr, d->ddb$t_name, 3);
+	memcpy(it->bufaddr, &d->ddb$t_name[1], 3);
 	snprintf(&it->bufaddr[3],3,"%d",u->ucb$w_unit);
       } else {
-	bcopy(&d->ddb$t_name,it->bufaddr,15);
+	memcpy(it->bufaddr,&d->ddb$t_name[1],15);
       }
       break;
     case DVI$_UNIT:
@@ -127,7 +127,7 @@ asmlinkage int exe$device_scan(void *return_devnam, unsigned short int *retlen, 
   while (it->item_code) {
     switch (it->item_code) {
     case DVI$_DEVNAM:
-      bcopy(&d->ddb$t_name,it->bufaddr,15);
+      memcpy(it->bufaddr,&d->ddb$t_name[1],15);
       break;
 
     }

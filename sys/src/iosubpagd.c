@@ -87,7 +87,7 @@ int ioc$search(struct return_values *r, void * devnam) {
       goto next;
     if (sb && 0!=strncmp(&sb->sb$t_nodename[1],node,nodelen))
       goto next;
-    if (!bcmp(d->ddb$t_name,device,3/* was s->dsc$w_length*/)) {
+    if (!bcmp(&d->ddb$t_name[1],device,3/* was s->dsc$w_length*/)) {
       struct _ucb * tmp = d->ddb$l_ucb;
       char * c=device;
       char unit=c[3]-48;

@@ -100,7 +100,7 @@ void  du_startio (struct _irp * i, struct _ucb * u) {
     bzero(m,1000 /*sizeof(struct _transfer_commands)*/);
     ((struct _mscp_basic_pkt *)m)->mscp$l_cmd_ref=c->cdrp$l_rspid;
     ((struct _mscp_basic_pkt *)m)->mscp$w_unit=((struct _mscp_ucb *)u)->ucb$w_mscpunit;
-    ((struct _mscp_basic_pkt *)m)->mscp$b_caa=u->ucb$l_ddb->ddb$t_name[1]; // use this as unit type?
+    ((struct _mscp_basic_pkt *)m)->mscp$b_caa=u->ucb$l_ddb->ddb$t_name[2]; // use this as unit type?
     c->cdrp$w_cdrpsize=600; //wrong, but we do not use a bufferdescriptor
     c->cdrp$l_msg_buf=m; // ??
     c->cdrp$l_xct_len=512;

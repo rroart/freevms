@@ -26,6 +26,7 @@
 #include<ipl.h>
 #include<linux/vmalloc.h>
 #include<ttyucbdef.h>
+#include<ttyvecdef.h>
 
 void null$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb);
 void null$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb);
@@ -220,7 +221,8 @@ inline void ini_fdt_end(struct _fdt * fdt) {
 }
 
 inline void ini_dpt_name(struct _dpt * d, char * n) {
-  bcopy(n,d->dpt$t_name,strlen(n));
+  d->dpt$t_name[0]=strlen(n);
+  memcpy(&d->dpt$t_name[1],n,d->dpt$t_name[0]);
 }
 
 inline void ini_dpt_adapt(struct _dpt * d, unsigned long type) {
@@ -341,7 +343,7 @@ inline CLASS_UNIT_INIT(struct _ucb * ucb,struct _tt_port * port_vector){
   struct _tty_ucb * tty = ucb;
   struct _dpt * glob_dpt = tty$gl_dpt;
   if (tty->ucb$l_tt_class==0) { // done or not?
-    tty->ucb$l_tt_class=dpt->dpt$ps_vector;
+    tty->ucb$l_tt_class=glob_dpt->dpt$ps_vector;
     tty->ucb$l_tt_port=port_vector;
     struct _ddb * ddb = ucb->ucb$l_ddb;
     struct _tt_class * ttc=tty->ucb$l_tt_class;
@@ -364,7 +366,8 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
   bzero(u,sizeof(struct _ucb));
   bzero(idb,sizeof(struct _idb));
 
-  bcopy(sdpt,dpt->dpt$t_name,strlen(sdpt));
+  dpt->dpt$t_name[0]=strlen(sdpt);
+  memcpy(&dpt->dpt$t_name[1],sdpt,dpt->dpt$t_name[0]);
 
   /* for the ddb init part */
   //  d->ddb$ps_link=d;
@@ -372,7 +375,9 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
   ddb->ddb$b_type=DYN$C_DDB;
   ddb->ddb$l_ddt=ddt;
   ddb->ddb$ps_ucb=u;
-  bcopy(sddb,ddb->ddb$t_name,strlen(sddb));
+  ddb->ddb$t_name[0]=strlen(sddb);
+  memcpy(&ddb->ddb$t_name[1],sddb,ddb->ddb$t_name[0]);
+
 
   /* for the ucb init part */
   qhead_init(&u->ucb$l_ioqfl);

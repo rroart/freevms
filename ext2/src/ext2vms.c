@@ -457,7 +457,7 @@ unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],s
       struct dsc$descriptor dsc;
 #if 0
       if (islocal)
-	sts = phyio_init(strlen(devnam[device])+1,ucb->ucb$l_ddb->ddb$t_name,&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
+	sts = phyio_init(strlen(devnam[device])+1,u&cb->ucb$l_ddb->ddb$t_name[1],&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
 #endif
 
 #if 0

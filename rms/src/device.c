@@ -81,7 +81,7 @@ void *device_create(unsigned devsiz,void *keyval,unsigned *retsts)
     } else {
         unsigned sts;
         struct phyio_info info;
-        sts = phyio_init(devsiz + 1,dev->ucb$l_ddb->ddb$t_name,&dev->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,&info);
+        sts = phyio_init(devsiz + 1,&dev->ucb$l_ddb->ddb$t_name[1],&dev->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,&info);
         *retsts = sts;
         if (sts & 1) {
             dev->ucb$l_vcb = NULL;
@@ -106,7 +106,7 @@ int device_compare(unsigned keylen,void *keyval,void *node)
     int cmp = 0;
     int len = keylen;
     char *keynam = (char *) keyval;
-    char *devnam = devnode->ucb$l_ddb->ddb$t_name;
+    char *devnam = &devnode->ucb$l_ddb->ddb$t_name[1];
     while (len-- > 0) {
         cmp = toupper(*keynam++) - toupper(*devnam++);
         if (cmp != 0) break;

@@ -683,7 +683,7 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
     goto end;
 
   case DYN$C_DDB:
-    memcpy(devnam,b,16);
+    memcpy(devnam,b+1,16);
     b+=16;
     printk("maybe creating remote ddb %s on other node\n",devnam);
 #ifdef CONFIG_VMS
@@ -701,7 +701,7 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
     if (0==strncmp(devnam,"dfa",3)) {
       ddb=du_iodb_vmsinit(); // was file_
       du_iodb_clu_vmsinit(ddb->ddb$l_ucb);
-      ddb->ddb$t_name[1]='f';
+      ddb->ddb$t_name[2]='f';
     }
     break;
 
