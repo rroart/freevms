@@ -418,11 +418,18 @@ struct file *rms_open_exec(const char *name)
 	struct _fabdef fab = cc$rms_fab;
 	int sts;
 
+	long prev_xqp_fcb = get_xqp_prim_fcb();
+	long prev_x2p_fcb = get_x2p_prim_fcb();
+
 	fab.fab$l_fna = name;
 	fab.fab$b_fns = strlen(fab.fab$l_fna);
 	if ((sts = exe$open(&fab)) & 1) {
-	  struct _fcb * fcb=get_prim_fcb();
-	  file=fcb;
+	  long xqp_fcb = get_xqp_prim_fcb();
+	  long x2p_fcb = get_x2p_prim_fcb();
+	  if (xqp_fcb!=prev_xqp_fcb)
+	    file=xqp_fcb;
+	  else
+	    file=x2p_fcb;
 	  exe$close(&fab);
 	}
 	return file;
@@ -765,7 +772,10 @@ int rms_prepare_binprm(struct linux_binprm *bprm)
 	struct _fcb * fcb = bprm->file;
 	struct inode * inode = fcb->fcb$l_primfcb;
 
+	if (fcb->fcb$l_fill_5)
 	mode = inode->i_mode;
+	else
+	mode = 0x755;
 	/*
 	 * Check execute perms again - if the caller has CAP_DAC_OVERRIDE,
 	 * vfs_permission lets a non-executable through

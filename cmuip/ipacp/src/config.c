@@ -571,6 +571,8 @@ void CNF$Configure_ACP (void)
     fs = get_fs();
     set_fs(get_ds());
 
+    long prev_xqp_fcb = get_xqp_prim_fcb();
+    long prev_x2p_fcb = get_x2p_prim_fcb();
     if (BLISSIFNOT((RC = exe$open(CFFAB)) &&
 	    BLISSIF(RC = exe$connect(CFRAB))))
 	{
@@ -586,7 +588,13 @@ void CNF$Configure_ACP (void)
 #define RMS_WORKAROUND
 #endif
 #ifdef RMS_WORKAROUND
-    struct file * filp = get_prim_fcb();
+    struct file * filp;
+    long xqp_fcb = get_xqp_prim_fcb();
+    long x2p_fcb = get_x2p_prim_fcb();
+    if (xqp_fcb!=prev_xqp_fcb)
+      filp=xqp_fcb;
+    else
+      filp=x2p_fcb;
     int offs = 0;
     while ((offs=CFRAB->rab$w_rsz=rms_kernel_read(filp,offs,CFBUF,512))>0)
 #else
