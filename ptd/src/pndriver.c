@@ -1223,7 +1223,7 @@ int PN$STARTIO (struct _irp * i, struct _ucb * u) {
 #if 0
   .ENABLE LSB
 #endif 
-     u->ucb$l_svapte=&u->ucb$l_svapte; // check		// Initialize buffer
+     u->ucb$l_svapte=*(long *)u->ucb$l_svapte; // check		// Initialize buffer
   //  pointers
  PZ_OUT_LOOP:
   //
@@ -1294,8 +1294,8 @@ int PN$STARTIO (struct _irp * i, struct _ucb * u) {
  //
  BUFFER_CHAR:
  u = ((struct _tz_ucb *)u)->ucb$l_tz_xucb;		// Switch UCBs to PZ UCB
- if	(UCB$M_BSY&
-	 u->ucb$l_sts) goto PZ_OUT_LOOP;	// If no PZ IRP, ignore
+ if	((UCB$M_BSY&
+	 u->ucb$l_sts)==0) goto PZ_OUT_LOOP;	// If no PZ IRP, ignore
  char * c =u->ucb$l_svapte;
  *c=chr; // check	// Add character to buffer
  u->ucb$l_svapte++;	// Bump pointer
