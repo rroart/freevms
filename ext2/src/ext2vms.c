@@ -104,6 +104,7 @@ unsigned long prev_version;
 char prev_name[81];
 unsigned long block_vcb;
 unsigned long audit_arglist[16];
+unsigned long prev_fp;
 };
 
 struct __exttwo xe2ps[1]; // number of pids 
