@@ -44,6 +44,6 @@ int ioc$search(struct return_values *r, void * devnam) {
       return SS$_NORMAL;
     }
     d=d->ddb$ps_link;
-  } while (d!=ioc$gl_devlist);
+  } while (d && d!=ioc$gl_devlist);
   return SS$_NOSUCHDEV;
 }
