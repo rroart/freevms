@@ -21,19 +21,19 @@ main(){
   sys$crelnt(0,0,0,0,0,&mytabnam2,&mypartab,0);
   sys$crelnt(0,0,0,0,0,&mytabnam3,&mytabnam2,0);
 
-  i[0].item_code=1;
+  i[0].item_code=LNM$_STRING;
   i[0].buflen=5;
   i[0].bufaddr="mylog";
   bzero(&i[1],sizeof(struct item_list_3));
   status=sys$crelnm(0,&mytabnam2,&mynam,0,i);
 
-  i[0].item_code=1;
+  i[0].item_code=LNM$_STRING;
   i[0].buflen=6;
   i[0].bufaddr="mylog3";
   bzero(&i[1],sizeof(struct item_list_3));
   status=sys$crelnm(0,&mytabnam2,&mynam2,0,i);
 
-  i[0].item_code=1;
+  i[0].item_code=LNM$_STRING;
   i[0].buflen=LNM$C_NAMLENGTH;
   i[0].bufaddr=resstring;
   status=sys$trnlnm(0,&mytabnam2,&mynam,0,i);

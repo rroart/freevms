@@ -17,7 +17,7 @@ main(){
   $DESCRIPTOR(mytabnam,"MYTEST");
   $DESCRIPTOR(mypartab,"LNM$SYSTEM_DIRECTORY");
 
-  i[0].item_code=1;
+  i[0].item_code=LNM$_STRING;
   i[0].buflen=LNM$C_NAMLENGTH;
   i[0].bufaddr=resstring;
 
