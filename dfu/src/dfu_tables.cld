@@ -168,7 +168,7 @@ DEFINE VERB defrag
 	QUALIFIER lbn,LABEL=lbn,NONNEGATABLE,VALUE(REQUIRED)
 
 DEFINE VERB verify
-	ROUTINE verify_command
+	CLIROUTINE verify_command
 	PARAMETER p1,LABEL=device,PROMPT="Device",VALUE(REQUIRED)
 	QUALIFIER output,LABEL=outfile,NONNEGATABLE,VALUE(REQUIRED,TYPE=$FILE)
 	QUALIFIER lock,LABEL=lock,NONNEGATABLE
@@ -180,7 +180,7 @@ DEFINE VERB undelete
 	ROUTINE undel_command
 	PARAMETER p1,LABEL=device,PROMPT="Device",VALUE(REQUIRED)
 	QUALIFIER file,LABEL=file,NONNEGATABLE,
-		VALUE(DEFAULT=SYS$OUTPUT:",TYPE=$FILE)
+		VALUE(DEFAULT="SYS$OUTPUT:",TYPE=$FILE)
 	QUALIFIER owner,LABEL=uic,NONNEGATABLE,VALUE(REQUIRED,TYPE=$UIC)
 	QUALIFIER ident,LABEL=ident,NONNEGATABLE,VALUE(REQUIRED)
 	QUALIFIER list,LABEL=list,NONNEGATABLE,VALUE(TYPE=$FILE,DEFAULT="SYS$OUTPUT")
@@ -241,17 +241,17 @@ DEFINE VERB directory
 	QUALIFIER truncate,LABEL=truncate,VALUE(TYPE=$NUMBER,DEFAULT=0)
 	QUALIFIER fill_factor,LABEL=ratio,VALUE(REQUIRED,TYPE=$NUMBER)
 	QUALIFIER version,LABEL=version,VALUE(REQUIRED,TYPE=$NUMBER)
-	disallow test and not compress
+	disallow test and (not compress)
 	disallow any2(dump,compress,version,create)
 	disallow any2(dump,compress,alias,create)
 	disallow any2(dump,compress,empty,create)
 	disallow any2(dump,compress,check,create)
-	disallow allocate and not create
-	disallow truncate and not compress
-	disallow ratio and not compress
+	disallow allocate and (not create)
+	disallow truncate and (not compress)
+	disallow ratio and (not compress)
         disallow alias and device
 	disallow version and device
         disallow empty and device
 	disallow check and device
-	disallow repair and not check
+	disallow repair and (not check)
 	disallow create and device
