@@ -41,12 +41,12 @@
 #include <linux/completion.h>
 #include <linux/prefetch.h>
 #include <linux/compiler.h>
-
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 #include <sysgen.h>
 #include <ipldef.h>
 #include <ipl.h>
+#include <statedef.h>
 #include <queue.h>
 #include<system_service_setup.h>
 #ifdef __arch_um__
@@ -342,6 +342,7 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
 
   spin_lock_irqsave(&runqueue_lock, flags);
   p->state = TASK_RUNNING;
+  p->pcb$w_state = SCH$C_CUR;
   if (task_on_comqueue(p)) /*  argh! */
     goto out;
 
@@ -417,6 +418,7 @@ static inline int try_to_wake_up2(struct task_struct * p, int synchronous, int p
 
   spin_lock_irqsave(&runqueue_lock, flags);
   p->state = TASK_RUNNING;
+  p->pcb$w_state = SCH$C_CUR;
   if (task_on_comqueue(p)) /*  argh! */
     goto out;
 
@@ -507,6 +509,7 @@ signed long schedule_timeout(signed long timeout)
 			       "value %lx from %p\n", timeout,
 			       __builtin_return_address(0));
 			current->state = TASK_RUNNING;
+			current->pcb$w_state = SCH$C_CUR;
 			goto out;
 		}
 	}
@@ -648,8 +651,10 @@ asmlinkage void sch$resched(void) {
     sch$gl_active_priority=sch$gl_active_priority & (~ (1 << (31-curpri)));
 
   if (curpcb->state==TASK_INTERRUPTIBLE)
-    if (signal_pending(curpcb))
+    if (signal_pending(curpcb)) {
       curpcb->state = TASK_RUNNING;
+      curpcb->pcb$w_state = SCH$C_CUR;
+    }
 
   //  if (curpcb->pid>0 && curpcb->state==TASK_RUNNING) {
   // Need pid 0 in the queue, this is more a linux thingie
@@ -797,6 +802,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   /* And no capabilities yet */
   cpu->cpu$l_curpcb=next;
   next->state=TASK_RUNNING;
+  next->pcb$w_state = SCH$C_CUR;
   next->pcb$l_cpu_id=cpu->cpu$l_phy_cpuid;
 
   if (next->pcb$b_pri<next->pcb$b_prib) next->pcb$b_pri++;
@@ -992,6 +998,7 @@ void wait_for_completion(struct completion *x)
 		__add_wait_queue_tail(&x->wait, &wait);
 		do {
 			__set_current_state(TASK_UNINTERRUPTIBLE);
+			current->pcb$w_state = 0;
 			spin_unlock_irq(&x->wait.lock);
 			schedule();
 			spin_lock_irq(&x->wait.lock);
@@ -1042,6 +1049,8 @@ void wait_for_completion2(struct completion *x)
 		__add_wait_queue_tail(&x->wait, &wait);
 		do {
 			__set_current_state(TASK_UNINTERRUPTIBLE);
+			current->pcb$w_state = 0;
+
 			spin_unlock_irq(&x->wait.lock);
 			schedule();
 			spin_lock_irq(&x->wait.lock);
@@ -1072,6 +1081,7 @@ void interruptible_sleep_on(wait_queue_head_t *q)
 	SLEEP_ON_VAR
 
 	current->state = TASK_INTERRUPTIBLE;
+	current->pcb$w_state = 0;
 
 	SLEEP_ON_HEAD
 	schedule();
@@ -1083,6 +1093,7 @@ long interruptible_sleep_on_timeout(wait_queue_head_t *q, long timeout)
 	SLEEP_ON_VAR
 
 	current->state = TASK_INTERRUPTIBLE;
+	current->pcb$w_state = 0;
 
 	SLEEP_ON_HEAD
 	timeout = schedule_timeout(timeout);
@@ -1096,6 +1107,7 @@ void sleep_on(wait_queue_head_t *q)
 	SLEEP_ON_VAR
 	
 	current->state = TASK_UNINTERRUPTIBLE;
+	current->pcb$w_state = 0;
 
 	SLEEP_ON_HEAD
 	schedule();
@@ -1107,6 +1119,7 @@ long sleep_on_timeout(wait_queue_head_t *q, long timeout)
 	SLEEP_ON_VAR
 	
 	current->state = TASK_UNINTERRUPTIBLE;
+	current->pcb$w_state = 0;
 
 	SLEEP_ON_HEAD
 	timeout = schedule_timeout(timeout);
