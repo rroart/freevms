@@ -29,6 +29,7 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
 
   struct _ddb * d;
   struct item_list_3 * it=itmlst;
+  struct _ucb * u = 0;
 
   exe$clref(efn);
   // check and do with iosb
@@ -36,6 +37,16 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
   // check chan no?
   // then check devnam
 
+  if (chan==0 && devnam!=0) {
+    struct return_values r,r2;
+    int status=ioc$search(&r,devnam);
+    if (status==SS$_NORMAL)
+      u=r.val1;
+  }
+  if (chan!=0) {
+    struct _ccb * c = &ctl$gl_ccbbase[chan];
+    u = c->ccb$l_ucb;
+  }
 
   // check itemcode with dvsdef defs
   if (contxt)
@@ -45,10 +56,9 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
   // sch$iolockr
   while (it->item_code) {
     switch (it->item_code) {
+    case DVI$_FULLDEVNAM:
     case DVI$_DEVNAM:
-      if (chan) {
-	struct _ccb * c = &ctl$gl_ccbbase[chan];
-	struct _ucb * u = c->ccb$l_ucb;
+      if (chan!=0 || u!=0 ) {
 	struct _ddb * d = u->ucb$l_ddb;
 	memcpy(it->bufaddr, &d->ddb$t_name[1], 3);
 	snprintf(&it->bufaddr[3],3,"%d",u->ucb$w_unit);
@@ -57,28 +67,48 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
       }
       break;
     case DVI$_UNIT:
-      if (chan) {
-	struct _ccb * c = &ctl$gl_ccbbase[chan];
-	struct _ucb * u = c->ccb$l_ucb;
-	struct _ddb * d = u->ucb$l_ddb;
-	memcpy(it->bufaddr, &u->ucb$w_unit, 2);
-      }
+      memcpy(it->bufaddr, &u->ucb$w_unit, 2);
       break;
     case DVI$_PID:
-      if (chan) {
-	struct _ccb * c = &ctl$gl_ccbbase[chan];
-	struct _ucb * u = c->ccb$l_ucb;
-	struct _ddb * d = u->ucb$l_ddb;
-	memcpy(it->bufaddr, &u->ucb$l_pid, 4);
-      }
+      memcpy(it->bufaddr, &u->ucb$l_pid, 4);
       break;
     case DVI$_OWNUIC:
-      if (chan) {
-	struct _ccb * c = &ctl$gl_ccbbase[chan];
-	struct _ucb * u = c->ccb$l_ucb;
-	struct _ddb * d = u->ucb$l_ddb;
+      {
 	int i=0;
 	memcpy(it->bufaddr, &i, 4); // implement later
+      }
+      break;
+    case DVI$_NEXTDEVNAM:
+    case DVI$_ROOTDEVNAM:
+    case DVI$_VOLCOUNT:
+    case DVI$_VOLNUMBER:
+      {
+	int i=0;
+	memcpy(it->bufaddr, &i, 4); // implement later
+      }
+      break;
+    case DVI$_DEVCLASS:
+      {
+	int * i = it->bufaddr;
+	*i=u->ucb$b_devclass;
+      }
+      break;
+    case DVI$_DEVCHAR:
+      {
+	int * i = it->bufaddr;
+	*i=u->ucb$l_devchar;
+      }
+      break;
+    case DVI$_MAXBLOCK:
+      {
+	int * i = it->bufaddr;
+	*i=((struct _dt_ucb *)u)->ucb$l_maxblock;
+      }
+      break;
+    case DVI$_DEVTYPE:
+      {
+	int * i = it->bufaddr;
+	*i=u->ucb$b_devtype;
       }
       break;
     default:
@@ -87,6 +117,9 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
     }
     it++;
   }
+
+  if (iosb)
+    iosb->iosb$w_status=SS$_NORMAL;
 
   contxt=d->ddb$l_link;
   if (contxt==0) 
