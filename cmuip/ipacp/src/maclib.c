@@ -1709,6 +1709,7 @@ int cq_enqueue(CQ,SRC,SCOUNT)
 	if	(R6<=SCOUNT)		// Does he want all we have till end?
 	goto	l10;			// Yes - need two moves, then
 	MOVC3	(SCOUNT,SRC,R7->CQ$ENQP); // Do the move
+	R3 = (long)R7->CQ$ENQP + SCOUNT;
 	R7->CQ$ENQP = R3;		// Update the queue pointer
 	R7->CQ$COUNT+=SCOUNT; // And update the count
 	return R0;
@@ -1751,6 +1752,7 @@ l20:
 	return R0;
 l10:					// Here on pointer-wrap case
 	MOVC3	(R6,R7->CQ$DEQP,DEST); // Move till end of queue
+	R3 = (long)DEST+R6;
 	R1 = R7->CQ$BASE;		// Reset pointer to start of queue
 	R6 = DCOUNT - R6;// Compute count we need from Q base
 	if (R6<=0) goto	l20;			// Have anything left?
