@@ -1,4 +1,4 @@
-VMSSUBDIRS = cld cdu starlet librtl cliutl backup dir init login dcl edt dfu
+VMSSUBDIRS = starlet librtl cld cdu cliutl backup dir init login dcl edt dfu
 VMSSUBDIRSINST = cld cliutl dir dcl login init edt dfu
 VMSSUBDIRS2 = examples
 
