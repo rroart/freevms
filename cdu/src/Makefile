@@ -18,7 +18,7 @@ install: all
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
 cdu: parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o
-	gcc parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o -ldl -liberty -o cdu
+	gcc  -g -static parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o -ldl -liberty $(VMSLIBS) -o cdu
 
 cdu2.a: cli2.o
 	ar r cdu2.a cli2.o
