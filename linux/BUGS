@@ -4,3 +4,10 @@ smp is probably broken.
 highmem too.
 
 bochs and uml works only partially, i.e. qio1 has problems.
+
+GCC:
+Due to use of anynymous structures a more recent gcc is needed.
+Redhat 7.2 with gcc "2.96" works. There are anonymous structure offset bugs
+that has been coded around.
+Redhat 8.0 with gcc 3.2 (RedHat patched) works. The anonymous structure offset
+bugs present in pure gcc 3.0.1 was gone in pure 3.1.
