@@ -4,7 +4,7 @@ login.o: login.c
 	gcc -g -c login.c
 
 loginout: login.o 
-	gcc -g -o $@ $^
+	gcc -g -static -o $@ $^
 
 install: all
 	cp -p loginout ../../rootum/vms"$$"common/sysexe
