@@ -525,4 +525,24 @@ malloc_not(size)
   return kmalloc(size,GFP_KERNEL);
 }
 
+inline EXE$READCHK() {
+  //printk("exe$readchk not impl\n");
+}
+
+inline EXE$WRITECHK() {
+  //printk("exe$writechk not impl\n");
+}
+
+inline EXE$DEBIT_BYTCNT_ALO() {
+  printk("EXE$DEBIT_BYTCNT_ALO not impl\n");
+}
+
+inline DEVICELOCK(){
+  printk("DEVICELOCK not impl\n");
+}
+
+inline DEVICEUNLOCK(){
+  printk("DEVICEUNLOCK not impl\n");
+}
+
 #include "libasnmbx.c"
