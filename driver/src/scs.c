@@ -57,6 +57,7 @@
 #include <system_data_cells.h>
 #include <ucbdef.h>
 #include <vcdef.h>
+#include <xmdef.h>
 
 #include "../../cmuip/ipacp/src/xedrv.h"
 
@@ -90,7 +91,214 @@ void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgf
 struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri);
 static inline void scs_rt_finish_output2(struct sk_buff *skb, char *dst);
 
+#ifdef CONFIG_VMS
 
+struct  scs_interface_structure
+{
+  void *     sei$dev_config		;
+  unsigned long     sei$io_chan			;
+  unsigned long     sei$arp_io_chan		;
+  void *     sei$rcvhdrs			;
+  void *     sei$recv_qhead		;
+  void *     sei$recv_qtail		;
+  void *     sei$arp_buffer		;
+  void *     sei$arp_block		;
+  unsigned short     sei$phy_size		;
+  unsigned char     sei$phy_addr		[6];
+  unsigned long     sei$restart_time		;
+  unsigned short     sei$restart_count		;
+  unsigned short     sei$retry_count		;
+  unsigned short     sei$max_retry		;
+  unsigned short     sei$mpbs			;
+  unsigned short     sei$curhdr			;
+  union {
+    unsigned short     sei$flags			;
+    struct {
+      unsigned 	sei$need_2_free	 : 1;	// XEshutdown buf free pending
+      unsigned 	sei$io_queued	 : 1;	// XE I/O has been started
+      unsigned 	sei$xe_decnet	 : 1;	// XE DECNET address seen
+      unsigned 	sei$xe_started	 : 1;// XE started at least once
+    };
+  };
+} scs_int_, * scs_int = &scs_int_;
+
+void skb_over_panic(struct sk_buff *skb, int sz, void *here)
+{
+	printk("skput:over: %p:%d put:%d dev:%s", 
+		here, skb->len, sz, skb->dev ? skb->dev->name : "<NULL>");
+	BUG();
+}
+
+void skb_under_panic(struct sk_buff *skb, int sz, void *here)
+{
+        printk("skput:under: %p:%d put:%d dev:%s",
+                here, skb->len, sz, skb->dev ? skb->dev->name : "<NULL>");
+	BUG();
+}
+
+static __inline__ struct sk_buff *skb_head_from_pool(void)
+{
+	return NULL;
+}
+
+static __inline__ void skb_head_to_pool(struct sk_buff *skb)
+{
+  kfree(skb);
+}
+void __kfree_skb(struct sk_buff *skb)
+{
+	if (skb->list) {
+	 	printk(KERN_WARNING "Warning: kfree_skb passed an skb still "
+		       "on a list (from %p).\n", NET_CALLER(skb));
+		BUG();
+	}
+
+	//dst_release(skb->dst);
+	if(skb->destructor) {
+		if (in_irq()) {
+			printk(KERN_WARNING "Warning: kfree_skb on hard IRQ %p\n",
+				NET_CALLER(skb));
+		}
+		skb->destructor(skb);
+	}
+#ifdef CONFIG_NETFILTER
+	nf_conntrack_put(skb->nfct);
+#endif
+	skb_headerinit(skb, NULL, 0);  /* clean state */
+	kfree_skbmem(skb);
+}
+
+struct sk_buff *alloc_skb(unsigned int size,int gfp_mask)
+{
+	struct sk_buff *skb;
+	u8 *data;
+
+	//if (in_interrupt() && (gfp_mask & __GFP_WAIT)) {
+	if (0 && (gfp_mask & __GFP_WAIT)) {
+		static int count = 0;
+		if (++count < 5) {
+			printk(KERN_ERR "alloc_skb called nonatomically "
+			       "from interrupt %p\n", NET_CALLER(size));
+ 			BUG();
+		}
+		gfp_mask &= ~__GFP_WAIT;
+	}
+
+	/* Get the HEAD */
+	skb = skb_head_from_pool();
+	if (skb == NULL) {
+	  //		skb = kmem_cache_alloc(skbuff_head_cache, gfp_mask & ~__GFP_DMA);
+	  skb = kmalloc(sizeof(struct sk_buff), GFP_KERNEL);
+		if (skb == NULL)
+			goto nohead;
+	}
+
+	/* Get the DATA. Size must match skb_add_mtu(). */
+	size = SKB_DATA_ALIGN(size);
+	data = kmalloc(size + sizeof(struct skb_shared_info), gfp_mask);
+	if (data == NULL)
+		goto nodata;
+
+	/* XXX: does not include slab overhead */ 
+	skb->truesize = size + sizeof(struct sk_buff);
+
+	/* Load the data pointers. */
+	skb->head = data;
+	skb->data = data;
+	skb->tail = data;
+	skb->end = data + size;
+
+	/* Set up other state */
+	skb->len = 0;
+	skb->cloned = 0;
+	skb->data_len = 0;
+
+	atomic_set(&skb->users, 1); 
+	atomic_set(&(skb_shinfo(skb)->dataref), 1);
+	skb_shinfo(skb)->nr_frags = 0;
+	skb_shinfo(skb)->frag_list = NULL;
+	return skb;
+
+nodata:
+	skb_head_to_pool(skb);
+nohead:
+	return NULL;
+}
+
+/*
+ *	Slab constructor for a skb head. 
+ */ 
+static inline void skb_headerinit(void *p, kmem_cache_t *cache, 
+				  unsigned long flags)
+{
+	struct sk_buff *skb = p;
+
+	skb->next = NULL;
+	skb->prev = NULL;
+	skb->list = NULL;
+	skb->sk = NULL;
+	skb->stamp.tv_sec=0;	/* No idea about time */
+	skb->dev = NULL;
+	skb->dst = NULL;
+	memset(skb->cb, 0, sizeof(skb->cb));
+	skb->pkt_type = PACKET_HOST;	/* Default type */
+	skb->ip_summed = 0;
+	skb->priority = 0;
+	skb->security = 0;	/* By default packets are insecure */
+	skb->destructor = NULL;
+
+#ifdef CONFIG_NETFILTER
+	skb->nfmark = skb->nfcache = 0;
+	skb->nfct = NULL;
+#ifdef CONFIG_NETFILTER_DEBUG
+	skb->nf_debug = 0;
+#endif
+#endif
+#ifdef CONFIG_NET_SCHED
+	skb->tc_index = 0;
+#endif
+}
+
+/*
+ *	Free an skbuff by memory without cleaning the state. 
+ */
+void kfree_skbmem(struct sk_buff *skb)
+{
+	skb_release_data(skb);
+	skb_head_to_pool(skb);
+}
+
+static void skb_release_data(struct sk_buff *skb)
+{
+	if (!skb->cloned ||
+	    atomic_dec_and_test(&(skb_shinfo(skb)->dataref))) {
+		if (skb_shinfo(skb)->nr_frags) {
+			int i;
+			for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
+				put_page(skb_shinfo(skb)->frags[i].page);
+		}
+
+		if (skb_shinfo(skb)->frag_list)
+			skb_drop_fraglist(skb);
+
+		kfree(skb->head);
+	}
+}
+
+static void skb_drop_fraglist(struct sk_buff *skb)
+{
+	struct sk_buff *list = skb_shinfo(skb)->frag_list;
+
+	skb_shinfo(skb)->frag_list = NULL;
+
+	do {
+		struct sk_buff *this = list;
+		list = list->next;
+		kfree_skb(this);
+	} while (list);
+}
+
+#endif
 
 int is_cluster_on() {
   return mypb.pb$w_state==PB$C_OPEN;
@@ -100,6 +308,8 @@ inline void scs_nsp_send2(struct sk_buff *skb)
 {
   unsigned short int *pktlen;
 #ifndef CONFIG_VMS
+  pktlen = (unsigned short *)skb_push(skb,2);
+#else
   pktlen = (unsigned short *)skb_push(skb,2);
 #endif
   *pktlen = htons(skb->len - 2);
@@ -118,15 +328,24 @@ static inline void scs_rt_finish_output2(struct sk_buff *skb, char *dst)
 {
   struct net_device *dev = skb->dev;
 
+#ifndef CONFIG_VMS
   if ((dev->type != ARPHRD_ETHER) && (dev->type != ARPHRD_LOOPBACK))
     dst = NULL;
 
-#ifndef CONFIG_VMS
   if (!dev->hard_header || (dev->hard_header(skb, dev, ETH_P_MYSCS,
 					     dst, NULL, skb->len) >= 0))
     dev_queue_xmit(skb);
   else
     kfree_skb(skb);
+#else
+  struct XE_iosb_structure IOS_, * IOS = &IOS_; 
+  int sts = exe$qiow(4,	scs_int->sei$io_chan,
+		     IO$_WRITEVBLK,
+		     IOS, 0, 0,
+		     skb->data,
+		     skb->len, 0, 0,
+		     dst, 0);
+
 #endif
 }
 
@@ -161,6 +380,9 @@ static void scs_send_endnode_hello(struct net_device *dev)
 #ifndef CONFIG_VMS
 	msg = skb_put(skb,sizeof(*nisca));
 	skb_put(skb,16);
+#else
+	msg = skb_put(skb,sizeof(*nisca));
+	skb_put(skb,16);
 #endif
 
         intro = msg;
@@ -185,6 +407,8 @@ static void scs_send_endnode_hello(struct net_device *dev)
 	}
 
 #ifndef CONFIG_VMS
+	pktlen = (unsigned short *)skb_push(skb,2);
+#else
 	pktlen = (unsigned short *)skb_push(skb,2);
 #endif
         *pktlen = htons(skb->len - 2);
@@ -218,6 +442,8 @@ static void scs_dev_timer_func(unsigned long arg)
   scs_dev_set_timer(dev);
 }
 
+static timer_done=0;
+
 static void scs_dev_set_timer()
 {
   struct timer_list * timer=kmalloc(sizeof(struct timer_list),GFP_KERNEL);
@@ -229,10 +455,21 @@ static void scs_dev_set_timer()
 
 #ifndef CONFIG_VMS
   add_timer(timer);
+#else
+  //  add_timer(timer);
+  // fix regular timing later
+  signed long long time=-100000000;
+  if (!timer_done)
+    exe$setimr (0, &time ,scs_dev_timer_func,scs_default_device,0);
+  timer_done=1;
 #endif
 }
 
+#ifndef CONFIG_VMS
 void __init scs_dev_init(void)
+#else
+void __init scs_dev_init(void)
+#endif
 {
   scs_dev_set_timer();
 }
@@ -253,9 +490,13 @@ extern int startconnect(int);
 
 int scs_neigh_endnode_hello(struct sk_buff *skb)
 {
+#ifndef CONFIG_VMS
 	struct _nisca *msg = skb->data;
 
 	msg=getcc(msg);
+#else
+	struct _nisca *msg = (long)getcc(msg)-14;
+#endif
 
  	if (0==strncmp("NODNAM",&msg->nisca$t_nodename[1],6))
 	  return 1;
@@ -267,7 +508,7 @@ int scs_neigh_endnode_hello(struct sk_buff *skb)
 	  first_hello++;
 	  printk("scs received hello from node %s\n",&msg->nisca$t_nodename[1]);
 	  {
-	    signed long long time=-100000000;
+	    signed long long time=-1000000000;
 	    //	    $DESCRIPTOR(tensec,"0 00:00:10.00");
 	    //exe$bintim(&tensec,&time);
 	    //time=-time;
@@ -283,6 +524,8 @@ int scs_neigh_endnode_hello(struct sk_buff *skb)
 	memcpy(&othersb.sb$t_nodename,&msg->nisca$t_nodename,8);
 
 #ifndef CONFIG_VMS
+	kfree_skb(skb);
+#else
 	kfree_skb(skb);
 #endif
 	return 0;
@@ -312,6 +555,9 @@ struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri)
 #ifndef CONFIG_VMS
 	if ((skb = alloc_skb(size + hdr, pri)) == NULL)
 		return NULL;
+#else
+	if ((skb = alloc_skb(size + hdr, pri)) == NULL)
+		return NULL;
 #endif
 
 	skb->protocol = __constant_htons(ETH_P_MYSCS);
@@ -321,6 +567,8 @@ struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri)
 	//	skb_set_owner_w(skb, sk);
 
 #ifndef CONFIG_VMS
+	skb_reserve(skb, hdr);
+#else
 	skb_reserve(skb, hdr);
 #endif
 
@@ -369,6 +617,8 @@ void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgf
 	struct _nisca *dx;
 	void * data;
 #ifndef CONFIG_VMS
+	data = skb_put(skb,sizeof(*nisca));
+#else
 	data = skb_put(skb,sizeof(*nisca));
 #endif
 	scs_fill_dx(data,0xab00,0x04010000,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1]);
@@ -422,6 +672,8 @@ void scs_msg_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg, 
 	void * data;
 #ifndef CONFIG_VMS
 	data = skb_put(skb,sizeof(*nisca));
+#else
+	data = skb_put(skb,sizeof(*nisca));
 #endif
 	scs_fill_dx(data,0xab00,0x04010000,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1]);
 	nisca=gettr(data);
@@ -448,12 +700,16 @@ void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdr
 	void * data;
 #ifndef CONFIG_VMS
 	data = skb_put(skb,sizeof(*nisca));
+#else
+	data = skb_put(skb,sizeof(*nisca));
 #endif
 	data = skb->data;
 	ppd=getppdscs(data);
 	scs=getppdscs(data);
 
 #ifndef CONFIG_VMS
+	data = skb_put(skb,sizeof(*scs));
+#else
 	data = skb_put(skb,sizeof(*scs));
 #endif
 	data = (unsigned long)scs + sizeof(*scs);
@@ -466,6 +722,8 @@ void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdr
 
 #ifndef CONFIG_VMS
 	data=skb_put(skb,bufsiz);
+#else
+	data=skb_put(skb,bufsiz);
 #endif
 }
 
@@ -475,12 +733,22 @@ int opc_msgrec(struct sk_buff *skb) {
   struct _cdt *cb;
   struct _cdt *cdt;
   unsigned char flags = 0;
+#ifndef CONFIG_VMS 
   __u16 len = ntohs(*(__u16 *)skb->data);
+#endif
   unsigned char padlen = 0;
+#ifndef CONFIG_VMS
   struct _scs * msg=skb->data;
+#else
+  struct _scs * msg=skb;
+#endif
   struct _scs * scs;
   struct _sbnb * sbnb;
+#ifndef CONFIG_VMS
   scs=getppdscs(msg);
+#else
+  scs=(long)getppdscs(msg)-14;
+#endif
   
   if (scs->scs$w_mtype) { // if other than con_req
     cdt=&cdtl[scs->scs$l_dst_conid];
@@ -556,7 +824,11 @@ int opc_msgrec(struct sk_buff *skb) {
 //int nisca_snt_dg (struct sk_buff * skb, void * addr) 
 int nisca_snt_dg (struct sk_buff * skb) { 
   //  return do_opc_dispatch(skb);
+#ifndef CONFIG_VMS
   void * addr = getppdscs(skb->data);
+#else
+  void * addr = (long)getppdscs(skb)-14;
+#endif
   struct _scs * scs = addr;
   struct _cdt * cdt = &cdtl[scs->scs$l_dst_conid];
   // shortcut
@@ -600,6 +872,8 @@ int nisca_snt_dg (struct sk_buff * skb) {
   }
 #endif
 #ifndef CONFIG_VMS
+  kfree_skb(skb);
+#else
   kfree_skb(skb);
 #endif
 }
@@ -946,7 +1220,9 @@ int do_opc_dispatch(struct sk_buff *skb)
 }
 
 #ifdef CONFIG_VMS
-scs_startdev ( XE_Int , setflag , setaddr)
+extern signed long XE_BROADCAST[];
+
+scs_startdev ( scs_int2 , setflag , setaddr)
 
 // This routine initializes the ethernet device to receive SCS packets.
 // Issue start command to the controller.
@@ -958,9 +1234,8 @@ scs_startdev ( XE_Int , setflag , setaddr)
 //   0 (false) on failure, device not started
 //  -1 (true) on success, device ready, reads queued
 
-	struct XE_Interface_Structure * XE_Int;
+	struct scs_interface_structure * scs_int2;
     {
-#if 0
     signed long
 	RC,
 	plen;
@@ -970,7 +1245,8 @@ scs_startdev ( XE_Int , setflag , setaddr)
 
 	bzero(Setup,sizeof(struct XE_setup_structure));
 
-	XE_Int = 0;
+	scs_int->sei$rcvhdrs = kmalloc(4*16, GFP_KERNEL);
+	qhead_init(& scs_int->sei$recv_qhead );
 
 // Build the nasty setup block required by the ethernet device
 
@@ -994,10 +1270,7 @@ scs_startdev ( XE_Int , setflag , setaddr)
     Setup ->XE$c_pcli_mca     = NMA$C_PCLI_MCA;
     Setup ->XE$w_mca_length   = 2 + XE_ADR_SIZE;
     Setup ->xe$w_mca_mode     = NMA$C_LINMC_CLR;
-#if 0
-    // not yet?
     CH$MOVE (XE_ADR_SIZE, XE_BROADCAST, Setup ->XE$L_mca_address);
-#endif
 
 // If he wants us to set the physical address, then do so.
 
@@ -1023,7 +1296,7 @@ scs_startdev ( XE_Int , setflag , setaddr)
     $DESCRIPTOR(dev_desc, mysb.sb$t_hwtype);
 
     // Assign Ethernet Controller
-    if (! (RC=exe$assign (&dev_desc, &scs_chan, 0, 0, 0)))
+    if (! (RC=exe$assign (&dev_desc, &scs_int->sei$io_chan, 0, 0, 0)))
          // Ethernet controller assign failed
 	{
 	printk("SCS $ASSIGN failure (dev=%s), EC = %x\n",
@@ -1033,7 +1306,7 @@ scs_startdev ( XE_Int , setflag , setaddr)
 
 // Issue the startup command to controller
 
-    RC = exe$qiow (1, scs_chan,
+    RC = exe$qiow (1, scs_int->sei$io_chan,
 		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr);
     if (!( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
 	{
@@ -1046,10 +1319,253 @@ scs_startdev ( XE_Int , setflag , setaddr)
 	return 0;
 	};
 
+    scs_startio(0);
+
 // Everything OK - return TRUE value
 
     return -1;
+    }
+
+struct scs_rcv_qb_structure
+{
+  void *     scs_rcv$next		;
+  void *     scs_rcv$last		;
+  unsigned short int     scs_rcv$vms_code	;
+  unsigned short int     scs_rcv$tran_size	;
+  unsigned short     scs_rcv$cmd_status	;
+  unsigned char     scs_rcv$error_summary	;
+  unsigned char     scs_rcv$iosb_unused2	;
+  unsigned char     scs_rcv$data		;
+};
+
+#define DRV$MAX_PHYSICAL_BUFSIZE 1400
+#define     MAX_RCV_BUF   8
+
+void scs_receive ( int i);
+
+scs_startio ( int dummy )
+{
+  signed long i, sts;
+  struct scs_rcv_qb_structure * buff;
+  struct xe_arp_structure * ARbuf;
+  struct XERCV_structure * rcvhdrs = scs_int->sei$rcvhdrs ;
+  short XE_chan = scs_int->sei$io_chan;
+  short XAR_chan = scs_int->sei$arp_io_chan;
+
+  scs_int->sei$curhdr = 0;
+  for (i=0;i<=(MAX_RCV_BUF-1);i++)
+    {	// Get buffer, put on Q and issue IO$_READVBLK function
+      buff = kmalloc(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len),GFP_KERNEL);
+      INSQUE ( buff , scs_int-> sei$recv_qtail  );
+      buff = buff + XE_hdr_offset;
+      sts = sys$qio(2,scs_int->sei$io_chan,IO$_READVBLK,0,&buff->scs_rcv$vms_code,
+		   scs_receive,  scs_int,
+		   &buff->scs_rcv$data,
+		   DRV$MAX_PHYSICAL_BUFSIZE,
+		   0, 0,
+		   rcvhdrs[i].XERCV$buf,0);
+    }
+      return -1;
+}
+
+void scs_receive ( int i)
+{
+  struct scs_rcv_qb_structure * Rbuf;
+  struct scs_rcv_qb_structure * NRbuf;
+  //  Device_Configuration_Entry * dev_config;
+  signed long
+    rcvix,
+    RC,
+    IRC,
+    Error_Flag  = 0;
+
+  struct XERCV_structure * rcvhdrs = scs_int->sei$rcvhdrs ;
+
+  // Get first input packet off of the queue
+  //!!HACK!!// What if the first packet wasn't the one which $QIO returned?
+  // not yet REMQUE(scs_int->sei$recv_qhead,&Rbuf);
+  struct scs_rcv_qb_structure * head=&scs_int->sei$recv_qhead, *tmp=head->scs_rcv$next;
+  while (tmp!=head) {
+    if (tmp->scs_rcv$vms_code)
+      break;
+    tmp=tmp->scs_rcv$next;
+  }
+  REMQUE(tmp,&Rbuf);
+  Rbuf = Rbuf + XE_hdr_offset;
+  rcvix = scs_int->sei$curhdr;
+
+  if ((RC = Rbuf->scs_rcv$vms_code) != SS$_NORMAL)
+    {
+      //	Error_Flag = 1;
+      switch (Rbuf->scs_rcv$vms_code)
+	{
+	case SS$_ABORT:
+#if 0
+	  DRV$OPR_FAO("SCS abort, cmd_status=!XW, error_summary=!XB",
+		      Rbuf->scs_rcv$cmd_status,Rbuf->scs_rcv$error_summary);
+#endif
+	  break;
+
+	case SS$_DATAOVERUN: case SS$_TIMEOUT:
+	  {
+#if 0
+	    DRV$OPR_FAO("SCS read error (timeout/overrun), RC=!XL",RC);
+	    DRV$OPR_FAO("DEBUG - bytes received=!XL",Rbuf->scs_rcv$tran_size);
+#endif
+	  };
+	  break;
+
+	default :
+#if 0
+	  DRV$OPR_FAO("SCS: VMS Error, cmd_status=!XW, error_summary=!XB",
+		      Rbuf->scs_rcv$cmd_status,Rbuf->scs_rcv$error_summary);
+#endif
+	}
+    };
+
+  //Ignore the timeout bit for DEQNA's
+  if ((Rbuf->scs_rcv$cmd_status  & 0x0FF00) != XM$M_STS_ACTIVE)
+    {
+      Error_Flag = 1;
+      // Error from board
+#if 0
+      DRV$OPR_FAO("SCS status error.  Status = !XL",
+		  Rbuf->scs_rcv$cmd_status & 0x0FF00);
+#endif
+    };
+
+  if (Error_Flag)
+    {
+      if (scs_int->sei$retry_count >= scs_int->sei$max_retry)
+#if 0
+	XE$ERR(scs_int,"SCS retried !ZB times.",scs_int->sei$retry_count);
+#else
+      { } 
+#endif
+      else
+	{
+	  // Stuff this packet back on the queue for deallocation
+	  Rbuf = Rbuf - XE_hdr_offset;
+	  INSQUE(Rbuf, scs_int->sei$recv_qtail);
+	  scs_int->sei$retry_count = scs_int->sei$retry_count+1;
+	  return;
+	}
+    }
+  else
+    scs_int->sei$retry_count = 0;
+
+  // Get another buffer and put it on the receive Q for this device
+
+  scs_int->sei$curhdr = scs_int->sei$curhdr+1;
+  if (scs_int->sei$curhdr > (MAX_RCV_BUF-1))
+    scs_int->sei$curhdr = 0;
+
+  NRbuf = kmalloc(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len), GFP_KERNEL);
+  INSQUE(NRbuf,scs_int->sei$recv_qtail);
+  NRbuf = NRbuf + XE_hdr_offset;
+  RC = sys$qio(2,scs_int->sei$io_chan,
+	       IO$_READVBLK,
+	       &NRbuf->scs_rcv$vms_code, scs_receive, scs_int,
+	       &NRbuf->scs_rcv$data,
+	       DRV$MAX_PHYSICAL_BUFSIZE,
+	       0,0,
+	       rcvhdrs[scs_int->sei$curhdr].XERCV$buf,0);
+
+  // Check for recoverable error. This hack is necessary because the DEQNA
+  // is known to get wedged, and the driver gives back SS$_DEVINACT when this
+  // happens.
+
+  if (BLISSIFNOT(RC))
+    {
+      if (RC == SS$_DEVINACT)
+	{
+	  // Stuff the packet back on the queue for deallocation
+	  Rbuf = Rbuf - XE_hdr_offset;
+	  INSQUE(Rbuf, scs_int->sei$recv_qtail);
+#if 0
+	  XE$ERR(scs_int,"SCS $QIO read error (dev_inact), RC=!XL",RC);
+#endif
+	}
+#if 0
+      else
+	DRV$FATAL_FAO("Ethernet $QIO queue read error, EC = !XL",RC);
 #endif
     }
+  else
+    {
+
+      char * buf = &Rbuf->scs_rcv$data;
+      char * bufh = rcvhdrs[rcvix].XERCV$buf;
+
+      scs_rcv2(bufh, buf);
+#if 0
+      // extend scs_rcv2?
+      drv$ip_receive(Rbuf-XE_hdr_offset,
+		     DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len),
+		     &Rbuf->scs_rcv$data,Rbuf->scs_rcv$tran_size,dev_config);
+#endif
+    };
+
+}
+
+int scs_rcv2(char * bufh, char * buf)
+{
+  struct _cdt *cb;
+  unsigned char flags = 0;
+#if 0
+  __u16 len = ntohs(*(__u16 *)skb->data);
+#endif
+  unsigned char padlen = 0;
+  struct _nisca * nisca;
+  unsigned char tr_flag;
+  unsigned char tr_pad;
+  unsigned char * msg; 
+  struct _ppd *ppd;
+  struct _scs *scs;
+  struct _nisca *dx;
+  int (*func)();
+
+  msg=buf;
+  nisca=(long)gettr(msg)-14;
+  scs=(long)getppdscs(msg)-14;
+  ppd=(long)getppdscs(msg)-14;
+  dx=(long)getdx(msg)-14;
+
+  if (scs_from_myself(dx,0xaa00,(mysb.sb$t_nodename[0]<<16)+mysb.sb$t_nodename[1])) {
+    //printk("discarding packet from myself (mcast...?)\n");
+    goto dump_it;
+  }
+
+  printscs(buf);
+
+  tr_flag=nisca->nisca$b_tr_flag;
+  tr_pad=nisca->nisca$b_tr_pad;
+
+  if (nisca->nisca$b_msg & NISCA$M_TR_CCFLG) {
+    switch((nisca->nisca$b_msg)&0x1f) {
+    case NISCA$C_HELLO:
+      return NF_HOOK(PF_DECnet, NF_SCS_HELLO, buf, 0, NULL, scs_neigh_endnode_hello);
+    }
+  }
+
+  if (nisca->nisca$b_msg & NISCA$M_TR_CTL) {
+    return NF_HOOK(PF_DECnet, NF_SCS_HELLO, buf, 0, NULL, opc_msgrec);
+  }
+
+  if (scs->scs$w_mtype>0x17)
+    panic("scs$w_mtype too large\n");
+#if 0
+  func=nisca_dispatch[scs->scs$w_mtype];
+  return func(skb,scs);
+#endif
+  //	nisca_snt_dg(skb,scs);
+  return NF_HOOK(PF_DECnet, NF_SCS_HELLO, buf, 0, NULL, nisca_snt_dg);
+ dump_it:
+#ifndef CONFIG_VMS
+  kfree_skb(skb);
+#endif
+ out:
+  return NET_RX_DROP;
+}
 
 #endif

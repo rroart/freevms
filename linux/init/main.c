@@ -922,6 +922,10 @@ static int init(void * unused)
 	extern char * mydevice;
 	probe_units();
 	if (mydevice==0)
+	  printk("No network module. Can not start clustering.\n");
+	else
+	  scs_init2();
+	if (mydevice==0)
 	  printk("No network module. Can not start IPACP.\n");
 	else
 	  kernel_thread(Main, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);

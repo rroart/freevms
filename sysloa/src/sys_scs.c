@@ -338,17 +338,20 @@ int /*__init*/ scs_init(void) {
     while (b<(buf+size)) {
       c=strchr(b,'=');
       n=strchr(b,'\n');
+      //printk("Q %s %x %x %x %x\n",b,b,n,c,c-b);
       if (0==strncmp(b, "SCSNODE", c-b)) {
 	memcpy(&mysb.sb$t_nodename, c+1, n-c-1);
-	goto end;
+	goto out;
       }
       if (0==strncmp(b, "SCSDEVICE", c-b)) {
 	memcpy(&mysb.sb$t_hwtype, c+1, n-c-1); // borrowing t_hwtype
-	goto end;
+	goto out;
       }
+    out:
       b=n+1;
     }
-    memcpy(&mysb.sb$t_nodename, "NONAME", 6);
+    if (mysb.sb$t_nodename==0)
+      memcpy(&mysb.sb$t_nodename, "NONAME", 6);
   end:
     filp_close(file,0);
   }
@@ -440,7 +443,11 @@ static struct net_proto_family	scs_family_ops = {
 
 static char banner[] __initdata = KERN_INFO "%%KERNEL-I-STARTUP, NET5: MYSCS, based on DECnet for Linux: V.2.4.15-pre5s (C) 1995-2001 Linux DECnet Project Team\n";
 
+#ifndef CONFIG_VMS
 static int __init scs_init2(void)
+#else
+int scs_init2(void)
+#endif
 {
         printk(banner);
 
@@ -474,8 +481,10 @@ static void __exit scs_exit(void)
 	scs_dev_cleanup();
 }
 
+#ifndef CONFIG_VMS
 module_init(scs_init2);
 module_exit(scs_exit);
+#endif
 //#endif /* #if 0 second one */
 
 int   scs_std$reqdata( struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (*complete)() ) {
