@@ -663,7 +663,7 @@ asmlinkage void __init start_kernel(void)
 	 *	make syscalls (and thus be locked).
 	 */
 
-	//	vms_init4();
+	vms_init4();
 	vms_init3();
 	smp_init();
 	rest_init();
