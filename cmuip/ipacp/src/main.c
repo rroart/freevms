@@ -791,15 +791,30 @@ void Main (void) {
 	  $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
 	  struct dsc$descriptor * mytabnam = &mytabnam_;
 	  $DESCRIPTOR(dev_, "INET$DEVICE");
+	  $DESCRIPTOR(pty_, "INET$PTY");
+	  $DESCRIPTOR(pty_term_, "INET$PTY_TERM");
 	  struct dsc$descriptor * dev = &dev_;
+	  struct dsc$descriptor * pty = &pty_;
+	  struct dsc$descriptor * pty_term = &pty_term_;
 	  struct item_list_3 itm[2];
 	  lnm_init_prc(ctl$gl_pcb); // needs this extra one
+
 	  itm[0].item_code=LNM$_STRING;
 	  itm[0].buflen=4;
 	  itm[0].bufaddr=mydevice;
 	  bzero(&itm[1],sizeof(struct item_list_3));
-
 	  sts=exe$crelnm(0,mytabnam,dev,0,itm);
+
+	  itm[0].item_code=LNM$_STRING;
+	  itm[0].buflen=4;
+	  itm[0].bufaddr="pna0";
+	  sts=exe$crelnm(0,mytabnam,pty,0,itm);
+
+	  itm[0].item_code=LNM$_STRING;
+	  itm[0].buflen=3; // should be 2
+	  itm[0].bufaddr="tza"; // should be tz
+	  sts=exe$crelnm(0,mytabnam,pty_term,0,itm);
+
 	}
 	// end of extra temp stuff
 
