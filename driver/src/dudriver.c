@@ -70,7 +70,7 @@ struct _fdt du$fdt = {
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
 
-void  du_startio3 (struct _irp * i, struct _ucb * u) { 
+void  du_startio3 (int fr3, int fr4, struct _ucb * u) { 
   //printk("thirdtime %x %x\n",i,u);
   ioc$reqcom(SS$_NORMAL,0,u);
   return;
@@ -80,7 +80,7 @@ void  du_startio2 (struct _irp * i, struct _ucb * u) {
   //printk("secondtime\n");
 
   u->ucb$l_fpc=du_startio3;
-  exe$iofork(i,u);
+  exe_std$primitive_fork(0,0,u);
   return;
 }
 
