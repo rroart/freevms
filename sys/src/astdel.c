@@ -116,22 +116,22 @@ asmlinkage void sch$astdel(void) {
 #ifdef __i386__
   //      printk("a1 ");
 #endif
-    acb->acb$l_kast(acb->acb$l_astprm);
+    acb->acb$l_kast(acb);
 #ifdef __i386__
     //      printk("a2 ");
 #endif
     //p->pcb$b_astact=0;
-    if ((acb->acb$b_rmod&ACB$M_NODELETE)==0) kfree(acb);
+    // do not do this? if ((acb->acb$b_rmod&ACB$M_NODELETE)==0) kfree(acb);
     goto more;
   }
   //printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
-  setipl(IPL$_ASTDEL);
   if (p->pcb$b_asten!=15 || p->pcb$b_astact) { // 15 because no modes yet
     insque(acb,p->pcb$l_astqfl);
     p->phd$b_astlvl=p->pr_astlvl=(acb->acb$b_rmod & 3) + 1;
     spin_unlock(&SPIN_SCHED);
     return;
   }
+  setipl(IPL$_ASTDEL);
   p->pcb$b_astact=0; // 1; wait with this until we get modes
   setipl(0); // for kernel mode, I think. everything is in kernelmode yet.
   if (((unsigned long)acb->acb$l_ast<0xa0000000)&&((unsigned long)acb->acb$l_ast>0xd0000000)) {
