@@ -91,6 +91,7 @@ bufpost(struct _irp * i) {
   struct _phd * phd = pcb->pcb$l_phd;
   //printk("doing bufpost\n");
   /* do iosb soon? */
+
   movbuf(i);
 
   if (i->irp$l_sts&IRP$M_MBXIO)
