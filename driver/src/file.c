@@ -24,7 +24,8 @@
 #include<system_data_cells.h>
 #include<ucbdef.h>
 #include<vcbdef.h>
-#include<linux/vmalloc.h>
+
+#include<linux/mm.h>
 
 struct _fdt file$fdt = {
   fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
@@ -98,7 +99,7 @@ void  file_startio (struct _irp * i, struct _ucb * u) {
 
   u->ucb$b_second_time_in_startio=1;
 
-  ioc$wfikpch(file_startio2,0,i,current,u,2,0);
+  ioc$wfikpch(file_startio2,0,i,ctl$gl_pcb,u,2,0);
   exe$setimr(0, &step1, fl_isr,i,0);
   return;
 }
@@ -219,14 +220,14 @@ int file$unit_init (struct _idb * idb, struct _ucb * ucb) {
 
 struct _dpt file$dpt;
 struct _ddb file$ddb;
-struct _ucb file$ucb;
+struct _dt_ucb file$ucb;
 struct _crb file$crb;
 
 int file$init_tables() {
   ini_dpt_name(&file$dpt, "DFDRIVER");
   ini_dpt_adapt(&file$dpt, 0);
   ini_dpt_defunits(&file$dpt, 1);
-  ini_dpt_ucbsize(&file$dpt,sizeof(struct _ucb));
+  ini_dpt_ucbsize(&file$dpt,sizeof(struct _dt_ucb));
   ini_dpt_struc_init(&file$dpt, file$struc_init);
   ini_dpt_struc_reinit(&file$dpt, file$struc_reinit);
   ini_dpt_ucb_crams(&file$dpt, 1/*NUMBER_CRAMS*/);
@@ -276,7 +277,7 @@ int file_iodb_vmsinit(void) {
   struct _ddb * ddb=&file$ddb;
   struct _crb * crb=&file$crb;
 #endif
-  struct _ucb * ucb=kmalloc(sizeof(struct _ucb),GFP_KERNEL);
+  struct _ucb * ucb=kmalloc(sizeof(struct _dt_ucb),GFP_KERNEL);
   struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
@@ -285,7 +286,7 @@ int file_iodb_vmsinit(void) {
   struct _ddb * newddb;
 
 //  ioc_std$clone_ucb(&file$ucb,&ucb);
-  bzero(ucb,sizeof(struct _ucb));
+  bzero(ucb,sizeof(struct _dt_ucb));
   bzero(ddb,sizeof(struct _ddb));
   bzero(crb,sizeof(struct _crb));
 
@@ -298,6 +299,8 @@ int file_iodb_vmsinit(void) {
   init_ddb(ddb,&file$ddt,ucb,"dfa");
   init_ucb(ucb, ddb, &file$ddt, crb);
   init_crb(crb);
+
+  ucb -> ucb$w_size = sizeof(struct _dt_ucb); // temp placed
 
   file$init_tables();
   file$struc_init (crb, ddb, idb, orb, ucb);
