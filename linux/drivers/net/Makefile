@@ -8,7 +8,7 @@ obj-m           :=
 obj-n           :=
 obj-            :=
 
-mod-subdirs     := appletalk arcnet fc irda tokenring pcmcia wireless wan
+mod-subdirs     := 
 
 O_TARGET := net.o
 
@@ -29,17 +29,7 @@ ifeq ($(CONFIG_ISDN_PPP),y)
   obj-$(CONFIG_ISDN) += slhc.o
 endif
 
-subdir-$(CONFIG_NET_PCMCIA) += pcmcia
-subdir-$(CONFIG_NET_WIRELESS) += wireless
 subdir-$(CONFIG_TULIP) += tulip
-subdir-$(CONFIG_IRDA) += irda
-subdir-$(CONFIG_TR) += tokenring
-subdir-$(CONFIG_WAN) += wan
-subdir-$(CONFIG_NET_FC) += fc
-subdir-$(CONFIG_ARCNET) += arcnet
-subdir-$(CONFIG_APPLETALK) += appletalk
-subdir-$(CONFIG_SK98LIN) += sk98lin
-subdir-$(CONFIG_SKFP) += skfp
 
 #
 # link order important here
@@ -210,12 +200,6 @@ obj-$(CONFIG_MACMACE) += macmace.o
 obj-$(CONFIG_MAC89x0) += mac89x0.o
 obj-$(CONFIG_TUN) += tun.o
 obj-$(CONFIG_DL2K) += dl2k.o
-
-ifeq ($(CONFIG_ARCH_ACORN),y)
-mod-subdirs	+= ../acorn/net
-subdir-y	+= ../acorn/net
-obj-y		+= ../acorn/net/acorn-net.o
-endif
 
 #
 # HIPPI adapters

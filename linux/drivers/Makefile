@@ -17,7 +17,6 @@ ifneq ($(CONFIG_VMS),y)
 subdir-$(CONFIG_MTD)		+= mtd
 endif
 subdir-$(CONFIG_VT)		+= video
-subdir-$(CONFIG_INPUT)		+= input
 subdir-$(CONFIG_IDE)		+= ide
 #subdir-$(CONFIG_SCSI)		+= scsi
 

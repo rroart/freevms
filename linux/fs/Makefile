@@ -13,7 +13,7 @@ ifneq ($(CONFIG_IO_VMS),y)
  export-objs += buffer.o
 endif
 
-mod-subdirs :=	nls
+mod-subdirs :=	
 
 obj-y :=	open.o read_write.o devices.o file_table.o \
 		super.o block_dev.o char_dev.o stat.o exec.o pipe.o namei.o \
@@ -35,50 +35,11 @@ subdir-$(CONFIG_PROC_FS)	+= proc
 subdir-y			+= partitions
 
 # Do not add any filesystems before this line
-subdir-$(CONFIG_EXT3_FS)	+= ext3    # Before ext2 so root fs can be ext3
-subdir-$(CONFIG_JBD)		+= jbd
 ifneq ($(CONFIG_VMS),y)
 subdir-$(CONFIG_EXT2_FS)	+= ext2
 endif
-subdir-$(CONFIG_EXTTWO_FS)	+= exttwo
-subdir-$(CONFIG_ZLIB_FS_INFLATE) += inflate_fs
-subdir-$(CONFIG_CRAMFS)		+= cramfs
-subdir-$(CONFIG_RAMFS)		+= ramfs
-subdir-$(CONFIG_CODA_FS)	+= coda
-subdir-$(CONFIG_INTERMEZZO_FS)	+= intermezzo
-subdir-$(CONFIG_MINIX_FS)	+= minix
-subdir-$(CONFIG_FAT_FS)		+= fat
-subdir-$(CONFIG_UMSDOS_FS)	+= umsdos
-subdir-$(CONFIG_MSDOS_FS)	+= msdos
-subdir-$(CONFIG_VFAT_FS)	+= vfat
-subdir-$(CONFIG_BFS_FS)		+= bfs
-subdir-$(CONFIG_ISO9660_FS)	+= isofs
 subdir-$(CONFIG_DEVFS_FS)	+= devfs
-subdir-$(CONFIG_HFS_FS)		+= hfs
-subdir-$(CONFIG_VXFS_FS)	+= freevxfs
-subdir-$(CONFIG_NFS_FS)		+= nfs
-subdir-$(CONFIG_NFSD)		+= nfsd
-subdir-$(CONFIG_LOCKD)		+= lockd
-subdir-$(CONFIG_NLS)		+= nls
-subdir-$(CONFIG_SYSV_FS)	+= sysv
-subdir-$(CONFIG_SMB_FS)		+= smbfs
-subdir-$(CONFIG_NCP_FS)		+= ncpfs
-subdir-$(CONFIG_HPFS_FS)	+= hpfs
-subdir-$(CONFIG_NTFS_FS)	+= ntfs
-subdir-$(CONFIG_UFS_FS)		+= ufs
-subdir-$(CONFIG_EFS_FS)		+= efs
-subdir-$(CONFIG_JFFS_FS)	+= jffs
-subdir-$(CONFIG_JFFS2_FS)	+= jffs2
-subdir-$(CONFIG_AFFS_FS)	+= affs
-subdir-$(CONFIG_ROMFS_FS)	+= romfs
-subdir-$(CONFIG_QNX4FS_FS)	+= qnx4
-subdir-$(CONFIG_UDF_FS)		+= udf
-subdir-$(CONFIG_AUTOFS_FS)	+= autofs
-subdir-$(CONFIG_AUTOFS4_FS)	+= autofs4
-subdir-$(CONFIG_ADFS_FS)	+= adfs
-subdir-$(CONFIG_REISERFS_FS)	+= reiserfs
 subdir-$(CONFIG_DEVPTS_FS)	+= devpts
-subdir-$(CONFIG_SUN_OPENPROMFS)	+= openpromfs
 
 ifneq ($(CONFIG_VMS),y)
 #subdir-y			+= ods2
