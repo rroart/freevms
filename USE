@@ -18,6 +18,9 @@ RUN/MCR:
 	no qualifiers
 	DCL only.
 	
+set symbol:
+	sym = val
+
 MOUNT:
 	Local file ODS2 image
 	Go to image directory
@@ -30,6 +33,10 @@ MOUNT:
 
 INIT: 
 	init filename volume-name size
+
+DELETE:
+	file or symbol
+	qualifier /symbol
 
 DIRECTORY:
 	directory
@@ -69,6 +76,10 @@ SHOW DEVICES:
 
 SHOW SYSTEM:
 	show system
+	DCL only
+
+SHOW SYMBOL:
+	show symbol sym
 	DCL only
 
 SHOW TIME:
