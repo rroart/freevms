@@ -583,7 +583,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 	fd++;
       }
     }
-    sys_getdents64(fd,&dir,1);
+    sys_getdents64(fd,&dir,64);
     //    vfs_readdir(file, filldir64, &buf);
     filp_close(f,0);
 
