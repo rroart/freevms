@@ -416,6 +416,10 @@ void segv_handler(int sig, struct uml_pt_regs *regs)
 	segfault_record[index].is_user = regs->is_user;
 	segv(SC_FAULT_ADDR(context), SC_IP(context), SC_FAULT_WRITE(context),
 	     regs->is_user);
+#include "../../../include/linux/autoconf.h"
+#ifdef CONFIG_MM_VMS
+	myrei();
+#endif
 }
 
 extern int timer_ready, timer_on;
