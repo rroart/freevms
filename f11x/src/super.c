@@ -18,20 +18,16 @@
 
 struct super_block * vms_read_super(struct super_block * s, void * data, int silent); 
 void vms_put_super (struct super_block * s);
-void vms_statfs(struct super_block * s, struct statfs * buf, int bufsize);
+void vms_statfs(struct super_block * s, struct statfs * buf);
 
 extern void vms_read_inode(struct inode * inode);
 extern void vms_put_inode(struct inode * inode);
 
 static struct super_operations vms_super_ops = {
-	vms_read_inode,
-	NULL,			/* notify_change() */
-	NULL,			/* XXX - vms_write_inode() */
-	vms_put_inode,
-	vms_put_super,
-	NULL,			/* XXX - vms_write_super() */
-	vms_statfs,
-	NULL,			/* XXX - vms_remount() */
+	read_inode: vms_read_inode,
+	put_inode: vms_put_inode,
+	put_super: vms_put_super,
+ 	statfs: vms_statfs
 };
 
 static DECLARE_FSTYPE_DEV(vms_fs_type, "ods2", vms_read_super);
@@ -95,12 +91,12 @@ vms_read_super(struct super_block * s, void * data, int silent)
 	int ifhbn;
 
 	MOD_INC_USE_COUNT;
-	lock_super(s);
+	//	lock_super(s);
 	set_blocksize(dev,VMS_BLOCKSIZE);
 
 	if(!(bh = bread(dev,1,VMS_BLOCKSIZE))) {
                 s->s_dev = 0;
-                unlock_super(s);
+                //unlock_super(s);
 		if(!silent) printk("VMS-fs: unable to read *home*block\n");
                 MOD_DEC_USE_COUNT;
                 return NULL;
@@ -112,7 +108,7 @@ vms_read_super(struct super_block * s, void * data, int silent)
 	vhi = (struct vms_home_info *) __get_free_page(GFP_KERNEL);
 	if(vhi == NULL) {
 		s->s_dev = 0;
-		unlock_super(s);
+		//unlock_super(s);
 		printk("vms_read_super: get_free_page() failed\n");
                 MOD_DEC_USE_COUNT;
                 return NULL;
@@ -121,7 +117,7 @@ vms_read_super(struct super_block * s, void * data, int silent)
 	if(vhb->hm2$l_homelbn != 1 || strncmp(vhb->hm2$t_format,"DECFILE11",9)) {
 /*		printk("VMS-fs: [%s]\n",vhb->hm2$t_format);*/
 		s->s_dev = 0;
-                unlock_super(s);
+                //unlock_super(s);
                 brelse(bh);
                 if (!silent)
                         printk("VFS: Can't find a FILES11B filesystem on dev "
@@ -149,10 +145,10 @@ vms_read_super(struct super_block * s, void * data, int silent)
 	((struct vms_home_info *)s->u.generic_sbp)->vhb = vhb;
 	s->dq_op = 0;
 	s->s_op = &vms_super_ops;
-//	s->s_mounted = iget(s,VMS_ROOT_INO);
+	s->s_root = d_alloc_root(iget(s,VMS_ROOT_INO));
 
-	if(!silent) printk("VMS-fs: phwee isn't VMS fun...\n");
-	unlock_super(s);
+	if(!silent) printk("ods2: isn't VMS fun...\n");
+	//unlock_super(s);
 	return(s);
 }
 
@@ -161,19 +157,19 @@ void vms_put_super (struct super_block * s)
 
 /*	printk("vms_put_super\n"); /* XXX */
 
-	lock_super (s);
+  //lock_super (s);
 	/* XXX - sync fs data, set state to ok, and flush buffers */
 	s->s_dev = 0;
 
 	/* XXX - free allocated kernel memory */
 
-	unlock_super (s);
+	//unlock_super (s);
 	MOD_DEC_USE_COUNT;
 
 	return;
 }
 
-void vms_statfs(struct super_block * s, struct statfs * buf, int bufsiz)
+void vms_statfs(struct super_block * s, struct statfs * buf)
 {
 	struct statfs tmp;
 
@@ -195,7 +191,7 @@ void vms_statfs(struct super_block * s, struct statfs * buf, int bufsiz)
 	tmp.f_namelen = VMS_MAXNAMLEN;
 /*        tmp.f_spare[6] */
 
-	memcpy(buf, &tmp, bufsiz);
+	memcpy(buf, &tmp, sizeof(struct statfs));
 
 	return;
 }

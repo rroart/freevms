@@ -9,7 +9,7 @@
 #include "vms_fs_i.h"
 
 /* XXX */
-extern int vms_lookup (struct inode *, const char *, int, struct inode **);
+extern struct dentry * vms_lookup (struct inode *, struct dentry *);
 extern int vms_bmap (struct inode *, int);
 extern void vms_print_inode (struct inode *);
 
@@ -17,8 +17,7 @@ extern void vms_print_inode (struct inode *);
  * this is fucking (can I say fucking in the kernel?) messy
  */
 static int
-vms_readdir (struct inode * inode, struct file * filp, void * dirent,
-	     filldir_t filldir)
+vms_readdir (struct file * filp, void * dirent, filldir_t filldir)
 {
 #define recsize (*((ushort *)de))
 #define STOP	((ushort)0177777)
@@ -31,6 +30,7 @@ vms_readdir (struct inode * inode, struct file * filp, void * dirent,
 	struct vms_inode_info *vii;
 	struct _fh2 *dhp,*dh;
 	char *dirbuf[VMS_BLOCKSIZE];
+	struct inode *inode = filp->f_dentry->d_inode;
 
 	printk(". (%i) ",filp->f_pos);
         if (!inode || !inode->i_sb || !S_ISDIR(inode->i_mode))
@@ -63,7 +63,7 @@ vms_readdir (struct inode * inode, struct file * filp, void * dirent,
 	}
 
 	//	eofblk = (dh->fh2$w_recattr.f_heof[0]<<16) + dh->fh2$w_recattr.f_heof[1];
-	eofblk = (dh->fh2$w_recattr.fat$l_efblk);
+	eofblk = pdp_invert(dh->fh2$w_recattr.fat$l_efblk);
 
 	fpos = filp->f_pos - 2;
 	block = fpos / VMS_BLOCKSIZE + 1;
@@ -71,7 +71,7 @@ vms_readdir (struct inode * inode, struct file * filp, void * dirent,
 
 	printk("starting block: %i (%i,%i)\n",block,fpos,offset);
 
-	while(block <= eofblk) {	/* XXX is this right? */
+	while(block < eofblk) {	/* XXX is this right? */
 		struct _dir1 *dv;
 		int nextblock;
 
@@ -110,7 +110,7 @@ vms_readdir (struct inode * inode, struct file * filp, void * dirent,
 			ino = dv->dir$fid.fid$w_num;
 /*			printk("%s\n",vmd->dir$t_name);*/
 			filp->f_pos = fpos + 2;
-			if(filldir(dirent,vmd->dir$t_name,vmd->dir$b_namecount,filp->f_pos,ino,DT_DIR) < 0) {
+			if(filldir(dirent,vmd->dir$t_name,vmd->dir$b_namecount,filp->f_pos,ino,DT_UNKNOWN) < 0) {
 				return(0);
 			}
 
@@ -131,39 +131,12 @@ vms_readdir (struct inode * inode, struct file * filp, void * dirent,
 	return(entries);
 }
 
-static struct file_operations vms_dir_operations = {
-	NULL,			/* lseek */
-	NULL,			/* read */
-	NULL,			/* write */
-	vms_readdir,		/* readdir */
-	NULL,			/* select */
-	NULL,			/* ioctl */
-	NULL,			/* mmap */
-	NULL,			/* open */
-	NULL,			/* release */
-	file_fsync,		/* fsync */
-	NULL,			/* fasync */
-	NULL,			/* check_media_change */
-	NULL,			/* revalidate */
+struct file_operations vms_dir_operations = {
+  read: generic_read_dir,
+  readdir: vms_readdir,
+  fsync: file_fsync
 };
 
 struct inode_operations vms_dir_inode_operations = {
-	&vms_dir_operations,	/* default directory file operations */
-	NULL,			/* create */
-	vms_lookup,		/* lookup */
-	NULL,			/* link */
-	NULL,			/* unlink */
-	NULL,			/* symlink */
-	NULL,			/* mkdir */
-	NULL,			/* rmdir */
-	NULL,			/* mknod */
-	NULL,			/* rename */
-	NULL,			/* readlink */
-	NULL,			/* follow_link */
-	NULL,			/* readpage */
-	NULL,			/* writepage */
-	NULL,			/* bmap */
-	NULL,			/* truncate */
-	NULL,			/* permission */
-	NULL,			/* smap */
+  lookup: vms_lookup
 };

@@ -17,12 +17,22 @@
 
 #define NO_DOLLAR
 
+/* handling funny byte order */
+/* socalled
+Inverted format field. The high- and low-order 16 bits are transposed for compatibility with PDP-11 software.
+*/
+
+static inline unsigned long pdp_invert(unsigned long l) {
+  unsigned short * s=&l;
+  return (s[0]<<16) + s[1];
+}
+
 struct _fatdef {
     vmsbyte fat$b_rtype;
     vmsbyte fat$b_rattrib;
     vmsword fat$w_rsize;
-    vmsswap fat$l_hiblk;
-    vmsswap fat$l_efblk;
+  vmsswap fat$l_hiblk; /* funny byte order */
+  vmsswap fat$l_efblk; /* funny byte order */
     vmsword fat$w_ffbyte;
     vmsbyte fat$b_bktsize;
     vmsbyte fat$b_vfcsize;

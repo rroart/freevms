@@ -35,8 +35,7 @@ static int vms_match (int len, const char * const name, struct _dir * d) {
 }
 
 /* XXX - this is a mess, especially for endianity */
-int vms_lookup (struct inode * dir, const char * name, int len,
-	        struct inode ** result)
+struct dentry * vms_lookup (struct inode * dir, struct dentry * dentry)
 {
 	int offset,block,ino,eofblk,fpos;
 	struct super_block *s;
@@ -44,33 +43,38 @@ int vms_lookup (struct inode * dir, const char * name, int len,
 	struct vms_inode_info *vii;
 	struct _fh2 *dh;
 	char dirbuf[VMS_BLOCKSIZE];
+	struct inode * result;
+	char * name = dentry->d_name.name;
+	int len = dentry->d_name.len;
 
 	s = dir->i_sb;
 
 	printk("vms_lookup: '%s' - ",name);
 
-	*result = NULL;
+	result = NULL;
 
-	if(!dir || !S_ISDIR(dir->i_mode)) return(-ENOENT);
+	if(!dir || !S_ISDIR(dir->i_mode)) return ERR_PTR(-ENOENT);
 
 	if(name[0] == '.') {
 		if(name[1] == 0) {
 			printk(".\n");
-			if(!(*result = iget(s,dir->i_ino))) {
+			if(!(result = iget(s,dir->i_ino))) {
 				printk("fuck\n");
 				iput(dir);
-				return(-EACCES);
+				return ERR_PTR(-EACCES);
 			}
-			return(0);
+			d_add(dentry, result);
+			return ERR_PTR(0);
 		}
 		if(name[1] == '.' && name[2] == 0) {
 			printk("..\n");
-			if(!(*result = iget(s,VMS_ROOT_INO))) {
+			if(!(result = iget(s,VMS_ROOT_INO))) {
 				printk("fuck\n");
 				iput(dir);
-				return(-EACCES);
+				return ERR_PTR(-EACCES);
 			}
-			return(0);
+			d_add(dentry, result);
+			return ERR_PTR(0);
 		}
 	}
 
@@ -78,7 +82,7 @@ int vms_lookup (struct inode * dir, const char * name, int len,
 	dh = &vii->header;
 
 	//	eofblk = (dh->h_rms.f_hvbn[0]<<16) + dh->h_rms.f_hvbn[1];
-	eofblk = (dh->fh2$w_recattr.fat$l_efblk);
+	eofblk = pdp_invert(dh->fh2$w_recattr.fat$l_hiblk);
 	fpos = 0;
 	block = 1;
 	offset = 0;
@@ -89,7 +93,7 @@ int vms_lookup (struct inode * dir, const char * name, int len,
 
 		if(!getvb(block,dirbuf,dh,s->s_dev)) {
 			printk("vms_lookup: getvb returned error\n");
-			return(0);
+			return ERR_PTR(0);
 		}
 
 		nextblock = 0;
@@ -105,15 +109,16 @@ int vms_lookup (struct inode * dir, const char * name, int len,
 			}
 
 			if(vmd->dir$w_size == 0) {
-				return(-ENOENT);
+				return ERR_PTR(-ENOENT);
 			}
 
 			dv = (struct _dir1 *)(vmd->dir$t_name + vmd->dir$b_namecount);
 			ino = dv->dir$fid.fid$w_num;
 			if(len == vmd->dir$b_namecount) {
 				if(vms_match(len,name,vmd)) {
-					*result = iget(dir->i_sb,dv->dir$fid.fid$w_num);
-					return(0);
+					result = iget(dir->i_sb,dv->dir$fid.fid$w_num);
+					d_add(dentry, result);
+					return ERR_PTR(0);
 				}
 			}
 
@@ -124,7 +129,7 @@ int vms_lookup (struct inode * dir, const char * name, int len,
 
 	printk("'%s'?\n",name);
 	iput(dir);
-	return(-ENOENT);
+	return ERR_PTR(-ENOENT);
 }
 
 

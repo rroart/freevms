@@ -20,6 +20,8 @@
 
 
 extern struct inode_operations vms_dir_inode_operations;
+extern struct inode_operations vms_dir_operations;
+extern struct file_operations generic_ro_fops;
 
 /*
 void ufs_print_inode(struct inode * inode)
@@ -85,11 +87,13 @@ void vms_read_inode(struct inode * inode)
 	if(vms_is_dir(&fileh)) {
 		inode->i_mode |= S_IFDIR;
 		inode->i_op = (struct inode_operations *) &vms_dir_inode_operations;
+		inode->i_fop = (struct inode_operations *) &vms_dir_operations;
 		inode->i_size = VMS_BLOCKSIZE * fileh.fh2$b_map_inuse;
 		inode->i_nlink = 1;
 	} else {
 		inode->i_mode |= S_IFREG;
 /*		inode->i_op = (struct inode_operations *) &vms_file_ops;*/
+		inode->i_fop = &generic_ro_fops;
 		inode->i_nlink = 1;
 		inode->i_blksize = VMS_BLOCKSIZE;
 	}
