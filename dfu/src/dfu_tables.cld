@@ -1,0 +1,257 @@
+! Command definition for DFU V2.2 (Freeware)
+MODULE dfu_tables
+
+DEFINE TYPE record_type_keywords
+KEYWORD	FIXED,NONNEGATABLE
+KEYWORD VARIABLE,NONNEGATABLE
+KEYWORD	VFC,NONNEGATABLE
+KEYWORD	UNDEFINED,NONNEGATABLE
+KEYWORD	STREAM,NONNEGATABLE
+KEYWORD	STREAMLF,NONNEGATABLE
+KEYWORD	STREAMCR,NONNEGATABLE
+
+DEFINE TYPE record_attributes_keywords
+KEYWORD	FORTRAN,NONNEGATABLE
+KEYWORD	IMPLIED,NONNEGATABLE
+KEYWORD	PRINT,NONNEGATABLE
+KEYWORD	NONE, NONNEGATABLE
+KEYWORD	NOSPAN,NONNEGATABLE
+
+DEFINE TYPE organization_keywords
+KEYWORD	DIRECT,NONNEGATABLE
+KEYWORD	INDEXED,NONNEGATABLE
+KEYWORD	RELATIVE,NONNEGATABLE
+KEYWORD	SEQUENTIAL,NONNEGATABLE
+
+DEFINE TYPE retrieval_type
+   KEYWORD minimum,LABEL=retr_min,VALUE (REQUIRED,TYPE=$NUMBER)
+   KEYWORD maximum,LABEL=retr_max,VALUE (REQUIRED,TYPE=$NUMBER)
+
+DEFINE TYPE version_type
+   KEYWORD minimum,LABEL=vers_min,VALUE (REQUIRED,TYPE=$NUMBER)
+   KEYWORD maximum,LABEL=vers_max,VALUE (REQUIRED,TYPE=$NUMBER)
+
+DEFINE TYPE size_type
+   KEYWORD minimum,LABEL=size_min,VALUE (REQUIRED,TYPE=$NUMBER)
+   KEYWORD maximum,LABEL=size_max,VALUE (REQUIRED,TYPE=$NUMBER)
+
+DEFINE TYPE match_type
+   KEYWORD or,LABEL=or,NONNEGATABLE
+
+DEFINE TYPE char_type
+   KEYWORD directory,LABEL=directory,NONNEGATABLE
+   KEYWORD nobackup,LABEL=nobackup,NONNEGATABLE
+   KEYWORD contiguous,LABEL=contiguous,NONNEGATABLE
+   KEYWORD besttry,LABEL=besttry,NONNEGATABLE
+   KEYWORD badacl,LABEL=badacl,NONNEGATABLE
+   KEYWORD badblock,LABEL=badblock,NONNEGATABLE
+   KEYWORD erase,LABEL=erase,NONNEGATABLE
+   KEYWORD locked,LABEL=locked,NONNEGATABLE
+   KEYWORD marked,LABEL=marked,NONNEGATABLE
+   KEYWORD spool,LABEL=spool,NONNEGATABLE
+   KEYWORD nomove,LABEL=nomove,NONNEGATABLE
+   KEYWORD nocharge,LABEL=nocharge,NONNEGATABLE
+   KEYWORD scratch,LABEL=scratch,NONNEGATABLE
+   KEYWORD noshelvable,LABEL=noshelvable,NONNEGATABLE
+   KEYWORD isshelved,LABEL=isshelved,NONNEGATABLE
+   KEYWORD match,LABEL=match,NONNEGATABLE,VALUE(REQUIRED,TYPE=match_type)
+
+DEFINE TYPE cre_date_type
+   KEYWORD since,LABEL=cre_since,VALUE(REQUIRED,TYPE=$DATETIME)
+   KEYWORD before,LABEL=cre_before,VALUE(REQUIRED,TYPE=$DATETIME)
+
+DEFINE TYPE mod_date_type
+   KEYWORD since,LABEL=mod_since,VALUE(REQUIRED,TYPE=$DATETIME)
+   KEYWORD before,LABEL=mod_before,VALUE(REQUIRED,TYPE=$DATETIME)
+
+DEFINE TYPE bak_date_type
+   KEYWORD none,LABEL=bak_none
+   KEYWORD since,LABEL=bak_since,VALUE(REQUIRED,TYPE=$DATETIME)
+   KEYWORD before,LABEL=bak_before,VALUE(REQUIRED,TYPE=$DATETIME)
+
+DEFINE TYPE exp_date_type
+   KEYWORD none,LABEL=exp_none
+   KEYWORD since,LABEL=exp_since,VALUE(REQUIRED,TYPE=$DATETIME)
+   KEYWORD before,LABEL=exp_before,VALUE(REQUIRED,TYPE=$DATETIME)
+
+DEFINE VERB help
+	ROUTINE help_command
+	PARAMETER p1,LABEL=helpkey,VALUE(TYPE=$REST_OF_LINE)
+
+DEFINE VERB exit
+	ROUTINE exit_command
+        
+DEFINE VERB spawn
+	ROUTINE spawn_command
+
+DEFINE VERB delete
+	ROUTINE delete_command
+	PARAMETER p1,LABEL=device,PROMPT="Device",VALUE(REQUIRED)
+	QUALIFIER file_id,LABEL=file_id,NONNEGATABLE,
+           VALUE(REQUIRED,LIST,TYPE=$NUMBER)
+	QUALIFIER directory,LABEL=directory,NONNEGATABLE
+	QUALIFIER noremove,LABEL=noremove,NONNEGATABLE
+	QUALIFIER nolog,LABEL=nolog,NONNEGATABLE
+	QUALIFIER tree,LABEL=tree,NONNEGATABLE
+	QUALIFIER statistics,LABEL=statistics,NONNEGATABLE
+	DISALLOW (directory and file_id)
+	DISALLOW (tree and file_id)
+
+DEFINE VERB report
+	ROUTINE report_command
+	PARAMETER p1,LABEL=device,PROMPT="Device",VALUE(REQUIRED)
+	QUALIFIER output,LABEL=outfile,NONNEGATABLE,VALUE(REQUIRED,TYPE=$FILE)
+	QUALIFIER graph,LABEL=graph,NONNEGATABLE
+	QUALIFIER nofile,LABEL=nofile,NONNEGATABLE
+	QUALIFIER usage,LABEL=usage,NONNEGATABLE
+	QUALIFIER statistics,LABEL=statistics,NONNEGATABLE
+	DISALLOW usage and nofile
+
+DEFINE VERB search
+	ROUTINE search_command
+	PARAMETER p1,LABEL=device,PROMPT="Device",VALUE(REQUIRED)
+	QUALIFIER file,LABEL=file,NONNEGATABLE,VALUE(LIST,REQUIRED)
+	QUALIFIER exclude,LABEL=exclude,NONNEGATABLE,VALUE(LIST,REQUIRED)
+	QUALIFIER owner,LABEL=uic,VALUE(REQUIRED,TYPE=$UIC)
+	QUALIFIER ident,LABEL=ident,VALUE(REQUIRED)
+	QUALIFIER allocated, LABEL=allocated,NONNEGATABLE
+	QUALIFIER size ,NONNEGATABLE,VALUE (REQUIRED,LIST,TYPE=size_type)
+	QUALIFIER fragment,LABEL=fragment,NONNEGATABLE,
+		VALUE (LIST,TYPE=retrieval_type)
+	QUALIFIER version_number,LABEL=version_number,NONNEGATABLE,
+		VALUE (LIST,TYPE=version_type)
+	QUALIFIER full,LABEL=full,NONNEGATABLE
+	QUALIFIER summary,LABEL=summary,NONNEGATABLE
+	QUALIFIER statistics,LABEL=statistics,NONNEGATABLE
+	QUALIFIER multiple,LABEL=multiple,NONNEGATABLE
+	QUALIFIER output,LABEL=outfile,NONNEGATABLE,VALUE(REQUIRED,TYPE=$FILE)
+	QUALIFIER sort,LABEL=sort,NONNEGATABLE
+	QUALIFIER created,LABEL=created,NONNEGATABLE,
+		VALUE(REQUIRED,LIST,TYPE=cre_date_type)
+	QUALIFIER modified,LABEL=modified,NONNEGATABLE,
+		VALUE(REQUIRED,LIST,TYPE=mod_date_type)
+	QUALIFIER backup,LABEL=backup,NONNEGATABLE,
+		VALUE(REQUIRED,LIST,TYPE=bak_date_type)
+	QUALIFIER expired,LABEL=expired,NONNEGATABLE,
+		VALUE(REQUIRED,LIST,TYPE=exp_date_type)
+	QUALIFIER characteristics,LABEL=characteristics,NONNEGATABLE,
+		VALUE (REQUIRED,LIST,TYPE=char_type)
+	QUALIFIER placed,LABEL=placed,NONNEGATABLE
+	QUALIFIER home,LABEL=home,NONNEGATABLE
+	QUALIFIER lbn,LABEL=lbn,NONNEGATABLE,VALUE(REQUIRED)
+	QUALIFIER fid,LABEL=fid,NONNEGATABLE,VALUE(REQUIRED,TYPE=$NUMBER)
+	QUALIFIER bakfid,LABEL=bakfid,NONNEGATABLE,VALUE(REQUIRED,TYPE=$NUMBER)
+	QUALIFIER novolset,LABEL=novolset,NONNEGATABLE
+	QUALIFIER nosearch,LABEL=nosearch,NONNEGATABLE
+
+	DISALLOW uic AND ident
+	DISALLOW allocated AND (NOT size)
+	DISALLOW bak_none AND (bak_since OR bak_before)
+	DISALLOW exp_none AND (exp_since OR exp_before)
+	DISALLOW summary AND full
+	DISALLOW sort AND (full or summary)
+	DISALLOW lbn AND (file OR size OR uic OR ident OR fragment
+		OR created OR modified OR backup OR expired OR bakfid
+		OR characteristics OR exclude OR fid OR multiple)
+	DISALLOW fid AND (file OR size OR uic OR ident OR bakfid
+		OR created OR modified OR backup OR expired
+		OR characteristics OR exclude OR lbn OR multiple)
+	DISALLOW nosearch AND (NOT home)
+
+DEFINE VERB defrag
+	ROUTINE defrag_command
+	PARAMETER p1,prompt="What",LABEL=file,VALUE(REQUIRED,LIST)
+	QUALIFIER device,LABEL=device,NONNEGATABLE,VALUE(REQUIRED)
+	QUALIFIER besttry,LABEL=besttry,NONNEGATABLE
+	QUALIFIER writecheck,LABEL=writecheck,NONNEGATABLE
+	QUALIFIER statistics,LABEL=statistics,NONNEGATABLE
+	QUALIFIER lbn,LABEL=lbn,NONNEGATABLE,VALUE(REQUIRED)
+
+DEFINE VERB verify
+	ROUTINE verify_command
+	PARAMETER p1,LABEL=device,PROMPT="Device",VALUE(REQUIRED)
+	QUALIFIER output,LABEL=outfile,NONNEGATABLE,VALUE(REQUIRED,TYPE=$FILE)
+	QUALIFIER lock,LABEL=lock,NONNEGATABLE
+	QUALIFIER fix,LABEL=fix,NONNEGATABLE
+	QUALIFIER rebuild,LABEL=rebuild,NONNEGATABLE
+	QUALIFIER statistics,LABEL=statistics,NONNEGATABLE
+
+DEFINE VERB undelete
+	ROUTINE undel_command
+	PARAMETER p1,LABEL=device,PROMPT="Device",VALUE(REQUIRED)
+	QUALIFIER file,LABEL=file,NONNEGATABLE,
+		VALUE(DEFAULT=SYS$OUTPUT:",TYPE=$FILE)
+	QUALIFIER owner,LABEL=uic,NONNEGATABLE,VALUE(REQUIRED,TYPE=$UIC)
+	QUALIFIER ident,LABEL=ident,NONNEGATABLE,VALUE(REQUIRED)
+	QUALIFIER list,LABEL=list,NONNEGATABLE,VALUE(TYPE=$FILE,DEFAULT="SYS$OUTPUT")
+	QUALIFIER statistics,LABEL=statistics,NONNEGATABLE
+	QUALIFIER noconfirm,LABEL=noconfirm,NONNEGATABLE
+	DISALLOW uic AND ident
+
+DEFINE VERB set
+	ROUTINE SET_COMMAND
+	PARAMETER p1,PROMPT="File(s)",VALUE(REQUIRED,
+		NOCONCATENATE,list)
+	QUALIFIER	eblock,nonnegatable,value(type=$number)
+	QUALIFIER	ebyte,nonnegatable,value(type=$number)
+	QUALIFIER	rvcount,nonnegatable,value(required,type=$number)
+	QUALIFIER	creation_date,value(required,type=$datetime)
+	QUALIFIER	revision_date,value(required,type=$datetime)
+	QUALIFIER	expiration_date,value(required,type=$datetime)
+	QUALIFIER	backup_date,value(required,type=$datetime)
+	QUALIFIER owner,LABEL=uic,NONNEGATABLE,VALUE(REQUIRED,TYPE=$UIC)
+	QUALIFIER ident,LABEL=ident,NONNEGATABLE,VALUE(REQUIRED)
+	QUALIFIER	update
+	QUALIFIER	log
+	QUALIFIER	confirm
+	QUALIFIER	directory
+	QUALIFIER	locked
+	QUALIFIER	contiguous_best_try
+	QUALIFIER	badacl
+	QUALIFIER	recsize,nonnegatable,value(required,type=$number)
+	QUALIFIER	bucketsize,nonnegatable,value(required,type=$number)
+	QUALIFIER	vfcsize,nonnegatable,value(required,type=$number)
+	QUALIFIER	maxrec,nonnegatable,value(required,type=$number)
+	QUALIFIER	rectype,nonnegatable,value(required,
+			type=record_type_keywords)
+	QUALIFIER	recattributes,nonnegatable,value(required,
+			type=record_attributes_keywords,list)
+	QUALIFIER	organization,nonnegatable,value(required,
+			type=organization_keywords)
+
+	DISALLOW uic AND ident
+	disallow	(rvcount or revision_date) and update
+	disallow	any2(fortran,implied,print,none)
+
+DEFINE VERB directory
+	ROUTINE directory_command
+	PARAMETER p1,LABEL=directory,VALUE(REQUIRED)
+	QUALIFIER device,LABEL=device,NONNEGATABLE,VALUE(REQUIRED)
+	QUALIFIER create,LABEL=create,NONNEGATABLE
+	QUALIFIER compress,LABEL=compress,NONNEGATABLE
+	QUALIFIER statistics,LABEL=statistics,NONNEGATABLE
+	QUALIFIER output,LABEL=outfile,NONNEGATABLE,VALUE(REQUIRED,TYPE=$FILE)
+	QUALIFIER test,LABEL=test,NONNEGATABLE	
+	QUALIFIER empty,LABEL=empty,NONNEGATABLE	
+	QUALIFIER check,LABEL=check,NONNEGATABLE	
+	QUALIFIER alias,LABEL=alias,NONNEGATABLE
+	QUALIFIER dump,LABEL=dump,NONNEGATABLE
+	QUALIFIER repair,LABEL=repair,NONNEGATABLE
+	QUALIFIER allocate,LABEL=allocate,VALUE(REQUIRED,TYPE=$NUMBER)
+	QUALIFIER truncate,LABEL=truncate,VALUE(TYPE=$NUMBER,DEFAULT=0)
+	QUALIFIER fill_factor,LABEL=ratio,VALUE(REQUIRED,TYPE=$NUMBER)
+	QUALIFIER version,LABEL=version,VALUE(REQUIRED,TYPE=$NUMBER)
+	disallow test and not compress
+	disallow any2(dump,compress,version,create)
+	disallow any2(dump,compress,alias,create)
+	disallow any2(dump,compress,empty,create)
+	disallow any2(dump,compress,check,create)
+	disallow allocate and not create
+	disallow truncate and not compress
+	disallow ratio and not compress
+        disallow alias and device
+	disallow version and device
+        disallow empty and device
+	disallow check and device
+	disallow repair and not check
+	disallow create and device
