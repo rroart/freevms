@@ -10,7 +10,7 @@ mod-subdirs :=	dio mtd sbus video macintosh usb input telephony sgi ide \
 		message/i2o message/fusion scsi md ieee1394 pnp isdn atm \
 		fc4 net/hamradio i2c bluetooth
 
-subdir-y :=	char block net
+subdir-y :=	char block net misc
 subdir-m :=	$(subdir-y)
 
 
