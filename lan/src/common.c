@@ -687,7 +687,7 @@ config_in_dev(struct in_device ** in) {
 struct net_device mynetdevice;
 
 probe_units() {
-#ifdef __arch_i386__
+#ifndef __arch_um__
   bzero(&mynetdevice,sizeof(mynetdevice));
   ne_probe(&mynetdevice);
 #endif
