@@ -54,7 +54,7 @@
 #define		PRV$M_BRIEF		0x2
 #define		PRV$M_FILLED		0x4
 	
-typedef union _prvdef {
+union _prvdef {
   struct  {
     unsigned prv$v_cmkrnl		: 1;
     unsigned prv$v_cmexec		: 1;
