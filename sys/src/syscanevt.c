@@ -6,12 +6,19 @@
 #include<ssdef.h>
 
 #include<linux/linkage.h>
+#include<linux/sched.h>
+
+#include<system_data_cells.h>
+
+#include <tqedef.h>
 
 asmlinkage int exe$cantim(unsigned long reqidt, unsigned int acmode){
-  exe$rmvtimq(reqidt,acmode);
+  exe_std$rmvtimq(acmode,reqidt,0,0);
   return SS$_NORMAL;
 }
 
-asmlinkage void exe$canwak(void){
-printk("called canwak but not implemented\n");
+asmlinkage void exe$canwak(unsigned int *pidadr, void *prcnam){
+  int ipid=smp$gl_cpu_data[0]->cpu$l_curpcb->pcb$l_pid;
+  exe_std$rmvtimq(0,0,TQE$C_WKSNGL,ipid);
+  return SS$_NORMAL;
 }
