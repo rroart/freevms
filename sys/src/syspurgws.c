@@ -5,6 +5,6 @@
 
 #include<linux/linkage.h>
 
-asmlinkage void exe$purgws(void) {
+asmlinkage int exe$purgws(struct _va_range *inadr) {
 
 }
