@@ -552,9 +552,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
   if (fib->fib$w_did_num) {
     int fd;
+    struct file * f;
     char * name;
     int error=0;
-    struct dirent dir;
+    struct dirent64 dir;
     struct nameidata nd;
     struct inode * head;
     struct _fcb * fcb=x2p->primary_fcb;
@@ -571,9 +572,17 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       dir.d_reclen=0;
     }
 
-    fd=sys_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY, 0);
+    f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY, 0);
+    {
+      struct files_struct * files = current->files;
+      while (fd < files->max_fds) {
+	if (file == files->fd[fd]) break;
+	fd++;
+      }
+    }
     sys_getdents64(fd,&dir,1);
-    sys_close(fd);
+    //    vfs_readdir(file, filldir64, &buf);
+    sys_close(f,0);
 
     resdsc->dsc$a_pointer=strdup(dir.d_name);
     resdsc->dsc$w_length=strlen(resdsc->dsc$a_pointer);
