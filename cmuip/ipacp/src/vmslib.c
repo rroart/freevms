@@ -184,7 +184,7 @@ XQL$FAO() {
 LIB$GET_VM_PAGE(size, addr) 
      long * addr;
 {
-  *addr=kmalloc(size/8+1,GFP_KERNEL);
+  *addr=kmalloc(4096*(size/8+1),GFP_KERNEL);
   return SS$_NORMAL;
   printk("LIB$GET_VM_PAGE not implemented\n");
 }

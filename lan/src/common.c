@@ -29,8 +29,10 @@
 #include<linux/if_ether.h>
 
 #include <linux/netdevice.h>
+#include <linux/inetdevice.h>
 
 #include "../../cmuip/ipacp/src/xedrv.h"
+#include "../../cmuip/central/include/netconfig.h"
 
 int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c){ 
   if ((i->irp$l_func&(IO$M_CTRL|IO$M_STARTUP))==(IO$M_CTRL|IO$M_STARTUP)) {
@@ -54,7 +56,7 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
       switch (*addr++) {
       case NMA$C_PCLI_PTY:
 	//lsb->lsb$l_valid_pty=*addr++;
-	ni->ucb$l_ni_pty=*addr++;
+	ni->ucb$l_ni_pty=htonl(*addr++);
 	break;
       default:
       }
@@ -62,9 +64,12 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     //lsb->lsb$l_next_lsb=ni->ucb$l_ni_lsb;
     //ni->ucb$l_ni_lsb=lsb;
 
+    config_in_dev(&dev->ip_ptr);
+
     if (dev->open) {
       dev->open(dev);
     }
+    set_bit(__LINK_STATE_START, &dev->state);
 
   }
 
@@ -163,10 +168,14 @@ int lan$eth_type_trans(struct _ucb * u, void * data ) {
 }
 
 int lan$netif_rx(struct _ucb * u, char * buf, int len ) {
-  int proto=lan$eth_type_trans(u, buf);
+  int proto=ntohs(lan$eth_type_trans(u, buf));
   struct _ucbnidef * ni;
   struct _ucb * head=u;
   struct _ucb * tmp=u->ucb$l_fqfl;
+  if (proto==ETH_P_IPV6) {
+    kfree(buf);
+    return;
+  }
   while (head!=tmp) {
     ni = tmp;
     if (proto == ni->ucb$l_ni_pty) break;
@@ -205,7 +214,7 @@ void              unregister_netdev(struct net_device *dev) {
   printk ("unreg netdev not impl\n");
 } 
 
-register_inetaddr_notifier() {
+register_inetaddr_notifier(struct notifier_block *nb) {
   printk(" register_inetaddr_notifie not impl\n");
 }
 
@@ -560,4 +569,18 @@ int netdev_boot_setup_check(struct net_device *dev)
 		}
 	}
 	return 0;
+}
+
+config_in_dev(struct in_device ** in) {
+  extern Device_Configuration_Entry dev_config_tab[];
+  struct in_ifaddr *in_ifa = kmalloc(sizeof(*in_ifa), GFP_KERNEL);
+  struct in_device *in_dev = kmalloc(sizeof(*in_dev), GFP_KERNEL);
+  memset(in_dev, 0, sizeof(*in_dev));
+  memset(in_ifa, 0, sizeof(*in_ifa));
+  *in=in_dev;
+  in_dev->ifa_list=in_ifa;
+  if (!in_dev)
+    return NULL;
+  in_ifa-> ifa_address = dev_config_tab[0].dc_ip_address;
+  in_ifa-> ifa_mask = dev_config_tab[0].dc_ip_netmask;
 }
