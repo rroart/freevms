@@ -583,7 +583,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     }
     sys_getdents64(fd,&dir,1);
     //    vfs_readdir(file, filldir64, &buf);
-    sys_close(f,0);
+    filp_close(f,0);
 
     resdsc->dsc$a_pointer=strdup(dir.d_name);
     resdsc->dsc$w_length=strlen(resdsc->dsc$a_pointer);
