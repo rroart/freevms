@@ -242,7 +242,7 @@ unsigned dir(int argc,char *argv[],int qualc,char *qualv[])
                         printcol = 0;
                     } else {
                         printf("%*s",newcol - printcol," ");
-                        printcol = newcol;
+			printcol = newcol;
                     }
                 }
                 fputs(rsa + dirlen,stdout);
@@ -1045,45 +1045,72 @@ struct CMDSET {
     int maxargs;
     int maxquals;
 } cmdset[] = {
-    {
-        "copy",copy,3,3,3,1
-},
-    {
-        "import",import,3,3,3,0
-},
-    {
-        "export",export,3,3,3,0
-},
-    {
-        "delete",del,3,2,2,0
-},
-    {
-        "difference",diff,3,3,3,0
-},
-    {
-        "directory",dir,3,1,2,6
-},
-    {
-        "exit",NULL,2,0,0,0
-},
-    {
-        "extend",extend,3,2,2,0
-},
-    {
-        "help",help,2,1,1,0
-},
-    {
-        "quit",NULL,2,0,0,0
-},
-    {
-        "show",show,2,2,2,0
-},
-    {
-        "search",search,3,3,3,0
-},
-    {
-        "set",set,3,2,3,0
-},
+  {
+    "copy",copy,3,3,3,1
+  },
+  {
+    "copy.exe",copy,3,3,3,1
+  },
+  {
+    "import",import,3,3,3,0
+  },
+  {
+    "import.exe",import,3,3,3,0
+  },
+  {
+    "export",export,3,3,3,0
+  },
+  {
+    "export.exe",export,3,3,3,0
+  },
+  {
+    "delete",del,3,2,2,0
+  },
+  {
+    "delete.exe",del,3,2,2,0
+  },
+  {
+    "delete.exe",del,3,2,2,0
+  },
+  {
+    "difference",diff,3,3,3,0
+  },
+  {
+    "difference.exe",diff,3,3,3,0
+  },
+  {
+    "directory",dir,3,1,2,6
+  },
+  {
+    "directory.exe",dir,3,1,2,6
+  },
+  {
+    "exit",NULL,2,0,0,0
+  },
+  {
+    "extend",extend,3,2,2,0
+  },
+  {
+    "extend.exe",extend,3,2,2,0
+  },
+  {
+    "help",help,2,1,1,0
+  },
+  {
+    "quit",NULL,2,0,0,0
+  },
+  {
+    "show",show,2,2,2,0
+  },
+  {
+    "search",search,3,3,3,0
+  },
+  {
+    "search.exe",search,3,3,3,0
+  },
+  {
+    "set",set,3,2,3,0
+  },
 #ifndef VMSIO
 #if 0
     {
@@ -1092,7 +1119,10 @@ struct CMDSET {
 #endif
     {
         "mount",domount,3,2,3,2
-},
+    },
+    {
+        "mount.exe",domount,3,2,3,2
+    },
 #if 0
     {
         "statistics",statis,3,1,1,0
@@ -1106,7 +1136,10 @@ struct CMDSET {
 #endif
     {
         "type",typ,3,2,2,0
-},
+    },
+    {
+        "type.exe",typ,3,2,2,0
+    },
     {
         NULL,NULL,0,0,0,0
 }
@@ -1270,6 +1303,7 @@ int main_not(int argc,char *argv[])
 
 int main(int argc,char *argv[])
 {
+  setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
   char str[2048];
   int c,i=0;
   for(c=0;c<argc;c++) {

@@ -77,6 +77,7 @@
 
 #include<ihddef.h>
 #include<ihadef.h>
+#include<syidef.h>
 
 #include <string.h>
 
@@ -687,24 +688,56 @@ static Command intcmd[] = {
 	1, "wait until",           int_wait_until,           NULL, "<datetime>", 
 	// the following are really not internal
 	// waiting for dcltables.exe
-	0, "mount", 1, 0, "/vms$common/sysexe/mount",
-	0, "directory", 1, 0, "/vms$common/sysexe/directory",
-	0, "copy", 1, 0, "/vms$common/sysexe/copy",
-	0, "export", 1, 0, "/vms$common/sysexe/export",
-	0, "import", 1, 0, "/vms$common/sysexe/import",
-	0, "delete", 1, 0, "/vms$common/sysexe/delete",
-	0, "difference", 1, 0, "/vms$common/sysexe/difference",
-	0, "extend", 1, 0, "/vms$common/sysexe/extend",
-	0, "search", 1, 0, "/vms$common/sysexe/search",
-	0, "type", 1, 0, "/vms$common/sysexe/type",
-	0, "init", 1, 0, "/vms$common/sysexe/init",
-	0, "create", 1, 0, "/vms$common/sysexe/create",
+	0, "_mount", 1, 0, "/vms$common/sysexe/mount",
+	0, "_directory", 1, 0, "/vms$common/sysexe/directory",
+	0, "_copy", 1, 0, "/vms$common/sysexe/copy",
+	0, "_export", 1, 0, "/vms$common/sysexe/export",
+	0, "_import", 1, 0, "/vms$common/sysexe/import",
+	0, "_delete", 1, 0, "/vms$common/sysexe/delete",
+	0, "_difference", 1, 0, "/vms$common/sysexe/difference",
+	0, "_extend", 1, 0, "/vms$common/sysexe/extend",
+	0, "_search", 1, 0, "/vms$common/sysexe/search",
+	0, "_type", 1, 0, "/vms$common/sysexe/type",
+	0, "_init", 1, 0, "/vms$common/sysexe/init",
+	0, "_create", 1, 0, "/vms$common/sysexe/create",
+	0, "_edt", 1, 0, "/vms$common/sysexe/edt",
+	0, "mount", 1, 0, "/vms$common/sysexe/mount.exe",
+	0, "directory", 1, 0, "/vms$common/sysexe/directory.exe",
+	0, "copy", 1, 0, "/vms$common/sysexe/copy.exe",
+	0, "export", 1, 0, "/vms$common/sysexe/export.exe",
+	0, "import", 1, 0, "/vms$common/sysexe/import.exe",
+	0, "delete", 1, 0, "/vms$common/sysexe/delete.exe",
+	0, "difference", 1, 0, "/vms$common/sysexe/difference.exe",
+	0, "extend", 1, 0, "/vms$common/sysexe/extend.exe",
+	0, "search", 1, 0, "/vms$common/sysexe/search.exe",
+	0, "type", 1, 0, "/vms$common/sysexe/type.exe",
+	0, "init", 1, 0, "/vms$common/sysexe/init.exe",
+	0, "create", 1, 0, "/vms$common/sysexe/create.exe",
+	0, "edt", 1, 0, "/vms$common/sysexe/edt.exe",
 	0, NULL, NULL, NULL, NULL };
 
 
 const char oz_s_logname_defaulttables[] = "DEFAULT";
 
 const char oz_sys_copyright[] = "C";
+
+int check_vms_mm() {
+  int retlenaddr;
+  int mem=0;
+  struct item_list_3 lst[14], syilst[2];
+  syilst[0].buflen=4;
+  syilst[0].item_code=SYI$_LASTFLD;
+  syilst[0].bufaddr=&mem;
+  syilst[0].retlenaddr=&retlenaddr;
+  syilst[1].buflen=0;
+  syilst[1].item_code=0;
+
+  int sts=sys$getsyi(0,0,0,syilst,0,0,0);
+
+  return mem;
+}
+
+int vms_mm;
 
 static char prompt[32]="$ ";
 
@@ -729,6 +762,8 @@ unsigned long main (int argc, char *argv[])
   h_s_error   = stderr;
   h_s_input   = stdin;
   h_s_output  = stdout;
+
+  vms_mm = check_vms_mm();
 
   /* Put argc/argv's in symbols oz_arg0... Set symbol oz_nargs to the number of values. */
 
@@ -3707,6 +3742,10 @@ static Command *decode_command (int argc, const char **argv, Command *cmdtbl, in
   len1 = 0;					/* length of last matched entry */
 
   for (i = 0; (p = cmdtbl[i].name) != NULL; i ++) { /* loop through table */
+    if (vms_mm) {
+    } else {
+      if (*p=='_') p++;
+    }
     j = cmpcmdname (argc, argv, p);		/* compare the name */
     if (j > len1) {				/* see if better match than last */
       cmd1 = cmdtbl + i;			/* ok, save table pointer */
@@ -5650,8 +5689,11 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
 
   active=(unsigned long)hdrbuf+hdrbuf->ihd$w_activoff;
 
+#if 0
+  // can't do this, for some reason it causes pagefault
   char * str = argv[0];
   str[len-4]=0;
+#endif
 
   func=active->iha$l_tfradr1;
 
