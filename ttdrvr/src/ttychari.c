@@ -85,7 +85,7 @@ int tty$putnextchar(int * chr, int * CC, struct _ucb * u) {
   int cc;
   tty$getnextchar(chr,&cc,u); // manual said echoing is needed, too
 
-  //ioc$reqcom(SS$_NORMAL,0,u);
+  ioc$reqcom(SS$_NORMAL,0,u); // not needed here?
 
   return 1;
 }
