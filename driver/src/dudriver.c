@@ -2463,6 +2463,20 @@ void du_dg() {
 void du_err() {
 }
 
+#if 0
+int mscpcli(void) {
+  while (1) {
+    if (mypb.pb$w_state==PB$C_OPEN) goto out;
+    sleep(10);
+  }
+ out:
+  du_init(0);
+ out2:
+  sleep(1000);
+  goto out2;
+}
+#endif
+
 void du_init(char *s) {
   struct _ucb * u;
   struct _ddb * d;

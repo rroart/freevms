@@ -596,11 +596,25 @@ static inline void dn_rt_finish_output2(struct sk_buff *skb, char *dst)
     kfree_skb(skb);
 }
 
+// this is not right, but works
+void scs_fill_dx(struct _nisca * msg,unsigned short dx_hi,unsigned long dx_lo,unsigned short sr_hi,unsigned long sr_lo) {
+  msg->nisca$w_dx_group=0xfffe;
+  msg->nisca$w_dx_dst_hi=dx_hi;
+  msg->nisca$l_dx_dst_lo=dx_lo;
+  msg->nisca$w_dx_src_hi=sr_hi;
+  msg->nisca$l_dx_src_lo=sr_lo;
+}
+
+int scs_from_myself(struct _nisca * msg,unsigned short sr_hi,unsigned long sr_lo) {
+  return 
+  (msg->nisca$w_dx_src_hi==sr_hi) &&
+  (msg->nisca$l_dx_src_lo==sr_lo);
+}
 
 static void dn_send_endnode_hello(struct net_device *dev)
 {
-        struct _nisca_intro *intro;
-        struct _nisca *nisca;
+        struct _nisca *intro;
+        struct _nisca *nisca, *dx;
         struct sk_buff *skb = NULL;
         unsigned short int *pktlen;
 	void * msg;
@@ -614,6 +628,10 @@ static void dn_send_endnode_hello(struct net_device *dev)
 	msg = skb_put(skb,sizeof(*nisca));
 
         intro = msg;
+
+	dx=getdx(msg);
+
+	scs_fill_dx(msg,0xab00,0x04010000,0xaa00,(system_utsname.nodename[0]<<16)+system_utsname.nodename[1]);
 
 	nisca=getcc(msg);
 
@@ -648,7 +666,7 @@ static void dn_send_endnode_hello(struct net_device *dev)
         msg->datalen = 0x02;
         memset(msg->data, 0xAA, 2);
 #endif
-        
+
         pktlen = (unsigned short *)skb_push(skb,2);
         *pktlen = dn_htons(skb->len - 2);
 
@@ -3547,9 +3565,9 @@ int opc_msgrec(struct sk_buff *skb) {
   __u16 len = dn_ntohs(*(__u16 *)skb->data);
   unsigned char padlen = 0;
   struct _scs * msg=skb;
-  msg=((long)msg)+16;
+  msg=((long)msg)+14;
   
-  if (msg->scs$w_mtype) {
+  if (msg->scs$w_mtype) { // if other than con_req
     cdt=&cdtl[msg->scs$l_src_conid];
   } else {
     cdt=find_free_cdt();
@@ -3562,6 +3580,7 @@ int opc_msgrec(struct sk_buff *skb) {
     // do an accept or reject
     //cdt->cdt$w_state=CDT$C_REJ_SENT
     //scs_msg_ctl_comm(cdt,SCS$C_REJ_REQ);
+    scs$accept(0,0,0,0,0,0,0,0,0,0,0,0,cdt,0);
     cdt->cdt$w_state=CDT$C_ACCP_SENT;
     scs_msg_ctl_comm(cdt,SCS$C_ACCP_REQ);
     break;
@@ -3762,19 +3781,19 @@ void * getdx(void * buf) {
 
 void * getcc(void * buf) {
   unsigned long l=(unsigned long)buf;
-  struct _nisca * nisca=(struct _nisca *)(l+16);
+  struct _nisca * nisca=(struct _nisca *)(l+14);
   return nisca;
 }
 
 void * gettr(void * buf) {
   unsigned long l=(unsigned long)buf;
-  struct _nisca * nisca=(struct _nisca *)(l+16);
+  struct _nisca * nisca=(struct _nisca *)(l+14);
   return nisca;
 }
 
 void * getppdscs(void * buf) {
   unsigned long l=(unsigned long)buf;
-  struct _nisca * nisca=(struct _nisca *)(l+16);
+  struct _nisca * nisca=(struct _nisca *)(l+14);
   unsigned long tr_flag=nisca->nisca$b_tr_flag;
   unsigned long tr_pad=nisca->nisca$b_tr_pad_data_len;
   unsigned long retadr=(unsigned long)(&nisca->nisca$b_tr_pad_data_len)+tr_pad;
@@ -3792,13 +3811,11 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
       struct _nisca * nisca;
       unsigned char tr_flag;
       unsigned char tr_pad;
-      unsigned char * msg=skb->data+2;
+      unsigned char * msg; 
       struct _ppd *ppd;
       struct _scs *scs;
+      struct _nisca *dx;
       int (*func)();
-      nisca=gettr(msg);
-      scs=getppdscs(msg);
-      ppd=getppdscs(msg);
 
       if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
               goto out;
@@ -3806,6 +3823,17 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
       skb_pull(skb, 2);
 
       skb_trim(skb, len);
+
+      msg=skb->data;
+      nisca=gettr(msg);
+      scs=getppdscs(msg);
+      ppd=getppdscs(msg);
+      dx=getdx(msg);
+
+      if (scs_from_myself(dx,0xaa00,(system_utsname.nodename[0]<<16)+system_utsname.nodename[1])) {
+	printk("discarding packet from myself (mcast...?)\n");
+	goto dump_it;
+      }
 
       tr_flag=nisca->nisca$b_tr_flag;
       tr_pad=nisca->nisca$b_tr_pad;

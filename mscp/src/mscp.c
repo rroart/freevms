@@ -2288,7 +2288,7 @@ int mscp(void) {
   char myname[]="mscp$disk";
   char myinfo[]="mscp disk";
   mscpdaemonize(); /* find out what this does */
-  
+
   //  listen(msgbuf,err,cdt,pdt,cdt);
   scs$listen(mscplisten,mscp,mscpmyerr,myname,myinfo);
 }

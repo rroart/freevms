@@ -845,6 +845,9 @@ static void prepare_namespace(void)
 extern int mydebug5;
 extern int mydebug6;
 
+extern int mscp(void);
+extern int msclcli(void);
+
 static int init(void * unused)
 {
 	lock_kernel();
@@ -870,6 +873,12 @@ static int init(void * unused)
 	(void) dup(0);
 	printk("here 2\n");
 	
+	//kernel_thread(mscp, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
+	//kernel_thread(mscpcli, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
+
+	scs_init();
+	mscp();
+
 	/*
 	 * We try each of these until one succeeds.
 	 *

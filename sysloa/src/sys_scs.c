@@ -572,16 +572,17 @@ static int dn_wait_accept(struct _cdt *sock, int flags)
         return 0;
 }
 
+//static int dn_accept(struct _cdt *sock, struct _cdt *newsock, int flags)
 
-static int dn_accept(struct _cdt *sock, struct _cdt *newsock, int flags)
+int scs$accept (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsysid, void *rstadr, void *rprnam, void *lprnam, int initcr, int minscr, int initdg, int blkpri, void *condat, void *auxstr, void (*badrsp)(), void (*movadr)(), int load_rating,int (*req_fast_recvmsg)(), void (*fast_recvmsg_pm)(), void (*change_aff)(), void (*complete)(), struct _cdt * cdt, int connect_parameter)
 {
-	struct _cdt *sk = sock, *newsk;
+	struct _cdt *sk = cdt, *newsk, *newsock;
 	struct sk_buff *skb = NULL;
 	struct _cdt *cb;
 	unsigned char menuver;
 	int err = 0;
 	unsigned char type;
-
+	int flags;
 	
 
         if (sk->cdt$w_state != CDT$C_LISTEN) {
@@ -1730,7 +1731,7 @@ static struct proto_ops dn_proto_ops = {
 	bind:		dn_bind,
 	connect:	dn_connect,
 	socketpair:	sock_no_socketpair,
-	accept:		dn_accept,
+	accept:		scs$accept,
 	getname:	dn_getname,
 	poll:		dn_poll,
 	ioctl:		dn_ioctl,
