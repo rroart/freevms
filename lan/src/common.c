@@ -46,6 +46,8 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     ioc_std$clone_ucb(u->ucb$l_ddb->ddb$ps_ucb /*&er$ucb*/,&newucb);
     //    exe$assign(dsc,&chan,0,0,0);
 
+    c->ccb$l_ucb=newucb;
+
     struct _ucbnidef * ni=newucb;
 
     struct net_device * dev = ni -> ucb$l_extra_l_1;
@@ -171,7 +173,7 @@ int lan$netif_rx(struct _ucb * u, char * buf, int len ) {
   int proto=ntohs(lan$eth_type_trans(u, buf));
   struct _ucbnidef * ni;
   struct _ucb * head=u;
-  struct _ucb * tmp=u->ucb$l_fqfl;
+  struct _ucb * tmp=u->ucb$l_link;
   if (proto==ETH_P_IPV6) {
     kfree(buf);
     return;
@@ -179,9 +181,15 @@ int lan$netif_rx(struct _ucb * u, char * buf, int len ) {
   while (head!=tmp) {
     ni = tmp;
     if (proto == ni->ucb$l_ni_pty) break;
-    tmp=tmp->ucb$l_fqfl;
+    tmp=tmp->ucb$l_link;
   }
-  exe$iofork(u->ucb$l_ioqfl,u);
+  if (proto != ni->ucb$l_ni_pty) {
+    kfree(buf);
+    return;
+  }
+
+  exe$iofork(tmp->ucb$l_ioqfl,tmp);
+
 }
 
 int lan$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {

@@ -33,8 +33,9 @@
 
 // extern int kernel_errno;
 
-void exe$insertirp(void * u, struct _irp * i) {
-  struct _irp *tmp=((struct _irp *)u)->irp$l_ioqfl;
+void exe$insertirp(struct _ucb * u, struct _irp * i) {
+  //  struct _irp *tmp=((struct _irp *)u)->irp$l_ioqfl; // change to ucb$l_ioqfl
+  struct _irp *tmp=u->ucb$l_ioqfl;
   while (tmp!=u && i->irp$b_pri>tmp->irp$b_pri)
     tmp=tmp->irp$l_ioqfl;
   insque(i,tmp);
@@ -91,7 +92,7 @@ int exe$insioq (struct _irp * i, struct _ucb * u) {
   /* raise ipl */
   int savipl=forklock(u->ucb$b_flck,u->ucb$b_flck);
   if (u->ucb$l_sts & UCB$M_BSY)
-    exe$insertirp(&u->ucb$l_ioqfl,i);
+    exe$insertirp(u,i); // should be &u->ucb$l_ioqfl ?
   else {
     u->ucb$l_sts|=UCB$M_BSY;
     ioc$initiate(i,u);
