@@ -461,7 +461,7 @@ got_it:
 	memcpy (de->name, name, namelen);
 	de->inode = cpu_to_le32(inode->i_ino);
 	ext2_set_de_type (de, inode);
-	err = ext2_commit_chunk(inode, page, from, to);
+	err = ext2_commit_chunk(dir, page, from, to);
 	dir->i_mtime = dir->i_ctime = CURRENT_TIME;
 	ext2_sync_inode (dir);
 	//mark_inode_dirty(dir);
