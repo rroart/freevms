@@ -1,0 +1,16 @@
+ncftpget ftp://ftp.gnu.org/pub/gnu/binutils/binutils-2.13.2.1.tar.gz
+ncftpget ftp://freevms.nvg.org/pub/vms/freevms/linker-0_0_45
+tar xzf binutils-2.13.2.1.tar.gz
+cd binutils-2.13.2.1
+patch -p1 < ../linker-0_0_45
+cd ..
+mkdir build
+cd build
+../configure --target=i386-rt-vms
+make
+# rename ld/ld-new to linker/src/link
+# link with: link infile /usr/lib/crt*.o /usr/lib/libc.a -o outfile etc
+# anal/image - like program readnisse. use with readnisse -h file
+# go to examples and gcc -c hi.c
+# do something like
+# ../linker/src/link hi.o /usr/lib/crt*.o /usr/lib/libc.a /usr/lib/gcc-lib/i386-redhat-linux/2.96/libgcc.a -o hi.exe
