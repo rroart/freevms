@@ -102,8 +102,12 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
     config_in_dev(&dev->ip_ptr);
 
-    if (dev->open) {
+    static dev_open = 0;
+
+    if (!dev_open && dev->open) {
       dev->open(dev);
+      dev_open = 1;
+      printk("%%KERNEL-I-INFO, Doing network dev->open(), one is enough.\n");
     }
     set_bit(__LINK_STATE_START, &dev->state);
     }
@@ -230,6 +234,7 @@ int lan$netif_rx(struct _ucb * u, void * bdsc) {
   struct _ucbnidef * ni;
   struct _ucb * head=u;
   struct _ucb * tmp=u->ucb$l_link;
+
   if (proto==ETH_P_IPV6) {
     kfreebuf(cb1);
     return;
