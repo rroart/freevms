@@ -28,9 +28,9 @@ int sch$qend(struct _pcb * p) {
     tmppri--;
     if (tmppri<=p->pcb$b_pri) {
 	if (p->pcb$b_pri != p->pcb$b_prib) ++p->pcb$b_pri;
-	 sch$resched(); /*no interrupt yet*/ /*did not work*/
+	//	 sch$resched(); /*no interrupt yet*/ /*did not work*/
 	//SOFTINT_RESCHED_VECTOR;
-	 p->need_resched = 0;       }
+	 p->need_resched = 1;       }
     else
       {
 	p->need_resched=1;

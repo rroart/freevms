@@ -122,6 +122,8 @@ static void poll_idle (void)
  */
 
 extern int done_init_idle;
+int in_idle_while;
+unsigned long round_and_round;
 
 void cpu_idle (void)
 {
@@ -144,8 +146,15 @@ void cpu_idle (void)
 		if (!idle)
 			idle = default_idle;
 		// printk("bef while\n");
+		in_idle_while=1;
 		while (!current->need_resched)
-					idle();
+		  idle();
+		//round_and_round=1;
+		//while (!current->need_resched && round_and_round++)
+		//			idle();
+		//if (!round_and_round)
+		//  printk("enough idling\n");
+		in_idle_while=0;
 		//cli();
 		//{ int i; for(i=0;i<1000000;i++) ; }
 		//sti();

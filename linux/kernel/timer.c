@@ -585,12 +585,14 @@ pid0count=0; /* Will be removed in the future */
 
 int countme2=500;
 
-extern int mydebug5;
+extern int mydebug5,mydebug6,in_idle_while;
 
 void update_process_times(int user_tick)
 {
 	struct task_struct *p = current;
 	int cpu = smp_processor_id(), system = user_tick ^ 1;
+	//	if (mydebug6 && in_idle_while)
+	//  printk(".");
 	if (mydebug5 && !countme2--) { 
 	  countme2=500; printk(",");
 	  printk("timer %x %x %x\n",p->pid,p->phd$w_quant,p->pcb$b_pri);

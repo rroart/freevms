@@ -63,6 +63,66 @@ int mydebug4 = 0;
 int mydebug5 = 0;
 int mydebug6 = 1;
 
+int numproc(void) {
+  int i,n=0;
+  struct _pcb  *tmp2;
+  unsigned long tmp;
+  for(i=0;i<32;i++) {
+    tmp=sch$aq_comh[i];
+    if(*(unsigned long *)tmp == tmp) {; } else {
+      tmp2=tmp;
+      do {
+	n++;
+	tmp2=tmp2->pcb$l_sqfl;
+	//	printk("%x %x %x & ",tmp2,tmp2->pid,tmp2->pcb$b_pri);
+      } while (tmp2!=tmp);
+      n--;
+      //      printk("\n");
+    }
+  }
+  return n;
+}
+
+void printcom(void) {
+  int i;
+  struct _pcb  *tmp2;
+  unsigned long tmp;
+  printk(KERN_EMERG "cpusch %x\n",sch$gl_comqs);
+  for(i=16;i<32;i++) {
+    tmp=sch$aq_comh[i];
+    if(*(unsigned long *)tmp == tmp) {; } else {
+      tmp2=tmp;
+      printk(KERN_EMERG "com %x ",i);
+      do {
+	printk(KERN_EMERG "%x %x %x %x| ",tmp2,tmp2->pcb$l_sqfl,tmp2->pid,tmp2->pcb$b_pri);
+	tmp2=tmp2->pcb$l_sqfl;
+      } while (tmp2!=tmp);
+      printk(KERN_EMERG "\n");
+    }
+  }
+  printk(KERN_EMERG "\n");
+}
+
+void printcom2(void) {
+  int i;
+  struct _pcb  *tmp2;
+  unsigned long tmp;
+  printk(KERN_EMERG "cpusch %x\n",sch$gl_comqs);
+  for(i=16;i<32;i++) {
+    tmp=sch$aq_comt[i];
+    if(*(unsigned long *)tmp == tmp) {; } else {
+      tmp2=tmp;
+      printk(KERN_EMERG "com %x ",i);
+      do {
+	printk(KERN_EMERG "%x %x %x %x| ",tmp2,tmp2->pcb$l_sqbl,tmp2->pid,tmp2->pcb$b_pri);
+	tmp2=tmp2->pcb$l_sqbl;
+      } while (tmp2!=tmp);
+      printk(KERN_EMERG "\n");
+    }
+  }
+  printk(KERN_EMERG "\n");
+}
+
 /*
  * Scheduling quanta.
  *
@@ -236,6 +296,23 @@ send_now_idle:
 #endif
 }
 
+int task_on_comqueue(struct _pcb *p) {
+  int i,found=0;
+  struct _pcb  *tmp2;
+  unsigned long tmp;
+  for(i=0;i<32;i++) {
+    tmp=sch$aq_comh[i];
+    if(*(unsigned long *)tmp == tmp) {; } else {
+      tmp2=tmp;
+      do {
+	if (tmp2 == p) found=1;
+	tmp2=tmp2->pcb$l_sqfl;
+      } while (tmp2!=tmp);
+    }
+  }
+  return found;
+}
+
 /*
  * Wake up a process. Put it on the run-queue if it's not
  * already there.  The "current" process is always on the
@@ -250,14 +327,16 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   int success = 0;
   unsigned long qhead;
   int curpri;
+  int before,after;
   int cpuid = smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid];
 
   spin_lock_irqsave(&runqueue_lock, flags);
   p->state = TASK_RUNNING;
-  nr_running++;
+  if (task_on_comqueue(p)) /*  argh! */
+    goto out;
 
-  p->pcb$b_pri=p->pcb$b_prib-3;  /* boost */
+  //  p->pcb$b_pri=p->pcb$b_prib-3;  /* boost */ /* not here */
   curpri=p->pcb$b_pri;
   if (mydebug4) printk("add tyr %x %x\n",p->pid,curpri);
   qhead=sch$aq_comt[curpri];
@@ -267,7 +346,17 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
   if (mydebug4) printk("iq3 %x\n",sch$aq_comh[curpri]);
 
+  before=numproc();
+  //    printcom();
+  //    printcom2();
   insque(p,qhead);
+  nr_running++;
+  after=numproc();
+  if(after-before!=1) {
+    printcom();
+    printcom2();
+    panic("insq1 %x %x %x %x\n",p,p->pid,before,after);
+  }
 
   if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
   if (mydebug4) printk("iq3 %x\n",sch$aq_comh[curpri]);
@@ -302,6 +391,7 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
     reschedule_idle(p);
   success = 1;
 
+ out:
   spin_unlock_irqrestore(&runqueue_lock, flags);
   return success;
 }
@@ -490,6 +580,7 @@ void sch$resched(void) {
   struct _pcb * curpcb;
   unsigned long curpri;
   unsigned long qhead;
+  int before,after;
 
   // lock sched db, soon
   //if (spl(IPL$_SCHED)) return;
@@ -515,7 +606,16 @@ void sch$resched(void) {
     sch$gl_comqs=sch$gl_comqs | (1 << curpri);
     //    curpcb->state=TASK_INTERRUPTIBLE; /* soon SCH$C_COM ? */
     qhead=sch$aq_comt[curpri];
+    before=numproc();
+    //    printcom();
     insque(curpcb,qhead);
+    nr_running++;
+    after=numproc();
+    if(after-before!=1) {
+      printcom();
+      panic("insq2 %x %x\n",before,after);
+    }
+
     sch$gl_idle_cpus=0;
   }
   sch$sched(1);
@@ -549,15 +649,14 @@ asmlinkage void schedule(void) {
 asmlinkage void sch$sched(int from_sch$resched) {
   int cpuid = smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid]; 
-  struct _pcb *prev, *next, *curpcb;
+  struct _pcb *next, *curpcb;
   int curpri, affinity;
   unsigned char tmppri;
   unsigned long qhead;
+  int after, before;
 
   curpcb=cpu->cpu$l_curpcb;
   curpri=cpu->cpu$b_cur_pri;
-
-  prev = curpcb;
 
   //  if (!countme--) { countme=500; printk("."); }
 
@@ -575,7 +674,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
   if (!curpcb->active_mm) BUG();
 
-  release_kernel_lock(prev, cpuid);
+  release_kernel_lock(curpcb, cpuid);
 
   spin_lock_irq(&runqueue_lock);
 
@@ -598,27 +697,16 @@ asmlinkage void sch$sched(int from_sch$resched) {
 			 (unsigned long *)qhead,(unsigned long *)(qhead+4),
 			 *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
 
-    if (mydebug5) {
-      int i;
-      struct _pcb  *tmp2;
-      unsigned long tmp;
-      for(i=0;i<32;i++) {
-	tmp=sch$aq_comh[i];
-	if(*(unsigned long *)tmp == tmp) {; } else {
-	  tmp2=((struct _pcb *)tmp)->pcb$l_sqfl->pcb$l_sqfl;
-	  printk("com %x ",i);
-	  do {
-	    printk("%x %x %x | ",tmp2,tmp2->pid,tmp2->pcb$b_pri);
-	    //	    if (prev->pid==2) { int i; for(i=0;i<1000000;i++) ; }
-	    tmp2=tmp2->pcb$l_sqfl;
-	  } while (tmp2!=tmp);
-	  printk("\n");
-	}
-      }
-    }
+    if (mydebug) printcom();
 
     if (mydebug4) printk("next %x %x %x %x\n",qhead,*(void**)qhead,next,sch$aq_comh[tmppri]);
+    before=numproc();
     next=(struct _pcb *) remque(qhead,next);
+    nr_running--;
+    after=numproc();
+    if(before-after!=1)
+      panic("remq1 %x %x\n",before,after);
+
     if (mydebug4) printk("next %x %x %x %x\n",qhead,*(void**)qhead,next,sch$aq_comh[tmppri]);
     if (mydebug4) printk("comh %x %x\n",sch$aq_comh[tmppri],((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl);
     if (sch$aq_comh[tmppri]==((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl)
@@ -630,8 +718,6 @@ asmlinkage void sch$sched(int from_sch$resched) {
   }
 
   if(next==0) 	  { int j; printk("qel0\n"); for(j=0;j<1000000000;j++) ; } 
-
-  nr_running--;
 
   /* bvs qempty not needed, it might panic on gen prot? */
 
@@ -653,35 +739,16 @@ asmlinkage void sch$sched(int from_sch$resched) {
   
   sch$gl_active_priority=sch$gl_active_priority | (1 << (31-cpu->cpu$b_cur_pri));
 
-  if (mydebug5) {
-    int i;
-    struct _pcb  *tmp2;
-    unsigned long tmp;
-    printk("pri %x %x %x %x %x %x\n",prev,prev->pid,prev->pcb$b_pri,next,next->pid,next->pcb$b_pri);
+  if (mydebug5) { 
+    printk("pri %x %x %x %x %x %x\n",curpcb,curpcb->pid,curpcb->pcb$b_pri,next,next->pid,next->pcb$b_pri);
     printk("cpusch %x %x\n",cpu->cpu$b_cur_pri,sch$gl_comqs);
-    for(i=0;i<32;i++) {
-      tmp=sch$aq_comh[i];
-      if(*(unsigned long *)tmp == tmp) {; } else {
-	tmp2=((struct _pcb *)tmp)->pcb$l_sqfl->pcb$l_sqfl;
-	printk("com %x ",i);
-	do {
-	  printk("%x %x %x | ",tmp2,tmp2->pid,tmp2->pcb$b_pri);
-	  //	    if (prev->pid==2) { int i; for(i=0;i<1000000;i++) ; }
-	  //	    if (prev->pid==2 && tmp2==0xc03e2340) { int i; for(i=0;i<2000000000;i++) ; }
-	  tmp2=tmp2->pcb$l_sqfl;
-	} while (tmp2!=tmp);
-	printk("\n");
-      }
-    }
-    printk("\n");
-    if (mydebug4) printk("loop end\n");
-    if (mydebug4) { int j; for(j=0;j<100000000;j++) ; }
+    printcom();
   }
 
-  prev->need_resched = 0;
+  curpcb->need_resched = 0;
 
   if (mydebug4) { int i; for(i=0;i<100000000;i++) ; }
-  if (next == prev) { /* does not belong in vms, but must be here */
+  if (next == curpcb) { /* does not belong in vms, but must be here */
     spin_unlock_irq(&runqueue_lock);
     //splret();
     return;
@@ -694,6 +761,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
   if (mydebug6)
     if (next>=&sch$aq_comh[0] && next<=&sch$aq_comh[33]) {
+      panic("ga!\n");
       printk("ga!\n");
       { int j; for(j=0;j<1000000000;j++) ; }
     }
@@ -702,16 +770,16 @@ asmlinkage void sch$sched(int from_sch$resched) {
   /*
    * there are 3 processes which are affected by a context switch:
    *
-   * prev == .... ==> (last => next)
+   * curpcb == .... ==> (last => next)
    *
-   * It's the 'much more previous' 'prev' that is on next's stack,
-   * but prev is set to (the just run) 'last' process by switch_to().
+   * It's the 'much more previous' 'curpcb' that is on next's stack,
+   * but curpcb is set to (the just run) 'last' process by switch_to().
    * This might sound slightly confusing but makes tons of sense.
    */
   prepare_to_switch();
   {
     struct mm_struct *mm = next->mm;
-    struct mm_struct *oldmm = prev->active_mm;
+    struct mm_struct *oldmm = curpcb->active_mm;
     if (!mm) {
       if (next->active_mm) { printk("bu %x %x %x\n",next,next->pid,next->pcb$b_pri); { int j; for(j=0;j<1000000000;j++) ; }; BUG(); }
       next->active_mm = oldmm;
@@ -722,8 +790,8 @@ asmlinkage void sch$sched(int from_sch$resched) {
       switch_mm(oldmm, mm, next, cpuid);
     }
 
-    if (!prev->mm) {
-      prev->active_mm = NULL;
+    if (!curpcb->mm) {
+      curpcb->active_mm = NULL;
       mmdrop(oldmm);
     }
   }
@@ -735,7 +803,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
   if (mydebug4) printk("bef swto\n");
 
-  switch_to(prev, next, prev);
+  switch_to(curpcb, next, curpcb);
 
   /* does not get here */
 

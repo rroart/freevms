@@ -9,11 +9,16 @@
 
 #include"queue.h"
 
+int in_insque=0;
+
 void insque(void * entry, void * pred) {
+if (in_insque) panic("aaaah\n");
+in_insque=1;
 *(void **)entry=*(void **)pred;
 *(void **)(entry+4)=pred;
 *(void **)((*(void **)pred)+4)=entry;
 *(void **)pred=entry;
+in_insque=0;
 }
 
 unsigned long remque(void * entry, void * addr) {
