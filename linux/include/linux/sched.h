@@ -702,6 +702,16 @@ extern long FASTCALL(interruptible_sleep_on_timeout(wait_queue_head_t *q,
 						    signed long timeout));
 extern int FASTCALL(wake_up_process(struct task_struct * tsk));
 
+extern void FASTCALL(__wake_up2(wait_queue_head_t *q, unsigned int mode, int nr,int priclass));
+extern void FASTCALL(__wake_up_sync2(wait_queue_head_t *q, unsigned int mode, int nr, int priclass));
+extern void FASTCALL(sleep_on(wait_queue_head_t *q));
+extern long FASTCALL(sleep_on_timeout(wait_queue_head_t *q,
+				      signed long timeout));
+extern void FASTCALL(interruptible_sleep_on(wait_queue_head_t *q));
+extern long FASTCALL(interruptible_sleep_on_timeout(wait_queue_head_t *q,
+						    signed long timeout));
+extern int FASTCALL(wake_up_process2(struct task_struct * tsk,int priclass));
+
 #define wake_up(x)			__wake_up((x),TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, 1)
 #define wake_up_nr(x, nr)		__wake_up((x),TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, nr)
 #define wake_up_all(x)			__wake_up((x),TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, 0)
@@ -712,6 +722,18 @@ extern int FASTCALL(wake_up_process(struct task_struct * tsk));
 #define wake_up_interruptible_all(x)	__wake_up((x),TASK_INTERRUPTIBLE, 0)
 #define wake_up_interruptible_sync(x)	__wake_up_sync((x),TASK_INTERRUPTIBLE, 1)
 #define wake_up_interruptible_sync_nr(x) __wake_up_sync((x),TASK_INTERRUPTIBLE,  nr)
+
+#define wake_up2(x,priclass)			__wake_up2((x),TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, 1,priclass)
+#define wake_up_nr2(x, nr,priclass)		__wake_up2((x),TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, nr,priclass)
+#define wake_up_all2(x,priclass)			__wake_up2((x),TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, 0,priclass)
+#define wake_up_sync2(x,priclass)			__wake_up_sync2((x),TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, 1,priclass)
+#define wake_up_sync_nr2(x, nr,priclass)		__wake_up_sync2((x),TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, nr,priclass)
+#define wake_up_interruptible2(x,priclass)	__wake_up2((x),TASK_INTERRUPTIBLE, 1,priclass)
+#define wake_up_interruptible_nr2(x, nr,priclass)	__wake_up2((x),TASK_INTERRUPTIBLE, nr,priclass)
+#define wake_up_interruptible_all2(x,priclass)	__wake_up2((x),TASK_INTERRUPTIBLE, 0,priclass)
+#define wake_up_interruptible_sync2(x,priclass)	__wake_up_sync2((x),TASK_INTERRUPTIBLE, 1,priclass)
+#define wake_up_interruptible_sync_nr2(x,priclass) __wake_up_sync2((x),TASK_INTERRUPTIBLE,  nr,priclass)
+
 asmlinkage long sys_wait4(pid_t pid,unsigned int * stat_addr, int options, struct rusage * ru);
 
 extern int in_group_p(gid_t);

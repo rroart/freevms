@@ -340,6 +340,7 @@ void sch$chsep2(struct _pcb * p,unsigned char newpri) {
   struct _pcb * p2, *p3 , *dummy;
   p3=p->pcb$l_sqfl;
   p2=p;
+  /*
   if (p3==p3->pcb$l_sqfl) {
       if (p2->state==TASK_RUNNING) {
 	sch$gl_comqs&=(~(1 << p2->pcb$b_pri));
@@ -347,6 +348,7 @@ void sch$chsep2(struct _pcb * p,unsigned char newpri) {
 	sch$gl_comoqs&=(~(1 << p2->pcb$b_pri));
       }
   }
+  */
   p->pcb$b_pri=newpri;
   /*
   if (!(p->pcb$l_sts & PCB$M_RES)) {
@@ -357,7 +359,7 @@ void sch$chsep2(struct _pcb * p,unsigned char newpri) {
     return;
   }
   */
-  SOFTINT_RESCHED_VECTOR;
+  //SOFTINT_RESCHED_VECTOR;
   p2->state=TASK_RUNNING;
   insque(p2,sch$aq_comt[newpri]);
   sch$gl_comqs|=(1 << newpri);

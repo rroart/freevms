@@ -408,6 +408,7 @@ static inline int try_to_wake_up2(struct task_struct * p, int synchronous, int p
   struct _cpu * cpu=smp$gl_cpu_data[cpuid];
 
   spin_lock_irqsave(&runqueue_lock, flags);
+  p->state = TASK_RUNNING;
   if (task_on_comqueue(p)) /*  argh! */
     goto out;
 

@@ -54,6 +54,8 @@
 #include <asm/mmu_context.h>
 #include <asm/hw_irq.h>
 
+#include "../../freevms/lib/src/pridef.h"
+
 #define MAX_BUF_PER_PAGE (PAGE_CACHE_SIZE / 512)
 #define NR_RESERVED (10*MAX_BUF_PER_PAGE)
 #define MAX_UNUSED_BUFFERS NR_RESERVED+20 /* don't ever have more than this 
@@ -127,7 +129,7 @@ void unlock_buffer(struct buffer_head *bh)
 	clear_bit(BH_Lock, &bh->b_state);
 	smp_mb__after_clear_bit();
 	if (waitqueue_active(&bh->b_wait))
-		wake_up(&bh->b_wait);
+		wake_up2(&bh->b_wait,PRI$_IOCOM);
 }
 
 /*
@@ -1329,7 +1331,7 @@ no_grow:
 		spin_unlock(&unused_list_lock);
 
 		/* Wake up any waiters ... */
-		wake_up(&buffer_wait);
+		wake_up2(&buffer_wait,PRI$_IOCOM);
 	}
 
 	/*
@@ -2522,7 +2524,7 @@ cleaned_buffers_try_again:
 	spin_unlock(&unused_list_lock);
 
 	/* Wake up anyone waiting for buffer heads */
-	wake_up(&buffer_wait);
+	wake_up2(&buffer_wait,PRI$_IOCOM);
 
 	/* And free the page */
 	page->buffers = NULL;
