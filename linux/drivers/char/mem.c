@@ -389,7 +389,12 @@ static inline size_t read_zero_pagealigned(char * buf, size_t size)
 	down_read(&mm->mmap_sem);
 
 	/* For private mappings, just map in zero pages. */
+#ifndef CONFIG_VMS_MM
 	for (vma = find_vma(mm, addr); vma; vma = vma->vm_next) {
+#else
+	  // need of course a lot more changes
+	  for (vma = 0; vma == 1; vma = 0) {
+#endif
 		unsigned long count;
 
 		if (vma->vm_start > addr || (vma->vm_flags & VM_WRITE) == 0)

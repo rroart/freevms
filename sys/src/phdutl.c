@@ -1,0 +1,2 @@
+mmg$dalcstxscn(void) {
+}

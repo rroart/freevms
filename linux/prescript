@@ -83,6 +83,9 @@ done
 		ln -s ../../freevms/sys/src/pagefault.c .;
 		ln -s ../../freevms/sys/src/sysadjwsl.c .;
 		ln -s ../../freevms/sys/src/syslkwset.c .;
+		ln -s ../../freevms/sys/src/syscrmpsc.c .;
+		ln -s ../../freevms/sys/src/sysdgblsc.c .;
+		ln -s ../../freevms/sys/src/phdutl.c .;
 
 		ln -s ../../freevms/pal/src/ipl.c .;
 		ln -s ../../freevms/pal/src/ast.c .;
