@@ -71,7 +71,7 @@ asmlinkage void sch$astdel(void) {
     /* unlock */
     printk("astdel1 %x \n",acb->acb$l_kast);
     setipl(0);
-    acb->acb$l_kast();
+    acb->acb$l_kast(acb->acb$l_astprm);
     setipl(IPL$_SYNCH);
     goto more;
   }

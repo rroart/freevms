@@ -167,6 +167,7 @@ void nl_init(void) {
   bcopy("NLA0",d->ddb$t_name,4);
 
   /* for the ucb init part */
+  qhead_init(&u->ucb$l_ioqfl);
   u->ucb$b_type=DYN$C_UCB;
   u->ucb$b_flck=IPL$_IOLOCK8;
   /* devchars? */

@@ -31,11 +31,10 @@ void exe$finishioc (long long * iosb, struct _irp * i, struct _pcb * p, struct _
   exe$finishio(iosb,i,p,u);
 }
 
-int exe$insioq (struct _ucb * u, struct _irp * i) {
+int exe$insioq (struct _irp * i, struct _ucb * u) {
   /* raise ipl */
   if (u->ucb$l_sts & UCB$M_BSY)
-    // exe$insertirp(&u->ucb$l_ioqfl,i); do not do this yet
-    u->ucb$l_sts&=~UCB$M_BSY;
+    exe$insertirp(&u->ucb$l_ioqfl,i);
   else {
     u->ucb$l_sts|=UCB$M_BSY;
     ioc$initiate(i,u);
@@ -81,6 +80,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   i->irp$w_func=q->func;
   i->irp$l_ucb=ctl$gl_ccbbase[q->chan].ccb$l_ucb;
   i->irp$l_pid=current->pid;
+  i->irp$w_sts|=IRP$M_BUFIO; /* no DIRIO because of no mmg$svaptechk */
   /* do preprocessing */
   /* does it do one or more functions */
   //  for(c=0,d=1;c<64;c++,d=d<1) /* right order? */
@@ -94,7 +94,7 @@ void exe$qioacppkt (void) {
 
 int exe$qiodrvpkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
 
-  exe$insioq(u,i);
+  exe$insioq(i,u);
   /* restore ipl to 0 */
   return SS$_NORMAL;
 }

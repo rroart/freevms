@@ -30,15 +30,18 @@ void ioc$reqcom(struct _irp * i, struct _ucb * u) {
 
   qemp=rqempty(&ioc$gq_postiq);
   insqti(i,&ioc$gq_postiq);
-  if (!qemp) goto notempty;
 
   if (smp_processor_id()==0) {
     SOFTINT_IOPOST_VECTOR;
   } else {
     /* request interprocessor interrupt */
+    if (!qemp) goto notempty;
+  notempty:
   }
-
- notempty:
+  i=remque(u->ucb$l_ioqfl,i);
+  ioc$initiate(i,u);
+  if (aqempty(u->ucb$l_ioqfl))
+    u->ucb$l_sts&=~UCB$M_BSY;
 }
 
 void ioc$wfikpch(struct _ipr * i, struct _ucb * u, int newipl, int timeout) {
