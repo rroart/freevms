@@ -112,8 +112,8 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 #endif
 
 	if (!in_free_all_bootmem_core)
-	  for(i=0,tmp=(((unsigned long)page-(unsigned long)mem_map)/sizeof(struct _pfn));i<(1 << order);i++,tmp++) {
-	    mmg$dallocpfn(tmp);
+	  for(i=0;i<(1 << order);i++,page++) {
+	    mmg$dallocpfn(page);
 	    //memlist_del(&page->list);
 	  }
 
