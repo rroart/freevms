@@ -63,7 +63,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   i->irp$w_chan=q->chan;
   i->irp$w_func=q->func;
   /* do preprocessing */
-
+  ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[q->func](q->p1,q->p2,q->p3,q->p4,q->p5,q->p6);
   
 }
 
