@@ -762,6 +762,11 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	  if (mypte->pte$v_typ0==0) {
 	    if (mypte->pte$v_pfn) {
 	    } else { // zero page demand?
+	      struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_HIGHER, IPL$_ASTDEL);
+	      if (address<rde->rde$ps_start_va && address>=(rde->rde$ps_start_va-PAGE_SIZE) {
+		rde->rde$ps_start_va-=PAGE_SIZE;
+		rde->rde$l_region_size+=PAGE_SIZE;
+	      }
 	      pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
 	      mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 	      *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
