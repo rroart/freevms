@@ -1168,8 +1168,13 @@ int main(int argc,char *argv[])
   char str[2048];
   int c,i=0;
   for(c=0;c<argc;c++) {
-    memcpy(&str[i],argv[c],strlen(argv[c]));
-    i+=strlen(argv[c]);
+    if (c) {
+      memcpy(&str[i],argv[c],strlen(argv[c]));
+      i+=strlen(argv[c]);
+    } else {
+      memcpy(&str[i],basename(argv[c]),strlen(basename(argv[c])));
+      i+=strlen(basename(argv[c]));
+    }
     str[i++]=32;
   }
   str[i]=0;
