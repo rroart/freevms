@@ -1278,7 +1278,7 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
 
 	print_name = pdev ? pdev->slot_name : "3c59x";
 
-	dev = alloc_etherdev(sizeof(*vp));
+	dev = kmalloc(sizeof(*vp), GFP_KERNEL);
 	retval = -ENOMEM;
 	if (!dev) {
 		printk (KERN_ERR PFX "unable to allocate etherdev, aborting\n");
