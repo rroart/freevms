@@ -13,8 +13,10 @@
 #define DO_OUTPUT 0
 #undef DO_OUTPUT
 
+#if 0
 struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
 struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
+#endif
 
 #define INPUT_NAME      "INFILE.DAT" 
 #define OUTPUT_NAME     "OUTFILE.DAT" 

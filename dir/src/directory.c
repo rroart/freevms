@@ -124,6 +124,7 @@
 //extern struct _nam cc$rms_nam;
 //extern struct _fab cc$rms_fab;
 
+#if 0
 struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
 struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
@@ -134,6 +135,7 @@ struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
 struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
 struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
 struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
+#endif
 
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
 
