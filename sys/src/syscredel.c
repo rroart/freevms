@@ -174,7 +174,7 @@ inline struct _rde * mmg$search_rde_va (void * va, struct _rde *head, struct _rd
   *prev=0;
   *next=head->rde$ps_va_list_flink;
 
-  while (tmp!=*next) {
+  while (head!=*next) {
     if (!head->rde$v_descend) {
       if ((tmp->rde$pq_start_va+tmp->rde$q_region_size) > va) goto out;
     } else {
