@@ -129,6 +129,12 @@ void exe$queue_fork(struct _irp * i, struct _ucb * u) {
   }
 }
 
-void exe_std$primitive_fork(struct _irp * i, struct _ucb * u) {
-  exe$iofork(i,u);
+void exe_std$queue_fork(struct _fkb * fkb) {
+  exe$queue_fork(0,fkb);
+}
+
+void exe_std$primitive_fork(long fr3, long fr4, struct _fkb * fkb) {
+  fkb->fkb$l_fr3=fr3;
+  fkb->fkb$l_fr4=fr4;
+  exe_std$queue_fork(fkb);
 }
