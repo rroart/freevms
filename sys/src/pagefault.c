@@ -32,11 +32,51 @@
 #include <wsldef.h>
 #include <va_rangedef.h>
 
+//FreeVMS PTE additions
+#define _PAGE_BIT_TYP1 11
+#define _PAGE_BIT_TYP0 10
+#define _PAGE_BIT_TYP 9
+#define _PAGE_TYP1 0x800
+#define _PAGE_TYP0 0x400
+#define _PAGE_TYP 0x200
+
 #ifdef __arch_um__
 #include "user_util.h"
 //#define yield() do { SOFTINT_RESCHED_VECTOR; } while(0)
 #define yield() do { sch$resched(); myrei(); } while(0)
 #endif
+
+signed int mmg$ininewpfn(struct _pcb * p, void * va, void * pte) {
+  signed long pfn=mmg$allocpfn();
+  struct _pfn * page;
+  if (pfn&0x80000000) return pfn;
+  if ((((int)va)&WSL$M_PAGTYP)>=WSL$C_GLOBAL) {
+    // not implemented yet
+  }
+  if (((unsigned long)va)&0x80000000 == 0) {
+    mmg$incptref(p,va,pte);
+  }
+  page=&((struct _pfn *)pfn$al_head)[pfn];
+  page->pfn$q_pte_index=pte; // hope it's the right one?
+  // also set page type
+  return mmg$makewsle(p,va,pte,pfn);
+}
+
+int mmg$incptref(struct _pcb * p, void * va, void * pte) {
+
+}
+
+int mmg$makewsle(struct _pcb * p, void * va, void * pte, signed int pfn) {
+  int new=p->pcb$l_phd->phd$l_wsnext;
+  struct _wsl * wsl = p->pcb$l_phd->phd$l_wslist;
+  struct _wsl * wsle = &wsl[new];
+  struct _pfn * page;
+  if (wsle->wsl$v_valid) panic("should be invalid\n");
+  wsle->wsl$v_valid=1;
+  // p->pcb$l_phd->phd$l_ptwsleval++
+  page=&((struct _pfn *)pfn$al_head)[pfn];
+  page->pfn$l_wslx_qw=new; // hope it's the right one?
+}
 
 //mmg$pagefault()
 #ifdef CONFIG_MM_VMS
@@ -382,6 +422,18 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	// 1 0 pfn=misc page is in page file
 	// 1 1 page is in image file
 
+	if ((*(unsigned long *)pte)&_PAGE_TYP1) { // page or image file
+	  if ((*(unsigned long *)pte)&_PAGE_TYP0) { // image file
+	  } else { // page file
+	  }
+	}
+
+	if (!((*(unsigned long *)pte)&_PAGE_TYP1)) { //zero transition or global
+
+
+	}
+
+	// mmg$ininewpfn(p,va,pte); // put this somewhere?
 
 
 	// keep some linux stuff for now
