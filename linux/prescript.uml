@@ -6,4 +6,5 @@ for X in `cd ../freevms/linux; find arch/um include/asm-um \( -name CVS -prune \
 	[ -f ../freevms/linux/$X ] && ln -sf `pwd`/../freevms/linux/$X $X;
 done
 
-( cd ../freevms/examples; rm asm; ln -s . asm )
+(cd arch/um/drivers;     ln -s ../../../../freevms/driver/src/ubdriver.c .;
+)
