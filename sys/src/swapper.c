@@ -24,6 +24,10 @@
 #include <lnmdef.h>
 #include <descrip.h>
 
+#include <fcbdef.h>
+#include <pfldef.h>
+#include <pflmapdef.h>
+
 #ifdef CONFIG_VMS
 
 struct mm_struct *swap_mm = &init_mm;
@@ -66,6 +70,9 @@ void swapsched(void) {
 
 }
 
+int pagefile=0;
+int myswapfile=0;
+
 int kswapd(void *unused)
 {
 	struct task_struct *tsk = current;
@@ -76,6 +83,45 @@ int kswapd(void *unused)
 #endif
 	strcpy(tsk->pcb$t_lname, "SWAPPER");
 	sigfillset(&tsk->blocked);
+
+
+
+	struct file * file;
+	file = filp_open("/vms$common/sysexe/pagefile.sys",O_RDONLY,0);
+	if (!IS_ERR(file)) {
+	  char * c, *b, *n;
+	  char buf[1024];
+	  file = rms_open_exec("/vms$common/sysexe/pagefile.sys");
+	  if (((struct _fcb *)(file))->fcb$b_type!=DYN$C_FCB) {
+	    printk("uh oh, not FCB\n");
+	  }
+	  struct _fcb * fcb = file;
+	  int pages=fcb->fcb$l_filesize>>12;
+	  int bitmapsiz=pages>>3;
+	  struct _pfl * pfl=kmalloc(sizeof(struct _pfl)+bitmapsiz,GFP_KERNEL);
+	  memset(pfl,0,sizeof(struct _pfl)+bitmapsiz);
+	  memset((long)pfl+bitmapsiz,0xff,bitmapsiz);
+	  extern struct _pfl swap_info_pfl[];
+	  //	  swap_info_pfl[0]=pfl;
+	  myswapfile=pfl;
+	  pfl->pfl$b_type=DYN$C_PFL;
+	  pfl->pfl$w_size=sizeof(struct _pfl)+bitmapsiz;
+	  pfl->pfl$l_pgflx=0;
+	  pfl->pfl$l_window=fcb->fcb$l_wlfl;
+	  pfl->pfl$l_bitmapsiz=bitmapsiz;
+	  pfl->pfl$l_frepagcnt=pages;
+	  pfl->pfl$l_bitmap=(long)pfl+sizeof(struct _pfl);
+	  pfl->pfl$l_startbyte=(long)pfl+sizeof(struct _pfl);
+	  printk("Pagefile installed, pages %x\n",fcb->fcb$l_filesize>>12);
+	  pagefile=1;
+	} else {
+	  printk("Pagefile not installed\n");
+	  pagefile=0;
+	}
+
+
+
+
 	
 	/*
 	 * Tell the memory management that we're a "memory allocator",
