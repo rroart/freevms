@@ -313,8 +313,60 @@ extern syscall_handler_t  exe$dlcefc ;
 extern syscall_handler_t  exe$crembx ;
 extern syscall_handler_t  exe$delmbx ;
 extern syscall_handler_t  exe$mount ;
+extern syscall_handler_t exe$cretva ;
+extern syscall_handler_t exe$expreg ;
+extern syscall_handler_t exe$crmpsc ;
+extern syscall_handler_t exe$mgblsc ;
+extern syscall_handler_t exe$deltva ;
+extern syscall_handler_t exe$cntreg ;
+extern syscall_handler_t exe$dgblsc ;
+extern syscall_handler_t exe$setswm ;
+extern syscall_handler_t exe$setprt ;
+extern syscall_handler_t exe$adjwsl ;
+extern syscall_handler_t exe$lkwset ;
+extern syscall_handler_t exe$lckpag ;
+extern syscall_handler_t exe$ulwset ;
+extern syscall_handler_t exe$ulkpag ;
+extern syscall_handler_t exe$purgws ;
+extern syscall_handler_t exe$creprc           ;
+extern syscall_handler_t exe$imgact           ;
+extern syscall_handler_t exe$imgfix           ;
+extern syscall_handler_t exe$imgsta           ;
+extern syscall_handler_t exe$dclexh           ;
+extern syscall_handler_t exe$rundwn           ;
+extern syscall_handler_t exe$sndjbc           ;
+extern syscall_handler_t exe$sndjbcw          ;
+extern syscall_handler_t exe$getqui           ;
+extern syscall_handler_t exe$getmsg           ;
+extern syscall_handler_t exe$putmsg           ;
+extern syscall_handler_t exe$excmsg           ;
+extern syscall_handler_t exe$getsyi           ;
+extern syscall_handler_t exe$getsyiw          ;
+extern syscall_handler_t exe$device_scan      ;
+extern syscall_handler_t exe$getdvi           ;
+extern syscall_handler_t exe$fao              ;
+extern syscall_handler_t exe$faol             ;
+extern syscall_handler_t exe$cmkrnl           ;
+extern syscall_handler_t exe$getjpi           ;
+extern syscall_handler_t exe$updsec           ;
+extern syscall_handler_t exe$resched          ;
+extern syscall_handler_t exe$setexv           ;
+extern syscall_handler_t exe$check_access     ;
+extern syscall_handler_t exe$getuai           ;
+extern syscall_handler_t exe$setuai           ;
+extern syscall_handler_t exe$idtoasc          ;
+extern syscall_handler_t exe$asctoid          ;
+extern syscall_handler_t exe$add_ident        ;
+extern syscall_handler_t exe$rem_ident        ;
+extern syscall_handler_t exe$find_held        ;
+extern syscall_handler_t exe$find_holder      ;
+extern syscall_handler_t exe$mod_ident        ;
+extern syscall_handler_t exe$mod_holder       ;
+extern syscall_handler_t exe$grantid       ;
+extern syscall_handler_t exe$revokid       ;
+extern syscall_handler_t exe$cmexec       ;
 
-#define LAST_GENERIC_SYSCALL __NR_$mount
+#define LAST_GENERIC_SYSCALL __NR_$cmexec
 
 #if LAST_GENERIC_SYSCALL > LAST_ARCH_SYSCALL
 #define LAST_SYSCALL LAST_GENERIC_SYSCALL
@@ -624,6 +676,56 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$crembx ] = exe$crembx ,
 	[ __NR_$delmbx ] = exe$delmbx ,
 	[ __NR_$mount ] = exe$mount,
+	[ __NR_$cretva ] = exe$cretva,
+	[ __NR_$expreg ] = exe$expreg,
+	[ __NR_$crmpsc ] = exe$crmpsc,
+	[ __NR_$mgblsc ] = exe$mgblsc,
+	[ __NR_$deltva ] = exe$deltva,
+	[ __NR_$cntreg ] = exe$cntreg,
+	[ __NR_$dgblsc ] = exe$dgblsc,
+	[ __NR_$setswm ] = exe$setswm,
+	[ __NR_$setprt ] = exe$setprt,
+	[ __NR_$adjwsl ] = exe$adjwsl,
+	[ __NR_$lkwset ] = exe$lkwset,
+	[ __NR_$lckpag ] = exe$lckpag,
+	[ __NR_$ulwset ] = exe$ulwset,
+	[ __NR_$ulkpag ] = exe$ulkpag,
+	[ __NR_$purgws ] = exe$purgws,
+	[ __NR_$creprc           ] = exe$creprc          ,
+	[ __NR_$imgact           ] = exe$imgact          ,
+	[ __NR_$imgfix           ] = exe$imgfix          ,
+	[ __NR_$imgsta           ] = exe$imgsta          ,
+	[ __NR_$dclexh           ] = exe$dclexh          ,
+	[ __NR_$rundwn           ] = exe$rundwn          ,
+	[ __NR_$sndjbc           ] = exe$sndjbc          ,
+	[ __NR_$sndjbcw          ] = exe$sndjbcw         ,
+	[ __NR_$getqui           ] = exe$getqui          ,
+	[ __NR_$getmsg           ] = exe$getmsg          ,
+	[ __NR_$putmsg           ] = exe$putmsg          ,
+	[ __NR_$excmsg           ] = exe$excmsg          ,
+	[ __NR_$getsyi           ] = exe$getsyi          ,
+	[ __NR_$getsyiw          ] = exe$getsyiw         ,
+	[ __NR_$device_scan      ] = exe$device_scan     ,
+	[ __NR_$getdvi           ] = exe$getdvi          ,
+	[ __NR_$fao              ] = exe$fao             ,
+	[ __NR_$faol             ] = exe$faol            ,
+	[ __NR_$cmkrnl           ] = exe$cmkrnl          ,
+	[ __NR_$getjpi           ] = exe$getjpi          ,
+	[ __NR_$updsec           ] = exe$updsec          ,
+	[ __NR_$resched          ] = exe$resched         ,
+	[ __NR_$setexv           ] = exe$setexv          ,
+	[ __NR_$check_access     ] = exe$check_access    ,
+	[ __NR_$getuai           ] = exe$getuai          ,
+	[ __NR_$setuai           ] = exe$setuai          ,
+	[ __NR_$idtoasc          ] = exe$idtoasc         ,
+	[ __NR_$asctoid          ] = exe$asctoid         ,
+	[ __NR_$add_ident        ] = exe$add_ident       ,
+	[ __NR_$rem_ident        ] = exe$rem_ident       ,
+	[ __NR_$find_held        ] = exe$find_held       ,
+	[ __NR_$find_holder      ] = exe$find_holder     ,
+	[ __NR_$mod_ident        ] = exe$mod_ident       ,
+	[ __NR_$mod_holder       ] = exe$mod_holder      ,
+	[ __NR_$cmexec       ] = exe$cmexec      ,
 	
 	ARCH_SYSCALLS
 	[ LAST_SYSCALL + 1 ... NR_syscalls ] = 

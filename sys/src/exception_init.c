@@ -7,6 +7,7 @@
 #include <starlet.h>
 #include <iosbdef.h>
 
+#include<linux/linkage.h>
 #include<asm/unistd.h>
 #include "../../starlet/src/sysdep.h"
 
@@ -130,4 +131,22 @@ int sys$waitfr(unsigned int efn) {
 }
 
 #endif
+
+// not the right place, but the closest I could find
+
+asmlinkage void exe$cmkrnl(int (*routine)(),int * args) {
+  //basically check privs
+  //if ok, do an int 0x85 (new one) with routine and args as params
+  //at int 0x85 I suppose privs must be checked again
+  //then routine with args will be executed
+  //I suppose a stupid cpu can do this
+}
+
+asmlinkage void exe$cmexec(int (*routine)(),int * args) {
+  //basically check privs
+  //if ok, do an int 0x85 (new one) with routine and args as params
+  //at int 0x85 I suppose privs must be checked again
+  //then routine with args will be executed
+  //I suppose a stupid cpu can do this
+}
 
