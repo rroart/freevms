@@ -4498,3 +4498,5 @@ void floppy_eject(void)
 	}
 }
 #endif
+
+EXPORT_NO_SYMBOLS;

@@ -109,9 +109,11 @@
 #if DEBUG
 # define CREATE_MASK	(SLAB_DEBUG_INITIAL | SLAB_RED_ZONE | \
 			 SLAB_POISON | SLAB_HWCACHE_ALIGN | \
-			 SLAB_NO_REAP | SLAB_CACHE_DMA)
+			 SLAB_NO_REAP | SLAB_CACHE_DMA | \
+			 SLAB_MUST_HWCACHE_ALIGN)
 #else
-# define CREATE_MASK	(SLAB_HWCACHE_ALIGN | SLAB_NO_REAP | SLAB_CACHE_DMA)
+# define CREATE_MASK	(SLAB_HWCACHE_ALIGN | SLAB_NO_REAP | \
+			 SLAB_CACHE_DMA | SLAB_MUST_HWCACHE_ALIGN)
 #endif
 
 /*
@@ -648,7 +650,7 @@ kmem_cache_create (const char *name, size_t size, size_t offset,
 		flags &= ~SLAB_POISON;
 	}
 #if FORCED_DEBUG
-	if (size < (PAGE_SIZE>>3))
+	if ((size < (PAGE_SIZE>>3)) && !(flags & SLAB_MUST_HWCACHE_ALIGN))
 		/*
 		 * do not red zone large object, causes severe
 		 * fragmentation.
@@ -1279,10 +1281,9 @@ static inline void * kmem_cache_alloc_one_tail (kmem_cache_t *cachep,
 })
 
 #ifdef CONFIG_SMP
-void* kmem_cache_alloc_batch(kmem_cache_t* cachep, int flags)
+void* kmem_cache_alloc_batch(kmem_cache_t* cachep, cpucache_t* cc, int flags)
 {
 	int batchcount = cachep->batchcount;
-	cpucache_t* cc = cc_data(cachep);
 
 	spin_lock(&cachep->spinlock);
 	while (batchcount--) {
@@ -1331,7 +1332,7 @@ try_again:
 				objp = cc_entry(cc)[--cc->avail];
 			} else {
 				STATS_INC_ALLOCMISS(cachep);
-				objp = kmem_cache_alloc_batch(cachep,flags);
+				objp = kmem_cache_alloc_batch(cachep,cc,flags);
 				if (!objp)
 					goto alloc_new_slab_nolock;
 			}
@@ -1919,12 +1920,13 @@ static int proc_getdata (char*page, char**start, off_t off, int count)
 #endif
 #ifdef CONFIG_SMP
 		{
+			cpucache_t *cc = cc_data(cachep);
 			unsigned int batchcount = cachep->batchcount;
 			unsigned int limit;
 
-			if (cc_data(cachep))
-				limit = cc_data(cachep)->limit;
-			 else
+			if (cc)
+				limit = cc->limit;
+			else
 				limit = 0;
 			len += sprintf(page+len, " : %4u %4u",
 					limit, batchcount);

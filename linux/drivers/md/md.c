@@ -4043,4 +4043,4 @@ MD_EXPORT_SYMBOL(md_interrupt_thread);
 MD_EXPORT_SYMBOL(mddev_map);
 MD_EXPORT_SYMBOL(md_check_ordering);
 MD_EXPORT_SYMBOL(get_spare);
-
+MODULE_LICENSE("GPL");

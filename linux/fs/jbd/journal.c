@@ -889,6 +889,7 @@ int journal_create (journal_t *journal)
 		BUFFER_TRACE(bh, "marking dirty");
 		mark_buffer_dirty(bh);
 		BUFFER_TRACE(bh, "marking uptodate");
+
 		mark_buffer_uptodate(bh, 1);
 		__brelse(bh);
 	}
@@ -913,7 +914,7 @@ int journal_create (journal_t *journal)
 
 	return journal_reset(journal);
 }
-
+	
 /*
  * Update a journal's dynamic superblock fields and write it to disk,
  * optionally waiting for the IO to complete.

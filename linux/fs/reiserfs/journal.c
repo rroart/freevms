@@ -93,6 +93,8 @@ static int do_journal_end(struct reiserfs_transaction_handle *,struct super_bloc
 static int flush_journal_list(struct super_block *s, struct reiserfs_journal_list *jl, int flushall) ;
 static int flush_commit_list(struct super_block *s, struct reiserfs_journal_list *jl, int flushall)  ;
 static int can_dirty(struct reiserfs_journal_cnode *cn) ;
+static int remove_from_journal_list(struct super_block *s, struct reiserfs_journal_list *jl, struct buffer_head *bh, int remove_freed);
+static int journal_join(struct reiserfs_transaction_handle *th, struct super_block *p_s_sb, unsigned long nblocks);
 
 static void init_journal_hash(struct super_block *p_s_sb) {
   memset(SB_JOURNAL(p_s_sb)->j_hash_table, 0, JOURNAL_HASH_SIZE * sizeof(struct reiserfs_journal_cnode *)) ;
@@ -148,7 +150,7 @@ repeat:
   }
   bn = allocate_bitmap_node(p_s_sb) ;
   if (!bn) {
-//    current->policy = SCHED_YIELD ;
+//    current->policy |= SCHED_YIELD ;
 //    schedule() ;
 	SOFTINT_RESCHED_VECTOR;
     goto repeat ;
@@ -1699,7 +1701,7 @@ static int journal_read(struct super_block *p_s_sb) {
   /* step three, starting at the oldest transaction, replay */
   if (last_flush_start > 0) {
     oldest_start = last_flush_start ;
-    oldest_trans_id = last_flush_trans_id ;
+    oldest_trans_id = last_flush_trans_id + 1 ;
   } 
   cur_dblock = oldest_start ;
   if (oldest_trans_id)  {
@@ -1719,6 +1721,8 @@ static int journal_read(struct super_block *p_s_sb) {
     }
     cur_dblock = reiserfs_get_journal_block(p_s_sb) + SB_JOURNAL(p_s_sb)->j_start ;
     replay_count++ ;
+   if (cur_dblock == oldest_start)
+        break;
   }
 
   if (oldest_trans_id == 0) {
@@ -2085,7 +2089,7 @@ relock:
 }
 
 
-int journal_join(struct reiserfs_transaction_handle *th, struct super_block *p_s_sb, unsigned long nblocks) {
+static int journal_join(struct reiserfs_transaction_handle *th, struct super_block *p_s_sb, unsigned long nblocks) {
   return do_journal_begin_r(th, p_s_sb, nblocks, 1) ;
 }
 
@@ -2240,7 +2244,7 @@ int journal_end(struct reiserfs_transaction_handle *th, struct super_block *p_s_
 **
 ** returns 1 if it cleaned and relsed the buffer. 0 otherwise
 */
-int remove_from_transaction(struct super_block *p_s_sb, unsigned long blocknr, int already_cleaned) {
+static int remove_from_transaction(struct super_block *p_s_sb, unsigned long blocknr, int already_cleaned) {
   struct buffer_head *bh ;
   struct reiserfs_journal_cnode *cn ;
   int ret = 0;
@@ -2281,7 +2285,7 @@ int remove_from_transaction(struct super_block *p_s_sb, unsigned long blocknr, i
 }
 
 /* removes from a specific journal list hash */
-int remove_from_journal_list(struct super_block *s, struct reiserfs_journal_list *jl, struct buffer_head *bh, int remove_freed) {
+static int remove_from_journal_list(struct super_block *s, struct reiserfs_journal_list *jl, struct buffer_head *bh, int remove_freed) {
   remove_journal_hash(SB_JOURNAL(s)->j_list_hash_table, jl, bh, remove_freed) ;
   return 0 ;
 }
@@ -2343,20 +2347,6 @@ int journal_end_sync(struct reiserfs_transaction_handle *th, struct super_block 
 int show_reiserfs_locks(void) {
 
   dump_journal_writers() ;
-#if 0 /* debugging code for when we are compiled static don't delete */
-  p_s_sb = sb_entry(super_blocks.next);
-  while (p_s_sb != sb_entry(&super_blocks)) {
-    if (reiserfs_is_super(p_s_sb)) {
-printk("journal lock is %d, join lock is %d, writers %d must wait is %d\n", 
-        atomic_read(&(SB_JOURNAL(p_s_sb)->j_wlock)),
-        atomic_read(&(SB_JOURNAL(p_s_sb)->j_jlock)),
-	atomic_read(&(SB_JOURNAL(p_s_sb)->j_wcount)),
-	SB_JOURNAL(p_s_sb)->j_must_wait) ;
-	printk("used cnodes %d, free cnodes %d\n", SB_JOURNAL(p_s_sb)->j_cnode_used, SB_JOURNAL(p_s_sb)->j_cnode_free) ;
-    }
-    p_s_sb = sb_entry(p_s_sb->s_list.next);
-  }
-#endif
   return 0 ;
 }
 

@@ -338,7 +338,7 @@ static int shrink_cache(int nr_pages, zone_t * classzone, unsigned int gfp_mask,
 {
 	struct list_head * entry;
 	int max_scan = nr_inactive_pages / priority;
-	int max_mapped = nr_pages << (9 - priority);
+	int max_mapped = min((nr_pages << (10 - priority)), max_scan / 10);
 
 	spin_lock(&pagemap_lru_lock);
 	while (--max_scan >= 0 && (entry = inactive_list.prev) != &inactive_list) {
@@ -588,6 +588,7 @@ int try_to_free_pages(zone_t *classzone, unsigned int gfp_mask, unsigned int ord
 	int priority = DEF_PRIORITY;
 	int nr_pages = SWAP_CLUSTER_MAX;
 
+	gfp_mask = pf_gfp_mask(gfp_mask);
 	do {
 		nr_pages = shrink_caches(classzone, priority, gfp_mask, nr_pages);
 		if (nr_pages <= 0)

@@ -586,7 +586,7 @@ mmap_failed:
 flush_failed:
 	spin_lock_irq(&current->sigmask_lock);
 	if (current->sig != oldsig) {
-		kfree(current->sig);
+		kmem_cache_free(sigact_cachep, current->sig);
 		current->sig = oldsig;
 	}
 	spin_unlock_irq(&current->sigmask_lock);
@@ -983,9 +983,7 @@ int do_coredump(long signr, struct pt_regs * regs)
 	if (do_truncate(file->f_dentry, 0) != 0)
 		goto close_fail;
 
-	down_read(&current->mm->mmap_sem);
 	retval = binfmt->core_dump(signr, regs, file);
-	up_read(&current->mm->mmap_sem);
 
 close_fail:
 	filp_close(file, NULL);

@@ -49,15 +49,14 @@
 #include <linux/string.h>
 #include <linux/skbuff.h>
 #include <linux/cache.h>
+#include <linux/rtnetlink.h>
 #include <linux/init.h>
 #include <linux/highmem.h>
 
-#include <net/ip.h>
 #include <net/protocol.h>
 #include <net/dst.h>
-#include <net/tcp.h>
-#include <net/udp.h>
 #include <net/sock.h>
+#include <net/checksum.h>
 
 #include <asm/uaccess.h>
 #include <asm/system.h>
