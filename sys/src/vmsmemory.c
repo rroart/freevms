@@ -333,7 +333,7 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				} else {
 				  static int mydebugg = 0;
 				  if (mydebugg) {
-				    printk("%x %x %x %x\n",address,page,src_pte,src_pte);
+				    printk("%x %x %x %x\n",address,*dst_pte,*src_pte,src_pte);
 				  }
 				}
 
