@@ -11,8 +11,8 @@ clean:
 install: all
 	install -d ../../rootum/vms$$common/sysexe
 	install -d ../../rooti386/vms$$common/sysexe
-	install i386/* ../../rooti386/vms"$$"common/sysexe
-	install um/* ../../rootum/vms"$$"common/sysexe
+	install i386/*.* ../../rooti386/vms"$$"common/sysexe
+	install um/*.* ../../rootum/vms"$$"common/sysexe
 
 OBJS = delete.o
 
@@ -36,7 +36,7 @@ um/delete${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
 	install -d um
 	gcc -g -static $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) -o um/delete${NOEXE}
 um/delete${EXE_ELF}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
-	ld -Bshareable $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/delete${EXE_ELF}
+	ld -Bshareable $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o um/delete${EXE_ELF}
 
 um/delete${EXE}: $(VMSLIBSUM) $(OBJS)
 	install -d um
