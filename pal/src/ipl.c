@@ -21,8 +21,8 @@ extern int timer_on;
 
 static mydebugi = 0;  // should have no printk in a non-interruptable zone
 
-#undef IPL_DEBUG
 #define IPL_DEBUG
+#undef IPL_DEBUG
 
 #ifdef IPL_DEBUG
 static long stk[1024];
