@@ -8,18 +8,9 @@ that has been coded around.
 Redhat 8.0 with gcc 3.2 (RedHat patched) works. The anonymous structure offset
 bugs present in pure gcc 3.0.1 was gone in pure 3.1.
 
-Untar the linux dist in /usr/src or some other place.
+Untar freevms, go to the linux directory, and do ./prescript.
 
-Untar freevms in the same directory (or symlink from there to the real place)
-
-Go to the linux directory.
-
-Do ../freevms/linux/prescript. (Links from working area ../freevms/linux)
-
-If having user mode linux, patch in now, and do ../freevms/linux/prescript.uml.
-(We are based on uml-patch-2.4.18-11, use -p1 -F 100 and such)
-
-Go to /usr/src/freevms and do a make and make install (if uml, see Makefiles for how to compile). Then copy the resulting files from root/.
+Go to the freevms directory and do a make and make install (if uml, see Makefiles for how to compile). Then copy the resulting files from root/.
 If you want to know how to make the linker do: cat linker/src/HOW
 
 UserMode Linux needs the symlinks from /usr/include/{asm,linux}
@@ -28,6 +19,7 @@ to the kernel build place.
 Go back and make the kernel.
 
 NOTE:
+Make dep in linux is broken, so you might have to do make bzImage twice.
 See BUGS regarding uml
 
 NOTE on kernel config with VMS options:
