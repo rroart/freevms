@@ -4,7 +4,6 @@
 // Author. Linux people.
 // Author. Roar Thronæs.
 
-#if 1
 #define ETH_P_MYSCS 0x6009
 
 // These two here and others have done parts that are still here:
@@ -20,10 +19,8 @@
  */
 
 #include <linux/config.h>
-#define CONFIG_DECNET
 #include <linux/net.h>
 #include <linux/netdevice.h>
-#include <linux/proc_fs.h>
 #include <linux/timer.h>
 #include <linux/string.h>
 #include <linux/if_arp.h>
@@ -31,7 +28,6 @@
 #include <linux/init.h>
 #include <linux/skbuff.h>
 #include <linux/rtnetlink.h>
-#include <linux/sysctl.h>
 #include <asm/uaccess.h>
 
 #include <linux/utsname.h>
@@ -69,22 +65,22 @@ extern struct _rdt rdt;
 extern struct _scs_rd rdtl[128];
 extern struct _cdl cdl;
 
-#define NF_DN_HELLO              5
+#define NF_SCS_HELLO              5
 
-#define DN_IFREQ_SIZE (sizeof(struct ifreq) - sizeof(struct sockaddr) + sizeof(struct sockaddr_dn))
+#define SCS_IFREQ_SIZE (sizeof(struct ifreq) - sizeof(struct sockaddr) + sizeof(struct sockaddr_dn))
 
-static char dn_rt_all_end_mcast[ETH_ALEN] = {0xAB,0x00,0x04,0x01,0x00,0x00};
-static char dn_rt_all_rt_mcast[ETH_ALEN]  = {0xAB,0x00,0x04,0x01,0x00,0x00};
-static char dn_hiord[ETH_ALEN]            = {0xAB,0x00,0x04,0x01,0x00,0x00}; // remember to add clusterid + 1
-static unsigned char dn_eco_version[3]    = {0x02,0x00,0x00};
+static char scs_rt_all_end_mcast[ETH_ALEN] = {0xAB,0x00,0x04,0x01,0x00,0x00};
+static char scs_rt_all_rt_mcast[ETH_ALEN]  = {0xAB,0x00,0x04,0x01,0x00,0x00};
+static char scs_hiord[ETH_ALEN]            = {0xAB,0x00,0x04,0x01,0x00,0x00}; // remember to add clusterid + 1
+static unsigned char scs_eco_version[3]    = {0x02,0x00,0x00};
 
-struct net_device *decnet_default_device = 0;
+struct net_device *scs_default_device = 0;
 
 int is_cluster_on() {
   return mypb.pb$w_state==PB$C_OPEN;
 }
 
-inline void dn_nsp_send2(struct sk_buff *skb)
+inline void scs_nsp_send2(struct sk_buff *skb)
 {
   unsigned short int *pktlen;
 #ifndef CONFIG_VMS
@@ -92,25 +88,17 @@ inline void dn_nsp_send2(struct sk_buff *skb)
 #endif
   *pktlen = htons(skb->len - 2);
   skb->nh.raw = skb->data;
-  skb->dev = decnet_default_device;
+  skb->dev = scs_default_device;
   //skb->dst = dst_clone(dst);
-  dn_rt_finish_output2(skb,&mypb.pb$b_rstation);
+  scs_rt_finish_output2(skb,&mypb.pb$b_rstation);
   //  dev_queue_xmit(skb);
 }
 
-extern struct neigh_table dn_neigh_table;
+static void scs_dev_delete(struct net_device *dev);
 
-static struct dn_dev *dn_dev_create(struct net_device *dev, int *err);
-static void dn_dev_delete(struct net_device *dev);
-static void rtmsg_ifa(int event, struct dn_ifaddr *ifa);
+static void scs_send_brd_hello(struct net_device *dev);
 
-static void dn_send_brd_hello(struct net_device *dev);
-
-#define DN_DEV_LIST_SIZE (sizeof(dn_dev_list)/sizeof(struct dn_dev_parms))
-
-#define DN_DEV_PARMS_OFFSET(x) ((int) ((char *) &((struct dn_dev_parms *)0)->x))
-
-static inline void dn_rt_finish_output2(struct sk_buff *skb, char *dst)
+static inline void scs_rt_finish_output2(struct sk_buff *skb, char *dst)
 {
   struct net_device *dev = skb->dev;
 
@@ -141,16 +129,15 @@ int scs_from_myself(struct _nisca * msg,unsigned short sr_hi,unsigned long sr_lo
   (msg->nisca$l_dx_src_lo==sr_lo);
 }
 
-static void dn_send_endnode_hello(struct net_device *dev)
+static void scs_send_endnode_hello(struct net_device *dev)
 {
         struct _nisca *intro;
         struct _nisca *nisca, *dx;
         struct sk_buff *skb = NULL;
         unsigned short int *pktlen;
 	void * msg;
-	struct dn_dev *dn_db = (struct dn_dev *)dev->dn_ptr;
 
-        if ((skb = dn_alloc_skb2(NULL, sizeof(*nisca)+16, GFP_ATOMIC)) == NULL)
+        if ((skb = scs_alloc_skb2(NULL, sizeof(*nisca)+16, GFP_ATOMIC)) == NULL)
 		return;
 
         skb->dev = dev;
@@ -185,67 +172,55 @@ static void dn_send_endnode_hello(struct net_device *dev)
 
 	skb->nh.raw = skb->data;
 
-	dn_rt_finish_output2(skb, dn_rt_all_rt_mcast);
+	scs_rt_finish_output2(skb, scs_rt_all_rt_mcast);
 }
 
 
-static void dn_send_brd_hello(struct net_device *dev)
+static void scs_send_brd_hello(struct net_device *dev)
 {
-	dn_send_endnode_hello(dev);
+	scs_send_endnode_hello(dev);
 }
 
-static void dn_dev_set_timer(struct net_device *dev);
+static void scs_dev_set_timer();
 
-static void dn_dev_timer_func(unsigned long arg)
+static void scs_dev_timer_func(unsigned long arg)
 {
-	struct net_device *dev = (struct net_device *)arg;
+  struct net_device *dev = (struct net_device *)arg;
 
-	dn_send_brd_hello(dev);
+#ifndef CONFIG_VMS
+  if (dev==0) {
+    void * newdev = __dev_get_by_name("eth0");
+    if (newdev)
+      dev = scs_default_device = newdev;
+  }
+#endif
+  if (dev) scs_send_brd_hello(dev);
 
-	dn_dev_set_timer(dev);
+  scs_dev_set_timer(dev);
 }
 
-static void dn_dev_set_timer(struct net_device *dev)
+static void scs_dev_set_timer()
 {
   struct timer_list timer;
 
-  timer.data = (unsigned long)dev;
-  timer.function = dn_dev_timer_func;
+  timer.data = (unsigned long)scs_default_device;
+  timer.function = scs_dev_timer_func;
   timer.expires = jiffies + (10 * HZ);
 
   add_timer(&timer);
 }
 
-#ifdef CONFIG_PROC_FS
-
-static int decnet_dev_get_info(char *buffer, char **start, off_t offset, int length)
+void __init scs_dev_init(void)
 {
-        return 0;
+  scs_dev_set_timer();
 }
 
-#endif /* CONFIG_PROC_FS */
-
-void __init dn_dev_init(void)
-{
-
-#ifdef CONFIG_PROC_FS
-	proc_net_create("myscs_dev", 0, decnet_dev_get_info);
-#endif /* CONFIG_PROC_FS */
-}
-
-void __exit dn_dev_cleanup(void)
+void __exit scs_dev_cleanup(void)
 {
 #ifndef CONFIG_VMS
 	rtnetlink_links[PF_DECnet] = NULL;
 #endif
-
-	proc_net_remove("myscs_dev");
 }
-
-static u32 dn_neigh_hash(const void *pkey, const struct net_device *dev);
-static int dn_neigh_construct(struct neighbour *);
-static void dn_short_error_report(struct neighbour *, struct sk_buff *);
-static int dn_long_output(struct sk_buff *);
 
 static int first_hello=0;
 
@@ -254,11 +229,9 @@ static int first_hello=0;
  */
 extern int startconnect(int);
 
-int dn_neigh_endnode_hello(struct sk_buff *skb)
+int scs_neigh_endnode_hello(struct sk_buff *skb)
 {
 	struct _nisca *msg = skb->data;
-	struct neighbour *neigh;
-	struct dn_neigh *dn;
 
 	msg=getcc(msg);
 
@@ -293,8 +266,6 @@ int dn_neigh_endnode_hello(struct sk_buff *skb)
 	return 0;
 }
 
-extern int decnet_log_martians;
-
 /*
  * This function uses a slightly different lookup method
  * to find its sockets, since it searches on object name/number
@@ -311,7 +282,7 @@ extern int decnet_log_martians;
  * The eventual aim is for each socket to have a cached header size
  * for its outgoing packets, and to set hdr from this when sk != NULL.
  */
-struct sk_buff *dn_alloc_skb2(struct _cdt *sk, int size, int pri)
+struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri)
 {
 	struct sk_buff *skb;
 	int hdr = 64;
@@ -337,21 +308,21 @@ struct sk_buff *dn_alloc_skb2(struct _cdt *sk, int size, int pri)
 void scs_msg_ctl_comm(struct _cdt *sk, unsigned char msgflg)
 {
 	struct sk_buff *skb = NULL;
-	if ((skb = dn_alloc_skb2(sk, 200, (msgflg == SCS$C_CON_REQ) ? 0 : GFP_ATOMIC)) == NULL)
+	if ((skb = scs_alloc_skb2(sk, 200, (msgflg == SCS$C_CON_REQ) ? 0 : GFP_ATOMIC)) == NULL)
 	  return;
 
 	scs_msg_ctl_fill(skb,sk,msgflg);
 
-	dn_nsp_send2(skb);	
+	scs_nsp_send2(skb);	
 }
 
-void dn_nsp_send_conninit2(struct _cdt *sk, unsigned char msgflg, char * rprnam, char * lprnam, char * condat)
+void scs_nsp_send_conninit2(struct _cdt *sk, unsigned char msgflg, char * rprnam, char * lprnam, char * condat)
 {
 	struct sk_buff *skb = NULL;
 	struct _nisca *nisca;
 	struct _ppd * ppd;
 	struct _scs * scs;
-	if ((skb = dn_alloc_skb2(sk, 200, (msgflg == SCS$C_CON_REQ) ? 0 : GFP_ATOMIC)) == NULL)
+	if ((skb = scs_alloc_skb2(sk, 200, (msgflg == SCS$C_CON_REQ) ? 0 : GFP_ATOMIC)) == NULL)
 	  return;
 
 	scs_msg_ctl_fill(skb,sk,msgflg);
@@ -365,7 +336,7 @@ void dn_nsp_send_conninit2(struct _cdt *sk, unsigned char msgflg, char * rprnam,
 	bcopy(lprnam,&scs->scs$t_src_proc,strlen(lprnam));
 	if (condat) bcopy(condat,&scs->scs$b_con_dat,strlen(condat));
 
-	dn_nsp_send2(skb);	
+	scs_nsp_send2(skb);	
 }
 
 void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg)
@@ -476,18 +447,7 @@ void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdr
 #endif
 }
 
-struct dn_rt_hash_bucket
-{
-	struct dn_route *chain;
-	rwlock_t lock;
-} __attribute__((__aligned__(8)));
-
 static unsigned char dn_hiord_addr[6] = {0xAB,0x00,0x04,0x01,0x00,0x00}; // remember to add clusterid + 1
-
-int dn_rt_min_delay = 2*HZ;
-int dn_rt_max_delay = 10*HZ;
-
-int decnet_dst_gc_interval = 2;
 
 int opc_msgrec(struct sk_buff *skb) {
   struct _cdt *cb;
@@ -882,12 +842,11 @@ void * getppdscs(void * buf) {
   return retadr;
 }
 
-int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt)
+int scs_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt)
 {
       struct _cdt *cb;
       unsigned char flags = 0;
       __u16 len = ntohs(*(__u16 *)skb->data);
-      struct dn_dev *dn = (struct dn_dev *)dev->dn_ptr;
       unsigned char padlen = 0;
       struct _nisca * nisca;
       unsigned char tr_flag;
@@ -928,12 +887,12 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
 	if (nisca->nisca$b_msg & NISCA$M_TR_CCFLG) {
 	  switch((nisca->nisca$b_msg)&0x1f) {
 	  case NISCA$C_HELLO:
-	    return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, dn_neigh_endnode_hello);
+	    return NF_HOOK(PF_DECnet, NF_SCS_HELLO, skb, skb->dev, NULL, scs_neigh_endnode_hello);
 	  }
 	}
 
 	if (nisca->nisca$b_msg & NISCA$M_TR_CTL) {
-	    return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, opc_msgrec);
+	    return NF_HOOK(PF_DECnet, NF_SCS_HELLO, skb, skb->dev, NULL, opc_msgrec);
 	}
 
 	if (scs->scs$w_mtype>0x17)
@@ -943,7 +902,7 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
 	return func(skb,scs);
 #endif
 	//	nisca_snt_dg(skb,scs);
-	return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, nisca_snt_dg);
+	return NF_HOOK(PF_DECnet, NF_SCS_HELLO, skb, skb->dev, NULL, nisca_snt_dg);
 dump_it:
 #ifndef CONFIG_VMS
 kfree_skb(skb);
@@ -961,189 +920,3 @@ int do_opc_dispatch(struct sk_buff *skb)
   func=opc_dispatch[ppd->ppd$b_opc];
   return func(skb,ppd);
 }
-
-/*
- * Fast timer is for delayed acks (200mS max)
- * Slow timer is for everything else (n * 500mS)
- */
-
-#define FAST_INTERVAL (HZ/5)
-#define SLOW_INTERVAL (HZ/2)
-
-#ifdef CONFIG_SYSCTL
-extern int decnet_dst_gc_interval;
-
-static struct ctl_table_header *dn_table_header = NULL;
-
-/*
- * ctype.h :-)
- */
-#define ISNUM(x) (((x) >= '0') && ((x) <= '9'))
-#define ISLOWER(x) (((x) >= 'a') && ((x) <= 'z'))
-#define ISUPPER(x) (((x) >= 'A') && ((x) <= 'Z'))
-#define ISALPHA(x) (ISLOWER(x) || ISUPPER(x))
-#define INVALID_END_CHAR(x) (ISNUM(x) || ISALPHA(x))
-
-static void strip_it(char *str)
-{
-	for(;;) {
-		switch(*str) {
-			case ' ':
-			case '\n':
-			case '\r':
-			case ':':
-				*str = 0;
-			case 0:
-				return;
-		}
-		str++;
-	}
-}
-
-static int dn_def_dev_strategy(ctl_table *table, int *name, int nlen,
-				void *oldval, size_t *oldlenp,
-				void *newval, size_t newlen,
-				void **context)
-{
-	size_t len;
-	struct net_device *dev = decnet_default_device;
-	char devname[17];
-	size_t namel;
-
-	devname[0] = 0;
-
-	if (oldval && oldlenp) {
-		if (get_user(len, oldlenp))
-			return -EFAULT;
-		if (len) {
-			if (dev)
-				strcpy(devname, dev->name);
-
-			namel = strlen(devname) + 1;
-			if (len > namel) len = namel;	
-
-			if (copy_to_user(oldval, devname, len))
-				return -EFAULT;
-
-			if (put_user(len, oldlenp))
-				return -EFAULT;
-		}
-	}
-
-	if (newval && newlen) {
-		if (newlen > 16)
-			return -E2BIG;
-
-		if (copy_from_user(devname, newval, newlen))
-			return -EFAULT;
-
-		devname[newlen] = 0;
-
-#ifndef CONFIG_VMS
-		if ((dev = __dev_get_by_name(devname)) == NULL)
-			return -ENODEV;
-#endif
-
-		if (dev->dn_ptr == NULL)
-			return -ENODEV;
-
-		decnet_default_device = dev;
-		dn_dev_set_timer(dev);
-	}
-
-	return 0;
-}
-
-
-static int dn_def_dev_handler(ctl_table *table, int write, 
-				struct file * filp,
-				void *buffer, size_t *lenp)
-{
-	size_t len;
-	int err;
-	struct net_device *dev = decnet_default_device;
-	char devname[17];
-
-	if (!*lenp || (filp->f_pos && !write)) {
-		*lenp = 0;
-		return 0;
-	}
-
-	if (write) {
-		if (*lenp > 16)
-			return -E2BIG;
-
-		if (copy_from_user(devname, buffer, *lenp))
-			return -EFAULT;
-
-		devname[*lenp] = 0;
-		strip_it(devname);
-
-#ifndef CONFIG_VMS
-		if ((dev = __dev_get_by_name(devname)) == NULL)
-			return -ENODEV;
-#endif
-
-		decnet_default_device = dev;
-		filp->f_pos += *lenp;
-
-		return 0;
-	}
-
-	if (dev == NULL) {
-		*lenp = 0;
-		return 0;
-	}
-
-	strcpy(devname, dev->name);
-	len = strlen(devname);
-	devname[len++] = '\n';
-
-	if (len > *lenp) len = *lenp;
-
-	if (copy_to_user(buffer, devname, len))
-		return -EFAULT;
-
-	*lenp = len;
-	filp->f_pos += len;
-
-	return 0;
-}
-
-static ctl_table dn_table[] = {
-	{NET_DECNET_DEFAULT_DEVICE, "default_device", NULL, 16, 0644, NULL,
-	dn_def_dev_handler, dn_def_dev_strategy, NULL, NULL, NULL},
-	{0}
-};
-
-static ctl_table dn_dir_table[] = {
-	{NET_DECNET, "myscs", NULL, 0, 0555, dn_table},
-	{0}
-};
-
-static ctl_table dn_root_table[] = {
-	{CTL_NET, "net", NULL, 0, 0555, dn_dir_table},
-	{0}
-};
-
-void dn_register_sysctl(void)
-{
-	dn_table_header = register_sysctl_table(dn_root_table, 1);
-}
-
-void dn_unregister_sysctl(void)
-{
-	unregister_sysctl_table(dn_table_header);
-}
-
-#else  /* CONFIG_SYSCTL */
-void dn_unregister_sysctl(void)
-{
-}
-void dn_register_sysctl(void)
-{
-}
-
-#endif
-
-#endif

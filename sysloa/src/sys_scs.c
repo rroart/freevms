@@ -35,16 +35,6 @@
 #include <linux/stat.h>
 #include <linux/init.h>
 #include <linux/poll.h>
-#include <net/neighbour.h>
-#include <net/dst.h>
-#if 0
-#include <net/dn.h>
-#include <net/dn_nsp.h>
-#include <net/dn_dev.h>
-#include <net/dn_route.h>
-#include <net/dn_fib.h>
-#include <net/dn_neigh.h>
-#endif
 #include<linux/vmalloc.h>
 #include<linux/errno.h>
 
@@ -80,19 +70,13 @@ struct _pb otherpb;
 struct _sb othersb;
 
 /*
- * decnet_address is kept in network order, decnet_ether_address is kept
+ * scs_address is kept in network order, scs_ether_address is kept
  * as a string of bytes.
  */
-dn_address decnet_address = 0;
-unsigned char decnet_ether_address[ETH_ALEN] = { 0xAA, 0x00, 0x04, 0x00, 0x00, 0x00 };
 
-#define DN_SK_HASH_SHIFT 8
-#define DN_SK_HASH_SIZE (1 << DN_SK_HASH_SHIFT)
-#define DN_SK_HASH_MASK (DN_SK_HASH_SIZE - 1)
+unsigned char scs_ether_address[ETH_ALEN] = { 0xAA, 0x00, 0x04, 0x00, 0x00, 0x00 };
 
-rwlock_t dn_hash_lock = RW_LOCK_UNLOCKED;
-
-struct _cdt *dn_sklist_find_listener2(char *addr)
+struct _cdt *scs_sklist_find_listener2(char *addr)
 {
   struct _cdt **skp = (addr);
   struct _cdt *sk;
@@ -127,7 +111,7 @@ int scs_std$connect (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *
 
 	sk->cdt$w_state   = CDT$C_CON_SENT;
 
-	dn_nsp_send_conninit2(sk, SCS$C_CON_REQ,rprnam,lprnam,condat);
+	scs_nsp_send_conninit2(sk, SCS$C_CON_REQ,rprnam,lprnam,condat);
 
 #if 0
 	for( ; ; ) {
@@ -145,7 +129,7 @@ out:
         return err;
 }
 
-//static int dn_accept(struct _cdt *sock, struct _cdt *newsock, int flags)
+//static int scs_accept(struct _cdt *sock, struct _cdt *newsock, int flags)
 
 int scs_std$accept (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsysid, void *rstadr, void *rprnam, void *lprnam, int initcr, int minscr, int initdg, int blkpri, void *condat, void *auxstr, void (*badrsp)(), void (*movadr)(), int load_rating,int (*req_fast_recvmsg)(), void (*fast_recvmsg_pm)(), void (*change_aff)(), void (*complete)(), struct _cdt * cdt, int connect_parameter)
 {
@@ -364,7 +348,7 @@ int /*__init*/ scs_init(void) {
 
 }
 
-//static int dn_sendmsg(struct _cdt *sock, struct msghdr *msg, int size,struct scm_cookie *scm)
+//static int scs_sendmsg(struct _cdt *sock, struct msghdr *msg, int size,struct scm_cookie *scm)
 
 int scs_std$senddg(int disposition_flag, int dg_msg_length, struct _cdrp *cdrp ) {
   struct _scs * scs = vmalloc(sizeof(struct _scs));
@@ -385,7 +369,7 @@ void scs_lower_level_send(struct _cdrp * cdrp, struct _scs * scs) {
   struct sk_buff *skb = NULL;
   struct _cdt * sk=cdrp->cdrp$l_cdt;
 
-  if ((skb = dn_alloc_skb2(sk, 1000, GFP_ATOMIC)) == NULL)
+  if ((skb = scs_alloc_skb2(sk, 1000, GFP_ATOMIC)) == NULL)
     return;
 
   scs_msg_fill(skb,sk,0,scs);
@@ -394,7 +378,7 @@ void scs_lower_level_send(struct _cdrp * cdrp, struct _scs * scs) {
 
   printscs(skb->data);
 
-  dn_nsp_send2(skb);	
+  scs_nsp_send2(skb);	
 }
 
 static int scs_std$sendmsg(int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (* complete)(void))
@@ -422,101 +406,45 @@ static int scs_std$sendmsg(int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cd
 	return sent ? sent : err;
 }
 
-static int dn_device_event(struct notifier_block *this, unsigned long event,
+static int scs_device_event(struct notifier_block *this, unsigned long event,
 			void *ptr)
 {
 	return NOTIFY_DONE;
 }
 
-static struct notifier_block dn_dev_notifier = {
-	notifier_call:	dn_device_event,
+static struct notifier_block scs_dev_notifier = {
+	notifier_call:	scs_device_event,
 };
 
-extern int dn_route_rcv(struct sk_buff *, struct net_device *, struct packet_type *);
+extern int scs_rcv(struct sk_buff *, struct net_device *, struct packet_type *);
 
-static struct packet_type dn_dix_packet_type = {
+static struct packet_type scs_dix_packet_type = {
 	type:		__constant_htons(ETH_P_MYSCS),
 	dev:		NULL,		/* All devices */
-	func:		dn_route_rcv,
+	func:		scs_rcv,
 	data:		(void*)1,
 };
 
 #define IS_NOT_PRINTABLE(x) ((x) < 32 || (x) > 126)
 
-char *dn_addr2asc(dn_address addr, char *buf)
-{
-  unsigned short node, area;
-
-  node = addr & 0x03ff;
-  area = addr >> 10;
-  sprintf(buf, "%hd.%hd", area, node);
-
-  return buf;
-}
-
-static int dn_get_info(char *buffer, char **start, off_t offset, int length)
-{
-	return 0;
-}
-
-
-static struct net_proto_family	dn_family_ops = {
+static struct net_proto_family	scs_family_ops = {
 	family:		AF_DECnet,
 	create:		0,
 };
 
-#ifdef CONFIG_SYSCTL
-void dn_register_sysctl(void);
-void dn_unregister_sysctl(void);
-#endif
-
-
-#ifdef MODULE
-EXPORT_NO_SYMBOLS;
-MODULE_DESCRIPTION("The Linux DECnet Network Protocol");
-MODULE_AUTHOR("Linux DECnet Project Team");
-MODULE_LICENSE("GPL");
-
-static int addr[2] = {0, 0};
-
-MODULE_PARM(addr, "2i");
-MODULE_PARM_DESC(addr, "The DECnet address of this machine: area,node");
-#endif
-
 static char banner[] __initdata = KERN_INFO "%%KERNEL-I-STARTUP, NET5: MYSCS, based on DECnet for Linux: V.2.4.15-pre5s (C) 1995-2001 Linux DECnet Project Team\n";
 
-static int __init decnet_init(void)
+static int __init scs_init2(void)
 {
-#ifdef MODULE
-	if (addr[0] > 63 || addr[0] < 0) {
-		printk(KERN_ERR "DECnet: Area must be between 0 and 63");
-		return 1;
-	}
-
-	if (addr[1] > 1023 || addr[1] < 0) {
-		printk(KERN_ERR "DECnet: Node must be between 0 and 1023");
-		return 1;
-	}
-
-	decnet_address = dn_htons((addr[0] << 10) | addr[1]);
-	dn_dn2eth(decnet_ether_address, dn_ntohs(decnet_address));
-#endif
-
         printk(banner);
 
-	sock_register(&dn_family_ops);
+	sock_register(&scs_family_ops);
 #ifndef CONFIG_VMS
-	dev_add_pack(&dn_dix_packet_type);
-	register_netdevice_notifier(&dn_dev_notifier);
+	dev_add_pack(&scs_dix_packet_type);
+	register_netdevice_notifier(&scs_dev_notifier);
 #endif
 
-	proc_net_create("myscs", 0, dn_get_info);
-
-	dn_dev_init();
-
-#ifdef CONFIG_SYSCTL
-	dn_register_sysctl();
-#endif /* CONFIG_SYSCTL */
+	scs_dev_init();
 
 	/*
 	 * Prevent DECnet module unloading until its fixed properly.
@@ -529,43 +457,17 @@ static int __init decnet_init(void)
 
 }
 
-#ifndef MODULE
-static int __init decnet_setup(char *str)
-{
-	unsigned short area = simple_strtoul(str, &str, 0);
-	unsigned short node = simple_strtoul(*str > 0 ? ++str : str, &str, 0);
-
-	decnet_address = dn_htons(area << 10 | node);
-	dn_dn2eth(decnet_ether_address, dn_ntohs(decnet_address));
-
-	return 1;
-}
-
-__setup("myscs=", decnet_setup);
-#endif
-
-static void __exit decnet_exit(void)
+static void __exit scs_exit(void)
 {
 #ifndef CONFIG_VMS
-	sock_unregister(AF_DECnet);
-	dev_remove_pack(&dn_dix_packet_type);
+	unregister_netdevice_notifier(&scs_dev_notifier);
 #endif
 
-#ifdef CONFIG_SYSCTL
-	dn_unregister_sysctl();
-#endif /* CONFIG_SYSCTL */
-
-#ifndef CONFIG_VMS
-	unregister_netdevice_notifier(&dn_dev_notifier);
-#endif
-
-	dn_dev_cleanup();
-
-	proc_net_remove("myscs");
+	scs_dev_cleanup();
 }
 
-module_init(decnet_init);
-module_exit(decnet_exit);
+module_init(scs_init2);
+module_exit(scs_exit);
 //#endif /* #if 0 second one */
 
 #endif
