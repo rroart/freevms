@@ -1,0 +1,444 @@
+System overview
+
+FreeVMS is still at an early stage.
+It can be compiled more ordinarily as a kernel with some VMS scheduling extensions (ruffly said, it has more) which is able to boot minimally with init, network and sshd.
+Alternatively, it can be compiled with CONFIG_VMS, which means you get VMS memory management and I/O, but only can boot single-user.
+It can only be compiled on i386, because it is useless and waste of resources to try another arch at this moment.
+It is possible to compile UML, User-Mode Linux on i386, because it facilitates better debugging, but also other bugs.
+Even with CONFIG, there is still lots of memory management bits left to do.
+P1 space, 4 level CPU modes (even though i386 may lack some features to use this fully) is in the process of being developed.
+
+
+****************
+
+CPU and PAL
+
+Since we are using i386, we lack a decent CPU.
+The Alpha processor implements some VMS VAX features by the PAL, programmable architecture library.
+Something PAL-like will be using here, but implemented in C or Assembly.
+
+REI is implemented as myrei in module ipl.
+It corresponds mostly to the REI in VARM.
+As an added optimization, a check whether interrupt has happened is done with psl_intr.
+Since REI is supposed to be atomic, this is tried to be implemented by doing mycli.
+Tmp2 corresponds to p->psl while p->oldpsl corresponds to the current psl which is about to be the previous.
+The checks for reserved operand fault is specified in VARM.
+No check is done for compatibility mode.
+Nothing yet is done to save the old stack pointer.
+No check is done for TP (trace pending).
+Mysti is here run to turn off atomicity.
+Now we really begin to deviate from VARM.
+Whereas REI now should restore PC and PSL and thereby proper modes, myrei does that last. This makes us stay longer in a higher ipl mode.
+This will be replaced by some assembly code later.
+The sw_ast routine in module ast does an eventual check and interrupt IPL 2 request, but does not yet do any stack switching.
+Check for software interrupts is done by do_sw_int.
+No clear instruction look-ahead is done either.
+
+The PSL resides in the software PCB struct.
+It can be pushed and popped with the routines pushpsl and poppsl (stack also is present in that PCB).
+Checks of overflows are done.
+Poppsl also set oldpsl and sets smp$gl_cpu_data.
+Setipl also set smp$gl_cpu_data in addition to the psl ipl, and with IPL_DEBUG set you can also save the top of the stack, in case you need to debug where an ipl last was set.
+
+The spl* routines are dead, I think.
+
+Chm routine is supposed to be like change mode chmx instructions, but have not yet found out how to implement.
+
+Currently, the IPLs themselves are implemented as routine calls.
+The really should be implemented with softints, but something did not work quite right (initial fsck slowed down more and more, for example).
+
+Initiation of interrupt is split into 3 routines intr_blocked, setipl and regtrap.
+Intr_blocked mainly does check whether wanted new ipl is bigger than current ipl, and if it is not it just marks the SISR (software interrupts status register) to mark that interrupt as pending.
+It also check whether the interrupt has been blocked to many times, and does a reset if too long. (This is a sign of trouble.)
+It also sets an extra PSL bit PSL_INTR to mark whether interrupt happened or not. To be used with myrei for optimization and whether interrupt happened or not.
+Myrei shall always end an interrupt.
+Regtrap follows the VARM initiate exception or interrupt.
+Pushpsl is done early (should be late), instead of using a temporary register.
+It can also copy the top of the stack if IPL_DEBUG is set.
+Do_sw_int mainly does the pending software interrupts.
+Mycli and mysti use local linux routines to implement disabling and enabling interrupts.
+Sickinsque is used in connection with forcing a panic and register dump.
+
+Queue routines insque, remque, insqhi, insqti, remqhi, remqti are implement the corresponding instructions.
+It is attempted to do them atomicly, and there is also some checks done.
+Since no flags are returned, we also need some empty queue check routines aqempty and rqempty.
+The module vmslib contains a routine REMQUE which also can return some flags.
+It should be moved sometime.
+
+What other data struct extensions other than psl do we need to simulate the right CPU?
+The cpu struct is extended with cpu$w_sisr, the pcb struct is extended with pr_astlvl.
+
+Modules:
+[pal.src]
+ast
+ipl
+queue
+
+[cmuip.ipacp.src]
+vmslib
+
+****************
+
+Interrupts and exceptions
+
+The i386 leaves a lot to be desired.
+We have some implementation of IPLs in software.
+Still to be done is to emulate SCBs in software.
+I do not yet know where pending hardware interrupts are registered.
+
+
+****************
+
+Hardware interrupts
+
+The interval timer interrupt goes off to exe$hwclkint in the timeschdl module.
+Since I have got no SMP machine available, there is no SMP support and therefore no interprocessor interrupt.
+Hardware interrupts has been prepared to use IPLs by having pushed psl and added myrei in hw_irq.h
+Similar code has been added to uml.
+
+[linux.include.asm-i386]
+hw_irq.h
+
+****************
+
+Software interrupts
+
+For the time begin, these are implemented by routine calls.
+(Had some problem with spending too much time in interrupts and not getting out if I used an actual softint)
+
+[linux.arch.i386.kernel]
+entry.S
+
+[linux.include.asm-i386]
+hw_irq.h
+
+****************
+
+Condition handling
+
+None done.
+Use the ones already in Linux.
+CHMx needs to be emulated.
+
+
+****************
+
+System service dispatching
+
+Currently, CHMx is not implemented.
+System services are implemented like Linux system calls.
+While the usual calls are on int 0x80, ours are on 0x81 to 0x84, to prepare for our own CPU modes.
+With uml there is no other vectors, so it just goes after the other calls.
+Since the i386 can not handle more than 5 parameters, we use a wrapper struct to have more than 5.
+
+[linux.arch.i386.kernel]
+entry.S
+
+[linux.arch.um.kernel]
+sys_call_table.c
+
+****************
+
+ASTs
+
+These are emulated, but just barely.
+Even user ASTs run in kernel mode, so that must be fixed.
+Preferably by setting up some stacks?
+On uml ASTs in user space makes it crash.
+
+****************
+
+Synchronization techniques
+
+Some atomic and uninterruptible stuff have been attempted, but still a lot remain.
+Interlocked instructions ADAWI, BBCCI, BBSSI, INSQHI, INSQTI, REMQHI, REMQTI mainly remain.
+Spinlocks are implemented (use the Linux mechanisms).
+Mutexes have been tried attempted, but are wrong.
+
+
+****************
+
+Event flags
+
+****************
+
+Lock management
+
+Barely implemented.
+No DLM.
+No deadlock checking.
+
+****************
+
+Time support
+
+****************
+
+Scheduling
+
+This was implemented early.
+Scheduling states is in the process of being used more widely.
+No SMP support (no capabilities and affinity).
+Because of Linux and lack of ldpctx and svpctx, some things are different in sch$resched.
+SVPCTX right after lock is not done.
+It does some check curpcb->state==TASK_INTERRUPTIBLE that remains from Linux, and probably has to for some while (do not remember why).
+It also has to check where the process is not on the COMQUEUE and the Linux state before it does the things from 5$ and on (do not remember why).
+Sch$sched has some checks to see whether is came from sch$resched, and skips something if it did.
+The interrupt initiation stuff is not yet done here.
+Another things that is different is how it idles, it is done different.
+There is a process for it, and therefore we can not jump to sch$idle.
+The check for DYN$C_PCB is not done, but will be soon.
+Some of our psl, ipl and astlvl additions are also done here.
+The 51$ Set PCB base is not done.
+LDPCTX is not done, and from now the rest is from Linux (if (next == curpcb)...) (except astlvl).
+
+[sys.src]
+sched.c
+
+****************
+
+Memory management overview and data structures
+
+A lot is implemented, including P1.
+Struct _rde have been borrowed from newer VMS, and is similar to the Linux struct vm_area_struct and is used to replace it.
+The module vmspte.h contains a lot of extensions to the existing i386 and uml page pte bits.
+Copy-on-reference is not present.
+
+[sys.src]
+vmspte.h
+
+****************
+
+Memory management system services
+
+P1 space layout:
+
+0x7fffe000-up: Stack top for user stack, defined in exec.c and tlb.c
+(Had to change on uml to 0x7fc00000, the nearest page table boundary)
+0x7fffe000, 0x1000: Fork temporary P1 Pointer Page, hardcoded in shell.c
+0x7ffff000, 0x1000: P1 Pointer Page, hardcoded in shell.c
+
+[linux.arch.um.kernel]
+tlb.c
+
+[linux.fs]
+exec.c
+
+[sys.src]
+shell.c
+
+****************
+
+Paging dynamics
+
+
+****************
+
+Working set list dynamics
+
+
+****************
+
+Swapper
+
+Not implemented yet.
+
+****************
+
+Pool management
+
+This is partially implemented, but not in use yet.
+
+****************
+
+Overview of the I/O subsystem
+
+
+****************
+
+I/O system services
+
+****************
+
+I/O device drivers and interrupt service routines
+
+****************
+
+Mailboxes
+
+****************
+
+Miscellaneous I/O topics
+
+There is a tty line driver implemented with QIO in CONFIG_VMS.
+It is bad.
+
+****************
+
+Process creation
+
+****************
+
+Image initiation
+
+****************
+
+Process dynamics
+
+****************
+
+Process deletion
+
+****************
+
+The Modular Executive
+
+****************
+
+Bootstrap procedures
+
+The Linux ones are used.
+
+****************
+
+Operating system initialization and shutdown
+
+
+****************
+
+Error handling
+
+****************
+
+Power failure and recovery
+
+****************
+
+Symmetric multiprocessing
+
+Not supported.
+
+****************
+
+Logical names
+
+****************
+
+Miscellaneous system services
+
+****************
+
+RMS
+
+See rmsint2.doc for now.
+
+****************
+
+Files-11 and XQP
+
+****************
+
+Clustering
+
+See also doc/sca doc/sca2
+
+It is as of now only a two-node cluster, and not exactly fault-tolerant.
+If one node crashes, both have to be rebooted.
+It sends only packages in udp-style, not tcp-style.
+It was based on decnet code, and some parts remain.
+
+At an earlier time, scs_init2 is invoked by Linux module code.
+It just registers the socket and start things with scs_dev_init.
+Scs_dev_init mainly sets a timer which sends a hello regularily.
+If CONFIG_VMS is there, it does nothing.
+
+In module main.c, it is started by scs_init, then mscp, dlminit, init_cwps are run.
+Scs_init sets up directory services (not yet used, though), and sets up basic data structures.
+Then it is set up to listen to something that does remote hw configuring.
+A file /vms$common/sysexe/params.dat is then read to begin local cluster config.
+The listen routine and some others mirror what you find in other protocols.
+Scs_std$listen listens on a service name.
+Scs_std$senddg sends a datagram ("udp").
+Scs_std$connect connects to service name.
+Scs_std$accept accepts connection.
+I think there is also one for rejection.
+Scs_std$sendmsg will sometime send a message ("tcp"?).
+Scs_std$reqdata will send a packet that says it requests data.
+Scs_std$senddata sends data.
+
+Scs_std$senddg etc invokes scs_lower_level_send, which fills in some datastructures and invokes scs_nsp_send2, invokes some routines that send it.
+
+Init_cwps just starts listening for cwps services.
+
+Cwps_listen receives cwps_requests and dispatches them.
+For now it is only related to forcex.
+
+Dlminit is not operative as of now.
+
+MSCP and dudriver is another chapter.
+
+Scs_neigh_endnode_hello is run when a "hello" from the other node is received.
+If it is the first time, it sets up the timer to start startconnect.
+Startconnect is a routine that connects to other node and then transfers ddb database.
+Ddb_transfer just transfers the ddb database.
+For simple timing these things are set to be done with 10 seconds intervals.
+
+Scs_rcv is the routine that receives incoming packets.
+It discards if it is a hello from itself.
+It then dispatches whether is was a hello to scs_neigh_endnode_hello and if a control (setup) packet to opc_msgrec, or otherwise, to nisca_snt_dg.
+Opc_msgrec handles protocol and connection setup.
+Nisca_snt_dg dispatches to the input routine designated by the connection id.
+
+Clustering is not yet ready for CONFIG_VMS networking.
+
+[linux.init]
+main.c
+
+[driver.src]
+scs.c
+
+[sysloa.src]
+sys_scs.c
+
+[mscp.src]
+mscp.c
+
+[driver.src]
+dudriver.c
+
+****************
+
+SCA
+
+See specific document for this.
+(sca-info.memos, probably available on the net)
+
+****************
+
+MSCP and dudriver
+
+****************
+
+CMU TCP/IP
+
+The CMU TCP/IP written mainly in bliss was translated to C.
+
+Some calls it does has been implemented as empty routines to make it link.
+Things to be checked upon is marked // check
+
+****************
+
+Linker
+
+There is a linker that can make static FreeVMS binaries.
+
+****************
+
+Bliss
+
+There is a bliss compiler under development.
+It is implemented under gcc.
+There are no plans for FreeVMS to depend on it.
+
+****************
+
