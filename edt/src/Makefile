@@ -44,6 +44,9 @@ EXTERNAL =
 
 all: $(OBJS) i386/edt${EXE} um/edt${EXE}
 
+clean:
+	rm *.o um/* i386/*
+
 install: all
 	[ ! -d ../../rootum/vms$$common.sysexe ] && mkdir -p ../../rootum/vms"$$"common/sysexe
 	[ ! -d ../../rooti386/vms$$common.sysexe ] && mkdir -p ../../rooti386/vms"$$"common/sysexe

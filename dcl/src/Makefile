@@ -8,6 +8,9 @@ EXTERNAL = ../../cliutl/src/show.a ../../cliutl/src/set.a
 
 all: i386/dcl${EXE} um/dcl${EXE}
 
+clean:
+	rm *.o um/* i386/*
+
 install: all
 	[ ! -d ../../rootum/vms$$common.sysexe ] && mkdir -p ../../rootum/vms"$$"common/sysexe
 	[ ! -d ../../rooti386/vms$$common.sysexe ] && mkdir -p ../../rooti386/vms"$$"common/sysexe

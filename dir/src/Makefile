@@ -8,6 +8,9 @@ FLAGS = -static
 
 all: directory${EXE} directoryum${EXE}
 
+clean:
+	rm *.o um/* i386/* directory
+
 install: all
 	[ ! -d ../../rootum/vms$$common.sysexe ] && mkdir -p ../../rootum/vms"$$"common/sysexe
 	[ ! -d ../../rooti386/vms$$common.sysexe ] && mkdir -p ../../rooti386/vms"$$"common/sysexe

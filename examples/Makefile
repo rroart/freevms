@@ -1,5 +1,8 @@
 all: dirs alli386 allum
 
+clean:
+	rm *.o um/* i386/*
+
 install: all
 	[ ! -d ../rootum/vms$$common/syshlp/examples ] && mkdir -p ../rootum/vms"$$"common/syshlp/examples
 	[ ! -d ../rooti386/vms$$common/syshlp/examples ] && mkdir -p ../rooti386/vms"$$"common/syshlp/examples
