@@ -42,6 +42,7 @@ int exe$insioq (struct _ucb * u, struct _irp * i) {
 /* put this into a struct */
 asmlinkage int exe$qio (struct struct_qio * q) {
   int func;
+  unsigned int c, d;
   struct _irp * i;
   exe$clref(q->efn);
   if (q->chan<0 || q->chan>ctl$gl_chindx) return SS$_IVCHAN;
@@ -63,7 +64,9 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   i->irp$w_chan=q->chan;
   i->irp$w_func=q->func;
   /* do preprocessing */
-  ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[q->func](q->p1,q->p2,q->p3,q->p4,q->p5,q->p6);
+  for(c=0,d=1;c<64;c++,d=d<1) /* right order? */
+    if (d&func)
+      ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[c](q->p1,q->p2,q->p3,q->p4,q->p5,q->p6);
   
 }
 
