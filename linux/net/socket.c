@@ -503,6 +503,7 @@ void sock_release(struct socket *sock)
 
 int sock_sendmsg(struct socket *sock, struct msghdr *msg, int size)
 {
+#ifndef CONFIG_VMS
 	int err;
 	struct scm_cookie scm;
 
@@ -512,10 +513,12 @@ int sock_sendmsg(struct socket *sock, struct msghdr *msg, int size)
 		scm_destroy(&scm);
 	}
 	return err;
+#endif
 }
 
 int sock_recvmsg(struct socket *sock, struct msghdr *msg, int size, int flags)
 {
+#ifndef CONFIG_VMS
 	struct scm_cookie scm;
 
 	memset(&scm, 0, sizeof(scm));
@@ -525,6 +528,7 @@ int sock_recvmsg(struct socket *sock, struct msghdr *msg, int size, int flags)
 		scm_recv(sock, msg, &scm, flags);
 
 	return size;
+#endif
 }
 
 
@@ -744,6 +748,7 @@ int sock_close(struct inode *inode, struct file *filp)
 
 static int sock_fasync(int fd, struct file *filp, int on)
 {
+#ifndef CONFIG_VMS
 	struct fasync_struct *fa, *fna=NULL, **prev;
 	struct socket *sock;
 	struct sock *sk;
@@ -801,6 +806,7 @@ static int sock_fasync(int fd, struct file *filp, int on)
 
 out:
 	release_sock(sock->sk);
+#endif
 	return 0;
 }
 
@@ -1291,6 +1297,7 @@ asmlinkage long sys_recv(int fd, void * ubuf, size_t size, unsigned flags)
 
 asmlinkage long sys_setsockopt(int fd, int level, int optname, char *optval, int optlen)
 {
+#ifndef CONFIG_VMS
 	int err;
 	struct socket *sock;
 
@@ -1306,6 +1313,7 @@ asmlinkage long sys_setsockopt(int fd, int level, int optname, char *optval, int
 		sockfd_put(sock);
 	}
 	return err;
+#endif
 }
 
 /*
@@ -1315,6 +1323,7 @@ asmlinkage long sys_setsockopt(int fd, int level, int optname, char *optval, int
 
 asmlinkage long sys_getsockopt(int fd, int level, int optname, char *optval, int *optlen)
 {
+#ifndef CONFIG_VMS
 	int err;
 	struct socket *sock;
 
@@ -1327,6 +1336,7 @@ asmlinkage long sys_getsockopt(int fd, int level, int optname, char *optval, int
 		sockfd_put(sock);
 	}
 	return err;
+#endif
 }
 
 
@@ -1353,6 +1363,7 @@ asmlinkage long sys_shutdown(int fd, int how)
 
 asmlinkage long sys_sendmsg(int fd, struct msghdr *msg, unsigned flags)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 	char address[MAX_SOCK_ADDR];
 	struct iovec iovstack[UIO_FASTIOV], *iov = iovstack;
@@ -1423,6 +1434,7 @@ out_put:
 	sockfd_put(sock);
 out:       
 	return err;
+#endif
 }
 
 /*
@@ -1431,6 +1443,7 @@ out:
 
 asmlinkage long sys_recvmsg(int fd, struct msghdr *msg, unsigned int flags)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 	struct iovec iovstack[UIO_FASTIOV];
 	struct iovec *iov=iovstack;
@@ -1509,6 +1522,7 @@ out_put:
 	sockfd_put(sock);
 out:
 	return err;
+#endif
 }
 
 
@@ -1521,12 +1535,14 @@ out:
 
 int sock_fcntl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 
 	sock = socki_lookup (filp->f_dentry->d_inode);
 	if (sock && sock->ops)
 		return sock_no_fcntl(sock, cmd, arg);
 	return(-EINVAL);
+#endif
 }
 
 /* Argument list sizes for sys_socketcall */
@@ -1692,6 +1708,7 @@ void __init sock_init(void)
 	 *	Initialize sock SLAB cache.
 	 */
 	 
+#ifndef CONFIG_VMS
 	sk_init();
 
 #ifdef SLAB_SKB
@@ -1699,6 +1716,7 @@ void __init sock_init(void)
 	 *	Initialize skbuff SLAB cache 
 	 */
 	skb_init();
+#endif
 #endif
 
 	/*
@@ -1724,8 +1742,10 @@ void __init sock_init(void)
 	 * The netlink device handler may be needed early.
 	 */
 
+#ifndef CONFIG_VMS
 #ifdef CONFIG_NET
 	rtnetlink_init();
+#endif
 #endif
 #ifdef CONFIG_NETLINK_DEV
 	init_netlink();
