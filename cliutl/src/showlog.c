@@ -23,7 +23,7 @@ show_logical(int argc, char**argv){
   mytabnam.dsc$w_length=strlen(argv[1]);
   mytabnam.dsc$a_pointer=argv[1];
 
-  itm[0].item_code=LNM$C_STRING;
+  itm[0].item_code=LNM$_STRING;
   itm[0].buflen=LNM$C_NAMLENGTH;
   itm[0].bufaddr=resstring;
   bzero(&itm[1],sizeof(struct item_list_3));

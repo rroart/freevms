@@ -17,6 +17,7 @@ locks/dlm (barely)
 cwps (forcex only)
 dcl (or something like it)
 vms images
+mailboxes
 
 syscalls/services:
 $adjwsl
