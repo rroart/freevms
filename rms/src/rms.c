@@ -430,7 +430,7 @@ int default_size[] = {7,8,0,1,1};
 unsigned do_parse(struct _fabdef *fab,struct WCCFILE **wccret)
 {
     struct WCCFILE *wccfile;
-    char *fna = fab->fab$l_fna;
+    char *fna = search_log_prc(fab->fab$l_fna);
     char *dna = fab->fab$l_dna;
     struct _namdef *nam = fab->fab$l_nam;
     int sts;
