@@ -40,7 +40,22 @@ void exe$insertirp(void * u, struct _irp * i) {
   insque(i,tmp);
 }
 
-void exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, unsigned long s) {
+int exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, unsigned long s) {
+  // acquire forklock etc
+  forklock(u->ucb$b_flck,-1);
+#if 0
+  if (i->irp$l_iosb)
+    bzero(i->irp$l_iosb,8);
+#endif
+  i->irp$l_iosb=0;
+  // inc process ast quota if v_quota was set
+  i->irp$b_rmod&=~ACB$M_QUOTA;
+  
+  insque(i,&smp$gl_cpu_data[smp_processor_id()]->cpu$l_psbl);
+  SOFTINT_IOPOST_VECTOR;
+
+  forkunlock(u->ucb$b_flck,-1);
+  return s;
 }
 
 void exe$altqueuepkt (void) {}
