@@ -1,5 +1,10 @@
 %{
 
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 int yy2debug=0;
 int yydebug=0;
 

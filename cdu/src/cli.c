@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #define GTY(x)
 #define HOST_BITS_PER_WIDE_INT 64
 #define POINTER_SIZE 32

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// More or less modified GCC source file, 2004  
+
 /* Hash tables.
    Copyright (C) 2000, 2001, 2003 Free Software Foundation, Inc.
 

@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 DEFTREECODE (STMT, "stmt", 'e', 1)
 DEFTREECODE (DEFINE_TYPE_STMT, "define_type_stmt", 'e', 2)
 DEFTREECODE (DEFINE_SYNTAX_STMT, "define_syntax_stmt", 'e', 2)
