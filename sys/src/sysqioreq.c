@@ -120,7 +120,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   if (q->iosb) *((unsigned long long *)q->iosb)=0;
   setipl(IPL$_ASTDEL);
   /*check proc quota*/
-  i=vmalloc(sizeof(struct _irp));
+  i=kmalloc(sizeof(struct _irp),GFP_KERNEL);
   bzero(i,sizeof(struct _irp));
   i->irp$b_type=DYN$C_IRP;
   i->irp$b_efn=q->efn;
@@ -189,6 +189,7 @@ void exe$qioqxqppkt (struct _pcb * p, struct _irp * i) {
   a->acb$l_pid=p->pcb$l_pid;
   a->acb$l_ast=f11b$dispatch;
   a->acb$l_astprm=i;
+  a->acb$b_rmod|=ACB$M_NODELETE; // bad idea to free this
   remque(i,0); // got to get rid of this somewhere, why not here?
   sch$qast(p->pcb$l_pid,PRI$_RESAVL,a);
 }
