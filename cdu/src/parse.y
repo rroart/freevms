@@ -149,7 +149,7 @@ define_verb
 |
 K_IDENT T_NAME
 |
-K_MODULE T_NAME
+K_MODULE T_NAME { $$ = build_nt(MODULE_STMT, $2); }
 ;
 
 define_syntax:
