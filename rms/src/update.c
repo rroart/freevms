@@ -516,7 +516,7 @@ unsigned f11b_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
   struct _fiddef hdrfid;
   unsigned hdrseq;
   unsigned start_pos = 0;
-  unsigned block_count = blocks;
+  unsigned block_count = blocks; // set right a bit later
   if (block_count < 1) return 0;
   if (fcb->fcb$l_efblk > 0) {
     unsigned mapblk,maplen;
@@ -550,8 +550,10 @@ unsigned f11b_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
     headvbn = nidxblk;
     vcbdev = rvn_to_dev(xqp->current_vcb,head->fh2$w_fid.fid$b_rvn);
   }
+  if (vcbdev->vcb$l_cluster>1)
+    block_count = blocks/vcbdev->vcb$l_cluster + 1;
   sts = bitmap_search(vcbdev,&start_pos,&block_count);
-  printk("Update_extend %d %d\n",start_pos,block_count);
+  printk("Update_extend %d %d %d\n",start_pos,blocks,block_count);
   if (sts & 1) {
     if (block_count < 1 || (contig && (block_count * vcbdev->vcb$l_cluster) < blocks)) {
       sts = SS$_DEVICEFULL;
