@@ -159,6 +159,7 @@ static inline int dup_mmap(struct mm_struct * mm)
 	mmlist_nr++;
 	spin_unlock(&mmlist_lock);
 
+#ifndef CONFIG_MM_VMS
 	for (mpnt = current->mm->mmap ; mpnt ; mpnt = mpnt->vm_next) {
 		struct file *file;
 
@@ -206,6 +207,7 @@ static inline int dup_mmap(struct mm_struct * mm)
 		if (retval)
 			goto fail_nomem;
 	}
+#endif
 	retval = 0;
 #ifndef CONFIG_MM_VMS
 	build_mmap_rb(mm);
@@ -762,13 +764,13 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
 	  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
 	  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-	  bzero(p->pcb$l_phd->phd$l_wslist,2048);
-	  bzero(p->pcb$l_phd->phd$l_wslock,2048);
-	  bzero(p->pcb$l_phd->phd$l_wsdyn,2048);
+	  bzero((void*)p->pcb$l_phd->phd$l_wslist,2048);
+	  bzero((void*)p->pcb$l_phd->phd$l_wslock,2048);
+	  bzero((void*)p->pcb$l_phd->phd$l_wsdyn,2048);
 	  p->pcb$l_phd->phd$l_wsnext=0;
 	  p->pcb$l_phd->phd$l_wslast=511;
 	  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
-	  bzero(p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+	  bzero((void*)p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
 	  p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
 	  p->pcb$l_phd->phd$l_pst_free=0;
 	}

@@ -160,13 +160,13 @@ asmlinkage void exe$creprc_real(unsigned int *pidadr, void *image, void *input, 
 	  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
 	  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
 	  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-	  bzero(p->pcb$l_phd->phd$l_wslist,4*512);
-	  bzero(p->pcb$l_phd->phd$l_wslock,4*512);
-	  bzero(p->pcb$l_phd->phd$l_wsdyn,4*512);
+	  bzero((void*)p->pcb$l_phd->phd$l_wslist,4*512);
+	  bzero((void*)p->pcb$l_phd->phd$l_wslock,4*512);
+	  bzero((void*)p->pcb$l_phd->phd$l_wsdyn,4*512);
 	  p->pcb$l_phd->phd$l_wsnext=0;
 	  p->pcb$l_phd->phd$l_wslast=511;
 	  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
-	  bzero(p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+	  bzero((void*)p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
 	  p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
 	  p->pcb$l_phd->phd$l_pst_free=0;
 	}
