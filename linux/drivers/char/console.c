@@ -244,12 +244,7 @@ static inline void scrolldelta(int lines)
 
 void schedule_console_callback(void)
 {
-#if 1
-  //ndef CONFIG_VMS
 	schedule_task(&console_callback_tq);
-#else
-	//	console_callback(0);
-#endif
 }
 
 static void scrup(int currcons, unsigned int t, unsigned int b, int nr)
@@ -1156,12 +1151,7 @@ static void respond_string(const char * p, struct tty_struct * tty)
 		tty_insert_flip_char(tty, *p, 0);
 		p++;
 	}
-#if 1
-	//ndef CONFIG_VMS
 	con_schedule_flip(tty);
-#else
-	tty->flip.tqueue.routine(tty);
-#endif
 }
 
 static void cursor_report(int currcons, struct tty_struct * tty)

@@ -337,12 +337,7 @@ void put_queue(int ch)
 	wake_up(&keypress_wait);
 	if (tty) {
 		tty_insert_flip_char(tty, ch, 0);
-#if 1
-		//ndef CONFIG_VMS
 		con_schedule_flip(tty);
-#else
-		tty->flip.tqueue.routine(tty);
-#endif
 	}
 }
 
@@ -356,12 +351,7 @@ static void puts_queue(char *cp)
 		tty_insert_flip_char(tty, *cp, 0);
 		cp++;
 	}
-#if 1
-//ndef CONFIG_VMS
 	con_schedule_flip(tty);
-#else
-	tty->flip.tqueue.routine(tty);
-#endif
 }
 
 static void applkey(int key, char mode)
@@ -477,12 +467,7 @@ static void send_intr(void)
 	if (!tty)
 		return;
 	tty_insert_flip_char(tty, 0, TTY_BREAK);
-#if 1
-	//ndef CONFIG_VMS
 	con_schedule_flip(tty);
-#else
-	tty->flip.tqueue.routine(tty);
-#endif
 }
 
 static void scroll_forw(void)
