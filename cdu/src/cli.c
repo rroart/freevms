@@ -27,7 +27,7 @@
 
 #include "cli.h"
 
-#define CDU_ROOT_SIZE 200
+#define CDU_ROOT_SIZE 1000
 struct _cdu cdu_root[CDU_ROOT_SIZE];
 int cdu_free = 0;
 
@@ -87,6 +87,7 @@ cdu_strncmp(int cdu, char * n, int size) {
 }
 
 int cdu_search_next(int i, int type, char * s, int size, int * retval) {
+  struct _cdu * cdu_root = *root_cdu;
   do {
     struct _cdu * name;
     switch (type) {
@@ -114,6 +115,7 @@ int cdu_search_next(int i, int type, char * s, int size, int * retval) {
 }
 
 int cdu_search_incr(int i, int type, char * s, int size, int * retval) {
+  struct _cdu * cdu_root = *root_cdu;
   do {
     struct _cdu * name;
     switch (type) {
@@ -144,11 +146,11 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
   if (mm_done==0) {
     mm_done=1;
     mmap(0x3f000000, 4,PROT_READ|PROT_WRITE,MAP_FIXED|MAP_ANONYMOUS|MAP_SHARED,0,0);
-    *root_cdu=&cdu_root[0];
   }
 
   struct dsc$descriptor * com = command_string;
   struct _cdu * cdu_root = table;
+  *root_cdu=table;
 
   char * line = com->dsc$a_pointer;
   int len = com->dsc$w_length;
@@ -359,6 +361,7 @@ unsigned int cli$dispatch(int userarg){
   int n;
   char * imagebase;
   struct _cdu * cdu;
+  struct _cdu * cdu_root = *root_cdu;
 
   if (vms_mm==0) goto exe2;
 
@@ -557,6 +560,8 @@ unsigned int cli$dispatch(int userarg){
   return SS$_NORMAL;
 }
 
+char * module_name = 0;
+
 int gencode(tree t) {
   while (t) {
     switch (TREE_CODE(t)) {
@@ -586,6 +591,9 @@ int gencode(tree t) {
 	tree type = TREE_OPERAND(t, 1);
 	gencode_type(type, &cdu_root[cdu]);
       }
+      break;
+    case MODULE_STMT:
+      module_name = IDENTIFIER_POINTER(TREE_OPERAND(t, 0));
       break;
     default:
     }
@@ -782,10 +790,22 @@ int gencode_keyw_clauses(tree t,struct _cdu * cdu) {
 }
 
 genwrite() {
-  int out = fopen("dcltables.c", "w");
+  int out;
+  if (module_name) {
+    int len = strlen(module_name);
+    char * dup = strndup(module_name,len+4);
+    dup[len]='.';
+    dup[len+1]='c';
+    dup[len+2]=0;
+    char * dupagain = strndup(dup,len+2);
+    out = fopen(dupagain, "w");
+  } else
+    out = fopen("dcltables.c", "w");
   fprintf(out, "#include \"cli.h\"\n\n");
-  fprintf(out, "struct _cdu cdu_root[] = {\n");
-
+  if (module_name)
+    fprintf(out, "struct _cdu %s[] = {\n",module_name);
+  else
+    fprintf(out, "struct _cdu cdu_root[] = {\n");
   int i = 0;
   struct _cdu * cdu = &cdu_root[0];
 
