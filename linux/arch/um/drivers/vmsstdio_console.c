@@ -102,7 +102,7 @@ static struct _ddt op$ddt = {
 int con$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   //  return read(0,i->irp$l_qio_p1,i->irp$l_qio_p2);
   struct tty_struct * tty;
-  init_dev2(chan2dev(i->irp$w_chan ,&tty));
+  init_dev2(chan2dev(i->irp$w_chan) ,&tty);
   u->ucb$l_irp=i;
   //tty_flip_buffer_push(tty);
   vms_read_chan(tty, 0, i->irp$l_qio_p1, i->irp$l_qio_p2);
