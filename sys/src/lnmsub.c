@@ -33,8 +33,8 @@ inline void panic(char * c) { }
 
 /* Author: Roar Thronæs */
 
-#undef LNM_DEBUG
 #define LNM_DEBUG
+#undef LNM_DEBUG
 
 #define lnmprintf printk
 

@@ -426,9 +426,9 @@ static int __init setup_mem_frac(char *str)
 __setup("memfrac=", setup_mem_frac);
 
 int exe$alononpaged() {
-  printk("not implemented\n");
+  printk("alononpaged not implemented\n");
 }
 
 int exe$deanonpaged() {
-  printk("not implemented\n");
+  printk("deanonpaged not implemented\n");
 }

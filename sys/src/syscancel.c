@@ -1,3 +1,3 @@
 exe$cancel() {
-  printk("not implemented\n");
+  printk("sys$cancel not implemented\n");
 }
