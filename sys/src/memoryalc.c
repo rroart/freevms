@@ -73,21 +73,25 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 	if (PageLRU(page))
 		lru_cache_del(page);
 
+#if 0
 	if (page->buffers)
 		BUG();
 	if (page->mapping)
 		BUG();
+#endif
 	if (!VALID_PAGE(page))
 		BUG();
+#if 0
 	if (PageSwapCache(page))
 		BUG();
+#endif
 	if (PageLocked(page))
 		BUG();
 	if (PageLRU(page))
 		BUG();
 	if (PageActive(page))
 		BUG();
-	page->flags &= ~((1<<PG_referenced) | (1<<PG_dirty));
+	page->pfn$l_page_state &= ~((1<<PG_referenced) | (1<<PG_dirty));
 
 	mask = (~0UL) << order;
 	page_idx = page - mem_map;
@@ -110,7 +114,7 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 	if (!in_free_all_bootmem_core)
 	  for(i=0,tmp=(((unsigned long)page-(unsigned long)mem_map)/sizeof(struct _pfn));i<(1 << order);i++,tmp++) {
 	    mmg$dallocpfn(tmp);
-	    memlist_del(&page->list);
+	    //memlist_del(&page->list);
 	  }
 
 	spin_unlock_irqrestore(&zone->lock, flags);
@@ -238,7 +242,7 @@ unsigned int nr_free_pages (void)
 	zone_t *zone;
 	pg_data_t *pgdat = pgdat_list;
 
-	sum = 0;
+	sum = sch$gl_freecnt;
 	return sum;
 }
 
@@ -393,7 +397,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		set_page_count(p, 0);
 		SetPageReserved(p);
 		init_waitqueue_head(&p->wait);
-		memlist_init(&p->list);
+		//memlist_init(&p->list);
 	}
 
 	offset = lmem_map - mem_map;	
