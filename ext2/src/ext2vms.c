@@ -650,6 +650,12 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     fib->fib$w_file_hdrseq_incr=f->f_pos;//dir.d_off+*reslen;
     fib->fib$w_dir_hdrseq_incr=*reslen;
 
+    if (/*wildcard ||*/ (fib->fib$w_nmctl & FIB$M_WILD)) {
+        fib->fib$l_wcc = curblk;
+    } else {
+        fib->fib$l_wcc = 0;
+    }
+
 #if 0
     if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
       sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
