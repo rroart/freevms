@@ -62,4 +62,9 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
   if (ahd->tty$l_ta_get>=ahd->tty$l_ta_end)
     ahd->tty$l_ta_get=ahd->tty$l_ta_data;
 
+  struct _tt_readbuf * bd = u->ucb$l_svapte;
+  char * bd_txt = bd->tty$l_rb_txt;
+  bd_txt[bd->tty$w_rb_txtoff]=*c;
+  bd->tty$w_rb_txtoff++;
+
 }
