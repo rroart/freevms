@@ -41,14 +41,6 @@ unsigned long long ioc$gq_lrpiq;
 unsigned long long ioc$gq_srpiq;
 #endif
 
-// move this later
-unsigned long long ioc$gq_listheads[128];
-
-struct mymap {
-  unsigned long flink;
-  unsigned long size;
-};
-
 #ifdef CONFIG_VMS
 
 zone_t thezone = {
@@ -491,38 +483,12 @@ static int __init setup_mem_frac(char *str)
 __setup("memfrac=", setup_mem_frac);
 #endif
 
-void __init init_nonpaged(pg_data_t *pgdat, unsigned long totalpages) {
-  struct mymap * mytmp;
-  memset(&ioc$gq_listheads[0], 0, sizeof(ioc$gq_listheads));
-  //override for now; half space is for nonpaged pool
-  sgn$gl_npagedyn=totalpages<<(PAGE_SHIFT-2); // half again/quarter
-
-  // ordinary nonpaged pool
-  mmg$gl_npagedyn=alloc_bootmem_node(pgdat,sgn$gl_npagedyn);
-  mmg$gl_npagedyn = (struct page *)(PAGE_OFFSET + 
-				    MAP_ALIGN((unsigned long)mmg$gl_npagedyn - PAGE_OFFSET));
-  exe$gl_npagedyn=mmg$gl_npagedyn;
-  exe$gl_nonpaged=exe$gl_npagedyn;
-  mytmp=exe$gl_npagedyn;
-  mytmp->flink=0; /* ? */
-  mytmp->size=sgn$gl_npagedyn;
-}
-
 int exe$alononpaged() {
   printk("alononpaged not implemented\n");
 }
 
 int exe$deanonpaged() {
   printk("deanonpaged not implemented\n");
-}
-
-// same as exe$allocate? no
-int exe$allocate_pool(int requestSize, int poolType, int alignment, unsigned int * allocatedSize, void ** returnBlock) {
-
-}
-
-void exe$deallocate_pool(void * returnBlock, int poolType, int size) {
-
 }
 
 struct _gen {
@@ -607,136 +573,6 @@ int exe$deallocate(void * returnblock, void ** poolhead, int size) {
   middle->gen$l_flink=nextnext;
 
   return SS$_INSFMEM;
-}
-
-int exe$alononpagvar (int reqsize, int *alosize_p, void **pool_p) {
-  // round up to nearest 16 should be moved here, and the statics fixed
-  // pool spinlock etc
-  int sts=SS$_NORMAL;
-
-  sts=exe$allocate(reqsize , &exe$gl_nonpaged, 0 , alosize_p, pool_p);
-
-  // unlock pool
-
-  return sts;
-}
-
-struct _myhead {
-  struct _myhead * hd$l_flink;
-  int hd$l_seq;
-};
-
-// move these two, see book to where
-void *exe$lal_remove_first(void *listhead) {
-  struct _myhead * h=listhead;
-  struct _myhead * ret = h->hd$l_flink;
-  if (ret) h->hd$l_flink=ret->hd$l_flink;
-  return ret;
-}
-
-void exe$lal_insert_first(void *packet,void *listhead) {
-  struct _myhead * h=listhead;
-  struct _myhead * p=packet;
-  p->hd$l_flink=h->hd$l_flink;
-  h->hd$l_flink=p;
-}
-
-// maybe implement the other way round
-int exe_std$deanonpgdsiz(void *pool, int size) {
-  struct _irp * irp = pool;
-  irp->irp$w_size=size;
-  return exe_std$deanonpaged(pool);
-}
-
-int exe_std$alononpaged (int reqsize, int *alosize_p, void **pool_p) {
-  int sts=SS$_NORMAL;
-#if 0
-  if (reqsize<=srpsize) {
-    if (rqempty(&ioc$gq_srpiq))
-      goto var;
-    int addr=remqti(&ioc$gq_srpiq,addr);
-    *alosize_p=reqsize;
-    *pool_p=addr;
-    return sts;
-  }
-  if (reqsize<=irpsize) {
-    if (rqempty(&ioc$gq_irpiq))
-      goto var;
-    int addr=remqti(&ioc$gq_irpiq,addr);
-    *alosize_p=reqsize;
-    *pool_p=addr;
-    return sts;
-  }
-  if (reqsize >= lrpmin && reqsize<=srpsize) {
-    if (rqempty(&ioc$gq_lrpiq))
-      goto var;
-    int addr=remqti(&ioc$gq_srpiq,addr);
-    *alosize_p=reqsize;
-    *pool_p=addr;
-    return sts;
-  }
-#endif
-  if (reqsize&63)
-    reqsize=((reqsize>>6)+1)<<6; // mm book said something about align 64
-
-  *alosize_p=reqsize;
-
-  if (reqsize<=6400) {
-    *pool_p = exe$lal_remove_first(&ioc$gq_listheads[reqsize>>6]);
-  } 
-
-  if (0==*pool_p) 
-    sts = exe$alononpagvar(reqsize, alosize_p, pool_p);
-
-  return sts;
-}
-
-int exe_std$deanonpaged (void *pool) {
-
-#if 0
-  // now taking some chances with addresses
-
-  if (mmg$gl_npagedyn<=pool && pool<=ioc$gl_lrpsplit) {
-    struct _irp * irp = pool;
-    if (irp->irp$w_size)
-      panic("irp size\n");
-    int sts=exe$deallocate(pool, exe$gl_nonpaged, irp->irp$w_size);
-    return sts;
-  }
-
-  if (ioc$gl_lrpsplit<=pool && pool<=ioc$gl_splitadr) {
-    insqti(pool,&ioc$gl_lrpsplit);
-    return SS$_NORMAL;
-  }
-
-  if (ioc$gl_splitadr<=pool && pool<=ioc$gl_srpsplit) {
-    insqti(pool,&ioc$gl_splitadr);
-    return SS$_NORMAL;
-  }
-
-  if (ioc$gl_srpsplit<=pool && pool<=(ioc$gl_srpsplit+4*512*srpsize)) {
-    insqti(pool,&ioc$gl_srpsplit);
-    return SS$_NORMAL;
-  }  
-  
-  return 0;
-#endif
-
-  struct _irp * irp = pool;
-  int reqsize=irp->irp$w_size;
-
-  if (reqsize&63)
-    reqsize=((reqsize>>6)+1)<<6; // mm book said something about align 64
-
-  if (reqsize==0 || (reqsize&63))
-    panic("reqsize size %x\n",reqsize);
-
-  if (reqsize<=6400) {
-    exe$lal_insert_first(pool, &ioc$gq_listheads[reqsize>>6]);
-  } else {
-    int sts=exe$deallocate(pool, exe$gl_nonpaged, reqsize);
-  }
-  return SS$_NORMAL;
 }
 
 int exe_std$alloctqe(int *alosize_p, struct _tqe **tqe_p) {

@@ -2129,6 +2129,9 @@ void __init vms_init4(void) {
   pn_vmsinit();
   tz_vmsinit();
 #endif
+  void exe$reclaim_pool_gentle(void * pool);
+  signed long long time=-10000000*60;
+  exe$setimr(0, &time, exe$reclaim_pool_gentle, exe$gs_npp_npool, 0);
 }
 
 void __init vms_init3(void) {
