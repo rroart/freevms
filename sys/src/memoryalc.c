@@ -453,6 +453,8 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	pgdat->nr_zones = 0;
 
 	mmg$gl_npagedyn=alloc_bootmem_node(pgdat,sgn$gl_npagedyn);
+	mmg$gl_npagedyn = (struct page *)(PAGE_OFFSET + 
+	  MAP_ALIGN((unsigned long)mmg$gl_npagedyn - PAGE_OFFSET));
 	exe$gl_npagedyn=mmg$gl_npagedyn;
 	mytmp=exe$gl_npagedyn;
 	mytmp->flink=0; /* ? */

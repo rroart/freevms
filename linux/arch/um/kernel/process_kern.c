@@ -193,12 +193,16 @@ void *_switch_to(void *prev, void *next)
 
 	c = 0;
 	set_current(to);
+//	printk("user_write %x\n",to->thread.switch_pipe[1]);
 	err = user_write(to->thread.switch_pipe[1], &c, sizeof(c));
+//	printk("user_write %x\n",to->thread.switch_pipe[1]);
 	if(err != sizeof(c))
 		panic("write of switch_pipe failed, errno = %d", -err);
 
 	if(from->state == TASK_ZOMBIE) kill_pid(getpid());
+//	printk("user_read %x\n",to->thread.switch_pipe[0]);
 	err = user_read(from->thread.switch_pipe[0], &c, sizeof(c));
+//	printk("user_read %x\n",to->thread.switch_pipe[0]);
 	if(err != sizeof(c))
 		panic("read of switch_pipe failed, errno = %d", -err);
 

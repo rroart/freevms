@@ -242,7 +242,9 @@ int run_kernel_thread(int (*fn)(void *), void *arg, void **jmp_ptr)
 	jmp_buf buf;
 
 	*jmp_ptr = &buf;
+//	printk("setjmp %x\n",jmp_ptr);
 	if(setjmp(buf)) return(1);
+//	printk("fnarg %x %x\n",fn,arg);
 	(*fn)(arg);
 	return(0);
 }
