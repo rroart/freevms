@@ -57,10 +57,8 @@ endmenu
 
 mainmenu_option next_comment
 comment 'Devices'
-if [ "$CONFIG_IO_VMS" = "y" ]; then
-    define_bool CONFIG_BLK_DEV_UBD y
-    bool 'Always do synchronous disk IO for UBD' CONFIG_BLK_DEV_UBD_SYNC
-fi
+define_bool CONFIG_BLK_DEV_UBD y
+bool 'Always do synchronous disk IO for UBD' CONFIG_BLK_DEV_UBD_SYNC
 tristate 'Loopback device support' CONFIG_BLK_DEV_LOOP
 dep_tristate 'Network block device support' CONFIG_BLK_DEV_NBD $CONFIG_NET
 tristate 'RAM disk support' CONFIG_BLK_DEV_RAM
