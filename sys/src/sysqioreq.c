@@ -43,7 +43,20 @@ void exe$insertirp(void * u, struct _irp * i) {
 void exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, unsigned long s) {
 }
 
-void exe$altqueuepkt (void) {
+void exe$altqueuepkt (void) {}
+
+int exe$altquepkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
+  struct _ddt *d; 
+  void (*f)(void *,void *);
+  int savipl=forklock(u->ucb$b_flck,u->ucb$b_flck);
+  /* no smp stuff yet */
+
+  d=u->ucb$l_ddt;
+  f=d->ddt$l_start;
+  f(i,u);
+
+  forkunlock(u->ucb$b_flck,savipl);
+  return SS$_NORMAL;
 }
 
 void exe$finishio (long long * iosb, struct _irp * i, struct _pcb * p, struct _ucb * u) {
