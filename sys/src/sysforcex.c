@@ -63,7 +63,9 @@ int cwps$forcex(unsigned int *pidadr, void *prcnam, unsigned int code){
   c->cdrp$l_rspid=scs_std$alloc_rspid(0,0,c,0);
   scs_std$find_rdte( c->cdrp$l_rspid, &r);
   r->rd$l_cdrp=c;
-  scs_std$connect(forcex_msg,forcex_dg,forcex_err,0,0,"cwps","cwps$forcex",0,0,0,0,0,&cdt); 
+  //printk("cluster forcex temporary broke?\n");
+  cdt=find_a_cdt(forcex_msg);
+
   c->cdrp$l_cdt=cdt;
   c->cdrp$w_cdrpsize=sizeof(struct _cwpssrv);
   c->cdrp$l_msg_buf=cwpssrv;

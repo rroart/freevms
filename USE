@@ -73,6 +73,7 @@ STOP:
 	you will have to give it decimal numbers
 	It must be used with VMS PIDs if to be used         
 	in a cluster (the Unix pids can be used on the local node).
+	(Stop on cluster currently has some problems)
 
 	stop /id proc
 	stop
