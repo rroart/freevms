@@ -21,6 +21,7 @@
 #include <asm/mmu_context.h>
 
 #include <system_data_cells.h>
+#include <phddef.h>
 
 extern void sem_exit (void);
 extern struct task_struct *child_reaper;
@@ -455,6 +456,10 @@ fake_volatile:
 #endif
 	__exit_mm(tsk);
 #ifdef CONFIG_MM_VMS
+	kfree(tsk->pcb$l_phd->phd$l_wslist);
+	kfree(tsk->pcb$l_phd->phd$l_wslock);
+	kfree(tsk->pcb$l_phd->phd$l_wsdyn);
+	kfree(tsk->pcb$l_phd->phd$l_pst_base_offset);
 	kfree(tsk->pcb$l_phd);
 #endif
 
