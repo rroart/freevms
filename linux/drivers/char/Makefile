@@ -30,7 +30,7 @@ export-objs     :=	console.o keyboard.o sysrq.o \
 			misc.o pty.o random.o selection.o serial.o \
 			tty_io.o tty_ioctl.o generic_serial.o
 else
-export-objs     :=	keyboard.o sysrq.o \
+export-objs     :=	sysrq.o \
 			misc.o pty.o random.o selection.o serial.o \
 			generic_serial.o
 endif
@@ -55,15 +55,23 @@ ifeq ($(ARCH),um)
   CONSOLE  =
 endif
 
+ifndef CONFIG_VMS
 obj-$(CONFIG_VT) += vt.o vc_screen.o consolemap.o consolemap_deftbl.o $(CONSOLE) selection.o
+else
+obj-y += consolemap.o consolemap_deftbl.o
+endif
+ifndef CONFIG_VMS
 obj-$(CONFIG_SERIAL) += $(SERIAL)
 obj-$(CONFIG_SERIAL_ACPI) += acpi_serial.o
 obj-$(CONFIG_SERIAL_21285) += serial_21285.o
 obj-$(CONFIG_SERIAL_SA1100) += serial_sa1100.o
 obj-$(CONFIG_SERIAL_AMBA) += serial_amba.o
+endif
 
 ifndef CONFIG_SUN_KEYBOARD
+ifndef CONFIG_VMS
   obj-$(CONFIG_VT) += keyboard.o $(KEYMAP) $(KEYBD)
+endif
 else
   obj-$(CONFIG_PCI) += keyboard.o $(KEYMAP)
 endif
