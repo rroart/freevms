@@ -67,6 +67,11 @@
 #define BLOCKSIZE 512
 #define MAXREC (BLOCKSIZE - 2)
 
+#if 0
+#define STRUCT_DIR_SIZE (sizeof(struct _dir)) // but this gives one too much
+#else
+#define STRUCT_DIR_SIZE 7 
+#endif
 
 /* Some statistical counters... */
 
@@ -290,7 +295,7 @@ unsigned insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
     int addlen = sizeof(struct _dir1);
     direct_inserts++;
     if (de == NULL)
-        addlen += (filelen + sizeof(struct _dir)) & ~1;
+        addlen += (filelen + STRUCT_DIR_SIZE) & ~1;
 
     /* Compute block space in use ... */
 
@@ -305,9 +310,9 @@ unsigned insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
                 break;
             sizecheck += 2;
             inuse += sizecheck;
-            sizecheck -= (nr->dir$b_namecount + 6) & ~1;
-            if (inuse > MAXREC || (inuse & 1) || sizecheck <= 0 /* ||
-                sizecheck % sizeof(struct _dir1) != 0 */ ) { //aagh
+            sizecheck -= (nr->dir$b_namecount + STRUCT_DIR_SIZE) & ~1;
+            if (inuse > MAXREC || (inuse & 1) || sizecheck <= 0 ||
+                sizecheck % sizeof(struct _dir1) != 0 ) {
                 deaccesschunk(0,0,0);
                 return SS$_BADIRECTORY;
             }
@@ -387,7 +392,7 @@ unsigned insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
 
         } else {
             unsigned reclen = (dr->dir$b_namecount +
-                                        sizeof(struct _dir)) & ~1;
+                                        STRUCT_DIR_SIZE) & ~1;
             struct _dir *nbr = (struct _dir *) newbuf;
             printk("Super split %d %d\n",dr,de);
             memcpy(newbuf,buffer,reclen);
@@ -450,7 +455,7 @@ unsigned delete_ent(struct _fcb * fcb,unsigned curblk,
     unsigned ent;
     struct _fh2 * head;
     direct_deletes++;
-    ent = (VMSWORD(dr->dir$w_size) - sizeof(struct _dir)
+    ent = (VMSWORD(dr->dir$w_size) - STRUCT_DIR_SIZE
            - dr->dir$b_namecount + 3) / sizeof(struct _dir1);
     if (ent > 1) {
         char *ne = (char *) de + sizeof(struct _dir1);
