@@ -331,48 +331,15 @@ if [ "$CONFIG_NET" = "y" ]; then
    bool 'Network device support' CONFIG_NETDEVICES
    if [ "$CONFIG_NETDEVICES" = "y" ]; then
       source drivers/net/Config.in
-      if [ "$CONFIG_ATM" = "y" ]; then
-         source drivers/atm/Config.in
-      fi
    fi
    endmenu
 fi
 
-source net/ax25/Config.in
-
-source net/irda/Config.in
-
-mainmenu_option next_comment
-comment 'ISDN subsystem'
-if [ "$CONFIG_NET" != "n" ]; then
-   tristate 'ISDN support' CONFIG_ISDN
-   if [ "$CONFIG_ISDN" != "n" ]; then
-      source drivers/isdn/Config.in
-   fi
-fi
-endmenu
-
-mainmenu_option next_comment
-comment 'Old CD-ROM drivers (not SCSI, not IDE)'
-
-bool 'Support non-SCSI/IDE/ATAPI CDROM drives' CONFIG_CD_NO_IDESCSI
-if [ "$CONFIG_CD_NO_IDESCSI" != "n" ]; then
-   source drivers/cdrom/Config.in
-fi
-endmenu
-
 #
 # input before char - char/joystick depends on it. As does USB.
 #
-source drivers/input/Config.in
 fi
 source drivers/char/Config.in
-
-if [ "$CONFIG_IO_VMS" != "y" ]; then
-#source drivers/misc/Config.in
-
-source drivers/media/Config.in
-fi
 
 if [ "$CONFIG_VMS" != "y" ]; then
 source fs/Config.in
@@ -388,23 +355,6 @@ if [ "$CONFIG_VT" = "y" ]; then
       source drivers/video/Config.in
    fi
    endmenu
-fi
-
-if [ "$CONFIG_IO_VMS" != "y" ]; then
-mainmenu_option next_comment
-comment 'Sound'
-
-tristate 'Sound card support' CONFIG_SOUND
-if [ "$CONFIG_SOUND" != "n" ]; then
-   source drivers/sound/Config.in
-fi
-endmenu
-
-source drivers/usb/Config.in
-
-if [ "$CONFIG_EXPERIMENTAL" = "y" ]; then
-   source net/bluetooth/Config.in
-fi
 fi
 
 mainmenu_option next_comment

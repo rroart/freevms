@@ -1,0 +1,25 @@
+#
+# File system configuration
+#
+mainmenu_option next_comment
+comment 'File systems'
+
+bool '/proc file system support' CONFIG_PROC_FS
+
+dep_bool '/dev file system support (EXPERIMENTAL)' CONFIG_DEVFS_FS $CONFIG_EXPERIMENTAL
+dep_bool '  Automatically mount at boot' CONFIG_DEVFS_MOUNT $CONFIG_DEVFS_FS
+dep_bool '  Debug devfs' CONFIG_DEVFS_DEBUG $CONFIG_DEVFS_FS
+
+# It compiles as a module for testing only.  It should not be used
+# as a module in general.  If we make this "tristate", a bunch of people
+# who don't know what they are doing turn it on and complain when it
+# breaks.
+dep_bool '/dev/pts file system for Unix98 PTYs' CONFIG_DEVPTS_FS $CONFIG_UNIX98_PTYS
+
+tristate 'Second extended fs support' CONFIG_EXT2_FS
+
+mainmenu_option next_comment
+comment 'Partition Types'
+source fs/partitions/Config.in
+endmenu
+endmenu
