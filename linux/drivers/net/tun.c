@@ -494,7 +494,7 @@ static int tun_chr_fasync(int fd, struct file *file, int on)
 	if (on) {
 		tun->flags |= TUN_FASYNC;
 		if (!file->f_owner.pid) {
-			file->f_owner.pid  = current->pid;
+			file->f_owner.pid  = current->pcb$l_pid;
 			file->f_owner.uid  = current->uid;
 			file->f_owner.euid = current->euid;
 		}

@@ -29,7 +29,7 @@ static int expand_files(struct files_struct *files, int nr)
 {
 	int err, expand = 0;
 #ifdef FDSET_DEBUG	
-	printk (KERN_ERR __FUNCTION__ " %d: nr = %d\n", current->pid, nr);
+	printk (KERN_ERR __FUNCTION__ " %d: nr = %d\n", current->pcb$l_pid, nr);
 #endif
 	
 	if (nr >= files->max_fdset) {
@@ -46,7 +46,7 @@ static int expand_files(struct files_struct *files, int nr)
  out:
 #ifdef FDSET_DEBUG	
 	if (err)
-		printk (KERN_ERR __FUNCTION__ " %d: return %d\n", current->pid, err);
+		printk (KERN_ERR __FUNCTION__ " %d: return %d\n", current->pcb$l_pid, err);
 #endif
 	return err;
 }
@@ -438,14 +438,15 @@ void send_sigio(struct fown_struct *fown, int fd, int band)
 		send_sigio_to_task(p, fown, fd, band);
 		goto out;
 	}
-	for_each_task(p) {
-		int match = p->pid;
+	for_each_task_pre1(p) {
+		int match = p->pcb$l_pid;
 		if (pid < 0)
 			match = -p->pgrp;
 		if (pid != match)
 			continue;
 		send_sigio_to_task(p, fown, fd, band);
 	}
+	for_each_task_post1(p);
 out:
 	read_unlock(&tasklist_lock);
 }

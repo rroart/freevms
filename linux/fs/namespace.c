@@ -796,7 +796,7 @@ static void chroot_fs_refs(struct nameidata *old_nd, struct nameidata *new_nd)
 	struct fs_struct *fs;
 
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
+	for_each_task_pre1(p) {
 		task_lock(p);
 		fs = p->fs;
 		if (fs) {
@@ -810,6 +810,7 @@ static void chroot_fs_refs(struct nameidata *old_nd, struct nameidata *new_nd)
 		} else
 			task_unlock(p);
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 }
 

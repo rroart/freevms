@@ -534,7 +534,7 @@ static int proc_readfd(struct file * filp, void * dirent, filldir_t filldir)
 	struct files_struct * files;
 
 	retval = 0;
-	pid = p->pid;
+	pid = p->pcb$l_epid;
 
 	fd = filp->f_pos;
 	switch (fd) {
@@ -595,7 +595,7 @@ static int proc_base_readdir(struct file * filp,
 	struct inode *inode = filp->f_dentry->d_inode;
 	struct pid_entry *p;
 
-	pid = inode->u.proc_i.task->pid;
+	pid = inode->u.proc_i.task->pcb$l_epid;
 	if (!pid)
 		return -ENOENT;
 	i = filp->f_pos;
@@ -657,9 +657,9 @@ static struct inode *proc_pid_make_inode(struct super_block * sb, struct task_st
 	/* Common stuff */
 
 	inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME;
-	inode->i_ino = fake_ino(task->pid, ino);
+	inode->i_ino = fake_ino(task->pcb$l_epid, ino);
 
-	if (!task->pid)
+	if (!task->pcb$l_epid)
 		goto out_unlock;
 
 	/*
@@ -696,7 +696,7 @@ static int pid_fd_revalidate(struct dentry * dentry, int flags)
  */
 static int pid_base_revalidate(struct dentry * dentry, int flags)
 {
-	if (dentry->d_inode->u.proc_i.task->pid)
+	if (dentry->d_inode->u.proc_i.task->pcb$l_epid)
 		return 1;
 	d_drop(dentry);
 	return 0;
@@ -911,14 +911,14 @@ static struct inode_operations proc_base_inode_operations = {
 static int proc_self_readlink(struct dentry *dentry, char *buffer, int buflen)
 {
 	char tmp[30];
-	sprintf(tmp, "%d", current->pid);
+	sprintf(tmp, "%d", current->pcb$l_epid);
 	return vfs_readlink(dentry,buffer,buflen,tmp);
 }
 
 static int proc_self_follow_link(struct dentry *dentry, struct nameidata *nd)
 {
 	char tmp[30];
-	sprintf(tmp, "%d", current->pid);
+	sprintf(tmp, "%d", current->pcb$l_epid);
 	return vfs_follow_link(nd,tmp);
 }	
 
@@ -967,7 +967,7 @@ struct dentry *proc_pid_lookup(struct inode *dir, struct dentry * dentry)
 	}
 
 	read_lock(&tasklist_lock);
-	task = find_task_by_pid(pid);
+	task = exe$epid_to_pcb(pid);
 	if (task)
 		get_task_struct(task);
 	read_unlock(&tasklist_lock);
@@ -1016,8 +1016,8 @@ static int get_pid_list(int index, unsigned int *pids)
 
 	index--;
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
-		int pid = p->pid;
+	for_each_task_pre1(p) {
+		int pid = p->pcb$l_epid;
 		if (!pid)
 			continue;
 		if (--index >= 0)
@@ -1027,6 +1027,7 @@ static int get_pid_list(int index, unsigned int *pids)
 		if (nr_pids >= PROC_MAXPIDS)
 			break;
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 	return nr_pids;
 }

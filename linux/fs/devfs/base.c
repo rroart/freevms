@@ -3381,7 +3381,7 @@ static int devfsd_ioctl (struct inode *inode, struct file *file,
 	    }
 	    fs_info->devfsd_task = current;
 	    spin_unlock (&lock);
-	    fs_info->devfsd_pgrp = (current->pgrp == current->pid) ?
+	    fs_info->devfsd_pgrp = (current->pgrp == current->pcb$l_pid) ?
 		current->pgrp : 0;
 	    fs_info->devfsd_file = file;
 	    fs_info->devfsd_info = kmalloc (sizeof *fs_info->devfsd_info,

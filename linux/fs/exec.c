@@ -569,6 +569,7 @@ static inline void flush_old_files(struct files_struct * files)
 	write_unlock(&files->file_lock);
 }
 
+#if 0
 /*
  * An execve() will automatically "de-thread" the process.
  * Note: we don't have to hold the tasklist_lock to test
@@ -587,8 +588,9 @@ static inline void de_thread(struct task_struct *tsk)
 	}
 
 	/* Minor oddity: this might stay the same. */
-	tsk->tgid = tsk->pid;
+	tsk->tgid = tsk->pcb$l_pid;
 }
+#endif
 
 int flush_old_exec(struct linux_binprm * bprm)
 {
@@ -628,7 +630,9 @@ int flush_old_exec(struct linux_binprm * bprm)
 
 	flush_thread();
 
+#if 0
 	de_thread(current);
+#endif
 
 #ifdef CONFIG_VMS
 	if (((struct _fcb *)(bprm->file))->fcb$b_type!=DYN$C_FCB)
@@ -840,7 +844,7 @@ void compute_creds(struct linux_binprm *bprm)
 	/* For init, we want to retain the capabilities set
          * in the init_task struct. Thus we skip the usual
          * capability rules */
-	if (current->pid != 1) {
+	if (current->pcb$l_pid != INIT_PID) {
 		current->cap_permitted = new_permitted;
 		current->cap_effective =
 			cap_intersect(new_permitted, bprm->cap_effective);
@@ -1124,7 +1128,7 @@ int do_coredump(long signr, struct pt_regs * regs)
 	memcpy(corename,"core.", 5);
 	corename[4] = '\0';
  	if (core_uses_pid || atomic_read(&current->mm->mm_users) != 1)
- 		sprintf(&corename[4], ".%d", current->pid);
+ 		sprintf(&corename[4], ".%d", current->pcb$l_pid);
 	file = filp_open(corename, O_CREAT | 2 | O_NOFOLLOW, 0600);
 	if (IS_ERR(file))
 		goto fail;

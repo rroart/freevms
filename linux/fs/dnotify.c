@@ -75,7 +75,7 @@ int fcntl_dirnotify(int fd, struct file *filp, unsigned long arg)
 	}
 	if (turning_off)
 		goto out;
-	filp->f_owner.pid = current->pid;
+	filp->f_owner.pid = current->pcb$l_pid;
 	filp->f_owner.uid = current->uid;
 	filp->f_owner.euid = current->euid;
 	dn->dn_magic = DNOTIFY_MAGIC;

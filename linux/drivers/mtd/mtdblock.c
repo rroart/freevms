@@ -476,8 +476,8 @@ int mtdblock_thread(void *dummy)
 	struct task_struct *tsk = current;
 	DECLARE_WAITQUEUE(wait, tsk);
 
-	tsk->session = 1;
-	tsk->pgrp = 1;
+	tsk->session = INIT_PID;
+	tsk->pgrp = INIT_PID;
 	/* we might get involved when memory gets low, so use PF_MEMALLOC */
 	tsk->flags |= PF_MEMALLOC;
 	strcpy(tsk->pcb$t_lname, "mtdblockd");

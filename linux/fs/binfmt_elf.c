@@ -157,7 +157,7 @@ create_elf_tables(char *p, int argc, int envc,
 	 */
 	 
 	if(smp_num_siblings > 1)
-		u_platform = u_platform - ((current->pid % 64) << 7);
+		u_platform = u_platform - ((current->pcb$l_pid % 64) << 7);
 #endif	
 
 	/*
@@ -1187,8 +1187,8 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 	prstatus.pr_info.si_signo = prstatus.pr_cursig = signr;
 	prstatus.pr_sigpend = current->pending.signal.sig[0];
 	prstatus.pr_sighold = current->blocked.sig[0];
-	psinfo.pr_pid = prstatus.pr_pid = current->pid;
-	psinfo.pr_ppid = prstatus.pr_ppid = current->p_pptr->pid;
+	psinfo.pr_pid = prstatus.pr_pid = current->pcb$l_pid;
+	psinfo.pr_ppid = prstatus.pr_ppid = current->p_pptr->pcb$l_pid;
 	psinfo.pr_pgrp = prstatus.pr_pgrp = current->pgrp;
 	psinfo.pr_sid = prstatus.pr_sid = current->session;
 	prstatus.pr_utime.tv_sec = CT_TO_SECS(current->times.tms_utime);

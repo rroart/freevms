@@ -194,7 +194,8 @@ struct super_block *proc_read_super(struct super_block *s,void *data,
 	 * Fixup the root inode's nlink value
 	 */
 	read_lock(&tasklist_lock);
-	for_each_task(p) if (p->pid) root_inode->i_nlink++;
+	for_each_task_pre1(p) if (p->pcb$l_pid) root_inode->i_nlink++;
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 	s->s_root = d_alloc_root(root_inode);
 	if (!s->s_root)

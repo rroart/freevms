@@ -2943,8 +2943,8 @@ int bdflush(void *startup)
 	 *	display semi-sane things. Not real crucial though...  
 	 */
 
-	tsk->session = 1;
-	tsk->pgrp = 1;
+	tsk->session = INIT_PID;
+	tsk->pgrp = INIT_PID;
 	strcpy(tsk->pcb$t_lname, "bdflush");
 
 	/* avoid getting signals */
@@ -2978,8 +2978,8 @@ int kupdate(void *startup)
 	struct task_struct * tsk = current;
 	int interval;
 
-	tsk->session = 1;
-	tsk->pgrp = 1;
+	tsk->session = INIT_PID;
+	tsk->pgrp = INIT_PID;
 	strcpy(tsk->pcb$t_lname, "kupdated");
 
 	/* sigstop and sigcont will stop and wakeup kupdate */

@@ -707,7 +707,7 @@ int vt_ioctl(struct tty_struct *tty, struct file * file,
 		  return -EPERM;
 		if (arg < 1 || arg > _NSIG || arg == SIGKILL)
 		  return -EINVAL;
-		spawnpid = current->pid;
+		spawnpid = current->pcb$l_pid;
 		spawnsig = arg;
 		return 0;
 	}
@@ -725,7 +725,7 @@ int vt_ioctl(struct tty_struct *tty, struct file * file,
 		vt_cons[console]->vt_mode = tmp;
 		/* the frsig is ignored, so we set it to 0 */
 		vt_cons[console]->vt_mode.frsig = 0;
-		vt_cons[console]->vt_pid = current->pid;
+		vt_cons[console]->vt_pid = current->pcb$l_pid;
 		/* no switch is required -- saw@shade.msu.ru */
 		vt_cons[console]->vt_newvt = -1; 
 		return 0;

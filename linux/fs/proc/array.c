@@ -159,8 +159,8 @@ static inline char * task_state(struct task_struct *p, char *buffer)
 		"TracerPid:\t%d\n"
 		"Uid:\t%d\t%d\t%d\t%d\n"
 		"Gid:\t%d\t%d\t%d\t%d\n",
-		get_task_state(p), p->tgid,
-		p->pid, p->pid ? p->p_opptr->pid : 0, 0,
+		get_task_state(p), p->pcb$l_epid,
+		p->pcb$l_epid, p->pcb$l_epid ? p->p_opptr->pcb$l_epid : 0, 0,
 		p->uid, p->euid, p->suid, p->fsuid,
 		p->gid, p->egid, p->sgid, p->fsgid);
 	read_unlock(&tasklist_lock);	
@@ -370,12 +370,12 @@ int proc_pid_stat(struct task_struct *task, char * buffer)
 	nice = task->pcb$b_prib;
 
 	read_lock(&tasklist_lock);
-	ppid = task->pid ? task->p_opptr->pid : 0;
+	ppid = task->pcb$l_epid ? task->p_opptr->pcb$l_epid : 0;
 	read_unlock(&tasklist_lock);
 	res = sprintf(buffer,"%d (%s) %c %d %d %d %d %d %lu %lu \
 %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %lu %lu %ld %lu %lu %lu %lu %lu \
 %lu %lu %lu %lu %lu %lu %lu %lu %d %d\n",
-		task->pid,
+		task->pcb$l_epid,
 		task->pcb$t_lname,
 		state,
 		ppid,
