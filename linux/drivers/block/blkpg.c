@@ -261,7 +261,7 @@ int blk_ioctl(kdev_t dev, unsigned int cmd, unsigned long arg)
 
 		case BLKPG:
 			return blkpg_ioctl(dev, (struct blkpg_ioctl_arg *) arg);
-#if 0			
+#ifndef CONFIG_VMS			
 		case BLKELVGET:
 			return blkelvget_ioctl(&blk_get_queue(dev)->elevator,
 					       (blkelv_ioctl_arg_t *) arg);
