@@ -56,7 +56,7 @@ Modification history:
 	Added TVT$HOLD bit
 */
 
-#include <starlet.h>	// VMS system definitions
+// not yet #include <starlet.h>	// VMS system definitions
 // not yet #include 'CMUIP_SRC:[CENTRAL]NETXPORT';
 
 #define     TELNET$K_Debug	  0
