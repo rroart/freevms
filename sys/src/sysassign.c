@@ -9,16 +9,17 @@
 #include<linux/linkage.h>
 
 asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam) {
+  int status;
   /* probe chan */
   /* probe mbxnam */
   /* 2 more */
   struct _ccb * c;
   struct _ucb * u;
-  *chan = ioc$ffchan();
+  status=ioc$ffchan(chan);
   /* lock i/o db */
   if (*chan) c=&ctl$gl_ccbbase[*chan];
   if (mbxnam) ioc$searchdev();
-  u=ioc$search(devnam);
+  status=ioc$search(u,devnam);
 }
 
 

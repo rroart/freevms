@@ -2042,4 +2042,6 @@ void __init vms_init2(void) {
   exe$gq_systime*=100;
   exe$gq_systime+=xtime.tv_sec;
   exe$gq_systime*=10000000;
+  
+  rnd_init();
 }

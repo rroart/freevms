@@ -9,20 +9,23 @@
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
 
-int ioc$ffchan(void) {
-  int i;
+int ioc$ffchan(unsigned short int *chan) {
+  unsigned short int i;
   for (i=0; i<CHANNELCNT,  ctl$gl_ccbbase[i].ccb$b_amod; i++) ;
   if (ctl$gl_ccbbase[i].ccb$b_amod)
-    return 0;
-  else
-    return i;
+    return SS$_NOIOCHAN;
+  else {
+    *chan=i;
+    return SS$_NORMAL;
+  }
 }
 
-int ioc$searchdev(void) {
+int ioc$searchdev() {
   /* implement later */
 }
 
-void * ioc$search(void * devnam) {
+int ioc$search(struct _ucb * u, struct _ddb * d, void * devnam) {
   /* real device, no logical. do not have logicals yet */
   /* return ucb or 0 */
+  
 }
