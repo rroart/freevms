@@ -1045,7 +1045,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
   for (device = 0; device < devices; device++) {
     //printk("Trying to mount %s\n",devnam[device]);
     if (strchr(devnam[device],'$')) {
-      int chan;
+      short int chan;
       extern struct _ccb ctl$ga_ccb_table[];
       struct dsc$descriptor dsc;
       dsc.dsc$a_pointer=devnam[device];
@@ -1057,7 +1057,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       islocal=0;
     } else {
       struct dsc$descriptor dsc;
-      int chan;
+      short int chan;
       char buf[5];
       int sts;
       memcpy(buf,devnam[device],4);
