@@ -48,8 +48,19 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   bzero(c,sizeof(struct _ccb));
   */
 
-  c->ccb$l_ucb=u;
-  c->ccb$l_ucb->ucb$l_refc++;
+  if (u->ucb$l_sts&UCB$M_TEMPLATE) {
+    struct _ucb * new;
+    int sts=ioc_std$clone_ucb(u, &new);
+    u=new;
+    printk("ucb cloned in assign\n");
+   if (d->ddt$l_cloneducb) { 
+     int u = d->ddt$l_cloneducb(u, &new);
+   }
+  } else {
+    c->ccb$l_ucb=u;
+    c->ccb$l_ucb->ucb$l_refc++;
+  }
+
   sch$iounlock();
   return status;
 }
