@@ -921,7 +921,9 @@ static int init(void * unused)
 	  kernel_thread(Main, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 #endif
 
-
+#ifdef CONFIG_VMS
+	memcpy(&ctl$gl_pcb->pcb$t_terminal,"opa0",4);
+#endif
 	if (execute_command)
 		execve(execute_command,argv_init,envp_init);
 	printk("Will try to start loginout.\nPress <enter> or something as usual (but within 60 seconds).\n");
