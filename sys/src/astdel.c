@@ -5,8 +5,11 @@
 #include "../../freevms/lib/src/acbdef.h"
 #include "../../freevms/lib/src/evtdef.h"
 #include "../../freevms/lib/src/statedef.h"
+#include "../../freevms/pal/src/queue.h"
 #include <linux/sched.h>
 #include <linux/smp.h>
+
+extern int mydebug5;
 
 int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   struct _pcb * p=find_process_by_pid(pid);
@@ -39,13 +42,17 @@ asmlinkage void sch$astdel(void) {
   for (j=0; j<20; j++) for (i=0; i<1000000000; i++) ;
   } */
   acb=remque(p->pcb$l_astqfl,dummy);
+  //  mydebug5=1;
+  //  printk(KERN_EMERG "astdel %x\n",acb);
   if (acb->acb$b_rmod & ACB$V_KAST) {
     acb->acb$b_rmod&=~ACB$V_KAST;
     /* unlock */
+    //printk(KERN_EMERG "astdel1 %x \n",acb->acb$l_kast);
     acb->acb$l_kast();
     goto more;
   }
-  acb->acb$l_ast(); /* ? */
+  //printk(KERN_EMERG "astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
+  acb->acb$l_ast(acb->acb$l_astprm); /* ? */
   /*unlock*/
 }
 

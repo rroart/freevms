@@ -42,7 +42,7 @@ struct _acb {
     unsigned char acb$b_type;           
     unsigned char acb$b_rmod;       
     unsigned long acb$l_pid;             
-    void (*acb$l_ast)(void);            
+    void (*acb$l_ast)(unsigned long);            
     unsigned long acb$l_astprm;          
     void (*acb$l_kast)(void);               
     };

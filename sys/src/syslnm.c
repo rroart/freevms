@@ -63,7 +63,7 @@ void cleanup_module()
 #endif
 
 asmlinkage sys_$CRELNM();
-asmlinkage sys$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst)
+asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst)
 {
 }
 
@@ -73,7 +73,7 @@ asmlinkage sys_$CRELNT();
   unsigned short int *promsk, void *tabnam, void
   *partab, unsigned char *acmode);*/
 
-asmlinkage sys$_crelnt  (struct struct_crelnt *s) {
+asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   int status;
   /*  char * mytabnam;
       int tabnamlen;*/

@@ -236,6 +236,11 @@
 #define __NR_$setpri		2
 #define __NR_$crelnt            3
 #define __NR_$setprn            4
+#define __NR_$dclast            5
+#define __NR_$waitfr            6
+#define __NR_$wflor             7
+#define __NR_$wfland            8
+#define __NR_$clref             9
 
 /* user-visible error numbers are in the range -1 - -124: see <asm-i386/errno.h> */
 

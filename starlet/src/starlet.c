@@ -43,3 +43,23 @@ int sys$setpri( unsigned int * pidadr, void * prcnam, unsigned int pri, unsigned
    
 }
 
+int sys$dclast  ( void (*astadr)(unsigned long), unsigned long astprm, unsigned int acmode) { 
+  return INLINE_SYSCALL($dclast,3,astadr,astprm,acmode);
+}
+
+int sys$waitfr  (unsigned int efn) {
+  return INLINE_SYSCALL($waitfr,1,efn);
+}
+
+int sys$wfland  (unsigned int efn, unsigned int mask) {
+  return INLINE_SYSCALL($wfland,2,efn,mask);
+}
+
+int sys$wflor  (unsigned int efn, unsigned int mask) {
+  return INLINE_SYSCALL($wflor,2,efn,mask);
+}
+
+int sys$clref  (unsigned int efn) {
+  return INLINE_SYSCALL($clref,1,efn);
+}
+

@@ -6,7 +6,7 @@
 /* Author: Roar Thronæs */
 
 //asmlinkage int sys_$setpri(unsigned int *pidadr, void *prcnam, unsigned int pri, unsigned int *prvpri, unsigned int*pol, unsigned int *prvpol) {
-asmlinkage int sys_$setpri(struct struct_setpri *s) {
+asmlinkage int exe$setpri(struct struct_setpri *s) {
   struct _pcb *p;
   if (s->pidadr) {
     p=current;
