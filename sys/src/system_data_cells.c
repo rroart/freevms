@@ -2101,6 +2101,9 @@ void __init vms_init2(void) {
   nl_init(); /* first */  
   rnd_init();
   xqp_init();
+#ifdef CONFIG_VMS
+  exttwo_init();
+#endif
 
 #if 0
 #ifdef CONFIG_BLK_DEV_FD_VMS

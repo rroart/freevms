@@ -164,6 +164,12 @@ int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
     exe$qioqxqppkt(p,i);
     return SS$_NORMAL;
   }
+#ifdef CONFIG_VMS
+  if (a->aqb$l_acppid==1) {
+    exe$qioqe2ppkt(p,i);
+    return SS$_NORMAL;
+  }
+#endif
   sch$wake(a->aqb$l_acppid);
   setipl(0);
   return SS$_NORMAL;
@@ -182,6 +188,8 @@ int exe_std$qiodrvpkt (struct _irp * i, struct _ucb * u) {
 
 extern f11b$dispatch();
 
+extern exttwo$dispatch();
+
 void exe$qioqxqppkt (struct _pcb * p, struct _irp * i) {
   struct _acb *a=&i->irp$l_fqfl;
   //  struct _f11b * f=ctl$gl_f11bxqp;
@@ -193,5 +201,19 @@ void exe$qioqxqppkt (struct _pcb * p, struct _irp * i) {
   remque(i,0); // got to get rid of this somewhere, why not here?
   sch$qast(p->pcb$l_pid,PRI$_RESAVL,a);
 }
+
+#ifdef CONFIG_VMS
+void exe$qioqe2ppkt (struct _pcb * p, struct _irp * i) {
+  struct _acb *a=&i->irp$l_fqfl;
+  //  struct _f11b * f=ctl$gl_f11bxqp;
+
+  a->acb$l_pid=p->pcb$l_pid;
+  a->acb$l_ast=exttwo$dispatch;
+  a->acb$l_astprm=i;
+  a->acb$b_rmod|=ACB$M_NODELETE; // bad idea to free this
+  remque(i,0); // got to get rid of this somewhere, why not here?
+  sch$qast(p->pcb$l_pid,PRI$_RESAVL,a);
+}
+#endif
 
 
