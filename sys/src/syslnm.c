@@ -364,6 +364,10 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
       break;
     case LNM$_STRING:
       i->buflen=(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_xlen;
+      if (i->retlenaddr) { // this is right?
+	long * l=i->retlenaddr;
+	*l=i->buflen; // check
+      }
       bcopy((ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,i->bufaddr,i->buflen);
 #ifdef LNM_DEBUG 
       lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
