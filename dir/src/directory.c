@@ -101,15 +101,41 @@
 #define dsc_a_pointer   dsc$a_pointer
 
 #else
-#include "ssdef.h"
-#include "descrip.h"
-#include "access.h"
-#include "rms.h"
+#include <mytypes.h>
+#include <descrip.h>
+#include <fabdef.h>
+#include <fiddef.h>
+#include <misc.h>
+#include <namdef.h>
+#include <rabdef.h>
+#include <rmsdef.h>
+#include <ssdef.h>
+#include <uicdef.h>
+#include <xabdef.h>
+#include <xabdatdef.h>
+#include <xabfhcdef.h>
+#include <xabprodef.h>
+#include <hm2def.h>
+#include "../../rms/src/cache.h"
+#include "../../rms/src/access.h"
+//#include "rms.h"
 #endif
 
+//extern struct _nam cc$rms_nam;
+//extern struct _fab cc$rms_fab;
+
+struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
+struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
+struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
+				   0, 0, 0, 0,
+			       VMSTIME_ZERO, VMSTIME_ZERO,
+			       VMSTIME_ZERO, VMSTIME_ZERO,
+			       VMSTIME_ZERO, VMSTIME_ZERO};
+struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
+struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
+struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
+
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
-
-
 
 /* keycomp: routine to compare parameter to a keyword - case insensitive! */
 
@@ -152,10 +178,10 @@ unsigned dir(int argc,char *argv[],int qualc,char *qualv[])
     char res[NAM$C_MAXRSS + 1],rsa[NAM$C_MAXRSS + 1];
     int sts,options;
     int filecount = 0;
-    struct NAM nam = cc$rms_nam;
-    struct FAB fab = cc$rms_fab;
-    struct XABDAT dat = cc$rms_xabdat;
-    struct XABFHC fhc = cc$rms_xabfhc;
+    struct _namdef nam = cc$rms_nam;
+    struct _fabdef fab = cc$rms_fab;
+    struct _xabdatdef dat = cc$rms_xabdat;
+    struct _xabfhcdef fhc = cc$rms_xabfhc;
     nam.nam$l_esa = res;
     nam.nam$b_ess = NAM$C_MAXRSS;
     fab.fab$l_nam = &nam;
@@ -166,7 +192,7 @@ unsigned dir(int argc,char *argv[],int qualc,char *qualv[])
     fab.fab$l_dna = "*.*;*";
     fab.fab$b_dns = strlen(fab.fab$l_dna);
     options = checkquals(dirquals,qualc,qualv);
-    sts = sys_parse(&fab);
+    sts = sys$parse(&fab);
     if (sts & 1) {
         char dir[NAM$C_MAXRSS + 1];
         int namelen;
@@ -181,7 +207,7 @@ unsigned dir(int argc,char *argv[],int qualc,char *qualv[])
         nam.nam$l_rsa = rsa;
         nam.nam$b_rss = NAM$C_MAXRSS;
         fab.fab$l_fop = FAB$M_NAM;
-        while ((sts = sys_search(&fab)) & 1) {
+        while ((sts = sys$search(&fab)) & 1) {
             if (dirlen != nam.nam$b_dev + nam.nam$b_dir ||
                 memcmp(rsa,dir,nam.nam$b_dev + nam.nam$b_dir) != 0) {
                 if (dirfiles > 0) {
@@ -225,11 +251,11 @@ unsigned dir(int argc,char *argv[],int qualc,char *qualv[])
                 } else {
                     printf("%-19s",rsa + dirlen);
                 }
-                sts = sys_open(&fab);
+                sts = sys$open(&fab);
                 if ((sts & 1) == 0) {
                     printf("Open error: %d\n",sts);
                 } else {
-                    sts = sys_close(&fab);
+                    sts = sys$close(&fab);
                     if (options & 2) {
                         char fileid[100];
                         sprintf(fileid,"(%d,%d,%d)",
@@ -245,10 +271,10 @@ unsigned dir(int argc,char *argv[],int qualc,char *qualv[])
                     }
                     if (options & 1) {
                         char tim[24];
-                        struct dsc_descriptor timdsc;
-                        timdsc.dsc_w_length = 23;
-                        timdsc.dsc_a_pointer = tim;
-                        sts = sys_asctim(0,&timdsc,dat.xab$q_cdt,0);
+                        struct dsc$descriptor timdsc;
+                        timdsc.dsc$w_length = 23;
+                        timdsc.dsc$a_pointer = tim;
+                        sts = sys$asctim(0,&timdsc,dat.xab$q_cdt,0);
                         if ((sts & 1) == 0) printf("Asctim error: %d\n",sts);
                         tim[23] = '\0';
                         printf("  %s",tim);
@@ -299,8 +325,8 @@ char *copyquals[] = {"binary",NULL};
 unsigned copy(int argc,char *argv[],int qualc,char *qualv[])
 {
     int sts,options;
-    struct NAM nam = cc$rms_nam;
-    struct FAB fab = cc$rms_fab;
+    struct _namdef nam = cc$rms_nam;
+    struct _fabdef fab = cc$rms_fab;
     char res[NAM$C_MAXRSS + 1],rsa[NAM$C_MAXRSS + 1];
     int filecount = 0;
     nam.nam$l_esa = res;
@@ -309,20 +335,20 @@ unsigned copy(int argc,char *argv[],int qualc,char *qualv[])
     fab.fab$l_fna = argv[1];
     fab.fab$b_fns = strlen(fab.fab$l_fna);
     options = checkquals(copyquals,qualc,qualv);
-    sts = sys_parse(&fab);
+    sts = sys$parse(&fab);
     if (sts & 1) {
         nam.nam$l_rsa = rsa;
         nam.nam$b_rss = NAM$C_MAXRSS;
         fab.fab$l_fop = FAB$M_NAM;
-        while ((sts = sys_search(&fab)) & 1) {
-            sts = sys_open(&fab);
+        while ((sts = sys$search(&fab)) & 1) {
+            sts = sys$open(&fab);
             if ((sts & 1) == 0) {
                 printf("%%COPY-F-OPENFAIL, Open error: %d\n",sts);
                 perror("-COPY-F-ERR ");
             } else {
-                struct RAB rab = cc$rms_rab;
+                struct _rabdef rab = cc$rms_rab;
                 rab.rab$l_fab = &fab;
-                if ((sts = sys_connect(&rab)) & 1) {
+                if ((sts = sys$connect(&rab)) & 1) {
                     FILE *tof;
                     char name[NAM$C_MAXRSS + 1];
                     unsigned records = 0;
@@ -369,7 +395,7 @@ unsigned copy(int argc,char *argv[],int qualc,char *qualv[])
                         filecount++;
                         rab.rab$l_ubf = rec;
                         rab.rab$w_usz = MAXREC;
-                        while ((sts = sys_get(&rab)) & 1) {
+                        while ((sts = sys$get(&rab)) & 1) {
                             unsigned rsz = rab.rab$w_rsz;
                             if ((options & 1) == 0 &&
                                  fab.fab$b_rat & PRINT_ATTR) rec[rsz++] = '\n';
@@ -386,7 +412,7 @@ unsigned copy(int argc,char *argv[],int qualc,char *qualv[])
                             perror("-COPY-F-ERR ");
                         }
                     }
-                    sys_disconnect(&rab);
+                    sys$disconnect(&rab);
                     rsa[nam.nam$b_rsl] = '\0';
                     if (sts == RMS$_EOF) {
                         printf("%%COPY-S-COPIED, %s copied to %s (%d record%s)\n",
@@ -396,7 +422,7 @@ unsigned copy(int argc,char *argv[],int qualc,char *qualv[])
                         sts = 1;
                     }
                 }
-                sys_close(&fab);
+                sys$close(&fab);
             }
         }
         if (sts == RMS$_NMF) sts = 1;
@@ -419,24 +445,24 @@ unsigned import(int argc,char *argv[],int qualc,char *qualv[])
     FILE *fromf;
     fromf = fopen(argv[1],"r");
     if (fromf != NULL) {
-        struct FAB fab = cc$rms_fab;
+        struct _fabdef fab = cc$rms_fab;
         fab.fab$l_fna = argv[2];
         fab.fab$b_fns = strlen(fab.fab$l_fna);
-        if ((sts = sys_create(&fab)) & 1) {
-            struct RAB rab = cc$rms_rab;
+        if ((sts = sys$create(&fab)) & 1) {
+            struct _rabdef rab = cc$rms_rab;
             rab.rab$l_fab = &fab;
-            if ((sts = sys_connect(&rab)) & 1) {
+            if ((sts = sys$connect(&rab)) & 1) {
                 char rec[MAXREC + 2];
                 rab.rab$l_rbf = rec;
                 rab.rab$w_usz = MAXREC;
                 while (fgets(rec,sizeof(rec),fromf) != NULL) {
                     rab.rab$w_rsz = strlen(rec);
-                    sts = sys_put(&rab);
+                    sts = sys$put(&rab);
                     if ((sts & 1) == 0) break;
                 }
-                sys_disconnect(&rab);
+                sys$disconnect(&rab);
             }
-            sys_close(&fab);
+            sys$close(&fab);
         }
         fclose(fromf);
         if (!(sts & 1)) {
@@ -454,7 +480,7 @@ unsigned import(int argc,char *argv[],int qualc,char *qualv[])
 unsigned diff(int argc,char *argv[],int qualc,char *qualv[])
 {
     int sts;
-    struct FAB fab = cc$rms_fab;
+    struct _fabdef fab = cc$rms_fab;
     FILE *tof;
     int records = 0;
     fab.fab$l_fna = argv[1];
@@ -464,14 +490,14 @@ unsigned diff(int argc,char *argv[],int qualc,char *qualv[])
         printf("Could not open file %s\n",argv[1]);
         sts = 0;
     } else {
-        if ((sts = sys_open(&fab)) & 1) {
-            struct RAB rab = cc$rms_rab;
+        if ((sts = sys$open(&fab)) & 1) {
+            struct _rabdef rab = cc$rms_rab;
             rab.rab$l_fab = &fab;
-            if ((sts = sys_connect(&rab)) & 1) {
+            if ((sts = sys$connect(&rab)) & 1) {
                 char rec[MAXREC + 2],cpy[MAXREC + 1];
                 rab.rab$l_ubf = rec;
                 rab.rab$w_usz = MAXREC;
-                while ((sts = sys_get(&rab)) & 1) {
+                while ((sts = sys$get(&rab)) & 1) {
                     strcpy(rec + rab.rab$w_rsz,"\n");
                     fgets(cpy,MAXREC,tof);
                     if (strcmp(rec,cpy) != 0) {
@@ -482,9 +508,9 @@ unsigned diff(int argc,char *argv[],int qualc,char *qualv[])
                         records++;
                     }
                 }
-                sys_disconnect(&rab);
+                sys$disconnect(&rab);
             }
-            sys_close(&fab);
+            sys$close(&fab);
         }
         fclose(tof);
         if (sts == RMS$_EOF) sts = 1;
@@ -504,26 +530,26 @@ unsigned typ(int argc,char *argv[],int qualc,char *qualv[])
 {
     int sts;
     int records = 0;
-    struct FAB fab = cc$rms_fab;
+    struct _fabdef fab = cc$rms_fab;
     fab.fab$l_fna = argv[1];
     fab.fab$b_fns = strlen(fab.fab$l_fna);
-    if ((sts = sys_open(&fab)) & 1) {
-        struct RAB rab = cc$rms_rab;
+    if ((sts = sys$open(&fab)) & 1) {
+        struct _rabdef rab = cc$rms_rab;
         rab.rab$l_fab = &fab;
-        if ((sts = sys_connect(&rab)) & 1) {
+        if ((sts = sys$connect(&rab)) & 1) {
             char rec[MAXREC + 2];
             rab.rab$l_ubf = rec;
             rab.rab$w_usz = MAXREC;
-            while ((sts = sys_get(&rab)) & 1) {
+            while ((sts = sys$get(&rab)) & 1) {
                 unsigned rsz = rab.rab$w_rsz;
                 if (fab.fab$b_rat & PRINT_ATTR) rec[rsz++] = '\n';
                 rec[rsz++] = '\0';
                 fputs(rec,stdout);
                 records++;
             }
-            sys_disconnect(&rab);
+            sys$disconnect(&rab);
         }
-        sys_close(&fab);
+        sys$close(&fab);
         if (sts == RMS$_EOF) sts = 1;
     }
     if ((sts & 1) == 0) {
@@ -542,8 +568,8 @@ unsigned search(int argc,char *argv[],int qualc,char *qualv[])
     int filecount = 0;
     int findcount = 0;
     char res[NAM$C_MAXRSS + 1],rsa[NAM$C_MAXRSS + 1];
-    struct NAM nam = cc$rms_nam;
-    struct FAB fab = cc$rms_fab;
+    struct _namdef nam = cc$rms_nam;
+    struct _fabdef fab = cc$rms_fab;
     register char *searstr = argv[2];
     register char firstch = tolower(*searstr++);
     register char *searend = searstr + strlen(searstr);
@@ -563,25 +589,25 @@ unsigned search(int argc,char *argv[],int qualc,char *qualv[])
     fab.fab$b_fns = strlen(fab.fab$l_fna);
     fab.fab$l_dna = "";
     fab.fab$b_dns = strlen(fab.fab$l_dna);
-    sts = sys_parse(&fab);
+    sts = sys$parse(&fab);
     if (sts & 1) {
         nam.nam$l_rsa = rsa;
         nam.nam$b_rss = NAM$C_MAXRSS;
         fab.fab$l_fop = FAB$M_NAM;
-        while ((sts = sys_search(&fab)) & 1) {
-            sts = sys_open(&fab);
+        while ((sts = sys$search(&fab)) & 1) {
+            sts = sys$open(&fab);
             if ((sts & 1) == 0) {
                 printf("%%SEARCH-F-OPENFAIL, Open error: %d\n",sts);
             } else {
-                struct RAB rab = cc$rms_rab;
+                struct _rabdef rab = cc$rms_rab;
                 rab.rab$l_fab = &fab;
-                if ((sts = sys_connect(&rab)) & 1) {
+                if ((sts = sys$connect(&rab)) & 1) {
                     int printname = 1;
                     char rec[MAXREC + 2];
                     filecount++;
                     rab.rab$l_ubf = rec;
                     rab.rab$w_usz = MAXREC;
-                    while ((sts = sys_get(&rab)) & 1) {
+                    while ((sts = sys$get(&rab)) & 1) {
                         register char *strng = rec;
                         register char *strngend = strng + (rab.rab$w_rsz - (searend - searstr));
                         while (strng < strngend) {
@@ -610,13 +636,13 @@ unsigned search(int argc,char *argv[],int qualc,char *qualv[])
                             }
                         }
                     }
-                    sys_disconnect(&rab);
+                    sys$disconnect(&rab);
                 }
                 if (sts == SS$_NOTINSTALL) {
                     printf("%%SEARCH-W-NOIMPLEM, file operation not implemented\n");
                     sts = 1;
                 }
-                sys_close(&fab);
+                sys$close(&fab);
             }
         }
         if (sts == RMS$_NMF || sts == RMS$_FNF) sts = 1;
@@ -639,8 +665,8 @@ unsigned search(int argc,char *argv[],int qualc,char *qualv[])
 unsigned del(int argc,char *argv[],int qualc,char *qualv[])
 {
     int sts = 0;
-    struct NAM nam = cc$rms_nam;
-    struct FAB fab = cc$rms_fab;
+    struct _namdef nam = cc$rms_nam;
+    struct _fabdef fab = cc$rms_fab;
     char res[NAM$C_MAXRSS + 1],rsa[NAM$C_MAXRSS + 1];
     int filecount = 0;
     nam.nam$l_esa = res;
@@ -648,7 +674,7 @@ unsigned del(int argc,char *argv[],int qualc,char *qualv[])
     fab.fab$l_nam = &nam;
     fab.fab$l_fna = argv[1];
     fab.fab$b_fns = strlen(fab.fab$l_fna);
-    sts = sys_parse(&fab);
+    sts = sys$parse(&fab);
     if (sts & 1) {
         if (nam.nam$b_ver < 2) {
             printf("%%DELETE-F-NOVER, you must specify a version!!\n");
@@ -656,8 +682,8 @@ unsigned del(int argc,char *argv[],int qualc,char *qualv[])
             nam.nam$l_rsa = rsa;
             nam.nam$b_rss = NAM$C_MAXRSS;
             fab.fab$l_fop = FAB$M_NAM;
-            while ((sts = sys_search(&fab)) & 1) {
-                sts = sys_erase(&fab);
+            while ((sts = sys$search(&fab)) & 1) {
+                sts = sys$erase(&fab);
                 if ((sts & 1) == 0) {
                     printf("%%DELETE-F-DELERR, Delete error: %d\n",sts);
                 } else {
@@ -682,28 +708,30 @@ unsigned del(int argc,char *argv[],int qualc,char *qualv[])
 /* test: you don't want to know! */
 struct VCB *test_vcb;
 
+#if 0
 unsigned test(int argc,char *argv[],int qualc,char *qualv[])
 {
     int sts = 0;
-    struct fiddef fid;
+    struct _fiddef fid;
     sts = update_create(test_vcb,NULL,"Test.File",&fid,NULL);
     printf("Test status of %d (%s)\n",sts,argv[1]);
     return sts;
 }
+#endif
 
 /* more test code... */
 
 unsigned extend(int argc,char *argv[],int qualc,char *qualv[])
 {
     int sts;
-    struct FAB fab = cc$rms_fab;
+    struct _fabdef fab = cc$rms_fab;
     fab.fab$l_fna = argv[1];
     fab.fab$b_fns = strlen(fab.fab$l_fna);
     fab.fab$b_fac = FAB$M_UPD;
-    if ((sts = sys_open(&fab)) & 1) {
+    if ((sts = sys$open(&fab)) & 1) {
         fab.fab$l_alq = 32;
-        sts = sys_extend(&fab);
-        sys_close(&fab);
+        sts = sys$extend(&fab);
+        sys$close(&fab);
     }
     if ((sts & 1) == 0) {
         printf("%%EXTEND-F-ERROR Status: %d\n",sts);
@@ -722,10 +750,10 @@ unsigned show(int argc,char *argv[],int qualc,char *qualv[])
     if (keycomp(argv[1],"default")) {
         unsigned short curlen;
         char curdir[NAM$C_MAXRSS + 1];
-        struct dsc_descriptor curdsc;
-        curdsc.dsc_w_length = NAM$C_MAXRSS;
-        curdsc.dsc_a_pointer = curdir;
-        if ((sts = sys_setddir(NULL,&curlen,&curdsc)) & 1) {
+        struct dsc$descriptor curdsc;
+        curdsc.dsc$w_length = NAM$C_MAXRSS;
+        curdsc.dsc$a_pointer = curdir;
+        if ((sts = sys$setddir(NULL,&curlen,&curdsc)) & 1) {
             curdir[curlen] = '\0';
             printf(" %s\n",curdir);
         } else {
@@ -736,10 +764,10 @@ unsigned show(int argc,char *argv[],int qualc,char *qualv[])
             unsigned sts;
             char timstr[24];
             unsigned short timlen;
-            struct dsc_descriptor timdsc;
-            timdsc.dsc_w_length = 20;
-            timdsc.dsc_a_pointer = timstr;
-            sts = sys_asctim(&timlen,&timdsc,NULL,0);
+            struct dsc$descriptor timdsc;
+            timdsc.dsc$w_length = 20;
+            timdsc.dsc$a_pointer = timstr;
+            sts = sys$asctim(&timlen,&timdsc,NULL,0);
             if (sts & 1) {
                 timstr[timlen] = '\0';
                 printf("  %s\n",timstr);
@@ -758,10 +786,10 @@ unsigned setdef_count = 0;
 void setdef(char *newdef)
 {
     register unsigned sts;
-    struct dsc_descriptor defdsc;
-    defdsc.dsc_a_pointer = newdef;
-    defdsc.dsc_w_length = strlen(defdsc.dsc_a_pointer);
-    if ((sts = sys_setddir(&defdsc,NULL,NULL)) & 1) {
+    struct dsc$descriptor defdsc;
+    defdsc.dsc$a_pointer = newdef;
+    defdsc.dsc$w_length = strlen(defdsc.dsc$a_pointer);
+    if ((sts = sys$setddir(&defdsc,NULL,NULL)) & 1) {
         setdef_count++;
     } else {
         printf("Error %d setting default to %s\n",sts,newdef);
@@ -786,6 +814,7 @@ unsigned set(int argc,char *argv[],int qualc,char *qualv[])
 
 /* The bits we need when we don't have real VMS routines underneath... */
 
+#if 0
 unsigned dodismount(int argc,char *argv[],int qualc,char *qualv[])
 {
     struct DEV *dev;
@@ -800,7 +829,7 @@ unsigned dodismount(int argc,char *argv[],int qualc,char *qualv[])
     if ((sts & 1) == 0) printf("%%DISMOUNT-E-STATUS Error: %d\n",sts);
     return sts;
 }
-
+#endif
 
 
 char *mouquals[] = {"write",NULL};
@@ -834,7 +863,14 @@ unsigned domount(int argc,char *argv[],int qualc,char *qualv[])
     if (devices > 0) {
         unsigned i;
         struct VCB *vcb;
-        sts = mount(options,devices,devs,labs,&vcb);
+	struct item_list_3 it[2];
+	it[0].item_code=1; /*not yet */
+	it[0].buflen=strlen(devs[0]);
+	it[0].bufaddr=devs[0];
+	it[1].item_code=0;
+	//        sts = mount(options,devices,devs,labs,&vcb);
+        sts = sys$mount(it);
+#if 0
         if (sts & 1) {
             for (i = 0; i < vcb->devices; i++)
                 if (vcb->vcbdev[i].dev != NULL)
@@ -852,6 +888,7 @@ unsigned domount(int argc,char *argv[],int qualc,char *qualv[])
         } else {
             printf("Mount failed with %d\n",sts);
         }
+#endif
     }
     return sts;
 }
@@ -862,6 +899,7 @@ void phyio_show(void);
 
 /* statis: print some simple statistics */
 
+#if 0
 unsigned statis(int argc,char *argv[],int qualc,char *qualv[])
 {
     printf("Statistics:-\n");
@@ -870,6 +908,7 @@ unsigned statis(int argc,char *argv[],int qualc,char *qualv[])
     phyio_show();
     return 1;
 }
+#endif
 
 #endif
 
@@ -941,19 +980,25 @@ struct CMDSET {
         "set",set,3,2,3,0
 },
 #ifndef VMSIO
+#if 0
     {
         "dismount",dodismount,3,2,2,0
 },
+#endif
     {
         "mount",domount,3,2,3,2
 },
+#if 0
     {
         "statistics",statis,3,1,1,0
 },
 #endif
+#endif
+#if 0
     {
         "test",test,4,2,2,0
 },
+#endif
     {
         "type",typ,3,2,2,0
 },
@@ -961,7 +1006,6 @@ struct CMDSET {
         NULL,NULL,0,0,0,0
 }
 };
-
 
 /* cmdexecute: identify and execute a command */
 
@@ -1038,9 +1082,9 @@ int cmdsplit(char *str)
 
 char *getcmd(char *inp, char *prompt)
 {
-    struct dsc_descriptor prompt_d = {strlen(prompt),DSC$K_DTYPE_T,
+    struct dsc$descriptor prompt_d = {strlen(prompt),DSC$K_DTYPE_T,
 					DSC$K_CLASS_S, prompt};
-    struct dsc_descriptor input_d = {1024,DSC$K_DTYPE_T,
+    struct dsc$descriptor input_d = {1024,DSC$K_DTYPE_T,
 					DSC$K_CLASS_S, inp};
     int status;
     char *retstat;
@@ -1062,7 +1106,7 @@ char *getcmd(char *inp, char *prompt)
 	retstat = NULL;
     else
 	{
-	inp[input_d.dsc_w_length] = '\0';
+	inp[input_d.dsc$w_length] = '\0';
 	retstat = inp;
 	}
 
@@ -1073,7 +1117,7 @@ char *getcmd(char *inp, char *prompt)
 
 /* main: the simple mainline of this puppy... */
 
-int main(int argc,char *argv[])
+int main_not(int argc,char *argv[])
 {
     char str[2048];
     FILE *atfile = NULL;
@@ -1111,10 +1155,24 @@ int main(int argc,char *argv[])
                     }
                 }
             } else {
-                if ((cmdsplit(ptr) & 1) == 0) break;
+	      if ((cmdsplit(ptr) & 1) == 0) break;
             }
         }
     }
     if (atfile != NULL) fclose(atfile);
     return 1;
+}
+
+int main(int argc,char *argv[])
+{
+  char str[2048];
+  int c,i=0;
+  for(c=0;c<argc;c++) {
+    memcpy(&str[i],argv[c],strlen(argv[c]));
+    i+=strlen(argv[c]);
+    str[i++]=32;
+  }
+  str[i]=0;
+  printf("cmd %s\n",str);
+  cmdsplit(str);
 }

@@ -1072,7 +1072,7 @@ unsigned exe$display(struct _fabdef *fab)
                 }
                 break;
             case XAB$C_PRO:{
-                    struct _xabprodef *pro = (struct _xabprodef *) xab;
+                    struct _xabprodef1 *pro = (struct _xabprodef1 *) xab;
                     pro->xab$w_pro = VMSWORD(head->fh2$w_fileprot);
                     memcpy(&pro->xab$l_uic,&head->fh2$l_fileowner,4);
                 }

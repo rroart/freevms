@@ -312,8 +312,9 @@ extern syscall_handler_t  exe$dacefc ;
 extern syscall_handler_t  exe$dlcefc ;
 extern syscall_handler_t  exe$crembx ;
 extern syscall_handler_t  exe$delmbx ;
+extern syscall_handler_t  exe$mount ;
 
-#define LAST_GENERIC_SYSCALL __NR_$delmbx
+#define LAST_GENERIC_SYSCALL __NR_$mount
 
 #if LAST_GENERIC_SYSCALL > LAST_ARCH_SYSCALL
 #define LAST_SYSCALL LAST_GENERIC_SYSCALL
@@ -622,6 +623,7 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$dlcefc ] = exe$dlcefc ,
 	[ __NR_$crembx ] = exe$crembx ,
 	[ __NR_$delmbx ] = exe$delmbx ,
+	[ __NR_$mount ] = exe$mount,
 	
 	ARCH_SYSCALLS
 	[ LAST_SYSCALL + 1 ... NR_syscalls ] = 

@@ -14,14 +14,30 @@
 	If the user mounts  cd0   we open up /dev/cd0 for access.
 */
 
+#include <linux/config.h>
+#include <linux/errno.h>
+#include <linux/kernel.h>
+
 #include <stdio.h>
 #include <linux/string.h>
 //#include <unistd.h>
-#include <fcntl.h>
+//#include <sys/fcntl.h>
 
 //#include "phyio.h"
 //#include "ssdef.h"
 #include "../../freevms/starlet/src/ssdef.h"
+
+#include <linux/mm.h>
+#include <linux/slab.h>
+#include <asm/uaccess.h>
+
+#if 0
+#define sys_close close
+#define sys_open open
+#define sys_read read
+#define sys_write write
+#define sys_lseek lseek
+#endif
 
 struct phyio_info {
   unsigned status;
@@ -49,38 +65,45 @@ void phyio_show(void)
            init_count,read_count,write_count);
 }
 
-unsigned phyio_init(int devlen,char *devnam,unsigned *handle,struct phyio_info *info)
+unsigned phyio_init(int devlen,char *devnam,struct file **handle,struct phyio_info *info)
 {
-    int vmsfd;
+    struct file * vmsfd;
     char *cp,devbuf[200];
+    char *tmpname;
     init_count++;
     info->status = 0;           /* We don't know anything about this device! */
     info->sectors = 0;
     info->sectorsize = 0;
-    sprintf(devbuf,DEV_PREFIX,devnam);
+    //    sprintf(devbuf,DEV_PREFIX,devnam);
+    sprintf(devbuf,"%s",devnam);
     cp = strchr(devbuf,':');
     if (cp != NULL) *cp = '\0';
-    vmsfd = sys_open(devbuf,O_RDWR);
-    if (vmsfd < 0) vmsfd = sys_open(devbuf,O_RDONLY);
-    if (vmsfd < 0) return SS$_NOSUCHDEV;
+    //    tmpname=getname(devnam);
+    vmsfd = filp_open(devbuf,O_RDONLY,0); // or RDWR
+    //    putname(tmpname);
+    if (IS_ERR(vmsfd))
+      return SS$_NOSUCHDEV;
     *handle = vmsfd;
     return SS$_NORMAL;
 }
 
-unsigned phyio_close(unsigned handle)
+unsigned phyio_close(struct file * handle)
 {
-    sys_close(handle);
+    filp_close(handle, NULL);
     return SS$_NORMAL;
 }
 
 
-unsigned phyio_read(unsigned handle,unsigned block,unsigned length,char *buffer)
+unsigned phyio_read(struct file * handle,unsigned block,unsigned length,char *buffer)
 {
+  mm_segment_t fs;
     int res;
 #ifdef DEBUG
     printk("Phyio read block: %d into %x (%d bytes)\n",block,buffer,length);
 #endif
     read_count++;
+
+#if 0
     if ((res = sys_lseek(handle,block*512,0)) < 0) {
         printk("lseek ");
 	printk("sys_lseek failed %d\n",res);
@@ -92,16 +115,39 @@ unsigned phyio_read(unsigned handle,unsigned block,unsigned length,char *buffer)
         return SS$_PARITY;
     }
     return SS$_NORMAL;
+#endif
+
+    fs = get_fs();
+    set_fs(KERNEL_DS);
+    if (generic_file_llseek(handle,block*512,0) < 0) goto error;
+    if (handle->f_op->read(handle, buffer, length, &handle->f_pos) != length) goto error;
+    set_fs(fs);
+    
+    return SS$_NORMAL;
+ error:
+    set_fs(fs);
+    return SS$_PARITY;
 }
 
 
-unsigned phyio_write(unsigned handle,unsigned block,unsigned length,char *buffer)
+unsigned phyio_write(struct file * handle,unsigned block,unsigned length,char *buffer)
 {
+  mm_segment_t fs;
 #ifdef DEBUG
     printk("Phyio write block: %d from %x (%d bytes)\n",block,buffer,length);
 #endif
     write_count++;
-    if (sys_lseek(handle,block*512,0) < 0) return SS$_PARITY;
-    if (sys_write(handle,buffer,length) != length) return SS$_PARITY;
+    //    if (sys_lseek(handle,block*512,0) < 0) return SS$_PARITY;
+    //    if (sys_write(handle,buffer,length) != length) return SS$_PARITY;
+
+    fs = get_fs();
+    set_fs(KERNEL_DS);
+    if (generic_file_llseek(handle,block*512,0) < 0) goto error;
+    if (handle->f_op->write(handle, buffer, length, &handle->f_pos) != length) goto error;
+    set_fs(fs);
+    
     return SS$_NORMAL;
+ error:
+    set_fs(fs);
+    return SS$_PARITY;
 }

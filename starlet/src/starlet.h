@@ -94,9 +94,11 @@ int sys$dacefc(unsigned int efn);
 
 int sys$dlcefc(void *name);
 
-int exe$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk, unsigned int acmode, void *lognam,...);
+int sys$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk, unsigned int acmode, void *lognam,...);
 
-int exe$delmbx  (unsigned short int chan);
+int sys$delmbx  (unsigned short int chan);
+
+int sys$mount(void *itmlst);
 
 struct _fab;
 

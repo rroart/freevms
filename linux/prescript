@@ -53,19 +53,6 @@ done
 		ln -s ../../freevms/driver/src/dudriver.c .;
 		ln -s ../../freevms/mscp/src/mscp.c .;
 		ln -s ../../freevms/sysloa/src/sys_scs.c .;
-
-		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
-		rm ast.c; ln -s ../../freevms/pal/src/ast.c .;
-		ln -s ../../freevms/pal/src/queue.c .;
-cd ..;
-cd mm;
-		ln -s ../../freevms/sys/src/memoryalc.c .;
-		ln -s ../../freevms/sys/src/vmsbootmem.c .;
-		ln -s ../../freevms/sys/src/vmsslab.c .;
-		ln -s ../../freevms/sys/src/allocpfn.c .;
-		ln -s ../../freevms/sys/src/ptalloc.c .;
-		ln -s ../../freevms/sys/src/swapper.c .;
-		ln -s ../../freevms/sys/src/wrtmfypag.c .;
 		ln -s ../../freevms/sys/src/mutex.c .;
 		ln -s ../../freevms/sys/src/sysascefc.c .;
 		ln -s ../../freevms/sys/src/deadlock.c .;
@@ -83,6 +70,20 @@ cd mm;
 		ln -s ../../freevms/rms/src/device.c .;
 		ln -s ../../freevms/rms/src/phyvms.c .;
 		ln -s ../../freevms/rms/src/phyunix.c .;
+		ln -s ../../freevms/mount/src/mountdsp.c .;
+
+		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
+		rm ast.c; ln -s ../../freevms/pal/src/ast.c .;
+		ln -s ../../freevms/pal/src/queue.c .;
+cd ..;
+cd mm;
+		ln -s ../../freevms/sys/src/memoryalc.c .;
+		ln -s ../../freevms/sys/src/vmsbootmem.c .;
+		ln -s ../../freevms/sys/src/vmsslab.c .;
+		ln -s ../../freevms/sys/src/allocpfn.c .;
+		ln -s ../../freevms/sys/src/ptalloc.c .;
+		ln -s ../../freevms/sys/src/swapper.c .;
+		ln -s ../../freevms/sys/src/wrtmfypag.c .;
 cd ..;
 
 cd drivers/block;

@@ -1,4 +1,4 @@
-SUBDIRS = starlet librtl cliutl backup pal
+SUBDIRS = starlet librtl cliutl backup dir pal
 SUBDIRS2 = examples dcl
 
 all:

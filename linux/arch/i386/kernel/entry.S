@@ -894,6 +894,7 @@ ENTRY(vmssys_call_table)
         .long SYMBOL_NAME(exe$dlcefc) 
         .long SYMBOL_NAME(exe$crembx) 
         .long SYMBOL_NAME(exe$delmbx) 
+        .long SYMBOL_NAME(exe$mount) 
 
 	.rept NR_vmssyscalls-(.-vmssys_call_table)/4
 		.long SYMBOL_NAME(sys_$ni_syscall)

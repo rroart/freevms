@@ -1,31 +1,53 @@
 #ifndef xabfhcdef_h
 #define xabfhcdef_h
 
-/* RMS.h v1.3   RMS routine definitions */
-
-/*
-        This is part of ODS2 written by Paul Nankervis,
-        email address:  Paulnank@au1.ibm.com
-
-        ODS2 is distributed freely for all members of the
-        VMS community to use. However all derived works
-        must maintain comments in their source to acknowledge
-        the contibution of the original author.
-*/
-
+#define XAB$C_FHC 29
+#define XAB$M_FTN 0x1
+#define XAB$M_CR 0x2
+#define XAB$M_PRN 0x4
+#define XAB$M_BLK 0x8
+	
 struct _xabfhcdef {
-    void *xab$l_nxt;
-    int xab$b_cod;
-    int xab$b_atr;
-    int xab$b_bkz;
-    int xab$w_dxq;
-    int xab$l_ebk;
-    int xab$w_ffb;
-    int xab$w_gbc;
-    int xab$l_hbk;
-    int xab$b_hsz;
-    int xab$w_lrl;
-    int xab$w_verlimit;
+  unsigned char xab$b_cod;
+  unsigned char xab$b_bln;
+  short int xabfhcdef$$_fill_1;
+  void *xab$l_nxt;
+  unsigned char xab$b_rfo;
+  union  {
+    unsigned char xab$b_atr;
+    struct  {
+      unsigned xab$v_ftn : 1;
+      unsigned xab$v_cr : 1;
+      unsigned xab$v_prn : 1;
+      unsigned xab$v_blk : 1;
+      unsigned xab$v_fill_11_ : 4;
+    };
+  };
+  unsigned short int xab$w_lrl;
+  union  {
+    unsigned int xab$l_hbk;
+    struct  {
+      unsigned short int xab$w_hbk0;
+      unsigned short int xab$w_hbk2;
+    };
+  };
+  union  {
+    unsigned int xab$l_ebk;
+    struct  {
+      unsigned short int xab$w_ebk0;
+      unsigned short int xab$w_ebk2;
+    };
+  };
+  unsigned short int xab$w_ffb;
+  unsigned char xab$b_bkz;
+  unsigned char xab$b_hsz;
+  unsigned short int xab$w_mrz;
+  unsigned short int xab$w_dxq;
+  unsigned short int xab$w_gbc;
+  char xabfhcdef$$_fill_6 [8];
+  unsigned short int xab$w_verlimit;
+  unsigned int xab$l_sbn;
 };
-
+ 
 #endif
+ 

@@ -8,6 +8,7 @@ fork (partly)
 queued i/o (a little bit)
 memory management (a little bit at low-level)
 ods2 readonly (partly)
+rms readonly (partly)
 
 syscalls:
 $ascefc
@@ -22,6 +23,7 @@ $enq
 $forcex
 $gettim
 $hiber
+$mount
 $numtim
 $qio
 $qiow
@@ -37,6 +39,7 @@ $synch
 $trnlnm
 $waitfr
 $wake
+some RMS syscalls
 
 cli:
 DCL

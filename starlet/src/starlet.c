@@ -87,7 +87,7 @@ int sys$setimr  (unsigned int efn, signed long long *daytim,
 }
 
 int sys$cantim  (unsigned long long reqidt, unsigned int acmode) {
-  return INLINE_SYSCALL($cantim,2,reqidt,acmode);
+  return INLINE_SYSCALL($cantim,2,reqidt,acmode); /* fix this */
 }
 
 int sys$numtim  (unsigned short int timbuf [7], unsigned long long * timadr) {
@@ -272,6 +272,10 @@ int sys$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, uns
 
 int sys$delmbx  (unsigned short int chan) {
   return INLINE_SYSCALL($delmbx,1,(unsigned long) chan);
+}
+
+int sys$mount(void *itmlst) {
+  return INLINE_SYSCALL($mount,1,itmlst);
 }
 
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
