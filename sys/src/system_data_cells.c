@@ -1901,6 +1901,8 @@ struct _tqe tqe,tqe2;
 
 struct _cpu vmscpus[32]; /* max. this number should be defined */
 
+//long long forklistheads[32][6];
+
 extern void exe$timeout(void);
 
 void qhead_init(void * l) {
@@ -1911,12 +1913,22 @@ void qhead_init(void * l) {
 
 int vmstimerconf=0;
 
+struct myq2 {
+  unsigned long flink;
+  unsigned long blink;
+};
+
 void __init vms_init(void) {
   int i,j;
 
   for(i=0;i<32;i++) {
     smp$gl_cpu_data[i]=&vmscpus[i];
     smp$gl_cpu_data[i]->cpu$l_cpuid_mask=2^i;
+    for(j=0;j<6;j++) {
+      struct myq2 * q = &smp$gl_cpu_data[i]->cpu$q_swiqfl[j];
+      q->flink=q;
+      q->blink=q;
+    }
   }
 
   sch$gl_idle_cpus=0;

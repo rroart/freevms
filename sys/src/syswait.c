@@ -20,12 +20,13 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   wq=sch$gq_lefwq;
   /* lock sched */
 
-  if (mask & *clusteraddr) {
+  if (!waitallflag && (mask & *clusteraddr)) {
   out:
-  /* unlock sched */
-  return SS$_NORMAL;
+    /* unlock sched */
+    return SS$_NORMAL;
   }
-
+  if (waitallflag && (mask & *clusteraddr == mask))
+    goto out;
   if (waitallflag) {
     p->pcb$l_sts|=PCB$M_WALL;
     p->pcb$l_efwm&=~mask;

@@ -112,6 +112,7 @@ struct {
   unsigned long cpu$l_mchk_mask;
   unsigned long cpu$l_mchk_sp;
   unsigned long cpu$l_p0pt_page;
+  unsigned long long cpu$q_swiqfl [6];
   unsigned long cpu$l_psfl;
   unsigned long cpu$l_psbl;
   unsigned long cpu$l_boot_time;

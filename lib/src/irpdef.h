@@ -142,7 +142,7 @@ unsigned short irp$w_sts;
 unsigned long irp$l_svapte;
 unsigned short irp$w_boff;
 unsigned short irp$w_empty;
-unsigned long irp$l_bcnt;
+unsigned short irp$w_bcnt;
 unsigned short irp$w_sts2;
 unsigned short irp$w_emptyagain;
 unsigned long irp$l_iost1;
