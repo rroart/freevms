@@ -2781,7 +2781,7 @@ int writeout_one_page(struct page *page)
     BUG();
   bh = buffers[0];
 	do {
-#if 0
+#ifndef CONFIG_VMS
 		if (buffer_locked(bh) || !buffer_dirty(bh) || !buffer_uptodate(bh))
 			continue;
 #endif
