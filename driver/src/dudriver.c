@@ -10,6 +10,7 @@
 #include<cdrpdef.h>
 #include<cdtdef.h>
 #include<crbdef.h>
+#include<dcdef.h>
 #include<ddbdef.h>
 #include<ddtdef.h>
 #include<devdef.h>
@@ -62,7 +63,7 @@ struct _pdt dupdt;
 
 struct _cddb ducddb;
 
-struct _fdt fdt_du = {
+struct _fdt du$fdt = {
   fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
@@ -158,6 +159,7 @@ void  du_startio (struct _irp * i, struct _ucb * u) {
 /* more yet undefined dummies */
 void  du_unsolint (void) { };
 void  du_cancel (void) { };
+static void  ioc_std$cancelio (void) { };
 void  du_regdump (void) { };
 void  du_diagbuf (void) { };
 void  du_errorbuf (void) { };
@@ -172,10 +174,10 @@ void  du_aux_storage (void) { };
 void  du_aux_routine (void) { };
 
 
-struct _ddt ddt_du = {
+struct _ddt du$ddt = {
   ddt$l_start: du_startio,
   ddt$l_unsolint: du_unsolint,
-  ddt$l_fdt: &fdt_du,
+  ddt$l_fdt: &du$fdt,
   ddt$l_cancel: du_cancel,
   ddt$l_regdump: du_regdump,
   ddt$l_diagbuf: du_diagbuf,
@@ -205,6 +207,84 @@ extern int scs_std$connect();
 extern int scs_std$dconnect();
 
 struct _dpt du_dpt;
+
+void du$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
+  ucb->ucb$b_flck=IPL$_IOLOCK8;
+  ucb->ucb$b_dipl=IPL$_IOLOCK8;
+
+  ucb->ucb$l_devchar = DEV$M_REC | DEV$M_AVL | DEV$M_CCL /*| DEV$M_OOV*/;
+
+  ucb->ucb$l_devchar2 = DEV$M_NNM;
+  ucb->ucb$b_devclass = DC$_MISC;
+  ucb->ucb$b_devtype = DT$_TTYUNKN;
+  ucb->ucb$w_devbufsiz = 132;
+
+  ucb->ucb$l_devdepend = 99; // just something to fill
+
+  // dropped the mutex stuff
+
+  return;
+}
+
+void du$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
+  ddb->ddb$ps_ddt=&du$ddt;
+  //dpt_store_isr(crb,nl_isr);
+  return;
+}
+
+int du$unit_init (struct _idb * idb, struct _ucb * ucb) {
+  ucb->ucb$v_online = 0;
+  //ucb->ucb$l_lr_msg_tmo = 0 ; // or offline? // where did this go?
+
+  // idb->idb$ps_owner=&(ucb->ucb$r_ucb); // this is mailbox?
+  // no adp or cram stuff
+
+  // or ints etc
+  
+  ucb->ucb$v_online = 1;
+
+  return SS$_NORMAL;
+}
+
+struct _dpt du$dpt;
+struct _ddb du$ddb;
+struct _mscp_ucb du$ucb;
+struct _crb du$crb;
+
+int du$init_tables() {
+  ini_dpt_name(&du$dpt, "DUDRIVER");
+  ini_dpt_adapt(&du$dpt, 0);
+  ini_dpt_defunits(&du$dpt, 1);
+  ini_dpt_ucbsize(&du$dpt,sizeof(struct _ucb));
+  ini_dpt_struc_init(&du$dpt, du$struc_init);
+  ini_dpt_struc_reinit(&du$dpt, du$struc_reinit);
+  ini_dpt_ucb_crams(&du$dpt, 1/*NUMBER_CRAMS*/);
+  ini_dpt_end(&du$dpt);
+
+  ini_ddt_unitinit(&du$ddt, du$unit_init);
+  ini_ddt_start(&du$ddt, du_startio);
+  ini_ddt_cancel(&du$ddt, ioc_std$cancelio);
+  ini_ddt_end(&du$ddt);
+
+  /* for the fdt init part */
+  /* a lot of these? */
+  ini_fdt_act(&du$fdt,IO$_ACCESS,acp_std$access,1);
+  ini_fdt_act(&du$fdt,IO$_READLBLK,acp_std$readblk,1);
+  ini_fdt_act(&du$fdt,IO$_READPBLK,acp_std$readblk,1);
+  ini_fdt_act(&du$fdt,IO$_READVBLK,acp_std$readblk,1);
+  ini_fdt_act(&du$fdt,IO$_WRITELBLK,acp_std$writeblk,1);
+  ini_fdt_act(&du$fdt,IO$_WRITEPBLK,acp_std$writeblk,1);
+  ini_fdt_act(&du$fdt,IO$_WRITEVBLK,acp_std$writeblk,1);
+  ini_fdt_act(&du$fdt,IO$_CREATE,acp_std$access,1);
+  ini_fdt_act(&du$fdt,IO$_DEACCESS,acp_std$deaccess,1);
+  ini_fdt_act(&du$fdt,IO$_DELETE,acp_std$modify,1);
+  ini_fdt_act(&du$fdt,IO$_MODIFY,acp_std$modify,1);
+  ini_fdt_act(&du$fdt,IO$_ACPCONTROL,acp_std$modify,1);
+  ini_fdt_act(&du$fdt,IO$_MOUNT,acp_std$mount,1);
+  ini_fdt_end(&du$fdt);
+
+  return SS$_NORMAL;
+}
 
 void * find_free_cdt(void);
 
@@ -268,25 +348,59 @@ int mscpcli(void) {
 
 extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long);
 
+void __du_init(void) {
+  struct _ucb * ucb=&du$ucb;
+  struct _ddb * ddb=&du$ddb;
+  struct _crb * crb=&du$crb;
+  unsigned long idb=0,orb=0;
+  struct _ccb * ccb;
+  struct _ucb * newucb,newucb1;
+
+//  ioc_std$clone_ucb(&du$ucb,&ucb);
+  bzero(ucb,sizeof(struct _mscp_ucb));
+  bzero(ddb,sizeof(struct _ddb));
+  bzero(crb,sizeof(struct _crb));
+
+  init_ddb(&du$ddb,&du$ddt,&du$ucb,"dua");
+  init_ucb(&du$ucb, &du$ddb, &du$ddt, &du$crb);
+  init_crb(&du$crb);
+
+  du$init_tables();
+  du$struc_init (crb, ddb, idb, orb, ucb);
+  du$struc_reinit (crb, ddb, idb, orb, ucb);
+  du$unit_init (idb, ucb);
+
+  insertdevlist(ddb);
+}
+
+struct _ucb * du_init2(char * s) {
+  struct _ucb * newucb;
+  struct _ucb * u=&du$ucb;
+  struct _ddb * d=&du$ddb;
+
+  insertfillist(u);
+
+  bcopy(s,d->ddb$t_name,strlen(s));
+
+  //ubd_open_dev(&ubd_dev[0]);
+  ioc_std$clone_ucb(&du$ucb,&newucb);
+  //exe$assign(&u0,&chan,0,0,0);
+  //registerdevchan(MKDEV(UBD_MAJOR,0),chan);
+  //ccb = &ctl$ga_ccb_table[chan];
+  //ccb->ccb$l_ucb->ucb$l_orb=ubd_dev[0].fd;
+
+  return u;
+}
+
 void * du_init(char *s) {
-  struct _ucb * u;
-  struct _ddb * d;
-  struct _crb * c;
+  struct _ucb * u=&du$ucb;
+  struct _ddb * d=&du$ddb;
+  struct _crb * c=&du$crb;
   struct _cddb * cddb;
   struct _pb * pb;
   struct _cdt * cdt;
 
   s++;
-
-  u=vmalloc(sizeof(struct _mscp_ucb));
-  bzero(u,sizeof(struct _mscp_ucb));
-  d=vmalloc(sizeof(struct _ddb));
-  bzero(d,sizeof(struct _ddb));
-  c=vmalloc(sizeof(struct _crb));
-  bzero(c,sizeof(struct _crb));
-  bzero(u,sizeof(struct _ucb));
-  bzero(d,sizeof(struct _ddb));
-  bzero(c,sizeof(struct _crb));
 
   pb=vmalloc(sizeof(struct _pb));
   bzero(pb,sizeof(struct _pb));
@@ -323,53 +437,10 @@ void * du_init(char *s) {
 
   /* this is a all-in-one, should be split later */
 
-  /* for the dpt part */
-  bcopy("DUDRIVER",du_dpt.dpt$t_name,8);
-  du_dpt.dpt$ps_ddt=&ddt_du;
-
-  /* for the ddb init part */
-  //  d->ddb$ps_link=d;
-  //  d->ddb$ps_blink=d;
-  d->ddb$b_type=DYN$C_DDB;
-  d->ddb$l_ddt=&ddt_du;
-  d->ddb$ps_ucb=u;
   bcopy(s,d->ddb$t_name,strlen(s));
-
-  /* for the ucb init part */
-  qhead_init(&u->ucb$l_ioqfl);
-  u->ucb$b_type=DYN$C_UCB;
-  u->ucb$b_flck=IPL$_IOLOCK8;
-  /* devchars? */
-  u->ucb$b_devclass=DEV$M_RND; /* just maybe? */
-  u->ucb$b_dipl=IPL$_IOLOCK8;
-  //  bcopy("nla0",u->ucb$t_name,4);
-  u->ucb$l_ddb=d;
-  u->ucb$l_crb=c;
-  u->ucb$l_ddt=&ddt_du;
-
-  /* for the crb init part */
-  c->crb$b_type=DYN$C_CRB;
-
-  /* and for the ddt init part */
-  ddt_du.ddt$l_fdt=&fdt_du;
 
   ((struct _mscp_ucb *)u)->ucb$l_cddb=cddb;
   qhead_init(&cddb->cddb$l_cdrpqfl);
-
-  /* a lot of these? */
-  ini_fdt_act(&fdt_du,IO$_READLBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt_du,IO$_READPBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt_du,IO$_READVBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt_du,IO$_WRITELBLK,acp_std$writeblk,1);
-  ini_fdt_act(&fdt_du,IO$_WRITEPBLK,acp_std$writeblk,1);
-  ini_fdt_act(&fdt_du,IO$_WRITEVBLK,acp_std$writeblk,1);
-  ini_fdt_act(&fdt_du,IO$_ACCESS,acp_std$access,1);
-  ini_fdt_act(&fdt_du,IO$_CREATE,acp_std$access,1);
-  ini_fdt_act(&fdt_du,IO$_DEACCESS,acp_std$deaccess,1);
-  ini_fdt_act(&fdt_du,IO$_DELETE,acp_std$modify,1);
-  ini_fdt_act(&fdt_du,IO$_MODIFY,acp_std$modify,1);
-  ini_fdt_act(&fdt_du,IO$_ACPCONTROL,acp_std$modify,1);
-  ini_fdt_act(&fdt_du,IO$_MOUNT,acp_std$mount,1);
 
   mypb.pb$b_type=DYN$C_SCS_PB;
   mypb.pb$w_state=PB$C_CLOSED;
