@@ -5,7 +5,6 @@ mainmenu_option next_comment
 comment 'Block devices'
 
 tristate 'Normal PC floppy disk support' CONFIG_BLK_DEV_FD
-tristate 'Normal FreeVMS PC floppy disk support (do not choose the above)' CONFIG_BLK_DEV_FD_VMS
 if [ "$CONFIG_AMIGA" = "y" ]; then
    tristate 'Amiga floppy support' CONFIG_AMIGA_FLOPPY
 fi
