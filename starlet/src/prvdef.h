@@ -94,6 +94,8 @@
 #define		PRV$V_AUDIT		37
 #define		PRV$V_SECURITY		38
 
+#define		PRV$V_DETACH		5
+
 union _prvdef {
   struct  {
     unsigned prv$v_cmkrnl		: 1;
