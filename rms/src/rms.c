@@ -1453,7 +1453,7 @@ unsigned exe$extend(struct _fabdef *fab)
   fibblk.fib$l_wcc = 0;
   fibblk.fib$w_exctl|=FIB$M_EXTEND;
   fibblk.fib$l_exsz=10;
-  sts = exe_qiow(0,getchan(wccfile->wcf_vcb),IO$_CREATE|IO$M_ACCESS,&iosb,0,0,
+  sts = exe_qiow(0,getchan(wccfile->wcf_vcb),IO$_MODIFY,&iosb,0,0,
 		 &fibdsc,&wccfile->wcf_wcd.wcd_serdsc,0,0,0,0);
   sts = iosb.iosb$w_status;
   return sts;
