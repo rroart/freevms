@@ -120,4 +120,22 @@
 */
 #define DYN$C_SHRBUFIO         128
 
+#define DYN$C_SCS_CDL 1
+#define DYN$C_SCS_CDT 2
+#define DYN$C_SCS_DIR 3
+#define DYN$C_SCS_PB 4
+#define DYN$C_SCS_PDT 5
+#define DYN$C_SCS_RDT 6
+#define DYN$C_SCS_SB 7
+#define DYN$C_SCS_SPPB 8
+#define DYN$C_SCS_SPNB 9
+#define DYN$C_SCS_SBNB 10
+#define DYN$C_SCS_PLVEC 11
+#define DYN$C_SCS_PDTLIST 12
+#define DYN$C_SCS_BD 13
+#define DYN$C_SCS_CMNBDLT 14
+#define DYN$C_SCS_RBUN 15
+#define DYN$C_SCS_CRRR 16
+#define DYN$C_SCS_TYP1 17
+
 #endif

@@ -287,6 +287,13 @@ struct _pdt {
   };
   int pdt$l_mgt_priority;
   char pdt$b_szalign1 [4];
+  unsigned long long pdt$q_comql;
+  unsigned long long pdt$q_comqh;
+  unsigned long long pdt$q_comq2;
+  unsigned long long pdt$q_comq3;
+  unsigned long long pdt$q_rspq;
+  void *pdt$l_dfqhdr;
+  void *pdt$l_mfqhdr;
 };
  
 #define PDT$M_CUR_LBS 0x1
