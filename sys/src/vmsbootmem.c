@@ -239,6 +239,7 @@ found:
 		if (test_and_set_bit(i, bdata->node_bootmem_map))
 			BUG();
 	memset(ret, 0, size);
+	printk("alloc_bootmem_core %x %x\n",ret,size);
 	return ret;
 }
 

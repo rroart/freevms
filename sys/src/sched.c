@@ -867,6 +867,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
    */
 
   if (mydebug4) printk("bef swto\n");
+  //  if (mydebug6) printk("bef swto %x %x\n",curpcb,next);
 
   switch_to(curpcb, next, curpcb);
 

@@ -68,7 +68,7 @@ extern long last_rtc_update;
 
 extern int use_tsc;
 
-int exetimeout=1;
+int exetimeout=0;
 
 void exe$timeout(void) {
   /* do sch$swpwake() if appropiate ???? */
