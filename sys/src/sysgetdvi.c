@@ -54,7 +54,18 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
 
 }
 
-asmlinkage void exe$getdviw(void) {
+asmlinkage int exe$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, struct _generic_64 *nullarg) {
+
+  /* I think this is about it */
+
+  int status=exe$getdvi(efn,chan,devnam,itmlst,iosb,astadr,astprm,nullarg);
+  if ((status&1)==0) return status;
+  return exe$synch(efn,iosb);
+
+}
+
+asmlinkage int exe$getdviw_wrap(struct struct_getdvi *s) {
+  return exe$getdviw(s->efn,s->chan,s->devnam,s->itmlst,s->iosb,s->astadr,s->astprm,s->nullarg);
 }
 
 asmlinkage int exe$device_scan(void *return_devnam, unsigned short int *retlen, void *search_devnam, void *itmlst, unsigned long long *contxt) {
