@@ -11,9 +11,16 @@ struct task_struct;
 #endif
 #endif
 
+static inline struct task_struct * old_get_current(void)
+{
+  struct task_struct *current;
+  __asm__("andl %%esp,%0; ":"=r" (current) : "0" (~8191UL));
+  return current;
+}
+
 static inline struct task_struct * get_current(void)
 {
-	return smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;
+  return ctl$gl_pcb;
 }
  
 #define current get_current()
@@ -22,9 +29,7 @@ static inline struct task_struct * get_current(void)
 
 static inline struct task_struct * get_cur_task(void)
 {
-        struct task_struct *cur_task;
-        __asm__("andl %%esp,%0; ":"=r" (cur_task) : "0" (~8191UL));
-        return cur_task;
+  return ctl$gl_pcb;
 }
  
 #define cur_task get_cur_task()

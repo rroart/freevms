@@ -11,11 +11,19 @@
 #include "linux/config.h"
 #include "asm/page.h"
 
+#include <system_data_cells.h>
+
 struct task_struct;
 
-#define CURRENT_TASK(dummy) (((unsigned long) &dummy) & (PAGE_MASK << 2))
+#define OLD_CURRENT_TASK(dummy) (((unsigned long) dummy) & (PAGE_MASK << 2))
 
-#define current ({ int dummy; (struct task_struct *) CURRENT_TASK(dummy); })
+#if 0
+#define CURRENT_TASK(dummy) (((unsigned long) &dummy) & (PAGE_MASK << 2))
+#endif
+
+#define CURRENT_TASK() (ctl$gl_pcb)
+
+#define current CURRENT_TASK()
 
 #endif /* __ASSEMBLY__ */
 
