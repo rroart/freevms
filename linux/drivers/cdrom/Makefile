@@ -9,7 +9,7 @@
 # parent makes..
 #
 
-O_TARGET := cdrom.o
+O_TARGET := driver.o
 
 include $(TOPDIR)/Rules.make
 
