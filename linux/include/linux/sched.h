@@ -283,6 +283,7 @@ extern struct user_struct root_user;
 struct task_struct {
 	/*
 	 * offsets of these are hardcoded elsewhere - touch with care
+	 * meaning entry.S -roar
 	 */
 	volatile long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
 	unsigned long flags;	/* per process flags, defined below */
