@@ -13,6 +13,7 @@
 #include <asm/pgtable.h>
 
 #include <ipldef.h>
+#include <phddef.h>
 #include <rdedef.h>
 
 static inline int mlock_fixup_all(struct _rde * vma, int newflags)
@@ -46,6 +47,7 @@ static inline int mlock_fixup_start(struct _rde * vma,
 	//spin_lock(&vma->vm_mm->page_table_lock);
 	vma->rde$pq_start_va = end;
 	//__insert_vm_struct(current->mm, n);
+	insrde(n,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	//spin_unlock(&vma->vm_mm->page_table_lock);
 	unlock_vma_mappings(vma);
 	return 0;
@@ -74,6 +76,7 @@ static inline int mlock_fixup_end(struct _rde * vma,
 	//spin_lock(&vma->vm_mm->page_table_lock);
 	vma->rde$q_region_size = start - (unsigned long)vma->rde$pq_start_va;
 	//__insert_vm_struct(current->mm, n);
+	insrde(n,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	//spin_unlock(&vma->vm_mm->page_table_lock);
 	unlock_vma_mappings(vma);
 	return 0;
@@ -119,7 +122,9 @@ static inline int mlock_fixup_middle(struct _rde * vma,
 	vma->rde$q_region_size = end - (unsigned long)vma->rde$pq_start_va;
 	vma->rde$l_flags = newflags;
 	//__insert_vm_struct(current->mm, left);
+	insrde(left,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	//__insert_vm_struct(current->mm, right);
+	insrde(right,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 	//spin_unlock(&vma->vm_mm->page_table_lock);
 	unlock_vma_mappings(vma);
 	return 0;

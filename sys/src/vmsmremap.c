@@ -14,6 +14,7 @@
 #include <asm/pgalloc.h>
 
 #include <ipldef.h>
+#include <phddef.h>
 #include <rdedef.h>
 
 extern int vm_enough_memory(long pages);
@@ -195,6 +196,7 @@ static inline unsigned long move_vma(struct _rde * vma,
 				new_vma->vm_ops->open(new_vma);
 			insert_vm_struct(current->mm, new_vma);
 #endif
+			insrde(new_vma,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 		}
 		do_munmap(current->mm, addr, old_len);
 		current->mm->total_vm += new_len >> PAGE_SHIFT;
