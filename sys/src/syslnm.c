@@ -124,7 +124,7 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
 
   status=lnm$firsttab(&ret,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
 
-  for(i=itmlst;i->item_code!=0;i+=sizeof(*i)) {
+  for(i=itmlst;i->item_code!=0;i++) {
     mylnmb=lnmmalloc(sizeof(struct _lnmb));
     bzero(mylnmb,sizeof(struct _lnmb));
     mylnmx=lnmmalloc(sizeof(struct _lnmx));
@@ -147,7 +147,7 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
     status=lnm$inslogtab(&ret,mylnmb);
 
   }
-  
+
   setipl(0);
   return status;
 }
