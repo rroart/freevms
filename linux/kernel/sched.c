@@ -1,5 +1,3 @@
-#include "../../freevms/sys/src/sched.c"
-#if 0
 /*
  *  linux/kernel/sched.c
  *
@@ -1344,4 +1342,3 @@ void __init sched_init(void)
 	atomic_inc(&init_mm.mm_count);
 	enter_lazy_tlb(&init_mm, current, cpu);
 }
-#endif

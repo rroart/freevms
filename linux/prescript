@@ -111,8 +111,9 @@
 		ln -s ../../sys/src/uai.c .;
 		ln -s ../../sys/src/process_scan.c .;
 		ln -s ../../sys/src/pagefile.c .;
-		ln -s ../../rms/src/rm3get.c ;
-		ln -s ../../rms/src/rmsmisc.h ;
+		ln -s ../../rms/src/rm3get.c .;
+		ln -s ../../rms/src/rmsmisc.h .;
+		ln -s ../../sys/src/sched.c .;
 
 		ln -s ../../pal/src/ipl.c .;
 		ln -s ../../pal/src/ast.c .;
