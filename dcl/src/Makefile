@@ -22,6 +22,8 @@ i386/dcl${EXE}: dcl.o $(LIB) $(EXTERNAL)
 	mkdir i386 || echo i386 exists
 	gcc -s -static dcl.o $(EXTERNAL) ../../starlet/src/starlet.a -o i386/dcl${EXE}
 	gcc -static dcl.o $(EXTERNAL) ../../starlet/src/starlet.a -o i386/dcld${EXE}
+	../../linker/src/linker $(LINKPRE) dcl.o $(EXTERNAL) ../../starlet/src/starlet.a $(LINKPOST) -o i386/dcl.exe
+# DCL linked like this is just for testing (DCL is really special)
 
 UMDEF=-Dcompile_um -I.
 

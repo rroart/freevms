@@ -2,6 +2,12 @@ VMSSUBDIRS = starlet librtl cliutl backup dir init login dcl edt
 VMSSUBDIRSINST = dir dcl login init edt
 VMSSUBDIRS2 = examples
 
+export LIBGCC = `find /usr/lib -name libgcc.a`
+
+#export LINKPRE = -Bstatic -s 
+export LINKPRE = -Bstatic
+export LINKPOST = /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/libc.a
+
 vmsall:
 	for X in $(VMSSUBDIRS); do \
 		cd $$X/src; \
@@ -49,5 +55,15 @@ image-kernel-noiomm:
 
 environment:
 	./envscript
+
+download-linker:
+	cd linker/src; \
+	make download-linker; \
+	cd ../..
+
+build-linker:
+	cd linker/src; \
+	make build-linker; \
+	cd ../..
 
 include Makefile.kernel
