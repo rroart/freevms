@@ -163,14 +163,14 @@ asmlinkage void exe$swtimint(void) {
 	//      if (times>=0 && times<5)   printtq(t);
 	//if (times>=0 && times<5)   printtq(exe$gl_tqfl);
 	//	printk(":");
-	if (times>1000 && times<1200) {
+	if (0 && times>1000 && times<1200) {
 	  printtq(t);
 	  printtq(exe$gl_tqfl);
 	  printtq(exe$gl_tqfl->tqe$l_tqfl);
 	  printtq(exe$gl_tqfl->tqe$l_tqfl->tqe$l_tqfl);
 	}
 	exe$instimq(t);
-	if (times>1000 && times<1200) {
+	if (0 && times>1000 && times<1200) {
 	  printtq(t);
 	  printtq(exe$gl_tqfl);
 	  printtq(exe$gl_tqfl->tqe$l_tqfl);

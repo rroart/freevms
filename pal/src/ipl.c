@@ -181,7 +181,7 @@ inline char intr_blocked(unsigned char this) {
   if (mydebugi>1) printk("bl %x %x %x %x\n",p->pid,this,smp$gl_cpu_data[this_cpu]->cpu$w_sisr,p->pslindex);
   if (this<=smp$gl_cpu_data[this_cpu]->cpu$b_ipl) {
     if (this<16) smp$gl_cpu_data[this_cpu]->cpu$w_sisr|=(1<<this);
-    if (mydebugi>0) printk("blocked %x %x\n",this,smp$gl_cpu_data[this_cpu]->cpu$b_ipl);
+    // if (mydebugi>0) printk("blocked %x %x\n",this,smp$gl_cpu_data[this_cpu]->cpu$b_ipl);
     //          { long long i;    for(i=10000000;i>0;i--) ; }
     if (p->pslindex>20)
       { long long i;    for(i=1;i!=0;i++) ; }
