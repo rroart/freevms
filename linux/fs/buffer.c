@@ -2324,6 +2324,53 @@ int block_read_full_page(struct page *page, get_block_t *get_block)
 
 	return 0;
 }
+
+int block_read_full_page2(struct page *page, struct inode *inode,unsigned long pageno)
+{
+	 struct _fcb * fcb=e2_search_fcb(inode);
+	 unsigned long iblock, lblock;
+	 unsigned int blocksize, blocks;
+	 int nr, i;
+	 int sts;
+	 unsigned long long iosb;
+	 int turns;
+	 unsigned long blocknr;
+
+	 blocksize = 1 << inode->i_blkbits;
+
+	 blocks = PAGE_CACHE_SIZE >> inode->i_blkbits;
+	 iblock = pageno << (PAGE_CACHE_SHIFT - inode->i_blkbits);
+	 lblock = (inode->i_size+blocksize-1) >> inode->i_blkbits;
+
+	 nr = 0;
+	 i = 0;
+	 turns = 0;
+
+	 do {
+	   if (iblock < lblock)
+	     blocknr=e2_map_vbn(fcb,iblock);
+	   else
+	     continue;
+#if 0
+	   // file holes not supported yet
+	   memset(kmap(page) + i*blocksize, 0, blocksize);
+	   flush_dcache_page(page);
+	   kunmap(page);
+	   continue;
+#endif
+
+	   nr++;
+
+	   sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
+			  page_address(page) + i*blocksize,blocksize, blocknr,MINOR(inode->i_dev)&31,0,0);
+
+	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
+
+	 SetPageUptodate(page);
+	 //	 UnlockPage(page);
+
+	 return 0;
+}
 #endif
 
 /* utility function for filesystems that need to do work on expanding
