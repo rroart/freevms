@@ -118,6 +118,9 @@ int con$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
 int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   write(1,i->irp$l_qio_p1,i->irp$l_qio_p2);
+  u->ucb$l_irp=i;
+  u->ucb$l_irp->irp$l_iost1 = SS$_NORMAL;
+  com$post(u->ucb$l_irp,u);
   return SS$_NORMAL;
 }
 

@@ -183,6 +183,12 @@ int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   //init_dev2(0x0401,&tty);
   tty = console_driver.table[0];
   console_driver.write(tty, 1, i->irp$l_qio_p1, i->irp$l_qio_p2);
+#if 1
+  // this must be put back sometime
+  u->ucb$l_irp=i;
+  u->ucb$l_irp->irp$l_iost1 = SS$_NORMAL;
+  com$post(u->ucb$l_irp,u);
+#endif
   return SS$_NORMAL;
 }
 
