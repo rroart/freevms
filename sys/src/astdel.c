@@ -21,7 +21,7 @@ extern int mydebug5;
 int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   int savipl;
   struct _pcb * p=find_process_by_pid(pid);
-  int status;
+  int status=SS$_NORMAL;
   int kernelmode;
   if (!p) {
     return SS$_NONEXPR;
