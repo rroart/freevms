@@ -917,6 +917,7 @@ out:
 
 asmlinkage long sys_socket(int family, int type, int protocol)
 {
+#ifndef CONFIG_VMS
 	int retval;
 	struct socket *sock;
 
@@ -935,6 +936,9 @@ out:
 out_release:
 	sock_release(sock);
 	return retval;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 /*
