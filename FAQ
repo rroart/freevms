@@ -16,6 +16,7 @@ Answer:		You have to change the line:
 Question:	Bochs does not boot properly, it hangs somewhere.
 
 Answer:		Try to increase or decrease ips in bochsrc.
+		Or use a different compiler version.
 
 Question:	Running uml gives an immediate "Segmentation fault".
 

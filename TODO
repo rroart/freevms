@@ -27,7 +27,7 @@ Use correct interface to network module in CONFIG_VMS (promiscuous mode (NMA$C_P
 
 Make a make linker autobuild
 
-Use sys$ with system service call instead in exe$ in ipacp etc, to make asts etc function properly.
+Use sys$ with system service call instead in exe$ in ipacp etc, to make asts etc function properly. (Note: doing that in vmsbuffer.c was unstable)
 
 Schedule code cleanup.
 
@@ -60,3 +60,9 @@ make pcb$t_lname counted string
 check all local big strings, like DESC$STR_ALLOC 1000 etc. replace?
 
 Find the newest cmuip patches
+
+use setpsli even in more interrupts/exceptions?
+
+Look at how ne2000 is probed
+
+Look at how simple and complex buffers are allocated and freed
