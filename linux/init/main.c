@@ -909,7 +909,7 @@ static char *vidmem = (char *)0xb8000;
 static int vidport=0x3d4;
 static int lines=25, mycols=80, orig_x=1, orig_y=10;
 
-static void scroll(void)
+void scroll(void)
 {
   int i;
 
