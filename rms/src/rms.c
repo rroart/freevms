@@ -1446,9 +1446,14 @@ unsigned exe$create(struct _fabdef *fab)
     fibblk.fib$l_exsz=10;
     sts = sys$qiow(0,getchan(wccfile->wcf_vcb),IO$_CREATE|IO$M_ACCESS,&iosb,0,0,
 		   &fibdsc,&wccfile->wcf_wcd.wcd_serdsc,0,0,0,0);
+    if (sts == SS$_ILLIOFUNC) {
+      sts = 1;
+      goto go;
+    }
     sts = iosb.iosb$w_status;
     memcpy(&wccfile->wcf_fib.fib$w_fid_num,&fibblk.fib$w_fid_num,sizeof(struct _fiddef));
   }
+ go:
   if (sts & 1) {
     ifi_table[ifi_no] = wccfile;
     fab->fab$w_ifi = ifi_no;
