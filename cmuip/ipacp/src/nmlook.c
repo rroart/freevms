@@ -1209,13 +1209,13 @@ CHECK_SERVER (void)
     signed long
 	RC,
 	DEVCHN,
-      PID;
+     PID;
 struct item_list_3 ITMLIST[3];
 
 // First, try to assign a channel on the name resolver mailbox.
 
     RC = exe$assign( SRVMBXNAM,
-		 DEVCHN, 0, 0, 0);
+		 &DEVCHN, 0, 0, 0);
     if (! RC)
 	return FALSE;
 
@@ -1225,7 +1225,7 @@ struct item_list_3 ITMLIST[3];
 // name resolver process.
 
     ITMLIST[0].item_code=JPI$_PID;
-    ITMLIST[0].bufaddr=PID;
+    ITMLIST[0].bufaddr=&PID;
     ITMLIST[1].item_code=0;
     ITMLIST[1].buflen=0;
     ITMLIST[1].bufaddr=0;

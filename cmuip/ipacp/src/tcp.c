@@ -429,6 +429,12 @@ MODULE TCP(IDENT="8.2",LANGUAGE(BLISS32),
 #include <ssdef.h>
 // not yet? #include <iosbdef.h>
 
+#undef TCP_DATA_OFFSET
+#include <net/checksum.h>
+#define TCP_DATA_OFFSET 5 
+#define Calc_Checksum(x,y) ip_compute_csum(y,x)
+#define Gen_Checksum(a,b,c,d,e) csum_tcpudp_magic(c,d,a,e,csum_partial(b,a,0))
+
 
 
 //SBTTL "External Routines"
@@ -488,7 +494,7 @@ extern  void    SEG$Timeout_Syn_Wait_List();
 // IP.BLI
 
 extern     IP$Send();
-extern     Gen_Checksum();
+//extern     Gen_Checksum();
 
 // NMLOOK.BLI
 
@@ -763,7 +769,7 @@ void Send_TCP_Options(tcb,Seg)
      struct tcb_structure * tcb;
      struct segment_structure * Seg;
 {
-  extern ip_islocal();
+  extern (*ip_islocal)();
   struct tcp$opt_block * OPTR;
 
 // Point at the start of the TCP data
@@ -775,12 +781,12 @@ void Send_TCP_Options(tcb,Seg)
     OPTR->tcp$opt_kind = TCP$OPT_KIND_MSS;
     OPTR->tcp$opt_length = TCP$OPT_LENGTH_MSS;
 //    OPTR->tcp$opt_dword = max_recv_datasize;
-    if (ip_islocal (tcb->foreign_host) == -1)
+    if ((*ip_islocal) (tcb->foreign_host) == -1)
       OPTR->tcp$opt_dword = default_mss;
     else
       OPTR->tcp$opt_dword = max_recv_datasize;
 
-    SWAPWORD(OPTR->tcp$opt_dword);
+    SWAPWORD(&OPTR->tcp$opt_dword);
 
 // Insert other options here. Be sure to update SEND_OPTION_SIZE and to make
 // sure that the maximum TCP header size is not exceeded.
@@ -984,7 +990,7 @@ signed long	tmp;
 
 // Set control flags and options for the segment
 
-	    Seg->sh$control_flags = 0;
+	    ((short*)&Seg->sh$ack)[2]=0; //was: Seg->sh$control_flags = 0;
 	    Seg->sh$c_ack = ACKF;
 	    if (SYNF)
 		{
@@ -1225,7 +1231,7 @@ void    tcp$enqueue_ack();
 void    tcp$send_ack();
 void    do_probe();
 
-Check_TCB ( struct tcb_structure * tcb , signed long Idx , unsigned long now, unsigned long nxtime ) // check switch if
+Check_TCB ( struct tcb_structure * tcb , signed long Idx , unsigned long now, unsigned long * nxtime ) // check switch if
     {
 
     if ($$LOGF(LOG$TCBCHECK+LOG$TCBDUMP))
@@ -1417,7 +1423,7 @@ Check_TCB ( struct tcb_structure * tcb , signed long Idx , unsigned long now, un
 	    min_time = MAXU(min_time, now) ;
 	    min_time = MINU(rx_time, min_time) ;
 //	    nxtime = MINU(..nxtime,rx_time);
-	    nxtime = MINU(nxtime, min_time); // check ..nxtime
+	    *nxtime = MINU(*nxtime, min_time); // check ..nxtime
 	    XLOG$FAO(LOG$DEBUG,
 		     "!%T TCP$Check_Rexmit_Queue : nxtime = !XL!/",
 		     0,nxtime); // check ..nxtime
@@ -1479,7 +1485,7 @@ tcp$service_connections (void)
     if ($$LOGF(LOG$TCBCHECK))
 	LOG$FAO("!%T !UL Servicing all TCBs, !/",0,now);
 
-    count = VTCB_Scan ( Check_TCB , now , nxtime );
+    count = VTCB_Scan ( Check_TCB , now , &nxtime );
     XLOG$FAO(LOG$DEBUG,"!%T Service_connections: now=!XL nxtime=!XL!/",0,
 	     now,nxtime); 
 
@@ -1521,8 +1527,8 @@ void tcp$send_enqueue(tcb,bufcount,buf,pushf)
 
 // Update user pointer and counter
 
-    bufcount = lbcount - copycount;
-    buf = lbptr + copycount;
+    *bufcount = lbcount - copycount;
+    *buf = lbptr + copycount;
 
 // if PUSH was set, then advance the send Push pointer to end of this buffer
 
@@ -1677,7 +1683,7 @@ tcp$send_data(struct tcb_structure * tcb)
 
 	bufptr = mm$seg_get(bufsize);
 	seg = bufptr+DEVICE_HEADER+IP_HDR_BYTE_SIZE;
-	seg->sh$control_flags = 0;
+	((short*)&seg->sh$ack)[2]=0; //was: seg->sh$control_flags = 0;
 
 // Set PUSH and advance PUSH pointer
 
@@ -1751,7 +1757,7 @@ tcp$send_data(struct tcb_structure * tcb)
 
 // Enqueue as much data as possible from this user buffer
 
-	    tcp$send_enqueue(tcb,qb->sn$size,qb->sn$data,qb->sn$eol);
+	    tcp$send_enqueue(tcb,&qb->sn$size,&qb->sn$data,qb->sn$eol);
 
 // If the user buffer still has data in it, then we ran out of queue space.
 
@@ -1976,7 +1982,7 @@ tcp$send_ctl(struct tcb_structure * tcb,long type)
 
 // build the segment
 
-    seg->sh$control_flags = 0;		// Clear control Flags.
+    ((short*)&seg->sh$ack)[2]=0; //was: seg->sh$control_flags = 0;		// Clear control Flags.
     switch (type)
       {
     case M$ACK:
@@ -2065,7 +2071,7 @@ void do_probe(struct tcb_structure * tcb)
     seg->sh$source_port = tcb->local_port;
     seg->sh$dest_port = tcb->foreign_port;
     seg->sh$seq = (tcb->snd_nxt ^ -1);
-    seg->sh$control_flags = 0;
+    ((short*)&seg->sh$ack)[2]=0; //was: seg->sh$control_flags = 0;
     seg->sh$c_ack = TRUE;
     seg->sh$c_syn = TRUE;
     seg->sh$ack = tcb->rcv_nxt;
@@ -2082,10 +2088,10 @@ void do_probe(struct tcb_structure * tcb)
 
 // Byteswap header and do checksum
 
-    seg->sh$seq = ROT(seg->sh$seq,16);
-    seg->sh$ack = ROT(seg->sh$ack,16);
+    seg->sh$seq = htonl(seg->sh$seq/*,16*/);
+    seg->sh$ack = htonl(seg->sh$ack/*,16*/);
 
-    swapbytes(TCP_HEADER_SIZE/2,seg);
+    swapbytesseghdr(TCP_HEADER_SIZE/2,seg);
     seg->sh$checksum = Gen_Checksum(segsize,seg,tcb->local_host,
 				    tcb->foreign_host,TCP_PROTOCOL);
 // Finally, send the packet.
@@ -2188,13 +2194,13 @@ void Build_Header(tcb,seg,length,seqspace,seqstart,
 // Swap bytes within TCP header words(16-bits) so checksum is correct for
 // order in which the bytes are transmitted.
 
-    seg->sh$seq = ROT(seg->sh$seq,16);
-    seg->sh$ack = ROT(seg->sh$ack,16); // swap 16-bit words in 32-bit fullwords
+    seg->sh$seq = htonl(seg->sh$seq/*,16*/);
+    seg->sh$ack = htonl(seg->sh$ack/*,16*/); // swap 16-bit words in 32-bit fullwords
 
 // Swap the bytes in the header. Note that options are always in network byte
 // order and thus need not be swapped.
 
-    swapbytes(TCP_HEADER_SIZE/2,seg);
+    swapbytesseghdr(TCP_HEADER_SIZE/2,seg);
 
 // generate the actual checksum now that all the bytes are in the order of
 // transmission.

@@ -694,7 +694,7 @@ void Set_PTY_Window_Size (TVT, pag, width)
 	struct TVT$BLOCK * TVT;
     {
       long pty_chan	= TVT->TVT$PTY_CHN;
-      struct _qcbdef * PTY_Char;
+      struct _qcbdef * PTY_Char = &TVT->TVT$TTY_CHAR;
       union _ttdef * Charistics = &PTY_Char->QCB$L_CHARISTICS;
       union _tt2def * Extend_Char = &PTY_Char->QCB$L_EXTEND_CHAR;   // JC
 
@@ -794,7 +794,7 @@ void Set_PTY_Term_Type (TVT, type, devdep)
       extern set_devdep();
       long pty_chan	= TVT->TVT$PTY_CHN;
       long tty_chan	= TVT->TVT$TTY_CHN;
-      struct _qcbdef * PTY_Char;
+      struct _qcbdef * PTY_Char = &TVT->TVT$TTY_CHAR;
       union _ttdef * Charistics = &PTY_Char->QCB$L_CHARISTICS;
       union _tt2def * Extend_Char = &PTY_Char->QCB$L_EXTEND_CHAR;   // JC
       struct OPT$BLOCK * LCLOPTS		= &TVT->TVT$LCLOPTS;

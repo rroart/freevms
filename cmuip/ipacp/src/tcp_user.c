@@ -673,7 +673,7 @@ void tcp$status(struct user_status_args * Uargs)
       RC;
 	struct status_return_arg_blk strct,*CS=&strct;
 
-    if ((TCB=tcb_ok(Uargs->st$local_conn_id,RC,Uargs)) == 0)
+    if ((TCB=tcb_ok(Uargs->st$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Connection Doesn't Exist
 	return;
@@ -750,7 +750,7 @@ void tcp$info(struct user_info_args * Uargs)
     register
 	struct tcb_structure * TCB;
 
-    if ((TCB=tcb_ok(Uargs->if$local_conn_id,RC,Uargs)) == 0)
+    if ((TCB=tcb_ok(Uargs->if$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Connection Doesn't Exist
 	return;
@@ -953,7 +953,7 @@ void tcp$abort(struct user_abort_args * Uargs)
     register
 	struct tcb_structure * TCB;
 
-    if ((TCB=tcb_ok(Uargs->ab$local_conn_id,RC,Uargs)) == 0)
+    if ((TCB=tcb_ok(Uargs->ab$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Connection Doesn't Exist (probably...)
 	return;
@@ -1212,7 +1212,7 @@ void tcp$receive(struct user_recv_args * Uargs)
     register
 	struct tcb_structure * TCB;
 
-    if ((TCB=tcb_ok(Uargs->re$local_conn_id,RC,Uargs)) == 0)
+    if ((TCB=tcb_ok(Uargs->re$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Connection doesn't exist.
 	return;
@@ -1382,7 +1382,7 @@ void Queue_Send_Data(Uargs,TCB)
 
 // Enqueue as much as we can.
 
-	tcp$send_enqueue(TCB,Ucount,Uaddr,Uargs->se$eol);
+	tcp$send_enqueue(TCB,&Ucount,&Uaddr,Uargs->se$eol);
 	if (Ucount == 0)
 	    {
 
@@ -1468,7 +1468,7 @@ void tcp$send(struct user_send_args * Uargs)
     register
 	struct tcb_structure * TCB;
 
-    if ((TCB=tcb_ok(Uargs->se$local_conn_id,RC,Uargs)) == 0)
+    if ((TCB=tcb_ok(Uargs->se$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Connection does not exist.
 	return;
@@ -1556,7 +1556,7 @@ void tcp$close(struct user_close_args * Uargs)
     register
 	struct tcb_structure * TCB;
 
-    if ((TCB=tcb_ok(Uargs->cl$local_conn_id,RC,Uargs)) == 0)
+    if ((TCB=tcb_ok(Uargs->cl$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Connection Does NOT exist.
 	return;
@@ -1697,10 +1697,10 @@ void tcp$tcb_init(TCB)
 // Init queue headers, Empty queue forward & back ptrs point at QHead element of
 // queue header as defined by VAX-11 absolute queue instructions.
 
-    TCB->lp_next = TCB->lp_back = TCB->lp_next; // Local port list.
-    TCB->rf_qhead = TCB->rf_qtail = TCB->rf_qhead; // Received future segments.
-    TCB->snd_qhead = TCB->snd_qtail = TCB->snd_qhead; // Segment send.
-    TCB->ur_qhead = TCB->ur_qtail = TCB->ur_qhead; // user receive request.
+    TCB->lp_next = TCB->lp_back = &TCB->lp_next; // Local port list.
+    TCB->rf_qhead = TCB->rf_qtail = &TCB->rf_qhead; // Received future segments.
+    TCB->snd_qhead = TCB->snd_qtail = &TCB->snd_qhead; // Segment send.
+    TCB->ur_qhead = TCB->ur_qtail = &TCB->ur_qhead; // user receive request.
     TCB->state = TCB->last_state = CS$CLOSED; // Set a known Connection state.
 
 // Initialize circular queue pointers. TCB$Create already set queue addresses.
@@ -1978,7 +1978,7 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 
     if (ADRLST != 0)
 	{
-	IP$SET_HOSTS(ADRCNT,ADRLST,TCB->local_host,TCB->foreign_host);
+	IP$SET_HOSTS(ADRCNT,ADRLST,&TCB->local_host,&TCB->foreign_host);
 	TCB->foreign_hnlen = NAMLEN;
 	if (NAMLEN != 0)
 	    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(TCB->foreign_hname,0));
@@ -2021,7 +2021,7 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 		     TCB->foreign_port,TCB->foreign_port);
 
 	    ok =check_unique_conn(TCB->local_port, TCB->foreign_host,
-				   TCB->foreign_port, CN_Index);
+				   TCB->foreign_port, &CN_Index);
 	    if (ok == ERROR)
 		{		// Error: Connection Tbl space Exhausted.
 		tcb$delete(TCB);
@@ -2051,7 +2051,7 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 		{
 		LP = user$get_local_port(TCP_User_LP);
 		ok =check_unique_conn(LP,TCB->foreign_host,
-				       TCB->foreign_port,CN_Index);
+				       TCB->foreign_port,&CN_Index);
  		if (ok == ERROR)
 		    {	// Connection table Space Exhausted
 		    tcb$delete(TCB);
@@ -2093,7 +2093,7 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 	ISWILD=(TCB->foreign_port == WILD) || (TCB->foreign_host == WILD);
 
 	ok =check_unique_conn(TCB->local_port,TCB->foreign_host,
-			       TCB->foreign_port,CN_Index);
+			       TCB->foreign_port,&CN_Index);
 
 // OK = Error means that the connection table was full - punt.
 

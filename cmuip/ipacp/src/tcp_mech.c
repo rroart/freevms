@@ -160,8 +160,8 @@ void tcp$init (void)
     mm$get_mem( &ConectPtr , ConectSize * CN$BLK_SIZE * 4 );
     for (cidx=0;cidx<=ConectSize-1;cidx++)
 	{				// Initialize connection table
-	ConectPtr[cidx].CN$TCB_List = ConectPtr[cidx].CN$TCB_List;
-	ConectPtr[cidx].CN$TCB_Tail = ConectPtr[cidx].CN$TCB_List;
+	ConectPtr[cidx].CN$TCB_List = &ConectPtr[cidx].CN$TCB_List;
+	ConectPtr[cidx].CN$TCB_Tail = &ConectPtr[cidx].CN$TCB_List;
 	ConectPtr[cidx].CN$Local_Port = -1;
 	};
 
@@ -995,6 +995,7 @@ Side Effects:
 */
 
 GET_TCB(TCBIDX,TCBret)
+     long * TCBret;
     {
 
 extern	tcp$kill_pending_requests();
@@ -1013,7 +1014,7 @@ extern	tcp$kill_pending_requests();
     if ((TCB->vtcb_index != TCBIDX))
 	return NET$_CDE;	// Confusion...
 
-    TCBret = TCB;		// Good connection - return TCB
+    *TCBret = TCB;		// Good connection - return TCB
 	return    SS$_NORMAL;
     }
 

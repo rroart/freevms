@@ -524,10 +524,10 @@ dsc$a_pointer:local_namestr};
 // Segment Input from IP Queue header.
 // Initialize Queue header to point at itself (ie, empty state).
 
-   struct queue_header_structure(si_fields) segin = { 
-    si_qhead: &segin,
-    si_qtail: &segin
-   };
+   struct queue_header_structure(si_fields) segin_ = { 
+    si_qhead: &segin_,
+    si_qtail: &segin_
+   }, * segin = &segin_;
 
 // Storage for original process name
 
@@ -687,7 +687,7 @@ Side Effects:
 // Skip this snooze if we have network segments to process or IP has datagrams
 // to send or it's Time to exit.
 
-	if (queue_empty(&segin.si_qhead) && (! Time_2_Exit)) {
+	if (queue_empty(&segin->si_qhead) && (! Time_2_Exit)) {
 
 // Any valid Connections around? (TCB_Count > 0). If none take a restful nap.
 // Otherwise, use next TCB service time provided by TCB scan.
@@ -712,8 +712,8 @@ Side Effects:
 			 0,rto);
 	    }
 
-	    ((long *)BTime)[1] = -1;	// make it delta time.
-	    ((long *)BTime)[0] = rto*CSEC_TIMER_DELTA; // nap size.
+	    ((long *)&BTime)[1] = -1;	// make it delta time.
+	    ((long *)&BTime)[0] = rto*CSEC_TIMER_DELTA; // nap size.
 	} else {			// No TCB's
 	    exe$bintim(&Long_Nap,&BTime);
 	    Big_Sleep = TRUE;
@@ -722,7 +722,7 @@ Side Effects:
 
 // Check again for segment arrival & no TCB actions
 
-	    if (queue_empty(&segin.si_qhead) && (((long *)&BTime)[0] != 0)) {
+	    if (queue_empty(&segin->si_qhead) && (((long *)&BTime)[0] != 0)) {
 
 
 // If we are doing a BIG sleep then purge the working set to reduce system impact.
@@ -760,6 +760,8 @@ Side Effects:
 
 void    INIT_PROCNAME(void);
 
+char * mydevice;
+
 void Main (void) {
   $DESCRIPTOR(logical_netname_,"INET$NETWORK_NAME");
 #if 0
@@ -794,11 +796,7 @@ void Main (void) {
 	  lnm_init_prc(smp$gl_cpu_data[0]->cpu$l_curpcb); // needs this extra one
 	  itm[0].item_code=1;
 	  itm[0].buflen=4;
-#ifdef __arch_um__
-	  itm[0].bufaddr="eua0";
-#else
-	  itm[0].bufaddr="era0";
-#endif
+	  itm[0].bufaddr=mydevice;
 	  bzero(&itm[1],sizeof(struct item_list_3));
 
 	  sts=exe$crelnm(0,mytabnam,dev,0,itm);

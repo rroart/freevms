@@ -573,7 +573,7 @@ Side Effects:
 void user$post_io_status (UARG,STATUS,NBYTES,
  				   FLAGS,ICMCODE)
     {
-	  netio_status_block * IOSB;
+	  netio_status_block IOSB_,* IOSB = & IOSB_;
 
 // Fill in Network IO status Block
 
@@ -626,7 +626,7 @@ Side Effects:
 
 USER$Err (struct user_default_args * Arg, long Err)
     {
-	 netio_status_block * IOSB;
+	 netio_status_block IOSB_ , * IOSB = & IOSB_;
 
 // Fill in Network IO status Block
 
@@ -684,7 +684,7 @@ void user$post_function_ok(struct user_default_args * Arg)
     {
     signed long
     IRP;
-	 netio_status_block * IOSB;
+	 netio_status_block IOSB_, * IOSB = &IOSB_;
 
 // Fill in Network IO status Block
 
@@ -707,7 +707,7 @@ void user$net_connection_info(struct user_info_args * uargs,
 			     long Lcl_Host,long Frn_Host,long Lcl_Port,long Frn_Port,
  			     long Frn_Name,long Frn_Nlen)
     {
-	 connection_info_return_block * CS;
+	 connection_info_return_block CS_,* CS= &CS_;
 
 // Verify buffer size
 
@@ -799,12 +799,13 @@ signed long
     UDP_User_LP;
 
 user$get_local_port(Pbase)
+     long * Pbase;
     {
     signed long
 	rval;
 
-    Pbase = Pbase+1; // check
-    rval = Pbase % USER_LP_END; // check
+    *Pbase = *Pbase+1; // check
+    rval = *Pbase % USER_LP_END; // check
     if (rval < USER_LP_START)
 	rval = rval+USER_LP_START;
     return rval && 0x7FFF;
@@ -1178,7 +1179,7 @@ extern 	ipu$cancel();
 	Done;
 
     ucbptr = uargs->vc$ucb_adrs; // check + UCB$L_EXTRA;
-    $$KCALL(MOVBYT,4,ucbptr,proto);
+    $$KCALL(MOVBYT,4,ucbptr,&proto);
 
     XLOG$FAO(LOG$USER,"!%T VMS$Cancel: PID=!XL, Chan=!XL, UCB proto=!XL!/",
 	     0,uargs->vc$pid,uargs->vc$piochan,proto);
@@ -1545,7 +1546,7 @@ user$privileged(PID)
 // Returns TRUE if user has the privilege, FALSE otherwise.
 //
     {
-	struct GETJPI_BLOCK * JPI;
+	struct GETJPI_BLOCK JPI_, * JPI = &JPI_;
     signed long
 	PRVLEN;
 union _prvdef PRVBUF;
@@ -1555,7 +1556,7 @@ union _prvdef PRVBUF;
     JPI->BUFLEN = 4;
     JPI->ITEM = JPI$_CURPRIV;
     JPI->BUFADR = &PRVBUF;
-    JPI->RETLEN = PRVLEN;
+    JPI->RETLEN = &PRVLEN;
     JPI->LISTEND = 0;
 
 // Request the priviliges for the process.
@@ -1574,7 +1575,7 @@ check_id(PID,ID)
 // Returns TRUE if the user has the necessary ID, FALSE otherwise.
 //
     {
-	struct GETJPI_BLOCK * JPI;
+	struct GETJPI_BLOCK JPI_, * JPI=&JPI_;
     signed long
 	STATUS,
 	UICLEN,
@@ -1587,7 +1588,7 @@ check_id(PID,ID)
     JPI->BUFLEN = 4;
     JPI->ITEM = JPI$_UIC;
     JPI->BUFADR = UICBLK;
-    JPI->RETLEN = UICLEN;
+    JPI->RETLEN = &UICLEN;
     JPI->LISTEND = 0;
 
 // Retrieve the UIC for the process
@@ -1775,7 +1776,7 @@ void net$gthst(struct gthst_args * uargs)
 	{
 	signed long
 	    Args[4];
-	 gthst_nmlook_block * RBLOCK; // check struct gthst_nmlook_args
+	 gthst_nmlook_block RBLOCK_, * RBLOCK =&RBLOCK_; // check struct gthst_nmlook_args
 	    long *ADRVEC= &RBLOCK->ghn$adrlst;
 	extern 
 	  dev_count;
@@ -1890,7 +1891,7 @@ void GTHST_NMLOOK_DONE(uargs,Status,Adrcnt,Adrlst,namlen,Nambuf)
     {
     signed long
 	Args[4];
-	 gthst_nmlook_block * NLB;
+	 gthst_nmlook_block NLB_, * NLB =&NLB_;
 
 // If an error occurred, give it to the user
 
@@ -1927,7 +1928,7 @@ void GTHST_ADLOOK_DONE(uargs,Status,namlen,Nambuf)
     {
     signed long
 	Args[4];
-	 gthst_adlook_block * ALB;
+	 gthst_adlook_block ALB_, * ALB= &ALB_;
 
 // If an error occurred, give it to the user
 
@@ -1964,7 +1965,7 @@ void GTHST_RRLOOK_DONE(uargs,Status,RDLen,RData,namlen,Nambuf)
     {
     signed long
 	Args[4];
-	 gthst_rrlook_block * RLB;
+	 gthst_rrlook_block RLB_, * RLB= &RLB_;
 
 // If an error occurred, give it to the user
 

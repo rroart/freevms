@@ -300,7 +300,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
 	Buff = Buff + XE_hdr_offset;
 	RC = exe$qio(ASTEFN,XE_chan,IO$_READVBLK,&Buff->XERCV$vms_code,
 		     XE_receive,  XE_Int,
-		  Buff->XERCV$data,
+		  &Buff->XERCV$data,
 		  DRV$MAX_PHYSICAL_BUFSIZE,
 		     0, 0,
 		     rcvhdrs[I].XERCV$buf,0);
@@ -357,6 +357,8 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 	struct XE_iosb_structure IOS_ , * IOS = &IOS_;
 	struct XE_setup_structure Setup_, * Setup= &Setup_;
 	struct XE_sdesc_structure Paramdescr_, * Paramdescr= &Paramdescr_;
+
+	bzero(Setup,sizeof(struct XE_setup_structure));
 
 // Build the nasty setup block required by the ethernet device
 
@@ -447,7 +449,7 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 		     struct xe_addrs_structure * phaddr,
 		     struct xe_Addrs_structure * hwaddr,
-		     long online)
+		     long * online)
 //
 // Read status of device.
 //   phaddr	pointer to area to store "physical" (decnet) address
@@ -507,7 +509,7 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 //Ignore the timeout bit for DEQNA's
 
 //!!HACK!!// there may be a problem with XE$cmd_status.
-    online = (IOS->XE$cmd_status && 0x0FF00) == XM$M_STS_ACTIVE;
+    *online = (IOS->XE$cmd_status & 0x0FF00) == XM$M_STS_ACTIVE;
 
 // Return success
 
@@ -547,7 +549,7 @@ xe_startall ( XE_Int , restart )
 // If not, it probably means that DECNET was slow to get started and we
 // need to wait for it.
 
-	if (! XE_SenseDev(XE_Int,phaddr,hwaddr,online))
+	if (! XE_SenseDev(XE_Int,phaddr,hwaddr,&online))
 	    return 0;
 	if (XE_Int->XEI$XE_decnet)
 	  useaddr = phaddr;
@@ -566,7 +568,7 @@ xe_startall ( XE_Int , restart )
 
 // Get device address
 
-	if (! XE_SenseDev(XE_Int,phaddr,hwaddr,online))
+	if (! XE_SenseDev(XE_Int,phaddr,hwaddr,&online))
 	    return 0;
 
 // Remember that it was started at least once
@@ -595,8 +597,9 @@ xe_startall ( XE_Int , restart )
 	    if (CH$NEQ(XE_ADR_SIZE,CH$PTR(useaddr),
 		      XE_ADR_SIZE,CH$PTR(addrs)))
 		{
+		  long l[3]={0,0,0};
 		if (CH$NEQ(XE_ADR_SIZE,CH$PTR(addrs),
-			  XE_ADR_SIZE,CH$PTR(UPLIT(0,0))))
+			   XE_ADR_SIZE,l/*CH$PTR(UPLIT(0,0))*/))
 		    {
 			DESC$STR_ALLOC(newstr,50);
 
@@ -669,7 +672,7 @@ void XE_Shutdown ( XE_Int , restart )
 	RC,
       now;
      Device_Configuration_Entry * dev_config;
-	 struct XE_iosb_structure * IOS;
+	 struct XE_iosb_structure IOS_, * IOS=&IOS_;
 
 // Disallow ASTs
 
@@ -947,7 +950,7 @@ Outputs:
 
 static    XE_LOG(MSG,IPADDR,HWADDR)
     {
-      long * STR_DESC;
+      long STR_DESC[2];
       extern	void xearp$log();
 
     STR_DESC[0] = sizeof(MSG);
@@ -958,9 +961,9 @@ static    XE_LOG(MSG,IPADDR,HWADDR)
 
 void xe$xmit ( Device_Configuration_Entry * dev_config )
     {
-      struct XE_iosb_structure * IOS; 
+      struct XE_iosb_structure IOS_, * IOS = &IOS_; 
       Net_Send_Queue_Element * QB;
-    struct xe_addrs_structure * Addrs;
+    struct XE_addrs_structure Addrs_, * Addrs = &Addrs_;
     struct XESND_structure * Sbuf;
     struct ip_structure * IPHDR;
     signed long
@@ -970,7 +973,7 @@ void xe$xmit ( Device_Configuration_Entry * dev_config )
 	AddrCheck,
 	xchan;
 
-	struct  XE_Interface_Structure * XE_Int = &dev_config ->dc_dev_interface  ;
+	struct  XE_Interface_Structure * XE_Int = dev_config ->dc_dev_interface  ;
 
     DRV$NOINT;
 // Check if a request is on the Net_send_Q for this device
@@ -991,11 +994,11 @@ X:	{
 
 // Position for Ethernet device header
 
-	Sbuf = QB->NSQ$Data - XE_hdr_len;
+	Sbuf = (long)QB->NSQ$Data - XE_hdr_len;
 	IPHDR = QB->NSQ$Data;
 // IPH$TTL in the swapped header is really IPH$Protocol
-	if ((IPHDR->iph$ttl == UDP_PROTOCOL) &&
-	   (IPHDR->iph$dest == ((! dev_config->dc_ip_netmask) ||
+	if ((IPHDR->iph$protocol == UDP_PROTOCOL) &&
+	   (IPHDR->iph$dest == ((! dev_config->dc_ip_netmask) |
 		dev_config->dc_ip_network)))
 	    {
 	    CH$MOVE(XE_ADR_SIZE, CH$PTR(XE_BROADCAST), CH$PTR(Addrs));
@@ -1032,6 +1035,7 @@ X:	{
 
 // Check for $QIO error
 
+	    // not needed? RC=RC&1; // check bliss ! is lbs?
 	    if (! (RC))
 		{
 		XE$ERR(XE_Int,"XE $QIO error (send),RC=!XL",RC);
@@ -1049,7 +1053,7 @@ X:	{
 
 // Check for controller error
 
-	    if ((IOS->XE$cmd_status && 0x0FF00) != XM$M_STS_ACTIVE)
+	    if ((IOS->XE$cmd_status & 0x0FF00) != XM$M_STS_ACTIVE)
 		{
 		DRV$XLOG_FAO(LOG$PHY,"%T XE command error !XW!/",
 				0,IOS->XE$cmd_status);
@@ -1123,7 +1127,14 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 
 // Get first input packet off of the queue
 //!!HACK!!// What if the first packet wasn't the one which $QIO returned?
-    REMQUE(XE_Int->XEI$recv_Qhead,&Rbuf);
+    // not yet REMQUE(XE_Int->XEI$recv_Qhead,&Rbuf);
+    struct XERCV_QB_structure * head=&XE_Int->XEI$recv_Qhead, *tmp=head->XERCV$next;
+    while (tmp!=head) {
+      if (tmp->XERCV$vms_code)
+	break;
+      tmp=tmp->XERCV$next;
+    }
+    REMQUE(tmp,&Rbuf);
     Rbuf = Rbuf + XE_hdr_offset;
     rcvix = XE_Int->XEI$curhdr;
 
@@ -1151,7 +1162,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 	};
 
     //Ignore the timeout bit for DEQNA's
-    if ((Rbuf->XERCV$cmd_status  && 0x0FF00) != XM$M_STS_ACTIVE)
+    if ((Rbuf->XERCV$cmd_status  & 0x0FF00) != XM$M_STS_ACTIVE)
 	{
 	Error_Flag = 1;
 	// Error from board
@@ -1188,7 +1199,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
     RC = exe$qio(ASTEFN,XE_Int->xei$io_chan,
 	      IO$_READVBLK,
 	      &NRbuf->XERCV$vms_code, XE_receive, XE_Int,
-	      NRbuf->XERCV$data,
+	      &NRbuf->XERCV$data,
 	      DRV$MAX_PHYSICAL_BUFSIZE,
 0,0,
 	      rcvhdrs[XE_Int->XEI$curhdr].XERCV$buf,0);
@@ -1224,7 +1235,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 
 	drv$ip_receive(Rbuf-XE_hdr_offset,
 		   DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len),
-		   Rbuf->XERCV$data,Rbuf->XERCV$tran_size,dev_config);
+		   &Rbuf->XERCV$data,Rbuf->XERCV$tran_size,dev_config);
 	};
 
     DRV$AST_IN_PROGRESS = FALSE;
@@ -1345,6 +1356,7 @@ void xe$arp_xmit(XE_Int,arbuf,arlen,dest)
 //SBTTL "Perform device specific DUMP functions"
 
 XE$dump(dev_config, funct, arg, buffer, sizeAdrs)
+     long * sizeAdrs;
     {
 extern	XE$ARP_DUMP();
 
@@ -1353,7 +1365,7 @@ extern	XE$ARP_DUMP();
       {
 	case XEDMP$ARP_Entry:
 	    {
-	      sizeAdrs = XE$ARP_DUMP ( arg, buffer, sizeAdrs); // check .size
+	      *sizeAdrs = XE$ARP_DUMP ( arg, buffer, sizeAdrs); // check .size
 	    return SS$_NORMAL;
 	    };
 	    break;

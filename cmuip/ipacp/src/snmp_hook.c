@@ -116,6 +116,7 @@ extern
 
 SNMP$NET_INPUT ( SrcAddr , DstAdr , SrcPrt , DstPrt ,
 			    Size , Buff , out_buff, out_len)
+     //     long * out_len; // check. not yet
     {
     signed long
 	RC;
@@ -433,6 +434,8 @@ getStatPtr (name,namelen,type,len,acl,exact,access_method)
 //    int		*access_method; /* OUT - 1 if function, 0 if char * */
 //
 	char name[SNMP$K_OIDsize];
+long * type;
+long * acl;
 {
   signed long x,
 	found  = 0,
@@ -460,8 +463,8 @@ getStatPtr (name,namelen,type,len,acl,exact,access_method)
     if (! found) return 0;
 
     // vp now points to the approprate struct */
-    type = vp->var$type;
-    acl = vp->var$acl;
+    *type = vp->var$type;
+    *acl = vp->var$acl;
     return access;
     }
 
@@ -584,6 +587,9 @@ static signed long
 var_system (vp, name, length, exact, var_len, access_method)
      struct variable_struct * vp;
         char name[SNMP$K_OIDsize];
+     long * length;
+     long * access_method;
+     long * var_len;
     {
     // Declare system variables from IPACP
     extern
@@ -595,21 +601,21 @@ var_system (vp, name, length, exact, var_len, access_method)
 	 return 0;
     ch$move(vp->var$namelen * SNMP$K_OIDsize, vp->var$name, name );
 
-    length = vp->var$namelen;
-    access_method = 0;
-    var_len = 4;	// default length == 4 bytes
+    *length = vp->var$namelen;
+    *access_method = 0;
+    *var_len = 4;	// default length == 4 bytes
 
     switch (vp->var$magic) 
       {
 	case VERSION_DESCR:
 	    {
-	    var_len = version_description->dsc$w_length;
+	    *var_len = version_description->dsc$w_length;
 	    return version_description->dsc$a_pointer;
 	    };
 	    break;
 	case VERSION_ID:
 	    {
-	    var_len = VERSION_IDENT_SIZE*SNMP$K_OIDsize;
+	    *var_len = VERSION_IDENT_SIZE*SNMP$K_OIDsize;
 	    return version_ident;
 	    };
 	    break;
@@ -637,6 +643,9 @@ var_system (vp, name, length, exact, var_len, access_method)
 var_ifEntry (vp, name, length, exact, var_len, access_method)
      struct variable_struct * vp;
         char name[SNMP$K_OIDsize];
+     long * length;
+     long * access_method;
+     long * var_len;
     {
     // Declare system variables from IPACP
       extern Device_Configuration_Entry * dev_config_tab;
@@ -664,9 +673,9 @@ var_ifEntry (vp, name, length, exact, var_len, access_method)
     interface = interface - 1; // translate into internal index of interfaces
     ch$move(vp->var$namelen * SNMP$K_OIDsize, newname, name);
 
-    length = vp->var$namelen;
-    access_method = 0;
-    var_len = 4;	// default length == 4 bytes
+    *length = vp->var$namelen;
+    *access_method = 0;
+    *var_len = 4;	// default length == 4 bytes
 
     dev_config = dev_config_tab[interface].dc_begin;
     switch (vp->var$magic)
@@ -676,7 +685,7 @@ var_ifEntry (vp, name, length, exact, var_len, access_method)
 	    break;
 	case IFDESCR:
 	    {
-	    var_len = &(dev_config->dcmib_ifDescr);
+	    *var_len = &(dev_config->dcmib_ifDescr);
 	    return &(dev_config->dcmib_ifDescr/*+4*/);
 	    };
 	    break;
@@ -691,7 +700,7 @@ var_ifEntry (vp, name, length, exact, var_len, access_method)
 	    break;
 	case IFPHYSADDRESS:
 	    {
-	    var_len = dev_config->dcmib_ifPAsize;
+	    *var_len = dev_config->dcmib_ifPAsize;
 	    return dev_config->dcmib_ifPhysAddress;
 	    };
 	    break;
@@ -910,6 +919,9 @@ var_atEntry(vp, name, length, exact, var_len, access_method)
 var_ip (vp, name, length, exact, var_len, access_method)
      struct variable_struct * vp;
         char name[SNMP$K_OIDsize];
+     long * length;
+     long * access_method;
+     long * var_len;
     {
 extern
 	IP_group_MIB;
@@ -918,9 +930,9 @@ extern
 	 return 0;
     ch$move(vp->var$namelen * SNMP$K_OIDsize, vp->var$name, name );
 
-    length = vp->var$namelen;
-    access_method = 0;
-    var_len = 4;	// default length == 4 bytes
+    *length = vp->var$namelen;
+    *access_method = 0;
+    *var_len = 4;	// default length == 4 bytes
 
     return IP_group_MIB + (vp->var$magic-1)*4;
     }

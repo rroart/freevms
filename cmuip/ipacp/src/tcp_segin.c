@@ -351,6 +351,12 @@ MODULE SEGIN(IDENT="6.7",LANGUAGE(BLISS32),
 #include <ssdef.h>
 #include <descrip.h>
 
+#undef TCP_DATA_OFFSET
+#include <net/checksum.h>
+#define TCP_DATA_OFFSET 5 
+#define Calc_Checksum(x,y) ip_compute_csum(y,x)
+#define Gen_Checksum(a,b,c,d,e) csum_tcpudp_magic(c,d,a,e,csum_partial(b,a,0))
+
 //XQDEFINE;
 
 extern struct TCP_MIB_struct *     tcp_mib ;   // TCP management Information Block
@@ -368,7 +374,7 @@ extern void    tcp$post_active_open_io_status();
 extern void    tcp$post_user_close_io_status();
 extern  void    tcp$kill_pending_requests();
 extern  void    tcp$deliver_user_data();
-extern     Gen_CheckSum();
+//extern     Gen_CheckSum();
 extern  void    tcp$adlook_done();
 
 // TCP_TELNET.BLI
@@ -694,7 +700,7 @@ void reset_unknown_connection(Seg,QB)
 // Create & fill in the temporary TCB
 
     TCB = tcb$create();
-    TCB->lp_next = TCB->lp_back = TCB->lp_next;	// Init Local Port queue.
+    TCB->lp_next = TCB->lp_back = &TCB->lp_next;	// Init Local Port queue.
     TCB->local_port = Seg->sh$dest_port && 0xffff ;
     TCB->local_host = QB->nr$dest_adrs;
     TCB->foreign_port = Seg->sh$source_port && 0xffff ;
@@ -1405,7 +1411,7 @@ Side effects:
 void SEG$Log_Segment(struct segment_structure * seg,signed long size,
 			   signed long TR_Flag,signed long BS_Flag)
     {
-struct segment_structure * segcopy;
+struct segment_structure segcopy_, * segcopy=&segcopy_;
 struct segment_structure * seghdr;
     signed long
 	dataoff,
@@ -1416,9 +1422,9 @@ struct segment_structure * seghdr;
 	{
 	CH$MOVE(TCP_HEADER_SIZE,CH$PTR(seg,0),CH$PTR(segcopy,0));
 	seghdr = segcopy;
-	swapbytes(TCP_HEADER_SIZE/2,seghdr); // Swap header bytes back
-	seghdr->sh$seq = ROT(seghdr->sh$seq,16);
-	seghdr->sh$ack = ROT(seghdr->sh$ack,16);
+	swapbytesseghdr(TCP_HEADER_SIZE/2,seghdr); // Swap header bytes back
+	seghdr->sh$seq = ntohl(seghdr->sh$seq/*,16*/);
+	seghdr->sh$ack = ntohl(seghdr->sh$ack/*,16*/);
 	};
 
 // Point at segment data (past header and possible options)
@@ -1448,8 +1454,8 @@ struct segment_structure * seghdr;
 	    seghdr->sh$dest_port,seghdr->sh$dest_port,
 	    seghdr->sh$seq,seghdr->sh$seq,seghdr->sh$ack,seghdr->sh$ack,
 	    seghdr->sh$window,seghdr->sh$checksum,seghdr->sh$data_offset,
-	    seghdr->sh$urgent,seghdr->sh$c_all_flags);
-    if (seghdr->sh$c_all_flags != 0)
+	    seghdr->sh$urgent,((short*)&seghdr->sh$ack)[2] /* was: seghdr->sh$c_all_flags*/);
+    if (1 /* was: seghdr->sh$c_all_flags != 0*/)
 	{
 	LOG$OUT(" = ");
 	if (seghdr->sh$c_urg)  LOG$OUT("URG "); else
@@ -1638,7 +1644,7 @@ struct segment_structure * SEG;
 // Start at beginning of options area (start of segment data)
 
     OPTR = SEG->sh$data;
-    DATAPTR = SEG+(SEG->sh$data_offset*4);
+    DATAPTR = (long)SEG+(SEG->sh$data_offset*4);
 
 // Scan the the entire options area until we hit the start of TCP data
 
@@ -1654,7 +1660,7 @@ struct segment_structure * SEG;
 	    break;
 
 	case TCP$OPT_KIND_NOP:	// No-op option
-	    OPTR = OPTR + 1;	// Advance pointer by one byte
+	    OPTR = (long)OPTR + 1;	// Advance pointer by one byte
 	    break;
 
 	case TCP$OPT_KIND_MSS:	// Maximum segment size option
@@ -1665,7 +1671,7 @@ struct segment_structure * SEG;
 	    if (OPTLEN == TCP$OPT_LENGTH_MSS)
 		{		// Length is correct
 		SZ = OPTR->tcp$opt_dword;
-		SWAPWORD(SZ);	// Change to VAX byte order
+		SWAPWORD(&SZ);	// Change to VAX byte order
 		TCB->max_seg_data_size = MIN(SZ,max_recv_datasize);
 		TCB->snd_ack_threshold = TCB->max_seg_data_size ;
 		XLOG$FAO(LOG$TCP,
@@ -1676,7 +1682,7 @@ struct segment_structure * SEG;
 		XLOG$FAO(LOG$TCP+LOG$TCPERR,
 			 "!%T ?TCP MSS option wrong size=!SL, TCB=!XL!/",
 			 0,OPTR->tcp$opt_length,TCB);
-	    OPTR = OPTR + OPTR->tcp$opt_length;
+	    OPTR = (long)OPTR + OPTR->tcp$opt_length;
 	    };
 	    break;
 
@@ -1685,7 +1691,8 @@ struct segment_structure * SEG;
 	    XLOG$FAO(LOG$TCP+LOG$TCPERR,
 		     "!%T ?Bad TCP option type !SL, size !SL for TCB !XL!/",
 		     0,OPTR->tcp$opt_kind,OPTR->tcp$opt_length,TCB);
-	    break;		// Can't procede, since length may not be valid
+	    OPTR = (long)OPTR + OPTR->tcp$opt_length;
+	    // not yet break;		// Can't procede, since length may not be valid
 	    };
 	};
 	};
@@ -2440,7 +2447,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 		    dataptr;
 		if (TCB->user_timeout != 0)
 		    TCB->user_timeout = Time_Stamp() + TCB->user_timeval;
-		dataptr = seg+seg->sh$data_offset*4;
+		dataptr = (long)seg+seg->sh$data_offset*4;
 		QB->nr$ucount = Ucount; // number of bytes for user
 		QB->nr$uptr = dataptr+Uoffset; // point to first data byte
 		QB->nr$seq_start = SEQstart; // first usable seq #
@@ -2722,7 +2729,7 @@ X:	    {
 
 	    sum = Gen_Checksum(QB->nr$size,seg,QB->nr$src_adrs,
 			       QB->nr$dest_adrs,TCP_Protocol);
-	    if (sum != 0xffff)
+	    if (sum != 0 /* was: 0xffff */ )
 		{		// Checksum error - punt it
 		if ($$LOGF(LOG$TCPERR))
 		    {
@@ -2733,9 +2740,9 @@ X:	    {
 		goto leave_x;
 		};
 
-	    swapbytes(TCP_HEADER_SIZE/2,seg); // Swap header bytes back
-	    seg->sh$seq = ROT(seg->sh$seq,16);
-	    seg->sh$ack = ROT(seg->sh$ack,16);
+	    swapbytesseghdr(TCP_HEADER_SIZE/2,seg); // Swap header bytes back
+	    seg->sh$seq = ntohl(seg->sh$seq/*,16*/);
+	    seg->sh$ack = ntohl(seg->sh$ack/*,16*/);
 
 	    if ($$LOGF(LOG$TCP))
 		SEG$LOG_Segment(seg,QB->nr$size,TRUE,FALSE);
@@ -2753,10 +2760,10 @@ Y:		{
 		if (seg->sh$c_rst) // RESET segment?
 		    {
 		    XLOG$FAO(LOG$TCPERR,
-			"!%T RST received for unknown TCB, SP=!SL,DP=!SL!/",
+			"!%T RST received for unknown TCB, SP=!SL,DP=!SL!",
 			0,seg->sh$source_port,seg->sh$dest_port);
 		    goto leave_x;
-		    } else {
+		    }
 
 		if (seg->sh$c_syn) // "SYN" Segment?
 		    {
@@ -2794,7 +2801,7 @@ Y:		{
 		    IP_Address = QB->nr$src_adrs;
 #if 0
 		    // not yet
-    ACT$FAO("!%D SYN received for unknown port !UW from <!UB.!UB.!UB.!UB>!/",0,
+    ACT$FAO("!%D SYN received for unknown port !UW from <!UB.!UB.!UB.!UB>!",0,
 			seg->sh$dest_port,
 			.IP_Address<0,8>,IP_Address<8,8>,
 			.IP_Address<16,8>,IP_Address<24,8>);
@@ -2808,11 +2815,11 @@ Y:		{
 #if 0
 		[OTHERWISE]:
 #endif
-		    {
+		  {
 		    reset_unknown_connection(seg,QB);
 		    goto leave_x;
 		    };
-		    }}
+		    }
 		};
  leave_y:
 

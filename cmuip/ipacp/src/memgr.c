@@ -434,7 +434,7 @@ Side Effects:
 
 */
 
-void mm$qblk_get (void)
+mm$qblk_get (void)
     {
       long R0=0;
 #if 0
@@ -469,7 +469,7 @@ void mm$qblk_get (void)
 	    qb_max = qb_gets;
 	};
 
-    ptr = Hptr + MEM$HDR_SIZE*4; // Point at data area
+    ptr = (long)Hptr + MEM$HDR_SIZE*4; // Point at data area
     CH$FILL(/*%CHAR*/(0),qb_size*4,ptr);	// fresh qb.
 //!!HACK!!!~~~ Should record allocator here ~~~
     XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Get !XL size !SL!/",0,Hptr, Pages);

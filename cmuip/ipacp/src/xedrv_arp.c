@@ -518,7 +518,7 @@ struct arp_PKT * ARBUF;
 // Source IP address (m bytes)
 
 	DPTR = APTR;
-	APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(ARBLK->AB_IPADDR),APTR);
+	APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(&ARBLK->AB_IPADDR),APTR);
 
 // Target hardware address (unknown)
 
@@ -527,7 +527,7 @@ struct arp_PKT * ARBUF;
 // Target IP address (m bytes)
 
 	DPTR = APTR;
-	APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(IPADDR),APTR);
+	APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(&IPADDR),APTR);
 
 // Calculate length
 
@@ -630,11 +630,11 @@ char AR_THA [ARP_HDW_LEN];
 	APTR = CH$PTR(ARBUF->ar$xtra);
 	CH$MOVE(HWLEN,APTR,CH$PTR(AR_SHA));
 	APTR = CH$PLUS(APTR,HWLEN);
-	CH$MOVE(ARP_IP_LEN,APTR,CH$PTR(AR_SPA));
+	CH$MOVE(ARP_IP_LEN,APTR,CH$PTR(&AR_SPA));
 	APTR = CH$PLUS(APTR,ARP_IP_LEN);
 	CH$MOVE(HWLEN,APTR,CH$PTR(AR_THA));
 	APTR = CH$PLUS(APTR,HWLEN);
-	CH$MOVE(HWLEN,APTR,CH$PTR(AR_TPA));
+	CH$MOVE(HWLEN,APTR,CH$PTR(&AR_TPA));
 
 // See if this packet is for us
 
@@ -674,12 +674,12 @@ char AR_THA [ARP_HDW_LEN];
 // Reverse the destination IP address
 
 		DPTR = APTR;
-		APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(AR_TPA),APTR);
+		APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(&AR_TPA),APTR);
 
 // And switch the source to the destination
 
 		APTR = CH$MOVE(HWLEN,CH$PTR(AR_SHA),APTR);
-		APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(AR_SPA),APTR);
+		APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(&AR_SPA),APTR);
 
 		ARPLEN = (long)APTR-(long)ARBUF;
 
@@ -712,7 +712,7 @@ char AR_THA [ARP_HDW_LEN];
 
 // Extract and swap source IP address into longword form
 
-		CH$MOVE(ARP_IP_LEN,APTR,CH$PTR(IPADDR));
+		CH$MOVE(ARP_IP_LEN,APTR,CH$PTR(&IPADDR));
 
 // Add this entry to the cache, replacing old entry if necessary
 // N.B. We are at AST level here, which makes this OK
@@ -863,7 +863,7 @@ void ARP_SWEEP(void)
     {
 struct ACACHE_BLK * ACPTR;
  signed long I,
-	APREV,
+	*APREV,
 	CTIME;
 
     CTIME = Time_Stamp();
@@ -900,11 +900,11 @@ struct ACACHE_BLK * ACPTR;
 
 //		LIB$FREE_VM(/*%REF*/(ACACHE_LEN*4),ACPTR);
 		LIB$FREE_VM_PAGE(/*%REF*/(((ACACHE_LEN * 4) / 512) + 1), ACPTR);
-		ACPTR = APREV; // check ..aprev
+		ACPTR = *APREV; // check ..aprev
 		}
 	    else
 		{		// Advance to next cache entry
-		APREV = ACPTR->AC$NEXT;
+		*APREV = ACPTR->AC$NEXT;
 		ACPTR = ACPTR->AC$NEXT;
 		};
 	    };

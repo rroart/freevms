@@ -204,6 +204,11 @@ MODULE UDP( IDENT="4.0e",LANGUAGE(BLISS32),
 #include <ssdef.h>
 #include <descrip.h>
 
+#undef TCP_DATA_OFFSET
+#include <net/checksum.h>
+#define Calc_Checksum(x,y) ip_compute_csum(y,x)
+#define Gen_Checksum(a,b,c,d,e) csum_tcpudp_magic(c,d,a,e,csum_partial(b,a,0))
+
 //*** Special literals from USER.BLI ***
 
 extern signed long
@@ -249,7 +254,7 @@ extern  void    user$post_io_status();
 
 extern  void    IP$SET_HOSTS();
 extern     ip$send();
-extern     Gen_Checksum();
+//extern     Gen_Checksum();
 
 // NMLOOK.BLI
 
@@ -345,11 +350,11 @@ void Log_UDP_Packet(Seg,SwapFlag,SendFlag)
       struct dsc$descriptor sptr;
     signed long
       segdata;
-    struct udpkt_structure * segcopy ;
+    struct udpkt_structure segcopy_ , * segcopy = &segcopy_;
     struct udpkt_structure * seghdr;
 
     seghdr = Seg;		// Point at segment header
-    segdata = Seg + UDP_HEADER_SIZE;
+    segdata = (long)Seg + UDP_HEADER_SIZE;
     if (SwapFlag)		// Need to byteswap header?
 	{
 	CH$MOVE(UDP_HEADER_SIZE,CH$PTR(Seg,0),CH$PTR(segcopy,0)); // Make a copy
@@ -469,7 +474,7 @@ void udp$input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
     if (Seg->up$checksum != 0)
 	{
 	sum = Gen_Checksum(SegSize,Seg,Src$Adrs,Dest$Adrs,UDP_Protocol);
-	if (sum != 0xFFFF)
+	if (sum != 0 /* was: 0xFFFF */)
 	    {			// Bad checkum - log & drop packet
 	    udp_mib->MIB$UDPINERRORS = udp_mib->MIB$UDPINERRORS + 1;
 	    if ($$LOGF(LOG$UDP))
@@ -486,12 +491,12 @@ void udp$input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
     
 // Setup pointer to UDP data and UDP data size
 
-    Uptr = Seg + UDP_HEADER_SIZE;
+    Uptr = (long)Seg + UDP_HEADER_SIZE;
     Ucount = SegSize - UDP_HEADER_SIZE;
 
     // Check to see if it's an RPC port
     if ((RPC_SERVICE &&
-	((RPC_index = RPC$CHECK_PORT(Seg->up$dest_port)) > 0)))
+	((RPC_index = RPC$CHECK_PORT(Seg->up$dest_port)) >= 0)))
 	{
 	signed long
 	  out_len;
@@ -815,7 +820,7 @@ extern	mm$qblk_get();
 
 // If there is a user read outstanding, deliver data, else queue for later
 
-    if (REMQUE(UDPCB->udpcb$usr_qhead,QBR) != EMPTY_QUEUE) // check
+    if (REMQUE(UDPCB->udpcb$usr_qhead,&QBR) != EMPTY_QUEUE) // check
       Deliver_UDP_Data (UDPCB,QB,QBR);
     else
 	INSQUE(QB,UDPCB->udpcb$nr_qtail);
@@ -899,10 +904,10 @@ void Deliver_UDP_Data(UDPCB,QB,URQ)
 
 //SBTTL "UDPCB_OK - Match connection ID to UDPCB address"
 
-UDPCB_OK(long Conn_ID,long RCaddr,struct user_default_args * Uargs)
+UDPCB_OK(long Conn_ID,long * RCaddr,struct user_default_args * Uargs)
     {
 	struct UDPCB_Structure * UDPCB;
-#define	UDPCBERR(EC) { RCaddr = EC; return 0;}
+#define	UDPCBERR(EC) { *RCaddr = EC; return 0;}
 
 // Range check the connection id. This should never fail, since the user should
 // not be fondling connection IDs.
@@ -930,6 +935,7 @@ UDPCB_OK(long Conn_ID,long RCaddr,struct user_default_args * Uargs)
 //SBTTL "UDPCB_Get - Allocate and initialize one UDPCB"
 
 UDPCB_Get(IDX,Src$Port)
+     long * IDX;
     {
       extern	LIB$GET_VM();
       extern	LIB$GET_VM_PAGE();
@@ -989,7 +995,7 @@ X:  {			// ** Block X **
 
 // Return the pointer
 
-    IDX = UDPCBIDX;
+    *IDX = UDPCBIDX;
     return UDPCB;
     }
 
@@ -1051,7 +1057,7 @@ void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,long RC)
 
 // Purge the user request queue, posting all requests
 
-    while (REMQUE(UDPCB->udpcb$usr_qhead,URQ) != EMPTY_QUEUE) // check
+    while (REMQUE(UDPCB->udpcb$usr_qhead,&URQ) != EMPTY_QUEUE) // check
 	{
 	    user$post_io_status(URQ->ur$uargs,RC,0,0,0);
 	    mm$uarg_free(URQ->ur$uargs);
@@ -1060,7 +1066,7 @@ void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,long RC)
 
 // Purge any received qblocks as well
 
-    while (REMQUE(UDPCB->udpcb$nr_qhead,QB) != EMPTY_QUEUE) // check
+    while (REMQUE(UDPCB->udpcb$nr_qhead,&QB) != EMPTY_QUEUE) // check
 	{
 	mm$seg_free(QB->nr$buf_size,QB->nr$buf);
 	mm$qblk_free(QB);
@@ -1157,7 +1163,7 @@ void udp$open(struct user_open_args * Uargs)
 
 // First create a UDPCB for this connection.
 
-    if ((UDPCB = UDPCB_Get(UIDX,ProtoHdr->ipadr$src_port)) <= 0)
+    if ((UDPCB = UDPCB_Get(&UIDX,ProtoHdr->ipadr$src_port)) <= 0)
 	{
 	USER$Err(Uargs,NET$_UCT);
 	return;
@@ -1246,7 +1252,7 @@ void UDP_NMLOOK_DONE(UDPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
     signed long
       RC;
 	struct user_open_args * Uargs;
-	 netio_status_block * IOSB ;
+	 netio_status_block IOSB_, * IOSB = &IOSB_ ;
 #define	UOP_ERROR(EC) \ 
 	    { \
 	    USER$Err(Uargs,EC); \
@@ -1307,8 +1313,8 @@ UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST)
 // Set local and foreign host numbers according to our info
 
     if (ADRCNT > 0)
-	IP$SET_HOSTS(ADRCNT,ADRLST,UDPCB->udpcb$local_host,
-		     UDPCB->udpcb$foreign_host);
+	IP$SET_HOSTS(ADRCNT,ADRLST,&UDPCB->udpcb$local_host,
+		     &UDPCB->udpcb$foreign_host);
 
 // Now, check that this connection is unique and get a local port, if needed.
 
@@ -1396,7 +1402,7 @@ void udp$close(struct user_close_args * Uargs)
 
 // Check for valid UDPCB
 
-    if ((UDPCB = UDPCB_OK(Uargs->cl$local_conn_id,RC,Uargs)) == 0)
+    if ((UDPCB = UDPCB_OK(Uargs->cl$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);
 	return;
@@ -1425,7 +1431,7 @@ void udp$abort(struct user_abort_args * Uargs)
 
 // Check for valid UDPCB
 
-    if ((UDPCB = UDPCB_OK(Uargs->ab$local_conn_id,RC,Uargs)) == 0)
+    if ((UDPCB = UDPCB_OK(Uargs->ab$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);
 	return;
@@ -1458,7 +1464,7 @@ void udp$send(struct user_send_args * Uargs)
 
 // Validate connection ID and get UDPCB pointer
 
-    if ((UDPCB = UDPCB_OK(Uargs->se$local_conn_id,RC,Uargs)) == 0)
+    if ((UDPCB = UDPCB_OK(Uargs->se$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// No such connection
 	return;
@@ -1501,7 +1507,7 @@ void udp$send(struct user_send_args * Uargs)
 
     LocalAddr = UAddr->ipadr$src_host;
     if (LocalAddr == WILD)
-    IP$SET_HOSTS(1,ForeignAddr,LocalAddr,ForeignAddr);
+    IP$SET_HOSTS(1,&ForeignAddr,&LocalAddr,&ForeignAddr);
 
     LocalPort = UAddr->ipadr$src_port;
     if (LocalPort == WILD)
@@ -1622,7 +1628,7 @@ void udp$receive(struct user_recv_args * Uargs)
 
 // Validate connection ID and get UDPCB pointer
 
-    if ((UDPCB = UDPCB_OK(Uargs->re$local_conn_id,RC,Uargs)) == 0)
+    if ((UDPCB = UDPCB_OK(Uargs->re$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// No such connection
 	return;
@@ -1665,7 +1671,7 @@ void udp$receive(struct user_recv_args * Uargs)
 // If anything is available on the queue, deliver it now, else queue for later
 
     NOINT;
-    if (REMQUE(UDPCB->udpcb$nr_qhead,QB) != EMPTY_QUEUE) // check
+    if (REMQUE(UDPCB->udpcb$nr_qhead,&QB) != EMPTY_QUEUE) // check
       Deliver_UDP_Data(UDPCB,QB,URQ);
     else
 	INSQUE(URQ,UDPCB->udpcb$usr_qtail);
@@ -1688,7 +1694,7 @@ void udp$info(struct user_info_args * Uargs)
 
 // Validate the connection ID
 
-    if ((UDPCB = UDPCB_OK(Uargs->if$local_conn_id,RC,Uargs)) == 0)
+    if ((UDPCB = UDPCB_OK(Uargs->if$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Bad connection ID
 	return;

@@ -398,7 +398,7 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
 
     NOINT;
 
-    if (check_unique_conn(LPORT,FHOST,FPORT,CIDX) != TRUE)
+    if (check_unique_conn(LPORT,FHOST,FPORT,&CIDX) != TRUE)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT create failed - CONECT table full!/",0);
 	OKINT;

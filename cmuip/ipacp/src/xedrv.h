@@ -230,9 +230,9 @@ struct XE_Sense // check
 
 static    XE_Param_Size (struct XE_Sense*  Buffer) {
   if ((Buffer)->XE_Sense_Type)  
-    return (Buffer->XE_Sense_Length + XE_SS_BYTEOFF);
+    return (Buffer->XE_Sense_Length + XE_SS_BYTEOFF) + 2; // gcc bug/feature
   else
-    return (XE_TYPE_AND_VALUE);
+    return (XE_TYPE_AND_VALUE)+2; // 2 gcc bug feature?
 }
 
 // Receive buffer Q structure

@@ -227,6 +227,11 @@ MODULE IP(IDENT="4.5c",LANGUAGE(BLISS32),
 #include <ssdef.h>
 #include <descrip.h>
 
+#undef TCP_DATA_OFFSET
+#include <net/checksum.h>
+#define Calc_Checksum(x,y) ip_compute_csum(y,x)
+#define Gen_Checksum(a,b,c,d,e) csum_tcpudp_magic(c,d,a,e,csum_partial(b,a,0))
+
 extern     TIME_STAMP();
 extern  void    LOG_FAO();
 extern  void    LOG_OUTPUT();
@@ -246,7 +251,7 @@ extern  void    QL_FAO();
 // Maclib.mar
 
 extern     Calc_checksum();
-extern     Gen_Checksum();
+//extern     Gen_Checksum();
 extern  void    MovByt();
 extern  void    swapbytes();
 
@@ -376,7 +381,7 @@ extern      STR$COPY_DX();
 
 // Make sure there is room for this entry
 
-    if ((gwy_count > MAX_GWY))
+    if ((gwy_count >= MAX_GWY))
 	{
 	OPR$FAO("Too many gateways in INET$CONFIG - entry for !AS ignored",
 		GWYNAME);
@@ -479,7 +484,7 @@ DESC$STR_ALLOC(DSTSTR,20);
     QL$FAO(/*%STRING*/("!%T !AS: S=!AS,D=!AS,HL=!SL,PR=!SL,TL=!SL,ID=!SL,FL=!SL,FR=!SL,TTL=!SL!/",
 		   "!_    !AS: HDR=!XL,DATA=!XL!/"),
 	   0,NAME,SRCSTR,DSTSTR,IPHDR->iph$ihl,IPHDR->iph$protocol,
-	   IPHDR->iph$total_length,IPHDR->iph$ident,IPHDR->iph$flags,
+	   IPHDR->iph$total_length,IPHDR->iph$ident,IPHDR->iph$fragment_offset>>13,
 	   IPHDR->iph$fragment_offset,IPHDR->iph$ttl,NAME,IPHDR,DATAPTR);
     }
 
@@ -517,7 +522,7 @@ ip_find_dev(IPADDR)
 	    // If this is a clone device return
 	    //	number of device from which it was cloned.
 	    temp = dev_config_tab[IDX].dc_clone_dev;
-	    if ((temp > 0)) return temp;
+	    if ((temp >= 0)) return temp;
 	    return IDX;
 	    };
 
@@ -556,7 +561,7 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 //   -1 on failure, no route known to that address
 //  >=0 on success, with device index
 
-     long * IPDEST, * NEWIPDEST; // check
+     long * IPDEST, * IPSRC, * NEWIPDEST; // check
     {
     signed long
 	IDX,GWY;
@@ -564,17 +569,17 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 
 // If this address is on same network, use it
 
-    if ((IDX = ip_find_dev(*IPDEST)) > 0)
+    if ((IDX = ip_find_dev(*IPDEST)) >= 0)
 	{
 	if ((*IPDEST == 0xFFFFFFFF))
 	    {
-	    NEWIPDEST = (! dev_config_tab[IDX].dc_ip_netmask)
+	    *NEWIPDEST = (~ dev_config_tab[IDX].dc_ip_netmask)
 		| dev_config_tab[IDX].dc_ip_network;
-	    IPDEST = *NEWIPDEST;
+	    *IPDEST = *NEWIPDEST;
 	    }
 	else
-	    NEWIPDEST = *IPDEST;
-	IPSRC = dev_config_tab[IDX].dc_ip_address;
+	    *NEWIPDEST = *IPDEST;
+	*IPSRC = dev_config_tab[IDX].dc_ip_address;
 	return IDX;
 	};
 
@@ -583,7 +588,7 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
     if (LEV > MAX_LEV)
 	{
 	    DESC$STR_ALLOC(DSTSTR,20);
-	ASCII_DEC_BYTES(DSTSTR,4,IPDEST,&DSTSTR->dsc$w_length);
+	ASCII_DEC_BYTES(DSTSTR,4,*IPDEST,&DSTSTR->dsc$w_length);
 	XQL$FAO(LOG$IP+LOG$IPERR,
 		"!%T IP_ROUTE max recursion depth exceeded, DEST=!AS!/",
 		0,DSTSTR);
@@ -593,12 +598,12 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 // Check for ICMP information, and try again
 
     if ((GWY = icmp$check(*IPDEST)) != 0)
-	return IP_ROUTE(GWY,IPSRC,NEWIPDEST,LEV+1);
+	return IP_ROUTE(&GWY,IPSRC,NEWIPDEST,LEV+1);
 
 // Check for gateway table and try again.
 
     if ((GWY = IP_FIND_GWY(*IPDEST)) != 0)
-	return IP_ROUTE(GWY,IPSRC,NEWIPDEST,LEV+1);
+	return IP_ROUTE(&GWY,IPSRC,NEWIPDEST,LEV+1);
 
 // None of the above - no route exists.
 
@@ -641,7 +646,7 @@ long IDX;
 		temp;
 
 	    temp = ip_find_dev (IPADDR);
-	    if ((temp > 0) &&
+	    if ((temp >= 0) &&
 		(STRICT != dev_config_tab[temp].dc_dev_interface))
 		return temp;		// yes, make sure it's not
 	    };			// device thaqt rcvd the ARP rqst.
@@ -655,6 +660,7 @@ void IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR)
 // Set local/foreign hosts pair given list of foreign addresses.
 //
 	long * ADRLST;	// Assume 32-bit IP addr
+long * LCLPTR, * FRNPTR;
     {
 signed long I,
 	LIDX,
@@ -670,15 +676,15 @@ signed long I,
 	{
 	signed long
 	    J;
-	if ((J = ip_islocal(ADRLST[I])) > 0)
+	if ((J = ip_islocal(ADRLST[I])) >= 0)
 	    {
 	    FIDX = I;
 	    LIDX = J;
 	    break;
 	    };
 	};
-    FRNPTR = ADRLST[FIDX];
-    LCLPTR = dev_config_tab[LIDX].dc_ip_address;
+    *FRNPTR = ADRLST[FIDX];
+    *LCLPTR = dev_config_tab[LIDX].dc_ip_address;
     }
 
 //SBTTL "IP$SEND_RAW:  Send TCP segment to IP for transmission."
@@ -733,7 +739,7 @@ ip$send_raw(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 // If no route, then flush the packet and return failure.
 
     //!!HACK!!// IP$ISME takes way too long
-    if ((ip$isme(IP$Dest, TRUE) > 0))
+    if ((ip$isme(IP$Dest, TRUE) >= 0))
 	{
 	dev = -1;		// Loopback
 	}
@@ -741,7 +747,7 @@ ip$send_raw(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	{
 	signed long
 	    newip_src;
-	if ((dev = IP_ROUTE(IP$Dest,newip_src,newip_dest,0)) < 0)
+	if ((dev = IP_ROUTE(&IP$Dest,&newip_src,&newip_dest,0)) < 0)
 	    {
 		DESC$STR_ALLOC(dststr,20);
 	    ASCII_DEC_BYTES(dststr,4,IP$Dest,&dststr->dsc$w_length);
@@ -785,7 +791,7 @@ ip$send_raw(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 		struct segment_structure * Seg2;
 
 	    Buf2 = mm$seg_get(Bufsize);
-	    Seg2 = Seg-Buf+Buf2;
+	    Seg2 = (long)Seg-Buf+Buf2;
 	    CH$MOVE(Bufsize,Buf,Buf2);
 	    ip$receive(Buf2,Bufsize,Seg2,SegSize,0);
 	    }
@@ -919,7 +925,7 @@ ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 // If no route, then flush the packet and return failure.
 
     ip_src = IP$Src;
-    if ((ip$isme(IP$Dest, TRUE) > 0))
+    if ((ip$isme(IP$Dest, TRUE) >= 0))
 	{
 	newip_dest = IP$Dest;
 	dev = -1;		// Loopback
@@ -928,7 +934,7 @@ ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	{
 	signed long
 	    newip_src;
-	if ((dev = IP_ROUTE(IP$Dest,newip_src,newip_dest,0)) < 0)
+	if ((dev = IP_ROUTE(&IP$Dest,&newip_src,&newip_dest,0)) < 0)
 	    {
 		DESC$STR_ALLOC(dststr,20);
 	    ASCII_DEC_BYTES(dststr,4,IP$Dest,&dststr->dsc$w_length);
@@ -959,7 +965,7 @@ ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 
 // Position buffer for IP header
 
-    IPHDR = Seg - IP_HDR_BYTE_SIZE;
+    IPHDR = (long)Seg - IP_HDR_BYTE_SIZE;
     iplen = IP_HDR_BYTE_SIZE + SegSize;
 //!!HACK!!// Check to see if IPHDR < Buf 
 
@@ -972,8 +978,7 @@ ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
     IPHDR->iph$ident = ID;
     if (! fragmenting)
 	{
-	IPHDR->iph$flags = 0;
-	IPHDR->iph$fragment_offset = 0;
+	IPHDR->iph$fragmentation_data = 0;
 	}
     else
 	IPHDR->iph$fragmentation_data = fragmentation_data;
@@ -997,7 +1002,7 @@ ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 
 // Re-arrange bytes and words in IP header
 
-    swapbytes(IP_HDR_SWAP_SIZE,IPHDR);
+    swapbytesiphdr(IP_HDR_SWAP_SIZE,IPHDR);
 
 // Compute checksum for IP header
 
@@ -1017,7 +1022,7 @@ ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	      buf2;
 	    struct segment_structure * seg2;
 	    buf2 = mm$seg_get(Bufsize);
-	    seg2 = Seg-Buf+buf2;
+	    seg2 = (long)Seg-Buf+buf2;
 	    CH$MOVE(Bufsize,Buf,buf2);
 	    iphdr2 = (long)IPHDR-(long)Seg+(long)seg2;
 	    ip$receive(buf2,Bufsize,iphdr2,iplen,0);
@@ -1110,16 +1115,16 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 
 // Compute and verify checksum of IP header
 
-    hdrlen = iphdr->iph$swap_ihl * 4;
-    Sum = Calc_checksum(hdrlen,iphdr);
-    if (Sum != 0xFFFF)
+    hdrlen = iphdr->iph$ihl * 4; // was: swap_ihl
+    Sum = ip_fast_csum(iphdr,iphdr->iph$ihl); // was: Calc_Checksum(hdrlen,iphdr);
+    if (Sum != 0/* was: 0xFFFF*/)
 	{			// Checksum error
 	IP_group_MIB->IPMIB$ipInHdrErrors =	// Ooops// another error...
 		IP_group_MIB->IPMIB$ipInHdrErrors + 1;
 	if ($$LOGF(LOG$IP+LOG$IPERR))
 	    {
 	    QL$FAO("!%T IP Receive checksum error, sum=!XL!/",0,Sum);
-	    swapbytes(IP_HDR_SWAP_SIZE,iphdr);
+	    swapbytesiphdr(IP_HDR_SWAP_SIZE,iphdr);
 	    ip$log(ASCIDNOT("(IPrecv)"),iphdr);
 	    };
         mm$seg_free(Buf_size,Buf);
@@ -1128,7 +1133,7 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 
 // Do byteswap of word fields in IP header (not including options or addresses).
 
-    swapbytes(IP_HDR_SWAP_SIZE,iphdr);
+    swapbytesiphdr(IP_HDR_SWAP_SIZE,iphdr);
 
 // Make sure datagram length computed from "Total Length" field of IP header
 // is consistent with length actually transferred from device.
@@ -1161,14 +1166,14 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 // Check if segment destination is local host
 
     //!!HACK!!// IP$ISME too slow?
-    if (ip$isme(iphdr->iph$dest, FALSE) > 0)
+    if (ip$isme(iphdr->iph$dest, FALSE) >= 0)
 	{
 	if ($$LOGF(LOG$IP))
 	    ip$log(ASCIDNOT("IPrecv"),iphdr);
 
 // If this packet is a fragment, then hand it to the reassembly code.
 
-	if (iphdr->iph$mf || (iphdr->iph$fragment_offset != 0))
+	if ((iphdr->iph$fragmentation_data&0x80000000) || (iphdr->iph$fragment_offset != 0))
 	  IP_FRAGMENT(iphdr,iplen,hdrlen,Buf,Buf_size);
 	else
 	    IP_DISPATCH(iphdr,iplen,hdrlen,Buf,Buf_size);
@@ -1190,7 +1195,7 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 
 // Now handle Store and Forward - look up destination of next hop
 
-	    dev = IP_ROUTE(iphdr->iph$dest,ip_src,newip_dest,0);
+	    dev = IP_ROUTE(&iphdr->iph$dest,&ip_src,&newip_dest,0);
 	    if (dev < 0)
 		{
 		IP_group_MIB->IPMIB$ipOutNoRoutes = 
@@ -1250,7 +1255,7 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 
 // Swap bytes and words in IP header
 
-	    swapbytes(IP_HDR_SWAP_SIZE,iphdr);
+	    swapbytesiphdr(IP_HDR_SWAP_SIZE,iphdr);
 
 // Put this datagram in net send queue
 
@@ -1290,7 +1295,7 @@ void IP_DISPATCH(iphdr,iplen,HDRLEN,BUF,BUFSIZE)
 
 // Calculate pointer & size of data
 
-    SEG = iphdr + HDRLEN;
+    SEG = (long)iphdr + HDRLEN;
     SEGSIZE = iplen - HDRLEN;
 
 // Dispatch according to protocol type
@@ -1378,7 +1383,7 @@ X:  {			// *** Block X ***
 
 // First fragment case. Flush old fragment and add this one.
 
-    if (iphdr->iph$mf && (iphdr->iph$fragment_offset == 0))
+    if ((iphdr->iph$fragmentation_data&0x80000000) && (iphdr->iph$fragment_offset == 0))
 	{
 	if (RAPTR != 0)
 	    {
@@ -1466,7 +1471,7 @@ Y:	{
 
 // Copy the MF bit to preserve it from Seg_Free
 
-	COPY_MF = iphdr->iph$mf;
+	COPY_MF = iphdr->iph$fragmentation_data&0x80000000;
 
 // Flush the buffer
 

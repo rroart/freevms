@@ -343,7 +343,7 @@ GET_HEX_BYTES(NUMBYT,CPTR,DEST)
     DPTR = CH$PTR(DEST,0);
     for (I=(NUMBYT-1);I>=0;I--)
 	{
-	if ((TCHR=GET_HEX_NUM(CPTR,CVAL)) < 0)
+	if ((TCHR=GET_HEX_NUM(CPTR,&CVAL)) < 0)
 	    return -1;
 	CH$WCHAR_A(CVAL,DPTR);
 	if (I != 0)
@@ -363,6 +363,8 @@ GET_HEX_NUM(INPTR,VAL)
 //   >=0 on success, returning the terminating character.
 // INPTR is updated to point to the termiating character.
 
+     long * INPTR;
+long * VAL;
     {
     signed long
     	CHR,RVAL,NCHR,CPTR;
@@ -387,13 +389,13 @@ GET_HEX_NUM(INPTR,VAL)
 		else
 		    break;
 	NCHR = NCHR+1;
-	RVAL = RVAL^4+VAL;
-	INPTR = CPTR;
+	RVAL = RVAL^4+*VAL;
+	*INPTR = CPTR;
 	CHR = CH$RCHAR_A(CPTR);
 	};
     if (NCHR == 0)
 	return -1;
-    VAL = RVAL;
+    *VAL = RVAL;
     return CHR;
     }
 
@@ -714,8 +716,8 @@ extern struct dsc$descriptor *	myname;
     signed long
 	MSGLEN,
       PTR;
-    struct dsc$descriptor *MSG;
-	struct _opcdef * MSGBUF ;
+    struct dsc$descriptor MSG_, *MSG=&MSG_;
+	struct _opcdef MSGBUF_, * MSGBUF=&MSGBUF_ ;
     char *MSGTEXT = &MSGBUF->opc$l_ms_text;
     signed long
 	NAMPTR = myname->dsc$a_pointer,
@@ -727,7 +729,7 @@ extern struct dsc$descriptor *	myname;
     Request_ID = Request_ID + 1;
     MSGLEN = TEXT->dsc$w_length;
     if (MSGLEN > MAXCHR)
-	MSGLEN = MAXCHR;
+      MSGLEN = MAXCHR; // check should be *MSGLEN ?
     CH$MOVE(MSGLEN,TEXT->dsc$a_pointer,MSGTEXT);
     MSG->dsc$w_length = 8+MSGLEN;
     MSG->dsc$b_class = DSC$K_CLASS_Z;

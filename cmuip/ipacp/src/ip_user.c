@@ -82,6 +82,10 @@ MODULE IP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 #include <ssdef.h>
 #include <descrip.h>
 
+#undef TCP_DATA_OFFSET
+#include <net/checksum.h>
+#define Calc_Checksum(x,y) ip_compute_csum(y,x)
+
 //*** Special literals from USER.BLI ***
 
 #define    UCB$Q_DDP  ucb$q_devdepend //check
@@ -104,7 +108,7 @@ extern signed long
 
 extern  void    swapbytes();
 extern  void    MOVBYT();
-extern     Calc_Checksum();
+//extern     Calc_Checksum();
 
 // MEMGR.BLI
 
@@ -206,7 +210,7 @@ void Log_IP_Packet(seg,SwapFlag,SendFlag)
     signed long
 	Header_Size,
 	segdata;
-	struct ip_structure * segcopy;
+	struct ip_structure segcopy_ ,* segcopy=&segcopy_;
 	struct ip_structure * seghdr;
 	struct dsc$descriptor sptr;
 
@@ -214,7 +218,7 @@ void Log_IP_Packet(seg,SwapFlag,SendFlag)
 
     seghdr = seg;		// Point at segment header
     Header_Size = seg->iph$ihl * 4;	// Calculate header size
-    segdata = seg + Header_Size;
+    segdata = (long)seg + Header_Size;
     if (SwapFlag)		// Need to byteswap header?
 	{
 	CH$MOVE(Header_Size,CH$PTR(seg,0),CH$PTR(segcopy,0)); // Make a copy
@@ -409,7 +413,7 @@ void Deliver_IP_Data(IPCB,QB,URQ)
 	ucount;
     struct user_recv_args * Uargs;
     struct user_recv_args * Sargs;
-  ipadr$address_block * Aptr ;
+  ipadr$address_block Aptr_, * Aptr = &Aptr_;
 	  struct ip_structure * Uptr;
 
 // Determine data start and data count
@@ -462,11 +466,11 @@ void Deliver_IP_Data(IPCB,QB,URQ)
 
 //SBTTL "IPCB_OK - Match connection ID to IPCB address"
 
-IPCB_OK(long Conn_ID,long RCaddr,struct user_default_args * Uargs)
+IPCB_OK(long Conn_ID,long * RCaddr,struct user_default_args * Uargs)
     {
 	struct IPCB_Structure * IPCB;
 
-#define	IPCBERR(EC) { RCaddr = EC; return 0;}
+#define	IPCBERR(EC) { *RCaddr = EC; return 0;}
 
 // Range check the connection id. This should never fail, since the user should
 // not be fondling connection IDs.
@@ -494,6 +498,7 @@ IPCB_OK(long Conn_ID,long RCaddr,struct user_default_args * Uargs)
 //SBTTL "IPCB_Get - Allocate and initialize one IPCB"
 
 IPCB_Get(IDX)
+     long * IDX;
     {
 extern	LIB$GET_VM();
 extern	LIB$GET_VM_PAGE();
@@ -537,7 +542,7 @@ X:  {			// ** Block X **
 
 // Return the pointer
 
-    IDX = IPCBIDX;
+    *IDX = IPCBIDX;
     return IPCB;
     }
 
@@ -675,7 +680,7 @@ void ipu$open(struct user_open_args * Uargs)
 
 // First create a IPCB for this connection.
 
-    if ((IPCB = IPCB_Get(UIDX)) <= 0)
+    if ((IPCB = IPCB_Get(&UIDX)) <= 0)
 	{
 	USER$Err(Uargs,NET$_UCT);
 	return;
@@ -755,7 +760,7 @@ void IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
     signed long
     RC;
     struct user_open_args * Uargs;
-	 netio_status_block * IOSB ;
+	 netio_status_block IOSB_, * IOSB = &IOSB_ ;
 #define	UOP_ERROR(EC) \
 	    { \
 	    USER$Err(Uargs,EC); \
@@ -850,7 +855,7 @@ struct IPCB_Structure * IPCB;
 
 // Check for valid IPCB
 
-    if ((IPCB = IPCB_OK(Uargs->cl$local_conn_id,RC,Uargs)) == 0)
+    if ((IPCB = IPCB_OK(Uargs->cl$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);
 	return;
@@ -879,7 +884,7 @@ void ipu$abort(struct user_abort_args * Uargs)
 
 // Check for valid IPCB
 
-    if ((IPCB = IPCB_OK(Uargs->ab$local_conn_id,RC,Uargs)) == 0)
+    if ((IPCB = IPCB_OK(Uargs->ab$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);
 	return;
@@ -917,7 +922,7 @@ void ipu$send(struct user_send_args * Uargs)
 
 // Validate connection ID and get IPCB pointer
 
-    if ((IPCB = IPCB_OK(Uargs->se$local_conn_id,RC,Uargs)) == 0)
+    if ((IPCB = IPCB_OK(Uargs->se$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// No such connection
 	return;
@@ -984,7 +989,7 @@ void ipu$send(struct user_send_args * Uargs)
 	// Send packet exactly as the client passed it.
 
 	// Re-arrange bytes and words in IP header
-	swapbytes ( IP_HDR_SWAP_SIZE , seg );
+	swapbytesiphdr ( IP_HDR_SWAP_SIZE , seg );
 
 	// Compute checksum for IP header
 	if (Flags&4)
@@ -1018,7 +1023,7 @@ void ipu$send(struct user_send_args * Uargs)
 
 
     if (LocalAddr == WILD)
-	IP$SET_HOSTS(1,ForeignAddr,LocalAddr,ForeignAddr);
+	IP$SET_HOSTS(1,&ForeignAddr,&LocalAddr,&ForeignAddr);
 
     if (Protocol == WILD)
 	Protocol = IPCB->ipcb$proto_filter;
@@ -1031,7 +1036,7 @@ void ipu$send(struct user_send_args * Uargs)
     IPIPID = IPIPID+1;	// Increment packet ID
     RC = SS$_NORMAL;
     if ((ip$send(LocalAddr,ForeignAddr,IPTOS,ipttl,
-		   seg + Uargs->se$ext2,USize,
+		   (long)seg + Uargs->se$ext2,USize,
 		   IPIPID,IPDF,TRUE,Protocol,
 		   Buf,bufsize) == 0)) RC = NET$_NRT;
 
@@ -1060,7 +1065,7 @@ void ipu$receive(struct user_recv_args * Uargs)
 
 // Validate connection ID and get IPCB pointer
 
-    if ((IPCB = IPCB_OK(Uargs->re$local_conn_id,RC,Uargs)) == 0)
+    if ((IPCB = IPCB_OK(Uargs->re$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// No such connection
 	return;
@@ -1120,7 +1125,7 @@ extern	user$net_connection_info ();
 
 // Validate the connection ID
 
-    if ((IPCB = IPCB_OK(Uargs->if$local_conn_id,RC,Uargs)) == 0)
+    if ((IPCB = IPCB_OK(Uargs->if$local_conn_id,&RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Bad connection ID
 	return;

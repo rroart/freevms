@@ -80,6 +80,10 @@ MODULE ICMP(IDENT="1.0B",LANGUAGE(BLISS32),
 
 #include <descrip.h>
 
+#undef TCP_DATA_OFFSET
+#include <net/checksum.h>
+#define Calc_Checksum(x,y) ip_compute_csum(y,x)
+
 // Memgr.bli
 extern     mm$seg_get();
 extern  void    mm$seg_free();
@@ -140,7 +144,7 @@ MACRO
 static signed long
     ICMHTB [ICM_HSHLEN]; // ICMP database hash table
 
-    struct ICMP_MIB_struct * icmp_mib ;	// ICMP Management Information Block
+    struct ICMP_MIB_struct icmp_mib_, * icmp_mib = &icmp_mib_ ;	// ICMP Management Information Block
 
 
 //SBTTL "ICMP routing code"
@@ -250,8 +254,8 @@ extern	icmp$user_input();
     // Keep count of incoming packets
     icmp_mib->MIB$icmpInMsgs = icmp_mib->MIB$icmpInMsgs + 1;
 
-    Sum = Calc_checksum(ICMlen,ICMptr);
-    if (Sum != 0xFFFF)
+    Sum = Calc_Checksum(ICMlen,ICMptr);
+    if (Sum != 0 /* was: 0xFFFF */)
 	{
 	icmp_mib->MIB$icmpInErrors = icmp_mib->MIB$icmpInErrors + 1;
 	if ($$LOGF(LOG$ICMP))
@@ -261,7 +265,7 @@ extern	icmp$user_input();
 	};
 
     // Fix-up the ICMP word ordering
-    swapbytes(ICMP_HEADER_SIZE/2,ICMptr);
+    swapbytesicmphdr(ICMP_HEADER_SIZE/2,ICMptr);
     ICMdat = 0;
     ICMtype = ICMptr->icm$type;
 
@@ -322,11 +326,11 @@ extern	icmp$user_input();
 		ptype,IPdat,IPhlen,IPlen,passup;
 	    passup = TRUE;
 	    IPhdr = ICMptr->icm$data;
-	    IPhlen = IPhdr->iph$swap_ihl*4;
+	    IPhlen = IPhdr->iph$ihl*4; // was: swap_ihl
 
 // Fix the byteswapped packet
 
-	    swapbytes(IP_HDR_SWAP_SIZE,IPhdr);
+	    swapbytesiphdr(IP_HDR_SWAP_SIZE,IPhdr);
 	    if ($$LOGF(LOG$ICMP))
 		ip$log(ASCID("ICMrcv/IP"),IPhdr);
 
@@ -362,7 +366,7 @@ extern	icmp$user_input();
 		icmp_mib->MIB$icmpInRedirects =
 			icmp_mib->MIB$icmpInRedirects + 1;
 
-		swapbytes(2,ICMptr->icm$r_gwy);
+		swapbytesicmphdr(2,ICMptr->icm$r_gwy);
 		ICMP_Add(ICMptr->icm$r_gwy,ICMptr->icm$data);
 		};
 		break;
@@ -575,7 +579,7 @@ void ICMP_Echo(ICMpkt,ICMlen,IPPKT,IPlen)
 
 // Swap the header bytes and compute the checksum
 
-    swapbytes(ICMP_HEADER_SIZE/2,Seg);
+    swapbytesicmphdr(ICMP_HEADER_SIZE/2,Seg);
     Seg->icm$cksum = Calc_Checksum(Segsize, Seg);
 
 // Send packet, preserving ID, TOS, TTL, etc.
@@ -680,7 +684,7 @@ void ICMP_Send_DUNR(ICMpkt,ICMlen,IPPKT,IPlen,code)
 
 // Swap the header bytes and compute the checksum
 
-    swapbytes(ICMP_HEADER_SIZE/2,Seg);
+    swapbytesicmphdr(ICMP_HEADER_SIZE/2,Seg);
     Seg->icm$cksum = Calc_Checksum(Segsize, Seg);
 
 // Send packet, preserving ID, TOS, TTL, etc.

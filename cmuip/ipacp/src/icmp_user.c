@@ -211,16 +211,16 @@ void Log_ICMP_Packet(Seg,SwapFlag,SendFlag)
 struct dsc$descriptor sptr;
     signed long
 	segdata;
-	struct icmp_header * segcopy;
+	struct icmp_header segcopy_ , * segcopy = &segcopy_;
 	struct icmp_header * seghdr;
 
     seghdr = Seg;		// Point at segment header
-    segdata = Seg + ICMP_HEADER_SIZE;
+    segdata = (long)Seg + ICMP_HEADER_SIZE;
     if (SwapFlag)		// Need to byteswap header?
 	{
 	CH$MOVE(ICMP_HEADER_SIZE,CH$PTR(Seg,0),CH$PTR(segcopy,0)); // Make a copy
 	seghdr = segcopy;	// Point at this version...
-	swapbytes(ICMP_HEADER_SIZE/2,seghdr); // Swap header bytes
+	swapbytesicmphdr(ICMP_HEADER_SIZE/2,seghdr); // Swap header bytes
 	};
 
 // Print first part of info
@@ -323,13 +323,13 @@ X:	{
 	    };
 
 	Buf2 = mm$seg_get(bufsize);	// Get a buffer
-	Seg = Buf2 + (Seg - Buf);
+	Seg = Buf2 + ((long)Seg - Buf);
 //!!HACK!!// There's no need to copy the whole buffer, only usize worth...
 	MOVBYT(bufsize,Buf,Buf2);
 
 // Setup pointer to ICMP data and ICMP data size
 
-	Uptr = Seg + ICMP_HEADER_SIZE;
+	Uptr = (long)Seg + ICMP_HEADER_SIZE;
 	Ucount = SegSize - ICMP_HEADER_SIZE;
 
 	    {
@@ -471,11 +471,11 @@ void Deliver_ICMP_Data(ICMPCB,QB,URQ)
 
 //SBTTL "ICMPCB_OK - Match connection ID to ICMPCB address"
 
-ICMPCB_OK(long Conn_ID,long RCaddr,struct user_default_args * uargs)
+ICMPCB_OK(long Conn_ID,long *RCaddr,struct user_default_args * uargs)
     {
 	struct ICMPCB_Structure * ICMPCB;
 
-#define	ICMPCBERR(EC) { RCaddr = EC; return 0;}
+#define	ICMPCBERR(EC) { *RCaddr = EC; return 0;}
 
 // Range check the connection id. This should never fail, since the user should
 // not be fondling connection IDs.
@@ -503,6 +503,7 @@ ICMPCB_OK(long Conn_ID,long RCaddr,struct user_default_args * uargs)
 //SBTTL "ICMPCB_Get - Allocate and initialize one ICMPCB"
 
 ICMPCB_Get(IDX)
+     long * IDX;
     {
 extern	LIB$GET_VM();
 extern	LIB$GET_VM_PAGE();
@@ -548,7 +549,7 @@ X:  {			// ** Block X **
 
 // Return the pointer
 
-    IDX = ICMPCBIDX;
+    *IDX = ICMPCBIDX;
     return ICMPCB;
     }
 
@@ -697,7 +698,7 @@ void icmp$open(struct user_open_args * uargs)
 
 // First create a ICMPCB for this connection.
 
-    if ((ICMPCB = ICMPCB_Get(UIDX)) <= 0)
+    if ((ICMPCB = ICMPCB_Get(&UIDX)) <= 0)
 	{
 	USER$Err(uargs,NET$_UCT);
 	return;
@@ -776,7 +777,7 @@ void ICMP_NMLOOK_DONE(ICMPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
     signed long
 	RC;
 	struct user_open_args * uargs;
-	netio_status_block * IOSB ;
+	netio_status_block IOSB_, * IOSB = &IOSB_;
 
 #define	UOP_ERROR(EC) \
 	    { \
@@ -836,8 +837,8 @@ ICMP_COPEN_DONE(ICMPCB,ADRCNT,ADRLST)
 // Set local and foreign host numbers according to our info
 
     if (ADRCNT > 0)
-	IP$SET_HOSTS(ADRCNT,ADRLST,ICMPCB->ICMPCB$Local_Host,
-		     ICMPCB->ICMPCB$Foreign_Host);
+	IP$SET_HOSTS(ADRCNT,ADRLST,&ICMPCB->ICMPCB$Local_Host,
+		     &ICMPCB->ICMPCB$Foreign_Host);
 
 // Done at last - log success
 
@@ -882,7 +883,7 @@ void icmp$close(struct user_close_args * uargs)
 
 // Check for valid ICMPCB
 
-    if ((ICMPCB = ICMPCB_OK(uargs->cl$local_conn_id,RC,uargs)) == 0)
+    if ((ICMPCB = ICMPCB_OK(uargs->cl$local_conn_id,&RC,uargs)) == 0)
 	{
 	USER$Err(uargs,RC);
 	return;
@@ -911,7 +912,7 @@ void icmp$abort(struct user_abort_args * uargs)
 
 // Check for valid ICMPCB
 
-    if ((ICMPCB = ICMPCB_OK(uargs->ab$local_conn_id,RC,uargs)) == 0)
+    if ((ICMPCB = ICMPCB_OK(uargs->ab$local_conn_id,&RC,uargs)) == 0)
 	{
 	USER$Err(uargs,RC);
 	return;
@@ -948,7 +949,7 @@ void icmp$send(struct user_send_args * uargs)
 
 // Validate connection ID and get ICMPCB pointer
 
-    if ((ICMPCB = ICMPCB_OK(uargs->se$local_conn_id,RC,uargs)) == 0)
+    if ((ICMPCB = ICMPCB_OK(uargs->se$local_conn_id,&RC,uargs)) == 0)
 	{
 	USER$Err(uargs,RC);	// No such connection
 	icmp_mib->MIB$icmpOutErrors =
@@ -988,7 +989,7 @@ void icmp$send(struct user_send_args * uargs)
 
     LocalAddr = ICMPCB->ICMPCB$Local_Host;
     if (LocalAddr == WILD)
-    IP$SET_HOSTS(1,ForeignAddr,LocalAddr,ForeignAddr);
+    IP$SET_HOSTS(1,&ForeignAddr,&LocalAddr,&ForeignAddr);
 
    if ((ForeignAddr == WILD))
 	{
@@ -1029,7 +1030,7 @@ void icmp$send(struct user_send_args * uargs)
 
 // Swap the header bytes and compute the checksum
 
-    swapbytes(ICMP_HEADER_SIZE/2,Seg);
+    swapbytesicmphdr(ICMP_HEADER_SIZE/2,Seg);
 //!!HACK!!// Hardwired in ICMP Header size of 8.
     Seg->icm$cksum=Calc_Checksum(usize+ICMP_HEADER_SIZE,Seg);
 
@@ -1115,7 +1116,7 @@ void icmp$receive(struct user_recv_args * uargs)
 
 // Validate connection ID and get ICMPCB pointer
 
-    if ((ICMPCB = ICMPCB_OK(uargs->re$local_conn_id,RC,uargs)) == 0)
+    if ((ICMPCB = ICMPCB_OK(uargs->re$local_conn_id,&RC,uargs)) == 0)
 	{
 	USER$Err(uargs,RC);	// No such connection
 	return;
@@ -1175,7 +1176,7 @@ extern	void user$net_connection_info();
 
 // Validate the connection ID
 
-    if ((ICMPCB = ICMPCB_OK(uargs->if$local_conn_id,RC,uargs)) == 0)
+    if ((ICMPCB = ICMPCB_OK(uargs->if$local_conn_id,&RC,uargs)) == 0)
 	{
 	USER$Err(uargs,RC);	// Bad connection ID
 	return;
