@@ -635,22 +635,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	      flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	    }
 
-	    {
-	      struct _acb * a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
-	      struct pfast * pf=kmalloc(sizeof(struct pfast),GFP_KERNEL);
-	      struct _rde * rde;
-	      pf->file=file;
-	      pf->address=address&0xfffff000;
-	      pf->offset=offset;
-	      pf->pte=pte;
-	      rde=mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
-	      pf->pteentry=rde->rde$r_regprot.regprt$l_region_prot;
-	      pf->rde=rde;
-	      bzero(a,sizeof(struct _acb));
-	      a->acb$l_ast=pagefaultast;
-	      a->acb$l_astprm=pf;
-	      sch$qast(current->pid,0,a);
-	    }
+	    makereadast(file,address,pte,offset);
 	    return;
 	  } else { // page file
 	  }
@@ -673,7 +658,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    struct _mypte * gpte = &gpt[index];
 
 	    if (gpte->pte$v_valid) {
-	      if (mypte->pte$v_typ1) { // global section, no pagefiling yet
+	      if (gpte->pte$v_typ1) { // global section, no pagefiling yet
 		*mypte=*gpte;
 		mypte->pte$v_global=0;	
 		mypte->pte$v_gblwrt=0;	
@@ -687,7 +672,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 
 	    } else {
 
-	      if (mypte->pte$v_typ1) { // global section, no pagefiling yet
+	      if (gpte->pte$v_typ1) { // global section, no pagefiling yet
 		unsigned long gptx=mypte->pte$v_gptx;
 		struct _mypte * gpte=&((struct _mypte *)mmg$gq_gpt_base)[gptx];
 		struct _secdef * pstl=((struct _phd *)mmg$gl_sysphd)->phd$l_pst_base_offset;
@@ -702,6 +687,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 		*mypte=*gpte;
 		mypte->pte$v_global=0;	
 		mypte->pte$v_gblwrt=0;	
+		*(unsigned long *)pte|=_PAGE_DIRTY;//collided with gblwrt
 		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 		makereadast(file,address,pte,offset);
 	      } else { // global zero
