@@ -731,7 +731,7 @@ unsigned long ioc$gl_cramh_blink;
 unsigned long ioc$gl_cramh_flink;
 unsigned long ioc$gl_cramh_pages;
 unsigned long ioc$gl_crbtmout;
-unsigned long ioc$gl_devlist;
+unsigned long ioc$gl_devlist; /* ddb liste */
 unsigned long ioc$gl_dptlist;
 unsigned long ioc$gl_dtn_list;
 unsigned long ioc$gl_du_cddb;
@@ -2042,6 +2042,7 @@ void __init vms_init2(void) {
   exe$gq_systime*=100;
   exe$gq_systime+=xtime.tv_sec;
   exe$gq_systime*=10000000;
-  
+
+  nl_init(); /* first */  
   rnd_init();
 }

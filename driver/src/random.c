@@ -80,9 +80,12 @@ void acp$writeblk();
 
 struct _dpt rnd_dpt;
 
+struct _ucb randomucb;
+
 void rnd_init(void) {
   struct _ucb * u;
-  u=vmalloc(sizeof(struct _ucb));
+  //  u=vmalloc(sizeof(struct _ucb));
+  u=&randomucb;
   bzero(u,sizeof(struct _ucb));
   u->ucb$b_type=DYN$C_UCB;
   u->ucb$b_flck=IPL$_IOLOCK8;

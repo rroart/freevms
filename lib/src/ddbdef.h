@@ -16,8 +16,10 @@
 struct _ddb {
   union  {
     int ddb$l_link;                 
+    int ddb$l_blink;                 
     struct  {
       struct _ddb *ddb$ps_link;   
+      struct _ddb *ddb$ps_blink;   
     };
   };
   union  {

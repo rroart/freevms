@@ -3,6 +3,8 @@
 #include"../../freevms/starlet/src/ssdef.h"
 #include"../../freevms/lib/src/irpdef.h"
 #include"../../freevms/lib/src/ucbdef.h"
+#include"../../freevms/lib/src/ddtdef.h"
+#include"../../freevms/lib/src/fdtdef.h"
 #include"../../freevms/sys/src/system_data_cells.h"
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
@@ -68,12 +70,14 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   i->irp$l_iosb=q->iosb;
   i->irp$w_chan=q->chan;
   i->irp$w_func=q->func;
+  i->irp$l_ucb=ctl$gl_ccbbase[q->chan].ccb$l_ucb;
+  i->irp$l_pid=current; /* wrong? */
   /* do preprocessing */
   /* does it do one or more functions */
   for(c=0,d=1;c<64;c++,d=d<1) /* right order? */
-    if (d&func) { }
-      //      ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[c](q->p1,q->p2,q->p3,q->p4,q->p5,q->p6);
-  
+    if (d&func) {
+      ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[c](q->p1,q->p2,q->p3,q->p4,q->p5,q->p6);
+    }
 }
 
 void exe$qioacppkt (void) {
