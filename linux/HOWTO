@@ -19,6 +19,10 @@ make download-linker
 make build-linker
 Then do make vmsall etc
 
+Bliss:
+make download-bliss
+make build-bliss
+
 No longer needed symlinks:
 UserMode Linux no longer needs the symlinks from /usr/include/{asm,linux}
 to the kernel build place.
