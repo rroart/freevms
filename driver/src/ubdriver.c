@@ -728,7 +728,7 @@ int ubd_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
 
   ubd_open_dev(&ubd_dev[unitno]);
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&ubd$ucb*/,&newucb);
-  exe$assign(&dsc,&chan,0,0,0);
+  exe$assign(dsc,&chan,0,0,0);
   registerdevchan(MKDEV(UBD_MAJOR,unitno),chan);
   ccb = &ctl$ga_ccb_table[chan];
   ccb->ccb$l_ucb->ucb$l_orb=ubd_dev[unitno].fd;
