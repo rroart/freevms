@@ -387,6 +387,7 @@ ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned lon
   //myidecount++;
   //printk(KERN_INFO "do_rw_disk %x %x %x\n",drive,rq,block);
   //printk(KERN_INFO "do_rw_disk %x %x %x\n",rq->nr_sectors,rq,block);
+  //{int i; for( i=1000000; i--; i); }
   HWGROUP(drive)->rq = rq;
 	if (IDE_CONTROL_REG)
 		OUT_BYTE(drive->ctl,IDE_CONTROL_REG);
