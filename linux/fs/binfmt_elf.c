@@ -696,8 +696,10 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 						    &interp_load_addr);
 
 		allow_write_access(interpreter);
+#ifndef CONFIG_MM_VMS
 		fput(interpreter);
 		kfree(elf_interpreter);
+#endif
 
 		if (BAD_ADDR(elf_entry)) {
 			printk(KERN_ERR "Unable to load interpreter\n");
