@@ -173,6 +173,7 @@ void vms_statfs(struct super_block * s, struct statfs * buf)
 {
 	struct statfs tmp;
 
+	bzero(&tmp,sizeof(tmp));
 /*	printk("vms_statfs\n"); /* XXX */
 	tmp.f_type = s->s_magic;
 	tmp.f_bsize = PAGE_SIZE;
