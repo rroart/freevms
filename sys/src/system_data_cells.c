@@ -7,7 +7,7 @@
 #include<system_data_cells.h>
 #include<dyndef.h>
 #include<queue.h>
-#include<rdtdef.h>
+#include<rddef.h>
 #include<cdtdef.h>
 
 /* Author: Roar Thronæs */
@@ -1923,8 +1923,8 @@ unsigned long lockidtbl[LOCKIDTBL];
 unsigned long lockmaxid;
 unsigned long locknxtid;
 
-struct _cdt cdtl[1024]; //scs$gw_cdtcnt];
-struct _rdt rdtl[128]; //[scs$gw_rdtcnt];
+struct _cdt cdtl[1024]; //[scs$gw_cdtcnt];
+struct _scs_rd rdtl[128]; //[scs$gw_rdtcnt];
 
 /* spinlocks */
 
