@@ -994,7 +994,7 @@ int e2_fcb_wcb_add_one(struct _fcb * fcb,signed long vbn,signed long result)
   struct _wcb * head=&fcb->fcb$l_wlfl;
   struct _wcb * tmp=head->wcb$l_wlfl;
   while (tmp!=head) {
-    if (vbn>=tmp->wcb$l_stvbn && vbn<=(tmp->wcb$l_stvbn+tmp->wcb$l_p1_count)) {
+    if (vbn>=tmp->wcb$l_stvbn && vbn<=(tmp->wcb$l_stvbn+tmp->wcb$l_p1_count) && result==(tmp->wcb$l_p1_lbn+tmp->wcb$l_p1_count)) {
       tmp->wcb$l_p1_count++;
       return SS$_NORMAL;
     }
