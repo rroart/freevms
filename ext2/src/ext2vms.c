@@ -577,7 +577,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     {
       struct files_struct * files = current->files;
       while (fd < files->max_fds) {
-	if (file == files->fd[fd]) break;
+	if (f == files->fd[fd]) break;
 	fd++;
       }
     }
