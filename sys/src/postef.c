@@ -1,6 +1,7 @@
 #include<linux/sched.h>
 #include<asm/bitops.h>
 #include"../../freevms/starlet/src/ssdef.h"
+#include"../../freevms/lib/src/cebdef.h"
 #include"../../freevms/lib/src/evtdef.h"
 #include"../../freevms/lib/src/ipldef.h"
 #include"../../freevms/sys/src/system_data_cells.h"
@@ -12,34 +13,65 @@ int waitcheck(struct _pcb *p, unsigned long priclass, unsigned long * efp, unsig
   tmp=(*clusteraddr)&~p->pcb$l_efwm;
   *clusteraddr&=~p->pcb$l_efwm;
   if (!tmp) return;
-  tmp=~(p->pcb$l_sts&(~PCB$M_WALL));
-  if (!tmp && tmp!=p->pcb$l_efwm) return;
+  // tmp=~(p->pcb$l_sts&(~PCB$M_WALL)); // what?
+  // if (!tmp && tmp!=p->pcb$l_efwm) return; // what?
+  sch$rse(p,priclass,EVT$_EVENT);
+}
+
+int waitcheck2(struct _pcb *p, unsigned long priclass, unsigned long * efp, unsigned long * clusteraddr) {
+  unsigned long tmp;
+  //  if (efp!=clusteraddr) return;
+  tmp=(*clusteraddr)&~p->pcb$l_efwm;
+  *clusteraddr&=~p->pcb$l_efwm;
+  if (!tmp) return;
+  //  tmp=~(p->pcb$l_sts&(~PCB$M_WALL)); // what?
+  // if (!tmp && tmp!=p->pcb$l_efwm) return; // what?
   sch$rse(p,priclass,EVT$_EVENT);
 }
 
 int sch$postef(unsigned long ipid, unsigned long priclass, unsigned long efn) {
   int savipl=vmslock(&SPIN_SCHED,IPL$_SYNCH);
-  struct _pcb * p;
-  int efncluster=(efn&224)>>5;
+  struct _pcb * p, * first;
+  int efncluster=getefcno(efn);
   int retval;
   unsigned long * clusteraddr;
   /* sched spinlock */
   p=find_process_by_pid(ipid);
   if (!p) return SS$_NONEXPR;
-  clusteraddr=&p->pcb$l_efcs+efncluster;
-#if 0
-  // replacing with bbssi
-  if ((*clusteraddr)&(~(1<<(efn&31))))
-    retval=SS$_WASSET;
-  else
-    retval=SS$_WASCLR;
-  (*clusteraddr)|=(1<<(efn&31));
-#endif
-  if (test_and_set_bit(efn&31,clusteraddr)) // bbssi
-    retval=SS$_WASSET;
-  else
-    retval=SS$_WASCLR;
-  waitcheck(p,priclass,&p->pcb$l_efcs+p->pcb$b_wefc,clusteraddr);
+  if (efn>127)
+    return SS$_ILLEFC;
+  clusteraddr=getefc(p,efn);
+  if (efncluster<2) {
+    if (test_and_set_bit(efn&31,clusteraddr)) // bbssi
+      retval=SS$_WASSET;
+    else
+      retval=SS$_WASCLR;
+    waitcheck(p,priclass,&p->pcb$l_efcs+p->pcb$b_wefc,clusteraddr);
+  } else {
+    struct _ceb * c=*(unsigned long *)getefcp(p,efn);
+    struct _pcb * tmp, *next;
+    if (!c) {
+      retval=SS$_UNASEFC;
+      goto end;
+    }
+
+    if (test_and_set_bit(efn&31,clusteraddr)) // bbssi
+      retval=SS$_WASSET;
+    else
+      retval=SS$_WASCLR;
+
+    if (retval=SS$_WASCLR) {
+      first=&c->ceb$l_wqfl;
+      tmp=first->pcb$l_sqfl;
+      while (first!=tmp) {
+	clusteraddr=getefc(tmp,efn);
+	next=tmp->pcb$l_sqfl;
+	waitcheck2(tmp,priclass,&tmp->pcb$l_efcs+tmp->pcb$b_wefc,clusteraddr);
+	tmp=next;
+      }
+    }
+  }
+ end:
   vmsunlock(&SPIN_SCHED,savipl);
   return retval;
 }
