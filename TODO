@@ -10,3 +10,17 @@ FIX pal
 better RMS compatibilty; check input and output RAB fields (incl l_sts)
 
 Logical support in the DCL and elsewhere
+
+Rewrite ide driver or make it use VMS data structures.
+
+Put RMS ifab/irab in P1.
+
+Fix CONFIG_VMS network drivers.
+
+Gcc 3.4.x compile
+
+Use 2 other cpu modes.
+
+Put ctl$gl_ccb_table in P1.
+
+Use correct interface to network module in CONFIG_VMS
