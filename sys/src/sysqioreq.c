@@ -76,6 +76,7 @@ int exe$insioq (struct _irp * i, struct _ucb * u) {
 
 asmlinkage int exe_qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
   struct struct_qio s;
+  //printk("in exe_qiow %x %x %x %x %x %x %x %x %x %x %x\n",efn,chan,func,iosb,astadr,astprm,p1,p2,p3,p4);
   s.efn=efn;
   s.chan=chan;
   s.func=func;
