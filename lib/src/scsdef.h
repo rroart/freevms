@@ -69,6 +69,10 @@ struct _scs {
 #define SCS$S_SCSDEF1 28
 	
 struct _scs1 {
+  unsigned long scs$l_lconid;
+  unsigned long scs$l_rspid;
+  unsigned long scs$l_xct_len;
+  unsigned long scs$l_snd_name;
   unsigned int scs$l_snd_boff;
   unsigned int scs$l_rec_name;
   unsigned int scs$l_rec_boff;
