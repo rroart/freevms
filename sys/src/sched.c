@@ -397,9 +397,41 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   return success;
 }
 
+static inline int try_to_wake_up2(struct task_struct * p, int synchronous, int priclass)
+{
+  unsigned long flags;
+  int success = 0;
+  unsigned long qhead;
+  int curpri;
+  int before,after;
+  int cpuid = smp_processor_id();
+  struct _cpu * cpu=smp$gl_cpu_data[cpuid];
+
+  spin_lock_irqsave(&runqueue_lock, flags);
+  if (task_on_comqueue(p)) /*  argh! */
+    goto out;
+
+  sch$chse2(p,priclass);
+
+  nr_running++;
+
+  if (!synchronous || !(p->cpus_allowed & (1 << smp_processor_id())))
+    reschedule_idle(p);
+  success = 1;
+
+ out:
+  spin_unlock_irqrestore(&runqueue_lock, flags);
+  return success;
+}
+
 inline int wake_up_process(struct task_struct * p)
 {
 	return try_to_wake_up(p, 0);
+}
+
+inline int wake_up_process2(struct task_struct * p,int priclass)
+{
+	return try_to_wake_up2(p, 0, priclass);
 }
 
 static void process_timeout(unsigned long __data)
@@ -858,6 +890,30 @@ static inline void __wake_up_common (wait_queue_head_t *q, unsigned int mode,
 	}
 }
 
+static inline void __wake_up_common2 (wait_queue_head_t *q, unsigned int mode,
+			 	     int nr_exclusive, const int sync, int priclass)
+{
+	struct list_head *tmp;
+	struct task_struct *p;
+
+	CHECK_MAGIC_WQHEAD(q);
+	WQ_CHECK_LIST_HEAD(&q->task_list);
+	
+	list_for_each(tmp,&q->task_list) {
+		unsigned int state;
+                wait_queue_t *curr = list_entry(tmp, wait_queue_t, task_list);
+
+		CHECK_MAGIC(curr->__magic);
+		p = curr->task;
+		state = p->state;
+		if (state & mode) {
+			WQ_NOTE_WAKER(curr);
+			if (try_to_wake_up2(p, sync, priclass) && (curr->flags&WQ_FLAG_EXCLUSIVE) && !--nr_exclusive)
+				break;
+		}
+	}
+}
+
 void __wake_up(wait_queue_head_t *q, unsigned int mode, int nr)
 {
 	if (q) {
@@ -889,6 +945,56 @@ void complete(struct completion *x)
 }
 
 void wait_for_completion(struct completion *x)
+{
+	spin_lock_irq(&x->wait.lock);
+	if (!x->done) {
+		DECLARE_WAITQUEUE(wait, current);
+
+		wait.flags |= WQ_FLAG_EXCLUSIVE;
+		__add_wait_queue_tail(&x->wait, &wait);
+		do {
+			__set_current_state(TASK_UNINTERRUPTIBLE);
+			spin_unlock_irq(&x->wait.lock);
+			schedule();
+			spin_lock_irq(&x->wait.lock);
+		} while (!x->done);
+		__remove_wait_queue(&x->wait, &wait);
+	}
+	x->done--;
+	spin_unlock_irq(&x->wait.lock);
+}
+
+void __wake_up2(wait_queue_head_t *q, unsigned int mode, int nr, int priclass)
+{
+	if (q) {
+		unsigned long flags;
+		wq_read_lock_irqsave(&q->lock, flags);
+		__wake_up_common2(q, mode, nr, 0, priclass);
+		wq_read_unlock_irqrestore(&q->lock, flags);
+	}
+}
+
+void __wake_up_sync2(wait_queue_head_t *q, unsigned int mode, int nr,int priclass)
+{
+	if (q) {
+		unsigned long flags;
+		wq_read_lock_irqsave(&q->lock, flags);
+		__wake_up_common2(q, mode, nr, 1, priclass);
+		wq_read_unlock_irqrestore(&q->lock, flags);
+	}
+}
+
+void complete2(struct completion *x,int priclass)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&x->wait.lock, flags);
+	x->done++;
+	__wake_up_common2(&x->wait, TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, 1, 0, priclass);
+	spin_unlock_irqrestore(&x->wait.lock, flags);
+}
+
+void wait_for_completion2(struct completion *x)
 {
 	spin_lock_irq(&x->wait.lock);
 	if (!x->done) {
@@ -1010,7 +1116,7 @@ asmlinkage long sys_nice(int increment)
 
 #endif
 
-static inline struct task_struct *find_process_by_pid(pid_t pid)
+inline struct task_struct *find_process_by_pid(pid_t pid)
 {
 	struct task_struct *tsk = current;
 
@@ -1465,5 +1571,5 @@ void __init sched_init(void)
   enter_lazy_tlb(&init_mm, current, cpu);
 }
 
-#include "../../freevms/sys/src/rse.c"
+// #include "../../freevms/sys/src/rse.c"
 

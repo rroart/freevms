@@ -206,6 +206,3 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
     write_unlock(&xtime_lock);
   }  
 }
-
-void sch$wait(void) {
-}

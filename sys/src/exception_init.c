@@ -1,7 +1,7 @@
 #include "../../freevms/starlet/src/ssdef.h"
 #include "../../freevms/starlet/src/misc.h"
 
-int exe$synch  (unsigned int efn, struct _iosb *iosb) {
+int exe$synch(unsigned int efn, struct _iosb *iosb) {
   if (!iosb) {
     exe$waitfr(efn);
     return SS$_NORMAL;
@@ -13,5 +13,6 @@ int exe$synch  (unsigned int efn, struct _iosb *iosb) {
   exe$waitfr(efn);
   if (iosb->iostat & 0xff)
     return iosb->iostat;
+  exe$clref(efn);
   goto again;
 }

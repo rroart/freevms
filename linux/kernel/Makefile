@@ -16,7 +16,8 @@ obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \
 	    sysctl.o acct.o capability.o ptrace.o timer.o user.o \
 	    signal.o sys.o kmod.o context.o \
 	    syssetpri.o system_data_cells.o ipl.o syspcntrl.o timeschdl.o \
-	    exception_init.o syswait.o exsubrout.o \
+	    exception_init.o syswait.o sysevtsrv.o rse.o exsubrout.o \
+	    iociopost.o postef.o \
 	    ../../freevms/pal/src/libqueue.a
 
 obj-$(CONFIG_UID16) += uid16.o

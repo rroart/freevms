@@ -513,6 +513,12 @@ ENTRY(timer_vector)
         POPR_ALL
         iret
 
+ENTRY(iopost_vector)
+        PUSHR_ALL
+        call SYMBOL_NAME(ioc$iopost)
+        POPR_ALL
+        iret
+
 .data
 ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_ni_syscall)	/* 0  -  old "setup()" system call*/

@@ -7,6 +7,7 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   struct _pcb * p=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;
   int efncluster=(efn&224)>>5;
   unsigned long * clusteraddr;
+  struct _wqh * wq;
   /* ipl 2*/
   /* no legal check yet */
   clusteraddr=&p->pcb$l_efcs+efncluster;
@@ -15,6 +16,7 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   /* not impl */
   return;
  notcommon:
+  wq=sch$gq_lefwq;
   /* lock sched */
 
   if (mask & *clusteraddr) {
@@ -25,11 +27,10 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
 
   if (waitallflag) {
     p->pcb$l_sts|=PCB$M_WALL;
+    p->pcb$l_efwm&=~mask;
   }
 
-  /* not implemented */
-
-  sch$wait();
+  sch$wait(p,wq);
   return SS$_NORMAL;
 }
 

@@ -10,6 +10,7 @@
 #include"../../freevms/lib/src/evtdef.h"
 #include"../../freevms/lib/src/statedef.h"
 #include"../../freevms/lib/src/cpudef.h"
+#include"../../freevms/sys/src/system_data_cells.h"
 
 extern int mydebug;
 
@@ -73,7 +74,7 @@ int sch$pixscan(void) {
   tmppri--;
   
   //printk("pri %x|",tmppri);
-
+  goto out; /* not this yet */
   for(i=30;i>tmppri,scanned;i--) {
     tmp=sch$aq_comh[i];
     if(*(unsigned long *)tmp == tmp) {; } else {
@@ -100,6 +101,31 @@ int sch$pixscan(void) {
     return;
 }
 
+void sch$chsep(struct _pcb * p,unsigned char newpri) {
+  struct _pcb * p2, *p3 , *dummy;
+  p3=p->pcb$l_sqfl;
+  p2=remque(p,dummy);
+  if (p3==p3->pcb$l_sqfl) {
+      if (p2->pcb$w_state==SCH$C_COM) {
+	sch$gl_comqs&=(~(1 << p2->pcb$b_pri));
+      } else if (p2->pcb$w_state==SCH$C_COMO) {
+	sch$gl_comoqs&=(~(1 << p2->pcb$b_pri));
+      }
+  }
+  p->pcb$b_pri=newpri;
+  if (!(p->pcb$l_sts & PCB$M_RES)) {
+    sch$swpwake();
+    p2->pcb$w_state=SCH$C_COMO;
+    insque(p2,sch$aq_comot[newpri]);
+    sch$gl_comoqs|=(1 << newpri);
+    return;
+  }
+  SOFTINT_RESCHED_VECTOR;
+  p2->pcb$w_state=SCH$C_COM;
+  insque(p2,sch$aq_comt[newpri]);
+  sch$gl_comqs|=(1 << newpri);
+}
+
 // need more statequeues before sch$chse*
   void sch$chse(struct _pcb * p, unsigned char class) {
     unsigned char pri=0,newpri;
@@ -123,18 +149,14 @@ int sch$pixscan(void) {
       break;
     }
     newpri=p->pcb$b_prib-pri;
-    if (newpri<p->pcb$b_pri) p->pcb$b_pri=newpri;
-    if (p->pcb$b_pri<16) p->pcb$b_pri=16;
-  }
-
-  void sch$chsep(struct _pcb * p,unsigned char newpri) {
-    p->pcb$b_pri=newpri;
-    if (p->pcb$b_pri<16) p->pcb$b_pri=16;
+    if (newpri>p->pcb$b_pri) newpri=p->pcb$b_pri;
+    if (p->pcb$b_pri<16) p->pcb$b_pri=p->pcb$b_prib;
+    sch$chsep(p,newpri);
   }
 
 void sch$wake(unsigned long pid) {
   struct _pcb * p=find_process_by_pid(pid);
-  p->pcb$l_sts &= PCB$M_WAKEPEN;
+  p->pcb$l_sts |= PCB$M_WAKEPEN;
   sch$rse(p,PRI$_RESAVL,EVT$_WAKE);
 }
 
@@ -152,12 +174,59 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
   struct _pcb *p2;
 
   switch (event) {
+  case EVT$_AST:
+    switch (p->pcb$w_state) {
+    case SCH$C_SUSP:
+    case SCH$C_SUSPO:
+    case SCH$C_COM:
+    case SCH$C_COMO:
+    case SCH$C_CUR:
+      break;
+    default:
+      goto ast;
+    }
+
+  case EVT$_EVENT: {
+    if (p->pcb$w_state==SCH$C_LEF) goto event;
+    if (p->pcb$w_state==SCH$C_CEF) goto cef;
+    if (p->pcb$w_state==SCH$C_LEFO) goto lefo;
+  }
+
+  case EVT$_CEF: {
+    if (p->pcb$w_state==SCH$C_CEF) goto cef;
+    if (p->pcb$w_state==SCH$C_LEFO) goto lefo;
+  }
+
+  case EVT$_LEFO:
+    if (p->pcb$w_state==SCH$C_LEFO) goto lefo;
+
+  case EVT$_FPGA:
+    if (p->pcb$w_state==SCH$C_FPG) goto fpga;
+
   case EVT$_WAKE:
     switch (p->pcb$w_state) {
     case SCH$C_HIB:
     case SCH$C_HIBO:
       goto wake;
     }     
+
+  case EVT$_RESUME:
+    switch (p->pcb$w_state) {
+    case SCH$C_SUSP:
+    case SCH$C_SUSPO:
+      goto resume;
+    }
+
+  case EVT$_PFCOM:
+    if (p->pcb$w_state==SCH$C_PFW) goto pfcom;
+
+  case EVT$_SETPRI:
+    switch (p->pcb$w_state) {
+    case SCH$C_COM:
+    case SCH$C_COMO:
+      goto setpri;
+    }
+
   case EVT$_SWPOUT:
     switch (p->pcb$w_state) {
     case SCH$C_COM:
@@ -166,21 +235,33 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
     case SCH$C_SUSP:
       goto swpout;
     }
-  case EVT$_AST:
-    switch (p->pcb$w_state) {
-    case SCH$C_SUSP:
-    case SCH$C_SUSPO:
-    case SCH$C_COM:
-    case SCH$C_COMO:
-    case SCH$C_CUR:
-      return;
-    default:
-      goto ast;
-    }
   }
+
+  /* bugcheck */
   return;
 
+ cef:
+  if (!(p->pcb$l_sts & PCB$M_RES)) goto lefo;
+ event:
+  /* add stuff to pc no use here */
+  goto lefo;
+
+ lefo:
+  goto common;
+
+ ast:
+ colpga:
+ fpga:
  wake:
+ resume:
+ pfcom:
+ setpri:
+
+ common:
+  //  p2=remque(p,dummy);
+  //  sch$aq_wqhdr[p->pcb$w_state].wqh$l_wqcnt--;
+  p->pcb$l_onqtime+=(exe$gl_abstim_tics-p->pcb$l_waitime);
+    sch$chse(p,class);
   return;
 
  swpout:
@@ -203,10 +284,6 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
     insque(p,qhead);
   }
   return;
-
- ast:
-  return;
-
 }
 
 void sch$change_cur_priority(struct _pcb *p, unsigned char newpri) {
@@ -229,3 +306,88 @@ void sch$change_cur_priority(struct _pcb *p, unsigned char newpri) {
 void sch$one_sec(void) {
   sch$pixscan();
     }
+
+int sch$waitm(struct _pcb * p, struct _wqh * wq) {
+  /* do no phd stuff yet */
+  p->pcb$l_waitime=exe$gl_abstim_tics;
+  /* check queued ast */
+  if (p->phd$b_astlvl==4)
+    sch$sched(0);
+  sch$sched(0); /* do it anyway until asts are implemented */
+  /* check psl and ast stuff */
+  sch$rse(p,PRI$_NULL,EVT$_AST);
+  sch$sched(0);
+}
+
+int sch$waitl(struct _pcb * p, struct _wqh * wq) {
+  /* do a svpctx ? */
+  return sch$waitm(p,wq);
+}
+
+int sch$waitk(struct _pcb * p, struct _wqh * wq) {
+  p->pcb$w_state=wq->wqh$l_wqstate;
+  insque(p,wq->wqh$l_wqfl);
+  wq->wqh$l_wqcnt++;
+  return sch$waitl(p,wq);
+}
+
+int sch$wait(struct _pcb * p, struct _wqh * wq) {
+  /* remove call frame etc ? */
+  return sch$waitk(p,wq);
+}
+
+void sch$chsep2(struct _pcb * p,unsigned char newpri) {
+  struct _pcb * p2, *p3 , *dummy;
+  p3=p->pcb$l_sqfl;
+  p2=p;
+  if (p3==p3->pcb$l_sqfl) {
+      if (p2->state==TASK_RUNNING) {
+	sch$gl_comqs&=(~(1 << p2->pcb$b_pri));
+      } else if (p2->pcb$w_state==SCH$C_COMO) {
+	sch$gl_comoqs&=(~(1 << p2->pcb$b_pri));
+      }
+  }
+  p->pcb$b_pri=newpri;
+  /*
+  if (!(p->pcb$l_sts & PCB$M_RES)) {
+    sch$swpwake();
+    p2->pcb$w_state=SCH$C_COMO;
+    insque(p2,sch$aq_comot[newpri]);
+    sch$gl_comoqs|=(1 << newpri);
+    return;
+  }
+  */
+  SOFTINT_RESCHED_VECTOR;
+  p2->state=TASK_RUNNING;
+  insque(p2,sch$aq_comt[newpri]);
+  sch$gl_comqs|=(1 << newpri);
+}
+
+// need more statequeues before sch$chse*
+  void sch$chse2(struct _pcb * p, unsigned char class) {
+    unsigned char pri=0,newpri;
+
+    switch (class) {
+    case PRI$_NULL:
+      pri=0;
+      break;
+    case PRI$_IOCOM:
+      pri=2;
+      break;
+    case PRI$_TIMER:
+    case PRI$_RESAVL:
+      pri=3;
+      break;
+    case PRI$_TOCOM:
+      pri=4;
+      break;
+    case PRI$_TICOM:
+      pri=6;
+      break;
+    }
+    newpri=p->pcb$b_prib-pri;
+    if (newpri>p->pcb$b_pri) newpri=p->pcb$b_pri;
+    if (p->pcb$b_pri<16) p->pcb$b_pri=p->pcb$b_prib;
+    sch$chsep2(p,newpri);
+  }
+

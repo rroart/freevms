@@ -90,6 +90,7 @@ asmlinkage void test_code(void);
 asmlinkage void sched_vector(void);
 asmlinkage void resched_vector(void);
 asmlinkage void timer_vector(void);
+asmlinkage void iopost_vector(void);
 
 int kstack_depth_to_print = 24;
 
@@ -955,6 +956,7 @@ void __init trap_init(void)
 		set_intr_gate(SCHED_VECTOR,&sched_vector);
 		set_intr_gate(RESCHED_VECTOR,&resched_vector);
 		set_intr_gate(TIMER_VECTOR,&timer_vector);
+		set_intr_gate(IOPOST_VECTOR,&iopost_vector);
 
 	/*
 	 * default LDT is a single-entry callgate to lcall7 for iBCS

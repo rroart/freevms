@@ -1,5 +1,5 @@
-#ifndef lnm_h
-#define lnm_h
+#ifndef lnmstrdef_h
+#define lnmstrdef_h
 
 /* Author: Roar Thronæs */
 
@@ -21,8 +21,8 @@
 #define LNM$C_TABLE 0x82	/* for use with lnmx index */
 
 #ifndef USERLAND
-#define lnmmalloc kmalloc
-#define lnmfree kfree
+#define lnmmalloc vmalloc
+#define lnmfree vfree
 #else
 #define lnmmalloc malloc
 #define lnmfree free

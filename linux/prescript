@@ -12,7 +12,10 @@ done
 		ln -s ../../freevms/sys/src/timeschdl.c .;
 		ln -s ../../freevms/sys/src/exsubrout.c .;
 		ln -s ../../freevms/sys/src/syswait.c .;
+		ln -s ../../freevms/sys/src/sysevtsrv.c .;
 		ln -s ../../freevms/sys/src/exception_init.c .;
+		ln -s ../../freevms/sys/src/postef.c .;
+		ln -s ../../freevms/sys/src/iociopost.c .;
 		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
 )
 

@@ -511,6 +511,14 @@ unsigned long pcb$l_capability_seq;
 
 /* journalling filesystem info */
 	void *journal_info;
+  // more phd
+  unsigned long long phd$q_privmsk;
+  unsigned short phd$w_size;
+  unsigned char phd$b_type;
+  unsigned char phd$b_spare_1;
+  unsigned long pdg$l_pcb;
+  unsigned char phd$b_astlvl;
+  unsigned short phd$w_flags;
 };
 /* will need a PCB. PCB is a null PCB placeholder */
 
