@@ -23,3 +23,12 @@ Go to /usr/src/freevms and do a make (if uml, see Makefiles for how to compile)
 (Sorry, got no make install yet)
 
 Go back and make the kernel.
+
+NOTE:
+See BUGS regarding uml
+
+NOTE on kernel config:
+VMS MM works only on uml
+VMS IO works so far only on blockdevices, and the only blockdevices supported
+is the uml "harddisk" and on i386 only ide (booted only on bochs and may
+not work with all fs blocksizes).
