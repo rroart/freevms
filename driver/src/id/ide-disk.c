@@ -231,6 +231,8 @@ static ide_startstop_t write_intr (ide_drive_t *drive)
 			if (i > 0) {
 				idedisk_output_data (drive, rq->buffer, SECTOR_WORDS);
 				ide_set_handler (drive, &write_intr, WAIT_CMD, NULL);
+				ioc$reqcom(SS$_NORMAL,0,ideu);
+				kfree(rq);
                                 return ide_started;
 			}
                         return ide_stopped;
