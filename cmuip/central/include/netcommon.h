@@ -342,6 +342,7 @@ typedef struct {
 /* Dump list of udpCB's */
 
 #define D$UDP_LIST_BLKSIZE	MAX_UDPCB*4	/* byte size. */
+
 typedef
     ulong D$UDP_LIST_RETURN_BLK[D$UDP_LIST_BLKSIZE/4];
 
@@ -367,6 +368,8 @@ typedef struct {
 	};
     ulong du$udpcb_user_id;		/* Owning process */
     } d$udpcb_dump_return_blk;
+
+#define  D$DEV_DUMP_BLKSIZE sizeof(d$udpcb_dump_return_blk) 
 
 /* Dump list of ICMPCB's */
 
@@ -443,6 +446,7 @@ typedef struct {
     uchar du$arp_hwaddr[MAX_ARP_HDW_LEN]; /* Physical address */
     } d$arp_dump_return_blk_entry;
 
+#define D$ARP_DUMP_BLKSIZE    sizeof(d$arp_dump_return_blk_entry)
 #define D$ARP_DUMP_MAXBLKSIZE 512	/* Max size of block */
 #define D$ARP_DUMP_MAXBLK (D$ARP_DUMP_MAXBLKSIZE/sizeof(D$ARP_DUMP_RETURN_BLK_ENTRY))
 

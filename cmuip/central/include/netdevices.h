@@ -45,14 +45,14 @@
 #define DRV$IP_ISME (IPACP_Interface->ACPI$IP_ISME)
 
 /* Wake up the Big Guy */
-#define DRV$ACPWAKE() \
+#define DRV$ACPWAKE \
 	{ \
-	if (*(IPACP_Interface->ACPI$SLEEPING) == 1) then \
+	if (*(IPACP_Interface->ACPI$Sleeping) == 1) \
 	    { \
-	    extern SYS$WAKE; \
+	    extern sys$wake(); \
 	     \
-	    IPACP_Interface->ACPI$SLEEPING = FALSE; \
-	    SYS$WAKE(); \
+	    IPACP_Interface->ACPI$Sleeping = FALSE; \
+	    sys$wake(); \
 	    } \
 	}
 
@@ -83,7 +83,7 @@
 */
 
    /* Conditionally do something according to LOG_STATE flags */
-#define $$LOGF(LOGF) (((*IPACP_Interface->ACPI$LOG_STATE) & (LOGF)) != 0)
+#define $$LOGF(LOGF) (((*IPACP_Interface->ACPI$LOG_STATE) && (LOGF)) != 0)
 
     /* Write a message to the IPACP log file. */
 /*#define DRV$LOG_FAO (.IPACP_Interface[ACPI$LOG_FAO]) */

@@ -82,16 +82,16 @@ typedef struct {
     ulong	*dc_Send_Qhead;
     ulong	*dc_send_Qtail;
 
-    /* dc_flags		= [$Long_Integer], */
+  ulong  dc_flags;
     unsigned	dc_valid_device:1;
-    unsigned	dc_Online:1;
-    unsigned	dc_unused1:1;
+    unsigned	dc_online:1;
+    unsigned	dc_is_clone:1;
 
   unsigned long int dc_clone_dev;
 
     /* MIB data */
     ulong	dcmib_ifIndex;		/* Interface index number */
-    quadword	dcmib_ifDescr;		/* Interface description string
+  quadword	dcmib_ifDescr;		/* Interface description string */
     ulong	dcmib_ifType;		/* device type */
     ulong	dcmib_ifMTU;		/* Max Transfer Unit */
     ulong	dcmib_ifSpeed;		/* Bandwidth (bits/second) */
@@ -107,7 +107,7 @@ typedef struct {
     ulong	dcmib_ifInErrors;	/* bad and discarded */
     ulong	dcmib_ifInUnknownProtos;/* Unknown protocol fields */
     ulong	dcmib_ifOutOctets;	/*  */
-    ulong	dcmib_ifOutUcastPkt;	/*  */
+    ulong	dcmib_ifOutUcastPkts;	/*  */
     ulong	dcmib_ifOutNUcastPkts;	/*  */
     ulong	dcmib_ifOutDiscards;	/*  */
     ulong	dcmib_ifOutErrors;	/*  */

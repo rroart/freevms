@@ -232,16 +232,23 @@ MODULE CONFIG(IDENT="6.6",ZIP,OPTIMIZE,
 #include	<starlet.h>	// VMS system definitions
      // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// String descriptor stuff
 #include "netvms.h"		// Special VMS definitions
-#include "STRUCTURE";	// Data structures
-#include	"TCPMACROS";	// ACP-wide macros
-#include "SNMP";		// MIB definitions
-#include "CMUIP_SRC:[CENTRAL]NETCOMMON"; // Common Defs
-#include "CMUIP_SRC:[CENTRAL]NETCONFIG"; // Device configuration defs
+#include "structure.h"	// Data structures
+#include	"tcpmacros.h"	// ACP-wide macros
+#include "snmp.h"		// MIB definitions
+#include <cmuip/central/include/netcommon.h> // Common Defs
+#include <cmuip/central/include/netconfig.h> // Device configuration defs
 
-extern
+#include <ssdef.h>
+#include <descrip.h>
+#include <fabdef.h>
+#include <rabdef.h>
+#include <prcdef.h>
+#include <prvdef.h>
+#include <pqldef.h>
+
 extern  void    OPR_FAO();
 extern  void    SEND_2_OPERATOR();
-extern     LIB$GET_VM : ADDRESSING_MODE(GENERAL)();
+extern     LIB$GET_VM ();
 extern  void    SWAPBYTES();
 extern     GET_IP_ADDR();
 extern     GET_DEC_NUM();
@@ -250,42 +257,54 @@ extern     GET_HEX_NUM();
 extern  void    ASCII_DEC_BYTES();
 extern  void    ASCII_HEX_BYTES();
 
-MACRO
+#define CH$PTR(X) ((long)X+1)
+#define CH$RCHAR(X) *(((char *)X)++) // check or ++ char?
+#define CH$PLUS(X,Y) ((long)X+(long)Y)
+#define CH$WCHAR_A(X,Y) *(char*)Y=X
+ 
+#if 0
     STR[] = CH$PTR(UPLIT(%ASCIZ %STRING(%REMAINING))) %,
     STRMOVE(THESTR,DPTR) =		// Strmove - STRMOVE(STRING,BP)
-	CH$MOVE(%CHARCOUNT(THESTR),STR(THESTR),DPTR) %,
+	CH$MOVE(sizeof(THESTR),STR(THESTR),DPTR) %,
     STREQL(THESTR,LITSTR) =		// Compare to literal string
-	CH$EQL(%CHARCOUNT(LITSTR),STR(LITSTR),%CHARCOUNT(LITSTR),THESTR) %,
-    STREQLZ(THESTR,LITSTR) =		// Compare to literal string (ASCIZ)
-	CH$EQL(%CHARCOUNT(LITSTR)+1,STR(LITSTR),%CHARCOUNT(LITSTR)+1,THESTR) %;
+	CH$EQL(sizeof(LITSTR),STR(LITSTR),sizeof(LITSTR),THESTR) %,
+#endif
+#define    STREQLZ(THESTR,LITSTR) 	/* Compare to literal string (ASCIZ) */ \
+	(0==strncmp(THESTR,LITSTR,sizeof(LITSTR))) // or other, or min/max?
 
-MACRO
-    Init_DynDesc (D)
-	{
-	$BBLOCK [D, dsc$w_length]	= 0;
-	$BBLOCK [D, dsc$b_dtype]	= DSC$K_DTYPE_T;
-	$BBLOCK [D, dsc$b_class]	= DSC$K_CLASS_D;
-	$BBLOCK [D, dsc$a_pointer]	= 0;
-	}%;
+#if 0
+	CH$EQL(sizeof(LITSTR)+1,STR(LITSTR),sizeof(LITSTR)+1,THESTR)
+#endif
+
+#define    Init_DynDesc (D) \
+	D = { \
+	dsc$w_length : 0, \
+	dsc$b_dtype : DSC$K_DTYPE_T, \
+	dsc$b_class :  DSC$K_CLASS_D, \
+	dsc$a_pointer : 0 \
+	};
 
 
 // Module-wide definitions
 
-LITERAL
-    RECLEN = 512,
-    STRLEN = 128,
-    STRSIZ = CH$ALLOCATION(STRLEN);
+#define     RECLEN   512
+#define     STRLEN   128
+#define     STRSIZ   CH$ALLOCATION(STRLEN)
 
 // Define file reading blocks
 
+static char     CFBUF [RECLEN];
+
 static signed long
-    LINPTR,
-    LINLEN,
-    CFBUF : VECTOR[RECLEN,BYTE],
-    CFFAB : $FAB(FNM = "INET$CONFIG"),
-    CFRAB : $RAB(FAB = CFFAB,
-		 UBF = CFBUF,
-		 USZ = %ALLOCATION(CFBUF));
+    linptr,
+  linlen;
+
+static struct _fabdef    CFFAB_ = { fab$l_fna : "INET$CONFIG" }; // check was fnm
+static struct _fabdef * CFFAB = & CFFAB_;
+static struct _rabdef    CFRAB_ = { rab$l_fab : &CFFAB_,
+			    rab$l_ubf : CFBUF,
+			    rab$w_usz : RECLEN }; // check
+static struct _rabdef * CFRAB = & CFRAB_;
 
  void    CONFIG_ERR();
  void    Init_Device();
@@ -313,14 +332,14 @@ static signed long
 // at run-time.  See NETCONFIG.REQ for a complete explaination of
 // this structure.
 
-    struct IPACP_Info_Structure * IPACP_Int;
+ IPACP_Info_Structure * IPACP_Int;
 
 // N.B. : make sure everything that needs to be defined, like the
 // MAX_Physical_BufSize, *is* defined by the time this routine is called...
 
 CNF$Define_IPACP_Interface (void)
     {
-    externAL
+    extern
 	// pointer to IPACP AST_in_progress flag (from MAIN.BLI)
 	AST_in_progress,
 	// IPACP nap control (from MAIN.BLI)
@@ -356,41 +375,41 @@ extern 	void ERROR_FAO();
 extern 	void FATAL_FAO();
 
     // IAPCP receive callback.
-    IPACP_Int [ ACPI$IP_Receive ]	= IP$Receive;
+    IPACP_Int ->  ACPI$IP_Receive 	= IP$Receive;
 
     // pointer to IPACP sleeping flag
-    IPACP_Int [ ACPI$Sleeping ] 	= Sleeping;
+    IPACP_Int ->  ACPI$Sleeping  	= Sleeping;
 
     // pointer to IPACP AST_in_progress flag
-    IPACP_Int [ ACPI$AST_in_progress ] 	= AST_in_progress;
+    IPACP_Int ->  ACPI$AST_in_progress  	= AST_in_progress;
 
     // Interrupt blocking routines
-    IPACP_Int [ ACPI$NOINT ]		= MAIN$NOINT;
-    IPACP_Int [ ACPI$OKINT ]		= MAIN$OKINT;
+    IPACP_Int ->  ACPI$NOINT 		= MAIN$NOINT;
+    IPACP_Int ->  ACPI$OKINT 		= MAIN$OKINT;
 
     // Error reporting routines
-    IPACP_Int [ ACPI$Device_Error ]	= CNF$Device_Error;
+    IPACP_Int ->  ACPI$Device_Error 	= CNF$Device_Error;
 
     // IPACP self-address recognition
-    IPACP_Int [ ACPI$IP_ISME ]		= IP$ISME;
+    IPACP_Int ->  ACPI$IP_ISME 		= IP$ISME;
 
     // Memory allocation routines
-    IPACP_Int [ ACPI$Seg_Get ]		= MM$Seg_Get;
-    IPACP_Int [ ACPI$Seg_Free ]		= MM$Seg_Free;
-    IPACP_Int [ ACPI$QBlk_Free ]	= MM$QBlk_Free;
+    IPACP_Int ->  ACPI$Seg_Get 		= MM$Seg_Get;
+    IPACP_Int ->  ACPI$Seg_Free 		= MM$Seg_Free;
+    IPACP_Int ->  ACPI$QBlk_Free 	= MM$QBlk_Free;
 
     // Provide event logging entry points
-    IPACP_Int [ ACPI$LOG_STATE ]	= LOG_STATE;	// pointer
-    IPACP_Int [ ACPI$LOG_FAO ]		= LOG_FAO;
-    IPACP_Int [ ACPI$QL_FAO ]		= QL_FAO;
-    IPACP_Int [ ACPI$OPR_FAO ]		= OPR_FAO;
-    IPACP_Int [ ACPI$ERROR_FAO ]	= ERROR_FAO;
-    IPACP_Int [ ACPI$FATAL_FAO ]	= FATAL_FAO;
+    IPACP_Int ->  ACPI$LOG_STATE 	= LOG_STATE;	// pointer
+    IPACP_Int ->  ACPI$LOG_FAO 		= LOG_FAO;
+    IPACP_Int ->  ACPI$QL_FAO 		= QL_FAO;
+    IPACP_Int ->  ACPI$OPR_FAO 		= OPR_FAO;
+    IPACP_Int ->  ACPI$ERROR_FAO 	= ERROR_FAO;
+    IPACP_Int ->  ACPI$FATAL_FAO 	= FATAL_FAO;
 
     // IPACP max physical buffer size
-    IPACP_Int [ ACPI$MPBS ] 		= MAX_PHYSICAL_BUFSIZE;
+    IPACP_Int ->  ACPI$MPBS  		= MAX_PHYSICAL_BUFSIZE;
 
-    IPACP_Int
+    return IPACP_Int;
     }
 
 
@@ -401,7 +420,7 @@ extern 	void FATAL_FAO();
 
 void Init_Vars (void)
     {
-    externAL
+    extern
 	struct IP_group_MIB_struct * IP_group_MIB;
 
     IP_group_MIB->IPMIB$ipForwarding = 2;	// Just a host, no forwarding
@@ -430,63 +449,63 @@ void No_Check(ndx)
     }
 
 static signed long
-    DEV_Attn;
+    dev_attn;
 
 // gotta declare this PSect on the quad boundary so-as we can use
 // self relative queue instructions on it...
 
+#if 0
 PSECT
     GLOBAL = quads(ALIGN(3));
+#endif
 
 signed long
-    DEV_Config_Tab: Device_Configuration_Table PSECT(quads) ALIGN(3),
-    DEV_Count;
+    dev_count;
+Device_Configuration_Entry * dev_config_tab; /* check PSECT(quads) ALIGN(3), */
 
 
 
 CNF$DEVICE_STAT ( Inx, RB_A )
-!
+//
 // Dump out a Device configuration entry.
-!
+//
     {
-    BIND
-	RB = RB_A : D$Dev_Dump_Return_Blk;
+      d$dev_dump_return_blk * RB = RB_A;
 
-    IF (Inx LSS 0) || (Inx > DC_Max_Num_Net_devices-1) OR
-	(dev_config_tab[Inx,dc_valid_device] == 0) THEN
+    if ((Inx < 0) || (Inx > DC_Max_Num_Net_Devices-1) ||
+	(dev_config_tab[Inx].dc_valid_device == 0))
 	return -1;
 
     // fill in the simple stuff...
-    RB->DU$Dev_Address = dev_config_tab[Inx,dc_ip_address];
-    RB->DU$Dev_netmask = dev_config_tab[Inx,dc_ip_netmask];
-    RB->DU$Dev_network = dev_config_tab[Inx,dc_ip_network];
-    RB->DU$Dev_Pck_Xmit = 0;
-    RB->DU$Dev_Pck_Recv = 0;
+    RB->du$dev_address = dev_config_tab[Inx].dc_ip_address;
+    RB->du$dev_netmask = dev_config_tab[Inx].dc_ip_netmask;
+    RB->du$dev_network = dev_config_tab[Inx].dc_ip_network;
+    RB->du$dev_pck_xmit = 0;
+    RB->du$dev_pck_recv = 0;
 
     // Start a new block so we can use BIND to simplify the code.
     {
-    BIND
-	DevNam  = dev_config_tab[Inx,dc_devname] : $BBLOCK->DSC$K_Z_BLN,
-	DevSpec = dev_config_tab[Inx,dc_devspec] : $BBLOCK->DSC$K_Z_BLN;
+      struct dsc$descriptor * DevNam  = &dev_config_tab[Inx].dc_devname ;
+      struct dsc$descriptor * DevSpec = &dev_config_tab[Inx].dc_devspec;
     signed long
 	StrLen;
 
     // Copy device name
-    StrLen = DevNam_Max_Size;
-    if (Strlen > DevNam->dsc$w_length)
+    StrLen = DEVNAM_MAX_SIZE;
+    if (StrLen > DevNam->dsc$w_length)
 	StrLen = DevNam->dsc$w_length;
-    RB->DU$DevNam_Len = Strlen;
-    CH$MOVE ( Strlen , DevNam->dsc$a_pointer , RB->DU$DevNam_Str );
+    RB->du$devnam_len = StrLen;
+    CH$MOVE ( StrLen , DevNam->dsc$a_pointer , RB->du$devnam_str );
 
     // Copy device-specific field
-    StrLen = DevSpec_Max_Size;
-    if (Strlen > DevSpec->dsc$w_length)
+    StrLen = DEVSPEC_MAX_SIZE;
+    if (StrLen > DevSpec->dsc$w_length)
 	StrLen = DevSpec->dsc$w_length;
-    RB->DU$DevSpec_Len = Strlen;
-    CH$MOVE ( Strlen , DevSpec->dsc$a_pointer , RB->DU$DevSpec_Str );
+    RB->du$devspec_len = StrLen;
+    CH$MOVE ( StrLen , DevSpec->dsc$a_pointer , RB->du$devspec_str );
     }
 
-    D$Dev_dump_blksize
+    return D$DEV_DUMP_BLKSIZE;
     }
 
 
@@ -494,14 +513,14 @@ CNF$DEVICE_LIST ( RB )
 //
 // Dump out the list of valid devices.
 //
-	struct D$Device_List_Return_Blk * RB;
+	 long * RB; // check
     {
-    signed long
+      signed long I,
 	RBIX;
 
     RBIX = 1;
-    for (I=0;I<=DC_Max_Num_Net_devices-1;I++)
-	if (dev_config_tab[I,dc_valid_device] != 0)
+    for (I=0;I<=DC_Max_Num_Net_Devices-1;I++)
+	if (dev_config_tab[I].dc_valid_device != 0)
 	    {
 	    RB[RBIX] = I;
 	    RBIX = RBIX + 1;
@@ -510,7 +529,7 @@ CNF$DEVICE_LIST ( RB )
     RB[0] = RBIX - 1;
 
     // return total size in bytes.
-    RBIX * 4
+    return RBIX * 4;
     }
 
 
@@ -534,9 +553,9 @@ Side Effects:
 
 void CNF$Configure_ACP (void)
     {
-    LOCAL		     
+      signed long
 	RC,
-	cfield : VECTOR->STRSIZ,
+	cfield [STRSIZ],
 	cflen,
 	cptr;
 
@@ -547,28 +566,28 @@ void CNF$Configure_ACP (void)
 // OPEN the file "config.TXT" & read/decode network device data into blockvector
 // dev_config and memory management info.
 
-    IF NOT ((RC = $OPEN(FAB = CFFAB)) AND
-	    (RC = $CONNECT(RAB = CFRAB))) THEN
+    if (! ((RC = exe$open(CFFAB)) &&
+	    (RC = exe$connect(CFRAB))))
 	{
-	send_2_operator(%ascid "Unable to access "INET$CONFIG:"");
-	$exit(code=.RC);
+	send_2_operator(ASCIDNOT( "Unable to access INET$CONFIG:"));
+	exe$exit(RC);
 	};
 
 // Extract information from each non-comment line of the file
 
-    DEV_Count = 0;		// No devices
+    dev_count = 0;		// No devices
 
-    while ($GET(RAB = CFRAB))
+    while (exe$get(CFRAB))
 	{
 	signed long
 	    chr;
-	linptr = CH$PTR(CFRAB->RAB$L_UBF);
-	linlen = CFRAB->RAB$W_RSZ;
+	linptr = CH$PTR(CFRAB->rab$l_ubf);
+	linlen = CFRAB->rab$w_rsz;
 
-// IF 1st char of line is a "!" then is it a comment & we ignore it.
+// if (1st char of line is a "!" then is it a comment & we ignore it.
 
-	chr = CH$RCHAR(CH$PTR(CFRAB->RAB$L_UBF));
-	if ((chr != %C"!') && (chr != %C';"))
+	chr = CH$RCHAR(CH$PTR(CFRAB->rab$l_ubf));
+	if ((chr != '!') && (chr != ';'))
 	    {
 	    if (linlen > (RECLEN-1))
 		linlen = RECLEN-1;
@@ -580,42 +599,39 @@ void CNF$Configure_ACP (void)
 
 	    cflen = GETFIELD(cfield);
 	    cptr = CH$PTR(cfield);
-	    SELECTONE TRUE OF
-		SET
-		[STREQLZ(cptr,"DEVICE_INIT")]:
+	    if (STREQLZ(cptr,"DEVICE_INIT"))
 		    Init_Device();
-		[STREQLZ(cptr,"MEMGR_INIT")]:
+		else if (STREQLZ(cptr,"MEMGR_INIT"))
 		    Init_Memgr();
-		[STREQLZ(cptr,"GATEWAY")]:
+		else if (STREQLZ(cptr,"GATEWAY"))
 		    Init_Gateway();
-		[STREQLZ(cptr,"NAME_SERVER")]:
+		else if (STREQLZ(cptr,"NAME_SERVER"))
 		    Init_NameServer();
-		[STREQLZ(cptr,"LOGGING")]:
+		else if (STREQLZ(cptr,"LOGGING"))
 		    Init_Logging();
-		[STREQLZ(cptr,"ACTIVITY")]:
+		else if (STREQLZ(cptr,"ACTIVITY"))
 		    Init_Activity_Logging();
-		[STREQLZ(cptr,"IP_FORWARDING")]:
+		else if (STREQLZ(cptr,"IP_FORWARDING"))
 		    Init_Forwarding();
-		[STREQLZ(cptr,"VARIABLE")]:
+		else if (STREQLZ(cptr,"VARIABLE"))
 		    Init_Variable();
-		[STREQLZ(cptr,"MBX_RESOLVER")]:
+		else if (STREQLZ(cptr,"MBX_RESOLVER"))
 		    Init_MbxResolver();
-		[STREQLZ(cptr,"WKS")]:
+		else if (STREQLZ(cptr,"WKS"))
 		    Init_WKS();
-		[STREQLZ(cptr,"RPC")]:
+		else if (STREQLZ(cptr,"RPC"))
 		    Init_RPC();
-		[STREQLZ(cptr,"AUTH")]:
+		else if (STREQLZ(cptr,"AUTH"))
 		    Init_Auth();
-		[STREQLZ(cptr,"LOCAL_HOST")]:
+		else if (STREQLZ(cptr,"LOCAL_HOST"))
 		    Init_Local_Host();
-		[OTHERWISE]:
-		    Config_Err(%ASCID"Unknown keyword");
-		TES;
+		else
+		    Config_Err(ASCID("Unknown keyword"));
 	    };
 	};
 
-    $DISCONNECT(RAB = CFRAB);
-    $CLOSE(FAB = CFFAB);
+    exe$disconnect(CFRAB);
+    exe$close(CFFAB);
 
 // make sure we did some device configuration here as networks without devices
 // are not really very interesting.
@@ -624,13 +640,13 @@ void CNF$Configure_ACP (void)
 	ERROR$FAO("No network devices detected in INET$CONFIG");
     }
 
-CONFIG_ERR(EMSG) : NOVALUE (void)
-!
+void CONFIG_ERR(EMSG)
+//
 // Handle error in configuration file. Give the error message and exit.
-!
+//
     {
-    FATAL$FAO("CONFIG - !AS in line:!/!_"!AD"",
-	      EMSG,CFRAB->RAB$W_RSZ,CFRAB->RAB$L_UBF);
+    FATAL$FAO("CONFIG - !AS in line:!/!_!AD",
+	      EMSG,CFRAB->rab$w_rsz,CFRAB->rab$l_ubf);
     }
 
 void Init_Device (void)
@@ -639,14 +655,14 @@ void Init_Device (void)
 // Parses the device description and adds to DEV_CONFIG table.
 
     {
-extern 	LIB$CALLG		: ADDRESSING_MODE (GENERAL)();
-extern 	LIB$FIND_IMAGE_SYMBOL	: ADDRESSING_MODE (GENERAL)();
-extern 	STR$APPEND		: BLISS ADDRESSING_MODE (GENERAL)();
-extern 	STR$CASE_BLIND_COMPARE	: BLISS ADDRESSING_MODE (GENERAL)();
-extern 	STR$COPY_DX		: BLISS ADDRESSING_MODE (GENERAL)();
-struct Device_Info_Structure * Devinfo;
-struct Device_Configuration_Entry * dev_config;
-    signed long
+extern 	LIB$CALLG();
+extern 	LIB$FIND_IMAGE_SYMBOL();
+extern 	STR$APPEND		();
+extern 	STR$CASE_BLIND_COMPARE	();
+extern 	STR$COPY_DX		();
+ Device_Info_Structure * devinfo;
+ Device_Configuration_Entry * dev_config;
+ signed long I,
 //	tmp,
 	rc,
 	ipaddr,
@@ -657,37 +673,37 @@ struct Device_Configuration_Entry * dev_config;
 	devtlen,
 	devstr[STRSIZ],
 	devslen,
-	devspec[STRSIZ],
-	dev_desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= Devstr),
-	devtyp_desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= Devtype),
-	dev_spec_desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= Devtype),
+devspec[STRSIZ],
 	devidx;		// device index into devconfig.
+struct dsc$descriptor dev_desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :devstr}, * dev_desc=&dev_desc_;
+struct dsc$descriptor	devtyp_desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :devtype}, * devtyp_desc=&devtyp_desc_;
+struct dsc$descriptor	dev_spec_desc_  = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :devtype}, * dev_spec_desc = &dev_spec_desc_;
 
 // skip over delimiter.
 
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Dev_config table overflow?
-// Table index = 0 to DC_Max_Num_Net_devices-1.
+// Table index = 0 to DC_Max_Num_Net_Devices-1.
 
-    devidx = Dev_count;
-    if (Dev_Count > DC_Max_Num_Net_devices-1 )
+    devidx = dev_count;
+    if (dev_count > DC_Max_Num_Net_Devices-1 )
 	FATAL$FAO(%STRING("Too many network devices in INET$CONFIG, max = ",
 			  %NUMBER(DC_Max_Num_Net_Devices)));
-    Dev_Count = Dev_Count+1;
-    dev_config = dev_config_tab[devidx,dc_begin];
+    dev_count = dev_count+1;
+    dev_config = dev_config_tab[devidx].dc_begin;
 
 // Clear all flags
 
@@ -696,9 +712,9 @@ struct Device_Configuration_Entry * dev_config;
 
 // Get device driver type
 
-    devtyp_desc [dsc$w_length] = GETFIELD(devtyp_desc [dsc$a_pointer]);
+    devtyp_desc -> dsc$w_length  = GETFIELD(devtyp_desc -> dsc$a_pointer );
 //    devtlen = GETFIELD(devtype);
-    SKIPTO(%C":");
+    SKIPTO(':');
    
 //    cptr = CH$PTR(devtype);
 
@@ -706,71 +722,71 @@ struct Device_Configuration_Entry * dev_config;
 // it more easily (all symbols included, plus code is now in main image PSECT)
 
 
-    if ((STR$CASE_BLIND_COMPARE(devtyp_desc,%ASCID"ETHER") == 0))
+    if ((STR$CASE_BLIND_COMPARE(devtyp_desc,ASCID("ETHER")) == 0))
 	{
 extern	    DRV$TRANSPORT_INIT();
 
 	Image_Init = DRV$TRANSPORT_INIT;
 	}
 // Get name of shared-image IP-transport
-    else IF (rc = LIB$FIND_IMAGE_SYMBOL(
+    else if ((rc = LIB$FIND_IMAGE_SYMBOL(
 		devtyp_desc,
-		%ASCID"DRV$TRANSPORT_INIT",
+		ASCID("DRV$TRANSPORT_INIT"),
 		Image_Init,
-		%ASCID"CMUIP_ROOT:[SYSLIB].EXE"
-		) != SS$_NORMAL) THEN
+		ASCID("CMUIP_ROOT:[SYSLIB].EXE")
+		) != SS$_NORMAL))
 	{
 	Image_Init = 0;
 	Signal(rc);
-	Config_Err(%ASCID"Trouble accessing device support image.")
+	Config_Err(ASCID("Trouble accessing device support image."));
 	};
 
     if ((Image_Init != 0))
 	{	// Set up the vector
-	DevInfo = LIB$CALLG(argv,Image_Init);
+	devinfo = LIB$CALLG(argv,Image_Init);
 
-	dev_config->dc_rtn_init = DevInfo->DI$Init;
-	dev_config->dc_rtn_xmit = DevInfo->DI$Xmit;
-	dev_config->dc_rtn_dump = DevInfo->DI$Dump;
-	dev_config->dc_rtn_check = DevInfo->DI$Check
+	dev_config->dc_rtn_Init = devinfo->DI$Init;
+	dev_config->dc_rtn_Xmit = devinfo->DI$Xmit;
+	dev_config->dc_rtn_Dump = devinfo->DI$Dump;
+	dev_config->dc_rtn_check = devinfo->DI$Check;
 	};
 
 // Get vms device name, used
 // by the device init routine to $assign the device.
-    dev_desc [dsc$w_length] = GETFIELD(dev_desc [dsc$a_pointer]);
-//    $INIT_DYNDESC( dev_config [dc_devname] );
-    INIT_DYNDESC( dev_config [dc_devname] );
-    STR$COPY_DX (Dev_Config [dc_devname], dev_desc);
-    STR$APPEND (Dev_config [dc_devname], %ASCID ":");
+    dev_desc -> dsc$w_length  = GETFIELD(dev_desc -> dsc$a_pointer );
+//    $INIT_DYNDESC( dev_config ->dc_devname );
+    INIT_DYNDESC( dev_config ->dc_devname );
+    STR$COPY_DX (dev_config ->dc_devname, dev_desc);
+    STR$APPEND (dev_config ->dc_devname, %ASCID ":");
 // skip over field terminator.
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Get vms device specific information, used by the device go receive
 // and initiate connections.
-    dev_desc [dsc$w_length] = GETFIELD(dev_desc [dsc$a_pointer]);
-//    $INIT_DYNDESC( dev_config [dc_devspec] );
-    INIT_DYNDESC( dev_config [dc_devspec] );
-    STR$COPY_DX (Dev_Config [dc_devspec], dev_desc);
+    dev_desc -> dsc$w_length  = GETFIELD(dev_desc -> dsc$a_pointer );
+//    $INIT_DYNDESC( dev_config->dc_devspec );
+    INIT_DYNDESC( dev_config ->dc_devspec );
+    STR$COPY_DX (dev_config ->dc_devspec, dev_desc);
 // skip over field terminator.
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Set hardware address/device dependant words
-//    IF GET_HEX_BYTES(dev_config->dc_phy_size,LINPTR,
-//		     CH$PTR(dev_config->dc_phy_addr)) LSS 0 THEN
-//	Config_Err(%ASCID"Bad device address");
-//    SKIPTO(%C":");
+//    IF GET_HEX_BYTES(dev_config->dc_phy_size,linptr,
+//		     CH$PTR(dev_config->dc_phy_addr)) < 0 THEN
+//	Config_Err(ASCID("Bad device address"));
+//    SKIPTO(':');
 
 // Get device IP address
 
-    if (GET_IP_ADDR(LINPTR,ipaddr) LSS 0)
-	Config_Err(%ASCID"Bad device IP address");
+    if (GET_IP_ADDR(linptr,ipaddr) < 0)
+	Config_Err(ASCID("Bad device IP address"));
     dev_config->dc_ip_address = ipaddr;
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Get device IP network mask
 
-    if (GET_IP_ADDR(LINPTR,ipmask) LSS 0)
-	Config_Err(%ASCID"Bad device IP mask");
+    if (GET_IP_ADDR(linptr,ipmask) < 0)
+	Config_Err(ASCID("Bad device IP mask"));
     dev_config->dc_ip_netmask = ipmask;
 
 // Set device IP network number
@@ -780,13 +796,13 @@ extern	    DRV$TRANSPORT_INIT();
 // mark the device as valid so initialization routine will execute the device
 // init rtn.
 
-    dev_config->dc_valid_device = true;
+    dev_config->dc_valid_device = TRUE;
 
 // Initialize all of the other fields for this device
 
-    Dev_Config->dc_send_Qhead = Dev_Config->dc_send_Qhead;
-    Dev_Config->dc_send_Qtail = Dev_Config->dc_send_Qhead;
-    Dev_Config->dc_online = false;
+    dev_config->dc_Send_Qhead = dev_config->dc_Send_Qhead;
+    dev_config->dc_send_Qtail = dev_config->dc_Send_Qhead;
+    dev_config->dc_online = FALSE;
 
 // See if this device name is a duplicate.
 
@@ -794,8 +810,8 @@ extern	    DRV$TRANSPORT_INIT();
 	for (I=0;I<=(devidx-1);I++)
 	    {
 	    // If match, then mark this device as a clone of the it.
-	    IF STR$CASE_BLIND_COMPARE(Dev_Config_Tab[I,dc_devname],
-			Dev_Config_Tab[devidx,dc_devname]) == 0 THEN
+	    if (STR$CASE_BLIND_COMPARE(dev_config_tab[I].dc_devname,
+			dev_config_tab[devidx].dc_devname) == 0)
 		{
 		dev_config->dc_is_clone = TRUE;
 		dev_config->dc_clone_dev = I;
@@ -821,41 +837,41 @@ void Init_Gateway (void)
 extern	void IP$Gwy_Config();
     signed long
 	GWYname [STRSIZ],
-	GWY_Name_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= GWYname),
 	GWYaddr,
 	GWYnet,
 	GWYnetmask,
 	tmp;
+struct dsc$descriptor 	GWY_Name_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :GWYname}, * GWY_Name_Desc = &GWY_Name_Desc_;
 
 // Skip delimiter
 
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // First, get the gateway name.
 
-    GWY_Name_Desc [dsc$w_length] = GETFIELD(GWYname);
+    GWY_Name_Desc -> dsc$w_length  = GETFIELD(GWYname);
 
 // Next, the gateway address
 
-    SKIPTO(%C":");
-    if (GET_IP_ADDR(LINPTR,GWYaddr) LSS 0)
-	Config_err(%ASCID"Bad gateway address");
+    SKIPTO(':');
+    if (GET_IP_ADDR(linptr,GWYaddr) < 0)
+	Config_err(ASCID("Bad gateway address"));
 
 // Next, the network number behind the gateway
 
-    SKIPTO(%C":");
-    if (GET_IP_ADDR(LINPTR,GWYnet) LSS 0)
-	Config_err(%ASCID"Bad gateway network number");
+    SKIPTO(':');
+    if (GET_IP_ADDR(linptr,GWYnet) < 0)
+	Config_err(ASCID("Bad gateway network number"));
 
 // Next, the network mask for that network
 
-    SKIPTO(%C":");
-    if (GET_IP_ADDR(LINPTR,GWYnetmask) LSS 0)
-	Config_err(%ASCID"Bad gateway mask");
+    SKIPTO(':');
+    if (GET_IP_ADDR(linptr,GWYnetmask) < 0)
+	Config_err(ASCID("Bad gateway mask"));
 
 // Tell IP about this gateway
 
@@ -882,7 +898,7 @@ void Init_NameServer (void)
 
 // Skip delimiter
 
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // First, get the name server name
 
@@ -890,9 +906,9 @@ void Init_NameServer (void)
 
 // Next, the name server address
 
-    SKIPTO(%C":");
-    if (GET_IP_ADDR(LINPTR,NSaddr) LSS 0)
-	Config_err(%ASCID"Bad name server address");
+    SKIPTO(':');
+    if (GET_IP_ADDR(linptr,NSaddr) < 0)
+	Config_err(ASCID("Bad name server address"));
 
 // Add this entry to the name server database
 
@@ -905,35 +921,35 @@ void Init_MEMGR (void)
 // Specifies memory-manager initialization parameters.
 //
     {
-    externAL
-	QBLK_COUNT_BASE : UNSIGNED BYTE,
-	UARG_COUNT_BASE : UNSIGNED BYTE,
-	MIN_SEG_COUNT_BASE : UNSIGNED BYTE,
-	MAX_SEG_COUNT_BASE : UNSIGNED BYTE;
+    extern unsigned char
+	qblk_count_base,
+	uarg_count_base ,
+	min_seg_count_base ,
+	max_seg_count_base ;
 
 // Get # of Queue blocks to preallocate
 
-    SKIPTO(%C":");
-    if (GET_DEC_NUM(LINPTR,QBLK_count_base) LSS 0)
-	Config_Err(%ASCID"Bad integer value");
+    SKIPTO(':');
+    if (GET_DEC_NUM(linptr,qblk_count_base) < 0)
+	Config_Err(ASCID("Bad integer value"));
 
 // Get # of UARG blocks to preallocate
 
-    SKIPTO(%C":");
-    if (GET_DEC_NUM(LINPTR,UARG_count_base) LSS 0)
-	Config_Err(%ASCID"Bad integer value");
+    SKIPTO(':');
+    if (GET_DEC_NUM(linptr,uarg_count_base) < 0)
+	Config_Err(ASCID("Bad integer value"));
 
 // Get # of minimum-size packet buffers to preallocate
 
-    SKIPTO(%C":");
-    if (GET_DEC_NUM(LINPTR,MIN_seg_count_base) LSS 0)
-	Config_Err(%ASCID"Bad integer value");
+    SKIPTO(':');
+    if (GET_DEC_NUM(linptr,min_seg_count_base) < 0)
+	Config_Err(ASCID("Bad integer value"));
 
 // get # of maximum-size packet buffers to preallocate
 
-    SKIPTO(%C":");
-    if (GET_DEC_NUM(LINPTR,MAX_seg_count_base) LSS 0)
-	Config_Err(%ASCID"Bad integer value");
+    SKIPTO(':');
+    if (GET_DEC_NUM(linptr,max_seg_count_base) < 0)
+	Config_Err(ASCID("Bad integer value"));
     }
 
 
@@ -949,12 +965,12 @@ extern	void LOG_CHANGE();
 
 // Skip terminator
 
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Get log state value
 
-    if (GET_HEX_NUM(LINPTR,logstate) LSS 0)
-	Config_Err(%ASCID"Bad hex value for log state");
+    if (GET_HEX_NUM(linptr,logstate) < 0)
+	Config_Err(ASCID("Bad hex value for log state"));
 
 // Set log state
 
@@ -974,12 +990,12 @@ extern	void ACT_CHANGE();
 
 // Skip terminator
 
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Get log state value
 
-    if (GET_HEX_NUM(LINPTR,logstate) LSS 0)
-	Config_Err(%ASCID"Bad hex value for activity log state");
+    if (GET_HEX_NUM(linptr,logstate) < 0)
+	Config_Err(ASCID("Bad hex value for activity log state"));
 
 // Set log state
 
@@ -994,17 +1010,17 @@ void INIT_FORWARDING (void)
     {
     signed long
 	ipstate;
-    externAL
+    extern
 	struct IP_group_MIB_struct * IP_group_MIB;
 
 // Skip terminator
 
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Get forwarding state value
 
-    if (GET_HEX_NUM(LINPTR,ipstate) LSS 0)
-	Config_Err(%ASCID"Bad hex value for forwarding state");
+    if (GET_HEX_NUM(linptr,ipstate) < 0)
+	Config_Err(ASCID("Bad hex value for forwarding state"));
 
 // Set state for IP module
 
@@ -1017,7 +1033,7 @@ void INIT_FORWARDING (void)
 
 void INIT_VARIABLE (void)
     {
-    externAL
+    extern
 	FQ_MAX,
 	SYN_WAIT_COUNT,
 	ACCESS_FLAGS,
@@ -1038,8 +1054,8 @@ void INIT_VARIABLE (void)
 	TCPTTL,
 	UDPTTL,
 	ACT_THRESHOLD,
-	LOG_THRESHOLD,
-	struct IP_group_MIB_struct * IP_group_MIB;
+    LOG_THRESHOLD;
+extern	struct IP_group_MIB_struct * IP_group_MIB;
     signed long
 	varname [STRSIZ],
 	varlen,
@@ -1048,7 +1064,7 @@ void INIT_VARIABLE (void)
 
 // Skip terminator
 
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Get the variable name
 
@@ -1057,64 +1073,61 @@ void INIT_VARIABLE (void)
 
 // Skip the terminator
 
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Get the variable value
 
-    if (GET_DEC_NUM(LINPTR,varval) LSS 0)
-	Config_Err(%ASCID"Bad variable value");
+    if (GET_DEC_NUM(linptr,varval) < 0)
+	Config_Err(ASCIDNOT("Bad variable value"));
 
 // Check the variable name & set it.
 //!!HACK!!// Document these!
-    SELECTONE TRUE OF
-	SET
-	[STREQLZ(varptr,"IP_FORWARDING")]:
+	if (STREQLZ(varptr,"IP_FORWARDING"))
 	    IP_group_MIB->IPMIB$ipForwarding = varval;
-	[STREQLZ(varptr,"FQ_MAX")]:
+	else if (STREQLZ(varptr,"FQ_MAX"))
 	    FQ_MAX = varval;
-	[STREQLZ(varptr,"SYN_WAIT_COUNT")]:
+	else if (STREQLZ(varptr,"SYN_WAIT_COUNT"))
 	    SYN_WAIT_COUNT = varval;
-	[STREQLZ(varptr,"ACCESS_FLAGS")]:
+	else if (STREQLZ(varptr,"ACCESS_FLAGS"))
 	    ACCESS_FLAGS = varval;
-	[STREQLZ(varptr,"MAX_TCP_DATASIZE")]:
+	else if (STREQLZ(varptr,"MAX_TCP_DATASIZE"))
 	    MAX_RECV_DATASIZE = varval;
-	[STREQLZ(varptr,"DEFAULT_MSS")]:
+	else if (STREQLZ(varptr,"DEFAULT_MSS"))
 	    DEFAULT_MSS = varval;
-	[STREQLZ(varptr,"TELNET_SERVICE")]:
+	else if (STREQLZ(varptr,"TELNET_SERVICE"))
 	    TELNET_SERVICE = varval;
-	[STREQLZ(varptr,"RPC_SERVICE")]:
+	else if (STREQLZ(varptr,"RPC_SERVICE"))
 	    RPC_SERVICE = varval;
-	[STREQLZ(varptr,"SNMP_SERVICE")]:
+	else if (STREQLZ(varptr,"SNMP_SERVICE"))
 	    SNMP_SERVICE = varval;
-	[STREQLZ(varptr,"KEEP_ALIVE")]:
+	else if (STREQLZ(varptr,"KEEP_ALIVE"))
 	    KEEP_ALIVE = varval;
-	[STREQLZ(varptr,"RETRY_COUNT")]:
+	else if (STREQLZ(varptr,"RETRY_COUNT"))
 	    RETRY_COUNT = varval;
-	[STREQLZ(varptr,"MAX_LOCAL_PORTS")]:
+	else if (STREQLZ(varptr,"MAX_LOCAL_PORTS"))
 	    MAX_LOCAL_PORTS = varval;
-	[STREQLZ(varptr,"MAX_CONN")]:
+	else if (STREQLZ(varptr,"MAX_CONN"))
 	    MAX_CONN = varval;
-	[STREQLZ(varptr,"MAX_GATEWAYS")]:
-	    Max_Gateways = varval;
-	[STREQLZ(varptr,"ICMPTTL")]:
+	else if (STREQLZ(varptr,"MAX_GATEWAYS"))
+	    MAX_GATEWAYS = varval;
+	else if (STREQLZ(varptr,"ICMPTTL"))
 	    ICMPTTL = varval;
-	[STREQLZ(varptr,"IPTTL")]:
+	else if (STREQLZ(varptr,"IPTTL"))
 	    IPTTL = varval;
-	[STREQLZ(varptr,"TCPTTL")]:
+	else if (STREQLZ(varptr,"TCPTTL"))
 	    TCPTTL = varval;
-	[STREQLZ(varptr,"UDPTTL")]:
+	else if (STREQLZ(varptr,"UDPTTL"))
 	    UDPTTL = varval;
-	[STREQLZ(varptr,"WINDOW_DEFAULT")]:
+	else if (STREQLZ(varptr,"WINDOW_DEFAULT"))
 	    WINDOW_DEFAULT = varval;
-	[STREQLZ(varptr,"ACK_THRESHOLD")]:
+	else if (STREQLZ(varptr,"ACK_THRESHOLD"))
 	    ACK_THRESHOLD = varval;
-	[STREQLZ(varptr,"ACT_THRESHOLD")]:
+	else if (STREQLZ(varptr,"ACT_THRESHOLD"))
 	    ACT_THRESHOLD = varval;
-	[STREQLZ(varptr,"LOG_THRESHOLD")]:
+	else if (STREQLZ(varptr,"LOG_THRESHOLD"))
 	    LOG_THRESHOLD = varval;
-	[OTHERWISE]:
-	    Config_Err(%ASCID"Unknown variable name");
-	TES;
+    else
+	    Config_Err(ASCID("Unknown variable name"));
     }
 
 
@@ -1122,130 +1135,126 @@ void INIT_VARIABLE (void)
 //SBTTL "Process definitions"
 /*
     Define some keyword tables for parsing options to $CREPRC
- )%
+*/
 
 // Macro for defining two-word privilege bit
 
-MACRO
-    PRVIX(BYT,BST,BLN,EXT) = UPLIT(BYT/4,1^BST) %;
-LITERAL
-    PVSIZE = 2,
-    PVIX = 0,
-    PVAL = 1;
+#define    PRVIX(BYT) BYT
 
-BIND
+#define     PVSIZE   2
+#define     PVIX   0
+#define     PVAL   1
+
 
 // Define the STATUS keywords
 
-    STATNAMES = PLIT(
-	%ASCID"SSRWAIT",PRC$M_SSRWAIT,
-	%ASCID"SSFEXCU",PRC$M_SSFEXCU,
-	%ASCID"PSWAPM",PRC$M_PSWAPM,
-	%ASCID"NOACNT",PRC$M_NOACNT,
-	%ASCID"BATCH",PRC$M_BATCH,
-	%ASCID"HIBER",PRC$M_HIBER,
-	%ASCID"IMGDMP",PRC$M_IMGDMP,
-	%ASCID"NOUAF",PRC$M_NOUAF,
-	%ASCID"NETWRK",PRC$M_NETWRK,
-	%ASCID"DISAWS",PRC$M_DISAWS,
-	%ASCID"DETACH",PRC$M_DETACH,
-	%ASCID"INTER",PRC$M_INTER,
-	%ASCID"NOPASSWORD",PRC$M_NOPASSWORD) : VECTOR,
+char *	 STATNAMES[] = {
+	ASCIDNOT("SSRWAIT"),PRC$M_SSRWAIT,
+	ASCIDNOT("SSFEXCU"),PRC$M_SSFEXCU,
+	ASCIDNOT("PSWAPM"),PRC$M_PSWAPM,
+	ASCIDNOT("NOACNT"),PRC$M_NOACNT,
+	ASCIDNOT("BATCH"),PRC$M_BATCH,
+	ASCIDNOT("HIBER"),PRC$M_HIBER,
+	ASCIDNOT("IMGDMP"),PRC$M_IMGDMP,
+	ASCIDNOT("NOUAF"),PRC$M_NOUAF,
+	ASCIDNOT("NETWRK"),PRC$M_NETWRK,
+	ASCIDNOT("DISAWS"),PRC$M_DISAWS,
+	ASCIDNOT("DETACH"),PRC$M_DETACH,
+	ASCIDNOT("INTER"),PRC$M_INTER,
+	ASCIDNOT("NOPASSWORD"),PRC$M_NOPASSWORD};
 
 // Define the PRIVILEGE keywords
 
-    PRIVNAMES = PLIT(
-	%ASCID"*",-1,
-	%ASCID"ALLSPOOL",PRVIX(PRV$V_ALLSPOOL),
-	%ASCID"BUGCHK",PRVIX(PRV$V_BUGCHK),
-	%ASCID"BYPASS",PRVIX(PRV$V_BYPASS),
-	%ASCID"CMEXEC",PRVIX(PRV$V_CMEXEC),
-	%ASCID"CMKRNL",PRVIX(PRV$V_CMKRNL),
-	%ASCID"DETACH",PRVIX(PRV$V_DETACH),
-	%ASCID"DIAGNOSE",PRVIX(PRV$V_DIAGNOSE),
-	%ASCID"DOWNGRADE",PRVIX(PRV$V_DOWNGRADE),
-	%ASCID"EXQUOTA",PRVIX(PRV$V_EXQUOTA),
-	%ASCID"GROUP",PRVIX(PRV$V_GROUP),
-	%ASCID"GRPNAM",PRVIX(PRV$V_GRPNAM),
-	%ASCID"GRPPRV",PRVIX(PRV$V_GRPPRV),
-	%ASCID"LOG_IO",PRVIX(PRV$V_LOG_IO),
-	%ASCID"MOUNT",PRVIX(PRV$V_MOUNT),
-	%ASCID"NETMBX",PRVIX(PRV$V_NETMBX),
-	%ASCID"NOACNT",PRVIX(PRV$V_NOACNT),
-	%ASCID"OPER",PRVIX(PRV$V_OPER),
-	%ASCID"PFNMAP",PRVIX(PRV$V_PFNMAP),
-	%ASCID"PHY_IO",PRVIX(PRV$V_PHY_IO),
-	%ASCID"PRMCEB",PRVIX(PRV$V_PRMCEB),
-	%ASCID"PRMGBL",PRVIX(PRV$V_PRMGBL),
-	%ASCID"PRMMBX",PRVIX(PRV$V_PRMMBX),
-	%ASCID"PSWAPM",PRVIX(PRV$V_PSWAPM),
-	%ASCID"READALL",PRVIX(PRV$V_READALL),
-	%ASCID"SECURITY",PRVIX(PRV$V_SECURITY),
-	%ASCID"SETPRI",PRVIX(PRV$V_SETPRI),
-	%ASCID"SETPRV",PRVIX(PRV$V_SETPRV),
-	%ASCID"SHARE",PRVIX(PRV$V_SHARE),
-	%ASCID"SHMEM",PRVIX(PRV$V_SHMEM),
-	%ASCID"SYSGBL",PRVIX(PRV$V_SYSGBL),
-	%ASCID"SYSLCK",PRVIX(PRV$V_SYSLCK),
-	%ASCID"SYSNAM",PRVIX(PRV$V_SYSNAM),
-	%ASCID"SYSPRV",PRVIX(PRV$V_SYSPRV),
-	%ASCID"TMPMBX",PRVIX(PRV$V_TMPMBX),
-	%ASCID"UPGRADE",PRVIX(PRV$V_UPGRADE),
-	%ASCID"VOLPRO",PRVIX(PRV$V_VOLPRO),
-	%ASCID"WORLD",PRVIX(PRV$V_WORLD)) : VECTOR;
+char * PRIVNAMES[] = {
+	ASCIDNOT("*"),-1,
+	ASCIDNOT("ALLSPOOL"),PRVIX(PRV$V_ALLSPOOL),
+	ASCIDNOT("BUGCHK"),PRVIX(PRV$V_BUGCHK),
+	ASCIDNOT("BYPASS"),PRVIX(PRV$V_BYPASS),
+	ASCIDNOT("CMEXEC"),PRVIX(PRV$V_CMEXEC),
+	ASCIDNOT("CMKRNL"),PRVIX(PRV$V_CMKRNL),
+	ASCIDNOT("DETACH"),PRVIX(PRV$V_DETACH),
+	ASCIDNOT("DIAGNOSE"),PRVIX(PRV$V_DIAGNOSE),
+	ASCIDNOT("DOWNGRADE"),PRVIX(PRV$V_DOWNGRADE),
+	ASCIDNOT("EXQUOTA"),PRVIX(PRV$V_EXQUOTA),
+	ASCIDNOT("GROUP"),PRVIX(PRV$V_GROUP),
+	ASCIDNOT("GRPNAM"),PRVIX(PRV$V_GRPNAM),
+	ASCIDNOT("GRPPRV"),PRVIX(PRV$V_GRPPRV),
+	ASCIDNOT("LOG_IO"),PRVIX(PRV$V_LOG_IO),
+	ASCIDNOT("MOUNT"),PRVIX(PRV$V_MOUNT),
+	ASCIDNOT("NETMBX"),PRVIX(PRV$V_NETMBX),
+	ASCIDNOT("NOACNT"),PRVIX(PRV$V_NOACNT),
+	ASCIDNOT("OPER"),PRVIX(PRV$V_OPER),
+	ASCIDNOT("PFNMAP"),PRVIX(PRV$V_PFNMAP),
+	ASCIDNOT("PHY_IO"),PRVIX(PRV$V_PHY_IO),
+	ASCIDNOT("PRMCEB"),PRVIX(PRV$V_PRMCEB),
+	ASCIDNOT("PRMGBL"),PRVIX(PRV$V_PRMGBL),
+	ASCIDNOT("PRMMBX"),PRVIX(PRV$V_PRMMBX),
+	ASCIDNOT("PSWAPM"),PRVIX(PRV$V_PSWAPM),
+	ASCIDNOT("READALL"),PRVIX(PRV$V_READALL),
+	ASCIDNOT("SECURITY"),PRVIX(PRV$V_SECURITY),
+	ASCIDNOT("SETPRI"),PRVIX(PRV$V_SETPRI),
+	ASCIDNOT("SETPRV"),PRVIX(PRV$V_SETPRV),
+	ASCIDNOT("SHARE"),PRVIX(PRV$V_SHARE),
+	ASCIDNOT("SHMEM"),PRVIX(PRV$V_SHMEM),
+	ASCIDNOT("SYSGBL"),PRVIX(PRV$V_SYSGBL),
+	ASCIDNOT("SYSLCK"),PRVIX(PRV$V_SYSLCK),
+	ASCIDNOT("SYSNAM"),PRVIX(PRV$V_SYSNAM),
+	ASCIDNOT("SYSPRV"),PRVIX(PRV$V_SYSPRV),
+	ASCIDNOT("TMPMBX"),PRVIX(PRV$V_TMPMBX),
+	ASCIDNOT("UPGRADE"),PRVIX(PRV$V_UPGRADE),
+	ASCIDNOT("VOLPRO"),PRVIX(PRV$V_VOLPRO),
+	ASCIDNOT("WORLD"),PRVIX(PRV$V_WORLD)};
 
 
 // Define process quotas
 
-$FIELD QUOTA_FIELDS (void)
-    SET
-    QTA$TYPE	= [$BYTE],	// Quota type
-    QTA$VALUE	= [$ULONG]	// Quota value
-    TES;
-LITERAL
-    QUOTA_SIZE = $FIELD_SET_SIZE,
-    QUOTA_BLEN = 5;
-MACRO
-    QUOTA = BLOCK->QUOTA_SIZE FIELD(QUOTA_FIELDS) %;
-LITERAL
-    MAXQUOTA = 15;		// Max number of quotas to specify
+struct QUOTA_FIELDS
+{
+char  QTA$TYPE;	// Quota type
+unsigned long    QTA$VALUE;	// Quota value
+ };
+
+#define     QUOTA_SIZE   $FIELD_SET_SIZE
+#define     QUOTA_BLEN   5
+
+#define    QUOTA BLOCK->QUOTA_SIZE 
+
+#define     MAXQUOTA   15		// Max number of quotas to specify
 
 // Define a keyword table for parsing the process quotas.
 
-BIND
-    QUOTANAMES = PLIT(
-	%ASCID"ASTLM",	PQL$_ASTLM,
-	%ASCID"BIOLM",	PQL$_BIOLM,
-	%ASCID"BYTLM",	PQL$_BYTLM,
-	%ASCID"CPULM",	PQL$_CPULM,
-	%ASCID"DIOLM",	PQL$_DIOLM,
-	%ASCID"ENQLM",	PQL$_ENQLM,
-	%ASCID"FILLM",	PQL$_FILLM,
-	%ASCID"JTQUOTA",PQL$_JTQUOTA,
-	%ASCID"PGFLQUOTA",PQL$_PGFLQUOTA,
-	%ASCID"PRCLM",	PQL$_PRCLM,
-	%ASCID"TQELM",	PQL$_TQELM,
-	%ASCID"WSDEFAULT",PQL$_WSDEFAULT,
-	%ASCID"WSEXTENT",PQL$_WSEXTENT,
-	%ASCID"WSQUOTA",PQL$_WSQUOTA);
+char * QUOTANAMES[] = {
+	ASCIDNOT("ASTLM"),	PQL$_ASTLM,
+	ASCIDNOT("BIOLM"),	PQL$_BIOLM,
+	ASCIDNOT("BYTLM"),	PQL$_BYTLM,
+	ASCIDNOT("CPULM"),	PQL$_CPULM,
+	ASCIDNOT("DIOLM"),	PQL$_DIOLM,
+	ASCIDNOT("ENQLM"),	PQL$_ENQLM,
+	ASCIDNOT("FILLM"),	PQL$_FILLM,
+	ASCIDNOT("JTQUOTA"),PQL$_JTQUOTA,
+	ASCIDNOT("PGFLQUOTA"),PQL$_PGFLQUOTA,
+	ASCIDNOT("PRCLM"),	PQL$_PRCLM,
+	ASCIDNOT("TQELM"),	PQL$_TQELM,
+	ASCIDNOT("WSDEFAULT"),PQL$_WSDEFAULT,
+	ASCIDNOT("WSEXTENT"),PQL$_WSEXTENT,
+	  ASCIDNOT("WSQUOTA"),PQL$_WSQUOTA};
 
 KEY_VALUE(KEYTAB,KEYLEN,KEYSTR)
 //
 // Get keyword value from keyword string.
 //
-	long * KEYTAB;
+	long I, * KEYTAB;
     {
-    signed long
-	struct $BBLOCK * CURSTR->DSC$K_S_BLN;
+    struct dsc$descriptor * CURSTR;
 
-    INCR I FROM 0 TO (KEYTAB[-1]-1) BY 2 DO
+    for ( I = 0;  I<= (KEYTAB[-1]-1); I+=2 )
 	{
 	CURSTR = KEYTAB[I];
-	IF CH$EQL(KEYLEN,KEYSTR,
-		  CURSTR->dsc$w_length,CURSTR->dsc$a_pointer) THEN
+	if (CH$EQL(KEYLEN,KEYSTR,
+		  CURSTR->dsc$w_length,CURSTR->dsc$a_pointer))
 	    return KEYTAB[I+1];
 	};
-    Config_Err(%ASCID"Bad keyword field");
+    Config_Err(ASCID("Bad keyword field"));
     return -1;
     }
 
@@ -1258,7 +1267,7 @@ PARSE_PRCPRIVS(PRVBLK)
     {
     signed long
 	PRIVCNT,
-	struct [PRIVPTR->PVSIZE],
+	 PRIVPTR[PVSIZE],
 	PRIVBUF[STRSIZ],
 	PLEN,
 	CHR;
@@ -1289,8 +1298,8 @@ PARSE_PRCPRIVS(PRVBLK)
 
 // Check for end of field separator
 
-	CHR = CH$RCHAR_A(LINPTR);
-	if (CHR == %C":")
+	CHR = CH$RCHAR_A(linptr);
+	if (CHR == ':')
 	    break;
 	};
 
@@ -1305,7 +1314,7 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 // Returns the count of quotas seen.
 //
     {
-	struct QUOTA * QPTR;
+	struct QUOTA * qptr;
     signed long
 	QUOTBUF [STRSIZ],
 	QUOTLEN,
@@ -1318,7 +1327,7 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 
     QUOTCNT = 0;
     CH$FILL(0,QMAX*QUOTA_BLEN,QLIST);
-    QPTR = QLIST;
+    qptr = QLIST;
 
 // Loop, parsing keywords.
 
@@ -1335,41 +1344,41 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 
 // Parse the separator - must be an equal sign
 
-	CHR = CH$RCHAR_A(LINPTR);
-	if (CHR != %C"=")
-	    CONFIG_ERR(%ASCID"Missing "=" in quota description");
+	CHR = CH$RCHAR_A(linptr);
+	if (CHR != '=')
+	    CONFIG_ERR(ASCID("Missing = in quota description"));
 	SKIPWHITE();
 
 // Parse the quota value
 
-	if (GET_DEC_NUM(LINPTR,QUOTVAL) LSS 0)
-	    CONFIG_ERR(%ASCID"Missing or bad quota value");
+	if (GET_DEC_NUM(linptr,QUOTVAL) < 0)
+	    CONFIG_ERR(ASCID("Missing or bad quota value"));
 	SKIPWHITE();
 
 // Set the value in the quotalist
 
-	QPTR->QTA$TYPE = QUOTYPE;
-	QPTR->QTA$VALUE = QUOTVAL;
+	qptr->QTA$TYPE = QUOTYPE;
+	qptr->QTA$VALUE = QUOTVAL;
 
 // Increment to next entry, checking for overflow
 
 	QUOTCNT = QUOTCNT + 1;
-	if (QUOTCNT GEQ (QMAX-1))
-	    CONFIG_ERR(%ASCID"Exceeded max number of quota keywords");
-	QPTR = QPTR + QUOTA_BLEN;
+	if (QUOTCNT >= (QMAX-1))
+	    CONFIG_ERR(ASCID("Exceeded max number of quota keywords"));
+	qptr = qptr + QUOTA_BLEN;
 	SKIPWHITE();
 
 // Check for terminator
 
-	CHR = CH$RCHAR_A(LINPTR);
-	if (CHR == %C":")
+	CHR = CH$RCHAR_A(linptr);
+	if (CHR == ':')
 	    break;
 	};
 
 // Put the terminator entry in the list
 
-    QPTR->QTA$TYPE = PQL$_LIST};
-    QPTR->QTA$VALUE = 0;
+    qptr->QTA$TYPE = PQL$_LISTEND;
+    qptr->QTA$VALUE = 0;
 
 // Return the number of entries in the list.
 
@@ -1401,8 +1410,8 @@ PARSE_PRCSTATUS (void)
 	    break;
 	STATVAL = STATVAL || KEY_VALUE(STATNAMES,STATLEN,CH$PTR(STATBUF));
 	SKIPWHITE();
-	CHR = CH$RCHAR_A(LINPTR);
-	if (CHR == %C":")
+	CHR = CH$RCHAR_A(linptr);
+	if (CHR == ':')
 	    break;
 	};
 
@@ -1427,134 +1436,134 @@ extern	void Seg$WKS_Config();
     signed long
 	CHR,LPTR,
 	WKSprname [STRSIZ],
-	WKSprname_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= WKSprname),
-	WKSimname : VECTOR->STRSIZ,
-	WKSimname_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= WKSimname),
-	QUOTAS : BLOCK[MAXQUOTA*QUOTA_BLEN] FIELD(QUOTA_FIELDS),
-	Quota_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= Quotas),
-	WKSInput : VECTOR->STRSIZ,
-	WKSInput_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= WKSInput),
-	WKSOutput : VECTOR->STRSIZ,
-	WKSOutput_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= WKSOutput),
-	WKSError : VECTOR->STRSIZ,
-	WKSError_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= WKSError),
+	WKSimname [STRSIZ],
+	QUOTAS[MAXQUOTA*QUOTA_BLEN],
+	WKSInput [STRSIZ],
+	WKSOutput[STRSIZ],
+	WKSError[STRSIZ],
 	WKSport,
 	WKSstat,
-	WKSpriv[2],
+	wkspriv[2],
 	WKSprior,
 	WKSqlim,
 	WKSmaxsrv;
+struct dsc$descriptor WKSprname_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :WKSprname}, *WKSprname_Desc=&WKSprname_Desc;
+struct dsc$descriptor WKSimname_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :WKSimname}, *WKSimname_Desc=&WKSimname_Desc_;
+struct dsc$descriptor Quota_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :QUOTAS}, *Quota_Desc=&Quota_Desc_;
+struct dsc$descriptor WKSInput_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :WKSInput}, *WKSInput_Desc=&WKSInput_Desc_;
+struct dsc$descriptor WKSOutput_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :WKSOutput}, *WKSOutput_Desc=&WKSOutput_Desc_;
+struct dsc$descriptor WKSError_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :WKSError}, *WKSError_Desc=&WKSError_Desc_;
 
 // Skip delimiter
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // First, get the port number
-    if (GET_DEC_NUM(LINPTR,WKSport) LSS 0)
-	Config_Err(%ASCID"Bad WKS port value");
-    SKIPTO(%C":");
+    if (GET_DEC_NUM(linptr,WKSport) < 0)
+	Config_Err(ASCID("Bad WKS port value"));
+    SKIPTO(':');
 
 // Next, process name
-    WKSprname_Desc [dsc$w_length] = GETFIELD(WKSprname);
-    SKIPTO(%C":");
+    WKSprname_Desc -> dsc$w_length  = GETFIELD(WKSprname);
+    SKIPTO(':');
 
 // Next, image name - N.B. image name may not have ":" in it.
     WKSimname_Desc = GETFIELD(WKSimname);
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Next, $CREPRC status flags. Comma-separated list of keywords.
     WKSstat = PARSE_PRCSTATUS();
 
 // Next, $CREPRC priviliges. Comma-separated list of keywords.
-    PARSE_PRCPRIVS(WKSPRIV);
+    PARSE_PRCPRIVS(wkspriv);
 
 // Parse the process quotas
     if (PARSE_NULLFIELD())
-	SKIPTO(%C":")
+      SKIPTO(':');
     else
 	Quota_Desc->dsc$w_length = PARSE_PRCQUOTAS(QUOTAS,MAXQUOTA)*QUOTA_BLEN;
 
 // Parse the process INPUT file
     if (PARSE_NULLFIELD())
 	{
-	SKIPTO(%C":");
-	STR$COPY_DX ( WKSInput_Desc , %ASCID"_NLA0:" )
+	SKIPTO(':');
+STR$COPY_DX ( WKSInput_Desc , ASCID("_NLA0:") );
 	}
     else
 	{
-	WKSInput_Desc [dsc$w_length] = GETFIELD(WKSInput);
-	SKIPTO(%C":")
+	WKSInput_Desc -> dsc$w_length  = GETFIELD(WKSInput);
+SKIPTO(':');
 	};
 
 // Parse the process OUTPUT file
     if (PARSE_NULLFIELD())
 	{
-	SKIPTO(%C":");
-	STR$COPY_DX ( WKSOutput_Desc , %ASCID"_NLA0:" )
+	SKIPTO(':');
+STR$COPY_DX ( WKSOutput_Desc , ASCID("_NLA0:") );
 	}
     else
 	{
-	WKSOutput_Desc [dsc$w_length] = GETFIELD(WKSOutput);
-	SKIPTO(%C":")
+	WKSOutput_Desc -> dsc$w_length  = GETFIELD(WKSOutput);
+SKIPTO(':');
 	};
 
 // Parse the process ERROR stream
     if (PARSE_NULLFIELD())
 	{
-	SKIPTO(%C":");
-	STR$COPY_DX ( WKSError_Desc , %ASCID"_NLA0:" );
+	SKIPTO(':');
+	STR$COPY_DX ( WKSError_Desc , ASCID("_NLA0:") );
 	}
     else
 	{
-	WKSError_Desc [dsc$w_length] = GETFIELD(WKSError);
-	SKIPTO(%C":")
+	WKSError_Desc -> dsc$w_length  = GETFIELD(WKSError);
+	SKIPTO(':');
 	};
 
 // Next, priority value
-    if (GET_DEC_NUM(LINPTR,WKSprior) LSS 0)
-	Config_Err(%ASCID"Bad priority value");
-    SKIPTO(%C":");
+    if (GET_DEC_NUM(linptr,WKSprior) < 0)
+	Config_Err(ASCID("Bad priority value"));
+    SKIPTO(':');
 
 // Next the number of outstanding SYN's we will allow for this server.
-    if (GET_DEC_NUM(LINPTR,WKSqlim) LSS 0)
-	Config_Err(%ASCID"Bad queue limit value");    
+    if (GET_DEC_NUM(linptr,WKSqlim) < 0)
+	Config_Err(ASCID("Bad queue limit value"));    
 
 // Now, find out what the maximum number of servers permitted is.  If zero
 // or error, then set to unlimited (0).  (This is actually GLBOAL_MAXSRV as
 // defined in TCP_SEGIN.BLI.
 //
 	WKSmaxsrv = 0;
-	if ((CH$RCHAR_A(LINPTR) == %C":"))
-	    if (GET_DEC_NUM(LINPTR,WKSmaxsrv) LSS 0)
+	if ((CH$RCHAR_A(linptr) == ':'))
+	    if (GET_DEC_NUM(linptr,WKSmaxsrv) < 0)
 		WKSmaxsrv = 0;
 
 // Tell the configuration routine in SEGIN about this guy.
 
     Seg$WKS_Config(WKSport, WKSprname_Desc, WKSimname_Desc, WKSstat,
-		WKSpriv,WKSprior,WKSqlim,WKSmaxsrv,Quota_Desc,
+		wkspriv,WKSprior,WKSqlim,WKSmaxsrv,Quota_Desc,
 		WKSInput_Desc,WKSOutput_Desc,WKSError_Desc);
     }
 
@@ -1578,53 +1587,53 @@ extern	RPC$CONFIG();
 	RPCprot,
 	RPCport,
 	RPCname[STRSIZ],
-	RPCname_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= RPCname),
-	RPCimname [STRSIZ],
-	RPCimname_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= RPCimname);
+      RPCimname [STRSIZ];
+struct dsc$descriptor RPCname_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :RPCname}, *RPCname_Desc=&RPCname_Desc_;
+struct dsc$descriptor RPCimname_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :RPCimname}, *RPCimname_Desc=&RPCimname_Desc_;
 
 // Skip delimiter
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // First, get the service name
-    RPCname_Desc [dsc$w_length] = GETFIELD(RPCname);
-    SKIPTO(%C":");
+    RPCname_Desc -> dsc$w_length  = GETFIELD(RPCname);
+    SKIPTO(':');
 
 // Next, get the program number
-    if (GET_DEC_NUM(LINPTR,RPCprog) LSS 0)
-	Config_Err(%ASCID"Bad RPC program number");
-    SKIPTO(%C":");
+    if (GET_DEC_NUM(linptr,RPCprog) < 0)
+	Config_Err(ASCID("Bad RPC program number"));
+    SKIPTO(':');
 
 // Next, get the version number
-    if (GET_DEC_NUM(LINPTR,RPCvers) LSS 0)
-	Config_Err(%ASCID"Bad RPC version number");
-    SKIPTO(%C":");
+    if (GET_DEC_NUM(linptr,RPCvers) < 0)
+	Config_Err(ASCID("Bad RPC version number"));
+    SKIPTO(':');
 
 // Next, get the protocol number
-    if (GET_DEC_NUM(LINPTR,RPCprot) LSS 0)
-	Config_Err(%ASCID"Bad RPC protocol number");
-    SKIPTO(%C":");
+    if (GET_DEC_NUM(linptr,RPCprot) < 0)
+	Config_Err(ASCID("Bad RPC protocol number"));
+    SKIPTO(':');
 
 // Next, get the port number
-    if (GET_DEC_NUM(LINPTR,RPCport) LSS 0)
-	Config_Err(%ASCID"Bad RPC port number");
-    SKIPTO(%C":");
+    if (GET_DEC_NUM(linptr,RPCport) < 0)
+	Config_Err(ASCID("Bad RPC port number"));
+    SKIPTO(':');
 
 // Next, image name - N.B. image name may not have ":" in it.
     RPCimname_Desc = GETFIELD(RPCimname);
-//    SKIPTO(%C":");
+//    SKIPTO(':');
 
 // Tell the configuration routine in the RPC module about this guy.
 
     RC=RPC$CONFIG( RPCname_Desc,RPCprog,RPCvers,RPCprot,RPCport,RPCimname_Desc);
-    if (RC LSS 0) Config_Err(%ASCID"Can not accept RPC config entry");
+    if (RC < 0) Config_Err(ASCID("Can not accept RPC config entry"));
     }
 
 //SBTTL "Init_Auth - Add an authorization entry"
@@ -1645,34 +1654,34 @@ extern	RPC$CONFIG_AUTH();
 	AUTHuic,
 	AUTHuid,
 	AUTHgid,
-	AUTHhostname [STRSIZ],
-	AUTHhostname_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= AUTHhostname);
+      AUTHhostname [STRSIZ];
+struct dsc$descriptor AUTHhostname_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :AUTHhostname}, *  AUTHhostname_Desc = & AUTHhostname_Desc_;
 
 // Skip delimiter
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // First, get the VMS uic number
-    if (GET_HEX_NUM(LINPTR,AUTHuic) LSS 0)
-	Config_Err(%ASCID"Bad AUTH uic number");
-    SKIPTO(%C":");
+    if (GET_HEX_NUM(linptr,AUTHuic) < 0)
+	Config_Err(ASCID("Bad AUTH uic number"));
+    SKIPTO(':');
 
 // Next, get the net uid number
-    if (GET_DEC_NUM(LINPTR,AUTHuid) LSS 0)
-	Config_Err(%ASCID"Bad AUTH uid number");
-    SKIPTO(%C":");
+    if (GET_DEC_NUM(linptr,AUTHuid) < 0)
+	Config_Err(ASCID("Bad AUTH uid number"));
+    SKIPTO(':');
 
 // Next, host name - N.B. host name may not have ":" in it.
     AUTHhostname_Desc = GETFIELD(AUTHhostname);
-//    SKIPTO(%C":");
+//    SKIPTO(':');
 
 // Tell the configuration routine in the RPC module about this guy.
 
     RC=RPC$CONFIG_AUTH(AUTHuic, AUTHuid, AUTHgid, AUTHhostname_Desc);
-    if ((RC LSS 0)) Config_Err(%ASCID"Can not accept AUTH config entry");
+    if ((RC < 0)) Config_Err(ASCID("Can not accept AUTH config entry"));
     }
 
 //SBTTL "Init_MBXResolver - Define the system name resolver process"
@@ -1685,36 +1694,36 @@ void Init_MBXResolver (void)
     {
 extern	void NML$CONFIG();
     signed long
-	IMAGENAME [STRSIZ],
-	ImageName_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= imagename),
+	imagename [STRSIZ],
 	STATFLAGS,
 	PRIORITY,
-	PRIVS : VECTOR[2],
-	QUOTAS : BLOCK[MAXQUOTA*QUOTA_BLEN] FIELD(QUOTA_FIELDS),
-	Quota_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[dsc$w_length]	= 0,
-				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
-				[dsc$b_class]	= DSC$K_CLASS_Z,
-				[dsc$a_pointer]	= Quotas);
+	PRIVS[2],
+	QUOTAS[MAXQUOTA*QUOTA_BLEN];
+struct dsc$descriptor ImageName_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :imagename}, *ImageName_Desc = &ImageName_Desc_;
+struct dsc$descriptor Quota_Desc_ = {
+				dsc$w_length :0,
+				dsc$b_dtype :DSC$K_DTYPE_Z,
+				dsc$b_class :DSC$K_CLASS_Z,
+				dsc$a_pointer :QUOTAS}, * Quota_Desc = &Quota_Desc;
 
 // Skip delimiter
 
-    SKIPTO(%C":");
+    SKIPTO(':');
 
 // Parse the image name
 
-    ImageName_Desc [dsc$w_length] = GETFIELD(IMAGENAME);
-    SKIPTO(%C":");
+    ImageName_Desc -> dsc$w_length  = GETFIELD(imagename);
+    SKIPTO(':');
 
 // Parse the priority value
 
-    if (GET_DEC_NUM(LINPTR,PRIORITY) LSS 0)
-	Config_Err(%ASCID"Bad priority value");
-    SKIPTO(%C":");
+    if (GET_DEC_NUM(linptr,PRIORITY) < 0)
+	Config_Err(ASCID("Bad priority value"));
+    SKIPTO(':');
 
 // Parse the process status values
 
@@ -1726,12 +1735,12 @@ extern	void NML$CONFIG();
 
 // Parse the process quotas
 
-    Quota_Desc [dsc$w_length] = PARSE_PRCQUOTAS(QUOTAS,MAXQUOTA) * QUOTA_BLEN;
+    Quota_Desc -> dsc$w_length  = PARSE_PRCQUOTAS(QUOTAS,MAXQUOTA) * QUOTA_BLEN;
 
 // Call the name resolver configuration routine
 
-    NML$CONFIG(IMAGENAME_Desc, PRIORITY, STATFLAGS, PRIVS,
-	       QUOTA_Desc);
+    NML$CONFIG(ImageName_Desc, PRIORITY, STATFLAGS, PRIVS,
+	       Quota_Desc);
     }
 
 //SBTTL "Add an entry to the local hosts list"
@@ -1749,15 +1758,15 @@ extern	void USER$ACCESS_CONFIG();
 
 // First, read the host address
 
-    SKIPTO(%C":");
-    if (GET_IP_ADDR(LINPTR,hostaddr) LSS 0)
-	Config_err(%ASCID"Bad host address");
+    SKIPTO(':');
+    if (GET_IP_ADDR(linptr,hostaddr) < 0)
+	Config_err(ASCID("Bad host address"));
 
 // Then, the host mask
 
-    SKIPTO(%C":");
-    if (GET_IP_ADDR(LINPTR,hostmask) LSS 0)
-	Config_err(%ASCID"Bad host mask");
+    SKIPTO(':');
+    if (GET_IP_ADDR(linptr,hostmask) < 0)
+	Config_err(ASCID("Bad host mask"));
 
 // Got the info. Call routine to add to the list
 
@@ -1766,17 +1775,17 @@ extern	void USER$ACCESS_CONFIG();
 
 //SBTTL "Parsing utility routines"
 
-SKIPTO(TCHR) : NOVALUE (void)
+void SKIPTO(TCHR)
 
 // Skip characters past a given character in line buffer.
 
     {
     signed long
 	CHR;
-    while ((CHR = CH$RCHAR_A(LINPTR)) != 0)
+    while ((CHR = CH$RCHAR_A(linptr)) != 0)
 	if (CHR == TCHR)
 	    return;
-    Config_err(%ASCID"SKIPTO failure (EOL)");
+    Config_err(ASCID("SKIPTO failure (EOL)"));
     }
 
 void SKIPWHITE (void)
@@ -1786,19 +1795,19 @@ void SKIPWHITE (void)
     {
     signed long
         CHR,LPTR;
-    LPTR = LINPTR;
+    LPTR = linptr;
     while ((CHR = CH$RCHAR_A(LPTR)) != 0)
 	{
-	if (CHR != %C" ")
+	if (CHR != ' ')
 	    return;
-	LINPTR = LPTR;
+	linptr = LPTR;
 	};
-    Config_err(%ASCID"SKIPWHITE failure (EOL)");
+	Config_err(ASCID("SKIPWHITE failure (EOL)"));
     }
 
 GETFIELD(FLDADR)
     
-// Read a field the current record (LINPTR). A field is defined as the a
+// Read a field the current record (linptr). A field is defined as the a
 // sequence of non-whitespace characters up to whitespace or a field
 // delimiter (currently ",', '=' and ':"). Returns field size on success
 // with the field text (case-folded) at FLDADR.
@@ -1809,28 +1818,28 @@ GETFIELD(FLDADR)
         PTR,CHR,CNT,DSTPTR;
 
     SKIPWHITE();
-    PTR = LINPTR;
+    PTR = linptr;
     DSTPTR = CH$PTR(FLDADR);
     CNT = 0;
-    WHILE ((CHR = CH$RCHAR_A(PTR)) != 0) AND
-	  (CHR != %C",') && (CHR != %C':') && (CHR != %C' ") AND
-	  (CHR != %C"=") DO
+    while (((CHR = CH$RCHAR_A(PTR)) != 0) &&
+	  (CHR != ',') && (CHR != ':') && (CHR != ' ') &&
+	   (CHR != '='))
 	{
-	LINPTR = PTR;
+	linptr = PTR;
 	CNT = CNT+1;
-	if ((CHR GEQ %C"a') && (CHR <= %C'z"))
-	    CHR = CHR-(%C"a'-%C'A");
+	if ((CHR > 'a') && (CHR <= 'z'))
+	    CHR = CHR-('a'-'A');
 	CH$WCHAR_A(CHR,DSTPTR);
 	};
     CH$WCHAR_A(0,DSTPTR);
     if (cnt == 0)
-	Config_err(%ASCID"Bad or null field found");
+	Config_err(ASCID("Bad or null field found"));
     return cnt;
     }
 
 PARSE_NULLFIELD (void)
     
-// Read a field the current record (LINPTR). A field is defined as the a
+// Read a field the current record (linptr). A field is defined as the a
 // sequence of non-whitespace characters up to whitespace or a field
 // delimiter (currently ",', '=' and ':"). Returns field size on success
 // with the field text (case-folded) at FLDADR.
@@ -1841,12 +1850,12 @@ PARSE_NULLFIELD (void)
         PTR,CHR;
 
     SKIPWHITE();
-    PTR = LINPTR;
+    PTR = linptr;
 
-    IF ((CHR = CH$RCHAR_A(PTR)) != 0) AND
-	  (CHR != %C",') && (CHR != %C':') && (CHR != %C' ") AND
-	  (CHR != %C"=") THEN 0
-    else 1
+    if (((CHR = CH$RCHAR_A(PTR)) != 0) &&
+	  (CHR != ',') && (CHR != ':') && (CHR != ' ') &&
+    (CHR != '=')) return 0;
+    else return 1;
 
     }
 
@@ -1879,56 +1888,56 @@ Side Effects:
 
 void CNF$Net_Device_Init (void)
     {
-    externAL
+    extern
 	RETRY_COUNT,
 	MAX_PHYSICAL_BUFSIZE;
     signed long
-	j,
+	J,
       cdev;
 	struct Device_Configuration_Entry * dev_config;
 
-    Dev_attn = 0;		// No devices need attention
-    for (j=0;j<=(Dev_count-1);j++)
+    dev_attn = 0;		// No devices need attention
+    for (J=0;J<=(dev_count-1);J++)
 	{
-	if (Dev_Config_Tab[J,dc_valid_Device])
+	if (dev_config_tab[J].dc_valid_device)
 	    {
 DESC$STR_ALLOC(oprmsg,80);
 DESC$STR_ALLOC(ipstr,20);
 		DESC$STR_ALLOC(phystr,50);
+		struct dsc$descriptor * devnam;
 	    signed long
-		struct $BBLOCK * devnam->DSC$K_S_BLN,
       stastr;
 
 // Initialize this device
 
-	    if (Dev_Config_Tab[j,dc_is_clone])
-		cdev = Dev_Config_Tab[j,dc_clone_dev]
+	    if (dev_config_tab[J].dc_is_clone)
+     cdev = dev_config_tab[J].dc_clone_dev;
 	    else
 		{
-		cdev = j;
-		(Dev_config_Tab[j,dc_rtn_init])(Dev_config_Tab[j,dc_begin],
+		cdev = J;
+		(dev_config_tab[J].dc_rtn_Init)(dev_config_tab[J].dc_begin,
 				IPACP_Int,
-				.RETRY_COUNT,
-				.MAX_PHYSICAL_BUFSIZE);
+				RETRY_COUNT,
+				MAX_PHYSICAL_BUFSIZE);
 		};
 
 // And tell the operator the status.
 
-	    devnam = dev_config_tab[j,dc_devname];
-//	    ASCII_Hex_Bytes(phystr,dev_config_tab[cdev,dc_phy_size],
+	    devnam = &dev_config_tab[J].dc_devname;
+//	    ASCII_Hex_Bytes(phystr,dev_config_tab[cdev].dc_phy_size,
 //			    dev_config[cdev,dc_phy_addr],
 //			    phystr->dsc$w_length);
-	    ASCII_Dec_Bytes(ipstr,4,dev_config_tab[j,dc_ip_address],
+	    ASCII_Dec_Bytes(ipstr,4,dev_config_tab[J].dc_ip_address,
 			    ipstr->dsc$w_length);
-	    if (dev_config_tab[cdev,dc_online])
-		stastr = %ASCID"Online"
+	    if (dev_config_tab[cdev].dc_online)
+     stastr = ASCID("Online");
 	    else
-		stastr = %ASCID"Offline";
+		stastr = ASCID("Offline");
 
 	    OPR$FAO("Net device !SL is !AS, IP=!AS (!AS)",
-		    j,devnam,ipstr,stastr);
+		    J,devnam,ipstr,stastr);
 
-	    dev_config_tab[cdev,dcmib_ifIndex] = cdev;
+	    dev_config_tab[cdev].dcmib_ifIndex = cdev;
 
 	    };
 	};
@@ -1944,8 +1953,8 @@ static signed long
 
 void CNF$Check_Sched (void)
     {
-    $SETIMR(	DAYTIM = CHECKTIME,
-		ASTADR = CNF$Check_Devices);
+    exe$setimr(	0,  CHECKTIME,
+		CNF$Check_Devices, 0, 0);
     }
 
 void CNF$Device_Error (void)
@@ -1958,13 +1967,13 @@ void CNF$Device_Error (void)
 void CNF$Check_Devices (void)
     {
     register i;
-    for (i=0;i<=(Dev_count-1);i++)
-	IF Dev_Config_tab[i,dc_valid_device] && 
-	   (NOT Dev_Config_tab[i,dc_online]) AND
-	   (NOT Dev_Config_tab[i,dc_is_clone]) THEN
+    for (i=0;i<=(dev_count-1);i++)
+	if (dev_config_tab[i].dc_valid_device && 
+	   (! dev_config_tab[i].dc_online) &&
+	   (! dev_config_tab[i].dc_is_clone))
 	     // Try to restart
-	    dev_attn = dev_attn + (Dev_config_tab[i,dc_rtn_check])(
-						Dev_config_tab[i,dc_begin]);
+	    dev_attn = dev_attn + (dev_config_tab[i].dc_rtn_check)(
+						dev_config_tab[i].dc_begin);
 
     if (dev_attn != 0)
 	CNF$Check_Sched();		// Reschedule if there is still a problem
@@ -1978,8 +1987,5 @@ void CNF$Check_Devices (void)
 //
 CNF$Get_Local_IP_addr (void)
     {
-    Dev_Config_Tab[0,dc_ip_address]
+      return dev_config_tab[0].dc_ip_address;
     }
-
-}
-ELUDOM

@@ -451,11 +451,11 @@ signed long LITERAL
 
 // Define block for storing allowed hosts.
 
-$FIELD ACCESS_FIELDS (void)
-    SET
-    AC$HOST	= [$BYTES(4)],
-    AC$MASK	= [$BYTES(4)]
-    TES;
+struct ACCESS_LIST
+{
+  long   AC$HOST;
+  long    AC$MASK;
+};
 LITERAL
     ACCESS_SIZE = $FIELD_SET_SIZE,
     ACCESS_MAX = 20;
@@ -675,7 +675,7 @@ Side Effects:
 
 */
 
-USER$POST_FUNCTION_OK(struct User_Default_Args * Arg): NOVALUE (void)
+void USER$POST_FUNCTION_OK(struct User_Default_Args * Arg)
     {
     signed long
     IRP;
@@ -698,9 +698,9 @@ USER$POST_FUNCTION_OK(struct User_Default_Args * Arg): NOVALUE (void)
 // Common routine used by TCP and UDP to return connection info
 // (local/foreign host numbers,names and ports)
 
-USER$Net_Connection_Info(struct User_Info_Args * Uargs,
+void USER$Net_Connection_Info(struct User_Info_Args * Uargs,
 			     Lcl_Host,Frn_Host,Lcl_Port,Frn_Port,
-void 			     Frn_Name,Frn_Nlen) (void)
+ 			     Frn_Name,Frn_Nlen)
     {
 	struct Connection_Info_Return_Block * CS;
 
@@ -841,7 +841,7 @@ Side Effects:
 
 */
 
-Net$Debug(struct Debug_Args * UArgs): NOVALUE (void)
+void Net$Debug(struct Debug_Args * UArgs)
     {
     switch (UARGS->DE$GROUP)
 	SET
@@ -872,7 +872,7 @@ Side Effects:
 
 */
 
-Net$Event(struct Event_Args * UArgs): NOVALUE (void)
+void Net$Event(struct Event_Args * UArgs)
     {
 extern	MM$Get_Mem(), MM$Free_Mem();
     signed long
@@ -938,7 +938,7 @@ Output:
 	buffer is filled with requested dump data.
 */
 
-NET$SNMP(struct SNMP_Args * Uargs): NOVALUE (void)
+void NET$SNMP(struct SNMP_Args * Uargs)
     {
 extern	SNMP$USER_INPUT(),
 	MM$Get_Mem(), MM$Free_Mem();
@@ -1011,7 +1011,7 @@ else
 
     MM$Free_Mem(In_Buff,UArgs->SNMP$WBuf_Size);
 
-    if (NOT Error)
+    if (! Error)
 	{
 
 // Check to see if user buffer is large enough to hold requested data.
@@ -1159,10 +1159,10 @@ FORWARD ROUTINE
 
 User$Brk (void)
     {
-    SS$_NORMAL
+      return    SS$_NORMAL;
     }
 
-void VMS$Cancel(struct VMS$Cancel_Args * Uargs) (void)
+void VMS$Cancel(struct VMS$Cancel_Args * Uargs)
     {
 extern 	TCP$Cancel();
 extern 	UDP$Cancel();
@@ -1390,9 +1390,9 @@ extern	   ICMP$ICMPCB_Dump();
 
     case du$device_dump:
 	{
-	IF (uargs->du$device_idx geq 0) AND
+	if ((uargs->du$device_idx geq 0) AND
 	   (uargs->du$device_idx leq DC_max_num_net_Devices-1) AND
-	   (Dev_Config_Tab[uargs->du$device_idx,dc_valid_Device]) THEN
+	   (Dev_Config_Tab[uargs->du$device_idx,dc_valid_Device]))
 	    {		// call device dump routine.
 	    bufsize = Uargs->DU$Buf_Size;
 	    if (bufsize > RBBYTES)
@@ -1400,7 +1400,7 @@ extern	   ICMP$ICMPCB_Dump();
 	    rc = (Dev_config_tab[uargs->du$device_idx, dc_rtn_Dump])
 		    (uargs->du$device_idx, uargs->du$ARG1, uargs->du$ARG2,
 		     rb, bufsize);
-	    if (NOT rc)
+	    if (! rc)
 		Error = USER$Err(uargs,NET$_epd); // error processing dump
 	    }
 	else
@@ -1463,7 +1463,7 @@ extern	    CNF$Device_stat();
 
 // Did we have an Error or Illegal Dump directive code?
 
-    if (NOT Error)
+    if (! Error)
 	{
 
 // Check to see if user buffer is large enough to hold requested data.
@@ -1506,7 +1506,7 @@ Side Effects:
 	IP: device and all clones are set offline.
 */
 
-Net$EXIT(struct Debug_EXIT_Args * Uargs): NOVALUE (void)
+void Net$EXIT(struct Debug_EXIT_Args * Uargs)
     {
 
     XLOG$FAO(LOG$USER,"!%T EXIT requested, User PID: !XL!/",0,Uargs->EX$PID);
@@ -1585,7 +1585,7 @@ Check_ID(PID,ID)
 
 // Retrieve the UIC for the process
 
-    if (NOT $GETJPIW(PIDADR=PID,ITMLST=JPI))
+    if (! $GETJPIW(PIDADR=PID,ITMLST=JPI))
 	return FALSE;
 
 // Check the rights database for this user
@@ -1629,7 +1629,7 @@ USER$CHECK_ACCESS(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
 // If we're checking acess for any network open, then check for INTERNET_ACCESS
 
     if (ACCESS_FLAGS<ACF$ALLOPENS>)
-	if (NOT CHECK_ID(PID,INTERNET_ID))
+	if (! CHECK_ID(PID,INTERNET_ID))
 	    return NET$_NOINA;
 
 // If we're checking access to non-local hosts, then do so
@@ -1642,17 +1642,17 @@ X:	{
 	for (I=(ACHOST_COUNT-1);I>=0;I--)
 	    if ((FRNHST && ACHOSTS[I,AC$MASK]) == ACHOSTS[I,AC$HOST])
 		LEAVE X;
-	if (NOT CHECK_ID(PID,ARPANET_ID))
+	if (! CHECK_ID(PID,ARPANET_ID))
 	    return NET$_NOANA;
 	};
 
 // If the local port is privileged, then require special privilege
 
     if (ACCESS_FLAGS<ACF$PRIVPORT>)
-	IF (((LCLPRT && %X"FFFF") GEQ Well_Known_LP_Start) AND
+	if ((((LCLPRT && %X"FFFF") GEQ Well_Known_LP_Start) AND
 	    ((LCLPRT && %X"FFFF") <= Well_Known_LP_End) && FRNPRT == 0) OR
-	   (FRNPRT == WKS$SMTP) THEN
-	    if (NOT User$Privileged(PID))
+	   (FRNPRT == WKS$SMTP))
+	    if (! User$Privileged(PID))
 		return NET$_NOPRV;
 
 // Passed all of the tests - let them have access to the network
@@ -1661,7 +1661,7 @@ X:	{
     }
 
 
-USER$ACCESS_CONFIG(HOSTNUM,HOSTMASK) : NOVALUE (void)
+void USER$ACCESS_CONFIG(HOSTNUM,HOSTMASK)
 //
 // Add an entry to the list of allowed local hosts. Called by CONFIG when
 // LOCAL_HOST entry seen in the config file.
@@ -1699,8 +1699,8 @@ void ACCESS_INIT (void)
 
     if (ACCESS_FLAGS<ACF$ALLOPENS>)
 	{
-	IF NOT $ASCTOID(NAME	= INTERNET_STRING,
-			ID	= INTERNET_ID) THEN
+	if (! $ASCTOID(NAME	= INTERNET_STRING,
+			ID	= INTERNET_ID))
 	    {
 	    OPR$FAO("% Failed to find identifier !AS - access check disabled",
 		    INTERNET_STRING);
@@ -1713,8 +1713,8 @@ void ACCESS_INIT (void)
 
     if (ACCESS_FLAGS<ACF$ARPAHOST>)
 	{
-	IF NOT $ASCTOID(NAME	= ARPANET_STRING,
-			ID	= ARPANET_ID) THEN
+	if (! $ASCTOID(NAME	= ARPANET_STRING,
+			ID	= ARPANET_ID))
 	    {
 	    OPR$FAO("% Failed to find identifier !AS - access check disabled",
 		    ARPANET_STRING);
@@ -1757,7 +1757,7 @@ LITERAL
     ALBSIZE = GTHST_ADLOOK_RET_ARGS_LENGTH*4,
     RLBSize = 6;
 
-void NET$GTHST(struct GTHST_Args * Uargs) (void)
+void NET$GTHST(struct GTHST_Args * Uargs)
     {
 
 // Dispatch the GTHST subfunction
@@ -1889,7 +1889,7 @@ void GTHST_NMLOOK_DONE(Uargs,Status,Adrcnt,Adrlst,Namlen,Nambuf)
 
 // If an error occurred, give it to the user
 
-    if (NOT Status)
+    if (! Status)
 	{
 	USER$Err(Uargs,Status);
 	return;
@@ -1926,7 +1926,7 @@ void GTHST_ADLOOK_DONE(Uargs,Status,Namlen,Nambuf)
 
 // If an error occurred, give it to the user
 
-    if (NOT Status)
+    if (! Status)
 	{
 	USER$Err(Uargs,Status);
 	return;
@@ -1963,7 +1963,7 @@ void GTHST_RRLOOK_DONE(Uargs,Status,RDLen,RData,Namlen,Nambuf)
 
 // If an error occurred, give it to the user
 
-    if (NOT Status)
+    if (! Status)
 	{
 	USER$Err(Uargs,Status);
 	return;
@@ -1996,10 +1996,9 @@ void GTHST_RRLOOK_DONE(Uargs,Status,RDLen,RData,Namlen,Nambuf)
 
 //SBTTL "GTHST_CANCEL - Cancel GTHST requests for a process"
 
-FORWARD ROUTINE
- void    GTHST_CANCEL_ONE;
+ void    GTHST_CANCEL_ONE();
 
-Void GTHST_CANCEL(struct VMS$CANCEL_ARGS * Uargs) (void)
+void GTHST_CANCEL(struct VMS$CANCEL_ARGS * Uargs)
 //
 // Search the list of pending GTHST requests looking for match. If found,
 // post it now and delete from the queue.
@@ -2008,7 +2007,7 @@ Void GTHST_CANCEL(struct VMS$CANCEL_ARGS * Uargs) (void)
     NML$STEP(GTHST_CANCEL_ONE,Uargs);
     }
 
-GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS) : NOVALUE (void)
+void GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS)
 //
 // Check a single entry from the name lookup queue to see if it belongs to
 // the process that is doing the cancel. If so, we will cancel it.
@@ -2020,9 +2019,9 @@ GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS) : NOVALUE (void)
 // Do sanity check on AST routine. Only GTHST done routines should be attached
 // to GTHST requests.
 
-    IF (ASTADR != GTHST_NMLOOK_DONE) AND
+    if ((ASTADR != GTHST_NMLOOK_DONE) AND
 	(ASTADR != GTHST_ADLOOK_DONE) AND
-	(ASTADR != GTHST_RRLOOK_DONE) THEN
+	(ASTADR != GTHST_RRLOOK_DONE))
 	return;
 
 // See if the UCB of the cancellor is the same as that of the request. If so,
@@ -2033,8 +2032,7 @@ GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS) : NOVALUE (void)
 	NML$CANCEL(UARGS,TRUE,NET$_CCAN);
     }
 
-FORWARD ROUTINE
- void    GTHST_PURGE_ONE;
+ void    GTHST_PURGE_ONE();
 
 void GTHST_PURGE (void)
 //
@@ -2045,7 +2043,7 @@ void GTHST_PURGE (void)
     NML$STEP(GTHST_PURGE_ONE,0);
     }
 
-GTHST_PURGE_ONE(COVALUE,ASTADR,UARGS) : NOVALUE (void)
+void GTHST_PURGE_ONE(COVALUE,ASTADR,UARGS)
 //
 // Coroutine for NML$STEP/GTHST_PURGE
 //
@@ -2054,9 +2052,9 @@ GTHST_PURGE_ONE(COVALUE,ASTADR,UARGS) : NOVALUE (void)
 // Do sanity check on AST routine. Only GTHST done routines should be attached
 // to GTHST requests.
 
-    IF (ASTADR != GTHST_NMLOOK_DONE) AND
+    if ((ASTADR != GTHST_NMLOOK_DONE) AND
 	(ASTADR != GTHST_ADLOOK_DONE) AND
-	(ASTADR != GTHST_RRLOOK_DONE) THEN
+	(ASTADR != GTHST_RRLOOK_DONE))
 	return;
     NML$CANCEL(UARGS,TRUE,NET$_TE);
     }
@@ -2108,7 +2106,7 @@ void USER$Process_User_Requests (void)
 extern 	void TCP$OPEN();
 extern 	void TCP$CLOSE();
 extern 	void TCP$ABORT();
-extern 	TCP$SEND : NOVALUE();
+extern void	TCP$SEND ();
 extern 	void TCP$RECEIVE();
 extern 	void TCP$INFO();
 extern 	void TCP$STATUS();
@@ -2117,7 +2115,7 @@ extern 	void TCP$STATUS();
 extern 	void UDP$OPEN();
 extern 	void UDP$CLOSE();
 extern 	void UDP$ABORT();
-extern 	UDP$SEND : NOVALUE();
+extern void 	UDP$SEND ();
 extern 	void UDP$RECEIVE();
 extern 	void UDP$INFO();
 extern 	void UDP$STATUS();
@@ -2126,7 +2124,7 @@ extern 	void UDP$STATUS();
 extern 	void ICMP$OPEN();
 extern 	void ICMP$CLOSE();
 extern 	void ICMP$ABORT();
-extern 	ICMP$SEND : NOVALUE();
+extern void 	ICMP$SEND ();
 extern 	void ICMP$RECEIVE();
 extern 	void ICMP$INFO();
 extern 	void ICMP$STATUS();
@@ -2135,7 +2133,7 @@ extern 	void ICMP$STATUS();
 extern 	void IPU$OPEN();
 extern 	void IPU$CLOSE();
 extern 	void IPU$ABORT();
-extern 	IPU$SEND : NOVALUE();
+extern 	void IPU$SEND ();
 extern 	void IPU$RECEIVE();
 extern 	void IPU$INFO();
 extern 	void IPU$STATUS();

@@ -221,6 +221,8 @@ MODULE XE_DRIVER(IDENT="5.0a",LANGUAGE(BLISS32),
 #include <iodef.h>
 #include <ssdef.h>
 #include <nmadef.h>
+#include <descrip.h>
+#include <xmdef.h>
 
 // NETMACLIB.OBJ
 extern    Time_Stamp();
@@ -253,7 +255,7 @@ long    XE_descriptor[2];
 static 
     // DRV$Device_Info is a list of everything we want the IPACP
     // to know about us...  Initialized by ROUTINE DRV$TRANSPORT_INIT.
-    struct Device_Info_Structure * DRV$Device_Info;
+     Device_Info_Structure * DRV$Device_Info;
 
     // The IPACP_Interface tells us all about the IPACP.  It gives us
     // entry points, literals and global pointers.  See NETDEVICES.REQ
@@ -265,11 +267,11 @@ static
 
  void    XE_Shutdown();
 
-#define XE$ERR(XE_Int) \
-    { \
-    /*DRV$OPR_FAO(%REMAINING); */ /* check */ \
-    XE_Shutdown(XE_Int,true); \
-    } 
+static XE$ERR(XE_Int)
+  {
+    /*DRV$OPR_FAO(%REMAINING); */ /* check */
+    XE_Shutdown(XE_Int,TRUE);
+  } 
 
 
 
@@ -281,9 +283,9 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
       RC;
     struct XERCV_QB_structure * Buff;
 	struct xe_arp_structure * ARbuf;
-      struct XERCV_QB_structure * rcvhdrs = XE_Int->XEI$rcvhdrs ;
-      short XE_chan = XE_Int->XEI$IO_Chan;
-	short XAR_chan = XE_Int->XEI$ARP_IO_Chan;
+      struct XERCV_structure * rcvhdrs = XE_Int->XEI$rcvhdrs ;
+      short XE_chan = XE_Int->xei$io_chan;
+	short XAR_chan = XE_Int->xei$arp_io_chan;
 
 // Supply four receive buffers to device controller
 
@@ -311,8 +313,8 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
 // get ARP buffer and issue a receive qio
 
     ARbuf = DRV$Seg_get(XE_ARP_LEN*4);
-    XE_Int-> XEI$ARP_Buffer  = ARbuf;
-    RC = exe$qio(	ARPEFN, XE_Int-> XEI$ARP_IO_Chan ,
+    XE_Int-> xei$arp_buffer  = ARbuf;
+    RC = exe$qio(	ARPEFN, XE_Int-> xei$arp_io_chan ,
 		IO$_READVBLK,
 		ARbuf -> ar_ios0 ,
 			XE_ArpRcv, XE_Int,
@@ -374,10 +376,10 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 
 // Change XE$W_mca_mode to NMA$C_LINMC_SET if you want IP broadcasts.
 
-    Setup [XE$c_pcli_mca]     = NMA$C_PCLI_MCA;
-    Setup [XE$W_MCA_Length]   = 2 + XE_ADR_SIZE;
-    Setup [XE$W_MCA_MODE]     = NMA$C_LINMC_CLR;
-    CH$MOVE (XE_ADR_SIZE, XE_BROADCAST, Setup [XE$L_MCA_Address]);
+    Setup ->XE$c_pcli_mca     = NMA$C_PCLI_MCA;
+    Setup ->XE$w_mca_length   = 2 + XE_ADR_SIZE;
+    Setup ->xe$w_mca_mode     = NMA$C_LINMC_CLR;
+    CH$MOVE (XE_ADR_SIZE, XE_BROADCAST, Setup ->XE$L_mca_address);
 
 // If he wants us to set the physical address, then do so.
 
@@ -386,53 +388,53 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 	Setup->XE$c_pcli_pha = NMA$C_PCLI_PHA;
 	Setup->XE$w_pcli_phlen = XE_ADR_SIZE+2;
 	Setup->XE$w_pcli_phmode = NMA$C_LINMC_SET;
-	CH$MOVE(XE_ADR_SIZE,CH$PTR(setaddr),CH$PTR(setup->XE$l_pcli_phaddr));
-	plen = Setup->XE$setup_pha_end - Setup;
+	CH$MOVE(XE_ADR_SIZE,CH$PTR(setaddr),CH$PTR(Setup->XE$l_pcli_phaddr));
+	plen = (long)Setup->xe$setup_pha_end - (long)Setup;
 	}
     else
-	plen = Setup->XE$setup_end - Setup;
+	plen = (long)Setup->xe$setup_end - (long)Setup;
 
 // Set up for IP protocol on this channel
 
     Setup->XE$l_protocol      = XE_IP_type;	// IP
     Swapbytes(1,Setup->XE$l_protocol);
 
-    Paramdescr->XE$setup_length = plen;
-    Paramdescr->XE$setup_address = Setup;
+    Paramdescr->xe$setup_length = plen;
+    Paramdescr->xe$setup_address = Setup;
 
 // Issue the startup command to controller
 
-    RC = exe$qiow (1, XE_Int->XEI$IO_chan,
-		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,ios,0,0,0,Paramdescr);
-    if (NOT( (RC == SS$_NORMAL) and (IOS->XE$vms_code == SS$_NORMAL) ))
+    RC = exe$qiow (1, XE_Int->xei$io_chan,
+		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr);
+    if (!( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
 	{
-	if (IOS->XE$vms_code == SS$_BADPARAM)
+	if (IOS->xe$vms_code == SS$_BADPARAM)
 	   XE$ERR(XE_Int,"XE startup failure, RC=!XL,VMS_code=!XL,Param=!XL",
-	       RC,IOS->XE$VMS_Code,IOS[1,0,32,0])
+		  RC,IOS->xe$vms_code,((long *)IOS)[1]);
 	else
 	   XE$ERR(XE_Int,"XE startup failure, RC=!XL,VMS_code=!XL,Xfer size=!SL",
-	       RC,IOS->XE$VMS_Code,IOS->XE$Tran_size);
+	       RC,IOS->xe$vms_code,IOS->xe$tran_size);
 	return 0;
 	};
 
 // Modify the setup block for the arp responder
 
     Setup->XE$l_protocol = XE_ARP_type;
-    Setup->XE$W_mca_mode = NMA$C_LINMC_SET;
+    Setup->xe$w_mca_mode = NMA$C_LINMC_SET;
 
     Swapbytes(1,Setup->XE$l_protocol);
-    Paramdescr->XE$setup_length = Setup->XE$setup_end - Setup;
-    Paramdescr->XE$setup_address = Setup;
+    Paramdescr->xe$setup_length = (long)Setup->xe$setup_end - (long)Setup;
+    Paramdescr->xe$setup_address = Setup;
 
 // Issue the startup command to controller
 
-    RC = exe$qiow (1, XE_Int->XEI$ARP_IO_chan,
-		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,ios,0,0,0,Paramdescr);
-    if (NOT( (RC == SS$_NORMAL) && (IOS->XE$vms_code == SS$_NORMAL) ))
+    RC = exe$qiow (1, XE_Int->xei$arp_io_chan,
+		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr);
+    if (NOT( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
 	{	// Startup command failed
 	XE$ERR(XE_Int,
 	       "XE ARP startup failure, RC=!XL,VMS_code=!XL,Xfer size=!SL",
-	       RC,IOS->XE$VMS_Code,IOS->XE$Tran_size);
+	       RC,IOS->xe$vms_code,IOS->xe$tran_size);
 	return 0;
 	};
 
@@ -442,9 +444,9 @@ XE_StartDev ( XE_Int , setflag , setaddr )
     }
 
 XE_SenseDev( struct XE_Interface_Structure * XE_Int,
-		     struct XE_Addrs_structure * phaddr,
-		     struct XE_Addrs_structure * hwaddr,
-		     online)
+		     struct xe_addrs_structure * phaddr,
+		     struct xe_Addrs_structure * hwaddr,
+		     long online)
 //
 // Read status of device.
 //   phaddr	pointer to area to store "physical" (decnet) address
@@ -462,48 +464,49 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 
 // Get info from controller
 
-    Paramdescr->XE$setup_length = %ALLOCATION (Sense);
-    Paramdescr->XE$setup_address = Sense;
+    Paramdescr->xe$setup_length = sizeof (Sense);
+    Paramdescr->xe$setup_address = Sense;
 
-    rc = exe$qiow (1, XE_Int->XEI$IO_chan,
-		IO$_SENSEMODE+IO$M_CTRL, ios, 0, 0, 0, Paramdescr);
-    if (NOT ((rc eql ss$_normal) && (IOS->XE$vms_code)))
+    RC = exe$qiow (1, XE_Int->xei$io_chan,
+		IO$_SENSEMODE+IO$M_CTRL, IOS, 0, 0, 0, Paramdescr);
+    if (! ((RC == SS$_NORMAL) && (IOS->xe$vms_code)))
 	{			// Statistics call failed
 	XE$ERR(XE_Int,
 	       "XE sense mode QIOW failure, RC=!XL,VMS_Code=!XL,Xfer size=!SL",
-	       RC,IOS->XE$VMS_code,IOS->XE$tran_size);
+	       RC,IOS->xe$vms_code,IOS->xe$tran_size);
 	return 0;
 	};
 
-    Paramdescr [XE$SETUP_LENGTH] = IOS [XE$Tran_Size];
+    Paramdescr->xe$setup_length = IOS ->xe$tran_size;
 
-    while (Paramdescr [XE$SETUP_LENGTH] > 0)
+    while (Paramdescr ->xe$setup_length > 0)
 	{
-	BIND
-	    Param = Paramdescr [XE$SETUP_ADDRESS] : $BBLOCK FIELD (XE_Sense);
+	  struct XE_Sense*  Param = Paramdescr ->xe$setup_address ;
 
-	Paramdescr [XE$SETUP_LENGTH] = Paramdescr [XE$SETUP_LENGTH] - 
+	Paramdescr ->xe$setup_length = Paramdescr ->xe$setup_length - 
 				XE_Param_Size (Param);
-	Paramdescr [XE$SETUP_ADDRESS] = Paramdescr [XE$SETUP_ADDRESS] +
+	Paramdescr ->xe$setup_address = Paramdescr ->xe$setup_address +
 				XE_Param_Size (Param);
 
 	switch (Param->XE_Sense_Param)
-	SET
-	CASE NMA$C_PCLI_PHA:
+	  {
+	case NMA$C_PCLI_PHA:
 	    CH$MOVE(XE_ADR_SIZE,CH$PTR(Param->XE_Sense_String),
 		    CH$PTR(phaddr));
+	    break;
 
-	CASE NMA$C_PCLI_HWA:
+	case NMA$C_PCLI_HWA:
 	    CH$MOVE(XE_ADR_SIZE,CH$PTR(Param->XE_Sense_String),
 		    CH$PTR(hwaddr));
-	TES
+	    break;
+	  }
 	};
 
 // See if the device is online
 //Ignore the timeout bit for DEQNA's
 
 //!!HACK!!// there may be a problem with XE$cmd_status.
-    online = (IOS->XE$cmd_status && %X"0FF00") == XM$M_STS_ACTIVE;
+    online = (IOS->XE$cmd_status && 0x0FF00) == XM$M_STS_ACTIVE;
 
 // Return success
 
@@ -517,19 +520,19 @@ XE_StartAll ( XE_Int , restart )
     {
     signed long
       online;
-    struct Device_Configuration_Entry * dev_config;
-    struct XE_addrs_structure * addrs;
-	struct XE_addrs_structure * hwaddr;
-	struct XE_addrs_structure * phaddr;
-	struct XE_addrs_structure * useaddr;
+     Device_Configuration_Entry * dev_config;
+    struct xe_addrs_structure * addrs;
+	struct xe_addrs_structure * hwaddr;
+	struct xe_addrs_structure * phaddr;
+	struct xe_addrs_structure * useaddr;
 
 // Point at out current idea of the device address
 
-    addrs = XE_Int-> XEI$phy_addr ;
+    addrs = XE_Int-> xei$phy_addr ;
 
 // Try to start the device
 
-    if (NOT XE_StartDev(XE_Int,0,0))
+    if (! XE_StartDev(XE_Int,0,0))
 	return 0;
 
 // Only check for DECNET and set ARP address the first time that we successfully
@@ -543,17 +546,17 @@ XE_StartAll ( XE_Int , restart )
 // If not, it probably means that DECNET was slow to get started and we
 // need to wait for it.
 
-	if (NOT XE_SenseDev(XE_Int,phaddr,hwaddr,online))
+	if (! XE_SenseDev(XE_Int,phaddr,hwaddr,online))
 	    return 0;
 	if (XE_Int->XEI$XE_decnet)
-	    useaddr = phaddr
+	  useaddr = phaddr;
 	else
 	    useaddr = hwaddr;
-	IF CH$NEQ(XE_ADR_SIZE,CH$PTR(useaddr),
-		  XE_ADR_SIZE,CH$PTR(XE_Int->XEI$phy_addr)) THEN
+	if (CH$NEQ(XE_ADR_SIZE,CH$PTR(useaddr),
+		  XE_ADR_SIZE,CH$PTR(XE_Int->xei$phy_addr)))
 	    {
 	    DRV$OPR_FAO("XE restart failed - address mismatch");
-	    XE_Shutdown(XE_Int,true);
+	    XE_Shutdown(XE_Int,TRUE);
 	    return 0;
 	    };
 	}
@@ -562,7 +565,7 @@ XE_StartAll ( XE_Int , restart )
 
 // Get device address
 
-	if (NOT XE_SenseDev(XE_Int,phaddr,hwaddr,online))
+	if (! XE_SenseDev(XE_Int,phaddr,hwaddr,online))
 	    return 0;
 
 // Remember that it was started at least once
@@ -571,11 +574,11 @@ XE_StartAll ( XE_Int , restart )
 
 // If no "physical" (DECNET) address, then restart device and set address
 
-	    IF CH$EQL(XE_ADR_SIZE,CH$PTR(phaddr),
-		      XE_ADR_SIZE,CH$PTR(XE_BROADCAST)) THEN
+	    if (CH$EQL(XE_ADR_SIZE,CH$PTR(phaddr),
+		      XE_ADR_SIZE,CH$PTR(XE_BROADCAST)))
 		{
 		XE_Shutdown(XE_Int,0);
-		if (NOT XE_StartDev(XE_Int,true,hwaddr))
+		if (! XE_StartDev(XE_Int,TRUE,hwaddr))
 		    return 0;
 		useaddr = hwaddr;
 		XE_Int->XEI$XE_decnet = FALSE;
@@ -588,11 +591,11 @@ XE_StartAll ( XE_Int , restart )
 
 // Check against address specified in CONFIG - report if different
 
-	    IF CH$NEQ(XE_ADR_SIZE,CH$PTR(useaddr),
-		      XE_ADR_SIZE,CH$PTR(addrs)) THEN
+	    if (CH$NEQ(XE_ADR_SIZE,CH$PTR(useaddr),
+		      XE_ADR_SIZE,CH$PTR(addrs)))
 		{
-		IF CH$NEQ(XE_ADR_SIZE,CH$PTR(addrs),
-			  XE_ADR_SIZE,CH$PTR(UPLIT(0,0))) THEN
+		if (CH$NEQ(XE_ADR_SIZE,CH$PTR(addrs),
+			  XE_ADR_SIZE,CH$PTR(UPLIT(0,0))))
 		    {
 			DESC$STR_ALLOC(newstr,50);
 
@@ -606,7 +609,7 @@ XE_StartAll ( XE_Int , restart )
 // Initialize ARP parameters for this device
 
 //!!HACK!!// Trim this down...
-    	XEARP$DEV_INIT(XE_Int,AR$HRD_ETHER,XE_IP_TYPE,addrs,XE_ARP_HLEN,1,0);
+    	XEARP$DEV_INIT(XE_Int,AR$HRD_ETHER,XE_IP_type,addrs,XE_ARP_HLEN,1,0);
 	};
 
 // Start I/O on the device
@@ -614,22 +617,20 @@ XE_StartAll ( XE_Int , restart )
     XE_StartIO ( XE_Int );
 
 // Say that this device is finally ready
-    dev_config = XE_Int->XEI$Dev_config;
+    dev_config = XE_Int->xei$dev_config;
 //    dev_config [dc_online] = online;
-    dev_config [dc_online] = True;
+    dev_config ->dc_online = TRUE;
 
     return TRUE;
     }
 
 
 
-LITERAL
-    EMPTY_QUEUE = 3 : UNSIGNED(8);
+#define    EMPTY_QUEUE 3
 
-LITERAL
-    XE_RESTART_TIME = 5*100;		// How long to leave shutdown
+#define    XE_RESTART_TIME 5*100		// How long to leave shutdown
 
-void XE_FreeBufs ( struct XE_Interface_Structure * XE_Int ) (void)
+void XE_FreeBufs ( struct XE_Interface_Structure * XE_Int )
 
 // AST routine to deallocate XE read buffers on error.
 // Scheduled by shutdown routine.
@@ -644,10 +645,10 @@ void XE_FreeBufs ( struct XE_Interface_Structure * XE_Int ) (void)
 
 // Release the ARP buffer
 
-    if ((BUFF=XE_Int->XEI$ARP_buffer) != 0)
+    if ((BUFF=XE_Int->xei$arp_buffer) != 0)
 	{
 	DRV$Seg_Free ( XE_ARP_LEN*4 , BUFF );
-	XE_Int-> XEI$ARP_buffer  = 0;
+	XE_Int-> xei$arp_buffer  = 0;
 	};
 
 // Say that this has been done.
@@ -655,7 +656,7 @@ void XE_FreeBufs ( struct XE_Interface_Structure * XE_Int ) (void)
     XE_Int-> XEI$need_2_free  = FALSE;
     }
 
-void XE_Shutdown ( XE_Int , restart ) (void)
+void XE_Shutdown ( XE_Int , restart )
 //
 // Shut the device controller down. Issue shutdown command to controller
 // if online, set offline, general cleanup.
@@ -666,7 +667,7 @@ void XE_Shutdown ( XE_Int , restart ) (void)
     signed long
 	RC,
       now;
-    struct Device_Configuration_Entry * dev_config;
+     Device_Configuration_Entry * dev_config;
 	 struct XE_iosb_structure * IOS;
 
 // Disallow ASTs
@@ -676,8 +677,8 @@ void XE_Shutdown ( XE_Int , restart ) (void)
     now =  Time_Stamp();
 
 // Set device offline.
-    dev_config = XE_Int->XEI$Dev_config;
-    dev_config [dc_online] = False;
+    dev_config = XE_Int->xei$dev_config;
+    dev_config ->dc_online = FALSE;
 
 // If it should be restarted, then say when
 
@@ -691,29 +692,29 @@ void XE_Shutdown ( XE_Int , restart ) (void)
 
 // Shutdown the IP channel
 
-    if (XE_Int->XEI$IO_chan != 0)
+    if (XE_Int->xei$io_chan != 0)
 	{
-	$CANCEL(chan=XE_Int->XEI$IO_chan);
-	RC = exe$qiow( 1, XE_Int->XEI$IO_chan,
+	exe$cancel(XE_Int->xei$io_chan);
+	RC = exe$qiow( 1, XE_Int->xei$io_chan,
 		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS);
-	if ((RC != SS$_NORMAL) || (IOS->XE$VMS_CODE != SS$_NORMAL))
+	if ((RC != SS$_NORMAL) || (IOS->xe$vms_code != SS$_NORMAL))
 	    {
 	    DRV$Warn_FAO("XE shutdown QIOW failure, EC = !XL",RC);
-	    DRV$Fatal_FAO("XE shutdown failure, EC = !XL",IOS->XE$VMS_CODE);
+	    DRV$Fatal_FAO("XE shutdown failure, EC = !XL",IOS->xe$vms_code);
 	    };
 	};
 
 // Shutdown the ARP channel
 
-    if (XE_Int->XEI$ARP_IO_chan != 0)
+    if (XE_Int->xei$arp_io_chan != 0)
 	{
-	$CANCEL(chan=XE_Int->XEI$ARP_IO_chan);
-	RC = exe$qiow( 1, XE_Int->XEI$ARP_IO_chan,
+	exe$cancel(XE_Int->xei$arp_io_chan);
+	RC = exe$qiow( 1, XE_Int->xei$arp_io_chan,
 		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS);
-	if ((RC != SS$_NORMAL) || (IOS->XE$VMS_CODE != SS$_NORMAL))
+	if ((RC != SS$_NORMAL) || (IOS->xe$vms_code != SS$_NORMAL))
 	    {
 	    DRV$Warn_FAO("XE ARP shutdown QIOW failure, EC = !XL",RC);
-	    DRV$Fatal_FAO("XE ARP shutdown failure, EC = !XL",IOS->XE$VMS_CODE);
+	    DRV$Fatal_FAO("XE ARP shutdown failure, EC = !XL",IOS->xe$vms_code);
 	    return;
 	    };
 	};
@@ -724,7 +725,7 @@ void XE_Shutdown ( XE_Int , restart ) (void)
 	{
 	XE_Int->XEI$IO_queued = FALSE;
 	XE_Int->XEI$need_2_free = TRUE;
-	$DCLAST(astadr = XE_FreeBufs, astprm = XE_Int);
+	exe$dclast( XE_FreeBufs, XE_Int);
 	};
 
 // Allow AST's again
@@ -735,20 +736,18 @@ void XE_Shutdown ( XE_Int , restart ) (void)
 //SBTTL	"Ethernet driver check routine"
 // Routine to call whenever the device is offline and shouldn't be.
 
-XE$CHECK ( struct Device_Configuration_Entry * dev_config )
-								: NOVALUE (void)
+XE$CHECK ( Device_Configuration_Entry * dev_config )
     {
     signed long
 	now;
-    BIND
-	XE_Int = dev_config [ dc_dev_interface ] : REF XE_Interface_Structure;
+	struct XE_Interface_Structure * XE_Int = dev_config-> dc_dev_interface  ;
 
 
     now = Time_Stamp();
     if (now > XE_Int->XEI$restart_time)
 	{
-	IF (NOT XE_Int->XEI$need_2_free) AND
-	   XE_StartAll(XE_Int,true) THEN
+	if ((! XE_Int->XEI$need_2_free) &&
+	   XE_StartAll(XE_Int,TRUE))
 	    {		// Device restarted OK
 	    XE_Int->XEI$restart_time = 0;
 	    XE_Int->XEI$retry_count = 0;
@@ -766,7 +765,7 @@ XE$CHECK ( struct Device_Configuration_Entry * dev_config )
 	};
 
 // Return 0 since device still needs attention.
-	0
+    return 0;
     }
 
 //Sbttl   "Ethernet driver init routine"
@@ -798,12 +797,12 @@ XE$CHECK ( struct Device_Configuration_Entry * dev_config )
 //!!HACK!!// Should there be XE$Init and XE$Init_Controller?
 //!!HACK!!//  XE$Init_Class and XE$Init_Port
 
-XE$init ( struct Device_Configuration_Entry * dev_config ,
-void 		  IPACP_Int, max_retry, MPBS) (void)
+void XE$init ( Device_Configuration_Entry * dev_config ,
+ 		  long IPACP_Int, long max_retry, long MPBS)
     {
 extern 	XEARP$INIT();
-extern 	LIB$GET_VM : ADDRESSING_MODE(GENERAL)();
-extern 	LIB$GET_VM_PAGE : ADDRESSING_MODE(GENERAL)();
+extern 	LIB$GET_VM();
+extern 	LIB$GET_VM_PAGE();
     signed long
 	RC,
 	rcvhdrs,
@@ -821,40 +820,40 @@ extern 	LIB$GET_VM_PAGE : ADDRESSING_MODE(GENERAL)();
     XEARP$INIT();
 
 // Assign Ethernet Controller
-    IF NOT (rc=$Assign (devnam = dev_config->dc_devname, chan = XE_chan))
-    THEN     // Ethernet controller assign failed
+    if (! (RC=exe$assign (dev_config->dc_devname, XE_Chan)))
+         // Ethernet controller assign failed
 	{
-	DRV$Fatal_FAO("XE $ASSIGN failure (dev="!AS"), EC = !XL",
-		    dev_config->dc_devname,rc);
+	DRV$Fatal_FAO("XE $ASSIGN failure (dev=), EC = !XL",
+		    dev_config->dc_devname,RC);
 	return;
 	};
 
 //  Assign the channel for the arp responder
-    IF NOT (rc=$Assign(devnam = dev_config->dc_devname,chan=XAR_chan))
-    THEN     // Ethernet controller assign failed
+    if (! (RC=exe$assign( dev_config->dc_devname,XAR_Chan)))
+         // Ethernet controller assign failed
 	{
-	DRV$Fatal_FAO("XE $ASSIGN failure (dev="!AS"), EC = !XL",
-		    dev_config->dc_devname,rc);
+	DRV$Fatal_FAO("XE $ASSIGN failure (dev=), EC = !XL",
+		    dev_config->dc_devname,RC);
 	return;
 	};
 
 // Allocate and Initialize the XE controller block
     // Allocate VM
-    !!!HACK!!// When are we going to deallocate this?  Ever?
-//    if (NOT (LIB$GET_VM(%REF(XE_Interface_size*4),XE_Int)))
-    if (NOT (LIB$GET_VM_PAGE(%REF(((XE_Interface_size * 4) / 512) + 1),XE_Int)))
+    //!!HACK!!// When are we going to deallocate this?  Ever?
+//    if (! (LIB$GET_VM(%REF(XE_Interface_size*4),XE_Int)))
+      if (! (LIB$GET_VM_PAGE(/*%REF*/(((XE_Interface_size * 4) / 512) + 1),XE_Int)))
 	{	// Couldn't allocate memory for controller block
-	DRV$Fatal_FAO("XE LIB$GET_VM failure (dev="!AS"), EC = !XL" ,
-		    dev_config->dc_devname,rc);
+	DRV$Fatal_FAO("XE LIB$GET_VM failure (dev=), EC = !XL" ,
+		    dev_config->dc_devname,RC);
 	return;
 	};
 
     // Zero out the memory block
-    CH$FILL(%CHAR(0),XE_Interface_size*4,XE_Int);
+    CH$FILL(/*%CHAR*/(0),XE_Interface_size*4,XE_Int);
 
     // Fill in the blanks...
-    XE_Int->XEI$IO_chan = XE_chan;
-    XE_Int->XEI$ARP_IO_chan = XAR_chan;
+    XE_Int->xei$io_chan = XE_Chan;
+    XE_Int->xei$arp_io_chan = XAR_Chan;
     XE_Int->XEI$Phy_Size = 6;	// Ether addrs are 6 bytes long (48 bits)
     XE_Int->XEI$max_retry = max_retry;	// Maximum # of conseq. retries allowed
     XE_Int->XEI$MPBS = MPBS;	// Maximum Physical Buffer Size
@@ -865,17 +864,17 @@ extern 	LIB$GET_VM_PAGE : ADDRESSING_MODE(GENERAL)();
     XE_Int->XEI$recv_Qtail = XE_Int->XEI$recv_Qhead;
 
     // set double-link between XE_Int and dev_config blocks
-    XE_Int-> XEI$dev_config  = dev_config;
-    dev_config [ dc_dev_interface ]  = XE_Int;
+    XE_Int-> xei$dev_config  = dev_config;
+    dev_config -> dc_dev_interface   = XE_Int;
 
 // Allocate and Initialize the XE receive headers
     // Allocate VM
-    !!!HACK!!// When are we going to deallocate this?  Ever?
-//    if (NOT (LIB$GET_VM(%REF(MAX_RCV_BUF*XERCV_LEN*4),rcvhdrs)))
-    if (NOT (LIB$GET_VM_PAGE(%REF(((MAX_RCV_BUF*XERCV_LEN*4)/512)+1),rcvhdrs)))
+    //!!HACK!!// When are we going to deallocate this?  Ever?
+//    if (! (LIB$GET_VM(%REF(MAX_RCV_BUF*XERCV_LEN*4),rcvhdrs)))
+      if (! (LIB$GET_VM_PAGE(/*%REF*/(((MAX_RCV_BUF*XERCV_LEN*4)/512)+1),rcvhdrs)))
 	{	// Couldn't allocate memory for receive headers
-	DRV$Fatal_FAO("XE LIB$GET_VM failure (dev="!AS"), RC=!XL",
-		    dev_config->dc_devname,rc);
+	DRV$Fatal_FAO("XE LIB$GET_VM failure (dev=!AS), RC=!XL",
+		    dev_config->dc_devname,RC);
 	return;
 	};
 
@@ -883,7 +882,7 @@ extern 	LIB$GET_VM_PAGE : ADDRESSING_MODE(GENERAL)();
     XE_Int->XEI$curhdr = 0;	// current ethernet header to use
 
 // Start the device
-    XE_Startall(XE_Int,false);
+    XE_Startall(XE_Int,FALSE);
 
 // Fill in the dev_config ifTable fields
     {
@@ -891,15 +890,15 @@ extern 	LIB$GET_VM_PAGE : ADDRESSING_MODE(GENERAL)();
 
 //    dev_config->dcmib_ifIndex = -1;	// Filled by IPACP
 
-    desc->dsc$w_length = XE_Descriptor[0];
-    desc->dsc$A_POINTER = XE_Descriptor[1];
+    desc->dsc$w_length = XE_descriptor[0];
+    desc->dsc$a_pointer = XE_descriptor[1];
 
     dev_config->dcmib_ifType = 6;		// EtherNet
     dev_config->dcmib_ifMTU = DRV$MAX_PHYSICAL_BUFSIZE;
     dev_config->dcmib_ifSpeed = 10000000;	// bits/second
 
     dev_config->dcmib_ifPAsize = XE_Int->XEI$Phy_Size;
-    dev_config->dcmib_ifPhysAddress = XE_Int->XEI$Phy_Addr;
+    dev_config->dcmib_ifPhysAddress = XE_Int->xei$phy_addr;
 
     dev_config->dcmib_ifAdminStatus = 2;	// start
 //    dev_config->dcmib_ifOperStatus = 2;		// start
@@ -945,26 +944,24 @@ Outputs:
 *******************************************************************************
 */
 
-MACRO
-    XE_LOG(MSG,IPADDR,HWADDR)
+static    XE_LOG(MSG,IPADDR,HWADDR)
     {
-      struct dsc$descriptor * STR_DESC;
-    extern	void XEARP$LOG();
+      long * STR_DESC;
+      extern	void XEARP$LOG();
 
-    STR_DESC[0] = %CHARCOUNT(MSG);
-    STR_DESC[1] = UPLIT(MSG);
+    STR_DESC[0] = sizeof(MSG);
+    STR_DESC[1] = MSG;
 
     XEARP$LOG(STR_DESC,IPADDR,6,HWADDR);
-    } %;
+    }
 
-XE$xmit ( struct Device_Configuration_Entry * dev_config )
-								: NOVALUE (void)
+void XE$xmit ( Device_Configuration_Entry * dev_config )
     {
-      struct XE_IOSB_structure * IOS; 
-      struct BLOCK * QB[] Field(QB_net_send);
-    struct XE_addrs_structure * Addrs;
-    struct XESND_Structure * Sbuf;
-    struct IP_Structure * IPHDR;
+      struct XE_iosb_structure * IOS; 
+      Net_Send_Queue_Element * QB;
+    struct xe_addrs_structure * Addrs;
+    struct XESND_structure * Sbuf;
+    struct ip_structure * IPHDR;
     signed long
 	RC,
 	Sen_size,
@@ -972,19 +969,19 @@ XE$xmit ( struct Device_Configuration_Entry * dev_config )
 	AddrCheck,
 	xchan;
 
-	struct  XE_Interface_Structure * XE_Int = &dev_config [ dc_dev_interface ] : ;
+	struct  XE_Interface_Structure * XE_Int = &dev_config ->dc_dev_interface  ;
 
     DRV$NOINT;
 // Check if a request is on the Net_send_Q for this device
 
-    if ((REMQUE(Dev_config->dc_send_Qhead,QB)) == Empty_Queue)
+    if ((REMQUE(dev_config->dc_Send_Qhead,QB)) == EMPTY_QUEUE) // check
 	return;			// The Q is empty
 
     ARstat = 0;			// Assume we will deallocate the packet
 
 // Make sure device is online
 
-    if (NOT Dev_config->dc_online)
+    if (! dev_config->dc_online)
 	{			// Device is offline
 	DRV$XQL_FAO(LOG$PHY,"!%T XE device !XL offline (xmit)!/",0,XE_Int);
 	}
@@ -996,28 +993,30 @@ X:	{
 	Sbuf = QB->NSQ$Data - XE_hdr_len;
 	IPHDR = QB->NSQ$Data;
 // IPH$TTL in the swapped header is really IPH$Protocol
-	IF (IPHDR->IPH$TTL Eql UDP_Protocol) AND
-	   (IPHDR->IPH$Dest Eqlu ((NOT DEV_CONFIG->DC_IP_NETMASK) OR
-		DEV_CONFIG->DC_IP_NETWORK)) THEN
+	if ((IPHDR->iph$ttl == UDP_PROTOCOL) &&
+	   (IPHDR->iph$dest == ((! dev_config->dc_ip_netmask) ||
+		dev_config->dc_ip_network)))
 	    {
-	    CH$MOVE(XE_ADR_SIZE, CH$PTR(XE_Broadcast), CH$PTR(ADDRS));
+	    CH$MOVE(XE_ADR_SIZE, CH$PTR(XE_BROADCAST), CH$PTR(Addrs));
 	    ARstat = 1;
 	    }
 	else
-	    ARstat = XEARP$CHECK(XE_Int,QB->NSQ$IP_DEST,ADDRS,QB);
+	    ARstat = XEARP$CHECK(XE_Int,QB->NSQ$IP_Dest,Addrs,QB);
 	if (ARstat > 0)
 	    {		// Have an address
 
 // Fill in Ethernet header information
 
+#if 0
 	    if ($$LOGF(LOG$PHY))
-		XE_LOG("XE IP xmit",QB->NSQ$IP_DEST,ADDRS);
+		XE_LOG("XE IP xmit",QB->NSQ$IP_Dest,Addrs);
+#endif
 
-	    CH$MOVE(XE_ADR_SIZE,CH$PTR(addrs),Sbuf->XESND$dest);
+	    CH$MOVE(XE_ADR_SIZE,CH$PTR(Addrs),Sbuf->XESND$dest);
 	    Sbuf->XESND$type = XE_IP_type;
-	    Swapbytes(1,Sbuf->XESND$Type);
+	    Swapbytes(1,Sbuf->XESND$type);
 
-	    xchan = XE_Int->XEI$IO_chan;
+	    xchan = XE_Int->xei$io_chan;
 
 // Send packet to controller
 
@@ -1032,38 +1031,39 @@ X:	{
 
 // Check for $QIO error
 
-	    if (NOT (RC))
+	    if (! (RC))
 		{
 		XE$ERR(XE_Int,"XE $QIO error (send),RC=!XL",RC);
-		LEAVE X;
+		goto leave_x;
 		};
 
 // Check for device driver error
 
-	    if (IOS->XE$vms_code != SS$_NORMAL)
+	    if (IOS->xe$vms_code != SS$_NORMAL)
 		{
 		XE$ERR(XE_Int,"XE driver error (send),VMS_code=!XL",
-		       IOS->XE$vms_code);
-		LEAVE X;
+		       IOS->xe$vms_code);
+		goto leave_x;
 		};
 
 // Check for controller error
 
-	    if ((IOS->XE$cmd_status && %X"0FF00") != XM$M_STS_ACTIVE)
+	    if ((IOS->XE$cmd_status && 0x0FF00) != XM$M_STS_ACTIVE)
 		{
 		DRV$XLOG_FAO(LOG$PHY,"%T XE command error !XW!/",
 				0,IOS->XE$cmd_status);
-		LEAVE X;
+		goto leave_x;
 		};
 	    };
 	};	// End of block X:
+    leave_x:
 
 // Delete buffer and release QBlk if ARP didn't claim them and deletable
 
-    if (ARstat GEQ 0)
+    if (ARstat >= 0)
 	{
-	if (QB->NSQ$delete)
-	    DRV$Seg_free(QB->NSQ$del_buf_size,QB->NSQ$del_buf);
+	if (QB->NSQ$Delete)
+	    DRV$Seg_free(QB->NSQ$Del_buf_size,QB->NSQ$Del_Buf);
 	DRV$Qblk_free(QB);
 	};
     DRV$OKINT;
@@ -1094,30 +1094,29 @@ Outputs:
 void XE_receive ( struct XE_Interface_Structure * XE_Int )
     {
       struct XERCV_QB_structure * Rbuf;
-      struct XERCV_QB_Structure * Nrbuf;
-      struct Device_Configuration_Entry * dev_config;
+      struct XERCV_QB_structure * NRbuf;
+       Device_Configuration_Entry * dev_config;
     signed long
 	rcvix,
 	RC,
 	IRC,
 	Error_Flag  = 0;
-    BIND
-	rcvhdrs = XE_Int->XEI$rcvhdrs : BLOCKVECTOR[MAX_RCV_BUF,XERCV_LEN]
-					 FIELD(XE_RECV);
 
-    dev_config = XE_Int-> XEI$dev_config ;
+    struct XERCV_structure * rcvhdrs = XE_Int->XEI$rcvhdrs ;
+
+    dev_config = XE_Int-> xei$dev_config ;
 
 // Set flag indicating interrupt in progress
 
-    DRV$AST_in_Progress = True;
+    DRV$AST_IN_PROGRESS = TRUE;
 
 // If device not online, then give message and punt
 
-    if (NOT dev_config->dc_online)
+    if (! dev_config->dc_online)
 	{
 
 //~~	DRV$OPR_FAO("XE receive AST when offline");
-	DRV$AST_in_Progress = False;
+	DRV$AST_IN_PROGRESS = FALSE;
 	return;
 	};
 
@@ -1130,42 +1129,46 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
     if ((RC = Rbuf->XERCV$vms_code) != SS$_NORMAL)
 	{
 //	Error_Flag = 1;
-	switch (RBUF->XERCV$VMS_CODE)
-	    SET
-	    CASE SS$_ABORT:
+	switch (Rbuf->XERCV$vms_code)
+	  {
+	    case SS$_ABORT:
 		DRV$OPR_FAO("XE abort, cmd_status=!XW, error_summary=!XB",
-  			RBUF->XERCV$cmd_status,RBUF->XERCV$error_summary);
-	    CASE SS$_DATAOVERUN,SS$_TIMEOUT:
+  			Rbuf->XERCV$cmd_status,Rbuf->XERCV$error_summary);
+		break;
+
+	    case SS$_DATAOVERUN: case SS$_TIMEOUT:
 		{
 		DRV$OPR_FAO("XE read error (timeout/overrun), RC=!XL",RC);
 		DRV$OPR_FAO("DEBUG - bytes received=!XL",Rbuf->XERCV$tran_size);
 		};
-	    [OTHERWISE] :
+		break;
+
+	    default :
 		DRV$OPR_FAO("XE: VMS Error, cmd_status=!XW, error_summary=!XB",
-  			RBUF->XERCV$cmd_status,RBUF->XERCV$error_summary);
-	    TES
+  			Rbuf->XERCV$cmd_status,Rbuf->XERCV$error_summary);
+	  }
 	};
 
-    !Ignore the timeout bit for DEQNA's
-    if ((Rbuf->XERCV$cmd_status  && %X"0FF00") != XM$M_STS_ACTIVE)
+    //Ignore the timeout bit for DEQNA's
+    if ((Rbuf->XERCV$cmd_status  && 0x0FF00) != XM$M_STS_ACTIVE)
 	{
 	Error_Flag = 1;
 	// Error from board
 	DRV$OPR_FAO("XE status error.  Status = !XL",
-		     Rbuf->XERCV$cmd_status && %X"0FF00");
+		     Rbuf->XERCV$cmd_status && 0x0FF00);
 	};
 
     if (Error_Flag)
 	{
-	if (XE_Int->XEI$retry_count GEQ XE_Int->XEI$max_retry)
-	    XE$ERR(XE_Int,"XE retried !ZB times.",XE_Int->XEI$retry_count)
+	if (XE_Int->XEI$retry_count >= XE_Int->XEI$max_retry)
+	  XE$ERR(XE_Int,"XE retried !ZB times.",XE_Int->XEI$retry_count);
 	else
 	    {
 	    // Stuff this packet back on the queue for deallocation
-	    Rbuf = Rbuf - XE_hdr_Offset;
+	    Rbuf = Rbuf - XE_hdr_offset;
 	    INSQUE(Rbuf, XE_Int->XEI$recv_Qtail);
 	    XE_Int->XEI$retry_count = XE_Int->XEI$retry_count+1;
-	    DRV$AST_in_Progress = False;
+	    DRV$AST_IN_PROGRESS = FALSE;
 	    return;
 	    }
 	}
@@ -1181,7 +1184,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
     NRbuf = DRV$Seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
     INSQUE(NRbuf,XE_Int->XEI$recv_Qtail);
     NRbuf = NRbuf + XE_hdr_offset;
-    RC = exe$qio(ASTEFN,XE_Int->XEI$IO_chan,
+    RC = exe$qio(ASTEFN,XE_Int->xei$io_chan,
 	      IO$_READVBLK,
 	      NRbuf->XERCV$vms_code, XE_receive, XE_Int,
 	      NRbuf->XERCV$data,
@@ -1193,12 +1196,12 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 // is known to get wedged, and the driver gives back SS$_DEVINACT when this
 // happens.
 
-    if (NOT RC)
+    if (! RC)
 	{
 	if (RC == SS$_DEVINACT)
 	    {
 	    // Stuff the packet back on the queue for deallocation
-	    Rbuf = Rbuf - XE_hdr_Offset;
+	    Rbuf = Rbuf - XE_hdr_offset;
 	    INSQUE(Rbuf, XE_Int->XEI$recv_Qtail);
 	    XE$ERR(XE_Int,"XE $QIO read error (dev_inact), RC=!XL",RC);
 	    }
@@ -1210,8 +1213,10 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 
 // Send datagram to IP
 
+#if 0
 	if ($$LOGF(LOG$PHY))
 	    XE_LOG("XE IP receive",0,rcvhdrs[rcvix].XERCV$src);
+#endif
 
 	dev_config->dcmib_ifInOctets = dev_config->dcmib_ifInOctets +
 		Rbuf->XERCV$tran_size + XE_hdr_len;
@@ -1221,7 +1226,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 		   Rbuf->XERCV$data,Rbuf->XERCV$tran_size,dev_config);
 	};
 
-    DRV$AST_in_Progress = False;
+    DRV$AST_IN_PROGRESS = FALSE;
     }
 
 
@@ -1240,10 +1245,10 @@ Inputs:
 
 *******************************************************************************
 */
-XE_ArpRcv( struct XE_Interface_Structure * XE_Int ): NOVALUE (void)
+void Xe_ArpRcv( struct XE_Interface_Structure * XE_Int )
     {
-	struct Device_Configuration_Entry * dev_config = XE_Int->XEI$Dev_Config;
-	struct XE_ARP_STRUCTURE * ARbuf;
+	 Device_Configuration_Entry * dev_config = XE_Int->xei$dev_config;
+	struct xe_arp_structure * ARbuf;
     signed long
 	usflag,
 	tpa,
@@ -1254,39 +1259,41 @@ XE_ArpRcv( struct XE_Interface_Structure * XE_Int ): NOVALUE (void)
 
 // Set flag indicating interrupt in progress
 
-    DRV$AST_in_Progress = True;
+    DRV$AST_IN_PROGRESS = TRUE;
 
 // Check for bogosity
 
-    if (NOT dev_config->dc_online)
+    if (! dev_config->dc_online)
 	{
 //~~	Send_2_Operator(%ASCID "XE ARP receive AST when offline");
-	DRV$AST_in_Progress = False;
+	DRV$AST_IN_PROGRESS = FALSE;
 	return;
 	};
 
 // check status of receive
 
-    ARbuf = XE_Int->XEI$ARP_buffer;
-    IF ((ARbuf->ar_ios0 != SS$_NORMAL) AND
-       (ARbuf->ar_ios0 != SS$_DATAOVERUN)) THEN
+    ARbuf = XE_Int->xei$arp_buffer;
+    if (((ARbuf->ar_ios0 != SS$_NORMAL) &&
+       (ARbuf->ar_ios0 != SS$_DATAOVERUN)))
 	// Error from DEC driver
 	if (ARbuf->ar_ios0 == SS$_ABORT)
 	    DRV$OPR_FAO("XE abort, cmd_status=!XW, error_summary=!XB",
-  			ARBUF->ar_ios2,ARBUF->ar_ios3)
+  			ARbuf->ar_ios2,ARbuf->ar_ios3);
 	else
 	    DRV$Error_FAO("XE ARP receive error (ugh), EC = !XL",ARbuf->ar_ios0);
 
+#if 0
     if ($$LOGF(LOG$PHY))
 	XE_LOG("XE ARP receive",0,ARbuf->phys$2);
+#endif
 
 // Packet is OK at the hardware level - hand it up to the ARP module
 
-    XEARP$INPUT(XE_Int,ARBUF->AR_DATA);
+    XEARP$INPUT(XE_Int,ARbuf->ar_data);
 
 // restart the arp receive
 //!!HACK!!// what's the EFN for?
-    RC = exe$qio(ARPEFN,XE_Int->XEI$ARP_IO_chan,
+    RC = exe$qio(ARPEFN,XE_Int->xei$arp_io_chan,
 		 IO$_READVBLK,ARbuf->ar_ios0,
 		 XE_ArpRcv, XE_Int,
 		 ARbuf->ar_data,ARP_MAX_LEN*4,0,0,
@@ -1294,13 +1301,13 @@ XE_ArpRcv( struct XE_Interface_Structure * XE_Int ): NOVALUE (void)
     if (RC != SS$_NORMAL)
 	XE$ERR(XE_Int,"XE ARP read failure, RC = !XL",RC);
 
-    DRV$AST_in_Progress = False;
+    DRV$AST_IN_PROGRESS = FALSE;
     }
 
 
 //SBTTL "ARP transmit routine"
 
-XE$ARP_XMIT(XE_Int,arbuf,arlen,dest) : NOVALUE (void)
+void XE$ARP_XMIT(XE_Int,arbuf,arlen,dest)
 
 // Finish packaging of ARP packet and transmit it.
 // ARBUF points to the ARP data portion of the packet - header space has been
@@ -1317,16 +1324,16 @@ XE$ARP_XMIT(XE_Int,arbuf,arlen,dest) : NOVALUE (void)
 // 0 for destination means he wants us to do a broadcast.
 
     if (dest == 0)
-	dest = xe_broadcast;
+	dest = XE_BROADCAST;
 
 // Write the ARP to the network (don't need to build any header info)
 
-    rc = exe$qiow(0,XE_Int->XEI$ARP_IO_chan,IO$_WRITEVBLK,
+    rc = exe$qiow(0,XE_Int->xei$arp_io_chan,IO$_WRITEVBLK,
 		ios, 0, 0, arbuf, arlen, 0, 0, dest, 0);
     if (rc != SS$_NORMAL)
 	{
 	XE$ERR(XE_Int,"XE ARP xmit failure, RC = !XL",rc);
-	Signal(RC)
+	Signal(rc);
 	}
     else
 	if ($$LOGF(LOG$PHY))
@@ -1341,16 +1348,17 @@ XE$dump(dev_config, funct, arg, buffer, sizeAdrs)
 extern	XE$ARP_DUMP();
 
 
-    switch (ct)
-	SET
+    switch (funct)
+      {
 	case XEDMP$ARP_Entry:
 	    {
-	    sizeAdrs = XE$ARP_DUMP ( arg, buffer, ..sizeAdrs);
-	    SS$_NORMAL
+	      sizeAdrs = XE$ARP_DUMP ( arg, buffer, sizeAdrs); // check .size
+	    return SS$_NORMAL;
 	    };
-	[Otherwise] :
-	    0
-	TES
+	    break;
+	default:
+	  return 0;
+      }
     }
 
 
@@ -1361,15 +1369,15 @@ DRV$TRANSPORT_INIT (void)
     {
 
     // Fill in the EtherNet description string
-    XE_descriptor[0] = %CHARCOUNT(XE_description);
+    XE_descriptor[0] = strlen(XE_description);
     XE_descriptor[1] = UPLIT(XE_description);
 
     // Provide the XEDRV entry points
-    DRV$Device_Info->DI$Init	= XE$Init;
-    DRV$Device_Info->DI$Xmit	= XE$XMit;
-    DRV$Device_Info->DI$Dump	= XE$Dump;
-    DRV$Device_Info->DI$Check	= XE$Check;
+    DRV$Device_Info->DI$Init	= XE$init;
+    DRV$Device_Info->DI$Xmit	= XE$xmit;
+    DRV$Device_Info->DI$Dump	= XE$dump;
+    DRV$Device_Info->DI$Check	= XE$CHECK;
 
-    DRV$Device_Info
+    return DRV$Device_Info;
     }
 

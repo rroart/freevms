@@ -44,8 +44,8 @@
 
 // Definition of AR$PRO (protocol) fields
 
-#define     AR$PRO_PUP   %X'200'	// PUP
-#define     AR$PRO_IP   %X'800'	// IP
+#define     AR$PRO_PUP   0x200	// PUP
+#define     AR$PRO_IP   0x800	// IP
 #define     AR$PRO_IP_3MB   %O'1001'	// IP (3MB Experimental Ethernet)
 
 // Address lengths

@@ -58,27 +58,30 @@ Modification History:
 
 //SBTTL "Module definition"	
 
+#if 0
 MODULE IP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 	    ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 			    NONEXTERNAL=LONG_RELATIVE),
 	    LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
 	    OPTIMIZE,OPTLEVEL=3,ZIP)=
 
-{
+#endif
 
 // Include standard definition files
 
-!LIBRARY "SYS$LIBRARY:STARLET";
-#include "SYS$LIBRARY:LIB";
-#include "CMUIP_SRC:[CENTRAL]NETERROR";
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";
-#include "CMUIP_SRC:[CENTRAL]NETVMS";
-#include "CMUIP_SRC:[CENTRAL]NETCOMMON";
-#include "CMUIP_SRC:[CENTRAL]NetTCPIP";			// IP & ICMP definitions
-#include "STRUCTURE";
-#include "TCPMACROS";
+//LIBRARY "SYS$LIBRARY:STARLET";
+// not yet #include "SYS$LIBRARY:LIB";
+#include <cmuip/central/include/neterror.h>
+// not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT
+#include "netvms.h"
+#include <cmuip/central/include/netcommon.h>
+#include <cmuip/central/include/nettcpip.h>			// IP & ICMP definitions
+#include "structure.h"
+#include "tcpmacros.h"
 
-!*** Special literals from USER.BLI ***
+#include <ssdef.h>
+
+//*** Special literals from USER.BLI ***
 
 extern signed long LITERAL
     UCB$Q_DDP,
@@ -145,37 +148,41 @@ extern
 
 // Define the "IPCB" - IP analogue of TCB.
 
-$FIELD  IPCB_Fields (void)
-    SET
-    IPCB$Foreign_Host	= [$Ulong],	// IP foreign host number
-    IPCB$Host_Filter	= [$Ulong],	// Receive packets from this host
-    IPCB$Proto_Filter	= [$Ulong],	// Receive packets to this protocol
+struct  IPCB_Structure
+{
+unsigned long     IPCB$Foreign_Host	;	// IP foreign host number
+unsigned long     IPCB$Host_Filter	;	// Receive packets from this host
+unsigned long     IPCB$Proto_Filter	;	// Receive packets to this protocol
     IPCB$Foreign_Hname	= [$Bytes(MAX_HNAME)],
     IPCB$Foreign_Hnlen	= [$Short_Integer],
-    IPCB$USR_Qhead	= [$Address],	// User receive request queue
-    IPCB$USR_Qtail	= [$Address],
-    IPCB$NR_Qhead	= [$Address],	// Net receive queue
-    IPCB$NR_Qtail	= [$Address],
-    IPCB$NR_Qcount	= [$Short_Integer],
-    IPCB$Flags		= [$Bytes(2)],
-    $OVERLAY(IPCB$Flags)
-	IPCB$Wildcard	= [$Bit],	// IPCB opened with wild FH/LH
-	IPCB$Addr_Mode	= [$Bit],	// User wants IP addresses
-	IPCB$Aborting	= [$Bit],	// IPCB is closing
-	IPCB$NMLook	= [$Bit],	// IPCB has an outstanding name lookup
-    $CONTINUE
-    IPCB$IPCBID		= [$Address],	// IPCB_Table index for this connection
-    IPCB$UCB_Adrs	= [$Address],	// Connection UCB address
-    IPCB$UARGS	= [$Address],	// Uarg block in pending open
-    IPCB$User_ID	= [$Bytes(4)],	// Process ID of owner
-    IPCB$PIOchan	= [$Bytes(2)]	// Process IO channel
-    TES;
+void *     IPCB$USR_Qhead	;	// User receive request queue
+void *     IPCB$USR_Qtail	;
+void *     IPCB$NR_Qhead	;	// Net receive queue
+void *     IPCB$NR_Qtail	;
+unsigned short int    IPCB$NR_Qcount;
+union {
+      unsigned short    IPCB$Flags;
+struct {
+unsigned 	IPCB$Wildcard	 : 1;	// IPCB opened with wild FH/LH
+unsigned 	IPCB$Addr_Mode	 : 1;	// User wants IP addresses
+unsigned 	IPCB$Aborting	 : 1;	// IPCB is closing
+unsigned 	IPCB$NMLook	 : 1;	// IPCB has an outstanding name lookup
+	  };
+};
+void *     IPCB$IPCBID		;	// IPCB_Table index for this connection
+void *     IPCB$UCB_Adrs	;	// Connection UCB address
+void *     IPCB$UARGS	;	// Uarg block in pending open
+unsigned long    IPCB$User_ID;	// Process ID of owner
+unsigned short    IPCB$PIOchan;	// Process IO channel
+      };
 
+#if 0
 LITERAL
     IPCB_Size = $Field_Set_Size;
 MACRO
     IPCB_Structure = BLOCK->IPCB_Size FIELD(IPCB_Fields) %;
 //MESSAGE(%NUMBER(IPCB_Size)," longwords per IPCB")
+#endif
 
 
 
@@ -191,20 +198,19 @@ signed long
 //SBTTL "IP packet logger"
 /*
     Queue up a log entry to dump out a IP packet.
- )%
+ */
 
-Log_IP_Packet(Seg,SwapFlag,SendFlag) : NOVALUE (void)
-    {
-    MAP
+void Log_IP_Packet(Seg,SwapFlag,SendFlag)
 	struct IP_Structure * Seg;
+    {
     signed long
 	Header_Size,
 	sptr,
-	segdata,
-	segcopy : IP_Structure,
-	struct IP_Structure * seghdr;
+	segdata;
+	struct ip_structure * segcopy;
+	struct ip_structure * seghdr;
 
-!!!HACK!!// Make sure this works right.
+//!!HACK!!// Make sure this works right.
 
     seghdr = seg;		// Point at segment header
     Header_Size = Seg->IPH$IHL * 4;	// Calculate header size
@@ -237,7 +243,7 @@ IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
     {
     signed long
 	Ucount,
-	IPCBIX,
+	IPCBIX;
 	struct IPCB_Structure * IPCB;
 
     Ucount = IPCB_Count;
@@ -265,20 +271,18 @@ IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
     the IPCB list and queue the IP packet for deliver here.
 */
 
-FORWARD ROUTINE
-    Queue_User_IP;
+    Queue_User_IP();
 
-IPU$User_Input ( Src$Adrs,Dst$Adrs,Protocol,
-				BufSize,Buf,SegSize,Seg ): NOvalue=
-    {
-    MAP
+void IPU$User_Input ( Src$Adrs,Dst$Adrs,Protocol,
+				BufSize,Buf,SegSize,Seg )
 	struct IP_Structure * Seg;
+{
     signed long
 	Uptr,
 	Ucount,
 	IPCBIX,
 	sum,
-	delete,
+      delete;
 	struct IPCB_Structure * IPCB;
     LABEL
 	X;
@@ -292,14 +296,14 @@ IPU$User_Input ( Src$Adrs,Dst$Adrs,Protocol,
     if ($$LOGF(LOG$IP))
 	Log_IP_Packet(Seg,TRUE,FALSE);
 
-!!!HACK!!// I deleted this.  It should be done 
+//!!HACK!!// I deleted this.  It should be done 
 
 // Try to match the input packet up with a IPCB
-!!!HACK!!// What if there's more than one IPCB for this address?
+//!!HACK!!// What if there's more than one IPCB for this address?
     IPCB = IPCB_Find ( Src$Adrs , Dst$Adrs , Protocol );
     if (IPCB == 0)
 	{
-!!!HACK!!// Don"t worry if there"e no IPCB.
+//!!HACK!!// Don"t worry if there"e no IPCB.
 	if ($$LOGF(LOG$IP))
 	    QL$FAO("!%T No IPCB found for segment !XL!/",0,Seg);
 	}
@@ -338,21 +342,18 @@ X:	{
     Returns TRUE if the IP packet has been fully disposed of (i.e. the
     caller may deallocate the packet), FALSE otherwise (i.e. the packet
     has been placed on a queue and may not be deallocated yet).
- )%
+ */
 
-FORWARD ROUTINE
- VOID    DELIVER_IP_DATA;
+ void    DELIVER_IP_DATA();
 
 Queue_User_IP(IPCB,Uptr,Usize,Buf,Bufsize,QB)
-    {
-    MAP
-	struct IPCB_Structure * IPCB,
+	struct IPCB_Structure * IPCB;
 	struct queue_blk_structure(QB_NR_Fields) * QB;
+    {
     signed long
 	Buf2,
 	QBR;
-    EXTERNAL ROUTINE
-	MM$QBlk_Get;
+extern	MM$QBlk_Get();
     LITERAL
 	IPCB$NR_Qmax = 5;	// Max input packets permitted on input queue
 
@@ -369,7 +370,7 @@ Queue_User_IP(IPCB,Uptr,Usize,Buf,Bufsize,QB)
 
     Buf2 = MM$Seg_Get(Bufsize);	// Get a buffer
     Uptr = Buf2 + (Uptr - Buf);
-!!!HACK!!// There's no need to copy the whole buffer, only Usize worth...
+//!!HACK!!// There's no need to copy the whole buffer, only Usize worth...
     MOVBYT(Bufsize,Buf,Buf2);
 
 // Allocate a queue block and insert onto user receive queue
@@ -396,14 +397,13 @@ Queue_User_IP(IPCB,Uptr,Usize,Buf,Bufsize,QB)
     Perform actual delivery of IP packet to a user request.
     IP packet is copied into the user buffer and the user I/O request
     is posted.
- )%
+ */
 
-Deliver_IP_Data(IPCB,QB,URQ) : NOVALUE (void)
-    {
-    MAP
-	struct IPCB_Structure * IPCB,
-	struct queue_blk_structure(QB_NR_Fields) * QB,
+void Deliver_IP_Data(IPCB,QB,URQ)
+	struct IPCB_Structure * IPCB;
+	struct queue_blk_structure(QB_NR_Fields) * QB;
  	struct queue_blk_structure(QB_UR_Fields) * URQ;
+    {
     signed long
 	FLAGS,
 	ICMTYPE,
@@ -416,7 +416,7 @@ Deliver_IP_Data(IPCB,QB,URQ) : NOVALUE (void)
 
 // Determine data start and data count
 
-!!!HACK!!// come back here...
+//!!HACK!!// come back here...
 
     Ucount = QB->NR$Ucount;
     Uptr = QB->NR$Uptr;
@@ -466,7 +466,6 @@ Deliver_IP_Data(IPCB,QB,URQ) : NOVALUE (void)
 
 IPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
     {
-    signed long
 	struct IPCB_Structure * IPCB;
     MACRO
 	IPCBERR(EC) = (RCaddr = EC; return 0) %;
@@ -498,11 +497,10 @@ IPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
 
 IPCB_Get(IDX)
     {
-    EXTERNAL ROUTINE
-	LIB$GET_VM 	: ADDRESSING_MODE(GENERAL),
-	LIB$GET_VM_PAGE	: ADDRESSING_MODE(GENERAL);
+extern	LIB$GET_VM();
+extern	LIB$GET_VM_PAGE();
+	struct IPCB_Structure * IPCB;
     signed long
-	struct IPCB_Structure * IPCB,
 	IPCBIDX,
 	RC ;
     LABEL
@@ -548,11 +546,10 @@ X:  {			// ** Block X **
 
 //SBTTL "IPCB_Free - Deallocate a IPCB"
 
-void IPCB_Free(IPCBIX,struct IPCB_Structure * IPCB) (void)
+void IPCB_Free(IPCBIX,struct IPCB_Structure * IPCB)
     {
-    EXTERNAL ROUTINE
-	LIB$FREE_VM		: ADDRESSING_MODE(GENERAL),
-	LIB$FREE_VM_PAGE	: ADDRESSING_MODE(GENERAL);
+extern	LIB$FREE_VM();
+extern	LIB$FREE_VM_PAGE();
 
     signed long
 	RC ;
@@ -572,16 +569,15 @@ void IPCB_Free(IPCBIX,struct IPCB_Structure * IPCB) (void)
 
 //SBTTL "Kill_IP_Requests - purge all I/O requests for a connection"
 
-void Kill_IP_Requests(struct IPCB_Structure * IPCB,RC) (void)
+void Kill_IP_Requests(struct IPCB_Structure * IPCB,RC)
     {
-    signed long
-	struct queue_blk_structure(QB_UR_Fields) * URQ,
+	struct queue_blk_structure(QB_UR_Fields) * URQ;
 	struct queue_blk_structure(QB_NR_Fields) * QB;
 
 // Make sure we aren't doing this more than once
-!
+//
 //   if (IPCB->IPCB$Aborting)
-!	RETURN;
+//	RETURN;
 
 // Say that this connection is aborting (prevent future requests)
 
@@ -625,16 +621,16 @@ void Kill_IP_Requests(struct IPCB_Structure * IPCB,RC) (void)
 
 //SBTTL "IPCB_Close - Close/deallocate a IPCB"
 
-void IPCB_Close(UIDX,struct IPCB_Structure * IPCB,RC) (void)
+void IPCB_Close(UIDX,struct IPCB_Structure * IPCB,RC)
     {
     Kill_IP_Requests(IPCB,RC);
     IPCB_FREE(UIDX,IPCB);
     }
 
-void IPCB_Abort(struct IPCB_Structure * IPCB,RC) (void)
-!
+void IPCB_Abort(struct IPCB_Structure * IPCB,RC)
+//
 // Abort a IPCB - called by IP code.
-!
+//
     {
     IPCB_CLOSE(IPCB->IPCB$IPCBID,IPCB,RC);
     }
@@ -642,10 +638,10 @@ void IPCB_Abort(struct IPCB_Structure * IPCB,RC) (void)
 
 //SBTTL "IPU$Purge_All_IO - delete IP database before network exits"
 
-IPU$Purge_All_IO : NOVALUE (void)
+void IPU$Purge_All_IO (void)
     {
     signed long
-	IPCBIDX,
+	IPCBIDX;
 	struct IPCB_Structure * IPCB;
 
 // Loop for all connections, purge them, and delete them.
@@ -660,20 +656,19 @@ IPU$Purge_All_IO : NOVALUE (void)
 /*
     Open an IP "connection". Create a IP Control Block, which serves as a
     place to hang incoming packets and user receive requests.
- )%
+ */
 
-FORWARD ROUTINE
- VOID    IP_NMLOOK_DONE,
- VOID    IP_ADLOOK_DONE;
+ void    IP_NMLOOK_DONE();
+ void    IP_ADLOOK_DONE();
 
-void IPU$OPEN(struct User_Open_Args * Uargs) (void)
+void IPU$OPEN(struct User_Open_Args * Uargs)
     {
+	struct IPCB_Structure * IPCB;
     signed long
 	IPADDR,
 	NAMLEN,
 	NAMPTR,
 	UIDX,
-	struct IPCB_Structure * IPCB,
 	IPCBPTR,
 	Args : VECTOR[4];
     LABEL
@@ -758,14 +753,12 @@ X:  {			// *** Block X ***
     and post the users open request.
 */
 
-IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE (void)
+void IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
     {
-    MAP
-	struct IPCB_Structure * IPCB;
     signed long
-	RC,
+    RC;
 	struct User_Open_Args * Uargs,
-	IOSB : NetIO_Status_Block;
+	struct NetIO_Status_Block * IOSB ;
     MACRO
 	UOP_ERROR(EC) = 
 	    {
@@ -790,8 +783,8 @@ IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE (void)
     // Finish up the open
 
 //    if (ADRCNT > 0)
-!	IP$SET_HOSTS(ADRCNT,ADRLST,IPCB->IPCB$Local_Host,
-!		     IPCB->IPCB$Foreign_Host);
+//	IP$SET_HOSTS(ADRCNT,ADRLST,IPCB->IPCB$Local_Host,
+//		     IPCB->IPCB$Foreign_Host);
 
     // Done at last - log success
 
@@ -800,11 +793,11 @@ IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE (void)
 
 // Verify that we have access to the host set
 
-!!!HACK!!// Should we do this or not??
+//!!HACK!!// Should we do this or not??
 //    RC = USER$CHECK_ACCESS(IPCB->IPCB$USER_ID,IPCB->IPCB$Local_Host,
-!		      0,IPCB->IPCB$Foreign_Host,0);
+//		      0,IPCB->IPCB$Foreign_Host,0);
 //    if (NOT RC)
-!	UOP_ERROR(RC);
+//	UOP_ERROR(RC);
 
 // Set the foreign host name in the IPCB
 
@@ -825,10 +818,9 @@ IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE (void)
 
 //SBTTL "IP_ADLOOK_DONE - Finish IP address to name lookup"
 
-IP_ADLOOK_DONE(IPCB,STATUS,NAMLEN,NAMPTR) : NOVALUE (void)
-    {
-    MAP
+void IP_ADLOOK_DONE(IPCB,STATUS,NAMLEN,NAMPTR)
 	struct IPCB_Structure * IPCB;
+    {
 
 // Clear pending name lookup flag
 
@@ -854,10 +846,10 @@ IP_ADLOOK_DONE(IPCB,STATUS,NAMLEN,NAMPTR) : NOVALUE (void)
     associated with a connection.
 */
 
-void IPU$CLOSE(struct User_Close_Args * Uargs) (void)
+void IPU$CLOSE(struct User_Close_Args * Uargs)
     {
+struct IPCB_Structure * IPCB;
     signed long
-	struct IPCB_Structure * IPCB,
 	RC;
 
 // Check for valid IPCB
@@ -881,12 +873,12 @@ void IPU$CLOSE(struct User_Close_Args * Uargs) (void)
 //SBTTL "IPU$ABORT - abort IP "connection""
 /*
     Abort a IP "connection". Identical in functionality to IPU$CLOSE.
- )%
+ */
 
-void IPU$ABORT(struct User_Abort_Args * Uargs) (void)
+void IPU$ABORT(struct User_Abort_Args * Uargs)
     {
+	struct IPCB_Structure * IPCB;
     signed long
-	struct IPCB_Structure * IPCB,
 	RC;
 
 // Check for valid IPCB
@@ -911,9 +903,9 @@ void IPU$ABORT(struct User_Abort_Args * Uargs) (void)
 /*
     Handle user send request for IP connection. Form a IP packet from the
     user's data buffer and hand it to IP layer for transmission.
- )%
+ */
 
-void IPU$S}(struct User_Send_Args * Uargs) (void)
+void IPU$S}(struct User_Send_Args * Uargs)
     {
     signed long
 	RC,
@@ -921,9 +913,9 @@ void IPU$S}(struct User_Send_Args * Uargs) (void)
 	Bufsize,
 	Buf,
 	LocalAddr, ForeignAddr, Protocol,
-	struct IP_Structure * Seg,
 	Segsize,
-	USize,
+	USize;
+	struct IP_Structure * Seg;
 	struct IPCB_Structure * IPCB;
 
 
@@ -935,7 +927,7 @@ void IPU$S}(struct User_Send_Args * Uargs) (void)
 	RETURN;
 	};
 
-!!!HACK!!// Does this size arg mean  anything?
+//!!HACK!!// Does this size arg mean  anything?
     XLOG$FAO(LOG$USER,"!%T IP$S}: Conn=!XL, IPCB=!XL, Size=!SL!/",
 	     0,Uargs->SE$Local_Conn_ID,IPCB,Uargs->SE$Buf_size);
 
@@ -957,18 +949,18 @@ void IPU$S}(struct User_Send_Args * Uargs) (void)
 	};
 
 
-!!!HACK!!// Where's the comment?
+//!!HACK!!// Where's the comment?
     Flags = Uargs->SE$Flags;
 
 // Allocate an output buffer and build an IP packet
-!!!HACK!!// This is silly, why not just use the uarg block.
-!!!HACK!!// Not possible now, but maybe with a little work...
+//!!HACK!!// This is silly, why not just use the uarg block.
+//!!HACK!!// Not possible now, but maybe with a little work...
 
     // Calc total size of IP packet.  Note: Uargs->SE$EXT2 is header size.
     USize = Uargs->SE$Buf_size;
     Segsize = Uargs->SE$Buf_size + Uargs->SE$EXT2;
 //    if (SegSize > Max_IP_Data_Size)
-!	SegSize = Max_IP_Data_Size;
+//	SegSize = Max_IP_Data_Size;
 
 // Use preallocated buffer sizes to reduce dynamic memory load
 
@@ -979,7 +971,7 @@ void IPU$S}(struct User_Send_Args * Uargs) (void)
 	if (bufsize <= MAX_PHYSICAL_BUFSIZE)
 	    bufsize = MAX_PHYSICAL_BUFSIZE;
     Buf = MM$Seg_Get(Bufsize);	// Get a buffer
-!!!HACK!!// Next line is a hack, but it really speeds things up...
+//!!HACK!!// Next line is a hack, but it really speeds things up...
     Seg = Buf + device_header; // Point at IP segment
 
 // Copy the user data into the data area
@@ -1060,14 +1052,14 @@ void IPU$S}(struct User_Send_Args * Uargs) (void)
     Handle user receive request for IP connection. If there is a packet
     available on the IP receive queue, then deliver it to the user
     immediately. Otherwise, queue up the user receive for later.
- )%
+ */
 
-void IPU$RECEIVE(struct User_Recv_Args * Uargs) (void)
+void IPU$RECEIVE(struct User_Recv_Args * Uargs) 
     {
+	struct IPCB_Structure * IPCB;
+	struct queue_blk_structure(QB_NR_Fields) * QB;
+	struct queue_blk_structure(QB_UR_Fields) * URQ;
     signed long
-	struct IPCB_Structure * IPCB,
-	struct queue_blk_structure(QB_NR_Fields) * QB,
-	struct queue_blk_structure(QB_UR_Fields) * URQ,
 	RC;
 
 // Validate connection ID and get IPCB pointer
@@ -1121,14 +1113,13 @@ void IPU$RECEIVE(struct User_Recv_Args * Uargs) (void)
 //SBTTL "IPU$INFO - get info about IP "connection""
 /*
     Read the host names/numbers for a IP connection.
- )%
+ */
 
-void IPU$INFO(struct User_Info_Args * Uargs) (void)
+void IPU$INFO(struct User_Info_Args * Uargs)
     {
-    EXTERNAL ROUTINE
-	USER$Net_Connection_Info : NOVALUE;
+extern	USER$Net_Connection_Info ();
+	struct IPCB_Structure * IPCB;
     signed long
-	struct IPCB_Structure * IPCB,
 	RC;
 
 // Validate the connection ID
@@ -1153,9 +1144,9 @@ void IPU$INFO(struct User_Info_Args * Uargs) (void)
 /*
     This routine is a placeholder for the network STATUS command, which is
     currently implemented for the TCP protocol.
- )%
+ */
 
-void IPU$STATUS(struct User_Status_Args * Uargs) (void)
+void IPU$STATUS(struct User_Status_Args * Uargs)
     {
     USER$Err(Uargs,NET$_NYI);
     }
@@ -1164,12 +1155,12 @@ void IPU$STATUS(struct User_Status_Args * Uargs) (void)
 /*
     Handle process abort/$CANCEL request for a IP connection. Identical
     in functionality to IPU$CLOSE/IPU$ABORT except for calling procedure.
- )%
+ */
 
 IPU$CANCEL(struct VMS$Cancel_Args * Uargs)
     {
-    signed long
 	struct IPCB_Structure * IPCB,
+    signed long
 	Fcount;
 
     Fcount = 0;
@@ -1195,13 +1186,12 @@ IPU$CANCEL(struct VMS$Cancel_Args * Uargs)
 
 //SBTTL "IP dump routines"
 
-IPU$Connection_List(RB) : NOVALUE (void)
-!
+void IPU$Connection_List(RB)
+//
 // Dump out the list of IP connections.
-!
-    {
-    MAP
+//
 	struct D$IP_List_Return_Blk * RB;
+    {
     signed long
 	RBIX;
     RBIX = 1;
@@ -1215,14 +1205,13 @@ IPU$Connection_List(RB) : NOVALUE (void)
     }
 
 IPU$IPCB_Dump(IPCBIX,RB)
-!
+//
 // Dump out a single IP connection
-!
-    {
-    MAP
+//
 	struct D$IPCB_Dump_Return_BLK * RB;
+    {
+	struct IPCB_Structure * IPCB;
     signed long
-	struct IPCB_Structure * IPCB,
 	QB,
 	Qcount;
 
@@ -1270,5 +1259,3 @@ IPU$IPCB_Dump(IPCBIX,RB)
 
     return TRUE;
     }
-}
-ELUDOM
