@@ -508,6 +508,22 @@ static int watchdog = 5000;
 #define tx_interrupt_mitigation 1
 
 /* Put out somewhat more debugging messages. (0: no msg, 1 minimal .. 6). */
+#define VORTEX_DEBUG 6
+#undef VORTEX_DEBUG
+#undef KERN_ALERT
+#undef KERN_CRIT
+#undef KERN_ERR
+#undef KERN_WARNING
+#undef KERN_NOTICE
+#undef KERN_INFO
+#undef KERN_DEBUG
+#define KERN_ALERT KERN_EMERG
+#define KERN_CRIT KERN_EMERG
+#define KERN_ERR KERN_EMERG
+#define KERN_WARNING KERN_EMERG
+#define KERN_NOTICE KERN_EMERG
+#define KERN_INFO KERN_EMERG
+#define KERN_DEBUG KERN_EMERG
 #define vortex_debug debug
 #ifdef VORTEX_DEBUG
 static int vortex_debug = VORTEX_DEBUG;
