@@ -26,7 +26,8 @@ obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \
 	    queue.o sysascefc.o deadlock.o sysmailbx.o mbdriver.o \
 	    rms.o rms2.o access.o update.o cache.o direct.o \
 	    device.o phyunix.o phyvms.o mountdsp.o ucbcredel.o dispatch.o \
-	    file.o iosubrams.o pedriver.o scs.o pagefault.o
+	    file.o iosubrams.o pedriver.o scs.o pagefault.o \
+	    sysadjwsl.o syslkwset.o
 
 obj-$(CONFIG_UID16) += uid16.o
 obj-$(CONFIG_MODULES) += ksyms.o
