@@ -5,6 +5,7 @@ event flags (partly)
 process control and communication (partly)
 logicals (partly)
 fork (partly)
+queued i/o (a little bit)
 
 syscalls:
 $asctim
