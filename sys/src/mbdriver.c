@@ -503,12 +503,11 @@ void mb$finishread(struct _ucb * u) {
       } 
       com_std$drvdealmem(msg);
 
-      if (!aqempty(&u->ucb$l_mb_msgqfl)) {
-	struct __mmb * next = u->ucb$l_mb_msgqfl;
-      
-	if ((next->mmb$b_func&IO$M_FCODE)!=IO$_WRITEOF)
+      struct __mmb * next = u->ucb$l_mb_msgqfl;
+
+      if (!aqempty(&u->ucb$l_mb_msgqfl) && (next->mmb$b_func&IO$M_FCODE)!=IO$_WRITEOF) {
 	  not_done=0;
-	else {
+      } else {
 
 	  if (s->srb$w_bufquochrg) {
 	    room_ast=1;
@@ -520,22 +519,8 @@ void mb$finishread(struct _ucb * u) {
     
 	  i->irp$l_iost1= s->srb$w_datasize + (SS$_NORMAL<<16);
 	  i->irp$l_iost2 = exe$ipid_to_epid(msg->mmb$l_pid);
+
 	  com$post(i,u);
-	}
-      } else {
-	if (s->srb$w_bufquochrg) {
-	  room_ast=1;
-	  u->ucb$w_bufquo+=s->srb$w_reqsiz;
-	}
-
-	i->irp$l_bcnt=s->srb$w_datasize;
-	remque(i,0);
-
-	i->irp$l_iost1= s->srb$w_datasize + (SS$_NORMAL<<16);
-	i->irp$l_iost2 = exe$ipid_to_epid(msg->mmb$l_pid);
-
-	com$post(i,u);
-
       }
       break;
     }
