@@ -99,13 +99,19 @@ define verb show
 	parameter p1,label=something,value(type=show_something)
 
 define syntax name_table
-	cliroutine int_create_logical_table
+	cliroutine create_name_table
 	parameter p1
 
 define verb create 
 	image create
-	routine create_main
+	routine main
+	qualifier directory
 	qualifier name_table,syntax=name_table
+
+define verb stop
+	cliroutine stop
+	parameter p1
+	qualifier identification, value(required)
 
 define verb dfu
 	image dfu
