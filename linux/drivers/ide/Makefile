@@ -18,7 +18,7 @@ obj-m		:=
 ide-obj-y	:=
 
 obj-$(CONFIG_BLK_DEV_HD)	+= hd.o
-obj-$(CONFIG_BLK_DEV_IDE_VMS)       += dqdriver.o enable-ide.o ide-info.o
+obj-$(CONFIG_BLK_DEV_IDE_VMS)       += dqdriver.o enable-ide.o 
 obj-$(CONFIG_BLK_DEV_IDE)       += ide-mod.o ide-probe-mod.o
 obj-$(CONFIG_BLK_DEV_IDECS)     += ide-cs.o
 obj-$(CONFIG_BLK_DEV_IDEDISK)   += ide-disk.o

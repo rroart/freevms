@@ -4,8 +4,6 @@ typedef long long int64;
 typedef unsigned long long uint64;
 
 typedef struct _orb ORB ;
-typedef struct __fdt  FDT ;
-typedef struct __iosb  IOSB ;
 typedef struct _abort_gtcmd  ABORT_GTCMD ;
 typedef struct _acb  ACB ;
 typedef struct _accnm  ACCNM ;
