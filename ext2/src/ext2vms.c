@@ -659,8 +659,8 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     } else {
       fib->fib$w_fid_num=4;
       fib->fib$w_fid_seq=4;
-      fib->fib$w_fid_rvn=0;
-      fib->fib$w_fid_nmx=0;
+      fib->fib$b_fid_rvn=0;
+      fib->fib$b_fid_nmx=0;
     }
 
     if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
