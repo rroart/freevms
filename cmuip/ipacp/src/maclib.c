@@ -474,7 +474,7 @@ Not_Mounted:
 	if	(SS$_INSFMEM==R0)		// OK?
 	goto	bye;			// EQL means Error.
 	R8 = acp_qb_adrs;		// for build_VCB
-	R0 = Build_VCB(R5,R8);
+	R0 = build_vcb(R5,R8);
 	if ((R0&1)==1) goto all_done;
 	return	Dismount();		// lbs = Error.
 }
@@ -706,7 +706,7 @@ l5:
 //
 //--
 
-	BUILD_VCB(R5,R8)
+	build_vcb(R5,R8)
      struct _ucb * R5;
      struct _aqb * R8;
 {
@@ -1662,7 +1662,7 @@ long	CQ$DEQP;	// Pointer to first used byte on queue
 #endif
 
 //ENTRY CQ_Enqueue,^M<R2,R3,R4,R5,R6,R7>
-int CQ_Enqueue(CQ,SRC,SCOUNT)
+int cq_enqueue(CQ,SRC,SCOUNT)
  {
   int R0,R1,R2,R3,R4,R5,R6,R8,R9;
   struct _CQ * R7;
@@ -1697,7 +1697,7 @@ l20:
 #endif
 
 //ENTRY CQ_Dequeue,^M<R2,R3,R4,R5,R6,R7>
-	  void CQ_Dequeue(CQ,DEST ,DCOUNT) 
+	  void cq_dequeue(CQ,DEST ,DCOUNT) 
 {
   int R0,R1,R2,R3,R4,R5,R6,R8,R9;
   struct _CQ * R7;
@@ -1733,7 +1733,7 @@ l20:
 #endif
 
 //ENTRY CQ_DeqCopy,^M<R2,R3,R4,R5,R6,R7>
-	  void CQ_DeqCopy(CQ,DEST ,DCOUNT) 
+	  void cq_deqcopy(CQ,DEST ,DCOUNT) 
 {
   int R0,R1,R2,R3,R4,R5,R6,R8,R9;
   struct _CQ * R7;

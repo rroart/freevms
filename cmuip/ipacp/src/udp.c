@@ -218,8 +218,8 @@ extern signed long
     AST_In_Progress,
     UDP_User_LP,
     log_state,
-    MIN_PHYSICAL_BUFSIZE,
-    MAX_PHYSICAL_BUFSIZE;
+    min_physical_bufsize,
+    max_physical_bufsize;
 
 // External routines
 
@@ -248,7 +248,7 @@ extern  void    user$post_io_status();
 // IP.BLI
 
 extern  void    IP$SET_HOSTS();
-extern     IP$SEND();
+extern     ip$send();
 extern     Gen_Checksum();
 
 // NMLOOK.BLI
@@ -275,10 +275,10 @@ extern     RPC$INPUT();
 extern    RPC$CHECK_PORT();
 
 signed long
-    UDPTTL	= 32;
+    udpttl	= 32;
 
 extern signed long
-    SNMP_SERVICE,
+    snmp_service,
     RPC_SERVICE;
 
 
@@ -525,7 +525,7 @@ void udp$input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 	};
 
 // Check to see if it's an SNMP packet
-    if ((Seg->up$dest_port == UDP_PORT_SNMP) && SNMP_SERVICE)
+    if ((Seg->up$dest_port == UDP_PORT_SNMP) && snmp_service)
 	{
 	signed long
 	  out_len;
@@ -1553,11 +1553,11 @@ UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
 // Use preallocated buffer sizes to reduce dynamic memory load
 
     bufsize = Usize + UDP_HEADER_SIZE + IP_HDR_BYTE_SIZE + DEVICE_HEADER;
-    if (bufsize <= MIN_PHYSICAL_BUFSIZE)
-      bufsize = MIN_PHYSICAL_BUFSIZE;
+    if (bufsize <= min_physical_bufsize)
+      bufsize = min_physical_bufsize;
     else
-	if (bufsize <= MAX_PHYSICAL_BUFSIZE)
-	    bufsize = MAX_PHYSICAL_BUFSIZE;
+	if (bufsize <= max_physical_bufsize)
+	    bufsize = max_physical_bufsize;
     buf = mm$seg_get(bufsize);	// Get a buffer
     Seg = buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE; // Point at UDP segment
     Segsize = Usize+UDP_HEADER_SIZE; // Length of segment + UDP header
@@ -1591,7 +1591,7 @@ UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
 // Send the segment to IP (it will deallocate it)
 
     UDPIPID = UDPIPID+1;	// Increment packet ID
-    RC = IP$SEND(LocalAddr,ForeignAddr,UDPTOS,UDPTTL,
+    RC = ip$send(LocalAddr,ForeignAddr,UDPTOS,udpttl,
 		   Seg,Segsize,UDPIPID,UDPDF,TRUE,UDP_Protocol,
 		   buf,bufsize);
 

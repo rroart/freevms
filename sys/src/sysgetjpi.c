@@ -81,7 +81,21 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
   return SS$_NORMAL;
 }
 
+asmlinkage int exe$getjpiw(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long long astprm) {
+
+  /* I think this is about it */
+
+  int status=exe$getjpi(efn,pidadr,prcnam,itmlst,iosb,astadr,astprm);
+  if ((status&1)==0) return status;
+  return exe$synch(efn,iosb);
+
+}
+
 asmlinkage int exe$getjpi_wrap(struct struct_getjpi *s) {
   return exe$getjpi(s->efn,s->pidadr,s->prcnam,s->itmlst,s->iosb,s->astadr,s->astprm);
+}
+
+asmlinkage int exe$getjpiw_wrap(struct struct_getjpi *s) {
+  return exe$getjpiw(s->efn,s->pidadr,s->prcnam,s->itmlst,s->iosb,s->astadr,s->astprm);
 }
 

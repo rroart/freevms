@@ -135,8 +135,7 @@ extern signed long log_state,
     local_name,
     ast_in_progress;
 
-extern signed long
-    M$INTERNAL;
+#define     M$INTERNAL	  15
 
 extern     tcp$tcb_close();
 extern     tcb$create();
@@ -1666,7 +1665,7 @@ signed long
 //	Now set any delayed device dependent
 //
 	    set_devdep(TVT);				// JC
-	    PTY_Write(TVT);				// JC Write after Hold off
+	    PTY_WRITE(TVT);				// JC Write after Hold off
 	    };
 	};
     }

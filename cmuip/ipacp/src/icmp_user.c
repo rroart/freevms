@@ -85,10 +85,12 @@ MODULE ICMP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 
 //*** Special literals from USER.BLI ***
 
+#if 0
 extern signed long 
     UCB$Q_DDP,
     UCB$L_CBID,
     UCB$L_EXTRA;
+#endif
 
 // External data items
 
@@ -128,7 +130,7 @@ extern  void    user$post_io_status();
 // IP.BLI
 
 extern  void    IP$SET_HOSTS();
-extern     IP$SEND();
+extern     ip$send();
 
 // NMLOOK.BLI
 
@@ -189,7 +191,7 @@ MACRO
 //SBTTL "ICMP data storage"
 
 signed long
-    ICMPTTL	 = 32;	// TTL for ICMP
+    icmpttl	 = 32;	// TTL for ICMP
 
 static signed long
     ICMPIPID  = 1,	// Current IP packet ID
@@ -710,7 +712,7 @@ void icmp$open(struct user_open_args * uargs)
 // At this point, the connection exists. Write the connection ID
 // back into the Unit Control Block for this connection.
 
-    icmpcbptr = uargs->op$ucb_adrs + UCB$L_CBID;
+    icmpcbptr = uargs->op$ucb_adrs; // not yet  + UCB$L_CBID;
     $$KCALL(MOVBYT,4,UIDX,icmpcbptr);
 
 // Initialize queue headers for the ICMPCB
@@ -1040,7 +1042,7 @@ void icmp$send(struct user_send_args * uargs)
 
     ICMPIPID = ICMPIPID+1;	// Increment packet ID
     RC = SS$_NORMAL;
-    if ((IP$SEND(LocalAddr,ForeignAddr,ICMPTOS,ICMPTTL,
+    if ((ip$send(LocalAddr,ForeignAddr,ICMPTOS,icmpttl,
 		   Seg,Segsize,ICMPIPID,ICMPDF,TRUE,ICMP_Protocol,
 		   Buf,bufsize) == 0)) RC = NET$_NRT;
 

@@ -145,8 +145,8 @@ MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
 	};
 
 signed long
-	ACT_THRESHOLD	 = 512,
-	LOG_THRESHOLD	 = 512 ;
+	act_threshold	 = 512,
+	log_threshold	 = 512 ;
 
 
 void APPEND_DEC(DPTR,DCNT,NUM,OUTCNT)
@@ -488,7 +488,7 @@ void LOG_OUTPUT(OUTDESC)
 
 	RC = exe$put( LOGRAB);
 //!!HACK!!// Take out this Flush!
-	if (( 	(logcount > LOG_THRESHOLD)
+	if (( 	(logcount > log_threshold)
 	   ||	(log_state && LOG$FLUSH) ))	// JC
 	 {
 	    RC = exe$flush(LOGRAB);
@@ -623,7 +623,7 @@ void ACT_OUTPUT(OUTDESC)
 	ACTCOUNT = ACTCOUNT + OUTDESC->dsc$w_length ;
 
 	RC = exe$put(ACTRAB);
-	if ((ACTCOUNT > ACT_THRESHOLD))
+	if ((ACTCOUNT > act_threshold))
 	    {
 	    RC = exe$flush(ACTRAB);
 	    ACTCOUNT = 0 ;

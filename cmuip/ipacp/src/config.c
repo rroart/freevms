@@ -308,18 +308,18 @@ static struct _rabdef * CFRAB = & CFRAB_;
 
  void    config_err();
  void    Init_Device();
- void    Init_MEMGR();
+ void    init_memgr();
  void    Init_Gateway();
  void    Init_NameServer();
- void    Init_Logging();
- void    Init_Activity_Logging();
- void    Init_Forwarding();
- void    Init_Variable();
- void    Init_MBXResolver();
+ void    init_logging();
+ void    init_activity_logging();
+ void    init_forwarding();
+ void    init_variable();
+ void    init_mbxresolver();
  void    Init_WKS();
  void    Init_RPC();
  void    Init_Auth();
- void    Init_Local_Host();
+ void    init_local_host();
     GETFIELD();
     PARSE_NULLFIELD();
  void    SKIPTO();
@@ -341,19 +341,19 @@ CNF$Define_IPACP_Interface (void)
     {
     extern
 	// pointer to IPACP AST_in_progress flag (from MAIN.BLI)
-	AST_in_progress,
+	ast_in_progress,
 	// IPACP nap control (from MAIN.BLI)
-	Sleeping,
+	sleeping,
 
 	// IPACP Maximum Physical Buffer Size
-	MAX_PHYSICAL_BUFSIZE,
+	max_physical_bufsize,
 
-	LOG_STATE;
+	log_state;
 
 	// IAPCP receive callback (from IP.BLI)
 extern	ip$receive();
 	// IPACP self-address recognition (from IP.BLI)
-extern 	IP$ISME();
+extern 	ip$isme();
 
 	// Interrupt blocking routines (from WHERE???)
 extern 	void MAIN$NOINT();
@@ -378,10 +378,10 @@ extern 	void FATAL_FAO();
     IPACP_Int ->  ACPI$IP_Receive 	= ip$receive;
 
     // pointer to IPACP sleeping flag
-    IPACP_Int ->  ACPI$Sleeping  	= Sleeping;
+    IPACP_Int ->  ACPI$Sleeping  	= sleeping;
 
     // pointer to IPACP AST_in_progress flag
-    IPACP_Int ->  ACPI$AST_in_progress  	= AST_in_progress;
+    IPACP_Int ->  ACPI$AST_in_progress  	= ast_in_progress;
 
     // Interrupt blocking routines
     IPACP_Int ->  ACPI$NOINT 		= MAIN$NOINT;
@@ -391,7 +391,7 @@ extern 	void FATAL_FAO();
     IPACP_Int ->  ACPI$Device_Error 	= CNF$Device_Error;
 
     // IPACP self-address recognition
-    IPACP_Int ->  ACPI$IP_ISME 		= IP$ISME;
+    IPACP_Int ->  ACPI$IP_ISME 		= ip$isme;
 
     // Memory allocation routines
     IPACP_Int ->  ACPI$Seg_Get 		= mm$seg_get;
@@ -399,7 +399,7 @@ extern 	void FATAL_FAO();
     IPACP_Int ->  ACPI$QBlk_Free 	= mm$qblk_free;
 
     // Provide event logging entry points
-    IPACP_Int ->  ACPI$LOG_STATE 	= LOG_STATE;	// pointer
+    IPACP_Int ->  ACPI$LOG_STATE 	= log_state;	// pointer
     IPACP_Int ->  ACPI$LOG_FAO 		= LOG_FAO;
     IPACP_Int ->  ACPI$QL_FAO 		= QL_FAO;
     IPACP_Int ->  ACPI$OPR_FAO 		= OPR_FAO;
@@ -407,7 +407,7 @@ extern 	void FATAL_FAO();
     IPACP_Int ->  ACPI$FATAL_FAO 	= FATAL_FAO;
 
     // IPACP max physical buffer size
-    IPACP_Int ->  ACPI$MPBS  		= MAX_PHYSICAL_BUFSIZE;
+    IPACP_Int ->  ACPI$MPBS  		= max_physical_bufsize;
 
     return IPACP_Int;
     }
@@ -418,7 +418,7 @@ extern 	void FATAL_FAO();
    file.
 */
 
-void Init_Vars (void)
+void init_vars (void)
     {
     extern
 	struct IP_group_MIB_struct * IP_group_MIB;
@@ -465,7 +465,7 @@ Device_Configuration_Entry * dev_config_tab; /* check PSECT(quads) ALIGN(3), */
 
 
 
-CNF$DEVICE_STAT ( Inx, RB_A )
+cnf$device_stat ( Inx, RB_A )
 //
 // Dump out a Device configuration entry.
 //
@@ -509,7 +509,7 @@ CNF$DEVICE_STAT ( Inx, RB_A )
     }
 
 
-CNF$DEVICE_LIST ( RB )
+cnf$device_list ( RB )
 //
 // Dump out the list of valid devices.
 //
@@ -561,7 +561,7 @@ void CNF$Configure_ACP (void)
 
 // Initialize all the variables before they are set by the config script
 
-    INIT_VARS();
+    init_vars();
 
 // OPEN the file "config.TXT" & read/decode network device data into blockvector
 // dev_config and memory management info.
@@ -606,21 +606,21 @@ void CNF$Configure_ACP (void)
 	    if (STREQLZ(cptr,"DEVICE_INIT"))
 		    Init_Device();
 		else if (STREQLZ(cptr,"MEMGR_INIT"))
-		    Init_Memgr();
+		    init_memgr();
 		else if (STREQLZ(cptr,"GATEWAY"))
 		    Init_Gateway();
 		else if (STREQLZ(cptr,"NAME_SERVER"))
 		    Init_NameServer();
 		else if (STREQLZ(cptr,"LOGGING"))
-		    Init_Logging();
+		    init_logging();
 		else if (STREQLZ(cptr,"ACTIVITY"))
-		    Init_Activity_Logging();
+		    init_activity_logging();
 		else if (STREQLZ(cptr,"IP_FORWARDING"))
-		    Init_Forwarding();
+		    init_forwarding();
 		else if (STREQLZ(cptr,"VARIABLE"))
-		    Init_Variable();
+		    init_variable();
 		else if (STREQLZ(cptr,"MBX_RESOLVER"))
-		    Init_MbxResolver();
+		    init_mbxresolver();
 		else if (STREQLZ(cptr,"WKS"))
 		    Init_WKS();
 		else if (STREQLZ(cptr,"RPC"))
@@ -628,7 +628,7 @@ void CNF$Configure_ACP (void)
 		else if (STREQLZ(cptr,"AUTH"))
 		    Init_Auth();
 		else if (STREQLZ(cptr,"LOCAL_HOST"))
-		    Init_Local_Host();
+		    init_local_host();
 		else
 		    config_err(ASCID("Unknown keyword"));
 	    };
@@ -919,7 +919,7 @@ void Init_NameServer (void)
     OPR$FAO("%IPACP: Obsolete keyword NAME_SERVER found in INET$CONFIG");
     }
 
-void Init_MEMGR (void)
+void init_memgr (void)
 //
 // Handle MEMGR-INIT entry in the INET$CONFIG file.
 // Specifies memory-manager initialization parameters.
@@ -958,7 +958,7 @@ void Init_MEMGR (void)
 
 
 
-void INIT_LOGGING (void)
+void init_logging (void)
 
 // Set initial logging state.
 
@@ -983,7 +983,7 @@ extern	void LOG_CHANGE();
 
 
 
-void INIT_ACTIVITY_LOGGING (void)
+void init_activity_logging (void)
 
 // Set initial activity logging state.
 
@@ -1010,7 +1010,7 @@ extern	void ACT_CHANGE();
 
 //SBTTL "Initialize IP forwarding state"
 
-void INIT_FORWARDING (void)
+void init_forwarding (void)
     {
     signed long
 	ipstate;
@@ -1035,7 +1035,7 @@ void INIT_FORWARDING (void)
 
 //SBTTL "Initialize various configuration variables"
 
-void INIT_VARIABLE (void)
+void init_variable (void)
     {
     extern
 	fq_max,
@@ -1690,7 +1690,7 @@ struct dsc$descriptor AUTHhostname_Desc_ = {
 
 //SBTTL "Init_MBXResolver - Define the system name resolver process"
 
-void Init_MBXResolver (void)
+void init_mbxresolver (void)
 //
 // Define the system name resolver process.
 // MBX_RESOLVER:<image>:<priority>:<flags>:<privs>:<quotas>
@@ -1749,7 +1749,7 @@ struct dsc$descriptor Quota_Desc_ = {
 
 //SBTTL "Add an entry to the local hosts list"
 
-void INIT_LOCAL_HOST (void)
+void init_local_host (void)
 //
 // Format is Local_Host:<ip-address>:<ip-mask>
 // Reads the data and calls USER$ACCESS_CONFIG(ipaddr,ipmask)
@@ -1893,8 +1893,8 @@ Side Effects:
 void CNF$Net_Device_Init (void)
     {
     extern
-	RETRY_COUNT,
-	MAX_PHYSICAL_BUFSIZE;
+	retry_count,
+	max_physical_bufsize;
     signed long
 	J,
       cdev;
@@ -1921,8 +1921,8 @@ DESC$STR_ALLOC(ipstr,20);
 		cdev = J;
 		(dev_config_tab[J].dc_rtn_Init)(dev_config_tab[J].dc_begin,
 				IPACP_Int,
-				RETRY_COUNT,
-				MAX_PHYSICAL_BUFSIZE);
+				retry_count,
+				max_physical_bufsize);
 		};
 
 // And tell the operator the status.

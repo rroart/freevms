@@ -102,7 +102,7 @@ typedef unsigned long u_long;
 #include <descrip.h>
 
 signed long
-    SNMP_SERVICE = 0;
+    snmp_service = 0;
 
 
 

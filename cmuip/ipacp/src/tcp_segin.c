@@ -396,7 +396,7 @@ extern  void    tcp$send_ack();
 extern  void    tcp$dump_tcb();
 extern  void    tcp$inactivate_tcb();
 extern  void    tcp$set_tcb_state();
-extern  void    CQ_Enqueue();
+extern  void    cq_enqueue();
 extern     tcp$tcb_close();
 extern     tcp$compute_rtt();
 
@@ -497,7 +497,7 @@ Side Effects:
 #define     MINRTT   1			// Minimum reasonable RTT
 #define     MINSRTT   10		// Minimum smoothed RTT
 
-void ACK_RT_Queue(struct tcb_structure * TCB, signed long AckNum) 
+void ack_rt_queue(struct tcb_structure * TCB, signed long AckNum) 
     {
       unsigned long
 	Delta,
@@ -684,7 +684,7 @@ Side Effects:
 */
 
 
-void RESET_UNKNOWN_CONNECTION(Seg,QB)
+void reset_unknown_connection(Seg,QB)
      struct segment_structure * Seg;
      struct queue_blk_structure(qb_nr_fields) * QB;
 {
@@ -803,7 +803,7 @@ queue_network_data(TCB,QB)
 	     "!%T QND: ENQ !SL from !XL,EQ=!XL,DQ=!XL,RCQ=!XL/!XL!/",
 	     0,Ucount,Uptr,TCB->rcv_q_enqp,TCB->rcv_q_deqp,
 	     TCB->rcv_q_base,TCB->rcv_q_end);
-    CQ_Enqueue(TCB->rcv_q_queue,Uptr,Ucount);
+    cq_enqueue(TCB->rcv_q_queue,Uptr,Ucount);
     XLOG$FAO(LOG$TCP,
 	"!%T QND: Q cnt !UW !/", 0, TCB->rcv_q_count);
 
@@ -1626,7 +1626,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 
 //SBTTL "READ_TCP_Options: process TCP segment options in SYN segment"
 
-void READ_TCP_OPTIONS(TCB,SEG)
+void read_tcp_options(TCB,SEG)
 struct tcb_structure * TCB;
 struct segment_structure * SEG;
     {
@@ -1810,7 +1810,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 // Process segment options, if any.
 
 	    if (seg->sh$data_offset > TCP_DATA_OFFSET)
-		Read_TCP_Options(TCB,seg);
+		read_tcp_options(TCB,seg);
 
 // Fill in any unspecified Foreign Host or Port
 // Also, if wild foreign host, start an address to name lookup for it.
@@ -1848,7 +1848,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 		Send_Reset(TCB,seg->sh$ack);
 		tcp$kill_pending_requests(TCB,NET$_NRT);
 		tcb$delete(TCB);
-		Return(ERROR);
+		return(ERROR);
 		};
 //	    XLOG$FAO(LOG$TCBSTATE,"!%T Decode-seg: SYN-ACK sent.!/", 0);
 
@@ -1901,7 +1901,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 //		    XLOG$FAO(LOG$TCP, "!%T (Syn-sent)Valid ACK.!/", 0);
 		    ack = TRUE;
 		    TCB->snd_una = seg->sh$ack;
-		    ACK_RT_Queue(TCB,seg->sh$ack);
+		    ack_rt_queue(TCB,seg->sh$ack);
 		    }
 		else
 		    return(TRUE); // Invalid ACK.
@@ -1966,7 +1966,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 // Process segment options, if any.
 
 		if (seg->sh$data_offset > TCP_DATA_OFFSET)
-		    Read_TCP_Options(TCB,seg);
+		    read_tcp_options(TCB,seg);
 		};
 	    };
 
@@ -2190,7 +2190,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 	    if (! seg->sh$c_rst)
 		{
 		TCB->snd_una = seg->sh$ack;
-		Ack_RT_Queue(TCB,seg->sh$ack);
+		ack_rt_queue(TCB,seg->sh$ack);
 		TCB->is_synched = TRUE;
 		tcp$set_tcb_state(TCB,CS$ESTABLISHED);
 		XLOG$FAO(LOG$TCP,"!%T SYN_RECV Connection established.!/",0);
@@ -2219,7 +2219,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 
 		    if (! TELNET_OPEN(TCB))
 			{
-			Reset_Unknown_Connection(seg,QB);
+			reset_unknown_connection(seg,QB);
 			return ERROR;
 			};
 		    }
@@ -2235,7 +2235,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 	    if (AckTst_OK)
 		{
 		TCB->snd_una = seg->sh$ack;
-		ACK_RT_Queue(TCB,seg->sh$ack);
+		ack_rt_queue(TCB,seg->sh$ack);
 
 // If state is CS$FIN_WAIT_1 & the RT-Queue is empty (ie, SND_NXT = Seg_ACK)
 // then change state to FIN_WAIT_2.
@@ -2799,7 +2799,7 @@ Y:		{
 			.IP_Address<0,8>,IP_Address<8,8>,
 			.IP_Address<16,8>,IP_Address<24,8>);
 #endif
-		    Reset_Unknown_Connection(seg,QB);
+		    reset_unknown_connection(seg,QB);
 		    goto leave_x;
 		    } else {
 
@@ -2809,7 +2809,7 @@ Y:		{
 		[OTHERWISE]:
 #endif
 		    {
-		    Reset_Unknown_Connection(seg,QB);
+		    reset_unknown_connection(seg,QB);
 		    goto leave_x;
 		    };
 		    }}

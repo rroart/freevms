@@ -398,7 +398,7 @@ extern  void    NML$STEP();
 
 // IP.BLI
 
-extern     IP_ISLOCAL();
+extern     ip_islocal();
 
 
 // User Network(TCP) I/O Request arg blk Function Codes.
@@ -942,7 +942,7 @@ Output:
 	buffer is filled with requested dump data.
 */
 
-void NET$SNMP(struct snmp_args * uargs)
+void net$snmp(struct snmp_args * uargs)
     {
 extern	SNMP$USER_INPUT(),
 	mm$get_mem(), mm$free_mem();
@@ -1070,14 +1070,14 @@ Side Effects:
 
 */
 
- void    GTHST_Purge();
+ void    gthst_purge();
 
 void user$purge_all_io (void)
     {
 extern 	void tcp$purge_all_io();
-extern 	void UDP$Purge_All_IO();
-extern 	void ICMP$Purge_All_IO();
-extern 	void IPU$Purge_All_IO();
+extern 	void udp$purge_all_io();
+extern 	void icmp$purge_all_io();
+extern 	void ipu$purge_all_io();
     register
 	qb;
     signed long
@@ -1093,10 +1093,10 @@ struct user_send_args * Sargs;
 // Purge network I/O for all protocols
 
     tcp$purge_all_io();
-    UDP$Purge_All_IO();
-    ICMP$Purge_All_IO();
-    IPU$Purge_All_IO();
-    GTHST_Purge();
+    udp$purge_all_io();
+    icmp$purge_all_io();
+    ipu$purge_all_io();
+    gthst_purge();
 
 // check the user request queue again just to be safe.
 
@@ -1168,9 +1168,9 @@ user$brk (void)
 
 void VMS$Cancel(struct vms$cancel_args * uargs)
     {
-extern 	TCP$Cancel();
-extern 	UDP$Cancel();
-extern 	ICMP$Cancel();
+extern 	tcp$cancel();
+extern 	udp$cancel();
+extern 	icmp$cancel();
 extern 	ipu$cancel();
     signed long
 	ucbptr,
@@ -1187,15 +1187,15 @@ extern 	ipu$cancel();
     switch (uargs->vc$protocol)
       {
     case U$TCP_PROTOCOL:
-	Done = TCP$Cancel(uargs);
+	Done = tcp$cancel(uargs);
 	break;
 
     case U$UDP_PROTOCOL:
-	Done = UDP$Cancel(uargs);
+	Done = udp$cancel(uargs);
 	break;
 
     case U$ICMP_PROTOCOL:
-	Done = ICMP$Cancel(uargs);
+	Done = icmp$cancel(uargs);
 	break;
 
     case U$IP_PROTOCOL:
@@ -1235,7 +1235,7 @@ Output:
 	buffer is filled with requested dump data.
 */
 
-void NET$DUMP(struct debug_dump_args * uargs)
+void net$dump(struct debug_dump_args * uargs)
     {
 extern	CALCULATE_UPTIME();
 extern	TEK$sys_uptime;
@@ -1344,8 +1344,8 @@ void 	    tcp$connection_list();
 
     case DU$TCB_DUMP:
 	{
-extern	   TCP$TCB_Dump();
-	if (TCP$TCB_Dump(uargs->du$arg0,RB))
+extern	   tcp$tcb_dump();
+	if (tcp$tcb_dump(uargs->du$arg0,RB))
 	  bufsize = D$TCB_DUMP_BLKSIZE;
 	else
 	  Error = USER$Err(uargs,NET$_CDE);
@@ -1355,8 +1355,8 @@ extern	   TCP$TCB_Dump();
 
     case DU$UDP_CONNECTIONS:
 	{
-void 	    UDP$Connection_List();
-	UDP$Connection_List(RB);
+void 	    udp$connection_list();
+	udp$connection_list(RB);
 	bufsize = D$UDP_LIST_BLKSIZE;
 	};
 
@@ -1364,8 +1364,8 @@ void 	    UDP$Connection_List();
 
     case DU$UDPCB_DUMP:
 	{
-extern	    UDP$UDPCB_Dump();
-	if (UDP$UDPCB_Dump(uargs->du$local_conn_id,RB))
+extern	    udp$udpcb_dump();
+	if (udp$udpcb_dump(uargs->du$local_conn_id,RB))
 	  bufsize = D$UDPCB_DUMP_BLKSIZE;
 	else
 	    Error = USER$Err(uargs,NET$_CDE);
@@ -1375,8 +1375,8 @@ extern	    UDP$UDPCB_Dump();
 
     case DU$ICMP_CONNECTIONS:
 	{
-extern void 	    ICMP$Connection_List();
-	ICMP$Connection_List(RB);
+extern void 	    icmp$connection_list();
+	icmp$connection_list(RB);
 	bufsize = D$ICMP_LIST_BLKSIZE;
 	};
 
@@ -1384,8 +1384,8 @@ extern void 	    ICMP$Connection_List();
 
     case DU$ICMPCB_DUMP:
 	{
-extern	   ICMP$ICMPCB_Dump();
-	if (ICMP$ICMPCB_DUMP (uargs->du$local_conn_id,RB))
+extern	   icmp$icmpcb_dump();
+	if (icmp$icmpcb_dump (uargs->du$local_conn_id,RB))
 	  bufsize = D$ICMPCB_DUMP_BLKSIZE;
 	else
 	    Error = USER$Err(uargs,NET$_CDE);
@@ -1445,16 +1445,16 @@ extern	   ICMP$ICMPCB_Dump();
 
     case DU$DEVICE_LIST:
 	{
-extern	    CNF$Device_list();
-	bufsize = CNF$Device_list(RB);
+extern	    cnf$device_list();
+	bufsize = cnf$device_list(RB);
 	};
 
     case DU$DEVICE_STAT:
 	{
-extern	    CNF$Device_stat();
+extern	    cnf$device_stat();
 	if (uargs->du$buf_size < DC_ENTRY_SIZE*4)
 	  Error = USER$Err(uargs,NET$_BTS);
-	else if (CNF$Device_stat ( uargs->du$arg0, RB ) == -1)
+	else if (cnf$device_stat ( uargs->du$arg0, RB ) == -1)
 	  Error = USER$Err(uargs,NET$_DAE);
 	else
 	  bufsize = D$DEV_DUMP_BLKSIZE;
@@ -1759,7 +1759,7 @@ Side effects:
 #define    ALBSIZE GTHST_ADLOOK_RET_ARGS_LENGTH*4
 #define    RLBSize 6
 
-void NET$GTHST(struct gthst_args * uargs)
+void net$gthst(struct gthst_args * uargs)
     {
       long IDX;
 
@@ -2039,7 +2039,7 @@ void GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS)
 
  void    GTHST_PURGE_ONE();
 
-void GTHST_PURGE (void)
+void gthst_purge (void)
 //
 // Routine to purge all requests when network ACP exits. Step through all
 // requests (with NML$STEP) and punt them.
@@ -2119,28 +2119,28 @@ extern 	void TCP$STATUS();
 // UDP functions:
 extern 	void UDP$OPEN();
 extern 	void UDP$CLOSE();
-extern 	void UDP$ABORT();
+extern 	void udp$abort();
 extern void 	UDP$SEND ();
 extern 	void UDP$RECEIVE();
-extern 	void UDP$INFO();
-extern 	void UDP$STATUS();
+extern 	void udp$info();
+extern 	void udp$status();
 
 // ICMP functions:
 extern 	void ICMP$OPEN();
 extern 	void ICMP$CLOSE();
-extern 	void ICMP$ABORT();
+extern 	void icmp$abort();
 extern void 	ICMP$SEND ();
 extern 	void ICMP$RECEIVE();
-extern 	void ICMP$INFO();
-extern 	void ICMP$STATUS();
+extern 	void icmp$info();
+extern 	void icmp$status();
 
 // IP functions:
 extern 	void IPU$OPEN();
 extern 	void IPU$CLOSE();
-extern 	void IPU$ABORT();
+extern 	void ipu$abort();
 extern 	void IPU$SEND ();
 extern 	void IPU$RECEIVE();
-extern 	void IPU$INFO();
+extern 	void ipu$info();
 extern 	void IPU$STATUS();
     register
 	struct user_default_args * argblk;
@@ -2195,13 +2195,13 @@ struct dsc$descriptor
 	  if ( argblk->ud$funct >=  U$OPEN && argblk->ud$funct <= U$MAX_TCP_FUNCTION)
 	    switch ( argblk->ud$funct)
 	      {
-	      case U$OPEN:	TCP$OPEN(argblk); break;
-	      case U$SEND: 	TCP$SEND(argblk); break;
-	   case U$RECV:	TCP$Receive(argblk); break;
-	   case U$CLOSE:	TCP$CLOSE(argblk); break;
-	   case U$ABORT:	TCP$ABORT(argblk); break;
-	   case U$STATUS:	TCP$Status(argblk); break;
-	   case U$INFO:	TCP$Info(argblk); break;
+	      case U$OPEN:	tcp$open(argblk); break;
+	      case U$SEND: 	tcp$send(argblk); break;
+	   case U$RECV:	tcp$receive(argblk); break;
+	   case U$CLOSE:	tcp$close(argblk); break;
+	   case U$ABORT:	tcp$abort(argblk); break;
+	   case U$STATUS:	tcp$status(argblk); break;
+	   case U$INFO:	tcp$info(argblk); break;
 	   default:	USER$Err(argblk,NET$_IFC); // Illegal Function Code.
 
 	      }
@@ -2213,77 +2213,77 @@ struct dsc$descriptor
 	case U$OPEN:
 	    switch (argblk->ud$protocol)
 	      {
-	    case U$UDP_PROTOCOL:	UDP$OPEN(argblk); break;
-	    case U$ICMP_PROTOCOL:	ICMP$OPEN(argblk); break;
-	    case U$IP_PROTOCOL:	IPU$OPEN(argblk); break;
+	    case U$UDP_PROTOCOL:	udp$open(argblk); break;
+	    case U$ICMP_PROTOCOL:	icmp$open(argblk); break;
+	    case U$IP_PROTOCOL:	ipu$open(argblk); break;
 	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
 	    };
 
 	case U$SEND:
 	    switch (argblk->ud$protocol)
 	      {
-	    case U$UDP_PROTOCOL:	UDP$SEND(argblk); break;
-	    case U$ICMP_PROTOCOL:	ICMP$SEND(argblk); break;
-	    case U$IP_PROTOCOL:	IPU$SEND(argblk); break;
+	    case U$UDP_PROTOCOL:	udp$send(argblk); break;
+	    case U$ICMP_PROTOCOL:	icmp$send(argblk); break;
+	    case U$IP_PROTOCOL:	ipu$send(argblk); break;
 	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
 	    };
 
 	case U$RECV:
 	    switch (argblk->ud$protocol)
 	      {
-	    case U$UDP_PROTOCOL:	UDP$Receive(argblk); break;
-	    case U$ICMP_PROTOCOL:	ICMP$Receive(argblk); break;
-	    case U$IP_PROTOCOL:	IPU$Receive(argblk); break;
+	    case U$UDP_PROTOCOL:	udp$receive(argblk); break;
+	    case U$ICMP_PROTOCOL:	icmp$receive(argblk); break;
+	    case U$IP_PROTOCOL:	ipu$receive(argblk); break;
 	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
 	    };
 
 	case U$CLOSE:
 	    switch (argblk->ud$protocol)
 	      {
-	    case U$UDP_PROTOCOL:	UDP$CLOSE(argblk); break;
-	    case U$ICMP_PROTOCOL:	ICMP$CLOSE(argblk); break;
-	    case U$IP_PROTOCOL:	IPU$CLOSE(argblk); break;
+	    case U$UDP_PROTOCOL:	udp$close(argblk); break;
+	    case U$ICMP_PROTOCOL:	icmp$close(argblk); break;
+	    case U$IP_PROTOCOL:	ipu$close(argblk); break;
 	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
 	    };
 
 	case U$ABORT:
 	    switch (argblk->ud$protocol)
 	      {
-	    case U$UDP_PROTOCOL:	UDP$ABORT(argblk); break;
-	    case U$ICMP_PROTOCOL:	ICMP$ABORT(argblk); break;
-	    case U$IP_PROTOCOL:	IPU$ABORT(argblk); break;
+	    case U$UDP_PROTOCOL:	udp$abort(argblk); break;
+	    case U$ICMP_PROTOCOL:	icmp$abort(argblk); break;
+	    case U$IP_PROTOCOL:	ipu$abort(argblk); break;
 	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
 	    };
 
 	case U$STATUS:
 	    switch (argblk->ud$protocol)
 	      {
-	    case U$UDP_PROTOCOL:	UDP$Status(argblk); break;
-	    case U$ICMP_PROTOCOL:	ICMP$Status(argblk); break;
-	    case U$IP_PROTOCOL:	IPU$Status(argblk); break;
+	    case U$UDP_PROTOCOL:	udp$status(argblk); break;
+	    case U$ICMP_PROTOCOL:	icmp$status(argblk); break;
+	    case U$IP_PROTOCOL:	ipu$status(argblk); break;
 	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
 	    };
 
 	case U$INFO:
 	    switch (argblk->ud$protocol)
 	      {
-	    case U$UDP_PROTOCOL:	UDP$Info(argblk); break;
-	    case U$ICMP_PROTOCOL:	ICMP$Info(argblk); break;
-	    case U$IP_PROTOCOL:	IPU$Info(argblk); break;
+	    case U$UDP_PROTOCOL:	udp$info(argblk); break;
+	    case U$ICMP_PROTOCOL:	icmp$info(argblk); break;
+	    case U$IP_PROTOCOL:	ipu$info(argblk); break;
 	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
 	    };
 
-	      case U$GTHST:	Net$GTHST(argblk); break;
+	      case U$GTHST:	net$gthst(argblk); break;
 
 	default:
 	    {
 	    switch (argblk->ud$funct) // check acp maintenance functions
 	      {
-	      case M$DUMP:	Net$DUMP(argblk); break;
+	      case M$DUMP:	net$dump(argblk); break;
 	      case M$EXIT:	Net$EXIT(argblk); break;
 	      case M$DEBUG:	Net$Debug(argblk); break;
 	      case M$EVENT:	Net$Event(argblk); break;
-	      case M$SNMP:	Net$SNMP(argblk); break;
+	      case M$SNMP:	net$snmp(argblk); break;
 //	    case M$Cancel:	VMS$Cancel(argblk);
 	    case M$CANCEL:	SS$_NORMAL;
 	    default :USER$Err(argblk,NET$_IFC); // Illegal Function Code.

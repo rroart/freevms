@@ -92,18 +92,18 @@ extern     CALC_CHECKSUM();		// MacLib
 extern  void    SwapBytes();	// MacLib
 
 // IP.bli
-extern  void    IP$SEND();
-extern  void    IP$Log();
+extern  void    ip$send();
+extern  void    ip$log();
 
 // TCP_Segin
 extern  void    SEG$ICMP();
 
 // UDP_Segin
-extern  void    UDP$ICMP();
+extern  void    udp$icmp();
 
 extern signed long
 log_state,
-    ICMPTTL,
+    icmpttl,
     min_physical_bufsize,	// Size of "small" device buffers
     max_physical_bufsize;	// Size of "large" device buffers
 
@@ -328,7 +328,7 @@ extern	icmp$user_input();
 
 	    Swapbytes(IP_HDR_SWAP_SIZE,IPhdr);
 	    if ($$LOGF(LOG$ICMP))
-		IP$Log(ASCID("ICMrcv/IP"),IPhdr);
+		ip$log(ASCID("ICMrcv/IP"),IPhdr);
 
 // Calculate lengths, pointer to protocol data
 
@@ -421,7 +421,7 @@ extern	icmp$user_input();
 			}
 		    else
 			{
-			UDP$ICMP(ICMtype,ICMdat,IPhdr->iph$source,
+			udp$icmp(ICMtype,ICMdat,IPhdr->iph$source,
 			     IPhdr->iph$dest,IPdat,DataSize,
 			     buf,bufsize);
 			} ;
@@ -581,7 +581,7 @@ void ICMP_Echo(ICMpkt,ICMlen,IPPKT,IPlen)
 // Send packet, preserving ID, TOS, TTL, etc.
 //!!HACK!!// IPPKT->iph$dest is wrong//  what about broadcasts?
 
-    IP$SEND(IPPKT->iph$dest, IPPKT->iph$source, IPPKT->iph$type_service,
+    ip$send(IPPKT->iph$dest, IPPKT->iph$source, IPPKT->iph$type_service,
 	    IPPKT->iph$ttl, Seg, Segsize, IPPKT->iph$ident,
 	    FALSE, TRUE, ICMP_Protocol, Buf, Bufsize);
 
@@ -686,8 +686,8 @@ void ICMP_Send_DUNR(ICMpkt,ICMlen,IPPKT,IPlen,code)
 // Send packet, preserving ID, TOS, TTL, etc.
 //!!HACK!!// IPPKT->iph$dest is wrong//  what about broadcasts?
 
-    IP$SEND(IPPKT->iph$dest, IPPKT->iph$source, IPPKT->iph$type_service,
-	    ICMPTTL, Seg, Segsize, IPPKT->iph$ident,
+    ip$send(IPPKT->iph$dest, IPPKT->iph$source, IPPKT->iph$type_service,
+	    icmpttl, Seg, Segsize, IPPKT->iph$ident,
 	    FALSE, TRUE, ICMP_Protocol, Buf, Bufsize);
 
     // Keep count of outgoing packets

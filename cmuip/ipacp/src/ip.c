@@ -277,8 +277,8 @@ extern   Device_Configuration_Entry  dev_config_tab[];
 
 extern signed long
     dev_count,			// Number of devices known
-    Min_Physical_Bufsize,	// Size of "small" device buffers
-    Max_Physical_Bufsize;	// Size of "large" device buffers
+    min_physical_bufsize,	// Size of "small" device buffers
+    max_physical_bufsize;	// Size of "large" device buffers
 
 extern signed long log_state;
 
@@ -344,11 +344,11 @@ struct dsc$descriptor    RA_CHECK_TIMESTR = ASCID2(13,"0 00:00:30.00");
 // Internet Protocol counters and states
 
 signed long
-    RETRY_COUNT  = 5,	// Number of time to retry an IP read.
+    retry_count  = 5,	// Number of time to retry an IP read.
 				// Setable through the config file.
-    IPTTL  = 32,	// Default time-to-live
+    ipttl  = 32,	// Default time-to-live
 				// Setable through the config file.
-  Max_Gateways;
+  max_gateways;
     struct IP_group_MIB_struct * IP_group_MIB ;
 
 static   struct gateway_structure  gwy_table[MAX_GWY]; // space for list of known gateways
@@ -433,7 +433,7 @@ void ip$init  (void)
 
     // Initial the IP group MIB
 //    IP_group_MIB->IPMIB$ipForwarding	= 0;	// Initialized by CONFIG.BLI
-    IP_group_MIB->IPMIB$ipDefaultTTL	= IPTTL;
+    IP_group_MIB->IPMIB$ipDefaultTTL	= ipttl;
     IP_group_MIB->IPMIB$ipInReceives	= 0;
     IP_group_MIB->IPMIB$ipInHdrErrors	= 0;
     IP_group_MIB->IPMIB$ipInAddrErrors	= 0;
@@ -498,7 +498,7 @@ DESC$STR_ALLOC(DSTSTR,20);
 //		else
 //		    Return device index for default gateway.
 
-IP_FIND_DEV(IPADDR)
+ip_find_dev(IPADDR)
 
 //Find interface for a destination IP address
 //Returns:
@@ -564,7 +564,7 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 
 // If this address is on same network, use it
 
-    if ((IDX = IP_FIND_DEV(*IPDEST)) > 0)
+    if ((IDX = ip_find_dev(*IPDEST)) > 0)
 	{
 	if ((*IPDEST == 0xFFFFFFFF))
 	    {
@@ -640,7 +640,7 @@ long IDX;
 	    signed long
 		temp;
 
-	    temp = IP_Find_Dev (IPADDR);
+	    temp = ip_find_dev (IPADDR);
 	    if ((temp > 0) &&
 		(STRICT != dev_config_tab[temp].dc_dev_interface))
 		return temp;		// yes, make sure it's not
@@ -648,7 +648,7 @@ long IDX;
     return -1;
     }
 
-int (*    IP_ISLOCAL)(int) = IP_FIND_DEV;
+int (*    ip_islocal)(int) = ip_find_dev;
 
 void IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR)
 //
@@ -670,7 +670,7 @@ signed long I,
 	{
 	signed long
 	    J;
-	if ((J = IP_ISLOCAL(ADRLST[I])) > 0)
+	if ((J = ip_islocal(ADRLST[I])) > 0)
 	    {
 	    FIDX = I;
 	    LIDX = J;
@@ -857,7 +857,7 @@ Side Effects:
 *******************************************************************************
 */
 
-IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
+ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 		       ID,Frag,Delete_Seg,Protocol,Buf,Bufsize)
  struct udpkt_structure * Seg;
     {
@@ -896,14 +896,14 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	do
 	    {
 	    frag_size = MIN(OPT$MAX_RECV_DATASIZE, SegSize - frag_offset);
-	    subbuff = mm$seg_get(Max_Physical_Bufsize);
+	    subbuff = mm$seg_get(max_physical_bufsize);
 	    subseg = subbuff + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
 	    CH$MOVE(frag_size, Seg + frag_offset, subseg);
 	    fragmentation_data = (frag_offset / 8);
 	    if ((frag_offset + frag_size) < SegSize)
 	      fragmentation_data = fragmentation_data + 0x2000; //more frags
-	    IP$SEND(IP$Src, IP$Dest, Service, Life, subseg, frag_size,
-	            ID, Frag, 1, Protocol, subbuff, Max_Physical_Bufsize);
+	    ip$send(IP$Src, IP$Dest, Service, Life, subseg, frag_size,
+	            ID, Frag, 1, Protocol, subbuff, max_physical_bufsize);
 	    frag_offset = frag_offset + frag_size;
 	    }
 	while (frag_offset < SegSize);
@@ -919,7 +919,7 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 // If no route, then flush the packet and return failure.
 
     ip_src = IP$Src;
-    if ((IP$ISME(IP$Dest, TRUE) > 0))
+    if ((ip$isme(IP$Dest, TRUE) > 0))
 	{
 	newip_dest = IP$Dest;
 	dev = -1;		// Loopback

@@ -238,7 +238,7 @@ extern     xearp$check();
 extern  void    xearp$input();
 
 void    XE_receive();
-    void XE_ArpRcv();
+    void xe_arprcv();
 
     char *   XE_BROADCAST = "FFFFFFFFFFFF"; // check
 
@@ -317,7 +317,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
     RC = exe$qio(	ARPEFN, XE_Int-> xei$arp_io_chan ,
 		IO$_READVBLK,
 		ARbuf -> ar_ios0 ,
-			XE_ArpRcv, XE_Int,
+			xe_arprcv, XE_Int,
 			ARbuf->ar_data, ARP_MAX_LEN*4, 0, 0,
 			ARbuf->phys$1, 0);
     if (RC != SS$_NORMAL)
@@ -1245,7 +1245,7 @@ Inputs:
 
 *******************************************************************************
 */
-void Xe_ArpRcv( struct XE_Interface_Structure * XE_Int )
+void xe_arprcv( struct XE_Interface_Structure * XE_Int )
     {
 	 Device_Configuration_Entry * dev_config = XE_Int->xei$dev_config;
 	struct xe_arp_structure * ARbuf;
@@ -1295,7 +1295,7 @@ void Xe_ArpRcv( struct XE_Interface_Structure * XE_Int )
 //!!HACK!!// what's the EFN for?
     RC = exe$qio(ARPEFN,XE_Int->xei$arp_io_chan,
 		 IO$_READVBLK,ARbuf->ar_ios0,
-		 XE_ArpRcv, XE_Int,
+		 xe_arprcv, XE_Int,
 		 ARbuf->ar_data,ARP_MAX_LEN*4,0,0,
 		 ARbuf->phys$1,0);
     if (RC != SS$_NORMAL)

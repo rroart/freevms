@@ -91,12 +91,12 @@ MODULE IP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 // External data items
 
 extern signed long
-    IPTTL,
+    ipttl,
     INTDF,
     AST_In_Progress,
     log_state,
-    MIN_PHYSICAL_BUFSIZE,
-    MAX_PHYSICAL_BUFSIZE;
+    min_physical_bufsize,
+    max_physical_bufsize;
 
 // External routines
 
@@ -123,7 +123,7 @@ extern  void    user$post_io_status();
 
 // IP.BLI
 
-extern  void    ip$set_hosts();
+extern  void    IP$SET_HOSTS();
 extern     ip$send_raw();
 extern     ip$send();
 
@@ -961,11 +961,11 @@ void ipu$send(struct user_send_args * Uargs)
 // Use preallocated buffer sizes to reduce dynamic memory load
 
     bufsize = segsize + DEVICE_HEADER;
-    if (bufsize <= MIN_PHYSICAL_BUFSIZE)
-      bufsize = MIN_PHYSICAL_BUFSIZE;
+    if (bufsize <= min_physical_bufsize)
+      bufsize = min_physical_bufsize;
     else
-	if (bufsize <= MAX_PHYSICAL_BUFSIZE)
-	    bufsize = MAX_PHYSICAL_BUFSIZE;
+	if (bufsize <= max_physical_bufsize)
+	    bufsize = max_physical_bufsize;
     Buf = mm$seg_get(bufsize);	// Get a buffer
 //!!HACK!!// Next line is a hack, but it really speeds things up...
     seg = Buf + DEVICE_HEADER; // Point at IP segment
@@ -1018,7 +1018,7 @@ void ipu$send(struct user_send_args * Uargs)
 
 
     if (LocalAddr == WILD)
-	ip$set_hosts(1,ForeignAddr,LocalAddr,ForeignAddr);
+	IP$SET_HOSTS(1,ForeignAddr,LocalAddr,ForeignAddr);
 
     if (Protocol == WILD)
 	Protocol = IPCB->ipcb$proto_filter;
@@ -1030,7 +1030,7 @@ void ipu$send(struct user_send_args * Uargs)
 
     IPIPID = IPIPID+1;	// Increment packet ID
     RC = SS$_NORMAL;
-    if ((ip$send(LocalAddr,ForeignAddr,IPTOS,IPTTL,
+    if ((ip$send(LocalAddr,ForeignAddr,IPTOS,ipttl,
 		   seg + Uargs->se$ext2,USize,
 		   IPIPID,IPDF,TRUE,Protocol,
 		   Buf,bufsize) == 0)) RC = NET$_NRT;

@@ -49,10 +49,10 @@
 	{ \
 	if (*(IPACP_Interface->ACPI$Sleeping) == 1) \
 	    { \
-	    extern sys$wake(); \
+	    extern exe$wake(); \
 	     \
 	    IPACP_Interface->ACPI$Sleeping = FALSE; \
-	    sys$wake(); \
+	    exe$wake(); \
 	    } \
 	}
 

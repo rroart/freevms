@@ -114,7 +114,7 @@ static ConectSize;
 static struct connection_table_structure * ConectPtr;
 
 signed long
-    MAX_LOCAL_PORTS  = 30;	// Settable in CONFIG
+    max_local_ports  = 30;	// Settable in CONFIG
 
 // Valid TCB table, contains pointers to valid TCB's. Used to verify 
 // user supplied Local_connection_Id.  As one sees: A local_Connection_ID is
@@ -156,7 +156,7 @@ void tcp$init (void)
 	cidx;
 
     // Allocate the connection list
-    ConectSize = MAX_LOCAL_PORTS;
+    ConectSize = max_local_ports;
     mm$get_mem( ConectPtr , ConectSize * CN$BLK_SIZE * 4 );
     for (cidx=0;cidx<=ConectSize-1;cidx++)
 	{				// Initialize connection table

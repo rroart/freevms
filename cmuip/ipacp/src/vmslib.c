@@ -277,3 +277,121 @@ find_cpu_data() {
 Queue_Not_Empty() {
   printk("not implemented\n");
 }
+
+exe$sndopr() {
+  printk("not implemented\n");
+}
+
+rpc_service() {
+  printk("not implemented\n");
+}
+
+drv$qblk_free() {
+  printk("not implemented\n");
+}
+
+drv$seg_free() {
+  printk("not implemented\n");
+}
+
+Warn_Error() {
+  printk("not implemented\n");
+}
+
+RPC_SERVICE() {
+  printk("not implemented\n");
+}
+
+RPC$INIT() {
+  printk("not implemented\n");
+}
+
+RPC$CONFIG_AUTH() {
+  printk("not implemented\n");
+}
+
+RPC$CONFIG() {
+  printk("not implemented\n");
+}
+
+PokeAddr() {
+  printk("not implemented\n");
+}
+
+LOG$OUT() {
+  printk("not implemented\n");
+}
+
+Fatal_Error() {
+  printk("not implemented\n");
+}
+
+DRV$Warn_FAO() {
+  printk("not implemented\n");
+}
+
+DRV$WARN_FAO() {
+  printk("not implemented\n");
+}
+
+DRV$QL_FAO() {
+  printk("not implemented\n");
+}
+
+DRV$OPR_FAO() {
+  printk("not implemented\n");
+}
+
+DRV$Error_FAO() {
+  printk("not implemented\n");
+}
+
+exe$finish_rdb() {
+  printk("not implemented\n");
+}
+
+drv$seg_get() {
+  printk("not implemented\n");
+}
+
+drv$device_error() {
+  printk("not implemented\n");
+}
+
+RPC$CHECK_PORT() {
+  printk("not implemented\n");
+}
+
+CH$RCHAR() {
+  printk("not implemented\n");
+}
+
+DRV$FATAL_FAO() {
+  printk("not implemented\n");
+}
+
+DRV$QBLK_Free() {
+  printk("not implemented\n");
+}
+
+DRV$XLOG_FAO() {
+  printk("not implemented\n");
+}
+
+RPC$INPUT() {
+  printk("not implemented\n");
+}
+
+drv$ip_receive() {
+  printk("not implemented\n");
+}
+
+SEG$LOG_Segment() {
+  printk("not implemented\n");
+}
+
+DRV$XQL_FAO() {
+  printk("not implemented\n");
+}
+
+

@@ -203,17 +203,17 @@ XQDEFINE			// (maybe) define queue debugging externals
 
 //*** Special literals from USER.BLI ***
 
+#define    UCB$L_CBID	ucb$l_devdepnd2	// Control Block associated with UCB
+
 extern signed long /* LITERAL*/
     UCB$Q_DDP,
-    UCB$L_CBID,
     UCB$L_EXTRA;
 
-extern signed long /*LITERAL*/
 // User function codes
 
-    M$CANCEL,
-    U$OPEN ,
-    U$CLOSE;
+#define     U$OPEN	  1
+#define     U$CLOSE	  4
+#define     M$CANCEL	  14
 
 extern signed long
     default_mss,
@@ -1859,7 +1859,7 @@ void tcp$open(struct user_open_args * Uargs)
 
 // Setup TCB ID in UCB - move 4-byte TCB index into system UCB
 
-    ucbptr = Uargs->op$ucb_adrs + UCB$L_CBID;
+    ucbptr = Uargs->op$ucb_adrs ; // not yet+ UCB$L_CBID;
 #if 0
 	// check wait
     $$KCALL(MOVBYT,4,TCB->vtcb_index,ucbptr);

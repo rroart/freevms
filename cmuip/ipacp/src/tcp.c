@@ -439,9 +439,9 @@ extern int   Time_Stamp(void);
 extern  Calc_CheckSum();
 extern void     MovByt();
 extern  void    SWAPBYTES();
-extern  void    CQ_ENQUEUE();
-extern  void    CQ_DEQUEUE();
-extern  void    CQ_DEQCOPY();
+extern  void    cq_enqueue();
+extern  void    cq_dequeue();
+extern  void    cq_deqcopy();
 
 // IOUTIL.BLI
 
@@ -572,9 +572,9 @@ signed long
 // Common macro used by all to send a TCP segment to IP.
 
 
-#define    SEND_SEG(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,XTIME) \
+#define    send_seg(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,XTIME) \
 	TCPIPID = TCPIPID+1; \
-	IP$SEND(tcb->local_host,tcb->foreign_host,TCPTOS,tcpttl, \
+	ip$send(tcb->local_host,tcb->foreign_host,TCPTOS,tcpttl, \
 		SEGADDR,SEGSIZE,TCPIPID,TCPDF,DELFLAG,TCP_PROTOCOL, \
 		BUFPTR,BUFSIZE)
 #define    send_seg1(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE) \
@@ -583,11 +583,11 @@ signed long
 	    tcb->probe_time = PROBE_IVAL + Time_Stamp(); \
 	else \
 	    tcb->probe_time = PROBE_IVAL + XTIME; \
-	SEND_SEG(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,0); \
+	send_seg(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,0); \
 	}
-#define    SEND_SEG0(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,XTIME) \
+#define    send_seg0(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,XTIME) \
 	{ \
-	SEND_SEG(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE) \
+	send_seg(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,0); \
 	}
 
 
@@ -763,7 +763,7 @@ void Send_TCP_Options(tcb,Seg)
      struct tcb_structure * tcb;
      struct segment_structure * Seg;
 {
-  extern IP_IsLocal();
+  extern ip_islocal();
   struct tcp$opt_block * OPTR;
 
 // Point at the start of the TCP data
@@ -775,7 +775,7 @@ void Send_TCP_Options(tcb,Seg)
     OPTR->tcp$opt_kind = TCP$OPT_KIND_MSS;
     OPTR->tcp$opt_length = TCP$OPT_LENGTH_MSS;
 //    OPTR->tcp$opt_dword = max_recv_datasize;
-    if (IP_IsLocal (tcb->foreign_host) == -1)
+    if (ip_islocal (tcb->foreign_host) == -1)
       OPTR->tcp$opt_dword = default_mss;
     else
       OPTR->tcp$opt_dword = max_recv_datasize;
@@ -1006,7 +1006,7 @@ signed long	tmp;
 		tcb->rx_count,tcb->rx_ctl,tcb->rx_timer);
 	    if (Datasize > 0)
 		{
-		  CQ_DEQCOPY(&tcb->srx_q_queue,Dataptr,Datasize);
+		  cq_deqcopy(&tcb->srx_q_queue,Dataptr,Datasize);
 		tcp_mib->MIB$tcpRetransSegs = tcp_mib->MIB$tcpRetransSegs + 1;
 		};
 // Build the rest of the header
@@ -1517,10 +1517,7 @@ void tcp$send_enqueue(tcb,bufcount,buf,pushf)
     XLOG$FAO(LOG$TCP,"!%T SEND-ENQ EQ=!XL,DQ=!XL,RX=!XL,SNQ=!XL/!XL,CNT=!SL,SIZ=!SL,PSH=!SL!/",
 	     0,tcb->snd_q_enqp,tcb->snd_q_deqp,tcb->srx_q_deqp,
 	     tcb->snd_q_base,tcb->snd_q_end,usedcount,copycount, pushf);
-#if 0
-    // check wait
-    $$KCALL(CQ_ENQUEUE,&tcb->snd_q_queue,lbptr,copycount);
-#endif
+    $$KCALL(cq_enqueue,&tcb->snd_q_queue,lbptr,copycount);
 
 // Update user pointer and counter
 
@@ -1708,7 +1705,7 @@ tcp$send_data(struct tcb_structure * tcb)
 	XLOG$FAO(LOG$TCP,
 	   "!%T Sending for TCB !XL, EFF = !SL!/",
 	   0, tcb, tcb->max_eff_data_size);
-	CQ_Dequeue(tcb->snd_q_queue,seg->sh$data,seqsize);
+	cq_dequeue(tcb->snd_q_queue,seg->sh$data,seqsize);
 
 // Deduct from the window and add to statistics
 
@@ -2033,9 +2030,9 @@ tcp$send_ctl(struct tcb_structure * tcb,long type)
     ts$sx = ts$sx + 1;		// track segments transmitted.
     tcp_mib->MIB$tcpOutSegs = tcp_mib->MIB$tcpOutSegs + 1;
     if (seqspace > 0)
-      send_seg1(tcb, seg, segsize, TRUE, bufptr, bufsize);
+      send_seg1(tcb, seg, segsize, TRUE, bufptr, bufsize)
     else
-      Send_Seg0(tcb, seg, segsize, TRUE, bufptr, bufsize);
+      send_seg0(tcb, seg, segsize, TRUE, bufptr, bufsize,0);
     }
 
 //%SBTTL "Send a probe packet"
