@@ -5,6 +5,10 @@
 
 #include<system_data_cells.h>
 #include<internals.h>
+#include<pridef.h>
+#include<wqhdef.h>
+#include<linux/sched.h>
+#include<ipldef.h>
 
 // definitely needs reimplementation
 
@@ -31,3 +35,16 @@ void sch$iounlock(void) {
   sch$unlockw(&ioc$gq_mutex);
 }
 
+void sch_std$ravail(int rsn) {
+  int retval=test_and_clear_bit(rsn,&sch$gl_resmask);
+  int savipl=vmslock(&SPIN_SCHED,IPL$_MAILBOX);
+  struct _wqh * wq=sch$gq_mwait;
+  struct _pcb * p=wq->wqh$l_wqfl;
+  for (;p!=wq;p->pcb$l_sqfl) {
+    if (p->pcb$l_efwm==rsn) {
+      wq->wqh$l_wqcnt--;
+      sch$chse(p,PRI$_RESAVL);
+    }
+  }
+  vmsunlock(&SPIN_SCHED,savipl);
+}
