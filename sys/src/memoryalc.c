@@ -19,7 +19,7 @@ struct mymap {
 int exe$alophycntg(unsigned long * va, unsigned long num) {
   signed long firstpfn;
 
-  firstpfn=mmg$allocontig(num);
+  firstpfn=mmg$allocontig_align(num);
   if (firstpfn<0) {
     return SS$_INSFMEM;
   }
@@ -34,11 +34,6 @@ struct list_head inactive_list;
 struct list_head active_list;
 pg_data_t *pgdat_list;
 
-static char *zone_names[MAX_NR_ZONES] = { "DMA", "Normal", "HighMem" };
-static int zone_balance_ratio[MAX_NR_ZONES] __initdata = { 128, 128, 128, };
-static int zone_balance_min[MAX_NR_ZONES] __initdata = { 20 , 20, 20, };
-static int zone_balance_max[MAX_NR_ZONES] __initdata = { 255 , 255, 255, };
-
 #define memlist_init(x) INIT_LIST_HEAD(x)
 #define memlist_add_head list_add
 #define memlist_add_tail list_add_tail
@@ -46,8 +41,6 @@ static int zone_balance_max[MAX_NR_ZONES] __initdata = { 255 , 255, 255, };
 #define memlist_entry list_entry
 #define memlist_next(x) ((x)->next)
 #define memlist_prev(x) ((x)->prev)
-
-#define BAD_RANGE(zone,x) (((zone) != (x)->zone) || (((x)-mem_map) < (zone)->zone_start_mapnr) || (((x)-mem_map) >= (zone)->zone_start_mapnr+(zone)->size))
 
 extern int in_free_all_bootmem_core;
 
@@ -86,50 +79,6 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 		goto local_freelist;
  back_local_freelist:
 
-	zone = page->zone;
-
-	mask = (~0UL) << order;
-	base = zone->zone_mem_map;
-	page_idx = page - base;
-	if (page_idx & ~mask)
-		BUG();
-	index = page_idx >> (1 + order);
-
-	area = zone->free_area + order;
-
-	spin_lock_irqsave(&zone->lock, flags);
-
-	zone->free_pages -= mask;
-
-	while (mask + (1 << (MAX_ORDER-1))) {
-		struct page *buddy1, *buddy2;
-
-		if (area >= zone->free_area + MAX_ORDER)
-			BUG();
-		if (!__test_and_change_bit(index, area->map))
-			/*
-			 * the buddy page is still allocated.
-			 */
-			break;
-		/*
-		 * Move the buddy up one level.
-		 */
-		buddy1 = base + (page_idx ^ -mask);
-		buddy2 = base + page_idx;
-		if (BAD_RANGE(zone,buddy1))
-			BUG();
-		if (BAD_RANGE(zone,buddy2))
-			BUG();
-
-		memlist_del(&buddy1->list);
-		mask <<= 1;
-		area++;
-		index >>= 1;
-		page_idx &= mask;
-	}
-	memlist_add_head(&(base + page_idx)->list, &area->free_list);
-
-	spin_unlock_irqrestore(&zone->lock, flags);
 	spin_lock_irqsave(&zone->lock, flags);
 	if (!in_free_all_bootmem_core)
 	  for(i=0,tmp=((page-mem_map)/sizeof(struct _pfn));i<(1 << order);i++,tmp++)
@@ -156,9 +105,6 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 	current->nr_local_pages++;
 }
 
-#define MARK_USED(index, order, area) \
-	__change_bit((index) >> (1+(order)), (area)->map)
-
 #ifndef CONFIG_DISCONTIGMEM
 struct page *_alloc_pages(unsigned int gfp_mask, unsigned int order)
 {
@@ -184,12 +130,12 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
 
 	spin_lock_irqsave(&zone->lock, flags);
 	if (order)
-	  pfn=mmg$allocontig(1 << order);
+	  pfn=mmg$allocontig_align(1 << order);
 	else
 	  pfn=mmg$allocpfn();
 	spin_unlock_irqrestore(&zone->lock, flags);
 
-	printk("allocated pfn %x %x\n",pfn,1<<order);
+	//	printk("allocated pfn %x %x\n",pfn,1<<order);
 
 	if (pfn>=0) {
 	  page=&mem_map[pfn];
@@ -199,7 +145,7 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
 	}
 
 	printk("should not be here now\n");
-	classzone->need_balance = 1;
+
 	mb();
 	if (waitqueue_active(&kswapd_wait))
 		wake_up_interruptible(&kswapd_wait);
@@ -207,12 +153,12 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
 rebalance:
 	try_to_free_pages(classzone, gfp_mask, order);
 
-	spin_lock_irqsave(zone->lock, flags);
+	spin_lock_irqsave(&zone->lock, flags);
 	if (order)
 	  pfn=mmg$allocontig(1 << order);
 	else
 	  pfn=mmg$allocpfn();
-	spin_unlock_irqrestore(zone->lock, flags);
+	spin_unlock_irqrestore(&zone->lock, flags);
 
 	if (pfn>=0) {
 	  page=&mem_map[pfn];
@@ -275,11 +221,6 @@ unsigned int nr_free_pages (void)
 	pg_data_t *pgdat = pgdat_list;
 
 	sum = 0;
-	while (pgdat) {
-		for (zone = pgdat->node_zones; zone < pgdat->node_zones + MAX_NR_ZONES; zone++)
-			sum += zone->free_pages;
-		pgdat = pgdat->node_next;
-	}
 	return sum;
 }
 
@@ -291,37 +232,8 @@ unsigned int nr_free_buffer_pages (void)
 	pg_data_t *pgdat = pgdat_list;
 	unsigned int sum = 0;
 
-	do {
-		zonelist_t *zonelist = pgdat->node_zonelists + (GFP_USER & GFP_ZONEMASK);
-		zone_t **zonep = zonelist->zones;
-		zone_t *zone;
-
-		for (zone = *zonep++; zone; zone = *zonep++) {
-			unsigned long size = zone->size;
-			unsigned long high = zone->pages_high;
-			if (size > high)
-				sum += size - high;
-		}
-
-		pgdat = pgdat->node_next;
-	} while (pgdat);
-
 	return sum;
 }
-
-#if CONFIG_HIGHMEM
-unsigned int nr_free_highpages (void)
-{
-	pg_data_t *pgdat = pgdat_list;
-	unsigned int pages = 0;
-
-	while (pgdat) {
-		pages += pgdat->node_zones[ZONE_HIGHMEM].free_pages;
-		pgdat = pgdat->node_next;
-	}
-	return pages;
-}
-#endif
 
 #define K(x) ((x) << (PAGE_SHIFT-10))
 
@@ -424,12 +336,6 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		totalpages += size;
 	}
 	realtotalpages = totalpages;
-	if (zholes_size)
-		for (i = 0; i < MAX_NR_ZONES; i++)
-			realtotalpages -= zholes_size[i];
-			
-	printk("On node %d totalpages: %lu\n", nid, realtotalpages);
-
 	INIT_LIST_HEAD(&active_list);
 	INIT_LIST_HEAD(&inactive_list);
 
@@ -473,89 +379,10 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	}
 
 	offset = lmem_map - mem_map;	
-	for (j = 0; j < MAX_NR_ZONES; j++) {
-		zone_t *zone = pgdat->node_zones + j;
-		unsigned long mask;
-		unsigned long size, realsize;
-
-		realsize = size = zones_size[j];
-		if (zholes_size)
-			realsize -= zholes_size[j];
-
-		printk("zone(%lu): %lu pages.\n", j, size);
-		zone->size = size;
-		zone->name = zone_names[j];
-		zone->lock = SPIN_LOCK_UNLOCKED;
-		zone->zone_pgdat = pgdat;
-		zone->free_pages = 0;
-		zone->need_balance = 0;
-		if (!size)
-			continue;
-
-		pgdat->nr_zones = j+1;
-
-		mask = (realsize / zone_balance_ratio[j]);
-		if (mask < zone_balance_min[j])
-			mask = zone_balance_min[j];
-		else if (mask > zone_balance_max[j])
-			mask = zone_balance_max[j];
-		zone->pages_min = mask;
-		zone->pages_low = mask*2;
-		zone->pages_high = mask*3;
-
-		zone->zone_mem_map = mem_map + offset;
-		zone->zone_start_mapnr = offset;
-		zone->zone_start_paddr = zone_start_paddr;
-
-		if ((zone_start_paddr >> PAGE_SHIFT) & (zone_required_alignment-1))
-			printk("BUG: wrong zone alignment, it will crash\n");
-
-		for (i = 0; i < size; i++) {
-			struct page *page = mem_map + offset + i;
-			page->zone = zone;
-			if (j != ZONE_HIGHMEM)
-				page->virtual = __va(zone_start_paddr);
-			zone_start_paddr += PAGE_SIZE;
-		}
-
-		offset += size;
-		for (i = 0; ; i++) {
-			unsigned long bitmap_size;
-
-			memlist_init(&zone->free_area[i].free_list);
-			if (i == MAX_ORDER-1) {
-				zone->free_area[i].map = NULL;
-				break;
-			}
-
-			/*
-			 * Page buddy system uses "index >> (i+1)",
-			 * where "index" is at most "size-1".
-			 *
-			 * The extra "+3" is to round down to byte
-			 * size (8 bits per byte assumption). Thus
-			 * we get "(size-1) >> (i+4)" as the last byte
-			 * we can access.
-			 *
-			 * The "+1" is because we want to round the
-			 * byte allocation up rather than down. So
-			 * we should have had a "+7" before we shifted
-			 * down by three. Also, we have to add one as
-			 * we actually _use_ the last bit (it's [0,n]
-			 * inclusive, not [0,n[).
-			 *
-			 * So we actually had +7+1 before we shift
-			 * down by 3. But (n+8) >> 3 == (n >> 3) + 1
-			 * (modulo overflows, which we do not have).
-			 *
-			 * Finally, we LONG_ALIGN because all bitmap
-			 * operations are on longs.
-			 */
-			bitmap_size = (size-1) >> (i+4);
-			bitmap_size = LONG_ALIGN(bitmap_size+1);
-			zone->free_area[i].map = 
-			  (unsigned long *) alloc_bootmem_node(pgdat, bitmap_size);
-		}
+	for (i = 0; i < totalpages; i++) {
+	  struct page *page = mem_map + offset + i;
+	  page->virtual = __va(zone_start_paddr);
+	  zone_start_paddr += PAGE_SIZE;
 	}
 }
 
@@ -568,10 +395,7 @@ static int __init setup_mem_frac(char *str)
 {
 	int j = 0;
 
-	while (get_option(&str, &zone_balance_ratio[j++]) == 2);
-	printk("setup_mem_frac: ");
-	for (j = 0; j < MAX_NR_ZONES; j++) printk("%d  ", zone_balance_ratio[j]);
-	printk("\n");
+	printk("setup_mem_frac not done\n");
 	return 1;
 }
 
