@@ -17,16 +17,14 @@ ifeq ($(CONFIG_MM_VMS),y)
 export-objs := vmsshmem.o vmsfilemap.o
 endif
 
-obj-y	 := page_io.o \
-	    numa.o oom_kill.o \
-	    swap.o swap_state.o allocpfn.o
+obj-y	 := numa.o oom_kill.o allocpfn.o
 
 obj-$(CONFIG_HIGHMEM) += highmem.o
 
 ifneq ($(CONFIG_MM_VMS),y)
 obj-y += page_alloc.o bootmem.o slab.o vmscan.o mmap.o \
-	 filemap.o memory.o mremap.o \
-	 mprotect.o mlock.o vmalloc.o shmem.o swapfile.o
+	 filemap.o memory.o mremap.o page_io.o \
+	 mprotect.o mlock.o vmalloc.o shmem.o swapfile.o swap.o swap_state.o
 endif
 
 obj-$(CONFIG_MM_VMS) += memoryalc.o vmsbootmem.o ptalloc.o \
