@@ -88,9 +88,18 @@ int tty$putnextchar(int * chr, int * CC, struct _ucb * u) {
     ahd->tty$l_ta_put=ahd->tty$l_ta_data;
 
   int cc;
-  tty$getnextchar(chr,&cc,u); // manual said echoing is needed, too
+#if 0
+  if ((u->ucb$l_sts&UCB$M_INT)==0)
+#endif
+    tty$getnextchar(chr,&cc,u); // manual said echoing is needed, too
+#if 0
+  else {
+    *CC=0;
+    tty->ucb$b_tt_outype=0;
+  }
+#endif
 
-  ioc$reqcom(SS$_NORMAL,0,u); // not needed here?
+  //  ioc$reqcom(SS$_NORMAL,0,u); // not needed here?
 
   return 1;
 }
