@@ -573,7 +573,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   x2p->current_vcb=vcb; // until I can place it somewhere else
 
   if (fib->fib$w_did_num) {
-    //    struct getdents_callback64 buf;
     int wildcard=0;
     struct readdir_callback2 buf;
     int fd=0;
@@ -581,7 +580,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     char * name;
     signed int error=0;
     struct dirent64 dir;
-    struct nameidata nd;
     struct inode * head;
     struct _fcb * fcb=x2p->primary_fcb;
     head = fcb->fcb$l_primfcb;
@@ -617,7 +615,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     //fib->fib$l_wcc = f->f_pos;
     x2p->prev_fp = f->f_pos;
     if (sts!=SS$_NORMAL)
-      mywcc=0;
+      x2p->prev_fp=0;
 
     filp_close(f,0);
 
