@@ -60,7 +60,30 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   return SS$_NORMAL;
 }
 
-int lan$sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) { }
+int lan$sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  if ((i->irp$l_func&(IO$M_CTRL))==(IO$M_CTRL)) {
+    struct dsc$descriptor * d=i->irp$l_qio_p2;
+    long * l=d;
+    long len=l[0]/(2*sizeof(long));
+    long *addr = d->dsc$a_pointer;
+
+    struct _ucbnidef * ni=newucb;
+
+    for(;len;len--) {
+      switch (*addr++) {
+      case NMA$C_PCLI_PTY:
+	//lsb->lsb$l_valid_pty=*addr++;
+	ni->ucb$l_ni_pty=*addr++;
+	break;
+      default:
+      }
+    }
+    //lsb->lsb$l_next_lsb=ni->ucb$l_ni_lsb;
+    //ni->ucb$l_ni_lsb=lsb;
+  }
+  if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL;
+  return SS$_NORMAL;
+}
 
 int lan$setchar(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) { }
 
