@@ -6,6 +6,7 @@
 #include"../../freevms/lib/src/cdtdef.h"
 #include"../../freevms/lib/src/pdtdef.h"
 
+#include<acbdef.h>
 #include<aqbdef.h>
 #include<cdrpdef.h>
 #include<ddbdef.h>
@@ -146,6 +147,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     i->irp$l_qio_p1=buf;
     i->irp$l_qio_p2=512;
     i->irp$l_qio_p3=hrb->hrb$l_lbn;
+    ((struct _acb *)i)->acb$b_rmod|=ACB$M_NODELETE; // bad idea to free this
     //printk("chan %x\n",chan);
     u=ctl$gl_ccbbase[chan].ccb$l_ucb;
     i->irp$l_ucb=u;
