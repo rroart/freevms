@@ -38,17 +38,6 @@ obj-$(CONFIG_PLIP) += plip.o
 
 obj-$(CONFIG_ROADRUNNER) += rrunner.o
 
-obj-$(CONFIG_HAPPYMEAL) += sunhme.o
-obj-$(CONFIG_SUNLANCE) += sunlance.o
-obj-$(CONFIG_SUNQE) += sunqe.o
-obj-$(CONFIG_SUNBMAC) += sunbmac.o
-obj-$(CONFIG_MYRI_SBUS) += myri_sbus.o
-obj-$(CONFIG_SUNGEM) += sungem.o
-
-obj-$(CONFIG_MACE) += mace.o
-obj-$(CONFIG_BMAC) += bmac.o
-obj-$(CONFIG_GMAC) += gmac.o
-
 obj-$(CONFIG_OAKNET) += oaknet.o 8390.o
 
 obj-$(CONFIG_DGRS) += dgrs.o
@@ -68,14 +57,6 @@ obj-$(CONFIG_NATSEMI) += natsemi.o
 obj-$(CONFIG_NS83820) += ns83820.o
 obj-$(CONFIG_STNIC) += stnic.o 8390.o
 obj-$(CONFIG_FEALNX) += fealnx.o mii.o
-
-ifeq ($(CONFIG_SK98LIN),y)
-obj-y += sk98lin/sk98lin.o
-endif
-
-ifeq ($(CONFIG_SKFP),y)
-  obj-y += skfp/skfp.o
-endif
 
 obj-$(CONFIG_VIA_RHINE) += via-rhine.o mii.o
 obj-$(CONFIG_ADAPTEC_STARFIRE) += starfire.o
@@ -188,15 +169,11 @@ obj-$(CONFIG_MIPS_AU1000_ENET) += au1000_eth.o
 obj-$(CONFIG_SGI_IOC3_ETH) += ioc3-eth.o
 obj-$(CONFIG_BAGETLANCE) += bagetlance.o
 obj-$(CONFIG_DECLANCE) += declance.o
-obj-$(CONFIG_ATARILANCE) += atarilance.o
-obj-$(CONFIG_ATARI_BIONET) += atari_bionet.o
-obj-$(CONFIG_ATARI_PAMSNET) += atari_pamsnet.o
 obj-$(CONFIG_A2065) += a2065.o
 obj-$(CONFIG_HYDRA) += hydra.o 8390.o
 obj-$(CONFIG_ARIADNE) += ariadne.o
 obj-$(CONFIG_CS89x0) += cs89x0.o
 obj-$(CONFIG_MACSONIC) += macsonic.o
-obj-$(CONFIG_MACMACE) += macmace.o
 obj-$(CONFIG_MAC89x0) += mac89x0.o
 obj-$(CONFIG_TUN) += tun.o
 obj-$(CONFIG_DL2K) += dl2k.o
