@@ -35,7 +35,7 @@ asmlinkage int exe$forcex(unsigned int *pidadr, void *prcnam, unsigned int code)
   vmsunlock(&SPIN_SCHED,0);
   if (!p) return 0;
   p->pcb$l_sts|=PCB$M_FORCPEN;
-  a=vmalloc(sizeof(struct _acb));
+  a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
   bzero(a,sizeof(struct _acb));
   a->acb$l_pid=p->pcb$l_pid;
   a->acb$l_ast=&exe$exit;
