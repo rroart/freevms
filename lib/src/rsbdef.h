@@ -36,6 +36,7 @@ struct _rsb {
 
   unsigned short int rsb$w_size;
   unsigned char rsb$b_type;
+  unsigned char rsb$b_depth;
   unsigned char rsb$b_fgmode;
   unsigned char rsb$b_ggmode;
   unsigned char rsb$b_cgmode;

@@ -82,7 +82,7 @@ struct _lkb {
   unsigned short lkb$w_refcnt;
   unsigned char lkb$b_tslt;
   unsigned char lib$b_res;
-  struct _rsb *lkb$q_rsb;
+  struct _rsb *lkb$l_rsb;
   unsigned int lkb$l_remlkid;
   unsigned int lkb$l_csid;
   int (*lkb$pq_oldblkast)();

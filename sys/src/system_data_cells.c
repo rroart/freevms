@@ -2,6 +2,8 @@
 #include"../../freevms/sys/src/system_data_cells.h"
 #include"../../freevms/lib/src/dyndef.h"
 #include"../../freevms/pal/src/queue.h"
+#include"../../freevms/lib/src/rdtdef.h"
+#include"../../freevms/lib/src/cdtdef.h"
 
 /* Author: Roar Thronæs */
 
@@ -1904,13 +1906,13 @@ struct _cpu vmscpus[32]; /* max. this number should be defined */
 
 //long long forklistheads[32][6];
 
-struct _rsb * reshashtbl[RESHASHTBL];
+struct _rsb * reshashtbl[2*RESHASHTBL];
 unsigned long lockidtbl[LOCKIDTBL];
 unsigned long lockmaxid;
 unsigned long locknxtid;
 
-struct _cdt cdtl[scs$gw_cdtcnt];
-struct _rdt rdtl[scs$gw_rdtcnt];
+struct _cdt cdtl[1024]; //scs$gw_cdtcnt];
+struct _rdt rdtl[128]; //[scs$gw_rdtcnt];
 
 extern void exe$timeout(void);
 
@@ -2010,10 +2012,14 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
 
   qhead_init(&lck$gl_rrsfl);
 
-  for(i=0;i<RESHASHTBL;i++)
-    reshashtbl[i]=0;
+  for(i=0;i<RESHASHTBL;i++) {
+    //    reshashtbl[i]=0;
+    qhead_init(&reshashtbl[2*i]);
+  }
   lck$gl_hashtbl=&reshashtbl;
   lck$gl_idtbl=&lockidtbl;
+  for(i=0;i<LOCKIDTBL-1;i++)
+    lockidtbl[i]=i+1;
   lck$gl_nxtid=&locknxtid;
   lck$gl_maxid=&lockmaxid;
 
