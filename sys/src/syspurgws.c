@@ -21,6 +21,8 @@ int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirecti
 #ifdef CONFIG_VMS
   // acquire mmg spin
   struct _mypte *pte = findpte(p,va);
+  if (pte->pte$v_valid==0)
+    return SS$_NORMAL;
   unsigned long pfn=__pa(pte->pte$v_pfn<<PAGE_SHIFT)>>PAGE_SHIFT;
   struct page * page=&mem_map[pfn];
   struct _phd * phd=p->pcb$l_phd;
