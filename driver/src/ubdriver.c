@@ -661,6 +661,12 @@ int ubd_init(void)
 	if(err != 0) printk(KERN_ERR 
 			    "um_request_irq failed - errno = %d\n", -err);
 	ubd_vmsinit();
+	{
+		struct _ccb * ccb;
+		ubd_open_dev(&ubd_dev[0]);
+		ccb = &ctl$ga_ccb_table[dev2chan(MKDEV(UBD_MAJOR,0))];
+		ccb->ccb$l_ucb->ucb$l_orb=ubd_dev[0].fd;
+	}
 	return(err);
 }
 
@@ -727,7 +733,6 @@ static int ubd_open(struct inode * inode, struct file * filp)
 {
 	char *file;
 	int n;
-	struct _ccb * ccb;
 
 	n = minor(inode->i_rdev);
 	if(n > MAX_DEV)
@@ -748,8 +753,6 @@ static int ubd_open(struct inode * inode, struct file * filp)
 		}
 		if(ubd_dev[n].fd < 0)
 			return -ENODEV;
-		ccb = &ctl$ga_ccb_table[dev2chan(MKDEV(UBD_MAJOR,n))];
-		ccb->ccb$l_ucb->ucb$l_orb=ubd_dev[n].fd;
 		file = ubd_dev[n].cow.file ? ubd_dev[n].cow.file : 
 			ubd_dev[n].file;
 		ubd_dev[n].size = file_size(file);
