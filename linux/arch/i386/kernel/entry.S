@@ -507,6 +507,12 @@ ENTRY(resched_vector)
         POPR_ALL
         iret
 
+ENTRY(timer_vector)
+        PUSHR_ALL
+        call SYMBOL_NAME(exe$swtimint)
+        POPR_ALL
+        iret
+
 .data
 ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_ni_syscall)	/* 0  -  old "setup()" system call*/

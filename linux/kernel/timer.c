@@ -24,6 +24,7 @@
 #include <linux/kernel_stat.h>
 
 #include <asm/uaccess.h>
+#include <asm/hw_irq.h>
 #include "../../freevms/sys/src/sysgen.h"
 #include "../../freevms/sys/src/rse.h"
 
@@ -594,8 +595,10 @@ void update_process_times(int user_tick)
 	if (p->pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}  /* Will be removed in the future */
 	if (p->pid==1) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}  /* Will be removed in the future */
 	if (p->pid) {
+	  p->phd$l_cputim++;
 		if (++p->phd$w_quant  >= 0 ) {
-		  if (p->phd$w_quant<128) sch$qend(p);
+		  if (p->phd$w_quant<128)
+		    SOFTINT_TIMER_VECTOR;
 		}
 		if (p->pcb$b_prib == 31)
 			kstat.per_cpu_nice[cpu] += user_tick;

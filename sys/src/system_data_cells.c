@@ -1,4 +1,6 @@
+#include<linux/vmalloc.h>
 #include"../../freevms/sys/src/system_data_cells.h"
+#include"../../freevms/lib/src/dyndef.h"
 
 /* Author: Roar Thronæs */
 
@@ -549,7 +551,7 @@ unsigned long exe$gl_time_deviation;
 unsigned long exe$gl_timeadjust;
 unsigned long exe$gl_tmv_svabuf;
 unsigned long exe$gl_tmv_svapte;
-unsigned long exe$gl_tqfl;
+struct _tqe * exe$gl_tqfl;
 unsigned long exe$gl_transition_year;
 unsigned long exe$gl_ubdelay;
 unsigned long exe$gl_unicode_upcase_version;
@@ -1893,6 +1895,15 @@ struct _cpu vmscpus[32]; /* max. this number should be defined */
 void vms_init(void) {
   smp$gl_cpu_data=&vmscpus;
   sch$gl_idle_cpus=0;
+
+  exe$gl_tqfl=vmalloc(sizeof(struct _tqe));
+  exe$gl_tqfl->tqe$l_tqfl=exe$gl_tqfl; 
+  exe$gl_tqfl->tqe$l_tqbl=exe$gl_tqfl;
+  exe$gl_tqfl->tqe$w_size=0;
+  exe$gl_tqfl->tqe$b_type=DYN$C_TQE;
+  exe$gl_tqfl->tqe$b_rqtype=TQE$C_TMSNGL;
+  exe$gl_tqfl->tqe$l_rqpid=0xffffffff;
+  exe$gl_tqfl->tqe$l_cputim=0xffffffff;
 
   /* take lnm stuff from syslnm.c etc */
 

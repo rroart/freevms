@@ -40,7 +40,7 @@
 #include "../../freevms/sys/src/sysgen.h"
 #include "../../freevms/sys/src/system_data_cells.h"
 #include "../../freevms/lib/src/ipldef.h"
-#include "../../freevms/lbr/src/ipl.h"
+#include "../../freevms/pal/src/ipl.h"
 
 extern void timer_bh(void);
 extern void tqueue_bh(void);
@@ -498,7 +498,7 @@ int this_cpu = smp_processor_id();
   int old;
 
   // lock sched db, soon
-  //if (prespl(IPL$_SCHED)) return;
+  //if (spl(IPL$_SCHED)) return;
   //    old=spl(IPL$_SCHED);
   // svpctx, do not think we need to do this here
   // get cpu base when it is implemented	
@@ -552,7 +552,7 @@ asmlinkage void schedule(void)
 	int old;
 
 	/* wait until both are more finished... if (from_sch$resched == 1) goto try_for_process;*/ /* goto 30$ */ 
-	//if (prespl(IPL$_SCHED)) return;
+	//if (spl(IPL$_SCHED)) return;
 	//  old=spl(IPL$_SCHED);
 
 	spin_lock_prefetch(&runqueue_lock);
@@ -686,7 +686,7 @@ repeat_schedule:
 	if (next == prev) {
 	  /* printk("next == prev\n");*/ 
 	  spin_unlock_irq(&runqueue_lock);
-	  //splx(old);
+	  //splret();
 	  return;
 	} 
 
@@ -746,7 +746,7 @@ repeat_schedule:
 	 */
 	switch_to(prev, next, prev);
 
-	//splx(old);
+	//splret();
 	//  return;
  sch$idle:
 	//	printk("sch$idle\n");

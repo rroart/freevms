@@ -1,5 +1,5 @@
 #include"../../starlet/src/starlet.h"
-#include"../../lbr/src/vmsopt.h" 
+#include"../../starlet/src/vmsopt.h" 
 #include"../../librtl/src/descrip.h"
 #include<stdio.h>
 

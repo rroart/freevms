@@ -1,5 +1,6 @@
 #include<linux/linkage.h>
 #include<stdlib.h>
+#include"../../starlet/src/starlet.h"
 #include"../../starlet/src/lnmdef.h"
 #include"../../starlet/src/ssdef.h"
 #include"../../librtl/src/descrip.h"
@@ -72,7 +73,7 @@ asmlinkage sys_$CRELNT();
   unsigned short int *promsk, void *tabnam, void
   *partab, unsigned char *acmode);*/
 
-asmlinkage sys$crelnt  (struct struct_crelnt *s) {
+asmlinkage sys$_crelnt  (struct struct_crelnt *s) {
   int status;
   /*  char * mytabnam;
       int tabnamlen;*/
@@ -257,7 +258,7 @@ int status;
     s=lnmmalloc(sizeof(struct struct_crelnt));
     s->partab=&mypartab;
     s->tabnam=&mytabnam;
-    status=sys$crelnt(s);
+    status=sys$_crelnt(s);
     printf("end status %x\n",status);
     for (c=0;c<LNMSHASHTBL;c++) {
       if (lnmhshs.entry[2*c]) printf("lnmhshs entry %x %x %s\n",c,lnmhshs.entry[2*c],((struct lnmb *)(lnmhshs.entry[2*c]))->lnmb$t_name);

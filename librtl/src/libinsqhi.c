@@ -1,7 +1,7 @@
 #include "lib$routines.h"       /* Our header file! */
 #include "ssdef.h"
 
-#include "queue.h"
+#include "../../pal/src/queue.h"
 
 unsigned long lib$insque(void * entry, void * header) {
 insqhi(entry,header);

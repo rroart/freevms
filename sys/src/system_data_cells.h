@@ -5,6 +5,7 @@
 
 #include"../../lib/src/lnmstrdef.h"
 #include"../../lib/src/cpudef.h"
+#include"../../lib/src/tqedef.h"
 
 extern unsigned long acme$gq_mutex;
 extern unsigned long acme$gq_request_queue;
@@ -547,7 +548,7 @@ extern unsigned long exe$gl_time_deviation;
 extern unsigned long exe$gl_timeadjust;
 extern unsigned long exe$gl_tmv_svabuf;
 extern unsigned long exe$gl_tmv_svapte;
-extern unsigned long exe$gl_tqfl;
+extern struct _tqe * exe$gl_tqfl;
 extern unsigned long exe$gl_transition_year;
 extern unsigned long exe$gl_ubdelay;
 extern unsigned long exe$gl_unicode_upcase_version;
