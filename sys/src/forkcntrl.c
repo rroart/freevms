@@ -105,7 +105,7 @@ void exe$queue_fork(struct _irp * i, struct _ucb * u) {
   /* I think that the below is really an fkb */
   /* need caller and caller's caller address of return again */
   // u->ucb$l_fr4=current; // wrong?
-  newipl=u->ucb$b_dipl;
+  newipl=f->fkb$b_flck;
   f=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[newipl-6];
   isempty=aqempty(f);
   insque(u,f->fkb$l_fqbl);
