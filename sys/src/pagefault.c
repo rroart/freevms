@@ -60,7 +60,7 @@ signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _
   if (((unsigned long)va)&0x80000000 == 0) {
     mmg$incptref(p->pcb$l_phd,pte);
   }
-  page=&((struct _pfn *)pfn$al_head)[pfn];
+  page=&((struct _pfn *)pfn$al_head[PFN$C_FREPAGLST])[pfn];
   // also set page type
   mem_map[pfn].pfn$v_pagtyp=((unsigned long)va)&PFN$M_PAGTYP;
   mem_map[pfn].virtual=__va(pfn*PAGE_SIZE);
@@ -95,7 +95,7 @@ int mmg$decptref(struct _phd * phd, struct _mypte * pte) {
 }
 
 int mmg$makewsle(struct _pcb * p, struct _phd * phd, void * va, void * pte, signed int pfn) {
-  int new=p->pcb$l_phd->phd$l_wsnext++;
+  int new=p->pcb$l_phd->phd$l_wsnext++; // maybe not ++ here?
   struct _wsl * wsl = p->pcb$l_phd->phd$l_wslist;
   struct _wsl * wsle = &wsl[new];
   struct _pfn * page;
@@ -104,9 +104,15 @@ int mmg$makewsle(struct _pcb * p, struct _phd * phd, void * va, void * pte, sign
   wsle->wsl$v_pagtyp=mem_map[pfn].pfn$v_pagtyp;
   ((unsigned long)wsle->wsl$pq_va)|=(unsigned long)va;
   // p->pcb$l_phd->phd$l_ptwsleval++
-  //  page=&((struct _pfn *)pfn$al_head)[pfn];
+  //  page=&((struct _pfn *)pfn$al_head[PFN$C_FREPAGLST])[pfn];
   page=&mem_map[pfn];
   page->pfn$l_wslx_qw=new; // hope it's the right one?
+
+  if ((((unsigned long)wsle->wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_GLOBAL)
+    p->pcb$l_gpgcnt++;
+  if ((((unsigned long)wsle->wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_PROCESS)
+    p->pcb$l_ppgcnt++;
+
 }
 
 /* vma is the first one with  address < vma->vm_end,
@@ -233,6 +239,8 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	//some linux stuff
 	tsk = current;
 
+	tsk->pcb$l_phd->phd$l_pageflts++;
+
 	//printk("fault %x ",address);
 	//printk(":");
 
@@ -309,6 +317,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    //printk(" a ");
 	    {
 	      signed long pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+	      mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 	      *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	      //printk(" pfn pte %x %x ",pfn,*(unsigned long *)pte);
 	    }
@@ -326,6 +335,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    } else { // zero page demand?
 	      {
 		signed long pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+		mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 		*(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	      }
 	      return;
@@ -633,6 +643,8 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	  address=0x11111111;
 	}
 
+	current->pcb$l_phd->phd$l_pageflts++;
+
 	// locate pte of address
 	page = address & PAGE_MASK;
 	pgd = pgd_offset(mm, page);
@@ -658,6 +670,9 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	// 1 0 pfn=misc page is in page file
 	// 1 1 page is in image file
 
+	if (((unsigned long)mypte)<0xa0000000)
+	  goto skip;
+
 	if (mypte->pte$v_typ1) { // page or image file
 	  if (mypte->pte$v_typ0) { // image file
 	    unsigned long index=(*(unsigned long *)pte)>>PAGE_SHIFT;
@@ -670,6 +685,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+vbn;
 
 	    pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+	    mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 	    *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	    flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	    
@@ -684,6 +700,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    if (mypte->pte$v_pfn) {
 	    } else { // zero page demand?
 	      pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+	      mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 	      *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	      flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	      return;
@@ -783,12 +800,14 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	return;
 	// mmg$ininewpfn(tsk,va,pte); // put this somewhere?
 
-
+ skip:
 	// keep some linux stuff for now
 	catcher = current->thread.fault_catcher;
 	si.si_code = SEGV_MAPERR;
 	down_read(&mm->mmap_sem);
 	//vma = find_vma(mm, address);
+	goto bad; // got straight to bad for now.
+      
 	vma = mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
 	if(!vma) goto bad;
 	else if(vma->rde$pq_start_va <= address) goto good_area;
@@ -854,16 +873,30 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 #endif
 #endif
 
+#ifdef CONFIG_VMS
+
 int mmg$frewsle(struct _pcb * p, void * va) {
   struct _phd * phd = p->pcb$l_phd;
   struct _wsl * wsl = phd->phd$l_wslist;
-  struct _wsl wsle = wsl[phd->phd$l_wsnext];
+  struct _wsl wsle ;
+  unsigned long pte;
+  unsigned long index;
+  unsigned long va2;
+  unsigned long sts;
 
+ again:
+  wsle = wsl[phd->phd$l_wsnext];
   if (wsle.wsl$pq_va==0) { // empty
-    //if (p->pcb$l_ppgcnt+p->pcb$l_gpgcnt==512) {
-      // can not be used
-    //}
+    if (phd->phd$l_wssize<p->pcb$l_ppgcnt+p->pcb$l_gpgcnt) {
+      goto more;
+    }
     // compare to wsquota
+    if (phd->phd$l_wsquota<p->pcb$l_ppgcnt+p->pcb$l_gpgcnt) {
+      goto more;
+    }
+
+    return SS$_NORMAL;
+
     // compare to growlim
     // this probably gets selected
   }
@@ -874,4 +907,81 @@ int mmg$frewsle(struct _pcb * p, void * va) {
   // but empty but translation buffer, skip
   // if selected for reuse and non-empty
   // if not selected incr inde and start again
+
+  index=phd->phd$l_wsnext;
+  va2=((unsigned long)wsle.wsl$pq_va)&0xfffff000;
+  pte=findpte(p,va2);
+  sts=mmg$frewslx(p, va2,pte,index);
+  if (sts==SS$_NORMAL)
+    return SS$_NORMAL;
+
+ more:
+  phd->phd$l_wsnext++;
+  if (phd->phd$l_wsnext>phd->phd$l_wslast)
+    phd->phd$l_wsnext=0; //? phd->phd$l_wsdyn;
+  goto again;
+
 }
+
+int mmg$frewslx(struct _pcb * p, void * va,unsigned long * pte, unsigned long index) {
+  signed long pfn=__pa(((struct _mypte*)pte)->pte$v_pfn << PAGE_SHIFT) >> PAGE_SHIFT ;
+  struct _wsl * wsl = p->pcb$l_phd->phd$l_wslist;
+
+  //if dem zero (data page)?
+  if ((mem_map[pfn].pfn$q_bak&PTE$M_TYP0)==0)
+    return 0;
+
+  if (*pte&_PAGE_DIRTY)
+    return 0;
+
+#if 0
+  // not yet?
+  if (*pte&_PAGE_DIRTY)
+    mem_map[pfn].pfn$v_modify=1;
+  else
+    mem_map[pfn].pfn$v_modify=0;
+  (*pte) &= ~(_PAGE_DIRTY|_PAGE_PRESENT);
+#endif
+  // how to fix tlb/tb?
+
+  // has pagefile backing store?
+
+  if ((((unsigned long)wsl[index].wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_GLOBAL) {
+    *pte = mem_map[pfn].pfn$q_bak;
+    mmg$decptref(p->pcb$l_phd,pte);
+    p->pcb$l_gpgcnt--;
+  }
+
+  if ((((unsigned long)wsl[index].wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_PROCESS) {
+    *pte = mem_map[pfn].pfn$q_bak; // need this  here too?
+    p->pcb$l_ppgcnt--;
+  }
+
+#ifdef __arch_um__
+#if 1
+  //forget it?
+  *pte|=_PAGE_NEWPAGE;
+  flush_tlb_range(p->mm, va, va + PAGE_SIZE);
+#endif
+#endif
+
+  wsl[index].wsl$pq_va=0;
+
+  mmg$relpfn(pfn);
+
+  return SS$_NORMAL;
+}
+
+unsigned long findpte(struct _pcb * pcb,unsigned long address) {
+  unsigned long page;
+  pgd_t *pgd;
+  pmd_t *pmd;
+  pte_t *pte;
+  page = address & PAGE_MASK;
+  pgd = pgd_offset(pcb->mm, page);
+  pmd = pmd_offset(pgd, page);
+  pte = pte_offset(pmd, page);
+  return pte;
+}
+
+#endif
