@@ -521,7 +521,7 @@ void TZ$INITLINE(struct _ucb * ucb)				// RESET SINGLE LINE
   R2=R1;
   R2->class_setup_ucb(tty);		// Init ucb fields
  l20:
-  if	(UCB$M_POWER&ucb->ucb$l_sts==0) return;	// Powerfail handler
+  if	((UCB$M_POWER&ucb->ucb$l_sts)==0) return;	// Powerfail handler
   R0	 = tty->ucb$l_tt_class;
   R2=R1;
   R2->class_powerfail(ucb);

@@ -61,7 +61,7 @@ signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _
     pte=&((struct _mypte *)mmg$gq_gpt_base)[pte->pte$v_gptx];
     // not implemented yet
   }
-  if (((unsigned long)va)&0x80000000 == 0) {
+  if ((((unsigned long)va)&0x80000000) == 0) {
     mmg$incptref(p->pcb$l_phd,pte);
   }
   // wrong page=&((struct _pfn *)pfn$al_head[PFN$C_FREPAGLST])[pfn];
