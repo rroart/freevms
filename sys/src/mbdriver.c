@@ -122,7 +122,7 @@ int mb$fdt_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
 ;
 
   if (c->ccb$l_sts&CCB$M_NOWRITEACC)
-    return exe_std$abortio(SS$_ILLIOFUNC,i,p,u);
+    return exe_std$abortio(i,p,u,SS$_ILLIOFUNC);
 
   if (!test_and_set_bit(CCB$V_WRTCHKDON,&c->ccb$l_sts)) {
     int sts=exe_std$chkwrtacces(0,0,p,u);
@@ -131,7 +131,7 @@ int mb$fdt_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
   }
 
   if (i->irp$l_qio_p2>u->ucb$w_devbufsiz)
-    return exe_std$abortio(SS$_MBTOOSML,i,p,u);
+    return exe_std$abortio(i,p,u,SS$_MBTOOSML);
 
   int func=i->irp$l_func;
 
@@ -209,17 +209,17 @@ int mb$fdt_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
   vmsunlock(&SPIN_MAILBOX,savipl);
       
   if (func&IO$M_NOW)
-    return exe$finishioc(i->irp$l_iosb,i,p,u);
+    return exe$finishioc(SS$_NORMAL|(i->irp$l_bcnt<<16),i,p,u);
   else
     return SS$_NORMAL; // really exe$qioreturn
 }
 
 int mb$fdt_read (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   if (c->ccb$l_sts&CCB$M_NOREADACC)
-    return exe_std$abortio(SS$_ILLIOFUNC,i,p,u);
+    return exe_std$abortio(i,p,u,SS$_ILLIOFUNC);
 
   if (i->irp$l_qio_p2>u->ucb$w_devbufsiz)
-    return exe_std$abortio(SS$_MBTOOSML,i,p,u);
+    return exe_std$abortio(i,p,u,SS$_MBTOOSML);
 
   if (i->irp$l_qio_p2)
     exe_std$readchk(i,p,u,i->irp$l_qio_p1,i->irp$l_qio_p2);
@@ -282,7 +282,7 @@ int mb$fdt_read (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   if ((func & IO$M_STREAM) && ! skip) {
     if (u->ucb$w_bufquo<s->srb$w_reqsiz) {
       if (u->ucb$w_iniquo<s->srb$w_reqsiz && aqempty(u->ucb$l_mb_msgqfl))
-	return exe_std$abortio(SS$_EXQUOTA,i,p,u);
+	return exe_std$abortio(i,p,u,SS$_MBFULL);
     }
   }
 
