@@ -248,59 +248,53 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
 {
   unsigned long flags;
   int success = 0;
+  unsigned long qhead;
+  int curpri;
+  int cpuid = smp_processor_id();
+  struct _cpu * cpu=smp$gl_cpu_data[cpuid];
 
-  /*
-   * We want the common case fall through straight, thus the goto.
-   */
   spin_lock_irqsave(&runqueue_lock, flags);
   p->state = TASK_RUNNING;
-  //	if (task_on_runqueue(p))
-  //		goto out;
   nr_running++;
-  { 
-    unsigned long qhead;
-    int curpri;
-    int cpuid = smp_processor_id();
-    struct _cpu * cpu=smp$gl_cpu_data[cpuid];
-    /* p->pcb$b_pri=p->pcb$b_prib-3; */ /* boost */
-    curpri=p->pcb$b_pri;
-    if (mydebug4) printk("add tyr %x %x\n",p->pid,curpri);
-    qhead=sch$aq_comt[curpri];
-    if (mydebug4) printk("eq qhead %x %x %x %x\n",
-			 (unsigned long *)qhead,(unsigned long *)(qhead+4),
-			 *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
-    if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
-    if (mydebug4) printk("iq3 %x\n",sch$aq_comh[curpri]);
 
-    insque(p,qhead);
+  /* p->pcb$b_pri=p->pcb$b_prib-3; */ /* boost */
+  curpri=p->pcb$b_pri;
+  if (mydebug4) printk("add tyr %x %x\n",p->pid,curpri);
+  qhead=sch$aq_comt[curpri];
+  if (mydebug4) printk("eq qhead %x %x %x %x\n",
+		       (unsigned long *)qhead,(unsigned long *)(qhead+4),
+		       *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
+  if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
+  if (mydebug4) printk("iq3 %x\n",sch$aq_comh[curpri]);
 
-    if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
-    if (mydebug4) printk("iq3 %x\n",sch$aq_comh[curpri]);
-    if (mydebug4) printk("eq qhead %x %x %x %x\n",
-			 (unsigned long *)qhead,(unsigned long *)(qhead+4),
-			 *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
+  insque(p,qhead);
 
-    if (mydebug4) printk("comq1 %x %x\n",curpri,sch$gl_comqs);
+  if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
+  if (mydebug4) printk("iq3 %x\n",sch$aq_comh[curpri]);
+  if (mydebug4) printk("eq qhead %x %x %x %x\n",
+		       (unsigned long *)qhead,(unsigned long *)(qhead+4),
+		       *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
 
-    sch$gl_comqs=sch$gl_comqs | (1 << curpri);
+  if (mydebug4) printk("comq1 %x %x\n",curpri,sch$gl_comqs);
 
-    if (mydebug4) printk("comq1 %x %x\n",curpri,sch$gl_comqs);
-    if (mydebug4) {
-      int i;
-      struct _pcb  *tmp2,*tmp3=qhead;
-      unsigned long tmp;
-      printk("p %x\n",p);
-      printk("%x %x %x %x\n",tmp3,tmp3->pcb$l_sqfl,tmp3->pcb$l_sqfl->pcb$l_sqfl,tmp3->pcb$l_sqfl->pcb$l_sqfl->pcb$l_sqfl);
-      for(i=0;i<32;i++) {
-	tmp=sch$aq_comh[i];
-	//      printk("i %x %x i",i,tmp);
-	if(*(unsigned long *)tmp == tmp) {; } else {
-	  tmp2=((struct _pcb *)tmp)->pcb$l_sqfl->pcb$l_sqfl;
-	  do {
-	    printk("com2 %x %x %x %x\n",tmp2,tmp2->pid,tmp2->pcb$b_pri,i);
-	    tmp2=tmp2->pcb$l_sqfl;
-	  } while (tmp2!=tmp);
-	}
+  sch$gl_comqs=sch$gl_comqs | (1 << curpri);
+
+  if (mydebug4) printk("comq1 %x %x\n",curpri,sch$gl_comqs);
+  if (mydebug4) {
+    int i;
+    struct _pcb  *tmp2,*tmp3=qhead;
+    unsigned long tmp;
+    printk("p %x\n",p);
+    printk("%x %x %x %x\n",tmp3,tmp3->pcb$l_sqfl,tmp3->pcb$l_sqfl->pcb$l_sqfl,tmp3->pcb$l_sqfl->pcb$l_sqfl->pcb$l_sqfl);
+    for(i=0;i<32;i++) {
+      tmp=sch$aq_comh[i];
+      //      printk("i %x %x i",i,tmp);
+      if(*(unsigned long *)tmp == tmp) {; } else {
+	tmp2=((struct _pcb *)tmp)->pcb$l_sqfl->pcb$l_sqfl;
+	do {
+	  printk("com2 %x %x %x %x\n",tmp2,tmp2->pid,tmp2->pcb$b_pri,i);
+	  tmp2=tmp2->pcb$l_sqfl;
+	} while (tmp2!=tmp);
       }
     }
   }
@@ -308,7 +302,6 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
     reschedule_idle(p);
   success = 1;
 
- out:
   spin_unlock_irqrestore(&runqueue_lock, flags);
   return success;
 }
