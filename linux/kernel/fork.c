@@ -29,6 +29,7 @@
 #include <sysgen.h>
 #include <phddef.h>
 #include <pridef.h>
+#include <rdedef.h>
 
 /* The idle threads do not count.. */
 int nr_threads;
@@ -700,12 +701,12 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	/* pcb stuff */
 
-	p->pcb$l_phd=kmalloc(sizeof(struct _phd));
+	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
 	bzero(p->pcb$l_phd,sizeof(struct _phd));
 
 	p->pcb$l_phd->phd$q_ptbr=p->mm->pgd;
 	{
-	  struct _rde * rde=kmalloc(sizeof(struct _rde));
+	  struct _rde * rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
 	  bzero(rde,sizeof(struct _rde));
 	  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
 	  insque(rde,p->pcb$l_phd->phd$ps_p0_va_list_flink);
