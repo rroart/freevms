@@ -34,6 +34,9 @@
 !--
 */
 
+#include<stdarg.h>
+#include<descrip.h>
+
 /* IPACP max physical buffer size*/
 #define DRV$MAX_PHYSICAL_BUFSIZE (IPACP_Interface->ACPI$MPBS)
 
@@ -83,83 +86,131 @@
 */
 
    /* Conditionally do something according to LOG_STATE flags */
+#define $$LOGF SSLOGF
 #define $$LOGF(LOGF) (((*IPACP_Interface->ACPI$LOG_STATE) && (LOGF)) != 0)
 
+extern IPACP_Info_Structure * IPACP_Interface;
+
     /* Write a message to the IPACP log file. */
-/*#define DRV$LOG_FAO (.IPACP_Interface[ACPI$LOG_FAO]) */
+static int inline DRV$LOG_FAO(char *c, ...) {
+  struct dsc$descriptor d;
+  d.dsc$w_length=strlen(c);
+  d.dsc$a_pointer=c;
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,c);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  return IPACP_Interface->ACPI$LOG_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
+
+static int inline DRV$XLOG_FAO(int i, ...) {
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,i);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  if ($$LOGF(i))
+    return DRV$LOG_FAO(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
+
 /*! Queue a message to the IPACP log file. */
 
-/*#define DRV$QL_FAO (.IPACP_Interface[ACPI$QL_FAO]) */
+static int inline DRV$QL_FAO(char *c, ...) {
+  struct dsc$descriptor d;
+  d.dsc$w_length=strlen(c);
+  d.dsc$a_pointer=c;
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,c);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  return IPACP_Interface->ACPI$QL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
+
+static int inline DRV$XQL_FAO(int i, ...) {
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,i);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  if ($$LOGF(i))
+    return DRV$QL_FAO(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
 
 /*    ! Write a message to the console operator */
 
-/*#define DRV$OPR_FAO (.IPACP_Interface[ACPI$OPR_FAO]) */
+static int inline DRV$OPR_FAO(char *c, ...) {
+  struct dsc$descriptor d;
+  d.dsc$w_length=strlen(c);
+  d.dsc$a_pointer=c;
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,c);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  return IPACP_Interface->ACPI$OPR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
 
-/*
-    DRV$OPR_FAO(CST) =
-	BEGIN
-	LOCAL
-	     STR_DESC : VECTOR [2];
+static int inline DRV$ERROR_FAO(char *c, ...) {
+  struct dsc$descriptor d;
+  d.dsc$w_length=strlen(c);
+  d.dsc$a_pointer=c;
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,c);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  return IPACP_Interface->ACPI$ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
 
-	STR_DESC[0] = %CHARCOUNT(CST);
-	STR_DESC[1] = UPLIT(CST);
+static int inline DRV$WARN_FAO(char *c, ...) {
+  struct dsc$descriptor d;
+  d.dsc$w_length=strlen(c);
+  d.dsc$a_pointer=c;
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,c);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  return IPACP_Interface->ACPI$ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
 
-	%IF %NULL(%REMAINING) %THEN
-	    (.IPACP_Interface[ACPI$OPR_FAO])(STR_DESC);
-	%ELSE
-	    (.IPACP_Interface[ACPI$OPR_FAO])(STR_DESC,%REMAINING);
-	%FI
-	END
-	%,
-
-    DRV$ERROR_FAO(CST) =
-	BEGIN
-	LOCAL
-	     STR_DESC : VECTOR [2];
-
-	STR_DESC[0] = %CHARCOUNT(CST);
-	STR_DESC[1] = UPLIT(CST);
-
-	%IF %NULL(%REMAINING) %THEN
-	    (.IPACP_Interface[ACPI$ERROR_FAO])(STR_DESC);
-	%ELSE
-	    (.IPACP_Interface[ACPI$ERROR_FAO])(STR_DESC,%REMAINING);
-	%FI
-	END
-	%,
-
-    DRV$WARN_FAO(CST) =
-	BEGIN
-	LOCAL
-	     STR_DESC : VECTOR [2];
-
-	STR_DESC[0] = %CHARCOUNT(CST);
-	STR_DESC[1] = UPLIT(CST);
-
-	%IF %NULL(%REMAINING) %THEN
-	    (.IPACP_Interface[ACPI$ERROR_FAO])(STR_DESC);
-	%ELSE
-	    (.IPACP_Interface[ACPI$ERROR_FAO])(STR_DESC,%REMAINING);
-	%FI
-	END
-	%,
-
-    DRV$FATAL_FAO(CST) =
-	BEGIN
-	LOCAL
-	     STR_DESC : VECTOR [2];
-
-	STR_DESC[0] = %CHARCOUNT(CST);
-	STR_DESC[1] = UPLIT(CST);
-
-	%IF %NULL(%REMAINING) %THEN
-	    (.IPACP_Interface[ACPI$FATAL_FAO])(STR_DESC);
-	%ELSE
-	    (.IPACP_Interface[ACPI$FATAL_FAO])(STR_DESC,%REMAINING);
-	%FI
-	END
-        %;
-*/
+static int inline DRV$FATAL_FAO(char *c, ...) {
+  struct dsc$descriptor d;
+  d.dsc$w_length=strlen(c);
+  d.dsc$a_pointer=c;
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,c);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  return IPACP_Interface->ACPI$FATAL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
 
 /*
 ! Now we define some literals for use by the device support modules.
