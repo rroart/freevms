@@ -152,6 +152,7 @@ cd arch/i386/kernel;
 cd ../../..;
 
 cd fs
+		ln -s ../../freevms/sys/src/vmsbuffer.c .;
 mkdir ods2
 cd ods2
 		ln -s ../../../freevms/f11x/src/[Ma-z]* .;
