@@ -4,6 +4,10 @@
 #include <misc.h>
 #include <starlet.h>
   
+void an_ast(int i) {
+printf("an_ast %x %x\n",getpid(),i);
+}
+
 main(){
 
 struct _lksb lksb;
@@ -18,7 +22,8 @@ struct _lksb lksb;
                    &lksb,        
                    0,            
                     &resource,   
-                   0, 0, 0, 0, 0, 0); 
+                   0,
+		   an_ast, 41, 0, 0, 0); 
 
 sleep(5);
 printf("%x %x\n",lksb.lksb$w_status,lksb.lksb$l_lkid);
@@ -30,7 +35,9 @@ printf("%x %x\n",lksb.lksb$w_status,lksb.lksb$l_lkid);
                    lkmode,        
                    &lksb,         
                    flags,         
-                   0, 0, 0, 0, 0, 0, 0); 
+                   0,
+		   0,
+		   an_ast, 43, 0, 0, 0); 
 
 sleep(5);
 printf("%x %x\n",lksb.lksb$w_status,lksb.lksb$l_lkid);

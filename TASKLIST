@@ -115,6 +115,9 @@ FreeVMS tasklist
 
 3. (later) high priority:
   Clustering, SCA, MSCP etc, barely started, need more people.
+  Ordinary security stuff.
+  	Start with aiming at
+	http://www.nsa.gov/selinux/doc/inevitability/inevitability.html
 
 Medium priority:
 

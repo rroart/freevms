@@ -123,7 +123,7 @@ asmlinkage int exe$enq(struct struct_enq * s) {
     l->lkb$b_efn=s->efn;
     l->lkb$b_rqmode=s->lkmode;
     l->lkb$l_cplastadr=s->astadr;
-    //    l->lkb$l_blkastadr=s->blkastadr;
+    l->lkb$l_blkastadr=s->blkastadr;
     l->lkb$l_astprm=s->astprm;
     l->lkb$l_pid=current->pid;
     strncpy(r->rsb$t_resnam,d->dsc$a_pointer,d->dsc$w_length);
@@ -193,11 +193,22 @@ asmlinkage int exe$enq(struct struct_enq * s) {
     r=l->lkb$l_rsb;
     remque(l->lkb$l_sqfl,l->lkb$l_sqfl);// ?
     remque(r->rsb$l_grqfl,dummy);
-    if (aqempty(r->rsb$l_cvtqfl) && aqempty(r->rsb$l_grqfl) && aqempty(r->rsb$l_wtqfl)) {
+    if (aqempty(r->rsb$l_cvtqfl) && aqempty(r->rsb$l_grqfl)) {
       lck$grant_lock(l,r,l->lkb$b_grmode,s->lkmode);
+      return SS$_NORMAL;
     } else {
-      if (test_bit(s->lkmode,lck$ar_compat_tbl[l->lkb$b_grmode])) {
-	
+      if (r->rsb$b_cgmode!=l->lkb$b_grmode) {
+	if (test_bit(s->lkmode,lck$ar_compat_tbl[l->lkb$b_grmode])) {
+	  lck$grant_lock(l,r,l->lkb$b_grmode,s->lkmode);
+	}
+      } else {
+	int newmode=find_highest(l,r);
+	if (test_bit(newmode,lck$ar_compat_tbl[l->lkb$b_grmode])) {
+	  r->rsb$b_fgmode=newmode;
+	  r->rsb$b_ggmode=newmode;
+	  r->rsb$b_cgmode=newmode;
+	  lck$grant_lock(l,r,l->lkb$b_grmode,newmode);
+	}
       }
     }
   }
@@ -226,6 +237,7 @@ int lck$grant_lock(struct _lkb * l,struct _rsb * r, signed int curmode, signed i
     sch$postef(current->pid,PRI$_RESAVL,l->lkb$b_efn);
 
     if (l->lkb$l_cplastadr && l->lkb$l_flags&LCK$M_SYNCSTS==0) {
+      l->lkb$l_ast=l->lkb$l_cplastadr;
       sch$qast(current->pid,PRI$_RESAVL,l);
     }
     if (l->lkb$l_ast) {
@@ -236,4 +248,17 @@ int lck$grant_lock(struct _lkb * l,struct _rsb * r, signed int curmode, signed i
     //if (current->pcb$w_state!=SCH$C_CUR)
     sch$postef(current->pid,PRI$_RESAVL,l->lkb$b_efn);
 
+}
+
+int find_highest(struct _lkb * l, struct _rsb * skip) {
+  struct _lkb * first=&l->lkb$l_sqfl;
+  struct _rsb * skipme=&skip->rsb$l_grqfl;
+  struct _lkb * tmp=first->lkb$l_astqfl;
+  int high=0;
+  while (tmp!=first) {
+    if (tmp!=skipme)
+      if (l->lkb$b_grmode>high)
+	high=l->lkb$b_grmode;
+  }
+  return high;
 }
