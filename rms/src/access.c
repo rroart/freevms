@@ -67,7 +67,7 @@
 #include <scbdef.h>
 #include <wcbdef.h>
 #include <vmstime.h>
-#include "../../freevms/f11x/src/xqp.h"
+#include "xqp.h"
 #include "cache.h"
 #include "access.h"
 
