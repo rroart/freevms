@@ -121,8 +121,6 @@ if [ "$CONFIG_VMS" != "y" ]; then
 source fs/Config.in
 fi
 
-source drivers/md/Config.in
-
 if [ "$CONFIG_VMS" != "y" ]; then
 source drivers/mtd/Config.in
 fi
