@@ -13,4 +13,18 @@
 #define likely(x)	__builtin_expect((x),1)
 #define unlikely(x)	__builtin_expect((x),0)
 
+#if __GNUC__ > 3
+#define __attribute_used__	__attribute((__used__))
+#elif __GNUC__ == 3
+#if  __GNUC_MINOR__ >= 3
+# define __attribute_used__	__attribute__((__used__))
+#else
+# define __attribute_used__	__attribute__((__unused__))
+#endif /* __GNUC_MINOR__ >= 3 */
+#elif __GNUC__ == 2
+#define __attribute_used__	__attribute__((__unused__))
+#else
+#define __attribute_used__	/* not implemented */
+#endif /* __GNUC__ */
+
 #endif /* __LINUX_COMPILER_H */
