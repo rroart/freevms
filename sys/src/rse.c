@@ -110,12 +110,18 @@ int sch$pixscan(void) {
   return;
 }
 
+int myp3, myp2, mycomq, mypri, sqfl;
+
 void sch$chsep(struct _pcb * p,unsigned char newpri) {
   struct _pcb * p2, *p3 , *dummy;
   p3=p->pcb$l_sqfl;
-  mycheckaddr();
+  myp3=p3;
+  mycheckaddr(0);
   p2=remque(p,dummy);
-  mycheckaddr();
+  myp2=p2;
+  mycomq=sch$gl_comqs;
+  mypri=p2->pcb$b_pri;
+  sqfl=p3->pcb$l_sqfl;
   if (p3==p3->pcb$l_sqfl) {
       if (p2->pcb$w_state==SCH$C_COM) {
 	sch$gl_comqs&=(~(1 << p2->pcb$b_pri));
@@ -123,25 +129,30 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
 	sch$gl_comoqs&=(~(1 << p2->pcb$b_pri));
       }
   }
+  mycheckaddr(0);
   p->pcb$b_pri=newpri;
   //  if (!(p->pcb$l_sts & PCB$M_RES)) { not yet used
   if (0) {
     sch$swpwake();
     p2->pcb$w_state=SCH$C_COMO;
     p2->state=TASK_RUNNING;
-    mycheckaddr();
+    mycheckaddr(0);
     insque(p2,*(unsigned long *)&sch$aq_comot[newpri]);
-    mycheckaddr();
     sch$gl_comoqs|=(1 << newpri);
+    mycheckaddr(0);
     return;
   }
   //  SOFTINT_RESCHED_VECTOR; not yet?
   p2->pcb$w_state=SCH$C_COM;
   p2->state=TASK_RUNNING;
-  mycheckaddr();
-  if (!task_on_comqueue(p2)) insque(p2,*(unsigned long *)&sch$aq_comt[newpri]);
-  mycheckaddr();
-  sch$gl_comqs|=(1 << newpri);
+  mycheckaddr(0);
+  if (!task_on_comqueue(p2)) {
+    if (p2!=ctl$gl_pcb) { // another temp workaround
+      insque(p2,*(unsigned long *)&sch$aq_comt[newpri]);
+      sch$gl_comqs|=(1 << newpri);
+    }
+  }
+  mycheckaddr(0);
   p->pcb$l_sts&=~PCB$M_WAKEPEN; // got to have this somewhere, here works
 }
 
@@ -297,15 +308,16 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
     int tmppri=p->pcb$b_pri;
     unsigned long qhead;
 
+    mycheckaddr(0);
     p2=remque(p,dummy);
-    if (sch$aq_comh[tmppri]==((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl)
+    if (sch$aq_comh[tmppri]==&sch$aq_comh[tmppri])
       sch$gl_comqs=sch$gl_comqs & (~(1 << tmppri));
     (p->pcb$w_state)++;
+    mycheckaddr(0);
     sch$gl_comoqs=sch$gl_comoqs | (1 << tmppri);
-    mycheckaddr();
     qhead=*(unsigned long *)&sch$aq_comot[tmppri];
-    mycheckaddr();
     insque(p,qhead);
+    mycheckaddr(0);
   }
   return;
 }
@@ -378,6 +390,7 @@ int sch$waitk(struct _pcb * p, struct _wqh * wq) {
   if (task_on_comqueue(p)) {  // scheduling bug fix that may be removed sometime
     struct _pcb * p3=p->pcb$l_sqfl;
     remque(p,0);
+    qhead_init(p); // temp measure since we don't insert into wqs
     if (p3==p3->pcb$l_sqfl) {
       sch$gl_comqs&=(~(1 << p->pcb$b_pri));
     }
@@ -413,20 +426,20 @@ void sch$chsep2(struct _pcb * p,unsigned char newpri) {
     p2->pcb$w_state=SCH$C_COMO;
     p2->state=TASK_RUNNING;
     p2->pcb$w_state = SCH$C_CUR;
-    mycheckaddr();
+    mycheckaddr(0);
     insque(p2,*(unsigned long *)&sch$aq_comot[newpri]);
-    mycheckaddr();
     sch$gl_comoqs|=(1 << newpri);
+    mycheckaddr(0);
     return;
   }
   */
   //SOFTINT_RESCHED_VECTOR;
   p2->state=TASK_RUNNING;
   p2->pcb$w_state = SCH$C_CUR;
-  mycheckaddr();
+  mycheckaddr(0);
   insque(p2,*(unsigned long *)&sch$aq_comt[newpri]);
-  mycheckaddr();
   sch$gl_comqs|=(1 << newpri);
+  mycheckaddr(0);
 }
 
 // need more statequeues before sch$chse*
