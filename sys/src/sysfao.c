@@ -9,7 +9,7 @@
 #include<ssdef.h>
 #include<stdarg.h>
 
-asmlinkage int exe$faol(void * ctrstr , int * outlen , void * outbuf , int * prmlst) {
+asmlinkage int exe$faol(void * ctrstr , short int * outlen , void * outbuf , int * prmlst) {
   int * argv=prmlst;
   struct dsc$descriptor * in=ctrstr;
   struct dsc$descriptor * out=outbuf;
@@ -164,7 +164,7 @@ asmlinkage int exe$faol(void * ctrstr , int * outlen , void * outbuf , int * prm
   return SS$_NORMAL;
 }
 
-asmlinkage int exe$fao(void * ctrstr , int * outlen , void * outbuf , ...) {
+asmlinkage int exe$fao(void * ctrstr , short int * outlen , void * outbuf , ...) {
   va_list args;
   int argv[18],argc=0;
   va_start(args,outbuf);
