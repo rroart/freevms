@@ -6,6 +6,7 @@
 #include<linux/linkage.h>
 #include<linux/sched.h>
 #include <linux/vmalloc.h>
+#include <linux/file.h>
 #include <system_data_cells.h>
 #include<descrip.h>
 #include<gsddef.h>
@@ -20,7 +21,13 @@
 #include<wsldef.h>
 
 asmlinkage int exe$crmpsc_wrap(struct struct_crmpsc * s) {
-  return exe$crmpsc(s->inadr,s->retadr,s->acmode,s->flags,s->gsdnam,s->ident,s->relpag,s->chan,s->pagcnt,s->vbn,s->prot,s->pfc);
+  int ret;
+  int chan=s->chan;
+  struct file * file=0;
+  if (chan) file=fget(chan);
+  ret=exe$crmpsc(s->inadr,s->retadr,s->acmode,s->flags,s->gsdnam,s->ident,s->relpag,file,s->pagcnt,s->vbn,s->prot,s->pfc);
+  if (file) fput(file);
+  return ret;
 }
 
 asmlinkage int exe$mgblsc_wrap(struct struct_mgblsc * s) {
