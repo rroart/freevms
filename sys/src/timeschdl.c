@@ -81,6 +81,7 @@ int exetimeout=0;
 
 void exe$timeout(void) {
   /* do sch$swpwake() if appropiate ???? */
+  sch$swpwake();
   exe$gl_abstim++;
   /* do erl$wake() if appropiate ???? */
   /* ecc$reenable() */

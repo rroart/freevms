@@ -202,6 +202,8 @@ void sch$wake(unsigned long pid) {
 void sch$swpwake(void) {
   if (sch$gl_comoqs) goto wake;
 
+  if (sch$gl_mfycnt>0) goto wake;
+
   return;
  wake:
   sch$wake(sch$gl_swppid); /*not yet set*/
