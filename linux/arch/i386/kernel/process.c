@@ -446,7 +446,7 @@ void show_regs(struct pt_regs * regs)
 	unsigned long cr0 = 0L, cr2 = 0L, cr3 = 0L, cr4 = 0L;
 
 	printk("\n");
-	printk("Pid: %d, comm: %20s\n", current->pid, current->comm);
+	printk("Pid: %d, comm: %20s\n", current->pid, current->pcb$t_lname);
 	printk("EIP: %04x:[<%08lx>] CPU: %d",0xffff & regs->xcs,regs->eip, smp_processor_id());
 	if (regs->xcs & 3)
 		printk(" ESP: %04x:%08lx",0xffff & regs->xss,regs->esp);
@@ -546,7 +546,7 @@ void release_thread(struct task_struct *dead_task)
 		// temporary debugging check
 		if (ldt) {
 			printk("WARNING: dead process %8s still has LDT? <%p>\n",
-					dead_task->comm, ldt);
+					dead_task->pcb$t_lname, ldt);
 			BUG();
 		}
 	}

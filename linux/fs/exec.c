@@ -560,9 +560,9 @@ int flush_old_exec(struct linux_binprm * bprm)
 			i = 0;
 		else
 			if (i < 15)
-				current->comm[i++] = ch;
+				current->pcb$t_lname[i++] = ch;
 	}
-	current->comm[i] = '\0';
+	current->pcb$t_lname[i] = '\0';
 
 	flush_thread();
 
@@ -946,7 +946,7 @@ void set_binfmt(struct linux_binfmt *new)
 int do_coredump(long signr, struct pt_regs * regs)
 {
 	struct linux_binfmt * binfmt;
-	char corename[6+sizeof(current->comm)+10];
+	char corename[6+sizeof(current->pcb$t_lname)+10];
 	struct file * file;
 	struct inode * inode;
 	int retval = 0;

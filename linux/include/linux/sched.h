@@ -392,11 +392,17 @@ unsigned long pcb$l_capability_seq;
  * all fields in a single cacheline that are needed for
  * the goodness() loop in schedule().
  */
+
+  unsigned char pcb$b_prisav;
+  unsigned char pcb$b_pribsav;
+  unsigned char pcb$nothing;
+  unsigned char pcb$b_authpri;
+
 /*	long counter; temp */
 /*	long nice; temp */
-	unsigned long policy;
+  unsigned long pcb$l_sched_policy;
 	struct mm_struct *mm;
-	int processor;
+	int processor_not;
 	/*
 	 * cpus_runnable is ~0 if the process is not running on any
 	 * CPU. It's (1 << cpu) if it's running on a CPU. This mask
@@ -446,7 +452,7 @@ unsigned long pcb$l_capability_seq;
 
 	wait_queue_head_t wait_chldexit;	/* for wait4() */
 	struct completion *vfork_done;		/* for vfork() */
-	unsigned long rt_priority;
+	unsigned long rt_priority_not;
 	unsigned long it_real_value, it_prof_value, it_virt_value;
 	unsigned long it_real_incr, it_prof_incr, it_virt_incr;
 	struct timer_list real_timer;
@@ -467,7 +473,7 @@ unsigned long pcb$l_capability_seq;
 /* limits */
 	struct rlimit rlim[RLIM_NLIMITS];
 	unsigned short used_math;
-	char comm[16];
+  //	char comm[16];
 /* file system info */
 	int link_count, total_link_count;
 	struct tty_struct *tty; /* NULL if no tty */
@@ -562,7 +568,7 @@ extern struct exec_domain	default_exec_domain;
     addr_limit:		KERNEL_DS,					\
     exec_domain:	&default_exec_domain,				\
     lock_depth:		-1,						\
-    policy:		SCHED_OTHER,					\
+    pcb$l_sched_policy:		SCHED_OTHER,					\
     mm:			NULL,						\
     active_mm:		&init_mm,					\
     cpus_runnable:	-1,						\
@@ -583,7 +589,7 @@ extern struct exec_domain	default_exec_domain;
     keep_capabilities:	0,						\
     rlim:		INIT_RLIMITS,					\
     user:		INIT_USER,					\
-    comm:		"swapper",					\
+    pcb$t_lname:		"swapper",					\
     thread:		INIT_THREAD,					\
     fs:			&init_fs,					\
     files:		&init_files,					\
@@ -647,7 +653,7 @@ static inline struct task_struct *find_task_by_pid(int pid)
 
 static inline void task_set_cpu(struct task_struct *tsk, unsigned int cpu)
 {
-	tsk->processor = cpu;
+	tsk->pcb$l_cpu_id = cpu;
 	tsk->cpus_runnable = 1UL << cpu;
 }
 

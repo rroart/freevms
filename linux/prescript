@@ -6,6 +6,7 @@ for X in `cd ../freevms/linux; find . \( -name CVS -prune \) -o -type f`; do
 done
 
 (cd kernel; 	ln -s ../../freevms/sys/src/syssetpri.c .;
+		ln -s ../../freevms/sys/src/syspcntrl.c; 
 		ln -s ../../freevms/sys/src/rse.c .;
 		ln -s ../../freevms/sys/src/system_data_cells.c .;
 		ln -s ../../freevms/lbr/src/ipl.c .;

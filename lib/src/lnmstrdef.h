@@ -99,31 +99,6 @@ unsigned char reserved2;
 void * entry[2*LNMSHASHTBL];
 };
 
-struct struct_crelnt {
- unsigned int *attr;
- void *resnam;
- unsigned int *reslen;
- unsigned int *quota;
- unsigned short *promsk;
- void *tabnam;
- void *partab;
- unsigned char *acmode;
-};
-
-asmlinkage int sys$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
-
-/*asmlinkage sys$crelnt  (unsigned int *attr, void *resnam, unsigned
-                         int *reslen, unsigned int *quota,
-                unsigned short *promsk, void *tabnam, void
-                         *partab, unsigned char *acmode);*/
-
-asmlinkage int sys$crelnt  (struct struct_crelnt *);
-
-asmlinkage int sys$dellnm  (void *tabnam, void *lognam, unsigned char *acmode);
-
-asmlinkage int sys_trnlnm  (unsigned int *attr, void *tabnam, void
-*lognam, unsigned char *acmode, void *itmlst);
-
 struct struct_nt {
 /* ???? */
 int depth;

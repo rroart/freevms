@@ -418,7 +418,7 @@ static inline void __schedule_tail_not(struct task_struct *prev)
 	int policy;
 
 	/*
-	 * prev->policy can be written from here only before `prev'
+	 * prev->pcb$l_sched_policy can be written from here only before `prev'
 	 * can be scheduled (before setting prev->cpus_runnable to ~0UL).
 	 * Of course it must also be read before allowing prev
 	 * to be rescheduled, but since the write depends on the read
@@ -427,8 +427,8 @@ static inline void __schedule_tail_not(struct task_struct *prev)
 	 * common code semantics allows code outside the critical section
 	 * to enter inside the critical section)
 	 */
-	policy = prev->policy;
-	prev->policy = policy & ~SCHED_YIELD;
+	policy = prev->pcb$l_sched_policy;
+	prev->pcb$l_sched_policy = policy & ~SCHED_YIELD;
 	wmb();
 
 	/*
@@ -475,7 +475,7 @@ needs_resched:
 		goto out_unlock;
 	}
 #else
-	prev->policy &= ~SCHED_YIELD;
+	prev->pcb$l_sched_policy &= ~SCHED_YIELD;
 #endif /* CONFIG_SMP */
 }
 
@@ -979,7 +979,7 @@ static int setscheduler(pid_t pid, int policy,
 		goto out_unlock;
 			
 	if (policy < 0)
-		policy = p->policy;
+		policy = p->pcb$l_sched_policy;
 	else {
 		retval = -EINVAL;
 		if (policy != PCB$K_SCHED_FIFO && policy != PCB$K_SCHED_RR &&
@@ -1006,8 +1006,8 @@ static int setscheduler(pid_t pid, int policy,
 		goto out_unlock;
 
 	retval = 0;
-	p->policy = policy;
-	p->rt_priority = lp.sched_priority;
+	p->pcb$l_sched_policy = policy;
+	//	p->rt_priority = lp.sched_priority;
 	if (task_on_runqueue(p))
 		move_first_runqueue(p);
 
@@ -1045,7 +1045,7 @@ asmlinkage long sys_sched_getscheduler(pid_t pid)
 	read_lock(&tasklist_lock);
 	p = find_process_by_pid(pid);
 	if (p)
-		retval = p->policy & ~SCHED_YIELD;
+		retval = p->pcb$l_sched_policy & ~SCHED_YIELD;
 	read_unlock(&tasklist_lock);
 
 out_nounlock:
@@ -1067,7 +1067,7 @@ asmlinkage long sys_sched_getparam(pid_t pid, struct sched_param *param)
 	retval = -ESRCH;
 	if (!p)
 		goto out_unlock;
-	lp.sched_priority = p->rt_priority;
+	//	lp.sched_priority = p->rt_priority;
 	read_unlock(&tasklist_lock);
 
 	/*
@@ -1113,8 +1113,8 @@ asmlinkage long sys_sched_yield(void)
 		 * This process can only be rescheduled by us,
 		 * so this is safe without any locking.
 		 */
-	  //		if (current->policy == PCB$K_SCHED_OTHER)
-	  //			current->policy |= SCHED_YIELD;
+	  //		if (current->pcb$l_sched_policy == PCB$K_SCHED_OTHER)
+	  //			current->pcb$l_sched_policy |= SCHED_YIELD;
 		current->need_resched = 1;
 
 		spin_lock_irq(&runqueue_lock);
@@ -1168,7 +1168,7 @@ asmlinkage long sys_sched_rr_get_interval(pid_t pid, struct timespec *interval)
 	read_lock(&tasklist_lock);
 	p = find_process_by_pid(pid);
 	if (p)
-		jiffies_to_timespec(p->policy & PCB$K_SCHED_FIFO ? 0 : NICE_TO_TICKS(p->pcb$b_prib), &t);
+		jiffies_to_timespec(p->pcb$l_sched_policy & PCB$K_SCHED_FIFO ? 0 : NICE_TO_TICKS(p->pcb$b_prib), &t);
 	read_unlock(&tasklist_lock);
 	if (p)
 		retval = copy_to_user(interval, &t, sizeof(t)) ? -EFAULT : 0;
@@ -1185,7 +1185,7 @@ static void show_task(struct task_struct * p)
 	int state;
 	static const char * stat_nam[] = { "R", "S", "D", "Z", "T", "W" };
 
-	printk("%-13.13s ", p->comm);
+	printk("%-13.13s ", p->pcb$t_lname);
 	state = p->state ? ffz(~p->state) + 1 : 0;
 	if (((unsigned) state) < sizeof(stat_nam)/sizeof(char *))
 		printk(stat_nam[state]);
@@ -1305,7 +1305,7 @@ void reparent_to_init(void)
 
 	this_task->ptrace = 0;
 	this_task->pcb$b_prib = DEFPRI;
-	this_task->policy = PCB$K_SCHED_OTHER;
+	this_task->pcb$l_sched_policy = PCB$K_SCHED_OTHER;
 	/* cpus_allowed? */
 	/* rt_priority? */
 	/* signals? */
@@ -1380,7 +1380,7 @@ void __init sched_init(void)
 	int cpu = smp_processor_id();
 	int nr;
 
-	init_task.processor = cpu;
+	init_task.pcb$l_cpu_id = cpu;
 
 	for(nr = 0; nr < PIDHASH_SZ; nr++)
 		pidhash[nr] = NULL;

@@ -237,7 +237,7 @@ dequeue_signal(sigset_t *mask, siginfo_t *info)
 	int sig = 0;
 
 #if DEBUG_SIG
-printk("SIG dequeue (%s:%d): %d ", current->comm, current->pid,
+printk("SIG dequeue (%s:%d): %d ", current->pcb$t_lname, current->pid,
 	signal_pending(current));
 #endif
 
@@ -508,7 +508,7 @@ send_sig_info(int sig, struct siginfo *info, struct task_struct *t)
 
 
 #if DEBUG_SIG
-printk("SIG queue (%s:%d): %d ", t->comm, t->pid, sig);
+printk("SIG queue (%s:%d): %d ", t->pcb$t_lname, t->pid, sig);
 #endif
 
 	ret = -EINVAL;

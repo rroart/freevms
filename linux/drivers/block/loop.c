@@ -563,14 +563,14 @@ static int loop_thread(void *data)
 	daemonize();
 	exit_files(current);
 
-	sprintf(current->comm, "loop%d", lo->lo_number);
+	sprintf(current->pcb$t_lname, "loop%d", lo->lo_number);
 
 	spin_lock_irq(&current->sigmask_lock);
 	sigfillset(&current->blocked);
 	flush_signals(current);
 	spin_unlock_irq(&current->sigmask_lock);
 
-	current->policy = SCHED_OTHER;
+	current->pcb$l_sched_policy = PCB$K_SCHED_OTHER;
 	current->pcb$b_prib = 24;
 
 	spin_lock_irq(&lo->lo_lock);

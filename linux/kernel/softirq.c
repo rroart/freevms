@@ -261,8 +261,9 @@ void tasklet_kill(struct tasklet_struct *t)
 		current->state = TASK_RUNNING;
 		do {
 		  //			current->policy |= SCHED_YIELD;
-			  current->need_resched=1;
-			schedule();
+		  //  current->need_resched=1;
+		  //schedule();
+		  SOFTINT_RESCHED_VECTOR;
 		} while (test_bit(TASKLET_STATE_SCHED, &t->state));
 	}
 	tasklet_unlock_wait(t);
@@ -374,7 +375,7 @@ static int ksoftirqd(void * __bind_cpu)
 	while (smp_processor_id() != cpu)
 		schedule();
 
-	sprintf(current->comm, "ksoftirqd_CPU%d", bind_cpu);
+	sprintf(current->pcb$t_lname, "ksoftirqd_CPU%d", bind_cpu);
 
 	__set_current_state(TASK_INTERRUPTIBLE);
 	mb();

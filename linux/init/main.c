@@ -782,8 +782,9 @@ static void prepare_namespace(void)
 		pid = kernel_thread(do_linuxrc, "/linuxrc", SIGCHLD);
 		if (pid > 0) {
 			while (pid != wait(&i)) {
-				current->policy |= SCHED_YIELD;
-				schedule();
+			  //				current->policy |= SCHED_YIELD;
+				//schedule();
+			  SOFTINT_RESCHED_VECTOR;
 			}
 		}
 		if (MAJOR(real_root_dev) != RAMDISK_MAJOR

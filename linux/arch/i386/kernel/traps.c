@@ -214,7 +214,7 @@ void show_registers(struct pt_regs *regs)
 	printk("ds: %04x   es: %04x   ss: %04x\n",
 		regs->xds & 0xffff, regs->xes & 0xffff, ss);
 	printk("Process %s (pid: %d, stackpage=%08lx)",
-		current->comm, current->pid, 4096+(unsigned long)current);
+		current->pcb$t_lname, current->pid, 4096+(unsigned long)current);
 	/*
 	 * When in-kernel, we also print out the stack and code at the
 	 * time of the fault..
@@ -717,7 +717,7 @@ asmlinkage void math_state_restore(struct pt_regs regs)
 asmlinkage void math_emulate(long arg)
 {
 	printk("math-emulation not enabled and no coprocessor found.\n");
-	printk("killing %s.\n",current->comm);
+	printk("killing %s.\n",current->pcb$t_lname);
 	force_sig(SIGFPE,current);
 	schedule();
 }

@@ -151,8 +151,9 @@ static void net_family_write_lock(void)
 		spin_unlock(&net_family_lock);
 
 		//		current->policy |= SCHED_YIELD;
-		current->need_resched=1;
-		schedule();
+		//		current->need_resched=1;
+		//		schedule();
+		SOFTINT_RESCHED_VECTOR;
 
 		spin_lock(&net_family_lock);
 	}
@@ -855,7 +856,7 @@ int sock_create(int family, int type, int protocol, struct socket **res)
 		static int warned; 
 		if (!warned) {
 			warned = 1;
-			printk(KERN_INFO "%s uses obsolete (PF_INET,SOCK_PACKET)\n", current->comm);
+			printk(KERN_INFO "%s uses obsolete (PF_INET,SOCK_PACKET)\n", current->pcb$t_lname);
 		}
 		family = PF_PACKET;
 	}

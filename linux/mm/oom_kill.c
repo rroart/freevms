@@ -20,6 +20,7 @@
 #include <linux/swap.h>
 #include <linux/swapctl.h>
 #include <linux/timex.h>
+#include <asm/hw_irq.h>
 
 /* #define DEBUG */
 
@@ -103,7 +104,7 @@ static int badness(struct task_struct *p)
 		points /= 4;
 #ifdef DEBUG
 	printk(KERN_DEBUG "OOMkill: task %d (%s) got %d points\n",
-	p->pid, p->comm, points);
+	p->pid, p->pcb$t_lname, points);
 #endif
 	return points;
 }
@@ -142,7 +143,7 @@ static struct task_struct * select_bad_process(void)
  */
 void oom_kill_task(struct task_struct *p)
 {
-	printk(KERN_ERR "Out of Memory: Killed process %d (%s).\n", p->pid, p->comm);
+	printk(KERN_ERR "Out of Memory: Killed process %d (%s).\n", p->pid, p->pcb$t_lname);
 
 	/*
 	 * We give our sacrificial lamb high priority and access to
@@ -189,8 +190,9 @@ static void oom_kill(void)
 	 * for more memory.
 	 */
 	//	current->policy |= SCHED_YIELD;
-	current->need_resched=1;
-	schedule();
+	//current->need_resched=1;
+	//schedule();
+	SOFTINT_RESCHED_VECTOR;
 	return;
 }
 

@@ -234,6 +234,8 @@
 
 #define __NR_$testtest          1
 #define __NR_$setpri		2
+#define __NR_$crelnt            3
+#define __NR_$setprn            4
 
 /* user-visible error numbers are in the range -1 - -124: see <asm-i386/errno.h> */
 

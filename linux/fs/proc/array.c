@@ -87,8 +87,8 @@ static inline char * task_name(struct task_struct *p, char * buf)
 	char * name;
 
 	ADDBUF(buf, "Name:\t");
-	name = p->comm;
-	i = sizeof(p->comm);
+	name = p->pcb$t_lname;
+	i = sizeof(p->pcb$t_lname);
 	do {
 		unsigned char c = *name;
 		name++;
@@ -346,7 +346,7 @@ int proc_pid_stat(struct task_struct *task, char * buffer)
 %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %lu %lu %ld %lu %lu %lu %lu %lu \
 %lu %lu %lu %lu %lu %lu %lu %lu %d %d\n",
 		task->pid,
-		task->comm,
+		task->pcb$t_lname,
 		state,
 		ppid,
 		task->pgrp,

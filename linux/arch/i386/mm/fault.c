@@ -351,7 +351,7 @@ out_of_memory:
 		down_read(&mm->mmap_sem);
 		goto survive;
 	}
-	printk("VM: killing process %s\n", tsk->comm);
+	printk("VM: killing process %s\n", tsk->pcb$t_lname);
 	if (error_code & 4)
 		do_exit(SIGKILL);
 	goto no_context;

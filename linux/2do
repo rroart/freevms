@@ -3,6 +3,9 @@ doing pcb/task_struct leads to changes in/with:
 CPU structure.
 SCH structure.
 Interrupt/IPLs. Interrupt stack. iret/REI & ASTs.
+Syscalls: copied linux ones and use 0x81.
+	  VMS does not seem to use interrupt for syscalls
+Memory management: need to be studied
 
 Currently broken:
 MD support
