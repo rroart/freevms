@@ -39,6 +39,8 @@
 #include <asm/mmu_context.h>
 #include "../../freevms/sys/src/sysgen.h"
 #include "../../freevms/sys/src/system_data_cells.h"
+#include "../../freevms/lib/src/ipldef.h"
+#include "../../freevms/lbr/src/ipl.h"
 
 extern void timer_bh(void);
 extern void tqueue_bh(void);
@@ -493,9 +495,11 @@ int this_cpu = smp_processor_id();
   struct list_head *tmp;
   unsigned int c, weight;
   struct _pcb *p,*next,*prev;
+  int old;
 
   // lock sched db, soon
-  // old=spl(IPL$_SCHED) soon to be implemented?
+  //if (prespl(IPL$_SCHED)) return;
+  //    old=spl(IPL$_SCHED);
   // svpctx, do not think we need to do this here
   // get cpu base when it is implemented	
   // has got no cpu$ yet, but current is here
@@ -545,8 +549,11 @@ asmlinkage void schedule(void)
 	struct list_head *tmp;
 	int this_cpu, c;
 	unsigned char weight;
+	int old;
 
 	/* wait until both are more finished... if (from_sch$resched == 1) goto try_for_process;*/ /* goto 30$ */ 
+	//if (prespl(IPL$_SCHED)) return;
+	//  old=spl(IPL$_SCHED);
 
 	spin_lock_prefetch(&runqueue_lock);
 
@@ -679,6 +686,7 @@ repeat_schedule:
 	if (next == prev) {
 	  /* printk("next == prev\n");*/ 
 	  spin_unlock_irq(&runqueue_lock);
+	  //splx(old);
 	  return;
 	} 
 
@@ -738,6 +746,8 @@ repeat_schedule:
 	 */
 	switch_to(prev, next, prev);
 
+	//splx(old);
+	//  return;
  sch$idle:
 	//	printk("sch$idle\n");
 	sch$gl_idle_cpus=1;

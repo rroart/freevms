@@ -1887,5 +1887,7 @@ extern unsigned long xqp$gl_sections;
 extern struct lnmhshs lnmhshs;
 extern struct lnmhshp lnmhshp;
 
+extern struct _cpu vmscpus[32];
+
 #endif
  

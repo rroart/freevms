@@ -8,5 +8,6 @@ done
 (cd kernel; 	ln -s ../../freevms/sys/src/syssetpri.c .;
 		ln -s ../../freevms/sys/src/rse.c .;
 		ln -s ../../freevms/sys/src/system_data_cells.c .;
+		ln -s ../../freevms/lbr/src/ipl.c .;
 )
 

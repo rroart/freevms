@@ -232,8 +232,8 @@
 #define __NR_readahead		225
 
 
-
-#define __NR_$setpri		1
+#define __NR_$testtest          1
+#define __NR_$setpri		2
 
 /* user-visible error numbers are in the range -1 - -124: see <asm-i386/errno.h> */
 

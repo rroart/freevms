@@ -2,7 +2,7 @@ doing pcb/task_struct leads to changes in/with:
 
 CPU structure.
 SCH structure.
-Interrupt/IPLs. Interrupt stack.
+Interrupt/IPLs. Interrupt stack. iret/REI & ASTs.
 
 Currently broken:
 MD support

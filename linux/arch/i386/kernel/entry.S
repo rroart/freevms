@@ -742,6 +742,7 @@ ENTRY(sys_call_table)
 
 ENTRY(vmssys_call_table)
 	.long SYMBOL_NAME(sys_$ni_syscall)	/* 0  -  old "setup()" system call*/
+	.long SYMBOL_NAME(sys_$testtest)
 	.long SYMBOL_NAME(sys_$setpri)
 
 	.rept NR_vmssyscalls-(.-vmssys_call_table)/4

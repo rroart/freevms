@@ -143,7 +143,7 @@ void show_trace(unsigned long * stack)
 
 	if (!stack)
 		stack = (unsigned long*)&stack;
-	{ int i; for (i=0;i<1000000000;i++) ; }
+	//	{ int i; for (i=0;i<1000000000;i++) ; }
 	printk("Call Trace: ");
 	i = 1;
 	while (((long) stack & (THREAD_SIZE-1)) != 0) {
@@ -918,32 +918,6 @@ cobalt_init(void)
 	printk("Cobalt APIC enabled: ID reg %lx\n", co_apic_read(CO_APIC_ID));
 }
 #endif
-
-static unsigned char cpu$b_ipl = 1;
-static unsigned char cpu$b_astlvl = 0;
-
-struct {
-  unsigned char interrupt;
-  unsigned char at_level;
-} cpu$t_ipending[256];
-
-static inline unsigned char spl(unsigned char new) {
-  unsigned char tmp=cpu$b_ipl;
-  cpu$b_ipl=new;
-  return tmp;
-}
-
-static inline void splx(unsigned char old) {
-  int i, tmp;
-  tmp=cpu$b_ipl;
-  cpu$b_ipl=old;
-  for(i=0;i<256;i++)
-    if (cpu$t_ipending[i].interrupt>=tmp) { ; }
-  /*
-    do the interrupt?
-   */
-
-}
 
 void __init trap_init(void)
 {

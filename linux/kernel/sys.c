@@ -26,6 +26,11 @@ asmlinkage void do_test_code(void) {
   //  __asm__ __volatile__ ("iret\n");
 }
 
+asmlinkage int sys_$testtest(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k, int l, int m, int n, int o) {
+  printk("testtest %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x\n",a,b,c,d,e,f,g,h,i,j,k,l,m,n,o); 
+  return 1;
+}
+
 /*
  * this is where the system-wide overflow UID and GID are defined, for
  * architectures that now have 32-bit UID/GID but didn't in the past

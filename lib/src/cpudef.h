@@ -74,6 +74,12 @@ struct _cpu {
   struct _pcb *cpu$l_curpcb;
   // struct _ktb *cpu$l_curktb;
   unsigned char cpu$b_ipl; /* some cpus lack something */  
+struct {
+  unsigned char interrupt;
+  unsigned char at_level;
+  void * address;
+} cpu$t_ipending[256];
+
   unsigned char cpu$b_astlvl; /* some cpus lack something */
 
   unsigned long cpu$l_realstack;
