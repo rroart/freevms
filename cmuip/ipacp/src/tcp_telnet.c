@@ -565,9 +565,9 @@ TELNET_OPEN(TCB)
 		dsc$a_pointer : accporbuf}, *accpornam=&accpornam_;
       struct TVT$BLOCK * TVT;
       struct _iosb io_stats;
+	unsigned short int PTYCHAN,
+	  MBXCHAN;
       signed long
-	PTYCHAN,
-	MBXCHAN,
 	Status,
 	RC,
 	tmp;
@@ -608,11 +608,12 @@ TELNET_OPEN(TCB)
 
 // Assign the PTY device and start it up.
 
-    RC = LIB$ASN_WTH_MBX(PTY_NAME,
-			 /*%REF*/(TVT_MBX_BUFLEN),
-			 /*%REF*/(TVT_MBX_BUFLEN),
-			 PTYCHAN,
-			 MBXCHAN);
+    int tvt_mbx_buflen = TVT_MBX_BUFLEN;
+    RC = lib$asn_wth_mbx(PTY_NAME,
+			 /*%REF*/(&tvt_mbx_buflen),
+			 /*%REF*/(&tvt_mbx_buflen),
+			 &PTYCHAN,
+			 &MBXCHAN);
     if (BLISSIFNOT(RC))
 	{
 	    XLOG$FAO(LOG$TCPERR,
