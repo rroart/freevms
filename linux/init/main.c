@@ -881,6 +881,7 @@ static int init(void * unused)
 	scs_init();
 	mscp();
 	dlminit();
+	init_cwps();
 
 	/*
 	 * We try each of these until one succeeds.

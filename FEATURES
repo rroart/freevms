@@ -13,6 +13,7 @@ ods5 readonly (partly)
 xqp (barely)
 sca/scs/cluster (barely)
 locks/dlm (barely)
+cwps (forcex only)
 
 syscalls/services:
 $ascefc
