@@ -23,7 +23,7 @@ Use 2 other cpu modes.
 
 Put ctl$gl_ccb_table in P1.
 
-Use correct interface to network module in CONFIG_VMS
+Use correct interface to network module in CONFIG_VMS (promiscuous mode (NMA$C_PCLI_PRM) needs protocol, but that mode is not yet implemented).
 
 Make a make linker autobuild
 
@@ -41,3 +41,17 @@ Get more/better write-support in.
 Do more SCA/SCS stuff.
 After some time even more driver support might be cut/broke (the most).
 
+Try to upgrade 2.4.18 uml part from 11 to the newest
+
+For CMUIP: do checks upon parts with // check // not yet // was. more such?
+Also CMUIP: there was something in telnet that should be lookup upon
+And: Find the latest patch to it.
+
+Check parenthesis and bools in CMUIP and other places.
+
+Use real interrupts instead of calls for sch$reshed iofork etc
+
+Some forgotten // check in tcp_telnet*?
+Also some #if 0 that should later be removed.
+
+check whether ddb$t_name has len first
