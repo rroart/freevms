@@ -297,6 +297,7 @@ if [ "$CONFIG_IO_VMS" != "n" ]; then
 define_bool CONFIG_IDE y
 define_bool CONFIG_BLK_DEV_IDE y
 define_bool CONFIG_BLK_DEV_IDEDISK y
+define_bool CONFIG_BLK_DEV_FD y
 fi
 
 if [ "$CONFIG_IO_VMS" != "y" ]; then
