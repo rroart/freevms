@@ -15,7 +15,7 @@ FreeVMS tasklist
 	Also needed is implementing and finishing the following instructions:
 
 		INSQUE, REMQUE
-		ADAWI, BBCCI, BBSSI, INSQHI, INSQTI, REMQHI, REMQTI
+		ADAWI, INSQHI, INSQTI, REMQHI, REMQTI
 		PROBE
 		CHMx
 		REI
