@@ -1469,12 +1469,11 @@ done:
  */
 int writeout_one_page(struct page *page)
 {
-  struct buffer_head *bh, **buffers = page->buffers;
+  struct buffer_head *bh;
   int turns=0;
 
   if (!PageLocked(page))
     BUG();
-  bh = buffers[0];
 	do {
 #if 0
 		if (buffer_locked(bh) || !buffer_dirty(bh) || !buffer_uptodate(bh))
