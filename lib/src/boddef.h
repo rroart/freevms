@@ -11,7 +11,7 @@
 #define BOD$C_LENGTH 64                 
 #define BOD$S_BODDEF 64
  
-truct _bod {
+struct _bod {
   struct _bod *bod$l_flink;           
   struct _bod *bod$l_blink;           
   unsigned short int bod$w_size;      
