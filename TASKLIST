@@ -22,6 +22,8 @@ FreeVMS tasklist
 		SWASTEN
 		SWPCTX, LDPCTX
 
+	Interrupt/trap/stack functionality needs also implementation.
+
   Data Structure Definitions, some done, need more people.
 
   Kernel:	
