@@ -330,7 +330,12 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 #else
 				    bcopy(__va(address2),__va(page*PAGE_SIZE),PAGE_SIZE);
 #endif
+				} else {
+				  static int mydebugg = 0;
+				  if (mydebugg) {
+				    printk("%x %x %x %x\n",address,page,pte,*pte);
 				  }
+				}
 
 cont_copy_pte_range:		set_pte(dst_pte, pte);
 				if (0) {
