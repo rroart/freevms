@@ -65,6 +65,10 @@ int cwps$forcex(unsigned int *pidadr, void *prcnam, unsigned int code){
   r->rd$l_cdrp=c;
   //printk("cluster forcex temporary broke?\n");
   cdt=find_a_cdt(forcex_msg);
+  if (cdt==0) {
+    printk("no forcex_msg\n");
+    return 0;
+  }
 
   c->cdrp$l_cdt=cdt;
   c->cdrp$w_cdrpsize=sizeof(struct _cwpssrv);
