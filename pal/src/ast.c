@@ -15,7 +15,7 @@ int in_sw_ast;
 
 asmlinkage void sw_ast(void) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
-  struct _pcb * p=cpu->cpu$l_curpcb;
+  struct _pcb * p=ctl$gl_pcb;
   //in_sw_ast=1;
   //printk("sw_ast\n");
   //{ int i; for (i=0;i<10000000;i++) ; }

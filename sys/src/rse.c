@@ -317,7 +317,7 @@ void sch$change_cur_priority(struct _pcb *p, unsigned char newpri) {
   int cpuid = smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid];
   cpu->cpu$b_cur_pri=newpri;
-  p2=cpu->cpu$l_curpcb;
+  p2=ctl$gl_pcb;
   p2->pcb$b_pri=newpri;
   /* lacks sch$al_cpu etc stuff */
   tmppri=ffs(sch$gl_comqs);
