@@ -16,7 +16,7 @@ void exe$insertirp(void * u, struct _irp * i) {
   insque(i,tmp);
 }
 
-void exe$abortio(void) {
+void exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, unsigned long s) {
 }
 
 void exe$altqueuepkt (void) {
@@ -78,7 +78,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   i->irp$l_astprm=q->astprm;
   i->irp$l_iosb=q->iosb;
   i->irp$w_chan=q->chan;
-  i->irp$w_func=q->func;
+  i->irp$l_func=q->func;
   i->irp$b_pri=p->pcb$b_pri;
   i->irp$l_qio_p1=q->p1;
   i->irp$l_qio_p2=q->p2;
@@ -88,7 +88,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   i->irp$l_qio_p6=q->p6;
   i->irp$l_ucb=ctl$gl_ccbbase[q->chan].ccb$l_ucb;
   i->irp$l_pid=current->pid;
-  i->irp$w_sts|=IRP$M_BUFIO; /* no DIRIO because of no mmg$svaptechk */
+  i->irp$l_sts|=IRP$M_BUFIO; /* no DIRIO because of no mmg$svaptechk */
   /* do preprocessing */
   /* does it do one or more functions */
   //  for(c=0,d=1;c<64;c++,d=d<1) /* right order? */
@@ -105,6 +105,10 @@ int exe$qiodrvpkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
   exe$insioq(i,u);
   /* restore ipl to 0 */
   return SS$_NORMAL;
+}
+
+int exe_std$qiodrvpkt (struct _irp * i, struct _ucb * u) {
+  return exe$qiodrvpkt(i,0,u);
 }
 
 void exe$qioqxqppkt (void) {

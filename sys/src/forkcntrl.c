@@ -85,3 +85,7 @@ void exe$iofork(struct _irp * i, struct _ucb * u) {
     }
   }
 }
+
+void exe_std$primitive_fork(struct _irp * i, struct _ucb * u) {
+  exe$iofork(i,u);
+}

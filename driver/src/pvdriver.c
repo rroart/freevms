@@ -345,9 +345,6 @@ extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * 
 
 //static struct _fdt floppy_fdt;
 
-void acp$readblk();
-void acp$writeblk();
-
 struct _dpt floppy_dpt;
 
 struct _ddb floppyddb;

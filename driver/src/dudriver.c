@@ -2358,14 +2358,14 @@ inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn) {
 
 static struct _fdt du_fdt;
 
-void acp$readblk();
-void acp$writeblk();
+void acp_std$readblk();
+void acp_std$writeblk();
 
 void du_init(void) {
   /* a lot of these? */
-  ini_fdt_act(&du_fdt,IO$_READLBLK,acp$readblk);
-  ini_fdt_act(&du_fdt,IO$_READPBLK,acp$readblk);
-  ini_fdt_act(&du_fdt,IO$_READVBLK,acp$readblk);
+  ini_fdt_act(&du_fdt,IO$_READLBLK,acp_std$readblk);
+  ini_fdt_act(&du_fdt,IO$_READPBLK,acp_std$readblk);
+  ini_fdt_act(&du_fdt,IO$_READVBLK,acp_std$readblk);
 }
 
 char dudriverstring[]="DUDRIVER";

@@ -3,20 +3,35 @@
 #include "../../freevms/lib/src/ccbdef.h"
 #include <linux/sched.h>
 
-void acp$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c, int funcno, void * fdt, void * p1, long p2, long p3, long p4, long p5, long p6) {
+void acp_std$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   // p1 is buffer address
   // p2 is byte count
   // p3 is disk address
   int blocks;
-  i->irp$w_sts|=IRP$M_FUNC;
-  blocks=(p2+511)/512;
+  i->irp$l_sts|=IRP$M_FUNC;
+  blocks=(i->irp$l_qio_p2+511)/512;
   i->irp$l_abcnt=0;
-  i->irp$l_obcnt=p2;
+  i->irp$l_obcnt=i->irp$l_qio_p2;
   exe$qiodrvpkt(i,p,u);
   //  exe$finishioc(0,i,p,u); // only with errors?
 }
 
-void acp$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c, int funcno, void * fdt, void * p1, long p2, long p3, long p4, long p5, long p6) {
+void acp_std$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+}
+
+void acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+}
+
+void acp_std$accessnet(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+}
+
+void acp_std$deaccess(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+}
+
+void acp_std$modify(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+}
+
+void acp_std$mount(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
 }
 
 

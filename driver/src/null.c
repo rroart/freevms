@@ -135,9 +135,6 @@ extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * 
 
 //static struct _fdt null_fdt;
 
-void acp$readblk();
-void acp$writeblk();
-
 struct _dpt null_dpt;
 
 struct _ddb nullddb;

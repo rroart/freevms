@@ -54,7 +54,7 @@ asmlinkage void ioc$iopost(void) {
   return; // the rest is not finished
 #endif
 
-  if (i->irp$w_sts & IRP$M_BUFIO) goto bufio;
+  if (i->irp$l_sts & IRP$M_BUFIO) goto bufio;
 
  dirio:
   i->irp$b_rmod|=ACB$M_KAST;

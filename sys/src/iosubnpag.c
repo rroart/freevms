@@ -15,14 +15,18 @@ void ioc$initiate(struct _irp * i, struct _ucb * u) {
   /* no  smp affinity check yet */
   u->ucb$l_irp=i;
   u->ucb$l_svapte=i->irp$l_svapte;
-  u->ucb$w_boff=i->irp$w_boff;
-  u->ucb$w_bcnt=i->irp$l_bcnt;
+  u->ucb$l_boff=i->irp$l_boff;
+  u->ucb$l_bcnt=i->irp$l_bcnt;
   u->ucb$l_sts&=~(UCB$M_TIMOUT|UCB$M_CANCEL);
   /* no diagnostic buf */
   d=u->ucb$l_ddt;
   f=d->ddt$l_start;
   f(i,u);
   
+}
+
+void ioc_std$initiate(struct _irp * i, struct _ucb * u) {
+  ioc$initiate(i,u);
 }
 
 extern int exetimeout;
@@ -60,6 +64,10 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   if (aqempty(u->ucb$l_ioqfl))
     u->ucb$l_sts&=~UCB$M_BSY;
   printk("end of reqcom\n");
+}
+
+void ioc_std$reqcom(int iosb1, int iosb2, struct _ucb * u) {
+  return(ioc$reqcom(iosb1,iosb2,u));
 }
 
 void ioc$wfikpch(void * nextfunc, void * timeoutfunc, struct _irp * i, unsigned long fr4, struct _ucb * u, int timeout, int oldipl) {
