@@ -2111,8 +2111,10 @@ void __init vms_init2(void) {
 }
 
 void __init vms_init4(void) {
-  nl_init(); /* first */  
-  rnd_init();
+  __fl_init();
+  __du_init();
+  //nl_init(); /* first */  
+  //rnd_init();
 }
 
 void __init vms_init3(void) {
