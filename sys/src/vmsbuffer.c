@@ -589,6 +589,7 @@ struct buffer_head * bread(kdev_t dev, int block, int size)
 	 bh -> b_dev = dev;
 	 bh -> b_data = kmalloc(size, GFP_KERNEL);
 	 bh -> b_size = size;
+	 bh -> b_blocknr = block;
 
 	 //printk(KERN_INFO "qiow2 %x,%x,%x,%x | ",dev,dev2chan(dev),size,block);
 	 //printk(KERN_INFO "q2 %x,%x|",dev,block);
