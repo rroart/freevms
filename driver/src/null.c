@@ -25,6 +25,7 @@
 #include<system_data_cells.h>
 #include<ipl.h>
 #include<linux/vmalloc.h>
+#include<ttyucbdef.h>
 
 void null$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb);
 void null$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb);
@@ -334,6 +335,24 @@ inline void ini_ddt_end(struct _ddt * d) {
 }
 
 inline void dpt_store_isr(long a, long b) {
+}
+
+inline CLASS_UNIT_INIT(struct _ucb * ucb,struct _tt_port * port_vector){
+  struct _tty_ucb * tty = ucb;
+  struct _dpt * glob_dpt = tty$gl_dpt;
+  if (tty->ucb$l_tt_class==0) { // done or not?
+    tty->ucb$l_tt_class=dpt->dpt$ps_vector;
+    tty->ucb$l_tt_port=port_vector;
+    struct _ddb * ddb = ucb->ucb$l_ddb;
+    struct _tt_class * ttc=tty->ucb$l_tt_class;
+    ucb->ucb$l_ddt=ttc->class_ddt;
+    ddb->ddb$l_ddt=ttc->class_ddt;
+    tty->ucb$l_tt_getnxt=ttc->class_getnxt;
+    tty->ucb$l_tt_putnxt=ttc->class_putnxt;
+    // maybe initialize parity and speeds here?
+  }
+  return;
+  printk("CLASS_UNIT_INIT not impl\n");
 }
 
 struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt, struct _fdt * fdt, char * sddb, char * sdpt) {
