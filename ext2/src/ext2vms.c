@@ -551,6 +551,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
   if (fib->fib$w_did_num) {
     char * name;
+    int error=0;
     struct nameidata nd;
     struct inode * head;
     struct _fcb * fcb=x2p->primary_fcb;
