@@ -15,6 +15,7 @@ Use setpsli even in more interrupts/exceptions?
 Look at how simple and complex buffers are allocated and freed
 Update FCB at the same time as read/write attrib?
 Have dcltables compiled and loaded the same way as .exe2
+Why does initialize use volume cluster 17?
 
 CPU/PAL:
 FIX pal
