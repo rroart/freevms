@@ -2155,3 +2155,12 @@ unsigned long long inline unix_to_vms_time(unsigned long l) {
   return retval;
 }
 
+unsigned long inline vms_to_unix_time(unsigned long long l) {
+  unsigned long long retval=FUDGEFACTOR*864;
+  retval*=100;
+  retval=l-retval;
+  //  retval/=10000000;
+  retval>>=23;
+  return retval;
+}
+
