@@ -71,12 +71,25 @@ int mydebug4 = 0;
 int mydebug5 = 0;
 int mydebug6 = 1;
 
+mycheckaddr(){
+#if 1
+  unsigned long * f=&sch$aq_comh[31];
+  unsigned long * b=&sch$aq_comt[31];
+  if (*f==0xa01c8598 && *b!=0xa01c8598)
+    panic("mypanic\n");
+  if (*b==0xa01c8598 && *f!=0xa01c8598)
+    panic("mypanic\n");
+  if (nr_running<2 && *b!=*f)
+    panic("mypanic\n");
+#endif 
+}
+
 int numproc(void) {
   int i,n=0;
   struct _pcb  *tmp2;
   unsigned long tmp;
   for(i=0;i<32;i++) {
-    tmp=sch$aq_comh[i];
+    tmp=&sch$aq_comh[i];
     if(*(unsigned long *)tmp == tmp) {; } else {
       tmp2=tmp;
       do {
@@ -97,7 +110,7 @@ void printcom(void) {
   unsigned long tmp;
   printk(KERN_EMERG "cpusch %x\n",sch$gl_comqs);
   for(i=16;i<32;i++) {
-    tmp=sch$aq_comh[i];
+    tmp=&sch$aq_comh[i];
     if(*(unsigned long *)tmp == tmp) {; } else {
       tmp2=tmp;
       printk(KERN_EMERG "com %x ",i);
@@ -117,7 +130,7 @@ void printcom2(void) {
   unsigned long tmp;
   printk(KERN_EMERG "cpusch %x\n",sch$gl_comqs);
   for(i=16;i<32;i++) {
-    tmp=sch$aq_comt[i];
+    tmp=&sch$aq_comt[i];
     if(*(unsigned long *)tmp == tmp) {; } else {
       tmp2=tmp;
       printk(KERN_EMERG "com %x ",i);
@@ -307,10 +320,11 @@ send_now_idle:
 int task_on_comqueue(struct _pcb *p) {
   int i,found=0;
   struct _pcb  *tmp2;
-  unsigned long tmp;
+  struct _pcb * tmp;
   for(i=0;i<32;i++) {
-    tmp=sch$aq_comh[i];
+    tmp=&sch$aq_comh[i];
     if(*(unsigned long *)tmp == tmp) {; } else {
+      tmp=tmp->pcb$l_sqfl;
       tmp2=tmp;
       do {
 	//	if (tmp2 == p) found=1;
@@ -349,7 +363,7 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   //  p->pcb$b_pri=p->pcb$b_prib-3;  /* boost */ /* not here */
   curpri=p->pcb$b_pri;
   if (mydebug4) printk("add tyr %x %x\n",p->pid,curpri);
-  qhead=sch$aq_comt[curpri];
+  qhead=*(unsigned long *)&sch$aq_comt[curpri];
   if (mydebug4) printk("eq qhead %x %x %x %x\n",
 		       (unsigned long *)qhead,(unsigned long *)(qhead+4),
 		       *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
@@ -359,7 +373,9 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   before=numproc();
   //    printcom();
   //    printcom2();
+  mycheckaddr();
   insque(p,qhead);
+  mycheckaddr();
   nr_running++;
   after=numproc();
   if(after-before!=1) {
@@ -386,7 +402,7 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
     printk("p %x\n",p);
     printk("%x %x %x %x\n",tmp3,tmp3->pcb$l_sqfl,tmp3->pcb$l_sqfl->pcb$l_sqfl,tmp3->pcb$l_sqfl->pcb$l_sqfl->pcb$l_sqfl);
     for(i=0;i<32;i++) {
-      tmp=sch$aq_comh[i];
+      tmp=&sch$aq_comh[i];
       //      printk("i %x %x i",i,tmp);
       if(*(unsigned long *)tmp == tmp) {; } else {
 	tmp2=((struct _pcb *)tmp)->pcb$l_sqfl->pcb$l_sqfl;
@@ -662,13 +678,22 @@ asmlinkage void sch$resched(void) {
   if (curpcb->state==TASK_RUNNING) {
     sch$gl_comqs=sch$gl_comqs | (1 << curpri);
     //    curpcb->state=TASK_INTERRUPTIBLE; /* soon SCH$C_COM ? */
-    qhead=sch$aq_comt[curpri];
+    qhead=*(unsigned long *)&sch$aq_comt[curpri];
     before=numproc();
     //    printcom();
-    insque(curpcb,qhead);
+    //if (curpcb==0xa018c000 && qhead==0xa018c000)
+    //  panic("aieeeeeh\n");
+    mycheckaddr();
+    //if (curpcb==qhead) panic(" a panic\n");
+    if (!task_on_comqueue(curpcb)) {
+      if (curpcb==qhead) panic(" a panic\n");
+      insque(curpcb,qhead);
+    }
+    mycheckaddr();
     nr_running++;
     after=numproc();
     if(after-before!=1) {
+      //printk("entry qhead %x %x\n",curpcb,qhead);
       printcom();
       panic("insq2 %x %x\n",before,after);
     }
@@ -764,7 +789,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
     next=idle_task(cpuid);
   } else {
     tmppri--;
-    qhead=sch$aq_comh[tmppri];
+    qhead=*(unsigned long *)&sch$aq_comh[tmppri];
     if (mydebug4) printk("eq qhead %x %x %x %x\n",
 			 (unsigned long *)qhead,(unsigned long *)(qhead+4),
 			 *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
@@ -773,7 +798,9 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
     if (mydebug4) printk("next %x %x %x %x\n",qhead,*(void**)qhead,next,sch$aq_comh[tmppri]);
     before=numproc();
+    mycheckaddr();
     next=(struct _pcb *) remque(qhead,next);
+    mycheckaddr();
     nr_running--;
     after=numproc();
     if(before-after!=1) {
