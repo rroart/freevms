@@ -291,7 +291,9 @@ int exe$asctim(unsigned short *timlen,
     long length = timbuf->dsc$w_length;
     char *chrptr = timbuf->dsc$a_pointer;
 
+#if 0
     printk("flag %x\n",cvtflg);
+#endif
     /* First use sys_numtim to get the date/time fields... */
 
     {
@@ -304,11 +306,13 @@ int exe$asctim(unsigned short *timlen,
 
     /* See if we want delta days or date... */
 
+#if 0
     {
       int i;
       for(i=0;i<7;i++)printk("%x : ",wrktim[i]);
       printk("\n");
     }
+#endif
 
     if (cvtflg == 0) {
 
