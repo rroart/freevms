@@ -2449,7 +2449,7 @@ extern int scs_std$dconnect();
 
 struct _dpt du_dpt;
 
-void find_free_cdt(void);
+void * find_free_cdt(void);
 
 extern struct _pb mypb;
 extern struct _sb mysb;
@@ -2485,6 +2485,8 @@ void du_init(char *s) {
   struct _pb * pb;
   struct _cdt * cdt;
 
+  s++;
+
   u=vmalloc(sizeof(struct _mscp_ucb));
   bzero(u,sizeof(struct _mscp_ucb));
   d=vmalloc(sizeof(struct _ddb));
@@ -2506,7 +2508,7 @@ void du_init(char *s) {
   ((struct _mscp_ucb *)u)->ucb$l_cddb=c;
   u->ucb$l_pdt=&dupdt;
   pb->pb$l_pdt=&dupdt;
-  ((struct _mscp_ucb *)u)->ucb$l_cdt=0;//find_free_cdt;
+  ((struct _mscp_ucb *)u)->ucb$l_cdt=find_free_cdt();
   cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
   cdt->cdt$l_pb=pb;
 
