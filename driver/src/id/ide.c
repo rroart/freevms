@@ -1550,6 +1550,7 @@ void ide_do_request(ide_hwgroup_t *hwgroup, int masked_irq)
 	ide_startstop_t	startstop;
 
 	printk("in ide_do_request\n");
+	sickinsque(7,14);
 	{int j; 
 	for(j=0;j<2000000000;j++) ;
 	}
