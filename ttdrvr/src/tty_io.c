@@ -530,6 +530,7 @@ static ssize_t tty_read(struct file * file, char * buf, size_t count,
 
 	unlock_kernel();
 
+	exe$dassgn(chan);
 	return i;
 }
 
@@ -554,6 +555,7 @@ static ssize_t tty_write(struct file * file, const char * buf, size_t count,
 	sts = exe$qio(0,chan,IO$_WRITEPBLK,0/*&iosb*/,0,0,
 				 buf,count,0,0,0,0);
 
+	exe$dassgn(chan);
 	return count;
 }
 
