@@ -1162,7 +1162,7 @@ static int ext2_update_inode(struct inode * inode, int do_sync)
 		//wait_on_buffer (bh);
 #endif
 #if 0
-		sts = exe_qiow(0,(unsigned short)dev2chan(bh->b_dev),IO$_WRITEPBLK,&iosb,0,0,
+		sts = exe$qiow(0,(unsigned short)dev2chan(bh->b_dev),IO$_WRITEPBLK,&iosb,0,0,
 			       bh->b_data,bh->b_size, 1,MINOR(inode->i_dev)&31,0,0);
 #endif
 		if (buffer_req(bh) && !buffer_uptodate(bh)) {
