@@ -68,6 +68,7 @@ cd mm;
 		ln -s ../../freevms/sys/src/wrtmfypag.c .;
 		ln -s ../../freevms/sys/src/mutex.c .;
 		ln -s ../../freevms/sys/src/sysascefc.c .;
+		ln -s ../../freevms/sys/src/deadlock.c .;
 cd ..;
 
 cd drivers/block;
