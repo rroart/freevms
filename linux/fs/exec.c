@@ -1024,6 +1024,11 @@ init_phd(struct _phd * phd) {
 	  bzero((void*)phd->phd$l_wslist,4*512);
 	  bzero((void*)phd->phd$l_wslock,4*512);
 	  bzero((void*)phd->phd$l_wsdyn,4*512);
+	  phd->phd$l_wsquota=PQL_DWSQUOTA;
+	  phd->phd$l_wsauthext=PQL_DWSEXTENT;
+	  phd->phd$l_wsextent=PQL_DWSEXTENT;
+	  phd->phd$l_wsauth=PQL_DWSQUOTA;
+	  phd->phd$l_wssize=WSMAX;
 	  phd->phd$l_wsnext=0;
 	  phd->phd$l_wslast=511;
 #if 0
