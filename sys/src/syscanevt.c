@@ -3,9 +3,13 @@
 
 // Author. Roar Thronæs.
 
+#include<ssdef.h>
+
 #include<linux/linkage.h>
 
-asmlinkage void exe$cantim(void){
+asmlinkage int exe$cantim(unsigned long reqidt, unsigned int acmode){
+  exe$rmvtimq(reqidt,acmode);
+  return SS$_NORMAL;
 }
 
 asmlinkage void exe$canwak(void){
