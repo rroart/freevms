@@ -335,10 +335,14 @@ int /*__init*/ scs_init(void) {
   if (!IS_ERR(file)) {
     char * c, *b, *n;
     char buf[1024];
+#ifdef CONFIG_VMS
     file = rms_open_exec("[vms$common.sysexe]params.dat");
     if (file==0)
       goto out2;
     int size=rms_generic_file_read(file,buf,1024,&pos);
+#else
+    int size=generic_file_read(file,buf,1024,&pos);
+#endif
     int i=0;
     b=buf;
     while (b<(buf+size)) {
