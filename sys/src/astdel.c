@@ -17,6 +17,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   int savipl;
   struct _pcb * p=find_process_by_pid(pid);
   int status;
+  int kernelmode;
   if (!p) {
     return SS$_NONEXPR;
   }
@@ -24,10 +25,21 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   savipl=getipl();
   setipl(IPL$_SYNCH);
   insque(a,&p->pcb$l_astqfl);
+  if ((a->acb$b_rmod & ACB$M_KAST)==0)
+    kernelmode=a->acb$b_rmod & 3;
+  else
+    kernelmode=0;
+  p->phd$b_astlvl=kernelmode;
   /* just simple insert , no pris yet */
   //printk("bef rse\n");
   if (p->pcb$w_state!=SCH$C_CUR)
     status=sch$rse(p, priclass, EVT$_AST);
+  else {
+    struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
+    struct _pcb * curp=cpu->cpu$l_curpcb;
+    // if (p==curp) etc // smp not enabled
+    p->pr_astlvl=p->phd$b_astlvl;
+  }
   //printk("aft rse\n");
   /* unlock */
   setipl(savipl);
@@ -72,14 +84,38 @@ asmlinkage void sch$astdel(void) {
     /* unlock */
     printk("astdel1 %x \n",acb->acb$l_kast);
     setipl(IPL$_ASTDEL);
+    p->pcb$b_astact=1;
     acb->acb$l_kast(acb->acb$l_astprm);
+    p->pcb$b_astact=0;
     goto more;
   }
   printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
   setipl(0);
+  p->pcb$b_astact=1;
   if(acb->acb$l_ast) acb->acb$l_ast(acb->acb$l_astprm); /* ? */
+  p->pcb$b_astact=0;
   /*unlock*/
   goto more;
+}
+
+void sch$newlvl(struct _pcb *p) {
+  int newlvl;
+  int oldipl=getipl();
+  
+  setipl(IPL$_SYNCH);
+
+  if (aqempty(p->pcb$l_astqfl))
+    newlvl=4;
+  else {
+    if(p->pcb$l_astqfl->acb$b_rmod & ACB$M_KAST)
+      newlvl=p->pcb$l_astqfl->acb$b_rmod & 3;
+    else
+      newlvl=p->phd$b_astlvl; /* ? */
+  }
+    
+  p->phd$b_astlvl=newlvl;
+  p->pr_astlvl=newlvl;
+  setipl(oldipl);
 }
 
 

@@ -238,6 +238,14 @@ int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct 
   return INLINE_SYSCALL($qio,1,&s);
 }
 
+int sys$clrast(void) {
+  return INLINE_SYSCALL($clrast,0);
+}
+
+int sys$setast(char enbflg) {
+  return INLINE_SYSCALL($setast,1,((unsigned long)s));
+}
+
 int sys$asctim  (unsigned short int *timlen, void *timbuf,
 		 unsigned long long *timadr, char cvtflg) {
   return INLINE_SYSCALL3($asctim,4,timlen,timbuf,timadr,(unsigned long)cvtflg);

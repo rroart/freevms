@@ -305,8 +305,10 @@ extern syscall_handler_t  exe$enqw ;
 extern syscall_handler_t  exe$crelnm ;
 extern syscall_handler_t  exe$trnlnm ;
 extern syscall_handler_t  exe$dellnm ;
+extern syscall_handler_t  exe$clrast ;
+extern syscall_handler_t  exe$setast ;
 
-#define LAST_GENERIC_SYSCALL __NR_$dellnm
+#define LAST_GENERIC_SYSCALL __NR_$setast
 
 #if LAST_GENERIC_SYSCALL > LAST_ARCH_SYSCALL
 #define LAST_SYSCALL LAST_GENERIC_SYSCALL
@@ -608,6 +610,8 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$crelnm ] = exe$crelnm ,
 	[ __NR_$trnlnm ] = exe$trnlnm ,
 	[ __NR_$dellnm ] = exe$dellnm ,
+	[ __NR_$clrast ] = exe$clrast ,
+	[ __NR_$setast ] = exe$setast ,
 	
 	ARCH_SYSCALLS
 	[ LAST_SYSCALL + 1 ... NR_syscalls ] = 

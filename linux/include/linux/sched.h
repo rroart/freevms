@@ -429,8 +429,8 @@ struct task_struct {
 	void *journal_info;
 
   unsigned long pcb$l_phypcb;
-  unsigned long pcb$l_astqfl;
-  unsigned long pcb$l_astqbl;
+  struct _acb * pcb$l_astqfl;
+  struct _acb * pcb$l_astqbl;
   unsigned char pcb$b_astact;
   unsigned char pcb$b_asten;
   unsigned short pcb$w_state;
@@ -481,8 +481,8 @@ unsigned long pcb$l_uic;
 unsigned long pcb$l_orb;
   unsigned short pcb$w_res3;
   unsigned short pcb$w_tmbu;
-unsigned long pcb$l_lockqfl;
-unsigned long pcb$l_lockqbl;
+struct _lkb * pcb$l_lockqfl;
+struct _lkb * pcb$l_lockqbl;
 unsigned long pcb$l_dlckpri;
 unsigned long pcb$l_ipast;
 unsigned long pcb$l_defprot;
@@ -522,6 +522,7 @@ unsigned long pcb$l_capability_seq;
   unsigned char phd$b_spare_1;
   unsigned long pdg$l_pcb;
   unsigned char phd$b_astlvl; /* some cpus lack something */
+  unsigned char pr_astlvl; /* some cpus lack something */
   unsigned short phd$w_flags;
 
   union {

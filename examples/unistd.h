@@ -164,6 +164,8 @@
 #define __NR_$crelnm 311
 #define __NR_$trnlnm 312
 #define __NR_$dellnm 313
+#define __NR_$clrast 314
+#define __NR_$setast 315
 
 #endif
 

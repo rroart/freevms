@@ -175,7 +175,7 @@ typedef struct page {
   unsigned short int pfn$w_pt_lck_cnt;
   unsigned short int pfn$w_pt_win_cnt;
 
-	struct list_head list;		/* ->mapping has some page lists. */
+  struct list_head list;		/* ->mapping has some page lists. */
 	struct address_space *mapping;	/* The inode (or ...) we belong to. */
 	unsigned long index;		/* Our offset within mapping. */
 	struct page *next_hash;		/* Next page sharing our hash bucket in

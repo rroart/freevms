@@ -128,6 +128,8 @@ static inline pid_t setsid(void)
 #undef __NR_$crelnm          
 #undef __NR_$trnlnm          
 #undef __NR_$dellnm          
+#undef __NR_$clrast
+#undef __NR_$setast 
 
 #undef __NR_$close 
 #undef __NR_$connect 
@@ -245,6 +247,8 @@ static inline pid_t setsid(void)
 #define __NR_$crelnm 311
 #define __NR_$trnlnm 312
 #define __NR_$dellnm 313
+#define __NR_$clrast 314
+#define __NR_$setast 315
 
 #endif
 

@@ -16,3 +16,7 @@ int exe$synch(unsigned int efn, struct _iosb *iosb) {
   exe$clref(efn);
   goto again;
 }
+
+int exe$clrast(void) {
+  printk("this does not work yet (how to implement?), and is strong discouraged in real VMS too\n");
+}

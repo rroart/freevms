@@ -10,6 +10,7 @@ struct _mypfn {
 signed long mmg$allocpfn(void) {
   struct _pfn * p;
   struct _mypfn * m, * h;
+  if (sch$gl_freecnt<(1+4)) return -1;
   if (!pfn$al_head)
     return -1;
   if (pfn$al_head==pfn$al_tail) panic("eech2\n");
@@ -28,6 +29,7 @@ signed long mmg$allocontig(unsigned long num) {
   struct _pfn * p, * first=pfn$al_head, * next;
   struct _mypfn * h, * m;
   unsigned long done=0, c;
+  if (sch$gl_freecnt<(num+4)) return -1;
   if (!pfn$al_head)
     return -1;
   while(!done) {
@@ -73,6 +75,8 @@ signed long mmg$allocontig_align(unsigned long num) {
   struct _pfn * p, * first=pfn$al_head, * next;
   struct _mypfn * h, * m;
   unsigned long done=0, c;
+  unsigned long count=0;
+  if (sch$gl_freecnt<(num+4)) return -1;
   if (!pfn$al_head)
     return -1;
   while(!done) {
@@ -84,6 +88,8 @@ signed long mmg$allocontig_align(unsigned long num) {
       done=1;
     }
   out:
+    count++;
+    if ((first->pfn$l_flink==0) || ((unsigned long)first->pfn$l_flink>(unsigned long)&mem_map[8193])) panic("eech3\n");
     if (!done) first=first->pfn$l_flink;
   }
 

@@ -82,6 +82,10 @@ int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void 
 int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
 int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
 
+int sys$clrast(void);
+
+int sys$setast(char enbflg);
+
 struct struct_crelnt {
  unsigned int *attr;
  void *resnam;

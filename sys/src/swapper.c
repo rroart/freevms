@@ -92,6 +92,8 @@ int kswapd(void *unused)
 		__set_current_state(TASK_RUNNING);
 		remove_wait_queue(&kswapd_wait, &wait);
 
+		printk("doing the swap\n");
+
 		balance();
 		mmg$wrtmfypag();
 		swapsched();

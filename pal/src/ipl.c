@@ -244,7 +244,8 @@ asmlinkage void myrei (void) {
   if (p->psl_is==1 && p->oldpsl_is==0) panic("is stuff\n");
   if (p->psl_ipl > p->oldpsl_ipl) panic("rei to higher ipl\n");
   setipl(current->psl_ipl);
-  if (!in_sw_ast) sw_ast();
+  //  if (!in_sw_ast) sw_ast();
+  sw_ast();
   do_sw_int();
   /* also needs some changing mode stacks */
 }

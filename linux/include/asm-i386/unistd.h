@@ -283,6 +283,8 @@
 #define __NR_$crelnm           37
 #define __NR_$trnlnm           38
 #define __NR_$dellnm           39
+#define __NR_$clrast           40
+#define __NR_$setast           41
 
 #define __NR_$close 1
 #define __NR_$connect 2
