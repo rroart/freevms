@@ -454,6 +454,9 @@ fake_volatile:
 	acct_process(code);
 #endif
 	__exit_mm(tsk);
+#ifdef CONFIG_MM_VMS
+	kfree(tsk->pcb$l_phd);
+#endif
 
 	lock_kernel();
 	sem_exit();
