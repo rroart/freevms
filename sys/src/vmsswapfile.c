@@ -317,11 +317,13 @@ void free_swap_and_cache(swp_entry_t entry)
 	struct page *page = NULL;
 
 	p = swap_info_get(entry);
+#if 0
 	if (p) {
 		if (swap_entry_free(p, SWP_OFFSET(entry)) == 1)
 			page = find_trylock_page(&swapper_space, entry.val);
 		swap_info_put(p);
 	}
+#endif
 	if (page) {
 		page_cache_get(page);
 		/* Only cache user (+us), or swap space full? Free it! */
@@ -578,7 +580,7 @@ static int try_to_unuse(unsigned int type)
 		 * defer to do_swap_page in such a case - in some tests,
 		 * do_swap_page and try_to_unuse repeatedly compete.
 		 */
-		wait_on_page(page);
+		//wait_on_page(page);
 		lock_page(page);
 
 		/*

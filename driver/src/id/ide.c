@@ -1050,7 +1050,9 @@ void ide_end_drive_cmd (ide_drive_t *drive, byte stat, byte err)
 	spin_lock_irqsave(&io_request_lock, flags);
 	blkdev_dequeue_request(rq);
 	HWGROUP(drive)->rq = NULL;
+#if 0
 	end_that_request_last(rq);
+#endif
 	spin_unlock_irqrestore(&io_request_lock, flags);
 }
 
@@ -2338,7 +2340,9 @@ void ide_unregister (unsigned int index)
 			drive->id = NULL;
 		}
 		drive->present = 0;
+#if 0
 		blk_cleanup_queue(&drive->queue);
+#endif
 	}
 	if (d->present)
 		hwgroup->drive = d;

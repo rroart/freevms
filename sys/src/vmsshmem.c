@@ -494,7 +494,7 @@ static struct page * shmem_getpage_locked(struct shmem_inode_info *info, struct 
 	swp_entry_t *entry;
 
 repeat:
-	page = find_lock_page(mapping, idx);
+	page = 0;// find_lock_page(mapping, idx);
 	if (page)
 		return page;
 
@@ -509,7 +509,7 @@ repeat:
 	 * cache and swap cache.  We need to recheck the page cache
 	 * under the protection of the info->lock spinlock. */
 
-	page = find_get_page(mapping, idx);
+	page = 0;//find_get_page(mapping, idx);
 	if (page) {
 		if (TryLockPage(page))
 			goto wait_retry;
@@ -522,7 +522,7 @@ repeat:
 		unsigned long flags;
 
 		/* Look it up and read it in.. */
-		page = find_get_page(&swapper_space, entry->val);
+		page = 0;//find_get_page(&swapper_space, entry->val);
 		if (!page) {
 			swp_entry_t swap = *entry;
 			spin_unlock (&info->lock);
@@ -533,7 +533,7 @@ repeat:
 					goto repeat;
 				return ERR_PTR(-ENOMEM);
 			}
-			wait_on_page(page);
+			//wait_on_page(page);
 			if (!Page_Uptodate(page) && entry->val == swap.val) {
 				page_cache_release(page);
 				return ERR_PTR(-EIO);
@@ -590,7 +590,7 @@ no_space:
 
 wait_retry:
 	spin_unlock (&info->lock);
-	wait_on_page(page);
+	//wait_on_page(page);
 	page_cache_release(page);
 	goto repeat;
 }

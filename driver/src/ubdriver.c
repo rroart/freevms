@@ -454,7 +454,9 @@ static void ubd_finish(int error)
 	int nsect;
 
 	if(error){
+#ifndef CONFIG_VMS
 		end_request(0);
+#endif
 		return;
 	}
 	nsect = CURRENT->current_nr_sectors;
@@ -463,7 +465,9 @@ static void ubd_finish(int error)
 	CURRENT->errors = 0;
 	CURRENT->nr_sectors -= nsect;
 	CURRENT->current_nr_sectors = 0;
+#ifndef CONFIG_VMS
 	end_request(1);
+#endif
 }
 
 static void ubd_handler(void)
@@ -478,7 +482,9 @@ static void ubd_handler(void)
 		printk(KERN_ERR "Pid %d - spurious interrupt in ubd_handler, "
 		       "errno = %d\n", getpid(), -n);
 		spin_lock(&REQUEST_LOCK);
+#ifndef CONFIG_VMS
 		end_request(0);
+#endif
 		spin_unlock(&REQUEST_LOCK);
 		return;
 	}
@@ -619,8 +625,10 @@ int ubd_init(void)
 		return -1;
 	}
 	ubd_queue = BLK_DEFAULT_QUEUE(MAJOR_NR);
+#if 0
 	INIT_QUEUE(ubd_queue, DEVICE_REQUEST, &ubd_lock);
 	INIT_ELV(ubd_queue, &ubd_queue->elevator);
+#endif
 	read_ahead[MAJOR_NR] = 8;		/* 8 sector (4kB) read-ahead */
 	blksize_size[MAJOR_NR] = blk_sizes;
 	blk_size[MAJOR_NR] = sizes;
@@ -836,13 +844,17 @@ static int prepare_request(struct request *req, struct io_thread_req *io_req)
 	if(dev->is_dir){
 		strcpy(req->buffer, "HOSTFS:");
 		strcat(req->buffer, dev->file);
+#ifndef CONFIG_VMS
 		end_request(1);
+#endif
 		return(1);
 	}
 	if(IS_WRITE(req) && ((dev->openflags & O_ACCMODE) == O_RDONLY)){
 		printk("Write attempted on readonly ubd device %d\n", 
 		       minor(req->rq_dev));
+#ifndef CONFIG_VMS
 		end_request(0);
+#endif
 		return(1);
 	}
 

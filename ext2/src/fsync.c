@@ -41,10 +41,12 @@ int ext2_sync_file(struct file * file, struct dentry *dentry, int datasync)
 
 int ext2_fsync_inode(struct inode *inode, int datasync)
 {
-	int err;
+	int err=0;
 	
+#if 0
 	err  = fsync_inode_buffers(inode);
 	err |= fsync_inode_data_buffers(inode);
+#endif
 	if (!(inode->i_state & I_DIRTY))
 		return err;
 	if (datasync && !(inode->i_state & I_DIRTY_DATASYNC))

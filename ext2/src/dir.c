@@ -159,7 +159,7 @@ static struct page * ext2_get_page(struct inode *dir, unsigned long n)
 	block_read_full_page2(dir,page,n);
 	// read_cache_page(mapping, n, (filler_t*)ext2_aops.readpage, NULL);
 	if (!IS_ERR(page)) {
-		wait_on_page(page);
+	  //wait_on_page(page);
 		kmap(page);
 		if (!Page_Uptodate(page))
 			goto fail;

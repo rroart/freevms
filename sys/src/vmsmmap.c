@@ -74,7 +74,7 @@ int vm_enough_memory(long pages)
 	    return 1;
 
 	/* The page cache contains buffer pages these days.. */
-	free = atomic_read(&page_cache_size);
+	free = 0;//atomic_read(&page_cache_size);
 	free += nr_free_pages();
 	free += nr_swap_pages;
 
