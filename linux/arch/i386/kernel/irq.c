@@ -621,7 +621,10 @@ asmlinkage unsigned int do_IRQ(struct pt_regs regs)
 	 */
 	for (;;) {
 		spin_unlock(&desc->lock);
-		handle_IRQ_event(irq, &regs, action);
+		if (action->vms_interrupt)
+		  vms_handle_IRQ_event(action->idb, irq, &regs, action);
+		else
+		  handle_IRQ_event(irq, &regs, action);
 		spin_lock(&desc->lock);
 		
 		if (!(desc->status & IRQ_PENDING))
@@ -712,6 +715,7 @@ int request_irq(unsigned int irq,
 	action->name = devname;
 	action->next = NULL;
 	action->dev_id = dev_id;
+	action->vms_interrupt = 0;
 
 	retval = setup_irq(irq, action);
 	if (retval)

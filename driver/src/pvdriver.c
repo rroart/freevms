@@ -205,7 +205,10 @@ static int use_virtual_dma;
  */
 
 static unsigned short virtual_dma_port=0x3f0;
-void floppy_interrupt(int irq, void *dev_id, struct pt_regs * regs);
+void floppy_interrupt(int irq, void *dev_id, struct pt_regs * regs) {
+  panic("should not be in this floppy_interrupt\n");
+}
+
 static int set_dor(int fdc, char mask, char data);
 static void register_devfs_entries (int drive) __init;
 static devfs_handle_t devfs_handle;
@@ -234,6 +237,8 @@ static int irqdma_allocated;
 #include <linux/blkpg.h>
 #include <linux/cdrom.h> /* for the compatibility eject ioctl */
 
+static void floppy_hardint2(struct _idb * idb);
+
 /* putting vms related stuff here */
 
 // This is a pre-alpha level driver
@@ -249,6 +254,8 @@ static int irqdma_allocated;
 #include"../../freevms/lib/src/ddbdef.h"
 #include"../../freevms/lib/src/ipldef.h"
 #include"../../freevms/lib/src/dyndef.h"
+#include"../../freevms/lib/src/idbdef.h"
+#include"../../freevms/lib/src/vecdef.h"
 #include"../../freevms/starlet/src/ssdef.h"
 #include"../../freevms/starlet/src/iodef.h"
 #include"../../freevms/starlet/src/devdef.h"
@@ -382,11 +389,14 @@ struct _ddb floppyddb;
 struct _ucb floppyucb;
 struct _crb floppycrb;
 struct _ccb floppyccb;
+struct _idb floppyidb;
 
 void floppy_init2(void) {
   struct _ucb * u;
   struct _ddb * d;
   struct _crb * c;
+  struct _idb * i;
+  struct _vec * v;
 
 #if 0
   vmalloc does not work this early
@@ -400,9 +410,12 @@ void floppy_init2(void) {
   c=&floppycrb;
   d=&floppyddb;
   u=&floppyucb;
+  i=&floppyidb;
+
   bzero(u,sizeof(struct _ucb));
   bzero(d,sizeof(struct _ddb));
   bzero(c,sizeof(struct _crb));
+  bzero(i,sizeof(struct _idb));
 
   insertdevlist(d);
 
@@ -423,10 +436,10 @@ void floppy_init2(void) {
   /* for the ucb init part */
   qhead_init(&u->ucb$l_ioqfl);
   u->ucb$b_type=DYN$C_UCB;
-  u->ucb$b_flck=IPL$_QUEUEAST; /* should be IOLOCK8 */
+  u->ucb$b_flck=IPL$_IOLOCK8;
   /* devchars? */
   u->ucb$b_devclass=DEV$M_RND; /* just maybe? */
-  u->ucb$b_dipl=IPL$_QUEUEAST; /* should be IPL$_IOLOCK8 */
+  u->ucb$b_dipl=IPL$_IOLOCK8;
   //  bcopy("dva0",u->ucb$t_name,4);
   u->ucb$l_ddb=d;
   u->ucb$l_crb=c;
@@ -434,6 +447,17 @@ void floppy_init2(void) {
 
   /* for the crb init part */
   c->crb$b_type=DYN$C_CRB;
+  c->crb$b_flck=IPL$_IOLOCK8;
+
+  /* for the crb vec init part */
+  v=&c->crb$l_intd;
+
+  v->vec$l_idb=i;
+  // not now  v->vec$ps_isr_code=floppy_isr;
+  v->vec$ps_isr_code=floppy_hardint2;
+
+  /* for the idb init part */
+  i->idb$ps_owner=u;
 
   /* and for the ddt init part */
   ddt_floppy.ddt$l_fdt=&fdt_floppy;
@@ -1946,7 +1970,7 @@ static void print_result(char *message, int inr)
 }
 
 /* interrupt handler. Note that this can be called externally on the Sparc */
-void floppy_interrupt(int irq, void *dev_id, struct pt_regs * regs)
+void floppy_interrupt2(struct _idb * idb)
 {
 	void (*handler)(void) = DEVICE_INTR;
 	int do_print;
@@ -4378,6 +4402,9 @@ int __init vms_floppy_init(void)
 {
 	int i,unit,drive;
 
+	printk("Starting vms_floppy_init\n");
+
+	floppy_init2();
 
 	raw_cmd = NULL;
 
@@ -4508,7 +4535,99 @@ int __init vms_floppy_init(void)
 
 static spinlock_t floppy_usage_lock = SPIN_LOCK_UNLOCKED;
 
-static int floppy_grab_irq_and_dma(void)
+#ifndef NO_FLOPPY_ASSEMBLER
+#error noassflop
+#endif
+
+static void floppy_hardint2(struct _idb * idb)
+{
+  register unsigned char st;
+
+#undef TRACE_FLPY_INT
+#define NO_FLOPPY_ASSEMBLER
+
+#ifdef TRACE_FLPY_INT
+  static int calls=0;
+  static int bytes=0;
+  static int dma_wait=0;
+#endif
+  if(!doing_pdma) {
+    floppy_interrupt2(idb);
+    return;
+  }
+
+#ifdef TRACE_FLPY_INT
+  if(!calls)
+    bytes = virtual_dma_count;
+#endif
+
+#ifndef NO_FLOPPY_ASSEMBLER
+#error no_floppy_assembler
+#endif
+
+  {
+    register int lcount;
+    register char *lptr;
+
+    st = 1;
+    for(lcount=virtual_dma_count, lptr=virtual_dma_addr; 
+	lcount; lcount--, lptr++) {
+      st=inb(virtual_dma_port+4) & 0xa0 ;
+      if(st != 0xa0) 
+	break;
+      if(virtual_dma_mode)
+	outb_p(*lptr, virtual_dma_port+5);
+                        else
+			  *lptr = inb_p(virtual_dma_port+5);
+    }
+    virtual_dma_count = lcount;
+    virtual_dma_addr = lptr;
+    st = inb(virtual_dma_port+4);
+  }
+
+#ifdef TRACE_FLPY_INT
+  calls++;
+#endif
+  if(st == 0x20)
+    return;
+  if(!(st & 0x20)) {
+    virtual_dma_residue += virtual_dma_count;
+    virtual_dma_count=0;
+#ifdef TRACE_FLPY_INT
+    printk("count=%x, residue=%x calls=%d bytes=%d dma_wait=%d\n", 
+	   virtual_dma_count, virtual_dma_residue, calls, bytes,
+	   dma_wait);
+    calls = 0;
+    dma_wait=0;
+#endif
+    doing_pdma = 0;
+    floppy_interrupt2(idb);
+    return;
+  }
+#ifdef TRACE_FLPY_INT
+  if(!virtual_dma_count)
+    dma_wait++;
+#endif
+}
+
+static int fd_request_irq2(void)
+{
+  if(can_use_virtual_dma)
+    printk("can_use_virtual_dma\n");
+  else
+    printk("not_can_use_virtual_dma\n");
+
+  if(can_use_virtual_dma)
+    return vms_request_irq(&floppyidb,FLOPPY_IRQ, floppy_hardint2,SA_INTERRUPT,
+		       "floppy", NULL);
+  else
+    return vms_request_irq(&floppyidb,FLOPPY_IRQ, floppy_interrupt2,
+		       SA_INTERRUPT|SA_SAMPLE_RANDOM
+		       ,
+		       "floppy", NULL);     
+}
+
+int floppy_grab_irq_and_dma(void)
 {
 	unsigned long flags;
 
@@ -4519,7 +4638,7 @@ static int floppy_grab_irq_and_dma(void)
 	}
 	spin_unlock_irqrestore(&floppy_usage_lock, flags);
 	MOD_INC_USE_COUNT;
-	if (fd_request_irq()) {
+	if (fd_request_irq2()) {
 		DPRINT("Unable to grab IRQ%d for the floppy driver\n",
 			FLOPPY_IRQ);
 		MOD_DEC_USE_COUNT;

@@ -43,8 +43,10 @@
 #include <asm/delay.h>
 #include <asm/desc.h>
 #include <asm/irq.h>
-
-
+#include "../../../../freevms/lib/src/idbdef.h"
+#include "../../../../freevms/lib/src/ucbdef.h"
+#include "../../../../freevms/lib/src/crbdef.h"
+#include "../../../../freevms/lib/src/vecdef.h"
 
 /*
  * Linux has a controller-independent x86 interrupt architecture.
@@ -434,7 +436,7 @@ void vms___global_restore_flags(unsigned long flags)
  * waste of time and is not what some drivers would
  * prefer.
  */
-int vms_handle_IRQ_event(unsigned int irq, struct pt_regs * regs, struct irqaction * action)
+int vms_handle_IRQ_event(struct _idb * idb, unsigned int irq, struct pt_regs * regs, struct irqaction * action)
 {
 	int status;
 	int cpu = smp_processor_id();
@@ -447,8 +449,10 @@ int vms_handle_IRQ_event(unsigned int irq, struct pt_regs * regs, struct irqacti
 		__sti();
 
 	do {
+	  void (*handler)(struct _idb * idb);
 		status |= action->flags;
-		action->handler(irq, action->dev_id, regs);
+		handler=((struct _vec *)&idb->idb$ps_owner->ucb$l_crb->crb$l_intd)->vec$ps_isr_code;
+		handler(idb);
 		action = action->next;
 	} while (action);
 	if (status & SA_SAMPLE_RANDOM)
@@ -620,8 +624,9 @@ asmlinkage unsigned int vms_do_IRQ(struct pt_regs regs)
 	 * SMP environment.
 	 */
 	for (;;) {
+	  struct _idb * idb; /* just a dummy in an unused routine */
 		spin_unlock(&desc->lock);
-		handle_IRQ_event(irq, &regs, action);
+		vms_handle_IRQ_event(idb, irq, &regs, action);
 		spin_lock(&desc->lock);
 		
 		if (!(desc->status & IRQ_PENDING))
@@ -674,7 +679,7 @@ out:
  *
  */
  
-int vms_request_irq(unsigned int irq, 
+int vms_request_irq(struct _idb * idb, unsigned int irq, 
 		void (*handler)(int, void *, struct pt_regs *),
 		unsigned long irqflags, 
 		const char * devname,
@@ -712,6 +717,8 @@ int vms_request_irq(unsigned int irq,
 	action->name = devname;
 	action->next = NULL;
 	action->dev_id = dev_id;
+	action->vms_interrupt = 1;
+	action->idb = idb;
 
 	retval = setup_irq(irq, action);
 	if (retval)
