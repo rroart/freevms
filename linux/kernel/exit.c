@@ -440,6 +440,12 @@ NORET_TYPE void do_exit(long code)
 		panic("Attempted to kill the idle task!");
 	if (tsk->pid == 1)
 		panic("Attempted to kill init!");
+
+	if (tsk->pcb$b_prib!=31) {
+	  tsk->pcb$b_prib=31; // to avoid returning here after last RESCHED
+	  SOFTINT_RESCHED_VECTOR;
+	}
+
 	tsk->flags |= PF_EXITING;
 	del_timer_sync(&tsk->real_timer);
 
@@ -478,6 +484,12 @@ fake_volatile:
 	SOFTINT_RESCHED_VECTOR;
 	//sch$resched();
 	printk("before bug\n");
+#if 0
+	cli();
+	do { ; } while (1);
+ gogo:
+	goto gogo;
+#endif
 	BUG();
 /*
  * In order to get rid of the "volatile function does return" message
