@@ -39,7 +39,7 @@ int sch$postef(unsigned long ipid, unsigned long priclass, unsigned long efn) {
     retval=SS$_WASSET;
   else
     retval=SS$_WASCLR;
-  waitcheck(p,priclass,&p->pcb$l_efcs+4*p->pcb$b_wefc,clusteraddr);
+  waitcheck(p,priclass,&p->pcb$l_efcs+p->pcb$b_wefc,clusteraddr);
   vmsunlock(&SPIN_SCHED,savipl);
   return retval;
 }
