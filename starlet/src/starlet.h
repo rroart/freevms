@@ -207,6 +207,31 @@ struct struct_crembx {
   void *lognam;
 };
 
+struct struct_mgblsc {
+struct _va_range *inadr;
+struct _va_range *retadr;
+unsigned int acmode;
+unsigned int flags;
+void *gsdnam;
+struct _secid *ident;
+unsigned int relpag;
+};
+
+struct struct_crmpsc {
+struct _va_range *inadr;
+struct _va_range *retadr;
+unsigned int acmode;
+unsigned int flags;
+void *gsdnam;
+unsigned long long * ident;
+unsigned int relpag;
+unsigned /*short*/ int chan;
+unsigned int pagcnt;
+unsigned int vbn;
+unsigned int prot;
+unsigned int pfc;
+};
+
 #endif
 
 

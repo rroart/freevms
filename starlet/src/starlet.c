@@ -278,6 +278,35 @@ int sys$mount(void *itmlst) {
   return INLINE_SYSCALL($mount,1,itmlst);
 }
 
+int sys$mgblsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam, struct _secid *ident, unsigned int relpag) {
+  struct struct_mgblsc s;
+  s.inadr=inadr;
+  s.retadr=retadr;
+  s.acmode=acmode;
+  s.flags=flags;
+  s.gsdnam=gsdnam;
+  s.ident=ident;
+  s.relpag=relpag;
+  return INLINE_SYSCALL($mgblsc,1,&s);
+}
+
+int sys$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam, unsigned long long * ident, unsigned int relpag, unsigned /*short*/ int chan, unsigned int pagcnt, unsigned int vbn, unsigned int prot,unsigned int pfc) {
+  struct struct_crmpsc s;
+  s.inadr=inadr;
+  s.retadr=retadr;
+  s.acmode=acmode;
+  s.flags=flags;
+  s.gsdnam=gsdnam;
+  s.ident=ident;
+  s.relpag=relpag;
+  s.chan=chan;
+  s.pagcnt=pagcnt;
+  s.vbn=vbn;
+  s.prot=prot;
+  s.pfc=pfc;
+  return INLINE_SYSCALL($crmpsc,1,&s);
+}
+
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
 int sys$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }
 int sys$create (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($create,3,fab,err,suc); }
