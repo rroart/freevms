@@ -29,8 +29,9 @@
 #define LNMX$S_LNMXDEF      25               
 
 #ifndef USERLAND
-#define lnmmalloc vmalloc
-#define lnmfree vfree
+#define lnmmalloc(x) kmalloc(x,GFP_KERNEL);
+#define lnmfree kfree
+#undef lnmprintf
 #define lnmprintf printk
 #else
 #define lnmmalloc malloc
@@ -97,7 +98,7 @@ unsigned long reserved;
 unsigned short lnmhsh$w_size;
 unsigned char lnmhsh$b_type;
 unsigned char reserved2;
-struct _lnmb * entry[LNMPHASHTBL];
+void * entry[2*LNMPHASHTBL];
 };
 
 struct lnmhshs {
@@ -121,21 +122,21 @@ struct _lnmhsh {
 
 struct struct_nt {
 /* ???? */
-int depth;
-int tries;
-int acmode;
-struct _lnmc * cache;
-char * context[10];
-struct _lnmb * lnmb;
+  struct _lnmb * lnmb;
+  struct _lnmb * lnmb_cur;
+  struct _lnmth * lnmth;
+  char * lognam;
+  unsigned long loglen;
+  unsigned long hash;
 };
 
 struct struct_rt {
   int flags;
-int depth;
-int tries;
-int acmode;
-struct _lnmc * cache;
-char * context[10];
+  int depth;
+  int tries;
+  int acmode;
+  struct _lnmc * cache;
+  char * context[10];
 };
 
 struct struct_lnm_ret {
