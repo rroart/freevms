@@ -246,20 +246,25 @@ int ide$init_tables() {
   return SS$_NORMAL;
 }
 
-int ide_iodb_vmsinit(void) {
+int ide_iodb_vmsinit(int mscp) {
 #if 0
   struct _ucb * ucb=&ide$ucb;
   struct _ddb * ddb=&ide$ddb;
   struct _crb * crb=&ide$crb;
 #endif 
-  struct _ucb * ucb=kmalloc(sizeof(struct _ucb),GFP_KERNEL);
+  int ucb_size = sizeof(struct _ucb);
+  if (mscp)
+    ucb_size=sizeof(struct _mscp_ucb);
+  struct _ucb * ucb=kmalloc(ucb_size /*sizeof(struct _ucb)*/,GFP_KERNEL);
   struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,sizeof(struct _ucb));
+  bzero(ucb,ucb_size/*sizeof(struct _ucb)*/);
   bzero(ddb,sizeof(struct _ddb));
   bzero(crb,sizeof(struct _crb));
+
+  ucb -> ucb$w_size = ucb_size; // temp placed // check
 
 #if 0
   init_ddb(&ide$ddb,&ide$ddt,&ide$ucb,"dqa");
@@ -307,7 +312,7 @@ int ide_vmsinit(void) {
 
   printk(KERN_INFO "dev here pre\n");
 
-  ddb=ide_iodb_vmsinit();
+  ddb=ide_iodb_vmsinit(0);
 
   /* for the fdt init part */
   /* a lot of these? */
