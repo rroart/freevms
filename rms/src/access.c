@@ -36,6 +36,7 @@
 #include <mytypes.h>
 #include <aqbdef.h>
 #include <atrdef.h>
+#include <ccbdef.h>
 #include <fatdef.h>
 #include <vcbdef.h>
 #include <descrip.h>
@@ -87,7 +88,7 @@ int f11b_read_writevb(struct _irp * i) {
   } else {
     buffer=f11b_read_block(vcb,lbn,blocks,&iosb);
     memcpy(i->irp$l_qio_p1,buffer,512);
-    vfree(buffer);
+    kfree(buffer);
   }
   //f11b_io_done(i);
 }
@@ -109,7 +110,7 @@ signed int f11b_map_idxvbn(struct _vcb * vcb, unsigned int vbn) {
 
 void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
   struct _iosb myiosb;
-  unsigned char * buf = vmalloc(512*count);
+  unsigned char * buf = kmalloc(512*count,GFP_KERNEL);
   unsigned long phyblk=lbn; // one to one
   unsigned long sts=sys$qiow(0,xqp->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
@@ -171,7 +172,7 @@ void f11b_read_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
 	head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);  
 	sts=iosb.iosb$w_status;
 	memcpy(atrp->atr$l_addr,head,atrp->atr$w_size);
-	vfree(head); // wow. freeing something
+	kfree(head); // wow. freeing something
       }
       break;
     case ATR$C_CREDATE:
@@ -221,7 +222,7 @@ void f11b_read_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
     }
     atrp++;
   }
-  vfree(head);
+  kfree(head);
 }
 
 void f11b_write_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
@@ -304,7 +305,7 @@ void f11b_write_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
     head->fh2$w_checksum = VMSWORD(check);
   }
   writehead(fcb,head);
-  vfree(head);
+  kfree(head);
 }
 
 void * getvcb(void) {
@@ -316,6 +317,7 @@ int getchan(struct _vcb * v) {
 }
 
 extern struct _ucb * myfilelist[50];
+extern char * myfilelists[50];
 extern int myfilelistptr;
 
 // really really bad
@@ -408,7 +410,8 @@ unsigned deaccesshead(struct _fh2 *head,unsigned idxblk)
 unsigned writechunk(struct _fcb * fcb,unsigned long vblock, char * buff)
 {
   struct _iosb iosb;
-  struct _ucb * ucb=finducb(fcb);
+  struct _vcb * vcb = xqp->current_vcb;
+  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
   int pbn;
   int sts=ioc_std$mapvblk(vblock,0,&fcb->fcb$l_wlfl,0,0,&pbn,0,0);
   sts=sys$qiow(0,xqp->io_channel,IO$_WRITELBLK,&iosb,0,0,buff,512,pbn,0,0,0);
@@ -418,7 +421,8 @@ unsigned writechunk(struct _fcb * fcb,unsigned long vblock, char * buff)
 static unsigned gethead(struct _fcb * fcb,struct _fh2 **headbuff)
 {
   struct _iosb iosb;
-  struct _ucb * ucb=finducb(fcb);
+  struct _vcb * vcb = xqp->current_vcb;
+  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
   int vbn;
   int sts;
   struct _fiddef fid;
@@ -431,7 +435,8 @@ static unsigned gethead(struct _fcb * fcb,struct _fh2 **headbuff)
 
 unsigned writehead(struct _fcb * fcb,struct _fh2 *headbuff)
 {
-  struct _ucb * ucb=finducb(fcb);
+  struct _vcb * vcb = xqp->current_vcb;
+  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
   struct _fiddef * fid = &headbuff->fh2$w_fid.fid$w_num;
   unsigned short check = checksum((vmsword *) headbuff);
   int vbn=fid->fid$w_num + (fid->fid$b_nmx << 16) - 1 +
@@ -550,7 +555,7 @@ struct _fh2 *premap_indexf(struct _fcb *fcb,struct _ucb *ucb,unsigned *retsts)
     *retsts = sys$qiow(0,xqp->io_channel,IO$_READLBLK,&iosb,0,0, (char *) head,sizeof(struct _fh2),VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),0,0,0);
     *retsts = iosb.iosb$w_status;
     if (!(*retsts & 1)) {
-      vfree(head);
+      kfree(head);
       head = NULL;
     } else {
       if (VMSWORD(head->fh2$w_fid.fid$w_num) != 1 ||
@@ -558,7 +563,7 @@ struct _fh2 *premap_indexf(struct _fcb *fcb,struct _ucb *ucb,unsigned *retsts)
 	  VMSWORD(head->fh2$w_fid.fid$w_seq) != 1 ||
 	  VMSWORD(head->fh2$w_checksum) != checksum((unsigned short *) head)) {
 	*retsts = SS$_DATACHECK;
-	vfree(head);
+	kfree(head);
 	head = NULL;
       }
     }
@@ -602,7 +607,8 @@ int add_wcb(struct _fcb * fcb, unsigned short * map)
   unsigned extents = 0;
   struct _fh2 *head = 0;
 
-  struct _ucb * ucb = finducb(fcb); // bad bad
+  struct _vcb * vcb = xqp->current_vcb;
+  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb = finducb(fcb); // bad bad
   unsigned short *mp;
   unsigned phyblk, phylen;
   struct _wcb *wcb;
@@ -611,7 +617,7 @@ int add_wcb(struct _fcb * fcb, unsigned short * map)
   get_fm2_val(&mp,&phyblk,&phylen);
   if (phylen!=0) {
 
-    wcb = (struct _wcb *) vmalloc(sizeof(struct _wcb));
+    wcb = (struct _wcb *) kmalloc(sizeof(struct _wcb), GFP_KERNEL);
     bzero(wcb,sizeof(struct _wcb));
     if (wcb == NULL) {
       retsts = SS$_INSFMEM;
@@ -647,7 +653,8 @@ int wcb_create_all(struct _fcb * fcb, struct _fh2 * fh2)
   unsigned extents = 0;
   struct _fh2 *head = 0;
 
-  struct _ucb * ucb = finducb(fcb); // bad bad
+  struct _vcb * vcb = xqp->current_vcb;
+  struct _ucb * ucb = vcb->vcb$l_rvt; // was: finducb(fcb); // bad bad
   unsigned short *mp;
   unsigned short *me;
 
@@ -675,7 +682,7 @@ int wcb_create_all(struct _fcb * fcb, struct _fh2 * fh2)
     get_fm2_val(&mp,&phyblk,&phylen);
     if (phylen!=0) {
 
-      wcb = (struct _wcb *) vmalloc(sizeof(struct _wcb));
+      wcb = (struct _wcb *) kmalloc(sizeof(struct _wcb),GFP_KERNEL);
       bzero(wcb,sizeof(struct _wcb));
       if (wcb == NULL) {
 	retsts = SS$_INSFMEM;
@@ -838,7 +845,7 @@ unsigned deaccessfile(struct _fcb *fcb)
 
 static void *fcb_create(unsigned filenum,unsigned *retsts)
 {
-  struct _fcb *fcb = (struct _fcb *) vmalloc(sizeof(struct _fcb));
+  struct _fcb *fcb = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
   if (fcb == NULL) {
     if (retsts) *retsts = SS$_INSFMEM;
   } else {
@@ -854,7 +861,7 @@ static void *fcb_create(unsigned filenum,unsigned *retsts)
 void *fcb_create2(struct _fh2 * head,unsigned *retsts)
 {
   struct _vcb * vcb=xqp->current_vcb;
-  struct _fcb *fcb = (struct _fcb *) vmalloc(sizeof(struct _fcb));
+  struct _fcb *fcb = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
   bzero(fcb,sizeof(struct _fcb));
   if (fcb == NULL) {
     if (retsts) *retsts = SS$_INSFMEM;
@@ -1002,7 +1009,7 @@ unsigned dismount(struct _vcb * vcb)
       printk("Post close\n");
       cachedump();
 #endif
-      vfree(vcb);
+      kfree(vcb);
     }
   }
   return sts;
@@ -1029,14 +1036,30 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       ucb = du_init(devnam[device]);
       islocal=0;
     } else {
-      ucb = fl_init(devnam[device]);
+      struct dsc$descriptor dsc;
+      int chan;
+      char buf[5];
+      int sts;
+      memcpy(buf,devnam[device],4);
+      buf[4]=0;
+      dsc.dsc$a_pointer=buf;
+      dsc.dsc$w_length=4;
+
+      sts=exe$assign(&dsc,&chan,0,0,0);
+
+      if ((sts & 1)==0) {
+	ucb = fl_init(devnam[device]);
+      } else {
+	extern struct _ccb ctl$ga_ccb_table[];
+	ucb = ctl$ga_ccb_table[chan].ccb$l_ucb;
+      }
       islocal=1;
     }
-    vcb = (struct _vcb *) vmalloc(sizeof(struct _vcb));
+    vcb = (struct _vcb *) kmalloc(sizeof(struct _vcb),GFP_KERNEL);
     bzero(vcb,sizeof(struct _vcb));
     vcb->vcb$b_type=DYN$C_VCB;
     xqp->current_vcb=vcb; // until I can place it somewhere else
-    aqb = (struct _aqb *) vmalloc(sizeof(struct _aqb));
+    aqb = (struct _aqb *) kmalloc(sizeof(struct _aqb),GFP_KERNEL);
     bzero(aqb,sizeof(struct _aqb));
     aqb->aqb$b_type=DYN$C_AQB;
     qhead_init(&aqb->aqb$l_acpqfl);
@@ -1055,9 +1078,9 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       int chan;
       struct dsc$descriptor dsc;
       if (islocal)
-	sts = phyio_init(strlen(devnam[device])+1,ucb->ucb$l_ddb->ddb$t_name,&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
-      dsc.dsc$w_length=strlen(devnam[device]);
-      dsc.dsc$a_pointer=devnam[device];
+	sts = phyio_init(strlen(devnam[device])+1,devnam[device],&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
+      dsc.dsc$a_pointer=do_file_translate(devnam[device]);
+      dsc.dsc$w_length=strlen(dsc.dsc$a_pointer);
       if (!islocal)
 	dsc.dsc$a_pointer=((char *) dsc.dsc$a_pointer)+1;
       sts=exe$assign(&dsc,&chan,0,0,0);
@@ -1106,6 +1129,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	vcb->vcb$l_maxfiles = home.hm2$l_maxfiles;
 	//vcb->vcb$l_free = 500; // how do we compute this?
 	memcpy(&vcb->vcb$t_volname,home.hm2$t_volname,12);
+	vcb->vcb$l_rvt = ucb; // just single volume so far
 	idxfid.fid$b_rvn = device + 1;
 	//sts = accessfile(vcb,&idxfid,&idxfcb,flags & 1);
 	idxhd = f11b_read_block(vcbdev,VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),1, &iosb);
@@ -1124,7 +1148,6 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	  ucb->ucb$l_vcb = NULL;
 	} else {
 	  ucb->ucb$l_vcb = vcb;
-	  vcb->vcb$l_rvt = ucb; // just single volume so far
 	  //insque(idxfcb,&vcb->vcb$l_fcbfl);
 	  if (1) {
 	    struct _fibdef mapfib = {0,2,2,1,0};
