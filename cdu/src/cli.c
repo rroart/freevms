@@ -14,7 +14,12 @@
 #include<sys/mman.h>
 
 #include<descrip.h>
+#include<ihadef.h>
+#include<ihddef.h>
+#include<ihsdef.h>
+#include<isddef.h>
 #include<ssdef.h>
+#include<va_rangedef.h>
 
 #include "tree.h"
 #include "cld.h"
@@ -128,12 +133,200 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
   return SS$_NORMAL;
 }
 
+typedef struct {
+  unsigned char st_name[4];
+  unsigned char st_value[4];
+  unsigned char st_size[4]; 
+  unsigned char st_info[1];
+  unsigned char st_other[1];
+  unsigned char st_shndx[2];
+} Elf_External_Sym;
+
+typedef struct bfd_symbol
+{
+  const char *name;
+  unsigned long value;
+  unsigned int flags;
+} asymbol;
+
+#define COERCE32(x) (((signed long) (x) ^ 0x80000000) - 0x80000000)
+
+unsigned int
+bfd_getl32 (void * dummy, const void *p)
+{
+  const char *addr = p;
+  unsigned long v;
+
+  v = (unsigned long) addr[0];
+  v |= (unsigned long) addr[1] << 8;
+  v |= (unsigned long) addr[2] << 16;
+  v |= (unsigned long) addr[3] << 24;
+  return v;
+}
+
+signed int
+bfd_getl_signed_32 (void * dummy, const void *p)
+{
+  const char *addr = p;
+  unsigned long v;
+
+  v = (unsigned long) addr[0];
+  v |= (unsigned long) addr[1] << 8;
+  v |= (unsigned long) addr[2] << 16;
+  v |= (unsigned long) addr[3] << 24;
+  return COERCE32 (v);
+}
+
+#define bfd_h_get_32 bfd_getl32
+#define bfd_h_get_signed_32 bfd_getl_signed_32
+#define H_GET_32  bfd_h_get_32
+#define H_GET_S32 bfd_h_get_signed_32
+#define H_GET_WORD                H_GET_32
+#define H_GET_SIGNED_WORD H_GET_S32
+void
+nisse_swap_symbol_in (void *abfd,
+		      const void *psrc,
+		      const void *pshn,
+		      asymbol /*Elf_Internal_Sym*/ *dst)
+{
+  const Elf_External_Sym *src = psrc;
+  //  int signed_vma = get_nisse_backend_data (abfd)->sign_extend_vma;
+  int signed_vma = 0; // check. added this to be sure.
+  dst->name = H_GET_32 (abfd, src->st_name);
+  if (signed_vma)
+    dst->value = H_GET_SIGNED_WORD (abfd, src->st_value);
+  else
+    dst->value = H_GET_WORD (abfd, src->st_value);
+  dst->flags = H_GET_WORD (abfd, src->st_size);
+}
+
+extern int vms_mm;
+
 unsigned int cli$dispatch(int userarg){
+  char * routine;
+  char * myp1 = "";
+  char * myargv[2]={"",myp1};
+  if (vms_mm==0) goto exe2;
+  unsigned long sts;
+  struct dsc$descriptor aname;
+  struct dsc$descriptor dflnam;
+  struct file * f;
+  struct _ihd * hdrbuf;
+  struct _iha * active;
+  struct _va_range inadr;
+  void (*func)();
+  char * imgnam = (*cur_cdu)->cdu$l_image;
+  int len = strlen(imgnam);
+
+  aname.dsc$w_length=len-4;
+  aname.dsc$a_pointer=imgnam;
+  dflnam.dsc$w_length=len;
+  dflnam.dsc$a_pointer=imgnam;
+
+  hdrbuf=malloc(512);
+  memset(hdrbuf, 0, 512);
+
+  sts=sys$imgact(&aname,&dflnam,hdrbuf,0,0,0,0,0);
+  printf("imgact got sts %x\n",sts);
+
+  if (sts!=SS$_NORMAL) return sts;
+
+  active=(unsigned long)hdrbuf+hdrbuf->ihd$w_activoff;
+
+#if 0
+  // can't do this, for some reason it causes pagefault
+  char * str = argv[0];
+  str[len-4]=0;
+#endif
+
+  func=active->iha$l_tfradr1;
+
+  struct _ihd * ehdr32 = hdrbuf;
+
+  struct _ihs * debug = (unsigned long)ehdr32+ehdr32->ihd$w_symdbgoff;
+
+  char * buffer = ehdr32;
+
+  struct _isd * section=(unsigned long)buffer+ehdr32->ihd$w_size;
+
+  long symtab=0, symtabsize=0, symtabvbn=0, symstr=0, symstrsize=0, symstrvbn=0;
+
+  while (section<(buffer+512*ehdr32->ihd$b_hdrblkcnt)) {
+    if (section->isd$w_size==0)
+      break;
+    if (section->isd$w_size==0xffffffff) {
+      int no=((unsigned long)section-(unsigned long)buffer)>>9;
+      section=buffer+512*(no+1);
+      continue;
+    }
+    if (debug->ihs$l_dstvbn==section->isd$l_vbn) {
+      symtab=section->isd$v_vpn;
+      symtabvbn=debug->ihs$l_dstvbn;
+      symtabsize=section->isd$w_pagcnt;
+    }
+
+    if (debug->ihs$l_dmtvbn==section->isd$l_vbn) {
+      symstr=section->isd$v_vpn;
+      symstrvbn=debug->ihs$l_dmtvbn;
+      symstrsize=section->isd$w_pagcnt;
+    }
+
+    section=(unsigned long)section+section->isd$w_size;
+  }
+
+  if (symtabsize == 0 || symstrsize == 0)
+    goto skip;
+
+#if 0
+  symstr = malloc(symstrsize<<12);
+  symtab = malloc(symtabsize<<12);
+  memset(symstr,0,symstrsize<<12);
+  memset(symtab,0,symtabsize<<12);
+#endif
+
+  routine = (*cur_cdu)->cdu$l_routine;
+  int value = 0;
+
+  while (1) {
+    Elf_External_Sym * src = symtab;
+    if (src->st_name[0]==0 && src->st_name[1]==0) break;
+    asymbol dst;
+    nisse_swap_symbol_in(0, src, 0, &dst);
+    symtab += sizeof(Elf_External_Sym);
+    src++;
+    if (0==strncmp(symstr+dst.name,routine,strlen(routine))) {
+      value = dst.value;
+      break;
+    }
+  }
+
+  if (value)
+    func = value;
+
+ skip:
+
+  printf("entering image? %x\n",func);
+  if ((*my_cdu)->cdu$l_parameters) {
+    struct _para * p = (*my_cdu)->cdu$l_parameters;
+    myargv[1] = p->value;
+  }
+  //  func(argc,argv++);
+  func(userarg,myargv,0,0);
+  printf("after image\n");
+
+  sys$rundwn();
+
+  return SS$_NORMAL;
+
+ exe2:
+  {}
   char * mainp="main";
-  char * routine=mainp;
+  routine=mainp;
   char * path="/vms$common/sysexe/";
   int pathlen=strlen(path);
   char image[256];
+
+  {}
   memcpy(image,path,pathlen);
   memcpy(image+pathlen,(*cur_cdu)->cdu$l_image,strlen((*cur_cdu)->cdu$l_image));
   memcpy(image+pathlen+strlen((*cur_cdu)->cdu$l_image),".exe2",5);
@@ -156,12 +349,10 @@ unsigned int cli$dispatch(int userarg){
     return 0;
   }
   // not yet  fn(userarg);
-  char * myp1 = "";
   if ((*my_cdu)->cdu$l_parameters) {
     struct _para * p = (*my_cdu)->cdu$l_parameters;
-    myp1 = p->value;
+   myargv[1] = p->value;
   }
-  char * myargv[2]={"",myp1};
   fn(userarg,myargv,0,0);
   //fn(argc,argv++);
   

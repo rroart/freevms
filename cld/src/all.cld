@@ -1,4 +1,12 @@
-define verb dird
+define verb ccopy
+	image directory
+	routine copy
+
+define verb cdifference
+	image directory
+	routine diff
+
+define verb cdirectory
 	image directory
 	routine dir
 	parameter p1
@@ -6,6 +14,18 @@ define verb dird
 	qualifier file
 	qualifier size
 
-define verb dfud
+define verb cmount
+	image directory
+	routine domount
+
+define verb ctype
+	image directory
+	routine typ
+
+define verb csearch
+	image directory
+	routine search
+
+define verb cdfu
 	image dfu
 	routine verify_command
