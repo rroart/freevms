@@ -613,8 +613,6 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	current->mm->end_data = 0;
 	current->mm->end_code = 0;
 	current->mm->mmap = NULL;
-	current->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
-	init_phd(current->pcb$l_phd);
 	current->flags &= ~PF_FORKNOEXEC;
 	elf_entry = (unsigned long) elf_ex.e_entry;
 
