@@ -73,13 +73,13 @@ VM_MASK		= 0x00020000
 /*
  * these are offsets into the task-struct.
  */
-state		= 368    /* was 0 */
-flags		= 372
-sigpending	= 376
-addr_limit	= 380
-exec_domain	= 384
-need_resched	= 388
-tsk_ptrace	= 392
+state		= 12    /* was 0 */
+flags		= 16
+sigpending	= 20
+addr_limit	= 24
+exec_domain	= 28
+need_resched	= 32
+tsk_ptrace	= 36
 /*
 processor	= 52
 */
