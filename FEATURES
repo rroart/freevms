@@ -9,6 +9,7 @@ queued i/o (a little bit)
 memory management (a little bit at low-level)
 ods2 readonly (partly)
 rms readonly (partly)
+ods5 readonly (partly)
 
 syscalls:
 $ascefc

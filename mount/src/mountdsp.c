@@ -10,6 +10,7 @@
 #include <misc.h>
 #include <fiddef.h>
 #include <uicdef.h>
+#include <vcbdef.h>
 #include <hm2def.h>
 #include "../../freevms/rms/src/cache.h"
 #include "../../freevms/rms/src/access.h"
@@ -17,7 +18,7 @@
 asmlinkage int exe$mount(void *itmlst) {
   int i;
   struct item_list_3 *it=itmlst;
-  struct VCB * vcb;
+  struct _vcb * vcb;
   char *devs[2],*labs[2];
   int status;
 
@@ -29,8 +30,6 @@ asmlinkage int exe$mount(void *itmlst) {
 
   if (vcb==0) return;
 
-  for (i = 0; i < vcb->devices; i++)
-    if (vcb->vcbdev[i].dev != 0)
-      printk("%%MOUNT-I-MOUNTED, Volume %12.12s mounted on %s\n",
-	     vcb->vcbdev[i].home.hm2$t_volname,vcb->vcbdev[i].dev->devnam);
+  printk("%%MOUNT-I-MOUNTED, Volume %12.12s mounted on %s\n",
+	 vcb->vcb$t_volname,devs[0]);
 }

@@ -71,9 +71,11 @@ unsigned phyio_init(int devlen,char *devnam,struct file **handle,struct phyio_in
     char *cp,devbuf[200];
     char *tmpname;
     init_count++;
+#if 0
     info->status = 0;           /* We don't know anything about this device! */
     info->sectors = 0;
     info->sectorsize = 0;
+#endif
     //    sprintf(devbuf,DEV_PREFIX,devnam);
     sprintf(devbuf,"%s",devnam);
     cp = strchr(devbuf,':');

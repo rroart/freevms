@@ -118,22 +118,22 @@ struct DEV {
 };                              /* Device information */
 
 void fid_copy(struct _fiddef *dst,struct _fiddef *src,unsigned rvn);
-unsigned device_lookup(unsigned devlen,char *devnam,int create,struct DEV **retdev);
+unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **retdev);
 
-unsigned dismount(struct VCB *vcb);
-unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],struct VCB **vcb);
+unsigned dismount(struct _vcb *vcb);
+unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],struct _vcb **vcb);
 
-unsigned accesserase(struct VCB *vcb,struct _fiddef *fid);
-unsigned deaccessfile(struct FCB_not *fcb);
-unsigned accessfile(struct VCB *vcb,struct _fiddef *fid,
-                    struct FCB_not **fcb,unsigned wrtflg);
+unsigned accesserase(struct _vcb *vcb,struct _fiddef *fid);
+unsigned deaccessfile(struct _fcb *fcb);
+unsigned accessfile(struct _vcb *vcb,struct _fiddef *fid,
+                    struct _fcb **fcb,unsigned wrtflg);
 
-unsigned deaccesschunk(struct VIOC *vioc,unsigned wrtvbn,int wrtblks,int reuse);
-unsigned accesschunk(struct FCB_not *fcb,unsigned vbn,struct VIOC **retvioc,
+unsigned deaccesschunk(unsigned wrtvbn,int wrtblks,int reuse);
+unsigned accesschunk(struct _fcb *fcb,unsigned vbn,
                      char **retbuff,unsigned *retblocks,unsigned wrtblks);
-unsigned access_extend(struct FCB_not *fcb,unsigned blocks,unsigned contig);
-unsigned update_freecount(struct VCBDEV *vcbdev,unsigned *retcount);
-unsigned update_create(struct VCB *vcb,struct _fiddef *did,char *filename,
-                       struct _fiddef *fid,struct FCB_not **fcb);
-unsigned update_extend(struct FCB_not *fcb,unsigned blocks,unsigned contig);
+unsigned access_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);
+unsigned update_freecount(struct _vcb *vcbdev,unsigned *retcount);
+unsigned update_create(struct _vcb *vcb,struct _fiddef *did,char *filename,
+                       struct _fiddef *fid,struct _fcb **fcb);
+unsigned update_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);
 unsigned short checksum(vmsword *block);

@@ -1,3 +1,4 @@
+#if 0
 /* Cache.c v1.3   Caching control routines */
 
 /*
@@ -381,3 +382,4 @@ void *cache_find(void **root,unsigned hashval,void *keyval,unsigned *retsts,
     }
     return cacheobj;
 }
+#endif

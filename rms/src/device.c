@@ -26,6 +26,8 @@
 #include <ssdef.h>
 
 #include <mytypes.h>
+#include <aqbdef.h>
+#include <ddbdef.h>
 #include <fatdef.h>
 #include <vcbdef.h>
 #include <descrip.h>
@@ -37,6 +39,7 @@
 #include <fibdef.h>
 #include <fiddef.h>
 #include <rmsdef.h>
+#include <ucbdef.h>
 #include <xabdef.h>
 #include <xabdatdef.h>
 #include <xabfhcdef.h>
@@ -60,24 +63,28 @@ struct phyio_info {
 
 void *device_create(unsigned devsiz,void *keyval,unsigned *retsts)
 {
-    register char *devnam = (char *) keyval;
-    register struct DEV *dev = (struct DEV *) vmalloc(sizeof(struct DEV) + devsiz + 2);
+    char *devnam = (char *) keyval;
+    struct _ucb *dev = (struct _ucb *) vmalloc(sizeof(struct _ucb) + devsiz + 2);
     if (dev == NULL) {
         *retsts = SS$_INSFMEM;
     } else {
-        register unsigned sts;
+        unsigned sts;
         struct phyio_info info;
+#if 0
         dev->cache.objmanager = NULL;
         dev->cache.objtype = 1;
+#endif
+#if 0
         memcpy(dev->devnam,devnam,devsiz);
         memcpy(dev->devnam + devsiz,":",2);
-        sts = phyio_init(devsiz + 1,dev->devnam,&dev->handle,&info);
+#endif
+        sts = phyio_init(devsiz + 1,dev->ucb$l_ddb->ddb$t_name,&dev->ucb$l_vcb->vcb$l_aqb->aqb$l_acppid,&info);
         *retsts = sts;
         if (sts & 1) {
-            dev->vcb = NULL;
-            dev->status = info.status;
-            dev->sectors = info.sectors;
-            dev->sectorsize = info.sectorsize;
+            dev->ucb$l_vcb = NULL;
+            dev->ucb$b_state = info.status;
+            dev->ucb$b_sectors = info.sectors;
+	    //            dev->sectorsize = info.sectorsize;
         } else {
             vfree(dev);
             dev = NULL;
@@ -90,11 +97,11 @@ void *device_create(unsigned devsiz,void *keyval,unsigned *retsts)
 
 int device_compare(unsigned keylen,void *keyval,void *node)
 {
-    register struct DEV *devnode = (struct DEV *) node;
-    register int cmp = 0;
-    register int len = keylen;
-    register char *keynam = (char *) keyval;
-    register char *devnam = devnode->devnam;
+    struct _ucb *devnode = (struct _ucb *) node;
+    int cmp = 0;
+    int len = keylen;
+    char *keynam = (char *) keyval;
+    char *devnam = devnode->ucb$l_ddb->ddb$t_name;
     while (len-- > 0) {
         cmp = toupper(*keynam++) - toupper(*devnam++);
         if (cmp != 0) break;
@@ -104,18 +111,18 @@ int device_compare(unsigned keylen,void *keyval,void *node)
 
 /* device_lookup() is to to find devices... */
 
-struct DEV *dev_root = NULL;
+struct _ucb *dev_root = NULL;
 
-unsigned device_lookup(unsigned devlen,char *devnam,
-                       int create,struct DEV **retdev)
+unsigned device_lookup_not(unsigned devlen,char *devnam,int create,struct _ucb **retdev)
 {
-    register struct DEV *dev;
+#if 0
+    struct _ucb *dev;
     unsigned sts = 1,devsiz = 0;
     while (devsiz < devlen) {
         if (devnam[devsiz] == ':') break;
         devsiz++;
     }
-    dev = (struct DEV *) cache_find((void **) &dev_root,devsiz,devnam,&sts,
+    dev = (struct _ucb *) cache_find((void **) &dev_root,devsiz,devnam,&sts,
                                     device_compare,create ? device_create : NULL);
     if (dev == NULL) {
         if (sts == SS$_ITEMNOTFOUND) sts = SS$_NOSUCHDEV;
@@ -124,4 +131,29 @@ unsigned device_lookup(unsigned devlen,char *devnam,
         sts = SS$_NORMAL;
     }
     return sts;
+#endif
 }
+
+extern struct _ucb * myfilelist[50];
+extern int myfilelistptr;
+
+unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **retdev)
+{
+    struct _ucb *dev;
+    int i;
+    unsigned sts = 1,devsiz = 0;
+    for (i=0;i<myfilelistptr;i++) {
+      dev=myfilelist[i];
+      if (strlen(dev->ucb$l_ddb->ddb$t_name)==strlen(devnam) && strncmp(dev->ucb$l_ddb->ddb$t_name,devnam,strlen(devnam))==0) goto end;
+    }
+ end:
+    if (dev == NULL) {
+        if (sts == SS$_ITEMNOTFOUND) sts = SS$_NOSUCHDEV;
+    } else {
+        *retdev = dev;
+        sts = SS$_NORMAL;
+    }
+    return sts;
+}
+
+
