@@ -73,7 +73,7 @@ int mmg$credel(int acmode, void * first, void * last, void (* pagesubr)(), struc
     return SS$_NOPRIV;
   mymmg.mmg$l_pagesubr=pagesubr;
   while (tmp<last) {
-    pagesubr(0,tmp,0,+PAGE_SIZE,0,newpte);      // crepag or del
+    pagesubr(0,tmp,p,+PAGE_SIZE,0,newpte);      // crepag or del
     tmp=tmp+PAGE_SIZE;
   }
   return SS$_NORMAL;
