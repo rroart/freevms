@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified DFU source file, 2004.
+
 /*
      DFU V2.2
 
@@ -15,23 +21,46 @@
 #pragma message disable(INCOMPARRY)
 #endif
 
-#include ssdef
-#include atrdef
-#include libdef
-#include stdio
-#include descrip
-#include climsgdef
-#include syidef
-#include rms
-#include "fibdef"
-#include "file_hdr"
-#include iodef
-#include sor$routines
-#include smgdef
-#include trmdef
+#include <ssdef.h>
+#include <atrdef.h>
+#include <libdef.h>
+#include <stdio.h>
+#include <descrip.h>
+#include <climsgdef.h>
+#include <syidef.h>
+#include <rms.h>
+#include "fibdef.h"
+#include "file_hdr.h"
+#include <iodef.h>
+#if 0
+#include <sor$routines.h>
+#endif
+#include <smgdef.h>
+#include <trmdef.h>
 #ifndef IO$M_MOVEFILE
 #define IO$M_MOVEFILE 4096
 #endif
+
+#define globalvalue int
+#define TRUE 1
+#define FALSE 0
+#define SYS$QIO sys$qiow
+#define SYS$QIOW sys$qiow
+#define SYS$ASSIGN sys$assign
+#define SYS$DASSGN sys$dassgn
+#define SYS$SEARCH sys$search
+#define SYS$PARSE sys$parse
+#define SYS$FAO sys$fao
+#define SYS$ASCTIM sys$asctim
+#define SYS$BINTIM sys$bintim
+#define SYS$WAITFR sys$waitfr
+#define SYS$GETJPIW sys$getjpiw
+#define SYS$GETSYIW sys$getsyiw
+#define SYS$GETDVIW sys$getdviw
+
+#define FAB _fabdef
+#define NAM _namdef
+#define RAB _rabdef
 
 typedef unsigned long Boolean;
 
@@ -45,9 +74,15 @@ extern Boolean smg$enable;
 extern char outbuf[255];
 
 /* Share memory space */
+#if 0
 extern _align(PAGE) struct _hdr {
     char block[512];
     } header[1001];
+#else
+struct _hdr {
+    char block[512];
+    } header[1001];
+#endif
 
 static unsigned int status, version, alloc, ratio, truncsize, lbn;
 static Boolean matalias, matcheck, matversion, matdump, 
@@ -61,6 +96,7 @@ globalvalue DFU_ASSIGN, DFU_NOPRIV;
 
 int display_stat();
 
+#if 0
 int set_command(mask)
 /* 
    Set any file attribute you like!
@@ -270,12 +306,17 @@ int set_command(mask)
       { sprintf(outbuf,"Modify %s ? : ",res_str);
         ans[0] = 'n'; x = 4;
         prompt.dsc$w_length = strlen(outbuf);
+#if 0
         if (smg$enable) 
           status = SMG$READ_COMPOSED_LINE(&keyb_id, 0, &answer,
             &prompt , &x, &disp1_id, &modifiers, 0,0,0,0,0);
          else
           status = SMG$READ_COMPOSED_LINE(&keyb_id, 0, &answer,
             &prompt , &x, 0 , &modifiers, 0,0,0,0,0);
+#else
+	printf("%s",prompt.dsc$a_pointer);
+	read(0,ans,254);
+#endif
         if ((ans[0] == 'a') || (ans[0] == 'A'))
         { matconfirm = FALSE; 
           ans[0] = 'y'; 
@@ -385,6 +426,7 @@ next_name:
   put_disp();
   return(1);
 }
+#endif
 
 int delete_file(unsigned short id[3], unsigned short dchan, 
                   Boolean noremove, Boolean deldir, Boolean nolog,
@@ -678,6 +720,7 @@ next_del:
   return(1);
 }
 
+#if 0
 int parse_tree(short int dchan, char *r_str, Boolean nolog)
 /* 
    Subroutine to parse for all subdirectories.
@@ -760,6 +803,7 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
   sor$end_sort();
   return(1);
 }
+#endif
 
 int delete_command(mask)
 /*
@@ -769,6 +813,7 @@ int delete_command(mask)
 
 { static char device[64], dummy[7], dname[160], exp_str[255], 
     res_str[255], t_str[255];
+#if 0
   unsigned long tmp;
   struct FAB fab;
   struct NAM nam;
@@ -925,8 +970,10 @@ int delete_command(mask)
   sprintf(outbuf,"\n%%DFU-I-READY, DELETE command ready");
   put_disp();
   if (matstat) status = lib$show_timer(0,0,display_stat,0);
+#endif
 }  
 
+#if 0
 int defrag_command(mask)
 /*
    Defrag files using the XQP MOVEFILE function.
@@ -1044,6 +1091,7 @@ int defrag_command(mask)
   if (matstat) status = lib$show_timer(0,0,display_stat,0);
   return(1);
 }
+#endif
 
 int move_to_lbn(unsigned short * from, unsigned int lbn_to, 
                 unsigned short chan)
@@ -1188,6 +1236,7 @@ int movefile(char *defr_file, int flag)
   return(status);
 }
 
+#if 0
 int directory_command(mask)
 /*
    Performs the directory command
@@ -1337,6 +1386,7 @@ int directory_command(mask)
   fclose(fp);
   return(1);
 }
+#endif
 
 void create_dir (char *crea_file, int all_size)
 /*

@@ -205,7 +205,7 @@ struct header_area_struct {
   union {			/* Record type - consists of 2 parts	*/
     unsigned char  rtype;
     struct {
-      unsigned rtype:4;		/*   Record type field -
+      unsigned char rtype:4;		/*   Record type field -
 					FAT$C_UNDEFINED		0
 					FAT$C_FIXED		1
 					FAT$C_VARIABLE		2
@@ -214,7 +214,7 @@ struct header_area_struct {
 					FAT$C_STREAMLF		5
 					FAT$C_STREAMCR		6	*/
 
-      unsigned fileorg:4;	/*   File organization -
+      unsigned char fileorg:4;	/*   File organization -
 					FAT$C_SEQUENTIAL	0
 					FAT$C_RELATIVE		1
 					FAT$C_INDEXED		2
@@ -273,10 +273,10 @@ struct header_area_struct {
   union {
     unsigned short   fileprot;	/* File protection code			*/
     struct {
-      unsigned system : 4;	/*    System access rights		*/
-      unsigned owner  : 4;	/*    Owner access rights		*/
-      unsigned group  : 4;	/*    Group access rights		*/
-      unsigned world  : 4;	/*    World access rights		*/
+      unsigned short system : 4;	/*    System access rights		*/
+      unsigned short owner  : 4;	/*    Owner access rights		*/
+      unsigned short group  : 4;	/*    Group access rights		*/
+      unsigned short world  : 4;	/*    World access rights		*/
 				/*     Bit	Meaning if set
 					0	Deny read access
 					1	Deny write access
@@ -303,13 +303,13 @@ struct header_area_struct {
   union {
     unsigned char  journal;		/* Journal control flags	*/
     struct {
-      unsigned only_ru	    : 1; /* 0 - Access only via recovery unit	*/
-      unsigned rujnl	    : 1; /* 1 - Recovery unit journaling enabled*/
-      unsigned bijnl	    : 1; /* 2 - Before-image journaling	enabled	*/
-      unsigned aijnl	    : 1; /* 3 - After-image journaling enabled	*/
-      unsigned atjnl	    : 1; /* 4 - Audit-trail journaling enabled	*/
-      unsigned never_ru	    : 1; /* 5 - No access via recovery unit	*/
-      unsigned journal_file : 1; /* 6 - File is an RMS journal file	*/
+      unsigned char only_ru	    : 1; /* 0 - Access only via recovery unit	*/
+      unsigned char rujnl	    : 1; /* 1 - Recovery unit journaling enabled*/
+      unsigned char bijnl	    : 1; /* 2 - Before-image journaling	enabled	*/
+      unsigned char aijnl	    : 1; /* 3 - After-image journaling enabled	*/
+      unsigned char atjnl	    : 1; /* 4 - Audit-trail journaling enabled	*/
+      unsigned char never_ru	    : 1; /* 5 - No access via recovery unit	*/
+      unsigned char journal_file : 1; /* 6 - File is an RMS journal file	*/
       } journal_bits;
     } journal_overlay;
 
@@ -371,12 +371,12 @@ struct map_0_struct {
   union {
     unsigned short map_type;
     struct {
-      unsigned exact  :  1;	/* Placement is exact			*/
-      unsigned oncyl  :  1;	/* Space allocated on a single cylinder	*/
-      unsigned fill   : 10;	/* Unused bits				*/
-      unsigned lbn    :  1;	/* Allocate space using LBN in next ptr	*/
-      unsigned rvn    :  1;	/* Allocate space on this rel. volume	*/
-      unsigned format :  2;	/* Must be FM2$C_PLACEMENT (0)		*/
+      unsigned short exact  :  1;	/* Placement is exact			*/
+      unsigned short oncyl  :  1;	/* Space allocated on a single cylinder	*/
+      unsigned short fill   : 10;	/* Unused bits				*/
+      unsigned short lbn    :  1;	/* Allocate space using LBN in next ptr	*/
+      unsigned short rvn    :  1;	/* Allocate space on this rel. volume	*/
+      unsigned short format :  2;	/* Must be FM2$C_PLACEMENT (0)		*/
       } format_bits;
     } map_code;
   };
@@ -391,9 +391,9 @@ struct map_1_struct {
   union {
     unsigned short map_type;	
     struct {
-      unsigned count   : 8;	/* Number of blocks pointed to (< 256)	*/
-      unsigned highlbn : 6;	/* High order 6 bits of LBN		*/
-      unsigned format  : 2;	/* Must be FM2$C_FORMAT1 (1)		*/
+      unsigned short count   : 8;	/* Number of blocks pointed to (< 256)	*/
+      unsigned short highlbn : 6;	/* High order 6 bits of LBN		*/
+      unsigned short format  : 2;	/* Must be FM2$C_FORMAT1 (1)		*/
       } format_bits;
     } map_code;
   unsigned short lowlbn;	/* Low order 16 bit of LBN		*/
@@ -410,8 +410,8 @@ struct map_2_struct {
   union {
     unsigned short map_type;	
     struct {
-      unsigned count  : 14;	/* Number of blocks pointed to (< 16384)*/
-      unsigned format :  2;	/* Must be FM2$C_FORMAT2 (2)		*/
+      unsigned short count  : 14;	/* Number of blocks pointed to (< 16384)*/
+      unsigned short format :  2;	/* Must be FM2$C_FORMAT2 (2)		*/
       } format_bits;
     } map_code;
   unsigned int lbn;		/* Starting LBN for this extent		*/
@@ -428,8 +428,8 @@ struct map_3_struct {
   union {
     unsigned short map_type;	
     struct {
-      unsigned hicount : 14;	/* High order part of the block count	*/
-      unsigned format  :  2;	/* Must be FM2$C_FORMAT3 (3)		*/
+      unsigned short hicount : 14;	/* High order part of the block count	*/
+      unsigned short format  :  2;	/* Must be FM2$C_FORMAT3 (3)		*/
       } format_bits;
     } map_code;
   unsigned short lowcount;	/* Low order part of the block count	*/

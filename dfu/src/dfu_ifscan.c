@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified DFU source file, 2004.
+
 /*
 	DFU V2.2
 
@@ -16,26 +22,47 @@
 #pragma message disable(GLOBALEXT)
 #endif
 
-#include "file_hdr"
-#include "home2def"
-#include ssdef
-#include stdio
-#include descrip
-#include "fibdef"
-#include clidef
-#include climsgdef
-#include lib$routines
-#include libdef
-#include sor$routines
-#include atrdef
-#include dcdef
-#include devdef
-#include mntdef
-#include dvidef
-#include iodef
-#include strdef
-#include trmdef
-#include smgdef
+#include "file_hdr.h"
+#include "home2def.h"
+#include <ssdef.h>
+#include <stdio.h>
+#include <descrip.h>
+#include "fibdef.h"
+#include <clidef.h>
+#include <climsgdef.h>
+#if 0
+#include <lib$routines.h>
+#endif
+#include <libdef.h>
+#if 0
+#include <sor$routines.h>
+#endif
+#include <atrdef.h>
+#include <dcdef.h>
+#include <devdef.h>
+#include <mntdef.h>
+#include <dvidef.h>
+#include <iodef.h>
+#include <strdef.h>
+#include <trmdef.h>
+#include <smgdef.h>
+
+#define globalvalue int
+#define TRUE 1
+#define FALSE 0
+#define SYS$QIO sys$qiow
+#define SYS$QIOW sys$qiow
+#define SYS$ASSIGN sys$assign
+#define SYS$DASSGN sys$dassgn
+#define SYS$SEARCH sys$search
+#define SYS$PARSE sys$parse
+#define SYS$FAO sys$fao
+#define SYS$ASCTIM sys$asctim
+#define SYS$BINTIM sys$bintim
+#define SYS$WAITFR sys$waitfr
+#define SYS$GETJPIW sys$getjpiw
+#define SYS$GETSYIW sys$getsyiw
+#define SYS$GETDVIW sys$getdviw
 
 typedef unsigned long Boolean;
 
@@ -76,10 +103,17 @@ const int iocnt=2;
 
 char block[512]; 	/* One page/block */
 
+#if 0
 extern _align(PAGE) struct _hdr {	
                         /* Large enough to hold 1001 headers */
 	char block[512];
 	} header[1001];
+#else
+extern struct _hdr {	
+                        /* Large enough to hold 1001 headers */
+	char block[512];
+	} header[1001];
+#endif
 
 static struct _ibmap {
 	char block[512];
@@ -155,6 +189,7 @@ void do_abort(void)
   put_status(2);
 }
 
+#if 0 
 int search_command (int mask)
 
 /*
@@ -382,7 +417,11 @@ int search_command (int mask)
     {strcpy(fname,"SYS$OUTPUT:"); file_descr.dsc$w_length = 11;}
     else
      fname[file_descr.dsc$w_length] = '\0'; 
+#if 0
   fp = fopen(fname,"w","mrs=255","rfm=var","ctx=rec","rat=cr","rop=WBH");	
+#else
+  fp = stdout;
+#endif
   clean_flags.fopen = 1;
   if (matsort == FALSE)
     clean_flags.sort = 0;
@@ -416,7 +455,9 @@ int search_command (int mask)
 
   curvol = 1; size = 1;
   ctx.end = FALSE;
+#if 0
   if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_OFF);
+#endif
   while ((curvol <= maxvol) && (!ctx.end))
   { ctx.i = -1; /* Clear context */
     if (rvt[curvol].i_open ==1) 
@@ -809,7 +850,9 @@ nexti: status = get_next_header();
   if (matstat == TRUE) status = lib$show_timer(0,0,display_stat,0);
   return(1);
 }            
+#endif
 
+#if 0
 int report_command(int mask)
 /*
     Create disk fragmentation report
@@ -867,7 +910,11 @@ int report_command(int mask)
     {strcpy(fname,"SYS$OUTPUT:"); file_descr.dsc$w_length = 11;}
     else
     {fname[file_descr.dsc$w_length] = '\0'; }
+#if 0
   fp = fopen(fname,"w","mrs=255","rfm=var","ctx=rec","rat=cr","rop=WBH");	
+#else
+  fp= stdout;
+#endif
   clean_flags.fopen = 1;
 
 /* All qualifiers parsed */
@@ -884,7 +931,9 @@ int report_command(int mask)
 
   curvol = 1; size = 1;
   ctx.end = FALSE;
+#if 0
   if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_OFF);
+#endif
   while ((curvol <= maxvol) && (!ctx.end))
   { ctx.i = -1; /* Clear context */
     if (rvt[curvol].i_open ==1) 
@@ -1262,9 +1311,15 @@ int undel_command(int mask)
     if (status != 0) matoutput = TRUE;
   }
   if (matoutput)
+#if 0
   { fp = fopen(fname,"w","mrs=255","rfm=var","ctx=rec","rat=cr","rop=WBH");	
     clean_flags.fopen = 1;
   }
+#else
+  { fp = stdout;
+    clean_flags.fopen = 1;
+  }
+#endif
 
 /* Ident or UIC */
   status = parse_item("ident", &id_descr, 0, &matuic, 0);
@@ -1360,7 +1415,9 @@ int undel_command(int mask)
   }
 
 /* Loop for all volumes in the set */
+#if 0
   if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_OFF);
+#endif
   while ((curvol <= maxvol) && (!ctx.end))
   { ctx.i = -1;
     if (rvt[curvol].i_open ==1) 
@@ -1487,6 +1544,7 @@ int undel_command(int mask)
 	x = 4; ans[0] = 'n';
 	if (!matlist)
 	  if(!matnoconfirm)
+#if 0
           { if (smg$enable)
             { SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_ON);
               status = SMG$READ_COMPOSED_LINE(&keyb_id, 0, &answer,
@@ -1498,6 +1556,7 @@ int undel_command(int mask)
                  &prompt, &k, 0, &modifiers, 0,0,0,0,0);
            }
 	   else
+#endif
 	    strcpy(ans,"Y");
 	if ((ans[0] == 'y') || (ans[0] == 'Y')) 
 	{  
@@ -1774,6 +1833,7 @@ next_und: status = get_next_header();
   if (matstat == TRUE) status = lib$show_timer(0,0,display_stat,0);
   return(1);
 }
+#endif
 
 int make_syslost(struct f_id *l_fid)
 /* 
@@ -1901,14 +1961,20 @@ int verify_command(int mask)
 
   progress_ind = TRUE;
   y = 0;
+#if 0
   status = parse_item("fix", &dummy_descr, 0, &matfix, 2);
   status = parse_item("rebuild", &dummy_descr, 0, &matreb, 2);
+#else
+  matfix=0;
+  matreb=0;
+#endif
 /* Check the privileges */
   if ( ((matfix) || (matreb)) && (mask > -1))
   { singlemsg(0, DFU_NOPRIV);
     return(SS$_NOPRIV);
   }
 /* Get device name */
+#if 0
   status = parse_item("device", &device_descr, 0, &dummy , 0);
   if (status == 1) 
   { if (strindex(&device,":",64) == -1) 
@@ -1917,18 +1983,35 @@ int verify_command(int mask)
 	device_descr.dsc$w_length += 1;
       }
   }
+#else
+  memcpy(device,"dfa0:",4);
+  device_descr.dsc$w_length=4;
+#endif
+#if 0
   status = parse_item("statistics", &dummy_descr, 0, &matstat, 2);
   status = parse_item("lock", &dummy_descr, 0, &matlock, 2);
+#else
+  matstat=0;
+  matlock=0;
+#endif
   if (matreb) matlock = TRUE; /* Lock anyway if rebuild requested */
   for (i=0; i < 750; i++) usage_table[i].flag = 0;
 /* Get output file */
   clean_flags.fopen = 0;
+#if 0
   status = parse_item("outfile", &file_descr, 0, &matoutput , 0);
+#else
+  matoutput=0;
+#endif
   if (matoutput == FALSE) 
     {strcpy(fname,"SYS$OUTPUT:"); file_descr.dsc$w_length = 11;}
     else
     {fname[file_descr.dsc$w_length] = '\0'; }
+#if 0
   fp = fopen(fname,"w","mrs=255","rfm=var","ctx=rec","rat=cr","rop=WBH");	
+#else
+  fp = stdout;
+#endif
   clean_flags.fopen = 1;
 
 /* Fill in FIB */
@@ -1969,7 +2052,9 @@ int verify_command(int mask)
 
   curvol = 1; size = 1;
   ctx.end = FALSE;
+#if 0
   if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_OFF);
+#endif
   multalloc = FALSE; 
   while ((curvol <= maxvol) && (!ctx.end))
   { ctx.i = -1; trigger = FALSE;
@@ -2586,7 +2671,9 @@ int build_dir_table(char *dev_str, Boolean matoutput)
 
   curvol = 1; size = 1;
   ctx.end = FALSE;
+#if 0
   if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_OFF);
+#endif
   while ((curvol <= maxvol) && (!ctx.end))
   { ctx.i = -1;
     if (rvt[curvol].i_open ==1) 
@@ -2709,6 +2796,7 @@ next_file: status = get_next_header();
   return(1);
 }
 
+#if 0
 int parse_item(char *inp, struct dsc$descriptor *return_descr,
 	       int *convert, Boolean *flag, int typ) 
   /* Check presence of parameter  in command line
@@ -2837,6 +2925,7 @@ int parse_item(char *inp, struct dsc$descriptor *return_descr,
   }
   else return(1);
 }
+#endif
 
 void fid_to_name(char * ret_dir)
 /* 
@@ -3309,9 +3398,11 @@ void cleanup()
   { stat = fclose(fp);
   }
 
+#if 0
   if (clean_flags.sort == 1) 
   { stat = sor$end_sort();
   }
+#endif
 
   if (clean_flags.events == 1) 
     for (i=1; i <= iocnt ; i++) 

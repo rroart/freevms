@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified DFU source file, 2004.
+
 /*
      DFU V2.2
 
@@ -13,13 +19,30 @@
 #pragma message disable(GLOBALEXT)
 #endif
 
-#include "fibdef"
-#include ssdef
-#include iodef
-#include libdef
-#include stdio
-#include descrip
-#include "file_hdr"
+#include "fibdef.h"
+#include <ssdef.h>
+#include <iodef.h>
+#include <libdef.h>
+#include <stdio.h>
+#include <descrip.h>
+#include "file_hdr.h"
+
+#define globalvalue int
+#define TRUE 1
+#define FALSE 0
+#define SYS$QIO sys$qiow
+#define SYS$QIOW sys$qiow
+#define SYS$ASSIGN sys$assign
+#define SYS$DASSGN sys$dassgn
+#define SYS$SEARCH sys$search
+#define SYS$PARSE sys$parse
+#define SYS$FAO sys$fao
+#define SYS$ASCTIM sys$asctim
+#define SYS$BINTIM sys$bintim
+#define SYS$WAITFR sys$waitfr
+#define SYS$GETJPIW sys$getjpiw
+#define SYS$GETSYIW sys$getsyiw
+#define SYS$GETDVIW sys$getdviw
 
 typedef unsigned long Boolean;
 
@@ -29,7 +52,11 @@ typedef struct _qb { int flags, uic_long, usage, permquota,
                      overdraft, unused[3]; };
 
 extern unsigned int ctrlc;
+#if 0
 extern unsigned int lbnstart, lbncount;
+#else
+unsigned int lbnstart, lbncount;
+#endif
 extern Boolean trigger;
 extern char outbuf[255];
 

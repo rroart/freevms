@@ -1,12 +1,8 @@
 EXE = .exe
 NOEXE = 
 
-export LIBGCC = `gcc -print-libgcc-file-name`
-
-export LIBC = /usr/lib/libc.a
-
-LIB = ../../starlet/src/starlet.a
-LIBUM = ../../starlet/src/starletum.a
+LIB = ../../starlet/src/starlet.a ../../librtl/src/starlet.a
+LIBUM = ../../starlet/src/starletum.a ../../librtl/src/starlet.a
 
 FLAGS = -static
 
@@ -21,19 +17,23 @@ install: all
 	install um/* ../../rootum/vms"$$"common/sysexe
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
+OBJS = dfu.o dfu_bitmap.o dfu_filedir.o dfu_ifscan.o
+
 %.o: %.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
-i386/dfu${NOEXE}: dfu.o $(LIB)
+i386/dfu${NOEXE}: $(LIB) $(OBJS)
 	install -d i386
-	gcc -s -static dfu.o ../../starlet/src/starlet.a -o i386/dfu${NOEXE}
-i386/dfu${EXE}: dfu.o $(LIB)
-	../../linker/src/linker $(LINKPRE) dfu.o ../../starlet/src/starlet.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o dfu${EXE}
+	gcc -g -static $(OBJS) $(LIB) -o i386/dfu${NOEXE}
+
+i386/dfu${EXE}: $(LIB) $(OBJS) 
+	install -d i386
+	../../linker/src/linker $(LINKPRE) $(OBJS) $(LIB) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dfu${EXE}
 
 UMDEF=-Dcompile_um -I.
 
-um/dfu${NOEXE}: dfu.c $(LIBUM)
+um/dfu${NOEXE}: dfu.c $(LIBUM) $(OBJS)
 	install -d um
-	gcc $(FLAGS) -g $(UMDEF) -I../../starlet/src -I../../librtl/src/ -I../../lib/src dfu.c ../../starlet/src/starletum.a -o dfuum${NOEXE}
+	gcc $(FLAGS) -g $(UMDEF) $(OBJS) $(LIBUM) -o um/dfu${NOEXE}
 
 um/dfu${EXE}:

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified DFU source file, 2004.
+
 /******************************************************
 *
 *	(C)opyright Digital Equipment Corp. 1995
@@ -11,17 +17,76 @@
 #pragma message disable(GLOBALEXT)
 #endif
 
-#include clidef         
-#include climsgdef
-#include descrip
-#include stdio
-#include lib$routines
-#include ssdef
-#include jpidef
-#include smgdef
-#include signal
-#include tt2def
-#include iodef
+#include <clidef.h>         
+#include <climsgdef.h>
+#include <descrip.h>
+#include <stdio.h>
+#include <lib$routines.h>
+#include <ssdef.h>
+#include <jpidef.h>
+#include <smgdef.h>
+#include <signal.h>
+#include <tt2def.h>
+#include <iodef.h>
+#if 1
+#include <syidef.h>
+#include <misc.h>
+#endif
+
+#define globalvalue int
+#define TRUE 1
+#define FALSE 0
+#define SYS$QIO sys$qiow
+#define SYS$QIOW sys$qiow
+#define SYS$ASSIGN sys$assign
+#define SYS$DASSGN sys$dassgn
+#define SYS$SEARCH sys$search
+#define SYS$PARSE sys$parse
+#define SYS$FAO sys$fao
+#define SYS$ASCTIM sys$asctim
+#define SYS$BINTIM sys$bintim
+#define SYS$WAITFR sys$waitfr
+#define SYS$GETJPIW sys$getjpiw
+#define SYS$GETSYIW sys$getsyiw
+#define SYS$GETDVIW sys$getdviw
+unsigned long lib$init_timer() { return SS$_NORMAL; }
+unsigned long lib$show_timer() { return SS$_NORMAL; }
+int SYS$DCLEXH() { return SS$_NORMAL; }
+int SYS$CANEXH() { return SS$_NORMAL; }
+int check_vms_mm() {
+  int retlenaddr;
+  int mem=0;
+  struct item_list_3 lst[14], syilst[2];
+  syilst[0].buflen=4;
+  syilst[0].item_code=SYI$_LASTFLD;
+  syilst[0].bufaddr=&mem;
+  syilst[0].retlenaddr=&retlenaddr;
+  syilst[1].buflen=0;
+  syilst[1].item_code=0;
+
+  int sts=sys$getsyi(0,0,0,syilst,0,0,0);
+
+  return mem;
+}
+
+int vms_mm;
+
+int SYS$EXPREG(int pagcnt, long ret[2], int a, int b) {
+  if (vms_mm) 
+    return sys$expreg(pagcnt,ret,a,b);
+  int size=pagcnt*4096; // check
+  ret[0]=malloc(size);
+  ret[1]=ret[0]+size;
+  return SS$_NORMAL;
+}
+int SYS$DELTVA(long in[2], long ret[2], int a) {
+  if (vms_mm)
+    return sys$deltva(in,ret,a);
+  free(in[0]);
+  ret[0]=in[0];
+  ret[1]=in[1];
+  return SS$_NORMAL;
+}
 typedef unsigned long Boolean;
 
 globalvalue dfu_tables;
@@ -30,17 +95,24 @@ globalvalue dfu_tables;
 int key_tab, status, cip, orig_colls;
 static int orgttchar[3], ttchar[3];
 
+#if 0
 extern char outbuf[255];
 extern unsigned int ctrlc, tchan, disp_id, disp1_id, rows, colls,
                     disp2_id, status_id, paste_id, help_id, keyb_id;
 extern Boolean smg$enable;
+#else
+char outbuf[255];
+unsigned int ctrlc, tchan, disp_id, disp1_id, rows, colls,
+                    disp2_id, status_id, paste_id, help_id, keyb_id;
+Boolean smg$enable;
+#endif
 
 static FILE *xp;
 int astrtn(), refresh() ; /* Ast routines called by CTRLC,Y and W */
 unsigned int prim_hand(), brdcst_ast();
 void singlemsg(),put_disp(), put_status();
 
-main()
+main(int argc, char *argv[])
 
 /*	MAIN 
 
@@ -80,12 +152,24 @@ main()
 
 /* First find out how we got called ( by RUN, or a foreign command */
    ret_len = 0;
+#if 0
    status = lib$get_foreign(&input_line,0,&ret_len,0); 
+#else
+   status = 1;
+#if 0
+   strcpy(command_line,argv[1]);
+#endif
+#endif
    out_len = ret_len; 
 
    smg$enable = TRUE;
    key_tab = 0; disp2_id = 0; cip = 0;
 
+#if 1
+   setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
+   smg$enable = FALSE;
+   vms_mm = check_vms_mm();
+#else
 /* Now create the SMG environment */
  
    colls=80;rows=24;
@@ -131,6 +215,7 @@ main()
      SMG$SET_CURSOR_ABS(&disp2_id,&1,&1);  
      SMG$BEGIN_PASTEBOARD_UPDATE(&paste_id);
    }
+#endif
 
    sprintf(outbuf,"\n     Disk and File Utilities for OpenVMS DFU V2.2");
    put_disp();
@@ -158,12 +243,15 @@ main()
      put_disp();
      sprintf(outbuf,"     VERIFY     : Check and repair disk structure"); 
      put_disp();
+#if 0
      SMG$END_PASTEBOARD_UPDATE(&paste_id);
+#endif
    }  
 
    prvmask = 0;
    status = dfu_check_access(&prvmask);  /*Get the privilege mask */
 
+#if 0
 /* Setup terminal channel for control purposes; get the terminal chars */
    status = SYS$ASSIGN(&terminal, &tchan, 0,0);
    status = SYS$QIOW(0,tchan, IO$_SENSEMODE,0,0,0,&orgttchar,12,0,0,0,0);
@@ -179,8 +267,10 @@ main()
        status = SMG$READ_COMPOSED_LINE(&keyb_id,0,&input_line,&prompt,
          &out_len,0,0,0,0,0,0);
    }
+#endif
 
    cip = 1;
+   return verify_command(0);
 
 /* Main loop starts here. Get a command and pasre it*/
    for (;;)
@@ -190,6 +280,7 @@ main()
      if (out_len == 0) goto endfor;
 
 /* First catch special screen commands */
+#if 0
      if (smg$enable)
      { status = strncmp(command_line, "PREV_SCREEN", 11);
        if (status == 0) 
@@ -222,15 +313,19 @@ main()
        SMG$CHANGE_VIEWPORT(&disp1_id,&x,&1,&y,&colls);
        SMG$SET_CURSOR_ABS(&disp1_id,&x,&1);  
      }
+#endif
 
 /* Catch the CLI errors do avoid disrupting the SMG screen... */
+#if 0
      VAXC$ESTABLISH(prim_hand);
      status = CLI$DCL_PARSE(&input_line,dfu_tables,lib$get_input,0,&prompt);
      VAXC$ESTABLISH(NULL);
+#endif
      if (status == CLI$_NOCOMD) singlemsg(0,status);
      if ((status & 1 ) != 1) goto endfor;
       else
 /* Now dispatch if no errors */
+#if 0
      { reset_ctrl();
        CLI$DISPATCH(prvmask);
        clean_ctrlc();
@@ -238,18 +333,22 @@ main()
        status = brdcst_ast();
        if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id, &cursor_on);
      }
+#endif
 endfor:
      if (ret_len !=0) 
      { /* Single command processing , so exit here */
        status += 0x10000000; /* Do not echo the error on DCL level */
        if (smg$enable) 
        { if (colls != orig_colls) toggle_width();
+#if 0
          SMG$SET_CURSOR_ABS(&disp2_id,&2,&1);  
+#endif
        }
        exit(status);
      }
      /* Get next line */
      cip = 0;
+#if 0
      if (smg$enable)
      { SMG$ERASE_LINE(&disp2_id, &1, &1);
        SMG$SET_CURSOR_ABS(&disp2_id,&1,&1);  
@@ -260,6 +359,10 @@ endfor:
       else
        status = SMG$READ_COMPOSED_LINE(&keyb_id,0,&input_line,
                 &prompt,&out_len,0,0,0,0,0,0); /*Get next command */
+#else
+     printf("%s",prompt.dsc$a_pointer);
+     read(0,command_line,254);
+#endif
    }
 }  /* END of MAIN */
 int help_command(int mask)
@@ -269,6 +372,7 @@ int help_command(int mask)
 	Output  : contents of DFUHLP helplib.
 */
 {  unsigned int x,flag=1,tmp=0;
+#if 0
    static char help[80];
    $DESCRIPTOR(help_key ,help);
    $DESCRIPTOR(help_item, "helpkey");
@@ -304,6 +408,7 @@ int help_command(int mask)
      sprintf(outbuf,"%%DFU-E-HELPERR, Error opening help library,");
      put_disp(); singlemsg(0,status);
    }
+#endif
    return(1);
 } /*END help_command */
 
@@ -316,6 +421,7 @@ int exit_command(int mask)
 */
 {  void clean_ctrlc(), toggle_width();
 
+#if 0
    clean_ctrlc(); 
    if (smg$enable)
    { SMG$DISABLE_BROADCAST_TRAPPING(&paste_id);
@@ -324,6 +430,7 @@ int exit_command(int mask)
      SMG$DELETE_PASTEBOARD(&paste_id, &0);
    }
    exit(1);
+#endif
    return(1);
 } /*END exit_command */
 
@@ -334,6 +441,7 @@ int spawn_command(int mask)
   int save_id;
   $DESCRIPTOR(prompt,"DFU_sub$ ");
 
+#if 0
   if (smg$enable)
   { SMG$SAVE_PHYSICAL_SCREEN(&paste_id, &save_id);
     SMG$DISABLE_BROADCAST_TRAPPING(&paste_id);
@@ -349,11 +457,13 @@ int spawn_command(int mask)
     SMG$SET_BROADCAST_TRAPPING(&paste_id,brdcst_ast,0);
   }
   if ((status & 1) !=1) singlemsg(0,status);
+#endif
   return (1);
 }
 
 void prev_screen(void)
 {
+#if 0
   int row_start, cnt;
 
   SMG$GET_VIEWPORT_CHAR(&disp1_id, &row_start);
@@ -368,10 +478,12 @@ void prev_screen(void)
     { cnt = (rows - 10);
       SMG$SCROLL_VIEWPORT(&disp1_id, &SMG$M_DOWN, &cnt);
     }
+#endif
 }
 
 void next_screen(void)
 {
+#if 0
   int row_start, cnt;
 
   SMG$GET_VIEWPORT_CHAR(&disp1_id, &row_start);
@@ -386,6 +498,7 @@ void next_screen(void)
     { cnt = (rows - 10);
       SMG$SCROLL_VIEWPORT(&disp1_id, &SMG$M_UP, &cnt);
     }
+#endif
 }
 
 int dump_actn(struct dsc$descriptor *out_str, int user_arg)
@@ -398,6 +511,7 @@ void dump_screen(void)
 /* Routine to dump the screen contents to a file */
 { char fname[]="DFU_SCREEN.TXT";
 
+#if 0
   xp = fopen(fname,"w","mrs=132","rfm=var","ctx=rec","rat=cr","rop=WBH");
   status = SMG$PUT_PASTEBOARD(&paste_id, dump_actn, 0 , 0);
   if ((status & 1) !=1)
@@ -409,11 +523,13 @@ void dump_screen(void)
     put_disp(); 
   }
   fclose(xp);
+#endif
 }
 
 void toggle_width(void)
 /* Routine to change terminal width */
 {
+#if 0
   if (colls > 80)
     SMG$CHANGE_PBD_CHARACTERISTICS(&paste_id, &80, &colls);
    else           
@@ -423,6 +539,7 @@ void toggle_width(void)
   SMG$CHANGE_VIEWPORT(&disp1_id,0,0,0,&colls);
   SMG$CHANGE_VIRTUAL_DISPLAY(&status_id,0,&colls);
   SMG$CHANGE_VIRTUAL_DISPLAY(&disp2_id,0,&colls);
+#endif
 }
   
 int dfu_check_access(int *mask)
@@ -431,6 +548,7 @@ int dfu_check_access(int *mask)
 */
 
 { int i,j, rights_size, ret_addr, pages;
+#if 0
   unsigned short len;
   int jpi$_rights_size , jpi$_process_rights;
   struct _itm { short buflen, itemcode;
@@ -489,6 +607,7 @@ int dfu_check_access(int *mask)
     }
   }
   free(ret_addr);
+#endif
   return(1);
 }
   
@@ -543,8 +662,10 @@ void clean_ctrlc()
 
 int refresh()
 {
+#if 0
   status = SMG$CANCEL_INPUT(&keyb_id);
   status = SMG$REPAINT_SCREEN(&paste_id);
+#endif
   return(1);
 }
 
@@ -567,7 +688,9 @@ void put_status(int x)
   $DESCRIPTOR(stat_descr, outbuf);
   if (smg$enable)
   { stat_descr.dsc$w_length = strlen(outbuf);
+#if 0
     SMG$PUT_CHARS(&status_id, &stat_descr, &x, &2, &SMG$M_ERASE_LINE);
+#endif
   }
 }
 
@@ -577,7 +700,9 @@ void put_disp(void)
 
   if (smg$enable)
   { to_disp.dsc$w_length = strlen(outbuf);
+#if 0
     SMG$PUT_LINE(&disp1_id, &to_disp,0,0,0,&SMG$M_WRAP_CHAR,0,0);
+#endif
   }
    else printf("%s\n",outbuf);
 }
@@ -591,12 +716,14 @@ void singlemsg(int stat1, int stat)
    int len;                                               
    $DESCRIPTOR(mesg_desc , outbuf);
 
+#if 0
    if (stat1 !=0)
    { SYS$GETMSG(stat1,&mesg_desc.dsc$w_length, &mesg_desc,0,0);
      outbuf[mesg_desc.dsc$w_length]='\0';
      put_disp(); mesg_desc.dsc$w_length = 255;
    }
    SYS$GETMSG(stat,&mesg_desc.dsc$w_length, &mesg_desc,0,0);
+#endif
    outbuf[mesg_desc.dsc$w_length]='\0';
    put_disp(); mesg_desc.dsc$w_length = 255;
 }
@@ -618,13 +745,16 @@ int signal[], mech[];
 
 int params;
 signal[0] -= 2;
+#if 0
 SYS$PUTMSG(signal, actrtn,0,params);
+#endif
 return SS$_CONTINUE;
 }
 
 unsigned int brdcst_ast()
 /* Displays the broadcast messages */
 { static char msg[160];
+#if 0
   int len;
   $DESCRIPTOR(brdcst_msg,msg);
 
@@ -638,5 +768,6 @@ unsigned int brdcst_ast()
     brdcst_msg.dsc$w_length = 160;
     status = SMG$GET_BROADCAST_MESSAGE(&paste_id, &brdcst_msg, &len,0);
   }
+#endif
   return(1);
 }

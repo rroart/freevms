@@ -78,11 +78,11 @@ struct  HM2_Struct {
   union {
     unsigned short volchar;	/* Volume characteristics		*/
     struct {
-      unsigned readcheck  : 1;	/* 0 - Verify all reads from volume	*/
-      unsigned writcheck  : 1;	/* 1 - Verify all writes to volume	*/
-      unsigned erase      : 1;	/* 2 - Erase/overwrite on delete	*/
-      unsigned nohighwater: 1;	/* 3 - Disable highwater marking	*/
-      unsigned class_prot : 1;	/* 4 - Enable classification checks	*/
+      unsigned short readcheck  : 1;	/* 0 - Verify all reads from volume	*/
+      unsigned short writcheck  : 1;	/* 1 - Verify all writes to volume	*/
+      unsigned short erase      : 1;	/* 2 - Erase/overwrite on delete	*/
+      unsigned short nohighwater: 1;	/* 3 - Disable highwater marking	*/
+      unsigned short class_prot : 1;	/* 4 - Enable classification checks	*/
       } volchar_bits;
     } volchar_overlay;
 
@@ -98,10 +98,10 @@ struct  HM2_Struct {
   union {
     unsigned short protect;	/* Volume protection			*/
     struct {
-      unsigned system : 4;	/*    System access			*/
-      unsigned owner  : 4;	/*    Owner access			*/
-      unsigned group  : 4;	/*    Group access			*/
-      unsigned world  : 4;	/*    World access			*/
+      unsigned short system : 4;	/*    System access			*/
+      unsigned short owner  : 4;	/*    Owner access			*/
+      unsigned short group  : 4;	/*    Group access			*/
+      unsigned short world  : 4;	/*    World access			*/
 				/*    Bit	Meaning if set
 				       0	No read access
 				       1	No write access
