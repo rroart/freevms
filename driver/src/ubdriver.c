@@ -688,20 +688,19 @@ static request_queue_t *ubd_get_queue(kdev_t device)
 int ubd_vmsinit(void) {
   unsigned short chan;
   $DESCRIPTOR(u0,"daa0");
+  $DESCRIPTOR(u1,"daa1");
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"ubd0","ubdriver");
   struct _ucb * ucb=&ubd$ucb;
   struct _ddb * ddb=&ubd$ddb;
   struct _crb * crb=&ubd$crb;
   unsigned long idb=0,orb=0;
   struct _ccb * ccb;
-  struct _ucb * newucb;
+  struct _ucb * newucb,newucb1;
 
 //  ioc_std$clone_ucb(&ubd$ucb,&ucb);
   bzero(ucb,sizeof(struct _ucb));
   bzero(ddb,sizeof(struct _ddb));
   bzero(crb,sizeof(struct _crb));
-
-  insertdevlist(ddb);
 
   init_ddb(&ubd$ddb,&ubd$ddt,&ubd$ucb,"daa");
   init_ucb(&ubd$ucb, &ubd$ddb, &ubd$ddt, &ubd$crb);
@@ -712,6 +711,8 @@ int ubd_vmsinit(void) {
   ubd$struc_reinit (crb, ddb, idb, orb, ucb);
   ubd$unit_init (idb, ucb);
 
+  insertdevlist(ddb);
+
   /* for the fdt init part */
   /* a lot of these? */
 
@@ -721,6 +722,13 @@ int ubd_vmsinit(void) {
   registerdevchan(MKDEV(UBD_MAJOR,0),chan);
   ccb = &ctl$ga_ccb_table[chan];
   ccb->ccb$l_ucb->ucb$l_orb=ubd_dev[0].fd;
+
+  ubd_open_dev(&ubd_dev[1]);
+  ioc_std$clone_ucb(&ubd$ucb,&newucb1);
+  exe$assign(&u1,&chan,0,0,0);
+  registerdevchan(MKDEV(UBD_MAJOR,1),chan);
+  ccb = &ctl$ga_ccb_table[chan];
+  ccb->ccb$l_ucb->ucb$l_orb=ubd_dev[1].fd;
 
   return chan;
 }
