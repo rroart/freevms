@@ -120,6 +120,8 @@ int testlibfile_scan_end	(FILE *fptr, int *fstatus, char *cont);
 int testlibfind_file    	(FILE *fptr, int *fstatus, char *cont);
 int testlibfind_file_end    	(FILE *fptr, int *fstatus, char *cont);
 int testliblocc			(FILE *fptr, int *fstatus, char *cont);
+int testlibmatchc		(FILE *fptr, int *fstatus, char *cont);
+int testlibmovc3 		(FILE *fptr, int *fstatus, char *cont);
 int testlibwait			(FILE *fptr, int *fstatus, char *cont);
 
 
@@ -210,6 +212,8 @@ flist[]={
 {"lib$find_file_end",		&testlibfind_file},
 #endif
 {"lib$locc",			&testliblocc},
+{"lib$matchc",			&testlibmatchc},
+{"lib$movc3",			&testlibmovc3},
 {"lib$wait",			&testlibwait}
 };
 
@@ -608,7 +612,6 @@ int	testlibanalyze_sdesc_64 (FILE *fptr, int *fstatus, char *cont)
 	unsigned long type;		/* Length of first string */
 	unsigned long result_code;
 	unsigned short s1_len;
-	unsigned long long s1_long_len;
 	char 	*s1_ptr;			/* Pointer to first string */
 	char 	pt1[10], pv1[10];
 	char 	pt2[10], pv2[10];
@@ -632,8 +635,7 @@ int	testlibanalyze_sdesc_64 (FILE *fptr, int *fstatus, char *cont)
 	printf ("Input   Value    "); str$$print_sd (&s1);	printf ("\n");
 	printf ("\n");
 
-	result_code = lib$analyze_sdesc_64 (&s1, &s1_long_len,&s1_ptr,&type);
-	s1_len = (unsigned short) s1_long_len;
+	result_code = lib$analyze_sdesc_64 (&s1, &s1_len,&s1_ptr,&type);
 
 	print_result_code  (presult,result_code,cont);
 	print_int_compare  ("Type", DSC$K_DTYPE_T, s1.dsc$b_dtype, cont);
@@ -1628,6 +1630,10 @@ char	pv1[10],pv2[10],presult[30];
 
 	result_code = lib$locc (&char_string, &source_string);
 
+	if ( result_code != atoi (presult ) )
+	{	*cont = 'P';
+	}
+
 	printf ("Output Result %d \n",result_code);
 	printf ("\n");
 	printf ("Output Character ");str$$print_sd(&char_string);  printf ("\n");
@@ -1635,4 +1641,74 @@ char	pv1[10],pv2[10],presult[30];
 	printf ("\n");
 
 return result_code;
+}
+
+/************************************************/
+
+int testlibmatchc		(FILE *fptr, int *fstatus, char *cont)
+{
+unsigned long	result_code;
+struct	dsc$descriptor_s char_string, source_string;
+char	pt1[10],pt2[10];
+char	pv1[10],pv2[10],presult[30];
+
+	printf ("Testing LIB$MATCHC \n");
+	printf ("\n\n");
+
+	*fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
+
+	str$$malloc_sd (&char_string, pv1);
+	str$$malloc_sd (&source_string, pv2);
+
+	printf ("Input  Character ");str$$print_sd(&char_string); printf ("\n");
+	printf ("Input  Source    ");str$$print_sd(&source_string);printf ("\n");
+	printf ("\n");
+
+	result_code = lib$matchc (&char_string, &source_string);
+
+	print_lu_compare("INDEX",(unsigned long)atoi(presult),result_code,cont);
+
+	printf ("\n\n");
+	if ( result_code != atoi (presult) )
+	{	*cont = 'P';
+	}
+
+	printf ("Output Result %ld \n",result_code);
+	printf ("\n");
+	printf ("Output Character ");str$$print_sd(&char_string);  printf ("\n");
+	printf ("Output Source    ");str$$print_sd(&source_string);printf ("\n");
+	printf ("\n");
+
+return result_code;
+}
+
+
+/************************************************/
+
+int	testlibmovc3 		(FILE *fptr, int *fstatus, char *cont)
+{
+char	pt1[10],pt2[10], pt3[10];
+char	pv1[30],pv2[30], pv3[30];
+unsigned short length;
+
+	printf ("Testing LIB$MOVC3 \n");
+	printf ("\n\n");
+
+	*fstatus = fscanf (fptr,scan6,pt1,pv1,pt2,pv2,pt3,pv3);
+
+	printf ("Input  Count       "); printf ("%30s \n",pv1);
+	printf ("Input  Source      "); printf ("%30s \n",pv2);
+	printf ("Input  Destination "); printf ("%30s \n",pv3);
+	printf ("\n");
+
+	length = atoi (pv3);
+	lib$movc3 (&length,pv1, pv2);
+
+	printf ("\n");
+	printf ("Output Count       "); printf ("%30s \n",pv1);
+	printf ("Output Source      "); printf ("%30s \n",pv2);
+	printf ("Output Destination "); printf ("%30s \n",pv3);
+	printf ("\n");
+
+return 0;
 }

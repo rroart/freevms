@@ -254,6 +254,9 @@ lib$wait
 comment
 filler 
 lib$locc
+Double Null
+cd NULL cd NULL 0
+lib$locc
 Match char is Null
 cd NULL cd A 0
 lib$locc
@@ -277,3 +280,66 @@ cd A cd BAA 2
 lib$locc
 Search string is NULL
 cd A cd NULL 0
+lib$matchc
+Double Null
+cd NULL cd NULL 1
+lib$matchc
+Match char is Null
+cd NULL cd A 1
+lib$matchc
+Match char not present
+cd A cd B 0
+lib$matchc
+Match char present
+cd A cd A 1
+lib$matchc
+Match is first character
+cd A cd ABCDEFG 1
+lib$matchc
+Match is last character
+cd A cd GFEDCBA 7
+lib$matchc
+Match is first and second
+cd A cd AABCDR 1
+lib$matchc
+Match first occurence
+cd A cd BAA 2
+lib$matchc
+Search string is NULL
+cd A cd NULL 0
+lib$matchc
+2 char search string no match
+cd AB CD AA 0
+lib$matchc
+2 char search string match
+cd AB CD AB 1
+lib$matchc
+2 char search in a 3 char string front
+CD AB CD ABC 1
+lib$matchc
+2 char search in a 3 char string back
+CD BC CD ABC 2
+lib$matchc
+3 char search in a 3 char string 
+CD ABC CD ABC 1
+lib$matchc
+3 char search in a 3 char string close 
+CD AZC CD ABC 0
+lib$movc3
+0 character move
+AS A AS 0 lu 0
+lib$movc3
+1 character move
+AS A AS 0 lu 1
+lib$movc3
+2 character move
+AS AB AS 01 lu 2
+lib$movc3
+2 character move with excess
+AS AB AS 0123 lu 2
+lib$movc3
+2 character move with excess
+AS ABC AS 012 lu 2
+lib$movc3
+5 character move insufficient
+AS A AS 01234 lu 5

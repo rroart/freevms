@@ -244,7 +244,8 @@ unsigned long lib$lookup_tree(const void *,void *,const int (*)(void *,void *),v
 
 long lib$lp_lines(void);
 
-int lib$matchc(const void *,const void *);
+unsigned long lib$matchc ( const struct dsc$descriptor_s *sub_string,
+			   const struct dsc$descriptor_s *search_string);
 
 int lib$match_cond(const unsigned long *,const unsigned long *,...);
 
