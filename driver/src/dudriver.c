@@ -2306,12 +2306,14 @@ struct _ddt ddt_du = {
 
 /* include a buffered 4th param? */
 inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn) {
-
+  f->fdt$ps_func_rtn[mask]=fn;
 }
 
 void du_init(void) {
   /* a lot of these? */
-  ini_fdt_act(&du_fdt,IO$_READLBK|IO$_READPBLK|IO$_READVBLK,acp$readblk);
+  ini_fdt_act(&du_fdt,IO$_READLBK,acp$readblk);
+  ini_fdt_act(&du_fdt,IO$_READPBLK,acp$readblk);
+  ini_fdt_act(&du_fdt,IO$_READVBLK,acp$readblk);
 }
 
 struct _dpt du_dpt = {
