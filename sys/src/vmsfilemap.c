@@ -51,17 +51,6 @@ extern struct address_space_operations ext2_aops;
  * SMP-threaded pagemap-LRU 1999, Andrea Arcangeli <andrea@suse.de>
  */
 
-atomic_t page_cache_size = ATOMIC_INIT(0);
-unsigned int page_hash_bits;
-struct page **page_hash_table;
-
-int vm_max_readahead = 31;
-int vm_min_readahead = 3;
-EXPORT_SYMBOL(vm_max_readahead);
-EXPORT_SYMBOL(vm_min_readahead);
-
-
-spinlock_t pagecache_lock __cacheline_aligned_in_smp = SPIN_LOCK_UNLOCKED;
 /*
  * NOTE: to avoid deadlocking you must never acquire the pagemap_lru_lock 
  *	with the pagecache_lock held.
@@ -71,12 +60,7 @@ spinlock_t pagecache_lock __cacheline_aligned_in_smp = SPIN_LOCK_UNLOCKED;
  *		pagemap_lru_lock ->
  *			pagecache_lock
  */
-spinlock_t pagemap_lru_lock __cacheline_aligned_in_smp = SPIN_LOCK_UNLOCKED;
 
-#define CLUSTER_PAGES		(1 << page_cluster)
-#define CLUSTER_OFFSET(x)	(((x) >> page_cluster) << page_cluster)
-
-static void FASTCALL(add_page_to_hash_queue(struct page * page, struct page **p));
 static inline int sync_page(struct page *page)
 {
 	struct address_space *mapping = page->mapping;
@@ -137,7 +121,7 @@ void invalidate_inode_pages(struct inode * inode)
 		if (TryLockPage(page))
 			continue;
 
-		if (page->buffers && !try_to_free_buffers(page, 0))
+		if (page->buffers && 0/*!try_to_free_buffers(page, 0)*/)
 			goto unlock;
 
 		if (page_count(page) != 1)
@@ -234,8 +218,9 @@ static int truncate_list_pages(struct list_head *head, unsigned long start, unsi
 					truncate_complete_page(page);
 
 				UnlockPage(page);
-			} else
- 				wait_on_page(page);
+			} else {
+ 				//wait_on_page(page);
+			}
 
 			page_cache_release(page);
 
@@ -347,7 +332,7 @@ static int invalidate_list_pages2(struct list_head *head)
 			page_cache_get(page);
 			spin_unlock(&pagecache_lock);
 			unlocked = 1;
-			wait_on_page(page);
+			//wait_on_page(page);
 		}
 
 		page_cache_release(page);
@@ -558,7 +543,7 @@ int filemap_fdatawait(struct address_space * mapping)
 		page_cache_get(page);
 		spin_unlock(&pagecache_lock);
 
-		___wait_on_page(page);
+		//___wait_on_page(page);
 		if (PageError(page))
 			ret = -EIO;
 
@@ -567,52 +552,6 @@ int filemap_fdatawait(struct address_space * mapping)
 	}
 	spin_unlock(&pagecache_lock);
 	return ret;
-}
-
-/*
- * Read in an entire cluster at once.  A cluster is usually a 64k-
- * aligned block that includes the page requested in "offset."
- */
-static int FASTCALL(read_cluster_nonblocking(struct file * file, unsigned long offset,
-					     unsigned long filesize));
-static int read_cluster_nonblocking(struct file * file, unsigned long offset,
-	unsigned long filesize)
-{
-	unsigned long pages = CLUSTER_PAGES;
-
-	offset = CLUSTER_OFFSET(offset);
-	while ((pages-- > 0) && (offset < filesize)) {
-	  int error = 0; //page_cache_read(file, offset);
-		if (error < 0)
-			return error;
-		offset ++;
-	}
-
-	return 0;
-}
-
-/* 
- * Wait for a page to get unlocked.
- *
- * This must be called with the caller "holding" the page,
- * ie with increased "page->count" so that the page won't
- * go away during the wait..
- */
-void ___wait_on_page(struct page *page)
-{
-	struct task_struct *tsk = current;
-	DECLARE_WAITQUEUE(wait, tsk);
-
-	add_wait_queue(&page->wait, &wait);
-	do {
-		set_task_state(tsk, TASK_UNINTERRUPTIBLE);
-		if (!PageLocked(page))
-			break;
-		sync_page(page);
-		schedule();
-	} while (PageLocked(page));
-	tsk->state = TASK_RUNNING;
-	remove_wait_queue(&page->wait, &wait);
 }
 
 void unlock_page(struct page *page)
@@ -661,55 +600,6 @@ void lock_page(struct page *page)
 }
 
 /*
- * a rather lightweight function, finding and getting a reference to a
- * hashed page atomically.
- */
-struct page * __find_get_page(struct address_space *mapping,
-			      unsigned long offset, struct page **hash)
-{
-	struct page *page;
-
-	/*
-	 * We scan the hash list read-only. Addition to and removal from
-	 * the hash-list needs a held write-lock.
-	 */
-	spin_lock(&pagecache_lock);
-	page = 0;//__find_page_nolock(mapping, offset, *hash);
-	if (page)
-		page_cache_get(page);
-	spin_unlock(&pagecache_lock);
-	return page;
-}
-
-/*
- * Same as above, but trylock it instead of incrementing the count.
- */
-struct page *find_trylock_page(struct address_space *mapping, unsigned long offset)
-{
-	struct page *page;
-	struct page **hash = page_hash(mapping, offset);
-
-	spin_lock(&pagecache_lock);
-	page = 0;//__find_page_nolock(mapping, offset, *hash);
-	if (page) {
-		if (TryLockPage(page))
-			page = NULL;
-	}
-	spin_unlock(&pagecache_lock);
-	return page;
-}
-
-#if 0
-#define PROFILE_READAHEAD
-#define DEBUG_READAHEAD
-#endif
-
-struct page * __find_lock_page (struct address_space * mapping,
-                                unsigned long index, struct page **hash) {
-  BUG();
-}
-
-/*
  * Mark a page as having seen activity.
  *
  * If it was already so marked, move it
@@ -743,16 +633,14 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 	struct inode *inode = mapping->host;
 	unsigned long index, offset;
 	struct page *cached_page;
-	int reada_ok;
 	int error;
-	int max_readahead = 0;//get_max_readahead(inode);
 
 	cached_page = NULL;
 	index = *ppos >> PAGE_CACHE_SHIFT;
 	offset = *ppos & ~PAGE_CACHE_MASK;
 
 	for (;;) {
-		struct page *page, **hash;
+		struct page *page;
 		unsigned long end_index, nr, ret;
 
 		end_index = inode->i_size >> PAGE_CACHE_SHIFT;
@@ -771,10 +659,9 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 		/*
 		 * Try to find the data in the page cache..
 		 */
-		hash = page_hash(mapping, index);
 
 		spin_lock(&pagecache_lock);
-		page = 0;//__find_page_nolock(mapping, index, *hash);
+		page = 0;
 
 		/*
 		 * Ok, it wasn't cached, so we need to create a new
@@ -795,16 +682,13 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 			 * dropped the page cache lock. Check for that.
 			 */
 			spin_lock(&pagecache_lock);
-			page = 0;//__find_page_nolock(mapping, index, *hash);
+			page = 0;
 		}
 
 		/*
 		 * Ok, add the new page to the hash-queues...
 		 */
 		page = cached_page;
-		//__add_to_page_cache(page, mapping, index, hash);
-		spin_unlock(&pagecache_lock);
-		//lru_cache_add(page);		
 		cached_page = NULL;
 
 		/* ... and start the actual read. The read will unlock the page. */
@@ -903,8 +787,10 @@ static ssize_t generic_file_direct_IO(int rw, struct file * filp, char * buf, si
 	 * completly asynchronous or performance will go to /dev/null.
 	 */
 	retval = filemap_fdatasync(mapping);
+#if 0
 	if (retval == 0)
 		retval = fsync_inode_data_buffers(inode);
+#endif
 	if (retval == 0)
 		retval = filemap_fdatawait(mapping);
 	if (retval < 0)
@@ -1198,7 +1084,7 @@ struct page * filemap_nopage(struct vm_area_struct * area, unsigned long address
 	struct file *file = 0;//area->vm_file;
 	struct address_space *mapping = file->f_dentry->d_inode->i_mapping;
 	struct inode *inode = mapping->host;
-	struct page *page, **hash;
+	struct page *page;
 	unsigned long size, pgoff, endoff;
 
 	pgoff = 0;//((address - area->rde$pq_start_va) >> PAGE_CACHE_SHIFT) + area->vm_pgoff;
@@ -1222,9 +1108,8 @@ retry_all:
 	/*
 	 * Do we have something in the page cache already?
 	 */
-	hash = page_hash(mapping, pgoff);
 retry_find:
-	page = __find_get_page(mapping, pgoff, hash);
+	page = 0;
 	if (!page)
 		goto no_cached_page;
 
@@ -1301,7 +1186,7 @@ page_not_uptodate:
 	}
 
 	if (!ext2_aops.readpage(file, page)) {
-		wait_on_page(page);
+	  //wait_on_page(page);
 		if (Page_Uptodate(page))
 			goto success;
 	}
@@ -1328,7 +1213,7 @@ page_not_uptodate:
 	}
 	ClearPageError(page);
 	if (!ext2_aops.readpage(file, page)) {
-		wait_on_page(page);
+	  //wait_on_page(page);
 		if (Page_Uptodate(page))
 			goto success;
 	}
@@ -1764,6 +1649,7 @@ static long madvise_willneed(struct _rde * vma,
 		return error;
 
 	/* round to cluster boundaries if this isn't a "random" area. */
+#if 0
 	if (0) {
 	  //if (!VM_RandomReadHint(vma)) {
 		start = CLUSTER_OFFSET(start);
@@ -1786,6 +1672,7 @@ static long madvise_willneed(struct _rde * vma,
 
 	/* Don't wait for someone else to push these requests. */
 	run_task_queue(&tq_disk);
+#endif
 
 	return error;
 }
@@ -1955,10 +1842,10 @@ static unsigned char mincore_page(struct _rde * vma,
 {
 	unsigned char present = 0;
 	struct address_space * as = 0;//vma->vm_file->f_dentry->d_inode->i_mapping;
-	struct page * page, ** hash = page_hash(as, pgoff);
+	struct page * page;
 
 	spin_lock(&pagecache_lock);
-	page = 0;//__find_page_nolock(as, pgoff, *hash);
+	page = 0;
 	if ((page) && (Page_Uptodate(page)))
 		present = 1;
 	spin_unlock(&pagecache_lock);
@@ -2278,14 +2165,16 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
 		}
 
 		status = -ENOMEM;	/* we'll assign it later anyway */
-		page = __get_free_pages(GFP_ATOMIC, 0);
+		page = alloc_page(0);
 		if (!page)
 			break;
 
+#if 0
 		/* We have exclusive IO access to the page.. */
 		if (!PageLocked(page)) {
 			PAGE_BUG(page);
 		}
+#endif
 
 		kaddr = kmap(page);
 		status = block_prepare_write2(inode, page, offset, offset+bytes, index);
@@ -2344,7 +2233,9 @@ sync_failure:
 	 * few blocks outside i_size.  Trim these off again.
 	 */
 	kunmap(page);
+#if 0
 	UnlockPage(page);
+#endif
 	page_cache_release(page);
 	if (pos + bytes > inode->i_size)
 		vmtruncate(inode, inode->i_size);
@@ -2372,27 +2263,5 @@ o_direct:
 
 void __init page_cache_init(unsigned long mempages)
 {
-	unsigned long htable_size, order;
-
-	htable_size = mempages;
-	htable_size *= sizeof(struct page *);
-	for(order = 0; (PAGE_SIZE << order) < htable_size; order++)
-		;
-
-	do {
-		unsigned long tmp = (PAGE_SIZE << order) / sizeof(struct page *);
-
-		page_hash_bits = 0;
-		while((tmp >>= 1UL) != 0UL)
-			page_hash_bits++;
-
-		page_hash_table = (struct page **)
-			__get_free_pages(GFP_ATOMIC, order);
-	} while(page_hash_table == NULL && --order > 0);
-
-	printk("Page-cache hash table entries: %d (order: %ld, %ld bytes)\n",
-	       (1 << page_hash_bits), order, (PAGE_SIZE << order));
-	if (!page_hash_table)
-		panic("Failed to allocate page hash table\n");
-	memset((void *)page_hash_table, 0, PAGE_HASH_SIZE * sizeof(struct page *));
+	printk("%%KERNEL-I-ISNOMORE, Linux Page-cache is no longer used\n");
 }

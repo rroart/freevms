@@ -154,7 +154,7 @@ void __wait_on_buffer(struct buffer_head * bh)
 	get_bh(bh);
 	add_wait_queue(&bh->b_wait, &wait);
 	do {
-		run_task_queue(&tq_disk);
+	  //run_task_queue(&tq_disk);
 		set_task_state(tsk, TASK_UNINTERRUPTIBLE);
 		if (!buffer_locked(bh))
 			break;
@@ -185,114 +185,8 @@ static void write_locked_buffers(struct buffer_head **array, unsigned int count)
 	do {
 		struct buffer_head * bh = *array++;
 		bh->b_end_io = end_buffer_io_sync;
-		submit_bh(WRITE, bh);
+		//submit_bh(WRITE, bh);
 	} while (--count);
-}
-
-/*
- * Write some buffers from the head of the dirty queue.
- *
- * This must be called with the LRU lock held, and will
- * return without it!
- */
-#define NRSYNC (32)
-static int write_some_buffers(kdev_t dev)
-{
-	struct buffer_head *next;
-	struct buffer_head *array[NRSYNC];
-	unsigned int count;
-	int nr;
-
-	next = lru_list[BUF_DIRTY];
-	nr = nr_buffers_type[BUF_DIRTY];
-	count = 0;
-	while (next && --nr >= 0) {
-		struct buffer_head * bh = next;
-		next = bh->b_next_free;
-
-		if (dev && bh->b_dev != dev)
-			continue;
-		if (test_and_set_bit(BH_Lock, &bh->b_state))
-			continue;
-		if (atomic_set_buffer_clean(bh)) {
-			__refile_buffer(bh);
-			get_bh(bh);
-			array[count++] = bh;
-			if (count < NRSYNC)
-				continue;
-
-			spin_unlock(&lru_list_lock);
-			write_locked_buffers(array, count);
-			return -EAGAIN;
-		}
-		unlock_buffer(bh);
-		__refile_buffer(bh);
-	}
-	spin_unlock(&lru_list_lock);
-
-	if (count)
-		write_locked_buffers(array, count);
-	return 0;
-}
-
-/*
- * Write out all buffers on the dirty list.
- */
-static void write_unlocked_buffers(kdev_t dev)
-{
-	do {
-		spin_lock(&lru_list_lock);
-	} while (write_some_buffers(dev));
-	run_task_queue(&tq_disk);
-}
-
-/*
- * Wait for a buffer on the proper list.
- *
- * This must be called with the LRU lock held, and
- * will return with it released.
- */
-static int wait_for_buffers(kdev_t dev, int index, int refile)
-{
-	struct buffer_head * next;
-	int nr;
-
-	next = lru_list[index];
-	nr = nr_buffers_type[index];
-	while (next && --nr >= 0) {
-		struct buffer_head *bh = next;
-		next = bh->b_next_free;
-
-		if (!buffer_locked(bh)) {
-			if (refile)
-				__refile_buffer(bh);
-			continue;
-		}
-		if (dev && bh->b_dev != dev)
-			continue;
-
-		get_bh(bh);
-		spin_unlock(&lru_list_lock);
-		wait_on_buffer (bh);
-		put_bh(bh);
-		return -EAGAIN;
-	}
-	spin_unlock(&lru_list_lock);
-	return 0;
-}
-
-static inline void wait_for_some_buffers(kdev_t dev)
-{
-	spin_lock(&lru_list_lock);
-	wait_for_buffers(dev, BUF_LOCKED, 1);
-}
-
-static int wait_for_locked_buffers(kdev_t dev, int index, int refile)
-{
-	do {
-		spin_lock(&lru_list_lock);
-	} while (wait_for_buffers(dev, index, refile));
-	return 0;
 }
 
 /* Call sync_buffers with wait!=0 to ensure that the call does not
@@ -482,271 +376,16 @@ out:
 /* After several hours of tedious analysis, the following hash
  * function won.  Do not mess with it... -DaveM
  */
-#define _hashfn(dev,block)	\
-	((((dev)<<(bh_hash_shift - 6)) ^ ((dev)<<(bh_hash_shift - 9))) ^ \
-	 (((block)<<(bh_hash_shift - 6)) ^ ((block) >> 13) ^ \
-	  ((block) << (bh_hash_shift - 12))))
-#define hash(dev,block) hash_table[(_hashfn(HASHDEV(dev),block) & bh_hash_mask)]
-
-static inline void __insert_into_hash_list(struct buffer_head *bh)
-{
-	struct buffer_head **head = &hash(bh->b_dev, bh->b_blocknr);
-	struct buffer_head *next = *head;
-
-	*head = bh;
-	bh->b_pprev = head;
-	bh->b_next = next;
-	if (next != NULL)
-		next->b_pprev = &bh->b_next;
-}
-
-static __inline__ void __hash_unlink(struct buffer_head *bh)
-{
-	struct buffer_head **pprev = bh->b_pprev;
-	if (pprev) {
-		struct buffer_head *next = bh->b_next;
-		if (next)
-			next->b_pprev = pprev;
-		*pprev = next;
-		bh->b_pprev = NULL;
-	}
-}
-
-static void __insert_into_lru_list(struct buffer_head * bh, int blist)
-{
-	struct buffer_head **bhp = &lru_list[blist];
-
-	if (bh->b_prev_free || bh->b_next_free) BUG();
-
-	if(!*bhp) {
-		*bhp = bh;
-		bh->b_prev_free = bh;
-	}
-	bh->b_next_free = *bhp;
-	bh->b_prev_free = (*bhp)->b_prev_free;
-	(*bhp)->b_prev_free->b_next_free = bh;
-	(*bhp)->b_prev_free = bh;
-	nr_buffers_type[blist]++;
-	size_buffers_type[blist] += bh->b_size;
-}
-
-static void __remove_from_lru_list(struct buffer_head * bh)
-{
-	struct buffer_head *next = bh->b_next_free;
-	if (next) {
-		struct buffer_head *prev = bh->b_prev_free;
-		int blist = bh->b_list;
-
-		prev->b_next_free = next;
-		next->b_prev_free = prev;
-		if (lru_list[blist] == bh) {
-			if (next == bh)
-				next = NULL;
-			lru_list[blist] = next;
-		}
-		bh->b_next_free = NULL;
-		bh->b_prev_free = NULL;
-		nr_buffers_type[blist]--;
-		size_buffers_type[blist] -= bh->b_size;
-	}
-}
-
-/* must be called with both the hash_table_lock and the lru_list_lock
-   held */
-static void __remove_from_queues(struct buffer_head *bh)
-{
-	__hash_unlink(bh);
-	__remove_from_lru_list(bh);
-}
-
-static void remove_from_queues(struct buffer_head *bh)
-{
-	spin_lock(&lru_list_lock);
-	write_lock(&hash_table_lock);
-	__remove_from_queues(bh);
-	write_unlock(&hash_table_lock);	
-	spin_unlock(&lru_list_lock);
-}
-
-struct buffer_head * get_hash_table(kdev_t dev, int block, int size)
-{
-	struct buffer_head *bh, **p = &hash(dev, block);
-
-	read_lock(&hash_table_lock);
-
-	for (;;) {
-		bh = *p;
-		if (!bh)
-			break;
-		p = &bh->b_next;
-		if (bh->b_blocknr != block)
-			continue;
-		if (bh->b_size != size)
-			continue;
-		if (bh->b_dev != dev)
-			continue;
-		get_bh(bh);
-		break;
-	}
-
-	read_unlock(&hash_table_lock);
-	return bh;
-}
-
-void buffer_insert_inode_queue(struct buffer_head *bh, struct inode *inode)
-{
-	spin_lock(&lru_list_lock);
-	if (bh->b_inode)
-		list_del(&bh->b_inode_buffers);
-	bh->b_inode = inode;
-	list_add(&bh->b_inode_buffers, &inode->i_dirty_buffers);
-	spin_unlock(&lru_list_lock);
-}
-
-void buffer_insert_inode_data_queue(struct buffer_head *bh, struct inode *inode)
-{
-	spin_lock(&lru_list_lock);
-	if (bh->b_inode)
-		list_del(&bh->b_inode_buffers);
-	bh->b_inode = inode;
-	list_add(&bh->b_inode_buffers, &inode->i_dirty_data_buffers);
-	spin_unlock(&lru_list_lock);
-}
-
-/* The caller must have the lru_list lock before calling the 
-   remove_inode_queue functions.  */
-static void __remove_inode_queue(struct buffer_head *bh)
-{
-	bh->b_inode = NULL;
-	list_del(&bh->b_inode_buffers);
-}
-
-static inline void remove_inode_queue(struct buffer_head *bh)
-{
-	if (bh->b_inode)
-		__remove_inode_queue(bh);
-}
-
-int inode_has_buffers(struct inode *inode)
-{
-	int ret;
-	
-	spin_lock(&lru_list_lock);
-	ret = !list_empty(&inode->i_dirty_buffers) || !list_empty(&inode->i_dirty_data_buffers);
-	spin_unlock(&lru_list_lock);
-	
-	return ret;
-}
-
-/* If invalidate_buffers() will trash dirty buffers, it means some kind
-   of fs corruption is going on. Trashing dirty data always imply losing
-   information that was supposed to be just stored on the physical layer
-   by the user.
-
-   Thus invalidate_buffers in general usage is not allwowed to trash
-   dirty buffers. For example ioctl(FLSBLKBUF) expects dirty data to
-   be preserved.  These buffers are simply skipped.
-  
-   We also skip buffers which are still in use.  For example this can
-   happen if a userspace program is reading the block device.
-
-   NOTE: In the case where the user removed a removable-media-disk even if
-   there's still dirty data not synced on disk (due a bug in the device driver
-   or due an error of the user), by not destroying the dirty buffers we could
-   generate corruption also on the next media inserted, thus a parameter is
-   necessary to handle this case in the most safe way possible (trying
-   to not corrupt also the new disk inserted with the data belonging to
-   the old now corrupted disk). Also for the ramdisk the natural thing
-   to do in order to release the ramdisk memory is to destroy dirty buffers.
-
-   These are two special cases. Normal usage imply the device driver
-   to issue a sync on the device (without waiting I/O completion) and
-   then an invalidate_buffers call that doesn't trash dirty buffers.
-
-   For handling cache coherency with the blkdev pagecache the 'update' case
-   is been introduced. It is needed to re-read from disk any pinned
-   buffer. NOTE: re-reading from disk is destructive so we can do it only
-   when we assume nobody is changing the buffercache under our I/O and when
-   we think the disk contains more recent information than the buffercache.
-   The update == 1 pass marks the buffers we need to update, the update == 2
-   pass does the actual I/O. */
-void invalidate_bdev(struct block_device *bdev, int destroy_dirty_buffers)
-{
-	int i, nlist, slept;
-	struct buffer_head * bh, * bh_next;
-	kdev_t dev = to_kdev_t(bdev->bd_dev);	/* will become bdev */
-
- retry:
-	slept = 0;
-	spin_lock(&lru_list_lock);
-	for(nlist = 0; nlist < NR_LIST; nlist++) {
-		bh = lru_list[nlist];
-		if (!bh)
-			continue;
-		for (i = nr_buffers_type[nlist]; i > 0 ; bh = bh_next, i--) {
-			bh_next = bh->b_next_free;
-
-			/* Another device? */
-			if (bh->b_dev != dev)
-				continue;
-			/* Not hashed? */
-			if (!bh->b_pprev)
-				continue;
-			if (buffer_locked(bh)) {
-				get_bh(bh);
-				spin_unlock(&lru_list_lock);
-				wait_on_buffer(bh);
-				slept = 1;
-				spin_lock(&lru_list_lock);
-				put_bh(bh);
-			}
-
-			write_lock(&hash_table_lock);
-			/* All buffers in the lru lists are mapped */
-			if (!buffer_mapped(bh))
-				BUG();
-			if (buffer_dirty(bh))
-				printk("invalidate: dirty buffer\n");
-			if (!atomic_read(&bh->b_count)) {
-				if (destroy_dirty_buffers || !buffer_dirty(bh)) {
-					remove_inode_queue(bh);
-				}
-			} else
-				printk("invalidate: busy buffer\n");
-
-			write_unlock(&hash_table_lock);
-			if (slept)
-				goto out;
-		}
-	}
-out:
-	spin_unlock(&lru_list_lock);
-	if (slept)
-		goto retry;
-
-	/* Get rid of the page cache */
-	invalidate_inode_pages(bdev->bd_inode);
-}
-
-void __invalidate_buffers(kdev_t dev, int destroy_dirty_buffers)
-{
-	struct block_device *bdev = bdget(dev);
-	if (bdev) {
-		invalidate_bdev(bdev, destroy_dirty_buffers);
-		bdput(bdev);
-	}
-}
-
 static void free_more_memory(void)
 {
 	zone_t * zone = contig_page_data.node_zonelists[GFP_NOFS & GFP_ZONEMASK].zones[0];
 	
-	balance_dirty();
 #if 0
+	balance_dirty();
 	wakeup_bdflush();
 #endif
 	try_to_free_pages(zone, GFP_NOFS, 0);
-	run_task_queue(&tq_disk);
+	//run_task_queue(&tq_disk);
 	//	current->policy |= SCHED_YIELD;
 	__set_current_state(TASK_RUNNING);
 	//schedule();
@@ -816,217 +455,6 @@ still_busy:
 	return;
 }
 
-inline void set_buffer_async_io(struct buffer_head *bh) {
-    bh->b_end_io = end_buffer_io_async ;
-    mark_buffer_async(bh, 1);
-}
-
-/*
- * Synchronise all the inode's dirty buffers to the disk.
- *
- * We have conflicting pressures: we want to make sure that all
- * initially dirty buffers get waited on, but that any subsequently
- * dirtied buffers don't.  After all, we don't want fsync to last
- * forever if somebody is actively writing to the file.
- *
- * Do this in two main stages: first we copy dirty buffers to a
- * temporary inode list, queueing the writes as we go.  Then we clean
- * up, waiting for those writes to complete.
- * 
- * During this second stage, any subsequent updates to the file may end
- * up refiling the buffer on the original inode's dirty list again, so
- * there is a chance we will end up with a buffer queued for write but
- * not yet completed on that list.  So, as a final cleanup we go through
- * the osync code to catch these locked, dirty buffers without requeuing
- * any newly dirty buffers for write.
- */
-
-int fsync_inode_buffers(struct inode *inode)
-{
-	struct buffer_head *bh;
-	struct inode tmp;
-	int err = 0, err2;
-	
-	INIT_LIST_HEAD(&tmp.i_dirty_buffers);
-	
-	spin_lock(&lru_list_lock);
-
-	while (!list_empty(&inode->i_dirty_buffers)) {
-		bh = BH_ENTRY(inode->i_dirty_buffers.next);
-		list_del(&bh->b_inode_buffers);
-		if (!buffer_dirty(bh) && !buffer_locked(bh))
-			bh->b_inode = NULL;
-		else {
-			bh->b_inode = &tmp;
-			list_add(&bh->b_inode_buffers, &tmp.i_dirty_buffers);
-			if (buffer_dirty(bh)) {
-				get_bh(bh);
-				spin_unlock(&lru_list_lock);
-				ll_rw_block(WRITE, 1, &bh);
-				brelse(bh);
-				spin_lock(&lru_list_lock);
-			}
-		}
-	}
-
-	while (!list_empty(&tmp.i_dirty_buffers)) {
-		bh = BH_ENTRY(tmp.i_dirty_buffers.prev);
-		remove_inode_queue(bh);
-		get_bh(bh);
-		spin_unlock(&lru_list_lock);
-		wait_on_buffer(bh);
-		if (!buffer_uptodate(bh))
-			err = -EIO;
-		brelse(bh);
-		spin_lock(&lru_list_lock);
-	}
-	
-	spin_unlock(&lru_list_lock);
-	err2 = osync_inode_buffers(inode);
-
-	if (err)
-		return err;
-	else
-		return err2;
-}
-
-int fsync_inode_data_buffers(struct inode *inode)
-{
-	struct buffer_head *bh;
-	struct inode tmp;
-	int err = 0, err2;
-	
-	INIT_LIST_HEAD(&tmp.i_dirty_data_buffers);
-	
-	spin_lock(&lru_list_lock);
-
-	while (!list_empty(&inode->i_dirty_data_buffers)) {
-		bh = BH_ENTRY(inode->i_dirty_data_buffers.next);
-		list_del(&bh->b_inode_buffers);
-		if (!buffer_dirty(bh) && !buffer_locked(bh))
-			bh->b_inode = NULL;
-		else {
-			bh->b_inode = &tmp;
-			list_add(&bh->b_inode_buffers, &tmp.i_dirty_data_buffers);
-			if (buffer_dirty(bh)) {
-				get_bh(bh);
-				spin_unlock(&lru_list_lock);
-				ll_rw_block(WRITE, 1, &bh);
-				brelse(bh);
-				spin_lock(&lru_list_lock);
-			}
-		}
-	}
-
-	while (!list_empty(&tmp.i_dirty_data_buffers)) {
-		bh = BH_ENTRY(tmp.i_dirty_data_buffers.prev);
-		remove_inode_queue(bh);
-		get_bh(bh);
-		spin_unlock(&lru_list_lock);
-		wait_on_buffer(bh);
-		if (!buffer_uptodate(bh))
-			err = -EIO;
-		brelse(bh);
-		spin_lock(&lru_list_lock);
-	}
-	
-	spin_unlock(&lru_list_lock);
-	err2 = osync_inode_data_buffers(inode);
-
-	if (err)
-		return err;
-	else
-		return err2;
-}
-
-/*
- * osync is designed to support O_SYNC io.  It waits synchronously for
- * all already-submitted IO to complete, but does not queue any new
- * writes to the disk.
- *
- * To do O_SYNC writes, just queue the buffer writes with ll_rw_block as
- * you dirty the buffers, and then use osync_inode_buffers to wait for
- * completion.  Any other dirty buffers which are not yet queued for
- * write will not be flushed to disk by the osync.
- */
-
-int osync_inode_buffers(struct inode *inode)
-{
-	struct buffer_head *bh;
-	struct list_head *list;
-	int err = 0;
-
-	spin_lock(&lru_list_lock);
-	
- repeat:
-	
-	for (list = inode->i_dirty_buffers.prev; 
-	     bh = BH_ENTRY(list), list != &inode->i_dirty_buffers;
-	     list = bh->b_inode_buffers.prev) {
-		if (buffer_locked(bh)) {
-			get_bh(bh);
-			spin_unlock(&lru_list_lock);
-			wait_on_buffer(bh);
-			if (!buffer_uptodate(bh))
-				err = -EIO;
-			brelse(bh);
-			spin_lock(&lru_list_lock);
-			goto repeat;
-		}
-	}
-
-	spin_unlock(&lru_list_lock);
-	return err;
-}
-
-int osync_inode_data_buffers(struct inode *inode)
-{
-	struct buffer_head *bh;
-	struct list_head *list;
-	int err = 0;
-
-	spin_lock(&lru_list_lock);
-	
- repeat:
-
-	for (list = inode->i_dirty_data_buffers.prev; 
-	     bh = BH_ENTRY(list), list != &inode->i_dirty_data_buffers;
-	     list = bh->b_inode_buffers.prev) {
-		if (buffer_locked(bh)) {
-			get_bh(bh);
-			spin_unlock(&lru_list_lock);
-			wait_on_buffer(bh);
-			if (!buffer_uptodate(bh))
-				err = -EIO;
-			brelse(bh);
-			spin_lock(&lru_list_lock);
-			goto repeat;
-		}
-	}
-
-	spin_unlock(&lru_list_lock);
-	return err;
-}
-
-
-/*
- * Invalidate any and all dirty buffers on a given inode.  We are
- * probably unmounting the fs, but that doesn't mean we have already
- * done a sync().  Just drop the buffers from the inode list.
- */
-void invalidate_inode_buffers(struct inode *inode)
-{
-	struct list_head * entry;
-	
-	spin_lock(&lru_list_lock);
-	while ((entry = inode->i_dirty_buffers.next) != &inode->i_dirty_buffers)
-		remove_inode_queue(BH_ENTRY(entry));
-	while ((entry = inode->i_dirty_data_buffers.next) != &inode->i_dirty_data_buffers)
-		remove_inode_queue(BH_ENTRY(entry));
-	spin_unlock(&lru_list_lock);
-}
-
-
 /*
  * Ok, this is getblk, and it isn't very clear, again to hinder
  * race-conditions. Most of the code is seldom used, (ie repeating),
@@ -1050,31 +478,6 @@ struct buffer_head * getblk(kdev_t dev, int block, int size)
 	 bh -> b_size = size;
 }
 
-/* -1 -> no need to flush
-    0 -> async flush
-    1 -> sync flush (wait for I/O completion) */
-static int balance_dirty_state(void)
-{
-	unsigned long dirty, tot, hard_dirty_limit, soft_dirty_limit;
-
-	dirty = size_buffers_type[BUF_DIRTY] >> PAGE_SHIFT;
-	dirty += size_buffers_type[BUF_LOCKED] >> PAGE_SHIFT;
-	tot = nr_free_buffer_pages();
-
-	dirty *= 100;
-	soft_dirty_limit = tot * bdf_prm.b_un.nfract;
-	hard_dirty_limit = tot * bdf_prm.b_un.nfract_sync;
-
-	/* First, check for the "real" dirty limit. */
-	if (dirty > soft_dirty_limit) {
-		if (dirty > hard_dirty_limit && !(current->flags & PF_NOIO))
-			return 1;
-		return 0;
-	}
-
-	return -1;
-}
-
 /*
  * if a new dirty buffer is created we need to balance bdflush.
  *
@@ -1084,14 +487,14 @@ static int balance_dirty_state(void)
  */
 void balance_dirty(void)
 {
-	int state = balance_dirty_state();
+  int state = 0;//balance_dirty_state();
 
 	if (state < 0)
 		return;
 
 	/* If we're getting into imbalance, start write-out */
-	spin_lock(&lru_list_lock);
 #if 0
+	spin_lock(&lru_list_lock);
 	write_some_buffers(NODEV);
 #endif
 
@@ -1112,7 +515,7 @@ void balance_dirty(void)
 inline void __mark_dirty(struct buffer_head *bh)
 {
 	bh->b_flushtime = jiffies + bdf_prm.b_un.age_buffer;
-	refile_buffer(bh);
+	//refile_buffer(bh);
 }
 
 /* atomic version, the user must call balance_dirty() by hand
@@ -1138,33 +541,6 @@ void set_buffer_flushtime(struct buffer_head *bh)
 EXPORT_SYMBOL(set_buffer_flushtime);
 
 /*
- * A buffer may need to be moved from one buffer list to another
- * (e.g. in case it is not shared any more). Handle this.
- */
-static void __refile_buffer(struct buffer_head *bh)
-{
-	int dispose = BUF_CLEAN;
-	if (buffer_locked(bh))
-		dispose = BUF_LOCKED;
-	if (buffer_dirty(bh))
-		dispose = BUF_DIRTY;
-	if (dispose != bh->b_list) {
-		__remove_from_lru_list(bh);
-		bh->b_list = dispose;
-		if (dispose == BUF_CLEAN)
-			remove_inode_queue(bh);
-		__insert_into_lru_list(bh, dispose);
-	}
-}
-
-void refile_buffer(struct buffer_head *bh)
-{
-	spin_lock(&lru_list_lock);
-	__refile_buffer(bh);
-	spin_unlock(&lru_list_lock);
-}
-
-/*
  * Release a buffer head
  */
 void __brelse(struct buffer_head * buf)
@@ -1186,7 +562,7 @@ void __brelse(struct buffer_head * buf)
  */
 void __bforget(struct buffer_head * buf)
 {
-	mark_buffer_clean(buf);
+  //mark_buffer_clean(buf);
 	__brelse(buf);
 }
 
@@ -1225,80 +601,21 @@ struct buffer_head * bread(kdev_t dev, int block, int size)
 }
 
 /*
- * Note: the caller should wake up the buffer_wait list if needed.
+ * Called when truncating a buffer on a page completely.
  */
-static void __put_unused_buffer_head(struct buffer_head * bh)
+static void discard_buffer(struct buffer_head * bh)
 {
-	if (bh->b_inode)
-		BUG();
-	if (nr_unused_buffer_heads >= MAX_UNUSED_BUFFERS) {
-		kmem_cache_free(bh_cachep, bh);
-	} else {
-		bh->b_dev = B_FREE;
-		bh->b_blocknr = -1;
-		bh->b_this_page = NULL;
-
-		nr_unused_buffer_heads++;
-		bh->b_next_free = unused_list;
-		unused_list = bh;
+	if (buffer_mapped(bh)) {
+	  //mark_buffer_clean(bh);
+		lock_buffer(bh);
+		clear_bit(BH_Uptodate, &bh->b_state);
+		clear_bit(BH_Mapped, &bh->b_state);
+		clear_bit(BH_Req, &bh->b_state);
+		clear_bit(BH_New, &bh->b_state);
+		//remove_from_queues(bh);
+		unlock_buffer(bh);
 	}
 }
-
-void put_unused_buffer_head(struct buffer_head *bh)
-{
-	spin_lock(&unused_list_lock);
-	__put_unused_buffer_head(bh);
-	spin_unlock(&unused_list_lock);
-}
-EXPORT_SYMBOL(put_unused_buffer_head);
-
-/*
- * Reserve NR_RESERVED buffer heads for async IO requests to avoid
- * no-buffer-head deadlock.  Return NULL on failure; waiting for
- * buffer heads is now handled in create_buffers().
- */ 
-struct buffer_head * get_unused_buffer_head(int async)
-{
-	struct buffer_head * bh;
-
-	spin_lock(&unused_list_lock);
-	if (nr_unused_buffer_heads > NR_RESERVED) {
-		bh = unused_list;
-		unused_list = bh->b_next_free;
-		nr_unused_buffer_heads--;
-		spin_unlock(&unused_list_lock);
-		return bh;
-	}
-	spin_unlock(&unused_list_lock);
-
-	/* This is critical.  We can't call out to the FS
-	 * to get more buffer heads, because the FS may need
-	 * more buffer-heads itself.  Thus SLAB_NOFS.
-	 */
-	if((bh = kmem_cache_alloc(bh_cachep, SLAB_NOFS)) != NULL) {
-		bh->b_blocknr = -1;
-		bh->b_this_page = NULL;
-		return bh;
-	}
-
-	/*
-	 * If we need an async buffer, use the reserved buffer heads.
-	 */
-	if (async) {
-		spin_lock(&unused_list_lock);
-		if (unused_list) {
-			bh = unused_list;
-			unused_list = bh->b_next_free;
-			nr_unused_buffer_heads--;
-			spin_unlock(&unused_list_lock);
-			return bh;
-		}
-		spin_unlock(&unused_list_lock);
-	}
-
-	return NULL;
-}
-EXPORT_SYMBOL(get_unused_buffer_head);
 
 void set_bh_page (struct buffer_head *bh, struct page *page, unsigned long offset)
 {
@@ -1314,100 +631,6 @@ void set_bh_page (struct buffer_head *bh, struct page *page, unsigned long offse
 		bh->b_data = page_address(page) + offset;
 }
 EXPORT_SYMBOL(set_bh_page);
-
-/*
- * Create the appropriate buffers when given a page for data area and
- * the size of each buffer.. Use the bh->b_this_page linked list to
- * follow the buffers created.  Return NULL if unable to create more
- * buffers.
- * The async flag is used to differentiate async IO (paging, swapping)
- * from ordinary buffer allocations, and only async requests are allowed
- * to sleep waiting for buffer heads. 
- */
-static struct buffer_head * create_buffers(struct page * page, unsigned long size, int async)
-{
-	struct buffer_head *bh, *head;
-	long offset;
-
-try_again:
-	head = NULL;
-	offset = PAGE_SIZE;
-	while ((offset -= size) >= 0) {
-		bh = get_unused_buffer_head(async);
-		if (!bh)
-			goto no_grow;
-
-		bh->b_dev = NODEV;
-		bh->b_this_page = head;
-		head = bh;
-
-		bh->b_state = 0;
-		bh->b_next_free = NULL;
-		bh->b_pprev = NULL;
-		atomic_set(&bh->b_count, 0);
-		bh->b_size = size;
-
-		set_bh_page(bh, page, offset);
-
-		bh->b_list = BUF_CLEAN;
-		bh->b_end_io = NULL;
-	}
-	return head;
-/*
- * In case anything failed, we just free everything we got.
- */
-no_grow:
-	if (head) {
-		spin_lock(&unused_list_lock);
-		do {
-			bh = head;
-			head = head->b_this_page;
-			__put_unused_buffer_head(bh);
-		} while (head);
-		spin_unlock(&unused_list_lock);
-
-		/* Wake up any waiters ... */
-		wake_up(&buffer_wait);
-		//wake2 etc,PRI$_IOCOM
-	}
-
-	/*
-	 * Return failure for non-async IO requests.  Async IO requests
-	 * are not allowed to fail, so we have to wait until buffer heads
-	 * become available.  But we don't want tasks sleeping with 
-	 * partially complete buffers, so all were released above.
-	 */
-	if (!async)
-		return NULL;
-
-	/* We're _really_ low on memory. Now we just
-	 * wait for old buffer heads to become free due to
-	 * finishing IO.  Since this is an async request and
-	 * the reserve list is empty, we're sure there are 
-	 * async buffer heads in use.
-	 */
-	run_task_queue(&tq_disk);
-
-	free_more_memory();
-	goto try_again;
-}
-
-/*
- * Called when truncating a buffer on a page completely.
- */
-static void discard_buffer(struct buffer_head * bh)
-{
-	if (buffer_mapped(bh)) {
-		mark_buffer_clean(bh);
-		lock_buffer(bh);
-		clear_bit(BH_Uptodate, &bh->b_state);
-		clear_bit(BH_Mapped, &bh->b_state);
-		clear_bit(BH_Req, &bh->b_state);
-		clear_bit(BH_New, &bh->b_state);
-		remove_from_queues(bh);
-		unlock_buffer(bh);
-	}
-}
 
 /**
  * try_to_release_page - release old fs-specific metadata on a page
@@ -1431,7 +654,7 @@ int try_to_release_page(struct page * page, int gfp_mask)
 	 */
 	return 0;
 try_to_free:	
-	return try_to_free_buffers(page, gfp_mask);
+	return 0;//try_to_free_buffers(page, gfp_mask);
 }
 
 /*
@@ -1486,67 +709,6 @@ int discard_bh_page(struct page *page, unsigned long offset, int drop_pagecache)
 	return 1;
 }
 
-void create_empty_buffers(struct page *page, kdev_t dev, unsigned long blocksize)
-{
-	struct buffer_head *bh, *head, *tail;
-
-	/* FIXME: create_buffers should fail if there's no enough memory */
-	head = create_buffers(page, blocksize, 1);
-	if (page->buffers)
-		BUG();
-
-	bh = head;
-	do {
-		bh->b_dev = dev;
-		bh->b_blocknr = 0;
-		bh->b_end_io = NULL;
-		tail = bh;
-		bh = bh->b_this_page;
-	} while (bh);
-	tail->b_this_page = head;
-	page->buffers = head;
-	page_cache_get(page);
-}
-EXPORT_SYMBOL(create_empty_buffers);
-
-/*
- * We are taking a block for data and we don't want any output from any
- * buffer-cache aliases starting from return from that function and
- * until the moment when something will explicitly mark the buffer
- * dirty (hopefully that will not happen until we will free that block ;-)
- * We don't even need to mark it not-uptodate - nobody can expect
- * anything from a newly allocated buffer anyway. We used to used
- * unmap_buffer() for such invalidation, but that was wrong. We definitely
- * don't want to mark the alias unmapped, for example - it would confuse
- * anyone who might pick it with bread() afterwards...
- */
-
-static void unmap_underlying_metadata(struct buffer_head * bh)
-{
-	struct buffer_head *old_bh;
-
-	old_bh = get_hash_table(bh->b_dev, bh->b_blocknr, bh->b_size);
-	if (old_bh) {
-		mark_buffer_clean(old_bh);
-		wait_on_buffer(old_bh);
-		clear_bit(BH_Req, &old_bh->b_state);
-		__brelse(old_bh);
-	}
-}
-
-/*
- * NOTE! All mapped/uptodate combinations are valid:
- *
- *	Mapped	Uptodate	Meaning
- *
- *	No	No		"unknown" - must do get_block()
- *	No	Yes		"hole" - zero-filled
- *	Yes	No		"allocated" - allocated on disk, not read in
- *	Yes	Yes		"valid" - allocated and up-to-date in memory.
- *
- * "Dirty" is valid only with the last case (mapped+uptodate).
- */
-
 /*
  * block_write_full_page() is SMP threaded - the kernel lock is not held.
  */
@@ -1588,8 +750,10 @@ static int __block_write_full_page_not(struct inode *inode, struct page *page, g
 			err = get_block(inode, block, bh, 1);
 			if (err)
 				goto out;
+#if 0
 			if (buffer_new(bh))
 				unmap_underlying_metadata(bh);
+#endif
 		}
 		turns++;
 		bh=arr[turns];
@@ -1602,7 +766,7 @@ static int __block_write_full_page_not(struct inode *inode, struct page *page, g
 	/* Stage 2: lock the buffers, mark them clean */
 	do {
 		lock_buffer(bh);
-		set_buffer_async_io(bh);
+		//set_buffer_async_io(bh);
 		set_bit(BH_Uptodate, &bh->b_state);
 		clear_bit(BH_Dirty, &bh->b_state);
 		turns++;
@@ -1638,7 +802,7 @@ out:
 	do {
 		if (buffer_mapped(bh)) {
 			lock_buffer(bh);
-			set_buffer_async_io(bh);
+			//set_buffer_async_io(bh);
 			need_unlock = 0;
 		}
 		turns++;
@@ -1923,7 +1087,7 @@ int block_read_full_page_not(struct page *page, get_block_t *get_block)
 		struct buffer_head * bh = arr[i];
 		//printk("bl r f p 4 %x\n",i);
 		lock_buffer(bh);
-		set_buffer_async_io(bh);
+		//set_buffer_async_io(bh);
 	}
 
 	//printk("bl r f p 5\n");
@@ -2236,7 +1400,7 @@ int block_write_full_page(struct page *page, get_block_t *get_block)
 
 	/* easy case */
 	if (page->index < end_index)
-		return __block_write_full_page(inode, page, get_block);
+		return __block_write_full_page_not(inode, page, get_block);
 
 	/* things got complicated... */
 	offset = inode->i_size & (PAGE_CACHE_SIZE-1);
@@ -2337,7 +1501,7 @@ int waitfor_one_page(struct page *page)
 
 	bh = head;
 	do {
-		wait_on_buffer(bh);
+	  //wait_on_buffer(bh);
 		if (buffer_req(bh) && !buffer_uptodate(bh))
 			error = -EIO;
 	} while ((bh = bh->b_this_page) != head);
@@ -2403,8 +1567,10 @@ int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsig
 				continue;
 			}
 		} else {
+#if 0
 			if (buffer_new(&bh))
 				unmap_underlying_metadata(&bh);
+#endif
 			if (!buffer_mapped(&bh))
 				BUG();
 		}
@@ -2461,7 +1627,7 @@ static int wait_kio(int rw, int nr, struct buffer_head *bh[], int size)
 		iosize += size;
 		tmp = bh[i];
 		if (buffer_locked(tmp)) {
-			wait_on_buffer(tmp);
+		  //wait_on_buffer(tmp);
 		}
 		
 		if (!buffer_uptodate(tmp)) {
@@ -2684,7 +1850,7 @@ static int sync_page_buffers(struct buffer_head *head)
 		if (test_and_set_bit(BH_Lock, &bh->b_state)) {
 			if (!test_bit(BH_launder, &bh->b_state))
 				continue;
-			wait_on_buffer(bh);
+			//wait_on_buffer(bh);
 			tryagain = 1;
 			continue;
 		}
@@ -2694,11 +1860,11 @@ static int sync_page_buffers(struct buffer_head *head)
 			continue;
 		}
 
-		__mark_buffer_clean(bh);
+		//__mark_buffer_clean(bh);
 		get_bh(bh);
 		set_bit(BH_launder, &bh->b_state);
 		bh->b_end_io = end_buffer_io_sync;
-		submit_bh(WRITE, bh);
+		//submit_bh(WRITE, bh);
 		tryagain = 0;
 	} while ((bh = bh->b_this_page) != head);
 
@@ -2711,89 +1877,6 @@ static int sync_page_buffers(struct buffer_head *head)
 #define BUFFER_BUSY_BITS	((1<<BH_Dirty) | (1<<BH_Lock))
 #define buffer_busy(bh)		(atomic_read(&(bh)->b_count) | ((bh)->b_state & BUFFER_BUSY_BITS))
 
-/*
- * try_to_free_buffers() checks if all the buffers on this particular page
- * are unused, and free's the page if so.
- *
- * Wake up bdflush() if this fails - if we're running low on memory due
- * to dirty buffers, we need to flush them out as quickly as possible.
- *
- * NOTE: There are quite a number of ways that threads of control can
- *       obtain a reference to a buffer head within a page.  So we must
- *	 lock out all of these paths to cleanly toss the page.
- */
-int try_to_free_buffers(struct page * page, unsigned int gfp_mask)
-{
-	struct buffer_head * tmp, ** buffers = page->buffers, *bh;
-	int turns= 0;
-
-	bh=buffers[0];
-
-cleaned_buffers_try_again:
-	spin_lock(&lru_list_lock);
-	write_lock(&hash_table_lock);
-	tmp = bh;
-	do {
-		if (buffer_busy(tmp))
-			goto busy_buffer_page;
-		turns++;
-		tmp = buffers[turns];
-	} while (tmp);
-
-	spin_lock(&unused_list_lock);
-	turns=0;
-	tmp = buffers[0];
-
-	/* if this buffer was hashed, this page counts as buffermem */
-	if (bh->b_pprev)
-		atomic_dec(&buffermem_pages);
-	do {
-		struct buffer_head * p = tmp;
-		turns++;
-		tmp = buffers[turns];
-
-		if (p->b_dev == B_FREE) BUG();
-
-		remove_inode_queue(p);
-		__remove_from_queues(p);
-		__put_unused_buffer_head(p);
-	} while (tmp);
-	spin_unlock(&unused_list_lock);
-
-	/* Wake up anyone waiting for buffer heads */
-	wake_up(&buffer_wait);
-	//	wake_up2(&buffer_wait,PRI$_IOCOM);
-
-	/* And free the page */
-	page->buffers = NULL;
-	page_cache_release(page);
-	write_unlock(&hash_table_lock);
-	spin_unlock(&lru_list_lock);
-	return 1;
-
-busy_buffer_page:
-	/* Uhhuh, start writeback so that we don't end up with all dirty pages */
-	write_unlock(&hash_table_lock);
-	spin_unlock(&lru_list_lock);
-	gfp_mask = pf_gfp_mask(gfp_mask);
-	if (gfp_mask & __GFP_IO) {
-		if ((gfp_mask & __GFP_HIGHIO) || !PageHighMem(page)) {
-			if (sync_page_buffers(bh)) {
-				/* no IO or waiting next time */
-				gfp_mask = 0;
-				goto cleaned_buffers_try_again;
-			}
-		}
-	}
-#if 0
-	if (balance_dirty_state() >= 0)
-		wakeup_bdflush();
-#endif
-	return 0;
-}
-
-EXPORT_SYMBOL(try_to_free_buffers);
-
 /* ================== Debugging =================== */
 
 void show_buffers(void)
@@ -2805,11 +1888,13 @@ void show_buffers(void)
 	static char *buf_types[NR_LIST] = { "CLEAN", "LOCKED", "DIRTY", };
 #endif
 
+#if 0
 	printk("Buffer memory:   %6dkB\n",
 			atomic_read(&buffermem_pages) << (PAGE_SHIFT-10));
 
 	printk("Cache memory:   %6dkB\n",
 			(atomic_read(&page_cache_size)- atomic_read(&buffermem_pages)) << (PAGE_SHIFT-10));
+#endif
 
 #ifdef CONFIG_SMP /* trylock does nothing on UP and so we could deadlock */
 	if (!spin_trylock(&lru_list_lock))
@@ -2853,39 +1938,7 @@ void show_buffers(void)
  */
 void __init buffer_init(unsigned long mempages)
 {
-	printk("%KERNEL-I-ISNOMORE, Linux Buffer-cache\n");
-
-	/* try to allocate something until we get it or we're asking
-	   for something that is really too small */
-
-	do {
-		unsigned long tmp;
-
-		nr_hash = (PAGE_SIZE << order) / sizeof(struct buffer_head *);
-		bh_hash_mask = (nr_hash - 1);
-
-		tmp = nr_hash;
-		bh_hash_shift = 0;
-		while((tmp >>= 1UL) != 0UL)
-			bh_hash_shift++;
-
-		hash_table = (struct buffer_head **)
-		    __get_free_pages(GFP_ATOMIC, order);
-	} while (hash_table == NULL && --order > 0);
-	printk("Buffer-cache hash table entries: %d (order: %d, %ld bytes)\n",
-	       nr_hash, order, (PAGE_SIZE << order));
-
-	if (!hash_table)
-		panic("Failed to allocate buffer hash table\n");
-
-	/* Setup hash chains. */
-	for(i = 0; i < nr_hash; i++)
-		hash_table[i] = NULL;
-
-	/* Setup lru lists. */
-	for(i = 0; i < NR_LIST; i++)
-		lru_list[i] = NULL;
-
+	printk("%%KERNEL-I-ISNOMORE, Linux Buffer-cache is no longer used\n");
 }
 
 /* ====================== bdflush support =================== */
@@ -2899,7 +1952,7 @@ DECLARE_WAIT_QUEUE_HEAD(bdflush_wait);
 
 int block_sync_page(struct page *page)
 {
-	run_task_queue(&tq_disk);
+  //run_task_queue(&tq_disk);
 	return 0;
 }
 
