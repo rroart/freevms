@@ -154,9 +154,11 @@ int mb$fdt_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
     m->mmb$b_type=DYN$C_BUFIO;
     m->mmb$b_func=func;
     m->mmb$w_datasize=i->irp$l_qio_p2;
+    qhead_init(&m->mmb$l_noreaderwaitqfl);
     if ((func&IO$M_NOW)==0) m->mmb$l_irp=i;
     m->mmb$l_pid=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb->pcb$l_pid;
     m->mmb$w_datasize=i->irp$l_bcnt;
+    m->mmb$l_datastart=&m->mmb$t_data;
     if (m->mmb$w_datasize)
       memcpy(m->mmb$t_data,i->irp$l_qio_p1,i->irp$l_qio_p2);
   } else {
@@ -361,7 +363,7 @@ void mb$finishread(struct _ucb * u) {
 
       if (i->irp$l_nopartnerqfl)
 	remque(i->irp$l_nopartnerqfl,0);
-      if (msg->mmb$l_noreaderwaitqfl)
+      if (!aqempty(msg->mmb$l_noreaderwaitqfl))
 	remque(msg->mmb$l_noreaderwaitqfl,0);
 #if 0
       if (msg->mmb$l_nowriterwaitqfl)
@@ -466,7 +468,7 @@ void mb$finishread(struct _ucb * u) {
       break;
     case read_more:
       msg=remque(msg,0);
-      if (msg->mmb$l_noreaderwaitqfl)
+      if (!aqempty(msg->mmb$l_noreaderwaitqfl))
 	remque(msg->mmb$l_noreaderwaitqfl,0);
 
       msg->mmb$l_msgqfl=msg->mmb$l_datastart;
@@ -775,9 +777,10 @@ int exe_std$wrtmailbox (struct _mb_ucb *mb_ucb, int msgsiz, void *msg,...) {
   m->mmb$b_type=DYN$C_BUFIO;
   m->mmb$b_func=0;
   m->mmb$w_datasize=msgsiz;
+  qhead_init(&m->mmb$l_noreaderwaitqfl);
   m->mmb$l_irp=0;
   m->mmb$l_pid=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb->pcb$l_pid;
-  m->mmb$w_datasize=msgsiz;
+  m->mmb$l_datastart=&m->mmb$t_data;
   if (m->mmb$w_datasize)
     memcpy(m->mmb$t_data,msg,msgsiz);
 
