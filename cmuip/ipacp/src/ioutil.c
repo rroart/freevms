@@ -431,7 +431,12 @@ LOG_OPEN (void)
     {
     signed long
 	RC;
+#if 0
+    // not yet
     RC = exe$create( LOGFAB);
+#else
+    RC = 0;
+#endif
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("Log file $CREATE failed, RC = !XL, STV = !XL",
@@ -528,7 +533,7 @@ void LOG_FAO(CSTR, args)
     {
     signed long
       RC;
-	DESC$STR_ALLOC(OUTDESC,1000);
+	DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
 
     RC = exe$faol(CSTR,
 	       &OUTDESC->dsc$w_length,
@@ -574,7 +579,12 @@ ACT_OPEN (void)
     {
     signed long
 	RC;
+#if 0
+    // not yet
     RC = exe$create( ACTFAB);
+#else
+    RC = 0;
+#endif
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("Activity file $CREATE failed, RC = !XL",RC);
@@ -664,7 +674,7 @@ void ACT_FAO(CSTR, args)
     {
     signed long
       RC;
-	DESC$STR_ALLOC(OUTDESC,1000);
+	DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
 
     RC = exe$faol(CSTR,
 	       &OUTDESC->dsc$w_length,
@@ -755,8 +765,8 @@ void OPR_FAO(int CSTR, ...)
     {
     signed long
       RC;
-    DESC$STR_ALLOC(OUTDESC,1000);
-	DESC$STR_ALLOC(OPRDESC,1000);
+    DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
+	DESC$STR_ALLOC(OPRDESC,250); // was: 1000 stack-smasher
 
 	va_list args;
 	va_start(args,CSTR);
@@ -790,9 +800,9 @@ void ERROR_FAO(int CSTR, ...)
     signed long
 	RC,
       OLDSTATE;
-    DESC$STR_ALLOC(OUTDESC,1000);
-    DESC$STR_ALLOC(OPRDESC,1000);
-	DESC$STR_ALLOC(LOGDESC,1000);
+    DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
+    DESC$STR_ALLOC(OPRDESC,250); // was: 1000 stack-smasher
+	DESC$STR_ALLOC(LOGDESC,250); // was: 1000 stack-smasher
 
 // Format the message string
 
@@ -841,9 +851,9 @@ void FATAL_FAO(int CSTR, ...)
     signed long
 	RC,
       OLDSTATE;
-    DESC$STR_ALLOC(OUTDESC,1000);
-    DESC$STR_ALLOC(OPRDESC,1000);
-	DESC$STR_ALLOC(LOGDESC,1000);
+    DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
+    DESC$STR_ALLOC(OPRDESC,250); // was: 1000 stack-smasher
+	DESC$STR_ALLOC(LOGDESC,250); // was: 1000 stack-smasher
 
 // Format the output string
 
