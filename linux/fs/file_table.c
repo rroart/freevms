@@ -103,15 +103,6 @@ void fput(struct file * file)
 	struct vfsmount * mnt = file->f_vfsmnt;
 	struct inode * inode = dentry->d_inode;
 
-#ifdef CONFIG_MM_VMS
-	if (file->f_count.counter==1) 
-	  if (0==strncmp(file->f_dentry->d_name.name,"l",1)) return;
-#if 0
-	  if (11==file->f_dentry->d_name.len)
-	    if (0==strncmp(file->f_dentry->d_name.name,"ld.so.cache",11)) return;
-#endif
-#endif
-
 	if (atomic_dec_and_test(&file->f_count)) {
 		locks_remove_flock(file);
 
