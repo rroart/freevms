@@ -1698,8 +1698,8 @@ void __init sched_init(void)
 
   sch$gl_pcbvec=pcbvec;
   sch$gl_seqvec=seqvec;
-  bzero(sch$gl_pcbvec,(unsigned long)MAXPROCESSCNT*sizeof(unsigned long));
-  bzero(sch$gl_seqvec,(unsigned long)MAXPROCESSCNT*sizeof(unsigned long));
+  memset(sch$gl_pcbvec,0,(unsigned long)MAXPROCESSCNT*sizeof(unsigned long));
+  memset(sch$gl_seqvec,0,(unsigned long)MAXPROCESSCNT*sizeof(unsigned long));
 
   printk("pid 0 here %x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl); 
   //	{ int i,j; for(j=0;j<2;j++) for(i=0;i<1000000000;i++); }
