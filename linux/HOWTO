@@ -82,6 +82,7 @@ Running stuff:
 Bochs:
 	Configure with at least 
 	--enable-debugger --enable-ne2000 --enable-cpu-level=6
+	maybe also with --enable-sse
 
 Automation:
 	Use make image to make a floppy and disk image.
