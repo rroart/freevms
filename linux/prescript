@@ -166,4 +166,10 @@ cd ../..
 cd arch/um/drivers;     ln -s ../../../../driver/src/ubdriver.c .;
 )
 
+mkdir include2
+cd include2
+ln -s `pwd`/../include/linux .
+ln -s `pwd`/../include/asm-i386 asm
+cd ..
+
 echo you have read the HOWTO and done a make in ..?
