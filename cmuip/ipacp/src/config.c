@@ -222,15 +222,16 @@ Modification History:
 	Added ARP transponder code for Deuna device
 */
 
+#if 0
 MODULE CONFIG(IDENT="6.6",ZIP,OPTIMIZE,
 	      ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 			      NONEXTERNAL=LONG_RELATIVE),
 	      LIST(NOEXPAND,NOREQUIRE,ASSEMBLY,	OBJECT,BINARY))
-{
+#endif
 
-#include	"SYS$LIBRARY:STARLET";	// VMS system definitions
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// String descriptor stuff
-#include "CMUIP_SRC:[CENTRAL]NETVMS";		// Special VMS definitions
+#include	<starlet.h>	// VMS system definitions
+     // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// String descriptor stuff
+#include "netvms.h"		// Special VMS definitions
 #include "STRUCTURE";	// Data structures
 #include	"TCPMACROS";	// ACP-wide macros
 #include "SNMP";		// MIB definitions
@@ -238,16 +239,16 @@ MODULE CONFIG(IDENT="6.6",ZIP,OPTIMIZE,
 #include "CMUIP_SRC:[CENTRAL]NETCONFIG"; // Device configuration defs
 
 extern
- VOID    OPR_FAO,
- VOID    S}_2_OPERATOR,
-    LIB$GET_VM : ADDRESSING_MODE(GENERAL),
- VOID    SWAPBYTES,
-    GET_IP_ADDR,
-    GET_DEC_NUM,
-    GET_HEX_BYTES,
-    GET_HEX_NUM,
- VOID    ASCII_DEC_BYTES,
- VOID    ASCII_HEX_BYTES;
+extern  void    OPR_FAO();
+extern  void    SEND_2_OPERATOR();
+extern     LIB$GET_VM : ADDRESSING_MODE(GENERAL)();
+extern  void    SWAPBYTES();
+extern     GET_IP_ADDR();
+extern     GET_DEC_NUM();
+extern     GET_HEX_BYTES();
+extern     GET_HEX_NUM();
+extern  void    ASCII_DEC_BYTES();
+extern  void    ASCII_HEX_BYTES();
 
 MACRO
     STR[] = CH$PTR(UPLIT(%ASCIZ %STRING(%REMAINING))) %,
@@ -261,10 +262,10 @@ MACRO
 MACRO
     Init_DynDesc (D)
 	{
-	$BBLOCK [D, DSC$W_Length]	= 0;
-	$BBLOCK [D, DSC$B_DType]	= DSC$K_DTYPE_T;
-	$BBLOCK [D, DSC$B_Class]	= DSC$K_CLASS_D;
-	$BBLOCK [D, DSC$A_Pointer]	= 0;
+	$BBLOCK [D, dsc$w_length]	= 0;
+	$BBLOCK [D, dsc$b_dtype]	= DSC$K_DTYPE_T;
+	$BBLOCK [D, dsc$b_class]	= DSC$K_CLASS_D;
+	$BBLOCK [D, dsc$a_pointer]	= 0;
 	}%;
 
 
@@ -286,25 +287,24 @@ static signed long
 		 UBF = CFBUF,
 		 USZ = %ALLOCATION(CFBUF));
 
-FORWARD ROUTINE
- VOID    CONFIG_ERR,
- void    Init_Device,
- void    Init_MEMGR,
- void    Init_Gateway,
- void    Init_NameServer,
- void    Init_Logging,
- void    Init_Activity_Logging,
- void    Init_Forwarding,
- void    Init_Variable,
- void    Init_MBXResolver,
- void    Init_WKS,
- void    Init_RPC,
- void    Init_Auth,
- void    Init_Local_Host,
-    GETFIELD,
-    PARSE_NULLFIELD,
- VOID    SKIPTO,
- VOID    SKIPWHITE;
+ void    CONFIG_ERR();
+ void    Init_Device();
+ void    Init_MEMGR();
+ void    Init_Gateway();
+ void    Init_NameServer();
+ void    Init_Logging();
+ void    Init_Activity_Logging();
+ void    Init_Forwarding();
+ void    Init_Variable();
+ void    Init_MBXResolver();
+ void    Init_WKS();
+ void    Init_RPC();
+ void    Init_Auth();
+ void    Init_Local_Host();
+    GETFIELD();
+    PARSE_NULLFIELD();
+ void    SKIPTO();
+ void    SKIPWHITE();
 
 
 
@@ -313,15 +313,14 @@ FORWARD ROUTINE
 // at run-time.  See NETCONFIG.REQ for a complete explaination of
 // this structure.
 
-signed long
-    IPACP_Int : IPACP_Info_Structure;
+    struct IPACP_Info_Structure * IPACP_Int;
 
 // N.B. : make sure everything that needs to be defined, like the
 // MAX_Physical_BufSize, *is* defined by the time this routine is called...
 
 CNF$Define_IPACP_Interface (void)
     {
-    EXTERNAL
+    externAL
 	// pointer to IPACP AST_in_progress flag (from MAIN.BLI)
 	AST_in_progress,
 	// IPACP nap control (from MAIN.BLI)
@@ -331,30 +330,30 @@ CNF$Define_IPACP_Interface (void)
 	MAX_PHYSICAL_BUFSIZE,
 
 	LOG_STATE;
-    EXTERNAL ROUTINE
+
 	// IAPCP receive callback (from IP.BLI)
-	IP$Receive : NOVALUE,
+extern	IP$Receive();
 	// IPACP self-address recognition (from IP.BLI)
-	IP$ISME,
+extern 	IP$ISME();
 
 	// Interrupt blocking routines (from WHERE???)
-	MAIN$NOINT : NOVALUE,
-	MAIN$OKINT : NOVALUE,
+extern 	void MAIN$NOINT();
+extern 	void MAIN$OKINT();
 
 	// Error reporting routines (from CONFIG.BLI)
-	CNF$Device_Error : NOVALUE,
+extern 	void CNF$Device_Error();
 
 	// Memory allocation routines (from MEMGR.BLI)
-	MM$Seg_Get : NOVALUE,
-	MM$Seg_Free : NOVALUE,
-	MM$QBlk_Free : NOVALUE,
+extern 	void MM$Seg_Get();
+extern 	void MM$Seg_Free();
+extern 	void MM$QBlk_Free();
 
 	// Formatted event logging routines (from IOUTIL.BLI)
-	LOG_FAO : NOVALUE,
-	QL_FAO : NOVALUE,
-	OPR_FAO : NOVALUE,
-	ERROR_FAO : NOVALUE,
-	FATAL_FAO : NOVALUE;
+extern 	void LOG_FAO();
+extern 	void QL_FAO();
+extern 	void OPR_FAO();
+extern 	void ERROR_FAO();
+extern 	void FATAL_FAO();
 
     // IAPCP receive callback.
     IPACP_Int [ ACPI$IP_Receive ]	= IP$Receive;
@@ -400,10 +399,10 @@ CNF$Define_IPACP_Interface (void)
    file.
 */
 
-Init_Vars : NOVALUE (void)
+void Init_Vars (void)
     {
-    EXTERNAL
-	IP_group_MIB : IP_group_MIB_struct;
+    externAL
+	struct IP_group_MIB_struct * IP_group_MIB;
 
     IP_group_MIB->IPMIB$ipForwarding = 2;	// Just a host, no forwarding
     }
@@ -422,12 +421,12 @@ See the DC_Fields portion of STRUCTURE.DEF for details.
 
 */
 
-No_Check(ndx) : NOVALUE (void)
+void No_Check(ndx)
 
 // Dummy routine for non-checked devices.
 
     {
-    RETURN;
+    return;
     }
 
 static signed long
@@ -474,17 +473,17 @@ CNF$DEVICE_STAT ( Inx, RB_A )
 
     // Copy device name
     StrLen = DevNam_Max_Size;
-    if (Strlen > DevNam->DSC$W_LENGTH)
-	StrLen = DevNam->DSC$W_LENGTH;
+    if (Strlen > DevNam->dsc$w_length)
+	StrLen = DevNam->dsc$w_length;
     RB->DU$DevNam_Len = Strlen;
-    CH$MOVE ( Strlen , DevNam->DSC$A_POINTER , RB->DU$DevNam_Str );
+    CH$MOVE ( Strlen , DevNam->dsc$a_pointer , RB->DU$DevNam_Str );
 
     // Copy device-specific field
     StrLen = DevSpec_Max_Size;
-    if (Strlen > DevSpec->DSC$W_LENGTH)
-	StrLen = DevSpec->DSC$W_LENGTH;
+    if (Strlen > DevSpec->dsc$w_length)
+	StrLen = DevSpec->dsc$w_length;
     RB->DU$DevSpec_Len = Strlen;
-    CH$MOVE ( Strlen , DevSpec->DSC$A_POINTER , RB->DU$DevSpec_Str );
+    CH$MOVE ( Strlen , DevSpec->dsc$a_pointer , RB->DU$DevSpec_Str );
     }
 
     D$Dev_dump_blksize
@@ -492,12 +491,11 @@ CNF$DEVICE_STAT ( Inx, RB_A )
 
 
 CNF$DEVICE_LIST ( RB )
-!
+//
 // Dump out the list of valid devices.
-!
-    {
-    MAP
+//
 	struct D$Device_List_Return_Blk * RB;
+    {
     signed long
 	RBIX;
 
@@ -534,7 +532,7 @@ Side Effects:
 	and calls all of the configuration routines in other modules.
 */
 
-CNF$Configure_ACP: NOVALUE (void)
+void CNF$Configure_ACP (void)
     {
     LOCAL		     
 	RC,
@@ -635,47 +633,46 @@ CONFIG_ERR(EMSG) : NOVALUE (void)
 	      EMSG,CFRAB->RAB$W_RSZ,CFRAB->RAB$L_UBF);
     }
 
-Init_Device : NOVALUE (void)
+void Init_Device (void)
 
 // Handle a DEVICE_INIT entry in the INET$CONFIG file.
 // Parses the device description and adds to DEV_CONFIG table.
 
     {
-    EXTERNAL ROUTINE
-	LIB$CALLG		: ADDRESSING_MODE (GENERAL),
-	LIB$FIND_IMAGE_SYMBOL	: ADDRESSING_MODE (GENERAL),
-	STR$APP}		: BLISS ADDRESSING_MODE (GENERAL),
-	STR$CASE_BLIND_COMPARE	: BLISS ADDRESSING_MODE (GENERAL),
-	STR$COPY_DX		: BLISS ADDRESSING_MODE (GENERAL);
+extern 	LIB$CALLG		: ADDRESSING_MODE (GENERAL)();
+extern 	LIB$FIND_IMAGE_SYMBOL	: ADDRESSING_MODE (GENERAL)();
+extern 	STR$APPEND		: BLISS ADDRESSING_MODE (GENERAL)();
+extern 	STR$CASE_BLIND_COMPARE	: BLISS ADDRESSING_MODE (GENERAL)();
+extern 	STR$COPY_DX		: BLISS ADDRESSING_MODE (GENERAL)();
+struct Device_Info_Structure * Devinfo;
+struct Device_Configuration_Entry * dev_config;
     signed long
-!	tmp,
+//	tmp,
 	rc,
 	ipaddr,
 	ipmask,
-	argv : VECTOR[1],
+	argv[1],
 	Image_Init,
-	struct Device_Info_Structure * Devinfo,
-	struct Device_Configuration_Entry * dev_config,
-	devtype : VECTOR->STRSIZ,
+	devtype[STRSIZ],
 	devtlen,
-	devstr : VECTOR->STRSIZ,
+	devstr[STRSIZ],
 	devslen,
-	devspec : VECTOR->STRSIZ,
+	devspec[STRSIZ],
 	dev_desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= Devstr),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= Devstr),
 	devtyp_desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= Devtype),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= Devtype),
 	dev_spec_desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= Devtype),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= Devtype),
 	devidx;		// device index into devconfig.
 
 // skip over delimiter.
@@ -699,20 +696,19 @@ Init_Device : NOVALUE (void)
 
 // Get device driver type
 
-    devtyp_desc [DSC$W_LENGTH] = GETFIELD(devtyp_desc [DSC$A_POINTER]);
+    devtyp_desc [dsc$w_length] = GETFIELD(devtyp_desc [dsc$a_pointer]);
 //    devtlen = GETFIELD(devtype);
     SKIPTO(%C":");
    
 //    cptr = CH$PTR(devtype);
 
-!!!HACK!!// For now, we just include the ethernet code inorderto test
+//!!HACK!!// For now, we just include the ethernet code inorderto test
 // it more easily (all symbols included, plus code is now in main image PSECT)
 
 
     if ((STR$CASE_BLIND_COMPARE(devtyp_desc,%ASCID"ETHER") == 0))
 	{
-	EXTERNAL ROUTINE
-	    DRV$TRANSPORT_INIT;
+extern	    DRV$TRANSPORT_INIT();
 
 	Image_Init = DRV$TRANSPORT_INIT;
 	}
@@ -741,17 +737,17 @@ Init_Device : NOVALUE (void)
 
 // Get vms device name, used
 // by the device init routine to $assign the device.
-    dev_desc [DSC$W_LENGTH] = GETFIELD(dev_desc [DSC$A_POINTER]);
+    dev_desc [dsc$w_length] = GETFIELD(dev_desc [dsc$a_pointer]);
 //    $INIT_DYNDESC( dev_config [dc_devname] );
     INIT_DYNDESC( dev_config [dc_devname] );
     STR$COPY_DX (Dev_Config [dc_devname], dev_desc);
-    STR$APP} (Dev_config [dc_devname], %ASCID ":");
+    STR$APPEND (Dev_config [dc_devname], %ASCID ":");
 // skip over field terminator.
     SKIPTO(%C":");
 
 // Get vms device specific information, used by the device go receive
 // and initiate connections.
-    dev_desc [DSC$W_LENGTH] = GETFIELD(dev_desc [DSC$A_POINTER]);
+    dev_desc [dsc$w_length] = GETFIELD(dev_desc [dsc$a_pointer]);
 //    $INIT_DYNDESC( dev_config [dc_devspec] );
     INIT_DYNDESC( dev_config [dc_devspec] );
     STR$COPY_DX (Dev_Config [dc_devspec], dev_desc);
@@ -760,8 +756,8 @@ Init_Device : NOVALUE (void)
 
 // Set hardware address/device dependant words
 //    IF GET_HEX_BYTES(dev_config->dc_phy_size,LINPTR,
-!		     CH$PTR(dev_config->dc_phy_addr)) LSS 0 THEN
-!	Config_Err(%ASCID"Bad device address");
+//		     CH$PTR(dev_config->dc_phy_addr)) LSS 0 THEN
+//	Config_Err(%ASCID"Bad device address");
 //    SKIPTO(%C":");
 
 // Get device IP address
@@ -808,8 +804,8 @@ Init_Device : NOVALUE (void)
 	    };
     }
 
-Init_Gateway : NOVALUE (void)
-!!!HACK!!// Make gateway struct dynamic.
+void Init_Gateway (void)
+//!!HACK!!// Make gateway struct dynamic.
 // Handle a GATEWAY entry in the INET$CONFIG file.
 // Parses gateway description and adds to GWY_TABLE
 // Gateway entries are of the form:
@@ -822,15 +818,14 @@ Init_Gateway : NOVALUE (void)
 //   gwy_status	Gateway status. Initialized to "up" (nonzero) by this code.
 
     {
-    EXTERNAL ROUTINE
-	IP$Gwy_Config : NOVALUE;
+extern	void IP$Gwy_Config();
     signed long
-	GWYname : VECTOR->STRSIZ,
+	GWYname [STRSIZ],
 	GWY_Name_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= GWYname),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= GWYname),
 	GWYaddr,
 	GWYnet,
 	GWYnetmask,
@@ -842,7 +837,7 @@ Init_Gateway : NOVALUE (void)
 
 // First, get the gateway name.
 
-    GWY_Name_Desc [DSC$W_LENGTH] = GETFIELD(GWYname);
+    GWY_Name_Desc [dsc$w_length] = GETFIELD(GWYname);
 
 // Next, the gateway address
 
@@ -867,7 +862,7 @@ Init_Gateway : NOVALUE (void)
     IP$Gwy_Config(GWY_Name_Desc,GWYaddr,GWYnet,GWYnetmask);
     }
 
-Init_NameServer : NOVALUE (void)
+void Init_NameServer (void)
 
 // Handle a Name_Server entry in the INET$CONFIG file.
 // Parses Name Server description and adds to NS_TABLE
@@ -880,7 +875,7 @@ Init_NameServer : NOVALUE (void)
 
     {
     signed long
-	NSname : VECTOR->STRSIZ,
+	NSname [STRSIZ],
 	NSnlen,
 	NSaddr,
 	tmp;
@@ -904,13 +899,13 @@ Init_NameServer : NOVALUE (void)
     OPR$FAO("%IPACP: Obsolete keyword NAME_SERVER found in INET$CONFIG");
     }
 
-Init_MEMGR : NOVALUE (void)
-!
+void Init_MEMGR (void)
+//
 // Handle MEMGR-INIT entry in the INET$CONFIG file.
 // Specifies memory-manager initialization parameters.
-!
+//
     {
-    EXTERNAL
+    externAL
 	QBLK_COUNT_BASE : UNSIGNED BYTE,
 	UARG_COUNT_BASE : UNSIGNED BYTE,
 	MIN_SEG_COUNT_BASE : UNSIGNED BYTE,
@@ -943,13 +938,12 @@ Init_MEMGR : NOVALUE (void)
 
 
 
-INIT_LOGGING : NOVALUE (void)
+void INIT_LOGGING (void)
 
 // Set initial logging state.
 
     {
-    EXTERNAL ROUTINE
-	LOG_CHANGE : NOVALUE;
+extern	void LOG_CHANGE();
     signed long
 	logstate;
 
@@ -969,13 +963,12 @@ INIT_LOGGING : NOVALUE (void)
 
 
 
-INIT_ACTIVITY_LOGGING : NOVALUE (void)
+void INIT_ACTIVITY_LOGGING (void)
 
 // Set initial activity logging state.
 
     {
-    EXTERNAL ROUTINE
-	ACT_CHANGE : NOVALUE;
+extern	void ACT_CHANGE();
     signed long
 	logstate;
 
@@ -997,12 +990,12 @@ INIT_ACTIVITY_LOGGING : NOVALUE (void)
 
 //SBTTL "Initialize IP forwarding state"
 
-INIT_FORWARDING : NOVALUE (void)
+void INIT_FORWARDING (void)
     {
     signed long
 	ipstate;
-    EXTERNAL
-	IP_group_MIB : IP_group_MIB_struct;
+    externAL
+	struct IP_group_MIB_struct * IP_group_MIB;
 
 // Skip terminator
 
@@ -1022,9 +1015,9 @@ INIT_FORWARDING : NOVALUE (void)
 
 //SBTTL "Initialize various configuration variables"
 
-INIT_VARIABLE : NOVALUE (void)
+void INIT_VARIABLE (void)
     {
-    EXTERNAL
+    externAL
 	FQ_MAX,
 	SYN_WAIT_COUNT,
 	ACCESS_FLAGS,
@@ -1046,9 +1039,9 @@ INIT_VARIABLE : NOVALUE (void)
 	UDPTTL,
 	ACT_THRESHOLD,
 	LOG_THRESHOLD,
-	IP_group_MIB : IP_group_MIB_struct;
+	struct IP_group_MIB_struct * IP_group_MIB;
     signed long
-	varname : VECTOR->STRSIZ,
+	varname [STRSIZ],
 	varlen,
 	varptr,
 	varval;
@@ -1072,7 +1065,7 @@ INIT_VARIABLE : NOVALUE (void)
 	Config_Err(%ASCID"Bad variable value");
 
 // Check the variable name & set it.
-!!!HACK!!// Document these!
+//!!HACK!!// Document these!
     SELECTONE TRUE OF
 	SET
 	[STREQLZ(varptr,"IP_FORWARDING")]:
@@ -1237,12 +1230,11 @@ BIND
 	%ASCID"WSQUOTA",PQL$_WSQUOTA);
 
 KEY_VALUE(KEYTAB,KEYLEN,KEYSTR)
-!
+//
 // Get keyword value from keyword string.
-!
+//
+	long * KEYTAB;
     {
-    MAP
-	struct VECTOR * KEYTAB;
     signed long
 	struct $BBLOCK * CURSTR->DSC$K_S_BLN;
 
@@ -1250,7 +1242,7 @@ KEY_VALUE(KEYTAB,KEYLEN,KEYSTR)
 	{
 	CURSTR = KEYTAB[I];
 	IF CH$EQL(KEYLEN,KEYSTR,
-		  CURSTR->DSC$W_LENGTH,CURSTR->DSC$A_POINTER) THEN
+		  CURSTR->dsc$w_length,CURSTR->dsc$a_pointer) THEN
 	    return KEYTAB[I+1];
 	};
     Config_Err(%ASCID"Bad keyword field");
@@ -1258,17 +1250,16 @@ KEY_VALUE(KEYTAB,KEYLEN,KEYSTR)
     }
 
 PARSE_PRCPRIVS(PRVBLK)
-!
+//
 // Parse a comma-separated list of privilege keywords.
 // Returns the number of keywords seen.
-!
+//
+	long PRVBLK[2];
     {
-    MAP
-	struct VECTOR * PRVBLK[2];
     signed long
 	PRIVCNT,
-	struct VECTOR * PRIVPTR->PVSIZE,
-	PRIVBUF : VECTOR->STRSIZ,
+	struct [PRIVPTR->PVSIZE],
+	PRIVBUF[STRSIZ],
 	PLEN,
 	CHR;
 
@@ -1309,14 +1300,14 @@ PARSE_PRCPRIVS(PRVBLK)
     }
 
 PARSE_PRCQUOTAS(QLIST,QMAX)
-!
+//
 // Parse a comma-separated list of quota values.
 // Returns the count of quotas seen.
-!
+//
     {
+	struct QUOTA * QPTR;
     signed long
-	struct QUOTA * QPTR,
-	QUOTBUF : VECTOR->STRSIZ,
+	QUOTBUF [STRSIZ],
 	QUOTLEN,
 	QUOTCNT,
 	QUOTYPE,
@@ -1386,14 +1377,14 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
     }
 
 PARSE_PRCSTATUS (void)
-!
+//
 // Parse a comma-separated list of process status flags.
 // Returns the values OR'ed together.
-!
+//
     {
     signed long
 	STATVAL,
-	STATBUF : VECTOR->STRSIZ,
+	STATBUF[STRSIZ],
 	STATLEN,
 	CHR;
 
@@ -1422,7 +1413,7 @@ PARSE_PRCSTATUS (void)
 
 //SBTTL "Init_WKS - Add a WKS entry"
 		     
-Init_WKS : NOVALUE (void)
+void Init_WKS (void)
 
 // Handle a WKS entry in the INET$CONFIG file.
 // Parses WKS description and calles Seg$WKS_Config to add the info.
@@ -1431,50 +1422,49 @@ Init_WKS : NOVALUE (void)
 // (cont) <queue-limit>:<maxsrv>
 
     {
-    EXTERNAL ROUTINE
-	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL),
-	Seg$WKS_Config : NOVALUE;
+extern	STR$COPY_DX();
+extern	void Seg$WKS_Config();
     signed long
 	CHR,LPTR,
-	WKSprname : VECTOR->STRSIZ,
+	WKSprname [STRSIZ],
 	WKSprname_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= WKSprname),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= WKSprname),
 	WKSimname : VECTOR->STRSIZ,
 	WKSimname_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= WKSimname),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= WKSimname),
 	QUOTAS : BLOCK[MAXQUOTA*QUOTA_BLEN] FIELD(QUOTA_FIELDS),
 	Quota_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= Quotas),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= Quotas),
 	WKSInput : VECTOR->STRSIZ,
 	WKSInput_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= WKSInput),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= WKSInput),
 	WKSOutput : VECTOR->STRSIZ,
 	WKSOutput_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= WKSOutput),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= WKSOutput),
 	WKSError : VECTOR->STRSIZ,
 	WKSError_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= WKSError),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= WKSError),
 	WKSport,
 	WKSstat,
-	WKSpriv : VECTOR[2],
+	WKSpriv[2],
 	WKSprior,
 	WKSqlim,
 	WKSmaxsrv;
@@ -1488,7 +1478,7 @@ Init_WKS : NOVALUE (void)
     SKIPTO(%C":");
 
 // Next, process name
-    WKSprname_Desc [DSC$W_LENGTH] = GETFIELD(WKSprname);
+    WKSprname_Desc [dsc$w_length] = GETFIELD(WKSprname);
     SKIPTO(%C":");
 
 // Next, image name - N.B. image name may not have ":" in it.
@@ -1505,7 +1495,7 @@ Init_WKS : NOVALUE (void)
     if (PARSE_NULLFIELD())
 	SKIPTO(%C":")
     else
-	Quota_Desc->DSC$W_LENGTH = PARSE_PRCQUOTAS(QUOTAS,MAXQUOTA)*QUOTA_BLEN;
+	Quota_Desc->dsc$w_length = PARSE_PRCQUOTAS(QUOTAS,MAXQUOTA)*QUOTA_BLEN;
 
 // Parse the process INPUT file
     if (PARSE_NULLFIELD())
@@ -1515,7 +1505,7 @@ Init_WKS : NOVALUE (void)
 	}
     else
 	{
-	WKSInput_Desc [DSC$W_LENGTH] = GETFIELD(WKSInput);
+	WKSInput_Desc [dsc$w_length] = GETFIELD(WKSInput);
 	SKIPTO(%C":")
 	};
 
@@ -1527,7 +1517,7 @@ Init_WKS : NOVALUE (void)
 	}
     else
 	{
-	WKSOutput_Desc [DSC$W_LENGTH] = GETFIELD(WKSOutput);
+	WKSOutput_Desc [dsc$w_length] = GETFIELD(WKSOutput);
 	SKIPTO(%C":")
 	};
 
@@ -1539,7 +1529,7 @@ Init_WKS : NOVALUE (void)
 	}
     else
 	{
-	WKSError_Desc [DSC$W_LENGTH] = GETFIELD(WKSError);
+	WKSError_Desc [dsc$w_length] = GETFIELD(WKSError);
 	SKIPTO(%C":")
 	};
 
@@ -1555,7 +1545,7 @@ Init_WKS : NOVALUE (void)
 // Now, find out what the maximum number of servers permitted is.  If zero
 // or error, then set to unlimited (0).  (This is actually GLBOAL_MAXSRV as
 // defined in TCP_SEGIN.BLI.
-!
+//
 	WKSmaxsrv = 0;
 	if ((CH$RCHAR_A(LINPTR) == %C":"))
 	    if (GET_DEC_NUM(LINPTR,WKSmaxsrv) LSS 0)
@@ -1570,7 +1560,7 @@ Init_WKS : NOVALUE (void)
 
 //SBTTL "Init_RPC - Add an RPC entry"
 		     
-Init_RPC : NOVALUE (void)
+void Init_RPC (void)
 
 // Handle an RPC entry in the INET$CONFIG file.
 // Parses RPC description and calles RPC$Config to add the info.
@@ -1578,9 +1568,8 @@ Init_RPC : NOVALUE (void)
 //   RPC:<name>:<prog>:<vers>:<prot>:<port>:<imagename>
 
     {
-    EXTERNAL ROUTINE
-	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL),
-	RPC$CONFIG;
+extern	STR$COPY_DX	();
+extern	RPC$CONFIG();
     signed long
 	RC,
 	CHR,LPTR,
@@ -1588,24 +1577,24 @@ Init_RPC : NOVALUE (void)
 	RPCvers,
 	RPCprot,
 	RPCport,
-	RPCname : VECTOR->STRSIZ,
+	RPCname[STRSIZ],
 	RPCname_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= RPCname),
-	RPCimname : VECTOR->STRSIZ,
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= RPCname),
+	RPCimname [STRSIZ],
 	RPCimname_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= RPCimname);
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= RPCimname);
 
 // Skip delimiter
     SKIPTO(%C":");
 
 // First, get the service name
-    RPCname_Desc [DSC$W_LENGTH] = GETFIELD(RPCname);
+    RPCname_Desc [dsc$w_length] = GETFIELD(RPCname);
     SKIPTO(%C":");
 
 // Next, get the program number
@@ -1640,7 +1629,7 @@ Init_RPC : NOVALUE (void)
 
 //SBTTL "Init_Auth - Add an authorization entry"
 		     
-Init_Auth : NOVALUE (void)
+void Init_Auth (void)
 
 // Handle an AUTH entry in the INET$CONFIG file.
 // Parses AUTH description and calles RPC$Config_Auth to add the info.
@@ -1648,21 +1637,20 @@ Init_Auth : NOVALUE (void)
 //   AUTH:<[UIC]>:<uid>:<gid>:<hostname>
 
     {
-    EXTERNAL ROUTINE
-	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL),
-	RPC$CONFIG_AUTH;
+extern	STR$COPY_DX	();
+extern	RPC$CONFIG_AUTH();
     signed long
 	RC,
 	CHR,LPTR,
 	AUTHuic,
 	AUTHuid,
 	AUTHgid,
-	AUTHhostname : VECTOR->STRSIZ,
+	AUTHhostname [STRSIZ],
 	AUTHhostname_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= AUTHhostname);
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= AUTHhostname);
 
 // Skip delimiter
     SKIPTO(%C":");
@@ -1689,30 +1677,29 @@ Init_Auth : NOVALUE (void)
 
 //SBTTL "Init_MBXResolver - Define the system name resolver process"
 
-Init_MBXResolver : NOVALUE (void)
-!
+void Init_MBXResolver (void)
+//
 // Define the system name resolver process.
 // MBX_RESOLVER:<image>:<priority>:<flags>:<privs>:<quotas>
-!
+//
     {
-    EXTERNAL ROUTINE
-	NML$CONFIG : NOVALUE;
+extern	void NML$CONFIG();
     signed long
-	IMAGENAME : VECTOR->STRSIZ,
+	IMAGENAME [STRSIZ],
 	ImageName_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= imagename),
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= imagename),
 	STATFLAGS,
 	PRIORITY,
 	PRIVS : VECTOR[2],
 	QUOTAS : BLOCK[MAXQUOTA*QUOTA_BLEN] FIELD(QUOTA_FIELDS),
 	Quota_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
-				[DSC$W_LENGTH]	= 0,
-				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
-				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
-				[DSC$A_POINTER]	= Quotas);
+				[dsc$w_length]	= 0,
+				[dsc$b_dtype]	= DSC$K_DTYPE_Z,
+				[dsc$b_class]	= DSC$K_CLASS_Z,
+				[dsc$a_pointer]	= Quotas);
 
 // Skip delimiter
 
@@ -1720,7 +1707,7 @@ Init_MBXResolver : NOVALUE (void)
 
 // Parse the image name
 
-    ImageName_Desc [DSC$W_LENGTH] = GETFIELD(IMAGENAME);
+    ImageName_Desc [dsc$w_length] = GETFIELD(IMAGENAME);
     SKIPTO(%C":");
 
 // Parse the priority value
@@ -1739,7 +1726,7 @@ Init_MBXResolver : NOVALUE (void)
 
 // Parse the process quotas
 
-    Quota_Desc [DSC$W_LENGTH] = PARSE_PRCQUOTAS(QUOTAS,MAXQUOTA) * QUOTA_BLEN;
+    Quota_Desc [dsc$w_length] = PARSE_PRCQUOTAS(QUOTAS,MAXQUOTA) * QUOTA_BLEN;
 
 // Call the name resolver configuration routine
 
@@ -1749,14 +1736,13 @@ Init_MBXResolver : NOVALUE (void)
 
 //SBTTL "Add an entry to the local hosts list"
 
-INIT_LOCAL_HOST : NOVALUE (void)
-!
+void INIT_LOCAL_HOST (void)
+//
 // Format is Local_Host:<ip-address>:<ip-mask>
 // Reads the data and calls USER$ACCESS_CONFIG(ipaddr,ipmask)
-!
+//
     {
-    EXTERNAL ROUTINE
-	USER$ACCESS_CONFIG : NOVALUE;
+extern	void USER$ACCESS_CONFIG();
     signed long
 	hostaddr,
 	hostmask;
@@ -1789,11 +1775,11 @@ SKIPTO(TCHR) : NOVALUE (void)
 	CHR;
     while ((CHR = CH$RCHAR_A(LINPTR)) != 0)
 	if (CHR == TCHR)
-	    RETURN;
+	    return;
     Config_err(%ASCID"SKIPTO failure (EOL)");
     }
 
-SKIPWHITE : NOVALUE (void)
+void SKIPWHITE (void)
 
 // Skip over whitespace in the current record.
 
@@ -1804,7 +1790,7 @@ SKIPWHITE : NOVALUE (void)
     while ((CHR = CH$RCHAR_A(LPTR)) != 0)
 	{
 	if (CHR != %C" ")
-	    RETURN;
+	    return;
 	LINPTR = LPTR;
 	};
     Config_err(%ASCID"SKIPWHITE failure (EOL)");
@@ -1891,14 +1877,14 @@ Side Effects:
 */
 
 
-CNF$Net_Device_Init : NOVALUE (void)
+void CNF$Net_Device_Init (void)
     {
-    EXTERNAL
+    externAL
 	RETRY_COUNT,
 	MAX_PHYSICAL_BUFSIZE;
     signed long
 	j,
-	cdev,
+      cdev;
 	struct Device_Configuration_Entry * dev_config;
 
     Dev_attn = 0;		// No devices need attention
@@ -1906,12 +1892,12 @@ CNF$Net_Device_Init : NOVALUE (void)
 	{
 	if (Dev_Config_Tab[J,dc_valid_Device])
 	    {
-	    signed long
-		DESC$STR_ALLOC(oprmsg,80),
-		struct $BBLOCK * devnam->DSC$K_S_BLN,
-		stastr,
-		DESC$STR_ALLOC(ipstr,20),
+DESC$STR_ALLOC(oprmsg,80);
+DESC$STR_ALLOC(ipstr,20);
 		DESC$STR_ALLOC(phystr,50);
+	    signed long
+		struct $BBLOCK * devnam->DSC$K_S_BLN,
+      stastr;
 
 // Initialize this device
 
@@ -1929,11 +1915,11 @@ CNF$Net_Device_Init : NOVALUE (void)
 // And tell the operator the status.
 
 	    devnam = dev_config_tab[j,dc_devname];
-!	    ASCII_Hex_Bytes(phystr,dev_config_tab[cdev,dc_phy_size],
-!			    dev_config[cdev,dc_phy_addr],
-!			    phystr->DSC$W_LENGTH);
+//	    ASCII_Hex_Bytes(phystr,dev_config_tab[cdev,dc_phy_size],
+//			    dev_config[cdev,dc_phy_addr],
+//			    phystr->dsc$w_length);
 	    ASCII_Dec_Bytes(ipstr,4,dev_config_tab[j,dc_ip_address],
-			    ipstr->DSC$W_LENGTH);
+			    ipstr->dsc$w_length);
 	    if (dev_config_tab[cdev,dc_online])
 		stastr = %ASCID"Online"
 	    else
@@ -1951,26 +1937,25 @@ CNF$Net_Device_Init : NOVALUE (void)
 
 //SBTTL	"Check devices needing attention"
 
-FORWARD ROUTINE
- void    CNF$Check_Devices;
+ void    CNF$Check_Devices();
 
 static signed long
-    CHECKTIME : VECTOR[2] INITIAL(-20000000,-1); // 2 seconds in the future
+    CHECKTIME [2] ={-20000000,-1}; // 2 seconds in the future
 
-CNF$Check_Sched : NOVALUE (void)
+void CNF$Check_Sched (void)
     {
     $SETIMR(	DAYTIM = CHECKTIME,
 		ASTADR = CNF$Check_Devices);
     }
 
-CNF$Device_Error : NOVALUE (void)
+void CNF$Device_Error (void)
     {
     if (dev_attn == 0)
 	CNF$Check_Sched();		// Schedule a check
     dev_attn = dev_attn+1;	// And bump count of wedged devices
     }
 
-CNF$Check_Devices : NOVALUE (void)
+void CNF$Check_Devices (void)
     {
     register i;
     for (i=0;i<=(Dev_count-1);i++)
@@ -1987,10 +1972,10 @@ CNF$Check_Devices : NOVALUE (void)
 
 
 
-!
+//
 // A simple routine to return our local IP address.  By using this, we
 // cut down on external access to the device configuration table.
-!
+//
 CNF$Get_Local_IP_addr (void)
     {
     Dev_Config_Tab[0,dc_ip_address]

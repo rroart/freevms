@@ -169,7 +169,7 @@ Modification History:
 
 4.2   1-Jul-86, Edit by VAF
 	Add support for "future" segments queue in INIT_TCB and
-	TCP$KILL_P}ING_REQUESTS.
+	TCP$KILL_PENDING_REQUESTS.
 	Add new counters, make available to dump function.
 
 4.1  25-Jun-86, Edit by VAF
@@ -182,11 +182,11 @@ Modification History:
 	Start adding support for UCB extension to hold TCB pointer.
 
 3.9  12-Jun-86, Edit by VAF
-	Do buffering of user sends here not in S}_DATA routine. It may cost
+	Do buffering of user sends here not in SEND_DATA routine. It may cost
 	a little extra buffer copying, but it will probably speed things up.
 
 3.8  11-Jun-86, Edit by VAF
-	In USER$Purge_All_IO call TCP$KILL_P}ING_REQUESTS - don't duplicate
+	In USER$Purge_All_IO call TCP$KILL_PENDING_REQUESTS - don't duplicate
 	all of that effort.
 
 3.7  10-Jun-86, Edit by VAF
@@ -207,7 +207,7 @@ Modification History:
 	Make VMS$CANCEL routine initiate a close, not reset connection.
 
 3.3   2-May-86, Edit by VAF
-	In NET$S}, don't call S}_DATA - it will be done soon enough.
+	In NET$SEND, don't call SEND_DATA - it will be done soon enough.
 
 3.2  22-Apr-86, Edit by VAF
 	Phase II of flushing XPORT - use $FAO for doing output formatting.
@@ -217,7 +217,7 @@ Modification History:
 	Add a new bit to the open call - OP$NoWait - for immediate return
 
 3.0  19-Apr-86, Edit by VAF
-	Flush call to S}_DATA in main user processing routine.
+	Flush call to SEND_DATA in main user processing routine.
 	A lot of code in this module needs work - it shouldn't be diddling tcb
 	states and such.
 
@@ -291,30 +291,31 @@ Modification History:
 
 //SBTTL "Module Definition"
 
+#if 0
 MODULE USER(IDENT="6.7a",LANGUAGE(BLISS32),
 	    ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 			    NONEXTERNAL=LONG_RELATIVE),
 	    LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
 	    OPTIMIZE,OPTLEVEL=3,ZIP)=
-{
+#endif
 
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS transportablity package
-!LIBRARY "SYS$LIBRARY:STARLET";	// VMS system definitions ** Not STARLET **
-#include "SYS$LIBRARY:LIB";	// VMS system definitions ** Not STARLET **
-#include "CMUIP_SRC:[central]NETERROR";	// Network error messages
-#include "CMUIP_SRC:[CENTRAL]NETCOMMON";	// Various VMS specifics
-#include "CMUIP_SRC:[CENTRAL]NETVMS";		// Various VMS specifics
-#include "STRUCTURE";		// TCB & Segment Structure definitions
-!LIBRARY "TCP";			// TCP related definitions
-#include "TCPMACROS";		// Include local macros
-#include "CMUIP_SRC:[central]NETCONFIG"; // Transport devices interface
+// not yet #include <cmuip/central/include/netxport.h"	// BLISS transportablity package
+//LIBRARY <starlet.h>	// VMS system definitions ** Not STARLET **
+// not yet #include "SYS$LIBRARY:LIB";	// VMS system definitions ** Not STARLET **
+#include <cmuip/central/include/neterror.h>	// Network error messages
+#include <cmuip/central/include/netcommon.h>	// Various VMS specifics
+#include "netvms.h"		// Various VMS specifics
+#include "structure.h"		// TCB & Segment Structure definitions
+//LIBRARY "tcp.h"			// TCP related definitions
+#include "tcpmacros.h"		// Include local macros
+#include <cmuip/central/include/netconfig.h> // Transport devices interface
 
-!*** N.B. Special UCB extensions used by IP device driver	***
-!*** Take care to always match definitions in IPDRIVER.MAR	***
-!*** Referenced by: TCP_USER.BLI, UDP.BLI, ICMP.BLI		***
+//*** N.B. Special UCB extensions used by IP device driver	***
+//*** Take care to always match definitions in IPDRIVER.MAR	***
+//*** Referenced by: TCP_USER.BLI, UDP.BLI, ICMP.BLI		***
 
 signed long LITERAL
-    UCB$Q_DDP	= $BYTEOFFSET(UCB$Q_DEVDEP}),
+    UCB$Q_DDP	= $BYTEOFFSET(UCB$Q_DEVDEPEND),
     UCB$L_CBID	= UCB$Q_DDP,	// Control Block associated with UCB
     UCB$L_EXTRA	= UCB$Q_DDP+4;	// Extra longword for later expansion
 
@@ -361,39 +362,39 @@ extern
 
 // Rtns from MEMGR.BLI
 
-    MM$UArg_Free: NOVALUE,
+extern     MM$UArg_Free();
 
 // IOUTIL.BLI
 
- VOID    ACT_OUTPUT,
-    LOG_CHANGE,
-    ACT_CHANGE,
- VOID    LOG_OUTPUT,
- VOID    LOG_TIME_STAMP,
- VOID    ACT_FAO,
- VOID    LOG_FAO,
- VOID    OPR_FAO,
+extern  void    ACT_OUTPUT();
+extern     LOG_CHANGE();
+extern     ACT_CHANGE();
+extern  void    LOG_OUTPUT();
+extern  void    LOG_TIME_STAMP();
+extern  void    ACT_FAO();
+extern  void    LOG_FAO();
+extern  void    OPR_FAO();
 
 // Routines From:  MACLIB.MAR
 
-    Set_IP_device_OFFline: NOVALUE,
-    User_Requests_Avail,
-    VMS_IO$POST: NOVALUE,
-    MovByt: NOVALUE,
-    SwapBytes: NOVALUE,
-    Time_Stamp,
+extern     void Set_IP_device_OFFline();
+extern     User_Requests_Avail();
+extern     void VMS_IO$POST();
+extern     void MovByt();
+extern     void SwapBytes();
+extern     Time_Stamp();
 
 // NMLOOK.BLI
 
- VOID    NML$GETNAME,
- VOID    NML$GETALST,
- VOID    NML$GETRR,
- VOID    NML$CANCEL,
- VOID    NML$STEP,
+extern  void    NML$GETNAME();
+extern  void    NML$GETALST();
+extern  void    NML$GETRR();
+extern  void    NML$CANCEL();
+extern  void    NML$STEP();
 
 // IP.BLI
 
-    IP_ISLOCAL;
+extern     IP_ISLOCAL();
 
 
 // User Network(TCP) I/O Request arg blk Function Codes.
@@ -408,7 +409,7 @@ signed long LITERAL
     M$UNUSED	= 0: UNSIGNED(8),
 
     U$OPEN	= 1: UNSIGNED(8),
-    U$S}	= 2: UNSIGNED(8),
+    U$SEND	= 2: UNSIGNED(8),
     U$RECV	= 3: UNSIGNED(8),
     U$CLOSE	= 4: UNSIGNED(8),
     U$STATUS	= 5: UNSIGNED(8),
@@ -509,7 +510,7 @@ Side Effects:
 */
 
 
-IO$POST (IOSB, struct User_Default_Args * UArg): NOVALUE (void)
+void IO$POST (IOSB, struct User_Default_Args * UArg)
     {
     signed long
 	IRP;
@@ -539,15 +540,15 @@ IO$POST (IOSB, struct User_Default_Args * UArg): NOVALUE (void)
 Function:
 
 	Return I/O Status to the user processes.  Used for TCP functions
-	which actually transfer data between user & TCP (S}, Receieive
+	which actually transfer data between user & TCP (SEND, Receieive
 	status, dump).
 
 Inputs:
 
 	IRP = Address of User's IO Request Packet (VMS structure).
 	UCB = Address of Unit Control Blk (VMS Structure).
-	VMS_Return_Code = SS$_Normal etc.
-	TCP_Err, When VMS_Return_Code != SS$_Normal this is the error feild
+	VMS_Return_Code = SS$_NORMAL etc.
+	TCP_Err, When VMS_Return_Code != SS$_NORMAL this is the error feild
 	Bytes_Xfered = # of bytes read/written
 	IO_Tag = IO request identifier (receive only)
 	URG = Urgent data present (send only)
@@ -564,12 +565,10 @@ Side Effects:
 */
 
 
-USER$POST_IO_STATUS (UARG,STATUS,NBYTES,
-VOID 				   FLAGS,ICMCODE) (void)
+void USER$POST_IO_STATUS (UARG,STATUS,NBYTES,
+ 				   FLAGS,ICMCODE)
     {
-    signed long
-!	IRP,
-	IOSB :  NetIO_Status_Block;
+	struct  NetIO_Status_Block * IOSB;
 
 // Fill in Network IO status Block
 
@@ -622,8 +621,7 @@ Side Effects:
 
 USER$ERR (struct User_Default_Args * Arg,Err)
     {
-    signed long
-	IOSB : NETIO_STATUS_BLOCK;
+	struct NETIO_STATUS_BLOCK * IOSB;
 
 // Fill in Network IO status Block
 
@@ -680,12 +678,12 @@ Side Effects:
 USER$POST_FUNCTION_OK(struct User_Default_Args * Arg): NOVALUE (void)
     {
     signed long
-	IRP,
-	IOSB : NetIO_Status_Block;
+    IRP;
+	struct NetIO_Status_Block * IOSB;
 
 // Fill in Network IO status Block
 
-    IOSB->NSB$STATUS = SS$_Normal;
+    IOSB->NSB$STATUS = SS$_NORMAL;
     IOSB->NSB$BYTE_COUNT = 0;
     IOSB->NSB$XSTATUS = 0;
 
@@ -704,15 +702,14 @@ USER$Net_Connection_Info(struct User_Info_Args * Uargs,
 			     Lcl_Host,Frn_Host,Lcl_Port,Frn_Port,
 void 			     Frn_Name,Frn_Nlen) (void)
     {
-    signed long
-	CS: Connection_Info_Return_Block;
+	struct Connection_Info_Return_Block * CS;
 
 // Verify buffer size
 
     if (Uargs->IF$Buf_Size LSS Connection_Info_ByteSize)
 	{
 	USER$Err(Uargs,NET$_BTS);// Buffer Too Small error.
-	RETURN;
+	return;
 	};
 
 // Fill in Connection Information return argument block.
@@ -727,9 +724,9 @@ void 			     Frn_Name,Frn_Nlen) (void)
 
 // Local host name
 
-    CH$MOVE(Local_Name->DSC$W_LENGTH,Local_Name->DSC$A_POINTER,
+    CH$MOVE(Local_Name->dsc$w_length,Local_Name->dsc$a_pointer,
 	    CH$PTR(CS->CI$Local_Host));
-    CS->CI$LHost_Name_Size = Local_Name->DSC$W_LENGTH;
+    CS->CI$LHost_Name_Size = Local_Name->dsc$w_length;
 
 // Local and foreign port numbers.
 
@@ -757,14 +754,14 @@ void 			     Frn_Name,Frn_Nlen) (void)
 // get a portion of the 64-bit time to use as a clock based factor in
 // time based calculations.
 
-!Entry:	none
+//Entry:	none
 
-!Exit:	returns clock based integer.
+//Exit:	returns clock based integer.
 
 USER$Clock_Base (void)
     {
     signed long
-	Now: VECTOR[2];
+	Now[2];
 
     $GETTIM(TimAdr=Now);
     return (NOW[0]^-20+NOW[1]^12) && %x"7FFF";
@@ -809,9 +806,9 @@ USER$GET_LOCAL_PORT(Pbase)
     }
 
 FORWARD ROUTINE
- VOID    ACCESS_INIT;
+ void    ACCESS_INIT;
 
-USER$INIT_ROUTINES : NOVALUE (void)
+void USER$INIT_ROUTINES (void)
     {
     TCP_User_LP = USER$Clock_Base();
     UDP_User_LP = USER$Clock_Base();
@@ -846,10 +843,10 @@ Side Effects:
 
 Net$Debug(struct Debug_Args * UArgs): NOVALUE (void)
     {
-    SELECT (UARGS->DE$GROUP) OF
+    switch (UARGS->DE$GROUP)
 	SET
-	[0] : LOG_CHANGE(UARGS->DE$LEVEL);
-	[1] : ACT_CHANGE(UARGS->DE$LEVEL);
+	case 0: LOG_CHANGE(UARGS->DE$LEVEL);
+	case 1: ACT_CHANGE(UARGS->DE$LEVEL);
 	TES;
 
     USER$Post_Function_OK(Uargs);
@@ -877,8 +874,7 @@ Side Effects:
 
 Net$Event(struct Event_Args * UArgs): NOVALUE (void)
     {
-    EXTERNAL ROUTINE
-	MM$Get_Mem, MM$Free_Mem;
+extern	MM$Get_Mem(), MM$Free_Mem();
     signed long
 	RC,
 	Buffer;
@@ -886,7 +882,7 @@ Net$Event(struct Event_Args * UArgs): NOVALUE (void)
     if ((RC=MM$Get_Mem(Buffer,UArgs->EV$Buf_Size)) != SS$_NORMAL)
 	{
 	USER$ERR(Uargs,RC);
-	RETURN
+	return;
 	};
 
     $$KCALL(MOVBYT, UArgs->EV$Buf_Size, UArgs->EV$Data_Start, Buffer);
@@ -944,9 +940,8 @@ Output:
 
 NET$SNMP(struct SNMP_Args * Uargs): NOVALUE (void)
     {
-    EXTERNAL ROUTINE
-	SNMP$USER_INPUT,
-	MM$Get_Mem, MM$Free_Mem;
+extern	SNMP$USER_INPUT(),
+	MM$Get_Mem(), MM$Free_Mem();
     LITERAL
 	RBBYTES = D$User_Return_Blk_Max_Size,
 	RBSIZE = (RBBYTES+3)/4;		// Largest dump block, in alloc units
@@ -954,17 +949,17 @@ NET$SNMP(struct SNMP_Args * Uargs): NOVALUE (void)
 	RC,
 	struct VECTOR * In_Buff [,BYTE],
 	Error = False,
-	Now: VECTOR[2],			// time as in now.
-	One: VECTOR[2] Initial(1,0),	// QuadWord of val 1.
+	Now[2],			// time as in now.
+	One[2] = {1,0],	// QuadWord of val 1.
 	BufSize  = 0,
-	RB: VECTOR->RBSIZE;
+	RB[RBSIZE];
 
 // Fetch the input data from kernal space.
 
     if ((RC=MM$Get_Mem(In_Buff,UArgs->SNMP$WBuf_Size)) != SS$_NORMAL)
 	{
 	USER$ERR(Uargs,RC);
-	RETURN
+	return;
 	};
 
     $$KCALL(MOVBYT, UArgs->SNMP$WBuf_Size, UArgs->SNMP$Data_Start, In_Buff);
@@ -972,7 +967,7 @@ NET$SNMP(struct SNMP_Args * Uargs): NOVALUE (void)
 // Determine which Dump Directive we have.
 
 /*
-    SELECTONE Uargs->SNMP$Function OF
+    switch (Uargs->SNMP$Function)
     SET
 
 // Return the dynamic memory allocation counts, # of times the free list for the
@@ -987,13 +982,12 @@ NET$SNMP(struct SNMP_Args * Uargs): NOVALUE (void)
 	Error = SNMP$USER_INPUT(In_Buff,UArgs->SNMP$WBuf_Size,
 			       RB+4,Bufsize)
 	};
-    [SNMP$C_Kill]:
+    case SNMP$C_Kill:
 */
 
 if ((Uargs->SNMP$Function == 4))
 	{
-	EXTERNAL ROUTINE
-	    TCP$KILL;
+extern	    TCP$KILL();
 
 	XLOG$FAO(LOG$USER,"!%T Kill !XL (bsize=!XL)!/",0,
 		 In_Buff[0],Uargs->SNMP$WBuf_Size);
@@ -1035,7 +1029,7 @@ else
 
 // Post the user's IO request back to the user.
 
-	    User$Post_IO_Status(Uargs,SS$_Normal,BufSize+4,0,0);
+	    User$Post_IO_Status(Uargs,SS$_NORMAL,BufSize+4,0,0);
 	    MM$UArg_Free(Uargs);	// Release user arg block.
 	    End;
 	};
@@ -1073,20 +1067,19 @@ Side Effects:
 FORWARD ROUTINE
  void    GTHST_Purge;
 
-USER$Purge_All_IO : NOVALUE (void)
+void USER$Purge_All_IO (void)
     {
-    EXTERNAL ROUTINE
-	TCP$Purge_All_IO : NOVALUE,
-	UDP$Purge_All_IO : NOVALUE,
-	ICMP$Purge_All_IO : NOVALUE,
-	IPU$Purge_All_IO : NOVALUE;
+extern 	void TCP$Purge_All_IO();
+extern 	void UDP$Purge_All_IO();
+extern 	void ICMP$Purge_All_IO();
+extern 	void IPU$Purge_All_IO();
     register
 	qb;
     signed long
-	struct User_Default_Args * Uargs,
-	struct User_Send_Args * Sargs,
-	IOSTATUS:  NetIO_Status_Block,
-	EXPR: Vector[2];
+	EXPR[2];
+struct User_Default_Args * Uargs;
+struct User_Send_Args * Sargs;
+struct  NetIO_Status_Block * IOSTATUS;
 
 // Set virtual device IP offline.  Prevent further user io.
 
@@ -1119,7 +1112,7 @@ USER$Purge_All_IO : NOVALUE (void)
 
 	if (Uargs->UD$Funct neq M$Cancel)
 	    User$Post_IO_Status(Uargs,NET$_TE,0,0,0);
-!!!HACK!!// Don't release the Uarg?
+//!!HACK!!// Don't release the Uarg?
 	};
     }
 
@@ -1162,7 +1155,7 @@ Side Effects:
 */
 
 FORWARD ROUTINE
- VOID    GTHST_CANCEL;
+ void    GTHST_CANCEL;
 
 User$Brk (void)
     {
@@ -1171,11 +1164,10 @@ User$Brk (void)
 
 void VMS$Cancel(struct VMS$Cancel_Args * Uargs) (void)
     {
-    EXTERNAL ROUTINE
-	TCP$Cancel,
-	UDP$Cancel,
-	ICMP$Cancel,
-	IPU$Cancel;
+extern 	TCP$Cancel();
+extern 	UDP$Cancel();
+extern 	ICMP$Cancel();
+extern 	IPU$Cancel();
     signed long
 	ucbptr,
 	proto,
@@ -1188,21 +1180,21 @@ void VMS$Cancel(struct VMS$Cancel_Args * Uargs) (void)
 	     0,Uargs->VC$PID,Uargs->VC$PIOchan,Proto);
 
     Done = 0;
-    SELECTONE Uargs->VC$Protocol OF
+    switch (Uargs->VC$Protocol)
     SET
-    [U$TCP_Protocol]:
+    case U$TCP_Protocol:
 	Done = TCP$Cancel(Uargs);
 
-    [U$UDP_Protocol]:
+    case U$UDP_Protocol:
 	Done = UDP$Cancel(Uargs);
 
-    [U$ICMP_Protocol]:
+    case U$ICMP_Protocol:
 	Done = ICMP$Cancel(Uargs);
 
-    [U$IP_Protocol]:
+    case U$IP_Protocol:
 	Done = IPU$Cancel(Uargs);
 
-    [OTHERWISE]:
+    CASE OTHERWISE:
 	Done = USER$BRK();
     TES;
 
@@ -1235,12 +1227,10 @@ Output:
 	buffer is filled with requested dump data.
 */
 
-NET$DUMP(struct Debug_Dump_Args * Uargs): NOVALUE (void)
+void NET$DUMP(struct Debug_Dump_Args * Uargs)
     {
-    EXTERNAL ROUTINE
-	CALCULATE_UPTIME;
-    EXTERNAL
-	TEK$sys_uptime;
+extern	CALCULATE_UPTIME();
+extern	TEK$sys_uptime;
     register
 	struct queue_blk_structure(QB_UR_Fields) * QB;	// queue block pointer.
     LITERAL
@@ -1248,25 +1238,25 @@ NET$DUMP(struct Debug_Dump_Args * Uargs): NOVALUE (void)
 	RBSIZE = (RBBYTES+3)/4;		// Largest dump block, in alloc units
     signed long
 	RC,
-	Error = False,
+	Error = FALSE,
 	BufSize,
-	count = 0,
-	RB: VECTOR->RBSIZE;
+      count = 0,
+	RB[RBSIZE];
 
 // Determine which Dump Directive we have.
 
-    SELECTONE Uargs->DU$Dump_Directive OF
+    switch (Uargs->DU$Dump_Directive)
     SET
 
 // Return the dynamic memory allocation counts, # of times the free list for the
 // specified data structure was empty.  Used to figure out how many free list
 // elements to pre-allocate.
 
-    [DU$Dynamic_Mem_Alloc]:
+    case DU$Dynamic_Mem_Alloc:
 	{
 	Map
-	    RB: D$Mem_Alloc_Return_Blk;
-	EXTERNAL
+	    struct D$Mem_Alloc_Return_Blk * RB;
+	externAL
 	    QBLK_Count_base : UNSIGNED BYTE,
 	    Uarg_Count_base : UNSIGNED BYTE,
 	    MIN_Seg_Count_base : UNSIGNED BYTE,
@@ -1299,14 +1289,14 @@ NET$DUMP(struct Debug_Dump_Args * Uargs): NOVALUE (void)
 	Bufsize	= D$MA_BLKsize;
 	};
 
-    [DU$TCP_stats]:
+    case DU$TCP_stats:
 	{
 	MAP
-	    RB: D$TCP_Stats_Return_Blk;
+	    struct D$TCP_Stats_Return_Blk * RB;
 
 	rb->dm$tcpacp_pid		= mypid;
 	rb->dm$user_io_requests		= ts$uir;
-!!!HACK!!//  // storeForward does not belong here...
+//!!HACK!!//  // storeForward does not belong here...
 	rb->dm$storeForward		= 0;
 	rb->dm$active_conects_opened	= ts$aco;
 	rb->dm$passive_conects_opened	= ts$pco;
@@ -1338,20 +1328,18 @@ NET$DUMP(struct Debug_Dump_Args * Uargs): NOVALUE (void)
 // 0th element of return vector is the count of valid tcb addresses in the
 // return vector (ie, counted vector).
 
-    [DU$Local_Connection_ID]:
+    case DU$Local_Connection_ID:
 	{
-	EXTERNAL ROUTINE
-void 	    TCP$Connection_List;
+void 	    TCP$Connection_List();
 	TCP$Connection_List(RB);
 	BufSize = D$lc_id_BlkSize;
 	};
 
 // Dump out a TCB
 
-    [DU$TCB_Dump]:
+    case DU$TCB_Dump:
 	{
-	EXTERNAL ROUTINE
-	   TCP$TCB_Dump;
+extern	   TCP$TCB_Dump();
 	if (TCP$TCB_Dump(Uargs->DU$ARG0,RB))
 	    BufSize = D$TCB_Dump_BLKsize
 	else
@@ -1360,20 +1348,18 @@ void 	    TCP$Connection_List;
 
 // Return all UDP connections (as D$Local_Connection_ID above)
 
-    [DU$UDP_Connections]:
+    case DU$UDP_Connections:
 	{
-	EXTERNAL ROUTINE
-void 	    UDP$Connection_List;
+void 	    UDP$Connection_List();
 	UDP$Connection_List(RB);
 	Bufsize = D$UDP_List_Blksize;
 	};
 
 // Dump out a UDPCB
 
-    [DU$UDPCB_Dump]:
+    case DU$UDPCB_Dump:
 	{
-	EXTERNAL ROUTINE
-	    UDP$UDPCB_Dump;
+extern	    UDP$UDPCB_Dump();
 	if (UDP$UDPCB_Dump(Uargs->DU$Local_Conn_ID,RB))
 	    Bufsize = D$UDPCB_Dump_Blksize
 	else
@@ -1382,20 +1368,18 @@ void 	    UDP$Connection_List;
 
 // Return all ICMP connections (as D$Local_Connection_ID above)
 
-    [DU$ICMP_Connections]:
+    case DU$ICMP_Connections:
 	{
-	EXTERNAL ROUTINE
-void 	    ICMP$Connection_List;
+extern void 	    ICMP$Connection_List();
 	ICMP$Connection_List(RB);
 	Bufsize = D$ICMP_List_Blksize;
 	};
 
 // Dump out a ICMPCB
 
-    [DU$ICMPCB_Dump]:
+    case DU$ICMPCB_Dump:
 	{
-	EXTERNAL ROUTINE
-	   ICMP$ICMPCB_Dump;
+extern	   ICMP$ICMPCB_Dump();
 	if (ICMP$ICMPCB_DUMP (Uargs->DU$Local_Conn_ID,RB))
 	    Bufsize = D$ICMPCB_Dump_Blksize
 	else
@@ -1404,7 +1388,7 @@ void 	    ICMP$Connection_List;
 
 // Get device-depandent dump from device driver module
 
-    [du$device_dump]:
+    case du$device_dump:
 	{
 	IF (uargs->du$device_idx geq 0) AND
 	   (uargs->du$device_idx leq DC_max_num_net_Devices-1) AND
@@ -1425,46 +1409,44 @@ void 	    ICMP$Connection_List;
 
 // Dump out ARP cache entries.
 
-    [DU$ARP_CACHE]:
+    CASE DU$ARP_CACHE:
 	{
 	signed long
 	    USIZE,
 	    RMOD;
-!	EXTERNAL ROUTINE
-!	    ARP_DUMP;
+//	externAL ROUTINE
+//	    ARP_DUMP;
 
 	Error = USER$Err(Uargs,NET$_IFC); // Illegal Function code.
 
 // Compute size of return block - make multiple of dump block size
 
-!	USIZE = Uargs->DU$Buf_Size;
-!	if (USIZE > RBBYTES)
-!	    USIZE = RBBYTES;
-!	RMOD = USIZE MOD D$ARP_Dump_Blksize;
-!	USIZE = USIZE - RMOD;
-!	if (USIZE <= 0)
-!	    Error = USER$Err(Uargs,NET$_BTS)
-!	else
-!	    {
-!	    Bufsize = ARP_DUMP(Uargs->DU$Start_Index,RB,USIZE);
-!	    if (Bufsize LSS 0)
-!		Error = USER$Err(Uargs,NET$_DAE);
-!	    };
+//	USIZE = Uargs->DU$Buf_Size;
+//	if (USIZE > RBBYTES)
+//	    USIZE = RBBYTES;
+//	RMOD = USIZE MOD D$ARP_Dump_Blksize;
+//	USIZE = USIZE - RMOD;
+//	if (USIZE <= 0)
+//	    Error = USER$Err(Uargs,NET$_BTS)
+//	else
+//	    {
+//	    Bufsize = ARP_DUMP(Uargs->DU$Start_Index,RB,USIZE);
+//	    if (Bufsize LSS 0)
+//		Error = USER$Err(Uargs,NET$_DAE);
+//	    };
 	};
 
 // Get list of device indexes.
 
-    [DU$Device_List]:
+    case DU$Device_List:
 	{
-	EXTERNAL ROUTINE
-	    CNF$Device_list;
+extern	    CNF$Device_list();
 	Bufsize = CNF$Device_list(RB);
 	};
 
-    [DU$Device_Stat]:
+    case DU$Device_Stat:
 	{
-	EXTERNAL ROUTINE
-	    CNF$Device_stat;
+extern	    CNF$Device_stat();
 	if (Uargs->DU$Buf_Size LSS DC_Entry_Size*4)
 	    Error = USER$Err(Uargs,NET$_BTS)
 	else if (CNF$Device_stat ( Uargs->DU$ARG0, RB ) == -1)
@@ -1475,7 +1457,7 @@ void 	    ICMP$Connection_List;
 
 // Undefined function code - give error
 
-    [Otherwise]:
+    case Otherwise:
 	Error = USER$Err(Uargs,NET$_IFC); // Illegal Function code.
     TES;
 
@@ -1498,7 +1480,7 @@ void 	    ICMP$Connection_List;
 
 // Post the user's IO request back to the user.
 
-	    User$Post_IO_Status(Uargs,SS$_Normal,BufSize,0,0);
+	    User$Post_IO_Status(Uargs,SS$_NORMAL,BufSize,0,0);
 	    MM$UArg_Free(Uargs);	// Release user arg block.
 	    End;
 	};
@@ -1550,16 +1532,16 @@ MACRO
     GETJPI_BLOCK = BLOCK->GETJPI_SIZE FIELD(GETJPI_FIELDS) %;
 
 User$Privileged(PID)
-!
+//
 // Verify the user has privileges to use a well-known local port. User must
 // have PHY_IO privilege.
 // Returns TRUE if user has the privilege, FALSE otherwise.
-!
+//
     {
+	struct GETJPI_BLOCK * JPI;
     signed long
-	JPI : GETJPI_BLOCK,
-	PRVBUF : $BBLOCK[8],
 	PRVLEN;
+char PRVBUF[8];
 
 // Fill in GETJPI request block.
 
@@ -1579,17 +1561,17 @@ User$Privileged(PID)
 
 
 Check_ID(PID,ID)
-!
+//
 // Check that a user holds a given rights identifier. The identifiers of
 // interest to us are ARPANET_ACCESS and ARPANET_WIZARD.
 // Returns TRUE if the user has the necessary ID, FALSE otherwise.
-!
+//
     {
+	struct GETJPI_BLOCK * JPI;
     signed long
 	STATUS,
-	JPI : GETJPI_BLOCK,
-	UICBLK : VECTOR[2],
 	UICLEN,
+	UICBLK[2],
 	RDBCTX,
 	CURID;
 
@@ -1631,10 +1613,10 @@ Check_ID(PID,ID)
 LITERAL WKS$SMTP = 25;		// Well known port number for SMTP
 
 USER$CHECK_ACCESS(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
-!
+//
 // Main routine to check for network access.
 // Returns SS$_NORMAL if access is granted, or error code.
-!
+//
     {
     LABEL
 	X;
@@ -1680,22 +1662,20 @@ X:	{
 
 
 USER$ACCESS_CONFIG(HOSTNUM,HOSTMASK) : NOVALUE (void)
-!
+//
 // Add an entry to the list of allowed local hosts. Called by CONFIG when
 // LOCAL_HOST entry seen in the config file.
-!
+//
     {
 
 // Make sure there is room for this entry
 
     if (ACHOST_COUNT GEQ ACCESS_MAX)
 	{
-	signed long
 	    DESC$STR_ALLOC(HSTSTR,20);
-	EXTERNAL ROUTINE
-VOID 	    ASCII_DEC_BYTES;
+extern void 	    ASCII_DEC_BYTES();
 
-	ASCII_DEC_BYTES(HSTSTR,4,HOSTNUM,HSTSTR->DSC$W_LENGTH);
+	ASCII_DEC_BYTES(HSTSTR,4,HOSTNUM,HSTSTR->dsc$w_length);
 	OPR$FAO("Local hosts list full - not adding entry for !AS",HSTSTR);
 	};
 
@@ -1707,12 +1687,12 @@ VOID 	    ASCII_DEC_BYTES;
     }
 
 
-ACCESS_INIT : NOVALUE (void)
-!
+void ACCESS_INIT (void)
+//
 // Perform necessary initialzation for host access control. Translates the
 // necessary identifiers via $ASCTOID and checks consistancy of switches and
 // access list.
-!
+//
     {
 
 // If access to network check enabled, translate INTERNET_ACCESS rights ID
@@ -1768,9 +1748,9 @@ Side effects:
 */
 
 FORWARD ROUTINE
- VOID    GTHST_NMLOOK_DONE,
- VOID    GTHST_ADLOOK_DONE,
- VOID    GTHST_RRLOOK_DONE;
+ void    GTHST_NMLOOK_DONE,
+ void    GTHST_ADLOOK_DONE,
+ void    GTHST_RRLOOK_DONE;
 
 LITERAL
     NLBSIZE = GTHST_NMLOOK_RET_ARGS_LENGTH*4,
@@ -1787,14 +1767,14 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 
 // Local host info - same as name to address-list w/o doing name lookup.
 
-    [GTH_LCLHST]:
+    CASE GTH_LCLHST:
 	{
 	signed long
-	    RBLOCK : GTHST_NMLOOK_RET_ARGS,
 	    Args: VECTOR[4];
+	    struct GTHST_NMLOOK_RET_ARGS * RBLOCK;
 	BIND
 	    ADRVEC = RBLOCK->GHN$ADRLST : VECTOR;
-	EXTERNAL
+	externAL
 	    DEV_COUNT,
 	    DEV_CONFIG_TAB : DEVICE_CONFIGURATION_TABLE;
 
@@ -1803,7 +1783,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 	if (Uargs->GH$BUFSIZE LSS NLBSIZE)
 	    {
 	    USER$Err(Uargs,NET$_BTS);
-	    RETURN;
+	    return;
 	    };
 
 // Get the list of addresses from the configuration table
@@ -1814,9 +1794,9 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 
 // Copy the name of the local host from the local info
 
-	CH$MOVE(Local_Name->DSC$W_LENGTH,Local_Name->DSC$A_POINTER,
+	CH$MOVE(Local_Name->dsc$w_length,Local_Name->dsc$a_pointer,
 		CH$PTR(RBLOCK->GHN$NAMSTR));
-	RBLOCK->GHN$NAMLEN = Local_Name->DSC$W_LENGTH;
+	RBLOCK->GHN$NAMLEN = Local_Name->dsc$w_length;
 
 // Return data to the user
 
@@ -1824,13 +1804,13 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 
 // And give them a good status reply
 
-	User$Post_IO_Status(Uargs,SS$_Normal,NLBSIZE,0,0);
+	User$Post_IO_Status(Uargs,SS$_NORMAL,NLBSIZE,0,0);
 	MM$UArg_Free(Uargs);
 	};
 
 // Name to address-list lookup
 
-    [GTH_NMLOOK]:
+    CASE GTH_NMLOOK:
 	{
 	MAP
 	    struct GTHST_NMLOOK_ARGS * Uargs;
@@ -1838,7 +1818,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 	if (Uargs->GHN$BUFSIZE LSS NLBSIZE)
 	    {
 	    USER$Err(Uargs,NET$_BTS);
-	    RETURN;
+	    return;
 	    };
 
 	NML$GETALST(CH$PTR(Uargs->GHN$HSTNAM),Uargs->GHN$HSTLEN,
@@ -1847,7 +1827,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 
 // Address to name lookup
 
-    [GTH_ADLOOK]:
+    CASE GTH_ADLOOK:
 	{
 	MAP
 	    struct GTHST_ADLOOK_ARGS * Uargs;
@@ -1857,7 +1837,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 	if (Uargs->GHA$BUFSIZE LSS ALBSIZE)
 	    {
 	    USER$Err(Uargs,NET$_BTS);
-	    RETURN;
+	    return;
 	    };
 
 // User argument is IP address - 0 means local address.
@@ -1870,7 +1850,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 
 // Domain resource record query.
 
-    [GTH_RRECLK]:
+    CASE GTH_RRECLK:
 	{
 	MAP
 	    struct GTHST_RRLOOK_ARGS * Uargs;
@@ -1878,7 +1858,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 	if (Uargs->GRR$BUFSIZE LSS RLBSize)
 	    {
 	    USER$Err(Uargs,NET$_BTS);
-	    RETURN;
+	    return;
 	    };
 
 	NML$GETRR(Uargs->GRR$RRTYPE,
@@ -1888,7 +1868,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 
 // Unknown GTHST function
 
-    [OUTRANGE]:
+    CASE OUTRANGE:
 	USER$Err(Uargs,NET$_IGF);
     TES;
     }
@@ -1900,21 +1880,19 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
     Post the user request with the completion code.
 */
 
-GTHST_NMLOOK_DONE(Uargs,Status,Adrcnt,Adrlst,Namlen,Nambuf) : NOVALUE (void)
+void GTHST_NMLOOK_DONE(Uargs,Status,Adrcnt,Adrlst,Namlen,Nambuf)
+	struct GTHST_NMLOOK_ARGS * Uargs;
     {
     signed long
 	Args: VECTOR[4];
-    MAP
-	struct GTHST_NMLOOK_ARGS * Uargs;
-    signed long
-	NLB : GTHST_NMLOOK_RET_ARGS;
+	struct GTHST_NMLOOK_RET_ARGS * NLB;
 
 // If an error occurred, give it to the user
 
     if (NOT Status)
 	{
 	USER$Err(Uargs,Status);
-	RETURN;
+	return;
 	};
     
 // Copy the return data into prototype block
@@ -1930,7 +1908,7 @@ GTHST_NMLOOK_DONE(Uargs,Status,Adrcnt,Adrlst,Namlen,Nambuf) : NOVALUE (void)
 
 // And give them a good status reply
 
-    User$Post_IO_Status(Uargs,SS$_Normal,NLBSIZE,0,0);
+    User$Post_IO_Status(Uargs,SS$_NORMAL,NLBSIZE,0,0);
     MM$UArg_Free(Uargs);
     }
 
@@ -1939,21 +1917,19 @@ GTHST_NMLOOK_DONE(Uargs,Status,Adrcnt,Adrlst,Namlen,Nambuf) : NOVALUE (void)
     Same as above, but for GTH_ADLOOK function.
 */
 
-GTHST_ADLOOK_DONE(Uargs,Status,Namlen,Nambuf) : NOVALUE (void)
+void GTHST_ADLOOK_DONE(Uargs,Status,Namlen,Nambuf)
+	struct GTHST_ADLOOK_ARGS * Uargs;
     {
     signed long
 	Args: VECTOR[4];
-    MAP
-	struct GTHST_ADLOOK_ARGS * Uargs;
-    signed long
-	ALB : GTHST_ADLOOK_RET_ARGS;
+	struct GTHST_ADLOOK_RET_ARGS * ALB;
 
 // If an error occurred, give it to the user
 
     if (NOT Status)
 	{
 	USER$Err(Uargs,Status);
-	RETURN;
+	return;
 	};
 
 // Build the return block
@@ -1967,7 +1943,7 @@ GTHST_ADLOOK_DONE(Uargs,Status,Namlen,Nambuf) : NOVALUE (void)
 
 // And give them a good status reply
 
-    User$Post_IO_Status(Uargs,SS$_Normal,ALBSIZE,0,0);
+    User$Post_IO_Status(Uargs,SS$_NORMAL,ALBSIZE,0,0);
     MM$UArg_Free(Uargs);
     }
 
@@ -1978,21 +1954,19 @@ GTHST_ADLOOK_DONE(Uargs,Status,Namlen,Nambuf) : NOVALUE (void)
     Post the user request with the completion code.
 */
 
-GTHST_RRLOOK_DONE(Uargs,Status,RDLen,RData,Namlen,Nambuf) : NOVALUE (void)
+void GTHST_RRLOOK_DONE(Uargs,Status,RDLen,RData,Namlen,Nambuf) 
+	struct GTHST_RRLOOK_ARGS * Uargs;
     {
     signed long
-	Args: VECTOR[4];
-    MAP
-	struct GTHST_RRLOOK_ARGS * Uargs;
-    signed long
-	RLB : GTHST_RRLOOK_RET_ARGS;
+	Args[4];
+	struct GTHST_RRLOOK_RET_ARGS * RLB;
 
 // If an error occurred, give it to the user
 
     if (NOT Status)
 	{
 	USER$Err(Uargs,Status);
-	RETURN;
+	return;
 	};
     
 // Copy the return data into prototype block
@@ -2000,7 +1974,7 @@ GTHST_RRLOOK_DONE(Uargs,Status,RDLen,RData,Namlen,Nambuf) : NOVALUE (void)
     if (Uargs->GRR$BUFSIZE LSS RLBSize + RDLen)
 	{
 	USER$Err(Uargs,NET$_BTS);
-	RETURN;
+	return;
 	};
 
     RLB->GRR$RDLEN = RDLen;
@@ -2016,33 +1990,32 @@ GTHST_RRLOOK_DONE(Uargs,Status,RDLen,RData,Namlen,Nambuf) : NOVALUE (void)
 
 // And give them a good status reply
 
-    User$Post_IO_Status(Uargs,SS$_Normal, RLBSize + RDLen,0,0);
+    User$Post_IO_Status(Uargs,SS$_NORMAL, RLBSize + RDLen,0,0);
     MM$UArg_Free(Uargs);
     }
 
 //SBTTL "GTHST_CANCEL - Cancel GTHST requests for a process"
 
 FORWARD ROUTINE
- VOID    GTHST_CANCEL_ONE;
+ void    GTHST_CANCEL_ONE;
 
 Void GTHST_CANCEL(struct VMS$CANCEL_ARGS * Uargs) (void)
-!
+//
 // Search the list of pending GTHST requests looking for match. If found,
 // post it now and delete from the queue.
-!
+//
     {
     NML$STEP(GTHST_CANCEL_ONE,Uargs);
     }
 
 GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS) : NOVALUE (void)
-!
+//
 // Check a single entry from the name lookup queue to see if it belongs to
 // the process that is doing the cancel. If so, we will cancel it.
-!
-    {
-    MAP
-	struct VMS$CANCEL_ARGS * VCUARGS,
+//
+     struct VMS$CANCEL_ARGS * VCUARGS;
 	struct User_Default_Args * UARGS;
+    {
 
 // Do sanity check on AST routine. Only GTHST done routines should be attached
 // to GTHST requests.
@@ -2050,7 +2023,7 @@ GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS) : NOVALUE (void)
     IF (ASTADR != GTHST_NMLOOK_DONE) AND
 	(ASTADR != GTHST_ADLOOK_DONE) AND
 	(ASTADR != GTHST_RRLOOK_DONE) THEN
-	RETURN;
+	return;
 
 // See if the UCB of the cancellor is the same as that of the request. If so,
 // cancel the request (i.e. "finish" it with an error).
@@ -2061,21 +2034,21 @@ GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS) : NOVALUE (void)
     }
 
 FORWARD ROUTINE
- VOID    GTHST_PURGE_ONE;
+ void    GTHST_PURGE_ONE;
 
-GTHST_PURGE : NOVALUE (void)
-!
+void GTHST_PURGE (void)
+//
 // Routine to purge all requests when network ACP exits. Step through all
 // requests (with NML$STEP) and punt them.
-!
+//
     {
     NML$STEP(GTHST_PURGE_ONE,0);
     }
 
 GTHST_PURGE_ONE(COVALUE,ASTADR,UARGS) : NOVALUE (void)
-!
+//
 // Coroutine for NML$STEP/GTHST_PURGE
-!
+//
     {
 
 // Do sanity check on AST routine. Only GTHST done routines should be attached
@@ -2084,7 +2057,7 @@ GTHST_PURGE_ONE(COVALUE,ASTADR,UARGS) : NOVALUE (void)
     IF (ASTADR != GTHST_NMLOOK_DONE) AND
 	(ASTADR != GTHST_ADLOOK_DONE) AND
 	(ASTADR != GTHST_RRLOOK_DONE) THEN
-	RETURN;
+	return;
     NML$CANCEL(UARGS,TRUE,NET$_TE);
     }
 
@@ -2128,45 +2101,44 @@ IMPORTANT NOTE// :
 */
 
 
-USER$Process_User_Requests : NOVALUE (void)
+void USER$Process_User_Requests (void)
     {
-    EXTERNAL ROUTINE
 
 // TCP functions:
-	TCP$OPEN : NOVALUE,
-	TCP$CLOSE : NOVALUE,
-	TCP$ABORT : NOVALUE,
-	TCP$S} : NOVALUE,
-	TCP$RECEIVE : NOVALUE,
-	TCP$INFO : NOVALUE,
-	TCP$STATUS : NOVALUE,
+extern 	void TCP$OPEN();
+extern 	void TCP$CLOSE();
+extern 	void TCP$ABORT();
+extern 	TCP$SEND : NOVALUE();
+extern 	void TCP$RECEIVE();
+extern 	void TCP$INFO();
+extern 	void TCP$STATUS();
 
 // UDP functions:
-	UDP$OPEN : NOVALUE,
-	UDP$CLOSE : NOVALUE,
-	UDP$ABORT : NOVALUE,
-	UDP$S} : NOVALUE,
-	UDP$RECEIVE : NOVALUE,
-	UDP$INFO : NOVALUE,
-	UDP$STATUS : NOVALUE,
+extern 	void UDP$OPEN();
+extern 	void UDP$CLOSE();
+extern 	void UDP$ABORT();
+extern 	UDP$SEND : NOVALUE();
+extern 	void UDP$RECEIVE();
+extern 	void UDP$INFO();
+extern 	void UDP$STATUS();
 
 // ICMP functions:
-	ICMP$OPEN : NOVALUE,
-	ICMP$CLOSE : NOVALUE,
-	ICMP$ABORT : NOVALUE,
-	ICMP$S} : NOVALUE,
-	ICMP$RECEIVE : NOVALUE,
-	ICMP$INFO : NOVALUE,
-	ICMP$STATUS : NOVALUE,
+extern 	void ICMP$OPEN();
+extern 	void ICMP$CLOSE();
+extern 	void ICMP$ABORT();
+extern 	ICMP$SEND : NOVALUE();
+extern 	void ICMP$RECEIVE();
+extern 	void ICMP$INFO();
+extern 	void ICMP$STATUS();
 
 // IP functions:
-	IPU$OPEN : NOVALUE,
-	IPU$CLOSE : NOVALUE,
-	IPU$ABORT : NOVALUE,
-	IPU$S} : NOVALUE,
-	IPU$RECEIVE : NOVALUE,
-	IPU$INFO : NOVALUE,
-	IPU$STATUS : NOVALUE;
+extern 	void IPU$OPEN();
+extern 	void IPU$CLOSE();
+extern 	void IPU$ABORT();
+extern 	IPU$SEND : NOVALUE();
+extern 	void IPU$RECEIVE();
+extern 	void IPU$INFO();
+extern 	void IPU$STATUS();
     register
 	struct User_Default_Args * ArgBlk;
 
@@ -2174,30 +2146,30 @@ USER$Process_User_Requests : NOVALUE (void)
 	{
 	if ($$LOGF(LOG$USER))
 	    {
+DESC$STR_ALLOC(funcstr,30);
 	    signed long
-		DESC$STR_ALLOC(funcstr,30),
 		func;
-	    SELECTONE ArgBlk->UD$Funct OF
+	    switch (ArgBlk->UD$Funct)
 	    SET
-	    [U$OPEN]:	func=%ASCID"TEK$OPEN";
-	    [U$S}]: 	func=%ASCID"TEK$S}";
-	    [U$RECV]:	func=%ASCID"TEK$RECEIVE";
-	    [U$CLOSE]:	func=%ASCID"TEK$CLOSE";
-	    [U$ABORT]:	func=%ASCID"TEK$ABORT";
-	    [U$STATUS]:	func=%ASCID"TEK$STATUS";
-	    [U$INFO]:	func=%ASCID"TEK$INFO";
+	    CASE U$OPEN:	func=%ASCID"TEK$OPEN";
+	    CASE U$SEND: 	func=%ASCID"TEK$SEND";
+	    CASE U$RECV:	func=%ASCID"TEK$RECEIVE";
+	    CASE U$CLOSE:	func=%ASCID"TEK$CLOSE";
+	    CASE U$ABORT:	func=%ASCID"TEK$ABORT";
+	    CASE U$STATUS:	func=%ASCID"TEK$STATUS";
+	    CASE U$INFO:	func=%ASCID"TEK$INFO";
 
-	    [U$GTHST]:  func=%ASCID"Net$GTHST";
-	    [M$DUMP]:	func=%ASCID"Net$DUMP";
-	    [M$EXIT]:	func=%ASCID"Net$EXIT";
-	    [M$DEBUG]:	func=%ASCID"Net$Debug";
-	    [M$EVENT]:	func=%ASCID"Net$Event";
-	    [M$SNMP]:	func=%ASCID"Net$SNMP";
+	    CASE U$GTHST:  func=%ASCID"Net$GTHST";
+	    CASE M$DUMP:	func=%ASCID"Net$DUMP";
+	    CASE M$EXIT:	func=%ASCID"Net$EXIT";
+	    CASE M$DEBUG:	func=%ASCID"Net$Debug";
+	    CASE M$EVENT:	func=%ASCID"Net$Event";
+	    CASE M$SNMP:	func=%ASCID"Net$SNMP";
 
-	    [M$Cancel]:	func=%ASCID"VMS$Cancel";
-	    [OTHERWISE]:
+	    case M$Cancel:	func=%ASCID"VMS$Cancel";
+	    CASE OTHERWISE:
 		    {
-		    $FAO(%ASCID"?User FCN !SL",funcstr->DSC$W_LENGTH,funcstr,
+		    $FAO(%ASCID"?User FCN !SL",funcstr->dsc$w_length,funcstr,
 			 argblk->UD$Funct);
 		    func = funcstr;
 		    };
@@ -2219,101 +2191,100 @@ USER$Process_User_Requests : NOVALUE (void)
 	   // Handle TCP functions first to improve speed.
 	   CASE argBlk->ud$funct FROM u$open TO u$max_TCP_function OF
 	   SET
-	   [u$open]:	TCP$OPEN(ArgBlk);
-	   [u$send]: 	TCP$S}(ArgBlk);
-	   [u$recv]:	TCP$Receive(ArgBlk);
-	   [u$close]:	TCP$CLOSE(ArgBlk);
-	   [u$abort]:	TCP$ABORT(ArgBlk);
-	   [u$status]:	TCP$Status(ArgBlk);
-	   [u$info]:	TCP$Info(ArgBlk);
-	   [OUTRANGE]:	USER$Err(ArgBlk,NET$_IFC); // Illegal Function Code.
+	   case u$open:	TCP$OPEN(ArgBlk);
+	   case u$send: 	TCP$SEND(ArgBlk);
+	   case u$recv:	TCP$Receive(ArgBlk);
+	   case u$close:	TCP$CLOSE(ArgBlk);
+	   case u$abort:	TCP$ABORT(ArgBlk);
+	   case u$status:	TCP$Status(ArgBlk);
+	   case u$info:	TCP$Info(ArgBlk);
+	   CASE OUTRANGE:	USER$Err(ArgBlk,NET$_IFC); // Illegal Function Code.
 
 	   TES
 	else
 	CASE argBlk->ud$funct FROM u$open TO u$max_user_function OF
 	SET
 
-	[u$open]:
-	    SELECTONE Argblk->ud$protocol OF
+	case u$open:
+	    switch (Argblk->ud$protocol)
 	    SET
-	    [U$UDP_Protocol] :	UDP$OPEN(ArgBlk);
-	    [U$ICMP_Protocol] :	ICMP$OPEN(ArgBlk);
-	    [U$IP_Protocol] :	IPU$OPEN(ArgBlk);
-	    [OTHERWISE]:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
+	    case U$UDP_Protocol:	UDP$OPEN(ArgBlk);
+	    case U$ICMP_Protocol:	ICMP$OPEN(ArgBlk);
+	    case U$IP_Protocol:	IPU$OPEN(ArgBlk);
+	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
 	    TES;
 
-	[u$send]:
-	    SELECTONE Argblk->ud$protocol OF
+	case u$send:
+	    switch (Argblk->ud$protocol)
 	    SET
-	    [U$UDP_Protocol] :	UDP$S}(ArgBlk);
-	    [U$ICMP_Protocol] :	ICMP$S}(ArgBlk);
-	    [U$IP_Protocol] :	IPU$S}(ArgBlk);
-	    [OTHERWISE]:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
+	    case U$UDP_Protocol:	UDP$SEND(ArgBlk);
+	    case U$ICMP_Protocol:	ICMP$SEND(ArgBlk);
+	    case U$IP_Protocol:	IPU$SEND(ArgBlk);
+	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
 	    TES;
 
-	[u$recv]:
-	    SELECTONE Argblk->ud$protocol OF
+	case u$recv:
+	    switch (Argblk->ud$protocol)
 	    SET
-	    [U$UDP_Protocol] :	UDP$Receive(ArgBlk);
-	    [U$ICMP_Protocol] :	ICMP$Receive(ArgBlk);
-	    [U$IP_Protocol] :	IPU$Receive(ArgBlk);
-	    [OTHERWISE]:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
+	    case U$UDP_Protocol:	UDP$Receive(ArgBlk);
+	    case U$ICMP_Protocol:	ICMP$Receive(ArgBlk);
+	    case U$IP_Protocol:	IPU$Receive(ArgBlk);
+	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
 	    TES;
 
-	[u$close]:
-	    SELECTONE Argblk->ud$protocol OF
+	case u$close:
+	    switch (Argblk->ud$protocol)
 	    SET
-	    [U$UDP_Protocol] :	UDP$CLOSE(ArgBlk);
-	    [U$ICMP_Protocol] :	ICMP$CLOSE(ArgBlk);
-	    [U$IP_Protocol] :	IPU$CLOSE(ArgBlk);
-	    [OTHERWISE]:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
+	    case U$UDP_Protocol:	UDP$CLOSE(ArgBlk);
+	    case U$ICMP_Protocol:	ICMP$CLOSE(ArgBlk);
+	    case U$IP_Protocol:	IPU$CLOSE(ArgBlk);
+	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
 	    TES;
 
-	[u$abort]:
-	    SELECTONE Argblk->ud$protocol OF
+	case u$abort:
+	    switch (Argblk->ud$protocol)
 	    SET
-	    [U$UDP_Protocol] :	UDP$ABORT(ArgBlk);
-	    [U$ICMP_Protocol] :	ICMP$ABORT(ArgBlk);
-	    [U$IP_Protocol] :	IPU$ABORT(ArgBlk);
-	    [OTHERWISE]:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
+	    case U$UDP_Protocol:	UDP$ABORT(ArgBlk);
+	    case U$ICMP_Protocol:	ICMP$ABORT(ArgBlk);
+	    case U$IP_Protocol:	IPU$ABORT(ArgBlk);
+	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
 	    TES;
 
-	[u$status]:
-	    SELECTONE Argblk->ud$protocol OF
+	case u$status:
+	    switch (Argblk->ud$protocol)
 	    SET
-	    [U$UDP_Protocol] :	UDP$Status(ArgBlk);
-	    [U$ICMP_Protocol] :	ICMP$Status(ArgBlk);
-	    [U$IP_Protocol] :	IPU$Status(ArgBlk);
-	    [OTHERWISE]:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
+	    case U$UDP_Protocol:	UDP$Status(ArgBlk);
+	    case U$ICMP_Protocol:	ICMP$Status(ArgBlk);
+	    case U$IP_Protocol:	IPU$Status(ArgBlk);
+	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
 	    TES;
 
-	[u$info]:
-	    SELECTONE Argblk->ud$protocol OF
+	case u$info:
+	    switch (Argblk->ud$protocol)
 	    SET
-	    [U$UDP_Protocol] :	UDP$Info(ArgBlk);
-	    [U$ICMP_Protocol] :	ICMP$Info(ArgBlk);
-	    [U$IP_Protocol] :	IPU$Info(ArgBlk);
-	    [OTHERWISE]:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
+	    case U$UDP_Protocol:	UDP$Info(ArgBlk);
+	    case U$ICMP_Protocol:	ICMP$Info(ArgBlk);
+	    case U$IP_Protocol:	IPU$Info(ArgBlk);
+	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
 	    TES;
 
-	[u$gthst]:	Net$GTHST(argblk);
+	case u$gthst:	Net$GTHST(argblk);
 
-	[OUTRANGE]:
+	CASE OUTRANGE:
 	    {
-	    SELECTONE argBlk->ud$funct OF // check acp maintenance functions
+	    switch (argBlk->ud$funct) // check acp maintenance functions
 	    SET
-	    [M$DUMP]:	Net$DUMP(ArgBlk);
-	    [M$EXIT]:	Net$EXIT(ArgBlk);
-	    [M$DEBUG]:	Net$Debug(ArgBlk);
-	    [M$EVENT]:	Net$Event(ArgBlk);
-	    [M$SNMP]:	Net$SNMP(ArgBlk);
-!	    [M$Cancel]:	VMS$Cancel(ArgBlk);
-	    [M$Cancel]:	SS$_NORMAL;
-	    [OTHERWISE]:USER$Err(ArgBlk,NET$_IFC); // Illegal Function Code.
+	    CASE M$DUMP:	Net$DUMP(ArgBlk);
+	    CASE M$EXIT:	Net$EXIT(ArgBlk);
+	    CASE M$DEBUG:	Net$Debug(ArgBlk);
+	    CASE M$EVENT:	Net$Event(ArgBlk);
+	    CASE M$SNMP:	Net$SNMP(ArgBlk);
+//	    case M$Cancel:	VMS$Cancel(ArgBlk);
+	    case M$Cancel:	SS$_NORMAL;
+	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IFC); // Illegal Function Code.
 	    TES;
 	    };
 	TES;
 	};
     }
-}
-ELUDOM
+
