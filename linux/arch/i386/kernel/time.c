@@ -460,7 +460,7 @@ static inline void do_timer_interrupt(int irq, void *dev_id, struct pt_regs *reg
 #endif
 }
 
-static int use_tsc;
+int use_tsc;
 
 /*
  * This is the same as the above, except we _also_ save the current
@@ -558,9 +558,11 @@ unsigned long get_cmos_time(void)
 	return mktime(year, mon, day, hour, min, sec);
 }
 
+void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs);
+
 /* change to exe$hwclkint sometime ? */
-static struct irqaction irq0  = { timer_interrupt, SA_INTERRUPT, 0, "timer", NULL, NULL};
-//static struct irqaction irq0  = { exe$hwclkint, SA_INTERRUPT, 0, "timer", NULL, NULL};
+//static struct irqaction irq0  = { timer_interrupt, SA_INTERRUPT, 0, "timer", NULL, NULL};
+static struct irqaction irq0  = { exe$hwclkint, SA_INTERRUPT, 0, "timer", NULL, NULL};
 
 /* ------ Calibrate the TSC ------- 
  * Return 2^32 * (1 / (TSC clocks per usec)) for do_fast_gettimeoffset().

@@ -60,6 +60,8 @@ extern int delay_at_last_interrupt;
 
 extern long last_rtc_update;
 
+extern int use_tsc;
+
 void exe$timeout(void) {
   /* do sch$swpwake() if appropiate ???? */
   exe$gl_abstim++;
@@ -99,8 +101,6 @@ asmlinkage void exe$swtimint(void) {
     }
   }
 }
-
-static int use_tsc;
 
 void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
   /* reset pr$_iccs */
