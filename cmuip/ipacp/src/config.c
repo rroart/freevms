@@ -571,8 +571,10 @@ void CNF$Configure_ACP (void)
     fs = get_fs();
     set_fs(get_ds());
 
+#ifdef CONFIG_VMS
     long prev_xqp_fcb = get_xqp_prim_fcb();
     long prev_x2p_fcb = get_x2p_prim_fcb();
+#endif
     if (BLISSIFNOT((RC = exe$open(CFFAB)) &&
 	    BLISSIF(RC = exe$connect(CFRAB))))
 	{
