@@ -224,6 +224,7 @@ insertdevlist(struct _ddb *d) {
 
 inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type) {
   f->fdt$ps_func_rtn[mask]=fn;
+  f->fdt$q_valid|=mask;
   if (type)
     f->fdt$q_buffered|=mask;
 }

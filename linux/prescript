@@ -47,6 +47,7 @@ done
 		ln -s ../../freevms/sys/src/sysgetlki.c .;
 		ln -s ../../freevms/sys/src/syslnm.c .;
 		ln -s ../../freevms/sys/src/lnmsub.c .;
+		ln -s ../../freevms/sys/src/init.c vmsinit.c;
 		ln -s ../../freevms/driver/src/random.c .;
 		ln -s ../../freevms/driver/src/null.c .;
 		ln -s ../../freevms/driver/src/dudriver.c .;

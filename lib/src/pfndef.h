@@ -1,7 +1,7 @@
 #ifndef pfndef_h
 #define pfndef_h
 	
-#include <shm_iddef.h>
+#include "../../../freevms/lib/src/shm_iddef.h"
 
 #define PMAP$C_LENGTH 8                 
 	
@@ -79,8 +79,8 @@ struct _plnk {
  
 struct _pfn {
   union  {
-    PLNK pfn$r_shm_list_link;
-    SHM_ID pfn$r_shm_reg_id;        
+    struct _plnk pfn$r_shm_list_link;
+    struct _shm_id pfn$r_shm_reg_id;        
     struct  {
       union  {
 	unsigned int pfn$l_flink; 

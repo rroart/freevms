@@ -2000,9 +2000,9 @@ typedef unsigned int       UINT;		/* Usigned int (32 bits) */
 
 #include "mytypedefs.h"
 extern unsigned long mmg$gl_bwp_mask;
-DDT   driver$ddt;			/* Prototype DDT */
-DPT   driver$dpt;			/* Prototype DPT */
-FDT   driver$fdt;			/* Prototype FDT */
+static DDT   _ddt;			/* Prototype DDT */
+static DPT   _dpt;			/* Prototype DPT */
+static FDT   _fdt;			/* Prototype FDT */
 
 
 extern int   MMG$GL_PAGE_SIZE;			/* Page size in bytes */
@@ -2017,9 +2017,9 @@ extern UCB   *sys$ar_bootucb;			/* Boot UCB */
 
 /* Shortcuts for some of the external references */
 
-#define _ddt  driver$ddt			/* Abbreviation for DDT */
-#define _dpt  driver$dpt			/* Abbreviation for DPT */
-#define _fdt  driver$fdt			/* Abbreviation for FDT */
+//#define _ddt  driver$ddt			/* Abbreviation for DDT */
+//#define _dpt  driver$dpt			/* Abbreviation for DPT */
+//#define _fdt  driver$fdt			/* Abbreviation for FDT */
 
 
 
