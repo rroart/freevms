@@ -32,7 +32,7 @@
 
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
-#include "/usr/src/freevms/sys/src/sysgen.h"
+#include "../../freevms/sys/src/sysgen.h"
 
 extern void timer_bh(void);
 extern void tqueue_bh(void);
@@ -1317,5 +1317,5 @@ void __init sched_init(void)
 	enter_lazy_tlb(&init_mm, current, cpu);
 }
 
-#include "/usr/src/freevms/sys/src/rse.c"
+#include "../../freevms/sys/src/rse.c"
 
