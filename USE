@@ -1,6 +1,11 @@
 starting uml example:
 	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=/vms\$common/sysexe/dcl
 
+config file:
+	/vms\$common/sysexe/params.dat must have
+	SCSNODE=name
+	This replaces/will replace the use of hostname for clustering
+
 running commands:
 	DCL: typically command
 	/bin/sh: /vms\$common/sysexe/command
@@ -17,9 +22,9 @@ MOUNT:
 	mount filename
 
 	Cluster mount
-	The other file image must be in /file
-	mount _filename
-	Then use as dir dua0 etc
+	The other file image must be mounted
+	mount other$dfa0
+	Then use as dir other$dfa0 etc
 
 INIT: 
 	init filename volume-name size
@@ -92,7 +97,11 @@ Clustering:
 At least works on uml, problems on both bochs/i386 and ordinary i386.
 Does not work with CONFIG_VMS yet (mount /proc panics).
 Run net on one node and net2 on the other.
-Wait until you see a kernel message.
+Within 10 secs, you will see a "scs received hello"
+After 10 secs, you will see starting cluster connects and some CON_RSPs.
+10 secs later you may see some maybes and ddb transfers.
+Wait until you see these kernel messages.
+Then you can do mount other$dfa0 etc.
 
 ******************************
 
