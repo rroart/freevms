@@ -86,6 +86,7 @@ done
 		ln -s ../../freevms/sys/src/syscrmpsc.c .;
 		ln -s ../../freevms/sys/src/sysdgblsc.c .;
 		ln -s ../../freevms/sys/src/phdutl.c .;
+		ln -s ../../freevms/sys/src/syscredel.c .;
 
 		ln -s ../../freevms/pal/src/ipl.c .;
 		ln -s ../../freevms/pal/src/ast.c .;
@@ -99,7 +100,6 @@ cd mm;
 		ln -s ../../freevms/sys/src/ptalloc.c .;
 		ln -s ../../freevms/sys/src/swapper.c .;
 		ln -s ../../freevms/sys/src/wrtmfypag.c .;
-		ln -s ../../freevms/sys/src/syscredel.c .;
 		ln -s ../../freevms/sys/src/vmsmmap.c .;
 		ln -s ../../freevms/sys/src/vmsfilemap.c .;
 		ln -s ../../freevms/sys/src/vmsmemory.c .;

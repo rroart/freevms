@@ -19,6 +19,7 @@
 #include <asm/pgalloc.h>
 
 #include <rdedef.h>
+#include <va_rangedef.h>
 
 /*
  * WARNING: the debugging will use recursive algorithms so never enable this
@@ -400,6 +401,9 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 	int correct_wcount = 0;
 	int error;
 	rb_node_t ** rb_link, * rb_parent;
+	struct _va_range inadr;
+	inadr.va_range$ps_start_va=addr;
+	inadr.va_range$ps_end_va=addr+len;
 
 	if (file && (!file->f_op || !file->f_op->mmap))
 		return -ENODEV;
@@ -417,6 +421,18 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 	/* Too many mappings? */
 	if (mm->map_count > MAX_MAP_COUNT)
 		return -ENOMEM;
+
+#if 0
+	prot=prot; //translate later?
+	flags=flags; //translate later?
+
+	exe$crmpsc(&inadr,0,0,flags,0,0,(unsigned short int)file,0,pgoff,prot,0);
+
+	// if file 0
+	// exe$cretva(&inadr,0,0);
+
+#endif
+	return;
 
 	/* Obtain the address to map to. we verify (or select) it and ensure
 	 * that it represents a valid section of the address space.

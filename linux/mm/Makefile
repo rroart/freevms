@@ -9,7 +9,13 @@
 
 O_TARGET := mm.o
 
+ifneq ($(CONFIG_MM_VMS),y)
 export-objs := shmem.o filemap.o
+endif
+
+ifeq ($(CONFIG_MM_VMS),y)
+export-objs := vmsshmem.o vmsfilemap.o
+endif
 
 obj-y	 := page_io.o \
 	    numa.o oom_kill.o \
@@ -24,7 +30,7 @@ obj-y += page_alloc.o bootmem.o slab.o vmscan.o mmap.o \
 endif
 
 obj-$(CONFIG_MM_VMS) += memoryalc.o vmsbootmem.o allocpfn.o ptalloc.o \
-			vmsslab.o swapper.o wrtmfypag.o syscredel.o \
+			vmsslab.o swapper.o wrtmfypag.o \
 			vmsmmap.o vmsfilemap.o vmsmemory.o vmsmremap.o \
 	 		vmsmprotect.o vmsmlock.o vmsvmalloc.o \
 			vmsshmem.o vmsswapfile.o

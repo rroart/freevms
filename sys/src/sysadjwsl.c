@@ -5,6 +5,7 @@
 
 #include<linux/linkage.h>
 #include<linux/sched.h>
+#include<phddef.h>
 #include<sysgen.h>
 #include<system_data_cells.h>
 #include<va_rangedef.h>
