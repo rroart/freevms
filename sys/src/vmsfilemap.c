@@ -1338,7 +1338,8 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 		cached_page = NULL;
 
 		/* ... and start the actual read. The read will unlock the page. */
-		error = ext2_aops.readpage(filp, page);
+		//		error = ext2_aops.readpage(filp, page, filp->f_dentry->d_inode, index);
+		error = block_read_full_page2(page, filp->f_dentry->d_inode, index);
 
 		if (!error) {
 			if (Page_Uptodate(page))
