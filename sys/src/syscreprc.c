@@ -104,6 +104,9 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
   if (erd)
     memcpy(pqb->pqb$t_error,erd->dsc$a_pointer,erd->dsc$w_length);
 
+  if (oud) // temp measure
+    memcpy(p->pcb$t_terminal,oud->dsc$a_pointer,oud->dsc$w_length);
+
   // translate some logicals
   // copy security clearance
   // copy msg
@@ -205,9 +208,6 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
  bad_fork_cleanup_files:
  bad_fork_cleanup_fs:
 
-	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
-	init_phd(p->pcb$l_phd);
-
 	// now a hole
 
 	// now more from fork
@@ -277,6 +277,15 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	flush_tlb_mm(mm); // check this
 #endif
 
+	// Now we are getting into the area that is really the swappers
+
+	// To be moved to shell.c and swp$shelinit later
+
+	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
+	init_phd(p->pcb$l_phd);
+
+	init_fork_p1pp(p,p->pcb$l_phd,ctl$gl_pcb,ctl$gl_pcb->pcb$l_phd);
+
 	int exe$procstrt(struct _pcb * p);
 #ifdef __arch_um__
 	current->thread.request.u.thread.proc = exe$procstrt;
@@ -294,7 +303,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
 	//	start_thread(regs,eip,esp);
 
-	sch$chse(p, PRI$_NULL);
+	sch$chse(p, PRI$_TICOM);
 
 	return SS$_NORMAL;
 
