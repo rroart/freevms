@@ -48,6 +48,8 @@
 
 #include<phddef.h>
 #include<rdedef.h>
+#include<secdef.h>
+#include<sysgen.h>
 
 int core_uses_pid;
 
@@ -1008,4 +1010,34 @@ close_fail:
 fail:
 	unlock_kernel();
 	return retval;
+}
+
+init_phd(struct _phd * phd) {
+	bzero(phd,sizeof(struct _phd));
+#ifdef CONFIG_MM_VMS
+	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
+	{
+	  qhead_init(&phd->phd$ps_p0_va_list_flink);
+	  phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
+	  phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
+	  phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
+	  bzero((void*)phd->phd$l_wslist,4*512);
+	  bzero((void*)phd->phd$l_wslock,4*512);
+	  bzero((void*)phd->phd$l_wsdyn,4*512);
+	  phd->phd$l_wsnext=0;
+	  phd->phd$l_wslast=511;
+#if 0
+	  {
+	    struct _wsl * wsl = phd->phd$l_wslist;
+	    int i;
+	    for(i=0; i<512; i++)
+	      wsl[i].wsl$v_valid=1;
+	  }
+#endif
+	  phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
+	  bzero((void*)phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+	  phd->phd$l_pst_last=PROCSECTCNT-1;
+	  phd->phd$l_pst_free=0;
+	}
+#endif
 }
