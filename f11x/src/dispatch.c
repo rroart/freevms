@@ -1,6 +1,7 @@
 // $Id$
 // $Locker$
 
+// Author. Paul Nankervis.
 // Author. Roar Thronæs.
 
 #include<mytypes.h>
@@ -70,25 +71,38 @@ void f11b$dispatcher(void) {
 	if (i->irp$l_func & IO$M_CREATE) action=2;
 	if (i->irp$l_func & IO$M_DELETE) action=1;
 	//if (fib->fib$w_did_num>0) 
-	if (0) 
-	  sts=direct(vcb,fibdsc,filedsc,reslen,resdsc,atrp,action,i);
-	else
-	  sts=f11b_access(vcb,i);
+	sts=f11b_access(vcb,i);
+	if (sts==SS$_NOSUCHFILE && (i->irp$l_func & IO$M_CREATE))
+	  goto create;
       }
       break;
     case IO$_READVBLK:
+    case IO$_WRITEVBLK:
       {
 	char * buffer;
-	//f11b_read_writevb(i);
-	accesschunk(0,i->irp$l_qio_p3,&buffer,0,0,i);
-	memcpy(i->irp$l_qio_p1,buffer,512);
+	f11b_read_writevb(i);
+	//accesschunk(0,i->irp$l_qio_p3,&buffer,0,0,i);
+	//memcpy(i->irp$l_qio_p1,buffer,512);
       }
       break;
     case IO$_CREATE:
       {
 	struct _vcb * vcb = i->irp$l_ucb->ucb$l_vcb;
 	//f11b$create(vcb,i);
-	update_create(vcb,i->irp$l_qio_p1,i->irp$l_qio_p2,i);
+      create:
+	update_create(vcb,i);
+      }
+      break;
+    case IO$_DELETE:
+      {
+	struct _vcb * vcb = i->irp$l_ucb->ucb$l_vcb;
+	accesserase(vcb,i);
+      }
+      break;
+    case IO$_MODIFY:
+      {
+	struct _vcb * vcb = i->irp$l_ucb->ucb$l_vcb;
+	f11b_modify(vcb,i);
       }
       break;
     default:
@@ -96,12 +110,6 @@ void f11b$dispatcher(void) {
       break;
     }
   }
-}
-
-void f11b$create(struct _vcb * v, struct _irp * i) {
-  struct _fh2 * head=vmalloc(sizeof(struct _fh2));
-  struct _fcb * fcb=vmalloc(sizeof(struct _fcb));
-  
 }
 
 /* module data
@@ -113,3 +121,74 @@ read_writevb
 
 
  */
+
+unsigned f11b_modify(struct _vcb * vcb, struct _irp * irp)
+{
+  struct _iosb iosb;
+  unsigned sts=SS$_NORMAL;
+  unsigned wrtflg=1;
+  struct _fcb *fcb;
+  struct _fh2 *head;
+  struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
+  struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
+  unsigned short *reslen=irp->irp$l_qio_p3;
+  struct dsc$descriptor * resdsc=irp->irp$l_qio_p4;
+  void * atrp=irp->irp$l_qio_p5;
+  struct _fibdef * fib=(struct _fibdef *)fibdsc->dsc$a_pointer;
+  struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
+  unsigned action=0;
+  if (irp->irp$l_func & IO$M_ACCESS) action=0;
+  if (irp->irp$l_func & IO$M_DELETE) action=1;
+  if (irp->irp$v_fcode == IO$_CREATE) action=2;
+  if (irp->irp$l_func & IO$M_CREATE) action=2;
+  action=0;
+#ifdef DEBUG
+  printk("Accessing file (%d,%d,%d)\n",(fid->fid$b_nmx << 16) +
+	 fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn);
+#endif
+
+  xqp->current_vcb=vcb; // until I can place it somewhere else
+
+  if (fib->fib$w_did_num) {
+    struct _fh2 * head;
+    struct _fcb * fcb=xqp->primary_fcb;
+    head = f11b_read_header (vcb, 0, fcb, &iosb);  
+    sts=iosb.iosb$w_status;
+    if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
+      unsigned eofblk = VMSSWAP(head->fh2$w_recattr.fat$l_efblk);
+      if (VMSWORD(head->fh2$w_recattr.fat$w_ffbyte) == 0) --eofblk;
+      sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
+    } else {
+      sts = SS$_BADIRECTORY;
+    }
+  }
+
+  if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
+
+  if (irp->irp$l_qio_p5 == 0)
+    return SS$_NORMAL;
+
+  if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) { iosbret(irp,SS$_WRITLCK);  return SS$_WRITLCK; }
+
+  fcb=f11b_search_fcb(vcb,fid);
+  head = f11b_read_header(vcb,fid,fcb,&iosb);
+  sts=iosb.iosb$w_status;
+  if (sts & 1) {
+  } else {
+    printk("Accessfile status %d\n",sts);
+    iosbret(irp,sts);
+    return sts;
+  }
+
+  if (fcb==NULL) {
+    fcb=fcb_create2(head,&sts);
+  }
+  if (fcb == NULL) { iosbret(irp,sts); return sts; }
+
+  xqp->primary_fcb=fcb;
+  xqp->current_window=&fcb->fcb$l_wlfl;
+
+  if (atrp) f11b_write_attrib(fcb,atrp);
+  iosbret(irp,SS$_NORMAL);
+  return SS$_NORMAL;
+}

@@ -10,6 +10,7 @@
 #include<aqbdef.h>
 #include<cdrpdef.h>
 #include<ddtdef.h>
+#include<dyndef.h>
 #include<fdtdef.h>
 #include<internals.h>
 #include<iodef.h>
@@ -167,6 +168,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   /*check proc quota*/
   i=vmalloc(sizeof(struct _irp));
   bzero(i,sizeof(struct _irp));
+  i->irp$b_type=DYN$C_IRP;
   i->irp$b_efn=q->efn;
   i->irp$l_ast=q->astadr;
   i->irp$l_astprm=q->astprm;

@@ -305,9 +305,9 @@ unsigned insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
                 break;
             sizecheck += 2;
             inuse += sizecheck;
-            sizecheck -= (nr->dir$b_namecount + sizeof(struct _dir)) & ~1;
-            if (inuse > MAXREC || (inuse & 1) || sizecheck <= 0 ||
-                sizecheck % sizeof(struct _dir1) != 0) {
+            sizecheck -= (nr->dir$b_namecount + 6) & ~1;
+            if (inuse > MAXREC || (inuse & 1) || sizecheck <= 0 /* ||
+                sizecheck % sizeof(struct _dir1) != 0 */ ) { //aagh
                 deaccesschunk(0,0,0);
                 return SS$_BADIRECTORY;
             }
@@ -434,6 +434,7 @@ unsigned insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
 
     de->dir$w_version = VMSWORD(version);
     fid_copy(&de->dir$fid,fid,0);
+    writechunk(fcb, curblk, buffer);
     return deaccesschunk(curblk,1,1);
 }
 

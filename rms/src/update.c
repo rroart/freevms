@@ -16,6 +16,7 @@
 #include <ucbdef.h>
 #include <vcbdef.h>
 #include <descrip.h>
+#include <iodef.h>
 #include <ssdef.h>
 #include <uicdef.h>
 #include <namdef.h>
@@ -24,6 +25,7 @@
 #include <fibdef.h>
 #include <fiddef.h>
 #include <iosbdef.h>
+#include <irpdef.h>
 #include <rmsdef.h>
 #include <scbdef.h>
 #include <wcbdef.h>
@@ -36,6 +38,8 @@
 #include <hm2def.h>
 #include <fcbdef.h>
 #include <vmstime.h>
+
+#include "../../f11x/src/xqp.h"
 
 //#include "ssdef.h"
 #include "cache.h"
@@ -185,7 +189,7 @@ unsigned bitmap_search(struct _vcb *vcbdev,unsigned *position,unsigned *count)
     unsigned sts;
     unsigned map_block,block_offset;
     unsigned search_words,needed;
-    unsigned run = 0,cluster;
+    unsigned run = 0,cluster,ret_cluster, first_bit=0;
     unsigned best_run = 0,best_cluster = 0;
     struct _scbdef * scb;
     needed = *count;
@@ -196,6 +200,7 @@ unsigned bitmap_search(struct _vcb *vcbdev,unsigned *position,unsigned *count)
     map_block = cluster / 4096 + 2;
     block_offset = cluster % 4096;
     cluster = cluster - (cluster % WORK_BITS);
+    ret_cluster = cluster;
     search_words = (scb->scb$l_volsize/scb->scb$w_cluster) / WORK_BITS;
     do {
         unsigned blkcount;
@@ -207,38 +212,58 @@ unsigned bitmap_search(struct _vcb *vcbdev,unsigned *position,unsigned *count)
         work_ptr = bitmap + block_offset / WORK_BITS;
         work_val = *work_ptr++;
         if (block_offset % WORK_BITS) {
-            work_val = work_val && (WORK_MASK << block_offset % WORK_BITS);
+            work_val = work_val & (WORK_MASK << block_offset % WORK_BITS);
         }        
         work_count = (blkcount * 4096 - block_offset) / WORK_BITS;
         if (work_count > search_words) work_count = search_words;
         search_words -= work_count;
         do {
+	    unsigned bit_no = 0;
             if (work_val == WORK_MASK) {
                 run += WORK_BITS;
+		if (run > best_run) {
+		  best_run = run;
+		  best_cluster = cluster + bit_no;
+		}
+		if (best_run >= needed)
+		  goto out_of_here;
             } else {
-                unsigned bit_no = 0;
                 while (work_val != 0) {
                     if (work_val & 1) {
                         run++;
+                        if (run > best_run) {
+                            best_run = run;
+                            best_cluster = cluster + bit_no;
+                        }
+			if (first_bit==0)
+			  first_bit = bit_no;
+			if (best_run >= needed)
+			  goto out_of_here;
                     } else {
                         if (run > best_run) {
                             best_run = run;
                             best_cluster = cluster + bit_no;
                         }
                         run = 0;
+			ret_cluster = cluster;
+			first_bit = bit_no+1;
                     }
                     work_val = work_val >> 1;
                     bit_no++;
                 }
-                if (bit_no < WORK_BITS) {
-                    if (run > best_run) {
-                        best_run = run;
-                        best_cluster = cluster + bit_no;
-                    }
-                    run = 0;
+		if (bit_no < WORK_BITS) {
+		  if (run > best_run) {
+		    best_run = run;
+		    best_cluster = cluster + bit_no;
+		  }
+		  run = 0;
+		  ret_cluster = cluster;
+		  first_bit = bit_no;
                 }
             }
             cluster += WORK_BITS;
+	    if (run==0)
+	      ret_cluster=cluster;
             if (work_count-- > 0) {
                 work_val = *work_ptr++;
             } else {
@@ -251,6 +276,8 @@ unsigned bitmap_search(struct _vcb *vcbdev,unsigned *position,unsigned *count)
         map_block += blkcount;
         block_offset = 0;
     } while (best_run < needed && search_words != 0);
+ out_of_here:
+    best_cluster = ret_cluster + first_bit;
     if (best_run > needed) best_run = needed;
     *count = best_run;
     *position = best_cluster;
@@ -317,10 +344,15 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
                                 sts = deaccesschunk(0,0,0);
 				writechunk(getidxfcb(vcbdev),idxblk,*headbuff);
                             } else {
+			      signed int newvbn;
                                 *rethead_no = head_no + 1;
                                 *retidxblk = idxblk;
                                 deaccesschunk(map_block,blkcount,modify_flag);
 				writechunk(getidxfcb(vcbdev),map_block,bitmap);
+				newvbn=f11b_map_idxvbn(vcbdev,idxblk);
+				if (newvbn==-1) {
+				  sts=update_extend(getidxfcb(vcbdev),1,1);
+				}
                                 return SS$_NORMAL;
                             }
                         }
@@ -387,109 +419,129 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
         memcpy(id->fi2$t_filenamext,filename+20,strlen(filename+20));
     }
     id->fi2$w_revision = 1;
-    exe$gettim(id->fi2$q_credate);
+    exe$gettim(&id->fi2$q_credate);
     memcpy(id->fi2$q_revdate,id->fi2$q_credate,sizeof(id->fi2$q_credate));
     memcpy(id->fi2$q_expdate,id->fi2$q_credate,sizeof(id->fi2$q_credate));
     head->fh2$w_recattr.fat$l_efblk = VMSSWAP(1);
     {
-        unsigned short check = checksum((vmsword *) head);
-        head->fh2$w_checksum = VMSWORD(check);
+      unsigned short check = checksum((vmsword *) head);
+      head->fh2$w_checksum = VMSWORD(check);
     }
-    writechunk(getidxfcb(vcbdev),idxblk,head);
+    writechunk(getidxfcb(vcbdev),*idxblk,head);
     return 1;
 }
 
 /* update_create() will create a new file... */
 
-unsigned update_create(struct _vcb *vcb,struct dsc$descriptor *fibdsc,struct dsc$descriptor *serdsc,struct _irp * i)
+unsigned update_create(struct _vcb *vcb,struct _irp * i)
 {
+  struct dsc$descriptor * fibdsc=i->irp$l_qio_p1;
+  struct dsc$descriptor * filedsc=i->irp$l_qio_p2;
   struct _fibdef * fib=fibdsc->dsc$a_pointer;
   struct _fiddef * fid=&fib->fib$w_fid_num;
-  char *filename=serdsc->dsc$a_pointer;
-    struct _fh2 *head;
-    unsigned idxblk;
-    unsigned sts;
-    struct dsc$descriptor fibdsc;
-    fibdsc.dsc$w_length=sizeof(struct _fibdef);
-    fibdsc.dsc$a_pointer=fib;
-    sts = update_addhead(vcb,filename,fib,0,fid,&head,&idxblk);
-    if (!(sts & 1)) return sts;
-    sts = deaccesshead(head,idxblk);
-    //    sts = writehead(getidxfcb(vcb),head);
-    if (sts & 1) {
-      sts = f11b_access(vcb,fid); // change to irp
-    }
-    printk("(%d,%d,%d) %d\n",fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn,sts);
-    return sts;
+  char *filename=filedsc->dsc$a_pointer;
+  struct _fh2 *head;
+  unsigned idxblk;
+  unsigned sts;
+  sts = update_addhead(vcb,filename,fib,0,fid,&head,&idxblk);
+  if (!(sts & 1)) return sts;
+  sts = deaccesshead(head,idxblk);
+  //    sts = writehead(getidxfcb(vcb),head);
+
+  if ((i->irp$l_func & IO$M_ACCESS) && (sts & 1)) {
+    unsigned short reslen;
+    char retbuf[256];
+    struct dsc$descriptor resdsc;
+    resdsc.dsc$w_length=255;
+    resdsc.dsc$a_pointer=&retbuf;
+    //fib->fib$w_did_num = 0;
+    //fib->fib$w_did_seq = 0;
+    //fib->fib$b_did_rvn = 0;
+    //fib->fib$b_did_nmx = 0;
+    sts = f11b_access(vcb,i); // change to irp
+  }
+
+  xqp->primary_fcb=f11b_search_fcb(xqp->current_vcb,&fib->fib$w_fid_num);
+
+  if ((fib->fib$w_exctl&FIB$M_EXTEND) && (sts & 1)) {
+    struct _fcb * newfcb;
+    newfcb=f11b_search_fcb(xqp->current_vcb,&fib->fib$w_fid_num);
+    sts = update_extend(newfcb,fib->fib$l_exsz,0);
+  }
+
+  printk("(%d,%d,%d) %d\n",fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn,sts);
+  return sts;
 }
 
 unsigned update_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
 {
   struct _iosb iosb;
-    unsigned sts;
-    struct _vcb *vcbdev;
-    struct _fh2 *head, *head2;
-    unsigned headvbn;
-    struct _fiddef hdrfid;
-    unsigned hdrseq;
-    unsigned start_pos = 0;
-    unsigned block_count = blocks;
-    if (block_count < 1) return 0;
-    if (fcb->fcb$l_efblk > 0) {
-        unsigned mapblk,maplen;
-        sts = getwindow(fcb,fcb->fcb$l_efblk,&vcbdev,&mapblk,&maplen,&hdrfid,&hdrseq);
-        if ((sts & 1) == 0) return sts;
-        start_pos = mapblk + 1;
-        if (hdrseq != 0) {
-	  head = f11b_read_header(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,&hdrfid,fcb,&iosb);
-	  sts=iosb.iosb$w_status;
-	  if ((sts & 1) == 0) return sts;
-        } else {
-	  head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
-	  sts=iosb.iosb$w_status;
-        }
-    } else {
-      head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
+  unsigned sts;
+  struct _vcb *vcbdev;
+  struct _fh2 *head;
+  unsigned headvbn;
+  struct _fiddef hdrfid;
+  unsigned hdrseq;
+  unsigned start_pos = 0;
+  unsigned block_count = blocks;
+  if (block_count < 1) return 0;
+  if (fcb->fcb$l_efblk > 0) {
+    unsigned mapblk,maplen;
+    sts = getwindow(fcb,fcb->fcb$l_efblk,&vcbdev,&mapblk,&maplen,&hdrfid,&hdrseq);
+    if ((sts & 1) == 0) return sts;
+    start_pos = mapblk + 1;
+    if (hdrseq != 0) {
+      head = f11b_read_header(xqp->current_vcb,&hdrfid,fcb,&iosb);
       sts=iosb.iosb$w_status;
-      start_pos = 0;          /* filenum * 3 /indexfsize * volumesize; */
+      if ((sts & 1) == 0) return sts;
+    } else {
+      head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);
+      sts=iosb.iosb$w_status;
     }
-    vcbdev = rvn_to_dev(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,fcb->fcb$b_fid_rvn);
-    if (vcbdev->vcb$l_free == 0 || head->fh2$b_map_inuse + 4 >=
-                head->fh2$b_acoffset - head->fh2$b_mpoffset) {
-        struct _fh2 *nhead;
-        unsigned nidxblk;
-        sts = update_addhead(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,"",&head->fh2$w_fid,head->fh2$w_seg_num+1,
-              &head->fh2$w_ext_fid,&nhead,&nidxblk);
-        if (!(sts & 1)) return sts;
-        deaccesshead(head,headvbn);
-	writehead(getidxfcb(vcbdev,head));
-        head = nhead;
-        headvbn = nidxblk;
-        vcbdev = rvn_to_dev(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,head->fh2$w_fid.fid$b_rvn);
-    }
-    sts = bitmap_search(vcbdev,&start_pos,&block_count);
-    printk("Update_extend %d %d\n",start_pos,block_count);
-    if (sts & 1) {
-        if (block_count < 1 || contig && block_count * vcbdev->vcb$l_cluster < blocks) {
-            sts = SS$_DEVICEFULL;
-        } else {
-            unsigned short *mp;
-            mp = (unsigned short *) head + head->fh2$b_mpoffset + head->fh2$b_map_inuse;
-            *mp++ = (3 << 14) | ((block_count *vcbdev->vcb$l_cluster - 1) >> 16);
-            *mp++ = (block_count * vcbdev->vcb$l_cluster - 1) & 0xffff;
-            *mp++ = (start_pos * vcbdev->vcb$l_cluster) & 0xffff;
-            *mp++ = (start_pos * vcbdev->vcb$l_cluster) >> 16;
-            head->fh2$b_map_inuse += 4;
-            fcb->fcb$l_efblk += block_count * vcbdev->vcb$l_cluster;
-	    head2 = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
-	    sts=iosb.iosb$w_status;
-            head2->fh2$w_recattr.fat$l_hiblk = VMSSWAP(fcb->fcb$l_efblk * vcbdev->vcb$l_cluster);
-            sts = bitmap_modify(vcbdev,start_pos,block_count,0);
-        }
-    }
+  } else {
+    head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);
+    sts=iosb.iosb$w_status;
+    start_pos = 0;          /* filenum * 3 /indexfsize * volumesize; */
+  }
+  vcbdev = rvn_to_dev(xqp->current_vcb,fcb->fcb$b_fid_rvn);
+  if (vcbdev->vcb$l_free == 0 || head->fh2$b_map_inuse + 4 >=
+      head->fh2$b_acoffset - head->fh2$b_mpoffset) {
+    struct _fh2 *nhead;
+    unsigned nidxblk;
+    sts = update_addhead(xqp->current_vcb,"",&head->fh2$w_fid,head->fh2$w_seg_num+1,
+			 &head->fh2$w_ext_fid,&nhead,&nidxblk);
+    if (!(sts & 1)) return sts;
     deaccesshead(head,headvbn);
-    writehead(getidxfcb(vcbdev),head);
-    return sts;
+    writehead(getidxfcb(vcbdev,head));
+    head = nhead;
+    headvbn = nidxblk;
+    vcbdev = rvn_to_dev(xqp->current_vcb,head->fh2$w_fid.fid$b_rvn);
+  }
+  sts = bitmap_search(vcbdev,&start_pos,&block_count);
+  printk("Update_extend %d %d\n",start_pos,block_count);
+  if (sts & 1) {
+    if (block_count < 1 || contig && block_count * vcbdev->vcb$l_cluster < blocks) {
+      sts = SS$_DEVICEFULL;
+    } else {
+      unsigned short *mp,*map;
+      map = mp = (unsigned short *) head + head->fh2$b_mpoffset + head->fh2$b_map_inuse;
+      *mp++ = (3 << 14) | ((block_count *vcbdev->vcb$l_cluster - 1) >> 16);
+      *mp++ = (block_count * vcbdev->vcb$l_cluster - 1) & 0xffff;
+      *mp++ = (start_pos * vcbdev->vcb$l_cluster) & 0xffff;
+      *mp++ = (start_pos * vcbdev->vcb$l_cluster) >> 16;
+      head->fh2$b_map_inuse += 4;
+      add_wcb(fcb,map);
+      fcb->fcb$l_efblk += block_count * vcbdev->vcb$l_cluster;
+      //head2 = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);
+      //sts=iosb.iosb$w_status;
+      head->fh2$w_recattr.fat$l_hiblk = VMSSWAP(fcb->fcb$l_efblk * vcbdev->vcb$l_cluster);
+      writehead(fcb,head);
+      sts = bitmap_modify(vcbdev,start_pos,block_count,0);
+    }
+  }
+  deaccesshead(head,headvbn);
+  writehead(getidxfcb(vcbdev),head);
+  return sts;
 }
 
 
@@ -527,7 +579,7 @@ unsigned deallocfile(struct _fcb *fcb)
         unsigned headvbn = 0;
 
         struct _fh2 *head;
-	head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
+	head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);
 	sts=iosb.iosb$w_status;
         do {
             unsigned ext_seg_num = 0;
@@ -537,7 +589,7 @@ unsigned deallocfile(struct _fcb *fcb)
             unsigned filenum = (head->fh2$w_fid.fid$b_nmx << 16) +
                 head->fh2$w_fid.fid$w_num - 1;
             unsigned idxblk;
-            vcbdev = rvn_to_dev(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,rvn);
+            vcbdev = rvn_to_dev(xqp->current_vcb,rvn);
             if (vcbdev == NULL) break;
             idxblk = filenum / 4096 +
                 vcbdev->vcb$l_cluster * 4 + 1;
@@ -566,7 +618,7 @@ unsigned deallocfile(struct _fcb *fcb)
                 rvn = extfid.fid$b_rvn;
             }
             if (extfid.fid$w_num != 0 || extfid.fid$b_nmx != 0) {
-	      head = f11b_read_header(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,&extfid,fcb,&iosb);
+	      head = f11b_read_header(xqp->current_vcb,&extfid,fcb,&iosb);
 	      sts=iosb.iosb$w_status;
 	      if ((sts & 1) == 0) break;
             } else {
@@ -581,18 +633,17 @@ unsigned deallocfile(struct _fcb *fcb)
 
 /* accesserase: delete a file... */
 
-unsigned accesserase(struct _vcb * vcb,struct _fibdef * fib)
+unsigned accesserase(struct _vcb * vcb,struct _irp * irp)
 {
   struct _iosb iosb;
     struct _fcb *fcb;
-    struct dsc$descriptor fibdsc;
+    struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
+    struct _fibdef * fib=fibdsc->dsc$a_pointer;
     int sts;
     struct _fh2 *  head;
-    fibdsc.dsc$w_length=sizeof(struct _fibdef);
-    fibdsc.dsc$a_pointer=fib;
-    sts = f11b_access(vcb,&fibdsc); // change to irp
+    sts = f11b_access(vcb,irp); // change to irp
     if (sts & 1) {
-      head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
+      head = f11b_read_header (xqp->current_vcb, fib, 0, &iosb);  
       sts=iosb.iosb$w_status;
       head->fh2$l_filechar |= FH2$M_MARKDEL;
       printk("Accesserase ... \n");
