@@ -598,6 +598,9 @@ void CNF$Configure_ACP (void)
 // Read the first field (category keyword) and dispatch to the appro processing
 // routine.
 
+// roart: had to add a label and goto, since $get here read all
+	    again:
+
 	    cflen = GETFIELD(cfield);
 	    cptr = CH$PTR(cfield,0);
 	    if (STREQLZ(cptr,"DEVICE_INIT"))
@@ -629,6 +632,11 @@ void CNF$Configure_ACP (void)
 		else
 		    config_err(ASCID("Unknown keyword"));
 	    };
+	if ( *(char*)linptr == '\n') {
+	  linptr++;
+	  if (*(char*)linptr != 0)
+	    goto again;
+	}
 	};
 
     exe$disconnect(CFRAB);
@@ -803,8 +811,8 @@ extern	    drv$transport_init();
 
 // Initialize all of the other fields for this device
 
-    dev_config->dc_Send_Qhead = dev_config->dc_Send_Qhead;
-    dev_config->dc_send_Qtail = dev_config->dc_Send_Qhead;
+    dev_config->dc_Send_Qhead = &dev_config->dc_Send_Qhead;
+    dev_config->dc_send_Qtail = &dev_config->dc_Send_Qhead;
     dev_config->dc_online = FALSE;
 
 // See if this device name is a duplicate.
@@ -972,7 +980,7 @@ extern	void LOG_CHANGE();
 
 // Get log state value
 
-    if (GET_HEX_NUM(linptr,logstate) < 0)
+    if (GET_HEX_NUM(&linptr,&logstate) < 0)
 	config_err(ASCID("Bad hex value for log state"));
 
 // Set log state
@@ -997,7 +1005,7 @@ extern	void ACT_CHANGE();
 
 // Get log state value
 
-    if (GET_HEX_NUM(linptr,logstate) < 0)
+    if (GET_HEX_NUM(&linptr,&logstate) < 0)
 	config_err(ASCID("Bad hex value for activity log state"));
 
 // Set log state
@@ -1022,7 +1030,7 @@ void init_forwarding (void)
 
 // Get forwarding state value
 
-    if (GET_HEX_NUM(linptr,ipstate) < 0)
+    if (GET_HEX_NUM(&linptr,&ipstate) < 0)
 	config_err(ASCID("Bad hex value for forwarding state"));
 
 // Set state for IP module
@@ -1670,7 +1678,7 @@ struct dsc$descriptor AUTHhostname_Desc_ = {
     SKIPTO(':');
 
 // First, get the VMS uic number
-    if (GET_HEX_NUM(linptr,AUTHuic) < 0)
+    if (GET_HEX_NUM(&linptr,&AUTHuic) < 0)
 	config_err(ASCID("Bad AUTH uic number"));
     SKIPTO(':');
 
@@ -1832,7 +1840,7 @@ GETFIELD(FLDADR)
 	{
 	linptr = PTR;
 	CNT = CNT+1;
-	if ((CHR > 'a') && (CHR <= 'z'))
+	if ((CHR >= 'a') && (CHR <= 'z'))
 	    CHR = CHR-('a'-'A');
 	CH$WCHAR_A(CHR,DSTPTR);
 	};
