@@ -701,3 +701,36 @@ probe_units() {
 #endif
 #endif
 }
+
+static struct net_device *alloc_netdev(int sizeof_priv, const char *mask,
+				       void (*setup)(struct net_device *))
+{
+	struct net_device *dev;
+	int alloc_size;
+
+	/* ensure 32-byte alignment of the private area */
+	alloc_size = sizeof (*dev) + sizeof_priv + 31;
+
+	dev = (struct net_device *) kmalloc (alloc_size, GFP_KERNEL);
+	if (dev == NULL)
+	{
+		printk(KERN_ERR "alloc_dev: Unable to allocate device memory.\n");
+		return NULL;
+	}
+
+	memset(dev, 0, alloc_size);
+
+	if (sizeof_priv)
+		dev->priv = (void *) (((long)(dev + 1) + 31) & ~31);
+
+	setup(dev);
+	strcpy(dev->name, mask);
+
+	return dev;
+}
+
+struct net_device *alloc_etherdev(int sizeof_priv)
+{
+	return alloc_netdev(sizeof_priv, "eth%d", ether_setup);
+}
+
