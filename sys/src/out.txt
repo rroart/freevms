@@ -1,0 +1,253 @@
+
+Parameters in use: Active
+Parameter Name            Current    Default     Min.     Max.     Unit  Dynamic
+--------------            -------    -------    -------  -------   ----  -------
+PFCDEFAULT                     64         32         0       127 Pages      D
+KFILSTCNT                      16          4         2       255 Slots      
+GBLSECTIONS                   530        250        60      4095 Sections   
+GBLPAGES                   119506      15000       512   4194176 Pages      
+GBLPAGFIL                    9096       1024       128   4194176 Pages      
+MAXPROCESSCNT                 160         32        12      8192 Processes  
+SMP_CPUS                       -1         -1         0        -1 CPU bitmas 
+MULTIPROCESSING                 3          3         0         4 Coded-valu 
+VECTOR_PROC                     1          1         0         3 Coded-valu 
+SMP_SANITY_CNT                300        300         1        -1 10ms.      
+SMP_SPINWAIT               100000     100000         1   8388607 10 usec.   
+SMP_LNGSPINWAIT           3000000    3000000         1   8388607 10 usec.   
+PROCSECTCNT                    64         64         5      1024 Sections   
+MINWSCNT                       20         20        10        -1 Pages      
+PAGFILCNT                       4          4         4        63 Files      
+SWPFILCNT                       2          2         0        63 Files      
+SYSMWCNT                     3077        508        48     32767 Pages      
+INTSTKPAGES                    12          6         4     65535 Pages      
+BALSETCNT                      74         16         4      8192 Slots      
+CLUSTER_CREDITS                10         10        10       128 Credits    
+WSMAX                       10200       1024        60   1048576 Pages      
+NPAGEDYN                  1876480     860000     16384        -1 Bytes      
+NPAGEVIR                  9384960    4300000     16384        -1 Bytes      
+PAGEDYN                   1357312     214100     14336        -1 Bytes      
+VIRTUALPAGECNT              50000      12032       512   4194304 Pages      
+SPTREQ                       8000       3900      3000        -1 Pages      
+WBM_MSG_INT                    10         10        10        -1 msec       D
+WBM_MSG_UPPER                  10         10         0        -1 Messages   D
+WBM_MSG_LOWER                   5          5         0        -1 Messages   D
+MULTITHREAD                     1          1         0         1 Kthreads   
+MPW_HILIMIT                  2946        500         0        -1 Pages      
+MPW_LOLIMIT                   120         32         0        -1 Pages      
+QUANTUM                        20         20         2     32767 10Ms       D
+MPW_WRTCLUSTER                120        120        16       120 Pages      
+MPW_IOLIMIT                     4          4         1       127 I/O        
+MPW_THRESH                    200        200         0        -1 Pages      D
+MPW_WAITLIMIT                3066        620         0        -1 Pages      D
+MPW_LOWAITLIMIT              2826        380         0        -1 Pages      D
+PFRATL                          0          0         0        -1 Flts/10Sec D
+PFRATH                        120        120         0        -1 Flts/10Sec D
+WSINC                         150        150         0        -1 Pages      D
+WSDEC                         250        250         0        -1 Pages      D
+AWSMIN                         50         50         0        -1 Pages      D
+AWSTIME                        20         20         1        -1 10Ms       D
+SWPOUTPGCNT                   500        288         0        -1 Pages      D
+LONGWAIT                       30         30         0     65535 Seconds    D
+DORMANTWAIT                     2          2         0     65535 Seconds    D
+TIMVCFAIL                    1600       1600       100     65535 10Ms       D
+ERRORLOGBUFFERS                14          4         2        64 Buffers    
+DUMPSTYLE                       2          2         0        -1 Bitmask    D
+USERD1                          0          0         0        -1            D
+USERD2                          0          0         0        -1            D
+USER3                           0          0         0        -1            
+USER4                           0          0         0        -1            
+EXTRACPU                     1000       1000         0        -1 10Ms       D
+MAXSYSGROUP                     8          8         1     32768 UIC Group  D
+MVTIMEOUT                    3600       3600         1     64000 Seconds    D
+TAPE_MVTIMEOUT                600        600         1     64000 Seconds    D
+MAXBUF                       7696       7696      1700     64000 Bytes      D
+DEFMBXBUFQUO                 1056       1056       256     64000 Bytes      D
+DEFMBXMXMSG                   256        256        64     64000 Bytes      D
+FREELIM                        94         32        16        -1 Pages      
+FREEGOAL                     5120        200        16        -1 Pages      D
+GROWLIM                        94         63         0        -1 Pages      D
+BORROWLIM                      94        300         0        -1 Pages      D
+XFMAXRATE                     236        236         0       255 Special    D
+LAMAPREGS                       0          0         0       255 Mapregs    
+REALTIME_SPTS                   0          0         0        -1 Pages      
+CLISYMTBL                     512        512        20      1024 Pages      D
+LOCKIDTBL                    2374       3840      1792  16776959 Entries    
+RESHASHTBL                   2048         64         1  16777216 Entries    
+DEADLOCK_WAIT                  10         10         0        -1 Seconds    D
+SCSBUFFCNT                    512         50         0     32767 Entries    
+SCSCONNCNT                      7         40         2     32767 Entries    
+SCSRESPCNT                    300        300         0     32767 Entries    
+SCSMAXDG                      576        576        28       985 Bytes      
+SCSMAXMSG                     216        216        60       985 Bytes      
+SCSFLOWCUSH                     1          1         0        16 Credits    D
+SCSSYSTEMID                 56881          0         0        -1 Pure-numbe 
+SCSSYSTEMIDH                    0          0         0        -1 Pure-numbe 
+SCSNODE                   "MARIN1"    "    "    "    "    "ZZZZ" Ascii       
+PRCPOLINTERVAL                 30         30         1     32767 Seconds    D
+PASTIMOUT                       5          5         1        99 Seconds    D
+PASTDGBUF                      16          4         1        16 Buffers    
+PANUMPOLL                      16         16         1       223 Ports      D
+PAMAXPORT                      32         32         0       223 Port-numbe D
+PAPOLLINTERVAL                  5          5         1     32767 Seconds    D
+PAPOOLINTERVAL                 15         15         1     32767 Seconds    D
+PASANITY                        1          1         0         1 Boolean    D
+PANOPOLL                        0          0         0         1 Boolean    D
+TIMEPROMPTWAIT              65535      65535         0     65535 uFortnight 
+UDABURSTRATE                    0          0         0        31 Longwords  
+LNMSHASHTBL                   128        128         1      8192 Entries    
+LNMPHASHTBL                   128        128         1      8192 Entries    
+BUGREBOOT                       1          1         0         1 Boolean    D
+DUMPBUG                         1          1         0         1 Boolean    
+BUGCHECKFATAL                   0          0         0         1 Boolean    D
+ACP_MULTIPLE                    0          0         0         1 Boolean    D
+SETTIME                         0          0         0         1 Boolean    
+ACP_SHARE                       1          1         0         1 Boolean    
+UAFALTERNATE                    0          0         0         1 Boolean    
+SAVEDUMP                        0          0         0         1 Boolean    
+CLASS_PROT                      0          0         0         1 Boolean    D
+LGI_BRK_TERM                    1          1         0         1 Boolean    D
+LGI_BRK_DISUSER                 0          0         0         1 Boolean    D
+LOAD_PWD_POLICY                 0          0         0         1 Boolean    D
+MOUNTMSG                        0          0         0         1 Boolean    D
+DISMOUMSG                       0          0         0         1 Boolean    D
+TTY_SCANDELTA            10000000   10000000    100000        -1 100Ns      
+TTY_DIALTYPE                    0          0         0       255 Bit-Encode 
+TTY_SPEED                      15         15         1        17 Special    
+TTY_RSPEED                      0          0         0        17 Special    
+TTY_PARITY                     24         24         0       255 Special    
+TTY_BUF                        80         80         0       511 Characters 
+TTY_DEFCHAR             402657952  402657952         0        -1 Bit-Encode 
+TTY_DEFCHAR2                 4098       4098         0        -1 Bit-Encode 
+TTY_TYPAHDSZ                   78         78         0     32767 Bytes      
+TTY_ALTYPAHD                  200        200         0     32767 Bytes      
+TTY_ALTALARM                   64         64         0     65535 Bytes      
+TTY_DMASIZE                    64         64         0     65535 Bytes      D
+SHADOW_MAX_UNIT               100        100        10     10000 S. sets    
+WBM_OPCOM_LVL                   1          1         0         2 mode       D
+TTY_CLASSNAME                 "TT"      "TT"      "AA"      "ZZ" Ascii       
+TTY_SILOTIME                    8          8         0       255 Ms         
+TTY_TIMEOUT                   900        900         0        -1 Seconds    D
+TTY_AUTOCHAR                    7          7         0       255 Character  D
+RMS_DFMBC                      16         16         1       127 Blocks     D
+RMS_DFMBFSDK                    0          0         0       127 Buffers    D
+RMS_DFMBFSMT                    0          0         0       127 Buffers    D
+RMS_DFMBFSUR                    0          0         0       127 Buffers    D
+RMS_DFMBFREL                    0          0         0       127 Buffers    D
+RMS_DFMBFIDX                    0          0         0       127 Buffers    D
+RMS_DFMBFHSH                    0          0         0       127 Obsolete   D
+RMS_PROLOGUE                    0          0         0         3 Prolog-Lvl D
+RMS_EXTEND_SIZE                 0          0         0     65535 Blocks     D
+RMS_FILEPROT                64000      64000         0     65535 Prot-mask  
+RMS_DFNBC                       8          8         1       127 Blocks     D
+PQL_DASTLM                     24         24         4     32767 Ast        D
+PQL_MASTLM                    100          4         4     32767 Ast        D
+PQL_DBIOLM                     18         18         4     32767 I/O        D
+PQL_MBIOLM                    100          4         4     32767 I/O        D
+PQL_DBYTLM                   8192       8192      1024        -1 Bytes      D
+PQL_MBYTLM                  48000       1024      1024        -1 Bytes      D
+PQL_DCPULM                      0          0         0        -1 10Ms       D
+PQL_MCPULM                      0          0         0        -1 10Ms       D
+PQL_DDIOLM                     18         18         4     32767 I/O        D
+PQL_MDIOLM                    100          4         4     32767 I/O        D
+PQL_DFILLM                     16         16         2     32767 Files      D
+PQL_MFILLM                    100          2         2     32767 Files      D
+PQL_DPGFLQUOTA              32768       8192       512        -1 Pages      D
+PQL_MPGFLQUOTA              10200        512       512        -1 Pages      D
+PQL_DPRCLM                      8          8         0     32767 Processes  D
+PQL_MPRCLM                      8          0         0     32767 Processes  D
+PQL_DTQELM                      8          8         0     32767 Timers     D
+PQL_MTQELM                      0          0         0     32767 Timers     D
+PQL_DWSDEFAULT                241        100        60        -1 Pages      
+PQL_MWSDEFAULT                512         60        60        -1 Pages      
+PQL_DWSQUOTA                  482        200        60        -1 Pages      D
+PQL_MWSQUOTA                 1024         60        60        -1 Pages      D
+PQL_DWSEXTENT               10200        400        60        -1 Pages      D
+PQL_MWSEXTENT               10200         60        60        -1 Pages      D
+PQL_DENQLM                    128        128         4     32767 Locks      D
+PQL_MENQLM                    200         30         4     32767 Locks      D
+PQL_DJTQUOTA                 1024       1024         0        -1 Bytes      D
+PQL_MJTQUOTA                    0          0         0        -1 Bytes      D
+ACP_MAPCACHE                   10          9         2     65535 Pages      D
+ACP_HDRCACHE                  168         36         8     65535 Pages      D
+ACP_DIRCACHE                  168         22         4     65535 Pages      D
+ACP_DINDXCACHE                 42         26         2     65535 Pages      D
+ACP_WORKSET                     0          0         0     65535 Pages      D
+ACP_FIDCACHE                   64         64         0       100 File-Ids   D
+ACP_EXTCACHE                   64         64         0      2000 Extents    D
+ACP_EXTLIMIT                  100        100         0      1000 Percent/10 D
+ACP_QUOCACHE                  160         64         0      2337 Users      D
+ACP_SYSACC                     16          8         0     65535 Directorie D
+ACP_MAXREAD                    32         32         1        64 Blocks     D
+ACP_WINDOW                      7          7         1       255 Pointers   D
+ACP_WRITEBACK                   1          1         0         1 Boolean    D
+ACP_DATACHECK                   2          2         0        99 Bit-mask   D
+ACP_BASEPRIO                    8          8         4        31 Priority   D
+ACP_SWAPFLGS                   14         15         0        15 Bit-mask   D
+ACP_XQP_RES                     1          1         0         1 Boolean    
+ACP_REBLDSYSD                   1          1         0         1 Boolean    
+DEFPRI                          4          4         1        31 Priority   D
+IJOBLIM                        64         64         1      8192 Jobs       D
+BJOBLIM                        16         16         0      1024 Jobs       D
+NJOBLIM                        16         16         0      1024 Jobs       D
+RJOBLIM                        16         16         0     65535 Jobs       D
+DEFQUEPRI                     100        100         0       255 Priority   D
+MAXQUEPRI                     100        100         0       255 Priority   D
+LGI_PWD_TMO                    30         30         0       255 Seconds    D
+LGI_RETRY_LIM                   3          3         0       255 Tries      D
+LGI_RETRY_TMO                  20         20         0       255 Seconds    D
+LGI_BRK_LIM                     5          5         1       255 Failures   D
+LGI_BRK_TMO                   300        300         0   5184000 Seconds    D
+LGI_HID_TIM                   300        300         01261440000 Seconds    D
+VAXCLUSTER                      2          1         0         2 Coded-valu 
+EXPECTED_VOTES                  1          1         1       127 Votes      
+VOTES                           1          1         0       127 Votes      
+RECNXINTERVAL                  20         20         1     32767 Seconds    D
+DISK_QUORUM     "                "    "    "    "    "    "ZZZZ" Ascii       
+QDSKVOTES                       1          1         0       127 Votes      
+QDSKINTERVAL                   10          3         1     32767 Seconds    
+ALLOCLASS                       1          0         0       255 Pure-numbe 
+LOCKDIRWT                       1          0         0       255 Pure-numbe 
+NISCS_CONV_BOOT                 0          0         0         1 Boolean    
+NISCS_LOAD_PEA0                 1          0         0         1 Boolean    
+CHECK_CLUSTER                   0          0         0         1 Boolean    
+NISCS_PORT_SERV                 0          0         0         3 Bit-encode 
+MSCP_LOAD                       1          0         0     16384 Coded-valu 
+MSCP_SERVE_ALL                  1          4         0        15 Bit-Encode 
+MSCP_BUFFER                   128        128        16        -1 Pages      
+MSCP_CREDITS                    8          8         2       128 I/O        
+TAILORED                        0          0         0         1 Boolean    
+WS_OPA0                         0          0         0         1 Boolean    D
+STARTUP_P1                  "    "    "    "    "    "    "zzzz" Ascii       
+STARTUP_P2                  "    "    "    "    "    "    "zzzz" Ascii       
+STARTUP_P3                  "    "    "    "    "    "    "zzzz" Ascii       
+STARTUP_P4                  "    "    "    "    "    "    "zzzz" Ascii       
+STARTUP_P5                  "    "    "    "    "    "    "zzzz" Ascii       
+STARTUP_P6                  "    "    "    "    "    "    "zzzz" Ascii       
+STARTUP_P7                  "    "    "    "    "    "    "zzzz" Ascii       
+STARTUP_P8                  "    "    "    "    "    "    "zzzz" Ascii       
+MMG_CTLFLAGS                    3          3         0       255 Bit-mask   D
+WINDOW_SYSTEM                   1          0         0         2 Pure-numbe D
+ERLBUFFERPAGES                  2          2         2        32 Pages      
+TAPE_ALLOCLASS                  0          0         0       255 Pure-numbe 
+VECTOR_MARGIN                 100        100         1        -1 Pure-numbe D
+SHADOWING                       0          0         0         3 Coded-valu 
+SHADOW_SYS_DISK                 0          0         0        -1 Bit_Code   D
+SHADOW_SYS_UNIT                 0          0         0      9999 Unit       
+SHADOW_MAX_COPY                 4          4         0       200 Threads    D
+TMSCP_LOAD                      1          0         0         3 Coded-valu 
+LGI_CALLOUTS                    0          0         0       255 Count      D
+NET_CALLOUTS                    0          0         0       255 Count      D
+SHADOW_SYS_WAIT               256        256         1     65535 Seconds    D
+IEEE_ADDRESS                    0          0         0        -1 Pure-numbe D
+IEEE_ADDRESSH                   0          0         0     65535 Pure-numbe D
+SHADOW_SYS_TMO                120        120         1     65535 Seconds    D
+SHADOW_MBR_TMO                120        120         1     65535 Seconds    D
+CRD_CONTROL                     7          7         0        15 Bit-mask   
+RMS_HEURISTIC                   0          0         0         1 Boolean    D
+RMS_DFLRL                       0          0         0     32767 Bytes      D
+SECURITY_POLICY                 7          7         0        -1 Bit-mask   
+NISCS_MAX_PKTSZ              1498       1498      1080      8192 Bytes      
+NISCS_LAN_OVRHD                18         18         0       256 Bytes      
+TMSCP_SERVE_ALL                 2          0         0        15 Bit-Encode 
+CWCREPRC_ENABLE                 1          1         0         1 Bit-mask   D
+MSCP_CMD_TMO                    0          0         02147483647 Seconds    D

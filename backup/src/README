@@ -1,0 +1,84 @@
+This progam reads a VMS backuptape.
+
+WARNING: This version is still well short of the full features of
+BACKUP.  Hopefully this file should somewhat document the various
+quirks and limitations (although it doesn't do as good a job of
+describing the things which are completely missing).
+
+If you have patches to send in or reports of success and/or failure, I
+guess for now the place to send them is kingdon@cyclic.com.  In the
+future there is a good chance there will be some mailing list for
+VMSBACKUP or for "Free-VMS file utilities" or some such category; you
+might want to see if http://www.lp.se/free-vms/ has something more
+up-to-date than this paragraph (as of this writing the only thing
+there is that BACKUP is listed in the task list).
+
+To find out what version you have on unix use the -V option.  On VMS,
+ANALYZE/IMAGE/HEADER VMSBACKUP.EXE and look for the part where it says
+"image file identification:".  In the sources look at getoptmain.c or
+build.com (which will have the same version number, unless someone
+messed up).
+
+To build on unix, "make".  To build on VMS, "@build".
+
+Known bugs include:
+
+* Poor handling of redundancy groups.  If you create a saveset with
+/GROUP_SIZE=0, then vmsbackup will be do just fine, but if the group
+size is nonzero (the default), then vmsbackup/LIST will tend to list
+files twice.
+
+* On VMS systems probably cannot read tapes (only savesets in .BCK files on
+disk).  Maybe it could be done if you mount the tape non-foreign, but I don't
+know of anyone who has tried that.  Reading tapes does work on non-VMS
+systems (at least with version 3.0; presumably with more recent versions too).
+
+* Dates are not printed on non-VMS systems; where the dates would be
+there is nothing.  This can be fixed if someone wants to write a
+portable equivalent for SYS$ASCTIM.
+
+* We do not yet print dates for files (just the date for the saveset itself).
+
+* One cannot specify a file to list to, as in /LIST=file.
+
+* /LIST/FULL prints much less than BACKUP; I haven't decoded most of
+the brh_dol_k_file info yet.
+
+* Some of the record formats and record attributes are not printed
+using the same text that BACKUP uses.  This is just a matter of going
+through and figuring out what it should be in each case (would
+synergize nicely with testsuite, below, because then we could just run
+the testsuite on vmsbackup and on BACKUP and make sure they agree).
+Extraction is even worse; anything other than a text file is unlikely
+to get extracted in any useful manner.
+
+TODO:
+
+* Anyone want to write a testsuite?
+
+* Implement lots more features.
+
+Open questions:
+
+* Is there a documented standard for what savesets look like?  From
+DEC or from http://www.bbc.com or from anyone else?
+
+History:
+
+The tape program is orginally written by John Douglas Carey and
+the pattern matching routine by some unknown on the net. 
+
+The remote tape option use the rmtlib from mod.sources.
+
+A good way to archive remotetape access for users with only
+a local account is to create a "netwide" user tar and let
+the remote tape programs do suid to user tar.
+
+The program is tested on vax and sun.
+
+
+Sven-Ove Westberg 
+Lulea University of Technology
+S-951 87  Lulea,  Sweden
+UUCP:  sow@luthcad.UUCP
+UUCP:  {decvax,philabs,seismo}!mcvax!enea!luthcad!sow

@@ -1,0 +1,102 @@
+#
+# Make file for STR$ functions
+#
+# History
+#
+#	Oct 10, 1997 - Kevin Handy
+#		Initial version
+#
+#	Feb 4, 1997 - Christof Zeile
+#		Change '.0' to '.o'.
+#		Change 'str_analyse_sdesc' to 'str_analyze_sdesc'
+#
+#	Feb 4, 1997 - Kevin Handy
+#		Added '-Wall' and '-Wmissing-prototypes' so I could
+#		find more problems.
+#
+#	01/26/1998 - Kevin Handy
+#		Merged together my basic and string libraries, so I
+#		only has one subdirectory to worry about.
+#
+CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion
+
+
+STROBJ = str.o str__const.o str__is_string_class.o \
+	str__copy_fill.o str__resize.o \
+	str_analyze_sdesc.o \
+	str_append.o str_blind_compare.o \
+	str_compare.o str_compare_eql.o str_concat.o \
+	str_copy_dx.o str_copy_r.o \
+	str_dupl_char.o \
+	str_free1_dx.o str_get1_dx.o str_left.o \
+	str_pos_extr.o str_right.o \
+	str_trim.o str_upcase.o str_find_first_in_set.o \
+	str_find_first_not_in_set.o str_position.o \
+	str_translate.o str_element.o \
+	str_len_extr.o str_prefix.o
+
+LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
+	lib_cvt_otb.o lib_ichar.o lib_index.o lib_len.o \
+	lib_ab_asc_ebc.o lib_ab_asc_ebc_rev.o \
+	lib_ab_cvt_o_u.o lib_ab_cvt_u_o.o lib_ab_cvtpt_o.o \
+	lib_ab_cvtpt_u.o lib_ab_cvtpt_z.o lib_ab_cvttp_o.o \
+	lib_ab_cvttp_u.o lib_ab_cvttp_z.o lib_ab_ebc_asc.o \
+	lib_ab_ebc_asc_rev.o lib_ab_lowercase.o lib_ab_upcase.o \
+	lib_add_times.o lib_addx.o lib_cvt_vectim.o lib_day.o \
+	lib_day_of_week.o lib_mult_delta_time.o lib_sub_times.o \
+	lib_subx.o
+
+SYSOBJ = sys__combine_date_time.o sys_asctim.o sys_bintim.o \
+	sys_gettim.o sys_numtim.o
+
+STRLIB = starlet.a
+
+all : $(STRLIB) tests
+
+clean :
+	- rm *.o
+	- rm *.a
+	- rm teststr
+	- rm test_str_element
+	- rm test_addx
+	- rm test_date
+
+tests: teststr test_str_element test_addx test_date
+
+teststr : teststr.c $(STRLIB)
+test_str_element : test_str_element.c $(STRLIB)
+test_addx : test_addx.c $(STRLIB)
+test_date : test_date.c $(STRLIB)
+
+$(STRLIB) : $(STROBJ) $(LIBOBJ) $(SYSOBJ)
+	ar -rv $(STRLIB) $?
+
+str.o : str.c strdef.h
+str__const.o : str__const.c strdef.h
+str__is_string_class.o : str__is_string_class.c strdef.h
+str__copy_fill.o : str__copy_fill.c strdef.h
+str__resize.o : str__resize.c strdef.h
+str_analyze_sdesc.o : str_analyze_sdesc.c strdef.h
+str_append.o : str_append.c strdef.h
+str_blind_compare.o : str_blind_compare.c strdef.h
+str_compare.o : str_compare.c strdef.h
+str_compare_eql.o : str_compare_eql.c strdef.h
+str_concat.o : str_concat.c strdef.h
+str_copy_dx.o : str_copy_dx.c strdef.h
+str_copy_r.o : str_copy_r.c strdef.h
+str_dupl_char.o : str_dupl_char.c strdef.h
+str_element.o : str_element.c strdef.h
+str_free1_dx.o : str_free1_dx.c strdef.h
+str_get1_dx.o : str_get1_dx.c strdef.h
+str_left.o : str_left.c strdef.h
+str_len_extr.o : str_len_extr.c strdef.h
+str_pos_extr.o : str_pos_extr.c strdef.h
+str_position.o : str_position.c strdef.h
+str_prefix.o : str_prefix.c strdef.h
+str_right.o : str_right.c strdef.h
+str_find_first_in_set.o : str_find_first_in_set.c strdef.h
+str_find_first_not_in_set.o : str_find_first_not_in_set.c strdef.h
+str_translate.o : str_translate.c strdef.h
+str_trim.o : str_trim.c strdef.h
+str_upcase.o : str_upcase.c strdef.h
+

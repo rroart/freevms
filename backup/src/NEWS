@@ -1,0 +1,32 @@
+Changes since version 3.0.1:
+
+* Merged in changes from version 3.1 from S.J. Tappin of the
+University of Birmingham.  .HLB is now on the list of file extensions
+which are ignored by default (along with .TLB, .EXE, etc.).  Filenames
+are matched in a case-insensitive fashion.  Added -B option to
+extract files in binary mode.
+
+* Merged in the -b change from Timothy Stark's version 4.0.  This lets
+one set the blocksize.
+
+Changes from version 3.0 to version 3.0.1:
+
+* The output from listings now more closely approximates the output of
+VMS BACKUP/LIST.
+
+* There is now a version which runs on VMS and accepts (a few) of the
+qualifiers of BACKUP.
+
+* Can read savesets on disk (created with the /SAVE_SET qualifier) as
+well as on tape.
+
+* More portable (in particular, no longer depends on things like
+#ifdef sun to determined byte-order, and no longer depends on the
+size of host data types like short and long).
+
+Changes which were in version 3.0:
+
+(Version 3.0 is also known as "v07i099: Read VMS backup tapes"
+(read-vms-backs) from the comp.sources.unix archive)
+
+* See the bottom of the ChangeLog file.

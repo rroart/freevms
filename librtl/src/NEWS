@@ -1,0 +1,22 @@
+02/13/1998
+
+	I'm releasing a very preliminary version of this library with
+	date/time functions contributed by Paul Nankervis. I've
+	modified his functions to be more compatible with the
+	VMS header files SYS$ROUTINES.H and LIB$ROUTINES.H, broke
+	them into seperate files and applied a couple of int/long
+	changes to various parameters.
+
+	I will probibly rename this package to 'starlet' from 'str'
+	in the next release, because it is starting to contain a lot
+	more than just STR$ routines in it.
+
+	Very few of these routines have been well tested, and even
+	fewer have been compared against the actual VMS routines,
+	however they all compile on a Linux/Intel system.
+	I really need an extensive set of test programs to exercise
+	the functions (Subtle hint, any takers?).
+
+	The Makefile has been reworked slightly to include a 'clean'
+	function to wipe out all compiled code so I could put out
+	a clean distribution.

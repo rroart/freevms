@@ -1,0 +1,60 @@
+This directory contains files implementing some of the
+VMS functions. This is a preliminary release so
+that anyone can test what is there, but a lot is missing
+yet. I've never used many of the functions available, so
+some of the handling for them is probibly very wrong.
+
+Question: How can yo do a variable arguement list like
+in VMS using standard C? The only method available
+(stdarg.h) assumes that the functon can determine how
+many parameters (and what kind) will be available.
+For now, the assumption will be that you will pass ALL
+parameters.
+
+All funcitons that haven't been implemented yet are
+coded as "assert(0)" in str.c, so using them will cause
+a crash.
+
+The header file "strdef.h" is similiar to "str$routines.h"
+on VMS, but I've added definitions of "STR$_error" items
+so I could use them instead of comparing against the
+external variable versions. I'm using a different name
+because I'm developing using Linux, and Unix gives me
+lots of problems with a '$' in file names. Also it doesn't
+assume a variable number of arguements in any function as
+I can't find a way to make that work yet.
+
+Several header files were taken from various
+GNU-C distribution for VMS I uploaded some time
+back, and I'm not sure of it's legal status.
+
+The functions are based upon VMS 5.0 manuals, so other
+functions may have been added since then. Please let me
+know of any (I'm stuck at 5.5 for a while).
+
+Someone who knows how to do wildcard should set up a
+str$match_wild, or convert one of the regex routines
+to handle VMS style wildcards.
+
+Also, I've never used any of the string math, so someone
+who has should work on these.
+
+I've defered signals for now because they are going
+to be dependent on other (as yet) unimplemented libraries.
+I've placed a DOSIGNAL(x) where a signal should be sent, but
+defined DOSIGNAL as an 'assert()' for now (really not the
+right thing, but OK for testing).
+
+Contributors Include:
+
+	Christof Zeile for much debugging/portability help.
+
+	Paul Nankervis for several date/dime functions,
+	sys$addx and sys$subx.
+
+Maintainer:
+	Kevin Handy <kth@srv.net>
+	http://snake.srv.net/~kth
+	Software Solutions, Inc.
+	Idaho Falls, Idaho
+

@@ -1,0 +1,13 @@
+! VMSBACKUP.CLD - command definition for VMSBACKUP 
+!
+! Eventually the verb here will be just BACKUP, but since this utility
+! is not full-featured (yet) and we want to conveniently use both it
+! and BACKUP during testing, we call it VMSBACKUP for now.
+DEFINE VERB VMSBACKUP
+IMAGE VMSBACKUP:VMSBACKUP.EXE
+PARAMETER P1
+PARAMETER P2
+QUALIFIER SAVE_SET, PLACEMENT=local
+QUALIFIER LIST, PLACEMENT=global
+QUALIFIER FULL, PLACEMENT=global
+QUALIFIER BRIEF, PLACEMENT=global
