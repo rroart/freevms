@@ -81,8 +81,8 @@ MODULE ICMP(IDENT="1.0B",LANGUAGE(BLISS32),
 #include <descrip.h>
 
 // Memgr.bli
-extern     MM$Seg_Get();
-extern  void    MM$Seg_Free();
+extern     mm$seg_get();
+extern  void    mm$seg_free();
 
 // IOUTIL.BLI
 extern  void    ASCII_DEC_BYTES();
@@ -256,7 +256,7 @@ extern	ICMP$User_Input();
 	ICMP_MIB->MIB$icmpInErrors = ICMP_MIB->MIB$icmpInErrors + 1;
 	if ($$LOGF(LOG$ICMP))
 	    QL$FAO("!%T ICMP recv checksum error, cksum=!XL!/",0,Sum);
-	MM$Seg_Free(bufsize,buf);
+	mm$seg_free(bufsize,buf);
 	return;
 	};
 
@@ -474,7 +474,7 @@ extern	ICMP$User_Input();
     };
 
     // Release the buffer
-    MM$Seg_Free(bufsize,buf);
+    mm$seg_free(bufsize,buf);
     }
 
 void ICMP_Pproblem(ICMpkt,ICMlen,IPpkt,IPlen,ICMpptr)
@@ -551,7 +551,7 @@ void ICMP_Echo(ICMpkt,ICMlen,IPPKT,IPlen)
 
 // Allocate the segment.
 
-    Buf = MM$Seg_Get(Bufsize);
+    Buf = mm$seg_get(Bufsize);
     Seg = Buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
     Segsize = ICMlen;
 
@@ -655,7 +655,7 @@ void ICMP_Send_DUNR(ICMpkt,ICMlen,IPPKT,IPlen,code)
 
 // Allocate the segment.
 
-    Buf = MM$Seg_Get(Bufsize);
+    Buf = mm$seg_get(Bufsize);
     Seg = Buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
     Segsize = ICMlen;
 

@@ -1014,7 +1014,7 @@ l5:
 // R2 = IRP address
 
 	R2 = R0;			// save system argblk adrs.
-	R0 = MM$UArg_Get();		// allocate IP process space
+	R0 = mm$uarg_get();		// allocate IP process space
 					// Returns in R0
 
 // copy the argblk system-space ==> IP-Local-space.
@@ -1048,7 +1048,7 @@ NO_IPACP_Arg_Blk:
 // Remember: This fake IRP Must NOT be posted to VMS IO post rtns.  System crash
 // will occur.
 
-	R0 = MM$UArg_Get();		// get a IPACP user argument blk.
+	R0 = mm$uarg_get();		// get a IPACP user argument blk.
 	R5 = R0;			// save argblk adrs
 //;;	R5->ab$l_pid = R2->irp$l_pid;	// set PID in IPACP argblk.
 	R0 = R2->irp$l_pid;	// Transform internal PID

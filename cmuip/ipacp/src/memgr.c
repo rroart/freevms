@@ -346,7 +346,7 @@ Side Effects:
 
 */
 
-MM$Get_Mem (Addr, Size)
+mm$get_mem (Addr, Size)
     {
     signed long
 	Pages,
@@ -386,7 +386,7 @@ Side Effects:
 
 */
 
-void MM$Free_Mem(Mem,Size)
+void mm$free_mem(Mem,Size)
     {
     signed long
 	Pages,
@@ -433,7 +433,7 @@ Side Effects:
 
 */
 
-void MM$QBLK_GET (void)
+void mm$qblk_get (void)
     {
       long R0=0;
 #if 0
@@ -502,7 +502,7 @@ Side Effects:
 
 */
 
-void MM$QBLK_Free(Ptr)
+void mm$qblk_free(Ptr)
     {
       long R0=0;
 #if 0
@@ -613,7 +613,7 @@ Side Effects:
 */
 
 
-void MM$UARG_GET (void)
+void mm$uarg_get (void)
     {
       long R0 = 0;
 #if 0
@@ -665,7 +665,7 @@ Side Effects:
 */
 
 
-void MM$UARG_Free(Ptr)
+void mm$uarg_free(Ptr)
     {
       long R0=0;
     signed long
@@ -767,7 +767,7 @@ Side Effects:
 */
 
 
-MM$SEG_GET(Size)
+mm$seg_get(Size)
     {
       long R0=0;
 #if 0
@@ -866,7 +866,7 @@ Side Effects:
 */
 
 
-void MM$SEG_FREE(Size,Ptr)
+void mm$seg_free(Size,Ptr)
     {
       long R0=0;
 #if 0
@@ -1006,7 +1006,7 @@ Side Effects:
 */
 
 
-void MM$INIT (void)
+void mm$init (void)
     {
     QBLK_Init();
     Uarg_Init();
@@ -1028,7 +1028,7 @@ memory to be trashed.
 
 #ifdef QDEBUG
 
-MM$INSQUE(QBLK,QHDR,QRTN,QID,QVAL)
+mm$insque(QBLK,QHDR,QRTN,QID,QVAL)
     {
       struct MEM$HDR_STRUCT * HPTR;
     HPTR = QBLK - MEM$HDR_SIZE*4;
@@ -1040,7 +1040,7 @@ MM$INSQUE(QBLK,QHDR,QRTN,QID,QVAL)
     return INSQUE(QBLK,QHDR);
     }
 
-MM$REMQUE(QHDR,QBLK,QRTN,QID,QVAL)
+mm$remque(QHDR,QBLK,QRTN,QID,QVAL)
      signed long * QBLK;
     {
       struct MEM$HDR_STRUCT * HPTR;

@@ -108,11 +108,11 @@ extern     Calc_Checksum();
 
 // MEMGR.BLI
 
-extern  void    MM$UArg_Free();
-extern     MM$QBLK_Get();
-extern  void    MM$QBLK_Free();
-extern     MM$Seg_Get();
-extern  void    MM$Seg_Free();
+extern  void    mm$uarg_free();
+extern     mm$qblk_get();
+extern  void    mm$qblk_free();
+extern     mm$seg_get();
+extern  void    mm$seg_free();
 
 // USER.BLI
 
@@ -352,7 +352,7 @@ Queue_User_IP(IPCB,Uptr,Usize,Buf,bufsize,QB)
     signed long
 	Buf2,
 	QBR;
-extern	MM$QBlk_Get();
+extern	mm$qblk_get();
 #define	IPCB$NR_QMAX 5	// Max input packets permitted on input queue
 
 // See if the input queue is full for this IPCB
@@ -366,7 +366,7 @@ extern	MM$QBlk_Get();
 
 // We need to make a copy of this IP datagram.
 
-    Buf2 = MM$Seg_Get(bufsize);	// Get a buffer
+    Buf2 = mm$seg_get(bufsize);	// Get a buffer
     Uptr = Buf2 + (Uptr - Buf);
 //!!HACK!!// There's no need to copy the whole buffer, only Usize worth...
     MOVBYT(bufsize,Buf,Buf2);
@@ -374,7 +374,7 @@ extern	MM$QBlk_Get();
 // Allocate a queue block and insert onto user receive queue
 
     if (QB == 0)
-	QB = MM$QBLK_Get();
+	QB = mm$qblk_get();
     QB->nr$buf_size = bufsize;	// Total size of network buffer
     QB->nr$buf = Buf2;		// Pointer to network buffer
     QB->nr$ucount = Usize;	// Length of the data
@@ -453,11 +453,11 @@ void Deliver_IP_Data(IPCB,QB,URQ)
 
     User$Post_IO_Status(URQ->ur$uargs,SS$_NORMAL,
 			ucount,0,0);
-    MM$UArg_Free(URQ->ur$uargs);
+    mm$uarg_free(URQ->ur$uargs);
 
-    MM$QBLK_Free(URQ);
-    MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
-    MM$QBLK_Free(QB);
+    mm$qblk_free(URQ);
+    mm$seg_free(QB->nr$buf_size,QB->nr$buf);
+    mm$qblk_free(QB);
     }
 
 //SBTTL "IPCB_OK - Match connection ID to IPCB address"
@@ -603,16 +603,16 @@ void Kill_IP_Requests(struct IPCB_Structure * IPCB,long RC)
     while (REMQUE(IPCB->ipcb$usr_qhead,URQ) != EMPTY_QUEUE) // check
 	{
 	User$Post_IO_Status(URQ->ur$uargs,RC,0,0,0);
-	MM$UArg_Free(URQ->ur$uargs);
-	MM$QBlk_Free(URQ);	
+	mm$uarg_free(URQ->ur$uargs);
+	mm$qblk_free(URQ);	
 	};
 
 // Purge any received qblocks as well
 
     while (REMQUE(IPCB->ipcb$nr_qhead,QB) != EMPTY_QUEUE) // check
 	{
-	MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
-	MM$QBlk_Free(QB);
+	mm$seg_free(QB->nr$buf_size,QB->nr$buf);
+	mm$qblk_free(QB);
 	};
     }
 
@@ -807,7 +807,7 @@ void IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
     IOSB->nsb$byte_count = 0;
     IOSB->net_status.nsb$xstatus = 0;
     IO$POST(IOSB,Uargs);
-    MM$UArg_Free(Uargs);
+    mm$uarg_free(Uargs);
     }
 
 
@@ -863,7 +863,7 @@ struct IPCB_Structure * IPCB;
 // Close done - post user request and free argblk
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
-    MM$UArg_Free(Uargs);
+    mm$uarg_free(Uargs);
     }
 
 //SBTTL "IPU$ABORT - abort IP "connection""
@@ -892,7 +892,7 @@ void IPU$ABORT(struct user_abort_args * Uargs)
 // Done. Clean up.
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
-    MM$UArg_Free(Uargs);
+    mm$uarg_free(Uargs);
     }
 
 //SBTTL "IPU$SEND - send IP packet"
@@ -966,7 +966,7 @@ void IPU$SEND(struct user_send_args * Uargs)
     else
 	if (bufsize <= MAX_PHYSICAL_BUFSIZE)
 	    bufsize = MAX_PHYSICAL_BUFSIZE;
-    Buf = MM$Seg_Get(bufsize);	// Get a buffer
+    Buf = mm$seg_get(bufsize);	// Get a buffer
 //!!HACK!!// Next line is a hack, but it really speeds things up...
     seg = Buf + DEVICE_HEADER; // Point at IP segment
 
@@ -1002,7 +1002,7 @@ void IPU$SEND(struct user_send_args * Uargs)
 	// Post the I/O request back to the user
 
 	User$Post_IO_Status(Uargs,RC,0,0,0);
-	MM$UArg_Free(Uargs);
+	mm$uarg_free(Uargs);
 	return;
 	};
 
@@ -1011,7 +1011,7 @@ void IPU$SEND(struct user_send_args * Uargs)
 	ForeignAddr = IPCB->ipcb$foreign_host;
     if ((ForeignAddr == WILD))
 	{
-	MM$Seg_FREE(bufsize,Buf);	// Give back buffer
+	mm$seg_free(bufsize,Buf);	// Give back buffer
 	USER$Err(Uargs,NET$_NOPN);
 	return 0;
 	};
@@ -1038,7 +1038,7 @@ void IPU$SEND(struct user_send_args * Uargs)
 // Post the I/O request back to the user
 
     User$Post_IO_Status(Uargs,RC,0,0,0);
-    MM$UArg_Free(Uargs);
+    mm$uarg_free(Uargs);
     }
 
 
@@ -1087,7 +1087,7 @@ void IPU$RECEIVE(struct user_recv_args * Uargs)
 
 // Make a request block for the receive
 
-    URQ = MM$QBLK_Get();		// Get a queue block
+    URQ = mm$qblk_get();		// Get a queue block
     URQ->ur$size = Uargs->re$buf_size; // # of bytes this rq can take
     URQ->ur$data = Uargs->re$data_start; // Address of system buffer
     URQ->ur$irp_adrs = Uargs->re$irp_adrs; // IO request packet address

@@ -252,10 +252,10 @@ extern  void    SwapBytes();
 
 // Memgr.bli
 
-extern     MM$Seg_Get();
-extern  void    MM$Seg_Free();
-extern     MM$QBLK_Get();
-extern  void    MM$QBLK_Free();
+extern     mm$seg_get();
+extern  void    mm$seg_free();
+extern     mm$qblk_get();
+extern  void    mm$qblk_free();
 
 // SEGIN.BLI/TCP.BLI
 
@@ -751,7 +751,7 @@ IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	    IP_group_MIB->IPMIB$ipOutNoRoutes = 
 			IP_group_MIB->IPMIB$ipOutNoRoutes + 1;
 	    if (Delete_Seg != 0)
-		MM$Seg_Free(Bufsize,Buf);
+		mm$seg_free(Bufsize,Buf);
 	    return 0;		// No route exists
 	    };
 	};
@@ -784,7 +784,7 @@ IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	      Buf2;
 		struct segment_structure * Seg2;
 
-	    Buf2 = MM$Seg_Get(Bufsize);
+	    Buf2 = mm$seg_get(Bufsize);
 	    Seg2 = Seg-Buf+Buf2;
 	    CH$MOVE(Bufsize,Buf,Buf2);
 	    IP$Receive(Buf2,Bufsize,Seg2,SegSize,0);
@@ -797,7 +797,7 @@ IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 
 // Build a Net_send_q entry for the device handler
 
-	QB = MM$QBLK_get();
+	QB = mm$qblk_get();
 	QB->NSQ$Driver = dev_config;
 	QB->NSQ$Data = Seg;
 	QB->NSQ$Datasize = SegSize;
@@ -896,7 +896,7 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	do
 	    {
 	    frag_size = MIN(OPT$MAX_RECV_DATASIZE, SegSize - frag_offset);
-	    subbuff = MM$Seg_Get(Max_Physical_Bufsize);
+	    subbuff = mm$seg_get(Max_Physical_Bufsize);
 	    subseg = subbuff + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
 	    CH$MOVE(frag_size, Seg + frag_offset, subseg);
 	    fragmentation_data = (frag_offset / 8);
@@ -910,7 +910,7 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 
 	fragmenting = 0;	// All done fragmenting
 	if (Delete_Seg != 0)
-	    MM$Seg_Free(Bufsize,Buf);		// Get rid of the wasted space
+	    mm$seg_free(Bufsize,Buf);		// Get rid of the wasted space
 	}
     else
 	{
@@ -938,7 +938,7 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	    IP_group_MIB->IPMIB$ipOutNoRoutes = 
 			IP_group_MIB->IPMIB$ipOutNoRoutes + 1;
 	    if (Delete_Seg != 0)
-		MM$Seg_Free(Bufsize,Buf);
+		mm$seg_free(Bufsize,Buf);
 	    return 0;		// No route exists
 	    };
 	if (ip_src == 0)
@@ -1016,7 +1016,7 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 		iphdr2,
 	      buf2;
 	    struct segment_structure * seg2;
-	    buf2 = MM$Seg_Get(Bufsize);
+	    buf2 = mm$seg_get(Bufsize);
 	    seg2 = Seg-Buf+buf2;
 	    CH$MOVE(Bufsize,Buf,buf2);
 	    iphdr2 = (long)IPHDR-(long)Seg+(long)seg2;
@@ -1033,7 +1033,7 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 
 // Build a Net_send_q entry for the device handler
 
-	QB = MM$QBLK_get();
+	QB = mm$qblk_get();
 	QB->NSQ$Driver = dev_config;
 	QB->NSQ$Data = IPHDR;
 	QB->NSQ$Datasize = IP_HDR_BYTE_SIZE + SegSize;
@@ -1122,7 +1122,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 	    Swapbytes(IP_HDR_SWAP_SIZE,iphdr);
 	    IP$LOG(ASCIDNOT("(IPrecv)"),iphdr);
 	    };
-        MM$Seg_Free(Buf_size,Buf);
+        mm$seg_free(Buf_size,Buf);
 	return;
 	};
 
@@ -1146,7 +1146,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 	    if (! $$LOGF(LOG$IP))
 		IP$LOG(ASCIDNOT("(IPRecv)"),iphdr);
 	    };
-	MM$Seg_Free(Buf_size,Buf);
+	mm$seg_free(Buf_size,Buf);
 	return;
 	};
 
@@ -1178,7 +1178,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 	    {		// Drop the packet - not allowed to forward
 	    IP_group_MIB->IPMIB$ipInAddrErrors =
 		IP_group_MIB->IPMIB$ipInAddrErrors + 1;
-	    MM$Seg_Free(Buf_size,Buf);
+	    mm$seg_free(Buf_size,Buf);
 	    }
 	else
 	    {		// Try to forward the packet
@@ -1203,7 +1203,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 		    if (! $$LOGF(LOG$IP))
 			IP$LOG(ASCIDNOT("IPfwd"),iphdr);
 		    };
-		MM$Seg_Free(Buf_size,Buf);
+		mm$seg_free(Buf_size,Buf);
 		return;
 		};
 
@@ -1220,7 +1220,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 		    if (! $$LOGF(LOG$IP))
 			IP$LOG(ASCIDNOT("IPfwd"),iphdr);
 		    };
-		MM$Seg_Free(Buf_size,Buf);
+		mm$seg_free(Buf_size,Buf);
 		return;
 		};
 
@@ -1235,7 +1235,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 		    if (! $$LOGF(LOG$IP))
 			IP$LOG(ASCIDNOT("IPfwd"),iphdr);
 		    };
-		MM$Seg_Free(Buf_size,Buf);
+		mm$seg_free(Buf_size,Buf);
 		return;
 		};
 
@@ -1256,7 +1256,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 
 	    dev_config = dev_config_tab[dev].dc_begin;
 
-	    QB = MM$QBLK_get();
+	    QB = mm$qblk_get();
 	    QB->NSQ$Driver = dev_config;
 	    QB->NSQ$Data = iphdr;
 	    QB->NSQ$Datasize = iplen;
@@ -1320,7 +1320,7 @@ void IP_DISPATCH(iphdr,iplen,HDRLEN,BUF,BUFSIZE)
 	IP_group_MIB->IPMIB$ipInUnknownProtos =
 		IP_group_MIB->IPMIB$ipInUnknownProtos + 1;
 	unknown_flag = 1;
-	MM$Seg_Free(BUFSIZE,BUF);
+	mm$seg_free(BUFSIZE,BUF);
 	};
     };
 
@@ -1385,7 +1385,7 @@ X:  {			// *** Block X ***
 
 // RA data already exists - just flush the old buffer.
 
-	    MM$Seg_Free(RAPTR->ra$bufsize,RAPTR->ra$buf);
+	    mm$seg_free(RAPTR->ra$bufsize,RAPTR->ra$buf);
 	    }
 	else
 	    {
@@ -1410,7 +1410,7 @@ X:  {			// *** Block X ***
 	    if (FIRST)
 		exe$setimr(0, RA_CHECK_TIME, IP_FRAGMENT_CHECK, 0, 0);
 	    };
-	RAPTR->ra$buf = MM$Seg_Get(16384);
+	RAPTR->ra$buf = mm$seg_get(16384);
 	RAPTR->ra$bufsize = 16384;
 	RAPTR->ra$data = RAPTR->ra$buf;
 	RAPTR->ra$datend = CH$MOVE(iplen,iphdr,RAPTR->ra$data);
@@ -1418,7 +1418,7 @@ X:  {			// *** Block X ***
 	XQL$FAO(LOG$IP,
 		"!%T Fragment at !XL for RA !XL, IPLEN=!SL, next octet=!SL!/",
 		0,iphdr,RAPTR,iplen,RAPTR->ra$octet);
-	MM$Seg_Free(BUFSIZE,BUF);
+	mm$seg_free(BUFSIZE,BUF);
 	return;
 	}
 
@@ -1447,11 +1447,11 @@ Y:	{
 // the innards of the data.
 
 	    NewBUFsize = RAPTR->ra$bufsize * 2;
-	    NewBUF = MM$Seg_Get(NewBUFsize);
+	    NewBUF = mm$seg_get(NewBUFsize);
 	    CH$MOVE(RAPTR->ra$bufsize, RAPTR->ra$buf, NewBUF);
 	    RAPTR->ra$data = (long)RAPTR->ra$data + ((long)NewBUF - (long)RAPTR->ra$buf);
 	    RAPTR->ra$datend = (long)RAPTR->ra$datend + ((long)NewBUF - (long)RAPTR->ra$buf);
-	    MM$Seg_Free(RAPTR->ra$bufsize, RAPTR->ra$buf);
+	    mm$seg_free(RAPTR->ra$bufsize, RAPTR->ra$buf);
 	    RAPTR->ra$bufsize = NewBUFsize;
 	    RAPTR->ra$buf = NewBUF;
 	    };
@@ -1470,7 +1470,7 @@ Y:	{
 
 // Flush the buffer
 
-	MM$Seg_Free(BUFSIZE,BUF);
+	mm$seg_free(BUFSIZE,BUF);
 
 // If this is the last fragment, then dispatch the datagram.
 
@@ -1513,7 +1513,7 @@ Y:	{
 	if (! $$LOGF(LOG$IP))
 	    IP$LOG(ASCIDNOT("IPfrag"),iphdr);
 	};
-    MM$Seg_Free(BUFSIZE,BUF);
+    mm$seg_free(BUFSIZE,BUF);
     }
 
 void IP_FRAGMENT_CHECK  (void)
@@ -1544,7 +1544,7 @@ void IP_FRAGMENT_CHECK  (void)
 
 	    XQL$FAO(LOG$IP,"!%T Flushing expired IP RA block !XL!/",0,RAPTR);
 	    REMQUE(RAPTR,RAPTR);
-	    MM$Seg_Free(RAPTR->ra$bufsize,RAPTR->ra$buf);
+	    mm$seg_free(RAPTR->ra$bufsize,RAPTR->ra$buf);
 //	    LIB$FREE_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
 	    LIB$FREE_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),RAPTR);
 	    IP_group_MIB->IPMIB$ipReasmFails = 

@@ -112,11 +112,11 @@ extern     Calc_Checksum();
 
 // MEMGR.BLI
 
-extern  void    MM$UArg_Free();
-extern     MM$QBLK_Get();
-extern  void    MM$QBLK_Free();
-extern     MM$Seg_Get();
-extern  void    MM$Seg_Free();
+extern  void    mm$uarg_free();
+extern     mm$qblk_get();
+extern  void    mm$qblk_free();
+extern     mm$seg_get();
+extern  void    mm$seg_free();
 
 // USER.BLI
 
@@ -320,7 +320,7 @@ X:	{
 	    goto leave_x;
 	    };
 
-	Buf2 = MM$Seg_Get(bufsize);	// Get a buffer
+	Buf2 = mm$seg_get(bufsize);	// Get a buffer
 	Seg = Buf2 + (Seg - Buf);
 //!!HACK!!// There's no need to copy the whole buffer, only usize worth...
 	MOVBYT(bufsize,Buf,Buf2);
@@ -351,7 +351,7 @@ X:	{
 // If the packet hasn't been given to the user, delete it now
 
     if (delete)
-	MM$Seg_Free(bufsize,Buf2);
+	mm$seg_free(bufsize,Buf2);
     }
 
 
@@ -374,7 +374,7 @@ Queue_User_ICMP(ICMPCB,Uptr,usize,Buf,bufsize,QB)
     {
     signed long
 	QBR;
-extern	MM$QBlk_Get();
+extern	mm$qblk_get();
 
 #define	ICMPCB$NR_Qmax 5	// Max input packets permitted on input queue
 
@@ -390,7 +390,7 @@ extern	MM$QBlk_Get();
 // Allocate a queue block and insert onto user receive queue
 
     if (QB == 0)
-	QB = MM$QBLK_Get();
+	QB = mm$qblk_get();
     QB->nr$buf_size = bufsize;	// Total size of network buffer
     QB->nr$buf = Buf;		// Pointer to network buffer
     QB->nr$ucount = usize;	// Length of the data
@@ -460,11 +460,11 @@ void Deliver_ICMP_Data(ICMPCB,QB,URQ)
 
     User$Post_IO_Status(URQ->ur$uargs,SS$_NORMAL,
 			Ucount,0,0);
-    MM$UArg_Free(URQ->ur$uargs);
+    mm$uarg_free(URQ->ur$uargs);
 
-    MM$QBLK_Free(URQ);
-    MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
-    MM$QBLK_Free(QB);
+    mm$qblk_free(URQ);
+    mm$seg_free(QB->nr$buf_size,QB->nr$buf);
+    mm$qblk_free(QB);
     }
 
 //SBTTL "ICMPCB_OK - Match connection ID to ICMPCB address"
@@ -618,17 +618,17 @@ void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,long RC)
 	else
 	    {
 	    User$Post_IO_Status(URQ->ur$uargs,RC,0,0,0);
-	    MM$UArg_Free(URQ->ur$uargs);
+	    mm$uarg_free(URQ->ur$uargs);
 	    };
-	MM$QBlk_Free(URQ);	
+	mm$qblk_free(URQ);	
 	};
 
 // Purge any received qblocks as well
 
     while (REMQUE(ICMPCB->ICMPCB$NR_Qhead,QB) != EMPTY_QUEUE) // check
 	{
-	MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
-	MM$QBlk_Free(QB);
+	mm$seg_free(QB->nr$buf_size,QB->nr$buf);
+	mm$qblk_free(QB);
 	};
     }
 
@@ -822,7 +822,7 @@ void ICMP_NMLOOK_DONE(ICMPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
     IOSB->nsb$byte_count = 0;
     IOSB->net_status.nsb$xstatus = 0;
     IO$POST(IOSB,uargs);
-    MM$UArg_Free(uargs);
+    mm$uarg_free(uargs);
     }
 
 //SBTTL "ICMP_COPEN_DONE - Common user/internal ICMP open done routine"
@@ -893,7 +893,7 @@ void ICMP$CLOSE(struct user_close_args * uargs)
 // Close done - post user request and free argblk
 
     User$Post_IO_Status(uargs,SS$_NORMAL,0,0,0);
-    MM$UArg_Free(uargs);
+    mm$uarg_free(uargs);
     }
 
 //SBTTL "ICMP$ABORT - abort ICMP "connection""
@@ -922,7 +922,7 @@ void ICMP$ABORT(struct user_abort_args * uargs)
 // Done. Clean up.
 
     User$Post_IO_Status(uargs,SS$_NORMAL,0,0,0);
-    MM$UArg_Free(uargs);
+    mm$uarg_free(uargs);
     }
 
 //SBTTL "ICMP$SEND - send ICMP packet"
@@ -1010,7 +1010,7 @@ void ICMP$SEND(struct user_send_args * uargs)
     else
 	if (bufsize <= max_physical_bufsize)
 	    bufsize = max_physical_bufsize;
-    Buf = MM$Seg_Get(bufsize);	// Get a buffer
+    Buf = mm$seg_get(bufsize);	// Get a buffer
     Seg = Buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE; // Point at ICMP segment
     Segsize = usize+ICMP_HEADER_SIZE; // Length of segment + ICMP header
 
@@ -1090,7 +1090,7 @@ void ICMP$SEND(struct user_send_args * uargs)
 // Post the I/O request back to the user
 
     User$Post_IO_Status(uargs,RC,0,0,0);
-    MM$UArg_Free(uargs);
+    mm$uarg_free(uargs);
 
     }
 
@@ -1140,7 +1140,7 @@ void ICMP$RECEIVE(struct user_recv_args * uargs)
 
 // Make a request block for the receive
 
-    URQ = MM$QBLK_Get();		// Get a queue block
+    URQ = mm$qblk_get();		// Get a queue block
     URQ->ur$size = uargs->re$buf_size; // # of bytes this rq can take
     URQ->ur$data = uargs->re$data_start; // Address of system buffer
     URQ->ur$irp_adrs = uargs->re$irp_adrs; // IO request packet address

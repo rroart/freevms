@@ -366,7 +366,7 @@ extern signed long
 
 // Rtns from MEMGR.BLI
 
-extern     MM$UArg_Free();
+extern     mm$uarg_free();
 
 // IOUTIL.BLI
 
@@ -646,7 +646,7 @@ USER$ERR (struct user_default_args * Arg, long Err)
 // Queue IRP to VMS I/O post-processor
 
     IO$POST(IOSB, Arg);
-    MM$UArg_Free(Arg);			// Release user TCP arg block.
+    mm$uarg_free(Arg);			// Release user TCP arg block.
 
 // If logging is enabled then output the user error message to the log file.
 
@@ -695,7 +695,7 @@ void USER$POST_FUNCTION_OK(struct user_default_args * Arg)
 // Queue IRP to IO post-processor
 
     IO$POST(IOSB,Arg);
-    MM$UArg_Free(Arg);		// Release user arg block.
+    mm$uarg_free(Arg);		// Release user arg block.
     }
 
 //SBTTL "Give info about a connection"
@@ -751,7 +751,7 @@ void USER$Net_Connection_Info(struct user_info_args * uargs,
 // Return the Connection Status to the user by posting the IO request.
 
     User$Post_IO_Status(uargs,SS$_NORMAL,CONNECTION_INFO_BYTESIZE,0,0);
-    MM$UArg_Free(uargs);		// relese user arg block.
+    mm$uarg_free(uargs);		// relese user arg block.
     }
 
 //SBTTL "Derive an integer Clock base"
@@ -878,12 +878,12 @@ Side Effects:
 
 void Net$Event(struct event_args * uargs)
     {
-extern	MM$Get_Mem(), MM$Free_Mem();
+extern	mm$get_mem(), mm$free_mem();
     signed long
 	RC,
 	Buffer;
 
-    if ((RC=MM$Get_Mem(Buffer,uargs->ev$buf_size)) != SS$_NORMAL)
+    if ((RC=mm$get_mem(Buffer,uargs->ev$buf_size)) != SS$_NORMAL)
 	{
 	USER$ERR(uargs,RC);
 	return;
@@ -895,7 +895,7 @@ extern	MM$Get_Mem(), MM$Free_Mem();
 	    ((long)uargs->ev$pid)&0xffff, uargs->ev$buf_size, Buffer); // check pid
 
     USER$Post_Function_OK(uargs);
-    MM$Free_Mem(Buffer,uargs->ev$buf_size);
+    mm$free_mem(Buffer,uargs->ev$buf_size);
     }
 
 
@@ -945,7 +945,7 @@ Output:
 void NET$SNMP(struct snmp_args * uargs)
     {
 extern	SNMP$USER_INPUT(),
-	MM$Get_Mem(), MM$Free_Mem();
+	mm$get_mem(), mm$free_mem();
 #define	RBBYTES D$User_Return_Blk_Max_Size
 #define	RBSIZE (RBBYTES+3)/4		// Largest dump block, in alloc units
  char * In_Buff;
@@ -959,7 +959,7 @@ extern	SNMP$USER_INPUT(),
 
 // Fetch the input data from kernal space.
 
-    if ((RC=MM$Get_Mem(In_Buff,uargs->snmp$wbuf_size)) != SS$_NORMAL)
+    if ((RC=mm$get_mem(In_Buff,uargs->snmp$wbuf_size)) != SS$_NORMAL)
 	{
 	USER$ERR(uargs,RC);
 	return;
@@ -1015,7 +1015,7 @@ else
 
 // Did we have an Error or Illegal Dump directive code?
 
-    MM$Free_Mem(In_Buff,uargs->snmp$wbuf_size);
+    mm$free_mem(In_Buff,uargs->snmp$wbuf_size);
 
     if (! Error)
 	{
@@ -1036,7 +1036,7 @@ else
 // Post the user's IO request back to the user.
 
 	    User$Post_IO_Status(uargs,SS$_NORMAL,bufsize+4,0,0);
-	    MM$UArg_Free(uargs);	// Release user arg block.
+	    mm$uarg_free(uargs);	// Release user arg block.
 	    };
 	};
     }
@@ -1207,7 +1207,7 @@ extern 	IPU$Cancel();
     };
 
     GTHST_CANCEL(uargs);
-    MM$UArg_Free(uargs);		// Release IPACP argument block
+    mm$uarg_free(uargs);		// Release IPACP argument block
     }
 
 //Sbttl "NET$Dump - Dump the TCB blocks to a user process"
@@ -1486,7 +1486,7 @@ extern	    CNF$Device_stat();
 // Post the user's IO request back to the user.
 
 	    User$Post_IO_Status(uargs,SS$_NORMAL,bufsize,0,0);
-	    MM$UArg_Free(uargs);	// Release user arg block.
+	    mm$uarg_free(uargs);	// Release user arg block.
 	    };
 	};
     }
@@ -1809,7 +1809,7 @@ void NET$GTHST(struct gthst_args * uargs)
 // And give them a good status reply
 
 	User$Post_IO_Status(uargs,SS$_NORMAL,NLBSIZE,0,0);
-	MM$UArg_Free(uargs);
+	mm$uarg_free(uargs);
 	};
 	break;
 
@@ -1914,7 +1914,7 @@ void GTHST_NMLOOK_DONE(uargs,Status,Adrcnt,Adrlst,namlen,Nambuf)
 // And give them a good status reply
 
     User$Post_IO_Status(uargs,SS$_NORMAL,NLBSIZE,0,0);
-    MM$UArg_Free(uargs);
+    mm$uarg_free(uargs);
     }
 
 //SBTTL "Address lookup done handler"
@@ -1949,7 +1949,7 @@ void GTHST_ADLOOK_DONE(uargs,Status,namlen,Nambuf)
 // And give them a good status reply
 
     User$Post_IO_Status(uargs,SS$_NORMAL,ALBSIZE,0,0);
-    MM$UArg_Free(uargs);
+    mm$uarg_free(uargs);
     }
 
 //SBTTL "RR lookup done handler"
@@ -1996,7 +1996,7 @@ void GTHST_RRLOOK_DONE(uargs,Status,RDLen,RData,namlen,Nambuf)
 // And give them a good status reply
 
     User$Post_IO_Status(uargs,SS$_NORMAL, RLBSize + RDLen,0,0);
-    MM$UArg_Free(uargs);
+    mm$uarg_free(uargs);
     }
 
 //SBTTL "GTHST_CANCEL - Cancel GTHST requests for a process"

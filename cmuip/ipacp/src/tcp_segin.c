@@ -382,10 +382,10 @@ extern  void    TELNET_OUTPUT();
 
 extern     TCB$Create();
 extern  void    TCB$Delete();
-extern  void    MM$Seg_Free();
-// not yet extern  void    MM$QBLK_Free();
-extern     MM$QBLK_Get();
-extern  void    MM$UArg_Free();
+extern  void    mm$seg_free();
+// not yet extern  void    mm$qblk_free();
+extern     mm$qblk_get();
+extern  void    mm$uarg_free();
 
 // TCP.BLI
 
@@ -853,7 +853,7 @@ void SEG$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
     {
 	struct queue_blk_structure(qb_nr_fields) * QB;
 
-    QB = MM$QBLK_Get();
+    QB = mm$qblk_get();
     QB->nr$buf_size = BufSize;	// Total size of network buffer.
     QB->nr$buf = Buf;		// Start adrs of network buffer.
     QB->nr$size = SegSize;	// byte size of segment within network buffer.
@@ -909,7 +909,7 @@ void SEG$ICMP(ICMtype,ICMex,ipsrc,ipdst,Seg,Segsize,
     {
 	struct queue_blk_structure(qb_nr_fields) * QB;
 
-    QB = MM$QBLK_Get();
+    QB = mm$qblk_get();
     QB->nr$buf_size = bufsize;	// Total size of network buffer.
     QB->nr$buf = buf;		// Start adrs of network buffer.
     QB->nr$size = 8;		// byte size of segment within network buffer.
@@ -1005,8 +1005,8 @@ Y:  {
     Seg = QB->nr$seg;		// point at segment.
     if (Decode_Segment(TCB,Seg,QB))
 	{			// Delete segment (match = [-1,0,1]).
-	MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
-	MM$QBlk_Free(QB);
+	mm$seg_free(QB->nr$buf_size,QB->nr$buf);
+	mm$qblk_free(QB);
 	};
     }
 
@@ -1262,10 +1262,10 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 		REMQUE(QB,QB);	// Remove queue entry.
 		WKS_LIST[WIX].WKS$SYN_Qcount=WKS_LIST[WIX].WKS$SYN_Qcount+1;
 		SYN_WAIT_COUNT = SYN_WAIT_COUNT + 1;
-		MM$Seg_Free(QB->nr$buf_size,QB->nr$buf); // Release the seg.
+		mm$seg_free(QB->nr$buf_size,QB->nr$buf); // Release the seg.
 		tmp = QB;	// tmp Qblk pointer.
 		QB = QB->nr$next; // next entry.
-		MM$QBlk_Free(tmp);// & the queue block.
+		mm$qblk_free(tmp);// & the queue block.
 		}
 	    else
 		QB = QB->nr$next;	// point at next entry.
@@ -1618,8 +1618,8 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 
 	if (delete)
 	    {
-	    MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
-	    MM$QBLK_Free(QB);
+	    mm$seg_free(QB->nr$buf_size,QB->nr$buf);
+	    mm$qblk_free(QB);
 	    };
 	};
     }
@@ -2510,8 +2510,8 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 		{
 		User$Post_IO_Status(QBR->ur$uargs,
 				     SS$_NORMAL,0,NSB$PUSHBIT,0);
-		MM$UArg_Free(QBR->ur$uargs); // Free user arg blk.
-		MM$QBlk_Free(QBR);// Free Queue Block.
+		mm$uarg_free(QBR->ur$uargs); // Free user arg blk.
+		mm$qblk_free(QBR);// Free Queue Block.
 		};
 	    };
 
@@ -2846,8 +2846,8 @@ Y:		{
 
         if ((delete != 0))
 	    {
-	    MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
-	    MM$QBLK_Free(QB);
+	    mm$seg_free(QB->nr$buf_size,QB->nr$buf);
+	    mm$qblk_free(QB);
 	    };
 	};			// "While"
 

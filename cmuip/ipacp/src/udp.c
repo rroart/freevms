@@ -231,11 +231,11 @@ extern  void    Movbyt();
 
 // MEMGR.BLI
 
-extern  void    MM$UArg_Free();
-extern     MM$QBLK_Get();
-extern  void    MM$QBLK_Free();
-extern     MM$Seg_Get();
-extern  void    MM$Seg_Free();
+extern  void    mm$uarg_free();
+extern     mm$qblk_get();
+extern  void    mm$qblk_free();
+extern     mm$seg_get();
+extern  void    mm$seg_free();
 
 // USER.BLI
 
@@ -519,7 +519,7 @@ void UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 
 	// Release the input datagram buffer
 	if (delete)
-	    MM$Seg_Free(BufSize,Buf);
+	    mm$seg_free(BufSize,Buf);
 
 	return;	// Don't pass this buffer on to the upper layers
 	};
@@ -551,7 +551,7 @@ void UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 
 	// Release the input datagram buffer
 	if (delete)
-	    MM$Seg_Free(BufSize,Buf);
+	    mm$seg_free(BufSize,Buf);
 
 	return;	// Don't pass this buffer on to the upper layers
 	};
@@ -624,7 +624,7 @@ X2:	{
 // If the packet hasn't been given to the user, delete it now
 
     if (delete)
-	MM$Seg_Free(BufSize,Buf);
+	mm$seg_free(BufSize,Buf);
     }
 
 //SBTTL "ICMP input handler for UDP"
@@ -702,12 +702,12 @@ X:	{			// Good UDP/ICMP message
 	      ipadr$address_block * Uptr;
 	    signed long
 		Ucount;
-extern		MM$QBlk_Get();
+extern		mm$qblk_get();
 
 // Allocate and setup the fields in the QB. ** N.B. We overwrite part of the IP
 // header, so be careful if you change the size of the UDPUSER block **
 
-	    QB = MM$QBLK_Get();
+	    QB = mm$qblk_get();
 	    QB->nr$icmp = TRUE;
 	    QB->nr$icm_type = ICMtype;
 	    QB->nr$icm_code = 0;
@@ -771,7 +771,7 @@ extern		MM$QBlk_Get();
 // In any case, free up the buffer
 // No, dont't clear the buffer.  What if ICMP needs it?
     if (delete)
-	MM$Seg_Free(bufsize,buf);
+	mm$seg_free(bufsize,buf);
     }
 
 //SBTTL "Queue_User_UDP - Queue up UDP packet for delivery to user"
@@ -791,7 +791,7 @@ Queue_User_UDP(UDPCB,Uptr,Usize,Buf,Bufsize,QB)
     {
     signed long
 	QBR;
-extern	MM$QBlk_Get();
+extern	mm$qblk_get();
 #define	UDPCB$NR_Qmax 5	// Max input packets permitted on input queue
 
 // See if the input queue is full for this UDPCB
@@ -807,7 +807,7 @@ extern	MM$QBlk_Get();
 // Allocate a queue block and insert onto user receive queue
 
     if (QB == 0)
-	QB = MM$QBLK_Get();
+	QB = mm$qblk_get();
     QB->nr$buf_size = Bufsize;	// Total size of network buffer
     QB->nr$buf = Buf;		// Pointer to network buffer
     QB->nr$ucount = Usize;	// Length of the data
@@ -889,11 +889,11 @@ void Deliver_UDP_Data(UDPCB,QB,URQ)
 	};
     User$Post_IO_Status(URQ->ur$uargs,SS$_NORMAL,
 			Ucount,FLAGS,ICMTYPE);
-    MM$UArg_Free(URQ->ur$uargs);
+    mm$uarg_free(URQ->ur$uargs);
 
-    MM$QBLK_Free(URQ);
-    MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
-    MM$QBLK_Free(QB);
+    mm$qblk_free(URQ);
+    mm$seg_free(QB->nr$buf_size,QB->nr$buf);
+    mm$qblk_free(QB);
     UDP_MIB->MIB$UDPINDATAGRAMS = UDP_MIB->MIB$UDPINDATAGRAMS + 1;
     }
 
@@ -1054,16 +1054,16 @@ void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,long RC)
     while (REMQUE(UDPCB->udpcb$usr_qhead,URQ) != EMPTY_QUEUE) // check
 	{
 	    User$Post_IO_Status(URQ->ur$uargs,RC,0,0,0);
-	    MM$UArg_Free(URQ->ur$uargs);
-	    MM$QBlk_Free(URQ);	
+	    mm$uarg_free(URQ->ur$uargs);
+	    mm$qblk_free(URQ);	
 	};
 
 // Purge any received qblocks as well
 
     while (REMQUE(UDPCB->udpcb$nr_qhead,QB) != EMPTY_QUEUE) // check
 	{
-	MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
-	MM$QBlk_Free(QB);
+	mm$seg_free(QB->nr$buf_size,QB->nr$buf);
+	mm$qblk_free(QB);
 	};
     }
 
@@ -1293,7 +1293,7 @@ void UDP_NMLOOK_DONE(UDPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
     IOSB->nsb$byte_count = 0;
     IOSB->net_status.nsb$xstatus = 0;
     IO$POST(IOSB,Uargs);
-    MM$UArg_Free(Uargs);
+    mm$uarg_free(Uargs);
     }
 
 //SBTTL "UDP_COPEN_DONE - Common user UDP open done routine"
@@ -1409,7 +1409,7 @@ void UDP$CLOSE(struct user_close_args * Uargs)
 // Close done - post user request and free argblk
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
-    MM$UArg_Free(Uargs);
+    mm$uarg_free(Uargs);
     }
 
 //SBTTL "UDP$ABORT - abort UDP "connection""
@@ -1438,7 +1438,7 @@ void UDP$ABORT(struct user_abort_args * Uargs)
 // Done. Clean up.
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
-    MM$UArg_Free(Uargs);
+    mm$uarg_free(Uargs);
     }
 
 //SBTTL "UDP$SEND - send UDP packet"
@@ -1525,7 +1525,7 @@ void UDP$SEND(struct user_send_args * Uargs)
 // Post the I/O request back to the user
 
     User$Post_IO_Status(Uargs,RC,0,0,0);
-    MM$UArg_Free(Uargs);
+    mm$uarg_free(Uargs);
     }
 
 
@@ -1558,7 +1558,7 @@ UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
     else
 	if (bufsize <= MAX_PHYSICAL_BUFSIZE)
 	    bufsize = MAX_PHYSICAL_BUFSIZE;
-    buf = MM$Seg_Get(bufsize);	// Get a buffer
+    buf = mm$seg_get(bufsize);	// Get a buffer
     Seg = buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE; // Point at UDP segment
     Segsize = Usize+UDP_HEADER_SIZE; // Length of segment + UDP header
 
@@ -1655,7 +1655,7 @@ void UDP$RECEIVE(struct user_recv_args * Uargs)
 
 // Make a request block for the receive
 
-    URQ = MM$QBLK_Get();		// Get a queue block
+    URQ = mm$qblk_get();		// Get a queue block
     URQ->ur$size = Uargs->re$buf_size; // # of bytes this rq can take
     URQ->ur$data = Uargs->re$data_start; // Address of system buffer
     URQ->ur$irp_adrs = Uargs->re$irp_adrs; // IO request packet address

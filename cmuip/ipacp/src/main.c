@@ -602,7 +602,7 @@ extern	void ACPINI_ADLOOK_DONE();
 
     CNF$Configure_ACP();		// read/process file "config.txt"
 
-    MM$Init();				// see memgr.bli module.
+    mm$init();				// see memgr.bli module.
     CNF$Net_Device_Init();		// Initialize Network device(s).
     IP$Init();				// Initialize IP
     User$Init_Routines();		// Initialize stuff in USER module.

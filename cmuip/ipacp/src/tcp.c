@@ -473,12 +473,12 @@ extern void    TCB$Delete();
 
 // MEMGR.BLI
 
-extern     MM$Seg_Get();
-extern void    MM$Seg_Free();
-extern     MM$QBlk_Get();
-extern void    MM$QBlk_Free();
-extern void    MM$Uarg_Free();
-extern     MM$Get_Mem();
+extern     mm$seg_get();
+extern void    mm$seg_free();
+extern     mm$qblk_get();
+extern void    mm$qblk_free();
+extern void    mm$uarg_free();
+extern     mm$get_mem();
 
 // TCP_SEGIN.BLI
 
@@ -978,7 +978,7 @@ signed long	tmp;
 	      else
 		bufsize = segsize + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
 	    }
-	    Buf = MM$Seg_Get(bufsize);
+	    Buf = mm$seg_get(bufsize);
 	    Seg = Buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE;
 	    Dataptr = Seg->sh$data;
 
@@ -1678,7 +1678,7 @@ TCP$SEND_DATA(struct tcb_structure * tcb)
 
 // Get buffer, point at segment, clear flags
 
-	bufptr = MM$Seg_Get(bufsize);
+	bufptr = mm$seg_get(bufsize);
 	seg = bufptr+DEVICE_HEADER+IP_HDR_BYTE_SIZE;
 	seg->sh$control_flags = 0;
 
@@ -1766,10 +1766,10 @@ TCP$SEND_DATA(struct tcb_structure * tcb)
 
 	    uargs = qb->sn$uargs;
 	    User$Post_IO_Status(uargs,SS$_NORMAL,qb->sn$size,0,0);
-	    MM$UArg_Free(uargs);
+	    mm$uarg_free(uargs);
 	    nqb = qb->sn$next;
 	    REMQUE(qb,qb);
-	    MM$QBLK_Free(qb);
+	    mm$qblk_free(qb);
 	    qb = nqb;
 	    };
 	};
@@ -1974,7 +1974,7 @@ TCP$SEND_CTL(struct tcb_structure * tcb,long type)
     else
 	if (bufsize <= max_physical_bufsize)
 	    bufsize = max_physical_bufsize;
-    bufptr = MM$Seg_Get(bufsize);	// Carve out a control segment structure.
+    bufptr = mm$seg_get(bufsize);	// Carve out a control segment structure.
     seg = bufptr + DEVICE_HEADER + IP_HDR_BYTE_SIZE; // point at segment start.
 
 // build the segment

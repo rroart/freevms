@@ -241,11 +241,11 @@ extern     void TCB$Delete();
 
 // Rtns from MEMGR.BLI
 
-extern     MM$Seg_Get();
-extern     void MM$Seg_Free();
-extern     MM$QBLK_Get();
-extern     void MM$QBLK_Free();
-extern     void MM$UArg_Free();
+extern     mm$seg_get();
+extern     void mm$seg_free();
+extern     mm$qblk_get();
+extern     void mm$qblk_free();
+extern     void mm$uarg_free();
 
 // IOUTIL.BLI
 
@@ -353,8 +353,8 @@ register	struct user_send_args * Uargs;
 	{
 	Uargs = QB->sn$uargs;	// point at user argblk.
 	User$Post_IO_Status(Uargs,RC,0,0,0);
-	MM$UArg_Free(Uargs);	// release user arg blk.
-	MM$QBlk_Free(QB);		// release queue block
+	mm$uarg_free(Uargs);	// release user arg blk.
+	mm$qblk_free(QB);		// release queue block
 	};
     }
 
@@ -396,8 +396,8 @@ void TCP$Purge_Receive_Queue(struct tcb_structure * TCB, signed long RC)
     while (REMQUE(TCB->ur_qhead,QB) != EMPTY_QUEUE) // check
 	{
 	User$Post_IO_Status(QB->ur$uargs,RC,0,0,0);
-	MM$UArg_Free(QB->ur$uargs); // release user arg block.
-	MM$QBlk_Free(QB);
+	mm$uarg_free(QB->ur$uargs); // release user arg block.
+	mm$qblk_free(QB);
 	};
     }
 
@@ -526,8 +526,8 @@ void TCP$KILL_PENDING_REQUESTS(struct tcb_structure * TCB,signed long ERcode)
 //~~~		  Q$TCBFQ,TCB->RF_Qhead) != Empty_Queue DO
     while (REMQUE(TCB->rf_qhead,QBR) != EMPTY_QUEUE) // check
 	{
-	MM$Seg_Free(QBR->nr$buf_size,QBR->nr$buf);
-	MM$QBlk_Free(QBR);
+	mm$seg_free(QBR->nr$buf_size,QBR->nr$buf);
+	mm$qblk_free(QBR);
 	};
 
 // Purge ReTransmission queue
@@ -716,7 +716,7 @@ void TCP$STATUS(struct user_status_args * Uargs)
 // Return the Connection Status to the user by posting the IO request.
   
     User$Post_IO_Status(Uargs,SS$_NORMAL,SR_BLK_SIZE*4,0,0);
-    MM$UArg_Free(Uargs);		// release user arg block.
+    mm$uarg_free(Uargs);		// release user arg block.
     }
 
 //SBTTL "User call: TCP$INFO - Return Connection Information."
@@ -1097,7 +1097,7 @@ void TCP$Deliver_User_Data(struct tcb_structure * TCB)
 
 	// post the IRP and release the Uargs
 	User$Post_IO_Status(UQB->ur$uargs,SS$_NORMAL,datasize,Uflags,0);
-	MM$UArg_Free(UQB->ur$uargs); // release user arg blk.
+	mm$uarg_free(UQB->ur$uargs); // release user arg blk.
 
 	ts$dbr = ts$dbr + datasize; // total data bytes delivered to users.
 
@@ -1119,7 +1119,7 @@ void TCP$Deliver_User_Data(struct tcb_structure * TCB)
 	    (TCB->old_rcv_wnd != TCB->rcv_wnd))
 //	    tcb->pending_ack = True; // Indicate we need an ack sent.
 	    TCP$Enqueue_Ack(TCB) ;	// Indicate we need an ack sent.
-	MM$QBlk_Free(UQB);	// Release Queue blk.
+	mm$qblk_free(UQB);	// Release Queue blk.
 	UQB = TCB->ur_qhead;	// point at next user request blk.
 	};	// End of "OUTER" While.
     }
@@ -1163,7 +1163,7 @@ void Queue_Receive_Request(TCB,Uargs)
 
 // Fill in Queue Blk from user argument blk.
 
-    QB = MM$QBLK_Get();		// Get a Queue block structure.
+    QB = mm$qblk_get();		// Get a Queue block structure.
     QB->ur$size = Uargs->re$buf_size; // # of data bytes requested.
     QB->ur$data = Uargs->re$data_start; // Adrs of system buffer data start.
     QB->ur$irp_adrs = Uargs->re$irp_adrs; // IO request Packet address.
@@ -1284,7 +1284,7 @@ break;
 		TCB->eof = TRUE;
 		User$Post_IO_Status(Uargs,SS$_NORMAL,0,
 				    NSB$PUSHBIT || NSB$EOFBIT,0);
-		MM$UArg_Free(Uargs); // cleanup.
+		mm$uarg_free(Uargs); // cleanup.
 		}
 	    else
 		USER$Err(Uargs,NET$_CC);
@@ -1389,7 +1389,7 @@ void Queue_Send_Data(Uargs,TCB)
 // If we got all of it, post request now, else remember remainder for later
 
 	    User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
-	    MM$UArg_Free(Uargs);
+	    mm$uarg_free(Uargs);
 	    };
 	};
 
@@ -1399,7 +1399,7 @@ void Queue_Send_Data(Uargs,TCB)
 	{
 	register
 	    struct queue_blk_structure(qb_send_fields) * QB;
-	QB = MM$QBLK_Get();
+	QB = mm$qblk_get();
 	QB->sn$size = Ucount;	// user's buffer length
 	QB->sn$data = Uaddr;	// Point at start of data
 	QB->sn$eol = Uargs->se$eol;
@@ -1649,7 +1649,7 @@ void TCP$Post_User_Close_IO_Status(struct tcb_structure * TCB,
 	IOSB->net_status.nsb$xstatus = 0;
 	Uargs = TCB->argblk;	// point at user's TCP arg block.
 	IO$POST(IOSB,Uargs);
-	MM$UArg_Free(Uargs);	// Free user arg blk memory.
+	mm$uarg_free(Uargs);	// Free user arg blk memory.
 	};
     }
 
@@ -2149,7 +2149,7 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 	IOSB->nsb$byte_count = 0;
 	IOSB->net_status.nsb$xstatus = 0;
 	IO$POST(IOSB,Uargs); // Tell em.
-	MM$UArg_Free(Uargs);	// Release user arg blk.
+	mm$uarg_free(Uargs);	// Release user arg blk.
 	}
     else
 	{
@@ -2260,7 +2260,7 @@ void TCP$Post_Active_Open_IO_Status(struct tcb_structure * TCB,
 	    IOSB->net_status.nsb$xstatus = 0;
 	    Uargs = TCB->argblk; // point at user's TCP arg block.
 	    IO$POST(IOSB,Uargs);
-	    MM$UArg_Free(Uargs);	// Free user arg blk memory.
+	    mm$uarg_free(Uargs);	// Free user arg blk memory.
 	    };
 	};
     }

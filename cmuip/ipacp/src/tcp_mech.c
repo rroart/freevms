@@ -83,7 +83,7 @@ MODULE TCP_MECH(IDENT="1.0c",LANGUAGE(BLISS32),
 #include <ssdef.h>
 
 extern
-    MM$Get_Mem(), MM$Free_Mem();
+    mm$get_mem(), mm$free_mem();
 
 
 //SBTTL "System variable allocation and declaration"
@@ -157,7 +157,7 @@ void TCP$Init (void)
 
     // Allocate the connection list
     ConectSize = MAX_LOCAL_PORTS;
-    MM$Get_Mem( ConectPtr , ConectSize * CN$BLK_SIZE * 4 );
+    mm$get_mem( ConectPtr , ConectSize * CN$BLK_SIZE * 4 );
     for (cidx=0;cidx<=ConectSize-1;cidx++)
 	{				// Initialize connection table
 	ConectPtr[cidx].CN$TCB_List = ConectPtr[cidx].CN$TCB_List;
@@ -167,7 +167,7 @@ void TCP$Init (void)
 
     // Allocate the valid TCB table
     VTCB_Size = MAX_CONN;
-    MM$Get_Mem ( vtcb_ptr , (VTCB_Size+1) * 4 );
+    mm$get_mem ( vtcb_ptr , (VTCB_Size+1) * 4 );
     CH$FILL ( 0 , (VTCB_Size+1) * 4 , vtcb_ptr );
 
     TCP_MIB->MIB$tcpRtoAlgorithm= 0;
@@ -241,9 +241,9 @@ extern	MovByt();
 	VTCB_Size = VTCB_Size * 2;
 
 	Old = vtcb_ptr;
-	MM$Get_Mem( vtcb_ptr , (VTCB_Size+1) * 4 );
+	mm$get_mem( vtcb_ptr , (VTCB_Size+1) * 4 );
 	MovByt ( (Indx+1) * 4 , Old , vtcb_ptr );
-	MM$Free_Mem( Old , (Indx+1) * 4 );
+	mm$free_mem( Old , (Indx+1) * 4 );
 
         Indx = Indx + 1;
 	};
@@ -476,7 +476,7 @@ Outputs:
 Find_Free_LP_Entry (LPort)
     {
 extern	MovByt(),
-	MM$Get_Mem(), MM$Free_Mem();
+	mm$get_mem(), mm$free_mem();
     signed long
 	J,
 	Old,	
@@ -504,7 +504,7 @@ extern	MovByt(),
 //    ConectSize = ConectSize * 2;
 
     Old = ConectPtr;
-//    MM$Get_Mem( ConectPtr , ConectSize * CN$Blk_Size * 4 );
+//    mm$get_mem( ConectPtr , ConectSize * CN$Blk_Size * 4 );
 
     // Initialize the new table.
 //    INCR cidx FROM (Idx) TO (ConectSize-1) DO
@@ -516,7 +516,7 @@ extern	MovByt(),
     MovByt ( idx * CN$BLK_SIZE * 4 , Old , ConectPtr );
 
     OKINT;
-    MM$Free_Mem( Old , idx * CN$BLK_SIZE * 4 );
+    mm$free_mem( Old , idx * CN$BLK_SIZE * 4 );
 //    XLOG$FAO(LOG$TCP,"TCP: Grew conect table to !SW entries...!/",ConectSize);
 
 return idx;
@@ -817,9 +817,9 @@ TCB$Create (void)
 	RC;	// return code
 
     NOINT;			// Hold AST's please...
-    MM$Get_Mem ( TCB   , TCB_SIZE*4 );
-    MM$Get_Mem ( SENDQ , window_default );
-    MM$Get_Mem ( RECVQ , window_default );
+    mm$get_mem ( TCB   , TCB_SIZE*4 );
+    mm$get_mem ( SENDQ , window_default );
+    mm$get_mem ( RECVQ , window_default );
     OKINT;
 
 //    CH$FILL(%CHAR(0),tcb_size*4,TCB);	// clean house.....zero fill.
@@ -887,10 +887,10 @@ extern	TELNET_CLOSE();
 	Conect_Remove ( TCB );
 
 // First, deallocate the queues for this TCB
-	MM$Free_Mem ( TCB->snd_q_base, TCB->snd_q_size ); 
-	MM$Free_Mem ( TCB->rcv_q_base, TCB->rcv_q_size ); 
+	mm$free_mem ( TCB->snd_q_base, TCB->snd_q_size ); 
+	mm$free_mem ( TCB->rcv_q_base, TCB->rcv_q_size ); 
 // Then, deallocate the TCB itself
-	MM$Free_Mem ( TCB_Ptr, TCB_SIZE*4 );
+	mm$free_mem ( TCB_Ptr, TCB_SIZE*4 );
 
 	}
     else

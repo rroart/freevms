@@ -888,8 +888,8 @@ void QL_FAO(CSTR)
     {
     extern
 	sleeping;
-    extern	MM$QBLK_GET();
-    extern void	MM$QBlk_Free ();
+    extern	mm$qblk_get();
+    extern void	mm$qblk_free ();
     extern	LIB$SYS_FAOL ();
     signed long
 	RC;
@@ -903,7 +903,7 @@ void QL_FAO(CSTR)
 
 // Allocate a queue block for the message
 
-    QB = MM$QBLK_GET();
+    QB = mm$qblk_get();
     MDSC = QB->EMQ$MDSC;
 //    $INIT_DYNDESC(MDSC);
     INIT_DYNDESC(MDSC);
@@ -914,7 +914,7 @@ void QL_FAO(CSTR)
     if (! RC)
 	{
 	OPR$FAO("QL_FAO failure, RC = !XL",RC);
-	MM$QBlk_Free(QB);
+	mm$qblk_free(QB);
 	return;
 	};
 
@@ -934,7 +934,7 @@ void CHECK_ERRMSG_Q (void)
 // Called from main TCP processing loop after all useful work has been done.
 //
     {
-      extern      void	MM$QBlk_Free ();
+      extern      void	mm$qblk_free ();
 extern	STR$FREE1_DX ();
  struct queue_blk_structure(QB$ERRMSG) * QB;
 	struct dsc$descriptor * MDSC;
@@ -946,7 +946,7 @@ extern	STR$FREE1_DX ();
 	MDSC = QB->EMQ$MDSC;
 	LOG_OUTPUT(MDSC);
 	STR$FREE1_DX(MDSC);
-	MM$QBlk_Free(QB);
+	mm$qblk_free(QB);
 	};
     }
 

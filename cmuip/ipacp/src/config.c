@@ -363,9 +363,9 @@ extern 	void MAIN$OKINT();
 extern 	void CNF$Device_Error();
 
 	// Memory allocation routines (from MEMGR.BLI)
-extern 	void MM$Seg_Get();
-extern 	void MM$Seg_Free();
-extern 	void MM$QBlk_Free();
+extern 	void mm$seg_get();
+extern 	void mm$seg_free();
+extern 	void mm$qblk_free();
 
 	// Formatted event logging routines (from IOUTIL.BLI)
 extern 	void LOG_FAO();
@@ -394,9 +394,9 @@ extern 	void FATAL_FAO();
     IPACP_Int ->  ACPI$IP_ISME 		= IP$ISME;
 
     // Memory allocation routines
-    IPACP_Int ->  ACPI$Seg_Get 		= MM$Seg_Get;
-    IPACP_Int ->  ACPI$Seg_Free 		= MM$Seg_Free;
-    IPACP_Int ->  ACPI$QBlk_Free 	= MM$QBlk_Free;
+    IPACP_Int ->  ACPI$Seg_Get 		= mm$seg_get;
+    IPACP_Int ->  ACPI$Seg_Free 		= mm$seg_free;
+    IPACP_Int ->  ACPI$QBlk_Free 	= mm$qblk_free;
 
     // Provide event logging entry points
     IPACP_Int ->  ACPI$LOG_STATE 	= LOG_STATE;	// pointer
