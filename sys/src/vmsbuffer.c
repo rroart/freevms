@@ -967,7 +967,7 @@ static int __block_commit_write(struct inode *inode, struct page *page,
 
 	for(block_start = 0;
 	    turns<(PAGE_SIZE/blocksize);
-	    block_start=block_end, turns++) {
+	    block_start=block_end, turns++, block++) {
 	  blocknr=e2_map_vbn(fcb,block);
 		block_end = block_start + blocksize;
 		if (block_end <= from || block_start >= to) {
