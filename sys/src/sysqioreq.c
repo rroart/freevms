@@ -64,6 +64,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   i->irp$w_chan=q->chan;
   i->irp$w_func=q->func;
   /* do preprocessing */
+  /* does it do one or more functions */
   for(c=0,d=1;c<64;c++,d=d<1) /* right order? */
     if (d&func)
       ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[c](q->p1,q->p2,q->p3,q->p4,q->p5,q->p6);
