@@ -37,3 +37,30 @@ is the uml "harddisk" and on i386 only ide (booted only on bochs and may
 not work with all fs blocksizes).
 Boot with init=/bin/sh.
 Note that with some kernel options it might not compile, so in case strip away some configs.
+
+Example build i386:
+bunzip2 -dc linux-2.4.18.tar.bz2|tar xf -
+tar xzf freevms-0_0_44.tgz
+cd linux
+../freevms/linux/prescript
+cp -p ~/.config .
+make menuconfig
+make dep
+make bzImage
+
+Example build um:
+bunzip2 -dc linux-2.4.18.tar.bz2|tar xf -
+tar xzf freevms-0_0_44.tgz
+cd linux
+mv /usr/include/linux /usr/include/linux.orig
+mv /usr/include/asm /usr/include/asm.orig
+ln -s include/linux /usr/include/linux
+ln -s include/asm-i386 /usr/include/asm
+../freevms/linux/prescript
+patch -p1 -F 100 < ../uml-patch-2.4.18-11
+../freevms/linux/prescript.uml
+cp -p ~/.config .
+make menuconfig ARCH=um
+make dep ARCH=um
+make linux ARCH=um
+
