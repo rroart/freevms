@@ -41,6 +41,14 @@ int tty$putnextchar(int * chr, struct _ucb * u) {
     sprintf(&term[3],"%d",u->ucb$w_unit);
     termd.dsc$w_length=strlen(term);
 
+#if 0
+    if (u->ucb$l_ddb->ddb$t_name[1]=='t' && u->ucb$l_ddb->ddb$t_name[2]=='z') {
+      // temp workaround ?
+      term[0]='p';
+      term[1]='n';
+    }
+#endif
+
     jobctl_unsolicit(&termd);
 
   }
