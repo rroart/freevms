@@ -259,8 +259,21 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 
 				/* If it's a COW mapping, write protect it both in the parent and the child */
 				if (cow && pte_write(pte)) {
-				  //ptep_set_wrprotect(src_pte);// drop this a while because it makes the stack readonly
-					pte = *src_pte;
+				  ptep_set_wrprotect(src_pte);// drop this a while because it makes the stack readonly
+				  pte = *src_pte;
+				  if (0) {
+				    pte_t * mypte=&pte;
+				    signed long page = mmg$allocpfn();
+				    unsigned long address2 = (*(unsigned long *)src_pte)&0xfffff000;
+				    mem_map[page].virtual=__va(page*PAGE_SIZE);
+				    *(unsigned long *)mypte=(__va(page*PAGE_SIZE));
+				    *(unsigned long *)mypte|=_PAGE_PRESENT;
+				    *(unsigned long *)mypte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+				    //flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
+				    bcopy(address2,__va(page*PAGE_SIZE),PAGE_SIZE);
+				    //map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
+				    //*(unsigned long *)pte|=1;
+				  }
 				}
 
 				/* If it's a shared mapping, mark it clean in the child */
@@ -271,6 +284,11 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				dst->rss++;
 
 cont_copy_pte_range:		set_pte(dst_pte, pte);
+				if (0) {
+				  unsigned long * l=dst_pte;
+				  *l&=0xfffff000;
+				  *l|=((*(unsigned long *)src_pte)&0xfff);
+				}
 cont_copy_pte_range_noset:	address += PAGE_SIZE;
 				if (address >= end)
 					goto out_unlock;
@@ -952,7 +970,7 @@ static inline void break_cow(struct _rde * vma, struct page * new_page, unsigned
  * We hold the mm semaphore and the page_table_lock on entry and exit
  * with the page_table_lock released.
  */
-static int do_wp_page(struct mm_struct *mm, struct _rde * vma,
+/* static */ int do_wp_page(struct mm_struct *mm, struct _rde * vma,
 	unsigned long address, pte_t *page_table, pte_t pte)
 {
 	struct page *old_page, *new_page;
