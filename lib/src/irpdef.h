@@ -254,6 +254,12 @@ struct	_irp	{
 
   /* copy from cdrp to this area ?*/
   struct _cdrp irp_cdrp;
+
+  // put at back to avoid recompile this time
+  // sort in right later
+
+  unsigned long long irp$q_tt_state;
+
 };
 
 #define irp$l_fqfl irp_cdrp.cdrp$l_fqfl
