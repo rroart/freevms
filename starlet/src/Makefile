@@ -1,4 +1,4 @@
-all: vmsopt.a
+all: vmsopt.a starlet.c starlet.h
 	cc -c starlet.c
 	cc -Dcompile_um -c starlet.c -o starletum.o
 	cc -c -I../../starlet/src rms.c
