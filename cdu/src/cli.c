@@ -20,6 +20,7 @@
 #include<isddef.h>
 #include<ssdef.h>
 #include<va_rangedef.h>
+#include<climsgdef.h>
 
 #include "tree.h"
 #include "cld.h"
@@ -217,6 +218,8 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
       endunit = line;
 
       if (*endunit == '=') {
+	line++;
+	endunit++;
 	while (*endunit!=' ' && *endunit!='/' && endunit < end)
 	  endunit++;
 	int v = my_alloc_cdu(CDU$C_NAME);
@@ -228,25 +231,13 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
     } else {
       while (*endunit!=' ' && *endunit!='/' && endunit < end)
 	endunit++;
-      int p = my_alloc_cdu(CDU$C_PARAMETER);
-      int n = my_alloc_cdu(CDU$C_NAME);
-      my_cdu_root[p].cdu$l_name = n;
-      struct _cdu * np = &my_cdu_root[n];
-      np->cdu$t_name[0]='p';
-      np->cdu$t_name[1]='0'+pn;
-      int v = my_alloc_cdu(CDU$C_NAME);
-      struct _cdu * vp = &my_cdu_root[v];
-      my_cdu_root[p].cdu$l_value = v;
-      memcpy(vp->cdu$t_name,line,endunit-line);
-      my_cdu_root[p].cdu$l_next=my->cdu$l_parameters;
-      my->cdu$l_parameters=p;
-      pn++;
 
       struct _cdu * cdu = (*cur_cdu);
+      int p,n,t,v;
       p=0;
-      v=0;
-      int t;
+      n=0;
       t=0;
+      v=0;
       p = cdu->cdu$l_parameters;
       if (p) v = cdu_root[p].cdu$l_value;
       if (v) t = cdu_root[v].cdu$l_type;
@@ -267,12 +258,26 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 	    *cur_cdu=&cdu_root[i];
 	  
 	}
+      } else { // ordinary param?
+	p = my_alloc_cdu(CDU$C_PARAMETER);
+	n = my_alloc_cdu(CDU$C_NAME);
+	my_cdu_root[p].cdu$l_name = n;
+	struct _cdu * np = &my_cdu_root[n];
+	np->cdu$t_name[0]='p';
+	np->cdu$t_name[1]='0'+pn;
+	v = my_alloc_cdu(CDU$C_NAME);
+	struct _cdu * vp = &my_cdu_root[v];
+	my_cdu_root[p].cdu$l_value = v;
+	memcpy(vp->cdu$t_name,line,endunit-line);
+	my_cdu_root[p].cdu$l_next=my->cdu$l_parameters;
+	my->cdu$l_parameters=p;
+	pn++;
       }
     }
     line = endunit;
   }
 
-  return SS$_NORMAL;
+  return CLI$_NORMAL;
 }
 
 typedef struct {
