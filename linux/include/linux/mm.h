@@ -1,3 +1,7 @@
+#ifdef CONFIG_MM_VMS
+#include <vmsmm.h>
+#else
+
 #ifndef _LINUX_MM_H
 #define _LINUX_MM_H
 
@@ -605,4 +609,5 @@ extern struct vm_area_struct *find_extend_vma(struct mm_struct *mm, unsigned lon
 
 #endif /* __KERNEL__ */
 
+#endif
 #endif
