@@ -10,6 +10,7 @@
 #include<phddef.h>
 #include<rddef.h>
 #include<cdtdef.h>
+#include<syidef.h>
 
 /* Author: Roar Thronæs */
 
@@ -1882,7 +1883,7 @@ unsigned long tty$gw_altypahd;
 unsigned long tty$gw_classnam;
 unsigned long tty$gw_defbuf;
 unsigned long tty$gw_dmasize;
-unsigned long tty$gw_typahdsz;
+unsigned long tty$gw_typahdsz = SYI$_TTY_TYPAHDSZ;
 unsigned long uid$gl_ieee_address;
 unsigned long uid$gw_ieee_addressh;
 unsigned long uis$gl_ltrc_buf;
@@ -2122,6 +2123,7 @@ void __init vms_init4(void) {
   __fl_init();
   //nl_init(); /* first */  
   //rnd_init();
+  ft_vmsinit();
 }
 
 void __init vms_init3(void) {
