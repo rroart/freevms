@@ -233,7 +233,7 @@ int kbd_iodb_vmsinit(void) {
   init_crb(&kb$crb);
 #endif
 
-  init_ddb(ddb,&kb$ddt,ucb,"opa");
+  init_ddb(ddb,&kb$ddt,ucb,"kba");
   init_ucb(ucb, ddb, &kb$ddt, crb);
   init_crb(crb);
 
