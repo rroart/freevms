@@ -88,6 +88,8 @@ static const char version[] =
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
 
+#include <linux/string.h>
+
 #define NS8390_CORE
 #include "8390.h"
 
