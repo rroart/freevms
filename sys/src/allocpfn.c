@@ -6,6 +6,7 @@
 #include <system_data_cells.h>
 #include <linux/mm.h>
 #include <pfndef.h>
+#include <vmspte.h>
 
 int lasteech=0;
 
@@ -22,6 +23,9 @@ signed long mmg$allocpfn(void) {
   if (pfn>=0) {
     //    mem_map[pfn].pfn$l_refcnt=0;
     // not yet? buggy gcc?
+  }
+  if (pfn>=0) {
+    mmg$delconpfn(ctl$gl_pcb,pfn);
   }
   return pfn;
 }
@@ -90,6 +94,9 @@ signed long mmg$allocontig(unsigned long num) {
     panic("refcnt\n");
 #endif
   sch$gl_freecnt-=num;
+  for(c=first-&mem_map[0];num;c++,num--) {
+    mmg$delconpfn(ctl$gl_pcb,c);
+  }
   return (((unsigned long)first-(unsigned long)mem_map)/sizeof(struct _pfn));
 }
 
@@ -97,6 +104,8 @@ signed long mmg$inspfn(unsigned long type, struct _pfn * pfn, struct _pfn * list
   struct _mypfn * m=pfn, * tmp;
 
   lasteech=3;
+
+  pfn->pfn$v_pagtyp=type;
 
   if (list) {
     tmp=list; 
@@ -213,6 +222,9 @@ signed long mmg$allocontig_align(unsigned long num) {
     panic("refcnt\n");
 #endif
   sch$gl_freecnt-=num;
+  for(c=first-&mem_map[0];num;c++,num--) {
+    mmg$delconpfn(ctl$gl_pcb,c);
+  }
   return (((unsigned long)first-(unsigned long)mem_map)/sizeof(struct _pfn));
 }
 
@@ -256,6 +268,11 @@ mypfncheckaddr(){
 #ifdef CONFIG_VMS
 
 int mmg$relpfn(signed int pfn) {
+  pte_t * pte = mem_map[pfn].pfn$q_pte_index;
+  *(unsigned long *)pte&=~(_PAGE_PRESENT|_PAGE_TYP1);
+#ifndef __arch_um__
+  __flush_tlb(); //flush_tlb_range(current->mm, page, page + PAGE_SIZE);
+#endif
   if (mem_map[pfn].pfn$l_page_state&PFN$M_MODIFY) {
     // do more dealloc
     // maybe backingstore related?
@@ -263,6 +280,19 @@ int mmg$relpfn(signed int pfn) {
 
   } else {
     mmg$inspfn(PFN$C_FREPAGLST,&mem_map[pfn],0); // really inspfnh
+  }
+}
+
+mmg$delconpfn(struct _pcb * p, int pfn) {
+  struct _pfn * pfnp=&mem_map[pfn];
+  unsigned long * pte = pfnp->pfn$q_pte_index;
+  if (pte) {
+    *pte=pfnp->pfn$q_bak;
+#ifndef __arch_um__
+    __flush_tlb(); //flush_tlb_range(current->mm, page, page + PAGE_SIZE);
+#endif
+    mmg$decptref(p->pcb$l_phd,pte);
+    pfnp->pfn$q_pte_index=0;
   }
 }
 
