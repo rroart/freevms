@@ -126,8 +126,10 @@ static void new_thread_handler(int sig)
 	free_page(current->thread.temp_stack);
 	set_cmdline("(kernel thread)");
 	force_flush_all();
+#if 0
 	if(current->thread.prev_sched != NULL)
 		schedule_tail(current->thread.prev_sched);
+#endif
 	current->thread.prev_sched = NULL;
 	current->thread.regs.regs.sc = (void *) (&sig + 1);
 	change_sig(SIGUSR1, 1);
@@ -263,8 +265,10 @@ void finish_fork_handler(int sig)
 	if(current->mm != current->p_pptr->mm)
 		protect(uml_physmem, high_physmem - uml_physmem, 1, 1, 0, 1);
 	task_protections((unsigned long) current);
+#if 0
 	if(current->thread.prev_sched != NULL)
 		schedule_tail(current->thread.prev_sched);
+#endif
 	current->thread.prev_sched = NULL;
 
 	free_page(current->thread.temp_stack);
