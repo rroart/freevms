@@ -48,9 +48,12 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
   pgd_t *pgd = 0;
   pmd_t *pmd = 0;
   pte_t *pte = 0;
-  struct mm_struct * mm=current->mm;
   unsigned long address=va;
   
+  struct mm_struct * mm = p->mm;
+  if (mm==0) 
+    mm = p->active_mm; // workaround for do_exit
+
   if (va>=rde->rde$pq_first_free_va) {
 
   }
@@ -124,6 +127,9 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
   struct _wsl * wsl = phd->phd$l_wslist;
   struct _pfn * pfn = &mem_map[mypte->pte$v_pfn];
   struct _wsl * wsle = &wsl[pfn->pfn$l_wslx_qw];
+  if (wsle->wsl$v_pagtyp==WSL$C_PROCESS) {
+    p->pcb$l_ppgcnt--;
+  }
   wsle->wsl$pq_va=0;
 
  out:
