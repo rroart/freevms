@@ -7,6 +7,7 @@
 #include<linux/kernel.h>
 #include <asm/hw_irq.h>
 #include <vms_drivers.h>
+#include <ipldef.h>
 #include <pridef.h>
 #include <irpdef.h>
 #include <acbdef.h>
@@ -24,24 +25,29 @@ void  com_std$delattnast (struct _acb **acb_lh, struct _ucb *ucb) {
   com_std$delattnastp(acb_lh, ucb, 0);
 }
 
-void fork_routine(fr4,fr5) {
+void fork_routine(fr3,fr4,fr5) {
   struct _acb * a = fr5;
-  long * exp = a->acb$l_kast;
+  long * exp = &a->acb$l_kast;
 
   a->acb$l_ast=a->acb$l_kast;
   a->acb$l_kast=0;
+  a->acb$l_astprm=exp[1];
+  a->acb$b_rmod=0;
   a->acb$l_pid=exp[3];
   return sch$qast(a->acb$l_pid,PRI$_IOCOM,a);
 }
 
 void  com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid) {
-  struct _acb * tmp;
-  for (;*acb_lh;*acb_lh=tmp) {
-    long * exp=&tmp->acb$l_kast;
-    if (ipid && ipid != exp[3])
-      continue;
-    (*acb_lh)->acb$l_astqfl=tmp->acb$l_astqfl;
-    fork(fork_routine,0,0,ucb);
+  struct _acb * next, * cur = acb_lh;
+  while (cur->acb$l_astqfl) {
+    next=cur->acb$l_astqfl;
+    long * exp=&next->acb$l_kast;
+    if ((ipid == 0) || (ipid == exp[3])) {
+      cur->acb$l_astqfl=next->acb$l_astqfl;
+      fork(fork_routine,0,0,next);
+    } else {
+      cur=next;
+    }
   }
 }
 
@@ -57,13 +63,16 @@ int   com_std$flushattns (struct _pcb *pcb, struct _ucb *ucb, int chan, struct _
   // missing device lock
   setipl(ucb->ucb$b_dipl);
   long ipid=pcb->pcb$l_pid;
-  struct _acb * tmp;
-  for (;*acb_lh;*acb_lh=tmp) {
-    long * exp=&tmp->acb$l_kast;
-    if (ipid && ipid != exp[3])
-      continue;
-    (*acb_lh)->acb$l_astqfl=tmp->acb$l_astqfl;
-    kfree(*acb_lh);
+  struct _acb * next, * cur = acb_lh;
+  while (cur->acb$l_astqfl) {
+    next=cur->acb$l_astqfl;
+    long * exp=&next->acb$l_kast;
+    if ((ipid == 0) || (ipid == exp[3])) {
+      kfree(next);
+      cur->acb$l_astqfl=next->acb$l_astqfl;
+    } else {
+      cur=next;
+    }
   }
   setipl(0);
   return SS$_NORMAL;
@@ -83,12 +92,14 @@ int   com_std$setattnast (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, 
   if (irp->irp$l_qio_p1==0) 
     return com_std$flushattns(pcb,ucb,chan,acb_lh);
   struct _acb * acb = kmalloc(sizeof(struct _acb)+100,GFP_KERNEL);
+  memset(acb, 0, sizeof(struct _acb));
   exp=&acb->acb$l_kast;
   exp[0]=irp->irp$l_qio_p1;
   exp[1]=irp->irp$l_qio_p2;
   exp[2]=chan;
   exp[3]=pcb->pcb$l_pid;
   setipl(ucb->ucb$b_dipl);
+  acb->acb$b_rmod=IPL$_QUEUEAST; // really fkb$b_flck
   acb->acb$l_astqfl=*acb_lh;
   *acb_lh=acb;
   setipl(0);
