@@ -373,6 +373,7 @@ static inline pid_t setsid(void)
 #define __NR_$delete_region_32 376
 #define __NR_$get_region_info  377
 #define __NR_$getdviw          378
+#define __NR_$cli          379
 #endif
 
 /*

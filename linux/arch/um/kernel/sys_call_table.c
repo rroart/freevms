@@ -375,7 +375,8 @@ extern syscall_handler_t exe$cmexec       ;
 extern syscall_handler_t exe$create_region_32_wrap;
 extern syscall_handler_t exe$delete_region_32;
 extern syscall_handler_t exe$get_region_info;
-#define LAST_GENERIC_SYSCALL __NR_$getdviw
+extern syscall_handler_t exe$cli;
+#define LAST_GENERIC_SYSCALL __NR_$cli
 
 #if LAST_GENERIC_SYSCALL > LAST_ARCH_SYSCALL
 #define LAST_SYSCALL LAST_GENERIC_SYSCALL
@@ -739,6 +740,7 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$delete_region_32 ] = exe$delete_region_32,
 	[ __NR_$get_region_info ] = exe$get_region_info,
 	[ __NR_$getdviw ] = exe$getdviw_wrap,
+	[ __NR_$cli ] = exe$cli,
 	
 	ARCH_SYSCALLS
 	[ LAST_SYSCALL + 1 ... NR_syscalls ] = 

@@ -442,3 +442,4 @@ unsigned long ctl$gl_cwps_l3 P1PP ;
 unsigned long ctl$gl_cwps_l4 P1PP ;
 unsigned long ctl$gl_prcprm_kdata2 P1PP ;
 unsigned long ctl$gl_usrundwn_exec P1PP ;
+unsigned long ctl$ag_clidata P1PP ;

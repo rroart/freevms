@@ -1,16 +1,21 @@
-define verb ccopy
+define verb copy
 	image directory
 	routine copy
 
-define verb cdelete
+define syntax delete_symbol
+	cliroutine delete_symbol
+	parameter p1
+
+define verb delete
 	image directory
 	routine del
+	qualifier symbol,syntax=delete_symbol
 
-define verb cdifference
+define verb difference
 	image directory
 	routine diff
 
-define verb cdirectory
+define verb directory
 	image directory
 	routine dir
 	parameter p1
@@ -18,7 +23,7 @@ define verb cdirectory
 	qualifier file
 	qualifier size
 
-define verb cmount
+define verb mount
 	image directory
 	routine domount
 
@@ -26,13 +31,25 @@ define verb ctype
 	image directory
 	routine typ
 
-define verb csearch
+define verb search
 	image directory
 	routine search
 
 define syntax show_default
 	cliroutine show_default
 	parameter p1
+
+define syntax show_symbol
+	cliroutine show_symbol
+	parameter p1
+
+define syntax show_logical
+	cliroutine show_logical
+	parameter p1
+	qualifier table,value(required)
+
+define syntax show_system
+	cliroutine show_system
 
 define syntax set_default
 	cliroutine set_default
@@ -53,13 +70,16 @@ define type set_something
 
 define type show_something
 	keyword default, syntax = show_default
+	keyword symbol, syntax = show_symbol
+	keyword logical, syntax = show_logical
+	keyword system, syntax = show_system
 
-define verb cset
+define verb set
 	parameter p1,label=something,value(type=set_something)
 
-define verb cshow
+define verb show
 	parameter p1,label=something,value(type=show_something)
 
-define verb cdfu
+define verb dfu
 	image dfu
 	routine verify_command

@@ -352,6 +352,7 @@
 #define __NR_$delete_region_32 100
 #define __NR_$get_region_info  101
 #define __NR_$getdviw          102
+#define __NR_$cli              103
 
 #define __NR_$close 1
 #define __NR_$connect 2

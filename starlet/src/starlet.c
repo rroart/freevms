@@ -487,6 +487,10 @@ int sys$getsyiw(unsigned int efn, unsigned int *csidadr, void *nodename, void *i
   return INLINE_SYSCALL($getsyiw,1,&s);
 }
 
+int sys$cli(void * cliv, int par1, int par2) {
+  return INLINE_SYSCALL($cli,3,cliv, par1, par2);
+}
+
 int sys$setddir (struct dsc$descriptor *newdir,unsigned short *oldlen, struct dsc$descriptor *olddir) { return INLINE_SYSCALL1($setddir,3,newdir,oldlen,olddir); }
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
 int sys$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }

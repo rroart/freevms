@@ -16,6 +16,9 @@ Look at how simple and complex buffers are allocated and freed
 Update FCB at the same time as read/write attrib?
 Have dcltables compiled and loaded the same way as .exe2
 Why does initialize use volume cluster 17?
+Check if cleanup to 0x40000000 kills 0x3f000000?
+Deallocate kernel cli/dcl symbols
+Consider unifiying qualifier and parameter code?
 
 CPU/PAL:
 FIX pal

@@ -194,7 +194,7 @@ struct _clidef1 {
  
 	
 struct _clidef2 {
-  char clidef$$_fill_8 [4];
+  char clidef$$_fill_8 [8]; // check. was 4. or fix "align" in def1
   unsigned long long cli$q_namdesc;     
   unsigned long long cli$q_valdesc;     
   unsigned long long cli$q_tabdesc;     

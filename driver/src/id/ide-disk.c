@@ -387,6 +387,14 @@ static ide_startstop_t recal_intr (ide_drive_t *drive)
 
 static int myidecount=0;
 
+#if 1
+long myindex=0;
+long mystack[1024];
+long mystack2[1024];
+long mystack3[1024];
+long mystack4[1024];
+#endif
+
 /*
  * do_rw_disk() issues READ and WRITE commands to a disk,
  * using LBA if supported, or CHS otherwise, to address sectors.
@@ -394,6 +402,16 @@ static int myidecount=0;
  */
 ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned long block)
 {
+#if 1
+  mystack[myindex]=block;
+  mystack2[myindex]=rq->nr_sectors;
+  mystack3[myindex]=0;
+  mystack4[myindex]=0;
+  myindex++;
+  if (myindex==1024) myindex=0;
+#endif
+  if (block>0x1f000)
+    printk("block %x\n",block);
   //myidecount++;
   //printk(KERN_INFO "do_rw_disk %x %x %x\n",drive,rq,block);
   //printk(KERN_INFO "do_rw_disk %x %x %x\n",rq->nr_sectors,rq,block);
