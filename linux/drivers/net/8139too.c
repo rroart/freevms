@@ -76,7 +76,7 @@
 		Tobias Ringström - Rx interrupt status checking suggestion
 
 		Andrew Morton - Clear blocked signals, avoid
-		buffer overrun setting current->comm.
+		buffer overrun setting current->pcb$t_lname.
 
 		Kalle Olavi Niemitalo - Wake-on-LAN ioctls
 
@@ -1563,8 +1563,8 @@ static int rtl8139_thread (void *data)
 	recalc_sigpending(current);
 	spin_unlock_irq(&current->sigmask_lock);
 
-	strncpy (current->comm, dev->name, sizeof(current->comm) - 1);
-	current->comm[sizeof(current->comm) - 1] = '\0';
+	strncpy (current->pcb$t_lname, dev->name, sizeof(current->pcb$t_lname) - 1);
+	current->pcb$t_lname[sizeof(current->pcb$t_lname) - 1] = '\0';
 
 	while (1) {
 		timeout = next_tick;
