@@ -20,6 +20,8 @@
 #include <asm/pgtable.h>
 #include <asm/mmu_context.h>
 
+#include "../../freevms/sys/src/system_data_cells.h"
+
 extern void sem_exit (void);
 extern struct task_struct *child_reaper;
 
@@ -428,7 +430,9 @@ static void exit_notify(void)
 
 NORET_TYPE void do_exit(long code)
 {
-	struct task_struct *tsk = current;
+	struct task_struct *tsk = current, *dum;
+	int cpuid = smp_processor_id();
+	struct _cpu * cpu=smp$gl_cpu_data[cpuid]; 
 
 	//	if (in_interrupt())
 	//		panic("Aiee, killing interrupt handler!");
@@ -462,6 +466,15 @@ fake_volatile:
 	tsk->exit_code = code;
 	exit_notify();
 	//	schedule();
+#if 0
+	setipl(0); // probably illegal semantic?
+	cpu->cpu$b_cur_pri=31; // cheat a bit more?
+	tsk->pcb$b_pri=31; // ditto
+	tsk->pcb$b_prib=31; // ditto
+	if (cpu->cpu$l_curpcb == tsk)
+	  if (task_on_comqueue(tsk))
+	    remque(tsk,dum);
+#endif
 	SOFTINT_RESCHED_VECTOR;
 	//sch$resched();
 	printk("before bug\n");

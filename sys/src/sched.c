@@ -712,12 +712,17 @@ asmlinkage void sch$sched(int from_sch$resched) {
   if (from_sch$resched == 1)
     goto label30$;
 
+#if 0
+
+  // NOT YET???
+
   if (intr_blocked(IPL$_SCHED))
     return;
 
   regtrap(REG_INTR,IPL$_SCHED);
 
   setipl(IPL$_SCHED);
+#endif
 
   sch$al_cpu_priority[curpri]=sch$al_cpu_priority[curpri] & (~ cpu->cpu$l_cpuid_mask );
   if (sch$al_cpu_priority[curpri]) 

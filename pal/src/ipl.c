@@ -9,7 +9,7 @@
 #include<linux/sched.h>
 #include<asm/current.h>
 
-static mydebug = 1;
+static mydebugi = 1;
 
 inline asmlinkage void pushpsl(void) {
   int this_cpu=smp_processor_id();
@@ -129,20 +129,20 @@ inline void regtrap(char type, char param) {
     break;
   }
   /*  not fully implemented */
-  if (mydebug>1) printk("bef %x %x ",param,smp$gl_cpu_data[cpu]->cpu$w_sisr);
+  if (mydebugi>1) printk("bef %x %x ",param,smp$gl_cpu_data[cpu]->cpu$w_sisr);
   if (type==REG_INTR && param<16) {
     smp$gl_cpu_data[cpu]->cpu$w_sisr&=~(1<<param);
   }
-  if (mydebug>1) printk("%x\n",smp$gl_cpu_data[cpu]->cpu$w_sisr);
+  if (mydebugi>1) printk("%x\n",smp$gl_cpu_data[cpu]->cpu$w_sisr);
 }
 
 inline char intr_blocked(unsigned char this) {
   int this_cpu = smp_processor_id();
   struct _pcb * p=current;
-  if (mydebug>1) printk("bl %x %x %x %x\n",p->pid,this,smp$gl_cpu_data[this_cpu]->cpu$w_sisr,p->pslindex);
+  if (mydebugi>1) printk("bl %x %x %x %x\n",p->pid,this,smp$gl_cpu_data[this_cpu]->cpu$w_sisr,p->pslindex);
   if (this<=smp$gl_cpu_data[this_cpu]->cpu$b_ipl) {
     if (this<16) smp$gl_cpu_data[this_cpu]->cpu$w_sisr|=(1<<this);
-    if (mydebug>0) printk("blocked %x %x\n",this,smp$gl_cpu_data[this_cpu]->cpu$b_ipl);
+    if (mydebugi>0) printk("blocked %x %x\n",this,smp$gl_cpu_data[this_cpu]->cpu$b_ipl);
     //          { long long i;    for(i=10000000;i>0;i--) ; }
     if (p->pslindex>20)
       { long long i;    for(i=1;i!=0;i++) ; }
@@ -156,10 +156,10 @@ inline char intr_blocked(unsigned char this) {
 asmlinkage void do_sw_int(void) {
   int this_cpu = smp_processor_id();
   int i, j, sisr=smp$gl_cpu_data[this_cpu]->cpu$w_sisr;
-  if (mydebug>1) printk("swint2 %x %x %x\n",current->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
+  if (mydebugi>1) printk("swint2 %x %x %x\n",current->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
   for(i=15,j=0x8000;i>smp$gl_cpu_data[this_cpu]->cpu$b_ipl;i--,j=j>>1) 
     if (sisr & j) {
-      if (mydebug>0) printk("swint %x %x %x\n",current->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
+      if (mydebugi>0) printk("swint %x %x %x\n",current->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
       switch (i) {
 	case 12:
 	  /* IPC something */
@@ -190,7 +190,7 @@ asmlinkage void do_sw_int(void) {
 	SOFTINT_ASTDEL_VECTOR;
 	break;
       }
-      if (mydebug>1) printk("hereint\n");
+      if (mydebugi>1) printk("hereint\n");
     }
 }
 
@@ -200,10 +200,10 @@ asmlinkage void myrei (void) {
   /* look at REI for this */
   struct _pcb *p=current;
   int this_cpu=smp_processor_id();
-  if (mydebug>1) printk("bl %x %x %x\n",p->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
-  if (mydebug>1) printk("befpop %x %x ",p->pid,p->psl_ipl);
+  if (mydebugi>1) printk("bl %x %x %x\n",p->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
+  if (mydebugi>1) printk("befpop %x %x ",p->pid,p->psl_ipl);
   poppsl();
-  if (mydebug>1) printk("%x\n",p->psl_ipl);
+  if (mydebugi>1) printk("%x\n",p->psl_ipl);
   if (p->psl_is==1 && p->psl_ipl==0) panic("is ipl\n");
   if (p->psl_ipl>0 && p->psl_cur_mod!=0) panic("ipl curmod\n");
   if (p->psl_prv_mod < p->psl_cur_mod) panic("prv curmod\n");
