@@ -42,6 +42,8 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
     int status=ioc$search(&r,devnam);
     if (status==SS$_NORMAL)
       u=r.val1;
+    else
+      return status;
   }
   if (chan!=0) {
     struct _ccb * c = &ctl$gl_ccbbase[chan];
@@ -55,6 +57,7 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
     d=ioc$gl_devlist;
   // sch$iolockr
   while (it->item_code) {
+    int * bufaddr_int = it->bufaddr;
     switch (it->item_code) {
     case DVI$_FULLDEVNAM:
     case DVI$_DEVNAM:
@@ -67,7 +70,7 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
       }
       break;
     case DVI$_UNIT:
-      memcpy(it->bufaddr, &u->ucb$w_unit, 2);
+      *bufaddr_int=u->ucb$w_unit;
       break;
     case DVI$_PID:
       memcpy(it->bufaddr, &u->ucb$l_pid, 4);
