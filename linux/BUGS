@@ -32,3 +32,5 @@ With CONFIG_VMS you may now get a rei oriented panic with the new console driver
 With CONFIG_VMS networking stops within 30 seconds.
 With CONFIG_VMS there are console driver problems with sh, use DCL.
 Check waitall and wait
+With CONFIG_VMS routing does not work
+it bugs and loops with ast in ast

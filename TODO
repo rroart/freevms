@@ -55,3 +55,8 @@ Some forgotten // check in tcp_telnet*?
 Also some #if 0 that should later be removed.
 
 check whether ddb$t_name has len first
+make pcb$t_lname counted string
+
+check all local big strings, like DESC$STR_ALLOC 1000 etc. replace?
+
+Find the newest cmuip patches

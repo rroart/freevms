@@ -138,6 +138,9 @@ SET WORKING_SET:
 run a VMS image file:
 	do mcr/run on a file with name.exe
 
+DCL:
+	if not too much crashed, it can be rebooted with ctrl-p
+
 CMUIP:
 	see example file INET$CONFIG.
 
