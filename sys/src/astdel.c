@@ -42,7 +42,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
     status=sch$rse(p, priclass, EVT$_AST);
   else {
     struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
-    struct _pcb * curp=cpu->cpu$l_curpcb;
+    struct _pcb * curp=ctl$gl_pcb;
     // if (p==curp) etc // smp not enabled
     p->pr_astlvl=p->phd$b_astlvl;
   }
@@ -61,7 +61,7 @@ int astdeb=0;
 
 asmlinkage void sch$astdel(void) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
-  struct _pcb * p=cpu->cpu$l_curpcb;
+  struct _pcb * p=ctl$gl_pcb;
   struct _acb * dummy, *acb;
 
   /*lock*/
@@ -102,7 +102,7 @@ asmlinkage void sch$astdel(void) {
     //printk("astdel1 %x \n",acb->acb$l_kast);
     setipl(IPL$_ASTDEL);
     //p->pcb$b_astact=1;
-    if (((unsigned long)acb->acb$l_kast<0xa0000000)||((unsigned long)acb->acb$l_kast>0xd0000000)) {
+    if (((unsigned long)acb->acb$l_kast<0x80000000)||((unsigned long)acb->acb$l_kast>0xb0000000)) {
       int i;
       printk("kast %x\n",acb->acb$l_kast);
       for(i=0;i<2000000000;i++) ;
@@ -134,7 +134,7 @@ asmlinkage void sch$astdel(void) {
   setipl(IPL$_ASTDEL);
   p->pcb$b_astact=0; // 1; wait with this until we get modes
   setipl(0); // for kernel mode, I think. everything is in kernelmode yet.
-  if (((unsigned long)acb->acb$l_ast<0xa0000000)&&((unsigned long)acb->acb$l_ast>0xd0000000)) {
+  if (((unsigned long)acb->acb$l_ast<0x80000000)&&((unsigned long)acb->acb$l_ast>0xb0000000)) {
     int i;
     printk("kast %x\n",acb->acb$l_ast);
     for(i=0;i<2000000000;i++) ;
@@ -153,7 +153,7 @@ asmlinkage void sch$astdel(void) {
     if(acb->acb$l_kast) acb->acb$l_kast(acb->acb$l_astprm); /* ? */
   }
 #ifdef __arch_um__
-  if (((unsigned long)acb->acb$l_ast<0xa0000000)) {
+  if (((unsigned long)acb->acb$l_ast<0x80000000)) {
     // funny, this printk resulted in tracing too
     // printk("no user ast, avoiding tracing against myself. ast astprm pid %x %x %x %x\n",acb->acb$l_ast,acb->acb$l_astprm,p->pcb$l_pid,p->pid);
   } else {
