@@ -250,6 +250,11 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	//some linux stuff
 	tsk = current;
 
+	if (in_atomic) { 
+	  printk("atomic addr %x\n",address);
+	  address=0x11111111;
+	}
+
 	tsk->pcb$l_phd->phd$l_pageflts++;
 
 	//printk("fault %x ",address);
@@ -281,6 +286,12 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	//	if (in_interrupt() || !mm)
 	if (!mm)
 		goto no_context;
+
+	if (address<PAGE_SIZE)
+	  goto bad_area;
+
+	if (address>0xd0000000)
+	  goto bad_area;
 
 	page = address & PAGE_MASK;
 	pgd = pgd_offset(mm, page);
@@ -372,6 +383,9 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 		  panic("Wrong\n");
 		}
 		memset(page,0,PAGE_SIZE); // must zero content also
+		if ((error_code&2)==0) {
+		  *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_USER|_PAGE_ACCESSED;
+	      }
 	      }
 	      return;
 	    }
@@ -699,6 +713,10 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	mypte = pte;
 	if (((unsigned long)mypte)<0xa0000000)
 	  goto skip;
+
+	if (page==0x80c2000) {
+	  printk("%x\n",page);
+	}
 
 	mmg$frewsle(current,address);
 
