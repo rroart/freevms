@@ -117,7 +117,11 @@ int acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _cc
 
 int acp_std$modify(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
+int acp_std$mount(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
 int acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int acp_std$deaccess(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
 void fl_read(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   exe$qiodrvpkt(i,p,u);
@@ -225,9 +229,12 @@ struct _ucb * fl_init(char * s) {
   ini_fdt_act(&fdt_file,IO$_WRITEPBLK,acp_std$writeblk,1);
   ini_fdt_act(&fdt_file,IO$_WRITEVBLK,acp_std$writeblk,1);
   ini_fdt_act(&fdt_file,IO$_ACCESS,acp_std$access,1);
-  ini_fdt_act(&fdt_file,IO$_CREATE,acp_std$modify,1);
+  ini_fdt_act(&fdt_file,IO$_CREATE,acp_std$access,1);
+  ini_fdt_act(&fdt_file,IO$_DEACCESS,acp_std$deaccess,1);
   ini_fdt_act(&fdt_file,IO$_DELETE,acp_std$modify,1);
-  ini_fdt_act(&fdt_file,IO$_MODIFY,acp_std$access,1);
+  ini_fdt_act(&fdt_file,IO$_MODIFY,acp_std$modify,1);
+  ini_fdt_act(&fdt_file,IO$_ACPCONTROL,acp_std$modify,1);
+  ini_fdt_act(&fdt_file,IO$_MOUNT,acp_std$mount,1);
   return u;
 }
 
