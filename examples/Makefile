@@ -1,4 +1,4 @@
-all: timer ast time eftim schdwk forcex ef wake synch enq lnm lnm2 qio1 qio2 cef cefw
+all: timer ast time eftim schdwk forcex ef wake synch enq lnm lnm2 qio1 qio2 cef cefw mem
 
 timer: timer.c
 	gcc -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.o -o timer
@@ -49,7 +49,10 @@ cef: cef.c
 cefw: cefwait.c
 	gcc -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starlet.o -o cefwait
 
-allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum lnmum lnm2um qio1um qio2um cef cefwum
+mem: mem.c
+	gcc -static -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starlet.o -o mem
+
+allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum lnmum lnm2um qio1um qio2um cef cefwum mem
 
 UMDEF=-Dcompile_um -I.
 
@@ -101,4 +104,8 @@ cefum: cef.c
 
 cefwum: cefwait.c
 	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starlet.c -o cefwum
+
+
+memum: mem.c
+	gcc -static $(UMDEF) -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starlet.c -o memum
 
