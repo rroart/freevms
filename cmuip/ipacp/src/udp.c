@@ -373,9 +373,7 @@ void Log_UDP_Packet(Seg,SwapFlag,SendFlag)
 
 // Log the contents of the UDP header
 
-    QL$FAO(/*%STRING*/("!%T !AS UDP packet, SEG=!XL, DATA=!XL!/",
-		   "!_SrcPrt:!_!XL (!UL)!_DstPrt:!_!XL (!UL)!/",
-		   "!_Length:!_!SL!_CKsum:!_!SL!/"),
+    QL$FAO("!%T !AS UDP packet, SEG=!XL, DATA=!XL!/!_SrcPrt:!_!XL (!UL)!_DstPrt:!_!XL (!UL)!/!_Length:!_!SL!_CKsum:!_!SL!/",
 	    0,&sptr,Seg,segdata,
 	   seghdr->up$source_port,seghdr->up$source_port,
 	   seghdr->up$dest_port,seghdr->up$dest_port,
@@ -402,9 +400,7 @@ void Log_UDP_Packet(Seg,SwapFlag,SendFlag)
 	else
 	    hexcnt = datalen;
 	ASCII_HEX_BYTES(dathex,hexcnt,segdata,&dathex->dsc$w_length);
-	QL$FAO(/*%STRING*/("!_Data Count: !SL!/",
-		       "!_HEX:!_!AS!/",
-		       "!_ASCII:!_!AF!/"),
+	QL$FAO("!_Data Count: !SL!/!_HEX:!_!AS!/!_ASCII:!_!AF!/",
 	       datalen,dathex,asccnt,segdata);
 	};
     }

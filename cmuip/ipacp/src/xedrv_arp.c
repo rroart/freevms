@@ -732,7 +732,7 @@ ARP_HASH(IPA)
 
     {
       char * IPAP = &IPA;
-    return ((IPAP[0]+IPAP[1]+IPAP[2]+IPAP[3]) & ARP_HSHAND);
+    return ((IPAP[0]+IPAP[1]+IPAP[2]+IPAP[3]) & (ARP_HSHAND));
     }
 
 ARP_FIND ( long IPADDR , struct XE_Interface_Structure * XE_Int )

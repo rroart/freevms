@@ -240,8 +240,7 @@ void Log_IP_Packet(seg,SwapFlag,SendFlag)
 
 // Log the contents of the IP header
 
-    QL$FAO(/*%STRING*/("!%T !AS IP packet, SEG=!XL, DATA=!XL, Header size !SL!/",
-		   "!_CKsum:!_!SL!/"),
+    QL$FAO("!%T !AS IP packet, SEG=!XL, DATA=!XL, Header size !SL!/!_CKsum:!_!SL!/",
 	    0,&sptr,seg,segdata,Header_Size,
 	   seghdr->iph$checksum);
 

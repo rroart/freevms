@@ -1087,9 +1087,8 @@ void rexmit_enqueue(tcb,SEQsize,CTLTYPE)
 
 // If this is the first data item on queue, set retransmit pointer
 
-    XLOG$FAO(LOG$TCP,/*%STRING(*/
-	     "!%T RX-ENQ: Time=!UL, TCB=!XL, RXTO=!SL, MXTO=!SL!/",
-	     "!%T RX-ENQ: PTR=!XL/!XL, SEQ=!XL, SIZ=!SL, CNT=!SL, CTL=!SL, RXC=!SL!/"/*)*/,
+    XLOG$FAO(LOG$TCP,
+	     "!%T RX-ENQ: Time=!UL, TCB=!XL, RXTO=!SL, MXTO=!SL!/!%T RX-ENQ: PTR=!XL/!XL, SEQ=!XL, SIZ=!SL, CNT=!SL, CTL=!SL, RXC=!SL!/",
 	     0,now,tcb,tcb->rx_timer,tcb->rx_timeout,
 	     0,tcb->srx_q_deqp,tcb->snd_q_deqp,tcb->rx_seq,SEQsize,
 	     tcb->srx_q_count,tcb->rx_ctl, tcb->rx_count);
@@ -1119,9 +1118,8 @@ void rexmit_enqueue(tcb,SEQsize,CTLTYPE)
 //    tcb->rx_timeout = now + RX_TIMEVAL; // Max time on RX queue
     tcb->srx_q_count = tcb->srx_q_count + SEQsize;
     tcb->rx_ctl = CTLTYPE;
-XLOG$FAO(LOG$TCP,/*%STRING(*/
-	     "!%T RX-ENQ: Time=!UL, TCB=!XL, RXTO=!SL, MXTO=!SL!/",
-	 "!%T RX-ENQ: PTR=!XL/!XL, SEQ=!XL, SIZ=!SL, CNT=!SL, CTL=!SL, RXC=!SL!/"/*)*/,
+XLOG$FAO(LOG$TCP,
+	     "!%T RX-ENQ: Time=!UL, TCB=!XL, RXTO=!SL, MXTO=!SL!/!%T RX-ENQ: PTR=!XL/!XL, SEQ=!XL, SIZ=!SL, CNT=!SL, CTL=!SL, RXC=!SL!/",
 	     0,now,tcb,tcb->rx_timer,tcb->rx_timeout,
 	     0,tcb->srx_q_deqp,tcb->snd_q_deqp,tcb->rx_seq,SEQsize,
 	     tcb->srx_q_count,tcb->rx_ctl, tcb->rx_count);
@@ -1189,13 +1187,7 @@ void tcp$dump_tcb ( struct tcb_structure * tcb )
     ASCII_DEC_BYTES(&fhstr,4,tcb->foreign_host,&fhstr.dsc$w_length);
     ASCII_DEC_BYTES(&lhstr,4,tcb->local_host,&lhstr.dsc$w_length);
 
-    LOG$FAO(/*%STRING*/("!_PID:!_!XL!_State:!AS(!XL)!/",
-		    "!_FH:!_!AS!_FP:!_!XL (!UL)!/",
-		    "!_LH:!_!AS!_LP:!_!XL (!UL)!/",
-		    "!_SND.WND: !UL!_RCV.WND: !UL!/",
-		    "!_SND.NXT: !XL (!UL)!_RCV.NXT: !XL (!UL)!/",
-		    "!_SND.UNA: !XL (!UL)!/",
-		    "!_RX time: !UL (now + !UL)!/"),
+    LOG$FAO("!_PID:!_!XL!_State:!AS(!XL)!/!_FH:!_!AS!_FP:!_!XL (!UL)!/!_LH:!_!AS!_LP:!_!XL (!UL)!/!_SND.WND: !UL!_RCV.WND: !UL!/!_SND.NXT: !XL (!UL)!_RCV.NXT: !XL (!UL)!/!_SND.UNA: !XL (!UL)!/!_RX time: !UL (now + !UL)!/",
 		    tcb->user_id,stastr,tcb->state,
 		    fhstr,tcb->foreign_port,tcb->foreign_port,
 		    lhstr,tcb->local_port,tcb->local_port,

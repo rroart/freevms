@@ -517,9 +517,8 @@ void ack_rt_queue(struct tcb_structure * TCB, signed long AckNum)
 
     oldcount = TCB->srx_q_count;
     deqc = AckNum - TCB->rx_seq;
-    XLOG$FAO(LOG$TCP,/*%STRING*/(
-	     "!%T ACK-RXQ: TCB=!XL, SEQ=!XL, PTR=!XL, CNT=!SL!/",
-	     "!%T ACK-RXQ: CTL=!SL, ACK=!XL, DEQC=!SL!/"),
+    XLOG$FAO(LOG$TCP,
+	     "!%T ACK-RXQ: TCB=!XL, SEQ=!XL, PTR=!XL, CNT=!SL!/!%T ACK-RXQ: CTL=!SL, ACK=!XL, DEQC=!SL!/",
 	     0,TCB,TCB->rx_seq,TCB->srx_q_deqp,TCB->srx_q_count,
 	     0,TCB->rx_ctl,AckNum,deqc);
 
@@ -1443,10 +1442,7 @@ struct dsc$descriptor	sptr;
 
 // Log most of the data - N.B. We don't write the final CRLF yet...
 
-    LOG$FAO(/*%STRING*/("!_SrcPrt:!_!XL (!UL)!_DstPrt:!_!XL (!UL)!/",
-		   "!_SEQnum:!_!XL (!UL)!_ACKnum:!_!XL (!UL)!/",
-		   "!_Window:!_!UW!_CKsum:!_!UW!_DatPtr:!_!UW!_UrgPtr:!_!UW!/",
-		   "!_Control Flags:!_!XL"),
+    LOG$FAO("!_SrcPrt:!_!XL (!UL)!_DstPrt:!_!XL (!UL)!/!_SEQnum:!_!XL (!UL)!_ACKnum:!_!XL (!UL)!/!_Window:!_!UW!_CKsum:!_!UW!_DatPtr:!_!UW!_UrgPtr:!_!UW!/!_Control Flags:!_!XL",
 	    seghdr->sh$source_port,seghdr->sh$source_port,
 	    seghdr->sh$dest_port,seghdr->sh$dest_port,
 	    seghdr->sh$seq,seghdr->sh$seq,seghdr->sh$ack,seghdr->sh$ack,

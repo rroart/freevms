@@ -159,7 +159,7 @@ ICMP_Hash(IPA)
      long IPA;
     {
       char * IPAP=&IPA;
-    return ((IPAP[0]+IPAP[1]+IPAP[2]+IPAP[3]) & ICM_HSHAND);
+    return ((IPAP[0]+IPAP[1]+IPAP[2]+IPAP[3]) & (ICM_HSHAND));
     }
 
 ICMP_Find(IPADDR)

@@ -729,8 +729,7 @@ struct dsc$descriptor	dev_spec_desc_  = {
 
     devidx = dev_count;
     if (dev_count > DC_Max_Num_Net_Devices-1 )
-      FATAL$FAO(/*%STRING*/("Too many network devices in INET$CONFIG, max = ",
-			    /*%NUMBER*/(DC_Max_Num_Net_Devices)));
+      FATAL$FAO("Too many network devices in INET$CONFIG, max = DC_Max_Num_Net_Devices");
     dev_count = dev_count+1;
     dev_config = dev_config_tab[devidx].dc_begin;
 

@@ -237,8 +237,7 @@ struct dsc$descriptor sptr;
 
 // Log the contents of the ICMP header
 
-    QL$FAO(/*%STRING*/("!%T !AS ICMP packet, SEG=!XL, DATA=!XL!/",
-		   "!_CKsum:!_!SL!/"),
+    QL$FAO("!%T !AS ICMP packet, SEG=!XL, DATA=!XL!/!_CKsum:!_!SL!/",
 	    0,&sptr,Seg,segdata,
 	   seghdr->icm$cksum);
 

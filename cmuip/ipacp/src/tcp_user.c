@@ -1058,9 +1058,7 @@ void tcp$deliver_user_data(struct tcb_structure * TCB)
 #endif
 	    ASCII_HEX_BYTES(&hexstr,nhex,TCB->rcv_q_deqp,
 			    &hexstr.dsc$w_length);
-	    LOG$FAO(/*%STRING*/("!%T Deliver user data: DQ=!XL,EQ=!XL,RCQ=!XL/!XL,Size=!SL!/",
-			    "!_HEX:   !AS!/",
-			    "!_ASCII: !AF!/"),
+	    LOG$FAO("!%T Deliver user data: DQ=!XL,EQ=!XL,RCQ=!XL/!XL,Size=!SL!/!_HEX:   !AS!/!_ASCII: !AF!/",
 		    0,TCB->rcv_q_deqp,TCB->rcv_q_enqp,TCB->rcv_q_base,
 		    TCB->rcv_q_end,datasize,&hexstr,nasc,TCB->rcv_q_deqp);
 	    };

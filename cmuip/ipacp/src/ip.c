@@ -483,8 +483,7 @@ DESC$STR_ALLOC(DSTSTR,20);
 // Queue up the message
 
     DATAPTR = IPHDR+IPHDR->iph$ihl*4;
-    QL$FAO(/*%STRING*/("!%T !AS: S=!AS,D=!AS,HL=!SL,PR=!SL,TL=!SL,ID=!SL,FL=!SL,FR=!SL,TTL=!SL!/",
-		   "!_    !AS: HDR=!XL,DATA=!XL!/"),
+    QL$FAO("!%T !AS: S=!AS,D=!AS,HL=!SL,PR=!SL,TL=!SL,ID=!SL,FL=!SL,FR=!SL,TTL=!SL!/!_    !AS: HDR=!XL,DATA=!XL!/",
 	   0,NAME,SRCSTR,DSTSTR,IPHDR->iph$ihl,IPHDR->iph$protocol,
 	   IPHDR->iph$total_length,IPHDR->iph$ident,IPHDR->iph$fragment_offset>>13,
 	   IPHDR->iph$fragment_offset,IPHDR->iph$ttl,NAME,IPHDR,DATAPTR);

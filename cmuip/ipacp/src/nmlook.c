@@ -725,9 +725,7 @@ void NQE_DUMP(struct NQENTRY * NQE)
 // Dump out a single queue entry.
 //
     {
-      LOG$FAO(/*%STRING*/("NQE at !XL, NEXT=!XL, PREV=!XL!/",
-		    "  TYPE=!UL, LEN=!UL, FLAGS=!XW, TIME=!XL!/",
-		    "  ASTADR=!XL, ASTPRM=!XL!/"),
+      LOG$FAO("NQE at !XL, NEXT=!XL, PREV=!XL!/  TYPE=!UL, LEN=!UL, FLAGS=!XW, TIME=!XL!/  ASTADR=!XL, ASTPRM=!XL!/",
 	    NQE,NQE->NQE$NEXT,NQE->NQE$PREV,
 	    NQE->NQE$TYPE,NQE->NQE$LENGTH,NQE->NQE$FLAGS,NQE->NQE$TIME,
 	    NQE->NQE$ASTADR,NQE->NQE$ASTPRM);
