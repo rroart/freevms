@@ -229,6 +229,10 @@ MODULE CONFIG(IDENT="6.6",ZIP,OPTIMIZE,
 	      LIST(NOEXPAND,NOREQUIRE,ASSEMBLY,	OBJECT,BINARY))
 #endif
 
+extern 	void OPR_FAO(int, ...);
+extern 	void ERROR_FAO(int, ...);
+extern 	void FATAL_FAO(int, ...);
+
 #include	<starlet.h>	// VMS system definitions
      // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// String descriptor stuff
 #include "netvms.h"		// Special VMS definitions
@@ -248,7 +252,9 @@ MODULE CONFIG(IDENT="6.6",ZIP,OPTIMIZE,
 
 #include <asm/uaccess.h>
 
+#if 0
 extern  void    OPR_FAO();
+#endif
 extern  void    send_2_operator();
 extern     LIB$GET_VM ();
 extern  void    SWAPBYTES();
@@ -368,9 +374,6 @@ extern 	void mm$qblk_free();
 	// Formatted event logging routines (from IOUTIL.BLI)
 extern 	void LOG_FAO();
 extern 	void QL_FAO();
-extern 	void OPR_FAO();
-extern 	void ERROR_FAO();
-extern 	void FATAL_FAO();
 
     // IAPCP receive callback.
     IPACP_Int ->  ACPI$IP_Receive 	= ip$receive;
