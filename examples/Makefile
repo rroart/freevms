@@ -1,134 +1,138 @@
-all: alli386 allum
+all: dirs alli386 allum
 
-alli386: timer ast time eftim schdwk forcex ef wake synch enq lnm lnm2 qio1 qio2 cef cefw mem memf getjpi crec
+alli386: i386/timer i386/ast i386/time i386/eftim i386/schdwk i386/forcex i386/ef i386/wake i386/synch i386/enq i386/lnm i386/lnm2 i386/qio1 i386/qio2 i386/cef i386/cefw i386/mem i386/memf i386/getjpi i386/crec
+
+dirs:
+	mkdir um || echo um exists
+	mkdir i386 || echo i386 exists
 
 LIB = ../starlet/src/starlet.a
 LIBUM = ../starlet/src/starletum.a
 
-timer: timer.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.a -o timer
-time: gettim.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ gettim.c ../starlet/src/starlet.a -o time
+i386/timer: timer.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.a -o i386/timer
+i386/time: gettim.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ gettim.c ../starlet/src/starlet.a -o i386/time
 
-ast: astdel.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ astdel.c ../starlet/src/starlet.a -o ast
+i386/ast: astdel.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ astdel.c ../starlet/src/starlet.a -o i386/ast
 
-eftim: eftim.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ eftim.c ../starlet/src/starlet.a -o eftim
+i386/eftim: eftim.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ eftim.c ../starlet/src/starlet.a -o i386/eftim
 
-schdwk: schdwk.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ schdwk.c ../starlet/src/starlet.a -o schdwk
+i386/schdwk: schdwk.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ schdwk.c ../starlet/src/starlet.a -o i386/schdwk
 
-forcex: forcex.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ forcex.c ../starlet/src/starlet.a -o forcex
+i386/forcex: forcex.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ forcex.c ../starlet/src/starlet.a -o i386/forcex
 
-ef: ef.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ ef.c ../starlet/src/starlet.a -o ef
+i386/ef: ef.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ ef.c ../starlet/src/starlet.a -o i386/ef
 
-wake: wake.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ wake.c ../starlet/src/starlet.a -o wake
-
-
-synch: synch.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ synch.c ../starlet/src/starlet.a -o synch
+i386/wake: wake.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ wake.c ../starlet/src/starlet.a -o i386/wake
 
 
-enq: enq.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.a -o enq
+i386/synch: synch.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ synch.c ../starlet/src/starlet.a -o i386/synch
 
-lnm: lnm.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starlet.a -o lnm
 
-lnm2: lnm2.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ lnm2.c ../starlet/src/starlet.a -o lnm2
+i386/enq: enq.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.a -o i386/enq
 
-qio1: qio1.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ qio1.c ../starlet/src/starlet.a -o qio1
+i386/lnm: lnm.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starlet.a -o i386/lnm
 
-qio2: qio2.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ qio2.c ../starlet/src/starlet.a -o qio2
+i386/lnm2: lnm2.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ lnm2.c ../starlet/src/starlet.a -o i386/lnm2
 
-cef: cef.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ cef.c ../starlet/src/starlet.a -o cef
+i386/qio1: qio1.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ qio1.c ../starlet/src/starlet.a -o i386/qio1
 
-cefw: cefwait.c $(LIB)
-	gcc -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starlet.a -o cefw
+i386/qio2: qio2.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ qio2.c ../starlet/src/starlet.a -o i386/qio2
 
-mem: mem.c $(LIB)
-	gcc -static -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starlet.a -o mem
+i386/cef: cef.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ cef.c ../starlet/src/starlet.a -o i386/cef
 
-memf: memf.c $(LIB)
-	gcc -static -I../starlet/src -I../librtl/src/ memf.c ../starlet/src/starlet.a -o memf
+i386/cefw: cefwait.c $(LIB)
+	gcc -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starlet.a -o i386/cefw
 
-getjpi: getjpi.c $(LIB)
-	gcc -static -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starlet.a -o getjpi
+i386/mem: mem.c $(LIB)
+	gcc -static -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starlet.a -o i386/mem
 
-crec: crec.c $(LIB)
-	gcc -static -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.a -o crec
+i386/memf: memf.c $(LIB)
+	gcc -static -I../starlet/src -I../librtl/src/ memf.c ../starlet/src/starlet.a -o i386/memf
 
-allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum lnmum lnm2um qio1um qio2um cefum cefwum memfum getjpium crecum
+i386/getjpi: getjpi.c $(LIB)
+	gcc -static -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starlet.a -o i386/getjpi
+
+i386/crec: crec.c $(LIB)
+	gcc -static -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.a -o i386/crec
+
+allum: um/timer um/ast um/time um/eftim um/schdwk um/forcex um/ef um/wake um/synch um/enq um/lnm um/lnm2 um/qio1 um/qio2 um/cef um/cefw um/mem um/memf um/getjpi um/crec
 
 UMDEF=-Dcompile_um
 
-timerum: timer.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starletum.a -o timerum
-timeum: gettim.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ gettim.c ../starlet/src/starletum.a -o timeum
+um/timer: timer.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starletum.a -o um/timer
+um/time: gettim.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ gettim.c ../starlet/src/starletum.a -o um/time
 
-astum: astdel.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ astdel.c ../starlet/src/starletum.a -o astum
+um/ast: astdel.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ astdel.c ../starlet/src/starletum.a -o um/ast
 
-eftimum: eftim.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ eftim.c ../starlet/src/starletum.a -o eftimum
+um/eftim: eftim.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ eftim.c ../starlet/src/starletum.a -o um/eftim
 
-schdwkum: schdwk.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ schdwk.c ../starlet/src/starletum.a -o schdwkum
+um/schdwk: schdwk.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ schdwk.c ../starlet/src/starletum.a -o um/schdwk
 
-forcexum: forcex.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ forcex.c ../starlet/src/starletum.a -o forcexum
+um/forcex: forcex.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ forcex.c ../starlet/src/starletum.a -o um/forcex
 
-efum: ef.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ ef.c ../starlet/src/starletum.a -o efum
+um/ef: ef.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ ef.c ../starlet/src/starletum.a -o um/ef
 
-wakeum: wake.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ wake.c ../starlet/src/starletum.a -o wakeum
-
-
-synchum: synch.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ synch.c ../starlet/src/starletum.a -o synchum
+um/wake: wake.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ wake.c ../starlet/src/starletum.a -o um/wake
 
 
-enqum: enq.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starletum.a -o enqum
-
-lnmum: lnm.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starletum.a -o lnmum
-
-lnm2um: lnm2.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ lnm2.c ../starlet/src/starletum.a -o lnm2um
-
-qio1um: qio1.c $(LIBUM)
-	gcc ${UMDEF} -I../starlet/src -I../librtl/src/ qio1.c ../starlet/src/starletum.a -o qio1um
-
-qio2um: qio2.c $(LIBUM)
-	gcc ${UMDEF} -I../starlet/src -I../librtl/src/ qio2.c ../starlet/src/starletum.a -o qio2um
-
-cefum: cef.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ cef.c ../starlet/src/starletum.a -o cefum
-
-cefwum: cefwait.c $(LIBUM)
-	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starletum.a -o cefwum
-
-memum: mem.c $(LIBUM)
-	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starletum.a -o memum
-
-memfum: memf.c $(LIBUM)
-	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ memf.c ../starlet/src/starletum.a -o memfum
-
-getjpium: getjpi.c $(LIBUM)
-	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starletum.a -o getjpium
+um/synch: synch.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ synch.c ../starlet/src/starletum.a -o um/synch
 
 
-crecum: crec.c $(LIBUM)
-	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starletum.a -o crecum
+um/enq: enq.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starletum.a -o um/enq
+
+um/lnm: lnm.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starletum.a -o um/lnm
+
+um/lnm2: lnm2.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ lnm2.c ../starlet/src/starletum.a -o um/lnm2
+
+um/qio1: qio1.c $(LIBUM)
+	gcc ${UMDEF} -I../starlet/src -I../librtl/src/ qio1.c ../starlet/src/starletum.a -o um/qio1
+
+um/qio2: qio2.c $(LIBUM)
+	gcc ${UMDEF} -I../starlet/src -I../librtl/src/ qio2.c ../starlet/src/starletum.a -o um/qio2
+
+um/cef: cef.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ cef.c ../starlet/src/starletum.a -o um/cef
+
+um/cefw: cefwait.c $(LIBUM)
+	gcc $(UMDEF) -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starletum.a -o um/cefw
+
+um/mem: mem.c $(LIBUM)
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starletum.a -o um/mem
+
+um/memf: memf.c $(LIBUM)
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ memf.c ../starlet/src/starletum.a -o um/memf
+
+um/getjpi: getjpi.c $(LIBUM)
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starletum.a -o um/getjpi
+
+
+um/crec: crec.c $(LIBUM)
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starletum.a -o um/crec
 
