@@ -232,6 +232,20 @@ unsigned int prot;
 unsigned int pfc;
 };
 
+struct struct_create_region_32 {
+unsigned long length;
+unsigned int region_prot;
+unsigned int flags;
+unsigned long long *return_region_id;
+void **return_va;
+unsigned long *return_length;
+unsigned long start_va;
+};
+
+struct struct_args {
+  unsigned long s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16;
+};
+
 #endif
 
 

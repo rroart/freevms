@@ -307,6 +307,18 @@ int sys$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int a
   return INLINE_SYSCALL($crmpsc,1,&s);
 }
 
+int sys$create_region_32  ( unsigned long length, unsigned int region_prot, unsigned int flags, unsigned long long *return_region_id, void **return_va, unsigned long *return_length, unsigned long start_va) {
+  struct struct_create_region_32 s;
+  s.length=length;
+  s.region_prot=region_prot;
+  s.flags=flags;
+  s.return_region_id=return_region_id;
+  s.return_va=return_va;
+  s.return_length=return_length;
+  s.start_va=start_va;
+  return INLINE_SYSCALL($create_region_32,1,&s);
+}
+
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
 int sys$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }
 int sys$create (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($create,3,fab,err,suc); }
