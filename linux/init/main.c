@@ -423,10 +423,21 @@ static int __init quiet_kernel(char *str)
 	return 1;
 }
 
+int mount_root_vfs=1;
+
+static int __init novfs(char *str)
+{
+	if (*str)
+		return 0;
+	mount_root_vfs=0;
+	return 1;
+}
+
 __setup("ro", readonly);
 __setup("rw", readwrite);
 __setup("debug", debug_kernel);
 __setup("quiet", quiet_kernel);
+__setup("novfs", novfs);
 
 /*
  * This is a simple kernel command line parsing function: it parses
@@ -837,6 +848,7 @@ static void prepare_namespace(void)
 	rd_load();
 #endif
 
+	if (mount_root_vfs)
 	/* Mount the root filesystem.. */
 	mount_root();
 
@@ -879,7 +891,10 @@ static int init(void * unused)
 	do_basic_setup();
 	printk("%%KERNEL-I-DEBUG, After do_basic_setup\n");
 #ifdef CONFIG_VMS
-        vms_mount();
+	if (mount_root_vfs)
+	  vms_mount();
+	else
+	  vms2_mount();
 #endif
 	prepare_namespace();
 	printk("%%KERNEL-I-DEBUG, After prepare_namspace\n");
@@ -899,8 +914,12 @@ static int init(void * unused)
 	//	mydebug5=1;
 	//	mydebug6=1;
 	printk("%%KERNEL-I-DEBUG, After unlock_kernel %x %x %x %x %x %x %x %x\n",current,current->pcb$l_pid,current->mm,current->active_mm,&init_task,init_task.pcb$l_pid,init_task.mm,init_task.active_mm);
-	if (open("/dev/console", O_RDWR, 0) < 0)
+#ifndef CONFIG_VMS
+	if (mount_root_vfs && open("/dev/console", O_RDWR, 0) < 0)
 		printk("Warning: unable to open an initial console.\n");
+#else
+	open_tty();
+#endif
 	printk("%%KERNEL-I-DEBUG, Before dup\n");
 	(void) dup(0);
 	(void) dup(0);
