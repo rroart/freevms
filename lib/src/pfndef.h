@@ -128,10 +128,14 @@ struct _pfn {
       int pfn$l_refcnt_fill1;
       //      short int pfn$w_refcnt_fill2;
       union {
-	unsigned long pfn$l_refcnt; // was w_, changed because of atomic stuff
-	atomic_t count;			/* Usage count, see below. */
+	unsigned long npfn$l_refcnt; // was w_, changed because of atomic stuff
+	atomic_t ncount;			/* Usage count, see below. */
       };
     };
+  };
+  union { // temp workaround
+    unsigned long pfn$l_refcnt; // was w_, changed because of atomic stuff
+    atomic_t count;			/* Usage count, see below. */
   };
   union  {
     unsigned long long pfn$q_bak;     
