@@ -705,6 +705,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	bzero(p->pcb$l_phd,sizeof(struct _phd));
 
 	p->pcb$l_phd->phd$q_ptbr=p->mm->pgd;
+#ifdef CONFIG_MM_VMS
 	{
 	  struct _rde * rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
 	  bzero(rde,sizeof(struct _rde));
@@ -712,7 +713,16 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	  insque(rde,p->pcb$l_phd->phd$ps_p0_va_list_flink);
 	  rde->rde$ps_start_va=0x1000;
 	  rde->rde$l_region_size=0x1000;
+	  p->pcb$l_phd->phd$l_wslist=vmalloc(4*512);
+	  p->pcb$l_phd->phd$l_wslock=vmalloc(4*512);
+	  p->pcb$l_phd->phd$l_wsdyn=vmalloc(4*512);
+	  bzero(p->pcb$l_phd->phd$l_wslist,4*512);
+	  bzero(p->pcb$l_phd->phd$l_wslock,4*512);
+	  bzero(p->pcb$l_phd->phd$l_wsdyn,4*512);
+	  p->pcb$l_phd->phd$l_wsnext=0;
+	  p->pcb$l_phd->phd$l_wslast=511;
 	}
+#endif
 
 	p->pcb$b_prib=31-DEFPRI;
 	p->pcb$b_pri=31-DEFPRI-6;
