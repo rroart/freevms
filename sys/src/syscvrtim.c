@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Paul Nankervis.
+
 /*
 
        VMSTIME.C  v1.1

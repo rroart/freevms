@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 // This is supposed to be a test driver
 
 #include"../../freevms/lib/src/crbdef.h"

@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include "../../freevms/lib/src/irpdef.h"
 #include "../../freevms/lib/src/ucbdef.h"
 #include "../../freevms/lib/src/ccbdef.h"

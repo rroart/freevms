@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Author. Linux people.
+
 #if 0
 #include <linux/config.h>
 #include <linux/module.h>

@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include"../../starlet/src/starlet.h"
 #include"../../starlet/src/vmsopt.h" 
 #include"../../librtl/src/descrip.h"

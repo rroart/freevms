@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #if 0
 is this the erroneous one?
 #include<linux/vmalloc.h>

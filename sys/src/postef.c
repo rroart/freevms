@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<linux/sched.h>
 #include<asm/bitops.h>
 #include"../../freevms/starlet/src/ssdef.h"

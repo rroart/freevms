@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 /* Not implemented: atomicity */
 /* Not implemented: long and quadword alignments */
 

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Author. Linux people.
+
 /*
  *  linux/mm/bootmem.c
  *

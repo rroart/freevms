@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<linux/linkage.h>
 #include"../../freevms/lib/src/acbdef.h"
 #include"../../freevms/lib/src/cpudef.h"

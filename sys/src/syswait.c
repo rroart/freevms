@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include <linux/sched.h>
 #include <linux/smp.h>
 #include "../../freevms/lib/src/cebdef.h"

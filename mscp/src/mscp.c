@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Author. NetBSD people.
+
 #if 0
 /*
  * Copyright (c) 1996 Ludd, University of Lule}, Sweden.

@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<linux/sched.h>
 #include"../../freevms/lib/src/irpdef.h"
 #include"../../freevms/lib/src/acbdef.h"

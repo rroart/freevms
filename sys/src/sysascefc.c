@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<linux/unistd.h>
 #include<linux/linkage.h>
 #include<linux/sched.h>
@@ -12,6 +17,8 @@
 #include"../../freevms/librtl/src/descrip.h"
 #include "../../freevms/sys/src/system_data_cells.h"
 #include "../../freevms/sys/src/internals.h"
+
+// Author. Roar Thronæs.
 
 asmlinkage int exe$ascefc(unsigned int efn, void *name, char prot, char perm) {
   struct _ceb * first=&sch$gq_cebhd;

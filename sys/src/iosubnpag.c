@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include <linux/kernel.h>
 #include "../../freevms/sys/src/asmlink.h"
 #include <linux/smp.h>

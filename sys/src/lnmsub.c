@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #ifdef USERLAND
 #define __LINUX_VMALLOC_H
 #define _LINUX_VMALLOC_H

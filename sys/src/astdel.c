@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include <linux/linkage.h>
 #include "../../freevms/sys/src/system_data_cells.h"
 #include "../../freevms/starlet/src/ssdef.h"

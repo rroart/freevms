@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include "../../freevms/starlet/src/ssdef.h"
 #include "../../freevms/starlet/src/iosbdef.h"
 

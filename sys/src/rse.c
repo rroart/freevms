@@ -1,6 +1,8 @@
 // $Id$
 // $Locker$
 
+// Author. Roar Thronæs.
+
 #include<linux/sched.h>
 #include "../../freevms/sys/src/asmlink.h"
 #include<asm/hw_irq.h>

@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include "../../freevms/sys/src/system_data_cells.h"
 #include "../../freevms/lib/src/acbdef.h"
 #include "../../freevms/lib/src/pridef.h"
