@@ -34,7 +34,7 @@ FreeVMS tasklist
     Synchronization:
 	Lock management (DLM), barely started, need more people.
 
-    Memory management, barely started, vacant.
+    Memory management, barely started, need more people.
 
     Process and time management, some work done, need more people. 
 
@@ -100,7 +100,7 @@ FreeVMS tasklist
   "SRM", started
 
 2. (a bit later) high priority:
-  RMS, barely started, vacant
+  RMS, barely started, need more people.
   "SRM" handling ODS-2
   Utilities COPY DIRECTORY etc, barely started, vacant
   VMS image support, linker+compiler support for images, nothing done, vacant.

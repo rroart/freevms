@@ -6,7 +6,7 @@ process control and communication (partly)
 logicals (partly)
 fork (partly)
 queued i/o (a little bit)
-memory management (a little bit at low-level)
+memory management (a little bit)
 ods2 readonly (partly)
 rms readonly (partly)
 ods5 readonly (partly)
@@ -14,26 +14,42 @@ xqp (barely)
 sca/scs/cluster (barely)
 locks/dlm (barely)
 
-syscalls:
+syscalls/services:
 $ascefc
 $asctim
 $assign
 $bintim
 $clref
+$close
+$connect
+$create
+$create_region_32
 $crelnm
 $crelnt
+$crmpsc
 $dclast
+$disconnect
+$display
 $enq
+$erase
+$extend
 $forcex
+$get
 $gettim
 $hiber
+$mgblsc
 $mount
 $numtim
+$open
+$parse
+$put
 $qio
 $qiow
 $readef
 $schdwk
+$search
 $setast
+$setddir
 $setef
 $setime
 $setimr
