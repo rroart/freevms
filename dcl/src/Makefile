@@ -4,7 +4,7 @@ EXE =
 LIB = ../../starlet/src/starlet.a
 LIBUM = ../../starlet/src/starletum.a
 
-EXTERNAL = ../../cliutl/src/show.a
+EXTERNAL = ../../cliutl/src/show.a ../../cliutl/src/set.a
 
 all: i386/dcl${EXE} um/dcl${EXE}
 
