@@ -33,6 +33,7 @@ SRCC=\
 	builtins_s.c \
 	dcl.c \
 	init.c \
+	loop.c \
 	parsing.c \
 	readcommand.c
 
@@ -47,6 +48,8 @@ PREFIX=/usr/local
 
 default:
 	make install
+
+include $(DEPENDC)
 
 
 #-------------------------------------------------------------------------------

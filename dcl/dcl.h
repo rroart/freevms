@@ -68,6 +68,7 @@
 		unsigned char			*help;		// static not allocated by malloc()
 		int						(*function)(unsigned char *argument);
 		int						type;
+		int						length;
 		struct dcl_command		*next;
 	} dcl$command;
 
@@ -89,8 +90,9 @@
 			int (*function)(), int type);
 
 	int commands_init(dcl$command **commands);
-	int parsing(unsigned char *command_line, dcl$command *commands,
-			dcl$env *env);
+	int loop(dcl$command *commands, dcl$env *env);
+	int parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
+			int required_type);
 
 	unsigned char *read_command(dcl$env *env);
 

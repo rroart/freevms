@@ -37,6 +37,90 @@
 #include "dcl.h"
 
 int
-parsing(unsigned char *command_line, dcl$command *commands, dcl$env *env)
+parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
+		int required_type)
 {
+	dcl$command		*current_command;
+	dcl$command		*first_target;
+
+	int				i;
+	int				length;
+	int				number_of_targets;
+	int				string_flag;
+
+	unsigned char	*ptr1;
+	unsigned char	*ptr2;
+	unsigned char	*ptr3;
+	unsigned char	*string;
+
+	ptr1 = line;
+	while((*ptr1) == ' ') ptr1++;
+	ptr2 = ptr1;
+
+	string_flag = 0;
+	while((((*ptr2) != ' ') && ((*ptr2) != 0)) || (string_flag != 0))
+	{
+		if ((*ptr2) == '"') string_flag = (string_flag == 0) ? -1 : 0;
+		ptr2++;
+	}
+
+	if (string_flag != 0) return(DCL$FAILURE);
+
+	/*
+	 * "length" variable contains the length of the first element of the
+	 * command line
+	 */
+
+	length = ptr2 - ptr1;
+
+	if ((string = malloc((length + 1) * sizeof(unsigned char))) == NULL)
+	{
+		return(DCL$FAILURE);
+	}
+
+	for(ptr3 = string, ptr2 = ptr1, i = 0;
+			(*ptr3) = (*ptr2), i < length;
+			i++, ptr2++, ptr3++)
+		if (((*ptr2) >= 'a') && ((*ptr2) <= 'z'))
+			(*ptr3) -= 'a' - 'A';
+
+	(*ptr3) = 0;
+
+	/*
+	 * Analysis
+	 */
+
+	current_command = commands;
+	number_of_targets = 0;
+
+	while(current_command != NULL)
+	{
+		if ((*current_command).length > length)
+		{
+			if (strncmp((*current_command).name, string, length) == 0)
+			{
+				first_target = current_command;
+				number_of_targets++;
+			}
+		}
+		else if ((*current_command).length == length)
+		{
+			if (strcmp((*current_command).name, string) == 0)
+			{
+				first_target = current_command;
+				number_of_targets++;
+			}
+		}
+
+		current_command = (*current_command).next;
+	}
+
+	if (number_of_targets == 1)
+	{
+		printf("Found !\n");
+	}
+
+	free(string);
+
+	return(DCL$SUCCESS);
 }

@@ -37,46 +37,19 @@
 #include "dcl.h"
 
 int
-main(int argc, char *argv[])
+loop(dcl$command *commands, dcl$env *env)
 {
-	dcl$command		*commands;
-	dcl$env			env;
+	unsigned char			*command_line;
 
-	/*
-	 * dcl$env struct initialization
-	 */
-
-	if ((env.prompt = malloc(3 * sizeof(unsigned char))) == NULL)
+	while((*env).end_flag == 0)
 	{
-		return(DCL$FAILURE);
+		command_line = read_command(env);
+
+		if (parsing(command_line, commands, env, DCL$VERB) != DCL$SUCCESS)
+		{
+			return(DCL$FAILURE);
+		}
 	}
 
-	strcpy(env.prompt, "$ ");
-	env.end_flag = 0;
-
-	/*
-	 * dcl$command struct initialization
-	 */
-
-	commands = NULL;
-	if (commands_init(&commands) != 0)
-	{
-		return(DCL$FAILURE);
-	}
-
-	/*
-	 * Loop
-	 */
-
-	if (loop(commands, &env) != DCL$SUCCESS)
-	{
-		return(DCL$FAILURE);
-	}
-
-	/*
-	 * dcl$command list is freed
-	 */
-
-	commands_freeing(commands);
 	return(DCL$SUCCESS);
 }

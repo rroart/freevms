@@ -38,15 +38,27 @@
 
 /*
 ================================================================================
-  This function returns -1 when it fails, 0 in all other cases.
+  This function returns DCL$FAILURE when it fails, DCL$SUCCESS
+  in all other cases.
 ================================================================================
 */
 
 int
 commands_init(dcl$command **commands)
 {
+	/*
+	 * VERB
+	 */
+
 	if ((*commands = command_add_on(*commands,
 			"DIRECTORY", "", directory_function, DCL$VERB))
+			== NULL)
+	{
+		return(DCL$FAILURE);
+	}
+
+	if ((*commands = command_add_on(*commands,
+			"LOGIN", "", logout_function, DCL$VERB))
 			== NULL)
 	{
 		return(DCL$FAILURE);
@@ -61,6 +73,42 @@ commands_init(dcl$command **commands)
 
 	if ((*commands = command_add_on(*commands,
 			"SET", "", set_function, DCL$VERB))
+			== NULL)
+	{
+		return(DCL$FAILURE);
+	}
+
+	if ((*commands = command_add_on(*commands,
+			"SEARCH", "", set_function, DCL$VERB))
+			== NULL)
+	{
+		return(DCL$FAILURE);
+	}
+
+	if ((*commands = command_add_on(*commands,
+			"SHOW", "", set_function, DCL$VERB))
+			== NULL)
+	{
+		return(DCL$FAILURE);
+	}
+
+	/*
+	 * KEYWORD
+	 */
+
+	if ((*commands = command_add_on(*commands,
+			"DEFAULT", "", set_function, DCL$KEYWORD))
+			== NULL)
+	{
+		return(DCL$FAILURE);
+	}
+
+	/*
+	 * QUALIFIER
+	 */
+
+	if ((*commands = command_add_on(*commands,
+			"/FULL", "", set_function, DCL$QUALIFIER))
 			== NULL)
 	{
 		return(DCL$FAILURE);
@@ -88,6 +136,7 @@ command_add_on(dcl$command *commands, unsigned char *name,
 	{
 		(*new).next = commands;
 		(*new).name = name;
+		(*new).length = strlen(name);
 		(*new).help = help;
 		(*new).function = function;
 	}
