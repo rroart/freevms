@@ -507,11 +507,12 @@ int this_cpu = smp_processor_id();
 	    if (weight<c) c=weight, next=p;
 	  }
 	}
-	current->state=TASK_INTERRUPTIBLE;
+	//	current->state=TASK_INTERRUPTIBLE;
 	SCH$GL_IDLE_CPUS=0;
 	// not yet? del from runq
 	current->need_resched=1;
 	from_sch$resched=1; /* can not goto */
+	from_sch$resched=0; /* until further */
 	schedule();
 }
 
@@ -545,7 +546,7 @@ asmlinkage void schedule(void)
 	int this_cpu, c;
 	unsigned char weight;
 
-	if (from_sch$resched == 1) goto try_for_process; /* goto 30$ */
+	/* wait until both are more finished... if (from_sch$resched == 1) goto try_for_process;*/ /* goto 30$ */ 
 
 	spin_lock_prefetch(&runqueue_lock);
 

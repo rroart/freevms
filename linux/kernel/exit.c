@@ -448,7 +448,9 @@ fake_volatile:
 
 	tsk->exit_code = code;
 	exit_notify();
-	schedule();
+	//	schedule();
+	SOFTINT_RESCHED_VECTOR;
+	printk("before bug\n");
 	BUG();
 /*
  * In order to get rid of the "volatile function does return" message

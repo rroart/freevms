@@ -140,7 +140,8 @@ void cpu_idle (void)
 		while (!current->need_resched)
 			idle();
 		// printk("aft while\n");
-		schedule();
+		//schedule();
+		SOFTINT_RESCHED_VECTOR;
 		check_pgt_cache();
 	}
 }
