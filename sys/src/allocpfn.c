@@ -7,6 +7,8 @@
 #include <linux/mm.h>
 #include <pfndef.h>
 
+int lasteech=0;
+
 struct _mypfn {
   struct _mypfn * pfn$l_flink;
   struct _mypfn * pfn$l_blink;
@@ -23,13 +25,17 @@ signed long mmg$allocpfn(void) {
   h=pfn$al_head=((struct _pfn *) pfn$al_head)->pfn$l_flink;
   h->pfn$l_blink=0; // gcc bug?
   //  p->pfn$l_refcnt=0;
-  if (h->pfn$l_flink==0) panic("eech\n");
+  if (h->pfn$l_flink==0) panic("eech %x\n",lasteech);
 #if 0
   // not yet, struct bugs
   if (p->pfn$l_refcnt)
     panic("refcnt\n");
 #endif
   sch$gl_freecnt--;
+  if (((struct _pfn *) pfn$al_head)->pfn$l_flink==0) {
+    panic("eech4\n");
+  }
+  lasteech=1;
   return (((unsigned long)p-(unsigned long)mem_map)/sizeof(struct _pfn));
 }
 
@@ -37,6 +43,7 @@ signed long mmg$allocontig(unsigned long num) {
   struct _pfn * p, * first=pfn$al_head, * next;
   struct _mypfn * h, * m;
   unsigned long done=0, c;
+  lasteech=2;
   if (sch$gl_freecnt<(num+4)) return -1;
   if (!pfn$al_head)
     return -1;
@@ -85,6 +92,7 @@ signed long mmg$dallocpfn(unsigned long pfn) {
 #else
   // do one that "sorts"; we do not want totally fragmentation and panic
   struct _mypfn * tmp = pfn$al_head;
+  lasteech=3;
 
 #if 0
   // do this check for a while
@@ -132,6 +140,7 @@ signed long mmg$allocontig_align(unsigned long num) {
   struct _mypfn * h, * m;
   unsigned long done=0, c;
   unsigned long count=0;
+  lasteech=4;
   if (sch$gl_freecnt<(num+4)) return -1;
   if (!pfn$al_head)
     return -1;
@@ -145,7 +154,7 @@ signed long mmg$allocontig_align(unsigned long num) {
     }
   out:
     count++;
-    if ((first->pfn$l_flink==0) || ((unsigned long)first->pfn$l_flink>(unsigned long)&mem_map[8193])) panic("eech3\n");
+    if ((first->pfn$l_flink==0) /*|| ((unsigned long)first->pfn$l_flink>(unsigned long)&mem_map[8193])*/) panic("eech3\n");
     if (!done) first=first->pfn$l_flink;
   }
 
