@@ -582,12 +582,28 @@ done:
 	return skb->len;
 }
 
+static inline void dn_rt_finish_output2(struct sk_buff *skb, char *dst)
+{
+  struct net_device *dev = skb->dev;
+
+  if ((dev->type != ARPHRD_ETHER) && (dev->type != ARPHRD_LOOPBACK))
+    dst = NULL;
+
+  if (!dev->hard_header || (dev->hard_header(skb, dev, ETH_P_MYSCS,
+					     dst, NULL, skb->len) >= 0))
+    dn_rt_send(skb);
+  else
+    kfree_skb(skb);
+}
+
+
 static void dn_send_endnode_hello(struct net_device *dev)
 {
         struct _nisca_intro *intro;
         struct _nisca *nisca;
         struct sk_buff *skb = NULL;
         unsigned short int *pktlen;
+	void * msg;
 	struct dn_dev *dn_db = (struct dn_dev *)dev->dn_ptr;
 
         if ((skb = dn_alloc_skb2(NULL, sizeof(*nisca)+16, GFP_ATOMIC)) == NULL)
@@ -595,12 +611,14 @@ static void dn_send_endnode_hello(struct net_device *dev)
 
         skb->dev = dev;
 
-        intro = skb->data;
-	* ((char*)intro)= 43;
-	nisca=getcc(skb->data);
+	msg = skb_put(skb,sizeof(*nisca));
+
+        intro = msg;
+
+	nisca=getcc(msg);
 
         nisca->nisca$b_msg  = NISCA$C_HELLO;
-        nisca->nisca$b_reason  = NISCA$M_TR_CTL|NISCA$M_TR_CCFLG;
+        nisca->nisca$b_msg  |= NISCA$M_TR_CTL|NISCA$M_TR_CCFLG;
 	nisca->nisca$l_maint  = NISCA$M_MAINT;
 	if (strlen(system_utsname.nodename)) {
 	  nisca->nisca$t_nodename[0]=4; //strlen(system_utsname.nodename);
@@ -636,7 +654,7 @@ static void dn_send_endnode_hello(struct net_device *dev)
 
 	skb->nh.raw = skb->data;
 
-	dn_rt_finish_output(skb, dn_rt_all_rt_mcast);
+	dn_rt_finish_output2(skb, dn_rt_all_rt_mcast);
 }
 
 
@@ -1398,20 +1416,30 @@ void dn_neigh_pointopoint_hello(struct sk_buff *skb)
 	kfree_skb(skb);
 }
 
+static int first_hello=0;
+
 /*
  * Endnode hello message received
  */
 int dn_neigh_endnode_hello(struct sk_buff *skb)
 {
-	struct _nisca *msg = (struct endnode_hello_message *)skb->data;
+	struct _nisca *msg = skb->data;
 	struct neighbour *neigh;
 	struct dn_neigh *dn;
 	dn_address src;
 
-	msg+=(((long)msg)+16);
+	msg=getcc(msg);
 
-	if (0==strncmp("NODNAM",&msg->nisca$t_nodename[1],6))
+ 	if (0==strncmp("NODNAM",&msg->nisca$t_nodename[1],6))
 	  return 1;
+
+ 	if (0==strncmp(&system_utsname.nodename,&msg->nisca$t_nodename[1],4))
+	  return 1;
+
+	if (!first_hello) {
+	  first_hello++;
+	  printk("scs received hello from node %s\n",&msg->nisca$t_nodename[1]);
+	}
 
 	// next should be more protocol-stuff or first a plain init
 
@@ -3347,7 +3375,7 @@ static int dn_return_short(struct sk_buff *skb)
 	*dst = tmp;
 
 	skb->pkt_type = PACKET_OUTGOING;
-	dn_rt_finish_output(skb, NULL);
+	dn_rt_finish_output2(skb, NULL);
 	return NET_RX_SUCCESS;
 }
 
@@ -3393,7 +3421,7 @@ static int dn_return_long(struct sk_buff *skb)
 	memcpy(dst_addr, tmp, ETH_ALEN);
 
 	skb->pkt_type = PACKET_OUTGOING;
-	dn_rt_finish_output(skb, tmp);
+	dn_rt_finish_output2(skb, tmp);
 	return NET_RX_SUCCESS;
 }
 
@@ -3756,42 +3784,40 @@ void * getppdscs(void * buf) {
 
 int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt)
 {
-	struct _cdt *cb;
-	unsigned char flags = 0;
-	__u16 len = dn_ntohs(*(__u16 *)skb->data);
-	struct dn_dev *dn = (struct dn_dev *)dev->dn_ptr;
-	unsigned char padlen = 0;
-	struct _nisca * nisca=skb;
-	unsigned char tr_flag;
-	unsigned char tr_pad;
-	unsigned char * msg;
-	struct _ppd *ppd;
-	struct _scs *scs;
-	int (*func)();
-	nisca=gettr(skb->data);
-	scs=getppdscs(skb->data);
-	ppd=getppdscs(skb->data);
+      struct _cdt *cb;
+      unsigned char flags = 0;
+      __u16 len = dn_ntohs(*(__u16 *)skb->data);
+      struct dn_dev *dn = (struct dn_dev *)dev->dn_ptr;
+      unsigned char padlen = 0;
+      struct _nisca * nisca;
+      unsigned char tr_flag;
+      unsigned char tr_pad;
+      unsigned char * msg=skb->data+2;
+      struct _ppd *ppd;
+      struct _scs *scs;
+      int (*func)();
+      nisca=gettr(msg);
+      scs=getppdscs(msg);
+      ppd=getppdscs(msg);
 
-	if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
-		goto out;
+      if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
+              goto out;
 
-	skb_pull(skb, 2);
+      skb_pull(skb, 2);
 
-	skb_trim(skb, len);
+      skb_trim(skb, len);
 
-	tr_flag=nisca->nisca$b_tr_flag;
-	tr_pad=nisca->nisca$b_tr_pad;
-	ppd=nisca+9+1;//tr_pad
-	scs=ppd;
+      tr_flag=nisca->nisca$b_tr_flag;
+      tr_pad=nisca->nisca$b_tr_pad;
 
-	/*
-	 * If we have padding, remove it.
-	 */
-	if (flags & DN_RT_F_PF) {
-		padlen = flags & ~DN_RT_F_PF;
-		skb_pull(skb, padlen);
-		flags = *skb->data;
-	}
+      /*
+       * If we have padding, remove it.
+       */
+      if (flags & DN_RT_F_PF) {
+              padlen = flags & ~DN_RT_F_PF;
+              skb_pull(skb, padlen);
+              flags = *skb->data;
+      }
 
 	skb->nh.raw = skb->data;
 
@@ -3801,8 +3827,8 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
 			(int)flags, (dev) ? dev->name : "???", len, skb->len, 
 			padlen);
 
-	if (nisca->nisca$b_reason & NISCA$M_TR_CCFLG) {
-	  switch(nisca->nisca$b_msg) {
+	if (nisca->nisca$b_msg & NISCA$M_TR_CCFLG) {
+	  switch((nisca->nisca$b_msg)&0x1f) {
 	  case NISCA$C_HELLO:
 	    return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, dn_neigh_endnode_hello);
 	  }
@@ -4770,6 +4796,7 @@ static int dn_def_dev_handler(ctl_table *table, int write,
 				void *buffer, size_t *lenp)
 {
 	size_t len;
+	int err;
 	struct net_device *dev = decnet_default_device;
 	char devname[17];
 
@@ -4791,11 +4818,15 @@ static int dn_def_dev_handler(ctl_table *table, int write,
 		if ((dev = __dev_get_by_name(devname)) == NULL)
 			return -ENODEV;
 
+#if 0
+		// not now. this will be set in dn_dev_create
 		if (dev->dn_ptr == NULL)
 			return -ENODEV;
+#endif
 
 		decnet_default_device = dev;
 		filp->f_pos += *lenp;
+		dn_dev_create(dev, &err); // put it here to make it start
 
 		return 0;
 	}
