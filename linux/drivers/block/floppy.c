@@ -4153,6 +4153,7 @@ static int have_no_fdc= -ENODEV;
 
 int __init floppy_init(void)
 {
+#if 0
 	int i,unit,drive;
 
 
@@ -4280,6 +4281,7 @@ int __init floppy_init(void)
 			register_disk(NULL, MKDEV(MAJOR_NR,TOMINOR(drive)+i*4),
 					1, &floppy_fops, 0);
 	}
+#endif
 	return have_no_fdc;
 }
 
@@ -4479,7 +4481,9 @@ MODULE_LICENSE("GPL");
 
 #else
 
+#if 0
 __setup ("floppy=", floppy_setup);
+#endif
 
 /* eject the boot floppy (if we need the drive for a different root floppy) */
 /* This should only be called at boot time when we're sure that there's no
