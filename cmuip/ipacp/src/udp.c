@@ -226,7 +226,7 @@ extern signed long
 
 // MACLIB.MAR
 
-extern  void    Swapbytes();
+extern  void    swapbytes();
 extern  void    Movbyt();
 
 // MEMGR.BLI
@@ -354,7 +354,7 @@ void Log_UDP_Packet(Seg,SwapFlag,SendFlag)
 	{
 	CH$MOVE(UDP_HEADER_SIZE,CH$PTR(Seg,0),CH$PTR(segcopy,0)); // Make a copy
 	seghdr = segcopy;	// Point at this version...
-	SwapBytes(UDP_HEADER_SIZE/2,seghdr); // Swap header bytes
+	swapbytes(UDP_HEADER_SIZE/2,seghdr); // Swap header bytes
 	};
 
 // Print first part of info
@@ -481,7 +481,7 @@ void udp$input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 
 // Fix byte order of the UDP header
 
-    SwapBytes(UDP_HEADER_SIZE/2,Seg);
+    swapbytes(UDP_HEADER_SIZE/2,Seg);
 
     
 // Setup pointer to UDP data and UDP data size
@@ -659,7 +659,7 @@ void udp$icmp(ICMtype,ICMex,IPsrc,IPdest,UDPptr,UDPlen,
 
     if ($$LOGF(LOG$ICMP+LOG$UDP))
 	QL$FAO("!%T UDP$ICMP UDPlen !SL Bufsize !SL!/",0,UDPlen,bufsize);
-    SwapBytes(UDPlen/2,UDPptr);
+    swapbytes(UDPlen/2,UDPptr);
 
 // Find the connection that this ICMP message is for
 // Remember that the ICMP/IP message is what we originally sent, so the
@@ -1584,7 +1584,7 @@ UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
 // Swap the header bytes and compute the checksum
 // No longer compute the checksum as it is now done in IP (see header comments)
 
-    SwapBytes(UDP_HEADER_SIZE/2,Seg);
+    swapbytes(UDP_HEADER_SIZE/2,Seg);
 //    Seg->UP$Checksum=Gen_Checksum(Segsize,Seg,LocalAddr,ForeignAddr,
 //				  UDP_Protocol);
 

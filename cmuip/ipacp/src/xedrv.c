@@ -226,7 +226,7 @@ MODULE XE_DRIVER(IDENT="5.0a",LANGUAGE(BLISS32),
 
 // NETMACLIB.OBJ
 extern    Time_Stamp();
-extern     SwapBytes();
+extern     swapbytes();
 
 // NETDEVICES.OBJ
 extern      ASCII_HEX_BYTES();
@@ -353,9 +353,9 @@ XE_StartDev ( XE_Int , setflag , setaddr )
     signed long
 	RC,
 	plen;
-	struct XE_iosb_structure * IOS;
-	struct XE_setup_structure * Setup;
-	struct XE_sdesc_structure * Paramdescr;
+	struct XE_iosb_structure IOS_ , * IOS = &IOS_;
+	struct XE_setup_structure Setup_, * Setup= &Setup_;
+	struct XE_sdesc_structure Paramdescr_, * Paramdescr= &Paramdescr_;
 
 // Build the nasty setup block required by the ethernet device
 
@@ -397,7 +397,7 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 // Set up for IP protocol on this channel
 
     Setup->XE$l_protocol      = XE_IP_type;	// IP
-    Swapbytes(1,Setup->XE$l_protocol);
+    swapbytes(1,&Setup->XE$l_protocol);
 
     Paramdescr->xe$setup_length = plen;
     Paramdescr->xe$setup_address = Setup;
@@ -422,7 +422,7 @@ XE_StartDev ( XE_Int , setflag , setaddr )
     Setup->XE$l_protocol = XE_ARP_type;
     Setup->xe$w_mca_mode = NMA$C_LINMC_SET;
 
-    Swapbytes(1,Setup->XE$l_protocol);
+    swapbytes(1,&Setup->XE$l_protocol);
     Paramdescr->xe$setup_length = (long)Setup->xe$setup_end - (long)Setup;
     Paramdescr->xe$setup_address = Setup;
 
@@ -820,7 +820,7 @@ extern 	LIB$GET_VM_PAGE();
     xearp$init();
 
 // Assign Ethernet Controller
-    if (! (RC=exe$assign (dev_config->dc_devname, XE_Chan)))
+    if (! (RC=exe$assign (&dev_config->dc_devname, &XE_Chan, 0, 0, 0)))
          // Ethernet controller assign failed
 	{
 	DRV$Fatal_FAO("XE $ASSIGN failure (dev=), EC = !XL",
@@ -829,7 +829,7 @@ extern 	LIB$GET_VM_PAGE();
 	};
 
 //  Assign the channel for the arp responder
-    if (! (RC=exe$assign( dev_config->dc_devname,XAR_Chan)))
+    if (! (RC=exe$assign( &dev_config->dc_devname,&XAR_Chan, 0, 0 ,0)))
          // Ethernet controller assign failed
 	{
 	DRV$Fatal_FAO("XE $ASSIGN failure (dev=), EC = !XL",
@@ -841,7 +841,7 @@ extern 	LIB$GET_VM_PAGE();
     // Allocate VM
     //!!HACK!!// When are we going to deallocate this?  Ever?
 //    if (! (LIB$GET_VM(%REF(XE_Interface_size*4),XE_Int)))
-      if (! (LIB$GET_VM_PAGE(/*%REF*/(((XE_Interface_size * 4) / 512) + 1),XE_Int)))
+      if (! (LIB$GET_VM_PAGE(/*%REF*/(((XE_Interface_size * 4) / 512) + 1),&XE_Int)))
 	{	// Couldn't allocate memory for controller block
 	DRV$Fatal_FAO("XE LIB$GET_VM failure (dev=), EC = !XL" ,
 		    dev_config->dc_devname,RC);
@@ -871,7 +871,7 @@ extern 	LIB$GET_VM_PAGE();
     // Allocate VM
     //!!HACK!!// When are we going to deallocate this?  Ever?
 //    if (! (LIB$GET_VM(%REF(MAX_RCV_BUF*XERCV_LEN*4),rcvhdrs)))
-      if (! (LIB$GET_VM_PAGE(/*%REF*/(((MAX_RCV_BUF*XERCV_LEN*4)/512)+1),rcvhdrs)))
+      if (! (LIB$GET_VM_PAGE(/*%REF*/(((MAX_RCV_BUF*XERCV_LEN*4)/512)+1),&rcvhdrs)))
 	{	// Couldn't allocate memory for receive headers
 	DRV$Fatal_FAO("XE LIB$GET_VM failure (dev=!AS), RC=!XL",
 		    dev_config->dc_devname,RC);
@@ -1014,7 +1014,7 @@ X:	{
 
 	    CH$MOVE(XE_ADR_SIZE,CH$PTR(Addrs),Sbuf->XESND$dest);
 	    Sbuf->XESND$type = XE_IP_type;
-	    Swapbytes(1,Sbuf->XESND$type);
+	    swapbytes(1,&Sbuf->XESND$type);
 
 	    xchan = XE_Int->xei$io_chan;
 

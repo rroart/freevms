@@ -269,7 +269,7 @@ extern  void    IP$SET_HOSTS();
 extern     void set_ip_device_offline();
 extern     User_Requests_Avail();
 extern     void MovByt();
-extern     void SwapBytes();
+extern     void swapbytes();
 extern     Time_Stamp();
 
 // TCP.BLI

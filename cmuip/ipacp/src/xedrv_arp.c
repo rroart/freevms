@@ -147,7 +147,7 @@ extern
 
 // NETMACLIB.OBJ
 extern     Time_Stamp();
-extern     SWAPBYTES();
+extern     swapbytes();
 
 // NETDEVICES.OBJ
 extern  void    ASCII_HEX_BYTES();
@@ -290,10 +290,10 @@ void xearp$init (void)
 
     for (I=0;I<=(ARP_HSHLEN-1);I++)
 	ARPHTB[I] = 0;
-    exe$bintim(ARP_SWP_TTXT,
-	    ARP_SWP_TIME);
-    exe$setimr(0, ARP_SWP_TIME,
-	    ARP_SWEEP);
+    exe$bintim(&ARP_SWP_TTXT,
+	    &ARP_SWP_TIME);
+    exe$setimr(0, &ARP_SWP_TIME,
+	    ARP_SWEEP, 0, 0);
     }
 
 
@@ -360,8 +360,8 @@ struct ARP_BLK * ARBLK;
 // If byteswapping is needed, then some fields need to be fixed
 
     if (SWAPPF)
-	SWAPBYTES((ARBLK->AB_SWP_END-ARBLK->AB_SWP_START)/2,
-		  ARBLK->AB_SWP_START);
+	swapbytes((ARBLK->AB_SWP_END-ARBLK->AB_SWP_START)/2,
+		  &ARBLK->AB_SWP_START);
     XE_Int->XEI$ARP_Block = ARBLK;
     }
 
@@ -537,8 +537,8 @@ struct arp_PKT * ARBUF;
 
 	if (ARBLK->AB_SWAP_16)
 	    {
-	    SWAPBYTES(1,ARBUF->ar$hln);
-	    SWAPBYTES((HWLEN+ARP_IP_LEN)/2,ARBUF->ar$xtra);
+	    swapbytes(1,&ARBUF->ar$hln);
+	    swapbytes((HWLEN+ARP_IP_LEN)/2,&ARBUF->ar$xtra);
 	    };
 
 	if ($$LOGF(LOG$ARP))
@@ -621,8 +621,8 @@ char AR_THA [ARP_HDW_LEN];
 
 	if (ARBLK->AB_SWAP_16)
 	    {
-	    SWAPBYTES(1,ARBUF->ar$hln);
-	    SWAPBYTES((HWLEN+ARP_IP_LEN)/2,ARBUF->ar$xtra);
+	    swapbytes(1,&ARBUF->ar$hln);
+	    swapbytes((HWLEN+ARP_IP_LEN)/2,&ARBUF->ar$xtra);
 	    };
 
 // Copy the dynamic fields out of the ARP buffer. Order is same as above
@@ -687,8 +687,8 @@ char AR_THA [ARP_HDW_LEN];
 
 		if (ARBLK->AB_SWAP_16)
 		    {
-		    SWAPBYTES(1,ARBUF->ar$hln);
-		    SWAPBYTES((HWLEN+ARP_IP_LEN)/2,ARBUF->ar$xtra);
+		    swapbytes(1,&ARBUF->ar$hln);
+		    swapbytes((HWLEN+ARP_IP_LEN)/2,&ARBUF->ar$xtra);
 		    };
 
 // Do an ARP output

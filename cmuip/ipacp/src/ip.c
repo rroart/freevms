@@ -248,7 +248,7 @@ extern  void    QL_FAO();
 extern     Calc_checksum();
 extern     Gen_Checksum();
 extern  void    MovByt();
-extern  void    SwapBytes();
+extern  void    swapbytes();
 
 // Memgr.bli
 
@@ -997,7 +997,7 @@ ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 
 // Re-arrange bytes and words in IP header
 
-    SwapBytes(IP_HDR_SWAP_SIZE,IPHDR);
+    swapbytes(IP_HDR_SWAP_SIZE,IPHDR);
 
 // Compute checksum for IP header
 
@@ -1119,7 +1119,7 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 	if ($$LOGF(LOG$IP+LOG$IPERR))
 	    {
 	    QL$FAO("!%T IP Receive checksum error, sum=!XL!/",0,Sum);
-	    Swapbytes(IP_HDR_SWAP_SIZE,iphdr);
+	    swapbytes(IP_HDR_SWAP_SIZE,iphdr);
 	    ip$log(ASCIDNOT("(IPrecv)"),iphdr);
 	    };
         mm$seg_free(Buf_size,Buf);
@@ -1128,7 +1128,7 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 
 // Do byteswap of word fields in IP header (not including options or addresses).
 
-    Swapbytes(IP_HDR_SWAP_SIZE,iphdr);
+    swapbytes(IP_HDR_SWAP_SIZE,iphdr);
 
 // Make sure datagram length computed from "Total Length" field of IP header
 // is consistent with length actually transferred from device.
@@ -1250,7 +1250,7 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 
 // Swap bytes and words in IP header
 
-	    Swapbytes(IP_HDR_SWAP_SIZE,iphdr);
+	    swapbytes(IP_HDR_SWAP_SIZE,iphdr);
 
 // Put this datagram in net send queue
 

@@ -407,7 +407,7 @@ extern  void    NML$GETNAME();
 // MACLIB.MAR
 
 extern     Time_Stamp();
-extern  void    SwapBytes();
+extern  void    swapbytes();
 
 // IOUTIL.BLI
 
@@ -1416,7 +1416,7 @@ struct segment_structure * seghdr;
 	{
 	CH$MOVE(TCP_HEADER_SIZE,CH$PTR(seg,0),CH$PTR(segcopy,0));
 	seghdr = segcopy;
-	SwapBytes(TCP_HEADER_SIZE/2,seghdr); // Swap header bytes back
+	swapbytes(TCP_HEADER_SIZE/2,seghdr); // Swap header bytes back
 	seghdr->sh$seq = ROT(seghdr->sh$seq,16);
 	seghdr->sh$ack = ROT(seghdr->sh$ack,16);
 	};
@@ -2640,7 +2640,7 @@ switch (QB->nr$icmp)
 {
 	case TRUE:			// ICMP message for TCP
 	    {
-	    SwapBytes(QB->nr$size/2,seg); // Swap header bytes back
+	    swapbytes(QB->nr$size/2,seg); // Swap header bytes back
 
 // Find out what connection this is for. The "segment" is the first part of
 // the TCP segment we sent out to generate the ICMP reply.
@@ -2733,7 +2733,7 @@ X:	    {
 		goto leave_x;
 		};
 
-	    SwapBytes(TCP_HEADER_SIZE/2,seg); // Swap header bytes back
+	    swapbytes(TCP_HEADER_SIZE/2,seg); // Swap header bytes back
 	    seg->sh$seq = ROT(seg->sh$seq,16);
 	    seg->sh$ack = ROT(seg->sh$ack,16);
 

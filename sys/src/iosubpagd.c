@@ -65,6 +65,13 @@ int ioc$search(struct return_values *r, void * devnam) {
   } else {
     device=devstr;
   }
+  {
+    // temp downcase?
+    int i;
+    for(i=0;i<3;i++) {
+      if (device[i]>='A' && device[i]<='Z') device[i]|=0x20;
+    }
+  }
   do {
     //    printk("bcmp %s %s\n",d->ddb$t_name,s->dsc$a_pointer);
     struct _sb * sb=d->ddb$ps_sb;

@@ -37,7 +37,7 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
     unsigned short int chan;
     struct _ucbnidef * newucb;
-    ioc_std$clone_ucb(u /*ddb->ddb$ps_ucb*/ /*&er$ucb*/,&newucb);
+    ioc_std$clone_ucb(u->ucb$l_ddb->ddb$ps_ucb /*&er$ucb*/,&newucb);
     //    exe$assign(dsc,&chan,0,0,0);
 
     struct _ucbnidef * ni=newucb;
@@ -56,6 +56,8 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     //lsb->lsb$l_next_lsb=ni->ucb$l_ni_lsb;
     //ni->ucb$l_ni_lsb=lsb;
   }
+  if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL;
+  return SS$_NORMAL;
 }
 
 int lan$sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) { }

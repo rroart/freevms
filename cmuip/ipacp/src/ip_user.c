@@ -102,7 +102,7 @@ extern signed long
 
 // MACLIB.MAR
 
-extern  void    Swapbytes();
+extern  void    swapbytes();
 extern  void    MOVBYT();
 extern     Calc_Checksum();
 
@@ -219,7 +219,7 @@ void Log_IP_Packet(seg,SwapFlag,SendFlag)
 	{
 	CH$MOVE(Header_Size,CH$PTR(seg,0),CH$PTR(segcopy,0)); // Make a copy
 	seghdr = segcopy;	// Point at this version...
-	SwapBytes(Header_Size/2,seghdr); // Swap header bytes
+	swapbytes(Header_Size/2,seghdr); // Swap header bytes
 	};
 
 // Print first part of info
@@ -984,7 +984,7 @@ void ipu$send(struct user_send_args * Uargs)
 	// Send packet exactly as the client passed it.
 
 	// Re-arrange bytes and words in IP header
-	SwapBytes ( IP_HDR_SWAP_SIZE , seg );
+	swapbytes ( IP_HDR_SWAP_SIZE , seg );
 
 	// Compute checksum for IP header
 	if (Flags&4)

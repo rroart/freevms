@@ -8,7 +8,9 @@
 
 #include <stdarg.h>
 
-CH$FILL() {
+CH$FILL(ch, size, addr) {
+  memset(addr,ch, size);
+  return SS$_NORMAL;
   printk("CH$FILL not implemented\n");
 }
 
@@ -95,7 +97,9 @@ PLIT() {
   printk("PLIT not implemented\n");
 }
 
-CH$MOVE() {
+CH$MOVE(size, src, addr) {
+  memcpy(addr,src, size);
+  return SS$_NORMAL;
   printk("CH$MOVE not implemented\n");
 }
 
@@ -131,7 +135,7 @@ ROT() {
   printk("ROT not implemented\n");
 }
 
-SwapBytes() {
+SwapBytes_not() {
   printk("SwapBytes not implemented\n");
 }
 
@@ -147,7 +151,11 @@ XQL$FAO() {
   printk("XQL$FAO not implemented\n");
 }
 
-LIB$GET_VM_PAGE() {
+LIB$GET_VM_PAGE(size, addr) 
+     long * addr;
+{
+  *addr=kmalloc(size/8+1,GFP_KERNEL);
+  return SS$_NORMAL;
   printk("LIB$GET_VM_PAGE not implemented\n");
 }
 
@@ -207,7 +215,8 @@ UnLock_IODB_not() {
   printk("UnLock_IODB_not not implemented\n");
 }
 
-ch$move() {
+ch$move(a,b,c) {
+  return CH$MOVE(a,b,c);
   printk("ch$move not implemented\n");
 }
 
@@ -285,7 +294,7 @@ Unlock_IODB() {
   printk("Unlock_IODB not implemented\n");
 }
 
-Swapbytes() {
+Swapbytes_not() {
   printk("Swapbytes not implemented\n");
 }
 

@@ -89,7 +89,7 @@ extern  void    ASCII_DEC_BYTES();
 
 // MacLib.mar
 extern     CALC_CHECKSUM();		// MacLib
-extern  void    SwapBytes();	// MacLib
+extern  void    swapbytes();	// MacLib
 
 // IP.bli
 extern  void    ip$send();
@@ -261,7 +261,7 @@ extern	icmp$user_input();
 	};
 
     // Fix-up the ICMP word ordering
-    SwapBytes(ICMP_HEADER_SIZE/2,ICMptr);
+    swapbytes(ICMP_HEADER_SIZE/2,ICMptr);
     ICMdat = 0;
     ICMtype = ICMptr->icm$type;
 
@@ -326,7 +326,7 @@ extern	icmp$user_input();
 
 // Fix the byteswapped packet
 
-	    Swapbytes(IP_HDR_SWAP_SIZE,IPhdr);
+	    swapbytes(IP_HDR_SWAP_SIZE,IPhdr);
 	    if ($$LOGF(LOG$ICMP))
 		ip$log(ASCID("ICMrcv/IP"),IPhdr);
 
@@ -362,7 +362,7 @@ extern	icmp$user_input();
 		icmp_mib->MIB$icmpInRedirects =
 			icmp_mib->MIB$icmpInRedirects + 1;
 
-		Swapbytes(2,ICMptr->icm$r_gwy);
+		swapbytes(2,ICMptr->icm$r_gwy);
 		ICMP_Add(ICMptr->icm$r_gwy,ICMptr->icm$data);
 		};
 		break;
@@ -575,7 +575,7 @@ void ICMP_Echo(ICMpkt,ICMlen,IPPKT,IPlen)
 
 // Swap the header bytes and compute the checksum
 
-    SwapBytes(ICMP_HEADER_SIZE/2,Seg);
+    swapbytes(ICMP_HEADER_SIZE/2,Seg);
     Seg->icm$cksum = Calc_Checksum(Segsize, Seg);
 
 // Send packet, preserving ID, TOS, TTL, etc.
@@ -680,7 +680,7 @@ void ICMP_Send_DUNR(ICMpkt,ICMlen,IPPKT,IPlen,code)
 
 // Swap the header bytes and compute the checksum
 
-    SwapBytes(ICMP_HEADER_SIZE/2,Seg);
+    swapbytes(ICMP_HEADER_SIZE/2,Seg);
     Seg->icm$cksum = Calc_Checksum(Segsize, Seg);
 
 // Send packet, preserving ID, TOS, TTL, etc.

@@ -438,7 +438,7 @@ MODULE TCP(IDENT="8.2",LANGUAGE(BLISS32),
 extern int   Time_Stamp(void);
 extern  Calc_CheckSum();
 extern void     MovByt();
-extern  void    SWAPBYTES();
+extern  void    swapbytes();
 extern  void    cq_enqueue();
 extern  void    cq_dequeue();
 extern  void    cq_deqcopy();
@@ -2085,7 +2085,7 @@ void do_probe(struct tcb_structure * tcb)
     seg->sh$seq = ROT(seg->sh$seq,16);
     seg->sh$ack = ROT(seg->sh$ack,16);
 
-    SwapBytes(TCP_HEADER_SIZE/2,seg);
+    swapbytes(TCP_HEADER_SIZE/2,seg);
     seg->sh$checksum = Gen_Checksum(segsize,seg,tcb->local_host,
 				    tcb->foreign_host,TCP_PROTOCOL);
 // Finally, send the packet.
@@ -2194,7 +2194,7 @@ void Build_Header(tcb,seg,length,seqspace,seqstart,
 // Swap the bytes in the header. Note that options are always in network byte
 // order and thus need not be swapped.
 
-    SwapBytes(TCP_HEADER_SIZE/2,seg);
+    swapbytes(TCP_HEADER_SIZE/2,seg);
 
 // generate the actual checksum now that all the bytes are in the order of
 // transmission.

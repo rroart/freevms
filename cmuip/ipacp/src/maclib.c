@@ -1325,10 +1325,10 @@ l10:
 #endif
 
 //ENTRY  SWAPBYTES,^M<>
-	int SWAPBYTES(WrdCnt,Start)
+	int swapbytes(WrdCnt,Start)
 {
-  int *R0,*R1,*R2,*R3,*R4,*R5,*R6,*R7,*R8,*R9;
-	R1 = Start;			// starting word address.
+  int *R0,*R2,*R3,*R4,*R5,*R6,*R7,*R8,*R9;
+	unsigned short * R1 = Start;			// starting word address.
 Swp_Loop:
 	R0 = *R1;				// low ==> temp
 	*R1 = (R1++)[1];			// high ==> low

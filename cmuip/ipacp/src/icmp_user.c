@@ -108,7 +108,7 @@ extern signed long
 
 // MACLIB.MAR
 
-extern  void    Swapbytes();
+extern  void    swapbytes();
 extern  void    MOVBYT();
 extern     Calc_Checksum();
 
@@ -220,7 +220,7 @@ struct dsc$descriptor sptr;
 	{
 	CH$MOVE(ICMP_HEADER_SIZE,CH$PTR(Seg,0),CH$PTR(segcopy,0)); // Make a copy
 	seghdr = segcopy;	// Point at this version...
-	SwapBytes(ICMP_HEADER_SIZE/2,seghdr); // Swap header bytes
+	swapbytes(ICMP_HEADER_SIZE/2,seghdr); // Swap header bytes
 	};
 
 // Print first part of info
@@ -1029,7 +1029,7 @@ void icmp$send(struct user_send_args * uargs)
 
 // Swap the header bytes and compute the checksum
 
-    SwapBytes(ICMP_HEADER_SIZE/2,Seg);
+    swapbytes(ICMP_HEADER_SIZE/2,Seg);
 //!!HACK!!// Hardwired in ICMP Header size of 8.
     Seg->icm$cksum=Calc_Checksum(usize+ICMP_HEADER_SIZE,Seg);
 
