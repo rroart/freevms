@@ -7,6 +7,6 @@ Do more SCA/SCS stuff.
 At least look at whatever "device" uml uses and NE2000.
 
 FIX pal
-better RMS compatibilty; check input and output RAB fields
+better RMS compatibilty; check input and output RAB fields (incl l_sts)
 
 Logical support in the DCL and elsewhere
