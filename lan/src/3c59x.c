@@ -1,4 +1,5 @@
 #include<crbdef.h>
+#include<cxbdef.h>
 #include<cdtdef.h>
 #include<dcdef.h>
 #include<ddtdef.h>
@@ -22,7 +23,7 @@
 #include<system_service_setup.h>
 #include<descrip.h>
 
-#include<linux/blkdev.h>
+#include<linux/netdevice.h>
 
 struct _ucbnidef * ecu;
 
@@ -325,7 +326,7 @@ int ec$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
 
 int ec$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL|0x080000000000;
-  struct net_device * dev = ((struct _ucbnidef *)ucb)->ucb$l_extra_l_1;
+  struct net_device * dev = ((struct _ucbnidef *)u)->ucb$l_extra_l_1;
   int sts = dev->hard_start_xmit  (i, p, u, c); 
   return sts = SS$_NORMAL;
 }
@@ -1162,8 +1163,8 @@ static int mdio_read(struct net_device *dev, int phy_id, int location);
 static void mdio_write(struct net_device *vp, int phy_id, int location, int value);
 static void vortex_timer(unsigned long arg);
 static void rx_oom_timer(unsigned long arg);
-static int vortex_start_xmit(struct sk_buff *skb, struct net_device *dev);
-static int boomerang_start_xmit(struct sk_buff *skb, struct net_device *dev);
+static int vortex_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+static int boomerang_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 static int vortex_rx(struct net_device *dev);
 static int boomerang_rx(struct net_device *dev);
 static void vortex_interrupt(int irq, void *dev_id, struct pt_regs *regs);
@@ -2348,10 +2349,11 @@ boomerang_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _
 	if (skb->ip_summed != CHECKSUM_HW)
 			vp->tx_ring[entry].status = cpu_to_le32(skb->len | TxIntrUploaded);
 	else
+#endif
 #else
+#if 0
 			vp->tx_ring[entry].status = cpu_to_le32(skb->len | TxIntrUploaded | AddTCPChksum);
 
-#if 0
 	if (!skb_shinfo(skb)->nr_frags) {
 #endif
 		vp->tx_ring[entry].frag[0].addr = cpu_to_le32(pci_map_single(vp->pdev, buf,
@@ -2661,7 +2663,7 @@ static int vortex_rx(struct net_device *dev)
 	int i;
 	short rx_status;
 
-	extern struct _ucb * ecu;
+	extern struct _ucbnidef * ecu;
 	struct _ucb * u = ecu;
     
 	if (vortex_debug > 5)
@@ -2704,7 +2706,7 @@ static int vortex_rx(struct net_device *dev)
 					dma_addr_t dma = pci_map_single(vp->pdev, buf,
 									   pkt_len, PCI_DMA_FROMDEVICE);
 					outl(dma, ioaddr + Wn7_MasterAddr);
-					outw(i->irp$l_qio_p2 + 14 + 3) & ~3, ioaddr + Wn7_MasterLen);
+					outw((i->irp$l_qio_p2 + 14 + 3) & ~3, ioaddr + Wn7_MasterLen);
 					outw(StartDMAUp, ioaddr + EL3_CMD);
 					while (inw(ioaddr + Wn7_MasterStatus) & 0x8000)
 						;
