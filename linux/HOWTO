@@ -11,6 +11,7 @@ bugs present in pure gcc 3.0.1 was gone in pure 3.1.
 Untar freevms, go to the linux directory, and do ./prescript.
 
 Go to the freevms directory and do a make and make install (if uml, see Makefiles for how to compile). Then copy the resulting files from root/.
+The resulting VFS root should have /vms$common.
 If you want to know how to make the linker do: cat linker/src/HOW
 
 UserMode Linux no longer needs the symlinks from /usr/include/{asm,linux}
