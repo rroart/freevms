@@ -1,6 +1,6 @@
 O_TARGET := lan.o
 
-export-objs := 8390.o
+export-objs := 8390.o mii.o
 
 obj-y := common.o
 

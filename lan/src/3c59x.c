@@ -2351,10 +2351,8 @@ boomerang_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _
 			vp->tx_ring[entry].status = cpu_to_le32(skb->len | TxIntrUploaded);
 	else
 #endif
-#else
-#if 0
 			vp->tx_ring[entry].status = cpu_to_le32(skb->len | TxIntrUploaded | AddTCPChksum);
-
+#if 0
 	if (!skb_shinfo(skb)->nr_frags) {
 #endif
 		vp->tx_ring[entry].frag[0].addr = cpu_to_le32(pci_map_single(vp->pdev, buf,
@@ -2707,7 +2705,7 @@ static int vortex_rx(struct net_device *dev)
 					dma_addr_t dma = pci_map_single(vp->pdev, buf,
 									   pkt_len, PCI_DMA_FROMDEVICE);
 					outl(dma, ioaddr + Wn7_MasterAddr);
-					outw((i->irp$l_qio_p2 + 14 + 3) & ~3, ioaddr + Wn7_MasterLen);
+					outw((pkt_len + 14 + 3) & ~3, ioaddr + Wn7_MasterLen);
 					outw(StartDMAUp, ioaddr + EL3_CMD);
 					while (inw(ioaddr + Wn7_MasterStatus) & 0x8000)
 						;
