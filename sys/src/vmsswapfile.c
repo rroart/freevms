@@ -662,7 +662,7 @@ static int try_to_unuse(unsigned int type)
 		if ((swcount > 0) != PageSwapCache(page))
 			BUG();
 		if ((swcount > 1) && PageDirty(page)) {
-			rw_swap_page(WRITE, page);
+		  //rw_swap_page(WRITE, page);
 			lock_page(page);
 		}
 		if (PageSwapCache(page))
@@ -960,7 +960,7 @@ asmlinkage long sys_swapon(const char * specialfile, int swap_flags)
 	}
 
 	lock_page(virt_to_page(swap_header));
-	rw_swap_page_nolock(READ, SWP_ENTRY(type,0), (char *) swap_header);
+	//	rw_swap_page_nolock(READ, SWP_ENTRY(type,0), (char *) swap_header);
 
 	if (!memcmp("SWAP-SPACE",swap_header->magic.magic,10))
 		swap_header_version = 1;
@@ -1308,3 +1308,42 @@ int valid_swaphandles(swp_entry_t entry, unsigned long *offset)
 	return ret;
 #endif
 }
+void delete_from_swap_cache(struct page *page ){
+  BUG();
+}
+struct address_space swapper_space;
+
+int add_to_swap_cache(struct page * a, swp_entry_t b) {
+  BUG();
+}
+
+struct page * read_swap_cache_async(swp_entry_t a){
+  BUG();
+}
+
+#if 0
+void free_page_and_swap_cache(struct page *page){
+  BUG();
+}
+#endif
+
+void swap_setup(void){
+  printk("swap setup does nothing\n");
+}
+
+struct page * lookup_swap_cache(swp_entry_t t){
+  BUG();
+}
+
+void activate_page(struct page *p){
+  BUG();
+}
+
+int page_cluster;
+
+void show_swap_cache_info(void){
+  BUG();
+}
+
+pager_daemon_t pager_daemon;
+
