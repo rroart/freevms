@@ -4,8 +4,8 @@ VMSSUBDIRS2 = examples
 
 export LIBGCC = `find /usr/lib -name libgcc.a`
 
-#export LINKPRE = -Bstatic -s 
-export LINKPRE = -Bstatic
+#export LINKPRE = -Bstatic
+export LINKPRE = -Bstatic -s 
 export LINKPOST = /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/libc.a
 
 vmsall:
