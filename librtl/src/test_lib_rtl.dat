@@ -1,0 +1,255 @@
+lib$adawi
+comment 1
+filler 1
+lib$addx
+sequence check
+2 12345678 ABCDEFBA 2 12345678 ABCDEFBA 2 00000000 00000000 ls 2 SS$_NORMAL
+lib$addx
+add 0 to 0 in Hex
+1 00000000 1 00000000 1 00000000 ls 1 SS$_NORMAL
+lib$addx
+add -1 to 1 in Hex
+1 FFFFFFFF 1 00000001 1 00000000 ls 1 SS$_NORMAL
+lib$addx
+add Max int + 1 in Hex
+1 7FFFFFFF 1 00000001 1 00000000 ls 1 SS$_INTOVF
+lib$addx
+add Max int -1 in Hex
+1 7FFFFFFF 1 FFFFFFFF 1 00000000 ls 1 SS$_NORMAL
+lib$addx
+add 0 to 0 in Hex
+1 7FFFFFFF 1 80000000 1 FFFFFFFF ls 1 SS$_NORMAL
+lib$addx
+carry over to next long word
+2 7FFFFFFE FFFFFFFF 2 00000000 00000001 2 00000000 00000000 ls 2 SS$_NORMAL
+lib$addx
+addition in second long word
+2 7FFFFFFE FFFFFFFF 2 00000001 00000000 2 00000000 00000000 ls 2 SS$_NORMAL
+lib$addx
+addition in first long word
+3 7FEFFFFF FFFFFFFF FFFFFFFE 3 00000000 00000000 00000001 3 00000000 00000000 00000000 ls 3 SS$_NORMAL
+lib$addx
+roll over to top of long word
+3 7FFFFFFF FFFFFFFF FFFFFFFF 3 00000000 00000000 00000001 3 00000000 00000000 00000000 ls 3 SS$_INTOVF
+lib$analyze_sdesc
+Testing single character
+cd A SS$_NORMAL
+lib$analyze_sdesc
+Testing small string
+cd ab SS$_NORMAL
+lib$analyze_sdesc
+Testing super big string
+cd MAXCSTR16 SS$_NORMAL
+lib$analyze_sdesc
+Testing NULL pointer
+cd NULL SS$_NORMAL
+lib$analyze_sdesc_64
+Testing NULL pointer
+cd NULL ls 1 SS$_NORMAL
+lib$analyze_sdesc_64
+Testing small string
+cd ABC ls 1 SS$_NORMAL
+lib$analyze_sdesc_64
+Testing NULL pointer
+cd NULL ls 0 SS$_NORMAL
+lib$analyze_sdesc_64
+Testing small string
+cd ABC ls 0 SS$_NORMAL
+lib$asn_wth_mbx
+comment 1
+filler line
+lib$ast_in_prog
+comment 1
+filler line
+lib$attach
+comment 1
+filler 1
+lib$build_nodespec
+Null checks
+cd NULL cd NULL cd NULL cd NULL us 0 LIB$_INVARG
+lib$build_nodespec
+Null checks
+cd "MACHINE_NAME" cd NULL cd NULL cd NULL us 0 SS$_NORMAL
+lib$build_nodespec
+Optional parameter check
+cd "MACHINE_NAME" cd NULL cd 0 cd 0 uw 0 SS$_NORMAL
+lib$build_nodespec
+Optional parameter check ACL list
+cd "MACHINE_NAME" cd NULL cd "acl_list" cd 0 uw 0 SS$_NORMAL
+lib$build_nodespec
+Optional parameter check seconday nodename
+cd "MACHINE_NAME" cd NULL cd 0 cd second_node_name uw 0 SS$_NORMAL
+lib$build_nodespec
+Optional parameter check length
+cd "MACHINE_NAME" cd NULL cd 0 cd 0 uw 1 SS$_NORMAL
+lib$build_nodespec
+Optional parameter ACL and Secondary
+cd "MACHINE_NAME" cd NULL cd "acl_list" cd second_node_name uw 0 SS$_NORMAL
+lib$build_nodespec
+Optional parameter ACL and length
+cd "MACHINE_NAME" cd NULL cd "acl_list" cd 0 uw 1 SS$_NORMAL
+lib$build_nodespec
+Optional parameter  Second and length
+cd "MACHINE_NAME" cd NULL cd NULL cd second_node_name uw 1 SS$_NORMAL
+lib$build_nodespec
+Optional parameter  ACL, Second and length
+cd "MACHINE_NAME" cd NULL cd "acl_list" cd second_node_name uw 1 SS$_NORMAL
+lib$char
+single char
+ch A SS$_NORMAL
+lib$char
+keep first
+ch AB SS$_NORMAL
+lib$char
+numbers
+ch 1 SS$_NORMAL
+lib$compare_nodename
+comment 1
+filler 1
+lib$callg
+comment
+filler
+lib$compress_nodename
+comment
+filler
+lib$convert_date_string
+null check
+NULL  0 0 0 0 0 SS$_NORMAL
+lib$convert_date_string
+take a guess
+21-MAR-2003:20240000  0 0 0 0 0 SS$_NORMAL
+lib$crc
+16 signed long table , initiala crc value and char stream
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16  999999   abcdefg
+lib$crc_table
+polynomial result
+0xFF SS$_NORMAL
+lib$create_user_vm_zone
+comment
+filler
+lib$create_user_vm_zone_64
+comment
+filler
+lib$create_vm_zone
+comment
+filler
+lib$create_dir
+new_directory
+New_Directory
+lib$date_time
+comment
+SS$NORMAL
+lib$delete_file
+comment
+test_file SS$_NORMAL
+lib$delete_symbol
+comment
+MySymbol SS$_NORMAL
+lib$delete_symbol
+Bad Symbol
+#MySymbol LIB$_INVSYMNAM
+lib$delete_logical
+Logical with table name
+My_Logical My_table SS$_NORMAL
+lib$delete_logical
+Logical use default table name
+My_Logical 0 SS$_NORMAL
+lib$delete_vm_zone
+Comment
+1 SS$_NORMAL
+lib$delete_vm_zone_64
+Comment
+1 SS$_NORMAL
+lib$digit_sep
+Single character input
+Z 0 SS$_NORMAL
+lib$digit_sep
+Large Input
+ZZZZZZ 0 SS$_NORMAL
+lib$digit_sep
+NULL input
+NULL 0 SS$_NORMAL
+lib$digit_sep
+Single character input
+Z 1 SS$_NORMAL
+lib$digit_sep
+Large Input
+ZZZZZZ 9 SS$_NORMAL
+lib$digit_sep
+NULL input
+NULL 9 SS$_NORMAL
+lib$disable_ctrl
+NULL input
+NULL 0 SS$_NORMAL
+lib$disable_ctrl
+ctrl T
+1048576 0 SS$_NORMAL
+lib$disable_ctrl
+ctrl Y 
+33554432 0 SS$_NORMAL
+lib$disable_ctrl
+ctrl T and Y 
+34603008 0 SS$_NORMAL
+lib$disable_ctrl
+ctrl T and invalid
+1048577 0  LIB$_INVARG
+lib$disable_ctrl
+ctrl Y and invalid
+33554433 0 LIB$_INVARG
+lib$disable_ctrl
+ctrl T and Y and invalid
+34603009 0 LIB$_INVARG
+lib$do_command
+error
+AASB some_code
+lib$do_command
+clear the screen
+clear some_code
+lib$enable_ctrl
+NULL input
+NULL 0 SS$_NORMAL
+lib$enable_ctrl
+ctrl T
+1048576 0 SS$_NORMAL
+lib$enable_ctrl
+ctrl Y 
+33554432 0 SS$_NORMAL
+lib$enable_ctrl
+ctrl T and Y 
+34603008 0 SS$_NORMAL
+lib$enable_ctrl
+ctrl T and invalid
+1048577 0  LIB$_INVARG
+lib$enable_ctrl
+ctrl Y and invalid
+33554433 0 LIB$_INVARG
+lib$enable_ctrl
+ctrl T and Y and invalid
+34603009 0 LIB$_INVARG
+lib$establish
+comment
+filler
+lib$expand_nodename
+comment
+filler
+lib$fid_to_name
+comment
+filler
+lib$file_scan
+comment
+filler
+lib$file_scan
+comment
+filler
+lib$file_scan_end
+comment
+filler
+lib$find_file
+comment
+filler
+lib$find_file_end
+comment
+filler
+lib$wait
+comment
+filler 

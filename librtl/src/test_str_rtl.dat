@@ -1,0 +1,1187 @@
+str$add
+Invalid sign number 1
+lu 2 ls 0 cd 0 lu 0 ls 0 cd 0 lu 0 ls 0 cd NULL LIB$_INVARG
+str$add
+Invalid sign number 2
+lu 1 ls 0 cd 0 lu 2 ls 0 cd 0 lu 0 ls 0 cd NULL LIB$_INVARG
+str$add
+0 + 0
+lu 0 ls 0 cd 0 lu 0 ls 0 cd 0 lu 0 ls 0 cd 0 SS$_NORMAL
+str$add
+0 + 1
+lu 0 ls 0 cd 0 lu 0 ls 0 cd 1 lu 0 ls 0 cd 1 SS$_NORMAL
+str$add
+1 + 0
+lu 0 ls 0 cd 1 lu 0 ls 0 cd 0 lu 0 ls 0 cd 1 SS$_NORMAL
+str$add
+1 + 1
+lu 0 ls 0 cd 1 lu 0 ls 0 cd 1 lu 0 ls 0 cd 2 SS$_NORMAL
+str$add
+10 + 0
+lu 0 ls 0 cd 10 lu 0 ls 0 cd 0 lu 0 ls 1 cd 1 SS$_NORMAL
+str$add
+0 + 10
+lu 0 ls 0 cd 0 lu 0 ls 0 cd 10 lu 0 ls 1 cd 1 SS$_NORMAL
+str$add
+10 + 10
+lu 0 ls 0 cd 10 lu 0 ls 0 cd 10 lu 0 ls 1 cd 2 SS$_NORMAL
+str$add
+2 + 8 carry 1
+lu 0 ls 0 cd 2 lu 0 ls 0 cd 8 lu 0 ls 1 cd 1 SS$_NORMAL
+str$add
+-8 + -2 carry 1
+lu 1 ls 0 cd 8 lu 1 ls 0 cd 2 lu 1 ls 1 cd 1 SS$_NORMAL
+str$add
+237 + 763 triple carry 1
+lu 0 ls 0 cd 237 lu 0 ls 0 cd 763 lu 0 ls 3 cd 1 SS$_NORMAL
+str$add
+0 x 10^0 + 0 x 10^0
+lu 0 ls 0 cd 0 lu 0 ls 0 cd 0 lu 0 ls 0 cd 0 SS$_NORMAL
+str$add
+0 x 10^0 + 1 x 10^1
+lu 0 ls 0 cd 0 lu 0 ls 1 cd 1 lu 0 ls 1 cd 1 SS$_NORMAL
+str$add
+1 x 10^1 + 0 x 10^1
+lu 0 ls 1 cd 1 lu 0 ls 1 cd 0 lu 0 ls 1 cd 1 SS$_NORMAL
+str$add
+0 x 10^1 + -0 x 10^1
+lu 0 ls 1 cd 0 lu 1 ls 1 cd 0 lu 0 ls 0 cd 0 SS$_NORMAL
+str$add
+123 x 10^3 + 456 x 10^3
+lu 0 ls 3 cd 123 lu 0 ls 3 cd 456 lu 0 ls 3 cd 579 SS$_NORMAL
+str$add
+123 E 10^5 + 456 x 10^3
+lu 0 ls 5 cd 123 lu 0 ls 3 cd 456 lu 0 ls 3 cd 12756 SS$_NORMAL
+str$add
+456 E 3 + 123 E 5
+lu 0 ls 3 cd 456 lu 0 ls 5 cd 123 lu 0 ls 3 cd 12756 SS$_NORMAL
+str$add
+123 x 10^3 + 456000
+lu 0 ls 3 cd 123 lu 0 ls 0 cd 456000 lu 0 ls 3 cd 579 SS$_NORMAL
+str$add
+123000 + 456 E 3
+lu 0 ls 0 cd 123000 lu 0 ls 3 cd 456 lu 0 ls 3 cd 579 SS$_NORMAL
+str$add
+123000 + 456 E-3
+lu 0 ls 0 cd 123000 lu 0 ls -3 cd 456 lu 0 ls -3 cd 123000456 SS$_NORMAL
+str$add
+123 x 10^1073741823 456 x 10^1073741823
+lu 0 ls 1073741823 cd 123 lu 0 ls 1073741823 cd 456 lu 0 ls 1073741823 cd 579 SS$_NORMAL
+str$add
+123 x 10^10 456
+lu 0 ls 10 cd 123 lu 0 ls 0 cd 456 lu 0 ls 0 cd 1230000000456 SS$_NORMAL
+str$add
+123 + 456 x 10^10 
+lu 0 ls 0 cd 123 lu 0 ls 10 cd 456 lu 0 ls 0 cd 4560000000123 SS$_NORMAL
+str$add
+1 + 1 x 10^70000
+lu 0 ls 0 cd 1 lu 0 ls 70000 cd 1 lu 0 ls 70000 cd 1 STR$_TRU
+str$add
+1 x 10^70000 + 1
+lu 0 ls 70000 cd 1 lu 0 ls 0 cd 1 lu 0 ls 70000 cd 1 STR$_TRU
+str$add
+65535 + 0
+lu 0 ls 0 cd MAXCSTR16 lu 0 ls 0 cd 0 lu 0 ls 0 cd MAXCSTR16 SS$_NORMAL
+str$add
+Large number
+lu 0 ls 0 cd 555555555555555555555 lu 0 ls 0 cd 1000000000 lu 0 ls 0 cd  555555555556555555555 SS$_NORMAL
+str$analyze_sdesc
+Testing single character
+cd A 1 
+str$analyze_sdesc
+Testing small string
+cd ab 2
+str$analyze_sdesc
+Testing super big string
+cd MAXCSTR16 65535
+str$analyze_sdesc
+Testing NULL pointer
+cd NULL 0
+str$analyze_sdesc_64
+Testing NULL pointer
+cd NULL ls 1 0
+str$analyze_sdesc_64
+Testing small string
+cd ABC ls 1 3
+str$analyze_sdesc_64
+Testing NULL pointer
+cd NULL ls 0 0
+str$analyze_sdesc_64
+Testing small string
+cd ABC ls 0 3
+str$append
+Append  NULL A
+cd NULL cd A  SS$_NORMAL
+str$append
+Append  A NULL
+cd A cd NULL  SS$_NORMAL
+str$append
+Append  NULL NULL
+cd NULL cd NULL SS$_NORMAL
+str$append
+Should fit
+cd MAXCSTR16 cd NULL SS$_NORMAL
+str$append
+one too many
+cd MAXCSTR16 cd A STR$_TRU
+str$append
+Append  189 14
+cd 189 cd 14  SS$_NORMAL
+str$append
+Append  1 14
+cd 1 cd 14  SS$_NORMAL
+str$append
+Append  189 14
+cd 189 cd 14  SS$_NORMAL
+str$case_blind_compare
+str$ing 1 = string 2
+cd a cd a 0 
+str$case_blind_compare
+str$ing 1 < string 2
+cd a cd b -1 
+str$case_blind_compare
+str$ing 1 > string 2
+cd b cd a 1 
+str$case_blind_compare
+str$ing 1 = uppercase string 2
+cd a cd A 0 
+str$case_blind_compare
+str$ing 1 = lowercase string 2
+cd A cd a 0 
+str$case_blind_compare
+str$ing 1 > blank filled string 2
+cd aTRLBLK cd A 1 
+str$case_blind_compare
+str$ing 1 > blank filled string 2
+cd ATRLBLK cd a 1 
+str$case_blind_compare
+Null < String 2
+cd NULL cd a -1 
+str$case_blind_compare
+String 2 > NULL
+cd a cd NULL 1 
+str$case_blind_compare
+NULL = NULL 
+cd NULL cd NULL 0
+str$case_blind_compare
+Character 1 = Character 
+cd 1 cd 1 0 
+str$case_blind_compare
+Character 1 < Character 1
+cd 1 cd 2 -1 
+str$case_blind_compare
+Character 1 < Character 1
+cd 2 cd 1 1 
+str$case_blind_compare
+ASCII Character 1 = ASCII Character 1
+cd $ cd $ 0 
+str$case_blind_compare
+ASCII Character 1 < ASCII Character 1
+cd ! cd ) -1 
+str$compare
+14 4 
+cd 14 cd 4 -1
+str$compare
+4 14 
+cd 4 cd 14 1
+str$compare
+a a 
+cd a cd a 0
+str$compare
+b a 
+cd b cd a 1
+str$compare
+a b 
+cd a cd b -1
+str$compare
+Null a
+cd NULL cd a -1
+str$compare
+a Null
+cd a cd NULL 1
+str$compare
+A aa
+cd A cd aa -1
+str$compare
+aa A
+cd aa cd A 1
+str$compare
+aa AA
+cd aa cd AA 1
+str$compare
+AA aa
+cd AA cd aa -1
+str$compare
+Null Null
+cd NULL cd NULL 0
+str$compare
+abcdefg A
+cd abcdefg cd A 1
+str$compare
+A abcdefg
+cd A cd abcdefg -1
+str$compare
+A bcdefg
+cd A cd bcdefg -1
+str$compare
+aA abcdefg
+cd aA cd abcdefg -1
+str$compare_eql
+14 4 
+cd 14 cd 4 1
+str$compare_eql
+4 14 
+cd 4 cd 14 1
+str$compare_eql
+4 4 
+cd 4 cd 4 0
+str$compare_eql
+a a 
+cd a cd a 0
+str$compare_eql
+b a 
+cd b cd a 1
+str$compare_eql
+a b 
+cd a cd b 1
+str$compare_eql
+Null a
+cd NULL cd a 1
+str$compare_eql
+a Null
+cd a cd NULL 1
+str$compare_eql
+A aa
+cd A cd aa 1
+str$compare_eql
+aa A
+cd aa cd A 1
+str$compare_eql
+aa AA
+cd aa cd AA 1
+str$compare_eql
+AA aa
+cd AA cd aa 1
+str$compare_eql
+Null Null
+cd NULL cd NULL 0
+str$compare_eql
+abcdefg A
+cd abcdefg cd A 1
+str$compare_eql
+A abcdefg
+cd A cd abcdefg 1
+str$compare_eql
+A bcdefg
+cd A cd bcdefg 1
+str$compare_eql
+aA abcdefg
+cd aA cd abcdefg 1
+str$compare_multi
+A A Multinational
+cd A cd A ls 0 ls 1 0
+str$compare_multi
+A A Danish
+cd A cd A ls 0 ls 2 0
+str$compare_multi
+A A Finish / Sweedish
+cd A cd A ls 0 ls 3 0
+str$compare_multi
+A A German
+cd A cd A ls 0 ls 4 0
+str$compare_multi
+A A Norwegian
+cd A cd A ls 0 ls 5 0
+str$compare_multi
+A A Spanish
+cd A cd A ls 0 ls 6 0
+str$concat
+concat 2 null's
+2 cd NULL cd NULL SS$_NORMAL
+str$concat
+leading null
+2 cd NULL cd A SS$_NORMAL
+str$concat
+trailing null
+2 cd A cd NULL SS$_NORMAL
+str$concat
+one character
+2 cd A cd A SS$_NORMAL
+str$concat
+still valid length
+2 cd MAXCSTR16 cd NULL SS$_NORMAL
+str$concat
+1 too big
+2 cd A cd MAXCSTR16 SS$_NORMAL 
+str$concat
+concat 3 null's
+3 cd NULL cd NULL cd NULL SS$_NORMAL
+str$concat
+leading null and trailing null
+3 cd A cd A cd NULL SS$_NORMAL
+str$concat
+trailing null's
+3 cd NULL cd NULL cd NULL SS$_NORMAL
+str$concat
+three letters
+3 cd AB cd A cd B SS$_NORMAL
+str$concat
+three words
+3 cd SenseMakes cd Makes cd Sense SS$_NORMAL
+str$concat
+still valid length
+2 cd MAXCSTR16 cd NULL SS$_NORMAL
+str$concat
+one over the limit
+3 cd NULL cd MAXCSTR16 cd A STR$_TRU
+str$copy_dx
+single digit
+cd 1 cd A SS$_NORMAL
+str$copy_dx
+two digits
+cd 12 cd AB SS$_NORMAL
+str$copy_dx
+really big
+cd NULL cd MAXCSTR16 SS$_NORMAL
+str$copy_dx
+two nulls
+cd NULL cd NULL SS$_NORMAL
+str$copy_dx
+destin null
+cd NULL cd A SS$_NORMAL
+str$$copy_fill
+InZZZZZZ
+st OutField lu 8 st In lu 2 st Z SS$_NORMAL
+str$$copy_fill
+In
+st OutField lu 2 st In lu 2 st Z SS$_NORMAL
+str$$copy_fill
+In
+st OutField lu 2 st Input lu 5 st Z STR$_TRU
+str$$copy_fill
+In
+st OutField lu 0 st Input lu 5 st Z STR$_TRU
+str$$copy_fill
+ZZZZZZZZ
+st OutField lu 8 st Input lu 0 st Z SS$_NORMAL
+str$$copy_fill
+ZZZZZZZZ
+st NULL lu 0 st NULL lu 0 st Z SS$_NORMAL
+str$copy_r
+one liner
+cd 1 lu 1 st A SS$_NORMAL
+str$copy_r
+check truncation
+cd NULL lu 1 st ABC STR$_TRU
+str$copy_r
+descriptor length 0 padding should occur
+cd NULL lu 5 st ABC SS$_NORMAL
+str$copy_r
+descriptor length 0 
+cd NULL lu 5 st ABCDE SS$_NORMAL
+str$copy_r
+descriptor length matches string length
+cd 12345 lu 5 st ABCDE SS$_NORMAL
+str$copy_r
+Null to Null
+cd NULL lu 0 st NULL STR$_TRU
+str$copy_r_64
+one liner
+cd 1 lu 1 st A SS$_NORMAL
+str$copy_r_64
+check truncation
+cd NULL lu 1 st ABC STR$_TRU
+str$copy_r_64
+descriptor length 0 padding occurs
+cd NULL lu 5 st ABC SS$_NORMAL
+str$copy_r_64
+check descriptor length 0 
+cd NULL lu 5 st ABCDE SS$_NORMAL
+str$copy_r_64
+descriptor length same as input string
+cd 12345 lu 5 st ABCDE SS$_NORMAL
+str$copy_r_64
+Null to Null
+cd NULL lu 0 st NULL SS$_NORMAL
+str$divide
+50 / .2 taken to 5 decimal places
+lu 0 ls 0 cd 50     lu 0 ls -1 cd 2  lu 3 lu 0    lu 0 ls 1 cd 25 SS$_NORMAL
+str$divide
+0 / 0 sign exp num - sign exp num - digits round - sign exp num
+lu 0 ls 0 cd 0     lu 0 ls 0 cd 0   ls 10 lu 0     lu 0 ls 0 cd 0 STR$_DIVBY_ZER
+str$divide
+47 / 14
+lu 0 ls 0 cd 47  lu 0 ls 0 cd 14 ls 10 lu 0 lu 0 ls -9 cd 3357142857 SS$_NORMAL
+str$divide
+889 / 2
+lu 0 ls 0 cd 889   lu 0 ls 0 cd 2   ls 10 lu 0  lu 0 ls -1 cd 4445 SS$_NORMAL
+str$divide
+0 / 1
+lu 0 ls 0 cd 0     lu 0 ls 0 cd 1   ls 10 lu 0   lu 0 ls 0 cd 0   SS$_NORMAL
+str$divide
+1 / 0
+lu 0 ls 0 cd 1     lu 0 ls 0 cd 0   ls 10 lu 0   lu 0 ls 0 cd 0   STR$_DIVBY_ZER
+str$divide
+1 / 1 
+lu 0 ls 0 cd 1     lu 0 ls 0 cd 1   ls 10 lu 0   lu 0 ls 0 cd 1   SS$_NORMAL
+str$divide
+1 / 6 
+lu 0 ls 0 cd 1     lu 0 ls 0 cd 6   ls 3 lu 0   lu 0 ls -3 cd 166  SS$_NORMAL
+str$divide
+1 / 6 
+lu 0 ls 0 cd 1     lu 0 ls 0 cd 6   ls 3 lu 1   lu 0 ls -3 cd 167  SS$_NORMAL
+str$divide
+10 / 10 
+lu 0 ls 0 cd 10    lu 0 ls 0 cd 10  ls 10 lu 0   lu 0 ls 0 cd 1   SS$_NORMAL
+str$divide
+1 / 14 taken to 5 decimal places
+lu 0 ls 0 cd 1     lu 0 ls 0 cd 14  lu 5 lu 0    lu 0 ls -6 cd 71428 SS$_NORMAL
+str$divide
+10 / 3 
+lu 0 ls 0 cd 10    lu 0 ls 0 cd 3 ls 10 lu 0 lu 0 ls -9 cd 3333333333 SS$_NORMAL
+str$divide
+189 / 14
+lu 0 ls 0 cd 189   lu 0 ls 0 cd 14  ls 10 lu 0   lu 0 ls -1 cd 135 SS$_NORMAL
+str$divide
+42 / 14
+lu 0 ls 0 cd 42    lu 0 ls 0 cd 14  ls 10 lu 0   lu 0 ls 0 cd 3    SS$_NORMAL
+str$dupl_char
+1 letter
+cd NULL ls 1 st A SS$_NORMAL
+str$dupl_char
+Default character
+cd NULL ls 1 st 0 SS$_NORMAL
+str$dupl_char
+Default character
+cd NULL ls 0 st A SS$_NORMAL
+str$dupl_char
+Default character
+cd NULL ls 0 st 0 SS$_NORMAL
+str$dupl_char
+Default character
+cd ABCDEFGHI ls 1 st Z SS$_NORMAL
+str$element
+Not there return should be null
+cd WXYZ ls 9 cd A cd 1A2A3A4A5  STR$_NOELEM
+str$element
+No delimiters return entire string
+cd WXYZ ls 9 cd Z cd 1A2A3A4A5  SS$_NORMAL
+str$element
+first one using characters to match
+cd NULL ls 0 cd A cd 1A2A3A4A5 SS$_NORMAL
+str$element
+first one using symbols to match
+cd NULL ls 0 cd & cd A&B&C&D&E SS$_NORMAL
+str$element
+second one
+cd NULL ls 1 cd & cd A&B&C&D&E SS$_NORMAL
+str$element
+No Element left output as null
+cd NULL ls 6 cd & cd A&B&C&D&E STR$_NOELEM
+str$element
+last substring no trailing delimiter
+cd NULL ls 3 cd & cd A&B!@#&C12&#$*D&E SS$_NORMAL
+str$element
+Last substring with trailing delimiter
+cd NULL ls 4 cd & cd A&B&C&D&E& SS$_NORMAL
+str$element
+Invalid delimiter
+cd NULL ls 4 cd NULL cd A&B&C&D&E STR$_INVDELIM
+str$element
+Invalid string
+cd NULL ls 4 cd & cd NULL STR$_NOELEM
+str$element
+Not a numeric token number
+cd NULL ls X cd & cd A&B&C&D&E STR$_ILLSTRSPE
+str$element
+No substring just tokens
+cd NULL ls 0 cd & cd &&&& SS$_NORMAL
+str$element
+No substring just tokens
+cd NULL ls 1 cd & cd &&&& SS$_NORMAL
+str$element
+no substring just tokens off end
+cd NULL ls 4 cd & cd &&&& STR$_NOELEM
+str$find_first_in_set
+Pair of Null's
+cd NULL cd NULL 0
+str$find_first_in_set
+Null search string
+cd NULL cd A 0
+str$find_first_in_set
+Null token string
+cd A cd NULL 0
+str$find_first_in_set
+single character found
+cd A cd A 1
+str$find_first_in_set
+single character not found
+cd A cd B 0
+str$find_first_in_set
+single search double token match first found
+cd A cd AB 1
+str$find_first_in_set
+single search double token match last found
+cd A cd BA 1
+str$find_first_in_set
+single search double token not found
+cd C cd AB 0
+str$find_first_in_set
+triple search double token found
+cd ABC cd BC 2
+str$find_first_in_set
+triple search double token last found
+cd ABC cd CD 3
+str$find_first_not_in_set
+Pair of Null's
+cd NULL cd NULL 0
+str$find_first_not_in_set
+Null search string
+cd NULL cd A 0
+str$find_first_not_in_set
+Null token string
+cd A cd NULL 1
+str$find_first_not_in_set
+all character match
+cd A cd A 0
+str$find_first_not_in_set
+first character not in set
+cd A cd B 1
+str$find_first_not_in_set
+first character match
+cd A cd AB 0
+str$find_first_not_in_set
+second character match
+cd A cd BA 0
+str$find_first_not_in_set
+single search double token not match
+cd C cd AB 1
+str$find_first_not_in_set
+last string first match
+cd ABC cd ACD 2
+str$find_first_not_in_set
+triple search double token last not match
+cd ABC cd AB 3
+str$find_first_not_in_set
+test numbers
+cd 123ABC cd 1234567890 4
+str$find_first_not_in_set
+test alphabet
+cd 1ABC cd ABCDEFGHIJKLMNOPQRSTUVWXYZ 1
+str$find_first_not_in_set
+test alphabet
+cd ABC11111111111 cd ABCDEFGHIJKLMNOPQRSTUVWXYZ 1
+str$find_first_substring
+Search string is NULL
+4 cd NULL ls 0  ls 0 cd Z 0
+str$find_first_substring
+substring is NULL
+4 cd A ls 0  ls 0 cd NULL 0
+str$find_first_substring
+Substr$ing Z not in sting
+4 cd ABCDEFGHIJKL ls 0  ls 0 cd Z 0
+str$find_first_substring
+Substr$ing L is last occurance
+4 cd ABCDEFGHIJKL ls 12 ls 1 cd L 1
+str$find_first_substring
+substr$ing A is first occurance
+4 cd ABCDEFGHIJKL ls 1  ls 1 cd A 1
+str$find_first_substring
+pattern ABC is first in string
+4 cd ABCDEFGHIJKL ls 1  ls 1 cd ABC 1
+str$find_first_substring
+pattern AAC not FGH is in string
+5 cd ABCDEFGHIJKL ls 6  ls 2 cd AAC cd FGH 1
+str$find_first_substring
+Third pattern in string
+6 cd ABCDEFGHIJKL ls 9  ls 3 cd AAC cd MN cd IJ 1
+str$find_first_substring
+Second pattern in string
+6 cd ABCDEFGHIJKL ls 11 ls 2 cd AAC cd KL cd IJ 1
+str$find_first_substring 
+3 patterns all not there
+6 cd ABCDEFGHIJKL ls 0  ls 0 cd AAC cd KK cd LL 0
+str$find_first_substring
+Pattern not there
+4 cd ABCDEFGHIJKL ls 0  ls 0 cd ZZZ 0
+str$free1_dx
+free a null
+cd NULL SS$_NORMAL
+str$free1_dx
+Free 1 character
+cd A SS$_NORMAL
+str$free1_dx
+Free 10 character
+cd ABCDEFGHIJ SS$_NORMAL
+str$get1_dx
+Ask for 0
+ls 0 cd NULL SS$_NORMAL
+str$get1_dx
+Ask for 0
+ls 1 cd NULL SS$_NORMAL
+str$get1_dx
+Ask for 0
+ls 1 cd ABCD SS$_NORMAL
+str$get1_dx
+Ask for 0
+ls 0 cd ABCD SS$_NORMAL
+str$get1_dx_64
+Ask for 0
+ls 0 cd NULL SS$_NORMAL
+str$get1_dx_64
+Ask for 0
+ls 1 cd NULL SS$_NORMAL
+str$get1_dx_64
+Ask for 0
+ls 1 cd ABCD SS$_NORMAL
+str$get1_dx_64
+Ask for 0
+ls 0 cd ABCD SS$_NORMAL
+str$left
+Destination is NULL
+cd NULL cd ABCDEFGH ls 3 SS$_NORMAL
+str$left
+Source is NULL
+cd ABC cd NULL ls 3 SS$_NORMAL
+str$left
+zero characters
+cd ABC cd ABCDEFGH ls 0 SS$_NORMAL
+str$left
+left 3
+cd ABC cd ABCDEFGH ls 3 SS$_NORMAL
+str$left
+more then there is characters
+cd ABC cd ABCDEFGH ls 10 $STR_ILLSTRPOS
+str$len_extr
+all null
+cd NULL cd NULL ls 0 ls 0 SS$_NORMAL
+str$len_extr
+null source
+cd A cd NULL ls 0 ls 0 SS$_NORMAL
+str$len_extr
+null source
+cd NULL cd A ls 0 ls 0 SS$_NORMAL
+str$len_extr
+zero start  should start at 1
+cd ABCDEF cd 123 ls 0 ls 1 SS$_NORMAL
+str$len_extr
+start greater then length return NULL
+cd ABCDEF cd 123 ls 4 ls 1 SS$_NORMAL
+str$len_extr
+zero length  should return NULL
+cd ABCDEF cd 123 ls 1 ls 0 STR$_NEGSTRLEN
+str$len_extr
+length greater should return NULL
+cd ABCDEF cd 123 ls 1 ls 4 STR$_ILLSTRSPE
+str$len_extr
+first character length of 1
+cd ABCDEF cd 123 ls 1 ls 1 SS$_NORMAL
+str$len_extr
+last character length of 1
+cd ABCDEF cd 123 ls 3 ls 1 SS$_NORMAL
+str$len_extr
+all characters
+cd ABCDEF cd 123 ls 3 ls 3 SS$_NORMAL
+str$match_wild
+Percent  
+cd abcdefg cd abc%efg STR$_MATCH
+str$match_wild
+Asterisk
+cd abcdefg cd a*      STR$_MATCH
+str$match_wild
+Asterisk before percent 
+cd abcdefg cd ab*f%   STR$_MATCH
+str$match_wild
+No character to match after g
+cd abcdefg cd ab*g%   STR$_NOMATCH
+str$match_wild
+No r in pattern string  
+cd abcdefg cd ab*rg%  STR$_NOMATCH
+str$match_wild
+Percent before Asterisk 
+cd abcdefg cd ab%def* STR$_MATCH
+str$match_wild
+Single character match
+cd a cd a             STR$_MATCH
+str$match_wild
+Double character NO match
+cd aa cd AA           STR$_NOMATCH
+str$match_wild
+Double character match
+cd aa cd aa           STR$_MATCH
+str$match_wild
+Double character NO match
+cd aa cd AA           STR$_NOMATCH
+str$match_wild
+Double character NO match
+cd a cd Z             STR$_NOMATCH
+str$match_wild
+Single character * match
+cd a cd *             STR$_MATCH
+str$match_wild
+Single character percent
+cd a cd %             STR$_MATCH
+str$match_wild
+Trailing *
+cd a cd a*            STR$_MATCH
+str$match_wild
+Leading *
+cd a cd *a            STR$_MATCH
+str$match_wild
+Try a double
+cd a cd a*a           STR$_NOMATCH
+str$match_wild
+Short 1 character
+cd abcde cd abcd      STR$_NOMATCH
+str$match_wild
+Extra 1 character
+cd abcde cd abcdef    STR$_NOMATCH
+str$mul
+9 * 9
+lu 0 ls 0 cd 9 lu 0 ls 0 cd 9 lu 0 ls 0 cd 81 SS$_NORMAL
+str$mul
+189 * 14
+lu 0 ls 0 cd 189 lu 0 ls 0 cd 14 lu 0 ls 0 cd 2646 SS$_NORMAL
+str$mul
+2 * 2
+lu 0 ls 0 cd 2 lu 0 ls 0 cd 2 lu 0 ls 0 cd 4 SS$_NORMAL
+str$mul
+5 * 5
+lu 0 ls 0 cd 5 lu 0 ls 0 cd 5 lu 0 ls 0 cd 25 SS$_NORMAL
+str$mul
+1x10^1 x 1x10^1
+lu 0 ls 1 cd 1 lu 0 ls 1 cd 1 lu 0 ls 2 cd 1 SS$_NORMAL
+str$mul
+1x10^1 x 1x10^-1
+lu 0 ls 1 cd 1 lu 0 ls -1 cd 1 lu 0 ls 0 cd 1 SS$_NORMAL
+str$ncompare
+4 4 
+cd 4  cd 4  0
+str$ncompare
+0 0 
+cd 0  cd 0  0
+str$ncompare
+10 0 
+cd 10  cd 0  1
+str$ncompare
+0 10 
+cd 0  cd 10  -1
+str$ncompare
+0 10 
+cd 1  cd 10   0
+str$ncompare
+0 10 
+cd 1  cd 10   1
+str$position
+null check
+cd NULL cd NULL ls 0 1
+str$position
+source null
+cd NULL cd 123 ls 0 0
+str$position
+substring null special result
+cd ABC cd NULL ls 0 4
+str$position
+start past end
+cd ABC cd 123 ls 4 0
+str$position 
+single character
+cd ABC cd A ls 1 1
+str$position
+last character
+cd ABC cd C ls 1 3
+str$position
+last character
+cd ABC cd C ls 2 3
+str$position
+last character
+cd ABC cd C ls 3 3
+str$position
+Negative start pos
+cd ABC cd C ls -3 0
+str$position
+start position after end 
+cd ABC cd C ls 4 0
+str$pos_extr
+Null checks
+cd NULL cd NULL ls 1 ls 0 SS$_NORMAL
+str$pos_extr
+start less than 1 set to 1
+cd NULL cd A ls 0 ls 1 STR$_ILLSTRPOS
+str$pos_extr
+start greater than length return NULL
+cd ABC cd 1 ls 2 ls 1 SS$_NORMAL
+str$pos_extr
+length greater then source use source
+cd ABC cd 123 ls 1 ls 4 SS$_NORMAL
+str$pos_extr
+straight replacement
+cd ABC cd 123 ls 1 ls 3 SS$_NORMAL
+str$prefix
+null check
+cd NULL cd NULL SS$_NORMAL
+str$prefix
+Destin null
+cd NULL cd ABC SS$_NORMAL
+str$prefix
+source Null
+cd 123 cd NULL SS$_NORMAL
+str$prefix
+single character
+cd 1 cd A SS$NORMAL
+str$prefix
+regular
+cd 1234 cd ABC SS$_NORMAL
+str$recip
+sign exp number - precision_sign p_exp p_num - result_sign r_exp r_num
+lu 0 ls 0 cd 3    lu 0 ls 0  cd 7              lu 0 ls -7 cd 3333333 SS$_NORMAL
+str$recip
+1 / 14 taken to 7 decimal places
+lu 0 ls 0 cd 14   lu 0 ls 0 cd 7               lu 0 ls -8 cd 7142857 SS$_NORMAL
+str$recip
+1 / 3 taken to 5 decimal places
+lu 0 ls 0 cd 3    lu 0 ls 0 cd 5               lu 0 ls -5 cd 33333 SS$_NORMAL
+str$recip
+1 / 100 taken to 4 decimal places
+lu 0 ls 0 cd 100  lu 0 ls 0 cd 4               lu 0 ls -2 cd 1 SS$_NORMAL
+str$recip
+1 / 100 taken to 5 decimal places
+lu 0 ls 0 cd 100  lu 0 ls 0 cd 5               lu 0 ls -2 cd 1 SS$_NORMAL
+str$replace
+check nulls
+cd NULL cd NULL ls 0 ls 0 cd A STR$_ILLSTRPOS
+str$replace
+more correct
+cd WHaT cd WHZT ls 3 ls 3 cd a SS$_NORMAL
+str$replace
+start pos past end
+cd WHATT cd WHAT ls 5 ls 5 cd A STR$_ILLSTRPOS
+str$replace
+overlap test
+cd ABCDEFBCDEFG cd ABCDEFG ls 6 ls 2 cd X STR$_ILLSTRPOS
+str$replace
+change thas to this
+cd THIS cd THAS ls 3 ls 3 cd I        SS$_NORMAL
+str$replace
+Big insert
+cd THInsertASentenceS cd THAS ls 3 ls 3 cd InsertASentence     SS$_NORMAL
+str$replace
+delete and insert
+cd TInsertASentenceS cd THAS ls 2 ls 3 cd InsertASentence     SS$_NORMAL
+str$replace
+number 2
+cd ThisIsMissingWord cd ThisXXMissingWord ls 5 ls 6 cd Is SS$_NORMAL
+str$right
+null check
+cd NULL cd NULL ls 0 SS$_NORMAL
+str$right
+source Null start pos off end
+cd NULL cd NULL ls 1 SS$_NORMAL
+str$right
+source Null start pos off end
+cd NULL cd NULL ls 2 SS$_NORMAL
+str$right
+abcdefg
+cd 0 cd abcdefg ls 0 SS$_NORMAL
+str$right
+abcdefg
+cd 0 cd abcdefg ls 1 SS$_NORMAL
+str$right
+bcdefg
+cd 0 cd abcdefg ls 2 SS$_NORMAL
+str$right
+cdefg
+cd 0 cd abcdefg ls 3 SS$_NORMAL
+str$right
+fg
+cd 0 cd abcdefg ls 6 SS$_NORMAL
+str$right
+g
+cd 0 cd abcdefg ls 7 SS$_NORMAL
+str$right
+null
+cd 0 cd abcdefg ls 8 SS$_NORMAL
+str$round
+Round result
+ls 5 lu 0    lu 0  ls 0 cd 123456 lu 0 ls 0 cd 12346 SS$_NORMAL
+str$round
+Rounding digit 4
+ls 5 lu 0    lu 0  ls 0 cd 123454 lu 0 ls 0 cd 12345 SS$_NORMAL
+str$round
+Rounding digit 5
+ls 5 lu 0    lu 0  ls 0 cd 123455 lu 0 ls 0 cd 12346 SS$_NORMAL
+str$round
+Rounding digit 6
+ls 5 lu 0    lu 0  ls 0 cd 123456 lu 0 ls 0 cd 12346 SS$_NORMAL
+str$round
+Truncate result
+ls 5 lu 1    lu 0  ls 0 cd 123456 lu 0 ls 0 cd 12345 SS$_NORMAL
+str$round
+Round result
+ls 5 lu 1    lu 0  ls 0 cd 123456 lu 0 ls 0 cd 12345 SS$_NORMAL
+str$round
+negative
+ls 5 lu 1    lu 0  ls -1 cd 123456 lu 0 ls 0 cd 12345 SS$_NORMAL
+str$round
+negative
+ls 2 lu 1    lu 0  ls -6 cd 123456 lu 0 ls -2 cd 12 SS$_NORMAL
+str$round
+More Precision then available digits with truncation
+ls 5 lu 1    lu 0  ls 0 cd 1 lu 0 ls 0 cd 1 SS$_NORMAL
+str$round
+More Precision then available digits with rounding
+ls 5 lu 0    lu 0  ls 0 cd 1 lu 0 ls 0 cd 1 SS$_NORMAL
+str$round
+Destination is Null Truncate
+ls 5 lu 1    lu 0  ls 0 cd 12345 lu 0 ls 0 cd NULL SS$_NORMAL
+str$round
+Source is Null - Truncate
+ls 5 lu 1    lu 0  ls 0 cd NULL lu 0 ls 0 cd NULL SS$_NORMAL
+str$round
+Destination is Null  Round
+ls 5 lu 0    lu 0  ls 0 cd 12345 lu 0 ls 0 cd NULL SS$_NORMAL
+str$round
+Source is Null - Round
+ls 5 lu 0    lu 0  ls 0 cd NULL lu 0 ls 0 cd NULL SS$_NORMAL
+str$round
+places flags asign aexp adigits csign cexp cdigits
+ls 1 lu 1    lu 0  ls 0 cd 12345 lu 0 ls 0 cd 1 SS$_NORMAL
+str$round
+Destination Larger than source - Truncate
+ls 2 lu 1    lu 0  ls 0 cd 12345 lu 0 ls 0 cd 1234567890 SS$_NORMAL
+str$round
+Destination Larger than source - Round
+ls 2 lu 0    lu 0  ls 0 cd 12345 lu 0 ls 0 cd 1234567890 SS$_NORMAL
+str$round
+Invalid Flag
+ls 1 lu 2    lu 0  ls 0 cd 12345 lu 0 ls 0 cd 1 LIB$_INVARG
+str$round
+Max String size down to 1
+ls 1 lu 0    lu 0  ls 0 cd MAXCSTR16 lu 0 ls 0 cd 9 SS$_NORMAL
+str$sub
+100 - 1
+lu 0 ls 0 cd 100 lu 0 ls 0 cd 1 lu 0 ls 0 cd 99 SS$_NORMAL
+str$sub
+10000 - 1
+lu 0 ls 0 cd 10000 lu 0 ls 0 cd 1 lu 0 ls 0 cd 9999 SS$_NORMAL
+str$sub
+1110000 - 1
+lu 0 ls 0 cd 1110000 lu 0 ls 0 cd 1 lu 0 ls 0 cd 1109999 SS$_NORMAL
+str$sub
+100 - 14
+lu 0 ls 0 cd 100 lu 0 ls 0 cd 14 lu 0 ls 0 cd 86 SS$_NORMAL
+str$sub
+Invalid sign number 1
+lu 2 ls 0 cd 0 lu 0 ls 0 cd 0 lu 0 ls 0 cd NULL LIB$_INVARG
+str$sub
+Invalid sign number 2
+lu 1 ls 0 cd 0 lu 2 ls 0 cd 0 lu 0 ls 0 cd NULL LIB$_INVARG
+str$sub
+08 - 2
+lu 0 ls 0 cd 08 lu 0 ls 0 cd 2 lu 0 ls 0 cd 6 SS$_NORMAL
+str$sub
+18 - 2
+lu 0 ls 0 cd 18 lu 0 ls 0 cd 2 lu 0 ls 0 cd 16 SS$_NORMAL
+str$sub
+999 - 999
+lu 0 ls 0 cd 999 lu 0 ls 0 cd 999 lu 0 ls 0 cd 0 SS$_NORMAL
+str$sub
+18 - 14
+lu 0 ls 0 cd 18 lu 0 ls 0 cd 14 lu 0 ls 0 cd 4 SS$_NORMAL
+str$sub
+1 x 10^2 - 1 x10^1
+lu 0 ls 2 cd 1 lu 0 ls 1 cd 1 lu 0 ls 1 cd 9 SS$_NORMAL
+str$sub
+0 - 1 x10^1
+lu 0 ls 0 cd 0 lu 0 ls 1 cd 1 lu 1 ls 1 cd 1 SS$_NORMAL
+str$sub
+1 x10^1 - 0
+lu 0 ls 1 cd 1 lu 0 ls 0 cd 0 lu 0 ls 1 cd 1 SS$_NORMAL
+str$sub
+0 x 10^1 - 0 x 10^1
+lu 0 ls 1 cd 0 lu 0 ls 1 cd 0 lu 0 ls 0 cd 0 SS$_NORMAL
+str$sub
+123 x 10^4 - 5 E -2 
+lu 0 ls 4 cd 123 lu 0 ls -2 cd 5 lu 0 ls -2 cd 122999995 SS$_NORMAL
+str$sub
+0 - 0
+lu 0 ls 0 cd 0 lu 0 ls 0 cd 0 lu 0 ls 0 cd 0 SS$_NORMAL
+str$sub
+1 - 1
+lu 0 ls 0 cd 1 lu 0 ls 0 cd 1 lu 0 ls 0 cd 0 SS$_NORMAL
+str$sub
+1 - 0
+lu 0 ls 0 cd 1 lu 0 ls 0 cd 0 lu 0 ls 0 cd 1 SS$_NORMAL
+str$sub
+0 - 1
+lu 0 ls 0 cd 0 lu 0 ls 0 cd 1 lu 1 ls 0 cd 1 SS$_NORMAL
+str$sub
+1 - -1
+lu 0 ls 0 cd 1 lu 1 ls 0 cd 1 lu 0 ls 0 cd 2 SS$_NORMAL
+str$sub
+-1 - -2
+lu 1 ls 0 cd 1 lu 1 ls 0 cd 2 lu 0 ls 0 cd 1 SS$_NORMAL
+str$sub
+1 - 2
+lu 0 ls 0 cd 1 lu 0 ls 0 cd 2 lu 1 ls 0 cd 1 SS$_NORMAL
+str$sub
+-1 - -2
+lu 1 ls 0 cd 1 lu 1 ls 0 cd 2 lu 0 ls 0 cd 1 SS$_NORMAL
+str$sub
+-1 - 2
+lu 1 ls 0 cd 1 lu 0 ls 0 cd 2 lu 1 ls 0 cd 3 SS$_NORMAL
+str$sub
+-2 - -2
+lu 1 ls 0 cd 2 lu 1 ls 0 cd 2 lu 0 ls 0 cd 0 SS$_NORMAL
+str$sub
+2 - 2
+lu 0 ls 0 cd 2 lu 0 ls 0 cd 2 lu 0 ls 0 cd 0 SS$_NORMAL
+str$sub
+2 - -2
+lu 0 ls 0 cd 2 lu 1 ls 0 cd 2 lu 0 ls 0 cd 4 SS$_NORMAL
+str$sub
+-2 - 2
+lu 1 ls 0 cd 2 lu 0 ls 0 cd 2 lu 1 ls 0 cd 4 SS$_NORMAL
+str$sub
+-2 - -1
+lu 1 ls 0 cd 2 lu 1 ls 0 cd 1 lu 1 ls 0 cd 1 SS$_NORMAL
+str$sub
+2 - -1
+lu 0 ls 0 cd 2 lu 1 ls 0 cd 1 lu 0 ls 0 cd 3 SS$_NORMAL
+str$sub
+2 - 1
+lu 0 ls 0 cd 2 lu 0 ls 0 cd 1 lu 0 ls 0 cd 1 SS$_NORMAL
+str$sub
+2 - -1
+lu 0 ls 0 cd 2 lu 1 ls 0 cd 1 lu 0 ls 0 cd 3 SS$_NORMAL
+str$sub
+-2 - -1
+lu 1 ls 0 cd 2 lu 1 ls 0 cd 1 lu 1 ls 0 cd 1 SS$_NORMAL
+str$sub
+54 - 14
+lu 0 ls 0 cd 54 lu 0 ls 0 cd 14 lu 0 ls 1 cd 4 SS$_NORMAL
+str$translate
+replace 123 with ABC
+cd 123 cd ABC cd 456 cd ABC SS$_NORMAL
+str$translate
+Null check
+cd NULL cd NULL cd NULL cd NULL SS$_NORMAL
+str$translate
+nothing
+cd NULL cd 123 cd ABC cd 999 SS$_NORMAL
+str$translate
+first character
+cd NULL cd 123 cd ABC cd 199 SS$_NORMAL
+str$translate
+last character
+cd NULL cd 123 cd ABC cd 991 SS$_NORMAL
+str$translate
+straight replace
+cd NULL cd 123456789 cd ABCDEFGHI cd 123456789 SS$_NORMAL
+str$translate
+change 1,3,5,7,9
+cd 919191919 cd 121212121 cd 9 cd 1 SS$_NORMAL
+str$translate
+not enough translate characters blank padded 
+cd 1 cd ABCD cd 1 cd ABCD SS$_NORMAL
+str$trim
+trim trailing whitespace
+cd NULL cd NULL ls 1 SS$_NORMAL
+str$trim
+trim trailing whitespace
+cd NULL cd A ls 1 SS$_NORMAL
+str$trim
+trailing blank
+cd NULL cd BA ls 1 SS$_NORMAL
+str$trim
+trailing tab
+cd NULL cd TA ls 1 SS$_NORMAL
+str$trim
+check returned length
+cd NULL cd BABCDE7 ls 1 SS$_NORMAL
+str$upcase
+null check
+cd NULL cd NULL SS$_NORMAL
+str$upcase
+null source
+cd ABC cd NULL SS$_NORMAL
+str$upcase
+null destination
+cd NULL cd ABC SS$_NORMAL
+str$upcase
+null destination do conversion
+cd NULL cd abc SS$_NORMAL
+str$upcase
+replace destination
+cd 1234 cd abc SS$_NORMAL
+str$upcase
+first char to convert
+cd 1234 cd aBC SS$_NORMAL
+str$upcase
+last char to convert
+cd 12345 cd ABc SS$_NORMAL
+str$upcase
+non alphabetic
+cd A cd 1234 SS$_NORMAL
+sysasctimi
+Show current date and time
+filler STR_NORMAL
+str$iszerotrim
+Null
+cd NULL ls 10 SS$_NORMAL
+str$iszerotrim
+1 zero
+cd 0 ls 9 SS$_NORMAL
+str$iszerotrim
+two zero's
+cd 00 ls 14 SS$_NORMAL
+str$iszerotrim
+cd 12 ls 34 SS$_NORMAL
+str$lzerotrim               
+Null
+cd NULL  $STR_NORMAL
+str$lzerotrim               
+No leading zero
+cd 10  $STR_NORMAL
+str$lzerotrim
+Only one zero
+cd 0  $STR_NORMAL
+str$lzerotrim
+There is one to remove
+cd 01  $STR_NORMAL
+str$lzerotrim
+We have two zero's to remove
+cd 0010  $STR_NORMAL
+str$lzerotrim
+Exponent not in zero range
+cd 0010  $STR_NORMAL
+str$lzerotrim
+Exponent in zero range
+cd 0010  $STR_NORMAL
+str$lzerotrim
+Exponent in zero range
+cd 0010  $STR_NORMAL
+str$lzerotrim
+Exponent past zero range
+cd 0010  $STR_NORMAL
+str$lzerotrim
+testing 1000
+cd 0010 ls 2 $STR_NORMAL
+str$rzerotrim
+NULL
+cd NULL $STR_NORMAL
+str$rzerotrim
+One zero to remove
+cd 10 $STR_NORMAL
+str$rzerotrim
+Only one zero
+cd 0 $STR_NORMAL
+str$rzerotrim
+No right zero's to remove
+cd 01 $STR_NORMAL
+str$rzerotrim
+Both leading and trailing zero's
+cd 0010 $STR_NORMAL
+str$rzerotrim
+Both leading and trailing zero's
+cd 00100 $STR_NORMAL
