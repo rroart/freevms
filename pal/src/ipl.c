@@ -53,11 +53,19 @@ inline int getipl() {
   return current->psl_ipl;
 }
 
+inline int __PAL_MFPR_IPL() {
+  return getipl();
+}
+
 /* no smp yet */
 inline void setipl(unsigned char i) {
   int this_cpu = smp_processor_id();
   smp$gl_cpu_data[this_cpu]->cpu$b_ipl=i;
   current->psl_ipl=i;
+}
+
+inline void __PAL_MTPR_IPL(unsigned char i) {
+  setipl(i);
 }
 
  inline void splx(void) {

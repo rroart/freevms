@@ -103,3 +103,7 @@ inline int rqempty(void * q) {
 struct myq *m=(struct myq *) q;
 return (m->flink==0 && m->blink==0);
 }
+
+//__PAL_INSQUEL_D
+
+//__PAL_REMQUEL_D
