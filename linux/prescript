@@ -109,6 +109,9 @@ done
 		ln -s ../../freevms/sys/src/sysupdsec.c .;
 		ln -s ../../freevms/sys/src/sysgetjpi.c .;
 		ln -s ../../freevms/sys/src/uai.c .;
+		ln -s ../../freevms/sys/src/process_scan.c .;
+		ln -s ../../freevms/rms/src/rm3get.c ;
+		ln -s ../../freevms/rms/src/rmsmisc.h ;
 
 		ln -s ../../freevms/pal/src/ipl.c .;
 		ln -s ../../freevms/pal/src/ast.c .;
