@@ -4,8 +4,11 @@
 // Author. Roar Thronæs.
 // Author. Linux people.
 
-#if 0
+#define ETH_P_MYSCS 0x6009
+
+//#if 0
 #include <linux/config.h>
+#define CONFIG_DECNET
 #include <linux/module.h>
 #include <linux/errno.h>
 #include <linux/types.h>
@@ -1164,13 +1167,16 @@ static int dn_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 	return err;
 }
 
-#endif /* #if 0 */
+//#endif /* #if 0 */
 
+#include<cdldef.h>
 #include<cdtdef.h>
 #include<ddtdef.h>
 #include<dptdef.h>
+#include<dyndef.h>
 #include<fdtdef.h>
 #include<pdtdef.h>
+#include<rddef.h>
 #include<rdtdef.h>
 #include<sbnbdef.h>
 #include<iodef.h>
@@ -1178,16 +1184,29 @@ static int dn_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 #include<linux/vmalloc.h>
 #include<sys/errno.h>
 
-static struct _cdt * cdl$l_freecdt;
+//static struct _cdt * cdl$l_freecdt;
+extern struct _cdt cdtl[1024];
+struct _rdt rdt;
+extern struct _scs_rd rdtl[128];
+struct _cdl cdl;
 
 void * find_free_cdt(void) {
   /* remember to fix cdldef */
-  struct _cdt * c=cdl$l_freecdt;
-  cdl$l_freecdt=cdl$l_freecdt->cdt$l_link;
+  struct _cdt * c=cdl.cdl$l_freecdt;
+  cdl.cdl$l_freecdt=((struct _cdt *)cdl.cdl$l_freecdt)->cdt$l_link;
+  c->cdt$l_rconid=0;
+  qhead_init(&c->cdt$l_waitqfl);
+  qhead_init(&c->cdt$l_crwaitqfl);
   return c;
 }
 
-int rspid_alloc(void) {
+int rspid_alloc(struct _cdrp * c) {
+  /* remember to fix rdtdef */
+  struct _scs_rd * r=rdt.rdt$l_freerd;
+  rdt.rdt$l_freerd=r->rd$l_link;
+  r->rd$w_state=1;
+  r->rd$l_cdrp=c;
+  return r->rd$w_seqnum;
 }
 
 void * register_name(char * c1, char * c2) {
@@ -1211,31 +1230,32 @@ int scs$listen (void (*msgadr)(void *msg_buf, struct _cdt *cdt, struct _pdt *pdt
 {
   int err = -EINVAL;
 
-  struct _cdt *sk = find_free_cdt();
+  struct socket *sk = find_free_cdt();
+  //lock_sock(sk);
 
-  sk->cdt$l_msginput=msgadr;
-  sk->cdt$l_erraddr=erradr;
+  //sk->cdt$l_msginput=msgadr;
+  //sk->cdt$l_erraddr=erradr;
 
   register_name(lprnam,prinfo);
 
   //	lock_sock(sk);
 
-#if 0
-	if (sk->zapped)
-		goto out;
+  //#if 0
+  //if (sk->zapped)
+  //	goto out;
 
-	if ((DN_SK(sk)->state != DN_O) || (sk->state == TCP_LISTEN))
-		goto out;
-#endif
+  //if ((DN_SK(sk)->state != DN_O) || (sk->state == TCP_LISTEN))
+  //	goto out;
+	//#endif
 
-	//	sk->max_ack_backlog = backlog;
-	//	sk->ack_backlog     = 0;
-	sk->cdt$w_state           = CDT$C_LISTEN;
+	//sk->max_ack_backlog = backlog;
+	//sk->ack_backlog     = 0;
+	//	sk->cdt$w_state           = CDT$C_LISTEN;
 	err                 = 0;
-	//	dn_rehash_sock(sk);
+	dn_rehash_sock(sk);
 
 out:
-	//	release_sock(sk);
+	//release_sock(sk);
 
         return err;
 }
@@ -1247,9 +1267,6 @@ int dir_listen(void * packet, struct _cdt * c, struct _pdt * p) {
 
 }
 
-extern struct _cdt cdtl[1024];
-extern struct _rdt rdtl[1024];
-
 int /*__init*/ scs_init(void) {
   int i;
   char myname[]="scs$directory";
@@ -1258,29 +1275,46 @@ int /*__init*/ scs_init(void) {
   bzero(cdtl,sizeof(cdtl));
   bzero(rdtl,sizeof(rdtl));
 
-  scs$gl_cdl=&cdtl;
-  cdl$l_freecdt=&cdtl;
+  scs$gl_cdl=&cdl;
+  //cdl$l_freecdt=&cdtl;
 
-  scs$gl_rdt=&rdtl[1];
+  scs$gl_rdt=&rdt;
+
+  cdl.cdl$w_maxconidx=scs$gw_cdtcnt-1;
+  cdl.cdl$l_freecdt=&cdtl[0];
+  cdl.cdl$b_type=DYN$C_SCS;
+  cdl.cdl$b_subtyp=DYN$C_SCS_CDL;
+  cdl.cdl$l_nocdt_cnt=0;
 
   for(i=0;i<scs$gw_cdtcnt-1;i++) {
+    cdtl[i].cdt$b_type=DYN$C_SCS;
+    cdtl[i].cdt$b_subtyp=DYN$C_SCS_CDT;
     cdtl[i].cdt$l_link=&cdtl[i+i];
     cdtl[i].cdt$l_lconid=i;
+    cdtl[i].cdt$l_rconid=i;
+    cdtl[i].cdt$w_state=0;
     qhead_init(&cdtl[i].cdt$l_waitqfl);
+    qhead_init(&cdtl[i].cdt$l_crwaitqfl);
   }
 
-  qhead_init(&rdtl[0].rdt$l_waitfl);
-  rdtl[0].rdt$l_freerd=&rdtl[1];
-  for(i=1;i<scs$gw_rdtcnt;i++) {
-    rdtl[i].rdt$l_freerd=&rdtl[i+1];
-    qhead_init(&cdtl[i].cdt$l_waitqfl);
+  qhead_init(&rdt.rdt$l_waitfl);
+  rdt.rdt$b_type=DYN$C_SCS;
+  rdt.rdt$b_subtyp=DYN$C_SCS_RDT;
+  rdt.rdt$l_freerd=&rdtl[0];
+  rdt.rdt$l_qrdt_cnt=0;
+  rdt.rdt$l_maxrdidx=scs$gw_rdtcnt;
+  for(i=0;i<scs$gw_rdtcnt-1;i++) {
+    struct _scs_rd * r=&rdtl[i];
+    r->rd$l_link=&rdtl[i+1];
+    r->rd$w_state=0;
+    r->rd$w_seqnum=i; // ?
   }
 
   scs$listen(dir_listen,mydirerr,myname,myinfo);
 
 }
 
-#if 0
+//#if 0
 static int dn_shutdown(struct socket *sock, int how)
 {
 	struct sock *sk = sock->sk;
@@ -2099,7 +2133,7 @@ static struct notifier_block dn_dev_notifier = {
 extern int dn_route_rcv(struct sk_buff *, struct net_device *, struct packet_type *);
 
 static struct packet_type dn_dix_packet_type = {
-	type:		__constant_htons(ETH_P_DNA_RT),
+	type:		__constant_htons(ETH_P_MYSCS),
 	dev:		NULL,		/* All devices */
 	func:		dn_route_rcv,
 	data:		(void*)1,
@@ -2206,7 +2240,7 @@ static struct proto_ops dn_proto_ops = {
 	getname:	dn_getname,
 	poll:		dn_poll,
 	ioctl:		dn_ioctl,
-	listen:		dn_listen,
+	listen:		scs$listen,
 	shutdown:	dn_shutdown,
 	setsockopt:	dn_setsockopt,
 	getsockopt:	dn_getsockopt,
@@ -2259,7 +2293,7 @@ static int __init decnet_init(void)
 	dev_add_pack(&dn_dix_packet_type);
 	register_netdevice_notifier(&dn_dev_notifier);
 
-	proc_net_create("decnet", 0, dn_get_info);
+	proc_net_create("myscs", 0, dn_get_info);
 
 	dn_neigh_init();
 	dn_dev_init();
@@ -2296,7 +2330,7 @@ static int __init decnet_setup(char *str)
 	return 1;
 }
 
-__setup("decnet=", decnet_setup);
+__setup("myscs=", decnet_setup);
 #endif
 
 static void __exit decnet_exit(void)
@@ -2318,9 +2352,9 @@ static void __exit decnet_exit(void)
 	dn_fib_cleanup();
 #endif /* CONFIG_DECNET_ROUTER */
 
-	proc_net_remove("decnet");
+	proc_net_remove("myscs");
 }
 
 module_init(decnet_init);
 module_exit(decnet_exit);
-#endif /* #if 0 second one */
+//#endif /* #if 0 second one */
