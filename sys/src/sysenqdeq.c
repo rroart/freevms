@@ -14,6 +14,7 @@
 #include<misc.h>
 #include<ssdef.h>
 #include<starlet.h>
+#include<acbdef.h>
 #include<ipldef.h>
 #include<rsbdef.h>
 #include<lkbdef.h>
@@ -24,6 +25,7 @@
 // no vmslock etc here yet
 
 unsigned char lck$ar_compat_tbl[6]={0x3f,0x1f,0x7,0xb,3,1};
+#if 0
 unsigned char lck$ar_compat_tbl2[6,6]={
   {1,1,1,1,1,1},
   {0,1,1,1,1,1},
@@ -32,6 +34,7 @@ unsigned char lck$ar_compat_tbl2[6,6]={
   {0,0,0,0,1,1},
   {0,0,0,0,0,1}
 };
+#endif
 
 unsigned char lck$synccvt_tbl[6]={1,3,7,0xb,0x1f,0x3f};
 
@@ -68,26 +71,25 @@ dlm_dg(){}
 
 dlm_err(){}
 
-void lck$snd_granted(struct _lkb * l) {
-  struct _cdrp * c = vmalloc(sizeof(struct _cdrp));
-  bzero(c,sizeof(struct _cdrp));
-  c->cdrp$l_val1=l->lkb$l_remlkid;
-  c->cdrp$l_val2=l-lockidtbl[0];
+void lck$snd_granted(struct _lkb * lck) {
+  struct _cdrp * cdrp = vmalloc(sizeof(struct _cdrp));
+  bzero(cdrp,sizeof(struct _cdrp));
+  cdrp->cdrp$l_val1=lck->lkb$l_remlkid;
+  cdrp->cdrp$l_val2=lck-lockidtbl[0];
   if (!dlmconnected) {
-    scs_std$connect(dlm_msg,dlm_dg,dlm_err,0,0,"dlm$dlm",&current->pcb$t_lname,0,0,0,0,0);
     dlmconnected=1;
   }
-  scs_std$senddg(0,500,c);
+  scs_std$senddg(0,500,cdrp);
 }
 
 // this was suddenly not needed, I think
-static void * enq_find_oldest_parent(struct _rsb * r,struct _rsb * p) {
-  struct _rsb * rsb=r;
-  while (r) {
+static void * enq_find_oldest_parent(struct _rsb * res,struct _rsb * par) {
+  struct _rsb * rsb=res;
+  while (res) {
     rsb->rsb$b_depth++;
-    p=r->rsb$l_parent;
-    if (p==0) return r;
-    r=p;
+    par=res->rsb$l_parent;
+    if (par==0) return res;
+    res=par;
   };
 }
 
@@ -96,7 +98,7 @@ int reshash(struct dsc$descriptor * d) {
 }
 
 struct _rsb * find_reshashtbl(struct dsc$descriptor * d) {
-  struct _rsb * tmp, *head=reshashtbl[reshash(d)*2];
+  struct _rsb * tmp, *head=&reshashtbl[reshash(d)*2];
   tmp=head->rsb$l_hshchn;
   while (tmp!=head && strncmp(tmp->rsb$t_resnam,d->dsc$a_pointer,d->dsc$w_length)) {
     tmp=tmp->rsb$l_hshchn;
@@ -107,244 +109,527 @@ struct _rsb * find_reshashtbl(struct dsc$descriptor * d) {
     return tmp;
 }
 
-void insert_reshashtbl(struct _rsb *r) {
+void insert_reshashtbl(struct _rsb *res) {
   struct dsc$descriptor d;
-  d.dsc$w_length=r->rsb$b_rsnlen;
-  d.dsc$a_pointer=r->rsb$t_resnam;
-  insque(r,&reshashtbl[2*reshash(&d)]);
+  d.dsc$w_length=res->rsb$b_rsnlen;
+  d.dsc$a_pointer=res->rsb$t_resnam;
+  insque(res,&reshashtbl[2*reshash(&d)]);
 }
 
-int insert_lck(struct _lkb * l) {
+int insert_lck(struct _lkb * lck) {
   int i;
-  for(i=0;i<LOCKIDTBL && (lockidtbl[i]&0xffff0000);i++) ;
-  lockidtbl[i]=l;
+  for(i=1;i<LOCKIDTBL && (lockidtbl[i]&0xffff0000);i++) ;
+  lockidtbl[i]=lck;
   /* index pointer not implemented yet */
   return i;
 }
 
-asmlinkage int exe$enqw(struct struct_enq * s) {
-  int status=exe$enq(s);
-  printk("\n\nremember to do like qiow\n\n");
-  if ((status&1)==0) return status;
-  return exe$synch(s->efn,s->lksb);
-}
-
-asmlinkage int exe$enq(struct struct_enq * s) {
+asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id) {
   int convert;
-  int retval;
+  int retval=SS$_NORMAL;
+  int sts;
 
-  convert=s->flags&LCK$M_CONVERT;
-  if (s->lkmode>LCK$K_EXMODE) return SS$_BADPARAM;
+  // some tests. one only for now, should be more.
+  if (lkmode>LCK$K_EXMODE) return SS$_BADPARAM;
+
+  convert=flags&LCK$M_CONVERT;
   if (!convert) {
     /* new lock */
-    struct _rsb * r;
+    struct _rsb * res;
     struct _rsb * old;
-    struct _lkb * l, *p;
-    struct dsc$descriptor * d;
-    int sserror;
+    struct _lkb * lck, *par = 0;
+    struct dsc$descriptor * resnamdsc;
+    int sserror=0;
 
-    d=s->resnam;
-    if (d->dsc$w_length==0 || d->dsc$w_length>RSB$K_MAXLEN) { 
+    resnamdsc=resnam;
+    if (resnamdsc->dsc$w_length==0 || resnamdsc->dsc$w_length>RSB$K_MAXLEN) { 
       sserror=SS$_IVBUFLEN;
       goto error;
     }
-    if (s->flags&LCK$M_EXPEDITE)
-      if (s->lkmode!=LCK$K_NLMODE) {
+    if (flags&LCK$M_EXPEDITE)
+      if (lkmode!=LCK$K_NLMODE) {
 	sserror=SS$_UNSUPPORTED;
 	goto error;
       }
 
-    if (s->lkmode!=LCK$K_NLMODE) {
+    if (lkmode!=LCK$K_NLMODE) {
       sserror=SS$_UNSUPPORTED;
       goto error;
     }
 
-    setipl(IPL$_ASTDEL);
+    res=kmalloc(sizeof(struct _rsb),GFP_KERNEL);
+    bzero(res,sizeof(struct _rsb));
+    lck=kmalloc(sizeof(struct _lkb),GFP_KERNEL);
+    bzero(lck,sizeof(struct _lkb));
 
-    r=vmalloc(sizeof(struct _rsb));
-    bzero(r,sizeof(struct _rsb));
-    l=vmalloc(sizeof(struct _lkb));
+    lck->lkb$b_efn=efn;
+    lck->lkb$l_flags=flags;
+    lck->lkb$b_rqmode=lkmode;
+    lck->lkb$l_cplastadr=astadr;
+    lck->lkb$l_blkastadr=blkastadr;
+    lck->lkb$l_astprm=astprm;
+    lck->lkb$l_pid=current->pcb$l_pid;
+    lck->lkb$l_lksb=lksb;
+    qhead_init(&lck->lkb$l_sqfl);
+    qhead_init(&lck->lkb$l_ownqfl);
 
-    bzero(l,sizeof(struct _lkb));
-    l->lkb$b_efn=s->efn;
-    l->lkb$b_rqmode=s->lkmode;
-    l->lkb$l_cplastadr=s->astadr;
-    l->lkb$l_blkastadr=s->blkastadr;
-    l->lkb$l_astprm=s->astprm;
-    l->lkb$l_pid=current->pcb$l_pid;
-    strncpy(r->rsb$t_resnam,d->dsc$a_pointer,d->dsc$w_length);
+    strncpy(res->rsb$t_resnam,resnamdsc->dsc$a_pointer,resnamdsc->dsc$w_length);
+    res->rsb$b_rsnlen=resnamdsc->dsc$w_length;
 
-    if (s->flags&LCK$M_SYSTEM) {
+    setipl(IPL$_SCS);
+    // do scs spinlock
+    //setipl(IPL$_ASTDEL);
+
+    if (flags&LCK$M_SYSTEM) {
       /* priv checks */
     } else {
 	
     }
 
-    if (s->parid==0) {
+    if (parid==0) {
       //list_add(&res->lr_childof, &ns->ns_root_list);
       //this is added to lck$gl_rrsfl down below, I think
     } else {
       //check valid lock
       // check lock access mode
-      p=lockidtbl[s->parid];
-      if (current->pcb$l_pid != p->lkb$l_pid) return SS$_IVLOCKID;
+      par=lockidtbl[parid];
+      if (current->pcb$l_pid != par->lkb$l_pid) return SS$_IVLOCKID;
       //check if parent granted, if not return SS$_PARNOTGRANT;
-      if (p->lkb$b_state!=LKB$K_CONVERT  || p->lkb$b_state!=LKB$K_GRANTED) 
-	if (p->lkb$l_flags & LCK$M_CONVERT == 0) return SS$_PARNOTGRANT;
-      p->lkb$w_refcnt++;
-      r->rsb$l_parent = p->lkb$l_rsb; // should not be here?
+      if (par->lkb$b_state!=LKB$K_CONVERT  || par->lkb$b_state!=LKB$K_GRANTED) 
+	if ((par->lkb$l_flags & LCK$M_CONVERT) == 0) return SS$_PARNOTGRANT;
+      par->lkb$w_refcnt++;
+      res->rsb$l_parent = par->lkb$l_rsb; // should not be here?
       //check if uic-specific resource
       //check if system-wide
       //charge lock against quota
       //list_add(&res->lr_childof, &parent->lr_children);
-      //r->rsb$l_rtrsb=enq_find_oldest_parent(r,p->lkb$l_rsb);
-      l->lkb$l_parent=p;
+      //res->rsb$l_rtrsb=enq_find_oldest_parent(r,p->lkb$l_rsb);
+      lck->lkb$l_parent=par;
     }
 
-    old=find_reshashtbl(d);
+    old=find_reshashtbl(resnamdsc);
     if (!old) {
       lck$gl_rsbcnt++;
       lck$gl_lckcnt++;
-      retval=SS$_NORMAL;
-      if (s->flags & LCK$M_SYNCSTS) retval=SS$_SYNCH;
-      qhead_init(&r->rsb$l_grqfl);
-      qhead_init(&r->rsb$l_cvtqfl);
-      qhead_init(&r->rsb$l_wtqfl);
-      insque(&l->lkb$l_sqfl,r->rsb$l_grqfl);
-      l->lkb$l_rsb=r;
-      insert_reshashtbl(r);
-      if (s->parid==0) {
-	insque(&r->rsb$l_rrsfl,lck$gl_rrsfl);
-	qhead_init(&r->rsb$l_srsfl);
-	r->rsb$b_depth=0;
-	r->rsb$l_rtrsb=r;
-	insque(&l->lkb$l_ownqfl,&current->pcb$l_lockqfl);
+      if (flags & LCK$M_SYNCSTS) retval=SS$_SYNCH;
+      qhead_init(&res->rsb$l_grqfl);
+      qhead_init(&res->rsb$l_cvtqfl);
+      qhead_init(&res->rsb$l_wtqfl);
+      //insque(&lck->lkb$l_sqfl,res->rsb$l_grqfl);
+      lck->lkb$l_rsb=res;
+      insert_reshashtbl(res);
+      if (parid==0) {
+	insque(&res->rsb$l_rrsfl,lck$gl_rrsfl);
+	qhead_init(&res->rsb$l_srsfl);
+	res->rsb$b_depth=0;
+	res->rsb$l_rtrsb=res;
+	exe$clref(lck->lkb$b_efn);
+	insque(&lck->lkb$l_ownqfl,&current->pcb$l_lockqfl);
 	//?if (q->flags & LKB$M_DCPLAST) 
 	
-	s->lksb->lksb$l_lkid=insert_lck(l);
-	s->lksb->lksb$w_status=SS$_NORMAL;
+	lksb->lksb$l_lkid=insert_lck(lck);
+	lksb->lksb$w_status=SS$_NORMAL;
 	
-	lck$grant_lock(l,r,-1,s->lkmode);
+	sts = lck$grant_lock(lck ,res ,-1,lkmode,flags,efn,res->rsb$b_ggmode);
 
 	goto end;
       } else {
-	r->rsb$l_csid=p->lkb$l_rsb->rsb$l_csid;
-	p->lkb$l_rsb->rsb$w_refcnt++;
-	r->rsb$b_depth=p->lkb$l_rsb->rsb$b_depth+1;
+	// it has a parid non-zero
+	res->rsb$l_csid=par->lkb$l_rsb->rsb$l_csid;
+	par->lkb$l_rsb->rsb$w_refcnt++;
+	res->rsb$b_depth=par->lkb$l_rsb->rsb$b_depth+1;
 	//check maxdepth
-	r->rsb$l_rtrsb=p->lkb$l_rsb->rsb$l_rtrsb;
-	insque(&r->rsb$l_srsfl,&p->lkb$l_rsb->rsb$l_srsfl);
-	if (p->lkb$l_csid) { //remote
-	  lck$snd_granted(l);
+	if (res->rsb$b_depth>10) { // pick a number ?
+	  retval=SS$_EXDEPTH;
+	  goto error;
+	}
+	res->rsb$l_rtrsb=par->lkb$l_rsb->rsb$l_rtrsb;
+	insque(&res->rsb$l_srsfl,&par->lkb$l_rsb->rsb$l_srsfl);
+	if (par->lkb$l_csid) { //remote
+	  lck$snd_granted(lck);
 	} else {
-	  lck$grant_lock(l,r,-1,s->lkmode);
+	  sts = lck$grant_lock(lck,res,-1,lkmode,flags,efn,res->rsb$b_ggmode);
 	}
       }
     } else {
+      /* old, found in resource hash table */
       /* something else? */
-      vfree(r);
-      r=old;
-      if (aqempty(r->rsb$l_cvtqfl) && aqempty(r->rsb$l_wtqfl)) {
-	insque(l->lkb$l_sqfl,r->rsb$l_grqfl);
-	l->lkb$b_grmode=s->lkmode;
+      int granted = 0;
+      if (flags & LCK$M_SYNCSTS) retval=SS$_SYNCH;
+      kfree(res);
+      res=old;
+      lck->lkb$l_rsb=res;
+
+      //after, also check whether something in cvtqfl or wtqfl -> insque wtqfl
+
+      if (0!=test_bit(res->rsb$b_ggmode,&lck$ar_compat_tbl[lck->lkb$b_rqmode])) {
+	if (aqempty(res->rsb$l_wtqfl)) {
+	  granted=1;
+	  //sts = lck$grant_lock(lck ,res ,-1,lkmode,flags,efn);
+	} else {
+	  if (flags&LCK$M_NOQUEUE) {
+	    res->rsb$w_lckcnt--;
+	    kfree(lck);
+	    return SS$_NOTQUEUED;
+	  } else {
+	    lck->lkb$b_state=LKB$K_WAITING;
+	    insque(&lck->lkb$l_sqfl,res->rsb$l_wtqfl);
+	    lksb->lksb$w_status=0;
+	    lck->lkb$l_status|=LKB$M_ASYNC;
+	    maybe_blkast(res,lck);
+	  }
+	}
       } else {
-	insque(l->lkb$l_sqfl,r->rsb$l_wtqfl);
+	// if not compatible
+	if (flags&LCK$M_NOQUEUE) {
+	  res->rsb$w_lckcnt--;
+	  kfree(lck);
+	  return SS$_NOTQUEUED;
+	} else {
+	  lck->lkb$b_state=LKB$K_WAITING;
+	  insque(&lck->lkb$l_sqfl,res->rsb$l_wtqfl);
+	  lksb->lksb$w_status=0;
+	  lck->lkb$l_status|=LKB$M_ASYNC;
+	  maybe_blkast(res,lck);
+	  // insque(&lck->lkb$l_ownqfl,&current->pcb$l_lockqfl);
+	}
       }
 
-      s->lksb->lksb$l_lkid=insert_lck(l);
-      s->lksb->lksb$w_status=SS$_NORMAL;
+      lksb->lksb$l_lkid=insert_lck(lck);
+      lksb->lksb$w_status=SS$_NORMAL;
 
-      if (p->lkb$l_csid) { //remote
-	lck$snd_granted(l);
-      } else {
-	lck$grant_lock(l,r,-1,s->lkmode);
+      if ((granted & 1)==1) {
+	if (0/*par->lkb$l_csid*/) { //remote
+	  lck$snd_granted(lck);
+	} else {
+	  sts = lck$grant_lock(lck, res, -1,lkmode,flags,efn,res->rsb$b_ggmode);
+	}
       }
     }
   end:
     /* raise ipl */
-    return SS$_NORMAL;
+    return retval;
   error:
     /* ipl back */
-    vfree(r);
-    vfree(l);
+    kfree(res);
+    kfree(lck);
     return sserror;
     
-  } else {
+  } else { // convert
     /* convert */
-    struct _lkb * l;
-    struct _rsb * r;
+    int granted = 0, newmodes = 0;
+    struct _lkb * lck;
+    struct _rsb * res;
     void * dummy;
-    l=lockidtbl[s->lksb->lksb$l_lkid];
-    r=l->lkb$l_rsb;
-    if (l->lkb$b_state!=LKB$K_GRANTED) return SS$_CVTUNGRANT;
-    remque(&l->lkb$l_sqfl,&l->lkb$l_sqfl);// ?
-    remque(&r->rsb$l_grqfl,dummy);
-    if (aqempty(r->rsb$l_cvtqfl) && aqempty(r->rsb$l_grqfl)) {
-      lck$grant_lock(l,r,l->lkb$b_grmode,s->lkmode);
+    int newmode;
+    lck=lockidtbl[lksb->lksb$l_lkid];
+    res=lck->lkb$l_rsb;
+    if (lck->lkb$b_state!=LKB$K_GRANTED) return SS$_CVTUNGRANT;
+    lck->lkb$b_efn=efn;
+    lck->lkb$l_flags=flags;
+    lck->lkb$b_rqmode=lkmode;
+    lck->lkb$l_cplastadr=astadr;
+    lck->lkb$l_blkastadr=blkastadr;
+    lck->lkb$l_astprm=astprm;
+    lck->lkb$l_lksb=lksb;
+    remque(&lck->lkb$l_sqfl,&lck->lkb$l_sqfl);// ?
+    //remque(&res->rsb$l_grqfl,dummy); // superfluous
+    if (aqempty(res->rsb$l_cvtqfl) && aqempty(res->rsb$l_grqfl)) {
+      sts = lck$grant_lock(lck ,res,lck->lkb$b_grmode,lkmode,flags,efn,-1);
       return SS$_NORMAL;
-    } else {
-      if (r->rsb$b_cgmode!=l->lkb$b_grmode) {
-	if (test_bit(s->lkmode,lck$ar_compat_tbl[l->lkb$b_grmode])) {
-	  lck$grant_lock(l,r,l->lkb$b_grmode,s->lkmode);
-	}
+    } else { // convert, something in cvtqfl or grqfl
+      if (res->rsb$b_cgmode!=lck->lkb$b_grmode) {
+	newmode=res->rsb$b_ggmode;
       } else {
-	int newmode=find_highest(l,r);
-	if (test_bit(newmode,lck$ar_compat_tbl[l->lkb$b_grmode])) {
-	  r->rsb$b_fgmode=newmode;
-	  r->rsb$b_ggmode=newmode;
-	  r->rsb$b_cgmode=newmode;
-	  lck$grant_lock(l,r,l->lkb$b_grmode,newmode);
-	}
+	newmode=find_highest(lck,res);
+	newmodes= 0;
+      }
+      if (test_bit(lkmode,&lck$ar_compat_tbl[newmode])) {
+	//sts = lck$grant_lock(lck,res,lck->lkb$b_grmode,lkmode,flags,efn);
+	granted = 1;
       }
     }
+
+    if (granted) {
+      if (newmodes) {
+	res->rsb$b_fgmode=newmode;
+	res->rsb$b_ggmode=newmode;
+	res->rsb$b_cgmode=newmode;
+      }
+      sts = lck$grant_lock(lck,res,lck->lkb$b_grmode,lkmode /*newmode*/,flags,efn,res->rsb$b_ggmode);
+      grant_queued(res,newmode,1,1);
+    } else {
+      int wasempty=aqempty(&res->rsb$l_cvtqfl);
+      lck->lkb$b_rqmode=lkmode;
+      insque(&lck->lkb$l_sqfl,res->rsb$l_cvtqfl);
+      lck->lkb$b_state=LKB$K_CONVERT;
+      lksb->lksb$w_status=0;
+      lck->lkb$l_status|=LKB$M_ASYNC;
+      maybe_blkast(res,lck);
+      if (wasempty)
+	res->rsb$b_cgmode=newmode;
+      sts=SS$_NORMAL;
+    }
+    return sts;
   }
+}
+
+int lck$deqlock(struct _lkb *lck,int flags) {
+  struct _rsb * res = lck->lkb$l_rsb;
+  int newmode;
+
+  remque(&lck->lkb$l_ownqfl,0);
+  remque(&lck->lkb$l_sqfl,0);
+
+  // check if no locks on resource, remove the resource then
+
+  newmode=find_highest(lck,res);
+
+  res->rsb$b_fgmode=newmode;
+  res->rsb$b_ggmode=newmode;
+  res->rsb$b_cgmode=newmode;
+
+  grant_queued(res,0,1,1);
+
+  if (lck->lkb$b_state) {
+  }
+
 }
 
 asmlinkage int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags) {
-  
-}
-
-int lck$grant_lock(struct _lkb * l,struct _rsb * r, signed int curmode, signed int nextmode) {
-  if (nextmode>curmode) {
-    r->rsb$b_ggmode=nextmode;
-    r->rsb$b_fgmode=nextmode;
-    r->rsb$b_cgmode=nextmode;
+  int sts = SS$_NORMAL;
+  struct _lkb * lck;
+  if (lkid) {
+    lck = lockidtbl[lkid];
+    sts = lck$deqlock(lck,flags);
+    if (lck->lkb$l_parent!=lck && ((flags&LCK$M_DEQALL)==0)) {
+      // sts = SS$_SUBLOCKS;
+      goto end;
+    }
+  } else {
+    // no lockid, dequeue all
   }
-    l->lkb$b_grmode=nextmode;
-    l->lkb$l_lkst1=SS$_NORMAL;
-
-    if (l->lkb$l_blkastadr) {
-      /* not implemented */
-    }
-
-    insque(l->lkb$l_sqfl,r->rsb$l_grqfl);
-    l->lkb$b_state=LKB$K_GRANTED;
-
-    sch$postef(current->pcb$l_pid,PRI$_RESAVL,l->lkb$b_efn);
-
-    if (l->lkb$l_cplastadr && l->lkb$l_flags&LCK$M_SYNCSTS==0) {
-      l->lkb$l_ast=l->lkb$l_cplastadr;
-      sch$qast(current->pcb$l_pid,PRI$_RESAVL,l);
-    }
-    if (l->lkb$l_ast) {
-      /* not implemented */
-    }
-
-    sch$qast(current->pcb$l_pid,PRI$_RESAVL,l);
-    //if (current->pcb$w_state!=SCH$C_CUR)
-    sch$postef(current->pcb$l_pid,PRI$_RESAVL,l->lkb$b_efn);
-
+ end:
+  return sts;
 }
 
-int find_highest(struct _lkb * l, struct _rsb * skip) {
-  struct _lkb * first=&l->lkb$l_sqfl;
-  struct _rsb * skipme=&skip->rsb$l_grqfl;
-  struct _lkb * tmp=first->lkb$l_astqfl;
+void lock_iosb_kast(int par) {
+  struct _lkb * lck = par;
+  struct _lksb * lksb = lck->lkb$l_lksb;
+  if (lck->lkb$l_status&LKB$M_ASYNC) {
+    lksb->lksb$w_status=SS$_NORMAL;
+    lck->lkb$l_status&=~LKB$M_ASYNC;
+  }
+  if (lck->lkb$l_status&LKB$M_DCPLAST) {
+    lck->lkb$b_rmod=LKB$M_NODELETE;
+    lck->lkb$l_ast=lck->lkb$l_cplastadr;
+    lck->lkb$l_astprm=lck->lkb$l_oldastprm;
+    sch$qast(lck->lkb$l_pid,PRI$_RESAVL,lck);
+  }
+}
+
+int lck$grant_lock(struct _lkb * lck,struct _rsb * res, signed int curmode, signed int nextmode, int flags, int efn, signed int ggmode) {
+  int retsts=SS$_NORMAL;
+  int blocking = 0;
+
+  if (ggmode==-1 || nextmode>curmode) {
+    res->rsb$b_ggmode=nextmode;
+    res->rsb$b_fgmode=nextmode;
+    res->rsb$b_cgmode=nextmode;
+  }
+
+  lck->lkb$b_grmode=nextmode;
+  lck->lkb$l_lkst1=SS$_NORMAL;
+
+  // check timeout queue
+
+  if (lck->lkb$l_blkastadr) {
+    struct _lkb * head = &res->rsb$l_cvtqfl;
+    int diff=((char*)&head->lkb$l_sqfl)-((char*)head);
+    struct _lkb * next = res->rsb$l_cvtqfl - diff;
+    head=((unsigned long)head)-diff;
+
+    res->rsb$w_blkastcnt++;
+
+    while (head!=next) {
+      // two like whiles. remember to copy
+      if (0==test_bit(nextmode,&lck$ar_compat_tbl[next->lkb$b_rqmode])) {
+	blocking = 1;
+	goto endblockchk;
+      }
+      next=next->lkb$l_sqfl-diff;
+    }
+
+    head = &res->rsb$l_wtqfl;
+    next = res->rsb$l_wtqfl - diff;
+    head=((unsigned long)head)-diff;
+
+    while (head!=next) {
+      // two like whiles. remember to copy
+      if (0==test_bit(nextmode,&lck$ar_compat_tbl[next->lkb$b_rqmode])) {
+	blocking = 1;
+	goto endblockchk;
+      }
+      next=next->lkb$l_sqfl-diff;
+    }
+  }
+ endblockchk:
+
+  insque(&lck->lkb$l_sqfl,res->rsb$l_grqfl);
+  lck->lkb$b_state=LKB$K_GRANTED;
+
+  retsts=SS$_SYNCH;
+
+  lck->lkb$b_rmod|=ACB$M_NODELETE;
+  lck->lkb$b_rmod&=~(LKB$M_KAST|LKB$M_PKAST);
+
+  if (blocking || lck->lkb$l_cplastadr || (lck->lkb$l_status&LKB$M_ASYNC)) {
+
+    if (blocking && lck->lkb$l_cplastadr) {
+      lck->lkb$l_status|=LKB$M_DCPLAST;
+      lck->lkb$l_oldastprm=lck->lkb$l_astprm;
+      lck->lkb$b_rmod|=LKB$M_PKAST;
+    }
+
+    if (blocking) {
+      lck->lkb$l_ast=lck->lkb$l_blkastadr;
+    } else {
+      lck->lkb$l_ast=lck->lkb$l_cplastadr;
+    }
+
+    if (lck->lkb$l_status&LKB$M_ASYNC || (lck->lkb$b_rmod&LKB$M_PKAST)) {
+      if (0==(lck->lkb$b_rmod&LKB$M_PKAST)) {
+	lck->lkb$b_rmod|=LKB$M_KAST;
+      }
+      lck->lkb$l_kast=lock_iosb_kast;
+      lck->lkb$l_astprm=lck;
+    }
+
+#if 0
+    if (lck->lkb$l_cplastadr && (lck->lkb$l_flags&LCK$M_SYNCSTS)==0) {
+      lck->lkb$l_ast=lck->lkb$l_cplastadr;
+    }
+#endif
+
+    sch$qast(lck->lkb$l_pid,PRI$_RESAVL,lck);
+  }
+
+  //if (current->pcb$w_state!=SCH$C_CUR)
+
+  sch$postef(lck->lkb$l_pid,PRI$_RESAVL,lck->lkb$b_efn);
+
+  return retsts;
+}
+
+int maybe_blkast(struct _rsb * res, struct _lkb * lck) {
+  if (lck->lkb$l_blkastadr) {
+    struct _lkb * head = &res->rsb$l_grqfl;
+    int diff=((char*)&head->lkb$l_sqfl)-((char*)head);
+    struct _lkb * next = res->rsb$l_grqfl - diff;
+    head=((unsigned long)head)-diff;
+
+    while (head!=next) {
+      // three like whiles. remember to copy
+      if (0==test_bit(next->lkb$b_grmode,&lck$ar_compat_tbl[lck->lkb$b_rqmode])) {
+	next->lkb$b_rmod|=ACB$M_NODELETE;
+	next->lkb$b_rmod&=~(LKB$M_KAST|LKB$M_PKAST);
+	next->lkb$l_ast=next->lkb$l_blkastadr;
+	sch$qast(next->lkb$l_pid,PRI$_RESAVL,next);
+      }
+      next=next->lkb$l_sqfl-diff;
+    }
+    
+  }
+  return SS$_NORMAL;
+}
+
+int find_highest(struct _lkb * lck, struct _rsb * res) {
   int high=0;
-  while (tmp!=first) {
-    if (tmp!=skipme)
-      if (l->lkb$b_grmode>high)
-	high=l->lkb$b_grmode;
+  struct _lkb * skipme=&lck->lkb$l_sqfl;
+
+  struct _lkb * head=&res->rsb$l_grqfl;
+  struct _lkb * tmp=res->rsb$l_grqfl;
+
+  int diff=((char*)&tmp->lkb$l_sqfl)-((char*)tmp);
+
+  while (tmp!=head) {
+    if (tmp!=skipme) {
+      struct _lkb * lock=((char*)tmp)-((char*)diff);
+      if (lock->lkb$b_grmode>high)
+	high=lock->lkb$b_grmode;
+    }
+    tmp=tmp->lkb$l_astqfl; //really lkb$l_sqfl;
   }
+
+  while (tmp!=head) {
+    if (tmp!=skipme) {
+      struct _lkb * lock=((char*)tmp)-((char*)diff);
+      if (lock->lkb$b_grmode>high)
+	high=lock->lkb$b_grmode;
+    }
+    tmp=tmp->lkb$l_astqfl; //really lkb$l_sqfl;
+  }
+
+  head=&res->rsb$l_cvtqfl;
+  tmp=res->rsb$l_cvtqfl;
+
+
   return high;
 }
+
+int grant_queued(struct _rsb * res, int ggmode_not, int docvt, int dowt) {
+  struct _lkb * head, * tmp;
+  int diff;
+  int newmode;
+  if (docvt) {
+    head=&res->rsb$l_cvtqfl;
+    tmp=res->rsb$l_cvtqfl;
+    diff=((char*)&tmp->lkb$l_sqfl)-((char*)tmp);
+    while (head!=tmp) {
+      tmp=((char *)tmp)-((char*)diff);
+      newmode=res->rsb$b_ggmode;
+      if (test_bit(tmp->lkb$b_rqmode,&lck$ar_compat_tbl[res->rsb$b_ggmode])) {
+	struct _lkb * lck=tmp;
+	struct _lkb * next=tmp->lkb$l_sqfl;
+	remque(((int)tmp)+diff,0);
+	lck$grant_lock(lck ,res,lck->lkb$b_grmode,lck->lkb$b_rqmode,0,0,res->rsb$b_ggmode);
+	tmp=next;
+	continue;
+      }
+      newmode=find_highest(tmp,res);
+      if (res->rsb$b_ggmode==tmp->lkb$b_grmode) {
+	if (test_bit(tmp->lkb$b_rqmode,&lck$ar_compat_tbl[newmode])) {
+	  struct _lkb * lck=tmp;
+	  struct _lkb * next=tmp->lkb$l_sqfl;
+	  remque(((int)tmp)+diff,0);
+	  lck$grant_lock(lck ,res,lck->lkb$b_grmode,lck->lkb$b_rqmode,0,0,res->rsb$b_ggmode);
+	  tmp=next;
+	  continue;
+	} else {
+	  res->rsb$b_cgmode=newmode;
+	}
+      }
+      tmp=tmp->lkb$l_sqfl;
+    }
+  }
+  if (dowt) {
+  }
+
+}
+
+asmlinkage int exe$enqw(unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id) {
+  int status=exe$enq(efn,lkmode,lksb,flags,resnam,parid,astadr,astprm,blkastadr,acmode,rsdm_id);
+  printk("\n\nremember to do like qiow\n\n");
+  if ((status&1)==0) return status;
+  return exe$synch(efn,lksb);
+}
+
+asmlinkage int exe$enqw_wrap(struct struct_args * s) {
+  return exe$enqw(s->s1,s->s2,s->s3,s->s4,s->s5,s->s6,s->s7,s->s8,s->s9,s->s10,s->s11);
+}
+
+
+asmlinkage int exe$enq_wrap(struct struct_args * s) {
+  return exe$enq(s->s1,s->s2,s->s3,s->s4,s->s5,s->s6,s->s7,s->s8,s->s9,s->s10,s->s11);
+}
+
