@@ -1,4 +1,4 @@
-for some reason uml gets some segv problems after execve, and seems broken
+There are currently some problems with newer gcc and redhat with uml: for some reason uml sometimes gets some segv problems after execve, and seems broken
 
 doing something like ctrl-c in a shell gotten by ssh-ing locks the machine. (seems to be gone. wonder why.)
 
@@ -6,7 +6,7 @@ smp is probably broken.
 highmem too.
 do not expect decnet to work for the moment, it may collide with something else.
 
-bochs and uml works only partially, i.e. qio1 has problems.
+bochs and uml works only partially, i.e. qio1 has problems (maybe outdated?).
 
 GCC:
 Due to use of anynymous structures a more recent gcc is needed.

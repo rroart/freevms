@@ -1,54 +1,70 @@
 So far:
 
-Due to use of anynymous structures a more recent gcc is needed.
+About GCC/Distributions.
+Due to use of anonymous structures a more recent gcc is needed.
 You might need gcc "2.96" from recent RedHat; someone may have had success with
 gcc 3.x.
 Redhat 7.2 with gcc "2.96" works. There are anonymous structure offset bugs
 that has been coded around.
 Redhat 8.0 with gcc 3.2 (RedHat patched) works. The anonymous structure offset
 bugs present in pure gcc 3.0.1 was gone in pure 3.1.
+With recent gcc/Redhat uml gets backtrace problems and is partially broken.
 
-Untar freevms, go to the linux directory, and do ./prescript.
-
-Go to the freevms directory and do a make and make install (if uml, see Makefiles for how to compile). Then copy the resulting files from root/.
-The resulting VFS root should have /vms$common.
+Linker (experimental):
 If you want to know how to make the linker do: cat linker/src/HOW
 
+No longer needed symlinks:
 UserMode Linux no longer needs the symlinks from /usr/include/{asm,linux}
 to the kernel build place.
+
+NOTE on kernel build:
 If complaints about modversion.h, do a make update-modverfile.
-
-Go back and make the kernel.
-
-NOTE:
 Make dep in linux is broken, so you might have to do make bzImage twice.
-See BUGS regarding uml
 
 NOTE on kernel config with VMS options:
 There is only one option, CONFIG_VMS (replaces and includes CONFIG_VMS_IO/MM)
 Warning: It might be a risky destructive option. FS write may be destructive.
 VMS IO works so far only on blockdevices, and the only blockdevices supported
-is the uml "harddisk" and on i386 only ide (may not work with all blocksizes).
-Boot with init=/bin/sh.
+is the uml "harddisk" and on i386 only ide.
+Boot with init=/bin/sh or init=/vms\$common/sysexe/dcl
 Note that with some kernel options it might not compile, so in case strip away some configs.
 
+About make config/menuconfig/xconfig:
+If it does not compile, you have to strip down the config.
+Note:
+	There must be no support for:
+	SMP, IDE/ATAPI CDROM, ext3, highmem, IPv6, DECnet and much more.
+	Not sure about modules.
+Note for the experimental CONFIG_VMS (must be more stripped down):
+	IDE support only, and with only one disk and partition.
+	
 Example build i386:
 tar xzf freevms-0_0_46.tgz
 cd freevms/linux
 ./prescript
-cp -p ~/.config .
+cp -p ~/.config .		(or wherever a pre-existing .config may be)
 make menuconfig
-make dep
+make dep			(and ignore make dep errors)
 make bzImage
 
 Example build um:
 tar xzf freevms-0_0_46.tgz
 cd freevms/linux
-mv /usr/include/linux /usr/include/linux.orig
-mv /usr/include/asm /usr/include/asm.orig
 ./prescript
-cp -p ~/.config .
+cp -p ~/.config .		(or wherever a pre-existing .config may be)
 make menuconfig ARCH=um
-make dep ARCH=um
+make dep ARCH=um		(and ignore make dep errors)
 make linux ARCH=um
 
+Example build of user environment:
+cd .. or cd freevms
+make
+make install
+cp -rpv rooti386/. /		(if you are using the same computer)
+(The resulting VFS root should have /vms$common)
+
+Running stuff:
+	Without CONFIG_VMS:
+		Do not expect X to work.
+	With CONFIG_VMS:
+		Boot with single-user bash or dcl.
