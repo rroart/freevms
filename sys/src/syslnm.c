@@ -28,7 +28,6 @@ struct lnmhshp lnmhshp;
 #include<sysgen.h> 
 #include<system_data_cells.h>
 #else
-#include<linux/sched.h>
 #include<linux/vmalloc.h>
 #include<starlet.h>
 #include<lnmdef.h>
@@ -103,8 +102,9 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
 {
   int status;
   struct struct_lnm_ret ret= {0,0};
-  struct lnmb * mylnmb;
-  struct lnmth * mylnmth;
+  struct _lnmb * mylnmb;
+  struct _lnmth * mylnmth;
+  struct _lnmx * mylnmx;
   struct dsc$descriptor * mytabnam=tabnam;
   struct dsc$descriptor * mylognam=lognam;
   struct item_list_3 * i,j;
@@ -112,10 +112,10 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
 
   setipl(IPL$_ASTDEL);
 
-  mylnmb=lnmmalloc(sizeof(struct lnmb));
-  bzero(mylnmb,sizeof(struct lnmb));
-  mylnmth=lnmmalloc(sizeof(struct lnmth));
-  bzero(mylnmth,sizeof(struct lnmth));
+  mylnmb=lnmmalloc(sizeof(struct _lnmb));
+  bzero(mylnmb,sizeof(struct _lnmb));
+  mylnmth=lnmmalloc(sizeof(struct _lnmth));
+  bzero(mylnmth,sizeof(struct _lnmth));
 
   RT=(struct struct_rt *) lnmmalloc(sizeof(struct struct_rt));
   bzero(RT,sizeof(struct struct_rt));
@@ -125,21 +125,24 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
   status=lnm$firsttab(&ret,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
 
   for(i=itmlst;i->item_code!=0;i+=sizeof(*i)) {
-    mylnmb=lnmmalloc(sizeof(struct lnmb));
-    bzero(mylnmb,sizeof(struct lnmb));
+    mylnmb=lnmmalloc(sizeof(struct _lnmb));
+    bzero(mylnmb,sizeof(struct _lnmb));
+    mylnmx=lnmmalloc(sizeof(struct _lnmx));
+    bzero(mylnmx,sizeof(struct _lnmx));
     mylnmb->lnmb$l_flink=0;
     mylnmb->lnmb$l_blink=0;
-    mylnmb->lnmb$w_size=sizeof(struct lnmb);
+    mylnmb->lnmb$w_size=sizeof(struct _lnmb);
     mylnmb->lnmb$b_type=DYN$C_LNM;
     mylnmb->lnmb$b_acmode=0;
     mylnmb->lnmb$l_table=ret.mylnmb;
     mylnmb->lnmb$b_flags=0;
     mylnmb->lnmb$b_count=mylognam->dsc$w_length;
+    mylnmb->lnmb$l_lnmx=mylnmx;
     strncpy( &(mylnmb->lnmb$t_name[0]),mylognam->dsc$a_pointer,mylognam->dsc$w_length);
-    mylnmb->lnmxs[0].lnmx$b_count=i->buflen;
-    strncpy( &(mylnmb->lnmxs[0].lnmx$t_xlation[0]),i->bufaddr,i->buflen);
-    mylnmb->lnmxs[0].lnmx$b_flags=LNM$M_MYTERMINAL;
-    mylnmb->lnmxs[1].lnmx$b_flags=LNM$M_MYXEND;
+    mylnmx->lnmx$l_xlen=i->buflen;
+    strncpy( &(mylnmx->lnmx$t_xlation[0]),i->bufaddr,i->buflen);
+    mylnmx->lnmx$l_flags=LNMX$M_TERMINAL;
+    mylnmx->lnmx$l_flags|=LNMX$M_XEND;
 
     status=lnm$inslogtab(&ret,mylognam->dsc$w_length,mylognam->dsc$a_pointer,mylnmb);
 
@@ -159,9 +162,9 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   /*  char * mytabnam;
       int tabnamlen;*/
   struct struct_lnm_ret ret ={0,0};
-  struct lnmb * mylnmb;
-  struct lnmx * mylnmx;
-  struct lnmth * mylnmth;
+  struct _lnmb * mylnmb;
+  struct _lnmx * mylnmx;
+  struct _lnmth * mylnmth;
   struct _orb * myorb;
   long * trailer;
   struct struct_rt * RT;
@@ -174,12 +177,12 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
     /*    mytabnam="LNM$something";*/
   }
   setipl(IPL$_ASTDEL);
-  mylnmb=lnmmalloc(sizeof(struct lnmb));
-  bzero(mylnmb,sizeof(struct lnmb));
-  mylnmx=lnmmalloc(sizeof(struct lnmx));
-  bzero(mylnmx,sizeof(struct lnmx));
-  mylnmth=lnmmalloc(sizeof(struct lnmth));
-  bzero(mylnmth,sizeof(struct lnmth));
+  mylnmb=lnmmalloc(sizeof(struct _lnmb));
+  bzero(mylnmb,sizeof(struct _lnmb));
+  mylnmx=lnmmalloc(sizeof(struct _lnmx));
+  bzero(mylnmx,sizeof(struct _lnmx));
+  mylnmth=lnmmalloc(sizeof(struct _lnmth));
+  bzero(mylnmth,sizeof(struct _lnmth));
   myorb=lnmmalloc(sizeof(struct _orb));
   bzero(myorb,sizeof(struct _orb));
   trailer=lnmmalloc(sizeof(long));
@@ -244,21 +247,20 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
 
   mylnmb->lnmb$l_flink=0;
   mylnmb->lnmb$l_blink=0;
-  mylnmb->lnmb$w_size=sizeof(struct lnmb);
+  mylnmb->lnmb$w_size=sizeof(struct _lnmb);
   mylnmb->lnmb$b_type=DYN$C_LNM;
   mylnmb->lnmb$b_acmode=0;
-  mylnmth=&mylnmb->lnmxs[0].lnmx$b_count;
+  mylnmb->lnmb$l_lnmx=mylnmx;
+  mylnmth=&mylnmx->lnmx$l_xlen;
   mylnmb->lnmb$l_table=mylnmth; /* should be parent */
   mylnmb->lnmb$b_flags=LNM$M_TABLE;
   mylnmb->lnmb$b_count=mytabnam->dsc$w_length;
   strncpy( &(mylnmb->lnmb$t_name[0]),mytabnam->dsc$a_pointer,mytabnam->dsc$w_length);
 
-  mylnmb->lnmxs[0].lnmx$b_flags=LNM$M_MYTERMINAL;
-  mylnmb->lnmxs[0].lnmx$b_index=LNM$C_TABLE;
-  mylnmb->lnmxs[1].lnmx$b_flags=LNM$M_MYXEND;
+  mylnmx->lnmx$l_flags=LNMX$M_TERMINAL;
+  mylnmx->lnmx$l_index=LNMX$C_TABLE;
 
-
-  mylnmth->lnmth$b_flags=LNM$M_MYSHAREABLE|LNM$M_MYDIRECTORY;
+  mylnmth->lnmth$l_flags=LNMTH$M_SHAREABLE|LNMTH$M_DIRECTORY;
   mylnmth->lnmth$l_name=mylnmb;
   mylnmth->lnmth$l_parent=ret.mylnmb;
   mylnmth->lnmth$l_sibling=0;
@@ -316,8 +318,8 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
     lnm$unlock();
     return status;
   }
-  i->buflen=(ret.mylnmb)->lnmxs[0].lnmx$b_count;
-  bcopy((ret.mylnmb)->lnmxs[0].lnmx$t_xlation,i->bufaddr,i->buflen);
+  i->buflen=(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_xlen;
+  bcopy((ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,i->bufaddr,i->buflen);
   lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
   lnm$unlock();
   return status;
@@ -333,8 +335,8 @@ main(){
   int c;
   unsigned long * myhash;
   int status;
-  struct lnmb * lnm$system_directory;
-  struct lnmth * lnm$system_directory_b;
+  struct _lnmb * lnm$system_directory;
+  struct _lnmth * lnm$system_directory_b;
   struct struct_crelnt * s;
   $DESCRIPTOR(mynam,"BIBI");
   $DESCRIPTOR(mynam2,"BOBO");
@@ -344,23 +346,23 @@ main(){
   $DESCRIPTOR(mypartab,"LNM$SYSTEM_DIRECTORY");
   char resstring[LNM$C_NAMLENGTH];
 
-  /*    lnm$system_directory_b=lnmmalloc(sizeof(struct lnmth));*/
-  lnm$system_directory=lnmmalloc(sizeof(struct lnmb));
-  bzero(lnm$system_directory,sizeof(struct lnmb));
+  /*    lnm$system_directory_b=lnmmalloc(sizeof(struct _lnmth));*/
+  lnm$system_directory=lnmmalloc(sizeof(struct _lnmb));
+  bzero(lnm$system_directory,sizeof(struct _lnmb));
   lnm$system_directory->lnmb$l_flink=lnm$system_directory;
   lnm$system_directory->lnmb$l_blink=lnm$system_directory;
   lnm$system_directory->lnmb$b_type=DYN$C_LNM;
   lnm$system_directory->lnmb$b_acmode=MODE_K_KERNEL;
-  lnm$system_directory_b=(struct lnmth *)&lnm$system_directory->lnmxs[0].lnmx$b_count;
+  lnm$system_directory_b=(struct _lnmth *)&lnm$system_directory->lnmxs[0].lnmx$l_xlen;
   lnm$system_directory->lnmb$l_table=lnm$system_directory_b;
   lnm$system_directory->lnmb$b_flags=LNM$M_NO_ALIAS|LNM$M_TABLE|LNM$M_NO_DELETE;
   lnm$system_directory->lnmb$b_count=mypartab.dsc$w_length;
   strncpy(lnm$system_directory->lnmb$t_name,mypartab.dsc$a_pointer,lnm$system_directory->lnmb$b_count);
-  lnm$system_directory->lnmxs[0].lnmx$b_flags=LNM$M_MYTERMINAL;
-  lnm$system_directory->lnmxs[0].lnmx$b_index=LNM$C_TABLE;
-  lnm$system_directory->lnmxs[1].lnmx$b_flags=LNM$M_MYXEND;
+  lnm$system_directory->lnmxs[0].lnmx$b_flags=LNMX$M_TERMINAL;
+  lnm$system_directory->lnmxs[0].lnmx$b_index=LNMX$C_TABLE;
+  lnm$system_directory->lnmxs[1].lnmx$b_flags=LNMXH$M_XEND;
 
-  lnm$system_directory_b->lnmth$b_flags=LNM$M_MYSHAREABLE|LNM$M_MYDIRECTORY;
+  lnm$system_directory_b->lnmth$b_flags=LNMTH$M_SHAREABLE|LNMTH$M_DIRECTORY;
   lnm$system_directory_b->lnmth$l_name=lnm$system_directory;
   lnm$system_directory_b->lnmth$l_parent=0;
   lnm$system_directory_b->lnmth$l_sibling=0;
@@ -409,13 +411,13 @@ main(){
   lnmprintf("end status %x\n",status);
   for (c=0;c<LNMSHASHTBL;c++) {
     if (lnmhshs.entry[2*c]) { 
-      struct lnmth * l;
-      struct lnmb *head, *tmp;
+      struct _lnmth * l;
+      struct _lnmb *head, *tmp;
       head=lnmhshs.entry[2*c];
       tmp=head;
       do {
 	lnmprintf("lnmhshs entry %x %x %s\n",c,tmp,tmp->lnmb$t_name);
-	l=&(tmp->lnmxs[0].lnmx$b_count);
+	l=&(tmp->lnmxs[0].lnmx$l_xlen);
 	lnmprintf("     parent %x\n",l->lnmth$l_parent);
 	lnmprintf("     table %x\n",tmp->lnmb$l_table);
 	tmp=tmp->lnmb$l_flink;
@@ -424,59 +426,6 @@ main(){
   }
 }
 #else
-
-struct lnmb lnm_sys_dir;
-struct lnmth lnm_sys_dir_b;
-
-void lnm_init(void) {
-
-  /* this has to be done after malloc has been initialized */
-  /* can possibly done with mallocs */
-
-  unsigned long ahash;
-  unsigned long * myhash;
-  int status;
-  struct lnmb * lnm$system_directory=&lnm_sys_dir;
-  struct lnmth * lnm$system_directory_b=&lnm_sys_dir_b;
-  struct struct_crelnt s_c;
-  struct struct_crelnt * s=&s_c;
-  $DESCRIPTOR(mypartab,"LNM$SYSTEM_DIRECTORY");
-  /*    lnm$system_directory_b=lnmmalloc(sizeof(struct lnmth));*/
-  //  lnm$system_directory=lnmmalloc(sizeof(struct lnmb));
-  bzero(lnm$system_directory,sizeof(struct lnmb));
-  lnm$system_directory->lnmb$l_flink=lnm$system_directory;
-  lnm$system_directory->lnmb$l_blink=lnm$system_directory;
-  lnm$system_directory->lnmb$b_type=DYN$C_LNM;
-  lnm$system_directory->lnmb$b_acmode=MODE_K_KERNEL;
-  lnm$system_directory_b=(struct lnmth *)&lnm$system_directory->lnmxs[0].lnmx$b_count;
-  lnm$system_directory->lnmb$l_table=lnm$system_directory_b;
-  lnm$system_directory->lnmb$b_flags=LNM$M_NO_ALIAS|LNM$M_TABLE|LNM$M_NO_DELETE;
-  lnm$system_directory->lnmb$b_count=mypartab.dsc$w_length;
-  strncpy(lnm$system_directory->lnmb$t_name,mypartab.dsc$a_pointer,lnm$system_directory->lnmb$b_count);
-  lnm$system_directory->lnmxs[0].lnmx$b_flags=LNM$M_MYTERMINAL;
-  lnm$system_directory->lnmxs[0].lnmx$b_index=LNM$C_TABLE;
-  lnm$system_directory->lnmxs[1].lnmx$b_flags=LNM$M_MYXEND;
-
-  lnm$system_directory_b->lnmth$b_flags=LNM$M_MYSHAREABLE|LNM$M_MYDIRECTORY;
-  lnm$system_directory_b->lnmth$l_name=lnm$system_directory;
-  lnm$system_directory_b->lnmth$l_parent=0;
-  lnm$system_directory_b->lnmth$l_sibling=0;
-  lnm$system_directory_b->lnmth$l_child=0;
-  lnm$system_directory_b->lnmth$l_qtable=0;
-  lnm$system_directory_b->lnmth$l_hash=0;
-  lnm$system_directory_b->lnmth$l_orb=0;
-  lnm$system_directory_b->lnmth$l_byteslm=0;
-  lnm$system_directory_b->lnmth$l_bytes=0;
-
-  /*ctl$gl_lnmdirect=LNM$PROCESS_DIRECTORY;
-    lnm$al_dirtbl[0]=LNM$SYSTEM_DIRECTORY;
-    lnm$al_dirtbl[1]=ctl$gl_lnmdirect;*/
-  myhash=&ahash; //lnmmalloc(sizeof(unsigned long));
-  status=lnm$hash(mypartab.dsc$w_length,mypartab.dsc$a_pointer,0xffff,myhash);
-  lnmprintf("here %x %x\n",myhash,*myhash);
-  lnmhshs.entry[2*(*myhash)]=lnm$system_directory;
-  lnmhshs.entry[2*(*myhash)+1]=lnm$system_directory;
-}
 
 #endif
 

@@ -68,19 +68,20 @@ int lnm$hash(const int length, const unsigned char * log, const unsigned long ma
   /* 
      hash&=something.LNMHSH$L_MASK;
      Not implemented yet
-     */
- hash=hash%LNMSHASHTBL;
- //lnmprintf("herei7 %x\n",hash);
- hash=hash&mask;
- //lnmprintf("here3 %x\n",hash);
- *myhash=hash;
- //lnmprintf("here2 %x %x\n",myhash,hash);
- return SS$_NORMAL;
+  */
+  hash=hash%LNMSHASHTBL;
+  //lnmprintf("herei7 %x\n",hash);
+  hash=hash&mask;
+  //lnmprintf("here3 %x\n",hash);
+  *myhash=hash;
+  //lnmprintf("here2 %x %x\n",myhash,hash);
+  return SS$_NORMAL;
 }
 
 int lnm$searchlog(struct struct_lnm_ret * r,int loglen, char * logical, int tabnamlen, char * tablename) {
   int status;
-  struct struct_nt * NT=lnmmalloc(sizeof(struct struct_nt));
+  struct struct_nt * nt=lnmmalloc(sizeof(struct struct_nt));
+  bzero(nt,sizeof(struct struct_nt));
 
   /* local stack */
   /*
@@ -88,7 +89,7 @@ int lnm$searchlog(struct struct_lnm_ret * r,int loglen, char * logical, int tabn
     lnm$presearch();
   */
   lnmprintf("searchlog\n");
-  status=lnm$presearch(r,&lnmhshs, loglen, logical);
+  status=lnm$presearch(r,&lnmhshs, loglen, logical, nt);
   if (status==SS$_NOLOGNAM) return status;
   // lnm$setup();
   // lnm$table();
@@ -106,27 +107,27 @@ int lnm$search_one(struct struct_lnm_ret * r,int loglen, char * logical, int tab
   /* unlock */
 }
 
-int lnm$presearch(struct struct_lnm_ret * r,struct lnmhshs * hashtable,int loglen,  char * logical) {
+int lnm$presearch(struct struct_lnm_ret * r,struct lnmhshs * hashtable,int loglen,  char * logical, struct struct_nt * nt) {
   int status;
   unsigned long * myhash;
-  // struct lnmb * mylnmb; not needed?
+  // struct _lnmb * mylnmb; not needed?
   myhash=lnmmalloc(sizeof(unsigned long));
   lnmprintf("presearch %x %s\n",loglen,logical);
   lnmprintf("presearch %x %s\n",loglen,logical);
   status=lnm$hash(loglen,logical,0xffff,myhash);
   lnmprintf("presearch %s\n",logical);
-  status=lnm$contsearch(r,loglen,logical,*myhash,hashtable);
+  status=lnm$contsearch(r,loglen,logical,*myhash,hashtable,nt);
   lnmprintf("presearch %s\n",logical);
   //  r->mylnmb=mylnmb; erroneous?
   lnmfree(myhash);
   return status;
 }
 
-int lnm$contsearch(struct struct_lnm_ret * r,int loglen, char * logical, int hash, struct lnmhshs * hashtable) {
+int lnm$contsearch(struct struct_lnm_ret * r,int loglen, char * logical, int hash, struct lnmhshs * hashtable, struct struct_nt * nt) {
   int status;
   int lenstatus;
   int len=strlen(logical);
-  struct lnmb *head, *tmp;
+  struct _lnmb *head, *tmp;
   head=lnmhshs.entry[hash*2];
   tmp=head;
   if (tmp) 
@@ -159,7 +160,9 @@ int lnm$setup(struct struct_lnm_ret * r,struct struct_rt * RT, int tabnamlen,  c
   RT->depth=0;
   RT->tries=255;
   lnmprintf("lnm$setup %x %s\n",tabnamlen, tablename);
-  status=lnm$lookup(r, RT, tabnamlen, tablename);
+  struct struct_nt * nt = kmalloc(sizeof(struct struct_nt),GFP_KERNEL);
+  bzero(nt,sizeof(struct struct_nt));
+  status=lnm$lookup(r, RT, tabnamlen, tablename, nt);
   if (status==SS$_NORMAL) RT->context[RT->depth]=r->mylnmb;
   else return status;
   /* cache not implemented */
@@ -174,37 +177,47 @@ int lnm$table(struct struct_lnm_ret * r,struct struct_rt * RT, int tabnamlen, ch
   return status;
 }
 
-int lnm$lookup(struct struct_lnm_ret * r,struct struct_rt * RT,int loglen, char * logical) {
+int lnm$lookup(struct struct_lnm_ret * r,struct struct_rt * RT,int loglen, char * logical, struct struct_nt * nt) {
   int status;
+  struct _pcb * pcb = smp$gl_cpu_data[0]->cpu$l_curpcb;
   lnmprintf("lookup %s %x\n",logical,loglen);
-  status=lnm$presearch(r,&lnmhshs,loglen,logical);
+  nt->lnmb=pcb->pcb$l_ns_reserved_q1;
+  //  nt->hash=pcb->pcb$l_affinity_callback;
+  status=lnm$presearch(r,&lnmhshs,loglen,logical,nt);
+  if ((status&1)==0) {
+    nt->lnmb=lnm$al_dirtbl[0];
+    nt->hash=lnmhshs;
+    status=lnm$presearch(r,&lnmhshs,loglen,logical,nt);
+  }
   if (status!=SS$_NOLOGNAM) return status;
   return status;
 }
 
 int lnm$table_srch(struct struct_lnm_ret * r,struct struct_rt *RT, int tabnamlen,  char * tablename) {
-  int xname=0;
+  struct _lnmx * lnmx = (r->mylnmb)->lnmb$l_lnmx;
   int len, status;
+  struct struct_nt * nt = kmalloc(sizeof(struct struct_nt),GFP_KERNEL);
+  bzero(nt,sizeof(struct struct_nt));
   do {
     RT->tries--;
     if (!RT->tries) return SS$_TOOMANYLNAM;
-    if (((r->mylnmb)->lnmxs[xname].lnmx$b_flags)&LNM$M_MYTERMINAL)
-      RT->flags|=LNM$M_MYTERMINAL;
+    if ((lnmx->lnmx$l_flags)&LNMX$M_TERMINAL)
+      RT->flags|=LNMX$M_TERMINAL;
     else
-      RT->flags&=~LNM$M_MYTERMINAL;
+      RT->flags&=~LNMX$M_TERMINAL;
 
     if (RT->depth>10) return SS$_TOOMANYLNAM;
     RT->context[RT->depth]=(r->mylnmb);
-    if ((r->mylnmb)->lnmxs[xname].lnmx$b_index==LNM$C_TABLE) {
+    if (lnmx->lnmx$l_index==LNMX$C_TABLE) {
       return SS$_NORMAL;
     }
     RT->depth++;
-    len=(r->mylnmb)->lnmxs[xname].lnmx$b_count;
-    lnmprintf("tsr %x %s \n",(r->mylnmb)->lnmxs[xname].lnmx$t_xlation,(r->mylnmb)->lnmxs[xname].lnmx$t_xlation);
-    status=lnm$lookup(r,RT,len,(r->mylnmb)->lnmxs[xname].lnmx$t_xlation);
-    xname++;
-  } while (xname<20 && !((r->mylnmb)->lnmxs[xname].lnmx$b_flags)&LNM$M_MYXEND);
-  if ((r->mylnmb)->lnmxs[xname].lnmx$b_index==LNM$C_TABLE) {
+    len=lnmx->lnmx$l_xlen;
+    lnmprintf("tsr %x %s \n",lnmx->lnmx$t_xlation,lnmx->lnmx$t_xlation);
+    status=lnm$lookup(r,RT,len,lnmx->lnmx$t_xlation,nt);
+    lnmx=lnmx->lnmx$l_next;
+  } while (lnmx);
+  if (lnmx && lnmx->lnmx$l_index==LNMX$C_TABLE) {
     RT->depth--;
   }
 
@@ -212,7 +225,7 @@ int lnm$table_srch(struct struct_lnm_ret * r,struct struct_rt *RT, int tabnamlen
 
 }
 
-int lnm$inslogtab(struct struct_lnm_ret * r,int tabnamlen,  char * tablename, struct lnmb * mylnmb) {
+int lnm$inslogtab(struct struct_lnm_ret * r,int tabnamlen,  char * tablename, struct _lnmb * mylnmb) {
   int status;
   unsigned long * myhash;
   myhash=lnmmalloc(sizeof(unsigned long));
@@ -230,8 +243,7 @@ int lnm$inslogtab(struct struct_lnm_ret * r,int tabnamlen,  char * tablename, st
     mylnmb->lnmb$l_blink=mylnmb;
   }
   lnmprintf("inslog\n");
-  
-  ; }
+}
 
 int lnm$check_prot() { ; }
 
@@ -294,3 +306,24 @@ void lnm$unlockw(void) {
 }
 
 #endif
+
+char * search_log_prc(char * name) {
+  $DESCRIPTOR(prc,"LNM$PROCESS_TABLE");
+  int sts;
+  struct item_list_3 itm[2];
+  struct dsc$descriptor mytabnam, mynam;
+  char resstring[LNM$C_NAMLENGTH]="";
+  mynam.dsc$w_length=strlen(name);
+  mynam.dsc$a_pointer=name;
+  itm[0].item_code=1;
+  itm[0].buflen=LNM$C_NAMLENGTH;
+  itm[0].bufaddr=resstring;
+  bzero(&itm[1],sizeof(struct item_list_3));
+  sts = exe$trnlnm(0, &prc, &mynam, 0, itm);
+  if (resstring[0]) {
+    char * c = kmalloc(strlen(resstring),GFP_KERNEL);
+    memcpy(c,resstring,strlen(resstring));
+    return c;
+  } else
+    return name;
+}

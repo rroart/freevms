@@ -13,7 +13,7 @@ int lnm$setup(struct struct_lnm_ret * r,struct struct_rt * RT, int tabnamlen,  c
 int lnm$table(struct struct_lnm_ret * r,struct struct_rt * RT, int tabnamlen, char * tablename) ;
 int lnm$lookup(struct struct_lnm_ret * r,struct struct_rt * RT, int loglen, char * logical) ;
 int lnm$table_srch(struct struct_lnm_ret * r,struct struct_rt *RT, int tabnamlen,  char * tablename) ;
-int lnm$inslogtab(struct struct_lnm_ret * r,int tabnamlen,  char * tablename, struct lnmb * mylnmb);
+int lnm$inslogtab(struct struct_lnm_ret * r,int tabnamlen,  char * tablename, struct _lnmb * mylnmb);
 int lnm$delete_lnmb();
 
 #endif
