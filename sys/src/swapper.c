@@ -214,6 +214,8 @@ void lnm_init_sys(void) {
 
   lnm_sys_dir_table_header.lnmth$l_child = &lnm_sys_table_header;
   lnm_sys_table_header.lnmth$l_parent = &lnm_sys_dir_table_header;
+  lnm_sys_dir_table_header.lnmth$l_hash = &lnmhshs;
+  lnm_sys_table_header.lnmth$l_hash = &lnmhshs;
   lnm_sys.lnmb$l_table=&lnm_sys_dir_table_header; // beware this and over
 
   lnm$al_dirtbl[0]=&lnm_sys_dir;
@@ -228,8 +230,8 @@ void lnm_init_sys(void) {
   lnmhshs.entry[2*(*myhash)+1]=lnm$system_directory;
   status=lnm$hash(mytabnam.dsc$w_length,mytabnam.dsc$a_pointer,0xffff,myhash);
   lnmprintf("here %x %x\n",myhash,*myhash);
-  lnmhshs.entry[2*(*myhash)]=&lnm$sys;
-  lnmhshs.entry[2*(*myhash)+1]=&lnm$sys;
+  lnmhshs.entry[2*(*myhash)]=&lnm_sys;
+  lnmhshs.entry[2*(*myhash)+1]=&lnm_sys;
 }
 
 void exe$swapinit(void) {

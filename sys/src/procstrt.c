@@ -126,6 +126,8 @@ void lnm_init_prc(struct _pcb * p) {
 
   dir_lnmth->lnmth$l_child = tab_lnmth;
   tab_lnmth->lnmth$l_parent = dir_lnmth;
+  dir_lnmth->lnmth$l_hash = hash;
+  tab_lnmth->lnmth$l_hash = hash;
   tab_lnmb->lnmb$l_table=tab_lnmth; // beware this and over
 
   itm[0].item_code=1;
@@ -154,6 +156,10 @@ void lnm_init_prc(struct _pcb * p) {
   hash->entry[2*(*myhash)]=tab_lnmb;
   hash->entry[2*(*myhash)+1]=tab_lnmb;
 
+  dir_lnmb->lnmb$l_flink=dir_lnmb;
+  dir_lnmb->lnmb$l_blink=dir_lnmb;
+  tab_lnmb->lnmb$l_flink=tab_lnmb;
+  tab_lnmb->lnmb$l_blink=tab_lnmb;
 }
 
 int exe$procstrt(struct _pcb * p) {
