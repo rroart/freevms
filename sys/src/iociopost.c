@@ -45,6 +45,10 @@ kfreebuf(void * d) {
 
 movbuf(struct _irp * i) {
   // still skipping access checks and such
+  if (i->irp$l_svapte==&i->irp$l_svapte) {
+    printk("self ref svapte\n");
+    return;
+  }
   struct _bufio * bd = i->irp$l_svapte;
   struct _cxb * cx = bd;
 
@@ -87,7 +91,6 @@ bufpost(struct _irp * i) {
   struct _phd * phd = pcb->pcb$l_phd;
   //printk("doing bufpost\n");
   /* do iosb soon? */
-
   movbuf(i);
 
   if (i->irp$l_sts&IRP$M_MBXIO)
