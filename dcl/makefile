@@ -60,9 +60,9 @@ include $(DEPENDC)
 # Compilateurs et options générales
 #-------------------------------------------------------------------------------
 
-CC=g77
+CC=gcc
 F77=g77
-LD=g77
+LD=gcc
 
 GCC_FLAGS=-O2 -g -Wall
 LD_FLAGS=-O2 -g
