@@ -132,7 +132,7 @@ unsigned long ctl$c_krp_count;
 unsigned long ctl$c_krp_size;
 unsigned long ctl$c_p1ptr_size;
 struct _ccb ctl$ga_ccb_table[CHANNELCNT];
-struct _ccb ctl$gl_ccbbase[]=ctl$ga_ccb_table;
+struct _ccb * ctl$gl_ccbbase=ctl$ga_ccb_table;
 unsigned long ctl$ga_les_process;
 unsigned long ctl$gb_deflang;
 unsigned long ctl$gb_msgmask;
