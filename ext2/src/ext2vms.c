@@ -631,7 +631,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     dir.d_name[(*reslen)++]='1';
     bcopy(dir.d_name,resdsc->dsc$a_pointer,*reslen);
 
-    fib->fib$w_fid_num=0;
     if (dir.d_ino!=2) {
       fib->fib$w_fid_num=head->i_dev;
       *(unsigned long*)(&fib->fib$w_fid_seq)=dir.d_ino;
