@@ -44,21 +44,28 @@ mkdir -p /mnt/bin /mnt/sbin /mnt/etc /mnt/usr /mnt/usr/sbin /mnt/usr/bin /mnt/li
 
 cd /bin
 cp -pi cat cp dd df dmesg echo ed grep hostname ln ls mkdir mount mv ps rm sh umount uname /mnt/bin
+cd -
 
 cd /sbin
 cp -pi fsck fsck.ext2 ifconfig route sash /mnt/sbin
+cd -
 
 cd /usr/bin
 cp -pi head id /mnt/usr/bin
+cd -
 
 cd /lib
 cp -pi ld-linux.so.2 libc.so.6 libcom_err.so.2 libdl.so.2 libext2fs.so.2 libpcre.so.0 libtermcap.so.2 libproc.so.2* /mnt/lib
+cd -
 
 cd /etc
 cp -pi *passwd* *group* *shadow* /mnt/etc
+cd -
 
 umount /mnt
 losetup -d /dev/loop0
+
+cp -pi c.img c2.img
 
 exit 1
 

@@ -8,3 +8,11 @@ cp -p ../linux/arch/i386/boot/bzImage /mnt/boot/freevms.iomm
 umount /mnt
 losetup -d /dev/loop0
 
+losetup -o 512 /dev/loop0 c2.img
+mount -t ext2 /dev/loop0 /mnt
+
+cp -p ../linux/arch/i386/boot/bzImage /mnt/boot/freevms.iomm
+
+umount /mnt
+losetup -d /dev/loop0
+
