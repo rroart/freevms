@@ -105,7 +105,9 @@ int is_cluster_on() {
 inline void dn_nsp_send2(struct sk_buff *skb)
 {
   unsigned short int *pktlen;
+#ifndef CONFIG_VMS
   pktlen = (unsigned short *)skb_push(skb,2);
+#endif
   *pktlen = dn_htons(skb->len - 2);
   skb->nh.raw = skb->data;
   skb->dev = decnet_default_device;
@@ -381,8 +383,10 @@ int dn_dev_ioctl(unsigned int cmd, void *arg)
 		return -EFAULT;
 	ifr->ifr_name[IFNAMSIZ-1] = 0;
 
+#ifndef CONFIG_VMS
 #ifdef CONFIG_KMOD
 	dev_load(ifr->ifr_name);
+#endif
 #endif
 
 	switch(cmd) {
@@ -393,17 +397,21 @@ int dn_dev_ioctl(unsigned int cmd, void *arg)
 				return -EACCES;
 			if (sdn->sdn_family != AF_DECnet)
 				return -EINVAL;
+#ifndef CONFIG_VMS
 			rtnl_lock();
+#endif
 			exclusive = 1;
 			break;
 		default:
 			return -EINVAL;
 	}
 
+#ifndef CONFIG_VMS
 	if ((dev = __dev_get_by_name(ifr->ifr_name)) == NULL) {
 		ret = -ENODEV;
 		goto done;
 	}
+#endif
 
 	if ((dn_db = dev->dn_ptr) != NULL) {
 		for (ifap = &dn_db->ifa_list; (ifa=*ifap) != NULL; ifap = &ifa->ifa_next)
@@ -439,8 +447,10 @@ int dn_dev_ioctl(unsigned int cmd, void *arg)
 			ret = dn_dev_set_ifa(dev, ifa);
 	}
 done:
+#ifndef CONFIG_VMS
 	if (exclusive)
 		rtnl_unlock();
+#endif
 
 	return ret;
 rarok:
@@ -454,10 +464,14 @@ static struct dn_dev *dn_dev_by_index(int ifindex)
 {
 	struct net_device *dev;
 	struct dn_dev *dn_dev = NULL;
+#ifndef CONFIG_VMS
 	dev = dev_get_by_index(ifindex);
+#endif
 	if (dev) {
 		dn_dev = dev->dn_ptr;
+#ifndef CONFIG_VMS
 		dev_put(dev);
+#endif
 	}
 
 	return dn_dev;
@@ -497,8 +511,10 @@ static int dn_dev_rtm_newaddr(struct sk_buff *skb, struct nlmsghdr *nlh, void *a
 	if (rta[IFA_LOCAL-1] == NULL)
 		return -EINVAL;
 
+#ifndef CONFIG_VMS
 	if ((dev = __dev_get_by_index(ifm->ifa_index)) == NULL)
 		return -ENODEV;
+#endif
 
 	if ((dn_db = dev->dn_ptr) == NULL) {
 		int err;
@@ -529,23 +545,29 @@ static int dn_dev_fill_ifaddr(struct sk_buff *skb, struct dn_ifaddr *ifa,
 	struct nlmsghdr *nlh;
 	unsigned char *b = skb->tail;
 
+#ifndef CONFIG_VMS
 	nlh = NLMSG_PUT(skb, pid, seq, event, sizeof(*ifm));
 	ifm = NLMSG_DATA(nlh);
+#endif
 
 	ifm->ifa_family = AF_DECnet;
 	ifm->ifa_prefixlen = 16;
 	ifm->ifa_flags = ifa->ifa_flags | IFA_F_PERMANENT;
 	ifm->ifa_scope = ifa->ifa_scope;
 	ifm->ifa_index = ifa->ifa_dev->dev->ifindex;
+#ifndef CONFIG_VMS
 	RTA_PUT(skb, IFA_LOCAL, 2, &ifa->ifa_local);
 	if (ifa->ifa_label[0])
 		RTA_PUT(skb, IFA_LABEL, IFNAMSIZ, &ifa->ifa_label);
+#endif
 	nlh->nlmsg_len = skb->tail - b;
 	return skb->len;
 
 nlmsg_failure:
 rtattr_failure:
+#ifndef CONFIG_VMS
         skb_trim(skb, b - skb->data);
+#endif
         return -1;
 }
 
@@ -554,6 +576,7 @@ static void rtmsg_ifa(int event, struct dn_ifaddr *ifa)
 	struct sk_buff *skb;
 	int size = NLMSG_SPACE(sizeof(struct ifaddrmsg)+128);
 
+#ifndef CONFIG_VMS
 	skb = alloc_skb(size, GFP_KERNEL);
 	if (!skb) {
 		netlink_set_err(rtnl, 0, RTMGRP_DECnet_IFADDR, ENOBUFS);
@@ -566,6 +589,7 @@ static void rtmsg_ifa(int event, struct dn_ifaddr *ifa)
 	}
 	NETLINK_CB(skb).dst_groups = RTMGRP_DECnet_IFADDR;
 	netlink_broadcast(rtnl, skb, 0, RTMGRP_DECnet_IFADDR, GFP_KERNEL);
+#endif
 }
 
 static int dn_dev_dump_ifaddr(struct sk_buff *skb, struct netlink_callback *cb)
@@ -578,6 +602,7 @@ static int dn_dev_dump_ifaddr(struct sk_buff *skb, struct netlink_callback *cb)
 
 	s_idx = cb->args[0];
 	s_dn_idx = dn_idx = cb->args[1];
+#ifndef CONFIG_VMS
 	read_lock(&dev_base_lock);
 	for(dev = dev_base, idx = 0; dev; dev = dev->next) {
 		if ((dn_db = dev->dn_ptr) == NULL)
@@ -598,6 +623,8 @@ static int dn_dev_dump_ifaddr(struct sk_buff *skb, struct netlink_callback *cb)
 				goto done;
 		}
 	}
+#endif
+
 done:
 	read_unlock(&dev_base_lock);
 	cb->args[0] = idx;
@@ -613,11 +640,13 @@ static inline void dn_rt_finish_output2(struct sk_buff *skb, char *dst)
   if ((dev->type != ARPHRD_ETHER) && (dev->type != ARPHRD_LOOPBACK))
     dst = NULL;
 
+#ifndef CONFIG_VMS
   if (!dev->hard_header || (dev->hard_header(skb, dev, ETH_P_MYSCS,
 					     dst, NULL, skb->len) >= 0))
     dn_rt_send(skb);
   else
     kfree_skb(skb);
+#endif
 }
 
 // this is not right, but works
@@ -649,8 +678,10 @@ static void dn_send_endnode_hello(struct net_device *dev)
 
         skb->dev = dev;
 
+#ifndef CONFIG_VMS
 	msg = skb_put(skb,sizeof(*nisca));
 	skb_put(skb,16);
+#endif
 
         intro = msg;
 
@@ -690,9 +721,9 @@ static void dn_send_endnode_hello(struct net_device *dev)
         msg->mpd     = 0x00;
         msg->datalen = 0x02;
         memset(msg->data, 0xAA, 2);
-#endif
 
         pktlen = (unsigned short *)skb_push(skb,2);
+#endif
         *pktlen = dn_htons(skb->len - 2);
 
 	skb->nh.raw = skb->data;
@@ -710,12 +741,14 @@ static int dn_eth_up(struct net_device *dev)
 {
 	struct dn_dev *dn_db = dev->dn_ptr;
 
+#ifndef CONFIG_VMS
 	if (dn_db->parms.forwarding == 0)
 		dev_mc_add(dev, dn_rt_all_end_mcast, ETH_ALEN, 0);
 	else
 		dev_mc_add(dev, dn_rt_all_rt_mcast, ETH_ALEN, 0);
 
 	dev_mc_upload(dev);
+#endif
 
 	dn_db->use_long = 1;
 
@@ -790,8 +823,10 @@ struct dn_dev *dn_dev_create(struct net_device *dev, int *err)
 		}
 	}
 
+#ifndef CONFIG_VMS
 	dn_db->neigh_parms = neigh_parms_alloc(dev, &dn_neigh_table);
 	/* dn_db->neigh_parms->neigh_setup = dn_db->parms.neigh_setup; */
+#endif
 
 	dn_dev_sysctl_register(dev, &dn_db->parms);
 
@@ -841,6 +876,7 @@ static void dn_dev_delete(struct net_device *dev)
 
 	dn_dev_sysctl_unregister(&dn_db->parms);
 
+#ifndef CONFIG_VMS
 	neigh_ifdown(&dn_neigh_table, dev);
 
 	if (dev == decnet_default_device)
@@ -857,6 +893,7 @@ static void dn_dev_delete(struct net_device *dev)
 		neigh_release(dn_db->router);
 	if (dn_db->peer)
 		neigh_release(dn_db->peer);
+#endif
 
 	kfree(dn_db);
 }
@@ -896,8 +933,10 @@ void dn_dev_devices_off(void)
 {
 	struct net_device *dev;
 
+#ifndef CONFIG_VMS
 	for(dev = dev_base; dev; dev = dev->next)
 		dn_dev_down(dev);
+#endif
 
 }
 
@@ -905,10 +944,12 @@ void dn_dev_devices_on(void)
 {
 	struct net_device *dev;
 
+#ifndef CONFIG_VMS
 	for(dev = dev_base; dev; dev = dev->next) {
 		if (dev->flags & IFF_UP)
 			dn_dev_up(dev);
 	}
+#endif
 }
 
 #ifdef CONFIG_PROC_FS
@@ -941,6 +982,7 @@ static int decnet_dev_get_info(char *buffer, char **start, off_t offset, int len
         len += sprintf(buffer, "Name     Flags T1   Timer1 T3   Timer3 BlkSize Pri State DevType    Router Peer\n");
 
 	read_lock(&dev_base_lock);
+#ifndef CONFIG_VMS
         for (dev = dev_base; dev; dev = dev->next) {
 		if ((dn_db = (struct dn_dev *)dev->dn_ptr) == NULL)
 			continue;
@@ -966,6 +1008,7 @@ static int decnet_dev_get_info(char *buffer, char **start, off_t offset, int len
                 if (pos > offset + length)
                         break;
         }
+#endif
 
 	read_unlock(&dev_base_lock);
 
@@ -1009,7 +1052,9 @@ void __init dn_dev_init(void)
 
 	dn_dev_devices_on();
 
+#ifndef CONFIG_VMS
 	rtnetlink_links[PF_DECnet] = dnet_rtnetlink_table;
+#endif
 
 #ifdef CONFIG_PROC_FS
 	proc_net_create("myscs_dev", 0, decnet_dev_get_info);
@@ -1026,7 +1071,9 @@ void __init dn_dev_init(void)
 
 void __exit dn_dev_cleanup(void)
 {
+#ifndef CONFIG_VMS
 	rtnetlink_links[PF_DECnet] = NULL;
+#endif
 
 #ifdef CONFIG_SYSCTL
 	{
@@ -1098,8 +1145,10 @@ static struct neigh_ops dn_long_ops = {
 	error_report:		dn_long_error_report,
 	output:			dn_long_output,
 	connected_output:	dn_long_output,
+#ifndef CONFIG_VMS
 	hh_output:		dev_queue_xmit,
 	queue_xmit:		dev_queue_xmit,
+#endif
 };
 
 struct neigh_table dn_neigh_table = {
@@ -1166,9 +1215,11 @@ static int dn_neigh_construct(struct neighbour *neigh)
 	else if ((dev->type == ARPHRD_ETHER) || (dev->type == ARPHRD_LOOPBACK))
 		dn_dn2eth(neigh->ha, dn->addr);
 	else {
+#ifndef CONFIG_VMS
 		if (net_ratelimit())
 			printk(KERN_DEBUG "Trying to create neigh for hw %d\n",  dev->type);
 		return -EINVAL;
+#endif
 	}
 
 	dn->blksize = 230;
@@ -1179,7 +1230,9 @@ static int dn_neigh_construct(struct neighbour *neigh)
 static void dn_long_error_report(struct neighbour *neigh, struct sk_buff *skb)
 {
 	printk(KERN_DEBUG "dn_long_error_report: called\n");
+#ifndef CONFIG_VMS
 	kfree_skb(skb);
+#endif
 }
 
 
@@ -1189,6 +1242,7 @@ static int dn_neigh_output_packet(struct sk_buff *skb)
 	struct neighbour *neigh = dst->neighbour;
 	struct net_device *dev = neigh->dev;
 
+#ifndef CONFIG_VMS
 	if (!dev->hard_header || dev->hard_header(skb, dev, ntohs(skb->protocol), neigh->ha, NULL, skb->len) >= 0)
 		return neigh->ops->queue_xmit(skb);
 
@@ -1196,6 +1250,7 @@ static int dn_neigh_output_packet(struct sk_buff *skb)
 		printk(KERN_DEBUG "dn_neigh_output_packet: oops, can't send packet\n");
 
 	kfree_skb(skb);
+#endif
 	return -EINVAL;
 }
 
@@ -1210,6 +1265,7 @@ static int dn_long_output(struct sk_buff *skb)
 	struct _cdt *cb = (skb);
 
 
+#ifndef CONFIG_VMS
 	if (skb_headroom(skb) < headroom) {
 		struct sk_buff *skb2 = skb_realloc_headroom(skb, headroom);
 		if (skb2 == NULL) {
@@ -1225,6 +1281,7 @@ static int dn_long_output(struct sk_buff *skb)
 	}
 
 	data = skb_push(skb, sizeof(struct dn_long_packet) + 3);
+#endif
 	lp = (struct dn_long_packet *)(data+3);
 
 	*((unsigned short *)data) = dn_htons(skb->len - 2);
@@ -1286,7 +1343,9 @@ void dn_neigh_pointopoint_notify(struct sk_buff *skb)
  */
 void dn_neigh_pointopoint_hello(struct sk_buff *skb)
 {
+#ifndef CONFIG_VMS
 	kfree_skb(skb);
+#endif
 }
 
 static int first_hello=0;
@@ -1357,7 +1416,9 @@ int dn_neigh_endnode_hello(struct sk_buff *skb)
 	}
 #endif
 
+#ifndef CONFIG_VMS
 	kfree_skb(skb);
+#endif
 	return 0;
 }
 
@@ -1420,7 +1481,9 @@ done:
 
 void __init dn_neigh_init(void)
 {
+#ifndef CONFIG_VMS
 	neigh_table_init(&dn_neigh_table);
+#endif
 
 #ifdef CONFIG_PROC_FS
 	proc_net_create("myscs_neigh",0,dn_neigh_get_info);
@@ -1430,7 +1493,9 @@ void __init dn_neigh_init(void)
 void __exit dn_neigh_cleanup(void)
 {
 	proc_net_remove("myscs_neigh");
+#ifndef CONFIG_VMS
 	neigh_table_clear(&dn_neigh_table);
+#endif
 }
 /*
  * DECnet       An implementation of the DECnet protocol suite for the LINUX
@@ -1534,8 +1599,10 @@ static __inline__ int dn_queue_skb(struct _cdt *sk, struct sk_buff *skb, int sig
            number of warnings when compiling with -W --ANK
          */
 
+#ifndef CONFIG_VMS
         skb_set_owner_r(skb, sk);
         skb_queue_tail(queue, skb);
+#endif
 
 	/* This code only runs from BH or BH protected context.
 	 * Therefore the plain read_lock is ok here. -DaveM
@@ -1632,8 +1699,10 @@ struct sk_buff *dn_alloc_skb2(struct _cdt *sk, int size, int pri)
 	struct sk_buff *skb;
 	int hdr = 64;
 
+#ifndef CONFIG_VMS
 	if ((skb = alloc_skb(size + hdr, pri)) == NULL)
 		return NULL;
+#endif
 
 	skb->protocol = __constant_htons(ETH_P_MYSCS);
 	skb->pkt_type = PACKET_OUTGOING;
@@ -1641,7 +1710,9 @@ struct sk_buff *dn_alloc_skb2(struct _cdt *sk, int size, int pri)
 	//	if (sk)
 	//	skb_set_owner_w(skb, sk);
 
+#ifndef CONFIG_VMS
 	skb_reserve(skb, hdr);
+#endif
 
 	return skb;
 }
@@ -1727,12 +1798,14 @@ static inline unsigned dn_nsp_clone_and_send(struct sk_buff *skb, int gfp)
 	struct sk_buff *skb2;
 	int ret = 0;
 
+#ifndef CONFIG_VMS
 	if ((skb2 = skb_clone(skb, gfp)) != NULL) {
 		ret = cb->cdt$l_pb->pb$l_vc_addr->vc$l_xmt_msg;
 		cb->cdt$l_pb->pb$l_vc_addr->vc$l_xmt_msg++;
 		skb2->sk = skb->sk;
 		dn_nsp_send2(skb2);
 	}
+#endif
 
 	return ret;
 }
@@ -1764,8 +1837,10 @@ void dn_nsp_output2(struct _cdt *sk)
 	 * If we are still trying to get some other data down the
 	 * channel, we don't try and send any data.
 	 */
+#ifndef CONFIG_VMS
 	if ((skb = skb_peek(&scp->cdt$l_waitqfl)) != NULL)
 		reduce_win = dn_nsp_clone_and_send(skb, GFP_ATOMIC);
+#endif
 
 	/*
 	 * If we've sent any frame more than once, we cut the
@@ -1788,7 +1863,11 @@ int dn_nsp_xmit_timeout2(struct _cdt *sk)
 
 static inline unsigned char *dn_mk_common_header(struct _cdt *scp, struct sk_buff *skb, unsigned char msgflag, int len)
 {
+#ifndef CONFIG_VMS
 	unsigned char *ptr = skb_push(skb, len);
+#else
+	char * ptr=0;
+#endif
 
 	if (len < 5)
 		BUG();
@@ -1814,10 +1893,12 @@ void dn_nsp_queue_xmit2(struct _cdt *sk, struct sk_buff *skb, int gfp, int oth)
 
 	cb->cdt$l_pb->pb$l_vc_addr->vc$l_xmt_msg = 0;
 
+#ifndef CONFIG_VMS
 	if (oth)
 		skb_queue_tail(&scp->cdt$l_waitqfl, skb);
 	else
 		skb_queue_tail(&scp->cdt$l_waitqfl, skb);
+#endif
 
 	dn_nsp_clone_and_send(skb, gfp);
 }
@@ -1831,7 +1912,9 @@ void dn_send_conn_ack2 (struct _cdt *sk)
 	if ((skb = dn_alloc_skb2(sk, 3, 0)) == NULL)
 		return;
 
+#ifndef CONFIG_VMS
         msg = (struct nsp_conn_ack_msg *)skb_put(skb, 3);
+#endif
         //msg->msgflg = 0x24;                   
 	//msg->dstaddr = scp->cdt$l_rconid;
 
@@ -1879,7 +1962,9 @@ void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgf
 	struct _scs * scs;
 	struct _nisca *dx;
 	void * data;
+#ifndef CONFIG_VMS
 	data = skb_put(skb,sizeof(*nisca));
+#endif
 	scs_fill_dx(data,0xab00,0x04010000,0xaa00,(system_utsname.nodename[0]<<16)+system_utsname.nodename[1]);
 	nisca=gettr(data);
 	nisca->nisca$b_tr_flag=NISCA$M_TR_CTL;
@@ -1929,7 +2014,9 @@ void scs_msg_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg, 
 	struct _scs * scs;
 	struct _nisca *dx;
 	void * data;
+#ifndef CONFIG_VMS
 	data = skb_put(skb,sizeof(*nisca));
+#endif
 	scs_fill_dx(data,0xab00,0x04010000,0xaa00,(system_utsname.nodename[0]<<16)+system_utsname.nodename[1]);
 	nisca=gettr(data);
 	nisca->nisca$b_tr_flag=0;
@@ -1953,12 +2040,16 @@ void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdr
 	struct _scs * scs;
 	struct _nisca *dx;
 	void * data;
+#ifndef CONFIG_VMS
 	data = skb_put(skb,sizeof(*nisca));
+#endif
 	data = skb->data;
 	ppd=getppdscs(data);
 	scs=getppdscs(data);
 
+#ifndef CONFIG_VMS
 	data = skb_put(skb,sizeof(*scs));
+#endif
 	data = (unsigned long)scs + sizeof(*scs);
 
 	bcopy(cdrp->cdrp$l_msg_buf,data,bufsiz);
@@ -1967,7 +2058,9 @@ void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdr
 	//cdt->cdt$l_reserved3=current->pcb$l_pid;
 	//cdt->cdt$l_reserved4=cdrp->cdrp$l_msg_buf;
 
+#ifndef CONFIG_VMS
 	data=skb_put(skb,bufsiz);
+#endif
 }
 
 
@@ -2119,7 +2212,9 @@ static void SMP_TIMER_NAME(dn_dst_check_expire)(unsigned long dummy)
 			}
 			*rtp = rt->u.rt_next;
 			rt->u.rt_next = NULL;
+#ifndef CONFIG_VMS
 			dst_free(&rt->u.dst);
+#endif
 		}
 		write_unlock(&dn_rt_hash_table[i].lock);
 
@@ -2146,7 +2241,9 @@ void SMP_TIMER_NAME(dn_run_flush)(unsigned long dummy)
 		for(; rt; rt=next) {
 			next = rt->u.rt_next;
 			rt->u.rt_next = NULL;
+#ifndef CONFIG_VMS
 			dst_free((struct dst_entry *)rt);
+#endif
 		}
 
 nothing_to_declare:
@@ -2284,7 +2381,9 @@ int nisca_snt_dg (struct sk_buff * skb) {
     setipl(savipl);
   }
 #endif
+#ifndef CONFIG_VMS
   kfree_skb(skb);
+#endif
 }
 
 int nisca_snt_lb (struct sk_buff * skb, void * addr) { }
@@ -2563,12 +2662,14 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
       struct _nisca *dx;
       int (*func)();
 
+#ifndef CONFIG_VMS
       if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
               goto out;
 
       skb_pull(skb, 2);
 
       skb_trim(skb, len);
+#endif
 
       msg=skb->data;
       nisca=gettr(msg);
@@ -2623,7 +2724,9 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
 	//	nisca_snt_dg(skb,scs);
 	return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, nisca_snt_dg);
 dump_it:
+#ifndef CONFIG_VMS
 kfree_skb(skb);
+#endif
 out:
 return NET_RX_DROP;
 }
@@ -3015,8 +3118,10 @@ static int dn_def_dev_strategy(ctl_table *table, int *name, int nlen,
 
 		devname[newlen] = 0;
 
+#ifndef CONFIG_VMS
 		if ((dev = __dev_get_by_name(devname)) == NULL)
 			return -ENODEV;
+#endif
 
 		if (dev->dn_ptr == NULL)
 			return -ENODEV;
@@ -3052,8 +3157,10 @@ static int dn_def_dev_handler(ctl_table *table, int write,
 		devname[*lenp] = 0;
 		strip_it(devname);
 
+#ifndef CONFIG_VMS
 		if ((dev = __dev_get_by_name(devname)) == NULL)
 			return -ENODEV;
+#endif
 
 #if 0
 		// not now. this will be set in dn_dev_create

@@ -130,13 +130,17 @@ struct _cdt *dn_alloc_sock(struct socket *sock, int gfp)
 	struct _cdt *sk;
 	struct _cdt *scp;
 
+#ifndef CONFIG_VMS
 	if  ((sk = sk_alloc(PF_DECnet, gfp, 1)) == NULL) 
 		goto no_sock;
+#endif
 
 	if (sock) {
 			sock->ops = &dn_proto_ops;
 	}
+#ifndef CONFIG_VMS
 	sock_init_data(sock,sk);
+#endif
 	scp = sk;
 
 	sk->cdt$l_dginput = dn_nsp_backlog_rcv2;
@@ -638,7 +642,9 @@ static struct proto_ops dn_proto_ops = {
 	release:	none,
 	bind:		none,
 	connect:	none,
+#ifndef CONFIG_VMS
 	socketpair:	sock_no_socketpair,
+#endif
 	accept:		scs_std$accept,
 	getname:	none,
 	poll:		none,
@@ -649,8 +655,10 @@ static struct proto_ops dn_proto_ops = {
 	getsockopt:	none,
 	sendmsg:	scs_std$sendmsg,
 	recvmsg:	none,
+#ifndef CONFIG_VMS
 	mmap:		sock_no_mmap,
 	sendpage:	sock_no_sendpage,
+#endif
 };
 
 #ifdef CONFIG_SYSCTL
@@ -693,8 +701,10 @@ static int __init decnet_init(void)
         printk(banner);
 
 	sock_register(&dn_family_ops);
+#ifndef CONFIG_VMS
 	dev_add_pack(&dn_dix_packet_type);
 	register_netdevice_notifier(&dn_dev_notifier);
+#endif
 
 	proc_net_create("myscs", 0, dn_get_info);
 
@@ -734,14 +744,18 @@ __setup("myscs=", decnet_setup);
 
 static void __exit decnet_exit(void)
 {
+#ifndef CONFIG_VMS
 	sock_unregister(AF_DECnet);
 	dev_remove_pack(&dn_dix_packet_type);
+#endif
 
 #ifdef CONFIG_SYSCTL
 	dn_unregister_sysctl();
 #endif /* CONFIG_SYSCTL */
 
+#ifndef CONFIG_VMS
 	unregister_netdevice_notifier(&dn_dev_notifier);
+#endif
 
 	dn_route_cleanup();
 	dn_dev_cleanup();
