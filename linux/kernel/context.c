@@ -73,7 +73,9 @@ static int context_thread(void *startup)
 	DECLARE_WAITQUEUE(wait, curtask);
 	struct k_sigaction sa;
 
+#if 0
 	daemonize();
+#endif
 	strcpy(curtask->pcb$t_lname, "keventd");
 	keventd_running = 1;
 	keventd_task = curtask;
@@ -88,6 +90,7 @@ static int context_thread(void *startup)
 	/* Install a handler so SIGCLD is delivered */
 	sa.sa.sa_handler = SIG_IGN;
 	sa.sa.sa_flags = 0;
+
 	siginitset(&sa.sa.sa_mask, sigmask(SIGCHLD));
 	do_sigaction(SIGCHLD, &sa, (struct k_sigaction *)0);
 

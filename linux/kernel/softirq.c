@@ -366,7 +366,9 @@ static int ksoftirqd(void * __bind_cpu)
 	int bind_cpu = (int) (long) __bind_cpu;
 	int cpu = cpu_logical_map(bind_cpu);
 
+#if 0
 	daemonize();
+#endif
 	current->pcb$b_prib = 27; /* should be higher */
 	sigfillset(&current->blocked);
 
