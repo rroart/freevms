@@ -48,6 +48,8 @@ pg_data_t *pgdat_list;
 
 extern int in_free_all_bootmem_core;
 
+int memalcdeb=0;
+
 static void FASTCALL(__free_pages_ok (struct page *page, unsigned int order));
 static void __free_pages_ok (struct page *page, unsigned int order)
 {
@@ -81,34 +83,32 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 		BUG();
 	page->flags &= ~((1<<PG_referenced) | (1<<PG_dirty));
 
-	if (current->flags & PF_FREE_PAGES)
-		goto local_freelist;
- back_local_freelist:
+	mask = (~0UL) << order;
+	page_idx = page - mem_map;
+	base = mem_map;
 
 	spin_lock_irqsave(&zone->lock, flags);
+
+#if 0
+	while (mask + (1 << (MAX_ORDER-1))) {
+	  struct page *buddy1;
+	  if (memalcdeb) printk("memlistdel at %x %x %x\n",page_idx,mask,(page_idx ^ -mask));
+	  buddy1 = base + (page_idx ^ -mask);
+	  memlist_del(&buddy1->list);
+	  mask <<= 1;
+	  page_idx &= mask;
+	}
+	if (memalcdeb) printk("\n");
+#endif
+
 	if (!in_free_all_bootmem_core)
-	  for(i=0,tmp=((page-mem_map)/sizeof(struct _pfn));i<(1 << order);i++,tmp++)
+	  for(i=0,tmp=(((unsigned long)page-(unsigned long)mem_map)/sizeof(struct _pfn));i<(1 << order);i++,tmp++) {
 	    mmg$dallocpfn(tmp);
+	    memlist_del(&page->list);
+	  }
 
 	spin_unlock_irqrestore(&zone->lock, flags);
-	return;
 
- local_freelist:
-	if (current->nr_local_pages)
-		goto back_local_freelist;
-		if (in_interrupt())
-			goto back_local_freelist;		
-
-	spin_lock_irqsave(&zone->lock, flags);
-	if (!in_free_all_bootmem_core)
-	  for(i=0,tmp=((page-mem_map)/sizeof(struct _pfn));i<(1 << order);i++,tmp++)
-	    mmg$dallocpfn(tmp);
-
-	spin_unlock_irqrestore(&zone->lock, flags);
-
-	list_add(&page->list, &current->local_pages);
-	page->index = order;
-	current->nr_local_pages++;
 }
 
 #ifndef CONFIG_DISCONTIGMEM
