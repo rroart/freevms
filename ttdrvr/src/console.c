@@ -116,6 +116,7 @@
 
 #include <irpdef.h>
 #include <ttyucbdef.h>
+#include <ttydef.h>
 
 const struct consw *conswitchp;
 
@@ -1864,7 +1865,9 @@ DECLARE_MUTEX(con_buf_sem);
 static int do_con_write(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * chan)
 {
   struct _ucb * tty = u;
+  struct _tty_ucb * ttyucb = u;
   int from_user = 1;
+  i=ttyucb->ucb$l_tt_wrtbuf->tty$l_wb_irp;
   const unsigned char *buf=i->irp$l_qio_p1;
   int count=i->irp$l_qio_p2;
 #ifdef VT_BUF_VRAM_ONLY
