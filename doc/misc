@@ -1,0 +1,26 @@
+The directory utility contains a lot of commands, including
+directory, copy, mount, diff, search, type.
+Just do a cp directory to whatever of the other utilities, like
+cp directory mount.
+
+Make sure . is first in PATH, and stand in the same dir as the binaries.
+
+Do "mount ods2image" (or ods2image2)
+Now directory etc can be used like "directory ods2image2:".
+
+Other info:
+By reading the source
+
+Clustring:
+mount /proc                                                                     
+hostname b222                                                                   
+echo eth0 > /proc/sys/net/myscs/default_device                                  
+                                                                                
+The nodename is the 4 first letters of the hostname, and in addition            
+the first two letters has to differ on the two nodes.                           
+                                                                                
+I mount with                                                                    
+mount _filename                                                                
+_ at first letter is saying it is on the other node
+                                                                                
+The fileimage must be placed at /.                                              
