@@ -584,7 +584,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     struct inode * head;
     struct _fcb * fcb=x2p->primary_fcb;
     head = fcb->fcb$l_primfcb;
-    sts=iosb.iosb$w_status;
 
     name=ext2_vms_to_unix(filedsc);
 
@@ -643,7 +642,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   fcb=exttwo_search_fcb2(vcb,fid); // can actually use most of the f11b routine
 #if 0
   //head = f11b_read_header(vcb,fid,fcb,&iosb);
-  sts=iosb.iosb$w_status;
   if (sts & 1) {
   } else {
     printk("Accessfile status %d\n",sts);
