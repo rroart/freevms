@@ -27,41 +27,6 @@
 /*									*/
 /************************************************************************/
 
-#if 0
-#include "ozone.h"
-
-#include "oz_crtl_malloc.h"
-#include "oz_io_console.h"
-#include "oz_io_fs.h"
-#include "oz_io_mutex.h"
-#include "oz_io_pipe.h"
-#include "oz_io_timer.h"
-#include "oz_knl_ast.h"
-#include "oz_knl_devio.h"
-#include "oz_knl_hw.h"
-#include "oz_knl_lock.h"
-#include "oz_knl_logname.h"
-#include "oz_knl_sdata.h"
-#include "oz_knl_status.h"
-#include "oz_knl_thread.h"
-#include "oz_knl_userjob.h"
-#include "oz_sys_callknl.h"
-#include "oz_sys_dateconv.h"
-#include "oz_sys_event.h"
-#include "oz_sys_exhand.h"
-#include "oz_sys_handle.h"
-#include "oz_sys_io.h"
-#include "oz_sys_io_fs.h"
-#include "oz_sys_io_fs_printf.h"
-#include "oz_sys_logname.h"
-#include "oz_sys_password.h"
-#include "oz_sys_spawn.h"
-#include "oz_sys_thread.h"
-#include "oz_sys_userjob.h"
-#include "oz_sys_xprintf.h"
-#include "oz_util_start.h"
-#endif
-
 #include <stdio.h> 
 
 #include <iodef.h>
@@ -82,6 +47,7 @@
 #include <string.h>
 
 #include<dlfcn.h>
+#include<linux/bitops.h>
 
 #define oz_util_h_console stdout
 
@@ -139,7 +105,6 @@
 #define OZ_DATELONG_DAYNUMBER 2
 #define OZ_LOGNAME_MAXNAMSZ 16
 #define OZ_PASSWORD_MAX 16
-#define OZ_IO_MUTEX_CREATE 42
 #define OZ_FS_MAXFNLEN 42
 #define OZ_TIMER_RESOLUTION 10000000
 #define OZ_DATELONG_FRACTION 0
@@ -148,44 +113,43 @@
 #define OZ_THREAD_STATE_MAX 14
 #define OZ_EVENT_NAMESIZE 32
 
-int oz_sys_event_inc() { }
-int oz_sys_event_nwait() { } 
-int oz_sys_event_set() { }
-int OZ_IO_mutex_create() { }
-int mutex_create() { }
-int OZ_IO_fs_create() { }
-int fs_create() { }
-int OZ_Console_modebuff() { }
-int OZ_IO_console_getmode() { }
-int OZ_IO_fs_open() { }
-int OZ_IO_fs_readrec() { }
-int console_getmode() { }
-int console_modebuff() { }
-int fs_open() { }
-int fs_readrec() { }
+#if 0
+static int oz_sys_io_event_inc() { }
+static int oz_sys_event_nwait() { } 
+static int oz_sys_event_set() { }
+static int OZ_IO_fs_create() { }
+static int fs_create() { }
+static int OZ_Console_modebuff() { }
+static int OZ_IO_console_getmode() { }
+static int OZ_IO_fs_open() { }
+static int OZ_IO_fs_readrec() { }
+static int console_getmode() { }
+static int console_modebuff() { }
+static int fs_open() { }
+static int fs_readrec() { }
 
-int oz_sys_handle_release() { }
-int oz_sys_handle_getinfo() { }
-int oz_sys_event_create() { return 1; }
-int oz_sys_iochan_getunitname() { }
-int sys$suspnd() { }
-int oz_sys_spawn() { }
-int oz_sys_io() { }
-int oz_sys_io_dealloc() { }
-int oz_sys_callknl() { }
-int oz_sys_password_change() { }
-int oz_sys_job_create() { }
-int oz_sys_io_alloc() { }
-int oz_sys_thread_getbyid() { }
-int oz_sys_thread_orphan() { }
-int oz_sys_thread_abort() { }
-int oz_sys_process_getbyid() { }
-int oz_sys_datebin_decode() { }
-int oz_sys_daynumber_weekday() { }
-int oz_sys_exhand_create() { }
-int oz_sys_thread_create() { }
-int oz_sys_condhand_signal() { }
-int oz_sys_io_start() { }
+static int oz_sys_handle_release() { }
+static int oz_sys_handle_getinfo() { }
+static int oz_sys_iochan_getunitname() { }
+static int sys$suspnd() { }
+static int oz_sys_spawn() { }
+static int oz_sys_io() { }
+static int oz_sys_io_dealloc() { }
+static int oz_sys_callknl() { }
+static int oz_sys_password_change() { }
+static int oz_sys_job_create() { }
+static int oz_sys_io_alloc() { }
+static int oz_sys_thread_getbyid() { }
+static int oz_sys_thread_orphan() { }
+static int oz_sys_thread_abort() { }
+static int oz_sys_process_getbyid() { }
+static int oz_sys_datebin_decode() { }
+static int oz_sys_daynumber_weekday() { }
+static int oz_sys_exhand_create() { }
+static int oz_sys_thread_create() { }
+static int oz_sys_condhand_signal() { }
+static int oz_sys_io_start() { }
+#endif
 
 unsigned long oz_hw_atomic_inc_long(unsigned long *l, char c) {
   (*l)++;
@@ -497,11 +461,6 @@ static Optype get_operator (char *inbuf, char **inbuf_r);
 static char *cvt_sym_to_str (Symbol *symbol);
 static unsigned long func_collapse    (Symbol *symbol, char *strp, char **rtnp, void *valuep);
 static unsigned long func_compress    (Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_date_add    (Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_date_dow    (Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_date_now    (Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_date_sub    (Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_date_tzconv (Symbol *symbol, char *strp, char **rtnp, void *valuep);
 static unsigned long func_event_inc   (Symbol *symbol, char *strp, char **rtnp, void *valuep);
 static unsigned long func_event_set   (Symbol *symbol, char *strp, char **rtnp, void *valuep);
 static unsigned long func_field       (Symbol *symbol, char *strp, char **rtnp, void *valuep);
@@ -534,7 +493,6 @@ static unsigned long delete_logical (unsigned long h_error, const char *default_
 static unsigned long extcommand (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long runimage (unsigned long h_error, Runopts *runopts, const char *image, int argc, const char *argv[]);
 static unsigned long decode_runopts (const char *input, const char *output, int nowait, unsigned long h_input, unsigned long h_output, unsigned long h_error, int *argc_r, const char ***argv_r, Runopts *runopts);
-static unsigned long setup_runopts (unsigned long h_error, Runopts *runopts) { }
 static unsigned long finish_runopts (unsigned long h_error, Runopts *runopts) { }
 static unsigned long crepipepair (unsigned long *h_read_r, unsigned long *h_write_r);
 static void cleanup_runopts (Runopts *runopts) { }
@@ -557,28 +515,18 @@ static unsigned long show_process_bylogical (unsigned long h_output, unsigned lo
 static unsigned long show_process_byhandle (unsigned long h_output, unsigned long h_error, unsigned long h_process, unsigned long *showopts);
 static void show_symbol (unsigned long h_output, unsigned long h_error, Symbol *symbol);
 static unsigned long show_system (unsigned long h_output, unsigned long h_error, unsigned long *showopts);
-static unsigned long show_thread_bylogical (unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts);
-static unsigned long show_thread_byhandle (unsigned long h_output, unsigned long h_error, unsigned long h_thread, unsigned long *showopts);
-static void show_thread_seckeys (unsigned long h_output, unsigned long h_thread);
 static void show_secattr (unsigned long h_output, unsigned long h_object, unsigned long secattrcode, int prefix_w, const char *prefix);
 static void *secmalloc (void *dummy, unsigned long osize, void *obuff, unsigned long nsize);
 static unsigned long show_user_bylogical (unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts);
 static unsigned long show_user_byhandle (unsigned long h_output, unsigned long h_error, unsigned long h_user, unsigned long *showopts);
-static unsigned long wait_thread (unsigned long h_error, unsigned long h_thread) { }
 static unsigned long wait_events (unsigned long nevents, unsigned long *h_events);
 
 /* Internal command declarations */
 
-static unsigned long int_abort_thread         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_allocate_device      (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_change_password      (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_close_handle         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_create_event         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_create_file          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_create_job           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_create_logical_name  (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_create_logical_table (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_create_mutex         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_create_symbol        (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_deallocate_device    (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_delete_logical_name  (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
@@ -589,57 +537,28 @@ static unsigned long int_logout                 (unsigned long h_input, unsigned
 static unsigned long int_goto                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_help                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_if                   (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_more                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_open_file            (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_open_mutex           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_read_file            (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_resume_thread        (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_script               (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_set_console          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_set_default          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_set_prompt          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_set_process          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_set_working_set          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_stop          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_set_event_interval   (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_set_mutex            (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_set_thread           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_datetime        (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_device          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_default         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_working_set         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_show_event           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_show_iochan          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_job             (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_logical_name    (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_show_logical_table   (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_show_job             (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_show_mutex           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_show_process         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_symbol          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_system          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_show_thread          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_show_user            (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_show_volume          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_suspend_thread       (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_wait_event           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_wait_mutex           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_wait_thread          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_wait_until           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 
 static Command intcmd[] = {
-	0, "abort thread",         int_abort_thread,         NULL, "[-id <thread_id>] [-nowait] [-status <status>] [<thread_logical_name>]", 
 	0, "allocate device",      int_allocate_device,      NULL, "[-user] [-job] [-process] [-thread] <device_name>", 
 	0, "change password",      int_change_password,      NULL, "[<old_password> [<new_password>]]", 
-	1, "close handle",         int_close_handle,         NULL, "<handle> ...", 
-	0, "create event",         int_create_event,         NULL, "<logical_name> <event_name>", 
-	1, "create file",          int_create_file,          NULL, "[-lockmode <lockmode>] [-logical <logical_name>] <file_name>", 
-	0, "create job",           int_create_job,           NULL, "<logical_name> <job_name>", 
 	0, "create logical name",  int_create_logical_name,  NULL, "[-kernel] [-nooutermode] [-nosupersede] <logical_name> [-copy <logical_name>] [-link <logical_name>] [-object <handle>] [-terminal] [-value <value>] <value> ...", 
 	0, "define",  int_create_logical_name,  NULL, "<logical_name>", 
 	0, "create logical table", int_create_logical_table, NULL, "[-kernel] [-nooutermode] [-nosupersede] <table_name>", 
 	0, "create /name_table",  int_create_logical_table,  NULL, "<table_name>", 
-	1, "create mutex",         int_create_mutex,         NULL, "<iochan_logical_name> <mutex_device_name> <mutex_name>", 
 	0, "create symbol",        int_create_symbol,        NULL, "[-global] [-integer] [-level <n>] [-string] <name> <value> ...",
 	0, "deallocate device",    int_deallocate_device,    NULL, "<device_name>", 
 	0, "delete logical name",  int_delete_logical_name,  NULL, "<logical_name>", 
@@ -650,42 +569,19 @@ static Command intcmd[] = {
 	0, "goto",                 int_goto,                 NULL, "<label>",
 	1, "help",                 int_help,                 NULL, "", 
 	0, "if",                   int_if,                   NULL, "<integervalue> <statement ...>", 
-	1, "more",                 int_more,                 NULL, "[-columns <number>] [-number] [-rows <number>] [<file>]", 
-	1, "open file",            int_open_file,            NULL, "[-lockmode <lockmode>] [-logical <logical_name>] <file_name>", 
-	1, "open mutex",           int_open_mutex,           NULL, "<iochan_logical_name> <mutex_device_name> <mutex_name>", 
-	1, "read file",            int_read_file,            NULL, "[-logical <logical_name>] [-prompt <prompt>] [-size <size>] [-terminator <terminator>] <symbol_name>", 
-	0, "resume thread",        int_resume_thread,        NULL, "[-id <thread_id>] [<thread_logical_name>]", 
 	0, "@",               int_script,               NULL, "<script_name> [<args> ...]", 
-	1, "set console",          int_set_console,          NULL, "[-columns <columns>] [-[no]linewrap] [-rows <rows>] [<logical_name>]", 
 	0, "set default",          int_set_default,          NULL, "<directory>", 
 	0, "set prompt",           int_set_prompt,           NULL, "<prompt>", 
 	0, "set process",          int_set_process,          NULL, "<name>", 
 	0, "set working_set",      int_set_working_set,      NULL, "", 
-	0, "set event interval",   int_set_event_interval,   NULL, "<event_logname> <interval> [<basetime>]", 
-	1, "set mutex",            int_set_mutex,            NULL, "[-express] [-noqueue] <iochan_logical_name> <new_mode>", 
-	0, "set thread",           int_set_thread,           NULL, "[-id <thread_id>] [<thread_logical_name>] [-creates <secattr>] [-priority <basepri>] [-secattr <secattr>] [-seckeys <seckeys>]", 
 	0, "show time",            int_show_datetime,        NULL, "", 
 	0, "show devices",         int_show_device,          NULL, "[<device_logical_name> ...] [-iochans] [-objaddr] [-security]", 
 	0, "show default",         int_show_default,         NULL, "", 
 	0, "show working_set",     int_show_working_set,     NULL, "", 
-	1, "show event",           int_show_event,           NULL, "<event_logical_name> ...", 
-	1, "show iochan",          int_show_iochan,          NULL, "[<iochan_logical_name> ...] [-objaddr] [-security]", 
-	1, "show job",             int_show_job,             NULL, "[<job_logical_name> ...] [-objaddr] [-processes] [-security] [-threads]", 
 	0, "show logical",    int_show_logical_name,    NULL, "<logical_name> [-security]", 
-	0, "show logical table",   int_show_logical_table,   NULL, "[<table_name>] [-security]", 
-	1, "show mutex",           int_show_mutex,           NULL, "<iochan_logical_name>", 
-	1, "show process",         int_show_process,         NULL, "[<process_logical_name> ...] [-objaddr] [-security] [-threads]", 
 	0, "show symbol",          int_show_symbol,          NULL, "[<symbol_name> ...]", 
 	0, "show system",          int_show_system,          NULL, "[-devices] [-iochans] [-job] [-processes] [-security] [-threads]", 
-	1, "show thread",          int_show_thread,          NULL, "[-id <thread_id>] [-objaddr] [-security] [<thread_logical_name> ...]", 
-	1, "show user",            int_show_user,            NULL, "[<user_logical_name> ...] [-jobs] [-objaddr] [-processes] [-security] [-threads]", 
-	1, "show volume",          int_show_volume,          NULL, "[<device_name> ...]", 
 	0, "stop",                 int_stop,                 NULL, "[/id <pid>] <name>", 
-	0, "suspend thread",       int_suspend_thread,       NULL, "[-id <thread_id>] [<thread_logical_name>]", 
-	0, "wait event",           int_wait_event,           NULL, "<logical_name> ...", 
-	1, "wait mutex",           int_wait_mutex,           NULL, "<iochan_logical_name>", 
-	0, "wait thread",          int_wait_thread,          NULL, "[-id <thread_id>] [<thread_logical_name>]", 
-	1, "wait until",           int_wait_until,           NULL, "<datetime>", 
 	// the following are really not internal
 	// waiting for dcltables.exe
 	0, "_mount", 1, 0, "/vms$common/sysexe/mount",
@@ -776,40 +672,12 @@ unsigned long main (int argc, char *argv[])
 
   for (i = 1; i < argc; i ++) {
 
-    /* -console <device> : use the alternate device as the console (for control-Y, -T, etc) */
-
-    if (strcmp (argv[i], "-console") == 0) {
-      if (++ i >= argc) goto usage;
-      if ((h_s_console != 0) && (h_s_console != oz_util_h_console)) oz_sys_handle_release (PSL$C_KERNEL, h_s_console);
-      //      sts = sys$assign( &desc, &h_s_console,PSL$C_KERNEL,0,0);
-      if (sts != SS$_NORMAL) {
-        fprintf (h_s_error, "%s: error %u assigning channel to console %s\n", pn, sts, argv[i]);
-        return (sts);
-      }
-    }
-
     /* -exec <rest_of_line> : execute the single rest_of_line command */
 
     if (strcmp (argv[i], "-exec") == 0) {
       argc -= i;
       argv += i;
       break;
-    }
-
-    /* -interactive : set up default console device */
-
-    if (strcmp (argv[i], "-interactive") == 0) {
-      if ((h_s_console != 0) && (h_s_console != oz_util_h_console)) oz_sys_handle_release (PSL$C_KERNEL, h_s_console);
-      h_s_console = oz_util_h_console;
-      continue;
-    }
-
-    /* -nointeractive : no console device */
-
-    if (strcmp (argv[i], "-nointeractive") == 0) {
-      if ((h_s_console != 0) && (h_s_console != oz_util_h_console)) oz_sys_handle_release (PSL$C_KERNEL, h_s_console);
-      h_s_console = 0;
-      continue;
     }
 
     /* -noverify : turn off verify */
@@ -849,15 +717,7 @@ unsigned long main (int argc, char *argv[])
 
   def_func ("oz_collapse",    func_collapse,    SYMTYPE_STRING,  "collapsed = oz_collapse (string)");
   def_func ("oz_compress",    func_compress,    SYMTYPE_STRING, "compressed = oz_compress (string)");
-  def_func ("oz_date_add",    func_date_add,    SYMTYPE_STRING,        "sum = oz_date_add (date1, date2)");
-  def_func ("oz_date_dow",    func_date_dow,    SYMTYPE_STRING,  "dayofweek = oz_date_dow (date)");
-  def_func ("oz_date_now",    func_date_now,    SYMTYPE_STRING,        "now = oz_date_now");
-  def_func ("oz_date_sub",    func_date_sub,    SYMTYPE_STRING,       "diff = oz_date_sub (date1, date2)");
-  def_func ("oz_date_tzconv", func_date_tzconv, SYMTYPE_STRING,       "date = oz_date_tzconv (date, conv)");
   def_func ("oz_field",       func_field,       SYMTYPE_STRING,      "field = oz_field (index, separator, string)");
-  def_func ("oz_event_inc",   func_event_inc,   SYMTYPE_INTEGER,       "old = oz_event_inc (handle, inc)");
-  def_func ("oz_event_set",   func_event_set,   SYMTYPE_INTEGER,       "old = oz_event_set (handle, new)");
-  def_func ("oz_h_info",      func_h_info,      SYMTYPE_STRING,     "string = oz_h_info (handle, item)");
   def_func ("oz_len",         func_len,         SYMTYPE_INTEGER,    "length = oz_len (string)");
   def_func ("oz_lnm_attrs",   func_lnm_attrs,   SYMTYPE_STRING,      "attrs = oz_lnm_attrs (h_logname, index)");
   def_func ("oz_lnm_lookup",  func_lnm_lookup,  SYMTYPE_STRING,  "h_logname = oz_lnm_lookup (logname, procmode)");
@@ -868,22 +728,21 @@ unsigned long main (int argc, char *argv[])
   def_func ("oz_lowercase",   func_lowercase,   SYMTYPE_STRING,  "lowercase = oz_lowercase (string)");
   def_func ("oz_process",     func_process,     SYMTYPE_STRING,  "h_process = oz_process (process_id)");
   def_func ("oz_sub",         func_sub,         SYMTYPE_STRING,  "substring = oz_sub (size, offset, string)");
-  def_func ("oz_thread",      func_thread,      SYMTYPE_STRING,   "h_thread = oz_thread (thread_id)");
   def_func ("oz_trim",        func_trim,        SYMTYPE_STRING,    "trimmed = oz_trim (string)");
   def_func ("oz_uppercase",   func_uppercase,   SYMTYPE_STRING,  "uppercase = oz_uppercase (string)");
   def_func ("oz_verify",      func_verify,      SYMTYPE_INTEGER, "oldverify = oz_verify (-1:nc 0:off 1:on)");
 
   /* Create an event flag to use for I/O, and one for control-Y */
 
-  sts = oz_sys_event_create (PSL$C_KERNEL, "oz_cli i/o", &h_event);
+  sts = lib$get_ef (&h_event);
   if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u creating event flag\n", sts);
+    fprintf (h_s_error, "cli: error %u creating event flag\n", sts);
     return (sts);
   }
 
-  sts = oz_sys_event_create (PSL$C_KERNEL, "oz_cli ctrl-Y", &h_event_ctrly);
+  sts = lib$get_ef (&h_event_ctrly);
   if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u creating event flag\n", sts);
+    fprintf (h_s_error, "cli: error %u creating event flag\n", sts);
     return (sts);
   }
 
@@ -945,7 +804,7 @@ unsigned long main (int argc, char *argv[])
     if (inscript) {
       int start;
 #if 0
-      sts = oz_sys_io (PSL$C_KERNEL, h_s_input, h_event, OZ_IO_FS_GETINFO1, sizeof scriptinfo, &scriptinfo);
+      sts = sys$qio (h_event, h_s_input, IO$_SENSECHAR, 0, 0, 0, &scriptinfo, sizeof scriptinfo );
 #endif
       scriptinfo.curblock=1;
       scriptinfo.curbyte=scriptpos;
@@ -957,7 +816,7 @@ unsigned long main (int argc, char *argv[])
 	  scriptinfo.curbyte  = scriptread.atbyte;
 	}
 #if 0
-	sts = oz_sys_io (PSL$C_KERNEL, h_s_input, h_event, IO$_READLBLK, sizeof scriptread, &scriptread);
+	sts = sys$qiow (h_event, h_s_input, IO$_READLBLK, 0, 0, 0, &scriptread, sizeof scriptread );
 #endif
 
 	scriptread.atblock = 1;
@@ -989,7 +848,7 @@ unsigned long main (int argc, char *argv[])
         symbol -> ivalue = sts;						/* ... and set the error status */
       }
       exit_script ();							/* in any case, pop script level */
-      if ((sts == SS$_ENDOFFILE) && exited && (oz_sys_io (PSL$C_KERNEL, h_s_input, h_event, IO$_SENSEMODE, 0, NULL) == SS$_NORMAL)) {
+      if ((sts == SS$_ENDOFFILE) && exited && (sys$qio (h_event, h_s_input, IO$_SENSEMODE, 0, 0, NULL, 0, 0, 0, 0, 0, 0) == SS$_NORMAL)) {
         fprintf (h_s_error, "oz_cli: use 'exit' command to log out\n"); /* don't allow end-of-file to exit interactive session */
         exited = 0;
       }
@@ -1079,7 +938,7 @@ static void startendmsg (const char *name)
   memset (&console_write, 0, sizeof console_write);
   console_write.size = strlen (buf);
   console_write.buff = buf;
-  oz_sys_io (PSL$C_KERNEL, h_s_input, 0, IO$_WRITELBLK, sizeof console_write, &console_write);
+  sys$qio (0, h_s_input, IO$_WRITELBLK, 0, 0, 0, &console_write, sizeof console_write, 0, 0, 0, 0);
 }
 
 /************************************************************************/
@@ -1097,7 +956,7 @@ static void ctrly_enable (void)
   if (h_s_console != 0) {
     memset (&ctrly, 0, sizeof ctrly);
     ctrly.mask[0] = 1 << ('Y' - '@');
-    sts = oz_sys_io_start (PSL$C_KERNEL, h_s_console, NULL, 0, ctrly_ast, NULL, IO$_SETMODE, sizeof ctrly, &ctrly);
+    sts = sys$qio (NULL, h_s_console, IO$_SETMODE, 0, ctrly_ast, NULL, &ctrly, sizeof ctrly, 0, 0, 0, 0);
     if (sts != SS$_ALLSTARTED) fprintf (h_s_console, "oz_cli ctrly_enable: error %u enabling ctrl-Y detection\n", sts);
   }
 }
@@ -1132,7 +991,7 @@ static void ctrlt_enable (void)
   if (h_s_console != 0) {
     memset (&ctrlt, 0, sizeof ctrlt);
     ctrlt.mask[0] = 1 << ('T' - '@');
-    sts = oz_sys_io_start (PSL$C_KERNEL, h_s_console, NULL, 0, ctrlt_ast, NULL, IO$_SETMODE, sizeof ctrlt, &ctrlt);
+    sts = sys$qio (0, h_s_console, IO$_SETMODE, NULL, ctrlt_ast, 0, &ctrlt, sizeof ctrlt, 0, 0, 0, 0);
     if (sts != SS$_ALLSTARTED) fprintf (h_s_console, "oz_cli ctrlt_enable: error %u enabling ctrl-T detection\n", sts);
   }
 }
@@ -1186,7 +1045,7 @@ static void ctrlt_ast (void *dummy, unsigned long status, void *mchargs)
 
   /* First line is the current date/time and the quota */
 
-  sts = oz_sys_handle_getinfo (0, 1, &u_item, &index);
+  //  sts = oz_sys_handle_getinfo (0, 1, &u_item, &index);
   if (sts != SS$_NORMAL) {
     fprintf (h_s_console, "oz_cli: error %u getting user info\n", sts);
     goto cleanup;
@@ -1196,7 +1055,7 @@ static void ctrlt_ast (void *dummy, unsigned long status, void *mchargs)
 
   /* Get handle to the first process in this job */
 
-  sts = oz_sys_handle_getinfo (0, 1, &p_item, &index);
+  //  sts = oz_sys_handle_getinfo (0, 1, &p_item, &index);
   if (sts != SS$_NORMAL) {
     fprintf (h_s_console, "oz_cli: error %u getting first process handle\n", sts);
     goto cleanup;
@@ -1210,7 +1069,7 @@ static void ctrlt_ast (void *dummy, unsigned long status, void *mchargs)
 
     /* Find out process */
 
-    sts = oz_sys_handle_getinfo (h_lastproc, sizeof p_items / sizeof *p_items, p_items, &index);
+    //    sts = oz_sys_handle_getinfo (h_lastproc, sizeof p_items / sizeof *p_items, p_items, &index);
     if (sts != SS$_NORMAL) {
       fprintf (h_s_console, "oz_cli: error %u getting process info\n", sts);
       goto cleanup;
@@ -1224,7 +1083,7 @@ static void ctrlt_ast (void *dummy, unsigned long status, void *mchargs)
 
       /* Find out about thread */
 
-      sts = oz_sys_handle_getinfo (h_lastthread, sizeof t_items / sizeof *t_items, t_items, &index);
+      // sts = oz_sys_handle_getinfo (h_lastthread, sizeof t_items / sizeof *t_items, t_items, &index);
       if (sts != SS$_NORMAL) {
         fprintf (h_s_console, "oz_cli: error %u getting next thread info\n", sts);
         goto cleanup;
@@ -1244,18 +1103,12 @@ static void ctrlt_ast (void *dummy, unsigned long status, void *mchargs)
       }
       fprintf (h_s_console, "%u: %s  %#.3t/%#.3t/%#.3t  %s\n", t_id, state, t_tis_run, t_tis_com, t_tis_wev, t_name);
 
-      oz_sys_handle_release (PSL$C_KERNEL, h_lastthread);
       h_lastthread = 0;
     }
-    oz_sys_handle_release (PSL$C_KERNEL, h_lastproc);
     h_lastproc = 0;
   }
 
 cleanup:
-  if (h_nextproc   != 0) oz_sys_handle_release (PSL$C_KERNEL, h_nextproc);
-  if (h_lastproc   != 0) oz_sys_handle_release (PSL$C_KERNEL, h_lastproc);
-  if (h_nextthread != 0) oz_sys_handle_release (PSL$C_KERNEL, h_nextthread);
-  if (h_lastthread != 0) oz_sys_handle_release (PSL$C_KERNEL, h_lastthread);
   ctrlt_enable ();
 }
 
@@ -1280,14 +1133,11 @@ static void exit_script (void)
       fprintf (h_s_error, "oz_cli: undefined label %s in script\n", skiplabel);
       skiplabel[0] = 0;
     }
-    oz_sys_handle_release (PSL$C_KERNEL, h_s_input);	/* this is an inner script, close it */
     h_s_input = script -> h_input;			/* get next outer script handle */
     if (h_s_output != script -> h_output) {		/* restore its output file */
-      oz_sys_handle_release (PSL$C_KERNEL, h_s_output);
       h_s_output = script -> h_output;
     }
     if (h_s_error  != script -> h_error)  {		/* restore its error file */
-      oz_sys_handle_release (PSL$C_KERNEL, h_s_error);
       h_s_error  = script -> h_error;
     }
     while ((label = labels) != NULL) {			/* free off this ones labels */
@@ -1415,7 +1265,6 @@ restart:
   s = 1;					/* skip leading spaces */
   for (; (c = newbuf[i]) != 0; i ++) {		/* loop through all input chars */
     if (!dq && !sq && (c == '#')) break;	/* stop if unquoted comment character */
-    if (!dq && !sq && (c == '|') && (newbuf[i+1] == '>')) goto piping;
     if (!sq && (c == '"')) dq = 1 - dq;		/* if double quote outside single quotes, flip double quote flag */
     else if (!dq && (c == '\'')) sq = 1 - sq;	/* if single quote outside double quotes, flip single quote flag */
     else if (dq || sq || (c > ' ')) {		/* otherwise, check for printables (or quoted non-printables) */
@@ -1452,37 +1301,10 @@ rtn:
 
   /* Close any pipe handles */
 
-  if (h_pipei != 0) oz_sys_handle_release (PSL$C_KERNEL, h_pipei);
-  if (h_pipeo != 0) oz_sys_handle_release (PSL$C_KERNEL, h_pipeo);
-
   /* Return completion status */
 
   return (sts);
 
-  /* Piping using |> */
-
-piping:
-  i += 2;								/* skip over the |> */
-  newbuf[j] = 0;							/* make sure last arg string is terminated */
-  v[n] = NULL;								/* terminate the arg list with a null */
-  //  sts = sys$assign( OZ_IO_PIPES_TEMPLATE, &h_pipeo,PSL$C_KERNEL,0,0); /* create a stream-style pipe */
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u creating pipe\n", sts);
-    h_pipeo = 0;
-    goto rtn;
-  }
-  sts = oz_sys_iochan_getunitname (h_pipeo, sizeof pipeo - 1, pipeo);	/* get the pipe's device name */
-  if (sts != SS$_NORMAL) oz_sys_condhand_signal (2, sts, 0);
-  strcat (pipeo, ":");							/* put a colon on the end */
-  sts = exechopped (n, v, input, pipeo, 1);				/* execute the command using that pipe as the -output */
-									/* ... and forcing a -nowait option */
-  if ((sts != SS$_NORMAL) && (sts != SS$_BRANCHSTARTED)) goto rtn;		/* all done if some failure */
-  if (h_pipei != 0) oz_sys_handle_release (PSL$C_KERNEL, h_pipei);	/* if input was a pipe, it's safe to release handle because exechopped made its own */
-  strcpy (pipei, pipeo);						/* set the new pipe as input to the next command on line */
-  input   = pipei;
-  h_pipei = h_pipeo;
-  h_pipeo = 0;
-  goto restart;								/* go process next command on line following |> */
 }
 
 /************************************************************************/
@@ -1508,7 +1330,6 @@ typedef struct { Runopts runopts;
                  signed long refcount;
                } Tc;
 
-static unsigned long threadcommand (void *tcv);
 static void threadcommandexit (void *tcv, unsigned long status);
 
 static unsigned long exechopped (int argc, const char *argv[], const char *input, const char *output, int nowait)
@@ -1557,23 +1378,6 @@ static unsigned long exechopped (int argc, const char *argv[], const char *input
         free (tc);
         return (SS$_BADPARAM);
       }
-      sts = setup_runopts (h_s_error, &(tc -> runopts));		/* open corresponding handles */
-      if (sts == SS$_NORMAL) {
-        tc -> refcount = 2;						/* don't free tc until both thread and I are done with it */
-        sts = oz_sys_thread_create (PSL$C_KERNEL, 0, 0, tc -> runopts.h_init, tc -> runopts.h_exit, 0, 
-                                    threadcommand, tc, 1 /*OZ_ASTMODE_ENABLE*/, tc -> command -> name, &(tc -> runopts.h_thread));
-        if (sts != SS$_NORMAL) {
-          fprintf (h_s_error, "oz_cli: error %u creating thread for %s\n", sts, tc -> command -> name);
-          cleanup_runopts (&(tc -> runopts));				/* couldn't create thread, close off runopts */
-          free (tc);							/* then free the tc */
-        } else {
-          sts = finish_runopts (h_s_error, &(tc -> runopts));		/* thread started, finish with runopts */
-          if (oz_hw_atomic_inc_long (&(tc -> refcount), -1) == 0) {	/* dec ref count */
-            cleanup_runopts (&(tc -> runopts));				/* I made them go zero, close runopts */
-            free (tc);							/* ... and free the tc */
-          }
-        }
-      }
     }
 
     /* Otherwise, they are simply called */
@@ -1620,38 +1424,6 @@ static unsigned long exechopped (int argc, const char *argv[], const char *input
   return (sts);
 }
 
-/* This executes an internal command as a thread */
-
-static unsigned long threadcommand (void *tcv)
-
-{
-  unsigned long sts;
-  Tc *tc;
-
-  tc = tcv;
-  sts = oz_sys_exhand_create (PSL$C_KERNEL, threadcommandexit, tc);
-  if (sts != SS$_NORMAL) fprintf (tc -> runopts.h_err, "oz_cli: error %u creating exit handler\n", sts);
-  else sts = (*(tc -> command -> entry)) (tc -> runopts.h_in, 
-                                          tc -> runopts.h_out, 
-                                          tc -> runopts.h_err, 
-                                          tc -> command -> name, 
-                                          tc -> command -> param, 
-                                          tc -> argc, 
-                                          tc -> argv);
-  return (sts);
-}
-
-static void threadcommandexit (void *tcv, unsigned long status)
-
-{
-  Tc *tc;
-
-  tc = tcv;
-  if (oz_hw_atomic_inc_long (&(tc -> refcount), -1) == 0) {	/* dec ref count */
-    cleanup_runopts (&(tc -> runopts));				/* I made them go zero, close runopts */
-    free (tc);							/* ... and free the tc */
-  }
-}
 
 /************************************************************************/
 /*									*/
@@ -2403,248 +2175,6 @@ static unsigned long func_compress (Symbol *symbol, char *strp, char **rtnp, voi
 
 /************************************************************************/
 /*									*/
-/*  Add two date strings						*/
-/*									*/
-/*	sum = oz_date_add (date1, date2)				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long func_date_add (Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
-{
-  char *svalue1, *svalue2;
-  int rc1, rc2;
-  unsigned long sts;
-  unsigned long long date1, date2, now;
-
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;
-  if (*(strp ++) != '(') {
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, &strp, &svalue1, ',');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = eval_string (strp, &strp, &svalue2, ')');
-  if (sts != SS$_NORMAL) {
-    free (svalue1);
-    return (sts);
-  }
-  sys$gettim(&now);
-  //  now = oz_sys_datebin_tzconv (now, OZ_DATEBIN_TZCONV_UTC2LCL, 0);
-  rc1 = sys$bintim ( svalue1, &date1);
-  rc2 = sys$bintim ( svalue2, &date2);
-  if (rc1 == 0) {
-    fprintf (h_s_error, "oz_cli: bad date string %s\n", svalue1);
-    free (svalue1);
-    free (svalue2);
-    return (SS$_BADPARAM);
-  }
-  if (rc2 == 0) {
-    fprintf (h_s_error, "oz_cli: bad date string %s\n", svalue2);
-    free (svalue1);
-    free (svalue2);
-    return (SS$_BADPARAM);
-  }
-  if ((rc1 > 0) && (rc2 > 0)) {
-    fprintf (h_s_error, "oz_cli: cannot add two absolute dates %s and %s\n", svalue1, svalue2);
-    free (svalue1);
-    free (svalue2);
-    return (SS$_BADPARAM);
-  }
-  *rtnp = strp;
-  free (svalue1);
-  free (svalue2);
-  //  OZ_HW_DATEBIN_ADD (date1, date1, date2);
-  svalue1 = malloc (32);
-  rc1 = (rc1 < 0) && (rc2 < 0);
-  sys$asctim (32, svalue1, &date1, 0);
-  *((char **)valuep) = svalue1;
-  return (SS$_NORMAL);
-}
-
-/************************************************************************/
-/*									*/
-/*  Get day-of-week string						*/
-/*									*/
-/*	dayofweek = oz_date_dow (date)					*/
-/*									*/
-/************************************************************************/
-
-static const char *const daysofweek[7] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-
-static unsigned long func_date_dow (Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
-{
-  char *svalue;
-  int rc;
-  unsigned long datelongs[OZ_DATELONG_ELEMENTS], sts;
-  unsigned long long date, now;
-
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;
-  if (*(strp ++) != '(') {
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, &strp, &svalue, ')');
-  if (sts != SS$_NORMAL) return (sts);
-  sys$gettim(&now);
-  //  now = oz_sys_datebin_tzconv (now, OZ_DATEBIN_TZCONV_UTC2LCL, 0);
-  rc  = sys$bintim ( svalue, &date);
-  if (rc <= 0) {
-    fprintf (h_s_error, "oz_cli: bad date string %s\n", svalue);
-    free (svalue);
-    return (SS$_BADPARAM);
-  }
-  *rtnp  = strp;
-  svalue = realloc (svalue, 12);
-  oz_sys_datebin_decode (date, datelongs);
-  strcpy (svalue, daysofweek[oz_sys_daynumber_weekday(datelongs[OZ_DATELONG_DAYNUMBER])]);
-  *((char **)valuep) = svalue;
-  return (SS$_NORMAL);
-}
-
-/************************************************************************/
-/*									*/
-/*  Get current datetime						*/
-/*									*/
-/*	now = oz_date_now						*/
-/*									*/
-/************************************************************************/
-
-static unsigned long func_date_now (Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
-{
-  char *dates;
-  unsigned long long dateb;
-
-  *rtnp = strp;
-  sys$gettim(&dateb);
-  //  dateb = oz_sys_datebin_tzconv (dateb, OZ_DATEBIN_TZCONV_UTC2LCL, 0);
-  dates = malloc (32);
-  sys$asctim (32, dates, &dateb, 0);
-  *((char **)valuep) = dates;
-  return (SS$_NORMAL);
-}
-
-/************************************************************************/
-/*									*/
-/*  Subtract two date strings						*/
-/*									*/
-/*	diff = oz_date_sub (date1, date2)				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long func_date_sub (Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
-{
-  char *svalue1, *svalue2;
-  int rc1, rc2;
-  unsigned long sts;
-  unsigned long long date1, date2, now;
-
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;
-  if (*(strp ++) != '(') {
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, &strp, &svalue1, ',');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = eval_string (strp, &strp, &svalue2, ')');
-  if (sts != SS$_NORMAL) {
-    free (svalue1);
-    return (sts);
-  }
-  sys$gettim(&now);
-  //  now = oz_sys_datebin_tzconv (now, OZ_DATEBIN_TZCONV_UTC2LCL, 0);
-  rc1 = sys$bintim ( svalue1, &date1);
-  rc2 = sys$bintim ( svalue2, &date2);
-  if (rc1 == 0) {
-    fprintf (h_s_error, "oz_cli: bad date string %s\n", svalue1);
-    free (svalue1);
-    free (svalue2);
-    return (SS$_BADPARAM);
-  }
-  if (rc2 == 0) {
-    fprintf (h_s_error, "oz_cli: bad date string %s\n", svalue2);
-    free (svalue1);
-    free (svalue2);
-    return (SS$_BADPARAM);
-  }
-  if ((rc1 < 0) && (rc2 > 0)) {
-    fprintf (h_s_error, "oz_cli: cannot subtract absolute date %s from delta date %s\n", svalue2, svalue1);
-    free (svalue1);
-    free (svalue2);
-    return (SS$_BADPARAM);
-  }
-  *rtnp = strp;
-  free (svalue1);
-  free (svalue2);
-  //  OZ_HW_DATEBIN_SUB (date1, date1, date2);
-  svalue1 = malloc (32);
-  rc1 = (rc1 < 0) || (rc2 > 0);
-  sys$asctim (32, svalue1, &date1, 0);
-  *((char **)valuep) = svalue1;
-  return (SS$_NORMAL);
-}
-
-/************************************************************************/
-/*									*/
-/*  Timezone conversion							*/
-/*									*/
-/*	date = oz_date_tzconv (date, conv)				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long func_date_tzconv (Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
-{
-  char *svalue1, *svalue2;
-  int lcltoutc, rc1;
-  unsigned long sts;
-  unsigned long long date1, now;
-
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;
-  if (*(strp ++) != '(') {
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, &strp, &svalue1, ',');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = eval_string (strp, &strp, &svalue2, ')');
-  if (sts != SS$_NORMAL) {
-    free (svalue1);
-    return (sts);
-  }
-  lcltoutc = -1;
-  if (strcasecmp (svalue2, "utctolcl") == 0) lcltoutc = 0;
-  if (strcasecmp (svalue2, "lcltoutc") == 0) lcltoutc = 1;
-  if (lcltoutc < 0) {
-    fprintf (h_s_error, "oz_cli: bad conversion type %s ('lcltoutc' or 'utctolcl')\n", svalue2);
-    free (svalue1);
-    free (svalue2);
-    return (SS$_BADPARAM);
-  }
-  now = 0;					// for 'lcltoutc', things like 'now' or 'today' don't make sense
-  if (!lcltoutc) sys$gettim(&now);	// for 'utctolcl', they do sort of
-  rc1 = sys$bintim ( svalue1, &date1);
-  if (rc1 <= 0) {
-    fprintf (h_s_error, "oz_cli: bad absolute date string %s\n", svalue1);
-    free (svalue1);
-    free (svalue2);
-    return (SS$_BADPARAM);
-  }
-  *rtnp = strp;
-  free (svalue1);
-  free (svalue2);
-  //  date1 = oz_sys_datebin_tzconv (date1, lcltoutc ? OZ_DATEBIN_TZCONV_LCL2UTC : OZ_DATEBIN_TZCONV_UTC2LCL, 0);
-  svalue1 = malloc (32);
-  sys$asctim (32, svalue1, &date1, 0);
-  *((char **)valuep) = svalue1;
-  return (SS$_NORMAL);
-}
-
-/************************************************************************/
-/*									*/
 /*  Extract a field							*/
 /*									*/
 /*	field = oz_field (index, separator, string)			*/
@@ -2691,285 +2221,6 @@ static unsigned long func_field (Symbol *symbol, char *strp, char **rtnp, void *
     string[l] = 0;
   }
   return (SS$_NORMAL);
-}
-
-/************************************************************************/
-/*									*/
-/*  Increment / Set event flag value					*/
-/*									*/
-/*	oz_event_inc/set (handle, value)				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long event_incset (unsigned long (*incset) (unsigned long procmode, unsigned long h_event, signed long inc, signed long *value_r), 
-                           Symbol *symbol, char *strp, char **rtnp, void *valuep);
-
-static unsigned long func_event_inc (Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
-{
-  return (event_incset (oz_sys_event_inc, symbol, strp, rtnp, valuep));
-}
-
-static unsigned long func_event_set (Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
-{
-  return (event_incset (oz_sys_event_set, symbol, strp, rtnp, valuep));
-}
-
-static unsigned long event_incset (unsigned long (*incset) (unsigned long procmode, unsigned long h_event, signed long inc, signed long *value_r), 
-                           Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
-{
-  signed long value;
-  unsigned long sts;
-  unsigned long handle;
-
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
-  if (*(strp ++) != '(') {							/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_handle (strp, &strp, &handle, "", ',');				/* get the handle */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-  sts = eval_integer (strp, &strp, &value, ')');				/* get the item string */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-  *rtnp = strp;									/* return pointer just past the ) */
-  sts = (*incset) (PSL$C_KERNEL, handle, value, valuep);			/* increment or set the event flag */
-  if (sts != SS$_NORMAL) fprintf (h_s_error, "oz_cli: error %u performing %s\n", sts, symbol -> name);
-  return (sts);									/* return status */
-}
-
-/************************************************************************/
-/*									*/
-/*  Get handle info							*/
-/*									*/
-/*	string = oz_h_info (handle, item)				*/
-/*									*/
-/************************************************************************/
-
-typedef enum { HINFO_OBJTYPE, HINFO_HANDLE, HINFO_LONG, HINFO_ULONG, HINFO_STRING, HINFO_THREADSTATE, HINFO_DATEBINDEL, HINFO_DATEBINABS, HINFO_LOCKMODE } Hinfo;
-
-static const struct {
-	const char *name;       unsigned long code;                 unsigned long size;                Hinfo conv; } hinfotbl[] = {
-	"objtype",              JPI$M_FILL1,              sizeof (unsigned char),       HINFO_OBJTYPE, 
-	"user_handle",          JPI$M_FILL1,          sizeof (unsigned long),        HINFO_HANDLE, 
-	"user_refcount",        JPI$M_FILL1,        sizeof (signed long),             HINFO_LONG, 
-	"user_lognamdir",       JPI$M_FILL1,       sizeof (unsigned long),        HINFO_HANDLE, 
-	"user_lognamtbl",       LNM$_TABLE,       sizeof (unsigned long),        HINFO_HANDLE, 
-	"user_name",            JPI$_USERNAME,            OZ_USERNAME_MAX,           HINFO_STRING, 
-	"user_first",           JPI$M_FILL1,           sizeof (unsigned long),        HINFO_HANDLE, 
-	"user_next",            JPI$M_FILL1,            sizeof (unsigned long),        HINFO_HANDLE, 
-	"job_handle",           JPI$M_FILL1,           sizeof (unsigned long),        HINFO_HANDLE, 
-	"job_name",             JPI$M_FILL1,             OZ_JOBNAME_MAX,            HINFO_STRING, 
-	"job_refcount",         JPI$M_FILL1,         sizeof (signed long),             HINFO_LONG, 
-	"job_lognamdir",        JPI$M_FILL1,        sizeof (unsigned long),        HINFO_HANDLE, 
-	"job_lognamtbl",        JPI$M_FILL1,        sizeof (unsigned long),        HINFO_HANDLE, 
-	"job_processcount",     JPI$M_FILL1,     sizeof (unsigned long),            HINFO_ULONG, 
-	"job_first",            JPI$M_FILL1,            sizeof (unsigned long),        HINFO_HANDLE, 
-	"job_next",             JPI$M_FILL1,             sizeof (unsigned long),        HINFO_HANDLE, 
-	"process_handle",       JPI$M_FILL1,       sizeof (unsigned long),        HINFO_HANDLE, 
-	"process_refcount",     JPI$M_FILL1,     sizeof (signed long),             HINFO_LONG, 
-	"process_name",         JPI$M_FILL1,         OZ_PROCESS_NAMESIZE,       HINFO_STRING, 
-	"process_id",           JPI$M_FILL1,           sizeof (unsigned long),     HINFO_ULONG, 
-	"process_lognamdir",    JPI$M_FILL1,    sizeof (unsigned long),        HINFO_HANDLE, 
-	"process_lognamtbl",    JPI$M_FILL1,    sizeof (unsigned long),        HINFO_HANDLE, 
-	"process_threadcount",  JPI$M_FILL1,  sizeof (unsigned long),            HINFO_LONG, 
-	"process_first",        JPI$M_FILL1,        sizeof (unsigned long),        HINFO_HANDLE, 
-	"process_next",         JPI$M_FILL1,         sizeof (unsigned long),        HINFO_HANDLE, 
-	"thread_handle",        JPI$M_FILL1,        sizeof (unsigned long),        HINFO_HANDLE, 
-	"thread_refcount",      JPI$M_FILL1,      sizeof (signed long),             HINFO_LONG, 
-	"thread_state",         JPI$_STATE,         sizeof (unsigned char),  HINFO_THREADSTATE, 
-	"thread_tis_run",       JPI$M_FILL1,       sizeof (unsigned long long),       HINFO_DATEBINDEL, 
-	"thread_tis_com",       JPI$M_FILL1,       sizeof (unsigned long long),       HINFO_DATEBINDEL, 
-	"thread_tis_wev",       JPI$M_FILL1,       sizeof (unsigned long long),       HINFO_DATEBINDEL, 
-	"thread_tis_zom",       JPI$M_FILL1,       sizeof (unsigned long long),       HINFO_DATEBINDEL, 
-	"thread_tis_ini",       JPI$M_FILL1,       sizeof (unsigned long long),       HINFO_DATEBINABS, 
-	"thread_exitsts",       JPI$M_FILL1,       sizeof (unsigned long),            HINFO_ULONG, 
-	"thread_exitevent",     JPI$M_FILL1,     sizeof (unsigned long),        HINFO_HANDLE, 
-	"thread_name",          JPI$_PRCNAM,          OZ_THREAD_NAMESIZE,        HINFO_STRING, 
-	"thread_id",            JPI$_PID,            sizeof (unsigned long),      HINFO_ULONG, 
-	"thread_first",         JPI$M_FILL1,         sizeof (unsigned long),        HINFO_HANDLE, 
-	"thread_next",          JPI$M_FILL1,          sizeof (unsigned long),        HINFO_HANDLE, 
-	"device_handle",        JPI$M_FILL1,        sizeof (unsigned long),        HINFO_HANDLE, 
-	"device_refcount",      JPI$M_FILL1,      sizeof (signed long),             HINFO_LONG, 
-	"device_iochancount",   JPI$M_FILL1,   sizeof (unsigned long),            HINFO_ULONG, 
-	"device_first",         JPI$M_FILL1,         sizeof (unsigned long),        HINFO_HANDLE, 
-	"device_next",          JPI$M_FILL1,          sizeof (unsigned long),        HINFO_HANDLE, 
-	"device_unitname",      JPI$M_FILL1,      OZ_DEVUNIT_NAMESIZE,       HINFO_STRING, 
-	"device_classname",     JPI$M_FILL1,     OZ_DEVCLASS_NAMESIZE,      HINFO_STRING, 
-	"device_aliasname",     JPI$M_FILL1,     OZ_DEVUNIT_ALIASIZE,       HINFO_STRING, 
-	"iochan_handle",        JPI$M_FILL1,        sizeof (unsigned long),        HINFO_HANDLE, 
-	"iochan_refcount",      JPI$M_FILL1,      sizeof (signed long),             HINFO_LONG, 
-	"iochan_lockmode",      JPI$M_FILL1,      sizeof (unsigned long),      HINFO_LOCKMODE, 
-	"iochan_first",         JPI$M_FILL1,         sizeof (unsigned long),        HINFO_HANDLE, 
-	"iochan_next",          JPI$M_FILL1,          sizeof (unsigned long),        HINFO_HANDLE, 
-	"user_jobcount",        JPI$M_FILL1,        sizeof (unsigned long),            HINFO_ULONG, 
-	"device_unitdesc",      JPI$M_FILL1,      OZ_DEVUNIT_DESCSIZE,       HINFO_STRING, 
-	"system_boottime",      JPI$M_FILL1,      sizeof (unsigned long long),       HINFO_DATEBINABS, 
-	"system_phypagetotal",  JPI$M_FILL1,  sizeof (unsigned long),       HINFO_ULONG, 
-	"system_phypagefree",   JPI$M_FILL1,   sizeof (unsigned long),       HINFO_ULONG, 
-	"system_phypagel2size", JPI$M_FILL1, sizeof (unsigned long),            HINFO_ULONG, 
-	"system_npptotal",      JPI$M_FILL1,      sizeof (unsigned long),       HINFO_ULONG, 
-	"system_nppinuse",      JPI$M_FILL1,      sizeof (unsigned long),       HINFO_ULONG, 
-	"system_npppeak",       JPI$M_FILL1,       sizeof (unsigned long),       HINFO_ULONG, 
-	"system_pgptotal",      JPI$M_FILL1,      sizeof (unsigned long),       HINFO_ULONG, 
-	"system_pgpinuse",      JPI$M_FILL1,      sizeof (unsigned long),       HINFO_ULONG, 
-	"system_pgppeak",       JPI$M_FILL1,       sizeof (unsigned long),       HINFO_ULONG, 
-	"system_cpucount",      JPI$M_FILL1,      sizeof (signed long),             HINFO_LONG, 
-	"system_cpusavail",     JPI$M_FILL1,     sizeof (unsigned long),            HINFO_ULONG, 
-	"system_syspagetotal",  JPI$M_FILL1,  sizeof (unsigned long),            HINFO_ULONG, 
-	"system_syspagefree",   JPI$M_FILL1,   sizeof (unsigned long),            HINFO_ULONG, 
-	"system_usercount",     JPI$M_FILL1,     sizeof (unsigned long),            HINFO_ULONG, 
-	"system_devicecount",   JPI$M_FILL1,   sizeof (unsigned long),            HINFO_ULONG, 
-	"thread_basepri",       JPI$_PRIB,       sizeof (unsigned long),            HINFO_ULONG, 
-	"thread_curprio",       JPI$_PRI,       sizeof (unsigned long),            HINFO_ULONG, 
-	"thread_parent",        JPI$M_FILL1,        sizeof (unsigned long),        HINFO_HANDLE, 
-	NULL };
-
-static unsigned long func_h_info (Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
-{
-  char itembuff[256], *item_s, *out;
-  int i;
-  unsigned long sts;
-  unsigned long handle;
-  unsigned long itemlist;
-  unsigned long lockmode;
-  unsigned char objtype;
-  unsigned char threadstate;
-
-  /* Parse handle and item arguments */
-
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
-  if (*(strp ++) != '(') {							/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_handle (strp, &strp, &handle, "", ',');				/* get the handle */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-  sts = eval_string (strp, &strp, &item_s, ')');				/* get the item string */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-  *rtnp = strp;									/* return pointer just past the ) */
-
-  /* Decode item arg */
-
-  for (i = 0; hinfotbl[i].name != NULL; i ++) {
-    if (strcasecmp (hinfotbl[i].name, item_s) == 0) break;
-  }
-  if (hinfotbl[i].name == NULL) {
-    fprintf (h_s_error, "oz_cli: invalid handle item code %s\n", item_s);
-    free (item_s);
-    return (SS$_BADPARAM);
-  }
-  free (item_s);
-
-  /* Build item list */
-
-#if 0
-  itemlist.code = hinfotbl[i].code;
-  itemlist.size = hinfotbl[i].size;
-  itemlist.buff = itembuff;
-  itemlist.rlen = NULL;
-
-  if (itemlist.size > sizeof itembuff) oz_crash ("oz_cli: hinfotbl[%d].size is %u", i, itemlist.size);
-
-  /* Get handle info */
-
-  sts = oz_sys_handle_getinfo (handle, 1, &itemlist, NULL);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u getting handle info\n", sts);
-    return (sts);
-  }
-#endif
-
-  /* Produce output string */
-
-  switch (hinfotbl[i].conv) {
-    case HINFO_OBJTYPE: {
-      objtype = *(unsigned char *)itembuff;
-      out = malloc (32);
-      strcpy (out, encode_objtype_string (objtype));
-      break;
-    }
-    case HINFO_HANDLE: {
-      handle = *(unsigned long *)itembuff;
-      if (handle == 0) {
-        out = malloc (1);
-        out[0] = 0;
-      } else {
-#if 0
-        itemlist.code = JPI$M_FILL1;
-        itemlist.size = sizeof objtype;
-        itemlist.buff = &objtype;
-        sts = oz_sys_handle_getinfo (handle, 1, &itemlist, NULL);
-        if (sts != SS$_NORMAL) {
-          fprintf (h_s_error, "oz_cli: error %u getting handle info\n", sts);
-          return (sts);
-        }
-#endif
-        out = malloc (24);
-        snprintf (out, 24, "%8.8X:%s", handle, encode_objtype_string (objtype));
-      }
-      break;
-    }
-    case HINFO_LONG: {
-      out = malloc (16);
-      snprintf (out, 16, "%d", *(signed long *)itembuff);
-      break;
-    }
-    case HINFO_STRING: {
-      out = malloc (strlen (itembuff) + 1);
-      strcpy (out, itembuff);
-      break;
-    }
-    case HINFO_ULONG: {
-      out = malloc (16);
-      snprintf (out, 16, "%u", *(unsigned long *)itembuff);
-      break;
-    }
-    case HINFO_THREADSTATE: {
-      threadstate = *(unsigned char *)itembuff;
-      out = malloc (16);
-      switch (threadstate) {
-        case SCH$C_CUR: { strcpy (out, "RUN"); break; }
-        case SCH$C_COM: { strcpy (out, "COM"); break; }
-        case SCH$C_LEF: { strcpy (out, "WEV"); break; }
-#if 0
-        case OZ_THREAD_STATE_INI: { strcpy (out, "INI"); break; }
-        case OZ_THREAD_STATE_ZOM: { strcpy (out, "ZOM"); break; }
-#endif
-        default: { snprintf (out, 16, "%d", threadstate); break; }
-      }
-      break;
-    }
-    case HINFO_DATEBINDEL: {
-      out = malloc (32);
-      sys$asctim (32, out, &*(unsigned long long *)itembuff, 0);
-      break;
-    }
-    case HINFO_DATEBINABS: {
-      out = malloc (32);
-      sys$asctim (32, out, &*(unsigned long long *)itembuff, 0);
-      break;
-    }
-    case HINFO_LOCKMODE: {
-      lockmode = *(unsigned long *)itembuff;
-      out = malloc (16);
-      switch (lockmode) {
-        case LCK$K_NLMODE: { strcpy (out, "NL"); break; }
-        case LCK$K_CRMODE: { strcpy (out, "CR"); break; }
-        case LCK$K_CWMODE: { strcpy (out, "CW"); break; }
-        case LCK$K_PRMODE: { strcpy (out, "PR"); break; }
-        case LCK$K_PWMODE: { strcpy (out, "PW"); break; }
-        case LCK$K_EXMODE: { strcpy (out, "EX"); break; }
-        default: { snprintf (out, 16, "%d", lockmode); break; }
-      }
-      break;
-    }
-  }
-
-  *((char **)valuep) = out;							/* return the substring pointer */
-  return (SS$_NORMAL);								/* successful */
 }
 
 /************************************************************************/
@@ -3101,7 +2352,6 @@ static unsigned long func_lnm_lookup (Symbol *symbol, char *strp, char **rtnp, v
     return (sts);
   }
   sts = sys$trnlnm (0, h_table,  logname,  b_procmode,  &h_logname);
-  oz_sys_handle_release (PSL$C_KERNEL, h_table);
   if (sts != SS$_NORMAL) {
     out = malloc (1);
     out[0] = 0;
@@ -3326,7 +2576,8 @@ static unsigned long func_process (Symbol *symbol, char *strp, char **rtnp, void
   sts = eval_integer (strp, &strp, &processid, ')');				/* evaluate the processid expression */
   if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
 
-  sts = oz_sys_process_getbyid (processid, &h_process);
+  // use getjpi sometime
+  //  sts = oz_sys_process_getbyid (processid, &h_process);
   if (sts != SS$_NORMAL) {
     fprintf (h_s_error, "oz_cli: error %u getting process-id %u handle\n", sts, processid);
     return (sts);
@@ -3377,46 +2628,6 @@ static unsigned long func_sub (Symbol *symbol, char *strp, char **rtnp, void *va
   free (string);								/* free off the string buffer */
   *((char **)valuep) = substring;						/* return the substring pointer */
   return (SS$_NORMAL);								/* successful */
-}
-
-/************************************************************************/
-/*									*/
-/*  Find a thread by its id number					*/
-/*									*/
-/*	h_thread = oz_thread (thread_id)				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long func_thread (Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
-{
-  char *out;
-  unsigned long h_thread;
-  unsigned long threadid;
-  unsigned long sts;
-
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
-  if (*(strp ++) != '(') {							/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_integer (strp, &strp, &threadid, ')');				/* evaluate the threadid expression */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-
-  sts = oz_sys_thread_getbyid (threadid, &h_thread);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u getting thread-id %u handle\n", sts, threadid);
-    return (sts);
-  }
-
-  *rtnp = strp;
-
-  /* Make handle string */
-
-  out = malloc (24);
-  snprintf (out, 24, "%8.8X:%s", h_thread, encode_objtype_string (OZ_OBJTYPE_THREAD));
-  *((char **)valuep) = out;
-  return (SS$_NORMAL);
 }
 
 /************************************************************************/
@@ -3834,10 +3045,8 @@ static unsigned long logname_getobj (const char *name, unsigned char objtype, un
   if (sts != SS$_NORMAL) fprintf (h_s_error, "oz_cli: error %u looking up default tables (%s)\n", sts, defaulttables);
   else {
     sts = sys$trnlnm (0, h_table,  name,  PSL$C_USER,  &h_logname);		/* look up the logical name in the table */
-    oz_sys_handle_release (PSL$C_KERNEL, h_table);							/* release table's handle */
     if (sts == SS$_NORMAL) {
       sts = sys$trnlnm (0, h_logname, 0,  NULL,  objtype);	/* get handle to object the logical points to */
-      oz_sys_handle_release (PSL$C_KERNEL, h_logname);						/* no longer need the logical */
     }
   }
   return (sts);
@@ -3875,127 +3084,10 @@ static unsigned long logname_creobj (const char *name, unsigned char objtype, un
   sts = sys$trnlnm (0, 0,  defaulttables,  PSL$C_USER,  &h_table);	/* look up table in default directories */
   if (sts == SS$_NORMAL) {
     sts = sys$crelnm (0, h_table,  PSL$C_USER,  name,  NULL);	/* create the logical name in the table */
-    oz_sys_handle_release (PSL$C_KERNEL, h_table);						/* release table's handle */
   }
   return (sts);
 }
 
-/************************************************************************/
-/*									*/
-/*	abort thread [<logical_name>]					*/
-/*									*/
-/*		-nowait							*/
-/*		-status <status>					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_abort_thread (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *logical_name;
-  int i, usedup, wait;
-  unsigned long exitst, sts;
-  unsigned long h_thread;
-  unsigned long thread_id;
-
-  exitst       = SS$_ABORT;
-  logical_name = LASTHREADLNM;
-  thread_id    = 0;
-  wait         = 1;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Id - thread id number */
-
-    if (strcmp (argv[i], "-id") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing thread id number after -id\n");
-        return (SS$_IVPARAM);
-      }
-      thread_id = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad thread id number %s after -id\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      logical_name = NULL;
-      continue;
-    }
-
-    /* Nowait - just return after queuing the abort request */
-
-    if (strcmp (argv[i], "-nowait") == 0) {
-      wait = 0;
-      continue;
-    }
-
-    /* Status - specify the status it will exit with */
-
-    if (strcmp (argv[i], "-status") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing status value after -status\n");
-        return (SS$_IVPARAM);
-      }
-      exitst = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad status value %s after -status\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is the logical name */
-
-    logical_name = argv[i];
-    thread_id    = 0;
-  }
-
-  /* Get handle to thread from logical name or id number */
-
-  if (thread_id != 0) {
-    sts = oz_sys_thread_getbyid (thread_id, &h_thread);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u getting handle to thread id %u\n", sts, thread_id);
-      return (sts);
-    }
-  } else {
-    sts = logname_getobj (logical_name, OZ_OBJTYPE_THREAD, &h_thread);
-    if (sts != SS$_NORMAL) return (sts);
-  }
-
-  /* Abort the thread */
-
-  sts = oz_sys_thread_abort (h_thread, exitst);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u aborting thread\n", sts);
-  }
-
-  /* If didn't specify -nowait, wait for the thread to complete (or control-Y) */
-
-  else if (wait) sts = wait_thread (h_error, h_thread);
-
-  /* Release the handle */
-
-  oz_sys_handle_release (PSL$C_KERNEL, h_thread);
-
-  /* Anyway, return composite status */
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	allocate device <devicename>					*/
-/*		-user, -job, -process, -thread				*/
-/*									*/
-/************************************************************************/
-
 static unsigned long int_allocate_device (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
@@ -4058,7 +3150,7 @@ static unsigned long int_allocate_device (unsigned long h_input, unsigned long h
     return (SS$_IVPARAM);
   }
 
-  sts = oz_sys_io_alloc (devname, 0, objtype);
+  // not yet sts = sys$alloc (devname, 0, objtype);
   if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u allocating %s\n", sts, devname);
   return (sts);
 }
@@ -4104,7 +3196,8 @@ getagain:
     newpw = newpwbuf;
   }
 
-  sts = oz_sys_password_change (oldpw, newpw);
+  //  sts = oz_sys_password_change (oldpw, newpw);
+  // use $get/setuai when it gets implemented
   if (sts == SS$_NORMAL) fprintf (h_error, "oz_cli: password changed\n");
   else fprintf (h_error, "oz_cli: error %u changing password\n", sts);
   return (sts);
@@ -4126,217 +3219,15 @@ static unsigned long readpromptne (const char *prompt, int bufsiz, char *buffer)
   console_read.pmtsize = strlen (prompt);
   console_read.pmtbuff = prompt;
   console_read.noecho  = 1;
-  sts = oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_READLBLK, sizeof console_read, &console_read);
+  //  sts = oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_READLBLK, sizeof console_read, &console_read);
   if (sts == SS$_NORMAL) buffer[buflen] = 0;
   memset (&console_write, 0, sizeof console_write);
   console_write.size = 1;
   console_write.buff = "\n";
-  oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_WRITELBLK, sizeof console_write, &console_write);
+  //oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_WRITELBLK, sizeof console_write, &console_write);
   return (sts);
 }
-
-/************************************************************************/
-/*									*/
-/*	close handle <handle> ...					*/
-/*									*/
-/************************************************************************/
 
-static unsigned long int_close_handle (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  int i, usedup;
-  unsigned long sts;
-  unsigned long h_object;
-  unsigned char objtype;
-  Script *script;
-
-  for (i = 0; i < argc; i ++) {
-    h_object = oz_hw_atoz (argv[i], &usedup);
-    if (argv[i][usedup++] != ':') goto bad_handle;
-    if (decode_objtype_string (argv[i] + usedup, &objtype) != SS$_NORMAL) goto bad_handle;
-    if (objtype == OZ_OBJTYPE_IOCHAN) {
-      if (h_object == h_s_input)  goto script_handle;
-      if (h_object == h_s_output) goto script_handle;
-      if (h_object == h_s_error)  goto script_handle;
-      for (script = scripts; script != NULL; script = script -> next) {
-        if (h_object == script -> h_input)  goto script_handle;
-        if (h_object == script -> h_output) goto script_handle;
-        if (h_object == script -> h_error)  goto script_handle;
-      }
-    }
-    sts = oz_sys_handle_release (PSL$C_KERNEL, h_object);
-    if (sts != SS$_NORMAL) {
-       fprintf (h_error, "oz_cli: error %u closing handle %s\n", sts, argv[i]);
-       return (sts);
-    }
-  }
-
-  return (SS$_NORMAL);
-
-bad_handle:
-  fprintf (h_error, "oz_cli: bad handle %s\n", argv[i]);
-  return (SS$_BADPARAM);
-
-script_handle:
-  fprintf (h_error, "oz_cli: script handle %s\n", argv[i]);
-  return (SS$_BADPARAM);
-}
-
-/************************************************************************/
-/*									*/
-/*	create event <logical_name> <event_name>			*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_create_event (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *event_name, *logical_name;
-  unsigned long sts;
-  unsigned long h_event;
-
-  if (argc != 2) {
-    fprintf (h_error, "oz_cli: create job <logical_name> <job_name>\n");
-    return (SS$_IVPARAM);
-  }
-
-  logical_name = argv[0];
-  event_name   = argv[1];
-
-  /* Create event flag and assign logical to it */
-
-  sts = oz_sys_event_create (PSL$C_KERNEL, event_name, &h_event);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u creating event flag %s\n", sts, event_name);
-  else {
-    sts = logname_creobj (logical_name, OZ_OBJTYPE_EVENT, h_event);
-    if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u assigning logical name %s to event flag\n", sts, logical_name);
-    oz_sys_handle_release (PSL$C_KERNEL, h_event);
-  }
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	create file <file_name>						*/
-/*									*/
-/*		-lockmode <lock_mode>					*/
-/*		-logical <logical_name> 				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_create_file (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *logical_name;
-  int i, j;
-  unsigned long sts;
-  unsigned long h_iochan;
-#if 0
-  OZ_IO_fs_create fs_create;
-
-  memset (&fs_create, 0, sizeof fs_create);
-  fs_create.lockmode = LCK$K_EXMODE;
-  fs_create.ignclose = 1;
-  logical_name = NULL;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Lockmode - specify the lock mode to open it with */
-
-    if (strcmp (argv[i], "-lockmode") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing lock mode after -lockmode\n");
-        return (SS$_IVPARAM);
-      }
-      for (j = 0; j < (LCK$K_EXMODE+1); j ++) if (strcasecmp (lockmodes[j].name, argv[i]) == 0) break;
-      if (j == (LCK$K_EXMODE+1)) {
-        fprintf (h_error, "oz_cli: bad lock mode %s\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      fs_create.lockmode = lockmodes[j].valu;
-      continue;
-    }
-
-    /* Logical - specify the logical name to assign to it */
-
-    if (strcmp (argv[i], "-logical") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing logical name after -logical\n");
-        return (SS$_IVPARAM);
-      }
-      logical_name = argv[i];
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* Not an option, it is the filename */
-
-    fs_create.name = argv[i];
-  }
-
-  /* Make sure we got a file name in there somewhere */
-
-  if (fs_create.name == NULL) {
-    fprintf (h_error, "oz_cli: missing file name\n");
-    return (SS$_IVPARAM);
-  }
-
-  /* Create file and assign logical name to the channel                          */
-  /* If no logical is given, the file will be closed when the handle is released */
-
-  sts = oz_sys_io_fs_create (sizeof fs_create, &fs_create, 0, &h_iochan);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u creating file %s\n", sts, fs_create.name);
-  else {
-    if (logical_name != NULL) {
-      sts = logname_creobj (logical_name, OZ_OBJTYPE_IOCHAN, h_iochan);
-      if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u assigning logical %s to file %s\n", sts, logical_name, fs_create.name);
-    }
-    oz_sys_handle_release (PSL$C_KERNEL, h_iochan);
-  }
-#endif
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	create job <logical_name> <job_name>				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_create_job (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *jobname, *logname;
-  unsigned long sts;
-  unsigned long h_job;
-
-  if (argc != 2) {
-    fprintf (h_error, "oz_cli: create job <logical_name> <job_name>\n");
-    return (SS$_IVPARAM);
-  }
-
-  logname = argv[0];
-  jobname = argv[1];
-
-  /* Create job and assign logical to it */
-
-  sts = oz_sys_job_create (jobname, &h_job);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u creating job %s\n", sts, jobname);
-  else {
-    sts = logname_creobj (logname, OZ_OBJTYPE_JOB, h_job);
-    if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u assigning logical name %s to job\n", sts, logname);
-    oz_sys_handle_release (PSL$C_KERNEL, h_job);
-  }
-
-  return (sts);
-}
 
 /************************************************************************/
 /*									*/
@@ -4482,55 +3373,6 @@ static unsigned long crelogtbl (unsigned long cprocmode, void *crelogtblparv)
   p = crelogtblparv;
   sts = sys$crelnm (0, 0,  PSL$C_KERNEL,  p -> table_name,  NULL);
   return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	create mutex <logical_name> <template> <mutex_name>		*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_create_mutex (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-#if 0
-  const char *logical_name, *mutex_name, *template;
-  unsigned long sts;
-  unsigned long h_iochan;
-  OZ_IO_mutex_create mutex_create;
-
-  if (argc != 3) {
-    fprintf (h_error, "oz_cli: missing parameters\n");
-    return (SS$_IVPARAM);
-  }
-
-  logical_name = argv[0];
-  template     = argv[1];
-  mutex_name   = argv[2];
-
-  //  sts = sys$assign( template, &h_iochan,PSL$C_KERNEL,0,0);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u assigning channel to %s\n", sts, template);
-    return (sts);
-  }
-
-#if 0
-  memset (&mutex_create, 0, sizeof mutex_create);
-  mutex_create.namesize = strlen (mutex_name);
-  mutex_create.namebuff = mutex_name;
-
-  sts = oz_sys_io (PSL$C_KERNEL, h_iochan, 0, OZ_IO_MUTEX_CREATE, sizeof mutex_create, &mutex_create);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u creating mutex %s on %s\n", sts, mutex_name, template);
-  else {
-    sts = logname_creobj (logical_name, OZ_OBJTYPE_IOCHAN, h_iochan);
-    if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u assigning logical %s to mutex %s on %s\n", sts, logical_name, mutex_name, template);
-  }
-
-  oz_sys_handle_release (PSL$C_KERNEL, h_iochan);
-#endif
-
-  return (sts);
-#endif
 }
 
 /************************************************************************/
@@ -4693,7 +3535,7 @@ static unsigned long int_deallocate_device (unsigned long h_input, unsigned long
     return (SS$_IVPARAM);
   }
 
-  sts = oz_sys_io_dealloc (argv[0]);
+  //  sts = sys$dalloc (argv[0]);
   if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u deallocating %s\n", sts, argv[0]);
   return (sts);
 }
@@ -4757,9 +3599,7 @@ static unsigned long delete_logical (unsigned long h_error, const char *default_
     else {
       sts = sys$dellnm (h_logname,h_logname,0);
       if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u deleting logical %s\n", sts, logical_name);
-      oz_sys_handle_release (PSL$C_KERNEL, h_logname);
     }
-    oz_sys_handle_release (PSL$C_KERNEL, h_table);
   }
   return (sts);
 }
@@ -4955,561 +3795,6 @@ static unsigned long int_if (unsigned long h_input, unsigned long h_output, unsi
 
 /************************************************************************/
 /*									*/
-/*	more [-number] [<file>]						*/
-/*									*/
-/************************************************************************/
-
-typedef struct { int number;
-                 int shownum;
-                 unsigned long fileline;
-                 int i;
-                 int columns;
-                 int rows;
-                 int displine;
-                 int linewrap;
-                 char dispbuff[1];
-               } More;
-
-static unsigned long moreputchar (char c, More *more);
-static unsigned long moreflush (More *more);
-
-static unsigned long int_more (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  char c, filebuff[256];
-  const char *file;
-  int i, j, number, usedup;
-  unsigned long filerlen, sts, sts2;
-  More *more;
-#if 0
-  OZ_Console_modebuff console_modebuff;
-  OZ_IO_console_getmode console_getmode;
-  OZ_IO_fs_open fs_open;
-  OZ_IO_fs_readrec fs_readrec;
-
-  /* Get screen dimensions to get defaults for columns and rows */
-
-  memset (&console_getmode, 0, sizeof console_getmode);
-  console_getmode.size = sizeof console_modebuff;
-  console_getmode.buff = &console_modebuff;
-  sts = oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_SENSEMODE, sizeof console_getmode, &console_getmode);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u getting console screen dimensions\n", sts);
-    return (sts);
-  }
-  if (console_modebuff.columns == 0) console_modebuff.columns = 80;
-  if (console_modebuff.rows    == 0) console_modebuff.rows    = 25;
-
-  /* Parse arguments */
-
-  file = NULL;
-  number = 0;
-  for (i = 0; i < argc; i ++) {
-    if (strcmp (argv[i], "-number") == 0) {
-      number = 1;
-      continue;
-    }
-    if (strcmp (argv[i], "-columns") == 0) {
-      if (++ i >= argc) {
-        fprintf (h_error, "oz_cli: missing number of columns\n");
-        return (SS$_IVPARAM);
-      }
-      console_modebuff.columns = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad number of columns %s\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      continue;
-    }
-    if (strcmp (argv[i], "-rows") == 0) {
-      if (++ i >= argc) {
-        fprintf (h_error, "oz_cli: missing number of rows\n");
-        return (SS$_IVPARAM);
-      }
-      console_modebuff.rows = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad number of rows %s\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      continue;
-    }
-    if (argv[i][0] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_BADPARAM);
-    }
-    if (file == NULL) {
-      file = argv[i];
-      continue;
-    }
-    fprintf (h_error, "oz_cli: only one filename allowed\n");
-    return (SS$_BADPARAM);
-  }
-
-  /* If an file was given, open it */
-
-  if (file != NULL) {
-    memset (&fs_open, 0, sizeof fs_open);
-    fs_open.name = file;
-    fs_open.lockmode = LCK$K_CRMODE;
-    sts = oz_sys_io_fs_open (sizeof fs_open, &fs_open, 0, &h_input);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u opening file %s\n", sts, file);
-      return (sts);
-    }
-  }
-
-  /* Set up minimum number of columns and rows */
-
-  if (console_modebuff.columns < 2) console_modebuff.columns = 2;
-  if (number && (console_modebuff.columns < 10)) console_modebuff.columns = 10;
-  if (number) console_modebuff.columns -= 8;
-  if (console_modebuff.rows < 3) console_modebuff.rows = 3;
-
-  /* Set up context block */
-
-  more = malloc (sizeof *more + console_modebuff.columns + 2);	/* malloc context block */
-  memset (more, 0, sizeof *more + console_modebuff.columns + 2); /* ... and clear it out */
-  more -> number   = number;					/* whether or not to display file line numbers */
-  more -> shownum  = 1;						/* we have to display it on the first line of output */
-  more -> columns  = console_modebuff.columns;			/* number of data displayable columns (not including numbers) */
-  more -> rows     = console_modebuff.rows;			/* total number of rows on the screen */
-  more -> linewrap = (console_modebuff.linewrap > 0);		/* linewrap is enabled */
-
-  /* Read input records and display them */
-
-  memset (&fs_readrec, 0, sizeof fs_readrec);			/* clear unknown parameters */
-  fs_readrec.size    = sizeof filebuff;				/* size to read */
-  fs_readrec.buff    = filebuff;				/* where to read */
-  fs_readrec.rlen    = &filerlen;				/* get the length read */
-  fs_readrec.trmsize = 1;					/* set up standard terminator */
-  fs_readrec.trmbuff = "\n";
-  fs_readrec.pmtsize = 1;					/* set up standard prompt */
-  fs_readrec.pmtbuff = ">";
-  while (1) {
-    filerlen = 0;
-    sts2 = oz_sys_io (PSL$C_KERNEL, h_input, 0, IO$_READLBLK, sizeof fs_readrec, &fs_readrec);
-    for (j = 0; j < filerlen; j ++) {
-      c = filebuff[j];
-      if (c >= 127) continue;
-      if (c >= ' ') { sts = moreputchar (c, more); if (sts != SS$_BRANCHSTARTED) goto rtn; continue; }
-      switch (c) {
-        case  8: { if (more -> i > 0) more -> i --; break; }
-        case  9: { do { sts = moreputchar (' ', more); if (sts != SS$_BRANCHSTARTED) goto rtn; } while (more -> i & 7); break; }
-        case 10: { sts = moreflush (more); if (sts != SS$_BRANCHSTARTED) goto rtn; more -> shownum = 1; break; }
-        case 13: { more -> i = 0; break; }
-      }
-    }
-    sts = sts2;
-    if (sts == SS$_NORMAL) { sts = moreflush (more); if (sts != SS$_BRANCHSTARTED) goto rtn; more -> shownum = 1; }
-    else if (sts != SS$_NOTORIGIN) { if (more -> i != 0) { sts = moreflush (more); if (sts != SS$_BRANCHSTARTED) goto rtn; } sts = sts2; break; }
-  }
-  if (sts != SS$_ENDOFFILE) fprintf (h_error, "oz_cli: error %u reading file\n", sts);
-
-  /* Clean up */
-#endif
-rtn:
-  if (file != NULL) oz_sys_handle_release (PSL$C_KERNEL, h_input);
-  free (more);
-  return (sts);
-}
-
-static unsigned long moreputchar (char c, More *more)
-
-{
-  unsigned long sts;
-
-  if (more -> i == more -> columns) {
-    sts = moreflush (more);
-    if (sts != SS$_BRANCHSTARTED) return (sts);
-  }
-  more -> dispbuff[more->i++] = c;
-  return (SS$_BRANCHSTARTED);
-}
-
-static unsigned long moreflush (More *more)
-
-{
-  char crb;
-  unsigned long sts;
-  OZ_IO_console_read console_read;
-  OZ_IO_console_write console_write;
-
-  if (++ (more -> displine) % (more -> rows - 2) == 0) {
-    memset (&console_read, 0, sizeof console_read);		/* this is to read the continuation */
-    console_read.size    = 1;
-    console_read.buff    = &crb;
-    console_read.pmtsize = 41;
-    console_read.pmtbuff = "oz_cli: more: CR to continue, ^Z to exit>";
-    console_read.noecho  = 1;
-    sts = oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_READLBLK, sizeof console_read, &console_read);
-    memset (&console_write, 0, sizeof console_write);
-    console_write.trmsize = 1;
-    console_write.trmbuff = "\n";
-    oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_WRITELBLK, sizeof console_write, &console_write);
-    if (sts == SS$_ENDOFFILE) return (SS$_NORMAL);		/* eof means to stop here (but successfully) */
-    if ((sts != SS$_NORMAL) && (sts != SS$_NOTORIGIN)) {
-      fprintf (h_s_error, "oz_cli: error %u reading continuation prompt\n", sts);
-      return (sts); 
-    }
-  }
-  if (!(more -> linewrap) || (strlen (more -> dispbuff) < more -> columns)) strcat (more -> dispbuff, "\n");
-  if (!(more -> number)) fprintf (h_s_console, "%s", more -> dispbuff);
-  else if (!(more -> shownum)) fprintf (h_s_console, "        %s", more -> dispbuff);
-  else {
-    fprintf (h_s_console, "%7d %s", ++ (more -> fileline), more -> dispbuff);
-    more -> shownum = 0;
-  }
-  memset (more -> dispbuff, 0, more -> columns + 2);
-  more -> i = 0;
-  return (SS$_BRANCHSTARTED);
-}
-
-/************************************************************************/
-/*									*/
-/*	open file <file_name>						*/
-/*									*/
-/*		-lockmode <lock_mode>					*/
-/*		-logical <logical_name> 				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_open_file (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *logical_name;
-  int i, j;
-  unsigned long sts;
-  unsigned long h_iochan;
-#if 0
-  OZ_IO_fs_open fs_open;
-
-  memset (&fs_open, 0, sizeof fs_open);
-  fs_open.lockmode = LCK$K_PRMODE;
-  fs_open.ignclose = 1;
-  logical_name = NULL;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Lockmode - specify the lock mode to open it with */
-
-    if (strcmp (argv[i], "-lockmode") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing lock mode after -lockmode\n");
-        return (SS$_IVPARAM);
-      }
-      for (j = 0; j < (LCK$K_EXMODE+1); j ++) if (strcasecmp (lockmodes[j].name, argv[i]) == 0) break;
-      if (j == (LCK$K_EXMODE+1)) {
-        fprintf (h_error, "oz_cli: bad lock mode %s\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      fs_open.lockmode = lockmodes[j].valu;
-      continue;
-    }
-
-    /* Logical - specify the logical name to assign to it */
-
-    if (strcmp (argv[i], "-logical") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing logical name after -logical\n");
-        return (SS$_IVPARAM);
-      }
-      logical_name = argv[i];
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* Not an option, it is the filename */
-
-    fs_open.name = argv[i];
-  }
-
-  /* Make sure we got a file name in there somewhere */
-
-  if (fs_open.name == NULL) {
-    fprintf (h_error, "oz_cli: missing file name\n");
-    return (SS$_IVPARAM);
-  }
-
-  /* Open file and assign logical name to the channel                            */
-  /* If no logical is given, the file will be closed when the handle is released */
-
-  sts = oz_sys_io_fs_open (sizeof fs_open, &fs_open, 0, &h_iochan);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u opening file %s\n", sts, fs_open.name);
-  else {
-    if (logical_name != NULL) {
-      sts = logname_creobj (logical_name, OZ_OBJTYPE_IOCHAN, h_iochan);
-      if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u assigning logical %s to file %s\n", sts, logical_name, fs_open.name);
-    }
-    oz_sys_handle_release (PSL$C_KERNEL, h_iochan);
-  }
-#endif
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	open mutex <logical_name> <template> <mutex_name>		*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_open_mutex (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *logical_name, *mutex_name, *template;
-  unsigned long sts;
-  unsigned long h_iochan;
-#if 0
-  OZ_IO_mutex_lookup mutex_lookup;
-
-  if (argc != 3) {
-    fprintf (h_error, "oz_cli: missing parameters\n");
-    return (SS$_IVPARAM);
-  }
-
-  logical_name = argv[0];
-  template     = argv[1];
-  mutex_name   = argv[2];
-
-  //  sts = sys$assign( template, &h_iochan,PSL$C_KERNEL,0,0);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u assigning channel to %s\n", sts, template);
-    return (sts);
-  }
-
-  memset (&mutex_lookup, 0, sizeof mutex_lookup);
-  mutex_lookup.namesize = strlen (mutex_name);
-  mutex_lookup.namebuff = mutex_name;
-
-  sts = oz_sys_io (PSL$C_KERNEL, h_iochan, 0, OZ_IO_MUTEX_LOOKUP, sizeof mutex_lookup, &mutex_lookup);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u opening mutex %s on %s\n", sts, mutex_name, template);
-  else {
-    sts = logname_creobj (logical_name, OZ_OBJTYPE_IOCHAN, h_iochan);
-    if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u assigning logical %s to mutex %s on %s\n", sts, logical_name, mutex_name, template);
-  }
-
-  oz_sys_handle_release (PSL$C_KERNEL, h_iochan);
-#endif
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	read file -logical <logical_name> <symbol>			*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_read_file (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *logical_name, *symbol_name;
-  int i, j, usedup;
-  unsigned long rlen, sts;
-  unsigned long h_iochan;
-#if 0
-  OZ_IO_fs_readrec fs_readrec;
-  Symbol *symbol;
-
-  memset (&fs_readrec, 0, sizeof fs_readrec);
-  logical_name = "OZ_INPUT";
-  symbol_name  = NULL;
-
-  fs_readrec.size = 256;			/* fill in default read size */
-  fs_readrec.rlen = &rlen;			/* where to return length actually read */
-  fs_readrec.trmsize = 1;			/* fill in default terminator */
-  fs_readrec.trmbuff = "\n";
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Logical - specify the logical name of the file to read */
-
-    if (strcmp (argv[i], "-logical") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing logical name after -logical\n");
-        return (SS$_IVPARAM);
-      }
-      logical_name = argv[i];
-      continue;
-    }
-
-    /* Prompt - specify prompt string */
-
-    if (strcmp (argv[i], "-prompt") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing prompt string after -prompt\n");
-        return (SS$_IVPARAM);
-      }
-      fs_readrec.pmtsize = strlen (argv[i]);
-      fs_readrec.pmtbuff = argv[i];
-      continue;
-    }
-
-    /* Size - specify buffer size */
-
-    if (strcmp (argv[i], "-size") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing size value after -size\n");
-        return (SS$_IVPARAM);
-      }
-      fs_readrec.size = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: non-integer buffer size %s after -size\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      continue;
-    }
-
-    /* Terminator - specify terminator string */
-
-    if (strcmp (argv[i], "-terminator") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing terminator string after -terminator\n");
-        return (SS$_IVPARAM);
-      }
-      fs_readrec.trmsize = strlen (argv[i]);
-      fs_readrec.trmbuff = argv[i];
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* Not an option, it is the symbol */
-
-    symbol_name = argv[i];
-  }
-
-  /* Make sure we got a symbol name in there somewhere */
-
-  if (symbol_name == NULL) {
-    fprintf (h_error, "oz_cli: missing symbol name\n");
-    return (SS$_IVPARAM);
-  }
-
-  /* Get handle to iochan from logical name.  If no logical name given, use OZ_INPUT. */
-
-  sts = logname_getobj (logical_name, OZ_OBJTYPE_IOCHAN, &h_iochan);
-  if (sts != SS$_NORMAL) return (sts);
-
-  /* Allocate a read buffer */
-
-  if (fs_readrec.size != 0) fs_readrec.buff = malloc (fs_readrec.size);
-
-  /* Read the record */
-
-  sts = oz_sys_io (PSL$C_KERNEL, h_iochan, 0, IO$_READLBLK, sizeof fs_readrec, &fs_readrec);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u reading file %s\n", sts, logical_name);
-
-  /* Assign symbol */
-
-  if (symbol_name != NULL) {
-    symbol = malloc (rlen + 1 + sizeof *symbol);			/* allocate symbol buffer */
-    memcpy (symbol -> svalue, fs_readrec.buff, rlen);			/* copy in record data */
-    symbol -> svalue[rlen] = 0;						/* null terminate it */
-    strncpy (symbol -> name, symbol_name, sizeof symbol -> name);	/* set up symbol's name */
-    symbol -> symtype = SYMTYPE_STRING;					/* it is always type string */
-    insert_symbol (symbol, NULL, 0);					/* insert in local symbol list */
-  }
-
-  /* Free buffer, release the handle and return read status */
-
-  if (fs_readrec.size != 0) free (fs_readrec.buff);
-  oz_sys_handle_release (PSL$C_KERNEL, h_iochan);
-#endif
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	resume thread [<logical_name>]					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_resume_thread (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *logical_name;
-  int i, usedup;
-  unsigned long sts;
-  unsigned long h_logname, h_table, h_thread;
-  unsigned long thread_id;
-
-  logical_name = LASTHREADLNM;
-  thread_id    = 0;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Id - thread id number */
-
-    if (strcmp (argv[i], "-id") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing thread id number after -id\n");
-        return (SS$_IVPARAM);
-      }
-      thread_id = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad thread id number %s after -id\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      logical_name = NULL;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is the logical name */
-
-    logical_name = argv[i];
-    thread_id    = 0;
-  }
-
-  /* Get handle to thread from logical name.  If no logical name given, use last thread's handle. */
-
-  if (thread_id != 0) {
-    sts = oz_sys_thread_getbyid (thread_id, &h_thread);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u getting handle to thread id %u\n", sts, thread_id);
-      return (sts);
-    }
-  } else {
-    sts = logname_getobj (logical_name, OZ_OBJTYPE_THREAD, &h_thread);
-    if (sts != SS$_NORMAL) return (sts);
-  }
-
-  /* Resume the thread */
-
-  sts = sys$resume(h_thread,0);
-  if ((sts != SS$_WASCLR) && (sts != SS$_WASSET)) {
-    fprintf (h_error, "oz_cli: error %u resuming thread\n", sts);
-  }
-
-  /* Release the handle */
-
-  oz_sys_handle_release (PSL$C_KERNEL, h_thread);
-
-  /* Anyway, return composite status */
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
 /*  Run an external command whose name is given in OZ_CLI_TABLES	*/
 /*									*/
 /*	The command name may be prefixed by any of these options:	*/
@@ -5577,60 +3862,7 @@ static unsigned long extcommand (unsigned long h_input, unsigned long h_output, 
   /* Otherwise, look for the command name in the OZ_CLI_TABLES logical name table(s)   */
 
   else {
-#if 0
-    sts = sys$trnlnm (0, 0,  CMDLNMTBL,  PSL$C_USER,  &h_table);		/* point to the OZ_CLI_TABLES table list */
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u looking up " CMDLNMTBL "\n", sts);
-      return (sts);
-    }
-    h_command = 0;											/* no command logical found yet */
-    command[0] = 0;
-    nwords = 0;
-    for (j = 0; j < argc; j ++) {
-      l = strlen (command) + 1 + strlen (argv[j]);							/* make sure there's room for next command word in buffer */
-      if (l >= sizeof command) break;
-      if (j != 0) strcat (command, " ");								/* stuff next command word in string buffer */
-      strcat (command, argv[j]);
-      sts = sys$trnlnm (0, h_table,  command,  PSL$C_USER,  &h_logname);	/* look up the corresponding logical */
-      if (sts == SS$_NORMAL) {
-        if (h_command != 0) oz_sys_handle_release (PSL$C_KERNEL, h_command);				/* if found, release any old one we had */
-        h_command = h_logname;										/* save the new one */
-        nvalues = exitst;										/* save number of values on the logical */
-        nwords = j + 1;											/* remember how many command line words were used */
-        length = strlen (command);									/* remember length of command that matched */
-      }
-    }
-    oz_sys_handle_release (PSL$C_KERNEL, h_table);							/* release OZ_CLI_TABLES pointer */
-    if (h_command == 0) {										/* see if any match was made */
-      fprintf (h_error, "oz_cli: unknown command %s\n", command);				/* error if not */
-      return (SS$_IVPARAM);
-    }
-    command[length] = 0;										/* chop it off where we matched it */
-    if (nvalues == 0) {											/* if logical name has no values, command is disabled */
-      oz_sys_handle_release (PSL$C_KERNEL, h_command);
-      fprintf (h_error, "oz_cli: disabled command %s\n", command);
-      return (SS$_IVPARAM);
-    }
-
-    sts = sys$trnlnm (0, h_command, 0,  sizeof image,  NULL);		/* get image name */
-    if (sts != SS$_NORMAL) {
-      oz_sys_handle_release (PSL$C_KERNEL, h_command);
-      fprintf (h_error, "oz_cli: error %u getting image name for command %s\n", sts, command);
-      return (SS$_IVPARAM);
-    }
-    imagep = image;
-
-    oz_sys_handle_release (PSL$C_KERNEL, h_command);							/* all done with command logical */
-
-    /* Skip over the words in the command to point to first argument          */
-    /* Then put the string of words that made up the command just before them */
-
-    argv[--nwords] = command;
-    argc -= nwords;
-    argv += nwords;
-#else
     printf("%DCL-W-IVVERB, unrecognized command verb - check validity and spelling\n");
-#endif
   }
 
   /* Run the image */
@@ -5751,7 +3983,7 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
   /* Spawn the image */
   posix_spawn();
 
-  sts = oz_sys_spawn (runopts -> h_job, 
+  sts = sys$creprc /* was: spawn */ (&runopts -> h_job, 
                       image, 
                       runopts -> h_in, 
                       runopts -> h_out, 
@@ -5769,7 +4001,7 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
   /* Maybe orphan it then wait for it to finish */
 
   else {
-    if (runopts -> orphan) oz_sys_thread_orphan (runopts -> h_thread);
+    //    if (runopts -> orphan) oz_sys_thread_orphan (runopts -> h_thread);
     sts = finish_runopts (h_error, runopts);
   }
 
@@ -6047,547 +4279,6 @@ static unsigned long decode_runopts (const char *input, const char *output, int 
   return (SS$_NORMAL);
 }
 
-#if 0
-
-/************************************************************************/
-/*									*/
-/*  This routine opens files and sets up event flags, etc		*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	runopts = as returned by decode_runopts				*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	setup_runopts = SS$_NORMAL : successful				*/
-/*	                      else : error status			*/
-/*	*runopts = handles opened					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long setup_runopts (unsigned long h_error, Runopts *runopts)
-
-{
-  unsigned long sts;
-#if 0
-  OZ_IO_fs_create fs_create;
-  OZ_IO_fs_open fs_open;
-
-  /* Maybe we will need an evsym event flag */
-
-  if ((runopts -> ersym_name != NULL) || (runopts -> insym_name != NULL) || (runopts -> outsym_name != NULL)) {
-    sts = oz_sys_event_create (PSL$C_KERNEL, "-*sym pipe close", &(runopts -> h_evsym));
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u creating -*sym pipe close event flag\n", sts);
-      goto rtn;
-    }
-  }
-
-  /* Open error file if they supplied its name */
-
-  if (runopts -> error_name != NULL) {
-    memset (&fs_create, 0, sizeof fs_create);
-    fs_create.name = runopts -> error_name;
-    fs_create.lockmode = LCK$K_CWMODE;
-    fs_create.ignclose = 1;
-    sts = oz_sys_io_fs_create (sizeof fs_create, &fs_create, 0, &(runopts -> h_err));
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u creating error file %s\n", sts, runopts -> error_name);
-      goto rtn;
-    }
-  }
-
-  /* Create error symbol pipe if they supplied symbol name */
-
-  if (runopts -> ersym_name != NULL) {
-    sts = crepipepair (&(runopts -> h_ersym), &(runopts -> h_err));
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u creating error symbol pipe %s\n", sts, runopts -> ersym_name);
-      goto rtn;
-    }
-  }
-
-  /* Get the exit event flag if they supplied its logical name */
-
-  if (runopts -> exit_name != NULL) {
-    sts = logname_getobj (runopts -> exit_name, OZ_OBJTYPE_EVENT, &(runopts -> h_exit));
-    if (sts != SS$_NORMAL) goto rtn;
-  }
-
-  /* Get the init event flag if they supplied its logical name */
-
-  if (runopts -> init_name != NULL) {
-    sts = logname_getobj (runopts -> init_name, OZ_OBJTYPE_EVENT, &(runopts -> h_init));
-    if (sts != SS$_NORMAL) goto rtn;
-  }
-
-  /* Open input file if they supplied its name */
-
-  if (runopts -> input_name != NULL) {
-    memset (&fs_open, 0, sizeof fs_open);
-    fs_open.name = runopts -> input_name;
-    fs_open.lockmode = LCK$K_CRMODE;
-    fs_open.ignclose = 1;
-    sts = oz_sys_io_fs_open (sizeof fs_open, &fs_open, 0, &(runopts -> h_in));
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u opening input file %s\n", sts, runopts -> input_name);
-      goto rtn;
-    }
-  }
-
-  /* Create input symbol pipe if they supplied symbol name */
-
-  if (runopts -> insym_name != NULL) {
-    sts = crepipepair (&(runopts -> h_in), &(runopts -> h_insym));
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u creating input symbol pipe %s\n", sts, runopts -> insym_name);
-      goto rtn;
-    }
-  }
-
-  /* Get job if they supplied its logical name */
-
-  if (runopts -> job_name != NULL) {
-    sts = logname_getobj (runopts -> job_name, OZ_OBJTYPE_JOB, &(runopts -> h_job));
-    if (sts != SS$_NORMAL) goto rtn;
-  }
-
-  /* Create output file if they supplied its name */
-
-  if (runopts -> output_name != NULL) {
-    memset (&fs_create, 0, sizeof fs_create);
-    fs_create.name = runopts -> output_name;
-    fs_create.lockmode = LCK$K_CWMODE;
-    fs_create.ignclose = 1;
-    sts = oz_sys_io_fs_create (sizeof fs_create, &fs_create, 0, &(runopts -> h_out));
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u creating output file %s\n", sts, runopts -> output_name);
-      goto rtn;
-    }
-  }
-
-  /* Create output symbol pipe if they supplied symbol name */
-
-  if (runopts -> outsym_name != NULL) {
-    sts = crepipepair (&(runopts -> h_outsym), &(runopts -> h_out));
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u creating output symbol pipe %s\n", sts, runopts -> outsym_name);
-      goto rtn;
-    }
-  }
-
-  /* If there is no exit event flag specified, create temp one here so wait_thread routine will have something to wait for */
-
-  if (runopts -> exit_name == NULL) {
-    sts = oz_sys_event_create (PSL$C_KERNEL, "oz_cli temp exit", &(runopts -> h_exit));
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u creating temp exit event flag\n", sts);
-      goto rtn;
-    }
-  }
-
-  return (SS$_NORMAL);
-
-  /* Some error setting up, release all handles we may have opened and buffers that were allocated */
-
-rtn:
-  cleanup_runopts (runopts);
-
-  /* Return the error status */
-
-#endif
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  This routine is called after the command has been spawned.  It 	*/
-/*  creates process/thread logicals and optionally waits for the 	*/
-/*  thread to exit.							*/
-/*									*/
-/*  It also starts reading/writing the symbol pipes if necessary.	*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	runopts = run options struct pointer				*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	finish_runopts = completion status				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long finish_runopts (unsigned long h_error, Runopts *runopts)
-
-{
-  unsigned long rtnsts, sts;
-
-  rtnsts = SS$_NORMAL;
-
-  /* Save the handle as the most recent thread (default for wait thread command) */
-  /* Note that we may overwrite the previous values (which releases them)        */
-  /* If there is an error, keep going but remember the status                    */
-
-  sts = logname_creobj (LASTHREADLNM, OZ_OBJTYPE_THREAD, runopts -> h_thread);
-  if ((sts != SS$_NORMAL) && (sts != SS$_SUPERSEDE)) {
-    fprintf (h_error, "oz_cli: error %u creating thread logical " LASTHREADLNM "\n", sts);
-    rtnsts = sts;
-  }
-
-  if (runopts -> h_process != 0) {
-    sts = logname_creobj (LASTPROCLNM, OZ_OBJTYPE_PROCESS, runopts -> h_process);
-    if ((sts != SS$_NORMAL) && (sts != SS$_SUPERSEDE)) {
-      fprintf (h_error, "oz_cli: error %u creating process logical " LASTPROCLNM "\n", sts);
-      rtnsts = sts;
-    }
-  }
-
-  /* Create logicals for thread and process handles */
-
-  if (runopts -> thread_name != NULL) {
-    sts = logname_creobj (runopts -> thread_name, OZ_OBJTYPE_THREAD, runopts -> h_thread);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u creating thread logical %s\n", sts, runopts -> thread_name);
-      if (rtnsts == SS$_NORMAL) rtnsts = sts;
-    }
-  }
-
-  if ((runopts -> h_process != 0) && (runopts -> process_name != NULL)) {
-    sts = logname_creobj (runopts -> process_name, OZ_OBJTYPE_PROCESS, runopts -> h_process);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u creating process logical %s\n", sts, runopts -> process_name);
-      if (rtnsts == SS$_NORMAL) rtnsts = sts;
-    }
-  }
-
-  /* If -ersym, -insym and/or -outsym specified, start our end of the pipe I/O */
-
-  if (runopts -> ersym_name  != NULL) {
-    runopts -> ersym_pipebuf_qt  = &(runopts -> ersym_pipebuf_qh);
-    start_ersym_read  (runopts);
-  }
-  if (runopts -> insym_name  != NULL) start_insym_write (runopts);
-  if (runopts -> outsym_name != NULL) {
-    runopts -> outsym_pipebuf_qt = &(runopts -> outsym_pipebuf_qh);
-    start_outsym_read (runopts);
-  }
-
-  /* If waiting, we wait for it to complete.  Also allow it to be suspended by control-Y. */
-
-  if (runopts -> wait) {
-    sts = wait_thread (h_error, runopts -> h_thread);		/* wait for it (or control-Y) */
-    if (rtnsts == SS$_NORMAL) rtnsts = sts;			/* return the status */
-  }
-
-  return (rtnsts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Create a pair of pipes						*/
-/*									*/
-/************************************************************************/
-
-static unsigned long crepipepair (unsigned long *h_read_r, unsigned long *h_write_r)
-
-{
-#if 0
-  char pipename[OZ_DEVUNIT_NAMESIZE];
-  OZ_IO_fs_create fs_create;
-  OZ_IO_fs_open fs_open;
-  unsigned long sts;
-
-  //  sts = sys$assign( OZ_IO_PIPES_TEMPLATE, h_write_r,PSL$C_KERNEL,0,0);		// create pipe and get writable channel
-  if (sts == SS$_NORMAL) {
-    sts = oz_sys_iochan_getunitname (*h_write_r, sizeof pipename, pipename);				// assign readable channel to same pipe
-    //    if (sts == SS$_NORMAL) sts = sys$assign( pipename, h_read_r,PSL$C_KERNEL,0,0);
-    if (sts == SS$_NORMAL) {
-      memset (&fs_create, 0, sizeof fs_create);								// set the 'writer' flag so deassign will write an eof
-      fs_create.ignclose = 1;										// ignore closes, just do eof thing when channel deassigned
-      sts = oz_sys_io (PSL$C_KERNEL, *h_write_r, 0, IO$_CREATE, sizeof fs_create, &fs_create);
-      if (sts == SS$_NORMAL) {
-        memset (&fs_open, 0, sizeof fs_open);								// set the 'reader' flag for the read channel
-        fs_open.ignclose = 1;
-        sts = oz_sys_io (PSL$C_KERNEL, *h_read_r, 0, IO$_ACCESS, sizeof fs_open, &fs_open);
-      }
-      if (sts != SS$_NORMAL) oz_sys_handle_release (PSL$C_KERNEL, *h_read_r);
-    }
-    if (sts != SS$_NORMAL) oz_sys_handle_release (PSL$C_KERNEL, *h_write_r);
-  }
-
-  return (sts);
-#endif
-}
-
-/************************************************************************/
-/*									*/
-/*  This routine closes down the run options' related handles		*/
-/*									*/
-/************************************************************************/
-
-static void cleanup_runopts (Runopts *runopts)
-
-{
-  /* If the thread got going and they want the times printed, print them out now */
-
-  if (runopts -> timeit && (runopts -> h_thread != 0)) {
-    char t_name[OZ_THREAD_NAMESIZE];
-    unsigned long long t_tis_com, t_tis_run, t_tis_wev;
-    unsigned long sts;
-
-    unsigned long t_items[] = {
-	JPI$_PRCNAM,    sizeof t_name,        t_name,       NULL, 
-	JPI$M_FILL1, sizeof t_tis_run,    &t_tis_run,    NULL, 
-	JPI$M_FILL1, sizeof t_tis_com,    &t_tis_com,    NULL, 
-	JPI$M_FILL1, sizeof t_tis_wev,    &t_tis_wev,    NULL };
-
-    sts = oz_sys_handle_getinfo (runopts -> h_thread, 4, t_items, NULL);
-    if (sts != SS$_NORMAL) fprintf (h_s_error, "oz_cli: error %u getting thread info\n", sts);
-    else fprintf (h_s_error, "oz_cli: %#.3t/%#.3t/%#.3t  %s\n", t_tis_run, t_tis_com, t_tis_wev, t_name);
-  }
-
-  /* Close sub-process' error/input/output handles                           */
-  /* If there was an -ersym and/or -outsym pipe, this should write the EOF's */
-
-  if ((runopts -> error_name  != NULL) || (runopts -> ersym_name  != NULL)) {
-    oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_err);
-  }
-  if ((runopts -> input_name  != NULL) || (runopts -> insym_name  != NULL)) {
-    oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_in);
-  }
-  if ((runopts -> output_name != NULL) || (runopts -> outsym_name != NULL)) {
-    oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_out);
-  }
-
-  /* Close misc handles */
-
-  if (runopts -> h_exit    != 0) oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_exit);
-  if (runopts -> h_init    != 0) oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_init);
-  if (runopts -> h_job     != 0) oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_job);
-  if (runopts -> h_process != 0) oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_process);
-  if (runopts -> h_thread  != 0) oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_thread);
-
-  /* If -insym, close our write handle.  If write hasn't completed yet, this should abort it, so we wait for write to complete. */
-
-  if (runopts -> insym_name != NULL) {
-    oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_insym);	// release handle, abort any pending write
-    while (runopts -> insym_data != NULL) {				// see if write ast has executed yet
-      oz_sys_event_wait (PSL$C_KERNEL, runopts -> h_evsym, 0);	// if not, wait for it
-      oz_sys_event_set (PSL$C_KERNEL, runopts -> h_evsym, 0, NULL);	// clear in case of false alarm
-    }
-  }
-
-  /* If there was an -ersym and/or -outsym, wait for the EOF's then close the read handles and create symbols */
-
-  if (runopts -> h_evsym != 0) {
-    while ((runopts -> ersym_pipebuf_qt != NULL) || (runopts -> outsym_pipebuf_qt != NULL)) {
-      oz_sys_event_wait (PSL$C_KERNEL, runopts -> h_evsym, 0);
-      oz_sys_event_set (PSL$C_KERNEL, runopts -> h_evsym, 0, NULL);
-    }
-    if (runopts -> ersym_name  != NULL) {
-      oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_ersym);
-      deferoutsym (runopts -> ersym_name,  runopts -> ersym_pipebuf_qh);
-    }
-    if (runopts -> outsym_name != NULL) {
-      oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_outsym);
-      deferoutsym (runopts -> outsym_name, runopts -> outsym_pipebuf_qh);
-    }
-  }
-
-  /* Done with the -*sym event flag */
-
-  if (runopts -> h_evsym != 0) oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_evsym);
-
-  /* Nothing in here is any good any more */
-
-  memset (runopts, 0, sizeof *runopts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Read error symbol data into string of buffers			*/
-/*									*/
-/************************************************************************/
-
-static void start_ersym_read (Runopts *runopts)
-
-{
-#if 0
-  OZ_IO_fs_readrec fs_readrec;
-  Pipebuf *pipebuf;
-  unsigned long sts;
-
-  pipebuf = malloc (sizeof *pipebuf);
-  pipebuf -> runopts = runopts;
-  memset (&fs_readrec, 0, sizeof fs_readrec);
-  fs_readrec.size = sizeof pipebuf -> data;
-  fs_readrec.buff = pipebuf -> data;
-  fs_readrec.rlen = &(pipebuf -> rlen);
-  sts = oz_sys_io_start (PSL$C_KERNEL, runopts -> h_ersym, NULL, 0, ersym_read_ast, pipebuf, 
-                         IO$_READLBLK, sizeof fs_readrec, &fs_readrec);
-  if (sts != SS$_ALLSTARTED) oz_sys_thread_queueast (PSL$C_KERNEL, 0, ersym_read_ast, pipebuf, sts);
-}
-
-static void ersym_read_ast (void *pipebufv, unsigned long status, void *mchargs)
-
-{
-  Pipebuf *pipebuf;
-  Runopts *runopts;
-
-  pipebuf = pipebufv;
-  runopts = pipebuf -> runopts;
-
-  if (status == SS$_NORMAL) {
-    *(runopts -> ersym_pipebuf_qt) = pipebuf;
-    runopts -> ersym_pipebuf_qt = &(pipebuf -> next);
-    start_ersym_read (runopts);
-  } else {
-    free (pipebuf);
-    *(runopts -> ersym_pipebuf_qt) = NULL;
-    runopts -> ersym_pipebuf_qt = NULL;
-    if (status != SS$_ENDOFFILE) {
-      fprintf (h_s_error, "oz_cli: error %u reading %s error pipe\n", status, runopts -> ersym_name);
-    }
-    oz_sys_event_set (PSL$C_KERNEL, runopts -> h_evsym, 1, NULL);
-  }
-#endif
-}
-
-/************************************************************************/
-/*									*/
-/*  Write input symbol data from symbol buffer				*/
-/*									*/
-/************************************************************************/
-
-static void start_insym_write (Runopts *runopts)
-
-{
-#if 0
-  int len;
-  OZ_IO_fs_writerec fs_writerec;
-  unsigned long sts;
-
-  memset (&fs_writerec, 0, sizeof fs_writerec);
-
-  len = strlen (runopts -> insym_data);
-  if ((len == 0) || (runopts -> insym_data[len-1] != '\n')) {
-    fs_writerec.trmsize = 1;
-    fs_writerec.trmbuff = "\n";
-  }
-  fs_writerec.size = len;
-  fs_writerec.buff = runopts -> insym_data;
-
-  sts = oz_sys_io_start (PSL$C_KERNEL, runopts -> h_insym, NULL, 0, insym_write_ast, runopts, 
-                         IO$_WRITELBLK, sizeof fs_writerec, &fs_writerec);
-  if (sts != SS$_ALLSTARTED) insym_write_ast (runopts, sts, NULL);
-#endif
-}
-
-static void insym_write_ast (void *runoptsv, unsigned long status, void *mchargs)
-
-{
-#if 0
-  Runopts *runopts;
-
-  runopts = runoptsv;
-  if (status != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u writing %s input pipe\n", status, runopts -> insym_name);
-  }
-  free (runopts -> insym_data);
-  runopts -> insym_data = NULL;
-  oz_sys_handle_release (PSL$C_KERNEL, runopts -> h_insym);
-  runopts -> h_insym = 0;
-  oz_sys_event_set (PSL$C_KERNEL, runopts -> h_evsym, 1, NULL);
-#endif
-}
-
-/************************************************************************/
-/*									*/
-/*  Read output symbol data into string of buffers			*/
-/*									*/
-/************************************************************************/
-
-static void start_outsym_read (Runopts *runopts)
-
-{
-#if 0
-  OZ_IO_fs_readrec fs_readrec;
-  Pipebuf *pipebuf;
-  unsigned long sts;
-
-  pipebuf = malloc (sizeof *pipebuf);
-  pipebuf -> runopts = runopts;
-  memset (&fs_readrec, 0, sizeof fs_readrec);
-  fs_readrec.size = sizeof pipebuf -> data;
-  fs_readrec.buff = pipebuf -> data;
-  fs_readrec.rlen = &(pipebuf -> rlen);
-  sts = oz_sys_io_start (PSL$C_KERNEL, runopts -> h_outsym, NULL, 0, outsym_read_ast, pipebuf, 
-                         IO$_READLBLK, sizeof fs_readrec, &fs_readrec);
-  if (sts != SS$_ALLSTARTED) oz_sys_thread_queueast (PSL$C_KERNEL, 0, outsym_read_ast, pipebuf, sts);
-#endif
-}
-
-static void outsym_read_ast (void *pipebufv, unsigned long status, void *mchargs)
-
-{
-#if 0
-  Pipebuf *pipebuf;
-  Runopts *runopts;
-
-  pipebuf = pipebufv;
-  runopts = pipebuf -> runopts;
-
-  if (status == SS$_NORMAL) {
-    *(runopts -> outsym_pipebuf_qt) = pipebuf;
-    runopts -> outsym_pipebuf_qt = &(pipebuf -> next);
-    start_outsym_read (runopts);
-  } else {
-    free (pipebuf);
-    *(runopts -> outsym_pipebuf_qt) = NULL;
-    runopts -> outsym_pipebuf_qt = NULL;
-    if (status != SS$_ENDOFFILE) {
-      fprintf (h_s_error, "oz_cli: error %u reading %s error pipe\n", status, runopts -> outsym_name);
-    }
-    oz_sys_event_set (PSL$C_KERNEL, runopts -> h_evsym, 1, NULL);
-  }
-#endif
-}
-
-/************************************************************************/
-/*									*/
-/*  Define -ersym/-outsym symbol					*/
-/*									*/
-/************************************************************************/
-
-static void deferoutsym (const char *sym_name, Pipebuf *pipebuf_qh)
-
-{
-  Pipebuf *pipebuf;
-  Symbol *symbol;
-  unsigned long rlen;
-
-  rlen = 1;								// tally up all buffers plus a terminating null
-  for (pipebuf = pipebuf_qh; pipebuf != NULL; pipebuf = pipebuf -> next) rlen += pipebuf -> rlen;
-
-  symbol = malloc (rlen + sizeof *symbol);				// allocate a symbol struct for it
-  memset (symbol, 0, sizeof *symbol);					// clear the header portion
-  strncpy (symbol -> name, sym_name, sizeof symbol -> name);		// copy in the symbol name
-  symbol -> symtype = SYMTYPE_STRING;					// set the symbol type to string
-  rlen = 0;								// use this for offset in symbol value buffer
-  while ((pipebuf = pipebuf_qh) != NULL) {				// repeat as long as there are pipe buffers to process
-    pipebuf_qh = pipebuf -> next;					// unlink pipe buffer
-    memcpy (symbol -> svalue + rlen, pipebuf -> data, pipebuf -> rlen);	// copy the data
-    rlen += pipebuf -> rlen;						// increment offset for next one
-    free (pipebuf);							// free off this one
-  }
-  if ((rlen > 0) && (symbol -> svalue[rlen-1] == '\n')) -- rlen;	// remove a trailing \n
-  symbol -> svalue[rlen] = 0;						// null terminate the string
-
-  insert_symbol (symbol, NULL, 0);					// insert symbol into symbol table
-}
-
-#endif
-
 
 /************************************************************************/
 /*									*/
@@ -6660,160 +4351,6 @@ static unsigned long int_script (unsigned long h_input, unsigned long h_output, 
   return (SS$_NORMAL);
 }
 
-#if 0
-
-
-/************************************************************************/
-/*									*/
-/*	set console [-columns <columns>] [-[no]linewrap] [-rows <rows>] [<logical_name>]
-/*									*/
-/************************************************************************/
-
-static unsigned long int_set_console (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-#if 0
-  char devname[OZ_DEVUNIT_NAMESIZE];
-  int i, usedup;
-  OZ_Console_modebuff modebuff;
-  unsigned long h_console, h_logname, h_table;
-  OZ_IO_console_setmode console_setmode;
-  unsigned long logvalatr, sts;
-
-  h_console = h_s_console;
-
-  memset (&modebuff, 0, sizeof modebuff);
-
-  for (i = 0; i < argc; i ++) {
-
-    /* -columns - specify number of columns on terminal screen */
-
-    if (strcmp (argv[i], "-columns") == 0) {
-      if (++ i >= argc) {
-        fprintf (h_error, "oz_cli: missing column number\n");
-        sts = SS$_IVPARAM;
-        goto rtnsts;
-      }
-      modebuff.columns = oz_hw_atoi (argv[i], &usedup);
-      if ((usedup == 0) || (argv[i][usedup] != 0)) {
-        fprintf (h_error, "oz_cli: bad column number %s\n", argv[i]);
-        sts = SS$_BADPARAM;
-        goto rtnsts;
-      }
-      continue;
-    }
-
-    /* -linewrap - tell it to wrap line if go off end */
-
-    if (strcmp (argv[i], "-linewrap") == 0) {
-      modebuff.linewrap = 1;
-      continue;
-    }
-
-    /* -nolinewrap - tell it to chop line if go off end */
-
-    if (strcmp (argv[i], "-nolinewrap") == 0) {
-      modebuff.linewrap = -1;
-      continue;
-    }
-
-    /* -rows - specify number of rows on screen */
-
-    if (strcmp (argv[i], "-rows") == 0) {
-      if (++ i >= argc) {
-        fprintf (h_error, "oz_cli: missing row number\n");
-        sts = SS$_IVPARAM;
-        goto rtnsts;
-      }
-      modebuff.rows = oz_hw_atoi (argv[i], &usedup);
-      if ((usedup == 0) || (argv[i][usedup] != 0)) {
-        fprintf (h_error, "oz_cli: bad row number %s\n", argv[i]);
-        sts = SS$_BADPARAM;
-        goto rtnsts;
-      }
-      continue;
-    }
-
-    /* End of options */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      sts = SS$_BADPARAM;
-      goto rtnsts;
-    }
-
-    /* First and only arg is console device name */
-
-    if (h_console == h_s_console) {
-      sts = sys$trnlnm (0, 0,  defaulttables,  PSL$C_USER,  &h_table);
-      if (sts != SS$_NORMAL) {
-        fprintf (h_error, "oz_cli: error %u looking up default tables (%s)\n", sts, defaulttables);
-        goto rtnsts;
-      }
-      sts = sys$trnlnm (0, h_table,  argv[i],  PSL$C_USER,  &h_logname);
-      oz_sys_handle_release (PSL$C_KERNEL, h_table);
-      if (sts == SS$_NOLOGNAME) {
-	//        sts = sys$assign( argv[i], &h_console,PSL$C_KERNEL,0,0);
-        if (sts != SS$_NORMAL) {
-          fprintf (h_error, "oz_cli: error %u assigning channel to console %s\n", sts, argv[i]);
-          goto rtnsts;
-        }
-        continue;
-      }
-      if (sts != SS$_NORMAL) {
-        fprintf (h_error, "oz_cli: error %u looking up logical %s\n", sts, argv[i]);
-        goto rtnsts;
-      }
-      sts = sys$trnlnm (0, h_logname,  NULL,  0,  NULL);
-      if (sts != SS$_NORMAL) {
-        fprintf (h_error, "oz_cli: error %u getting logical %s attributes\n", sts, argv[i]);
-        oz_sys_handle_release (PSL$C_KERNEL, h_logname);
-        goto rtnsts;
-      }
-      if (logvalatr & 1/*OZ_LOGVALATR_OBJECT*/) {
-        sts = sys$trnlnm (0, h_logname, 0,  0,  NULL);
-        oz_sys_handle_release (PSL$C_KERNEL, h_logname);
-        if (sts != SS$_NORMAL) {
-          fprintf (h_error, "oz_cli: error %u getting console iochan from logical %s\n", sts, argv[i]);
-          goto rtnsts;
-        }
-      } else {
-        sts = sys$trnlnm (0, h_logname, 0,  sizeof devname,  NULL);
-        oz_sys_handle_release (PSL$C_KERNEL, h_logname);
-        if (sts != SS$_NORMAL) {
-          fprintf (h_error, "oz_cli: error %u getting console devname from logical %s\n", sts, argv[i]);
-          goto rtnsts;
-        }
-	//        sts = sys$assign( devname, &h_console,PSL$C_KERNEL,0,0);
-        if (sts != SS$_NORMAL) {
-          fprintf (h_error, "oz_cli: error %u assigning channel to console %s\n", sts, devname);
-          goto rtnsts;
-        }
-      }
-      continue;
-    }
-
-    /* No other args allowed */
-
-    fprintf (h_error, "oz_cli: extra parameter %s\n", argv[i]);
-    sts = SS$_BADPARAM;
-    goto rtnsts;
-  }
-
-  memset (&console_setmode, 0, sizeof console_setmode);
-  console_setmode.size = sizeof modebuff;
-  console_setmode.buff = &modebuff;
-  sts = oz_sys_io (PSL$C_KERNEL, h_console, 0, IO$_SETMODE, sizeof console_setmode, &console_setmode);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u setting console mode\n", sts);
-
-rtnsts:
-  if (h_console != h_s_console) oz_sys_handle_release (PSL$C_KERNEL, h_console);
-  return (sts);
-#endif
-}
-
-#endif
-
 static unsigned long int_set_prompt (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
@@ -6874,384 +4411,7 @@ static unsigned long int_set_default (unsigned long h_input, unsigned long h_out
 
   chdir(argv[0]);
   return SS$_NORMAL;
-
-  /* Open the directory as a file - but we don't need to access the contents */
-
-#if 0
-  memset (&fs_open, 0, sizeof fs_open);
-  fs_open.name = argv[0];
-  fs_open.lockmode = LCK$K_NLMODE;
-  sts = oz_sys_io_fs_open (sizeof fs_open, &fs_open, 0, &h_dir);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u finding directory %s\n", sts, argv[0]);
-    return (sts);
-  }
-#endif
-  /* Make sure it is a directory */
-
-#if 0
-  memset (&fs_getinfo1, 0, sizeof fs_getinfo1);
-  sts = oz_sys_io (PSL$C_KERNEL, h_dir, 0, OZ_IO_FS_GETINFO1, sizeof fs_getinfo1, &fs_getinfo1);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u determining if %s is a directory\n", sts, argv[0]);
-    oz_sys_handle_release (PSL$C_KERNEL, h_dir);
-    return (sts);
-  }
-  if (!(fs_getinfo1.filattrflags & OZ_FS_FILATTRFLAG_DIRECTORY)) {
-    fprintf (h_error, "oz_cli: %s is not a directory\n", argv[0]);
-    oz_sys_handle_release (PSL$C_KERNEL, h_dir);
-    return (OZ_FILENOTADIR);
-  }
-#endif
-
-  /* Get the resultant name */
-
-  sts = oz_sys_iochan_getunitname (h_dir, sizeof dirnambuff, dirnambuff);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u getting directory's device name\n", sts);
-    oz_sys_handle_release (PSL$C_KERNEL, h_dir);
-    return (sts);
-  }
-  i = strlen (dirnambuff);
-  dirnambuff[i++] = ':';
-#if 0
-  memset (&fs_getinfo2, 0, sizeof fs_getinfo2);
-  fs_getinfo2.filnamsize = sizeof dirnambuff - i;
-  fs_getinfo2.filnambuff = dirnambuff + i;
-  sts = oz_sys_io (PSL$C_KERNEL, h_dir, 0, OZ_IO_FS_GETINFO2, sizeof fs_getinfo2, &fs_getinfo2);
-  oz_sys_handle_release (PSL$C_KERNEL, h_dir);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u getting %s name\n", sts, argv[0]);
-    return (sts);
-  }
-#endif
-
-  /* Create the OZ_DEFAULT_DIR logical name */
-
-  xargv[0] = "-terminal";
-  xargv[1] = "OZ_DEFAULT_DIR";
-  xargv[2] = dirnambuff;
-  sts = int_create_logical_name (h_input, h_output, h_error, name, NULL, 3, xargv);
-  if (sts == SS$_SUPERSEDE) sts = SS$_NORMAL;
-  return (sts);
 }
-
-#if 0
-
-
-/************************************************************************/
-/*									*/
-/*	set event interval <logical_name> <interval> [<basetime>]	*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_set_event_interval (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  unsigned long long basetime, interval;
-  unsigned long h_event;
-  unsigned long sts;
-
-  if ((argc != 2) && (argc != 3)) {
-    fprintf (h_error, "oz_cli: invalid arguments <logical_name> <interval> [<basetime>]\n");
-    return (SS$_IVPARAM);
-  }
-
-  if (sys$bintim ( argv[1], &interval) >= 0) {			// decode interval string
-    fprintf (h_error, "oz_cli: bad interval %s, must be delta format\n", argv[1]);	// must be in delta format
-    return (SS$_BADPARAM);
-  }
-
-  sys$gettim(&basetime);
-
-  if (argc > 2) {
-    if (sys$bintim ( argv[2], &basetime) <= 0) {			// decode basetime string
-      fprintf (h_error, "oz_cli: bad basetime %s, must be absolute\n", argv[2]);
-      return (SS$_BADPARAM);
-    }
-    //    basetime = oz_sys_datebin_tzconv (basetime, OZ_DATEBIN_TZCONV_LCL2UTC, 0);			// convert local to UTC'
-  }
-
-  sts = logname_getobj (argv[0], OZ_OBJTYPE_EVENT, &h_event);					// get event flag handle
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u looking up event logical %s\n", sts, argv[0]);
-    return (sts);
-  }
-
-  sts = oz_sys_event_setimint (h_event, interval, basetime);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u setting event %s interval\n", sts, argv[0]);
-  oz_sys_handle_release (PSL$C_KERNEL, h_event);
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	set mutex [-express] [-noqueue] <iochan_logical_name> <new_mode>*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_set_mutex (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *logical_name, *new_mode;
-  int i;
-  unsigned long sts;
-  unsigned long h_iochan;
-  //  OZ_IO_mutex_setmode mutex_setmode;
-
-  //  memset (&mutex_setmode, 0, sizeof mutex_setmode);
-
-  logical_name = NULL;
-  new_mode     = NULL;
-
-  for (i = 0; i < argc; i ++) {
-    if (strcmp (argv[i], "-express") == 0) {
-      //      mutex_setmode.flags |= OZ_IO_MUTEX_SETMODE_FLAG_EXPRESS;
-      continue;
-    }
-    if (strcmp (argv[i], "-noqueue") == 0) {
-      //mutex_setmode.flags |= OZ_IO_MUTEX_SETMODE_FLAG_NOQUEUE;
-      continue;
-    }
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_BADPARAM);
-    }
-    if (logical_name == NULL) {
-      logical_name = argv[i];
-      continue;
-    }
-    if (new_mode == NULL) {
-      new_mode = argv[i];
-      continue;
-    }
-    fprintf (h_error, "oz_cli: extra parameter %s\n", argv[i]);
-    return (SS$_BADPARAM);
-  }
-
-  if (logical_name == NULL) {
-    fprintf (h_error, "oz_cli: missing logical_name parameter\n");
-    return (SS$_IVPARAM);
-  }
-
-  if (new_mode == NULL) {
-    fprintf (h_error, "oz_cli: missing new_mode parameter\n");
-    return (SS$_IVPARAM);
-  }
-
-#if 0
-  for (mutex_setmode.newmode = 0; mutex_setmode.newmode < (LCK$K_EXMODE+1); mutex_setmode.newmode ++) {
-    if (strcasecmp (lockmodes[mutex_setmode.newmode].name, new_mode) == 0) break;
-  }
-  if (mutex_setmode.newmode == (LCK$K_EXMODE+1)) {
-    fprintf (h_error, "oz_cli: bad new_mode parameter %s\n");
-    return (SS$_BADPARAM);
-  }
-#endif
-
-  sts = logname_getobj (logical_name, OZ_OBJTYPE_IOCHAN, &h_iochan);
-  if (sts != SS$_NORMAL) return (sts);
-
-#if 0
-  sts = oz_sys_io (PSL$C_KERNEL, h_iochan, 0, OZ_IO_MUTEX_SETMODE, sizeof mutex_setmode, &mutex_setmode);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u setting mutex %s to %s\n", sts, logical_name, new_mode);
-#endif
-
-  oz_sys_handle_release (PSL$C_KERNEL, h_iochan);
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	set thread [-id thread_id] [threadlogical] [-seckeys seckeys]	*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_set_thread (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *createsstr, *logical_name, *secattrstr, *seckeysstr;
-  int i, usedup;
-  unsigned long h_thread;
-  unsigned long thread_id;
-  unsigned long basepri, sts;
-
-  basepri      = 0;
-  createsstr   = NULL;
-  logical_name = LASTHREADLNM;
-  secattrstr   = NULL;
-  seckeysstr   = NULL;
-  thread_id    = 0;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Default create security attributes */
-
-    if (strcmp (argv[i], "-creates") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing default create security attributes after -creates\n");
-        return (SS$_IVPARAM);
-      }
-      createsstr = argv[i];
-      continue;
-    }
-
-    /* Id - thread id number */
-
-    if (strcmp (argv[i], "-id") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing thread id number after -id\n");
-        return (SS$_IVPARAM);
-      }
-      thread_id = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad thread id number %s after -id\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      logical_name = NULL;
-      continue;
-    }
-
-    /* Priority - base priority */
-
-    if (strcmp (argv[i], "-priority") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing base priority number after -priority\n");
-        return (SS$_IVPARAM);
-      }
-      basepri = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad base priority number %s after -priority\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      continue;
-    }
-
-    /* Security attributes */
-
-    if (strcmp (argv[i], "-secattr") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing security attributes after -secattr\n");
-        return (SS$_IVPARAM);
-      }
-      secattrstr = argv[i];
-      continue;
-    }
-
-    /* Security keys */
-
-    if (strcmp (argv[i], "-seckeys") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing security keys after -seckeys\n");
-        return (SS$_IVPARAM);
-      }
-      seckeysstr = argv[i];
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is the logical name */
-
-    logical_name = argv[i];
-    thread_id    = 0;
-  }
-
-  /* Get handle to thread from logical name.  If no logical name given, use last thread's handle. */
-
-  if (thread_id != 0) {
-    sts = oz_sys_thread_getbyid (thread_id, &h_thread);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u getting handle to thread id %u\n", sts, thread_id);
-      return (sts);
-    }
-  } else {
-    sts = logname_getobj (logical_name, OZ_OBJTYPE_THREAD, &h_thread);
-    if (sts != SS$_NORMAL) return (sts);
-  }
-
-  /* Maybe change the base priority */
-
-  if (basepri != 0) {
-    sts = oz_sys_thread_setbasepri (h_thread, basepri);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u setting thread's base priority\n", sts);
-      goto rtnsts;
-    }
-  }
-
-  /* Maybe change the default create security attributes (who can access what the thread creates) */
-
-  if (createsstr != NULL) {
-    unsigned long secattrsize;
-    void *secattrbuff;
-
-    sts = oz_sys_secattr_str2bin (strlen (createsstr), createsstr, NULL, secmalloc, NULL, &secattrsize, &secattrbuff);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u parsing secattr %s\n", sts, createsstr);
-      goto rtnsts;
-    }
-    sts = oz_sys_thread_setdefcresecattr (h_thread, secattrsize, secattrbuff);
-    free (secattrbuff);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u setting thread's defcresecattr\n", sts);
-      goto rtnsts;
-    }
-  }
-
-  /* Maybe change the security attributes (who can access the thread) */
-
-  if (secattrstr != NULL) {
-    unsigned long secattrsize;
-    void *secattrbuff;
-
-    sts = oz_sys_secattr_str2bin (strlen (secattrstr), secattrstr, NULL, secmalloc, NULL, &secattrsize, &secattrbuff);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u parsing secattr %s\n", sts, secattrstr);
-      goto rtnsts;
-    }
-    sts = oz_sys_thread_setsecattr (h_thread, secattrsize, secattrbuff);
-    free (secattrbuff);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u setting thread's secattr\n", sts);
-      goto rtnsts;
-    }
-  }
-
-  /* Maybe change the security keys (what the thread can access) */
-
-  if (seckeysstr != NULL) {
-    unsigned long seckeyssize;
-    void *seckeysbuff;
-
-    sts = oz_sys_seckeys_str2bin (strlen (seckeysstr), seckeysstr, secmalloc, NULL, &seckeyssize, &seckeysbuff);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u parsing seckeys %s\n", sts, seckeysstr);
-      goto rtnsts;
-    }
-    sts = oz_sys_thread_setseckeys (h_thread, seckeyssize, seckeysbuff);
-    free (seckeysbuff);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u setting thread's seckeys\n", sts);
-      goto rtnsts;
-    }
-  }
-
-  /* Done */
-
-rtnsts:
-  oz_sys_handle_release (PSL$C_KERNEL, h_thread);
-  return (sts);
-}
-
-
-#endif
 
 /************************************************************************/
 /*									*/
@@ -7363,400 +4523,6 @@ static unsigned long int_show_device (unsigned long h_input, unsigned long h_out
   return (sts);
 }
 
-#if 0
-
-/************************************************************************/
-/*									*/
-/*  Display device info given logical name				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_device_bylogical (unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts)
-
-{
-  unsigned long sts;
-  unsigned long h_device;
-
-  sts = logname_getobj (logical, OZ_OBJTYPE_UNKNOWN, &h_device);
-  //  if (sts != SS$_NORMAL) sts = sys$assign( logical, &h_device,PSL$C_KERNEL,0,0);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting device %s\n", sts, logical);
-  else {
-    sts = show_device_byhandle (h_output, h_error, h_device, showopts);
-    oz_sys_handle_release (PSL$C_KERNEL, h_device);
-  }
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display info for a device given its handle				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_device_byhandle (unsigned long h_output, unsigned long h_error, unsigned long h_device, unsigned long *showopts)
-
-{
-  unsigned long index, sts;
-  unsigned long h_lastiochan, h_nextiochan;
-
-  char d_aliasname[OZ_DEVUNIT_ALIASIZE], d_unitdesc[OZ_DEVUNIT_DESCSIZE], d_unitname[OZ_DEVUNIT_NAMESIZE];
-  signed long d_refcount;
-  unsigned long d_iochancount;
-  void *d_objaddr;
-
-  unsigned long items[] = { 
-        JPI$M_FILL1,    sizeof d_refcount,    &d_refcount,    NULL, 
-        JPI$M_FILL1, sizeof d_iochancount, &d_iochancount, NULL, 
-	JPI$M_FILL1,   sizeof d_aliasname,    d_aliasname,   NULL, 
-        JPI$M_FILL1,    sizeof d_unitname,     d_unitname,    NULL, 
-	JPI$M_FILL1,    sizeof d_unitdesc,     d_unitdesc,    NULL, 
-        JPI$M_FILL1,            sizeof d_objaddr,     &d_objaddr,     NULL };
-
-  unsigned long i_item = { JPI$M_FILL1, sizeof h_nextiochan, &h_nextiochan, NULL };
-
-  sts = oz_sys_handle_getinfo (h_device, sizeof items / sizeof *items, items, &index);
-
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting device info [%u]\n", sts, index);
-  else {
-    if (!(*showopts & SHOWNHDR_DEVICE)) {
-      *showopts |= SHOWNHDR_DEVICE;
-      if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "          ");
-      fprintf (h_output, "D  refc  iochans  aliasname  unitname      unitdesc\n");
-    }
-    if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "%8x: ", d_objaddr);
-    fprintf (h_output, "d  %4d  %7u  %-9s  %-12s  %s\n", d_refcount, d_iochancount, d_aliasname, d_unitname, d_unitdesc);
-    if (*showopts & SHOWOPT_SECURITY) show_secattr (h_output, h_device, JPI$M_FILL1, 2, "");
-    if (*showopts & SHOWOPT_DEVICE_IOCHANS) {
-      sts = oz_sys_handle_getinfo (h_device, 1, &i_item, &index);
-      //      i_item.code = JPI$M_FILL1;
-      while ((sts == SS$_NORMAL) && (h_nextiochan != 0)) {
-        h_lastiochan = h_nextiochan;
-        sts = show_iochan_byhandle (h_output, h_error, h_nextiochan, showopts);
-        if (sts == SS$_NORMAL) sts = oz_sys_handle_getinfo (h_lastiochan, 1, &i_item, &index);
-        oz_sys_handle_release (PSL$C_KERNEL, h_lastiochan);
-      }
-      if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting first/next iochan for device\n", sts);
-    }
-  }
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	show event <event_logname> ...					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_show_event (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  char intervalstr[32], evname[OZ_EVENT_NAMESIZE], nextwhenstr[32];
-  int i;
-  signed long value;
-  unsigned long long interval, nextwhen;
-  unsigned long h_event;
-  unsigned long sts;
-
-  unsigned long items[] = { 
-        JPI$M_FILL1,    sizeof value,    &value,    NULL, 
-	JPI$M_FILL1,     sizeof evname,    evname,   NULL, 
-        JPI$M_FILL1, sizeof interval, &interval, NULL, 
-	JPI$M_FILL1, sizeof nextwhen, &nextwhen, NULL };
-
-  for (i = 0; i < argc; i ++) {
-
-    sts = logname_getobj (argv[i], OZ_OBJTYPE_EVENT, &h_event);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u looking up event logical %s\n", sts, argv[i]);
-      return (sts);
-    }
-
-    sts = oz_sys_handle_getinfo (h_event, sizeof items / sizeof items[0], items, NULL);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u retrieving event %s info\n", sts, argv[i]);
-      return (sts);
-    }
-
-    if (i == 0) {
-      fprintf (h_output, "E  %24s  %27s  %10s  %s\n", "interval", "nextwhen", "value", "name");
-    }
-
-    if (interval == 0) {
-      strcpy (intervalstr, "");
-      strcpy (nextwhenstr, "");
-    } else {
-      sys$asctim (32, intervalstr, &interval, 0);
-      //      nextwhen = oz_sys_datebin_tzconv (nextwhen, OZ_DATEBIN_TZCONV_UTC2LCL, 0);
-      sys$asctim (32, nextwhenstr, &nextwhen, 0);
-    }
-
-    fprintf (h_output, "e  %24s  %27s  %10d  %s\n", intervalstr, nextwhenstr, value, evname);
-    oz_sys_handle_release (PSL$C_KERNEL, h_event);
-  }
-
-  return (SS$_NORMAL);
-}
-
-/************************************************************************/
-/*									*/
-/*	show iochan [<iochan_logical_name> ...]				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_show_iochan (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  int i, x;
-  unsigned long showopts, sts;
-
-  x = 0;
-  showopts = 0;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Objaddr - show objects kernel memory address */
-
-    if (strcmp (argv[i], "-objaddr") == 0) {
-      showopts |= SHOWOPT_OBJADDR;
-      continue;
-    }
-
-    /* Security */
-
-    if (strcmp (argv[i], "-security") == 0) {
-      showopts |= SHOWOPT_SECURITY;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is a iochan logical name */
-
-    x = 1;
-    sts = show_iochan_bylogical (h_output, h_error, argv[i], &showopts);
-    if (sts != SS$_NORMAL) break;
-  }
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display iochan info given logical name				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_iochan_bylogical (unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts)
-
-{
-  unsigned long sts;
-  unsigned long h_iochan;
-
-  sts = logname_getobj (logical, OZ_OBJTYPE_UNKNOWN, &h_iochan);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting iochan logical %s\n", sts, logical);
-  else {
-    sts = show_iochan_byhandle (h_output, h_error, h_iochan, showopts);
-    oz_sys_handle_release (PSL$C_KERNEL, h_iochan);
-  }
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display info for a iochan given its handle				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_iochan_byhandle (unsigned long h_output, unsigned long h_error, unsigned long h_iochan, unsigned long *showopts)
-
-{
-  char lockmode[8];
-  unsigned long index, sts;
-
-  signed long i_refcount;
-  unsigned long i_lockmode;
-  void *i_objaddr;
-
-  unsigned long items[] = { 
-        JPI$M_FILL1, sizeof i_refcount, &i_refcount, NULL, 
-        JPI$M_FILL1, sizeof i_lockmode, &i_lockmode, NULL, 
-        JPI$M_FILL1,         sizeof i_objaddr,  &i_objaddr,  NULL };
-
-  sts = oz_sys_handle_getinfo (h_iochan, sizeof items / sizeof *items, items, &index);
-
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting iochan info [%u]\n", sts, index);
-  else {
-    if (!(*showopts & SHOWNHDR_IOCHAN)) {
-      *showopts |= SHOWNHDR_IOCHAN;
-      if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "          ");
-      fprintf (h_output, "I    refc  lockmode\n");
-    }
-    switch (i_lockmode) {
-      case LCK$K_NLMODE: { strcpy (lockmode, "NL"); break; }
-      case LCK$K_CRMODE: { strcpy (lockmode, "CR"); break; }
-      case LCK$K_CWMODE: { strcpy (lockmode, "CW"); break; }
-      case LCK$K_PRMODE: { strcpy (lockmode, "PR"); break; }
-      case LCK$K_PWMODE: { strcpy (lockmode, "PW"); break; }
-      case LCK$K_EXMODE: { strcpy (lockmode, "EX"); break; }
-      default: { snprintf (lockmode, sizeof lockmode, "%d", i_lockmode); };
-    }
-    if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "%8x: ", i_objaddr);
-    fprintf (h_output, "i    %4d  %8s\n", i_refcount, lockmode);
-    if (*showopts & SHOWOPT_SECURITY) show_secattr (h_output, h_iochan, JPI$M_FILL1, 4, "");
-  }
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	show job [<job_logical_name> ...]				*/
-/*									*/
-/*		-processes						*/
-/*		-threads						*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_show_job (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  int i, x;
-  unsigned long showopts, sts;
-
-  x = 0;
-  showopts = 0;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Objaddr - show objects kernel memory address */
-
-    if (strcmp (argv[i], "-objaddr") == 0) {
-      showopts |= SHOWOPT_OBJADDR;
-      continue;
-    }
-
-    /* Processes - display process information for the job */
-
-    if (strcmp (argv[i], "-processes") == 0) {
-      showopts |= SHOWOPT_JOB_PROCS;
-      continue;
-    }
-
-    /* Security */
-
-    if (strcmp (argv[i], "-security") == 0) {
-      showopts |= SHOWOPT_SECURITY;
-      continue;
-    }
-
-    /* Threads - display thread information for the process */
-
-    if (strcmp (argv[i], "-threads") == 0) {
-      showopts |= SHOWOPT_JOB_THREADS;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is a job logical name */
-
-    x = 1;
-    sts = show_job_bylogical (h_output, h_error, argv[i], &showopts);
-    if (sts != SS$_NORMAL) break;
-  }
-
-  if (x == 0) sts = show_job_bylogical (h_output, h_error, "OZ_THIS_JOB", &showopts);
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display job info given logical name					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_job_bylogical (unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts)
-
-{
-  unsigned long sts;
-  unsigned long h_job;
-
-  sts = logname_getobj (logical, OZ_OBJTYPE_UNKNOWN, &h_job);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting job logical %s\n", sts, logical);
-  else {
-    sts = show_job_byhandle (h_output, h_error, h_job, showopts);
-    oz_sys_handle_release (PSL$C_KERNEL, h_job);
-  }
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display info for a job given its handle				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_job_byhandle (unsigned long h_output, unsigned long h_error, unsigned long h_job, unsigned long *showopts)
-
-{
-  unsigned long index, sts;
-  unsigned long h_lastproc, h_nextproc;
-
-  char j_name[OZ_JOBNAME_MAX];
-  signed long j_refcount;
-  unsigned long j_processcount;
-  void *j_objaddr;
-
-  unsigned long items[] = { 
-	JPI$M_FILL1,     sizeof j_refcount,     &j_refcount,     NULL, 
-	JPI$M_FILL1, sizeof j_processcount, &j_processcount, NULL, 
-	JPI$M_FILL1,         sizeof j_name,          j_name,         NULL, 
-	JPI$M_FILL1,          sizeof j_objaddr,      &j_objaddr,      NULL };
-
-  unsigned long p_item = { JPI$M_FILL1, sizeof h_nextproc, &h_nextproc, NULL };
-
-  sts = oz_sys_handle_getinfo (h_job, sizeof items / sizeof *items, items, &index);
-
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting job info [%u]\n", sts, index);
-  else {
-    if (!(*showopts & SHOWNHDR_JOB)) {
-      *showopts |= SHOWNHDR_JOB;
-      if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "          ");
-      fprintf (h_output, "J    refc  processes  name\n");
-    }
-    if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "%8x: ", j_objaddr);
-    fprintf (h_output, "j    %4d  %9u  %s\n", j_refcount, j_processcount, j_name);
-    if (*showopts & SHOWOPT_SECURITY) show_secattr (h_output, h_job, JPI$M_FILL1, 4, "");
-    if (*showopts & SHOWOPT_JOB_PROCS) {
-      sts = oz_sys_handle_getinfo (h_job, 1, &p_item, &index);
-      //      p_item.code = JPI$M_FILL1;
-      while ((sts == SS$_NORMAL) && (h_nextproc != 0)) {
-        h_lastproc = h_nextproc;
-        sts = show_process_byhandle (h_output, h_error, h_nextproc, showopts);
-        if (sts == SS$_NORMAL) sts = oz_sys_handle_getinfo (h_lastproc, 1, &p_item, &index);
-        oz_sys_handle_release (PSL$C_KERNEL, h_lastproc);
-      }
-      if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting first/next process in job\n", sts);
-    }
-  }
-
-  return (sts);
-}
-
-#endif
-
 
 /************************************************************************/
 /*									*/
@@ -7778,456 +4544,7 @@ static unsigned long int_show_logical_name (unsigned long h_input, unsigned long
   sts = show_logical(argc, argv);
 
   return sts;
-
-  if (logical_name == NULL) {
-    fprintf (h_error, "oz_cli: missing logical name\n");
-    return (SS$_IVPARAM);
-  }
-
-  sts = sys$trnlnm (0, 0,  defaulttables,  PSL$C_USER,  &h_table);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u looking up default tables (%s)\n", sts, defaulttables);
-  else {
-    sts = sys$trnlnm (0, h_table,  logical_name,  PSL$C_USER,  &h_logname);
-    if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u looking up logical %s\n", sts, logical_name);
-    else {
-      sts = show_logical_name (h_output, h_error, 0, sholnmflg, 1, h_logname);
-      oz_sys_handle_release (PSL$C_KERNEL, h_logname);
-    }
-    oz_sys_handle_release (PSL$C_KERNEL, h_table);
-  }
-
-  return (sts);
 }
-
-#if 0
-
-/************************************************************************/
-/*									*/
-/*	show logical table <table_name>					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_show_logical_table (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *table_name;
-  int i;
-  unsigned long sholnmflg, sts;
-
-  sholnmflg  = 0;
-  table_name = defaulttables;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* - security */
-
-    if (strcmp (argv[i], "-security") == 0) {
-      sholnmflg |= SHOLNMFLG_SECURITY;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is the logical name */
-
-    table_name = argv[i];
-  }
-
-  /* Dump out table and return status */
-
-  sts = show_logical_table (h_output, h_error, 0, sholnmflg, 0, table_name, 0);
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Show info for logicals in a table					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	logical_name = table's name					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	show_logical_table = SS$_NORMAL : successful			*/
-/*	                           else : error status			*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_logical_table (unsigned long h_output, unsigned long h_error, int level, unsigned long sholnmflg, unsigned long logtblatr, const char *table_name, unsigned long h_table)
-
-{
-  char logical_name[OZ_LOGNAME_MAXNAMSZ], object_table_name[OZ_LOGNAME_MAXNAMSZ];
-  unsigned long lognamatr, logvalatr, nvalues, i, sts;
-  unsigned long h_logical;
-
-  if (level > LNM$C_MAXDEPTH) {
-    fprintf (h_error, "oz_cli: too many logical name levels\n");
-    return (SS$_EXLNMQUOTA);
-  }
-
-  /* If given an handle to the table, get the table's name */
-
-  if (logtblatr & 1/*OZ_LOGVALATR_OBJECT*/) {
-    sts = sys$trnlnm (0, h_table,  object_table_name,  sizeof object_table_name,  &nvalues);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u getting logical table's name\n", sts);
-      return (sts);
-    }
-    table_name = object_table_name;
-  }
-
-  /* Otherwise, we were given its name, so look it up in the directories */
-
-  else {
-    sts = sys$trnlnm (0, 0,  table_name,  PSL$C_USER,  &h_table);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u looking up table %s in the directories\n", sts, table_name);
-      return (sts);
-    }
-  }
-
-  /* Print out the name of the table */
-
-  fprintf (h_output, "%*s%s:\n", level * 2, "", table_name);
-  if (sholnmflg & SHOLNMFLG_SECURITY) show_secattr (h_output, h_table, JPI$M_FILL1, (level + 1) * 2, "");
-
-  /* If it is a table, dump it out */
-
-  if (lognamatr & LNM$M_TABLE) {
-    h_logical = 0;
-    while (1) {
-      //      sts = oz_sys_logname_gettblent (h_table, &h_logical);			/* get logical name from table */
-      if (sts != SS$_NORMAL) {
-        fprintf (h_error, "oz_cli: error %u retrieving value from table %s\n", sts, table_name);
-        break;
-      }
-      if (h_logical == 0) break;
-      sts = show_logical_name (h_output, h_error, level + 1, sholnmflg, 0, h_logical); /* print out the logical */
-      if (sts != SS$_NORMAL) break;						/* stop if error */
-    }
-    if (h_logical != 0) oz_sys_handle_release (PSL$C_KERNEL, h_logical);
-  }
-
-  /* Otherwise, it is a list of tables, so recurse */
-
-  else {
-    for (i = 0; i < nvalues; i ++) {
-      sts = sys$trnlnm (0, h_table, i,  sizeof logical_name,  &logvalatr);
-      if (sts == SS$_NORMAL) sts = show_logical_table (h_output, h_error, level + 1, sholnmflg, logvalatr, logical_name, h_logical);
-      else fprintf (h_error, "oz_cli: error %u retrieving value %u from %s\n", sts, i, table_name);
-#if 0
-      if (logvalatr & OZ_LOGVALATR_OBJECT) oz_sys_handle_release (PSL$C_KERNEL, h_logical);
-#endif
-      if (sts != SS$_NORMAL) break;
-    }
-  }
-
-  /* If we created the handle, release it */
-
-#if 0
-  if (!(logtblatr & OZ_LOGVALATR_OBJECT)) oz_sys_handle_release (PSL$C_KERNEL, h_table);
-#endif
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Show info for a single logical name					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	table = 0 : don't print table name with logical name		*/
-/*	        1 : print table name with logical name			*/
-/*	h_logname = logical name handle					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	show_logical_name = SS$_NORMAL : successful			*/
-/*	                          else : error status			*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_logical_name (unsigned long h_output, unsigned long h_error, int level, unsigned long sholnmflg, int table, unsigned long h_logname)
-
-{
-  char name[OZ_LOGNAME_MAXNAMSZ], table_name[OZ_LOGNAME_MAXNAMSZ], value[256];
-  unsigned long i, lognamatr, logvalatr, nvalues, sts;
-  unsigned long h_table;
-  unsigned long procmode;
-
-  /* Get general info about logical name */
-
-  sts = sys$trnlnm (0, h_logname,  name,  sizeof name,  &nvalues);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u getting logical name attributes\n", sts);
-    return (sts);
-  }
-
-  /* Output stuff up to the = */
-
-  if (table) {
-    sts = sys$trnlnm (0, h_table,  table_name,  sizeof table_name,  NULL);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u getting logical name %s table name\n", sts, name);
-      oz_sys_handle_release (PSL$C_KERNEL, h_table);
-      return (sts);
-    }
-#if 0
-    fprintf (h_output, "%*s%s%c%s", level * 2, "", table_name, OZ_LOGNAME_TABLECHR, name);
-#endif
-  } else {
-    fprintf (h_output, "%*s%s", level * 2, "", name);
-  }
-  if (procmode == PSL$C_KERNEL) fprintf (h_output, " (kernel)");
-  else if (procmode == PSL$C_USER) fprintf (h_output, " (user)");
-  else fprintf (h_output, " (procmode %d)", procmode);
-#if 0
-  if (lognamatr & OZ_LOGNAMATR_NOSUPERSEDE) fprintf (h_output, " (nosupersede)");
-  if (lognamatr & OZ_LOGNAMATR_NOOUTERMODE) fprintf (h_output, " (nooutermode)");
-#endif
-  if (lognamatr & LNM$M_TABLE)       fprintf (h_output, " (table)\n");
-  else {
-    fprintf (h_output, " =");
-
-    /* Output the list of values */
-
-    for (i = 0; i < nvalues; i ++) {
-      sts = sys$trnlnm (0, h_logname, i,  sizeof value,  &logvalatr);
-      if (sts != SS$_NORMAL) {
-        fprintf (h_error, "oz_cli: error %u getting value %u of logical %s\n", sts, i, name);
-        break;
-      }
-      fprintf (h_output, " '%s'", value);
-#if 0
-      if (logvalatr & OZ_LOGVALATR_OBJECT) fprintf (h_output, " (object)");
-      else if (logvalatr & LNM$M_TERMINAL) fprintf (h_output, " (terminal)");
-#endif
-    }
-    fprintf (h_output, "\n");
-  }
-  if (sholnmflg & SHOLNMFLG_SECURITY) show_secattr (h_output, h_logname, JPI$M_FILL1, (level + 1) * 2, "");
-
-  oz_sys_handle_release (PSL$C_KERNEL, h_table);
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	show mutex <logical_name>					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_show_mutex (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-#if 0
-  char device_name[OZ_DEVUNIT_NAMESIZE];
-  unsigned long rlen, sts;
-  unsigned long h_iochan;
-  unsigned long items[1];
-  OZ_IO_mutex_getinfo1 mutex_getinfo1;
-
-  /* There should only be exactly one argument - the logical name */
-
-  if (argc != 1) {
-    fprintf (h_error, "oz_cli: missing mutex iochan logical name\n");
-    return (SS$_IVPARAM);
-  }
-
-  /* Convert the logical name to an I/O channel */
-
-  sts = logname_getobj (argv[0], OZ_OBJTYPE_IOCHAN, &h_iochan);
-  if (sts != SS$_NORMAL) return (sts);
-
-  /* Get the corresponding mutex device name */
-
-  items[0].code = JPI$M_FILL1;
-  items[0].size = sizeof device_name;
-  items[0].buff = device_name;
-  items[0].rlen = NULL;
-  sts = oz_sys_handle_getinfo (h_iochan, 1, items, NULL);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting device name of mutex %s\n", sts, argv[0]);
-  else {
-
-    /* Get the length of the mutex's name */
-
-    memset (&mutex_getinfo1, 0, sizeof mutex_getinfo1);
-    mutex_getinfo1.namerlen = &rlen;
-    sts = oz_sys_io (PSL$C_KERNEL, h_iochan, 0, OZ_IO_MUTEX_GETINFO1, sizeof mutex_getinfo1, &mutex_getinfo1);
-    if (sts == SS$_NORMAL) {
-
-      /* Now get everything else about the mutex */
-
-      mutex_getinfo1.namesize = rlen;
-      mutex_getinfo1.namebuff = malloc (rlen + 1);
-      sts = oz_sys_io (PSL$C_KERNEL, h_iochan, 0, OZ_IO_MUTEX_GETINFO1, sizeof mutex_getinfo1, &mutex_getinfo1);
-      if (sts == SS$_NORMAL) {
-        ((char *)(mutex_getinfo1.namebuff))[rlen] = 0;
-
-        /* Print it all out */
-
-        fprintf (h_output, "        device: %s\n", device_name);
-        fprintf (h_output, "          name: %S\n", mutex_getinfo1.namebuff);
-        fprintf (h_output, "       curmode: %s\n", lockmodes[mutex_getinfo1.curmode]);
-        fprintf (h_output, "active readers: %d\n", mutex_getinfo1.active_readers);
-        fprintf (h_output, "active writers: %d\n", mutex_getinfo1.active_writers);
-        fprintf (h_output, " block readers: %d\n", mutex_getinfo1.block_readers);
-        fprintf (h_output, " block writers: %d\n", mutex_getinfo1.block_writers);
-      }
-      free (mutex_getinfo1.namebuff);
-    }
-    if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting %s mutex info\n", sts, argv[0]);
-  }
-  oz_sys_handle_release (PSL$C_KERNEL, h_iochan);
-
-  return (sts);
-#endif
-}
-
-/************************************************************************/
-/*									*/
-/*	show process [<process_logical_name> ...]			*/
-/*									*/
-/*		-threads : show threads of the processes		*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_show_process (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  int i, x;
-  unsigned long showopts, sts;
-
-  x = 0;
-  showopts = 0;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Objaddr - show objects kernel memory address */
-
-    if (strcmp (argv[i], "-objaddr") == 0) {
-      showopts |= SHOWOPT_OBJADDR;
-      continue;
-    }
-
-    /* Security */
-
-    if (strcmp (argv[i], "-security") == 0) {
-      showopts |= SHOWOPT_SECURITY;
-      continue;
-    }
-
-    /* Threads - display thread information for the process */
-
-    if (strcmp (argv[i], "-threads") == 0) {
-      showopts |= SHOWOPT_PROC_THREADS;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is a process logical name */
-
-    x = 1;
-    sts = show_process_bylogical (h_output, h_error, argv[i], &showopts);
-    if (sts != SS$_NORMAL) break;
-  }
-
-  if (x == 0) sts = show_process_bylogical (h_output, h_error, LASTPROCLNM, &showopts);
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display process info given logical name				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_process_bylogical (unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts)
-
-{
-  unsigned long sts;
-  unsigned long h_process;
-
-  sts = logname_getobj (logical, OZ_OBJTYPE_UNKNOWN, &h_process);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting process logical %s\n", sts, logical);
-  else {
-    sts = show_process_byhandle (h_output, h_error, h_process, showopts);
-    oz_sys_handle_release (PSL$C_KERNEL, h_process);
-  }
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display info for a process given its handle				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_process_byhandle (unsigned long h_output, unsigned long h_error, unsigned long h_process, unsigned long *showopts)
-
-{
-  unsigned long index, sts;
-  unsigned long h_lastthread, h_nextthread;
-
-  char p_name[OZ_PROCESS_NAMESIZE];
-  signed long p_refcount;
-  unsigned long p_id;
-  unsigned long p_threadcount;
-  void *p_objaddr;
-
-  unsigned long items[] = { 
-        JPI$M_FILL1,    sizeof p_refcount,    &p_refcount,    NULL, 
-        JPI$M_FILL1,          sizeof p_id,          &p_id,          NULL, 
-        JPI$M_FILL1, sizeof p_threadcount, &p_threadcount, NULL, 
-        JPI$M_FILL1,        sizeof p_name,         p_name,        NULL, 
-	JPI$M_FILL1,             sizeof p_objaddr,     &p_objaddr,     NULL };
-
-  unsigned long t_item = { JPI$M_FILL1, sizeof h_nextthread, &h_nextthread, NULL };
-
-  sts = oz_sys_handle_getinfo (h_process, sizeof items / sizeof *items, items, &index);
-
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting process info [%u]\n", sts, index);
-  else {
-    if (!(*showopts & SHOWNHDR_PROCESS)) {
-      *showopts |= SHOWNHDR_PROCESS;
-      if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "          ");
-      fprintf (h_output, "P      refc  processid  threads  name\n");
-    }
-    if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "%8x: ", p_objaddr);
-    fprintf (h_output, "p      %4d  %9u  %7u  %s\n", p_refcount, p_id, p_threadcount, p_name);
-    if (*showopts & SHOWOPT_SECURITY) show_secattr (h_output, h_process, JPI$M_FILL1, 6, "");
-    if (*showopts & SHOWOPT_PROC_THREADS) {
-      sts = oz_sys_handle_getinfo (h_process, 1, &t_item, &index);
-      //      t_item.code = JPI$M_FILL1;
-      while ((sts == SS$_NORMAL) && (h_nextthread != 0)) {
-        h_lastthread = h_nextthread;
-        sts = show_thread_byhandle (h_output, h_error, h_nextthread, showopts);
-        if (sts == SS$_NORMAL) sts = oz_sys_handle_getinfo (h_lastthread, 1, &t_item, &index);
-        oz_sys_handle_release (PSL$C_KERNEL, h_lastthread);
-      }
-      if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting first/next thread in process\n", sts);
-    }
-  }
-
-  return (sts);
-}
-
-#endif
 
 
 /************************************************************************/
@@ -8388,1088 +4705,6 @@ static unsigned long int_show_system (unsigned long h_input, unsigned long h_out
   sts = show_system (h_output, h_error, &showopts);
   return (sts);
 }
-
-#if 0
-
-/************************************************************************/
-/*									*/
-/*  Display system information						*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_system (unsigned long h_output, unsigned long h_error, unsigned long *showopts)
-     // move to showsystem.c eventually
-{
-  char sepchar;
-  unsigned long index, sts;
-  unsigned long h_lastdev, h_lastuser, h_nextdev, h_nextuser;
-
-  unsigned long long s_boottime;
-  unsigned long s_phypagetotal;
-  unsigned long s_phypagefree;
-  unsigned long s_phypagel2size;
-  unsigned long s_npptotal;
-  unsigned long s_nppinuse;
-  unsigned long s_npppeak;
-  unsigned long s_pgptotal;
-  unsigned long s_pgpinuse;
-  unsigned long s_pgppeak;
-  signed long s_cpucount;
-  unsigned long s_cpusavail;
-  unsigned long s_syspagetotal;
-  unsigned long s_syspagefree;
-  unsigned long s_usercount;
-  unsigned long s_devicecount;
-  unsigned long s_cachepages;
-
-  unsigned long items[] = { 
-	JPI$M_FILL1,      sizeof s_boottime,      &s_boottime,      NULL, 
-	JPI$M_FILL1,  sizeof s_phypagetotal,  &s_phypagetotal,  NULL, 
-	JPI$M_FILL1,   sizeof s_phypagefree,   &s_phypagefree,   NULL, 
-	JPI$M_FILL1, sizeof s_phypagel2size, &s_phypagel2size, NULL, 
-	JPI$M_FILL1,      sizeof s_npptotal,      &s_npptotal,      NULL, 
-	JPI$M_FILL1,      sizeof s_nppinuse,      &s_nppinuse,      NULL, 
-	JPI$M_FILL1,       sizeof s_npppeak,       &s_npppeak,       NULL, 
-	JPI$M_FILL1,      sizeof s_pgptotal,      &s_pgptotal,      NULL, 
-	JPI$M_FILL1,      sizeof s_pgpinuse,      &s_pgpinuse,      NULL, 
-	JPI$M_FILL1,       sizeof s_pgppeak,       &s_pgppeak,       NULL, 
-	JPI$M_FILL1,      sizeof s_cpucount,      &s_cpucount,      NULL, 
-	JPI$M_FILL1,     sizeof s_cpusavail,     &s_cpusavail,     NULL, 
-	JPI$M_FILL1,  sizeof s_syspagetotal,  &s_syspagetotal,  NULL, 
-	JPI$M_FILL1,   sizeof s_syspagefree,   &s_syspagefree,   NULL, 
-	JPI$M_FILL1,     sizeof s_usercount,     &s_usercount,     NULL, 
-	JPI$M_FILL1,   sizeof s_devicecount,   &s_devicecount,   NULL, 
-	JPI$M_FILL1,    sizeof s_cachepages,    &s_cachepages,    NULL };
-
-  unsigned long d_item = { JPI$M_FILL1, sizeof h_nextdev, &h_nextdev, NULL };
-  unsigned long u_item = { JPI$M_FILL1, sizeof h_nextuser, &h_nextuser, NULL };
-
-  sts = oz_sys_handle_getinfo (0, sizeof items / sizeof *items, items, &index);
-
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting system info [%u]\n", sts, index);
-  else {
-    fprintf (h_output, "                       boottime : %t\n", s_boottime);
-    fprintf (h_output, "             physical page size : %u bytes\n", 1 << s_phypagel2size);
-    fprintf (h_output, "           total physical pages : %u (%u MB)\n", s_phypagetotal, s_phypagetotal >> (20 - s_phypagel2size));
-    fprintf (h_output, "        phy pages used by cache : %u (%u MB)\n", s_cachepages,   s_cachepages   >> (20 - s_phypagel2size));
-    fprintf (h_output, "            free physical pages : %u (%u MB)\n", s_phypagefree,  s_phypagefree  >> (20 - s_phypagel2size));
-    fprintf (h_output, "      non-paged pool total size : %u (%u KB)\n", s_npptotal, s_npptotal >> 10);
-    fprintf (h_output, "          non-paged pool in use : %u (%u KB)\n", s_nppinuse, s_nppinuse >> 10);
-    fprintf (h_output, "      non-paged pool peak usage : %u (%u KB)\n", s_npppeak,  s_npppeak  >> 10);
-    fprintf (h_output, "          paged pool total size : %u (%u KB)\n", s_pgptotal, s_pgptotal >> 10);
-    fprintf (h_output, "              paged pool in use : %u (%u KB)\n", s_pgpinuse, s_pgpinuse >> 10);
-    fprintf (h_output, "          paged pool peak usage : %u (%u KB)\n", s_pgppeak,  s_pgppeak  >> 10);
-    fprintf (h_output, "            max cpu's built for : %u\n", s_cpucount);
-    fprintf (h_output, "        available cpu number(s) :");
-    sepchar = ' ';
-    for (index = 0; index < s_cpucount; index ++) {
-      if (s_cpusavail & (1 << index)) {
-         fprintf (h_output, "%c%u", sepchar, index);
-         sepchar = ',';
-      }
-    }
-    fprintf (h_output, "\n");
-    fprintf (h_output, "   system pagetable entry total : %u (%u KB)\n", s_syspagetotal, s_syspagetotal << (s_phypagel2size - 10));
-    fprintf (h_output, "  free system pagetable entries : %u (%u KB)\n", s_syspagefree,  s_syspagefree  << (s_phypagel2size - 10));
-    fprintf (h_output, "      number of users logged in : %u\n", s_usercount);
-    fprintf (h_output, "      number of devices defined : %u\n", s_devicecount);
-
-    if (*showopts & SHOWOPT_SYSTEM_DEVICES) {
-      sts = oz_sys_handle_getinfo (0, 1, &d_item, &index);
-      //      d_item.code = JPI$M_FILL1;
-      while ((sts == SS$_NORMAL) && (h_nextdev != 0)) {
-        h_lastdev = h_nextdev;
-        sts = show_device_byhandle (h_output, h_error, h_nextdev, showopts);
-        if (sts == SS$_NORMAL) sts = oz_sys_handle_getinfo (h_lastdev, 1, &d_item, &index);
-        oz_sys_handle_release (PSL$C_KERNEL, h_lastdev);
-      }
-      if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting first/next device in system\n", sts);
-    }
-
-    if ((sts == SS$_NORMAL) && (*showopts & SHOWOPT_SYSTEM_USERS)) {
-      sts = oz_sys_handle_getinfo (0, 1, &u_item, &index);
-      //      u_item.code = JPI$M_FILL1;
-      while ((sts == SS$_NORMAL) && (h_nextuser != 0)) {
-        h_lastuser = h_nextuser;
-        sts = show_user_byhandle (h_output, h_error, h_nextuser, showopts);
-        if (sts == SS$_NORMAL) sts = oz_sys_handle_getinfo (h_lastuser, 1, &u_item, &index);
-        oz_sys_handle_release (PSL$C_KERNEL, h_lastuser);
-      }
-      if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting first/next user in system\n", sts);
-    }
-  }
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	show thread [<thread_logical_name> ...]				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_show_thread (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  int i, security, usedup, x;
-  unsigned long showopts, sts;
-  unsigned long h_thread;
-  unsigned long thread_id;
-
-  showopts = 0;
-  x = 0;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Id - thread id number */
-
-    if (strcmp (argv[i], "-id") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing thread id number after -id\n");
-        return (SS$_IVPARAM);
-      }
-      thread_id = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad thread id number %s after -id\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      sts = oz_sys_thread_getbyid (thread_id, &h_thread);
-      if (sts != SS$_NORMAL) {
-        fprintf (h_error, "oz_cli: error %u getting handle to thread id %u\n", sts, thread_id);
-        return (sts);
-      }
-      x = 1;
-      sts = show_thread_byhandle (h_output, h_error, h_thread, &showopts);
-      oz_sys_handle_release (PSL$C_KERNEL, h_thread);
-      if (sts != SS$_NORMAL) break;
-      continue;
-    }
-
-    /* Objaddr - show objects kernel memory address */
-
-    if (strcmp (argv[i], "-objaddr") == 0) {
-      showopts |= SHOWOPT_OBJADDR;
-      continue;
-    }
-
-    /* Security */
-
-    if (strcmp (argv[i], "-security") == 0) {
-      showopts |= SHOWOPT_SECURITY;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is a thread logical name */
-
-    x = 1;
-    sts = show_thread_bylogical (h_output, h_error, argv[i], &showopts);
-    if (sts != SS$_NORMAL) break;
-  }
-
-  if (x == 0) sts = show_thread_bylogical (h_output, h_error, LASTHREADLNM, &showopts);
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display thread info given logical name				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_thread_bylogical (unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts)
-
-{
-  unsigned long sts;
-  unsigned long h_thread;
-
-  sts = logname_getobj (logical, OZ_OBJTYPE_UNKNOWN, &h_thread);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting thread logical %s\n", sts, logical);
-  else {
-    sts = show_thread_byhandle (h_output, h_error, h_thread, showopts);
-    oz_sys_handle_release (PSL$C_KERNEL, h_thread);
-  }
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display info for a thread given its handle				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_thread_byhandle (unsigned long h_output, unsigned long h_error, unsigned long h_thread, unsigned long *showopts)
-
-{
-  char state[16];
-  unsigned long h_event;
-  unsigned long t_id;
-  unsigned long datelongs[OZ_DATELONG_ELEMENTS], index, len, sts;
-
-  char t_name[OZ_THREAD_NAMESIZE];
-  signed long t_refcount;
-  unsigned long long t_tis_com, t_tis_ini, t_tis_run, t_tis_wev, t_tis_zom;
-  unsigned char t_state;
-  unsigned long t_basepri, t_curprio;
-  void *t_objaddr;
-
-  struct { unsigned long long bin;
-           char str[16];
-         } t_tis[OZ_THREAD_STATE_MAX];
-
-  char e_name[OZ_EVENT_NAMESIZE];
-  signed long e_value;
-
-  static const unsigned long thread_wev_codes[] = { JPI$M_FILL1, JPI$M_FILL1, 
-                                                     JPI$M_FILL1, JPI$M_FILL1 };
-
-  unsigned long items[] = { 
-	JPI$M_FILL1, sizeof t_refcount, &t_refcount, NULL, 
-	JPI$_STATE,    sizeof t_state,    &t_state,    NULL, 
-	JPI$M_FILL1,  sizeof t_tis[SCH$C_CUR].bin, &(t_tis[SCH$C_CUR].bin), NULL, 
-	JPI$M_FILL1,  sizeof t_tis[SCH$C_COM].bin, &(t_tis[SCH$C_COM].bin), NULL, 
-	JPI$M_FILL1,  sizeof t_tis[SCH$C_LEF].bin, &(t_tis[SCH$C_LEF].bin), NULL, 
-#if 0
-	JPI$M_FILL1,  sizeof t_tis[OZ_THREAD_STATE_ZOM].bin, &(t_tis[OZ_THREAD_STATE_ZOM].bin), NULL, 
-	JPI$M_FILL1,  sizeof t_tis[OZ_THREAD_STATE_INI].bin, &(t_tis[OZ_THREAD_STATE_INI].bin), NULL, 
-#endif
-	JPI$_PID,       sizeof t_id,       &t_id,       NULL, 
-	JPI$_PRCNAM,     sizeof t_name,      t_name,     NULL, 
-	JPI$_PRI,  sizeof t_curprio,  &t_curprio,  NULL, 
-	JPI$_PRIB,  sizeof t_basepri,  &t_basepri,  NULL, 
-	JPI$M_FILL1,         sizeof t_objaddr,  &t_objaddr,  NULL };
-
-  unsigned long thread_wev_item = { 0, sizeof h_event, &h_event, NULL };
-  unsigned long event_items[] = {
-	JPI$M_FILL1,  sizeof e_name,   e_name,  NULL, 
-	JPI$M_FILL1, sizeof e_value, &e_value, NULL };
-
-  sts = oz_sys_handle_getinfo (h_thread, sizeof items / sizeof *items, items, &index);
-
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting thread info [%u]\n", sts, index);
-  else {
-
-    /* If we haven't shown the thread header, show it now */
-
-    if (!(*showopts & SHOWNHDR_THREAD)) {
-      *showopts |= SHOWNHDR_THREAD;
-      if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "          ");
-      fprintf (h_output, "T        refc  state       tis_run       tis_com       tis_wev       tis_zom  curprio/basepri  threadid  name\n");
-    }
-
-    /* Convert state number to equivalent string */
-
-    switch (t_state) {
-      case SCH$C_CUR: { strcpy (state, "RUN"); break; }
-      case SCH$C_COM: { strcpy (state, "COM"); break; }
-      case SCH$C_LEF: { strcpy (state, "WEV"); break; }
-#if 0
-      case OZ_THREAD_STATE_INI: { strcpy (state, "INI"); break; }
-      case OZ_THREAD_STATE_ZOM: { strcpy (state, "ZOM"); break; }
-#endif
-      default: { snprintf (state, sizeof state, "%3d", t_state); };
-    }
-
-    /* Convert time-in-state values to nice strings that fit in 12 columns */
-
-    for (index = 0; index <= SCH$C_CUR; index ++) {
-      oz_sys_datebin_decode (t_tis[index].bin, datelongs);
-
-      /* If there are any number of days, put them in at beginning */
-
-      len = 0;
-      if (datelongs[OZ_DATELONG_DAYNUMBER] > 0) {
-        oz_hw_itoa (datelongs[OZ_DATELONG_DAYNUMBER], sizeof t_tis[index].str, t_tis[index].str);
-        len = strlen (t_tis[index].str);
-      }
-
-      /* If we put in days and there is room for :hh, or if we didn't put in days, put hours in */
-
-      if (((len != 0) && (len <= 9)) || (len == 0)) {
-        if (len != 0) t_tis[index].str[len++] = '@';
-        t_tis[index].str[len++] = (datelongs[OZ_DATELONG_SECOND] / 36000) + '0';
-        datelongs[OZ_DATELONG_SECOND] %= 36000;
-        t_tis[index].str[len++] = (datelongs[OZ_DATELONG_SECOND] /  3600) + '0';
-        datelongs[OZ_DATELONG_SECOND] %=  3600;
-      }
-
-      /* If we put in hours and there is room for :mm, or if we didn't put in hours, put minutes in */
-
-      if (((len != 0) && (len <= 9)) || (len == 0)) {
-        if (len != 0) t_tis[index].str[len++] = ':';
-        t_tis[index].str[len++] = (datelongs[OZ_DATELONG_SECOND] / 600) + '0';
-        datelongs[OZ_DATELONG_SECOND] %= 600;
-        t_tis[index].str[len++] = (datelongs[OZ_DATELONG_SECOND] /  60) + '0';
-        datelongs[OZ_DATELONG_SECOND] %=  60;
-      }
-
-      /* If we put in minutes and there is room for :ss, or if we didn't put in minutes, put in seconds */
-      /* Then follow it up with up to three digits of .fff if there is room                             */
-
-      if (((len != 0) && (len <= 9)) || (len == 0)) {
-        if (len != 0) t_tis[index].str[len++] = ':';
-        if ((len != 0) || (datelongs[OZ_DATELONG_SECOND] >= 10)) {
-          t_tis[index].str[len++] = (datelongs[OZ_DATELONG_SECOND] / 10) + '0';
-          datelongs[OZ_DATELONG_SECOND] %= 10;
-        }
-        t_tis[index].str[len++] = datelongs[OZ_DATELONG_SECOND] + '0';
-        if (len <= 10) {
-          t_tis[index].str[len++] = '.';
-          while ((len < 12) && (t_tis[index].str[len-4] != '.')) {
-#if OZ_TIMER_RESOLUTION > 400000000
-  error : code assumes OZ_TIMER_RESOLUTION * 10 fits in a unsigned long
-#endif
-            datelongs[OZ_DATELONG_FRACTION] *= 10;
-            t_tis[index].str[len++] = (datelongs[OZ_DATELONG_FRACTION] / OZ_TIMER_RESOLUTION) + '0';
-            datelongs[OZ_DATELONG_FRACTION] %= OZ_TIMER_RESOLUTION;
-          }
-        }
-      }
-      t_tis[index].str[len] = 0;
-    }
-
-    /* Display thread detail line */
-
-    if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "%8x: ", t_objaddr);
-    fprintf (h_output, "t        %4d  %5s  %-12s  %-12s  %-12s  %-12s  %7u/%-7u  %8u  %s\n", 
-                         t_refcount, state, t_tis[SCH$C_CUR].str, 
-                                            t_tis[SCH$C_COM].str, 
-                                            t_tis[SCH$C_LEF].str, 
-                                            t_tis[SCH$C_LEF].str, t_curprio, t_basepri, t_id, t_name);
-
-    /* If state is WEV, display each event flag's name */
-
-    if (t_state == SCH$C_LEF) {
-      for (index = 0; index < sizeof thread_wev_codes / sizeof thread_wev_codes[0]; index ++) {
-	//        thread_wev_item.code = thread_wev_codes[index];
-        sts = oz_sys_handle_getinfo (h_thread, 1, &thread_wev_item, NULL);
-        if (sts != SS$_NORMAL) {
-          fprintf (h_error, "oz_cli: error %u getting wevent[%u] handle\n", sts, index);
-          break;
-        }
-        if (h_event == 0) break;
-        sts = oz_sys_handle_getinfo (h_event, sizeof event_items / sizeof *event_items, event_items, NULL);
-        oz_sys_handle_release (PSL$C_KERNEL, h_event);
-        if (sts != SS$_NORMAL) {
-          fprintf (h_error, "oz_cli: error %u getting wevent[%u] info\n", sts, index);
-          break;
-        }
-        fprintf (h_output, "%s %s", (index == 0) ? "                (WEV:" : ",", e_name);
-        if (e_value != 0) fprintf (h_output, "=%d", e_value);
-      }
-      if (index != 0) fprintf (h_output, ")\n");
-    }
-
-    /* Maybe display security info */
-
-    if (*showopts & SHOWOPT_SECURITY) {
-      show_secattr (h_output, h_thread, JPI$M_FILL1, 16, "creates:");
-      show_secattr (h_output, h_thread, JPI$M_FILL1,       16, "secattr:");
-      show_thread_seckeys (h_output, h_thread);
-    }
-  }
-
-  return (sts);
-}
-
-static void show_thread_seckeys (unsigned long h_output, unsigned long h_thread)
-
-{
-  char *secattrstr;
-  unsigned char secattrbuf[SECATTRSIZE];
-  unsigned long secattrlen, sts;
-
-  unsigned long item = { JPI$M_FILL1, sizeof secattrbuf, secattrbuf, &secattrlen };
-
-  sts = oz_sys_handle_getinfo (h_thread, 1, &item, NULL);
-  if (sts == SS$_NORMAL) sts = oz_sys_seckeys_bin2str (secattrlen, secattrbuf, secmalloc, NULL, &secattrstr);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_output, "        seckeys:(error %u)\n", sts);
-  } else {
-    fprintf (h_output, "        seckeys:(%s)\n", secattrstr);
-    if (secattrstr != NULL) free (secattrstr);
-  }
-}
-
-/************************************************************************/
-/*									*/
-/*  Show object's security attributes					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	h_output = output channel					*/
-/*	h_object = object's handle					*/
-/*	code     = JPI$M_FILL1?_SECATTR				*/
-/*	prefix_w = prefix string width					*/
-/*	prefix   = prefix string					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	secattrs written to output					*/
-/*									*/
-/************************************************************************/
-
-static void show_secattr (unsigned long h_output, unsigned long h_object, unsigned long secattrcode, int prefix_w, const char *prefix)
-
-{
-  char *secattrstr;
-  unsigned char secattrbuf[SECATTRSIZE];
-  unsigned long secattrlen, sts;
-
-  unsigned long item = { secattrcode, sizeof secattrbuf, secattrbuf, &secattrlen };
-
-  sts = oz_sys_handle_getinfo (h_object, 1, &item, NULL);
-  if (sts == SS$_NORMAL) sts = oz_sys_secattr_bin2str (secattrlen, secattrbuf, NULL, secmalloc, NULL, &secattrstr);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_output, "%*.*s(error %u)\n", prefix_w, prefix_w, prefix, sts);
-  } else {
-    fprintf (h_output, "%*.*s(%s)\n", prefix_w, prefix_w, prefix, secattrstr);
-    if (secattrstr != NULL) free (secattrstr);
-  }
-}
-
-/* Alloc memory for security structs */
-
-static void *secmalloc (void *dummy, unsigned long osize, void *obuff, unsigned long nsize)
-
-{
-  void *nbuff;
-
-  nbuff = NULL;
-  if (nsize != 0) {
-    nbuff = malloc (nsize);
-    memcpy (nbuff, obuff, osize);
-  }
-  if (obuff != NULL) free (obuff);
-  return (nbuff);
-}
-
-/************************************************************************/
-/*									*/
-/*	show user [<user_logical_name> ...]				*/
-/*									*/
-/*		-jobs							*/
-/*		-processes						*/
-/*		-threads						*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_show_user (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  int i, x;
-  unsigned long sts, showopts;
-
-  x = 0;
-  showopts = 0;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Jobs - display job information for the user */
-
-    if (strcmp (argv[i], "-jobs") == 0) {
-      showopts |= SHOWOPT_USER_JOBS;
-      continue;
-    }
-
-    /* Objaddr - show objects kernel memory address */
-
-    if (strcmp (argv[i], "-objaddr") == 0) {
-      showopts |= SHOWOPT_OBJADDR;
-      continue;
-    }
-
-    /* Processes - display process information for the job */
-
-    if (strcmp (argv[i], "-processes") == 0) {
-      showopts |= SHOWOPT_USER_PROCS;
-      continue;
-    }
-
-    /* Security */
-
-    if (strcmp (argv[i], "-security") == 0) {
-      showopts |= SHOWOPT_SECURITY;
-      continue;
-    }
-
-    /* Threads - display thread information for the process */
-
-    if (strcmp (argv[i], "-threads") == 0) {
-      showopts |= SHOWOPT_USER_THREADS;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is a user logical name */
-
-    x = 1;
-    sts = show_user_bylogical (h_output, h_error, argv[i], &showopts);
-    if (sts != SS$_NORMAL) break;
-  }
-
-  if (x == 0) sts = show_user_bylogical (h_output, h_error, "OZ_THIS_USER", &showopts);
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display user info given logical name				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_user_bylogical (unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts)
-
-{
-  unsigned long sts;
-  unsigned long h_user;
-
-  sts = logname_getobj (logical, OZ_OBJTYPE_UNKNOWN, &h_user);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting user logical %s\n", sts, logical);
-  else {
-    sts = show_user_byhandle (h_output, h_error, h_user, showopts);
-    oz_sys_handle_release (PSL$C_KERNEL, h_user);
-  }
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Display info for a user given its handle				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long show_user_byhandle (unsigned long h_output, unsigned long h_error, unsigned long h_user, unsigned long *showopts)
-
-{
-  unsigned long index, sts;
-  unsigned long h_lastjob, h_nextjob;
-
-  char u_name[OZ_USERNAME_MAX], u_quota[256];
-  signed long u_refcount;
-  unsigned long u_jobcount;
-  void *u_objaddr;
-
-  unsigned long items[] = { 
-#if 0
-	JPI$M_FILL1,  sizeof u_refcount, &u_refcount, NULL, 
-	JPI$M_FILL1,  sizeof u_jobcount, &u_jobcount, NULL, 
-#endif
-	JPI$_USERNAME,      sizeof u_name,      u_name,     NULL, 
-#if 0
-	JPI$M_FILL1, sizeof u_quota,     u_quota,    NULL, 
-	JPI$M_FILL1,        sizeof u_objaddr,  &u_objaddr,  NULL
-#endif
-	0, 0, 0, 0};
-
-  unsigned long j_item = { JPI$M_FILL1, sizeof h_nextjob, &h_nextjob, NULL };
-
-  sts = oz_sys_handle_getinfo (h_user, sizeof items / sizeof *items, items, &index);
-
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting user info [%u]\n", sts, index);
-  else {
-    if (!(*showopts & SHOWNHDR_USER)) {
-      *showopts |= SHOWNHDR_USER;
-      if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "          ");
-      fprintf (h_output, "U  refc  jobs  name\n");
-    }
-    if (*showopts & SHOWOPT_OBJADDR) fprintf (h_output, "%8x: ", u_objaddr);
-    fprintf (h_output, "u  %4d  %4u  %4s\n", u_refcount, u_jobcount, u_name);
-    fprintf (h_output, "    quota:(%s)\n", u_quota);
-    if (*showopts & SHOWOPT_SECURITY) show_secattr (h_output, h_user, JPI$M_FILL1, 10, "  secattr:");
-    if (*showopts & SHOWOPT_USER_JOBS) {
-      sts = oz_sys_handle_getinfo (h_user, 1, &j_item, &index);
-      //      j_item.code = JPI$M_FILL1;
-      while ((sts == SS$_NORMAL) && (h_nextjob != 0)) {
-        h_lastjob = h_nextjob;
-        sts = show_job_byhandle (h_output, h_error, h_nextjob, showopts);
-        if (sts == SS$_NORMAL) sts = oz_sys_handle_getinfo (h_lastjob, 1, &j_item, &index);
-        oz_sys_handle_release (PSL$C_KERNEL, h_lastjob);
-      }
-      if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u getting first/next job for user\n", sts);
-    }
-  }
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	show volume <device_name>					*/
-/*									*/
-/************************************************************************/
-
-static char *quadmemsize (unsigned long long size, char *buff);
-
-static unsigned long int_show_volume (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  char freebytesstr[32], totalbytesstr[32];
-  int i;
-  unsigned long h_iochan;
-  //  OZ_IO_fs_getinfo3 fs_getinfo3;
-  unsigned long clusterbytes, sts;
-  unsigned long long freebytes, totalbytes;
-
-#if 0
-  for (i = 0; i < argc; i ++) {
-
-    sts = sys$assign( argv[i], &h_iochan,PSL$C_KERNEL,0,0);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u assigning channel to %s\n", sts, argv[i]);
-      return (sts);
-    }
-
-    memset (&fs_getinfo3, 0, sizeof fs_getinfo3);
-    sts = oz_sys_io (PSL$C_KERNEL, h_iochan, 0, OZ_IO_FS_GETINFO3, sizeof fs_getinfo3, &fs_getinfo3);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u getting info about %s\n", sts, argv[i]);
-      return (sts);
-    }
-
-    clusterbytes = fs_getinfo3.clusterfactor * fs_getinfo3.blocksize;
-    freebytes    = fs_getinfo3.clustersfree;
-    freebytes   *= clusterbytes;
-    totalbytes   = fs_getinfo3.clustertotal;
-    totalbytes  *= clusterbytes;
-    fprintf (h_output, "       Blocksize: %u bytes\n"
-                                   "   Clusterfactor: %u blocks, %u bytes\n"
-                                   "    Clustersfree: %u, %u blocks, %s\n"
-                                   "    Clustertotal: %u, %u blocks, %s\n", 
-                                   fs_getinfo3.blocksize, 
-                                   fs_getinfo3.clusterfactor, clusterbytes, 
-                                   fs_getinfo3.clustersfree,  fs_getinfo3.clustersfree  * fs_getinfo3.clusterfactor, quadmemsize (freebytes,  freebytesstr), 
-                                   fs_getinfo3.clustertotal,  fs_getinfo3.clustertotal  * fs_getinfo3.clusterfactor, quadmemsize (totalbytes, totalbytesstr));
-    if (fs_getinfo3.nincache != 0) {
-      fprintf (h_output, "        In cache: %u page(s)\n"
-                                     "           Dirty: %u page(s)\n", 
-                                     fs_getinfo3.nincache, 
-                                     fs_getinfo3.ndirties);
-    }
-    if (fs_getinfo3.avgwriterate != 0) {
-      fprintf (h_output, "  Avg write rate: %u page(s)/sec\n", fs_getinfo3.avgwriterate);
-    }
-    if (fs_getinfo3.dirty_interval != 0) {
-      fprintf (h_output, "  Dirty interval: %#t\n", fs_getinfo3.dirty_interval);
-    }
-    fprintf (h_output, "     Mount flags:");
-    if (fs_getinfo3.mountflags == 0)  fprintf (h_output, " (none)\n");
-    else {
-      if (fs_getinfo3.mountflags & OZ_FS_MOUNTFLAG_NOCACHE)   fprintf (h_output, " -nocache");
-      if (fs_getinfo3.mountflags & OZ_FS_MOUNTFLAG_READONLY)  fprintf (h_output, " -readonly");
-      if (fs_getinfo3.mountflags & OZ_FS_MOUNTFLAG_WRITETHRU) fprintf (h_output, " -writethru");
-      fprintf (h_output, "\n");
-    }
-
-    oz_sys_handle_release (PSL$C_KERNEL, h_iochan);
-  }
-#endif
-
-  return (SS$_NORMAL);
-}
-
-static char *quadmemsize (unsigned long long size, char *buff)
-
-{
-  unsigned long long tenths;
-
-  if (size >= ((unsigned long long)10) << 30) {
-    tenths   = size & 0x3FFFFFFF;
-    tenths  *= 10;
-    tenths >>= 30;
-    snprintf (buff, 32, "%u.%u Gigabytes", (unsigned long)(size >> 30), (unsigned long)tenths);
-  } else if (size >= 100*1024*1024) {
-    snprintf (buff, 32, "%u Megabytes", (unsigned long)(size >> 20));
-  } else {
-    snprintf (buff, 32, "%u Kilobytes", (unsigned long)(size >> 10));
-  }
-  return (buff);
-}
-
-/************************************************************************/
-/*									*/
-/*	suspend thread [<logical_name>]					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_suspend_thread (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *logical_name;
-  int i, usedup;
-  unsigned long sts;
-  unsigned long h_thread;
-  unsigned long thread_id;
-
-  logical_name = LASTHREADLNM;
-  thread_id = 0;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Id - thread id number */
-
-    if (strcmp (argv[i], "-id") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing thread id number after -id\n");
-        return (SS$_IVPARAM);
-      }
-      thread_id = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad thread id number %s after -id\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      logical_name = NULL;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is the logical name */
-
-    logical_name = argv[i];
-    thread_id    = 0;
-  }
-
-  /* Get handle to thread from logical name or id number */
-
-  if (thread_id != 0) {
-    sts = oz_sys_thread_getbyid (thread_id, &h_thread);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u getting handle to thread id %u\n", sts, thread_id);
-      return (sts);
-    }
-  } else {
-    sts = logname_getobj (logical_name, OZ_OBJTYPE_THREAD, &h_thread);
-    if (sts != SS$_NORMAL) return (sts);
-  }
-
-  /* Suspend the thread */
-
-  sts = sys$suspnd(h_thread,0,0);
-  if ((sts != SS$_WASCLR) && (sts != SS$_WASSET)) {
-    fprintf (h_error, "oz_cli: error %u suspending thread\n", sts);
-  }
-
-  /* Release the handle */
-
-  oz_sys_handle_release (PSL$C_KERNEL, h_thread);
-
-  /* Anyway, return composite status */
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	wait event <logical_name> ...					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_wait_event (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *logical_name;
-  int i, nevents;
-  unsigned long sts;
-  unsigned long *h_events;
-
-  nevents  = 0;
-  h_events = malloc (argc * sizeof *h_events);
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - it is a logical name - add corresponding event flag to list */
-
-    logical_name = argv[i];
-    sts = logname_getobj (logical_name, OZ_OBJTYPE_EVENT, h_events + nevents);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u looking up event logical %s\n", sts, logical_name);
-      goto rtn;
-    }
-    nevents ++;
-  }
-
-  if (nevents == 0) {
-    fprintf (h_error, "oz_cli: missing logical name\n");
-    return (SS$_IVPARAM);
-  }
-
-  /* Wait for any one of them to be set (or for control-Y) */
-
-  sts = wait_events (nevents, h_events);
-
-  /* Release all handles and return final status */
-
-rtn:
-  while (nevents > 0) oz_sys_handle_release (PSL$C_KERNEL, h_events[--nevents]);
-  free (h_events);
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	wait mutex <logical_name>					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_wait_mutex (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-#if 0
-  unsigned long sts;
-  unsigned long h_iochan;
-
-  if (argc != 1) {
-    fprintf (h_error, "oz_cli: missing mutex iochan logical name\n");
-    return (SS$_IVPARAM);
-  }
-
-  sts = logname_getobj (argv[0], OZ_OBJTYPE_IOCHAN, &h_iochan);
-  if (sts != SS$_NORMAL) return (sts);
-
-  sts = oz_sys_io (PSL$C_KERNEL, h_iochan, 0, OZ_IO_MUTEX_UNBLOCK, 0, NULL);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u waiting for mutex %s\n", sts, argv[0]);
-
-  oz_sys_handle_release (PSL$C_KERNEL, h_iochan);
-
-  return (sts);
-#endif
-}
-
-/************************************************************************/
-/*									*/
-/*	wait thread [<logical_name>]					*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_wait_thread (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  const char *logical_name;
-  int i, usedup;
-  unsigned long sts;
-  unsigned long h_thread;
-  unsigned long thread_id;
-
-  logical_name = LASTHREADLNM;
-  thread_id    = 0;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Id - thread id number */
-
-    if (strcmp (argv[i], "-id") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing thread id number after -id\n");
-        return (SS$_IVPARAM);
-      }
-      thread_id = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad thread id number %s after -id\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      logical_name = NULL;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is the logical name */
-
-    logical_name = argv[i];
-    thread_id    = 0;
-  }
-
-  /* Get handle to thread from logical name.  If no logical name given, use last thread's handle. */
-
-  if (thread_id != 0) {
-    sts = oz_sys_thread_getbyid (thread_id, &h_thread);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_error, "oz_cli: error %u getting handle to thread id %u\n", sts, thread_id);
-      return (sts);
-    }
-  } else {
-    sts = logname_getobj (logical_name, OZ_OBJTYPE_THREAD, &h_thread);
-    if (sts != SS$_NORMAL) return (sts);
-  }
-
-  /* Wait for thread to exit (or for control-Y) */
-
-  sts = wait_thread (h_error, h_thread);
-
-  /* Release the handle */
-
-  oz_sys_handle_release (PSL$C_KERNEL, h_thread);
-
-  /* Anyway, return composite status */
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Wait for an thread to exit (also enable control-Y during wait)	*/
-/*									*/
-/************************************************************************/
-
-static unsigned long wait_thread (unsigned long h_error, unsigned long h_thread)
-
-{
-  unsigned long exitst, sts, sts2;
-  unsigned long h_exit;
-
-  /* Get exit event flag associated with thread */
-
-  sts = oz_sys_thread_getexitevent (h_thread, &h_exit);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u getting thread exit event flag\n", sts);
-    return (sts);
-  }
-
-  /* If handle is zero, it means the thread has exited (or it didn't have an exit event flag to begin with) */
-
-  if (h_exit == 0) {
-    sts = oz_sys_thread_getexitsts (h_thread, &exitst);
-    if (sts == SS$_NORMAL) sts = exitst;
-    else fprintf (h_error, "oz_cli: error %u checking for thread exited\n", sts);
-    return (sts);
-  }
-
-  /* Resume the thread before attempting to wait for it */
-
-  sts = sys$resume(h_thread,0);
-  if ((sts != SS$_WASSET) && (sts != SS$_WASCLR)) {
-    fprintf (h_error, "oz_cli: error %u resuming thread\n", sts);
-    oz_sys_handle_release (PSL$C_KERNEL, h_exit);
-    return (sts);
-  }
-
-  /* Wait for the thread to exit or for control-Y */
-
-  do {
-    sts = wait_events (1, &h_exit);				/* wait for it to exit */
-    if (sts != SS$_NORMAL) break;				/* break out if error or control-Y */
-    oz_sys_event_set (PSL$C_KERNEL, h_exit, 0, NULL);	/* clear the exit event flag before we check the status */
-    sts = oz_sys_thread_getexitsts (h_thread, &exitst);		/* see if thread has exited by trying to get its status */
-    if ((sts != SS$_NORMAL) && (sts != SS$_WASCLR)) fprintf (h_error, "oz_cli: error %u checking for thread exited\n", sts);
-  } while (sts == SS$_WASCLR);				/* keep going if thread still running */
-  if (sts == SS$_NORMAL) sts = exitst;				/* if thread has exited, return its exit status */
-  else {
-    sts2 = sys$suspnd(h_thread,0,0);			/* not exited, suspend it */
-    if (sts2 == SS$_WASCLR) fprintf (h_error, "oz_cli: thread is now suspended (abort thread, resume thread, wait thread)\n");
-    else if (sts2 == SS$_WASSET) fprintf (h_error, "oz_cli: thread was already suspended\n");
-    else fprintf (h_error, "oz_cli: error %u suspending thread\n", sts2);
-  }
-
-  /* Release event flag handle and return status */
-
-  oz_sys_handle_release (PSL$C_KERNEL, h_exit);
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*	wait until <datetime>						*/
-/*									*/
-/************************************************************************/
-
-static unsigned long int_wait_until (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
-{
-  int rc;
-  unsigned long sts;
-  unsigned long long now;
-  unsigned long long timer_waituntil;
-
-  if (argc != 1) {
-    fprintf (h_error, "oz_cli: missing datetime\n");
-    return (SS$_IVPARAM);
-  }
-
-  sys$gettim(&now);
-  //  now = oz_sys_datebin_tzconv (now, OZ_DATEBIN_TZCONV_UTC2LCL, 0);
-  rc  = sys$bintim ( argv[0], &timer_waituntil);
-  if (rc == 0) {
-    fprintf (h_error, "oz_cli: invalid datetime %s\n", argv[0]);
-    return (SS$_BADPARAM);
-  }
-
-  //  if (rc < 0) OZ_HW_DATEBIN_ADD (timer_waituntil, timer_waituntil, now);
-
-  //  timer_waituntil = oz_sys_datebin_tzconv (timer_waituntil, OZ_DATEBIN_TZCONV_LCL2UTC, 0);
-#if 0
-  sts = oz_sys_io (PSL$C_KERNEL, h_timer, 0, OZ_IO_TIMER_WAITUNTIL, sizeof timer_waituntil, &timer_waituntil);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u waiting for timer %s\n", sts, argv[0]);
-#endif
-
-  return (sts);
-}
-
-/************************************************************************/
-/*									*/
-/*  Wait for an event flag to be set.  Enable control-Y during wait.	*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	nevents  = number of events in h_events				*/
-/*	h_events = event flag handle array				*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	wait_events = SS$_NORMAL : event flag is now set		*/
-/*	         SS$_ABORTEDBYCLI : control-Y was pressed		*/
-/*	                    else : error status				*/
-/*									*/
-/************************************************************************/
-
-static unsigned long wait_events (unsigned long nevents, unsigned long *h_events)
-
-{
-  signed long ef;
-  unsigned long i;
-  unsigned long sts;
-
-  while (1) {
-    sts = oz_sys_event_nwait (PSL$C_KERNEL, nevents, h_events, 0);	/* wait for given event flag or any ast */
-    if ((sts != SS$_WASSET) && (sts != SS$_WASCLR) && (sts != SS$_NORMAL)) return (sts);
-    for (i = 0; i < nevents; i ++) {					/* check the given event flags */
-      oz_sys_event_inc (PSL$C_KERNEL, h_events[i], 0, &ef);
-      if (ef > 0) return (SS$_NORMAL);					/* successful if any one of them is set */
-    }
-    if (ctrly_hit) return (SS$_ABORT);				/* see if ctrl-Y was pressed */
-  }
-}
-#endif
 
 static unsigned long int_stop (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
