@@ -492,7 +492,7 @@ unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],s
 	  ucb->ucb$l_vcb = vcb;
 	  vcb->vcb$l_rvt = ucb; // just single volume so far
 	  vcbdev->vcb$l_free=home.s_free_blocks_count;
-	  printk("Freespace is %d\n",vcbdev->vcb$l_free);
+	  printk("%%MOUNT-I-FREE, Freespace is %d\n",vcbdev->vcb$l_free);
 	}
       }
     }
