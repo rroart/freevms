@@ -970,6 +970,9 @@ void __init mount_root(void)
 	void *data;
 #endif
 	root_mountflags |= MS_VERBOSE;
+#ifdef CONFIG_VMS
+	root_mountflags&=~MS_RDONLY;
+#endif
 
 #ifdef CONFIG_ROOT_NFS
 	if (MAJOR(ROOT_DEV) != UNNAMED_MAJOR)
