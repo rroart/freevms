@@ -130,11 +130,11 @@ void cpu_idle (void)
 {
 	/* endless idle loop with no priority at all */
 	init_idle();
-	printk("id %x\n",current->pid);	
+	printk("id %x\n",current->pcb$l_pid);	
 	printk("idle %x %x %x\n",done_init_idle,current,&init_task);
   printk("pid 0 here again%x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl); 
 	{ int i; for(i=0;i<10000000;i++) ; }
-	if (current->pid==0) { /* just to be sure */
+	if (current->pcb$l_pid==0) { /* just to be sure */
 	  	  current->pcb$b_prib  = 24;
 	  	  current->pcb$b_pri   = 24;
 	  current->pcb$b_prib  = 31;
@@ -475,7 +475,7 @@ void show_regs(struct pt_regs * regs)
 	unsigned long cr0 = 0L, cr2 = 0L, cr3 = 0L, cr4 = 0L;
 
 	printk(KERN_EMERG "\n");
-	printk(KERN_EMERG "Pid: %d, comm: %20s\n", current->pid, current->pcb$t_lname);
+	printk(KERN_EMERG "Pid: %d, comm: %20s\n", current->pcb$l_pid, current->pcb$t_lname);
 	printk(KERN_EMERG "EIP: %04x:[<%08lx>] CPU: %d",0xffff & regs->xcs,regs->eip, smp_processor_id());
 	if (regs->xcs & 3)
 		printk(KERN_EMERG " ESP: %04x:%08lx",0xffff & regs->xss,regs->esp);
