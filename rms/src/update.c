@@ -340,7 +340,7 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
                         if (sts & 1) {
                             *work_ptr |= 1 << bit_no;
                             modify_flag = 1;
-                            if ((*headbuff)->fh2$w_checksum != 0 || (*headbuff)->fh2$w_fid.fid$w_num != 0 ||
+                            if ((*headbuff)->fh2$w_checksum != 0 && (*headbuff)->fh2$w_fid.fid$w_num != 0 &&
                                 (VMSLONG((*headbuff)->fh2$l_filechar) & FH2$M_MARKDEL) == 0) {
                                 sts = deaccesschunk(0,0,0);
 				writechunk(getidxfcb(vcbdev),idxblk,*headbuff);
@@ -429,6 +429,7 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
       head->fh2$w_checksum = VMSWORD(check);
     }
     writechunk(getidxfcb(vcbdev),*idxblk,head);
+    *rethead=head;
     return 1;
 }
 
@@ -440,13 +441,14 @@ unsigned f11b_create(struct _vcb *vcb,struct _irp * i)
   struct dsc$descriptor * filedsc=i->irp$l_qio_p2;
   struct _fibdef * fib=fibdsc->dsc$a_pointer;
   struct _fiddef * fid=&fib->fib$w_fid_num;
+  struct _fiddef * did=&fib->fib$w_did_num;
   char *filename=filedsc->dsc$a_pointer;
   struct _fh2 *head;
   unsigned idxblk;
   unsigned sts;
   struct _fcb *fcb;
   struct _iosb iosb;
-  sts = update_addhead(vcb,filename,fib,0,fid,&head,&idxblk);
+  sts = update_addhead(vcb,filename,did,0,fid,&head,&idxblk);
   if (!(sts & 1)) return sts;
   //sts = deaccesshead(head,idxblk);
   //    sts = writehead(getidxfcb(vcb),head);
@@ -492,6 +494,12 @@ unsigned f11b_create(struct _vcb *vcb,struct _irp * i)
     newfcb=f11b_search_fcb(xqp->current_vcb,&fib->fib$w_fid_num);
     sts = f11b_extend(newfcb,fib->fib$l_exsz,0);
   }
+
+  struct _fatdef * fat = ((long *)i->irp$l_qio_p5)[1];
+  fat->fat$l_efblk = VMSSWAP(1); // so this won't be changed to 0
+
+  struct _fcb * newfcb=f11b_search_fcb(xqp->current_vcb,&fib->fib$w_fid_num);
+  f11b_write_attrib(newfcb, i->irp$l_qio_p5);
 
   printk("(%d,%d,%d) %d\n",fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn,sts);
   return sts;
@@ -666,13 +674,22 @@ unsigned f11b_delete(struct _vcb * vcb,struct _irp * irp)
   unsigned short *reslen=irp->irp$l_qio_p3;
   struct dsc$descriptor * resdsc=irp->irp$l_qio_p4;
   struct _fibdef * fib=fibdsc->dsc$a_pointer;
+  struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
   int sts=0;
   struct _fh2 *  head;
   unsigned action=1;
 
+  if (xqp->primary_fcb) {
+    struct _fcb * fcb = xqp->primary_fcb;
+    if (fid->fid$w_num!=fcb->fcb$w_fid_num)
+      xqp->primary_fcb=0; //f11b_search_fcb(vcb,fid);
+  }
+
   if (fib->fib$w_did_num) {
     struct _fh2 * head;
     struct _fcb * fcb=xqp->primary_fcb;
+    if (fcb==0)
+      fcb=f11b_search_fcb(vcb,&fib->fib$w_did_num);
     head = f11b_read_header (vcb, 0, fcb, &iosb);  
     sts=iosb.iosb$w_status;
     if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
@@ -685,6 +702,8 @@ unsigned f11b_delete(struct _vcb * vcb,struct _irp * irp)
   }
 
   if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
+
+  fcb=f11b_search_fcb(vcb,fid);
 
   if (sts & 1) {
     head = f11b_read_header (xqp->current_vcb, fib, 0, &iosb);  
