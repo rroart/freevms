@@ -46,6 +46,7 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 	int				i;
 	int				length;
 	int				number_of_targets;
+	int				status;
 	int				string_flag;
 
 	unsigned char	*ptr1;
@@ -92,6 +93,7 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 
 	current_command = commands;
 	number_of_targets = 0;
+	first_target = NULL;
 
 	while(current_command != NULL)
 	{
@@ -117,10 +119,36 @@ parsing(unsigned char *line, dcl$command *commands, dcl$env *env,
 
 	if (number_of_targets == 1)
 	{
-		printf("Found !\n");
+		if ((*first_target).type == DCL$VERB)
+		{
+			status = (*first_target).function(ptr2, env);
+		}
+		else
+		{
+			(*env).last_error = string;
+			return(DCL$WIVVERB);
+		}
+	}
+	else if (number_of_targets > 1)
+	{
+		(*env).last_error = string;
+		return(DCL$WABVERB);
+	}
+	else
+	{
+		(*env).last_error = string;
+		return(DCL$WIVVERB);
 	}
 
 	free(string);
 
-	return(DCL$SUCCESS);
+	/*
+	 *   %DCL-W-IVKEYW, unrecognized keyword - check validity and spelling
+	 *    \DLGJDLFJG\
+	 *    %DCL-W-IVQUAL, unrecognized qualifier - check validity, spelling, and placement
+	 *     \DSFLGKJDFLGJ\
+	 *
+	 */
+
+	return(status);
 }

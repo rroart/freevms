@@ -39,15 +39,39 @@
 int
 loop(dcl$command *commands, dcl$env *env)
 {
+	int						status;
+
 	unsigned char			*command_line;
 
 	while((*env).end_flag == 0)
 	{
 		command_line = read_command(env);
 
-		if (parsing(command_line, commands, env, DCL$VERB) != DCL$SUCCESS)
+		if ((status = parsing(command_line, commands, env, DCL$VERB))
+				== DCL$FAILURE)
 		{
 			return(DCL$FAILURE);
+		}
+
+		switch(status)
+		{
+			case DCL$WABVERB :
+				if (fprintf(stderr, "%%DCL-W-ABVERB, ambiguous command verb - "
+						"supply more characters\n") < 0)
+					return(DCL$FAILURE);
+				if (fprintf(stderr, " \\%s\\\n", (*env).last_error) < 0)
+					return(DCL$FAILURE);
+				free((*env).last_error);
+				break;
+
+			case DCL$WIVVERB :
+				if (fprintf(stderr, "%%DCL-W-IVVERB, unrecognized command "
+						"verb - check validity and spelling\n") < 0)
+					return(DCL$FAILURE);
+				if (fprintf(stderr, " \\%s\\\n", (*env).last_error) < 0)
+					return(DCL$FAILURE);
+				free((*env).last_error);
+				break;
 		}
 	}
 

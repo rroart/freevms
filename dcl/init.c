@@ -47,18 +47,11 @@ int
 commands_init(dcl$command **commands)
 {
 	/*
-	 * VERB
+	 * VERBS
 	 */
 
 	if ((*commands = command_add_on(*commands,
 			"DIRECTORY", "", directory_function, DCL$VERB))
-			== NULL)
-	{
-		return(DCL$FAILURE);
-	}
-
-	if ((*commands = command_add_on(*commands,
-			"LOGIN", "", logout_function, DCL$VERB))
 			== NULL)
 	{
 		return(DCL$FAILURE);
@@ -93,7 +86,7 @@ commands_init(dcl$command **commands)
 	}
 
 	/*
-	 * KEYWORD
+	 * KEYWORDS
 	 */
 
 	if ((*commands = command_add_on(*commands,
@@ -104,7 +97,7 @@ commands_init(dcl$command **commands)
 	}
 
 	/*
-	 * QUALIFIER
+	 * QUALIFIERS
 	 */
 
 	if ((*commands = command_add_on(*commands,
@@ -138,6 +131,7 @@ command_add_on(dcl$command *commands, unsigned char *name,
 		(*new).name = name;
 		(*new).length = strlen(name);
 		(*new).help = help;
+		(*new).type = type;
 		(*new).function = function;
 	}
 	else

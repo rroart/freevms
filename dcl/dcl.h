@@ -45,7 +45,7 @@
 
 /*
 --------------------------------------------------------------------------------
- DCL return values
+  DCL return values
 --------------------------------------------------------------------------------
 */
 
@@ -54,7 +54,22 @@
 
 /*
 --------------------------------------------------------------------------------
- DCL command structure
+  DCL errors
+--------------------------------------------------------------------------------
+*/
+
+//	ambiguous command verb - supply more characters
+#	define		DCL$WABVERB		1
+//	unrecognized command verb - check validity and spelling
+#	define		DCL$WIVVERB		2
+//	unrecognized keyword - check validity and spelling
+#	define		DCL$WIVKEYW		3
+//	unrecognized qualifier - check validity, spelling, and placement
+#	define		DCL$WIVQUAL		4
+
+/*
+--------------------------------------------------------------------------------
+  DCL command structure
 --------------------------------------------------------------------------------
 */
 
@@ -62,21 +77,23 @@
 #	define		DCL$KEYWORD		0x02
 #	define		DCL$QUALIFIER	0x04
 
+	typedef struct dcl_env
+	{
+		int						end_flag;
+		unsigned char			*last_error;
+		unsigned char			*prompt;
+	} dcl$env;
+
 	typedef struct dcl_command
 	{
 		unsigned char			*name;		// static not allocated by malloc()
 		unsigned char			*help;		// static not allocated by malloc()
-		int						(*function)(unsigned char *argument);
+		int						(*function)(unsigned char *argument,
+										dcl$env *env);
 		int						type;
 		int						length;
 		struct dcl_command		*next;
 	} dcl$command;
-
-	typedef struct dcl_env
-	{
-		int						end_flag;
-		unsigned char			*prompt;
-	} dcl$env;
 
 
 /*

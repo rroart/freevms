@@ -40,5 +40,5 @@ int
 logout_function(unsigned char *argument, dcl$env *env)
 {
 	(*env).end_flag = -1;
-	return(0);
+	return(DCL$SUCCESS);
 }
