@@ -168,8 +168,7 @@ ENOSYS = 38
 .previous
 
 #define GET_CURRENT(reg) \
-	movl $-8192, reg; \
-	andl %esp, reg
+	movl ctl$gl_pcb, reg; \
 
 ENTRY(lcall7)
         PUSHPSL
@@ -184,7 +183,7 @@ ENTRY(lcall7)
 	movl %ecx,CS(%esp)	#
 	movl %esp,%ebx
 	pushl %ebx
-	andl $-8192,%ebx	# GET_CURRENT
+	movl ctl$gl_pcb,%ebx	# GET_CURRENT
 	movl exec_domain(%ebx),%edx	# Get the execution domain
 	movl 4(%edx),%edx	# Get the lcall7 handler for the domain
 	pushl $0x7
@@ -206,7 +205,7 @@ ENTRY(lcall27)
 	movl %ecx,CS(%esp)	#
 	movl %esp,%ebx
 	pushl %ebx
-	andl $-8192,%ebx	# GET_CURRENT
+	movl ctl$gl_pcb,%ebx	# GET_CURRENT
 	movl exec_domain(%ebx),%edx	# Get the execution domain
 	movl 4(%edx),%edx	# Get the lcall7 handler for the domain
 	pushl $0x27
