@@ -58,6 +58,7 @@
 #include <ucbdef.h>
 #include <vcdef.h>
 #include <xmdef.h>
+#include <prcpoldef.h>
 
 #include "../../cmuip/ipacp/src/xedrv.h"
 
@@ -92,6 +93,9 @@ struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri);
 static inline void scs_rt_finish_output2(char *buf, int len, char *dst);
 
 #ifdef CONFIG_VMS
+
+#define DRV$MAX_PHYSICAL_BUFSIZE 1600
+#define     MAX_RCV_BUF   64
 
 struct  scs_interface_structure
 {
@@ -745,8 +749,10 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
       ddb=ubd_iodb_vmsinit();
 #endif
 #ifndef __arch_um__
-    if (0==strncmp(devnam,"dqa",3)) 
-      ddb=ide_iodb_vmsinit();
+    if (0==strncmp(devnam,"dqa",3)) {
+      ddb=ide_iodb_vmsinit(1);
+      du_iodb_clu_vmsinit(ddb->ddb$l_ucb);
+    }
 #endif
 #endif
     if (0==strncmp(devnam,"dua",3)) 
@@ -772,6 +778,10 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
 #ifndef __arch_um__
       if (0==strncmp(devnam,"dqa",3)) 
 	ucb = ide_iodbunit_vmsinit(ddb,i,&d);
+      if (0==strncmp(devnam,"dqa",3)) 
+	((struct _mscp_ucb *)ucb)->ucb$w_mscpunit=ucb->ucb$w_unit;
+      if (0==strncmp(devnam,"dqa",3)) 
+	printk("UCB MSCPUNIT %x\n",((struct _mscp_ucb *)ucb)->ucb$w_mscpunit);
 #endif
 #endif
       if (0==strncmp(devnam,"dua",3)) 
@@ -1030,8 +1040,8 @@ scs_startdev ( scs_int2 , setflag , setaddr)
 
 	bzero(Setup,sizeof(struct XE_setup_structure));
 
-	scs_int->sei$rcvhdrs = kmalloc(4*16, GFP_KERNEL);
-	memset(scs_int->sei$rcvhdrs, 0, 4*16);
+	scs_int->sei$rcvhdrs = kmalloc(MAX_RCV_BUF*16, GFP_KERNEL);
+	memset(scs_int->sei$rcvhdrs, 0, MAX_RCV_BUF*16);
 	qhead_init(& scs_int->sei$recv_qhead );
 
 // Build the nasty setup block required by the ethernet device
@@ -1124,9 +1134,6 @@ struct scs_rcv_qb_structure
   unsigned char     scs_rcv$iosb_unused2	;
   unsigned char     scs_rcv$data		;
 };
-
-#define DRV$MAX_PHYSICAL_BUFSIZE 1400
-#define     MAX_RCV_BUF   64
 
 void scs_receive ( int i);
 
