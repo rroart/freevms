@@ -911,12 +911,10 @@ struct _write_log_entry {
   } whis$r_fill_62_;
 } ;
  
-#if !defined(VAXC)
+
 #define whis$w_entflgs whis$r_fill_62_.whis$w_entflgs
 #define whis$v_et_tlib whis$r_fill_62_.whis$r_fill_63_.whis$v_et_tlib
 #define whis$v_et_err whis$r_fill_62_.whis$r_fill_63_.whis$v_et_err
-#endif		
- 
 
 	
 struct _get_unit_name {
