@@ -139,7 +139,7 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **ret
       int chan=0;
       struct dsc$descriptor d;
       d.dsc$w_length=strlen(root_device_name);
-      d.dsc$a_pointer=root_device_name;
+      d.dsc$a_pointer=do_translate(root_device_name);
       sts=exe$assign(&d,&chan,0,0,0);
       dev= ctl$ga_ccb_table[chan].ccb$l_ucb;
       goto end;

@@ -5,6 +5,7 @@
 
 #include<linux/unistd.h>
 #include<linux/linkage.h>
+#include<linux/mm.h>
 
 #include <mytypes.h>
 #include <misc.h>
@@ -15,6 +16,31 @@
 #include "../../rms/src/cache.h"
 #include "../../rms/src/access.h"
 
+static struct {
+  char * from, * to;
+} translate[] = {
+  {"ubd","daa"},
+  {"hda","dqa"},
+  {"hdb","dqb"},
+  {"hdc","dqc"},
+  {"hdd","dqd"},
+  {0,0}
+}
+;
+
+char * do_translate(char * from) {
+  int i;
+  for (i=0;i<5;i++) {
+    if (0==strncmp(from,translate[i].from,3)) {
+      char * c=kmalloc(15,GFP_KERNEL);
+      memcpy(c,translate[i].to,3);
+      memcpy(c+3,from+3,10);
+      return c;
+    }
+  }
+  return from;
+}
+
 asmlinkage int exe$mount(void *itmlst) {
   int i;
   struct item_list_3 *it=itmlst;
@@ -22,7 +48,7 @@ asmlinkage int exe$mount(void *itmlst) {
   char *devs[2],*labs[2];
   int status;
 
-  devs[0]=it[0].bufaddr;
+  devs[0]=do_translate(it[0].bufaddr);
 
   if (it[1].item_code) {
 #ifdef CONFIG_VMS
