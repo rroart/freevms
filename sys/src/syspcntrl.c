@@ -1,7 +1,9 @@
 #include<linux/unistd.h>
 #include<linux/linkage.h>
 #include<linux/sched.h>
+#include<asm/bitops.h>
 #include"../../freevms/starlet/src/starlet.h"
+#include"../../freevms/starlet/src/ssdef.h"
 #include"../../freevms/lib/src/pridef.h"
 #include"../../freevms/lib/src/statedef.h"
 #include"../../freevms/lib/src/evtdef.h"
@@ -16,16 +18,21 @@ asmlinkage int exe$hiber(void) {
   /* spinlock sched */
   struct _pcb * p=current;
   vmslock(&SPIN_SCHED,IPL$_SCHED);
+  
+#if 0
   if (p->pcb$l_sts & PCB$M_WAKEPEN) {
     p->pcb$l_sts&=~PCB$M_WAKEPEN;
-    /* release spin */
-    /* set ipl 0 ? */
-    vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
-    /* cwps stuff not yet */
-    setipl(0);
-    return;
   }
-  p->pcb$l_sts&=~PCB$M_WAKEPEN;
+#endif
+  /* release spin */
+  /* set ipl 0 ? */
+
+  if (test_and_clear_bit(12,&p->pcb$l_sts)) { // PCB$M_WAKEPEN 0x1000 12 bits
+    vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
+    setipl(0);
+    return SS$_NORMAL;
+  }
+  /* cwps stuff not yet */
   return sch$wait(p,sch$gq_hibwq);
 }
 

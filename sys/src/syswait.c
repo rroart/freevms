@@ -1,25 +1,43 @@
 #include <linux/sched.h>
 #include <linux/smp.h>
+#include "../../freevms/lib/src/cebdef.h"
 #include "../../freevms/lib/src/cpudef.h"
+#include "../../freevms/lib/src/ipldef.h"
 #include "../../freevms/starlet/src/ssdef.h"
 #include "../../freevms/sys/src/system_data_cells.h"
+#include "../../freevms/sys/src/internals.h"
 
 int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   struct _pcb * p=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;
   int efncluster=(efn&224)>>5;
   unsigned long * clusteraddr;
   struct _wqh * wq;
-  /* ipl 2*/
+  setipl(IPL$_ASTDEL);
   /* no legal check yet */
-  clusteraddr=&p->pcb$l_efcs+efncluster;
+  if (efn>127)
+    return SS$_ILLEFC;
+  clusteraddr=getefc(p,efn);
   p->pcb$b_wefc=efncluster;
+  if (efncluster>1 && !clusteraddr)
+    return SS$_UNASEFC;
+
+  vmslock(&SPIN_SCHED,IPL$_SCHED);
+
+#if 0
   if (efncluster==0 || efncluster==1) goto notcommon;
   /* not impl */
   printk("in a wait non impl routine %x %x %x %x\n",efn,mask,clusteraddr,efncluster);
   return;
  notcommon:
-  wq=sch$gq_lefwq;
-  /* lock sched */
+#endif
+
+  if (efncluster<2) {
+    wq=sch$gq_lefwq;
+    /* do */
+  } else {
+    unsigned long * l=getefcp(p,efn);
+    wq=&((struct _ceb *)(*l))->ceb$l_wqfl;
+  }
 
   if (!waitallflag && (mask & *clusteraddr)) {
   out:
@@ -30,8 +48,9 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
     goto out;
   if (waitallflag) {
     p->pcb$l_sts|=PCB$M_WALL;
-    p->pcb$l_efwm&=~mask;
-  }
+    p->pcb$l_efwm|=~mask;
+  } else 
+    p->pcb$l_efwm|=~mask;
 
   sch$wait(p,wq);
   return SS$_NORMAL;

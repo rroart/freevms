@@ -1435,7 +1435,7 @@ unsigned long sch$al_cpu_priority[32];
 unsigned long sch$gq_affinity_time_int;
 unsigned long sch$gq_cc_per_hardtick;
 unsigned long sch$gq_cc_per_quant;
-unsigned long sch$gq_cebhd;
+unsigned long long sch$gq_cebhd;
 unsigned long sch$gq_colpgwq;
 unsigned long sch$gl_comoqs;
 unsigned long sch$gl_comqs;
@@ -2059,6 +2059,8 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   lck$gl_maxid=&lockmaxid;
 
   qhead_init(&scs$gq_local_names);
+
+  qhead_init(&sch$gq_cebhd);
 
   printk("Done system data cells\n");
 }

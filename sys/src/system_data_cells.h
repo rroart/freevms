@@ -1423,7 +1423,7 @@ extern unsigned long sch$al_cpu_priority[32];
 extern unsigned long sch$gq_affinity_time_int;
 extern unsigned long sch$gq_cc_per_hardtick;
 extern unsigned long sch$gq_cc_per_quant;
-extern unsigned long sch$gq_cebhd;
+extern unsigned long long sch$gq_cebhd;
 extern unsigned long sch$gq_colpgwq;
 extern unsigned long sch$gl_comoqs;
 extern unsigned long sch$gl_comqs;
