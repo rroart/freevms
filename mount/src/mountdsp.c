@@ -61,7 +61,7 @@ asmlinkage int exe$mount(void *itmlst) {
     status=mount(1,1,devs,labs,&vcb);
   }
 
-  if (status&1==0) return;
+  if ((status&1)==0) return;
 
   if (vcb==0) return;
 

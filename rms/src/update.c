@@ -340,7 +340,7 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
                             *work_ptr |= 1 << bit_no;
                             modify_flag = 1;
                             if ((*headbuff)->fh2$w_checksum != 0 || (*headbuff)->fh2$w_fid.fid$w_num != 0 ||
-                                VMSLONG((*headbuff)->fh2$l_filechar) & FH2$M_MARKDEL == 0) {
+                                (VMSLONG((*headbuff)->fh2$l_filechar) & FH2$M_MARKDEL) == 0) {
                                 sts = deaccesschunk(0,0,0);
 				writechunk(getidxfcb(vcbdev),idxblk,*headbuff);
                             } else {
@@ -543,7 +543,7 @@ unsigned f11b_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
   sts = bitmap_search(vcbdev,&start_pos,&block_count);
   printk("Update_extend %d %d\n",start_pos,block_count);
   if (sts & 1) {
-    if (block_count < 1 || contig && block_count * vcbdev->vcb$l_cluster < blocks) {
+    if (block_count < 1 || (contig && (block_count * vcbdev->vcb$l_cluster) < blocks)) {
       sts = SS$_DEVICEFULL;
     } else {
       unsigned short *mp,*map;
