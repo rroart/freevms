@@ -591,6 +591,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     dir.d_type=0;
     memset(dir.d_name,0,256);
 
+    dir.d_off=fib->fib$w_exctl;
+    dir.d_reclen=fib->fib$w_nmctl;
+
+#if 0
     if (fib->fib$l_wcc!=0) {
       dir.d_off=fib->fib$l_wcc; //resdsc->dsc$a_pointer;
       dir.d_reclen=resdsc->dsc$w_length;
@@ -598,6 +602,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       dir.d_off=0;
       dir.d_reclen=0;
     }
+#endif
 
     f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY, 0);
 #if 0
@@ -618,10 +623,12 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     filp_close(f,0);
 
     //    resdsc->dsc$a_pointer=strdup(dir.d_name);
-    *reslen=strlen(resdsc->dsc$a_pointer);
+    *reslen=strlen(dir.d_name);
     bcopy(dir.d_name,resdsc->dsc$a_pointer,resdsc->dsc$w_length);
 
-    fib->fib$l_wcc=dir.d_off;
+    //    fib->fib$l_wcc=dir.d_off;
+    fib->fib$w_exctl=dir.d_off;
+    fib->fib$w_nmctl=dir.d_reclen;
 
 #if 0
     if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
