@@ -1584,9 +1584,9 @@ void PTY_SET_OWNER_PID(TVT)
 		dsc$a_pointer : ptynambuf}, *ptynam=&ptynam_;
 signed long
 	RC,
-	Unit_Number,
-	Owner_PID,
-	Owner_UIC,
+	Unit_Number = 0,
+	Owner_PID = 0,
+	Owner_UIC = 0,
   FHost,FPort;
     extern	PokeAddr();
  struct item_list_3 Item_List[3];
