@@ -50,9 +50,9 @@ void * exe$nampid2(struct _pcb *p, unsigned long *pidadr, void *prcnam) {
   }
   if (pidadr) {
     struct _pcb * tmp, **htable = &pidhash[pid_hashfn(*pidadr)];
-    printk("bef for\n");
+    //printk("bef for\n");
     for(tmp = *htable; tmp && tmp->pid != *pidadr; tmp = tmp->pidhash_next) ;
-    printk("aft for\n");
+    //printk("aft for\n");
     return tmp;
   }
   if (prcnam) {
