@@ -1350,11 +1350,11 @@ unsigned long rms$gq_reserved08;
 unsigned long rms$gq_reserved09;
 unsigned long rms$gq_reserved10;
 unsigned long sch$al_cpu_cap;
-unsigned long sch$aq_comh;
-unsigned long sch$aq_comoh;
-unsigned long sch$aq_comot;
-unsigned long sch$aq_comt;
-unsigned long sch$aq_wqhdr;
+unsigned long long sch$aq_comh[32];
+unsigned long long sch$aq_comoh[32];
+unsigned long long sch$aq_comot[32];
+unsigned long long sch$aq_comt[32];
+unsigned long sch$aq_wqhdr[44];
 unsigned long sch$ar_cap_priv;
 unsigned long sch$ar_class_name;
 unsigned long sch$ar_class_pcblink;
@@ -1677,9 +1677,11 @@ unsigned long smp$gl_astsr_ack;
 unsigned long smp$gl_available_port_cpus;
 unsigned long smp$gl_bug_done;
 unsigned long smp$gl_bugchkcp;
+unsigned long long smp$gq_capabilities[32];
+unsigned short smp$gw_affinity_count[32];
 unsigned long smp$gl_compat_level;
 unsigned long smp$gl_cpu_auto_start;
-struct _cpu ** smp$gl_cpu_data;
+struct _cpu * smp$gl_cpu_data[64];
 unsigned long smp$gl_cpu_transition;
 unsigned long smp$gl_cpu_upd_defer;
 unsigned long smp$gl_cpuconf;
@@ -1709,7 +1711,6 @@ unsigned long smp$gq_new_hwclock;
 unsigned long smp$gq_primary_workq;
 unsigned long smp$gq_proposed_hwclock;
 unsigned long smp$gq_tree_upd_count;
-unsigned long smp$gw_affinity_count;
 unsigned long smp$gw_min_index;
 unsigned long smp$gw_spnlkcnt;
 unsigned long swi$gl_fqbl;
@@ -1891,9 +1892,13 @@ unsigned long xqp$gl_sections;
 struct lnmhshs lnmhshs; /* should be one struct, will be solved later */
 struct lnmhshp lnmhshp;
 
-struct _cpu vmscpus[32]; /* max. this number should be defined */
+/*struct _cpu vmscpus[32];*/ /* max. this number should be defined */
 void vms_init(void) {
-  smp$gl_cpu_data=&vmscpus;
+  int i;
+
+  for(i=0;i<32;i++)
+    smp$gl_cpu_data[i]=vmalloc(sizeof(struct _cpu));
+
   sch$gl_idle_cpus=0;
 
   exe$gl_tqfl=vmalloc(sizeof(struct _tqe));

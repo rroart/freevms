@@ -5,10 +5,10 @@
  inline void splx(void) {
   int this_cpu = smp_processor_id();
   int i, tmp;
-  tmp=vmscpus[this_cpu].cpu$b_ipl;
-  vmscpus[this_cpu].cpu$b_ipl=vmscpus[this_cpu].previpl[vmscpus[this_cpu].iplnr--];
+  tmp=smp$gl_cpu_data[this_cpu]->cpu$b_ipl;
+  smp$gl_cpu_data[this_cpu]->cpu$b_ipl=smp$gl_cpu_data[this_cpu]->previpl[smp$gl_cpu_data[this_cpu]->iplnr--];
   for(i=0;i<256;i++)
-    if (vmscpus[this_cpu].cpu$t_ipending[i].interrupt>=tmp) { ; }
+    if (smp$gl_cpu_data[this_cpu]->cpu$t_ipending[i].interrupt>=tmp) { ; }
   /*
     do the interrupt?
    */
@@ -18,19 +18,19 @@
 
  inline char spl(unsigned char new) {
   int this_cpu = smp_processor_id();
-  if (new<=vmscpus[this_cpu].cpu$b_ipl) {
+  if (new<=smp$gl_cpu_data[this_cpu]->cpu$b_ipl) {
     /* mark ipending */
     return 1;
   }
-  vmscpus[this_cpu].previpl[vmscpus[this_cpu].iplnr++]=vmscpus[this_cpu].cpu$b_ipl;
-  vmscpus[this_cpu].cpu$b_ipl=new;
+  smp$gl_cpu_data[this_cpu]->previpl[smp$gl_cpu_data[this_cpu]->iplnr++]=smp$gl_cpu_data[this_cpu]->cpu$b_ipl;
+  smp$gl_cpu_data[this_cpu]->cpu$b_ipl=new;
   return 0;
 }
 
 inline int prespl_not(unsigned char new) {
   int this_cpu = smp_processor_id();
   printk("prespl: should not get here now\n");
-  if (new<=vmscpus[this_cpu].cpu$b_ipl) {
+  if (new<=smp$gl_cpu_data[this_cpu]->cpu$b_ipl) {
     /* mark ipending */
     return 1;
   }
