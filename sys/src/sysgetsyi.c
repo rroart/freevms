@@ -5,11 +5,11 @@
 
 #include<linux/linkage.h>
 
-asmlinkage int exe$setrwm(int flags) {
+asmlinkage void exe$getsyi(void) {
 
 }
 
-asmlinkage int exe$setswm(int flags) {
+asmlinkage void exe$getsyiw(void) {
 
 }
 

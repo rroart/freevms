@@ -14,6 +14,9 @@
 #include<va_rangedef.h>
 #include<wsldef.h>
 
+asmlinkage int exe$mgblsc(void) {
+}
+
 /* no short int yet*/
 asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam, unsigned int relpag, unsigned /*short*/ int chan, unsigned int pagcnt, unsigned int vbn, unsigned int prot,unsigned int pfc) {
   // we will just have to pretend this fd is chan and offset i vbn (mmap)?

@@ -17,10 +17,6 @@
 #include <ssdef.h>
 #include <va_rangedef.h>
 
-// exe$cntreg
-// exe$cretva
-// exe$deltva
-// exe$expreg
 // mmg$credel
 // mmg$crepag
 // mmg$cretva
@@ -28,6 +24,16 @@
 // mmg$fast_create
 // mmg$try_all
 // create_bufobj
+
+asmlinkage void exe$cntreg(void) {
+}
+
+asmlinkage void exe$deltva(void) {
+}
+
+asmlinkage void exe$expreg(void) {
+}
+
 
 struct _mmg mymmg;
 
