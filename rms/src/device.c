@@ -33,6 +33,7 @@
 
 #include <mytypes.h>
 #include <aqbdef.h>
+#include <ccbdef.h>
 #include <ddbdef.h>
 #include <fatdef.h>
 #include <vcbdef.h>
