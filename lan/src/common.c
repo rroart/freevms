@@ -46,6 +46,8 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
     struct _ucbnidef * ni=newucb;
 
+    struct net_device * dev = ni -> ucb$l_extra_l_1;
+
     //struct _lsbdef * lsb=kmalloc(sizeof(struct _lsbdef),GFP_KERNEL);
     //bzero(lsb,sizeof(struct _lsbdef));
     for(;len;len--) {
@@ -60,6 +62,10 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     //lsb->lsb$l_next_lsb=ni->ucb$l_ni_lsb;
     //ni->ucb$l_ni_lsb=lsb;
   }
+
+  if (dev->open) {
+    ret = dev->open(dev);
+
   if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL;
   return SS$_NORMAL;
 }
