@@ -4759,7 +4759,7 @@ static void floppy_release_irq_and_dma(void)
 
 
 #ifdef MODULE
-#error nomoduleyet
+//#error nomoduleyet
 
 char *floppy;
 
