@@ -59,6 +59,8 @@ static check_dup(struct _ucb * u, long * l) {
   return (proto == ni->ucb$l_ni_pty);
 }
 
+extern struct net_device * scs_default_device;
+
 int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c){ 
   switch (i->irp$l_func&IO$M_FMODIFIERS) {
   case IO$M_CTRL|IO$M_STARTUP:
@@ -81,6 +83,8 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     struct _ucbnidef * ni=newucb;
 
     struct net_device * dev = ni -> ucb$l_extra_l_1;
+
+    scs_default_device = dev;
 
     //struct _lsbdef * lsb=kmalloc(sizeof(struct _lsbdef),GFP_KERNEL);
     //bzero(lsb,sizeof(struct _lsbdef));
