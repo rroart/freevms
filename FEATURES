@@ -1,4 +1,6 @@
-partly VMS-style scheduling
+scheduling (partly)
+asts (partly)
+timing (partly)
 
 syscalls:
 $asctim
