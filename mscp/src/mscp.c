@@ -133,7 +133,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
  read:
   {
     char * buf = vmalloc(1024);
-    struct _irp * i=vmalloc(sizeof(struct _irp));
+    struct _irp * i=kmalloc(sizeof(struct _irp),GFP_KERNEL);
     struct _ucb * u;
     struct _hrb * hrb = find_hrb(scs1->scs$l_rspid);
     remque(hrb,hrb);
@@ -160,7 +160,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
   return;
  write:
   {
-    struct _irp * i=vmalloc(sizeof(struct _irp));
+    struct _irp * i=kmalloc(sizeof(struct _irp),GFP_KERNEL);
     struct _ucb * u;
     struct _hrb * hrb = find_hrb(scs1->scs$l_rspid);
     remque(hrb,hrb);
