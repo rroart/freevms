@@ -656,7 +656,7 @@ asmlinkage void __init start_kernel(void)
 #endif
 	check_bugs();
 	lnm_init_prc(current); // put this later than lnm_init_sys
-	printk("POSIX conformance testing by UNIFIX\n");
+	printk("No POSIX conformance testing by UNIFIX\n");
 	printk("Popular Organization for the Suppression of Individual eXpression\n");
 
 	/* 
