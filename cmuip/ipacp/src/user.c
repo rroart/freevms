@@ -2173,7 +2173,8 @@ struct dsc$descriptor
 	    case M$CANCEL:	func=ASCID("VMS$Cancel"); break;
 	    default:
 		    {
-		    exe$fao(ASCID("?User FCN !SL"),funcstr->dsc$w_length,funcstr,
+		      $DESCRIPTOR(ctr,"?User FCN !SL");
+		    exe$fao(&ctr,&funcstr->dsc$w_length,funcstr,
 			 argblk->ud$funct);
 		    func = *funcstr;
 		    };

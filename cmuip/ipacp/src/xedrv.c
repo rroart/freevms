@@ -703,8 +703,8 @@ void XE_Shutdown ( XE_Int , restart )
 		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS);
 	if ((RC != SS$_NORMAL) || (IOS->xe$vms_code != SS$_NORMAL))
 	    {
-	    DRV$Warn_FAO("XE shutdown QIOW failure, EC = !XL",RC);
-	    DRV$Fatal_FAO("XE shutdown failure, EC = !XL",IOS->xe$vms_code);
+	    DRV$WARN_FAO("XE shutdown QIOW failure, EC = !XL",RC);
+	    DRV$FATAL_FAO("XE shutdown failure, EC = !XL",IOS->xe$vms_code);
 	    };
 	};
 
@@ -717,8 +717,8 @@ void XE_Shutdown ( XE_Int , restart )
 		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS);
 	if ((RC != SS$_NORMAL) || (IOS->xe$vms_code != SS$_NORMAL))
 	    {
-	    DRV$Warn_FAO("XE ARP shutdown QIOW failure, EC = !XL",RC);
-	    DRV$Fatal_FAO("XE ARP shutdown failure, EC = !XL",IOS->xe$vms_code);
+	    DRV$WARN_FAO("XE ARP shutdown QIOW failure, EC = !XL",RC);
+	    DRV$FATAL_FAO("XE ARP shutdown failure, EC = !XL",IOS->xe$vms_code);
 	    return;
 	    };
 	};
@@ -827,7 +827,7 @@ extern 	LIB$GET_VM_PAGE();
     if (BLISSIFNOT(RC=exe$assign (&dev_config->dc_devname, &XE_Chan, 0, 0, 0)))
          // Ethernet controller assign failed
 	{
-	DRV$Fatal_FAO("XE $ASSIGN failure (dev=), EC = !XL",
+	DRV$FATAL_FAO("XE $ASSIGN failure (dev=), EC = !XL",
 		    dev_config->dc_devname,RC);
 	return;
 	};
@@ -836,7 +836,7 @@ extern 	LIB$GET_VM_PAGE();
     if (BLISSIFNOT(RC=exe$assign( &dev_config->dc_devname,&XAR_Chan, 0, 0 ,0)))
          // Ethernet controller assign failed
 	{
-	DRV$Fatal_FAO("XE $ASSIGN failure (dev=), EC = !XL",
+	DRV$FATAL_FAO("XE $ASSIGN failure (dev=), EC = !XL",
 		    dev_config->dc_devname,RC);
 	return;
 	};
@@ -847,7 +847,7 @@ extern 	LIB$GET_VM_PAGE();
 //    if (! (LIB$GET_VM(%REF(XE_Interface_size*4),XE_Int)))
       if (! (LIB$GET_VM_PAGE(/*%REF*/(((XE_Interface_size * 4) / 512) + 1),&XE_Int)))
 	{	// Couldn't allocate memory for controller block
-	DRV$Fatal_FAO("XE LIB$GET_VM failure (dev=), EC = !XL" ,
+	DRV$FATAL_FAO("XE LIB$GET_VM failure (dev=), EC = !XL" ,
 		    dev_config->dc_devname,RC);
 	return;
 	};
@@ -877,7 +877,7 @@ extern 	LIB$GET_VM_PAGE();
 //    if (! (LIB$GET_VM(%REF(MAX_RCV_BUF*XERCV_LEN*4),rcvhdrs)))
       if (! (LIB$GET_VM_PAGE(/*%REF*/(((MAX_RCV_BUF*XERCV_LEN*4)/512)+1),&rcvhdrs)))
 	{	// Couldn't allocate memory for receive headers
-	DRV$Fatal_FAO("XE LIB$GET_VM failure (dev=!AS), RC=!XL",
+	DRV$FATAL_FAO("XE LIB$GET_VM failure (dev=!AS), RC=!XL",
 		    dev_config->dc_devname,RC);
 	return;
 	};
@@ -1218,7 +1218,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 	    XE$ERR(XE_Int,"XE $QIO read error (dev_inact), RC=!XL",RC);
 	    }
 	else
-	    DRV$Fatal_FAO("Ethernet $QIO queue read error, EC = !XL",RC);
+	    DRV$FATAL_FAO("Ethernet $QIO queue read error, EC = !XL",RC);
 	}
     else
 	{
@@ -1292,7 +1292,7 @@ void xe_arprcv( struct XE_Interface_Structure * XE_Int )
 	    DRV$OPR_FAO("XE abort, cmd_status=!XW, error_summary=!XB",
   			ARbuf->ar_ios2,ARbuf->ar_ios3);
 	else
-	    DRV$Error_FAO("XE ARP receive error (ugh), EC = !XL",ARbuf->ar_ios0);
+	    DRV$ERROR_FAO("XE ARP receive error (ugh), EC = !XL",ARbuf->ar_ios0);
 
 #if 0
     if ($$LOGF(LOG$PHY))

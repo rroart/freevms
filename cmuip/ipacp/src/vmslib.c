@@ -490,7 +490,7 @@ drv$ip_receive_not() {
   printk("drv$ip_receive not implemented\n");
 }
 
-SEG$LOG_Segment() {
+SEG$LOG_Segment_not() {
   printk("SEG$LOG_Segment not implemented\n");
 }
 

@@ -1059,7 +1059,7 @@ void tcp$deliver_user_data(struct tcb_structure * TCB)
 	    DESC$STR_ALLOC(hexstr,maxhex*3),
 #endif
 	    ASCII_HEX_BYTES(&hexstr,nhex,TCB->rcv_q_deqp,
-			    hexstr.dsc$w_length);
+			    &hexstr.dsc$w_length);
 	    LOG$FAO(/*%STRING*/("!%T Deliver user data: DQ=!XL,EQ=!XL,RCQ=!XL/!XL,Size=!SL!/",
 			    "!_HEX:   !AS!/",
 			    "!_ASCII: !AF!/"),

@@ -68,6 +68,9 @@ Change log:
 */
 #endif
 
+#include<stdarg.h>
+#include<descrip.h>
+
 // Define version-specific debugging flags.
 
 #if 0
@@ -146,54 +149,67 @@ MACRO
 	   
 // Write a message to the console operator
 
-#define OPR$FAO printk
-#define ERROR$FAO printk
-#define WARN$FAO printk
-#define FATAL$FAO printk
-#define Fatal_Error printk
+static int inline OPR$FAO(char *c, ...) {
+  struct dsc$descriptor d;
+  d.dsc$w_length=strlen(c);
+  d.dsc$a_pointer=c;
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,c);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  return OPR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
+
+static int inline ERROR$FAO(char *c, ...) {
+  struct dsc$descriptor d;
+  d.dsc$w_length=strlen(c);
+  d.dsc$a_pointer=c;
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,c);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  return ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
+
+static int inline WARN$FAO(char *c, ...) {
+  struct dsc$descriptor d;
+  d.dsc$w_length=strlen(c);
+  d.dsc$a_pointer=c;
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,c);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  return ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
+
+static int inline FATAL$FAO(char *c, ...) {
+  struct dsc$descriptor d;
+  d.dsc$w_length=strlen(c);
+  d.dsc$a_pointer=c;
+  va_list args;
+  int argv[18],argc=0;
+  va_start(args,c);
+  while(argc<18) {
+    argv[argc]=va_arg(args,int);
+    argc++;
+  }
+  va_end(args);
+  return FATAL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+}
 
 #if 0
-static    OPR$FAO(CST, ...) 
-{
-  extern void OPR_FAO();
-	%IF %NULL(%REMAINING) %THEN
-	    OPR_FAO(%ASCID %STRING(CST));
-	%ELSE
-	    OPR_FAO(%ASCID %STRING(CST),%REMAINING);
-	%FI
-	END
-	%,
-    ERROR$FAO(CST) =
-	BEGIN
-	$QEXTR(ERROR_FAO,NOVALUE)
-	%IF %NULL(%REMAINING) %THEN
-	    ERROR_FAO(%ASCID %STRING(CST));
-	%ELSE
-	    ERROR_FAO(%ASCID %STRING(CST),%REMAINING);
-	%FI
-	END
-	%,
-    WARN$FAO(CST) =
-	BEGIN
-	$QEXTR(ERROR_FAO,NOVALUE)
-	%IF %NULL(%REMAINING) %THEN
-	    ERROR_FAO(%ASCID %STRING(CST));
-	%ELSE
-	    ERROR_FAO(%ASCID %STRING(CST),%REMAINING);
-	%FI
-	END
-	%,
-    FATAL$FAO(CST) =
-	BEGIN
-	$QEXTR(FATAL_FAO,NOVALUE)
-	%IF %NULL(%REMAINING) %THEN
-	    FATAL_FAO(%ASCID %STRING(CST));
-	%ELSE
-	    FATAL_FAO(%ASCID %STRING(CST),%REMAINING);
-	%FI
-	END
-        %,
-
 // Obsolete error processing macros - special cases of above.
 
     Fatal_Error(S,ERRCODE) =
@@ -212,10 +228,6 @@ static    OPR$FAO(CST, ...)
 	%,
 
 #endif
-
-#define LOG$FAO printk
-#define OPR$FAO printk
-#define FATAL$FAO panic 
 
 // Control segment Send macros
 
@@ -322,9 +334,9 @@ static int inline $$KCALL(int (*func)(), ...) {
 	%FI
     %,
 
-%IF LOGSWITCH %THEN		// Want the logging macros
 #endif
-   
+#ifdef LOGSWITCH		// Want the logging macros
+//know how to implement these, but delay it   
    // Conditionally do something according to LOG_STATE flags
 
 #define   $$LOGF(logf) \
@@ -353,9 +365,6 @@ static int inline $$KCALL(int (*func)(), ...) {
 	%FI
 	END
 	%,
-#endif
-#ifndef XLOG$FAO
-// not yet	   static void XLOG$FAO(void) {}	   
 #endif
 #if 0
     XLOG$FAO(LOGF) =
@@ -396,22 +405,23 @@ static int inline $$KCALL(int (*func)(), ...) {
 	    QL$FAO(%REMAINING)
 	END
         %;
+#endif
 
-%ELSE				// Don't want logging macros - make them null
+#else				// Don't want logging macros - make them null
 
-    $$LOGF(LOGF) = 0 %,		// $$LOGF always fails
-    LOG$OUT(XSTR) = 0 %,	// LOG$OUT does nothing
-    XLOG$OUT(LOGF) = 0 %,	// XLOG$OUT "
-    LOG$FAO(CST) = 0 %,		// LOG$FAO "
-    ACT$OUT(XSTR) = 0 %,	// ACT$OUT does nothing
-    ACT$FAO(CST) = 0 %,		// ACT$FAO "
-    XLOG$FAO(LOGF) = 0 %,	// XLOG$FAO "
-    QL$FAO(CST) = 0 %,		// QL$FAO "
-    XQL$FAO(LOGF) = 0 %;	// XQL$FAO "
-%FI
+#define $$LOGF SSLOGF
+static inline    $$LOGF(/*LOGF*/)  { } ;		// $$LOGF always fails
+static inline    LOG$OUT(/*XSTR*/)  { } ;	// LOG$OUT does nothing
+static inline    XLOG$OUT(/*LOGF*/)  { } ;	// XLOG$OUT 
+static inline    LOG$FAO(/*CST*/)  { } ;		// LOG$FAO 
+static inline    ACT$OUT(/*XSTR*/)  { } ;	// ACT$OUT does nothing
+static inline    ACT$FAO(/*CST*/) { } ;		// ACT$FAO 
+static inline    XLOG$FAO(/*LOGF*/)  { };	// XLOG$FAO 
+static inline    QL$FAO(/*CST*/) { } ;		// QL$FAO 
+static inline    XQL$FAO(/*LOGF*/) { } ;	// XQL$FAO 
+#endif
 
 // Network logger flag bits - determine what events to log
-#endif
 
 #define    LOG$PHY	 0x01	// Packet physical headers
 #define    LOG$ARP	 0x02	// ARP packet info

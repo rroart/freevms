@@ -1965,7 +1965,7 @@ DESC$STR_ALLOC(ipstr,20);
 		stastr = ASCID("Offline");
 
 	    OPR$FAO("Net device !SL is !AS, IP=!AS (!AS)",
-		    J,devnam,ipstr,stastr);
+		    J,devnam,ipstr,&stastr);
 
 	    dev_config_tab[cdev].dcmib_ifIndex = cdev;
 

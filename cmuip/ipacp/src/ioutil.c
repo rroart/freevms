@@ -501,6 +501,8 @@ void LOG_OUTPUT(OUTDESC)
 	LOGRAB->rab$l_rbf = OUTDESC->dsc$a_pointer;
 	logcount = logcount + OUTDESC->dsc$w_length ;
 
+#if 0
+	// not yet. no write support, and rms don't work here
 	RC = exe$put( LOGRAB);
 //!!HACK!!// Take out this Flush!
 	if (( 	(logcount > log_threshold)
@@ -509,12 +511,12 @@ void LOG_OUTPUT(OUTDESC)
 	    RC = exe$flush(LOGRAB);
 	    logcount = 0 ;
 	    } ;
+#endif
 	};
-
     }
 
-void LOG_FAO(CSTR)
-
+void LOG_FAO(CSTR, args)
+     va_list args;
 // Do output to log file using $FAO to format parameters.
 
     {
@@ -523,9 +525,9 @@ void LOG_FAO(CSTR)
 	DESC$STR_ALLOC(OUTDESC,1000);
 
     RC = exe$faol(CSTR,
-	       OUTDESC->dsc$w_length,
+	       &OUTDESC->dsc$w_length,
 	       OUTDESC,
-		  /*AP+*/8);
+		  &args); // check. was ap+8
     if (BLISSIF(RC))
       LOG_OUTPUT(OUTDESC);
     else
@@ -637,17 +639,20 @@ void ACT_OUTPUT(OUTDESC)
 	ACTRAB->rab$l_rbf = OUTDESC->dsc$a_pointer;
 	ACTCOUNT = ACTCOUNT + OUTDESC->dsc$w_length ;
 
+#if 0
+	// not yet. no write support, and rms don't work here
 	RC = exe$put(ACTRAB);
 	if ((ACTCOUNT > act_threshold))
 	    {
 	    RC = exe$flush(ACTRAB);
 	    ACTCOUNT = 0 ;
 	    } ;
+#endif
 	};
     }
 
-void ACT_FAO(CSTR)
-
+void ACT_FAO(CSTR, args)
+     va_list args;
 // Do output to activity log file using $FAO to format parameters.
 
     {
@@ -656,9 +661,9 @@ void ACT_FAO(CSTR)
 	DESC$STR_ALLOC(OUTDESC,1000);
 
     RC = exe$faol(CSTR,
-	       OUTDESC->dsc$w_length,
+	       &OUTDESC->dsc$w_length,
 	       OUTDESC,
-		  /*AP+*/8);
+		  &args); // check. was ap+8
     if (BLISSIF(RC))
       ACT_OUTPUT(OUTDESC);
     else
@@ -738,8 +743,8 @@ extern struct dsc$descriptor *	myname;
     return exe$sndopr(MSG, 0);
     }
 
-void OPR_FAO(CSTR) 
-
+void OPR_FAO(CSTR, args) 
+     va_list args;
 // Send a message to the VMS operator, using $FAO for output formatting.
 
     {
@@ -749,15 +754,16 @@ void OPR_FAO(CSTR)
 	DESC$STR_ALLOC(OPRDESC,1000);
 
     RC = exe$faol(CSTR,
-	        OUTDESC->dsc$w_length,
+	        &OUTDESC->dsc$w_length,
 	       OUTDESC,
-		  /*AP+*/8);
+		  &args); // check. was ap+8
     if (BLISSIFNOT(RC))
 	exe$exit( RC);
 
 // Reformat for console output
 
-    RC = exe$fao(ASCID("IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    $DESCRIPTOR(ctr,"IPACP: !AS");
+    RC = exe$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (BLISSIFNOT(RC))
 	exe$exit( RC);
     send_2_operator(OPRDESC);
@@ -768,7 +774,8 @@ signed long
 
 //SBTTL "Error processing routines - ERROR_FAO, FATAL_FAO"
 
-void ERROR_FAO(CSTR)
+void ERROR_FAO(CSTR, args)
+     va_list args;
 //
 // Send a message to the console & log the error (OPR_FAO + LOG_FAO)
 //
@@ -783,9 +790,9 @@ void ERROR_FAO(CSTR)
 // Format the message string
 
     RC = exe$faol(CSTR,
-	       OUTDESC->dsc$w_length,
+	       &OUTDESC->dsc$w_length,
 	       OUTDESC,
-		  /*AP+*/8);
+		  &args); // check. was ap+8
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("ERROR_FAO failure, RC = !XL",RC);
@@ -794,14 +801,16 @@ void ERROR_FAO(CSTR)
 
 // Format and send message to the operator
 
-    RC = exe$fao(ASCID("?IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    $DESCRIPTOR(ctr,"?IPACP: !AS");
+    RC = exe$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (BLISSIFNOT(RC))
 	exe$exit( RC);
     send_2_operator(OPRDESC);
 
 // Format the message for logging - add time+date and EOL
 
-    RC = exe$fao(ASCID("!%T !AS!/"),LOGDESC->dsc$w_length,LOGDESC,0,OUTDESC);
+    $DESCRIPTOR(ctr2,"!%T !AS!/");
+    RC = exe$fao(&ctr2,&LOGDESC->dsc$w_length,LOGDESC,0,OUTDESC);
     if (BLISSIFNOT(RC))
 	exe$exit( RC);
 
@@ -814,7 +823,8 @@ void ERROR_FAO(CSTR)
     }
 
 
-void FATAL_FAO(CSTR)
+void FATAL_FAO(CSTR, args)
+     va_list args;
 //
 // Same as above, except also exit the ACP.
 //
@@ -829,9 +839,9 @@ void FATAL_FAO(CSTR)
 // Format the output string
 
     RC = exe$faol(CSTR,
-	       OUTDESC->dsc$w_length,
+	       &OUTDESC->dsc$w_length,
 	       OUTDESC,
-		  /*AP+*/8);
+		  &args); // check. was ap+8
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("FATAL_FAO failure, RC = !XL",RC);
@@ -840,14 +850,16 @@ void FATAL_FAO(CSTR)
 
 // Format & send message to the operator
 
-    RC = exe$fao(ASCID("?IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    $DESCRIPTOR(ctr,"?IPACP: !AS");
+    RC = exe$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (BLISSIFNOT(RC))
 	exe$exit( RC);
     send_2_operator(OPRDESC);
 
 // Format it for logging
 
-    RC = exe$fao(ASCID("!%T !AS!/"),LOGDESC->dsc$w_length,LOGDESC,
+    $DESCRIPTOR(ctr2,"!%T !AS!/");
+    RC = exe$fao(&ctr2,&LOGDESC->dsc$w_length,LOGDESC,
 	      0,OUTDESC);
 
 // Make sure we are logging something & log it

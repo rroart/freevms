@@ -1066,7 +1066,8 @@ extern	PokeAddr ();
     for (J=GLOBAL_MINSRV;J<=WKS_LIST[Idx].WKS$MaxSrv;J++)
 	{
 	ProcName->dsc$w_length = PNAMLEN;
-	exe$fao(/*%ASCID*/"!AS.!SL",ProcName->dsc$w_length,ProcName,
+	$DESCRIPTOR(ctr,"!AS.!SL");
+	exe$fao(&ctr,&ProcName->dsc$w_length,ProcName,
 	     WKS_LIST[Idx].WKS$Process,J);
 
 #if 0
@@ -2745,7 +2746,7 @@ X:	    {
 	    seg->sh$ack = ntohl(seg->sh$ack/*,16*/);
 
 	    if ($$LOGF(LOG$TCP))
-		SEG$LOG_Segment(seg,QB->nr$size,TRUE,FALSE);
+		SEG$Log_Segment(seg,QB->nr$size,TRUE,FALSE);
 		
 
 // Now, find the connection that this segment is destined for

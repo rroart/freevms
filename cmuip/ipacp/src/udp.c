@@ -401,7 +401,7 @@ void Log_UDP_Packet(Seg,SwapFlag,SendFlag)
 	  hexcnt = maxhex;
 	else
 	    hexcnt = datalen;
-	ASCII_HEX_BYTES(dathex,hexcnt,segdata,dathex->dsc$w_length);
+	ASCII_HEX_BYTES(dathex,hexcnt,segdata,&dathex->dsc$w_length);
 	QL$FAO(/*%STRING*/("!_Data Count: !SL!/",
 		       "!_HEX:!_!AS!/",
 		       "!_ASCII:!_!AF!/"),

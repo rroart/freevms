@@ -77,6 +77,7 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 #include<iodef.h>
 #include<iosbdef.h>
 #include<dvidef.h>
+#include<lnmdef.h>
 
 
 
@@ -535,7 +536,7 @@ Print (control_string, P1)
     Out_Desc->dsc$a_pointer = Out_Buffer;
     Status = exe$faol ( // check
 	 control_string,
-	 Out_Desc->dsc$w_length,
+	 &Out_Desc->dsc$w_length,
 	 Out_Desc,
 	 P1);
     if (! Status) return Status;
@@ -1109,7 +1110,7 @@ void set_devdep(TVT)
 	$DESCRIPTOR(lnm_proc,"LNM$PROCESS_TABLE");
 	$DESCRIPTOR(lnm_pty,"INET$PTY_TERM");
 	$DESCRIPTOR(lnm_pass,"TELNET_PASSALL");
-	struct item_list_3 itm[2]={ {buflen:20, item_code:1, bufaddr: ptystr, &ptynam->dsc$w_length }, {0,0,0,0} };
+	struct item_list_3 itm[2]={ {buflen:20, item_code:LNM$_STRING, bufaddr: ptystr, &ptynam->dsc$w_length }, {0,0,0,0} };
 
 //
 //	If user is not yet setup we must exit to prevent conflicts.
@@ -1243,8 +1244,9 @@ void set_devdep(TVT)
 	Status = exe$trnlnm (0, &lnm_proc, &lnm_pty, 0, itm); // JC
 
 	Status = Status == SS$_NORMAL;
+	$DESCRIPTOR(ctr,"_!ASA!UL:");
 	if (Status)
-	  Status = exe$fao(/*%ASCID*/"_!ASA!UL:",devnam,devnam,ptynam,Unit_Number);
+	  Status = exe$fao(&ctr,devnam,devnam,ptynam,Unit_Number); // check
 	if (Status)
 	  Status = exe$getdviw (0,0,devnam,Item_List,0,0);
 

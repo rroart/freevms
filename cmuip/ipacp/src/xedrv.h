@@ -293,16 +293,6 @@ struct XERCV_structure
 MACRO XERCV_structure = BLOCK[XESND_len] FIELD(XE_recv)%;
 #endif
 
-#define DRV$OPR_FAO printk
-#define DRV$Error_FAO printk
-#define DRV$QL_FAO printk
-#define DRV$Warn_FAO printk
-#define DRV$WARN_FAO printk
-#define DRV$XQL_FAO printk
-#define DRV$XLOG_FAO printk 
-#define DRV$FATAL_FAO panic
-#define DRV$Fatal_FAO panic
-
 #define drv$ip_receive(Buf,Buf_size,IPHdr,devlen,dev_config) IPACP_Interface->ACPI$IP_Receive(Buf,Buf_size,IPHdr,devlen,dev_config)
 
 #define drv$qblk_free(Pntr) IPACP_Interface->ACPI$QBlk_Free(Pntr) 
