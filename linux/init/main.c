@@ -662,6 +662,8 @@ asmlinkage void __init start_kernel(void)
 	 *	Like idlers init is an unlocked kernel thread, which will
 	 *	make syscalls (and thus be locked).
 	 */
+
+	//	vms_init4();
 	vms_init3();
 	smp_init();
 	rest_init();
