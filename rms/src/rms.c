@@ -1314,7 +1314,7 @@ unsigned exe$erase(struct _fabdef *fab)
         fibblk.fib$b_fid_rvn = 0;
         fibblk.fib$b_fid_nmx = 0;
         fibblk.fib$l_wcc = 0;
-	sts = exe_qiow(0,getchan(wccfile->wcf_vcb),IO$_ACCESS|IO$M_CREATE,&iosb,0,0,
+	sts = exe_qiow(0,getchan(wccfile->wcf_vcb),IO$_ACCESS|IO$M_DELETE,&iosb,0,0,
 		       &fibdsc,&serdsc,0,0,0,0);
 	sts = iosb.iosb$w_status;
         if (sts & 1) {
@@ -1399,6 +1399,8 @@ unsigned exe$extend(struct _fabdef *fab)
   int wcc_flag = 0;
   struct _fibdef fibblk;
   struct dsc$descriptor fibdsc,serdsc;
+  struct _atrdef atr[2];
+  struct _fatdef recattr;
   struct WCCFILE *wccfile = NULL;
   struct _namdef *nam = fab->fab$l_nam;
   if (fab->fab$w_ifi != 0) return RMS$_IFI;
@@ -1425,9 +1427,18 @@ unsigned exe$extend(struct _fabdef *fab)
   serdsc.dsc$w_length = wccfile->wcf_wcd.wcd_reslen;
   serdsc.dsc$a_pointer = wccfile->wcf_result + wccfile->wcf_wcd.wcd_prelen;
   if (ifi_no < 1 || ifi_no >= IFI_MAX) return RMS$_IFI;
+  atr[0].atr$w_type=ATR$C_RECATTR;
+  atr[0].atr$w_size=ATR$S_RECATTR;
+  atr[0].atr$l_addr=&recattr;
+  atr[1].atr$w_type=0;
+  fibdsc.dsc$w_length=sizeof(struct _fibdef);
+  fibdsc.dsc$a_pointer=&ifi_table[fab->fab$w_ifi]->wcf_fib;
+  sts = exe_qiow(0,getchan(ifi_table[fab->fab$w_ifi]->wcf_vcb),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
+		 &fibdsc,0,0,0,atr,0);
+  sts = iosb.iosb$w_status;
   fibblk.fib$l_wcc = 0;
   fibblk.fib$w_exctl|=FIB$M_EXTEND;
-  fibblk.fib$l_exsz=10;
+  fibblk.fib$l_exsz=fab->fab$l_alq - recattr.fat$l_efblk;
   sts = exe_qiow(0,getchan(wccfile->wcf_vcb),IO$_MODIFY|IO$M_ACCESS,&iosb,0,0,
 		   &fibdsc,&wccfile->wcf_wcd.wcd_serdsc,0,0,0,0);
   sts = iosb.iosb$w_status;

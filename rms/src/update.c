@@ -351,7 +351,7 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
 				writechunk(getidxfcb(vcbdev),map_block,bitmap);
 				newvbn=f11b_map_idxvbn(vcbdev,idxblk);
 				if (newvbn==-1) {
-				  sts=update_extend(getidxfcb(vcbdev),1,1);
+				  sts=f11b_extend(getidxfcb(vcbdev),1,1);
 				}
                                 return SS$_NORMAL;
                             }
@@ -433,7 +433,7 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
 
 /* update_create() will create a new file... */
 
-unsigned update_create(struct _vcb *vcb,struct _irp * i)
+unsigned f11b_create(struct _vcb *vcb,struct _irp * i)
 {
   struct dsc$descriptor * fibdsc=i->irp$l_qio_p1;
   struct dsc$descriptor * filedsc=i->irp$l_qio_p2;
@@ -466,14 +466,14 @@ unsigned update_create(struct _vcb *vcb,struct _irp * i)
   if ((fib->fib$w_exctl&FIB$M_EXTEND) && (sts & 1)) {
     struct _fcb * newfcb;
     newfcb=f11b_search_fcb(xqp->current_vcb,&fib->fib$w_fid_num);
-    sts = update_extend(newfcb,fib->fib$l_exsz,0);
+    sts = f11b_extend(newfcb,fib->fib$l_exsz,0);
   }
 
   printk("(%d,%d,%d) %d\n",fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn,sts);
   return sts;
 }
 
-unsigned update_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
+unsigned f11b_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
 {
   struct _iosb iosb;
   unsigned sts;
@@ -633,21 +633,41 @@ unsigned deallocfile(struct _fcb *fcb)
 
 /* accesserase: delete a file... */
 
-unsigned accesserase(struct _vcb * vcb,struct _irp * irp)
+unsigned f11b_delete(struct _vcb * vcb,struct _irp * irp)
 {
   struct _iosb iosb;
-    struct _fcb *fcb;
-    struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
-    struct _fibdef * fib=fibdsc->dsc$a_pointer;
-    int sts;
-    struct _fh2 *  head;
-    sts = f11b_access(vcb,irp); // change to irp
-    if (sts & 1) {
-      head = f11b_read_header (xqp->current_vcb, fib, 0, &iosb);  
-      sts=iosb.iosb$w_status;
-      head->fh2$l_filechar |= FH2$M_MARKDEL;
-      printk("Accesserase ... \n");
-      sts = deaccessfile(fcb);
+  struct _fcb *fcb;
+  struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
+  struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
+  unsigned short *reslen=irp->irp$l_qio_p3;
+  struct dsc$descriptor * resdsc=irp->irp$l_qio_p4;
+  struct _fibdef * fib=fibdsc->dsc$a_pointer;
+  int sts;
+  struct _fh2 *  head;
+  unsigned action=1;
+
+  if (fib->fib$w_did_num) {
+    struct _fh2 * head;
+    struct _fcb * fcb=xqp->primary_fcb;
+    head = f11b_read_header (vcb, 0, fcb, &iosb);  
+    sts=iosb.iosb$w_status;
+    if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
+      unsigned eofblk = VMSSWAP(head->fh2$w_recattr.fat$l_efblk);
+      if (VMSWORD(head->fh2$w_recattr.fat$w_ffbyte) == 0) --eofblk;
+      sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
+    } else {
+      sts = SS$_BADIRECTORY;
     }
-    return sts;
+  }
+
+  if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
+
+  if (sts & 1) {
+    head = f11b_read_header (xqp->current_vcb, fib, 0, &iosb);  
+    sts=iosb.iosb$w_status;
+    head->fh2$l_filechar |= FH2$M_MARKDEL;
+    printk("Accesserase ... \n");
+    sts = deaccessfile(fcb);
+  }
+  return sts;
 }

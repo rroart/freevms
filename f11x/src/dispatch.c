@@ -90,13 +90,13 @@ void f11b$dispatcher(void) {
 	struct _vcb * vcb = i->irp$l_ucb->ucb$l_vcb;
 	//f11b$create(vcb,i);
       create:
-	update_create(vcb,i);
+	f11b_create(vcb,i);
       }
       break;
     case IO$_DELETE:
       {
 	struct _vcb * vcb = i->irp$l_ucb->ucb$l_vcb;
-	accesserase(vcb,i);
+	f11b_delete(vcb,i);
       }
       break;
     case IO$_MODIFY:
@@ -189,6 +189,13 @@ unsigned f11b_modify(struct _vcb * vcb, struct _irp * irp)
   xqp->current_window=&fcb->fcb$l_wlfl;
 
   if (atrp) f11b_write_attrib(fcb,atrp);
+
+  if ((fib->fib$w_exctl&FIB$M_EXTEND) && (sts & 1)) {
+    struct _fcb * newfcb;
+    newfcb=f11b_search_fcb(xqp->current_vcb,&fib->fib$w_fid_num);
+    sts = f11b_extend(newfcb,fib->fib$l_exsz,0);
+  }
+
   iosbret(irp,SS$_NORMAL);
   return SS$_NORMAL;
 }
