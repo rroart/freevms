@@ -1328,7 +1328,7 @@ l10:
 	int swapbytes(WrdCnt,Start)
 {
   int *R0,*R2,*R3,*R4,*R5,*R6,*R7,*R8,*R9;
-	unsigned short * R1 = Start;			// starting word address.
+	unsigned char * R1 = Start;			// starting word address.
 Swp_Loop:
 	R0 = *R1;				// low ==> temp
 	*R1 = (R1++)[1];			// high ==> low
@@ -1509,24 +1509,25 @@ Swp_Loop:
 // Calc_Checksum uses.
 //--
 
-#if 0
 // Take checksum from elsewhere
 
 //Entry	Gen_Checksum,^M<R2>
-int Gen_Checksum(Byte_Count,Start,Srca,Dsta,PtclT)
+int Gen_Checksum(Byte_Count,Start,Srca,Dsta,ptclt)
   {
   int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
 	R0 = Byte_Count;	// Put byte count in R0
-	ASHL	-2,R0,R2		// Put fullword count in R2
-	;// Must use byte count rotated +/- 8 bits
-	;// Must use protocol rotated +/- 8 bits
-	;// (Because net stuff wants Big Endian byte order)
+	R2 = R0 >> 2;		// Put fullword count in R2
+	// Must use byte count rotated +/- 8 bits
+	// Must use protocol rotated +/- 8 bits
+	// (Because net stuff wants Big Endian byte order)
 	R0<<=8;		// Start with byte count
 	R0=R0&0x00ffffff;
-	R0=R0+	((Ptclt&0xff)<<24);	// Add in protocol (only 8 bits wide)
+	R0=R0+	((ptclt&0xff)<<24);	// Add in protocol (only 8 bits wide)
 	R0 +=	Srca;		// Add in source addr
-	R0 +=	Dsta;		// Add in dest addr (and carry)
-	goto	Calc_Check0;		// Join Calc_Checksum routine
+	int C = R0 >> 31;
+	R0 +=	Dsta + C;		// Add in dest addr (and carry)
+			// Join Calc_Checksum routine
+	return Calc_Check0(R0,R2,Byte_Count,Start,Srca,Dsta,ptclt);
 	  }
 
 //++
@@ -1534,56 +1535,65 @@ int Gen_Checksum(Byte_Count,Start,Srca,Dsta,PtclT)
 //--
 
 //Entry	Calc_Checksum,^M<R2>
-int Calc_Checksum(Byte_Count,Start,Srca,Dsta,PtclT)
+int Calc_Checksum(Byte_Count,Start,Srca,Dsta,ptclt)
   {
   int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
 	R0 = 0;			// Start with a zero checksum
 	R2 = Byte_Count;
 	R2>>=2;		// Put fullword count in R2
 					// (and clear Carry)
-Calc_Check0:				// Point where Gen_Checksum joins in
-	;// R0 and PSW-Carry contain initial 32 bit checksum
-	;// R2 contains fullword count
-	;// Start(AP) is pointer to 1st byte
-	;// Byte_Count(AP) contains byte count
+	return Calc_Check0(R0,R2,Byte_Count,Start,Srca,Dsta,ptclt);
+  }
+
+int Calc_Check0(R0,R2,Byte_Count,Start,Srca,Dsta,ptclt) {	// Point where Gen_Checksum joins in
+  int *R1,R3,R4,R5,R6,R7,R8,R9,C=R0>>31;
+	// R0 and PSW-Carry contain initial 32 bit checksum
+	// R2 contains fullword count
+	// Start(AP) is pointer to 1st byte
+	// Byte_Count(AP) contains byte count
 	R1 = Start;		// starting address.
-	SOBGEQ	R2,CLop			// enter loop
+	if ((--R2)>=0) goto clop;			// enter loop
 	goto	Odd_Word;		// (no fullwords)
-Clop:	ADWC	(R1)+,R0		// add in next fullword and Carry
-	SOBGEQ	R2,CLop			// get next one
+clop:	R0 = *(R1++)+C;		// add in next fullword and Carry
+	C = R0 >> 31;
+	if ((--R2)>=0) goto clop;			// get next one
 Odd_Word:
-	;// Check for extra word
-	BBC	1,Byte_Count,Odd_Byte
-	R2 =	*(R1++);		// get next word
-	ADWC	R2,R0			// add it in (and the Carry)
+	// Check for extra word
+	if ((Byte_Count&2)==0) goto Odd_Byte;
+	R2 =	*( ((short *)R1)++);		// get next word
+	R0=R0+R2+C;			// add it in (and the Carry)
+	C = R0 >> 31;
 Odd_Byte:
-	;// Check for extra byte
-	if ((Byte_Count&1)==0) goto Reduce16
-	R2 =	*(R1++);		// get next byte
-	ADWC	R2,R0			// add it in (and the Carry)
+	// Check for extra byte
+	if ((Byte_Count&1)==0) goto Reduce16;
+	R2 =	*( ((char *)R1)++);		// get next byte
+	R0=R0+R2+C;			// add it in (and the Carry)
+	C = R0 >> 31;
 Reduce16:
-	;// We have the sum modulo 2**32-1 (actually: protocol and bytecount
-	;// from Gen_Checksum are strange, but are eqv mod 2**16-1)
-	;// Now reduce mod 2**16-1
-	EXTZV	16,16,R0,R2		// extract HO word
+	// We have the sum modulo 2**32-1 (actually: protocol and bytecount
+	// from Gen_Checksum are strange, but are eqv mod 2**16-1)
+	// Now reduce mod 2**16-1
+	R2=R0>>16;		// extract HO word
 //	INSV	0,16,16,R0		// clear HO word
-	R0 = R0;
-	ADWC	R2,R0			// add HO and LO words (and Carry)
-	BBCC	16, R0, Comp		// clear carry out of LO word
+	R0 = R0 & 0xffff;
+	R0=R0+R2+C;			// add HO and LO words (and Carry)
+	C = R0 >> 31;
+	if (test_and_clear_bit(15,&R0)==0) goto Comp; //bbcc		// clear carry out of LO word
 					// (and branch if short word result)
 	R0++;			// add carry in
-	BCC	Comp			// branch if no more carry
+	C = R0 >> 31;
+	if (C==0)	goto Comp;		// branch if no more carry
 	R0++;			// else add final carry in
 					// (this INCW can't produce a carry)
-Comp:	;// Complement the word
-	MCOMW	R0,R0
-	BEQL	ZSum
+Comp:	// Complement the word
+	    R0=~R0;
+	    if  (R0==0) goto	ZSum;
 	return R0;
-ZSum:	;// Return 0 as FFFF
-	MCOMW	R0,R0
+ZSum:	// Return 0 as FFFF
+	    R0=~R0;
 	return R0;
 }
-#endif
+
 //.Entry	Gen_Checksum,^M<R3,R4>
 //
 //	R0 = PtclT;		// Start with the protocol code
