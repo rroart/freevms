@@ -45,7 +45,15 @@ int exe$insioq (struct _ucb * u, struct _irp * i) {
   return;
 }
 
-asmlinkage int exe$qiow (void) { /* dummy yet */ };
+asmlinkage int exe$qiow (struct struct_qio * q) {
+
+  /* I think this is about it */
+
+  int status=exe$qio(q);
+  if ((status&1)==0) return status;
+  return exe$synch(q->efn,q->iosb);
+
+}
 
 /* put this into a struct */
 asmlinkage int exe$qio (struct struct_qio * q) {
@@ -72,7 +80,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   i->irp$w_chan=q->chan;
   i->irp$w_func=q->func;
   i->irp$l_ucb=ctl$gl_ccbbase[q->chan].ccb$l_ucb;
-  i->irp$l_pid=current; /* wrong? */
+  i->irp$l_pid=current->pid;
   /* do preprocessing */
   /* does it do one or more functions */
   //  for(c=0,d=1;c<64;c++,d=d<1) /* right order? */
