@@ -35,7 +35,7 @@ int sch$qend(struct _pcb * p) {
      */
   }
   //  p->need_resched = 1;
-  if (mydebug) printk("quend %x %x\n",p->pid,p->need_resched);
+  if (mydebug) printk("quend %x %x\n",p->pcb$l_pid,p->need_resched);
   {
     //    struct list_head * tmp;
     struct _pcb * e, * next;

@@ -51,8 +51,8 @@ int fs_overflowgid = DEFAULT_FS_OVERFLOWUID;
  * this indicates whether you can reboot with ctrl-alt-del: the default is yes
  */
 
-int C_A_D = 1;
-int cad_pid = 1;
+int C_A_D = INIT_PID;
+int cad_pid = INIT_PID;
 
 
 /*
@@ -202,13 +202,13 @@ asmlinkage long sys_$ni_syscall3(void)
 
 static int proc_sel(struct task_struct *p, int which, int who)
 {
-	if(p->pid)
+	if(p->pcb$l_pid)
 	{
 		switch (which) {
 			case PRIO_PROCESS:
 				if (!who && p == current)
 					return 1;
-				return(p->pid == who);
+				return(p->pcb$l_pid == who);
 			case PRIO_PGRP:
 				if (!who)
 					who = current->pgrp;
@@ -240,7 +240,7 @@ asmlinkage long sys_setpriority(int which, int who, int niceval)
 	niceval = 31 - niceval; 
 
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
+	for_each_task_pre1(p) {
 		if (!proc_sel(p, which, who))
 			continue;
 		if (p->uid != current->euid &&
@@ -253,6 +253,7 @@ asmlinkage long sys_setpriority(int which, int who, int niceval)
 		else
 			p->pcb$b_prib = niceval;
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 
 	return error;
@@ -273,7 +274,7 @@ asmlinkage long sys_getpriority(int which, int who)
 		return -EINVAL;
 
 	read_lock(&tasklist_lock);
-	for_each_task (p) {
+	for_each_task_pre1 (p) {
 		long niceval;
 		if (!proc_sel(p, which, who))
 			continue;
@@ -281,6 +282,7 @@ asmlinkage long sys_getpriority(int which, int who)
 		if (niceval > retval)
 			retval = niceval;
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 
 	return retval;
@@ -852,7 +854,7 @@ asmlinkage long sys_setpgid(pid_t pid, pid_t pgid)
 	int err = -EINVAL;
 
 	if (!pid)
-		pid = current->pid;
+		pid = current->pcb$l_epid;
 	if (!pgid)
 		pgid = pid;
 	if (pgid < 0)
@@ -864,7 +866,7 @@ asmlinkage long sys_setpgid(pid_t pid, pid_t pgid)
 	read_lock(&tasklist_lock);
 
 	err = -ESRCH;
-	p = find_task_by_pid(pid);
+	p = exe$epid_to_pcb(pid);
 	if (!p)
 		goto out;
 
@@ -882,11 +884,12 @@ asmlinkage long sys_setpgid(pid_t pid, pid_t pgid)
 		goto out;
 	if (pgid != pid) {
 		struct task_struct * tmp;
-		for_each_task (tmp) {
+		for_each_task_pre1 (tmp) {
 			if (tmp->pgrp == pgid &&
 			    tmp->session == current->session)
 				goto ok_pgid;
 		}
+		for_each_task_post1(tmp);
 		goto out;
 	}
 
@@ -949,13 +952,14 @@ asmlinkage long sys_setsid(void)
 	int err = -EPERM;
 
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
-		if (p->pgrp == current->pid)
+	for_each_task_pre1(p) {
+		if (p->pgrp == current->pcb$l_pid)
 			goto out;
 	}
+	for_each_task_post1(p);
 
 	current->leader = 1;
-	current->session = current->pgrp = current->pid;
+	current->session = current->pgrp = current->pcb$l_pid;
 	current->tty = NULL;
 	current->tty_old_pgrp = 0;
 	err = current->pgrp;

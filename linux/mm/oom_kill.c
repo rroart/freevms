@@ -104,7 +104,7 @@ static int badness(struct task_struct *p)
 		points /= 4;
 #ifdef DEBUG
 	printk(KERN_DEBUG "OOMkill: task %d (%s) got %d points\n",
-	p->pid, p->pcb$t_lname, points);
+	p->pcb$l_pid, p->pcb$t_lname, points);
 #endif
 	return points;
 }
@@ -123,8 +123,8 @@ static struct task_struct * select_bad_process(void)
 	struct task_struct *chosen = NULL;
 
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
-		if (p->pid) {
+	for_each_task_pre1(p) {
+		if (p->pcb$l_pid) {
 			int points = badness(p);
 			if (points > maxpoints) {
 				chosen = p;
@@ -132,6 +132,7 @@ static struct task_struct * select_bad_process(void)
 			}
 		}
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 	return chosen;
 }
@@ -143,7 +144,7 @@ static struct task_struct * select_bad_process(void)
  */
 void oom_kill_task(struct task_struct *p)
 {
-	printk(KERN_ERR "Out of Memory: Killed process %d (%s).\n", p->pid, p->pcb$t_lname);
+	printk(KERN_ERR "Out of Memory: Killed process %d (%s).\n", p->pcb$l_pid, p->pcb$t_lname);
 
 	/*
 	 * We give our sacrificial lamb high priority and access to
@@ -179,9 +180,10 @@ static void oom_kill(void)
 
 	/* kill all processes that share the ->mm (i.e. all threads) */
 	read_lock(&tasklist_lock);
-	for_each_task(q) {
+	for_each_task_pre1(q) {
 		if(q->mm == p->mm) oom_kill_task(q);
 	}
+	for_each_task_post1(q);
 	read_unlock(&tasklist_lock);
 
 	/*

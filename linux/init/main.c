@@ -876,7 +876,7 @@ static int init(void * unused)
 	unlock_kernel();
 	//	mydebug5=1;
 	//	mydebug6=1;
-	printk("%%KERNEL-I-DEBUG, After unlock_kernel %x %x %x %x %x %x %x %x\n",current,current->pid,current->mm,current->active_mm,&init_task,init_task.pid,init_task.mm,init_task.active_mm);
+	printk("%%KERNEL-I-DEBUG, After unlock_kernel %x %x %x %x %x %x %x %x\n",current,current->pcb$l_pid,current->mm,current->active_mm,&init_task,init_task.pcb$l_pid,init_task.mm,init_task.active_mm);
 	if (open("/dev/console", O_RDWR, 0) < 0)
 		printk("Warning: unable to open an initial console.\n");
 	printk("%%KERNEL-I-DEBUG, Before dup\n");

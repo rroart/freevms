@@ -277,7 +277,7 @@ static int netlink_autobind(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 	struct sock *osk;
-	s32 pid = current->pid;
+	s32 pid = current->pcb$l_pid;
 	int err;
 
 retry:

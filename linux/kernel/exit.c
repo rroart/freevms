@@ -50,8 +50,7 @@ static void release_task(struct task_struct * p)
 #endif
 		atomic_dec(&p->user->processes);
 		free_uid(p->user);
-		unhash_process(p);
-
+		REMOVE_LINKS(p);
 		release_thread(p);
 		current->cmin_flt += p->min_flt + p->cmin_flt;
 		current->cmaj_flt += p->maj_flt + p->cmaj_flt;
@@ -65,7 +64,7 @@ static void release_task(struct task_struct * p)
 		 * timeslices, because any timeslice recovered here
 		 * was given away by the parent in the first place.)
 		 */
-		p->pid = 0;
+		p->pcb$l_pid = 0;
 		{
 		  unsigned long * vec=sch$gl_pcbvec;
 		  vec[p->pcb$l_pid&0xffff]=0;
@@ -88,16 +87,17 @@ int session_of_pgrp(int pgrp)
 
 	fallback = -1;
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
+	for_each_task_pre1(p) {
  		if (p->session <= 0)
  			continue;
 		if (p->pgrp == pgrp) {
 			fallback = p->session;
 			break;
 		}
-		if (p->pid == pgrp)
+		if (p->pcb$l_pid == pgrp)
 			fallback = p->session;
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 	return fallback;
 }
@@ -115,10 +115,10 @@ static int will_become_orphaned_pgrp(int pgrp, struct task_struct * ignored_task
 	struct task_struct *p;
 
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
+	for_each_task_pre1(p) {
 		if ((p == ignored_task) || (p->pgrp != pgrp) ||
 		    (p->state == TASK_ZOMBIE) ||
-		    (p->p_pptr->pid == 1))
+		    (p->p_pptr->pcb$l_pid == INIT_PID))
 			continue;
 		if ((p->p_pptr->pgrp != pgrp) &&
 		    (p->p_pptr->session == p->session)) {
@@ -126,6 +126,7 @@ static int will_become_orphaned_pgrp(int pgrp, struct task_struct * ignored_task
  			return 0;
 		}
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 	return 1;	/* (sighing) "Often!" */
 }
@@ -141,7 +142,7 @@ static inline int has_stopped_jobs(int pgrp)
 	struct task_struct * p;
 
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
+	for_each_task_pre1(p) {
 		if (p->pgrp != pgrp)
 			continue;
 		if (p->state != TASK_STOPPED)
@@ -149,6 +150,7 @@ static inline int has_stopped_jobs(int pgrp)
 		retval = 1;
 		break;
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 	return retval;
 }
@@ -170,7 +172,7 @@ static inline void forget_original_parent(struct task_struct * father)
 	if (reaper == father)
 		reaper = child_reaper;
 
-	for_each_task(p) {
+	for_each_task_pre1(p) {
 		if (p->p_opptr == father) {
 			/* We dont want people slaying init */
 			p->exit_signal = SIGCHLD;
@@ -185,6 +187,7 @@ static inline void forget_original_parent(struct task_struct * father)
 			if (p->pdeath_signal) send_sig(p->pdeath_signal, p, 0);
 		}
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 }
 
@@ -441,9 +444,9 @@ NORET_TYPE void do_exit(long code)
 
 	//	if (in_interrupt())
 	//		panic("Aiee, killing interrupt handler!");
-	if (!tsk->pid)
+	if (!tsk->pcb$l_pid)
 		panic("Attempted to kill the idle task!");
-	if (tsk->pid == 1)
+	if (tsk->pcb$l_pid == INIT_PID)
 		panic("Attempted to kill init!");
 
 	if (tsk->pcb$b_prib!=31) {
@@ -538,6 +541,9 @@ asmlinkage long sys_wait4(pid_t pid,unsigned int * stat_addr, int options, struc
 	DECLARE_WAITQUEUE(wait, current);
 	struct task_struct *tsk;
 
+	if (pid>0)
+	  pid = exe$epid_to_ipid(pid);
+
 	if (options & ~(WNOHANG|WUNTRACED|__WNOTHREAD|__WCLONE|__WALL))
 		return -EINVAL;
 
@@ -551,7 +557,7 @@ repeat:
 		struct task_struct *p;
 	 	for (p = tsk->p_cptr ; p ; p = p->p_osptr) {
 			if (pid>0) {
-				if (p->pid != pid)
+				if (p->pcb$l_pid != pid)
 					continue;
 			} else if (!pid) {
 				if (p->pgrp != current->pgrp)
@@ -581,7 +587,7 @@ repeat:
 					retval = put_user((p->exit_code << 8) | 0x7f, stat_addr);
 				if (!retval) {
 					p->exit_code = 0;
-					retval = p->pid;
+					retval = p->pcb$l_epid;
 				}
 				goto end_wait4;
 			case TASK_ZOMBIE:
@@ -593,7 +599,7 @@ repeat:
 					retval = put_user(p->exit_code, stat_addr);
 				if (retval)
 					goto end_wait4; 
-				retval = p->pid;
+				retval = p->pcb$l_epid;
 				if (p->p_opptr != p->p_pptr) {
 					write_lock_irq(&tasklist_lock);
 					REMOVE_LINKS(p);

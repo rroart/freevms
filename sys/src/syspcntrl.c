@@ -42,6 +42,7 @@ int alloc_ipid() {
       return i| ((seq[i]++)<<16);
     }
   }
+  printk(KERN_EMERG "alloc_ipid 0\n");
   return 0;
 }
 
@@ -52,26 +53,32 @@ void * exe$epid_to_pcb(unsigned long pid) {
 }
 extern long csid;
 int exe$epid_to_ipid(unsigned long pid) {
+  if (pid == INIT_PID_REAL) return INIT_PID; // handle init 1
   unsigned long *vec=sch$gl_pcbvec;
   long mask = process_index_mask();
   struct _pcb * p;
   if ((csid&0xff)==(pid>>21)) {
     int ipid=(pid&mask)|(((pid&0x1ffff)>>process_bit_shift())<<16);
     if (vec[ipid&0xffff] && ((struct _pcb *)vec[ipid&0xffff])->pcb$l_pid==ipid)
+      { } else
+    printk(KERN_EMERG "panic? ipid %x %x %x %x\n",pid,ipid,((struct _pcb *)vec[ipid&0xffff])->pcb$l_pid,((struct _pcb *)vec[ipid&0xffff])->pcb$l_epid);
       return ipid;
-    panic("ipid\n");
   }
   if ((pid&0xfffe0000))
     return 0;
+  return 0;
   p = find_process_by_pid(pid); // linux pid compatibility? may bug...
   if (p) return p->pcb$l_pid;
   return 0;
 }
 void * exe$ipid_to_pcb(unsigned long pid) {
   int i;
+  if (pid>10000) printk(KERN_EMERG "EXE %x\n",pid);
+  if (pid>sch$gl_maxpix) return 0;
   unsigned long *vec=sch$gl_pcbvec;
   if (vec[pid&0xffff] && ((struct _pcb *)vec[pid&0xffff])->pcb$l_pid==pid)
     return vec[pid&0xffff];
+  return 0;
   return find_process_by_pid(pid); // linux pid compatibility? may bug...
 }
 int exe$ipid_to_epid(unsigned long pid) {
@@ -163,6 +170,7 @@ int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb 
   return 0;
 }
 
+#if 0
 /* return params not as specified */
 void * exe$nampid2(struct _pcb *p, unsigned long *pidadr, void *prcnam) {
   /* sched spinlock */
@@ -185,6 +193,7 @@ void * exe$nampid2(struct _pcb *p, unsigned long *pidadr, void *prcnam) {
   vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
   return 0;
 }
+#endif
 
 asmlinkage int exe$wake(unsigned long *pidadr, void *prcnam) {
   struct _pcb * retpcb, *p;
@@ -225,6 +234,11 @@ asmlinkage int exe$setprn(struct dsc$descriptor *s) {
   return SS$_NORMAL;
 }
 
-
-
-
+inline void *find_task_by_pid(int pid) {
+  int tsk;
+  tsk=exe$ipid_to_pcb(pid);
+  if (tsk) return tsk;
+  long *x=&tsk;
+  printk(KERN_EMERG "FIND %d %x %x %x %x %x %x %x %x %x %x\n",pid,pid,x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8]);
+  return 0;
+}

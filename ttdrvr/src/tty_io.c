@@ -502,7 +502,7 @@ void do_tty_hangup(void *data)
 	}
 	
 	read_lock(&tasklist_lock);
- 	for_each_task(p) {
+ 	for_each_task_pre1(p) {
 		if ((tty->session > 0) && (p->session == tty->session) &&
 		    p->leader) {
 			send_sig(SIGHUP,p,1);
@@ -513,6 +513,7 @@ void do_tty_hangup(void *data)
 		if (p->tty == tty)
 			p->tty = NULL;
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 
 	tty->flags = 0;
@@ -605,9 +606,10 @@ void disassociate_ctty(int on_exit)
 	tty->pgrp = -1;
 
 	read_lock(&tasklist_lock);
-	for_each_task(p)
+	for_each_task_pre1(p)
 	  	if (p->session == current->session)
 			p->tty = NULL;
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 }
 
@@ -1265,10 +1267,11 @@ static void release_dev(struct file * filp)
 		struct task_struct *p;
 
 		read_lock(&tasklist_lock);
-		for_each_task(p) {
+		for_each_task_pre1(p) {
 			if (p->tty == tty || (o_tty && p->tty == o_tty))
 				p->tty = NULL;
 		}
+		for_each_task_post1(p);
 		read_unlock(&tasklist_lock);
 
 		if (redirect == tty || (o_tty && redirect == o_tty))
@@ -1459,7 +1462,7 @@ init_dev_done:
 			printk(KERN_WARNING "tty_io.c: "
 				"process %d (%s) used obsolete /dev/%s - "
 				"update software to use /dev/ttyS%d\n",
-				current->pid, current->pcb$t_lname,
+				current->pcb$l_pid, current->pcb$t_lname,
 				tty_name(tty, buf), TTY_NUMBER(tty));
 			nr_warns++;
 		}
@@ -1506,7 +1509,7 @@ static int tty_fasync(int fd, struct file * filp, int on)
 		if (!waitqueue_active(&tty->read_wait))
 			tty->minimum_to_wake = 1;
 		if (filp->f_owner.pid == 0) {
-			filp->f_owner.pid = (-tty->pgrp) ? : current->pid;
+			filp->f_owner.pid = (-tty->pgrp) ? : current->pcb$l_pid;
 			filp->f_owner.uid = current->uid;
 			filp->f_owner.euid = current->euid;
 		}
@@ -1608,9 +1611,10 @@ static int tiocsctty(struct tty_struct *tty, int arg)
 			struct task_struct *p;
 
 			read_lock(&tasklist_lock);
-			for_each_task(p)
+			for_each_task_pre1(p)
 				if (p->tty == tty)
 					p->tty = NULL;
+			for_each_task_post1(p);
 			read_unlock(&tasklist_lock);
 		} else
 			return -EPERM;
@@ -1881,7 +1885,7 @@ static void __do_SAK(void *arg)
 	if (tty->driver.flush_buffer)
 		tty->driver.flush_buffer(tty);
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
+	for_each_task_pre1(p) {
 		if ((p->tty == tty) ||
 		    ((session > 0) && (p->session == session))) {
 			send_sig(SIGKILL, p, 1);
@@ -1902,6 +1906,7 @@ static void __do_SAK(void *arg)
 		}
 		task_unlock(p);
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 #endif
 }

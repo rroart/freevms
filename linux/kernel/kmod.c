@@ -89,8 +89,8 @@ int exec_usermodehelper(char *program_path, char *argv[], char *envp[])
 	int i;
 	struct task_struct *curtask = current;
 
-	curtask->session = 1;
-	curtask->pgrp = 1;
+	curtask->session = INIT_PID;
+	curtask->pgrp = INIT_PID;
 
 	use_init_fs_context();
 

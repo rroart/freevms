@@ -1413,7 +1413,7 @@ unsigned long sch$gl_freereq;
 unsigned long sch$gl_growlim;
 unsigned long sch$gl_idle_cpus;
 unsigned long sch$gl_max_sched_class;
-unsigned long sch$gl_maxpix;
+unsigned long sch$gl_maxpix=MAXPROCESSCNT;
 unsigned long sch$gl_mfycnt=0;
 unsigned long sch$gl_mfylim=64;
 unsigned long sch$gl_mfylimsv;

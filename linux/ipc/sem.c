@@ -903,7 +903,7 @@ asmlinkage long sys_semop (int semid, struct sembuf *tsops, unsigned nsops)
 	} else
 		un = NULL;
 
-	error = try_atomic_semop (sma, sops, nsops, un, current->pid, 0);
+	error = try_atomic_semop (sma, sops, nsops, un, current->pcb$l_pid, 0);
 	if (error <= 0)
 		goto update;
 
@@ -915,7 +915,7 @@ asmlinkage long sys_semop (int semid, struct sembuf *tsops, unsigned nsops)
 	queue.sops = sops;
 	queue.nsops = nsops;
 	queue.undo = un;
-	queue.pid = current->pid;
+	queue.pid = current->pcb$l_pid;
 	queue.alter = decrease;
 	queue.id = semid;
 	if (alter)
@@ -951,7 +951,7 @@ asmlinkage long sys_semop (int semid, struct sembuf *tsops, unsigned nsops)
 		if (queue.status == 1)
 		{
 			error = try_atomic_semop (sma, sops, nsops, un,
-						  current->pid,0);
+						  current->pcb$l_pid,0);
 			if (error <= 0) 
 				break;
 		} else {
@@ -1042,7 +1042,7 @@ found:
 			sem->semval += u->semadj[i];
 			if (sem->semval < 0)
 				sem->semval = 0; /* shouldn't happen */
-			sem->sempid = current->pid;
+			sem->sempid = current->pcb$l_pid;
 		}
 		sma->sem_otime = CURRENT_TIME;
 		/* maybe some queued-up processes were waiting for this */

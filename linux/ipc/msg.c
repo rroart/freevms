@@ -613,7 +613,7 @@ int inline pipelined_send(struct msg_queue* msq, struct msg_msg* msg)
 				wake_up_process(msr->r_tsk);
 			} else {
 				msr->r_msg = msg;
-				msq->q_lrpid = msr->r_tsk->pid;
+				msq->q_lrpid = msr->r_tsk->pcb$l_pid;
 				msq->q_rtime = CURRENT_TIME;
 				wake_up_process(msr->r_tsk);
 				return 1;
@@ -683,7 +683,7 @@ retry:
 		goto retry;
 	}
 
-	msq->q_lspid = current->pid;
+	msq->q_lspid = current->pcb$l_pid;
 	msq->q_stime = CURRENT_TIME;
 
 	if(!pipelined_send(msq,msg)) {
@@ -776,7 +776,7 @@ retry:
 		list_del(&msg->m_list);
 		msq->q_qnum--;
 		msq->q_rtime = CURRENT_TIME;
-		msq->q_lrpid = current->pid;
+		msq->q_lrpid = current->pcb$l_pid;
 		msq->q_cbytes -= msg->m_ts;
 		atomic_sub(msg->m_ts,&msg_bytes);
 		atomic_dec(&msg_hdrs);

@@ -586,4 +586,3 @@ EXPORT_SYMBOL(__tasklet_hi_schedule);
 EXPORT_SYMBOL(init_task_union);
 
 EXPORT_SYMBOL(tasklist_lock);
-EXPORT_SYMBOL(pidhash);

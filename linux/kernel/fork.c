@@ -41,8 +41,6 @@ int max_threads;
 unsigned long total_forks;	/* Handle normal Linux uptimes. */
 int last_pid;
 
-struct task_struct *pidhash[PIDHASH_SZ];
-
 void add_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
 {
 	unsigned long flags;
@@ -87,52 +85,6 @@ void __init fork_init(unsigned long mempages)
 
 /* Protects next_safe and last_pid. */
 spinlock_t lastpid_lock = SPIN_LOCK_UNLOCKED;
-
-/*static*/ int get_pid(unsigned long flags)
-{
-	static int next_safe = PID_MAX;
-	struct task_struct *p;
-	int pid;
-
-	if (flags & CLONE_PID)
-		return current->pid;
-
-	spin_lock(&lastpid_lock);
-	if((++last_pid) & 0xffff8000) {
-		last_pid = 300;		/* Skip daemons etc. */
-		goto inside;
-	}
-	if(last_pid >= next_safe) {
-inside:
-		next_safe = PID_MAX;
-		read_lock(&tasklist_lock);
-	repeat:
-		for_each_task(p) {
-			if(p->pid == last_pid	||
-			   p->pgrp == last_pid	||
-			   p->tgid == last_pid	||
-			   p->session == last_pid) {
-				if(++last_pid >= next_safe) {
-					if(last_pid & 0xffff8000)
-						last_pid = 300;
-					next_safe = PID_MAX;
-				}
-				goto repeat;
-			}
-			if(p->pid > last_pid && next_safe > p->pid)
-				next_safe = p->pid;
-			if(p->pgrp > last_pid && next_safe > p->pgrp)
-				next_safe = p->pgrp;
-			if(p->session > last_pid && next_safe > p->session)
-				next_safe = p->session;
-		}
-		read_unlock(&tasklist_lock);
-	}
-	pid = last_pid;
-	spin_unlock(&lastpid_lock);
-
-	return pid;
-}
 
 static inline int dup_mmap(struct mm_struct * mm)
 {
@@ -402,7 +354,7 @@ static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
 	tsk->nswap = tsk->cnswap = 0;
 
 	if (mydebug4) {
-	printk("copy_mm %x %x %x %x\n",tsk,tsk->pid,tsk->mm,tsk->active_mm);
+	printk("copy_mm %x %x %x %x\n",tsk,tsk->pcb$l_pid,tsk->mm,tsk->active_mm);
     { int j; for(j=0;j<1000000000;j++) ; }
 	}
 	tsk->mm = NULL;
@@ -676,7 +628,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	 * calls
 	 */
 	if (clone_flags & CLONE_PID) {
-		if (current->pid)
+		if (current->pcb$l_pid)
 			goto fork_out;
 	}
 
@@ -719,7 +671,6 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	p->state = TASK_UNINTERRUPTIBLE;
 
 	copy_flags(clone_flags, p);
-	p->pid = get_pid(clone_flags);
 	p->pcb$l_pid=alloc_ipid();
 	{
 	  unsigned long *vec=sch$gl_pcbvec;
@@ -805,8 +756,8 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	dup_phd(p,current);
 	if (copy_mm(clone_flags, p))
 		goto bad_fork_cleanup_sighand;
-	//printk("phd %x %x %x\n",tsk,tsk->pid,tsk->pcb$l_phd);
-	//printk("phd %x %x %x\n",current,current->pid,current->pcb$l_phd);
+	//printk("phd %x %x %x\n",tsk,tsk->pcb$l_pid,tsk->pcb$l_phd);
+	//printk("phd %x %x %x\n",current,current->pcb$l_pid,current->pcb$l_phd);
 	retval = copy_thread(0, clone_flags, stack_start, stack_size, p, regs);
 	if (retval)
 		goto bad_fork_cleanup_mm;
@@ -852,8 +803,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	 *
 	 * Let it rip!
 	 */
-	retval = p->pid;
-	p->tgid = retval;
+	retval = p->pcb$l_epid;
 	INIT_LIST_HEAD(&p->thread_group);
 
 	/* Need tasklist lock for parent etc handling! */
@@ -869,12 +819,13 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	}
 
 	if (clone_flags & CLONE_THREAD) {
+#if 0
 		p->tgid = current->tgid;
+#endif
 		list_add(&p->thread_group, &current->thread_group);
 	}
 
 	SET_LINKS(p);
-	hash_pid(p);
 	nr_threads++;
 	write_unlock_irq(&tasklist_lock);
 

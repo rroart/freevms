@@ -32,7 +32,7 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
       break;
 
     case JPI$_MASTER_PID:
-      bcopy(&p->pid,it->bufaddr,4);
+      bcopy(&p->pcb$l_pid,it->bufaddr,4);
       break;
 
     case JPI$_STATE:

@@ -953,7 +953,7 @@ int proc_dointvec_bset(ctl_table *table, int write, struct file *filp,
 		return -EPERM;
 	}
 	return do_proc_dointvec(table,write,filp,buffer,lenp,1,
-				(current->pid == 1) ? OP_SET : OP_AND);
+				(current->pcb$l_pid == 1) ? OP_SET : OP_AND);
 }
 
 /**

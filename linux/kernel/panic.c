@@ -58,7 +58,7 @@ NORET_TYPE void panic(const char * fmt, ...)
 		printk(KERN_EMERG "In interrupt handler - not syncing\n");
 		printk(KERN_EMERG "Kernel panic: %s\n",buf);
 	}
-	else if (!current->pid)
+	else if (!current->pcb$l_pid)
 		printk(KERN_EMERG "In idle task - not syncing\n");
 	else
 		sys_sync();

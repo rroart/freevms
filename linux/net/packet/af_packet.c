@@ -1448,7 +1448,7 @@ static int packet_ioctl(struct socket *sock, unsigned int cmd,
 			int pid;
 			if (get_user(pid, (int *) arg))
 				return -EFAULT; 
-			if (current->pid != pid && current->pgrp != -pid && 
+			if (current->pcb$l_pid != pid && current->pgrp != -pid && 
 			    !capable(CAP_NET_ADMIN))
 				return -EPERM;
 			sk->proc = pid;

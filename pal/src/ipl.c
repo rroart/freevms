@@ -47,7 +47,7 @@ inline asmlinkage void pushpsl(void) {
   //  panic("xyz\n");
   current->pslstk[current->pslindex++]=current->psl;
   if(current->pslindex<0 || current->pslindex>30) {
-    printk("push %x %x\n",current->pid,current->pslindex);
+    printk("push %x %x\n",current->pcb$l_pid,current->pslindex);
     panic("push\n");
   }
 #if 0
@@ -63,7 +63,7 @@ inline asmlinkage void poppsl(void) {
   current->psl=current->pslstk[--(current->pslindex)];
   smp$gl_cpu_data[this_cpu]->cpu$b_ipl=current->psl_ipl;
   if(current->pslindex<0 || current->pslindex>30) {
-    printk("pop %x %x\n",current->pid,current->pslindex);
+    printk("pop %x %x\n",current->pcb$l_pid,current->pslindex);
     if (0) { int dummy;
     unsigned char *i;
     int j=0;
@@ -204,7 +204,7 @@ inline char intr_blocked(unsigned char this) {
   int flag=mycli();
   int this_cpu = smp_processor_id();
   struct _pcb * p=current;
-  if (mydebugi>1) printk("bl %x %x %x %x\n",p->pid,this,smp$gl_cpu_data[this_cpu]->cpu$w_sisr,p->pslindex);
+  if (mydebugi>1) printk("bl %x %x %x %x\n",p->pcb$l_pid,this,smp$gl_cpu_data[this_cpu]->cpu$w_sisr,p->pslindex);
   if (this<=smp$gl_cpu_data[this_cpu]->cpu$b_ipl) {
     if (this<16) smp$gl_cpu_data[this_cpu]->cpu$w_sisr|=(1<<this);
     // if (mydebugi>0) printk("blocked %x %x\n",this,smp$gl_cpu_data[this_cpu]->cpu$b_ipl);
@@ -251,10 +251,10 @@ inline char intr_blocked(unsigned char this) {
 asmlinkage void do_sw_int(void) {
   int this_cpu = smp_processor_id();
   int i, j, sisr=smp$gl_cpu_data[this_cpu]->cpu$w_sisr;
-  if (mydebugi>1) printk("swint2 %x %x %x\n",current->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
+  if (mydebugi>1) printk("swint2 %x %x %x\n",current->pcb$l_pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
   for(i=15,j=0x8000;i>smp$gl_cpu_data[this_cpu]->cpu$b_ipl;i--,j=j>>1) 
     if (sisr & j) {
-      if (mydebugi>0) printk("swint %x %x %x\n",current->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
+      if (mydebugi>0) printk("swint %x %x %x\n",current->pcb$l_pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
       switch (i) {
 	case 12:
 	  /* IPC something */
@@ -304,8 +304,8 @@ asmlinkage void myrei (void) {
   }
   flag=mycli();
   this_cpu=smp_processor_id();
-  if (mydebugi>1) printk("bl %x %x %x\n",p->pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
-  if (mydebugi>1) printk("befpop %x %x ",p->pid,p->psl_ipl);
+  if (mydebugi>1) printk("bl %x %x %x\n",p->pcb$l_pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
+  if (mydebugi>1) printk("befpop %x %x ",p->pcb$l_pid,p->psl_ipl);
   poppsl();
   if (mydebugi>1) printk("%x\n",p->psl_ipl);
   if (p->psl_is==1 && p->psl_ipl==0) panic("is ipl\n");
@@ -344,7 +344,7 @@ int inline mycli(void) {
   spin_lock(SPIN_ATOMIC);
   __save_flags(flags);
   retval=flags&0x00000200; /* interrupt enable/disable flag */
-  if (in_atomic && in_atomic==current->pid) {
+  if (in_atomic && in_atomic==current->pcb$l_pid) {
 #ifdef __i386__
     long long l;
     for(l=0;l<20;l++) printk("%x ",prev1[l]);
@@ -356,9 +356,9 @@ int inline mycli(void) {
     sickinsque(0x10000000,0x20000000);
     panic("test\n");
   }
-  if (in_atomic && in_atomic!=current->pid) printk("halfpancimycli\n");
+  if (in_atomic && in_atomic!=current->pcb$l_pid) printk("halfpancimycli\n");
   __cli();
-  in_atomic=current->pid;
+  in_atomic=current->pcb$l_pid;
   { unsigned long *l=&flags;
   int i;
   for(i=0;i<20;i++) prev1[i]=l[i];
@@ -377,10 +377,10 @@ void inline mysti(int flags) {
 int inline mycli(void) {
   int retval=timer_on;
   spin_lock(SPIN_ATOMIC);
-  if (in_atomic && in_atomic==current->pid) panic("test\n");
-  if (in_atomic && in_atomic!=current->pid) printk("halfpancimycli\n");
+  if (in_atomic && in_atomic==current->pcb$l_pid) panic("test\n");
+  if (in_atomic && in_atomic!=current->pcb$l_pid) printk("halfpancimycli\n");
   block_signals();
-  in_atomic=current->pid;
+  in_atomic=current->pcb$l_pid;
   return retval;
 }
 #endif

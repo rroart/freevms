@@ -47,7 +47,7 @@ asmlinkage long sys_capget(cap_user_header_t header, cap_user_data_t dataptr)
 
      spin_lock(&task_capability_lock);
 
-     if (pid && pid != current->pid) {
+     if (pid && pid != current->pcb$l_pid) {
 	     read_lock(&tasklist_lock); 
              target = find_task_by_pid(pid);  /* identify target of query */
              if (!target) 
@@ -85,13 +85,14 @@ static void cap_set_pg(int pgrp,
 
      /* FIXME: do we need to have a write lock here..? */
      read_lock(&tasklist_lock);
-     for_each_task(target) {
+     for_each_task_pre1(target) {
              if (target->pgrp != pgrp)
                      continue;
              target->cap_effective   = *effective;
              target->cap_inheritable = *inheritable;
              target->cap_permitted   = *permitted;
      }
+     for_each_task_post1(target);
      read_unlock(&tasklist_lock);
 }
 
@@ -106,13 +107,14 @@ static void cap_set_all(kernel_cap_t *effective,
      /* FIXME: do we need to have a write lock here..? */
      read_lock(&tasklist_lock);
      /* ALL means everyone other than self or 'init' */
-     for_each_task(target) {
-             if (target == current || target->pid == 1)
+     for_each_task_pre1(target) {
+             if (target == current || target->pcb$l_pid == INIT_PID)
                      continue;
              target->cap_effective   = *effective;
              target->cap_inheritable = *inheritable;
              target->cap_permitted   = *permitted;
      }
+     for_each_task_post1(target);
      read_unlock(&tasklist_lock);
 }
 
@@ -157,7 +159,7 @@ asmlinkage long sys_capset(cap_user_header_t header, const cap_user_data_t data)
      error = -EPERM;
      spin_lock(&task_capability_lock);
 
-     if (pid > 0 && pid != current->pid) {
+     if (pid > 0 && pid != current->pcb$l_pid) {
              read_lock(&tasklist_lock);
              target = find_task_by_pid(pid);  /* identify target of query */
              if (!target) {

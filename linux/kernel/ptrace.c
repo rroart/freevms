@@ -55,7 +55,7 @@ int ptrace_check_attach(struct task_struct *child, int kill)
 int ptrace_attach(struct task_struct *task)
 {
 	task_lock(task);
-	if (task->pid <= 1)
+	if (task->pcb$l_pid <= INIT_PID)
 		goto bad;
 	if (task == current)
 		goto bad;

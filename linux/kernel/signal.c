@@ -237,7 +237,7 @@ dequeue_signal(sigset_t *mask, siginfo_t *info)
 	int sig = 0;
 
 #if DEBUG_SIG
-printk("SIG dequeue (%s:%d): %d ", current->pcb$t_lname, current->pid,
+printk("SIG dequeue (%s:%d): %d ", current->pcb$t_lname, current->pcb$l_pid,
 	signal_pending(current));
 #endif
 
@@ -425,7 +425,7 @@ static int send_signal(int sig, struct siginfo *info, struct sigpending *signals
 				q->info.si_signo = sig;
 				q->info.si_errno = 0;
 				q->info.si_code = SI_USER;
-				q->info.si_pid = current->pid;
+				q->info.si_pid = current->pcb$l_pid;
 				q->info.si_uid = current->uid;
 				break;
 			case 1:
@@ -508,7 +508,7 @@ send_sig_info(int sig, struct siginfo *info, struct task_struct *t)
 
 
 #if DEBUG_SIG
-printk("SIG queue (%s:%d): %d ", t->pcb$t_lname, t->pid, sig);
+printk("SIG queue (%s:%d): %d ", t->pcb$t_lname, t->pcb$l_pid, sig);
 #endif
 
 	ret = -EINVAL;
@@ -591,13 +591,14 @@ kill_pg_info(int sig, struct siginfo *info, pid_t pgrp)
 
 		retval = -ESRCH;
 		read_lock(&tasklist_lock);
-		for_each_task(p) {
+		for_each_task_pre1(p) {
 			if (p->pgrp == pgrp) {
 				int err = send_sig_info(sig, info, p);
 				if (retval)
 					retval = err;
 			}
 		}
+		for_each_task_post1(p);
 		read_unlock(&tasklist_lock);
 	}
 	return retval;
@@ -618,13 +619,14 @@ kill_sl_info(int sig, struct siginfo *info, pid_t sess)
 
 		retval = -ESRCH;
 		read_lock(&tasklist_lock);
-		for_each_task(p) {
+		for_each_task_pre1(p) {
 			if (p->leader && p->session == sess) {
 				int err = send_sig_info(sig, info, p);
 				if (retval)
 					retval = err;
 			}
 		}
+		for_each_task_post1(p);
 		read_unlock(&tasklist_lock);
 	}
 	return retval;
@@ -662,14 +664,15 @@ static int kill_something_info(int sig, struct siginfo *info, int pid)
 		struct task_struct * p;
 
 		read_lock(&tasklist_lock);
-		for_each_task(p) {
-			if (p->pid > 1 && p != current) {
+		for_each_task_pre1(p) {
+			if (p->pcb$l_pid > INIT_PID && p != current) {
 				int err = send_sig_info(sig, info, p);
 				++count;
 				if (err != -EPERM)
 					retval = err;
 			}
 		}
+		for_each_task_post1(p);
 		read_unlock(&tasklist_lock);
 		return count ? retval : -ESRCH;
 	} else if (pid < 0) {
@@ -738,7 +741,7 @@ void do_notify_parent(struct task_struct *tsk, int sig)
 
 	info.si_signo = sig;
 	info.si_errno = 0;
-	info.si_pid = tsk->pid;
+	info.si_pid = tsk->pcb$l_pid;
 	info.si_uid = tsk->uid;
 
 	/* FIXME: find out whether or not this is supposed to be c*time. */
@@ -978,11 +981,14 @@ asmlinkage long
 sys_kill(int pid, int sig)
 {
 	struct siginfo info;
+	
+	if (pid>0)
+	  pid = exe$epid_to_ipid(pid);
 
 	info.si_signo = sig;
 	info.si_errno = 0;
 	info.si_code = SI_USER;
-	info.si_pid = current->pid;
+	info.si_pid = current->pcb$l_pid;
 	info.si_uid = current->uid;
 
 	return kill_something_info(sig, &info, pid);
@@ -992,6 +998,9 @@ asmlinkage long
 sys_rt_sigqueueinfo(int pid, int sig, siginfo_t *uinfo)
 {
 	siginfo_t info;
+
+	if (pid>0)
+	  pid = exe$epid_to_ipid(pid);
 
 	if (copy_from_user(&info, uinfo, sizeof(siginfo_t)))
 		return -EFAULT;

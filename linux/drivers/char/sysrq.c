@@ -295,15 +295,16 @@ static void send_sig_all(int sig, int even_init)
 {
 	struct task_struct *p;
 
-	for_each_task(p) {
+	for_each_task_pre1(p) {
 		if (p->mm) { /* Not swapper nor kernel thread */
-			if (p->pid == 1 && even_init)
+			if (p->pcb$l_pid == INIT_PID && even_init)
 				/* Ugly hack to kill init */
-				p->pid = 0x8000;
-			if (p->pid != 1)
+				p->pcb$l_pid = 0x8000;
+			if (p->pcb$l_pid != INIT_PID)
 				force_sig(sig, p);
 		}
 	}
+	for_each_task_post1(p);
 }
 
 static void sysrq_handle_term(int key, struct pt_regs *pt_regs,
@@ -470,7 +471,7 @@ void __handle_sysrq_nolock(int key, struct pt_regs *pt_regs,
 
 	orig_log_level = console_loglevel;
 	console_loglevel = 7;
-	printk(KERN_INFO "Cur %x pid %x pri %x prib %x stat %x while %x\n",current,current->pid,current->pcb$b_pri,current->pcb$b_prib,current->state,in_idle_while);
+	printk(KERN_INFO "Cur %x pid %x pri %x prib %x stat %x while %x\n",current,current->pcb$l_pid,current->pcb$b_pri,current->pcb$b_prib,current->state,in_idle_while);
 	printk(KERN_INFO "Round %x %x\n",round_and_round,nr_running);
 	if (mydebug6) {
 		switch (mydebug5) {
@@ -497,9 +498,9 @@ void __handle_sysrq_nolock(int key, struct pt_regs *pt_regs,
 	tmp2=tmp;
 	printk("com %x ",i);
 	do {
-	  printk("%x %x %x | ",tmp2,tmp2->pid,tmp2->pcb$b_pri);
-	  //	    if (prev->pid==2) { int i; for(i=0;i<1000000;i++) ; }
-	  //	    if (prev->pid==2 && tmp2==0xc03e2340) { int i; for(i=0;i<2000000000;i++) ; }
+	  printk("%x %x %x | ",tmp2,tmp2->pcb$l_pid,tmp2->pcb$b_pri);
+	  //	    if (prev->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
+	  //	    if (prev->pcb$l_pid==2 && tmp2==0xc03e2340) { int i; for(i=0;i<2000000000;i++) ; }
 	  tmp2=tmp2->pcb$l_sqfl;
 	} while (tmp2!=tmp);
 	printk("\n");

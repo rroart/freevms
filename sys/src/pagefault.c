@@ -597,7 +597,7 @@ no_context:
  */
 out_of_memory:
 	up_read(&mm->mmap_sem);
-	if (tsk->pid == 1) {
+	if (tsk->pcb$l_pid == INIT_PID) {
 	  //		tsk->policy |= SCHED_YIELD;
 	  current->need_resched=1;
 		schedule();
@@ -853,7 +853,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 		current->maj_flt++;
 		break;
 	      default:
-		if (current->pid == 1) {
+		if (current->pcb$l_pid == INIT_PID) {
 		  up_read(&mm->mmap_sem);
 		  yield();
 		  down_read(&mm->mmap_sem);
@@ -915,7 +915,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 			current->maj_flt++;
 			break;
 		default:
-			if (current->pid == 1) {
+			if (current->pcb$l_pid == INIT_PID) {
 				up_read(&mm->mmap_sem);
 				yield();
 				down_read(&mm->mmap_sem);

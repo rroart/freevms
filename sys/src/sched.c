@@ -145,7 +145,7 @@ int numproc(void) {
       do {
 	n++;
 	tmp2=tmp2->pcb$l_sqfl;
-	//	printk("%x %x %x & ",tmp2,tmp2->pid,tmp2->pcb$b_pri);
+	//	printk("%x %x %x & ",tmp2,tmp2->pcb$l_pid,tmp2->pcb$b_pri);
       } while (tmp2!=tmp);
       n--;
       //      printk("\n");
@@ -165,7 +165,7 @@ void printcom(void) {
       tmp2=tmp;
       printk(KERN_EMERG "com %x ",i);
       do {
-	printk(KERN_EMERG "%x %x %x %x| ",tmp2,tmp2->pcb$l_sqfl,tmp2->pid,tmp2->pcb$b_pri);
+	printk(KERN_EMERG "%x %x %x %x| ",tmp2,tmp2->pcb$l_sqfl,tmp2->pcb$l_pid,tmp2->pcb$b_pri);
 	tmp2=tmp2->pcb$l_sqfl;
       } while (tmp2!=tmp);
       printk(KERN_EMERG "\n");
@@ -185,7 +185,7 @@ void printcom2(void) {
       tmp2=tmp;
       printk(KERN_EMERG "com %x ",i);
       do {
-	printk(KERN_EMERG "%x %x %x %x| ",tmp2,tmp2->pcb$l_sqbl,tmp2->pid,tmp2->pcb$b_pri);
+	printk(KERN_EMERG "%x %x %x %x| ",tmp2,tmp2->pcb$l_sqbl,tmp2->pcb$l_pid,tmp2->pcb$b_pri);
 	tmp2=tmp2->pcb$l_sqbl;
       } while (tmp2!=tmp);
       printk(KERN_EMERG "\n");
@@ -412,7 +412,7 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
 
   //  p->pcb$b_pri=p->pcb$b_prib-3;  /* boost */ /* not here */
   curpri=p->pcb$b_pri;
-  if (mydebug4) printk("add tyr %x %x\n",p->pid,curpri);
+  if (mydebug4) printk("add tyr %x %x\n",p->pcb$l_pid,curpri);
   qhead=*(unsigned long *)&sch$aq_comt[curpri];
   if (mydebug4) printk("eq qhead %x %x %x %x\n",
 		       (unsigned long *)qhead,(unsigned long *)(qhead+4),
@@ -431,7 +431,7 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   if(after-before!=1) {
     printcom();
     printcom2();
-    panic("insq1 %x %x %x %x\n",p,p->pid,before,after);
+    panic("insq1 %x %x %x %x\n",p,p->pcb$l_pid,before,after);
   }
 
   if (mydebug4) printk("p %x %x %x\n",qhead,*(void**)qhead,p);
@@ -457,7 +457,7 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
       if(*(unsigned long *)tmp == tmp) {; } else {
 	tmp2=((struct _pcb *)tmp)->pcb$l_sqfl->pcb$l_sqfl;
 	do {
-	  printk("com2 %x %x %x %x\n",tmp2,tmp2->pid,tmp2->pcb$b_pri,i);
+	  printk("com2 %x %x %x %x\n",tmp2,tmp2->pcb$l_pid,tmp2->pcb$b_pri,i);
 	  tmp2=tmp2->pcb$l_sqfl;
 	} while (tmp2!=tmp);
       }
@@ -726,7 +726,7 @@ asmlinkage void sch$resched(void) {
       curpcb->pcb$w_state = SCH$C_CUR;
     }
 
-  //  if (curpcb->pid>0 && curpcb->state==TASK_RUNNING) {
+  //  if (curpcb->pcb$l_pid>0 && curpcb->state==TASK_RUNNING) {
   // Need pid 0 in the queue, this is more a linux thingie
   if (!task_on_comqueue(curpcb)) // why???
   if (curpcb->state==TASK_RUNNING) {
@@ -913,7 +913,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
 #ifdef DEBUG_SCHED
   if (mydebug5) { 
-    printk("pri %x %x %x %x %x %x\n",curpcb,curpcb->pid,curpcb->pcb$b_pri,next,next->pid,next->pcb$b_pri);
+    printk("pri %x %x %x %x %x %x\n",curpcb,curpcb->pcb$l_pid,curpcb->pcb$b_pri,next,next->pcb$l_pid,next->pcb$b_pri);
     printk("cpusch %x %x\n",cpu->cpu$b_cur_pri,sch$gl_comqs);
     printcom();
   }
@@ -933,7 +933,6 @@ asmlinkage void sch$sched(int from_sch$resched) {
     return;
   } 
 
-  task_set_cpu(next, cpuid);
   spin_unlock_irq(&runqueue_lock);
   spin_unlock(&SPIN_SCHED);
 
@@ -961,7 +960,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
     struct mm_struct *mm = next->mm;
     struct mm_struct *oldmm = curpcb->active_mm;
     if (!mm) {
-      if (next->active_mm) { printk("bu %x %x %x\n",next,next->pid,next->pcb$b_pri); { int j; for(j=0;j<1000000000;j++) ; }; BUG(); }
+      if (next->active_mm) { printk("bu %x %x %x\n",next,next->pcb$l_pid,next->pcb$b_pri); { int j; for(j=0;j<1000000000;j++) ; }; BUG(); }
       next->active_mm = oldmm;
       atomic_inc(&oldmm->mm_count);
       enter_lazy_tlb(oldmm, next, cpuid);
@@ -1289,7 +1288,11 @@ inline struct task_struct *find_process_by_pid(pid_t pid)
 
 	if (pid)
 		tsk = find_task_by_pid(pid);
+	if (tsk)
 	return tsk;
+        long *x=&tsk;
+        printk(KERN_EMERG "FIND %d %x %x %x %x %x %x %x %x %x %x\n",pid,pid,x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8]);
+	return 0;
 }
 
 static int setscheduler(pid_t pid, int policy, 
@@ -1365,11 +1368,15 @@ out_nounlock:
 asmlinkage long sys_sched_setscheduler(pid_t pid, int policy, 
 				      struct sched_param *param)
 {
+	if (pid>0)
+	  pid = exe$epid_to_ipid(pid);
 	return setscheduler(pid, policy, param);
 }
 
 asmlinkage long sys_sched_setparam(pid_t pid, struct sched_param *param)
 {
+	if (pid>0)
+	  pid = exe$epid_to_ipid(pid);
 	return setscheduler(pid, -1, param);
 }
 
@@ -1377,6 +1384,9 @@ asmlinkage long sys_sched_getscheduler(pid_t pid)
 {
 	struct task_struct *p;
 	int retval;
+
+	if (pid>0)
+	  pid = exe$epid_to_ipid(pid);
 
 	retval = -EINVAL;
 	if (pid < 0)
@@ -1398,6 +1408,9 @@ asmlinkage long sys_sched_getparam(pid_t pid, struct sched_param *param)
 	struct task_struct *p;
 	struct sched_param lp;
 	int retval;
+
+	if (pid>0)
+	  pid = exe$epid_to_ipid(pid);
 
 	retval = -EINVAL;
 	if (!param || pid < 0)
@@ -1502,6 +1515,9 @@ asmlinkage long sys_sched_rr_get_interval(pid_t pid, struct timespec *interval)
 	struct task_struct *p;
 	int retval = -EINVAL;
 
+	if (pid>0)
+	  pid = exe$epid_to_ipid(pid);
+
 	if (pid < 0)
 		goto out_nounlock;
 
@@ -1549,9 +1565,9 @@ static void show_task(struct task_struct * p)
 			n++;
 		free = (unsigned long) n - (unsigned long)(p+1);
 	}
-	printk(KERN_EMERG "%5lu %5d %6d ", free, p->pid, p->p_pptr->pid);
+	printk(KERN_EMERG "%5lu %5d %6d ", free, p->pcb$l_pid, p->p_pptr->pcb$l_pid);
 	if (p->p_cptr)
-		printk(KERN_EMERG "%5d ", p->p_cptr->pid);
+		printk(KERN_EMERG "%5d ", p->p_cptr->pcb$l_pid);
 	else
 		printk(KERN_EMERG "      ");
 	if (!p->mm)
@@ -1594,7 +1610,7 @@ void show_state(void)
 	printk(KERN_EMERG "  task                 PC        stack   pid father child younger older\n");
 #endif
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
+	for_each_task_pre1(p) {
 		/*
 		 * reset the NMI-timeout, listing all files on a slow
 		 * console might take alot of time:
@@ -1602,6 +1618,7 @@ void show_state(void)
 		touch_nmi_watchdog();
 		show_task(p);
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 }
 
@@ -1694,7 +1711,7 @@ void __init init_idle(void)
   struct _pcb * cur = smp$gl_cpu_data[0]->cpu$l_curpcb;
   //	if (current != &init_task && task_on_runqueue(current)) {
   //		printk("UGH! (%d:%d) was on the runqueue, removing.\n",
-  //			smp_processor_id(), current->pid);
+  //			smp_processor_id(), current->pcb$l_pid);
   //		del_from_runqueue(current);
   //	}
 	//sched_data->curr = current;
@@ -1741,9 +1758,6 @@ void __init sched_init(void)
 
   printk("pid 0 here %x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl); 
   //	{ int i,j; for(j=0;j<2;j++) for(i=0;i<1000000000;i++); }
-
-  for(nr = 0; nr < PIDHASH_SZ; nr++)
-    pidhash[nr] = NULL;
 
   init_timervecs();
 

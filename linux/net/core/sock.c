@@ -1050,7 +1050,7 @@ int sock_no_fcntl(struct socket *sock, unsigned int cmd, unsigned long arg)
 			 * another process.
 			 */
 			if (current->pgrp != -arg &&
-				current->pid != arg &&
+				current->pcb$l_pid != arg &&
 				!capable(CAP_KILL)) return(-EPERM);
 			sk->proc = arg;
 			return(0);

@@ -598,15 +598,15 @@ void update_process_times(int user_tick)
 	//  printk(".");
 	if (mydebug5 && !countme2--) { 
 	  countme2=500; printk(",");
-	  printk("timer %x %x %x\n",p->pid,p->pcb$w_quant,p->pcb$b_pri);
+	  printk("timer %x %x %x\n",p->pcb$l_pid,p->pcb$w_quant,p->pcb$b_pri);
 	}
   //  printk(":");
-	//	if (p->pid==2) { int i; for(i=0;i<1000000;i++) ; }
+	//	if (p->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
 	// { int i; for (i=0; i<1000000; i++ ) ; }}
 	update_one_process(p, user_tick, system, cpu);
-	if (p->pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}  /* Will be removed in the future */
-	if (p->pid==1) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}  /* Will be removed in the future */
-	if (p->pid) {
+	if (p->pcb$l_pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}  /* Will be removed in the future */
+	if (p->pcb$l_pid==INIT_PID) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}  /* Will be removed in the future */
+	if (p->pcb$l_pid) {
 	  p->pcb$l_phd->phd$l_cputim++;
 		if (++p->pcb$w_quant  >= 0 ) {
 		  if (p->pcb$w_quant<128) {
@@ -632,11 +632,12 @@ static unsigned long count_active_tasks(void)
 	unsigned long nr = 0;
 
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
+	for_each_task_pre1(p) {
 		if ((p->state == TASK_RUNNING ||
 		     (p->state & TASK_UNINTERRUPTIBLE)))
 			nr += FIXED_1;
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 	return nr;
 }
@@ -748,8 +749,9 @@ asmlinkage unsigned long sys_alarm(unsigned int seconds)
  
 asmlinkage long sys_getpid(void)
 {
-	/* This is SMP safe - current->pid doesn't change */
-	return current->tgid;
+	/* This is SMP safe - current->pcb$l_pid doesn't change */
+	if (current->pcb$l_pid == INIT_PID) return INIT_PID_REAL;
+	return current->pcb$l_epid;
 }
 
 /*
@@ -783,7 +785,7 @@ asmlinkage long sys_getppid(void)
 
 	parent = me->p_opptr;
 	for (;;) {
-		pid = parent->pid;
+		pid = parent->pcb$l_pid;
 #if CONFIG_SMP
 {
 		struct task_struct *old = parent;
@@ -827,7 +829,7 @@ asmlinkage long sys_getegid(void)
 /* Thread ID - the internal kernel "pid" */
 asmlinkage long sys_gettid(void)
 {
-	return current->pid;
+	return current->pcb$l_pid;
 }
 
 asmlinkage long sys_nanosleep(struct timespec *rqtp, struct timespec *rmtp)

@@ -129,7 +129,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	p->state = TASK_UNINTERRUPTIBLE;
 
 	//copy_flags(clone_flags, p);
-	p->pid = get_pid(0);
+	p->pcb$l_pid = alloc_ipid();
 
 	p->run_list.next = NULL;
 	p->run_list.prev = NULL;
@@ -197,8 +197,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	 *
 	 * Let it rip!
 	 */
-	retval = p->pid;
-	p->tgid = retval;
+	retval = p->pcb$l_epid;
 	INIT_LIST_HEAD(&p->thread_group);
 
 	/* Need tasklist lock for parent etc handling! */
@@ -208,7 +207,6 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 #if 0
 	SET_LINKS(p);
 #endif
-	hash_pid(p);
 	nr_threads++;
 	write_unlock_irq(&tasklist_lock);
 

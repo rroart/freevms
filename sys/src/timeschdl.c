@@ -95,9 +95,9 @@ void exe$timeout(void) {
   sch$one_sec();
   /* sch$ravail() */
 #ifdef __i386__
-  if (exetimeout) printk("exe$timeout %x %x %x\n",cur_task->pid,current->pid,current->thread.eip);
+  if (exetimeout) printk("exe$timeout %x %x %x\n",cur_task->pcb$l_pid,current->pcb$l_pid,current->thread.eip);
 #else
-  if (exetimeout) printk("exe$timeout %x\n",current->pid);
+  if (exetimeout) printk("exe$timeout %x\n",current->pcb$l_pid);
 #endif
 }
 
@@ -275,15 +275,15 @@ int hwclkdone=1;
       //  printk(".");
       if (mydebug5 && !countme2--) { 
 	countme2=500; printk(",");
-	printk("timer %x %x %x\n",p->pid,p->pcb$w_quant,p->pcb$b_pri);
+	printk("timer %x %x %x\n",p->pcb$l_pid,p->pcb$w_quant,p->pcb$b_pri);
       }
       //  printk(":");
-      //	if (p->pid==2) { int i; for(i=0;i<1000000;i++) ; }
+      //	if (p->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
       // { int i; for (i=0; i<1000000; i++ ) ; }}
       update_one_process(p, user_tick, system, cpu);
-      if (p->pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}  /* Will be removed in the future */
-      if (p->pid==1) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}  /* Will be removed in the future */
-      if (p->pid) {
+      if (p->pcb$l_pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}  /* Will be removed in the future */
+      if (p->pcb$l_pid==INIT_PID) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}  /* Will be removed in the future */
+      if (p->pcb$l_pid) {
 	p->pcb$l_phd->phd$l_cputim++;
 	p->pcb$w_quant+=QUANTADD;
 	if (++p->pcb$w_quant  >= 0 ) {
