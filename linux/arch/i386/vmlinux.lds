@@ -6,7 +6,7 @@ OUTPUT_ARCH(i386)
 ENTRY(_start)
 SECTIONS
 {
-  . = 0xC0000000 + 0x100000;
+  . = 0x80000000 + 0x100000;
   _text = .;			/* Text and read-only data */
   .text : {
 	*(.text)
@@ -79,4 +79,8 @@ SECTIONS
   .stab.index 0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
   .comment 0 : { *(.comment) }
+
+p1pp 0x7ffff000 (NOLOAD): {
+*(p1pp)
+}
 }

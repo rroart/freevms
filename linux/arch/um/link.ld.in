@@ -4,7 +4,7 @@ ENTRY(_start)
 
 SECTIONS
 {
-  . = START() + SIZEOF_HEADERS;
+  . = START() + 256 /* was: SIZEOF_HEADERS */;
 
   . = ALIGN(4096);
   .thread_private : {
@@ -140,4 +140,8 @@ SECTIONS
   .stab.index 0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
   .comment 0 : { *(.comment) }
+
+p1pp 0x7ffff000 (NOLOAD): {
+*(p1pp)
+}
 }
