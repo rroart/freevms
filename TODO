@@ -14,6 +14,7 @@ Use real interrupts instead of calls for sch$reshed iofork etc
 Use setpsli even in more interrupts/exceptions?
 Look at how simple and complex buffers are allocated and freed
 Update FCB at the same time as read/write attrib?
+Have dcltables compiled and loaded the same way as .exe2
 
 CPU/PAL:
 FIX pal
