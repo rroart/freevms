@@ -3933,6 +3933,8 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
   func(argc,argv++);
   printf("after image\n");
 
+  sys$rundwn();
+
   return SS$_NORMAL;
 
  do_dl:
