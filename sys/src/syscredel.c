@@ -15,6 +15,7 @@
 #include <phddef.h>
 #include <rdedef.h>
 #include <ssdef.h>
+#include <starlet.h>
 #include <va_rangedef.h>
 #include <vmspte.h>
 
@@ -221,6 +222,10 @@ int mmg$fast_create_gptx(struct _pcb * p, struct _rde *rde, void * start_va, voi
     tmp+=PAGE_SIZE;
     newpte.pte$v_gptx++;
   }
+}
+
+asmlinkage int exe$create_region_32_wrap  (struct struct_args * s) {
+  return exe$create_region_32(s->s1,s->s2,s->s3,s->s4,s->s5,s->s6,s->s7);
 }
 
 asmlinkage int exe$create_region_32  ( unsigned long length, unsigned int region_prot, unsigned int flags, unsigned long long *return_region_id, void **return_va, unsigned long *return_length, unsigned long start_va) {
