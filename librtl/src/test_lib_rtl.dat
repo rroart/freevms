@@ -253,3 +253,27 @@ filler
 lib$wait
 comment
 filler 
+lib$locc
+Match char is Null
+cd NULL cd A 0
+lib$locc
+Match char not present
+cd A cd B 0
+lib$locc
+Match char present
+cd A cd A 0
+lib$locc
+Match is first character
+cd A cd ABCDEFG 1
+lib$locc
+Match is last character
+cd A cd GFEDCBA 7
+lib$locc
+Match is first and second
+cd A cd AABCDR 1
+lib$locc
+Match first occurence
+cd A cd BAA 2
+lib$locc
+Search string is NULL
+cd A cd NULL 0

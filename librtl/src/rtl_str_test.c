@@ -569,6 +569,7 @@ int	teststranalyze_64 (FILE *fptr, int *fstatus, char *cont)
 	unsigned short type;		/* Length of first string */
 	unsigned long result_code;
 	unsigned short s1_len;
+	unsigned long long s1_long_len;
 	char 	*s1_ptr;			/* Pointer to first string */
 	char 	pt1[10], pv1[10];
 	char 	pt2[10], pv2[10];
@@ -592,7 +593,8 @@ int	teststranalyze_64 (FILE *fptr, int *fstatus, char *cont)
 	printf ("Input   Value    "); str$$print_sd (&s1);	printf ("\n");
 	printf ("\n");
 
-	result_code = str$analyze_sdesc_64 (&s1, &s1_len,&s1_ptr,&type);
+	result_code = str$analyze_sdesc_64 (&s1, &s1_long_len,&s1_ptr,&type);
+	s1_len = (unsigned short) s1_long_len;
 
 	print_result_code  (presult,result_code,cont);
 	print_int_compare  ("Type", DSC$K_DTYPE_T, s1.dsc$b_dtype, cont);

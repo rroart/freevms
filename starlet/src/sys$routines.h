@@ -594,4 +594,11 @@ extern "C" {
 # ifdef __cplusplus
 }
 # endif
+
+//	Utility Functions
+
+int sys$$geterrno(char *errmsg);
+
+int sys$$getmsg (unsigned int msgid, unsigned short int *msglen, char *fmt,...);
+
 #endif	

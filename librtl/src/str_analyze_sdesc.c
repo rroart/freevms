@@ -13,6 +13,10 @@
  *
  *	Oct 10, 1996 - Kevin Handy
  *		Preliminary design.
+ *
+ *	Mar 23, 2005 - Andrew Allison
+ *		Added lib$routines.h for lib$stop prototype
+ *
  */
 
 #include <stdio.h>
@@ -20,6 +24,7 @@
 #include "descrip.h"
 #include "strdef.h"
 #include "str$routines.h"
+#include "lib$routines.h"
 
 /*************************************************************
  * str$analyze_sdesc

@@ -77,7 +77,7 @@ if ( not_valid_node_name (nodename2) )
 lib$expand_nodename (nodename1, &node1, &expandlen);
 lib$expand_nodename (nodename2, &node2, &expandlen);
 
-result = str$compare (&node1, &node2 );
+*result = (unsigned long) str$compare (&node1, &node2 );
 
 return result_code;
 }

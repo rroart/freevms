@@ -75,6 +75,11 @@ PROTO unsigned long str$add(const unsigned long* asign, const long* aexp,
 PROTO short int str$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
 	unsigned short* word_integer_length, char** data_address);
 
+unsigned long str$analyze_sdesc_64 (const struct dsc$descriptor_s* descrip,
+                                unsigned long long      *quad_integer_length,
+                                char            **data_address,
+                                unsigned short  *descriptor_type );
+
 PROTO unsigned long str$append(struct dsc$descriptor_s* destination_string,
 	const struct dsc$descriptor_s* source_string);
 
@@ -105,6 +110,10 @@ PROTO unsigned long str$copy_dx(struct dsc$descriptor_s* destination_string,
 PROTO unsigned long str$copy_r(struct dsc$descriptor_s* destination_string,
 	const unsigned short* word_integer_source_length,
 	const void* source_string_address);
+
+PROTO unsigned long str$copy_r_64(struct dsc$descriptor_s* destination_string,
+        const unsigned short* word_integer_source_length,
+        const void *source_string_address);
 
 PROTO unsigned long str$divide(
 	const unsigned long* asign, const long* aexp, const struct dsc$descriptor_s* a_digits,
@@ -138,6 +147,9 @@ PROTO unsigned long str$free1_dx(struct dsc$descriptor_s* string_descriptor);
 
 PROTO unsigned long str$get1_dx(unsigned short* word_integer_length,
 	struct dsc$descriptor_s* character_string);
+
+PROTO unsigned long str$get1_dx_64 (unsigned short* word_integer_length,
+        struct dsc$descriptor_s* character_string);
 
 PROTO unsigned long str$left(struct dsc$descriptor_s* destination_string,
 	const struct dsc$descriptor_s* source_string,
@@ -199,6 +211,16 @@ PROTO unsigned long str$round(const long* places, const unsigned long* flags,
 	unsigned long* csign, long* cexp,
 	struct dsc$descriptor_s* cdigits);
 
+PROTO unsigned long str$sub (const unsigned long *asign,
+                      const          long *aexp,
+                      const struct dsc$descriptor_s *adigits,
+                      const unsigned long *bsign,
+                      const          long *bexp,
+                      const struct dsc$descriptor_s *bdigits,
+                      unsigned       long *csign,
+                                     long *cexp,
+                            struct dsc$descriptor_s *cdigits);
+
 PROTO unsigned long str$translate(struct dsc$descriptor_s* destination_string,
 	const struct dsc$descriptor_s* source_string,
 	const struct dsc$descriptor_s* translation_string,
@@ -218,8 +240,19 @@ PROTO unsigned long str$upcase(struct dsc$descriptor_s* destination_string,
  */
 PROTO unsigned long str$$is_string_class(
         const struct dsc$descriptor_s* test_string);
+PROTO int     str$$iszero (const struct dsc$descriptor_s *sd1);
+PROTO int     str$$lzerotrim (struct dsc$descriptor_s *sd1);
+PROTO int     str$$iszerotrim (struct dsc$descriptor_s *sd1, long *exp);
+PROTO int     str$$rzerotrim (struct dsc$descriptor_s *sd1, long *exp);
+PROTO int str$$ncompare (     struct dsc$descriptor_s *sd1,
+                        struct dsc$descriptor_s *sd2);
+
+
 PROTO unsigned int str$$resize(struct dsc$descriptor_s* dest,
 	unsigned short size);
 PROTO unsigned long str$$copy_fill(char* dest_ptr, unsigned short dest_length,
         const char* source_ptr, unsigned short source_length, char fill);
+PROTO void str$$malloc_sd(struct dsc$descriptor_s *temp_sd, char *string);
+PROTO void    str$$print_sd (const struct dsc$descriptor_s *sd1 );
+
 

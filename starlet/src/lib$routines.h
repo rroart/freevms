@@ -17,6 +17,11 @@ unsigned long lib$addx(const void *,const void *,void *, const long *);
 unsigned long lib$analyze_sdesc(const struct dsc$descriptor_s *,
 	unsigned short *,char **);
 
+unsigned long lib$analyze_sdesc_64 (const struct dsc$descriptor_s* descrip,
+                                unsigned short  *word_integer_length,
+                                char            **data_address,
+                                unsigned long   *descriptor_type );
+
 unsigned long lib$ascii_to_uid();
 
 unsigned long lib$asn_wth_mbx(const void *,const long *,const long *,
@@ -27,6 +32,12 @@ int lib$ast_in_prog(void);
 unsigned long lib$attach(const unsigned long *);
 
 int lib$bbcci(const int *,void *), lib$bbssi(const int *,void *);  
+
+unsigned long lib$build_nodespec(const  struct  dsc$descriptor_s *primary,
+                                        struct  dsc$descriptor_s *nodespec,
+                                 const  struct  dsc$descriptor_s *acs,
+                                 const  struct  dsc$descriptor_s *secondary,
+                                 unsigned short *nodespec_length );
 
 unsigned long lib$callg(const void *,const unsigned long (*)()); 
 
@@ -224,7 +235,8 @@ unsigned long lib$int_over(const unsigned long *);
 
 unsigned short lib$len(const struct dsc$descriptor_s *);
 
-int lib$locc(const void *,const void *);
+unsigned long lib$locc (const struct dsc$descriptor_s *char_string,
+			const struct dsc$descriptor_s *source_string);
 
 unsigned long lib$lookup_key(const void *,const void *,void *,...);
 
@@ -351,3 +363,6 @@ unsigned long lib$verify_vm_zone(const unsigned long *);
 unsigned long lib$wait(float);
 
 #endif	
+
+int lib$$ncompare (char *s1,char *s2);
+

@@ -55,6 +55,7 @@
 #include "strdef.h"
 #include "ssdef.h"
 #include "str$routines.h"
+#include "lib$routines.h"
 
 /*************************************************************
  * lib$analyze_sdesc

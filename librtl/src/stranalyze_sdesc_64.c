@@ -47,6 +47,9 @@
  *		Preliminary design.
  *
  *	Mar 1, 2004 - Andrew Allison
+ *
+ *	Mar 23, 2005 - Andrew Allison
+ *		Added lib$routines.h to include block
  */
 
 #include <stdio.h>
@@ -55,6 +58,7 @@
 #include "descrip.h"
 #include "strdef.h"
 #include "str$routines.h"
+#include "lib$routines.h"
 
 /*************************************************************
  * str$analyze_sdesc_64

@@ -19,6 +19,10 @@
  *		Change SS$_NORMAL to STR$_NORMAL so I don't need
  *		to copy SSDEF.H across.
  *		Use '%ld' instead of '%d' several places to quiet gcc.
+ *
+ *	Mar 23, 2005 - Andrew Allison
+ *		Added casts to pass values to anacond as unsigned long
+ *
  */
 
 #include <stdio.h>
@@ -78,7 +82,7 @@ int main()
 	    printf("\nelement number %ld\n",elemnumb);
 	    retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimOk,&GlobalStrElem);
 	    printf("return value %ld : ",retrnval);
-	    anacond(retrnval);
+	    anacond((unsigned long) retrnval);
 	    printf("\nelement number %ld\n",elemnumb);
 	    testanal("str$element, delimiter ok",&Test1);
 	}
@@ -90,7 +94,7 @@ int main()
 	printf("\nelement number %ld\n",elemnumb);
 	retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimNull,&GlobalStrElem);
 	printf("return value %ld : ",retrnval);
-	anacond(retrnval);
+	anacond((unsigned long) retrnval);
 	printf("\nelement number %ld\n",elemnumb);
 	testanal("str$element, delimiter null",&Test1);
 	/*
@@ -101,7 +105,7 @@ int main()
 	printf("\nelement number %ld\n",elemnumb);
 	retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimLong,&GlobalStrElem);
 	printf("return value %ld : ",retrnval);
-	anacond(retrnval);
+	anacond((unsigned long) retrnval);
 	printf("\nelement number %ld\n",elemnumb);
 	testanal("str$element, delimiter long",&Test1);
 	/*
@@ -112,7 +116,7 @@ int main()
 	printf("\nelement number %ld\n",elemnumb);
 	retrnval=str$element(&Test3,&elemnumb,&GlobalStrDelimOk,&GlobalStrElem);
 	printf("return value %ld : ",retrnval);
-	anacond(retrnval);
+	anacond((unsigned long) retrnval);
 	printf("\nelement number %ld\n",elemnumb);
 	testanal("str$element, delimiter ok, dest string short",&Test3);
 	return EXIT_SUCCESS;
