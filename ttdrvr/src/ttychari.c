@@ -55,7 +55,7 @@ int tty$putnextchar(int * chr, struct _ucb * u) {
 
  out:
 
-  if (tty->ucb$l_tt_typahd==0) {
+  if (tty->ucb$l_tt_typahd==0) {  // this is duplicated -> own routine?
     tty->ucb$l_tt_typahd = kmalloc (sizeof (struct _tt_type_ahd),GFP_KERNEL);
     struct _tt_type_ahd * ahd = tty->ucb$l_tt_typahd;
     ahd->tty$l_ta_data=kmalloc(1024,GFP_KERNEL);
