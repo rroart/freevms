@@ -12,6 +12,7 @@
 #include<ucbdef.h>
 #include<ddbdef.h>
 #include<ccbdef.h>
+#include<lnmdef.h>
 #include<sbdef.h>
 #include<system_data_cells.h>
 #include<sysgen.h>
@@ -115,7 +116,7 @@ int ioc_std$trandevnam (void * descr_p, int flags, char *buf, int *outlen, void 
   $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
   struct dsc$descriptor * mytabnam = &mytabnam_;
   struct item_list_3 itm[2];
-  itm[0].item_code=1;
+  itm[0].item_code=LNM$_STRING;
   itm[0].buflen=4;
   itm[0].retlenaddr=outlen;
   itm[0].bufaddr=buf;

@@ -130,7 +130,7 @@ void lnm_init_prc(struct _pcb * p) {
   tab_lnmth->lnmth$l_hash = hash;
   tab_lnmb->lnmb$l_table=tab_lnmth; // beware this and over
 
-  itm[0].item_code=1;
+  itm[0].item_code=LNM$_STRING;
   itm[0].buflen=6;
   itm[0].bufaddr="opa0:";
   bzero(&itm[1],sizeof(struct item_list_3));

@@ -20,6 +20,7 @@ inline void panic(char * c) { }
 #else
 #include<linux/mm.h>
 #include<sysgen.h>
+#include<lnmdef.h>
 #include<lnmsub.h>
 #include<system_data_cells.h>
 #include<queue.h>
@@ -367,7 +368,7 @@ char * search_log_prc(char * name) {
   char resstring[LNM$C_NAMLENGTH]="";
   mynam.dsc$w_length=strlen(name);
   mynam.dsc$a_pointer=name;
-  itm[0].item_code=1;
+  itm[0].item_code=LNM$_STRING;
   itm[0].buflen=LNM$C_NAMLENGTH;
   itm[0].bufaddr=resstring;
   bzero(&itm[1],sizeof(struct item_list_3));
