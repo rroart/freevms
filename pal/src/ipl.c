@@ -22,12 +22,14 @@ static mydebugi = 0;  // should have no printk in a non-interruptable zone
 
 inline asmlinkage void pushpsli(void) {
   pushpsl();
+#if 0
 #ifdef __arch_um__
   current->psl_cur_mod=0;
   current->psl_prv_mod=0;
   current->psl_is=1;
   current->psl_ipl=22;
   smp$gl_cpu_data[0]->cpu$b_ipl=current->psl_ipl;
+#endif
 #endif
 }
 
