@@ -79,6 +79,16 @@ SECTIONS
   .uml.exitcall : { *(.uml.exitcall.exit) }
   __uml_exitcall_end = .;
 
+  __preinit_array_start = .;
+  .preinit_array : { *(.preinit_array) }
+  __preinit_array_end = .;
+  __init_array_start = .;
+  .init_array : { *(.init_array) }
+  __init_array_end = .;
+  __fini_array_start = .;
+  .fini_array : { *(.fini_array) }
+  __fini_array_end = .;
+
   .data.init : { *(.data.init) }
   .data    :
   {
