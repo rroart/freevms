@@ -132,6 +132,8 @@ static inline int mprotect_fixup_start(struct _rde * vma, struct _rde ** pprev,
 {
 	struct _rde * n, * prev = *pprev;
 
+	panic("fixup_start not implemented yet\n");
+
 	*pprev = vma;
 
 	if (prev && (prev->rde$pq_start_va + prev->rde$q_region_size) == vma->rde$pq_start_va && can_vma_merge(prev, newflags) &&
@@ -240,6 +242,8 @@ static inline int mprotect_fixup_middle(struct _rde * vma, struct _rde ** pprev,
 {
 	struct _rde * left, * right;
 
+	panic("fixup_middle not implemented yet\n");
+
 	left = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 	if (!left)
 		return -ENOMEM;
@@ -290,7 +294,7 @@ static int mprotect_fixup(struct _rde * vma, struct _rde ** pprev,
 	pgprot_t newprot;
 	int error;
 
-	if (newflags == vma->rde$l_flags) {
+	if ((newflags >> 8) == (vma->rde$l_flags >> 8)) {
 		*pprev = vma;
 		return 0;
 	}
@@ -345,7 +349,7 @@ asmlinkage long sys_mprotect(unsigned long start, size_t len, unsigned long prot
 
 		/* Here we know that  vma->rde$pq_start_va <= nstart < (vma->rde$pq_start_va + vma->rde$q_region_size). */
 
-		newflags = prot | (vma->rde$l_flags & ~(PROT_READ | PROT_WRITE | PROT_EXEC));
+		newflags = (prot<<8) | (vma->rde$l_flags & ~((PROT_READ | PROT_WRITE | PROT_EXEC)<<8));
 		if ((newflags & ~(newflags >> 4)) & 0xf) {
 			error = -EACCES;
 			goto out;
