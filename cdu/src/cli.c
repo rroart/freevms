@@ -109,6 +109,11 @@ int cdu_search_next(int i, int type, char * s, int size, int * retval) {
     case CDU$C_KEYWORD:
       name=&cdu_root[cdu_root[i].cdu$l_name];
       break;
+    case CDU$C_QUALIFIER:
+      name=&cdu_root[cdu_root[i].cdu$l_name];
+      break;
+    default:
+      printf("oops not found\n");
     }
     if (cdu_root[i].cdu$b_type==type && strncmp(name->cdu$t_name,s,size)==0) {
       if (retval)
@@ -134,6 +139,11 @@ int cdu_search_incr(int i, int type, char * s, int size, int * retval) {
     case CDU$C_SYNTAX:
       name=&cdu_root[cdu_root[i].cdu$l_syntax];
       break;
+    case CDU$C_QUALIFIER:
+      name=&cdu_root[cdu_root[i].cdu$l_name];
+      break;
+    default:
+      printf("oops not found\n");
     }
     if (cdu_root[i].cdu$b_type==type && strncmp(name->cdu$t_name,s,size)==0) {
       if (retval)
@@ -371,7 +381,8 @@ nisse_swap_symbol_in (void *abfd,
 extern int vms_mm;
 
 unsigned int cli$dispatch(int userarg){
-  char * routine;
+  char * mainp="main";
+  char * routine=mainp;
   char * myp1 = "";
   char * myargv[4]={"",myp1,myp1,myp1};
   char image[256];
@@ -384,6 +395,7 @@ unsigned int cli$dispatch(int userarg){
   void (*func)();
   void * handle = 0;
   int value = 0;
+  int internal = 0;
 
   cdu= &cdu_root[(*cur_cdu)->cdu$l_routine];
   if (cdu->cdu$t_name[0])
@@ -392,6 +404,7 @@ unsigned int cli$dispatch(int userarg){
   if ((*cur_cdu)->cdu$l_flags&CDU$M_INTERNAL) {
     value=get_cli_int(routine);
     func=value;
+    internal=1;
     goto skip;
   }
 
@@ -505,9 +518,6 @@ unsigned int cli$dispatch(int userarg){
  exe2:
   {}
 
-  char * mainp="main";
-  routine=mainp;
-
   path="/vms$common/sysexe/";
   pathlen=strlen(path);
   n = (*cur_cdu)->cdu$l_image;
@@ -535,8 +545,10 @@ unsigned int cli$dispatch(int userarg){
   }
 
  skip:
+#if 0
   if (handle==0)
     printf("entering image? %x\n",func);
+#endif
 
   // not yet  func(userarg);
   if ((*my_cdu)->cdu$l_parameters) {
@@ -550,11 +562,13 @@ unsigned int cli$dispatch(int userarg){
   }
   func(userarg,myargv,0,0);
   //func(argc,argv++);
-  if (handle==0) {
-    printf("after image\n");
-    sys$rundwn();
-  } else {
-    dlclose(handle);
+  if (!internal) {
+    if (handle==0) {
+      //printf("after image\n");
+      sys$rundwn();
+    } else {
+      dlclose(handle);
+    }
   }
 
   return SS$_NORMAL;
