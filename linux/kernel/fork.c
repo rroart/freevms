@@ -207,7 +207,9 @@ static inline int dup_mmap(struct mm_struct * mm)
 			goto fail_nomem;
 	}
 	retval = 0;
+#ifndef CONFIG_MM_VMS
 	build_mmap_rb(mm);
+#endif
 
 fail_nomem:
 	flush_tlb_mm(current->mm);

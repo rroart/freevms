@@ -46,6 +46,8 @@
 #include <linux/kmod.h>
 #endif
 
+#include<phddef.h>
+
 int core_uses_pid;
 
 static struct linux_binfmt *formats;
@@ -319,7 +321,11 @@ int setup_arg_pages(struct linux_binprm *bprm)
 		mpnt->vm_pgoff = 0;
 		mpnt->vm_file = NULL;
 		mpnt->vm_private_data = (void *) 0;
+#ifndef CONFIG_MM_VMS
 		insert_vm_struct(current->mm, mpnt);
+#else
+		insque(mpnt,current->pcb$l_phd->phd$ps_p0_va_list_flink);
+#endif
 		current->mm->total_vm = (mpnt->vm_end - mpnt->vm_start) >> PAGE_SHIFT;
 	} 
 

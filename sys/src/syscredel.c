@@ -30,13 +30,22 @@
 
 struct _mmg mymmg;
 
+int inline mmg$inadrini(){
+}
+
+int inline mmg$retadrini(){
+}
+
+int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte);
+
 int mmg$credel(int acmode, void * first, void * last, void (* pagesubr)(), struct _va_range *inadr, struct _va_range *retadr, unsigned int acmodeagain, struct _pcb * p, int numpages) {
   unsigned long tmp=first;
+  int newpte=0; // lots of zeros for demand page zero
   if (((long)first & 0x80000000) || ((long)last & 0x80000000))
     return SS$_NOPRIV;
   mymmg.mmg$l_pagesubr=pagesubr;
   while (tmp<last) {
-    pagesubr(0,tmp,0,+PAGE_SIZE);      // crepag or del
+    pagesubr(0,tmp,0,+PAGE_SIZE,newpte);      // crepag or del
     tmp=tmp+PAGE_SIZE;
   }
   return SS$_NORMAL;
@@ -44,15 +53,36 @@ int mmg$credel(int acmode, void * first, void * last, void (* pagesubr)(), struc
 
 asmlinkage int exe$cretva (struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
   struct _rde * rde = mmg$lookup_rde_va (inadr->va_range$ps_start_va, current->pcb$l_phd, 0, 2);
+  void * first=inadr->va_range$ps_start_va;
+  void * last=inadr->va_range$ps_end_va;
+  struct _pcb * p=current;
+  unsigned long numpages=(last-first)/PAGE_SIZE+1;
+  mmg$credel(acmode, first, last, mmg$crepag, inadr, retadr, acmode, p, numpages);
 }
 
-int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde) {
+int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
 
+  pgd_t *pgd;
+  pmd_t *pmd;
+  pte_t *pte;
+  struct mm_struct * mm=current->mm;
+  unsigned long address=va;
+  
   if (va>=rde->rde$pq_first_free_va) {
 
   }
 
-  
+  pgd = pgd_offset(mm, address);
+  pmd = pmd_alloc(mm, pgd, address);
+  if (pmd) {
+    pte = pte_alloc(mm, pmd, address);
+  }
+
+  if ((long)(*(long *)pte)) {
+    return SS$_VA_IN_USE;
+  } else {
+    *(unsigned long *)pte=newpte;
+  }
 
 }
 
@@ -136,6 +166,15 @@ inline struct _rde * mmg$search_rde_va (void * va, struct _rde *head, struct _rd
   }
 }
 
+int mmg$fast_create(struct _pcb * p, struct _rde *rde, void * start_va, void * end_va, unsigned long pages, unsigned long prot_pte) {
+  unsigned long newpte;
+  unsigned long page;
+  unsigned long tmp=start_va;
+  unsigned long new_pte;
 
-
-
+  for(page=0;page<pages;page++) {
+    newpte=prot_pte|page;
+    mmg$crepag(0,tmp,0,+PAGE_SIZE,0,newpte);
+    tmp+=PAGE_SIZE;
+  }
+}

@@ -13,6 +13,9 @@
 #include <asm/uaccess.h>
 #include <asm/pgalloc.h>
 
+#include <ipldef.h>
+#include <rdedef.h>
+
 extern int vm_enough_memory(long pages);
 
 static inline pte_t *get_one_pte(struct mm_struct *mm, unsigned long addr)
@@ -122,47 +125,50 @@ oops_we_failed:
 	return -1;
 }
 
-static inline unsigned long move_vma(struct vm_area_struct * vma,
+static inline unsigned long move_vma(struct _rde * vma,
 	unsigned long addr, unsigned long old_len, unsigned long new_len,
 	unsigned long new_addr)
 {
-	struct mm_struct * mm = vma->vm_mm;
-	struct vm_area_struct * new_vma, * next, * prev;
+  struct mm_struct * mm = current->mm;//vma->vm_mm;
+	struct _rde * new_vma, * next, * prev;
 	int allocated_vma;
 
 	new_vma = NULL;
-	next = find_vma_prev(mm, new_addr, &prev);
+	//next = find_vma_prev(mm, new_addr, &prev);
+	next = mmg$lookup_rde_va(new_addr,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+	prev = next->rde$ps_va_list_blink;
 	if (next) {
-		if (prev && prev->vm_end == new_addr &&
-		    can_vma_merge(prev, vma->vm_flags) && !vma->vm_file && !(vma->vm_flags & VM_SHARED)) {
+		if (prev && (prev->rde$pq_start_va + prev->rde$q_region_size) == new_addr &&
+		    can_vma_merge(prev, vma->rde$l_flags) /*&& !vma->vm_file */&& !(vma->rde$l_flags & VM_SHARED)) {
 			spin_lock(&mm->page_table_lock);
-			prev->vm_end = new_addr + new_len;
+			prev->rde$q_region_size = new_len;
 			spin_unlock(&mm->page_table_lock);
 			new_vma = prev;
-			if (next != prev->vm_next)
+			if (next != prev->rde$ps_va_list_flink)
 				BUG();
-			if (prev->vm_end == next->vm_start && can_vma_merge(next, prev->vm_flags)) {
+			if ((prev->rde$pq_start_va + prev->rde$q_region_size) == next->rde$pq_start_va && can_vma_merge(next, prev->rde$l_flags)) {
 				spin_lock(&mm->page_table_lock);
-				prev->vm_end = next->vm_end;
+				prev->rde$q_region_size = next->rde$q_region_size;
 				__vma_unlink(mm, next, prev);
 				spin_unlock(&mm->page_table_lock);
 
 				mm->map_count--;
 				kmem_cache_free(vm_area_cachep, next);
 			}
-		} else if (next->vm_start == new_addr + new_len &&
-			   can_vma_merge(next, vma->vm_flags) && !vma->vm_file && !(vma->vm_flags & VM_SHARED)) {
+		} else if (next->rde$pq_start_va == new_addr + new_len &&
+			   can_vma_merge(next, vma->rde$l_flags) /*&& !vma->vm_file*/ && !(vma->rde$l_flags & VM_SHARED)) {
 			spin_lock(&mm->page_table_lock);
-			next->vm_start = new_addr;
+			next->rde$pq_start_va = new_addr;
 			spin_unlock(&mm->page_table_lock);
 			new_vma = next;
 		}
 	} else {
-		prev = find_vma(mm, new_addr-1);
-		if (prev && prev->vm_end == new_addr &&
-		    can_vma_merge(prev, vma->vm_flags) && !vma->vm_file && !(vma->vm_flags & VM_SHARED)) {
+	  //prev = find_vma(mm, new_addr-1);
+	  prev = mmg$lookup_rde_va(new_addr-1,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+		if (prev && (prev->rde$pq_start_va + prev->rde$q_region_size) == new_addr &&
+		    can_vma_merge(prev, vma->rde$l_flags) /*&& !vma->vm_file*/ && !(vma->rde$l_flags & VM_SHARED)) {
 			spin_lock(&mm->page_table_lock);
-			prev->vm_end = new_addr + new_len;
+			prev->rde$q_region_size = new_len;
 			spin_unlock(&mm->page_table_lock);
 			new_vma = prev;
 		}
@@ -179,22 +185,24 @@ static inline unsigned long move_vma(struct vm_area_struct * vma,
 	if (!move_page_tables(current->mm, new_addr, addr, old_len)) {
 		if (allocated_vma) {
 			*new_vma = *vma;
-			new_vma->vm_start = new_addr;
-			new_vma->vm_end = new_addr+new_len;
-			new_vma->vm_pgoff += (addr - vma->vm_start) >> PAGE_SHIFT;
+			new_vma->rde$pq_start_va = new_addr;
+			new_vma->rde$q_region_size = new_len;
+#if 0
+			new_vma->vm_pgoff += (addr - vma->rde$pq_start_va) >> PAGE_SHIFT;
 			new_vma->vm_raend = 0;
 			if (new_vma->vm_file)
 				get_file(new_vma->vm_file);
 			if (new_vma->vm_ops && new_vma->vm_ops->open)
 				new_vma->vm_ops->open(new_vma);
 			insert_vm_struct(current->mm, new_vma);
+#endif
 		}
 		do_munmap(current->mm, addr, old_len);
 		current->mm->total_vm += new_len >> PAGE_SHIFT;
-		if (new_vma->vm_flags & VM_LOCKED) {
+		if (new_vma->rde$l_flags & VM_LOCKED) {
 			current->mm->locked_vm += new_len >> PAGE_SHIFT;
-			make_pages_present(new_vma->vm_start,
-					   new_vma->vm_end);
+			make_pages_present(new_vma->rde$pq_start_va,
+					   (new_vma->rde$pq_start_va + new_vma->rde$q_region_size));
 		}
 		return new_addr;
 	}
@@ -215,7 +223,7 @@ unsigned long do_mremap(unsigned long addr,
 	unsigned long old_len, unsigned long new_len,
 	unsigned long flags, unsigned long new_addr)
 {
-	struct vm_area_struct *vma;
+	struct _rde *vma;
 	unsigned long ret = -EINVAL;
 
 	if (flags & ~(MREMAP_FIXED | MREMAP_MAYMOVE))
@@ -264,17 +272,18 @@ unsigned long do_mremap(unsigned long addr,
 	 * Ok, we need to grow..  or relocate.
 	 */
 	ret = -EFAULT;
-	vma = find_vma(current->mm, addr);
-	if (!vma || vma->vm_start > addr)
+	//vma = find_vma(current->mm, addr);
+	vma = mmg$lookup_rde_va(addr,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+	if (!vma || vma->rde$pq_start_va > addr)
 		goto out;
 	/* We can't remap across vm area boundaries */
-	if (old_len > vma->vm_end - addr)
+	if (old_len > (vma->rde$pq_start_va + vma->rde$q_region_size) - addr)
 		goto out;
-	if (vma->vm_flags & VM_DONTEXPAND) {
+	if (vma->rde$l_flags & VM_DONTEXPAND) {
 		if (new_len > old_len)
 			goto out;
 	}
-	if (vma->vm_flags & VM_LOCKED) {
+	if (vma->rde$l_flags & VM_LOCKED) {
 		unsigned long locked = current->mm->locked_vm << PAGE_SHIFT;
 		locked += new_len - old_len;
 		ret = -EAGAIN;
@@ -286,7 +295,7 @@ unsigned long do_mremap(unsigned long addr,
 	    > current->rlim[RLIMIT_AS].rlim_cur)
 		goto out;
 	/* Private writable mapping? Check memory availability.. */
-	if ((vma->vm_flags & (VM_SHARED | VM_WRITE)) == VM_WRITE &&
+	if ((vma->rde$l_flags & (VM_SHARED | VM_WRITE)) == VM_WRITE &&
 	    !(flags & MAP_NORESERVE)				 &&
 	    !vm_enough_memory((new_len - old_len) >> PAGE_SHIFT))
 		goto out;
@@ -294,20 +303,20 @@ unsigned long do_mremap(unsigned long addr,
 	/* old_len exactly to the end of the area..
 	 * And we're not relocating the area.
 	 */
-	if (old_len == vma->vm_end - addr &&
+	if (old_len == (vma->rde$pq_start_va + vma->rde$q_region_size) - addr &&
 	    !((flags & MREMAP_FIXED) && (addr != new_addr)) &&
 	    (old_len != new_len || !(flags & MREMAP_MAYMOVE))) {
 		unsigned long max_addr = TASK_SIZE;
-		if (vma->vm_next)
-			max_addr = vma->vm_next->vm_start;
+		if (vma->rde$ps_va_list_flink)
+			max_addr = vma->rde$ps_va_list_flink->rde$pq_start_va;
 		/* can we just expand the current mapping? */
 		if (max_addr - addr >= new_len) {
 			int pages = (new_len - old_len) >> PAGE_SHIFT;
-			spin_lock(&vma->vm_mm->page_table_lock);
-			vma->vm_end = addr + new_len;
-			spin_unlock(&vma->vm_mm->page_table_lock);
+			//spin_lock(&vma->vm_mm->page_table_lock);
+			vma->rde$q_region_size = new_len;
+			//spin_unlock(&vma->vm_mm->page_table_lock);
 			current->mm->total_vm += pages;
-			if (vma->vm_flags & VM_LOCKED) {
+			if (vma->rde$l_flags & VM_LOCKED) {
 				current->mm->locked_vm += pages;
 				make_pages_present(addr + old_len,
 						   addr + new_len);
@@ -325,10 +334,10 @@ unsigned long do_mremap(unsigned long addr,
 	if (flags & MREMAP_MAYMOVE) {
 		if (!(flags & MREMAP_FIXED)) {
 			unsigned long map_flags = 0;
-			if (vma->vm_flags & VM_SHARED)
+			if (vma->rde$l_flags & VM_SHARED)
 				map_flags |= MAP_SHARED;
 
-			new_addr = get_unmapped_area(vma->vm_file, 0, new_len, vma->vm_pgoff, map_flags);
+			new_addr = get_unmapped_area(0/*vma->vm_file*/, 0, new_len, 0/*vma->vm_pgoff*/, map_flags);
 			ret = new_addr;
 			if (new_addr & ~PAGE_MASK)
 				goto out;

@@ -17,7 +17,10 @@ asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, uns
   // we will just have to pretend this fd is chan and offset i vbn (mmap)?
   // fd -> file
 
+  unsigned long prot_pte = 0xc00; // TYP1 and TYP0
   struct _secdef *sec, *pstl;
+  void * first=inadr->va_range$ps_start_va;
+  void * last=inadr->va_range$ps_end_va;
   struct _pcb * p=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;
   int savipl=getipl();
 
@@ -38,8 +41,7 @@ asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, uns
   sec->sec$l_ccb=chan;
   sec->sec$l_vbn=vbn;
 
-  //  mmg$fast_create(); //not yet
-  exe$cretva(inadr,retadr,acmode);
+  mmg$fast_create(p, 0, first, last, (last-first)/PAGE_SIZE+1, prot_pte);
 
   setipl(savipl);
 

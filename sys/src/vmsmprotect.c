@@ -12,6 +12,10 @@
 #include <asm/pgalloc.h>
 #include <asm/pgtable.h>
 
+#include <ipldef.h>
+#include <phddef.h>
+#include <rdedef.h>
+
 static inline void change_pte_range(pmd_t * pmd, unsigned long address,
 	unsigned long size, pgprot_t newprot)
 {
@@ -91,16 +95,16 @@ static void change_protection(unsigned long start, unsigned long end, pgprot_t n
 	return;
 }
 
-static inline int mprotect_fixup_all(struct vm_area_struct * vma, struct vm_area_struct ** pprev,
+static inline int mprotect_fixup_all(struct _rde * vma, struct _rde ** pprev,
 	int newflags, pgprot_t prot)
 {
-	struct vm_area_struct * prev = *pprev;
-	struct mm_struct * mm = vma->vm_mm;
+	struct _rde * prev = *pprev;
+	struct mm_struct * mm = current->mm;//vma->vm_mm;
 
-	if (prev && prev->vm_end == vma->vm_start && can_vma_merge(prev, newflags) &&
-	    !vma->vm_file && !(vma->vm_flags & VM_SHARED)) {
+	if (prev && (prev->rde$pq_start_va + prev->rde$q_region_size) == vma->rde$pq_start_va && can_vma_merge(prev, newflags) &&
+	    /*!vma->vm_file && */ !(vma->rde$l_flags & VM_SHARED)) {
 		spin_lock(&mm->page_table_lock);
-		prev->vm_end = vma->vm_end;
+		prev->rde$q_region_size = vma->rde$q_region_size;
 		__vma_unlink(mm, vma, prev);
 		spin_unlock(&mm->page_table_lock);
 
@@ -111,8 +115,8 @@ static inline int mprotect_fixup_all(struct vm_area_struct * vma, struct vm_area
 	}
 
 	spin_lock(&mm->page_table_lock);
-	vma->vm_flags = newflags;
-	vma->vm_page_prot = prot;
+	vma->rde$l_flags = newflags;
+	vma->rde$r_regprot.regprt$l_region_prot = *(unsigned long *)&prot;
 	spin_unlock(&mm->page_table_lock);
 
 	*pprev = vma;
@@ -120,20 +124,20 @@ static inline int mprotect_fixup_all(struct vm_area_struct * vma, struct vm_area
 	return 0;
 }
 
-static inline int mprotect_fixup_start(struct vm_area_struct * vma, struct vm_area_struct ** pprev,
+static inline int mprotect_fixup_start(struct _rde * vma, struct _rde ** pprev,
 	unsigned long end,
 	int newflags, pgprot_t prot)
 {
-	struct vm_area_struct * n, * prev = *pprev;
+	struct _rde * n, * prev = *pprev;
 
 	*pprev = vma;
 
-	if (prev && prev->vm_end == vma->vm_start && can_vma_merge(prev, newflags) &&
-	    !vma->vm_file && !(vma->vm_flags & VM_SHARED)) {
-		spin_lock(&vma->vm_mm->page_table_lock);
-		prev->vm_end = end;
-		vma->vm_start = end;
-		spin_unlock(&vma->vm_mm->page_table_lock);
+	if (prev && (prev->rde$pq_start_va + prev->rde$q_region_size) == vma->rde$pq_start_va && can_vma_merge(prev, newflags) &&
+	    /* !vma->vm_file && */ !(vma->rde$l_flags & VM_SHARED)) {
+	  //spin_lock(&vma->vm_mm->page_table_lock);
+		prev->rde$q_region_size = end - (unsigned long)prev->rde$pq_start_va;
+		vma->rde$pq_start_va = end;
+		//spin_unlock(&vma->vm_mm->page_table_lock);
 
 		return 0;
 	}
@@ -141,49 +145,53 @@ static inline int mprotect_fixup_start(struct vm_area_struct * vma, struct vm_ar
 	if (!n)
 		return -ENOMEM;
 	*n = *vma;
-	n->vm_end = end;
-	n->vm_flags = newflags;
-	n->vm_raend = 0;
-	n->vm_page_prot = prot;
+	n->rde$q_region_size = end - (unsigned long)n->rde$pq_start_va;
+	n->rde$l_flags = newflags;
+	//n->vm_raend = 0;
+	n->rde$r_regprot.regprt$l_region_prot = *(unsigned long *)&prot;
+#if 0
 	if (n->vm_file)
 		get_file(n->vm_file);
 	if (n->vm_ops && n->vm_ops->open)
 		n->vm_ops->open(n);
-	vma->vm_pgoff += (end - vma->vm_start) >> PAGE_SHIFT;
+	vma->vm_pgoff += (end - (unsigned long)vma->rde$pq_start_va) >> PAGE_SHIFT;
+#endif
 	lock_vma_mappings(vma);
-	spin_lock(&vma->vm_mm->page_table_lock);
-	vma->vm_start = end;
-	__insert_vm_struct(current->mm, n);
-	spin_unlock(&vma->vm_mm->page_table_lock);
+	//spin_lock(&vma->vm_mm->page_table_lock);
+	vma->rde$pq_start_va = end;
+	//__insert_vm_struct(current->mm, n);
+	//spin_unlock(&vma->vm_mm->page_table_lock);
 	unlock_vma_mappings(vma);
 
 	return 0;
 }
 
-static inline int mprotect_fixup_end(struct vm_area_struct * vma, struct vm_area_struct ** pprev,
+static inline int mprotect_fixup_end(struct _rde * vma, struct _rde ** pprev,
 	unsigned long start,
 	int newflags, pgprot_t prot)
 {
-	struct vm_area_struct * n;
+	struct _rde * n;
 
 	n = kmem_cache_alloc(vm_area_cachep, GFP_KERNEL);
 	if (!n)
 		return -ENOMEM;
 	*n = *vma;
-	n->vm_start = start;
-	n->vm_pgoff += (n->vm_start - vma->vm_start) >> PAGE_SHIFT;
-	n->vm_flags = newflags;
-	n->vm_raend = 0;
-	n->vm_page_prot = prot;
+	n->rde$pq_start_va = start;
+	//n->vm_pgoff += (n->rde$pq_start_va - vma->rde$pq_start_va) >> PAGE_SHIFT;
+	n->rde$l_flags = newflags;
+	//n->vm_raend = 0;
+	n->rde$r_regprot.regprt$l_region_prot = *(unsigned long *)&prot;
+#if 0
 	if (n->vm_file)
 		get_file(n->vm_file);
 	if (n->vm_ops && n->vm_ops->open)
 		n->vm_ops->open(n);
+#endif
 	lock_vma_mappings(vma);
-	spin_lock(&vma->vm_mm->page_table_lock);
-	vma->vm_end = start;
-	__insert_vm_struct(current->mm, n);
-	spin_unlock(&vma->vm_mm->page_table_lock);
+	//spin_lock(&vma->vm_mm->page_table_lock);
+	vma->rde$q_region_size = start - (unsigned long)vma->rde$pq_start_va;
+	//__insert_vm_struct(current->mm, n);
+	//spin_unlock(&vma->vm_mm->page_table_lock);
 	unlock_vma_mappings(vma);
 
 	*pprev = n;
@@ -191,11 +199,11 @@ static inline int mprotect_fixup_end(struct vm_area_struct * vma, struct vm_area
 	return 0;
 }
 
-static inline int mprotect_fixup_middle(struct vm_area_struct * vma, struct vm_area_struct ** pprev,
+static inline int mprotect_fixup_middle(struct _rde * vma, struct _rde ** pprev,
 	unsigned long start, unsigned long end,
 	int newflags, pgprot_t prot)
 {
-	struct vm_area_struct * left, * right;
+	struct _rde * left, * right;
 
 	left = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 	if (!left)
@@ -207,9 +215,10 @@ static inline int mprotect_fixup_middle(struct vm_area_struct * vma, struct vm_a
 	}
 	*left = *vma;
 	*right = *vma;
-	left->vm_end = start;
-	right->vm_start = end;
-	right->vm_pgoff += (right->vm_start - left->vm_start) >> PAGE_SHIFT;
+	left->rde$q_region_size = start - (unsigned long)left->rde$pq_start_va;
+	right->rde$pq_start_va = end;
+#if 0
+	right->vm_pgoff += (right->rde$pq_start_va - left->rde$pq_start_va) >> PAGE_SHIFT;
 	left->vm_raend = 0;
 	right->vm_raend = 0;
 	if (vma->vm_file)
@@ -218,17 +227,18 @@ static inline int mprotect_fixup_middle(struct vm_area_struct * vma, struct vm_a
 		vma->vm_ops->open(left);
 		vma->vm_ops->open(right);
 	}
-	vma->vm_pgoff += (start - vma->vm_start) >> PAGE_SHIFT;
+	vma->vm_pgoff += (start - vma->rde$pq_start_va) >> PAGE_SHIFT;
 	vma->vm_raend = 0;
-	vma->vm_page_prot = prot;
+#endif
+	vma->rde$r_regprot.regprt$l_region_prot = *(unsigned long *)&prot;
 	lock_vma_mappings(vma);
-	spin_lock(&vma->vm_mm->page_table_lock);
-	vma->vm_start = start;
-	vma->vm_end = end;
-	vma->vm_flags = newflags;
-	__insert_vm_struct(current->mm, left);
-	__insert_vm_struct(current->mm, right);
-	spin_unlock(&vma->vm_mm->page_table_lock);
+	//spin_lock(&vma->vm_mm->page_table_lock);
+	vma->rde$pq_start_va = start;
+	vma->rde$q_region_size = end - start;
+	vma->rde$l_flags = newflags;
+	//__insert_vm_struct(current->mm, left);
+	//__insert_vm_struct(current->mm, right);
+	//spin_unlock(&vma->vm_mm->page_table_lock);
 	unlock_vma_mappings(vma);
 
 	*pprev = right;
@@ -236,23 +246,23 @@ static inline int mprotect_fixup_middle(struct vm_area_struct * vma, struct vm_a
 	return 0;
 }
 
-static int mprotect_fixup(struct vm_area_struct * vma, struct vm_area_struct ** pprev,
+static int mprotect_fixup(struct _rde * vma, struct _rde ** pprev,
 	unsigned long start, unsigned long end, unsigned int newflags)
 {
 	pgprot_t newprot;
 	int error;
 
-	if (newflags == vma->vm_flags) {
+	if (newflags == vma->rde$l_flags) {
 		*pprev = vma;
 		return 0;
 	}
 	newprot = protection_map[newflags & 0xf];
-	if (start == vma->vm_start) {
-		if (end == vma->vm_end)
+	if (start == vma->rde$pq_start_va) {
+		if (end == (vma->rde$pq_start_va + vma->rde$q_region_size))
 			error = mprotect_fixup_all(vma, pprev, newflags, newprot);
 		else
 			error = mprotect_fixup_start(vma, pprev, end, newflags, newprot);
-	} else if (end == vma->vm_end)
+	} else if (end == (vma->rde$pq_start_va + vma->rde$q_region_size))
 		error = mprotect_fixup_end(vma, pprev, start, newflags, newprot);
 	else
 		error = mprotect_fixup_middle(vma, pprev, start, end, newflags, newprot);
@@ -267,7 +277,7 @@ static int mprotect_fixup(struct vm_area_struct * vma, struct vm_area_struct ** 
 asmlinkage long sys_mprotect(unsigned long start, size_t len, unsigned long prot)
 {
 	unsigned long nstart, end, tmp;
-	struct vm_area_struct * vma, * next, * prev;
+	struct _rde * vma, * next, * prev;
 	int error = -EINVAL;
 
 	if (start & ~PAGE_MASK)
@@ -283,32 +293,35 @@ asmlinkage long sys_mprotect(unsigned long start, size_t len, unsigned long prot
 
 	down_write(&current->mm->mmap_sem);
 
-	vma = find_vma_prev(current->mm, start, &prev);
+	//vma = find_vma_prev(current->mm, start, &prev);
+	//vma = mmg$search_rde_va(start, &current->pcb$l_phd->phd$ps_p0_va_list_flink, &prev, &next);
+	vma = mmg$lookup_rde_va(start,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
+	prev = vma->rde$ps_va_list_blink;
 	error = -EFAULT;
-	if (!vma || vma->vm_start > start)
+	if (!vma || vma->rde$pq_start_va > start)
 		goto out;
 
 	for (nstart = start ; ; ) {
 		unsigned int newflags;
 		int last = 0;
 
-		/* Here we know that  vma->vm_start <= nstart < vma->vm_end. */
+		/* Here we know that  vma->rde$pq_start_va <= nstart < (vma->rde$pq_start_va + vma->rde$q_region_size). */
 
-		newflags = prot | (vma->vm_flags & ~(PROT_READ | PROT_WRITE | PROT_EXEC));
+		newflags = prot | (vma->rde$l_flags & ~(PROT_READ | PROT_WRITE | PROT_EXEC));
 		if ((newflags & ~(newflags >> 4)) & 0xf) {
 			error = -EACCES;
 			goto out;
 		}
 
-		if (vma->vm_end > end) {
+		if ((vma->rde$pq_start_va + vma->rde$q_region_size) > end) {
 			error = mprotect_fixup(vma, &prev, nstart, end, newflags);
 			goto out;
 		}
-		if (vma->vm_end == end)
+		if ((vma->rde$pq_start_va + vma->rde$q_region_size) == end)
 			last = 1;
 
-		tmp = vma->vm_end;
-		next = vma->vm_next;
+		tmp = (vma->rde$pq_start_va + vma->rde$q_region_size);
+		next = vma->rde$ps_va_list_flink;
 		error = mprotect_fixup(vma, &prev, nstart, tmp, newflags);
 		if (error)
 			goto out;
@@ -316,20 +329,20 @@ asmlinkage long sys_mprotect(unsigned long start, size_t len, unsigned long prot
 			break;
 		nstart = tmp;
 		vma = next;
-		if (!vma || vma->vm_start != nstart) {
+		if (!vma || vma->rde$pq_start_va != nstart) {
 			error = -EFAULT;
 			goto out;
 		}
 	}
-	if (next && prev->vm_end == next->vm_start && can_vma_merge(next, prev->vm_flags) &&
-	    !prev->vm_file && !(prev->vm_flags & VM_SHARED)) {
-		spin_lock(&prev->vm_mm->page_table_lock);
-		prev->vm_end = next->vm_end;
-		__vma_unlink(prev->vm_mm, next, prev);
-		spin_unlock(&prev->vm_mm->page_table_lock);
+	if (next && (prev->rde$pq_start_va + prev->rde$q_region_size) == next->rde$pq_start_va && can_vma_merge(next, prev->rde$l_flags) &&
+	    /*!prev->vm_file && */ !(prev->rde$l_flags & VM_SHARED)) {
+	  //spin_lock(&prev->vm_mm->page_table_lock);
+		prev->rde$q_region_size = next->rde$q_region_size;
+		//__vma_unlink(prev->vm_mm, next, prev);
+		//spin_unlock(&prev->vm_mm->page_table_lock);
 
 		kmem_cache_free(vm_area_cachep, next);
-		prev->vm_mm->map_count--;
+		//prev->vm_mm->map_count--;
 	}
 out:
 	up_write(&current->mm->mmap_sem);

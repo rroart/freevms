@@ -31,6 +31,9 @@
 
 #include <linux/highmem.h>
 
+#include <ipldef.h>
+#include <rdedef.h>
+
 /*
  * Shared mappings implemented 30.11.1994. It's not fully working yet,
  * though.
@@ -1785,51 +1788,60 @@ asmlinkage ssize_t sys_readahead(int fd, loff_t offset, size_t count)
  * sure this is sequential access, we don't need a flexible read-ahead
  * window size -- we can always use a large fixed size window.
  */
-static void nopage_sequential_readahead(struct vm_area_struct * vma,
+static void nopage_sequential_readahead(struct _rde * vma,
 	unsigned long pgoff, unsigned long filesize)
 {
 	unsigned long ra_window;
 
-	ra_window = get_max_readahead(vma->vm_file->f_dentry->d_inode);
+	ra_window = get_max_readahead(0/*vma->vm_file->f_dentry->d_inode*/);
 	ra_window = CLUSTER_OFFSET(ra_window + CLUSTER_PAGES - 1);
 
 	/* vm_raend is zero if we haven't read ahead in this area yet.  */
+#if 0
 	if (vma->vm_raend == 0)
 		vma->vm_raend = vma->vm_pgoff + ra_window;
+#endif
 
 	/*
 	 * If we've just faulted the page half-way through our window,
 	 * then schedule reads for the next window, and release the
 	 * pages in the previous window.
 	 */
-	if ((pgoff + (ra_window >> 1)) == vma->vm_raend) {
-		unsigned long start = vma->vm_pgoff + vma->vm_raend;
+	if ((pgoff + (ra_window >> 1)) == 0/*vma->vm_raend*/) {
+	  unsigned long start = 0;//vma->vm_pgoff + vma->vm_raend;
 		unsigned long end = start + ra_window;
 
-		if (end > ((vma->vm_end >> PAGE_SHIFT) + vma->vm_pgoff))
-			end = (vma->vm_end >> PAGE_SHIFT) + vma->vm_pgoff;
+#if 0
+		if (end > (((vma->rde$pq_start_va + vma->rde$q_region_size) >> PAGE_SHIFT) + vma->vm_pgoff))
+			end = ((vma->rde$pq_start_va + vma->rde$q_region_size) >> PAGE_SHIFT) + vma->vm_pgoff;
+#endif
 		if (start > end)
 			return;
 
 		while ((start < end) && (start < filesize)) {
+#if 0
 			if (read_cluster_nonblocking(vma->vm_file,
 							start, filesize) < 0)
 				break;
+#endif
 			start += CLUSTER_PAGES;
 		}
 		run_task_queue(&tq_disk);
 
 		/* if we're far enough past the beginning of this area,
 		   recycle pages that are in the previous window. */
+		if (0) {
+#if 0
 		if (vma->vm_raend > (vma->vm_pgoff + ra_window + ra_window)) {
+#endif
 			unsigned long window = ra_window << PAGE_SHIFT;
 
-			end = vma->vm_start + (vma->vm_raend << PAGE_SHIFT);
+			//end = vma->rde$pq_start_va + (vma->vm_raend << PAGE_SHIFT);
 			end -= window + window;
 			filemap_sync(vma, end - window, window, MS_INVALIDATE);
 		}
 
-		vma->vm_raend += ra_window;
+		//vma->vm_raend += ra_window;
 	}
 
 	return;
@@ -1846,14 +1858,14 @@ static void nopage_sequential_readahead(struct vm_area_struct * vma,
 struct page * filemap_nopage(struct vm_area_struct * area, unsigned long address, int unused)
 {
 	int error;
-	struct file *file = area->vm_file;
+	struct file *file = 0;//area->vm_file;
 	struct address_space *mapping = file->f_dentry->d_inode->i_mapping;
 	struct inode *inode = mapping->host;
 	struct page *page, **hash;
 	unsigned long size, pgoff, endoff;
 
-	pgoff = ((address - area->vm_start) >> PAGE_CACHE_SHIFT) + area->vm_pgoff;
-	endoff = ((area->vm_end - area->vm_start) >> PAGE_CACHE_SHIFT) + area->vm_pgoff;
+	pgoff = 0;//((address - area->rde$pq_start_va) >> PAGE_CACHE_SHIFT) + area->vm_pgoff;
+	endoff = 0;//((area->vm_end - area->rde$pq_start_va) >> PAGE_CACHE_SHIFT) + area->vm_pgoff;
 
 retry_all:
 	/*
@@ -1861,8 +1873,10 @@ retry_all:
 	 * accessible..
 	 */
 	size = (inode->i_size + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+#if 0
 	if ((pgoff >= size) && (area->vm_mm == current->mm))
 		return NULL;
+#endif
 
 	/* The "size" of the file, as far as mmap is concerned, isn't bigger than the mapping */
 	if (size > endoff)
@@ -1989,7 +2003,7 @@ page_not_uptodate:
 /* Called with mm->page_table_lock held to protect against other
  * threads/the swapper from ripping pte's out from under us.
  */
-static inline int filemap_sync_pte(pte_t * ptep, struct vm_area_struct *vma,
+static inline int filemap_sync_pte(pte_t * ptep, struct _rde *vma,
 	unsigned long address, unsigned int flags)
 {
 	pte_t pte = *ptep;
@@ -2006,7 +2020,7 @@ static inline int filemap_sync_pte(pte_t * ptep, struct vm_area_struct *vma,
 
 static inline int filemap_sync_pte_range(pmd_t * pmd,
 	unsigned long address, unsigned long size, 
-	struct vm_area_struct *vma, unsigned long offset, unsigned int flags)
+	struct _rde *vma, unsigned long offset, unsigned int flags)
 {
 	pte_t * pte;
 	unsigned long end;
@@ -2036,7 +2050,7 @@ static inline int filemap_sync_pte_range(pmd_t * pmd,
 
 static inline int filemap_sync_pmd_range(pgd_t * pgd,
 	unsigned long address, unsigned long size, 
-	struct vm_area_struct *vma, unsigned int flags)
+	struct _rde *vma, unsigned int flags)
 {
 	pmd_t * pmd;
 	unsigned long offset, end;
@@ -2070,14 +2084,15 @@ int filemap_sync(struct vm_area_struct * vma, unsigned long address,
 	pgd_t * dir;
 	unsigned long end = address + size;
 	int error = 0;
+	struct mm_struct *mm =current->mm;
 
 	/* Aquire the lock early; it may be possible to avoid dropping
 	 * and reaquiring it repeatedly.
 	 */
-	spin_lock(&vma->vm_mm->page_table_lock);
+	//spin_lock(&vma->vm_mm->page_table_lock);
 
-	dir = pgd_offset(vma->vm_mm, address);
-	flush_cache_range(vma->vm_mm, end - size, end);
+	dir = pgd_offset(mm, address);
+	flush_cache_range(mm, end - size, end);
 	if (address >= end)
 		BUG();
 	do {
@@ -2085,9 +2100,9 @@ int filemap_sync(struct vm_area_struct * vma, unsigned long address,
 		address = (address + PGDIR_SIZE) & PGDIR_MASK;
 		dir++;
 	} while (address && (address < end));
-	flush_tlb_range(vma->vm_mm, end - size, end);
+	flush_tlb_range(mm, end - size, end);
 
-	spin_unlock(&vma->vm_mm->page_table_lock);
+	//spin_unlock(&vma->vm_mm->page_table_lock);
 
 	return error;
 }
@@ -2103,7 +2118,7 @@ int generic_file_mmap(struct file * file, struct vm_area_struct * vma)
 	struct address_space *mapping = file->f_dentry->d_inode->i_mapping;
 	struct inode *inode = mapping->host;
 
-	if ((vma->vm_flags & VM_SHARED) && (vma->vm_flags & VM_MAYWRITE)) {
+	if ((((struct _rde *)vma)->rde$l_flags & VM_SHARED) && (((struct _rde *)vma)->rde$l_flags & VM_MAYWRITE)) {
 		if (!mapping->a_ops->writepage)
 			return -EINVAL;
 	}
@@ -2127,13 +2142,13 @@ int generic_file_mmap(struct file * file, struct vm_area_struct * vma)
  * where the application knows that it has finished with the data and
  * wishes to intelligently schedule its own I/O traffic.
  */
-static int msync_interval(struct vm_area_struct * vma,
+static int msync_interval(struct _rde * vma,
 	unsigned long start, unsigned long end, int flags)
 {
 	int ret = 0;
-	struct file * file = vma->vm_file;
+	struct file * file = 0;//vma->vm_file;
 
-	if (file && (vma->vm_flags & VM_SHARED)) {
+	if (file && (vma->rde$l_flags & VM_SHARED)) {
 		ret = filemap_sync(vma, start, end-start, flags);
 
 		if (!ret && (flags & (MS_SYNC|MS_ASYNC))) {
@@ -2162,7 +2177,7 @@ static int msync_interval(struct vm_area_struct * vma,
 asmlinkage long sys_msync(unsigned long start, size_t len, int flags)
 {
 	unsigned long end;
-	struct vm_area_struct * vma;
+	struct _rde * vma;
 	int unmapped_error, error = -EINVAL;
 
 	down_read(&current->mm->mmap_sem);
@@ -2181,20 +2196,21 @@ asmlinkage long sys_msync(unsigned long start, size_t len, int flags)
 	 * If the interval [start,end) covers some unmapped address ranges,
 	 * just ignore them, but return -EFAULT at the end.
 	 */
-	vma = find_vma(current->mm, start);
+	//vma = find_vma(current->mm, start);
+	vma = mmg$lookup_rde_va(start,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
 	unmapped_error = 0;
 	for (;;) {
 		/* Still start < end. */
 		error = -EFAULT;
 		if (!vma)
 			goto out;
-		/* Here start < vma->vm_end. */
-		if (start < vma->vm_start) {
+		/* Here start < (vma->rde$pq_start_va + vma->rde$q_region_size). */
+		if (start < vma->rde$pq_start_va) {
 			unmapped_error = -EFAULT;
-			start = vma->vm_start;
+			start = vma->rde$pq_start_va;
 		}
-		/* Here vma->vm_start <= start < vma->vm_end. */
-		if (end <= vma->vm_end) {
+		/* Here vma->rde$pq_start_va <= start < (vma->rde$pq_start_va + vma->rde$q_region_size). */
+		if (end <= (vma->rde$pq_start_va + vma->rde$q_region_size)) {
 			if (start < end) {
 				error = msync_interval(vma, start, end, flags);
 				if (error)
@@ -2203,28 +2219,28 @@ asmlinkage long sys_msync(unsigned long start, size_t len, int flags)
 			error = unmapped_error;
 			goto out;
 		}
-		/* Here vma->vm_start <= start < vma->vm_end < end. */
-		error = msync_interval(vma, start, vma->vm_end, flags);
+		/* Here vma->rde$pq_start_va <= start < (vma->rde$pq_start_va + vma->rde$q_region_size) < end. */
+		error = msync_interval(vma, start, (vma->rde$pq_start_va + vma->rde$q_region_size), flags);
 		if (error)
 			goto out;
-		start = vma->vm_end;
-		vma = vma->vm_next;
+		start = (vma->rde$pq_start_va + vma->rde$q_region_size);
+		vma = 0; //vma->vm_next;
 	}
 out:
 	up_read(&current->mm->mmap_sem);
 	return error;
 }
 
-static inline void setup_read_behavior(struct vm_area_struct * vma,
+static inline void setup_read_behavior(struct _rde * vma,
 	int behavior)
 {
-	VM_ClearReadHint(vma);
+  //VM_ClearReadHint(vma);
 	switch(behavior) {
 		case MADV_SEQUENTIAL:
-			vma->vm_flags |= VM_SEQ_READ;
+			vma->rde$l_flags |= VM_SEQ_READ;
 			break;
 		case MADV_RANDOM:
-			vma->vm_flags |= VM_RAND_READ;
+			vma->rde$l_flags |= VM_RAND_READ;
 			break;
 		default:
 			break;
@@ -2232,65 +2248,69 @@ static inline void setup_read_behavior(struct vm_area_struct * vma,
 	return;
 }
 
-static long madvise_fixup_start(struct vm_area_struct * vma,
+static long madvise_fixup_start(struct _rde * vma,
 	unsigned long end, int behavior)
 {
-	struct vm_area_struct * n;
-	struct mm_struct * mm = vma->vm_mm;
+	struct _rde * n;
+	struct mm_struct * mm = current->mm;//vma->vm_mm;
 
 	n = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 	if (!n)
 		return -EAGAIN;
 	*n = *vma;
-	n->vm_end = end;
+	n->rde$q_region_size = end - (unsigned long)n->rde$pq_start_va;
 	setup_read_behavior(n, behavior);
-	n->vm_raend = 0;
+	//n->vm_raend = 0;
+#if 0
 	if (n->vm_file)
 		get_file(n->vm_file);
 	if (n->vm_ops && n->vm_ops->open)
 		n->vm_ops->open(n);
-	vma->vm_pgoff += (end - vma->vm_start) >> PAGE_SHIFT;
+#endif
+	//vma->vm_pgoff += (end - vma->rde$pq_start_va) >> PAGE_SHIFT;
 	lock_vma_mappings(vma);
 	spin_lock(&mm->page_table_lock);
-	vma->vm_start = end;
-	__insert_vm_struct(mm, n);
+	vma->rde$pq_start_va = end;
+	//__insert_vm_struct(mm, n);
 	spin_unlock(&mm->page_table_lock);
 	unlock_vma_mappings(vma);
 	return 0;
 }
 
-static long madvise_fixup_end(struct vm_area_struct * vma,
+static long madvise_fixup_end(struct _rde * vma,
 	unsigned long start, int behavior)
 {
-	struct vm_area_struct * n;
-	struct mm_struct * mm = vma->vm_mm;
+	struct _rde * n;
+	struct mm_struct * mm = current->mm;// vma->vm_mm;
 
 	n = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 	if (!n)
 		return -EAGAIN;
 	*n = *vma;
-	n->vm_start = start;
-	n->vm_pgoff += (n->vm_start - vma->vm_start) >> PAGE_SHIFT;
+	n->rde$pq_start_va = start;
+	//n->vm_pgoff += (n->rde$pq_start_va - vma->rde$pq_start_va) >> PAGE_SHIFT;
 	setup_read_behavior(n, behavior);
-	n->vm_raend = 0;
+	//n->vm_raend = 0;
+#if 0
 	if (n->vm_file)
 		get_file(n->vm_file);
 	if (n->vm_ops && n->vm_ops->open)
 		n->vm_ops->open(n);
+#endif
 	lock_vma_mappings(vma);
 	spin_lock(&mm->page_table_lock);
-	vma->vm_end = start;
-	__insert_vm_struct(mm, n);
+	vma->rde$q_region_size = start - (unsigned long)vma->rde$pq_start_va;
+	//__insert_vm_struct(mm, n);
 	spin_unlock(&mm->page_table_lock);
 	unlock_vma_mappings(vma);
 	return 0;
 }
 
-static long madvise_fixup_middle(struct vm_area_struct * vma,
+static long madvise_fixup_middle(struct _rde * vma,
 	unsigned long start, unsigned long end, int behavior)
 {
-	struct vm_area_struct * left, * right;
-	struct mm_struct * mm = vma->vm_mm;
+	struct _rde * left, * right;
+	struct mm_struct * mm = current->mm;//vma->vm_mm;
 
 	left = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 	if (!left)
@@ -2302,11 +2322,12 @@ static long madvise_fixup_middle(struct vm_area_struct * vma,
 	}
 	*left = *vma;
 	*right = *vma;
-	left->vm_end = start;
-	right->vm_start = end;
-	right->vm_pgoff += (right->vm_start - left->vm_start) >> PAGE_SHIFT;
-	left->vm_raend = 0;
-	right->vm_raend = 0;
+	left->rde$q_region_size = start - (unsigned long)left->rde$pq_start_va;
+	right->rde$pq_start_va = end;
+	//right->vm_pgoff += (right->rde$pq_start_va - left->rde$pq_start_va) >> PAGE_SHIFT;
+	//left->vm_raend = 0;
+	//right->vm_raend = 0;
+#if 0
 	if (vma->vm_file)
 		atomic_add(2, &vma->vm_file->f_count);
 
@@ -2314,15 +2335,16 @@ static long madvise_fixup_middle(struct vm_area_struct * vma,
 		vma->vm_ops->open(left);
 		vma->vm_ops->open(right);
 	}
-	vma->vm_pgoff += (start - vma->vm_start) >> PAGE_SHIFT;
-	vma->vm_raend = 0;
+#endif
+	//vma->vm_pgoff += (start - vma->rde$pq_start_va) >> PAGE_SHIFT;
+	//vma->vm_raend = 0;
 	lock_vma_mappings(vma);
 	spin_lock(&mm->page_table_lock);
-	vma->vm_start = start;
-	vma->vm_end = end;
+	vma->rde$pq_start_va = start;
+	vma->rde$q_region_size = end - start;
 	setup_read_behavior(vma, behavior);
-	__insert_vm_struct(mm, left);
-	__insert_vm_struct(mm, right);
+	//__insert_vm_struct(mm, left);
+	//__insert_vm_struct(mm, right);
 	spin_unlock(&mm->page_table_lock);
 	unlock_vma_mappings(vma);
 	return 0;
@@ -2332,23 +2354,23 @@ static long madvise_fixup_middle(struct vm_area_struct * vma,
  * We can potentially split a vm area into separate
  * areas, each area with its own behavior.
  */
-static long madvise_behavior(struct vm_area_struct * vma,
+static long madvise_behavior(struct _rde * vma,
 	unsigned long start, unsigned long end, int behavior)
 {
 	int error = 0;
 
 	/* This caps the number of vma's this process can own */
-	if (vma->vm_mm->map_count > MAX_MAP_COUNT)
+	if (current->mm->map_count > MAX_MAP_COUNT)
 		return -ENOMEM;
 
-	if (start == vma->vm_start) {
-		if (end == vma->vm_end) {
+	if (start == vma->rde$pq_start_va) {
+		if (end == (vma->rde$pq_start_va + vma->rde$q_region_size)) {
 			setup_read_behavior(vma, behavior);
-			vma->vm_raend = 0;
+			//vma->vm_raend = 0;
 		} else
 			error = madvise_fixup_start(vma, end, behavior);
 	} else {
-		if (end == vma->vm_end)
+		if (end == (vma->rde$pq_start_va + vma->rde$q_region_size))
 			error = madvise_fixup_end(vma, start, behavior);
 		else
 			error = madvise_fixup_middle(vma, start, end, behavior);
@@ -2361,7 +2383,7 @@ static long madvise_behavior(struct vm_area_struct * vma,
  * Schedule all required I/O operations, then run the disk queue
  * to make sure they are started.  Do not wait for completion.
  */
-static long madvise_willneed(struct vm_area_struct * vma,
+static long madvise_willneed(struct _rde * vma,
 	unsigned long start, unsigned long end)
 {
 	long error = -EBADF;
@@ -2369,26 +2391,29 @@ static long madvise_willneed(struct vm_area_struct * vma,
 	unsigned long size, rlim_rss;
 
 	/* Doesn't work if there's no mapped file. */
+#if 0
 	if (!vma->vm_file)
 		return error;
 	file = vma->vm_file;
 	size = (file->f_dentry->d_inode->i_size + PAGE_CACHE_SIZE - 1) >>
 							PAGE_CACHE_SHIFT;
+#endif
 
-	start = ((start - vma->vm_start) >> PAGE_SHIFT) + vma->vm_pgoff;
-	if (end > vma->vm_end)
-		end = vma->vm_end;
-	end = ((end - vma->vm_start) >> PAGE_SHIFT) + vma->vm_pgoff;
+	start = ((start - (unsigned long)vma->rde$pq_start_va) >> PAGE_SHIFT);// + vma->vm_pgoff;
+	if (end > (vma->rde$pq_start_va + vma->rde$q_region_size))
+		end = (vma->rde$pq_start_va + vma->rde$q_region_size);
+	end = ((end - (unsigned long)vma->rde$pq_start_va) >> PAGE_SHIFT);// + vma->vm_pgoff;
 
 	/* Make sure this doesn't exceed the process's max rss. */
 	error = -EIO;
 	rlim_rss = current->rlim ?  current->rlim[RLIMIT_RSS].rlim_cur :
 				LONG_MAX; /* default: see resource.h */
-	if ((vma->vm_mm->rss + (end - start)) > rlim_rss)
+	if ((current->mm->rss + (end - start)) > rlim_rss)
 		return error;
 
 	/* round to cluster boundaries if this isn't a "random" area. */
-	if (!VM_RandomReadHint(vma)) {
+	if (0) {
+	  //if (!VM_RandomReadHint(vma)) {
 		start = CLUSTER_OFFSET(start);
 		end = CLUSTER_OFFSET(end + CLUSTER_PAGES - 1);
 
@@ -2432,17 +2457,17 @@ static long madvise_willneed(struct vm_area_struct * vma,
  * An interface that causes the system to free clean pages and flush
  * dirty pages is already available as msync(MS_INVALIDATE).
  */
-static long madvise_dontneed(struct vm_area_struct * vma,
+static long madvise_dontneed(struct _rde * vma,
 	unsigned long start, unsigned long end)
 {
-	if (vma->vm_flags & VM_LOCKED)
+	if (vma->rde$l_flags & VM_LOCKED)
 		return -EINVAL;
 
-	zap_page_range(vma->vm_mm, start, end - start);
+	zap_page_range(current->mm, start, end - start);
 	return 0;
 }
 
-static long madvise_vma(struct vm_area_struct * vma, unsigned long start,
+static long madvise_vma(struct _rde * vma, unsigned long start,
 	unsigned long end, int behavior)
 {
 	long error = -EBADF;
@@ -2507,7 +2532,7 @@ static long madvise_vma(struct vm_area_struct * vma, unsigned long start,
 asmlinkage long sys_madvise(unsigned long start, size_t len, int behavior)
 {
 	unsigned long end;
-	struct vm_area_struct * vma;
+	struct _rde * vma;
 	int unmapped_error = 0;
 	int error = -EINVAL;
 
@@ -2528,21 +2553,22 @@ asmlinkage long sys_madvise(unsigned long start, size_t len, int behavior)
 	 * If the interval [start,end) covers some unmapped address
 	 * ranges, just ignore them, but return -ENOMEM at the end.
 	 */
-	vma = find_vma(current->mm, start);
+	//vma = find_vma(current->mm, start);
+	vma = mmg$lookup_rde_va(start,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
 	for (;;) {
 		/* Still start < end. */
 		error = -ENOMEM;
 		if (!vma)
 			goto out;
 
-		/* Here start < vma->vm_end. */
-		if (start < vma->vm_start) {
+		/* Here start < (vma->rde$pq_start_va + vma->rde$q_region_size). */
+		if (start < vma->rde$pq_start_va) {
 			unmapped_error = -ENOMEM;
-			start = vma->vm_start;
+			start = vma->rde$pq_start_va;
 		}
 
-		/* Here vma->vm_start <= start < vma->vm_end. */
-		if (end <= vma->vm_end) {
+		/* Here vma->rde$pq_start_va <= start < (vma->rde$pq_start_va + vma->rde$q_region_size). */
+		if (end <= (vma->rde$pq_start_va + vma->rde$q_region_size)) {
 			if (start < end) {
 				error = madvise_vma(vma, start, end,
 							behavior);
@@ -2553,12 +2579,12 @@ asmlinkage long sys_madvise(unsigned long start, size_t len, int behavior)
 			goto out;
 		}
 
-		/* Here vma->vm_start <= start < vma->vm_end < end. */
-		error = madvise_vma(vma, start, vma->vm_end, behavior);
+		/* Here vma->rde$pq_start_va <= start < (vma->rde$pq_start_va + vma->rde$q_region_size) < end. */
+		error = madvise_vma(vma, start, (vma->rde$pq_start_va + vma->rde$q_region_size), behavior);
 		if (error)
 			goto out;
-		start = vma->vm_end;
-		vma = vma->vm_next;
+		start = (vma->rde$pq_start_va + vma->rde$q_region_size);
+		vma = 0; //vma->vm_next;
 	}
 
 out:
@@ -2572,11 +2598,11 @@ out:
  * and is up to date; i.e. that no page-in operation would be required
  * at this time if an application were to map and access this page.
  */
-static unsigned char mincore_page(struct vm_area_struct * vma,
+static unsigned char mincore_page(struct _rde * vma,
 	unsigned long pgoff)
 {
 	unsigned char present = 0;
-	struct address_space * as = vma->vm_file->f_dentry->d_inode->i_mapping;
+	struct address_space * as = 0;//vma->vm_file->f_dentry->d_inode->i_mapping;
 	struct page * page, ** hash = page_hash(as, pgoff);
 
 	spin_lock(&pagecache_lock);
@@ -2588,20 +2614,22 @@ static unsigned char mincore_page(struct vm_area_struct * vma,
 	return present;
 }
 
-static long mincore_vma(struct vm_area_struct * vma,
+static long mincore_vma(struct _rde * vma,
 	unsigned long start, unsigned long end, unsigned char * vec)
 {
 	long error, i, remaining;
 	unsigned char * tmp;
 
 	error = -ENOMEM;
+#if 0
 	if (!vma->vm_file)
 		return error;
+#endif
 
-	start = ((start - vma->vm_start) >> PAGE_SHIFT) + vma->vm_pgoff;
-	if (end > vma->vm_end)
-		end = vma->vm_end;
-	end = ((end - vma->vm_start) >> PAGE_SHIFT) + vma->vm_pgoff;
+	start = ((start - (unsigned long)vma->rde$pq_start_va) >> PAGE_SHIFT);// + vma->vm_pgoff;
+	if (end > (vma->rde$pq_start_va + vma->rde$q_region_size))
+		end = (vma->rde$pq_start_va + vma->rde$q_region_size);
+	end = ((end - (unsigned long)vma->rde$pq_start_va) >> PAGE_SHIFT);// + vma->vm_pgoff;
 
 	error = -EAGAIN;
 	tmp = (unsigned char *) __get_free_page(GFP_KERNEL);
@@ -2660,7 +2688,7 @@ asmlinkage long sys_mincore(unsigned long start, size_t len,
 {
 	int index = 0;
 	unsigned long end;
-	struct vm_area_struct * vma;
+	struct _rde * vma;
 	int unmapped_error = 0;
 	long error = -EINVAL;
 
@@ -2681,21 +2709,22 @@ asmlinkage long sys_mincore(unsigned long start, size_t len,
 	 * If the interval [start,end) covers some unmapped address
 	 * ranges, just ignore them, but return -ENOMEM at the end.
 	 */
-	vma = find_vma(current->mm, start);
+	//vma = find_vma(current->mm, start);
+	vma = mmg$lookup_rde_va(start,current->pcb$l_phd,LOOKUP_RDE_EXACT,IPL$_ASTDEL);
 	for (;;) {
 		/* Still start < end. */
 		error = -ENOMEM;
 		if (!vma)
 			goto out;
 
-		/* Here start < vma->vm_end. */
-		if (start < vma->vm_start) {
+		/* Here start < (vma->rde$pq_start_va + vma->rde$q_region_size). */
+		if (start < vma->rde$pq_start_va) {
 			unmapped_error = -ENOMEM;
-			start = vma->vm_start;
+			start = vma->rde$pq_start_va;
 		}
 
-		/* Here vma->vm_start <= start < vma->vm_end. */
-		if (end <= vma->vm_end) {
+		/* Here vma->rde$pq_start_va <= start < (vma->rde$pq_start_va + vma->rde$q_region_size). */
+		if (end <= (vma->rde$pq_start_va + vma->rde$q_region_size)) {
 			if (start < end) {
 				error = mincore_vma(vma, start, end,
 							&vec[index]);
@@ -2706,13 +2735,13 @@ asmlinkage long sys_mincore(unsigned long start, size_t len,
 			goto out;
 		}
 
-		/* Here vma->vm_start <= start < vma->vm_end < end. */
-		error = mincore_vma(vma, start, vma->vm_end, &vec[index]);
+		/* Here vma->rde$pq_start_va <= start < (vma->rde$pq_start_va + vma->rde$q_region_size) < end. */
+		error = mincore_vma(vma, start, (vma->rde$pq_start_va + vma->rde$q_region_size), &vec[index]);
 		if (error)
 			goto out;
-		index += (vma->vm_end - start) >> PAGE_CACHE_SHIFT;
-		start = vma->vm_end;
-		vma = vma->vm_next;
+		index += ((unsigned long)(vma->rde$pq_start_va + vma->rde$q_region_size) - start) >> PAGE_CACHE_SHIFT;
+		start = (vma->rde$pq_start_va + vma->rde$q_region_size);
+		vma = 0; //vma->vm_next;
 	}
 
 out:
