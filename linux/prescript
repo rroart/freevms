@@ -87,6 +87,28 @@ done
 		ln -s ../../freevms/sys/src/sysdgblsc.c .;
 		ln -s ../../freevms/sys/src/phdutl.c .;
 		ln -s ../../freevms/sys/src/syscredel.c .;
+		ln -s ../../freevms/sys/src/sysdclexh.c .;
+		ln -s ../../freevms/sys/src/sysimgfix.c .;
+		ln -s ../../freevms/sys/src/sysimgsta.c .;
+		ln -s ../../freevms/sys/src/sysimgact.c .;
+		ln -s ../../freevms/sys/src/sysfao.c .;
+		ln -s ../../freevms/sys/src/sysgetdvi.c .;
+		ln -s ../../freevms/sys/src/exceptmsg.c .;
+		ln -s ../../freevms/sys/src/sysputmsg.c .;
+		ln -s ../../freevms/sys/src/sysgetmsg.c .;
+		ln -s ../../freevms/sys/src/syssndjbc.c .;
+		ln -s ../../freevms/sys/src/sysgetsyi.c .;
+		ln -s ../../freevms/sys/src/sysrundwn.c .;
+		ln -s ../../freevms/sys/src/syscreprc.c .;
+		ln -s ../../freevms/sys/src/procstrt.c .;
+		ln -s ../../freevms/sys/src/syssetprt.c .;
+		ln -s ../../freevms/sys/src/syssetprv.c .;
+		ln -s ../../freevms/sys/src/syspurgws.c .;
+		ln -s ../../freevms/sys/src/sysparprc.c .;
+		ln -s ../../freevms/sys/src/syssetexv.c .;
+		ln -s ../../freevms/sys/src/sysupdsec.c .;
+		ln -s ../../freevms/sys/src/sysgetjpi.c .;
+		ln -s ../../freevms/sys/src/uai.c .;
 
 		ln -s ../../freevms/pal/src/ipl.c .;
 		ln -s ../../freevms/pal/src/ast.c .;
