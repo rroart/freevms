@@ -402,7 +402,7 @@ unsigned long stack_sp(unsigned long page)
 
 int current_pid(void)
 {
-	return(current->pid);
+	return(current->pcb$l_pid);
 }
 
 extern int done_init_idle;
@@ -413,11 +413,11 @@ int hwclkdone=0;
 void cpu_idle(void)
 {
 	init_idle();
-	printk("id %x\n",current->pid);	
+	printk("id %x\n",current->pcb$l_pid);	
 	printk("idle %x %x %x\n",done_init_idle,current,&init_task);
   printk("pid 0 here again%x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl); 
 	{ int i; for(i=0;i<10000000;i++) ; }
-	if (current->pid==0) { /* just to be sure */
+	if (current->pcb$l_pid==0) { /* just to be sure */
 	  	  current->pcb$b_prib  = 24;
 	  	  current->pcb$b_pri   = 24;
 	  current->pcb$b_prib  = 31;
@@ -494,7 +494,7 @@ char *current_cmd(void)
 void force_sigbus(void)
 {
 	printk(KERN_ERR "Killing pid %d because of a lack of memory\n", 
-	       current->pid);
+	       current->pcb$l_pid);
 	lock_kernel();
 	sigaddset(&current->pending.signal, SIGBUS);
 	recalc_sigpending(current);

@@ -444,7 +444,7 @@ static void setup_frame(int sig, struct k_sigaction *ka,
 
 #if DEBUG_SIG
 	printk("SIG deliver (%s:%d): sp=%p pc=%p ra=%p\n",
-		current->comm, current->pid, frame, regs->eip, frame->pretcode);
+		current->comm, current->pcb$l_pid, frame, regs->eip, frame->pretcode);
 #endif
 
 	return;
@@ -519,7 +519,7 @@ static void setup_rt_frame(int sig, struct k_sigaction *ka, siginfo_t *info,
 
 #if DEBUG_SIG
 	printk("SIG deliver (%s:%d): sp=%p pc=%p ra=%p\n",
-		current->comm, current->pid, frame, regs->eip, frame->pretcode);
+		current->comm, current->pcb$l_pid, frame, regs->eip, frame->pretcode);
 #endif
 
 	return;
@@ -630,7 +630,7 @@ int do_signal(struct pt_regs *regs, sigset_t *oldset)
 				info.si_signo = signr;
 				info.si_errno = 0;
 				info.si_code = SI_USER;
-				info.si_pid = current->p_pptr->pid;
+				info.si_pid = current->p_pptr->pcb$l_pid;
 				info.si_uid = current->p_pptr->uid;
 			}
 
@@ -655,7 +655,7 @@ int do_signal(struct pt_regs *regs, sigset_t *oldset)
 			int exit_code = signr;
 
 			/* Init gets no signals it doesn't want.  */
-			if (current->pid == 1)
+			if (current->pcb$l_pid == INIT_PID)
 				continue;
 
 			switch (signr) {

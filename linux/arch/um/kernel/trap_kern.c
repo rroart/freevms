@@ -69,7 +69,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 			current->maj_flt++;
 			break;
 		default:
-			if (current->pid == 1) {
+			if (current->pcb$l_pid == INIT_PID) {
 				up_read(&mm->mmap_sem);
 				yield();
 				down_read(&mm->mmap_sem);
@@ -113,7 +113,7 @@ void bad_segv(unsigned long address, unsigned long ip, int is_write)
 	struct siginfo si;
 
 	printk(KERN_ERR "Unfixable SEGV in '%s' (pid %d) at 0x%lx "
-	       "(ip 0x%lx)\n", current->pcb$t_lname, current->pid, address, ip);
+	       "(ip 0x%lx)\n", current->pcb$t_lname, current->pcb$l_pid, address, ip);
 	si.si_signo = SIGSEGV;
 	si.si_code = SEGV_ACCERR;
 	si.si_addr = (void *) address;

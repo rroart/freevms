@@ -14,9 +14,10 @@ static void kill_off_processes(void)
 	int me;
 
 	me = getpid();
-	for_each_task(p){
+	for_each_task_pre1(p){
 		if(p->thread.extern_pid != me) kill_pid(p->thread.extern_pid);
 	}
+	for_each_task_post1(p);
 	if(init_task.thread.extern_pid != me) 
 		kill_pid(init_task.thread.extern_pid);
 }

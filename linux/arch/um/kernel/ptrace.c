@@ -45,7 +45,7 @@ int sys_ptrace(long request, long pid, long addr, long data)
 		goto out;
 
 	ret = -EPERM;
-	if (pid == 1)		/* you may not mess with init */
+	if (pid == INIT_PID)		/* you may not mess with init */
 		goto out_tsk;
 
 	if (request == PTRACE_ATTACH) {

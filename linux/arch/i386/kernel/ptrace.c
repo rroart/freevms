@@ -153,6 +153,9 @@ asmlinkage int sys_ptrace(long request, long pid, long addr, long data)
 	struct user * dummy = NULL;
 	int i, ret;
 
+	if (pid>0)
+	  pid = exe$epid_to_ipid(pid);
+
 	lock_kernel();
 	ret = -EPERM;
 	if (request == PTRACE_TRACEME) {
@@ -174,7 +177,7 @@ asmlinkage int sys_ptrace(long request, long pid, long addr, long data)
 		goto out;
 
 	ret = -EPERM;
-	if (pid == 1)		/* you may not mess with init */
+	if (pid == INIT_PID)		/* you may not mess with init */
 		goto out_tsk;
 
 	if (request == PTRACE_ATTACH) {

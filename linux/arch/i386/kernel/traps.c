@@ -227,7 +227,7 @@ void show_registers(struct pt_regs *regs)
 	printk("ds: %04x   es: %04x   ss: %04x\n",
 		regs->xds & 0xffff, regs->xes & 0xffff, ss);
 	printk("Process %s (pid: %d, state: %x, stackpage=%08lx)",
-		current->pcb$t_lname, current->pid, current->state, 4096+(unsigned long)current);
+		current->pcb$t_lname, current->pcb$l_pid, current->state, 4096+(unsigned long)current);
 	/*
 	 * When in-kernel, we also print out the stack and code at the
 	 * time of the fault..

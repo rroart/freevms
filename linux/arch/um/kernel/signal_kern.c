@@ -193,7 +193,7 @@ static int kern_do_signal(struct pt_regs *regs, sigset_t *oldset, int error)
 				info.si_signo = signr;
 				info.si_errno = 0;
 				info.si_code = SI_USER;
-				info.si_pid = current->p_pptr->pid;
+				info.si_pid = current->p_pptr->pcb$l_pid;
 				info.si_uid = current->p_pptr->uid;
 			}
 
@@ -218,7 +218,7 @@ static int kern_do_signal(struct pt_regs *regs, sigset_t *oldset, int error)
 			int exit_code = signr;
 
 			/* Init gets no signals it doesn't want.  */
-			if (current->pid == 1)
+			if (current->pcb$l_pid == INIT_PID)
 				continue;
 
 			switch (signr) {
