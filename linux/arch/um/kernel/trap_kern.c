@@ -24,6 +24,7 @@
 
 extern int nsyscalls;
 
+#ifndef CONFIG_MM_VMS
 unsigned long segv(unsigned long address, unsigned long ip, int is_write, 
 		   int is_user)
 {
@@ -105,6 +106,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	up_read(&mm->mmap_sem);
 	return(0);
 }
+#endif
 
 void bad_segv(unsigned long address, unsigned long ip, int is_write)
 {
