@@ -140,6 +140,8 @@ run a VMS image file:
 
 DCL:
 	if not too much crashed, it can be rebooted with ctrl-p
+	exe images are now the default with commands
+	old fork/exec commands can be run with _ prefixed.
 
 CMUIP:
 	see example file INET$CONFIG.

@@ -78,3 +78,5 @@ Gcc 3.4 had problems with the first.
 sysimgact use PAGE_ instead of numbers.
 
 Look at having images as ELF? (Itanic is going to use ELF, it seems)
+
+Check waitall and wait

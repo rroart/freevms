@@ -7,30 +7,34 @@ bugs present in pure gcc 3.0.1 was gone in pure 3.1.
 There are still problems related to anonymous structure initialization.
 
 Our bugs/features:
+
+Generally:
 No smp support (is probably broken).
 No highmem support.
 Do not expect decnet to work for the moment, it may collide with something else.
 Threads are probably broke.
+With gcc 3.4.x, search_exception_table can not find __init functions (test_wp_bi).
+Still scheduling bugs left (gives panic ctl$gl_pcb on comq).
+P1PP corruption; dual allocation and gets overwritten.
+Copy on RMS on ODS-2 does not work properly.
+Uml gets often tracing myself.
+Uml for the moment is broken.
+ASTs to user space crashes UML, usually.
+Asts not working due to use of exe$ instead of sys$
+
+For non-CONFIG_VMS:
 Init crashes with keventd after rc.sysinit has finished.
 Cluster networking on a real PC hangs one of them.
 Creprc has some output problems.
 Process sessions has some problems.
 The 60 sec limit and one login only for loginout. (panics).
-ASTs to user space crashes UML, usually.
-Uml gets often tracing myself.
-Uml for the moment is broken.
-With ext2 copy on CONFIG_VMS there are some fs problems. (See fsck)
-With ext2 on CONFIG_VMS truncate is broke/not implemented.
-Images doesn't not work on CONFIG_VMS (endless loop).
-Copy on RMS on ODS-2 does not work properly.
-RMS $get does not work in IPACP CNF$Configure_ACP (CONFIG_VMS).
-Still scheduling bugs left (gives panic ctl$gl_pcb on comq).
-P1PP corruption; dual allocation and gets overwritten.
-Asts not working due to use of exe$ instead of sys$
-With gcc 3.4.1, search_exception_table can not find __init functions (test_wp_bi).
-With CONFIG_VMS you may now get a rei oriented panic with the new console driver
-With CONFIG_VMS networking stops within 30 seconds.
-With CONFIG_VMS there are console driver problems with sh, use DCL.
-Check waitall and wait
+
+For CONFIG_VMS:
+RMS $get does not work in IPACP CNF$Configure_ACP.
+With ext2 copy there are some fs problems. (See fsck)
+With ext2 truncate is broke/not implemented.
+You may now get panics with the new console driver
+The pseudo and console drivers may not always work properly.
+There are console driver problems with sh, use DCL.
 It bugs and loops with ast in ast
-With CONFIG_VMS telnet may give double output, and may not work for long.
+Telnet may give double output, and may not work for long.
