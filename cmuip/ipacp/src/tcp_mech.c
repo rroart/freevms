@@ -120,7 +120,7 @@ signed long
 // user supplied Local_connection_Id.  As one sees: A local_Connection_ID is
 // actually the address of a TCB.
 
-signed long vtcb_ptr[0];
+long * vtcb_ptr;
 signed long    max_tcb  = 0,
     max_conn  = 60,	// Settable in CONFIG
     vtcb_size  = 0,
