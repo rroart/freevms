@@ -574,6 +574,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
   if (fib->fib$w_did_num) {
     //    struct getdents_callback64 buf;
+    int wildcard=0;
     static int mywcc=0;
     struct readdir_callback2 buf;
     int fd=0;
@@ -650,7 +651,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     fib->fib$w_file_hdrseq_incr=f->f_pos;//dir.d_off+*reslen;
     fib->fib$w_dir_hdrseq_incr=*reslen;
 
-    if (/*wildcard ||*/ (fib->fib$w_nmctl & FIB$M_WILD)) {
+    if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
+      wildcard=1;
+
+    if (wildcard || (fib->fib$w_nmctl & FIB$M_WILD)) {
         fib->fib$l_wcc = 1/*curblk*/;
     } else {
         fib->fib$l_wcc = 0;
