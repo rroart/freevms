@@ -1331,7 +1331,8 @@ l10:
 	unsigned char * R1 = Start;			// starting word address.
 Swp_Loop:
 	R0 = *R1;				// low ==> temp
-	*R1 = (R1++)[1];			// high ==> low
+	*R1 = R1[1];			// high ==> low
+	R1++;
 	*R1++ = R0;			// temp ==> High
 	if	(--WrdCnt) goto Swp_Loop;		// decr word's left to do
 	return R0;
