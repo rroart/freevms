@@ -49,7 +49,7 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
     /* unlock sched */
     return SS$_NORMAL;
   }
-  if (waitallflag && (mask & *clusteraddr == mask))
+  if (waitallflag && ((mask & *clusteraddr) == mask))
     goto out;
   if (waitallflag) {
     p->pcb$l_sts|=PCB$M_WALL;

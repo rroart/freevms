@@ -156,7 +156,7 @@ asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, uns
       ((unsigned long *)mmg$gq_gpt_base)[i]=*(unsigned long *)&gpte;
     }
       ((unsigned long *)mmg$gq_gpt_base)[i]=0;
-    mmg$gq_free_gpt+=1+(last-first)>>PAGE_SHIFT;
+    mmg$gq_free_gpt+=1+((last-first)>>PAGE_SHIFT);
     return exe$mgblsc(inadr,retadr,acmode,flags,gsdnam,ident,relpag);
   }
 
