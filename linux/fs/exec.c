@@ -311,7 +311,13 @@ int setup_arg_pages(struct linux_binprm *bprm)
 #endif
 	int i;
 
-	stack_base = STACK_TOP - MAX_ARG_PAGES*PAGE_SIZE;
+#ifdef __arch_um__
+#define STACK_TOP1 0x7ffe0000
+#else
+#define STACK_TOP1 STACK_TOP
+#define STACK_TOP1 0x7ffe0000
+#endif
+	stack_base = STACK_TOP1 - MAX_ARG_PAGES*PAGE_SIZE;
 
 	bprm->p += stack_base;
 	if (bprm->loader)
@@ -327,7 +333,7 @@ int setup_arg_pages(struct linux_binprm *bprm)
 #ifndef CONFIG_MM_VMS
 		mpnt->vm_mm = current->mm;
 		mpnt->vm_start = PAGE_MASK & (unsigned long) bprm->p;
-		mpnt->vm_end = STACK_TOP;
+		mpnt->vm_end = STACK_TOP1;
 		mpnt->vm_page_prot = PAGE_COPY;
 		mpnt->vm_flags = VM_STACK_FLAGS;
 		mpnt->vm_ops = NULL;
@@ -338,7 +344,7 @@ int setup_arg_pages(struct linux_binprm *bprm)
 		current->mm->total_vm = (mpnt->vm_end - mpnt->vm_start) >> PAGE_SHIFT;
 #else
 		mpnt->rde$pq_start_va = PAGE_MASK & (unsigned long) bprm->p;
-		mpnt->rde$q_region_size = STACK_TOP - (unsigned long) mpnt->rde$pq_start_va;
+		mpnt->rde$q_region_size = STACK_TOP1 - (unsigned long) mpnt->rde$pq_start_va;
 		mpnt->rde$r_regprot.regprt$l_region_prot = _PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED;//PAGE_COPY;
 		mpnt->rde$l_flags = VM_STACK_FLAGS;
 		insrde(mpnt,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
@@ -485,6 +491,12 @@ static int exec_mmap(void)
 		task_unlock(current);
 		activate_mm(active_mm, mm);
 		mm_release();
+
+		current->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
+		init_phd(current->pcb$l_phd);
+		init_p1pp(current,current->pcb$l_phd);
+		lnm_init_prc(current);
+
 		if (old_mm) {
 			if (active_mm != old_mm) BUG();
 			mmput(old_mm);
@@ -597,6 +609,12 @@ int flush_old_exec(struct linux_binprm * bprm)
 	char * name;
 	int i, ch, retval;
 	struct signal_struct * oldsig;
+#ifdef __arch_um__
+	struct _pcb * pcb = OLD_CURRENT_TASK(&retval);
+#else
+	struct _pcb * pcb = old_get_current();
+#endif
+	pcb = current;
 
 	/*
 	 * Make sure we have a private signal table
@@ -1000,7 +1018,10 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	//	mydebug=1;
 
 	//printk("before lnm_init_prc\n");
+#if 0
+	init_p1pp(current,current->pcb$l_phd);
 	lnm_init_prc(current);
+#endif
 	//printk("after lnm_init_prc\n");
 
 #ifdef CONFIG_VMS
