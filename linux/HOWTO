@@ -4,9 +4,14 @@ Untar the linux dist in /usr/src
 
 Have a dir in /usr/src (or a symlink) freevms.
 
-Go to /usr/src/freevms and do a make.
-(Sorry, got no make install yet)
-
 Go to /usr/src/linux.
 
 Do ./prescript. (Copies from working area /usr/src/freevms/linux)
+
+Make symlinks from the 'kernel directory'/include/linux to /usr/include/linux
+and the same with asm-i386 to /usr/include/asm.
+
+Go to /usr/src/freevms and do a make.
+(Sorry, got no make install yet)
+
+Go back and make the kernel.
