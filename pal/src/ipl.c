@@ -254,6 +254,7 @@ asmlinkage void myrei (void) {
   if (p->psl_cur_mod < p->oldpsl_cur_mod) panic("rei to higher mode\n");
   if (p->psl_is==1 && p->oldpsl_is==0) panic("is stuff\n");
   if (p->psl_ipl > p->oldpsl_ipl) panic("rei to higher ipl\n");
+    //sickinsque(0x10000000+p->psl_ipl,0x20000000+p->oldpsl_ipl);
   setipl(current->psl_ipl);
   //  if (!in_sw_ast) sw_ast();
   mysti(flag);
