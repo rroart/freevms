@@ -739,6 +739,7 @@ int exttwo_read_writevb(struct _irp * i) {
 void * exttwo_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
   struct _iosb myiosb;
   unsigned char * buf = vmalloc(512*count);
+  buf[0]=1;
   unsigned long phyblk=lbn; // one to one
   unsigned long sts=sys$qiow(0,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
