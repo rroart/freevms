@@ -1,4 +1,4 @@
-VMSSUBDIRS = starlet librtl cliutl backup dir init pal dcl
+VMSSUBDIRS = starlet librtl cliutl backup dir init dcl
 VMSSUBDIRSINST = dir dcl init
 VMSSUBDIRS2 = examples
 
