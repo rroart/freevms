@@ -725,11 +725,11 @@ int exttwo_read_writevb(struct _irp * i) {
   struct _fcb * fcb = x2p->primary_fcb; // ???? is this right
   struct _wcb * wcb = &fcb->fcb$l_wlfl;
   int blocks=(i->irp$l_qio_p2+511)/512;
-  lbn=f11b_map_vbn(i->irp$l_qio_p3,wcb);
+  lbn=f11b_map_vbn(i->irp$l_qio_p3-1,wcb);
   if (i->irp$v_fcode==IO$_WRITEVBLK) {
-    exttwo_write_block(vcb,i->irp$l_qio_p1,lbn-1,blocks,&iosb);
+    exttwo_write_block(vcb,i->irp$l_qio_p1,lbn,blocks,&iosb);
   } else {
-    buffer=exttwo_read_block(vcb,lbn-1,blocks,&iosb);
+    buffer=exttwo_read_block(vcb,lbn,blocks,&iosb);
     memcpy(i->irp$l_qio_p1,buffer,512);
     vfree(buffer);
   }
