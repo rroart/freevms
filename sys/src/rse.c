@@ -20,7 +20,7 @@ int sch$qend(struct _pcb * p) {
       }
     }
     if (next == e)
-      { /*p->need_resched = 0; */ }
+      { /* p->need_resched = 0; */ }
     else
       {
 	if (p->pcb$b_pri != p->pcb$b_prib) ++p->pcb$b_pri;
