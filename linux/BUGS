@@ -2,6 +2,7 @@ doing something like ctrl-c in a shell gotten by ssh-ing locks the machine. (see
 
 smp is probably broken.
 highmem too.
+do not expect decnet to work for the moment, it may collide with something else.
 
 bochs and uml works only partially, i.e. qio1 has problems.
 
