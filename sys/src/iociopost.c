@@ -137,7 +137,7 @@ asmlinkage void ioc$iopost(void) {
     i=remqhi(&ioc$gq_postiq,i);
   } else {
     if (!aqempty(&smp$gl_cpu_data[smp_processor_id()]->cpu$l_psfl)) {
-      i=remque(&smp$gl_cpu_data[smp_processor_id()]->cpu$l_psfl,i);
+      i=remque(smp$gl_cpu_data[smp_processor_id()]->cpu$l_psfl,i);
     } else {
       return;
     }
