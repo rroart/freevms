@@ -1,10 +1,12 @@
 #include <ssdef.h>
 #include <misc.h>
 #include <descrip.h>
-
+#include <dvidef.h>
 
 #ifdef __KERNEL__
-#define sys exe
+#define sys$assign exe$assign
+#define sys$getdviw exe$getdviw
+#define sys$crembx exe$crembx
 #endif
 
 int lib$asn_wth_mbx (void * device_name , long * maximum_message_size, long * buffer_quota , short * device_channel , short * mailbox_channel) {
@@ -32,6 +34,7 @@ int lib$asn_wth_mbx (void * device_name , long * maximum_message_size, long * bu
   d.dsc$a_pointer=retbuf;
   d.dsc$w_length=retlen;
 
+  int devnam=device_name;
   sts=sys$assign(devnam,device_channel,0,&d,0);
 
   if ((sts&1)==0)
