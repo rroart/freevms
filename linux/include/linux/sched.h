@@ -341,7 +341,7 @@ struct task_struct {
 	struct list_head run_list;
 	unsigned long sleep_time;
 
-	struct task_struct *next_task, *prev_task;
+	struct task_struct *next_task, *prev_task; // remember to remove these
 	struct mm_struct *active_mm;
 	struct list_head local_pages;
 	unsigned int allocation_order, nr_local_pages;
@@ -612,8 +612,6 @@ extern struct exec_domain	default_exec_domain;
     cpus_runnable:	-1,						\
     cpus_allowed:	-1,						\
     run_list:		LIST_HEAD_INIT(tsk.run_list),			\
-    next_task:		&tsk,						\
-    prev_task:		&tsk,						\
     p_opptr:		&tsk,						\
     p_pptr:		&tsk,						\
     thread_group:	LIST_HEAD_INIT(tsk.thread_group),		\
@@ -958,8 +956,6 @@ do {									\
 })
 
 #define REMOVE_LINKS(p) do { \
-	(p)->next_task->prev_task = (p)->prev_task; \
-	(p)->prev_task->next_task = (p)->next_task; \
 	if ((p)->p_osptr) \
 		(p)->p_osptr->p_ysptr = (p)->p_ysptr; \
 	if ((p)->p_ysptr) \
@@ -969,10 +965,6 @@ do {									\
 	} while (0)
 
 #define SET_LINKS(p) do { \
-	(p)->next_task = &init_task; \
-	(p)->prev_task = init_task.prev_task; \
-	init_task.prev_task->next_task = (p); \
-	init_task.prev_task = (p); \
 	(p)->p_ysptr = NULL; \
 	if (((p)->p_osptr = (p)->p_pptr->p_cptr) != NULL) \
 		(p)->p_osptr->p_ysptr = p; \
