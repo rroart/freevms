@@ -23,7 +23,7 @@
 
 #include<linux/blkdev.h>
 
-static unsigned long tty$startio (struct _irp * i, struct _ucb * u)
+unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 {
   unsigned long sts=SS$_NORMAL;
   struct request * rq = kmalloc (sizeof(struct request), GFP_KERNEL);
@@ -33,10 +33,10 @@ static unsigned long tty$startio (struct _irp * i, struct _ucb * u)
   //  ide_drive_t *drive=u->ucb$l_orb;
 
   //i->irp$l_qio_p3 <<= 1;
-  i->irp$l_qio_p3 += partadd(u->ucb$l_orb,i->irp$l_qio_p4);
+  //  i->irp$l_qio_p3 += partadd(u->ucb$l_orb,i->irp$l_qio_p4);
     //drive->part[i->irp$l_qio_p4].start_sect + drive->sect0;
 
-  ideu=u;
+  //  ideu=u;
 
   switch (i->irp$v_fcode) {
 
