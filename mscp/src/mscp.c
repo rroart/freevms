@@ -1,3 +1,4 @@
+#if 0
 /*
  * Copyright (c) 1996 Ludd, University of Lule}, Sweden.
  * Copyright (c) 1988 Regents of the University of California.
@@ -2261,20 +2262,29 @@ mscp_requeue(mi)
 	panic("mscp_requeue");
 }
 
-void myerr(void) {
+#endif /* if 0 */
+
+#include"../../freevms/lib/src/cdtdef.h"
+#include"../../freevms/lib/src/pdtdef.h"
+
+void mscpmyerr(void) {
   /* do nothing yet */
 }
 
-int mylisten(void * packet, struct _cdt * c, struct _pdt * p) {
+int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
 
 }
+
+void mscpdaemonize() { }
 
 /* mscp.exe mscp$disk let it be a kernel_thread? maybe not... */
 int mscp(void) {
-  char myname[]='mscp$disk';
-  char myinfo[]='mscp disk';
-  daemonize(); /* find out what this does */
+  char myname[]="mscp$disk";
+  char myinfo[]="mscp disk";
+  mscpdaemonize(); /* find out what this does */
   
   //  listen(msgbuf,err,cdt,pdt,cdt);
-  scs$listen(mylisten,myerr,myname,myinfo);
+  scs$listen(mscplisten,mscp,mscpmyerr,myname,myinfo);
 }
+
+

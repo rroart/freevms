@@ -48,7 +48,7 @@ struct _cdt {
   union  {
     void *cdt$l_msginput;
     struct _cdt *cdt$l_link;
-  } cdtunion;
+  };
   int (*cdt$l_dginput)();
   unsigned short int cdt$w_size;
   unsigned char cdt$b_type;

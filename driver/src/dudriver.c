@@ -1,3 +1,4 @@
+#if 0
 /*
  * Copyright (c) 1996 Ludd, University of Lule}, Sweden.
  * Copyright (c) 1988 Regents of the University of California.
@@ -2261,28 +2262,58 @@ mscp_requeue(mi)
 	panic("mscp_requeue");
 }
 
-void myerr(void) {
+#endif /* if 0 */
+
+#include"../../freevms/lib/src/cdtdef.h"
+#include"../../freevms/lib/src/ddtdef.h"
+#include"../../freevms/lib/src/dptdef.h"
+#include"../../freevms/lib/src/fdtdef.h"
+#include"../../freevms/lib/src/pdtdef.h"
+#include"../../freevms/starlet/src/iodef.h"
+
+void dumyerr(void) {
   /* do nothing yet */
 }
 
-int mylisten(void * packet, struct _cdt * c, struct _pdt * p) {
+int dulisten(void * packet, struct _cdt * c, struct _pdt * p) {
 
 }
 
+void dudaemonize(void) { }
+
 /* mscp.exe mscp$disk let it be a kernel_thread? maybe not... */
-int mscp(void) {
-  char myname[]='mscp$disk';
-  char myinfo[]='mscp disk';
-  daemonize(); /* find out what this does */
+int dumscp(void) {
+  char myname[]="mscp$disk";
+  char myinfo[]="mscp disk";
+  dudaemonize(); /* find out what this does */
   
   //  listen(msgbuf,err,cdt,pdt,cdt);
-  scs$listen(mylisten,myerr,myname,myinfo);
+  scs$listen(dulisten,dumyerr,myname,myinfo);
 }
 
 struct _fdt fdt_du = {
   fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
-}
+};
+
+/* more yet undefined dummies */
+void  du_startio (void) { };
+void  du_unsolint (void) { };
+void  du_functb (void) { };
+void  du_cancel (void) { };
+void  du_regdump (void) { };
+void  du_diagbuf (void) { };
+void  du_errorbuf (void) { };
+void  du_unitinit (void) { };
+void  du_altstart (void) { };
+void  du_mntver (void) { };
+void  du_cloneducb (void) { };
+void  du_mntv_sssc (void) { };
+void  du_mntv_for (void) { };
+void  du_mntv_sqd (void) { };
+void  du_aux_storage (void) { };
+void  du_aux_routine (void) { };
+
 
 struct _ddt ddt_du = {
   ddt$l_start: du_startio,
@@ -2290,8 +2321,8 @@ struct _ddt ddt_du = {
   ddt$l_functb: du_functb,
   ddt$l_cancel: du_cancel,
   ddt$l_regdump: du_regdump,
-  ddt$w_diagbuf: du_diagbuf,
-  ddt$w_errorbuf: du_errorbuf,
+  ddt$l_diagbuf: du_diagbuf,
+  ddt$l_errorbuf: du_errorbuf,
   ddt$l_unitinit: du_unitinit,
   ddt$l_altstart: du_altstart,
   ddt$l_mntver: du_mntver,
@@ -2309,14 +2340,25 @@ inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn) {
   f->fdt$ps_func_rtn[mask]=fn;
 }
 
+static struct _fdt du_fdt;
+
+void acp$readblk(void) { }
+/* acp stuff not finished. this is a dummy */
+
 void du_init(void) {
   /* a lot of these? */
-  ini_fdt_act(&du_fdt,IO$_READLBK,acp$readblk);
+  ini_fdt_act(&du_fdt,IO$_READLBLK,acp$readblk);
   ini_fdt_act(&du_fdt,IO$_READPBLK,acp$readblk);
   ini_fdt_act(&du_fdt,IO$_READVBLK,acp$readblk);
 }
 
+char dudriverstring[]="DUDRIVER";
+
+int testme = 3;
+
 struct _dpt du_dpt = {
-  dpt$t_name:"DUDRIVER"
+  //  dpt$t_name:"DUDRIVER"
+  //  dpt$b_type:&testme,
+  // dpt$t_name:dudriverstring  // have no idea why this won't compile
 };
 

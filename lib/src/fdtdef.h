@@ -19,16 +19,7 @@ struct _fdt {
   unsigned long long fdt$q_valid;
   unsigned long long fdt$q_buffered;
   int (*fdt$ps_func_rtn [64])();
-}
- 
-#pragma member_alignment restore
-#ifdef INITIAL_POINTER_SIZE			
-#pragma required_pointer_size restore		
-#endif
-#ifdef cplusplus
-    }
-#endif
-#pragma standard
+};
  
 #endif
  

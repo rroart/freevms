@@ -1,25 +1,18 @@
 #ifndef rdtdef_h
 #define rdtdef_h
 
-#define RDT$C_LENGTH 40
-#define RDT$S_RDTDEF 41
+#define RDT$S_RDTDEF 24
 	
 struct _rdt {
-  char rdtdef$fill;
-};
-
-#define CRDT$S_CRDTDEF 40
-	
-struct _crdt {
-  unsigned char crdt$b_scs_maint_block [16];
-  void *crdt$l_waitfl;
-  void *crdt$l_waitbl;
-  unsigned short int crdt$w_size;
-  unsigned char crdt$b_type;
-  unsigned char crdt$b_subtyp;
-  void *crdt$l_freerd;
-  unsigned int crdt$l_maxrdidx;
-  unsigned int crdt$l_qrdt_cnt;
+  unsigned char rdt$b_scs_maint_block [16];
+  void *rdt$l_waitfl;
+  void *rdt$l_waitbl;
+  unsigned short int rdt$w_size;
+  unsigned char rdt$b_type;
+  unsigned char rdt$b_subtyp;
+  void *rdt$l_freerd;
+  unsigned int rdt$l_maxrdidx;
+  unsigned int rdt$l_qrdt_cnt;
 };
 
 #endif

@@ -19,11 +19,12 @@ struct _ddt {
   short int ddt$w_intercept_level;
   unsigned long ddt$l_start;
   unsigned long ddt$l_unsolint;
-  struct _fdt * ddt$l_fdt;
+  struct _fdt * ddt$l_fdt; /* same as functb ? */
+  struct _fdt * ddt$l_functb;
   unsigned long ddt$l_cancel;
   unsigned long ddt$l_regdump;
-  unsigned short int ddt$w_diagbuf;
-  unsigned short int ddt$w_errorbuf;
+  unsigned long ddt$l_diagbuf;
+  unsigned long ddt$l_errorbuf;
   unsigned long ddt$l_unitinit;
   unsigned long ddt$l_altstart;
   unsigned long ddt$l_mntver;

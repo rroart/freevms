@@ -69,18 +69,13 @@ struct _dpt {
       void *dpt$ps_vector;
     };
   };
-  union  {
+  union {
     char dpt$t_name [16];
     struct  {
-      union  {
-	unsigned char dpt$b_name_len;
-	struct  {
-	  unsigned char dpt$ib_name_len;
-	};
-      };
+      unsigned char dpt$b_name_len;
       char dpt$t_name_str [15];
     };
-  };
+  } dpt$dptunion;
   union  {
     unsigned int dpt$l_ecolevel;
     struct  {
@@ -88,9 +83,9 @@ struct _dpt {
     };
   };
   unsigned int dpt$l_ucode;
-  unsigned int64 dpt$q_linktime;
+  unsigned long long dpt$q_linktime;
   union  {
-    unsigned int64 dpt$iq_image_name;
+    unsigned long long dpt$iq_image_name;
     struct  {
       unsigned short int dpt$iw_iname_len;
       unsigned char dpt$ib_iname_type;
@@ -113,7 +108,8 @@ struct _dpt {
   unsigned char dpt$t_image_name;
   char dpt$b_fill_23_ [7];
 };
- 
+
+#define dpt$t_name dpt$dptunion.dpt$t_name 
  
 #endif
  

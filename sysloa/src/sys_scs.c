@@ -1,3 +1,4 @@
+#if 0
 #include <linux/config.h>
 #include <linux/module.h>
 #include <linux/errno.h>
@@ -1157,7 +1158,21 @@ static int dn_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 	return err;
 }
 
-static struct_ cdt * cdl$l_freecdt;
+#endif /* #if 0 */
+
+#include"../../freevms/lib/src/cdtdef.h"
+#include"../../freevms/lib/src/ddtdef.h"
+#include"../../freevms/lib/src/dptdef.h"
+#include"../../freevms/lib/src/fdtdef.h"
+#include"../../freevms/lib/src/pdtdef.h"
+#include"../../freevms/lib/src/rdtdef.h"
+#include"../../freevms/lib/src/sbnbdef.h"
+#include"../../freevms/starlet/src/iodef.h"
+#include"../../freevms/sys/src/system_data_cells.h"
+#include<linux/vmalloc.h>
+#include<sys/errno.h>
+
+static struct _cdt * cdl$l_freecdt;
 
 void * find_free_cdt(void) {
   /* remember to fix cdldef */
@@ -1179,11 +1194,14 @@ void * register_name(char * c1, char * c2) {
 
 //static int scs$listen(struct socket *sock, int backlog)
 //sock is about-ish lprnam;
-int scs_std$listen (void (*msgadr)(void *msg_buf, struct _cdt *cdt, struct _pdt *pdt ),
+
+int scs$listen (void (*msgadr)(void *msg_buf, struct _cdt *cdt, struct _pdt *pdt ),
 		    void (*erradr)( unsigned int err_status, unsigned int reason, struct _cdt *cdt, struct _pdt *pdt), 
 		    void *lprnam, 
 		    void *prinfo)
 {
+  int err = -EINVAL;
+
   struct _cdt *sk = find_free_cdt();
 
   sk->cdt$l_msginput=msgadr;
@@ -1191,24 +1209,24 @@ int scs_std$listen (void (*msgadr)(void *msg_buf, struct _cdt *cdt, struct _pdt 
 
   register_name(lprnam,prinfo);
 
-	int err = -EINVAL;
+  //	lock_sock(sk);
 
-	lock_sock(sk);
-
+#if 0
 	if (sk->zapped)
 		goto out;
 
 	if ((DN_SK(sk)->state != DN_O) || (sk->state == TCP_LISTEN))
 		goto out;
+#endif
 
-	sk->max_ack_backlog = backlog;
-	sk->ack_backlog     = 0;
+	//	sk->max_ack_backlog = backlog;
+	//	sk->ack_backlog     = 0;
 	sk->cdt$w_state           = CDT$C_LISTEN;
 	err                 = 0;
-	dn_rehash_sock(sk);
+	//	dn_rehash_sock(sk);
 
 out:
-	release_sock(sk);
+	//	release_sock(sk);
 
         return err;
 }
@@ -1220,11 +1238,13 @@ int dir_listen(void * packet, struct _cdt * c, struct _pdt * p) {
 
 }
 
+extern struct _cdt cdtl[1024];
+extern struct _rdt rdtl[1024];
 
-int __init scs_init(void) {
+int /*__init*/ scs_init(void) {
   int i;
-  char myname[]='scs$directory';
-  char myinfo[]='directory srv';
+  char myname[]="scs$directory";
+  char myinfo[]="directory srv";
 
   bzero(cdtl,sizeof(cdtl));
   bzero(rdtl,sizeof(rdtl));
@@ -1235,22 +1255,23 @@ int __init scs_init(void) {
   scs$gl_rdt=&rdtl[1];
 
   for(i=0;i<scs$gw_cdtcnt-1;i++) {
-    cdtl[i].l_link=&cdtl[i+i];
-    cdtl[i].l_lconid=i;
+    cdtl[i].cdt$l_link=&cdtl[i+i];
+    cdtl[i].cdt$l_lconid=i;
     qhead_init(&cdtl[i].cdt$l_waitqfl);
   }
 
   qhead_init(&rdtl[0].rdt$l_waitfl);
-  rdtl[0].l_freerd=&rdtl[1];
+  rdtl[0].rdt$l_freerd=&rdtl[1];
   for(i=1;i<scs$gw_rdtcnt;i++) {
-    rdtl[i].l_freerd=&rdtl[i+1];
-    qhead_init(&cdtl[i].rdt$l_waitqfl);
+    rdtl[i].rdt$l_freerd=&rdtl[i+1];
+    qhead_init(&cdtl[i].cdt$l_waitqfl);
   }
 
   scs$listen(dir_listen,mydirerr,myname,myinfo);
 
 }
 
+#if 0
 static int dn_shutdown(struct socket *sock, int how)
 {
 	struct sock *sk = sock->sk;
@@ -2293,3 +2314,4 @@ static void __exit decnet_exit(void)
 
 module_init(decnet_init);
 module_exit(decnet_exit);
+#endif /* #if 0 second one */

@@ -130,11 +130,11 @@ struct _pdt {
   int (*pdt$l_load_vector)();
   unsigned short int pdt$w_load_class;
   short int pdtdef$$_fill_6;
-  unsigned int64 pdt$q_pb;
-  unsigned int64 pdt$q_conn_wait;
-  unsigned int64 pdt$q_yellow;
-  unsigned int64 pdt$q_red;
-  unsigned int64 pdt$q_disabled;
+  unsigned long long pdt$q_pb;
+  unsigned long long pdt$q_conn_wait;
+  unsigned long long pdt$q_yellow;
+  unsigned long long pdt$q_red;
+  unsigned long long pdt$q_disabled;
   unsigned int pdt$l_port_map;
   int pdt$l_avail_thruput;
   unsigned int pdt$l_load_rating;
@@ -152,7 +152,7 @@ struct _pdt {
   unsigned int pdt$l_dg_rcv;
   unsigned int pdt$l_msg_xmt;
   unsigned int pdt$l_msg_rcv;
-  unsigned int64 pdt$q_bytes_xfer;
+  unsigned long long pdt$q_bytes_xfer;
   unsigned int pdt$l_num_map;
   unsigned int pdt$l_port_cmd;
   char pdtdef$$_fill_55 [4];
@@ -165,7 +165,7 @@ struct _pdt {
   unsigned int pdt$l_dg_rcv_last;
   unsigned int pdt$l_msg_xmt_last;
   unsigned int pdt$l_msg_rcv_last;
-  unsigned int64 pdt$q_bytes_xfer_last;
+  unsigned long long pdt$q_bytes_xfer_last;
   unsigned int pdt$l_num_map_last;
   unsigned int pdt$l_port_cmd_last;
   int pdtdef$$_fill_66;
@@ -182,7 +182,7 @@ struct _pdt {
   unsigned int pdt$l_dg_rcv_peak;
   unsigned int pdt$l_msg_xmt_peak;
   unsigned int pdt$l_msg_rcv_peak;
-  unsigned int64 pdt$q_bytes_xfer_peak;
+  unsigned long long pdt$q_bytes_xfer_peak;
   unsigned int pdt$l_port_cmd_peak;
   unsigned int pdt$l_bytes_dg_xmt_avg;
   unsigned int pdt$l_bytes_dg_rcv_avg;
@@ -193,7 +193,7 @@ struct _pdt {
   unsigned int pdt$l_dg_rcv_avg;
   unsigned int pdt$l_msg_xmt_avg;
   unsigned int pdt$l_msg_rcv_avg;
-  unsigned int64 pdt$q_bytes_xfer_avg;
+  unsigned long long pdt$q_bytes_xfer_avg;
   unsigned int pdt$l_port_cmd_avg;
   unsigned char pdt$b_ls_flag;
   char pdt$t_fill_0 [3];
@@ -279,12 +279,12 @@ struct _pdt {
   unsigned int pdt$l_tqeaddr;
   unsigned int pdt$l_timvcfail;
   union  {
-    unsigned int64 pdt$q_mgt_handles;
+    unsigned long long pdt$q_mgt_handles;
     struct  {
       unsigned int pdt$l_mgt_handle;
       unsigned int pdt$l_mgt_mgr_handle;
-    } pdthand;
-  } pdthando;
+    };
+  };
   int pdt$l_mgt_priority;
   char pdt$b_szalign1 [4];
 };
