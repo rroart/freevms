@@ -253,6 +253,9 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 
 	//check if ipl>2 bugcheck
 
+	if (address==0x5a5a5a5a)
+	  panic("poisoned\n");
+
 	if (in_atomic) { 
 	  printk("atomic addr %x\n",address);
 	  address=0x11111111;
