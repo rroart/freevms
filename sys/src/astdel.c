@@ -54,8 +54,10 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
 }
 
 printast(struct _acb * acb) {
-  //printk("acb %x %x %x %x\n",acb,acb->acb$l_pid,acb->acb$l_ast,acb->acb$l_astprm);
+  printk("acb %x %x %x %x %x\n",acb,acb->acb$l_pid,acb->acb$l_ast,acb->acb$l_astprm,acb->acb$l_kast);
 }
+
+int astdeb=0;
 
 asmlinkage void sch$astdel(void) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
@@ -87,7 +89,11 @@ asmlinkage void sch$astdel(void) {
      } */
   acb=remque(p->pcb$l_astqfl,dummy);
   //printk("here ast2 %x %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl,acb);
-  printast(acb);
+#ifdef __i386__
+  if (0 && astdeb /*&& ( ((unsigned long)acb->acb$l_ast)>0xd0000000 || ((unsigned long)acb->acb$l_kast)>0xd0000000)*/)   printast(acb);
+  //printk(" a %x %x ",p->pcb$l_astqfl,&p->pcb$l_astqfl);
+#endif
+  //  printast(acb);
   //  mydebug5=1;
   //  printk(KERN_EMERG "astdel %x\n",acb);
   if (acb->acb$b_rmod & ACB$M_KAST) {
@@ -96,14 +102,26 @@ asmlinkage void sch$astdel(void) {
     //printk("astdel1 %x \n",acb->acb$l_kast);
     setipl(IPL$_ASTDEL);
     //p->pcb$b_astact=1;
-    if (((unsigned long)acb->acb$l_kast<4096)) {
+    if (((unsigned long)acb->acb$l_kast<0xa0000000)||((unsigned long)acb->acb$l_kast>0xd0000000)) {
       int i;
       printk("kast %x\n",acb->acb$l_kast);
       for(i=0;i<2000000000;i++) ;
     }
+#ifdef __i386__
+    if (0 && astdeb)
+      printk(" a %x ",acb->acb$l_kast);
+  if (0 && astdeb)
+    printk(" a %x",*(unsigned long*)acb->acb$l_kast);
+#endif
+#ifdef __i386__
+  //      printk("a1 ");
+#endif
     acb->acb$l_kast(acb->acb$l_astprm);
+#ifdef __i386__
+    //      printk("a2 ");
+#endif
     //p->pcb$b_astact=0;
-    if ((acb->acb$b_rmod&ACB$M_NODELETE)==0) vfree(acb);
+    if ((acb->acb$b_rmod&ACB$M_NODELETE)==0) kfree(acb);
     goto more;
   }
   //printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
@@ -116,14 +134,26 @@ asmlinkage void sch$astdel(void) {
   }
   p->pcb$b_astact=0; // 1; wait with this until we get modes
   setipl(0); // for kernel mode, I think. everything is in kernelmode yet.
-  if (((unsigned long)acb->acb$l_ast<4096)) {
+  if (((unsigned long)acb->acb$l_ast<0xa0000000)&&((unsigned long)acb->acb$l_ast>0xd0000000)) {
     int i;
     printk("kast %x\n",acb->acb$l_ast);
     for(i=0;i<2000000000;i++) ;
   }
+#ifdef __i386__
+  if (0 && astdeb)
+    printk(" a %x",acb->acb$l_ast);
+  if (0 && astdeb)
+    printk(" a %x",*(unsigned long*)acb->acb$l_ast);
+#endif
+#ifdef __i386__
+  //  printk("a3 ");
+#endif
   if(acb->acb$l_ast) acb->acb$l_ast(acb->acb$l_astprm); /* ? */
+#ifdef __i386__
+  //      printk("a4 ");
+#endif
   p->pcb$b_astact=0;
-  if ((acb->acb$b_rmod&ACB$M_NODELETE)==0) vfree(acb);
+  if ((acb->acb$b_rmod&ACB$M_NODELETE)==0) kfree(acb);
   /*unlock*/
   goto more;
 }
