@@ -78,14 +78,16 @@ int kswapd(void *unused)
 	struct task_struct *tsk = current;
 	DECLARE_WAITQUEUE(wait, tsk);
 
+	signed long long time=-10000000*5;
+	exe$schdwk(0,0,&time,0);
+	sys$hiber();
+
 #if 0
 	daemonize();
 #endif
 	strcpy(tsk->pcb$t_lname, "SWAPPER");
 	sch$gl_swppid=tsk->pcb$l_pid;
 	sigfillset(&tsk->blocked);
-
-
 
 	struct file * file;
 	file = filp_open("/vms$common/sysexe/pagefile.sys",O_RDONLY,0);
@@ -120,10 +122,6 @@ int kswapd(void *unused)
 	  pagefile=0;
 	}
 
-
-
-
-	
 	/*
 	 * Tell the memory management that we're a "memory allocator",
 	 * and that if we need more memory we should get access to it
