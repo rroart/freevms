@@ -804,7 +804,7 @@ static ssize_t tty_write(struct file * file, const char * buf, size_t count,
 	if (!tty->ldisc.write)
 		return -EIO;
 
-	sts = exe$qio(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_WRITEPBLK,&iosb,0,0,
+	sts = exe$qio(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_WRITEPBLK,0/*&iosb*/,0,0,
 				 buf,count,0,0,0,0);
 
 	return count;
