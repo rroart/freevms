@@ -182,7 +182,7 @@ No SMP support (no capabilities and affinity).
 Because of Linux and lack of ldpctx and svpctx, some things are different in sch$resched.
 SVPCTX right after lock is not done.
 It does some check curpcb->state==TASK_INTERRUPTIBLE that remains from Linux, and probably has to for some while (do not remember why).
-It also has to check where the process is not on the COMQUEUE and the Linux state before it does the things from 5$ and on (do not remember why).
+It also has to check the process Linux state before it does the things from 5$ and on, because some times sch$sched should have been called instead of sch$resched.
 Sch$sched has some checks to see whether is came from sch$resched, and skips something if it did.
 The interrupt initiation stuff is not yet done here.
 Another things that is different is how it idles, it is done different.
@@ -266,12 +266,30 @@ I/O device drivers and interrupt service routines
 
 Mailboxes
 
+Nothing special about mailboxes.
+Follows the internals book, I think.
+
 ****************
 
 Miscellaneous I/O topics
 
 There is a tty line driver implemented with QIO in CONFIG_VMS.
-It is bad.
+It is a bit bad, but not as bad as before.
+
+The main 386 module is vmsconsole (not derived from console).
+The read routine uses kbd$fdtread in pc_keyb.
+Pc_keybd is based on the Linux routine, but does it differently.
+Use of PSMOUSE may break it in the future.
+
+The write routine uses console_driver.write in console.
+The routine n_tty.c is based on the one in char/, but changed a bit. Vms_read_chan is added, and it is a modified version of read_chan. Vms_read_chan is no longer used.
+Console.c in ttdrvr is based on the one in char/ (include changed, only)
+Tty_io.c is modifies, but has mostly changes for $qio use.
+Keyboard.c is new.
+Vmspc_keybd is not doing anything, and will be removed.
+
+[ttdrvr.src]
+vmsconsole.c
 
 ****************
 

@@ -23,8 +23,12 @@ With ext2 copy on CONFIG_VMS there are some fs problems. (See fsck)
 With ext2 on CONFIG_VMS truncate is broke/not implemented.
 Images doesn't not work on CONFIG_VMS (endless loop).
 Copy on RMS on ODS-2 does not work properly.
-With CONFIG_VMS, you may early loose keyboard contact, usually after fork.
 RMS $get does not work in IPACP CNF$Configure_ACP (CONFIG_VMS).
 Still scheduling bugs left (gives panic ctl$gl_pcb on comq).
 P1PP corruption; dual allocation and gets overwritten.
 Asts not working due to use of exe$ instead of sys$
+With gcc 3.4.1, search_exception_table can not find __init functions (test_wp_bi).
+With CONFIG_VMS you may now get a rei oriented panic with the new console driver
+With CONFIG_VMS networking stops within 30 seconds.
+With CONFIG_VMS there are console driver problems with sh, use DCL.
+Check waitall and wait
