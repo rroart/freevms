@@ -88,3 +88,8 @@ Get getdx to add 2?
 Proper deletion of dead processes in the databases (still shows up with sh sys)
 
 Do mscp protocol a bit more properly
+
+Check global pages paging, creating and deleting.
+
+Rde with 0 start 0 len?
+

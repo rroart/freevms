@@ -96,6 +96,7 @@ void mmg$purgempl(unsigned long command) {
   if (sts!=SS$_NORMAL)
     return;
 
+  // try to replace this with 0x80000000 + otherpte->v_pfn?
   int * mypage=vmalloc(4096/*,GFP_KERNEL*/);
   //  *mypage=42;
   pfn->virtual=mypage;

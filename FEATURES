@@ -22,6 +22,11 @@ P1 space (a little bit)
 edt
 CMUIP with telnetd
 terminal class and pseudo driver
+CONFIGURE process
+SWAPPER process (does simple page in and out)
+linker (simple, static images)
+bliss
+supported network interfaces: ne2k and 3c900 (3c905/3c590 might work, untested)
 
 syscalls/services:
 $adjwsl
