@@ -1,3 +1,6 @@
+# $Id$
+# $Locker$
+
 /*
  *  linux/arch/i386/entry.S
  *
@@ -393,6 +396,11 @@ ENTRY(spurious_interrupt_bug)
 	pushl $0
 	pushl $ SYMBOL_NAME(do_spurious_interrupt_bug)
 	jmp error_code
+
+ENTRY(test_code)
+        pushl $0
+        pushl $ SYMBOL_NAME(do_test_code)
+        jmp error_code
 
 .data
 ENTRY(sys_call_table)

@@ -18,6 +18,11 @@
 #include <asm/uaccess.h>
 #include <asm/io.h>
 
+asmlinkage void do_test_call(void) {
+  printk("here I am\n");
+  return 1;
+}
+
 /*
  * this is where the system-wide overflow UID and GID are defined, for
  * architectures that now have 32-bit UID/GID but didn't in the past

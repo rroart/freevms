@@ -1,0 +1,9 @@
+So far:
+
+Untar the linux dist in /usr/src
+
+Have a dir in /usr/src (or a symlink) freevms.
+
+Go to /usr/src/linux.
+
+Do ./prescript. (Copies from working area /usr/src/freevms/linux)

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+for X in `cd ../freevms/linux; find . \( -name CVS -prune \) -o -type f`; do
+	[ -f $X ] && rm $X
+	[ -f ../freevms/linux/$X ] && cp -p ../freevms/linux/$X $X;
+done
+
+(cd kernel; 	ln -s ../../freevms/sys/src/syssetpri.c .;
+		ln -s ../../freevms/sys/src/rse.c .;
+)
+

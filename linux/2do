@@ -1,0 +1,4 @@
+doing pcb/task_struct leads to changes in/with:
+
+CPU structure.
+Interrupt/IPLs.
