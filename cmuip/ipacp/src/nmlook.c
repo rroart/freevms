@@ -127,8 +127,8 @@ extern     LIB$FREE_VM_PAGE ();
 extern  void    QL_FAO();
 extern  void    LOG_FAO();
 extern  void    OPR_FAO();
-extern     TIME_STAMP();
-extern     USER$Clock_Base();
+extern     Time_Stamp();
+extern     user$clock_base();
 
 extern signed long
     myuic,
@@ -289,7 +289,7 @@ void NML$INIT (void)
 
 // Initialize the request queue and initial request number
 
-    CURQID = USER$Clock_Base();
+    CURQID = user$clock_base();
     NQE_QUEUE->qhead = NQE_QUEUE->qtail = NQE_QUEUE;
     NQE_COUNT = 0;
 
@@ -697,7 +697,7 @@ void NML$DUMP (void)
     signed long
 	NOW;
 
-    NOW = TIME_STAMP();
+    NOW = Time_Stamp();
     LOG$FAO("NQE count is !SL, TIME is !XL, QHEAD=!XL, QTAIL=!XL!/",
 	    NQE_COUNT,NOW,NQE_QUEUE->qhead,NQE_QUEUE->qtail);
     NQE = NQE_QUEUE->qhead;
@@ -834,7 +834,7 @@ void NQE_ENQUEUE(NQE,QRYID,MSLEN,MSBUF)
 
 // Next, finish setting up the request header
 
-    NQE->NQE$TIME = TIME_STAMP();
+    NQE->NQE$TIME = Time_Stamp();
     NQE->NQE$LENGTH = MSLEN;
     NQE->NQE$ID = QRYID;
     NQE->NQE$F_XMIT = 0;

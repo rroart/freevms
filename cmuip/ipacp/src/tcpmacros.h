@@ -209,15 +209,13 @@ MACRO
 #define OPR$FAO printk
 #define FATAL$FAO panic 
 
-#if 0
 // Control segment Send macros
 
-    SEND_SYN$ACK(TCB) = TCP$Send_CTL(Tcb,M$SYN_ACK)%,
-    SEND_SYN(TCB) = TCP$SEND_CTL(TCB,M$SYN)%,
-    SEND_FIN(TCB) = TCP$SEND_CTL(TCB,M$FIN)%,
-    SEND_RST(TCB) = TCP$SEND_CTL(TCB,M$RST)%,
+#define    send_syn$ack(TCB) tcp$send_ctl(TCB,M$SYN_ACK)
+#define    send_syn(TCB) tcp$send_ctl(TCB,M$SYN)
+#define    send_fin(TCB) tcp$send_ctl(TCB,M$FIN)
+#define    send_rst(TCB) tcp$send_ctl(TCB,M$RST)
 
-#endif
 // Queue management macros.
 
 #define    Queue_Empty(Queue$Head) (Queue$Head->si_qhead == Queue$Head)

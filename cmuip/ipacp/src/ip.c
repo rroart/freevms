@@ -259,15 +259,15 @@ extern  void    mm$qblk_free();
 
 // SEGIN.BLI/TCP.BLI
 
-extern  void    Seg$Input();
+extern  void    seg$input();
 
 // UDP.BLI
 
-extern  void    UDP$Input();
+extern  void    udp$input();
 
 // ICMP.BLI
-extern     ICMP$Check();
- void    ICMP$Input();
+extern     icmp$check();
+ void    icmp$input();
 
 
 // External data
@@ -365,7 +365,7 @@ static    RA_CHECK_TIME[2];	// Quadword time value for checking RA queue
 
 //SBTTL "IP$Gwy_Config - Add a gateway entry to the table"
 
-void IP$GWY_CONFIG(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK)
+void ip$gwy_config(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK)
     {
     long
       GWYNAME	= GWYNAME_A;
@@ -413,7 +413,7 @@ extern      STR$COPY_DX();
 
 //SBTTL "IP_INIT - Initialize state of IP"
 
-void IP$INIT  (void)
+void ip$init  (void)
 //
 // Initialize the IP reassembly queue and the time value for checking it.
 //
@@ -456,7 +456,7 @@ void IP$INIT  (void)
 
 //SBTTL "IP$LOG - make a logging entry for an IP packet"
 
-void IP$LOG(long NAME,struct ip_structure * IPHDR)
+void ip$log(long NAME,struct ip_structure * IPHDR)
 
 // IP logging routine.
 // Compose message from IP header contents, give to QL_FAO.
@@ -592,7 +592,7 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 
 // Check for ICMP information, and try again
 
-    if ((GWY = ICMP$Check(*IPDEST)) != 0)
+    if ((GWY = icmp$check(*IPDEST)) != 0)
 	return IP_ROUTE(GWY,IPSRC,NEWIPDEST,LEV+1);
 
 // Check for gateway table and try again.
@@ -605,7 +605,7 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
     return -1;
     }
 
-IP$ISME(IPADDR, STRICT)
+ip$isme(IPADDR, STRICT)
 
 //Determine if an IP address refers to this system
 //Returns:
@@ -713,9 +713,9 @@ Side Effects:
 *******************************************************************************
 */
 
- void    IP$RECEIVE();
+ void    ip$receive();
 
-IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
+ip$send_raw(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	struct segment_structure * Seg;
     {
       Net_Send_Queue_Element * QB;
@@ -733,7 +733,7 @@ IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 // If no route, then flush the packet and return failure.
 
     //!!HACK!!// IP$ISME takes way too long
-    if ((IP$ISME(IP$Dest, TRUE) > 0))
+    if ((ip$isme(IP$Dest, TRUE) > 0))
 	{
 	dev = -1;		// Loopback
 	}
@@ -763,7 +763,7 @@ IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 
     if ($$LOGF(LOG$IP))
 	{
-	IP$LOG(ASCIDNOT("IPSend"),Seg);
+	ip$log(ASCIDNOT("IPSend"),Seg);
 	if (IP$Dest != newip_dest)
 	    {
 		DESC$STR_ALLOC(dststr,20);
@@ -777,7 +777,7 @@ IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	// Packet is for local host - use loopback
 
 	if (Delete_Seg)	// If deleting, then no copy needed
-	  IP$Receive(Buf,Bufsize,Seg,SegSize,0);
+	  ip$receive(Buf,Bufsize,Seg,SegSize,0);
 	else
 	    {		// e wants the seg - need to copy it, then
 	    signed long
@@ -787,7 +787,7 @@ IP$SEND_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	    Buf2 = mm$seg_get(Bufsize);
 	    Seg2 = Seg-Buf+Buf2;
 	    CH$MOVE(Bufsize,Buf,Buf2);
-	    IP$Receive(Buf2,Bufsize,Seg2,SegSize,0);
+	    ip$receive(Buf2,Bufsize,Seg2,SegSize,0);
 	    }
     else
 	{
@@ -985,7 +985,7 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 
     if ($$LOGF(LOG$IP))
 	{
-	IP$LOG(ASCIDNOT("IPSend"),IPHDR);
+	ip$log(ASCIDNOT("IPSend"),IPHDR);
 	if (IP$Dest != newip_dest)
 	    {
 		DESC$STR_ALLOC(dststr,20);
@@ -1009,7 +1009,7 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 // Packet is for local host - use loopback
 
 	if (Delete_Seg)	// If deleting, then no copy needed
-	  IP$Receive(Buf,Bufsize,IPHDR,iplen,0);
+	  ip$receive(Buf,Bufsize,IPHDR,iplen,0);
 	else
 	    {		// e wants the seg - need to copy it, then
 	    signed long
@@ -1020,7 +1020,7 @@ IP$SEND(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	    seg2 = Seg-Buf+buf2;
 	    CH$MOVE(Bufsize,Buf,buf2);
 	    iphdr2 = (long)IPHDR-(long)Seg+(long)seg2;
-	    IP$Receive(buf2,Bufsize,iphdr2,iplen,0);
+	    ip$receive(buf2,Bufsize,iphdr2,iplen,0);
 	    };
 	}
     else
@@ -1087,13 +1087,13 @@ Outputs:
 void    IP_FRAGMENT();
  void    IP_DISPATCH();
 
-void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
+void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
      Device_Configuration_Entry * dev_config;
 	struct ip_structure * iphdr;
     {
     extern
 	IPCB_Count;
-    extern	IPU$User_Input();
+    extern	ipu$user_input();
     Net_Send_Queue_Element * QB;
     signed long
  	Sum,
@@ -1120,7 +1120,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 	    {
 	    QL$FAO("!%T IP Receive checksum error, sum=!XL!/",0,Sum);
 	    Swapbytes(IP_HDR_SWAP_SIZE,iphdr);
-	    IP$LOG(ASCIDNOT("(IPrecv)"),iphdr);
+	    ip$log(ASCIDNOT("(IPrecv)"),iphdr);
 	    };
         mm$seg_free(Buf_size,Buf);
 	return;
@@ -1144,7 +1144,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 		    "!%T IP discarded: device length=!SL, IP length=!SL!/",
 		    0,devlen,iplen);
 	    if (! $$LOGF(LOG$IP))
-		IP$LOG(ASCIDNOT("(IPRecv)"),iphdr);
+		ip$log(ASCIDNOT("(IPRecv)"),iphdr);
 	    };
 	mm$seg_free(Buf_size,Buf);
 	return;
@@ -1153,7 +1153,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 // Check to see if any one wants to peek at IP packets.
 
     if (IPCB_Count > 0)
-	IPU$User_Input (iphdr->iph$dest , iphdr->iph$source ,
+	ipu$user_input (iphdr->iph$dest , iphdr->iph$source ,
 			iphdr->iph$protocol ,
 			Buf_size , Buf ,
 			iplen , iphdr );
@@ -1161,10 +1161,10 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 // Check if segment destination is local host
 
     //!!HACK!!// IP$ISME too slow?
-    if (IP$ISME(iphdr->iph$dest, FALSE) > 0)
+    if (ip$isme(iphdr->iph$dest, FALSE) > 0)
 	{
 	if ($$LOGF(LOG$IP))
-	    IP$LOG(ASCIDNOT("IPrecv"),iphdr);
+	    ip$log(ASCIDNOT("IPrecv"),iphdr);
 
 // If this packet is a fragment, then hand it to the reassembly code.
 
@@ -1201,7 +1201,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 		    {
 		    QL$FAO("!%T IPfwd: Cannot route IP destination!/",0);
 		    if (! $$LOGF(LOG$IP))
-			IP$LOG(ASCIDNOT("IPfwd"),iphdr);
+			ip$log(ASCIDNOT("IPfwd"),iphdr);
 		    };
 		mm$seg_free(Buf_size,Buf);
 		return;
@@ -1218,7 +1218,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 		    QL$FAO("!%T struct used * IPfwd to forward to device !SL!/",
 			   0,dev);
 		    if (! $$LOGF(LOG$IP))
-			IP$LOG(ASCIDNOT("IPfwd"),iphdr);
+			ip$log(ASCIDNOT("IPfwd"),iphdr);
 		    };
 		mm$seg_free(Buf_size,Buf);
 		return;
@@ -1233,7 +1233,7 @@ void IP$Receive (Buf,Buf_size,iphdr,devlen,dev_config)
 		    {
 		    QL$FAO("!%T IPfwd: packet TTL expired!/",0);
 		    if (! $$LOGF(LOG$IP))
-			IP$LOG(ASCIDNOT("IPfwd"),iphdr);
+			ip$log(ASCIDNOT("IPfwd"),iphdr);
 		    };
 		mm$seg_free(Buf_size,Buf);
 		return;
@@ -1300,18 +1300,18 @@ void IP_DISPATCH(iphdr,iplen,HDRLEN,BUF,BUFSIZE)
     case ICMP_PROTOCOL:
 	{
 	if ($$LOGF(LOG$ICMP) && (! $$LOGF(LOG$IP)))
-	    IP$LOG(ASCIDNOT("ICMRecv"),iphdr);
-	ICMP$Input (SEG,SEGSIZE,iphdr,iplen,BUFSIZE,BUF);
+	    ip$log(ASCIDNOT("ICMRecv"),iphdr);
+	icmp$input (SEG,SEGSIZE,iphdr,iplen,BUFSIZE,BUF);
 	};
 	break;
 
     case TCP_PROTOCOL:
-	Seg$Input(iphdr->iph$source,iphdr->iph$dest,BUFSIZE,BUF,
+	seg$input(iphdr->iph$source,iphdr->iph$dest,BUFSIZE,BUF,
 		  SEGSIZE,SEG);
 	break;
 
     case UDP_PROTOCOL:
-	UDP$Input(iphdr->iph$source,iphdr->iph$dest,BUFSIZE,BUF,
+	udp$input(iphdr->iph$source,iphdr->iph$dest,BUFSIZE,BUF,
 		  SEGSIZE,SEG);
 	break;
 
@@ -1511,7 +1511,7 @@ Y:	{
 	{
 	QL$FAO("!%T IP Fragment unusable!/",0);
 	if (! $$LOGF(LOG$IP))
-	    IP$LOG(ASCIDNOT("IPfrag"),iphdr);
+	    ip$log(ASCIDNOT("IPfrag"),iphdr);
 	};
     mm$seg_free(BUFSIZE,BUF);
     }

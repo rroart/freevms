@@ -265,17 +265,17 @@ static struct queue_header_structure(queue_header_fields) Free_Maxsize_Segs =
 // they provide the base number of items on a free list.
 
 unsigned char
-    QBLK_Count_base  = 0,	// #Qblks on free list.
-    Uarg_Count_base  = 0,	// #Uarg blks on free list.
-    Min_Seg_Count_base = 0, // #Min-size segs
-    Max_Seg_Count_base = 0, // #Max-size segs
+    qblk_count_base  = 0,	// #Qblks on free list.
+    uarg_count_base  = 0,	// #Uarg blks on free list.
+    min_seg_count_base = 0, // #Min-size segs
+    max_seg_count_base = 0, // #Max-size segs
 
 // Counters for the number of items on a specific queue.
 
-    QBLK_Count = 0,	// #Qblks on free list.
-    Uarg_Count = 0,	// #Uarg blks on free list.
-    Min_Seg_Count = 0,	// #Min-size segs
-    Max_Seg_Count = 0;	// #Max-size segs
+    qblk_count = 0,	// #Qblks on free list.
+    uarg_count = 0,	// #Uarg blks on free list.
+    min_seg_count = 0,	// #Min-size segs
+    max_seg_count = 0;	// #Max-size segs
 
 /*
 Here we keep track of what kind of data structures are being dynamically 
@@ -283,14 +283,14 @@ allocated & which should have more reserved during initialization.
 */
 
 signed long
-    QB_gets  = 0,	// Queue Blks dynamically allocated
-    UA_gets  = 0,	// User arg blks.
-    MIN_gets  = 0,	// Minimum size buffers
-    MAX_gets  = 0,	// Maximum size buffers
-    QB_max  = 0,	// Queue Blk max queue size
-    UA_max  = 0,	// User arg max queue size
-    MIN_max  = 0,	// Minimum size buffers max queue size
-    MAX_max  = 0;	// Maximum seg max queue size
+    qb_gets  = 0,	// Queue Blks dynamically allocated
+    ua_gets  = 0,	// User arg blks.
+    min_gets  = 0,	// Minimum size buffers
+    max_gets  = 0,	// Maximum size buffers
+    qb_max  = 0,	// Queue Blk max queue size
+    ua_max  = 0,	// User arg max queue size
+    min_max  = 0,	// Minimum size buffers max queue size
+    max_max  = 0;	// Maximum seg max queue size
 
 //Sbttl "Memory Management Fault Handler"
 /*
@@ -447,7 +447,7 @@ void mm$qblk_get (void)
     Pages =0;
 
     if (REMQUE(&FREE_Qblks.qhead,Hptr) != EMPTY_QUEUE) // check
-	QBLK_Count = QBLK_Count - 1; // Say there is 1 less avail.
+	qblk_count = qblk_count - 1; // Say there is 1 less avail.
     else			// allocate a new qb.
 	{
 
@@ -463,9 +463,9 @@ void mm$qblk_get (void)
 	OKINT;
 	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE*4,Hptr);
 	Hptr->MEM$ISPERM = FALSE; // Not a permanent qblk
-	QB_gets = QB_gets + 1;	// track this event.
-	if (QB_gets > QB_max)
-	    QB_max = QB_gets;
+	qb_gets = qb_gets + 1;	// track this event.
+	if (qb_gets > qb_max)
+	    qb_max = qb_gets;
 	};
 
     ptr = Hptr + MEM$HDR_SIZE*4; // Point at data area
@@ -524,7 +524,7 @@ void mm$qblk_free(Ptr)
 //~~~ Record deallocator here ~~~
 	Hptr->MEM$ISFREE = TRUE;
 	INSQUE(Hptr,&FREE_Qblks.qtail);
-	QBLK_Count = QBLK_Count + 1;
+	qblk_count = qblk_count + 1;
 	}
     else
 	{
@@ -535,7 +535,7 @@ void mm$qblk_free(Ptr)
 	if (! (LIB$FREE_VM_PAGE(Pages, Hptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
-	QB_gets = QB_gets - 1;		// track this event.
+	qb_gets = qb_gets - 1;		// track this event.
 	};
     }
 /*
@@ -565,8 +565,8 @@ void QBLK_Init (void)
 	Pages,
 	RC ;
 
-    QBLK_Count = QBLK_Count_base;
-    for (J=1;J<=QBLK_Count;J++)
+    qblk_count = qblk_count_base;
+    for (J=1;J<=qblk_count;J++)
 	{
 //	LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr);
 	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1) ;
@@ -626,7 +626,7 @@ void mm$uarg_get (void)
 	Pages ;
 
     if (REMQUE(&FREE_Uargs.qhead,Ptr) != EMPTY_QUEUE) // check
-      Uarg_Count = Uarg_Count - 1;
+      uarg_count = uarg_count - 1;
     else
 	{
 	NOINT;			// Disable interrupts, do allocation
@@ -636,9 +636,9 @@ void mm$uarg_get (void)
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Get !XL size !SL!/",0,Ptr, Pages);
-	UA_gets = UA_gets + 1;
-	if (UA_gets > UA_max)
-	    UA_max = UA_gets;
+	ua_gets = ua_gets + 1;
+	if (ua_gets > ua_max)
+	    ua_max = ua_gets;
 	};
     CH$FILL(/*%CHAR*/(0),Max_User_ArgBlk_Size*4,Ptr);
     return(Ptr);
@@ -676,12 +676,12 @@ void mm$uarg_free(Ptr)
 	R0;	// standard vax/vms routine return value register.
 #endif
 
-    if (Uarg_Count < Uarg_Count_base)
+    if (uarg_count < uarg_count_base)
 	{
 //!!HACK!!// can an exception right here cause 
 //!!HACK!!// CPU 00 -- DOUBLDEALO, Double deallocation of memory block????
 	INSQUE(Ptr,&FREE_Uargs.qtail);
-	Uarg_Count = Uarg_Count + 1;
+	uarg_count = uarg_count + 1;
 	}
     else
 	{
@@ -692,7 +692,7 @@ void mm$uarg_free(Ptr)
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Free !XL size !SL!/",0,Ptr, Pages);
-	UA_gets = UA_gets - 1;
+	ua_gets = ua_gets - 1;
 	};
     }
 
@@ -716,15 +716,15 @@ Side Effects:
 
 */
 
-void Uarg_Ini (void)
+void uarg_init (void)
     {
       signed long J,
 	Ptr,
 	Pages,
 	RC ;
 
-    Uarg_Count = Uarg_Count_base;
-    for (J=1;J<=Uarg_Count;J++)
+    uarg_count = uarg_count_base;
+    for (J=1;J<=uarg_count;J++)
 	{
 //	LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),Ptr);
 	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
@@ -791,14 +791,14 @@ mm$seg_get(Size)
 	{
 	  if (REMQUE(&Free_Minsize_Segs.qhead,Ptr) != EMPTY_QUEUE) // check
 	    {
-	    Min_Seg_Count = Min_Seg_Count - 1;
+	    min_seg_count = min_seg_count - 1;
 	    Alloc = TRUE;
 	    }
 	else
 	    {
-	    MIN_gets = MIN_gets + 1;
-	    if (MIN_gets > MIN_max)
-		MIN_max = MIN_gets;
+	    min_gets = min_gets + 1;
+	    if (min_gets > min_max)
+		min_max = min_gets;
 	    };
 	};
 	break;
@@ -809,14 +809,14 @@ mm$seg_get(Size)
 	{
 	  if (REMQUE(&Free_Maxsize_Segs.qhead,Ptr) != EMPTY_QUEUE) // check
 	    {
-	    Max_Seg_Count = Max_Seg_Count - 1;
+	    max_seg_count = max_seg_count - 1;
 	    Alloc = TRUE;
 	    }
 	else
 	    {
-	    MAX_gets = MAX_gets + 1;
-	    if (MAX_gets > MAX_max)
-		MAX_max = MAX_gets;
+	    max_gets = max_gets + 1;
+	    if (max_gets > max_max)
+		max_max = max_gets;
 	    };
 	};
     };
@@ -885,27 +885,27 @@ void mm$seg_free(Size,Ptr)
 
     case MIN_PHYSICAL_BUFSIZE:
 	{
-	if (Min_Seg_Count < Min_Seg_Count_base)
+	if (min_seg_count < min_seg_count_base)
 	    {
 	    INSQue(Ptr,&Free_Minsize_Segs.qtail);
-	    Min_Seg_Count = Min_Seg_Count + 1;
+	    min_seg_count = min_seg_count + 1;
 	    Released = TRUE;
 	    }
 	else
-	    MIN_gets = MIN_gets - 1;
+	    min_gets = min_gets - 1;
 	};
 	break;
 
     case MAX_PHYSICAL_BUFSIZE:
 	{
-	if (Max_Seg_Count < Max_Seg_Count_base)
+	if (max_seg_count < max_seg_count_base)
 	    {
 	    INSQUE(Ptr,&Free_Maxsize_Segs.qtail);
-	    Max_Seg_Count = Max_Seg_Count + 1;
+	    max_seg_count = max_seg_count + 1;
 	    Released = TRUE;
 	    }
 	else
-	    MAX_gets = MAX_gets - 1;
+	    max_gets = max_gets - 1;
 	};
     };
 
@@ -946,7 +946,7 @@ Side Effects:
 
 */
 
-void SEG_INIT (void)
+void seg_init (void)
     {
 #if 0
     BUILTIN
@@ -959,8 +959,8 @@ void SEG_INIT (void)
 
 // Allocate minimum (default) size segments.
 
-    Min_Seg_Count = Min_Seg_Count_base;
-    for (J=0;J<=Min_Seg_Count-1;J++)
+    min_seg_count = min_seg_count_base;
+    for (J=0;J<=min_seg_count-1;J++)
 	{
 //	LIB$GET_VM(MIN_PHYSICAL_BUFSIZE,Ptr);
 	Pages = ((MIN_PHYSICAL_BUFSIZE / 512) + 1) ;
@@ -972,8 +972,8 @@ void SEG_INIT (void)
 
 // Allocate maximum size segments
 
-    Max_Seg_Count = Max_Seg_Count_base;
-    for (J=Max_Seg_Count;J>=1;J--)
+    max_seg_count = max_seg_count_base;
+    for (J=max_seg_count;J>=1;J--)
 	{
 //	LIB$GET_VM(MAX_PHYSICAL_BUFSIZE,ptr);
 	Pages = ((MAX_PHYSICAL_BUFSIZE / 512) + 1) ;
@@ -1009,8 +1009,8 @@ Side Effects:
 void mm$init (void)
     {
     QBLK_Init();
-    Uarg_Init();
-    Seg_Init();
+    uarg_init();
+    seg_init();
     }
 
 

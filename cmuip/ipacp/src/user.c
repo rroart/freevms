@@ -381,8 +381,8 @@ extern  void    OPR_FAO();
 
 // Routines From:  MACLIB.MAR
 
-extern     void Set_IP_device_OFFline();
-extern     User_Requests_Avail();
+extern     void set_ip_device_offline();
+extern     user_requests_avail();
 extern     void VMS_IO$POST();
 extern     void MOVBYT();
 extern     void SwapBytes();
@@ -477,7 +477,7 @@ MACRO
 #define     ACF_ALLOPENS   4		// "
 
 signed long
-    ACCESS_FLAGS  = ACF_PRIVPORT; // Flags for access checks to do
+    access_flags  = ACF_PRIVPORT; // Flags for access checks to do
 
 static signed long
     ACHOST_COUNT  = 0,	// Count of hosts
@@ -570,7 +570,7 @@ Side Effects:
 */
 
 
-void USER$POST_IO_STATUS (UARG,STATUS,NBYTES,
+void user$post_io_status (UARG,STATUS,NBYTES,
  				   FLAGS,ICMCODE)
     {
 	  netio_status_block * IOSB;
@@ -624,7 +624,7 @@ Side Effects:
 
 */
 
-USER$ERR (struct user_default_args * Arg, long Err)
+USER$Err (struct user_default_args * Arg, long Err)
     {
 	 netio_status_block * IOSB;
 
@@ -680,7 +680,7 @@ Side Effects:
 
 */
 
-void USER$POST_FUNCTION_OK(struct user_default_args * Arg)
+void user$post_function_ok(struct user_default_args * Arg)
     {
     signed long
     IRP;
@@ -703,7 +703,7 @@ void USER$POST_FUNCTION_OK(struct user_default_args * Arg)
 // Common routine used by TCP and UDP to return connection info
 // (local/foreign host numbers,names and ports)
 
-void USER$Net_Connection_Info(struct user_info_args * uargs,
+void user$net_connection_info(struct user_info_args * uargs,
 			     long Lcl_Host,long Frn_Host,long Lcl_Port,long Frn_Port,
  			     long Frn_Name,long Frn_Nlen)
     {
@@ -750,7 +750,7 @@ void USER$Net_Connection_Info(struct user_info_args * uargs,
   
 // Return the Connection Status to the user by posting the IO request.
 
-    User$Post_IO_Status(uargs,SS$_NORMAL,CONNECTION_INFO_BYTESIZE,0,0);
+    user$post_io_status(uargs,SS$_NORMAL,CONNECTION_INFO_BYTESIZE,0,0);
     mm$uarg_free(uargs);		// relese user arg block.
     }
 
@@ -763,7 +763,7 @@ void USER$Net_Connection_Info(struct user_info_args * uargs,
 
 //Exit:	returns clock based integer.
 
-USER$Clock_Base (void)
+user$clock_base (void)
     {
     signed long
 	Now[2];
@@ -798,7 +798,7 @@ signed long
     TCP_User_LP,
     UDP_User_LP;
 
-USER$GET_LOCAL_PORT(Pbase)
+user$get_local_port(Pbase)
     {
     signed long
 	rval;
@@ -812,10 +812,10 @@ USER$GET_LOCAL_PORT(Pbase)
 
  void    ACCESS_INIT();
 
-void USER$INIT_ROUTINES (void)
+void user$init_routines (void)
     {
-    TCP_User_LP = USER$Clock_Base();
-    UDP_User_LP = USER$Clock_Base();
+    TCP_User_LP = user$clock_base();
+    UDP_User_LP = user$clock_base();
     ACCESS_INIT();
     }
 
@@ -853,7 +853,7 @@ void Net$Debug(struct debug_args * uargs)
       case 1: ACT_CHANGE(uargs->de$level); break; 
 	};
 
-    USER$Post_Function_OK(uargs);
+    user$post_function_ok(uargs);
     }
 
 
@@ -885,7 +885,7 @@ extern	mm$get_mem(), mm$free_mem();
 
     if ((RC=mm$get_mem(Buffer,uargs->ev$buf_size)) != SS$_NORMAL)
 	{
-	USER$ERR(uargs,RC);
+	USER$Err(uargs,RC);
 	return;
 	};
 
@@ -894,7 +894,7 @@ extern	mm$get_mem(), mm$free_mem();
     ACT$FAO("!%D (PID:!XW) [!AD]!/", 0,
 	    ((long)uargs->ev$pid)&0xffff, uargs->ev$buf_size, Buffer); // check pid
 
-    USER$Post_Function_OK(uargs);
+    user$post_function_ok(uargs);
     mm$free_mem(Buffer,uargs->ev$buf_size);
     }
 
@@ -961,7 +961,7 @@ extern	SNMP$USER_INPUT(),
 
     if ((RC=mm$get_mem(In_Buff,uargs->snmp$wbuf_size)) != SS$_NORMAL)
 	{
-	USER$ERR(uargs,RC);
+	USER$Err(uargs,RC);
 	return;
 	};
 
@@ -992,13 +992,13 @@ extern	SNMP$USER_INPUT(),
 
 if ((uargs->snmp$function == 4))
 	{
-extern	    TCP$KILL();
+extern	    tcp$kill();
 
 	XLOG$FAO(LOG$USER,"!%T Kill !XL (bsize=!XL)!/",0,
 		 In_Buff[0],uargs->snmp$wbuf_size);
 	bufsize = 10;
 
-	RC = TCP$KILL(In_Buff[0]); // nu? what are you waiting for? kill!!!
+	RC = tcp$kill(In_Buff[0]); // nu? what are you waiting for? kill!!!
 	if (RC != SS$_NORMAL) Error = USER$Err(uargs,RC);
 
 	CH$MOVE(bufsize,UPLIT("abcdefghij"),RB+4); // First long is size
@@ -1035,7 +1035,7 @@ else
 
 // Post the user's IO request back to the user.
 
-	    User$Post_IO_Status(uargs,SS$_NORMAL,bufsize+4,0,0);
+	    user$post_io_status(uargs,SS$_NORMAL,bufsize+4,0,0);
 	    mm$uarg_free(uargs);	// Release user arg block.
 	    };
 	};
@@ -1072,9 +1072,9 @@ Side Effects:
 
  void    GTHST_Purge();
 
-void USER$Purge_All_IO (void)
+void user$purge_all_io (void)
     {
-extern 	void TCP$Purge_All_IO();
+extern 	void tcp$purge_all_io();
 extern 	void UDP$Purge_All_IO();
 extern 	void ICMP$Purge_All_IO();
 extern 	void IPU$Purge_All_IO();
@@ -1088,11 +1088,11 @@ struct user_send_args * Sargs;
 
 // Set virtual device IP offline.  Prevent further user io.
 
-    $$KCALL(Set_IP_device_OFFline);
+    $$KCALL(set_ip_device_offline);
 
 // Purge network I/O for all protocols
 
-    TCP$Purge_All_IO();
+    tcp$purge_all_io();
     UDP$Purge_All_IO();
     ICMP$Purge_All_IO();
     IPU$Purge_All_IO();
@@ -1110,13 +1110,13 @@ struct user_send_args * Sargs;
 // & not from a user process, be sure NOT to post the IO//  USER$Err will delete
 // the uargs block.
 
-    while ((uargs=$$KCALL(User_Requests_Avail)) != FALSE)
+    while ((uargs=$$KCALL(user_requests_avail)) != FALSE)
 	{
 
 // post the user's io request with an error code: tcp is exiting.
 
 	if (uargs->ud$funct != M$CANCEL)
-	    User$Post_IO_Status(uargs,NET$_TE,0,0,0);
+	    user$post_io_status(uargs,NET$_TE,0,0,0);
 //!!HACK!!// Don't release the Uarg?
 	};
     }
@@ -1161,7 +1161,7 @@ Side Effects:
 
  void    GTHST_CANCEL();
 
-User$Brk (void)
+user$brk (void)
     {
       return    SS$_NORMAL;
     }
@@ -1171,7 +1171,7 @@ void VMS$Cancel(struct vms$cancel_args * uargs)
 extern 	TCP$Cancel();
 extern 	UDP$Cancel();
 extern 	ICMP$Cancel();
-extern 	IPU$Cancel();
+extern 	ipu$cancel();
     signed long
 	ucbptr,
 	proto,
@@ -1199,11 +1199,11 @@ extern 	IPU$Cancel();
 	break;
 
     case U$IP_PROTOCOL:
-	Done = IPU$Cancel(uargs);
+	Done = ipu$cancel(uargs);
 	break;
 
     default:
-	Done = USER$BRK();
+	Done = user$brk();
     };
 
     GTHST_CANCEL(uargs);
@@ -1335,8 +1335,8 @@ extern	TEK$sys_uptime;
 
     case DU$LOCAL_CONNECTION_ID:
 	{
-void 	    TCP$Connection_List();
-	TCP$Connection_List(RB);
+void 	    tcp$connection_list();
+	tcp$connection_list(RB);
 	bufsize = D$LC_ID_BLKSIZE;
 	};
 
@@ -1485,7 +1485,7 @@ extern	    CNF$Device_stat();
 
 // Post the user's IO request back to the user.
 
-	    User$Post_IO_Status(uargs,SS$_NORMAL,bufsize,0,0);
+	    user$post_io_status(uargs,SS$_NORMAL,bufsize,0,0);
 	    mm$uarg_free(uargs);	// Release user arg block.
 	    };
 	};
@@ -1516,9 +1516,9 @@ void Net$EXIT(struct debug_exit_args * uargs)
 
     XLOG$FAO(LOG$USER,"!%T EXIT requested, User PID: !XL!/",0,uargs->ex$pid);
 
-    USER$Post_Function_OK(uargs);
+    user$post_function_ok(uargs);
     Time_2_Exit = TRUE;		// Set global for exit, rtn: start_network.
-    $$KCALL(Set_IP_device_OFFline); // mark network device(s) offline.
+    $$KCALL(set_ip_device_offline); // mark network device(s) offline.
     }
 
 //SBTTL "Network access check routines"
@@ -1538,7 +1538,7 @@ MACRO
     GETJPI_BLOCK = BLOCK->GETJPI_SIZE FIELD(GETJPI_FIELDS) %;
 #endif
 
-User$Privileged(PID)
+user$privileged(PID)
 //
 // Verify the user has privileges to use a well-known local port. User must
 // have PHY_IO privilege.
@@ -1567,7 +1567,7 @@ union _prvdef PRVBUF;
     }
 
 
-Check_ID(PID,ID)
+check_id(PID,ID)
 //
 // Check that a user holds a given rights identifier. The identifiers of
 // interest to us are ARPANET_ACCESS and ARPANET_WIZARD.
@@ -1617,7 +1617,7 @@ Check_ID(PID,ID)
 
 #define WKS$SMTP 25		// Well known port number for SMTP
 
-USER$CHECK_ACCESS(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
+user$check_access(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
 //
 // Main routine to check for network access.
 // Returns SS$_NORMAL if access is granted, or error code.
@@ -1627,18 +1627,18 @@ USER$CHECK_ACCESS(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
 
 // If no access checking is enabled, then skip this routine
 
-    if (ACCESS_FLAGS == 0)
+    if (access_flags == 0)
 	return SS$_NORMAL;
 
 // If we're checking acess for any network open, then check for INTERNET_ACCESS
 
-    if (ACCESS_FLAGS&ACF_ALLOPENS)
-	if (! CHECK_ID(PID,INTERNET_ID))
+    if (access_flags&ACF_ALLOPENS)
+	if (! check_id(PID,INTERNET_ID))
 	    return NET$_NOINA;
 
 // If we're checking access to non-local hosts, then do so
 
-    if (ACCESS_FLAGS&ACF_ARPAHOST)
+    if (access_flags&ACF_ARPAHOST)
 X:	{
 
 // If the foreign host is in the "local hosts" list, then allow it.
@@ -1646,18 +1646,18 @@ X:	{
 	for (I=(ACHOST_COUNT-1);I>=0;I--)
 	    if ((FRNHST && ACHOSTS[I].AC$MASK) == ACHOSTS[I].AC$HOST)
 		goto leave_x;
-	if (! CHECK_ID(PID,ARPANET_ID))
+	if (! check_id(PID,ARPANET_ID))
 	    return NET$_NOANA;
 	};
     leave_x:
 
 // If the local port is privileged, then require special privilege
 
-    if (ACCESS_FLAGS&ACF_PRIVPORT)
+    if (access_flags&ACF_PRIVPORT)
 	if ((((LCLPRT && 0xFFFF) >= WELL_KNOWN_LP_START) &&
 	    ((LCLPRT && 0xFFFF) <= WELL_KNOWN_LP_END) && FRNPRT == 0) ||
 	   (FRNPRT == WKS$SMTP))
-	    if (! User$Privileged(PID))
+	    if (! user$privileged(PID))
 		return NET$_NOPRV;
 
 // Passed all of the tests - let them have access to the network
@@ -1666,7 +1666,7 @@ X:	{
     }
 
 
-void USER$ACCESS_CONFIG(HOSTNUM,HOSTMASK)
+void user$access_config(HOSTNUM,HOSTMASK)
 //
 // Add an entry to the list of allowed local hosts. Called by CONFIG when
 // LOCAL_HOST entry seen in the config file.
@@ -1701,33 +1701,33 @@ void ACCESS_INIT (void)
 
 // If access to network check enabled, translate INTERNET_ACCESS rights ID
 
-    if (ACCESS_FLAGS&ACF_ALLOPENS)
+    if (access_flags&ACF_ALLOPENS)
 	{
 	if (! exe$asctoid(INTERNET_STRING,
 			INTERNET_ID))
 	    {
 	    OPR$FAO("% Failed to find identifier !AS - access check disabled",
 		    INTERNET_STRING);
-	    ACCESS_FLAGS&=~ACF_ALLOPENS;
+	    access_flags&=~ACF_ALLOPENS;
 	    };
 	};
 
 // If ARPANET access check enabled, translate ARPANET_ACCESS rights ID and
 // verify that some hosts exist in the host list.
 
-    if (ACCESS_FLAGS&ACF_ARPAHOST)
+    if (access_flags&ACF_ARPAHOST)
 	{
 	if (! exe$asctoid(ARPANET_STRING,
 			ARPANET_ID))
 	    {
 	    OPR$FAO("% Failed to find identifier !AS - access check disabled",
 		    ARPANET_STRING);
-	    ACCESS_FLAGS&=~ACF_ARPAHOST;
+	    access_flags&=~ACF_ARPAHOST;
 	    };
 	if (ACHOST_COUNT == 0)
 	    {
 	    OPR$FAO("% No local hosts list - ARPANET access check disabled");
-	    ACCESS_FLAGS&=~ACF_ARPAHOST;
+	    access_flags&=~ACF_ARPAHOST;
 	    };
 	};
     }
@@ -1808,7 +1808,7 @@ void NET$GTHST(struct gthst_args * uargs)
 
 // And give them a good status reply
 
-	User$Post_IO_Status(uargs,SS$_NORMAL,NLBSIZE,0,0);
+	user$post_io_status(uargs,SS$_NORMAL,NLBSIZE,0,0);
 	mm$uarg_free(uargs);
 	};
 	break;
@@ -1913,7 +1913,7 @@ void GTHST_NMLOOK_DONE(uargs,Status,Adrcnt,Adrlst,namlen,Nambuf)
 
 // And give them a good status reply
 
-    User$Post_IO_Status(uargs,SS$_NORMAL,NLBSIZE,0,0);
+    user$post_io_status(uargs,SS$_NORMAL,NLBSIZE,0,0);
     mm$uarg_free(uargs);
     }
 
@@ -1948,7 +1948,7 @@ void GTHST_ADLOOK_DONE(uargs,Status,namlen,Nambuf)
 
 // And give them a good status reply
 
-    User$Post_IO_Status(uargs,SS$_NORMAL,ALBSIZE,0,0);
+    user$post_io_status(uargs,SS$_NORMAL,ALBSIZE,0,0);
     mm$uarg_free(uargs);
     }
 
@@ -1995,7 +1995,7 @@ void GTHST_RRLOOK_DONE(uargs,Status,RDLen,RData,namlen,Nambuf)
 
 // And give them a good status reply
 
-    User$Post_IO_Status(uargs,SS$_NORMAL, RLBSize + RDLen,0,0);
+    user$post_io_status(uargs,SS$_NORMAL, RLBSize + RDLen,0,0);
     mm$uarg_free(uargs);
     }
 
@@ -2104,7 +2104,7 @@ IMPORTANT NOTE// :
 */
 
 
-void USER$Process_User_Requests (void)
+void user$process_user_requests (void)
     {
 
 // TCP functions:
@@ -2145,7 +2145,7 @@ extern 	void IPU$STATUS();
     register
 	struct user_default_args * argblk;
 
-    while ((argblk=$$KCALL(User_Requests_Avail)) != FALSE)
+    while ((argblk=$$KCALL(user_requests_avail)) != FALSE)
 	{
 	if ($$LOGF(LOG$USER))
 	    {

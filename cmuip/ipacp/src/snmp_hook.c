@@ -587,7 +587,7 @@ var_system (vp, name, length, exact, var_len, access_method)
     {
     // Declare system variables from IPACP
     extern
-	Dev_Count;
+	dev_count;
     extern
 	CALCULATE_UPTIME();
 
@@ -615,7 +615,7 @@ var_system (vp, name, length, exact, var_len, access_method)
 	    break;
 	case CFG_NNETS:
 	    {
-	    sys_nnets = Dev_Count;
+	    sys_nnets = dev_count;
 	    return sys_nnets;
 	    };
 	    break;
@@ -640,7 +640,7 @@ var_ifEntry (vp, name, length, exact, var_len, access_method)
     {
     // Declare system variables from IPACP
       extern Device_Configuration_Entry * dev_config_tab;
-	extern Dev_Count;
+	extern dev_count;
 	signed long i,
 	newname [MAX_NAME_LEN],
 	interface,	// interface number
@@ -651,7 +651,7 @@ var_ifEntry (vp, name, length, exact, var_len, access_method)
 
     // find "next" interface
     interface = 0;
-    for (i=1;i<=Dev_Count;i++)
+    for (i=1;i<=dev_count;i++)
 	{
 	newname[10] = i;
 	result = compare(name, length, newname, vp->var$namelen);
@@ -907,7 +907,7 @@ var_atEntry(vp, name, length, exact, var_len, access_method)
 */
 #endif
 
-var_IP (vp, name, length, exact, var_len, access_method)
+var_ip (vp, name, length, exact, var_len, access_method)
      struct variable_struct * vp;
         char name[SNMP$K_OIDsize];
     {
@@ -993,7 +993,7 @@ var_ipAddrEntry (vp, name, length, exact, var_len, access_method)
     {
     extern
       Device_Configuration_Entry * dev_config_tab ;
-extern	Dev_Count;
+extern	dev_count;
  signed long i,
 	newname [MAX_NAME_LEN],
 	result,
@@ -1012,7 +1012,7 @@ extern	Dev_Count;
 
     // find "next" interface
     interface = -1;
-    for (i=0;i<=Dev_Count-1;i++)
+    for (i=0;i<=dev_count-1;i++)
 	{
 
 	// "Cobble" in the new name
@@ -1065,7 +1065,7 @@ extern	Dev_Count;
 
 
 
-var_ICMP (vp, name, length, exact, var_len, access_method)
+var_icmp (vp, name, length, exact, var_len, access_method)
      struct variable_struct * vp;
      char name[SNMP$K_OIDsize];
     {
@@ -1085,7 +1085,7 @@ var_ICMP (vp, name, length, exact, var_len, access_method)
 
 
 
-var_UDP (vp, name, length, exact, var_len, access_method)
+var_udp (vp, name, length, exact, var_len, access_method)
   struct variable_struct * vp;
     char name[SNMP$K_OIDsize];
     {
@@ -1105,7 +1105,7 @@ var_UDP (vp, name, length, exact, var_len, access_method)
 
 
 
-var_TCP (vp, name, length, exact, var_len, access_method)
+var_tcp (vp, name, length, exact, var_len, access_method)
   struct variable_struct * vp;
     char name[SNMP$K_OIDsize];
     {
@@ -1129,11 +1129,11 @@ var_tcpConn (vp, name, length, exact, var_len, access_method)
   struct variable_struct * vp;
     char name[SNMP$K_OIDsize];
     {
-      extern long j,
+      extern long
 	* vtcb_ptr,
 	vtcb_size,
 	tcb_count;
-    signed long
+      signed long j,
 	count,
 	newname [MAX_NAME_LEN],
       result;

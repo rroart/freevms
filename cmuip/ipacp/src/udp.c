@@ -239,11 +239,11 @@ extern  void    mm$seg_free();
 
 // USER.BLI
 
-extern     USER$GET_LOCAL_PORT();
-extern     USER$CHECK_ACCESS();
+extern     user$get_local_port();
+extern     user$check_access();
 extern     USER$Err();
 extern  void    IO$POST();
-extern  void    User$Post_IO_Status();
+extern  void    user$post_io_status();
 
 // IP.BLI
 
@@ -331,7 +331,7 @@ static signed long
     UDPCB_Count  = 0;	// Count of active UDPCBs
 long    UDPCB_TABLE[MAX_UDPCB+1];// Table of UDPCBs
 
-    struct UDP_MIB_struct * UDP_MIB ;	// UDP Management Information Block
+    struct UDP_MIB_struct * udp_mib ;	// UDP Management Information Block
 
 
 //SBTTL "UDP packet logger"
@@ -441,7 +441,7 @@ UDPCB_Find(Src$Adrs,Src$Port,Dest$Port)
 UDP_SEND();
     Queue_User_UDP();
 
-void UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
+void udp$input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 	struct udpkt_structure * Seg;
     {
     signed long
@@ -471,7 +471,7 @@ void UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 	sum = Gen_Checksum(SegSize,Seg,Src$Adrs,Dest$Adrs,UDP_Protocol);
 	if (sum != 0xFFFF)
 	    {			// Bad checkum - log & drop packet
-	    UDP_MIB->MIB$UDPINERRORS = UDP_MIB->MIB$UDPINERRORS + 1;
+	    udp_mib->MIB$UDPINERRORS = udp_mib->MIB$UDPINERRORS + 1;
 	    if ($$LOGF(LOG$UDP))
 		QL$FAO("!%T UDP seg !XL dropped on bad checksum (!XL)!/",0,
 			Seg,sum);
@@ -498,7 +498,7 @@ void UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 	unsigned char out_buff  [16384]; // check will destroy stack and pcb
 
 	// Keep count
-	UDP_MIB->MIB$UDPINDATAGRAMS = UDP_MIB->MIB$UDPINDATAGRAMS + 1;
+	udp_mib->MIB$UDPINDATAGRAMS = udp_mib->MIB$UDPINDATAGRAMS + 1;
 
 	out_len = 16384; // initial size of buffer
 
@@ -532,7 +532,7 @@ void UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 	unsigned char    out_buff [512];
 
 	// Keep count
-	UDP_MIB->MIB$UDPINDATAGRAMS = UDP_MIB->MIB$UDPINDATAGRAMS + 1;
+	udp_mib->MIB$UDPINDATAGRAMS = udp_mib->MIB$UDPINDATAGRAMS + 1;
 
 	out_len = 512; // initial size of buffer
 
@@ -561,7 +561,7 @@ void UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
     UDPCB = UDPCB_Find(Src$Adrs,Seg->up$source_port,Seg->up$dest_port);
     if (UDPCB == 0)
 	{
-	UDP_MIB->MIB$UDPNOPORTS = UDP_MIB->MIB$UDPNOPORTS + 1;
+	udp_mib->MIB$UDPNOPORTS = udp_mib->MIB$UDPNOPORTS + 1;
 	if ($$LOGF(LOG$UDP))
 	    QL$FAO("!%T No UDPCB found for segment !XL, SP=!SL, DP=!SL!/",
 		   0,Seg,Seg->up$source_port,Seg->up$dest_port);
@@ -638,7 +638,7 @@ X2:	{
 void    Deliver_UDP_Data();
  void    UDPCB_ABORT();
 
-void UDP$ICMP(ICMtype,ICMex,IPsrc,IPdest,UDPptr,UDPlen,
+void udp$icmp(ICMtype,ICMex,IPsrc,IPdest,UDPptr,UDPlen,
 			buf,bufsize)
 //ICMtype - ICMP packet type
 //ICMex - extra data from ICMP packet (pointer for ICM_PPROBLEM)
@@ -798,7 +798,7 @@ extern	mm$qblk_get();
 
     if (UDPCB->udpcb$nr_qcount > UDPCB$NR_Qmax)
 	{
-	UDP_MIB->MIB$UDPINERRORS = UDP_MIB->MIB$UDPINERRORS + 1;
+	udp_mib->MIB$UDPINERRORS = udp_mib->MIB$UDPINERRORS + 1;
 	if ($$LOGF(LOG$UDP))
 	    QL$FAO("!%T UDP at !XL dropped - UDPCB NR queue full!/",0,Uptr);
 	return TRUE;		// Drop the packet - no room
@@ -887,14 +887,14 @@ void Deliver_UDP_Data(UDPCB,QB,URQ)
 	ICMTYPE = QB->nr$icm_type;
 	FLAGS = FLAGS || NSB$ICMPBIT;
 	};
-    User$Post_IO_Status(URQ->ur$uargs,SS$_NORMAL,
+    user$post_io_status(URQ->ur$uargs,SS$_NORMAL,
 			Ucount,FLAGS,ICMTYPE);
     mm$uarg_free(URQ->ur$uargs);
 
     mm$qblk_free(URQ);
     mm$seg_free(QB->nr$buf_size,QB->nr$buf);
     mm$qblk_free(QB);
-    UDP_MIB->MIB$UDPINDATAGRAMS = UDP_MIB->MIB$UDPINDATAGRAMS + 1;
+    udp_mib->MIB$UDPINDATAGRAMS = udp_mib->MIB$UDPINDATAGRAMS + 1;
     }
 
 //SBTTL "UDPCB_OK - Match connection ID to UDPCB address"
@@ -995,7 +995,7 @@ X:  {			// ** Block X **
 
 //SBTTL "UDPCB_Free - Deallocate a UDPCB"
 
-void UDPCB_Free(long UDPCBIX,struct UDPCB_Structure * UDPCB)
+void udpcb_free(long UDPCBIX,struct UDPCB_Structure * UDPCB)
     {
       extern	LIB$FREE_VM();
       extern LIB$FREE_VM_PAGE();
@@ -1053,7 +1053,7 @@ void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,long RC)
 
     while (REMQUE(UDPCB->udpcb$usr_qhead,URQ) != EMPTY_QUEUE) // check
 	{
-	    User$Post_IO_Status(URQ->ur$uargs,RC,0,0,0);
+	    user$post_io_status(URQ->ur$uargs,RC,0,0,0);
 	    mm$uarg_free(URQ->ur$uargs);
 	    mm$qblk_free(URQ);	
 	};
@@ -1069,10 +1069,10 @@ void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,long RC)
 
 //SBTTL "UDPCB_Close - Close/deallocate a UDPCB"
 
-void UDPCB_Close(long UIDX,struct UDPCB_Structure * UDPCB,long RC)
+void udpcb_close(long UIDX,struct UDPCB_Structure * UDPCB,long RC)
     {
     Kill_UDP_Requests(UDPCB,RC);
-    UDPCB_FREE(UIDX,UDPCB);
+    udpcb_free(UIDX,UDPCB);
     }
 
 void UDPCB_Abort(struct UDPCB_Structure * UDPCB,long RC)
@@ -1080,14 +1080,14 @@ void UDPCB_Abort(struct UDPCB_Structure * UDPCB,long RC)
 // Abort a UDPCB - called by ICMP code.
 //
     {
-      UDPCB_CLOSE(UDPCB->udpcb$udpcbid,UDPCB,RC);
+      udpcb_close(UDPCB->udpcb$udpcbid,UDPCB,RC);
     }
 
 
 
 //SBTTL "Purge_All_UDP_IO - delete UDP database before network exits"
 
-void UDP$Purge_All_IO  (void)
+void udp$purge_all_io  (void)
     {
     signed long
       UDPCBIDX;
@@ -1097,7 +1097,7 @@ void UDP$Purge_All_IO  (void)
 
     for (UDPCBIDX=1;UDPCBIDX<=MAX_UDPCB;UDPCBIDX++)
 	if ((UDPCB = UDPCB_TABLE[UDPCBIDX]) != 0)
-	    UDPCB_Close(UDPCBIDX,UDPCB,NET$_TE);
+	    udpcb_close(UDPCBIDX,UDPCB,NET$_TE);
     }
 
 //SBTTL "UDP_Conn_Unique - Check for unique UDP connection"
@@ -1127,7 +1127,7 @@ UDP_Conn_Unique(LP,FH,FP)
     return TRUE;
     }
 
-//SBTTL "UDP$OPEN - open a UDP "connection""
+//SBTTL "udp$open - open a UDP "connection""
 /*
     Open a UDP "connection". Create a UDP Control Block, which serves as a
     place to hang incoming packets and user receive requests.
@@ -1137,7 +1137,7 @@ UDP_COPEN_DONE();
 void    UDP_NMLOOK_DONE();
 void    UDP_ADLOOK_DONE();
 
-void UDP$OPEN(struct user_open_args * Uargs)
+void udp$open(struct user_open_args * Uargs)
     {
       ipadr$address_block * ProtoHdr;
       struct UDPCB_Structure * UDPCB;
@@ -1250,7 +1250,7 @@ void UDP_NMLOOK_DONE(UDPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 #define	UOP_ERROR(EC) \ 
 	    { \
 	    USER$Err(Uargs,EC); \
-	    UDPCB_FREE(UDPCB->udpcb$udpcbid,UDPCB); \
+	    udpcb_free(UDPCB->udpcb$udpcbid,UDPCB); \
 	    return; \
 	    }
 
@@ -1275,7 +1275,7 @@ void UDP_NMLOOK_DONE(UDPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 
 // Verify that we have access to the host/port set
 
-    RC = USER$CHECK_ACCESS(UDPCB->udpcb$user_id,UDPCB->udpcb$local_host,
+    RC = user$check_access(UDPCB->udpcb$user_id,UDPCB->udpcb$local_host,
 		      UDPCB->udpcb$local_port,UDPCB->udpcb$foreign_host,
 		      UDPCB->udpcb$foreign_port);
     if (! RC)
@@ -1328,10 +1328,10 @@ UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST)
 	    {
 	    signed long
 		LP;
-	    LP = USER$GET_LOCAL_PORT(UDP_User_LP);
+	    LP = user$get_local_port(UDP_User_LP);
 	    if (UDP_Conn_Unique(LP,UDPCB->udpcb$foreign_host,
 				UDPCB->udpcb$foreign_port))
-		EXITLOOP (UDPCB->udpcb$local_port = LP);
+		{ UDPCB->udpcb$local_port = LP; break; };
 	    };
 
 // If it failed, then no connections available - punt
@@ -1388,7 +1388,7 @@ void UDP_ADLOOK_DONE(UDPCB,STATUS,NAMLEN,NAMPTR)
     associated with a connection.
 */
 
-void UDP$CLOSE(struct user_close_args * Uargs)
+void udp$close(struct user_close_args * Uargs)
     {
       struct UDPCB_Structure * UDPCB;
     signed long
@@ -1404,11 +1404,11 @@ void UDP$CLOSE(struct user_close_args * Uargs)
 
 // Use common routine for closing
 
-    UDPCB_Close(Uargs->cl$local_conn_id,UDPCB,NET$_CC);
+    udpcb_close(Uargs->cl$local_conn_id,UDPCB,NET$_CC);
 
 // Close done - post user request and free argblk
 
-    User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
+    user$post_io_status(Uargs,SS$_NORMAL,0,0,0);
     mm$uarg_free(Uargs);
     }
 
@@ -1417,7 +1417,7 @@ void UDP$CLOSE(struct user_close_args * Uargs)
     Abort a UDP "connection". Identical in functionality to UDP$CLOSE.
  */
 
-void UDP$ABORT(struct user_abort_args * Uargs)
+void udp$abort(struct user_abort_args * Uargs)
     {
       struct UDPCB_Structure * UDPCB;
     signed long
@@ -1433,11 +1433,11 @@ void UDP$ABORT(struct user_abort_args * Uargs)
 
 // Use common routine for closing
 
-    UDPCB_Close(Uargs->ab$local_conn_id,UDPCB,NET$_CC);
+    udpcb_close(Uargs->ab$local_conn_id,UDPCB,NET$_CC);
 
 // Done. Clean up.
 
-    User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
+    user$post_io_status(Uargs,SS$_NORMAL,0,0,0);
     mm$uarg_free(Uargs);
     }
 
@@ -1447,7 +1447,7 @@ void UDP$ABORT(struct user_abort_args * Uargs)
     user's data buffer and hand it to IP layer for transmission.
  */
 
-void UDP$SEND(struct user_send_args * Uargs)
+void udp$send(struct user_send_args * Uargs)
     {
     signed long
 	RC,
@@ -1524,7 +1524,7 @@ void UDP$SEND(struct user_send_args * Uargs)
 
 // Post the I/O request back to the user
 
-    User$Post_IO_Status(Uargs,RC,0,0,0);
+    user$post_io_status(Uargs,RC,0,0,0);
     mm$uarg_free(Uargs);
     }
 
@@ -1595,7 +1595,7 @@ UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
 		   Seg,Segsize,UDPIPID,UDPDF,TRUE,UDP_Protocol,
 		   buf,bufsize);
 
-    UDP_MIB->MIB$UDPOUTDATAGRAMS = UDP_MIB->MIB$UDPOUTDATAGRAMS + 1;
+    udp_mib->MIB$UDPOUTDATAGRAMS = udp_mib->MIB$UDPOUTDATAGRAMS + 1;
 
     // Return an appropriate code.
     if (RC == 0)
@@ -1612,7 +1612,7 @@ UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
     immediately. Otherwise, queue up the user receive for later.
  */
 
-void UDP$RECEIVE(struct user_recv_args * Uargs)
+void udp$receive(struct user_recv_args * Uargs)
     {
     signed long
 	RC;
@@ -1679,9 +1679,9 @@ void UDP$RECEIVE(struct user_recv_args * Uargs)
     Read the host names/numbers and the ports for a UDP connection.
  */
 
-void UDP$INFO(struct user_info_args * Uargs)
+void udp$info(struct user_info_args * Uargs)
     {
-	USER$Net_Connection_Info ();
+	user$net_connection_info ();
 	struct UDPCB_Structure * UDPCB;
     signed long
 	RC;
@@ -1696,7 +1696,7 @@ void UDP$INFO(struct user_info_args * Uargs)
 
 // Give the information back (common TCP/UDP routine in USER.BLI)
 
-    USER$Net_Connection_Info(Uargs,UDPCB->udpcb$local_host,UDPCB->udpcb$foreign_host,
+    user$net_connection_info(Uargs,UDPCB->udpcb$local_host,UDPCB->udpcb$foreign_host,
 			UDPCB->udpcb$local_port,UDPCB->udpcb$foreign_port,
 			UDPCB->udpcb$foreign_hname,UDPCB->udpcb$foreign_hnlen);
     }
@@ -1708,7 +1708,7 @@ void UDP$INFO(struct user_info_args * Uargs)
     currently implemented for the UDP protocol.
  */
 
-void UDP$STATUS(struct user_status_args * Uargs)
+void udp$status(struct user_status_args * Uargs)
     {
     USER$Err(Uargs,NET$_NYI);
     }
@@ -1719,7 +1719,7 @@ void UDP$STATUS(struct user_status_args * Uargs)
     in functionality to UDP$CLOSE/UDP$ABORT except for calling procedure.
  */
 
-UDP$CANCEL(struct vms$cancel_args * Uargs)
+udp$cancel(struct vms$cancel_args * Uargs)
     {
       struct UDPCB_Structure * UDPCB;
       signed long I,
@@ -1739,7 +1739,7 @@ UDP$CANCEL(struct vms$cancel_args * Uargs)
 		(UDPCB->udpcb$piochan == Uargs->vc$piochan))
 		{
 		XLOG$FAO(LOG$USER,"!%T UDP$Cancel: UDPCB=!XL!/",0,UDPCB);
-		UDPCB_Close(I,UDPCB,NET$_CCAN);
+		udpcb_close(I,UDPCB,NET$_CCAN);
 		Fcount = Fcount + 1;
 		};
 	    };
@@ -1748,7 +1748,7 @@ UDP$CANCEL(struct vms$cancel_args * Uargs)
 
 //SBTTL "UDP dump routines"
 
-void UDP$Connection_List(RB)
+void udp$connection_list(RB)
 //
 // Dump out the list of UDP connections.
 //
@@ -1766,7 +1766,7 @@ void UDP$Connection_List(RB)
     RB[0] = RBIX - 1;
     }
 
-UDP$UDPCB_DUMP(UDPCBIX,RB)
+udp$udpcb_dump(UDPCBIX,RB)
 //
 // Dump out a single UDP connection
 //

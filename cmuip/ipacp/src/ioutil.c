@@ -136,12 +136,12 @@ MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
 	CH$WCHAR_A(CHR,DPTR); \
 	}
 
-#define    Init_DynDesc (D) \
-	D = {\
-	dsc$w_length:	= 0,\
-	dsc$b_dtype:	= DSC$K_DTYPE_T,\
-	dsc$b_class:	= DSC$K_CLASS_D,\
-	dsc$a_pointer:	= 0\
+#define    INIT_DYNDESC(D) \
+	{\
+	D->dsc$w_length	= 0;\
+	D->dsc$b_dtype	= DSC$K_DTYPE_T;\
+	D->dsc$b_class	= DSC$K_CLASS_D;\
+	D->dsc$a_pointer	= 0;\
 	};
 
 signed long
@@ -691,7 +691,7 @@ Side Effects:
 	be truncated.
 */
 
-Send_2_Operator(TEXT)
+send_2_operator(TEXT)
 	struct dsc$descriptor * TEXT;
     {
 extern struct dsc$descriptor *	myname;
@@ -745,7 +745,7 @@ void OPR_FAO(CSTR)
     RC = exe$fao(ASCID("IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (! RC)
 	exe$exit( RC);
-    SEND_2_OPERATOR(OPRDESC);
+    send_2_operator(OPRDESC);
     }
 
 signed long
@@ -782,7 +782,7 @@ void ERROR_FAO(CSTR)
     RC = exe$fao(ASCID("?IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (! RC)
 	exe$exit( RC);
-    SEND_2_OPERATOR(OPRDESC);
+    send_2_operator(OPRDESC);
 
 // Format the message for logging - add time+date and EOL
 
@@ -828,7 +828,7 @@ void FATAL_FAO(CSTR)
     RC = exe$fao(ASCID("?IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (! RC)
 	exe$exit( RC);
-    SEND_2_OPERATOR(OPRDESC);
+    send_2_operator(OPRDESC);
 
 // Format it for logging
 
@@ -974,12 +974,12 @@ Side Effects:
 
 void Exit_Handler (void)
     {
-      extern      void	USER$Purge_All_IO ();
+      extern      void	user$purge_all_io ();
 extern void	RESET_PROCNAME() ;
 
     ERROR$FAO("Exit handler: Exit requested, cleaning up...");
 
-    USER$Purge_All_IO();
+    user$purge_all_io();
     if (log_state != 0)
 	LOG_CLOSE();
     if (act_state != 0)
@@ -1018,10 +1018,10 @@ Side Effects:
 Exception_Handler(SIG,MECH)
      struct  _chfdef1 * SIG;
     {
-extern void	USER$Purge_All_IO ();
+extern void	user$purge_all_io ();
 
     ERROR$FAO("Exception handler: signal name !XL",SIG->chf$l_sig_name);
-    USER$Purge_All_IO();
+    user$purge_all_io();
     exe$flush( LOGRAB);
     exe$flush( ACTRAB);
     return(SS$_RESIGNAL);

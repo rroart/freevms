@@ -247,7 +247,7 @@ MODULE CONFIG(IDENT="6.6",ZIP,OPTIMIZE,
 #include <pqldef.h>
 
 extern  void    OPR_FAO();
-extern  void    SEND_2_OPERATOR();
+extern  void    send_2_operator();
 extern     LIB$GET_VM ();
 extern  void    SWAPBYTES();
 extern     GET_IP_ADDR();
@@ -276,12 +276,12 @@ extern  void    ASCII_HEX_BYTES();
 	CH$EQL(sizeof(LITSTR)+1,STR(LITSTR),sizeof(LITSTR)+1,THESTR)
 #endif
 
-#define    Init_DynDesc (D) \
-	D = { \
-	dsc$w_length : 0, \
-	dsc$b_dtype : DSC$K_DTYPE_T, \
-	dsc$b_class :  DSC$K_CLASS_D, \
-	dsc$a_pointer : 0 \
+#define    INIT_DYNDESC(D) \
+	{ \
+	((struct dsc$descriptor*)&D)->dsc$w_length = 0; \
+	((struct dsc$descriptor*)&D)->dsc$b_dtype = DSC$K_DTYPE_T; \
+	((struct dsc$descriptor*)&D)->dsc$b_class =  DSC$K_CLASS_D; \
+	((struct dsc$descriptor*)&D)->dsc$a_pointer = 0; \
 	};
 
 
@@ -306,7 +306,7 @@ static struct _rabdef    CFRAB_ = { rab$l_fab : &CFFAB_,
 			    rab$w_usz : RECLEN }; // check
 static struct _rabdef * CFRAB = & CFRAB_;
 
- void    CONFIG_ERR();
+ void    config_err();
  void    Init_Device();
  void    Init_MEMGR();
  void    Init_Gateway();
@@ -351,7 +351,7 @@ CNF$Define_IPACP_Interface (void)
 	LOG_STATE;
 
 	// IAPCP receive callback (from IP.BLI)
-extern	IP$Receive();
+extern	ip$receive();
 	// IPACP self-address recognition (from IP.BLI)
 extern 	IP$ISME();
 
@@ -375,7 +375,7 @@ extern 	void ERROR_FAO();
 extern 	void FATAL_FAO();
 
     // IAPCP receive callback.
-    IPACP_Int ->  ACPI$IP_Receive 	= IP$Receive;
+    IPACP_Int ->  ACPI$IP_Receive 	= ip$receive;
 
     // pointer to IPACP sleeping flag
     IPACP_Int ->  ACPI$Sleeping  	= Sleeping;
@@ -630,7 +630,7 @@ void CNF$Configure_ACP (void)
 		else if (STREQLZ(cptr,"LOCAL_HOST"))
 		    Init_Local_Host();
 		else
-		    Config_Err(ASCID("Unknown keyword"));
+		    config_err(ASCID("Unknown keyword"));
 	    };
 	};
 
@@ -644,7 +644,7 @@ void CNF$Configure_ACP (void)
 	ERROR$FAO("No network devices detected in INET$CONFIG");
     }
 
-void CONFIG_ERR(EMSG)
+void config_err(EMSG)
 //
 // Handle error in configuration file. Give the error message and exit.
 //
@@ -728,9 +728,9 @@ struct dsc$descriptor	dev_spec_desc_  = {
 
     if ((STR$CASE_BLIND_COMPARE(devtyp_desc,ASCID("ETHER")) == 0))
 	{
-extern	    DRV$TRANSPORT_INIT();
+extern	    drv$transport_init();
 
-	Image_Init = DRV$TRANSPORT_INIT;
+	Image_Init = drv$transport_init;
 	}
 // Get name of shared-image IP-transport
     else if ((rc = LIB$FIND_IMAGE_SYMBOL(
@@ -742,7 +742,7 @@ extern	    DRV$TRANSPORT_INIT();
 	{
 	Image_Init = 0;
 	Signal(rc);
-	Config_Err(ASCID("Trouble accessing device support image."));
+	config_err(ASCID("Trouble accessing device support image."));
 	};
 
     if ((Image_Init != 0))
@@ -777,20 +777,20 @@ extern	    DRV$TRANSPORT_INIT();
 // Set hardware address/device dependant words
 //    IF GET_HEX_BYTES(dev_config->dc_phy_size,linptr,
 //		     CH$PTR(dev_config->dc_phy_addr)) < 0 THEN
-//	Config_Err(ASCID("Bad device address"));
+//	config_err(ASCID("Bad device address"));
 //    SKIPTO(':');
 
 // Get device IP address
 
     if (GET_IP_ADDR(linptr,ipaddr) < 0)
-	Config_Err(ASCID("Bad device IP address"));
+	config_err(ASCID("Bad device IP address"));
     dev_config->dc_ip_address = ipaddr;
     SKIPTO(':');
 
 // Get device IP network mask
 
     if (GET_IP_ADDR(linptr,ipmask) < 0)
-	Config_Err(ASCID("Bad device IP mask"));
+	config_err(ASCID("Bad device IP mask"));
     dev_config->dc_ip_netmask = ipmask;
 
 // Set device IP network number
@@ -838,7 +838,7 @@ void Init_Gateway (void)
 //   gwy_status	Gateway status. Initialized to "up" (nonzero) by this code.
 
     {
-extern	void IP$Gwy_Config();
+extern	void ip$gwy_config();
     signed long
 	GWYname [STRSIZ],
 	GWYaddr,
@@ -863,23 +863,23 @@ struct dsc$descriptor 	GWY_Name_Desc_ = {
 
     SKIPTO(':');
     if (GET_IP_ADDR(linptr,GWYaddr) < 0)
-	Config_err(ASCID("Bad gateway address"));
+	config_err(ASCID("Bad gateway address"));
 
 // Next, the network number behind the gateway
 
     SKIPTO(':');
     if (GET_IP_ADDR(linptr,GWYnet) < 0)
-	Config_err(ASCID("Bad gateway network number"));
+	config_err(ASCID("Bad gateway network number"));
 
 // Next, the network mask for that network
 
     SKIPTO(':');
     if (GET_IP_ADDR(linptr,GWYnetmask) < 0)
-	Config_err(ASCID("Bad gateway mask"));
+	config_err(ASCID("Bad gateway mask"));
 
 // Tell IP about this gateway
 
-    IP$Gwy_Config(GWY_Name_Desc,GWYaddr,GWYnet,GWYnetmask);
+    ip$gwy_config(GWY_Name_Desc,GWYaddr,GWYnet,GWYnetmask);
     }
 
 void Init_NameServer (void)
@@ -912,7 +912,7 @@ void Init_NameServer (void)
 
     SKIPTO(':');
     if (GET_IP_ADDR(linptr,NSaddr) < 0)
-	Config_err(ASCID("Bad name server address"));
+	config_err(ASCID("Bad name server address"));
 
 // Add this entry to the name server database
 
@@ -935,25 +935,25 @@ void Init_MEMGR (void)
 
     SKIPTO(':');
     if (GET_DEC_NUM(linptr,qblk_count_base) < 0)
-	Config_Err(ASCID("Bad integer value"));
+	config_err(ASCID("Bad integer value"));
 
 // Get # of UARG blocks to preallocate
 
     SKIPTO(':');
     if (GET_DEC_NUM(linptr,uarg_count_base) < 0)
-	Config_Err(ASCID("Bad integer value"));
+	config_err(ASCID("Bad integer value"));
 
 // Get # of minimum-size packet buffers to preallocate
 
     SKIPTO(':');
     if (GET_DEC_NUM(linptr,min_seg_count_base) < 0)
-	Config_Err(ASCID("Bad integer value"));
+	config_err(ASCID("Bad integer value"));
 
 // get # of maximum-size packet buffers to preallocate
 
     SKIPTO(':');
     if (GET_DEC_NUM(linptr,max_seg_count_base) < 0)
-	Config_Err(ASCID("Bad integer value"));
+	config_err(ASCID("Bad integer value"));
     }
 
 
@@ -974,7 +974,7 @@ extern	void LOG_CHANGE();
 // Get log state value
 
     if (GET_HEX_NUM(linptr,logstate) < 0)
-	Config_Err(ASCID("Bad hex value for log state"));
+	config_err(ASCID("Bad hex value for log state"));
 
 // Set log state
 
@@ -999,7 +999,7 @@ extern	void ACT_CHANGE();
 // Get log state value
 
     if (GET_HEX_NUM(linptr,logstate) < 0)
-	Config_Err(ASCID("Bad hex value for activity log state"));
+	config_err(ASCID("Bad hex value for activity log state"));
 
 // Set log state
 
@@ -1024,7 +1024,7 @@ void INIT_FORWARDING (void)
 // Get forwarding state value
 
     if (GET_HEX_NUM(linptr,ipstate) < 0)
-	Config_Err(ASCID("Bad hex value for forwarding state"));
+	config_err(ASCID("Bad hex value for forwarding state"));
 
 // Set state for IP module
 
@@ -1038,27 +1038,27 @@ void INIT_FORWARDING (void)
 void INIT_VARIABLE (void)
     {
     extern
-	FQ_MAX,
-	SYN_WAIT_COUNT,
-	ACCESS_FLAGS,
-	MAX_RECV_DATASIZE,
-	DEFAULT_MSS,
-	TELNET_SERVICE,
-	RPC_SERVICE,
-	SNMP_SERVICE,
-	KEEP_ALIVE,
-	RETRY_COUNT,
-	MAX_LOCAL_PORTS,
-	MAX_CONN,
-	MAX_GATEWAYS,
-	WINDOW_DEFAULT,
-	ACK_THRESHOLD,
-	ICMPTTL,
-	IPTTL,
-	TCPTTL,
-	UDPTTL,
-	ACT_THRESHOLD,
-    LOG_THRESHOLD;
+	fq_max,
+	syn_wait_count,
+	access_flags,
+	max_recv_datasize,
+	default_mss,
+	telnet_service,
+	rpc_service,
+	snmp_service,
+	keep_alive,
+	retry_count,
+	max_local_ports,
+	max_conn,
+	max_gateways,
+	window_default,
+	ack_threshold,
+	icmpttl,
+	ipttl,
+	tcpttl,
+	udpttl,
+	act_threshold,
+    log_threshold;
 extern	struct IP_group_MIB_struct * IP_group_MIB;
     signed long
 	varname [STRSIZ],
@@ -1082,56 +1082,56 @@ extern	struct IP_group_MIB_struct * IP_group_MIB;
 // Get the variable value
 
     if (GET_DEC_NUM(linptr,varval) < 0)
-	Config_Err(ASCIDNOT("Bad variable value"));
+	config_err(ASCIDNOT("Bad variable value"));
 
 // Check the variable name & set it.
 //!!HACK!!// Document these!
 	if (STREQLZ(varptr,"IP_FORWARDING"))
 	    IP_group_MIB->IPMIB$ipForwarding = varval;
 	else if (STREQLZ(varptr,"FQ_MAX"))
-	    FQ_MAX = varval;
+	    fq_max = varval;
 	else if (STREQLZ(varptr,"SYN_WAIT_COUNT"))
-	    SYN_WAIT_COUNT = varval;
+	    syn_wait_count = varval;
 	else if (STREQLZ(varptr,"ACCESS_FLAGS"))
-	    ACCESS_FLAGS = varval;
+	    access_flags = varval;
 	else if (STREQLZ(varptr,"MAX_TCP_DATASIZE"))
-	    MAX_RECV_DATASIZE = varval;
+	    max_recv_datasize = varval;
 	else if (STREQLZ(varptr,"DEFAULT_MSS"))
-	    DEFAULT_MSS = varval;
+	    default_mss = varval;
 	else if (STREQLZ(varptr,"TELNET_SERVICE"))
-	    TELNET_SERVICE = varval;
+	    telnet_service = varval;
 	else if (STREQLZ(varptr,"RPC_SERVICE"))
-	    RPC_SERVICE = varval;
+	    rpc_service = varval;
 	else if (STREQLZ(varptr,"SNMP_SERVICE"))
-	    SNMP_SERVICE = varval;
+	    snmp_service = varval;
 	else if (STREQLZ(varptr,"KEEP_ALIVE"))
-	    KEEP_ALIVE = varval;
+	    keep_alive = varval;
 	else if (STREQLZ(varptr,"RETRY_COUNT"))
-	    RETRY_COUNT = varval;
+	    retry_count = varval;
 	else if (STREQLZ(varptr,"MAX_LOCAL_PORTS"))
-	    MAX_LOCAL_PORTS = varval;
+	    max_local_ports = varval;
 	else if (STREQLZ(varptr,"MAX_CONN"))
-	    MAX_CONN = varval;
+	    max_conn = varval;
 	else if (STREQLZ(varptr,"MAX_GATEWAYS"))
-	    MAX_GATEWAYS = varval;
+	    max_gateways = varval;
 	else if (STREQLZ(varptr,"ICMPTTL"))
-	    ICMPTTL = varval;
+	    icmpttl = varval;
 	else if (STREQLZ(varptr,"IPTTL"))
-	    IPTTL = varval;
+	    ipttl = varval;
 	else if (STREQLZ(varptr,"TCPTTL"))
-	    TCPTTL = varval;
+	    tcpttl = varval;
 	else if (STREQLZ(varptr,"UDPTTL"))
-	    UDPTTL = varval;
+	    udpttl = varval;
 	else if (STREQLZ(varptr,"WINDOW_DEFAULT"))
-	    WINDOW_DEFAULT = varval;
+	    window_default = varval;
 	else if (STREQLZ(varptr,"ACK_THRESHOLD"))
-	    ACK_THRESHOLD = varval;
+	    ack_threshold = varval;
 	else if (STREQLZ(varptr,"ACT_THRESHOLD"))
-	    ACT_THRESHOLD = varval;
+	    act_threshold = varval;
 	else if (STREQLZ(varptr,"LOG_THRESHOLD"))
-	    LOG_THRESHOLD = varval;
+	    log_threshold = varval;
     else
-	    Config_Err(ASCID("Unknown variable name"));
+	    config_err(ASCID("Unknown variable name"));
     }
 
 
@@ -1257,7 +1257,7 @@ KEY_VALUE(KEYTAB,KEYLEN,KEYSTR)
 		  CURSTR->dsc$w_length,CURSTR->dsc$a_pointer))
 	    return KEYTAB[I+1];
 	};
-    Config_Err(ASCID("Bad keyword field"));
+    config_err(ASCID("Bad keyword field"));
     return -1;
     }
 
@@ -1350,13 +1350,13 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 
 	CHR = CH$RCHAR_A(linptr);
 	if (CHR != '=')
-	    CONFIG_ERR(ASCID("Missing = in quota description"));
+	    config_err(ASCID("Missing = in quota description"));
 	SKIPWHITE();
 
 // Parse the quota value
 
 	if (GET_DEC_NUM(linptr,QUOTVAL) < 0)
-	    CONFIG_ERR(ASCID("Missing or bad quota value"));
+	    config_err(ASCID("Missing or bad quota value"));
 	SKIPWHITE();
 
 // Set the value in the quotalist
@@ -1368,7 +1368,7 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 
 	QUOTCNT = QUOTCNT + 1;
 	if (QUOTCNT >= (QMAX-1))
-	    CONFIG_ERR(ASCID("Exceeded max number of quota keywords"));
+	    config_err(ASCID("Exceeded max number of quota keywords"));
 	qptr = qptr + QUOTA_BLEN;
 	SKIPWHITE();
 
@@ -1436,7 +1436,7 @@ void Init_WKS (void)
 
     {
 extern	STR$COPY_DX();
-extern	void Seg$WKS_Config();
+extern	void seg$wks_config();
     signed long
 	CHR,LPTR,
 	WKSprname [STRSIZ],
@@ -1487,7 +1487,7 @@ struct dsc$descriptor WKSError_Desc_ = {
 
 // First, get the port number
     if (GET_DEC_NUM(linptr,WKSport) < 0)
-	Config_Err(ASCID("Bad WKS port value"));
+	config_err(ASCID("Bad WKS port value"));
     SKIPTO(':');
 
 // Next, process name
@@ -1548,12 +1548,12 @@ SKIPTO(':');
 
 // Next, priority value
     if (GET_DEC_NUM(linptr,WKSprior) < 0)
-	Config_Err(ASCID("Bad priority value"));
+	config_err(ASCID("Bad priority value"));
     SKIPTO(':');
 
 // Next the number of outstanding SYN's we will allow for this server.
     if (GET_DEC_NUM(linptr,WKSqlim) < 0)
-	Config_Err(ASCID("Bad queue limit value"));    
+	config_err(ASCID("Bad queue limit value"));    
 
 // Now, find out what the maximum number of servers permitted is.  If zero
 // or error, then set to unlimited (0).  (This is actually GLBOAL_MAXSRV as
@@ -1566,7 +1566,7 @@ SKIPTO(':');
 
 // Tell the configuration routine in SEGIN about this guy.
 
-    Seg$WKS_Config(WKSport, WKSprname_Desc, WKSimname_Desc, WKSstat,
+    seg$wks_config(WKSport, WKSprname_Desc, WKSimname_Desc, WKSstat,
 		wkspriv,WKSprior,WKSqlim,WKSmaxsrv,Quota_Desc,
 		WKSInput_Desc,WKSOutput_Desc,WKSError_Desc);
     }
@@ -1612,22 +1612,22 @@ struct dsc$descriptor RPCimname_Desc_ = {
 
 // Next, get the program number
     if (GET_DEC_NUM(linptr,RPCprog) < 0)
-	Config_Err(ASCID("Bad RPC program number"));
+	config_err(ASCID("Bad RPC program number"));
     SKIPTO(':');
 
 // Next, get the version number
     if (GET_DEC_NUM(linptr,RPCvers) < 0)
-	Config_Err(ASCID("Bad RPC version number"));
+	config_err(ASCID("Bad RPC version number"));
     SKIPTO(':');
 
 // Next, get the protocol number
     if (GET_DEC_NUM(linptr,RPCprot) < 0)
-	Config_Err(ASCID("Bad RPC protocol number"));
+	config_err(ASCID("Bad RPC protocol number"));
     SKIPTO(':');
 
 // Next, get the port number
     if (GET_DEC_NUM(linptr,RPCport) < 0)
-	Config_Err(ASCID("Bad RPC port number"));
+	config_err(ASCID("Bad RPC port number"));
     SKIPTO(':');
 
 // Next, image name - N.B. image name may not have ":" in it.
@@ -1637,7 +1637,7 @@ struct dsc$descriptor RPCimname_Desc_ = {
 // Tell the configuration routine in the RPC module about this guy.
 
     RC=RPC$CONFIG( RPCname_Desc,RPCprog,RPCvers,RPCprot,RPCport,RPCimname_Desc);
-    if (RC < 0) Config_Err(ASCID("Can not accept RPC config entry"));
+    if (RC < 0) config_err(ASCID("Can not accept RPC config entry"));
     }
 
 //SBTTL "Init_Auth - Add an authorization entry"
@@ -1670,12 +1670,12 @@ struct dsc$descriptor AUTHhostname_Desc_ = {
 
 // First, get the VMS uic number
     if (GET_HEX_NUM(linptr,AUTHuic) < 0)
-	Config_Err(ASCID("Bad AUTH uic number"));
+	config_err(ASCID("Bad AUTH uic number"));
     SKIPTO(':');
 
 // Next, get the net uid number
     if (GET_DEC_NUM(linptr,AUTHuid) < 0)
-	Config_Err(ASCID("Bad AUTH uid number"));
+	config_err(ASCID("Bad AUTH uid number"));
     SKIPTO(':');
 
 // Next, host name - N.B. host name may not have ":" in it.
@@ -1685,7 +1685,7 @@ struct dsc$descriptor AUTHhostname_Desc_ = {
 // Tell the configuration routine in the RPC module about this guy.
 
     RC=RPC$CONFIG_AUTH(AUTHuic, AUTHuid, AUTHgid, AUTHhostname_Desc);
-    if ((RC < 0)) Config_Err(ASCID("Can not accept AUTH config entry"));
+    if ((RC < 0)) config_err(ASCID("Can not accept AUTH config entry"));
     }
 
 //SBTTL "Init_MBXResolver - Define the system name resolver process"
@@ -1726,7 +1726,7 @@ struct dsc$descriptor Quota_Desc_ = {
 // Parse the priority value
 
     if (GET_DEC_NUM(linptr,PRIORITY) < 0)
-	Config_Err(ASCID("Bad priority value"));
+	config_err(ASCID("Bad priority value"));
     SKIPTO(':');
 
 // Parse the process status values
@@ -1755,7 +1755,7 @@ void INIT_LOCAL_HOST (void)
 // Reads the data and calls USER$ACCESS_CONFIG(ipaddr,ipmask)
 //
     {
-extern	void USER$ACCESS_CONFIG();
+extern	void user$access_config();
     signed long
 	hostaddr,
 	hostmask;
@@ -1764,17 +1764,17 @@ extern	void USER$ACCESS_CONFIG();
 
     SKIPTO(':');
     if (GET_IP_ADDR(linptr,hostaddr) < 0)
-	Config_err(ASCID("Bad host address"));
+	config_err(ASCID("Bad host address"));
 
 // Then, the host mask
 
     SKIPTO(':');
     if (GET_IP_ADDR(linptr,hostmask) < 0)
-	Config_err(ASCID("Bad host mask"));
+	config_err(ASCID("Bad host mask"));
 
 // Got the info. Call routine to add to the list
 
-    USER$ACCESS_CONFIG(hostaddr,hostmask);
+    user$access_config(hostaddr,hostmask);
     }
 
 //SBTTL "Parsing utility routines"
@@ -1789,7 +1789,7 @@ void SKIPTO(TCHR)
     while ((CHR = CH$RCHAR_A(linptr)) != 0)
 	if (CHR == TCHR)
 	    return;
-    Config_err(ASCID("SKIPTO failure (EOL)"));
+    config_err(ASCID("SKIPTO failure (EOL)"));
     }
 
 void SKIPWHITE (void)
@@ -1806,7 +1806,7 @@ void SKIPWHITE (void)
 	    return;
 	linptr = LPTR;
 	};
-	Config_err(ASCID("SKIPWHITE failure (EOL)"));
+	config_err(ASCID("SKIPWHITE failure (EOL)"));
     }
 
 GETFIELD(FLDADR)
@@ -1837,7 +1837,7 @@ GETFIELD(FLDADR)
 	};
     CH$WCHAR_A(0,DSTPTR);
     if (CNT == 0)
-	Config_err(ASCID("Bad or null field found"));
+	config_err(ASCID("Bad or null field found"));
     return CNT;
     }
 

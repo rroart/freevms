@@ -138,15 +138,15 @@ extern signed long log_state,
 extern signed long
     M$INTERNAL;
 
-extern     TCP$TCB_CLOSE();
-extern     TCB$Create();
-extern  void    TCB$Delete();
-extern  void    TCP$Enqueue_Ack();
-extern  void    TCP$Send_Ack();
-extern     TCP$Send_Data();
-extern     TCP$TCB_Init();
+extern     tcp$tcb_close();
+extern     tcb$create();
+extern  void    tcb$delete();
+extern  void    tcp$enqueue_ack();
+extern  void    tcp$send_ack();
+extern     tcp$send_data();
+extern     tcp$tcb_init();
 extern     TIME_STAMP();
-extern     Check_Unique_Conn();
+extern     check_unique_conn();
  void    Conect_Insert();
 
 #define    TVT_OPEN_TIMEOUT 120*CSEC // Amount of time to wait for TVT to open
@@ -198,7 +198,7 @@ extern
     Terminal_Type_Sub(),
     Window_Size_On(),
     Window_Size_Sub(),
-    Set_DEVDEP(),				// JC
+    set_devdep(),				// JC
     LineMode_Sub();
 
 struct OPT$BLOCK  DEFAULT_OPTION_BLOCK[TELNET$K_X_DISPLAY_LOCATION];
@@ -214,14 +214,14 @@ struct OPT$BLOCK  DEFAULT_OPTION_BLOCK[TELNET$K_X_DISPLAY_LOCATION];
 	    /* TELNET$K_BINARY */ OPT$STATE : OPT$STATE_OFF,
 	    /* TELNET$K_BINARY */ OPT$CURRENT : FALSE,
 	    /* TELNET$K_BINARY */ OPT$PREFER : OPT$DONT_CARE,
-	    /* TELNET$K_BINARY */ OPT$ON_RTN : Set_DEVDEP,		//JC
-	    /* TELNET$K_BINARY */ OPT$OFF_RTN : Set_DEVDEP,		//JC
+	    /* TELNET$K_BINARY */ OPT$ON_RTN : set_devdep,		//JC
+	    /* TELNET$K_BINARY */ OPT$OFF_RTN : set_devdep,		//JC
 				    }, {
 	    /* TELNET$K_ECHO */ OPT$STATE : OPT$STATE_OFF,	//JC
 	    /* TELNET$K_ECHO */ OPT$CURRENT : FALSE,		//JC
 	    /* TELNET$K_ECHO */ OPT$PREFER : OPT$STATE_ON,		//JC
-	    /* TELNET$K_ECHO */ OPT$ON_RTN : Set_DEVDEP,		//JC
-	    /* TELNET$K_ECHO */ OPT$OFF_RTN : Set_DEVDEP,		//JC
+	    /* TELNET$K_ECHO */ OPT$ON_RTN : set_devdep,		//JC
+	    /* TELNET$K_ECHO */ OPT$OFF_RTN : set_devdep,		//JC
 				    }, {
 				      /* reconn */
 				    }, {
@@ -249,8 +249,8 @@ struct OPT$BLOCK  DEFAULT_OPTION_BLOCK[TELNET$K_X_DISPLAY_LOCATION];
 	    /* TELNET$K_Extended_Ascii */ OPT$STATE : OPT$STATE_OFF,//JC
 	    /* TELNET$K_Extended_Ascii */ OPT$CURRENT : FALSE,	//JC
 	    /* TELNET$K_Extended_Ascii */ OPT$PREFER : OPT$DONT_CARE,//JC
-	    /* TELNET$K_Extended_Ascii */ OPT$ON_RTN : Set_DEVDEP,	//JC
-	    /* TELNET$K_Extended_Ascii */ OPT$OFF_RTN : Set_DEVDEP,	//JC
+	    /* TELNET$K_Extended_Ascii */ OPT$ON_RTN : set_devdep,	//JC
+	    /* TELNET$K_Extended_Ascii */ OPT$OFF_RTN : set_devdep,	//JC
 				    }, {
 				    }, {
 				    }, {
@@ -399,7 +399,7 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
 
     NOINT;
 
-    if (Check_Unique_Conn(LPORT,FHOST,FPORT,CIDX) != TRUE)
+    if (check_unique_conn(LPORT,FHOST,FPORT,CIDX) != TRUE)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT create failed - CONECT table full!/",0);
 	OKINT;
@@ -408,7 +408,7 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
 
 // Create and initialize a new TCB
 
-    if ((TCB = TCB$Create()) == ERROR)
+    if ((TCB = tcb$create()) == ERROR)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT TCB creation failed!/",0);
 	OKINT;
@@ -417,7 +417,7 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
 
 // Perform standard TCB initializations
 
-    TCP$TCB_Init(TCB);
+    tcp$tcb_init(TCB);
 
 // Setup standard TVT TCB fields. Note that segment input processing code will
 // setup wild foreign host/port and local host when this routine returns.
@@ -458,7 +458,7 @@ void TELNET_OPEN_TIMEOUT(TCB)
 //~~~ Maybe we should do something better here?
 
     XLOG$FAO(LOG$TCPERR,"!%T TVT open timeout for TCB x!XL!/",0,TCB);
-    TCB$Delete(TCB);
+    tcb$delete(TCB);
     }
 
 //SBTTL "TELNET_OPEN - Finish open of TCP connection for a TVT"
@@ -471,11 +471,11 @@ void TELNET_OPEN_TIMEOUT(TCB)
 
  void    TVT_NEGOTIATE ();
  void    TCP_READ ();
- void    TCP_ADD_STRING ();
+ void    tcp_add_string ();
  void    TCP_WRITE ();
  void    PTY_READ ();
  void    PTY_WRITE ();
- void    NET_TO_PTY ();
+ void    net_to_pty ();
  void    PTY_TO_NET ();
     MBX_READ ();
  void    MBX_READ_DONE ();
@@ -593,7 +593,7 @@ TELNET_OPEN(TCB)
 	XLOG$FAO(LOG$TCPERR,
 	  "!%T Telnet_Open: LIB$GET_VM_PAGE failure for TCB=x!XL, RC=x!XL!/"
 	  ,0,TCB,RC);
-	TCB$DELETE(TCB);
+	tcb$delete(TCB);
 	return FALSE;
 	};
 
@@ -619,7 +619,7 @@ TELNET_OPEN(TCB)
 	    XLOG$FAO(LOG$TCPERR,
 		"!%T Telnet_Open:  PTY assign failure for TCB x!XL, RC=x!XL!/"
 		,0,TCB,RC);
-	    TCB$DELETE(TCB);
+	    tcb$delete(TCB);
 	    return FALSE;
 	};
 
@@ -677,7 +677,7 @@ TELNET_OPEN(TCB)
 
     if (! MBX_READ(TVT))
 	{
-	TCB$DELETE(TCB);
+	tcb$delete(TCB);
 	return FALSE;
 	};
 
@@ -715,7 +715,7 @@ TELNET_OPEN(TCB)
 		,TMPDSC->dsc$w_length			// JC buffer
 		,TMPDSC					// JC
 		,nam);					// JC
-	TCP_Add_String(TVT, TMPDSC) ;
+	tcp_add_string(TVT, TMPDSC) ;
 	} ;
 
 // Check for creation of terminal side of connection (like _TZA0:)
@@ -727,7 +727,7 @@ TELNET_OPEN(TCB)
 
 //    CH$WCHAR(%CHAR(0),CH$PTR(TVT->TVT$WR_BUF));
 
-    NET_TO_PTY(TVT, CH_NUL) ;
+    net_to_pty(TVT, CH_NUL) ;
 
 // Queue up the options that we want
 
@@ -987,7 +987,7 @@ X:	    {
 
 	    if (LCLOPTS[Telnet$K_Binary].OPT$STATE)
 		{
-		Net_To_PTY(TVT, CHR) ;
+		net_to_pty(TVT, CHR) ;
 		}
 	    else
 		{
@@ -1004,14 +1004,14 @@ X:	    {
 			{
 		    case CH_NUL:	// Null - fake a LF
 			{
-//!!HWM			Net_To_PTY(TVT, CH_LF) ;
+//!!HWM			net_to_pty(TVT, CH_LF) ;
 			TVT->TVT$NR_CR = FALSE;
 			};
 			break;
 
 		    case CH_CR:	// Another CR - append it & retain CR state
 			{
-			Net_To_PTY(TVT, CHR) ;
+			net_to_pty(TVT, CHR) ;
 			};
 		      break;
 
@@ -1022,7 +1022,7 @@ X:	    {
 //~~~ shithead UNIX systems which send CR-LF-LF when the user types CR-LF.
 //~~~ We should be keeping the LF here.
 //~~~ (We are, now.  HWM 4-Nov-91)
-//!!			Net_To_PTY(TVT, CHR) ;
+//!!			net_to_pty(TVT, CHR) ;
 			TVT->TVT$NR_CR = FALSE;
 			TVT->TVT$NR_LF = TRUE ;
 			};
@@ -1030,7 +1030,7 @@ X:	    {
 
 		    default: // Funny state - append and reset CR state
 			{
-			Net_To_PTY(TVT, CHR) ;
+			net_to_pty(TVT, CHR) ;
 			TVT->TVT$NR_CR = FALSE;
 			TVT->TVT$NR_LF = FALSE ;
 			};
@@ -1044,7 +1044,7 @@ X:	    {
 //!//JC                    if (CHR == CH_LF)
 //!//JC 			{
 //!//JC 			TVT->TVT$NR_LF = TRUE ;
-//!//JC !!!HWM			Net_To_PTY(TVT, CH_CR) ;
+//!//JC !!!HWM			net_to_pty(TVT, CH_CR) ;
 //!//JC 			if ($$LOGF(LOG$TVT))
 //!//JC 			    {
 //!//JC 			    LOG$FAO("!%T TCB x!XL TCP_READ: ADD CR, BCNT = !SL!/",
@@ -1059,7 +1059,7 @@ X:	    {
 			TVT->TVT$NR_CR = TRUE ;
 			TVT->TVT$NR_LF = FALSE ;
 			} ;
-		    Net_To_PTY(TVT, CHR) ;
+		    net_to_pty(TVT, CHR) ;
 		    };
 		};
 	    };
@@ -1076,7 +1076,7 @@ X:	    {
 	      {
 	    case TELNET$K_IAC:	// Another IAC. Send one IAC to terminal
 		{
-		Net_To_PTY(TVT, CHR) ;
+		net_to_pty(TVT, CHR) ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
 		break;
@@ -1119,9 +1119,9 @@ X:	    {
 		{
 		if (! IS_CNTRLT_GOOD(TVT))
 		    {
-		    TCP_ADD_STRING(TVT,AYT_RESPONSE);
+		    tcp_add_string(TVT,AYT_RESPONSE);
 		    } ;
-		Net_To_PTY(TVT, Telnet$K_Char_AYT) ;
+		net_to_pty(TVT, Telnet$K_Char_AYT) ;
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
@@ -1129,7 +1129,7 @@ X:	    {
 
 	    case TELNET$K_BRK:	// I think VMS ignores the break key.
 		{
-		Net_To_PTY(TVT, Telnet$K_Char_Brk) ;
+		net_to_pty(TVT, Telnet$K_Char_Brk) ;
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
@@ -1137,7 +1137,7 @@ X:	    {
 
 	    case TELNET$K_IP:	// Interrupt process
 		{
-		Net_To_PTY(TVT, Telnet$K_Char_IP) ;
+		net_to_pty(TVT, Telnet$K_Char_IP) ;
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
@@ -1145,7 +1145,7 @@ X:	    {
 
 	    case TELNET$K_AO:	// Abort Output
 		{
-		Net_To_PTY(TVT, Telnet$K_Char_AO) ;
+		net_to_pty(TVT, Telnet$K_Char_AO) ;
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
@@ -1153,7 +1153,7 @@ X:	    {
 
 	    case TELNET$K_EC:	// Erase Character
 		{
-		Net_To_PTY(TVT, Telnet$K_Char_EC) ;
+		net_to_pty(TVT, Telnet$K_Char_EC) ;
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
@@ -1161,7 +1161,7 @@ X:	    {
 
 	    case TELNET$K_EL:	// Erase Line
 		{
-		Net_To_PTY(TVT, Telnet$K_Char_EL) ;
+		net_to_pty(TVT, Telnet$K_Char_EL) ;
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
@@ -1169,7 +1169,7 @@ X:	    {
 
 	    case TELNET$K_EOR:	// End of Record
 		{
-		Net_To_PTY(TVT, CH_CR) ;	// Fake it by stuffing a CR
+		net_to_pty(TVT, CH_CR) ;	// Fake it by stuffing a CR
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
@@ -1177,7 +1177,7 @@ X:	    {
 		
 	    case TELNET$K_DATA_MARK:		// Data Mark
 		{
-		Net_To_PTY(TVT, Telnet$K_Char_Purge) ;	// Purge typeahead
+		net_to_pty(TVT, Telnet$K_Char_Purge) ;	// Purge typeahead
 		TVT->TVT$CTRL = TRUE ;
 		TVT->TVT$NRSTATE = TVT$STATE_NORMAL;
 		};
@@ -1243,7 +1243,7 @@ X:	    {
 
     if ((TCB->pending_ack))
 	{
-	TCP$Enqueue_Ack(TCB) ;
+	tcp$enqueue_ack(TCB) ;
 	} ;
 
     }
@@ -1343,7 +1343,7 @@ signed long	CHWMAX,
     if (CHWMAX <= 0)
 	{
 // Something got jammed - gotta force a write
-//	TCP$Send_Data(TCB) ;
+//	tcp$send_data(TCB) ;
 	$ACPWAKE ;
 	return;
 	} ;
@@ -1431,7 +1431,7 @@ signed long	CHWMAX,
     if ((((TCB->snd_q_count + TCB->srx_q_count) >= TCB->max_eff_data_size) ||
 	 (Now >= TCB->snd_delay_timer)))
 	$ACPWAKE;
-//	TCP$Send_Data(TCB) ;
+//	tcp$send_data(TCB) ;
 
 // Indicate that we're not in the network write code any more
 
@@ -1440,7 +1440,7 @@ signed long	CHWMAX,
 
 
 
-void TCP_ADD_STRING(TVT,STRDESC_A)
+void tcp_add_string(TVT,STRDESC_A)
 //
 // TCP_ADD_STRING - Write as much data as possible from the supplied string
 // to the network write buffer via PTY_TO_NET.
@@ -1482,7 +1482,7 @@ void TCP_ADD_STRING(TVT,STRDESC_A)
 
     }
 
-void NET_TO_PTY(TVT, CHR)
+void net_to_pty(TVT, CHR)
 //
 // NET_TO_PTY - Move a byte from the net buffer to PTY buffer and force a
 // write, if possible
@@ -1665,7 +1665,7 @@ signed long
 //
 //	Now set any delayed device dependent
 //
-	    Set_DEVDEP(TVT);				// JC
+	    set_devdep(TVT);				// JC
 	    PTY_Write(TVT);				// JC Write after Hold off
 	    };
 	};
@@ -1728,7 +1728,7 @@ void PTY_READ(TVT)
 	XLOG$FAO(LOG$TCPERR,
 		 "!%T TVT PTY read $QIO failure for TCB x!XL, RC=x!XL!/",
 		 0,TVT->TVT$TCB,RC);
-	TCB$DELETE(TVT->TVT$TCB);
+	tcb$delete(TVT->TVT$TCB);
 	};
     }
 
@@ -1760,7 +1760,7 @@ struct PTY$IOSB * IOSB = &TVT->TVT$RD_IOSB;
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT read error for TCB x!XL, RC=x!XL!/",
 		 0,TVT->TVT$TCB,RC);
-	TCB$DELETE(TVT->TVT$TCB);
+	tcb$delete(TVT->TVT$TCB);
 	return;
 	};
 
@@ -1954,7 +1954,7 @@ void PTY_WRITE(TVT)
 		 "!%T TVT PTY write $QIO failure for TCB x!XL, RC=x!XL!/",
 		 0,TVT->TVT$TCB,RC);
 //	if (IO_Status->PTSB$EXTRA1 != SS$_DATAOVERUN)
-	    TCB$DELETE(TVT->TVT$TCB);
+	    tcb$delete(TVT->TVT$TCB);
 	TVT->TVT$PWRITE = FALSE;
 	return;
 	};
@@ -1997,7 +1997,7 @@ void PTY_WRITE_DONE(TVT)
 		 0,TCB,RC);
 	if (RC != SS$_DATAOVERUN)
 	    {
-	    TCB$DELETE(TVT->TVT$TCB);
+	    tcb$delete(TVT->TVT$TCB);
 	    return;
 	    };
 	};
@@ -2126,7 +2126,7 @@ void MBX_READ_DONE(TVT)
 	{
 	XLOG$FAO(LOG$TCPERR,"!%T TVT MBX read failure for TCB x!XL, RC=x!XL!/",
 		 0,TVT->TVT$TCB,RC);
-	TCB$DELETE(TVT->TVT$TCB);
+	tcb$delete(TVT->TVT$TCB);
 //	AST_IN_PROGRESS = FALSE;
 //	OKINT ;
 	return;
@@ -2141,7 +2141,7 @@ void MBX_READ_DONE(TVT)
 	    {
 	    XLOG$FAO(LOG$TCPERR,"!%T TVT hangup signal for TCB x!XL!/",
 		     0,TVT->TVT$TCB);
-	    TCP$TCB_CLOSE(TVT->TVT$TCB);
+	    tcp$tcb_close(TVT->TVT$TCB);
 //	    AST_IN_PROGRESS = FALSE;
 //	    OKINT ;
 	    return;

@@ -233,9 +233,9 @@ extern      ASCII_HEX_BYTES();
 
 // XEDRV_ARP.BLI
 
-extern  void    XEARP$DEV_INIT();
-extern     XEARP$CHECK();
-extern  void    XEARP$INPUT();
+extern  void    xearp$dev_init();
+extern     xearp$check();
+extern  void    xearp$input();
 
 void    XE_receive();
     void XE_ArpRcv();
@@ -294,7 +294,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
     XE_Int->XEI$curhdr = 0;
     for (I=0;I<=(MAX_RCV_BUF-1);I++)
 	{	// Get buffer, put on Q and issue IO$_READVBLK function
-	Buff = DRV$Seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
+	Buff = drv$seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
 	INSQUE ( Buff , XE_Int-> XEI$recv_Qtail  );
 	Buff = Buff + XE_hdr_offset;
 	RC = exe$qio(ASTEFN,XE_chan,IO$_READVBLK,Buff->XERCV$vms_code,
@@ -312,7 +312,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
 
 // get ARP buffer and issue a receive qio
 
-    ARbuf = DRV$Seg_get(XE_ARP_LEN*4);
+    ARbuf = drv$seg_get(XE_ARP_LEN*4);
     XE_Int-> xei$arp_buffer  = ARbuf;
     RC = exe$qio(	ARPEFN, XE_Int-> xei$arp_io_chan ,
 		IO$_READVBLK,
@@ -430,7 +430,7 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 
     RC = exe$qiow (1, XE_Int->xei$arp_io_chan,
 		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr);
-    if (NOT( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
+    if (!( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
 	{	// Startup command failed
 	XE$ERR(XE_Int,
 	       "XE ARP startup failure, RC=!XL,VMS_code=!XL,Xfer size=!SL",
@@ -515,7 +515,7 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 
 //SBTTL "Start device - top-level"
 
-XE_StartAll ( XE_Int , restart )
+xe_startall ( XE_Int , restart )
 	struct XE_Interface_Structure * XE_Int;
     {
     signed long
@@ -609,7 +609,7 @@ XE_StartAll ( XE_Int , restart )
 // Initialize ARP parameters for this device
 
 //!!HACK!!// Trim this down...
-    	XEARP$DEV_INIT(XE_Int,AR$HRD_ETHER,XE_IP_type,addrs,XE_ARP_HLEN,1,0);
+    	xearp$dev_init(XE_Int,AR$HRD_ETHER,XE_IP_type,addrs,XE_ARP_HLEN,1,0);
 	};
 
 // Start I/O on the device
@@ -641,13 +641,13 @@ void XE_FreeBufs ( struct XE_Interface_Structure * XE_Int )
 // Flush IP buffers
 
     while (REMQUE ( XE_Int-> XEI$recv_Qhead  , BUFF ) != EMPTY_QUEUE)
-	DRV$Seg_Free ( DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len + IOS_len) , BUFF );
+	drv$seg_free ( DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len + IOS_len) , BUFF );
 
 // Release the ARP buffer
 
     if ((BUFF=XE_Int->xei$arp_buffer) != 0)
 	{
-	DRV$Seg_Free ( XE_ARP_LEN*4 , BUFF );
+	drv$seg_free ( XE_ARP_LEN*4 , BUFF );
 	XE_Int-> xei$arp_buffer  = 0;
 	};
 
@@ -685,7 +685,7 @@ void XE_Shutdown ( XE_Int , restart )
     if (restart != 0)
 	{
 	XE_Int-> XEI$restart_time  = now + XE_RESTART_TIME;
-	DRV$Device_Error();
+	drv$device_error();
 	}
     else
 	XE_Int-> XEI$restart_time  = 0;
@@ -747,7 +747,7 @@ XE$CHECK ( Device_Configuration_Entry * dev_config )
     if (now > XE_Int->XEI$restart_time)
 	{
 	if ((! XE_Int->XEI$need_2_free) &&
-	   XE_StartAll(XE_Int,TRUE))
+	   xe_startall(XE_Int,TRUE))
 	    {		// Device restarted OK
 	    XE_Int->XEI$restart_time = 0;
 	    XE_Int->XEI$retry_count = 0;
@@ -800,7 +800,7 @@ XE$CHECK ( Device_Configuration_Entry * dev_config )
 void XE$init ( Device_Configuration_Entry * dev_config ,
  		  long IPACP_Int, long max_retry, long MPBS)
     {
-extern 	XEARP$INIT();
+extern 	xearp$init();
 extern 	LIB$GET_VM();
 extern 	LIB$GET_VM_PAGE();
     signed long
@@ -817,7 +817,7 @@ extern 	LIB$GET_VM_PAGE();
     DRV$NOINT;
 
 // Initialize the ARP module
-    XEARP$INIT();
+    xearp$init();
 
 // Assign Ethernet Controller
     if (! (RC=exe$assign (dev_config->dc_devname, XE_Chan)))
@@ -882,7 +882,7 @@ extern 	LIB$GET_VM_PAGE();
     XE_Int->XEI$curhdr = 0;	// current ethernet header to use
 
 // Start the device
-    XE_Startall(XE_Int,FALSE);
+    xe_startall(XE_Int,FALSE);
 
 // Fill in the dev_config ifTable fields
     {
@@ -947,15 +947,15 @@ Outputs:
 static    XE_LOG(MSG,IPADDR,HWADDR)
     {
       long * STR_DESC;
-      extern	void XEARP$LOG();
+      extern	void xearp$log();
 
     STR_DESC[0] = sizeof(MSG);
     STR_DESC[1] = MSG;
 
-    XEARP$LOG(STR_DESC,IPADDR,6,HWADDR);
+    xearp$log(STR_DESC,IPADDR,6,HWADDR);
     }
 
-void XE$xmit ( Device_Configuration_Entry * dev_config )
+void xe$xmit ( Device_Configuration_Entry * dev_config )
     {
       struct XE_iosb_structure * IOS; 
       Net_Send_Queue_Element * QB;
@@ -1001,7 +1001,7 @@ X:	{
 	    ARstat = 1;
 	    }
 	else
-	    ARstat = XEARP$CHECK(XE_Int,QB->NSQ$IP_Dest,Addrs,QB);
+	    ARstat = xearp$check(XE_Int,QB->NSQ$IP_Dest,Addrs,QB);
 	if (ARstat > 0)
 	    {		// Have an address
 
@@ -1063,8 +1063,8 @@ X:	{
     if (ARstat >= 0)
 	{
 	if (QB->NSQ$Delete)
-	    DRV$Seg_free(QB->NSQ$Del_buf_size,QB->NSQ$Del_Buf);
-	DRV$Qblk_free(QB);
+	    drv$seg_free(QB->NSQ$Del_buf_size,QB->NSQ$Del_Buf);
+	drv$qblk_free(QB);
 	};
     DRV$OKINT;
     }
@@ -1181,7 +1181,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
     if (XE_Int->XEI$curhdr > (MAX_RCV_BUF-1))
 	XE_Int->XEI$curhdr = 0;
 
-    NRbuf = DRV$Seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
+    NRbuf = drv$seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
     INSQUE(NRbuf,XE_Int->XEI$recv_Qtail);
     NRbuf = NRbuf + XE_hdr_offset;
     RC = exe$qio(ASTEFN,XE_Int->xei$io_chan,
@@ -1221,7 +1221,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 	dev_config->dcmib_ifInOctets = dev_config->dcmib_ifInOctets +
 		Rbuf->XERCV$tran_size + XE_hdr_len;
 
-	DRV$IP_Receive(Rbuf-XE_hdr_offset,
+	drv$ip_receive(Rbuf-XE_hdr_offset,
 		   DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len),
 		   Rbuf->XERCV$data,Rbuf->XERCV$tran_size,dev_config);
 	};
@@ -1289,7 +1289,7 @@ void Xe_ArpRcv( struct XE_Interface_Structure * XE_Int )
 
 // Packet is OK at the hardware level - hand it up to the ARP module
 
-    XEARP$INPUT(XE_Int,ARbuf->ar_data);
+    xearp$input(XE_Int,ARbuf->ar_data);
 
 // restart the arp receive
 //!!HACK!!// what's the EFN for?
@@ -1307,7 +1307,7 @@ void Xe_ArpRcv( struct XE_Interface_Structure * XE_Int )
 
 //SBTTL "ARP transmit routine"
 
-void XE$ARP_XMIT(XE_Int,arbuf,arlen,dest)
+void xe$arp_xmit(XE_Int,arbuf,arlen,dest)
 
 // Finish packaging of ARP packet and transmit it.
 // ARBUF points to the ARP data portion of the packet - header space has been
@@ -1363,7 +1363,7 @@ extern	XE$ARP_DUMP();
 
 
 
-DRV$TRANSPORT_INIT (void)
+drv$transport_init (void)
 // Initialize the transport information/entry vector
 // Must be done at run time to avoid ADDRESS fixups...
     {
@@ -1374,7 +1374,7 @@ DRV$TRANSPORT_INIT (void)
 
     // Provide the XEDRV entry points
     DRV$Device_Info->DI$Init	= XE$init;
-    DRV$Device_Info->DI$Xmit	= XE$xmit;
+    DRV$Device_Info->DI$Xmit	= xe$xmit;
     DRV$Device_Info->DI$Dump	= XE$dump;
     DRV$Device_Info->DI$Check	= XE$CHECK;
 

@@ -116,16 +116,16 @@ extern  void    mm$seg_free();
 
 // USER.BLI
 
-extern     USER$CHECK_ACCESS();
+extern     user$check_access();
 extern     USER$Err();
 extern  void    IO$POST();
-extern  void    User$Post_IO_Status();
+extern  void    user$post_io_status();
 
 // IP.BLI
 
-extern  void    IP$SET_HOSTS();
-extern     IP$SEND_RAW();
-extern     IP$SEND();
+extern  void    ip$set_hosts();
+extern     ip$send_raw();
+extern     ip$send();
 
 // NMLOOK.BLI
 
@@ -273,7 +273,7 @@ IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
 
     Queue_User_IP();
 
-void IPU$User_Input ( Src$Adrs,Dst$Adrs,Protocol,
+void ipu$user_input ( Src$Adrs,Dst$Adrs,Protocol,
 				bufsize,Buf,segsize,seg )
 	struct ip_structure * seg;
 {
@@ -451,7 +451,7 @@ void Deliver_IP_Data(IPCB,QB,URQ)
 
 // Post the I/O and free up memory
 
-    User$Post_IO_Status(URQ->ur$uargs,SS$_NORMAL,
+    user$post_io_status(URQ->ur$uargs,SS$_NORMAL,
 			ucount,0,0);
     mm$uarg_free(URQ->ur$uargs);
 
@@ -543,7 +543,7 @@ X:  {			// ** Block X **
 
 //SBTTL "IPCB_Free - Deallocate a IPCB"
 
-void IPCB_Free(long IPCBIX,struct IPCB_Structure * IPCB)
+void ipcb_free(long IPCBIX,struct IPCB_Structure * IPCB)
     {
 extern	LIB$FREE_VM();
 extern	LIB$FREE_VM_PAGE();
@@ -602,7 +602,7 @@ void Kill_IP_Requests(struct IPCB_Structure * IPCB,long RC)
 
     while (REMQUE(IPCB->ipcb$usr_qhead,URQ) != EMPTY_QUEUE) // check
 	{
-	User$Post_IO_Status(URQ->ur$uargs,RC,0,0,0);
+	user$post_io_status(URQ->ur$uargs,RC,0,0,0);
 	mm$uarg_free(URQ->ur$uargs);
 	mm$qblk_free(URQ);	
 	};
@@ -618,10 +618,10 @@ void Kill_IP_Requests(struct IPCB_Structure * IPCB,long RC)
 
 //SBTTL "IPCB_Close - Close/deallocate a IPCB"
 
-void IPCB_Close(long UIDX,struct IPCB_Structure * IPCB, long RC)
+void ipcb_close(long UIDX,struct IPCB_Structure * IPCB, long RC)
     {
     Kill_IP_Requests(IPCB,RC);
-    IPCB_FREE(UIDX,IPCB);
+    ipcb_free(UIDX,IPCB);
     }
 
 void IPCB_Abort(struct IPCB_Structure * IPCB, long RC)
@@ -629,13 +629,13 @@ void IPCB_Abort(struct IPCB_Structure * IPCB, long RC)
 // Abort a IPCB - called by IP code.
 //
     {
-    IPCB_CLOSE(IPCB->ipcb$ipcbid,IPCB,RC);
+    ipcb_close(IPCB->ipcb$ipcbid,IPCB,RC);
     }
 
 
 //SBTTL "IPU$Purge_All_IO - delete IP database before network exits"
 
-void IPU$Purge_All_IO (void)
+void ipu$purge_all_io (void)
     {
     signed long
 	IPCBIDX;
@@ -645,7 +645,7 @@ void IPU$Purge_All_IO (void)
 
     for (IPCBIDX=1;IPCBIDX<=MAX_IPCB;IPCBIDX++)
 	if ((IPCB = ipcb_table[IPCBIDX]) != 0)
-	    IPCB_Close(IPCBIDX,IPCB,NET$_TE);
+	    ipcb_close(IPCBIDX,IPCB,NET$_TE);
     }
 
 
@@ -658,7 +658,7 @@ void IPU$Purge_All_IO (void)
  void    IP_NMLOOK_DONE();
  void    IP_ADLOOK_DONE();
 
-void IPU$OPEN(struct user_open_args * Uargs)
+void ipu$open(struct user_open_args * Uargs)
     {
 	struct IPCB_Structure * IPCB;
     signed long
@@ -759,7 +759,7 @@ void IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 #define	UOP_ERROR(EC) \
 	    { \
 	    USER$Err(Uargs,EC); \
-	    IPCB_FREE(IPCB->ipcb$ipcbid,IPCB); \
+	    ipcb_free(IPCB->ipcb$ipcbid,IPCB); \
 	    return; \
 	    }
 
@@ -842,7 +842,7 @@ void IP_ADLOOK_DONE(IPCB,STATUS,NAMLEN,NAMPTR)
     associated with a connection.
 */
 
-void IPU$CLOSE(struct user_close_args * Uargs)
+void ipu$close(struct user_close_args * Uargs)
     {
 struct IPCB_Structure * IPCB;
     signed long
@@ -858,11 +858,11 @@ struct IPCB_Structure * IPCB;
 
 // Use common routine for closing
 
-    IPCB_Close(Uargs->cl$local_conn_id,IPCB,NET$_CC);
+    ipcb_close(Uargs->cl$local_conn_id,IPCB,NET$_CC);
 
 // Close done - post user request and free argblk
 
-    User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
+    user$post_io_status(Uargs,SS$_NORMAL,0,0,0);
     mm$uarg_free(Uargs);
     }
 
@@ -871,7 +871,7 @@ struct IPCB_Structure * IPCB;
     Abort a IP "connection". Identical in functionality to IPU$CLOSE.
  */
 
-void IPU$ABORT(struct user_abort_args * Uargs)
+void ipu$abort(struct user_abort_args * Uargs)
     {
 	struct IPCB_Structure * IPCB;
     signed long
@@ -887,11 +887,11 @@ void IPU$ABORT(struct user_abort_args * Uargs)
 
 // Use common routine for closing
 
-    IPCB_Close(Uargs->ab$local_conn_id,IPCB,NET$_CC);
+    ipcb_close(Uargs->ab$local_conn_id,IPCB,NET$_CC);
 
 // Done. Clean up.
 
-    User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
+    user$post_io_status(Uargs,SS$_NORMAL,0,0,0);
     mm$uarg_free(Uargs);
     }
 
@@ -901,7 +901,7 @@ void IPU$ABORT(struct user_abort_args * Uargs)
     user's data buffer and hand it to IP layer for transmission.
  */
 
-void IPU$SEND(struct user_send_args * Uargs)
+void ipu$send(struct user_send_args * Uargs)
     {
     signed long
 	RC,
@@ -978,7 +978,7 @@ void IPU$SEND(struct user_send_args * Uargs)
     LocalAddr = seg->iph$source;
     Protocol = seg->iph$protocol;
 
-    // Use IP$SEND_RAW if this is an exact packet
+    // Use ip$send_raw if this is an exact packet
     if (Flags&2) // check
 	{
 	// Send packet exactly as the client passed it.
@@ -997,11 +997,11 @@ void IPU$SEND(struct user_send_args * Uargs)
 	    Log_IP_Packet(seg,FALSE,TRUE);
 
 	RC = SS$_NORMAL;
-	if ((IP$SEND_RAW(seg->iph$dest,seg,segsize,1,
+	if ((ip$send_raw(seg->iph$dest,seg,segsize,1,
 			Buf,bufsize) == 0)) RC = NET$_NRT;
 	// Post the I/O request back to the user
 
-	User$Post_IO_Status(Uargs,RC,0,0,0);
+	user$post_io_status(Uargs,RC,0,0,0);
 	mm$uarg_free(Uargs);
 	return;
 	};
@@ -1018,7 +1018,7 @@ void IPU$SEND(struct user_send_args * Uargs)
 
 
     if (LocalAddr == WILD)
-	IP$SET_HOSTS(1,ForeignAddr,LocalAddr,ForeignAddr);
+	ip$set_hosts(1,ForeignAddr,LocalAddr,ForeignAddr);
 
     if (Protocol == WILD)
 	Protocol = IPCB->ipcb$proto_filter;
@@ -1030,27 +1030,27 @@ void IPU$SEND(struct user_send_args * Uargs)
 
     IPIPID = IPIPID+1;	// Increment packet ID
     RC = SS$_NORMAL;
-    if ((IP$SEND(LocalAddr,ForeignAddr,IPTOS,IPTTL,
+    if ((ip$send(LocalAddr,ForeignAddr,IPTOS,IPTTL,
 		   seg + Uargs->se$ext2,USize,
 		   IPIPID,IPDF,TRUE,Protocol,
 		   Buf,bufsize) == 0)) RC = NET$_NRT;
 
 // Post the I/O request back to the user
 
-    User$Post_IO_Status(Uargs,RC,0,0,0);
+    user$post_io_status(Uargs,RC,0,0,0);
     mm$uarg_free(Uargs);
     }
 
 
 
-//SBTTL "IPU$RECEIVE - receive a IP packet"
+//SBTTL "ipu$receive - receive a IP packet"
 /*
     Handle user receive request for IP connection. If there is a packet
     available on the IP receive queue, then deliver it to the user
     immediately. Otherwise, queue up the user receive for later.
  */
 
-void IPU$RECEIVE(struct user_recv_args * Uargs) 
+void ipu$receive(struct user_recv_args * Uargs) 
     {
 	struct IPCB_Structure * IPCB;
 	struct queue_blk_structure(qb_nr_fields) * QB;
@@ -1111,9 +1111,9 @@ void IPU$RECEIVE(struct user_recv_args * Uargs)
     Read the host names/numbers for a IP connection.
  */
 
-void IPU$INFO(struct user_info_args * Uargs)
+void ipu$info(struct user_info_args * Uargs)
     {
-extern	USER$Net_Connection_Info ();
+extern	user$net_connection_info ();
 	struct IPCB_Structure * IPCB;
     signed long
 	RC;
@@ -1128,7 +1128,7 @@ extern	USER$Net_Connection_Info ();
 
 // Give the information back (common TCP/IP routine in USER.BLI)
 
-    USER$Net_Connection_Info(Uargs,IPCB->ipcb$host_filter,
+    user$net_connection_info(Uargs,IPCB->ipcb$host_filter,
 			IPCB->ipcb$foreign_host,
 			0,0,
 			IPCB->ipcb$foreign_hname,
@@ -1142,7 +1142,7 @@ extern	USER$Net_Connection_Info ();
     currently implemented for the TCP protocol.
  */
 
-void IPU$STATUS(struct user_status_args * Uargs)
+void ipu$status(struct user_status_args * Uargs)
     {
     USER$Err(Uargs,NET$_NYI);
     }
@@ -1153,7 +1153,7 @@ void IPU$STATUS(struct user_status_args * Uargs)
     in functionality to IPU$CLOSE/IPU$ABORT except for calling procedure.
  */
 
-IPU$CANCEL(struct vms$cancel_args * Uargs)
+ipu$cancel(struct vms$cancel_args * Uargs)
     {
       struct IPCB_Structure * IPCB;
       signed long I,
@@ -1173,7 +1173,7 @@ IPU$CANCEL(struct vms$cancel_args * Uargs)
 	       (IPCB->ipcb$piochan == Uargs->vc$piochan))
 		{
 		XLOG$FAO(LOG$USER,"!%T IPU$Cancel: IPCB=!XL!/",0,IPCB);
-		IPCB_Close(I,IPCB,NET$_CCAN);
+		ipcb_close(I,IPCB,NET$_CCAN);
 		Fcount = Fcount + 1;
 		};
 	    };
@@ -1182,7 +1182,7 @@ IPU$CANCEL(struct vms$cancel_args * Uargs)
 
 //SBTTL "IP dump routines"
 
-void IPU$Connection_List(RB)
+void ipu$connection_list(RB)
 //
 // Dump out the list of IP connections.
 //
@@ -1200,7 +1200,7 @@ void IPU$Connection_List(RB)
     RB[0] = RBIX - 1;
     }
 
-IPU$IPCB_Dump(IPCBIX,RB)
+ipu$ipcb_dump(IPCBIX,RB)
 //
 // Dump out a single IP connection
 //

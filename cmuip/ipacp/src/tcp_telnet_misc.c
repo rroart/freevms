@@ -522,7 +522,7 @@ TT$_VT400_SERIES,
 Print (control_string, P1)
     {
     extern
-	Send_2_Operator();
+	send_2_operator();
     signed long
 	Status;
     unsigned char Out_Buffer[256];
@@ -539,7 +539,7 @@ Print (control_string, P1)
 	 Out_Desc,
 	 P1);
     if (! Status) return Status;
-    return Send_2_Operator(Out_Desc);
+    return send_2_operator(Out_Desc);
     }
 
 
@@ -791,7 +791,7 @@ void Set_PTY_Term_Type (TVT, type, devdep)
 	unsigned long devdep[2];
 	struct TVT$BLOCK * TVT;
     {
-      extern SET_DEVDEP();
+      extern set_devdep();
       long pty_chan	= TVT->TVT$PTY_CHN;
       long tty_chan	= TVT->TVT$TTY_CHN;
       struct _qcbdef * PTY_Char;
@@ -886,7 +886,7 @@ void Set_PTY_Term_Type (TVT, type, devdep)
 		0,io_stats.iosb$w_status);
 	};
 	TVT->TVT$TTSET = 1;		// Set TTSET flag
-	SET_DEVDEP(TVT);
+	set_devdep(TVT);
     }
     return SS$_NORMAL;
     }
@@ -1065,7 +1065,7 @@ void Set_DEVDEP_DONE(TVT)
 	return SS$_NORMAL;
 };
 
-void Set_DEVDEP(TVT)
+void set_devdep(TVT)
 //--
 // Functional Description:
 //

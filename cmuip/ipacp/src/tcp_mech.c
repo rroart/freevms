@@ -93,7 +93,7 @@ extern
 
 unsigned long long    Start_Time;	// Quadword time IPACP started.
 unsigned long long    TEK$sys_uptime;	// Quadword delta time since IPACP started.
-struct TCP_MIB_struct * TCP_MIB;	// TCP management Information Block
+struct TCP_MIB_struct * tcp_mib;	// TCP management Information Block
 
 
 
@@ -121,10 +121,10 @@ signed long
 // actually the address of a TCB.
 
 signed long vtcb_ptr[0];
-signed long    Max_TCB  = 0,
-    MAX_CONN  = 60,	// Settable in CONFIG
-    VTCB_Size  = 0,
-    TCB_Count  = 0;	// # of valid TCB's in VTCB table.
+signed long    max_tcb  = 0,
+    max_conn  = 60,	// Settable in CONFIG
+    vtcb_size  = 0,
+    tcb_count  = 0;	// # of valid TCB's in VTCB table.
 
 
 //SBTTL "Initialize TCP"
@@ -150,7 +150,7 @@ Side Effects:
 
 //!!HACK!!// we're breaking the ADT... (gasp)
 
-void TCP$Init (void)
+void tcp$init (void)
     {
     signed long
 	cidx;
@@ -166,22 +166,22 @@ void TCP$Init (void)
 	};
 
     // Allocate the valid TCB table
-    VTCB_Size = MAX_CONN;
-    mm$get_mem ( vtcb_ptr , (VTCB_Size+1) * 4 );
-    CH$FILL ( 0 , (VTCB_Size+1) * 4 , vtcb_ptr );
+    vtcb_size = max_conn;
+    mm$get_mem ( vtcb_ptr , (vtcb_size+1) * 4 );
+    CH$FILL ( 0 , (vtcb_size+1) * 4 , vtcb_ptr );
 
-    TCP_MIB->MIB$tcpRtoAlgorithm= 0;
-    TCP_MIB->MIB$tcpRtoMin	= 0;
-    TCP_MIB->MIB$tcpRtoMax	= 0;
-    TCP_MIB->MIB$tcpMaxConn	= 0;
-    TCP_MIB->MIB$tcpActiveOpens	= 0;
-    TCP_MIB->MIB$tcpPassiveOpens= 0;
-    TCP_MIB->MIB$tcpAttemptFails= 0;
-    TCP_MIB->MIB$tcpEstabResets	= 0;
-    TCP_MIB->MIB$tcpCurrEstab	= 0;
-    TCP_MIB->MIB$tcpInSegs	= 0;
-    TCP_MIB->MIB$tcpOutSegs	= 0;
-    TCP_MIB->MIB$tcpRetransSegs	= 0;
+    tcp_mib->MIB$tcpRtoAlgorithm= 0;
+    tcp_mib->MIB$tcpRtoMin	= 0;
+    tcp_mib->MIB$tcpRtoMax	= 0;
+    tcp_mib->MIB$tcpMaxConn	= 0;
+    tcp_mib->MIB$tcpActiveOpens	= 0;
+    tcp_mib->MIB$tcpPassiveOpens= 0;
+    tcp_mib->MIB$tcpAttemptFails= 0;
+    tcp_mib->MIB$tcpEstabResets	= 0;
+    tcp_mib->MIB$tcpCurrEstab	= 0;
+    tcp_mib->MIB$tcpInSegs	= 0;
+    tcp_mib->MIB$tcpOutSegs	= 0;
+    tcp_mib->MIB$tcpRetransSegs	= 0;
 
     };
 
@@ -219,7 +219,7 @@ Side Effects:
 
 VTCB_Insert ( struct tcb_structure * TCB )
     {
-extern	MovByt();
+extern	MOVBYT();
  signed long J,
 	Indx,
 	Old;
@@ -227,34 +227,34 @@ extern	MovByt();
     NOINT;
 
     Indx = 0;
-    for (J=1;J<=VTCB_Size;J++)
+    for (J=1;J<=vtcb_size;J++)
 	if (vtcb_ptr[J] == 0) 
 	  { Indx = J; break; }
     if (Indx == 0)
 	{
 	OPR$FAO("MMgr: Growing Valid TCB table to !SW entries...!/",
-		 VTCB_Size*2);
+		 vtcb_size*2);
 	// This should be called at AST level to assure that we aren't
 	// pulling the rug out from anyone
 
-	Indx = VTCB_Size;
-	VTCB_Size = VTCB_Size * 2;
+	Indx = vtcb_size;
+	vtcb_size = vtcb_size * 2;
 
 	Old = vtcb_ptr;
-	mm$get_mem( vtcb_ptr , (VTCB_Size+1) * 4 );
-	MovByt ( (Indx+1) * 4 , Old , vtcb_ptr );
+	mm$get_mem( vtcb_ptr , (vtcb_size+1) * 4 );
+	MOVBYT ( (Indx+1) * 4 , Old , vtcb_ptr );
 	mm$free_mem( Old , (Indx+1) * 4 );
 
         Indx = Indx + 1;
 	};
 
     // Maintain pointer to last TCB in table
-    if (Indx > Max_TCB) Max_TCB = Indx;
-//OPR$FAO("!%T Max_TCB = !UW",0,Max_TCB);
+    if (Indx > max_tcb) max_tcb = Indx;
+//OPR$FAO("!%T max_tcb = !UW",0,max_tcb);
 
     // Link the new TCB into the Valid TCB table.
     vtcb_ptr[Indx] = TCB; // set TCB's address
-    TCB_Count = TCB_Count + 1; // Keep track of active TCB's.
+    tcb_count = tcb_count + 1; // Keep track of active TCB's.
     TCB->vtcb_index = Indx; // Remember index into Valid TCB Table
 
     OKINT;	// Carry on...
@@ -274,15 +274,15 @@ VTCB_Remove ( struct tcb_structure * TCB )
     if (vtcb_ptr[IDX] == TCB)
 	{
         vtcb_ptr[IDX] = 0;	// Clean out entry
-	TCB_Count = TCB_Count-1; // Account for this TCB going away.
-	if (Max_TCB <= IDX)
+	tcb_count = tcb_count-1; // Account for this TCB going away.
+	if (max_tcb <= IDX)
 	   X : {
 	   for (J=IDX;J>=1;J--)
-	     if (vtcb_ptr[J] != 0) { Max_TCB = J; goto leave; }
+	     if (vtcb_ptr[J] != 0) { max_tcb = J; goto leave; }
 	   // No valid TCB's left?  Do a sanity check.
-	   for (J=VTCB_Size;J>=1;J--)
-	     if (vtcb_ptr[J] != 0) { Max_TCB = J; goto leave; }
-	   Max_TCB = 1;
+	   for (J=vtcb_size;J>=1;J--)
+	     if (vtcb_ptr[J] != 0) { max_tcb = J; goto leave; }
+	   max_tcb = 1;
 	   };  // end of block X
 	leave:
 	}
@@ -324,15 +324,15 @@ VTCB_Scan ( ASTRTN , ASTP1 , ASTP2 )
 	sum  = 0,
 	count;
 
-    count = TCB_Count;
+    count = tcb_count;
 
     NOINT;
 
-    for (J=1;J<=VTCB_Size;J++)
+    for (J=1;J<=vtcb_size;J++)
 	if (vtcb_ptr[J] != 0)
 	    {
-	    if (J > Max_TCB)
-		OPR$FAO("%T TCB (!UL) above Max_TCB (!UL)",J,Max_TCB);
+	    if (J > max_tcb)
+		OPR$FAO("%T TCB (!UL) above max_tcb (!UL)",J,max_tcb);
 
 	    sum = sum + (ASTRTN)(vtcb_ptr[J],J,ASTP1,ASTP2);
 
@@ -349,7 +349,7 @@ VTCB_Scan ( ASTRTN , ASTP1 , ASTP2 )
 
 
 
-void TCP$Connection_List(RB)
+void tcp$connection_list(RB)
 //
 // Dump the list of TCP connections.
 //
@@ -358,7 +358,7 @@ D$LC_ID_Return_Blk RB;
       signed long J;
 
     RB[0] = 0;
-    for (J=1;J<=VTCB_Size;J++)
+    for (J=1;J<=vtcb_size;J++)
 	{
 	if (vtcb_ptr[J] != 0)
 	    {
@@ -372,7 +372,7 @@ D$LC_ID_Return_Blk RB;
 
 VTCB_Indx_OK ( LCID )
     {
-    if ((LCID >= 1) && (LCID <= VTCB_Size))
+    if ((LCID >= 1) && (LCID <= vtcb_size))
 	if ((vtcb_ptr[LCID] != 0)) return 1;
 
     return 0;
@@ -475,7 +475,7 @@ Outputs:
 
 Find_Free_LP_Entry (LPort)
     {
-extern	MovByt(),
+extern	MOVBYT(),
 	mm$get_mem(), mm$free_mem();
     signed long
 	J,
@@ -513,7 +513,7 @@ extern	MovByt(),
 	ConectPtr[cidx].CN$TCB_Tail = ConectPtr[cidx].CN$TCB_List;
 	ConectPtr[cidx].CN$Local_Port = -1;
 	};
-    MovByt ( idx * CN$BLK_SIZE * 4 , Old , ConectPtr );
+    MOVBYT ( idx * CN$BLK_SIZE * 4 , Old , ConectPtr );
 
     OKINT;
     mm$free_mem( Old , idx * CN$BLK_SIZE * 4 );
@@ -627,7 +627,7 @@ Side Effects:
 */
 
 
-CHECK_UNIQUE_CONN(LPort,Fhost,FPort,IDX)
+check_unique_conn(LPort,Fhost,FPort,IDX)
      signed long * IDX;
     {
     register
@@ -806,7 +806,7 @@ Side Effects:
 
 */
 
-TCB$Create (void)
+tcb$create (void)
     {
       struct tcb_structure * TCB;	// New TCB
     signed long
@@ -863,7 +863,7 @@ Side Effects:
 
 */
 
-void TCB$Delete ( TCB_Ptr )
+void tcb$delete ( TCB_Ptr )
     {
 extern	TELNET_CLOSE();
     signed long
@@ -934,9 +934,9 @@ Side Effects:
 	completly deleted.
 */
 
-TCB_OK(signed long TCBIDX,signed long * ERR,struct user_default_args * uargs)
+tcb_ok(signed long TCBIDX,signed long * ERR,struct user_default_args * uargs)
     {
-extern	TCP$KILL_PENDING_REQUESTS();
+extern	tcp$kill_pending_requests();
 #define	TCBERR(EC) {*ERR = EC; return 0;}
     register
 	struct tcb_structure * TCB;
@@ -945,7 +945,7 @@ extern	TCP$KILL_PENDING_REQUESTS();
 // Since the user never touches connection IDs (except for priviliged
 // functions), neither of these checks should ever fail.
 
-    if ((TCBIDX <= 0) || (TCBIDX > VTCB_Size))
+    if ((TCBIDX <= 0) || (TCBIDX > vtcb_size))
 	TCBERR(NET$_CDE);	// Bad connection-ID
     TCB = vtcb_ptr[TCBIDX];
     if (TCB <= 0)
@@ -962,8 +962,8 @@ extern	TCP$KILL_PENDING_REQUESTS();
 	signed long
 	    tmp;
 	tmp = TCB->inactive_code; // pickup reason we are inactive.
-	TCP$KILL_PENDING_REQUESTS(TCB,tmp); // clean up & post user IO.
-	TCB$Delete(TCB); // Delete the inactive connection.
+	tcp$kill_pending_requests(TCB,tmp); // clean up & post user IO.
+	tcb$delete(TCB); // Delete the inactive connection.
 	*ERR = tmp;
 	return 0;
 	}
@@ -997,7 +997,7 @@ Side Effects:
 GET_TCB(TCBIDX,TCBret)
     {
 
-extern	TCP$KILL_PENDING_REQUESTS();
+extern	tcp$kill_pending_requests();
     register
 	struct tcb_structure * TCB;
 
@@ -1005,7 +1005,7 @@ extern	TCP$KILL_PENDING_REQUESTS();
 // Since the user never touches connection IDs (except for priviliged
 // functions), neither of these checks should ever fail.
 
-    if ((TCBIDX <= 0) || (TCBIDX > VTCB_Size))
+    if ((TCBIDX <= 0) || (TCBIDX > vtcb_size))
 	return NET$_CDE;	// Bad connection-ID
     TCB = vtcb_ptr[TCBIDX];
     if (TCB <= 0)

@@ -140,7 +140,7 @@ MACRO
 static signed long
     ICMHTB [ICM_HSHLEN]; // ICMP database hash table
 
-    struct ICMP_MIB_struct * ICMP_MIB ;	// ICMP Management Information Block
+    struct ICMP_MIB_struct * icmp_mib ;	// ICMP Management Information Block
 
 
 //SBTTL "ICMP routing code"
@@ -168,7 +168,7 @@ ICMP_Find(IPADDR)
 
     {
 	struct ICM_DBLOCK * ICPTR;
-    ICPTR = ICMHTB[ICMP_HASH(IPADDR)];
+    ICPTR = ICMHTB[ICMP_Hash(IPADDR)];
     while (ICPTR != 0)
 	if (ICPTR->icm$address == IPADDR)
 	  return ICPTR;
@@ -204,7 +204,7 @@ extern	LIB$GET_VM();
     ICMblock->icm$gwy = GWY_Addr;
     }
 
-ICMP$Check(IPaddr)
+icmp$check(IPaddr)
 
 //Check if the ICMP routing table has an entry for this IP address.
 //Returns:
@@ -232,7 +232,7 @@ void    ICMP_Tstamp();
 void    ICMP_Info();
  void    ICMP_Echo();
 
-void ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf)
+void icmp$input (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf)
 
 // Main ICMP input routine.
 // Verify ICMP checksum and dispatch according to function code.
@@ -240,7 +240,7 @@ void ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf)
      struct ip_structure * IPptr;
 	struct icmp_header * ICMptr;
     {
-extern	ICMP$User_Input();
+extern	icmp$user_input();
     signed long
 	ICMP_swapped  = 0,
 	ICMdat,ICMtype,
@@ -248,12 +248,12 @@ extern	ICMP$User_Input();
 	DataSize ;
 
     // Keep count of incoming packets
-    ICMP_MIB->MIB$icmpInMsgs = ICMP_MIB->MIB$icmpInMsgs + 1;
+    icmp_mib->MIB$icmpInMsgs = icmp_mib->MIB$icmpInMsgs + 1;
 
     Sum = Calc_checksum(ICMlen,ICMptr);
     if (Sum != 0xFFFF)
 	{
-	ICMP_MIB->MIB$icmpInErrors = ICMP_MIB->MIB$icmpInErrors + 1;
+	icmp_mib->MIB$icmpInErrors = icmp_mib->MIB$icmpInErrors + 1;
 	if ($$LOGF(LOG$ICMP))
 	    QL$FAO("!%T ICMP recv checksum error, cksum=!XL!/",0,Sum);
 	mm$seg_free(bufsize,buf);
@@ -270,7 +270,7 @@ extern	ICMP$User_Input();
 		0,ICMtype,ICMptr->icm$code,ICMptr->icm$var);
 
     // Now check to see if any users are looking at ICMP packets...
-    ICMP$User_Input(IPptr->iph$source,IPptr->iph$dest,
+    icmp$user_input(IPptr->iph$source,IPptr->iph$dest,
 		    bufsize,buf,
 		    ICMlen,ICMptr);
 
@@ -282,8 +282,8 @@ extern	ICMP$User_Input();
 	// First are "special" ICMP message - not in reply to IP packet
 	case ICM_ECHO:
 	    {
-	    ICMP_MIB->MIB$icmpInEchos =
-		ICMP_MIB->MIB$icmpInEchos + 1;
+	    icmp_mib->MIB$icmpInEchos =
+		icmp_mib->MIB$icmpInEchos + 1;
 
 	    ICMP_Echo(ICMptr,ICMlen,IPptr,IPlen);
 	    };
@@ -291,8 +291,8 @@ extern	ICMP$User_Input();
 
 	case ICM_TSTAMP:
 	    {
-	    ICMP_MIB->MIB$icmpInTimeStamps =
-		ICMP_MIB->MIB$icmpInTimeStamps + 1;
+	    icmp_mib->MIB$icmpInTimeStamps =
+		icmp_mib->MIB$icmpInTimeStamps + 1;
 
 	    ICMP_Tstamp(ICMptr,ICMlen,IPptr,IPlen);
 	    };
@@ -306,8 +306,8 @@ extern	ICMP$User_Input();
 
 	case ICM_AMREQUEST:
 	    {
-	    ICMP_MIB->MIB$icmpInAddrMasks =
-		ICMP_MIB->MIB$icmpInAddrMasks + 1;
+	    icmp_mib->MIB$icmpInAddrMasks =
+		icmp_mib->MIB$icmpInAddrMasks + 1;
 
 	    ICMP_Tstamp(ICMptr,ICMlen,IPptr,IPlen);
 	    };
@@ -339,8 +339,8 @@ extern	ICMP$User_Input();
 	      {
 	    case ICM_DUNREACH:
 		{
-		ICMP_MIB->MIB$icmpInDestUnreachs =
-			ICMP_MIB->MIB$icmpInDestUnreachs + 1;
+		icmp_mib->MIB$icmpInDestUnreachs =
+			icmp_mib->MIB$icmpInDestUnreachs + 1;
 
 		if ($$LOGF(LOG$ICMP))
 			QL$FAO("!%T ICMP recv: Destination Unreachable!/",0);
@@ -349,8 +349,8 @@ extern	ICMP$User_Input();
 
 	    case ICM_SQUENCH:
 		{
-		ICMP_MIB->MIB$icmpInSrcQuenchs =
-			ICMP_MIB->MIB$icmpInSrcQuenchs + 1;
+		icmp_mib->MIB$icmpInSrcQuenchs =
+			icmp_mib->MIB$icmpInSrcQuenchs + 1;
 
 		if ($$LOGF(LOG$ICMP))
 			QL$FAO("!%T ICMP recv: Source Quench!/",0);
@@ -359,8 +359,8 @@ extern	ICMP$User_Input();
 
 	    case ICM_REDIRECT:
 		{
-		ICMP_MIB->MIB$icmpInRedirects =
-			ICMP_MIB->MIB$icmpInRedirects + 1;
+		icmp_mib->MIB$icmpInRedirects =
+			icmp_mib->MIB$icmpInRedirects + 1;
 
 		Swapbytes(2,ICMptr->icm$r_gwy);
 		ICMP_Add(ICMptr->icm$r_gwy,ICMptr->icm$data);
@@ -369,15 +369,15 @@ extern	ICMP$User_Input();
 
 	    case ICM_TEXCEED:
 		{
-		ICMP_MIB->MIB$icmpInTimeExcds =
-			ICMP_MIB->MIB$icmpInTimeExcds + 1;
+		icmp_mib->MIB$icmpInTimeExcds =
+			icmp_mib->MIB$icmpInTimeExcds + 1;
 		};
 		break;
 
 	    case ICM_PPROBLEM:
 		{
-		ICMP_MIB->MIB$icmpInParamProbs =
-			ICMP_MIB->MIB$icmpInParamProbs + 1;
+		icmp_mib->MIB$icmpInParamProbs =
+			icmp_mib->MIB$icmpInParamProbs + 1;
 
 		if (ICMptr->icm$code != 0)
 		  ICMdat = ICMptr->icm$p_ptr;
@@ -437,8 +437,8 @@ extern	ICMP$User_Input();
 
 	case ICM_TSREPLY :
 	    {
-	    ICMP_MIB->MIB$icmpInTimeStampreps =
-		ICMP_MIB->MIB$icmpInTimeStampreps + 1;
+	    icmp_mib->MIB$icmpInTimeStampreps =
+		icmp_mib->MIB$icmpInTimeStampreps + 1;
 	    QL$FAO("!%T ICMP recv: Time Stamp reply. how did this happen?!/",0);
 	    };
 	    break;
@@ -451,23 +451,23 @@ extern	ICMP$User_Input();
 
 	case ICM_AMREPLY :
 	    {
-	    ICMP_MIB->MIB$icmpInAddrMaskReps =
-		ICMP_MIB->MIB$icmpInAddrMaskReps + 1;
+	    icmp_mib->MIB$icmpInAddrMaskReps =
+		icmp_mib->MIB$icmpInAddrMaskReps + 1;
 	    QL$FAO("!%T ICMP recv: AddrMask reply. how did this happen?!/",0);
 	    };
 	    break;
 
 	case ICM_EREPLY:
 	    {
-	    ICMP_MIB->MIB$icmpInEchoReps =
-		ICMP_MIB->MIB$icmpInEchoReps + 1;
+	    icmp_mib->MIB$icmpInEchoReps =
+		icmp_mib->MIB$icmpInEchoReps + 1;
 	    QL$FAO("!%T ICMP recv: Echo reply!/",0);
 	    };
 	    break;
 
 	default:
 	    {
-	    ICMP_MIB->MIB$icmpInErrors = ICMP_MIB->MIB$icmpInErrors + 1;
+	    icmp_mib->MIB$icmpInErrors = icmp_mib->MIB$icmpInErrors + 1;
 	    if ($$LOGF(LOG$ICMP))
 		QL$FAO("!%T ICMP recv: unknown ICMP type !XL!/",0,ICMtype);
 	    };
@@ -516,8 +516,8 @@ void ICMP_Echo(ICMpkt,ICMlen,IPPKT,IPlen)
 			    srcstr->dsc$w_length);
 	    ASCII_DEC_BYTES(dststr,4,IPPKT->iph$dest,
 			    dststr->dsc$w_length);
-	    ICMP_MIB->MIB$icmpOutErrors =
-		ICMP_MIB->MIB$icmpOutErrors + 1;
+	    icmp_mib->MIB$icmpOutErrors =
+		icmp_mib->MIB$icmpOutErrors + 1;
 	    QL$FAO("!%T ICMP_ECHO: TTL exceeded, SRC=!AS,DST=!AS,ID=!UL!/",
 		   0,srcstr,dststr,IPPKT->iph$ident);
 	    };
@@ -541,8 +541,8 @@ void ICMP_Echo(ICMpkt,ICMlen,IPPKT,IPlen)
 		ASCII_DEC_BYTES(dststr,4,IPPKT->iph$dest,
 				dststr->dsc$w_length);
 
-		ICMP_MIB->MIB$icmpOutErrors =
-			ICMP_MIB->MIB$icmpOutErrors + 1;
+		icmp_mib->MIB$icmpOutErrors =
+			icmp_mib->MIB$icmpOutErrors + 1;
 		QL$FAO("!%T ICMP_ECHO: PKT too large,SRC=!AS,DST=!AS,ID=!UL!/",
 		   0,srcstr,dststr,IPPKT->iph$ident);
 		};
@@ -586,10 +586,10 @@ void ICMP_Echo(ICMpkt,ICMlen,IPPKT,IPlen)
 	    FALSE, TRUE, ICMP_Protocol, Buf, Bufsize);
 
     // Keep count of outgoing packets
-    ICMP_MIB->MIB$icmpOutMsgs = ICMP_MIB->MIB$icmpOutMsgs + 1;
+    icmp_mib->MIB$icmpOutMsgs = icmp_mib->MIB$icmpOutMsgs + 1;
 
-    ICMP_MIB->MIB$icmpOutEchoReps =
-	ICMP_MIB->MIB$icmpOutEchoReps + 1;
+    icmp_mib->MIB$icmpOutEchoReps =
+	icmp_mib->MIB$icmpOutEchoReps + 1;
     }
 
 void ICMP_Tstamp(ICMpkt,ICMlen,IPpkt,IPlen)
@@ -645,8 +645,8 @@ void ICMP_Send_DUNR(ICMpkt,ICMlen,IPPKT,IPlen,code)
 		ASCII_DEC_BYTES(dststr,4,IPPKT->iph$dest,
 				dststr->dsc$w_length);
 
-		ICMP_MIB->MIB$icmpOutErrors =
-			ICMP_MIB->MIB$icmpOutErrors + 1;
+		icmp_mib->MIB$icmpOutErrors =
+			icmp_mib->MIB$icmpOutErrors + 1;
 		QL$FAO("!%T ICMP_ECHO: PKT too large,SRC=!AS,DST=!AS,ID=!UL!/",
 		   0,srcstr,dststr,IPPKT->iph$ident);
 		};
@@ -691,8 +691,8 @@ void ICMP_Send_DUNR(ICMpkt,ICMlen,IPPKT,IPlen,code)
 	    FALSE, TRUE, ICMP_Protocol, Buf, Bufsize);
 
     // Keep count of outgoing packets
-    ICMP_MIB->MIB$icmpOutMsgs = ICMP_MIB->MIB$icmpOutMsgs + 1;
+    icmp_mib->MIB$icmpOutMsgs = icmp_mib->MIB$icmpOutMsgs + 1;
 
-    ICMP_MIB->MIB$icmpOutDestUnreachs =
-	ICMP_MIB->MIB$icmpOutDestUnreachs + 1;
+    icmp_mib->MIB$icmpOutDestUnreachs =
+	icmp_mib->MIB$icmpOutDestUnreachs + 1;
     }

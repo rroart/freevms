@@ -154,8 +154,8 @@ extern  void    ASCII_HEX_BYTES();
 extern  void    ASCII_DEC_BYTES();
 
 // XEDRV.BLI
-extern     XE$Xmit();
-extern     XE$ARP_Xmit();
+extern     xe$xmit();
+extern     xe$arp_xmit();
 
 //    STR$GET1_DX : ADDRESSING_MODE(GENERAL),
 extern     LIB$GET_VM ();
@@ -242,7 +242,7 @@ static signed long
 
 
 
-static XEARP$_LOG (NAME)
+static xearp$_log (NAME)
     {
 	long STR_DESC[2];
 
@@ -250,11 +250,11 @@ static XEARP$_LOG (NAME)
     STR_DESC[1] = (NAME);
 
 #if 0
-    XEARP$LOG(STR_DESC,%REMAINING)
+    xearp$log(STR_DESC,%REMAINING)
 #endif
     };
 
-void XEARP$LOG(NAME,IPADDR,HWLEN,HWADDR)
+void xearp$log(NAME,IPADDR,HWLEN,HWADDR)
 
 // Write a logging entry for ARP.
 
@@ -275,7 +275,7 @@ DESC$STR_ALLOC(IPSTR,20);
 
  void    ARP_SWEEP();
 
-void XEARP$INIT (void)
+void xearp$init (void)
 
 // Initialize ARP package.
 // Initializes all hash buckets to be circular lists.
@@ -299,7 +299,7 @@ void XEARP$INIT (void)
 
 #define     MAX_HDR_SIZE   100		// Max size of device header on ARP packet
 
-void XEARP$DEV_INIT(XE_Int,HWTYPE,IPTYPE,HWADDR,HDRSIZ,
+void xearp$dev_init(XE_Int,HWTYPE,IPTYPE,HWADDR,HDRSIZ,
 	        			    SWAPPF,SWAP16F)
 
 // Initialize ARP portions of device status block entry.
@@ -369,7 +369,7 @@ ARP_HASH();
 ARP_FIND();
 ARP_CNEW();
 
-XEARP$CHECK(XE_Int, IPADDR, HWADDR, QB)
+xearp$check(XE_Int, IPADDR, HWADDR, QB)
 
 // Get physical address on an interface for given IP address.
 // Inputs:
@@ -453,7 +453,7 @@ struct ACACHE_BLK * ACPTR;
 		CH$MOVE(HWLEN,ACPTR->AC$HWADDR,CH$PTR(HWADDR));
 #if 0
 		if ($$LOGF(LOG$ARP))
-		    XEARP$_LOG("ARP cache hit",IPADDR,HWLEN,HWADDR);
+		    xearp$_log("ARP cache hit",IPADDR,HWLEN,HWADDR);
 #endif
 
 // See if we should try to refresh this entry now.
@@ -549,7 +549,7 @@ struct arp_PKT * ARBUF;
 	      ADRPTR = NULADR;
 	    else
 		ADRPTR = HWADDR;
-	    XEARP$_LOG("ARP RQ XMIT",IPADDR,HWLEN,ADRPTR);
+	    xearp$_log("ARP RQ XMIT",IPADDR,HWLEN,ADRPTR);
 	    };
 
 // Now, call the device-dependant routine to send an ARP
@@ -558,7 +558,7 @@ struct arp_PKT * ARBUF;
 
 	if (FOUND <= 0)
 	    HWADDR = 0;
-	XE$ARP_Xmit(XE_Int,ARBUF,ARPLEN,HWADDR);
+	xe$arp_xmit(XE_Int,ARBUF,ARPLEN,HWADDR);
 	};
 
 // Return appropriate reply
@@ -569,7 +569,7 @@ struct arp_PKT * ARBUF;
 
  void    ARP_UPDATE();
 
-void XEARP$INPUT ( XE_Int , ARBUF )
+void xearp$input ( XE_Int , ARBUF )
 
 // Handle ARP reception by device driver.
 // Called at AST level when an ARP packet has been
@@ -659,7 +659,7 @@ char AR_THA [ARP_HDW_LEN];
 		ARP_UPDATE ( IPADDR , XE_Int , HWLEN , AR_SHA );
 
 		if ($$LOGF(LOG$ARP))
-		    XEARP$_LOG("ARP RQ RCV",IPADDR,HWLEN,AR_SHA);
+		    xearp$_log("ARP RQ RCV",IPADDR,HWLEN,AR_SHA);
 
 // Doing reply now
 
@@ -693,7 +693,7 @@ char AR_THA [ARP_HDW_LEN];
 
 // Do an ARP output
 
-		XE$ARP_Xmit(XE_Int,ARBUF,ARPLEN,AR_SHA);
+		xe$arp_xmit(XE_Int,ARBUF,ARPLEN,AR_SHA);
 		} else
 
 
@@ -720,7 +720,7 @@ char AR_THA [ARP_HDW_LEN];
 		ARP_UPDATE ( IPADDR , XE_Int , HWLEN , HWADDR );
 
 		if ($$LOGF(LOG$ARP))
-		    XEARP$_LOG("ARP RPLY RCV",IPADDR,HWLEN,HWADDR);
+		    xearp$_log("ARP RPLY RCV",IPADDR,HWLEN,HWADDR);
 		};
 	    };
 	    };
@@ -850,7 +850,7 @@ struct ACACHE_BLK * ACPTR;
 	ACPTR->AC$SAVEQB = 0;
 	XE_Int = ACPTR->AC$DEVICE;
 	INSQUE(QB,dev_config->dc_send_Qtail);
-	XE$Xmit(dev_config);
+	xe$xmit(dev_config);
 	};
     }
 
@@ -892,7 +892,7 @@ struct ACACHE_BLK * ACPTR;
 		      Net_Send_Queue_Element * QB;
 
 		    QB = ACPTR->AC$SAVEQB;
-		    DRV$Seg_Free(QB->NSQ$Del_buf_size,QB->NSQ$Del_Buf);
+		    drv$seg_free(QB->NSQ$Del_buf_size,QB->NSQ$Del_Buf);
 		    DRV$QBLK_Free(QB);
 		    };
 

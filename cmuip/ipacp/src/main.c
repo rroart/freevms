@@ -52,7 +52,7 @@ Module Modification History:
 *** Begin CMU change log ***
 
 8.1	29-Nov-1991	Henry W. Miller		USBR
-	Use unsigned arithmetic in Wait_For_Something_2_Do().
+	Use unsigned arithmetic in Wait_For_Something_2_DO().
 
 8.0A	16-Jul-1991	Henry W. Miller		USBR
 	Added hooks for memory debugging.
@@ -513,10 +513,10 @@ dsc$a_pointer:local_namestr};
     DESC$STR_ALLOC(Local_Name,MAX_HNAME),
 #endif
     signed long
-    MAX_RECV_DATASIZE =OPT$MAX_RECV_DATASIZE,	// Max segment size
-    DEFAULT_MSS	=DEFAULT_DATA_SIZE,		// Max segment size
-    MAX_PHYSICAL_BUFSIZE,	// Max size of device receive buffer
-    MIN_PHYSICAL_BUFSIZE;	// Minimum size of device send buffer
+    max_recv_datasize =OPT$MAX_RECV_DATASIZE,	// Max segment size
+    default_mss	=DEFAULT_DATA_SIZE,		// Max segment size
+    max_physical_bufsize,	// Max size of device receive buffer
+    min_physical_bufsize;	// Minimum size of device send buffer
 
 // Segment Input from IP Queue header.
 // Initialize Queue header to point at itself (ie, empty state).
@@ -588,11 +588,11 @@ extern	void ACPINI_ADLOOK_DONE();
 // allocated receive buffers and is the maximum size of the IP fragmentation
 // buffer.
 
-    MAX_PHYSICAL_BUFSIZE = DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+ 
+    max_physical_bufsize = DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+ 
 			   OPT$MAX_RECV_DATASIZE;
 //    IF (.MAX_PHYSICAL_BUFSIZE MOD 4) NEQ 0 THEN
 //	FATAL$FAO('Initialize_ACP - Max buffer size not divisible by 4');
-    MIN_PHYSICAL_BUFSIZE = DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+ 
+    min_physical_bufsize = DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+ 
 			    DEFAULT_DATA_SIZE;
 
     // First define the IPACP interface for any other modules we may load...
@@ -604,9 +604,9 @@ extern	void ACPINI_ADLOOK_DONE();
 
     mm$init();				// see memgr.bli module.
     CNF$Net_Device_Init();		// Initialize Network device(s).
-    IP$Init();				// Initialize IP
-    User$Init_Routines();		// Initialize stuff in USER module.
-    TCP$Init();
+    ip$init();				// Initialize IP
+    user$init_routines();		// Initialize stuff in USER module.
+    tcp$init();
 
 // Initialize name lookup service
 
@@ -658,7 +658,7 @@ Side Effects:
 	set before hibernation to reduce system impact.
 */
 
-	void  Wait_For_Something_2_Do(unsigned nxtime) {
+	void  wait_for_something_2_do(unsigned nxtime) {
 	  //    BIND
 	// Range of pages to purge from WS.
 #if 0
@@ -830,7 +830,7 @@ void Main (void) {
 
 // Mount the network virtual device "IP".
 
-    if (!(rc=mount_Ip_device())) 
+    if (!(rc=mount_ip_device())) 
 	FATAL$FAO("Failed to mount virtual device IP, RC = %x\n",rc);
 
 // Perform tcp/acp initialization
@@ -847,18 +847,18 @@ void Main (void) {
 	    long nxtime ;
 
 	SEG$Process_Received_Segments();
-	USER$Process_User_Requests();
+	user$process_user_requests();
 	if (intdf < -1)
 	    OPR$FAO("Intdf went negative...");
-	nxtime = TCP$Service_Connections();
+	nxtime = tcp$service_connections();
 	CHECK_ERRMSG_Q();
-	Wait_For_Something_2_DO(nxtime);
+	wait_for_something_2_do(nxtime);
     } while (Time_2_Exit==0);
 
 // Exit in an orderly fashion.
 
     NML$PURGE(NET$_TE);		// Purge the name server queue
-    USER$Purge_All_IO();	// Post any pending user IO.
+    user$purge_all_io();	// Post any pending user IO.
     LOG$FAO("!%T IPACP exit.!/",0);
     exe$exit(SS$_NORMAL);	// say goodbye...
 }
@@ -982,7 +982,7 @@ struct dsc$descriptor myname;
 
 #if 0
 //check wait check
-    IF NOT(rc=$$KCALL(mount_Ip_device)) THEN
+    IF NOT(rc=$$KCALL(mount_ip_device)) THEN
 	FATAL$FAO("Failed to mount virtual device IP ,RC = %x\n",rc);
 #endif
 
@@ -1000,18 +1000,18 @@ struct dsc$descriptor myname;
 	    unsigned long nxtime;
 
 	SEG$Process_Received_Segments();
-	USER$Process_User_Requests();
+	user$process_user_requests();
 	if (intdf <= -1)
 	    OPR$FAO("Intdf went negative...\n");
-	nxtime = TCP$Service_Connections();
+	nxtime = tcp$service_connections();
 	CHECK_ERRMSG_Q();
-	Wait_For_Something_2_DO(nxtime);
+	wait_for_something_2_do(nxtime);
     } while (Time_2_Exit==0);
 
 // Exit in an orderly fashion.
 
     NML$PURGE(NET$_TE);		// Purge the name server queue
-    USER$Purge_All_IO();	// Post any pending user IO.
+    user$purge_all_io();	// Post any pending user IO.
     LOG$FAO("!%T IPACP exit.!/");
     exe$exit(SS$_NORMAL);	// say goodbye...
 }

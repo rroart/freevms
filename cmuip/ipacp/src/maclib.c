@@ -363,7 +363,7 @@ long funct=0;
 
 //ENTRY	Mount_ip_Device,^M<R2,R3,R4,R5,R6,R7,R8>
 
-void Mount_ip_Device() {
+void mount_ip_device() {
   int R0,R3,R6,R7,R8,R9;
   struct _vcb * R1;
   struct _aqb * R2;
@@ -372,7 +372,7 @@ void Mount_ip_Device() {
 Begin_Lock:
   // not yet	$LKWSET_S	Locked_Range	// lock us in the working set.	
 	R1 = &Shared_Device;	// point @ Pseudo device desc.
-	R0 = Find_UCB(R1);		// locate the UCB
+	R0 = find_ucb(R1);		// locate the UCB
 	if ((R0&1)==1) goto l2;			// OK ?
 
 // Unable to find UCB,  return error here.
@@ -572,7 +572,7 @@ UNLOCK_IODB() {
 //
 //--
 
-int FIND_UCB(R1)
+int find_ucb(R1)
 {
   int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
 
@@ -778,7 +778,7 @@ l10:
 //--
 
 //Entry	Set_ip_Device_OffLine,^M<R5>
-int Set_ip_Device_OffLine(UCB_Adrs)
+int set_ip_device_offline(UCB_Adrs)
 {
   int R0,R1,R2,R3,R4,R6,R7,R8,R9;
   struct _ucb * R5;
@@ -975,7 +975,7 @@ l90:
 //__
 
 //Entry USER_Requests_Avail,^M<R2,R3,R4,R5>
-	int USER_Requests_Avail()
+	int user_requests_avail()
 	  {
   int R1,R3,R4,R6,R7,R8,R9;
   struct _aqb * R0;
@@ -1252,7 +1252,7 @@ l10:
 //--
 
 //Entry	Time_Stamp, 0
- int TimeStamp()
+ int Time_Stamp()
    {
   int R1,R2,R3,R4,R5,R6,R7,R8,R9;
   long long R0;
