@@ -298,6 +298,7 @@ struct _vcb {
   };
 };
 
+#define		vcb$l_cache		vcb_0.vcb$l_cache
 #define		vcb$l_fileprot		vcb_0.vcb$l_fileprot
 #define		vcb$l_free		vcb_0.vcb$l_free
 #define		vcb$l_home2lbn		vcb_0.vcb$l_home2lbn
