@@ -394,7 +394,9 @@ struct buffer_head * getblk(kdev_t dev, int block, int size)
 
 	 bh -> b_dev = dev;
 	 bh -> b_data = kmalloc(size, GFP_KERNEL);
+	 bh -> b_blocknr = block;
 	 bh -> b_size = size;
+	 return bh;
 }
 
 /*
