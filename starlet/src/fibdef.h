@@ -122,6 +122,8 @@ struct _fibdef {
     unsigned fib$w_nmctl;
     unsigned fib$l_exsz;
     unsigned fib$w_exctl;
+    unsigned short fib$w_file_hdrseq_incr;
+    unsigned short fib$w_dir_hdrseq_incr;
 };
 
 #endif
