@@ -335,9 +335,23 @@ int sch$waitm(struct _pcb * p, struct _wqh * wq) {
     sch$sched(0);
     return;
   }
-  if (p->psl_ipl!=0) {
-    sch$sched(0);
-    return;
+  //  if (p->psl_ipl!=0) 
+  {
+    union {
+      struct {
+	unsigned psl_cur_mod:2;
+	unsigned psl_prv_mod:2;
+	unsigned psl_ipl:5;
+	unsigned psl_is:1;
+	unsigned psl_intr:1;
+      };
+      unsigned short psl;
+    } savpsl;
+    savpsl.psl=p->pslstk[p->pslindex-1];
+    if (savpsl.psl_ipl) {
+      sch$sched(0);
+      return;
+    }
   }
   sch$rse(p,PRI$_NULL,EVT$_AST);
   sch$sched(0);
