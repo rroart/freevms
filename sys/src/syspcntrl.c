@@ -33,7 +33,9 @@ asmlinkage int exe$hiber(void) {
 void * exe$nampid2(struct _pcb *p, unsigned long *pidadr, void *prcnam) {
   /* sched spinlock */
   vmslock(&SPIN_SCHED,IPL$_SCHED);
-  if (pidadr==0 && prcnam==0) return p;
+  if (pidadr==0 && prcnam==0) {
+    return p;
+  }
   if (pidadr) {
     struct _pcb * tmp, **htable = &pidhash[pid_hashfn(*pidadr)];
     printk("bef for\n");
@@ -46,19 +48,20 @@ void * exe$nampid2(struct _pcb *p, unsigned long *pidadr, void *prcnam) {
     return;
   }
   /* should not get here */
+  vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
   return 0;
 }
 
 asmlinkage int exe$wake(unsigned long *pidadr, void *prcnam) {
   struct _pcb *p;
   p=exe$nampid2(current,pidadr,prcnam);
-  vmsunlock(&SPIN_SCHED,0);
   if (p) {
     sch$wake(p->pid);
-    vmsunlock(&SPIN_SCHED,0);
+    vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
     return;
   }
   /* no cwps stuff yet */
+  setipl(0);
 }
 
 asmlinkage int exe$suspnd(unsigned int *pidadr, void *prcnam, unsigned int flags ) {

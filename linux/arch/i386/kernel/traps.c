@@ -140,6 +140,8 @@ static inline int kernel_text_address(unsigned long addr)
 
 #endif
 
+firsttrace=0;
+
 void show_trace(unsigned long * stack)
 {
   int j=0;
@@ -148,7 +150,9 @@ void show_trace(unsigned long * stack)
 
 	if (!stack)
 		stack = (unsigned long*)&stack;
-	{ int i,j; cli(); for (j=0;j<50;j++) for (i=0;i<1000000000;i++) ; }
+	if (firsttrace==1)
+	  { int i,j; cli(); for (j=0;j<50;j++) for (i=0;i<1000000000;i++) ; }
+	firsttrace++;
 	printk("Call Trace: ");
 	i = 1;
 	while (((long) stack & (THREAD_SIZE-1)) != 0) {
