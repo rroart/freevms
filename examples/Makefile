@@ -47,7 +47,7 @@ cef: cef.c
 	gcc -I../starlet/src -I../librtl/src/ cef.c ../starlet/src/starlet.a -o cef
 
 cefw: cefwait.c
-	gcc -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starlet.a -o cefwait
+	gcc -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starlet.a -o cefw
 
 mem: mem.c
 	gcc -static -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starlet.a -o mem
