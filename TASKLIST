@@ -1,0 +1,79 @@
+1. High priority:
+
+  Basic/foundation stuff:
+
+    CPU, barely started, need more people:	
+	We will need someone with keen eye for and high knowledge of CPU 
+	semantics to finish IPLs etc, because we need to get synchronization
+	correct on the instruction level, or we will never get it stable.
+
+	Important concepts are atomicity/noninterruption, interlocking, stacks.
+	(See VARM, eventually AARM.) 
+
+	Also needed is implementing and finishing the following instructions:
+
+		INSQUE, REMQUE
+		ADAWI, BBCCI, BBSSI, INSQHI, INSQTI, REMQHI, REMQTI
+		PROBE
+		CHMx
+		REI
+		SWASTEN
+		SWPCTX, LDPCTX
+
+  Data Structure Definitions, some done, need more people.
+
+  Kernel:	
+
+    Control Mechanisms:
+	ASTs, work on this have started, need more people.
+
+    Synchronization:
+	Lock management (DLM), barely started, need more people.
+
+    Memory management, no work done yet, vacant.
+
+    Process and time management, some work done, need more people. 
+
+    I/O Subsystem, barely started, need lots of more people.
+
+    Logicals, barely started, need more people.
+
+  ODS-2, work is under way
+
+  DCL, will at first be implemented kernel-independent, need more people.
+
+  Basic libraries:
+    LBR, nothing done, vacant.
+
+  Other libraries:
+    LIBRTL, parts done, need more people still.
+
+  "SRM", started
+
+2. (a bit later) high priority:
+  RMS, nothing done, vacant
+  "SRM" handling ODS-2
+  Utilities COPY DIRECTORY etc, nothing done, vacant
+  VMS image support, linker+compiler support for images, nothing done, vacant.
+  Kernel:
+    Control Mechanisms:
+	Condition handling, no work done yet, vacant.
+	System service dispatching, to be done the VMS way, nothing done, vacant.
+    Synchronization:
+	Spinlocks, the Linux ones are probably usable.
+	Mutexes, nothing done, vacant
+    SMP support, no support yet, vacant 
+
+3. (later) high priority:
+  Clustering, SCA, MSCP etc, barely started, need more people.
+
+Medium priority:
+
+Medium/low priority:
+  Non-i386 support.
+  64-bit support.
+
+Low priority:
+  CRTL, we will continue to try to use libc etc? 
+  Editors, nothing done, vacant
+  Volume shadowing, nothing done, vacant
