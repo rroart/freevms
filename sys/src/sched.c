@@ -715,7 +715,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
 #if 0
 
-  // NOT YET???
+  // NOT YET??? nope,not an interrupt. pushpsl+setipl/vmslock instead?
 
   if (intr_blocked(IPL$_SCHED))
     return;
