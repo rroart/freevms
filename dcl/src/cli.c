@@ -516,14 +516,7 @@ static unsigned long int_show_logical_name    (unsigned long h_input, unsigned l
 //static unsigned long int_show_system          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 
 static Command intcmd[] = {
-	0, "allocate device",      int_allocate_device,      NULL, "[-user] [-job] [-process] [-thread] <device_name>", 
-	0, "change password",      int_change_password,      NULL, "[<old_password> [<new_password>]]", 
-	0, "create logical name",  int_create_logical_name,  NULL, "[-kernel] [-nooutermode] [-nosupersede] <logical_name> [-copy <logical_name>] [-link <logical_name>] [-object <handle>] [-terminal] [-value <value>] <value> ...", 
-	0, "define",  int_create_logical_name,  NULL, "<logical_name>", 
-	0, "create logical table", int_create_logical_table, NULL, "[-kernel] [-nooutermode] [-nosupersede] <table_name>", 
-	0, "create /name_table",  int_create_logical_table,  NULL, "<table_name>", 
-	0, "create symbol",        int_create_symbol,        NULL, "[-global] [-integer] [-level <n>] [-string] <name> <value> ...",
-	0, "deallocate device",    int_deallocate_device,    NULL, "<device_name>", 
+	0, "odefine",  int_create_logical_name,  NULL, "<logical_name>", 
 	0, "delete logical name",  int_delete_logical_name,  NULL, "<logical_name>", 
 	0, "delete logical table", int_delete_logical_table, NULL, "<table_name>", 
 	1, "echo",                 int_echo,                 NULL, "<string> ...", 
@@ -534,15 +527,17 @@ static Command intcmd[] = {
 	0, "if",                   int_if,                   NULL, "<integervalue> <statement ...>", 
 	0, "@",               int_script,               NULL, "<script_name> [<args> ...]", 
 	0, "set default",          int_set_default,          NULL, "<directory>", 
-	0, "set prompt",           int_set_prompt,           NULL, "<prompt>", 
-	0, "set process",          int_set_process,          NULL, "<name>", 
+	0, "oset prompt",           int_set_prompt,           NULL, "<prompt>", 
+	0, "oset process",          int_set_process,          NULL, "<name>", 
+#if 0
 	0, "set working_set",      int_set_working_set,      NULL, "", 
-	0, "show time",            int_show_datetime,        NULL, "", 
-	0, "show devices",         int_show_device,          NULL, "[<device_logical_name> ...] [-iochans] [-objaddr] [-security]", 
-	0, "show default",         int_show_default,         NULL, "", 
+#endif
+	0, "oshow time",            int_show_datetime,        NULL, "", 
+	0, "oshow devices",         int_show_device,          NULL, "[<device_logical_name> ...] [-iochans] [-objaddr] [-security]", 
+	0, "oshow default",         int_show_default,         NULL, "", 
+#if 0
 	0, "show working_set",     int_show_working_set,     NULL, "", 
 	0, "show logical",    int_show_logical_name,    NULL, "<logical_name> [-security]", 
-#if 0
 	0, "show system",          int_show_system,          NULL, "[-devices] [-iochans] [-job] [-processes] [-security] [-threads]", 
 #endif
 	0, "stop",                 int_stop,                 NULL, "[/id <pid>] <name>", 
@@ -609,6 +604,13 @@ void * get_cli_int(char * c) {
       return cliroutines[i].fn;
   }
   return 0;
+}
+
+get_cdu_root() {
+  //extern struct _cdu cdu_root[];
+  //return &cdu_root[0];
+  extern long cdu_root;
+  return &cdu_root;
 }
 
 	// the following are really not internal
@@ -898,6 +900,7 @@ unsigned long main (int argc, char *argv[])
 	  if (sts&1)
 	    goto dontexec;
 	}
+	fprintf(stderr, "Could not find %s in cld, doing it the old way\n",p);
 	sts = execute (p);						/* execute the command line */
       dontexec:
 	if (sts != SS$_BRANCHSTARTED) symbol -> ivalue = sts;			/* save the new status */
@@ -3855,7 +3858,7 @@ static unsigned long extcommand (unsigned long h_input, unsigned long h_output, 
     return (SS$_IVPARAM);
   }
 
-  if (0==strncmp(argv[1],"=",1)) {
+  if (argv[1] && 0==strncmp(argv[1],"=",1)) {
     set_symbol(argv[0],argv[2]);
     return SS$_NORMAL;
   }
