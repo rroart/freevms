@@ -42,13 +42,14 @@ asmlinkage void sch$astdel(void) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
   struct _pcb * p=cpu->cpu$l_curpcb;
   struct _acb * dummy, *acb;
- more:
+
   /*lock*/
   if (intr_blocked(IPL$_ASTDEL))
     return;
 
   regtrap(REG_INTR, IPL$_ASTDEL);
 
+ more:
   setipl(IPL$_SYNCH);
 
   /* { int i;
@@ -70,16 +71,15 @@ asmlinkage void sch$astdel(void) {
     acb->acb$b_rmod&=~ACB$M_KAST;
     /* unlock */
     printk("astdel1 %x \n",acb->acb$l_kast);
-    setipl(0);
+    setipl(IPL$_ASTDEL);
     acb->acb$l_kast(acb->acb$l_astprm);
-    setipl(IPL$_SYNCH);
     goto more;
   }
   printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
   setipl(0);
   if(acb->acb$l_ast) acb->acb$l_ast(acb->acb$l_astprm); /* ? */
-  setipl(IPL$_SYNCH);
   /*unlock*/
+  goto more;
 }
 
 
