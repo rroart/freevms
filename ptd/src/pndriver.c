@@ -760,12 +760,13 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  l70:
   send_chr++;			// Increment sent character count
   tty=tz;
-  signed int sts=tty->ucb$l_tt_putnxt(&inp_char,tty);	// Buffer character
-  if (sts<0) {	// check		// LSS burst 
+  signed int CC;
+  tty->ucb$l_tt_putnxt(&inp_char,&CC,tty);	// Buffer character
+  if (CC<0) {	// check		// LSS burst 
     tty=tz;
     tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;	// Signal burst
   }
-  if (sts>0) {   // check 		// GTR single character
+  if (CC>0) {   // check 		// GTR single character
     tty=tz;
     tty->tty$b_tank_char = inp_char;		// Store character in tank
     tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal character in tank
@@ -773,15 +774,15 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   tpd=tz; if	(TTY$M_TP_XOFF&	// See if XOFFED is so then
 			 tpd->ucb$b_tp_stat) goto l120;	// stop input and check for echoed data
   send_num--;			// Decrease number to send in burst
-  if (send_num<=0) goto	l110;			// LEQ block done see if request done
-  inp_char=*buf++;		// Get next character
-  goto	l70;			// Send next character
+  if (send_num>0) {			// LEQ block done see if request done
+    inp_char=*buf++;		// Get next character
+    goto	l70;			// Send next character
+  }
 
  //
  // See if this request is done or if more to do
  //
- l110:
- if	(send_chr<send_tot)			// All done
+  if	(send_chr<send_tot)			// All done
    {			// GEQ done so check for echo
 
      DEVICEUNLOCK();	// More in request release lock 
@@ -1581,7 +1582,7 @@ int PN$FDTSENSEM (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
   int devclass;
   int devdep;
   int size, *buf, spec_chr, devdep2, speed, parity;
-  VERIFY_SENSE(&size,&buf,i);		// VERIFY USER STORAGE
+  VERIFY_SENSE(&size,&buf,i,p,u,c);		// VERIFY USER STORAGE
   tz = ((struct _tz_ucb *)tz)->ucb$l_pz_xucb;		// Switch to TZ UCB
   if (tz==0) {		// Have UCB
     //	If no TZ device abort with SS$_NOSUCHDEV
@@ -1589,7 +1590,7 @@ int PN$FDTSENSEM (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
     return exe_std$abortio(i,p,u,SS$_NOSUCHDEV);		// Abort request
   }
   tz = ((struct _tty_ucb *)tz)->ucb$l_tt_logucb;		// Switch to logical device if one exists
-  spec_chr=GET_DCL();			// BUILD SPECIAL CHARACTERISTICS
+  spec_chr=GET_DCL(tz);			// BUILD SPECIAL CHARACTERISTICS
 
 #if 0
   DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
@@ -1662,7 +1663,7 @@ int PN$FDTSENSEC(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   long devdep;
   struct _ucb * tz=u;
   int size, *buf, spec_chr, devdep2, speed, parity;
-  VERIFY_SENSE(&size,&buf,i);		// VERIFY USER STORAGE
+  VERIFY_SENSE(&size,&buf,i,p,u,c);		// VERIFY USER STORAGE
   tz = ((struct _tz_ucb *)tz)->ucb$l_pz_xucb;		// Switch to TZ UCB
   if (tz==0)	{		// Have UCB
     //	If no TZ device abort with SS$_NOSUCHDEV
@@ -1670,7 +1671,7 @@ int PN$FDTSENSEC(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
     return exe_std$abortio(i,p,u,SS$_NOSUCHDEV);		// Abort request
   }
 
-  spec_chr=GET_DCL();			// BUILD SPECIAL CHARACTERISTICS
+  spec_chr=GET_DCL(tz);			// BUILD SPECIAL CHARACTERISTICS
 
 #if 0
   DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
