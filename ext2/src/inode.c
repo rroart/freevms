@@ -518,7 +518,7 @@ static int ext2_get_block(struct inode *inode, long iblock, struct buffer_head *
 	unsigned long goal;
 	int left;
 	int depth = ext2_block_to_path(inode, iblock, offsets);
-
+	panic("ext2_get_block\n");
 	if (depth == 0)
 		goto out;
 
@@ -584,9 +584,9 @@ static int ext2_writepage(struct page *page)
 {
 	return block_write_full_page(page,ext2_get_block);
 }
-static int ext2_readpage(struct file *file, struct page *page)
+static int ext2_readpage(struct file *file, struct page *page, struct inode * inode, unsigned long pageno)
 {
-	return block_read_full_page(page,ext2_get_block);
+	return block_read_full_page2(page,inode,pageno);
 }
 static int ext2_prepare_write(struct file *file, struct page *page, unsigned from, unsigned to)
 {

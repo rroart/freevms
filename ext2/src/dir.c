@@ -67,9 +67,9 @@ static int ext2_commit_chunk(struct page *page, unsigned from, unsigned to)
 	return err;
 }
 
-static void ext2_check_page(struct page *page)
+static void ext2_check_page(struct page *page, struct inode *inode, unsigned long pageno)
 {
-	struct inode *dir = page->mapping->host;
+	struct inode *dir = inode; //page->mapping->host;
 	struct super_block *sb = dir->i_sb;
 	unsigned chunk_size = ext2_chunk_size(dir);
 	char *kaddr = page_address(page);
@@ -79,7 +79,7 @@ static void ext2_check_page(struct page *page)
 	ext2_dirent *p;
 	char *error;
 
-	if ((dir->i_size >> PAGE_CACHE_SHIFT) == page->index) {
+	if ((dir->i_size >> PAGE_CACHE_SHIFT) == pageno) {
 		limit = dir->i_size & ~PAGE_CACHE_MASK;
 		if (limit & (chunk_size - 1))
 			goto Ebadsize;
@@ -136,7 +136,7 @@ Einumber:
 bad_entry:
 	ext2_error (sb, "ext2_check_page", "bad entry in directory #%lu: %s - "
 		"offset=%lu, inode=%lu, rec_len=%d, name_len=%d",
-		dir->i_ino, error, (page->index<<PAGE_CACHE_SHIFT)+offs,
+		dir->i_ino, error, (pageno<<PAGE_CACHE_SHIFT)+offs,
 		(unsigned long) le32_to_cpu(p->inode),
 		rec_len, p->name_len);
 	goto fail;
@@ -145,7 +145,7 @@ Eend:
 	ext2_error (sb, "ext2_check_page",
 		"entry in directory #%lu spans the page boundary"
 		"offset=%lu, inode=%lu",
-		dir->i_ino, (page->index<<PAGE_CACHE_SHIFT)+offs,
+		dir->i_ino, (pageno<<PAGE_CACHE_SHIFT)+offs,
 		(unsigned long) le32_to_cpu(p->inode));
 fail:
 	SetPageChecked(page);
@@ -155,15 +155,16 @@ fail:
 static struct page * ext2_get_page(struct inode *dir, unsigned long n)
 {
 	struct address_space *mapping = dir->i_mapping;
-	struct page *page = read_cache_page(mapping, n,
-				(filler_t*)ext2_aops.readpage, NULL);
+	struct page *page = alloc_pages(GFP_KERNEL, 0);
+	block_read_full_page2(page,dir,n);
+	// read_cache_page(mapping, n, (filler_t*)ext2_aops.readpage, NULL);
 	if (!IS_ERR(page)) {
 		wait_on_page(page);
 		kmap(page);
 		if (!Page_Uptodate(page))
 			goto fail;
 		if (!PageChecked(page))
-			ext2_check_page(page);
+			ext2_check_page(page,dir,n);
 		if (PageError(page))
 			goto fail;
 	}
