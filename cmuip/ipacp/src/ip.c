@@ -349,7 +349,7 @@ signed long
     ipttl  = 32,	// Default time-to-live
 				// Setable through the config file.
   max_gateways;
-    struct IP_group_MIB_struct * IP_group_MIB ;
+    struct IP_group_MIB_struct IP_group_MIB_, * IP_group_MIB = &IP_group_MIB_;
 
 static   struct gateway_structure  gwy_table[MAX_GWY]; // space for list of known gateways
 static signed long

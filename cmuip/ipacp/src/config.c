@@ -332,7 +332,7 @@ static struct _rabdef * CFRAB = & CFRAB_;
 // at run-time.  See NETCONFIG.REQ for a complete explaination of
 // this structure.
 
- IPACP_Info_Structure * IPACP_Int;
+ IPACP_Info_Structure IPACP_Int_, * IPACP_Int=&IPACP_Int_;
 
 // N.B. : make sure everything that needs to be defined, like the
 // MAX_Physical_BufSize, *is* defined by the time this routine is called...
