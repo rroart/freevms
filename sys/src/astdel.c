@@ -25,8 +25,10 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   setipl(IPL$_SYNCH);
   insque(a,p->pcb$l_astqfl);
   /* just simple insert , no pris yet */
+  //printk("bef rse\n");
   if (p->pcb$w_state!=SCH$C_CUR)
     status=sch$rse(p, priclass, EVT$_AST);
+  //printk("aft rse\n");
   /* unlock */
   setipl(savipl);
   return status;
@@ -50,15 +52,15 @@ asmlinkage void sch$astdel(void) {
   setipl(IPL$_SYNCH);
 
   /* { int i;
-  printk("here ast\n");
-  for (i=0; i<1000000; i++) ;
-  } */
+     printk("here ast\n");
+     for (i=0; i<1000000; i++) ;
+     } */
   if (aqempty(&p->pcb$l_astqfl)) 
     return;
   /* { int i,j;
-  printk("here ast2 %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl);
-  for (j=0; j<20; j++) for (i=0; i<1000000000; i++) ;
-  } */
+     printk("here ast2 %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl);
+     for (j=0; j<20; j++) for (i=0; i<1000000000; i++) ;
+     } */
   acb=remque(p->pcb$l_astqfl,dummy);
   printk("here ast2 %x %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl,acb);
   printast(acb);
@@ -68,11 +70,15 @@ asmlinkage void sch$astdel(void) {
     acb->acb$b_rmod&=~ACB$M_KAST;
     /* unlock */
     printk("astdel1 %x \n",acb->acb$l_kast);
+    setipl(0);
     acb->acb$l_kast();
+    setipl(IPL$_SYNCH);
     goto more;
   }
   printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
+  setipl(0);
   acb->acb$l_ast(acb->acb$l_astprm); /* ? */
+  setipl(IPL$_SYNCH);
   /*unlock*/
 }
 

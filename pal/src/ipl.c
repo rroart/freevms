@@ -136,6 +136,8 @@ inline void regtrap(char type, char param) {
   if (mydebugi>1) printk("%x\n",smp$gl_cpu_data[cpu]->cpu$w_sisr);
 }
 
+int block3=0;
+
 inline char intr_blocked(unsigned char this) {
   int this_cpu = smp_processor_id();
   struct _pcb * p=current;
@@ -148,8 +150,22 @@ inline char intr_blocked(unsigned char this) {
       { long long i;    for(i=1;i!=0;i++) ; }
       //  panic("pslindex\n");
     pushpsl();
+    block3++;
+    if (this!=3) block3=0;
+    if (block3>90) mydebugi=3;
+    if (block3>100) {
+      extern void show_trace_task(struct task_struct *tsk);
+      extern int mydebug2, mydebug3, mydebug4, mydebug5, mydebug6;
+      show_trace_task(p);
+      { long long i;    for(i=1;i!=0;i++) ; }
+      mydebug2=1;
+      mydebug4=1;
+      mydebug5=1;
+      mydebug6=1;
+    }
     return 1;
   }
+  block3=0;
   return 0;
 }
 
