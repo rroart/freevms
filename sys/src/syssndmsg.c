@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<linux/linkage.h>
 #include<linux/kernel.h>
 

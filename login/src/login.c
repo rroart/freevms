@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 /* This program is derived from 4.3 BSD software and is
    subject to the copyright notice below.
    

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified User Mode Linux source file, 2001-2004.
+
 #include<ccbdef.h>
 #include<crbdef.h>
 #include<cdtdef.h>

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Ozone source file, 2001-2004  
+
 //+++2002-08-17
 //    Copyright (C) 2001,2002  Mike Rieker, Beverly, MA USA
 //

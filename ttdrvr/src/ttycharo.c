@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include <ttydef.h>
 #include <ttyucbdef.h>
 #include <ttytadef.h>

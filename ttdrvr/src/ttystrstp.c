@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<crbdef.h>
 #include<cdtdef.h>
 #include<dcdef.h>

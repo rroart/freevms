@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Contains some modified Linux sources, 2001-2004  
+
 #include<cxbdef.h>
 #include<crbdef.h>
 #include<cdtdef.h>

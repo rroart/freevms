@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Paul Nankervis.
+// Author. Roar Thronæs.
+
 #include <linux/config.h>
 #include <linux/fs.h>
 #include <linux/ext2_fs.h>
