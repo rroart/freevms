@@ -639,6 +639,9 @@ int flush_old_exec(struct linux_binprm * bprm)
 	if (current->euid == current->uid && current->egid == current->gid)
 		current->mm->dumpable = 1;
 	name = bprm->filename;
+#ifdef CONFIG_VMS
+	if (current->pcb$l_pqb) goto skip_name;  // if creprc was done
+#endif
 	for (i=0; (ch = *(name++)) != '\0';) {
 		if (ch == '/')
 			i = 0;
@@ -647,6 +650,7 @@ int flush_old_exec(struct linux_binprm * bprm)
 				current->pcb$t_lname[i++] = ch;
 	}
 	current->pcb$t_lname[i] = '\0';
+ skip_name:
 
 	flush_thread();
 
