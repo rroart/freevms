@@ -429,6 +429,30 @@ s.s12=stsflg;
  return INLINE_SYSCALL($creprc,1,&s);
 }
 
+int sys$getsyi(unsigned int efn, unsigned int *csidadr, void *nodename, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long astprm) {
+  struct struct_args s;
+  s.s1=efn;
+  s.s2=csidadr;
+  s.s3=nodename;
+  s.s4=itmlst;
+  s.s5=iosb;
+  s.s6=astadr;
+  s.s7=astprm;
+  return INLINE_SYSCALL($getsyi,1,&s);
+}
+
+int sys$getsyiw(unsigned int efn, unsigned int *csidadr, void *nodename, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long astprm) {
+  struct struct_args s;
+  s.s1=efn;
+  s.s2=csidadr;
+  s.s3=nodename;
+  s.s4=itmlst;
+  s.s5=iosb;
+  s.s6=astadr;
+  s.s7=astprm;
+  return INLINE_SYSCALL($getsyiw,1,&s);
+}
+
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
 int sys$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }
 int sys$create (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($create,3,fab,err,suc); }
