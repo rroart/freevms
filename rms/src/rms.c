@@ -61,11 +61,18 @@
 #include <fh2def.h>
 #include <fcbdef.h>
 #include <vmstime.h>
+#include <xabkeydef.h>
+#include <xaballdef.h>
+#include <keydef.h>
+#include <bktdef.h>
+#include<areadef.h>
 
 //#include <rms.h>
 #include "cache.h"
 #include "access.h"
 #include "direct.h"
+
+#include "rmsmisc.h"
 
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
 
@@ -79,6 +86,12 @@ char char_delim[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0};
 
+struct WCCFILE *ifi_table[] = {
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+};
 
 /* Routine to find size of file name components */
 
@@ -183,56 +196,6 @@ unsigned dircache(struct _vcb *vcb,char *dirnam,int dirlen,struct _fiddef *dirid
         return 0;
     }
 }
-
-
-/*      For file context info we use WCCDIR and WCCFILE structures...
-        Each WCCFILE structure contains one WCCDIR structure for file
-        context. Each level of directory has an additional WCCDIR record.
-        For example DKA200:[PNANKERVIS.F11]RMS.C is loosley stored as:-
-                        next         next
-                WCCFILE  -->  WCCDIR  -->  WCCDIR
-                RMS.C;       F11.DIR;1    PNANKERVIS.DIR;1
-
-        WCCFILE is pointed to by fab->fab$l_nam->nam$l_wcc and if a
-        file is open also by ifi_table[fab->fab$w_ifi]  (so that close
-        can easily locate it).
-
-        Most importantly WCCFILE contains a resulting filename field
-        which stores the resulting file spec. Each WCCDIR has a prelen
-        length to indicate how many characters in the specification
-        exist before the bit contributed by this WCCDIR. (ie to store
-        the device name and any previous directory name entries.)  */
-
-
-#define STATUS_INIT 1
-#define STATUS_TMPDIR  2
-#define STATUS_WILDCARD 4
-
-struct WCCDIR {
-    struct WCCDIR *wcd_next;
-    struct WCCDIR *wcd_prev;
-    int wcd_status;
-    int wcd_wcc;
-    int wcd_prelen;
-    unsigned short wcd_reslen;
-    struct dsc$descriptor wcd_serdsc;
-    struct _fiddef wcd_dirid;
-    char wcd_sernam[1];         /* Must be last in structure */
-};                              /* Directory context */
-
-
-#define STATUS_RECURSE 8
-#define STATUS_TMPWCC  16
-#define MAX_FILELEN 1024
-
-struct WCCFILE {
-    struct _fabdef *wcf_fab;
-    struct _vcb *wcf_vcb;
-    int wcf_status;
-    struct _fibdef wcf_fib;
-    char wcf_result[MAX_FILELEN];
-    struct WCCDIR wcf_wcd;      /* Must be last..... (dynamic length). */
-};                              /* File context */
 
 
 /* Function to remove WCCFILE and WCCDIR structures when not required */
@@ -737,7 +700,9 @@ unsigned exe$connect(struct _rabdef *rab)
     if (rab->rab$l_fab->fab$b_org == FAB$C_SEQ) {
         return 1;
     } else {
-        return SS$_NOTINSTALL;
+      //return SS$_NOTINSTALL;
+      printk("warning: in very experimental rms index area\n");
+	return 1;
     }
 }
 
@@ -752,15 +717,6 @@ unsigned exe$disconnect(struct _rabdef *rab)
 
 
 
-#define IFI_MAX 64
-struct WCCFILE *ifi_table[] = {
-    NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-    NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-    NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-    NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
-};
-
-
 /* get for sequential files */
 
 unsigned exe$get(struct _rabdef *rab)
@@ -773,6 +729,9 @@ unsigned exe$get(struct _rabdef *rab)
   unsigned block,blocks,offset;
   unsigned cpylen,reclen;
   unsigned delim,rfm,sts;
+
+  if (rab->rab$l_fab->fab$b_org == FAB$C_IDX)
+    return rms$get_idx(rab);
 
   reclen = rab->rab$w_usz;
   recbuff = rab->rab$l_ubf;
@@ -1274,7 +1233,91 @@ unsigned exe$open(struct _fabdef *fab)
         cleanup_wcf(wccfile);
         if (nam != NULL) nam->nam$l_wcc = 0;
     }
-    return sts;
+    if (fab->fab$b_org == FAB$C_IDX) {
+      char buffer[512];
+      struct _prologue_key * key;
+      struct _prologue_area * area;
+      struct _xabkeydef * xabkey;
+      struct _xaballdef * xaball;
+      int block=1,prevblock=0;
+      int offset=0;
+      int i,sts;
+      int rootvbn,datavbn;
+      do {
+	if (prevblock!=block) {
+	  sts = sys$qiow(0,getchan(ifi_table[fab->fab$w_ifi]->wcf_vcb),IO$_READVBLK,&iosb,0,0,
+			 buffer,512,block,0,0,0);
+	  sts = iosb.iosb$w_status;
+	}
+	key=vmalloc(sizeof(struct _prologue_key));
+	bcopy(buffer_offset(buffer,offset),key,sizeof(struct _prologue_key));
+	xabkey=vmalloc(sizeof(struct _xabkeydef));
+	xabkey->xab$b_cod=XAB$C_KEY;
+	bcopy(key,((unsigned long)xabkey)+2,sizeof(struct _prologue_key));
+	xabkey->xab$l_dvb=key->key$l_ldvbn;
+	xabkey->xab$l_nxt=wccfile->xab;
+	wccfile->xab=xabkey;
+	prevblock=block;
+	block=key->key$l_idxfl;
+	offset=key->key$w_noff;
+      } while (block);
+      rootvbn=key->key$l_rootvbn;
+      datavbn=key->key$l_ldvbn;
+      block=prevblock+1;
+      offset=0;
+      for(i=key->key$b_ianum;i;i--) {
+	sts = sys$qiow(0,getchan(ifi_table[fab->fab$w_ifi]->wcf_vcb),IO$_READVBLK,&iosb,0,0,
+		       buffer,512,block,0,0,0);
+	sts = iosb.iosb$w_status;
+	area=buffer_offset(buffer,offset);
+	xaball=vmalloc(sizeof(struct _xaballdef));
+	xaball->xab$b_cod=XAB$C_ALL;
+	xaball->xab$b_aop=area->area$b_aop;
+	xaball->xab$b_aln=area->area$b_aln;
+	xaball->xab$b_aid=area->area$b_areaid;
+	xaball->xab$l_nxt=wccfile->xab;
+	wccfile->xab=xabkey;
+	offset+=64;;
+	if (offset==512) {
+	  offset=0;
+	  block++;
+	}
+      }
+      for(i=key->key$b_lanum;i;i--) {
+	sts = sys$qiow(0,getchan(ifi_table[fab->fab$w_ifi]->wcf_vcb),IO$_READVBLK,&iosb,0,0,
+		       buffer,512,block,0,0,0);
+	sts = iosb.iosb$w_status;
+	area=buffer_offset(buffer,offset);
+	xaball=vmalloc(sizeof(struct _xaballdef));
+	xaball->xab$b_cod=XAB$C_ALL;
+	xaball->xab$b_aop=area->area$b_aop;
+	xaball->xab$b_aln=area->area$b_aln;
+	xaball->xab$b_aid=area->area$b_areaid;
+	xaball->xab$l_nxt=wccfile->xab;
+	wccfile->xab=xabkey;
+	offset+=64;;
+	if (offset==512) {
+	  offset=0;
+	  block++;
+	}
+      }
+      if (offset)
+	block++;
+    block=rootvbn;
+    sts = sys$qiow(0,getchan(ifi_table[fab->fab$w_ifi]->wcf_vcb),IO$_READVBLK,&iosb,0,0,
+		   buffer,512,block,0,0,0);
+    sts = iosb.iosb$w_status;
+    {
+      struct _bkt * buck = buffer;
+      printf("buck\n");
+    }
+ 
+    block=datavbn;
+    sts = sys$qiow(0,getchan(ifi_table[fab->fab$w_ifi]->wcf_vcb),IO$_READVBLK,&iosb,0,0,
+		   buffer,512,block,0,0,0);
+    sts = iosb.iosb$w_status;
+  }
+  return sts;
 }
 
 
