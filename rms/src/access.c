@@ -1056,6 +1056,8 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	sts = phyio_init(strlen(devnam[device])+1,ucb->ucb$l_ddb->ddb$t_name,&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
       dsc.dsc$w_length=strlen(devnam[device]);
       dsc.dsc$a_pointer=devnam[device];
+      if (!islocal)
+	dsc.dsc$a_pointer=((char *) dsc.dsc$a_pointer)+1;
       sts=exe$assign(&dsc,&chan,0,0,0);
       ucb->ucb$ps_adp=chan; //wrong field and use, but....
       //sts = device_lookup(strlen(devnam[device]),devnam[device],1,&ucbret);
