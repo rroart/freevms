@@ -355,3 +355,4 @@ void * __init __alloc_bootmem_node (pg_data_t *pgdat, unsigned long size, unsign
 	panic("Out of memory");
 	return NULL;
 }
+
