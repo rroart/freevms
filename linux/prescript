@@ -62,7 +62,7 @@ cd drivers/block;
 cd ../..;
 
 cd drivers/ide;
-		ln -s ../../../freevms/driver/src/dq/*.c .;
+		ln -s ../../../freevms/driver/src/dq/*.[hc] .;
 cd ../..;
 
 cd arch/i386/kernel;

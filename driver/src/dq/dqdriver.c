@@ -1876,8 +1876,8 @@
 
 /* Define the DEC C functions used by this driver */
 
-#include   "../../../freevms/lib/src/builtins.h"				/* C builtin functions -- unused, but... */
-#include   "../../../freevms/lib/src/string.h"				/* String rtns from "kernel CRTL" */
+//#include   "../../../freevms/lib/src/builtins.h"				/* C builtin functions -- unused, but... */
+//#include   "../../../freevms/lib/src/string.h"				/* String rtns from "kernel CRTL" */
 
 /* Define some useful types */
 
@@ -1997,6 +1997,8 @@ typedef unsigned int       UINT;		/* Usigned int (32 bits) */
 
 
 /* External references */
+
+#include "mytypedefs.h"
 
 extern int   MMG$GL_PAGE_SIZE;			/* Page size in bytes */
 extern int   MMG$GL_VPN_TO_VA;			/* Page to byte shift count */
