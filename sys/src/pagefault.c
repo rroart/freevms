@@ -618,8 +618,8 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	// 1 0 pfn=misc page is in page file
 	// 1 1 page is in image file
 
-	if ((*(unsigned long *)pte)&_PAGE_TYP1) { // page or image file
-	  if ((*(unsigned long *)pte)&_PAGE_TYP0) { // image file
+	if (mypte->pte$v_typ1) { // page or image file
+	  if (mypte->pte$v_typ0) { // image file
 	    unsigned long index=(*(unsigned long *)pte)>>PAGE_SHIFT;
 	    struct _secdef *pstl=current->pcb$l_phd->phd$l_pst_base_offset;
 	    struct _secdef *sec=&pstl[index];
@@ -629,27 +629,23 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    unsigned long offset;// in PAGE_SIZE units
 	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+vbn;
 
-	    {
-	      pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
-	      *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-	      flush_tlb_range(current->mm, page, page + PAGE_SIZE);
-	    }
-
+	    pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+	    *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	    flush_tlb_range(current->mm, page, page + PAGE_SIZE);
+	    
 	    makereadast(file,address,pte,offset);
 	    return;
 	  } else { // page file
 	  }
 	}
 
-	if (!((*(unsigned long *)pte)&_PAGE_TYP1)) { //zero transition or global
-	  if (!((*(unsigned long *)pte)&_PAGE_TYP0)) {
-	    if ((*(unsigned long *)pte)&0xfffff000) {
+	if (mypte->pte$v_typ1==0) { //zero transition or global
+	  if (mypte->pte$v_typ0==0) {
+	    if (mypte->pte$v_pfn) {
 	    } else { // zero page demand?
-	      {
-		pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
-		*(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
-	      }
+	      pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+	      *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	      flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	      return;
 	    }
 	  } else {
