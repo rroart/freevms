@@ -25,7 +25,7 @@ struct _sb {
   unsigned short int sb$w_maxmsg;
   char sb$t_swtype [4];
   char sb$t_swvers [4];
-  unsigned __int64 sb$q_swincarn;
+  unsigned long long sb$q_swincarn;
   char sb$t_hwtype [4];
   unsigned char sb$b_hwvers [12];
   char sb$t_nodename [16];

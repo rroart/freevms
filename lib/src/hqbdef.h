@@ -37,7 +37,7 @@ struct _hqb {
       unsigned hqb$v_fill_5_ : 5;
     };
   };
-  unsigned int64 hqb$q_time;
+  unsigned long long hqb$q_time;
   unsigned short int hqb$w_num_que;
   unsigned short int hqb$w_max_que;
   struct _hrb *hqb$l_hrb_fl;

@@ -12,8 +12,8 @@ struct _fkb {
     unsigned char fkb$b_type;
     unsigned char fkb$b_flck;
     void (*fkb$l_fpc)(void);
-    unsigned long fkb$q_fr3;
-    unsigned long fkb$q_fr4;
+    unsigned long fkb$l_fr3;
+    unsigned long fkb$l_fr4;
     };
 
 #endif

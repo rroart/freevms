@@ -23,7 +23,7 @@ asmlinkage void exe$forkdspth(void) {
     f=remque(fq,dummy);
     printk("forking entry %x\n",f);
     func=f->fkb$l_fpc;
-    func(f->fkb$q_fr3,f); /* change q to l later */
+    func(f->fkb$l_fr3,f);
     fq=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[0]; /* so far */
   }
 }

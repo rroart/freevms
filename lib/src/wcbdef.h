@@ -82,7 +82,7 @@ struct _wcb {
       unsigned int wcb$l_p1_rvn;
     };
     struct  {
-      unsigned int64 wcb$q_deliq;
+      unsigned long long wcb$q_deliq;
       char wcb$b_fill_7 [4];
     };
   };

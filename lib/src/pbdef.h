@@ -92,13 +92,7 @@
 #define PB$C_LENGTH 116
 #define PB$S_PBDEF 116
 	
- 
-#ifdef __cplusplus		
-struct _sb;
-struct _cdt;
-#endif		
- 
-typedef struct _pb {
+struct _pb {
   struct _pb *pb$l_flink;
   struct _pb *pb$l_blink;
   unsigned short int pb$w_size;

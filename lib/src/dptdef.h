@@ -109,7 +109,9 @@ struct _dpt {
   char dpt$b_fill_23_ [7];
 };
 
+#if 0
 #define dpt$t_name dpt$dptunion.dpt$t_name 
+#endif
  
 #endif
  

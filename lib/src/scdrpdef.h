@@ -96,8 +96,8 @@ struct _scdrp {
   unsigned char scdrp$b_cd_type;      
   unsigned char scdrp$b_flck;         
   void (*scdrp$l_fpc)();              
-  long long scdrp$q_fr3;                
-  long long scdrp$q_fr4;                
+  unsigned long scdrp$l_fr3;                
+  unsigned long scdrp$l_fr4;                
   struct _ucb *scdrp$l_port_ucb;      
   struct _ucb *scdrp$l_ucb;           
   unsigned int scdrp$l_func;          

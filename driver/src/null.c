@@ -163,8 +163,8 @@ void nl_init(void) {
   d=&nullddb;
   u=&nullucb;
   bzero(u,sizeof(struct _ucb));
-  bzero(u,sizeof(struct _ddb));
-  bzero(u,sizeof(struct _crb));
+  bzero(d,sizeof(struct _ddb));
+  bzero(c,sizeof(struct _crb));
 
   ioc$gl_devlist=d; /* one-shot */
 

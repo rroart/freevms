@@ -175,7 +175,7 @@ struct _clidef1 {
   };
   void *cli$a_erract;                 
   union  {
-    unsigned int64 cli$q_rqdesc;  
+    unsigned long long cli$q_rqdesc;  
     struct  {
       unsigned short int cli$w_rqsize; 
       short int clidef$$_fill_4;  
@@ -195,9 +195,9 @@ struct _clidef1 {
 	
 struct _clidef2 {
   char clidef$$_fill_8 [4];
-  unsigned int64 cli$q_namdesc;     
-  unsigned int64 cli$q_valdesc;     
-  unsigned int64 cli$q_tabdesc;     
+  unsigned long long cli$q_namdesc;     
+  unsigned long long cli$q_valdesc;     
+  unsigned long long cli$q_tabdesc;     
   int cli$l_itmlst;                   
   int cli$l_attr;                     
 
@@ -235,18 +235,18 @@ struct _clidef5 {
   char clidef$$_fill_5 [2];           
   unsigned int cli$l_outpid;          
   int cli$l_lststatus;                
-  unsigned int64 cli$q_cmdstr;      
-  unsigned int64 cli$q_input;       
-  unsigned int64 cli$q_output;      
-  unsigned int64 cli$q_prcnam;      
+  unsigned long long cli$q_cmdstr;      
+  unsigned long long cli$q_input;       
+  unsigned long long cli$q_output;      
+  unsigned long long cli$q_prcnam;      
   int cli$l_astadr;                   
   int cli$l_astprm;                   
   unsigned char cli$b_efn;            
   unsigned char cli$b_version;        
   char clidef$$_fill_6 [2];           
-  unsigned int64 cli$q_prompt;      
-  unsigned int64 cli$q_cli;         
-  unsigned int64 cli$q_table;       
+  unsigned long long cli$q_prompt;      
+  unsigned long long cli$q_cli;         
+  unsigned long long cli$q_table;       
 
 };
 struct _clidef6 {
@@ -270,7 +270,7 @@ struct _clidef6 {
     };
   };
   union  {
-    unsigned int64 cli$q_qdvaldesc; 
+    unsigned long long cli$q_qdvaldesc; 
     struct  {
       unsigned short int cli$w_qdvalsiz; 
       short int clidef$$_fill_7;  

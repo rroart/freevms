@@ -2005,8 +2005,8 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   tqe2.tqe$b_type=DYN$C_TQE;
   tqe2.tqe$b_rqtype=TQE$C_SSREPT;
   tqe2.tqe$l_fpc=&exe$timeout;
-  tqe2.tqe$q_fr3=0; /* something? */
-  tqe2.tqe$q_fr4=0; /* something? */
+  tqe2.tqe$l_fr3=0; /* something? */
+  tqe2.tqe$l_fr4=0; /* something? */
   tqe2.tqe$q_time=0;
   tqe2.tqe$q_delta=10000000;
 

@@ -25,11 +25,11 @@
 struct _scsnet {
   char scsnet$t_swtype [4];
   char scsnet$t_swvers [4];
-  unsigned __int64 scsnet$q_swincarn;
+  unsigned long long scsnet$q_swincarn;
   char scsnet$t_hwtype [4];
   unsigned char scsnet$b_hwvers [12];
-  unsigned __int64 scsnet$q_nodename;
-  unsigned __int64 scsnet$q_curtime;
+  unsigned long long scsnet$q_nodename;
+  unsigned long long scsnet$q_curtime;
 };
  
 #endif

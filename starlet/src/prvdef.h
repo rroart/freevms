@@ -117,7 +117,7 @@ typedef union _prvdef {
   };
 };
  
-typedef struct _prvdsp_bits {
+struct _prvdsp_bits {
   unsigned prv$v_sorted		: 1;
   unsigned prv$v_brief		: 1;
   unsigned prv$v_filled		: 1;

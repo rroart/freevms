@@ -132,11 +132,11 @@ struct {
 };
  
 struct _sched_ds {
-  unsigned long cpu$q_acc_run;
-  unsigned long cpu$q_proc_count;
-  unsigned long cpu$q_acc_interrupt;
-  unsigned long cpu$q_acc_waitime;
-  unsigned long cpu$q_sched_flags;
+  unsigned long long cpu$q_acc_run;
+  unsigned long long cpu$q_proc_count;
+  unsigned long long cpu$q_acc_interrupt;
+  unsigned long long cpu$q_acc_waitime;
+  unsigned long long cpu$q_sched_flags;
 };
  
 #endif

@@ -529,14 +529,14 @@ unsigned short int mscp$w_tape_char;
   short int mscp$w_reserved;
   union  {
     union  {
-      unsigned int64 mscp$q_unit_id;
+      unsigned long long mscp$q_unit_id;
       struct  {
 	void *mscp$l_excl_lba;
 	unsigned int mscp$l_excl_lbc;
       };
     };
     union  {
-      int64 mscp$q_slun_overlay;
+      long long mscp$q_slun_overlay;
       struct  {
 	unsigned int mscp$l_slun_allocls;
 	unsigned short int mscp$w_slun_unit;
@@ -821,9 +821,9 @@ unsigned short int mscp$w_tape_char;
   unsigned char mscp$b_cnt_svr;
   unsigned char mscp$b_cnt_hvr;
   union  {
-    unsigned int64 mscp$q_time;
+    unsigned long long mscp$q_time;
     struct  {
-      unsigned int64 mscp$q_cnt_id;
+      unsigned long long mscp$q_cnt_id;
     };
   };
   unsigned int mscp$l_maxbcnt;
@@ -848,14 +848,14 @@ unsigned short int mscp$w_tape_char;
       unsigned int mscp$l_lbcount;
       unsigned short int mscp$w_src_unum;
       short int mscp$w_reserved;
-      unsigned int64 mscp$q_src_uid;
+      unsigned long long mscp$q_src_uid;
       unsigned int mscp$l_dest_lbn;
       unsigned short int mscp$w_hrn;
       unsigned short int mscp$w_ent_id;
       int mscp$l_reserved;
       unsigned int mscp$l_src_lbn;
-      unsigned int64 mscp$q_port_adr;
-      unsigned int64 mscp$q_sys_adr;
+      unsigned long long mscp$q_port_adr;
+      unsigned long long mscp$q_sys_adr;
     };
     struct  {
       int mscp$l_filler;

@@ -63,7 +63,7 @@ struct _dsrv {
     unsigned short int dsrv$w_ctimo;
     unsigned short int dsrv$w_reserved;
   };
-  unsigned int64 dsrv$q_ctrl_id;
+  unsigned long long dsrv$q_ctrl_id;
   unsigned int dsrv$l_memw_tot;
   unsigned short int dsrv$w_memw_cnt;
   unsigned short int dsrv$w_memw_max;

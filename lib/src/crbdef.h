@@ -19,8 +19,8 @@ struct _crb {
   unsigned char crb$b_type;           
   unsigned char crb$b_flck;           
   void (*crb$l_fpc)();                
-  long long crb$q_fr3;                  
-  long long crb$q_fr4;                  
+  unsigned long crb$l_fr3;                  
+  unsigned long crb$l_fr4;                  
   struct _fkb *crb$l_wqfl;            
   struct _fkb *crb$l_wqbl;            
   union  {

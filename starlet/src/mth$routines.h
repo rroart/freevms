@@ -4,10 +4,6 @@
  */
 #ifndef _MTH$ROUTINES_H
 #define _MTH$ROUTINES_H
-# ifdef __cplusplus
-extern "C" {
-# endif
-
 
 float mth$acos();
 double mth$dacos(), mth$gacos();
@@ -501,7 +497,4 @@ long mth$jisign();
 
 float mth$sngl(), mth$snglg();
 
-# ifdef __cplusplus
-}
-# endif
 #endif	

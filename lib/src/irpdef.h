@@ -167,8 +167,8 @@ unsigned long irp$l_keydesc;
 #define irp$b_cd_type irp_cdrp.cdrp$b_cd_type
 #define irp$b_flck irp_cdrp.cdrp$b_flck
 #define irp$l_fpc irp_cdrp.cdrp$l_fpc
-#define irp$q_fr3 irp_cdrp.cdrp$q_fr3
-#define irp$q_fr4 irp_cdrp.cdrp$q_fr4
+#define irp$l_fr3 irp_cdrp.cdrp$l_fr3
+#define irp$l_fr4 irp_cdrp.cdrp$l_fr4
 #define irp$l_savd_rtn irp_cdrp.cdrp$l_savd_rtn
 #define irp$l_msg_buf irp_cdrp.cdrp$l_msg_buf
 #define irp$l_rspid irp_cdrp.cdrp$l_rspid

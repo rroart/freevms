@@ -34,7 +34,7 @@ struct scbdef {
     char scb$t_volockname[12];
     VMSTIME scb$q_mounttime;
     vmsword scb$w_backrev;
-    vmslong scb$q_genernum[2];
+    vmslong scb$q_genernum[2]; /* error? */
     char scb$b_reserved[446];
     vmsword scb$w_checksum;
 };

@@ -4,9 +4,6 @@
  */
 #ifndef _LIB$ROUTINES_H
 #define _LIB$ROUTINES_H
-# ifdef __cplusplus
-extern "C" {
-# endif
 
 #include "../../librtl/src/descrip.h"
 
@@ -333,7 +330,4 @@ unsigned long lib$verify_vm_zone(const unsigned long *);
 
 unsigned long lib$wait(float);
 
-# ifdef __cplusplus
-}
-# endif
 #endif	

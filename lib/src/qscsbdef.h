@@ -43,18 +43,18 @@ struct _qscsb {
   unsigned int qscsb$l_qscubcnt;
   unsigned int qscsb$l_maxmsg;
   char qscsb$b_fill_1_ [4];
-  unsigned __int64 qscsb$q_nodename;
-  unsigned __int64 qscsb$q_systemid;
-  unsigned __int64 qscsb$q_connects;
-  unsigned __int64 qscsb$q_version;
-  unsigned __int64 qscsb$q_conntime;
-  unsigned __int64 qscsb$q_iocnt;
-  unsigned __int64 qscsb$q_abcnt;
-  unsigned __int64 qscsb$q_complexiocnt;
-  unsigned __int64 qscsb$q_controliocnt;
-  unsigned __int64 qscsb$q_simpleiocnt;
-  unsigned __int64 qscsb$q_stallediocnt;
-  unsigned __int64 qscsb$q_errmsgcnt;
+  unsigned long long qscsb$q_nodename;
+  unsigned long long qscsb$q_systemid;
+  unsigned long long qscsb$q_connects;
+  unsigned long long qscsb$q_version;
+  unsigned long long qscsb$q_conntime;
+  unsigned long long qscsb$q_iocnt;
+  unsigned long long qscsb$q_abcnt;
+  unsigned long long qscsb$q_complexiocnt;
+  unsigned long long qscsb$q_controliocnt;
+  unsigned long long qscsb$q_simpleiocnt;
+  unsigned long long qscsb$q_stallediocnt;
+  unsigned long long qscsb$q_errmsgcnt;
 } ;
  
 #define QSCSB$C_LENGTH 208

@@ -244,14 +244,14 @@ struct _ucb2 {
   unsigned long ucb$l_pid;
   struct _ucb *ucb$l_link;
   struct _vcb *ucb$l_vcb;
-  unsigned long ucb$q_devchar;
-  unsigned long ucb$q_devchar2;
+  unsigned long ucb$l_devchar;
+  unsigned long ucb$l_devchar2;
   unsigned long ucb$l_affinity;
   unsigned long reserved;
   unsigned char ucb$b_devclass;
   unsigned char ucb$b_devtype;
   unsigned short ucb$w_devbufsiz;
-  unsigned long ucb$q_devdepend;
+  unsigned long ucb$l_devdepend;
   unsigned long ucb$l_devdepend2;
   struct _irp *ucb$l_ioqfl;
   struct _irp *ucb$l_ioqbl;

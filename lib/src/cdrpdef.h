@@ -104,8 +104,8 @@ struct _cdrp {
   unsigned char cdrp$b_cd_type;
   unsigned char cdrp$b_flck;
   void (*cdrp$l_fpc)();
-  unsigned long cdrp$q_fr3;
-  unsigned long cdrp$q_fr4;
+  unsigned long cdrp$l_fr3;
+  unsigned long cdrp$l_fr4;
   void (*cdrp$l_savd_rtn)();
   void *cdrp$l_msg_buf;
   unsigned int cdrp$l_rspid;

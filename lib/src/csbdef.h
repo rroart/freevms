@@ -74,9 +74,9 @@ struct _csb {
   char csb$b_hwname [61];
   char csb$b_hwname_pad [3]; 
   char csb$t_sw_version [8];
-  unsigned int64 csb$q_swincarn;
-  unsigned int64 csb$q_reftime;
-  unsigned int64 csb$q_lnm_seqnum;  
+  unsigned long long csb$q_swincarn;
+  unsigned long long csb$q_reftime;
+  unsigned long long csb$q_lnm_seqnum;  
   unsigned int csb$wil_cnx_sts_r0;
   unsigned short int csb$w_cnx_sts_r0;
   unsigned int csb$wil_cnx_sts_r1;
@@ -96,13 +96,13 @@ struct _csb {
   unsigned short int csb$w_csid_seq;
   unsigned int csb$wil_cnid;
   unsigned short int csb$w_cnid;
-  int64 csb$q_partnerq;
+  long long csb$q_partnerq;
   void *csb$l_partnerqfl;
   void *csb$l_partnerqbl;
-  int64 csb$q_warmcdrpq;
+  long long csb$q_warmcdrpq;
   struct _cdrp *csb$l_warmcdrpqfl;
   struct _cdrp *csb$l_warmcdrpqbl;
-  unsigned int64 csb$q_rm_ctxq;
+  unsigned long long csb$q_rm_ctxq;
   unsigned int csb$l_rm_ctxqfl;
   unsigned int csb$l_rm_ctxqbl;
   void *csb$l_sentqbl;  void *csb$l_resendqfl;
@@ -130,7 +130,7 @@ struct _csb {
   unsigned short int csb$w_err_cntr;
   unsigned int csb$l_scs2lckmgr_msgcnt;
   int csb$l_scs2lckmgr_msgarray;
-  int64 csb$q_scs2lckmgr_pad;
+  long long csb$q_scs2lckmgr_pad;
 };
  
 #endif
