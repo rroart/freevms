@@ -192,7 +192,7 @@ int mb$fdt_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
   if (m->mmb$w_datasize==0 || ((func&IO$M_FCODE)==IO$_WRITEOF))
     u->ucb$w_bufquo--;
 
-  insque(m,&u->ucb$l_mb_msgqfl);
+  insque(m,u->ucb$l_mb_msgqbl);
 
   //  if (u->ucb$l_sts & UCB$M_BSY)
   if (!aqempty(mu->ucb$l_mb_readqfl))
@@ -303,7 +303,7 @@ int mb$fdt_read (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   //  if (m->mmb$w_msgsize)
   //    memcpy(m->mmb$t_data,i->irp$l_qio_p2,m->mmb$w_size);
   // ?  u->ucb$w_msgcnt++;
-  insque(i,&mu->ucb$l_mb_readqfl);
+  insque(i,mu->ucb$l_mb_readqbl);
 
   if (!aqempty(u->ucb$l_mb_msgqfl))
     mb$finishread(u);
@@ -506,7 +506,7 @@ void mb$finishread(struct _ucb * u) {
       struct __mmb * next = u->ucb$l_mb_msgqfl;
 
       if (!aqempty(&u->ucb$l_mb_msgqfl) && (next->mmb$b_func&IO$M_FCODE)!=IO$_WRITEOF) {
-	  not_done=0;
+	  not_done=1;
       } else {
 
 	  if (s->srb$w_bufquochrg) {
@@ -782,7 +782,7 @@ int exe_std$wrtmailbox (struct _mb_ucb *mb_ucb, int msgsiz, void *msg,...) {
       u->ucb$w_bufquo-=m->mmb$w_datasize;
   }
 
-  insque(m,&u->ucb$l_mb_msgqfl);
+  insque(m,u->ucb$l_mb_msgqbl);
 
   if (!aqempty(mb_ucb->ucb$l_mb_readqfl))
     mb$finishread(u);
