@@ -619,8 +619,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 #endif
     buf.count = 0;
     buf.dirent = &dir;
-    generic_file_llseek(f, dir.d_off, 0);
+    generic_file_llseek(f, fib->fib$l_wcc/*dir.d_off*/, 0);
     vfs_readdir(f, fillonedir64, &buf);
+    fib->fib$l_wcc = f->f_pos;
+
     filp_close(f,0);
 
     //    resdsc->dsc$a_pointer=strdup(dir.d_name);
@@ -630,8 +632,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     //    fib->fib$l_wcc=dir.d_off;
     fib->fib$w_file_hdrseq_incr=f->f_pos;//dir.d_off+*reslen;
     fib->fib$w_dir_hdrseq_incr=*reslen;
-
-    fib->fib$l_wcc = 1;
 
 #if 0
     if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
