@@ -33,7 +33,7 @@
 #include <misc.h>
 #endif
 
-#define globalvalue int
+#define globalvalue extern int
 #define TRUE 1
 #define FALSE 0
 #define SYS$QIO sys$qiow
@@ -49,6 +49,8 @@
 #define SYS$GETJPIW sys$getjpiw
 #define SYS$GETSYIW sys$getsyiw
 #define SYS$GETDVIW sys$getdviw
+#define CLI$DCL_PARSE cli$dcl_parse
+#define CLI$DISPATCH cli$dispatch
 unsigned long lib$init_timer() { return SS$_NORMAL; }
 unsigned long lib$show_timer() { return SS$_NORMAL; }
 int SYS$DCLEXH() { return SS$_NORMAL; }
@@ -88,6 +90,27 @@ int SYS$DELTVA(long in[2], long ret[2], int a) {
   return SS$_NORMAL;
 }
 typedef unsigned long Boolean;
+
+int verify_command(int mask);
+
+struct cli_struct {
+  char * cliroutine;
+  void (*fn)();
+};
+
+struct cli_struct cliroutines[]={
+{  "verify",          verify_command,           },
+{ 0, 0 , },
+};
+
+void * get_cli_int(char * c) {
+  int i;
+  for (i=0;cliroutines[i].cliroutine;i++) {
+    if (0==strncmp(c,cliroutines[i].cliroutine,strlen(cliroutines[i].cliroutine)))
+      return cliroutines[i].fn;
+  }
+  return 0;
+}
 
 globalvalue dfu_tables;
 /* Next global params needed for CTRL/C trapping */
@@ -270,7 +293,7 @@ main(int argc, char *argv[])
 #endif
 
    cip = 1;
-   return verify_command(0);
+   //return verify_command(0);
 
 /* Main loop starts here. Get a command and pasre it*/
    for (;;)
@@ -318,22 +341,24 @@ main(int argc, char *argv[])
 /* Catch the CLI errors do avoid disrupting the SMG screen... */
 #if 0
      VAXC$ESTABLISH(prim_hand);
-     status = CLI$DCL_PARSE(&input_line,dfu_tables,lib$get_input,0,&prompt);
+#endif
+     status = CLI$DCL_PARSE(&input_line,&dfu_tables,0 /* not yet lib$get_input*/,0,&prompt); // check added & before dfu_tables
+#if 0
      VAXC$ESTABLISH(NULL);
 #endif
      if (status == CLI$_NOCOMD) singlemsg(0,status);
      if ((status & 1 ) != 1) goto endfor;
       else
 /* Now dispatch if no errors */
-#if 0
      { reset_ctrl();
        CLI$DISPATCH(prvmask);
        clean_ctrlc();
        cip = 0;
        status = brdcst_ast();
+#if 0
        if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id, &cursor_on);
-     }
 #endif
+     }
 endfor:
      if (ret_len !=0) 
      { /* Single command processing , so exit here */
@@ -361,7 +386,11 @@ endfor:
                 &prompt,&out_len,0,0,0,0,0,0); /*Get next command */
 #else
      printf("%s",prompt.dsc$a_pointer);
-     read(0,command_line,254);
+     out_len = read(0,command_line,254);
+     out_len--;
+     command_line[out_len]=0;
+     if (strncmp(command_line,"exit",4)==0)
+       return 0;
 #endif
    }
 }  /* END of MAIN */
@@ -615,6 +644,7 @@ void reset_ctrl(void)
 /* Reset CTRLC/Y on the terminal channel */
 
 {
+#if 0
   int stat, func;
   struct { short status, count; 
            int extra ;} iosb;
@@ -628,6 +658,7 @@ void reset_ctrl(void)
   t_mask[1] += (1 << 25); 
   status = SYS$QIOW(0,tchan,(IO$_SETMODE+IO$M_OUTBAND),&iosb,
     0,0,astrtn,&t_mask,0,0,0,0); 
+#endif
 }
 
 int astrtn()
@@ -648,6 +679,7 @@ void clean_ctrlc()
            int extra ;} iosb;
   unsigned int t_mask[2];
 
+#if 0
   status = SYS$QIOW(0,tchan, IO$_SETMODE,0,0,0,&orgttchar,12,0,0,0,0); 
   if (!smg$enable)
     status = SYS$QIOW(0,tchan,(IO$_SETMODE+IO$M_OUTBAND),&iosb,
@@ -657,6 +689,7 @@ void clean_ctrlc()
     status = SYS$QIOW(0,tchan,(IO$_SETMODE+IO$M_OUTBAND),&iosb,
       0,0,refresh,&t_mask,0,0,0,0); 
   }
+#endif
   status = 1;
 }
 

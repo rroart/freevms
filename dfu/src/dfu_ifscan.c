@@ -63,6 +63,8 @@
 #define SYS$GETJPIW sys$getjpiw
 #define SYS$GETSYIW sys$getsyiw
 #define SYS$GETDVIW sys$getdviw
+#define CLI$PRESENT cli$present
+#define CLI$GET_VALUE cli$get_value
 
 typedef unsigned long Boolean;
 
@@ -1961,7 +1963,7 @@ int verify_command(int mask)
 
   progress_ind = TRUE;
   y = 0;
-#if 0
+#if 1
   status = parse_item("fix", &dummy_descr, 0, &matfix, 2);
   status = parse_item("rebuild", &dummy_descr, 0, &matreb, 2);
 #else
@@ -1974,8 +1976,9 @@ int verify_command(int mask)
     return(SS$_NOPRIV);
   }
 /* Get device name */
-#if 0
-  status = parse_item("device", &device_descr, 0, &dummy , 0);
+#if 1
+  status = parse_item("device", &device_descr, 0, &dummy , 0); // not yet
+  status = parse_item("p1", &device_descr, 0, &dummy , 0);
   if (status == 1) 
   { if (strindex(&device,":",64) == -1) 
       {
@@ -2796,7 +2799,7 @@ next_file: status = get_next_header();
   return(1);
 }
 
-#if 0
+
 int parse_item(char *inp, struct dsc$descriptor *return_descr,
 	       int *convert, Boolean *flag, int typ) 
   /* Check presence of parameter  in command line
@@ -2925,7 +2928,7 @@ int parse_item(char *inp, struct dsc$descriptor *return_descr,
   }
   else return(1);
 }
-#endif
+
 
 void fid_to_name(char * ret_dir)
 /* 
