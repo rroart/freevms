@@ -215,6 +215,20 @@ void myqio(int rw, int data, int size, int blocknr,kdev_t dev)
   return sts;
 }
 
+void vms_submit_bh(int rw, struct buffer_head * bh)
+{
+  int sts;
+  int type;
+  unsigned long long iosb;
+  if (rw)
+    type=IO$_WRITEPBLK;
+  else
+    type=IO$_READPBLK;
+  sts = exe_qiow(0,(unsigned short)dev2chan(bh->b_dev),type,&iosb,0,0,
+		     bh->b_data,bh->b_size, bh->b_blocknr,MINOR(bh->b_dev)&31,0,0);
+  return sts;
+}
+
 void vms_ll_rw_block(int rw, int nr, struct buffer_head * bhs[],kdev_t dev)
 {
   int sts;
@@ -663,9 +677,45 @@ void make_fcb(struct inode * inode) {
 }
 
 struct _fcb * e2_search_fcb(void * v) {
-  return exttwo_search_fcb(x2p->current_vcb,v);
+  if (x2p->current_vcb)
+    return exttwo_search_fcb(x2p->current_vcb,v);
+  else
+    return 0;
 }
 
 signed long e2_map_vbn(struct _fcb * fcb, signed long vbn) {
   return f11b_map_vbn(vbn,&fcb->fcb$l_wlfl);
+}
+
+int e2_fcb_wcb_add_one(struct _fcb * fcb,signed long vbn,signed long result)
+{
+  int retsts;
+  struct _wcb * wcb;
+  struct _wcb * head=&fcb->fcb$l_wlfl;
+  struct _wcb * tmp=head->wcb$l_wlfl;
+  while (tmp!=head) {
+    if (vbn>=tmp->wcb$l_stvbn && vbn<=(tmp->wcb$l_stvbn+tmp->wcb$l_p1_count)) {
+      tmp->wcb$l_p1_count++;
+      return SS$_NORMAL;
+    }
+    tmp=tmp->wcb$l_wlfl;
+  }
+
+  wcb = (struct _wcb *) kmalloc(sizeof(struct _wcb),GFP_KERNEL);
+  bzero(wcb,sizeof(struct _wcb));
+  if (wcb == NULL) {
+    retsts = SS$_INSFMEM;
+    return retsts;
+  }
+
+  wcb->wcb$b_type=DYN$C_WCB;
+  wcb->wcb$l_orgucb=x2p->current_ucb;
+  insque(wcb,&fcb->fcb$l_wlfl);
+  wcb->wcb$l_fcb=fcb;
+  
+  wcb->wcb$l_stvbn=vbn;
+  wcb->wcb$l_p1_count=1;
+  wcb->wcb$l_p1_lbn=result;
+
+  return SS$_NORMAL;
 }
