@@ -78,6 +78,10 @@ int sys$waitfr(unsigned int efn) {
 int sys$hiber(void) {
   return INLINE_SYSCALL($hiber,0);
 }
+
+int sys$dclast(void (*astadr)(__unknown_params), unsigned long astprm, unsigned int acmode) {
+  return INLINE_SYSCALL($dclast,3,astadr,astprm,acmode);
+}
 #endif
 
 #ifdef __arch_um__
@@ -141,6 +145,14 @@ int sys$hiber(void) {
   int sts;
   pushpsl();
   sts=exe$hiber();
+  myrei();
+  return sts;
+}
+
+int sys$dclast(void (*astadr)(__unknown_params), unsigned long astprm, unsigned int acmode) {
+  int sts;
+  pushpsl();
+  sts=exe$dclast(astadr,astprm,acmode);
   myrei();
   return sts;
 }
