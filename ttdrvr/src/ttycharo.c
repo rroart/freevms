@@ -31,9 +31,14 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
       //wb->tty$l_wb_fpc=?;
       //exe_std$primitive_fork(wb,i,wb);
       struct _irp * temp_irp = lt->ucb$l_tl_phyucb->ucb$l_irp;
+      // temp_irp is nonzero when telnetted. some other times too. fix later.
+      if (temp_irp==0) 
+	temp_irp=((struct _tty_ucb *)lt->ucb$l_tl_phyucb)->ucb$l_tt_wrtbuf->tty$l_wb_irp;
       kfree(temp_irp->irp$l_svapte); // have to get rid of this first?
       temp_irp->irp$l_svapte=0;
-      int status = ioc$reqcom(SS$_NORMAL,0,lt->ucb$l_tl_phyucb);
+      temp_irp->irp$l_iost1=SS$_NORMAL;
+      // int status = com$post(temp_irp,lt->ucb$l_tl_phyucb);
+      // not working with duplex?      int status = ioc$reqcom(SS$_NORMAL,0,lt->ucb$l_tl_phyucb);
       goto again;
     } else {
       // more data
@@ -71,5 +76,9 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
   char * bd_txt = bd->tty$l_rb_txt;
   bd_txt[bd->tty$w_rb_txtoff]=*c;
   bd->tty$w_rb_txtoff++;
+
+  ioc$reqcom(SS$_NORMAL,0,u); // not needed here? bad place?
+
+  return 1;
 
 }
