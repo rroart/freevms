@@ -44,6 +44,7 @@
 #include <vcbdef.h>
 #include <wcbdef.h>
 #include <descrip.h>
+#include <devdef.h>
 #include <ssdef.h>
 #include <uicdef.h>
 #include <namdef.h>
@@ -230,12 +231,15 @@ void cleanup_wcf(struct WCCFILE *wccfile)
 
 unsigned do_search(struct _fabdef *fab,struct WCCFILE *wccfile)
 {
-  struct _iosb iosb={0};
+    struct _iosb iosb={0};
     int sts;
+    unsigned short dummy;
     struct _fibdef fibblk;
     struct WCCDIR *wcc;
     struct dsc$descriptor fibdsc,resdsc;
     struct _namdef *nam = fab->fab$l_nam;
+    if (ucb2chan(wccfile->wcf_vcb,&dummy))
+      return SS$_NORMAL;
     wcc = &wccfile->wcf_wcd;
     if (fab->fab$w_ifi != 0) return RMS$_IFI;
 
@@ -569,7 +573,10 @@ memset(wccfile,0,sizeof(struct WCCFILE)+256);
         struct _ucb *dev;
         sts = device_lookup(fna_size[0],wccfile->wcf_result,0,&dev);
         if ((sts & 1) == 0) return sts;
-        if ((wccfile->wcf_vcb = dev->ucb$l_vcb) == NULL) return SS$_DEVNOTMOUNT;
+	int disk_or_tape = dev->ucb$l_devchar & DEV$M_FOD;
+        if ((wccfile->wcf_vcb = dev->ucb$l_vcb) == NULL && disk_or_tape) return SS$_DEVNOTMOUNT;
+	if (wccfile->wcf_vcb == 0)
+	  wccfile->wcf_vcb = dev;
         wcc = &wccfile->wcf_wcd;
         wcc->wcd_prev = NULL;
         wcc->wcd_next = NULL;
