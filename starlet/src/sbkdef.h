@@ -10,15 +10,15 @@ struct _sbkdef {
     struct  {
       unsigned short int sbk$w_stlbnh;
       unsigned short int sbk$w_stlbnl;
-    } sbk$r_stlbn_fields;
-  } sbk$r_stlbn_overlay;
+    };
+  };
   union  {
     unsigned int sbk$l_filesize;
     struct  {
       unsigned short int sbk$w_filesizh;
       unsigned short int sbk$w_filesizl;
-    } sbk$r_filesize_fields;
-  } sbk$r_filesize_overlay;
+    };
+  };
   unsigned char sbk$b_acnt;
   unsigned char sbk$b_lcnt;
   unsigned int sbk$l_fcb;
@@ -31,12 +31,5 @@ struct _sbkdef {
   unsigned int sbk$l_writes;
 };
  
-#define		sbk$l_filesize		sbk$r_filesize_overlay.sbk$l_filesize
-#define		sbk$l_stlbn		sbk$r_stlbn_overlay.sbk$l_stlbn
-#define		sbk$w_filesizh		sbk$r_filesize_overlay.sbk$r_filesize_fields.sbk$w_filesizh
-#define		sbk$w_filesizl		sbk$r_filesize_overlay.sbk$r_filesize_fields.sbk$w_filesizl
-#define		sbk$w_stlbnh		sbk$r_stlbn_overlay.sbk$r_stlbn_fields.sbk$w_stlbnh
-#define		sbk$w_stlbnl		sbk$r_stlbn_overlay.sbk$r_stlbn_fields.sbk$w_stlbnl
-
 #endif
  
