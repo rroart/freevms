@@ -5637,7 +5637,10 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
   dflnam.dsc$w_length=len;
   dflnam.dsc$a_pointer=argv[0];
 
-  sts=sys$imgact(&aname,&dflnam,&hdrbuf,0,0,0,0,0);
+  hdrbuf=malloc(512);
+  memset(hdrbuf, 0, 512);
+
+  sts=sys$imgact(&aname,&dflnam,hdrbuf,0,0,0,0,0);
   printf("imgact got sts %x\n",sts);
 
   if (sts!=SS$_NORMAL) return sts;
