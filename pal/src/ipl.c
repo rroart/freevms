@@ -107,6 +107,8 @@ inline void setipl(unsigned char i) {
   current->psl_ipl=i;
 #ifdef IPL_DEBUG
   int addr=&this_cpu;
+  if (i==0)
+    memcpy((long)stk+0,addr,128);
   if (i==2)
     memcpy((long)stk+64*10,addr,128);
   if (i==8 && i!=this)
@@ -317,7 +319,14 @@ asmlinkage void myrei (void) {
   if (p->psl_prv_mod < p->psl_cur_mod) panic("prv curmod\n");
   if (p->psl_cur_mod < p->oldpsl_cur_mod) panic("rei to higher mode\n");
   if (p->psl_is==1 && p->oldpsl_is==0) panic("is stuff\n");
-  if (p->psl_ipl > p->oldpsl_ipl) panic("rei to higher ipl\n");
+#ifdef IPL_DEBUG
+  if (p->psl_ipl > p->oldpsl_ipl && p->psl_ipl==2 && p->oldpsl_ipl==0) {
+    int i;
+    for (i=0;i<64;i++) printk("%4x ",(unsigned long)stk[i]);
+    printk("\n");
+  }
+#endif
+  if (p->psl_ipl > p->oldpsl_ipl) panic("rei to higher ipl %x %x\n",p->psl_ipl , p->oldpsl_ipl);
     //sickinsque(0x10000000+p->psl_ipl,0x20000000+p->oldpsl_ipl);
   setipl(current->psl_ipl);
   //  if (!in_sw_ast) sw_ast();
