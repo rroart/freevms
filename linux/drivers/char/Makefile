@@ -16,13 +16,13 @@ FONTMAPFILE = cp437.uni
 
 O_TARGET := char.o
 
-obj-y	 += mem.o tty_io.o n_tty.o tty_ioctl.o raw.o pty.o random.o
+obj-y	 += mem.o tty_io.o n_tty.o tty_ioctl.o raw.o pty.o misc.o random.o
 
 # All of the (potential) objects that export symbols.
 # This list comes from 'grep -l EXPORT_SYMBOL *.[hc]'.
 
 export-objs     :=	console.o keyboard.o sysrq.o \
-			pty.o random.o selection.o serial.o \
+			misc.o pty.o random.o selection.o serial.o \
 			tty_io.o tty_ioctl.o generic_serial.o
 
 mod-subdirs	:=	joystick ftape drm drm-4.0 pcmcia
