@@ -150,8 +150,8 @@ SHOW WORKING_SET:
 SET WORKING_SET:
 	adds or subtracts to working set quota
 	does not work exactly to specs
-	set working_set /quota delta
-	set working_set /extent delta
+	set working_set /quota=delta
+	set working_set /extent=delta
 	DCL only
 
 run a VMS image file:

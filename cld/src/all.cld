@@ -51,6 +51,15 @@ define syntax show_logical
 define syntax show_system
 	cliroutine show_system
 
+define syntax show_time
+	cliroutine show_time
+
+define syntax show_devices
+	cliroutine show_devices
+
+define syntax show_working_set
+	cliroutine show_working_set
+
 define syntax set_default
 	cliroutine set_default
 	parameter p1
@@ -63,22 +72,40 @@ define syntax set_process
 	cliroutine set_process
 	qualifier identification,value(required)
 
+define syntax set_working_set
+	cliroutine set_working_set
+	qualifier quota,value(required)
+	qualifier extent,value(required)
+
 define type set_something
 	keyword default, syntax = set_default
 	keyword prompt, syntax = set_prompt
 	keyword process, syntax = set_process
+	keyword working_set, syntax = set_working_set
 
 define type show_something
 	keyword default, syntax = show_default
 	keyword symbol, syntax = show_symbol
 	keyword logical, syntax = show_logical
 	keyword system, syntax = show_system
+	keyword time, syntax = show_time
+	keyword devices, syntax = show_devices
+	keyword working_set, syntax = show_working_set
 
 define verb set
 	parameter p1,label=something,value(type=set_something)
 
 define verb show
 	parameter p1,label=something,value(type=show_something)
+
+define syntax name_table
+	cliroutine int_create_logical_table
+	parameter p1
+
+define verb create 
+	image create
+	routine create_main
+	qualifier name_table,syntax=name_table
 
 define verb dfu
 	image dfu

@@ -1,6 +1,8 @@
 # $Id$
 # $Locker$
 
+EXTERNAL2 = ../../cdu/src/cdu2.a
+
 FLAGS = -static
 
 all: set.a show.a i386/create${NOEXE} i386/create${EXE} um/create${NOEXE} um/create${EXE}
@@ -26,18 +28,20 @@ show.a: showsystem.o showdevice.o showwork.o showlog.o
 %.o: %.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
-i386/create${NOEXE}: create.o $(VMSLIBS)
+i386/create${NOEXE}: create.o $(VMSLIBS) $(EXTERNAL2)
 	install -d i386
-	gcc $(FLAGS) -g create.o $(VMSLIBS) -o i386/create${NOEXE}
+	gcc $(FLAGS) -g create.o $(VMSLIBS) $(EXTERNAL2) -o i386/create${NOEXE}
+	ld -Bshareable create.o $(VMSLIBS) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/create.exe2
 
-i386/create${EXE}: create.o $(VMSLIBS)
+i386/create${EXE}: create.o $(VMSLIBS) $(EXTERNAL2)
 	install -d i386
-	$(LINKER) $(LINKPRE) create.o $(VMSLIBS) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/create${EXE}
+	$(LINKER) $(LINKPRE) create.o $(VMSLIBS) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o i386/create${EXE}
 
-um/create${NOEXE}: create.o $(VMSLIBSUM)
+um/create${NOEXE}: create.o $(VMSLIBSUM) $(EXTERNAL2)
 	install -d um
-	gcc $(FLAGS) -g create.o $(VMSLIBSUM) -o um/create${NOEXE}
+	gcc $(FLAGS) -g create.o $(VMSLIBSUM) $(EXTERNAL2) -o um/create${NOEXE}
+	ld -Bshareable create.o $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o um/create.exe2
 
-um/create${EXE}: create.o $(VMSLIBSUM)
+um/create${EXE}: create.o $(VMSLIBSUM) $(EXTERNAL2)
 	install -d um
-	$(LINKER) $(LINKPRE) create.o $(VMSLIBSUM) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/create${EXE}
+	$(LINKER) $(LINKPRE) create.o $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o um/create${EXE}

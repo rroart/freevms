@@ -39,7 +39,7 @@ is the uml "harddisk" and on i386 only ide.
 Boot with init=/bin/sh or init=/vms\$common/sysexe/dcl
 
 Example build i386:
-tar xzf freevms-0_0_51.tgz
+tar xzf freevms-0_1_2.tgz
 cd freevms/linux
 ./prescript
 cd ..
@@ -49,7 +49,7 @@ maybe do make update-modverfile
 make bzImage
 
 Example build um:
-tar xzf freevms-0_0_51.tgz
+tar xzf freevms-0_1_2.tgz
 cd freevms/linux
 ./prescript
 cd ..
@@ -68,6 +68,10 @@ Edit linux/include/linux/autoconf.h to have CONFIG_VMS defined
 
 Example build of user environment:
 cd .. or cd freevms
+make download-bliss
+make build-bliss
+make download-linker
+make build-linker
 make vmsall
 make vmsinstall
 cp -rpv rooti386/. /		(if you are using the same computer)
