@@ -172,6 +172,8 @@ inline char intr_blocked(unsigned char this) {
       //  panic("pslindex\n");
     block3++;
     //    if (this!=8) block3=0;
+    if (block3>20)
+      block3++;
     if (block3>90) mydebugi=3;
     if (block3>100) {
 #if 0
