@@ -184,7 +184,7 @@ extern int astdeb;
 
 extern int in_atomic;
 
-int makereadast(unsigned long file, unsigned long address, unsigned long pte, unsigned long offset, write_flag) {
+int makereadast(unsigned long file, unsigned long address, unsigned long pte, unsigned long offset, unsigned long write_flag) {
   struct _acb * a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
   struct pfast * pf=kmalloc(sizeof(struct pfast),GFP_KERNEL);
   struct _rde * rde;
