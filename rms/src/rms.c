@@ -74,9 +74,16 @@
 
 #include "rmsmisc.h"
 
+#if 0
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
 
 struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
+#endif
+
+// borrowed from starlet/src/rms.c
+
+struct _fabdef cc$rms_fab={FAB$C_BID,FAB$C_BLN,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+struct _namdef cc$rms_nam={NAM$C_BID,NAM$C_BLN,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 /* Table of file name component delimeters... */
 
