@@ -60,8 +60,12 @@ int exe$epid_to_ipid(unsigned long pid) {
   if ((csid&0xff)==(pid>>21)) {
     int ipid=(pid&mask)|(((pid&0x1ffff)>>process_bit_shift())<<16);
     if (vec[ipid&0xffff] && ((struct _pcb *)vec[ipid&0xffff])->pcb$l_pid==ipid)
-      { } else
-    printk(KERN_EMERG "panic? ipid %x %x %x %x\n",pid,ipid,((struct _pcb *)vec[ipid&0xffff])->pcb$l_pid,((struct _pcb *)vec[ipid&0xffff])->pcb$l_epid);
+      { } else {
+	if (vec[ipid&0xffff])
+	  printk(KERN_EMERG "panic? ipid %x %x %x %x\n",pid,ipid,((struct _pcb *)vec[ipid&0xffff])->pcb$l_pid,((struct _pcb *)vec[ipid&0xffff])->pcb$l_epid);
+	else
+	  printk(KERN_EMERG "panic? no vec ipid %x %x %x %x\n",pid,ipid,vec[ipid&0xffff],0);
+      }
       return ipid;
   }
   if ((pid&0xfffe0000))
