@@ -638,6 +638,8 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     filp_close(f,0);
 
     //    resdsc->dsc$a_pointer=strdup(dir.d_name);
+    if (0==strcmp(name,"/") && 0==strcmp(dir.d_name,"."))
+      strcpy(dir.d_name,"000000.DIR");
     if (0==strcmp(dir.d_name,".."))
       strcpy(dir.d_name,"DOTDOT.DIR");
     if (0==strcmp(dir.d_name,"."))
