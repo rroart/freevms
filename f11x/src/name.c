@@ -29,7 +29,7 @@ static int vms_match (int len, const char * const name, struct _dir * d) {
 		return 0;
 
 	for(i=0;i<len;i++) {
-		if(toupper(name[i]) != toupper(d->dir$t_name)) return(0);
+		if(toupper(name[i]) != toupper(d->dir$t_name[i])) return(0);
 	}
 	return(1);
 }
@@ -87,7 +87,7 @@ struct dentry * vms_lookup (struct inode * dir, struct dentry * dentry)
 	block = 1;
 	offset = 0;
 
-	while(block <= eofblk) {	/* XXX is this right? */
+	while(block < eofblk) {	/* XXX is this right? */
 		struct _dir1 *dv;
 		int nextblock;
 

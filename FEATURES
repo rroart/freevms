@@ -7,6 +7,7 @@ logicals (partly)
 fork (partly)
 queued i/o (a little bit)
 memory management (a little bit at low-level)
+ods2 readonly (partly)
 
 syscalls:
 $ascefc

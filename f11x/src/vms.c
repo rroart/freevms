@@ -210,7 +210,7 @@ getvb(long vbn,char *buf,struct _fh2 *hp,kdev_t dev) {
                 }
                 block += size;
         }
-	printk("limit: %i(%i)\n",limit,rp);
+	printk("limit: %x(%x)\n",limit,rp);
         if ( rp > limit )
                 return(0);
         lbn = lbnbase(rp) + vbn - block;
