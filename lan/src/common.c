@@ -35,6 +35,9 @@
 #include "../../cmuip/ipacp/src/xedrv.h"
 #include "../../cmuip/central/include/netconfig.h"
 
+#define LAN_DEBUG
+#undef LAN_DEBUG
+
 static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv,
 				      char *mask, void (*setup)(struct net_device *));
 static struct net_device *init_alloc_dev(int sizeof_priv);
@@ -245,6 +248,9 @@ int lan$netif_rx(struct _ucb * u, void * bdsc) {
 
   if (proto==ETH_P_IPV6) {
     kfreebuf(cb1);
+#ifdef LAN_DEBUG
+    printk("<0>" "discard packet V6\n");
+#endif
     return;
   }
   while (tmp) {
@@ -254,11 +260,17 @@ int lan$netif_rx(struct _ucb * u, void * bdsc) {
   }
   if (proto != ni->ucb$l_ni_pty) {
     kfreebuf(cb1);
+#ifdef LAN_DEBUG
+    printk("<0>" "discard packet prot %x\n",proto);
+#endif
     return;
   }
 
   if (aqempty(&tmp->ucb$l_ioqfl)) {
     kfreebuf(cb1);
+#ifdef LAN_DEBUG
+    printk("<0>" "discard packet\n");
+#endif
     return;
   }
 
