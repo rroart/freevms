@@ -492,11 +492,6 @@ static int exec_mmap(void)
 		activate_mm(active_mm, mm);
 		mm_release();
 
-		current->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
-		init_phd(current->pcb$l_phd);
-		init_p1pp(current,current->pcb$l_phd);
-		lnm_init_prc(current);
-
 		if (old_mm) {
 			if (active_mm != old_mm) BUG();
 			mmput(old_mm);
@@ -609,12 +604,6 @@ int flush_old_exec(struct linux_binprm * bprm)
 	char * name;
 	int i, ch, retval;
 	struct signal_struct * oldsig;
-#ifdef __arch_um__
-	struct _pcb * pcb = OLD_CURRENT_TASK(&retval);
-#else
-	struct _pcb * pcb = old_get_current();
-#endif
-	pcb = current;
 
 	/*
 	 * Make sure we have a private signal table
@@ -628,6 +617,11 @@ int flush_old_exec(struct linux_binprm * bprm)
 	 */
 	retval = exec_mmap();
 	if (retval) goto mmap_failed;
+
+	current->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
+	init_phd(current->pcb$l_phd);
+	init_p1pp(current,current->pcb$l_phd);
+	lnm_init_prc(current);
 
 	/* This is the point of no return */
 	release_old_signals(oldsig);
