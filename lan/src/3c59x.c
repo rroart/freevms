@@ -2631,7 +2631,7 @@ static int vortex_rx(struct net_device *dev)
 
 	extern struct _ucbnidef * ecu;
 	struct _ucb * u = ecu;
-    
+
 	if (vortex_debug > 5)
 		printk(KERN_DEBUG "vortex_rx(): status %4.4x, rx_status %4.4x.\n",
 			   inw(ioaddr+EL3_STATUS), inw(ioaddr+RxStatus));
