@@ -5,16 +5,22 @@
 
 #include <linux/init.h>
 #include <linux/sched.h>
-#include <system_data_cells.h>
+#include <linux/vmalloc.h>
+
+#include <ccbdef.h>
 #include <ddtdef.h>
 #include <dptdef.h>
+#include <dyndef.h>
 #include <fdtdef.h>
-#include <ucbdef.h>
+#include <internals.h>
 #include <iodef.h>
+#include <ipldef.h>
 #include <irpdef.h>
-#include <ccbdef.h>
+#include <ssdef.h>
+#include <system_data_cells.h>
+#include <ucbdef.h>
 
-struct _ucb ucb0;
+struct _mb_ucb ucb0;
 
 struct _dpt mb_dpt = { };
 
@@ -49,6 +55,8 @@ void mb_sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
 }
 
 void mb_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  int savipl;
+  struct __mmb * m;
   int func=i->irp$l_func;
   if (func==IO$_WRITEOF) {
     i->irp$l_boff=0;
@@ -57,11 +65,46 @@ void mb_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
     i->irp$l_bcnt=i->irp$l_qio_p2;
     i->irp$l_media=i->irp$l_qio_p1;
   }
+  m=vmalloc(sizeof(struct __mmb));
+  bzero(m,sizeof(struct __mmb));
+  m->mmb$w_size=sizeof(struct __mmb);
+  m->mmb$b_type=DYN$C_BUFIO;
+  m->mmb$b_func=func;
+  m->mmb$w_msgsize=i->irp$l_qio_p2;
+  m->mmb$l_irp=i;
+  m->mmb$l_pid=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb->pid;
+  if (m->mmb$w_msgsize)
+    memcpy(m->mmb$t_data,i->irp$l_qio_p2,m->mmb$w_size);
+  savipl=vmslock(&SPIN_MAILBOX,IPL$_MAILBOX);
+  u->ucb$w_msgcnt++;
+  insque(m,&u->ucb$l_mb_msgqfl);
+  vmsunlock(&SPIN_MAILBOX,savipl);
+  exe$finishioc(i->irp$l_iosb,i,p,u);
+  return SS$_NORMAL;
 }
 
 void mb_read (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   int func=i->irp$l_func;
-
+  struct __mmb * m;
+  int savipl;
+  i->irp$l_bcnt=i->irp$l_qio_p2;
+  i->irp$l_media=i->irp$l_qio_p1;
+  m=vmalloc(sizeof(struct __mmb));
+  bzero(m,sizeof(struct __mmb));
+  m->mmb$w_size=sizeof(struct __mmb);
+  m->mmb$b_type=DYN$C_BUFIO;
+  m->mmb$b_func=func;
+  m->mmb$w_msgsize=i->irp$l_qio_p2;
+  m->mmb$l_irp=i;
+  m->mmb$l_pid=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb->pid;
+  //  if (m->mmb$w_msgsize)
+  //    memcpy(m->mmb$t_data,i->irp$l_qio_p2,m->mmb$w_size);
+  savipl=vmslock(&SPIN_MAILBOX,IPL$_MAILBOX);
+  u->ucb$w_msgcnt++;
+  insque(m,&((struct _mb_ucb *)u)->ucb$l_mb_readqfl);
+  vmsunlock(&SPIN_MAILBOX,savipl);
+  exe$finishioc(i->irp$l_iosb,i,p,u);
+  return SS$_NORMAL;
 }
 
 void mb_cancel (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {

@@ -3,6 +3,9 @@
 
 // Author. Roar Thronæs.
 
+#include<linux/smp.h>
+#include<linux/kernel.h>
+#include<asm/hw_irq.h>
 #include<linux/sched.h>
 #include<irpdef.h>
 #include<acbdef.h>
@@ -48,7 +51,11 @@ asmlinkage void ioc$iopost(void) {
   if (!rqempty(&ioc$gq_postiq)) {
     i=remqhi(&ioc$gq_postiq,i);
   } else {
-    return;
+    if (!aqempty(&smp$gl_cpu_data[smp_processor_id()]->cpu$l_psfl)) {
+      i=remque(&smp$gl_cpu_data[smp_processor_id()]->cpu$l_psfl,i);
+    } else {
+      return;
+    }
   }
   p=find_process_by_pid(i->irp$l_pid);
 

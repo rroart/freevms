@@ -3,18 +3,28 @@
 
 // Author. Roar Thronæs.
 
-#include<starlet.h>
-#include<iodef.h>
-#include<ssdef.h>
-#include<irpdef.h>
-#include<ucbdef.h>
+#include<linux/spinlock.h>
+
+#include<acbdef.h>
+#include<aqbdef.h>
+#include<cdrpdef.h>
 #include<ddtdef.h>
 #include<fdtdef.h>
-#include<ipldef.h>
-#include<system_data_cells.h>
 #include<internals.h>
+#include<iodef.h>
+#include<ipldef.h>
+#include<irpdef.h>
+#include<pridef.h>
+#include<ssdef.h>
+#include<starlet.h>
+#include<system_data_cells.h>
+#include<ucbdef.h>
+#include<vcbdef.h>
+
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
+#include<linux/kernel.h>
+#include<asm/hw_irq.h>
 
 void exe$insertirp(void * u, struct _irp * i) {
   struct _irp *tmp=((struct _irp *)u)->irp$l_ioqfl;
@@ -30,7 +40,11 @@ void exe$altqueuepkt (void) {
 }
 
 void exe$finishio (long long * iosb, struct _irp * i, struct _pcb * p, struct _ucb * u) {
-
+  /* do iosb stuff */
+  forklock(u->ucb$b_flck,-1);
+  insque(i,&smp$gl_cpu_data[smp_processor_id()]->cpu$l_psbl);
+  SOFTINT_IOPOST_VECTOR;
+  forkunlock(u->ucb$b_flck,-1);
 }
 
 void exe$finishioc (long long * iosb, struct _irp * i, struct _pcb * p, struct _ucb * u) {
@@ -106,7 +120,20 @@ asmlinkage int exe$qio (struct struct_qio * q) {
       //  }
 }
 
-void exe$qioacppkt (void) {
+void exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
+  int wasempty;
+  struct _vcb * v=u->ucb$l_vcb;
+  struct _aqb * a=v->vcb$l_aqb;
+  wasempty=aqempty(&a->aqb$l_acpqfl);
+  exe$insioq(i,&a->aqb$l_acpqfl);
+  if (wasempty) return SS$_NORMAL;
+  if (a->aqb$l_acppid==0) {
+    exe$qioqxqppkt(p,&i->irp$l_fqfl);
+    return;
+  }
+  sch$wake(a->aqb$l_acppid);
+  /* restore ipl to 0 */
+  return SS$_NORMAL;
 }
 
 int exe$qiodrvpkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
@@ -120,6 +147,15 @@ int exe_std$qiodrvpkt (struct _irp * i, struct _ucb * u) {
   return exe$qiodrvpkt(i,0,u);
 }
 
-void exe$qioqxqppkt (void) {
+extern f11b$dispatch();
+
+void exe$qioqxqppkt (struct _pcb * p, struct _cdrp * c) {
+  struct _acb *a=c;
+  //  struct _f11b * f=ctl$gl_f11bxqp;
+
+  a->acb$l_ast=f11b$dispatch;
+  a->acb$l_astprm=c->cdrp$l_fqfl;
+  sch$qast(p->pid,PRI$_RESAVL,a);
 }
+
 

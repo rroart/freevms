@@ -75,6 +75,7 @@ done
 		ln -s ../../freevms/rms/src/phyunix.c .;
 		ln -s ../../freevms/mount/src/mountdsp.c .;
 		ln -s ../../freevms/sys/src/ucbcredel.c .;
+		ln -s ../../freevms/f11x/src/dispatch.c .;
 
 		ln -s ../../freevms/pal/src/ipl.c .;
 		ln -s ../../freevms/pal/src/ast.c .;

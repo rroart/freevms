@@ -1980,6 +1980,7 @@ void __init vms_init(void) {
       q->flink=q;
       q->blink=q;
     }
+    qhead_init(&smp$gl_cpu_data[i]->cpu$l_psfl);
   }
 
   sch$gl_idle_cpus=0;

@@ -53,6 +53,7 @@ int ioc_std$clone_ucb(struct return_values * r, struct _ucb * u) {
   c->ucb$l_sts|=UCB$M_ONLINE;
   c->ucb$l_sts&=~UCB$M_TEMPLATE;
   // c->ucb$l_charge
+  qhead_init(c->ucb$l_mb_msgqfl); // probably this too?
 
  again:
   if (++u->ucb$w_unit_seed>9999) u->ucb$w_unit_seed=1;
