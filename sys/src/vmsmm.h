@@ -26,6 +26,7 @@ extern struct list_head inactive_list;
 #include <asm/atomic.h>
 
 #include <pfndef.h>
+#include <rdedef.h>
 
 /*
  * Linux kernel virtual memory manager primitives.
@@ -42,7 +43,7 @@ extern struct list_head inactive_list;
  * space that has a special rule for the page-fault handlers (ie a shared
  * library, the executable area etc).
  */
-struct vm_area_struct {
+struct vm_area_struct_not {
 	struct mm_struct * vm_mm;	/* The address space we belong to. */
 	unsigned long vm_start;		/* Our start address within vm_mm. */
 	unsigned long vm_end;		/* The first byte after our end address
@@ -75,50 +76,54 @@ struct vm_area_struct {
 	void * vm_private_data;		/* was vm_pte (shared mem) */
 };
 
+#define vm_area_struct _rde
+
+// vm_flags will be 8 bits left to coexist with rde stuff
+
 /*
  * vm_flags..
  */
-#define VM_READ		0x00000001	/* currently active flags */
-#define VM_WRITE	0x00000002
-#define VM_EXEC		0x00000004
-#define VM_SHARED	0x00000008
+#define VM_READ		0x00000100	/* currently active flags */
+#define VM_WRITE	0x00000200
+#define VM_EXEC		0x00000400
+#define VM_SHARED	0x00000800
 
-#define VM_MAYREAD	0x00000010	/* limits for mprotect() etc */
-#define VM_MAYWRITE	0x00000020
-#define VM_MAYEXEC	0x00000040
-#define VM_MAYSHARE	0x00000080
+#define VM_MAYREAD	0x00001000	/* limits for mprotect() etc */
+#define VM_MAYWRITE	0x00002000
+#define VM_MAYEXEC	0x00004000
+#define VM_MAYSHARE	0x00008000
 
-#define VM_GROWSDOWN	0x00000100	/* general info on the segment */
-#define VM_GROWSUP	0x00000200
-#define VM_SHM		0x00000400	/* shared memory area, don't swap out */
-#define VM_DENYWRITE	0x00000800	/* ETXTBSY on write attempts.. */
+#define VM_GROWSDOWN	0x00010000	/* general info on the segment */
+#define VM_GROWSUP	0x00020000
+#define VM_SHM		0x00040000	/* shared memory area, don't swap out */
+#define VM_DENYWRITE	0x00080000	/* ETXTBSY on write attempts.. */
 
-#define VM_EXECUTABLE	0x00001000
-#define VM_LOCKED	0x00002000
-#define VM_IO           0x00004000	/* Memory mapped I/O or similar */
+#define VM_EXECUTABLE	0x00100000
+#define VM_LOCKED	0x00200000
+#define VM_IO           0x00400000	/* Memory mapped I/O or similar */
 
 					/* Used by sys_madvise() */
-#define VM_SEQ_READ	0x00008000	/* App will access data sequentially */
-#define VM_RAND_READ	0x00010000	/* App will not benefit from clustered reads */
+#define VM_SEQ_READ	0x00800000	/* App will access data sequentially */
+#define VM_RAND_READ	0x01000000	/* App will not benefit from clustered reads */
 
-#define VM_DONTCOPY	0x00020000      /* Do not copy this vma on fork */
-#define VM_DONTEXPAND	0x00040000	/* Cannot expand with mremap() */
-#define VM_RESERVED	0x00080000	/* Don't unmap it from swap_out */
+#define VM_DONTCOPY	0x02000000      /* Do not copy this vma on fork */
+#define VM_DONTEXPAND	0x04000000	/* Cannot expand with mremap() */
+#define VM_RESERVED	0x08000000	/* Don't unmap it from swap_out */
 
-#define VM_STACK_FLAGS	0x00000177
+#define VM_STACK_FLAGS	0x00017700
 
 #define VM_READHINTMASK			(VM_SEQ_READ | VM_RAND_READ)
-#define VM_ClearReadHint(v)		(v)->vm_flags &= ~VM_READHINTMASK
-#define VM_NormalReadHint(v)		(!((v)->vm_flags & VM_READHINTMASK))
-#define VM_SequentialReadHint(v)	((v)->vm_flags & VM_SEQ_READ)
-#define VM_RandomReadHint(v)		((v)->vm_flags & VM_RAND_READ)
+#define VM_ClearReadHint(v)		(v)->rde$l_flags &= ~VM_READHINTMASK
+#define VM_NormalReadHint(v)		(!((v)->rde$l_flags & VM_READHINTMASK))
+#define VM_SequentialReadHint(v)	((v)->rde$l_flags & VM_SEQ_READ)
+#define VM_RandomReadHint(v)		((v)->rde$l_flags & VM_RAND_READ)
 
 /* read ahead limits */
 extern int vm_min_readahead;
 extern int vm_max_readahead;
 
 /*
- * mapping from the currently active vm_flags protection bits (the
+ * mapping from the currently active rde$l_flags protection bits (the
  * low four bits) to a page protection mask..
  */
 extern pgprot_t protection_map[16];
@@ -130,9 +135,9 @@ extern pgprot_t protection_map[16];
  * to the functions called when a no-page or a wp-page exception occurs. 
  */
 struct vm_operations_struct {
-	void (*open)(struct vm_area_struct * area);
-	void (*close)(struct vm_area_struct * area);
-	struct page * (*nopage)(struct vm_area_struct * area, unsigned long address, int unused);
+	void (*open)(struct _rde * area);
+	void (*close)(struct _rde * area);
+	struct page * (*nopage)(struct _rde * area, unsigned long address, int unused);
 };
 
 /*
@@ -275,37 +280,37 @@ typedef struct not_use_page {
  * the pages. The struct page (these bits with information) are always
  * mapped into kernel address space...
  */
-#define PG_locked		 0	/* Page is locked. Don't touch. */
-#define PG_error		 1
-#define PG_referenced		 2
-#define PG_uptodate		 3
-#define PG_dirty		 4
-#define PG_unused		 5
-#define PG_lru			 6
-#define PG_active		 7
-#define PG_slab			 8
-#define PG_skip			10
-#define PG_highmem		11
-#define PG_checked		12	/* kill me in 2.5.<early>. */
-#define PG_arch_1		13
-#define PG_reserved		14
-#define PG_launder		15	/* written out by VM pressure.. */
+#define PG_locked		 3	/* Page is locked. Don't touch. */
+#define PG_error		20
+#define PG_referenced		21
+#define PG_uptodate		22
+#define PG_dirty		13
+#define PG_unused		23
+#define PG_lru			24
+#define PG_active		25
+#define PG_slab			26
+#define PG_skip			27
+//#define PG_highmem		11
+#define PG_checked		28	/* kill me in 2.5.<early>. */
+#define PG_arch_1		29
+#define PG_reserved		30
+#define PG_launder		31	/* written out by VM pressure.. */
 
 /* Make it prettier to test the above... */
 #define UnlockPage(page)	unlock_page(page)
-#define Page_Uptodate(page)	test_bit(PG_uptodate, &(page)->flags)
-#define SetPageUptodate(page)	set_bit(PG_uptodate, &(page)->flags)
-#define ClearPageUptodate(page)	clear_bit(PG_uptodate, &(page)->flags)
-#define PageDirty(page)		test_bit(PG_dirty, &(page)->flags)
-#define SetPageDirty(page)	set_bit(PG_dirty, &(page)->flags)
-#define ClearPageDirty(page)	clear_bit(PG_dirty, &(page)->flags)
-#define PageLocked(page)	test_bit(PG_locked, &(page)->flags)
-#define LockPage(page)		set_bit(PG_locked, &(page)->flags)
-#define TryLockPage(page)	test_and_set_bit(PG_locked, &(page)->flags)
-#define PageChecked(page)	test_bit(PG_checked, &(page)->flags)
-#define SetPageChecked(page)	set_bit(PG_checked, &(page)->flags)
-#define PageLaunder(page)	test_bit(PG_launder, &(page)->flags)
-#define SetPageLaunder(page)	set_bit(PG_launder, &(page)->flags)
+#define Page_Uptodate(page)	test_bit(PG_uptodate, &(page)->pfn$l_page_state)
+#define SetPageUptodate(page)	set_bit(PG_uptodate, &(page)->pfn$l_page_state)
+#define ClearPageUptodate(page)	clear_bit(PG_uptodate, &(page)->pfn$l_page_state)
+#define PageDirty(page)		test_bit(PG_dirty, &(page)->pfn$l_page_state)
+#define SetPageDirty(page)	set_bit(PG_dirty, &(page)->pfn$l_page_state)
+#define ClearPageDirty(page)	clear_bit(PG_dirty, &(page)->pfn$l_page_state)
+#define PageLocked(page)	test_bit(PG_locked, &(page)->pfn$l_page_state)
+#define LockPage(page)		set_bit(PG_locked, &(page)->pfn$l_page_state)
+#define TryLockPage(page)	test_and_set_bit(PG_locked, &(page)->pfn$l_page_state)
+#define PageChecked(page)	test_bit(PG_checked, &(page)->pfn$l_page_state)
+#define SetPageChecked(page)	set_bit(PG_checked, &(page)->pfn$l_page_state)
+#define PageLaunder(page)	test_bit(PG_launder, &(page)->pfn$l_page_state)
+#define SetPageLaunder(page)	set_bit(PG_launder, &(page)->pfn$l_page_state)
 
 extern void FASTCALL(set_page_dirty(struct page *));
 
@@ -315,34 +320,34 @@ extern void FASTCALL(set_page_dirty(struct page *));
  * the clear_bit and the read of the waitqueue (to avoid SMP races with a
  * parallel wait_on_page).
  */
-#define PageError(page)		test_bit(PG_error, &(page)->flags)
-#define SetPageError(page)	set_bit(PG_error, &(page)->flags)
-#define ClearPageError(page)	clear_bit(PG_error, &(page)->flags)
-#define PageReferenced(page)	test_bit(PG_referenced, &(page)->flags)
-#define SetPageReferenced(page)	set_bit(PG_referenced, &(page)->flags)
-#define ClearPageReferenced(page)	clear_bit(PG_referenced, &(page)->flags)
-#define PageTestandClearReferenced(page)	test_and_clear_bit(PG_referenced, &(page)->flags)
-#define PageSlab(page)		test_bit(PG_slab, &(page)->flags)
-#define PageSetSlab(page)	set_bit(PG_slab, &(page)->flags)
-#define PageClearSlab(page)	clear_bit(PG_slab, &(page)->flags)
-#define PageReserved(page)	test_bit(PG_reserved, &(page)->flags)
+#define PageError(page)		test_bit(PG_error, &(page)->pfn$l_page_state)
+#define SetPageError(page)	set_bit(PG_error, &(page)->pfn$l_page_state)
+#define ClearPageError(page)	clear_bit(PG_error, &(page)->pfn$l_page_state)
+#define PageReferenced(page)	test_bit(PG_referenced, &(page)->pfn$l_page_state)
+#define SetPageReferenced(page)	set_bit(PG_referenced, &(page)->pfn$l_page_state)
+#define ClearPageReferenced(page)	clear_bit(PG_referenced, &(page)->pfn$l_page_state)
+#define PageTestandClearReferenced(page)	test_and_clear_bit(PG_referenced, &(page)->pfn$l_page_state)
+#define PageSlab(page)		test_bit(PG_slab, &(page)->pfn$l_page_state)
+#define PageSetSlab(page)	set_bit(PG_slab, &(page)->pfn$l_page_state)
+#define PageClearSlab(page)	clear_bit(PG_slab, &(page)->pfn$l_page_state)
+#define PageReserved(page)	test_bit(PG_reserved, &(page)->pfn$l_page_state)
 
-#define PageActive(page)	test_bit(PG_active, &(page)->flags)
-#define SetPageActive(page)	set_bit(PG_active, &(page)->flags)
-#define ClearPageActive(page)	clear_bit(PG_active, &(page)->flags)
+#define PageActive(page)	test_bit(PG_active, &(page)->pfn$l_page_state)
+#define SetPageActive(page)	set_bit(PG_active, &(page)->pfn$l_page_state)
+#define ClearPageActive(page)	clear_bit(PG_active, &(page)->pfn$l_page_state)
 
-#define PageLRU(page)		test_bit(PG_lru, &(page)->flags)
-#define TestSetPageLRU(page)	test_and_set_bit(PG_lru, &(page)->flags)
-#define TestClearPageLRU(page)	test_and_clear_bit(PG_lru, &(page)->flags)
+#define PageLRU(page)		test_bit(PG_lru, &(page)->pfn$l_page_state)
+#define TestSetPageLRU(page)	test_and_set_bit(PG_lru, &(page)->pfn$l_page_state)
+#define TestClearPageLRU(page)	test_and_clear_bit(PG_lru, &(page)->pfn$l_page_state)
 
 #ifdef CONFIG_HIGHMEM
-#define PageHighMem(page)		test_bit(PG_highmem, &(page)->flags)
+#define PageHighMem(page)		test_bit(PG_highmem, &(page)->pfn$l_page_state)
 #else
 #define PageHighMem(page)		0 /* needed to optimize away at compile time */
 #endif
 
-#define SetPageReserved(page)		set_bit(PG_reserved, &(page)->flags)
-#define ClearPageReserved(page)		clear_bit(PG_reserved, &(page)->flags)
+#define SetPageReserved(page)		set_bit(PG_reserved, &(page)->pfn$l_page_state)
+#define ClearPageReserved(page)		clear_bit(PG_reserved, &(page)->pfn$l_page_state)
 
 /*
  * Error return values for the *_nopage functions
@@ -363,6 +368,16 @@ extern struct page * FASTCALL(_alloc_pages(unsigned int gfp_mask, unsigned int o
 extern struct page * FASTCALL(__alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_t *zonelist));
 extern struct page * alloc_pages_node(int nid, unsigned int gfp_mask, unsigned int order);
 
+#ifdef __arch_um__
+#ifndef HAVE_ARCH_VALIDATE
+static inline struct page *arch_validate(struct page *page, 
+					 unsigned int gfp_mask, int order)
+{
+  return(page);
+}
+#endif
+#endif
+
 static inline struct page * alloc_pages(unsigned int gfp_mask, unsigned int order)
 {
 	/*
@@ -370,7 +385,11 @@ static inline struct page * alloc_pages(unsigned int gfp_mask, unsigned int orde
 	 */
 	if (order >= MAX_ORDER)
 		return NULL;
+#ifndef __arch_um__
 	return _alloc_pages(gfp_mask, order);
+#else
+	return arch_validate(_alloc_pages(gfp_mask, order), gfp_mask, order);
+#endif
 }
 
 #define alloc_page(gfp_mask) alloc_pages(gfp_mask, 0)
@@ -404,20 +423,20 @@ extern void show_free_areas_node(pg_data_t *pgdat);
 extern void clear_page_tables(struct mm_struct *, unsigned long, int);
 
 extern int fail_writepage(struct page *);
-struct page * shmem_nopage(struct vm_area_struct * vma, unsigned long address, int unused);
+struct page * shmem_nopage(struct _rde * vma, unsigned long address, int unused);
 struct file *shmem_file_setup(char * name, loff_t size);
 extern void shmem_lock(struct file * file, int lock);
-extern int shmem_zero_setup(struct vm_area_struct *);
+extern int shmem_zero_setup(struct _rde *);
 
 extern void zap_page_range(struct mm_struct *mm, unsigned long address, unsigned long size);
-extern int copy_page_range(struct mm_struct *dst, struct mm_struct *src, struct vm_area_struct *vma);
+extern int copy_page_range(struct mm_struct *dst, struct mm_struct *src, struct _rde *vma);
 extern int remap_page_range(unsigned long from, unsigned long to, unsigned long size, pgprot_t prot);
 extern int zeromap_page_range(unsigned long from, unsigned long size, pgprot_t prot);
 
 extern int vmtruncate(struct inode * inode, loff_t offset);
 extern pmd_t *FASTCALL(__pmd_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address));
 extern pte_t *FASTCALL(pte_alloc(struct mm_struct *mm, pmd_t *pmd, unsigned long address));
-extern int handle_mm_fault(struct mm_struct *mm,struct vm_area_struct *vma, unsigned long address, int write_access);
+extern int handle_mm_fault(struct mm_struct *mm,struct _rde *vma, unsigned long address, int write_access);
 extern int make_pages_present(unsigned long addr, unsigned long end);
 extern int access_process_vm(struct task_struct *tsk, unsigned long addr, void *buf, int len, int write);
 extern int ptrace_readdata(struct task_struct *tsk, unsigned long src, char *dst, int len);
@@ -428,7 +447,7 @@ extern void ptrace_disable(struct task_struct *);
 extern int ptrace_check_attach(struct task_struct *task, int kill);
 
 int get_user_pages(struct task_struct *tsk, struct mm_struct *mm, unsigned long start,
-		int len, int write, int force, struct page **pages, struct vm_area_struct **vmas);
+		int len, int write, int force, struct page **pages, struct _rde **vmas);
 
 /*
  * On a two-level page table, this ends up being trivial. Thus the
@@ -459,7 +478,7 @@ extern struct address_space swapper_space;
 
 static inline int is_page_cache_freeable(struct page * page)
 {
-	return page_count(page) - !!page->buffers == 1;
+  return page_count(page) /*- !!page->buffers*/ == 1;
 }
 
 extern int can_share_swap_page(struct page *);
@@ -468,10 +487,10 @@ extern int remove_exclusive_swap_page(struct page *);
 extern void __free_pte(pte_t);
 
 /* mmap.c */
-extern void lock_vma_mappings(struct vm_area_struct *);
-extern void unlock_vma_mappings(struct vm_area_struct *);
-extern void insert_vm_struct(struct mm_struct *, struct vm_area_struct *);
-extern void __insert_vm_struct(struct mm_struct *, struct vm_area_struct *);
+extern void lock_vma_mappings(struct _rde *);
+extern void unlock_vma_mappings(struct _rde *);
+extern void insert_vm_struct(struct mm_struct *, struct _rde *);
+extern void __insert_vm_struct(struct mm_struct *, struct _rde *);
 extern void build_mmap_rb(struct mm_struct *);
 extern void exit_mmap(struct mm_struct *);
 
@@ -498,20 +517,25 @@ extern int do_munmap(struct mm_struct *, unsigned long, size_t);
 
 extern unsigned long do_brk(unsigned long, unsigned long);
 
-static inline void __vma_unlink(struct mm_struct * mm, struct vm_area_struct * vma, struct vm_area_struct * prev)
+#if 0
+static inline void __vma_unlink(struct mm_struct * mm, struct _rde * vma, struct _rde * prev)
 {
 	prev->vm_next = vma->vm_next;
 	rb_erase(&vma->vm_rb, &mm->mm_rb);
 	if (mm->mmap_cache == vma)
 		mm->mmap_cache = prev;
 }
+#endif
 
-static inline int can_vma_merge(struct vm_area_struct * vma, unsigned long vm_flags)
+static inline int can_vma_merge(struct _rde * vma, unsigned long rde$l_flags)
 {
-	if (!vma->vm_file && vma->vm_flags == vm_flags)
+#if 0
+	if (!vma->vm_file && vma->rde$l_flags == rde$l_flags)
 		return 1;
 	else
 		return 0;
+#endif
+	return 0;
 }
 
 struct zone_t;
@@ -521,8 +545,8 @@ extern unsigned long page_unuse(struct page *);
 extern void truncate_inode_pages(struct address_space *, loff_t);
 
 /* generic vm_area_ops exported for stackable file systems */
-extern int filemap_sync(struct vm_area_struct *, unsigned long,	size_t, unsigned int);
-extern struct page *filemap_nopage(struct vm_area_struct *, unsigned long, int);
+extern int filemap_sync(struct _rde *, unsigned long,	size_t, unsigned int);
+extern struct page *filemap_nopage(struct _rde *, unsigned long, int);
 
 /*
  * GFP bitmasks..
@@ -563,50 +587,50 @@ static inline unsigned int pf_gfp_mask(unsigned int gfp_mask)
 }
 	
 /* vma is the first one with  address < vma->vm_end,
- * and even  address < vma->vm_start. Have to extend vma. */
-static inline int expand_stack(struct vm_area_struct * vma, unsigned long address)
+ * and even  address < vma->rde$pq_start_va. Have to extend vma. */
+static inline int expand_stack(struct _rde * vma, unsigned long address)
 {
 	unsigned long grow;
 
 	/*
-	 * vma->vm_start/vm_end cannot change under us because the caller is required
+	 * vma->rde$pq_start_va/vm_end cannot change under us because the caller is required
 	 * to hold the mmap_sem in write mode. We need to get the spinlock only
 	 * before relocating the vma range ourself.
 	 */
 	address &= PAGE_MASK;
- 	spin_lock(&vma->vm_mm->page_table_lock);
-	grow = (vma->vm_start - address) >> PAGE_SHIFT;
-	if (vma->vm_end - address > current->rlim[RLIMIT_STACK].rlim_cur ||
-	    ((vma->vm_mm->total_vm + grow) << PAGE_SHIFT) > current->rlim[RLIMIT_AS].rlim_cur) {
-		spin_unlock(&vma->vm_mm->page_table_lock);
+ 	//spin_lock(&vma->vm_mm->page_table_lock);
+	grow = (unsigned long)(vma->rde$pq_start_va - address) >> PAGE_SHIFT;
+	if ((vma->rde$pq_start_va + vma->rde$q_region_size) - address > current->rlim[RLIMIT_STACK].rlim_cur /* ||
+														((vma->vm_mm->total_vm + grow) << PAGE_SHIFT) > current->rlim[RLIMIT_AS].rlim_cur*/) {
+	  //spin_unlock(&vma->vm_mm->page_table_lock);
 		return -ENOMEM;
 	}
-	vma->vm_start = address;
-	vma->vm_pgoff -= grow;
-	vma->vm_mm->total_vm += grow;
-	if (vma->vm_flags & VM_LOCKED)
-		vma->vm_mm->locked_vm += grow;
-	spin_unlock(&vma->vm_mm->page_table_lock);
+	vma->rde$pq_start_va = address;
+	//vma->vm_pgoff -= grow;
+	//vma->vm_mm->total_vm += grow;
+	//if (vma->rde$l_flags & VM_LOCKED)
+	  //vma->vm_mm->locked_vm += grow;
+	//spin_unlock(&vma->vm_mm->page_table_lock);
 	return 0;
 }
 
 /* Look up the first VMA which satisfies  addr < vm_end,  NULL if none. */
-extern struct vm_area_struct * find_vma(struct mm_struct * mm, unsigned long addr);
-extern struct vm_area_struct * find_vma_prev(struct mm_struct * mm, unsigned long addr,
-					     struct vm_area_struct **pprev);
+extern struct _rde * find_vma(struct mm_struct * mm, unsigned long addr);
+extern struct _rde * find_vma_prev(struct mm_struct * mm, unsigned long addr,
+					     struct _rde **pprev);
 
 /* Look up the first VMA which intersects the interval start_addr..end_addr-1,
    NULL if none.  Assume start_addr < end_addr. */
-static inline struct vm_area_struct * find_vma_intersection(struct mm_struct * mm, unsigned long start_addr, unsigned long end_addr)
+static inline struct _rde * find_vma_intersection(struct mm_struct * mm, unsigned long start_addr, unsigned long end_addr)
 {
-	struct vm_area_struct * vma = find_vma(mm,start_addr);
+	struct _rde * vma = find_vma(mm,start_addr);
 
-	if (vma && end_addr <= vma->vm_start)
+	if (vma && end_addr <= vma->rde$pq_start_va)
 		vma = NULL;
 	return vma;
 }
 
-extern struct vm_area_struct *find_extend_vma(struct mm_struct *mm, unsigned long addr);
+extern struct _rde *find_extend_vma(struct mm_struct *mm, unsigned long addr);
 
 #endif /* __KERNEL__ */
 
