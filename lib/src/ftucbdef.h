@@ -18,7 +18,7 @@ struct _ft_ucb {
   void *ucb$l_ft_1st_page;
   void *ucb$l_ft_lst_page;
   void *ucb$l_ft_s0_page;
-  unsigned unsigned long long ucb$q_ft_buffer_handle;
+  unsigned long long ucb$q_ft_buffer_handle;
   union  {
     unsigned short int ucb$w_ft_sts;
     struct  {

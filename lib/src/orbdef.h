@@ -68,7 +68,7 @@ struct _orb {
   unsigned short int orb$w_refcount; 
   union  {
     union  {
-      unsigned unsigned long long orb$q_mode_prot;
+      unsigned long long orb$q_mode_prot;
       struct  {
 	unsigned int orb$l_mode_protl;
 	unsigned int orb$l_mode_proth;
