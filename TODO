@@ -98,3 +98,5 @@ Fix pool to conform more with newer versions
 Check use of relative queues; is fork use of & correct?
 
 Ext2 3rd level sizes
+
+Check page alignment for allocated pools.
