@@ -1,0 +1,25 @@
+#!/bin/bash
+
+unshadow () 
+{ 
+    for x in "$@";
+    do
+        if [ -f $x ]; then
+            mv $x $x.tmp.$$;
+            cp $x.tmp.$$ $x && rm -rf $x.tmp.$$;
+            chmod u+w $x;
+        else
+            echo "No such file '$x'";
+        fi;
+    done
+}
+
+LINDIR=../freevms
+for X in `cd $LINDIR; find . \( -name CVS -prune \) -o -type f -o -type d`; do
+	[ ! -d $X ] && [ -d $LINDIR/$X ] && mkdir $X
+	[ ! -L $X ] && [ ! -d $LINDIR/$X ] && ln -s `pwd`/$LINDIR/$X $X;
+done
+
+(cd linux/arch/i386; unshadow config )
+(cd linux/arch/um; unshadow config )
+(cd linux/include/linux; unshadow autoconf.h )
