@@ -21,8 +21,8 @@ extern int timer_on;
 
 static mydebugi = 0;  // should have no printk in a non-interruptable zone
 
-#define IPL_DEBUG
 #undef IPL_DEBUG
+#define IPL_DEBUG
 
 #ifdef IPL_DEBUG
 static long stk[1024];
@@ -93,10 +93,10 @@ inline int __PAL_MFPR_IPL() {
 inline void setipl(unsigned char i) {
   int this_cpu = smp_processor_id();
 #ifdef IPL_DEBUG
-  int this=smp$gl_cpu_data[this_cpu]->cpu$l_curpcb->psl_ipl; 
+  int this=ctl$gl_pcb->psl_ipl; 
 #if 0
-  if (i==2 && i<smp$gl_cpu_data[this_cpu]->cpu$l_curpcb->psl_ipl)
-    printk("ouch %x\n",smp$gl_cpu_data[this_cpu]->cpu$l_curpcb->psl_ipl);
+  if (i==2 && i<ctl$gl_pcb->psl_ipl)
+    printk("ouch %x\n",ctl$gl_pcb->psl_ipl);
 #endif
 #endif
   smp$gl_cpu_data[this_cpu]->cpu$b_ipl=i;

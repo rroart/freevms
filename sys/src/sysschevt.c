@@ -37,10 +37,10 @@ asmlinkage int exe$setimr  (unsigned int efn, signed long long *daytim,
   t->tqe$l_astprm=reqidt;
   t->tqe$q_time=time;
   t->tqe$b_rqtype=TQE$C_TMSNGL;
-  t->tqe$l_pid=cpu->cpu$l_curpcb->pcb$l_pid;
+  t->tqe$l_pid=ctl$gl_pcb->pcb$l_pid;
   t->tqe$b_efn=efn;
   //printast((struct _acb * )t);
-  cpu->cpu$l_curpcb->pcb$w_state=SCH$C_LEF; /* put it here until ... */
+  ctl$gl_pcb->pcb$w_state=SCH$C_LEF; /* put it here until ... */
   exe$instimq(t);
 }
 

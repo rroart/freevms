@@ -525,7 +525,7 @@ Not_Mounted:
 
 lock_iodb(int * R4) {
   // not yetR4 = ctl$gl_pcb;		// get my PCB address
-  *R4=smp$gl_cpu_data[0]->cpu$l_curpcb;
+  *R4=ctl$gl_pcb;
 	return	SCH$IOLOCKW();		// lock & return
 	}
 
@@ -559,7 +559,7 @@ lock_iodb(int * R4) {
 unlock_iodb(int * R4) {
   int R0,R1,R2,R3,R5,R6,R7,R8,R9;
   // not yet R4 = ctl$gl_pcb;
-  *R4=smp$gl_cpu_data[0]->cpu$l_curpcb;
+  *R4=ctl$gl_pcb;
 	R0 = SCH$IOUNLOCK();			// unlock I/O database
 #ifdef VMS_V4
 	SETIPL	#0				// timeshare

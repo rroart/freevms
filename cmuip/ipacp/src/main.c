@@ -793,7 +793,7 @@ void Main (void) {
 	  $DESCRIPTOR(dev_, "INET$DEVICE");
 	  struct dsc$descriptor * dev = &dev_;
 	  struct item_list_3 itm[2];
-	  lnm_init_prc(smp$gl_cpu_data[0]->cpu$l_curpcb); // needs this extra one
+	  lnm_init_prc(ctl$gl_pcb); // needs this extra one
 	  itm[0].item_code=LNM$_STRING;
 	  itm[0].buflen=4;
 	  itm[0].bufaddr=mydevice;

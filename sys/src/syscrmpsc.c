@@ -73,7 +73,7 @@ asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, uns
   struct _secdef *sec, *pstl;
   void * first=inadr->va_range$ps_start_va;
   void * last=inadr->va_range$ps_end_va;
-  struct _pcb * p=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;
+  struct _pcb * p=ctl$gl_pcb;
   unsigned long prot_pte;
   struct _rde * rde;
   int savipl=getipl();

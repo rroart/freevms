@@ -2643,7 +2643,7 @@ Finish_Cancel:
 int netacp_alive(struct _ucb * u) {
   if (u->ucb$l_devchar & DEV$V_AVL)
   return SS$_NORMAL;
-  return exe_std$abortio(u->ucb$l_irp, smp$gl_cpu_data[0]->cpu$l_curpcb, u, SS$_MEDOFL);
+  return exe_std$abortio(u->ucb$l_irp, ctl$gl_pcb, u, SS$_MEDOFL);
 #if 0 
 	Bbs	#DEV$V_AVL,UCB$L_DevChar(R5),l5;
 	movzwl	#SS$_MEDOFL,R0		// ACP is not running, return error.

@@ -16,7 +16,7 @@
 
 int exe$setast(char enbflg) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
-  struct _pcb * p=cpu->cpu$l_curpcb;
+  struct _pcb * p=ctl$gl_pcb;
   int retval;
   if (p->pcb$b_asten&(1<<p->psl_cur_mod))
     retval=SS$_WASSET;
@@ -37,7 +37,7 @@ int exe$setast(char enbflg) {
 
 int exe$dclast(void (*astadr)(__unknown_params), unsigned long astprm, unsigned int acmode) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
-  struct _pcb * p=cpu->cpu$l_curpcb;
+  struct _pcb * p=ctl$gl_pcb;
   struct _acb * a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
   bzero(a,sizeof(struct _acb));
   a->acb$l_pid=p->pcb$l_pid;

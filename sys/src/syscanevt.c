@@ -18,7 +18,7 @@ asmlinkage int exe$cantim(unsigned long reqidt, unsigned int acmode){
 }
 
 asmlinkage void exe$canwak(unsigned int *pidadr, void *prcnam){
-  int ipid=smp$gl_cpu_data[0]->cpu$l_curpcb->pcb$l_pid;
+  int ipid=ctl$gl_pcb->pcb$l_pid;
   exe_std$rmvtimq(0,0,TQE$C_WKSNGL,ipid);
   return SS$_NORMAL;
 }

@@ -83,7 +83,7 @@ dirpost(struct _irp * i) {
 
 bufpost(struct _irp * i) {
   struct _acb * a=(struct _acb *) i;
-  struct _pcb * pcb = smp$gl_cpu_data[0]->cpu$l_curpcb;
+  struct _pcb * pcb = ctl$gl_pcb;
   struct _phd * phd = pcb->pcb$l_phd;
   //printk("doing bufpost\n");
   /* do iosb soon? */

@@ -12,7 +12,7 @@
 #include<wsldef.h>
 
 int exe$adjwsl(signed int pagcnt, unsigned int *wsetlm) {
-  struct _pcb * p=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;
+  struct _pcb * p=ctl$gl_pcb;
   int newsize;
   //or ctl$gl_phd?
   // do all here, have no priv image in setwork

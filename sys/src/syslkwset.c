@@ -18,7 +18,7 @@ int mm_in_range(struct _va_range *inadr, void *address) {
 }
 
 int mm_common_lock(struct _va_range *inadr,int mask,int set) {
-  struct _pcb * p=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;
+  struct _pcb * p=ctl$gl_pcb;
   struct _wsl * wsl=p->pcb$l_phd->phd$l_wslist;
   int i;
   if (set) {

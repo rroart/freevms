@@ -16,7 +16,7 @@ asmlinkage void exe$resched(void) {
   setipl(IPL$_SCHED);
   spin_lock(&SPIN_SCHED);
 
-  p=smp$gl_cpu_data[0]->cpu$l_curpcb;
+  p=ctl$gl_pcb;
   p->pcb$l_onqtime=exe$gl_abstim_tics;
 
   sch$change_cur_priority(p, p->pcb$b_prib);

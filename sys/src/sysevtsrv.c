@@ -14,7 +14,7 @@
 
 asmlinkage int exe$clref(unsigned int efn) {
   int retval;
-  struct _pcb * p=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;
+  struct _pcb * p=ctl$gl_pcb;
   int efncluster=(efn&224)>>5;
   unsigned long * clusteraddr;
   clusteraddr=getefc(p,efn);

@@ -88,7 +88,7 @@ int lnm$searchlog(struct struct_lnm_ret * r,int loglen, char * lognam, int tabna
   int status;
   void * hash; 
   long ahash;
-  struct _pcb * pcb = smp$gl_cpu_data[0]->cpu$l_curpcb; 
+  struct _pcb * pcb = ctl$gl_pcb; 
   struct struct_rt * rt=lnmmalloc(sizeof(struct struct_rt));
   struct struct_nt * nt=lnmmalloc(sizeof(struct struct_nt));
   bzero(rt,sizeof(struct struct_rt));
@@ -228,18 +228,18 @@ int lnm$table(struct struct_lnm_ret * r,struct struct_rt * rt, struct struct_nt 
 
 int lnm$lookup(struct struct_lnm_ret * r,struct struct_rt * rt, int loglen, char * lognam, struct struct_nt * nt) {
   int status;
-  struct _pcb * pcb = smp$gl_cpu_data[0]->cpu$l_curpcb;
+  struct _pcb * pcb = ctl$gl_pcb;
   void * hash;
   nt->loglen=loglen;
   nt->lognam=lognam;
 #ifdef LNM_DEBUG 
   lnmprintf("lookup %s %x\n",nt->lognam,nt->loglen);
 #endif
-  nt->lnmb=pcb->pcb$l_ns_reserved_q1;
+  nt->lnmb=*lnm$al_dirtbl[1];
   hash=pcb->pcb$l_affinity_callback;
   status=lnm$presearch(r,hash,nt);
   if ((status&1)==0) {
-    nt->lnmb=lnm$al_dirtbl[0];
+    nt->lnmb=*lnm$al_dirtbl[0];
     hash=&lnmhshs;
     status=lnm$presearch(r,hash,nt);
   }

@@ -156,7 +156,7 @@ int mb$fdt_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
     m->mmb$w_datasize=i->irp$l_qio_p2;
     qhead_init(&m->mmb$l_noreaderwaitqfl);
     if ((func&IO$M_NOW)==0) m->mmb$l_irp=i;
-    m->mmb$l_pid=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb->pcb$l_pid;
+    m->mmb$l_pid=ctl$gl_pcb->pcb$l_pid;
     m->mmb$w_datasize=i->irp$l_bcnt;
     m->mmb$l_datastart=&m->mmb$t_data;
     if (m->mmb$w_datasize)
@@ -766,7 +766,7 @@ int exe_std$wrtmailbox (struct _mb_ucb *mb_ucb, int msgsiz, void *msg,...) {
   m->mmb$w_datasize=msgsiz;
   qhead_init(&m->mmb$l_noreaderwaitqfl);
   m->mmb$l_irp=0;
-  m->mmb$l_pid=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb->pcb$l_pid;
+  m->mmb$l_pid=ctl$gl_pcb->pcb$l_pid;
   m->mmb$l_datastart=&m->mmb$t_data;
   if (m->mmb$w_datasize)
     memcpy(m->mmb$t_data,msg,msgsiz);
