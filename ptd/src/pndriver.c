@@ -1083,6 +1083,9 @@ int PN$CLONE_INIT(struct _ucb * u) {
  // R5 = PTY UCB
  void (*fn)();
  fn=R0;
+ // try another initline?
+ extern int TZ$INITLINE();
+ fn=TZ$INITLINE;
  fn(0,new);  // check				// CALL THE UNIT INIT ROUTINE
  p = ctl$gl_pcb;		// Use current PCB
 #if 0
