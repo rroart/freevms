@@ -1987,8 +1987,15 @@ static char *page_getlink(struct dentry * dentry, struct page **ppage)
 {
 	struct page * page;
 	struct address_space *mapping = dentry->d_inode->i_mapping;
+#ifndef CONFIG_VMS
 	page = read_cache_page(mapping, 0, (filler_t *)mapping->a_ops->readpage,
 				NULL);
+#else
+	page = alloc_pages(GFP_KERNEL, 0);
+
+	block_read_full_page2(dentry->d_inode,page,0);
+
+#endif
 	if (IS_ERR(page))
 		goto sync_fail;
 	wait_on_page(page);

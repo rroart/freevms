@@ -440,10 +440,10 @@ unsigned char *read_dev_sector(struct block_device *bdev, unsigned long n, Secto
 {
 	struct address_space *mapping = bdev->bd_inode->i_mapping;
 	int sect = PAGE_CACHE_SIZE / 512;
-	struct page *page;
+	struct page *page = alloc_pages(GFP_KERNEL, 0);
 
-	page = read_cache_page(mapping, n/sect,
-			(filler_t *)def_blk_aops.readpage, NULL);
+	block_read_full_page2(bdev->bd_inode,page,n/sect);
+
 	if (!IS_ERR(page)) {
 		wait_on_page(page);
 		if (!Page_Uptodate(page))
