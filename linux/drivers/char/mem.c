@@ -538,8 +538,12 @@ static int mmap_zero(struct file * file, struct vm_area_struct * vma)
 		return shmem_zero_setup(vma);
 	if (zeromap_page_range(vma->vm_start, vma->vm_end - vma->vm_start, vma->vm_page_prot))
 #else
+#if 0
 	if (vma->rde$l_flags & VM_SHARED)
 		return shmem_zero_setup(vma);
+#else
+	panic("mmap zero\n");
+#endif
 	if (zeromap_page_range(vma->rde$ps_start_va, (unsigned long)vma->rde$q_region_size, *(pgprot_t*)&vma->rde$r_regprot.regprt$l_region_prot))
 #endif
 	  return -EAGAIN;

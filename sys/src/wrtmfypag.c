@@ -89,7 +89,9 @@ void mmg$purgempl(unsigned long command) {
   struct _pfn * pfn = pfn$al_tail[PFN$C_MFYPAGLST];
   mmg$rempfn(PFN$C_MFYPAGLST,pfn);
 
+#if 0
   long old_va=pfn->virtual;
+#endif
   int pfl_page;
   int sts=mmg$allocpagfil1(1, &pfl_page);
 
@@ -97,17 +99,22 @@ void mmg$purgempl(unsigned long command) {
     return;
 
   // try to replace this with 0x80000000 + otherpte->v_pfn?
+#if 0
   int * mypage=vmalloc(4096/*,GFP_KERNEL*/);
   //  *mypage=42;
   pfn->virtual=mypage;
   unsigned long * pte = findpte_new(ctl$gl_pcb->mm,mypage);
   long oldpte = *pte;
-  struct _mypte * mypte = pte;
+#endif
   long pfnno = pfn-&mem_map[0];
 
   struct _mypte * otherpte=pfn->pfn$q_pte_index;
-  *pte=*(long*)otherpte;
-  *pte|=_PAGE_PRESENT;
+  struct _mypte * mypte = otherpte;
+  struct _pte * pte = otherpte;
+#if 0
+  *(unsigned long *)pte=*(long*)otherpte;
+#endif
+  *(unsigned long *)pte|=_PAGE_PRESENT;
 
 #ifndef __arch_um__
   __flush_tlb();
@@ -116,15 +123,22 @@ void mmg$purgempl(unsigned long command) {
   extern int myswapfile;
   struct _pfl * pfl = myswapfile;
 
-  block_write_full_page3(pfl->pfl$l_window->wcb$l_fcb, &mem_map[pfnno], pfl_page);
+  block_write_full_page3(pfl->pfl$l_window->wcb$l_fcb, pfn, pfl_page);
+#if 0
   pfn->virtual=old_va;
+#endif
   printk("Wrote to pfl_page %x %x %x\n",pfl_page,otherpte,*(long*)otherpte);
 
+  *(unsigned long *)pte&=~_PAGE_PRESENT;
+#if 0
   *pte=oldpte;
+#endif
 #ifndef __arch_um__
   __flush_tlb();
 #endif
+#if 0
   vfree(mypage);
+#endif
 
   long * tmp=otherpte;
   *tmp=0;

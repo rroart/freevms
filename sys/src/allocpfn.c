@@ -222,7 +222,7 @@ signed long mmg$allocontig_align(unsigned long num) {
   if (!pfn$al_head[PFN$C_FREPAGLST])
     return -1;
   while(!done) {
-    if (!(((unsigned long)first->virtual) & ( (num<<PAGE_SHIFT)-1))) {
+    if (!(((unsigned long)page_address(first)) & ( (num<<PAGE_SHIFT)-1))) {
       for(p=first,c=1;c<num;c++) {
 	next=p++;
 	if (next->pfn$l_flink!=p) goto out;

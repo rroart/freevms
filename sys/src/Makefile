@@ -33,14 +33,14 @@ obj-y     = sched.o \
 	    shell.o
 
 ifeq ($(CONFIG_VMS),y)
-export-objs := vmsshmem.o vmsfilemap.o vmsbuffer.o
+export-objs := vmsfilemap.o vmsbuffer.o
 endif
 
 obj-$(CONFIG_VMS) += memoryalc.o vmsbootmem.o ptalloc.o \
 			vmsslab.o wrtmfypag.o \
 			vmsmmap.o vmsfilemap.o vmsmemory.o vmsmremap.o \
 	 		vmsmprotect.o vmsmlock.o vmsvmalloc.o \
-			vmsshmem.o vmsswapfile.o allocpfn.o
+			vmsswapfile.o allocpfn.o
 
 obj-$(CONFIG_VMS) += vmsbuffer.o
 

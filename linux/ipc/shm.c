@@ -129,11 +129,13 @@ static void shm_open (struct vm_area_struct *shmd)
  */
 static void shm_destroy (struct shmid_kernel *shp)
 {
+#ifndef CONFIG_MM_VMS
 	shm_tot -= (shp->shm_segsz + PAGE_SIZE - 1) >> PAGE_SHIFT;
 	shm_rmid (shp->id);
 	shmem_lock(shp->shm_file, 0);
 	fput (shp->shm_file);
 	kfree (shp);
+#endif
 }
 
 /*
@@ -176,17 +178,22 @@ static int shm_mmap(struct file * file, struct vm_area_struct * vma)
 }
 
 static struct file_operations shm_file_operations = {
+#ifndef CONFIG_MM_VMS
 	mmap:	shm_mmap
+#endif
 };
 
 static struct vm_operations_struct shm_vm_ops = {
+#ifndef CONFIG_MM_VMS
 	open:	shm_open,	/* callback for a new vm-area open */
 	close:	shm_close,	/* callback for when the vm-area is released */
 	nopage:	shmem_nopage,
+#endif
 };
 
 static int newseg (key_t key, int shmflg, size_t size)
 {
+#ifndef CONFIG_MM_VMS
 	int error;
 	struct shmid_kernel *shp;
 	int numpages = (size + PAGE_SIZE -1) >> PAGE_SHIFT;
@@ -234,6 +241,7 @@ no_id:
 no_file:
 	kfree(shp);
 	return error;
+#endif
 }
 
 asmlinkage long sys_shmget (key_t key, size_t size, int shmflg)
@@ -384,6 +392,7 @@ static void shm_get_stat (unsigned long *rss, unsigned long *swp)
 
 asmlinkage long sys_shmctl (int shmid, int cmd, struct shmid_ds *buf)
 {
+#ifndef CONFIG_MM_VMS
 	struct shm_setbuf setbuf;
 	struct shmid_kernel *shp;
 	int err, version;
@@ -572,6 +581,7 @@ out_up:
 out_unlock:
 	shm_unlock(shmid);
 	return err;
+#endif
 }
 
 /*

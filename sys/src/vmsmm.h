@@ -43,45 +43,6 @@ extern struct list_head inactive_list;
  * mmap() functions).
  */
 
-/*
- * This struct defines a memory VMM memory area. There is one of these
- * per VM-area/task.  A VM area is any part of the process virtual memory
- * space that has a special rule for the page-fault handlers (ie a shared
- * library, the executable area etc).
- */
-struct vm_area_struct_not {
-	struct mm_struct * vm_mm;	/* The address space we belong to. */
-	unsigned long vm_start;		/* Our start address within vm_mm. */
-	unsigned long vm_end;		/* The first byte after our end address
-					   within vm_mm. */
-
-	/* linked list of VM areas per task, sorted by address */
-	struct vm_area_struct *vm_next;
-
-	pgprot_t vm_page_prot;		/* Access permissions of this VMA. */
-	unsigned long vm_flags;		/* Flags, listed below. */
-
-	rb_node_t vm_rb;
-
-	/*
-	 * For areas with an address space and backing store,
-	 * one of the address_space->i_mmap{,shared} lists,
-	 * for shm areas, the list of attaches, otherwise unused.
-	 */
-	struct vm_area_struct *vm_next_share;
-	struct vm_area_struct **vm_pprev_share;
-
-	/* Function pointers to deal with this struct. */
-	struct vm_operations_struct * vm_ops;
-
-	/* Information about our backing store: */
-	unsigned long vm_pgoff;		/* Offset (within vm_file) in PAGE_SIZE
-					   units, *not* PAGE_CACHE_SIZE */
-	struct file * vm_file;		/* File we map to (can be NULL). */
-	unsigned long vm_raend;		/* XXX: put full readahead info here. */
-	void * vm_private_data;		/* was vm_pte (shared mem) */
-};
-
 #define vm_area_struct _rde
 
 // vm_flags will be 8 bits left to coexist with rde stuff
@@ -145,43 +106,6 @@ struct vm_operations_struct {
 	void (*close)(struct _rde * area);
 	struct page * (*nopage)(struct _rde * area, unsigned long address, int unused);
 };
-
-/*
- * Each physical page in the system has a struct page associated with
- * it to keep track of whatever it is we are using the page for at the
- * moment. Note that we have no way to track which tasks are using
- * a page.
- *
- * Try to keep the most commonly accessed fields in single cache lines
- * here (16 bytes or greater).  This ordering should be particularly
- * beneficial on 32-bit processors.
- *
- * The first line is data used in page cache lookup, the second line
- * is used for linear searches (eg. clock algorithm scans). 
- *
- * TODO: make this structure smaller, it could be as small as 32 bytes.
- */
-
-// renaming a bit
-
-typedef struct not_use_page {
-	struct list_head list;		/* ->mapping has some page lists. */
-	struct address_space *mapping;	/* The inode (or ...) we belong to. */
-	unsigned long index;		/* Our offset within mapping. */
-	struct page *next_hash;		/* Next page sharing our hash bucket in
-					   the pagecache hash table. */
-	atomic_t count;			/* Usage count, see below. */
-	unsigned long flags;		/* atomic flags, some possibly
-					   updated asynchronously */
-	struct list_head lru;		/* Pageout list, eg. active_list;
-					   protected by pagemap_lru_lock !! */
-	wait_queue_head_t wait;		/* Page locked?  Stand in line... */
-	struct page **pprev_hash;	/* Complement to *next_hash. */
-	struct buffer_head * buffers;	/* Buffer maps us to a disk block. */
-	void *virtual;			/* Kernel virtual address (NULL if
-					   not kmapped, ie. highmem) */
-	struct zone_struct *zone;	/* Memory zone we are in. */
-} not_mem_map_t;
 
 /*
  * Methods to modify the page usage count.
@@ -286,6 +210,7 @@ typedef struct not_use_page {
  * the pages. The struct page (these bits with information) are always
  * mapped into kernel address space...
  */
+#if 0
 #define PG_locked		 3	/* Page is locked. Don't touch. */
 #define PG_error		20
 #define PG_referenced		21
@@ -294,12 +219,16 @@ typedef struct not_use_page {
 #define PG_unused		23
 #define PG_lru			24
 #define PG_active		25
+#endif
 #define PG_slab			26
+#if 0
 #define PG_skip			27
 //#define PG_highmem		11
 #define PG_checked		28	/* kill me in 2.5.<early>. */
 #define PG_arch_1		29
+#endif
 #define PG_reserved		30
+#if 0
 #define PG_launder		31	/* written out by VM pressure.. */
 
 /* Make it prettier to test the above... */
@@ -333,10 +262,12 @@ extern void FASTCALL(set_page_dirty(struct page *));
 #define SetPageReferenced(page)	set_bit(PG_referenced, &(page)->pfn$l_page_state)
 #define ClearPageReferenced(page)	clear_bit(PG_referenced, &(page)->pfn$l_page_state)
 #define PageTestandClearReferenced(page)	test_and_clear_bit(PG_referenced, &(page)->pfn$l_page_state)
+#endif
 #define PageSlab(page)		test_bit(PG_slab, &(page)->pfn$l_page_state)
 #define PageSetSlab(page)	set_bit(PG_slab, &(page)->pfn$l_page_state)
 #define PageClearSlab(page)	clear_bit(PG_slab, &(page)->pfn$l_page_state)
 #define PageReserved(page)	test_bit(PG_reserved, &(page)->pfn$l_page_state)
+#if 0
 
 #define PageActive(page)	test_bit(PG_active, &(page)->pfn$l_page_state)
 #define SetPageActive(page)	set_bit(PG_active, &(page)->pfn$l_page_state)
@@ -352,6 +283,7 @@ extern void FASTCALL(set_page_dirty(struct page *));
 #define PageHighMem(page)		0 /* needed to optimize away at compile time */
 #endif
 
+#endif
 #define SetPageReserved(page)		set_bit(PG_reserved, &(page)->pfn$l_page_state)
 #define ClearPageReserved(page)		clear_bit(PG_reserved, &(page)->pfn$l_page_state)
 

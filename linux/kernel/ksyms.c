@@ -278,8 +278,8 @@ EXPORT_SYMBOL(__find_lock_page);
 EXPORT_SYMBOL(grab_cache_page);
 EXPORT_SYMBOL(grab_cache_page_nowait);
 EXPORT_SYMBOL(read_cache_page);
-#endif
 EXPORT_SYMBOL(set_page_dirty);
+#endif
 EXPORT_SYMBOL(vfs_readlink);
 EXPORT_SYMBOL(vfs_follow_link);
 EXPORT_SYMBOL(page_readlink);
@@ -296,12 +296,16 @@ EXPORT_SYMBOL(dcache_readdir);
 /* for stackable file systems (lofs, wrapfs, cryptfs, etc.) */
 EXPORT_SYMBOL(default_llseek);
 EXPORT_SYMBOL(dentry_open);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(filemap_nopage);
+#endif
 EXPORT_SYMBOL(filemap_sync);
 EXPORT_SYMBOL(filemap_fdatasync);
 EXPORT_SYMBOL(filemap_fdatawait);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(lock_page);
 EXPORT_SYMBOL(unlock_page);
+#endif
 
 /* device registration */
 EXPORT_SYMBOL(register_chrdev);

@@ -60,7 +60,9 @@
  */
 void fastcall set_page_dirty(struct page *page)
 {
+#if 0
   test_and_set_bit(PG_dirty, &page->pfn$l_page_state);
+#endif
 }
 
 /**
@@ -108,35 +110,6 @@ int generic_buffer_fdatasync(struct inode *inode, unsigned long start_idx, unsig
 	return retval;
 }
 
-/*
- * In-memory filesystems have to fail their
- * writepage function - and this has to be
- * worked around in the VM layer..
- *
- * We
- *  - mark the page dirty again (but do NOT
- *    add it back to the inode dirty list, as
- *    that would livelock in fdatasync)
- *  - activate the page so that the page stealer
- *    doesn't try to write it out over and over
- *    again.
- */
-int fail_writepage(struct page *page)
-{
-	/* Only activate on memory-pressure, not fsync.. */
-	if (PageLaunder(page)) {
-		activate_page(page);
-		SetPageReferenced(page);
-	}
-
-	/* Set the page dirty again, unlock */
-	SetPageDirty(page);
-	UnlockPage(page);
-	return 0;
-}
-
-EXPORT_SYMBOL(fail_writepage);
-
 /**
  *      filemap_fdatasync - walk the list of dirty pages of the given address space
  *     	and writepage() all of them.
@@ -165,60 +138,6 @@ int filemap_fdatawait(struct address_space * mapping)
 	int ret = 0;
 
 	return ret;
-}
-
-void fastcall unlock_page(struct page *page)
-{
-	clear_bit(PG_launder, &(page)->pfn$l_page_state);
-	smp_mb__before_clear_bit();
-#if 0
-	if (!test_and_clear_bit(PG_locked, &(page)->pfn$l_page_state))
-		BUG();
-#endif
-	smp_mb__after_clear_bit(); 
-#if 0
-	if (waitqueue_active(&(page)->wait))
-	wake_up(&(page)->wait);
-#endif
-}
-
-/*
- * Get a lock on the page, assuming we need to sleep
- * to get it..
- */
-static void __lock_page(struct page *page)
-{
-}
-	
-
-/*
- * Get an exclusive lock on the page, optimistically
- * assuming it's not locked..
- */
-void fastcall lock_page(struct page *page)
-{
-	if (TryLockPage(page))
-		__lock_page(page);
-}
-
-/*
- * Mark a page as having seen activity.
- *
- * If it was already so marked, move it
- * to the active queue and drop the referenced
- * bit. Otherwise, just mark it for future
- * action..
- */
-void fastcall  mark_page_accessed(struct page *page)
-{
-	if (!PageActive(page) && PageReferenced(page)) {
-		activate_page(page);
-		ClearPageReferenced(page);
-		return;
-	}
-
-	/* Mark the page referenced, AFTER checking for previous usage.. */
-	SetPageReferenced(page);
 }
 
 /*
@@ -294,8 +213,10 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 		 * Mark the page accessed if we read the
 		 * beginning or we just did an lseek.
 		 */
+#if 0
 		if (!offset || !filp->f_reada)
 			mark_page_accessed(page);
+#endif
 
 		/*
 		 * Ok, we have the page, and it's up-to-date, so
@@ -389,8 +310,10 @@ void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_
 		 * Mark the page accessed if we read the
 		 * beginning or we just did an lseek.
 		 */
+#if 0
 		if (!offset)
 			mark_page_accessed(page);
+#endif
 
 		/*
 		 * Ok, we have the page, and it's up-to-date, so
@@ -758,147 +681,6 @@ asmlinkage ssize_t sys_readahead(int fd, loff_t offset, size_t count)
 		fput(file);
 	}
 	return ret;
-}
-
-/*
- * filemap_nopage() is invoked via the vma operations vector for a
- * mapped memory region to read in file data during a page fault.
- *
- * The goto's are kind of ugly, but this streamlines the normal case of having
- * it in the page cache, and handles the special cases reasonably without
- * having a lot of duplicated code.
- */
-struct page * filemap_nopage(struct vm_area_struct * area, unsigned long address, int unused)
-{
-	int error;
-	struct file *file = 0;//area->vm_file;
-	struct inode *inode = file->f_dentry->d_inode;
-	struct page *page;
-	unsigned long size, pgoff, endoff;
-
-	pgoff = 0;//((address - area->rde$pq_start_va) >> PAGE_CACHE_SHIFT) + area->vm_pgoff;
-	endoff = 0;//((area->vm_end - area->rde$pq_start_va) >> PAGE_CACHE_SHIFT) + area->vm_pgoff;
-
-retry_all:
-	/*
-	 * An external ptracer can access pages that normally aren't
-	 * accessible..
-	 */
-	size = (inode->i_size + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
-#if 0
-	if ((pgoff >= size) && (area->vm_mm == current->mm))
-		return NULL;
-#endif
-
-	/* The "size" of the file, as far as mmap is concerned, isn't bigger than the mapping */
-	if (size > endoff)
-		size = endoff;
-
-	/*
-	 * Do we have something in the page cache already?
-	 */
-retry_find:
-	page = 0;
-	if (!page)
-		goto no_cached_page;
-
-	/*
-	 * Ok, found a page in the page cache, now we need to check
-	 * that it's up-to-date.
-	 */
-	if (!Page_Uptodate(page))
-		goto page_not_uptodate;
-
-success:
- 	/*
-	 * Try read-ahead for sequential areas.
-	 */
-#if 0
-	if (VM_SequentialReadHint(area))
-		nopage_sequential_readahead(area, pgoff, size);
-#endif
-
-	/*
-	 * Found the page and have a reference on it, need to check sharing
-	 * and possibly copy it over to another page..
-	 */
-	mark_page_accessed(page);
-	flush_page_to_ram(page);
-	return page;
-
-no_cached_page:
-	/*
-	 * If the requested offset is within our file, try to read a whole 
-	 * cluster of pages at once.
-	 *
-	 * Otherwise, we're off the end of a privately mapped file,
-	 * so we need to map a zero page.
-	 */
-#if 0
-	if ((pgoff < size) && !VM_RandomReadHint(area))
-		error = read_cluster_nonblocking(file, pgoff, size);
-	else
-		error = page_cache_read(file, pgoff);
-#endif
-
-	/*
-	 * The page we want has now been added to the page cache.
-	 * In the unlikely event that someone removed it in the
-	 * meantime, we'll just come back here and read it again.
-	 */
-	if (error >= 0)
-		goto retry_find;
-
-	/*
-	 * An error return from page_cache_read can result if the
-	 * system is low on memory, or a problem occurs while trying
-	 * to schedule I/O.
-	 */
-	if (error == -ENOMEM)
-		return NOPAGE_OOM;
-	return NULL;
-
-page_not_uptodate:
-	lock_page(page);
-
-	/* Did somebody else get it up-to-date? */
-	if (Page_Uptodate(page)) {
-		UnlockPage(page);
-		goto success;
-	}
-
-	if (!ext2_readpage(file, page)) {
-	  //wait_on_page(page);
-		if (Page_Uptodate(page))
-			goto success;
-	}
-
-	/*
-	 * Umm, take care of errors if the page isn't up-to-date.
-	 * Try to re-read it _once_. We do this synchronously,
-	 * because there really aren't any performance issues here
-	 * and we need to check for errors.
-	 */
-	lock_page(page);
-
-	/* Somebody else successfully read it in? */
-	if (Page_Uptodate(page)) {
-		UnlockPage(page);
-		goto success;
-	}
-	ClearPageError(page);
-	if (!ext2_readpage(file, page)) {
-	  //wait_on_page(page);
-		if (Page_Uptodate(page))
-			goto success;
-	}
-
-	/*
-	 * Things didn't work out. Return zero to tell the
-	 * mm layer so, possibly freeing the page cache page first.
-	 */
-	page_cache_release(page);
-	return NULL;
 }
 
 /* Called with mm->page_table_lock held to protect against other
@@ -1499,7 +1281,9 @@ static unsigned char mincore_page(struct _rde * vma,
 
 	spin_lock(&pagecache_lock);
 	page = 0;
+#if 0
 	if ((page) && (Page_Uptodate(page)))
+#endif
 		present = 1;
 	spin_unlock(&pagecache_lock);
 
@@ -1849,8 +1633,10 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
 unlock:
 		kunmap(page);
 		/* Mark it unlocked again and drop the page.. */
+#if 0
 		SetPageReferenced(page);
 		UnlockPage(page);
+#endif
 		page_cache_release(page);
 
 		if (status < 0)

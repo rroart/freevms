@@ -194,8 +194,8 @@ static inline void pgd_clear(pgd_t * pgdp)	{ }
  * Permanent address of a page. Obviously must never be
  * called on a highmem page.
  */
-#define page_address(page) ({ if (!(page)->virtual) BUG(); (page)->virtual; })
 #define __page_address(page) ({ PAGE_OFFSET + (((page) - mem_map) << PAGE_SHIFT); })
+#define page_address(page) __page_address(page)
 #define pages_to_mb(x) ((x) >> (20-PAGE_SHIFT))
 #define pte_page(x) \
     (mem_map+((unsigned long)((__pa(pte_val(x)) >> PAGE_SHIFT))))

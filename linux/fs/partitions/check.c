@@ -451,13 +451,13 @@ unsigned char *read_dev_sector(struct block_device *bdev, unsigned long n, Secto
 	block_read_full_page2(bdev->bd_inode,page,n/sect);
 
 	if (!IS_ERR(page)) {
-#if 0
+#ifndef CONFIG_VMS
 		wait_on_page(page);
-#endif
 		if (!Page_Uptodate(page))
 			goto fail;
 		if (PageError(page))
 			goto fail;
+#endif
 		p->v = page;
 		return (unsigned char *)page_address(page) + 512 * (n % sect);
 fail:

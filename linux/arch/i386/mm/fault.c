@@ -74,7 +74,12 @@ good_area:
 	for (;;) {
 	survive:
 		{
+#ifndef CONFIG_VMS
 			int fault = handle_mm_fault(current->mm, vma, start, 1);
+#else
+			int fault;
+			panic("fix verify write?\n");
+#endif
 			if (!fault)
 				goto bad_area;
 			if (fault < 0)

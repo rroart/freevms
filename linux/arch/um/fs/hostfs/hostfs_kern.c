@@ -239,7 +239,12 @@ static struct file_operations hostfs_dir_fops = {
 
 int hostfs_writepage(struct page *page)
 {
+#ifndef CONFIG_VMS
 	struct address_space *mapping = page->mapping;
+#else
+	panic("fix this\n");
+	struct address_space *mapping;
+#endif
 	struct inode *inode = mapping->host;
 	char *buffer;
 	unsigned long long base;
@@ -247,29 +252,37 @@ int hostfs_writepage(struct page *page)
 	int end_index = inode->i_size >> PAGE_CACHE_SHIFT;
 	int err;
 
+#ifndef CONFIG_VMS
 	if (page->index >= end_index)
 		count = inode->i_size & (PAGE_CACHE_SIZE-1);
 
 	buffer = kmap(page);
 	base = ((unsigned long long) page->index) << PAGE_CACHE_SHIFT;
+#endif
 
 	err = write_file(inode->u.hostfs_i.fd, &base, buffer, count);
 	if(err != count){
+#ifndef CONFIG_VMS
 		ClearPageUptodate(page);
+#endif
 		goto out;
 	}
 
 	if (base > inode->i_size)
 		inode->i_size = base;
 
+#ifndef CONFIG_VMS
 	if (PageError(page))
 		ClearPageError(page);	
+#endif
 	err = 0;
 
  out:	
 	kunmap(page);
 
+#ifndef CONFIG_VMS
 	UnlockPage(page);
+#endif
 	return err; 
 }
 
@@ -279,19 +292,27 @@ int hostfs_readpage(struct file *file, struct page *page)
 	long long start;
 	int err = 0;
 
+#ifndef CONFIG_VMS
 	start = (long long) page->index << PAGE_CACHE_SHIFT;
+#else
+	panic("fix this4\n");
+#endif
 	buffer = kmap(page);
 	err = read_file(file_hostfs_i(file)->fd, &start, buffer,
 			PAGE_CACHE_SIZE);
 	if(err < 0) goto out;
 
 	flush_dcache_page(page);
+#ifndef CONFIG_VMS
 	SetPageUptodate(page);
 	if (PageError(page)) ClearPageError(page);
+#endif
 	err = 0;
  out:
 	kunmap(page);
+#ifndef CONFIG_VMS
 	UnlockPage(page);
+#endif
 	return(err);
 }
 
@@ -302,7 +323,11 @@ int hostfs_prepare_write(struct file *file, struct page *page,
 	long long start, tmp;
 	int err;
 
+#ifndef CONFIG_VMS
 	start = (long long) page->index << PAGE_CACHE_SHIFT;
+#else
+	panic("fix this5\n");
+#endif
 	buffer = kmap(page);
 	if(from != 0){
 		tmp = start;
@@ -325,13 +350,20 @@ int hostfs_prepare_write(struct file *file, struct page *page,
 int hostfs_commit_write(struct file *file, struct page *page, unsigned from,
 		 unsigned to)
 {
+#ifndef CONFIG_VMS
 	struct address_space *mapping = page->mapping;
+#else
+	panic("fix this2\n");
+	struct address_space *mapping;
+#endif
 	struct inode *inode = mapping->host;
 	char *buffer;
 	long long start;
 	int err = 0;
 
+#ifndef CONFIG_VMS
 	start = (long long) (page->index << PAGE_CACHE_SHIFT) + from;
+#endif
 	buffer = kmap(page);
 	err = write_file(file_hostfs_i(file)->fd, &start, buffer + from, 
 			 to - from);
@@ -659,19 +691,27 @@ int hostfs_link_readpage(struct file *file, struct page *page)
 	long long start;
 	int err;
 
+#ifndef CONFIG_VMS
 	start = page->index << PAGE_CACHE_SHIFT;
 	buffer = kmap(page);
 	name = inode_name(page->mapping->host, 0);
+#else
+	panic("fix this3\n");
+#endif
 	if(name == NULL) return(-ENOMEM);
 	err = do_readlink(name, buffer, PAGE_CACHE_SIZE);
 	kfree(name);
 	if(err == 0){
 		flush_dcache_page(page);
+#ifndef CONFIG_VMS
 		SetPageUptodate(page);
 		if (PageError(page)) ClearPageError(page);
+#endif
 	}
 	kunmap(page);
+#ifndef CONFIG_VMS
 	UnlockPage(page);
+#endif
 	return(err);
 }
 

@@ -88,12 +88,12 @@ static void fastcall __free_pages_ok (struct page *page, unsigned int order)
 		BUG();
 	if (PageLocked(page))
 		BUG();
-#endif
 	if (PageLRU(page))
 		BUG();
 	if (PageActive(page))
 		BUG();
 	page->pfn$l_page_state &= ~((1<<PG_referenced) | (1<<PG_dirty));
+#endif
 
 	mask = (~0UL) << order;
 	page_idx = page - mem_map;
@@ -322,8 +322,10 @@ void show_free_areas_core(pg_data_t *pgdat)
 		printk("= %lukB)\n", K(total));
 	}
 
+#if 0
 #ifdef SWAP_CACHE_INFO
 	show_swap_cache_info();
+#endif
 #endif	
 }
 
@@ -398,14 +400,18 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	for (p = lmem_map; p < lmem_map + totalpages; p++) {
 		set_page_count(p, 0);
 		SetPageReserved(p);
+#if 0
 		init_waitqueue_head(&p->wait);
+#endif
 		//memlist_init(&p->list);
 	}
 
 	offset = lmem_map - mem_map;	
 	for (i = 0; i < totalpages; i++) {
 	  struct page *page = mem_map + offset + i;
+#if 0
 	  page->virtual = __va(zone_start_paddr);
+#endif
 	  zone_start_paddr += PAGE_SIZE;
 	}
 }

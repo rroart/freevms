@@ -152,8 +152,10 @@ int del_partition(kdev_t dev, struct blkpg_partition *p) {
 
 	/* partition in use? Incomplete check for now. */
 	devp = MKDEV(MAJOR(dev), minor);
+#ifndef CONFIG_VMS
 	if (is_mounted(devp) || is_swap_partition(devp))
 		return -EBUSY;
+#endif
 
 	/* all seems OK */
 	fsync_dev(devp);
@@ -293,8 +295,10 @@ int blk_ioctl(kdev_t dev, unsigned int cmd, unsigned long arg)
 			if (intval > PAGE_SIZE || intval < 512 ||
 			    (intval & (intval - 1)))
 				return -EINVAL;
+#ifndef CONFIG_VMS
 			if (is_mounted (dev) || is_swap_partition (dev))
 				return -EBUSY;
+#endif
 			set_blocksize (dev, intval);
 			return 0;
 

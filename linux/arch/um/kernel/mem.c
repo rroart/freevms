@@ -170,12 +170,16 @@ void show_mem(void)
         i = max_mapnr;
         while (i-- > 0) {
                 total++;
+#ifndef CONFIG_VMS
                 if (PageHighMem(mem_map+i))
                         highmem++;
+#endif
                 if (PageReserved(mem_map+i))
                         reserved++;
+#ifndef CONFIG_VMS
                 else if (PageSwapCache(mem_map+i))
                         cached++;
+#endif
                 else if (page_count(mem_map+i))
                         shared += page_count(mem_map+i) - 1;
         }

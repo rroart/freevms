@@ -1353,6 +1353,7 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 			struct page* page;
 			struct vm_area_struct *vma;
 
+#ifndef CONFIG_VMS
 			if (get_user_pages(current, current->mm, addr, 1, 0, 1,
 						&page, &vma) <= 0) {
 				DUMP_SEEK (file->f_pos + PAGE_SIZE);
@@ -1369,6 +1370,7 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 				}
 				put_page(page);
 			}
+#endif
 		}
 	}
 

@@ -2006,9 +2006,9 @@ static char *page_getlink(struct dentry * dentry, struct page **ppage)
 		goto sync_fail;
 #ifndef CONFIG_VMS
 	wait_on_page(page);
-#endif
 	if (!Page_Uptodate(page))
 		goto async_fail;
+#endif
 	*ppage = page;
 	return kmap(page);
 
