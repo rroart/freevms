@@ -18,9 +18,9 @@ OBJS-$(CONFIG_UML_NET) += net_kern.o net_user.o
 OBJS-$(CONFIG_MCONSOLE) += mconsole_kern.o mconsole_user.o
 OBJS-$(CONFIG_MMAPPER) += mmapper_kern.o 
 ifneq ($(CONFIG_VMS),y)
-OBJS-y += ubd.o ubd_user.o 
+OBJS-y += ubd.o ubd_user.o
 endif
-OBJS-$(CONFIG_VMS) += ../../../../driver/src/ubdriver.o ubd_user.o 
+OBJS-$(CONFIG_VMS) += ../../../../driver/src/ubdriver.o ubd_user.o vmsstdio_console.o
 OBJS-$(CONFIG_HOSTAUDIO) += hostaudio_kern.o hostaudio_user.o
 OBJS-$(CONFIG_FD_CHAN) += fd.o 
 OBJS-$(CONFIG_NULL_CHAN) += null.o 
