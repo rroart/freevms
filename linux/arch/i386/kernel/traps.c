@@ -915,6 +915,16 @@ cobalt_init(void)
 	printk("Cobalt APIC enabled: ID reg %lx\n", co_apic_read(CO_APIC_ID));
 }
 #endif
+
+static unsigned char ipl = 1;
+
+static unsigned char ipending[128];
+
+static inline unsigned char spl(unsigned char new) {
+  unsigned char tmp=ipl;
+  ipl=new;
+}
+
 void __init trap_init(void)
 {
 #ifdef CONFIG_EISA

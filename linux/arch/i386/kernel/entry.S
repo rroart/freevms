@@ -398,7 +398,6 @@ ENTRY(spurious_interrupt_bug)
 	jmp error_code
 
 ENTRY(test_code)
-        pushl $0
         pushl $ SYMBOL_NAME(do_test_code)
         jmp error_code
 
