@@ -1,45 +1,76 @@
-#include <stdio.h> 
-#include <descrip.h> 
-#include <lckdef.h> 
-#include <misc.h>
+#include <stdio.h>
+#include <descrip.h>
+#include <lckdef.h>
 #include <starlet.h>
-  
-void an_ast(int i) {
-printf("an_ast %x %x\n",getpid(),i);
-}
+#include <lksbdef.h>
+
+$DESCRIPTOR(resource,"STRUCTURE_1");
+
+signed long long time1=-10000000;
+signed long long time2=-20000000;
+signed long long time3=-30000000;
+signed long long time4=-40000000;
+signed long long time10=-100000000;
+signed long long time15=-150000000;
+signed long long time20=-200000000;
+signed long long time30=-300000000;
 
 main(){
+  struct _lksb lksb;
+  unsigned int status, lkmode, flags;
 
-struct _lksb lksb;
+  lkmode = LCK$K_NLMODE;
 
-         unsigned int status, lkmode, flags; 
-         $DESCRIPTOR(resource,"STRUCTURE_1"); 
+  flags = 0;//LCK$M_SYSTEM;
 
-         lkmode = LCK$K_NLMODE; 
-  
-         status = sys$enq(0,  
-                   lkmode,      
-                   &lksb,        
-                   0,            
-                    &resource,   
-                   0,
-		   an_ast, 41, 0, 0, 0); 
+  status = sys$enqw(0,
+		    lkmode,
+		    &lksb,
+		    flags,
+		    &resource,
+		    0, 0, 0, 0, 0, 0);
 
-sleep(5);
-printf("%x %x\n",lksb.lksb$w_status,lksb.lksb$l_lkid);
+  printf("main %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid);
 
-         lkmode = LCK$K_PWMODE; 
-         flags = LCK$M_CONVERT; 
-  
-         status = sys$enq(0,     
-                   lkmode,        
-                   &lksb,         
-                   flags,         
-                   0,
-		   0,
-		   an_ast, 43, 0, 0, 0); 
+  sleep (10);
 
-sleep(5);
-printf("%x %x\n",lksb.lksb$w_status,lksb.lksb$l_lkid);
+  lkmode = LCK$K_PWMODE;
+  flags = LCK$M_CONVERT;
 
- } 
+  printf("a %x\n",getpid());
+
+  status = sys$enqw(0,
+		    lkmode,
+		    &lksb,
+		    flags,
+		    0, 0, 0, 0, 0, 0, 0);
+
+  printf("a %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid)\
+    ;
+
+  sleep (10);
+
+  lkmode = LCK$K_PRMODE;
+  flags = LCK$M_CONVERT;
+
+  printf("b %x\n",getpid());
+
+  status = sys$enqw(0,
+		    lkmode,
+		    &lksb,
+		    flags,
+		    0, 0, 0, 0, 0, 0, 0);
+
+  printf("b %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid)\
+    ;
+
+  sleep (10);
+
+  status = sys$deq(lksb.lksb$l_lkid,0,0,0);
+
+  printf("c %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid)\
+    ;
+
+  sleep(20);
+
+}
