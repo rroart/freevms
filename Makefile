@@ -1,27 +1,29 @@
-SUBDIRS = starlet librtl cliutl backup dir init pal dcl
-SUBDIRSINST = dir dcl init
-SUBDIRS2 = examples
+VMSSUBDIRS = starlet librtl cliutl backup dir init pal dcl
+VMSSUBDIRSINST = dir dcl init
+VMSSUBDIRS2 = examples
 
-all:
-	for X in $(SUBDIRS); do \
+vmsall:
+	for X in $(VMSSUBDIRS); do \
 		cd $$X/src; \
 		make; \
 		cd ../..; \
 	done; \
-	for X in $(SUBDIRS2); do \
+	for X in $(VMSSUBDIRS2); do \
 		cd $$X; \
 		make; \
 		cd ..; \
-	done; 
+	done;
 
-install:
-	for X in $(SUBDIRSINST); do \
+rootinstall:
+	for X in $(VMSSUBDIRSINST); do \
 		cd $$X/src; \
 		make install; \
 		cd ../..; \
 	done; \
-	for X in $(SUBDIRS2); do \
+	for X in $(VMSSUBDIRS2); do \
 		cd $$X; \
 		make install; \
 		cd ..; \
 	done; 
+
+include Makefile.kernel
