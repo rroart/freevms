@@ -119,6 +119,8 @@ asmlinkage int exe$crembx  (char prmflg, unsigned short int *chan, unsigned int 
   c->ccb$b_amod=1; /* wherever this gets set */
   if (lognam==0) {
     /* assume nonexist and must create */
+    if (bufquo==0) bufquo=DEFMBXBUFQUO;
+    if (maxmsg==0) maxmsg=DEFMBXMXMSG;
     u=clone_init_ucb();
     u->ucb$w_bufquo=bufquo;
     u->ucb$w_iniquo=bufquo;
