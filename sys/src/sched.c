@@ -361,7 +361,7 @@ send_now_idle:
 	int this_cpu = smp_processor_id();
 	struct task_struct *tsk;
 
-	tsk = smp$gl_cpu_data[this_cpu]->cpu$l_curpcb;
+	tsk = ctl$gl_pcb;
 	if (p->pcb$b_pri >= tsk->pcb$b_pri) /* previous was meaningless */
 		tsk->need_resched = 1;
 #endif
