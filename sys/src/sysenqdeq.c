@@ -54,7 +54,7 @@ int dlminit(void) {
   char myinfo[]="dlm dlm";
 
   //  listen(msgbuf,err,cdt,pdt,cdt);
-  scs$listen(dlmlisten,dlmmyerr,myname,myinfo,0);
+  scs_std$listen(dlmlisten,dlmmyerr,myname,myinfo,0);
 }
 
 extern struct _rsb * reshashtbl[];
@@ -74,10 +74,10 @@ void lck$snd_granted(struct _lkb * l) {
   c->cdrp$l_val1=l->lkb$l_remlkid;
   c->cdrp$l_val2=l-lockidtbl[0];
   if (!dlmconnected) {
-    scs$connect(dlm_msg,dlm_dg,dlm_err,0,0,"dlm$dlm",&current->pcb$t_lname,0,0,0,0,0);
+    scs_std$connect(dlm_msg,dlm_dg,dlm_err,0,0,"dlm$dlm",&current->pcb$t_lname,0,0,0,0,0);
     dlmconnected=1;
   }
-  scs_std$senddg(0,0,c);
+  scs_std$senddg(0,500,c);
 }
 
 // this was suddenly not needed, I think
