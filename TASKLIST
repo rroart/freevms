@@ -43,11 +43,22 @@ FreeVMS tasklist
   ODS-2, work is under way
 
   DCL, will at first be implemented kernel-independent, need more people.
+  Suggested order:
+	CLI, LBR
+	CDU, MSG
+	DCL itself, with Internal Procedures
+	CLI Command Language Interface routines No kernel stuff
+		See
+		$ help cli
+		http://www.openvms.compaq.com:8000/73final/4493/
+		4493pro_003.html#cli_chap
 	LBR librarian   No kernel stuff (I think)
 		See 
 		$ help lbr
 		http://www.openvms.compaq.com:8000/73final/6100/
 		6100pro_005.html#lib_chap
+		http://www.openvms.compaq.com:8000/73final/4493/
+		493pro_019.html#23_structureoflibraries
 	CDU Command Definition Utility  No kernel stuff (I think)
 		See
 		$ help set command
