@@ -327,7 +327,8 @@ int ec$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
 int ec$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL|0x080000000000;
   struct net_device * dev = ((struct _ucbnidef *)u)->ucb$l_extra_l_1;
-  int sts = dev->hard_start_xmit  (i, p, u, c); 
+  int (*func)() = dev->hard_start_xmit;
+  int sts = func  (i, p, u, c); 
   return sts = SS$_NORMAL;
 }
 
@@ -2752,7 +2753,7 @@ boomerang_rx(struct net_device *dev)
 	int rx_status;
 	int rx_work_limit = vp->dirty_rx + RX_RING_SIZE - vp->cur_rx;
 
-	extern struct _ucb * ecu;
+	extern struct _ucbnidef * ecu;
 	struct _ucb * u = ecu;
     
 	if (vortex_debug > 5)
@@ -2781,12 +2782,12 @@ boomerang_rx(struct net_device *dev)
 				printk(KERN_DEBUG "Receiving packet size %d status %4.4x.\n",
 					   pkt_len, rx_status);
 
+			struct _cxb * cb1 = lan$alloc_cxb(pkt_len);
+			struct _cxb * cb2 = cb1->cxb$l_link;
+
 			/* Check if the packet is long enough to just accept without
 			   copying to a properly sized skbuff. */
 			if (pkt_len < rx_copybreak /*&& (skb = dev_alloc_skb(pkt_len + 2)) != 0*/) {
-				struct _cxb * cb1 = lan$alloc_cxb(pkt_len);
-				struct _cxb * cb2 = cb1->cxb$l_link;
-
 #if 0
 				skb->dev = dev;
 				skb_reserve(skb, 2);	/* Align IP on 16 byte boundaries */
