@@ -76,7 +76,6 @@
 
 #include <linux/module.h>
 #include <linux/sched.h>
-#include <linux/tty.h>
 #include <linux/tty_flip.h>
 #include <linux/kernel.h>
 #include <linux/string.h>
@@ -109,6 +108,8 @@
 
 #include "../../linux/drivers/char/console_macros.h"
 
+#include <irpdef.h>
+#include <ttyucbdef.h>
 
 const struct consw *conswitchp;
 
@@ -132,7 +133,7 @@ extern void vcs_make_devfs (unsigned int index, int unregister);
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
 #endif
 
-static struct tty_struct *console_table[MAX_NR_CONSOLES];
+static struct _tty_ucb *console_table[MAX_NR_CONSOLES];
 static struct termios *console_termios[MAX_NR_CONSOLES];
 static struct termios *console_termios_locked[MAX_NR_CONSOLES];
 struct vc vc_cons [MAX_NR_CONSOLES];
@@ -141,14 +142,14 @@ struct vc vc_cons [MAX_NR_CONSOLES];
 static const struct consw *con_driver_map[MAX_NR_CONSOLES];
 #endif
 
-static int con_open(struct tty_struct *, struct file *);
+static int con_open(struct _tty_ucb *, struct file *);
 static void vc_init(unsigned int console, unsigned int rows,
 		    unsigned int cols, int do_clear);
 static void blank_screen(unsigned long dummy);
 static void gotoxy(int currcons, int new_x, int new_y);
 static void save_cur(int currcons);
 static void reset_terminal(int currcons, int do_clear);
-static void con_flush_chars(struct tty_struct *tty);
+static void con_flush_chars(struct _ucb *tty);
 static void set_vesa_blanking(unsigned long arg);
 static void set_cursor(int currcons);
 static void hide_cursor(int currcons);
@@ -794,6 +795,7 @@ int vc_resize(unsigned int lines, unsigned int cols,
 		save_cur(currcons);
 
 		if (console_table[currcons]) {
+#if 0
 			struct winsize ws, *cws = &console_table[currcons]->winsize;
 			memset(&ws, 0, sizeof(ws));
 			ws.ws_row = video_num_lines;
@@ -802,6 +804,9 @@ int vc_resize(unsigned int lines, unsigned int cols,
 			    console_table[currcons]->pgrp > 0)
 				kill_pg(console_table[currcons]->pgrp, SIGWINCH, 1);
 			*cws = ws;
+#else
+			console_table[currcons]->ucb$w_tt_desize=video_num_lines;
+#endif
 		}
 
 		if (IS_VISIBLE)
@@ -1158,7 +1163,7 @@ static void csi_m(int currcons)
 	update_attr(currcons);
 }
 
-static void respond_string(const char * p, struct tty_struct * tty)
+static void respond_string(const char * p, struct _ucb * tty)
 {
 	while (*p) {
 		tty_insert_flip_char(tty, *p, 0);
@@ -1174,7 +1179,7 @@ static void respond_string(const char * p, struct tty_struct * tty)
 #endif
 }
 
-static void cursor_report(int currcons, struct tty_struct * tty)
+static void cursor_report(int currcons, struct _ucb * tty)
 {
 	char buf[40];
 
@@ -1182,12 +1187,12 @@ static void cursor_report(int currcons, struct tty_struct * tty)
 	respond_string(buf, tty);
 }
 
-static inline void status_report(struct tty_struct * tty)
+static inline void status_report(struct _ucb * tty)
 {
 	respond_string("\033[0n", tty);	/* Terminal ok */
 }
 
-static inline void respond_ID(struct tty_struct * tty)
+static inline void respond_ID(struct _ucb * tty)
 {
 	respond_string(VT102ID, tty);
 }
@@ -1467,7 +1472,7 @@ static void reset_terminal(int currcons, int do_clear)
 }
 
 /* console_sem is held */
-static void do_con_trol(struct tty_struct *tty, unsigned int currcons, int c)
+static void do_con_trol(struct _ucb *tty, unsigned int currcons, int c)
 {
 	/*
 	 *  Control characters can be used in the _middle_
@@ -1850,9 +1855,12 @@ char con_buf[PAGE_SIZE];
 DECLARE_MUTEX(con_buf_sem);
 
 /* acquires console_sem */
-static int do_con_write(struct tty_struct * tty, int from_user,
-			const unsigned char *buf, int count)
+static int do_con_write(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * chan)
 {
+  struct _ucb * tty = u;
+  int from_user = 1;
+  const unsigned char *buf=i->irp$l_qio_p1;
+  int count=i->irp$l_qio_p2;
 #ifdef VT_BUF_VRAM_ONLY
 #define FLUSH do { } while(0);
 #else
@@ -1865,7 +1873,9 @@ static int do_con_write(struct tty_struct * tty, int from_user,
 	int c, tc, ok, n = 0, draw_x = -1;
 	unsigned int currcons;
 	unsigned long draw_from = 0, draw_to = 0;
+#if 0
 	struct vt_struct *vt = (struct vt_struct *)tty->driver_data;
+#endif
 	u16 himask, charmask;
 	const unsigned char *orig_buf = NULL;
 	int orig_count;
@@ -1873,7 +1883,7 @@ static int do_con_write(struct tty_struct * tty, int from_user,
 	if (in_interrupt())
 		return count;
 		
-	currcons = vt->vc_num;
+	currcons = 0; // was: vt->vc_num;
 	if (!vc_cons_allocated(currcons)) {
 	    /* could this happen? */
 	    static int error = 0;
@@ -1918,7 +1928,7 @@ again:
 	if (IS_FG)
 		hide_cursor(currcons);
 
-	while (!tty->stopped && count) {
+	while (/*!tty->stopped &&*/ count) {
 		c = *buf;
 		buf++;
 		n++;
@@ -2036,7 +2046,7 @@ out:
 		 * the CON_BUF_SIZE, and the tty is not stopped,
 		 * keep going.
 		 */
-		if ((orig_count > CON_BUF_SIZE) && !tty->stopped) {
+	  if ((orig_count > CON_BUF_SIZE) /*&& !tty->stopped*/) {
 			orig_count -= CON_BUF_SIZE;
 			orig_buf += CON_BUF_SIZE;
 			count = orig_count;
@@ -2304,19 +2314,18 @@ int tioclinux(struct tty_struct *tty, unsigned long arg)
  *	/dev/ttyN handling
  */
 
-static int con_write(struct tty_struct * tty, int from_user,
-		     const unsigned char *buf, int count)
+static int con_write(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
 {
 	int	retval;
 
 	pm_access(pm_con);
-	retval = do_con_write(tty, from_user, buf, count);
-	con_flush_chars(tty);
+	retval = do_con_write(i,p,u,c);
+	con_flush_chars(u);
 
 	return retval;
 }
 
-static void con_put_char(struct tty_struct *tty, unsigned char ch)
+static void con_put_char(struct _ucb *tty, unsigned char ch)
 {
 	if (in_interrupt())
 		return;		/* n_r3964 calls put_char() from interrupt context */
@@ -2324,14 +2333,16 @@ static void con_put_char(struct tty_struct *tty, unsigned char ch)
 	do_con_write(tty, 0, &ch, 1);
 }
 
-static int con_write_room(struct tty_struct *tty)
+static int con_write_room(struct _ucb *tty)
 {
+#if 0
 	if (tty->stopped)
 		return 0;
+#endif
 	return 4096;		/* No limit, really; we're not buffering */
 }
 
-static int con_chars_in_buffer(struct tty_struct *tty)
+static int con_chars_in_buffer(struct _ucb *tty)
 {
 	return 0;		/* we're not buffering */
 }
@@ -2341,26 +2352,28 @@ static int con_chars_in_buffer(struct tty_struct *tty)
  * paste_selection(), which has to stuff in a large number of
  * characters...
  */
-static void con_throttle(struct tty_struct *tty)
+static void con_throttle(struct _ucb *tty)
 {
 }
 
-static void con_unthrottle(struct tty_struct *tty)
+static void con_unthrottle(struct _ucb *tty)
 {
+#if 0
 	struct vt_struct *vt = (struct vt_struct *) tty->driver_data;
 
 	wake_up_interruptible(&vt->paste_wait);
+#endif
 }
 
 /*
  * Turn the Scroll-Lock LED on when the tty is stopped
  */
-static void con_stop(struct tty_struct *tty)
+static void con_stop(struct _ucb *tty)
 {
 	int console_num;
 	if (!tty)
 		return;
-	console_num = MINOR(tty->device) - (tty->driver.minor_start);
+	console_num = 0;// was: MINOR(tty->device) - (tty->driver.minor_start);
 	if (!vc_cons_allocated(console_num))
 		return;
 	set_vc_kbd_led(kbd_table + console_num, VC_SCROLLOCK);
@@ -2372,12 +2385,12 @@ static void con_stop(struct tty_struct *tty)
 /*
  * Turn the Scroll-Lock LED off when the console is started
  */
-static void con_start(struct tty_struct *tty)
+static void con_start(struct _ucb *tty)
 {
 	int console_num;
 	if (!tty)
 		return;
-	console_num = MINOR(tty->device) - (tty->driver.minor_start);
+	console_num = 0; // was: MINOR(tty->device) - (tty->driver.minor_start);
 	if (!vc_cons_allocated(console_num))
 		return;
 	clr_vc_kbd_led(kbd_table + console_num, VC_SCROLLOCK);
@@ -2390,7 +2403,7 @@ static void con_start(struct tty_struct *tty)
  * we can race here against con_close, so we grab the bkl
  * and check the pointer before calling set_cursor
  */
-static void con_flush_chars(struct tty_struct *tty)
+static void con_flush_chars(struct _ucb *tty)
 {
 	struct vt_struct *vt;
 
@@ -2400,9 +2413,12 @@ static void con_flush_chars(struct tty_struct *tty)
 	pm_access(pm_con);
 	lock_kernel();
 	acquire_console_sem();
+#if 0
 	vt = (struct vt_struct *)tty->driver_data;
 	if (vt)
 		set_cursor(vt->vc_num);
+#endif
+	set_cursor(0);
 	release_console_sem();
 	unlock_kernel();
 }
@@ -2410,24 +2426,32 @@ static void con_flush_chars(struct tty_struct *tty)
 /*
  * Allocate the console screen memory.
  */
-static int con_open(struct tty_struct *tty, struct file * filp)
+static int con_open(struct _tty_ucb *tty, struct file * filp)
 {
 	unsigned int	currcons;
 	int i;
 
-	currcons = MINOR(tty->device) - tty->driver.minor_start;
+	currcons = 0; // was: MINOR(tty->device) - tty->driver.minor_start;
 
 	i = vc_allocate(currcons);
 	if (i)
 		return i;
 
 	vt_cons[currcons]->vc_num = currcons;
+#if 0
 	tty->driver_data = vt_cons[currcons];
+#endif
 
+#if 0
 	if (!tty->winsize.ws_row && !tty->winsize.ws_col) {
 		tty->winsize.ws_row = video_num_lines;
 		tty->winsize.ws_col = video_num_columns;
 	}
+	//not yet
+#else
+	if (!tty->ucb$w_tt_desize)
+	  tty->ucb$w_tt_desize = video_num_lines;
+#endif
 #if 0
 	if (tty->count == 1)
 		vcs_make_devfs (currcons, 0);
@@ -2435,15 +2459,19 @@ static int con_open(struct tty_struct *tty, struct file * filp)
 	return 0;
 }
 
-static void con_close(struct tty_struct *tty, struct file * filp)
+static void con_close(struct _ucb *tty, struct file * filp)
 {
 	if (!tty)
 		return;
+#if 0
 	if (tty->count != 1) return;
+#endif
 #if 0
 	vcs_make_devfs (MINOR (tty->device) - tty->driver.minor_start, 1);
 #endif
+#if 0
 	tty->driver_data = 0;
+#endif
 }
 
 static void vc_init(unsigned int currcons, unsigned int rows, unsigned int cols, int do_clear)
