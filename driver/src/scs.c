@@ -201,12 +201,12 @@ static void scs_dev_timer_func(unsigned long arg)
 
 static void scs_dev_set_timer()
 {
-  struct timer_list timer;
-  bzero(&timer,sizeof(timer));
+  struct timer_list * timer=kmalloc(sizeof(struct timer_list),GFP_KERNEL);
+  bzero(timer,sizeof(timer));
 
-  timer.data = (unsigned long)scs_default_device;
-  timer.function = scs_dev_timer_func;
-  timer.expires = jiffies + (10 * HZ);
+  timer->data = (unsigned long)scs_default_device;
+  timer->function = scs_dev_timer_func;
+  timer->expires = jiffies + (10 * HZ);
 
   add_timer(&timer);
 }
