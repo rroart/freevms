@@ -292,6 +292,7 @@ int ide_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&ide$ucb*/,&newucb);
+  newucb->ucb$w_fill_0=unitno;
   exe$assign(dsc,&chan,0,0,0);
   registerdevchan(MKDEV(IDE0_MAJOR,unitno),chan);
 
