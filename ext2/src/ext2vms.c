@@ -674,7 +674,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   x2p->primary_fcb=fcb;
   x2p->current_window=&fcb->fcb$l_wlfl;
 
-  if (atrp) exttwo_read_attrib(fcb,head,atrp);
+  if (atrp) exttwo_read_attrib(fcb,fcb->fcb$l_primfcb,atrp);
   iosbret(irp,SS$_NORMAL);
   return SS$_NORMAL;
 }
