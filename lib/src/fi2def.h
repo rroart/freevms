@@ -16,11 +16,8 @@
 */
 
 #define NO_DOLLAR
-#include "cache.h"
-#include "vmstime.h"
-#include "mytypes.h"
 
-struct fi2 {
+struct _fi2 {
     char fi2$t_filename[20];
     vmsword fi2$w_revision;
     VMSTIME fi2$q_credate;

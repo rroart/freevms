@@ -13,9 +13,7 @@
         the contibution of the original author.
 */
 
-#include "vmstime.h"
-
-struct xabfhcdef {
+struct _xabfhcdef {
     void *xab$l_nxt;
     int xab$b_cod;
     int xab$b_atr;

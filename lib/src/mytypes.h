@@ -17,7 +17,6 @@
 */
 
 #define NO_DOLLAR
-#include "cache.h"
 #include "vmstime.h"
 
 #ifdef BIG_ENDIAN

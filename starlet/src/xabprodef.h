@@ -15,7 +15,7 @@
 	Originally part of rms.h
 */
 
-struct xabprodef1 {
+struct _xabprodef {
     void *xab$l_nxt;
     int xab$b_cod;
     int xab$w_pro;

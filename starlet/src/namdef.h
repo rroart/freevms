@@ -15,14 +15,12 @@
 	Originally part of rms.h
 */
 
-#include "vmstime.h"
-
 #define NAM$C_MAXRSS 255
 #define NAM$M_SYNCHK 1
 
 #define NAM$M_WILDCARD 0x100
 
-struct namdef {
+struct _namdef {
     unsigned short nam$w_did_num;
     unsigned short nam$w_did_seq;
     unsigned char nam$b_did_rvn;

@@ -5,7 +5,7 @@
 
 /* This is supposed to have lot more. Got this because of syslnm */
 
-struct orb {
+struct _orb {
 unsigned short orb$w_uicmember;
 unsigned short orb$w_uicgroup;
 unsigned long orb$l_acl_mutex;

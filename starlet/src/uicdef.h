@@ -16,11 +16,8 @@
 */
 
 #define NO_DOLLAR
-#include "cache.h"
-#include "vmstime.h"
-#include "mytypes.h"
 
-struct uicdef {
+struct _uicdef {
     vmsword uic$w_mem;
     vmsword uic$w_grp;
 };

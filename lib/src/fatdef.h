@@ -16,11 +16,8 @@
 */
 
 #define NO_DOLLAR
-#include "cache.h"
-#include "vmstime.h"
-#include "mytypes.h"
 
-struct fat {
+struct _fatdef {
     vmsbyte fat$b_rtype;
     vmsbyte fat$b_rattrib;
     vmsword fat$w_rsize;

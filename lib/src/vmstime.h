@@ -21,7 +21,7 @@
 #ifndef __VMSTIME__
 #define __VMSTIME__ loaded
 
-#include "descrip.h"
+struct dsc_descriptor;
 
 #ifdef __ALPHA
 #define VMSTIME_64BIT __int64

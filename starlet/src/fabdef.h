@@ -44,8 +44,8 @@
 #define FAB$C_STMLF 5
 #define FAB$C_STMCR 6
 
-struct fabdef {
-    struct namdef *fab$l_nam;
+struct _fabdef {
+    struct _namdef *fab$l_nam;
     int fab$w_ifi;
     char *fab$l_fna;
     char *fab$l_dna;

@@ -15,8 +15,6 @@
 	Originally part of rms.h
 */
 
-#include "vmstime.h"
-
 #define RMS$_RTB 98728
 #define RMS$_EOF 98938
 #define RMS$_FNF 98962

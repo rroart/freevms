@@ -161,7 +161,7 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   struct lnmb * mylnmb;
   struct lnmx * mylnmx;
   struct lnmth * mylnmth;
-  struct orb * myorb;
+  struct _orb * myorb;
   long * trailer;
   struct struct_rt * RT;
   struct dsc$descriptor_s * mytabnam, * mypartab;
@@ -179,8 +179,8 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   bzero(mylnmx,sizeof(struct lnmx));
   mylnmth=lnmmalloc(sizeof(struct lnmth));
   bzero(mylnmth,sizeof(struct lnmth));
-  myorb=lnmmalloc(sizeof(struct orb));
-  bzero(myorb,sizeof(struct orb));
+  myorb=lnmmalloc(sizeof(struct _orb));
+  bzero(myorb,sizeof(struct _orb));
   trailer=lnmmalloc(sizeof(long));
 
   /* mutex lock */

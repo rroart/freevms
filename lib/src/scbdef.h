@@ -16,11 +16,7 @@
 */
 
 #define NO_DOLLAR
-#include "cache.h"
-#include "vmstime.h"
-#include "mytypes.h"
-
-struct scbdef {
+struct _scbdef {
     vmsword scb$w_struclev;
     vmsword scb$w_cluster;
     vmslong scb$l_volsize;

@@ -16,15 +16,17 @@
 */
 
 #define NO_DOLLAR
-#include "cache.h"
-#include "vmstime.h"
-#include "mytypes.h"
 
-struct fiddef {
+struct _fiddef {
     vmsword fid$w_num;
     vmsword fid$w_seq;
+  union {
+    vmsword fid$w_rvn;
+    struct {
     vmsbyte fid$b_rvn;
     vmsbyte fid$b_nmx;
+    };
+  };
 };
 
 #endif

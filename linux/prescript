@@ -73,6 +73,11 @@ cd mm;
 		ln -s ../../freevms/sys/src/mbdriver.c .;
 		ln -s ../../freevms/rms/src/rms.c .;
 		ln -s ../../freevms/rms/src/rms2.c .;
+		ln -s ../../freevms/rms/src/direct.h .;
+		ln -s ../../freevms/rms/src/access.h .;
+		ln -s ../../freevms/rms/src/cache.h .;
+		ln -s ../../freevms/rms/src/update.c .;
+		ln -s ../../freevms/rms/src/access.c .;
 cd ..;
 
 cd drivers/block;
@@ -86,6 +91,12 @@ cd ../..;
 cd arch/i386/kernel;
 		ln -s ../../../../freevms/sys/src/vmsirq.c .;
 cd ../../..;
+
+cd fs
+mkdir ods2
+cd ods2
+		ln -s ../../../freevms/f11x/src/[Ma-z]* .;
+cd ../..
 )
 
 echo you have read the HOWTO and done a make in ../freevms?

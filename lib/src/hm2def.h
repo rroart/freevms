@@ -16,11 +16,8 @@
 */
 
 #define NO_DOLLAR
-#include "cache.h"
-#include "vmstime.h"
-#include "mytypes.h"
 
-struct hm2 {
+struct _hm2 {
     vmslong hm2$l_homelbn;
     vmslong hm2$l_alhomelbn;
     vmslong hm2$l_altidxlbn;
@@ -38,7 +35,7 @@ struct hm2 {
     vmsword hm2$w_rvn;
     vmsword hm2$w_setcount;
     vmsword hm2$w_volchar;
-    struct uicdef hm2$w_volowner;
+    struct _uicdef hm2$w_volowner;
     vmslong hm2$l_reserved1;
     vmsword hm2$w_protect;
     vmsword hm2$w_fileprot;

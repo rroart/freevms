@@ -1,7 +1,7 @@
 #ifndef fibdef_h
 #define fibdef_h
 
-/* Fibdef.h v1.3    Definition of 'struct fibdef' */
+/* Fibdef.h v1.3    Definition of 'struct _fibdef' */
 
 /*
         This is part of ODS2 written by Paul Nankervis,
@@ -18,7 +18,7 @@
 
 #define FIB$M_WILD 0x100
 
-struct fibdef {
+struct _fibdef {
     unsigned fib$l_acctl;
     unsigned short fib$w_fid_num;
     unsigned short fib$w_fid_seq;

@@ -523,6 +523,11 @@
 #define SS$_ARBTOOBIG	0x0EC2	/* 3778 */
 #define SS$_ORBTOOBIG	0x0ECA	/* 3786 */
 
+#define SS$_NOSUCHVOL 0x0F2a /* 3882 */
+
+#define SS$_UNSUPVOLSET 0x26B4 /* 9908 */
+
+
 /* no privilege fatal error codes (hex 2800-2a00) */
 #define SS$_NOPRIVSTRT	0x2800	/* 10240 */
 #define SS$_NOCMKRNL	0x2804	/* 10244 */

@@ -18,8 +18,8 @@
 #define RAB$C_SEQ 0
 #define RAB$C_RFA 2
 
-struct rabdef {
-    struct fabdef *rab$l_fab;
+struct _rabdef {
+    struct _fabdef *rab$l_fab;
     char *rab$l_ubf;
     char *rab$l_rhb;
     char *rab$l_rbf;

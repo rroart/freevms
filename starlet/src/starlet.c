@@ -274,40 +274,40 @@ int sys$delmbx  (unsigned short int chan) {
   return INLINE_SYSCALL($delmbx,1,(unsigned long) chan);
 }
 
-int exe$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
-int exe$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }
-int exe$create (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($create,3,fab,err,suc); }
-int exe$delete (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($delete,3,fab,err,suc); }
-int exe$disconnect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($disconnect,3,fab,err,suc); }
-int exe$display (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($display,3,fab,err,suc); }
-int exe$enter (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($enter,3,fab,err,suc); }
-int exe$erase (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($erase,3,fab,err,suc); }
-int exe$extend (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($extend,3,fab,err,suc); }
-int exe$find (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($find,3,fab,err,suc); }
-int exe$flush (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($flush,3,fab,err,suc); }
-int exe$free (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($free,3,fab,err,suc); }
-int exe$get (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($get,3,fab,err,suc); }
-int exe$modify (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($modify,3,fab,err,suc); }
-int exe$nxtvol (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($nxtvol,3,fab,err,suc); }
-int exe$open (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($open,3,fab,err,suc); }
-int exe$parse (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($parse,3,fab,err,suc); }
-int exe$put (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($put,3,fab,err,suc); }
-int exe$read (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($read,3,fab,err,suc); }
-int exe$release (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($release,3,fab,err,suc); }
-int exe$remove (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($remove,3,fab,err,suc); }
-int exe$rename (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($rename,3,fab,err,suc); }
-int exe$rewind (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($rewind,3,fab,err,suc); }
-int exe$search (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($search,3,fab,err,suc); }
-int exe$space (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($space,3,fab,err,suc); }
-int exe$truncate (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($truncate,3,fab,err,suc); }
-int exe$update (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($update,3,fab,err,suc); }
-int exe$wait (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($wait,3,fab,err,suc); }
-int exe$write (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($write,3,fab,err,suc); }
-int exe$filescan (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($filescan,3,fab,err,suc); }
-int exe$setddir (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($setddir,3,fab,err,suc); }
-int exe$setdfprot (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($setdfprot,3,fab,err,suc); }
-int exe$ssvexc (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($ssvexc,3,fab,err,suc); }
-int exe$rmsrundwn (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($rmsrundwn,3,fab,err,suc); }
+int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
+int sys$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }
+int sys$create (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($create,3,fab,err,suc); }
+int sys$delete (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($delete,3,fab,err,suc); }
+int sys$disconnect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($disconnect,3,fab,err,suc); }
+int sys$display (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($display,3,fab,err,suc); }
+int sys$enter (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($enter,3,fab,err,suc); }
+int sys$erase (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($erase,3,fab,err,suc); }
+int sys$extend (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($extend,3,fab,err,suc); }
+int sys$find (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($find,3,fab,err,suc); }
+int sys$flush (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($flush,3,fab,err,suc); }
+int sys$free (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($free,3,fab,err,suc); }
+int sys$get (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($get,3,fab,err,suc); }
+int sys$modify (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($modify,3,fab,err,suc); }
+int sys$nxtvol (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($nxtvol,3,fab,err,suc); }
+int sys$open (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($open,3,fab,err,suc); }
+int sys$parse (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($parse,3,fab,err,suc); }
+int sys$put (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($put,3,fab,err,suc); }
+int sys$read (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($read,3,fab,err,suc); }
+int sys$release (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($release,3,fab,err,suc); }
+int sys$remove (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($remove,3,fab,err,suc); }
+int sys$rename (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($rename,3,fab,err,suc); }
+int sys$rewind (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($rewind,3,fab,err,suc); }
+int sys$search (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($search,3,fab,err,suc); }
+int sys$space (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($space,3,fab,err,suc); }
+int sys$truncate (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($truncate,3,fab,err,suc); }
+int sys$update (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($update,3,fab,err,suc); }
+int sys$wait (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($wait,3,fab,err,suc); }
+int sys$write (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($write,3,fab,err,suc); }
+int sys$filescan (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($filescan,3,fab,err,suc); }
+int sys$setddir (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($setddir,3,fab,err,suc); }
+int sys$setdfprot (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($setdfprot,3,fab,err,suc); }
+int sys$ssvexc (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($ssvexc,3,fab,err,suc); }
+int sys$rmsrundwn (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($rmsrundwn,3,fab,err,suc); }
 
 int sys$asctim  (unsigned short int *timlen, void *timbuf,
 		 unsigned long long *timadr, char cvtflg) {

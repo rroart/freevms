@@ -15,13 +15,11 @@
 	Originally part of rms.h
 */
 
-#include "vmstime.h"
-
 #define XAB$C_DAT 18
 #define XAB$C_FHC 29
 #define XAB$C_PRO 19
 
-struct xabdef {
+struct _xabdef {
     void *xab$l_nxt;
     int xab$b_cod;
     int xab$w_rvn;

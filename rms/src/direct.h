@@ -1,6 +1,3 @@
-#ifndef dirdef_h
-#define dirdef_h
-
 /* Direct.h v1.3    Definitions for directory access routines */
 
 /*
@@ -15,17 +12,20 @@
 
 
 
-struct _dir {
-    vmsword dir$w_size;
-    vmsword dir$w_verlimit;
-    vmsbyte dir$b_flags;
-    vmsbyte dir$b_namecount;
-    char dir$t_name[1];
+struct dir$rec {
+    vmsword dir$size;
+    vmsword dir$verlimit;
+    vmsbyte dir$flags;
+    vmsbyte dir$namecount;
+    char dir$name[1];
 };
 
-struct _dir1 {
-    vmsword dir$w_version;
+struct dir$ent {
+    vmsword dir$version;
     struct _fiddef dir$fid;
 };
 
-#endif
+
+unsigned direct(struct _vcb *vcb,struct dsc$descriptor *fibdsc,
+                struct dsc$descriptor *filedsc,unsigned short *reslen,
+                struct dsc$descriptor *resdsc,unsigned action);
