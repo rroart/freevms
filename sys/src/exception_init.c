@@ -28,7 +28,7 @@ int exe$synch(unsigned int efn, struct _iosb *iosb) {
 }
 
 int exe$clrast(void) {
-  printk("this does not work yet (how to implement?), and is strong discouraged in real VMS too\n");
+  printk("this does not work yet (how to implement?), and is strongly discouraged in real VMS too\n");
 }
 
 extern /*asmlinkage*/ int exe$qio(unsigned int efn, unsigned /*short*/ int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
@@ -73,6 +73,10 @@ int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct
 
 int sys$waitfr(unsigned int efn) {
   return INLINE_SYSCALL($waitfr,1,efn);
+}
+
+int sys$hiber(void) {
+  return INLINE_SYSCALL($hiber,0);
 }
 #endif
 
@@ -133,6 +137,13 @@ int sys$waitfr(unsigned int efn) {
   return sts;
 }
 
+int sys$hiber(void) {
+  int sts;
+  pushpsl();
+  sts=exe$hiber();
+  myrei();
+  return sts;
+}
 #endif
 
 // not the right place, but the closest I could find
