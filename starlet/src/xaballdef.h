@@ -55,6 +55,8 @@ struct _xaballdef {
   };
   short int xaballdef$$_fill_8;
 };
+
+extern struct _xaballdef cc$rms_xaball;
  
 #endif
  

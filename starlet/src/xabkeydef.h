@@ -149,6 +149,8 @@ struct _xabkeydef {
 };
 
 // cc$rms_xabkey = cod= 0x15 (C_KEY) bln=0x64 (C_KEYLEN)
+
+extern struct _xabkeydef cc$rms_xabkey;
  
 #endif
  

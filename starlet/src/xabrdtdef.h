@@ -16,5 +16,7 @@ struct _xabrdtdef {
   long long xab$q_rdt;
 };
 
+extern struct _xabrdtdef cc$rms_xabrdt;
+
 #endif
  

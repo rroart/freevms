@@ -16,5 +16,7 @@ struct _xabsumdef {
   unsigned short int xab$w_pvn;
 };
 
+extern struct _xabsumdef cc$rms_xabsum;
+
 #endif
  

@@ -7,6 +7,9 @@
 #define XAB$M_PRN 0x4
 #define XAB$M_BLK 0x8
 	
+#define XAB$K_FHCLEN 44
+#define XAB$C_FHCLEN 44
+
 struct _xabfhcdef {
   unsigned char xab$b_cod;
   unsigned char xab$b_bln;
@@ -48,6 +51,8 @@ struct _xabfhcdef {
   unsigned short int xab$w_verlimit;
   unsigned int xab$l_sbn;
 };
+
+extern struct _xabfhcdef cc$rms_xabfhc;
  
 #endif
  

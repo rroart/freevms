@@ -28,5 +28,7 @@ struct _xabdatdef {
   long long xab$q_eff;
 };
 
+extern struct _xabdatdef cc$rms_xabdat;
+
 #endif
  

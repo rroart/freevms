@@ -21,5 +21,7 @@ struct _xabtrmdef {
   unsigned int xabtrmdef$$_fill_10;
 };
 
+extern struct _xabtrmdef cc$rms_xabtrm;
+
 #endif
  

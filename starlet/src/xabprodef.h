@@ -94,5 +94,7 @@ struct _xabprodef1 {
 #define XAB$V_PROPOGATE	0
 #define XAB$M_PROPOGATE	(1 << XAB$V_PROPOGATE)
 
+extern struct _xabprodef1 cc$rms_xabpro;
+
 #endif
  
