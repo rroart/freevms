@@ -584,6 +584,7 @@ void CNF$Configure_ACP (void)
 
 #ifdef CONFIG_VMS
 #define RMS_WORKAROUND
+#undef RMS_WORKAROUND
 #endif
 #ifdef RMS_WORKAROUND
     struct file * filp = get_prim_fcb();
