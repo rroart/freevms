@@ -54,7 +54,7 @@
 #include <asm/mmu_context.h>
 #include <asm/hw_irq.h>
 
-#include "../../freevms/lib/src/pridef.h"
+#include <pridef.h>
 
 #define MAX_BUF_PER_PAGE (PAGE_CACHE_SIZE / 512)
 #define NR_RESERVED (10*MAX_BUF_PER_PAGE)

@@ -102,7 +102,7 @@
 
 #include <linux/kmod.h>
 
-#include "../../freevms/lib/src/pridef.h"
+#include <pridef.h>
 
 #ifdef CONFIG_VT
 extern void con_init_devfs (void);

@@ -27,8 +27,8 @@ extern unsigned long event;
 #include <linux/securebits.h>
 #include <linux/fs_struct.h>
 
-#include "../../freevms/lib/src/pcbdef.h"
-#include "../../freevms/sys/src/asmlink.h"
+#include <pcbdef.h>
+#include <asmlink.h>
 
 struct exec_domain;
 

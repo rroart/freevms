@@ -24,11 +24,11 @@
 #include <linux/kernel_stat.h>
 
 #include <asm/uaccess.h>
-#include "../../freevms/sys/src/asmlink.h"
+#include <asmlink.h>
 #include <asm/hw_irq.h>
-#include "../../freevms/sys/src/sysgen.h"
-#include "../../freevms/sys/src/rse.h"
-#include "../../freevms/sys/src/system_data_cells.h"
+#include <sysgen.h>
+#include <rse.h>
+#include <system_data_cells.h>
 
 /*
  * Timekeeping variables

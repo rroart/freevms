@@ -26,8 +26,8 @@
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 
-#include "../../freevms/sys/src/sysgen.h"
-#include "../../freevms/lib/src/pridef.h"
+#include <sysgen.h>
+#include <pridef.h>
 
 /* The idle threads do not count.. */
 int nr_threads;

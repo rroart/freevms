@@ -25,7 +25,7 @@ extern struct list_head inactive_list;
 #include <asm/pgtable.h>
 #include <asm/atomic.h>
 
-#include "../../../freevms/lib/src/pfndef.h"
+#include <pfndef.h>
 
 /*
  * Linux kernel virtual memory manager primitives.

@@ -1,7 +1,7 @@
 #ifndef _I386_CURRENT_H
 #define _I386_CURRENT_H
 
-#include "../../freevms/sys/src/system_data_cells.h"
+#include <system_data_cells.h>
 
 struct task_struct;
 //struct _cpu;

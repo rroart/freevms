@@ -1824,37 +1824,37 @@
 
 /* Define system data structure types and constants */
 
-#include   "../../../freevms/lib/src/bufiodef.h"				/* BUFfered I/O header                      */
-#include   "../../../freevms/lib/src/ccbdef.h"				/* Channel Control Block                    */
-#include   "../../../freevms/lib/src/crbdef.h"				/* Controller Request Block                 */
-#include   "../../../freevms/lib/src/crabdef.h"				/* Counted Resource Allocation Block        */
-#include   "../../../freevms/lib/src/cramdef.h"				/* Controller Register Access Method        */
-#include   "../../../freevms/lib/src/crctxdef.h"				/* Counted Resource Context Block           */
-#include   "../../../freevms/starlet/src/dcdef.h"				/* Device Codes                             */
-#include   "../../../freevms/lib/src/ddbdef.h"				/* Device Data Block                        */
-#include   "../../../freevms/lib/src/ddtdef.h"				/* Driver dispatch table                    */
-#include   "../../../freevms/starlet/src/devdef.h"				/* Device characteristics                   */
-#include   "../../../freevms/lib/src/dptdef.h"				/* Driver Prologue Table                    */
-#include   "../../../freevms/lib/src/dtndef.h"				/* Define the DTNs                          */
-#include   "../../../freevms/lib/src/dyndef.h"				/* Dynamic type definitions                 */
-#include   "../../../freevms/lib/src/embdvdef.h"				/* Error log entry for devices              */
-#include   "../../../freevms/lib/src/fdtdef.h"				/* Function Decision Table                  */
-#include   "../../../freevms/lib/src/fkbdef.h"				/* ForK Block                               */
-#include   "../../../freevms/lib/src/idbdef.h"				/* Interrupt Data Block                     */
-#include   "../../../freevms/lib/src/iocdef.h"				/* IOC constants                            */
-#include   "../../../freevms/starlet/src/iodef.h"				/* I/O function codes                       */
-#include   "../../../freevms/lib/src/irpdef.h"				/* I/O Request Packet                       */
-#include   "../../../freevms/lib/src/orbdef.h"				/* Object Rights Block                      */
-#include   "../../../freevms/starlet/src/pagedef.h"				/* Get page definitions and disk block size */
-#include   "../../../freevms/lib/src/pcbdef.h"				/* Process Control Block                    */
-#include   "../../../freevms/lib/src/pcidef.h"				/* PCIbus definitions                       */
-#include   "../../../freevms/starlet/src/prvdef.h"				/* Privilege bit definitions                */
-#include   "../../../freevms/lib/src/qssysdef.h"				/* QIOServer PACKACK UCB update buffer      */
-#include   "../../../freevms/starlet/src/ssdef.h"				/* System service status codes              */
+#include   <bufiodef.h>				/* BUFfered I/O header                      */
+#include   <ccbdef.h>				/* Channel Control Block                    */
+#include   <crbdef.h>				/* Controller Request Block                 */
+#include   <crabdef.h>				/* Counted Resource Allocation Block        */
+#include   <cramdef.h>				/* Controller Register Access Method        */
+#include   <crctxdef.h>				/* Counted Resource Context Block           */
+#include   <dcdef.h>				/* Device Codes                             */
+#include   <ddbdef.h>				/* Device Data Block                        */
+#include   <ddtdef.h>				/* Driver dispatch table                    */
+#include   <devdef.h>				/* Device characteristics                   */
+#include   <dptdef.h>				/* Driver Prologue Table                    */
+#include   <dtndef.h>				/* Define the DTNs                          */
+#include   <dyndef.h>				/* Dynamic type definitions                 */
+#include   <embdvdef.h>				/* Error log entry for devices              */
+#include   <fdtdef.h>				/* Function Decision Table                  */
+#include   <fkbdef.h>				/* ForK Block                               */
+#include   <idbdef.h>				/* Interrupt Data Block                     */
+#include   <iocdef.h>				/* IOC constants                            */
+#include   <iodef.h>				/* I/O function codes                       */
+#include   <irpdef.h>				/* I/O Request Packet                       */
+#include   <orbdef.h>				/* Object Rights Block                      */
+#include   <pagedef.h>				/* Get page definitions and disk block size */
+#include   <pcbdef.h>				/* Process Control Block                    */
+#include   <pcidef.h>				/* PCIbus definitions                       */
+#include   <prvdef.h>				/* Privilege bit definitions                */
+#include   <qssysdef.h>				/* QIOServer PACKACK UCB update buffer      */
+#include   <ssdef.h>				/* System service status codes              */
 #include   <stddef.h>				/* Common definitions                       */
-#include   "../../../freevms/starlet/src/stsdef.h"				/* STatuS value fields                      */
-#include   "../../../freevms/lib/src/ucbdef.h"				/* Unit Control Block                       */
-#include   "../../../freevms/starlet/src/vadef.h"		 		/* Virtual Address definitions              */
+#include   <stsdef.h>				/* STatuS value fields                      */
+#include   <ucbdef.h>				/* Unit Control Block                       */
+#include   <vadef.h>		 		/* Virtual Address definitions              */
 
 #ifndef IOC$K_BYTE_LANED			/* Defined in V7-1.2 onwards... */
 #define IOC$K_BYTE_LANED 1			/* Define this for V71R as well */
@@ -1862,22 +1862,22 @@
 
 /* Define function prototypes for system routines */
 
-#include   "../../../freevms/lib/src/acp_routines.h"				/* ACP$ and ACP_STD$ routines */
-#include   "../../../freevms/lib/src/erl_routines.h"				/* erl$ and erl_std$ routines */
-#include   "../../../freevms/lib/src/exe_routines.h"				/* exe$ and exe_std$ routines */
-#include   "../../../freevms/lib/src/ioc_routines.h"				/* ioc$ and ioc_std$ routines */
-#include   "../../../freevms/lib/src/ldr_routines.h"				/* ldr$ and ldr_std$ routines */
-#include   "../../../freevms/starlet/src/starlet.h"				/* Define SYS$SETPRV prototypes */ 
+#include   <acp_routines.h>				/* ACP$ and ACP_STD$ routines */
+#include   <erl_routines.h>				/* erl$ and erl_std$ routines */
+#include   <exe_routines.h>				/* exe$ and exe_std$ routines */
+#include   <ioc_routines.h>				/* ioc$ and ioc_std$ routines */
+#include   <ldr_routines.h>				/* ldr$ and ldr_std$ routines */
+#include   <starlet.h>				/* Define SYS$SETPRV prototypes */ 
 
 /* Define various device driver macros */
 
-#include   "../../../freevms/lib/src/vms_drivers.h"				/* Device driver support macros */
-#include   "../../../freevms/lib/src/vms_macros.h"				/* Define bug_check and such */
+#include   <vms_drivers.h>				/* Device driver support macros */
+#include   <vms_macros.h>				/* Define bug_check and such */
 
 /* Define the DEC C functions used by this driver */
 
-//#include   "../../../freevms/lib/src/builtins.h"				/* C builtin functions -- unused, but... */
-//#include   "../../../freevms/lib/src/string.h"				/* String rtns from "kernel CRTL" */
+//#include   <builtins.h>				/* C builtin functions -- unused, but... */
+//#include   <string.h>				/* String rtns from "kernel CRTL" */
 
 /* Define some useful types */
 

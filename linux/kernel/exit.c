@@ -20,7 +20,7 @@
 #include <asm/pgtable.h>
 #include <asm/mmu_context.h>
 
-#include "../../freevms/sys/src/system_data_cells.h"
+#include <system_data_cells.h>
 
 extern void sem_exit (void);
 extern struct task_struct *child_reaper;
