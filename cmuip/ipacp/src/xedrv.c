@@ -298,7 +298,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
 	Buff = drv$seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
 	INSQUE ( Buff , XE_Int-> XEI$recv_Qtail  );
 	Buff = Buff + XE_hdr_offset;
-	RC = exe$qio(ASTEFN,XE_chan,IO$_READVBLK,&Buff->XERCV$vms_code,
+	RC = sys$qio(ASTEFN,XE_chan,IO$_READVBLK,&Buff->XERCV$vms_code,
 		     XE_receive,  XE_Int,
 		  &Buff->XERCV$data,
 		  DRV$MAX_PHYSICAL_BUFSIZE,
@@ -315,7 +315,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
 
     ARbuf = drv$seg_get(XE_ARP_LEN*4);
     XE_Int-> xei$arp_buffer  = ARbuf;
-    RC = exe$qio(	ARPEFN, XE_Int-> xei$arp_io_chan ,
+    RC = sys$qio(	ARPEFN, XE_Int-> xei$arp_io_chan ,
 		IO$_READVBLK,
 		&ARbuf -> ar_ios0 ,
 			xe_arprcv, XE_Int,
@@ -407,7 +407,7 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 
 // Issue the startup command to controller
 
-    RC = exe$qiow (1, XE_Int->xei$io_chan,
+    RC = sys$qiow (1, XE_Int->xei$io_chan,
 		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr);
     if (!( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
 	{
@@ -431,7 +431,7 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 
 // Issue the startup command to controller
 
-    RC = exe$qiow (1, XE_Int->xei$arp_io_chan,
+    RC = sys$qiow (1, XE_Int->xei$arp_io_chan,
 		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr);
     if (!( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
 	{	// Startup command failed
@@ -470,7 +470,7 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
     Paramdescr->xe$setup_length = sizeof (Sense);
     Paramdescr->xe$setup_address = Sense;
 
-    RC = exe$qiow (1, XE_Int->xei$io_chan,
+    RC = sys$qiow (1, XE_Int->xei$io_chan,
 		IO$_SENSEMODE+IO$M_CTRL, IOS, 0, 0, 0, Paramdescr);
     if (! ((RC == SS$_NORMAL) && (IOS->xe$vms_code)))
 	{			// Statistics call failed
@@ -699,7 +699,7 @@ void XE_Shutdown ( XE_Int , restart )
     if (XE_Int->xei$io_chan != 0)
 	{
 	exe$cancel(XE_Int->xei$io_chan);
-	RC = exe$qiow( 1, XE_Int->xei$io_chan,
+	RC = sys$qiow( 1, XE_Int->xei$io_chan,
 		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS);
 	if ((RC != SS$_NORMAL) || (IOS->xe$vms_code != SS$_NORMAL))
 	    {
@@ -713,7 +713,7 @@ void XE_Shutdown ( XE_Int , restart )
     if (XE_Int->xei$arp_io_chan != 0)
 	{
 	exe$cancel(XE_Int->xei$arp_io_chan);
-	RC = exe$qiow( 1, XE_Int->xei$arp_io_chan,
+	RC = sys$qiow( 1, XE_Int->xei$arp_io_chan,
 		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS);
 	if ((RC != SS$_NORMAL) || (IOS->xe$vms_code != SS$_NORMAL))
 	    {
@@ -729,7 +729,7 @@ void XE_Shutdown ( XE_Int , restart )
 	{
 	XE_Int->XEI$IO_queued = FALSE;
 	XE_Int->XEI$need_2_free = TRUE;
-	exe$dclast( XE_FreeBufs, XE_Int);
+	sys$dclast( XE_FreeBufs, XE_Int);
 	};
 
 // Allow AST's again
@@ -953,7 +953,7 @@ static    XE_LOG(MSG,IPADDR,HWADDR)
       long STR_DESC[2];
       extern	void xearp$log();
 
-    STR_DESC[0] = sizeof(MSG);
+    STR_DESC[0] = strlen(MSG);
     STR_DESC[1] = MSG;
 
     xearp$log(STR_DESC,IPADDR,6,HWADDR);
@@ -1011,10 +1011,8 @@ X:	{
 
 // Fill in Ethernet header information
 
-#if 0
 	    if ($$LOGF(LOG$PHY))
 		XE_LOG("XE IP xmit",QB->NSQ$IP_Dest,Addrs);
-#endif
 
 	    CH$MOVE(XE_ADR_SIZE,CH$PTR(Addrs),Sbuf->XESND$dest);
 	    Sbuf->XESND$type = XE_IP_type;
@@ -1026,7 +1024,7 @@ X:	{
 
 //!!HACK!!// What's the EFN for?
 	    Sen_size = MAX(QB->NSQ$Datasize,XE_MINSIZE);
-	    RC = exe$qiow(1,	xchan,
+	    RC = sys$qiow(1,	xchan,
 			IO$_WRITEVBLK,
 			  IOS, 0, 0,
 			QB->NSQ$Data,
@@ -1196,7 +1194,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
     NRbuf = drv$seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
     INSQUE(NRbuf,XE_Int->XEI$recv_Qtail);
     NRbuf = NRbuf + XE_hdr_offset;
-    RC = exe$qio(ASTEFN,XE_Int->xei$io_chan,
+    RC = sys$qio(ASTEFN,XE_Int->xei$io_chan,
 	      IO$_READVBLK,
 	      &NRbuf->XERCV$vms_code, XE_receive, XE_Int,
 	      &NRbuf->XERCV$data,
@@ -1225,10 +1223,8 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 
 // Send datagram to IP
 
-#if 0
 	if ($$LOGF(LOG$PHY))
 	    XE_LOG("XE IP receive",0,rcvhdrs[rcvix].XERCV$src);
-#endif
 
 	dev_config->dcmib_ifInOctets = dev_config->dcmib_ifInOctets +
 		Rbuf->XERCV$tran_size + XE_hdr_len;
@@ -1294,10 +1290,8 @@ void xe_arprcv( struct XE_Interface_Structure * XE_Int )
 	else
 	    DRV$ERROR_FAO("XE ARP receive error (ugh), EC = !XL",ARbuf->ar_ios0);
 
-#if 0
     if ($$LOGF(LOG$PHY))
 	XE_LOG("XE ARP receive",0,ARbuf->phys$2);
-#endif
 
 // Packet is OK at the hardware level - hand it up to the ARP module
 
@@ -1305,7 +1299,7 @@ void xe_arprcv( struct XE_Interface_Structure * XE_Int )
 
 // restart the arp receive
 //!!HACK!!// what's the EFN for?
-    RC = exe$qio(ARPEFN,XE_Int->xei$arp_io_chan,
+    RC = sys$qio(ARPEFN,XE_Int->xei$arp_io_chan,
 		 IO$_READVBLK,&ARbuf->ar_ios0,
 		 xe_arprcv, XE_Int,
 		 ARbuf->ar_data,ARP_MAX_LEN*4,0,0,
@@ -1340,7 +1334,7 @@ void xe$arp_xmit(XE_Int,arbuf,arlen,dest)
 
 // Write the ARP to the network (don't need to build any header info)
 
-    rc = exe$qiow(0,XE_Int->xei$arp_io_chan,IO$_WRITEVBLK,
+    rc = sys$qiow(0,XE_Int->xei$arp_io_chan,IO$_WRITEVBLK,
 		ios, 0, 0, arbuf, arlen, 0, 0, dest, 0);
     if (rc != SS$_NORMAL)
 	{
