@@ -30,6 +30,9 @@ extern unsigned long event;
 #include <pcbdef.h>
 #include <asmlink.h>
 
+#include <system_data_cells.h>
+#include <sysgen.h>
+
 struct exec_domain;
 
 /*
@@ -350,11 +353,11 @@ struct task_struct {
 	/* ??? */
 	unsigned long personality;
 	int did_exec:1;
-	pid_t pid;
+  //pid_t pid;
 	pid_t pgrp;
 	pid_t tty_old_pgrp;
 	pid_t session;
-	pid_t tgid;
+  //pid_t tgid;
 	/* boolean value for session group leader */
 	int leader;
 	/* 
@@ -650,52 +653,6 @@ extern union task_union init_task_union;
 
 extern struct   mm_struct init_mm;
 extern struct task_struct *init_tasks[NR_CPUS];
-
-/* PID hashing. (shouldnt this be dynamic?) */
-#define PIDHASH_SZ (4096 >> 2)
-extern struct task_struct *pidhash[PIDHASH_SZ];
-
-#define pid_hashfn(x)	((((x) >> 8) ^ (x)) & (PIDHASH_SZ - 1))
-
-static inline void hash_pid(struct task_struct *p)
-{
-	struct task_struct **htable = &pidhash[pid_hashfn(p->pid)];
-
-	if((p->pidhash_next = *htable) != NULL)
-		(*htable)->pidhash_pprev = &p->pidhash_next;
-	*htable = p;
-	p->pidhash_pprev = htable;
-}
-
-static inline void unhash_pid(struct task_struct *p)
-{
-	if(p->pidhash_next)
-		p->pidhash_next->pidhash_pprev = p->pidhash_pprev;
-	*p->pidhash_pprev = p->pidhash_next;
-}
-
-static inline struct task_struct *find_task_by_pid(int pid)
-{
-	struct task_struct *p, **htable = &pidhash[pid_hashfn(pid)];
-
-	for(p = *htable; p && p->pid != pid; p = p->pidhash_next)
-		;
-
-	return p;
-}
-
-#define task_has_cpu(tsk) ((tsk)->cpus_runnable != ~0UL)
-
-static inline void task_set_cpu(struct task_struct *tsk, unsigned int cpu)
-{
-	tsk->pcb$l_cpu_id = cpu;
-	tsk->cpus_runnable = 1UL << cpu;
-}
-
-static inline void task_release_cpu(struct task_struct *tsk)
-{
-	tsk->cpus_runnable = ~0UL;
-}
 
 /* per-UID process charging. */
 extern struct user_struct * alloc_uid(uid_t);
@@ -1022,35 +979,33 @@ do {									\
 	(p)->p_pptr->p_cptr = p; \
 	} while (0)
 
-#define for_each_task(p) \
-	for (p = &init_task ; (p = p->next_task) != &init_task ; )
+extern unsigned long pcbvec[];
+
+#define for_each_task_pre1(p) \
+	{ \
+	int cnt; \
+	for(cnt=0;cnt<MAXPROCESSCNT;cnt++) { \
+	p=pcbvec[cnt]; \
+	if (p==0) continue;
+
+#define for_each_task_post1(p) \
+	} }
+
+#define for_each_task_pre(p) \
+	{ \
+	unsigned long i; \
+	struct _pcb *head; \
+	for(i=0;i<32;i++) { \
+	head=&sch$aq_comh[i]; \
+	p=sch$aq_comh[i]; \
+	while (head!=p) {
+
+#define for_each_task_post(p) \
+	p=p->pcb$l_sqfl; \
+	} } }
 
 #define next_thread(p) \
 	list_entry((p)->thread_group.next, struct task_struct, thread_group)
-
-static inline void del_from_runqueue(struct task_struct * p)
-{
-	nr_running--;
-	p->sleep_time = jiffies;
-	list_del(&p->run_list);
-	p->run_list.next = NULL;
-}
-
-static inline int task_on_runqueue(struct task_struct *p)
-{
-	return (p->run_list.next != NULL);
-}
-
-static inline void unhash_process(struct task_struct *p)
-{
-	if (task_on_runqueue(p)) BUG();
-	write_lock_irq(&tasklist_lock);
-	nr_threads--;
-	unhash_pid(p);
-	REMOVE_LINKS(p);
-	list_del(&p->thread_group);
-	write_unlock_irq(&tasklist_lock);
-}
 
 /* Protects ->fs, ->files, ->mm, and synchronises with wait4().  Nests inside tasklist_lock */
 static inline void task_lock(struct task_struct *p)
@@ -1083,5 +1038,8 @@ static inline char * d_path(struct dentry *dentry, struct vfsmount *vfsmnt,
 }
 
 #endif /* __KERNEL__ */
+
+#define INIT_PID 2
+#define INIT_PID_REAL 1
 
 #endif
