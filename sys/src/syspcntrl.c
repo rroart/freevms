@@ -141,8 +141,17 @@ int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb 
   }
   if (prcnam) {
     int i;
-    for (i=2; i<MAXPROCESSCNT; i++) {
-      // compare stuff etc
+    struct dsc$descriptor * d = prcnam;
+    // compare stuff etc
+    for (i=2;i<MAXPROCESSCNT;i++) {
+      if (vec[i]!=0) { // change to nullpcb later
+	struct _pcb * p=vec[i];
+	if (strncmp(d->dsc$a_pointer,p->pcb$t_lname,d->dsc$w_length)==0) {
+	  *retipid=vec[i];
+	  *retpcb=p;
+	  return SS$_NORMAL;
+	}
+      }
       // not clusterable yet?
     }
     return SS$_NORMAL;
@@ -210,8 +219,8 @@ asmlinkage int exe$setprn(struct dsc$descriptor *s) {
   if (!p) p=current;
   p=current;
   strncpy(p->pcb$t_lname,s->dsc$a_pointer,s->dsc$w_length);
-
-  printk("here I am2 %x\n",s->dsc$a_pointer);
+  p->pcb$t_lname[s->dsc$w_length]=0;
+  return SS$_NORMAL;
 }
 
 
