@@ -18,7 +18,7 @@
 #include <asm/uaccess.h>
 #include <asm/io.h>
 
-asmlinkage void do_test_call(void) {
+asmlinkage void do_test_code(void) {
   printk("here I am\n");
   return 1;
 }
