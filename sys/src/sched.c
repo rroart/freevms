@@ -95,12 +95,14 @@ mycheckaddr(unsigned int ctl){
     tmp=&sch$aq_comh[i];
     if(*(unsigned long *)tmp == tmp) {
       if (test_bit(i,&sch$gl_comqs))
-	panic("testbit\n");
+	panic("testbit %x %x\n",i,sch$gl_comqs);
     }
     if(*(unsigned long *)tmp == tmp) {; } else {
       tmp2=tmp;
       do {
 	n++;
+	if (tmp2!=tmp && i!=tmp2->pcb$b_pri)
+	  panic("wrong pri in q %x %x %x\n",tmp2,i,tmp2->pcb$b_pri);
 	if (ctl<42 && ctl$gl_pcb==tmp2)
 	  panic("ctl$gl_pcb on comq\n");
 	if (ctl>42 && ctl==tmp2)
@@ -1565,11 +1567,11 @@ void __init sched_init(void)
 
   init_task.pcb$l_cpu_id = cpuid;
   cpu=smp$gl_cpu_data[cpuid];
-  init_task.pcb$b_pri=16;
+  init_task.pcb$b_pri=31;
   init_task.pcb$b_prib=31;
   qhead_init(&init_task.pcb$l_astqfl);
   cpu->cpu$l_curpcb=&init_task;
-  cpu->cpu$b_cur_pri=16;
+  cpu->cpu$b_cur_pri=31;
 
   sch$gl_pcbvec=pcbvec;
   sch$gl_seqvec=seqvec;
