@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 #include<crbdef.h>
 #include<cxbdef.h>
 #include<cdtdef.h>
@@ -2337,10 +2343,10 @@ boomerang_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _
 #if 0
 	if (!skb_shinfo(skb)->nr_frags) {
 #endif
-		vp->tx_ring[entry].status = cpu_to_le32(i->irp$l_qio_p2 + 14 | TxIntrUploaded);
+		vp->tx_ring[entry].status = cpu_to_le32((i->irp$l_qio_p2 + 14) | TxIntrUploaded);
 		vp->tx_ring[entry].frag[0].addr = cpu_to_le32(pci_map_single(vp->pdev, buf,
 										buf, PCI_DMA_TODEVICE));
-		vp->tx_ring[entry].frag[0].length = cpu_to_le32(i->irp$l_qio_p2 + 14 | LAST_FRAG);
+		vp->tx_ring[entry].frag[0].length = cpu_to_le32((i->irp$l_qio_p2 + 14) | LAST_FRAG);
 #if 0
 	} else {
 		int i;
