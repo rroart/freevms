@@ -307,10 +307,10 @@ struct _lbsts {
       unsigned pdt$v_prv_lbs : 1;
       unsigned pdt$v_x_lbs : 1;
       unsigned pdt$v_fill_19_ : 5;
-    } pdt$r_lbsts_bits;
+    };
     unsigned char pdt$b_lbsts;
-  } pdt$r_lbsts_overlay;
-} ;
+  };
+};
  
 #endif
  
