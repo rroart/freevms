@@ -53,6 +53,8 @@ asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, uns
   bzero(rde,sizeof(struct _rde));
   rde->rde$pq_start_va=first;
   rde->rde$q_region_size=last-first;
+  rde->rde$l_flags=pfc;
+  rde->rde$r_regprot.regprt$l_region_prot = prot;
   insrde(rde,&p->pcb$l_phd->phd$ps_p0_va_list_flink);
 
   mmg$fast_create(p, 0, first, last, (last-first)>>12, prot_pte);
