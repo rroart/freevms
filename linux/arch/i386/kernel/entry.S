@@ -341,8 +341,8 @@ syscall_common:
         movl %eax,EAX(%esp)		# save the return value
 ENTRY(vmsret_from_sys_call)
 	cli				# need_resched and signals atomic test
-	cmpl $0,need_resched(%ebx)
-	jne vmsreschedule
+#	cmpl $0,need_resched(%ebx)
+#	jne vmsreschedule
 	cmpl $0,sigpending(%ebx)
 	jne vmssignal_return
 vmsrestore_all:
