@@ -119,7 +119,10 @@ int device_compare(unsigned keylen,void *keyval,void *node)
 struct _ucb *dev_root = NULL;
 
 extern struct _ucb * myfilelist[50];
+extern char * myfilelists[50];
 extern int myfilelistptr;
+extern char root_device_name[];
+extern struct _ccb ctl$ga_ccb_table[];
 
 unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **retdev)
 {
@@ -127,27 +130,26 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **ret
     int i;
     unsigned sts = 1,devsiz = 0;
     char * colon;
+    int chan=0;
+    struct dsc$descriptor d;
+
     if (*devnam=='_') {
       devnam++;
     }
     colon=strchr(devnam,':');
     if (colon) devlen=colon-devnam;
-    if (myfilelistptr==0) { 
-      // real disk
-      extern char root_device_name[];
-      extern struct _ccb ctl$ga_ccb_table[];
-      int chan=0;
-      struct dsc$descriptor d;
-      d.dsc$w_length=strlen(root_device_name);
-      d.dsc$a_pointer=do_translate(root_device_name);
-      sts=exe$assign(&d,&chan,0,0,0);
-      dev= ctl$ga_ccb_table[chan].ccb$l_ucb;
-      goto end;
-    }
+
     for (i=0;i<myfilelistptr;i++) {
       dev=myfilelist[i];
-      if (strlen(dev->ucb$l_ddb->ddb$t_name)==devlen && strncmp(dev->ucb$l_ddb->ddb$t_name,devnam,devlen)==0) goto end;
+      if (strlen(myfilelists[i])==devlen && strncmp(myfilelists[i],devnam,devlen)==0) goto end;
     }
+
+    // real disk
+    d.dsc$w_length=devlen;
+    d.dsc$a_pointer=do_translate(devnam);
+    sts=exe$assign(&d,&chan,0,0,0);
+    dev= ctl$ga_ccb_table[chan].ccb$l_ucb;
+    
  end:
     if (dev == NULL) {
         if (sts == SS$_ITEMNOTFOUND) sts = SS$_NOSUCHDEV;
@@ -155,6 +157,7 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **ret
         *retdev = dev;
         sts = SS$_NORMAL;
     }
+    
     return sts;
 }
 
