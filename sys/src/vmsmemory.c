@@ -259,7 +259,7 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 
 				/* If it's a COW mapping, write protect it both in the parent and the child */
 				if (cow && pte_write(pte)) {
-					ptep_set_wrprotect(src_pte);
+				  //ptep_set_wrprotect(src_pte);// drop this a while because it makes the stack readonly
 					pte = *src_pte;
 				}
 
