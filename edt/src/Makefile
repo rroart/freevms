@@ -152,6 +152,7 @@ write_file.o: write_file.c
 i386/edt${EXE}: $(LIB) $(EXTERNAL)
 	mkdir i386 || echo i386 exists
 	gcc -s -static $(OBJS) $(EXTERNAL) -o i386/edt${EXE}
+	../../linker/src/linker $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) $(LINKPOST) -o i386/edt.exe
 
 UMDEF=-Dcompile_um -I.
 

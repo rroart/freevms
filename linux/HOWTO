@@ -13,7 +13,10 @@ Use gcc 2.96 etc with uml.
 As recent gcc as 3.4 can now be used. (But some new problems are there)
 
 Linker (experimental):
-If you want to know how to make the linker do: cat linker/src/HOW
+If you want to know how to make the linker do: 
+make download-linker
+make build-linker
+Then do make vmsall etc
 
 No longer needed symlinks:
 UserMode Linux no longer needs the symlinks from /usr/include/{asm,linux}
