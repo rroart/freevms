@@ -895,6 +895,9 @@ static int init(void * unused)
 	  vms_mount();
 	else
 	  vms2_mount();
+	extern char * default_name;
+	char * vmsdev = do_translate(root_device_name);
+	memcpy(default_name,vmsdev,strlen(vmsdev));
 #endif
 	prepare_namespace();
 	printk("%%KERNEL-I-DEBUG, After prepare_namspace\n");

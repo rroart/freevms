@@ -786,6 +786,11 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 	char * tmp;
 	int fd, error;
 
+#ifdef CONFIG_VMS
+	extern int mount_root_vfs;
+	if (mount_root_vfs==0)
+	  return -EACCES;
+#endif
 #if BITS_PER_LONG != 32
 	flags |= O_LARGEFILE;
 #endif
@@ -847,6 +852,9 @@ int filp_close(struct file *filp, fl_owner_t id)
 		retval = filp->f_op->flush(filp);
 		unlock_kernel();
 	}
+#ifndef CONFIG_VMS
+#define is_tty_fops(x) 0
+#endif
 	if (!is_tty_fops(filp)) {
 	  fcntl_dirnotify(0, filp, 0);
 	  locks_remove_posix(filp, id);
