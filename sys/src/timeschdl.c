@@ -94,12 +94,12 @@ void printtq(struct _tqe * t) {
 asmlinkage void exe$swtimint(void) {
   static signed int times=0;
 
-  if (intr_blocked(IPL$_TIMER))
+  if (intr_blocked(IPL$_TIMERFORK))
       return;
 
-  regtrap(REG_INTR, IPL$_TIMER);
+  regtrap(REG_INTR, IPL$_TIMERFORK);
 
-  setipl(IPL$_TIMER);
+  setipl(IPL$_TIMERFORK);
 
   times++;
   if (current->phd$w_quant>=0 && current->phd$w_quant<128) 

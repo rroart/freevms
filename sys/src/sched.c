@@ -1559,6 +1559,8 @@ void __init init_idle(void)
 	//sched_data->curr = current;
 	//	sched_data->last_schedule = get_cycles();
 	clear_bit(current->pcb$l_cpu_id, &wait_init_idle);
+	current->psl=0;
+	//	current->pslindex=0;
 	printk("done init_idle\n");
 	done_init_idle=1;
 }

@@ -57,6 +57,10 @@ done
 		rm ipl.c; ln -s ../../freevms/pal/src/ipl.c .;
 		rm ast.c; ln -s ../../freevms/pal/src/ast.c .;
 cd ..;
+cd mm;
+		ln -s ../../freevms/sys/src/memoryalc.c .;
+		ln -s ../../freevms/sys/src/vmsbootmem.c .;
+cd ..;
 
 cd drivers/block;
 		ln -s ../../../freevms/driver/src/pvdriver.c .;

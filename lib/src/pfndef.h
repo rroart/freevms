@@ -122,8 +122,9 @@ typedef struct page {
     unsigned long long pfn$q_pte_index; 
     struct  {
       int pfn$l_refcnt_fill1;
-      short int pfn$w_refcnt_fill2;
-      unsigned short int pfn$w_refcnt; 
+      //      short int pfn$w_refcnt_fill2;
+      unsigned long pfn$l_refcnt; // was w_
+      atomic_t count;			/* Usage count, see below. */
     };
   };
   union  {
@@ -179,7 +180,7 @@ typedef struct page {
 	unsigned long index;		/* Our offset within mapping. */
 	struct page *next_hash;		/* Next page sharing our hash bucket in
 					   the pagecache hash table. */
-	atomic_t count;			/* Usage count, see below. */
+  //	atomic_t count;	->pfn$l_refcnt		/* Usage count, see below. */
 	unsigned long flags;		/* atomic flags, some possibly
 					   updated asynchronously */
 	struct list_head lru;		/* Pageout list, eg. active_list;

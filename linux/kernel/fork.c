@@ -707,6 +707,9 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	qhead_init(&p->pcb$l_astqfl);
 	p->pcb$b_asten=15;
 
+	p->psl=0;
+	//	p->pslindex=0;
+
 	/*
 	 * "share" dynamic priority between parent and child, thus the
 	 * total amount of dynamic priorities in the system doesnt change,

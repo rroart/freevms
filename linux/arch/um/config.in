@@ -1,0 +1,125 @@
+define_bool CONFIG_USERMODE y
+
+mainmenu_name "Linux/Usermode Kernel Configuration"
+
+define_bool CONFIG_ISA n
+define_bool CONFIG_SBUS n
+define_bool CONFIG_PCI n
+
+define_bool CONFIG_UID16 y
+
+define_bool CONFIG_RWSEM_XCHGADD_ALGORITHM y
+
+mainmenu_option next_comment
+comment 'Code maturity level options'
+bool 'Prompt for development and/or incomplete code/drivers' CONFIG_EXPERIMENTAL
+endmenu
+
+mainmenu_option next_comment
+comment 'General Setup'
+define_bool CONFIG_STDIO_CONSOLE y
+bool 'Networking support' CONFIG_NET
+bool 'System V IPC' CONFIG_SYSVIPC
+bool 'BSD Process Accounting' CONFIG_BSD_PROCESS_ACCT
+bool 'Sysctl support' CONFIG_SYSCTL
+bool 'VMS Memory Management' CONFIG_MM_VMS
+
+tristate 'Kernel support for a.out binaries' CONFIG_BINFMT_AOUT
+tristate 'Kernel support for ELF binaries' CONFIG_BINFMT_ELF
+tristate 'Kernel support for MISC binaries' CONFIG_BINFMT_MISC
+bool 'Unix98 PTY support' CONFIG_UNIX98_PTYS
+if [ "$CONFIG_UNIX98_PTYS" = "y" ]; then
+   int 'Maximum number of Unix98 PTYs in use (0-2048)' CONFIG_UNIX98_PTY_COUNT 256
+fi
+bool 'Virtual serial line' CONFIG_SSL
+tristate 'Host filesystem' CONFIG_HOSTFS
+bool 'Management console' CONFIG_MCONSOLE
+dep_bool 'Magic SysRq key' CONFIG_MAGIC_SYSRQ $CONFIG_MCONSOLE
+bool '2G/2G host address space split' CONFIG_HOST_2G_2G
+bool 'Symmetric multi-processing support' CONFIG_UML_SMP
+define_bool CONFIG_SMP $CONFIG_UML_SMP
+string 'Default main console channel initialization' CONFIG_CON_ZERO_CHAN \
+	"fd:0,fd:1"
+string 'Default console channel initialization' CONFIG_CON_CHAN "xterm"
+string 'Default serial line channel initialization' CONFIG_SSL_CHAN "pty"
+endmenu
+
+mainmenu_option next_comment
+comment 'Loadable module support'
+bool 'Enable loadable module support' CONFIG_MODULES
+if [ "$CONFIG_MODULES" = "y" ]; then
+# MODVERSIONS does not yet work in this architecture
+#   bool '  Set version information on all module symbols' CONFIG_MODVERSIONS
+    bool '  Kernel module loader' CONFIG_KMOD
+fi
+endmenu
+
+mainmenu_option next_comment
+comment 'Devices'
+define_bool CONFIG_BLK_DEV_UBD y
+bool 'Always do synchronous disk IO for UBD' CONFIG_BLK_DEV_UBD_SYNC
+tristate 'Loopback device support' CONFIG_BLK_DEV_LOOP
+dep_tristate 'Network block device support' CONFIG_BLK_DEV_NBD $CONFIG_NET
+tristate 'RAM disk support' CONFIG_BLK_DEV_RAM
+if [ "$CONFIG_BLK_DEV_RAM" = "y" -o "$CONFIG_BLK_DEV_RAM" = "m" ]; then
+	int '   Default RAM disk size' CONFIG_BLK_DEV_RAM_SIZE 4096
+fi
+dep_bool '  Initial RAM disk (initrd) support' CONFIG_BLK_DEV_INITRD $CONFIG_BLK_DEV_RAM
+tristate 'Example IO memory driver' CONFIG_MMAPPER
+
+tristate 'Sound support' CONFIG_UML_SOUND
+define_tristate CONFIG_SOUND $CONFIG_UML_SOUND
+define_tristate CONFIG_HOSTAUDIO $CONFIG_UML_SOUND
+
+bool 'file descriptor channel support' CONFIG_FD_CHAN
+bool 'null channel support' CONFIG_NULL_CHAN
+bool 'port channel support' CONFIG_PORT_CHAN
+bool 'pty channel support' CONFIG_PTY_CHAN
+bool 'tty channel support' CONFIG_TTY_CHAN
+bool 'xterm channel support' CONFIG_XTERM_CHAN
+
+endmenu
+
+if [ "$CONFIG_NET" = "y" ]; then
+   source net/Config.in
+fi
+
+if [ "$CONFIG_NET" = "y" ]; then
+   mainmenu_option next_comment
+   comment 'Network device support'
+
+   bool 'Virtual network device support' CONFIG_UML_NET
+   if [ "$CONFIG_UML_NET" != "n" ]; then
+      bool '    Ethertap transport' CONFIG_UML_NET_ETHERTAP
+      bool '    TUN/TAP transport' CONFIG_UML_NET_TUNTAP
+      bool '    SLIP transport' CONFIG_UML_NET_SLIP
+      bool '    Daemon transport' CONFIG_UML_NET_DAEMON
+      bool '    Multicast transport' CONFIG_UML_NET_MCAST
+   fi
+
+   bool 'Software network device support' CONFIG_NETDEVICES
+   if [ "$CONFIG_NETDEVICES" = "y" ]; then
+      source drivers/net/Config.in
+   fi
+
+   endmenu
+fi
+
+source fs/Config.in
+
+source drivers/md/Config.in
+
+source drivers/mtd/Config.in
+
+mainmenu_option next_comment
+comment 'Kernel hacking'
+bool 'Debug memory allocations' CONFIG_DEBUG_SLAB
+bool 'Enable kernel debugging symbols' CONFIG_DEBUGSYM
+if [ "$CONFIG_XTERM_CHAN" = "y" ]; then
+   dep_bool 'Enable ptrace proxy' CONFIG_PT_PROXY $CONFIG_DEBUGSYM
+else 
+   define_bool CONFIG_PT_PROXY n
+fi
+dep_bool 'Enable gprof support' CONFIG_GPROF $CONFIG_DEBUGSYM
+dep_bool 'Enable gcov support' CONFIG_GCOV $CONFIG_DEBUGSYM
+endmenu
