@@ -443,9 +443,11 @@ unsigned f11b_create(struct _vcb *vcb,struct _irp * i)
   struct _fh2 *head;
   unsigned idxblk;
   unsigned sts;
+  struct _fcb *fcb;
+  struct _iosb iosb;
   sts = update_addhead(vcb,filename,fib,0,fid,&head,&idxblk);
   if (!(sts & 1)) return sts;
-  sts = deaccesshead(head,idxblk);
+  //sts = deaccesshead(head,idxblk);
   //    sts = writehead(getidxfcb(vcb),head);
 
   if ((i->irp$l_func & IO$M_ACCESS) && (sts & 1)) {
@@ -458,7 +460,28 @@ unsigned f11b_create(struct _vcb *vcb,struct _irp * i)
     //fib->fib$w_did_seq = 0;
     //fib->fib$b_did_rvn = 0;
     //fib->fib$b_did_nmx = 0;
-    sts = f11b_access(vcb,i); // change to irp
+    sts = f11b_access(vcb,i); // should not be, but can not implement otherwise for a while
+#if 0
+    fcb=f11b_search_fcb(vcb,fid);
+    head = f11b_read_header(vcb,fid,fcb,&iosb);
+    sts=iosb.iosb$w_status;
+    if (sts & 1) {
+    } else {
+      printk("Accessfile status in create %d\n",sts);
+      iosbret(i,sts);
+      return sts;
+    }
+
+    if (fcb==NULL) {
+      fcb=fcb_create2(head,&sts);
+    }
+
+    if (fcb == NULL) { iosbret(i,sts); return sts; }
+
+    xqp->primary_fcb=fcb;
+    xqp->current_window=&fcb->fcb$l_wlfl;
+#endif
+
   }
 
   xqp->primary_fcb=f11b_search_fcb(xqp->current_vcb,&fib->fib$w_fid_num);
