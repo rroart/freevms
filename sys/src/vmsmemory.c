@@ -288,7 +288,7 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				get_page(ptepage);
 				dst->rss++;
 
-				if ((ptepage->pfn$q_bak&PTE$M_TYP0)) {
+				if (1 && (ptepage->pfn$q_bak&PTE$M_TYP0)) {
 				    pte_t * mypte=&pte;
 				    signed long page = mmg$allocpfn();
 				    unsigned long address2 = (*(unsigned long *)src_pte)&0xfffff000;
@@ -306,13 +306,30 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 #if 0
 				    ((unsigned long)wsle->wsl$pq_va)|=(unsigned long)mem_map[page].virtual;
 #endif
-				    *(unsigned long *)mypte=(__va(page*PAGE_SIZE));
-				    *(unsigned long *)mypte|=_PAGE_PRESENT;
-				    *(unsigned long *)mypte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-#ifdef __arch_um__				   
-				    flush_tlb_range(dst, address2, address2 + PAGE_SIZE);
+#ifdef __arch_um__
+				    *(unsigned long *)mypte=((unsigned long)(__va(page*PAGE_SIZE)))|((*(unsigned long *)mypte)&0xfff);
+#else
+				    *(unsigned long *)mypte=((unsigned long)(page*PAGE_SIZE))|((*(unsigned long *)mypte)&0xfff);
 #endif
+				    //*(unsigned long *)mypte|=_PAGE_PRESENT;
+				    //*(unsigned long *)mypte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+#ifdef __arch_um__				   
+				    //flush_tlb_range(dst, address2, address2 + PAGE_SIZE);
+#endif
+				    if (0 && __va(page*PAGE_SIZE)>0xc0500000) goto there;
+				    if (0 && ( address2<0x100000 || __va(page*PAGE_SIZE)<0x100000)) {
+				    there:
+				      printk("%x %x %x %x %x\n",address2,page,__va(page*PAGE_SIZE),src_pte,*src_pte);
+#ifdef __arch_i386__
+				      sickinsque(4,4);
+#endif				     
+				      panic("die is cast\n");
+				    }
+#ifdef __arch_um__
 				    bcopy(address2,__va(page*PAGE_SIZE),PAGE_SIZE);
+#else
+				    bcopy(__va(address2),__va(page*PAGE_SIZE),PAGE_SIZE);
+#endif
 				  }
 
 cont_copy_pte_range:		set_pte(dst_pte, pte);
