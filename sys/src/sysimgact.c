@@ -45,17 +45,17 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void ** hdrbuf, unsigned l
   struct _va_range inadr;
   char * buffer;
   mm_segment_t fs;
+  int pos=0;
   struct _imcb * im = kmalloc(sizeof(struct _imcb),GFP_KERNEL);
   bzero(im,sizeof(struct _imcb));
   //  im->imcb$b_type
-  f=open_exec(dscdflnam->dsc$a_pointer);
+  f=rms_open_exec(dscdflnam->dsc$a_pointer);
   if (f==0) return 0;
   *hdrbuf=header;
   im->imcb$l_context=f;//w_chan too small, temp place
   fs = get_fs();
   set_fs(KERNEL_DS);
-  generic_file_llseek(f,0,0);
-  f->f_op->read(f, header, 512, &f->f_pos);
+  rms_generic_file_read(f, header, 512, &pos);
   set_fs(fs);
 
   im->imcb$l_flink=img$gl_imcb_list;
