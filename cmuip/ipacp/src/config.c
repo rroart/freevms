@@ -600,9 +600,12 @@ void CNF$Configure_ACP (void)
 
 // roart: had to add a label and goto, since $get here read all
 	    again:
+	    printk("linptr %x %s\n",linptr,linptr);
+	    printk("ptr %x %s\n",cptr,cptr);
 
 	    cflen = GETFIELD(cfield);
 	    cptr = CH$PTR(cfield,0);
+	    printk("cf %x %x %s %x %s\n",cflen,cptr,cptr,cfield,cfield);
 	    if (STREQLZ(cptr,"DEVICE_INIT"))
 		    Init_Device();
 		else if (STREQLZ(cptr,"MEMGR_INIT"))
