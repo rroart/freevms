@@ -92,8 +92,8 @@ STOP:
 	in a cluster (the Unix pids can be used on the local node).
 	(Stop on cluster works again)
 
-	stop /id proc
-	stop
+	stop /id=proc
+	stop name
 	DCL only (unless you use /vms\$common/syshlp/examples/forcex)
 
 DEFINE:

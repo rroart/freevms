@@ -19,6 +19,7 @@ Why does initialize use volume cluster 17?
 Check if cleanup to 0x40000000 kills 0x3f000000?
 Deallocate kernel cli/dcl symbols
 Consider unifiying qualifier and parameter code?
+DCL ambiguity check
 
 CPU/PAL:
 FIX pal
