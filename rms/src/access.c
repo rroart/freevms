@@ -47,6 +47,7 @@
 #include <fi5def.h>
 #include <fibdef.h>
 #include <fiddef.h>
+#include <iodef.h>
 #include <iosbdef.h>
 #include <irpdef.h>
 #include <rmsdef.h>
@@ -70,6 +71,61 @@
 
 #define DEBUGx
 
+int f11b_read_writevb(struct _irp * i) {
+  int lbn;
+  char * buffer;
+  struct _iosb iosb;
+  struct _vcb * vcb = i->irp$l_ucb->ucb$l_vcb;
+  struct _fcb * fcb = xqp->primary_fcb; // ???? is this right
+  struct _wcb * wcb = &fcb->fcb$l_wlfl;
+  int blocks=(i->irp$l_qio_p2+511)/512;
+  lbn=f11b_map_vbn(i->irp$l_qio_p3,wcb);
+  if (i->irp$v_fcode==IO$_WRITEVBLK) {
+    f11b_write_block(vcb,lbn,i->irp$l_qio_p1,lbn,blocks,&iosb);
+  } else {
+    buffer=f11b_read_block(vcb,lbn,blocks,&iosb);
+    memcpy(i->irp$l_qio_p1,buffer,512);
+    vfree(buffer);
+  }
+}
+
+signed int f11b_map_vbn(unsigned int vbn,struct _wcb *wcb) {
+  // thing there should be more here?
+  signed int lbn;
+  ioc_std$mapvblk(vbn,0,wcb,0,0,&lbn,0,0);
+  return lbn;
+}
+
+void * f11b_read_header(struct _vcb * vcb, unsigned long filenum, struct _fcb * fcb) {
+
+}
+
+void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
+  unsigned char * buf = vmalloc(512*count);
+  unsigned long phyblk=lbn; // one to one
+  unsigned long sts=phyio_read(vcb->vcb$l_aqb->aqb$l_mount_count,phyblk,512*count,buf);
+  if (iosb) iosb->iosb$w_status=sts;
+  return buf;
+}
+
+void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
+  unsigned long phyblk=lbn; // one to one
+  unsigned long sts=phyio_write(vcb->vcb$l_aqb->aqb$l_mount_count,phyblk,512*count,buf);
+  if (iosb) iosb->iosb$w_status=sts;
+  return buf;
+}
+
+void * findfcb(struct _vcb * vcb,int filenum)
+{
+    struct _fcb * head = &vcb->vcb$l_fcbfl;
+    struct _fcb * tmp = head->fcb$l_fcbfl;
+    while(tmp!=head) {
+      if (filenum==((tmp->fcb$b_fid_nmx << 16) + tmp->fcb$w_fid_num)) return tmp;
+      tmp=tmp->fcb$l_fcbfl;
+    }
+    return 0;
+}
+
 void iosbret(struct _irp * i,int sts) {
   if (i && i->irp$l_iosb) {
     struct _iosb * iosb=i->irp$l_iosb;
@@ -78,7 +134,7 @@ void iosbret(struct _irp * i,int sts) {
   }
 }
 
-void f11x_handle_atr(struct _fcb * fcb,struct _atrdef * atrp) {
+void f11b_read_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
   struct _fh2 * head;
   unsigned long fi;
   gethead(fcb,&head);
@@ -256,8 +312,6 @@ unsigned writechunk(struct _fcb * fcb,unsigned long vblock, char * buff)
   int sts=ioc_std$mapvblk(vblock,0,&fcb->fcb$l_wlfl,0,0,&pbn,0,0);
   return phyio_write(ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,pbn,512,buff);
 }
-
-/* accesshead() find file or extension header from INDEXF... */
 
 unsigned gethead(struct _fcb * fcb,struct _fh2 **headbuff)
 {
@@ -480,64 +534,6 @@ int wcb_create_all(struct _fcb * fcb, struct _fh2 * fh2)
 
 /* getwindow() find a window to map VBN to LBN ... */
 
-#if 0
-unsigned getwindow(struct _fcb * fcb,unsigned vbn,struct _vcb **devptr,
-		   unsigned *phyblk,unsigned *phylen,struct _fiddef *hdrfid,
-		   unsigned *hdrseq)
-{
-  unsigned sts=SS$_NORMAL;
-  struct _wcb *wcb;
-  struct WCBKEY wcbkey;
-#ifdef DEBUG
-  printk("Accessing window for vbn %d, file (%x)\n",vbn,fcb->cache.hashval);
-#endif
-  wcbkey.vbn = vbn;
-  wcbkey.fcb = fcb;
-  wcbkey.prevwcb = NULL;
-  //wcb = cache_find((void *) &fcb->fcb$l_wlfl,0,&wcbkey,&sts,wcb_compare,wcb_create);
-  {
-    struct _wcb * head=&fcb->fcb$l_wlfl;
-    struct _wcb * tmp=head->wcb$l_wlfl;
-    while(tmp!=head) {
-      if (0==wcb_compare(0,&wcbkey,tmp)) goto end;
-      tmp=tmp->wcb$l_wlfl;
-    }
-  end:
-    if (tmp==head) { 
-      wcb = wcb_create(0,&wcbkey,&sts);
-      if (wcb) {
-	//insque(wcb,&fcb->fcb$l_wlfl);
-      }
-    } else {
-      wcb = tmp;
-    }
-  }
-  if (wcb == NULL) return sts;
-  {
-    unsigned extent = 0;
-    unsigned togo = vbn - wcb->loblk;
-
-    while (togo >= wcb->phylen[extent]) {
-      togo -= wcb->phylen[extent];
-      if (++extent > wcb->extcount) return SS$_BUGCHECK;
-    }
-
-    *devptr = rvn_to_dev(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,0);
-    *phyblk = wcb->phyblk[extent] + togo;
-    *phylen = wcb->phylen[extent] - togo;
-    if (hdrfid != NULL) memcpy(hdrfid,&wcb->wcb$l_fcb->fcb$w_fid,sizeof(struct _fiddef));
-    if (hdrseq != NULL) *hdrseq = wcb->hd_seg_num;
-#ifdef DEBUG
-    printk("Mapping vbn %d to %d (%d -> %d)[%d] file (%x)\n",
-	   vbn,*phyblk,wcb->loblk,wcb->hiblk,wcb->hd_basevbn,fcb->cache.hashval);
-#endif
-    //cache_untouch(&wcb->cache,1);
-  }
-  if (*devptr == NULL) return SS$_DEVNOTMOUNT;
-  return SS$_NORMAL;
-}
-#endif
-
 unsigned getwindow(struct _fcb * fcb,unsigned vbn,struct _vcb **devptr,
 		   unsigned *phyblk,unsigned *phylen,struct _fiddef *hdrfid,
 		   unsigned *hdrseq)
@@ -547,9 +543,7 @@ unsigned getwindow(struct _fcb * fcb,unsigned vbn,struct _vcb **devptr,
 #ifdef DEBUG
   printk("Accessing window for vbn %d, file (%x)\n",vbn,fcb->cache.hashval);
 #endif
-  if (aqempty(&fcb->fcb$l_wlfl))
-    sts = wcb_create_all(fcb,0);
-  if (aqempty(&fcb->fcb$l_wlfl)) return sts;
+
   wcb = fcb->fcb$l_wlfl;
 
   *devptr = rvn_to_dev(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,0);
@@ -561,15 +555,10 @@ unsigned getwindow(struct _fcb * fcb,unsigned vbn,struct _vcb **devptr,
   printk("Mapping vbn %d to %d (%d -> %d)[%d] file (%x)\n",
 	 vbn,*phyblk,wcb->loblk,wcb->hiblk,wcb->hd_basevbn,fcb->cache.hashval);
 #endif
-  //cache_untouch(&wcb->cache,1);
 
   if (*devptr == NULL) return SS$_DEVNOTMOUNT;
   return SS$_NORMAL;
 }
-
-/* Object manager for VIOC objects:- if the object has been
-   modified then we need to flush it to disk before we let
-   the cache routines do anything to it... */
 
 /* deaccesschunk() to deaccess a VIOC (chunk of a file) */
 
@@ -600,20 +589,17 @@ unsigned deaccesschunk(unsigned wrtvbn,
   return SS$_NORMAL;
 }
 
-
-void *vioc_create(unsigned hashval,void *keyval,unsigned *retsts)
+void *f11b_readvblock(struct _fcb * fcb,unsigned curvbn,unsigned *retsts)
 {
+  struct _iosb iosb;
   int length;
-  unsigned curvbn = hashval + 1;
   char *address;
-  struct _fcb *fcb = (struct _fcb *) keyval;
   length = fcb->fcb$l_efblk - curvbn + 1;
   length = 1;
-  address = (char *) vmalloc(512);
   do {
     // no breaking of the water for now?
     if (fcb->fcb$l_highwater != 0 && curvbn >= fcb->fcb$l_highwater) {
-      memset(address,0,length * 512);
+      //memset(address,0,length * 512);
       break;
     } else {
       unsigned sts;
@@ -625,7 +611,8 @@ void *vioc_create(unsigned hashval,void *keyval,unsigned *retsts)
 	if (fcb->fcb$l_highwater != 0 && curvbn + phylen > fcb->fcb$l_highwater) {
 	  phylen = fcb->fcb$l_highwater - curvbn;
 	}
-	sts = phyio_read(vcbdev->vcb$l_aqb->aqb$l_mount_count,phyblk,phylen * 512,address);
+	address = f11b_read_block(vcbdev,phyblk,phylen,&iosb);
+	sts = iosb.iosb$w_status;
       }
       if ((sts & 1) == 0) {
 	*retsts = sts;
@@ -640,8 +627,6 @@ void *vioc_create(unsigned hashval,void *keyval,unsigned *retsts)
   return address;
 }
 
-
-
 /* accesschunk() return pointer to a 'chunk' of a file ... */
 
 unsigned accesschunk(struct _fcb *fcb,unsigned vbn,
@@ -650,13 +635,10 @@ unsigned accesschunk(struct _fcb *fcb,unsigned vbn,
   unsigned sts;
   int blocks;
   if (!fcb) fcb=xqp->primary_fcb;
-#ifdef DEBUG
-  printk("Access chunk %8x %d (%x)\n",base,vbn,fcb->cache.hashval);
-#endif
   //  if (vbn < 1 || vbn > fcb->fcb$l_efblk) return SS$_ENDOFFILE;
   if (vbn < 1 || vbn > 100000) { iosbret(irp, SS$_ENDOFFILE); return SS$_ENDOFFILE; } // for second read
 
-  *retbuff = vioc_create(vbn-1,fcb,&sts);
+  *retbuff = f11b_readvblock(fcb,vbn,&sts);
 
   if (retblocks) *retblocks=1;
   iosbret(irp,SS$_NORMAL);
@@ -672,6 +654,7 @@ unsigned deaccessfile(struct _fcb *fcb)
 {
   int sts;
   struct _fh2 * head;
+  return SS$_NORMAL;
 #ifdef DEBUG
   printk("Deaccessing file (%x) reference %d\n",fcb->cache.hashval,fcb->cache.refcount);
 #endif
@@ -683,11 +666,11 @@ unsigned deaccessfile(struct _fcb *fcb)
   return SS$_NORMAL;
 }
 
-void *fcb_create(unsigned filenum,void *keyval,unsigned *retsts)
+void *fcb_create(unsigned filenum,unsigned *retsts)
 {
   struct _fcb *fcb = (struct _fcb *) vmalloc(sizeof(struct _fcb));
   if (fcb == NULL) {
-    *retsts = SS$_INSFMEM;
+    if (retsts) *retsts = SS$_INSFMEM;
   } else {
     qhead_init(&fcb->fcb$l_wlfl);
     fcb->fcb$l_efblk = 100000;
@@ -701,15 +684,24 @@ void *fcb_create(unsigned filenum,void *keyval,unsigned *retsts)
 
 /* accessfile() open up file for access... */
 
-unsigned accessfile(struct _vcb * vcb,struct dsc$descriptor * fibdsc,struct dsc$descriptor * filedsc,unsigned short *reslen,struct dsc$descriptor * resdsc,struct dsc$descriptor * atrp, struct _fcb **fcbadd, unsigned action, struct _irp * irp)
+unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
 {
   unsigned sts;
   unsigned wrtflg=1;
   struct _fcb *fcb;
   struct _fh2 *head;
+  struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
+  struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
+  unsigned short *reslen=irp->irp$l_qio_p3;
+  struct dsc$descriptor * resdsc=irp->irp$l_qio_p4;
+  void * atrp=irp->irp$l_qio_p5;
   struct _fibdef * fib=(struct _fibdef *)fibdsc->dsc$a_pointer;
   struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
   unsigned filenum = (fid->fid$b_nmx << 16) + fid->fid$w_num;
+  unsigned action=0;
+  if (irp->irp$v_fmod == IO$M_ACCESS) action=0;
+  if (irp->irp$v_fmod == IO$M_CREATE) action=2;
+  if (irp->irp$v_fmod == IO$M_DELETE) action=1;
 #ifdef DEBUG
   printk("Accessing file (%d,%d,%d)\n",(fid->fid$b_nmx << 16) +
 	 fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn);
@@ -717,66 +709,39 @@ unsigned accessfile(struct _vcb * vcb,struct dsc$descriptor * fibdsc,struct dsc$
   if (filenum < 1) { iosbret(irp,SS$_BADPARAM); return SS$_BADPARAM; }
   if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) { iosbret(irp,SS$_WRITLCK);  return SS$_WRITLCK; }
   if (fid->fid$b_rvn > 1) filenum |= fid->fid$b_rvn << 24;
-  {
-    struct _fcb * head = &vcb->vcb$l_fcbfl;
-    struct _fcb * tmp = head->fcb$l_fcbfl;
-    while(tmp!=head) {
-      if (filenum==((tmp->fcb$b_fid_nmx << 16) + tmp->fcb$w_fid_num)) goto end;
-      tmp=tmp->fcb$l_fcbfl;
-    }
-  end:
-    if (tmp==head) {
-      fcb=fcb_create(filenum,0,&sts);
-      if (fcb) {
-	fcb->fcb$w_fid_num=fid->fid$w_num;
-	fcb->fcb$w_fid_seq=fid->fid$w_seq;
-	insque(fcb,&vcb->vcb$l_fcbfl);
-      }
-    } else {
-      fcb = tmp;
+  fcb=findfcb(vcb,filenum);
+  if (fcb==NULL) {
+    fcb=fcb_create(filenum,&sts);
+    if (fcb) {
+      fcb->fcb$w_fid_num=fid->fid$w_num;
+      fcb->fcb$w_fid_seq=fid->fid$w_seq;
+      insque(fcb,&vcb->vcb$l_fcbfl);
+      wcb_create_all(fcb,0);
     }
   }
   if (fcb == NULL) { iosbret(irp,sts); return sts; }
-  /* If not found make one... */
-  if (fcbadd) *fcbadd = fcb;
+
   xqp->primary_fcb=fcb;
-#if 0
-  if (fcb->vcb == NULL) {
-    fcb->fcb$b_fid_rvn = fid->fid$b_rvn;
-    //        if (fcb->fcb$b_fid_rvn == 0 && vcb->devices > 1) fcb->fcb$b_fid_rvn = 1;
-    fcb->vcb = vcb;
-  }
-#endif
-  if (wrtflg) {
-#if 0
-    if (fcb->headvioc != NULL && (fcb->fcb$l_status & FCB_WRITE) == 0) {
-      deaccesshead(fcb->headvioc,NULL,0);
-      fcb->headvioc = NULL;
+  xqp->current_window=&fcb->fcb$l_wlfl;
+
+  sts = accesshead(vcb,fid,0,&head,0,wrtflg);
+  if (sts & 1) {
+    fcb->fcb$l_efblk = VMSSWAP(head->fh2$w_recattr.fat$l_hiblk);
+    if (head->fh2$b_idoffset > 39) {
+      fcb->fcb$l_highwater = VMSLONG(head->fh2$l_highwater);
+    } else {
+      fcb->fcb$l_highwater = 0;
     }
-#endif
+    if (head->fh2$l_filechar & FH2$M_CONTIG)
+      fcb->fcb$l_stlbn=f11b_map_vbn(1,&fcb->fcb$l_wlfl);
+    fcb->fcb$l_hdlbn=f11b_map_vbn(fid->fid$w_num + (fid->fid$b_nmx << 16) - 1 + VMSWORD(vcb->vcb$l_ibmapvbn) + VMSWORD(vcb->vcb$l_ibmapsize),&fcb->fcb$l_wlfl);
+  } else {
+    printk("Accessfile status %d\n",sts);
+    iosbret(irp,sts);
+    return sts;
   }
-#if 0
-  if (fcb->headvioc == NULL) 
-#else
-    if (1) {
-#endif
-      unsigned sts;
-      //        sts = accesshead(vcb,fid,0,&fcb->headvioc,&fcb->head,&fcb->headvbn,wrtflg);
-      sts = accesshead(vcb,fid,0,&head,0,wrtflg);
-      if (sts & 1) {
-	fcb->fcb$l_efblk = VMSSWAP(head->fh2$w_recattr.fat$l_hiblk);
-	if (head->fh2$b_idoffset > 39) {
-	  fcb->fcb$l_highwater = VMSLONG(head->fh2$l_highwater);
-	} else {
-	  fcb->fcb$l_highwater = 0;
-	}
-      } else {
-	printk("Accessfile status %d\n",sts);
-	iosbret(irp,sts);
-	return sts;
-      }
-    }
-  if (atrp) f11x_handle_atr(fcb,atrp);
+
+  if (atrp) f11b_read_attrib(fcb,atrp);
   iosbret(irp,SS$_NORMAL);
   return SS$_NORMAL;
 }
@@ -838,6 +803,7 @@ unsigned dismount(struct _vcb * vcb)
 
 unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],struct _vcb **retvcb)
 {
+  struct _iosb iosb;
   unsigned device,sts;
   struct _vcb *vcb;
   struct _vcb *vcbdev;
@@ -916,14 +882,13 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	memcpy(&vcb->vcb$t_volname,home.hm2$t_volname,12);
 	idxfid.fid$b_rvn = device + 1;
 	//sts = accessfile(vcb,&idxfid,&idxfcb,flags & 1);
-	idxfcb=fcb_create(1,0,&sts);
+	idxfcb=fcb_create(1,&sts);
 	idxfcb->fcb$w_fid[0]=1;
 	idxfcb->fcb$w_fid[1]=1;
 	insque(idxfcb,&vcb->vcb$l_fcbfl);
-	idxhd = vmalloc (sizeof(struct _fh2));
-	sts = phyio_read(vcbdev->vcb$l_aqb->aqb$l_mount_count,VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),sizeof(struct _fh2), (char *) idxhd);
+	idxhd = f11b_read_block(vcbdev,VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),1, &iosb);
 	wcb_create_all(idxfcb,idxhd);
-	if (!(sts & 1)) {
+	if (!(iosb.iosb$w_status & 1)) {
 	  ucb->ucb$l_vcb = NULL;
 	} else {
 	  ucb->ucb$l_vcb = vcb;
@@ -932,9 +897,14 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	  if (1) {
 	    struct _fibdef mapfib = {0,2,2,1,0};
 	    struct dsc$descriptor mapdsc;
+	    struct _irp * dummyirp = vmalloc(sizeof(struct _irp));
 	    mapdsc.dsc$w_length=sizeof(struct _fibdef);
 	    mapdsc.dsc$a_pointer=&mapfib;
-	    sts = accessfile(vcb,&mapdsc,0,0,0,0,&mapfcb,1,0);
+	    bzero(dummyirp,sizeof(struct _irp));
+	    dummyirp->irp$l_qio_p1=&mapdsc;
+	    dummyirp->irp$l_ucb=ucb;
+	    sts = f11b_access(vcb,dummyirp);
+	    mapfcb=getmapfcb(vcb);
 	    if (sts & 1) {
 	      struct _scbdef *scb;
 	      //insque(mapfcb,&vcb->vcb$l_fcbfl);

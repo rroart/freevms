@@ -400,9 +400,11 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
 
 /* update_create() will create a new file... */
 
-unsigned update_create(struct _vcb *vcb,struct _fibdef *fib,char *filename,
-                       struct _fiddef *fid,struct _fcb **fcb)
+unsigned update_create(struct _vcb *vcb,struct dsc$descriptor *fibdsc,struct dsc$descriptor *serdsc,struct _irp * i)
 {
+  struct _fibdef * fib=fibdsc->dsc$a_pointer;
+  struct _fiddef * fid=&fib->fib$w_fid_num;
+  char *filename=serdsc->dsc$a_pointer;
     struct _fh2 *head;
     unsigned idxblk;
     unsigned sts;
@@ -413,8 +415,8 @@ unsigned update_create(struct _vcb *vcb,struct _fibdef *fib,char *filename,
     if (!(sts & 1)) return sts;
     sts = deaccesshead(head,idxblk);
     //    sts = writehead(getidxfcb(vcb),head);
-    if (sts & 1 && fcb != NULL) {
-        sts = accessfile(vcb,fid,0,0,0,0,fcb,1,0);
+    if (sts & 1) {
+      sts = f11b_access(vcb,fid); // change to irp
     }
     printk("(%d,%d,%d) %d\n",fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn,sts);
     return sts;
@@ -578,7 +580,7 @@ unsigned accesserase(struct _vcb * vcb,struct _fibdef * fib)
     struct _fh2 *  head;
     fibdsc.dsc$w_length=sizeof(struct _fibdef);
     fibdsc.dsc$a_pointer=fib;
-    sts = accessfile(vcb,&fibdsc,0,0,0,0,&fcb,1,0);
+    sts = f11b_access(vcb,&fibdsc); // change to irp
     if (sts & 1) {
       sts = gethead (fcb, &head);
       head->fh2$l_filechar |= FH2$M_MARKDEL;
@@ -587,135 +589,3 @@ unsigned accesserase(struct _vcb * vcb,struct _fibdef * fib)
     }
     return sts;
 }
-
-
-
-
-#ifdef EXTEND
-unsigned extend(struct _fcb *fcb,unsigned blocks)
-{
-    unsigned sts;
-    struct _vcb *vcbdev;
-    unsigned clusterno;
-    unsigned extended = 0;
-    if ((fcb->fcb$l_status & FCB_WRITE) == 0) return SS$_WRITLCK;
-    if (fcb->fcb$l_efblk > 0) {
-        unsigned phyblk,phylen;
-        sts = getwindow(fcb,fcb->fcb$l_efblk,&vcbdev,&phyblk,&phylen,NULL,NULL);
-        clusterno = (phyblk + 1) / vcbdev->vcb$l_cluster;
-        if ((sts & 1) == 0) return sts;
-    } else {
-        vcbdev = fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb->vcbdev;
-        clusterno = 0;          /* filenum * 3 /indexfsize * volumesize; */
-    }
-    while (extended < blocks) {
-        unsigned *bitmap,blkcount;
-        unsigned clustalq = 0;
-        unsigned clustersz = vcbdev->vcb$l_cluster;
-        sts = accesschunk(getmapfcb(vcbdev),clusterno / 4096 + 2,
-            (char **) &bitmap,&blkcount,1,0);
-        if ((sts & 1) == 0) return sts;
-        do {
-            unsigned wordno = (clusterno % 4096) / WORK_BITS;
-            unsigned wordval = bitmap[wordno];
-            if (wordval == 0xffff) {
-                if (clustalq) break;
-                clusterno = (clusterno % WORK_BITS) *
-                    WORK_BITS + 1;
-            } else {
-                unsigned bitno = clusterno % WORK_BITS;
-                do {
-                    if (wordval & (1 << bitno)) {
-                        if (clustalq) break;
-                    } else {
-                        clustalq++;
-                        wordval |= 1 << bitno;
-                    }
-                    clusterno++;
-                    if (clustalq >= (extended - blocks)) break;
-                } while (++bitno < WORK_BITS);
-                if (clustalq) {
-                    bitmap[wordno] = wordval;
-                    if (bitno < WORK_BITS) break;
-                }
-            }
-        } while (++wordno < blkcount * 512 / sizeof(unsigned));
-        mp = (unsigned word *) fcb->head + fcb->head->fh2$b_mpoffset;
-        *mp++ = (3 << 14) | (clustalq >> 16);
-        *mp++ = clustalq & 0xff;
-        *mp++ = clustno & 0xff;
-        *clusertize
-            * mp++ = clustno << 16;
-        fcb->head->fh2$b_map_inuse + 4;
-        fcb->fcb$l_efblk += clustalq;
-        fcb->head.fh2$w_recattr.fat$l_hiblk[0] = fcb->fcb$l_efblk >> 16;
-        fcb->head.fh2$w_recattr.fat$l_hiblk[1] = fcb->fcb$l_efblk & 0xff;
-        sts = deaccesschunk(clusterno / 4096 + 2,blkcount,1);
-	sts = writechunk(fcb,clusterno/4096+2,bitmap);
-        /* code to append clusterno:clustalq to map */
-    }
-}
-#endif
-
-
-
-#ifdef EXTEND
-
-unsigned access_create(struct _vcb * vcb,struct _fcb ** fcbadd,unsigned blocks) {
-    struct _fcb *fcb;
-    struct _fiddef fid;
-    unsigned create = sizeof(struct _fcb);
-    if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) return SS$_WRITLCK;
-
-    sts = headmap_search(struct _vcb * vcbdev,struct _fiddef * fid,
-        struct _fh2 ** headbuff,unsigned *retidxblk,) {
-        fcb = cachesearch((void *) &vcb->fcb,filenum,0,NULL,NULL,&create);
-        if (fcb == NULL) return SS$_INSFMEM;
-        /* If not found make one... */
-        if (create == 0) {
-	  //fcb->cache.objtype = CACHETYPE_DEV;
-            fcb->fcb$b_fid_rvn = fid->fid_b_rvn;
-            if (fcb->fcb$b_fid_rvn == 0 && vcb->devices > 1) fcb->fcb$b_fid_rvn = 1;
-            fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb = vcb;
-            fcb->fcb$l_wlfl = NULL;
-        }
-        if (wrtflg) {
-#if 0
-            if (fcb->headvioc != NULL && (fcb->cache.status & CACHE_WRITE) == 0) {
-#endif
-	      if (0) {
-                deaccesshead(0,NULL,0);
-		writehead(getidxfcb(vcb),headbuff);
-                //fcb->headvioc = NULL;
-            }
-            fcb->cache.status |= CACHE_WRITE;
-        }
-        if (1) {
-            unsigned sts;
-            if (vcb->idxboot != NULL) {
-                *fcbadd = fcb;
-                fcb->fcb$l_efblk = 32767;   /* guess at indexf.sys file size */
-                fcb->fcb$l_highwater = 0;
-                fcb->head = vcb->idxboot;       /* Load bootup header */
-            }
-            sts = accesshead(vcb,fid,0,0,&fcb->head,&fcb->headvbn,wrtflg);
-            if (sts & 1) {
-                fcb->fcb$l_efblk = VMSSWAP(fcb->head->fh2$w_recattr.fat$l_hiblk);
-                if (fcb->head->fh2$b_idoffset > 39) {
-                    fcb->fcb$l_highwater = fcb->head->fh2$l_highwater;
-                } else {
-                    fcb->fcb$l_highwater = 0;
-                }
-            } else {
-                printk("Accessfile status %d\n",sts);
-                fcb->cache.objmanager = NULL;
-                cacheuntouch(&fcb->cache,0,0);
-                cachefree(&fcb->cache);
-                return sts;
-            }
-        }
-        *fcbadd = fcb;
-        return SS$_NORMAL;
-    }
-#endif
-

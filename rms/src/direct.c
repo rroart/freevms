@@ -20,6 +20,7 @@
     lookups of filenames in directory files... */
 
 
+#include <linux/vmalloc.h>
 #include <stdio.h>
 //#include <stdlib.h>
 #include <linux/ctype.h>
@@ -786,12 +787,15 @@ unsigned direct(struct _vcb * vcb,struct dsc$descriptor * fibdsc,
     struct _fibdef *fib = (struct _fibdef *) fibdsc->dsc$a_pointer;
     struct _fibdef dirfib;
     struct dsc$descriptor dirdsc;
+    struct _irp * dummyirp=vmalloc(sizeof(struct _irp));
+    bcopy(i,dummyirp,sizeof(struct _irp));
     dirdsc.dsc$w_length=sizeof(struct _fibdef);
     dirdsc.dsc$a_pointer=&dirfib;
     memcpy(&dirfib,fib,sizeof(struct _fibdef));
     dirfib.fib$w_fid_num=fib->fib$w_did_num;
     dirfib.fib$w_fid_seq=fib->fib$w_did_seq;
-    sts = accessfile(vcb,&dirdsc,0,0,0,atrp, 0,action,i);
+    dummyirp->irp$l_qio_p1=&dirdsc;
+    sts = f11b_access(vcb,dummyirp);
     fcb=xqp->primary_fcb;
     if (sts & 1) {
       gethead(fcb,&head);
