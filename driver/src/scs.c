@@ -88,6 +88,15 @@ static char dn_rt_all_rt_mcast[ETH_ALEN]  = {0xAB,0x00,0x04,0x01,0x00,0x00};
 static char dn_hiord[ETH_ALEN]            = {0xAB,0x00,0x04,0x01,0x00,0x00}; // remember to add clusterid + 1
 static unsigned char dn_eco_version[3]    = {0x02,0x00,0x00};
 
+static inline void dn_nsp_send2(struct sk_buff *skb)
+{
+  skb->h.raw = skb->data;
+  skb->dev = decnet_default_device;
+  //skb->dst = dst_clone(dst);
+  dn_rt_finish_output2(skb,dn_rt_all_rt_mcast);
+  //  dev_queue_xmit(skb);
+}
+
 extern struct neigh_table dn_neigh_table;
 
 struct net_device *decnet_default_device;
@@ -2089,23 +2098,10 @@ out:
  */
 static __inline__ int dn_queue_skb(struct _cdt *sk, struct sk_buff *skb, int sig, struct sk_buff_head *queue)
 {
-#ifdef CONFIG_FILTER
-	struct sk_filter *filter;
-#endif
 
         /* Cast skb->rcvbuf to unsigned... It's pointless, but reduces
            number of warnings when compiling with -W --ANK
          */
-
-#ifdef CONFIG_FILTER
-        if (sk->filter) {
-		int err = 0;
-                if ((filter = sk->filter) != NULL && sk_filter(skb, sk->filter))
-                        err = -EPERM;  /* Toss packet */
-		if (err)
-			return err;
-        }
-#endif /* CONFIG_FILTER */
 
         skb_set_owner_r(skb, sk);
         skb_queue_tail(queue, skb);
@@ -2513,8 +2509,8 @@ struct sk_buff *dn_alloc_skb2(struct _cdt *sk, int size, int pri)
 	skb->protocol = __constant_htons(ETH_P_MYSCS);
 	skb->pkt_type = PACKET_OUTGOING;
 
-	if (sk)
-		skb_set_owner_w(skb, sk);
+	//	if (sk)
+	//	skb_set_owner_w(skb, sk);
 
 	skb_reserve(skb, hdr);
 
@@ -2638,7 +2634,7 @@ static inline unsigned dn_nsp_clone_and_send(struct sk_buff *skb, int gfp)
 		ret = cb->cdt$l_pb->pb$l_vc_addr->vc$l_xmt_msg;
 		cb->cdt$l_pb->pb$l_vc_addr->vc$l_xmt_msg++;
 		skb2->sk = skb->sk;
-		dn_nsp_send(skb2);
+		dn_nsp_send2(skb2);
 	}
 
 	return ret;
@@ -2846,7 +2842,7 @@ void dn_nsp_send_data_ack2(struct _cdt *sk)
 
 	skb_reserve(skb, 9);
 	dn_mk_ack_header(sk, skb, 0x04, 9, 0);
-	dn_nsp_send(skb);
+	dn_nsp_send2(skb);
 }
 
 void dn_nsp_send_oth_ack2(struct _cdt *sk)
@@ -2858,7 +2854,7 @@ void dn_nsp_send_oth_ack2(struct _cdt *sk)
 
 	skb_reserve(skb, 9);
 	dn_mk_ack_header(sk, skb, 0x14, 9, 1);
-	dn_nsp_send(skb);
+	dn_nsp_send2(skb);
 }
 
 
@@ -2875,7 +2871,7 @@ void dn_send_conn_ack2 (struct _cdt *sk)
         msg->msgflg = 0x24;                   
 	msg->dstaddr = scp->cdt$l_rconid;
 
-	dn_nsp_send(skb);	
+	dn_nsp_send2(skb);	
 }
 
 void dn_nsp_delayed_ack2(struct _cdt *sk)
@@ -2913,7 +2909,7 @@ void dn_send_conn_conf2(struct _cdt *sk, int gfp)
 
 	*skb_put(skb,1) = len;
 
-	dn_nsp_send(skb);
+	dn_nsp_send2(skb);
 
 }
 
@@ -2956,7 +2952,7 @@ static __inline__ void dn_nsp_do_disc(struct _cdt *sk, unsigned char msgflg,
 	 * associations.
 	 */
 	skb->dst = dst_clone(dst);
-	skb->dst->output(skb);
+	dev_queue_xmit(skb);
 }
 
 
@@ -3019,9 +3015,9 @@ void scs_msg_ctl_comm(struct _cdt *sk, unsigned char msgflg)
 	if ((skb = dn_alloc_skb2(sk, 200, (msgflg == SCS$C_CON_REQ) ? 0 : GFP_ATOMIC)) == NULL)
 	  return;
 
-	scs_msg_ctl_fill(skb->data,sk,msgflg);
+	scs_msg_ctl_fill(skb,sk,msgflg);
 
-	dn_nsp_send(skb);	
+	dn_nsp_send2(skb);	
 }
 
 void dn_nsp_send_conninit2(struct _cdt *sk, unsigned char msgflg)
@@ -3033,16 +3029,18 @@ void dn_nsp_send_conninit2(struct _cdt *sk, unsigned char msgflg)
 	if ((skb = dn_alloc_skb2(sk, 200, (msgflg == SCS$C_CON_REQ) ? 0 : GFP_ATOMIC)) == NULL)
 	  return;
 
-	scs_msg_ctl_fill(skb->data,sk,msgflg);
+	scs_msg_ctl_fill(skb,sk,msgflg);
 
-	dn_nsp_send(skb);	
+	dn_nsp_send2(skb);	
 }
 
-void scs_msg_ctl_fill(void * data, struct _cdt * cdt, unsigned char msgflg)
+void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg)
 {
 	struct _nisca *nisca;
 	struct _ppd * ppd;
 	struct _scs * scs;
+	void * data;
+	data = skb_put(skb,sizeof(*nisca));
 	nisca=gettr(data);
 	nisca->nisca$b_tr_flag=NISCA$M_TR_CTL;
 	nisca->nisca$b_tr_pad=0x13;
@@ -3564,7 +3562,7 @@ int opc_msgrec(struct sk_buff *skb) {
   unsigned char flags = 0;
   __u16 len = dn_ntohs(*(__u16 *)skb->data);
   unsigned char padlen = 0;
-  struct _scs * msg=skb;
+  struct _scs * msg=skb->data;
   msg=((long)msg)+14;
   
   if (msg->scs$w_mtype) { // if other than con_req
