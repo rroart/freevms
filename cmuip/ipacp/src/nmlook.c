@@ -126,7 +126,9 @@ extern     LIB$FREE_VM ();
 extern     LIB$FREE_VM_PAGE ();
 extern  void    QL_FAO();
 extern  void    LOG_FAO();
+#if 0
 extern  void    OPR_FAO();
+#endif
 extern     Time_Stamp();
 extern     user$clock_base();
 
@@ -489,13 +491,10 @@ void NML$GETNAME(ADDR,ASTADR,ASTPRM)
 
     if ($$LOGF(LOG$MSG))
 	{
-	signed long
-	    INA;
-	INA = ADDR;
-#if 0
+	signed char * INA;
+	INA = &ADDR;
 	QL$FAO("!%T NML$GETNAME: address is !UB.!UB.!UB.!UB!/",
 	       0,INA[0],INA[1],INA[2],INA[3]);
-#endif
 	};
 
 // Allocate and initialize a request block for us

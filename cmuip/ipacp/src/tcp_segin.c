@@ -420,7 +420,9 @@ extern  void    swapbytes();
 extern  void    ASCII_Hex_Bytes();
 extern  void    ASCII_Dec_Bytes();
 extern  void    Log_Time_Stamp();
+#if 0
 extern  void    OPR_FAO();
+#endif
 extern  void    LOG_FAO();
 extern  void    LOG_OUTPUT();
 extern  void    ACT_FAO();
@@ -809,7 +811,7 @@ queue_network_data(TCB,QB)
 	     "!%T QND: ENQ !SL from !XL,EQ=!XL,DQ=!XL,RCQ=!XL/!XL!/",
 	     0,Ucount,Uptr,TCB->rcv_q_enqp,TCB->rcv_q_deqp,
 	     TCB->rcv_q_base,TCB->rcv_q_end);
-    cq_enqueue(TCB->rcv_q_queue,Uptr,Ucount);
+    cq_enqueue(&TCB->rcv_q_queue,Uptr,Ucount);
     XLOG$FAO(LOG$TCP,
 	"!%T QND: Q cnt !UW !/", 0, TCB->rcv_q_count);
 
@@ -1094,14 +1096,11 @@ extern	PokeAddr ();
 	    {
 	    XLOG$FAO(LOG$TCP,"!%T Forked Server: !AS!/",0,ProcName);
 
-#if 0
-	    // not yet
 	    ACT$FAO("!%D Forked Server: !AS(PID:!XW) <!UB.!UB.!UB.!UB>!/",0,
-		    ProcName, NewPID<0,16,0>,
-		    IP_Address<0,8>,IP_Address<8,8>,
-		    IP_Address<16,8>,IP_Address<24,8>
+		    ProcName, NewPID&0xffff,
+		    IP_Address&0xff,(IP_Address>>8)&0xff,
+		    (IP_Address>>16)&0xff,(IP_Address>>24)&0xff
 		   );
-#endif
 	    ts$servers_forked = ts$servers_forked + 1; // count the servers.
 	    PokeAddr(NewPID, IP_Address, RP);
 	    return TRUE;
@@ -1415,8 +1414,8 @@ void SEG$Log_Segment(struct segment_structure * seg,signed long size,
 struct segment_structure segcopy_, * segcopy=&segcopy_;
 struct segment_structure * seghdr;
     signed long
-	dataoff,
-	sptr;
+      dataoff;
+struct dsc$descriptor	sptr;
 
     seghdr = seg;
     if (BS_Flag)		// Need to byteswap the header...
@@ -1432,18 +1431,15 @@ struct segment_structure * seghdr;
 
     dataoff = seghdr->sh$data_offset*4;
 
-#if 0
-    // not yet
     if (TR_Flag)
-	sptr = %ASCID"Received"
+      sptr = ASCID("Received");
     else
-	sptr = %ASCID"Sent";
-#endif
+	sptr = ASCID("Sent");
 
 // Write title line...
 
     LOG$FAO("!%T !AS Network Segment, SEG=!XL, OPT=!XL, DATA=!XL:!/",
-	    0,sptr,seg,seg+TCP_HEADER_SIZE,seg+dataoff);
+	    0,&sptr,seg,seg+TCP_HEADER_SIZE,seg+dataoff);
 
 // Log most of the data - N.B. We don't write the final CRLF yet...
 
@@ -2327,7 +2323,6 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 //********************************************************
 //		Check "RST" Bit.			!
 //********************************************************
-
     if (seg->sh$c_rst)
 	{
 
@@ -2800,13 +2795,10 @@ Y:		{
 // Connection not found. Give a RESET back.
 
 		    IP_Address = QB->nr$src_adrs;
-#if 0
-		    // not yet
     ACT$FAO("!%D SYN received for unknown port !UW from <!UB.!UB.!UB.!UB>!",0,
 			seg->sh$dest_port,
-			.IP_Address<0,8>,IP_Address<8,8>,
-			.IP_Address<16,8>,IP_Address<24,8>);
-#endif
+			IP_Address&0xff,(IP_Address>>8)&0xff,
+			(IP_Address>>16)&0xff,(IP_Address>>24)&0xff);
 		    reset_unknown_connection(seg,QB);
 		    goto leave_x;
 		    } else {
