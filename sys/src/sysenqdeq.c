@@ -98,7 +98,7 @@ asmlinkage int exe$enq(struct struct_enq * s) {
       qhead_init(&r->rsb$l_grqfl);
       qhead_init(&r->rsb$l_cvtqfl);
       qhead_init(&r->rsb$l_wtqfl);
-      insque(l->lkb$q_sqfl,r->rsb$l_grqfl);
+      insque(&l->lkb$q_sqfl,r->rsb$l_grqfl);
       l->lkb$l_rsb=r;
       insert_reshashtbl(r);
       if (!s->parid) {
@@ -134,7 +134,8 @@ asmlinkage int exe$enq(struct struct_enq * s) {
     struct _rsb * r;
     void * dummy;
     l=lockidtbl[s->lksb->lksb$l_lkid];
-    remque(l,dummy);
+    r=l->lkb$l_rsb;
+    remque(r->rsb$l_grqfl,dummy);
     if (aqempty(r->rsb$l_cvtqfl) && aqempty(r->rsb$l_wtqfl)) {
       r->rsb$b_cgmode=s->lkmode;
       l->lkb$b_grmode=s->lkmode;
