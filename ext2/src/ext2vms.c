@@ -578,7 +578,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     int fd=0;
     struct file * f;
     char * name;
-    int error=0;
+    signed int error=0;
     struct dirent64 dir;
     struct nameidata nd;
     struct inode * head;
@@ -620,7 +620,11 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     buf.count = 0;
     buf.dirent = &dir;
     generic_file_llseek(f, fib->fib$l_wcc/*dir.d_off*/, 0);
-    vfs_readdir(f, fillonedir64, &buf);
+    error=vfs_readdir(f, fillonedir64, &buf);
+    if (error >= 0)
+      error = buf.count;
+    if (error < 0)
+      sts = SS$_NOMOREFILES;
     fib->fib$l_wcc = f->f_pos;
 
     filp_close(f,0);
