@@ -525,6 +525,28 @@ void vms_mount(void) {
         sts = exe$mount(it);
 }
 
+struct readdir_callback2 {
+  struct dirent64 * dirent;
+  int count;
+};
+
+static int fillonedir64(void * __buf, const char * name, int namlen, loff_t offset, ino_t ino, unsigned int d_type)
+{
+  struct readdir_callback2 * buf = (struct readdir_callback2 *) __buf;
+  struct dirent64 * dirent;
+
+  if (buf->count)
+    return -EINVAL;
+  buf->count++;
+  dirent = buf->dirent;
+  dirent->d_ino=ino;
+  dirent->d_offset=offset;
+  dirent->d_namlen=namlen;
+  bcopy_to_user(name, dirent->d_name, namlen);
+  dirent->d_name[namlen]=0;
+  return 0;
+}
+
 unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 {
   struct _iosb iosb;
@@ -552,6 +574,8 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   x2p->current_vcb=vcb; // until I can place it somewhere else
 
   if (fib->fib$w_did_num) {
+    //    struct getdents_callback64 buf;
+    struct readdir_callback2 buf;
     int fd=0;
     struct file * f;
     char * name;
@@ -578,6 +602,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     }
 
     f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY, 0);
+#if 0
     fd = get_unused_fd();
     fd_install(fd, f);
     {
@@ -588,7 +613,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       }
     }
     sys_getdents64(fd,&dir,64);
-    //    vfs_readdir(file, filldir64, &buf);
+#endif
+    buf.count = 0;
+    buf.dirent = dirent;
+    vfs_readdir(file, fillonedir64, &buf);
     filp_close(f,0);
 
     resdsc->dsc$a_pointer=strdup(dir.d_name);
