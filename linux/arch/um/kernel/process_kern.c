@@ -390,6 +390,7 @@ int current_pid(void)
 extern int done_init_idle;
 int in_idle_while;
 unsigned long round_and_round;
+int hwclkdone=0;
 
 void cpu_idle(void)
 {
@@ -421,7 +422,7 @@ void cpu_idle(void)
 		 * although we are an idle CPU, we do not want to
 		 * get into the scheduler unnecessarily.
 		 */
-		schedule();
+		if (!hwclkdone) schedule();
 		if (current->need_resched) {
 			schedule();
 			check_pgt_cache();

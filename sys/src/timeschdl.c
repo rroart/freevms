@@ -179,9 +179,17 @@ asmlinkage void exe$swtimint(void) {
 #define QUANTADD 1
 #endif
 
+#ifdef __arch_um__
+extern int hwclkdone;
+#endif
+
 void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
   /* reset pr$_iccs */
   /* smp sanity timer */
+
+#ifdef __arch_um__
+int hwclkdone=1;
+#endif
 
   // on UP or primary SMP cpu:
   if (smp_processor_id()==0) {

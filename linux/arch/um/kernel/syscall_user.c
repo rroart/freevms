@@ -57,6 +57,7 @@ void syscall_handler(int sig, struct sigcontext sc)
 	long result;
 	int index, syscall;
 
+	pushpsl();
 	unprotect_kernel_mem(1);
 	timer_ready = 1;
 
@@ -96,6 +97,7 @@ void syscall_handler(int sig, struct sigcontext sc)
 	timer_ready = 0;
 	set_user_mode(NULL, 1);
 	timer_on = 1;
+	myrei();
 }
 
 int do_syscall(void *task, int pid)

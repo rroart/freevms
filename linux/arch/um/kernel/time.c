@@ -21,7 +21,9 @@ extern struct timeval xtime;
 
 void timer_handler(int sig, struct uml_pt_regs *regs)
 {
+	pushpsl();
 	timer_irq(regs);
+	myrei();
 }
 
 void timer(void)

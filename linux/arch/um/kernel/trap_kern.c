@@ -122,8 +122,10 @@ void bad_segv(unsigned long address, unsigned long ip, int is_write)
 
 void relay_signal(int sig, struct uml_pt_regs *regs)
 {
+	pushpsl();
 	if(!regs->is_user) panic("Kernel mode signal %d", sig);
 	force_sig(sig, current);
+	myrei();
 }
 
 void bus_handler(int sig, struct uml_pt_regs *regs)
