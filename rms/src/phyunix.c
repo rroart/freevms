@@ -25,7 +25,7 @@
 #include <linux/kernel.h>
 
 //#include <stdio.h>
-#include <linux/string.h>
+//#include <linux/string.h>
 //#include <unistd.h>
 //#include <sys/fcntl.h>
 
@@ -33,8 +33,9 @@
 //#include "ssdef.h"
 #include <ssdef.h>
 
-#include <linux/mm.h>
-#include <linux/slab.h>
+//#include <linux/mm.h>
+//#include <linux/slab.h>
+
 #include <asm/uaccess.h>
 
 struct phyio_info {

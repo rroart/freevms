@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /* interrupt.h */
 #ifndef _LINUX_INTERRUPT_H
 #define _LINUX_INTERRUPT_H

@@ -103,7 +103,6 @@ extern signed long
 
  extern  struct  ICMP_MIB_struct * icmp_mib ;	// ICMP Management Information Block
 
-
 // External routines
 
 // MACLIB.MAR
@@ -181,6 +180,12 @@ short    ICMPCB$PIOchan	;	// Process IO channel
 
 
 #define    ICMPCB_Size sizeof(struct  ICMPCB_Structure)
+
+void Deliver_ICMP_Data(
+		       struct ICMPCB_Structure * ICMPCB,
+		       struct queue_blk_structure(qb_nr_fields) * QB,
+	struct queue_blk_structure(qb_ur_fields) * URQ);
+
 #if 0
 MACRO
     ICMPCB_Structure = BLOCK->ICMPCB_Size FIELD(ICMPCB_Fields) %;

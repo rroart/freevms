@@ -12,6 +12,12 @@
 #include<misc.h>
 #include<ddbdef.h>
 
+struct _generic_64 {
+  long long l;
+};
+
+asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, struct _generic_64 *nullarg);
+
 asmlinkage int exe$getdvi_wrap(struct struct_getdvi *s) {
   return exe$getdvi(s->efn,s->chan,s->devnam,s->itmlst,s->iosb,s->astadr,s->astprm,s->nullarg);
 }

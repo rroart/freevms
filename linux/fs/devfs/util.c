@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /*  devfs (Device FileSystem) utilities.
 
     Copyright (C) 1999-2001  Richard Gooch
@@ -264,7 +270,7 @@ void devfs_dealloc_major (char type, int major)
     was_set = __test_and_clear_bit (major, list->bits);
     spin_unlock (&list->lock);
     if (!was_set)
-	printk (KERN_ERR __FUNCTION__ "(): major %d was already free\n",
+      printk (KERN_ERR "%s(): major %d was already free\n", __FUNCTION__,
 		major);
 }   /*  End Function devfs_dealloc_major  */
 EXPORT_SYMBOL(devfs_dealloc_major);
@@ -393,12 +399,12 @@ void devfs_dealloc_devnum (char type, kdev_t devnum)
 	if (was_set) list->none_free = 0;
 	up (semaphore);
 	if (!was_set)
-	    printk ( KERN_ERR __FUNCTION__ "(): device %s was already free\n",
+	  printk ( KERN_ERR "%s(): device %s was already free\n", __FUNCTION__,
 		     kdevname (devnum) );
 	return;
     }
     up (semaphore);
-    printk ( KERN_ERR __FUNCTION__ "(): major for %s not previously allocated\n",
+    printk ( KERN_ERR "%s(): major for %s not previously allocated\n", __FUNCTION__,
 	     kdevname (devnum) );
 }   /*  End Function devfs_dealloc_devnum  */
 EXPORT_SYMBOL(devfs_dealloc_devnum);
@@ -473,7 +479,7 @@ void devfs_dealloc_unique_number (struct unique_numspace *space, int number)
     if (was_set) ++space->num_free;
     up (&space->semaphore);
     if (!was_set)
-	printk (KERN_ERR __FUNCTION__ "(): number %d was already free\n",
+      printk (KERN_ERR "%s(): number %d was already free\n", __FUNCTION__,
 		number);
 }   /*  End Function devfs_dealloc_unique_number  */
 EXPORT_SYMBOL(devfs_dealloc_unique_number);

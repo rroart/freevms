@@ -18,6 +18,8 @@
 
 extern int mydebug5;
 
+void sch$newlvl(struct _pcb *p);
+
 int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   int savipl;
   struct _pcb * p=exe$ipid_to_pcb(pid);

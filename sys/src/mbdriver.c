@@ -31,6 +31,8 @@
 #define irp$l_nopartnerqfl irp$l_fqfl
 #define irp$l_nopartnerqbl irp$l_fqbl
 
+void mb$finishread(struct _ucb * u);
+
 struct _dpt mb_dpt = { };
 
 struct __mmb {

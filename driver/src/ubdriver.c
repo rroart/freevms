@@ -22,6 +22,8 @@
 //#include<stdio.h>
 #define SEEK_SET 0
 
+static void ubd_handler(void);
+
 static struct _irp * globali;
 static struct _ucb * globalu;
 

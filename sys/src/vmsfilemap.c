@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004. Based on filemap.c.
+
 /*
  *	linux/mm/filemap.c
  *
@@ -52,7 +58,7 @@
 /*
  * Add a page to the dirty page list.
  */
-void set_page_dirty(struct page *page)
+void fastcall set_page_dirty(struct page *page)
 {
   test_and_set_bit(PG_dirty, &page->pfn$l_page_state);
 }
@@ -161,7 +167,7 @@ int filemap_fdatawait(struct address_space * mapping)
 	return ret;
 }
 
-void unlock_page(struct page *page)
+void fastcall unlock_page(struct page *page)
 {
 	clear_bit(PG_launder, &(page)->pfn$l_page_state);
 	smp_mb__before_clear_bit();
@@ -189,7 +195,7 @@ static void __lock_page(struct page *page)
  * Get an exclusive lock on the page, optimistically
  * assuming it's not locked..
  */
-void lock_page(struct page *page)
+void fastcall lock_page(struct page *page)
 {
 	if (TryLockPage(page))
 		__lock_page(page);
@@ -203,7 +209,7 @@ void lock_page(struct page *page)
  * bit. Otherwise, just mark it for future
  * action..
  */
-void mark_page_accessed(struct page *page)
+void fastcall  mark_page_accessed(struct page *page)
 {
 	if (!PageActive(page) && PageReferenced(page)) {
 		activate_page(page);

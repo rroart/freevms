@@ -54,6 +54,7 @@ unsigned getwindow(struct _fcb * fcb,unsigned vbn,struct _vcb **devptr,
                    unsigned *hdrseq);
 struct _vcb *rvn_to_dev(struct _vcb *vcb,unsigned rvn);
 
+unsigned f11b_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);
 
 
 /* Bitmaps get accesses in 'WORK_UNITs' which can be an integer

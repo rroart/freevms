@@ -29,6 +29,9 @@
 #include<asm/hw_irq.h>
 #include "../../starlet/src/sysdep.h"
 
+void exe$qioqe2ppkt (struct _pcb * p, struct _irp * i);
+void exe$qioqxqppkt (struct _pcb * p, struct _irp * i);
+
 // temporary stuff with syscalls
 
 // extern int kernel_errno;
@@ -104,6 +107,7 @@ int exe$insioq (struct _irp * i, struct _ucb * u) {
   return SS$_NORMAL;
 }
 
+#if 0
 asmlinkage int exe_qiow_not(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
   struct struct_qio s;
   //printk("in exe_qiow %x %x %x %x %x %x %x %x %x %x %x\n",efn,chan,func,iosb,astadr,astprm,p1,p2,p3,p4);
@@ -121,6 +125,7 @@ asmlinkage int exe_qiow_not(unsigned int efn, unsigned short int chan,unsigned i
   s.p6=p6;
   return exe$qiow(&s);
 }
+#endif
 
 extern int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
 

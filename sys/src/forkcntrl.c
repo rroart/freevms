@@ -5,16 +5,20 @@
 
 #include<linux/linkage.h>
 #include<system_data_cells.h>
-#include<internals.h>
 #include<ucbdef.h>
 #include<irpdef.h>
 #include<fkbdef.h>
 #include<ipldef.h>
 #include<ipl.h>
+#include<internals.h>
 #include <linux/smp.h>
 #include <asm/current.h>
 #include <linux/kernel.h>
 #include <asm/hw_irq.h>
+
+asmlinkage void exe$forkdspth(int i);
+void exe$fork(struct _irp * i, struct _ucb * u);
+void exe$queue_fork(struct _irp * i, struct _ucb * u);
 
 struct fork_lock_struct {
   spinlock_t * spin;

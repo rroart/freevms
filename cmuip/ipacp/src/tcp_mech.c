@@ -285,6 +285,8 @@ VTCB_Remove ( struct tcb_structure * TCB )
 	   max_tcb = 1;
 	   };  // end of block X
 	leave:
+	{
+	}
 	}
     else return 0;
 

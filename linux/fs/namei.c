@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /*
  *  linux/fs/namei.c
  *
@@ -445,7 +451,7 @@ static inline void follow_dotdot(struct nameidata *nd)
  *
  * We expect 'base' to be positive and a directory.
  */
-int link_path_walk(const char * name, struct nameidata *nd)
+int fastcall link_path_walk(const char * name, struct nameidata *nd)
 {
 	struct dentry *dentry;
 	struct inode *inode;
@@ -636,7 +642,7 @@ return_err:
 	return err;
 }
 
-int path_walk(const char * name, struct nameidata *nd)
+int fastcall path_walk(const char * name, struct nameidata *nd)
 {
 	current->total_link_count = 0;
 	return link_path_walk(name, nd);
@@ -724,7 +730,7 @@ walk_init_root(const char *name, struct nameidata *nd)
 }
 
 /* SMP-safe */
-int path_init(const char *name, unsigned int flags, struct nameidata *nd)
+int fastcall path_init(const char *name, unsigned int flags, struct nameidata *nd)
 {
 	nd->last_type = LAST_ROOT; /* if there are only slashes... */
 	nd->flags = flags;
@@ -820,7 +826,7 @@ access:
  * that namei follows links, while lnamei does not.
  * SMP-safe
  */
-int __user_walk(const char *name, unsigned flags, struct nameidata *nd)
+int fastcall __user_walk(const char *name, unsigned flags, struct nameidata *nd)
 {
 	char *tmp;
 	int err;

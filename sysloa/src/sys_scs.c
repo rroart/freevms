@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Author. Linux people.
+// Modified Linux source, 2001-2004. Based on decnet files.
 
 #define ETH_P_MYSCS 0x6009
 
@@ -68,6 +68,10 @@ struct _sb mysb;
 struct _pdt mypdt;
 struct _pb otherpb;
 struct _sb othersb;
+
+void scs_lower_level_send(struct _cdrp * cdrp, struct _scs * scs);
+void * find_free_cdt(void);
+void * scs_register_name(char * c1, char * c2);
 
 /*
  * scs_address is kept in network order, scs_ether_address is kept
@@ -533,6 +537,8 @@ cwpslisten(void * packet, struct _cdt * c, struct _pdt * p) {
     }
     break;
   default:
+    {
+    }
   }
 }
 

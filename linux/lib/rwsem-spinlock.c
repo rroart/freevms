@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /* rwsem-spinlock.c: R/W semaphores: contention handling functions for generic spinlock
  *                                   implementation
  *
@@ -29,7 +35,7 @@ void rwsemtrace(struct rw_semaphore *sem, const char *str)
 /*
  * initialise the semaphore
  */
-void init_rwsem(struct rw_semaphore *sem)
+void fastcall init_rwsem(struct rw_semaphore *sem)
 {
 	sem->activity = 0;
 	spin_lock_init(&sem->wait_lock);
@@ -106,7 +112,7 @@ static inline struct rw_semaphore *__rwsem_wake_one_writer(struct rw_semaphore *
 /*
  * get a read lock on the semaphore
  */
-void __down_read(struct rw_semaphore *sem)
+void fastcall __down_read(struct rw_semaphore *sem)
 {
 	struct rwsem_waiter waiter;
 	struct task_struct *tsk;
@@ -152,7 +158,7 @@ void __down_read(struct rw_semaphore *sem)
  * get a write lock on the semaphore
  * - note that we increment the waiting count anyway to indicate an exclusive lock
  */
-void __down_write(struct rw_semaphore *sem)
+void fastcall __down_write(struct rw_semaphore *sem)
 {
 	struct rwsem_waiter waiter;
 	struct task_struct *tsk;
@@ -197,7 +203,7 @@ void __down_write(struct rw_semaphore *sem)
 /*
  * release a read lock on the semaphore
  */
-void __up_read(struct rw_semaphore *sem)
+void fastcall __up_read(struct rw_semaphore *sem)
 {
 	rwsemtrace(sem,"Entering __up_read");
 
@@ -214,7 +220,7 @@ void __up_read(struct rw_semaphore *sem)
 /*
  * release a write lock on the semaphore
  */
-void __up_write(struct rw_semaphore *sem)
+void fastcall __up_write(struct rw_semaphore *sem)
 {
 	rwsemtrace(sem,"Entering __up_write");
 

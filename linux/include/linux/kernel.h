@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 #ifndef _LINUX_KERNEL_H
 #define _LINUX_KERNEL_H
 
@@ -49,8 +55,10 @@ extern int console_printk[];
 
 #if defined(__i386__) || defined(UM_FASTCALL)
 #define FASTCALL(x)	x __attribute__((regparm(3)))
+#define fastcall	__attribute__((regparm(3)))
 #else
 #define FASTCALL(x)	x
+#define fastcall	
 #endif
 
 struct completion;

@@ -791,7 +791,7 @@ void Set_PTY_Term_Type (TVT, type, devdep)
 	unsigned long devdep[2];
 	struct TVT$BLOCK * TVT;
     {
-      extern set_devdep();
+      extern void set_devdep(struct TVT$BLOCK * TVT);
       long pty_chan	= TVT->TVT$PTY_CHN;
       long tty_chan	= TVT->TVT$TTY_CHN;
       struct _qcbdef * PTY_Char = &TVT->TVT$TTY_CHAR;

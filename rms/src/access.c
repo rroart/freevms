@@ -72,6 +72,14 @@
 #include "cache.h"
 #include "access.h"
 
+void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb);
+void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb);
+struct _fcb * getidxfcb(struct _vcb * vcb);
+unsigned writehead(struct _fcb * fcb,struct _fh2 *headbuff);
+void * f11b_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb,
+			unsigned long * retsts);
+
+
 #define DEBUGx
 
 int f11b_read_writevb(struct _irp * i) {

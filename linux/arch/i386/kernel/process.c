@@ -743,7 +743,7 @@ void dump_thread(struct pt_regs * regs, struct user * dump)
  * More important, however, is the fact that this allows us much
  * more flexibility.
  */
-void __switch_to(struct task_struct *prev_p, struct task_struct *next_p)
+void fastcall __switch_to(struct task_struct *prev_p, struct task_struct *next_p)
 {
 	struct thread_struct *prev = &prev_p->thread,
 				 *next = &next_p->thread;

@@ -2,6 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+// Modified Linux source, 2001-2004. Parts from fault.c and trap_kern.c
 
 #include <linux/config.h>
 #include <linux/slab.h>
@@ -39,6 +40,8 @@
 #include <va_rangedef.h>
 
 #include <linux/vmalloc.h>
+
+unsigned long findpte_new(struct mm_struct *mm, unsigned long address);
 
 #ifdef __arch_um__
 #include "user_util.h"

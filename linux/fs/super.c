@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /*
  *  linux/fs/super.c
  *
@@ -1030,7 +1036,7 @@ skip_nfs:
 retry:
 	bdev = bdget(kdev_t_to_nr(ROOT_DEV));
 	if (!bdev)
-		panic(__FUNCTION__ ": unable to allocate root device");
+		panic("%s : unable to allocate root device", __FUNCTION__ );
 	bdev->bd_op = devfs_get_ops (handle); /* Increments module use count */
 	path_start = devfs_generate_path (handle, path + 5, sizeof (path) - 5);
 	mode = FMODE_READ;

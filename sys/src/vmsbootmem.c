@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Author. Linux people.
+// Modified Linux source file, 2001-2004. Based on bootmem.c.
 
 /*
  *  linux/mm/bootmem.c

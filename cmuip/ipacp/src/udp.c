@@ -326,6 +326,8 @@ unsigned short     udpcb$piochan;// Process IO channel
 
 #define    UDPCB_Size sizeof(struct UDPCB_Structure)
 
+void UDPCB_Abort(struct UDPCB_Structure * UDPCB,long RC);
+
 //MESSAGE(%NUMBER(UDPCB_Size)," longwords per UDPCB")
 
 

@@ -119,6 +119,8 @@ asmlinkage int exe$dlcefc(void *name) {
   retval=SS$_NORMAL;
 
  end:
+  {
+  }
   /* unlock ceb mutex */
 }
 

@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<system_data_cells.h>
 #include<linux/kernel.h>
 #include <asm/hw_irq.h>
@@ -7,6 +12,8 @@
 #include <acbdef.h>
 
 #include <linux/mm.h>
+
+void  com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid);
 
 void com$post(struct _irp * i, struct _ucb * u) {
   insqti(i,&ioc$gq_postiq);

@@ -66,6 +66,8 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
     /* request interprocessor interrupt */
     if (!qemp) goto notempty;
   notempty:
+    {
+    }
   }
 
   setipl(savipl);

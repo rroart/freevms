@@ -27,6 +27,9 @@
 // mmg$try_all
 // create_bufobj
 
+inline struct _rde * mmg$lookup_rde_va (void * va, struct _phd * const phd, int function, int ipl);
+inline struct _rde * mmg$search_rde_va (void * va, struct _rde *head, struct _rde **prev, struct _rde **next);
+
 asmlinkage void exe$cntreg(void) {
 }
 

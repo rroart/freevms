@@ -2844,6 +2844,8 @@ Y:		{
 		};
 	    };		// TCP segment case (block X)
  leave_x:
+ {
+ }
 	}
 
 // Clean up, possibly delete segment & queue-block.

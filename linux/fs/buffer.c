@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /*
  *  linux/fs/buffer.c
  *
@@ -124,7 +130,7 @@ union bdflush_param {
 int bdflush_min[N_PARAM] = {  0,  10,    5,   25,  0,   1*HZ,   0, 0, 0};
 int bdflush_max[N_PARAM] = {100,50000, 20000, 20000,10000*HZ, 6000*HZ, 100, 0, 0};
 
-void unlock_buffer(struct buffer_head *bh)
+void fastcall unlock_buffer(struct buffer_head *bh)
 {
 	clear_bit(BH_Wait_IO, &bh->b_state);
 	clear_bit(BH_launder, &bh->b_state);
@@ -599,7 +605,7 @@ void buffer_insert_inode_queue(struct buffer_head *bh, struct inode *inode)
 	spin_unlock(&lru_list_lock);
 }
 
-void buffer_insert_inode_data_queue(struct buffer_head *bh, struct inode *inode)
+void fastcall buffer_insert_inode_data_queue(struct buffer_head *bh, struct inode *inode)
 {
 	spin_lock(&lru_list_lock);
 	if (bh->b_inode)
@@ -1100,7 +1106,7 @@ void balance_dirty(void)
 	}
 }
 
-inline void __mark_dirty(struct buffer_head *bh)
+inline void fastcall __mark_dirty(struct buffer_head *bh)
 {
 	bh->b_flushtime = jiffies + bdf_prm.b_un.age_buffer;
 	refile_buffer(bh);
@@ -1108,13 +1114,13 @@ inline void __mark_dirty(struct buffer_head *bh)
 
 /* atomic version, the user must call balance_dirty() by hand
    as soon as it become possible to block */
-void __mark_buffer_dirty(struct buffer_head *bh)
+void fastcall __mark_buffer_dirty(struct buffer_head *bh)
 {
 	if (!atomic_set_buffer_dirty(bh))
 		__mark_dirty(bh);
 }
 
-void mark_buffer_dirty(struct buffer_head *bh)
+void fastcall mark_buffer_dirty(struct buffer_head *bh)
 {
 	if (!atomic_set_buffer_dirty(bh)) {
 		__mark_dirty(bh);

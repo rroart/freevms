@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004. Based on buffer.c.
+
 /*
  *  linux/fs/buffer.c
  *
@@ -127,7 +133,7 @@ union bdflush_param {
 int bdflush_min[N_PARAM] = {  0,  10,    5,   25,  0,   1*HZ,   0, 0, 0};
 int bdflush_max[N_PARAM] = {100,50000, 20000, 20000,10000*HZ, 6000*HZ, 100, 0, 0};
 
-void unlock_buffer(struct buffer_head *bh)
+void fastcall unlock_buffer(struct buffer_head *bh)
 {
 	clear_bit(BH_Wait_IO, &bh->b_state);
 	clear_bit(BH_launder, &bh->b_state);
@@ -425,7 +431,7 @@ void balance_dirty(void)
 #endif
 }
 
-inline void __mark_dirty(struct buffer_head *bh)
+inline void fastcall __mark_dirty(struct buffer_head *bh)
 {
 	bh->b_flushtime = jiffies + bdf_prm.b_un.age_buffer;
 	//refile_buffer(bh);
@@ -433,13 +439,13 @@ inline void __mark_dirty(struct buffer_head *bh)
 
 /* atomic version, the user must call balance_dirty() by hand
    as soon as it become possible to block */
-void __mark_buffer_dirty(struct buffer_head *bh)
+void fastcall __mark_buffer_dirty(struct buffer_head *bh)
 {
 	if (!atomic_set_buffer_dirty(bh))
 		__mark_dirty(bh);
 }
 
-void mark_buffer_dirty(struct buffer_head *bh)
+void fastcall mark_buffer_dirty(struct buffer_head *bh)
 {
 	if (!atomic_set_buffer_dirty(bh)) {
 		__mark_dirty(bh);
@@ -551,6 +557,7 @@ int discard_bh_page(struct page *page, unsigned long offset, int drop_pagecache)
 	return 1;
 }
 
+#if 0
 /*
  * block_write_full_page() is SMP threaded - the kernel lock is not held.
  */
@@ -667,6 +674,7 @@ out:
 		UnlockPage(page);
 	return err;
 }
+#endif
 
 static int __block_write_full_page2(struct inode *inode, struct page *page, unsigned long pageno)
 {
@@ -830,6 +838,7 @@ static int __block_commit_write(struct inode *inode, struct page *page,
 	return 0;
 }
 
+#if 0
 /*
  * Generic "read page" function for block devices that have the normal
  * get_block functionality. This is most of the block device filesystems.
@@ -964,6 +973,7 @@ int block_read_full_page_not(struct page *page, get_block_t *get_block)
 
 	return 0;
 }
+#endif
 
 int block_read_full_page2(struct inode *inode,struct page *page, unsigned long pageno)
 {
@@ -1283,6 +1293,7 @@ out:
 	return err;
 }
 
+#if 0
 int block_write_full_page(struct page *page, get_block_t *get_block)
 {
 	struct inode *inode = page->mapping->host;
@@ -1316,6 +1327,7 @@ done:
 	ClearPageUptodate(page);
 	goto done;
 }
+#endif
 
 //extern int ext2_get_block(struct inode *inode, long iblock, struct buffer_head *bh_result, int create);
 

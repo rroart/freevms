@@ -63,6 +63,7 @@ Get_Mem();
 Free_Mem();
 Reset_Mem();
  void    MEM_STAT();
+void Mem_Stat (void);
 
 void Make_Zone (void)
     {

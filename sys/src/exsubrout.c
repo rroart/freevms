@@ -4,8 +4,8 @@
 // Author. Roar Thronæs.
 
 #include <system_data_cells.h>
-#include <internals.h>
 #include <ipldef.h>
+#include <internals.h>
 #include <ssdef.h>
 
 void exe$instimq(struct _tqe * t) {
@@ -46,6 +46,8 @@ void exe_std$rmvtimq(int acmode, int reqid, int remval, int ipid) {
     }
     tmp=next;
   cont:
+    {
+    }
   }
 }
 

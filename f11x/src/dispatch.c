@@ -28,6 +28,9 @@
 #include<linux/vmalloc.h>
 #include<asm/current.h>
 
+void f11b$dispatcher(void);
+unsigned f11b_modify(struct _vcb * vcb, struct _irp * irp);
+
 struct __xqp xqps[1]; // number of pids 
 
 struct __xqp * xqp=&xqps[0];

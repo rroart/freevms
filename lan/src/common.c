@@ -35,6 +35,10 @@
 #include "../../cmuip/ipacp/src/xedrv.h"
 #include "../../cmuip/central/include/netconfig.h"
 
+static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv,
+				      char *mask, void (*setup)(struct net_device *));
+static struct net_device *init_alloc_dev(int sizeof_priv);
+
 static check_dup(struct _ucb * u, long * l) {
   long len=l[0]/(2*sizeof(long));
   long *addr = l[1];
@@ -46,6 +50,8 @@ static check_dup(struct _ucb * u, long * l) {
       proto=htons(*addr++);
       break;
     default:
+      {
+      }
     }
   }
   struct _ucb * head=u ;
@@ -95,6 +101,8 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 	ni->ucb$l_ni_pty=htons(*addr++);
 	break;
       default:
+	{
+	}
       }
     }
     //lsb->lsb$l_next_lsb=ni->ucb$l_ni_lsb;

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 #ifdef CONFIG_MM_VMS
 #include <vmsmm.h>
 #else

@@ -45,6 +45,15 @@
 #include <fibdef.h>
 #include <fiddef.h>
 
+char * ext2_vms_to_unix(char * name,struct dsc$descriptor * dsc);
+void * exttwo_search_fcb2(struct _vcb * vcb,struct _fiddef * fid);
+unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp);
+void * exttwo_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb);
+void * exttwo_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb);
+void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef * atrp);
+void make_fcb(struct inode * inode);
+void exttwo$dispatcher(void);
+
 struct __exttwo {
   // unsigned long long xqp_queue;
   unsigned long exttwo_head;

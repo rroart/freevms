@@ -180,6 +180,11 @@ unsigned short    ipcb$piochan;	// Process IO channel
 
 #define IPCB_Size sizeof(struct IPCB_Structure)
 
+void Deliver_IP_Data(
+     struct IPCB_Structure * IPCB,
+	struct queue_blk_structure(qb_nr_fields) * QB,
+ 	struct queue_blk_structure(qb_ur_fields) * URQ);
+
 #if 0
 LITERAL
     IPCB_Size = $Field_Set_Size;
@@ -332,6 +337,8 @@ X:	{
 	delete = Queue_User_IP(IPCB,seg,segsize,Buf,bufsize,0);
     };
  leave_x:
+    {
+    }
 
     }
 

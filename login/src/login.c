@@ -118,6 +118,13 @@
 //#include <xstrncpy.h>
 //#include <nls.h>
 
+static void
+getloginname(void);
+void
+badlogin(const char *name);
+void
+sleepexit(int eval);
+
 #ifdef __linux__
 #  include <sys/sysmacros.h>
 #  include <linux/major.h>

@@ -40,10 +40,10 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void ** hdrbuf, unsigned l
   struct _ihd * ehdr32=header;
   struct _iha * active;
   struct _isd * section;
-  struct _ihi * name;
+  struct _ihi * ihid;
   struct _ihvn * vers;
   struct _ihs * debug;
-  struct _va_range inadr;
+  struct _va_range img_inadr;
   char * buffer;
   mm_segment_t fs;
   loff_t pos=0;
@@ -64,7 +64,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void ** hdrbuf, unsigned l
 
   active=(unsigned long)ehdr32+ehdr32->ihd$w_activoff;
   section=(unsigned long)ehdr32+ehdr32->ihd$w_size;
-  name=(unsigned long)ehdr32+ehdr32->ihd$w_imgidoff;
+  ihid=(unsigned long)ehdr32+ehdr32->ihd$w_imgidoff;
   vers=(unsigned long)ehdr32+ehdr32->ihd$w_version_array_off;
   debug=(unsigned long)ehdr32+ehdr32->ihd$w_symdbgoff;
 
@@ -82,10 +82,10 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void ** hdrbuf, unsigned l
       continue;
     }
 
-    inadr.va_range$ps_start_va=section->isd$v_vpn<<PAGE_SHIFT;
-    inadr.va_range$ps_end_va=inadr.va_range$ps_start_va+section->isd$w_pagcnt*PAGE_SIZE;
-    exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x51 ,0x187500   ,0,0,0,inadr.va_range$ps_start_va);
-    exe$crmpsc(&inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,section->isd$l_vbn,0,0);
+    img_inadr.va_range$ps_start_va=section->isd$v_vpn<<PAGE_SHIFT;
+    img_inadr.va_range$ps_end_va=img_inadr.va_range$ps_start_va+section->isd$w_pagcnt*PAGE_SIZE;
+    exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x51 ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
+    exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,section->isd$l_vbn,0,0);
 
     section=(unsigned long)section+section->isd$w_size;
   }

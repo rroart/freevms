@@ -1,8 +1,8 @@
 // $Id$
 // $Locker$
 
-// Author. Linux people.
 // Author. Roar Thronæs.
+// Modified Linux source, 2001-2004. Based on decnet files.
 
 #define ETH_P_MYSCS 0x6009
 
@@ -81,6 +81,16 @@ static unsigned char scs_eco_version[3]    = {0x02,0x00,0x00};
 
 struct net_device *scs_default_device = 0;
 short scs_chan = 0;
+
+void * getdx(void * buf);
+void * getcc(void * buf);
+void * gettr(void * buf);
+void * getppdscs(void * buf);
+void scs_msg_ctl_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg);
+struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri);
+static inline void scs_rt_finish_output2(struct sk_buff *skb, char *dst);
+
+
 
 int is_cluster_on() {
   return mypb.pb$w_state==PB$C_OPEN;
@@ -731,6 +741,8 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
   goto again;
 
  end:
+  {
+  }
   //kfree_skb(skb);
 }
 

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004. Based on swapfile.c.
+
 /*
  *  linux/mm/swapfile.c
  *
@@ -1338,7 +1344,7 @@ struct page * lookup_swap_cache(swp_entry_t t){
   BUG();
 }
 
-void activate_page(struct page *p){
+void fastcall activate_page(struct page *p){
   BUG();
 }
 

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004. Based on slab.c.
+
 /*
  * linux/mm/slab.c
  * Written by Mark Hemment, 1996/97.
@@ -1705,7 +1711,7 @@ static void enable_all_cpucaches (void)
  *
  * Called from do_try_to_free_pages() and __alloc_pages()
  */
-int kmem_cache_reap (int gfp_mask)
+int fastcall kmem_cache_reap (int gfp_mask)
 {
 	slab_t *slabp;
 	kmem_cache_t *searchp;

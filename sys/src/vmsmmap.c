@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004. Based on mmap.c.
+
 /*
  *	linux/mm/mmap.c
  *
@@ -25,6 +31,8 @@
 #include <va_rangedef.h>
 #include <dyndef.h>
 #include <fcbdef.h>
+
+struct vm_area_struct * find_vma_intersection2(struct mm_struct * mm, unsigned long start_addr, unsigned long end_addr);
 
 /*
  * WARNING: the debugging will use recursive algorithms so never enable this

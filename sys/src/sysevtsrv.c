@@ -12,6 +12,23 @@
 #include <ssdef.h>
 #include <system_data_cells.h>
 
+inline unsigned long * getefcp(struct _pcb * p, unsigned long efn) {
+  return &p->pcb$l_efcs + ((efn&96)>>5);
+}
+
+inline unsigned long * getefc(struct _pcb * p, unsigned long efn) {
+  unsigned long * retval = &p->pcb$l_efcs + ((efn&96)>>5);
+  if (efn<64)
+    return retval;
+  if (!retval) 
+    return 0;
+  return &((struct _ceb *)(*retval))->ceb$l_efc;
+}
+
+inline unsigned long * getefcno(unsigned long efn) {
+  return ((efn&96)>>5);
+}
+
 asmlinkage int exe$clref(unsigned int efn) {
   int retval;
   struct _pcb * p=ctl$gl_pcb;
@@ -37,22 +54,5 @@ asmlinkage int exe$readef(unsigned int efn, unsigned int *state) {
 asmlinkage int exe$setef(unsigned int efn) {
   struct _pcb * p=current;
   return sch$postef(p->pcb$l_pid,PRI$_IOCOM,efn);
-}
-
-inline unsigned long * getefcp(struct _pcb * p, unsigned long efn) {
-  return &p->pcb$l_efcs + ((efn&96)>>5);
-}
-
-inline unsigned long * getefc(struct _pcb * p, unsigned long efn) {
-  unsigned long * retval = &p->pcb$l_efcs + ((efn&96)>>5);
-  if (efn<64)
-    return retval;
-  if (!retval) 
-    return 0;
-  return &((struct _ceb *)(*retval))->ceb$l_efc;
-}
-
-inline unsigned long * getefcno(unsigned long efn) {
-  return ((efn&96)>>5);
 }
 

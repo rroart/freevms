@@ -55,6 +55,8 @@ mmg$gsdscn(void * input_gsnam, unsigned long long * input_ident, int section_fla
   return;
 
   end:
+  {
+  }
   }
   if (gsd) *gsd=0;
   return 0;

@@ -141,7 +141,7 @@ static int __init parse_iomem(char *str, int *add)
 	driver = str;
 	file = strchr(str,',');
 	if(file == NULL){
-		printk(__FUNCTION__ " failed to parse iomem\n");
+		printk("%s failed to parse iomem\n", __FUNCTION__);
 		return 1;
 	}
 	*file = '\0';
@@ -152,7 +152,8 @@ static int __init parse_iomem(char *str, int *add)
 		return 1;
 	}
 	if(fstat(fd, &buf) < 0) {
-		perror(__FUNCTION__ "fstat - cannot fstat file");
+		perror(__FUNCTION__);
+		perror(" fstat - cannot fstat file");
 		exit(1);
 	}
 	setup_range(fd, driver, -1, buf.st_size, buf.st_size);

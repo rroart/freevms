@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Author. Linux people.
+// Modified Linux source file, 2001-2004. Based on page_alloc.c.
 
 #include <linux/config.h>
 #include <linux/mm.h>
@@ -57,7 +57,7 @@ extern int in_free_all_bootmem_core;
 int memalcdeb=0;
 
 static void FASTCALL(__free_pages_ok (struct page *page, unsigned int order));
-static void __free_pages_ok (struct page *page, unsigned int order)
+static void fastcall __free_pages_ok (struct page *page, unsigned int order)
 {
 	unsigned long index, page_idx, mask, flags;
 	free_area_t *area;
@@ -124,7 +124,7 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 }
 
 #ifndef CONFIG_DISCONTIGMEM
-struct page *_alloc_pages(unsigned int gfp_mask, unsigned int order)
+struct page * fastcall _alloc_pages(unsigned int gfp_mask, unsigned int order)
 {
 	return __alloc_pages(gfp_mask, order,
 		contig_page_data.node_zonelists+(gfp_mask & GFP_ZONEMASK));
@@ -136,7 +136,7 @@ int inallocpfn=0;
 /*
  * This is the 'heart' of the zoned buddy allocator:
  */
-struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_t *zonelist)
+struct page * fastcall __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_t *zonelist)
 {
         unsigned long flags;
 	unsigned long min;
@@ -200,7 +200,7 @@ rebalance:
 /*
  * Common helper functions.
  */
-unsigned long __get_free_pages(unsigned int gfp_mask, unsigned int order)
+unsigned long fastcall __get_free_pages(unsigned int gfp_mask, unsigned int order)
 {
 	struct page * page;
 
@@ -210,7 +210,7 @@ unsigned long __get_free_pages(unsigned int gfp_mask, unsigned int order)
 	return (unsigned long) page_address(page);
 }
 
-unsigned long get_zeroed_page(unsigned int gfp_mask)
+unsigned long fastcall get_zeroed_page(unsigned int gfp_mask)
 {
 	struct page * page;
 
@@ -223,13 +223,13 @@ unsigned long get_zeroed_page(unsigned int gfp_mask)
 	return 0;
 }
 
-void __free_pages(struct page *page, unsigned int order)
+void fastcall __free_pages(struct page *page, unsigned int order)
 {
 	if (!PageReserved(page) && put_page_testzero(page))
 		__free_pages_ok(page, order);
 }
 
-void free_pages(unsigned long addr, unsigned int order)
+void fastcall free_pages(unsigned long addr, unsigned int order)
 {
 	if (addr != 0)
 		__free_pages(virt_to_page(addr), order);

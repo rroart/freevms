@@ -49,6 +49,8 @@ int dulisten(void * packet, struct _cdt * c, struct _pdt * p) {
 
 void dudaemonize(void) { }
 
+void du_dg(void * packet, struct _cdt * c, struct _pdt * p);
+
 /* mscp.exe mscp$disk let it be a kernel_thread? maybe not... */
 int dumscp(void) {
   char myname[]="mscp$disk";

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /*
  *  linux/mm/vmscan.c
  *
@@ -292,7 +298,7 @@ out_unlock:
 }
 
 static int FASTCALL(swap_out(unsigned int priority, unsigned int gfp_mask, zone_t * classzone));
-static int swap_out(unsigned int priority, unsigned int gfp_mask, zone_t * classzone)
+static int fastcall swap_out(unsigned int priority, unsigned int gfp_mask, zone_t * classzone)
 {
 	int counter, nr_pages = SWAP_CLUSTER_MAX;
 	struct mm_struct *mm;
@@ -334,7 +340,7 @@ empty:
 }
 
 static int FASTCALL(shrink_cache(int nr_pages, zone_t * classzone, unsigned int gfp_mask, int priority));
-static int shrink_cache(int nr_pages, zone_t * classzone, unsigned int gfp_mask, int priority)
+static int fastcall shrink_cache(int nr_pages, zone_t * classzone, unsigned int gfp_mask, int priority)
 {
 	struct list_head * entry;
 	int max_scan = nr_inactive_pages / priority;
@@ -558,7 +564,7 @@ static void refill_inactive(int nr_pages)
 }
 
 static int FASTCALL(shrink_caches(zone_t * classzone, int priority, unsigned int gfp_mask, int nr_pages));
-static int shrink_caches(zone_t * classzone, int priority, unsigned int gfp_mask, int nr_pages)
+static int fastcall shrink_caches(zone_t * classzone, int priority, unsigned int gfp_mask, int nr_pages)
 {
 	int chunk_size = nr_pages;
 	unsigned long ratio;
@@ -585,7 +591,7 @@ static int shrink_caches(zone_t * classzone, int priority, unsigned int gfp_mask
 	return nr_pages;
 }
 
-int try_to_free_pages(zone_t *classzone, unsigned int gfp_mask, unsigned int order)
+int fastcall try_to_free_pages(zone_t *classzone, unsigned int gfp_mask, unsigned int order)
 {
 	int priority = DEF_PRIORITY;
 	int nr_pages = SWAP_CLUSTER_MAX;

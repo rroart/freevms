@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Author. Linux people.
+// Modified Linux source file, 2001-2004. Based on *swap*.c.
 
 #include <linux/slab.h>
 #include <linux/kernel_stat.h>
@@ -30,7 +30,7 @@ struct mm_struct *swap_mm = &init_mm;
 
 DECLARE_WAIT_QUEUE_HEAD(kswapd_wait);
 
-int try_to_free_pages(zone_t *classzone, unsigned int gfp_mask, unsigned int order)
+int fastcall try_to_free_pages(zone_t *classzone, unsigned int gfp_mask, unsigned int order)
 {
 #if 0
 	int priority = DEF_PRIORITY;

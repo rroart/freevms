@@ -28,6 +28,12 @@
 #include<asm/uaccess.h>
 #endif
 
+struct _generic_64 {
+  long long l;
+};
+
+asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr, unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, unsigned short int mbxunt, unsigned int stsflg,...);
+
 asmlinkage int exe$creprc_wrap(struct struct_args *s) {
   return exe$creprc(s->s1,s->s2,s->s3,s->s4,s->s5,s->s6,s->s7,s->s8,s->s9,s->s10,s->s11,s->s12);
 }

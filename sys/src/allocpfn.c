@@ -14,6 +14,9 @@ struct _mypfn {
   struct _mypfn * pfn$l_blink;
 };
 
+signed long mmg$rempfnh(unsigned long type);
+signed long mmg$rempfn(unsigned long type, struct _pfn * pfn);
+
 signed long mmg$allocpfn(void) {
   signed long pfn=mmg$rempfnh(PFN$C_FREPAGLST);
   if (pfn>=0) {

@@ -19,6 +19,11 @@
 
 extern int mydebug;
 
+void sch$unwait(struct _pcb * p);
+void sch$rse(struct _pcb * p, unsigned char class, unsigned char event);
+void sch$swpwake(void);
+void sch$chsep(struct _pcb * p,unsigned char newpri);
+
 int sch$qend(struct _pcb * p) {
   int cpuid=smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid];

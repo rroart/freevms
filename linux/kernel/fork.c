@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /*
  *  linux/kernel/fork.c
  *
@@ -41,7 +47,7 @@ int max_threads;
 unsigned long total_forks;	/* Handle normal Linux uptimes. */
 int last_pid;
 
-void add_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
+void fastcall add_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
 {
 	unsigned long flags;
 
@@ -51,7 +57,7 @@ void add_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
 	wq_write_unlock_irqrestore(&q->lock, flags);
 }
 
-void add_wait_queue_exclusive(wait_queue_head_t *q, wait_queue_t * wait)
+void fastcall add_wait_queue_exclusive(wait_queue_head_t *q, wait_queue_t * wait)
 {
 	unsigned long flags;
 
@@ -61,7 +67,7 @@ void add_wait_queue_exclusive(wait_queue_head_t *q, wait_queue_t * wait)
 	wq_write_unlock_irqrestore(&q->lock, flags);
 }
 
-void remove_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
+void fastcall remove_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
 {
 	unsigned long flags;
 
@@ -291,7 +297,7 @@ struct mm_struct * mm_alloc(void)
  * is dropped: either by a lazy thread or by
  * mmput. Free the page directory and the mm.
  */
-inline void __mmdrop(struct mm_struct *mm)
+inline void fastcall __mmdrop(struct mm_struct *mm)
 {
 	if (mm == &init_mm) BUG();
 	pgd_free(mm->pgd);

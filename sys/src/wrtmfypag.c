@@ -18,6 +18,8 @@ struct _irp * mpw$gl_irpbl = &mpw$gl_irpfl;
 
 unsigned char mpw$gb_state;
 
+void mmg$purgempl(unsigned long command);
+
 void mmg$wrtmfypag(void) {
   if (mmg$gl_maxpfidx==0)
     return;

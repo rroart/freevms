@@ -28,6 +28,10 @@ static mydebugi = 0;  // should have no printk in a non-interruptable zone
 static long stk[1024];
 #endif
 
+inline asmlinkage void pushpsl(void);
+void inline mysti(int flags);
+asmlinkage void myrei (void);
+
 inline asmlinkage void pushpsli(void) {
   pushpsl();
 #if 0
