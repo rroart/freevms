@@ -1228,6 +1228,7 @@ void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
     return;
   } 
   fcb->fcb$b_type=DYN$C_FCB;
+  fcb->fcb$l_fill_5 = 1;
   qhead_init(&fcb->fcb$l_wlfl);
 
   fcb->fcb$w_fid_dirnum=inode->i_dev;
@@ -1418,7 +1419,7 @@ unsigned long e2_access_file(const char *name) {
   return sts;
 }
 
-unsigned long get_prim_fcb() {
+unsigned long get_x2p_prim_fcb() {
   return 	  x2p->primary_fcb;
 }
 
