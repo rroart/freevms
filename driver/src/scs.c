@@ -1927,9 +1927,9 @@ void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdr
 
 	bcopy(cdrp->cdrp$l_msg_buf,data,bufsiz);
 
-	cdt->cdt$l_fp_scs_norecv=cdrp;
-	cdt->cdt$l_reserved3=current->pcb$l_pid;
-	cdt->cdt$l_reserved4=cdrp->cdrp$l_msg_buf;
+	//cdt->cdt$l_fp_scs_norecv=cdrp;
+	//cdt->cdt$l_reserved3=current->pcb$l_pid;
+	//cdt->cdt$l_reserved4=cdrp->cdrp$l_msg_buf;
 
 	data=skb_put(skb,bufsiz);
 }

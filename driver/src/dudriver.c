@@ -221,7 +221,6 @@ extern struct _scs_rd rdtl[128];
 void du_dg(void * packet, struct _cdt * c, struct _pdt * p) {
   int sts;
   struct _iosb iosb;
-  struct _cdrp * cdrp;
   struct _scs * scs = packet;
   struct _scs1 * scs1 = scs;
   struct _ppd * ppd = scs;
@@ -230,6 +229,10 @@ void du_dg(void * packet, struct _cdt * c, struct _pdt * p) {
   void * next = basic;
   unsigned long lbn=trans->mscp$l_lbn;
   char * buf;
+  struct _scs_rd * rd=&rdtl[scs1->scs$l_rspid];
+  struct _cdrp * cdrp = rd->rd$l_cdrp;
+  struct _irp dummyirp;
+  struct _irp * irp = ((unsigned long)cdrp)-((unsigned long)((unsigned long)&dummyirp.irp$l_fqfl-(unsigned long)&dummyirp));
   struct _acb * a=vmalloc(sizeof(struct _acb));
   bzero(a,sizeof(struct _acb));
 
@@ -239,9 +242,12 @@ void du_dg(void * packet, struct _cdt * c, struct _pdt * p) {
     bcopy(next,cdrp->cdrp$l_msg_buf,512);
   }
 
-  a->acb$l_ast=((struct _cdrp *)c->cdt$l_fp_scs_norecv)->cdrp$l_fpc;
-  a->acb$l_astprm=((struct _cdrp *)c->cdt$l_fp_scs_norecv)->cdrp$l_fr3;
-  sch$qast(c->cdt$l_reserved3,PRI$_IOCOM,a);
+  //a->acb$l_ast=((struct _cdrp *)c->cdt$l_fp_scs_norecv)->cdrp$l_fpc;
+  //a->acb$l_astprm=((struct _cdrp *)c->cdt$l_fp_scs_norecv)->cdrp$l_fr3;
+  //sch$qast(c->cdt$l_reserved3,PRI$_IOCOM,a);
+  a->acb$l_ast=cdrp->cdrp$l_fpc;
+  a->acb$l_astprm=cdrp->cdrp$l_fr3;
+  sch$qast(irp->irp$l_pid,PRI$_IOCOM,a);
 }
 
 void du_err() {
