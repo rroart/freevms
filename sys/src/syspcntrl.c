@@ -73,8 +73,12 @@ int exe$epid_to_ipid(unsigned long pid) {
 }
 void * exe$ipid_to_pcb(unsigned long pid) {
   int i;
-  if (pid>10000) printk(KERN_EMERG "EXE %x\n",pid);
-  if (pid>sch$gl_maxpix) return 0;
+  if ((pid&0xffff)>MAXPROCESSCNT) printk(KERN_EMERG "EXE %x\n",pid);
+  if ((pid&0xffff)>MAXPROCESSCNT) {
+    unsigned long * x=&i;
+    printk(KERN_EMERG "FIND2 %d %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x\n",pid,pid,x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16]);
+  }
+  if ((pid&0xffff)>sch$gl_maxpix) return 0;
   unsigned long *vec=sch$gl_pcbvec;
   if (vec[pid&0xffff] && ((struct _pcb *)vec[pid&0xffff])->pcb$l_pid==pid)
     return vec[pid&0xffff];
