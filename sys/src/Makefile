@@ -29,7 +29,7 @@ obj-y     = sched.o \
 	    sysgetsyi.o sysrundwn.o syscreprc.o procstrt.o sysimgact.o \
 	    syssetprt.o syssetprv.o syspurgws.o uai.o sysparprc.o \
 	    sysupdsec.o sysgetjpi.o syssetexv.o process_scan.o \
-	    pagefile.o comdrvsub.o syscancel.o swapper.o 
+	    pagefile.o comdrvsub.o syscancel.o swapper.o syssndmsg.o
 
 ifeq ($(CONFIG_VMS),y)
 export-objs := vmsshmem.o vmsfilemap.o vmsbuffer.o

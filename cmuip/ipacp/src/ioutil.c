@@ -720,7 +720,7 @@ extern struct dsc$descriptor *	myname;
     MSG->dsc$b_class = DSC$K_CLASS_Z;
     MSG->dsc$b_dtype = DSC$K_DTYPE_Z;
     MSG->dsc$a_pointer = MSGBUF;
-    return exe$sndopr(MSGBUF=MSG);
+    return exe$sndopr(MSG, 0);
     }
 
 void OPR_FAO(CSTR) 

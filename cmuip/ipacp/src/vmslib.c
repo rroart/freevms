@@ -278,10 +278,6 @@ Queue_Not_Empty() {
   printk("not implemented\n");
 }
 
-exe$sndopr() {
-  printk("not implemented\n");
-}
-
 rpc_service() {
   printk("not implemented\n");
 }
