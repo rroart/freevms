@@ -16,6 +16,28 @@
 
 #include <ssdef.h>
 #include <system_data_cells.h>
+#include <mmgdef.h>
+#include <irpdef.h>
+#include <tqedef.h>
+#include <dyndef.h>
+
+// fix these later? they are presumably dead 
+static const int irpsize = ((sizeof (struct _irp)>>4)+1)<<4;
+static const int irpmin = ((/*irpsize*/ (((sizeof (struct _irp)>>4)+1)<<4)       >> (4+1))<<4)+1;
+static const int srpsize = /*irpmin - 1*/ ((/*irpsize*/ (((sizeof (struct _irp)>>4)+1)<<4)     \
+  >> (4+1))<<4);
+static const int lrpsize = 4096;
+static const int lrpmin = 2048;
+
+int exe$gl_lrpsplit;
+int ioc$gl_lrpsplit;
+int exe$gl_srpsplit;
+int ioc$gl_srpsplit;
+int exe$gl_splitadr;
+int ioc$gl_splitadr;
+unsigned long long ioc$gq_irpiq;
+unsigned long long ioc$gq_lrpiq;
+unsigned long long ioc$gq_srpiq;
 
 struct mymap {
   unsigned long flink;
@@ -384,13 +406,50 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	pgdat->node_start_mapnr = (lmem_map - mem_map);
 	pgdat->nr_zones = 0;
 
+	struct _irp * irp;
+
+	// ordinary nonpaged pool
 	mmg$gl_npagedyn=alloc_bootmem_node(pgdat,sgn$gl_npagedyn);
 	mmg$gl_npagedyn = (struct page *)(PAGE_OFFSET + 
 	  MAP_ALIGN((unsigned long)mmg$gl_npagedyn - PAGE_OFFSET));
 	exe$gl_npagedyn=mmg$gl_npagedyn;
+	exe$gl_nonpaged=exe$gl_npagedyn;
 	mytmp=exe$gl_npagedyn;
 	mytmp->flink=0; /* ? */
 	mytmp->size=sgn$gl_npagedyn;
+
+	// lrp pool
+	ioc$gl_lrpsplit=alloc_bootmem_node(pgdat,512*lrpsize);
+	ioc$gq_lrpiq=exe$gl_lrpsplit;
+	irp=&ioc$gq_lrpiq; // not really irp
+	irp->irp$l_ioqfl=0;
+	irp->irp$l_ioqbl=0;
+	for(i=0;i<512;i++) {
+	  void * lrp=(unsigned long)ioc$gl_lrpsplit+i*lrpsize;
+	  boot_insqti(irp,&ioc$gq_lrpiq);
+	}
+
+	// irp pool
+	exe$gl_splitadr=alloc_bootmem_node(pgdat,512*irpsize);
+	ioc$gq_irpiq=exe$gl_splitadr;
+	irp=&ioc$gq_irpiq;
+	irp->irp$l_ioqfl=0;
+	irp->irp$l_ioqbl=0;
+	for(i=0;i<512;i++) {
+	  struct _irp * irp=(unsigned long)exe$gl_splitadr+i*irpsize;
+	  boot_insqti(irp,&ioc$gq_irpiq);
+	}
+
+	// srp pool
+	exe$gl_srpsplit=alloc_bootmem_node(pgdat,4*512*srpsize);
+	ioc$gq_srpiq=exe$gl_srpsplit;
+	irp=&ioc$gq_srpiq; // not really irp
+	irp->irp$l_ioqfl=0;
+	irp->irp$l_ioqbl=0;
+	for(i=0;i<4*512;i++) {
+	  void * irp=(unsigned long)exe$gl_splitadr+i*sizeof(struct _irp);
+	  boot_insqti(irp,&ioc$gq_irpiq);
+	}
 
 	/*
 	 * Initially all pages are reserved - free ones are freed
@@ -437,4 +496,179 @@ int exe$alononpaged() {
 
 int exe$deanonpaged() {
   printk("deanonpaged not implemented\n");
+}
+
+// same as exe$allocate? 
+int exe$allocate_pool(int requestSize, int poolType, int alignment, unsigned int * allocatedSize, void ** returnBlock) {
+
+}
+
+void exe$deallocate_pool(void * returnBlock, int poolType, int size) {
+
+}
+
+struct _gen {
+  struct _gen * gen$l_flink;
+#if 0
+  struct _gen * gen$l_blink;
+  unsigned short int gen$w_size;
+  unsigned char gen$b_type;
+  unsigned char gen$b_subtype;
+#else
+  int gen$w_size; //change to l;
+#endif
+};
+
+int exe$allocate(int requestsize, void ** poolhead, int alignment, unsigned int * allocatedsize, void ** returnblock) {
+  if (requestsize&15)
+    requestsize=((requestsize>>4)+1)<<4; // mm book said something about align
+  struct _gen * nextnext, * next, * cur = poolhead;
+  while (cur->gen$l_flink) {
+    next=cur->gen$l_flink;
+
+    if (requestsize<=next->gen$w_size) {
+      *allocatedsize=requestsize;
+      *returnblock=next;
+      nextnext=next->gen$l_flink;
+      if (requestsize<next->gen$w_size) {
+	int newsize=next->gen$w_size-requestsize;
+	next=(long)next+requestsize;
+	next->gen$l_flink=nextnext;
+	next->gen$w_size=newsize;
+	nextnext=next;
+      }
+      cur->gen$l_flink=nextnext;
+      return SS$_NORMAL;
+    }
+    cur=next;
+  }
+  *allocatedsize=0;
+  *returnblock=0;
+  return SS$_INSFMEM;
+}
+
+int exe$deallocate(void * returnblock, void ** poolhead, int size) {
+#if 0
+  if (requestsize&15)
+    requestsize=((requestsize>>4)+1)<<4; // mm book said something about align
+#endif
+  struct _gen * middle = returnblock;
+  struct _gen * nextnext, * next, * cur = poolhead;
+  while (cur->gen$l_flink && ((unsigned long)cur->gen$l_flink<(unsigned long)returnblock)) {
+    cur=cur->gen$l_flink;
+  }
+	
+  next=cur->gen$l_flink;
+  nextnext=next->gen$l_flink;
+ 
+  middle->gen$w_size=size;
+  middle->gen$l_flink=nextnext;
+
+  if (next && nextnext && ((unsigned long)next+next->gen$w_size)==(unsigned long)middle && ((unsigned long)middle+middle->gen$w_size)==nextnext) {
+    next->gen$w_size+=middle->gen$w_size+nextnext->gen$w_size;
+    next->gen$l_flink=nextnext->gen$l_flink;
+    return SS$_NORMAL;
+  }
+
+  if (next && ((unsigned long)next+next->gen$w_size)==(unsigned long)middle) {
+    next->gen$w_size+=middle->gen$w_size;
+    next->gen$l_flink=nextnext;
+    return SS$_NORMAL;
+  }
+
+  if (next && nextnext && ((unsigned long)middle+middle->gen$w_size)==nextnext) {
+    middle->gen$w_size+=nextnext->gen$w_size;
+    next->gen$l_flink=middle;
+    return SS$_NORMAL;
+  }
+
+  next->gen$l_flink=middle;
+  middle->gen$l_flink=nextnext;
+
+  return SS$_INSFMEM;
+}
+
+int exe$alononpagvar (int reqsize, int *alosize_p, void **pool_p) {
+  // round up to nearest 16 should be moved here, and the statics fixed
+  // pool spinlock etc
+  int sts=SS$_NORMAL;
+
+  sts=exe$allocate(reqsize , &exe$gl_nonpaged, 0 , alosize_p, pool_p);
+
+  // unlock pool
+
+  return sts;
+}
+
+int exe_std$alononpaged (int reqsize, int *alosize_p, void **pool_p) {
+  int sts=SS$_NORMAL;
+  if (reqsize<=srpsize) {
+    if (rqempty(&ioc$gq_srpiq))
+      goto var;
+    int addr=remqti(&ioc$gq_srpiq,addr);
+    *alosize_p=reqsize;
+    *pool_p=addr;
+    return sts;
+  }
+  if (reqsize<=irpsize) {
+    if (rqempty(&ioc$gq_irpiq))
+      goto var;
+    int addr=remqti(&ioc$gq_irpiq,addr);
+    *alosize_p=reqsize;
+    *pool_p=addr;
+    return sts;
+  }
+  if (reqsize >= lrpmin && reqsize<=srpsize) {
+    if (rqempty(&ioc$gq_lrpiq))
+      goto var;
+    int addr=remqti(&ioc$gq_srpiq,addr);
+    *alosize_p=reqsize;
+    *pool_p=addr;
+    return sts;
+  }
+ var:
+  sts = exe$alononpagvar(reqsize, alosize_p, pool_p);
+  return sts;
+}
+
+int exe_std$deanonpaged (void *pool) {
+
+  // now taking some chances with addresses
+
+  if (mmg$gl_npagedyn<=pool && pool<=ioc$gl_lrpsplit) {
+    struct _irp * irp = pool;
+    if (irp->irp$w_size)
+      panic("irp size\n");
+    int sts=exe$deallocate(pool, exe$gl_nonpaged, irp->irp$w_size);
+    return sts;
+  }
+
+  if (ioc$gl_lrpsplit<=pool && pool<=ioc$gl_splitadr) {
+    insqti(pool,&ioc$gl_lrpsplit);
+    return SS$_NORMAL;
+  }
+
+  if (ioc$gl_splitadr<=pool && pool<=ioc$gl_srpsplit) {
+    insqti(pool,&ioc$gl_splitadr);
+    return SS$_NORMAL;
+  }
+
+  if (ioc$gl_srpsplit<=pool && pool<=(ioc$gl_srpsplit+4*512*srpsize)) {
+    insqti(pool,&ioc$gl_srpsplit);
+    return SS$_NORMAL;
+  }  
+  
+  return 0;
+}
+
+int exe_std$alloctqe(int *alosize_p, struct _tqe **tqe_p) {
+  int size=sizeof(struct _tqe);
+  int sts=exe_std$alononpaged(size,alosize_p,tqe_p);
+  if (sts==SS$_NORMAL) {
+    struct _tqe * tqe=*tqe_p;
+    tqe->tqe$w_size=*alosize_p;
+    tqe->tqe$b_type=DYN$C_TQE;
+    return sts;
+  }
+  // more remains
 }
