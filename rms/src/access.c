@@ -25,6 +25,7 @@
 
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
+#include<linux/mm.h>
 
 #include <stdio.h>
 #include <linux/string.h>
@@ -536,8 +537,8 @@ struct _fh2 *premap_indexf(struct _fcb *fcb,struct _ucb *ucb,unsigned *retsts)
     *retsts = SS$_DEVNOTMOUNT;
     return NULL;
   }
-  head = (struct _fh2 *) vmalloc(sizeof(struct _fh2));
-  *(unsigned long *)head=0;
+  head = (struct _fh2 *) kmalloc(sizeof(struct _fh2),GFP_KERNEL);
+  //  *(unsigned long *)head=0; not need when no vmalloc
   if (head == NULL) {
     *retsts = SS$_INSFMEM;
   } else {
