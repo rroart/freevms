@@ -7,7 +7,9 @@
 
 #include<crbdef.h>
 #include<cdtdef.h>
+#include<dcdef.h>
 #include<ddtdef.h>
+#include<devdef.h>
 #include<dptdef.h>
 #include<fdtdef.h>
 #include<pdtdef.h>
@@ -24,7 +26,7 @@
 #include<ipl.h>
 #include<linux/vmalloc.h>
 
-struct _fdt fdt_null = {
+struct _fdt null$fdt = {
   fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
@@ -99,8 +101,8 @@ void  null_startio3 (struct _irp * i, struct _ucb * u) {
 
 /* more yet undefined dummies */
 void  null_unsolint (void) { };
-void  null_functb (void) { };
 void  null_cancel (void) { };
+void  ioc_std$cancelio (void) { };
 void  null_regdump (void) { };
 void  null_diagbuf (void) { };
 void  null_errorbuf (void) { };
@@ -122,10 +124,10 @@ void null_write(void) {
 
 };
 
-struct _ddt ddt_null = {
+struct _ddt null$ddt = {
   ddt$l_start: null_startio,
   ddt$l_unsolint: null_unsolint,
-  ddt$l_functb: null_functb,
+  ddt$l_fdt: &null$fdt,
   ddt$l_cancel: null_cancel,
   ddt$l_regdump: null_regdump,
   ddt$l_diagbuf: null_diagbuf,
@@ -142,89 +144,41 @@ struct _ddt ddt_null = {
   ddt$l_aux_routine: null_aux_routine
 };
 
-/* include a buffered 4th param? */
-extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long);
-
-//static struct _fdt null_fdt;
-
-struct _dpt null_dpt;
-
-struct _ddb nullddb;
-struct _ucb nullucb;
-struct _crb nullcrb;
-struct _ccb nullccb;
+struct _dpt null$dpt;
+struct _ddb null$ddb;
+struct _ucb null$ucb;
+struct _crb null$crb;
 
 void nl_init(void) {
-  struct _ucb * u;
-  struct _ddb * d;
-  struct _crb * c;
+  struct _ucb * ucb;
+  struct _ddb * ddb;
+  struct _crb * crb;
+  unsigned long idb=0,orb=0;
 
-#if 0
-  vmalloc does not work this early
-  u=vmalloc(sizeof(struct _ucb));
-  bzero(u,sizeof(struct _ucb));
-  d=vmalloc(sizeof(struct _ddb));
-  bzero(d,sizeof(struct _ddb));
-  c=vmalloc(sizeof(struct _crb));
-  bzero(c,sizeof(struct _crb));
-#endif
-  c=&nullcrb;
-  d=&nullddb;
-  u=&nullucb;
-  bzero(u,sizeof(struct _ucb));
-  bzero(d,sizeof(struct _ddb));
-  bzero(c,sizeof(struct _crb));
+  crb=&null$crb;
+  ddb=&null$ddb;
+  //ioc_std$clone_ucb(&null$ucb,&ucb);
+  bzero(ddb,sizeof(struct _ddb));
+  bzero(crb,sizeof(struct _crb));
 
-  insertdevlist(d);
+  insertdevlist(ddb);
 
   /* this is a all-in-one, should be split later */
 
-  /* for the dpt part */
-  bcopy("NLDRIVER",null_dpt.dpt$t_name,8);
-  null_dpt.dpt$ps_ddt=&ddt_null;
+  init_ddb(&null$ddb,&null$ddt,&null$ucb,"nla");
+  init_ucb(&null$ucb, &null$ddb, &null$ddt, &null$crb);
+  init_crb(&null$crb);
 
-  /* for the ddb init part */
-  //  d->ddb$ps_link=d;
-  //  d->ddb$ps_blink=d;
-  d->ddb$b_type=DYN$C_DDB;
-  d->ddb$l_ddt=&ddt_null;
-  d->ddb$ps_ucb=u;
-  bcopy("NLA0",d->ddb$t_name,4);
+  null$init_tables();
+  null$struc_init (crb, ddb, idb, orb, ucb);
+  null$struc_reinit (crb, ddb, idb, orb, ucb);
+  null$unit_init (idb, ucb);
 
-  /* for the ucb init part */
-  qhead_init(&u->ucb$l_ioqfl);
-  u->ucb$b_type=DYN$C_UCB;
-  u->ucb$b_flck=IPL$_IOLOCK8;
-  /* devchars? */
-  u->ucb$b_devclass=DEV$M_RND; /* just maybe? */
-  u->ucb$b_dipl=IPL$_IOLOCK8;
-  //  bcopy("nla0",u->ucb$t_name,4);
-  u->ucb$l_ddb=d;
-  u->ucb$l_crb=c;
-  u->ucb$l_ddt=&ddt_null;
-
-  /* for the crb init part */
-  c->crb$b_type=DYN$C_CRB;
-
-  /* and for the ddt init part */
-  ddt_null.ddt$l_fdt=&fdt_null;
-  ddt_null.ddt$l_functb=&fdt_null;
-
-  /* for the fdt init part */
-  /* a lot of these? */
-  ini_fdt_act(&fdt_null,IO$_READLBLK,nl_read,1);
-  ini_fdt_act(&fdt_null,IO$_READPBLK,nl_read,1);
-  ini_fdt_act(&fdt_null,IO$_READVBLK,nl_read,1);
+  ioc_std$clone_ucb(&null$ucb,&ucb);
 }
 
-char nulldriverstring[]="NLDRIVER";
-
-struct _dpt null_dpt = {
-  //  dpt$t_name:"NLDRIVER"
-  //  dpt$b_type:&testme,
-  // dpt$t_name:nulldriverstring  // have no idea why this won't compile
-  // dpt$ps_ddt:&ddt_null;
-};
+/* include a buffered 4th param? */
+extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long);
 
 /* move this later */
 insertdevlist(struct _ddb *d) {
@@ -239,6 +193,10 @@ inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, uns
   f->fdt$q_valid|=mask;
   if (type)
     f->fdt$q_buffered|=mask;
+}
+
+inline void ini_fdt_end(struct _fdt * fdt) {
+  // but what will it do?
 }
 
 inline void ini_dpt_name(struct _dpt * d, char * n) {
@@ -276,6 +234,11 @@ inline void ini_dpt_struc_reinit(struct _dpt * d, unsigned long type) {
 
 inline void ini_dpt_ucb_crams(struct _dpt * d, unsigned long type) {
   //  d->dpt$iw_ucb_crams=type; not now
+}
+
+
+inline void ini_dpt_defunits(struct _dpt * d, unsigned long type) {
+  d->dpt$w_defunits=type;
 }
 
 
@@ -339,6 +302,9 @@ inline void ini_ddt_end(struct _ddt * d) {
   // d->ddt$=type; ??
 }
 
+inline void dpt_store_isr(long a, long b) {
+}
+
 struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt, struct _fdt * fdt, char * sddb, char * sdpt) {
   struct _ucb * u=vmalloc(sizeof(struct _ucb));
   struct _crb * c=vmalloc(sizeof(struct _crb));
@@ -377,7 +343,6 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
 
   /* and for the ddt init part */
   ddt->ddt$l_fdt=fdt;
-  ddt->ddt$l_functb=fdt;
 
   dpt->dpt$ps_ddt=ddt;
 
@@ -387,18 +352,92 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
 static unsigned long devchan[256];
 
 registerdevchan(unsigned long dev,unsigned short chan) {
-  devchan[chan]=MAJOR(dev);
+  //  devchan[chan]=MAJOR(dev);
+  devchan[chan]=dev;
   printk("registerdevchan dev %x at chan %x\n",devchan[chan],chan);
+  //{ int i; for(i=0;i<10000000;i++) ; }
 }
 
 unsigned short dev2chan(kdev_t dev) {
   int i;
   //printk("dev2chan %x %x\n", dev, MAJOR(dev));
   for (i=0;i<256;i++)
-    if (devchan[i]==MAJOR(dev)) return i;
+    if (devchan[i]==dev) return i;
+  //    if (devchan[i]==MAJOR(dev)) return i;
  mypanic:
   printk("dev2chan failed\n");
   for (i=0;i<4;i++)
     printk("%x %x\n",devchan[i],dev);
   panic("dev2chan\n");
+}
+
+
+
+
+
+void null$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
+  ucb->ucb$b_flck=IPL$_IOLOCK8;
+  ucb->ucb$b_dipl=IPL$_IOLOCK8;
+
+  ucb->ucb$l_devchar = DEV$M_REC | DEV$M_AVL | DEV$M_CCL /*| DEV$M_OOV*/;
+
+  ucb->ucb$l_devchar2 = DEV$M_NNM;
+  ucb->ucb$b_devclass = DC$_MISC;
+  ucb->ucb$b_devtype = DT$_TTYUNKN;
+  ucb->ucb$w_devbufsiz = 132;
+
+  ucb->ucb$l_devdepend = 99; // just something to fill
+
+  // dropped the mutex stuff
+
+  return;
+}
+
+void null$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
+  ddb->ddb$ps_ddt=&null$ddt;
+  dpt_store_isr(crb,nl_isr);
+  return;
+}
+
+int null$unit_init (struct _idb * idb, struct _ucb * ucb) {
+  ucb->ucb$v_online = 0;
+  //ucb->ucb$l_lr_msg_tmo = 0 ; // or offline? // where did this go?
+
+  // idb->idb$ps_owner=&(ucb->ucb$r_ucb); // this is mailbox?
+  // no adp or cram stuff
+
+  // or ints etc
+  
+  ucb->ucb$v_online = 1;
+
+  return SS$_NORMAL;
+}
+
+struct _dpt null$dpt;
+struct _ddt null$ddt;
+struct _fdt null$fdt;
+
+int null$init_tables() {
+  ini_dpt_name(&null$dpt, "NLDRIVER");
+  ini_dpt_adapt(&null$dpt, 0);
+  ini_dpt_defunits(&null$dpt, 1);
+  ini_dpt_ucbsize(&null$dpt,sizeof(struct _ucb));
+  ini_dpt_struc_init(&null$dpt, null$struc_init);
+  ini_dpt_struc_reinit(&null$dpt, null$struc_reinit);
+  ini_dpt_ucb_crams(&null$dpt, 1/*NUMBER_CRAMS*/);
+  ini_dpt_end(&null$dpt);
+
+  ini_ddt_unitinit(&null$ddt, null$unit_init);
+  ini_ddt_start(&null$ddt, null_startio);
+  ini_ddt_cancel(&null$ddt, ioc_std$cancelio);
+  ini_ddt_end(&null$ddt);
+
+  /* for the fdt init part */
+  /* a lot of these? */
+  ini_fdt_act(&null$fdt,IO$_READLBLK,nl_read,1);
+  ini_fdt_act(&null$fdt,IO$_READPBLK,nl_read,1);
+  ini_fdt_act(&null$fdt,IO$_READVBLK,nl_read,1);
+  ini_fdt_end(&null$fdt);
+
+  return SS$_NORMAL;
 }
