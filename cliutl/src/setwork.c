@@ -15,13 +15,34 @@
 
 set_working_set(int argc, char**argv){
   int pid=1;
-  struct dsc$descriptor d;
-  if (0==strncmp(argv[0],"/quota",strlen(argv[0]))) {
-    sys$adjwsl(atoi(argv[1]),0);
+
+  unsigned long sts;
+
+  $DESCRIPTOR(p, "p1");
+  $DESCRIPTOR(d, "quota");
+  $DESCRIPTOR(d2, "extent");
+
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+  memset(c, 0, 80);
+
+  int retlen;
+
+  sts = cli$present(&d);
+
+  if (sts&1) {
+    sts = cli$get_value(&d, &o, &retlen);
+    sys$adjwsl(atoi(c),0);
     return SS$_NORMAL;
   }
-  if (0==strncmp(argv[0],"/extent",strlen(argv[0]))) {
-    sys$adjwsl(atoi(argv[1]),0);
+
+  sts = cli$present(&d2);
+
+  if (sts&1) {
+    sts = cli$get_value(&d2, &o, &retlen);
+    sys$adjwsl(atoi(c),0);
     return SS$_NORMAL;
   }
 } 
