@@ -204,9 +204,9 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	write_lock_irq(&tasklist_lock);
 
 	/* CLONE_PARENT and CLONE_THREAD re-use the old parent */
-#if 0
+
 	SET_LINKS(p);
-#endif
+
 	nr_threads++;
 	write_unlock_irq(&tasklist_lock);
 
@@ -220,20 +220,25 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
 	// wait, better do execve itself
 
-	{
-#ifdef __i386__
-	  unsigned long stack_start=stack_here;
-	  struct pt_regs regs;
-	  memset(&regs,0,sizeof(regs));
-	  retval = copy_thread(0, clone_flags, stack_start, 0, p, &regs);
-#else
-	  retval = copy_thread(0, clone_flags, 0, 0, p, 0);
-#endif
-	}
+	retval = new_thread(0, clone_flags, 0, 0, p, 0);
 
+#ifdef __arch_um__
+	void * regs = &p->thread.regs
+#else
+	void * regs = &pidadr;
+#endif
+
+	start_thread(regs,eip,esp);
+
+	sch$chse(p, PRI$_NULL);
+
+	return SS$_NORMAL;
+
+#if 0
 	return sys_execve(((struct dsc$descriptor *)image)->dsc$a_pointer,0,0);
 
 	return SS$_NORMAL;
+#endif
 
 #if 0
 {
