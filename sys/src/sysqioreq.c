@@ -21,9 +21,12 @@ void exe$altqueuepkt (void) {
 }
 
 void exe$finishio (long long * iosb, struct _irp * i, struct _pcb * p, struct _ucb * u) {
+
 }
 
 void exe$finishioc (long long * iosb, struct _irp * i, struct _pcb * p, struct _ucb * u) {
+  iosb&=0xffffffff00000000;
+  exe$finishio(iosb,i,p,u);
 }
 
 int exe$insioq (struct _ucb * u, struct _irp * i) {
