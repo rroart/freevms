@@ -274,7 +274,7 @@ unsigned dir(int argc,char *argv[],int qualc,char *qualv[])
                         struct dsc$descriptor timdsc;
                         timdsc.dsc$w_length = 23;
                         timdsc.dsc$a_pointer = tim;
-                        sts = sys$asctim(0,&timdsc,dat.xab$q_cdt,0);
+                        sts = sys$asctim(0,&timdsc,&dat.xab$q_cdt,0);
                         if ((sts & 1) == 0) printf("Asctim error: %d\n",sts);
                         tim[23] = '\0';
                         printf("  %s",tim);
