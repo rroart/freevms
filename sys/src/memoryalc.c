@@ -86,9 +86,9 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 #if 0
 	if (PageSwapCache(page))
 		BUG();
-#endif
 	if (PageLocked(page))
 		BUG();
+#endif
 	if (PageLRU(page))
 		BUG();
 	if (PageActive(page))
