@@ -11,6 +11,7 @@
 #include<system_data_cells.h>
 #include<misc.h>
 #include<ddbdef.h>
+#include<ucbdef.h>
 
 struct _generic_64 {
   long long l;
@@ -45,9 +46,44 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
   while (it->item_code) {
     switch (it->item_code) {
     case DVI$_DEVNAM:
-      bcopy(&d->ddb$t_name,it->bufaddr,15);
+      if (chan) {
+	struct _ccb * c = &ctl$gl_ccbbase[chan];
+	struct _ucb * u = c->ccb$l_ucb;
+	struct _ddb * d = u->ucb$l_ddb;
+	memcpy(it->bufaddr, d->ddb$t_name, 3);
+	snprintf(&it->bufaddr[3],3,"%d",u->ucb$w_unit);
+      } else {
+	bcopy(&d->ddb$t_name,it->bufaddr,15);
+      }
       break;
-
+    case DVI$_UNIT:
+      if (chan) {
+	struct _ccb * c = &ctl$gl_ccbbase[chan];
+	struct _ucb * u = c->ccb$l_ucb;
+	struct _ddb * d = u->ucb$l_ddb;
+	memcpy(it->bufaddr, &u->ucb$w_unit, 2);
+      }
+      break;
+    case DVI$_PID:
+      if (chan) {
+	struct _ccb * c = &ctl$gl_ccbbase[chan];
+	struct _ucb * u = c->ccb$l_ucb;
+	struct _ddb * d = u->ucb$l_ddb;
+	memcpy(it->bufaddr, &u->ucb$l_pid, 4);
+      }
+      break;
+    case DVI$_OWNUIC:
+      if (chan) {
+	struct _ccb * c = &ctl$gl_ccbbase[chan];
+	struct _ucb * u = c->ccb$l_ucb;
+	struct _ddb * d = u->ucb$l_ddb;
+	int i=0;
+	memcpy(it->bufaddr, &i, 4); // implement later
+      }
+      break;
+    default:
+      printk("getdvi item_code %x not implemented\n",it->item_code);
+      break;
     }
     it++;
   }
