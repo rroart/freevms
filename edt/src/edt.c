@@ -46,6 +46,7 @@ int shownums = -1;			/* -1: on for linemode, off for changemode; 0: always off; 
 int main (int argc, char *argv[])
 
 {
+  setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
   char *buf, *init_name, *output_name, *p;
   const char *cmdpnt;
   FILE *init_file;
