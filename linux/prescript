@@ -80,6 +80,7 @@ done
 		ln -s ../../freevms/sys/src/iosubrams.c .;
 		ln -s ../../freevms/driver/src/pedriver.c .;
 		ln -s ../../freevms/driver/src/scs.c .;
+		ln -s ../../freevms/sys/src/pagefault.c .;
 
 		ln -s ../../freevms/pal/src/ipl.c .;
 		ln -s ../../freevms/pal/src/ast.c .;
