@@ -67,6 +67,10 @@
 #include <statedef.h>
 #include <descrip.h> 
 #include <starlet.h>
+#include<va_rangedef.h>
+
+#include<ihddef.h>
+#include<ihadef.h>
 
 #include <string.h>
 
@@ -435,10 +439,33 @@ static unsigned long h_s_error;
 static unsigned long h_s_input;
 static unsigned long h_s_output;
 static unsigned long h_timer;
-#if 0
-static OZ_IO_fs_getinfo1 scriptinfo;
-static OZ_IO_fs_readrec scriptread;
-#endif
+
+static struct {
+unsigned long curblock;
+unsigned long curbyte;
+} scriptinfo;
+
+static int inscript=0;
+
+static char * scriptbuffer;
+static int scriptlen;
+static int scriptpos;
+
+static struct { 
+  unsigned long size;                    /* data buffer size */
+  void *buff;                    /* data buffer address */
+  unsigned long trmsize;                 /* terminator buffer size */
+  const void *trmbuff;           /* terminator buffer address */
+  unsigned long *rlen;                   /* where to return length actually read */
+  /* (doesn't include terminator) */
+  unsigned long pmtsize;                 /* prompt string size */
+  const void *pmtbuff;           /* prompt buffer address */
+  unsigned long atblock;                /* position to this block before
+				    reading (if non-zero) */
+  unsigned long atbyte;                  /* position to this byte before 
+				    reading (if .atblock non-zero) */
+}  scriptread;
+
 static Script *scripts;
 static Symbol *symbols;
 
@@ -549,6 +576,7 @@ static unsigned long int_delete_logical_name  (unsigned long h_input, unsigned l
 static unsigned long int_delete_logical_table (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_echo                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_exit                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_logout                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_goto                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_help                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_if                   (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
@@ -557,15 +585,20 @@ static unsigned long int_open_file            (unsigned long h_input, unsigned l
 static unsigned long int_open_mutex           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_read_file            (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_resume_thread        (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_script               (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
+static unsigned long int_script               (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_set_console          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_set_default          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_set_prompt          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_set_process          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_set_working_set          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_stop          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_set_event_interval   (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_set_mutex            (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_set_thread           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_datetime        (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_device          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_default         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_show_working_set         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_event           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_iochan          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_job             (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
@@ -574,7 +607,7 @@ static unsigned long int_show_logical_table   (unsigned long h_input, unsigned l
 static unsigned long int_show_job             (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_mutex           (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_process         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
-static unsigned long int_show_symbol          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
+static unsigned long int_show_symbol          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_system          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_thread          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
 static unsigned long int_show_user            (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]){ }
@@ -601,7 +634,8 @@ static Command intcmd[] = {
 	0, "delete logical name",  int_delete_logical_name,  NULL, "<logical_name>", 
 	0, "delete logical table", int_delete_logical_table, NULL, "<table_name>", 
 	1, "echo",                 int_echo,                 NULL, "<string> ...", 
-	0, "exit",                 int_exit,                 NULL, "[<status>]", 
+	0, "logout",               int_logout,                 NULL, "[<status>]", 
+	0, "exit"  ,               int_exit,                 NULL, "[<status>]", 
 	0, "goto",                 int_goto,                 NULL, "<label>",
 	1, "help",                 int_help,                 NULL, "", 
 	0, "if",                   int_if,                   NULL, "<integervalue> <statement ...>", 
@@ -610,15 +644,19 @@ static Command intcmd[] = {
 	1, "open mutex",           int_open_mutex,           NULL, "<iochan_logical_name> <mutex_device_name> <mutex_name>", 
 	1, "read file",            int_read_file,            NULL, "[-logical <logical_name>] [-prompt <prompt>] [-size <size>] [-terminator <terminator>] <symbol_name>", 
 	0, "resume thread",        int_resume_thread,        NULL, "[-id <thread_id>] [<thread_logical_name>]", 
-	0, "script",               int_script,               NULL, "<script_name> [<args> ...]", 
+	0, "@",               int_script,               NULL, "<script_name> [<args> ...]", 
 	1, "set console",          int_set_console,          NULL, "[-columns <columns>] [-[no]linewrap] [-rows <rows>] [<logical_name>]", 
 	0, "set default",          int_set_default,          NULL, "<directory>", 
+	0, "set prompt",           int_set_prompt,           NULL, "<prompt>", 
+	0, "set process",          int_set_process,          NULL, "<name>", 
+	0, "set working_set",      int_set_working_set,      NULL, "", 
 	0, "set event interval",   int_set_event_interval,   NULL, "<event_logname> <interval> [<basetime>]", 
 	1, "set mutex",            int_set_mutex,            NULL, "[-express] [-noqueue] <iochan_logical_name> <new_mode>", 
 	0, "set thread",           int_set_thread,           NULL, "[-id <thread_id>] [<thread_logical_name>] [-creates <secattr>] [-priority <basepri>] [-secattr <secattr>] [-seckeys <seckeys>]", 
 	0, "show time",            int_show_datetime,        NULL, "", 
 	0, "show devices",         int_show_device,          NULL, "[<device_logical_name> ...] [-iochans] [-objaddr] [-security]", 
 	0, "show default",         int_show_default,         NULL, "", 
+	0, "show working_set",     int_show_working_set,     NULL, "", 
 	1, "show event",           int_show_event,           NULL, "<event_logical_name> ...", 
 	1, "show iochan",          int_show_iochan,          NULL, "[<iochan_logical_name> ...] [-objaddr] [-security]", 
 	1, "show job",             int_show_job,             NULL, "[<job_logical_name> ...] [-objaddr] [-processes] [-security] [-threads]", 
@@ -626,11 +664,12 @@ static Command intcmd[] = {
 	1, "show logical table",   int_show_logical_table,   NULL, "[<table_name>] [-security]", 
 	1, "show mutex",           int_show_mutex,           NULL, "<iochan_logical_name>", 
 	1, "show process",         int_show_process,         NULL, "[<process_logical_name> ...] [-objaddr] [-security] [-threads]", 
-	1, "show symbol",          int_show_symbol,          NULL, "[<symbol_name> ...]", 
+	0, "show symbol",          int_show_symbol,          NULL, "[<symbol_name> ...]", 
 	0, "show system",          int_show_system,          NULL, "[-devices] [-iochans] [-job] [-processes] [-security] [-threads]", 
 	1, "show thread",          int_show_thread,          NULL, "[-id <thread_id>] [-objaddr] [-security] [<thread_logical_name> ...]", 
 	1, "show user",            int_show_user,            NULL, "[<user_logical_name> ...] [-jobs] [-objaddr] [-processes] [-security] [-threads]", 
 	1, "show volume",          int_show_volume,          NULL, "[<device_name> ...]", 
+	0, "stop",                 int_stop,                 NULL, "[/id <pid>] <name>", 
 	0, "suspend thread",       int_suspend_thread,       NULL, "[-id <thread_id>] [<thread_logical_name>]", 
 	0, "wait event",           int_wait_event,           NULL, "<logical_name> ...", 
 	1, "wait mutex",           int_wait_mutex,           NULL, "<iochan_logical_name>", 
@@ -652,6 +691,8 @@ static Command intcmd[] = {
 const char oz_s_logname_defaulttables[] = "DEFAULT";
 
 const char oz_sys_copyright[] = "C";
+
+static char prompt[32]="$ ";
 
 unsigned long main (int argc, char *argv[])
 
@@ -813,7 +854,6 @@ unsigned long main (int argc, char *argv[])
 
   /* Set up command read prompt */
 
-#if 0
   memset (&scriptread, 0, sizeof scriptread);
   scriptread.size = sizeof cmdbuf - 1;
   scriptread.buff = cmdbuf;
@@ -824,7 +864,6 @@ unsigned long main (int argc, char *argv[])
   scriptread.pmtbuff = "oz_cli>";
 
   memset (&scriptinfo, 0, sizeof scriptinfo);
-#endif
 
   /* If -exec, execute the one command they supply                                     */
   /* But it might be a 'script' command, so check for that after executing the command */
@@ -846,31 +885,54 @@ unsigned long main (int argc, char *argv[])
       while (scripts != NULL) {
         exit_script ();
       }
+      scriptread.atblock = 0;
+      scriptread.atbyte  = 0;
+    }
+
+    /* Read command line from input file (but first get current file position) */
+
+    sts = SS$_NORMAL;
+
+    if (inscript) {
+      int start;
 #if 0
+      sts = oz_sys_io (PSL$C_KERNEL, h_s_input, h_event, OZ_IO_FS_GETINFO1, sizeof scriptinfo, &scriptinfo);
+#endif
+      scriptinfo.curblock=1;
+      scriptinfo.curbyte=scriptpos;
+
+      if (sts != SS$_NORMAL) scriptinfo.curblock = 0;
+      if ((sts == SS$_NORMAL) || (sts == SS$_ILLIOFUNC)) {
+	if (scriptread.atblock != 0) {
+	  scriptinfo.curblock = scriptread.atblock;
+	  scriptinfo.curbyte  = scriptread.atbyte;
+	}
+#if 0
+	sts = oz_sys_io (PSL$C_KERNEL, h_s_input, h_event, IO$_READLBLK, sizeof scriptread, &scriptread);
+#endif
+
+	scriptread.atblock = 1;
+	scriptpos=scriptread.atbyte;
+
+	start=scriptpos;
+	while(scriptpos<scriptlen && scriptbuffer[scriptpos]!='\n')
+	  scriptpos++;
+	scriptpos++;
+	bcopy(&scriptbuffer[start],cmdbuf,scriptpos-start);
+	cmdbuf[scriptpos-start]=0;
+	sts=SS$_NORMAL;
+	if(scriptpos>scriptlen)
+	  sts=SS$_ENDOFFILE;
+	scriptread.atbyte=scriptpos;
+      }
+#if 0
+      // why???
       scriptread.atblock = 0;
       scriptread.atbyte  = 0;
 #endif
     }
 
-    /* Read command line from input file (but first get current file position) */
-
-#if 0
-    sts = oz_sys_io (PSL$C_KERNEL, h_s_input, h_event, OZ_IO_FS_GETINFO1, sizeof scriptinfo, &scriptinfo);
-    if (sts != SS$_NORMAL) scriptinfo.curblock = 0;
-    if ((sts == SS$_NORMAL) || (sts == SS$_ILLIOFUNC)) {
-      if (scriptread.atblock != 0) {
-        scriptinfo.curblock = scriptread.atblock;
-        scriptinfo.curbyte  = scriptread.atbyte;
-      }
-      sts = oz_sys_io (PSL$C_KERNEL, h_s_input, h_event, IO$_READLBLK, sizeof scriptread, &scriptread);
-    }
-    scriptread.atblock = 0;
-    scriptread.atbyte  = 0;
-#endif
-
     /* If read error, close this script and resume next outer level */
-
-    sts = SS$_NORMAL;
 
     if (sts != SS$_NORMAL) {
       if (sts != SS$_ENDOFFILE) {					/* error message if not end-of-file */
@@ -887,20 +949,23 @@ unsigned long main (int argc, char *argv[])
     /* Otherwise, process the command line */
 
     else {
-      fprintf(stdout,"$ ");
-      fflush(stdout);
-      //scanf("%s",cmdbuf);
-      bzero(cmdbuf,CMDSIZ);
-      read(0,cmdbuf,CMDSIZ);
+      if (inscript==0) {
+	fprintf(stdout,"%s",prompt);
+	fflush(stdout);
+	//scanf("%s",cmdbuf);
+	bzero(cmdbuf,CMDSIZ);
+	read(0,cmdbuf,CMDSIZ);
+      }
+
       cmdlen=strlen(cmdbuf)-1;
       //      bcopy(p,cmdbuf,cmdlen);
       //      free(p);
       cmdbuf[cmdlen] = 0;						/* null terminate command line */
       p = proclabels (cmdbuf);						/* process any labels that are present */
       if (skiplabel[0] == 0) {						/* ignore line if skipping to a particular label */
-        if (verify) fprintf (h_s_output, "%s\n", cmdbuf);	/* ok, echo if verifying turned on */
-        sts = execute (p);						/* execute the command line */
-        if (sts != SS$_BRANCHSTARTED) symbol -> ivalue = sts;			/* save the new status */
+	if (verify) fprintf (h_s_output, "%s\n", cmdbuf);	/* ok, echo if verifying turned on */
+	sts = execute (p);						/* execute the command line */
+	if (sts != SS$_BRANCHSTARTED) symbol -> ivalue = sts;			/* save the new status */
       }
     }
   }
@@ -1180,6 +1245,7 @@ static void exit_script (void)
     scripts = script -> next;				/* unlink and free script save block */
     free (script);
   }
+  inscript=0;
 }
 
 /************************************************************************/
@@ -1229,10 +1295,8 @@ static char *proclabels (char *cmdbuf)
 
       /* Either way, store the current record's address in the label definition */
 
-#if 0
       label -> blkoffs = scriptinfo.curblock;
       label -> bytoffs = scriptinfo.curbyte;
-#endif
 
       /* If we are skipping to a particular label, see if we are there */
 
@@ -4899,7 +4963,7 @@ static unsigned long int_echo (unsigned long h_input, unsigned long h_output, un
 /*									*/
 /************************************************************************/
 
-static unsigned long int_exit (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+static unsigned long int_logout (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
   int i, usedup;
@@ -4962,12 +5026,10 @@ static unsigned long int_goto (unsigned long h_input, unsigned long h_output, un
 
   /* If found, reposition to the spot in the script where we found it last */
 
-#if 0
   if (label != NULL) {
     scriptread.atblock = label -> blkoffs;
     scriptread.atbyte  = label -> bytoffs;
   }
-#endif
 
   /* Anyway, return SS$_BRANCHSTARTED so we dont affect the oz_status variable */
 
@@ -5773,8 +5835,37 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
 
 {
   unsigned long sts;
+  struct dsc$descriptor aname;
+  struct dsc$descriptor dflnam;
+  struct file * f;
+  struct _ihd * hdrbuf;
+  struct _iha * active;
+  struct _va_range inadr;
+  void (*func)(void);
+  int len = strlen(argv[0]);
+  if (strncmp(".exe",argv[0]+len-4,4)) goto do_fork;
 
-  /* Open the handles */
+  aname.dsc$w_length=len-4;
+  aname.dsc$a_pointer=argv[0];
+  dflnam.dsc$w_length=len;
+  dflnam.dsc$a_pointer=argv[0];
+
+  sts=sys$imgact(&aname,&dflnam,&hdrbuf,0,0,0,0,0);
+  printf("imgact got sts %x\n",sts);
+
+  if (sts!=SS$_NORMAL) return sts;
+
+  active=(unsigned long)hdrbuf+hdrbuf->ihd$w_activoff;
+
+  func=active->iha$l_tfradr1;
+
+  printf("entering image? %x\n",func);
+  func();
+  printf("after image\n");
+
+  return SS$_NORMAL;
+
+ do_fork:
 
   if (fork()==0) {
     execv(image,argv);
@@ -6622,6 +6713,9 @@ static void deferoutsym (const char *sym_name, Pipebuf *pipebuf_qh)
 
   insert_symbol (symbol, NULL, 0);					// insert symbol into symbol table
 }
+
+#endif
+
 
 /************************************************************************/
 /*									*/
@@ -6632,10 +6726,10 @@ static void deferoutsym (const char *sym_name, Pipebuf *pipebuf_qh)
 static unsigned long int_script (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-#if 0
   unsigned long sts;
   unsigned long h_script;
-  OZ_IO_fs_open fs_open;
+  //  OZ_IO_fs_open fs_open;
+  int fd;
   Script *script;
 
   /* -input option is illegal */
@@ -6654,15 +6748,19 @@ static unsigned long int_script (unsigned long h_input, unsigned long h_output, 
 
   /* Try to open the script file */
 
-  memset (&fs_open, 0, sizeof fs_open);
-  fs_open.name = argv[0];
-  fs_open.lockmode = LCK$K_CRMODE;
-  fs_open.ignclose = 1;
-  sts = oz_sys_io_fs_open (sizeof fs_open, &fs_open, 0, &h_script);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_error, "oz_cli: error %u opening script %s\n", sts, argv[0]);
-    return (sts);
-  }
+  fd = open(argv[0],0);
+  if (fd==0)
+    return 0;
+
+  inscript=fd;
+
+  scriptbuffer=malloc(10000);
+
+  scriptlen=read(fd,scriptbuffer,10000);
+
+  scriptpos=0;
+
+  close(fd);
 
   /* Ok, stack the current input file, labels and symbols */
 
@@ -6688,8 +6786,10 @@ static unsigned long int_script (unsigned long h_input, unsigned long h_output, 
   /* Success */
 
   return (SS$_NORMAL);
-#endif
 }
+
+#if 0
+
 
 /************************************************************************/
 /*									*/
@@ -6841,6 +6941,36 @@ rtnsts:
 }
 
 #endif
+
+static unsigned long int_set_prompt (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+
+{
+  unsigned long sts;
+
+  /* We should have exactly one argument - the prompt name */
+
+  if (argc == 0) {
+    bcopy("$ ",prompt,2);
+    prompt[2]=0;
+  } else {
+    bcopy(argv[0],prompt,strlen(argv[0]));
+    prompt[strlen(argv[0])]=0;
+  }
+
+  return SS$_NORMAL;
+}
+
+static unsigned long int_set_process (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+
+{
+  unsigned long sts;
+
+  /* We should have exactly one argument - the process name */
+
+  set_process(argc,argv);
+
+  return SS$_NORMAL;
+}
 
 
 /************************************************************************/
@@ -8236,6 +8366,9 @@ static unsigned long show_process_byhandle (unsigned long h_output, unsigned lon
 
   return (sts);
 }
+
+#endif
+
 
 /************************************************************************/
 /*									*/
@@ -8310,8 +8443,6 @@ static void show_symbol (unsigned long h_output, unsigned long h_error, Symbol *
     }
   }
 }
-
-#endif
 
 
 /************************************************************************/
@@ -9479,3 +9610,84 @@ static unsigned long wait_events (unsigned long nevents, unsigned long *h_events
   }
 }
 #endif
+
+static unsigned long int_stop (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+
+{
+  int i, usedup;
+  unsigned long sts;
+  unsigned long h_thread;
+  unsigned long thread_id;
+
+  thread_id = 0;
+
+  if (strcmp (argv[0], "/id") == 0) {
+    unsigned int pid=atoi(argv[1]);
+    sys$forcex(&pid,0,42);
+  } else {
+    struct dsc$descriptor nam;
+    nam.dsc$w_length=strlen(argv[0]);
+    nam.dsc$a_pointer=argv[0];
+    sys$forcex(0,&nam,84);
+  }
+  return SS$_NORMAL;
+}
+
+static unsigned long int_set_working_set (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+
+{
+  int i;
+  unsigned long sts, showopts;
+
+  showopts = 0;
+
+  sts = set_working_set (argc , argv);
+  return (sts);
+}
+
+
+static unsigned long int_show_working_set (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+
+{
+  int i;
+  unsigned long sts, showopts;
+
+  showopts = 0;
+
+  sts = show_working_set (argc , argv);
+  return (sts);
+}
+
+static unsigned long int_exit                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+{
+  int i, usedup;
+  unsigned long exitst;
+
+  /* Always be sure to exit out of whatever script we're in */
+
+  exit_script ();
+
+  /* Now try to get the status from the command line */
+
+  exitst = SS$_NORMAL;
+
+  for (i = 0; i < argc; i ++) {
+
+    /* Unknown option */
+
+    if (*argv[i] == '-') {
+      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
+      return (SS$_IVPARAM);
+    }
+
+    /* No option - specify the status it will exit with */
+
+    exitst = oz_hw_atoi (argv[i], &usedup);
+    if (argv[i][usedup] != 0) {
+      fprintf (h_error, "oz_cli: bad status value %s\n", argv[i]);
+      return (SS$_BADPARAM);
+    }
+  }
+
+  return (exitst);
+}
