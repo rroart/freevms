@@ -89,7 +89,7 @@ CREATE /NAME_TABLE
 	DCL only
 
 SHOW LOGICAL:
-	show /table table logical
+	show logical /table table logical
 	DCL only
 
 ******************************
