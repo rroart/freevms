@@ -3,6 +3,8 @@
 
 // Author. Roar Thronæs.
 
+// Some lines/parts may be taken from lustre and modified. (Required line)
+
 #include<linux/linkage.h>
 #include<linux/vmalloc.h>
 #include<asm/current.h>
@@ -17,6 +19,7 @@
 #include<lkbdef.h>
 #include<pridef.h>
 #include<descrip.h>
+#include<cdrpdef.h>
 
 // no vmslock etc here yet
 
@@ -42,10 +45,51 @@ unsigned char lck$valblk_tbl[6]={0,0,0,0,0x1f,0x3f};
 
 unsigned char lck$al_dwncvt_tbl[6]={0,1,3,3,0xf,0x1f};
 
+void dlmmyerr(){}
 
+void dlmlisten(){}
+
+int dlminit(void) {
+  char myname[]="dlm$dlm";
+  char myinfo[]="dlm dlm";
+
+  //  listen(msgbuf,err,cdt,pdt,cdt);
+  scs$listen(dlmlisten,dlmmyerr,myname,myinfo,0);
+}
 
 extern struct _rsb * reshashtbl[];
 extern unsigned long lockidtbl[];
+
+static int dlmconnected=0;
+
+dlm_msg(){}
+
+dlm_dg(){}
+
+dlm_err(){}
+
+void lck$snd_granted(struct _lkb * l) {
+  struct _cdrp * c = vmalloc(sizeof(struct _cdrp));
+  bzero(c,sizeof(struct _cdrp));
+  c->cdrp$l_val1=l->lkb$l_remlkid;
+  c->cdrp$l_val2=l-lockidtbl[0];
+  if (!dlmconnected) {
+    scs$connect(dlm_msg,dlm_dg,dlm_err,0,0,"dlm$dlm",&current->pcb$t_lname,0,0,0,0,0);
+    dlmconnected=1;
+  }
+  scs_std$senddg(0,0,c);
+}
+
+// this was suddenly not needed, I think
+static void * enq_find_oldest_parent(struct _rsb * r,struct _rsb * p) {
+  struct _rsb * rsb=r;
+  while (r) {
+    rsb->rsb$b_depth++;
+    p=r->rsb$l_parent;
+    if (p==0) return r;
+    r=p;
+  };
+}
 
 int reshash(struct dsc$descriptor * d) {
   return d->dsc$w_length;
@@ -87,6 +131,7 @@ asmlinkage int exe$enqw(struct struct_enq * s) {
 
 asmlinkage int exe$enq(struct struct_enq * s) {
   int convert;
+  int retval;
 
   convert=s->flags&LCK$M_CONVERT;
   if (s->lkmode>LCK$K_EXMODE) return SS$_BADPARAM;
@@ -94,7 +139,7 @@ asmlinkage int exe$enq(struct struct_enq * s) {
     /* new lock */
     struct _rsb * r;
     struct _rsb * old;
-    struct _lkb * l;
+    struct _lkb * l, *p;
     struct dsc$descriptor * d;
     int sserror;
 
@@ -134,19 +179,41 @@ asmlinkage int exe$enq(struct struct_enq * s) {
     } else {
 	
     }
-    if (s->parid) {
-      
+
+    if (s->parid==0) {
+      //list_add(&res->lr_childof, &ns->ns_root_list);
+      //this is added to lck$gl_rrsfl down below, I think
+    } else {
+      //check valid lock
+      // check lock access mode
+      p=lockidtbl[s->parid];
+      if (current->pid != p->lkb$l_pid) return SS$_IVLOCKID;
+      //check if parent granted, if not return SS$_PARNOTGRANT;
+      if (p->lkb$b_state!=LKB$K_CONVERT  || p->lkb$b_state!=LKB$K_GRANTED) 
+	if (p->lkb$l_flags & LCK$M_CONVERT == 0) return SS$_PARNOTGRANT;
+      p->lkb$w_refcnt++;
+      r->rsb$l_parent = p->lkb$l_rsb; // should not be here?
+      //check if uic-specific resource
+      //check if system-wide
+      //charge lock against quota
+      //list_add(&res->lr_childof, &parent->lr_children);
+      //r->rsb$l_rtrsb=enq_find_oldest_parent(r,p->lkb$l_rsb);
+      l->lkb$l_parent=p;
     }
 
     old=find_reshashtbl(d);
     if (!old) {
+      lck$gl_rsbcnt++;
+      lck$gl_lckcnt++;
+      retval=SS$_NORMAL;
+      if (s->flags & LCK$M_SYNCSTS) retval=SS$_SYNCH;
       qhead_init(&r->rsb$l_grqfl);
       qhead_init(&r->rsb$l_cvtqfl);
       qhead_init(&r->rsb$l_wtqfl);
       insque(&l->lkb$l_sqfl,r->rsb$l_grqfl);
       l->lkb$l_rsb=r;
       insert_reshashtbl(r);
-      if (!s->parid) {
+      if (s->parid==0) {
 	insque(&r->rsb$l_rrsfl,lck$gl_rrsfl);
 	qhead_init(&r->rsb$l_srsfl);
 	r->rsb$b_depth=0;
@@ -160,6 +227,18 @@ asmlinkage int exe$enq(struct struct_enq * s) {
 	lck$grant_lock(l,r,-1,s->lkmode);
 
 	goto end;
+      } else {
+	r->rsb$l_csid=p->lkb$l_rsb->rsb$l_csid;
+	p->lkb$l_rsb->rsb$w_refcnt++;
+	r->rsb$b_depth=p->lkb$l_rsb->rsb$b_depth+1;
+	//check maxdepth
+	r->rsb$l_rtrsb=p->lkb$l_rsb->rsb$l_rtrsb;
+	insque(&r->rsb$l_srsfl,&p->lkb$l_rsb->rsb$l_srsfl);
+	if (p->lkb$l_csid) { //remote
+	  lck$snd_granted(l);
+	} else {
+	  lck$grant_lock(l,r,-1,s->lkmode);
+	}
       }
     } else {
       /* something else? */
@@ -172,9 +251,14 @@ asmlinkage int exe$enq(struct struct_enq * s) {
 	insque(l->lkb$l_sqfl,r->rsb$l_wtqfl);
       }
 
-    s->lksb->lksb$l_lkid=insert_lck(l);
-    s->lksb->lksb$w_status=SS$_NORMAL;
+      s->lksb->lksb$l_lkid=insert_lck(l);
+      s->lksb->lksb$w_status=SS$_NORMAL;
 
+      if (p->lkb$l_csid) { //remote
+	lck$snd_granted(l);
+      } else {
+	lck$grant_lock(l,r,-1,s->lkmode);
+      }
     }
   end:
     /* raise ipl */
@@ -192,8 +276,9 @@ asmlinkage int exe$enq(struct struct_enq * s) {
     void * dummy;
     l=lockidtbl[s->lksb->lksb$l_lkid];
     r=l->lkb$l_rsb;
-    remque(l->lkb$l_sqfl,l->lkb$l_sqfl);// ?
-    remque(r->rsb$l_grqfl,dummy);
+    if (l->lkb$b_state!=LKB$K_GRANTED) return SS$_CVTUNGRANT;
+    remque(&l->lkb$l_sqfl,&l->lkb$l_sqfl);// ?
+    remque(&r->rsb$l_grqfl,dummy);
     if (aqempty(r->rsb$l_cvtqfl) && aqempty(r->rsb$l_grqfl)) {
       lck$grant_lock(l,r,l->lkb$b_grmode,s->lkmode);
       return SS$_NORMAL;
