@@ -1,5 +1,8 @@
 So far:
 
+You might need gcc 2.96 from recent RedHat; someone may have had success with
+gcc 3.x.
+
 Untar the linux dist in /usr/src or some other place.
 
 Untar freevms in the same directory (or symlink from there to the real place)
