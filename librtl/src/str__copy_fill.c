@@ -30,7 +30,7 @@
  *
  *	Copies over text from source to dest.
  */
-unsigned long str$$copy_fill(char* dest_ptr, unsigned short dest_length,
+unsigned long str$$copy_fill_not(char* dest_ptr, unsigned short dest_length,
 	const char* source_ptr, unsigned short source_length, char fill)
 {
 	unsigned short max_copy;

@@ -52,7 +52,7 @@
  *
  *	Add two decimal strings of digits
  */
-unsigned long str$add(const unsigned long* asign, const long* aexp, 
+unsigned long str$add_not(const unsigned long* asign, const long* aexp, 
 	const struct dsc$descriptor_s* adigits,
 	const unsigned long* bsign, const long*bexp, 
 	const struct dsc$descriptor_s* bdigits,
@@ -68,7 +68,7 @@ unsigned long str$add(const unsigned long* asign, const long* aexp,
  * str$compare_multi
  *
  */
-long str$compare_multi(
+long str$compare_multi_not(
 	const struct dsc$descriptor_s* first_source_string,
 	const struct dsc$descriptor_s* second_source_string,
 	const long* flags_value,
@@ -84,7 +84,7 @@ long str$compare_multi(
  * str$divide
  *
  */
-unsigned long str$divide(
+unsigned long str$divide_not(
 	const unsigned long* asign, const long* aexp, const struct dsc$descriptor_s* a_digits,
 	const unsigned long* bsign, const long* bexp, const struct dsc$descriptor_s* b_digits,
 	const long* total_digits, const long* round_truncate_indicator,
@@ -100,7 +100,7 @@ unsigned long str$divide(
  * str$match_wild
  *
  */
-unsigned long str$match_wild(const struct dsc$descriptor_s* candidate_string,
+unsigned long str$match_wild_not(const struct dsc$descriptor_s* candidate_string,
 	const struct dsc$descriptor_s* pattern_string)
 {
 	/* Not yet coded */
@@ -112,7 +112,7 @@ unsigned long str$match_wild(const struct dsc$descriptor_s* candidate_string,
  * str$mul
  *
  */
-unsigned long str$mul(const unsigned long* asign, const long aexp,
+unsigned long str$mul_not(const unsigned long* asign, const long aexp,
 	const struct dsc$descriptor_s* adigits,
 	const unsigned long* bsign, const long* bexp,
 	const struct dsc$descriptor_s* bdigits,
@@ -129,7 +129,7 @@ unsigned long str$mul(const unsigned long* asign, const long aexp,
  * str$recip
  *
  */
-unsigned long str$recip(
+unsigned long str$recip_not(
 	const unsigned long* asign, const long* aexp,
 	const struct dsc$descriptor_s* adigits,
 	const unsigned long* bsign, const long* bexp,
@@ -146,7 +146,7 @@ unsigned long str$recip(
  * str$replace
  *
  */
-unsigned long str$replace(struct dsc$descriptor_s* destinstaion_string,
+unsigned long str$replace_not(struct dsc$descriptor_s* destinstaion_string,
 	const struct dsc$descriptor_s* source_string,
 	const long* start_position,
 	const long* end_position,
@@ -161,7 +161,7 @@ unsigned long str$replace(struct dsc$descriptor_s* destinstaion_string,
  * str$round
  *
  */
-unsigned long str$round(const long* places, unsigned long* flags,
+unsigned long str$round_not(const long* places, unsigned long* flags,
 	const unsigned long* asign, const long* aexp,
 	const struct dsc$descriptor_s* adigits,
 	const unsigned long* bsign, const long* bexp,
