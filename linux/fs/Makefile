@@ -28,7 +28,10 @@ subdir-y			+= partitions
 # Do not add any filesystems before this line
 subdir-$(CONFIG_EXT3_FS)	+= ext3    # Before ext2 so root fs can be ext3
 subdir-$(CONFIG_JBD)		+= jbd
+ifneq ($(CONFIG_IO_VMS),y)
 subdir-$(CONFIG_EXT2_FS)	+= ext2
+endif
+subdir-$(CONFIG_EXTTWO_FS)	+= exttwo
 subdir-$(CONFIG_ZLIB_FS_INFLATE) += inflate_fs
 subdir-$(CONFIG_CRAMFS)		+= cramfs
 subdir-$(CONFIG_RAMFS)		+= ramfs
