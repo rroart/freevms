@@ -698,10 +698,10 @@ static void __init do_initcalls(void)
 	call = &__initcall_start;
 	do {
 	  //printk ("before call %x\n",call);
-	  //	  { int i; for (i=100000000;i;i--) ; }
+	  //{ int i; for (i=10000000;i;i--) ; }
 		(*call)();
 		//printk("after call\n");
-		//	  { int i; for (i=100000000;i;i--) ; }
+		//{ int i; for (i=10000000;i;i--) ; }
 		call++;
 	} while (call < &__initcall_end);
 
