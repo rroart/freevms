@@ -769,165 +769,165 @@ unsigned exe$get(struct _rabdef *rab)
   struct dsc$descriptor fibdsc;
   struct _atrdef atr[2];
   struct _fatdef recattr;
-    char *buffer,*recbuff;
-    unsigned block,blocks,offset;
-    unsigned cpylen,reclen;
-    unsigned delim,rfm,sts;
+  char *buffer,*recbuff;
+  unsigned block,blocks,offset;
+  unsigned cpylen,reclen;
+  unsigned delim,rfm,sts;
 
-    reclen = rab->rab$w_usz;
-    recbuff = rab->rab$l_ubf;
-    delim = 0;
-    switch (rfm = rab->rab$l_fab->fab$b_rfm) {
-        case FAB$C_STMLF:
-            delim = 1;
-	    break;
-        case FAB$C_STMCR:
-            delim = 2;
-	    break;
-        case FAB$C_STM:
-            delim = 3;
-	    break;
-        case FAB$C_VFC:
-            reclen += rab->rab$l_fab->fab$b_fsz;
-            break;
-        case FAB$C_FIX:
-            if (reclen < rab->rab$l_fab->fab$w_mrs) return RMS$_RTB;
-            reclen = rab->rab$l_fab->fab$w_mrs;
-            break;
-    }
+  reclen = rab->rab$w_usz;
+  recbuff = rab->rab$l_ubf;
+  delim = 0;
+  switch (rfm = rab->rab$l_fab->fab$b_rfm) {
+  case FAB$C_STMLF:
+    delim = 1;
+    break;
+  case FAB$C_STMCR:
+    delim = 2;
+    break;
+  case FAB$C_STM:
+    delim = 3;
+    break;
+  case FAB$C_VFC:
+    reclen += rab->rab$l_fab->fab$b_fsz;
+    break;
+  case FAB$C_FIX:
+    if (reclen < rab->rab$l_fab->fab$w_mrs) return RMS$_RTB;
+    reclen = rab->rab$l_fab->fab$w_mrs;
+    break;
+  }
 
-    offset = rab->rab$w_rfa[2] % 512;
-    block = (rab->rab$w_rfa[1] << 16) + rab->rab$w_rfa[0];
-    if (block == 0) block = 1;
+  offset = rab->rab$w_rfa[2] % 512;
+  block = (rab->rab$w_rfa[1] << 16) + rab->rab$w_rfa[0];
+  if (block == 0) block = 1;
 
-    atr[0].atr$w_type=ATR$C_RECATTR;
-    atr[0].atr$w_size=ATR$S_RECATTR;
-    atr[0].atr$l_addr=&recattr;
-    atr[1].atr$w_type=0;
-    fibdsc.dsc$w_length=sizeof(struct _fibdef);
-    fibdsc.dsc$a_pointer=&ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fib;
-    sts = exe_qiow(0,getchan(ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_vcb),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
-		   &fibdsc,0,0,0,atr,0);
-    sts = iosb.iosb$w_status;
+  atr[0].atr$w_type=ATR$C_RECATTR;
+  atr[0].atr$w_size=ATR$S_RECATTR;
+  atr[0].atr$l_addr=&recattr;
+  atr[1].atr$w_type=0;
+  fibdsc.dsc$w_length=sizeof(struct _fibdef);
+  fibdsc.dsc$a_pointer=&ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fib;
+  sts = exe_qiow(0,getchan(ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_vcb),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
+		 &fibdsc,0,0,0,atr,0);
+  sts = iosb.iosb$w_status;
 
-    {
-        unsigned eofblk;
+  {
+    unsigned eofblk;
 
-	eofblk = VMSSWAP(recattr.fat$l_efblk);
-        if (block > eofblk || (block == eofblk &&
-			       offset >= VMSWORD(recattr.fat$w_ffbyte))) return RMS$_EOF;
-    }
-    buffer=vmalloc(512);
-    sts = exe_qiow(0,getchan(ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_vcb),IO$_READVBLK,&iosb,0,0,
-			   buffer,512,block,0,0,0);
-    sts = iosb.iosb$w_status;
-    blocks=1;
-    if ((sts & 1) == 0) {
-        if (sts == SS$_ENDOFFILE) sts = RMS$_EOF;
-        return sts;
-    }
-
-    if (rfm == FAB$C_VAR || rfm == FAB$C_VFC) {
-        vmsword *lenptr = (vmsword *) (buffer + offset);
-        reclen = VMSWORD(*lenptr);
-        offset += 2;
-        if (reclen > rab->rab$w_usz) {
-            sts = deaccesschunk(0,0,0);
-            return RMS$_RTB;
-        } 
-    }
-
-    cpylen = 0;
-    while (1) {
-        int dellen = 0;
-        int seglen = blocks * 512 - offset;
-	if (delim) {
-	    if (delim >= 3) {
-                char *ptr = buffer + offset;
-                if (dellen == 1 && *ptr != '\n') {
-                    if (cpylen >= reclen) {
-                        seglen = 0;
-                        sts = RMS$_RTB;
-                    } else {
-                        *recbuff++ = '\r';
-                        cpylen++;
-                    }
-                }
-                while (seglen-- > 0) {
-                    char ch = *ptr++;
-                    if (ch == '\n' || ch == '\f' || ch == '\v') {
-                        if (ch == '\n') {
-                            dellen++;
-                        } else {
-                            dellen = 0;
-                        }
-                        delim = 99;
-                        break; 
-                    }
-                    dellen = 0;
-                    if (ch == '\r') dellen = 1;
-                }
-                seglen = ptr - (buffer + offset) - dellen;;
-	    } else {
-                char *ptr = buffer + offset;
-                char term = '\r';
-                if (delim == 1) term = '\n';
-                while (seglen-- > 0) {
-                    if (*ptr++ == term) {
-                        dellen = 1;
-                        delim = 99;
-                        break;
-                    }
-                }
-                seglen = ptr - (buffer + offset) - dellen;;
-            }
-        } else {
-            if (seglen > reclen - cpylen) seglen = reclen - cpylen;
-            if (rfm == FAB$C_VFC && cpylen < rab->rab$l_fab->fab$b_fsz) {
-                unsigned fsz = rab->rab$l_fab->fab$b_fsz - cpylen;
-                if (fsz > seglen) fsz = seglen;
-                if (rab->rab$l_rhb) memcpy(rab->rab$l_rhb + cpylen,buffer + offset,fsz);
-                cpylen += fsz;
-                offset += fsz;
-                seglen -= fsz;
-            }
-        }
-        if (seglen) {
-            if (cpylen + seglen > reclen) {
-                seglen = reclen - cpylen;
-                sts = RMS$_RTB;
-            }
-	    memcpy(recbuff,buffer + offset,seglen);
-            recbuff += seglen;
-            cpylen += seglen;
-        }
-        offset += seglen + dellen;
-        if ((offset & 1) && (rfm == FAB$C_VAR || rfm == FAB$C_VFC)) offset++;
-        deaccesschunk(0,0,1);
-        if ((sts & 1) == 0) return sts;
-        block += offset / 512;
-        offset %= 512;
-        if ((delim == 0 && cpylen >= reclen) || delim == 99) {
-	    break;
-	} else {
-	    sts = exe_qiow(0,getchan(ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_vcb),IO$_READVBLK,&iosb,0,0,
-			   buffer,512,block,0,0,0);
-	    sts = iosb.iosb$w_status;
-	    blocks=1;
-            if ((sts & 1) == 0) {
-                if (sts == SS$_ENDOFFILE) sts = RMS$_EOF;
-                return sts;
-            }
-            offset = 0;
-        }
-    }
-    if (rfm == FAB$C_VFC) cpylen -= rab->rab$l_fab->fab$b_fsz;
-    rab->rab$w_rsz = cpylen;
-
-    rab->rab$w_rfa[0] = block & 0xffff;
-    rab->rab$w_rfa[1] = block >> 16;
-    rab->rab$w_rfa[2] = offset;
+    eofblk = VMSSWAP(recattr.fat$l_efblk);
+    if (block > eofblk || (block == eofblk &&
+			   offset >= VMSWORD(recattr.fat$w_ffbyte))) return RMS$_EOF;
+  }
+  buffer=vmalloc(512);
+  sts = exe_qiow(0,getchan(ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_vcb),IO$_READVBLK,&iosb,0,0,
+		 buffer,512,block,0,0,0);
+  sts = iosb.iosb$w_status;
+  blocks=1;
+  if ((sts & 1) == 0) {
+    if (sts == SS$_ENDOFFILE) sts = RMS$_EOF;
     return sts;
+  }
+
+  if (rfm == FAB$C_VAR || rfm == FAB$C_VFC) {
+    vmsword *lenptr = (vmsword *) (buffer + offset);
+    reclen = VMSWORD(*lenptr);
+    offset += 2;
+    if (reclen > rab->rab$w_usz) {
+      sts = deaccesschunk(0,0,0);
+      return RMS$_RTB;
+    } 
+  }
+
+  cpylen = 0;
+  while (1) {
+    int dellen = 0;
+    int seglen = blocks * 512 - offset;
+    if (delim) {
+      if (delim >= 3) {
+	char *ptr = buffer + offset;
+	if (dellen == 1 && *ptr != '\n') {
+	  if (cpylen >= reclen) {
+	    seglen = 0;
+	    sts = RMS$_RTB;
+	  } else {
+	    *recbuff++ = '\r';
+	    cpylen++;
+	  }
+	}
+	while (seglen-- > 0) {
+	  char ch = *ptr++;
+	  if (ch == '\n' || ch == '\f' || ch == '\v') {
+	    if (ch == '\n') {
+	      dellen++;
+	    } else {
+	      dellen = 0;
+	    }
+	    delim = 99;
+	    break; 
+	  }
+	  dellen = 0;
+	  if (ch == '\r') dellen = 1;
+	}
+	seglen = ptr - (buffer + offset) - dellen;;
+      } else {
+	char *ptr = buffer + offset;
+	char term = '\r';
+	if (delim == 1) term = '\n';
+	while (seglen-- > 0) {
+	  if (*ptr++ == term) {
+	    dellen = 1;
+	    delim = 99;
+	    break;
+	  }
+	}
+	seglen = ptr - (buffer + offset) - dellen;;
+      }
+    } else {
+      if (seglen > reclen - cpylen) seglen = reclen - cpylen;
+      if (rfm == FAB$C_VFC && cpylen < rab->rab$l_fab->fab$b_fsz) {
+	unsigned fsz = rab->rab$l_fab->fab$b_fsz - cpylen;
+	if (fsz > seglen) fsz = seglen;
+	if (rab->rab$l_rhb) memcpy(rab->rab$l_rhb + cpylen,buffer + offset,fsz);
+	cpylen += fsz;
+	offset += fsz;
+	seglen -= fsz;
+      }
+    }
+    if (seglen) {
+      if (cpylen + seglen > reclen) {
+	seglen = reclen - cpylen;
+	sts = RMS$_RTB;
+      }
+      memcpy(recbuff,buffer + offset,seglen);
+      recbuff += seglen;
+      cpylen += seglen;
+    }
+    offset += seglen + dellen;
+    if ((offset & 1) && (rfm == FAB$C_VAR || rfm == FAB$C_VFC)) offset++;
+    deaccesschunk(0,0,1);
+    if ((sts & 1) == 0) return sts;
+    block += offset / 512;
+    offset %= 512;
+    if ((delim == 0 && cpylen >= reclen) || delim == 99) {
+      break;
+    } else {
+      sts = exe_qiow(0,getchan(ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_vcb),IO$_READVBLK,&iosb,0,0,
+		     buffer,512,block,0,0,0);
+      sts = iosb.iosb$w_status;
+      blocks=1;
+      if ((sts & 1) == 0) {
+	if (sts == SS$_ENDOFFILE) sts = RMS$_EOF;
+	return sts;
+      }
+      offset = 0;
+    }
+  }
+  if (rfm == FAB$C_VFC) cpylen -= rab->rab$l_fab->fab$b_fsz;
+  rab->rab$w_rsz = cpylen;
+
+  rab->rab$w_rfa[0] = block & 0xffff;
+  rab->rab$w_rfa[1] = block >> 16;
+  rab->rab$w_rfa[2] = offset;
+  return sts;
 }
 
 
@@ -936,159 +936,159 @@ unsigned exe$get(struct _rabdef *rab)
 unsigned exe$put(struct _rabdef *rab)
 {
   struct _iosb iosb={0};
-    char *buffer,*recbuff;
+  char *buffer,*recbuff;
   struct dsc$descriptor fibdsc;
   struct _atrdef atr[2];
   struct _fatdef recattr;
-    unsigned block=0,blocks,offset;
-    unsigned cpylen,reclen;
-    unsigned delim,rfm,sts;
+  unsigned block=0,blocks,offset;
+  unsigned cpylen,reclen;
+  unsigned delim,rfm,sts;
 #if 0
-    struct _fcb *fcb = ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fcb;
-    struct _fh2 * head;
-    gethead(fcb,&head);
+  struct _fcb *fcb = ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fcb;
+  struct _fh2 * head;
+  gethead(fcb,&head);
 #endif
-    reclen = rab->rab$w_rsz;
-    recbuff = rab->rab$l_rbf;
-    delim = 0;
-    switch (rfm = rab->rab$l_fab->fab$b_rfm) {
-        case FAB$C_STMLF:
-            if (reclen < 1) {
-                delim = 1;
-	    } else {
-	        if (recbuff[reclen] != '\n') delim = 1;
-            }
-	    break;
-        case FAB$C_STMCR:
-            if (reclen < 1) {
-                delim = 2;
-	    } else {
-	        if (recbuff[reclen] != '\r') delim = 2;
-            }
-	    break;
-        case FAB$C_STM:
-            if (reclen < 2) {
-                delim = 3;
-	    } else {
-	        if (recbuff[reclen-1] != '\r' || recbuff[reclen] != '\n') delim = 3;
-            }
-	    break;
-        case FAB$C_VFC:
-            reclen += rab->rab$l_fab->fab$b_fsz;
-            break;
-        case FAB$C_FIX:
-            if (reclen != rab->rab$l_fab->fab$w_mrs) return RMS$_RSZ;
-            break;
+  reclen = rab->rab$w_rsz;
+  recbuff = rab->rab$l_rbf;
+  delim = 0;
+  switch (rfm = rab->rab$l_fab->fab$b_rfm) {
+  case FAB$C_STMLF:
+    if (reclen < 1) {
+      delim = 1;
+    } else {
+      if (recbuff[reclen] != '\n') delim = 1;
     }
+    break;
+  case FAB$C_STMCR:
+    if (reclen < 1) {
+      delim = 2;
+    } else {
+      if (recbuff[reclen] != '\r') delim = 2;
+    }
+    break;
+  case FAB$C_STM:
+    if (reclen < 2) {
+      delim = 3;
+    } else {
+      if (recbuff[reclen-1] != '\r' || recbuff[reclen] != '\n') delim = 3;
+    }
+    break;
+  case FAB$C_VFC:
+    reclen += rab->rab$l_fab->fab$b_fsz;
+    break;
+  case FAB$C_FIX:
+    if (reclen != rab->rab$l_fab->fab$w_mrs) return RMS$_RSZ;
+    break;
+  }
 
-    atr[0].atr$w_type=ATR$C_RECATTR;
-    atr[0].atr$w_size=ATR$S_RECATTR;
-    atr[0].atr$l_addr=&recattr;
-    atr[1].atr$w_type=0;
+  atr[0].atr$w_type=ATR$C_RECATTR;
+  atr[0].atr$w_size=ATR$S_RECATTR;
+  atr[0].atr$l_addr=&recattr;
+  atr[1].atr$w_type=0;
 
-    fibdsc.dsc$w_length=sizeof(struct _fibdef);
-    fibdsc.dsc$a_pointer=&ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fib;
-    sts = exe_qiow(0,getchan(getvcb()),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
-		   &fibdsc,0,0,0,atr,0);
-    sts = iosb.iosb$w_status;
+  fibdsc.dsc$w_length=sizeof(struct _fibdef);
+  fibdsc.dsc$a_pointer=&ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fib;
+  sts = exe_qiow(0,getchan(getvcb()),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
+		 &fibdsc,0,0,0,atr,0);
+  sts = iosb.iosb$w_status;
 
-    block = VMSSWAP(recattr.fat$l_efblk);
-    offset = VMSWORD(recattr.fat$w_ffbyte);
+  block = VMSSWAP(recattr.fat$l_efblk);
+  offset = VMSWORD(recattr.fat$w_ffbyte);
 
 #if 0
-    offset = rab->rab$w_rfa[2] % 512;
-    block = (rab->rab$w_rfa[1] << 16) + rab->rab$w_rfa[0];
-    if (block == 0) block = 1;
+  offset = rab->rab$w_rfa[2] % 512;
+  block = (rab->rab$w_rfa[1] << 16) + rab->rab$w_rfa[0];
+  if (block == 0) block = 1;
 #endif
 
-    buffer=recbuff;
-    sts = exe_qiow(0,getchan(getvcb()),IO$_WRITEVBLK,&iosb,0,0,
-		   buffer,512,block,0,0,0);
-    sts = iosb.iosb$w_status;
-    blocks=1;
-    if ((sts & 1) == 0) return sts;
+  buffer=recbuff;
+  sts = exe_qiow(0,getchan(getvcb()),IO$_WRITEVBLK,&iosb,0,0,
+		 buffer,512,block,0,0,0);
+  sts = iosb.iosb$w_status;
+  blocks=1;
+  if ((sts & 1) == 0) return sts;
 
-    if (rfm == FAB$C_VAR || rfm == FAB$C_VFC) {
-        vmsword *lenptr = (vmsword *) (buffer + offset);
-        *lenptr = VMSWORD(reclen);
-        offset += 2;
+  if (rfm == FAB$C_VAR || rfm == FAB$C_VFC) {
+    vmsword *lenptr = (vmsword *) (buffer + offset);
+    *lenptr = VMSWORD(reclen);
+    offset += 2;
+  }
+
+  cpylen = 0;
+  while (1) {
+    int seglen = blocks * 512 - offset;
+    if (seglen > reclen - cpylen) seglen = reclen - cpylen;
+    if (rfm == FAB$C_VFC && cpylen < rab->rab$l_fab->fab$b_fsz) {
+      unsigned fsz = rab->rab$l_fab->fab$b_fsz - cpylen;
+      if (fsz > seglen) fsz = seglen;
+      if (rab->rab$l_rhb) {
+	memcpy(buffer + offset,rab->rab$l_rhb + cpylen,fsz);
+      } else {
+	memset(buffer + offset,0,fsz);
+      }
+      cpylen += fsz;
+      offset += fsz;
+      seglen -= fsz;
     }
-
-    cpylen = 0;
-    while (1) {
-        int seglen = blocks * 512 - offset;
-        if (seglen > reclen - cpylen) seglen = reclen - cpylen;
-        if (rfm == FAB$C_VFC && cpylen < rab->rab$l_fab->fab$b_fsz) {
-            unsigned fsz = rab->rab$l_fab->fab$b_fsz - cpylen;
-            if (fsz > seglen) fsz = seglen;
-            if (rab->rab$l_rhb) {
-                memcpy(buffer + offset,rab->rab$l_rhb + cpylen,fsz);
-            } else {
-                memset(buffer + offset,0,fsz);
-	    }
-            cpylen += fsz;
-            offset += fsz;
-            seglen -= fsz;
-        }
-        if (seglen) {
-	    memcpy(buffer + offset,recbuff,seglen);
-            recbuff += seglen;
-            cpylen += seglen;
-            offset += seglen;
-        }
-	if (delim && offset < blocks * 512) {
-            offset++;
-            switch (delim) {
-                case 1:
- 		    *buffer = '\n';
-		    delim = 0;
-		    break;	
-                case 2:
-		    *buffer = '\r';
-		    delim = 0;
-		    break;	
-                case 3:
-		    *buffer = '\r';
-		    if (offset < blocks * 512) {
-                        offset++;
-		        *buffer = '\n';
-   		        delim = 0;
-	            } else {
-		        delim = 2;
-		    }
-		    break;	
-            }
-        }
-        sts = deaccesschunk(block,blocks,1);
-        if ((sts & 1) == 0) return sts;
-        block += blocks;
-        if (cpylen >= reclen && delim == 0) {
-	    break;
+    if (seglen) {
+      memcpy(buffer + offset,recbuff,seglen);
+      recbuff += seglen;
+      cpylen += seglen;
+      offset += seglen;
+    }
+    if (delim && offset < blocks * 512) {
+      offset++;
+      switch (delim) {
+      case 1:
+	*buffer = '\n';
+	delim = 0;
+	break;	
+      case 2:
+	*buffer = '\r';
+	delim = 0;
+	break;	
+      case 3:
+	*buffer = '\r';
+	if (offset < blocks * 512) {
+	  offset++;
+	  *buffer = '\n';
+	  delim = 0;
 	} else {
-	    sts = exe_qiow(0,getchan(getvcb()),IO$_WRITEVBLK,&iosb,0,0,
-			   buffer,512,block,0,0,0);
-	    sts = iosb.iosb$w_status;
-	    blocks=1;
-            if ((sts & 1) == 0) return sts;
-            offset = 0;
-        }
+	  delim = 2;
+	}
+	break;	
+      }
     }
-    if ((offset & 1) && (rfm == FAB$C_VAR || rfm == FAB$C_VFC)) offset++;
-    block += offset / 512;
-    offset %= 512;
+    sts = deaccesschunk(block,blocks,1);
+    if ((sts & 1) == 0) return sts;
+    block += blocks;
+    if (cpylen >= reclen && delim == 0) {
+      break;
+    } else {
+      sts = exe_qiow(0,getchan(getvcb()),IO$_WRITEVBLK,&iosb,0,0,
+		     buffer,512,block,0,0,0);
+      sts = iosb.iosb$w_status;
+      blocks=1;
+      if ((sts & 1) == 0) return sts;
+      offset = 0;
+    }
+  }
+  if ((offset & 1) && (rfm == FAB$C_VAR || rfm == FAB$C_VFC)) offset++;
+  block += offset / 512;
+  offset %= 512;
 
-    recattr.fat$l_efblk = VMSSWAP(block);
-    recattr.fat$w_ffbyte = VMSWORD(offset);
+  recattr.fat$l_efblk = VMSSWAP(block);
+  recattr.fat$w_ffbyte = VMSWORD(offset);
 
-    sts = exe_qiow(0,getchan(getvcb()),IO$_MODIFY,&iosb,0,0,
-		   &fibdsc,0,0,0,atr,0);
+  sts = exe_qiow(0,getchan(getvcb()),IO$_MODIFY,&iosb,0,0,
+		 &fibdsc,0,0,0,atr,0);
 
-    sts = iosb.iosb$w_status;
+  sts = iosb.iosb$w_status;
 
-    rab->rab$w_rfa[0] = block & 0xffff;
-    rab->rab$w_rfa[1] = block >> 16;
-    rab->rab$w_rfa[2] = offset;
-    return sts;
+  rab->rab$w_rfa[0] = block & 0xffff;
+  rab->rab$w_rfa[1] = block >> 16;
+  rab->rab$w_rfa[2] = offset;
+  return sts;
 }
 
 /* display to fill fab & xabs with info from the file header... */

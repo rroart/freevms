@@ -482,6 +482,7 @@ unsigned delete_ent(struct _fcb * fcb,unsigned curblk,
     {
         unsigned retsts = deaccesschunk(curblk,1,1);
         if (sts & 1) sts = retsts;
+	writechunk(fcb, curblk, buffer);
         return sts;
     }
 }
