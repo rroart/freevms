@@ -2302,6 +2302,10 @@ struct _fdt fdt_du = {
 void  du_startio (struct _irp * i, struct _ucb * u) { 
   if (u->ucb$q_devchar2&DEV$M_CDP) {
     /* not local? */
+    struct _cdrp * c;
+    c=(struct _cdrp *) i->irp$l_fqfl;
+    c->cdrp$l_cdt=u->ucb$l_cdt;
+    
   } else {
     /* local */
     /* error if it gets here, got no real mscp */

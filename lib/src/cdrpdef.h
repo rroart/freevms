@@ -1,7 +1,7 @@
 #ifndef cdrpdef_h
 #define cdrpdef_h
 
-#include <diobmdef.h>		
+//#include "../../freevms/lib/src/diobmdef.h"
 
 #define CDRP$M_WLE_REUSE 0x1
 #define CDRP$M_WLE_SUPWL 0x2
@@ -119,7 +119,7 @@ struct _cdrp {
       void *cdrp$l_rbufh_ad;
       unsigned int cdrp$l_rboff;
       unsigned int cdrp$l_xct_len;
-    } blockxfer;
+    };
    struct  {
       unsigned long something;
       char cdrp$t_lbufhndl [12];
@@ -127,8 +127,8 @@ struct _cdrp {
       unsigned int cdrp$l_dutuflags;
       unsigned short int cdrp$w_dutucntr;
       unsigned short int cdrp$w_endmsgsiz;
-   } classdrv;
-  } aunion; 
+   };
+  }; 
 };
  
 #define CDRP$S_CDRPDEF 480

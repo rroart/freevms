@@ -1,6 +1,8 @@
 #ifndef irpdef_h
 #define irpdef_h
 
+#include"../../freevms/lib/src/cdrpdef.h"
+
 //#include "../../freevms/lib/src/diobmdef.h"
 
 #define	IRP$M_WLE_REUSE	0x1
@@ -155,7 +157,33 @@ unsigned long irp$l_seqnum;
 unsigned long irp$l_extend;
 unsigned long irp$l_arb;
 unsigned long irp$l_keydesc;
-  /* copy from cdrp to this area */
+  /* copy from cdrp to this area ?*/
+  struct _cdrp irp_cdrp;
 };
+
+#define irp$l_fqfl irp_cdrp.cdrp$l_fqfl
+#define irp$l_fqbl irp_cdrp.cdrp$l_fqbl
+#define irp$w_cdrpsize irp_cdrp.cdrp$w_cdrpsize
+#define irp$b_cd_type irp_cdrp.cdrp$b_cd_type
+#define irp$b_flck irp_cdrp.cdrp$b_flck
+#define irp$l_fpc irp_cdrp.cdrp$l_fpc
+#define irp$q_fr3 irp_cdrp.cdrp$q_fr3
+#define irp$q_fr4 irp_cdrp.cdrp$q_fr4
+#define irp$l_savd_rtn irp_cdrp.cdrp$l_savd_rtn
+#define irp$l_msg_buf irp_cdrp.cdrp$l_msg_buf
+#define irp$l_rspid irp_cdrp.cdrp$l_rspid
+#define irp$l_cdt irp_cdrp.cdrp$l_cdt
+#define irp$l_rwcptr irp_cdrp.cdrp$l_rwcptr
+#define irp$l_lbufh_ad irp_cdrp.cdrp$l_lbufh_ad
+#define irp$l_lboff irp_cdrp.cdrp$l_lboff
+#define irp$l_rbufh_ad irp_cdrp.cdrp$l_rbufh_ad
+#define irp$l_rboff irp_cdrp.cdrp$l_rboff
+#define irp$l_xct_len irp_cdrp.cdrp$l_xct_len
+#define irp$l_something irp_cdrp.cdrp$l_something
+#define irp$t_lbufhndl irp_cdrp.cdrp$t_lbufhndl
+#define irp$l_ubarsrce irp_cdrp.cdrp$l_ubarsrce
+#define irp$l_dutuflags irp_cdrp.cdrp$l_dutuflags
+#define irp$w_dutucntr irp_cdrp.cdrp$w_dutucntr
+#define irp$w_endmsgsiz irp_cdrp.cdrp$w_endmsgsiz
 
 #endif
