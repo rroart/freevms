@@ -1653,6 +1653,7 @@ struct _phd init_phd;
 
 void __init init_idle(void)
 {
+  struct _pcb * cur = smp$gl_cpu_data[0]->cpu$l_curpcb;
   //	if (current != &init_task && task_on_runqueue(current)) {
   //		printk("UGH! (%d:%d) was on the runqueue, removing.\n",
   //			smp_processor_id(), current->pid);
@@ -1660,14 +1661,14 @@ void __init init_idle(void)
   //	}
 	//sched_data->curr = current;
 	//	sched_data->last_schedule = get_cycles();
-	clear_bit(current->pcb$l_cpu_id, &wait_init_idle);
-	current->psl=0;
-	current->pslindex=0;
-	current->pcb$b_asten=15;
-	current->phd$b_astlvl=4;
-	current->pr_astlvl=4;
-	current->pcb$l_phd=&init_phd;
-	bzero(current->pcb$l_phd,sizeof(struct _phd));
+	clear_bit(cur->pcb$l_cpu_id, &wait_init_idle);
+	cur->psl=0;
+	cur->pslindex=0;
+	cur->pcb$b_asten=15;
+	cur->phd$b_astlvl=4;
+	cur->pr_astlvl=4;
+	cur->pcb$l_phd=&init_phd;
+	bzero(cur->pcb$l_phd,sizeof(struct _phd));
 	// current->pcb$l_phd->phd$q_ptbr=current->mm->pgd; // same wait
 	printk("done init_idle\n");
 	done_init_idle=1;
