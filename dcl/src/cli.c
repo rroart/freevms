@@ -5727,7 +5727,7 @@ static unsigned long extcommand (unsigned long h_input, unsigned long h_output, 
 
   /* If it's a RUN command, it is followed by the image filename then args for the image */
 
-  if (strcasecmp (argv[0], "run") == 0 || strcasecmp (argv[0], "mcr") == 0 || dummy) {
+  if (strcasecmp (argv[0], "run") == 0 || strcasecmp (argv[0], "mcr") == 0 || strcasecmp (argv[0], "creprc") == 0 || dummy) {
     if (dummy) {
       imagep = argv[0];
     } else {
@@ -5843,6 +5843,7 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
   struct _va_range inadr;
   void (*func)(void);
   int len = strlen(argv[0]);
+  if (strcasecmp (argv[-1], "creprc") == 0) goto do_creprc;
   if (strncmp(".exe",argv[0]+len-4,4)) goto do_fork;
 
   aname.dsc$w_length=len-4;
@@ -5871,6 +5872,19 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
     execv(image,argv);
   }
 
+  return SS$_NORMAL;
+
+ do_creprc:
+  {
+    unsigned int pidadr;
+    struct dsc$descriptor image,prcnam;
+    image.dsc$w_length=strlen(argv[0]);
+    image.dsc$a_pointer=argv[0];
+    prcnam.dsc$a_pointer=basename(argv[0]);
+    prcnam.dsc$w_length=strlen(prcnam.dsc$a_pointer);
+    sys$creprc(&pidadr, &image, stdin, stdout, stderr, 0, 0, &prcnam, 27 , 0, 0, 0);
+
+  }
   return SS$_NORMAL;
 
   sts = setup_runopts (h_error, runopts);
