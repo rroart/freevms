@@ -291,9 +291,88 @@ extern struct user_struct root_user;
 struct task_struct {
   struct _pcb *pcb$l_sqfl;
   struct _pcb *pcb$l_sqbl;            
+  unsigned short pcb$w_size;
+  unsigned char pcb$b_type;
+  unsigned char pcb$b_wefc;
+  unsigned long pcb$l_phypcb;
+  unsigned long pcb$l_astqfl;
+  unsigned long pcb$l_astqbl;
+  unsigned char pcb$b_astact;
+  unsigned char pcb$b_asten;
+  unsigned short pcb$w_state;
+  unsigned char pcb$b_pri;             
+  unsigned char pcb$b_prib;
+  unsigned char pcb$b_reserved_b1;
+  unsigned char pcb$b_affinity_skip;
+  unsigned long pcb$l_owner;
+  unsigned long pcb$l_sts;
+  unsigned long pcb$l_sts2;
+  unsigned long pcb$l_wtime;         
+  unsigned long pcb$l_onqtime;         
+  unsigned long pcb$l_waitime;         
+  unsigned short pcb$w_astcnt;          
+  unsigned short pcb$w_biocnt;          
+  unsigned short pcb$w_biolm;           
+  short pcb$w_diocnt;                   
+  short pcb$w_diolm;                    
+  unsigned short pcb$w_prccnt;          
+  char pcb$t_terminal [8];            
+  unsigned long pcb$l_efwm;            
+  unsigned long pcb$l_efcs;            
+  unsigned long pcb$l_efcu;            
+  unsigned long pcb$l_efc2p;            
+  unsigned short pcb$w_pgflchar;
+  unsigned char pcb$b_pgflindex;
+  unsigned char pcb$reserved1;
+  unsigned long pcb$l_efc3p;            
+  unsigned long pcb$l_pid;             
+  unsigned long pcb$l_epid;             
+  unsigned long pcb$l_eowner;
+
+  unsigned long phd$l_cputim;
+  signed short phd$w_quant; /* really belongs in phd */
+  unsigned short phd$w_prclm; /* ditto */
+
+  unsigned short pcb$w_aptcnt;
+  unsigned short pcb$w_mtxcnt;
+  unsigned long pcb$l_gpgcnt;
+  unsigned long pcb$l_ppg;
+  unsigned long pcb$l_jib;
+  unsigned long pcb$l_wsswp;
+  unsigned long pcb$l_swapsize;
+
+  unsigned long pcb$l_priv;
+  unsigned long pcb$l_arb;
+  unsigned char pcb$t_res1[48];
+unsigned long pcb$l_uic;
+  unsigned char pcb$t_res2[60];
+unsigned long pcb$l_orb;
+  unsigned short pcb$w_res3;
+  unsigned short pcb$w_tmbu;
+unsigned long pcb$l_lockqfl;
+unsigned long pcb$l_lockqbl;
+unsigned long pcb$l_dlckpri;
+unsigned long pcb$l_ipast;
+unsigned long pcb$l_defprot;
+unsigned long pcb$l_pmb;
+unsigned long pcb$l_affinity;
+unsigned long pcb$l_sched_spare;
+unsigned long pcb$l_capability;
+unsigned long pcb$l_cpu_id;
+unsigned long pcb$l_cputim;
+  unsigned char pcb$t_lname[16];
+unsigned long pcb$l_prcpdb;
+unsigned long pcb$l_pixhist;
+unsigned long pcb$l_ns_reserved_q1;
+unsigned long pcb$l_affinity_callback;
+unsigned long pcb$l_permanent_capability;
+unsigned long pcb$l_permanent_cpu_affinity;
+unsigned long pcb$l_cwpssrv_queue;
+unsigned long pcb$l_current_affinity;
+unsigned long pcb$l_capability_seq;
 	/*
 	 * offsets of these are hardcoded elsewhere - touch with care
-	 * meaning entry.S and getuser.S -roar
+	 * meaning entry.S and getuser.S -roar this is offset 368
 	 */
 	volatile long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
 	unsigned long flags;	/* per process flags, defined below */
@@ -377,18 +456,6 @@ struct task_struct {
 /* mm fault and swap info: this can arguably be seen as either mm-specific or thread-specific */
 	unsigned long min_flt, maj_flt, nswap, cmin_flt, cmaj_flt, cnswap;
 	int swappable:1;
-  unsigned short pcb$w_size;
-  unsigned char pcb$b_type;
-  unsigned short pcb$w_state;
-  unsigned char pcb$b_pri;             
-  unsigned char pcb$b_prib;            
-  unsigned char pcb$b_prisav;          
-  unsigned char pcb$b_pribsav;         
-  unsigned char pcb$b_authpri;         
-  signed short phd$w_quant; /* really belongs in phd */
-  unsigned long pcb$l_cpu_id;
-  unsigned long pcb$l_pixhist;
-
 /* process credentials */
 	uid_t uid,euid,suid,fsuid;
 	gid_t gid,egid,sgid,fsgid;

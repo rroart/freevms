@@ -920,6 +920,7 @@ cobalt_init(void)
 #endif
 
 static unsigned char cpu$b_ipl = 1;
+static unsigned char cpu$b_astlvl = 0;
 
 struct {
   unsigned char interrupt;

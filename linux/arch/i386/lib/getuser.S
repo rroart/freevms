@@ -21,7 +21,7 @@
  * as they get called from within inline assembly.
  */
 
-addr_limit = 20
+addr_limit = 380 /* was 12 */
 
 .text
 .align 4
