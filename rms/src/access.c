@@ -388,6 +388,10 @@ void f11b_read_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
 	memcpy(atrp->atr$l_addr,&head->fh2$w_fileprot,atrp->atr$w_size);
 	break;
 
+    case ATR$C_UCHAR:
+	memcpy(atrp->atr$l_addr,&head->fh2$l_filechar,atrp->atr$w_size);
+	break;
+
     default:
       printk("atr %x not supported\n",atrp->atr$w_type);
       break;
@@ -464,6 +468,10 @@ void f11b_write_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
 
     case ATR$C_FPRO:
 	memcpy(&head->fh2$w_fileprot,atrp->atr$l_addr,atrp->atr$w_size);
+	break;
+
+    case ATR$C_UCHAR:
+	memcpy(&head->fh2$l_filechar,atrp->atr$l_addr,atrp->atr$w_size);
 	break;
 
     default:
