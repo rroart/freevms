@@ -6,8 +6,8 @@ clean:
 install: all
 	install -d ../rootum/vms"$$"common/syshlp/examples
 	install -d ../rooti386/vms"$$"common/syshlp/examples
-	install *.com net net2 INET"$$"CONFIG um/* ../rootum/vms"$$"common/syshlp/examples
-	install *.com net net2 INET"$$"CONFIG i386/* ../rooti386/vms"$$"common/syshlp/examples
+#	install *.com net net2 INET"$$"CONFIG um/* ../rootum/vms"$$"common/syshlp/examples
+#	install *.com net net2 INET"$$"CONFIG i386/* ../rooti386/vms"$$"common/syshlp/examples
 
 alli386: i386/timer i386/ast i386/time i386/eftim i386/schdwk i386/forcex i386/ef i386/wake i386/synch i386/enq i386/enq2 i386/lnm i386/lnm2 i386/qio1 i386/qio2 i386/cef i386/cefw i386/mem i386/memf i386/getjpi i386/crec i386/getdvi i386/inout i386/mbx i386/creprc i386/hi i386/hi.exe
 
