@@ -2351,11 +2351,6 @@ struct _ddt ddt_du = {
   ddt$l_aux_routine: du_aux_routine
 };
 
-/* include a buffered 4th param? */
-inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn) {
-  f->fdt$ps_func_rtn[mask]=fn;
-}
-
 static struct _fdt du_fdt;
 
 void acp_std$readblk();

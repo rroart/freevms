@@ -131,7 +131,7 @@ struct _ddt ddt_null = {
 };
 
 /* include a buffered 4th param? */
-extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn);
+extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long);
 
 //static struct _fdt null_fdt;
 
@@ -200,9 +200,9 @@ void nl_init(void) {
 
   /* for the fdt init part */
   /* a lot of these? */
-  ini_fdt_act(&fdt_null,IO$_READLBLK,nl_read);
-  ini_fdt_act(&fdt_null,IO$_READPBLK,nl_read);
-  ini_fdt_act(&fdt_null,IO$_READVBLK,nl_read);
+  ini_fdt_act(&fdt_null,IO$_READLBLK,nl_read,1);
+  ini_fdt_act(&fdt_null,IO$_READPBLK,nl_read,1);
+  ini_fdt_act(&fdt_null,IO$_READVBLK,nl_read,1);
 }
 
 char nulldriverstring[]="NLDRIVER";
@@ -219,3 +219,112 @@ insertdevlist(struct _ddb *d) {
     d->ddb$ps_link=ioc$gl_devlist;
     ioc$gl_devlist=d;
 }
+
+/* just putting this here until I find out where it belong */
+
+inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type) {
+  f->fdt$ps_func_rtn[mask]=fn;
+  if (type)
+    f->fdt$q_buffered|=mask;
+}
+
+inline void ini_dpt_name(struct _dpt * d, char * n) {
+  bcopy(n,d->dpt$t_name,strlen(n));
+}
+
+inline void ini_dpt_adapt(struct _dpt * d, unsigned long type) {
+  d->dpt$b_adptype=type;
+}
+
+inline void ini_dpt_flags(struct _dpt * d, unsigned long type) {
+  d->dpt$l_flags=type;
+}
+
+
+inline void ini_dpt_maxunits(struct _dpt * d, unsigned long type) {
+  d->dpt$w_maxunits=type;
+}
+
+
+inline void ini_dpt_ucbsize(struct _dpt * d, unsigned long type) {
+  d->dpt$w_ucbsize=type;
+}
+
+
+inline void ini_dpt_struc_init(struct _dpt * d, unsigned long type) {
+  d->dpt$ps_init_pd=type;
+}
+
+
+inline void ini_dpt_struc_reinit(struct _dpt * d, unsigned long type) {
+  d->dpt$ps_reinit_pd=type;
+}
+
+
+inline void ini_dpt_ucb_crams(struct _dpt * d, unsigned long type) {
+  //  d->dpt$iw_ucb_crams=type; not now
+}
+
+
+inline void ini_dpt_end(struct _dpt * d) {
+  //  d->dpt$_=type; ??
+}
+
+
+
+
+inline void ini_ddt_ctrlinit(struct _ddt * d, unsigned long type) {
+  d->ddt$ps_ctrlinit_2=type;
+}
+
+inline void ini_ddt_unitinit(struct _ddt * d, unsigned long type) {
+  d->ddt$l_unitinit=type;
+}
+
+
+inline void ini_ddt_start(struct _ddt * d, unsigned long type) {
+  d->ddt$ps_start_2=type;
+}
+
+
+inline void ini_ddt_kp_startio(struct _ddt * d, unsigned long type) {
+  d->ddt$ps_kp_startio=type;
+}
+
+
+inline void ini_ddt_kp_stack_size(struct _ddt * d, unsigned long type) {
+  d->ddt$is_stack_bcnt=type;
+}
+
+
+inline void ini_ddt_kp_reg_mask(struct _ddt * d, unsigned long type) {
+  d->ddt$is_reg_mask=type;
+}
+
+
+inline void ini_ddt_cancel(struct _ddt * d, unsigned long type) {
+  d->ddt$ps_cancel_2=type;
+}
+
+
+inline void ini_ddt_regdmp(struct _ddt * d, unsigned long type) {
+  d->ddt$ps_regdump_2=type;
+}
+
+
+inline void ini_ddt_erlgbf(struct _ddt * d, unsigned long type) {
+  d->ddt$l_errorbuf=type;
+}
+
+
+inline void ini_ddt_qsrv_helper(struct _ddt * d, unsigned long type) {
+  d->ddt$ps_qsrv_helper=type;
+}
+
+
+inline void ini_ddt_end(struct _ddt * d) {
+  // d->ddt$=type; ??
+}
+
+
+
