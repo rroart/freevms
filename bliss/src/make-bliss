@@ -1,0 +1,13 @@
+#!/bin/sh
+CFLAGS=
+CPPFLAGS=
+CC=
+rm -rf gcc-3.4.2
+bunzip2 -dc gcc-3.4.2.tar.bz2|tar xpf -
+ln -s gcc-3.4.2 bliss
+tar xzf bliss-0_004.tgz
+mkdir build
+cd build
+../gcc-3.4.2/configure --enable-languages=bliss --with-included-gettext
+make bootstrap
+cd ..

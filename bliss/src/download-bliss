@@ -1,0 +1,3 @@
+#!/bin/sh
+ncftpget ftp://ftp.nvg.ntnu.no/pub/vms/bliss/bliss-0_004.tgz
+ncftpget ftp://ftp.gnu.org/pub/gnu/gcc/gcc-3.4.2/gcc-3.4.2.tar.bz2
