@@ -31,6 +31,9 @@ int exe$clrast(void) {
   printk("this does not work yet (how to implement?), and is strong discouraged in real VMS too\n");
 }
 
+extern /*asmlinkage*/ int exe$qio(unsigned int efn, unsigned /*short*/ int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
+extern /*asmlinkage*/ int exe$qiow(unsigned int efn, unsigned /*short*/ int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
+
 #ifdef __i386__
 int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6) {
   struct struct_qio s;
@@ -93,7 +96,7 @@ int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct
   //  return ({     unsigned int resultvar; asm volatile (  "bpushl .L__X'%k2, %k2\n\t"     "bmovl .L__X'%k2, %k2\n\t"      "movl %1, %%eax\n\t"    "int $0x80\n\t" "bpopl .L__X'%k2, %k2\n\t"      : "=a" (resultvar)      : "i" (__NR_$qio  ) , "acdSD" (  &s  )  : "memory", "cc");    if (resultvar >= 0xfffff001) {       errno= (-resultvar);    resultvar = 0xffffffff; }       (int) resultvar; }) ;
   //  return INLINE_SYSCALL($qio,1,&s); // did not work?
   pushpsl();
-  sts=exe$qio(&s);
+  sts=exe$qio(efn,chan,func,iosb,astadr,astprm,p1,p2,p3,p4,p5,p6);
   myrei();
   return sts;
 }
@@ -117,7 +120,7 @@ int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct
   //  return ({     unsigned int resultvar; asm volatile (  "bpushl .L__X'%k2, %k2\n\t"     "bmovl .L__X'%k2, %k2\n\t"      "movl %1, %%eax\n\t"    "int $0x80\n\t" "bpopl .L__X'%k2, %k2\n\t"      : "=a" (resultvar)      : "i" (__NR_$qio  ) , "acdSD" (  &s  )  : "memory", "cc");    if (resultvar >= 0xfffff001) {       errno= (-resultvar);    resultvar = 0xffffffff; }       (int) resultvar; }) ;
   //  return INLINE_SYSCALL($qio,1,&s); // did not work?
   pushpsl();
-  sts=exe$qiow(&s);
+  sts=exe$qiow(efn,chan,func,iosb,astadr,astprm,p1,p2,p3,p4,p5,p6);
   myrei();
   return sts;
 }

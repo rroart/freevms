@@ -71,10 +71,10 @@ int exe$insioq (struct _irp * i, struct _ucb * u) {
   /* restore ipl */
   /* release fork lock */
   forkunlock(u->ucb$b_flck,savipl);
-  return;
+  return SS$_NORMAL;
 }
 
-asmlinkage int exe_qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
+asmlinkage int exe_qiow_not(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
   struct struct_qio s;
   //printk("in exe_qiow %x %x %x %x %x %x %x %x %x %x %x\n",efn,chan,func,iosb,astadr,astprm,p1,p2,p3,p4);
   s.efn=efn;
@@ -92,51 +92,52 @@ asmlinkage int exe_qiow(unsigned int efn, unsigned short int chan,unsigned int f
   return exe$qiow(&s);
 }
 
-asmlinkage int exe$qiow (struct struct_qio * q) {
+extern int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
+
+asmlinkage int exe$qiow (unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
 
   /* I think this is about it */
 
-  int status=sys$qio(q->efn,q->chan,q->func,q->iosb,q->astadr,q->astprm,q->p1,q->p2,q->p3,q->p4,q->p5,q->p6);
+  int status=sys$qio(efn,chan,func,iosb,astadr,astprm,p1,p2,p3,p4,p5,p6);
   if ((status&1)==0) return status;
-  return exe$synch(q->efn,q->iosb);
+  return exe$synch(efn,iosb);
 
 }
 
 /* put this into a struct */
-asmlinkage int exe$qio (struct struct_qio * q) {
-  int func;
+asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
   unsigned int c, d;
   struct _pcb * p=current;
   struct _irp * i;
-  exe$clref(q->efn);
-  if (q->chan<0 || q->chan>ctl$gl_chindx) return SS$_IVCHAN;
+  exe$clref(efn);
+  if (chan<0 || chan>ctl$gl_chindx) return SS$_IVCHAN;
   /*ccb$l_wind stuff*/
-  func=q->func;
+
   /*spooled?*/
   /*no access check yet*/
   /*check fdt mask*/
   /*check func code*/
   /*check iosb*/
-  if (q->iosb) *((unsigned long long *)q->iosb)=0;
+  if (iosb) *((unsigned long long *)iosb)=0;
   setipl(IPL$_ASTDEL);
   /*check proc quota*/
   i=kmalloc(sizeof(struct _irp),GFP_KERNEL);
   bzero(i,sizeof(struct _irp));
   i->irp$b_type=DYN$C_IRP;
-  i->irp$b_efn=q->efn;
-  i->irp$l_ast=q->astadr;
-  i->irp$l_astprm=q->astprm;
-  i->irp$l_iosb=q->iosb;
-  i->irp$w_chan=q->chan;
-  i->irp$l_func=q->func;
+  i->irp$b_efn=efn;
+  i->irp$l_ast=astadr;
+  i->irp$l_astprm=astprm;
+  i->irp$l_iosb=iosb;
+  i->irp$w_chan=chan;
+  i->irp$l_func=func;
   i->irp$b_pri=p->pcb$b_pri;
-  i->irp$l_qio_p1=q->p1;
-  i->irp$l_qio_p2=q->p2;
-  i->irp$l_qio_p3=q->p3;
-  i->irp$l_qio_p4=q->p4;
-  i->irp$l_qio_p5=q->p5;
-  i->irp$l_qio_p6=q->p6;
-  i->irp$l_ucb=ctl$gl_ccbbase[q->chan].ccb$l_ucb;
+  i->irp$l_qio_p1=p1;
+  i->irp$l_qio_p2=p2;
+  i->irp$l_qio_p3=p3;
+  i->irp$l_qio_p4=p4;
+  i->irp$l_qio_p5=p5;
+  i->irp$l_qio_p6=p6;
+  i->irp$l_ucb=ctl$gl_ccbbase[chan].ccb$l_ucb;
   i->irp$l_pid=current->pcb$l_pid;
   i->irp$l_sts|=IRP$M_BUFIO; /* no DIRIO because of no mmg$svaptechk */
   /* do preprocessing */
@@ -145,11 +146,11 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   //  if (d&func) {
   c=i->irp$v_fcode;
   d=i->irp$v_fmod;
-  return ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[i->irp$v_fcode](i,p,i->irp$l_ucb,&ctl$gl_ccbbase[q->chan]); // a real beauty, isn't it :)
+  return ctl$ga_ccb_table[chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[i->irp$v_fcode](i,p,i->irp$l_ucb,&ctl$gl_ccbbase[chan]); // a real beauty, isn't it :)
       //  }
  earlyerror:
   setipl(0);
-  sch$postef(current->pcb$l_pid,PRI$_NULL,q->efn);
+  sch$postef(current->pcb$l_pid,PRI$_NULL,efn);
   return 0;		   
 }
 
@@ -216,4 +217,11 @@ void exe$qioqe2ppkt (struct _pcb * p, struct _irp * i) {
 }
 #endif
 
+asmlinkage int exe$qiow_wrap(struct struct_qio * s) {
+  return exe$qiow(s->efn,s->chan,s->func,s->iosb,s->astadr,s->astprm,s->p1,s->p2,s->p3,s->p4,s->p5,s->p6);
+}
+
+asmlinkage int exe$qio_wrap(struct struct_qio * s) {
+  return exe$qio(s->efn,s->chan,s->func,s->iosb,s->astadr,s->astprm,s->p1,s->p2,s->p3,s->p4,s->p5,s->p6);
+}
 

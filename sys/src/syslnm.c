@@ -153,7 +153,8 @@ asmlinkage sys_$CRELNT();
   unsigned short int *promsk, void *tabnam, void
   *partab, unsigned char *acmode);*/
 
-asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
+//asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
+asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *reslen, unsigned int *quota, unsigned short *promsk, void *tabnam, void *partab, unsigned char *acmode) {
   int status;
   /*  char * mytabnam;
       int tabnamlen;*/
@@ -165,10 +166,10 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   long * trailer;
   struct struct_rt * RT;
   struct dsc$descriptor_s * mytabnam, * mypartab;
-  if (!(s->partab)) return -1;
-  mypartab=s->partab;
+  if (!(partab)) return -1;
+  mypartab=partab;
   lnmprintf("partab %s\n",mypartab->dsc$a_pointer);
-  if (s->tabnam) mytabnam=s->tabnam;
+  if (tabnam) mytabnam=tabnam;
   else {
     /*    mytabnam="LNM$something";*/
   }
@@ -322,6 +323,10 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
   return status;
 }
 
+asmlinkage int exe$crelnt_wrap  (struct struct_crelnt *s) {
+  return exe$crelnt (s->attr, s->resnam, s->reslen, s->quota, s->promsk, s->tabnam, s->partab, s->acmode);
+}
+
 #ifdef USERLAND
 main(){
   struct item_list_3 i[2];
@@ -377,15 +382,15 @@ main(){
   s=lnmmalloc(sizeof(struct struct_crelnt));
   s->partab=&mypartab;
   s->tabnam=&mytabnam;
-  status=exe$crelnt(s);
+  status=exe$crelnt_wrap(s);
   s=lnmmalloc(sizeof(struct struct_crelnt));
   s->partab=&mypartab;
   s->tabnam=&mytabnam2;
-  status=exe$crelnt(s);
+  status=exe$crelnt_wrap(s);
   s=lnmmalloc(sizeof(struct struct_crelnt));
   s->partab=&mytabnam2;
   s->tabnam=&mytabnam3;
-  status=exe$crelnt(s);
+  status=exe$crelnt_wrap(s);
   i[0].item_code=1;
   i[0].buflen=5;
   i[0].bufaddr="mylog";

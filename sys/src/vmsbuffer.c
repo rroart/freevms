@@ -507,7 +507,7 @@ struct buffer_head * bread(kdev_t dev, int block, int size)
 	 //printk(KERN_INFO "qiow2 %x,%x,%x,%x | ",dev,dev2chan(dev),size,block);
 	 //printk(KERN_INFO "q2 %x,%x|",dev,block);
 
-	 sts = exe_qiow(0,dev2chan(dev),IO$_READPBLK,&iosb,0,0,
+	 sts = exe$qiow(0,dev2chan(dev),IO$_READPBLK,&iosb,0,0,
 			bh -> b_data,size,block,MINOR(dev)&31,0,0);
 
 	 set_bit(BH_Uptodate, &bh->b_state);
@@ -620,7 +620,7 @@ static int __block_write_full_page_not(struct inode *inode, struct page *page, g
 	/* Stage 3: submit the IO */
 	do {
 	  //		submit_bh(WRITE, bh);
-	  sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
+	  sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
 			 bh->b_data,bh->b_size, bh->b_blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 		turns++;
 		bh=arr[turns];
@@ -657,7 +657,7 @@ out:
 			set_bit(BH_Uptodate, &bh->b_state);
 			clear_bit(BH_Dirty, &bh->b_state);
 			//			submit_bh(WRITE, bh);
-			sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
+			sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
 				       bh->b_data,bh->b_size, bh->b_blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 		}
       		turns++;
@@ -706,7 +706,7 @@ static int __block_write_full_page2(struct inode *inode, struct page *page, unsi
 	    if (err)
 	      goto out;
 	  }
-	  sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
+	  sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
 			 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 
 	  turns++;
@@ -772,7 +772,7 @@ static int __block_prepare_write(struct inode *inode, struct page *page,
 	   if (block_end > to || block_start < from)
 	     flush_dcache_page(page);
 	   if ((block_start < from || block_end > to)) {
-	     sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
+	     sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
 			    kaddr+turns*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 	   }
 	}
@@ -814,7 +814,7 @@ static int __block_commit_write(struct inode *inode, struct page *page,
 		if (block_end <= from || block_start >= to) {
 		  partial = 1;
 		} else {
-		  sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
+		  sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
 				 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 		}
 	}
@@ -936,7 +936,7 @@ int block_read_full_page_not(struct page *page, get_block_t *get_block)
 	for (i = 0; i < nr; i++) {
 	  //printk(KERN_INFO "qiow %x,%x,%x,%x |",inode->i_dev,dev2chan(inode->i_dev),blocksize,arr[i]->b_blocknr);
 
-	  sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
+	  sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
 			 arr[i]->b_data,blocksize, arr[i]->b_blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 	  //printk(KERN_INFO "qiow %x %x\n",arr[i]->b_data[0],arr[i]->b_data[1]);
 	}
@@ -1005,7 +1005,7 @@ int block_read_full_page2(struct inode *inode,struct page *page, unsigned long p
 
 	   nr++;
 
-	   sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
+	   sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
 			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 
 	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
@@ -1056,7 +1056,7 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 
 	   nr++;
 
-	   sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
+	   sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
 			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 
 	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
@@ -1468,7 +1468,7 @@ int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsig
 		  type=IO$_READPBLK;
 		else
 		  type=IO$_WRITEPBLK;
-		sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),type,&iosb,0,0,
+		sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),type,&iosb,0,0,
 			       bh.b_data,blocksize, bh.b_blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 		//		blocks[i] = bh.b_blocknr;
 	}

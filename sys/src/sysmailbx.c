@@ -14,8 +14,7 @@
 #include <ipldef.h>
 #include <ccbdef.h>
 
-//int exe$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk, unsigned int acmode, void *lognam,...) {
-asmlinkage int exe$crembx(struct struct_crembx * s) {
+asmlinkage int exe$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk, unsigned int acmode, void *lognam,...) {
   int status;
   struct _ccb * c;
   $DESCRIPTOR(mytabnam,"LNM$SYSTEM_TABLE");
@@ -24,25 +23,25 @@ asmlinkage int exe$crembx(struct struct_crembx * s) {
   /* verify writable chan arg */
   /* ma780 stuff will not be relevant for some time */
   setipl(IPL$_ASTDEL);
-  status=ioc$ffchan(s->chan);
+  status=ioc$ffchan(chan);
   /* no priv check yet */
   /* lock i/o database mutex */
-  if (s->lognam==0) {
+  if (lognam==0) {
     /* assume nonexist and must create */
     
   } else {
     i[0].item_code=1;
     
     i[1].item_code=0;
-    //    status=exe$trnlnm(0,mytabnam,s->lognam,0,i);
+    //    status=exe$trnlnm(0,mytabnam,lognam,0,i);
     
   }
   if (status&0==0) { //does not exist?
-    //    status=exe$crelnm(0,mytabnam,s->lognam,0,i);
+    //    status=exe$crelnm(0,mytabnam,lognam,0,i);
   }
   /* incr ref count */
   // ucb ccb stuff 
-  c=&ctl$gl_ccbbase[*s->chan];
+  c=&ctl$gl_ccbbase[*chan];
   ioc_std$clone_ucb(0 /*mb$ar_ucb0*/,&c->ccb$l_ucb);
   // unlock mutex
   setipl(0);
@@ -51,4 +50,8 @@ asmlinkage int exe$crembx(struct struct_crembx * s) {
 
 int exe$delmbx  (unsigned short int chan)
 {
+}
+
+asmlinkage int exe$crembx_wrap(struct struct_crembx * s) {
+  return exe$crembx(s->prmflg, s->chan, s->maxmsg, s->bufquo, s->promsk, s->acmode, s->lognam);
 }

@@ -230,7 +230,7 @@ extern syscall_handler_t um_stime;
 
 extern syscall_handler_t  exe$testtest           ;
 extern syscall_handler_t  exe$setpri_wrap		 ;
-extern syscall_handler_t  exe$crelnt             ;
+extern syscall_handler_t  exe$crelnt_wrap             ;
 extern syscall_handler_t  exe$setprn             ;
 extern syscall_handler_t  exe$dclast             ;
 extern syscall_handler_t  exe$waitfr             ;
@@ -255,7 +255,7 @@ extern syscall_handler_t  exe$delprc            ;
 extern syscall_handler_t  exe$readef            ;
 extern syscall_handler_t  exe$setef             ;
 extern syscall_handler_t  exe$synch             ;
-extern syscall_handler_t  exe$enq               ;
+extern syscall_handler_t  exe$enq_wrap               ;
 extern syscall_handler_t  exe$deq               ;
 
 extern syscall_handler_t  exe$close  ;
@@ -297,11 +297,11 @@ extern syscall_handler_t  exe$asctim             ;
 extern syscall_handler_t  exe$bintim             ;
 extern syscall_handler_t  exe$assign             ;
 extern syscall_handler_t  exe$dassgn             ;
-extern syscall_handler_t  exe$qio             ;
-extern syscall_handler_t  exe$qiow             ;
-extern syscall_handler_t  exe$getlki ;
-extern syscall_handler_t  exe$getlkiw ;
-extern syscall_handler_t  exe$enqw ;
+extern syscall_handler_t  exe$qio_wrap             ;
+extern syscall_handler_t  exe$qiow_wrap             ;
+extern syscall_handler_t  exe$getlki_wrap ;
+extern syscall_handler_t  exe$getlkiw_wrap ;
+extern syscall_handler_t  exe$enqw_wrap ;
 extern syscall_handler_t  exe$crelnm ;
 extern syscall_handler_t  exe$trnlnm ;
 extern syscall_handler_t  exe$dellnm ;
@@ -310,7 +310,7 @@ extern syscall_handler_t  exe$setast ;
 extern syscall_handler_t  exe$ascefc ;
 extern syscall_handler_t  exe$dacefc ;
 extern syscall_handler_t  exe$dlcefc ;
-extern syscall_handler_t  exe$crembx ;
+extern syscall_handler_t  exe$crembx_wrap ;
 extern syscall_handler_t  exe$delmbx ;
 extern syscall_handler_t  exe$mount ;
 extern syscall_handler_t exe$cretva ;
@@ -597,7 +597,7 @@ syscall_handler_t *sys_call_table[] = {
 
 	[ __NR_$testtest ] = sys_ni_syscall          ,
 	[ __NR_$setpri ] = exe$setpri_wrap		,
-	[ __NR_$crelnt ] = exe$crelnt            ,
+	[ __NR_$crelnt ] = exe$crelnt_wrap            ,
 	[ __NR_$setprn ] = exe$setprn            ,
 	[ __NR_$dclast ] = exe$dclast            ,
 	[ __NR_$waitfr ] = exe$waitfr            ,
@@ -622,7 +622,7 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$readef ] = exe$readef           ,
 	[ __NR_$setef ] = exe$setef            ,
 	[ __NR_$synch ] = exe$synch            ,
-	[ __NR_$enq ] = exe$enq              ,
+	[ __NR_$enq ] = exe$enq_wrap              ,
 	[ __NR_$deq ] = exe$deq              ,
 	[ __NR_$close ] = exe$close,
 	[ __NR_$connect ] = exe$connect,
@@ -662,11 +662,11 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$bintim ] = exe$bintim            ,
 	[ __NR_$assign ] = exe$assign            ,
 	[ __NR_$dassgn ] = exe$dassgn            ,
-	[ __NR_$qio ] = exe$qio            ,
-	[ __NR_$qiow ] = exe$qiow            ,
-	[ __NR_$getlki ] = exe$getlki            ,
-	[ __NR_$getlkiw ] = exe$getlkiw            ,
-	[ __NR_$enqw ] = exe$enqw ,
+	[ __NR_$qio ] = exe$qio_wrap            ,
+	[ __NR_$qiow ] = exe$qiow_wrap            ,
+	[ __NR_$getlki ] = exe$getlki_wrap            ,
+	[ __NR_$getlkiw ] = exe$getlkiw_wrap            ,
+	[ __NR_$enqw ] = exe$enqw_wrap ,
 	[ __NR_$crelnm ] = exe$crelnm ,
 	[ __NR_$trnlnm ] = exe$trnlnm ,
 	[ __NR_$dellnm ] = exe$dellnm ,
@@ -675,7 +675,7 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$ascefc ] = exe$ascefc ,
 	[ __NR_$dacefc ] = exe$dacefc ,
 	[ __NR_$dlcefc ] = exe$dlcefc ,
-	[ __NR_$crembx ] = exe$crembx ,
+	[ __NR_$crembx ] = exe$crembx_wrap ,
 	[ __NR_$delmbx ] = exe$delmbx ,
 	[ __NR_$mount ] = exe$mount,
 	[ __NR_$cretva ] = exe$cretva,
