@@ -667,7 +667,7 @@ Side Effects:
 #endif
 	$DESCRIPTOR(Long_Nap,"0 12:0:0.0");		// hours.
     //    LITERAL
-#define	SHORT_NAP (20*Csec)
+#define	SHORT_NAP (20*CSEC)
     extern
 	tcb_count;
 #if 0
@@ -710,7 +710,7 @@ Side Effects:
 	    }
 
 	    ((long *)BTime)[1] = -1;	// make it delta time.
-	    ((long *)BTime)[0] = rto*Csec_Timer_Delta; // nap size.
+	    ((long *)BTime)[0] = rto*CSEC_TIMER_DELTA; // nap size.
 	} else {			// No TCB's
 	    exe$bintim(&Long_Nap,&BTime);
 	    Big_Sleep = TRUE;
@@ -981,7 +981,7 @@ struct dsc$descriptor myname;
 // Mount the network virtual device "IP".
 
 #if 0
-//wait check
+//check wait check
     IF NOT(rc=$$KCALL(mount_Ip_device)) THEN
 	FATAL$FAO("Failed to mount virtual device IP ,RC = %x\n",rc);
 #endif

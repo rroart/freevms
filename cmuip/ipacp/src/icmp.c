@@ -152,7 +152,7 @@ ICMP_Hash(IPA)
 
     {
     return (IPA<0,8>+.IPA<8,8>+.IPA<16,8>+.IPA<24,8>) && ICM_HSHAND;
-    };
+    }
 
 ICMP_Find(IPADDR)
 
@@ -167,13 +167,13 @@ ICMP_Find(IPADDR)
     signed long
 	struct ICM_DBLOCK * ICPTR;
     ICPTR = ICMHTB[ICMP_HASH(IPADDR)];
-    WHILE ICPTR != 0 DO
+    while (ICPTR != 0)
 	if (ICPTR->ICM$Address == IPADDR)
 	    return ICPTR
 	else
 	    ICPTR = ICPTR->ICM$Next;
     return 0;
-    };
+    }
 
 void ICMP_Add(GWY_Addr,struct IP_Structure * IP_Pkt) (void)
 
@@ -201,7 +201,7 @@ void ICMP_Add(GWY_Addr,struct IP_Structure * IP_Pkt) (void)
 	};
     ICMblock->ICM$Address = IPdest;
     ICMblock->ICM$GWY = GWY_addr;
-    };
+    }
 
 ICMP$Check(IPaddr)
 
@@ -217,7 +217,7 @@ ICMP$Check(IPaddr)
 	return 0
     else
 	return ICMptr->ICM$GWY;
-    };
+    }
 
 
 //SBTTL  "Handle ICMP packet input"
@@ -461,7 +461,7 @@ ICMP$INPUT (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf): NOVALUE (void)
 
     // Release the buffer
     MM$Seg_Free(BUFSIZE,BUF);
-    };
+    }
 
 ICMP_Pproblem(ICMpkt,ICMlen,IPpkt,IPlen,ICMpptr) : NOVALUE (void)
 
@@ -471,7 +471,7 @@ ICMP_Pproblem(ICMpkt,ICMlen,IPpkt,IPlen,ICMpptr) : NOVALUE (void)
 
     {
     XQL$FAO(LOG$ICMP,"!%T ICMP recv: IP param=!XL!/",ICMpptr);
-    };
+    }
 
 ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
 
@@ -577,7 +577,7 @@ ICMP_Echo(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
 
     ICMP_MIB->MIB$icmpOutEchoReps =
 	ICMP_MIB->mib$icmpOutEchoReps + 1;
-    };
+    }
 
 ICMP_Tstamp(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
 
@@ -587,7 +587,7 @@ ICMP_Tstamp(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
 
     {
     RETURN;
-    };
+    }
 
 ICMP_Info(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
 
@@ -597,7 +597,7 @@ ICMP_Info(ICMpkt,ICMlen,IPpkt,IPlen) : NOVALUE (void)
 
     {
     RETURN;
-    };
+    }
 
 ICMP_Send_DUNR(ICMpkt,ICMlen,IPpkt,IPlen,Code) : NOVALUE (void)
 
@@ -683,6 +683,6 @@ ICMP_Send_DUNR(ICMpkt,ICMlen,IPpkt,IPlen,Code) : NOVALUE (void)
 
     ICMP_MIB->MIB$icmpOutDestUnreachs =
 	ICMP_MIB->mib$icmpOutDestUnreachs + 1;
-    };
+    }
 
 } ELUDOM

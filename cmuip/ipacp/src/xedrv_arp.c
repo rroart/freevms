@@ -220,7 +220,7 @@ LITERAL
     ARP_HSHLEN = 128,		// Length of hash table
     ARP_HSHAND = ARP_HSHLEN-1;	// && value for forming hash values
 static signed long
-    ARP_SWP_TIME : VECTOR->2,	// Delta time to sweep cache
+    ARP_SWP_TIME : VECTOR[2],	// Delta time to sweep cache
     ARPHTB : VECTOR->ARP_HSHLEN;
 
 MACRO
@@ -231,10 +231,10 @@ MACRO
 MACRO XEARP$_LOG (NAME)=
     {
     signed long
-	STR_DESC : VECTOR->2;
+	STR_DESC : VECTOR[2];
 
-    STR_DESC->0 = %CHARCOUNT(NAME);
-    STR_DESC->1 = UPLIT(NAME);
+    STR_DESC[0] = %CHARCOUNT(NAME);
+    STR_DESC[1] = UPLIT(NAME);
 
     XEARP$LOG(STR_DESC,%REMAINING)
     } %;
@@ -256,7 +256,7 @@ XEARP$LOG(NAME,IPADDR,HWLEN,HWADDR) : NOVALUE =
 // Queue up a message for later output
 
     DRV$QL_FAO("!%T !AS: IP=!AS, PHY=!AS!/",0,NAME,IPSTR,PHYSTR);
-    };
+    }
 
 
 FORWARD ROUTINE
@@ -270,18 +270,18 @@ XEARP$INIT : NOVALUE =
 
     {
     signed long
-	ARP_SWP_TTXT : VECTOR->2;
+	ARP_SWP_TTXT : VECTOR[2];
 
-    ARP_SWP_TTXT->0 = %CHARCOUNT( ARP_SWP_TTXT_STR );
-    ARP_SWP_TTXT->1 = UPLIT ( ARP_SWP_TTXT_STR );
+    ARP_SWP_TTXT[0] = %CHARCOUNT( ARP_SWP_TTXT_STR );
+    ARP_SWP_TTXT[1] = UPLIT ( ARP_SWP_TTXT_STR );
 
-    INCR I FROM 0 TO (ARP_HSHLEN-1) DO
+    for (I=0;I<=(ARP_HSHLEN-1);I++)
 	ARPHTB[I] = 0;
     $BINTIM(TIMBUF = ARP_SWP_TTXT,
 	    TIMADR = ARP_SWP_TIME);
     $SETIMR(DAYTIM = ARP_SWP_TIME,
 	    ASTADR = ARP_SWEEP);
-    };
+    }
 
 LITERAL
     MAX_HDR_SIZE = 100;		// Max size of device header on ARP packet
@@ -351,7 +351,7 @@ VOID 			    SWAPPF,SWAP16F) =
 	SWAPBYTES((ARBLK[AB_SWP_}]-ARBLK->AB_SWP_START)/2,
 		  ARBLK->AB_SWP_START);
     XE_Int->XEI$ARP_BLOCK = ARBLK;
-    };
+    }
 
 FORWARD ROUTINE
     ARP_HASH,
@@ -378,7 +378,7 @@ XEARP$CHECK(XE_Int, IPADDR, HWADDR, QB)
     OWN
 	NULADR : VECTOR[CH$ALLOCATION(ARP_HDW_LEN)];
     signed long
-        XE_DESC : VECTOR->2,
+        XE_DESC : VECTOR[2],
 	FOUND,
 	RFLAG,
 	struct ACACHE_BLK * ACPTR,
@@ -386,8 +386,8 @@ XEARP$CHECK(XE_Int, IPADDR, HWADDR, QB)
     MACRO
 	XE_PREFRIX_STR = "XE:" %;
 
-    XE_DESC->0 = %CHARCOUNT( XE_PREFRIX_STR );
-    XE_DESC->1 = UPLIT( XE_PREFRIX_STR );
+    XE_DESC[0] = %CHARCOUNT( XE_PREFRIX_STR );
+    XE_DESC[1] = UPLIT( XE_PREFRIX_STR );
     CH$FILL(0,ARP_HDW_LEN,NULADR);
 
 // Get, validate pointer to device ARP block.
@@ -552,7 +552,7 @@ XEARP$CHECK(XE_Int, IPADDR, HWADDR, QB)
 // Return appropriate reply
 
     return FOUND;
-    };
+    }
 
 FORWARD ROUTINE
  VOID    ARP_UPDATE;
@@ -713,7 +713,7 @@ void XEARP$INPUT ( XE_Int , struct ARP_PKT * ARBUF ) =
 	    TES;
 	    };
 	};
-    };
+    }
 
 
 ARP_HASH(IPA)
@@ -723,7 +723,7 @@ ARP_HASH(IPA)
 
     {
     return (IPA<0,8>+.IPA<8,8>+.IPA<16,8>+.IPA<24,8>) && ARP_HSHAND;
-    };
+    }
 
 ARP_FIND ( IPADDR , struct XE_Interface_Structure * XE_Int )
 
@@ -739,14 +739,14 @@ ARP_FIND ( IPADDR , struct XE_Interface_Structure * XE_Int )
 
     ACPTR = ARPHTB[ARP_HASH(IPADDR)];
     !!!HACK!!// Screw this.  give each XE interface it's own hash table.
-    WHILE ACPTR != 0 DO
+    while (ACPTR != 0)
 	IF (ACPTR->AC$DEVICE == XE_Int) AND
 	   (ACPTR->AC$IPADDR == IPADDR) THEN
 	    return ACPTR
 	else
 	    ACPTR = ACPTR->AC$NEXT;
     return 0;
-    };
+    }
 
 ARP_CNEW(IPADDR,XE_Int,HWLEN)
 
@@ -792,7 +792,7 @@ ARP_CNEW(IPADDR,XE_Int,HWLEN)
     ACPTR->AC$NEXT = ARPHTB[HSHVAL];
     ARPHTB[HSHVAL] = ACPTR;
     return ACPTR;
-    };
+    }
 
 void ARP_UPDATE( IPADDR , XE_Int , HWLEN , HWADDR ) =
 
@@ -842,7 +842,7 @@ void ARP_UPDATE( IPADDR , XE_Int , HWLEN , HWADDR ) =
 	INSQUE(QB,DEV_CONFIG[DC_S}_QTAIL]);
 	XE$Xmit(dev_config);
 	};
-    };
+    }
 
 ARP_SWEEP : NOVALUE =
 
@@ -859,14 +859,14 @@ ARP_SWEEP : NOVALUE =
     CTIME = Time_Stamp();
     if ($$LOGF(LOG$ARP))
 	DRV$QL_FAO("!%T ARP_SWEEP running!/",0);
-    DECR I FROM (ARP_HSHLEN-1) TO 0 DO
+    for (I=(ARP_HSHLEN-1);I>=0;I--)
 	{
 
 // Start at hash bucket. NB: APREV points at pointer to update on unlink
 
 	ACPTR = ARPHTB[I];
 	APREV = ARPHTB[I];
-	WHILE ACPTR != 0 DO
+	while (ACPTR != 0)
 	    {
 	    if (ACPTR->AC$EXPIRE LSS CTIME)
 		{
@@ -905,7 +905,7 @@ ARP_SWEEP : NOVALUE =
 
     $SETIMR(DAYTIM = ARP_SWP_TIME,
 	    ASTADR = ARP_SWEEP);    
-    };
+    }
 
 //SBTTL "ARP_DUMP - Dump ARP cache"
 /*
@@ -933,10 +933,10 @@ XE$ARP_DUMP(ACIDX,RBLOCK,RBSIZE)
     CIDX = 0;
     DRV$NOINT;			// Don't allow anything to change
 X:  {			// Labelled block X
-    INCR HTIDX FROM 0 TO ARP_HSHLEN-1 DO
+    for (HTIDX=0;HTIDX<=ARP_HSHLEN-1;HTIDX++)
 	{
 	ACPTR = ARPHTB[HTIDX];
-	WHILE ACPTR != 0 DO
+	while (ACPTR != 0)
 	    {
 	    if (ACIDX > 0)
 		// If we haven't gotten to the one he wants yet, advance
@@ -976,13 +976,13 @@ X:  {			// Labelled block X
 	    CIDX = CIDX + 1;
 	    };
 	};
-    };			// Labelled block X
+    }			// Labelled block X
 
 // Return length of block
 
     DRV$OKINT;
     return RBSIZE - LRSIZE;
-    };
+    }
 
 }
 ELUDOM

@@ -231,7 +231,7 @@ Log_ICMP_Packet(Seg,SwapFlag,SendFlag) : NOVALUE (void)
 	    0,sptr,seg,segdata,
 	   seghdr->ICM$CkSum);
 
-    };
+    }
 
 //SBTTL "ICMPCB_Find - look up ICMP control block"
 
@@ -243,7 +243,7 @@ ICMPCB_Find(Src$Adrs)
 	struct ICMPCB_Structure * ICMPCB;
     Ucount = ICMPCB_Count;
     ICMPCBIX = 1;
-    WHILE (Ucount > 0) && (ICMPCBIX <= Max_ICMPCB) DO
+    while ((Ucount > 0) && (ICMPCBIX <= Max_ICMPCB))
 	{
 	if ((ICMPCB = ICMPCB_Table[ICMPCBIX]) != 0)
 	    {
@@ -255,7 +255,7 @@ ICMPCB_Find(Src$Adrs)
 	ICMPCBIX = ICMPCBIX + 1;
 	};
     return 0;
-    };
+    }
 
 //SBTTL "ICMP input handler"
 /*
@@ -353,7 +353,7 @@ X:	{
 
     if (delete)
 	MM$Seg_Free(Bufsize,Buf2);
-    };
+    }
 
 
 //SBTTL "Queue_User_ICMP - Queue up ICMP packet for delivery to user"
@@ -374,7 +374,7 @@ Queue_User_ICMP(ICMPCB,Uptr,Usize,Buf,Bufsize,QB)
     {
     MAP
 	struct ICMPCB_Structure * ICMPCB,
-	struct Queue_BLK_Structure * QB(QB_NR_Fields);
+	struct queue_blk_structure(QB_NR_Fields) * QB;
     signed long
 	QBR;
     EXTERNAL ROUTINE
@@ -407,7 +407,7 @@ Queue_User_ICMP(ICMPCB,Uptr,Usize,Buf,Bufsize,QB)
     else
 	INSQUE(QB,ICMPCB->ICMPCB$NR_Qtail);
     return FALSE;		// Don't deallocate this segment...
-    };
+    }
 
 //SBTTL "Deliver_ICMP_Data - Deliver ICMP data to user"
 /*
@@ -420,8 +420,8 @@ Deliver_ICMP_Data(ICMPCB,QB,URQ) : NOVALUE (void)
     {
     MAP
 	struct ICMPCB_Structure * ICMPCB,
-	struct Queue_Blk_Structure * QB(QB_NR_Fields),
-	struct Queue_Blk_Structure * URQ(QB_UR_Fields);
+	struct queue_blk_structure(QB_NR_Fields) * QB,
+	struct queue_blk_structure(QB_UR_Fields) * URQ;
     signed long
 	FLAGS,
 	ICMTYPE,
@@ -470,7 +470,7 @@ Deliver_ICMP_Data(ICMPCB,QB,URQ) : NOVALUE (void)
     MM$QBLK_Free(URQ);
     MM$Seg_Free(QB->NR$Buf_Size,QB->NR$Buf);
     MM$QBLK_Free(QB);
-    };
+    }
 
 //SBTTL "ICMPCB_OK - Match connection ID to ICMPCB address"
 
@@ -502,7 +502,7 @@ ICMPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
 // Everything is good - return the ICMPCB address
 
     return ICMPCB;
-    };
+    }
 
 //SBTTL "ICMPCB_Get - Allocate and initialize one ICMPCB"
 
@@ -523,11 +523,11 @@ ICMPCB_Get(IDX)
 
 X:  {			// ** Block X **
     ICMPCBIDX = 0;
-    INCR I FROM 1 TO MAX_ICMPCB DO
+    for (I=1;I<=MAX_ICMPCB;I++)
 	if (ICMPCB_Table[I] == 0)
 	    LEAVE X WITH (ICMPCBIDX = I);
     return 0;			// Failed to allocate a ICMPCB
-    };			// ** Block X **
+    }			// ** Block X **
 
 // Allocate some space for the ICMPCB
 
@@ -556,7 +556,7 @@ X:  {			// ** Block X **
 
     IDX = ICMPCBIDX;
     return ICMPCB;
-    };
+    }
 
 //SBTTL "ICMPCB_Free - Deallocate a ICMPCB"
 
@@ -582,15 +582,15 @@ void ICMPCB_Free(ICMPCBIX,struct ICMPCB_Structure * ICMPCB) (void)
     if (NOT RC)
 	FATAL$FAO("ICMPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     ICMPCB_Count = ICMPCB_Count-1;
-    };
+    }
 
 //SBTTL "Kill_ICMP_Requests - purge all I/O requests for a connection"
 
 void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,RC) (void)
     {
     signed long
-	struct Queue_Blk_Structure * URQ(QB_UR_Fields),
-	struct Queue_Blk_Structure * QB(QB_NR_Fields);
+	struct queue_blk_structure(QB_UR_Fields) * URQ,
+	struct queue_blk_structure(QB_NR_Fields) * QB;
 
 // Make sure we aren't doing this more than once
 !
@@ -621,7 +621,7 @@ void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,RC) (void)
 
 // Purge the user request queue, posting all requests
 
-    WHILE REMQUE(ICMPCB->ICMPCB$USR_Qhead,URQ) != Empty_Queue DO
+    while (REMQUE(ICMPCB->ICMPCB$USR_Qhead,URQ) != Empty_Queue)
 	{
 	if (ICMPCB->ICMPCB$Internal)
 	    (URQ->UR$ASTADR)(URQ->UR$ASTPRM,RC,0)
@@ -635,12 +635,12 @@ void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,RC) (void)
 
 // Purge any received qblocks as well
 
-    WHILE REMQUE(ICMPCB->ICMPCB$NR_Qhead,QB) != Empty_Queue DO
+    while (REMQUE(ICMPCB->ICMPCB$NR_Qhead,QB) != Empty_Queue)
 	{
 	MM$Seg_Free(QB->NR$Buf_Size,QB->NR$Buf);
 	MM$QBlk_Free(QB);
 	};
-    };
+    }
 
 //SBTTL "ICMPCB_Close - Close/deallocate a ICMPCB"
 
@@ -648,7 +648,7 @@ void ICMPCB_Close(UIDX,struct ICMPCB_Structure * ICMPCB,RC) (void)
     {
     Kill_ICMP_Requests(ICMPCB,RC);
     ICMPCB_FREE(UIDX,ICMPCB);
-    };
+    }
 
 void ICMPCB_Abort(struct ICMPCB_Structure * ICMPCB,RC) (void)
 !
@@ -659,7 +659,7 @@ void ICMPCB_Abort(struct ICMPCB_Structure * ICMPCB,RC) (void)
 	Kill_ICMP_Requests(ICMPCB,RC)
     else
 	ICMPCB_CLOSE(ICMPCB->ICMPCB$ICMPCBID,ICMPCB,RC);
-    };
+    }
 
 
 //SBTTL "ICMP$Purge_All_IO - delete ICMP database before network exits"
@@ -672,10 +672,10 @@ ICMP$Purge_All_IO : NOVALUE (void)
 
 // Loop for all connections, purge them, and delete them.
 
-    INCR ICMPCBIDX FROM 1 TO MAX_ICMPCB DO
+    for (ICMPCBIDX=1;ICMPCBIDX<=MAX_ICMPCB;ICMPCBIDX++)
 	if ((ICMPCB = ICMPCB_Table[ICMPCBIDX]) != 0)
 	    ICMPCB_Close(ICMPCBIDX,ICMPCB,NET$_TE);
-    };
+    }
 
 
 //SBTTL "ICMP$OPEN - open a ICMP "connection""
@@ -698,7 +698,7 @@ void ICMP$OPEN(struct User_Open_Args * Uargs) (void)
 	UIDX,
 	struct ICMPCB_Structure * ICMPCB,
 	ICMPCBPTR,
-	Args : VECTOR->4;
+	Args : VECTOR[4];
     LABEL
 	X;
 
@@ -762,14 +762,14 @@ X:  {			// *** Block X ***
     ICMPCB->ICMPCB$NMLook = TRUE;
     NML$GETNAME(IPADDR,ICMP_ADLOOK_DONE,ICMPCB);
     RETURN;
-    };			// *** Block X ***
+    }			// *** Block X ***
 
 // "standard" case, host name is supplied - start name lookup for it
 
     ICMPCB->ICMPCB$Uargs = Uargs;
     ICMPCB->ICMPCB$NMLook = TRUE;
     NML$GETALST(NAMPTR,NAMLEN,ICMP_NMLOOK_DONE,ICMPCB);
-    };
+    }
 
 
 
@@ -836,7 +836,7 @@ ICMP_NMLOOK_DONE(ICMPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE (void)
     IOSB->NSB$XSTATUS = 0;
     IO$POST(IOSB,Uargs);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "ICMP_COPEN_DONE - Common user/internal ICMP open done routine"
 
@@ -856,7 +856,7 @@ ICMP_COPEN_DONE(ICMPCB,ADRCNT,ADRLST)
     XLOG$FAO(LOG$USER,"!%T UDB_COPEN: Conn idx = !XL, ICMPCB = !XL!/",
 	     0,ICMPCB->ICMPCB$ICMPCBID,ICMPCB);
     return SS$_NORMAL;
-    };
+    }
 
 //SBTTL "ICMP_ADLOOK_DONE - Finish ICMP address to name lookup"
 
@@ -878,7 +878,7 @@ ICMP_ADLOOK_DONE(ICMPCB,STATUS,NAMLEN,NAMPTR) : NOVALUE (void)
 
     ICMPCB->ICMPCB$Foreign_Hnlen = NAMLEN;
     CH$MOVE(NAMLEN,NAMPTR,CH$PTR(ICMPCB->ICMPCB$Foreign_Hname));
-    };
+    }
 
 //SBTTL "ICMP$CLOSE - close ICMP "connection""
 /*
@@ -909,7 +909,7 @@ void ICMP$CLOSE(struct User_Close_Args * Uargs) (void)
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "ICMP$ABORT - abort ICMP "connection""
 /*
@@ -938,7 +938,7 @@ void ICMP$ABORT(struct User_Abort_Args * Uargs) (void)
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "ICMP$S} - send ICMP packet"
 /*
@@ -1096,7 +1096,7 @@ void ICMP$S}(struct User_Send_Args * Uargs) (void)
     User$Post_IO_Status(Uargs,RC,0,0,0);
     MM$UArg_Free(Uargs);
 
-    };
+    }
 
 
 
@@ -1111,8 +1111,8 @@ void ICMP$RECEIVE(struct User_Recv_Args * Uargs) (void)
     {
     signed long
 	struct ICMPCB_Structure * ICMPCB,
-	struct Queue_Blk_Structure * QB(QB_NR_Fields),
-	struct Queue_Blk_Structure * URQ(QB_UR_Fields),
+	struct queue_blk_structure(QB_NR_Fields) * QB,
+	struct queue_blk_structure(QB_UR_Fields) * URQ,
 	RC;
 
 // Validate connection ID and get ICMPCB pointer
@@ -1159,7 +1159,7 @@ void ICMP$RECEIVE(struct User_Recv_Args * Uargs) (void)
     else
 	INSQUE(URQ,ICMPCB->ICMPCB$USR_Qtail);
     OKINT;
-    };
+    }
 
 
 
@@ -1191,7 +1191,7 @@ void ICMP$INFO(struct User_Info_Args * Uargs) (void)
 			0,0,
 			ICMPCB->ICMPCB$Foreign_Hname,
 			ICMPCB->ICMPCB$Foreign_Hnlen);
-    };
+    }
 
 
 //SBTTL "ICMP$STATUS - get status of ICMP "connection""
@@ -1203,7 +1203,7 @@ void ICMP$INFO(struct User_Info_Args * Uargs) (void)
 void ICMP$STATUS(struct User_Status_Args * Uargs) (void)
     {
     USER$Err(Uargs,NET$_NYI);
-    };
+    }
 
 //SBTTL "ICMP$CANCEL - Handle VMS cancel for ICMP connection"
 /*
@@ -1221,7 +1221,7 @@ ICMP$CANCEL(struct VMS$Cancel_Args * Uargs)
 
 // Check all valid ICMPCB's looking for a match on pid and channel #.
 
-    INCR I FROM 1 TO MAX_ICMPCB DO
+    for (I=1;I<=MAX_ICMPCB;I++)
 	if ((ICMPCB = ICMPCB_Table[I]) != 0)
 	    {
 
@@ -1236,7 +1236,7 @@ ICMP$CANCEL(struct VMS$Cancel_Args * Uargs)
 		};
 	    };
     return Fcount;
-    };
+    }
 
 //SBTTL "ICMP dump routines"
 
@@ -1250,14 +1250,14 @@ ICMP$Connection_List(RB) : NOVALUE (void)
     signed long
 	RBIX;
     RBIX = 1;
-    INCR I FROM 1 TO MAX_ICMPCB-1 DO
+    for (I=1;I<=MAX_ICMPCB-1;I++)
 	if (ICMPCB_TABLE[I] != 0)
 	    {
 	    RB[RBIX] = I;
 	    RBIX = RBIX + 1;
 	    };
-    RB->0 = RBIX - 1;
-    };
+    RB[0] = RBIX - 1;
+    }
 
 ICMP$ICMPCB_Dump(ICMPCBIX,RB)
 !
@@ -1289,10 +1289,10 @@ ICMP$ICMPCB_Dump(ICMPCBIX,RB)
 
     QB = ICMPCB->ICMPCB$NR_Qhead;
     Qcount = 0;
-    WHILE (QB NEQA ICMPCB->ICMPCB$NR_Qhead) DO
+    while ((QB NEQA ICMPCB->ICMPCB$NR_Qhead))
 	{
 	MAP
-	    struct Queue_Blk_Structure * QB(QB_NR_Fields);
+	    struct queue_blk_structure(QB_NR_Fields) * QB;
 	Qcount = Qcount + 1;
 	QB = QB->NR$NEXT;
 	};
@@ -1302,10 +1302,10 @@ ICMP$ICMPCB_Dump(ICMPCBIX,RB)
 
     QB = ICMPCB->ICMPCB$USR_Qhead;
     Qcount = 0;
-    WHILE (QB NEQA ICMPCB->ICMPCB$USR_Qhead) DO
+    while ((QB NEQA ICMPCB->ICMPCB$USR_Qhead))
 	{
 	MAP
-	    struct Queue_Blk_Structure * QB(QB_UR_Fields);
+	    struct queue_blk_structure(QB_UR_Fields) * QB;
 	Qcount = Qcount + 1;
 	QB = QB->UR$NEXT;
 	};
@@ -1314,6 +1314,6 @@ ICMP$ICMPCB_Dump(ICMPCBIX,RB)
 // Done.
 
     return TRUE;
-    };
+    }
 }
 ELUDOM

@@ -83,9 +83,9 @@ SOFTWARE.
 #define READ	 1 
 #define WRITE	 0 
 
-#define RONLY	 %x'0AAAA' 	// read access for everyone
-#define RWRITE	 %x'0AABA' 	// add write access for community private
-#define NOACCESS 	 %x'0000' 	// no access for anybody
+#define RONLY	 0xAAAA 	// read access for everyone
+#define RWRITE	 0xAABA 	// add write access for community private
+#define NOACCESS  0x0000 	// no access for anybody
 
 #define INTEGER	 ASN_INTEGER 
 #define STRING	 ASN_OCTET_STR 
@@ -104,27 +104,27 @@ SOFTWARE.
 // IP group MIB (Management Information Block)
 
 // Note:  The IP group magic in SNMP_VARS assumes that every field is a long.
-    struct IP_group_MIB_struct {
-signed long IPMIB$ipForwarding		 ;
-signed long IPMIB$ipDefaultTTL		 ;
-signed long IPMIB$ipInReceives		 ;
-signed long IPMIB$ipInHdrErrors		 ;
-signed long IPMIB$ipInAddrErrors	 ;
-signed long IPMIB$ipForwDatagrams	 ;
-signed long IPMIB$ipInUnknownProtos	 ;
-signed long IPMIB$ipInDiscards		 ;
-signed long IPMIB$ipInDelivers		 ;
-signed long IPMIB$ipOutRequests		 ;
-signed long IPMIB$ipOutDiscards		 ;
-signed long IPMIB$ipOutNoRoutes		 ;
-signed long IPMIB$ipReasmTimeout	 ;
-signed long IPMIB$ipReasmReqds		 ;
-signed long IPMIB$ipReasmOKs		 ;
-signed long IPMIB$ipReasmFails		 ;
-signed long IPMIB$ipFragOKs		 ;
-signed long IPMIB$ipFragFails		 ;
-signed long IPMIB$ipFragCreates		 ;
-    };
+struct IP_group_MIB_struct {
+  signed long IPMIB$ipForwarding		 ;
+  signed long IPMIB$ipDefaultTTL		 ;
+  signed long IPMIB$ipInReceives		 ;
+  signed long IPMIB$ipInHdrErrors		 ;
+  signed long IPMIB$ipInAddrErrors	 ;
+  signed long IPMIB$ipForwDatagrams	 ;
+  signed long IPMIB$ipInUnknownProtos	 ;
+  signed long IPMIB$ipInDiscards		 ;
+  signed long IPMIB$ipInDelivers		 ;
+  signed long IPMIB$ipOutRequests		 ;
+  signed long IPMIB$ipOutDiscards		 ;
+  signed long IPMIB$ipOutNoRoutes		 ;
+  signed long IPMIB$ipReasmTimeout	 ;
+  signed long IPMIB$ipReasmReqds		 ;
+  signed long IPMIB$ipReasmOKs		 ;
+  signed long IPMIB$ipReasmFails		 ;
+  signed long IPMIB$ipFragOKs		 ;
+  signed long IPMIB$ipFragFails		 ;
+  signed long IPMIB$ipFragCreates		 ;
+};
 
 #define    IP_group_MIB_Size	sizeof(struct IP_group_MIB_struct)
 

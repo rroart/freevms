@@ -59,7 +59,7 @@ Modification History:
 	In Decode_Segment(), let TELNET module ACK it's own data, clean up
 	logging.
 	Change arithmetic and printout on timers from signed to unsigned.
-	Call TCP$Enqueue_ACK() rather than just setting P}ING_ACK or
+	Call TCP$Enqueue_ACK() rather than just setting PENDING_ACK or
 	calling TCP$Send_ACK() directly.
 
 6.5f	30-Aug-1991	Henry W. Miller		USBR
@@ -241,8 +241,8 @@ Modification History:
 	Don't use index 0 of VALID_TCB table.
 
 3.0  11-Jun-86, Edit by VAF
-	Make ACK_RT_QUEUE call S}_DATA if it actually removes anything from
-	the RT queue. Idea is to make S} processing event driven.
+	Make ACK_RT_QUEUE call SEND_DATA if it actually removes anything from
+	the RT queue. Idea is to make SEND processing event driven.
 	Fix receive sequence number check to agree with RFC.
 	(We were sometimes getting undetected duplicates)
 
@@ -334,88 +334,89 @@ MODULE SEGIN(IDENT="6.7",LANGUAGE(BLISS32),
 	     OPTIMIZE,OPTLEVEL=3,ZIP)=
 {
 
-#include "SYS$LIBRARY:STARLET";	// VMS system definitions
+#include <starlet.h>	// VMS system definitions
 
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS transportablity package
-#include "CMUIP_SRC:[CENTRAL]NETERROR";	// Network error codes
-#include "CMUIP_SRC:[CENTRAL]NETVMS";	// VMS specifics
-#include "CMUIP_SRC:[CENTRAL]NETCOMMON";// Network common defs
-#include "CMUIP_SRC:[CENTRAL]NETTCPIP";	// TCP/IP protocols
+  // not yet #include <cmuip/central/include/netxport.h>	// BLISS transportablity package
+#include <cmuip/central/include/neterror.h>	// Network error codes
+#include "netvms.h"	// VMS specifics
+#include <cmuip/central/include/netcommon.h>// Network common defs
+#include <cmuip/central/include/nettcpip.h>	// TCP/IP protocols
 
-#include "STRUCTURE";		// TCB & Segment Structure definitions
-#include "TCPMACROS";		// Local macros
-#include "TCP";			// TCP related definitions
-#include "SNMP";			// Simple Network Management Protocol
+#include "structure.h"		// TCB & Segment Structure definitions
+#include "tcpmacros.h"		// Local macros
+#include "tcp.h"			// TCP related definitions
+#include "snmp.h"			// Simple Network Management Protocol
 
-!XQDEFINE;
+#include <ssdef.h>
 
-extern signed long
-    TCP_MIB : TCP_MIB_struct;   // TCP management Information Block
+//XQDEFINE;
+
+extern struct TCP_MIB_struct *     TCP_MIB ;   // TCP management Information Block
 
 extern
-    LIB$GET_VM : ADDRESSING_MODE(GENERAL),
+LIB$GET_VM();
 
 // USER.BLI
 
- void    User$Post_IO_Status,
+extern void    User$Post_IO_Status();
 
 // TCP_USER.BLI
 
- void    TCP$Post_Active_Open_IO_Status,
- void    TCP$Post_User_Close_IO_Status,
- VOID    TCP$KILL_P}ING_REQUESTS,
- void    TCP$Deliver_User_Data,
-    Gen_CheckSum,
- void    TCP$Adlook_Done,
+extern void    TCP$Post_Active_Open_IO_Status();
+extern void    TCP$Post_User_Close_IO_Status();
+extern  void    TCP$KILL_PENDING_REQUESTS();
+extern  void    TCP$Deliver_User_Data();
+extern     Gen_CheckSum();
+extern  void    TCP$Adlook_Done();
 
 // TCP_TELNET.BLI
 
-    TELNET_CREATE,
-    TELNET_OPEN,
- VOID    TELNET_INPUT,
- VOID    TELNET_OUTPUT,
+extern     TELNET_CREATE();
+extern     TELNET_OPEN();
+extern  void    TELNET_INPUT();
+extern  void    TELNET_OUTPUT();
 
 // MEMGR.BLI
 
-    TCB$Create,
- void    TCB$Delete,
- void    MM$Seg_Free,
- void    MM$QBLK_Free,
-    MM$QBLK_Get,
- void    MM$UArg_Free,
+extern     TCB$Create();
+extern  void    TCB$Delete();
+extern  void    MM$Seg_Free();
+extern  void    MM$QBLK_Free();
+extern     MM$QBLK_Get();
+extern  void    MM$UArg_Free();
 
 // TCP.BLI
 
- void    TCP$Send_Data,
-    TCP$Send_Ctl,
- void    TCP$Enqueue_Ack,
- void    TCP$Send_Ack,
- void    TCP$Dump_TCB,
- void    TCP$Inactivate_TCB,
- void    TCP$Set_TCB_State,
- void    CQ_Enqueue,
-    TCP$TCB_CLOSE,
-    TCP$Compute_RTT,
+extern  void    TCP$Send_Data();
+extern     TCP$Send_Ctl();
+extern  void    TCP$Enqueue_Ack();
+extern  void    TCP$Send_Ack();
+extern  void    TCP$Dump_TCB();
+extern  void    TCP$Inactivate_TCB();
+extern  void    TCP$Set_TCB_State();
+extern  void    CQ_Enqueue();
+extern     TCP$TCB_CLOSE();
+extern     TCP$Compute_RTT();
 
 // NMLOOK.BLI
 
- VOID    NML$GETNAME,
+extern  void    NML$GETNAME();
 
 // MACLIB.MAR
 
-    Time_Stamp,
- void    SwapBytes,
+extern     Time_Stamp();
+extern  void    SwapBytes();
 
 // IOUTIL.BLI
 
- void    ASCII_Hex_Bytes,
- void    ASCII_Dec_Bytes,
- void    Log_Time_Stamp,
- VOID    OPR_FAO,
- VOID    LOG_FAO,
- VOID    LOG_OUTPUT,
- VOID    ACT_FAO,
- VOID    ACT_OUTPUT;
+extern  void    ASCII_Hex_Bytes();
+extern  void    ASCII_Dec_Bytes();
+extern  void    Log_Time_Stamp();
+extern  void    OPR_FAO();
+extern  void    LOG_FAO();
+extern  void    LOG_OUTPUT();
+extern  void    ACT_FAO();
+extern  void    ACT_OUTPUT();
 
 extern signed long
     INTDF,
@@ -570,20 +571,20 @@ void ACK_RT_Queue(struct tcb_structure * tcb,AckNum) (void)
 // Compute round trip time for adaptive retransmission.
 
 	TCP$Compute_RTT(TCB) ;
-!	oldrtt = TCB->round_trip_time;
-!	crtt = MAXU(Time_Stamp()-TCB->Xmit_Start_Time,MINRTT);
+//	oldrtt = TCB->round_trip_time;
+//	crtt = MAXU(Time_Stamp()-TCB->Xmit_Start_Time,MINRTT);
 
 // Compute smoothed round trip time, see RFC793 (TCP) page 41 for details.
 
-!	delta = ((TCB->round_trip_time*ALPHA)/100) +
-!		((crtt*ALPHACOMP)/100);
-!	TCB->round_trip_time = delta;
-!	delta = (BETA*.delta)/100;
-!	TCB->calculated_rto = MINU(MAX_RT_TIMEOUT,MAXU(delta,MIN_RT_TIMEOUT));
+//	delta = ((TCB->round_trip_time*ALPHA)/100) +
+//		((crtt*ALPHACOMP)/100);
+//	TCB->round_trip_time = delta;
+//	delta = (BETA*.delta)/100;
+//	TCB->calculated_rto = MINU(MAX_RT_TIMEOUT,MAXU(delta,MIN_RT_TIMEOUT));
 
-!	XLOG$FAO(LOG$TCP,
-!	    "!%T ACK-RXQ: Prev SRTT=!UL, Cur RTT=!UL, New SRTT=!UL, RTO=!UL!/",
-!		 0,oldrtt,crtt,TCB->round_trip_time,TCB->calculated_rto);
+//	XLOG$FAO(LOG$TCP,
+//	    "!%T ACK-RXQ: Prev SRTT=!UL, Cur RTT=!UL, New SRTT=!UL, RTO=!UL!/",
+//		 0,oldrtt,crtt,TCB->round_trip_time,TCB->calculated_rto);
 	};
 
 // If TVT and send queue just became non-full, try to get some more TVT data
@@ -601,19 +602,19 @@ void ACK_RT_Queue(struct tcb_structure * tcb,AckNum) (void)
 
     if (TCB->SRX_Q_Count == 0)
 	TCP$Send_Data(TCB);
-    };
+    }
 
 SEG$Purge_RT_Queue(struct tcb_structure * tcb): NOvalue=
-!
+//
 // Routine to clean out the retransmission queue. All this really involves
 // is clearing the RX count and flags and advancing the RX pointer to the
 // send dequeue pointer.
-!
+//
     {
     TCB->SRX_Q_Count = 0;	// Clear retransmit byte count
     TCB->SRX_Q_DEQP = TCB->SND_Q_DEQP; // Empty retransmit queue
     TCB->RX_CTL = 0;		// And clear retransmit flags
-    };
+    }
 
 //SBTTL "Send-Reset: RESET a Known connection"
 /*
@@ -656,7 +657,7 @@ Send_Reset(struct tcb_structure * tcb,SEQNum): NOvalue=
 // Restore the world to its proper state.
 
     TCB->Snd_Nxt = Sav$Snd_Nxt;
-    };
+    }
 
 //SBTTL "Reset-Unknown-Connection"
 /*
@@ -683,13 +684,11 @@ Side Effects:
 */
 
 
-RESET_UNKNOWN_CONNECTION(SEG,QB): NOVALUE (void)
-    {
-    MAP
-	struct Segment_Structure * Seg,
-	struct Queue_Blk_Structure * QB(QB_NR_Fields);
-    REGISTER
-	struct tcb_structure * tcb;
+void RESET_UNKNOWN_CONNECTION(SEG,QB)
+     struct segment_structure * Seg;
+     struct Queue_Blk_Structure(QB_NR_Fields) * QB;
+    register
+	struct tcb_structure * TCB;
 
 // Create & fill in the temporary TCB
 
@@ -725,7 +724,7 @@ RESET_UNKNOWN_CONNECTION(SEG,QB): NOVALUE (void)
 // Delete the TCB
 
     TCB$Delete(TCB);
-    };
+    }
 
 //SBTTL "Queue-Network-Data"
 /*
@@ -754,11 +753,10 @@ Side Effects:
 
 
 QUEUE_NETWORK_DATA(TCB,QB)
+     struct tcb_structure * TCB;
+     struct queue_blk_structure(QB_NR_Fields) * QB;
     {
-    MAP
-	struct tcb_structure * tcb,
-	struct Queue_BLK_Structure * QB(QB_NR_Fields);
-    REGISTER
+    register
 	Ucount,
 	Uptr;
     LITERAL
@@ -824,7 +822,7 @@ QUEUE_NETWORK_DATA(TCB,QB)
 	} ;
 
     return TRUE;
-    };
+    }
 
 //SBTTL "Handle TCP segment input"
 /******************************************************************************
@@ -854,7 +852,7 @@ Outputs:
 SEG$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg): NOVALUE (void)
     {
     signed long
-	struct Queue_Blk_Structure * QB(QB_NR_Fields);
+	struct queue_blk_structure(QB_NR_Fields) * QB;
 
     QB = MM$QBLK_Get();
     QB->NR$Buf_Size = BufSize;	// Total size of network buffer.
@@ -865,10 +863,10 @@ SEG$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg): NOVALUE (void)
     QB->NR$Dest_Adrs = Dest$Adrs; // destination internet adrs.
     QB->NR$Flags = 0;		// Clear input flags
     INSQUE(QB,Segin->SI_Qtail); // queue to tail of segment in queue.
-!~~~XINSQUE(QB,Segin->SI_Qtail,TCP_Input,Q$SEGIN,Segin->SI_Qhead);
+//~~~XINSQUE(QB,Segin->SI_Qtail,TCP_Input,Q$SEGIN,Segin->SI_Qhead);
 
     TCP_MIB->MIB$tcpInSegs = TCP_MIB->MIB$tcpInSegs + 1;
-    };
+    }
 
 //SBTTL "ICMP handler for TCP"
 /*
@@ -900,18 +898,18 @@ SEG$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg): NOVALUE (void)
 SEG$ICMP(ICMtype,ICMex,IPsrc,IPdst,Seg,Segsize,
 			buf,bufsize) : NOVALUE (void)
 
-!ICMtype - ICMP packet type
-!ICMex - Extra data from ICMP packet (pointer for ICM_PPROBLEM)
-!IPsrc - Source address of offending packet
-!IPdst - Destination address of offending packet
-!Seg - First 64-bits of data from offending packet (will have ports)
-!Segsize - Calculated octet count of Seg
-!Buf - address of network buffer, released by TCP later
-!Bufsize - size of network buffer
+//ICMtype - ICMP packet type
+//ICMex - Extra data from ICMP packet (pointer for ICM_PPROBLEM)
+//IPsrc - Source address of offending packet
+//IPdst - Destination address of offending packet
+//Seg - First 64-bits of data from offending packet (will have ports)
+//Segsize - Calculated octet count of Seg
+//Buf - address of network buffer, released by TCP later
+//Bufsize - size of network buffer
 
     {
     signed long
-	struct Queue_Blk_Structure * QB(QB_NR_Fields);
+	struct queue_blk_structure(QB_NR_Fields) * QB;
 
     QB = MM$QBLK_Get();
     QB->NR$Buf_Size = BufSize;	// Total size of network buffer.
@@ -926,7 +924,7 @@ SEG$ICMP(ICMtype,ICMex,IPsrc,IPdst,Seg,Segsize,
     QB->NR$ICM_EX = ICMex;	// and extra information
     INSQUE(QB,Segin->SI_Qtail); // queue to tail of segment in queue.
     RETURN;
-    };
+    }
 
 //SBTTL "Check-SYN-Wait-List"
 /*
@@ -954,13 +952,12 @@ Side Effects:
 
 */
 
-FORWARD ROUTINE
-    Decode_Segment;
+    Decode_Segment();
 
 void SEG$Check_SYN_Wait_List(struct tcb_structure * tcb) (void)
     {
     signed long
-	struct Queue_Blk_Structure * QB(QB_NR_Fields),
+	struct queue_blk_structure(QB_NR_Fields) * QB,
 	struct Segment_Structure * Seg,
 	LP,
 	WIX;
@@ -971,14 +968,14 @@ void SEG$Check_SYN_Wait_List(struct tcb_structure * tcb) (void)
 
     LP = TCB->Local_Port && %X"FFFF" ;
 X:  {
-    INCR I FROM 0 TO (WKS_COUNT-1) DO
+    for (I=0;I<=(WKS_COUNT-1);I++)
 	if (LP == WKS_LIST[I,WKS$Port])
 	    {
 	    WIX = I;
 	    LEAVE X;
 	    };
     RETURN;			// Port not found - no SYN pending
-    };
+    }
 
 // Point at the head of the SYN wait list for this port
 
@@ -988,7 +985,7 @@ X:  {
 // Handle wild-card foreign host & port cases.
 
 Y:  {
-    WHILE (QB NEQA WKS_LIST[WIX,WKS$SYN_Qhead]) DO
+    while ((QB NEQA WKS_LIST[WIX,WKS$SYN_Qhead]))
 	{
 	IF (TCB->Foreign_Host == Wild) OR
 	   (TCB->Foreign_Host == QB->NR$Src_Adrs) THEN
@@ -998,7 +995,7 @@ Y:  {
 	QB = QB->NR$NEXT;
 	};
     RETURN;
-    };
+    }
 
 // Here on match. Remove the SYN segment from the list & process it.
 
@@ -1013,7 +1010,7 @@ Y:  {
 	MM$Seg_Free(QB->NR$Buf_Size,QB->NR$Buf);
 	MM$QBlk_Free(QB);
 	};
-    };
+    }
 
 //SBTTL	"Fork a Server Process"
 /*
@@ -1056,8 +1053,7 @@ Fork_Server(IDX, IP_Address, Remote_Port)
 	RP,
 	DESC$STR_ALLOC(ProcName,PNAMLEN),
 	NewPID;
-    EXTERNAL ROUTINE
-	PokeAddr : ADDRESSING_MODE(GENERAL);
+extern	PokeAddr ();
 
 
     RP = (Remote_Port && %X"FFFF") ;
@@ -1117,7 +1113,7 @@ Fork_Server(IDX, IP_Address, Remote_Port)
 
     XLOG$FAO(LOG$TCPERR,"!%T Failed to fork server !AS!/",0,ProcName);
     return FALSE;
-    };
+    }
 
 //SBTTL "Check-Well-Known-Port: Is this a server port?"
 /*
@@ -1149,12 +1145,11 @@ Side Effects:
 */
 
 Check_WKS(DHost,DPort,SHost,SPort,QBNEW,Segnew)
+     struct queue_blk_structure(QB_NR_Fields) * QBNEW;
+     struct segment_structure * SegNew;
     {
-    MAP
-	struct Queue_BLK_Structure * QBNEW(QB_NR_Fields),
-	struct Segment_Structure * SegNew;
     signed long
-	struct Queue_Blk_Structure * QB(QB_NR_Fields),
+	struct queue_blk_structure(QB_NR_Fields) * QB,
 	struct Segment_Structure * Seg,
 	DP,
 	SP,
@@ -1168,14 +1163,14 @@ Check_WKS(DHost,DPort,SHost,SPort,QBNEW,Segnew)
 // See if we know about the port
 
 X:  {
-    INCR I FROM 0 TO (WKS_COUNT-1) DO
+    for (I=0;I<=(WKS_COUNT-1);I++)
 	if (DP == WKS_LIST[I,WKS$PORT])
 	    {
 	    WIX = I;
 	    LEAVE X;
 	    };
     return FALSE;
-    };
+    }
 
 // See if main queue count exceeded
 
@@ -1198,7 +1193,7 @@ X:  {
 
     XLOG$FAO(LOG$TCP,"!%T SYN for WKS !SL received!/",0,Dport);
     QB = WKS_LIST[WIX,WKS$SYN_QHEAD];
-    WHILE (QB NEQA WKS_LIST[WIX,WKS$SYN_QHEAD]) DO
+    while ((QB NEQA WKS_LIST[WIX,WKS$SYN_QHEAD]))
 	{
 
 // Check IP addresses.
@@ -1242,7 +1237,7 @@ X:  {
 	}
     else
 	return FALSE;
-    };
+    }
 
 //SBTTL "Timeout_Syn_Wait_List - Check SYN wait list for expired entries"
 
@@ -1250,13 +1245,13 @@ void SEG$Timeout_Syn_Wait_List(Now: UNSIGNED) (void)
     {
     signed long
 	WIX,
-	struct Queue_BLK_Structure * QB(QB_NR_Fields),
+	struct queue_blk_structure(QB_NR_Fields) * QB,
 	Tmp;
 
-    INCR WIX FROM 0 TO (WKS_COUNT-1) DO
+    for (WIX=0;WIX<=(WKS_COUNT-1);WIX++)
 	{
 	QB = WKS_LIST[WIX,WKS$SYN_Qhead];
-	WHILE QB NEQA WKS_LIST[WIX,WKS$SYN_Qhead] DO
+	while (QB NEQA WKS_LIST[WIX,WKS$SYN_Qhead])
 	    {
 	    if (QB->NR$TimeOut < now)
 		{		// Timed-out
@@ -1272,7 +1267,7 @@ void SEG$Timeout_Syn_Wait_List(Now: UNSIGNED) (void)
 		QB = QB->NR$Next;	// point at next entry.
 	    };
 	};
-    };
+    }
 
 //SBTTL "ADD_WKS - Add an entry to the WKS table"
 /*
@@ -1292,8 +1287,7 @@ void 			  Input_A, Output_A, Error_A) (void)
 	INPUT	= INPUT_A		: $BBLOCK,
 	OUTPUT	= OUTPUT_A		: $BBLOCK,
 	Error	= ERROR_A		: $BBLOCK;
-    EXTERNAL ROUTINE
-	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL);
+extern	STR$COPY_DX	();
     signed long
 	WIX,
 	QUOPTR,
@@ -1377,7 +1371,7 @@ void 			  Input_A, Output_A, Error_A) (void)
     WKS_LIST[WIX,WKS$SYN_Qcount] = QLIMIT;
     WKS_LIST[WIX,WKS$SYN_Qhead] = WKS_LIST[WIX,WKS$SYN_Qhead];
     WKS_LIST[WIX,WKS$SYN_Qtail] = WKS_LIST[WIX,WKS$SYN_Qhead];
-    };
+    }
 
 //SBTTL "Log-Segment: dump debug data about segment to log file."
 
@@ -1500,7 +1494,7 @@ SEG$Log_Segment(struct Segment_Structure * Seg,Size,
 	LOG$FAO("!_Data Count: !SL!/!_HEX:!_!AS!/!_ASCII:!_!AF!/",
 		.datcnt,dathex,asccnt,seg+.dataoff);
 	};
-    };
+    }
 
 
 
@@ -1509,13 +1503,12 @@ SEG$Log_Segment(struct Segment_Structure * Seg,Size,
  )%
 
 Append_Future_Q(TCB, QB, Seg, SEQsize)
+struct tcb_structure * TCB;
+struct queue_blk_structure(QB_NR_Fields) * QB;
+struct segment_structure * Seg;
     {
-    MAP
-	struct tcb_structure * tcb,
-	struct Queue_Blk_Structure * QB(QB_NR_Fields),
-	struct Segment_Structure * Seg;
     signed long
-	struct Queue_Blk_Structure * FQB(QB_NR_Fields);
+	struct queue_blk_structure(QB_NR_Fields) * FQB;
 
     ts$future_rcvd = ts$future_rcvd+1;
     if (TCB->RF_Qcount GEQ FQ_MAX)
@@ -1531,7 +1524,7 @@ Append_Future_Q(TCB, QB, Seg, SEQsize)
 
  // Find where to put this segment on the future queue
 
-    WHILE TRUE DO
+    while (TRUE)
 	if (FQB == TCB->RF_Qhead)
 	    EXITLOOP (FQB = TCB->RF_Qtail)
 	else
@@ -1555,9 +1548,9 @@ Append_Future_Q(TCB, QB, Seg, SEQsize)
 	     0,Seg,QB,FQB);
     TCB->RF_Qcount = TCB->RF_Qcount+1;
     INSQUE(QB,FQB);
-!~~~XINSQUE(QB,FQB,Append_Future_Q,Q$TCBFQ,TCB->RF_Qhead);
+//~~~XINSQUE(QB,FQB,Append_Future_Q,Q$TCBFQ,TCB->RF_Qhead);
     return FALSE;		// Don"t deallocate - it"s on our queue
-    };
+    }
 
 //SBTTL "Check and attempt to process segments on "future" queue"
 /*
@@ -1566,18 +1559,18 @@ Append_Future_Q(TCB, QB, Seg, SEQsize)
 void Check_Future_Q(struct tcb_structure * tcb) (void)
     {
     signed long
-	struct Queue_Blk_Structure * NQB(QB_NR_Fields);
+	struct queue_blk_structure(QB_NR_Fields) * NQB;
 
 // Handle segments on the future queue that are no longer in the future.
 
     NQB = TCB->RF_Qhead;
-    WHILE NQB NEQA TCB->RF_Qhead DO
+    while (NQB NEQA TCB->RF_Qhead)
 	{
 	signed long
 	    SEQoffset,
 	    SEQsize,
 	    delete,
-	    struct Queue_Blk_Structure * QB(QB_NR_Fields);
+	    struct queue_blk_structure(QB_NR_Fields) * QB;
 
 	QB = NQB;
 	NQB = QB->NR$Next;
@@ -1593,7 +1586,7 @@ void Check_Future_Q(struct tcb_structure * tcb) (void)
 	[SEQoffset GEQU SEQsize]:
 	     {
 	     delete = true;
-!~~~	     XREMQUE(QB,QB,Check_Future_Q,Q$TCBFQ,TCB->RF_Qhead);
+//~~~	     XREMQUE(QB,QB,Check_Future_Q,Q$TCBFQ,TCB->RF_Qhead);
 	     REMQUE(QB,QB);
 	     TCB->RF_Qcount = TCB->RF_Qcount-1;
 	     XLOG$FAO(LOG$TCP,"!%T Flushing FQ seg !XL, QB !XL, SEQ=!XL,!XL!/",
@@ -1607,7 +1600,7 @@ void Check_Future_Q(struct tcb_structure * tcb) (void)
 
 	[SEQoffset GEQ 0]:
 	    {
-!~~~	    XREMQUE(QB,QB,Check_Future_Q,Q$TCBFQ,TCB->RF_Qhead);
+//~~~	    XREMQUE(QB,QB,Check_Future_Q,Q$TCBFQ,TCB->RF_Qhead);
 	    REMQUE(QB,QB);
 	    TCB->RF_Qcount = TCB->RF_Qcount-1;
 	    XLOG$FAO(LOG$TCP,"!%T Using FQ seg !XL, QB !XL, SEQ=!XL,!XL!/",
@@ -1627,15 +1620,14 @@ void Check_Future_Q(struct tcb_structure * tcb) (void)
 	    MM$QBLK_Free(QB);
 	    };
 	};
-    };
+    }
 
 //SBTTL "READ_TCP_Options: process TCP segment options in SYN segment"
 
-READ_TCP_OPTIONS(TCB,SEG) : NOVALUE (void)
+void READ_TCP_OPTIONS(TCB,SEG)
+struct tcb_structure * TCB;
+struct segment_structure * SEG;
     {
-    MAP
-	struct tcb_structure * tcb,
-	struct Segment_Structure * SEG;
     signed long
 	struct TCP$OPT_BLOCK * OPTR,
 	OPTLEN,
@@ -1648,7 +1640,7 @@ READ_TCP_OPTIONS(TCB,SEG) : NOVALUE (void)
 
 // Scan the the entire options area until we hit the start of TCP data
 
-    WHILE OPTR LSS DATAPTR DO
+    while (OPTR LSS DATAPTR)
 	{
 
 // Deal with options we can handle
@@ -1657,7 +1649,7 @@ READ_TCP_OPTIONS(TCB,SEG) : NOVALUE (void)
 	SELECTONE OPTR->TCP$OPT_KIND OF
 	SET
 	[TCP$OPT_KIND_EOL]:	// End of options list
-	    EXITLOOP;
+	    break;
 
 	[TCP$OPT_KIND_NOP]:	// No-op option
 	    OPTR = OPTR + 1;	// Advance pointer by one byte
@@ -1689,11 +1681,11 @@ READ_TCP_OPTIONS(TCB,SEG) : NOVALUE (void)
 	    XLOG$FAO(LOG$TCP+LOG$TCPERR,
 		     "!%T ?Bad TCP option type !SL, size !SL for TCB !XL!/",
 		     0,OPTR->TCP$OPT_KIND,OPTR->TCP$OPT_LENGTH,TCB);
-	    EXITLOOP;		// Can't procede, since length may not be valid
+	    break;		// Can't procede, since length may not be valid
 	    };
 	TES;
 	};
-    };
+    }
 
 //SBTTL "Decode-Segment: Figure out what to do with a network segment."
 /*
@@ -1729,13 +1721,11 @@ Side Effects:
 */
 
 Decode_Segment(TCB,Seg,QB)
+     struct tcb_structure * TCB;
+     struct segment_structure * Seg;
+     struct queue_blk_structure(QB_NR_Fields) * QB;
     {
-    EXTERNAL ROUTINE
-	TCB_Promote;
-    MAP
-	struct tcb_structure * tcb,
-	struct Segment_Structure * Seg,
-	struct Queue_Blk_Structure * QB(QB_NR_Fields);
+extern	TCB_Promote();
     signed long
 	RC,
 	AckTst_OK,
@@ -1746,9 +1736,9 @@ Decode_Segment(TCB,Seg,QB)
 	SEQcount,
 	SEQstart,
 	SEQoffset,
-	struct Queue_Blk_Structure * QBR(QB_UR_Fields),
+	struct queue_blk_structure(QB_UR_Fields) * QBR,
 	EOL,
-	struct Queue_Blk_Structure * QBN(QB_NR_Fields),
+	struct queue_blk_structure(QB_NR_Fields) * QBN,
 	Ucount,
 	Uoffset,
 	RetCode,
@@ -1773,20 +1763,20 @@ Decode_Segment(TCB,Seg,QB)
 
     QBR = TCB->UR_Qhead;
 
-!********************************************************
-!	Process unsynchronized Connection States.	!
-!********************************************************
+//********************************************************
+//	Process unsynchronized Connection States.	!
+//********************************************************
 
     SELECTONE TCB->State OF
     SET
 
-!********************************************************
-!		LISTEN State				!
-!********************************************************
+//********************************************************
+//		LISTEN State				!
+//********************************************************
 
     [CS$LISTEN]:
 	{
-!	XLOG$FAO(LOG$TCP,"!%T Received Seg in LISTEN State.!/", 0);
+//	XLOG$FAO(LOG$TCP,"!%T Received Seg in LISTEN State.!/", 0);
 	SELECTONE TRUE OF
 	SET
 	[Seg->SH$C_ACK]:	// "ACK" ?
@@ -1807,8 +1797,8 @@ Decode_Segment(TCB,Seg,QB)
 // snd_nxt (send next) & snd_Una(send oldest unackowledged seq #) are
 // both sent during TCB initialization (Init-TCB).
 
-!	    XLOG$FAO(LOG$TCBSTATE,
-!		     "!%T Decode-Seg: Received SYN for Passive connection.!/",0);
+//	    XLOG$FAO(LOG$TCBSTATE,
+//		     "!%T Decode-Seg: Received SYN for Passive connection.!/",0);
 	    TCB->RCV_NXT = Seg->SH$Seq + 1;	  // Next expected rcv sequence #.
 	    TCB->IRS = TCB->Snd_WL = Seg->SH$Seq;// set Initial rcv seq #  & window update.
 	    TCB->Snd_Wnd = Seg->SH$Window; 	  // Send window size in bytes.
@@ -1854,11 +1844,11 @@ Decode_Segment(TCB,Seg,QB)
 		     "!%T Decode-seg(LISTEN): Send_SYN$ACK failed, TCB=!XL!/",
 		     0,TCB);
 		Send_Reset(TCB,Seg->SH$Ack);
-		TCP$KILL_P}ING_REQUESTS(TCB,NET$_NRT);
+		TCP$KILL_PENDING_REQUESTS(TCB,NET$_NRT);
 		TCB$Delete(TCB);
 		Return(Error);
 		};
-!	    XLOG$FAO(LOG$TCBSTATE,"!%T Decode-seg: SYN-ACK sent.!/", 0);
+//	    XLOG$FAO(LOG$TCBSTATE,"!%T Decode-seg: SYN-ACK sent.!/", 0);
 
 
 // If data present then queue it for later.
@@ -1866,7 +1856,7 @@ Decode_Segment(TCB,Seg,QB)
 	    if (DataSize > 0)
 		{
 		XLOG$FAO(LOG$TCPERR,"!%T Decode Seg(Listen): SYN data dropped!/", 0);
-!~~~		RetCode = False;
+//~~~		RetCode = False;
 		};
 
 // make sure the connection stays alive.
@@ -1882,13 +1872,13 @@ Decode_Segment(TCB,Seg,QB)
 	return (RetCode);
 	};			// "LISTEN" State.
 
-!********************************************************
-!		"SYN-SENT" State.			!
-!********************************************************
+//********************************************************
+//		"SYN-SENT" State.			!
+//********************************************************
 
     [CS$SYN_SENT]:
 	{
-!	XLOG$FAO(LOG$TCP, "!%T Received Seg in SYN-SENT State.!/", 0);
+//	XLOG$FAO(LOG$TCP, "!%T Received Seg in SYN-SENT State.!/", 0);
 	ACK = -1;
 	if (Seg->SH$C_ACK)
 	    {
@@ -1896,7 +1886,7 @@ Decode_Segment(TCB,Seg,QB)
 	       (Seg->SH$ACK > TCB->Snd_Nxt) THEN
 		{
 		Send_Reset(TCB,Seg->SH$Ack); // Unacceptable "ACK".
-!		XLOG$FAO(LOG$TCPERR, "!%T (Syn-sent)Unacceptable ACK.!/", 0);
+//		XLOG$FAO(LOG$TCPERR, "!%T (Syn-sent)Unacceptable ACK.!/", 0);
 		RETURN(True);
 		}
 	    else		// acceptable "ACK"
@@ -1904,7 +1894,7 @@ Decode_Segment(TCB,Seg,QB)
 		IF (TCB->Snd_UNA LEQU Seg->SH$Ack) AND
 		   (Seg->SH$Ack LEQU TCB->Snd_Nxt) THEN
 		    {
-!		    XLOG$FAO(LOG$TCP, "!%T (Syn-sent)Valid ACK.!/", 0);
+//		    XLOG$FAO(LOG$TCP, "!%T (Syn-sent)Valid ACK.!/", 0);
 		    Ack = True;
 		    TCB->Snd_UNA = Seg->SH$ACK;
 		    ACK_RT_Queue(TCB,Seg->SH$ACK);
@@ -1919,7 +1909,7 @@ Decode_Segment(TCB,Seg,QB)
 
 	if (Seg->SH$C_RST)	// Connection refused - reset
 	    {
-	    TCP$KILL_P}ING_REQUESTS(TCB,NET$_CRef);
+	    TCP$KILL_PENDING_REQUESTS(TCB,NET$_CRef);
 	    TCP$Inactivate_TCB(TCB,NET$_CR);
 	    XLOG$FAO(LOG$TCBSTATE,
 		     "!%T Decode seg:(SYN-Sent) RESET TCB !XL!/",
@@ -1956,7 +1946,7 @@ Decode_Segment(TCB,Seg,QB)
 		else
 		    TCP$Set_TCB_State(TCB,CS$SYN_RECV);
 
-!		TCP$Send_Ack(TCB);
+//		TCP$Send_Ack(TCB);
 		TCP$Enqueue_Ack(TCB);
 
 // If data present then queue for later
@@ -1966,7 +1956,7 @@ Decode_Segment(TCB,Seg,QB)
 		    XLOG$FAO(LOG$TCPERR,
 			     "!%T Decode Seg: SYN-ACK data dropped, TCB=!XL!/",
 			     0,TCB);
-!~~~		    RetCode = False;
+//~~~		    RetCode = False;
 		    };
 
 // Process segment options, if any.
@@ -1985,9 +1975,9 @@ Decode_Segment(TCB,Seg,QB)
 	};	// End: "SYN-SENT" State.
     TES;
 
-!*******************************************************
-!	Process "Synchronized" Connection States       !
-!*******************************************************
+//*******************************************************
+//	Process "Synchronized" Connection States       !
+//*******************************************************
 
 // Advance connection timeout since the other end is sending something
 
@@ -2095,11 +2085,11 @@ Decode_Segment(TCB,Seg,QB)
 	    // start of the segment is before the right edge and the segment
 	    // may be held for future use.
 
-!	    [(SEQoffset LSS 0) && (TCB->RCV_WND > (-.SEQoffset))]:
+//	    [(SEQoffset LSS 0) && (TCB->RCV_WND > (-.SEQoffset))]:
 	    [(SEQoffset LSS 0) && (TCB->RCV_WND < (SEQoffset))]:
 		{
 		RetCode = Append_Future_Q(TCB,QB,Seg,SEQSize);
-!		TCB->Pending_ACK = TRUE; // Force an ACK for this
+//		TCB->Pending_ACK = TRUE; // Force an ACK for this
 		TCP$Enqueue_Ack(TCB);
 		return RetCode;
 		};
@@ -2151,7 +2141,7 @@ Decode_Segment(TCB,Seg,QB)
 		XLOG$FAO(LOG$TCPERR,
 			 "!%T Decode Seg: dup seg - Seg-ack (!UL) <=Snd-nxt (!UL)!/",
 				0, seg->sh$ack, TCB->SND_NXT);
-!		TCP$Send_Ack(TCB);
+//		TCP$Send_Ack(TCB);
 		TCP$Enqueue_Ack(TCB);
 		}
 	    else
@@ -2179,9 +2169,9 @@ Decode_Segment(TCB,Seg,QB)
 
 // Segment is acceptable (in the receive window->rcv_wnd).
 
-!********************************************************
-!		Check the "ACK" bit.			!
-!********************************************************
+//********************************************************
+//		Check the "ACK" bit.			!
+//********************************************************
 
     if (seg->SH$c_ack)
 	{
@@ -2296,7 +2286,7 @@ Decode_Segment(TCB,Seg,QB)
 		    }
 		else
 		    {
-		    TCP$KILL_P}ING_REQUESTS(TCB,NET$_KILL);
+		    TCP$KILL_PENDING_REQUESTS(TCB,NET$_KILL);
 		    TCB$Delete(TCB);
 		    XLOG$FAO(LOG$TCBSTATE,
 			     "!%T Connection purged and deleted !XL!/", TCB);
@@ -2317,7 +2307,7 @@ Decode_Segment(TCB,Seg,QB)
 		XLOG$FAO(LOG$TCBSTATE,
 			 "!%T DS(Last-ACK): FIN ACKed, deleting conn !XL!/",
 			 0,TCB);
-		TCP$KILL_P}ING_REQUESTS(TCB,NET$_CC);
+		TCP$KILL_PENDING_REQUESTS(TCB,NET$_CC);
 		TCB$Delete(TCB);
 		RETURN(Error);	// TCB gone - let caller delete the segment
 		}
@@ -2327,9 +2317,9 @@ Decode_Segment(TCB,Seg,QB)
 	TES;
 	};			// End: Check "ACK" Bit.
 
-!********************************************************
-!		Check "RST" Bit.			!
-!********************************************************
+//********************************************************
+//		Check "RST" Bit.			!
+//********************************************************
 
     if (Seg->sh$c_rst)
 	{
@@ -2354,7 +2344,7 @@ Decode_Segment(TCB,Seg,QB)
 		rc = NET$_CC
 	    else
 		rc = NET$_CR;
-	    TCP$KILL_P}ING_REQUESTS(TCB,rc);
+	    TCP$KILL_PENDING_REQUESTS(TCB,rc);
 	    XLOG$FAO(LOG$TCBSTATE,
 		     "!%T DS(!SL): RESET Connection !XL!/", 0,TCB->State,TCB);
 	    TCP$Inactivate_TCB(TCB,rc); // Let user know connection was reset.
@@ -2363,9 +2353,9 @@ Decode_Segment(TCB,Seg,QB)
 	TES;
 	};			// End: Check "RST" Bit.
 
-!********************************************************
-!		Check "SYN" Bit.			!
-!********************************************************
+//********************************************************
+//		Check "SYN" Bit.			!
+//********************************************************
 
     if (Seg->sh$c_syn)
 	{
@@ -2385,7 +2375,7 @@ Decode_Segment(TCB,Seg,QB)
 	    else
 		{		// In-window SYN - Bad news
 		Send_Reset(TCB,Seg->SH$Ack);
-		TCP$KILL_P}ING_REQUESTS(TCB,NET$_CR);
+		TCP$KILL_PENDING_REQUESTS(TCB,NET$_CR);
 		XLOG$FAO(LOG$TCBSTATE,
 			 "!%T Dup SYN, deleting connection !XL!/",0,TCB);
 		TCB$Delete(TCB);
@@ -2394,9 +2384,9 @@ Decode_Segment(TCB,Seg,QB)
 	    };
 	};			// End: Check "SYN" Bit.
 
-!********************************************************
-!		Check "URG" Bit.			!
-!********************************************************
+//********************************************************
+//		Check "URG" Bit.			!
+//********************************************************
 
     if (Seg->SH$C_URG)
 	{
@@ -2409,9 +2399,9 @@ Decode_Segment(TCB,Seg,QB)
 	    };
 	};
 
-!********************************************************
-!	Process Segment Text (Check for Data & EOL).	!
-!********************************************************
+//********************************************************
+//	Process Segment Text (Check for Data & EOL).	!
+//********************************************************
 
     if (SEQcount > 0)
 	{			// Have something in window
@@ -2458,9 +2448,9 @@ Decode_Segment(TCB,Seg,QB)
 		QB->NR$SEQ_start = SEQstart; // first usable seq #
 		QB->NR$SEQ_count = SEQcount; // count of usable seq #s
 		RetCode = Queue_Network_Data(TCB,QB); // maintain FIFO
-!		if (Retcode == TRUE)	// Don't ACK on error...
-!		    TCB->pending_ack = TRUE;
-!		    TCP$Send_Ack(TCB);
+//		if (Retcode == TRUE)	// Don't ACK on error...
+//		    TCB->pending_ack = TRUE;
+//		    TCP$Send_Ack(TCB);
 
 // If this is a TVT, tell TVT processing that there's new data.
 
@@ -2475,13 +2465,13 @@ Decode_Segment(TCB,Seg,QB)
 
 		    {
 		    if ((Retcode == TRUE))	// Don't ACK on error...
-!		    TCB->pending_ack = TRUE;
+//		    TCB->pending_ack = TRUE;
 			{
 			TCP$Enqueue_Ack(TCB);
 			} ;
 
 		    IF (QBR != TCB->UR_Qhead) AND
-!		       ((TCB->RCV_Q_Count GEQ QBR->UR$Size) OR
+//		       ((TCB->RCV_Q_Count GEQ QBR->UR$Size) OR
 		       ((TCB->RCV_Q_Count > 0) || (QB->NR$EOL)) THEN
 			{
 			TCP$Deliver_User_Data(TCB);
@@ -2492,13 +2482,13 @@ Decode_Segment(TCB,Seg,QB)
 	TES;
 	};
 
-!********************************************************
-!		Check "FIN" Bit.			!
-!********************************************************
+//********************************************************
+//		Check "FIN" Bit.			!
+//********************************************************
 
     if (Seg->SH$C_FIN && NOT Seg_Trimmed)
 	{
-!	TCB->Pending_ACK = True;// Flag we need to ACK.
+//	TCB->Pending_ACK = True;// Flag we need to ACK.
 	TCP$Enqueue_ACK(TCB) ;
 
 // Set PUSH pointer to end of this segment to force any current data to be
@@ -2518,7 +2508,7 @@ Decode_Segment(TCB,Seg,QB)
 
 	if (TCB->RCV_Q_Count == 0)
 	    {
-	    WHILE (REMQUE(TCB->UR_Qhead,QBR)) != Empty_Queue DO
+	    while ((REMQUE(TCB->UR_Qhead,QBR)) != Empty_Queue)
 		{
 		User$Post_IO_Status(QBR->UR$Uargs,
 				     SS$_NORMAL,0,NSB$PUSHBIT,0);
@@ -2565,7 +2555,7 @@ Decode_Segment(TCB,Seg,QB)
 // else queue). TRUE or ERROR means OK to deallocate segment.
 
     return RetCode;
-    };
+    }
 
 
 
@@ -2578,12 +2568,12 @@ Check_Cum_Ack ( struct tcb_structure * tcb , Idx , P1 , P2 )
 	    TCP$Deliver_User_Data(TCB); // Try to give the user data.
 	XLOG$FAO(LOG$TCP,"!%T SEGIN sending cum ACK, TCB=!XL!/",
 			     0,TCB);
-!	TCP$Send_Ack(TCB); // send the cumulative ACK segment.
+//	TCP$Send_Ack(TCB); // send the cumulative ACK segment.
 	TCP$Enqueue_Ack(TCB); // send the cumulative ACK segment.
 	1
 	}
     else 0
-    };
+    }
 
 
 //SBTTL "Network Segment Arrival Main Processing Loop"
@@ -2623,15 +2613,14 @@ LITERAL
 
 SEG$Process_Received_Segments : NOVALUE (void)
     {
-    EXTERNAL ROUTINE
-	TCB_FIND,
-	VTCB_SCAN;
-    REGISTER
+extern	TCB_FIND();
+extern	VTCB_SCAN();
+    register
 	struct tcb_structure * tcb,
 	struct Segment_Structure * SEG;
     signed long
 	RQV,
-	struct Queue_Blk_Structure * QB(QB_NR_Fields),
+	struct queue_blk_structure(QB_NR_Fields) * QB,
  	sum,
 	count,
 	Need_2_ACK = False, // assume: NO cumulative ACK's needed.
@@ -2642,9 +2631,9 @@ SEG$Process_Received_Segments : NOVALUE (void)
 
 // Process segments until queue is empty
 
-!~~~WHILE XREMQUE(Segin->SI_Qhead,QB,Process_Received_Segments,Q$SEGIN,0)
-!~~~	  != Empty_Queue DO
-    WHILE (RQV = REMQUE(Segin->SI_Qhead,QB)) != Empty_Queue DO
+//~~~WHILE XREMQUE(Segin->SI_Qhead,QB,Process_Received_Segments,Q$SEGIN,0)
+//~~~	  != Empty_Queue DO
+    while ((RQV = REMQUE(Segin->SI_Qhead,QB)) != Empty_Queue)
 	{
 	ts$sr = ts$sr + 1;	// count segments received from IP.
 	Seg = QB->NR$Seg;	// point at segment proper.
@@ -2666,7 +2655,7 @@ SEG$Process_Received_Segments : NOVALUE (void)
 		    {
 		    signed long
 			DESC$STR_ALLOC(fhstr,20);
-!!		    ASCII_DEC_BYTES(fhstr,4,QB->NR$Dest_Adrs,
+//!		    ASCII_DEC_BYTES(fhstr,4,QB->NR$Dest_Adrs,
 		    ASCII_DEC_BYTES(fhstr,4,QB->NR$Dest_Adrs,
 				    fhstr->DSC$W_LENGTH);
 		    LOG$FAO("!%T ICMP for unknown TCB,FH=!AS,FP=!XL,LP=!XL!/",
@@ -2682,7 +2671,7 @@ SEG$Process_Received_Segments : NOVALUE (void)
 		SET
 		[ICM_DUNREACH]:	// Destination unreachable - treat as RESET
 		    {
-		    TCP$KILL_P}ING_REQUESTS(TCB,NET$_URC);
+		    TCP$KILL_PENDING_REQUESTS(TCB,NET$_URC);
 		    XLOG$FAO(LOG$TCBSTATE || LOG$ICMP,
 			     "!%T TCB !XL killed by ICMP Dest Unreachable!/",
 			     0,TCB);
@@ -2691,7 +2680,7 @@ SEG$Process_Received_Segments : NOVALUE (void)
 
 		[ICM_TEXCEED]:	// Time exceeded - treat as RESET
 		    {
-		    TCP$KILL_P}ING_REQUESTS(TCB,NET$_CTO);
+		    TCP$KILL_PENDING_REQUESTS(TCB,NET$_CTO);
 		    XLOG$FAO(LOG$TCBSTATE || LOG$ICMP,
 			     "!%T TCB !XL killed by ICMP Time Exceeded!/",
 			     0,TCB);
@@ -2863,6 +2852,6 @@ Y:		{
     if (Need_2_ACK)
 	VTCB_Scan ( Check_Cum_Ack , 0 , 0 );
 
-    };
+    }
 }
 ELUDOM

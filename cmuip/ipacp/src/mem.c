@@ -94,7 +94,7 @@ Make_Zone : NOVALUE (void)
 	};
     Mem_Stat();
     return (User_Zone)
-    };
+    }
 
 Get_Mem (Size, Block_A, Zone)
     {
@@ -108,7 +108,7 @@ Get_Mem (Size, Block_A, Zone)
 	0, status, size, Block_A, Zone) ;
     Mem_Stat();
     return (Status)
-    };
+    }
 
 Free_Mem (Size, Block_A, Zone)
     {
@@ -120,7 +120,7 @@ Free_Mem (Size, Block_A, Zone)
 	0, status, size, Block_A, Zone) ;
     Mem_Stat() ;
     return (Status)
-    };
+    }
 
 Reset_Mem (Size, Block_A, Zone)
     {
@@ -132,7 +132,7 @@ Reset_Mem (Size, Block_A, Zone)
 	0, status, size, Block_A, Zone) ;
     Mem_Stat() ;
     return (Status)
-    };
+    }
 
 Mem_Stat : NOVALUE (void)
     {
@@ -150,6 +150,6 @@ Mem_Stat : NOVALUE (void)
     XLOG$FAO(LOG$MEM,"!%T MEM_STAT: Gets: !SL, Frees: !SL, Bytes: !SL!/",
 	0,ngets, nfrees, nbytes);
     if (NOT Status) Signal (Status);
-    };
+    }
 }
 ELUDOM

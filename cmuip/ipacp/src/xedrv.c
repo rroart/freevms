@@ -245,7 +245,7 @@ MACRO
 
 static signed long
     // String descriptor used to hold description
-    XE_descriptor : VECTOR->2;
+    XE_descriptor : VECTOR[2];
 
 
 //SBTTL "Declare the device information block used to describe entry points."
@@ -295,7 +295,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
     DRV$OPR_FAO ("XEDRV: MPBS = !SL",DRV$MAX_PHYSICAL_BUFSIZE);
 
     XE_Int->XEI$curhdr = 0;
-    INCR I FROM 0 TO (MAX_RCV_BUF-1) DO
+    for (I=0;I<=(MAX_RCV_BUF-1);I++)
 	{	// Get buffer, put on Q and issue IO$_READVBLK function
 	Buff = DRV$Seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
 	INSQUE ( Buff , XE_Int [ XEI$recv_Qtail ] );
@@ -333,7 +333,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
 
     XE_Int->XEI$IO_queued = TRUE;
     return -1;
-    };
+    }
 
 
 
@@ -445,7 +445,7 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 // Everything OK - return TRUE value
 
     return -1;
-    };
+    }
 
 XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 		     struct XE_Addrs_structure * phaddr,
@@ -483,7 +483,7 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 
     Paramdescr [XE$SETUP_LENGTH] = IOS [XE$Tran_Size];
 
-    WHILE Paramdescr [XE$SETUP_LENGTH] > 0 DO
+    while (Paramdescr [XE$SETUP_LENGTH] > 0)
 	{
 	BIND
 	    Param = Paramdescr [XE$SETUP_ADDRESS] : $BBLOCK FIELD (XE_Sense);
@@ -514,7 +514,7 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 // Return success
 
     return -1;
-    };
+    }
 
 //SBTTL "Start device - top-level"
 
@@ -627,7 +627,7 @@ XE_StartAll ( XE_Int , restart )
     dev_config [dc_online] = True;
 
     return True;
-    };
+    }
 
 
 
@@ -648,7 +648,7 @@ void XE_FreeBufs ( struct XE_Interface_Structure * XE_Int ) (void)
 
 // Flush IP buffers
 
-    WHILE REMQUE ( XE_Int [ XEI$recv_Qhead ] , BUFF ) != EMPTY_QUEUE DO
+    while (REMQUE ( XE_Int [ XEI$recv_Qhead ] , BUFF ) != EMPTY_QUEUE)
 	DRV$Seg_Free ( DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len + IOS_len) , BUFF );
 
 // Release the ARP buffer
@@ -662,7 +662,7 @@ void XE_FreeBufs ( struct XE_Interface_Structure * XE_Int ) (void)
 // Say that this has been done.
 
     XE_Int [ XEI$need_2_free ] = FALSE;
-    };
+    }
 
 void XE_Shutdown ( XE_Int , restart ) (void)
 !
@@ -740,7 +740,7 @@ void XE_Shutdown ( XE_Int , restart ) (void)
 // Allow AST's again
     DRV$OKINT;
 
-    };
+    }
 
 //SBTTL	"Ethernet driver check routine"
 // Routine to call whenever the device is offline and shouldn't be.
@@ -777,7 +777,7 @@ XE$CHECK ( struct Device_Configuration_Entry * dev_config )
 
 // Return 0 since device still needs attention.
 	0
-    };
+    }
 
 //Sbttl   "Ethernet driver init routine"
 /******************************************************************************
@@ -899,12 +899,12 @@ void 		  IPACP_Int, max_retry, MPBS) (void)
 // Fill in the dev_config ifTable fields
     {
     BIND
-	desc = dev_config->dcmib_ifDescr : $BBLOCK->8;
+	desc = dev_config->dcmib_ifDescr : $BBLOCK[8];
 
 //    dev_config->dcmib_ifIndex = -1;	// Filled by IPACP
 
-    desc->DSC$W_LENGTH = XE_Descriptor->0;
-    desc->dsc$A_POINTER = XE_Descriptor->1;
+    desc->DSC$W_LENGTH = XE_Descriptor[0];
+    desc->dsc$A_POINTER = XE_Descriptor[1];
 
     dev_config->dcmib_ifType = 6;		// EtherNet
     dev_config->dcmib_ifMTU = DRV$MAX_PHYSICAL_BUFSIZE;
@@ -927,12 +927,12 @@ void 		  IPACP_Int, max_retry, MPBS) (void)
     dev_config->dcmib_ifOutDiscards = 0;
     dev_config->dcmib_ifOutErrors = 0;
     dev_config->dcmib_ifOutQLen = 0;
-    };
+    }
 
 // Ok to take AST's again
     DRV$OKINT;
 
-    };
+    }
 
 
 //Sbttl   "Ethernet driver xmit"
@@ -965,8 +965,8 @@ MACRO
     EXTERNAL ROUTINE
 	XEARP$LOG : NOVALUE;
 
-    STR_DESC->0 = %CHARCOUNT(MSG);
-    STR_DESC->1 = UPLIT(MSG);
+    STR_DESC[0] = %CHARCOUNT(MSG);
+    STR_DESC[1] = UPLIT(MSG);
 
     XEARP$LOG(STR_DESC,IPADDR,6,HWADDR);
     } %;
@@ -1084,7 +1084,7 @@ X:	{
 	DRV$Qblk_free(QB);
 	};
     DRV$OKINT;
-    };
+    }
 
 //SBTTL   "Ethernet driver recv"
 /******************************************************************************
@@ -1238,7 +1238,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int ) (void)
 	};
 
     DRV$AST_in_Progress = False;
-    };
+    }
 
 
 //Sbttl   "Ethernet driver arp recv"
@@ -1312,7 +1312,7 @@ XE_ArpRcv( struct XE_Interface_Structure * XE_Int ): NOVALUE (void)
 	XE$ERR(XE_Int,"XE ARP read failure, RC = !XL",RC);
 
     DRV$AST_in_Progress = False;
-    };
+    }
 
 
 //SBTTL "ARP transmit routine"
@@ -1350,7 +1350,7 @@ XE$ARP_XMIT(XE_Int,arbuf,arlen,dest) : NOVALUE (void)
 	if ($$LOGF(LOG$PHY))
 	    XE_LOG("XE ARP xmit",0,dest);
     DRV$OKINT ;
-    };
+    }
 
 //SBTTL "Perform device specific DUMP functions"
 
@@ -1370,7 +1370,7 @@ XE$dump(dev_config, funct, arg, buffer, sizeAdrs)
 	[Otherwise] :
 	    0
 	TES
-    };
+    }
 
 
 
@@ -1380,8 +1380,8 @@ DRV$TRANSPORT_INIT (void)
     {
 
     // Fill in the EtherNet description string
-    XE_descriptor->0 = %CHARCOUNT(XE_description);
-    XE_descriptor->1 = UPLIT(XE_description);
+    XE_descriptor[0] = %CHARCOUNT(XE_description);
+    XE_descriptor[1] = UPLIT(XE_description);
 
     // Provide the XEDRV entry points
     DRV$Device_Info->DI$Init	= XE$Init;
@@ -1390,7 +1390,7 @@ DRV$TRANSPORT_INIT (void)
     DRV$Device_Info->DI$Check	= XE$Check;
 
     DRV$Device_Info
-    };
+    }
 
 
 }

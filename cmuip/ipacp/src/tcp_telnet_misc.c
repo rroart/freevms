@@ -483,7 +483,7 @@ Print (Control_string, P1)=
 	PRMLST = P1);
     if (NOT Status) return Status;
     Send_2_Operator(Out_Desc)
-    };
+    }
 
 
 
@@ -559,7 +559,7 @@ void Line_Changed_AST (Parm) (void)
 		,"!%T Set_LINE_Change_AST: SETMODE status=!UL!/"
 		,0,io_stats[0,0,16,0]);
 	};
-    };
+    }
 
 
 IS_CNTRLT_GOOD (TVT)
@@ -596,7 +596,7 @@ IS_CNTRLT_GOOD (TVT)
 	(Charistics->TT$V_PASSALL == 1) OR
 	(Extend_Char->TT2$V_PASTHRU == 1)
 	)
-    };
+    }
 
 
 
@@ -616,7 +616,7 @@ Timing_Mark_On(TVT) : NOVALUE (void)
 
     LCLOPTS[Telnet$K_Timing_Mark,OPT$STATE] = OPT$STATE_OFF;
 
-    };
+    }
 
 
 
@@ -678,9 +678,9 @@ void Set_PTY_Window_Size (TVT, pag, width) (void)
 		,"!%T Set_PTY_Window_size: SETMODE status=!UL!/",
 		0,io_stats[0,0,16,0]);
 	}
-    };
+    }
     SS$_NORMAL
-    };
+    }
 
 Void Window_Size_Sub (TVT) (void)
 !++
@@ -708,7 +708,7 @@ Void Window_Size_Sub (TVT) (void)
     Set_PTY_Window_Size(TVT, Length, Width);
 
     SS$_NORMAL
-    };
+    }
 
 
 void Set_PTY_Term_Type (TVT, type, devdep) (void)
@@ -723,7 +723,7 @@ void Set_PTY_Term_Type (TVT, type, devdep) (void)
     EXTERNAL ROUTINE
 	SET_DEVDEP;
     MAP
-	struct VECTOR * devdep->2;
+	struct VECTOR * devdep[2];
     MAP
 	struct TVT$BLOCK * TVT;
     BIND
@@ -772,7 +772,7 @@ void Set_PTY_Term_Type (TVT, type, devdep) (void)
 			 || TT$M_MECHTAB
 			 || TT$M_WRAP
 			 || TT$M_SCOPE)))
-		OR		devdep->0;
+		OR		devdep[0];
 	PTY_Char[QCB$L_EXT}_CHAR]= (PTY_Char[QCB$L_EXT}_CHAR] AND
 		(NOT	(   TT2$M_PRINTER
 			 || TT2$M_REGIS
@@ -785,7 +785,7 @@ void Set_PTY_Term_Type (TVT, type, devdep) (void)
 			 || TT2$M_DECCRT
 			 || TT2$M_DECCRT2
 			 || TT2$M_DECCRT3)))
-	OR		devdep->1;
+	OR		devdep[1];
 
 	Charistics [TT$V_EIGHTBIT] = State_Binary || State_Eightbit;
 	Status = $QIOW (
@@ -808,9 +808,9 @@ void Set_PTY_Term_Type (TVT, type, devdep) (void)
 	};
 	TVT->TVT$TTSET = 1;		// Set TTSET flag
 	SET_DEVDEP(TVT);
-    };
+    }
     SS$_NORMAL
-    };
+    }
 
 Void Terminal_Type_On (TVT) (void)
 !++
@@ -828,7 +828,7 @@ Void Terminal_Type_On (TVT) (void)
     TVT_S}_SUBOP(TVT,Telnet$K_Terminal_Type,
         %REF(Option$K_Terminal_Type_Send), 1);
 
-    };
+    }
 
 Void Window_Size_On (TVT) (void)
 !++
@@ -847,7 +847,7 @@ Void Window_Size_On (TVT) (void)
     TVT_S}_SUBOP(TVT,Telnet$K_Window_Size,
         %REF(Option$K_Terminal_Type_Send), 1);
 
-    };
+    }
 
 Lookup_terminal(Term_Desc, Devdep)
 !++
@@ -859,7 +859,7 @@ Lookup_terminal(Term_Desc, Devdep)
 !--
 {
     MAP
-        struct VECTOR * Devdep->2,
+        struct VECTOR * Devdep[2],
 	Term_Desc	: REF Block[8,BYTE];
     EXTERNAL ROUTINE
 	STR$UPCASE		: BLISS ADDRESSING_MODE(GENERAL),
@@ -875,7 +875,7 @@ Lookup_terminal(Term_Desc, Devdep)
 !
 !	Setup buffer to hold input string
 !
-	Buffer->1="*";
+	Buffer[1]="*";
 	TYPDSC->DSC$W_LENGTH = %ALLOCATION(Buffer)-2;
 	TYPDSC->DSC$B_DTYPE = DSC$K_DTYPE_T;
 	TYPDSC->DSC$B_CLASS = DSC$K_CLASS_S;
@@ -891,8 +891,8 @@ Lookup_terminal(Term_Desc, Devdep)
 !	Now add the * to the string for a wild match
 !
 	TYPDSC->DSC$W_LENGTH = TYPDSC->DSC$W_LENGTH +1;
-	Buffer->0 = TERM_DESC->DSC$W_LENGTH+1;
-    INCR i FROM 1 TO Term_Table->0 DO
+	Buffer[0] = TERM_DESC->DSC$W_LENGTH+1;
+    INCR i FROM 1 TO Term_Table[0] DO
 	{
 
 !!!	Status =  STR$CASE_BLIND_COMPARE(
@@ -900,18 +900,18 @@ Lookup_terminal(Term_Desc, Devdep)
 !	Make a wild match
 !
 	Status =  STR$MATCH_WILD(
-			.Term_Table[Term_Table->1*.i+0],
+			.Term_Table[Term_Table[1]*.i+0],
 			TYPDSC);
 	    if ((Status && 1) == 1)
 	    {
-		devdep->0 = Term_Table[Term_Table->1*.i+2];
-		devdep->1 = Term_Table[Term_Table->1*.i+3];
-		RETURN(Term_Table[Term_Table->1*.i+1]);
+		devdep[0] = Term_Table[Term_Table[1]*.i+2];
+		devdep[1] = Term_Table[Term_Table[1]*.i+3];
+		RETURN(Term_Table[Term_Table[1]*.i+1]);
 	    };
 	};
 
     -1
-    };
+    }
 
 Void Terminal_Type_Sub (TVT) (void)
     {
@@ -931,7 +931,7 @@ Void Terminal_Type_Sub (TVT) (void)
 		REMOPTS[Telnet$K_Terminal_type,OPT$BASE]) : OPT$BLOCK;
     signed long
 	Type_id  = %X"FFFF",
-	devdep  : VECTOR->2,
+	devdep  : VECTOR[2],
 	Status,
 	OLDTYPDSC : BLOCK[DSC$K_Z_BLN,BYTE],
 	TYPDSC : BLOCK[DSC$K_Z_BLN,BYTE];
@@ -969,7 +969,7 @@ Void Terminal_Type_Sub (TVT) (void)
 	TVT->TVT$KILL_TERMINAL_TYPE = TVT->TVT$KILL_TERMINAL_TYPE+1;
 	Status = STR$COPY_DX(OLDTYPDSC,TYPDSC);
     SS$_NORMAL
-    };
+    }
 
 Set_DEVDEP_DONE(TVT) : NOVALUE (void)
     {
@@ -1127,7 +1127,7 @@ Set_DEVDEP(TVT) : NOVALUE (void)
 		,"!%T Set_DEVDEP: SETMODE PTY status=!UL!/",
 		0,io_stats[0,0,16,0]);
 	}
-    };
+    }
 
     TVT->TVT$TTSET = Changed;
     if (NOT Changed) RETURN(SS$_Normal);
@@ -1206,7 +1206,7 @@ Set_DEVDEP(TVT) : NOVALUE (void)
 !!!JC		,"!%T Set_DEVDEP: pty_chan=!UL!/",0,PTY_chan);
 
     SS$_NORMAL
-    };
+    }
 
 
 Void LineMode_Sub (TVT) (void)
@@ -1238,7 +1238,7 @@ Void LineMode_Sub (TVT) (void)
 	}
 */
     SS$_NORMAL
-    };
+    }
 
 
 /*
@@ -1249,7 +1249,7 @@ Linemode_SubOp_Mode ( Mask )
     signed long
 	New_Mask : BYTE,
 	Mode_EDIT,Mode_TRAPSIG,
-	SubOption_Data	: $BBLOCK->2,
+	SubOption_Data	: $BBLOCK[2],
 	SubOption_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
 				[DSC$W_LENGTH]	= %ALLOCATION(SubOption_Data),
 				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
@@ -1266,14 +1266,14 @@ Linemode_SubOp_Mode ( Mask )
 	{
 	Linemode_Modeflags = Mask;
 	Mask<Option$K_Linemode_Mode_EDIT_ACK,1> = 1;
-	SubOption_Data->0 = Option$K_Linemode_Mode;
-	SubOption_Data->1 = Mask;
+	SubOption_Data[0] = Option$K_Linemode_Mode;
+	SubOption_Data[1] = Mask;
 	!!!HACK!!// ???
 	Send_TCP_SubOption ( Option$K_Linemode , SubOption_Desc )
 	};
 
     SS$_NORMAL
-    };
+    }
 
 
 Linemode_SubOp_Forwardmask ( Action , Data_A , Length )
@@ -1291,7 +1291,7 @@ Linemode_SubOp_Forwardmask ( Action , Data_A , Length )
 	[Telnet$K_DO] :
 	    {
 !!!HACK!!// Should check for double IACs? Should check for Binary mode?
-	    WHILE SrcI LSS Length DO
+	    while (SrcI LSS Length)
 		{
 		Curr_FMask[DstI] = Data[SrcI];
 		DstI = DstI + 1;
@@ -1305,7 +1305,7 @@ Linemode_SubOp_Forwardmask ( Action , Data_A , Length )
 	TES;
 
     SS$_NORMAL
-    };
+    }
 
 
 
@@ -1345,7 +1345,7 @@ Process_SLC(Code,Modifier,Value,Reply_Desc)
     Append_Char(Reply_Desc,Value);
 
     SS$_NORMAL
-    };
+    }
 
 Linemode_SubOp_SLC(Data_A, Length)
     {
@@ -1358,18 +1358,18 @@ Linemode_SubOp_SLC(Data_A, Length)
 				[DSC$B_CLASS]	= DSC$K_CLASS_D,
 				[DSC$A_POINTER]	= 0);
 
-    WHILE LENGTH GEQ 3 DO
+    while (LENGTH GEQ 3)
 	{
-	Process_SLC(Data->0, Data->1, Data->2, Reply_Desc);
+	Process_SLC(Data[0], Data[1], Data[2], Reply_Desc);
 	Length = Length - 3;
-	Data = Data->3
+	Data = Data[3]
 	};
 
     if (Reply_Desc->DSC$W_LENGTH > 0)
 	Send_TCP_SubOpt ( Option$K_Linemode , Reply_Desc );
 
     SS$_NORMAL
-    };
+    }
 */
 
 } ELUDOM

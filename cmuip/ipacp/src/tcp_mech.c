@@ -56,42 +56,44 @@ Modification History:
 1.0a	25-Jan-1991	Henry W. Miller		USBR
 	Make WINDOW_DEFAULT a configurable variable.
 
- )%
+*/
 
 
 //SBTTL "Module definition"
 
+#if 0
 MODULE TCP_MECH(IDENT="1.0c",LANGUAGE(BLISS32),
 		ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 				NONEXTERNAL=LONG_RELATIVE),
 		LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
 		OPTIMIZE,OPTLEVEL=3,ZIP)
+#endif
 
-{
-#include "SYS$LIBRARY:STARLET";	// VMS system definitions
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// XPORT data structure definitions
-#include "CMUIP_SRC:[CENTRAL]NETERROR";	// Network error message definitions
-#include "CMUIP_SRC:[CENTRAL]NETVMS";	// Special VMS definitions
-#include "CMUIP_SRC:[CENTRAL]NETCOMMON";// Network common defs
-#include "CMUIP_SRC:[CENTRAL]NETTCPIP";	// TCP/IP protocols
-#include "STRUCTURE";		// TCP system data structure definitions
-#include "TCPMACROS";		// System macro definitions
-#include "TCP";			// TCP related definitions
-#include "SNMP";			// Simple Network Management Protocol
+#include <starlet.h>	// VMS system definitions
+     // not yet #include <cmuip/central/include/netxport.h>	// XPORT data structure definitions
+#include <cmuip/central/include/neterror.h>	// Network error message definitions
+#include "netvms.h"	// Special VMS definitions
+#include <cmuip/central/include/netcommon.h> // Network common defs
+#include <cmuip/central/include/nettcpip.h>	// TCP/IP protocols
+#include "structure.h"		// TCP system data structure definitions
+#include "tcpmacros.h"		// System macro definitions
+#include "tcp.h"			// TCP related definitions
+#include "snmp.h"			// Simple Network Management Protocol
+
+#include <ssdef.h>
 
 extern
-    MM$Get_Mem, MM$Free_Mem;
+    MM$Get_Mem(), MM$Free_Mem();
 
 
 //SBTTL "System variable allocation and declaration"
 
-extern ^GLOBAL
-    WINDOW_DEFAULT ;
+extern
+    window_default ;
 
-signed long
-    Start_Time: VECTOR->2,	// Quadword time IPACP started.
-    TEK$sys_uptime : VECTOR->2,	// Quadword delta time since IPACP started.
-    TCP_MIB : TCP_MIB_struct;	// TCP management Information Block
+unsigned long long    Start_Time;	// Quadword time IPACP started.
+unsigned long long    TEK$sys_uptime;	// Quadword delta time since IPACP started.
+struct TCP_MIB_struct * TCP_MIB;	// TCP management Information Block
 
 
 
@@ -108,21 +110,20 @@ TCB's are accessed thru the CONECT method or via the LOCAL-CONNECTION-ID which
 is actually the TCB's address.
 */
 
-static ^GLOBAL
-    ConectSize,
-    struct Connection_Table_Structure * ConectPtr;
+static ConectSize;
+static struct connection_table_structure * ConectPtr;
 
 signed long
-    MAX_LOCAL_PORTS  = 30,	// Settable in CONFIG
+    MAX_LOCAL_PORTS  = 30;	// Settable in CONFIG
 
 // Valid TCB table, contains pointers to valid TCB's. Used to verify 
 // user supplied Local_connection_Id.  As one sees: A local_Connection_ID is
 // actually the address of a TCB.
 
-    struct VECTOR * VTCB_ptr->0,
-    Max_TCB  = 0,
-    Max_CONN  = 60,	// Settable in CONFIG
-    VTCB_size  = 0,
+signed long vtcb_ptr[0];
+signed long    Max_TCB  = 0,
+    MAX_CONN  = 60,	// Settable in CONFIG
+    VTCB_Size  = 0,
     TCB_Count  = 0;	// # of valid TCB's in VTCB table.
 
 
@@ -147,27 +148,27 @@ Side Effects:
 	Allocate and initialize the TCP tables.
 */
 
-!!!HACK!!// we're breaking the ADT... (gasp)
+//!!HACK!!// we're breaking the ADT... (gasp)
 
-TCP$Init: NOVALUE (void)
+void TCP$Init (void)
     {
     signed long
 	cidx;
 
     // Allocate the connection list
     ConectSize = MAX_LOCAL_PORTS;
-    MM$Get_Mem( ConectPtr , ConectSize * CN$Blk_Size * 4 );
-    INCR cidx FROM 0 TO (ConectSize-1) DO
+    MM$Get_Mem( ConectPtr , ConectSize * CN$BLK_SIZE * 4 );
+    for (cidx=0;cidx<=ConectSize-1;cidx++)
 	{				// Initialize connection table
-	ConectPtr[cidx,CN$TCB_List] = ConectPtr[cidx,CN$TCB_List];
-	ConectPtr[cidx,CN$TCB_Tail] = ConectPtr[cidx,CN$TCB_List];
-	ConectPtr[cidx,CN$Local_Port] = -1;
+	ConectPtr[cidx].CN$TCB_List = ConectPtr[cidx].CN$TCB_List;
+	ConectPtr[cidx].CN$TCB_Tail = ConectPtr[cidx].CN$TCB_List;
+	ConectPtr[cidx].CN$Local_Port = -1;
 	};
 
     // Allocate the valid TCB table
     VTCB_Size = MAX_CONN;
-    MM$Get_Mem ( VTCB_Ptr , (VTCB_Size+1) * 4 );
-    CH$FILL ( 0 , (VTCB_Size+1) * 4 , VTCB_Ptr );
+    MM$Get_Mem ( vtcb_ptr , (VTCB_Size+1) * 4 );
+    CH$FILL ( 0 , (VTCB_Size+1) * 4 , vtcb_ptr );
 
     TCP_MIB->MIB$tcpRtoAlgorithm= 0;
     TCP_MIB->MIB$tcpRtoMin	= 0;
@@ -186,9 +187,9 @@ TCP$Init: NOVALUE (void)
 
 
 
-!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // VTCB ADT routines
-!---------------------------------------------------------------------
+//---------------------------------------------------------------------
 
 
 
@@ -216,20 +217,19 @@ Side Effects:
 */
 
 
-VTCB_Insert ( struct tcb_structure * tcb )
+VTCB_Insert ( struct tcb_structure * TCB )
     {
-    EXTERNAL ROUTINE
-	MovByt;
-    signed long
+extern	MovByt();
+ signed long J,
 	Indx,
 	Old;
 
     NOINT;
 
     Indx = 0;
-    INCR J FROM 1 TO VTCB_Size DO
-	if (VTCB_ptr[J] == 0)
-	    EXITLOOP Indx = J;
+    for (J=1;J<=VTCB_Size;J++)
+	if (vtcb_ptr[J] == 0) 
+	  { Indx = J; break; }
     if (Indx == 0)
 	{
 	OPR$FAO("MMgr: Growing Valid TCB table to !SW entries...!/",
@@ -240,9 +240,9 @@ VTCB_Insert ( struct tcb_structure * tcb )
 	Indx = VTCB_Size;
 	VTCB_Size = VTCB_Size * 2;
 
-	Old = VTCB_Ptr;
-	MM$Get_Mem( VTCB_Ptr , (VTCB_Size+1) * 4 );
-	MovByt ( (Indx+1) * 4 , Old , VTCB_Ptr );
+	Old = vtcb_ptr;
+	MM$Get_Mem( vtcb_ptr , (VTCB_Size+1) * 4 );
+	MovByt ( (Indx+1) * 4 , Old , vtcb_ptr );
 	MM$Free_Mem( Old , (Indx+1) * 4 );
 
         Indx = Indx + 1;
@@ -250,48 +250,46 @@ VTCB_Insert ( struct tcb_structure * tcb )
 
     // Maintain pointer to last TCB in table
     if (Indx > Max_TCB) Max_TCB = Indx;
-!OPR$FAO("!%T Max_TCB = !UW",0,Max_TCB);
+//OPR$FAO("!%T Max_TCB = !UW",0,Max_TCB);
 
     // Link the new TCB into the Valid TCB table.
-    VTCB_ptr[Indx] = TCB; // set TCB's address
+    vtcb_ptr[Indx] = TCB; // set TCB's address
     TCB_Count = TCB_Count + 1; // Keep track of active TCB's.
-    TCB->VTCB_INDEX = Indx; // Remember index into Valid TCB Table
+    TCB->vtcb_index = Indx; // Remember index into Valid TCB Table
 
     OKINT;	// Carry on...
 
-    SS$_NORMAL
-    };
+    return SS$_NORMAL;
+    }
 
 
 
-VTCB_Remove ( struct tcb_structure * tcb )
+VTCB_Remove ( struct tcb_structure * TCB )
     {
-    signed long
-	Idx;
+      signed long J,
+	IDX;
 
     // Get index into Valid TCB table
-    IDX = TCB->VTCB_INDEX;
-    if (VTCB_ptr[IDX] EQLA TCB)
+    IDX = TCB->vtcb_index;
+    if (vtcb_ptr[IDX] == TCB)
 	{
-	LABEL
-	    X;
-
-        VTCB_ptr[IDX] = 0;	// Clean out entry
+        vtcb_ptr[IDX] = 0;	// Clean out entry
 	TCB_Count = TCB_Count-1; // Account for this TCB going away.
-	if (Max_TCB <= Idx)
+	if (Max_TCB <= IDX)
 	   X : {
-	   DECR J FROM Idx TO 1 DO
-		if (VTCB_ptr[J] != 0) LEAVE X WITH Max_TCB = J;
+	   for (J=IDX;J>=1;J--)
+	     if (vtcb_ptr[J] != 0) { Max_TCB = J; goto leave; }
 	   // No valid TCB's left?  Do a sanity check.
-	   DECR J FROM VTCB_Size TO 1 DO
-		if (VTCB_ptr[J] != 0) LEAVE X WITH Max_TCB = J;
+	   for (J=VTCB_Size;J>=1;J--)
+	     if (vtcb_ptr[J] != 0) { Max_TCB = J; goto leave; }
 	   Max_TCB = 1;
 	   };  // end of block X
+	leave:
 	}
     else return 0;
 
-    TCB
-    };
+    return TCB;
+    }
 
 
 
@@ -320,70 +318,71 @@ Side Effects:
 
 
 VTCB_Scan ( ASTRTN , ASTP1 , ASTP2 )
+     signed long (*ASTRTN)();
     {
-    signed long
+      signed long J,
 	sum  = 0,
 	count;
 
-    count = TCB_count;
+    count = TCB_Count;
 
     NOINT;
 
-    INCR j FROM 1 TO VTCB_Size DO
-	if (VTCB_ptr[J] NEQA 0)
+    for (J=1;J<=VTCB_Size;J++)
+	if (vtcb_ptr[J] != 0)
 	    {
-	    if (j > Max_TCB)
-		OPR$FAO("%T TCB (!UL) above Max_TCB (!UL)",j,Max_TCB);
+	    if (J > Max_TCB)
+		OPR$FAO("%T TCB (!UL) above Max_TCB (!UL)",J,Max_TCB);
 
-	    sum = sum + (ASTRTN)(VTCB_ptr[J],J,ASTP1,ASTP2);
+	    sum = sum + (ASTRTN)(vtcb_ptr[J],J,ASTP1,ASTP2);
 
-	    if ((count = count-1) <= 0) !only process what we have.
+	    if ((count = count-1) <= 0) //only process what we have.
 		{
 		OKINT;
-		return Sum	// all done.
+		return sum;	// all done.
 		}
 	    };
     OKINT;
 
-    sum
-    };
+    return sum;
+    }
 
 
 
-TCP$Connection_List(RB) : NOVALUE (void)
-!
+void TCP$Connection_List(RB)
+//
 // Dump the list of TCP connections.
-!
+//
+D$LC_ID_Return_Blk RB;
     {
-    MAP
-	struct D$LC_ID_Return_Blk * RB;
+      signed long J;
 
-    RB->0 = 0;
-    INCR J FROM 1 TO VTCB_Size DO
+    RB[0] = 0;
+    for (J=1;J<=VTCB_Size;J++)
 	{
-	if (VTCB_ptr[J] NEQA 0)
+	if (vtcb_ptr[J] != 0)
 	    {
-	    RB->0 = RB->0 + 1; // bump return vector index/count elements.
-	    RB[RB->0] = J;    // Return index into table
+	    RB[0] = RB[0] + 1; // bump return vector index/count elements.
+	    RB[RB[0]] = J;    // Return index into table
 	    };
 	};
-    };
+    }
 
 
 
 VTCB_Indx_OK ( LCID )
     {
-    if ((LCID GEQ 1) && (LCID <= VTCB_Size))
-	if ((VTCB_ptr[LCID] != 0)) return 1;
+    if ((LCID >= 1) && (LCID <= VTCB_Size))
+	if ((vtcb_ptr[LCID] != 0)) return 1;
 
-    0
-    };
+    return 0;
+    }
 
 
 
-!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Conect_Table ADT routines
-!---------------------------------------------------------------------
+//---------------------------------------------------------------------
 
 
 
@@ -400,19 +399,19 @@ Outputs:
 
 Find_Local_Port(Port)
     {
-    signed long
+      signed long J,
 	P,
 	LP;
 
-    LP = Not_Found;
-    P = Port && %X"FFFF" ;
+    LP = NOT_FOUND;
+    P = Port && 0xFFFF ;
     NOINT;
-    INCR J FROM 0 TO ConectSize - 1  DO
-	if (ConectPtr[J,CN$Local_Port] == P)
-	    EXITLOOP LP = J;
+    for (J=0;J<=ConectSize - 1 ;J++)
+	if (ConectPtr[J].CN$Local_Port == P)
+	  { LP = J; break; }
     OKINT;
-    RETURN(LP);
-    };
+    return(LP);
+    }
 
 
 
@@ -421,20 +420,20 @@ Find_Local_Port(Port)
 // If TRUE Then remove the local-port name from the Connection table (CONECT).
 // REMQUE must not be interrupted...
 
-Conect_Remove ( struct tcb_structure * tcb )
+Conect_Remove ( struct tcb_structure * TCB )
     {
     signed long
 	RC,
 	tcb_ptr;
 
-    if ((REMQUE(tcb,tcb_ptr)) == queue_empty_now)
+    if ((REMQUE(TCB,tcb_ptr)) == QUEUE_EMPTY_NOW)  // check
 	{
-	if ((RC=Find_Local_Port(tcb->local_port)) != Error)
-	    ConectPtr[rc,CN$Local_Port] = -1; // Make CONECT entry avail.
-	1
+	if ((RC=Find_Local_Port(TCB->local_port)) != ERROR)
+	    ConectPtr[RC].CN$Local_Port = -1; // Make CONECT entry avail.
+	return 1;
 	}
-    else 0
-    };
+    else return 0;
+    }
 
 
 //SBTTL "TCP mechanism overview"
@@ -449,14 +448,14 @@ Inputs:
 
 */
 
-void Init_LP_Entry (Index, LPort) (void)
+void Init_LP_Entry (Index, LPort)
     {
     NOINT;
-    ConectPtr[index,CN$Local_Port] = (Lport && %X"FFFF") ;
-    ConectPtr[Index,CN$TCB_List] = ConectPtr[Index,CN$TCB_List];
-    ConectPtr[Index,CN$TCB_Tail] = ConectPtr[Index,CN$TCB_List];
+    ConectPtr[Index].CN$Local_Port = (LPort && 0xFFFF) ;
+    ConectPtr[Index].CN$TCB_List = ConectPtr[Index].CN$TCB_List;
+    ConectPtr[Index].CN$TCB_Tail = ConectPtr[Index].CN$TCB_List;
     OKINT;
-    };
+    }
 
 
 
@@ -476,26 +475,25 @@ Outputs:
 
 Find_Free_LP_Entry (LPort)
     {
-    EXTERNAL ROUTINE
-	MovByt,
-	MM$Get_Mem, MM$Free_Mem;
+extern	MovByt(),
+	MM$Get_Mem(), MM$Free_Mem();
     signed long
 	J,
 	Old,	
-	IDX : ^GLOBAL;
+      idx;
 
     NOINT;
-    Idx = Not_Found;
-    INCR J FROM 0 TO ConectSize - 1  DO
-	if (CONECTPTR[J,CN$Local_Port] == -1)
+    idx = NOT_FOUND;
+    for (J=0;J<=ConectSize - 1 ;J++)
+	if (ConectPtr[J].CN$Local_Port == -1)
 	    {
 	    OKINT;
-	    return J
+	    return J;
 	    };
 
     // Bypass the conect_table expansion code (for now...)
     OKINT;
-    return Not_Found;
+    return NOT_FOUND;
 
 /*
 //    OPR$FAO("TCP: Growing conect table to !SW entries...!/",ConectSize*2);
@@ -511,19 +509,19 @@ Find_Free_LP_Entry (LPort)
     // Initialize the new table.
 //    INCR cidx FROM (Idx) TO (ConectSize-1) DO
 	{				// Initialize connection table
-	ConectPtr[cidx,CN$TCB_List] = ConectPtr[cidx,CN$TCB_List];
-	ConectPtr[cidx,CN$TCB_Tail] = ConectPtr[cidx,CN$TCB_List];
-	ConectPtr[cidx,CN$Local_Port] = -1;
+	ConectPtr[cidx].CN$TCB_List = ConectPtr[cidx].CN$TCB_List;
+	ConectPtr[cidx].CN$TCB_Tail = ConectPtr[cidx].CN$TCB_List;
+	ConectPtr[cidx].CN$Local_Port = -1;
 	};
-    MovByt ( Idx * CN$Blk_Size * 4 , Old , ConectPtr );
+    MovByt ( idx * CN$BLK_SIZE * 4 , Old , ConectPtr );
 
     OKINT;
-    MM$Free_Mem( Old , Idx * CN$Blk_Size * 4 );
+    MM$Free_Mem( Old , idx * CN$BLK_SIZE * 4 );
 //    XLOG$FAO(LOG$TCP,"TCP: Grew conect table to !SW entries...!/",ConectSize);
 
-    IDX
+return idx;
 */
-    };
+    }
 
 
 //SBTTL "Conect_Insert - Insert TCB into CONECT table"
@@ -533,67 +531,63 @@ Find_Free_LP_Entry (LPort)
 // Last comes fully-UNspecified Foreign(H&P).
 */
 
-void Conect_Insert(struct tcb_structure * tcb,CN_Index) (void)
+void Conect_Insert(struct tcb_structure * TCB,signed long CN_Index)
     {
-    signed long
-	Ostruct tcb_structure * tcb,
-	IN;
+      struct tcb_structure * OTCB;
+      signed long IN;
 
 // Point at 1st TCB in local port list.
 
     NOINT;
-    OTCB = ConectPtr[CN_Index,CN$tcb_list];
-    if (OTCB EQLA ConectPtr[CN_Index,CN$TCB_List])
+    OTCB = ConectPtr[CN_Index].CN$TCB_List;
+    if (OTCB == ConectPtr[CN_Index].CN$TCB_List)
 	// Empty Local Port List
-	IN = ConectPtr[CN_Index,CN$TCB_List]  // Inset into Empty list.
+	IN = ConectPtr[CN_Index].CN$TCB_List;  // Inset into Empty list.
     else
 	{
-	SELECTONE TRUE OF
-	SET
-
 // Fully Unspecified?
 
-	[tcb->Foreign_Host == wild && tcb->Foreign_Port == Wild]:
-	    IN = ConectPtr[CN_Index,CN$tcb_tail];  // Yes - insert at tail.
-
+	  if (TCB->foreign_host == WILD && TCB->foreign_port == WILD)
+	    IN = ConectPtr[CN_Index].CN$TCB_Tail;  // Yes - insert at tail.
+	  else {
 // Fully Specified?
 
 
-	[tcb->Foreign_Host != Wild && tcb->Foreign_Port != Wild]:
-	    IN = ConectPtr[CN_Index,CN$TCB_List]; // yes - insert at Head.
-
+	    if (TCB->foreign_host != WILD && TCB->foreign_port != WILD)
+	      IN = ConectPtr[CN_Index].CN$TCB_List; // yes - insert at Head.
+	    else {
 // Partially unspecified, insert before fully-unspecified or at end of list,
 // which ever is approprate.
 
-	[OTHERWISE]:
 	    {
 	    signed long
-		OK;
-	    OK = False;
-	    IN = ConectPtr[CN_Index,CN$TCB_Tail]; // Default: add to tail.
-	    WHILE (OTCB NEQA ConectPtr[CN_Index,CN$TCB_List]) AND
-		  (NOT OK) DO
+		ok;
+	    ok = FALSE;
+	    IN = ConectPtr[CN_Index].CN$TCB_Tail; // Default: add to tail.
+	    while ((OTCB != ConectPtr[CN_Index].CN$TCB_List) &&
+		   (! ok))
 		{
-		IF (OTCB->Foreign_Host == Wild) OR
-		   (OTCB->Foreign_Port eql Wild) THEN
+		if ((OTCB->foreign_host == WILD) ||
+		    (OTCB->foreign_port == WILD))
 		    {
-		    OK = True;
-		    IN = OTCB->LP_Back; // point at previous TCB.
+		    ok = TRUE;
+		    IN = OTCB->lp_back; // point at previous TCB.
 		    }
 		else
-		    OTCB = OTCB->LP_Next;
+		    OTCB = OTCB->lp_next;
 		}
 	    };
-	TES;
-	};
+	    }
+	  }
+	}
 
 // Insert TCB in the Local Port list.
 
-!!!HACK!!// should be conditional
+//!!HACK!!// should be conditional
 //    LOG$FAO("Conect_Insert TCB=!XL IN=!XL!/",TCB,IN);
     INSQUE(TCB,IN);
     OKINT;
-    };
+    }
 
 
 
@@ -615,7 +609,7 @@ Inputs:
 	Lport = Requested local port #
 	Fhost = Foreign_Host (Internet adrs + Host adrs)
 	Fport = Foreign_Port
-		F(host or port) maybe unspecified(wild=0)
+		F(host or port) maybe unspecified(WILD=0)
 	IDX = Address of fullword which gets conect table index.
 
 Outputs:
@@ -633,24 +627,25 @@ Side Effects:
 */
 
 
-CHECK_UNIQUE_CONN(Lport,Fhost,Fport,IDX)
+CHECK_UNIQUE_CONN(LPort,Fhost,FPort,IDX)
+     signed long * IDX;
     {
-    REGISTER
-	struct tcb_structure * tcb;
+    register
+	struct tcb_structure * TCB;
     signed long
 	Index,
 	LP,
 	FP,
-	unique;
+	Unique;
 
     NOINT;
-    FP = (FPort && %X"FFFF") ;
-    LP = (LPort && %X"FFFF") ;
-    if ((Index = Find_Local_Port (LP) ) == Not_Found)
+    FP = (FPort && 0xFFFF) ;
+    LP = (LPort && 0xFFFF) ;
+    if ((Index = Find_Local_Port (LP) ) == NOT_FOUND)
 	{			// Insert local port into connection table
-	index = Find_Free_LP_Entry(LP);
-	if (Index == Error)
-	    Unique = Error  // CONECT tbl is full.
+	Index = Find_Free_LP_Entry(LP);
+	if (Index == ERROR)
+	    Unique = ERROR;  // CONECT tbl is full.
 	else
 	    {
 
@@ -660,8 +655,8 @@ CHECK_UNIQUE_CONN(Lport,Fhost,Fport,IDX)
  // Init local port queue header.
 
 	    Init_LP_Entry (Index, LP);
-	    IDX = Index;	// return conect index.
-	    Unique = True;	// Connection is unique.
+	    *IDX = Index;	// return conect index.
+	    Unique = TRUE;	// Connection is unique.
 	    };
 	}
     else			// Local port is in conect table
@@ -670,22 +665,22 @@ CHECK_UNIQUE_CONN(Lport,Fhost,Fport,IDX)
 // Search this Local Port's TCB list checking for non-unique connection.
 // Compare rtn call arg connection(Fhost,Fport) with TCB(Foreign_Host&Port).
 
-	.IDX = Index;		// return conect index.
-	Unique = True;		// assume a good attitude!
-	tcb = ConectPtr[Index,CN$TCB_List]; !point at 1st TCB is list.
-	WHILE (tcb NEQA ConectPtr[index,cn$tcb_list]) && (unique == true) DO
+	*IDX = Index;		// return conect index.
+	Unique = TRUE;		// assume a good attitude!
+	TCB = ConectPtr[Index].CN$TCB_List; //point at 1st TCB is list.
+	while ((TCB != ConectPtr[Index].CN$TCB_List) && (Unique == TRUE))
 	    {
-	    IF (TCB->Foreign_Host == FHOST) AND
-	       ((TCB->Foreign_Port && %X"FFFF") == FP) AND
-	       (TCB->State neq CS$Inactive) THEN
-		Unique = False
+	    if ((TCB->foreign_host == Fhost) &&
+	       ((TCB->foreign_port && 0xFFFF) == FP) &&
+		(TCB->state != CS$INACTIVE))
+	      Unique = FALSE;
 	    else
-		tcb = TCB->LP_Next;
+		TCB = TCB->lp_next;
 	    }
-	};
+	} 
     OKINT;
-    RETURN(Unique);
-    };
+    return(Unique);
+    }
 
 
 
@@ -713,45 +708,45 @@ Side Effects:
 */
 
 
-TCB_Find(lclport,frnaddr,frnport)=
+TCB_Find(lclport,frnaddr,frnport)
     {
-    REGISTER
-	struct tcb_structure * tcb,
-	result;
+    register
+    struct tcb_structure * TCB;
+	register signed long result;
     signed long
 	LP,
 	FP,
-	Cn_Idx;
+	cn_idx;
 
 // Find the connection this segment was destined for.
 
     NOINT;
-    LP = lclport && %X"FFFF" ;
-    FP = frnport && %X"FFFF" ;
+    LP = lclport && 0xFFFF ;
+    FP = frnport && 0xFFFF ;
     result=0;
-    if ((cn_idx = Find_Local_Port(LP)) != Error)
+    if ((cn_idx = Find_Local_Port(LP)) != ERROR)
 	{
-	TCB = ConectPtr[CN_IDX,CN$TCB_list]; // point at TCB.
+	TCB = ConectPtr[cn_idx].CN$TCB_List; // point at TCB.
 //    LOG$FAO ( "cn_idx = !XL (!XW !XL !XW) TCB=!XL !/", cn_idx ,lclport,frnaddr,frnport,TCB);
-	WHILE (TCB NEQA ConectPtr[cn_idx,CN$TCB_list]) DO
+	while ((TCB != ConectPtr[cn_idx].CN$TCB_List))
 	    {
 
-// Check seg source-address aginst TCB foreign-host or a wild foreign-host.
-!	LOG$FAO ( "TCB = !XL !/", TCB);
+// Check seg source-address aginst TCB foreign-host or a WILD foreign-host.
+//	LOG$FAO ( "TCB = !XL !/", TCB);
 
-	    IF (frnaddr == TCB->Foreign_Host) || 
-	       (TCB->Foreign_Host == Wild) THEN
+	    if ((frnaddr == TCB->foreign_host) || 
+		(TCB->foreign_host == WILD))
 		{
 
-// Check seg source-port aginst TCB foreign-port or a wild foreign-port
+// Check seg source-port aginst TCB foreign-port or a WILD foreign-port
 // If a match make sure TCB has NOT been inactivated.
 
-		IF (FP == (TCB->Foreign_Port && %X"FFFF")) OR
-		   ((TCB->Foreign_Port && %X"FFFF") == Wild) THEN
-		    if (TCB->state != CS$Inactive)
-			EXITLOOP result = TCB;
+		if ((FP == (TCB->foreign_port && 0xFFFF)) ||
+		    ((TCB->foreign_port && 0xFFFF) == WILD))
+		    if (TCB->state != CS$INACTIVE)
+		      { result = TCB; break; }
 		};
-	    TCB = TCB->LP_Next;// advance to next TCB in list.
+	    TCB = TCB->lp_next;// advance to next TCB in list.
 	    };
 	};
 
@@ -759,27 +754,27 @@ TCB_Find(lclport,frnaddr,frnport)=
 	
 //    LOG$FAO ( "Find_TCB returns !XL!/", result );
     OKINT;
-    result
-    };
+    return result;
+    }
 
 
 
-void TCB_Promote ( struct tcb_structure * tcb ) (void)
+void TCB_Promote ( struct tcb_structure * TCB )
     {
     signed long
 	TCBptr;
 
     NOINT;
     REMQUE(TCB,TCBptr);
-    INSQUE(TCBptr,ConectPtr[TCB->Con_Index,CN$TCB_list]);
+    INSQUE(TCBptr,ConectPtr[TCB->con_index].CN$TCB_List);
     OKINT;
-    };
+    }
 
 
 
-!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // TCB ADT routines
-!---------------------------------------------------------------------
+//---------------------------------------------------------------------
 
 
 
@@ -813,34 +808,34 @@ Side Effects:
 
 TCB$Create (void)
     {
+      struct tcb_structure * TCB;	// New TCB
     signed long
-	struct tcb_structure * tcb,	// New TCB
 	Indx,	// location of new TCB in Valid TCB table.
 	Old,	// remember the old value of VTCB_ptr when resizing...
-	S}Q,	// Send Queue
+	SENDQ,	// Send Queue
 	RECVQ,	// Receive Queue
 	RC;	// return code
 
     NOINT;			// Hold AST's please...
-    MM$Get_Mem ( TCB   , tcb_Size*4 );
-    MM$Get_Mem ( S}Q , Window_Default );
-    MM$Get_Mem ( RECVQ , Window_Default );
+    MM$Get_Mem ( TCB   , TCB_SIZE*4 );
+    MM$Get_Mem ( SENDQ , window_default );
+    MM$Get_Mem ( RECVQ , window_default );
     OKINT;
 
 //    CH$FILL(%CHAR(0),tcb_size*4,TCB);	// clean house.....zero fill.
 
 // Set pointers and sizes of send and receive queues
 
-    TCB->SND_Q_BASE = TCB->SRX_Q_BASE = S}Q;
-    TCB->SND_Q_SIZE = TCB->SRX_Q_SIZE = Window_Default;
-    TCB->RCV_Q_BASE = RECVQ;
-    TCB->RCV_Q_SIZE = Window_Default;
+    TCB->snd_q_base = TCB->srx_q_base = SENDQ;
+    TCB->snd_q_size = TCB->srx_q_size = window_default;
+    TCB->rcv_q_base = RECVQ;
+    TCB->rcv_q_size = window_default;
 
 // Find an empty Valid_TCB_table entry for the newly created TCB address.
     VTCB_Insert ( TCB );
 
-    TCB
-    };
+return TCB;
+    }
 
 
 
@@ -868,42 +863,41 @@ Side Effects:
 
 */
 
-void TCB$Delete ( TCB_Ptr ) (void)
+void TCB$Delete ( TCB_Ptr )
     {
-    EXTERNAL ROUTINE
-	TELNET_CLOSE;
+extern	TELNET_CLOSE();
     signed long
 	RC,
-	IDX,
-	struct tcb_structure * tcb;
+      IDX;
+	struct tcb_structure * TCB;
 
     TCB = TCB_Ptr;
 
 // Flush any TVT data block.
 
-    if (TCB->TVTDATA != 0)
+    if (TCB->tvtdata != 0)
 	TELNET_CLOSE(TCB);
 
     // Remove the TCB from the Valid TCB table.
     NOINT;			// Hold AST's
-    if (VTCB_Remove(TCB) NEQA 0)
+    if (VTCB_Remove(TCB) != 0)
 	{
 
 	// Remove the TCB from local port list.
 	Conect_Remove ( TCB );
 
 // First, deallocate the queues for this TCB
-	MM$Free_Mem ( TCB->SND_Q_BASE, TCB->SND_Q_SIZE ); 
-	MM$Free_Mem ( TCB->RCV_Q_BASE, TCB->RCV_Q_SIZE ); 
+	MM$Free_Mem ( TCB->snd_q_base, TCB->snd_q_size ); 
+	MM$Free_Mem ( TCB->rcv_q_base, TCB->rcv_q_size ); 
 // Then, deallocate the TCB itself
-	MM$Free_Mem ( tcb_ptr, tcb_size*4 );
+	MM$Free_Mem ( TCB_Ptr, TCB_SIZE*4 );
 
 	}
     else
 	Warn_Error("Attempt to Delete unknown TCB,");
 
     OKINT;
-    };
+    }
 
 
 
@@ -940,14 +934,12 @@ Side Effects:
 	completly deleted.
 */
 
-TCB_OK(TCBIDX,ERR,struct User_Default_Args * UARGS)
+TCB_OK(signed long TCBIDX,signed long * ERR,struct user_default_args * uargs)
     {
-    EXTERNAL ROUTINE
-	TCP$KILL_P}ING_REQUESTS;
-    MACRO
-	TCBERR(EC) = (ERR = EC; return 0) %;
-    REGISTER
-	struct tcb_structure * tcb;
+extern	TCP$KILL_PENDING_REQUESTS();
+#define	TCBERR(EC) {*ERR = EC; return 0;}
+    register
+	struct tcb_structure * TCB;
 
 // The following two checks are to verify the validity of the connection ID.
 // Since the user never touches connection IDs (except for priviliged
@@ -955,29 +947,29 @@ TCB_OK(TCBIDX,ERR,struct User_Default_Args * UARGS)
 
     if ((TCBIDX <= 0) || (TCBIDX > VTCB_Size))
 	TCBERR(NET$_CDE);	// Bad connection-ID
-    TCB = VTCB_Ptr[TCBIDX];
+    TCB = vtcb_ptr[TCBIDX];
     if (TCB <= 0)
 	TCBERR(NET$_CDE);	// TCB has been deleted
-    IF (TCB->VTCB_INDEX != TCBIDX) OR
-       (TCB->UCB_ADRS != Uargs->UD$UCB_Adrs) THEN
+    if ((TCB->vtcb_index != TCBIDX) ||
+	(TCB->ucb_adrs != uargs->ud$ucb_adrs))
 	TCBERR(NET$_CDE);	// Confusion...
 
 // Check to see if the connection is still active
 // (ie, TCB->State != CS$Inactive).
 
-    if (TCB->State == CS$Inactive)
+    if (TCB->state == CS$INACTIVE)
 	{
 	signed long
-	    TMP;
-	TMP = TCB->Inactive_Code; // pickup reason we are inactive.
-	TCP$KILL_P}ING_REQUESTS(TCB,Tmp); // clean up & post user IO.
+	    tmp;
+	tmp = TCB->inactive_code; // pickup reason we are inactive.
+	TCP$KILL_PENDING_REQUESTS(TCB,tmp); // clean up & post user IO.
 	TCB$Delete(TCB); // Delete the inactive connection.
-	.ERR = TMP;
+	*ERR = tmp;
 	return 0;
 	}
     else
 	return TCB;		// Good connection - return TCB
-    };
+    }
 
 
 
@@ -1004,10 +996,10 @@ Side Effects:
 
 GET_TCB(TCBIDX,TCBret)
     {
-    EXTERNAL ROUTINE
-	TCP$KILL_P}ING_REQUESTS;
-    REGISTER
-	struct tcb_structure * tcb;
+
+extern	TCP$KILL_PENDING_REQUESTS();
+    register
+	struct tcb_structure * TCB;
 
 // The following two checks are to verify the validity of the connection ID.
 // Since the user never touches connection IDs (except for priviliged
@@ -1015,15 +1007,15 @@ GET_TCB(TCBIDX,TCBret)
 
     if ((TCBIDX <= 0) || (TCBIDX > VTCB_Size))
 	return NET$_CDE;	// Bad connection-ID
-    TCB = VTCB_Ptr[TCBIDX];
+    TCB = vtcb_ptr[TCBIDX];
     if (TCB <= 0)
 	return NET$_CDE;	// TCB has been deleted
-    if ((TCB->VTCB_INDEX != TCBIDX))
+    if ((TCB->vtcb_index != TCBIDX))
 	return NET$_CDE;	// Confusion...
 
     TCBret = TCB;		// Good connection - return TCB
-    SS$_NORMAL
-    };
+	return    SS$_NORMAL;
+    }
 
 
 //SBTTL "Calculate system uptime"
@@ -1033,30 +1025,31 @@ CALCULATE_UPTIME (void)
 // in the global variable TEK$sys_uptime, a quadword.  Also returns the
     {
     signed long
-	uptime,
-	time_buffer : VECTOR [ 8, WORD ],
-	One: VECTOR->2 Initial(1,0),	// QuadWord of val 1.
-	Now: VECTOR->2;			// time as in now.
+    uptime;
+unsigned short	time_buffer[8];
+unsigned long long	One=1,	// QuadWord of val 1.
+	Now;			// time as in now.
 
-    $gettim(timadr=Now);	// current time
+    exe$gettim(&Now);	// current time
     Subm(2,Start_Time,Now,Now); // compute uptime.
 
 // Convert to delta system time (ie, multiply by -1)  Problem is that we have
 // time in quadwords.
 
-    Now->0 = NOT Now->0;	// Compute Delta time (quadword).
-    Now->1 = NOT Now->1;
+    Now = ! Now;	// Compute Delta time (quadword).
+#if 0
+    Now[1] = ! Now[1];
+#endif
     Addm(2,Now,One,TEK$sys_uptime); // compute Delta TCP uptime.
 
-    $numtim( TIMBUF = time_buffer, TIMADR = TEK$sys_uptime);
+    exe$numtim(time_buffer,TEK$sys_uptime);
 
     // time in hundredth of seconds
-    uptime = time_buffer->6 +
-		time_buffer->5 * 100 +
-		time_buffer->4 * 100 * 60 +
-		time_buffer->3 * 100 * 60 * 60 +
-		time_buffer->2 * 100 * 60 * 60 * 24 +
-		time_buffer->1 * 100 * 60 * 60 * 24 * 30
-    };
+    uptime = time_buffer[6] +
+		time_buffer[5] * 100 +
+		time_buffer[4] * 100 * 60 +
+		time_buffer[3] * 100 * 60 * 60 +
+		time_buffer[2] * 100 * 60 * 60 * 24 +
+      time_buffer[1] * 100 * 60 * 60 * 24 * 30;
+    }
 
-} ELUDOM

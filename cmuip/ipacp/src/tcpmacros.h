@@ -264,30 +264,30 @@ MACRO
     %,
 
 // Macros to do word and longword byte swapping.
-
-    SWAPWORD(ADDR) =
-	BEGIN
-	BIND XX = ADDR : VECTOR[2,BYTE];
-	REGISTER YY;
-	YY = .XX[0];
-	XX[0] = .XX[1];
-	XX[1] = .YY;
-	END %,
-    SWAPLONG(ADDR) =
-	BEGIN
-	REGISTER TEMP;
-	TEMP = .ADDR<0,16>; // Word swap of TTL
-	ADDR<0,16> = .ADDR<16,16>;
-	ADDR<16,16> = .TEMP;
-	END %,
+#endif
+#define    SWAPWORD(ADDR) \
+	{ \
+	char * XX = ADDR;\
+	register YY;\
+	YY = XX[0];\
+	XX[0] = XX[1];\
+	XX[1] = YY;\
+	}
+#define    SWAPLONG(ADDR) \
+	{\
+	short * XX = ADDR;\
+	register  TEMP;\
+	TEMP = XX[0]; /* Word swap of TTL*/ \
+        XX[0] = XX[1];\
+	XX[1] = TEMP;\
+        }
 
 // Macro to set $CMKRNL argument list
-
+#if 0
     $$KARGS(ANAME)[NAME] =
 	ANAME[%COUNT+1] = NAME; %,
 
 // Macro to setup and call routine via $CMKRNL.
-
     $$KCALL(RTN)[] =
 	%IF %LENGTH EQL 1 %THEN
 	    $CMKRNL(ROUTIN=RTN)

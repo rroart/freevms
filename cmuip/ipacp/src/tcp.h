@@ -276,7 +276,7 @@ struct  tcb_structure {
 
 // Set the size of one TCB
 
-    #define TCB_SIZE sizeof(struct tcb_structure);		// in BLISS Fullwords.
+    #define TCB_SIZE sizeof(struct tcb_structure)		// in BLISS Fullwords.
 
 //MESSAGE(%NUMBER(tcb_size),' longwords per tcb')
 
@@ -300,7 +300,7 @@ declaration is in TCP.BLI.
 */
 
 
-struct CN$Fields {
+struct connection_table_structure {
     void * CN$TCB_List;	// This port's TCB list. Queue head prt.
     void * CN$TCB_Tail;	// Queue tail ptr.
     long CN$Local_Port;	// Local Port #.
@@ -308,7 +308,7 @@ struct CN$Fields {
 
     #define CONECT_TBL_SIZE 4		// # of blocks in connection blockvector
     #define INITIAL_TCBS 2			// Initial size of Valid TCB table
-    #define CN$BLK_SIZE sizeof(struct CN$Fields)	// Size in longs
+    #define CN$BLK_SIZE sizeof(struct connection_table_structure)	// Size in longs
     #define CN$BLK_BLEN 10			// Size in bytes
 
 //ASSIGN(tblsize,%NUMBER(conect_tbl_size)*%NUMBER(cn$blk_size))

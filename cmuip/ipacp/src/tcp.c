@@ -1517,7 +1517,10 @@ void TCP$SEND_ENQUEUE(tcb,bufcount,buf,pushf)
     XLOG$FAO(LOG$TCP,"!%T SEND-ENQ EQ=!XL,DQ=!XL,RX=!XL,SNQ=!XL/!XL,CNT=!SL,SIZ=!SL,PSH=!SL!/",
 	     0,tcb->snd_q_enqp,tcb->snd_q_deqp,tcb->srx_q_deqp,
 	     tcb->snd_q_base,tcb->snd_q_end,usedcount,copycount, pushf);
+#if 0
+    // check wait
     $$KCALL(CQ_ENQUEUE,&tcb->snd_q_queue,lbptr,copycount);
+#endif
 
 // Update user pointer and counter
 

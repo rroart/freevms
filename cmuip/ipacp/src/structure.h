@@ -149,9 +149,9 @@ Modification History:
 #define    OK  0			// Valid TCB pointer: RTN, TCB_OK.
 #define    WILD  0			// Indicates a wild-card in Foreign_Socket pair.
 
-#define    Empty_Queue 3 // REMQUE: unsuccessful removal, queue empty.
-#define    Queue_Empty_Now 2 // REMQUE: OK removal & queue now empty.
-#define    First_Queue_Elem 1 // INSQUE return - inserted 1st element.
+#define    EMPTY_QUEUE 3 // REMQUE: unsuccessful removal, queue empty.
+#define    QUEUE_EMPTY_NOW 2 // REMQUE: OK removal & queue now empty.
+#define    FIRST_QUEUE_ELEM 1 // INSQUE return - inserted 1st element.
 
 #define    tblsize = 0;
 
@@ -374,28 +374,28 @@ user argument blocks have at least these arguments.
 */
 
 #define Static_Fields(NM) \
-void *     NM##data_start;	/* Start of data within this block.*/\
-void *     NM##ubuf_adrs;	/* User buffer address.*/\
-signed long     NM##vms_blk_id;	/* VMS system dynamic block ID.*/\
-void *     NM##irp_adrs;	/* I/O Request Packet Address.*/\
-void *     NM##ucb_adrs;	/* Unit Control Block Address.*/\
-void *     NM##pid;	/* Owning process ID.*/\
-unsigned short     NM##uargsize;	/* Size of this UARG block*/\
-signed char     NM##funct;	/* ACP Function code.*/\
-signed char     NM##protocol;/* ACP Protocol code.*/
+void *     NM##$data_start;	/* Start of data within this block.*/\
+void *     NM##$ubuf_adrs;	/* User buffer address.*/\
+signed long     NM##$vms_blk_id;	/* VMS system dynamic block ID.*/\
+void *     NM##$irp_adrs;	/* I/O Request Packet Address.*/\
+void *     NM##$ucb_adrs;	/* Unit Control Block Address.*/\
+void *     NM##$pid;	/* Owning process ID.*/\
+unsigned short     NM##$uargsize;	/* Size of this UARG block*/\
+signed char     NM##$funct;	/* ACP Function code.*/\
+signed char     NM##$protocol;/* ACP Protocol code.*/
 
-struct User_Def_Fields
+struct user_default_args
 {
   Static_Fields(ud);			// Only the standard fields
 };
 
-#define    UD_Size sizeof(struct User_Def_Fields)
+#define    UD_SIZE sizeof(struct user_default_args)
 
 // User Call: OPEN
 
-struct u$open_fields
+struct user_open_args
 {
-  Static_Fields(OP);			// Define the standard fields
+  Static_Fields(op);			// Define the standard fields
   unsigned char    op$protohdrblk;
   unsigned long     op$src_host;
   unsigned long     op$dst_host;
@@ -422,7 +422,7 @@ struct u$open_fields
   };
 };
 
-#define    Open_Arg_Length sizeof(struct U$OPEN_Fields)
+#define    OPEN_ARG_LENGTH sizeof(struct user_open_args)
 #define    Max_User_ArgBlk_Size Open_Arg_Length	// used by Uarg rtns (MEMGR.BLI)
 
 #define     OP$MODE_PASSIVE   0	// OP$MODE value for TCP passive open
@@ -433,7 +433,7 @@ struct u$open_fields
 
 // User Call: SEND
 
-struct u$send_fields
+struct user_send_args
 {
   Static_Fields(se);			// Define the standard fields
   unsigned char    se$protohdrblk[0];
@@ -455,11 +455,11 @@ struct u$send_fields
   signed char    se$data;	// User data start
 };
 
-#define    Send_Arg_Length sizeof(struct U$Send_Fields)
+#define    SEND_ARG_LENGTH sizeof(struct user_send_args)
 
 // User Call: RECIEVE
 
-struct u$recv_fields
+struct user_recv_args
 {
   Static_Fields(re);			// Define the standard fields
   unsigned char     re$protohdrblkp[0];
@@ -476,7 +476,7 @@ struct u$recv_fields
   signed char    re$data;
 };
 
-#define    RECV_Arg_Length sizeof(struct U$RECV_Fields)
+#define    RECV_ARG_LENGTH sizeof(struct user_recv_args)
 
 // User Call: CLOSE
 
@@ -498,7 +498,7 @@ struct u$close_fields
 
 // User Call: STATUS
 
-struct u$status_fields
+struct user_status_args
 {
   Static_Fields(st);			// Define the standard fields
   unsigned short     st$flags;	// Not used.
@@ -507,11 +507,11 @@ struct u$status_fields
   signed short    st$buf_size;
 };
 
-#define    Status_Arg_Length sizeof(struct U$STATUS_Fields)
+#define    STATUS_ARG_LENGTH sizeof(struct user_status_args)
 
 // User Status call status-return blk
 
-struct status_return_fields
+struct status_return_arg_blk
 {
   signed short     sr$bytes_avail;
   signed char     sr$state;
@@ -521,11 +521,11 @@ struct status_return_fields
   signed long int     sr$user_id;
 };
 
-#define    SR_BLK_Size sizeof(struct Status_Return_Fields)
+#define    SR_BLK_SIZE sizeof(struct status_return_arg_blk)
 
 // User Call: Net$INFO
 
-struct u$info_fields
+struct user_info_args
 {
   Static_Fields(if);			// Define the standard fields
   unsigned short     if$flags;	// Not used.
@@ -534,11 +534,11 @@ struct u$info_fields
   signed short     if$buf_size;// Size of returned data buffer
 };
 
-#define    Info_Arg_Length sizeof(struct U$INFO_Fields)
+#define    INFO_ARG_LENGTH sizeof(struct user_info_args)
 
 // User Call: ABORT
 
-struct u$abort_fields
+struct user_abort_args
 {
   Static_Fields(ab);			// Define the standard fields
   unsigned short     ab$flags;	// None defined
@@ -546,17 +546,17 @@ struct u$abort_fields
   void *    ab$local_conn_id;
 };
 
-#define    Abort_Arg_Length sizeof(struct U$ABORT_Fields)
+#define    ABORT_ARG_LENGTH sizeof(struct user_abort_args)
 
 // User call: GTHST
 
 #define    GTHST_Static(NM) \
-unsigned short 	NM##flags;	/* Function flags */\
-signed short 	NM##subfunct;	/* GTHST subfunction*/\
-signed short 	NM##bufsize;	/* User buffer size*/\
+unsigned short 	NM##$flags;	/* Function flags */\
+signed short 	NM##$subfunct;	/* GTHST subfunction*/\
+signed short 	NM##$bufsize;	/* User buffer size*/\
 union { \
-unsigned short 	NM##arg1;	/* Size of argument*/\
-unsigned short	NM##rrtype;	/* only for grr */\
+unsigned short 	NM##$arg1;	/* Size of argument*/\
+unsigned short	NM##$rrtype;	/* only for grr */\
 }; \
 union { \
 unsigned short 	NM##arg2size;	/* Size of argument*/\
@@ -695,7 +695,7 @@ struct m$event_fields
 // for which the IO is being canceled.  VMS cancels IO on both the $CANCEL
 // system service & when the user deasssigns ($DEASGN) the IO channel.
 
-struct m$vms_cancel_fields
+struct vms$cancel_args
 {
   Static_Fields(vc);		// Define the standard fields
   signed short     vc$piochan;	// Process IO channel (from IRP)

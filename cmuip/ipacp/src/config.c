@@ -392,7 +392,7 @@ CNF$Define_IPACP_Interface (void)
     IPACP_Int [ ACPI$MPBS ] 		= MAX_PHYSICAL_BUFSIZE;
 
     IPACP_Int
-    };
+    }
 
 
 
@@ -406,7 +406,7 @@ Init_Vars : NOVALUE (void)
 	IP_group_MIB : IP_group_MIB_struct;
 
     IP_group_MIB->IPMIB$ipForwarding = 2;	// Just a host, no forwarding
-    };
+    }
 
 
 //Sbttl "Device Configuration table definitions"
@@ -428,7 +428,7 @@ No_Check(ndx) : NOVALUE (void)
 
     {
     RETURN;
-    };
+    }
 
 static signed long
     DEV_Attn;
@@ -485,10 +485,10 @@ CNF$DEVICE_STAT ( Inx, RB_A )
 	StrLen = DevSpec->DSC$W_LENGTH;
     RB->DU$DevSpec_Len = Strlen;
     CH$MOVE ( Strlen , DevSpec->DSC$A_POINTER , RB->DU$DevSpec_Str );
-    };
+    }
 
     D$Dev_dump_blksize
-    };
+    }
 
 
 CNF$DEVICE_LIST ( RB )
@@ -502,18 +502,18 @@ CNF$DEVICE_LIST ( RB )
 	RBIX;
 
     RBIX = 1;
-    INCR I FROM 0 TO DC_Max_Num_Net_devices-1 DO
+    for (I=0;I<=DC_Max_Num_Net_devices-1;I++)
 	if (dev_config_tab[I,dc_valid_device] != 0)
 	    {
 	    RB[RBIX] = I;
 	    RBIX = RBIX + 1;
 	    };
     // First element of list is the count.
-    RB->0 = RBIX - 1;
+    RB[0] = RBIX - 1;
 
     // return total size in bytes.
     RBIX * 4
-    };
+    }
 
 
 //SBTTL "Configure Network ACP"
@@ -560,7 +560,7 @@ CNF$Configure_ACP: NOVALUE (void)
 
     DEV_Count = 0;		// No devices
 
-    WHILE $GET(RAB = CFRAB) DO
+    while ($GET(RAB = CFRAB))
 	{
 	signed long
 	    chr;
@@ -624,7 +624,7 @@ CNF$Configure_ACP: NOVALUE (void)
 
     if (dev_count <= 0)
 	ERROR$FAO("No network devices detected in INET$CONFIG");
-    };
+    }
 
 CONFIG_ERR(EMSG) : NOVALUE (void)
 !
@@ -633,7 +633,7 @@ CONFIG_ERR(EMSG) : NOVALUE (void)
     {
     FATAL$FAO("CONFIG - !AS in line:!/!_"!AD"",
 	      EMSG,CFRAB->RAB$W_RSZ,CFRAB->RAB$L_UBF);
-    };
+    }
 
 Init_Device : NOVALUE (void)
 
@@ -652,7 +652,7 @@ Init_Device : NOVALUE (void)
 	rc,
 	ipaddr,
 	ipmask,
-	argv : VECTOR->1,
+	argv : VECTOR[1],
 	Image_Init,
 	struct Device_Info_Structure * Devinfo,
 	struct Device_Configuration_Entry * dev_config,
@@ -795,7 +795,7 @@ Init_Device : NOVALUE (void)
 // See if this device name is a duplicate.
 
     if (devidx > 0)
-	INCR I FROM 0 TO (devidx-1) DO
+	for (I=0;I<=(devidx-1);I++)
 	    {
 	    // If match, then mark this device as a clone of the it.
 	    IF STR$CASE_BLIND_COMPARE(Dev_Config_Tab[I,dc_devname],
@@ -803,10 +803,10 @@ Init_Device : NOVALUE (void)
 		{
 		dev_config->dc_is_clone = TRUE;
 		dev_config->dc_clone_dev = I;
-		EXITLOOP;
+		break;
 		};
 	    };
-    };
+    }
 
 Init_Gateway : NOVALUE (void)
 !!!HACK!!// Make gateway struct dynamic.
@@ -865,7 +865,7 @@ Init_Gateway : NOVALUE (void)
 // Tell IP about this gateway
 
     IP$Gwy_Config(GWY_Name_Desc,GWYaddr,GWYnet,GWYnetmask);
-    };
+    }
 
 Init_NameServer : NOVALUE (void)
 
@@ -902,7 +902,7 @@ Init_NameServer : NOVALUE (void)
 // Add this entry to the name server database
 
     OPR$FAO("%IPACP: Obsolete keyword NAME_SERVER found in INET$CONFIG");
-    };
+    }
 
 Init_MEMGR : NOVALUE (void)
 !
@@ -939,7 +939,7 @@ Init_MEMGR : NOVALUE (void)
     SKIPTO(%C":");
     if (GET_DEC_NUM(LINPTR,MAX_seg_count_base) LSS 0)
 	Config_Err(%ASCID"Bad integer value");
-    };
+    }
 
 
 
@@ -965,7 +965,7 @@ INIT_LOGGING : NOVALUE (void)
 // Set log state
 
     LOG_CHANGE(logstate);
-    };
+    }
 
 
 
@@ -991,7 +991,7 @@ INIT_ACTIVITY_LOGGING : NOVALUE (void)
 // Set log state
 
     ACT_CHANGE(logstate);
-    };
+    }
 
 
 
@@ -1016,7 +1016,7 @@ INIT_FORWARDING : NOVALUE (void)
 // Set state for IP module
 
     IP_group_MIB->IPMIB$ipForwarding = ipstate;
-    };
+    }
 
 
 
@@ -1122,7 +1122,7 @@ INIT_VARIABLE : NOVALUE (void)
 	[OTHERWISE]:
 	    Config_Err(%ASCID"Unknown variable name");
 	TES;
-    };
+    }
 
 
 
@@ -1255,7 +1255,7 @@ KEY_VALUE(KEYTAB,KEYLEN,KEYSTR)
 	};
     Config_Err(%ASCID"Bad keyword field");
     return -1;
-    };
+    }
 
 PARSE_PRCPRIVS(PRVBLK)
 !
@@ -1264,7 +1264,7 @@ PARSE_PRCPRIVS(PRVBLK)
 !
     {
     MAP
-	struct VECTOR * PRVBLK->2;
+	struct VECTOR * PRVBLK[2];
     signed long
 	PRIVCNT,
 	struct VECTOR * PRIVPTR->PVSIZE,
@@ -1274,23 +1274,23 @@ PARSE_PRCPRIVS(PRVBLK)
 
 // Initialize to "no privileges"
 
-    PRVBLK->0 = 0;
-    PRVBLK->1 = 0;
+    PRVBLK[0] = 0;
+    PRVBLK[1] = 0;
     PRIVCNT = 0;
 
 // Loop, parsing keywords.
 
-    WHILE TRUE DO
+    while (TRUE)
 	{
 	PLEN = GETFIELD(PRIVBUF);
 	if (PLEN == 0)
-	    EXITLOOP;
+	    break;
 	PRIVCNT = PRIVCNT + 1;
 	PRIVPTR = KEY_VALUE(PRIVNAMES,PLEN,CH$PTR(PRIVBUF));
 	if (PRIVPTR == -1)
 	    {
-	    PRVBLK->0 = -1;
-	    PRVBLK->1 = -1;
+	    PRVBLK[0] = -1;
+	    PRVBLK[1] = -1;
 	    }
 	else
 	    PRVBLK[PRIVPTR->PVIX] = PRVBLK[PRIVPTR->PVIX] || PRIVPTR->PVAL;
@@ -1300,13 +1300,13 @@ PARSE_PRCPRIVS(PRVBLK)
 
 	CHR = CH$RCHAR_A(LINPTR);
 	if (CHR == %C":")
-	    EXITLOOP;
+	    break;
 	};
 
 // Return count of fields found
 
     return PRIVCNT;
-    };
+    }
 
 PARSE_PRCQUOTAS(QLIST,QMAX)
 !
@@ -1331,11 +1331,11 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 
 // Loop, parsing keywords.
 
-    WHILE TRUE DO
+    while (TRUE)
 	{
 	QUOTLEN = GETFIELD(QUOTBUF);
 	if (QUOTLEN == 0)
-	    EXITLOOP;
+	    break;
 
 // Parse the keyword
 
@@ -1372,7 +1372,7 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 
 	CHR = CH$RCHAR_A(LINPTR);
 	if (CHR == %C":")
-	    EXITLOOP;
+	    break;
 	};
 
 // Put the terminator entry in the list
@@ -1383,7 +1383,7 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 // Return the number of entries in the list.
 
     return QUOTCNT+1;
-    };
+    }
 
 PARSE_PRCSTATUS (void)
 !
@@ -1403,22 +1403,22 @@ PARSE_PRCSTATUS (void)
 
 // Loop, parsing the flags
 
-    WHILE TRUE DO
+    while (TRUE)
 	{
 	STATLEN = GETFIELD(STATBUF);
 	if (STATLEN == 0)
-	    EXITLOOP;
+	    break;
 	STATVAL = STATVAL || KEY_VALUE(STATNAMES,STATLEN,CH$PTR(STATBUF));
 	SKIPWHITE();
 	CHR = CH$RCHAR_A(LINPTR);
 	if (CHR == %C":")
-	    EXITLOOP;
+	    break;
 	};
 
 // Finall, return the complete value
 
     return STATVAL;
-    };
+    }
 
 //SBTTL "Init_WKS - Add a WKS entry"
 		     
@@ -1474,7 +1474,7 @@ Init_WKS : NOVALUE (void)
 				[DSC$A_POINTER]	= WKSError),
 	WKSport,
 	WKSstat,
-	WKSpriv : VECTOR->2,
+	WKSpriv : VECTOR[2],
 	WKSprior,
 	WKSqlim,
 	WKSmaxsrv;
@@ -1566,7 +1566,7 @@ Init_WKS : NOVALUE (void)
     Seg$WKS_Config(WKSport, WKSprname_Desc, WKSimname_Desc, WKSstat,
 		WKSpriv,WKSprior,WKSqlim,WKSmaxsrv,Quota_Desc,
 		WKSInput_Desc,WKSOutput_Desc,WKSError_Desc);
-    };
+    }
 
 //SBTTL "Init_RPC - Add an RPC entry"
 		     
@@ -1636,7 +1636,7 @@ Init_RPC : NOVALUE (void)
 
     RC=RPC$CONFIG( RPCname_Desc,RPCprog,RPCvers,RPCprot,RPCport,RPCimname_Desc);
     if (RC LSS 0) Config_Err(%ASCID"Can not accept RPC config entry");
-    };
+    }
 
 //SBTTL "Init_Auth - Add an authorization entry"
 		     
@@ -1685,7 +1685,7 @@ Init_Auth : NOVALUE (void)
 
     RC=RPC$CONFIG_AUTH(AUTHuic, AUTHuid, AUTHgid, AUTHhostname_Desc);
     if ((RC LSS 0)) Config_Err(%ASCID"Can not accept AUTH config entry");
-    };
+    }
 
 //SBTTL "Init_MBXResolver - Define the system name resolver process"
 
@@ -1706,7 +1706,7 @@ Init_MBXResolver : NOVALUE (void)
 				[DSC$A_POINTER]	= imagename),
 	STATFLAGS,
 	PRIORITY,
-	PRIVS : VECTOR->2,
+	PRIVS : VECTOR[2],
 	QUOTAS : BLOCK[MAXQUOTA*QUOTA_BLEN] FIELD(QUOTA_FIELDS),
 	Quota_Desc	: $BBLOCK [DSC$K_Z_BLN] PRESET (
 				[DSC$W_LENGTH]	= 0,
@@ -1745,7 +1745,7 @@ Init_MBXResolver : NOVALUE (void)
 
     NML$CONFIG(IMAGENAME_Desc, PRIORITY, STATFLAGS, PRIVS,
 	       QUOTA_Desc);
-    };
+    }
 
 //SBTTL "Add an entry to the local hosts list"
 
@@ -1776,7 +1776,7 @@ INIT_LOCAL_HOST : NOVALUE (void)
 // Got the info. Call routine to add to the list
 
     USER$ACCESS_CONFIG(hostaddr,hostmask);
-    };
+    }
 
 //SBTTL "Parsing utility routines"
 
@@ -1787,11 +1787,11 @@ SKIPTO(TCHR) : NOVALUE (void)
     {
     signed long
 	CHR;
-    WHILE (CHR = CH$RCHAR_A(LINPTR)) != 0 DO
+    while ((CHR = CH$RCHAR_A(LINPTR)) != 0)
 	if (CHR == TCHR)
 	    RETURN;
     Config_err(%ASCID"SKIPTO failure (EOL)");
-    };
+    }
 
 SKIPWHITE : NOVALUE (void)
 
@@ -1801,14 +1801,14 @@ SKIPWHITE : NOVALUE (void)
     signed long
         CHR,LPTR;
     LPTR = LINPTR;
-    WHILE (CHR = CH$RCHAR_A(LPTR)) != 0 DO
+    while ((CHR = CH$RCHAR_A(LPTR)) != 0)
 	{
 	if (CHR != %C" ")
 	    RETURN;
 	LINPTR = LPTR;
 	};
     Config_err(%ASCID"SKIPWHITE failure (EOL)");
-    };
+    }
 
 GETFIELD(FLDADR)
     
@@ -1840,7 +1840,7 @@ GETFIELD(FLDADR)
     if (cnt == 0)
 	Config_err(%ASCID"Bad or null field found");
     return cnt;
-    };
+    }
 
 PARSE_NULLFIELD (void)
     
@@ -1862,7 +1862,7 @@ PARSE_NULLFIELD (void)
 	  (CHR != %C"=") THEN 0
     else 1
 
-    };
+    }
 
 //Sbttl "Initialize Network Devices as described in dev_config."
 /*
@@ -1902,7 +1902,7 @@ CNF$Net_Device_Init : NOVALUE (void)
 	struct Device_Configuration_Entry * dev_config;
 
     Dev_attn = 0;		// No devices need attention
-    INCR j FROM 0 TO (Dev_count-1) DO
+    for (j=0;j<=(Dev_count-1);j++)
 	{
 	if (Dev_Config_Tab[J,dc_valid_Device])
 	    {
@@ -1946,7 +1946,7 @@ CNF$Net_Device_Init : NOVALUE (void)
 
 	    };
 	};
-    };
+    }
 
 
 //SBTTL	"Check devices needing attention"
@@ -1955,25 +1955,25 @@ FORWARD ROUTINE
  void    CNF$Check_Devices;
 
 static signed long
-    CHECKTIME : VECTOR->2 INITIAL(-20000000,-1); // 2 seconds in the future
+    CHECKTIME : VECTOR[2] INITIAL(-20000000,-1); // 2 seconds in the future
 
 CNF$Check_Sched : NOVALUE (void)
     {
     $SETIMR(	DAYTIM = CHECKTIME,
 		ASTADR = CNF$Check_Devices);
-    };
+    }
 
 CNF$Device_Error : NOVALUE (void)
     {
     if (dev_attn == 0)
 	CNF$Check_Sched();		// Schedule a check
     dev_attn = dev_attn+1;	// And bump count of wedged devices
-    };
+    }
 
 CNF$Check_Devices : NOVALUE (void)
     {
-    REGISTER i;
-    INCR i FROM 0 TO (Dev_count-1) DO
+    register i;
+    for (i=0;i<=(Dev_count-1);i++)
 	IF Dev_Config_tab[i,dc_valid_device] && 
 	   (NOT Dev_Config_tab[i,dc_online]) AND
 	   (NOT Dev_Config_tab[i,dc_is_clone]) THEN
@@ -1983,7 +1983,7 @@ CNF$Check_Devices : NOVALUE (void)
 
     if (dev_attn != 0)
 	CNF$Check_Sched();		// Reschedule if there is still a problem
-    };
+    }
 
 
 
@@ -1994,7 +1994,7 @@ CNF$Check_Devices : NOVALUE (void)
 CNF$Get_Local_IP_addr (void)
     {
     Dev_Config_Tab[0,dc_ip_address]
-    };
+    }
 
 }
 ELUDOM

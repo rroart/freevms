@@ -230,7 +230,7 @@ Log_IP_Packet(Seg,SwapFlag,SendFlag) : NOVALUE (void)
 	    0,sptr,seg,segdata,Header_Size,
 	   seghdr->IPH$CheckSum);
 
-    };
+    }
 
 //SBTTL "IPCB_Find - look up IP control block"
 IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
@@ -242,7 +242,7 @@ IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
 
     Ucount = IPCB_Count;
     IPCBIX = 1;
-    WHILE (Ucount > 0) && (IPCBIX <= Max_IPCB) DO
+    while ((Ucount > 0) && (IPCBIX <= Max_IPCB))
 	{
 	if ((IPCB = IPCB_Table[IPCBIX]) != 0)
 	    {
@@ -256,7 +256,7 @@ IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
 	IPCBIX = IPCBIX + 1;
 	};
     return 0;
-    };
+    }
 
 //SBTTL "IP input handler"
 /*
@@ -326,7 +326,7 @@ X:	{
 	delete = Queue_User_IP(IPCB,Seg,SegSize,Buf,Bufsize,0);
 	};
 
-    };
+    }
 
 
 //SBTTL "Queue_User_IP - Queue up IP packet for delivery to user"
@@ -347,7 +347,7 @@ Queue_User_IP(IPCB,Uptr,Usize,Buf,Bufsize,QB)
     {
     MAP
 	struct IPCB_Structure * IPCB,
-	struct Queue_BLK_Structure * QB(QB_NR_Fields);
+	struct queue_blk_structure(QB_NR_Fields) * QB;
     signed long
 	Buf2,
 	QBR;
@@ -389,7 +389,7 @@ Queue_User_IP(IPCB,Uptr,Usize,Buf,Bufsize,QB)
 	INSQUE(QB,IPCB->IPCB$NR_Qtail);
 
     return TRUE;		// Go ahead and deallocate this segment...
-    };
+    }
 
 //SBTTL "Deliver_IP_Data - Deliver IP data to user"
 /*
@@ -402,8 +402,8 @@ Deliver_IP_Data(IPCB,QB,URQ) : NOVALUE (void)
     {
     MAP
 	struct IPCB_Structure * IPCB,
-	struct Queue_Blk_Structure * QB(QB_NR_Fields),
- 	struct Queue_Blk_Structure * URQ(QB_UR_Fields);
+	struct queue_blk_structure(QB_NR_Fields) * QB,
+ 	struct queue_blk_structure(QB_UR_Fields) * URQ;
     signed long
 	FLAGS,
 	ICMTYPE,
@@ -460,7 +460,7 @@ Deliver_IP_Data(IPCB,QB,URQ) : NOVALUE (void)
     MM$QBLK_Free(URQ);
     MM$Seg_Free(QB->NR$Buf_Size,QB->NR$Buf);
     MM$QBLK_Free(QB);
-    };
+    }
 
 //SBTTL "IPCB_OK - Match connection ID to IPCB address"
 
@@ -492,7 +492,7 @@ IPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
 // Everything is good - return the IPCB address
 
     return IPCB;
-    };
+    }
 
 //SBTTL "IPCB_Get - Allocate and initialize one IPCB"
 
@@ -512,11 +512,11 @@ IPCB_Get(IDX)
 
 X:  {			// ** Block X **
     IPCBIDX = 0;
-    INCR I FROM 1 TO MAX_IPCB DO
+    for (I=1;I<=MAX_IPCB;I++)
 	if (IPCB_Table[I] == 0)
 	    LEAVE X WITH (IPCBIDX = I);
     return 0;			// Failed to allocate a IPCB
-    };			// ** Block X **
+    }			// ** Block X **
 
 // Allocate some space for the IPCB
 
@@ -544,7 +544,7 @@ X:  {			// ** Block X **
 
     IDX = IPCBIDX;
     return IPCB;
-    };
+    }
 
 //SBTTL "IPCB_Free - Deallocate a IPCB"
 
@@ -568,15 +568,15 @@ void IPCB_Free(IPCBIX,struct IPCB_Structure * IPCB) (void)
     if (NOT RC)
 	FATAL$FAO("IPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     IPCB_Count = IPCB_Count-1;
-    };
+    }
 
 //SBTTL "Kill_IP_Requests - purge all I/O requests for a connection"
 
 void Kill_IP_Requests(struct IPCB_Structure * IPCB,RC) (void)
     {
     signed long
-	struct Queue_Blk_Structure * URQ(QB_UR_Fields),
-	struct Queue_Blk_Structure * QB(QB_NR_Fields);
+	struct queue_blk_structure(QB_UR_Fields) * URQ,
+	struct queue_blk_structure(QB_NR_Fields) * QB;
 
 // Make sure we aren't doing this more than once
 !
@@ -607,7 +607,7 @@ void Kill_IP_Requests(struct IPCB_Structure * IPCB,RC) (void)
 
 // Purge the user request queue, posting all requests
 
-    WHILE REMQUE(IPCB->IPCB$USR_Qhead,URQ) != Empty_Queue DO
+    while (REMQUE(IPCB->IPCB$USR_Qhead,URQ) != Empty_Queue)
 	{
 	User$Post_IO_Status(URQ->UR$Uargs,RC,0,0,0);
 	MM$UArg_Free(URQ->UR$Uargs);
@@ -616,12 +616,12 @@ void Kill_IP_Requests(struct IPCB_Structure * IPCB,RC) (void)
 
 // Purge any received qblocks as well
 
-    WHILE REMQUE(IPCB->IPCB$NR_Qhead,QB) != Empty_Queue DO
+    while (REMQUE(IPCB->IPCB$NR_Qhead,QB) != Empty_Queue)
 	{
 	MM$Seg_Free(QB->NR$Buf_Size,QB->NR$Buf);
 	MM$QBlk_Free(QB);
 	};
-    };
+    }
 
 //SBTTL "IPCB_Close - Close/deallocate a IPCB"
 
@@ -629,7 +629,7 @@ void IPCB_Close(UIDX,struct IPCB_Structure * IPCB,RC) (void)
     {
     Kill_IP_Requests(IPCB,RC);
     IPCB_FREE(UIDX,IPCB);
-    };
+    }
 
 void IPCB_Abort(struct IPCB_Structure * IPCB,RC) (void)
 !
@@ -637,7 +637,7 @@ void IPCB_Abort(struct IPCB_Structure * IPCB,RC) (void)
 !
     {
     IPCB_CLOSE(IPCB->IPCB$IPCBID,IPCB,RC);
-    };
+    }
 
 
 //SBTTL "IPU$Purge_All_IO - delete IP database before network exits"
@@ -650,10 +650,10 @@ IPU$Purge_All_IO : NOVALUE (void)
 
 // Loop for all connections, purge them, and delete them.
 
-    INCR IPCBIDX FROM 1 TO MAX_IPCB DO
+    for (IPCBIDX=1;IPCBIDX<=MAX_IPCB;IPCBIDX++)
 	if ((IPCB = IPCB_Table[IPCBIDX]) != 0)
 	    IPCB_Close(IPCBIDX,IPCB,NET$_TE);
-    };
+    }
 
 
 //SBTTL "IPU$OPEN - open a user IP "connection""
@@ -675,7 +675,7 @@ void IPU$OPEN(struct User_Open_Args * Uargs) (void)
 	UIDX,
 	struct IPCB_Structure * IPCB,
 	IPCBPTR,
-	Args : VECTOR->4;
+	Args : VECTOR[4];
     LABEL
 	X;
 
@@ -741,13 +741,13 @@ X:  {			// *** Block X ***
     IPCB->IPCB$NMLook = TRUE;
     NML$GETNAME(IPADDR,IP_ADLOOK_DONE,IPCB);
     RETURN;
-    };			// *** Block X ***
+    }			// *** Block X ***
 
 // "standard" case, host name is supplied - start name lookup for it
 
     IPCB->IPCB$NMLook = TRUE;
     NML$GETALST(NAMPTR,NAMLEN,IP_NMLOOK_DONE,IPCB);
-    };
+    }
 
 
 
@@ -819,7 +819,7 @@ IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE (void)
     IOSB->NSB$XSTATUS = 0;
     IO$POST(IOSB,Uargs);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 
 
@@ -843,7 +843,7 @@ IP_ADLOOK_DONE(IPCB,STATUS,NAMLEN,NAMPTR) : NOVALUE (void)
 
     IPCB->IPCB$Foreign_Hnlen = NAMLEN;
     CH$MOVE(NAMLEN,NAMPTR,CH$PTR(IPCB->IPCB$Foreign_Hname));
-    };
+    }
 
 
 
@@ -876,7 +876,7 @@ void IPU$CLOSE(struct User_Close_Args * Uargs) (void)
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "IPU$ABORT - abort IP "connection""
 /*
@@ -905,7 +905,7 @@ void IPU$ABORT(struct User_Abort_Args * Uargs) (void)
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "IPU$S} - send IP packet"
 /*
@@ -1051,7 +1051,7 @@ void IPU$S}(struct User_Send_Args * Uargs) (void)
 
     User$Post_IO_Status(Uargs,RC,0,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 
 
@@ -1066,8 +1066,8 @@ void IPU$RECEIVE(struct User_Recv_Args * Uargs) (void)
     {
     signed long
 	struct IPCB_Structure * IPCB,
-	struct Queue_Blk_Structure * QB(QB_NR_Fields),
-	struct Queue_Blk_Structure * URQ(QB_UR_Fields),
+	struct queue_blk_structure(QB_NR_Fields) * QB,
+	struct queue_blk_structure(QB_UR_Fields) * URQ,
 	RC;
 
 // Validate connection ID and get IPCB pointer
@@ -1114,7 +1114,7 @@ void IPU$RECEIVE(struct User_Recv_Args * Uargs) (void)
     else
 	INSQUE(URQ,IPCB->IPCB$USR_Qtail);
     OKINT;
-    };
+    }
 
 
 
@@ -1146,7 +1146,7 @@ void IPU$INFO(struct User_Info_Args * Uargs) (void)
 			0,0,
 			IPCB->IPCB$Foreign_Hname,
 			IPCB->IPCB$Foreign_Hnlen);
-    };
+    }
 
 
 //SBTTL "IPU$STATUS - get status of IP "connection""
@@ -1158,7 +1158,7 @@ void IPU$INFO(struct User_Info_Args * Uargs) (void)
 void IPU$STATUS(struct User_Status_Args * Uargs) (void)
     {
     USER$Err(Uargs,NET$_NYI);
-    };
+    }
 
 //SBTTL "IPU$CANCEL - Handle VMS cancel for IP connection"
 /*
@@ -1176,7 +1176,7 @@ IPU$CANCEL(struct VMS$Cancel_Args * Uargs)
 
 // Check all valid IPCB's looking for a match on pid and channel #.
 
-    INCR I FROM 1 TO MAX_IPCB DO
+    for (I=1;I<=MAX_IPCB;I++)
 	if ((IPCB = IPCB_Table[I]) != 0)
 	    {
 
@@ -1191,7 +1191,7 @@ IPU$CANCEL(struct VMS$Cancel_Args * Uargs)
 		};
 	    };
     return Fcount;
-    };
+    }
 
 //SBTTL "IP dump routines"
 
@@ -1205,14 +1205,14 @@ IPU$Connection_List(RB) : NOVALUE (void)
     signed long
 	RBIX;
     RBIX = 1;
-    INCR I FROM 1 TO MAX_IPCB-1 DO
+    for (I=1;I<=MAX_IPCB-1;I++)
 	if (IPCB_TABLE[I] != 0)
 	    {
 	    RB[RBIX] = I;
 	    RBIX = RBIX + 1;
 	    };
-    RB->0 = RBIX - 1;
-    };
+    RB[0] = RBIX - 1;
+    }
 
 IPU$IPCB_Dump(IPCBIX,RB)
 !
@@ -1244,10 +1244,10 @@ IPU$IPCB_Dump(IPCBIX,RB)
 
     QB = IPCB->IPCB$NR_Qhead;
     Qcount = 0;
-    WHILE (QB NEQA IPCB->IPCB$NR_Qhead) DO
+    while ((QB NEQA IPCB->IPCB$NR_Qhead))
 	{
 	MAP
-	    struct Queue_Blk_Structure * QB(QB_NR_Fields);
+	    struct queue_blk_structure(QB_NR_Fields) * QB;
 	Qcount = Qcount + 1;
 	QB = QB->NR$NEXT;
 	};
@@ -1257,10 +1257,10 @@ IPU$IPCB_Dump(IPCBIX,RB)
 
     QB = IPCB->IPCB$USR_Qhead;
     Qcount = 0;
-    WHILE (QB NEQA IPCB->IPCB$USR_Qhead) DO
+    while ((QB NEQA IPCB->IPCB$USR_Qhead))
 	{
 	MAP
-	    struct Queue_Blk_Structure * QB(QB_UR_Fields);
+	    struct queue_blk_structure(QB_UR_Fields) * QB;
 	Qcount = Qcount + 1;
 	QB = QB->UR$NEXT;
 	};
@@ -1269,6 +1269,6 @@ IPU$IPCB_Dump(IPCBIX,RB)
 // Done.
 
     return TRUE;
-    };
+    }
 }
 ELUDOM

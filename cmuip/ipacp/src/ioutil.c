@@ -162,7 +162,7 @@ APP}_DEC(DPTR,DCNT,NUM,OUTCNT) : NOVALUE (void)
 	APPCHR(%C"-",DPTR,DCNT,OUTCNT);
 	};
     FLAG = 0;
-    WHILE DIV > 0 DO
+    while (DIV > 0)
 	{
 	DIG = VAL/.DIV;
 	REM = VAL MOD DIV;
@@ -174,7 +174,7 @@ APP}_DEC(DPTR,DCNT,NUM,OUTCNT) : NOVALUE (void)
 	    };
 	VAL = REM;
 	};
-    };
+    }
 
 VOID ASCII_DEC_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
 
@@ -187,7 +187,7 @@ VOID ASCII_DEC_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
     CPTR = CH$PTR(SOURCE);
     DCNT = DESC->DSC$W_LENGTH;
     DPTR = CH$PTR(DESC->DSC$A_POINTER);
-    DECR I FROM (COUNT-1) TO 0 DO
+    for (I=(COUNT-1);I>=0;I--)
 	{
 	CURBYTE = CH$RCHAR_A(CPTR);
 	APP}_DEC(DPTR,DCNT,CURBYTE,OUTCNT);
@@ -196,7 +196,7 @@ VOID ASCII_DEC_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
 	};
     if (LEN != 0)
 	.LEN = MIN(OUTCNT,DESC->DSC$W_LENGTH);
-    };
+    }
 
 APP}_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
 
@@ -208,7 +208,7 @@ APP}_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
     signed long
 	DIG,VAL;
     VAL = ROT(NUM,(8-.SIZE)*4); // Position first digit
-    DECR I FROM (SIZE-1) TO 0 DO
+    for (I=(SIZE-1);I>=0;I--)
 	{
 	VAL = ROT(VAL,4);	// Rotate highest order 4 bits to lowest
 	DIG = VAL<0,4>;	// Get the digit
@@ -218,7 +218,7 @@ APP}_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
 	    DIG = %C"A"+.DIG-10;
 	APPCHR(DIG,DPTR,DCNT,OUTCNT);
 	}
-    };
+    }
 
 VOID ASCII_HEX_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
 
@@ -231,7 +231,7 @@ VOID ASCII_HEX_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
     DCNT = DESC->DSC$W_LENGTH;
     DPTR = CH$PTR(DESC->DSC$A_POINTER);
     OUTCNT = 0;
-    DECR I FROM (COUNT-1) TO 0 DO
+    for (I=(COUNT-1);I>=0;I--)
 	{
 	CURBYTE = CH$RCHAR_A(CPTR);
 	APP}_HEX(DPTR,DCNT,CURBYTE,OUTCNT,2);
@@ -240,7 +240,7 @@ VOID ASCII_HEX_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN) (void)
 	};
     if (LEN != 0)
 	.LEN = MIN(OUTCNT,DESC->DSC$W_LENGTH);
-    };
+    }
 
 FORWARD ROUTINE
     GET_DEC_NUM;
@@ -257,7 +257,7 @@ GET_IP_ADDR(CPTR,VAL)
     signed long
     	DPTR,NVAL,CHR;
     DPTR = CH$PTR(VAL);
-    DECR I FROM 3 TO 0 DO
+    for (I=3;I>=0;I--)
 	{
 	if ((CHR = GET_DEC_NUM(CPTR,NVAL)) LSS 0)
 	    return -1;
@@ -267,7 +267,7 @@ GET_IP_ADDR(CPTR,VAL)
 		return -1;
 	};
     return CHR;
-    };
+    }
 
 GET_DEC_NUM(CPTR,VAL)
 
@@ -290,7 +290,7 @@ GET_DEC_NUM(CPTR,VAL)
     if ((CHR LSS %C"0') || (CHR > %C'9"))
 	return -1;
     RVAL = 0;
-    WHILE (CHR GEQ %C"0') && (CHR <= %C'9") DO
+    while ((CHR GEQ %C"0') && (CHR <= %C'9"))
 	{
 	RVAL = RVAL*10+(CHR-%C"0");
 	.CPTR = LPTR;
@@ -298,7 +298,7 @@ GET_DEC_NUM(CPTR,VAL)
 	};
     VAL = RVAL;
     return CHR;
-    };
+    }
 
 FORWARD ROUTINE
     GET_HEX_NUM;
@@ -317,7 +317,7 @@ GET_HEX_BYTES(NUMBYT,CPTR,DEST)
 	TCHR,
 	DPTR;
     DPTR = CH$PTR(DEST);
-    DECR I FROM (NUMBYT-1) TO 0 DO
+    for (I=(NUMBYT-1);I>=0;I--)
 	{
 	if ((TCHR=GET_HEX_NUM(CPTR,CVAL)) LSS 0)
 	    return -1;
@@ -327,7 +327,7 @@ GET_HEX_BYTES(NUMBYT,CPTR,DEST)
 		return -1;
 	};
     return TCHR;
-    };
+    }
 
 GET_HEX_NUM(INPTR,VAL)
 
@@ -348,7 +348,7 @@ GET_HEX_NUM(INPTR,VAL)
     WHILE (CHR == %C" ");
     RVAL = 0;
     NCHR = 0;
-    WHILE (0 == 0) DO
+    while ((0 == 0))
 	{
 	signed long
 	    CVAL;
@@ -361,7 +361,7 @@ GET_HEX_NUM(INPTR,VAL)
 		if ((CHR GEQ %C"A') && (CHR <= %C'F"))
 		    CVAL = CHR-%C"A"+10
 		else
-		    EXITLOOP;
+		    break;
 	NCHR = NCHR+1;
 	RVAL = RVAL^4+.CVAL;
 	.INPTR = CPTR;
@@ -371,7 +371,7 @@ GET_HEX_NUM(INPTR,VAL)
 	return -1;
     VAL = RVAL;
     return CHR;
-    };
+    }
 
 
 //SBTTL "Log file handling routines"
@@ -419,7 +419,7 @@ LOG_OPEN (void)
 	return FALSE;
 	};
     return TRUE;
-    };
+    }
 
 LOG_CLOSE (void)
     {
@@ -431,7 +431,7 @@ LOG_CLOSE (void)
 	}
     else
 	return FALSE;
-    };
+    }
 
 FORWARD ROUTINE
  VOID    LOG_FAO;
@@ -459,7 +459,7 @@ LOG_CHANGE(STATE) : NOVALUE (void)
 	    LOG_STATE = STATE;	// Set new log state
 	    };
 	};
-    };
+    }
 
 LOG_OUTPUT(OUTDESC) : NOVALUE (void)
 
@@ -490,7 +490,7 @@ LOG_OUTPUT(OUTDESC) : NOVALUE (void)
 	    } ;
 	};
 
-    };
+    }
 
 LOG_FAO(CSTR) : NOVALUE (void)
 
@@ -511,7 +511,7 @@ LOG_FAO(CSTR) : NOVALUE (void)
 	LOG_OUTPUT(OUTDESC)
     else
 	OPR$FAO("LOG_FAO failure, error code is !XL",RC);
-    };
+    }
 
 LOG_Time_Stamp: NOVALUE (void)
 
@@ -522,7 +522,7 @@ LOG_Time_Stamp: NOVALUE (void)
 
     {
     LOG$FAO("!%T ",0);
-    };
+    }
 
 
 
@@ -561,7 +561,7 @@ ACT_OPEN (void)
 	return FALSE;
 	};
     return TRUE;
-    };
+    }
 
 ACT_CLOSE (void)
     {
@@ -573,7 +573,7 @@ ACT_CLOSE (void)
 	}
     else
 	return FALSE;
-    };
+    }
 
 FORWARD ROUTINE
  VOID    ACT_FAO;
@@ -601,7 +601,7 @@ ACT_CHANGE(STATE) : NOVALUE (void)
 	    ACT_STATE = STATE;	// Set new log state
 	    };
 	};
-    };
+    }
 
 ACT_OUTPUT(OUTDESC) : NOVALUE (void)
 
@@ -628,7 +628,7 @@ ACT_OUTPUT(OUTDESC) : NOVALUE (void)
 	    ACTCOUNT = 0 ;
 	    } ;
 	};
-    };
+    }
 
 ACT_FAO(CSTR) : NOVALUE (void)
 
@@ -649,7 +649,7 @@ ACT_FAO(CSTR) : NOVALUE (void)
 	ACT_OUTPUT(OUTDESC)
     else
 	OPR$FAO("ACT_FAO failure, error code is !XL",RC);
-    };
+    }
 
 ACT_Time_Stamp: NOVALUE (void)
 
@@ -660,7 +660,7 @@ ACT_Time_Stamp: NOVALUE (void)
 
     {
     ACT$FAO("!%T ",0);
-    };
+    }
 
 //sbttl "Send messages to the Central VMS operator"
 /*
@@ -725,7 +725,7 @@ Send_2_Operator(Text)
     MSG->DSC$B_DTYPE = DSC$K_DTYPE_Z;
     MSG->DSC$A_POINTER = MSGBUF;
     return $SNDOPR(MSGBUF=MSG);
-    };
+    }
 
 OPR_FAO(CSTR) : NOVALUE (void)
 
@@ -752,7 +752,7 @@ OPR_FAO(CSTR) : NOVALUE (void)
     if (NOT RC)
 	$EXIT(CODE = RC);
     S}_2_OPERATOR(OPRDESC);
-    };
+    }
 
 signed long BIND
     PRINT_MSG = OPR_FAO;	// Synonym for host table module to use
@@ -804,7 +804,7 @@ ERROR_FAO(CSTR) : NOVALUE (void)
     LOG_CHANGE(%X"80000000" || LOG_STATE);
     LOG_OUTPUT(LOGDESC);
     LOG_CHANGE(OLDSTATE);
-    };
+    }
 
 
 FATAL_FAO(CSTR) : NOVALUE (void)
@@ -852,7 +852,7 @@ FATAL_FAO(CSTR) : NOVALUE (void)
     LOG_OUTPUT(LOGDESC);
     LOG_CHANGE(OLDSTATE);
     $EXIT(CODE = SS$_ABORT);
-    };
+    }
 
 //SBTTL "Queued message processing"
 /*
@@ -903,7 +903,7 @@ QL_FAO(CSTR) : NOVALUE (void)
 	INSQUE;
     signed long
 	struct DESC$STR * MDSC,
-	struct QUEUE_BLK_STRUCTURE * QB(QB$ERRMSG_FIELDS),
+	struct queue_blk_structure(QB$ERRMSG_FIELDS) * QB,
 	RC;
 
 // Make sure logging is enabled
@@ -936,7 +936,7 @@ QL_FAO(CSTR) : NOVALUE (void)
 // next interval.
 
     $ACPWAKE;
-    };
+    }
 
 CHECK_ERRMSG_Q : NOVALUE (void)
 !
@@ -950,19 +950,19 @@ CHECK_ERRMSG_Q : NOVALUE (void)
     BUILTIN
 	REMQUE;
     signed long
-	struct QUEUE_BLK_STRUCTURE * QB(QB$ERRMSG_FIELDS),
+	struct queue_blk_structure(QB$ERRMSG_FIELDS) * QB,
 	struct DESC$STR * MDSC;
 
 // Scan the error message queue, writing each entry to the log file.
 
-    WHILE REMQUE(ERR_MSG_Q->EM$QHEAD,QB) != EMPTY_QUEUE DO
+    while (REMQUE(ERR_MSG_Q->EM$QHEAD,QB) != EMPTY_QUEUE)
 	{
 	MDSC = QB->EMQ$MDSC;
 	LOG_OUTPUT(MDSC);
 	STR$FREE1_DX(MDSC);
 	MM$QBlk_Free(QB);
 	};
-    };
+    }
 
 //Sbttl "VMS Exit Handler"
 /*
@@ -1006,7 +1006,7 @@ Side Effects:
     $SETRWM(WATFLG=0);
 
     RESET_PROCNAME();
-    };
+    }
 
 //Sbttl "VMS Exception Handler"
 /*
@@ -1043,6 +1043,6 @@ Exception_Handler(SIG,MECH)
     $FLUSH(RAB = LOGRAB);
     $FLUSH(RAB = ACTRAB);
     RETURN(SS$_Resignal);
-    };
+    }
 }
 ELUDOM

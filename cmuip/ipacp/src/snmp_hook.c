@@ -102,7 +102,7 @@ signed long
 SNMP$INIT = 
     {
     SS$_NORMAL
-    };
+    }
 
 extern
     SNMP_INPUT;
@@ -120,7 +120,7 @@ SNMP$NET_INPUT ( SrcAddr , DstAdr , SrcPrt , DstPrt ,
     OKINT;
 
     SS$_NORMAL
-    };
+    }
 
 SNMP$USER_INPUT (in_buff, in_len, out_buff, out_len)
     {
@@ -132,7 +132,7 @@ SNMP$USER_INPUT (in_buff, in_len, out_buff, out_len)
     OKINT;
 
     SS$_NORMAL
-    };
+    }
 
 
 !
@@ -440,7 +440,7 @@ getStatPtr (name,namelen,type,len,acl,exact,access_method)
 	result,
 	struct variable_struct * vp;
 
-    INCR x FROM 0 TO MIBsize DO
+    for (x=0;x<=MIBsize;x++)
 	{
 	// Point to Xth entry in MIB table
 	vp = variables[x,0,0,0,0];
@@ -463,7 +463,7 @@ getStatPtr (name,namelen,type,len,acl,exact,access_method)
     type = vp->var$type;
     acl = vp->var$acl;
     return access;
-    };
+    }
 
 
 compare (name1, len1, name2, len2)
@@ -490,7 +490,7 @@ compare (name1, len1, name2, len2)
     if ((len2 LSS len1)) RETURN 1;
 
     RETURN 0	// both strings are equal
-    };
+    }
 
 cmp_ipaddr (ip1,ip2)
 // Lexicographically compare two ip addresses.
@@ -507,7 +507,7 @@ cmp_ipaddr (ip1,ip2)
 	};
 
     RETURN 0	// both IP addresses are equal
-    };
+    }
 
 cmp_TCB (TCB1,TCB2)
 // Lexicographically compare two ip addresses.
@@ -538,7 +538,7 @@ cmp_TCB (TCB1,TCB2)
     if (TCB2->foreign_port < TCB1->foreign_port) return 1;
 
     return 0
-    };
+    }
 
 
 /*
@@ -573,7 +573,7 @@ cmp_TCB (TCB1,TCB2)
 
 BIND
     version_description = %ASCID"CMU-OpenVMS/IP 6.6-5" : BLOCK[8,BYTE],
-    version_ident = UPLIT(1, 3, 6, 1, 4, 1, 3, 1, 6) : VECTOR->9;
+    version_ident = UPLIT(1, 3, 6, 1, 4, 1, 3, 1, 6) : VECTOR[9];
 
 LITERAL
     version_ident_size = 9;
@@ -630,7 +630,7 @@ var_system (vp, name, length, exact, var_len, access_method)
 	TES;
 
     0
-    };
+    }
 
 
 var_ifEntry (vp, name, length, exact, var_len, access_method)
@@ -652,9 +652,9 @@ var_ifEntry (vp, name, length, exact, var_len, access_method)
 
     // find "next" interface
     interface = 0;
-    INCR i FROM 1 TO Dev_Count DO
+    for (i=1;i<=Dev_Count;i++)
 	{
-	newname->10 = i;
+	newname[10] = i;
 	result = compare(name, ..length, newname, vp->var$namelen);
 	IF ((exact && (result == 0)) || (NOT exact && (result LSS 0)))
 	    THEN EXITLOOP interface = i
@@ -725,7 +725,7 @@ var_ifEntry (vp, name, length, exact, var_len, access_method)
 	    0;
 	TES;
     0
-    };
+    }
 
 
 
@@ -768,8 +768,8 @@ var_atEntry(vp, name, length, exact, var_len, access_method)
      * Interface is at offset 10,
      * IPADDR starts at offset 12.
      */
-    oid			    lowest->16;
-    oid			    current->16;
+    oid			    lowest[16];
+    oid			    current[16];
     register struct arptab  *arp;
     struct arptab	    *lowarp = 0;
     extern struct arptab    arptab[];
@@ -789,8 +789,8 @@ var_atEntry(vp, name, length, exact, var_len, access_method)
 	if (!(arp->at_flags & ATF_COM))	/* if this entry isn't valid */
 	    continue;
 	/* create new object id */
-	current->10 = 1;	/* ifIndex == 1 (ethernet) */
-	current->11 = 1;
+	current[10] = 1;	/* ifIndex == 1 (ethernet) */
+	current[11] = 1;
 	cp = (u_char *)&(arp->at_iaddr);
 	op = current + 12;
 	for(count = 4; count > 0; count--)
@@ -817,8 +817,8 @@ var_atEntry(vp, name, length, exact, var_len, access_method)
 	if (ipdp->timer == 0)	/* if this entry is unused, continue */
 	    continue;
 	/* create new object id */
-	current->10 = 2;	/* ifIndex == 2 (appletalk) */
-	current->11 = 1;
+	current[10] = 2;	/* ifIndex == 2 (appletalk) */
+	current[11] = 1;
 	cp = (u_char *)&ipaddr;
 	op = current + 12;
 	for(count = 4; count > 0; count--)
@@ -852,9 +852,9 @@ var_atEntry(vp, name, length, exact, var_len, access_method)
 	 * As far as IP is concerned, the "physical" address includes the Appletalk
 	 * network address as well as node number.
 	 */
-	return_buf->0 = ((u_char *)&lowipdp->net)[0];
-	return_buf->1 = ((u_char *)&lowipdp->net)[1];
-	return_buf->2 = lowipdp->node;
+	return_buf[0] = ((u_char *)&lowipdp->net)[0];
+	return_buf[1] = ((u_char *)&lowipdp->net)[1];
+	return_buf[2] = lowipdp->node;
     } else
 	return NULL;	/* no match */
     bcopy((char *)lowest, (char *)name, 16 * sizeof(oid));
@@ -863,7 +863,7 @@ var_atEntry(vp, name, length, exact, var_len, access_method)
     switch(vp->magic){
 	[ATIFINDEX]:
 	    *var_len = sizeof long_return;
-	    long_return = lowest->10;
+	    long_return = lowest[10];
 	    return (u_char *)&long_return;
 	[ATPHYSADDRESS]:
 	    *var_len = addrlen;
@@ -899,7 +899,7 @@ var_IP (vp, name, length, exact, var_len, access_method)
     var_len = 4;	// default length == 4 bytes
 
     return IP_group_MIB + (vp->var$magic-1)*4
-    };
+    }
 
 /*
 
@@ -987,13 +987,13 @@ var_ipAddrEntry (vp, name, length, exact, var_len, access_method)
 
     // find "next" interface
     interface = -1;
-    INCR i FROM 0 TO Dev_Count-1 DO
+    for (i=0;i<=Dev_Count-1;i++)
 	{
 
 	// "Cobble" in the new name
 	IPaddr = DEV_CONFIG_TAB[i,dc_ip_address];
-	newname->13 = IPaddr<24,8,0>;  newname->12 = IPaddr<16,8,0>;
-	newname->11 = IPaddr<8,8,0>;  newname->10 = IPaddr<0,8,0>;
+	newname[13] = IPaddr<24,8,0>;  newname[12] = IPaddr<16,8,0>;
+	newname[11] = IPaddr<8,8,0>;  newname[10] = IPaddr<0,8,0>;
 
 	result = compare(name, ..length, newname, vp->var$namelen);
 	if ((NOT exact && (result LSS 0)))
@@ -1010,8 +1010,8 @@ var_ipAddrEntry (vp, name, length, exact, var_len, access_method)
 
     // "Cobble" in the new name
     IPaddr = DEV_CONFIG_TAB[interface,dc_ip_address];
-    newname->13 = IPaddr<24,8,0>;  newname->12 = IPaddr<16,8,0>;
-    newname->11 = IPaddr<8,8,0>;  newname->10 = IPaddr<0,8,0>;
+    newname[13] = IPaddr<24,8,0>;  newname[12] = IPaddr<16,8,0>;
+    newname[11] = IPaddr<8,8,0>;  newname[10] = IPaddr<0,8,0>;
 
     ch$move(vp->var$namelen * SNMP$K_OIDsize, newname, name );
 
@@ -1032,7 +1032,7 @@ var_ipAddrEntry (vp, name, length, exact, var_len, access_method)
 	TES;
 
     return 0
-    };
+    }
 
 
 
@@ -1053,7 +1053,7 @@ var_ICMP (vp, name, length, exact, var_len, access_method)
     var_len = 4;	// default length == 4 bytes
 
     return ICMP_MIB + (vp->var$magic-1)*4
-    };
+    }
 
 
 
@@ -1074,7 +1074,7 @@ var_UDP (vp, name, length, exact, var_len, access_method)
     var_len = 4;	// default length == 4 bytes
 
     return UDP_MIB + (vp->var$magic-1)*4
-    };
+    }
 
 
 
@@ -1095,14 +1095,14 @@ var_TCP (vp, name, length, exact, var_len, access_method)
     var_len = 4;	// default length == 4 bytes
 
     return TCP_MIB + (vp->var$magic-1)*4
-    };
+    }
 
 
 
 var_tcpConn (vp, name, length, exact, var_len, access_method)
     {
     EXTERNAL 
-	struct VECTOR * VTCB_PTR->0,
+	struct VECTOR * VTCB_PTR[0],
 	VTCB_size,
 	TCB_Count;
     MAP
@@ -1122,19 +1122,19 @@ var_tcpConn (vp, name, length, exact, var_len, access_method)
     count = TCB_count;
     bestTCB = 0;
 
-    INCR j FROM 1 TO VTCB_Size DO
+    for (j=1;j<=VTCB_Size;j++)
 	if ((TCB = VTCB_ptr[J]) NEQA 0)
 	    {
 	    // "Cobble" in the new name
 	    TCPaddr = TCB->Local_Host;		// Local Host
-	    newname->10 = TCPaddr<0,8,0>;  newname->11 = TCPaddr<8,8,0>;
-	    newname->12 = TCPaddr<16,8,0>; newname->13 = TCPaddr<24,8,0>;
-	    newname->14 = TCB->Local_Port;	// Local Port
+	    newname[10] = TCPaddr<0,8,0>;  newname[11] = TCPaddr<8,8,0>;
+	    newname[12] = TCPaddr<16,8,0>; newname[13] = TCPaddr<24,8,0>;
+	    newname[14] = TCB->Local_Port;	// Local Port
 
 	    TCPaddr = TCB->Foreign_Host;	// Remote Host
-	    newname->15 = TCPaddr<0,8,0>;  newname->16 = TCPaddr<8,8,0>;
-	    newname->17 = TCPaddr<16,8,0>; newname->18 = TCPaddr<24,8,0>;
-	    newname->19 = TCB->Local_Port;	// Remote Port
+	    newname[15] = TCPaddr<0,8,0>;  newname[16] = TCPaddr<8,8,0>;
+	    newname[17] = TCPaddr<16,8,0>; newname[18] = TCPaddr<24,8,0>;
+	    newname[19] = TCB->Local_Port;	// Remote Port
 
 	    result = compare(name, ..length, newname, vp->var$namelen);
 	    if ((NOT exact && (result LSS 0)))
@@ -1145,21 +1145,21 @@ var_tcpConn (vp, name, length, exact, var_len, access_method)
 	    if ((exact && (result == 0))) EXITLOOP bestTCB = TCB;
 
 	    if ((count = count-1) <= 0) !only process what we have.
-		EXITLOOP;
+		break;
 	    };
 
     if ((bestTcb EQLA 0)) return 0;
 
     // "Cobble" in the new name
     TCPaddr = bestTCB->Local_Host;		// Local Host
-    newname->10 = TCPaddr<0,8,0>;  newname->11 = TCPaddr<8,8,0>;
-    newname->12 = TCPaddr<16,8,0>; newname->13 = TCPaddr<24,8,0>;
-    newname->14 = bestTCB->Local_Port;	// Local Port
+    newname[10] = TCPaddr<0,8,0>;  newname[11] = TCPaddr<8,8,0>;
+    newname[12] = TCPaddr<16,8,0>; newname[13] = TCPaddr<24,8,0>;
+    newname[14] = bestTCB->Local_Port;	// Local Port
 
     TCPaddr = bestTCB->Foreign_Host;	// Remote Host
-    newname->15 = TCPaddr<0,8,0>;  newname->16 = TCPaddr<8,8,0>;
-    newname->17 = TCPaddr<16,8,0>; newname->18 = TCPaddr<24,8,0>;
-    newname->19 = bestTCB->Local_Port;	// Remote Port
+    newname[15] = TCPaddr<0,8,0>;  newname[16] = TCPaddr<8,8,0>;
+    newname[17] = TCPaddr<16,8,0>; newname[18] = TCPaddr<24,8,0>;
+    newname[19] = bestTCB->Local_Port;	// Remote Port
 
     ch$move(vp->var$namelen * SNMP$K_OIDsize, newname, name );
 
@@ -1191,7 +1191,7 @@ var_tcpConn (vp, name, length, exact, var_len, access_method)
 	TES;
 
     return 0
-    };
+    }
 
 }
 ELUDOM

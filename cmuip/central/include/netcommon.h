@@ -83,10 +83,10 @@ typedef union {
 #define MAX_IPCB	 10		/* Max number of IP connections */
 
 /* Define protocol codes for open */
-#define U$TCP_Protocol	0		/* TCP protocol (default) */
-#define U$UDP_Protocol	1		/* UDP protocol */
-#define U$ICMP_Protocol	2		/* ICMP protocol */
-#define U$IP_Protocol	3		/* IP protocol */
+#define U$TCP_PROTOCOL	0		/* TCP protocol (default) */
+#define U$UDP_PROTOCOL	1		/* UDP protocol */
+#define U$ICMP_PROTOCOL	2		/* ICMP protocol */
+#define U$IP_PROTOCOL	3		/* IP protocol */
 
 
 
@@ -107,25 +107,25 @@ typedef union {
 */
 
 typedef struct {
-    uword NSB$STATUS;		/* VMS status return code */
-    uword NSB$Byte_Count;
+    uword nsb$status;		/* VMS status return code */
+    uword nsb$byte_count;
     union {
-	ulong NSB$XSTATUS;	/* Second status word */
+	ulong nsb$xstatus;	/* Second status word */
 	struct {
-	    uchar NSB$ICMP_CODE;	/* ICMP mess. code, if ICMP flag set*/
+	    uchar nsb$icmp_code;	/* ICMP mess. code, if ICMP flag set*/
 	    union {
-		uchar NSB$FLAGS;		/*  Request flags */
+		uchar nsb$flags;		/*  Request flags */
 		struct {
-		    uchar NSB$F_URG:1;	/* URGENT data bit (not implemented) */
-		    uchar NSB$F_PUSH:1;	/* PUSH data bit */
-		    uchar NSB$F_EOF:1;	/* EOF (i.e. connect. fully closed) */
-		    uchar NSB$F_ICMP:1;	/* ICMP message bit */
+		    uchar nsb$f_urg:1;	/* URGENT data bit (not implemented) */
+		    uchar nsb$f_push:1;	/* PUSH data bit */
+		    uchar nsb$f_eof:1;	/* EOF (i.e. connect. fully closed) */
+		    uchar nsb$f_icmp:1;	/* ICMP message bit */
 		    };
 		} flags;
 	    };
-	ulong NSB$XERROR;	/* ACP error code, if RC = SS$_ABORT */
+	ulong nsb$xerror;	/* ACP error code, if RC = SS$_ABORT */
 	} net_status;
-    } NetIO_Status_Block;
+    } netio_status_block;
 
 #define NSB$URGBIT   1		/* Bit value for URGENT bit in FLAGS field */
 #define NSB$PUSHBIT  2		/* Bit value for PUSH bit */
@@ -144,90 +144,90 @@ typedef struct {
 */
 
 typedef struct {
-    ulong IPADR$SRC_HOST;
-    ulong IPADR$DST_HOST;
+    ulong ipadr$src_host;
+    ulong ipadr$dst_host;
 
     union {
-	uchar IPADR$EXTENSION[8];
+	uchar ipadr$extension[8];
 	struct {
-	    ulong IPADR$EXT1;
-	    ulong IPADR$EXT2;
+	    ulong ipadr$ext1;
+	    ulong ipadr$ext2;
 	    };
 	struct {
-	    uword IPADR$SRC_PORT;
-	    uword IPADR$DST_PORT;
+	    uword ipadr$src_port;
+	    uword ipadr$dst_port;
 	    };
 	struct {
-	    uchar IPADR$TYPE;
-	    uchar IPADR$CODE;
-	    uword IPADR$CKSUM;
-	    ulong IPADR$SPECIAL;
+	    uchar ipadr$type;
+	    uchar ipadr$code;
+	    uword ipadr$cksum;
+	    ulong ipadr$special;
 	    };
 	};
-    } IPADR$ADDRESS_BLOCK;
+    } ipadr$address_block;
 
 /* NET$INFO - return block structure. */
 
 typedef struct {
-    uchar CI$FHost_Name_size;
-    uchar CI$LHost_Name_size;
-    uchar CI$Foreign_Host[HOST_NAME_MAX_SIZE];
+    uchar ci$fhost_name_size;
+    uchar ci$lhost_name_size;
+    uchar ci$foreign_host[HOST_NAME_MAX_SIZE];
     short fill;
-    ulong CI$Foreign_Port;
+    ulong ci$foreign_port;
     short fill_1;
-    uchar CI$Local_Host[HOST_NAME_MAX_SIZE];
-    ulong CI$Local_Port;
+    uchar ci$local_host[HOST_NAME_MAX_SIZE];
+    ulong ci$local_port;
     short fill_2;
-    ulong CI$local_internet_adrs;
-    ulong CI$remote_internet_adrs;
-    } Connection_Info_Return_Block;
+    ulong ci$local_internet_adrs;
+    ulong ci$remote_internet_adrs;
+    } connection_info_return_block;
 
 
 
 /* NET$GTHST - Return block for Name to Address translation */
 
 typedef struct {
-    ulong GHA$NL_ADRCNT;		/* Count of addresses */
-    ulong GHA$NL_ADRLST[MAX_HADDRS];	/* Address list */
-    ulong GHA$NL_NAMLEN;		/* Official name length */
-    char	  GHA$NL_NAMSTR[MAX_HNAME];	/* Official name string */
-    } GTHST_NMLOOK_BLOCK;
+    ulong gha$nl_adrcnt;		/* Count of addresses */
+    ulong gha$nl_adrlst[MAX_HADDRS];	/* Address list */
+    ulong gha$nl_namlen;		/* Official name length */
+    char	  gha$nl_namstr[MAX_HNAME];	/* Official name string */
+    } gthst_nmlook_block;
 
 
 /* NET$GTHST - Return block for Address to Name translation */
 
 typedef struct {
-    ulong GHN$NAMLEN;		/* Host name string length */
-    char	  GHN$NAMSTR[MAX_HNAME];
-    } GTHST_ADLOOK_BLOCK;
+    ulong ghn$namlen;		/* Host name string length */
+    char	  ghn$namstr[MAX_HNAME];
+    } gthst_adlook_block;
 
 /* NET$GTHST - Return block for Name to RR translation */
 
 typedef struct {
-    uword GRR$RL_RDLEN;		/* Resource data length */
-    char  GRR$RL_RDATA[];	/* RData followed by name. */
-    } GTHST_RRLOOK_BLOCK;
+    uword grr$rl_rdlen;		/* Resource data length */
+    char  grr$rl_rdata[];	/* RData followed by name. */
+    } gthst_rrlook_block;
 
 
 
 /* Dump Directive Codes. */
 
-#define DU$Dynamic_Mem_Alloc	 1 /* Memory management counters */
-#define DU$TCP_Stats		 2 /* TCP statistic counters */
-#define DU$Local_Connection_ID	 3 /* List of active TCP connections */
-#define DU$TCB_Dump		 4 /* Contents of a TCB */
-#define DU$Host_stats		 5 /* obsolete, unused */
-#define DU$Known_Host_Index	 6 /* obsolete, unused */
-#define DU$device_dump		 7 /* Device-dependant status */
-#define DU$UDP_Connections	 8 /* List of UDP connections */
-#define DU$UDPCB_Dump		 9 /* Contents of a UDPCB */
-#define DU$ARP_Cache		10 /* Contents of ARP cache */
-#define DU$ICMP_Connections	11 /* List of ICMP connections */
-#define DU$ICMPCB_Dump		12 /* Contents of a IPCB */
-#define DU$IP_Connections	13 /* List of IP connections */
-#define DU$IPCB_Dump		14 /* Contents of a IPCB */
-#define DU$Device_List		15 /* List of device indexes */
-#define DU$Device_Stat		16 /* Contents of dev_config entry */
+#define DU$DYNAMIC_MEM_ALLOC	 1 /* Memory management counters */
+#define DU$TCP_STATS		 2 /* TCP statistic counters */
+#define DU$LOCAL_CONNECTION_ID	 3 /* List of active TCP connections */
+#define DU$TCB_DUMP		 4 /* Contents of a TCB */
+#define DU$HOST_STATS		 5 /* obsolete, unused */
+#define DU$KNOWN_HOST_INDEX	 6 /* obsolete, unused */
+#define DU$DEVICE_DUMP		 7 /* Device-dependant status */
+#define DU$UDP_CONNECTIONS	 8 /* List of UDP connections */
+#define DU$UDPCB_DUMP		 9 /* Contents of a UDPCB */
+#define DU$ARP_CACHE		10 /* Contents of ARP cache */
+#define DU$ICMP_CONNECTIONS	11 /* List of ICMP connections */
+#define DU$ICMPCB_DUMP		12 /* Contents of a IPCB */
+#define DU$IP_CONNECTIONS	13 /* List of IP connections */
+#define DU$IPCB_DUMP		14 /* Contents of a IPCB */
+#define DU$DEVICE_LIST		15 /* List of device indexes */
+#define DU$DEVICE_STAT		16 /* Contents of dev_config entry */
 
 /* Dump return argument block formats. */
 
@@ -235,54 +235,54 @@ typedef struct {
 /* Dump Directive: DU$Dynamic_mem_Alloc  */
 
 typedef struct {
-    long DM$QB;			/* Queue Blocks */
-    long DM$UA;			/* UARG Blocks */
-    long DM$CS;			/* TCP Control segments */
-    long DM$DMS;		/* default size max segs */
-    long DM$NM;			/* net mesg receive buffer */
-    long DM$QBMX;		/* Queue blocks max */
-    long DM$UAMX;		/* UARG Blocks max */
-    long DM$CSMX;		/* TCP Control segments max */
-    long DM$DMSMX;		/* default size max segs max */
-    long DM$NMMX;		/* net mesg receive buffer max */
-    long DM$QBAL;		/* qblks allocated */
-    long DM$UAAL;		/* Uarg blks allocated */
-    long DM$CSAL;		/* Control segs allocated */
-    long DM$DMSAL;		/* Default segs allocated */
-    long DM$NMAL;		/* net recv bufs allocated */
-    long DM$QBFR;		/* QBlks free */
-    long DM$UAFR;		/* Uarg blks free */
-    long DM$CSFR;		/* Control segs free */
-    long DM$DMSFR;		/* Default segs free */
-    long DM$NMFR;		/* net recv bufs free */
-    } D$Mem_Alloc_Return_blk;
+    long dm$qb;			/* Queue Blocks */
+    long dm$ua;			/* UARG Blocks */
+    long dm$cs;			/* TCP Control segments */
+    long dm$dms;		/* default size max segs */
+    long dm$nm;			/* net mesg receive buffer */
+    long dm$qbmx;		/* Queue blocks max */
+    long dm$uamx;		/* UARG Blocks max */
+    long dm$csmx;		/* TCP Control segments max */
+    long dm$dmsmx;		/* default size max segs max */
+    long dm$nmmx;		/* net mesg receive buffer max */
+    long dm$qbal;		/* qblks allocated */
+    long dm$uaal;		/* Uarg blks allocated */
+    long dm$csal;		/* Control segs allocated */
+    long dm$dmsal;		/* Default segs allocated */
+    long dm$nmal;		/* net recv bufs allocated */
+    long dm$qbfr;		/* QBlks free */
+    long dm$uafr;		/* Uarg blks free */
+    long dm$csfr;		/* Control segs free */
+    long dm$dmsfr;		/* Default segs free */
+    long dm$nmfr;		/* net recv bufs free */
+    } d$mem_alloc_return_blk;
 
 /* User return dump blk:  TCP stats. */
 
 typedef struct {
-    long DM$TCPACP_PID;
-    long DM$User_IO_Requests;
-    long DM$StoreForward;
-    long DM$Active_Conects_Opened;
-    long DM$Passive_Conects_Opened;
-    long DM$Data_Bytes_Xmitted;
-    long DM$Data_Bytes_Recved;
-    long DM$Segs_Xmitted;
-    long DM$Segs_Recved;
-    long DM$Seg_Bad_Chksum;
-    long DM$BadSeq;
-    long DM$Duplicate_Segs;
-    long DM$Retrans_Segs;
-    long DM$RPZ_RXQ;
-    long DM$OORW_Segs;
-    long DM$Future_Rcvd;
-    long DM$Future_Used;
-    long DM$Future_Dropped;
-    long DM$Future_Dups;
-    long DM$Servers_Forked;
-    long DM$Uptime[2];
-    long DM$Arps_Received;
-    } D$TCP_Stats_Return_Blk;
+    long dm$tcpacp_pid;
+    long dm$user_io_requests;
+    long dm$storeforward;
+    long dm$active_conects_opened;
+    long dm$passive_conects_opened;
+    long dm$data_bytes_xmitted;
+    long dm$data_bytes_recved;
+    long dm$segs_xmitted;
+    long dm$segs_recved;
+    long dm$seg_bad_chksum;
+    long dm$badseq;
+    long dm$duplicate_segs;
+    long dm$retrans_segs;
+    long dm$rpz_rxq;
+    long dm$oorw_segs;
+    long dm$future_rcvd;
+    long dm$future_used;
+    long dm$future_dropped;
+    long dm$future_dups;
+    long dm$servers_forked;
+    long dm$uptime[2];
+    long dm$arps_received;
+    } d$tcp_stats_return_blk;
 
 /* Dump all known local-connection-ids. */
 
@@ -292,85 +292,86 @@ typedef struct {
 !!!HACK!!! remember to improve the dumping interface...
 */
 
-#define D$LC_ID_Blksize 100*4 /* byte size. */
+#define D$LC_ID_BLKSIZE 100*4 /* byte size. */
 typedef
-    ulong D$LC_ID_Return_Blk[D$LC_ID_Blksize/4];
+    ulong D$LC_ID_Return_Blk[D$LC_ID_BLKSIZE/4];
 
 /* Dump a specified TCB */
 
 typedef struct {
-    long DM$TCB_Addr;		/* Address of TCB (internal) */
-    long DM$User_ID;		/* Owning process ID */
-    word DM$State;		/* Current TCB state */
-    word DM$Last_State;		/* */
-    in_addr DM$Foreign_Host;	/* Foreign host # */
-    long DM$Foreign_Port;	/* Foreign port # */
-    in_addr DM$Local_Host;	/* Local host # */
-    long DM$Local_Port;		/* Local port # */
-    long DM$User_Recv_QE;	/* # of pending user receives */
-    long DM$User_Send_QE;	/* # of pending user sends */
-    long DM$Net_Recv_QE;	/* # of pending receive buffers */
-    long DM$Future_QE;		/* # of buffers on future queue */
-    long DM$Rexmit_QE;		/* # of bytes on RX queue */
-    long DM$Dasm_ptr;		/* Disassembly pointer */
-    long DM$Dasm_bc;		/* Dissasembly byte count */
-    long DM$Asm_ptr;		/* Assembly pointer */
-    long DM$Asm_bc;		/* Assembly byte count */
-    long DM$ISS;			/* Initial Send Sequence # */
-    long DM$SND_UNA;		/* # of bytes send but not ACK'ed */
-    long DM$SND_NXT;		/* Next Send Sequence # */
-    long DM$SND_WND;		/* Send window count */
-    long DM$SND_WL;		/*    DM$SND_BS		= [$SLong], */
-    long DM$IRS;		/* Initial Receive Sequence # */
-    long DM$RCV_NXT;		/* Next Receive Sequence # */
-    long DM$RCV_WND;		/* Receive window count */
-    long DM$RCV_BS;		/* */
-    long DM$Conn_TimeOut;	/* Connection dead timeout */
-    long DM$RT_TimeOut;		/* Retransmission timer */
-    long DM$Round_Trip_Time;	/* Measured round-trip-time */
-    } D$TCB_Dump_Return_Blk;
+    long dm$tcb_addr;		/* Address of TCB (internal) */
+    long dm$user_id;		/* Owning process ID */
+    word dm$state;		/* Current TCB state */
+    word dm$last_state;		/* */
+    long dm$foreign_host;	/* Foreign host # */
+    long dm$foreign_port;	/* Foreign port # */
+    long dm$local_host;	/* Local host # */
+    long dm$local_port;		/* Local port # */
+    long dm$user_recv_qe;	/* # of pending user receives */
+    long dm$user_send_qe;	/* # of pending user sends */
+    long dm$net_recv_qe;	/* # of pending receive buffers */
+    long dm$future_qe;		/* # of buffers on future queue */
+    long dm$rexmit_qe;		/* # of bytes on RX queue */
+    long dm$dasm_ptr;		/* Disassembly pointer */
+    long dm$dasm_bc;		/* Dissasembly byte count */
+    long dm$asm_ptr;		/* Assembly pointer */
+    long dm$asm_bc;		/* Assembly byte count */
+    long dm$iss;			/* Initial Send Sequence # */
+    long dm$snd_una;		/* # of bytes send but not ACK'ed */
+    long dm$snd_nxt;		/* Next Send Sequence # */
+    long dm$snd_wnd;		/* Send window count */
+    long dm$snd_wl;		/*    DM$SND_BS		= [$SLong], */
+  signed long dm$snd_bs;
+    long dm$irs;		/* Initial Receive Sequence # */
+    long dm$rcv_nxt;		/* Next Receive Sequence # */
+    long dm$rcv_wnd;		/* Receive window count */
+    long dm$rcv_bs;		/* */
+    long dm$conn_timeout;	/* Connection dead timeout */
+    long dm$rt_timeout;		/* Retransmission timer */
+    long dm$round_trip_time;	/* Measured round-trip-time */
+    } d$tcb_dump_return_blk;
 
 /* Dump list of udpCB's */
 
-#define D$UDP_List_BlkSize	MAX_UDPCB*4	/* byte size. */
+#define D$UDP_LIST_BLKSIZE	MAX_UDPCB*4	/* byte size. */
 typedef
-    ulong D$UDP_List_Return_Blk[D$UDP_List_BlkSize/4];
+    ulong D$UDP_LIST_RETURN_BLK[D$UDP_LIST_BLKSIZE/4];
 
 /* Dump of a single UDPCB */
 
 typedef struct {
-    char    *DU$UDPCB_Address;		/* Internal UDPCB address */
-    ulong   DU$UDPCB_Foreign_Host;	/* Foreign host number */
-    uword   DU$UDPCB_Foreign_Port;	/* Foreign port number */
-    in_addr DU$UDPCB_Local_Host;	/* Local host number */
-    uword   DU$UDPCB_Local_Port;	/* Local port number */
-    long    DU$UDPCB_NR_Qcount;		/* Count of items on receive queue */
-    long    DU$UDPCB_UR_Qcount;		/* Count of items on user queue */
+    char    *du$udpcb_address;		/* Internal UDPCB address */
+    ulong   du$udpcb_foreign_host;	/* Foreign host number */
+    uword   du$udpcb_foreign_port;	/* Foreign port number */
+    long du$udpcb_local_host;	/* Local host number */
+    uword   du$udpcb_local_port;	/* Local port number */
+    long    du$udpcb_nr_qcount;		/* Count of items on receive queue */
+    long    du$udpcb_ur_qcount;		/* Count of items on user queue */
     union {
-	uword   DU$UDPCB_Flags;		/* UDPCB flags */
+	uword   du$udpcb_flags;		/* UDPCB flags */
 	struct {
-	    uword DU$UDPCB_Wildcard:1;	/* Wildcard foreign host/port */
-	    uword DU$UDPCB_Raw_Mode:1;	/* User wants IP headers (not impl) */
-	    uword DU$UDPCB_Aborting:1;	/* Connection is closing */
-	    uword DU$UDPCB_NMlook:1;	/* Name lookup in progress */
-	    uword DU$UDPCB_Internal:1;	/* Connection is internal */
+	    uword du$udpcb_wildcard:1;	/* Wildcard foreign host/port */
+	    uword du$udpcb_raw_mode:1;	/* User wants IP headers (not impl) */
+	    uword du$udpcb_aborting:1;	/* Connection is closing */
+	    uword du$udpcb_nmlook:1;	/* Name lookup in progress */
+	    uword du$udpcb_internal:1;	/* Connection is internal */
 	    };
 	};
-    ulong DU$UDPCB_User_ID;		/* Owning process */
-    } D$UDPCB_Dump_Return_Blk;
+    ulong du$udpcb_user_id;		/* Owning process */
+    } d$udpcb_dump_return_blk;
 
 /* Dump list of ICMPCB's */
 
-#define D$ICMP_List_BlkSize	MAX_ICMPCB*4	/* byte size. */
+#define D$ICMP_LIST_BLKSIZE	MAX_ICMPCB*4	/* byte size. */
 typedef
-    ulong D$ICMP_List_Return_Blk[D$ICMP_List_BlkSize/4];
+    ulong D$ICMP_LIST_RETURN_BLK[D$ICMP_LIST_BLKSIZE/4];
 
 /* Dump of a single ICMPCB */
 
 typedef struct {
     char    *DU$ICMPCB_Address;		/* Internal ICMPCB address */
-    in_addr DU$ICMPCB_Foreign_Host;	/* Foreign host number */
-    in_addr DU$ICMPCB_Local_Host;	/* Local host number */
+    long DU$ICMPCB_Foreign_Host;	/* Foreign host number */
+    long DU$ICMPCB_Local_Host;	/* Local host number */
     long    DU$ICMPCB_NR_Qcount;	/* Count of items on receive queue */
     long    DU$ICMPCB_UR_Qcount;	/* Count of items on user queue */
     union {
@@ -395,23 +396,23 @@ typedef
 /* Dump of a single IPCB */
 
 typedef struct {
-    char    *DU$IPCB_Address;		/* Internal IPCB address */
-    in_addr DU$IPCB_Foreign_Host;	/* Foreign host number */
-    in_addr DU$IPCB_Local_Host;	/* Local host number */
-    long    DU$IPCB_NR_Qcount;	/* Count of items on receive queue */
-    long    DU$IPCB_UR_Qcount;	/* Count of items on user queue */
+    char    *du$ipcb_address;		/* Internal IPCB address */
+    long du$ipcb_foreign_host;	/* Foreign host number */
+    long du$ipcb_local_host;	/* Local host number */
+    long    du$ipcb_nr_qcount;	/* Count of items on receive queue */
+    long    du$ipcb_ur_qcount;	/* Count of items on user queue */
     union {
-	uword   DU$IPCB_Flags;		/* IPCB flags */
+	uword   du$ipcb_flags;		/* IPCB flags */
 	struct {
-	    uword DU$IPCB_Wildcard:1;	/* Wildcard foreign host/port */
-	    uword DU$IPCB_Raw_Mode:1;	/* User wants IP headers (not impl) */
-	    uword DU$IPCB_Aborting:1;	/* Connection is closing */
-	    uword DU$IPCB_NMlook:1;	/* Name lookup in progress */
-	    uword DU$IPCB_Internal:1;	/* Connection is internal */
+	    uword du$ipcb_wildcard:1;	/* Wildcard foreign host/port */
+	    uword du$ipcb_raw_mode:1;	/* User wants IP headers (not impl) */
+	    uword du$ipcb_aborting:1;	/* Connection is closing */
+	    uword du$ipcb_nmlook:1;	/* Name lookup in progress */
+	    uword du$ipcb_internal:1;	/* Connection is internal */
 	    };
 	};
-    ulong DU$IPCB_User_ID;		/* Owning process */
-    } D$IPCB_Dump_Return_Blk;
+    ulong du$ipcb_user_id;		/* Owning process */
+    } d$ipcb_dump_return_blk;
 
 /* Define ARP cache dump block format (single entry) *
 
@@ -419,40 +420,40 @@ typedef struct {
 #define MAX_ARP_HDW_LEN 8
 
 typedef struct {
-    uword DU$ARP_INDEX;			/* Arp cache "index" */
-    uword DU$ARP_DEVICE;		/* Device index */
-    ulong DU$ARP_EXPIRE;		/* Expiration time */
-    ulong DU$ARP_SAVEQB;	/* Saved QB */
+    uword du$arp_index;			/* Arp cache "index" */
+    uword du$arp_device;		/* Device index */
+    ulong du$arp_expire;		/* Expiration time */
+    ulong du$arp_saveqb;	/* Saved QB */
     union {
-	uword DU$ARP_FLAGS;		/* Flags */
+	uword du$arp_flags;		/* Flags */
 	struct {
-	    uword DU$ARP_VALID:1;	/* Entry is valid */
+	    uword du$arp_valid:1;	/* Entry is valid */
 	    };
 	};
-    ulong DU$ARP_IPADDR;		/* IP address */
-    uword DU$ARP_HWSIZE;		/* Physical address length */
-    uchar DU$ARP_HWADDR[MAX_ARP_HDW_LEN]; /* Physical address */
-    } D$ARP_Dump_Return_Blk_Entry;
+    ulong du$arp_ipaddr;		/* IP address */
+    uword du$arp_hwsize;		/* Physical address length */
+    uchar du$arp_hwaddr[MAX_ARP_HDW_LEN]; /* Physical address */
+    } d$arp_dump_return_blk_entry;
 
-#define D$ARP_Dump_MaxBlksize 512	/* Max size of block */
-#define D$ARP_Dump_Maxblk (D$ARP_Dump_MaxBlksize/sizeof(D$ARP_Dump_Return_Blk_Entry))
+#define D$ARP_DUMP_MAXBLKSIZE 512	/* Max size of block */
+#define D$ARP_DUMP_MAXBLK (D$ARP_DUMP_MAXBLKSIZE/sizeof(D$ARP_DUMP_RETURN_BLK_ENTRY))
 
 /* Dump of a single device interface */
 
-#define DevNam_Max_Size		20
-#define DevSpec_Max_Size	20
+#define DEVNAM_MAX_SIZE		20
+#define DEVSPEC_MAX_SIZE	20
 
 typedef struct {
-    in_addr DU$Dev_Address;	/* Interface IP address */
-    in_addr DU$Dev_netmask;	/* Interface IP Network Mask */
-    in_addr DU$Dev_network;	/* Interface IP Network */
-    uword   DU$Dev_Pck_Xmit;	/* Packet's transmitted */
-    uword   DU$Dev_Pck_Recv;	/* Packet's received */
-    uword   DU$DevNam_Len;
-    uword   DU$DevSpec_Len;
-    char    DU$DevNam_Str[DevNam_Max_Size];
-    char    DU$DevSpec_Str[DevSpec_Max_Size];
-    } D$Dev_Dump_Return_Blk;
+    long du$dev_address;	/* Interface IP address */
+    long du$dev_netmask;	/* Interface IP Network Mask */
+    long du$dev_network;	/* Interface IP Network */
+    uword   du$dev_pck_xmit;	/* Packet's transmitted */
+    uword   du$dev_pck_recv;	/* Packet's received */
+    uword   du$devnam_len;
+    uword   du$devspec_len;
+    char    du$devnam_str[DEVNAM_MAX_SIZE];
+    char    du$devspec_str[DEVSPEC_MAX_SIZE];
+    } d$dev_dump_return_blk;
 
 #undef word short
 #undef uword unsigned short	

@@ -401,7 +401,7 @@ Log_UDP_Packet(Seg,SwapFlag,SendFlag) : NOVALUE (void)
 		       "!_ASCII:!_!AF!/"),
 	       datalen,dathex,asccnt,segdata);
 	};
-    };
+    }
 
 //SBTTL "UDPCB_Find - look up UDP control block"
 
@@ -414,7 +414,7 @@ UDPCB_Find(Src$Adrs,Src$Port,Dest$Port)
 
     Ucount = UDPCB_Count;
     UDPCBIX = 1;
-    WHILE (Ucount > 0) && (UDPCBIX <= Max_UDPCB) DO
+    while ((Ucount > 0) && (UDPCBIX <= Max_UDPCB))
 	{
 	if ((UDPCB = UDPCB_Table[UDPCBIX]) != 0)
 	    {
@@ -429,7 +429,7 @@ UDPCB_Find(Src$Adrs,Src$Port,Dest$Port)
 	UDPCBIX = UDPCBIX + 1;
 	};
     return 0;
-    };
+    }
 
 
 //SBTTL "UDP input handler"
@@ -632,7 +632,7 @@ X2:	{
 
     if (delete)
 	MM$Seg_Free(Bufsize,Buf);
-    };
+    }
 
 //SBTTL "ICMP input handler for UDP"
 /*
@@ -711,7 +711,7 @@ X:	{			// Good UDP/ICMP message
 	if (1)
 	    {
 	    signed long
-		struct Queue_BLK_Structure * QB(QB_NR_Fields),
+		struct queue_blk_structure(QB_NR_Fields) * QB,
 		struct IPADR$ADDRESS_BLOCK * Uptr,
 		Ucount;
 	    EXTERNAL ROUTINE
@@ -779,7 +779,7 @@ X:	{			// Good UDP/ICMP message
 // No, dont't clear the buffer.  What if ICMP needs it?
     if (delete)
 	MM$Seg_Free(Bufsize,Buf);
-    };
+    }
 
 //SBTTL "Queue_User_UDP - Queue up UDP packet for delivery to user"
 /*
@@ -796,7 +796,7 @@ Queue_User_UDP(UDPCB,Uptr,Usize,Buf,Bufsize,QB)
     {
     MAP
 	struct UDPCB_Structure * UDPCB,
-	struct Queue_BLK_Structure * QB(QB_NR_Fields);
+	struct queue_blk_structure(QB_NR_Fields) * QB;
     signed long
 	QBR;
     EXTERNAL ROUTINE
@@ -830,7 +830,7 @@ Queue_User_UDP(UDPCB,Uptr,Usize,Buf,Bufsize,QB)
     else
 	INSQUE(QB,UDPCB->UDPCB$NR_Qtail);
     return FALSE;		// Don't deallocate this segment...
-    };
+    }
 
 //SBTTL "Deliver_UDP_Data - Deliver UDP data to user"
 /*
@@ -843,8 +843,8 @@ Deliver_UDP_Data(UDPCB,QB,URQ) : NOVALUE (void)
     {
     MAP
 	struct UDPCB_Structure * UDPCB,
-	struct Queue_Blk_Structure * QB(QB_NR_Fields),
-	struct Queue_Blk_Structure * URQ(QB_UR_Fields);
+	struct queue_blk_structure(QB_NR_Fields) * QB,
+	struct queue_blk_structure(QB_UR_Fields) * URQ;
     signed long
 	FLAGS,
 	ICMTYPE,
@@ -901,7 +901,7 @@ Deliver_UDP_Data(UDPCB,QB,URQ) : NOVALUE (void)
     MM$Seg_Free(QB->NR$Buf_Size,QB->NR$Buf);
     MM$QBLK_Free(QB);
     UDP_MIB->MIB$udpInDatagrams = UDP_MIB->MIB$udpInDatagrams + 1;
-    };
+    }
 
 //SBTTL "UDPCB_OK - Match connection ID to UDPCB address"
 
@@ -933,7 +933,7 @@ UDPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
 // Everything is good - return the UDPCB address
 
     return UDPCB;
-    };
+    }
 
 //SBTTL "UDPCB_Get - Allocate and initialize one UDPCB"
 
@@ -954,7 +954,7 @@ UDPCB_Get(IDX,Src$Port)
 
     Ucount = UDPCB_Count;
     UDPCBIDX = 1;
-    WHILE (Ucount > 0) && (UDPCBIDX <= Max_UDPCB) DO
+    while ((Ucount > 0) && (UDPCBIDX <= Max_UDPCB))
 	{
 	if ((UDPCB = UDPCB_Table[UDPCBIDX]) != 0)
 	    {
@@ -969,11 +969,11 @@ UDPCB_Get(IDX,Src$Port)
 
 X:  {			// ** Block X **
     UDPCBIDX = 0;
-    INCR I FROM 1 TO MAX_UDPCB DO
+    for (I=1;I<=MAX_UDPCB;I++)
 	if (UDPCB_Table[I] == 0)
 	    LEAVE X WITH (UDPCBIDX = I);
     return 0;			// Failed to allocate a UDPCB
-    };			// ** Block X **
+    }			// ** Block X **
 
 // Allocate some space for the UDPCB
 
@@ -1001,7 +1001,7 @@ X:  {			// ** Block X **
 
     IDX = UDPCBIDX;
     return UDPCB;
-    };
+    }
 
 //SBTTL "UDPCB_Free - Deallocate a UDPCB"
 
@@ -1024,15 +1024,15 @@ void UDPCB_Free(UDPCBIX,struct UDPCB_Structure * UDPCB) (void)
     if (NOT RC)
 	FATAL$FAO("UDPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     UDPCB_Count = UDPCB_Count-1;
-    };
+    }
 
 //SBTTL "Kill_UDP_Requests - purge all I/O requests for a connection"
 
 void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,RC) (void)
     {
     signed long
-	struct Queue_Blk_Structure * URQ(QB_UR_Fields),
-	struct Queue_Blk_Structure * QB(QB_NR_Fields);
+	struct queue_blk_structure(QB_UR_Fields) * URQ,
+	struct queue_blk_structure(QB_NR_Fields) * QB;
 
 // Make sure we aren't doing this more than once
 !
@@ -1063,7 +1063,7 @@ void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,RC) (void)
 
 // Purge the user request queue, posting all requests
 
-    WHILE REMQUE(UDPCB->UDPCB$USR_Qhead,URQ) != Empty_Queue DO
+    while (REMQUE(UDPCB->UDPCB$USR_Qhead,URQ) != Empty_Queue)
 	{
 	    User$Post_IO_Status(URQ->UR$Uargs,RC,0,0,0);
 	    MM$UArg_Free(URQ->UR$Uargs);
@@ -1072,12 +1072,12 @@ void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,RC) (void)
 
 // Purge any received qblocks as well
 
-    WHILE REMQUE(UDPCB->UDPCB$NR_Qhead,QB) != Empty_Queue DO
+    while (REMQUE(UDPCB->UDPCB$NR_Qhead,QB) != Empty_Queue)
 	{
 	MM$Seg_Free(QB->NR$Buf_Size,QB->NR$Buf);
 	MM$QBlk_Free(QB);
 	};
-    };
+    }
 
 //SBTTL "UDPCB_Close - Close/deallocate a UDPCB"
 
@@ -1085,7 +1085,7 @@ void UDPCB_Close(UIDX,struct UDPCB_Structure * UDPCB,RC) (void)
     {
     Kill_UDP_Requests(UDPCB,RC);
     UDPCB_FREE(UIDX,UDPCB);
-    };
+    }
 
 void UDPCB_Abort(struct UDPCB_Structure * UDPCB,RC) (void)
 !
@@ -1093,7 +1093,7 @@ void UDPCB_Abort(struct UDPCB_Structure * UDPCB,RC) (void)
 !
     {
     UDPCB_CLOSE(UDPCB->UDPCB$UDPCBID,UDPCB,RC)
-    };
+    }
 
 
 
@@ -1107,10 +1107,10 @@ UDP$Purge_All_IO : NOVALUE (void)
 
 // Loop for all connections, purge them, and delete them.
 
-    INCR UDPCBIDX FROM 1 TO MAX_UDPCB DO
+    for (UDPCBIDX=1;UDPCBIDX<=MAX_UDPCB;UDPCBIDX++)
 	if ((UDPCB = UDPCB_Table[UDPCBIDX]) != 0)
 	    UDPCB_Close(UDPCBIDX,UDPCB,NET$_TE);
-    };
+    }
 
 //SBTTL "UDP_Conn_Unique - Check for unique UDP connection"
 /*
@@ -1126,7 +1126,7 @@ UDP_Conn_Unique(LP,FH,FP)
 	Ucount;
 
     Ucount = UDPCB_Count;
-    INCR I FROM 1 TO MAX_UDPCB DO
+    for (I=1;I<=MAX_UDPCB;I++)
 	if ((UDPCB = UDPCB_Table[I]) != 0)
 	    {
 	    IF (UDPCB->UDPCB$Foreign_Host == FH) AND
@@ -1137,7 +1137,7 @@ UDP_Conn_Unique(LP,FH,FP)
 		return TRUE;
 	    };
     return TRUE;
-    };
+    }
 
 //SBTTL "UDP$OPEN - open a UDP "connection""
 /*
@@ -1160,7 +1160,7 @@ void UDP$OPEN(struct User_Open_Args * Uargs) (void)
 	UIDX,
 	struct UDPCB_Structure * UDPCB,
 	UDPCBPTR,
-	Args : VECTOR->4;
+	Args : VECTOR[4];
     LABEL
 	X;
 
@@ -1234,14 +1234,14 @@ X:  {			// *** Block X ***
     UDPCB->UDPCB$NMLook = TRUE;
     NML$GETNAME(IPADDR,UDP_ADLOOK_DONE,UDPCB);
     RETURN;
-    };			// *** Block X ***
+    }			// *** Block X ***
 
 // "standard" case, host name is supplied - start name lookup for it
 
     UDPCB->UDPCB$Uargs = Uargs;
     UDPCB->UDPCB$NMLook = TRUE;
     NML$GETALST(NAMPTR,NAMLEN,UDP_NMLOOK_DONE,UDPCB);
-    };
+    }
 
 
 
@@ -1308,7 +1308,7 @@ UDP_NMLOOK_DONE(UDPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE (void)
     IOSB->NSB$XSTATUS = 0;
     IO$POST(IOSB,Uargs);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "UDP_COPEN_DONE - Common user UDP open done routine"
 
@@ -1340,7 +1340,7 @@ UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST)
 
 // Try a bunch of times to find a unique local port...
 
-	INCR I FROM 1 TO Max_LP_Tries DO
+	for (I=1;I<=Max_LP_Tries;I++)
 	    {
 	    signed long
 		LP;
@@ -1372,7 +1372,7 @@ UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST)
 	.IP_Address<16,8>,IP_Address<24,8>
 		   );
     return SS$_NORMAL;
-    };
+    }
 
 //SBTTL "UDP_ADLOOK_DONE - Finish UDP address to name lookup"
 
@@ -1394,7 +1394,7 @@ UDP_ADLOOK_DONE(UDPCB,STATUS,NAMLEN,NAMPTR) : NOVALUE (void)
 
     UDPCB->UDPCB$Foreign_Hnlen = NAMLEN;
     CH$MOVE(NAMLEN,NAMPTR,CH$PTR(UDPCB->UDPCB$Foreign_Hname));
-    };
+    }
 
 //SBTTL "UDP$CLOSE - close UDP "connection""
 /*
@@ -1425,7 +1425,7 @@ void UDP$CLOSE(struct User_Close_Args * Uargs) (void)
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "UDP$ABORT - abort UDP "connection""
 /*
@@ -1454,7 +1454,7 @@ void UDP$ABORT(struct User_Abort_Args * Uargs) (void)
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,0,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "UDP$S} - send UDP packet"
 /*
@@ -1541,7 +1541,7 @@ void UDP$S}(struct User_Send_Args * Uargs) (void)
 
     User$Post_IO_Status(Uargs,RC,0,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 
 
@@ -1613,7 +1613,7 @@ UDP_S} ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
     if (RC == 0)
 	NET$_NRT
     else SS$_NORMAL
-    };
+    }
 
 
 
@@ -1628,8 +1628,8 @@ void UDP$RECEIVE(struct User_Recv_Args * Uargs) (void)
     {
     signed long
 	struct UDPCB_Structure * UDPCB,
-	struct Queue_Blk_Structure * QB(QB_NR_Fields),
-	struct Queue_Blk_Structure * URQ(QB_UR_Fields),
+	struct queue_blk_structure(QB_NR_Fields) * QB,
+	struct queue_blk_structure(QB_UR_Fields) * URQ,
 	RC;
 
 // Validate connection ID and get UDPCB pointer
@@ -1682,7 +1682,7 @@ void UDP$RECEIVE(struct User_Recv_Args * Uargs) (void)
     else
 	INSQUE(URQ,UDPCB->UDPCB$USR_Qtail);
     OKINT;
-    };
+    }
 
 
 
@@ -1712,7 +1712,7 @@ void UDP$INFO(struct User_Info_Args * Uargs) (void)
     USER$Net_Connection_Info(Uargs,UDPCB->UDPCB$Local_Host,UDPCB->UDPCB$Foreign_Host,
 			UDPCB->UDPCB$Local_Port,UDPCB->UDPCB$Foreign_Port,
 			UDPCB->UDPCB$Foreign_Hname,UDPCB->UDPCB$Foreign_Hnlen);
-    };
+    }
 
 
 //SBTTL "UDP$STATUS - get status of UDP "connection""
@@ -1724,7 +1724,7 @@ void UDP$INFO(struct User_Info_Args * Uargs) (void)
 void UDP$STATUS(struct User_Status_Args * Uargs) (void)
     {
     USER$Err(Uargs,NET$_NYI);
-    };
+    }
 
 //SBTTL "UDP$CANCEL - Handle VMS cancel for UDP connection"
 /*
@@ -1742,7 +1742,7 @@ UDP$CANCEL(struct VMS$Cancel_Args * Uargs)
 
 // Check all valid UDPCB's looking for a match on pid and channel #.
 
-    INCR I FROM 1 TO MAX_UDPCB DO
+    for (I=1;I<=MAX_UDPCB;I++)
 	if ((UDPCB = UDPCB_Table[I]) != 0)
 	    {
 
@@ -1757,7 +1757,7 @@ UDP$CANCEL(struct VMS$Cancel_Args * Uargs)
 		};
 	    };
     return Fcount;
-    };
+    }
 
 //SBTTL "UDP dump routines"
 
@@ -1771,14 +1771,14 @@ UDP$Connection_List(RB) : NOVALUE (void)
     signed long
 	RBIX;
     RBIX = 1;
-    INCR I FROM 1 TO MAX_UDPCB-1 DO
+    for (I=1;I<=MAX_UDPCB-1;I++)
 	if (UDPCB_TABLE[I] != 0)
 	    {
 	    RB[RBIX] = I;
 	    RBIX = RBIX + 1;
 	    };
-    RB->0 = RBIX - 1;
-    };
+    RB[0] = RBIX - 1;
+    }
 
 UDP$UDPCB_DUMP(UDPCBIX,RB)
 !
@@ -1812,10 +1812,10 @@ UDP$UDPCB_DUMP(UDPCBIX,RB)
 
     QB = UDPCB->UDPCB$NR_Qhead;
     Qcount = 0;
-    WHILE (QB NEQA UDPCB->UDPCB$NR_Qhead) DO
+    while ((QB NEQA UDPCB->UDPCB$NR_Qhead))
 	{
 	MAP
-	    struct Queue_Blk_Structure * QB(QB_NR_Fields);
+	    struct queue_blk_structure(QB_NR_Fields) * QB;
 	Qcount = Qcount + 1;
 	QB = QB->NR$NEXT;
 	};
@@ -1825,10 +1825,10 @@ UDP$UDPCB_DUMP(UDPCBIX,RB)
 
     QB = UDPCB->UDPCB$USR_Qhead;
     Qcount = 0;
-    WHILE (QB NEQA UDPCB->UDPCB$USR_Qhead) DO
+    while ((QB NEQA UDPCB->UDPCB$USR_Qhead))
 	{
 	MAP
-	    struct Queue_Blk_Structure * QB(QB_UR_Fields);
+	    struct queue_blk_structure(QB_UR_Fields) * QB;
 	Qcount = Qcount + 1;
 	QB = QB->UR$NEXT;
 	};
@@ -1837,7 +1837,7 @@ UDP$UDPCB_DUMP(UDPCBIX,RB)
 // Done.
 
     return TRUE;
-    };
+    }
 
 }
 ELUDOM

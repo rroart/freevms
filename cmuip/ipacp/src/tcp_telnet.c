@@ -349,7 +349,7 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
 
     OKINT;
     return TCB;
-    };
+    }
 
 TELNET_OPEN_TIMEOUT(TCB) : NOVALUE (void)
     {
@@ -365,7 +365,7 @@ TELNET_OPEN_TIMEOUT(TCB) : NOVALUE (void)
 
     XLOG$FAO(LOG$TCPERR,"!%T TVT open timeout for TCB x!XL!/",0,TCB);
     TCB$Delete(TCB);
-    };
+    }
 
 //SBTTL "TELNET_OPEN - Finish open of TCP connection for a TVT"
 /*
@@ -446,7 +446,7 @@ namelook_done(tvt,rc,namlen,name) : NOVALUE (void)
 			P4=4				// Sub-func #4
 			);
 
-    };
+    }
 
 TELNET_OPEN(TCB)
     {
@@ -643,7 +643,7 @@ TELNET_OPEN(TCB)
 
 // And give success return.
     TRUE
-    };
+    }
 
 //SBTTL "TELNET_CLOSE - Handle close of TELNET connection"
 /*
@@ -691,7 +691,7 @@ TELNET_CLOSE(TCB) : NOVALUE (void)
 		ASTPRM = TVT);
 	OKINT;
 	};
-    };
+    }
 
 TELNET_CLOSE_DONE(TVT) : NOVALUE (void)
 !
@@ -708,7 +708,7 @@ TELNET_CLOSE_DONE(TVT) : NOVALUE (void)
 
 //    LIB$FREE_VM(%REF(TVT$SIZE*4),TVT);
     LIB$FREE_VM_PAGE(%REF(((TVT$SIZE * 4) / 512) + 1),TVT);
-    };
+    }
 
 //SBTTL "TELNET_INPUT - Do TCP input for TELNET connection"
 /*
@@ -731,7 +731,7 @@ TELNET_INPUT(TCB) : NOVALUE (void)
 //else
     PTY_WRITE(TCB->TVTDATA);
 //FI
-    };
+    }
 
 //SBTTL "TELNET_OUTPUT - Do TCP output for TELNET connection"
 /*
@@ -755,7 +755,7 @@ TELNET_OUTPUT(TCB) : NOVALUE (void)
 //else
     PTY_READ(TCB->TVTDATA);
 //FI
-    };
+    }
 
 //SBTTL "Routines to interface to the network"
 
@@ -844,9 +844,9 @@ TCP_READ(TVT) : NOVALUE (void)
 	};
 
     TVT->TVT$CTRL = FALSE ;
-//    WHILE ((CHRCNT > 0) && (TVT->TVT$WR_BCNT <= (TVT_TTY_BUFLEN - 1))) DO
-//    WHILE ((CHRCNT > 0) && (NOT TVT->TVT$GAG)) DO
-    WHILE ((Byte_Limit > 0) && (NOT TVT->TVT$GAG)) DO
+//    while (((CHRCNT > 0) && (TVT->TVT$WR_BCNT <= (TVT_TTY_BUFLEN - 1))))
+//    while (((CHRCNT > 0) && (NOT TVT->TVT$GAG)))
+    while (((Byte_Limit > 0) && (NOT TVT->TVT$GAG)))
 	{
 
 // Read another character from the network buffer, wrapping pointer as needed
@@ -1127,7 +1127,7 @@ X:	    {
 	TCP$Enqueue_Ack(TCB) ;
 	} ;
 
-    };
+    }
 
 
 VOID PTY_TO_NET(TVT, CHR) (void)
@@ -1194,7 +1194,7 @@ VOID PTY_TO_NET(TVT, CHR) (void)
 // Indicate that we're not in the network write code any more
 
     TVT->TVT$NWRITE = FALSE;
-    };
+    }
 
 
 TCP_WRITE(TVT) : NOVALUE (void)
@@ -1244,7 +1244,7 @@ TCP_WRITE(TVT) : NOVALUE (void)
 
     CHWCNT = 0;
     CHWPTR = CH$PTR(TCB->SND_Q_ENQP);
-    WHILE TRUE DO
+    while (TRUE)
 	{
 
 // Do we need to send a doubled IAC?
@@ -1274,7 +1274,7 @@ TCP_WRITE(TVT) : NOVALUE (void)
 // Get a character and check for an IAC that needs to be quoted
 
 		if (TVT->TVT$RD_BCNT <= 0)
-		    EXITLOOP;
+		    break;
 		CHR = CH$RCHAR_A(TVT->TVT$RD_PTR);
 		if (CHR == TELNET$K_IAC)
 		    TVT->TVT$NW_IAC = TRUE;
@@ -1288,7 +1288,7 @@ TCP_WRITE(TVT) : NOVALUE (void)
 	if (CHWPTR GEQU TCB[SND_Q_}])
 	    CHWPTR = TCB->SND_Q_BASE;
 	if ((CHWCNT = CHWCNT + 1) GEQ CHWMAX)
-	    EXITLOOP;
+	    break;
 	};
 
 // Update the network queue pointer and counter
@@ -1319,7 +1319,7 @@ TCP_WRITE(TVT) : NOVALUE (void)
 // Indicate that we're not in the network write code any more
 
     TVT->TVT$NWRITE = FALSE;
-    };
+    }
 
 
 
@@ -1358,14 +1358,14 @@ TCP_ADD_STRING(TVT,STRDESC_A) : NOVALUE (void)
 
     CHWPTR = TVT->TVT$RD_PTR = CH$PTR(TVT->TVT$RD_BUF);
 
-    WHILE (CHRCNT > 0) DO
+    while ((CHRCNT > 0))
 	{
 	CHR = CH$RCHAR_A(CHRPTR);
 	PTY_TO_NET(TVT, CHR) ;
 	CHRCNT = CHRCNT - 1;
 	};
 
-    };
+    }
 
 VOID NET_TO_PTY(TVT, CHR) (void)
 !
@@ -1442,7 +1442,7 @@ VOID NET_TO_PTY(TVT, CHR) (void)
 		TVT_TTY_BUFLEN, TVT->TVT$WR_BUF);
 	};
 
-    };
+    }
 
 
 
@@ -1548,7 +1548,7 @@ PTY_SET_OWNER_PID(TVT) : NOVALUE (void)
 	    PTY_Write(TVT);				// JC Write after Hold off
 	    };
 	};
-    };
+    }
 
 
 
@@ -1611,7 +1611,7 @@ PTY_READ(TVT) : NOVALUE (void)
 		 0,TVT->TVT$TCB,RC);
 	TCB$DELETE(TVT->TVT$TCB);
 	};
-    };
+    }
 
 PTY_READ_DONE(TVT) : NOVALUE (void)
 !
@@ -1690,7 +1690,7 @@ PTY_READ_DONE(TVT) : NOVALUE (void)
 
 // Give this data to the network.
 
-//    WHILE (TVT->TVT$RD_BCNT > 0) DO
+//    while ((TVT->TVT$RD_BCNT > 0))
 !	{
 !	CHR = CH$RCHAR_A(TVT->TVT$RD_PTR) ;
 !	PTY_TO_NET(TVT, CHR) ;
@@ -1712,7 +1712,7 @@ PTY_READ_DONE(TVT) : NOVALUE (void)
 //FI
 	} ;
 
-    };
+    }
 
 FORWARD ROUTINE
  VOID    PTY_WRITE_DONE;
@@ -1844,7 +1844,7 @@ PTY_WRITE(TVT) : NOVALUE (void)
 	RETURN;
 	};
 
-    };
+    }
 
 PTY_WRITE_DONE(TVT) : NOVALUE (void)
 !
@@ -1937,7 +1937,7 @@ PTY_WRITE_DONE(TVT) : NOVALUE (void)
 	$ACPWAKE;
 //FI
 
-    };
+    }
 
 //SBTTL "Mailbox handling routines"
 
@@ -1967,7 +1967,7 @@ MBX_READ(TVT)
 	return FALSE;
 	};
     return TRUE;
-    };
+    }
 
 MBX_READ_DONE(TVT) : NOVALUE (void)
 !
@@ -2042,7 +2042,7 @@ MBX_READ_DONE(TVT) : NOVALUE (void)
 //    AST_IN_PROGRESS = FALSE;
 //    OKINT ;
     MBX_READ(TVT);
-    };
+    }
 
 //SBTTL "Option negotiation routines"
 
@@ -2058,7 +2058,7 @@ Void Set_State_ON (TVT, OPTBLK) (void)
 	if ((OPTBLK->OPT$ON_RTN != 0))
 	    (OPTBLK->OPT$ON_RTN)(TVT)
 	}
-    };
+    }
 
 Void Set_State_OFF (TVT, OPTBLK) (void)
     {
@@ -2072,7 +2072,7 @@ Void Set_State_OFF (TVT, OPTBLK) (void)
 	if ((OPTBLK->OPT$OFF_RTN != 0))
 	    (OPTBLK->OPT$OFF_RTN)(TVT)
 	}
-    };
+    }
 
 
 
@@ -2122,7 +2122,7 @@ TVT_READ_WILL(TVT,OPTION) : NOVALUE (void)
 	    else
 		TVT_S}(TVT,TELNET$K_DONT,OPTION);
 	    }
-    };
+    }
 
 TVT_READ_WONT(TVT,OPTION) : NOVALUE (void)
 !
@@ -2162,7 +2162,7 @@ TVT_READ_WONT(TVT,OPTION) : NOVALUE (void)
 		Set_State_OFF(TVT, OPTBLK);		// JC
 		TVT_S}(TVT,TELNET$K_DONT,OPTION);
 		}
-    };
+    }
 
 
 
@@ -2210,7 +2210,7 @@ TVT_READ_DO(TVT,OPTION) : NOVALUE (void)
 	    else
 		TVT_S}(TVT,TELNET$K_WONT,OPTION);
 	    };
-    };
+    }
 
 
 
@@ -2256,7 +2256,7 @@ TVT_READ_DONT(TVT,OPTION) : NOVALUE (void)
 		TVT_S}(TVT,TELNET$K_WONT,OPTION);
 		} ;
 	} ;
-    };
+    }
 
 
 
@@ -2287,7 +2287,7 @@ TVT_S}(TVT,OPR,OPTION) : NOVALUE (void)
     CH$WCHAR_A(OPR,TVT->TVT$NEG_EQP);
     CH$WCHAR_A(OPTION,TVT->TVT$NEG_EQP);
     TVT->TVT$NEG_CNT = TVT->TVT$NEG_CNT + TVT_OPTION_LEN;
-    };
+    }
 
 
 
@@ -2324,7 +2324,7 @@ TVT_S}_SUBOP(TVT,OPTION,DATA_A,SIZE) : NOVALUE (void)
     // Write the suboption data
 
 //    CH$WCHAR_A(Option$K_Tog_Flow_Cntl_OFF,TVT->TVT$NEG_EQP);
-    INCR i FROM 0 TO Size-1 DO
+    for (i=0;i<=Size-1;i++)
 	{
 	Char = CH$RCHAR_A(Data);
 	CH$WCHAR_A(Char,TVT->TVT$NEG_EQP)
@@ -2335,7 +2335,7 @@ TVT_S}_SUBOP(TVT,OPTION,DATA_A,SIZE) : NOVALUE (void)
     CH$WCHAR_A(TELNET$K_SE,TVT->TVT$NEG_EQP);
 
     TVT->TVT$NEG_CNT = TVT->TVT$NEG_CNT + (Size+5);
-    };
+    }
 
 
 
@@ -2361,7 +2361,7 @@ TVT_READ_SUB(TVT) : NOVALUE (void)
 	IF (OPTS[opt,OPT$SUB_RTN] != 0) AND
 	   (OPTS[opt,OPT$STATE] == OPT$STATE_ON) THEN
 		(OPTS[opt,OPT$SUB_RTN])(TVT)
-    };
+    }
 
 
 
@@ -2382,7 +2382,7 @@ TVT_NEGOTIATE(TVT) : NOVALUE (void)
 
 // First, do local options (offer to WILL them)
 
-    INCR OPTION FROM TELNET$K_MINOPT TO TELNET$K_MAXOPT DO
+    for (OPTION=TELNET$K_MINOPT;OPTION<=TELNET$K_MAXOPT;OPTION++)
 	{
 	BIND
 	    OPTBLK = LCLOPTS[OPTION,OPT$BASE] : OPT$BLOCK;
@@ -2408,7 +2408,7 @@ TVT_NEGOTIATE(TVT) : NOVALUE (void)
 
 // Then, do remote options (ask remote to DO them)
 
-    INCR OPTION FROM TELNET$K_MINOPT TO TELNET$K_MAXOPT DO
+    for (OPTION=TELNET$K_MINOPT;OPTION<=TELNET$K_MAXOPT;OPTION++)
 	{
 	BIND
 	    OPTBLK = REMOPTS[OPTION,OPT$BASE] : OPT$BLOCK;
@@ -2431,7 +2431,7 @@ TVT_NEGOTIATE(TVT) : NOVALUE (void)
 	    TVT_S}(TVT,TELNET$K_DONT,OPTION);
 	    };
 	};
-    };
+    }
 }
 ELUDOM
 

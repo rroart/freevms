@@ -346,7 +346,7 @@ static signed long
     RA_QUEUE : QUEUE_HEADER
 	       PRESET([QHEAD] = RA_QUEUE,
 		      [QTAIL] = RA_QUEUE),
-    RA_CHECK_TIME : VECTOR->2;	// Quadword time value for checking RA queue
+    RA_CHECK_TIME : VECTOR[2];	// Quadword time value for checking RA queue
 
 static signed long
     struct Gateway_structure * GWY_table_ptr INITIAL(GWY_table); // Known gateways
@@ -383,7 +383,7 @@ IP$GWY_CONFIG(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK) : NOVALUE (void)
     BIND
 	Gateway = GWY_table_ptr[GWYIDX, GWY_Name]
 		    : BLOCK->GWY_Size FIELD(GWY_Fields),
-	Gateway_name = Gateway [GWY_Name] : $BBLOCK->8;
+	Gateway_name = Gateway [GWY_Name] : $BBLOCK[8];
 
     Gateway_name->DSC$W_LENGTH = 0;
     Gateway_name->DSC$B_DTYPE = DSC$K_DTYPE_T;
@@ -401,7 +401,7 @@ IP$GWY_CONFIG(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK) : NOVALUE (void)
     Gateway [GWY_STATUS] = 1;
     }
 
-    };
+    }
 
 //SBTTL "IP_INIT - Initialize state of IP"
 
@@ -445,7 +445,7 @@ IP$INIT : NOVALUE (void)
     IP_group_MIB->IPMIB$ipFragFails	= 0;
     IP_group_MIB->IPMIB$ipFragCreates	= 0;
 
-    };
+    }
 
 //SBTTL "IP$LOG - make a logging entry for an IP packet"
 
@@ -474,7 +474,7 @@ void IP$LOG(NAME,struct IP_Structure * IPHDR) (void)
 	   0,NAME,SRCSTR,DSTSTR,IPHDR->IPH$IHL,IPHDR->IPH$PROTOCOL,
 	   IPHDR->IPH$TOTAL_LENGTH,IPHDR->IPH$IDENT,IPHDR->IPH$FLAGS,
 	   IPHDR->IPH$FRAGMENT_OFFSET,IPHDR->IPH$TTL,NAME,IPHDR,DATAPTR);
-    };
+    }
 
 //SBTTL "IP routing code"
 
@@ -499,7 +499,7 @@ IP_FIND_DEV(IPADDR)
 //  >=0	Success, device index to use is returned
 
     {
-    INCR IDX FROM 0 TO (DEV_COUNT-1) DO
+    for (IDX=0;IDX<=(DEV_COUNT-1);IDX++)
 	IF ((IPADDR && DEV_CONFIG_TAB[IDX,DC_IP_NETMASK]) EQL
 	   DEV_CONFIG_TAB[IDX,DC_IP_NETWORK]) OR
 	    (IPADDR == %X"FFFFFFFF") THEN
@@ -515,7 +515,7 @@ IP_FIND_DEV(IPADDR)
 	    };
 
     return -1;
-    };
+    }
 
 IP_FIND_GWY(IPADDR)
 
@@ -528,13 +528,13 @@ IP_FIND_GWY(IPADDR)
 !Returns address of connected gateway or 0 if none defined (or all down)
 
     {
-    INCR IDX FROM 0 TO (GWY_COUNT-1) DO
+    for (IDX=0;IDX<=(GWY_COUNT-1);IDX++)
 	IF (IPADDR && GWY_table_ptr[IDX,GWY_NETMASK]) EQL
 	   GWY_table_ptr[IDX,GWY_NETWORK] THEN
 	    if (GWY_table_ptr[IDX,GWY_STATUS] > 0)
 		return GWY_table_ptr[IDX,GWY_ADDRESS];
     return 0;
-    };
+    }
 
 IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 
@@ -596,7 +596,7 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 // None of the above - no route exists.
 
     return -1;
-    };
+    }
 
 IP$ISME(IPADDR, STRICT)
 
@@ -610,7 +610,7 @@ IP$ISME(IPADDR, STRICT)
 // 127.x.x.x is a loopback address
     if (IPADDR<0,8,0> == 127) return 0;
 
-    INCR IDX FROM 0 TO (DEV_COUNT-1) DO
+    for (IDX=0;IDX<=(DEV_COUNT-1);IDX++)
 	{
 // Check for exact address match
 	if (IPADDR == DEV_CONFIG_TAB[IDX,DC_IP_ADDRESS])
@@ -640,7 +640,7 @@ IP$ISME(IPADDR, STRICT)
 		return temp;		// yes, make sure it's not
 	    };			// device thaqt rcvd the ARP rqst.
     return -1;
-    };
+    }
 
 signed long BIND ROUTINE
     IP_ISLOCAL = IP_FIND_DEV;
@@ -662,7 +662,7 @@ IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR) : NOVALUE (void)
 
     LIDX = 0;
     FIDX = 0;
-    INCR I FROM 0 TO (ADRCNT-1) DO
+    for (I=0;I<=(ADRCNT-1);I++)
 	{
 	signed long
 	    J;
@@ -670,12 +670,12 @@ IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR) : NOVALUE (void)
 	    {
 	    FIDX = I;
 	    LIDX = J;
-	    EXITLOOP;
+	    break;
 	    };
 	};
     FRNPTR = ADRLST[FIDX];
     LCLPTR = DEV_CONFIG_TAB[LIDX,DC_IP_ADDRESS];
-    };
+    }
 
 //SBTTL "IP$S}_RAW:  Send TCP segment to IP for transmission."
 /******************************************************************************
@@ -717,7 +717,7 @@ IP$S}_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
     MAP
 	struct segment_Structure * SEG;
     signed long
-        struct Queue_blk_structure * QB(QB_net_send),
+        struct queue_blk_structure(QB_net_send) * QB,
 	ip_src,
 	newip_dest,
         dev;
@@ -817,7 +817,7 @@ IP$S}_RAW(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	};	// Give success return
 
     return -1;
-    };
+    }
 
 
 
@@ -866,7 +866,7 @@ IP$S}(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
     signed long
         struct IP_Structure * IPHDR,
 	iplen,
-        struct Queue_blk_structure * QB(QB_net_send),
+        struct queue_blk_structure(QB_net_send) * QB,
 	ip_src,
 	newip_dest,
         dev;
@@ -1057,9 +1057,9 @@ IP$S}(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	(Dev_config->dc_rtn_Xmit)(dev_config);
 	};// Give success return
 
-    };
+    }
     return -1;
-    };
+    }
 
 
 
@@ -1104,7 +1104,7 @@ void IP$Receive (Buf,Buf_size,IPHdr,devlen,dev_config) (void)
 	struct Device_Configuration_Entry * dev_config,
 	struct IP_Structure * Iphdr;
     signed long
-	struct Queue_blk_structure * QB(QB_net_send),
+	struct queue_blk_structure(QB_net_send) * QB,
  	Sum,
 	hdrlen,
 	IP_src,
@@ -1280,7 +1280,7 @@ void IP$Receive (Buf,Buf_size,IPHdr,devlen,dev_config) (void)
 	    INSQUE(QB,Dev_config->dc_send_Qtail);
 	    (Dev_config->dc_rtn_xmit)(dev_config);
 	    };
-    };
+    }
 
 //SBTTL "Dispatch IP packet to protocol routine"
 
@@ -1338,7 +1338,7 @@ IP_DISPATCH(IPHDR,IPLEN,HDRLEN,BUF,BUFSIZE) : NOVALUE (void)
 // Wake up mainline procedure if sleeping
 
     $ACPWAKE;
-    };
+    }
 
 //SBTTL "Handle reception of IP packet fragment"
 
@@ -1373,7 +1373,7 @@ IP_FRAGMENT(IPHDR,IPLEN,HDRLEN,BUF,BUFSIZE) : NOVALUE (void)
 
 X:  {			// *** Block X ***
     RAPTR = RA_QUEUE->QHEAD;
-    WHILE RAPTR != RA_QUEUE->QHEAD DO
+    while (RAPTR != RA_QUEUE->QHEAD)
 	{
 	IF (RAPTR->RA$Source == IPHDR->IPH$Source) AND
 	   (RAPTR->RA$Dest == IPHDR->IPH$Dest) AND
@@ -1382,7 +1382,7 @@ X:  {			// *** Block X ***
 	RAPTR = RAPTR->RA$Next;
 	};
     RAPTR = 0;
-    };			// *** Block X ***
+    }			// *** Block X ***
 	
 // Handle the fragment according to the case.
 
@@ -1528,7 +1528,7 @@ Y:	{
 	    IP$LOG(%ASCID"IPfrag",IPHDR);
 	};
     MM$Seg_Free(BUFSIZE,BUF);
-    };
+    }
 
 IP_FRAGMENT_CHECK : NOVALUE (void)
 !
@@ -1545,7 +1545,7 @@ IP_FRAGMENT_CHECK : NOVALUE (void)
 
     NOW = Time_Stamp();
     RAPTR = RA_QUEUE->QHEAD;
-    WHILE RAPTR != RA_QUEUE->QHEAD DO
+    while (RAPTR != RA_QUEUE->QHEAD)
 	{
 	RANXT = RAPTR->RA$Next;
 
@@ -1576,6 +1576,6 @@ IP_FRAGMENT_CHECK : NOVALUE (void)
     if (NOT QUEUE_EMPTY(RA_QUEUE))
 	$SETIMR(DAYTIM = RA_CHECK_TIME,
 		ASTADR = IP_FRAGMENT_CHECK);
-    };
+    }
 }
 ELUDOM

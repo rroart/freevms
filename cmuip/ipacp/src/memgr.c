@@ -167,7 +167,7 @@ extern
 
 extern signed long
 //    struct Connection_Table_Structure * ConectPtr,
-//    struct VECTOR * VTCB_ptr->0,	// Vector of Valid TCB pointers.
+//    struct VECTOR * VTCB_ptr[0],	// Vector of Valid TCB pointers.
 //    VTCB_Size,
 //    Max_TCB,
     ast_in_progress,		// Flag if running at AST level
@@ -306,7 +306,7 @@ Memgr_Fault_Handler(Caller,Primary_CC,Sec_CC) : NOVALUE (void)
     {
     Signal(Primary_cc);
     Fatal_Error("Memory Mgmt. Fault detected.",Primary_cc);
-    };
+    }
 
 
 
@@ -350,7 +350,7 @@ MM$Get_Mem (Addr, Size)
     CH$FILL(0,Size,..Addr);	// clean house.....zero fill.
 
     RC
-    };
+    }
 
 
 
@@ -387,7 +387,7 @@ MM$Free_Mem(Mem,Size) : NOVALUE (void)
     if (NOT ( RC = LIB$FREE_VM_PAGE ( Pages , Mem ) ))
 	    Memgr_Fault_Handler(0,RC,0);
     OKINT;
-    };
+    }
 
 
 
@@ -456,7 +456,7 @@ MM$QBLK_GET=
     Hptr->MEM$ISFREE = FALSE;	// QB is no longer free
     INSQUE(Hptr,USED_Qblks->QTail); // Insert on used queue
     RETURN(Ptr);
-    };
+    }
 
 /*
 
@@ -514,7 +514,7 @@ MM$QBLK_Free(Ptr): NOVALUE (void)
 	OKINT;
 	QB_Gets = QB_gets - 1;		// track this event.
 	};
-    };
+    }
 /*
 
 Function:
@@ -543,7 +543,7 @@ QBLK_Init: NOVALUE (void)
 	RC ;
 
     QBLK_Count = Qblk_count_base;
-    INCR J FROM 1 TO QBlk_count DO
+    for (J=1;J<=QBlk_count;J++)
 	{
 !	LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr);
 	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1) ;
@@ -555,7 +555,7 @@ QBLK_Init: NOVALUE (void)
 	Hptr->MEM$ISPERM = TRUE;
 	INSQUE(Hptr,Free_QBlks->QTail);
 	};
-    };
+    }
 
 
 
@@ -615,7 +615,7 @@ MM$UARG_GET=
 	};
     CH$FILL(%CHAR(0),Max_User_ArgBlk_Size*4,Ptr);
     RETURN(Ptr);
-    };
+    }
 
 /*
 
@@ -664,7 +664,7 @@ MM$UARG_Free(Ptr): NOVALUE (void)
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Free !XL size !SL!/",0,Ptr, Pages);
 	UA_Gets = UA_gets - 1;
 	};
-    };
+    }
 
 /*
 
@@ -694,7 +694,7 @@ Uarg_Init: NOVALUE (void)
 	RC ;
 
     Uarg_count = Uarg_count_base;
-    INCR J FROM 1 TO Uarg_count DO
+    for (J=1;J<=Uarg_count;J++)
 	{
 !	LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),ptr);
 	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
@@ -703,7 +703,7 @@ Uarg_Init: NOVALUE (void)
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Init !XL size !SL!/",0,Ptr, Pages);
 	INSQUE(Ptr,Free_Uargs->QTail);
 	};
-    };
+    }
 
 //SBTTL "Segment Handlers"
 /*
@@ -803,7 +803,7 @@ MM$SEG_GET(Size)
 
     XLOG$FAO(LOG$MEM,"!%T MM$Seg_Get !XL size !SL!/", 0,PTR, Size);
     RETURN(Ptr);
-    };
+    }
 
 /*
 
@@ -884,7 +884,7 @@ MM$SEG_FREE(Size,Ptr) : NOVALUE (void)
 	    } ;
 	OKINT;
 	};
-    };
+    }
 
 
 /*
@@ -919,7 +919,7 @@ SEG_INIT : NOVALUE (void)
 // Allocate minimum (default) size segments.
 
     MIN_seg_count = MIN_seg_count_base;
-    INCR J FROM 0 TO MIN_Seg_count-1 DO
+    for (J=0;J<=MIN_Seg_count-1;J++)
 	{
 !	LIB$GET_VM(MIN_PHYSICAL_BUFSIZE,ptr);
 	Pages = ((MIN_PHYSICAL_BUFSIZE / 512) + 1) ;
@@ -932,7 +932,7 @@ SEG_INIT : NOVALUE (void)
 // Allocate maximum size segments
 
     MAX_seg_count = MAX_seg_count_base;
-    DECR J FROM MAX_Seg_count TO 1 DO
+    for (J=MAX_Seg_count;J>=1;J--)
 	{
 !	LIB$GET_VM(MAX_PHYSICAL_BUFSIZE,ptr);
 	Pages = ((MAX_PHYSICAL_BUFSIZE / 512) + 1) ;
@@ -941,7 +941,7 @@ SEG_INIT : NOVALUE (void)
 	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
 	INSQUE(Ptr,Free_Maxsize_Segs->QTail);
 	};
-    };
+    }
 
 //Sbttl "Memory Management Initialization."
 /*
@@ -970,7 +970,7 @@ MM$INIT : NOVALUE (void)
     QBLK_Init();
     Uarg_Init();
     Seg_Init();
-    };
+    }
 
 
 //SBTTL "Debugging routines to simulate INSQUE and REMQUE"
@@ -998,7 +998,7 @@ MM$INSQUE(QBLK,QHDR,QRTN,QID,QVAL)
     HPTR->MEM$CURQUEUES = HPTR->MEM$CURQUEUES || QID;
     HPTR->MEM$ALLQUEUES = HPTR->MEM$ALLQUEUES || QID;
     return INSQUE(QBLK,QHDR);
-    };
+    }
 
 MM$REMQUE(QHDR,QBLK,QRTN,QID,QVAL)
     {
@@ -1014,7 +1014,7 @@ MM$REMQUE(QHDR,QBLK,QRTN,QID,QVAL)
 	HPTR->MEM$CURQUEUES = HPTR->MEM$CURQUEUES && (NOT QID);
 	};
     return RVAL;
-    };
+    }
 //FI
 
 }

@@ -218,7 +218,7 @@ static signed long
 			[DSC$A_POINTER]	= 0),
     SRVPRIOR,			// Name resolver priority
     SRVSTATUS,			// Name resolver status flags
-    SRVPRIVS : VECTOR->2,	// Name resolver privileges
+    SRVPRIVS : VECTOR[2],	// Name resolver privileges
     struct VECTOR * SRVQUOTAS;	// Name resolver quotas
 
 //SBTTL "NML$CONFIG - Configure name resolver process"
@@ -234,7 +234,7 @@ VOID NML$CONFIG(IMNAME_A,PRIOR,STATUS,PRIVS, QUOTAS) (void)
     EXTERNAL ROUTINE
 	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL);
     MAP
-	PRIVS	: REF VECTOR->2,
+	PRIVS	: REF VECTOR[2],
 	QUOTAS	: REF $BBLOCK;
     signed long
 	RC,
@@ -259,9 +259,9 @@ VOID NML$CONFIG(IMNAME_A,PRIOR,STATUS,PRIVS, QUOTAS) (void)
 
     SRVPRIOR = PRIOR;		// Resolver priority
     SRVSTATUS = STATUS;	// Resolver process status flags
-    SRVPRIVS->0 = PRIVS->0;	// Resolver privileges
-    SRVPRIVS->1 = PRIVS->1;
-    };
+    SRVPRIVS[0] = PRIVS[0];	// Resolver privileges
+    SRVPRIVS[1] = PRIVS[1];
+    }
 
 //SBTTL "NML$INIT - Initialize module state"
 
@@ -397,7 +397,7 @@ NML$INIT : NOVALUE (void)
 	    };
 	SRVSTATE = SRV$INIT;	// Resolver is initializing
 	};
-    };
+    }
 
 //SBTTL "NML$GETALST - Translate name to address list"
 
@@ -455,7 +455,7 @@ NML$GETALST(NAMPTR,NAMLEN,ASTADR,ASTPRM) : NOVALUE (void)
     NQE->NQE$ASTADR = ASTADR;
     NQE->NQE$ASTPRM = ASTPRM;
     NQE_ENQUEUE(NQE,CURQID,MSLEN,MSBUF);
-    };
+    }
 
 //SBTTL "NML$GETNAME - Translate address to name"
 
@@ -481,7 +481,7 @@ NML$GETNAME(ADDR,ASTADR,ASTPRM) : NOVALUE (void)
 	    INA : VECTOR[4,BYTE];
 	INA = ADDR;
 	QL$FAO("!%T NML$GETNAME: address is !UB.!UB.!UB.!UB!/",
-	       0,INA->0,INA->1,INA->2,INA->3);
+	       0,INA[0],INA[1],INA[2],INA[3]);
 	};
 
 // Allocate and initialize a request block for us
@@ -508,7 +508,7 @@ NML$GETNAME(ADDR,ASTADR,ASTPRM) : NOVALUE (void)
     NQE->NQE$ASTADR = ASTADR;
     NQE->NQE$ASTPRM = ASTPRM;
     NQE_ENQUEUE(NQE,CURQID,MSLEN,MSBUF);
-    };
+    }
 
 //SBTTL "NML$GETRR - Translate name to resource record"
 
@@ -562,7 +562,7 @@ NML$GETRR(RRTYPE,NAMPTR,NAMLEN,ASTADR,ASTPRM) : NOVALUE (void)
     NQE->NQE$ASTADR = ASTADR;
     NQE->NQE$ASTPRM = ASTPRM;
     NQE_ENQUEUE(NQE,CURQID,MSLEN,MSBUF);
-    };
+    }
 
 //SBTTL "NML$CANCEL - Cancel name lookup request"
 
@@ -581,7 +581,7 @@ NML$CANCEL(ASTPRM,ASTFLG,STATUS)
 
     RC = 0;
     NQE = NQE_QUEUE->QHEAD;
-    WHILE NQE != NQE_QUEUE DO
+    while (NQE != NQE_QUEUE)
 	{
 	NXNQE = NQE->NQE$NEXT;
 
@@ -605,7 +605,7 @@ NML$CANCEL(ASTPRM,ASTFLG,STATUS)
 // Return the count of requests found and deleted
 
     return RC;
-    };
+    }
 
 //SBTTL "NML$STEP - Examine the name lookup queue, calling coroutine"
 
@@ -623,13 +623,13 @@ NML$STEP(COADDR,COVALUE) : NOVALUE (void)
 // Walk the queue
 
     NQE = NQE_QUEUE->QHEAD;
-    WHILE NQE != NQE_QUEUE DO
+    while (NQE != NQE_QUEUE)
 	{
 	NXNQE = NQE->NQE$NEXT;
 	(COADDR)(COVALUE,NQE->NQE$ASTADR,NQE->NQE$ASTPRM);
 	NQE = NXNQE;
 	};
-    };
+    }
 
 NML$PURGE(STATUS) : NOVALUE (void)
 !
@@ -663,7 +663,7 @@ NML$PURGE(STATUS) : NOVALUE (void)
 // Walk the queue, purging all requests
 
     NQE = NQE_QUEUE->QHEAD;
-    WHILE NQE != NQE_QUEUE DO
+    while (NQE != NQE_QUEUE)
 	{
 	NXNQE = NQE->NQE$NEXT;
 	REMQUE(NQE,NQE);
@@ -671,7 +671,7 @@ NML$PURGE(STATUS) : NOVALUE (void)
 	NQE_DEALLOC(NQE);
 	NQE = NXNQE;
 	};
-    };
+    }
 
 //SBTTL "Debugging routine to dump out the queue contents"
 
@@ -693,18 +693,18 @@ NML$DUMP : NOVALUE (void)
 	    NQE_COUNT,NOW,NQE_QUEUE->QHEAD,NQE_QUEUE->QTAIL);
     NQE = NQE_QUEUE->QHEAD;
     PNQE = NQE_QUEUE;
-    WHILE NQE != NQE_QUEUE DO
+    while (NQE != NQE_QUEUE)
 	{
 	NQE_DUMP(NQE);
 	if (NQE->NQE$PREV != PNQE)
 	    {
 	    LOG$FAO("** List link error, PREV should be !XL **!/",PNQE);
-	    EXITLOOP;
+	    break;
 	    };
 	PNQE = NQE;
 	NQE = NQE->NQE$NEXT;
 	};
-    };
+    }
 
 
 VOID NQE_DUMP(struct NQENTRY * NQE()) (void)
@@ -718,7 +718,7 @@ VOID NQE_DUMP(struct NQENTRY * NQE()) (void)
 	    NQE,NQE->NQE$NEXT,NQE->NQE$PREV,
 	    NQE->NQE$TYPE,NQE->NQE$LENGTH,NQE->NQE$FLAGS,NQE->NQE$TIME,
 	    NQE->NQE$ASTADR,NQE->NQE$ASTPRM);
-    };
+    }
 
 S}_CONTROL(CCODE,CVALUE) : NOVALUE (void)
 !
@@ -753,7 +753,7 @@ S}_CONTROL(CCODE,CVALUE) : NOVALUE (void)
 		P2	= CONTROL_MSGSIZE);
     if (NOT RC)
 	ERROR$FAO("Failed to send NAMRES control message, RC = !XL",RC);
-    };
+    }
 
 //SBTTL "Request queue management routines"
 
@@ -784,7 +784,7 @@ NQE_ALLOC(NQE)
     RC = LIB$GET_VM_PAGE(%REF((NQE_MAXSIZE / 512) + 1),NQE);
     XQL$FAO(LOG$MSG,"!%T NQE_ALLOC, NQE=!XL, RC=!XL!/",0,..NQE,RC);
     return RC;
-    };
+    }
 
 
 
@@ -810,7 +810,7 @@ NQE_DEALLOC(NQE) : NOVALUE (void)
 
     NQE_COUNT = NQE_COUNT - 1;
     return SS$_NORMAL;
-    };
+    }
 
 NQE_ENQUEUE(NQE,QRYID,MSLEN,MSBUF) : NOVALUE (void)
 !
@@ -848,7 +848,7 @@ NQE_ENQUEUE(NQE,QRYID,MSLEN,MSBUF) : NOVALUE (void)
 
     if (SRVSTATE GEQ SRV$UP)
 	NQE_XMIT(NQE);
-    };
+    }
 
 NQE_DELETE(NQE,ASTFLG,STATUS) : NOVALUE (void)
 !
@@ -873,7 +873,7 @@ NQE_DELETE(NQE,ASTFLG,STATUS) : NOVALUE (void)
 // Finally, deallocate the queue entry
 
     NQE_DEALLOC(NQE);
-    };
+    }
 
 FORWARD ROUTINE
  VOID    NQE_XMIT_DONE;
@@ -908,7 +908,7 @@ NQE_XMIT(NQE)
 	return RC;
 	};
     return SS$_NORMAL;
-    };
+    }
 
 NQE_XMIT_DONE(NQE) : NOVALUE (void)
 !
@@ -928,7 +928,7 @@ NQE_XMIT_DONE(NQE) : NOVALUE (void)
     RC = IOSB->MI$STATUS;
     XQL$FAO(LOG$MSG,"!%T NQE_XMIT_DONE, NQE=!XL, RC=!XL!/",0,NQE,RC);
     NQE->NQE$F_XMIT = 1;
-    };
+    }
 
 XMIT_REQUESTS : NOVALUE (void)
 !
@@ -943,14 +943,14 @@ XMIT_REQUESTS : NOVALUE (void)
 // tranmitted successfully yet.
 
     NQE = NQE_QUEUE->QHEAD;
-    WHILE NQE != NQE_QUEUE DO
+    while (NQE != NQE_QUEUE)
 	{
 	NXNQE = NQE->NQE$NEXT;
 	if (NOT (NQE->NQE$F_XMIT))
 	    NQE_XMIT(NQE);
 	NQE = NXNQE;
 	};
-    };
+    }
 
 //SBTTL "Mailbox message receiving routines"
 
@@ -1011,7 +1011,7 @@ MBX_RECV_AST(MBUF) : NOVALUE (void)
 	ERROR$FAO("Queued read failed for mailbox, RC = !XL",RC);
 	RETURN;
 	};
-    };
+    }
 
 FORWARD ROUTINE
  VOID    CONTROL_MSG;
@@ -1051,7 +1051,7 @@ DECODE_REPLY(PID,RLEN,RBUF) : NOVALUE (void)
     FOUND = 0;
     RID = RBUF->RPLY$ID;
     NQE = NQE_QUEUE->QHEAD;
-    WHILE NQE != NQE_QUEUE DO
+    while (NQE != NQE_QUEUE)
 	{
 	NXNQE = NQE->NQE$NEXT;
 
@@ -1147,7 +1147,7 @@ DECODE_REPLY(PID,RLEN,RBUF) : NOVALUE (void)
     if (FOUND LEQ 0)
 	XQL$FAO(LOG$MSG,"!%T DECODE_REPLY failed to find RQ !XL, TYPE !SL!/",
 		0,RID,RTYPE);
-    };
+    }
 
 CONTROL_MSG(PID,RLEN,RBUF) : NOVALUE (void)
 !
@@ -1192,7 +1192,7 @@ CONTROL_MSG(PID,RLEN,RBUF) : NOVALUE (void)
 		0,CTYPE,PID);
 	};
     TES;
-    };
+    }
 
 CHECK_SERVER (void)
 !
@@ -1237,7 +1237,7 @@ CHECK_SERVER (void)
     SRVMBXCHN = DEVCHN;
     SRVPID = PID;
     return TRUE;
-    };
+    }
 
 }
 ELUDOM

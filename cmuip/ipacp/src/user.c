@@ -528,7 +528,7 @@ IO$POST (IOSB, struct User_Default_Args * UArg): NOVALUE (void)
 	};
 
     $$KCALL(VMS_IO$POST,IOSB,IRP,UArg->UD$UCB_Adrs);
-    };
+    }
 
 
 
@@ -590,7 +590,7 @@ VOID 				   FLAGS,ICMCODE) (void)
 
     IO$POST(IOSB, UARG)
 
-    };
+    }
 
 
 //SBTTL "USER Err - Return Errors to users process"
@@ -651,7 +651,7 @@ USER$ERR (struct User_Default_Args * Arg,Err)
 	LOG$FAO("!%T User error return, RC = !XL!/",0,Err);
 	    
     return TRUE;
-    };
+    }
 
 
 //Sbttl "POST USER FUNCTION OK - Give em a "YOU DONE GOOD" "
@@ -693,7 +693,7 @@ USER$POST_FUNCTION_OK(struct User_Default_Args * Arg): NOVALUE (void)
 
     IO$POST(IOSB,Arg);
     MM$UArg_Free(Arg);		// Release user arg block.
-    };
+    }
 
 //SBTTL "Give info about a connection"
 
@@ -750,7 +750,7 @@ void 			     Frn_Name,Frn_Nlen) (void)
 
     User$Post_IO_Status(Uargs,SS$_NORMAL,Connection_Info_ByteSize,0,0);
     MM$UArg_Free(Uargs);		// relese user arg block.
-    };
+    }
 
 //SBTTL "Derive an integer Clock base"
 
@@ -764,11 +764,11 @@ void 			     Frn_Name,Frn_Nlen) (void)
 USER$Clock_Base (void)
     {
     signed long
-	Now: VECTOR->2;
+	Now: VECTOR[2];
 
     $GETTIM(TimAdr=Now);
-    return (NOW->0^-20+NOW->1^12) && %x"7FFF";
-    };
+    return (NOW[0]^-20+NOW[1]^12) && %x"7FFF";
+    }
 
 //SBTTL "Allocate a USER Local Port"
 /*
@@ -806,7 +806,7 @@ USER$GET_LOCAL_PORT(Pbase)
     if (rval LSS User_LP_Start)
 	rval = rval+User_LP_Start;
     return rval && %X"7FFF";
-    };
+    }
 
 FORWARD ROUTINE
  VOID    ACCESS_INIT;
@@ -816,7 +816,7 @@ USER$INIT_ROUTINES : NOVALUE (void)
     TCP_User_LP = USER$Clock_Base();
     UDP_User_LP = USER$Clock_Base();
     ACCESS_INIT();
-    };
+    }
 
 
 
@@ -853,7 +853,7 @@ Net$Debug(struct Debug_Args * UArgs): NOVALUE (void)
 	TES;
 
     USER$Post_Function_OK(Uargs);
-    };
+    }
 
 
 
@@ -896,7 +896,7 @@ Net$Event(struct Event_Args * UArgs): NOVALUE (void)
 
     USER$Post_Function_OK(Uargs);
     MM$Free_Mem(Buffer,UArgs->EV$Buf_Size);
-    };
+    }
 
 
 
@@ -954,8 +954,8 @@ NET$SNMP(struct SNMP_Args * Uargs): NOVALUE (void)
 	RC,
 	struct VECTOR * In_Buff [,BYTE],
 	Error = False,
-	Now: VECTOR->2,			// time as in now.
-	One: VECTOR->2 Initial(1,0),	// QuadWord of val 1.
+	Now: VECTOR[2],			// time as in now.
+	One: VECTOR[2] Initial(1,0),	// QuadWord of val 1.
 	BufSize  = 0,
 	RB: VECTOR->RBSIZE;
 
@@ -996,10 +996,10 @@ if ((Uargs->SNMP$Function == 4))
 	    TCP$KILL;
 
 	XLOG$FAO(LOG$USER,"!%T Kill !XL (bsize=!XL)!/",0,
-		 In_Buff->0,Uargs->SNMP$WBuf_Size);
+		 In_Buff[0],Uargs->SNMP$WBuf_Size);
 	Bufsize = 10;
 
-	RC = TCP$KILL(In_Buff->0); // nu? what are you waiting for? kill!!!
+	RC = TCP$KILL(In_Buff[0]); // nu? what are you waiting for? kill!!!
 	if (RC != SS$_NORMAL) Error = USER$Err(Uargs,RC);
 
 	CH$MOVE(BufSize,UPLIT(%ASCII "abcdefghij"),RB+4); // First long is size
@@ -1030,7 +1030,7 @@ else
 
 // Copy local data into user's IO request buffer, Build movbyt arg list.
 
-	    RB->0 = Bufsize;
+	    RB[0] = Bufsize;
 	    $$KCALL(MOVBYT,Bufsize+4,RB,Uargs->SNMP$Data_Start);
 
 // Post the user's IO request back to the user.
@@ -1039,7 +1039,7 @@ else
 	    MM$UArg_Free(Uargs);	// Release user arg block.
 	    End;
 	};
-    };
+    }
 
 
 
@@ -1080,13 +1080,13 @@ USER$Purge_All_IO : NOVALUE (void)
 	UDP$Purge_All_IO : NOVALUE,
 	ICMP$Purge_All_IO : NOVALUE,
 	IPU$Purge_All_IO : NOVALUE;
-    REGISTER
+    register
 	qb;
     signed long
 	struct User_Default_Args * Uargs,
 	struct User_Send_Args * Sargs,
 	IOSTATUS:  NetIO_Status_Block,
-	EXPR: Vector->2;
+	EXPR: Vector[2];
 
 // Set virtual device IP offline.  Prevent further user io.
 
@@ -1102,8 +1102,8 @@ USER$Purge_All_IO : NOVALUE (void)
 
 // check the user request queue again just to be safe.
 
-    Expr->0 = 5*Timer_Delta;	// 5 seconds in Delta time format.
-    Expr->1 = -1;
+    Expr[0] = 5*Timer_Delta;	// 5 seconds in Delta time format.
+    Expr[1] = -1;
     $SCHDWK(Daytim=EXPR);
     $HIBER;			// Make sure ALL IO has been queued.
 
@@ -1112,7 +1112,7 @@ USER$Purge_All_IO : NOVALUE (void)
 // & not from a user process, be sure NOT to post the IO//  USER$Err will delete
 // the uargs block.
 
-    WHILE (Uargs=$$KCALL(User_Requests_Avail)) != false DO
+    while ((Uargs=$$KCALL(User_Requests_Avail)) != false)
 	{
 
 // post the user's io request with an error code: tcp is exiting.
@@ -1121,7 +1121,7 @@ USER$Purge_All_IO : NOVALUE (void)
 	    User$Post_IO_Status(Uargs,NET$_TE,0,0,0);
 !!!HACK!!// Don't release the Uarg?
 	};
-    };
+    }
 
 
 
@@ -1167,7 +1167,7 @@ FORWARD ROUTINE
 User$Brk (void)
     {
     SS$_NORMAL
-    };
+    }
 
 void VMS$Cancel(struct VMS$Cancel_Args * Uargs) (void)
     {
@@ -1208,7 +1208,7 @@ void VMS$Cancel(struct VMS$Cancel_Args * Uargs) (void)
 
     GTHST_CANCEL(Uargs);
     MM$UArg_Free(Uargs);		// Release IPACP argument block
-    };
+    }
 
 //Sbttl "NET$Dump - Dump the TCB blocks to a user process"
 
@@ -1241,8 +1241,8 @@ NET$DUMP(struct Debug_Dump_Args * Uargs): NOVALUE (void)
 	CALCULATE_UPTIME;
     EXTERNAL
 	TEK$sys_uptime;
-    REGISTER
-	struct Queue_Blk_Structure * QB(QB_UR_Fields);	// queue block pointer.
+    register
+	struct queue_blk_structure(QB_UR_Fields) * QB;	// queue block pointer.
     LITERAL
 	RBBYTES = D$User_Return_Blk_Max_Size,
 	RBSIZE = (RBBYTES+3)/4;		// Largest dump block, in alloc units
@@ -1502,7 +1502,7 @@ void 	    ICMP$Connection_List;
 	    MM$UArg_Free(Uargs);	// Release user arg block.
 	    End;
 	};
-    };
+    }
 
 //SBTTL "Net$Exit - Orderly shutdown of IP ACP"
 /*
@@ -1532,7 +1532,7 @@ Net$EXIT(struct Debug_EXIT_Args * Uargs): NOVALUE (void)
     USER$Post_Function_OK(Uargs);
     Time_2_Exit = True;		// Set global for exit, rtn: start_network.
     $$KCALL(Set_IP_device_OFFline); // mark network device(s) offline.
-    };
+    }
 
 //SBTTL "Network access check routines"
 
@@ -1558,7 +1558,7 @@ User$Privileged(PID)
     {
     signed long
 	JPI : GETJPI_BLOCK,
-	PRVBUF : $BBLOCK->8,
+	PRVBUF : $BBLOCK[8],
 	PRVLEN;
 
 // Fill in GETJPI request block.
@@ -1575,7 +1575,7 @@ User$Privileged(PID)
 	if (PRVBUF->PRV$V_PHY_IO || PRVBUF->PRV$V_SETPRV)
 	    return SS$_NORMAL;
     return NET$_NOPRV;
-    };
+    }
 
 
 Check_ID(PID,ID)
@@ -1588,7 +1588,7 @@ Check_ID(PID,ID)
     signed long
 	STATUS,
 	JPI : GETJPI_BLOCK,
-	UICBLK : VECTOR->2,
+	UICBLK : VECTOR[2],
 	UICLEN,
 	RDBCTX,
 	CURID;
@@ -1608,7 +1608,7 @@ Check_ID(PID,ID)
 
 // Check the rights database for this user
 
-    UICBLK->1 = 0;
+    UICBLK[1] = 0;
     RDBCTX = 0;
     CURID = ID;
     WHILE (STATUS = $FIND_HELD(	HOLDER	= UICBLK,
@@ -1625,7 +1625,7 @@ Check_ID(PID,ID)
 // Didn't find it - punt.
 
     return FALSE;
-    };
+    }
 
 
 LITERAL WKS$SMTP = 25;		// Well known port number for SMTP
@@ -1657,7 +1657,7 @@ X:	{
 
 // If the foreign host is in the "local hosts" list, then allow it.
 
-	DECR I FROM (ACHOST_COUNT-1) TO 0 DO
+	for (I=(ACHOST_COUNT-1);I>=0;I--)
 	    if ((FRNHST && ACHOSTS[I,AC$MASK]) == ACHOSTS[I,AC$HOST])
 		LEAVE X;
 	if (NOT CHECK_ID(PID,ARPANET_ID))
@@ -1676,7 +1676,7 @@ X:	{
 // Passed all of the tests - let them have access to the network
 
     return SS$_NORMAL;
-    };
+    }
 
 
 USER$ACCESS_CONFIG(HOSTNUM,HOSTMASK) : NOVALUE (void)
@@ -1704,7 +1704,7 @@ VOID 	    ASCII_DEC_BYTES;
     ACHOSTS[ACHOST_COUNT,AC$HOST] = HOSTNUM;
     ACHOSTS[ACHOST_COUNT,AC$MASK] = HOSTMASK;
     ACHOST_COUNT = ACHOST_COUNT + 1;
-    };
+    }
 
 
 ACCESS_INIT : NOVALUE (void)
@@ -1746,7 +1746,7 @@ ACCESS_INIT : NOVALUE (void)
 	    ACCESS_FLAGS<ACF$ARPAHOST> = 0;
 	    };
 	};
-    };
+    }
 
 //SBTTL "NET$GTHST: Get host information"
 /*
@@ -1791,7 +1791,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 	{
 	signed long
 	    RBLOCK : GTHST_NMLOOK_RET_ARGS,
-	    Args: VECTOR->4;
+	    Args: VECTOR[4];
 	BIND
 	    ADRVEC = RBLOCK->GHN$ADRLST : VECTOR;
 	EXTERNAL
@@ -1808,7 +1808,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 
 // Get the list of addresses from the configuration table
 
-	INCR IDX FROM 0 TO (DEV_COUNT-1) DO
+	for (IDX=0;IDX<=(DEV_COUNT-1);IDX++)
 	    ADRVEC[IDX] = DEV_CONFIG_TAB[IDX,DC_IP_ADDRESS];
 	RBLOCK->GHN$ADRCNT = DEV_COUNT;
 
@@ -1891,7 +1891,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
     [OUTRANGE]:
 	USER$Err(Uargs,NET$_IGF);
     TES;
-    };
+    }
 
 //SBTTL "Name lookup done handler"
 /*
@@ -1903,7 +1903,7 @@ void NET$GTHST(struct GTHST_Args * Uargs) (void)
 GTHST_NMLOOK_DONE(Uargs,Status,Adrcnt,Adrlst,Namlen,Nambuf) : NOVALUE (void)
     {
     signed long
-	Args: VECTOR->4;
+	Args: VECTOR[4];
     MAP
 	struct GTHST_NMLOOK_ARGS * Uargs;
     signed long
@@ -1932,7 +1932,7 @@ GTHST_NMLOOK_DONE(Uargs,Status,Adrcnt,Adrlst,Namlen,Nambuf) : NOVALUE (void)
 
     User$Post_IO_Status(Uargs,SS$_Normal,NLBSIZE,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "Address lookup done handler"
 /*
@@ -1942,7 +1942,7 @@ GTHST_NMLOOK_DONE(Uargs,Status,Adrcnt,Adrlst,Namlen,Nambuf) : NOVALUE (void)
 GTHST_ADLOOK_DONE(Uargs,Status,Namlen,Nambuf) : NOVALUE (void)
     {
     signed long
-	Args: VECTOR->4;
+	Args: VECTOR[4];
     MAP
 	struct GTHST_ADLOOK_ARGS * Uargs;
     signed long
@@ -1969,7 +1969,7 @@ GTHST_ADLOOK_DONE(Uargs,Status,Namlen,Nambuf) : NOVALUE (void)
 
     User$Post_IO_Status(Uargs,SS$_Normal,ALBSIZE,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "RR lookup done handler"
 /*
@@ -1981,7 +1981,7 @@ GTHST_ADLOOK_DONE(Uargs,Status,Namlen,Nambuf) : NOVALUE (void)
 GTHST_RRLOOK_DONE(Uargs,Status,RDLen,RData,Namlen,Nambuf) : NOVALUE (void)
     {
     signed long
-	Args: VECTOR->4;
+	Args: VECTOR[4];
     MAP
 	struct GTHST_RRLOOK_ARGS * Uargs;
     signed long
@@ -2018,7 +2018,7 @@ GTHST_RRLOOK_DONE(Uargs,Status,RDLen,RData,Namlen,Nambuf) : NOVALUE (void)
 
     User$Post_IO_Status(Uargs,SS$_Normal, RLBSize + RDLen,0,0);
     MM$UArg_Free(Uargs);
-    };
+    }
 
 //SBTTL "GTHST_CANCEL - Cancel GTHST requests for a process"
 
@@ -2032,7 +2032,7 @@ Void GTHST_CANCEL(struct VMS$CANCEL_ARGS * Uargs) (void)
 !
     {
     NML$STEP(GTHST_CANCEL_ONE,Uargs);
-    };
+    }
 
 GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS) : NOVALUE (void)
 !
@@ -2058,7 +2058,7 @@ GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS) : NOVALUE (void)
 
     if (VCUARGS->VC$UCB_ADRS == UARGS->UD$UCB_ADRS)
 	NML$CANCEL(UARGS,TRUE,NET$_CCAN);
-    };
+    }
 
 FORWARD ROUTINE
  VOID    GTHST_PURGE_ONE;
@@ -2070,7 +2070,7 @@ GTHST_PURGE : NOVALUE (void)
 !
     {
     NML$STEP(GTHST_PURGE_ONE,0);
-    };
+    }
 
 GTHST_PURGE_ONE(COVALUE,ASTADR,UARGS) : NOVALUE (void)
 !
@@ -2086,7 +2086,7 @@ GTHST_PURGE_ONE(COVALUE,ASTADR,UARGS) : NOVALUE (void)
 	(ASTADR != GTHST_RRLOOK_DONE) THEN
 	RETURN;
     NML$CANCEL(UARGS,TRUE,NET$_TE);
-    };
+    }
 
 //SBTTL "Process User Requests."
 /*
@@ -2167,10 +2167,10 @@ USER$Process_User_Requests : NOVALUE (void)
 	IPU$RECEIVE : NOVALUE,
 	IPU$INFO : NOVALUE,
 	IPU$STATUS : NOVALUE;
-    REGISTER
+    register
 	struct User_Default_Args * ArgBlk;
 
-    WHILE (ARGBLK=$$KCALL(User_requests_Avail)) != False DO
+    while ((ARGBLK=$$KCALL(User_requests_Avail)) != False)
 	{
 	if ($$LOGF(LOG$USER))
 	    {
@@ -2314,6 +2314,6 @@ USER$Process_User_Requests : NOVALUE (void)
 	    };
 	TES;
 	};
-    };
+    }
 }
 ELUDOM

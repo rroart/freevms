@@ -160,7 +160,7 @@ extern signed long LITERAL
 
 extern signed long
     struct Connection_Table_Structure * ConectPtr,
-    struct VECTOR * VTCB_ptr->0,	// Vector of Valid TCB pointers.
+    struct VECTOR * VTCB_ptr[0],	// Vector of Valid TCB pointers.
     VTCB_Size,
     Max_TCB,
     ast_in_progress,		// Flag if running at AST level
@@ -301,7 +301,7 @@ Memgr_Fault_Handler(Caller,Primary_CC,Sec_CC) : NOVALUE (void)
     {
     Signal(Primary_cc);
     Fatal_Error("Memory Mgmt. Fault detected.",Primary_cc);
-    };
+    }
 
 
 
@@ -339,7 +339,7 @@ MM$Get_Mem (Addr, Size)
     CH$FILL(0,Size,..Addr);	// clean house.....zero fill.
 
     RC
-    };
+    }
 
 
 
@@ -369,7 +369,7 @@ MM$Free_Mem(Mem,Size) : NOVALUE (void)
     if (NOT ( RC = LIB$FREE_VM ( Size , Mem ) ))
 	    Memgr_Fault_Handler(0,RC,0);
     OKINT;
-    };
+    }
 
 
 
@@ -434,7 +434,7 @@ MM$QBLK_GET=
     Hptr->MEM$ISFREE = FALSE;	// QB is no longer free
     INSQUE(Hptr,USED_Qblks->QTail); // Insert on used queue
     RETURN(Ptr);
-    };
+    }
 
 /*
 
@@ -488,7 +488,7 @@ MM$QBLK_Free(Ptr): NOVALUE (void)
 	OKINT;
 	QB_Gets = QB_gets - 1;		// track this event.
 	};
-    };
+    }
 /*
 
 Function:
@@ -515,7 +515,7 @@ QBLK_Init: NOVALUE (void)
 	struct MEM$HDR_STRUCT * Hptr;
 
     QBLK_Count = Qblk_count_base;
-    INCR J FROM 1 TO QBlk_count DO
+    for (J=1;J<=QBlk_count;J++)
 	{
 	LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr);
 	CH$FILL(%CHAR(0),MEM$HDR_SIZE*4,Hptr);
@@ -523,7 +523,7 @@ QBLK_Init: NOVALUE (void)
 	Hptr->MEM$ISPERM = TRUE;
 	INSQUE(Hptr,Free_QBlks->QTail);
 	};
-    };
+    }
 
 //SBTTL "TCB_Create: Create a Transmission Control Blk."
 /*
@@ -587,7 +587,7 @@ TCB$Create (void)
     NOINT;
 
     Indx = 0;
-    INCR J FROM 1 TO VTCB_Size DO
+    for (J=1;J<=VTCB_Size;J++)
 	if (VTCB_ptr[J] == 0)
 	    EXITLOOP Indx = J;
     if (Indx == 0)
@@ -619,7 +619,7 @@ TCB$Create (void)
     OKINT;	// Carry on...
 
     TCB
-    };
+    }
 
 //SBTTL "TCB-Delete:  Delete one TCB"
 /*
@@ -676,10 +676,10 @@ TCB$Delete(TCB_Ptr) : NOVALUE (void)
 	TCB_Count = TCB_Count-1; // Account for this TCB going away.
 	if (Max_TCB <= Idx)
 	   X : {
-	   DECR J FROM Idx TO 1 DO
+	   for (J=Idx;J>=1;J--)
 		if (VTCB_ptr[J] != 0) LEAVE X WITH Max_TCB = J;
 	   // No valid TCB's left?  Do a sanity check.
-	   DECR J FROM VTCB_Size TO 1 DO
+	   for (J=VTCB_Size;J>=1;J--)
 		if (VTCB_ptr[J] != 0) LEAVE X WITH Max_TCB = J;
 	   Max_TCB = 1;
 	   };  // end of block X
@@ -712,7 +712,7 @@ TCB$Delete(TCB_Ptr) : NOVALUE (void)
 	}
     else
 	Warn_Error("Attempt to Delete unknown TCB,");
-    };
+    }
 
 
 
@@ -768,7 +768,7 @@ MM$UARG_GET=
 	};
     CH$FILL(%CHAR(0),Max_User_ArgBlk_Size*4,Ptr);
     RETURN(Ptr);
-    };
+    }
 
 /*
 
@@ -822,7 +822,7 @@ queptr = Free_Uargs->QHead;
 	OKINT;
 	UA_Gets = UA_gets - 1;
 	};
-    };
+    }
 
 /*
 
@@ -850,12 +850,12 @@ Uarg_Init: NOVALUE (void)
 	Ptr;
 
     Uarg_count = Uarg_count_base;
-    INCR J FROM 1 TO Uarg_count DO
+    for (J=1;J<=Uarg_count;J++)
 	{
 	LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),ptr);
 	INSQUE(Ptr,Free_Uargs->QTail);
 	};
-    };
+    }
 
 //SBTTL "Segment Handlers"
 /*
@@ -948,7 +948,7 @@ MM$SEG_GET(Size)
 	};
 
     RETURN(Ptr);
-    };
+    }
 
 /*
 
@@ -1022,7 +1022,7 @@ MM$SEG_FREE(Size,Ptr) : NOVALUE (void)
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
 	};
-    };
+    }
 
 
 /*
@@ -1053,7 +1053,7 @@ SEG_INIT : NOVALUE (void)
 // Allocate minimum (default) size segments.
 
     MIN_seg_count = MIN_seg_count_base;
-    INCR J FROM 0 TO MIN_Seg_count-1 DO
+    for (J=0;J<=MIN_Seg_count-1;J++)
 	{
 	LIB$GET_VM(MIN_PHYSICAL_BUFSIZE,ptr);
 	INSQUE(Ptr,Free_Minsize_Segs->QTail);
@@ -1062,12 +1062,12 @@ SEG_INIT : NOVALUE (void)
 // Allocate maximum size segments
 
     MAX_seg_count = MAX_seg_count_base;
-    DECR J FROM MAX_Seg_count TO 1 DO
+    for (J=MAX_Seg_count;J>=1;J--)
 	{
 	LIB$GET_VM(MAX_PHYSICAL_BUFSIZE,ptr);
 	INSQUE(Ptr,Free_Maxsize_Segs->QTail);
 	};
-    };
+    }
 
 //Sbttl "Memory Management Initialization."
 /*
@@ -1096,7 +1096,7 @@ MM$INIT : NOVALUE (void)
     QBLK_Init();
     Uarg_Init();
     Seg_Init();
-    };
+    }
 
 
 //SBTTL "Debugging routines to simulate INSQUE and REMQUE"
@@ -1124,7 +1124,7 @@ MM$INSQUE(QBLK,QHDR,QRTN,QID,QVAL)
     HPTR->MEM$CURQUEUES = HPTR->MEM$CURQUEUES || QID;
     HPTR->MEM$ALLQUEUES = HPTR->MEM$ALLQUEUES || QID;
     return INSQUE(QBLK,QHDR);
-    };
+    }
 
 MM$REMQUE(QHDR,QBLK,QRTN,QID,QVAL)
     {
@@ -1140,7 +1140,7 @@ MM$REMQUE(QHDR,QBLK,QRTN,QID,QVAL)
 	HPTR->MEM$CURQUEUES = HPTR->MEM$CURQUEUES && (NOT QID);
 	};
     return RVAL;
-    };
+    }
 //FI
 
 }
