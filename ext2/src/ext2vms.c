@@ -285,6 +285,12 @@ int ext2_wcb_create_all(struct _fcb * fcb, struct inode * inode)
   int l1=0,l2=0,l3=0;
   int l1p=0,l2p=0,l3p=0;
   long *b1,*b2,*b3;
+ 
+  retsts=0;
+  for(i=0;i<15;i++)
+    retsts|=inode->u.ext2_i.i_data[i];
+  if (retsts==0)
+    return SS$_NORMAL;
 
   b1=kmalloc(EXT2_BLOCK_SIZE(s),GFP_KERNEL);
   b2=kmalloc(EXT2_BLOCK_SIZE(s),GFP_KERNEL);
