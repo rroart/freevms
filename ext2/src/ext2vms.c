@@ -557,7 +557,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     head = fcb->fcb$l_primfcb;
     sts=iosb.iosb$w_status;
 
-    name=ext2_vms_to_unix(filedesc);
+    name=ext2_vms_to_unix(filedsc);
 
     if (path_init(name,LOOKUP_POSITIVE|LOOKUP_FOLLOW|LOOKUP_DIRECTORY,&nd))
       error = path_walk(name, &nd);
