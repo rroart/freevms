@@ -526,10 +526,10 @@ static Command intcmd[] = {
 	1, "help",                 int_help,                 NULL, "", 
 	0, "if",                   int_if,                   NULL, "<integervalue> <statement ...>", 
 	0, "@",               int_script,               NULL, "<script_name> [<args> ...]", 
+#if 0
 	0, "set default",          int_set_default,          NULL, "<directory>", 
 	0, "oset prompt",           int_set_prompt,           NULL, "<prompt>", 
 	0, "oset process",          int_set_process,          NULL, "<name>", 
-#if 0
 	0, "set working_set",      int_set_working_set,      NULL, "", 
 #endif
 	0, "oshow time",            int_show_datetime,        NULL, "", 
@@ -539,8 +539,8 @@ static Command intcmd[] = {
 	0, "show working_set",     int_show_working_set,     NULL, "", 
 	0, "show logical",    int_show_logical_name,    NULL, "<logical_name> [-security]", 
 	0, "show system",          int_show_system,          NULL, "[-devices] [-iochans] [-job] [-processes] [-security] [-threads]", 
-#endif
 	0, "stop",                 int_stop,                 NULL, "[/id <pid>] <name>", 
+#endif
 	// the following are really not internal
 	// waiting for dcltables.exe
 	0, "_omount", 1, 0, "/vms$common/sysexe/mount",
@@ -594,6 +594,7 @@ struct cli_struct cliroutines[]={
 {  "show_system",          show_system,           },
 {  "show_symbol",          show_symbol, },
 {  "delete_symbol",          delete_symbol, },
+{  "stop", int_stop, },
 { 0, 0 , },
 };
 
@@ -4384,14 +4385,29 @@ static unsigned long int_set_prompt (unsigned long h_input, unsigned long h_outp
 {
   unsigned long sts;
 
-  /* We should have exactly one argument - the prompt name */
+  $DESCRIPTOR(p, "p1");
+
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+  memset (c, 0, 80);
+
+  int retlen;
+
+  sts = cli$present(&p);
+  if (sts&1) {
+    sts = cli$get_value(&p, &o, &retlen);
+    memcpy(prompt,c,strlen(c));
+    prompt[strlen(c)]=0;
+  } else {
+    memcpy(prompt, "$ ", 2);
+    prompt[2]=0;
+  }
+  return SS$_NORMAL;
 
   if (argc == 0) {
-    bcopy("$ ",prompt,2);
-    prompt[2]=0;
   } else {
-    bcopy(argv[0],prompt,strlen(argv[0]));
-    prompt[strlen(argv[0])]=0;
   }
 
   return SS$_NORMAL;
@@ -4445,29 +4461,27 @@ static unsigned long int_set_process (unsigned long h_input, unsigned long h_out
 static unsigned long int_set_default (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  char dirnambuff[OZ_DEVUNIT_NAMESIZE+OZ_FS_MAXFNLEN];
-  const char *xargv[3];
-  int i;
   unsigned long sts;
-  unsigned long h_dir;
-#if 0
-  OZ_IO_fs_getinfo1 fs_getinfo1;
-  OZ_IO_fs_getinfo2 fs_getinfo2;
-  OZ_IO_fs_open fs_open;
-#endif
 
-  /* We should have exactly one argument - the directory name */
+  $DESCRIPTOR(p, "p1");
 
-  if (argc != 1) {
-    fprintf (h_error, "oz_cli: missing directory parameter\n");
-    return (SS$_IVPARAM);
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+  memset (c, 0, 80);
+
+  int retlen;
+
+  sts = cli$present(&p);
+  if (sts&1) {
+    sts = cli$get_value(&p, &o, &retlen);
+    struct dsc$descriptor newdir;
+    newdir.dsc$w_length=strlen(c);
+    newdir.dsc$a_pointer=c;
+    sys$setddir(&newdir,0,0);
   }
 
-  struct dsc$descriptor newdir;
-  newdir.dsc$w_length=strlen(argv[0]);
-  newdir.dsc$a_pointer=argv[0];
-  sys$setddir(&newdir,0,0);
-  //chdir(argv[0]);
   return SS$_NORMAL;
 }
 
@@ -4633,21 +4647,34 @@ static unsigned long int_show_system (unsigned long h_input, unsigned long h_out
 static unsigned long int_stop (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  int i, usedup;
   unsigned long sts;
-  unsigned long h_thread;
-  unsigned long thread_id;
 
-  thread_id = 0;
+  $DESCRIPTOR(p, "p1");
+  $DESCRIPTOR(d, "identification");
 
-  if (strcmp (argv[0], "/id") == 0) {
-    unsigned int pid=strtol(argv[1],0,16);
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+  memset (c, 0, 80);
+
+  int retlen;
+
+  sts = cli$present(&d);
+
+  if (sts&1) {
+    sts = cli$get_value(&d, &o, &retlen);
+    unsigned int pid=strtol(c,0,16);
     sys$forcex(&pid,0,42);
   } else {
-    struct dsc$descriptor nam;
-    nam.dsc$w_length=strlen(argv[0]);
-    nam.dsc$a_pointer=argv[0];
-    sys$forcex(0,&nam,84);
+    sts = cli$present(&p);
+    if (sts&1) {
+      sts = cli$get_value(&p, &o, &retlen);
+      struct dsc$descriptor nam;
+      nam.dsc$w_length=strlen(c);
+      nam.dsc$a_pointer=c;
+      sys$forcex(0,&nam,84);
+    }
   }
   return SS$_NORMAL;
 }
