@@ -120,14 +120,28 @@ struct _cdrp {
       unsigned int cdrp$l_rboff;
       unsigned int cdrp$l_xct_len;
     };
-   struct  {
+    struct  {
       unsigned long something;
       char cdrp$t_lbufhndl [12];
       unsigned int cdrp$l_ubarsrce;
       unsigned int cdrp$l_dutuflags;
       unsigned short int cdrp$w_dutucntr;
       unsigned short int cdrp$w_endmsgsiz;
-   };
+    };
+    struct {
+      unsigned int cdrp$l_val1;
+      unsigned int cdrp$l_val2;
+      unsigned int cdrp$l_val3;
+      unsigned int cdrp$l_val4;
+      unsigned int cdrp$l_val5;
+      unsigned int cdrp$l_val6;
+      unsigned int cdrp$l_val7;
+      unsigned int cdrp$l_val8;
+      unsigned int cdrp$l_val9;
+      unsigned int cdrp$l_val10;
+      unsigned int cdrp$l_val11;
+      unsigned int cdrp$l_val12;
+    };
   }; 
 };
  
