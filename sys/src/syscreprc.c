@@ -18,14 +18,17 @@
 #include<rdedef.h>
 #include<secdef.h>
 #include<ssdef.h>
+#include<starlet.h>
 
-asmlinkage void exe$creprc_wrap(void) {
-
+asmlinkage int exe$creprc_wrap(struct struct_args *s) {
+  return exe$creprc(s->s1,s->s2,s->s3,s->s4,s->s5,s->s6,s->s7,s->s8,s->s9,s->s10,s->s11,s->s12);
 }
 
-asmlinkage void exe$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr, unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, unsigned short int mbxunt, unsigned int stsflg,...) {
+asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr, unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, unsigned short int mbxunt, unsigned int stsflg,...) {
+  unsigned long stack_here;
   struct _pcb * p, * cur;
   int retval;
+  unsigned long clone_flags=CLONE_VFORK;
   //check pidadr
   if (stsflg&PRC$M_DETACH) {
 
@@ -33,7 +36,7 @@ asmlinkage void exe$creprc(unsigned int *pidadr, void *image, void *input, void 
   if (uic) {
 
   }
-  setipl(IPL$_ASTDEL);
+  //setipl(IPL$_ASTDEL);//postpone this?
   cur=smp$gl_cpu_data[0]->cpu$l_curpcb;
   p = alloc_task_struct();
   //bzero(p,sizeof(struct _pcb));//not wise?
@@ -101,12 +104,14 @@ asmlinkage void exe$creprc(unsigned int *pidadr, void *image, void *input, void 
 	 * friends to set the per-user process limit to something lower
 	 * than the amount of processes root is running. -- Rik
 	 */
+#if 0
 	if (atomic_read(&p->user->processes) >= p->rlim[RLIMIT_NPROC].rlim_cur
 	              && !capable(CAP_SYS_ADMIN) && !capable(CAP_SYS_RESOURCE))
 		goto bad_fork_free;
 
 	atomic_inc(&p->user->__count);
 	atomic_inc(&p->user->processes);
+#endif
 
 	/*
 	 * Counter increases are protected by
@@ -151,8 +156,24 @@ asmlinkage void exe$creprc(unsigned int *pidadr, void *image, void *input, void 
 
 	INIT_LIST_HEAD(&p->local_pages);
 
+	p->files = current->files;
+	p->fs = current->fs;
+	p->sig = current->sig;
+
+	/* copy all the process information */
+	if (copy_files(clone_flags, p))
+		goto bad_fork_cleanup;
+	if (copy_fs(clone_flags, p))
+		goto bad_fork_cleanup_files;
+	if (copy_sighand(clone_flags, p))
+		goto bad_fork_cleanup_fs;
+
+ bad_fork_cleanup:
+ bad_fork_cleanup_files:
+ bad_fork_cleanup_fs:
+
 	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
-	bzero(p->pcb$l_phd,sizeof(struct _phd));
+	init_phd(p->pcb$l_phd);
 
 	// now a hole
 
@@ -184,7 +205,9 @@ asmlinkage void exe$creprc(unsigned int *pidadr, void *image, void *input, void 
 	write_lock_irq(&tasklist_lock);
 
 	/* CLONE_PARENT and CLONE_THREAD re-use the old parent */
+#if 0
 	SET_LINKS(p);
+#endif
 	hash_pid(p);
 	nr_threads++;
 	write_unlock_irq(&tasklist_lock);
@@ -198,6 +221,17 @@ asmlinkage void exe$creprc(unsigned int *pidadr, void *image, void *input, void 
 	// now something from exec
 
 	// wait, better do execve itself
+
+	{
+#ifdef __i386__
+	  unsigned long stack_start=stack_here;
+	  struct pt_regs regs;
+	  memset(&regs,0,sizeof(regs));
+	  retval = copy_thread(0, clone_flags, stack_start, 0, p, &regs);
+#else
+	  retval = copy_thread(0, clone_flags, 0, 0, p, 0);
+#endif
+	}
 
 	return sys_execve(((struct dsc$descriptor *)image)->dsc$a_pointer,0,0);
 
