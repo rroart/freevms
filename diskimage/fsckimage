@@ -1,0 +1,10 @@
+#!/bin/sh
+
+losetup -o 512 /dev/loop0 diskimage/c.img
+e2fsck -y $1 /dev/loop0
+losetup -d /dev/loop0
+
+losetup -o 512 /dev/loop0 diskimage/c2.img
+e2fsck -y $1 /dev/loop0
+losetup -d /dev/loop0
+
