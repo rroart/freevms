@@ -20,13 +20,17 @@
 int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
 #ifdef CONFIG_VMS
   // acquire mmg spin
+  struct page * page;
+  struct _phd * phd;
+  struct _wsl * wsl, *wsle;
+  unsigned long pfn;
   struct _mypte *pte = findpte(p,va);
   if (pte->pte$v_valid==0)
     return SS$_NORMAL;
-  unsigned long pfn=__pa(pte->pte$v_pfn<<PAGE_SHIFT)>>PAGE_SHIFT;
-  struct page * page=&mem_map[pfn];
-  struct _phd * phd=p->pcb$l_phd;
-  struct _wsl * wsle, *wsl=phd->phd$l_wslist;
+  pfn=__pa(pte->pte$v_pfn<<PAGE_SHIFT)>>PAGE_SHIFT;
+  page=&mem_map[pfn];
+  phd=p->pcb$l_phd;
+  wsl=phd->phd$l_wslist;
 
   wsle=&wsl[page->pfn$l_wslx_qw];
 
