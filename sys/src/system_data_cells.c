@@ -2124,3 +2124,12 @@ void __init vms_init3(void) {
   
   csid = xtime.tv_sec;
 }
+
+unsigned long long inline unix_to_vms_time(unsigned long l) {
+  unsigned long long retval=FUDGEFACTOR*864;
+  retval*=100;
+  retval+=l;
+  retval*=10000000;
+  return retval;
+}
+
