@@ -1,70 +1,79 @@
-EXE =
-# EXE = .exe
-
-LIB = ../../starlet/src/starlet.a
-LIBUM = ../../starlet/src/starletum.a
-
 FLAGS = -static
 
-all: directory${EXE} directoryum${EXE}
+all: i386/directory${EXE} i386/directory${NOEXE} um/directory${EXE} um/directory${NOEXE}
 
 clean:
-	rm *.o um/* i386/* directory
+	rm *.o um/* i386/*
 
 install: all
-	[ ! -d ../../rootum/vms$$common.sysexe ] && mkdir -p ../../rootum/vms"$$"common/sysexe
-	[ ! -d ../../rooti386/vms$$common.sysexe ] && mkdir -p ../../rooti386/vms"$$"common/sysexe
-	cp -p um/* ../../rootum/vms"$$"common/sysexe
-	tar -C i386 -clf - .| tar -C ../../rooti386/vms"$$"common/sysexe -xpf -
+	install -d ../../rootum/vms$$common/sysexe
+	install -d ../../rooti386/vms$$common/sysexe
+	install i386/* ../../rooti386/vms"$$"common/sysexe
+	install um/* ../../rootum/vms"$$"common/sysexe
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} copy${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} import${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} export${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} delete${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} difference${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} extend${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} help${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} show${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} search${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} type${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); ln -f directory${NOEXE} mount${NOEXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} copy${EXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} import${EXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} export${EXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} delete${EXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} difference${EXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} extend${EXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} help${EXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} show${EXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} search${EXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} type${EXE}
+	cd $(ROOTI386_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} mount${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} copy${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} import${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} export${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} delete${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} difference${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} extend${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} help${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} show${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} search${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} type${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); ln -f directory${NOEXE} mount${NOEXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} copy${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} import${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} export${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} delete${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} difference${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} extend${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} help${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} show${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} search${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} type${EXE}
+	cd $(ROOTUM_COMMON_SYSEXE); [ -f directory${EXE} ] && ln -f directory${EXE} mount${EXE}
 
-directory.o: directory.c
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ directory.c -o directory.o
+OBJS = directory.o
 
-directory${EXE}: directory.o $(LIB)
-	gcc -s -static directory.o ../../starlet/src/starlet.a -o directory${EXE}
-	../../linker/src/linker $(LINKPRE) directory.o ../../starlet/src/starlet.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o directory.exe
-	mkdir i386 || echo i386 exists
-	cp -p directory i386/directory
-	[ -f directory.exe ] && cp -p directory.exe i386/directory.exe
-	cd i386
-	cd i386; ln -f directory copy
-	cd i386; ln -f directory import
-	cd i386; ln -f directory export
-	cd i386; ln -f directory delete
-	cd i386; ln -f directory difference
-	cd i386; ln -f directory extend
-	cd i386; ln -f directory help
-	cd i386; ln -f directory show
-	cd i386; ln -f directory search
-	cd i386; ln -f directory type
-	cd i386; ln -f directory mount
-	cd i386; [ -f directory.exe ] && ln -f directory.exe copy.exe
-	cd i386; [ -f directory.exe ] && ln -f directory.exe import.exe
-	cd i386; [ -f directory.exe ] && ln -f directory.exe export.exe
-	cd i386; [ -f directory.exe ] && ln -f directory.exe delete.exe
-	cd i386; [ -f directory.exe ] && ln -f directory.exe difference.exe
-	cd i386; [ -f directory.exe ] && ln -f directory.exe extend.exe
-	cd i386; [ -f directory.exe ] && ln -f directory.exe help.exe
-	cd i386; [ -f directory.exe ] && ln -f directory.exe show.exe
-	cd i386; [ -f directory.exe ] && ln -f directory.exe search.exe
-	cd i386; [ -f directory.exe ] && ln -f directory.exe type.exe
-	cd i386; [ -f directory.exe ] && ln -f directory.exe mount.exe
-	cd ..
+%.o: %.c
+	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+
+i386/directory${NOEXE}: $(VMSLIBS) $(OBJS)
+	install -d i386
+	gcc -g -static $(OBJS) $(VMSLIBS) -o i386/directory${NOEXE}
+
+i386/directory${EXE}: $(VMSLIBS) $(OBJS)
+	install -d i386
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/directory${EXE}
 
 UMDEF=-Dcompile_um -I.
 
-directoryum${EXE}: directory.c $(LIBUM)
-	gcc $(FLAGS) -g $(UMDEF) -I../../starlet/src -I../../librtl/src/ -I../../lib/src directory.c ../../starlet/src/starletum.a -o directoryum${EXE}
-	mkdir um || echo um exists
-	cp -p directoryum um/copy
-	cp -p directoryum um/import
-	cp -p directoryum um/export
-	cp -p directoryum um/delete
-	cp -p directoryum um/difference
-	cp -p directoryum um/directory
-	cp -p directoryum um/extend
-	cp -p directoryum um/help
-	cp -p directoryum um/show
-	cp -p directoryum um/search
-	cp -p directoryum um/type
-	cp -p directoryum um/mount
+um/directory${NOEXE}: $(VMSLIBSUM) $(OBJS)
+	install -d um
+	gcc -g -static $(OBJS) $(VMSLIBSUM) -o um/directory${NOEXE}
+
+um/directory${EXE}: $(VMSLIBSUM) $(OBJS)
+	install -d um
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/directory${EXE}

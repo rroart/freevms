@@ -35,23 +35,18 @@ OBJS =	\
 
 CC = gcc -g -O2 -c
 
-EXE =
-
-LIB =
-LIBUM =
-
 EXTERNAL =
 
-all: $(OBJS) i386/edt${EXE} um/edt${EXE}
+all: $(OBJS) i386/edt${EXE} i386/edt${NOEXE} um/edt${EXE} um/edt${NOEXE}
 
 clean:
 	rm *.o um/* i386/*
 
 install: all
-	[ ! -d ../../rootum/vms$$common.sysexe ] && mkdir -p ../../rootum/vms"$$"common/sysexe
-	[ ! -d ../../rooti386/vms$$common.sysexe ] && mkdir -p ../../rooti386/vms"$$"common/sysexe
-	cp -p um/* ../../rootum/vms"$$"common/sysexe
-	cp -p i386/* ../../rooti386/vms"$$"common/sysexe
+	install -d ../../rootum/vms"$$"common/sysexe
+	install -d ../../rooti386/vms"$$"common/sysexe
+	install um/* ../../rootum/vms"$$"common/sysexe
+	install i386/* ../../rooti386/vms"$$"common/sysexe
 
 chrutils.o: chrutils.c
 	$(CC) chrutils.c
@@ -152,15 +147,20 @@ string.o: string.c
 write_file.o: write_file.c
 	$(CC) write_file.c
 
-i386/edt${EXE}: $(LIB) $(EXTERNAL)
-	mkdir i386 || echo i386 exists
-	gcc -static $(OBJS) $(EXTERNAL) -o i386/edt${EXE}
+i386/edt${NOEXE}: $(LIB) $(EXTERNAL)
+	install -d i386
+	gcc -g -static $(OBJS) $(EXTERNAL) -o i386/edt${NOEXE}
 	ld -Bshareable $(OBJS) $(LIBC) $(LIBGCC) -o i386/edt.exe2
-	../../linker/src/linker $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/edt.exe
 
-UMDEF=-Dcompile_um -I.
+i386/edt${EXE}: $(LIB) $(EXTERNAL)
+	install -d i386
+	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/edt${EXE}
 
-um/edt${EXE}: $(LIBUM) $(EXTERNAL)
-	mkdir um || echo um exists
-	gcc -s -static $(OBJS) $(EXTERNAL) -o um/edt${EXE}
+um/edt${NOEXE}: $(LIBUM) $(EXTERNAL)
+	install -d um
+	gcc -g -static $(OBJS) $(EXTERNAL) -o um/edt${NOEXE}
+
+um/edt${EXE}: $(LIB) $(EXTERNAL)
+	install -d um
+	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/edt${EXE}
 

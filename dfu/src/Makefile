@@ -1,9 +1,3 @@
-EXE = .exe
-NOEXE = 
-
-LIB = ../../starlet/src/starlet.a ../../librtl/src/starlet.a
-LIBUM = ../../starlet/src/starletum.a ../../librtl/src/starlet.a
-
 FLAGS = -static
 
 all: i386/dfu${EXE} i386/dfu${NOEXE} um/dfu${EXE} um/dfu${NOEXE}
@@ -22,18 +16,18 @@ OBJS = dfu.o dfu_bitmap.o dfu_filedir.o dfu_ifscan.o
 %.o: %.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
-i386/dfu${NOEXE}: $(LIB) $(OBJS)
+i386/dfu${NOEXE}: $(VMSLIBS) $(OBJS)
 	install -d i386
-	gcc -g -static $(OBJS) $(LIB) -o i386/dfu${NOEXE}
+	gcc -g -static $(OBJS) $(VMSLIBS) -o i386/dfu${NOEXE}
 
-i386/dfu${EXE}: $(LIB) $(OBJS) 
+i386/dfu${EXE}: $(VMSLIBS) $(OBJS) 
 	install -d i386
-	../../linker/src/linker $(LINKPRE) $(OBJS) $(LIB) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dfu${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dfu${EXE}
 
-UMDEF=-Dcompile_um -I.
-
-um/dfu${NOEXE}: dfu.c $(LIBUM) $(OBJS)
+um/dfu${NOEXE}: dfu.c $(VMSLIBSUM) $(OBJS)
 	install -d um
-	gcc $(FLAGS) -g $(UMDEF) $(OBJS) $(LIBUM) -o um/dfu${NOEXE}
+	gcc $(FLAGS) -g $(OBJS) $(VMSLIBSUM) -o um/dfu${NOEXE}
 
 um/dfu${EXE}:
+	install -d um
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/dfu${EXE}

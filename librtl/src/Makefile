@@ -54,7 +54,7 @@ CVTOBJ = cvt_convert_float.o
 
 QUELIB = libinsqhi.o
 
-STRLIB = starlet.a
+STRLIB = librtl.a
 
 all : $(STRLIB) tests
 
@@ -66,14 +66,15 @@ clean :
 	- rm test_addx
 	- rm test_date
 
-tests: teststr test_str_element test_addx test_date
+tests: teststr test_str_element test_addx
+# not: test_date
 
 teststr : teststr.c $(STRLIB)
 test_str_element : test_str_element.c $(STRLIB)
 test_addx : test_addx.c $(STRLIB)
 test_date : test_date.c $(STRLIB)
 
-$(STRLIB) : $(STROBJ) $(LIBOBJ) $(SYSOBJ) $(CVTOBJ) $(QUELIB)
+$(STRLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 	ar -rv $(STRLIB) $?
 
 str.o : str.c ../../starlet/src/strdef.h

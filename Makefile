@@ -2,13 +2,27 @@ VMSSUBDIRS = starlet librtl cliutl backup dir init login dcl edt dfu
 VMSSUBDIRSINST = dir dcl login init edt dfu
 VMSSUBDIRS2 = examples
 
-export LIBGCC = `gcc -print-libgcc-file-name`
+export LIBGCC = $(shell gcc -print-libgcc-file-name)
 
 export LIBC = /usr/lib/libc.a
+
+export VMSLIBS = $(TOPDIR)/librtl/src/librtl.a $(TOPDIR)/starlet/src/starlet.a
+export VMSLIBSUM = $(TOPDIR)/librtl/src/librtl.a $(TOPDIR)/starlet/src/starletum.a 
+export LINKER = $(TOPDIR)/linker/src/linker
 
 export LINKPRE = -Bstatic
 #export LINKPRE = -Bstatic -s 
 export LINKPOST = /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/libc.a
+
+export EXE = .exe
+export NOEXE =
+
+export ROOTI386 = $(TOPDIR)/rooti386
+export ROOTUM = $(TOPDIR)/rootum
+export ROOTI386_COMMON = $(TOPDIR)/rooti386/vms"$$$$"common
+export ROOTUM_COMMON = $(TOPDIR)/rootum/vms"$$$$"common
+export ROOTI386_COMMON_SYSEXE = $(TOPDIR)/rooti386/vms"$$$$"common/sysexe
+export ROOTUM_COMMON_SYSEXE = $(TOPDIR)/rootum/vms"$$$$"common/sysexe
 
 vmsall:
 	for X in $(VMSSUBDIRS); do \

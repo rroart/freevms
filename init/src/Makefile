@@ -1,5 +1,7 @@
-
 all: init
+
+clean:
+	rm *.o init
 
 init: initialize.o utils.o utils2.o
 	gcc -o init initialize.o utils.o utils2.o
@@ -14,5 +16,5 @@ initialize.o: initialize.c
 	gcc -c initialize.c
 
 install: all
-	cp -p init ../../rootum/vms"$$"common/sysexe
-	cp -p init ../../rooti386/vms"$$"common/sysexe
+	install init ../../rootum/vms"$$"common/sysexe
+	install init ../../rooti386/vms"$$"common/sysexe
