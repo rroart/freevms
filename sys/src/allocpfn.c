@@ -12,10 +12,12 @@ signed long mmg$allocpfn(void) {
   struct _mypfn * m, * h;
   if (!pfn$al_head)
     return -1;
+  if (pfn$al_head==pfn$al_tail) panic("eech2\n");
   m=p=pfn$al_head;
   h=pfn$al_head=((struct _pfn *) pfn$al_head)->pfn$l_flink;
   h->pfn$l_blink=0; // gcc bug?
   //  p->pfn$l_refcnt=0;
+  if (h->pfn$l_flink==0) panic("eech\n");
   if (p->pfn$l_refcnt)
     panic("refcnt\n");
   sch$gl_freecnt--;

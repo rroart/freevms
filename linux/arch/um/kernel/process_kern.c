@@ -46,7 +46,8 @@ static inline struct task_struct * get_cur_task(void)
         return cur_task;
 }
  
-#define cur_task get_cur_task()
+//#define cur_task get_cur_task()
+#define cur_task ({ int dummy; (struct task_struct *) CURRENT_TASK(dummy); })
 
 struct cpu_task cpu_tasks[NR_CPUS] = { [0 ... NR_CPUS - 1] = { -1, NULL } };
 

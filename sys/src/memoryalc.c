@@ -16,6 +16,10 @@ struct mymap {
   unsigned long size;
 };
 
+zone_t thezone = {
+  lock: SPIN_LOCK_UNLOCKED
+};
+
 int exe$alophycntg(unsigned long * va, unsigned long num) {
   signed long firstpfn;
 
@@ -52,6 +56,8 @@ static void __free_pages_ok (struct page *page, unsigned int order)
 	struct page *base;
 	zone_t *zone;
 	unsigned long i,tmp;
+
+	zone = &thezone;
 
 	/* Yes, think what happens when other parts of the kernel take 
 	 * a reference to a page in order to pin it for io. -ben
@@ -126,7 +132,7 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
 	signed long pfn;
 	unsigned long i;
 
-	zone = zonelist->zones;
+	zone = &thezone;
 
 	spin_lock_irqsave(&zone->lock, flags);
 	if (order)

@@ -142,7 +142,8 @@ static inline struct task_struct * get_cur_task(void)
         return cur_task;
 }
  
-#define cur_task get_cur_task()
+//#define cur_task get_cur_task()
+#define cur_task ({ int dummy; (struct task_struct *) CURRENT_TASK(dummy); })
 
 void trap_init(void)
 {
