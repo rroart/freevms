@@ -18,6 +18,8 @@ struct _myhead {
   int hd$l_seq;
 };
 
+void exe$reclaim_pool_aggressive(void * pool);
+
 // this has its parallell in exe$alonpagvar
 int exe$allocate_pool(int requestsize, int pooltype, int alignment, unsigned int * allocatedsize, void ** returnblock) {
   int reqsize=requestsize;
@@ -60,7 +62,7 @@ int exe$allocate_pool(int requestsize, int pooltype, int alignment, unsigned int
   void * array = &lsthd->lsthds$q_listheads;
 #endif
 
-  sts = exe$reclaim_pool_aggressive(exe$gs_bap_npool);
+  exe$reclaim_pool_aggressive(exe$gs_bap_npool);
   sts=exe$allocate(reqsize , &exe$gq_bap_variable, 0 , alosize_p, pool_p);
 
   if (sts==SS$_NORMAL)

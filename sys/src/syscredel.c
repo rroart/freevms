@@ -112,7 +112,7 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
 	// there also is a couple of more steps and checks
 
       skipthis:
-
+	{}
       } else { // zero page demand?
 	// do not do anything?
       }      
@@ -153,7 +153,7 @@ asmlinkage int exe$deltva(struct _va_range *inadr, struct _va_range *retadr, uns
   struct _pcb * p=ctl$gl_pcb;
   struct _rde * rde;
   unsigned long numpages=(last-first)/PAGE_SIZE;
-  int acmode=0;
+  acmode=0;
   mmg$credel(acmode, first, last, mmg$delpag, inadr, retadr, acmode, p, numpages);
 }
 

@@ -442,6 +442,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	      //printk("put transition page back in %x %x %x\n",loc,pte,address);
 	      return;
 	    notyet:
+	      {}
 	    } else { // zero page demand?
 	      {
 		struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_HIGHER, IPL$_ASTDEL);

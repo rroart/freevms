@@ -58,6 +58,9 @@ void * exttwo_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long 
 void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef * atrp);
 void make_fcb(struct inode * inode);
 void exttwo$dispatcher(void);
+unsigned exttwo_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);
+void * exttwo_search_fcb(struct _vcb * vcb,struct inode * inode);
+void exttwo_write_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef * atrp);
 
 struct __exttwo {
   // unsigned long long xqp_queue;

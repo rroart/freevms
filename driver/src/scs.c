@@ -88,6 +88,8 @@ void * getdx(void * buf);
 void * getcc(void * buf);
 void * gettr(void * buf);
 void * getppdscs(void * buf);
+void * skb_getdata (void * buf);
+
 void scs_msg_ctl_fill(char * buf, struct _cdt * cdt, unsigned char msgflg);
 struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri);
 static inline void scs_rt_finish_output2(char *buf, int len, char *dst);
@@ -1211,6 +1213,7 @@ void scs_receive ( int i)
 	  break;
 
 	default :
+	  {}
 #if 0
 	  DRV$OPR_FAO("SCS: VMS Error, cmd_status=!XW, error_summary=!XB",
 		      Rbuf->scs_rcv$cmd_status,Rbuf->scs_rcv$error_summary);

@@ -157,6 +157,7 @@ Eend:
 		dir->i_ino, (pageno<<PAGE_CACHE_SHIFT)+offs,
 		(unsigned long) le32_to_cpu(p->inode));
 fail:
+	{}
 #if 0
 	SetPageChecked(page);
 	SetPageError(page);
