@@ -36,6 +36,9 @@
 #include <phddef.h>
 #include <rdedef.h>
 
+extern struct address_space_operations ext2_aops;
+//extern struct address_space_operations def_blk_aops;
+
 /*
  * Shared mappings implemented 30.11.1994. It's not fully working yet,
  * though.
@@ -562,7 +565,7 @@ EXPORT_SYMBOL(fail_writepage);
 int filemap_fdatasync(struct address_space * mapping)
 {
 	int ret = 0;
-	int (*writepage)(struct page *) = mapping->a_ops->writepage;
+	int (*writepage)(struct page *) = ext2_aops.writepage;
 
 	spin_lock(&pagecache_lock);
 
@@ -723,7 +726,7 @@ int add_to_page_cache_unique(struct page * page,
 		return -ENOMEM;
 
 	if (!add_to_page_cache_unique(page, mapping, offset, hash)) {
-		int error = mapping->a_ops->readpage(file, page);
+		int error = ext2_aops.readpage(file, page);
 		page_cache_release(page);
 		return error;
 	}
@@ -1410,7 +1413,7 @@ page_not_up_to_date:
 
 readpage:
 		/* ... and start the actual read. The read will unlock the page. */
-		error = mapping->a_ops->readpage(filp, page);
+		error = ext2_aops.readpage(filp, page);
 
 		if (!error) {
 			if (Page_Uptodate(page))
@@ -1687,8 +1690,8 @@ asmlinkage ssize_t sys_sendfile(int out_fd, int in_fd, off_t *offset, size_t cou
 	retval = -EINVAL;
 	in_inode = in_file->f_dentry->d_inode;
 	if (!in_inode)
-		goto fput_in;
-	if (!in_inode->i_mapping->a_ops->readpage)
+		goto fput_in;	
+	if (!ext2_aops.readpage)
 		goto fput_in;
 	retval = locks_verify_area(FLOCK_VERIFY_READ, in_inode, in_file, in_file->f_pos, count);
 	if (retval)
@@ -1749,8 +1752,7 @@ static ssize_t do_readahead(struct file *file, unsigned long index, unsigned lon
 {
 	struct address_space *mapping = file->f_dentry->d_inode->i_mapping;
 	unsigned long max;
-
-	if (!mapping || !mapping->a_ops || !mapping->a_ops->readpage)
+	if (!mapping || !1 || !ext2_aops.readpage)
 		return -EINVAL;
 
 	/* Limit it to the size of the file.. */
@@ -1968,7 +1970,7 @@ page_not_uptodate:
 		goto success;
 	}
 
-	if (!mapping->a_ops->readpage(file, page)) {
+	if (!ext2_aops.readpage(file, page)) {
 		wait_on_page(page);
 		if (Page_Uptodate(page))
 			goto success;
@@ -1995,7 +1997,7 @@ page_not_uptodate:
 		goto success;
 	}
 	ClearPageError(page);
-	if (!mapping->a_ops->readpage(file, page)) {
+	if (!ext2_aops.readpage(file, page)) {
 		wait_on_page(page);
 		if (Page_Uptodate(page))
 			goto success;
@@ -2134,10 +2136,10 @@ int generic_file_mmap(struct file * file, struct vm_area_struct * vma)
 	struct inode *inode = mapping->host;
 
 	if ((((struct _rde *)vma)->rde$l_flags & VM_SHARED) && (((struct _rde *)vma)->rde$l_flags & VM_MAYWRITE)) {
-		if (!mapping->a_ops->writepage)
+		if (!ext2_aops.writepage)
 			return -EINVAL;
 	}
-	if (!mapping->a_ops->readpage)
+	if (!ext2_aops.readpage)
 		return -ENOEXEC;
 	UPDATE_ATIME(inode);
 	vma->vm_ops = &generic_file_vm_ops;
@@ -3047,12 +3049,12 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
 		}
 
 		kaddr = kmap(page);
-		status = mapping->a_ops->prepare_write(file, page, offset, offset+bytes);
+		status = ext2_aops.prepare_write(file, page, offset, offset+bytes);
 		if (status)
 			goto sync_failure;
 		page_fault = __copy_from_user(kaddr+offset, buf, bytes);
 		flush_dcache_page(page);
-		status = mapping->a_ops->commit_write(file, page, offset, offset+bytes);
+		status = ext2_aops.commit_write(file, page, offset, offset+bytes);
 		if (page_fault)
 			goto fail_write;
 		if (!status)
