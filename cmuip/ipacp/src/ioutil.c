@@ -117,30 +117,35 @@ MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
 #include <cmuip/central/include/netcommon.h>
 #include "tcpmacros.h"
 #include "structure.h"
+
+#include <ssdef.h>
+#include <descrip.h>
+#include <fabdef.h>
+#include <rabdef.h>
+
 
 
-MACRO APPCHR(CHR,DPTR,DCNT,OCNT)
-    if ((DCNT=.DCNT-1) > 0)
-	{
-	OCNT = OCNT+1;
-	CH$WCHAR_A(CHR,DPTR);
-	} %;
+#define APPCHR(CHR,DPTR,DCNT,OCNT) \
+    if ((DCNT=DCNT-1) > 0) \
+	{ \
+	OCNT = OCNT+1; \
+	CH$WCHAR_A(CHR,DPTR); \
+	}
 
-MACRO
-    Init_DynDesc (D)
-	{
-	$BBLOCK [D, dsc$w_length]	= 0;
-	$BBLOCK [D, dsc$b_dtype]	= DSC$K_DTYPE_T;
-	$BBLOCK [D, dsc$b_class]	= DSC$K_CLASS_D;
-	$BBLOCK [D, dsc$a_pointer]	= 0;
-	}%;
+#define    Init_DynDesc (D) \
+	D = {\
+	dsc$w_length:	= 0,\
+	dsc$b_dtype:	= DSC$K_DTYPE_T,\
+	dsc$b_class:	= DSC$K_CLASS_D,\
+	dsc$a_pointer:	= 0\
+	};
 
 signed long
 	ACT_THRESHOLD	 = 512,
 	LOG_THRESHOLD	 = 512 ;
 
 
-void APP}_DEC(DPTR,DCNT,NUM,OUTCNT)
+void APPEND_DEC(DPTR,DCNT,NUM,OUTCNT)
 
 // Append a decimal value to a string
 //   DPTR - Address of pointer to destination string (updated on return)
@@ -153,37 +158,38 @@ void APP}_DEC(DPTR,DCNT,NUM,OUTCNT)
 	DIV,DIG,REM,VAL,FLAG;
     if (NUM == 0)
 	{
-	APPCHR(%C"0",DPTR,DCNT,OUTCNT);
+	APPCHR('0',DPTR,DCNT,OUTCNT);
 	return;
 	};
     DIV = 1000000000;			// Highest pwr of 10 in 32 bits
     VAL = NUM;
-    if (VAL LSS 0)
+    if (VAL < 0)
 	{
-	VAL = -1*.VAL;
-	APPCHR(%C"-",DPTR,DCNT,OUTCNT);
+	VAL = -1*VAL;
+	APPCHR('-',DPTR,DCNT,OUTCNT);
 	};
     FLAG = 0;
     while (DIV > 0)
 	{
-	DIG = VAL/.DIV;
-	REM = VAL MOD DIV;
+	DIG = VAL/DIV;
+	REM = VAL % DIV;
 	DIV = DIV/10;
 	if ((DIG != 0) || (FLAG != 0))
 	    {
 	    FLAG = FLAG+1;
-	    APPCHR(DIG+%C"0",DPTR,DCNT,OUTCNT);
+	    APPCHR(DIG+'0',DPTR,DCNT,OUTCNT);
 	    };
 	VAL = REM;
 	};
     }
 
-VOID ASCII_DEC_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN)
+void ASCII_DEC_BYTES(DESC,COUNT,SOURCE,LEN)
 
 // Write a string of decimal bytes to a string descriptor.
 
+     struct dsc$descriptor * DESC;
     {
-    signed long
+      signed long I,
 	CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
     OUTCNT = 0;
     CPTR = CH$PTR(SOURCE);
@@ -192,42 +198,41 @@ VOID ASCII_DEC_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN)
     for (I=(COUNT-1);I>=0;I--)
 	{
 	CURBYTE = CH$RCHAR_A(CPTR);
-	APP}_DEC(DPTR,DCNT,CURBYTE,OUTCNT);
+	APPEND_DEC(DPTR,DCNT,CURBYTE,OUTCNT);
 	if (I != 0)
-	    APPCHR(%C".",DPTR,DCNT,OUTCNT);
+	    APPCHR('.',DPTR,DCNT,OUTCNT);
 	};
     if (LEN != 0)
-	.LEN = MIN(OUTCNT,DESC->dsc$w_length);
+	LEN = MIN(OUTCNT,DESC->dsc$w_length);
     }
 
-APP}_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
+APPEND_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
 
 // Append a hexidecimal value to a string
 
     {
-    BUILTIN
-	ROT;
-    signed long
+      signed long I,
 	DIG,VAL;
-    VAL = ROT(NUM,(8-.SIZE)*4); // Position first digit
+    VAL = ROT(NUM,(8-SIZE)*4); // Position first digit
     for (I=(SIZE-1);I>=0;I--)
 	{
 	VAL = ROT(VAL,4);	// Rotate highest order 4 bits to lowest
-	DIG = VAL<0,4>;	// Get the digit
+	DIG = VAL&0xf;	// Get the digit
 	if (DIG <= 9)
-	    DIG = %C"0"+.DIG
+	  DIG = '0'+DIG;
 	else
-	    DIG = %C"A"+.DIG-10;
+	    DIG = 'A'+DIG-10;
 	APPCHR(DIG,DPTR,DCNT,OUTCNT);
 	}
     }
 
-void ASCII_HEX_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN)
+void ASCII_HEX_BYTES(DESC,COUNT,SOURCE,LEN)
 
 // Write a string of hexidecimal bytes to a string descriptor.
 
+     struct dsc$descriptor * DESC;
     {
-    signed long
+      signed long I,
 	CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
     CPTR = CH$PTR(SOURCE);
     DCNT = DESC->dsc$w_length;
@@ -236,16 +241,16 @@ void ASCII_HEX_BYTES(struct DESC$STR * DESC,COUNT,SOURCE,LEN)
     for (I=(COUNT-1);I>=0;I--)
 	{
 	CURBYTE = CH$RCHAR_A(CPTR);
-	APP}_HEX(DPTR,DCNT,CURBYTE,OUTCNT,2);
+	APPEND_HEX(DPTR,DCNT,CURBYTE,OUTCNT,2);
 	if (I != 0)
-	    APPCHR(%C"-",DPTR,DCNT,OUTCNT);
+	    APPCHR('-',DPTR,DCNT,OUTCNT);
 	};
     if (LEN != 0)
-	.LEN = MIN(OUTCNT,DESC->dsc$w_length);
+	LEN = MIN(OUTCNT,DESC->dsc$w_length);
     }
 
-FORWARD ROUTINE
-    GET_DEC_NUM;
+
+    GET_DEC_NUM();
 
 GET_IP_ADDR(CPTR,VAL)
 
@@ -256,16 +261,16 @@ GET_IP_ADDR(CPTR,VAL)
 // N.B. Assumes that Internet addresses are 4 bytes long.
 
     {
-    signed long
+      signed long I,
     	DPTR,NVAL,CHR;
     DPTR = CH$PTR(VAL);
     for (I=3;I>=0;I--)
 	{
-	if ((CHR = GET_DEC_NUM(CPTR,NVAL)) LSS 0)
+	if ((CHR = GET_DEC_NUM(CPTR,NVAL)) < 0)
 	    return -1;
 	CH$WCHAR_A(NVAL,DPTR);
 	if (I != 0)
-	    if (CH$RCHAR_A(CPTR) != %C".")
+	    if (CH$RCHAR_A(CPTR) != '.')
 		return -1;
 	};
     return CHR;
@@ -285,25 +290,25 @@ GET_DEC_NUM(CPTR,VAL)
     {
     signed long
     	CHR,RVAL,LPTR;
-    LPTR = ..CPTR;
-    DO
-	CHR = CH$RCHAR_A(LPTR)
-    WHILE (CHR == %C" ");
-    if ((CHR LSS %C"0') || (CHR > %C'9"))
+    LPTR = CPTR;
+    do {
+      CHR = CH$RCHAR_A(LPTR);
+    } while (CHR == ' ');
+    if ((CHR < '0') || (CHR > '9'))
 	return -1;
     RVAL = 0;
-    while ((CHR GEQ %C"0') && (CHR <= %C'9"))
+    while ((CHR >= '0') && (CHR <= '9'))
 	{
-	RVAL = RVAL*10+(CHR-%C"0");
-	.CPTR = LPTR;
+	RVAL = RVAL*10+(CHR-'0');
+	CPTR = LPTR;
 	CHR = CH$RCHAR_A(LPTR);
 	};
     VAL = RVAL;
     return CHR;
     }
 
-FORWARD ROUTINE
-    GET_HEX_NUM;
+
+    GET_HEX_NUM();
 
 GET_HEX_BYTES(NUMBYT,CPTR,DEST)
 
@@ -313,7 +318,7 @@ GET_HEX_BYTES(NUMBYT,CPTR,DEST)
 // Octets must be separated by the character "-"
 
     {
-    signed long
+      signed long I,
 	CVAL,
 	LPTR,
 	TCHR,
@@ -321,11 +326,11 @@ GET_HEX_BYTES(NUMBYT,CPTR,DEST)
     DPTR = CH$PTR(DEST);
     for (I=(NUMBYT-1);I>=0;I--)
 	{
-	if ((TCHR=GET_HEX_NUM(CPTR,CVAL)) LSS 0)
+	if ((TCHR=GET_HEX_NUM(CPTR,CVAL)) < 0)
 	    return -1;
 	CH$WCHAR_A(CVAL,DPTR);
 	if (I != 0)
-	    if (CH$RCHAR_A(CPTR) != %C"-")
+	    if (CH$RCHAR_A(CPTR) != '-')
 		return -1;
 	};
     return TCHR;
@@ -344,29 +349,29 @@ GET_HEX_NUM(INPTR,VAL)
     {
     signed long
     	CHR,RVAL,NCHR,CPTR;
-    CPTR = ..INPTR;
-    DO
-	CHR = CH$RCHAR_A(CPTR)
-    WHILE (CHR == %C" ");
+    CPTR = INPTR;
+    do {
+      CHR = CH$RCHAR_A(CPTR);
+    } while (CHR == ' ');
     RVAL = 0;
     NCHR = 0;
     while ((0 == 0))
 	{
 	signed long
 	    CVAL;
-	if ((CHR GEQ %C"0') && (CHR <= %C'9"))
-	    CVAL = CHR-%C"0"
+	if ((CHR >= '0') && (CHR <= '9'))
+	  CVAL = CHR-'0';
 	else
-	    if ((CHR GEQ %C"a') && (CHR <= %C'f"))
-		CVAL = CHR-%C"a"+10
+	    if ((CHR >= 'a') && (CHR <= 'f'))
+	      CVAL = CHR-'a'+10;
 	    else
-		if ((CHR GEQ %C"A') && (CHR <= %C'F"))
-		    CVAL = CHR-%C"A"+10
+		if ((CHR >= 'A') && (CHR <= 'F'))
+		  CVAL = CHR-'A'+10;
 		else
 		    break;
 	NCHR = NCHR+1;
-	RVAL = RVAL^4+.CVAL;
-	.INPTR = CPTR;
+	RVAL = RVAL^4+VAL;
+	INPTR = CPTR;
 	CHR = CH$RCHAR_A(CPTR);
 	};
     if (NCHR == 0)
@@ -378,24 +383,21 @@ GET_HEX_NUM(INPTR,VAL)
 
 //SBTTL "Log file handling routines"
 
-static signed long
-    LOGFAB : $FAB(FNM = "INET$LOG:",
-    		  FAC = PUT,
-		  SHR = GET,
-		  FOP = (SQO),
-		  RFM = STMLF,			// JC
-		  ORG = SEQ),
-    LOGRAB : $RAB(FAB = LOGFAB);
+struct _fabdef    LOGFAB_ = { fab$l_fna : "INET$LOG:",
+    		  fab$b_fac : FAB$M_PUT,
+		  fab$b_shr : FAB$M_GET,
+		  fab$l_fop : (FAB$M_SQO),
+		  fab$b_rfm : FAB$C_STMLF,			// JC
+		  fab$b_org : FAB$C_SEQ}, *LOGFAB=&LOGFAB_;
+struct _rabdef    LOGRAB_ = { rab$l_fab: &LOGFAB_}, *LOGRAB=&LOGRAB_;
 
 signed long
-    LOG_STATE  = 0;
+    log_state  = 0;
 
-MACRO
-    TRUE = (0 == 0) %,
-    FALSE = (0 == 1) %;
+#define    TRUE (0 == 0)
+#define    FALSE (0 == 1)
 
-FORWARD ROUTINE
- VOID    OPR_FAO;
+ void    OPR_FAO();
 
 LOG_OPEN (void)
 
@@ -406,14 +408,14 @@ LOG_OPEN (void)
     {
     signed long
 	RC;
-    RC = $CREATE(FAB = LOGFAB);
+    RC = exe$create( LOGFAB);
     if (! RC)
 	{
 	OPR$FAO("Log file $CREATE failed, RC = !XL, STV = !XL",
 	    RC, LOGFAB->FAB$L_STV);
 	return FALSE;
 	};
-    RC = $CONNECT(RAB = LOGRAB);
+    RC = exe$connect( LOGRAB);
     if (! RC)
 	{
 	OPR$FAO("Log file $CONNECT failed, RC = !XL, STV = !XL",
@@ -425,10 +427,10 @@ LOG_OPEN (void)
 
 LOG_CLOSE (void)
     {
-    if (LOG_STATE != 0)
+    if (log_state != 0)
 	{
-	$DISCONNECT(RAB = LOGRAB);
-	$CLOSE(FAB = LOGFAB);
+	exe$disconnect( LOGRAB);
+	exe$close( LOGFAB);
 	return TRUE;
 	}
     else
@@ -442,11 +444,11 @@ void LOG_CHANGE(STATE)
     {
     if (STATE != 0)
 	{			// He wants it open now
-	if (LOG_STATE == 0)
+	if (log_state == 0)
 	    {		// Not open - open it now
 	    if (LOG_OPEN())
 		{
-		LOG_STATE = STATE;
+		log_state = STATE;
 		LOG$FAO("!%T Logging enabled!/",0);
 		};
 	    };
@@ -454,11 +456,11 @@ void LOG_CHANGE(STATE)
 	}
     else
 	{			// He wants it closed
-	if (LOG_STATE != 0)
+	if (log_state != 0)
 	    {		// It's open - close it now
 	    LOG$FAO("!%T Logging disabled!/",0);
 	    LOG_CLOSE();
-	    LOG_STATE = STATE;	// Set new log state
+	    log_state = STATE;	// Set new log state
 	    };
 	};
     }
@@ -473,7 +475,7 @@ void LOG_OUTPUT(OUTDESC)
 	logcount	:	initial(0) ;
     MAP
 	struct DESC$STR * OUTDESC;
-    if (LOG_STATE != 0)
+    if (log_state != 0)
 	{
 	signed long
 	    RC;
@@ -482,12 +484,12 @@ void LOG_OUTPUT(OUTDESC)
 	LOGRAB->RAB$L_RBF = OUTDESC->dsc$a_pointer;
 	LOGCOUNT = LOGCOUNT + OUTDESC->dsc$w_length ;
 
-	RC = $PUT(RAB = LOGRAB);
+	RC = exe$put( LOGRAB);
 //!!HACK!!// Take out this Flush!
 	IF ( 	(LOGCOUNT > LOG_THRESHOLD)
-	   OR	(LOG_STATE && LOG$FLUSH) )	// JC
+	   OR	(log_state && LOG$FLUSH) )	// JC
 	THEN {
-	    RC = $FLUSH(RAB = LOGRAB);
+	    RC = exe$flush(RAB = LOGRAB);
 	    LOGCOUNT = 0 ;
 	    } ;
 	};
@@ -499,16 +501,14 @@ void LOG_FAO(CSTR)
 // Do output to log file using $FAO to format parameters.
 
     {
-    BUILTIN
-	AP;
     signed long
-	RC,
+      RC;
 	DESC$STR_ALLOC(OUTDESC,1000);
 
-    RC = $FAOL(CTRSTR = CSTR,
-	       OUTLEN = OUTDESC->dsc$w_length,
-	       OUTBUF = OUTDESC,
-	       PRMLST = AP+8);
+    RC = exe$faol(CSTR,
+	       OUTDESC->dsc$w_length,
+	       OUTDESC,
+		  /*AP+*/8);
     if (RC)
 	LOG_OUTPUT(OUTDESC)
     else
@@ -530,16 +530,15 @@ void LOG_Time_Stamp (void)
 
 //SBTTL "Activity file handling routines"
 
-static signed long
-    ACTFAB : $FAB(FNM = "INET$ACTIVITY:",
-    		  FAC = PUT,
-		  SHR = GET,
-		  FOP = (SQO),
-		  ORG = SEQ),
-    ACTRAB : $RAB(FAB = ACTFAB);
+struct _fabdef    ACTFAB_ = { fab$l_fna : "INET$ACTIVITY:",
+    		  fab$b_fac : FAB$M_PUT,
+		  fab$b_shr : FAB$M_GET,
+		  fab$l_fop : (FAB$M_SQO),
+			fab$b_org : FAB$C_SEQ}, *ACTFAB=&ACTFAB_;
+struct _rabdef *    ACTRAB_ = {rab$l_fab : &ACTFAB_), *ACTRAB = &ACTRAB_;
 
 signed long
-    ACT_STATE  = 0;
+    act_state  = 0;
 
 ACT_OPEN (void)
 
@@ -550,13 +549,13 @@ ACT_OPEN (void)
     {
     signed long
 	RC;
-    RC = $CREATE(FAB = ACTFAB);
+    RC = exe$create( ACTFAB);
     if (! RC)
 	{
 	OPR$FAO("Activity file $CREATE failed, RC = !XL",RC);
 	return FALSE;
 	};
-    RC = $CONNECT(RAB = ACTRAB);
+    RC = exe$connect(ACTRAB);
     if (! RC)
 	{
 	OPR$FAO("Activity file $CONNECT failed, RC = !XL",RC);
@@ -567,10 +566,10 @@ ACT_OPEN (void)
 
 ACT_CLOSE (void)
     {
-    if (ACT_STATE != 0)
+    if (act_state != 0)
 	{
-	$DISCONNECT(RAB = ACTRAB);
-	$CLOSE(FAB = ACTFAB);
+	exe$disconnect(ACTRAB);
+	exe$close(ACTFAB);
 	return TRUE;
 	}
     else
@@ -584,11 +583,11 @@ void ACT_CHANGE(STATE)
     {
     if (STATE != 0)
 	{			// e wants it open now
-	if (ACT_STATE == 0)
+	if (act_state == 0)
 	    {		// Not open - open it now
 	    if (ACT_OPEN())
 		{
-		ACT_STATE = STATE;
+		act_state = STATE;
 		ACT$FAO("!%T Logging enabled!/",0);
 		};
 	    };
@@ -596,11 +595,11 @@ void ACT_CHANGE(STATE)
 	}
     else
 	{			// e wants it closed
-	if (ACT_STATE != 0)
+	if (act_state != 0)
 	    {		// It's open - close it now
 	    ACT$FAO("!%T Logging disabled!/",0);
 	    ACT_CLOSE();
-	    ACT_STATE = STATE;	// Set new log state
+	    act_state = STATE;	// Set new log state
 	    };
 	};
     }
@@ -615,7 +614,7 @@ void ACT_OUTPUT(OUTDESC)
 	ACTCOUNT	 = 0 ;
     MAP
 	struct DESC$STR * OUTDESC;
-    if (ACT_STATE != 0)
+    if (act_state != 0)
 	{
 	signed long
 	    RC;
@@ -623,10 +622,10 @@ void ACT_OUTPUT(OUTDESC)
 	ACTRAB->RAB$L_RBF = OUTDESC->dsc$a_pointer;
 	ACTCOUNT = ACTCOUNT + OUTDESC->dsc$w_length ;
 
-	RC = $PUT(RAB = ACTRAB);
+	RC = exe$put(ACTRAB);
 	if ((ACTCOUNT > ACT_THRESHOLD))
 	    {
-	    RC = $FLUSH(RAB = ACTRAB);
+	    RC = exe$flush(ACTRAB);
 	    ACTCOUNT = 0 ;
 	    } ;
 	};
@@ -637,16 +636,14 @@ void ACT_FAO(CSTR)
 // Do output to activity log file using $FAO to format parameters.
 
     {
-    BUILTIN
-	AP;
     signed long
-	RC,
+      RC;
 	DESC$STR_ALLOC(OUTDESC,1000);
 
-    RC = $FAOL(CTRSTR = CSTR,
-	       OUTLEN = OUTDESC->dsc$w_length,
-	       OUTBUF = OUTDESC,
-	       PRMLST = AP+8);
+    RC = exe$faol(CSTR,
+	       OUTDESC->dsc$w_length,
+	       OUTDESC,
+		  /*AP+*/8);
     if (RC)
 	ACT_OUTPUT(OUTDESC)
     else
@@ -720,13 +717,13 @@ Send_2_Operator(Text)
     Request_ID = Request_ID + 1;
     MSGLEN = TEXT->dsc$w_length;
     if (MSGLEN > MAXCHR)
-	.MSGLEN = MAXCHR;
+	MSGLEN = MAXCHR;
     CH$MOVE(MSGLEN,TEXT->dsc$a_pointer,MSGTEXT);
-    MSG->dsc$w_length = 8+.MSGLEN;
+    MSG->dsc$w_length = 8+MSGLEN;
     MSG->dsc$b_class = DSC$K_CLASS_Z;
     MSG->dsc$b_dtype = DSC$K_DTYPE_Z;
     MSG->dsc$a_pointer = MSGBUF;
-    return $SNDOPR(MSGBUF=MSG);
+    return exe$sndopr(MSGBUF=MSG);
     }
 
 void OPR_FAO(CSTR) 
@@ -734,26 +731,24 @@ void OPR_FAO(CSTR)
 // Send a message to the VMS operator, using $FAO for output formatting.
 
     {
-    BUILTIN
-	AP;
     signed long
-	RC,
-	DESC$STR_ALLOC(OUTDESC,1000),
+      RC;
+    DESC$STR_ALLOC(OUTDESC,1000);
 	DESC$STR_ALLOC(OPRDESC,1000);
 
-    RC = $FAOL(CTRSTR = CSTR,
-	       OUTLEN = OUTDESC->dsc$w_length,
-	       OUTBUF = OUTDESC,
-	       PRMLST = AP+8);
+    RC = exe$faol(CSTR,
+	        OUTDESC->dsc$w_length,
+	       OUTDESC,
+		  /*AP+*/8);
     if (! RC)
-	$EXIT(CODE = RC);
+	exe$exit( RC);
 
 // Reformat for console output
 
-    RC = $FAO(%ASCID"IPACP: !AS",OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    RC = exe$fao(ASCID("IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (! RC)
-	$EXIT(CODE = RC);
-    S}_2_OPERATOR(OPRDESC);
+	exe$exit( RC);
+    SEND_2_OPERATOR(OPRDESC);
     }
 
 signed long BIND
@@ -766,44 +761,42 @@ void ERROR_FAO(CSTR)
 // Send a message to the console & log the error (OPR_FAO + LOG_FAO)
 //
     {
-    BUILTIN
-	AP;
     signed long
 	RC,
-	OLDSTATE,
-	DESC$STR_ALLOC(OUTDESC,1000),
-	DESC$STR_ALLOC(OPRDESC,1000),
+      OLDSTATE;
+    DESC$STR_ALLOC(OUTDESC,1000);
+    DESC$STR_ALLOC(OPRDESC,1000);
 	DESC$STR_ALLOC(LOGDESC,1000);
 
 // Format the message string
 
-    RC = $FAOL(CTRSTR = CSTR,
-	       OUTLEN = OUTDESC->dsc$w_length,
-	       OUTBUF = OUTDESC,
-	       PRMLST = AP+8);
+    RC = exe$faol(CSTR,
+	       OUTDESC->dsc$w_length,
+	       OUTDESC,
+		  /*AP+*/8);
     if (! RC)
 	{
 	OPR$FAO("ERROR_FAO failure, RC = !XL",RC);
-	$EXIT(CODE = RC);
+	exe$exit( RC);
 	};
 
 // Format and send message to the operator
 
-    RC = $FAO(%ASCID"?IPACP: !AS",OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    RC = exe$fao(ASCID("?IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (! RC)
-	$EXIT(CODE = RC);
-    S}_2_OPERATOR(OPRDESC);
+	exe$exit( RC);
+    SEND_2_OPERATOR(OPRDESC);
 
 // Format the message for logging - add time+date and EOL
 
-    RC = $FAO(%ASCID"!%T !AS!/",LOGDESC->dsc$w_length,LOGDESC,0,OUTDESC);
+    RC = exe$fao(ASCID("!%T !AS!/"),LOGDESC->dsc$w_length,LOGDESC,0,OUTDESC);
     if (! RC)
-	$EXIT(CODE = RC);
+	exe$exit( RC);
 
 // Make sure we are logging something & log it
 
-    OLDSTATE = LOG_STATE;
-    LOG_CHANGE(%X"80000000" || LOG_STATE);
+    OLDSTATE = log_state;
+    LOG_CHANGE(0x80000000 || log_state);
     LOG_OUTPUT(LOGDESC);
     LOG_CHANGE(OLDSTATE);
     }
@@ -814,46 +807,44 @@ void FATAL_FAO(CSTR)
 // Same as above, except also exit the ACP.
 //
     {
-    BUILTIN
-	AP;
     signed long
 	RC,
-	OLDSTATE,
-	DESC$STR_ALLOC(OUTDESC,1000),
-	DESC$STR_ALLOC(OPRDESC,1000),
+      OLDSTATE;
+    DESC$STR_ALLOC(OUTDESC,1000);
+    DESC$STR_ALLOC(OPRDESC,1000);
 	DESC$STR_ALLOC(LOGDESC,1000);
 
 // Format the output string
 
-    RC = $FAOL(CTRSTR = CSTR,
-	       OUTLEN = OUTDESC->dsc$w_length,
-	       OUTBUF = OUTDESC,
-	       PRMLST = AP+8);
+    RC = exe$faol(CSTR,
+	       OUTDESC->dsc$w_length,
+	       OUTDESC,
+		  /*AP+*/8);
     if (! RC)
 	{
 	OPR$FAO("FATAL_FAO failure, RC = !XL",RC);
-	$EXIT(CODE = RC);
+	exe$exit( RC);
 	};
 
 // Format & send message to the operator
 
-    RC = $FAO(%ASCID"?IPACP: !AS",OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    RC = exe$fao(ASCID("?IPACP: !AS"),OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (! RC)
-	$EXIT(CODE = RC);
-    S}_2_OPERATOR(OPRDESC);
+	exe$exit( RC);
+    SEND_2_OPERATOR(OPRDESC);
 
 // Format it for logging
 
-    RC = $FAO(%ASCID"!%T !AS!/",LOGDESC->dsc$w_length,LOGDESC,
+    RC = exe$fao(ASCID("!%T !AS!/"),LOGDESC->dsc$w_length,LOGDESC,
 	      0,OUTDESC);
 
 // Make sure we are logging something & log it
 
-    OLDSTATE = LOG_STATE;
-    LOG_CHANGE(%X"80000000" || LOG_STATE);
+    OLDSTATE = log_state;
+    LOG_CHANGE(0x80000000 || log_state);
     LOG_OUTPUT(LOGDESC);
     LOG_CHANGE(OLDSTATE);
-    $EXIT(CODE = SS$_ABORT);
+    exe$exit( SS$_ABORT);
     }
 
 //SBTTL "Queued message processing"
@@ -898,23 +889,19 @@ void QL_FAO(CSTR)
 // Format and queue an error message using $FAO and the message queue.
 //
     {
-    EXTERNAL
-	SLEEPING;
-    EXTERNAL ROUTINE
-	MM$QBLK_GET,
-void	MM$QBlk_Free ,
-	LIB$SYS_FAOL ;
-    BUILTIN
-	AP,
-	INSQUE;
+    extern
+	sleeping;
+    extern	MM$QBLK_GET();
+    extern void	MM$QBlk_Free ();
+    extern	LIB$SYS_FAOL ();
     signed long
-	struct DESC$STR * MDSC,
-	struct queue_blk_structure(QB$ERRMSG_FIELDS) * QB,
 	RC;
+    struct dsc$descriptor * MDSC;
+    struct queue_blk_structure(qb$errmsg_fields) * QB;
 
 // Make sure logging is enabled
 
-    if (LOG_STATE == 0)
+    if (log_state == 0)
 	return;
 
 // Allocate a queue block for the message
@@ -950,14 +937,10 @@ void CHECK_ERRMSG_Q (void)
 // Called from main TCP processing loop after all useful work has been done.
 //
     {
-    EXTERNAL ROUTINE
-void	MM$QBlk_Free ,
-	STR$FREE1_DX ;
-    BUILTIN
-	REMQUE;
-    signed long
-	struct queue_blk_structure(QB$ERRMSG_FIELDS) * QB,
-	struct DESC$STR * MDSC;
+extern      void	MM$QBlk_Free ()
+extern	STR$FREE1_DX ();
+ struct queue_blk_structure(qb$errmsg_fields) * QB;
+	struct dsc$descriptor * MDSC;
 
 // Scan the error message queue, writing each entry to the log file.
 
@@ -1001,15 +984,15 @@ void	RESET_PROCNAME ;
     ERROR$FAO("Exit handler: Exit requested, cleaning up...");
 
     USER$Purge_All_IO();
-    if (LOG_STATE != 0)
+    if (log_state != 0)
 	LOG_CLOSE();
-    if (ACT_STATE != 0)
+    if (act_state != 0)
 	ACT_CLOSE();
     OPR$FAO("Network offline - ACP exiting.");
 
 // Re-enable resource wait mode (for debugging)
 
-    $SETRWM(WATFLG=0);
+    exe$setrwm(0);
 
     RESET_PROCNAME();
     }
@@ -1045,7 +1028,7 @@ extern void	USER$Purge_All_IO ();
 
     ERROR$FAO("Exception handler: signal name !XL",SIG->CHF$L_SIG_NAME);
     USER$Purge_All_IO();
-    $FLUSH(RAB = LOGRAB);
-    $FLUSH(RAB = ACTRAB);
+    exe$flush( LOGRAB);
+    exe$flush( ACTRAB);
     return(SS$_Resignal);
     }

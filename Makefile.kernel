@@ -123,7 +123,7 @@ export SVGA_MODE = -DSVGA_MODE=NORMAL_VGA
 
 CORE_FILES	=linux/kernel/kernel.o linux/mm/mm.o linux/fs/fs.o linux/ipc/ipc.o sys/src/sys.o driver/src/driver.o mscp/src/mscp_.o sysloa/src/sysloa.o rms/src/rms_.o mount/src/mount.o f11x/src/f11x.o pal/src/pal.o 
 ifdef CONFIG_VMS
-CORE_FILES	+=ext2/src/exttwo.o ttdrvr/src/ttdrvr.o cmuip/ip4driver/src/ip4driver_.o
+CORE_FILES	+=ext2/src/exttwo.o ttdrvr/src/ttdrvr.o cmuip/ip4driver/src/ip4driver_.o cmuip/ip4acp/src/ip4acp.o
 endif
 NETWORKS	=linux/net/network.o
 

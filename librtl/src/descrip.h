@@ -244,7 +244,7 @@ struct dsc$descriptor_bfa {
 	
 #define DSC$K_CLASS_BFA 191		
 	
-	
+#define DSC$K_Z_BLN 8	
 	
 
 

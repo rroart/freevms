@@ -77,31 +77,34 @@ SOFTWARE.
 
 */
 
+#if 0
 MODULE SNMP_HOOK(IDENT="1.0",LANGUAGE(BLISS32),
 	      ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
 			      NONEXTERNAL=LONG_RELATIVE),
 	      LIST(REQUIRE,ASSEMBLY,OBJECT,BINARY),
 	      OPTIMIZE,OPTLEVEL=3,ZIP)=
-{
+#endif
 
-#include "SYS$LIBRARY:STARLET";	// VMS system definitions
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS common definitions
-!LIBRARY "CMUIP_SRC:[CENTRAL]NETERROR";	// Network error codes
-#include "CMUIP_SRC:[CENTRAL]NETCONFIG";			// VMS-specific definitions
-#include "TCPMACROS";		// System-wide Macro definitions
-!LIBRARY "STRUCTURE";		// System-wide structure definitions
-#include "ASN1";			// ASN defs
-#include "SNMP";			// SNMP definitions
-#include "TCP";			// TCP definitions
+#include <starlet.h>	// VMS system definitions
+// not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS common definitions
+//LIBRARY "CMUIP_SRC:[CENTRAL]NETERROR";	// Network error codes
+#include <cmuip/central/include/netconfig.h>			// VMS-specific definitions
+#include "tcpmacros.h"		// System-wide Macro definitions
+//LIBRARY "structure.h"		// System-wide structure definitions
+#include "asn1.h"			// ASN defs
+#include "snmp.h"			// SNMP definitions
+#include "tcp.h"			// TCP definitions
+
+#include <ssdef.h>
 
 signed long
-    SNMP_SERVICE : INITIAL (0);
+    SNMP_SERVICE - 0;
 
 
 
-SNMP$INIT = 
+void SNMP$INIT (void) 
     {
-    SS$_NORMAL
+      return SS$_NORMAL;
     }
 
 extern
@@ -119,7 +122,7 @@ SNMP$NET_INPUT ( SrcAddr , DstAdr , SrcPrt , DstPrt ,
     RC = snmp_input(buff,Size,out_buff,out_len);
     OKINT;
 
-    SS$_NORMAL
+    return SS$_NORMAL;
     }
 
 SNMP$USER_INPUT (in_buff, in_len, out_buff, out_len)
@@ -131,13 +134,13 @@ SNMP$USER_INPUT (in_buff, in_len, out_buff, out_len)
     RC = snmp_input(in_buff,in_len,out_buff,out_len);
     OKINT;
 
-    SS$_NORMAL
+    return SS$_NORMAL;
     }
 
 
-!
+//
 // The rest of the module Provides access to the IPACP's MIB variables
-!
+//
 
 
 static signed long
@@ -155,7 +158,7 @@ static signed long
  * function pointer.  The former is the address of the operand, the latter is
  * an access routine for the variable.  
  *
-!!!HACK!!// Update these comments
+//!!HACK!!// Update these comments
  * u_char *
  * findVar(name, length, exact, var_len, access_method)
  * oid	    *name;	    IN/OUT - input name requested, output name found
@@ -170,36 +173,38 @@ static signed long
  * int	    *varLen;IN/OUT - input and output buffer len
 */
 
-LITERAL
-    SNMP$K_OIDsize = 4;
+#define    SNMP$K_OIDsize 4
 
-$FIELD variable_fields (void)
-    SET
-    var$name	= [$Bytes(24*SNMP$K_OIDsize)], // object identifier of variable
-    var$namelen	= [$Byte],	// /* length of above */
-    var$type	= [$Byte],	// type of variable, INTEGER or (octet) STRING
-    var$magic	= [$Byte],	// passed to function as a hint
-    var$acl	= [$UWord],	// access control list for variable
-    var$findVar	= [$Address]	// function that finds variable
-    TES;
+struct variable_struct
+{
+char    var$name[24*SNMP$K_OIDsize]; // object identifier of variable
+char    var$namelen;	// /* length of above */
+char    var$type;	// type of variable, INTEGER or (octet) STRING
+char    var$magic;	// passed to function as a hint
+unsignedshort    var$acl;	// access control list for variable
+void *    var$findVar;	// function that finds variable
+    };
 
-LITERAL
-    MIBmax_size	= 3+21+19+4+26+12+5+4+2,	// Add 2 as a fudge factor...
-    VAR_Block_Size = $Field_Set_Size;
+#define    MIBmax_size	3+21+19+4+26+12+5+4+2,	// Add 2 as a fudge factor...
+#define    VAR_Block_Size sizeof(struct variable_struct)
 
+#if 0
 MACRO
     variable_struct = BLOCK->VAR_Block_Size FIELD(variable_fields)%;
+#endif
 
-COMPILETIME
+const long
     $mibcnt = -1,
     $mibtmp = 0;
 
+#if 0
 MACRO
 
     $MIBstart (void)
 	%ASSIGN( $mibcnt, -1 )
 	PRESET (
 	%,
+#endif
 
     $MIBoid->oid =
 	%IF NOT %NULL(oid) %THEN
@@ -219,28 +224,28 @@ MACRO
 	[$MIBcnt,var$findVar]	= rtn
 	%,
 
+#if 0
     $MIBend (void)
 	)%;
 
 MACRO
     MIB = 1,3,6,1,2,1%;
-
+#endif
 
 // Declare the variable access routine which are used in the MIB
-FORWARD ROUTINE
-    VAR_SYSTEM,
-    VAR_IFENTRY,
-    VAR_IP,
-    VAR_IPADDRENTRY,
-    VAR_ICMP,
-    VAR_UDP,
-    VAR_TCP,
-    VAR_TCPCONN;
+    VAR_SYSTEM();
+    VAR_IFENTRY();
+    VAR_IP();
+    VAR_IPADDRENTRY();
+    VAR_ICMP();
+    VAR_UDP();
+    VAR_TCP();
+    VAR_TCPCONN();
 
 // Declare the MIB dispatch block
-!!!HACK!!// should we make this global
+//!!HACK!!// should we make this global
 signed long
-    variables : BLOCKVECTOR[MIBmax_size,VAR_Block_Size] FIELD(variable_fields)
+    variables [MIBmax_size]
 
     // Define the contents of the MIB blockvector
 $MIBstart 
@@ -405,23 +410,23 @@ $MIBend;
 LITERAL
     MIBsize = $MIBcnt+1;
 
-!GLOBAL
+//GLOBAL
 //    return_buf : VECTOR[64,BYTE];
 
 FORWARD ROUTINE
     compare;
 
 getStatPtr (name,namelen,type,len,acl,exact,access_method)
-!
+//
 // getStatPtr - return a pointer to the named variable, as well as it's
 // type, length, and access control list.
-!
+//
 // If an exact match for the variable name exists, it is returned.  If not,
 // and exact is false, the next variable lexicographically after the
 // requested one is returned.
-!
+//
 // If no appropriate variable can be found, NULL is returned.
-!
+//
 // The C language interface looks like this:
 //    oid		*name;	    /* IN - name of var, OUT - name matched */
 //    int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
@@ -430,7 +435,7 @@ getStatPtr (name,namelen,type,len,acl,exact,access_method)
 //    u_short	*acl;	    /* OUT - access control list */
 //    int		exact;	    /* IN - TRUE if exact match wanted */
 //    int		*access_method; /* OUT - 1 if function, 0 if char * */
-!
+//
 {
     MAP
 	struct VECTOR * name[,SNMP$K_OIDsize];
@@ -567,9 +572,9 @@ cmp_TCB (TCB1,TCB2)
 
 
 
-!
+//
 // System Variables:
-!
+//
 
 BIND
     version_description = %ASCID"CMU-OpenVMS/IP 6.6-5" : BLOCK[8,BYTE],
@@ -625,7 +630,7 @@ var_system (vp, name, length, exact, var_len, access_method)
 	    return sys_uptime;
 	    };
 	[OTHERWISE]:
-!!!HACK!!// Put some sort of erro logging in here...
+//!!HACK!!// Put some sort of erro logging in here...
 	    0;
 	TES;
 
@@ -721,7 +726,7 @@ var_ifEntry (vp, name, length, exact, var_len, access_method)
 	[IFOUTQLEN]:
 	    return dev_config->dcmib_IFOUTQLEN;
 	[OTHERWISE]:
-!!!HACK!!// Put some sort of erro logging in here...
+//!!HACK!!// Put some sort of erro logging in here...
 	    0;
 	TES;
     0
