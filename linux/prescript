@@ -78,6 +78,8 @@ done
 		ln -s ../../freevms/f11x/src/dispatch.c .;
 		ln -s ../../freevms/driver/src/file.c .;
 		ln -s ../../freevms/sys/src/iosubrams.c .;
+		ln -s ../../freevms/driver/src/pedriver.c .;
+		ln -s ../../freevms/driver/src/scs.c .;
 
 		ln -s ../../freevms/pal/src/ipl.c .;
 		ln -s ../../freevms/pal/src/ast.c .;
@@ -91,8 +93,6 @@ cd mm;
 		ln -s ../../freevms/sys/src/ptalloc.c .;
 		ln -s ../../freevms/sys/src/swapper.c .;
 		ln -s ../../freevms/sys/src/wrtmfypag.c .;
-		ln -s ../../freevms/driver/src/pedriver.c .;
-		ln -s ../../freevms/driver/src/scs.c .;
 cd ..;
 
 cd drivers/block;
