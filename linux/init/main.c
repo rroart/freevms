@@ -553,6 +553,7 @@ static void rest_init(void)
 
 void vms_init(void) __init;
 void vms_init2(void) __init;
+void vms_init3(void) __init;
 
 /*
  *	Activate the first processor.
@@ -661,6 +662,7 @@ asmlinkage void __init start_kernel(void)
 	 *	Like idlers init is an unlocked kernel thread, which will
 	 *	make syscalls (and thus be locked).
 	 */
+	vms_init3();
 	smp_init();
 	rest_init();
 }
