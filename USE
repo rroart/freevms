@@ -100,6 +100,7 @@ Clustering:
 Now works with CONFIG_VMS (without, there are problems with timer queue?).
 You need to have the nodename in params.dat.
 The two first letters in the nodename must be different.
+Also, the name must be max (or exactly) 4 letters.
 Clustering starts automatically.
 Within 10 secs, you will see a "scs received hello"
 After 10 secs, you will see starting cluster connects and some CON_RSPs.
