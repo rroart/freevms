@@ -651,7 +651,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     fib->fib$w_dir_hdrseq_incr=*reslen;
 
     if (/*wildcard ||*/ (fib->fib$w_nmctl & FIB$M_WILD)) {
-        fib->fib$l_wcc = curblk;
+        fib->fib$l_wcc = 1/*curblk*/;
     } else {
         fib->fib$l_wcc = 0;
     }
