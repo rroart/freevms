@@ -27,9 +27,12 @@ int waitcheck2(struct _pcb *p, unsigned long priclass, unsigned long * efp, unsi
   unsigned long tmp;
   //  if (efp!=clusteraddr) return;
   tmp=(*clusteraddr)&~p->pcb$l_efwm;
-  *clusteraddr&=~p->pcb$l_efwm;
-  if (!tmp) return;
-  //  tmp=~(p->pcb$l_sts&(~PCB$M_WALL)); // what?
+  //*clusteraddr&=~p->pcb$l_efwm;
+  if (tmp==0) return;
+  if (p->pcb$l_sts&PCB$M_WALL) {
+    if (p->pcb$l_efwm!=(~tmp))
+      return;
+  }
   // if (!tmp && tmp!=p->pcb$l_efwm) return; // what?
   sch$rse(p,priclass,EVT$_EVENT);
 }

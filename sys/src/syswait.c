@@ -53,6 +53,10 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   if (waitallflag && ((mask & *clusteraddr) == mask))
     goto out;
 
+  if (waitallflag && ((mask & *clusteraddr))) {
+    mask &= ~(*clusteraddr);
+  }
+
   if (waitallflag)
     p->pcb$l_sts|=PCB$M_WALL; // maybe reset if this is not the case?
   p->pcb$l_efwm=~mask;
