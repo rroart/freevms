@@ -106,6 +106,9 @@
 #include <pridef.h>
 #include <iodef.h>
 #include <descrip.h>
+#include <ucbdef.h>
+#include <system_data_cells.h>
+#include <ccbdef.h>
 
 #ifdef CONFIG_VT
 #if 0
@@ -372,8 +375,10 @@ int tty_check_change(struct tty_struct * tty)
 	}
 	if (current->pgrp == tty->pgrp)
 		return 0;
+#if 0
 	if (is_ignored(SIGTTOU))
 		return 0;
+#endif
 	if (is_orphaned_pgrp(current->pgrp))
 		return -EIO;
 	(void) kill_pg(current->pgrp,SIGTTOU,1);
@@ -776,6 +781,15 @@ static ssize_t tty_write(struct file * file, const char * buf, size_t count,
 	int sts;
 	unsigned long long iosb;
 
+	short int chan = 0;
+	struct _pcb * p = ctl$gl_pcb;
+	struct dsc$descriptor d;
+	d.dsc$a_pointer=&p->pcb$t_terminal;
+	d.dsc$w_length=strlen(p->pcb$t_terminal);
+	sts=exe$assign(&d,&chan,0,0,0);
+	struct _ucb *u=ctl$gl_ccbbase[chan].ccb$l_ucb;
+
+#if 0
 	/* Can't seek (pwrite) on ttys.  */
 	if (ppos != &file->f_pos)
 		return -ESPIPE;
@@ -796,6 +810,7 @@ static ssize_t tty_write(struct file * file, const char * buf, size_t count,
 		return -EIO;
 	if (!tty || !tty->driver.write || (test_bit(TTY_IO_ERROR, &tty->flags)))
 		return -EIO;
+#endif
 #if 0
 	if (!is_console && L_TOSTOP(tty) && (tty->pgrp > 0) &&
 	    (current->tty == tty) && (tty->pgrp != current->pgrp)) {
@@ -807,10 +822,13 @@ static ssize_t tty_write(struct file * file, const char * buf, size_t count,
 		}
 	}
 #endif
+#if 0
 	if (!tty->ldisc.write)
 		return -EIO;
+#endif
 
-	sts = exe$qio(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_WRITEPBLK,0/*&iosb*/,0,0,
+	//	sts = exe$qio(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_WRITEPBLK,0/*&iosb*/,0,0,
+	sts = exe$qio(0,chan,IO$_WRITEPBLK,0/*&iosb*/,0,0,
 				 buf,count,0,0,0,0);
 
 	return count;
@@ -2231,7 +2249,9 @@ void __init console_init(void)
 {
 	/* Setup the default TTY line discipline. */
 	memset(ldiscs, 0, sizeof(ldiscs));
+#if 0
 	(void) tty_register_ldisc(N_TTY, &tty_ldisc_N_TTY);
+#endif
 
 	/*
 	 * Set up the standard termios.  Individual tty drivers may 
@@ -2254,65 +2274,15 @@ void __init console_init(void)
 #else
 #error
 #endif
-#ifdef CONFIG_AU1000_SERIAL_CONSOLE
-	au1000_serial_console_init();
-#endif
 #ifdef CONFIG_SERIAL_CONSOLE
-#if (defined(CONFIG_8xx) || defined(CONFIG_8260))
-	console_8xx_init();
-#elif defined(CONFIG_MAC_SERIAL) && defined(CONFIG_SERIAL)
-	if (_machine == _MACH_Pmac)
- 		mac_scc_console_init();
-	else
-		serial_console_init();
-#elif defined(CONFIG_MAC_SERIAL)
- 	mac_scc_console_init();
-#elif defined(CONFIG_PARISC)
-	pdc_console_init();
-#elif defined(CONFIG_SERIAL)
+#if defined(CONFIG_SERIAL)
 #if 0
 	serial_console_init();
 #endif
 #endif /* CONFIG_8xx */
-#ifdef CONFIG_SGI_SERIAL
-	sgi_serial_console_init();
-#endif
-#if defined(CONFIG_MVME162_SCC) || defined(CONFIG_BVME6000_SCC) || defined(CONFIG_MVME147_SCC)
-	vme_scc_console_init();
-#endif
-#if defined(CONFIG_SERIAL167)
-	serial167_console_init();
-#endif
-#if defined(CONFIG_SH_SCI)
-	sci_console_init();
-#endif
-#endif
-#ifdef CONFIG_TN3270_CONSOLE
-	tub3270_con_init();
-#endif
-#ifdef CONFIG_TN3215
-	con3215_init();
-#endif
-#ifdef CONFIG_HWC
-        hwc_console_init();
 #endif
 #ifdef CONFIG_STDIO_CONSOLE
 	stdio_console_init();
-#endif
-#ifdef CONFIG_SERIAL_21285_CONSOLE
-	rs285_console_init();
-#endif
-#ifdef CONFIG_SERIAL_SA1100_CONSOLE
-	sa1100_rs_console_init();
-#endif
-#ifdef CONFIG_ARC_CONSOLE
-	arc_console_init();
-#endif
-#ifdef CONFIG_SERIAL_AMBA_CONSOLE
-	ambauart_console_init();
-#endif
-#ifdef CONFIG_SERIAL_TX3912_CONSOLE
-	tx3912_console_init();
 #endif
 }
 
@@ -2387,83 +2357,7 @@ void __init tty_init(void)
 		panic("Couldn't register /dev/ptmx driver\n");
 #endif
 
-#if 0	
-#ifdef CONFIG_VT
-	dev_console_driver = dev_tty_driver;
-	dev_console_driver.driver_name = "/dev/vc/0";
-	dev_console_driver.name = dev_console_driver.driver_name + 5;
-	dev_console_driver.major = TTY_MAJOR;
-	dev_console_driver.type = TTY_DRIVER_TYPE_SYSTEM;
-	dev_console_driver.subtype = SYSTEM_TYPE_CONSOLE;
-
-	if (tty_register_driver(&dev_console_driver))
-		panic("Couldn't register /dev/tty0 driver\n");
-
-	kbd_init();
-#endif
-#endif
 #ifndef __arch_um__
 	kbd_init();
-#endif
-
-#ifdef CONFIG_ESPSERIAL  /* init ESP before rs, so rs doesn't see the port */
-	espserial_init();
-#endif
-#if defined(CONFIG_MVME162_SCC) || defined(CONFIG_BVME6000_SCC) || defined(CONFIG_MVME147_SCC)
-	vme_scc_init();
-#endif
-#ifdef CONFIG_SERIAL_TX3912
-	tx3912_rs_init();
-#endif
-#ifdef CONFIG_ROCKETPORT
-	rp_init();
-#endif
-#ifdef CONFIG_SERIAL167
-	serial167_init();
-#endif
-#ifdef CONFIG_CYCLADES
-	cy_init();
-#endif
-#ifdef CONFIG_STALLION
-	stl_init();
-#endif
-#ifdef CONFIG_ISTALLION
-	stli_init();
-#endif
-#ifdef CONFIG_DIGI
-	pcxe_init();
-#endif
-#ifdef CONFIG_DIGIEPCA
-	pc_init();
-#endif
-#ifdef CONFIG_SPECIALIX
-	specialix_init();
-#endif
-#if (defined(CONFIG_8xx) || defined(CONFIG_8260))
-	rs_8xx_init();
-#endif /* CONFIG_8xx */
-	pty_init();
-#ifdef CONFIG_MOXA_SMARTIO
-	mxser_init();
-#endif	
-#ifdef CONFIG_MOXA_INTELLIO
-	moxa_init();
-#endif	
-#ifdef CONFIG_VT
-#if 0
-	vcs_init();
-#endif
-#endif
-#ifdef CONFIG_TN3270
-	tub3270_init();
-#endif
-#ifdef CONFIG_TN3215
-	tty3215_init();
-#endif
-#ifdef CONFIG_HWC
-	hwc_tty_init();
-#endif
-#ifdef CONFIG_A2232
-	a2232board_init();
 #endif
 }
