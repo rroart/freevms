@@ -346,6 +346,7 @@ int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *it
   return INLINE_SYSCALL($getdvi,1,&s);
 }
 
+#if 0
 int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, unsigned long long *nullarg) {
   struct struct_getdvi s;
   s.efn=efn;
@@ -357,6 +358,7 @@ int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *i
   s.nullarg=nullarg;
   return INLINE_SYSCALL($getdviw,1,&s);
 }
+#endif
 
 int sys$device_scan(void *return_devnam, unsigned short int *retlen, void *search_devnam, void *itmlst, unsigned long long *contxt) {
   return INLINE_SYSCALL($device_scan,5,return_devnam,retlen,search_devnam,itmlst,contxt);
