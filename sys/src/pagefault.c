@@ -337,6 +337,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 		signed long pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
 		mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 		*(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+		memset(page,0,PAGE_SIZE); // must zero content also
 	      }
 	      return;
 	    }
@@ -703,6 +704,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	      mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 	      *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	      flush_tlb_range(current->mm, page, page + PAGE_SIZE);
+	      bzero(page,PAGE_SIZE); // must zero content also
 	      return;
 	    }
 	  } else {
