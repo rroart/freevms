@@ -580,11 +580,11 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     int fd=0;
     struct file * f;
     signed int error=0;
+    int dirflg=0;
     struct dirent64 dir;
     struct inode * head;
     struct _fcb * fcb=x2p->primary_fcb;
     head = fcb->fcb$l_primfcb;
-    int dirflg=0;
 
     if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
       wildcard=1;
