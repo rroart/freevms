@@ -315,8 +315,8 @@ extern syscall_handler_t  exe$delmbx ;
 extern syscall_handler_t  exe$mount ;
 extern syscall_handler_t exe$cretva ;
 extern syscall_handler_t exe$expreg ;
-extern syscall_handler_t exe$crmpsc ;
-extern syscall_handler_t exe$mgblsc ;
+extern syscall_handler_t exe$crmpsc_wrap ;
+extern syscall_handler_t exe$mgblsc_wrap ;
 extern syscall_handler_t exe$deltva ;
 extern syscall_handler_t exe$cntreg ;
 extern syscall_handler_t exe$dgblsc ;
@@ -680,8 +680,8 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$mount ] = exe$mount,
 	[ __NR_$cretva ] = exe$cretva,
 	[ __NR_$expreg ] = exe$expreg,
-	[ __NR_$crmpsc ] = exe$crmpsc,
-	[ __NR_$mgblsc ] = exe$mgblsc,
+	[ __NR_$crmpsc ] = exe$crmpsc_wrap,
+	[ __NR_$mgblsc ] = exe$mgblsc_wrap,
 	[ __NR_$deltva ] = exe$deltva,
 	[ __NR_$cntreg ] = exe$cntreg,
 	[ __NR_$dgblsc ] = exe$dgblsc,
