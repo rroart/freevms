@@ -22,7 +22,7 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   struct _ccb * c;
   struct _ucb * u;
   struct _ddb * d;
-  struct return_values r;
+  struct return_values r,r2;
   //  printk("here assign\n");
   status=ioc$ffchan(chan);
   if (status!=SS$_NORMAL) return status;
@@ -32,7 +32,7 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   c=&ctl$gl_ccbbase[*chan];
   c->ccb$b_amod=1; /* wherever this gets set */
   //  printk("here assign\n");
-  if (mbxnam) ioc$searchdev();
+  if (mbxnam) ioc$searchdev(&r2,mbxnam);
   status=ioc$search(&r,devnam);
   //printk("here assign\n");
   if (status!=SS$_NORMAL) {
@@ -40,6 +40,8 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
     return status;
   }
   u=r.val1;
+
+  u->ucb$l_amb=r2.val1; // maybe set associated mb someplace?
 
   /* not yet?
   c=vmalloc(sizeof(struct _ccb));
