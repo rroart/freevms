@@ -268,7 +268,6 @@ DESC$STR_ALLOC(IPSTR,20);
     ASCII_HEX_BYTES(PHYSTR,HWLEN,HWADDR,&PHYSTR->dsc$w_length);
 
 // Queue up a message for later output
-
     DRV$QL_FAO("!%T !AS: IP=!AS, PHY=!AS!/",0,NAME,IPSTR,PHYSTR);
     }
 
@@ -451,10 +450,8 @@ struct ACACHE_BLK * ACPTR;
 		FOUND = 1;
 		HWLEN = ACPTR->AC$HWSIZE;
 		CH$MOVE(HWLEN,ACPTR->AC$HWADDR,CH$PTR(HWADDR));
-#if 0
 		if ($$LOGF(LOG$ARP))
 		    xearp$_log("ARP cache hit",IPADDR,HWLEN,HWADDR);
-#endif
 
 // See if we should try to refresh this entry now.
 
