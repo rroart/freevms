@@ -11,6 +11,7 @@
 #include<dptdef.h>
 #include<fdtdef.h>
 #include<pdtdef.h>
+#include<idbdef.h>
 #include<irpdef.h>
 #include<ucbdef.h>
 #include<ddbdef.h>
@@ -338,5 +339,66 @@ inline void ini_ddt_end(struct _ddt * d) {
   // d->ddt$=type; ??
 }
 
+struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt, struct _fdt * fdt, char * sddb, char * sdpt) {
+  struct _ucb * u=vmalloc(sizeof(struct _ucb));
+  struct _crb * c=vmalloc(sizeof(struct _crb));
+  struct _idb * idb=vmalloc(sizeof(struct _idb));
+  bzero(c,sizeof(struct _crb));
+  bzero(ddb,sizeof(struct _ddb));
+  bzero(u,sizeof(struct _ucb));
+  bzero(idb,sizeof(struct _idb));
 
+  insertdevlist(ddb);
 
+  bcopy(sdpt,dpt->dpt$t_name,strlen(sdpt));
+
+  /* for the ddb init part */
+  //  d->ddb$ps_link=d;
+  //  d->ddb$ps_blink=d;
+  ddb->ddb$b_type=DYN$C_DDB;
+  ddb->ddb$l_ddt=ddt;
+  ddb->ddb$ps_ucb=u;
+  bcopy(sddb,ddb->ddb$t_name,strlen(sddb));
+
+  /* for the ucb init part */
+  qhead_init(&u->ucb$l_ioqfl);
+  u->ucb$b_type=DYN$C_UCB;
+  u->ucb$b_flck=IPL$_IOLOCK8;
+  /* devchars? */
+  u->ucb$b_devclass=DEV$M_RND; /* just maybe? */
+  u->ucb$b_dipl=IPL$_IOLOCK8;
+  //  bcopy("nla0",u->ucb$t_name,4);
+  u->ucb$l_ddb=ddb;
+  u->ucb$l_crb=c;
+  u->ucb$l_ddt=ddt;
+
+  /* for the crb init part */
+  c->crb$b_type=DYN$C_CRB;
+
+  /* and for the ddt init part */
+  ddt->ddt$l_fdt=fdt;
+  ddt->ddt$l_functb=fdt;
+
+  dpt->dpt$ps_ddt=ddt;
+
+  return u;
+}
+
+static unsigned long devchan[256];
+
+registerdevchan(unsigned long dev,unsigned short chan) {
+  devchan[chan]=MAJOR(dev);
+  printk("registerdevchan dev %x at chan %x\n",devchan[chan],chan);
+}
+
+unsigned short dev2chan(kdev_t dev) {
+  int i;
+  //printk("dev2chan %x %x\n", dev, MAJOR(dev));
+  for (i=0;i<256;i++)
+    if (devchan[i]==MAJOR(dev)) return i;
+ mypanic:
+  printk("dev2chan failed\n");
+  for (i=0;i<4;i++)
+    printk("%x %x\n",devchan[i],dev);
+  panic("dev2chan\n");
+}
