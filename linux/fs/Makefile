@@ -13,7 +13,7 @@ ifneq ($(CONFIG_IO_VMS),y)
  export-objs += buffer.o
 endif
 
-mod-subdirs :=	
+mod-subdirs :=	nls
 
 obj-y :=	open.o read_write.o devices.o file_table.o \
 		super.o block_dev.o char_dev.o stat.o exec.o pipe.o namei.o \
@@ -38,6 +38,7 @@ subdir-y			+= partitions
 ifneq ($(CONFIG_VMS),y)
 subdir-$(CONFIG_EXT2_FS)	+= ext2
 endif
+subdir-$(CONFIG_EXTTWO_FS)	+= exttwo
 subdir-$(CONFIG_DEVFS_FS)	+= devfs
 subdir-$(CONFIG_DEVPTS_FS)	+= devpts
 
