@@ -25,7 +25,6 @@
 #include<nmadef.h>
 #include<system_data_cells.h>
 #include<ipl.h>
-#include<linux/vmalloc.h>
 #include<linux/pci.h>
 #include<system_service_setup.h>
 #include<descrip.h>

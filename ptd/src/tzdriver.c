@@ -907,7 +907,6 @@ struct _tt_port port_vector = {
 #include<devdef.h>
 #include<system_data_cells.h>
 #include<ipl.h>
-#include<linux/vmalloc.h>
 #include<linux/pci.h>
 #include<system_service_setup.h>
 #include<descrip.h>

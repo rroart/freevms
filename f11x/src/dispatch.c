@@ -4,6 +4,8 @@
 // Author. Paul Nankervis.
 // Author. Roar Thronæs.
 
+#include <linux/config.h>
+
 #include<mytypes.h>
 #include<ccbdef.h>
 #include<cpudef.h>
@@ -25,7 +27,6 @@
 
 #include<linux/init.h>
 #include<linux/sched.h>
-#include<linux/vmalloc.h>
 #include<asm/current.h>
 
 void f11b$dispatcher(void);

@@ -3,6 +3,8 @@
 
 // Author. Roar Thronæs.
 
+#include<linux/config.h>
+
 #include<starlet.h>
 #include<iodef.h>
 #include<ssdef.h>
@@ -12,7 +14,6 @@
 #include<ccbdef.h>
 #include <ddtdef.h>
 #include<system_data_cells.h>
-#include<linux/vmalloc.h>
 #include<linux/linkage.h>
 
 #include <descrip.h>
