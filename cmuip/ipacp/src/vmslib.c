@@ -461,7 +461,8 @@ drv$device_error_not() {
 }
 
 RPC$CHECK_PORT() {
-  printk("RPC$CHECK_PORT not implemented\n");
+  // don't be loud;  printk("RPC$CHECK_PORT not implemented\n");
+  return -1;
 }
 
 CH$RCHAR() {
@@ -482,6 +483,7 @@ DRV$XLOG_FAO_not() {
 
 RPC$INPUT() {
   printk("RPC$INPUT not implemented\n");
+  return 0;
 }
 
 drv$ip_receive_not() {
@@ -517,3 +519,10 @@ inline BLISSIF(int i) {
 inline BLISSIFNOT(int i) {
   return BLISSIF(i)==0;
 }
+
+malloc_not(size) 
+{
+  return kmalloc(size,GFP_KERNEL);
+}
+
+#include "libasnmbx.c"
