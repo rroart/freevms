@@ -32,7 +32,7 @@ i386/create${NOEXE}: create.o $(VMSLIBS)
 
 i386/create${EXE}: create.o $(VMSLIBS)
 	install -d i386
-	$(LINKER) $(LINKPRE) create.o $(VMSLIBS) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dfu${EXE}
+	$(LINKER) $(LINKPRE) create.o $(VMSLIBS) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/create${EXE}
 
 um/create${NOEXE}: create.o $(VMSLIBSUM)
 	install -d um
@@ -40,4 +40,4 @@ um/create${NOEXE}: create.o $(VMSLIBSUM)
 
 um/create${EXE}: create.o $(VMSLIBSUM)
 	install -d um
-	$(LINKER) $(LINKPRE) create.o $(VMSLIBSUM) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/dfu${EXE}
+	$(LINKER) $(LINKPRE) create.o $(VMSLIBSUM) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/create${EXE}
