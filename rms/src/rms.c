@@ -790,13 +790,15 @@ unsigned exe$get(struct _rabdef *rab)
     if (block > eofblk || (block == eofblk &&
 			   offset >= VMSWORD(recattr.fat$w_ffbyte))) return RMS$_EOF;
   }
-  buffer=vmalloc(512);
+  int alosize;
+  sts=exe_std$alononpaged(512,&alosize,&buffer);
   sts = sys$qiow(0,getchan(ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_vcb),IO$_READVBLK,&iosb,0,0,
 		 buffer,512,block,0,0,0);
   sts = iosb.iosb$w_status;
   blocks=1;
   if ((sts & 1) == 0) {
     if (sts == SS$_ENDOFFILE) sts = RMS$_EOF;
+    exe_std$deanonpgdsiz(buffer,512);
     return sts;
   }
 
@@ -806,6 +808,7 @@ unsigned exe$get(struct _rabdef *rab)
     offset += 2;
     if (reclen > rab->rab$w_usz) {
       sts = deaccesschunk(0,0,0);
+      exe_std$deanonpgdsiz(buffer,512);
       return RMS$_RTB;
     } 
   }
@@ -877,7 +880,10 @@ unsigned exe$get(struct _rabdef *rab)
     offset += seglen + dellen;
     if ((offset & 1) && (rfm == FAB$C_VAR || rfm == FAB$C_VFC)) offset++;
     deaccesschunk(0,0,1);
-    if ((sts & 1) == 0) return sts;
+    if ((sts & 1) == 0) {
+      exe_std$deanonpgdsiz(buffer,512);
+      return sts;
+    }
     block += offset / 512;
     offset %= 512;
     if ((delim == 0 && cpylen >= reclen) || delim == 99) {
@@ -889,6 +895,7 @@ unsigned exe$get(struct _rabdef *rab)
       blocks=1;
       if ((sts & 1) == 0) {
 	if (sts == SS$_ENDOFFILE) sts = RMS$_EOF;
+	exe_std$deanonpgdsiz(buffer,512);
 	return sts;
       }
       offset = 0;
@@ -901,6 +908,7 @@ unsigned exe$get(struct _rabdef *rab)
   rab->rab$w_rfa[0] = block & 0xffff;
   rab->rab$w_rfa[1] = block >> 16;
   rab->rab$w_rfa[2] = offset;
+  exe_std$deanonpgdsiz(buffer,512);
   return sts;
 }
 
