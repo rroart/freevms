@@ -55,10 +55,12 @@ static int ext2_commit_chunk(struct page *page, unsigned from, unsigned to)
 	int err = 0;
 	dir->i_version = ++event;
 	ext2_aops.commit_write(NULL, page, from, to);
+	goto sync;
 	if (IS_SYNC(dir)) {
 		int err2;
+	sync:
 		err = writeout_one_page(page);
-		err2 = waitfor_one_page(page);
+		err2 = 0; //waitfor_one_page(page);
 		if (err == 0)
 			err = err2;
 	}
@@ -392,7 +394,8 @@ void ext2_set_link(struct inode *dir, struct ext2_dir_entry_2 *de,
 	UnlockPage(page);
 	ext2_put_page(page);
 	dir->i_mtime = dir->i_ctime = CURRENT_TIME;
-	mark_inode_dirty(dir);
+	ext2_sync_inode (inode);
+	//mark_inode_dirty(dir);
 }
 
 /*
@@ -458,7 +461,8 @@ got_it:
 	ext2_set_de_type (de, inode);
 	err = ext2_commit_chunk(page, from, to);
 	dir->i_mtime = dir->i_ctime = CURRENT_TIME;
-	mark_inode_dirty(dir);
+	ext2_sync_inode (inode);
+	//mark_inode_dirty(dir);
 	/* OFFSET_CACHE */
 out_unlock:
 	UnlockPage(page);
@@ -500,7 +504,8 @@ int ext2_delete_entry (struct ext2_dir_entry_2 * dir, struct page * page )
 	UnlockPage(page);
 	ext2_put_page(page);
 	inode->i_ctime = inode->i_mtime = CURRENT_TIME;
-	mark_inode_dirty(inode);
+	ext2_sync_inode (inode);
+	//mark_inode_dirty(inode);
 	return err;
 }
 

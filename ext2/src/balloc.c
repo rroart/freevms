@@ -327,13 +327,15 @@ do_more:
 		}
 	}
 	
-	mark_buffer_dirty(bh2);
-	mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
+	vms_mark_buffer_dirty(bh2);
+	vms_mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
 
-	mark_buffer_dirty(bh);
+	vms_mark_buffer_dirty(bh);
+	goto sync;
 	if (sb->s_flags & MS_SYNCHRONOUS) {
-		ll_rw_block (WRITE, 1, &bh);
-		wait_on_buffer (bh);
+	sync:
+		vms_ll_rw_block (WRITE, 1, &bh, inode->i_dev);
+		//wait_on_buffer (bh);
 	}
 	if (overflow) {
 		block += count;
@@ -579,11 +581,12 @@ got_block:
 #endif
 
 	j = tmp;
-
-	mark_buffer_dirty(bh);
+	vms_mark_buffer_dirty(bh);
+	goto sync;
 	if (sb->s_flags & MS_SYNCHRONOUS) {
-		ll_rw_block (WRITE, 1, &bh);
-		wait_on_buffer (bh);
+	sync:
+		vms_ll_rw_block (WRITE, 1, &bh,inode->i_dev);
+		//wait_on_buffer (bh);
 	}
 
 	if (j >= le32_to_cpu(es->s_blocks_count)) {
@@ -598,9 +601,9 @@ got_block:
 		    "Goal hits %d of %d.\n", j, goal_hits, goal_attempts);
 
 	gdp->bg_free_blocks_count = cpu_to_le16(le16_to_cpu(gdp->bg_free_blocks_count) - 1);
-	mark_buffer_dirty(bh2);
+	vms_mark_buffer_dirty(bh2);
 	es->s_free_blocks_count = cpu_to_le32(le32_to_cpu(es->s_free_blocks_count) - 1);
-	mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
+	vms_mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
 	sb->s_dirt = 1;
 	unlock_super (sb);
 	*err = 0;

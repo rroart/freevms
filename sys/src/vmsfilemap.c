@@ -334,6 +334,7 @@ static int truncate_list_pages(struct list_head *head, unsigned long start, unsi
  */
 void truncate_inode_pages(struct address_space * mapping, loff_t lstart) 
 {
+#ifndef CONFIG_VMS
 	unsigned long start = (lstart + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
 	unsigned partial = lstart & (PAGE_CACHE_SIZE - 1);
 	int unlocked;
@@ -346,6 +347,7 @@ void truncate_inode_pages(struct address_space * mapping, loff_t lstart)
 	} while (unlocked);
 	/* Traversed all three lists without dropping the lock */
 	spin_unlock(&pagecache_lock);
+#endif
 }
 
 static inline int invalidate_this_page2(struct page * page,
@@ -1279,45 +1281,6 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 	index = *ppos >> PAGE_CACHE_SHIFT;
 	offset = *ppos & ~PAGE_CACHE_MASK;
 
-/*
- * If the current position is outside the previous read-ahead window, 
- * we reset the current read-ahead context and set read ahead max to zero
- * (will be set to just needed value later),
- * otherwise, we assume that the file accesses are sequential enough to
- * continue read-ahead.
- */
-	if (index > filp->f_raend || index + filp->f_rawin < filp->f_raend) {
-		reada_ok = 0;
-		filp->f_raend = 0;
-		filp->f_ralen = 0;
-		filp->f_ramax = 0;
-		filp->f_rawin = 0;
-	} else {
-		reada_ok = 1;
-	}
-/*
- * Adjust the current value of read-ahead max.
- * If the read operation stay in the first half page, force no readahead.
- * Otherwise try to increase read ahead max just enough to do the read request.
- * Then, at least MIN_READAHEAD if read ahead is ok,
- * and at most MAX_READAHEAD in all cases.
- */
-	if (!index && offset + desc->count <= (PAGE_CACHE_SIZE >> 1)) {
-		filp->f_ramax = 0;
-	} else {
-		unsigned long needed;
-
-		needed = ((offset + desc->count) >> PAGE_CACHE_SHIFT) + 1;
-
-		if (filp->f_ramax < needed)
-			filp->f_ramax = needed;
-
-		if (reada_ok && filp->f_ramax < vm_min_readahead)
-				filp->f_ramax = vm_min_readahead;
-		if (filp->f_ramax > max_readahead)
-			filp->f_ramax = max_readahead;
-	}
-
 	for (;;) {
 		struct page *page, **hash;
 		unsigned long end_index, nr, ret;
@@ -1342,15 +1305,52 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 
 		spin_lock(&pagecache_lock);
 		page = 0;//__find_page_nolock(mapping, index, *hash);
-		if (!page)
-			goto no_cached_page;
-found_page:
-		page_cache_get(page);
-		spin_unlock(&pagecache_lock);
 
-		if (!Page_Uptodate(page))
-			goto page_not_up_to_date;
-		generic_file_readahead(reada_ok, filp, inode, page);
+		/*
+		 * Ok, it wasn't cached, so we need to create a new
+		 * page..
+		 *
+		 * We get here with the page cache lock held.
+		 */
+		if (!cached_page) {
+			spin_unlock(&pagecache_lock);
+			cached_page = page_cache_alloc(mapping);
+			if (!cached_page) {
+				desc->error = -ENOMEM;
+				break;
+			}
+
+			/*
+			 * Somebody may have added the page while we
+			 * dropped the page cache lock. Check for that.
+			 */
+			spin_lock(&pagecache_lock);
+			page = 0;//__find_page_nolock(mapping, index, *hash);
+		}
+
+		/*
+		 * Ok, add the new page to the hash-queues...
+		 */
+		page = cached_page;
+		__add_to_page_cache(page, mapping, index, hash);
+		spin_unlock(&pagecache_lock);
+		lru_cache_add(page);		
+		cached_page = NULL;
+
+		/* ... and start the actual read. The read will unlock the page. */
+		error = ext2_aops.readpage(filp, page);
+
+		if (!error) {
+			if (Page_Uptodate(page))
+				goto page_ok;
+
+		}
+
+		/* UHHUH! A synchronous read error occurred. Report it */
+		desc->error = error;
+		page_cache_release(page);
+		break;
+
 page_ok:
 		/* If users can be writing to this page using arbitrary
 		 * virtual addresses, take care about potential aliasing
@@ -1386,87 +1386,6 @@ page_ok:
 			continue;
 		break;
 
-/*
- * Ok, the page was not immediately readable, so let's try to read ahead while we're at it..
- */
-page_not_up_to_date:
-		generic_file_readahead(reada_ok, filp, inode, page);
-
-		if (Page_Uptodate(page))
-			goto page_ok;
-
-		/* Get exclusive access to the page ... */
-		lock_page(page);
-
-		/* Did it get unhashed before we got the lock? */
-		if (!page->mapping) {
-			UnlockPage(page);
-			page_cache_release(page);
-			continue;
-		}
-
-		/* Did somebody else fill it already? */
-		if (Page_Uptodate(page)) {
-			UnlockPage(page);
-			goto page_ok;
-		}
-
-readpage:
-		/* ... and start the actual read. The read will unlock the page. */
-		error = ext2_aops.readpage(filp, page);
-
-		if (!error) {
-			if (Page_Uptodate(page))
-				goto page_ok;
-
-			/* Again, try some read-ahead while waiting for the page to finish.. */
-			generic_file_readahead(reada_ok, filp, inode, page);
-			wait_on_page(page);
-			if (Page_Uptodate(page))
-				goto page_ok;
-			error = -EIO;
-		}
-
-		/* UHHUH! A synchronous read error occurred. Report it */
-		desc->error = error;
-		page_cache_release(page);
-		break;
-
-no_cached_page:
-		/*
-		 * Ok, it wasn't cached, so we need to create a new
-		 * page..
-		 *
-		 * We get here with the page cache lock held.
-		 */
-		if (!cached_page) {
-			spin_unlock(&pagecache_lock);
-			cached_page = page_cache_alloc(mapping);
-			if (!cached_page) {
-				desc->error = -ENOMEM;
-				break;
-			}
-
-			/*
-			 * Somebody may have added the page while we
-			 * dropped the page cache lock. Check for that.
-			 */
-			spin_lock(&pagecache_lock);
-			page = 0;//__find_page_nolock(mapping, index, *hash);
-			if (page)
-				goto found_page;
-		}
-
-		/*
-		 * Ok, add the new page to the hash-queues...
-		 */
-		page = cached_page;
-		__add_to_page_cache(page, mapping, index, hash);
-		spin_unlock(&pagecache_lock);
-		lru_cache_add(page);		
-		cached_page = NULL;
-
-		goto readpage;
 	}
 
 	*ppos = ((loff_t) index << PAGE_CACHE_SHIFT) + offset;

@@ -406,10 +406,12 @@ static int ext2_alloc_branch(struct inode *inode,
 		*branch[n].p = branch[n].key;
 		mark_buffer_uptodate(bh, 1);
 		unlock_buffer(bh);
-		mark_buffer_dirty_inode(bh, inode);
+		//vms_mark_buffer_dirty_inode(bh, inode);
+		goto sync;
 		if (IS_SYNC(inode) || inode->u.ext2_i.i_osync) {
-			ll_rw_block (WRITE, 1, &bh);
-			wait_on_buffer (bh);
+		sync:
+			vms_ll_rw_block (WRITE, 1, &bh, inode->i_dev);
+			//wait_on_buffer (bh);
 		}
 		parent = nr;
 	}
@@ -470,17 +472,20 @@ static inline int ext2_splice_branch(struct inode *inode,
 
 	/* had we spliced it onto indirect block? */
 	if (where->bh) {
-		mark_buffer_dirty_inode(where->bh, inode);
+	  //		vms_mark_buffer_dirty_inode(where->bh, inode);
+	  goto sync;
 		if (IS_SYNC(inode) || inode->u.ext2_i.i_osync) {
-			ll_rw_block (WRITE, 1, &where->bh);
-			wait_on_buffer(where->bh);
+		sync:
+			vms_ll_rw_block (WRITE, 1, &where->bh, inode->i_dev);
+			//			wait_on_buffer(where->bh);
 		}
 	}
 
 	if (IS_SYNC(inode) || inode->u.ext2_i.i_osync)
 		ext2_sync_inode (inode);
 	else
-		mark_inode_dirty(inode);
+		ext2_sync_inode (inode);
+	//		mark_inode_dirty(inode);
 	return 0;
 
 changed:
@@ -725,7 +730,8 @@ static inline void ext2_free_data(struct inode *inode, u32 *p, u32 *q)
 			else if (block_to_free == nr - count)
 				count++;
 			else {
-				mark_inode_dirty(inode);
+				//mark_inode_dirty(inode);
+				ext2_sync_inode (inode);
 				ext2_free_blocks (inode, block_to_free, count);
 			free_this:
 				block_to_free = nr;
@@ -734,7 +740,8 @@ static inline void ext2_free_data(struct inode *inode, u32 *p, u32 *q)
 		}
 	}
 	if (count > 0) {
-		mark_inode_dirty(inode);
+	  //		mark_inode_dirty(inode);
+		ext2_sync_inode (inode);
 		ext2_free_blocks (inode, block_to_free, count);
 	}
 }
@@ -779,7 +786,8 @@ static void ext2_free_branches(struct inode *inode, u32 *p, u32 *q, int depth)
 					   depth);
 			bforget(bh);
 			ext2_free_blocks(inode, nr, 1);
-			mark_inode_dirty(inode);
+			//mark_inode_dirty(inode);
+			ext2_sync_inode (inode);
 		}
 	} else
 		ext2_free_data(inode, p, q);
@@ -824,10 +832,13 @@ void ext2_truncate (struct inode * inode)
 	partial = ext2_find_shared(inode, n, offsets, chain, &nr);
 	/* Kill the top of shared branch (already detached) */
 	if (nr) {
+		ext2_sync_inode (inode);
+#if 0
 		if (partial == chain)
 			mark_inode_dirty(inode);
 		else
 			mark_buffer_dirty_inode(partial->bh, inode);
+#endif
 		ext2_free_branches(inode, &nr, &nr+1, (chain+n-1) - partial);
 	}
 	/* Clear the ends of indirect blocks on the shared branch */
@@ -836,10 +847,12 @@ void ext2_truncate (struct inode * inode)
 				   partial->p + 1,
 				   (u32*)partial->bh->b_data + addr_per_block,
 				   (chain+n-1) - partial);
-		mark_buffer_dirty_inode(partial->bh, inode);
+		//		mark_buffer_dirty_inode(partial->bh, inode);
+		goto sync;
 		if (IS_SYNC(inode)) {
-			ll_rw_block (WRITE, 1, &partial->bh);
-			wait_on_buffer (partial->bh);
+		sync:
+			vms_ll_rw_block (WRITE, 1, &partial->bh, inode->i_dev);
+			//wait_on_buffer (partial->bh);
 		}
 		brelse (partial->bh);
 		partial--;
@@ -851,21 +864,24 @@ do_indirects:
 			nr = i_data[EXT2_IND_BLOCK];
 			if (nr) {
 				i_data[EXT2_IND_BLOCK] = 0;
-				mark_inode_dirty(inode);
+				ext2_sync_inode (inode);
+				//mark_inode_dirty(inode);
 				ext2_free_branches(inode, &nr, &nr+1, 1);
 			}
 		case EXT2_IND_BLOCK:
 			nr = i_data[EXT2_DIND_BLOCK];
 			if (nr) {
 				i_data[EXT2_DIND_BLOCK] = 0;
-				mark_inode_dirty(inode);
+				//mark_inode_dirty(inode);
+				ext2_sync_inode (inode);
 				ext2_free_branches(inode, &nr, &nr+1, 2);
 			}
 		case EXT2_DIND_BLOCK:
 			nr = i_data[EXT2_TIND_BLOCK];
 			if (nr) {
 				i_data[EXT2_TIND_BLOCK] = 0;
-				mark_inode_dirty(inode);
+				ext2_sync_inode (inode);
+				//		mark_inode_dirty(inode);
 				ext2_free_branches(inode, &nr, &nr+1, 3);
 			}
 		case EXT2_TIND_BLOCK:
@@ -875,7 +891,8 @@ do_indirects:
 	if (IS_SYNC(inode))
 		ext2_sync_inode (inode);
 	else
-		mark_inode_dirty(inode);
+		ext2_sync_inode (inode);
+	//		mark_inode_dirty(inode);
 }
 
 void ext2_read_inode (struct inode * inode)
@@ -1033,6 +1050,8 @@ static int ext2_update_inode(struct inode * inode, int do_sync)
 	int err = 0;
 	struct ext2_group_desc * gdp;
 
+	do_sync = 1;
+
 	if ((inode->i_ino != EXT2_ROOT_INO &&
 	     inode->i_ino < EXT2_FIRST_INO(inode->i_sb)) ||
 	    inode->i_ino > le32_to_cpu(inode->i_sb->u.ext2_sb.s_es->s_inodes_count)) {
@@ -1132,11 +1151,11 @@ static int ext2_update_inode(struct inode * inode, int do_sync)
 		raw_inode->i_block[0] = cpu_to_le32(kdev_t_to_nr(inode->i_rdev));
 	else for (block = 0; block < EXT2_N_BLOCKS; block++)
 		raw_inode->i_block[block] = inode->u.ext2_i.i_data[block];
-	mark_buffer_dirty(bh);
+	vms_mark_buffer_dirty(bh);
 	if (do_sync) {
 #if 1
-		ll_rw_block (WRITE, 1, &bh);
-		wait_on_buffer (bh);
+		vms_ll_rw_block (WRITE, 1, &bh, inode->i_dev);
+		//wait_on_buffer (bh);
 #endif
 #if 0
 		sts = exe_qiow(0,(unsigned short)dev2chan(bh->b_dev),IO$_WRITEPBLK,&iosb,0,0,

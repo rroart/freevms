@@ -72,7 +72,7 @@ NORET_TYPE void ext2_panic (struct super_block * sb, const char * function,
 		sb->u.ext2_sb.s_mount_state |= EXT2_ERROR_FS;
 		sb->u.ext2_sb.s_es->s_state =
 			cpu_to_le16(le16_to_cpu(sb->u.ext2_sb.s_es->s_state) | EXT2_ERROR_FS);
-		mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
+		vms_mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
 		sb->s_dirt = 1;
 	}
 	va_start (args, fmt);
@@ -661,16 +661,16 @@ static void ext2_commit_super (struct super_block * sb,
 			       struct ext2_super_block * es)
 {
 	es->s_wtime = cpu_to_le32(CURRENT_TIME);
-	mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
+	vms_mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
 	sb->s_dirt = 0;
 }
 
 static void ext2_sync_super(struct super_block *sb, struct ext2_super_block *es)
 {
 	es->s_wtime = cpu_to_le32(CURRENT_TIME);
-	mark_buffer_dirty(EXT2_SB(sb)->s_sbh);
-	ll_rw_block(WRITE, 1, &EXT2_SB(sb)->s_sbh);
-	wait_on_buffer(EXT2_SB(sb)->s_sbh);
+	//vms_mark_buffer_dirty(EXT2_SB(sb)->s_sbh);
+	vms_ll_rw_block(WRITE, 1, &EXT2_SB(sb)->s_sbh,sb->s_dev);
+	//	wait_on_buffer(EXT2_SB(sb)->s_sbh);
 	sb->s_dirt = 0;
 }
 

@@ -176,6 +176,8 @@ void end_buffer_io_sync(struct buffer_head *bh, int uptodate)
 	put_bh(bh);
 }
 
+#ifndef CONFIG_VMS
+
 /*
  * The buffers have been marked clean and locked.  Just submit the dang
  * things.. 
@@ -295,6 +297,8 @@ static int wait_for_locked_buffers(kdev_t dev, int index, int refile)
 	return 0;
 }
 
+#endif
+
 /* Call sync_buffers with wait!=0 to ensure that the call does not
  * return until all buffer writes have completed.  Sync() may return
  * before the writes have finished; fsync() may not.
@@ -315,12 +319,14 @@ int sync_buffers(kdev_t dev, int wait)
 	 * 2) write out all dirty, unlocked buffers;
 	 * 2) wait for completion by waiting for all buffers to unlock.
 	 */
+#ifndef CONFIG_VMS
 	write_unlocked_buffers(dev);
 	if (wait) {
 		err = wait_for_locked_buffers(dev, BUF_DIRTY, 0);
 		write_unlocked_buffers(dev);
 		err |= wait_for_locked_buffers(dev, BUF_LOCKED, 1);
 	}
+#endif
 	return err;
 }
 
@@ -740,7 +746,9 @@ static void free_more_memory(void)
 	zone_t * zone = contig_page_data.node_zonelists[GFP_NOFS & GFP_ZONEMASK].zones[0];
 	
 	balance_dirty();
+#ifndef CONFIG_VMS
 	wakeup_bdflush();
+#endif
 	try_to_free_pages(zone, GFP_NOFS, 0);
 	run_task_queue(&tq_disk);
 	//	current->policy |= SCHED_YIELD;
@@ -1088,7 +1096,9 @@ void balance_dirty(void)
 
 	/* If we're getting into imbalance, start write-out */
 	spin_lock(&lru_list_lock);
+#ifndef CONFIG_VMS
 	write_some_buffers(NODEV);
+#endif
 
 	/*
 	 * And if we're _really_ out of balance, wait for
@@ -1096,10 +1106,12 @@ void balance_dirty(void)
 	 * start bdflush.
 	 * This will throttle heavy writers.
 	 */
+#ifndef CONFIG_VMS
 	if (state > 0) {
 		wait_for_some_buffers(NODEV);
 		wakeup_bdflush();
 	}
+#endif
 }
 
 inline void __mark_dirty(struct buffer_head *bh)
@@ -1219,6 +1231,7 @@ struct buffer_head * bread(kdev_t dev, int block, int size)
 	 init_waitqueue_head(&bh->b_wait);
 	 get_bh(bh);
 
+	 bh -> b_dev = dev;
 	 bh -> b_data = kmalloc(size, GFP_KERNEL);
 	 bh -> b_size = size;
 
@@ -1450,6 +1463,7 @@ try_to_free:
  * we have truncated the file and are going to free the
  * blocks on-disk..
  */
+#ifndef CONFIG_VMS
 int discard_bh_page(struct page *page, unsigned long offset, int drop_pagecache)
 {
 	struct buffer_head *head, *bh, *next;
@@ -1492,6 +1506,53 @@ int discard_bh_page(struct page *page, unsigned long offset, int drop_pagecache)
 
 	return 1;
 }
+#else
+int discard_bh_page(struct page *page, unsigned long offset, int drop_pagecache)
+{
+	struct buffer_head *head, *bh, *next, **buffers;
+	unsigned int curr_off = 0;
+	int turns=0;
+
+	if (!PageLocked(page))
+		BUG();
+	if (!page->buffers)
+		return 1;
+
+	buffers = page->buffers;
+	bh = buffers[0];
+	do {
+		unsigned int next_off = curr_off + bh->b_size;
+		turns++;
+		next = buffers[turns];
+
+		/*
+		 * is this block fully flushed?
+		 */
+		if (offset <= curr_off)
+			discard_buffer(bh);
+		curr_off = next_off;
+		bh = next;
+	} while (bh);
+
+	/*
+	 * subtle. We release buffer-heads only if this is
+	 * the 'final' flushpage. We have invalidated the get_block
+	 * cached value unconditionally, so real IO is not
+	 * possible anymore.
+	 *
+	 * If the free doesn't work out, the buffers can be
+	 * left around - they just turn into anonymous buffers
+	 * instead.
+	 */
+	if (!offset) {
+		if (!try_to_release_page(page, 0))
+			return 0;
+	}
+
+	return 1;
+}
+
+#endif
 
 void create_empty_buffers(struct page *page, kdev_t dev, unsigned long blocksize)
 {
@@ -1649,100 +1710,6 @@ out:
 		UnlockPage(page);
 	return err;
 }
-#else
-static int __block_write_full_page(struct inode *inode, struct page *page, get_block_t *get_block)
-{
-	int err, i;
-	unsigned long block;
-	struct buffer_head *bh, *head;
-	int need_unlock;
-
-	if (!PageLocked(page))
-		BUG();
-
-	if (!page->buffers)
-		create_empty_buffers(page, inode->i_dev, 1 << inode->i_blkbits);
-	head = page->buffers;
-
-	block = page->index << (PAGE_CACHE_SHIFT - inode->i_blkbits);
-
-	bh = head;
-	i = 0;
-
-	/* Stage 1: make sure we have all the buffers mapped! */
-	do {
-		/*
-		 * If the buffer isn't up-to-date, we can't be sure
-		 * that the buffer has been initialized with the proper
-		 * block number information etc..
-		 *
-		 * Leave it to the low-level FS to make all those
-		 * decisions (block #0 may actually be a valid block)
-		 */
-		if (!buffer_mapped(bh)) {
-			err = get_block(inode, block, bh, 1);
-			if (err)
-				goto out;
-			if (buffer_new(bh))
-				unmap_underlying_metadata(bh);
-		}
-		bh = bh->b_this_page;
-		block++;
-	} while (bh != head);
-
-	/* Stage 2: lock the buffers, mark them clean */
-	do {
-		lock_buffer(bh);
-		set_buffer_async_io(bh);
-		set_bit(BH_Uptodate, &bh->b_state);
-		clear_bit(BH_Dirty, &bh->b_state);
-		bh = bh->b_this_page;
-	} while (bh != head);
-
-	/* Stage 3: submit the IO */
-	do {
-		struct buffer_head *next = bh->b_this_page;
-		submit_bh(WRITE, bh);
-		bh = next;
-	} while (bh != head);
-
-	/* Done - end_buffer_io_async will unlock */
-	SetPageUptodate(page);
-	return 0;
-
-out:
-	/*
-	 * ENOSPC, or some other error.  We may already have added some
-	 * blocks to the file, so we need to write these out to avoid
-	 * exposing stale data.
-	 */
-	ClearPageUptodate(page);
-	bh = head;
-	need_unlock = 1;
-	/* Recovery: lock and submit the mapped buffers */
-	do {
-		if (buffer_mapped(bh)) {
-			lock_buffer(bh);
-			set_buffer_async_io(bh);
-			need_unlock = 0;
-		}
-		bh = bh->b_this_page;
-	} while (bh != head);
-	do {
-		struct buffer_head *next = bh->b_this_page;
-		if (buffer_mapped(bh)) {
-			set_bit(BH_Uptodate, &bh->b_state);
-			clear_bit(BH_Dirty, &bh->b_state);
-			submit_bh(WRITE, bh);
-		}
-		bh = next;
-	} while (bh != head);
-	if (need_unlock)
-		UnlockPage(page);
-	return err;
-}
-#endif
-
 static int __block_prepare_write(struct inode *inode, struct page *page,
 		unsigned from, unsigned to, get_block_t *get_block)
 {
@@ -1884,7 +1851,6 @@ static int __block_commit_write(struct inode *inode, struct page *page,
  * mark_buffer_uptodate() functions propagate buffer state into the
  * page struct once IO has completed.
  */
-#ifndef CONFIG_IO_VMS
 int block_read_full_page(struct page *page, get_block_t *get_block)
 {
 	struct inode *inode = page->mapping->host;
@@ -1956,6 +1922,281 @@ int block_read_full_page(struct page *page, get_block_t *get_block)
 	return 0;
 }
 #else
+static int __block_write_full_page(struct inode *inode, struct page *page, get_block_t *get_block)
+{
+	int err, i;
+	unsigned long block;
+	struct buffer_head *bh,**arr;
+	int need_unlock;
+	int sts;
+	unsigned long long iosb;
+	int turns=0;
+	char * buffers = kmalloc(sizeof(arr),GFP_KERNEL);
+	bzero(buffers,sizeof(arr));
+
+	if (!PageLocked(page))
+		BUG();
+
+	block = page->index << (PAGE_CACHE_SHIFT - inode->i_blkbits);
+
+	i = 0;
+
+	arr=page->buffers;
+
+	bh=arr[0];
+
+	/* Stage 1: make sure we have all the buffers mapped! */
+	do {
+		/*
+		 * If the buffer isn't up-to-date, we can't be sure
+		 * that the buffer has been initialized with the proper
+		 * block number information etc..
+		 *
+		 * Leave it to the low-level FS to make all those
+		 * decisions (block #0 may actually be a valid block)
+		 */
+		if (!buffer_mapped(bh)) {
+			err = get_block(inode, block, bh, 1);
+			if (err)
+				goto out;
+			if (buffer_new(bh))
+				unmap_underlying_metadata(bh);
+		}
+		turns++;
+		bh=arr[turns];
+		block++;
+	} while (bh);
+
+	bh=arr[0];
+	turns=0;
+
+	/* Stage 2: lock the buffers, mark them clean */
+	do {
+		lock_buffer(bh);
+		set_buffer_async_io(bh);
+		set_bit(BH_Uptodate, &bh->b_state);
+		clear_bit(BH_Dirty, &bh->b_state);
+		turns++;
+		bh=arr[turns];
+	} while (bh);
+
+	bh=arr[0];
+	turns=0;
+	/* Stage 3: submit the IO */
+	do {
+	  //		submit_bh(WRITE, bh);
+	  sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
+			 bh->b_data,bh->b_size, bh->b_blocknr,MINOR(inode->i_dev)&31,0,0);
+		turns++;
+		bh=arr[turns];
+	} while (bh);
+
+	/* Done - end_buffer_io_async will unlock */
+	SetPageUptodate(page);
+	return 0;
+
+out:
+	/*
+	 * ENOSPC, or some other error.  We may already have added some
+	 * blocks to the file, so we need to write these out to avoid
+	 * exposing stale data.
+	 */
+	ClearPageUptodate(page);
+	bh = arr[0];
+	turns=0;
+	need_unlock = 1;
+	/* Recovery: lock and submit the mapped buffers */
+	do {
+		if (buffer_mapped(bh)) {
+			lock_buffer(bh);
+			set_buffer_async_io(bh);
+			need_unlock = 0;
+		}
+		turns++;
+		bh=arr[turns];
+	} while (bh);
+	bh=arr[0];
+	turns=0;
+	do {
+		if (buffer_mapped(bh)) {
+			set_bit(BH_Uptodate, &bh->b_state);
+			clear_bit(BH_Dirty, &bh->b_state);
+			//			submit_bh(WRITE, bh);
+			sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
+				       bh->b_data,bh->b_size, bh->b_blocknr,MINOR(inode->i_dev)&31,0,0);
+		}
+      		turns++;
+		bh=arr[turns];
+	} while (bh);
+	if (need_unlock)
+		UnlockPage(page);
+	return err;
+}
+static int __block_prepare_write(struct inode *inode, struct page *page,
+		unsigned from, unsigned to, get_block_t *get_block)
+{
+	unsigned block_start, block_end;
+	unsigned long block;
+	int err = 0;
+	unsigned blocksize, bbits;
+	struct buffer_head *bh, *head, *wait[2], **wait_bh=wait, *arr[MAX_BUF_PER_PAGE];
+	char *kaddr = kmap(page);
+	int turns = 0;
+	int sts;
+	unsigned long long iosb;
+	unsigned char * buffers=kmalloc(sizeof(arr),GFP_KERNEL);
+	bzero(arr,sizeof(arr));
+
+	blocksize = 1 << inode->i_blkbits;
+#if 0
+	if (!page->buffers)
+		create_empty_buffers(page, inode->i_dev, blocksize);
+	head = page->buffers;
+#endif
+
+	bbits = inode->i_blkbits;
+	block = page->index << (PAGE_CACHE_SHIFT - bbits);
+
+	for(block_start = 0; turns<(PAGE_SIZE/blocksize);
+	    block++, block_start=block_end, turns++) {
+
+	   bh = kmalloc (sizeof(struct buffer_head), GFP_KERNEL);
+	   bzero(bh, sizeof(struct buffer_head));
+	   init_buffer(bh, NULL, NULL);
+	   init_waitqueue_head(&bh->b_wait);
+	   get_bh(bh);
+
+	   bh -> b_dev = inode->i_dev;
+	   bh -> b_data = kmalloc(blocksize, GFP_KERNEL);
+	   bh -> b_size = blocksize;
+
+	   arr[turns]=bh;
+
+		if (!bh)
+			BUG();
+		block_end = block_start+blocksize;
+		if (block_end <= from)
+		    continue;
+		if (block_start >= to)
+		    break;
+		clear_bit(BH_New, &bh->b_state);
+		if (!buffer_mapped(bh)) {
+			err = get_block(inode, block, bh, 1);
+			if (err)
+			    goto out;
+			if (buffer_new(bh)) {
+				unmap_underlying_metadata(bh);
+				if (Page_Uptodate(page)) {
+					set_bit(BH_Uptodate, &bh->b_state);
+					continue;
+				}
+				if (block_end > to)
+					memset(kaddr+to, 0, block_end-to);
+				if (block_start < from)
+					memset(kaddr+block_start, 0, from-block_start);
+				if (block_end > to || block_start < from)
+					flush_dcache_page(page);
+				continue;
+			}
+		}
+		if (!buffer_uptodate(bh) &&
+		     (block_start < from || block_end > to)) {
+#if 0
+			ll_rw_block(READ, 1, &bh);
+#endif
+			sts = exe_qiow(0,(unsigned short)dev2chan(bh->b_dev),IO$_READPBLK,&iosb,0,0,
+				       bh->b_data,bh->b_size, bh->b_blocknr,MINOR(inode->i_dev)&31,0,0);
+#if 0
+			*wait_bh++=bh;
+#endif
+		}
+	}
+#if 0
+	while (turns) {
+	  if (arr[turns]) kfree(arr[turns]);
+	  turns--;
+	}
+#endif
+	bcopy(arr,buffers,sizeof(arr));
+	page->buffers=buffers;
+	return 0;
+out:
+	/*
+	 * Zero out any newly allocated blocks to avoid exposing stale
+	 * data.  If BH_New is set, we know that the block was newly
+	 * allocated in the above loop.
+	 */
+	bh = head;
+	block_start = 0;
+	do {
+		block_end = block_start+blocksize;
+		if (block_end <= from)
+			goto next_bh;
+		if (block_start >= to)
+			break;
+		if (buffer_new(bh)) {
+			if (buffer_uptodate(bh))
+				printk(KERN_ERR "%s: zeroing uptodate buffer!\n", __FUNCTION__);
+			memset(kaddr+block_start, 0, bh->b_size);
+			set_bit(BH_Uptodate, &bh->b_state);
+			mark_buffer_dirty(bh);
+		}
+next_bh:
+		block_start = block_end;
+		bh = bh->b_this_page;
+	} while (bh != head);
+	return err;
+}
+
+static int __block_commit_write(struct inode *inode, struct page *page,
+		unsigned from, unsigned to)
+{
+	unsigned block_start, block_end;
+	int partial = 0, need_balance_dirty = 0;
+	unsigned blocksize;
+	struct buffer_head *bh, **arr;
+	int turns=0;
+	int sts;
+	unsigned long long iosb;
+
+	blocksize = 1 << inode->i_blkbits;
+
+	arr=page->buffers;
+
+	for(bh = arr[turns], block_start = 0;
+	    bh;
+	    block_start=block_end, ++turns, bh = arr[turns]) {
+		block_end = block_start + blocksize;
+		if (block_end <= from || block_start >= to) {
+			if (!buffer_uptodate(bh))
+				partial = 1;
+		} else {
+			set_bit(BH_Uptodate, &bh->b_state);
+			if (!atomic_set_buffer_dirty(bh)) {
+				__mark_dirty(bh);
+#if 0
+				buffer_insert_inode_data_queue(bh, inode);
+#endif
+				sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
+					       bh->b_data,blocksize, bh->b_blocknr,MINOR(inode->i_dev)&31,0,0);
+				need_balance_dirty = 1;
+			}
+		}
+	}
+
+	if (need_balance_dirty)
+		balance_dirty();
+	/*
+	 * is this a partial write that happened to make all buffers
+	 * uptodate then we can optimize away a bogus readpage() for
+	 * the next read(). Here we 'discover' wether the page went
+	 * uptodate as a result of this (potentially partial) write.
+	 */
+	if (!partial)
+		SetPageUptodate(page);
+	return 0;
+}
+
 int block_read_full_page(struct page *page, get_block_t *get_block)
 {
 	 struct inode *inode = page->mapping->host;
@@ -1966,6 +2207,8 @@ int block_read_full_page(struct page *page, get_block_t *get_block)
 	 int sts;
 	 unsigned long long iosb;
 	 int turns;
+	 char * buffers = kmalloc(sizeof(arr),GFP_KERNEL);
+	 bzero(arr,sizeof(arr));
 
 	 // printk("bl r f p\n");
 #ifdef __i386
@@ -2072,6 +2315,9 @@ int block_read_full_page(struct page *page, get_block_t *get_block)
 	    printk(KERN_INFO "%x ",arr[0]->b_data[i]);
 	  printk(KERN_INFO "\n");
 	}
+
+	bcopy(arr,buffers,sizeof(arr));
+	page->buffers=buffers;
 
 	SetPageUptodate(page);
 	UnlockPage(page);
@@ -2528,18 +2774,21 @@ done:
  */
 int writeout_one_page(struct page *page)
 {
-	struct buffer_head *bh, *head = page->buffers;
+  struct buffer_head *bh, **buffers = page->buffers;
+  int turns=0;
 
-	if (!PageLocked(page))
-		BUG();
-	bh = head;
+  if (!PageLocked(page))
+    BUG();
+  bh = buffers[0];
 	do {
 		if (buffer_locked(bh) || !buffer_dirty(bh) || !buffer_uptodate(bh))
 			continue;
 
 		bh->b_flushtime = jiffies;
-		ll_rw_block(WRITE, 1, &bh);	
-	} while ((bh = bh->b_this_page) != head);
+		vms_ll_rw_block(WRITE, 1, &bh,bh->b_dev);	
+		turns++;
+		bh=buffers[turns];
+	} while (bh);
 	return 0;
 }
 #endif
@@ -2908,6 +3157,9 @@ int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsig
 	int i, nr_blocks, retval;
 	unsigned long * blocks = iobuf->blocks;
 	int length;
+	int sts;
+	int type;
+	unsigned long long iosb;
 
 	length = iobuf->length;
 	nr_blocks = length / blocksize;
@@ -2943,12 +3195,18 @@ int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsig
 			if (!buffer_mapped(&bh))
 				BUG();
 		}
-		blocks[i] = bh.b_blocknr;
+		if (rw==READ)
+		  type=IO$_READPBLK;
+		else
+		  type=IO$_WRITEPBLK;
+		sts = exe_qiow(0,(unsigned short)dev2chan(inode->i_dev),type,&iosb,0,0,
+			       bh.b_data,blocksize, bh.b_blocknr,MINOR(inode->i_dev)&31,0,0);
+		//		blocks[i] = bh.b_blocknr;
 	}
 
 	/* patch length to handle short I/O */
 	iobuf->length = i * blocksize;
-	retval = brw_kiovec(rw, 1, &iobuf, inode->i_dev, iobuf->blocks, blocksize);
+	//	retval = brw_kiovec(rw, 1, &iobuf, inode->i_dev, iobuf->blocks, blocksize);
 	/* restore orig length */
 	iobuf->length = length;
  out:
@@ -3406,6 +3664,7 @@ static int sync_page_buffers(struct buffer_head *head)
  *       obtain a reference to a buffer head within a page.  So we must
  *	 lock out all of these paths to cleanly toss the page.
  */
+#ifndef CONFIG_VMS
 int try_to_free_buffers(struct page * page, unsigned int gfp_mask)
 {
 	struct buffer_head * tmp, * bh = page->buffers;
@@ -3463,10 +3722,83 @@ busy_buffer_page:
 			}
 		}
 	}
+#ifndef CONFIG_VMS
 	if (balance_dirty_state() >= 0)
 		wakeup_bdflush();
+#endif
 	return 0;
 }
+#else
+int try_to_free_buffers(struct page * page, unsigned int gfp_mask)
+{
+	struct buffer_head * tmp, ** buffers = page->buffers, *bh;
+	int turns= 0;
+
+	bh=buffers[0];
+
+cleaned_buffers_try_again:
+	spin_lock(&lru_list_lock);
+	write_lock(&hash_table_lock);
+	tmp = bh;
+	do {
+		if (buffer_busy(tmp))
+			goto busy_buffer_page;
+		turns++;
+		tmp = buffers[turns];
+	} while (tmp);
+
+	spin_lock(&unused_list_lock);
+	turns=0;
+	tmp = buffers[0];
+
+	/* if this buffer was hashed, this page counts as buffermem */
+	if (bh->b_pprev)
+		atomic_dec(&buffermem_pages);
+	do {
+		struct buffer_head * p = tmp;
+		turns++;
+		tmp = buffers[turns];
+
+		if (p->b_dev == B_FREE) BUG();
+
+		remove_inode_queue(p);
+		__remove_from_queues(p);
+		__put_unused_buffer_head(p);
+	} while (tmp);
+	spin_unlock(&unused_list_lock);
+
+	/* Wake up anyone waiting for buffer heads */
+	wake_up(&buffer_wait);
+	//	wake_up2(&buffer_wait,PRI$_IOCOM);
+
+	/* And free the page */
+	page->buffers = NULL;
+	page_cache_release(page);
+	write_unlock(&hash_table_lock);
+	spin_unlock(&lru_list_lock);
+	return 1;
+
+busy_buffer_page:
+	/* Uhhuh, start writeback so that we don't end up with all dirty pages */
+	write_unlock(&hash_table_lock);
+	spin_unlock(&lru_list_lock);
+	gfp_mask = pf_gfp_mask(gfp_mask);
+	if (gfp_mask & __GFP_IO) {
+		if ((gfp_mask & __GFP_HIGHIO) || !PageHighMem(page)) {
+			if (sync_page_buffers(bh)) {
+				/* no IO or waiting next time */
+				gfp_mask = 0;
+				goto cleaned_buffers_try_again;
+			}
+		}
+	}
+#ifndef CONFIG_VMS
+	if (balance_dirty_state() >= 0)
+		wakeup_bdflush();
+#endif
+	return 0;
+}
+#endif
 EXPORT_SYMBOL(try_to_free_buffers);
 
 /* ================== Debugging =================== */
@@ -3584,6 +3916,8 @@ void __init buffer_init(unsigned long mempages)
 
 DECLARE_WAIT_QUEUE_HEAD(bdflush_wait);
 
+#ifndef CONFIG_VMS
+
 void wakeup_bdflush(void)
 {
 	wake_up_interruptible(&bdflush_wait);
@@ -3619,6 +3953,8 @@ static int sync_old_buffers(void)
 	return 0;
 }
 
+#endif
+
 int block_sync_page(struct page *page)
 {
 	run_task_queue(&tq_disk);
@@ -3650,7 +3986,9 @@ asmlinkage long sys_bdflush(int func, long data)
 		 * to and from bdflush.
 		 */
 		user_mm = start_lazy_tlb();
+#ifndef CONFIG_VMS
 		error = sync_old_buffers();
+#endif
 		end_lazy_tlb(user_mm);
 		return error;
 #endif
@@ -3677,6 +4015,8 @@ asmlinkage long sys_bdflush(int func, long data)
 	 */
 	return 0;
 }
+
+#ifndef CONFIG_VMS
 
 /*
  * This is the actual bdflush daemon itself. It used to be started from
@@ -3787,3 +4127,4 @@ static int __init bdflush_init(void)
 
 module_init(bdflush_init)
 
+#endif

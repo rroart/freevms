@@ -203,15 +203,17 @@ void ext2_free_inode (struct inode * inode)
 				desc->bg_used_dirs_count =
 					cpu_to_le16(le16_to_cpu(desc->bg_used_dirs_count) - 1);
 		}
-		mark_buffer_dirty(bh2);
+		vms_mark_buffer_dirty(bh2);
 		es->s_free_inodes_count =
 			cpu_to_le32(le32_to_cpu(es->s_free_inodes_count) + 1);
-		mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
+		vms_mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
 	}
-	mark_buffer_dirty(bh);
+	vms_mark_buffer_dirty(bh);
+	goto sync;
 	if (sb->s_flags & MS_SYNCHRONOUS) {
-		ll_rw_block (WRITE, 1, &bh);
-		wait_on_buffer (bh);
+	sync:
+		vms_ll_rw_block (WRITE, 1, &bh, inode->i_dev);
+		//wait_on_buffer (bh);
 	}
 	sb->s_dirt = 1;
 error_return:
@@ -258,7 +260,7 @@ static int find_group_dir(struct super_block *sb, int parent_group)
 		cpu_to_le16(le16_to_cpu(best_desc->bg_free_inodes_count) - 1);
 	best_desc->bg_used_dirs_count =
 		cpu_to_le16(le16_to_cpu(best_desc->bg_used_dirs_count) + 1);
-	mark_buffer_dirty(best_bh);
+	vms_mark_buffer_dirty(best_bh);
 	return best_group;
 }
 
@@ -307,7 +309,7 @@ static int find_group_other(struct super_block *sb, int parent_group)
 found:
 	desc->bg_free_inodes_count =
 		cpu_to_le16(le16_to_cpu(desc->bg_free_inodes_count) - 1);
-	mark_buffer_dirty(bh);
+	vms_mark_buffer_dirty(bh);
 	return group;
 }
 
@@ -351,10 +353,12 @@ repeat:
 		goto bad_count;
 	ext2_set_bit (i, bh->b_data);
 
-	mark_buffer_dirty(bh);
+	vms_mark_buffer_dirty(bh);
+	goto sync;
 	if (sb->s_flags & MS_SYNCHRONOUS) {
-		ll_rw_block (WRITE, 1, &bh);
-		wait_on_buffer (bh);
+	sync:
+		vms_ll_rw_block (WRITE, 1, &bh, inode->i_dev);
+		//wait_on_buffer (bh);
 	}
 
 	ino = group * EXT2_INODES_PER_GROUP(sb) + i + 1;
@@ -368,7 +372,7 @@ repeat:
 
 	es->s_free_inodes_count =
 		cpu_to_le32(le32_to_cpu(es->s_free_inodes_count) - 1);
-	mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
+	vms_mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
 	sb->s_dirt = 1;
 	inode->i_uid = current->fsuid;
 	if (test_opt (sb, GRPID))
@@ -394,7 +398,8 @@ repeat:
 		inode->i_flags |= S_SYNC;
 	insert_inode_hash(inode);
 	inode->i_generation = event++;
-	mark_inode_dirty(inode);
+	ext2_sync_inode (inode);
+	//mark_inode_dirty(inode);
 
 	unlock_super (sb);
 	if(DQUOT_ALLOC_INODE(inode)) {
@@ -414,7 +419,7 @@ fail2:
 	if (S_ISDIR(mode))
 		desc->bg_used_dirs_count =
 			cpu_to_le16(le16_to_cpu(desc->bg_used_dirs_count) - 1);
-	mark_buffer_dirty(bh2);
+	vms_mark_buffer_dirty(bh2);
 fail:
 	unlock_super(sb);
 	make_bad_inode(inode);
@@ -432,7 +437,7 @@ bad_count:
 
 	desc = ext2_get_group_desc (sb, group, &bh2);
 	desc->bg_free_inodes_count = 0;
-	mark_buffer_dirty(bh2);
+	vms_mark_buffer_dirty(bh2);
 	goto repeat;
 }
 
