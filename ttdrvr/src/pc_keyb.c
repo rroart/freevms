@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 #include<crbdef.h>
 #include<cdtdef.h>
 #include<dcdef.h>
@@ -125,6 +131,7 @@ int kbd$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
       *buffer++=c;
     }
   i->irp$l_iost1 = SS$_NORMAL;
+  setipl(0); // it might be 8 or something here after waitfr, so workaround
   com$post(i,u);
   return SS$_NORMAL;
 }

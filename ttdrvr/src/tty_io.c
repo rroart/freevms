@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /*
  *  linux/drivers/char/tty_io.c
  *
@@ -305,7 +311,9 @@ static int tty_set_ldisc(struct tty_struct *tty, int ldisc)
 		return 0;	/* We are already in the desired discipline */
 	o_ldisc = tty->ldisc;
 
+#if 0
 	tty_wait_until_sent(tty, 0);
+#endif
 	
 	/* Shutdown the current discipline. */
 	if (tty->ldisc.close)
@@ -385,36 +393,6 @@ int tty_check_change(struct tty_struct * tty)
 	return -ERESTARTSYS;
 }
 
-static ssize_t hung_up_tty_read(struct file * file, char * buf,
-				size_t count, loff_t *ppos)
-{
-	/* Can't seek (pread) on ttys.  */
-	if (ppos != &file->f_pos)
-		return -ESPIPE;
-	return 0;
-}
-
-static ssize_t hung_up_tty_write(struct file * file, const char * buf,
-				 size_t count, loff_t *ppos)
-{
-	/* Can't seek (pwrite) on ttys.  */
-	if (ppos != &file->f_pos)
-		return -ESPIPE;
-	return -EIO;
-}
-
-/* No kernel lock held - none needed ;) */
-static unsigned int hung_up_tty_poll(struct file * filp, poll_table * wait)
-{
-	return POLLIN | POLLOUT | POLLERR | POLLHUP | POLLRDNORM | POLLWRNORM;
-}
-
-static int hung_up_tty_ioctl(struct inode * inode, struct file * file,
-			     unsigned int cmd, unsigned long arg)
-{
-	return cmd == TIOCSPGRP ? -ENOTTY : -EIO;
-}
-
 static struct file_operations tty_fops = {
 	llseek:		no_llseek,
 	read:		tty_read,
@@ -426,139 +404,6 @@ static struct file_operations tty_fops = {
 	fasync:		tty_fasync,
 };
 
-static struct file_operations hung_up_tty_fops = {
-	llseek:		no_llseek,
-	read:		hung_up_tty_read,
-	write:		hung_up_tty_write,
-	poll:		hung_up_tty_poll,
-	ioctl:		hung_up_tty_ioctl,
-	release:	tty_release,
-};
-
-/*
- * This can be called by the "eventd" kernel thread.  That is process synchronous,
- * but doesn't hold any locks, so we need to make sure we have the appropriate
- * locks for what we're doing..
- */
-void do_tty_hangup(void *data)
-{
-	struct tty_struct *tty = (struct tty_struct *) data;
-	struct file * cons_filp = NULL;
-	struct task_struct *p;
-	struct list_head *l;
-	int    closecount = 0, n;
-
-	if (!tty)
-		return;
-
-	/* inuse_filps is protected by the single kernel lock */
-	lock_kernel();
-	
-	check_tty_count(tty, "do_tty_hangup");
-	file_list_lock();
-	for (l = tty->tty_files.next; l != &tty->tty_files; l = l->next) {
-		struct file * filp = list_entry(l, struct file, f_list);
-		if (filp->f_dentry->d_inode->i_rdev == CONSOLE_DEV ||
-		    filp->f_dentry->d_inode->i_rdev == SYSCONS_DEV) {
-			cons_filp = filp;
-			continue;
-		}
-		if (filp->f_op != &tty_fops)
-			continue;
-		closecount++;
-		tty_fasync(-1, filp, 0);	/* can't block */
-		filp->f_op = &hung_up_tty_fops;
-	}
-	file_list_unlock();
-	
-	/* FIXME! What are the locking issues here? This may me overdoing things.. */
-	{
-		unsigned long flags;
-
-		save_flags(flags); cli();
-		if (tty->ldisc.flush_buffer)
-			tty->ldisc.flush_buffer(tty);
-		if (tty->driver.flush_buffer)
-			tty->driver.flush_buffer(tty);
-		if ((test_bit(TTY_DO_WRITE_WAKEUP, &tty->flags)) &&
-		    tty->ldisc.write_wakeup)
-			(tty->ldisc.write_wakeup)(tty);
-		restore_flags(flags);
-	}
-
-	wake_up_interruptible(&tty->write_wait);
-	wake_up_interruptible(&tty->read_wait);
-
-	/*
-	 * Shutdown the current line discipline, and reset it to
-	 * N_TTY.
-	 */
-	if (tty->driver.flags & TTY_DRIVER_RESET_TERMIOS)
-		*tty->termios = tty->driver.init_termios;
-	if (tty->ldisc.num != ldiscs[N_TTY].num) {
-		if (tty->ldisc.close)
-			(tty->ldisc.close)(tty);
-		tty->ldisc = ldiscs[N_TTY];
-		tty->termios->c_line = N_TTY;
-		if (tty->ldisc.open) {
-			int i = (tty->ldisc.open)(tty);
-			if (i < 0)
-				printk(KERN_ERR "do_tty_hangup: N_TTY open: "
-						"error %d\n", -i);
-		}
-	}
-	
-	read_lock(&tasklist_lock);
- 	for_each_task_pre1(p) {
-		if ((tty->session > 0) && (p->session == tty->session) &&
-		    p->leader) {
-			send_sig(SIGHUP,p,1);
-			send_sig(SIGCONT,p,1);
-			if (tty->pgrp > 0)
-				p->tty_old_pgrp = tty->pgrp;
-		}
-		if (p->tty == tty)
-			p->tty = NULL;
-	}
-	for_each_task_post1(p);
-	read_unlock(&tasklist_lock);
-
-	tty->flags = 0;
-	tty->session = 0;
-	tty->pgrp = -1;
-	tty->ctrl_status = 0;
-	/*
-	 *	If one of the devices matches a console pointer, we
-	 *	cannot just call hangup() because that will cause
-	 *	tty->count and state->count to go out of sync.
-	 *	So we just call close() the right number of times.
-	 */
-	if (cons_filp) {
-		if (tty->driver.close)
-			for (n = 0; n < closecount; n++)
-				tty->driver.close(tty, cons_filp);
-	} else if (tty->driver.hangup)
-		(tty->driver.hangup)(tty);
-	unlock_kernel();
-}
-
-void tty_hangup(struct tty_struct * tty)
-{
-#ifdef TTY_DEBUG_HANGUP
-	char	buf[64];
-	
-	printk(KERN_DEBUG "%s hangup...\n", tty_name(tty, buf));
-#endif
-#if 0
-#if 1
-	//ndef CONFIG_VMS
-	schedule_task(&tty->tq_hangup);
-#else
-	tty->tq_hangup.routine(tty);
-#endif
-#endif
-}
-
 void tty_vhangup(struct tty_struct * tty)
 {
 #ifdef TTY_DEBUG_HANGUP
@@ -566,12 +411,9 @@ void tty_vhangup(struct tty_struct * tty)
 
 	printk(KERN_DEBUG "%s vhangup...\n", tty_name(tty, buf));
 #endif
+#if 0
 	do_tty_hangup((void *) tty);
-}
-
-int tty_hung_up_p(struct file * filp)
-{
-	return (filp->f_op == &hung_up_tty_fops);
+#endif
 }
 
 /*
@@ -670,107 +512,26 @@ static ssize_t tty_read(struct file * file, char * buf, size_t count,
 	struct tty_struct * tty;
 	struct inode *inode;
 	int sts;
-	unsigned long long iosb;
+	unsigned long long iosb = 0;
 
-	/* Can't seek (pread) on ttys.  */
-	if (ppos != &file->f_pos)
-		return -ESPIPE;
+	short int chan = 0;
+	struct _pcb * p = ctl$gl_pcb;
+	struct dsc$descriptor d;
+	d.dsc$a_pointer=&p->pcb$t_terminal;
+	d.dsc$w_length=strlen(p->pcb$t_terminal);
+	sts=exe$assign(&d,&chan,0,0,0);
+	struct _ucb *u=ctl$gl_ccbbase[chan].ccb$l_ucb;
 
-	tty = (struct tty_struct *)file->private_data;
-	inode = file->f_dentry->d_inode;
-	if (tty_paranoia_check(tty, inode->i_rdev, "tty_read"))
-		return -EIO;
-	if (!tty || (test_bit(TTY_IO_ERROR, &tty->flags)))
-		return -EIO;
-
-	/* This check not only needs to be done before reading, but also
-	   whenever read_chan() gets woken up after sleeping, so I've
-	   moved it to there.  This should only be done for the N_TTY
-	   line discipline, anyway.  Same goes for write_chan(). -- jlc. */
-#if 0
-	if ((inode->i_rdev != CONSOLE_DEV) && /* don't stop on /dev/console */
-	    (tty->pgrp > 0) &&
-	    (current->tty == tty) &&
-	    (tty->pgrp != current->pgrp))
-		if (is_ignored(SIGTTIN) || is_orphaned_pgrp(current->pgrp))
-			return -EIO;
-		else {
-			(void) kill_pg(current->pgrp, SIGTTIN, 1);
-			return -ERESTARTSYS;
-		}
-#endif
 	lock_kernel();
-#if 0
-	if (tty->ldisc.read)
-		i = (tty->ldisc.read)(tty,file,buf,count);
-	else
-		i = -EIO;
-#else
-	sts = exe$qiow(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_READPBLK,&iosb,0,0,
+
+	sts = exe$qiow(0,chan,IO$_READPBLK,&iosb,0,0,
 				 buf,count,0,0,0,0);
 	i = count;
-#endif
+
 	unlock_kernel();
-	if (i > 0)
-		inode->i_atime = CURRENT_TIME;
+
 	return i;
 }
-
-/*
- * Split writes up in sane blocksizes to avoid
- * denial-of-service type attacks
- */
-static inline ssize_t do_tty_write(
-	ssize_t (*write)(struct tty_struct *, struct file *, const unsigned char *, size_t),
-	struct tty_struct *tty,
-	struct file *file,
-	const unsigned char *buf,
-	size_t count)
-{
-	ssize_t ret = 0, written = 0;
-	
-	if (file->f_flags & O_NONBLOCK) {
-		if (down_trylock(&tty->atomic_write))
-			return -EAGAIN;
-	}
-	else {
-		if (down_interruptible(&tty->atomic_write))
-			return -ERESTARTSYS;
-	}
-	if ( test_bit(TTY_NO_WRITE_SPLIT, &tty->flags) ) {
-		lock_kernel();
-		written = write(tty, file, buf, count);
-		unlock_kernel();
-	} else {
-		for (;;) {
-			unsigned long size = MAX(PAGE_SIZE*2,16384);
-			if (size > count)
-				size = count;
-			lock_kernel();
-			ret = write(tty, file, buf, size);
-			unlock_kernel();
-			if (ret <= 0)
-				break;
-			written += ret;
-			buf += ret;
-			count -= ret;
-			if (!count)
-				break;
-			ret = -ERESTARTSYS;
-			if (signal_pending(current))
-				break;
-			if (current->need_resched)
-				schedule();
-		}
-	}
-	if (written) {
-		file->f_dentry->d_inode->i_mtime = CURRENT_TIME;
-		ret = written;
-	}
-	up(&tty->atomic_write);
-	return ret;
-}
-
 
 static ssize_t tty_write(struct file * file, const char * buf, size_t count,
 			 loff_t *ppos)
@@ -789,53 +550,11 @@ static ssize_t tty_write(struct file * file, const char * buf, size_t count,
 	sts=exe$assign(&d,&chan,0,0,0);
 	struct _ucb *u=ctl$gl_ccbbase[chan].ccb$l_ucb;
 
-#if 0
-	/* Can't seek (pwrite) on ttys.  */
-	if (ppos != &file->f_pos)
-		return -ESPIPE;
-
-	/*
-	 *      For now, we redirect writes from /dev/console as
-	 *      well as /dev/tty0.
-	 */
-	inode = file->f_dentry->d_inode;
-	is_console = (inode->i_rdev == SYSCONS_DEV ||
-		      inode->i_rdev == CONSOLE_DEV);
-
-	if (is_console && redirect)
-		tty = redirect;
-	else
-		tty = (struct tty_struct *)file->private_data;
-	if (tty_paranoia_check(tty, inode->i_rdev, "tty_write"))
-		return -EIO;
-	if (!tty || !tty->driver.write || (test_bit(TTY_IO_ERROR, &tty->flags)))
-		return -EIO;
-#endif
-#if 0
-	if (!is_console && L_TOSTOP(tty) && (tty->pgrp > 0) &&
-	    (current->tty == tty) && (tty->pgrp != current->pgrp)) {
-		if (is_orphaned_pgrp(current->pgrp))
-			return -EIO;
-		if (!is_ignored(SIGTTOU)) {
-			(void) kill_pg(current->pgrp, SIGTTOU, 1);
-			return -ERESTARTSYS;
-		}
-	}
-#endif
-#if 0
-	if (!tty->ldisc.write)
-		return -EIO;
-#endif
-
 	//	sts = exe$qio(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_WRITEPBLK,0/*&iosb*/,0,0,
 	sts = exe$qio(0,chan,IO$_WRITEPBLK,0/*&iosb*/,0,0,
 				 buf,count,0,0,0,0);
 
 	return count;
-#if 0
-	return do_tty_write(tty->ldisc.write, tty, file,
-			    (const unsigned char *)buf, count);
-#endif
 }
 
 /* Semaphore to protect creating and releasing a tty */
@@ -1325,13 +1044,6 @@ static void release_dev(struct file * filp)
 	/*
 	 * Make sure that the tty's task queue isn't activated. 
 	 */
-#if 0
-	run_task_queue(&tq_timer);
-#endif
-#if 0 
-	//ndef CONFIG_VMS
-	flush_scheduled_tasks();
-#endif
 
 	/* 
 	 * The release_mem function takes care of the details of clearing
@@ -1783,7 +1495,9 @@ int tty_ioctl(struct inode * inode, struct file * file,
 		if (retval)
 			return retval;
 		if (cmd != TIOCCBRK) {
+#if 0
 			tty_wait_until_sent(tty, 0);
+#endif
 			if (signal_pending(current))
 				return -EINTR;
 		}
@@ -1870,135 +1584,6 @@ int tty_ioctl(struct inode * inode, struct file * file,
 	return -EINVAL;
 }
 
-
-/*
- * This implements the "Secure Attention Key" ---  the idea is to
- * prevent trojan horses by killing all processes associated with this
- * tty when the user hits the "Secure Attention Key".  Required for
- * super-paranoid applications --- see the Orange Book for more details.
- * 
- * This code could be nicer; ideally it should send a HUP, wait a few
- * seconds, then send a INT, and then a KILL signal.  But you then
- * have to coordinate with the init process, since all processes associated
- * with the current tty must be dead before the new getty is allowed
- * to spawn.
- *
- * Now, if it would be correct ;-/ The current code has a nasty hole -
- * it doesn't catch files in flight. We may send the descriptor to ourselves
- * via AF_UNIX socket, close it and later fetch from socket. FIXME.
- *
- * Nasty bug: do_SAK is being called in interrupt context.  This can
- * deadlock.  We punt it up to process context.  AKPM - 16Mar2001
- */
-static void __do_SAK(void *arg)
-{
-#ifdef TTY_SOFT_SAK
-	tty_hangup(tty);
-#else
-	struct tty_struct *tty = arg;
-	struct task_struct *p;
-	int session;
-	int		i;
-	struct file	*filp;
-	
-	if (!tty)
-		return;
-	session  = tty->session;
-	if (tty->ldisc.flush_buffer)
-		tty->ldisc.flush_buffer(tty);
-	if (tty->driver.flush_buffer)
-		tty->driver.flush_buffer(tty);
-	read_lock(&tasklist_lock);
-	for_each_task_pre1(p) {
-		if ((p->tty == tty) ||
-		    ((session > 0) && (p->session == session))) {
-			send_sig(SIGKILL, p, 1);
-			continue;
-		}
-		task_lock(p);
-		if (p->files) {
-			read_lock(&p->files->file_lock);
-			for (i=0; i < p->files->max_fds; i++) {
-				filp = fcheck_files(p->files, i);
-				if (filp && (filp->f_op == &tty_fops) &&
-				    (filp->private_data == tty)) {
-					send_sig(SIGKILL, p, 1);
-					break;
-				}
-			}
-			read_unlock(&p->files->file_lock);
-		}
-		task_unlock(p);
-	}
-	for_each_task_post1(p);
-	read_unlock(&tasklist_lock);
-#endif
-}
-
-/*
- * The tq handling here is a little racy - tty->SAK_tq may already be queued.
- * But there's no mechanism to fix that without futzing with tqueue_lock.
- * Fortunately we don't need to worry, because if ->SAK_tq is already queued,
- * the values which we write to it will be identical to the values which it
- * already has. --akpm
- */
-void do_SAK(struct tty_struct *tty)
-{
-	if (!tty)
-		return;
-	PREPARE_TQUEUE(&tty->SAK_tq, __do_SAK, tty);
-#if 0
-#if 1 
-	//ndef CONFIG_VMS
-	schedule_task(&tty->SAK_tq);
-#else
-	__do_SAK(tty);
-#endif
-#endif
-}
-
-/*
- * This routine is called out of the software interrupt to flush data
- * from the flip buffer to the line discipline.
- */
-static void flush_to_ldisc(void *private_)
-{
-	struct tty_struct *tty = (struct tty_struct *) private_;
-	unsigned char	*cp;
-	char		*fp;
-	int		count;
-	unsigned long flags;
-
-#if 0
-	if (test_bit(TTY_DONT_FLIP, &tty->flags)) {
-		queue_task(&tty->flip.tqueue, &tq_timer);
-		return;
-	}
-#endif
-	if (tty->flip.buf_num) {
-		cp = tty->flip.char_buf + TTY_FLIPBUF_SIZE;
-		fp = tty->flip.flag_buf + TTY_FLIPBUF_SIZE;
-		tty->flip.buf_num = 0;
-
-		save_flags(flags); cli();
-		tty->flip.char_buf_ptr = tty->flip.char_buf;
-		tty->flip.flag_buf_ptr = tty->flip.flag_buf;
-	} else {
-		cp = tty->flip.char_buf;
-		fp = tty->flip.flag_buf;
-		tty->flip.buf_num = 1;
-
-		save_flags(flags); cli();
-		tty->flip.char_buf_ptr = tty->flip.char_buf + TTY_FLIPBUF_SIZE;
-		tty->flip.flag_buf_ptr = tty->flip.flag_buf + TTY_FLIPBUF_SIZE;
-	}
-	count = tty->flip.count;
-	tty->flip.count = 0;
-	restore_flags(flags);
-	
-	tty->ldisc.receive_buf(tty, cp, fp, count);
-}
-
 /*
  * Routine which returns the baud rate of the tty
  *
@@ -2016,46 +1601,6 @@ static int baud_table[] = {
 #endif
 };
 
-static int n_baud_table = sizeof(baud_table)/sizeof(int);
-
-int tty_get_baud_rate(struct tty_struct *tty)
-{
-	unsigned int cflag, i;
-
-	cflag = tty->termios->c_cflag;
-
-	i = cflag & CBAUD;
-	if (i & CBAUDEX) {
-		i &= ~CBAUDEX;
-		if (i < 1 || i+15 >= n_baud_table) 
-			tty->termios->c_cflag &= ~CBAUDEX;
-		else
-			i += 15;
-	}
-	if (i==15 && tty->alt_speed) {
-		if (!tty->warned) {
-			printk(KERN_WARNING "Use of setserial/setrocket to "
-					    "set SPD_* flags is deprecated\n");
-			tty->warned = 1;
-		}
-		return(tty->alt_speed);
-	}
-	
-	return baud_table[i];
-}
-
-void tty_flip_buffer_push(struct tty_struct *tty)
-{
-#if 0
-	if (tty->low_latency)
-#endif
-		flush_to_ldisc((void *) tty);
-#if 0
-	else
-		queue_task(&tty->flip.tqueue, &tq_timer);
-#endif
-}
-
 /*
  * This subroutine initializes a tty structure.
  */
@@ -2067,12 +1612,12 @@ static void initialize_tty_struct(struct tty_struct *tty)
 	tty->pgrp = -1;
 	tty->flip.char_buf_ptr = tty->flip.char_buf;
 	tty->flip.flag_buf_ptr = tty->flip.flag_buf;
-	tty->flip.tqueue.routine = flush_to_ldisc;
+	tty->flip.tqueue.routine = 0;
 	tty->flip.tqueue.data = tty;
 	init_MUTEX(&tty->flip.pty_sem);
 	init_waitqueue_head(&tty->write_wait);
 	init_waitqueue_head(&tty->read_wait);
-	tty->tq_hangup.routine = do_tty_hangup;
+	tty->tq_hangup.routine = 0;
 	tty->tq_hangup.data = tty;
 	sema_init(&tty->atomic_read, 1);
 	sema_init(&tty->atomic_write, 1);
@@ -2249,9 +1794,6 @@ void __init console_init(void)
 {
 	/* Setup the default TTY line discipline. */
 	memset(ldiscs, 0, sizeof(ldiscs));
-#if 0
-	(void) tty_register_ldisc(N_TTY, &tty_ldisc_N_TTY);
-#endif
 
 	/*
 	 * Set up the standard termios.  Individual tty drivers may 
@@ -2289,9 +1831,6 @@ void __init console_init(void)
 static struct tty_driver dev_tty_driver, dev_syscons_driver;
 #ifdef CONFIG_UNIX98_PTYS
 static struct tty_driver dev_ptmx_driver;
-#endif
-#ifdef CONFIG_VT
-static struct tty_driver dev_console_driver;
 #endif
 
 /*

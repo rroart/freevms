@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2004  
+
 /*
  * linux/drivers/char/keyboard.c
  *
@@ -542,8 +548,8 @@ static void SAK(void)
 	 * them properly.
 	 */
 
-	do_SAK(tty);
 #if 0
+	do_SAK(tty);
 	reset_vc(fg_console);
 #endif
 #if 0

@@ -64,9 +64,9 @@ static struct sysrq_key_op sysrq_loglevel_op = {
 #ifdef CONFIG_VT
 static void sysrq_handle_SAK(int key, struct pt_regs *pt_regs,
 		struct kbd_struct *kbd, struct tty_struct *tty) {
+#ifndef CONFIG_VMS
 	if (tty)
 		do_SAK(tty);
-#ifndef CONFIG_VMS
 	reset_vc(fg_console);
 #endif
 }
