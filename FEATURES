@@ -36,6 +36,7 @@ $erase
 $extend
 $forcex
 $get
+$getdvi
 $getjpi
 $gettim
 $hiber
