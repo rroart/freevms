@@ -33,6 +33,11 @@ inline void panic(char * c) { }
 
 /* Author: Roar Thronæs */
 
+#undef LNM_DEBUG
+#define LNM_DEBUG
+
+#define lnmprintf printk
+
 /* << does not rotate ... ? */
 
 int lnm$hash(const int length, const unsigned char * log, const unsigned long mask, unsigned long * myhash) {
@@ -104,7 +109,7 @@ int lnm$searchlog(struct struct_lnm_ret * r,int loglen, char * lognam, int tabna
   nt->lognam=lognam;
   nt->hash=ahash;
 
-  hash=pcb->pcb$l_affinity_callback;
+  hash=ctl$gl_lnmhash;
   status=lnm$presearch(r, hash, nt);
 
   if ((status&1)==0) {
@@ -154,11 +159,11 @@ int lnm$presearch(struct struct_lnm_ret * r,struct lnmhshs * hashtable, struct s
 int lnm$contsearch(struct struct_lnm_ret * r, int hash, struct lnmhshs * hashtable, struct struct_nt * nt) {
   int status;
   int lenstatus;
-  struct _lnmb *head, *tmp;
-#ifdef LNM_DEBUG 
-  lnmprintf("contsearch\n");
-#endif
+  struct _lnmb *head, *tmp, *oldtmp;
   head=hashtable->entry[hash*2];
+#ifdef LNM_DEBUG 
+  lnmprintf("contsearch %x %x\n",head,hash);
+#endif
   if (head) {
     tmp=nt->lnmb_cur;
     if (tmp==0) {
@@ -173,14 +178,19 @@ int lnm$contsearch(struct struct_lnm_ret * r, int hash, struct lnmhshs * hashtab
 	  if (nt->lnmth && nt->lnmth!=tmp->lnmb$l_table) { 
 	  } else { 
 	    r->mylnmb=tmp;
+#ifdef LNM_DEBUG
+	    lnmprintf("found %x\n",tmp);
+#endif
 	    return SS$_NORMAL;
 	  }
 	}
       }
       /* no case-blind search yet */
       nt->lnmb_cur=tmp;
+      oldtmp=tmp;
       tmp=tmp->lnmb$l_flink;
-    } while (tmp!=head) ;
+    } while (tmp!=head && tmp!=oldtmp) ;
+    nt->lnmb_cur=0;
   }
   return SS$_NOLOGNAM;
 }
@@ -236,7 +246,7 @@ int lnm$lookup(struct struct_lnm_ret * r,struct struct_rt * rt, int loglen, char
   lnmprintf("lookup %s %x\n",nt->lognam,nt->loglen);
 #endif
   nt->lnmb=*lnm$al_dirtbl[1];
-  hash=pcb->pcb$l_affinity_callback;
+  hash=ctl$gl_lnmhash;
   status=lnm$presearch(r,hash,nt);
   if ((status&1)==0) {
     nt->lnmb=*lnm$al_dirtbl[0];
