@@ -50,7 +50,7 @@ asmlinkage int exe$ascefc(unsigned int efn, void *name, char prot, char perm) {
     qhead_init(&c->ceb$l_wqfl);
     c->ceb$l_state=SCH$C_CEF;
     c->ceb$t_efcnam[0]=((struct dsc$descriptor *)name)->dsc$w_length;
-    memcpy(((struct dsc$descriptor *)name)->dsc$a_pointer,&c->ceb$t_efcnam[1],c->ceb$t_efcnam[0]);
+    bcopy(((struct dsc$descriptor *)name)->dsc$a_pointer,&c->ceb$t_efcnam[1],c->ceb$t_efcnam[0]);
     insque(c,first);
     tmp=c;
   }

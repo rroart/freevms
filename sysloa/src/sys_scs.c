@@ -283,7 +283,7 @@ void * scs_register_name(char * c1, char * c2) {
   struct _sbnb * s=vmalloc(sizeof(struct _sbnb));
   bzero(s,sizeof(struct _sbnb));
 
-  memcpy(c1,&s->sbnb$b_procnam,min(16,strlen(c1)));
+  bcopy(c1,&s->sbnb$b_procnam,min(16,strlen(c1)));
 
   insque(s,scs$gq_local_names);
 

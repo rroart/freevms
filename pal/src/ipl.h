@@ -29,9 +29,7 @@ extern char spl(unsigned char new);
 extern inline void savipl(void);
 
 /* no smp yet */
-/* prototype getipl() - JDWTopGuy */
-void setipl(unsigned char i);
-int getipl();
+inline void setipl(unsigned char i);
 
 //extern int prespl(unsigned char new);
 

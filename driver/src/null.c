@@ -216,7 +216,7 @@ inline void ini_fdt_end(struct _fdt * fdt) {
 }
 
 inline void ini_dpt_name(struct _dpt * d, char * n) {
-  memcpy(n,d->dpt$t_name,strlen(n));
+  bcopy(n,d->dpt$t_name,strlen(n));
 }
 
 inline void ini_dpt_adapt(struct _dpt * d, unsigned long type) {
@@ -330,7 +330,7 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
   bzero(u,sizeof(struct _ucb));
   bzero(idb,sizeof(struct _idb));
 
-  memcpy(sdpt,dpt->dpt$t_name,strlen(sdpt));
+  bcopy(sdpt,dpt->dpt$t_name,strlen(sdpt));
 
   /* for the ddb init part */
   //  d->ddb$ps_link=d;
@@ -338,7 +338,7 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
   ddb->ddb$b_type=DYN$C_DDB;
   ddb->ddb$l_ddt=ddt;
   ddb->ddb$ps_ucb=u;
-  memcpy(sddb,ddb->ddb$t_name,strlen(sddb));
+  bcopy(sddb,ddb->ddb$t_name,strlen(sddb));
 
   /* for the ucb init part */
   qhead_init(&u->ucb$l_ioqfl);
@@ -347,7 +347,7 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
   /* devchars? */
   u->ucb$b_devclass=DEV$M_RND; /* just maybe? */
   u->ucb$b_dipl=IPL$_IOLOCK8;
-  //  memcpy("nla0",u->ucb$t_name,4);
+  //  bcopy("nla0",u->ucb$t_name,4);
   u->ucb$l_ddb=ddb;
   u->ucb$l_crb=c;
   u->ucb$l_ddt=ddt;

@@ -24,10 +24,10 @@ bufpost(struct _irp * i) {
   //printk("doing bufpost\n");
   /* do iosb soon? */
   if (i->irp$l_iosb) {
-    memcpy(&i->irp$l_iost1,i->irp$l_iosb,8);
+    bcopy(&i->irp$l_iost1,i->irp$l_iosb,8);
   }
   if (i->irp$l_bcnt) {
-    memcpy(i->irp$l_svapte,i->useraddress,i->irp$l_bcnt);
+    bcopy(i->irp$l_svapte,i->useraddress,i->irp$l_bcnt);
   }
   if (a->acb$l_ast) {
     a->acb$b_rmod&=~ACB$M_KAST;

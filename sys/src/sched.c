@@ -46,7 +46,7 @@
 #include <asm/mmu_context.h>
 #include <sysgen.h>
 #include <ipldef.h>
-/* #include <ipl.h> - internals.h now includes ipl.h to avoid compiler whinings */
+#include <ipl.h>
 #include <statedef.h>
 #include <queue.h>
 #include<system_service_setup.h>
@@ -72,8 +72,7 @@ int mydebug4 = 0;
 int mydebug5 = 0;
 int mydebug6 = 1;
 
-/* added "void" for correctness - JDWTopGuy */
-void mycheckaddr() {
+mycheckaddr(){
 #if 1
   int nr0=nr_running;
   int i,n=0,m=0;

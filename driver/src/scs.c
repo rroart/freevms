@@ -1865,9 +1865,9 @@ void dn_nsp_send_conninit2(struct _cdt *sk, unsigned char msgflg, char * rprnam,
 	bzero(&scs->scs$t_dst_proc,16);
 	bzero(&scs->scs$t_src_proc,16);
 	bzero(&scs->scs$b_con_dat,16);
-	memcpy(rprnam,&scs->scs$t_dst_proc,strlen(rprnam));
-	memcpy(lprnam,&scs->scs$t_src_proc,strlen(lprnam));
-	if (condat) memcpy(condat,&scs->scs$b_con_dat,strlen(condat));
+	bcopy(rprnam,&scs->scs$t_dst_proc,strlen(rprnam));
+	bcopy(lprnam,&scs->scs$t_src_proc,strlen(lprnam));
+	if (condat) bcopy(condat,&scs->scs$b_con_dat,strlen(condat));
 
 	dn_nsp_send2(skb);	
 }
@@ -1939,7 +1939,7 @@ void scs_msg_fill(struct sk_buff *skb, struct _cdt * cdt, unsigned char msgflg, 
 	ppd=getppdscs(data);
 	scs=getppdscs(data);
 
-	memcpy(newscs,scs,sizeof(struct _scs));
+	bcopy(newscs,scs,sizeof(struct _scs));
 
 	//ppd->ppb$b_opc=NISCA$C_MSGREC;
 	
@@ -1961,7 +1961,7 @@ void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdr
 	data = skb_put(skb,sizeof(*scs));
 	data = (unsigned long)scs + sizeof(*scs);
 
-	memcpy(cdrp->cdrp$l_msg_buf,data,bufsiz);
+	bcopy(cdrp->cdrp$l_msg_buf,data,bufsiz);
 
 	//cdt->cdt$l_fp_scs_norecv=cdrp;
 	//cdt->cdt$l_reserved3=current->pcb$l_pid;
@@ -2186,8 +2186,8 @@ int opc_msgrec(struct sk_buff *skb) {
     scs_std$accept(0,0,0,0,0,0,0,0,0,0,0,0,cdt,0);
     cdt->cdt$l_condat=vmalloc(16);
     cdt->cdt$l_lprocnam=vmalloc(16);
-    memcpy(&scs->scs$b_con_dat,cdt->cdt$l_condat,16);
-    memcpy(&scs->scs$t_dst_proc,cdt->cdt$l_lprocnam,16);
+    bcopy(&scs->scs$b_con_dat,cdt->cdt$l_condat,16);
+    bcopy(&scs->scs$t_dst_proc,cdt->cdt$l_lprocnam,16);
     sbnb=scs_find_name(cdt->cdt$l_lprocnam);
     //    cdt->cdt$l_lconid=sbnb->sbnb$w_local_index;
     cdt->cdt$l_msginput=cdtl[sbnb->sbnb$w_local_index].cdt$l_msginput;

@@ -131,8 +131,7 @@ struct hw_interrupt_type vms_no_irq_type = {
 atomic_t vms_irq_err_count;
 #ifdef CONFIG_X86_IO_APIC
 #ifdef APIC_MISMATCH_DEBUG
-/* Changed to vms_irq_mis_count to avoid conflict with linux irq.c */
-atomic_t vms_irq_mis_count;
+atomic_t irq_mis_count;
 #endif
 #endif
 
@@ -185,7 +184,7 @@ int vms_get_irq_list(char *buf)
 	p += sprintf(p, "ERR: %10u\n", atomic_read(&irq_err_count));
 #ifdef CONFIG_X86_IO_APIC
 #ifdef APIC_MISMATCH_DEBUG
-	p += sprintf(p, "MIS: %10u\n", atomic_read(&vms_irq_mis_count));
+	p += sprintf(p, "MIS: %10u\n", atomic_read(&irq_mis_count));
 #endif
 #endif
 	return p - buf;

@@ -159,12 +159,7 @@ struct tty_flip_buffer {
 #define TTY_NORMAL	0
 #define TTY_BREAK	1
 #define TTY_FRAME	2
-/*
- * JDWTopGuy: the following conflicts with a definition in freevms/sys/src/sysgen.h, redefining sysgen.h's TTY_PARITY
- * the compile-time warnings are quite annoying, and I'm guessing sysgen.h's definition is the one we want soooo....
- * BAM!
- * #define TTY_PARITY	3
- */
+#define TTY_PARITY	3
 #define TTY_OVERRUN	4
 
 #define INTR_CHAR(tty) ((tty)->termios->c_cc[VINTR])

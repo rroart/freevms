@@ -7,7 +7,6 @@
  *  Added initrd & change_root: Werner Almesberger & Hans Lermen, Feb '96
  *  Moan early if gcc is old, avoiding bogus kernels - Paul Gortmaker, May '96
  *  Simplified starting of init:  Michael A. Griffith <grif@acm.org> 
- *  Prototype puts(const char *s) to avoid various compile-time errors - JDWTopGuy - 11/30/2003
  */
 
 #define __KERNEL_SYSCALLS__
@@ -149,9 +148,6 @@ static int __init profile_setup(char *str)
 }
 
 __setup("profile=", profile_setup);
-
-
-void puts(const char *s);
 
 
 static struct dev_name_struct {

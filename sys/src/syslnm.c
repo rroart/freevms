@@ -317,7 +317,7 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
     return status;
   }
   i->buflen=(ret.mylnmb)->lnmxs[0].lnmx$b_count;
-  memcpy((ret.mylnmb)->lnmxs[0].lnmx$t_xlation,i->bufaddr,i->buflen);
+  bcopy((ret.mylnmb)->lnmxs[0].lnmx$t_xlation,i->bufaddr,i->buflen);
   lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
   lnm$unlock();
   return status;

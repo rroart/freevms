@@ -91,7 +91,7 @@ int init_ddb(struct _ddb * ddb, struct _ddt * ddt, struct _ucb * ucb, char * sdd
   ddb->ddb$b_type=DYN$C_DDB;
   ddb->ddb$l_ddt=ddt;
   ddb->ddb$ps_ucb=ucb;
-  memcpy(sddb,ddb->ddb$t_name,strlen(sddb));
+  bcopy(sddb,ddb->ddb$t_name,strlen(sddb));
   return SS$_NORMAL;
 }
 

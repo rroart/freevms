@@ -10,7 +10,7 @@
 #include<ipldef.h>
 #include<lkbdef.h>
 #include<phddef.h>
-/* #include <ipl.h> - included by internals.h */
+#include<ipl.h>
 #include <linux/linkage.h>
 #include <linux/sched.h>
 

@@ -39,7 +39,7 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
   while (it->item_code) {
     switch (it->item_code) {
     case DVI$_DEVNAM:
-      memcpy(&d->ddb$t_name,it->bufaddr,15);
+      bcopy(&d->ddb$t_name,it->bufaddr,15);
       break;
 
     }
@@ -74,7 +74,7 @@ asmlinkage int exe$device_scan(void *return_devnam, unsigned short int *retlen, 
   while (it->item_code) {
     switch (it->item_code) {
     case DVI$_DEVNAM:
-      memcpy(&d->ddb$t_name,it->bufaddr,15);
+      bcopy(&d->ddb$t_name,it->bufaddr,15);
       break;
 
     }

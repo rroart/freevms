@@ -222,7 +222,7 @@ fail_nomem:
 static inline int dup_phd(struct _pcb * p, struct _pcb * old) {
   p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
   if (old->pcb$l_phd)
-    memcpy(old->pcb$l_phd,p->pcb$l_phd,sizeof(struct _phd));
+    bcopy(old->pcb$l_phd,p->pcb$l_phd,sizeof(struct _phd));
   else
     bzero(p->pcb$l_phd,sizeof(struct _phd));
 #ifdef CONFIG_MM_VMS
@@ -230,21 +230,21 @@ static inline int dup_phd(struct _pcb * p, struct _pcb * old) {
   if (old->pcb$l_phd) {
     if (old->pcb$l_phd->phd$l_wslist) {
       p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
-      memcpy(old->pcb$l_phd->phd$l_wslist,((void*)p->pcb$l_phd->phd$l_wslist),2048);
+      bcopy(old->pcb$l_phd->phd$l_wslist,((void*)p->pcb$l_phd->phd$l_wslist),2048);
     }
     if (old->pcb$l_phd->phd$l_wslock) {
       p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
-      memcpy(old->pcb$l_phd->phd$l_wslock,((void*)p->pcb$l_phd->phd$l_wslock),2048);
+      bcopy(old->pcb$l_phd->phd$l_wslock,((void*)p->pcb$l_phd->phd$l_wslock),2048);
     }
     if (old->pcb$l_phd->phd$l_wsdyn) {
       p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-      memcpy(old->pcb$l_phd->phd$l_wsdyn,((void*)p->pcb$l_phd->phd$l_wsdyn),2048);
+      bcopy(old->pcb$l_phd->phd$l_wsdyn,((void*)p->pcb$l_phd->phd$l_wsdyn),2048);
     }
     //p->pcb$l_phd->phd$l_wsnext=0;
     //p->pcb$l_phd->phd$l_wslast=511;
     if (old->pcb$l_phd->phd$l_pst_base_offset) {
       p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
-      memcpy(old->pcb$l_phd->phd$l_pst_base_offset,p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+      bcopy(old->pcb$l_phd->phd$l_pst_base_offset,p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
     }
   }
 #endif
@@ -276,7 +276,7 @@ static inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
 		tmp = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 		if (!tmp)
 			goto fail_nomem;
-		memcpy(mpnt,tmp,sizeof(struct _rde));
+		bcopy(mpnt,tmp,sizeof(struct _rde));
 		tmp->rde$l_flags &= ~VM_LOCKED;
 
 		/*
@@ -770,7 +770,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 #if 0
 	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
 	if (current->pcb$l_phd)
-	  memcpy(current->pcb$l_phd,p->pcb$l_phd,sizeof(struct _phd));
+	  bcopy(current->pcb$l_phd,p->pcb$l_phd,sizeof(struct _phd));
 	else
 	  bzero(p->pcb$l_phd,sizeof(struct _phd));
 

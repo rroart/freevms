@@ -1258,10 +1258,10 @@ unsigned exe$open(struct _fabdef *fab)
 	  sts = iosb.iosb$w_status;
 	}
 	key=vmalloc(sizeof(struct _prologue_key));
-	memcpy(buffer_offset(buffer,offset),key,sizeof(struct _prologue_key));
+	bcopy(buffer_offset(buffer,offset),key,sizeof(struct _prologue_key));
 	xabkey=vmalloc(sizeof(struct _xabkeydef));
 	xabkey->xab$b_cod=XAB$C_KEY;
-	memcpy(key,((unsigned long)xabkey)+2,sizeof(struct _prologue_key));
+	bcopy(key,((unsigned long)xabkey)+2,sizeof(struct _prologue_key));
 	xabkey->xab$l_dvb=key->key$l_ldvbn;
 	xabkey->xab$l_nxt=wccfile->xab;
 	wccfile->xab=xabkey;
