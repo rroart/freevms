@@ -10,6 +10,7 @@
 #include<jpidef.h>
 #include <ssdef.h>
 #include <misc.h>
+#include <phddef.h>
 
 // this behaves like getjpiw for now
 
@@ -32,6 +33,46 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
 
     case JPI$_MASTER_PID:
       bcopy(&p->pid,it->bufaddr,4);
+      break;
+
+    case JPI$_STATE:
+      *(unsigned long *)it->bufaddr=p->pcb$w_state;
+      break;
+
+    case JPI$_PRI:
+      *(unsigned long *)it->bufaddr=p->pcb$b_pri;
+      break;
+
+    case JPI$_PAGEFLTS:
+      *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_pageflts;
+      break;
+
+    case JPI$_PPGCNT:
+      *(unsigned long *)it->bufaddr=p->pcb$l_ppgcnt;
+      break;
+
+    case JPI$_GPGCNT:
+      *(unsigned long *)it->bufaddr=p->pcb$l_gpgcnt;
+      break;
+
+    case JPI$_WSAUTH:
+      *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wsauth;
+      break;
+
+    case JPI$_WSQUOTA:
+      *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wsquota;
+      break;
+
+    case JPI$_WSSIZE:
+      *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wssize;
+      break;
+
+    case JPI$_WSAUTHEXT:
+      *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wsauthext;
+      break;
+
+    case JPI$_WSEXTENT:
+      *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wsextent;
       break;
 
     }
