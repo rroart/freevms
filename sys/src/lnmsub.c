@@ -370,9 +370,35 @@ void lnm$unlockw(void) {
 
 #endif
 
-char * search_log_prc(char * name) {
+int search_log_prc(char * name, char ** retname, int * retsize) {
   $DESCRIPTOR(prc,"LNM$PROCESS_TABLE");
   int sts;
+  int retlen;
+  struct item_list_3 itm[2];
+  struct dsc$descriptor mytabnam, mynam;
+  char resstring[LNM$C_NAMLENGTH]="";
+  mynam.dsc$w_length=strlen(name);
+  mynam.dsc$a_pointer=name;
+  itm[0].item_code=LNM$_STRING;
+  itm[0].buflen=LNM$C_NAMLENGTH;
+  itm[0].bufaddr=resstring;
+  itm[0].retlenaddr=&retlen;
+  bzero(&itm[1],sizeof(struct item_list_3));
+  sts = exe$trnlnm(0, &prc, &mynam, 0, itm);
+
+  if (sts&1) {
+    char * c = kmalloc(retlen,GFP_KERNEL);
+    memcpy(c,resstring,retlen);
+    *retname = c;
+    *retsize = retlen;
+  } 
+  return sts;
+}
+
+int search_log_sys(char * name, char ** retname, int * retsize) {
+  $DESCRIPTOR(sys,"LNM$SYSTEM_TABLE");
+  int sts;
+  int retlen;
   struct item_list_3 itm[2];
   struct dsc$descriptor mytabnam, mynam;
   char resstring[LNM$C_NAMLENGTH]="";
@@ -382,11 +408,53 @@ char * search_log_prc(char * name) {
   itm[0].buflen=LNM$C_NAMLENGTH;
   itm[0].bufaddr=resstring;
   bzero(&itm[1],sizeof(struct item_list_3));
-  sts = exe$trnlnm(0, &prc, &mynam, 0, itm);
-  if (resstring[0]) {
-    char * c = kmalloc(strlen(resstring),GFP_KERNEL);
-    memcpy(c,resstring,strlen(resstring));
-    return c;
-  } else
-    return name;
+  sts = exe$trnlnm(0, &sys, &mynam, 0, itm);
+
+  if (sts&1) {
+    char * c = kmalloc(retlen,GFP_KERNEL);
+    memcpy(c,resstring,retlen);
+    *retname = c;
+    *retsize = retlen;
+  } 
+  return sts;
+}
+
+int search_log_repl(char * name, char ** retname, int * retsize) {
+  int sts;
+  int namelen=strlen(name);
+  char * myname=kmalloc(namelen,GFP_KERNEL);
+  memcpy(myname,name,namelen);
+  sts=search_log_prc(myname,retname,retsize);
+  if (sts&1) goto ret; 
+  sts=search_log_sys(myname,retname,retsize);
+  if (sts&1) goto ret;
+  char * semi = strchr(myname,':');
+  if (semi==0) goto ret;
+  * semi = 0;
+  sts=search_log_prc(myname,retname,retsize);
+  if (sts&1) goto found;
+  sts=search_log_sys(myname,retname,retsize);
+  if ((sts&1)==0) goto ret;
+
+ found: 
+  {}
+  char * newret = kmalloc((*retsize)+namelen-strlen(myname),GFP_KERNEL);
+  memcpy(newret,*retname,(*retsize));
+  newret[*retsize]=0;
+  if (strchr(newret,':')) {
+    memcpy(newret+(*retsize),semi+1,namelen-strlen(myname)-1);
+    (*retsize)--;
+  } else {
+    printk("for RMS sys$input, check\n");
+    newret[*retsize]=':';
+    memcpy(newret+(*retsize),semi,namelen-strlen(myname));
+  }
+  *retname=newret;
+  *retsize=(*retsize)+namelen-strlen(myname);
+  //printk("newret %x %s\n",*retsize,newret);
+
+ ret:
+  kfree(myname);
+  //if (sts&1) printk("ret %s\n",*retname);
+  return sts;
 }

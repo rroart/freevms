@@ -495,3 +495,30 @@ main(){
 #endif
 
 
+void cre_syscommon(char * name) {
+  int sts;
+  char * myname = "DKA200:[vms$common.]";
+  char * myname2 = "DKA200:[vms$common.sysexe]";
+  $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
+  struct dsc$descriptor * mytabnam = &mytabnam_;
+  $DESCRIPTOR(dev_, "SYS$COMMON");
+  struct dsc$descriptor * dev = &dev_;
+  $DESCRIPTOR(dev2_, "SYS$SYSTEM");
+  struct dsc$descriptor * dev2 = &dev2_;
+  struct item_list_3 itm[2];
+  
+  memcpy(myname,name,strlen(name));
+  memcpy(myname2,name,strlen(name));
+
+  itm[0].item_code=LNM$_STRING;
+  itm[0].buflen=strlen(myname);
+  itm[0].bufaddr=myname;
+  bzero(&itm[1],sizeof(struct item_list_3));
+  sts=exe$crelnm(0,mytabnam,dev,0,itm);
+
+  itm[0].item_code=LNM$_STRING;
+  itm[0].buflen=strlen(myname2);
+  itm[0].bufaddr=myname2;
+  bzero(&itm[1],sizeof(struct item_list_3));
+  sts=exe$crelnm(0,mytabnam,dev2,0,itm);
+}
