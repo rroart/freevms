@@ -1,0 +1,20 @@
+***************
+*** 1676,1684 ****
+  
+  	daemonize();
+  
+- 	strcpy(current->comm, "kapm-idled");
+  	sigfillset(&current->blocked);
+- 	current->tty = NULL;	/* get rid of controlling tty */
+  
+  	if (apm_info.connection_version == 0) {
+  		apm_info.connection_version = apm_info.bios.version;
+--- 1663,1670 ----
+  
+  	daemonize();
+  
++ 	strcpy(current->comm, "kapmd");
+  	sigfillset(&current->blocked);
+  
+  	if (apm_info.connection_version == 0) {
+  		apm_info.connection_version = apm_info.bios.version;
