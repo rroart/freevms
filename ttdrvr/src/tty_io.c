@@ -1814,7 +1814,6 @@ void __init console_init(void)
 #ifdef CONFIG_VT
 	con_init();
 #else
-#error
 #endif
 #ifdef CONFIG_SERIAL_CONSOLE
 #if defined(CONFIG_SERIAL)

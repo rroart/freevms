@@ -1,0 +1,1708 @@
+;
+;	****************************************************************
+;
+;		Copyright (c) 1992, Carnegie Mellon University
+;
+;		All Rights Reserved
+;
+;	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+;	distribute  this software  provided  that the  above  copyright
+;	notice appears in  all copies and that  any distribution be for
+;	noncommercial purposes.
+;
+;	Carnegie Mellon University disclaims all warranties with regard
+;	to this software.  In no event shall Carnegie Mellon University
+;	be liable for  any special, indirect,  or consequential damages
+;	or any damages whatsoever  resulting from loss of use, data, or
+;	profits  arising  out of  or in  connection  with  the  use  or
+;	performance of this software.
+;
+;	****************************************************************
+;
+;;;	.TITLE	PZDRIVER - Pseudo terminal driver interface
+	.TITLE	PNDRIVER - Pseudo terminal driver interface
+	.IDENT 'V05-038'
+;
+; Comment out the following line if NOT building for VMS V4 (in other
+; words comment out if you want a V5 driver).
+;
+;;;	VMS_V4 = 1
+ 
+;++
+; FACILITY:
+;
+;	VAX/VMS Pseudo Terminal Driver interface
+;
+; ABSTRACT:
+;
+;	The pseudo terminal consists of two devices.
+;	This is the non terminal part of the two devices.
+;	(In other words, it's the control side of the device
+;	 which is used by the initiating device to communicate
+;	 with the process that was created by LOGINOUT...)
+;
+; AUTHOR:
+;
+;	19-Nov-1982	Dale Moore	Redid the TW driver for VMS 3.0
+;
+;	This program has been granted to the public domain by the author.
+;
+; Revision History:
+;
+;	Version 'V03-001'
+;		DWM	- Added Page seperators
+;			- On Last cancel, invoke hangup on TW device
+;			- changed PZ_STOP and PZ_STOP2 to return instead
+;			  of looping for more.
+;			- Changed last cancel to call ioc$reqcom instead of
+;			  using macro REQCOM which is a branch ioc$reqcom.
+;	Version V03-002	- Changed to Clear word rather than clear byte
+;			  in startio routine on word field.
+;
+;	Version V03-003 (Thu Dec  9 12:42:38 1982) D. Kashtan
+;			  Made into a TEMPLATE driver.
+;	Version V03-004 (Fri Dec 10 11:40:35 1982) D. Kashtan
+;			  Made EXE$... into +EXE$... in FDT dispatch table,
+;			  fixing bug that crashed system in SET/SENSE MODE/CHAR
+;	Version V03-005	(14-Jun-1983) Dale Moore
+;			  Add R4 to calls to IOC$INITIATE.
+;			  TTY$STARTIO mucks R4
+;	Version V03-006	(12-Jul-1983) Mark London, MIT Plasma Fusion Center
+;			- Set terminal to NOBROADCAST when no READ QIO avail-
+;			  able so as to allow Broadcasts without hanging up.
+;			  (When no QIO available, UCB$M_INT is enabled, and
+;			  the Broadcast don't get handled.  The sender of a
+;			  Broadcast goes into a wait state until the broadcast
+;			  is completed or timed-out, neither or which can
+;			  happen.  Setting NOBROADCASTs at least allow the
+;			  Broadcast to finish. What is needed is a CTRLS state
+;			  that doesn't allow Broadcasts to break through.)
+;			- Added MOVC3 instruction for burst data in PN$STARTIO,
+;			  which "should" speed up the transfers.
+;			- Fixed data transfer problem by raising to fork IPL
+;			  while calling PUTNXT in PN$FDTWRITE. NOTE: TWA0 must
+;			  be a mailbox to avoid TT reads from timing out.
+;
+;	Version V04-001 - Doug Davis, Digital Equipment
+;			- Most of the changes required for migration to
+;			  Version 4.0 relate to the new handling of UCB
+;			  creation and deletion. This includes adding 
+;			  a CLONEDUCB entry point to the dispatch table,
+;			  and "cloning" the UNITINIT routine to handle the
+;			  required entry. Also changed the call from 
+;			  IOC$CREATE_UCB to IOC$CLONE_UCB, with associated
+;			  maintainence of the UCB$V_DELETEUCB bit in the
+;			  UCB$L_STS field.
+;			- Changes were also incorporated reflecting new
+;			  methods of  XON/XOFF flow control.
+;			- Although pieces of the original code have been
+;			  superceded by these changes ( example - functions
+;			  that were performed by Unit_Init for new units
+;			  are are now performed by Clone_Init ), most of
+;			  the original code was left in place and/or commented
+;			  out.
+;			
+;			NOTE - No subroutines preambles were modified to
+;			       reflect these changes.
+;
+;	Version V04-002	(20-Jan-1985) Mark London, MIT Plasma Fusion Center
+;			- Changed test for output characters after call to
+;			  UCB$L_TT_PUTNXT and UCB$L_TT_GETNXT.  Output is
+;			  indicated in UCB$B_TT_OUTYPE.
+;
+;	Version V04-003 (24-Jun-1985) Kevin Carosso, Hughes Aircraft Co., S&CG
+;			Cleaned this thing up quite a bit.
+;			- Got rid of MBX characteristic on the devices.  This
+;			  was a holdover to before cloned devices really
+;			  existed.
+;			- Got rid of the UNIT_INIT routine completely.  This
+;			  was replaced by a CLONE_UCB routine.
+;			- Leave the PZ template device OFFLINE.  This is what
+;			  other TEMPLATE devices do, to indicate that you
+;			  really cannot do I/O to the template.
+;			- Rewrote the CANCEL_IO routine to issue a DISCONNECT
+;			  on the TW device at last deassign of the PZ device.
+;			  This causes the TW device to hangup on it's process.
+;			  Works quite nicely with VMS V4 connect/disconnect
+;			  mechanism.  Also, the devices should never stay
+;			  around after last deassign on the PZ, if you want to
+;			  reconnect, count on VMS connect/disconnect instead,
+;			  it's much less of a security hole.
+;			- Got rid of all modem operations.  Improper use tended
+;			  to crash the system and they are not necessary.  TW
+;			  device is always NOMODEM.  HANGUP works as you want
+;			  it to without the modem stuff.
+;			- Got rid of the BRDCST on/off stuff.  It doesn't seem
+;			  to be necessary any more.  It also had a bug in it
+;			  somewhere that caused the terminal to start off
+;			  NOBRDCST when it shouldn't.
+;			- General house-cleaning.  Got rid of commented out
+;			  lines from VMS V3 version.  Fixed up typos in 
+;			  comments.
+;
+;	Version V04-004 (10-Feb-1986) Kevin Carosso, Hughes Aircraft Co., S&CG
+;			Changed all references to PTDRIVER to TPDRIVER because
+;			DEC (bless their little hearts) invented the *#&#$&
+;			TU81 and use PTA0: now.
+;
+;	Version V04-005 (3-Sep-1986) Kevin Carosso, Hughes Aircraft Co., S&CG
+;			Fixed bug whereby the sequence ^S followed by ^Y
+;			would cause a system hang.  The fix is really in
+;			TWDRIVER.
+;
+;	Version V04-006 (5-Dec-1986) Kevin Carosso, Hughes Aircraft Co., S&CG
+;			Fixed the infamous character munging bug.  Turns
+;			out that in FDTWRITE we were enabling interrupts
+;			after doing the PUTNXT and before checking for
+;			a char.  Now check for the character and then
+;			ENBINT after we've decided what to do.  I assume
+;			UCB$B_TT_OUTYPE field was getting corrupted.
+;
+;	Version V04-007 (10-JUL-1987) Kevin Carosso, Hughes Aircraft Co., S&CG
+;			Fix in TWDRIVER for timeouts.  Don't bother
+;			clearing the TIM bit all the time in here now.
+;
+;			Also, while we're in here, lets make the device
+;			acquire "NODE$" prefixes, since mailboxes do.
+;
+;	Version V04-008	(2-NOV-1987) Kevin Carosso, Network Research Co.
+;			In PN$FDTWRITE we were overwriting the status in
+;			R0 just before jumping to EXE$ABORTIO when something
+;			goes wrong.  Don't POPR into R0, but into R1.  We
+;			only care about what we POPR into R3 anyway.
+;
+;			Fix thanks to Gerard K Newman @ San Diego
+;			Supercomputer Center.
+;
+;	Version V05-001 Digital Equipment Corp.
+;			Add support for Symmetric Multiprocessing. 
+;
+;	Version	V05-002	Digital Equipment Corp.
+;			Modify PN$CLONE_INIT to make newly cloned 
+;			owned by person requesting new device.
+;
+;	Version	V05-003	Digital Equipment Corp.
+;			Modify PN$CLONE_INIT to change device protection
+;			to be S:RWLP,O:RWLP.
+;
+;	Version	V05-004	Digital Equipment Corp
+;			Change TP driver names to TW. (TP driver it turns
+;			out, conflicted with the VAX/PSI terminal driver.)
+;			TWDRIVER and PZDRIVER are now registered with SQM 
+;			so there will be no more conflicts.
+;
+;	Version	V05-005 Digital Equipment Corp
+;			If input stopped then exit PN$FDTWRITE immediately 
+;			with reason of SS$_DATAOVERUN.  If we detect input
+;			stopping while inserting data return with 
+;			SS$_DATAOVERUN and number of bytes inserted.
+;
+;	Version V05-006	Digital Equipment Corp.
+;			Add CODE for sending an AST if PORT XON, PORT XOFF,
+;			and PORT SET_LINE routines are called.  Also add 
+;			SENSEMODE, and SENSECHAR routine for reading TW device
+;			characteristics.
+;
+;	Version V05-006A Kevin Carosso @ Network Research Co.
+;			Conditionalize assembly for VMS V4 or V5.  There
+;			is a magic symbol at the top that is commented
+;			out for VMS V5.
+;
+;	Version V05-007 Dale Moore	Carnegie Mellon and
+;			Mark Shannon	Carnegie Mellon
+;			Changed buffer size from 32 to 256. Changed
+;			Instructions that worked with Buffer size from
+;			BYTE instructions to WORD instructions.
+;			May result in more memory use, but better handle
+;			large I/O's.
+;
+;	Version V05-008 Dale Moore	Carnegie Mellon CS
+;			Found place where BISW 	TTY$M_TANK_BURST
+;			was suppose to be BISW	#TTY$M_TANK_BURST
+;			Thanks to the Gentlemen of Gandalf
+;
+;	Version V05-009	Dale Moore	Carnegie Mellon
+;			Changed to deal with data length as a long instead
+;			of word.  Some other stuff cleaned from executables
+;			of DEC Windows version.
+;
+;	Version V05-011 Dale Moore	Carnegie Mellon
+;			Updated to conform with what DEC is distributing
+;			With DECWindows.  Damn Version Skew.
+;
+;	Version V05-030	Bruce R. Miller		CMU NetDev
+;			Added Bill Glass's fixes to PN$FDTWRITE.  Was
+;			returning bad "number of bytes transfered" on
+;			request for 0 bytes.  Code also now tests the
+;			tank_prempt bit.  New conditions for returning
+;			DATAOVERUN.
+;			
+;	Version V05-031	Bruce R. Miller		CMU NetDev
+;			Added SETMODE sub-function to set the ACCPORNAM
+;			so that we show up in "SH US/FULL".  Then I
+;			commented it out, 'cause I didn't trust it.
+;
+;	Version V05-032	Bruce R. Miller		CMU NetDev
+;			Changed name to PZDriver.  To hell with Digital.
+;			I'm sick of worrying about DECWindows everytime
+;			I make a change to this code.
+;
+;	Version V05-033 John M. Clement		Rice University
+;			Added code to make Vanilla IO$_SETMODE work
+;			Prior to this it returned an error code.
+;			It has been tested, but some bits may need
+;			to be masked off as they should not be set
+;			It relies on the good sense of the caller!!!
+;
+;	Version V05-034 Henry W. Miller		USBR
+;			Changed buffer size to 1024 to handle cut & paste
+;			blasts.
+;
+;	Version V05-035 27-Nov-1991	Henry W. Miller		USBR
+;			Merge PZ and TZ UCB extensions together.
+;			Make sure UCB$x_STS is referenced properly based
+;			upon version of VMS.
+;			Use UCB$K_TP_LENGTH instead of UCB$K_TT_LENGTH,
+;			They are defined differently in different places.
+;
+;	Version V05-036 04-Dec-1991	Henry W. Miller		USBR
+;			Make driver unloadable.
+;
+;	Version V05-037 20-Dec-1991	Henry W. Miller		USBR
+;			Interlock code while in SET_ACC_POR.
+;
+;	Version V05-038 27-Jan-1992	John Clement		Rice Univ.
+;			Change name to PNDRIVER
+;
+;--
+
+	.PAGE
+	.SBTTL	Declarations
+ 
+	.LIBRARY	/SYS$LIBRARY:LIB.MLB/
+ 
+;
+; External Definitions:
+;
+.NOCROSS
+;	$ACBDEF				; Define ACB
+	$CRBDEF				; Define CRB
+	$CANDEF				; Define cancel codes
+	$DDBDEF				; DEFINE DDB
+	$DDTDEF				; DEFINE DDT
+	$DEVDEF				; DEVICE CHARACTERISTICS
+	$DYNDEF				; Dynamic structure definitions
+	$IODEF				; I/O Function Codes
+	$IRPDEF				; IRP definitions
+	$JIBDEF				; Define JIB offsets
+	$ORBDEF				; Define ORB offsets
+	$PCBDEF				; Define PCB
+	$PRDEF				; Define PR
+	$TTYUCBDEF			; Define the TTY fields in the UCB
+
+.IF	NOT_DEFINED	VMS_V4
+	$SPLCODDEF			; Spin lock code definitions
+.ENDC
+
+	$SSDEF				; DEFINE System Status
+	$TTDEF				; DEFINE TERMINAL TYPES
+	$TT2DEF				; Define Extended Characteristics
+	$TTYDEF				; DEFINE TERMINAL DRIVER SYMBOLS
+	$TTYDEFS			; DEFINE TERMINAL DRIVER SYMBOLS
+	$TTYMACS			; DEFINE TERMINAL DRIVER MACROS
+	$UCBDEF				; DEFINE UCB
+	$VECDEF				; DEFINE VECTOR FOR CRB
+.CROSS
+ 
+;
+; Local definitions
+;
+; QIO Argument list offsets
+;
+P1 = 0
+P2 = 4
+P3 = 8
+P4 = 12
+P5 = 16
+P6 = 20
+;
+; New device class for control end
+;
+DC$_PZ = ^XFF
+DT$_PZ = 0
+
+;
+; Definitions that follow the standard UCB fields for TZ driver
+;  This will all probably have to be the same as the standard term
+ 
+	$DEFINI	UCB			; Start of UCB definitions
+ 
+	.=UCB$K_TP_LENGTH		; Position at end of UCB
+ 
+$DEF	UCB$L_TZ_XUCB	.BLKL	1	; UCB of corresponding
+					;  control/application unit
+					; call 
+$DEF	UCB$L_TZ_XON_AST .BLKL	1	; AST list for XON event notification
+$DEF	UCB$L_TZ_XOFF_AST .BLKL	1	; AST list for XOFF event notification
+$DEF	UCB$L_TZ_SET_AST .BLKL	1	; AST list for notification of SET_LINE 
+$DEF	UCB$K_TZ_LEN			; Size of UCB
+ 
+;;;	$DEFEND	UCB			; End of UCB definitions
+ 
+;
+; Definitions that follow the standard UCB fields in PZ devices
+; 
+
+BUFFER_SIZE = 1024
+
+;
+; Length of access port buffer in UCB
+;
+ACCPOR_SIZE = 30
+ 
+;;;	$DEFINI UCB			; Start of UCB definitions
+;;;	.=UCB$K_LENGTH			; position at end of UCB
+;;;	.=UCB$K_TZ_LEN			; position at end of UCB
+$DEF	UCB$L_PZ_XUCB	.BLKL 1		; UCB of terminal part of pseudo terminal
+$DEF	UCB$T_PZ_BUFFER	.BLKB	BUFFER_SIZE ; Buffer to store characters to be transmitted
+
+$DEF	UCB$A_REM_HOST_LEN .BLKB 1	; Size of remote host ID string.
+$DEF	UCB$A_REM_HOST_STR .BLKB ACCPOR_SIZE; Space for remote host ID string.
+
+$DEF	UCB$K_PZ_LEN			; Size of UCB
+
+ 	$DEFEND UCB			; end of UCB definitions
+
+	.PAGE
+;
+; LOCAL Storage
+;
+	.PSECT $$$105_PROLOGUE
+ 
+	.SBTTL	Standard Tables
+ 
+;
+; Driver prologue table:
+;
+PN$DPT::
+	DPTAB	-			; Driver Prologue table
+		END = PN$END,-		; End and offset to INIT's vectors
+		UCBSIZE = UCB$K_PZ_LEN,-; Size of UCB
+;;;		FLAGS=DPT$M_NOUNLOAD,-		; Don't allow unload
+		ADAPTER=NULL,-			; ADAPTER TYPE
+		UNLOAD=PZ_UNLOAD,-		; Unload the PZ driver
+		NAME	= PNDRIVER		; Name of driver
+;;;		NAME	= PZDRIVER		; Name of driver
+	DPT_STORE INIT
+	DPT_STORE UCB,UCB$W_UNIT_SEED,W,0	; SET UNIT # SEED TO ZERO
+
+.IF	DEFINED	VMS_V4
+	DPT_STORE UCB,UCB$B_FIPL,B,8 		; FORK IPL
+.IF_FALSE
+	DPT_STORE UCB,UCB$B_FLCK,B,SPL$C_IOLOCK8 ; FORK LOCK
+.ENDC
+
+.IF	DEFINED	VMS_V4
+	DPT_STORE UCB,UCB$W_STS,W,-		; TEMPLATE device
+			<UCB$M_TEMPLATE>
+.IF_FALSE
+	DPT_STORE UCB,UCB$L_STS,L,-		; TEMPLATE device
+			<UCB$M_TEMPLATE>
+.ENDC
+	DPT_STORE UCB,UCB$L_DEVCHAR,L,<-	; Characteristics
+			DEV$M_REC!-		;   record oriented
+			DEV$M_AVL!-		;   available
+			DEV$M_IDV!-		;   input device
+			DEV$M_ODV>		;   output device
+	DPT_STORE UCB,UCB$L_DEVCHAR2,L, -		; Device characteristics
+			<DEV$M_NNM>			; prefix with "NODE$"
+	DPT_STORE UCB,UCB$B_DEVCLASS,B,DC$_PZ
+	DPT_STORE UCB,UCB$B_DIPL,B,8		; Device IPL = FIPL (no device)
+	DPT_STORE DDB,DDB$L_DDT,D,PN$DDT
+ 
+	DPT_STORE REINIT
+	DPT_STORE CRB,CRB$L_INTD+VEC$L_INITIAL,D,PN$INITIAL	; Controller
+	DPT_STORE END
+
+	.PAGE
+	.SBTTL Driver Dispatch table and function decision table
+;
+; Driver Dispatch table
+;
+;;;	DDTAB	DEVNAM	= PZ,-			; Device name
+	DDTAB	DEVNAM	= PN,-			; Device name
+		START	= PN$STARTIO,-		; Start I/O routine
+		FUNCTB	= PN$FUNCTAB,-		; The function table
+		CANCEL	= PN$CANCEL,-		; the cancel i/o routine
+		CLONEDUCB = PN$CLONE_INIT	; Entry when template cloned.
+;
+; Function Decision table for PZ devices
+;
+PN$FUNCTAB:
+	FUNCTAB	,-			; Legal Functions
+		<READLBLK,-
+		WRITELBLK,-
+		READVBLK,-
+		WRITEVBLK,-
+		READPBLK,-
+		WRITEPBLK,-
+		SETMODE,-
+		SETCHAR,-
+		SENSEMODE,-
+		SENSECHAR,-
+		>
+	FUNCTAB	,-			; Buffered I/O functions
+		<READLBLK,-
+		WRITELBLK,-
+		READVBLK,-
+		WRITEVBLK,-
+		READPBLK,-
+		WRITEPBLK,-
+		>
+	FUNCTAB	PN$FDTREAD,<READLBLK,READVBLK,READPBLK>
+	FUNCTAB PN$FDTWRITE,<WRITELBLK,WRITEVBLK,WRITEPBLK>
+	FUNCTAB PN$FDTSET,<SETMODE,SETCHAR>
+	FUNCTAB PN$FDTSENSEM,<SENSEMODE>
+	FUNCTAB	PN$FDTSENSEC,<SENSECHAR>
+
+
+	.SBTTL	Local Storage - Name of companion device
+ 
+TZSTRING:	.ASCII	/TZA/
+TZLENGTH = . - TZSTRING
+
+
+;++
+; PZ_UNLOAD, Unload the driver
+;
+; Functional description:
+;
+;	Usefull for dealocating system buffers with COM$DRVDEALMEM.
+;
+;	N.B.  See the VMS Device Support manual section on the
+;	Driver Unloading Routine before modifying this routine.
+;
+; Context:
+;
+;	SYSGEN calls the driver unloading routine at IPL$_POWER.
+;	The driver unloading routine cannot lower IPL.
+;	The driver unloading routine is called in process context.
+;	The driver unloading routine can use all registers.
+;
+; Inputs:
+;
+;	R6	- address of the DDB (device data block)
+;	R10	- address of the DPT (driver prologue table)
+;
+; Outputs:
+;
+;	The driver unloading routine can use all registers.
+;
+;--
+
+PZ_UNLOAD:				; Unload device
+	MOVL	#SS$_NORMAL,R0
+	RSB				; Return
+
+
+	.PAGE
+	.SBTTL	PN$FDTREAD - Function decision routine for PZ control read
+;++
+; PN$FDTREAD
+;
+; Functional Description:
+;
+;	This routine is called from the function decision table dispatcher
+; 	to process a read physical, read logical, read virtual I/O function.
+;
+;	The function first verifies the caller's parameters, terminating
+;	the request with immediate success or error if necessary.
+;	A system buffer is allocated and its
+;	address is saved in the IRP.  The caller's quota is updated, and
+;	the read request is queued to the driver for startup.
+;
+; Inputs:
+;
+;	R0,R1,R2	= Scratch
+;	R3		= IRP Address
+;	R4		= Address of PCB for current process
+;	R5		= Device UCB address
+;	R6		= Address of CCB
+;	R7		= I/O function code
+;	R8		= FDT Dispatch addr
+;	R9,R10,R11	= Scratch
+;	AP		= Address of function parameter list
+;			P1(AP) = Buffer Address
+;			P2(AP) = Buffer Size
+;
+; Outputs:
+;
+;	R0,R1,R2,R11	= Destroyed
+;	R3-R10,AP	= Preserved (pickled)
+;	IRP$L_SVAPTE(R3)= Address of allocated system buffer
+;	IRP$W_BOFF(R3)	= Requested byte count
+;
+;	System Buffer:
+;		LONGWORD/0	= Address of start of data= buff+12
+;		LONGWORD/1	= Address of user buffer
+;
+;--
+PN$FDTREAD::
+	MOVZWL	P2(AP),R1	; Get buffer Size
+	BNEQ	15$
+	JMP	10$		; Is the size zero? If so, go do it easy.
+15$:	MOVL	P1(AP),R0	; Get buffer Address
+	JSB	G^EXE$READCHK	; Do we have access to the buffer
+	PUSHR	#^M<R0,R3>	; Save user buffer address and IRP address
+	ADDL	#12,R1		; Add 12 bytes for buffer header
+
+.IF	DEFINED	VMS_V4
+	JSB	G^EXE$BUFFRQUOTA	; Is there enough buffer space left in
+					;  the quota?
+	BLBC	R0, 30$			; Branch if insufficient quota
+	JSB	G^EXE$ALLOCBUF		; Allocate a system buffer
+.IF_FALSE
+	JSB	G^EXE$DEBIT_BYTCNT_ALO 	; Verify enough byte quota allocate buffer
+					; and charge process for useage
+.ENDC
+
+	BLBC	R0,30$			; If error report it
+	POPR	#^M<R0,R3>		; Restore user buffer and irp address
+	MOVL	R2,IRP$L_SVAPTE(R3)	; Save address of buffer
+	MOVW	R1,IRP$W_BOFF(R3)	;  and requested byte count
+	MOVZWL	R1,R1			; convert to longword count
+
+.IF	DEFINED	VMS_V4
+	MOVL	PCB$L_JIB(R4),R11	; Get Jib address
+	SUBL	R1,JIB$L_BYTCNT(R11)	; Adjust quota count
+.ENDC
+
+	MOVAB	12(R2),(R2)		; Save addr of start of user data
+	MOVL	R0,4(R2)		; Save user buffer address in 2nd
+					; longword
+	JMP	G^EXE$QIODRVPKT	; Queue I/O packet to start I/O routine
+;
+; Did he request a read of zero bytes?
+;
+10$:	MOVL	#SS$_NORMAL,R0		; Everything is ok
+	JMP	G^EXE$FINISHIOC		; complete I/O request
+;
+; Come here when something goes wrong
+;
+30$:	POPR	#^M<R1,R3>		; Clear buffer addr and restore IRP
+	JMP	G^EXE$ABORTIO		; complete I/O request
+
+	.PAGE
+	.SBTTL	PN$FDTWRITE - Function decision routine for PZ control write
+;++
+; PN$FDTWRITE
+;
+; Functional Description:
+;
+;	This routine is called from the function decision table dispatcher
+; 	to process a write physical, write logical, write virtual I/O
+;	function.
+;
+;	The function first verifies the caller's parameters, terminating
+;	the request with immediate success or error if necessary.
+;	The routine then immediately start cramming the characters into
+;	the associated units typeahead buffer by calling putnxtchr.
+;
+; Inputs:
+;
+;	R0,R1,R2	= Scratch
+;	R3		= IRP Address
+;	R4		= Address of PCB for current process
+;	R5		= Device UCB address
+;	R6		= Address of CCB
+;	R7		= I/O function code
+;	R8		= FDT Dispatch addr
+;	R9,R10,R11	= Scratch
+;	AP		= Address of function parameter list
+;		P1(AP)	= Buffer Address
+;		P2(AP)	= Buffer Size
+;
+; Outputs:
+;
+;	R0,R1,R2	= Destroyed
+;	R3-R7,AP	= Preserved (pickled)
+;
+;
+;	N O T E:
+;		This routine now assumes that TZ and PZ's fork and DEVICE
+;	locks are the same lock.  This allows use to keep from having to 
+;	do an extra unecessary lock acquisition.
+;	
+;
+;
+; External Routines:
+;
+;	EXE$ABORTIO - FDT abort io routine
+;	Input Parameters:
+;		R0 - First longword of IOSB
+;		R3 - IRP Address
+;		R4 - PCB Address
+;		R5 - UCB Address
+;
+;	EXE$FINISHIOC - FDT finish IO routine
+;	Input Parameters:
+;		R0 - First longword of IOSB
+;		R3 - IRP Address
+;		R4 - PCB Address
+;		R5 - UCB Address
+;
+;	EXE$WRITECHK - Check access to buffer
+;	Input Parameters:
+;		R0 - Address of buffer
+;		R1 - Size of buffer
+;		R3 - IRP Address
+;	Output Parameters:
+;		R0,R1,R3 - Preserved
+;		R2 - clear
+;
+;	@UCB$L_TT_PUTNXT(R5) - Port driver input character routine
+;	Input Parameters:
+;		R3 - character
+;		R5 - UCB Address
+;	Output Parameters:
+;		R3 - if EQL then nothing
+;		     if LSS then Burst address to output
+;		     if GTR then char to output
+;		R5 - UCB Address
+;		R1,R2,R4 - trashed
+;		R0 - Is this trashed or preserved? Documentation say preserve.
+;
+;--
+PN$FDTWRITE::
+	CLRL	R10			; Clear count of characters sent
+	MOVZWL	P2(AP),R1		; Get buffer Size
+	BNEQ	10$			; Is the non zero? If so, do it easy.
+	BRW	160$			; Zero size buffer just finish it now
+
+10$:
+	MOVL	P1(AP),R0		; Get buffer Address
+	JSB	G^EXE$WRITECHK		; Do we have access to the buffer
+					; No return means no access
+	MOVL	R1,R9			; Number of characters to send
+	MOVL	R5,R11			; Save away PZ UCB ptr
+	PUSHR	#^M<R3,R4,R5>		; Save PCB, IRP,and UCB address
+;
+;	User request ok.
+;
+;	R0	-> 	Address of characters to input
+;	R5	->	Address of TZ's UCB 
+;	R8	->	Number of characters to send this time
+;	R9	->	Total number of characters to send
+;	R10	->	Numbers of characters already sent
+;	R11	->	Address of PZ's UCB
+;
+20$:
+	SUBL3	R10,R9,R8		; Get number of characters send
+	CMPL	R8,#BUFFER_SIZE		; More data than buffer can hold
+	BGEQ	30$			; GEQ then use BUFFER_SIZE segment
+	CMPL	R8,#1			; Test for one byte only 
+	BGTR	40$			; GTR more than one fill up buffer
+	MOVZBL	(R0)[R10],R3		; Move single character into R3
+	BRB	60$			; Now go ahead and send it
+30$:
+	MOVC3	#BUFFER_SIZE,(R0)[R10],-; Store data in UCB buffer
+		UCB$T_PZ_BUFFER(R11)	;
+.IF LESS_THAN BUFFER_SIZE-255
+	MOVZBL	#BUFFER_SIZE,R8		; Number of characters in burst
+.IF_FALSE
+	MOVZWL	#BUFFER_SIZE,R8		; Number of characters in burst
+.ENDC
+	BRB	50$			; Now finish setup for transfer
+40$:
+	MOVC3	R8,(R0)[R10],	-	; Store data in UCB buffer
+		UCB$T_PZ_BUFFER(R11)	;
+50$:
+	MOVAB	UCB$T_PZ_BUFFER(R11),R0	; Get buffer address
+	MOVZBL	(R0)+,R3		; Get first character 
+60$:
+	MOVL	UCB$L_PZ_XUCB(R11),R5	; Get TZ's UCB address
+
+.IF	DEFINED	VMS_V4
+	DSBINT	UCB$B_DIPL(R5)
+.IF_FALSE
+	DEVICELOCK		-	; Take device lock for TZ device
+		LOCKADDR=UCB$L_DLCK(R5),- ;
+		LOCKIPL=UCB$B_DIPL(R5), - ;
+		SAVIPL=-(SP),	-	;
+		PRESERVE=YES		;
+.ENDC
+
+	BBS	#TTY$V_TP_XOFF,	-	; See if XOFFED, if so then
+		UCB$B_TP_STAT(R5),120$	; don't even bother, cause it's full
+
+70$:
+	INCL	R10			; Increment sent character count
+	JSB	@UCB$L_TT_PUTNXT(R5)	; Buffer character
+	BLSS	90$			; LSS burst 
+	BGTR	100$			; GTR single character
+80$:	BBS	#TTY$V_TP_XOFF,	-	; See if XOFFED is so then
+		UCB$B_TP_STAT(R5),120$	; stop input and check for echoed data
+	DECL	R8			; Decrease number to send in burst
+	BLEQ	110$			; LEQ block done see if request done
+	MOVZBL	(R0)+,R3		; Get next character
+	BRB	70$			; Send next character
+90$:
+	BISW	#TTY$M_TANK_BURST, -	; Signal burst
+		UCB$W_TT_HOLD(R5)	;
+	BRB	80$			; Continue processing
+100$:
+	MOVB	R3,UCB$W_TT_HOLD(R5)	; Store character in tank
+	BISW	#TTY$M_TANK_HOLD, -	; Signal character in tank
+		UCB$W_TT_HOLD(R5)	;
+	BRB	80$			; Continue processing
+
+;
+; See if this request is done or if more to do
+;
+110$:
+	CMPL	R10,R9			; All done
+	BGEQ	120$			; GEQ done so check for echo
+
+.IF	DEFINED	VMS_V4
+	ENBINT
+.IF_FALSE
+	DEVICEUNLOCK		-	; More in request release lock 
+		LOCKADDR=UCB$L_DLCK(R5), - ; and go back and get it
+		NEWIPL=(SP)+,	-	;
+		PRESERVE=YES		;
+.ENDC
+
+	MOVL	P1(AP),R0		; Restore users buffer address
+	BRW	20$			; 
+
+;
+; See if need to start up pending read
+;
+120$:
+	BITW	#TTY$M_TANK_PREMPT!-	; If anything is in hold
+		TTY$M_TANK_HOLD!-	;  start output
+		TTY$M_TANK_BURST,-	;
+		UCB$W_TT_HOLD(R5)	;
+	BEQL	140$			; Otherwise, finish up
+130$:
+.IF	DEFINED	VMS_V4
+	BBC	#UCB$V_BSY,	-	; PZ ready to take data 
+		UCB$W_STS(R11),140$	;
+.IF_FALSE
+	BBC	#UCB$V_BSY,	-	; PZ ready to take data 
+		UCB$L_STS(R11),140$	;
+.ENDC
+	MOVL	UCB$L_IRP(R11),R3	; Get IRP address
+	MOVL	R11,R5			; Get PZ UCB address
+	JSB	G^IOC$INITIATE		; Now start PZ read 
+140$:
+
+.IF	DEFINED	VMS_V4
+	ENBINT
+.IF_FALSE
+	DEVICEUNLOCK		-	; Done release lock 
+		LOCKADDR=UCB$L_DLCK(R11), - ; NOTE PZ & TZ lock are the same
+		NEWIPL=(SP)+		;
+.ENDC
+
+	MOVL	UCB$L_PZ_XUCB(R11),R5
+	BBS	#TTY$V_TP_XOFF,	-	; See if XOFFED report this special
+		UCB$B_TP_STAT(R5),170$	; case
+;
+; Finish up the read
+;
+150$:
+	POPR	#^M<R3,R4,R5>		; Restore IRP, PCB, and UCB 
+160$:
+	INSV	R10,#16,#16,R0		; Move number of bytes INPUT
+	MOVW	#SS$_NORMAL,R0		; Everything is just fine
+	JMP	G^EXE$FINISHIOC		; Complete the I/O request
+
+;+
+; Special code to deal with input while xoffed.
+;-
+	TTY$M_TP_XOFF = 8
+	TTY$V_TP_XOFF = 3
+	ASSUME	TTY$M_TP_XOFF EQ TTY$M_TP_DLLOC+4
+	ASSUME  TTY$V_TP_XOFF EQ TTY$V_TP_DLLOC+1
+
+170$:          
+	CMPL	R10,R9			; All done?
+	BGEQ	150$			; Yes, a normal termination
+	POPR	#^M<R3,R4,R5>		; Restore IRP, PCB, and UCB
+	INSV	R10,#16,#16,R0		; Move number of bytes INPUT
+	MOVW	#SS$_DATAOVERUN,R0	; Cannot input more data 
+	JMP	G^EXE$FINISHIOC		; Complete the I/O request
+
+	.PAGE
+	.SBTTL	PN$CANCEL - Cancel the IO on the PZ device
+;++
+;
+; Functional Description:
+;
+;	This routine is entered to stop io on a PZ unit.  If this is the last
+;	deassign on the PZ device, issue a CLASS_DISCONNECT on our associated
+;	TZ device to get it away from any processes using it.
+;
+; Inputs:
+;
+;	R2 = Negative of the Channel Number,
+;		also called channel index number
+;	R3 = Current IO package address
+;	R4 = PCB of canceling process
+;	R5 = UCB Address
+;	R8 = CAN$C_CANCEL on CANCEL IO or CAN$C_DASSGN on DEASSIGN
+;
+; Outputs:
+;	Everything should be preserved
+;--
+PN$CANCEL::					; Cancel PZ usage
+	JSB	G^IOC$CANCELIO			; Call the cancel routine
+.IF	DEFINED	VMS_V4
+	BBC	#UCB$V_CANCEL,UCB$W_STS(R5),10$	; Branch if not for this guy
+.IF_FALSE
+	BBC	#UCB$V_CANCEL,UCB$L_STS(R5),10$	; Branch if not for this guy
+.ENDC
+	MOVQ	#SS$_ABORT,R0			; Status is request canceled
+.IF	DEFINED	VMS_V4
+	BICW	#<UCB$M_BSY!UCB$M_CANCEL>,-	;
+		UCB$W_STS(R5)			; Clear unit status flags
+.IF_FALSE
+	BICL	#<UCB$M_BSY!UCB$M_CANCEL>,-	;
+		UCB$L_STS(R5)			; Clear unit status flags
+.ENDC
+	JSB	G^IOC$REQCOM			; Complete request
+10$:	TSTW	UCB$W_REFC(R5)			; Last Deassign
+	BNEQ	100$				; No, just exit
+;
+; Last DEASSIGN we need to get rid of AST's 
+;
+	pushr	#^M<r2, r3, r4, r5, r7>
+	MOVL	R2,R6				; Save the Channel number
+	movl	UCB$L_PZ_XUCB(r5), r5		; Switch to TZ UCB
+	beql	20$				; if not there, skip
+	MOVAB	UCB$L_TZ_XON_AST(R5),R7		; Get XON list head address
+	TSTL	(R7)				; Any ast to deliver
+	BEQL	11$				; EQL 0 do not flush it
+	JSB	G^COM$FLUSHATTNS		; Flush it
+11$:	MOVAB	UCB$L_TZ_XOFF_AST(R5),R7	; Get XOFF list head address
+	TSTL	(R7)				; Any ast to deliver
+	BEQL	12$				; EQL 0 do not flush it
+	JSB	G^COM$FLUSHATTNS		; Flush it
+12$:	MOVAB	UCB$L_TZ_SET_AST(R5),R7		; Get SET_LINE list head address
+	TSTL	(R7)				; Any ast to deliver
+	BEQL	13$				; EQL 0 do not flush it
+	JSB	G^COM$FLUSHATTNS		; Flush it
+;
+; Do a DISCONNECT on the TZ device.
+;
+13$:
+	clrl	UCB$L_TZ_XUCB(r5)		; Clear backlink to PZ device
+.IF	DEFINED	VMS_V4
+	bisw2	#UCB$M_DELETEUCB, UCB$W_STS(r5) ; Set it to go bye-bye
+	bicw2	#UCB$M_ONLINE,UCB$W_STS(R5)	; Mark offline
+	bicb2	#UCB$M_INT, UCB$W_STS(r5)	; Don't expect interrupt
+.IF_FALSE
+	bisl2	#UCB$M_DELETEUCB, UCB$L_STS(r5) ; Set it to go bye-bye
+	bicl2	#UCB$M_ONLINE,UCB$L_STS(R5)	; Mark offline
+	bicl2	#UCB$M_INT, UCB$L_STS(r5)	; Don't expect interrupt
+.ENDC
+	movl	UCB$L_TT_LOGUCB(r5), r1		; Look at logical term UCB
+	tstw	UCB$W_REFC(r1)			; See if TZ has any references
+	bneq	15$				; If so, go and do disconnect
+	jsb	G^IOC$DELETE_UCB		; if not, delete the UCB
+	brb	20$
+15$:	clrl	r0				; indicate that we must hangup
+	movl	UCB$L_TT_CLASS(r5), r1
+	jsb	@CLASS_DISCONNECT(r1)		; Force disconnect
+20$:	popr	#^M<r2, r3, r4, r5, r7>		; Switch back to PZ UCB
+	clrl	UCB$L_PZ_XUCB(r5)		; Clear link to deleted TZ
+.IF	DEFINED	VMS_V4
+	bisw2	#UCB$M_DELETEUCB, UCB$W_STS(r5)	; Set our own delete bit
+.IF_FALSE
+	bisl2	#UCB$M_DELETEUCB, UCB$L_STS(r5)	; Set our own delete bit
+.ENDC
+100$:	rsb
+
+	.PAGE
+	.SBTTL PN$INITIAL - Initialize Pseudo terminal interface
+ 
+;++
+; PN$INITIAL - Initialize the interface
+;
+; Functional Description:
+;
+;	This routine is entered at device connect time and power recovery.
+;	There isn't much to do to the device.
+;
+; Inputs:
+;
+;	R4 = The devices CSR  (but there is no csr!)
+;	R5 = address of IDB
+;	R6 = address of DDB
+;	R7 = address of CRB
+;
+; Outputs:
+;
+;	All registers preserved
+;
+;--
+PN$INITIAL::
+	RSB
+
+	.PAGE
+	.SBTTL	PN$CLONE_INIT - initialize the unit
+;++
+; PN$CLONE_INIT - Initialize new PZ device
+;
+; Functional Description:
+;
+;	Main thing we do here is clone up an associated terminal device
+;	and initialize fields in the two new UCB's.
+;
+; Inputs:
+;
+;	R5	= Address of UCB
+;
+; Outputs:
+;
+;	All preserved
+;--
+ 
+PN$CLONE_INIT::
+ 
+;+ ---
+;	Ignore inits on UNIT #0 (the template PZ UCB)
+;- ---
+	TSTL	UCB$W_UNIT(R2)			;UNIT #0??
+	BNEQ	10$				;No: Initialize
+	RSB					;Yes: Return
+ 
+10$:	PUSHR	#^M<R0,R1,R2,R4,R6,R7,R8>
+.IF	DEFINED	VMS_V4
+	Bicw2	#UCB$M_DELETEUCB,UCB$W_STS(R2)	; Clear ucbdelete - dec
+.IF_FALSE
+	Bicl2	#UCB$M_DELETEUCB,UCB$L_STS(R2)	; Clear ucbdelete - dec
+.ENDC
+	Movl	R2,R5
+;
+; Find the associated device.
+;
+; NOTE: We can't call IOC$SEARCHDEV because it expects the string to
+;	be accessible from the previous access mode. (It executes the
+;	prober instruction with mode=#0). I don't know how to make the
+;	string accessible from the previous access mode cleanly, but I
+;	do know how to move most of IOC$SEARCHDEV into the PZ driver.
+;
+	MOVAL	G^IOC$GL_DEVLIST-DDB$L_LINK,-	; Get address of i/o database
+		R8				; listhead
+	CLRL	R6				; Desired mate = PTY UNIT 0
+	MOVAB	L^TZSTRING,R7			; String address for TZA
+	MOVL	#TZLENGTH,R4			; String length
+	BSBW	SEARCHDEV			; Find the DDB
+	BNEQ	20$				; Device not found
+	BSBW	SEARCHUNIT			; Search for specific unit
+	BNEQ	30$				; unit found
+20$:	POPR	#^M<R0,R1,R2,R4,R6,R7,R8>	; NOT FOUND: Return
+	RSB
+	
+;
+; Create the PTY, R1 has template UCB of TZ device
+;
+30$:	PUSHL	R5				; Save R5
+	MOVL	UCB$L_DDB(R5),R0		; Find UNIT #0 UCB FOR PZ DEV.
+	MOVL	DDB$L_UCB(R0),R0
+	MOVL	R1,R5				; R5 = UCB to CLONE
+	JSB	G^IOC$CLONE_UCB			; Clone UCB
+ 
+	MOVL	R2,R1				; Put PTY UCB back into R1
+	POPL	R5				; Restore R5
+	BLBS	R0,40$				; WIN!!! (big deal.)
+;+ ---
+;	CREATE_UCB failed, mark our PZ device offline
+;- ---
+.IF	DEFINED	VMS_V4
+	BICW2	#UCB$M_ONLINE,UCB$W_STS(R5)	; Mark offline
+.IF_FALSE
+	BICL2	#UCB$M_ONLINE,UCB$L_STS(R5)	; Mark offline
+.ENDC
+	BRW	100$				; And return
+;+ ---
+;	PTY UCB created successfully, link the UCBs together
+;- ---
+40$:	MOVL	R1,UCB$L_PZ_XUCB(R5)		; Store associated UCB
+	MOVL	R5,UCB$L_TZ_XUCB(R1)		; Store the other one back
+	CLRL	UCB$L_PID(R1)			; Clear the owner PID in PTY
+	CLRW	UCB$W_REFC(R1)			; Reference count is ZERO
+.IF	DEFINED	VMS_V4
+	Bicw2	#UCB$M_DELETEUCB,UCB$W_STS(R1)	; Inhibit deletion
+.IF_FALSE
+	Bicl2	#UCB$M_DELETEUCB,UCB$L_STS(R1)	; Inhibit deletion
+.ENDC
+	MOVW	UCB$W_UNIT(R1),-		; Set associated TZ unit
+		UCB$L_DEVDEPEND(R5)		; number in PZ devdepend
+;+ ---
+;	Call the PTY unit init routine
+;- ---
+	MOVL	UCB$L_DDT(R1),R0		; Get DDT
+	MOVL	DDT$L_UNITINIT(R0),R0		; Get Unit Init Addr in DDT
+	CMPL	R0,#IOC$RETURN			; Null Address??
+	BNEQ	50$				; No: Call it
+	MOVL	UCB$L_CRB(R1),R0		; Yes: Look in the CRB
+	MOVL	CRB$L_INTD+VEC$L_UNITINIT(R0),R0
+	BEQL	100$				; No: Unit init routine
+ 
+50$:	PUSHL	R5				; Save R5
+	MOVL	R1,R5				; R5 = PTY UCB
+	JSB	(R0)				; CALL THE UNIT INIT ROUTINE
+	MOVL	G^CTL$GL_PCB,R4			; Use current PCB
+	MOVL	UCB$L_ORB(R5),R0		; Fetch ORB address
+	MOVL	PCB$L_UIC(R4),ORB$L_OWNER(R0)	; Set device owner
+	BISB	#ORB$M_PROT_16,ORB$B_FLAGS(R0)	; Indicate using SOGW device protection
+	BICW	#^XFF,ORB$W_PROT(R0)		; Make device S:O:RWLP
+ 	POPL	R5				; Restore R5
+ 
+100$:	POPR	#^M<R0,R1,R2,R4,R6,R7,R8>
+	RSB
+
+	.PAGE
+	.SBTTL	DDB finding Routines
+;++
+; SearchDev - Search for device DDB
+;
+; This routine is called to search the device database for a DDB.
+; This is the first step in finding another devices UCB.
+;
+; This routine copied out of IOC$SEARCHDEV in IOSUBPAGD
+;
+; Inputs:
+;
+;	R8 = DDB Head
+;	R7 = Address of String
+;		String = ddc format: example = /TTA/
+;	R4 = Length of string
+;
+; Outputs:
+;
+;	R8 = DDB of desired device if EQL, otherwise not found
+;	R0 is trashed
+;	R1 is trashed
+;--
+SEARCHDEV:				; Search for device name
+10$:	MOVL	DDB$L_LINK(R8),R8	; Get address of next ddb
+	BEQL	20$			; If eql end of list
+	MOVAL	DDB$T_NAME(R8),R0	; Get address of generic device name
+	MOVB	(R0)+,R1		; Calculate len of string to compare
+	CMPB	R1,R4			; Length of names match?
+	BNEQ	10$			; If neq no
+	CMPC	R4,(R0),(R7)		; Compare device names
+	BNEQ	10$			; If neq names do not match
+	RSB
+20$:	INCL	R8			; indicate search failure
+	RSB
+ 
+	.SBTTL	UCB finding routine
+;++
+; SEARCHUNIT - Subroutine to search for UCB given DDB
+;
+; Given the DDB of a device, get the UCB and run down the ucb list until
+; we get the ucb with the desired unit number.  This code is taken out of
+; IOC$SEARCHDEV in IOSUBPAGD.
+;
+; Inputs:
+;
+;	R8 = DDB of device
+;	R6 = unit number of desired UCB
+;
+; Outputs:
+;
+;	R1 = UCB of device if NEQ, otherwise not found
+;	R0 is trashed
+;
+;--
+SEARCHUNIT:				; Search for unit number
+	MOVAL	DDB$L_UCB-UCB$L_LINK(R8),-
+		R1			; Get address of next ucb address
+10$:	MOVL	UCB$L_LINK(R1),R1	; Get Address of next ucb
+	BEQL	40$			; If EQL then end of list
+	CMPW	R6,UCB$W_UNIT(R1)	; Unit number match?
+	BEQL	30$			; If eql yes
+	BRB	10$
+30$:	MOVL	#SS$_NORMAL,R0		; Indicate match
+40$:	RSB
+
+	.PAGE
+	.SBTTL	PN$STARTIO - Device Startio routines
+;++
+; PN$STARTIO	- Start Input on idle device
+;
+; Functional Description:
+;
+;	If after the read FDT routines are done and nobody is doing
+;	anything on the device (UCB$V_BSY = 0) then call the start io
+;	routine.
+;
+; Called from:
+;
+;	Called from any one of five places:
+;	- The EXE$QIODRVPKT in the PZ FDT READ routine
+;		which calls EXE$INSIOQ which calls IOC$INITIATE
+;	- The IOC$REQCOM at the end of this PZ startio routine
+;		which calls IOC$INITIATE
+;	- The TZ startio routine which calls IOC$INITIATE
+;	- The PZ write fdt routine which calls IOC$INITIATE.
+;		In case we must echo a character.
+;	- The PN$RESUME routine which calls IOC$INITIATE.
+;
+; Inputs:
+;
+;	R3 = IRP Address
+;	R5 = UCB Address
+;		UCB$W_BCNT and UCB$L_SVAPTE are written by IOC$INITIATE
+;
+; Outputs:
+;
+;	R5 - UCB Address
+;
+;--
+PN$STARTIO::
+	.ENABLE LSB
+ 
+	MOVL	@UCB$L_SVAPTE(R5),-		; Initialize buffer
+		UCB$L_SVAPTE(R5)		;  pointers
+PZ_OUT_LOOP:
+;
+; Here R5 must point at the PZ device UCB and not at
+;  the UCB of the associated TZ device.
+;
+5$:	TSTW	UCB$W_BCNT(R5)			; Any space left in rd packet
+	BLEQ	50$				; No, Completed I/O
+;
+; Switch to terminal UCB
+;
+	MOVL	UCB$L_PZ_XUCB(R5),R5		; Set to TZ ucb
+;
+; Look for next output in state tank
+;
+; Change Case statement to reflect V4 changes in routines - DEC 
+;
+10$:	FFS	#0,#6,UCB$W_TT_HOLD+1(R5),R3
+	CASE	R3,TYPE=B,<-			; Dispatch
+		PZ_PREMPT,-			; Send Prempt Characte - DEC 
+		PZ_STOP,-			; Stop output
+		PZ_CHAR,-			; Char in tank
+		PZ_BURST,-			; Burst in progress
+		>
+;
+; No Pending Data - Look for next character
+;
+.IF	DEFINED	VMS_V4
+	BICB	#UCB$M_INT, UCB$W_STS(R5)	; Clear interrupt expected
+.IF_FALSE
+	BICL	#UCB$M_INT, UCB$L_STS(R5)	; Clear interrupt expected
+.ENDC
+;
+; Call class driver for more output
+;
+	JSB	@UCB$L_TT_GETNXT(R5)	; Get the next character
+	CASEB	UCB$B_TT_OUTYPE(R5),#-1,#1
+1$:	.WORD	PZ_START_BURST-1$	; Burst specified
+	.WORD	PZ_DONE-1$		; None
+	BRW	BUFFER_CHAR		; Buffer the character
+;
+; Output queue exhausted
+PZ_DONE:
+	MOVL	UCB$L_TZ_XUCB(R5),R5	; Switch UCBs to PZ UCB
+.IF	DEFINED	VMS_V4
+	BBC	#UCB$V_BSY,-		; If not BSY then ignore
+		UCB$W_STS(R5),47$	; the char
+.IF_FALSE
+	BBC	#UCB$V_BSY,-		; If not BSY then ignore
+		UCB$L_STS(R5),47$	; the char
+.ENDC
+	MOVL	UCB$L_IRP(R5),R3	; Restore IRP
+	CMPW	IRP$W_BCNT(R3),-	; Any characters moved
+		UCB$W_BCNT(R5)
+	BNEQ	50$			; Yes complete I/O
+47$:	RSB
+;
+; read buffer exhausted
+;
+50$:	MOVL	UCB$L_IRP(R5),R3	; Restore IRP
+	MOVW	#SS$_NORMAL,-		; Set successful completetion
+		IRP$L_IOST1(R3)
+	SUBW	UCB$W_BCNT(R5),-	; Update byte count
+		IRP$W_BCNT(R3)
+	MOVW	IRP$W_BCNT(R3),-	; Set in status
+		IRP$L_IOST1+2(R3)
+;
+; If we wanted to here we could set the second longword of the device status
+;
+	CLRL	IRP$L_IOST2(R3)		; No status
+	MOVQ	IRP$L_IOST1(R3),R0	; Load IOSB return values
+ 
+	JMP	G^IOC$REQCOM
+;
+; Put the character into the read buffer
+;
+BUFFER_CHAR:
+	MOVL	UCB$L_TZ_XUCB(R5),R5	; Switch UCBs to PZ UCB
+.IF	DEFINED	VMS_V4
+	BBC	#UCB$V_BSY,-
+		UCB$W_STS(R5), 60$	; If no PZ IRP, ignore
+.IF_FALSE
+	BBC	#UCB$V_BSY,-
+		UCB$L_STS(R5), 60$	; If no PZ IRP, ignore
+.ENDC
+	MOVB	R3,@UCB$L_SVAPTE(R5)	; Add character to buffer
+	INCL	UCB$L_SVAPTE(R5)	; Bump pointer
+	DECW	UCB$W_BCNT(R5)		; Show character added
+60$:	BRW	PZ_OUT_LOOP		; Go for another char
+;
+; Take care of Burst mode R5 must be TZ UCB
+;
+PZ_START_BURST:
+	BISW	#TTY$M_TANK_BURST,-	; Signal burst active
+		UCB$W_TT_HOLD(R5)
+;
+; Continue burst
+;
+PZ_BURST:
+	MOVL	UCB$L_TZ_XUCB(R5),R1	; Save PZ UCB in R1
+	CLRL	R3			; Initialize output size
+	CMPW	UCB$W_TT_OUTLEN(R5),UCB$W_BCNT(R1)  ; Is buffer too small?
+	BGTR	61$			; Yes
+	MOVW	UCB$W_TT_OUTLEN(R5),R3	; Nope, so output all
+	BRB	62$
+61$:	MOVW	UCB$W_BCNT(R1),R3	; Just output what we can
+ 
+62$:	PUSHR	#^M<R0,R1,R2,R3,R4,R5>	; MOVC3 destroys these registers
+	MOVC3	R3,@UCB$L_TT_OUTADR(R5),@UCB$L_SVAPTE(R1)
+					; Transfer burst to the buffer
+	POPR	#^M<R0,R1,R2,R3,R4,R5>	; Restore the registers
+ 
+	ADDL2	R3,UCB$L_SVAPTE(R1)	; Update output pointer
+	SUBW2	R3,UCB$W_BCNT(R1)	; Update output count
+	ADDL2	R3,UCB$L_TT_OUTADR(R5)	; Update input pointer
+	SUBW2	R3,UCB$W_TT_OUTLEN(R5)	; Update input count
+	BNEQ	65$			; Not the last character
+	BICW	#TTY$M_TANK_BURST,-
+		UCB$W_TT_HOLD(R5)	; Reset burst not active
+65$:	MOVL	UCB$L_TZ_XUCB(R5),R5	; Swicht UCBs to PZ UCB
+	BRW	PZ_OUT_LOOP
+;
+; Get a single char from tt and put in read buffer R5 = TZ UCB
+;
+PZ_CHAR:
+	MOVB	UCB$W_TT_HOLD(R5),R3	; Get the next byte
+	BICW	#TTY$M_TANK_HOLD,-	; Show tank empty
+		UCB$W_TT_HOLD(R5)
+	BRW	BUFFER_CHAR
+;
+; Stop the output R5 = TZ UCB
+;
+; Deleted PZ_STOP2 routine and changed bit clear to byte operation - DEC 
+;
+PZ_STOP:
+.IF	DEFINED	VMS_V4
+	BICB	#UCB$M_INT, -
+		UCB$W_STS(R5)		; Reset output active
+.IF_FALSE
+	BICL	#UCB$M_INT, -
+		UCB$L_STS(R5)		; Reset output active
+.ENDC
+	BRW	PZ_DONE			; DON'T go for anymore
+					; Or we'll get into an infinite loop
+;
+; Send Xon or Xoff characters, R5 = TZ UCB
+;
+; Changed PZ_XOFF and PZ_XON to be PZ_PREMPT - DEC 
+;
+PZ_PREMPT:
+	movb	UCB$B_TT_PREMPT(r5), r3	; Pick up the character
+	BICW	#TTY$M_TANK_PREMPT,-	; Reset Xoff state
+		UCB$W_TT_HOLD(R5)
+	BRW	BUFFER_CHAR
+	.DISABLE LSB
+
+	.SBTTL	PN$FDTSET - Set up ATTENTION AST's
+;++
+; PN$FDTSET - FUNCTION DECISION ROUTINE FOR SET MODE/CHAR FUNCTIONS
+;
+; FUNCTIONAL DESCRIPTION:
+;
+; This routine is the function decision routine for SET MODE/CHAR 
+; functions.
+;
+; P4(AP)	Determines what AST get's setup.
+;			1 -> XON AST
+;			2 -> XOFF AST
+;			3 -> SET_LINE AST
+;
+; INPUTS:
+;
+;	R3 = I/O PACKET ADDRESS
+;	R4 = PCB ADDRESS OF CURRENT PROCESS
+;	R5 = UCB ADDRESS
+;	R6 = CCB ADDRESS FOR ASSIGNED UNIT
+;	AP = ADDRESS OF ARGUMENT LIST AT USER PARAMETERS
+;
+; OUTPUTS:
+;
+;	The function is completed here by "EXE$FINISHIO".
+;
+; IMPLICIT OUTPUTS:
+;
+; 	R3,R5 ARE PRESERVED.
+;--
+PN$FDTSET:
+	PUSHL	R5
+	MOVZWL	#SS$_NOSUCHDEV,R0	; Assume no TZ device
+	MOVL	UCB$L_PZ_XUCB(R5),R5	; Switch to TZ UCB
+	BEQL	SET_ABORT		; No TZ UCB exit
+;;;JC------------------- Removed by J. Clement -------------------------
+;;;JC	CASE	P4(AP),LIMIT=#1,TYPE=B,<- ; Figure out what to set
+;;;JC		SET_XON_AST,-		;
+;;;JC		SET_XOFF_AST,-		;
+;;;JC		SET_LINE_AST,-		;
+;;;JC		SET_ACC_PORT>		;
+;;;JC------------------- Modified by J. Clement -------------------------
+	CASE	P4(AP),TYPE=B,<- 	; Figure out what to set
+		SET_MODE, -		; Page, type ....
+		SET_XON_AST,-		;
+		SET_XOFF_AST,-		;
+		SET_LINE_AST,-		;
+		SET_ACC_PORT>		;
+;;;JC------------------- END Modified by J. Clement -------------------------
+
+BAD_SET:
+	MOVL	#SS$_BADPARAM,R0	; Assume we were passed something bad.
+SET_ABORT:
+	POPL	R5
+	JMP	G^EXE$ABORTIO
+
+;
+;;;JC------------------- Modified by J. Clement -------------------------
+;	This will set page size, and dev characteristics.
+;
+SET_MODE:
+;
+;	Set the mode
+;
+	PUSHR	#^M<R6,R7,R8,R10,R11>
+	MOVL	P1(AP),R1		; ADDRESS USER BUFFER
+	MOVZWL	P2(AP),R11		; GET SIZE ARGUMENT
+	BEQL	1$			; Default ?
+	CMPW	R11,#8			; Compare it
+	BLSSU	4$			; Too small ?
+1$:	MOVB	1(R1),R6		; Get Type
+	MOVW	2(R1),R7		; Width
+	CMPW	R7,#511			; Test it
+	BGTRU	4$			; Too big ?
+	BNEQ	5$			; Too small ?
+4$:	POPR	#^M<R6,R7,R8,R10,R11>
+	BRB	BAD_SET			; Bad size
+5$:	MOVL	4(R1),R8		; Page/characteristics
+	CMPB	R11,#12			; DID HE ASK FOR 2ND ?
+	BLSS	10$			; NO
+	MOVL	8(R1),R10		; Get extended char.
+10$:
+	MOVL	UCB$L_TT_LOGUCB(R5),R5	; Switch to logical device if one exists
+.IF	DEFINED	VMS_V4
+	DSBINT	UCB$B_DIPL(R5)
+.IF_FALSE
+	DEVICELOCK LOCKADDR=UCB$L_DLCK(R5),- ; Lock out TZ activity
+		LOCKIPL=UCB$B_DIPL(R5),-; RAISE IPL
+		SAVIPL=-(SP)		; SAVE CURRENT IPL
+.ENDC
+
+	MOVB	R6,UCB$B_DEVTYPE(R5)	; BUILD TYPE, AND BUFFER SIZE
+	MOVW	R7,UCB$W_DEVBUFSIZ(R5)	; Buffer size
+	MOVL	R8,UCB$L_DEVDEPEND(R5)	; Set 1ST CHARACTERISTICS LONGWORD
+	CMPB	R11,#12			; DID HE ASK FOR 2ND ?
+	BLSS	12$			; NO
+	BICL	#TT2$M_DCL_MAILBX,R10	; Kill bad bits
+	MOVL	R10,UCB$L_DEVDEPND2(R5)	; Set 2nd CHARACTERISTICS LONGWORD
+12$:
+.IF	DEFINED	VMS_V4
+	ENBINT
+.IF_FALSE
+	DEVICEUNLOCK LOCKADDR=UCB$L_DLCK(R5),- ; RELEASE INTERLOCK
+		NEWIPL=(SP)+,	-	; RESTORE IPL
+		CONDITION=RESTORE	;
+.ENDC
+	POPR	#^M<R6,R7,R8,R10,R11> ; RESTORE SCRATCH REGISTERS
+	POPL	R5			; restore PZ UCB
+15$:	MOVL	#SS$_NORMAL,R0		; Damn, it worked!
+	JMP	G^EXE$FINISHIOC		; Complete request
+;;;JC------------------- END Modified by J. Clement -------------------------
+
+
+SET_XON_AST:
+	MOVAB	UCB$L_TZ_XON_AST(R5),R7	; XON AST list head address
+	BRB	SET_CMN			; Go to common code
+
+SET_XOFF_AST:
+	MOVAB	UCB$L_TZ_XOFF_AST(R5),R7 ; XOFF AST list head address
+	BRB	SET_CMN			; Go to common code
+
+SET_LINE_AST:
+	MOVAB	UCB$L_TZ_SET_AST(R5),R7	; SET_LINE AST list head address
+
+SET_CMN:
+	POPL	R5
+;	MOVZBL	#0,P2(AP)		; Remove user param (Is this needed?)
+	JSB	G^COM$SETATTNAST	; Insert into AST list
+	JMP	G^EXE$FINISHIOC		; Complete request
+
+SET_ACC_PORT:
+
+;;;JC	This code should be interlocked to prevent crashes!!!!
+	; We're not really going to do this...
+;;;	JMP	SET_ACC_PORT_FINISH	; Comment out this line if you dare...
+
+	MOVL	#SS$_BADPARAM,R0	; Assume we were passed something bad.
+	TSTL	P2(AP)			; What size where we given?
+	BLSS	SET_ACC_PORT_FINISH	; Negative number means ooops...
+	CMPL	P2(AP),#ACCPOR_SIZE	; Buffer too large?
+	BGTR	SET_ACC_PORT_FINISH	; ooops...
+
+	MOVL	UCB$L_TZ_XUCB(R5),R5	; Switch to PZ UCB
+	pushr   #^M<R1,R2,R3,R4,R5>	; save state (against MOVC5)
+	movc5	P2(AP),@P1(AP),#0,#ACCPOR_SIZE,UCB$A_REM_HOST_STR(R5)
+	popr    #^M<R1,R2,R3,R4,R5>
+
+	MOVB	P2(AP),UCB$A_REM_HOST_LEN(R5)	; It's a counted string.
+
+	; Point to the string.
+	MOVL	UCB$L_PZ_XUCB(R5),R5	; Switch to TZ UCB
+
+.IF	DEFINED	VMS_V4
+	DSBINT	UCB$B_DIPL(R5)
+.IF_FALSE
+	DEVICELOCK LOCKADDR=UCB$L_DLCK(R5),- ; Lock out TZ activity
+		LOCKIPL=UCB$B_DIPL(R5),-; RAISE IPL
+		SAVIPL=-(SP),	-	; SAVE CURRENT IPL
+		PRESERVE=YES		;
+.ENDC
+	MOVL	UCB$L_TZ_XUCB(R5),UCB$L_TT_ACCPORNAM(R5)   ; Point at PZ UCB
+	ADDL	#UCB$A_REM_HOST_LEN,UCB$L_TT_ACCPORNAM(R5) ; and add offset
+
+	; Set the flag in the UCB TTY extension that indicates the string.
+	BISW2	#TTY$M_PC_ACCPORNAM,UCB$W_TT_PRTCTL(R5)
+	MOVL	#SS$_NORMAL,R0		; Damn, it worked!
+
+.IF	DEFINED	VMS_V4
+	ENBINT
+.IF_FALSE
+	DEVICEUNLOCK LOCKADDR=UCB$L_DLCK(R5),- ; RELEASE INTERLOCK
+		NEWIPL=(SP)+,	-	; RESTORE IPL
+		CONDITION=RESTORE, -	;
+		PRESERVE=YES		;
+.ENDC
+
+SET_ACC_PORT_FINISH:
+	POPL	R5			; restore PZ UCB
+	JMP	G^EXE$FINISHIOC		; Complete request
+
+
+	.SBTTL	PN$FDTSENSEM - Sense mode routine
+;++
+; TTY$FDTSENSEM - SENSE MODE
+;
+; FUNCTIONAL DESCRIPTION:
+;
+; This routine passes the the current characteristics for SENSEMODE.
+; The buffer returned is a 8 or 12 bytes depending upon users request.
+;
+; INPUTS:
+;
+;	R3 = I/O PACKET ADDRESS
+;	R4 = CURRENT PCB ADDRESS
+;	R5 = UCB ADDRESS
+;	R6 = CCB ADDRESS
+;	R7 = FUNCTION CODE
+;	AP = ARG LIST FROM QIO
+;
+; OUTPUTS:
+;
+;	CONTROL IS PASSED TO EXE$ABORTIO ON FAILURE
+;	OR COMPLETED VIA EXE$FINISHIO
+;
+; STATUS RETURNS:
+;
+;	SS$_NORMAL - SUCCESSFULL
+;	SS$_ACCVIO - BUFFER NOT ACCESSIBLE
+;
+; NOTE:
+;	The following code assumes that the DEVICE and FORK lock
+;	for the TZ device are the same.  If this changes then this
+;	code is broken.
+;
+;--
+PN$FDTSENSEM::
+	BSBW	VERIFY_SENSE		; VERIFY USER STORAGE
+	PUSHR	#^M<R5,R6,R7,R8,R10,R11>
+	MOVL	UCB$L_PZ_XUCB(R5),R5	; Switch to TZ UCB
+	BEQL	PN$SENSE_ERR		; Have UCB
+	MOVL	UCB$L_TT_LOGUCB(R5),R5	; Switch to logical device if one exists
+	BSBW	GET_DCL			; BUILD SPECIAL CHARACTERISTICS
+
+.IF	DEFINED	VMS_V4
+	DSBINT	UCB$B_DIPL(R5)
+.IF_FALSE
+	DEVICELOCK LOCKADDR=UCB$L_DLCK(R5),- ; Lock out TZ activity
+		LOCKIPL=UCB$B_DIPL(R5),-; RAISE IPL
+		SAVIPL=-(SP),	-	; SAVE CURRENT IPL
+		PRESERVE=YES		;
+.ENDC
+	MOVL	UCB$B_DEVCLASS(R5),R6	; BUILD TYPE, AND BUFFER SIZE
+	MOVL	UCB$L_DEVDEPEND(R5),R7	;RETURN 1ST CHARACTERISTICS LONGWORD
+	BISL3	R2,UCB$L_DEVDEPND2(R5),R8;AND 2ND LONGWORD (IF REQUESTED)
+	MOVL	UCB$W_TT_SPEED-2(R5),R10; RETURN SPEED
+	MOVL	UCB$B_TT_PARITY-2(R5),R11; RETURN PARITY INFO
+	BICL	#^XFF000000,R11		; ZERO HIGH BYTE
+	MOVW	UCB$B_TT_CRFILL(R5),R11	; AND CR/LF FILL
+
+.IF	DEFINED	VMS_V4
+	ENBINT
+.IF_FALSE
+	DEVICEUNLOCK LOCKADDR=UCB$L_DLCK(R5),- ; RELEASE INTERLOCK
+		NEWIPL=(SP)+,	-	; RESTORE IPL
+		CONDITION=RESTORE, -	;
+		PRESERVE=YES		;
+.ENDC
+
+	MOVL	R6,(R1)			; RETURN USER DATA
+	MOVL	R7,4(R1)		;
+	CMPB	R0,#12			; DID HE ASK FOR 2ND ?
+	BLSS	10$			; NO
+	MOVL	R8,8(R1)		;
+10$:	MOVL	R10,R0			; RETURN IOSB DATA
+	MOVL	R11,R1			;
+	BRW	CMN_EXIT		; EXIT RETURNING R0,R1	
+
+;	If no TZ device abort with SS$_NOSUCHDEV
+PN$SENSE_ERR:
+	POPR	#^M<R5,R6,R7,R8,R10,R11>
+	MOVZWL	#SS$_NOSUCHDEV,R0	; Save error reason
+	JMP	G^EXE$ABORTIO		; Abort request
+
+	.SBTTL	PN$FDTSENSEC - Sense char routine
+;++
+; TTY$FDTSENSEC - SENSE CHARACTERISTICS
+;
+; FUNCTIONAL DESCRIPTION:
+;
+; This routine passes the the permanent characteristics for SENSECHAR.
+; The buffer returned is a 8 or 12 bytes depending upon users request.
+;
+; INPUTS:
+;
+;	R3 = I/O PACKET ADDRESS
+;	R4 = CURRENT PCB ADDRESS
+;	R5 = UCB ADDRESS
+;	R6 = CCB ADDRESS
+;	R7 = FUNCTION CODE
+;	AP = ARG LIST FROM QIO
+;
+; OUTPUTS:
+;
+;	CONTROL IS PASSED TO EXE$ABORTIO ON FAILURE
+;	OR COMPLETED VIA EXE$FINISHIO
+;
+; STATUS RETURNS:
+;
+;	SS$_NORMAL - SUCCESSFULL
+;	SS$_ACCVIO - BUFFER NOT ACCESSIBLE
+;
+; NOTE:
+;	The following code assumes that the DEVICE and FORK lock
+;	for the TZ device are the same.  If this changes then this
+;	code is broken.
+;--
+PN$FDTSENSEC::				; SENSE CHAR
+	BSBW	VERIFY_SENSE		; VERIFY USER STORAGE
+	PUSHR	#^M<R5,R6,R7,R8,R10,R11>
+	MOVL	UCB$L_PZ_XUCB(R5),R5	; Switch to TZ UCB
+	BEQL	PN$SENSE_ERR		; Have UCB
+	BSBW	GET_DCL			; BUILD SPECIAL CHARACTERISTICS
+
+.IF	DEFINED	VMS_V4
+	DSBINT	UCB$B_DIPL(R5)
+.IF_FALSE
+	DEVICELOCK LOCKADDR=UCB$L_DLCK(R5),- ; Lock out TZ activity
+		LOCKIPL=UCB$B_DIPL(R5),-; RAISE IPL
+		SAVIPL=-(SP)		; SAVE CURRENT IPL
+.ENDC
+
+	MOVL	UCB$B_TT_DETYPE-1(R5),R6; BUILD TYPE, AND BUFFER SIZE
+	MOVB	#DC$_TERM,R6		; BUILD DEVICE CLASS
+	MOVL	UCB$L_TT_DECHAR(R5),R7	;RETURN 1ST CHARACTERISTICS LONGWORD
+	BISL3	R2,UCB$L_TT_DECHA1(R5),R8;AND 2ND LONGWORD (IF REQUESTED)
+	MOVL	UCB$W_TT_DESPEE-2(R5),R10; RETURN SPEED
+	MOVL	UCB$B_TT_DEPARI-2(R5),R11; RETURN PARITY INFO
+	BICL	#^XFF000000,R11		; ZERO HIGH BYTE
+	MOVW	UCB$B_TT_DECRF(R5),R11	; AND CR/LF FILL
+
+.IF	DEFINED	VMS_V4
+	ENBINT
+.IF_FALSE
+	DEVICEUNLOCK LOCKADDR=UCB$L_DLCK(R5),- ; RELEASE INTERLOCK
+		NEWIPL=(SP)+,	-	; RESTORE IPL
+		CONDITION=RESTORE	;
+.ENDC
+
+	MOVL	R6,(R1)			; RETURN USER DATA
+	MOVL	R7,4(R1)		;
+	CMPB	R0,#12			; DID HE ASK FOR 2ND ?
+	BLSS	10$			; NO
+	MOVL	R8,8(R1)		;
+10$:	MOVL	R10,R0			; RETURN IOSB DATA
+	MOVL	R11,R1			;
+	BRW	CMN_EXIT		; EXIT RETURNING R0,R1	
+
+;	THIS ROUTINE BUILDS DCL PRIVATE CHARACTERISTICS
+
+GET_DCL:
+	CLRL	R2			; INIT RETURN ARGUMENT
+	TSTL	UCB$L_AMB(R5)		; ANY ASSOCIATED MAILBOX?
+	BEQL	10$			; NO
+	BISL	#TT2$M_DCL_MAILBX,R2	; YES, SO BUILD CHARACTERISTIC
+10$:	RSB
+
+;	Common exit path for PN$FDTSENSEM and PN$FDTSENSEC
+
+CMN_EXIT:
+	POPR	#^M<R5,R6,R7,R8,R10,R11> ; RESTORE SCRATCH REGISTERS
+	MOVW	#SS$_NORMAL,R0
+	JMP	G^EXE$FINISHIO		; COMPLETE REQUEST IOSB WORD 0,1
+
+;	This routine verifies that the user buffer is accessable
+
+VERIFY_SENSE:				;
+;
+;	Output:
+;		R1 Points to user buffer
+;		R0 Is number of bytes in buffer
+;
+	MOVL	P1(AP),R1		; ADDRESS USER BUFFER
+	IFNOWRT	#8,(R1),20$		; BR IF NO ACCESS TO QUADWORD BUFFER
+	MOVL	#8,R0			; INIT DEFAULT ARGUMENT SIZE
+	CLRQ	(R1)			; INIT RETURN DATA
+	MOVZWL	P2(AP),R2		; GET SIZE ARGUMENT
+	CMPL	R2,#12			; ROOM FOR SECOND DEVDEPEND SPECIFIED?
+	BLSSU	10$			; NO
+	IFNOWRT	#12,(R1),20$		; CHECK IF WRITE ACCESS
+	MOVW	#12,R0			; SAVE ARGUMENT SIZE
+	CLRL	8(R1)			; INIT RETURN FIELD
+10$:
+	RSB
+20$:
+	MOVZWL	#SS$_ACCVIO,R0		; SET ERROR STATUS
+	JMP	G^EXE$ABORTIO		; ABORT THE IO
+
+	.SBTTL	PN$END - End of driver
+PN$END:
+					; End of driver
+	.END

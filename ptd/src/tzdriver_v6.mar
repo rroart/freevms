@@ -1,0 +1,836 @@
+;
+;	****************************************************************
+;
+;		Copyright (c) 1992, Carnegie Mellon University
+;
+;		All Rights Reserved
+;
+;	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+;	distribute  this software  provided  that the  above  copyright
+;	notice appears in  all copies and that  any distribution be for
+;	noncommercial purposes.
+;
+;	Carnegie Mellon University disclaims all warranties with regard
+;	to this software.  In no event shall Carnegie Mellon University
+;	be liable for  any special, indirect,  or consequential damages
+;	or any damages whatsoever  resulting from loss of use, data, or
+;	profits  arising  out of  or in  connection  with  the  use  or
+;	performance of this software.
+;
+;	****************************************************************
+;
+	.TITLE	TZDRIVER - Pseudo terminal driver for Front End and ethernet
+	.IDENT	'V06-003'
+;
+; Comment out the following line if NOT building for VMS V4 (in other
+; words comment out if you want a V5 driver).
+;
+;;;	VMS_V4 = 1
+ 
+;++
+; FACILITY:
+;
+;	VAX/VMS TERMINAL DRIVER
+;
+; ABSTRACT:
+;
+;	PSEUDO TERMINAL ROUTINES.
+;
+; AUTHOR:
+;
+;	19-NOV-1982	Dale Moore (dwm) at CMU
+;		Redone for VMS V3.0
+;
+;	Version V06-003	27-Nov-1991	Henry W. Miller		USBR
+;			Changed title to TZDRIVER.
+;			Make sure UCB$x_STS is referenced properly depending
+;			upon version of VMS.
+;			Merge PZ and TZ UCB extensions together.
+;			Use UCB$K_TP_LENGTH instead of UCB$K_TT_LENGTH,
+;			they are defined differently in different places.
+;			In TZ$RESUME, return via RSB.  I don't think any
+;			further processing is required.  Also clear UCB$INT_M,
+;			rather then set, to allow I/O to proceed.
+;
+;	Version V06-002	Henry W. Miller		USBR
+;			Changed buffer size to 1024 to handle cut and paste
+;			blasts.
+;
+;	Version V06-001	Bruce R. Miller		CMU NetDev
+;			Changed name to PZDriver.  To hell with Digital.
+;			I'm sick of worrying about DECWindows everytime
+;			I make a change to this code.
+;
+;	This program has been granted to the public domain by the author.
+;
+; MODIFICATIONS:
+;
+;	V05-004 Kevin Carosso @ Network Research Co.
+;		Conditionalize assembly for VMS V4 or V5.  There
+;		is a magic symbol at the top that is commented
+;		out for VMS V5.
+;
+;	V05-004	Digital Equipment Corp.	24-May-1988
+;		Add code to delivered ASTs if PORT XON, PORT XOFF, or 
+;		PORT SET_LINE routines are called.
+;
+;	V05-003	Digital Equipment Corp.	13-May-1988
+;		1) Add hooks to indicate if line is XOFFed.
+;		2) Set TTY$M_PC_NOMODEM bit in UCB$W_TT_PRTCTL.
+;		3) Set device to HOSTSYNC.
+;
+;	V05-002	Digital Equipment Corp.	15-Feb-1988
+;		Add TTY$M_PC_MULTISESSION bit to UCB$W_TT_PRTCTL so that
+;		this device is not counted as a user in LOGIN.
+;
+;---------- Previous history ---------------------
+;
+;		DWM	- Added .Page above each .sbttl
+;			- added modem transition routines in disco and init
+;			- removed $ACBDEF external def's
+;			- restored timeout to resume
+;			- added ioc$initiate call in xoff and xon routines.
+;	Version V03-002 - Changed TP startio to clear TIM in UCB$W_STS
+;	Version V03-003 - Changed TW$RESUME to not set timeout bit in sts
+;
+;	Version V03-004 (Thu Dec  9 12:43:17 1982) D. Kashtan
+;			  Made into a TEMPLATE driver.
+;			  (***WARNING*** -- LOOK AT COMMENTS FOR ROUTINE
+;			   TW$SET_LINE.  THERE IS IMPORTANT INFORMATION
+;			   ABOUT CHANGES TO VMS THAT WILL AFFECT THE TWDRIVER)
+;	Version V03-005 - (14-Jun-1983 )Dale Moore
+;			  Add R4 to masks on calls to ioc$initiate.
+;			  TTY$STARTIO clobber R4.
+;	Version V03-006	- Change TW$XON and TW$XOFF routines from
+;			  unconditionally calling IOC$INITIATE.
+;			  IOC$INITIATE will branch to PY$STARTIO,
+;			  Which will call TTY$GETNEXTCHAR (UCB$L_TT_GETNEXT),
+;			  Which will branch to EOLSEEN,
+;			  which calls TTY$READONE,
+;			  which calls the PORT_XOFF routine which is TW$XOFF.
+;			  This cycle was eating up all of the kernel stack.
+;	Version V03-007 - (12-Jul-1983) Mark London
+;			  Set default of TW to TERM to allow REPLY/USERS.
+;			  Make TW owned and not a TEMPLATE in order that
+;			  SHO TERM TWA0 does not cause a crash (SHOW attempts
+;			  an ASSIGN to the device.)
+;	Verison V04-001 - ( 9-Nov-1984 ) L. Bellamy and D. Davis
+;			  In order of appearance:
+;
+;			  Added Object Rights Block offset definitions.
+;			  Add TEMPLATE bit to UCB$W_STS.
+;			  Add ORB definitions in prologue.
+;			  Modify to allow vector definitions using VEC macro.
+;			  Use CLASS_CTRL_INIT and CLASS_UNIT_INIT to locate
+;			   vector table.
+;			  Update powerfail routines.
+;			  Use new methodology for XON/XOFF flow control.
+;			  Get rid of all the SET_LINE stack manipulation
+;			  since the terminal driver does not do anything
+;			  malicious as suggested.
+;
+;			  NOTE - Comments in subroutine preambles not altered
+;			  to reflect changes in most places.
+;
+;	Version V04-003 (24-Jun-1985) Kevin Carosso, Hughes Aircraft Co., S&CG
+;			Cleaned this thing up quite a bit.
+;			- Got rid of MBX characteristic on the devices.  This
+;			  was a holdover to before cloned devices really
+;			  existed.
+;			- Leave the TW template device OFFLINE.  This is what
+;			  other TEMPLATE devices do, to indicate that you
+;			  really cannot do I/O to the template.  Also left
+;			  it UNAVAILABLE, since the only way it is supposed to
+;			  get used is by cloning in the PY device.
+;			- Got rid of all modem operations.  Improper use tended
+;			  to crash the system and they are not necessary.  TW
+;			  device is always NOMODEM.  HANGUP works as you want
+;			  it to without the modem stuff.
+;			- Setup forced characteristics and default permanent
+;			  characteristics.  Forced are: NOAUTOBAUD, and NODMA.
+;			  Default is HANGUP.
+;			- Fixed up TW$DISCONNECT to properly send a message
+;			  to PY device's associated mailbox only if we are
+;			  actually doing a hangup.  It used to do it every
+;			  time.  Changed the message to MSG$_TRMHANGUP.
+;			- Got rid of the BRDCST on/off stuff.  It doesn't seem
+;			  to be necessary any more.  It also had a bug in it
+;			  somewhere that caused the terminal to start off
+;			  NOBRDCST when it shouldn't.
+;			- General house-cleaning.  Got rid of commented out
+;			  lines from VMS V3 version.  Fixed up typos in 
+;			  comments.
+;
+;	Version V04-004 (10-Feb-1986) Kevin Carosso, Hughes Aircraft Co., S&CG
+;			Changed all references to PTDRIVER to TPDRIVER because
+;			DEC (bless their little hearts) invented the %*%#$%
+;			TU81 and use PTA0: now.
+;
+;	Version V04-005 (3-Sep-1986) Kevin Carosso, Hughes Aircraft Co., S&CG
+;			Fixed bug whereby the sequence ^S followed by ^Y
+;			would cause a system hang.  Apparently the class
+;			driver calls the port RESUME routine when doing
+;			an ABORT and again when canceling the ^S.  Calling
+;			RESUME twice like this is bad.  In general, the
+;			port RESUME routine should not restart the output.
+;			In this driver, the RESUME and STOP routines aren't
+;			needed, so I got rid of them completely.
+;
+;			Now on ^Y the ^S state is not cleared.  You still
+;			need to type ^Q to get your output (including the
+;			*INTERRUPT* echo string.  I thought this was another
+;			bug, but it's how my DHU-11 based terminals act
+;			and makes sense, because only a ^Q should really
+;			cancel a ^S.
+;
+;			Also removed the TEMPLATE bit from the TWA0: template
+;			device since it was allowing people to $ASSIGN channels
+;			and get unhappy (lonely) TW devices that could crash
+;			the system.  Now, the only way to clone TW devices
+;			is through the code in PYDRIVER, hence by assigning
+;			a channel to PYA0:.  You can still $ASSIGN to TWA0:,
+;			but since the device is offline that shouldn't hurt
+;			anything.  This fixed crashes caused by KERMIT and
+;			other things attempting to use TWA0:.  You now get
+;			an error "DEVOFFLINE".
+;
+;			Fixed a bug that caused a system crash from SHOW
+;			DEVICE/FULL of TWA0:.  The ACL_QUEUE bit was set
+;			in the ORB but the ACL queue was invalid (was zeroed).
+;			I got rid of the bit, now all is well.
+;
+;	Version V04-006 (5-Dec-1986) Kevin Carosso, Hughes Aircraft Co., S&CG
+;			Fixed the infamous character munging bug.  The fix
+;			is really in PYDRIVER.
+;
+;	Version V04-007 (10-JUL-1987) Kevin Carosso, Hughes Aircraft Co., S&CG
+;			In TW$INITLINE make sure to tell the class driver
+;			never to time out.  This fix from Forrest Kenney
+;			at DEC.
+;
+;			Also, while we're in here, lets make the device
+;			acquire "NODE$" prefixes, since all the other
+;			terminal drivers do.
+;
+;	Version V04-008	(2-NOV-1987) Kevin Carosso, Network Research Co.
+;			Only a version change here to keep in sync with
+;			TWDRIVER which has the real change.
+;
+;			Fix thanks to Gerard K Newman @ San Diego
+;			Supercomputer Center.
+;
+;	Version V05-001 (21-Dec-1987) Digital Equipment Corp.
+;			Add support for Symmetric Multiprocessing. 
+;
+;	Version V05-002 Digital Equipment Corp.
+;			Change TP driver names to TW. (TP driver it turns
+;			out, conflicted with the VAX/PSI terminal driver.)
+;			TWDRIVER and PYDRIVER are now registered with SQM 
+;			so there will be no more conflicts.
+;
+;	Version V05-003 Dale Moore	Carnegie Mellon University
+;			Added some fixes gleaned from DECWindows version.
+;--
+
+	.PAGE
+	.SBTTL	Declarations
+ 
+	.LIBRARY	/SYS$LIBRARY:LIB.MLB/
+ 
+;
+; EXTERNAL DEFINITIONS:
+;
+.NOCROSS
+	$ACBDEF				; AST control block definitions
+	$CRBDEF				; DEFINE CRB
+	$DCDEF				; DEVICE CLASSES AND TYPES
+	$DDBDEF				; DEFINE DDB
+	$DDTDEF				; DEFINE DDT
+	$DEVDEF				; DEVICE CHARACTERISTICS
+	$DYNDEF				; Dynamic structure definitions
+	$IDBDEF				; DEFINE IDB OFFSETS
+	$IODEF				; I/O Function Codes
+	$IRPDEF				; IRP definitions
+	$MSGDEF				; Message types
+	$ORBDEF				; Define Object's Rights Block offsets
+
+.IF	NOT_DEFINED	VMS_V4
+	$SPLCODDEF			; Spinlock code definitions
+.ENDC
+
+	$TTDEF				; DEFINE TERMINAL TYPES
+	$TT2DEF				; Define Extended Characteristics
+	$TTYDEF				; DEFINE TERMINAL DRIVER SYMBOLS
+	$TTYDEFS			; DEFINE TERMINAL DRIVER SYMBOLS
+	$TTYMACS			; DEFINE TERMINAL DRIVER MACROS
+	$UCBDEF				; DEFINE UCB
+	$VECDEF				; DEFINE VECTOR FOR CRB
+.CROSS
+ 
+;
+; LOCAL DEFINITIONS
+;
+DT$_TZ = ^XFF
+;
+; Definitions that follow the standard UCB fields for TZ driver
+;  This will all probably have to be the same as the standard term
+ 
+	$DEFINI	UCB			; Start of UCB definitions
+ 
+	.=UCB$K_TP_LENGTH		; Position at end of UCB
+ 
+$DEF	UCB$L_TZ_XUCB	.BLKL	1	; UCB of corresponding
+					;  control/application unit
+$DEF	UCB$L_TZ_XON_AST .BLKL	1	; AST list for XON event notification
+$DEF	UCB$L_TZ_XOFF_AST .BLKL	1	; AST list for XOFF event notification
+$DEF	UCB$L_TZ_SET_AST .BLKL	1	; AST list for notification of SET_LINE 
+$DEF	UCB$K_TZ_LEN			; Size of UCB
+ 
+;;;	$DEFEND	UCB			; End of UCB definitions
+;
+; Definitions that follow the standard UCB fields in PZ devices
+;
+
+BUFFER_SIZE = 1024
+ 
+;
+; Length of access port buffer in UCB
+;
+ACCPOR_SIZE = 30
+ 
+;;;	$DEFINI UCB			; Start of UCB definitions
+;;;	.=UCB$K_LENGTH			; position at end of UCB
+;;;	.=UCB$K_TZ_LEN			; position at end of UCB
+$DEF	UCB$L_PZ_XUCB	.BLKL 1		; UCB of terminal part of pseudo terminal
+$DEF	UCB$T_PZ_BUFFER	.BLKB	BUFFER_SIZE ; Buffer to store characters to be transmitted
+$DEF	UCB$A_REM_HOST_LEN .BLKB 1	; Size of remote host ID string.
+$DEF	UCB$A_REM_HOST_STR .BLKB ACCPOR_SIZE; Space for remote host ID string.
+
+$DEF	UCB$K_PZ_LEN			; Size of UCB
+
+ 	$DEFEND UCB			; end of UCB definitions
+ 
+;
+; LOCAL STORAGE
+;
+	.PSECT	$$$105_PROLOGUE
+
+	.PAGE
+	.SBTTL	Standard Tables
+ 
+;
+; Driver prologue table:
+;
+TZ$DPT::
+	DPTAB	-			; DRIVER PROLOGUE TABLE
+		END=TZ_END,-		; End and offset to INIT's vectors
+		UCBSIZE=UCB$K_TZ_LEN,- 	; SIZE OF UCB
+		FLAGS=DPT$M_NOUNLOAD,-	; Do not allow unload
+		ADAPTER=NULL,-		; ADAPTER TYPE
+		NAME=TZDRIVER,-		; NAME OF DRIVER
+		VECTOR=PORT_VECTOR
+	DPT_STORE INIT
+	DPT_STORE UCB,UCB$W_UNIT_SEED,W,0	; SET UNIT # SEED TO ZERO
+
+.IF	DEFINED	VMS_V4
+	DPT_STORE UCB,UCB$B_FIPL,B,8 		; FORK IPL
+.IF_FALSE
+	DPT_STORE UCB,UCB$B_FLCK,B,SPL$C_IOLOCK8 ; FORK LOCK
+.ENDC
+
+	DPT_STORE UCB,UCB$L_DEVCHAR,L,<-; CHARACTERISTICS
+			DEV$M_REC!-	;
+			DEV$M_IDV!-	;
+			DEV$M_ODV!-	;
+			DEV$M_TRM!-	; Terminal Device
+			DEV$M_CCL>
+	DPT_STORE UCB,UCB$L_DEVCHAR2,L,<-		; Device characteristics
+			DEV$M_RTT!-			; remote terminal
+			DEV$M_NNM>			; prefix with "NODE$"
+	DPT_STORE UCB,UCB$B_DEVCLASS,B,DC$_TERM		;
+	DPT_STORE UCB,UCB$B_TT_DETYPE,B,TT$_UNKNOWN	; TYPE
+	DPT_STORE UCB,UCB$W_TT_DESIZE,@W,TTY$GW_DEFBUF	; BUFFER SIZE
+	DPT_STORE UCB,UCB$L_TT_DECHAR,@L,TTY$GL_DEFCHAR	; DEFAULT CHARACTERS
+	DPT_STORE UCB,UCB$L_TT_DECHA1,@L,TTY$GL_DEFCHAR2; DEFAULT CHARACTERS
+	DPT_STORE UCB,UCB$W_TT_DESPEE,@B,TTY$GB_DEFSPEED; DEFAULT SPEED
+	DPT_STORE UCB,UCB$W_TT_DESPEE+1,@B,TTY$GB_RSPEED; DEFAULT SPEED
+	DPT_STORE UCB,UCB$B_TT_DEPARI,@B,TTY$GB_PARITY	; DEFAULT PARITY
+	DPT_STORE UCB,UCB$B_TT_PARITY,@B,TTY$GB_PARITY	; DEFAULT PARITY
+	DPT_STORE UCB,UCB$B_DEVTYPE,B,TT$_UNKNOWN	; TYPE
+	DPT_STORE UCB,UCB$W_DEVBUFSIZ,@W,TTY$GW_DEFBUF	; BUFFER SIZE
+	DPT_STORE UCB,UCB$L_DEVDEPEND,@L,TTY$GL_DEFCHAR	; DEFAULT CHARACTERS
+	DPT_STORE UCB,UCB$L_TT_DEVDP1,@L,TTY$GL_DEFCHAR2; Default Characters
+	DPT_STORE UCB,UCB$W_TT_SPEED,@B,TTY$GB_DEFSPEED	; DEFAULT SPEED
+	DPT_STORE UCB,UCB$W_TT_SPEED+1,@B,TTY$GB_RSPEED	; DEFAULT SPEED
+	DPT_STORE UCB,UCB$B_DIPL,B,8			; DEV IPL (no device)
+	DPT_STORE UCB,UCB$L_TT_WFLINK,L,0	; Zero write queue.
+	DPT_STORE UCB,UCB$L_TT_WBLINK,L,0	; Zero write queue.
+	DPT_STORE UCB,UCB$L_TT_RTIMOU,L,0	; Zero read timed out disp.
+;
+; Added ORB definitions 
+;
+;	DPT_STORE ORB, ORB$B_FLAGS, B, <ORB$M_PROT_16>
+;	DPT_STORE ORB, ORB$W_PROT, @W, TTY$GW_PROT
+;	DPT_STORE ORB, ORB$L_OWNER, @L, TTY$GL_OWNUIC
+ 
+	DPT_STORE DDB,DDB$L_DDT,D,TZ$DDT
+ 
+	DPT_STORE REINIT
+	DPT_STORE CRB,CRB$L_INTD+VEC$L_INITIAL,D,TZ$INITIAL; CONTROLLER INIT
+	DPT_STORE CRB,CRB$L_INTD+VEC$L_UNITINIT,D,TZ$INITLINE; UNIT INIT
+	DPT_STORE END
+ 
+	DDTAB	DEVNAM	= TZ,-		; Dummy TZ port Driver Dispatch table
+		START	= 0,-
+		FUNCTB	= 0
+ 
+	.PSECT $$$115_DRIVER,LONG
+ 
+; The associated class driver uses this table to command the port driver.
+; The address of the table is contained in the terminal UCB extension area.
+; The offset definitions are defined by the ttydefs.
+ 
+;
+; TZ specific dispatch table
+;
+PORT_VECTOR:
+;
+; Added port vector table using VEC macros 
+;
+	$VECINI	TZ,TZ$NULL
+	$VEC	STARTIO,TZ$STARTIO
+	$VEC	DISCONNECT,TZ$DISCONNECT
+	$VEC	SET_LINE,TZ$SET_LINE
+	$VEC	XON,TZ$XON
+	$VEC	XOFF,TZ$XOFF
+	$VEC	STOP,TZ$STOP
+	$VEC	ABORT,TZ$ABORT
+	$VEC	RESUME,TZ$RESUME
+	$VEC	FORKRET,TZ$FORK
+	$VECEND
+ 
+TZ$NULL:				; Null port routine
+	RSB
+ 
+
+	.PAGE
+	.SBTTL	TZ$INITIAL - Initialize pseudo terminal interface
+;++
+; TZ$INITIAL - INITIALIZE INTERFACE
+;
+; FUNCTIONAL DESCRIPTION:
+;
+; This routine is entered at device CONNECT time and power recovery.
+; All we do is connect ourselves up to the class driver.
+;
+; INPUTS:
+;
+;	R4 = ADDRESS OF THE UNIT CSR
+;	R5 = IDB OF UNIT
+;	R8 = ADDRESS OF THE UNIT CRB
+;
+; OUTPUTS:
+;
+;	R0, R1, R2, R3 are destroyed.
+;
+; IMPLICIT INPUTS:
+;
+;	IPL = IPL$_POWER
+;
+;--
+TZ$INITIAL::
+ 
+	CLASS_CTRL_INIT TZ$DPT,PORT_VECTOR
+	MOVB	#DT$_TZ,CRB$B_TT_TYPE(R8)
+	RSB
+
+	.PAGE
+	.SBTTL	TZ$INITLINE - RESET INDIVIDUAL LINE
+;++
+; TZ$INITLINE - RESET pseudo terminal control state
+;
+; FUNCTIONAL DESCRIPTION:
+;
+; This routine performs a simple unit initialization.
+;
+;
+; INPUTS:
+;
+;	R5 = UCB ADDRESS
+;
+; OUTPUTS:
+;
+;	R2,R5 ARE PRESERVED.
+;--
+TZ$INITLINE::				; RESET SINGLE LINE
+	MOVAL	TZ$VEC,R0		; Set TZ port vector table 
+	CLASS_UNIT_INIT			
+	TSTL	UCB$W_UNIT(R5)		; Skip initialization of TEMPLATE
+	BEQL	40$			; Unit #0 = Template: Skip everything!
+ 
+.IF	DEFINED	VMS_V4
+	BBS	#UCB$V_POWER,UCB$W_STS(R5),-	; Skip if powerfail recovery
+		20$
+.IF_FALSE
+	BBS	#UCB$V_POWER,UCB$L_STS(R5),-	; Skip if powerfail recovery
+		20$
+.ENDC
+	MOVL	UCB$L_TT_LOGUCB(r5), r1		; Look at logical term UCB
+	BEQL	10$				; If none, then has no refs
+
+	TSTW	UCB$W_REFC(R1)			; See if TZ has any references
+	BNEQ	20$				; If so don't reinit ucb
+10$:	BSB	SET_FORCED_CHARS		; Set required characteristics
+	BISL	#TT2$M_HANGUP,-			; Set default characteristics
+		UCB$L_TT_DECHA1(R5)		;
+	MOVL	UCB$L_TT_CLASS(R5),R1		; Address class vector table
+
+.IF	DEFINED	VMS_V4
+	BISW	#<TTY$M_PC_NOTIME!	-	; Tell class driver not to time out,
+		  TTY$M_PC_MULTISESSION>,-	; and do not count as user 
+		UCB$W_TT_PRTCTL(R5)		;
+.IF_FALSE
+	BISW	#<TTY$M_PC_NOTIME!	-	; Tell class driver not to time out,
+		  TTY$M_PC_NOMODEM!	-	; do not allow modem processing,
+		  TTY$M_PC_MULTISESSION>,-	; and do not count as user 
+		UCB$W_TT_PRTCTL(R5)		;
+.ENDC
+
+	BICL2	#TT$M_MODEM,UCB$L_DEVDEPEND(R5) ; Do not allow modem bit to ever be  
+	BICL2	#TT$M_MODEM,UCB$L_TT_DECHAR(R5) ; set.
+	BISL2	#TT$M_HOSTSYNC,UCB$L_DEVDEPEND(R5) ; Always set device to HOSTSYNC
+	BISL2	#TT$M_HOSTSYNC,UCB$L_TT_DECHAR(R5) ;
+	JSB	@CLASS_SETUP_UCB(R1)		; Init ucb fields
+20$:
+.IF	DEFINED	VMS_V4
+	BBC	#UCB$V_POWER,UCB$W_STS(R5),40$	; Powerfail handler
+.IF_FALSE
+	BBC	#UCB$V_POWER,UCB$L_STS(R5),40$	; Powerfail handler
+.ENDC
+	MOVL	UCB$L_TT_CLASS(R5),R0		;
+	JMP	@CLASS_POWERFAIL(R0)		;
+ 
+40$:	RSB
+ 
+ 
+
+;++
+; TZ$SET_LINE - Used to Reset SPEED and UCB
+;
+; FUNCTIONAL DESCRIPTION:
+;
+;	Called whenever someone tries to set terminal modes/characteristics.
+;	All we do is reset anything that we think should never be changed.
+;
+; INPUTS:
+;
+;	R5 = UCB ADDRESS of TZ
+;
+; OUTPUTS:
+;
+;	none
+;--
+TZ$SET_LINE::
+	MOVAB	UCB$L_TZ_SET_AST(R5),R4		; Get list head address
+	TSTL	(R4)				; See if list is empty
+	BEQL	SET_FORCED_CHARS		; Empty do not deliver ASTs
+	JSB	G^COM$DELATTNAST		; Delliver all ASTs 
+
+SET_FORCED_CHARS:
+;
+; This little routine sets certain required characteristics.  It is called by
+; the INITLINE code to set them at the outset and by the SETLINE code to reset
+; them unconditionally if someone tries to set them.
+;
+	BICL2	#<TT2$M_DMA ! TT2$M_AUTOBAUD>, -
+		UCB$L_DEVDEPND2(R5)
+	BICL2	#<TT2$M_DMA ! TT2$M_AUTOBAUD>, -
+		UCB$L_TT_DECHA1(R5)
+
+.IF	DEFINED	VMS_V4
+	BICL2	#TT$M_MODEM,UCB$L_DEVDEPEND(R5) ; Do not allow modem bit to ever be  
+	BICL2	#TT$M_MODEM,UCB$L_TT_DECHAR(R5) ; set.
+.ENDC
+
+	RSB
+ 
+
+ 
+	.Page
+;++
+; TZ$DISCONNECT - SHUT OFF UNIT
+;
+; FUNCTIONAL DESCRIPTION:
+;
+; This routine is used when for some reason the unit must be disconnected.
+; This can be at hangup or last deassign.  If the PZ device has an associated
+; mailbox, signal an MSG$_TRMHANGUP in it.
+;
+; Although we are disconnecting a virtual device, we don't do anything
+; more than send a hangup message because we want to allow the device to
+; be reusable.  It's really only if the control device (PZ) goes away
+; that we mark the TZ offline and delete it's UCB.  That code's all in
+; PZDRIVER.
+;
+; INPUTS:
+;
+;	R0 = (0 for hangup, 1 for nohangup)
+;	R5 = UCB ADDRESS of TZ
+;
+; OUTPUTS:
+;
+;	R3,R4 ARE USED.
+;--
+TZ$DISCONNECT::
+	blbs	r0, 99$			; If no hangup, skip all this.
+ 
+	PUSHR	#^M<R0,R1,R2,R3,R4,R5>	; Save the registers
+ 
+	MOVL	UCB$L_TZ_XUCB(R5),R5	; Get PZ UCB
+	BEQL	10$			; If disconnected, ignore
+	MOVL	UCB$L_AMB(R5),R3	; Load Associated Mailbox of PZ UCB
+	BEQL	10$			; If EQL then no mailbox
+	MOVZWL	#MSG$_TRMHANGUP,R4	; Load Message Type
+	JSB	G^EXE$SNDEVMSG		; Send the message
+10$:	POPR	#^M<R0,R1,R2,R3,R4,R5>	; Restore everything
+99$:	RSB
+ 
+ 
+
+	.PAGE
+	.SBTTL	TZ START I/O ROUTINE
+;++
+; TZ$STARTIO - START I/O OPERATION ON TZ
+;
+; FUNCTIONAL DESCRIPTION:
+;
+;	This routine is entered from the device independent terminal startio
+;	routine to enable output interrupts on an idle TZ unit
+;
+; INPUTS:
+;
+;	R3 =	Character	AND	CC = Plus (N EQL 0)
+;	R3 =	Address		AND	CC = Negative (N EQL 1)
+;
+;	R5 = UCB ADDRESS
+;
+; OUTPUTS:
+;
+;	R5 = UCB ADDRESS
+;--
+TZ$STARTIO::				; START I/O ON UNIT
+	BGEQ	20$			; Single character
+	BISW	#TTY$M_TANK_BURST,-	; Signal burst active
+		UCB$W_TT_HOLD(R5)
+10$:
+;
+; Here we must do something to notify our mate device that
+; there is data to pick up
+;
+	PUSHR	#^M<R0,R2,R3,R4,R5>	; Save TZ UCB
+	MOVL	UCB$L_TZ_XUCB(R5),R5	; Switch to PZ UCB
+	BEQL	17$			; PZ is disconnected: skip
+
+.IF	DEFINED	VMS_V4
+	DSBINT	UCB$B_FIPL(R5)
+	BBC	#UCB$V_BSY,-		; If the device isn't busy,
+		UCB$W_STS(R5),15$	; then dont do i/o
+.IF_FALSE
+	FORKLOCK		-	; Take out PZ device FORK LOCK
+		LOCK=UCB$B_FLCK(R5), -	;
+		SAVIPL=-(SP),	-	;
+		PRESERVE=NO
+	BBC	#UCB$V_BSY,-		; If the device isn't busy,
+		UCB$L_STS(R5),15$	; then dont do i/o
+.ENDC
+
+	MOVL	UCB$L_IRP(R5),R3	; Get IRP address
+	JSB	G^IOC$INITIATE		; IOC$INITIATE needs IRP addr
+15$:
+
+.IF	DEFINED	VMS_V4
+	ENBINT
+.IF_FALSE
+	FORKUNLOCK		-	; Release PZ drvice FORK LOCK
+		LOCK=UCB$B_FLCK(R5), -	;
+		NEWIPL=(SP)+,	-	;
+		PRESERVE=NO,	-	;
+		CONDITION=RESTORE	;
+.ENDC
+
+16$:	POPR	#^M<R0,R2,R3,R4,R5>	; Switch back to TZ UCB
+	RSB
+;
+; Come here if we have no PZ control device to send stuff to.  Just
+; suck all the data we can out of the class driver and throw it away.
+;
+17$:	POPR	#^M<R0,R2,R3,R4,R5>	; Switch back to TZ UCB
+	BICW	#TTY$M_TANK_HOLD!-	; Nothing in progress now
+		 TTY$M_TANK_BURST!-	;
+		 TTY$M_TANK_PREMPT,-	;
+		UCB$W_TT_HOLD(R5)	;
+18$:
+.IF	DEFINED	VMS_V4
+	BICB	#UCB$M_INT, UCB$W_STS(r5)
+.IF_FALSE
+	BICL	#UCB$M_INT, UCB$L_STS(r5)
+.ENDC
+	JSB	@UCB$L_TT_GETNXT(r5)
+	TSTB	UCB$B_TT_OUTYPE(r5)
+	BNEQ	18$
+	RSB
+ 
+20$:
+	MOVB	R3,UCB$W_TT_HOLD(R5)	; Save output character
+	BISW	#TTY$M_TANK_HOLD,-	; Signal charater in tank
+		UCB$W_TT_HOLD(R5)	
+	BRB	10$
+
+	.PAGE
+	.SBTTL	Port Routines Stop,Resume,XON,XOFF
+;++
+; TZ$XOFF -	Send Xoff
+; TZ$XON -	Send Xon
+; TZ$ABORT -	Abort current output
+;
+; Functional Description:
+;
+;	These routines are used by the terminal class driver to
+;	control output on the port
+;
+; Inputs:
+;
+;	R5 = UCB Address
+;
+; Outputs:
+;
+;	R5 = UCB Address
+;--
+	TTY$M_TP_XOFF = 8
+	TTY$V_TP_XOFF = 3
+	ASSUME	TTY$M_TP_XOFF EQ TTY$M_TP_DLLOC+4
+	ASSUME  TTY$V_TP_XOFF EQ TTY$V_TP_DLLOC+1
+
+TZ$XOFF:
+	PUSHR	#^M<R0,R1,R4> 		; Save registers
+	MOVAB	UCB$L_TZ_XOFF_AST(R5),R4 ; Get address of AST list
+	CMPB	R3,#^X13		; Is XOFF
+	BNEQ	TZ$XON_XOFF_CMN		; NEQ not XONN use common rotuine
+	BISB	#TTY$M_TP_XOFF,	-	; Set XOFF bit in UCB
+		UCB$B_TP_STAT(R5)	;
+	BRB	TZ$XON_XOFF_CMN		; Do common processing
+
+TZ$XON:
+	PUSHR	#^M<R0,R1,R4>		; Save registers
+	MOVAB	UCB$L_TZ_XON_AST(R5),R4 ; Get address of AST list
+	CMPB	R3,#^X11		; Is it XON
+	BNEQ	TZ$XON_XOFF_CMN		; NEQ not XONN use common rotuine
+	BICB	#TTY$M_TP_XOFF,	-	; Clear XOFF bit in UCB
+		UCB$B_TP_STAT(R5)	;
+;
+; Schedule xon/xoff to be sent, and changed schedule bit mask 
+;
+TZ$XON_XOFF_CMN:			; Common XONN/XOFF code
+	TSTL	(R4)			; See if AST present
+	BEQL	30$			; EQL no AST to deliver
+	MOVL	R4,R0			; Copy list address
+
+10$:
+	MOVL	(R0),R0			; Get next entry
+	BEQL	20$			; All done so deliver ASTs
+;	MOVZBW	R3,ACB$L_KAST+4(R0)	; Store new param value
+	MOVZBW	R3,ACB$L_KAST+6(R0)	; Store new param value
+	BRB	10$			; Look for another entry
+20$:
+	JSB	G^COM$DELATTNAST	; Deliver the ASTs
+30$:
+	POPR	#^M<R0,R1,R4>		; Restore registers
+.IF	DEFINED	VMS_V4
+	BISB	#UCB$M_INT,UCB$W_STS(R5)
+.IF_FALSE
+	BISL	#UCB$M_INT,UCB$L_STS(R5)
+.ENDC
+	BISW	#TTY$M_TANK_PREMPT,UCB$W_TT_HOLD(R5)	; Schedule xon
+	MOVB	R3,UCB$B_TT_PREMPT(R5)			; Save character
+	BRB	TZ$CONT
+
+;
+; Resume any active output
+;
+TZ$RESUME:
+.IF	DEFINED	VMS_V4
+;;;	BISW	#UCB$M_INT,UCB$W_STS(R5)
+	BICW	#UCB$M_INT,UCB$W_STS(R5)
+.IF_FALSE
+;;;	BISL	#UCB$M_INT,UCB$L_STS(R5)
+	BICL	#UCB$M_INT,UCB$L_STS(R5)
+.ENDC
+	BICW	#TTY$M_TANK_STOP,-	; No longer stopped
+		UCB$W_TT_HOLD(R5)	;
+	RSB				; Go, mon, go.
+
+TZ$CONT:
+	MOVL	R4,-(SP)
+	MOVL	UCB$L_TT_CLASS(R5),R4
+	JSB	@CLASS_FORK(R4)
+	MOVL	(SP)+,R4
+	RSB
+
+TZ$FORK:
+	PUSHR	#^M<R0,R1,R2,R3,R4,R5>	; Save TZ UCB
+	MOVL	UCB$L_TZ_XUCB(R5),R5	; Switch to PZ UCB
+	BEQL	15$			; PZ is disconnected: skip
+
+.IF	DEFINED	VMS_V4
+	DSBINT	UCB$B_FIPL(R5)
+.IF_FALSE
+	FORKLOCK		-	; Take out PZ device FORK LOCK
+		LOCK=UCB$B_FLCK(R5), -	;
+		SAVIPL=-(SP),	-	;
+		PRESERVE=NO
+.ENDC
+
+.IF	DEFINED	VMS_V4
+	BBC	#UCB$V_BSY,-		; If the device isn't busy,
+		UCB$W_STS(R5),10$	; then dont do i/o
+.IF_FALSE
+	BBC	#UCB$V_BSY,-		; If the device isn't busy,
+		UCB$L_STS(R5),10$	; then dont do i/o
+.ENDC
+	MOVL	UCB$L_IRP(R5),R3	; Get IRP address
+	JSB	G^IOC$INITIATE		; IOC$INITIATE needs IRP addr
+10$:
+
+.IF	DEFINED	VMS_V4
+	ENBINT
+.IF_FALSE
+	FORKUNLOCK		-	; Release PZ device FORK LOCK
+		LOCK=UCB$B_FLCK(R5), -	;
+		NEWIPL=(SP)+,	-	;
+		PRESERVE=NO,	-	;
+		CONDITION=RESTORE	;
+.ENDC
+
+15$:	POPR	#^M<R0,R1,R2,R3,R4,R5>	; Switch back to TZ UCB
+	RSB
+
+;
+; Stop any currently active output
+;
+TZ$STOP:
+	BISW	#TTY$M_TANK_STOP,-	; Make PZ_OUT_LOOP stop
+		UCB$W_TT_HOLD(R5)	;
+	RSB
+
+;
+; Abort any port currently active
+;
+TZ$ABORT:
+	BBCC	#TTY$V_TANK_BURST, -	; reset burst active
+		UCB$W_TT_HOLD(R5),10$	;
+10$:
+	RSB
+ 
+TZ_END:				; End of driver
+ 
+	.END
