@@ -203,7 +203,7 @@ struct _vcb {
 	      unsigned vcb$v_caching_options_mbz : 20;
 	    };
 	  };
-	};
+	} vcb_0;
 	struct  {
 	  struct _ucb *vcb$l_mem_ucb;
 	  struct _ucb *vcb$l_mast_ucb;
@@ -297,6 +297,15 @@ struct _vcb {
     };
   };
 };
+
+#define		vcb$l_fileprot		vcb_0.vcb$l_fileprot
+#define		vcb$l_free		vcb_0.vcb$l_free
+#define		vcb$l_home2lbn		vcb_0.vcb$l_home2lbn
+#define		vcb$l_homelbn		vcb_0.vcb$l_homelbn
+#define		vcb$l_ibmaplbn		vcb_0.vcb$l_ibmaplbn
+#define		vcb$l_ibmapsize		vcb_0.vcb$l_ibmapsize
+#define		vcb$l_ibmapvbn		vcb_0.vcb$l_ibmapvbn
+#define		vcb$l_ixhdr2lbn		vcb_0.vcb$l_ixhdr2lbn
 
 #if 0 
 #define		vcb$b_acb		vcb$r_vcb_disks.vcb$b_acb
