@@ -43,7 +43,7 @@ void sigio_handler(int sig, struct uml_pt_regs *regs)
 	int i, n;
 
 	if(smp_sigio_handler()) return;
-	pushpsl();
+	pushpsli();
 	while(1){
 		if((n = poll(pollfds, pollfds_num, 0)) < 0){
 			if(errno == EINTR) continue;
