@@ -589,6 +589,7 @@ void sch$resched(void) {
   // svpctx, do not think we need to do this here
 
   spin_lock_irq(&runqueue_lock);
+  release_kernel_lock(curpcb, cpuid);
 
   curpcb=cpu->cpu$l_curpcb;
   curpri=cpu->cpu$b_cur_pri;
@@ -752,6 +753,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   if (mydebug4) { int i; for(i=0;i<100000000;i++) ; }
   if (next == curpcb) { /* does not belong in vms, but must be here */
     spin_unlock_irq(&runqueue_lock);
+    reacquire_kernel_lock(curpcb);
     //splret();
     return;
   } 
