@@ -16,7 +16,6 @@ subdir-m :=	ipv4 # hum?
 
 subdir-$(CONFIG_NET)		+= 802 sched netlink
 subdir-$(CONFIG_INET)		+= ipv4
-subdir-$(CONFIG_NETFILTER)	+= ipv4/netfilter
 subdir-$(CONFIG_UNIX)		+= unix
 subdir-$(CONFIG_IPV6)		+= ipv6
 
