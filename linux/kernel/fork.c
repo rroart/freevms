@@ -216,6 +216,26 @@ fail_nomem:
 	return retval;
 }
 
+static inline int dup_phd(struct _pcb * p, struct _pcb * old) {
+  p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
+  bcopy(old->pcb$l_phd,p->pcb$l_phd,sizeof(struct _phd));
+  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
+  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
+  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
+  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
+  bzero(((void*)p->pcb$l_phd->phd$l_wslist),2048);
+  bzero(((void*)p->pcb$l_phd->phd$l_wslock),2048);
+  bzero(((void*)p->pcb$l_phd->phd$l_wsdyn),2048);
+  p->pcb$l_phd->phd$l_wsnext=0;
+  p->pcb$l_phd->phd$l_wslast=511;
+  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
+  if (old->pcb$l_phd->phd$l_pst_base_offset)
+    bcopy(old->pcb$l_phd->phd$l_pst_base_offset,p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+  else
+    bzero(((void*)p->pcb$l_phd->phd$l_pst_base_offset),PROCSECTCNT*sizeof(struct _secdef));
+}
+
+
 #ifdef CONFIG_MM_VMS
 
 static inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
@@ -400,6 +420,7 @@ static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
 
 	down_write(&oldmm->mmap_sem);
 	retval = dup_mmap(mm);
+	dup_phd(tsk,current);
 #ifdef CONFIG_MM_VMS
 	retval = dup_stuff(mm,tsk->pcb$l_phd);
 #endif
@@ -741,9 +762,9 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
 	  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
 	  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-	  bzero(p->pcb$l_phd->phd$l_wslist,4*512);
-	  bzero(p->pcb$l_phd->phd$l_wslock,4*512);
-	  bzero(p->pcb$l_phd->phd$l_wsdyn,4*512);
+	  bzero(p->pcb$l_phd->phd$l_wslist,2048);
+	  bzero(p->pcb$l_phd->phd$l_wslock,2048);
+	  bzero(p->pcb$l_phd->phd$l_wsdyn,2048);
 	  p->pcb$l_phd->phd$l_wsnext=0;
 	  p->pcb$l_phd->phd$l_wslast=511;
 	  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
