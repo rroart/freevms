@@ -934,26 +934,47 @@ void __init trap_init(void)
 		EISA_bus = 1;
 #endif
 
+	puts("puts 6.1\n");
 	set_trap_gate(0,&divide_error);
+	puts("puts 6.2\n");
 	set_trap_gate(1,&debug);
+	puts("puts 6.3\n");
 	set_intr_gate(2,&nmi);
+	puts("puts 6.4\n");
 	set_system_gate(3,&int3);	/* int3-5 can be called from all */
+	puts("puts 6.5\n");
 	set_system_gate(4,&overflow);
+	puts("puts 6.6\n");
 	set_system_gate(5,&bounds);
+	puts("puts 6.7\n");
 	set_trap_gate(6,&invalid_op);
+	puts("puts 6.8\n");
 	set_trap_gate(7,&device_not_available);
+	puts("puts 6.9\n");
 	set_trap_gate(8,&double_fault);
+	puts("puts 6.10\n");
 	set_trap_gate(9,&coprocessor_segment_overrun);
+	puts("puts 6.11\n");
 	set_trap_gate(10,&invalid_TSS);
+	puts("puts 6.12\n");
 	set_trap_gate(11,&segment_not_present);
+	puts("puts 6.13\n");
 	set_trap_gate(12,&stack_segment);
+	puts("puts 6.14\n");
 	set_trap_gate(13,&general_protection);
+	puts("puts 6.15\n");
 	set_intr_gate(14,&page_fault);
+	puts("puts 6.16\n");
 	set_trap_gate(15,&spurious_interrupt_bug);
+	puts("puts 6.17\n");
 	set_trap_gate(16,&coprocessor_error);
+	puts("puts 6.18\n");
 	set_trap_gate(17,&alignment_check);
+	puts("puts 6.19\n");
 	set_trap_gate(18,&machine_check);
+	puts("puts 6.20\n");
 	set_trap_gate(19,&simd_coprocessor_error);
+	puts("puts 6.21\n");
 
 	set_system_gate(SYSCALL_VECTOR,&system_call);
 		set_system_gate(VMSSYSCALL_VECTOR,&vmssystem_call);
@@ -965,6 +986,7 @@ void __init trap_init(void)
 		set_intr_gate(RESCHED_VECTOR,&resched_vector);
 		set_intr_gate(TIMER_VECTOR,&timer_vector);
 		set_intr_gate(IOPOST_VECTOR,&iopost_vector);
+	puts("puts 6.22\n");
 
 	/*
 	 * default LDT is a single-entry callgate to lcall7 for iBCS
@@ -972,11 +994,13 @@ void __init trap_init(void)
 	 */
 	set_call_gate(&default_ldt[0],lcall7);
 	set_call_gate(&default_ldt[4],lcall27);
+	puts("puts 6.23\n");
 
 	/*
 	 * Should be a barrier for any external CPU state.
 	 */
 	cpu_init();
+	puts("puts 6.24\n");
 
 #ifdef CONFIG_X86_VISWS_APIC
 	superio_init();

@@ -567,24 +567,39 @@ asmlinkage void __init start_kernel(void)
  * Interrupts are still disabled. Do necessary setups, then
  * enable them
  */
+	puts("puts 1\n");
 	lock_kernel();
+	puts("puts 2\n");
 	printk(linux_banner);
+	puts("puts 3\n");
 	setup_arch(&command_line);
+	puts("puts 4\n");
 	printk("Kernel command line: %s\n", saved_command_line);
+	puts("puts 5\n");
 	parse_options(command_line);
+	puts("puts 6\n");
 	trap_init();
+	puts("puts 7\n");
 	init_IRQ();
+	puts("puts 8\n");
 	vms_init();
+	puts("puts 9\n");
 	sched_init();
+	puts("puts 10\n");
 	softirq_init();
+	puts("puts 11\n");
 	time_init();
+	puts("puts 12\n");
 	vms_init2();
+	puts("puts 13\n");
 	/*
 	 * HACK ALERT! This is early. We're enabling the console before
 	 * we've done PCI setups etc, and console_init() must be aware of
 	 * this. But we do want output early, in case something goes wrong.
 	 */
+	puts("puts 14\n");
 	console_init();
+	puts("puts 15\n");
 #ifdef CONFIG_MODULES
 	init_modules();
 #endif
@@ -598,6 +613,7 @@ asmlinkage void __init start_kernel(void)
 		prof_buffer = (unsigned int *) alloc_bootmem(size);
 	}
 
+	puts("puts 16\n");
 	kmem_cache_init();
 	sti();
 	pgtable_cache_init();
@@ -869,3 +885,57 @@ static int init(void * unused)
 	execve("/bin/sh",argv_init,envp_init);
 	panic("No init found.  Try passing init= option to kernel.");
 }
+
+// debug additions
+
+static char *vidmem = (char *)0xb8000;
+static int vidport=0x3d4;
+static int lines=25, mycols=80, orig_x=1, orig_y=10;
+
+static void scroll(void)
+{
+  int i;
+
+  memcpy ( vidmem, vidmem + mycols * 2, ( lines - 1 ) * mycols * 2 );
+  for ( i = ( lines - 1 ) * mycols * 2; i < lines * mycols * 2; i += 2 )
+    vidmem[i] = ' ';
+}
+
+void puts(const char *s)
+{
+  int x,y,pos;
+  char c;
+
+  x=orig_x;
+  y=orig_y;
+
+  while ( ( c = *s++ ) != '\0' ) {
+    if ( c == '\n' ) {
+      x = 0;
+      if ( ++y >= lines ) {
+	scroll();
+	y--;
+      }
+    } else {
+      vidmem [ ( x + mycols * y ) * 2 ] = c; 
+      if ( ++x >= mycols ) {
+	x = 0;
+	if ( ++y >= lines ) {
+	  scroll();
+	  y--;
+	}
+      }
+    }
+  }
+
+  orig_x = x;
+  orig_y = y;
+
+  pos = (x + mycols * y) * 2;       /* Update cursor position */
+  outb_p(14, vidport);
+  outb_p(0xff & (pos >> 9), vidport+1);
+  outb_p(15, vidport);
+  outb_p(0xff & (pos >> 1), vidport+1);
+}
+
+
