@@ -181,7 +181,9 @@ asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int f
     retval = SS$_ILLIOFUNC;
     goto earlyerror;
   }
-  return ctl$ga_ccb_table[chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[i->irp$v_fcode](i,p,i->irp$l_ucb,&ctl$gl_ccbbase[chan]); // a real beauty, isn't it :)
+  retval = ctl$ga_ccb_table[chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[i->irp$v_fcode](i,p,i->irp$l_ucb,&ctl$gl_ccbbase[chan]); // a real beauty, isn't it :)
+  setipl(0); // temporary measure
+  return retval;
       //  }
  earlyerror:
   setipl(0);
