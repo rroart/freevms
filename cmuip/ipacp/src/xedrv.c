@@ -1272,7 +1272,7 @@ void xe_arprcv( struct XE_Interface_Structure * XE_Int )
 // Set flag indicating interrupt in progress
 
     DRV$AST_IN_PROGRESS = TRUE;
-    printk("<0>" "arprcb\n");
+
 // Check for bogosity
 
     if (! dev_config->dc_online)
