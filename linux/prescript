@@ -61,6 +61,10 @@ cd drivers/block;
 		ln -s ../../../freevms/driver/src/pvdriver.c .;
 cd ../..;
 
+cd drivers/ide;
+		ln -s ../../../freevms/driver/src/dq/*.c .;
+cd ../..;
+
 cd arch/i386/kernel;
 		ln -s ../../../../freevms/sys/src/vmsirq.c .;
 cd ../../..;
