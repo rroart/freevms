@@ -136,7 +136,7 @@ int mb$fdt_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
   if ((func&IO$M_READERCHECK) && (mu->ucb$l_mb_readerrefc==0))
     return exe$finishioc(SS$_NOREADER,i,p,u);
 
-  if (func==IO$_WRITEOF) {
+  if ((func&IO$M_FCODE)==IO$_WRITEOF) {
     i->irp$l_boff=0;
     i->irp$l_bcnt=0;
     i->irp$l_media=&i->irp$l_media;
@@ -189,7 +189,7 @@ int mb$fdt_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
   u->ucb$l_devdepend=u->ucb$w_msgcnt;
 
   u->ucb$w_bufquo-=m->mmb$w_datasize;
-  if (m->mmb$w_datasize==0 || (func&IO$_WRITEOF))
+  if (m->mmb$w_datasize==0 || ((func&IO$M_FCODE)==IO$_WRITEOF))
     u->ucb$w_bufquo--;
 
   insque(m,&u->ucb$l_mb_msgqfl);
@@ -340,7 +340,7 @@ void mb$finishread(struct _ucb * u) {
       if (msg->mmb$w_datasize > i->irp$l_bcnt)
 	read_status=read_less;
     }
-    if (func & IO$_WRITEOF)
+    if ((func&IO$M_FCODE)==IO$_WRITEOF)
       read_status=read_equal;
 
     switch (read_status) {
@@ -402,7 +402,7 @@ void mb$finishread(struct _ucb * u) {
       if (i->irp$l_svapte!=msg)
 	i->irp$l_bcnt=s->srb$w_datasize;
 
-      if (func & IO$_WRITEOF)
+      if ((func&IO$M_FCODE)==IO$_WRITEOF)
 	retstatus=SS$_ENDOFFILE;
     
       u->ucb$w_msgcnt--;
@@ -504,7 +504,7 @@ void mb$finishread(struct _ucb * u) {
       if (!aqempty(&u->ucb$l_mb_msgqfl)) {
 	struct __mmb * next = u->ucb$l_mb_msgqfl;
       
-	if ((next->mmb$b_func&IO$_WRITEOF)==0)
+	if ((next->mmb$b_func&IO$M_FCODE)!=IO$_WRITEOF)
 	  not_done=0;
 	else {
 
