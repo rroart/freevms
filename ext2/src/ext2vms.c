@@ -211,7 +211,73 @@ void exttwo$dispatcher(void) {
   }
 }
 
-exttwo_create() {}
+exttwo_create(struct _vcb *vcb,struct _irp * i)
+{
+  struct dsc$descriptor * fibdsc=i->irp$l_qio_p1;
+  struct dsc$descriptor * filedsc=i->irp$l_qio_p2;
+  struct _fibdef * fib=fibdsc->dsc$a_pointer;
+  struct _fiddef * fid=&fib->fib$w_fid_num;
+  char *filename=filedsc->dsc$a_pointer;
+  struct _fh2 *head;
+  unsigned idxblk;
+  unsigned sts;
+  struct _fcb *fcb;
+  struct _iosb iosb;
+  sts = 1; //update_addhead(vcb,filename,fib,0,fid,&head,&idxblk);
+  if (!(sts & 1)) return sts;
+  //sts = deaccesshead(head,idxblk);
+  //    sts = writehead(getidxfcb(vcb),head);
+
+  if ((i->irp$l_func & IO$M_ACCESS) && (sts & 1)) {
+    unsigned short reslen;
+    char retbuf[256];
+    struct dsc$descriptor resdsc;
+    resdsc.dsc$w_length=255;
+    resdsc.dsc$a_pointer=&retbuf;
+    //fib->fib$w_did_num = 0;
+    //fib->fib$w_did_seq = 0;
+    //fib->fib$b_did_rvn = 0;
+    //fib->fib$b_did_nmx = 0;
+    sts = exttwo_access(vcb,i); // should not be, but can not implement otherwise for a while
+    // the if 0s is copied, too, but not changed
+#if 0
+    fcb=f11b_search_fcb(vcb,fid);
+    head = f11b_read_header(vcb,fid,fcb,&iosb);
+    sts=iosb.iosb$w_status;
+    if (sts & 1) {
+    } else {
+      printk("Accessfile status in create %d\n",sts);
+      iosbret(i,sts);
+      return sts;
+    }
+
+    if (fcb==NULL) {
+      fcb=fcb_create2(head,&sts);
+    }
+
+    if (fcb == NULL) { iosbret(i,sts); return sts; }
+
+    xqp->primary_fcb=fcb;
+    xqp->current_window=&fcb->fcb$l_wlfl;
+#endif
+
+  }
+
+  x2p->primary_fcb=exttwo_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
+
+#if 0
+  // not yet?
+  if ((fib->fib$w_exctl&FIB$M_EXTEND) && (sts & 1)) {
+    struct _fcb * newfcb;
+    newfcb=exttwo_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
+    sts = exttwo_extend(newfcb,fib->fib$l_exsz,0);
+  }
+#endif
+
+  printk("(%d,%d,%d) %d\n",fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn,sts);
+  return sts;
+}
+
 exttwo_delete() {}
 exttwo_modify() {}
 int exttwo_io_done(struct _irp * i) {
@@ -635,6 +701,9 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
       wildcard=1;
 
+    dir.d_ino=0;
+    dir.d_type=0;
+    memset(dir.d_name,0,256);
     memset(name,0,256);
 
     if (wildcard || (fib->fib$w_nmctl & FIB$M_WILD)) {
@@ -644,25 +713,29 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     } else {
         fib->fib$l_wcc = 0;
 	strcpy(name,&x2p->context_save);
-	name[strlen(name)]='/';
-	ext2_vms_to_unix(name+strlen(name),filedsc);
-	strcpy(&x2p->context_save,name);
+	if (irp->irp$v_fcode != IO$_CREATE) {
+	  name[strlen(name)]='/';
+	  ext2_vms_to_unix(name+strlen(name),filedsc);
+	  strcpy(&x2p->context_save,name);
+	}
 	if (strstr(filedsc->dsc$a_pointer,".DIR")) {
 	  dirflg=O_DIRECTORY;
 	}
     }
 
-    dir.d_ino=0;
-    dir.d_type=0;
-    memset(dir.d_name,0,256);
-
-    f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|dirflg, 0);
+    if (irp->irp$v_fcode == IO$_CREATE) {
+      f=filp_open(name, O_CREAT|O_NONBLOCK|O_LARGEFILE|dirflg, 0);
+    } else {
+      f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|dirflg, 0);
+    }
     buf.count = 0;
     buf.dirent = &dir;
     if (IS_ERR(f)) {
       sts=SS$_NOSUCHFILE;
-      if ( (sts & 1) == 0) { 
+      if ( (sts & 1) == 0 && (irp->irp$v_fcode != IO$_CREATE)) { 
+#if 0
 	memset(&x2p->context_save,0,54);
+#endif
 	iosbret(irp,sts);
 	return sts;
       }
@@ -694,11 +767,13 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       strcpy(dir.d_name,"DOTDOT.DIR");
     if (0==strcmp(dir.d_name,"."))
       strcpy(dir.d_name,"DOT.DIR");
-    *reslen=strlen(dir.d_name);
-    dir.d_name[(*reslen)++]=';';
-    dir.d_name[(*reslen)++]='1';
-    bcopy(dir.d_name,resdsc->dsc$a_pointer,*reslen);
-
+    if (reslen) {
+      // temp workaround for write?
+      *reslen=strlen(dir.d_name);
+      dir.d_name[(*reslen)++]=';';
+      dir.d_name[(*reslen)++]='1';
+      bcopy(dir.d_name,resdsc->dsc$a_pointer,*reslen);
+    }
     if (dir.d_ino!=2) {
       fib->fib$w_fid_num=head->i_dev;
       *(unsigned long*)(&fib->fib$w_fid_seq)=dir.d_ino;
@@ -712,7 +787,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     //temp hack to get a dentry
     {
       char * c=strchr(&dir.d_name,';');
-      *c=0;
+      if (c) *c=0;
       f=filp_open(&dir.d_name, O_RDONLY,0);
       if (f>=0 && f<0xf0000000) {
 	if (f->f_dentry && f->f_dentry->d_inode)
@@ -784,7 +859,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 }
 
 int exttwo_read_writevb(struct _irp * i) {
-  int lbn;
+  signed int lbn;
   char * buffer;
   struct _iosb iosb;
   struct _vcb * vcb = i->irp$l_ucb->ucb$l_vcb;
@@ -793,13 +868,24 @@ int exttwo_read_writevb(struct _irp * i) {
   int factor = vms_block_factor(inode->i_blkbits);
   struct _wcb * wcb = &fcb->fcb$l_wlfl;
   int blocks=(i->irp$l_qio_p2+511)/512;
+  if (blocks>1) panic("blocks. copy from corresponding f11 routine/n");
   int e2bn=(i->irp$l_qio_p3-1)/factor;
   int rest=(i->irp$l_qio_p3-1)&(factor-1);
   lbn=f11b_map_vbn(e2bn,wcb);
   if (i->irp$v_fcode==IO$_WRITEVBLK) {
-    panic("tried to do an unfished write\n");
-    exttwo_write_block(vcb,i->irp$l_qio_p1,lbn,blocks,&iosb);
+    int err=0;
+    if (lbn==-1)
+      err=ext2_get_block(inode, e2bn, &lbn, 1, fcb);
+    if (err)
+      panic("write lbn -1\n");
+    //printk("tried to do an experimental write %x %x %x %x\n",i->irp$l_qio_p1,lbn,blocks,e2bn);
+    exttwo_write_block(vcb,i->irp$l_qio_p1,lbn*factor+rest,blocks,&iosb);
+    inode->i_size+=512;
+    ext2_sync_inode(inode);
+    ext2_write_super(inode->i_sb);
   } else {
+    //if (lbn<0) printk("e2bn %x %x %x %x %x\n",lbn,e2bn,i->irp$l_qio_p1,i->irp$l_qio_p2,i->irp$l_qio_p3);
+    if (lbn<0) return SS$_ENDOFFILE;
     buffer=exttwo_read_block(vcb,lbn*factor+rest,blocks,&iosb);
     //memcpy(i->irp$l_qio_p1,buffer+512*rest,512);
     memcpy(i->irp$l_qio_p1,buffer,512);
