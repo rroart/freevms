@@ -1,5 +1,5 @@
-VMSSUBDIRS = starlet librtl cliutl backup dir init login dcl
-VMSSUBDIRSINST = dir dcl login init
+VMSSUBDIRS = starlet librtl cliutl backup dir init login dcl edt
+VMSSUBDIRSINST = dir dcl login init edt
 VMSSUBDIRS2 = examples
 
 vmsall:
