@@ -47,6 +47,17 @@
 #undef __NR_$crelnm          
 #undef __NR_$trnlnm          
 #undef __NR_$dellnm          
+#undef __NR_$clrast
+#undef __NR_$setast
+#undef __NR_$ascefc
+#undef __NR_$dacefc
+#undef __NR_$dlcefc
+#undef __NR_$crembx
+#undef __NR_$delmbx
+#undef __NR_$mount
+#undef __NR_$create_region_32
+#undef __NR_$delete_region_32
+#undef __NR_$get_region_info
 
 #undef __NR_$close 
 #undef __NR_$connect 
