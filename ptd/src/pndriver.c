@@ -1211,7 +1211,7 @@ int SEARCHUNIT(struct _ddb * ddb, int unit, struct _ucb ** ucb) {				// Search f
 //	R5 - UCB Address
 //
 //--
-int stcnt=0;
+
 int PN$STARTIO (struct _irp * i, struct _ucb * u) {
   struct _irp * irp;
   struct _tpd_ucb * tpd;
@@ -1223,7 +1223,6 @@ int PN$STARTIO (struct _irp * i, struct _ucb * u) {
 #if 0
   .ENABLE LSB
 #endif 
-     stcnt++;
      u->ucb$l_svapte=&u->ucb$l_svapte; // check		// Initialize buffer
   //  pointers
  PZ_OUT_LOOP:
