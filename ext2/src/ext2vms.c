@@ -644,7 +644,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
     //temp hack to get a dentry
     f=filp_open(&dir.d_name, O_RDONLY,0);
-    if (f) filp_close(f,0);
+    if (f>=0) filp_close(f,0);
 
 #if 0
       sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
