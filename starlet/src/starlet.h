@@ -94,7 +94,7 @@ int sys$dacefc(unsigned int efn);
 
 int sys$dlcefc(void *name);
 
-int sys$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk, unsigned int acmode, void *lognam,...);
+int sys$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk, unsigned int acmode, void *lognam,long flags,...);
 
 int sys$delmbx  (unsigned short int chan);
 
