@@ -6,24 +6,25 @@
 /* This is supposed to have lot more. Got this because of syslnm */
 
 struct orb {
-unsigned short ORB$W_UICMEMBER;
-unsigned short ORB$W_UICGROUP;
-unsigned long ORB$L_ACL_MUTEX;
-unsigned short ORB$W_SIZE;
-unsigned char ORB$B_TYPE;
-unsigned char ORB$B_FLAGS;
+unsigned short orb$w_uicmember;
+unsigned short orb$w_uicgroup;
+unsigned long orb$l_acl_mutex;
+unsigned short orb$w_size;
+unsigned char orb$b_type;
+unsigned char orb$b_flags;
 unsigned short reserved;
-unsigned short ORB$W_REFCOUNT;
-unsigned long ORB$L_MODE_PROTL;
-unsigned long ORB$L_MODE_PROTH;
-unsigned long ORB$L_SYS_PROT;
-unsigned long ORB$L_OWN_PROT;
-unsigned long ORB$L_GRP_PROT;
-unsigned long ORB$L_WOR_PROT;
-unsigned long ORB$L_ACLFL;
-unsigned long ORB$L_ACLBL;
-unsigned char ORB$MIN_CLAS[20];
-unsigned char ORB$MAX_CLAS[20];
+unsigned short orb$w_refcount;
+unsigned long orb$l_mode_protl;
+unsigned long orb$l_mode_proth;
+unsigned long orb$l_sys_prot;
+unsigned long orb$l_own_prot;
+unsigned long orb$l_grp_prot;
+unsigned long orb$l_wor_prot;
+unsigned long orb$l_aclfl;
+unsigned long orb$l_aclbl;
+unsigned char orb$min_clas[20];
+unsigned char orb$max_clas[20];
 };
 
-#endif orb_h
+#endif
+

@@ -119,4 +119,11 @@ struct lnmc * cache;
 char * context[10];
 };
 
+struct struct_lnm_ret {
+  struct lnmth * mylnmth;
+  struct lnmb * mylnmb;
+};
+
 #endif
+
+

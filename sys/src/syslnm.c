@@ -75,8 +75,7 @@ asmlinkage sys_$CRELNM();
 asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst)
 {
   int status;
-  struct lnmb ** amylnmb;
-  struct lnmth ** amylnmth;
+  struct struct_lnm_ret ret= {0,0};
   struct lnmb * mylnmb;
   struct lnmth * mylnmth;
   struct dsc$descriptor * mytabnam=tabnam;
@@ -89,13 +88,10 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
   mylnmth=lnmmalloc(sizeof(struct lnmth));
   bzero(mylnmth,sizeof(struct lnmth));
 
-  amylnmb = lnmmalloc((sizeof(void *)));
-  amylnmth = lnmmalloc((sizeof(void *)));
-
   RT=(struct struct_rt *) lnmmalloc(sizeof(struct struct_rt));
   bzero(RT,sizeof(struct struct_rt));
 
-  status=lnm$firsttab(mytabnam->dsc$w_length,mytabnam->dsc$a_pointer,amylnmb,amylnmth);
+  status=lnm$firsttab(&ret,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
 
   for(i=itmlst;i->item_code!=0;i+=sizeof(*i)) {
     mylnmb=lnmmalloc(sizeof(struct lnmb));
@@ -114,7 +110,7 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
     mylnmb->lnmxs[0].lnmx$b_flags=LNM$M_MYTERMINAL;
     mylnmb->lnmxs[1].lnmx$b_flags=LNM$M_MYXEND;
 
-    status=lnm$inslogtab(mylognam->dsc$w_length,mylognam->dsc$a_pointer,mylnmb,mylnmth);
+    status=lnm$inslogtab(&ret,mylognam->dsc$w_length,mylognam->dsc$a_pointer,mylnmb);
 
   }
   
@@ -130,8 +126,7 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   int status;
   /*  char * mytabnam;
       int tabnamlen;*/
-  struct lnmb ** amylnmb;
-  struct lnmth ** amylnmth;
+  struct struct_lnm_ret ret ={0,0};
   struct lnmb * mylnmb;
   struct lnmx * mylnmx;
   struct lnmth * mylnmth;
@@ -139,8 +134,6 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   long * trailer;
   struct struct_rt * RT;
   struct dsc$descriptor_s * mytabnam, * mypartab;
-  amylnmb = lnmmalloc((sizeof(void *)));
-  amylnmth = lnmmalloc((sizeof(void *)));
   if (!(s->partab)) return -1;
   mypartab=s->partab;
   lnmprintf("partab %s\n",mypartab->dsc$a_pointer);
@@ -165,9 +158,9 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   //      lnmprintf("");/* this makes a difference somehow */
   //  lnmprintf("this %x\n",mytabnam->dsc$w_length);
   //  lnmprintf("this %x %s\n",mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
-  lnmprintf("fir %x\n",amylnmth);
-  status=lnm$firsttab(mypartab->dsc$w_length,mypartab->dsc$a_pointer,amylnmb,amylnmth);
-  lnmprintf("fir %x\n",amylnmth);
+  lnmprintf("fir %x\n",ret.mylnmth);
+  status=lnm$firsttab(&ret,mypartab->dsc$w_length,mypartab->dsc$a_pointer);
+  lnmprintf("fir %x\n",ret.mylnmth);
   if (status==SS$_NOLOGTAB) {
     lnmfree(mylnmb);
     lnmfree(mylnmx);
@@ -231,7 +224,7 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
 
   mylnmth->lnmth$b_flags=LNM$M_MYSHAREABLE|LNM$M_MYDIRECTORY;
   mylnmth->lnmth$l_name=mylnmb;
-  mylnmth->lnmth$l_parent=*amylnmb;
+  mylnmth->lnmth$l_parent=ret.mylnmb;
   mylnmth->lnmth$l_sibling=0;
   mylnmth->lnmth$l_child=0;
   mylnmth->lnmth$l_qtable=0;
@@ -241,7 +234,7 @@ asmlinkage int exe$crelnt  (struct struct_crelnt *s) {
   mylnmth->lnmth$l_bytes=0;
 
   lnmprintf("bef inslogtab %x %s\n",mylnmb->lnmb$b_count,mytabnam->dsc$a_pointer);
-  status=lnm$inslogtab(mylnmb->lnmb$b_count,mytabnam->dsc$a_pointer,mylnmb,mylnmth);
+  status=lnm$inslogtab(&ret,mylnmb->lnmb$b_count,mytabnam->dsc$a_pointer,mylnmb);
   //  lnmprintf("exit here\n");
   //  exit(1);
   lnmprintf("so far %x\n",status);
@@ -260,21 +253,20 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
 			*lognam, unsigned char *acmode, void *itmlst) {
   int status;
   struct dsc$descriptor *mytabnam, *mylognam;
-  struct lnmb ** amylnmb;
+  struct struct_lnm_ret ret={0,0};
   struct item_list_3 * i=itmlst;
 
-  amylnmb = lnmmalloc((sizeof(void *)));
   mylognam=lognam;
   mytabnam=tabnam;
   if (!(tabnam && itmlst)) return -1;
   /* lock mutex */
-  status=lnm$searchlog(mylognam->dsc$w_length,mylognam->dsc$a_pointer,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer,amylnmb);
+  status=lnm$searchlog(&ret,mylognam->dsc$w_length,mylognam->dsc$a_pointer,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
   if (status==SS$_NOLOGNAM || status!=SS$_NORMAL) {
     /* unlock mutex */
     return status;
   }
-  i->buflen=(*amylnmb)->lnmxs[0].lnmx$b_count;
-  i->bufaddr=(*amylnmb)->lnmxs[0].lnmx$t_xlation;
+  i->buflen=(ret.mylnmb)->lnmxs[0].lnmx$b_count;
+  i->bufaddr=(ret.mylnmb)->lnmxs[0].lnmx$t_xlation;
   lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
   return status;
 }

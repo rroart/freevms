@@ -63,7 +63,7 @@ int lnm$hash(const int length, const unsigned char * log, const unsigned long ma
  return SS$_NORMAL;
 }
 
-int lnm$searchlog(int loglen, char * logical, int tabnamlen, char * tablename,struct lnmb ** mylnmb) {
+int lnm$searchlog(struct struct_lnm_ret * r,int loglen, char * logical, int tabnamlen, char * tablename) {
   int status;
   struct struct_nt * NT=lnmmalloc(sizeof(struct struct_nt));
 
@@ -73,7 +73,7 @@ int lnm$searchlog(int loglen, char * logical, int tabnamlen, char * tablename,st
     lnm$presearch();
   */
   lnmprintf("searchlog\n");
-  status=lnm$presearch(&lnmhshs, loglen, logical,mylnmb);
+  status=lnm$presearch(r,&lnmhshs, loglen, logical);
   if (status==SS$_NOLOGNAM) return status;
   // lnm$setup();
   // lnm$table();
@@ -81,7 +81,7 @@ int lnm$searchlog(int loglen, char * logical, int tabnamlen, char * tablename,st
   return status;
 }
 
-int lnm$search_one(int loglen, char * logical, int tabnamlen, char * tablename, char * result) {
+int lnm$search_one(struct struct_lnm_ret * r,int loglen, char * logical, int tabnamlen, char * tablename, char * result) {
   /* lock mutex */
   // lnm$searchlog();
   lnmprintf("searchoneexit\n");
@@ -89,23 +89,23 @@ int lnm$search_one(int loglen, char * logical, int tabnamlen, char * tablename, 
   /* unlock */
 }
 
-int lnm$presearch(struct lnmhshs * hashtable,int loglen,  char * logical, struct lnmb ** alnmb) {
+int lnm$presearch(struct struct_lnm_ret * r,struct lnmhshs * hashtable,int loglen,  char * logical) {
   int status;
   unsigned long * myhash;
-  struct lnmb * mylnmb;
+  // struct lnmb * mylnmb; not needed?
   myhash=lnmmalloc(sizeof(unsigned long));
   lnmprintf("presearch %x %s\n",loglen,logical);
   lnmprintf("presearch %x %s\n",loglen,logical);
   status=lnm$hash(loglen,logical,0xffff,myhash);
   lnmprintf("presearch %s\n",logical);
-  status=lnm$contsearch(loglen,logical,*myhash,hashtable,&mylnmb);
+  status=lnm$contsearch(r,loglen,logical,*myhash,hashtable);
   lnmprintf("presearch %s\n",logical);
-  *alnmb=mylnmb;
+  //  r->mylnmb=mylnmb; erroneous?
   lnmfree(myhash);
   return status;
 }
 
-int lnm$contsearch(int loglen, char * logical, int hash, struct lnmhshs * hashtable, struct lnmb ** mylnmb) {
+int lnm$contsearch(struct struct_lnm_ret * r,int loglen, char * logical, int hash, struct lnmhshs * hashtable) {
   int status;
   int lenstatus;
   int len=strlen(logical);
@@ -118,7 +118,7 @@ int lnm$contsearch(int loglen, char * logical, int hash, struct lnmhshs * hashta
       if (tmp->lnmb$b_count==len) {
 	lenstatus=strcmp(logical,tmp->lnmb$t_name);
 	if (!lenstatus) {
-	  *mylnmb=tmp;
+	  r->mylnmb=tmp;
 	  return SS$_NORMAL;
 	}
       }
@@ -128,66 +128,66 @@ int lnm$contsearch(int loglen, char * logical, int hash, struct lnmhshs * hashta
   return SS$_NOLOGNAM;
 }
 
-int lnm$firsttab(int  tabnamlen,  char * tablename, struct lnmb ** mylnmb, struct lnmth ** mylnmth) {
+int lnm$firsttab(struct struct_lnm_ret * r,int  tabnamlen,  char * tablename) {
   struct struct_rt * MYRT;
   MYRT=(struct struct_rt *)lnmmalloc(sizeof(struct struct_rt));
   bzero(MYRT,sizeof(struct struct_rt));
   lnmprintf("firstab %s\n",tablename);
-  lnm$setup(MYRT,tabnamlen,tablename,mylnmb,mylnmth);
+  lnm$setup(r,MYRT,tabnamlen,tablename);
   lnmfree(MYRT);
 }
 
-int lnm$setup(struct struct_rt * RT, int tabnamlen,  char * tablename, struct lnmb ** mylnmb, struct lnmth ** mylnmth) {
+int lnm$setup(struct struct_lnm_ret * r,struct struct_rt * RT, int tabnamlen,  char * tablename) {
   int status;
   RT->depth=0;
   RT->tries=255;
   lnmprintf("lnm$setup %x %s\n",tabnamlen, tablename);
-  status=lnm$lookup(RT, tabnamlen, tablename, mylnmb,mylnmth);
-  if (status==SS$_NORMAL) RT->context[RT->depth]=(*mylnmb);
+  status=lnm$lookup(r, RT, tabnamlen, tablename);
+  if (status==SS$_NORMAL) RT->context[RT->depth]=r->mylnmb;
   else return status;
   /* cache not implemented */
-  status=lnm$table(RT,tabnamlen,tablename,mylnmb,mylnmth);
+  status=lnm$table(r, RT,tabnamlen,tablename);
   return status;
 }
 
-int lnm$table(struct struct_rt * RT, int tabnamlen, char * tablename, struct lnmb ** mylnmb, struct lnmth ** mylnmth) {
+int lnm$table(struct struct_lnm_ret * r,struct struct_rt * RT, int tabnamlen, char * tablename) {
   /* cache not implemented */
   int status;
-  status=lnm$table_srch(RT,tabnamlen,tablename,mylnmb,mylnmth);
+  status=lnm$table_srch(r,RT,tabnamlen,tablename);
   return status;
 }
 
-int lnm$lookup(struct struct_rt * RT,int loglen, char * logical, struct lnmb ** mylnmb, struct lnmth ** mylnmth) {
+int lnm$lookup(struct struct_lnm_ret * r,struct struct_rt * RT,int loglen, char * logical) {
   int status;
   lnmprintf("lookup %s %x\n",logical,loglen);
-  status=lnm$presearch(&lnmhshs,loglen,logical,mylnmb);
+  status=lnm$presearch(r,&lnmhshs,loglen,logical);
   if (status!=SS$_NOLOGNAM) return status;
   return status;
 }
 
-int lnm$table_srch(struct struct_rt *RT, int tabnamlen,  char * tablename, struct lnmb ** mylnmb, struct lnmth ** mylnmth) {
+int lnm$table_srch(struct struct_lnm_ret * r,struct struct_rt *RT, int tabnamlen,  char * tablename) {
   int xname=0;
   int len, status;
   do {
     RT->tries--;
     if (!RT->tries) return SS$_TOOMANYLNAM;
-    if (((*mylnmb)->lnmxs[xname].lnmx$b_flags)&LNM$M_MYTERMINAL)
+    if (((r->mylnmb)->lnmxs[xname].lnmx$b_flags)&LNM$M_MYTERMINAL)
       RT->flags|=LNM$M_MYTERMINAL;
     else
       RT->flags&=~LNM$M_MYTERMINAL;
 
     if (RT->depth>10) return SS$_TOOMANYLNAM;
-    RT->context[RT->depth]=(*mylnmb);
-    if ((*mylnmb)->lnmxs[xname].lnmx$b_index==LNM$C_TABLE) {
+    RT->context[RT->depth]=(r->mylnmb);
+    if ((r->mylnmb)->lnmxs[xname].lnmx$b_index==LNM$C_TABLE) {
       return SS$_NORMAL;
     }
     RT->depth++;
-    len=(*mylnmb)->lnmxs[xname].lnmx$b_count;
-    lnmprintf("tsr %x %s \n",(*mylnmb)->lnmxs[xname].lnmx$t_xlation,(*mylnmb)->lnmxs[xname].lnmx$t_xlation);
-    status=lnm$lookup(RT,len,(*mylnmb)->lnmxs[xname].lnmx$t_xlation,mylnmb,mylnmth);
+    len=(r->mylnmb)->lnmxs[xname].lnmx$b_count;
+    lnmprintf("tsr %x %s \n",(r->mylnmb)->lnmxs[xname].lnmx$t_xlation,(r->mylnmb)->lnmxs[xname].lnmx$t_xlation);
+    status=lnm$lookup(r,RT,len,(r->mylnmb)->lnmxs[xname].lnmx$t_xlation);
     xname++;
-  } while (xname<20 && !((*mylnmb)->lnmxs[xname].lnmx$b_flags)&LNM$M_MYXEND);
-  if ((*mylnmb)->lnmxs[xname].lnmx$b_index==LNM$C_TABLE) {
+  } while (xname<20 && !((r->mylnmb)->lnmxs[xname].lnmx$b_flags)&LNM$M_MYXEND);
+  if ((r->mylnmb)->lnmxs[xname].lnmx$b_index==LNM$C_TABLE) {
     RT->depth--;
   }
 
@@ -195,24 +195,27 @@ int lnm$table_srch(struct struct_rt *RT, int tabnamlen,  char * tablename, struc
 
 }
 
-int lnm$inslogtab(int tabnamlen,  char * tablename,struct lnmb ** mylnmb,struct lnmth ** mylnmth) {
+int lnm$inslogtab(struct struct_lnm_ret * r,int tabnamlen,  char * tablename, struct lnmb * mylnmb) {
   int status;
   unsigned long * myhash;
   myhash=lnmmalloc(sizeof(unsigned long));
   lnmprintf("inslog\n");
   lnmprintf("%x %s\n",tabnamlen,tablename);
   status=lnm$hash(tabnamlen,tablename,0xffff,myhash);
-  lnmprintf("inslog\n");
+  lnmprintf("inslog %x\n",r->mylnmb);
   lnmprintf("inslog myhash %x\n",*myhash);
   if (lnmhshs.entry[2*(*myhash)])
     insque(mylnmb,lnmhshs.entry[2*(*myhash)]);
   else {
     lnmhshs.entry[2*(*myhash)]=mylnmb;
     lnmhshs.entry[2*(*myhash)+1]=mylnmb;
+    //    (r->mylnmb)->lnmb$l_flink=r->mylnmb;
+    //    (r->mylnmb)->lnmb$l_blink=r->mylnmb;
   }
   lnmprintf("inslog\n");
   
   ; }
 
 int lnm$check_prot() { ; }
+
 
