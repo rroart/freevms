@@ -88,5 +88,19 @@ struct _irc2 {
   unsigned short int irc$w_rrv_id;
 };
 
+// making my own
+
+// this is preceded by a control byte
+// that byte is seperate because of alignment
+
+struct _irc_idx {
+  unsigned short int irc$w_id;
+  unsigned short int irc$w_rrv_id;
+  unsigned long irc$l_vbn;
+  unsigned short int irc$w_addnxtid; // add this to the the keylen offset 
+                                     // to find the next idx
+  unsigned short int irc$w_keylen;
+};
+
 #endif
  
