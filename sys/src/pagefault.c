@@ -61,9 +61,6 @@ signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _
     mmg$incptref(p->pcb$l_phd,pte);
   }
   // wrong page=&((struct _pfn *)pfn$al_head[PFN$C_FREPAGLST])[pfn];
-  page=&mem_map[pfn];
-  //  set_page_count(page, 1); bugged
-  mem_map[pfn].pfn$l_refcnt=1;
   // also set page type
   mem_map[pfn].pfn$v_pagtyp=((unsigned long)va)&PFN$M_PAGTYP;
   //  mem_map[pfn].virtual=__va(pfn*PAGE_SIZE); // not necessary
@@ -71,6 +68,13 @@ signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _
   mem_map[pfn].pfn$l_pt_pfn=0;
   mem_map[pfn].pfn$q_pte_index=0;
   //page->pfn$q_pte_index=pte; // hope it's the right one?
+
+  page=&mem_map[pfn];
+  set_page_count(page, 1);
+  //mem_map[pfn].pfn$l_refcnt=1;
+
+
+
   mmg$makewsle(p,p->pcb$l_phd,va,pte,pfn);
   return pfn;
 }
