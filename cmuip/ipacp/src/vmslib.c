@@ -1,397 +1,397 @@
 #include <ssdef.h>
 
 CH$FILL() {
-  printk("not implemented\n");
+  printk("CH$FILL not implemented\n");
 }
 
 CH$RCHAR_A() {
-  printk("not implemented\n");
+  printk("CH$RCHAR_A not implemented\n");
 }
 
 CH$ALLOCATION() {
-  printk("not implemented\n");
+  printk("CH$ALLOCATION not implemented\n");
 }
 
 STR$COPY_DX() {
-  printk("not implemented\n");
+  printk("STR$COPY_DX not implemented\n");
 }
 
 LIB$CALLG() {
-  printk("not implemented\n");
+  printk("LIB$CALLG not implemented\n");
 }
 
 LIB$FIND_IMAGE_SYMBOL() {
-  printk("not implemented\n");
+  printk("LIB$FIND_IMAGE_SYMBOL not implemented\n");
 }
 
 Signal() {
-  printk("not implemented\n");
+  printk("Signal not implemented\n");
 }
 
 STR$APPEND() {
-  printk("not implemented\n");
+  printk("STR$APPEND not implemented\n");
 }
 
 STR$CASE_BLIND_COMPARE() {
-  printk("not implemented\n");
+  printk("STR$CASE_BLIND_COMPARE not implemented\n");
 }
 
 CH$PTR() {
-  printk("not implemented\n");
+  printk("CH$PTR not implemented\n");
 }
 
 CH$NEQ() {
-  printk("not implemented\n");
+  printk("CH$NEQ not implemented\n");
 }
 
 CH$EQL() {
-  printk("not implemented\n");
+  printk("CH$EQL not implemented\n");
 }
 
 UPLIT() {
-  printk("not implemented\n");
+  printk("UPLIT not implemented\n");
 }
 
 PLIT() {
-  printk("not implemented\n");
+  printk("PLIT not implemented\n");
 }
 
 CH$MOVE() {
-  printk("not implemented\n");
+  printk("CH$MOVE not implemented\n");
 }
 
 INSQUE() {
-  printk("not implemented\n");
+  printk("INSQUE not implemented\n");
 }
 
 REMQUE() {
-  printk("not implemented\n");
+  printk("REMQUE not implemented\n");
 }
 
 MIN() {
-  printk("not implemented\n");
+  printk("MIN not implemented\n");
 }
 
 MAX() {
-  printk("not implemented\n");
+  printk("MAX not implemented\n");
 }
 
 MINU() {
-  printk("not implemented\n");
+  printk("MINU not implemented\n");
 }
 
 XLOG$FAO() {
-  printk("not implemented\n");
+  printk("XLOG$FAO not implemented\n");
 }
 
 MAXU() {
-  printk("not implemented\n");
+  printk("MAXU not implemented\n");
 }
 
 ROT() {
-  printk("not implemented\n");
+  printk("ROT not implemented\n");
 }
 
 SwapBytes() {
-  printk("not implemented\n");
+  printk("SwapBytes not implemented\n");
 }
 
 CH$WCHAR_A() {
-  printk("not implemented\n");
+  printk("CH$WCHAR_A not implemented\n");
 }
 
 QL$FAO() {
-  printk("not implemented\n");
+  printk("QL$FAO not implemented\n");
 }
 
 XQL$FAO() {
-  printk("not implemented\n");
+  printk("XQL$FAO not implemented\n");
 }
 
 LIB$GET_VM_PAGE() {
-  printk("not implemented\n");
+  printk("LIB$GET_VM_PAGE not implemented\n");
 }
 
 LIB$STAT_VM() {
-  printk("not implemented\n");
+  printk("LIB$STAT_VM not implemented\n");
 }
 
 LIB$RESET_VM_ZONE() {
-  printk("not implemented\n");
+  printk("LIB$RESET_VM_ZONE not implemented\n");
 }
 
 LIB$DELETE_VM_ZONE() {
-  printk("not implemented\n");
+  printk("LIB$DELETE_VM_ZONE not implemented\n");
 }
 
 LIB$CREATE_USER_VM_ZONE() {
-  printk("not implemented\n");
+  printk("LIB$CREATE_USER_VM_ZONE not implemented\n");
 }
 
 WARN$FAO() {
-  printk("not implemented\n");
+  printk("WARN$FAO not implemented\n");
 }  
  
 LIB$SYS_FAOL() {
-  printk("not implemented\n");
+  printk("LIB$SYS_FAOL not implemented\n");
 }
 
 ERROR$FAO() {
-  printk("not implemented\n");
+  printk("ERROR$FAO not implemented\n");
 }
 
 LIB$GET_VM() {
-  printk("not implemented\n");
+  printk("LIB$GET_VM not implemented\n");
 }
 
 CH$DIFF() {
-  printk("not implemented\n");
+  printk("CH$DIFF not implemented\n");
 }
 
 LIB$FREE_VM_PAGE() {
-  printk("not implemented\n");
+  printk("LIB$FREE_VM_PAGE not implemented\n");
 }
 
 FORKLOCK() {
-  printk("not implemented\n");
+  printk("FORKLOCK not implemented\n");
 }
 
 FORKUNLOCK () {
-  printk("not implemented\n");
+  printk("FORKUNLOCK not implemented\n");
 }
 
 Lock_IODB_not() {
-  printk("not implemented\n");
+  printk("Lock_IODB_not not implemented\n");
 }
 
 UnLock_IODB_not() {
-  printk("not implemented\n");
+  printk("UnLock_IODB_not not implemented\n");
 }
 
 ch$move() {
-  printk("not implemented\n");
+  printk("ch$move not implemented\n");
 }
 
 DRV$Fatal_FAO() {
-  printk("not implemented\n");
+  printk("DRV$Fatal_FAO not implemented\n");
 }
 
 QUEUE_EMPTY() {
-  printk("not implemented\n");
+  printk("QUEUE_EMPTY not implemented\n");
 }
 
 LIB$CREATE_VM_ZONE() {
-  printk("not implemented\n");
+  printk("LIB$CREATE_VM_ZONE not implemented\n");
 }
 
 STR$UPCASE() {
-  printk("not implemented\n");
+  printk("STR$UPCASE not implemented\n");
 }
 
 STR$MATCH_WILD() {
-  printk("not implemented\n");
+  printk("STR$MATCH_WILD not implemented\n");
 }
 
 STR$TRIM() {
-  printk("not implemented\n");
+  printk("STR$TRIM not implemented\n");
 }
 
 ACT$FAO() {
-  printk("not implemented\n");
+  printk("ACT$FAO not implemented\n");
 }
 
 ASCII_Dec_Bytes() {
-  printk("not implemented\n");
+  printk("ASCII_Dec_Bytes not implemented\n");
 }
 
 ASCII_Hex_Bytes() {
-  printk("not implemented\n");
+  printk("ASCII_Hex_Bytes not implemented\n");
 }
 
 Begin_Lock() {
-  printk("not implemented\n");
+  printk("Begin_Lock not implemented\n");
 }
 
 CH$PLUS() {
-  printk("not implemented\n");
+  printk("CH$PLUS not implemented\n");
 }
 
 INSQue() {
-  printk("not implemented\n");
+  printk("INSQue not implemented\n");
 }
 
 LIB$ASN_WTH_MBX() {
-  printk("not implemented\n");
+  printk("LIB$ASN_WTH_MBX not implemented\n");
 }
 
 SCH$IOLOCKW() {
-  printk("not implemented\n");
+  printk("SCH$IOLOCKW not implemented\n");
   return SS$_NORMAL;
 }
 
 SCH$IOUNLOCK() {
-  printk("not implemented\n");
+  printk("SCH$IOUNLOCK not implemented\n");
   return SS$_NORMAL;
 }
 
 STR$FREE1_DX() {
-  printk("not implemented\n");
+  printk("STR$FREE1_DX not implemented\n");
 }
 
 UNlock_IODB() {
-  printk("not implemented\n");
+  printk("UNlock_IODB not implemented\n");
 }
 
 Unlock_IODB() {
-  printk("not implemented\n");
+  printk("Unlock_IODB not implemented\n");
 }
 
 Swapbytes() {
-  printk("not implemented\n");
+  printk("Swapbytes not implemented\n");
 }
 
 Subm() {
-  printk("not implemented\n");
+  printk("Subm not implemented\n");
 }
 
 Addm() {
-  printk("not implemented\n");
+  printk("Addm not implemented\n");
 }
 
 Calc_Checksum() {
-  printk("not implemented\n");
+  printk("Calc_Checksum not implemented\n");
 }
 
 Calc_checksum() {
-  printk("not implemented\n");
+  printk("Calc_checksum not implemented\n");
 }
 
 End_Lock() {
-  printk("not implemented\n");
+  printk("End_Loc not implemented\n");
 }
 
 Gen_Checksum() {
-  printk("not implemented\n");
+  printk("Gen_Checksum not implemented\n");
 }
 
 find_cpu_data() {
-  printk("not implemented\n");
+  printk("find_cpu_data not implemented\n");
 }
 
 Queue_Not_Empty() {
-  printk("not implemented\n");
+  printk("Queue_Not_Empty not implemented\n");
 }
 
 rpc_service() {
-  printk("not implemented\n");
+  printk("rpc_service not implemented\n");
 }
 
 drv$qblk_free() {
-  printk("not implemented\n");
+  printk("drv$qblk_free not implemented\n");
 }
 
 drv$seg_free() {
-  printk("not implemented\n");
+  printk("drv$seg_free not implemented\n");
 }
 
 Warn_Error() {
-  printk("not implemented\n");
+  printk("Warn_Error not implemented\n");
 }
 
 RPC_SERVICE() {
-  printk("not implemented\n");
+  printk("RPC_SERVICE not implemented\n");
 }
 
 RPC$INIT() {
-  printk("not implemented\n");
+  printk("RPC$INIT not implemented\n");
 }
 
 RPC$CONFIG_AUTH() {
-  printk("not implemented\n");
+  printk("RPC$CONFIG_AUTH not implemented\n");
 }
 
 RPC$CONFIG() {
-  printk("not implemented\n");
+  printk("RPC$CONFIG not implemented\n");
 }
 
 PokeAddr() {
-  printk("not implemented\n");
+  printk("PokeAddr not implemented\n");
 }
 
 LOG$OUT() {
-  printk("not implemented\n");
+  printk("LOG$OUT not implemented\n");
 }
 
 Fatal_Error() {
-  printk("not implemented\n");
+  printk("Fatal_Error not implemented\n");
 }
 
 DRV$Warn_FAO() {
-  printk("not implemented\n");
+  printk("DRV$Warn_FAO not implemented\n");
 }
 
 DRV$WARN_FAO() {
-  printk("not implemented\n");
+  printk("DRV$WARN_FAO not implemented\n");
 }
 
 DRV$QL_FAO() {
-  printk("not implemented\n");
+  printk("DRV$QL_FAO not implemented\n");
 }
 
 DRV$OPR_FAO() {
-  printk("not implemented\n");
+  printk("DRV$OPR_FAO not implemented\n");
 }
 
 DRV$Error_FAO() {
-  printk("not implemented\n");
+  printk("DRV$Error_FAO not implemented\n");
 }
 
 exe$finish_rdb() {
-  printk("not implemented\n");
+  printk("exe$finish_rdb not implemented\n");
 }
 
 drv$seg_get() {
-  printk("not implemented\n");
+  printk("drv$seg_ge not implemented\n");
 }
 
 drv$device_error() {
-  printk("not implemented\n");
+  printk("drv$device_error not implemented\n");
 }
 
 RPC$CHECK_PORT() {
-  printk("not implemented\n");
+  printk("RPC$CHECK_PORT not implemented\n");
 }
 
 CH$RCHAR() {
-  printk("not implemented\n");
+  printk("CH$RCHAR not implemented\n");
 }
 
 DRV$FATAL_FAO() {
-  printk("not implemented\n");
+  printk("DRV$FATAL_FAO not implemented\n");
 }
 
 DRV$QBLK_Free() {
-  printk("not implemented\n");
+  printk("DRV$QBLK_Free not implemented\n");
 }
 
 DRV$XLOG_FAO() {
-  printk("not implemented\n");
+  printk("DRV$XLOG_FAO not implemented\n");
 }
 
 RPC$INPUT() {
-  printk("not implemented\n");
+  printk("RPC$INPUT not implemented\n");
 }
 
 drv$ip_receive() {
-  printk("not implemented\n");
+  printk("drv$ip_receive not implemented\n");
 }
 
 SEG$LOG_Segment() {
-  printk("not implemented\n");
+  printk("SEG$LOG_Segment not implemented\n");
 }
 
 DRV$XQL_FAO() {
-  printk("not implemented\n");
+  printk("DRV$XQL_FAO not implemented\n");
 }
 
 
