@@ -737,7 +737,7 @@ Side Effects:
 
 	    exe$schdwk(0,0,&BTime,0); // Schedule a wake-up.
 	    sleeping = TRUE;	// So AST Handler can wake us.
-	    exe$hiber();
+	    sys$hiber();
 
 // If we received an Attention AST from the PI device (network mesg avail)
 // Then sleeping will be set to false.  This implies that there is still an
