@@ -51,9 +51,10 @@ int tty$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   tty->ucb$q_tt_state = i->irp$q_tt_state; // here?
 
   struct _tt_readbuf * rb = kmalloc(size+sizeof(struct _tt_readbuf), GFP_KERNEL);
-  memset(rb, 0, sizeof(struct _tt_readbuf));
+  memset(rb, 0, size+sizeof(struct _tt_readbuf));
 
   rb->tty$w_rb_type = DYN$C_BUFIO;
+  rb->tty$w_rb_size = size+sizeof(struct _tt_readbuf);
   rb->tty$l_rb_txt = &rb->tty$l_rb_data;
   rb->tty$l_rb_uva = buf;
   rb->tty$l_rb_mod = i->irp$b_rmod;
