@@ -995,6 +995,10 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	//printk("execve %s\n",filename);
 	//	mydebug=1;
 
+	//printk("before lnm_init_prc\n");
+	lnm_init_prc(current);
+	//printk("after lnm_init_prc\n");
+
 #ifdef CONFIG_VMS
 	file = rms_open_exec(filename);
 #endif

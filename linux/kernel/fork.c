@@ -727,8 +727,6 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	}
 	p->pcb$l_epid=exe$ipid_to_epid(p->pcb$l_pid);
 
-	lnm_init_prc(p);
-
 	p->run_list.next = NULL;
 	p->run_list.prev = NULL;
 
