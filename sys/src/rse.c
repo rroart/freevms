@@ -23,6 +23,7 @@ void sch$unwait(struct _pcb * p);
 void sch$rse(struct _pcb * p, unsigned char class, unsigned char event);
 void sch$swpwake(void);
 void sch$chsep(struct _pcb * p,unsigned char newpri);
+void sch$change_cur_priority(struct _pcb *p, unsigned char newpri);
 
 int sch$qend(struct _pcb * p) {
   int cpuid=smp_processor_id();
@@ -33,12 +34,15 @@ int sch$qend(struct _pcb * p) {
   p->pcb$w_quant = -QUANTUM;
   p->pcb$l_onqtime=exe$gl_abstim_tics;
   p->pcb$l_sts=p->pcb$l_sts & ( ~ PCB$M_INQUAN );
+#if 0
+// not yet
   if (ffs(sch$gl_comoqs)) {
     p->pcb$b_pri=p->pcb$b_prib;
     /* cpu->cpu$b_cur_pri=
        not quite finished
      */
   }
+#endif
   {
     //    struct list_head * tmp;
     struct _pcb * e, * next;
@@ -53,7 +57,8 @@ int sch$qend(struct _pcb * p) {
     tmppri=ffs(sch$gl_comqs);
     tmppri--;
     if (tmppri<=p->pcb$b_pri) {
-	if (p->pcb$b_pri != p->pcb$b_prib) ++p->pcb$b_pri;
+	if (p->pcb$b_pri != p->pcb$b_prib)
+	  sch$change_cur_priority(p,p->pcb$b_pri+1);
 	//	 sch$resched(); /*no interrupt yet*/ /*did not work*/
 	//SOFTINT_RESCHED_VECTOR;
 	 p->need_resched = 1;       
@@ -183,7 +188,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
     }
     newpri=p->pcb$b_prib-pri;
     if (newpri>p->pcb$b_pri) newpri=p->pcb$b_pri;
-    if (p->pcb$b_pri<16) p->pcb$b_pri=p->pcb$b_prib;
+    if (p->pcb$b_pri<16) newpri=p->pcb$b_prib;
     sch$chsep(p,newpri);
   }
 
