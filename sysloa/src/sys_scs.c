@@ -53,6 +53,7 @@
 #include <cdtdef.h>
 #include <chdef.h>
 #include <cwpsdef.h>
+#include <ddbdef.h>
 #include <ddtdef.h>
 #include <dptdef.h>
 #include <dyndef.h>
@@ -70,10 +71,13 @@
 #include <scsdef.h>
 #include <ssdef.h>
 #include <system_data_cells.h>
+#include <ucbdef.h>
 #include <vcdef.h>
 
 struct _pb mypb;
 struct _sb mysb;
+struct _pb otherpb;
+struct _sb othersb;
 
 /*
  * decnet_address is kept in network order, decnet_ether_address is kept
@@ -171,10 +175,13 @@ int scs_std$connect (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *
 
 	dn_nsp_send_conninit2(sk, SCS$C_CON_REQ,rprnam,lprnam,condat);
 
+#if 0
 	for( ; ; ) {
 	  volatile state=sk->cdt$w_state;
 	  if (state==CDT$C_OPEN) goto out2;
 	}
+#endif
+
  out2:
 
 	if (auxstr) *((unsigned long **)auxstr)=cdt; // wrong, but temporary
@@ -205,15 +212,15 @@ struct _rdt rdt;
 extern struct _scs_rd rdtl[128];
 struct _cdl cdl;
 
-extern void mscpmyerr(void);
+extern int du_msg();
 
 void * find_mscp_cdt(void) {
   /* remember to fix cdldef */
   int i;
-  return &cdtl[4]; // gross gross hack
+  //  return &cdtl[5]; // gross gross hack
   for (i=0; i<100; i++) {
-    //if (cdtl[i].cdt$l_erraddr==mscpmyerr) return &cdtl[i];
-    if (cdtl[i].cdt$l_rconid) return &cdtl[i];
+    if (cdtl[i].cdt$l_rconid && cdtl[i].cdt$l_msginput==du_msg) return &cdtl[i];
+    //if (cdtl[i].cdt$l_rconid) return &cdtl[i];
   }
   return 0;
 }
@@ -316,10 +323,17 @@ int dir_listen(void * packet, struct _cdt * c, struct _pdt * p) {
 
 }
 
+extern void cf_listen(void * packet, struct _cdt * c, struct _pdt * p);
+
+void cf_myerr() {}
+
 int /*__init*/ scs_init(void) {
   int i;
   char myname[]="scs$directory";
   char myinfo[]="directory srv";
+
+  struct file * file;
+  int pos=0;
 
   bzero(cdtl,sizeof(cdtl));
   bzero(rdtl,sizeof(rdtl));
@@ -360,6 +374,28 @@ int /*__init*/ scs_init(void) {
   }
 
   scs_std$listen(dir_listen,mydirerr,myname,myinfo,0);
+
+  scs_std$listen(cf_listen,cf_myerr,"configure","hw conf",0); 
+
+  file = filp_open("/vms$common/sysexe/params.dat",O_RDONLY,0);
+  if (file) {
+    char * c, *b;
+    char buf[1024];
+    int size=generic_file_read(file,buf,1024,&pos);
+    int i=0;
+    b=buf;
+    while (b<(buf+size)) {
+      c=strchr(b,'=');
+      if (0==strncmp(b, "SCSNODE", c-b)) {
+	memcpy(&mysb.sb$b_systemid, c+1, strlen(c+1));
+	goto end;
+      }
+      b+=strlen(b)+1;
+    }
+    memcpy(&mysb.sb$b_systemid, "NONAME", 6);
+  end:
+    filp_close(file,0);
+  }
 
 }
 
@@ -788,3 +824,91 @@ cwps$getjpi_pscan(){}
 cwps$srcv_getjpi_ast(){}
 
 // module cwps_service_recv
+
+int ddb_transfer(struct _cdt * conf_cdt) {
+  struct _ddb * ddb;
+  struct _ucb * ucb;
+  char buf[512]; 
+  char *b = buf;
+  int i;
+  struct _cdrp * cdrp=kmalloc(sizeof(struct _cdrp),GFP_KERNEL);
+  struct _scs_rd *r;
+
+  __du_init(); //temp placement?
+
+  // now to transfer ddb
+
+  printk("initiating ddb transfer\n");
+
+  ddb = ioc$gl_devlist;
+
+  while (ddb) {
+    if (ddb->ddb$ps_sb==0 || ddb->ddb$ps_sb==&mysb) {
+      *b++=DYN$C_DDB;
+      memcpy(b,&ddb->ddb$t_name,16);
+      b+=16;
+      *b++=DYN$C_UCB;
+      ucb=ddb->ddb$l_ucb;
+      *b++=ucb->ucb$w_unit_seed;
+    }
+    ddb=ddb->ddb$ps_link;
+  }
+  *b++==0;
+  *b++==0;
+  *b++==0;
+  *b++==0;
+
+  cdrp->cdrp$l_rwcptr=0;
+  cdrp->cdrp$l_rspid=scs_std$alloc_rspid(0,0,cdrp,0);
+  scs_std$find_rdte( cdrp->cdrp$l_rspid, &r);
+  r->rd$l_cdrp=cdrp;
+
+  cdrp->cdrp$l_cdt=conf_cdt; //&cdtl[6]; // temp dummy ?
+  cdrp->cdrp$w_cdrpsize=512;
+  cdrp->cdrp$l_msg_buf=buf;
+  cdrp->cdrp$l_xct_len=100+512;
+  scs_std$senddg(0,100+512,cdrp);
+  kfree(cdrp);
+  printk("ending ddb transfer\n");
+
+  // also more to transfer
+
+}
+
+extern int cf_msg();
+extern int cf_dg();
+extern int cf_err();
+extern int dlm_msg();
+extern int dlm_dg();
+extern int dlm_err();
+extern int du_msg();
+extern int du_dg();
+extern int du_err();
+extern int forcex_msg();
+extern int forcex_dg();
+extern int forcex_err();
+
+int startconnect(int none) {
+  struct _cdt * cdt;
+  struct _cdt * conf_cdt;
+  char * s;
+
+  printk("starting cluster connects\n");
+  scs_std$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drv",0,0,0,0,0/*s*/,0,0,0,0,0,0,0,0,0);
+  // should be vms$disk_cl_drvr but use null-term for now
+
+  scs_std$connect(cf_msg,cf_dg,cf_err,0,0,"configure","configclient",0,0,0,0,0/*s*/,&conf_cdt,0,0,0,0,0,0,0,0);
+
+  scs_std$connect(forcex_msg,forcex_dg,forcex_err,0,0,"cwps","cwps$forcex",0,0,0,0,0,&cdt,0,0,0,0,0,0,0,0); 
+
+  scs_std$connect(dlm_msg,dlm_dg,dlm_err,0,0,"dlm$dlm",&current->pcb$t_lname,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+
+	  {
+	    signed long long time=-100000000;
+	    //	    $DESCRIPTOR(tensec,"0 00:00:10.00");
+	    //exe$bintim(&tensec,&time);
+	    //time=-time;
+	    exe$setimr(0,&time,ddb_transfer,conf_cdt,0);
+	  }
+}
+
