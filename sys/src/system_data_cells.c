@@ -7,6 +7,7 @@
 #include<system_data_cells.h>
 #include<dyndef.h>
 #include<queue.h>
+#include<phddef.h>
 #include<rddef.h>
 #include<cdtdef.h>
 
@@ -449,13 +450,13 @@ unsigned long exe$gl_glxgrpbl;
 unsigned long exe$gl_glxgrpfl;
 unsigned long exe$gl_glxsysbl;
 unsigned long exe$gl_glxsysfl;
-unsigned long exe$gl_gsddelbl;
 unsigned long exe$gl_gsddelfl;
-unsigned long exe$gl_gsdgrpbl;
+unsigned long exe$gl_gsddelbl;
 unsigned long exe$gl_gsdgrpfl;
+unsigned long exe$gl_gsdgrpbl;
 unsigned long exe$gl_gsdmtx;
-unsigned long exe$gl_gsdsysbl;
 unsigned long exe$gl_gsdsysfl;
+unsigned long exe$gl_gsdsysbl;
 unsigned long exe$gl_hbs_cip;
 unsigned long exe$gl_hbs_ptr;
 unsigned long exe$gl_hwname_length;
@@ -949,10 +950,10 @@ unsigned long mmg$gq_64sys_shift;
 unsigned long mmg$gq_bap;
 unsigned long mmg$gq_bwp_mask;
 unsigned long mmg$gq_bwp_width;
-unsigned long mmg$gq_free_gpt;
+unsigned long mmg$gq_free_gpt=0;
 unsigned long mmg$gq_gap_hi_va;
 unsigned long mmg$gq_gap_lo_va;
-unsigned long mmg$gq_gpt_base;
+unsigned long mmg$gq_gpt_base=0;
 unsigned long mmg$gq_l1_base;
 unsigned long mmg$gq_l2_base;
 unsigned long mmg$gq_level_width;
@@ -1954,6 +1955,8 @@ spinlock_t SPIN_TIMER __cacheline_aligned = SPIN_LOCK_UNLOCKED;
 spinlock_t SPIN_PR_LK8 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
 spinlock_t SPIN_IOLOCK8 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
 
+struct _phd system_phd;
+
 extern void exe$timeout(void);
 
 void qhead_init(void * l) {
@@ -2068,6 +2071,9 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
 
   qhead_init(&sch$gq_cebhd);
 
+  qhead_init(&exe$gl_gsdsysfl);
+  qhead_init(&exe$gl_gsdgrpfl);
+
   printk("Done system data cells\n");
 }
 
@@ -2083,9 +2089,17 @@ void __init vms_init2(void) {
   nl_init(); /* first */  
   rnd_init();
   xqp_init();
+
 #if 0
 #ifdef CONFIG_BLK_DEV_FD_VMS
   vms_floppy_init();
 #endif
 #endif
+}
+
+void __init vms_init3(void) {
+  mmg$gq_gpt_base=kmalloc(4096,GFP_KERNEL);
+
+  mmg$gl_sysphd=&system_phd;
+  init_phd(&system_phd);
 }
