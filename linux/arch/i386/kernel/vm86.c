@@ -603,12 +603,13 @@ static inline int task_valid(struct task_struct *tsk)
 	int ret = 0;
 
 	read_lock(&tasklist_lock);
-	for_each_task(p) {
+	for_each_task_pre1(p) {
 		if ((p == tsk) && (p->sig)) {
 			ret = 1;
 			break;
 		}
 	}
+	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 	return ret;
 }
