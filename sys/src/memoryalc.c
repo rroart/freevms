@@ -21,6 +21,7 @@
 #include <tqedef.h>
 #include <dyndef.h>
 
+#if 0
 // fix these later? they are presumably dead 
 static const int irpsize = ((sizeof (struct _irp)>>4)+1)<<4;
 static const int irpmin = ((/*irpsize*/ (((sizeof (struct _irp)>>4)+1)<<4)       >> (4+1))<<4)+1;
@@ -38,11 +39,17 @@ int ioc$gl_splitadr;
 unsigned long long ioc$gq_irpiq;
 unsigned long long ioc$gq_lrpiq;
 unsigned long long ioc$gq_srpiq;
+#endif
+
+// move this later
+unsigned long long ioc$gq_listheads[128];
 
 struct mymap {
   unsigned long flink;
   unsigned long size;
 };
+
+#ifdef CONFIG_VMS
 
 zone_t thezone = {
   lock: SPIN_LOCK_UNLOCKED
@@ -373,7 +380,6 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	unsigned long map_size;
 	unsigned long totalpages, offset, realtotalpages;
 	const unsigned long zone_required_alignment = 1UL << (MAX_ORDER-1);
-	struct mymap * mytmp;
 
 	if (zone_start_paddr & ~PAGE_MASK)
 		BUG();
@@ -406,18 +412,11 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	pgdat->node_start_mapnr = (lmem_map - mem_map);
 	pgdat->nr_zones = 0;
 
+	init_nonpaged(pgdat,totalpages);
+
+#if 0
+	// these pools died quickly, even before release
 	struct _irp * irp;
-
-	// ordinary nonpaged pool
-	mmg$gl_npagedyn=alloc_bootmem_node(pgdat,sgn$gl_npagedyn);
-	mmg$gl_npagedyn = (struct page *)(PAGE_OFFSET + 
-	  MAP_ALIGN((unsigned long)mmg$gl_npagedyn - PAGE_OFFSET));
-	exe$gl_npagedyn=mmg$gl_npagedyn;
-	exe$gl_nonpaged=exe$gl_npagedyn;
-	mytmp=exe$gl_npagedyn;
-	mytmp->flink=0; /* ? */
-	mytmp->size=sgn$gl_npagedyn;
-
 	// lrp pool
 	ioc$gl_lrpsplit=alloc_bootmem_node(pgdat,512*lrpsize);
 	ioc$gq_lrpiq=exe$gl_lrpsplit;
@@ -450,6 +449,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	  void * irp=(unsigned long)exe$gl_splitadr+i*sizeof(struct _irp);
 	  boot_insqti(irp,&ioc$gq_irpiq);
 	}
+#endif
 
 	/*
 	 * Initially all pages are reserved - free ones are freed
@@ -489,6 +489,24 @@ static int __init setup_mem_frac(char *str)
 }
 
 __setup("memfrac=", setup_mem_frac);
+#endif
+
+void __init init_nonpaged(pg_data_t *pgdat, unsigned long totalpages) {
+  struct mymap * mytmp;
+  memset(&ioc$gq_listheads[0], 0, sizeof(ioc$gq_listheads));
+  //override for now; half space is for nonpaged pool
+  sgn$gl_npagedyn=totalpages<<(PAGE_SHIFT-2); // half again/quarter
+
+  // ordinary nonpaged pool
+  mmg$gl_npagedyn=alloc_bootmem_node(pgdat,sgn$gl_npagedyn);
+  mmg$gl_npagedyn = (struct page *)(PAGE_OFFSET + 
+				    MAP_ALIGN((unsigned long)mmg$gl_npagedyn - PAGE_OFFSET));
+  exe$gl_npagedyn=mmg$gl_npagedyn;
+  exe$gl_nonpaged=exe$gl_npagedyn;
+  mytmp=exe$gl_npagedyn;
+  mytmp->flink=0; /* ? */
+  mytmp->size=sgn$gl_npagedyn;
+}
 
 int exe$alononpaged() {
   printk("alononpaged not implemented\n");
@@ -498,7 +516,7 @@ int exe$deanonpaged() {
   printk("deanonpaged not implemented\n");
 }
 
-// same as exe$allocate? 
+// same as exe$allocate? no
 int exe$allocate_pool(int requestSize, int poolType, int alignment, unsigned int * allocatedSize, void ** returnBlock) {
 
 }
@@ -519,9 +537,12 @@ struct _gen {
 #endif
 };
 
+// drop alignment later
 int exe$allocate(int requestsize, void ** poolhead, int alignment, unsigned int * allocatedsize, void ** returnblock) {
+#if 0
   if (requestsize&15)
     requestsize=((requestsize>>4)+1)<<4; // mm book said something about align
+#endif
   struct _gen * nextnext, * next, * cur = poolhead;
   while (cur->gen$l_flink) {
     next=cur->gen$l_flink;
@@ -600,8 +621,36 @@ int exe$alononpagvar (int reqsize, int *alosize_p, void **pool_p) {
   return sts;
 }
 
+struct _myhead {
+  struct _myhead * hd$l_flink;
+  int hd$l_seq;
+};
+
+// move these two, see book to where
+void *exe$lal_remove_first(void *listhead) {
+  struct _myhead * h=listhead;
+  struct _myhead * ret = h->hd$l_flink;
+  if (ret) h->hd$l_flink=ret->hd$l_flink;
+  return ret;
+}
+
+void exe$lal_insert_first(void *packet,void *listhead) {
+  struct _myhead * h=listhead;
+  struct _myhead * p=packet;
+  p->hd$l_flink=h->hd$l_flink;
+  h->hd$l_flink=p;
+}
+
+// maybe implement the other way round
+int exe_std$deanonpgdsiz(void *pool, int size) {
+  struct _irp * irp = pool;
+  irp->irp$w_size=size;
+  return exe_std$deanonpaged(pool);
+}
+
 int exe_std$alononpaged (int reqsize, int *alosize_p, void **pool_p) {
   int sts=SS$_NORMAL;
+#if 0
   if (reqsize<=srpsize) {
     if (rqempty(&ioc$gq_srpiq))
       goto var;
@@ -626,13 +675,25 @@ int exe_std$alononpaged (int reqsize, int *alosize_p, void **pool_p) {
     *pool_p=addr;
     return sts;
   }
- var:
-  sts = exe$alononpagvar(reqsize, alosize_p, pool_p);
+#endif
+  if (reqsize&63)
+    reqsize=((reqsize>>6)+1)<<6; // mm book said something about align 64
+
+  *alosize_p=reqsize;
+
+  if (reqsize<=6400) {
+    *pool_p = exe$lal_remove_first(&ioc$gq_listheads[reqsize>>6]);
+  } 
+
+  if (0==*pool_p) 
+    sts = exe$alononpagvar(reqsize, alosize_p, pool_p);
+
   return sts;
 }
 
 int exe_std$deanonpaged (void *pool) {
 
+#if 0
   // now taking some chances with addresses
 
   if (mmg$gl_npagedyn<=pool && pool<=ioc$gl_lrpsplit) {
@@ -659,6 +720,23 @@ int exe_std$deanonpaged (void *pool) {
   }  
   
   return 0;
+#endif
+
+  struct _irp * irp = pool;
+  int reqsize=irp->irp$w_size;
+
+  if (reqsize&63)
+    reqsize=((reqsize>>6)+1)<<6; // mm book said something about align 64
+
+  if (reqsize==0 || (reqsize&63))
+    panic("reqsize size %x\n",reqsize);
+
+  if (reqsize<=6400) {
+    exe$lal_insert_first(pool, &ioc$gq_listheads[reqsize>>6]);
+  } else {
+    int sts=exe$deallocate(pool, exe$gl_nonpaged, reqsize);
+  }
+  return SS$_NORMAL;
 }
 
 int exe_std$alloctqe(int *alosize_p, struct _tqe **tqe_p) {
