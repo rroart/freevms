@@ -72,6 +72,8 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 	}
 
 	tty->tty$v_st_write = 1;
+	tty->ucb$l_tt_wrtbuf=i->irp$l_svapte;
+
 	int chr;
 	int CC;
 	tty$getnextchar(&chr, &CC, u);
@@ -80,7 +82,7 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 	if (tty->ucb$b_tt_outype==0) //check
 	  return sts;
 	fn = ttp->port_startio;
-	sts = fn(i,u);
+	sts = fn(chr,u,CC); // check 
 	return sts;
       }
       break;
