@@ -225,6 +225,16 @@ void * find_mscp_cdt(void) {
   return 0;
 }
 
+void * find_a_cdt(int a) {
+  /* remember to fix cdldef */
+  int i;
+  for (i=0; i<100; i++) {
+    if (cdtl[i].cdt$l_rconid && cdtl[i].cdt$l_msginput==a) return &cdtl[i];
+    //if (cdtl[i].cdt$l_rconid) return &cdtl[i];
+  }
+  return 0;
+}
+
 void * find_free_cdt(void) {
   /* remember to fix cdldef */
   struct _cdt * c=cdl.cdl$l_freecdt;
