@@ -123,13 +123,13 @@ void startio (struct _irp * i, struct _ucb * u) {
       break;
     case IO$_WRITELBLK :
       fd=u->ucb$l_orb;
-      lseek(fd,i->irp$l_qio_p3,SEEK_SET);
+      lseek(fd,BLOCK_SIZE*i->irp$l_qio_p3,SEEK_SET);
       write_ubd_fs(fd,i->irp$l_qio_p1,i->irp$l_qio_p2);
       return ioc$reqcom(SS$_NORMAL,0,u);
       break;
     case IO$_WRITEPBLK :
       fd=u->ucb$l_orb;
-      lseek(fd,i->irp$l_qio_p3,SEEK_SET);
+      lseek(fd,BLOCK_SIZE*i->irp$l_qio_p3,SEEK_SET);
       write_ubd_fs(fd,i->irp$l_qio_p1,i->irp$l_qio_p2);
       return ioc$reqcom(SS$_NORMAL,0,u);
       break;
