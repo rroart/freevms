@@ -554,6 +554,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   unsigned wrtflg=1;
   struct _fcb *fcb;
   //  struct _fh2 *head;
+  char name[256], *tmpname;
   struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
   struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
   unsigned short *reslen=irp->irp$l_qio_p3;
@@ -578,7 +579,6 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     struct readdir_callback2 buf;
     int fd=0;
     struct file * f;
-    char * name;
     signed int error=0;
     struct dirent64 dir;
     struct inode * head;
@@ -588,12 +588,16 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
       wildcard=1;
 
+    memset(name,0,256);
+
     if (wildcard || (fib->fib$w_nmctl & FIB$M_WILD)) {
         fib->fib$l_wcc = 1/*curblk*/;
 	strcpy(name,&x2p->context_save);
     } else {
         fib->fib$l_wcc = 0;
-	name=ext2_vms_to_unix(filedsc);
+	strcpy(name,&x2p->context_save);
+	name[strlen(name)]='/';
+	ext2_vms_to_unix(name+strlen(name),filedsc);
 	strcpy(&x2p->context_save,name);
     }
 
@@ -922,8 +926,8 @@ int e2_fcb_wcb_add_one(struct _fcb * fcb,signed long vbn,signed long result)
   return SS$_NORMAL;
 }
 
-char * ext2_vms_to_unix(struct dsc$descriptor * dsc) {
-  char *c=kmalloc(sizeof(dsc->dsc$a_pointer)+1);
+char * ext2_vms_to_unix(char * name,struct dsc$descriptor * dsc) {
+  char *c=name;
   char *d;
   strcpy(c,dsc->dsc$a_pointer);
   if (0==strncmp(c,"000000.",7)) {
