@@ -918,7 +918,10 @@ cobalt_init(void)
 
 static unsigned char ipl = 1;
 
-static unsigned char ipending[128];
+struct {
+  unsigned char interrupt;
+  unsigned char at_level;
+} ipending[256];
 
 static inline unsigned char spl(unsigned char new) {
   unsigned char tmp=ipl;
