@@ -203,7 +203,7 @@ struct _vcb {
 	      unsigned vcb$v_caching_options_mbz : 20;
 	    };
 	  };
-	} vcb_0;
+	} vcb_1_2_1_1;
 	struct  {
 	  struct _ucb *vcb$l_mem_ucb;
 	  struct _ucb *vcb$l_mast_ucb;
@@ -289,28 +289,28 @@ struct _vcb {
 	  char vcb$t_fill_5 [99];
 	  unsigned long long vcb$q_exp_date;
 	};
-      };
-    };
+      } vcb_1_2_1;
+    } vcb_1_2;
     struct  {
       unsigned char vcb$b_qnamecnt;
       char vcb$t_qname [20];
-    };
-  };
+    } vcb_1_1;
+  } vcb_0;
 };
 
-#define		vcb$l_cache		vcb_0.vcb$l_cache
-#define		vcb$l_cluster		vcb_0.vcb$l_cluster
-#define		vcb$l_fileprot		vcb_0.vcb$l_fileprot
-#define		vcb$l_free		vcb_0.vcb$l_free
-#define		vcb$l_home2lbn		vcb_0.vcb$l_home2lbn
-#define		vcb$l_homelbn		vcb_0.vcb$l_homelbn
-#define		vcb$l_ibmaplbn		vcb_0.vcb$l_ibmaplbn
-#define		vcb$l_ibmapsize		vcb_0.vcb$l_ibmapsize
-#define		vcb$l_ibmapvbn		vcb_0.vcb$l_ibmapvbn
-#define		vcb$l_ixhdr2lbn		vcb_0.vcb$l_ixhdr2lbn
-#define		vcb$l_maxfiles		vcb_0.vcb$l_maxfiles
-#define		vcb$l_sbmaplbn		vcb_0.vcb$l_sbmaplbn
-#define		vcb$l_sbmapsize		vcb_0.vcb$l_sbmapsize
-#define		vcb$l_sbmapvbn		vcb_0.vcb$l_sbmapvbn
+#define		vcb$l_cache		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_cache
+#define		vcb$l_cluster		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_cluster
+#define		vcb$l_fileprot		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_fileprot
+#define		vcb$l_free		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_free
+#define		vcb$l_home2lbn		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_home2lbn
+#define		vcb$l_homelbn		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_homelbn
+#define		vcb$l_ibmaplbn		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_ibmaplbn
+#define		vcb$l_ibmapsize		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_ibmapsize
+#define		vcb$l_ibmapvbn		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_ibmapvbn
+#define		vcb$l_ixhdr2lbn		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_ixhdr2lbn
+#define		vcb$l_maxfiles		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_maxfiles
+#define		vcb$l_sbmaplbn		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_sbmaplbn
+#define		vcb$l_sbmapsize		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_sbmapsize
+#define		vcb$l_sbmapvbn		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_sbmapvbn
 
 #endif
