@@ -718,7 +718,9 @@ struct net_device mynetdevice2;
 
 probe_units() {
 #ifndef __arch_um__
+#if 0
   bzero(&mynetdevice,sizeof(mynetdevice));
+#endif
   ne_probe(&mynetdevice);
 #if 0
   bzero(&mynetdevice2,sizeof(mynetdevice2));
