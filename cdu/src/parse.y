@@ -255,6 +255,7 @@ K_SYNONYM T_NAME
 ;
 
 qualifier_clause_list_start:
+{ $$ = 0; }
 |
 ',' qualifier_clause_list { $$ = $2; }
 ;
@@ -423,7 +424,7 @@ name_list
 ;
 
 name_list:
-name_list T_NAME { $$ = chainon ($1, $2); }
+name_list T_NAME { $$ = chainon ($1, copy_node($2)); }
 |
 T_NAME
 ;
