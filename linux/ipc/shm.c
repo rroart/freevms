@@ -109,7 +109,9 @@ static inline void shm_inc (int id) {
 /* This is called by fork, once for every shm attach. */
 static void shm_open (struct vm_area_struct *shmd)
 {
+#ifndef CONFIG_MM_VMS
 	shm_inc (shmd->vm_file->f_dentry->d_inode->i_ino);
+#endif
 }
 
 /*
@@ -136,6 +138,7 @@ static void shm_destroy (struct shmid_kernel *shp)
  */
 static void shm_close (struct vm_area_struct *shmd)
 {
+#ifndef CONFIG_MM_VMS
 	struct file * file = shmd->vm_file;
 	int id = file->f_dentry->d_inode->i_ino;
 	struct shmid_kernel *shp;
@@ -153,13 +156,16 @@ static void shm_close (struct vm_area_struct *shmd)
 
 	shm_unlock(id);
 	up (&shm_ids.sem);
+#endif
 }
 
 static int shm_mmap(struct file * file, struct vm_area_struct * vma)
 {
+#ifndef CONFIG_MM_VMS
 	UPDATE_ATIME(file->f_dentry->d_inode);
 	vma->vm_ops = &shm_vm_ops;
 	shm_inc(file->f_dentry->d_inode->i_ino);
+#endif
 	return 0;
 }
 
@@ -678,6 +684,7 @@ asmlinkage long sys_shmdt (char *shmaddr)
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *shmd, *shmdnext;
 
+#ifndef CONFIG_MM_VMS
 	down_write(&mm->mmap_sem);
 	for (shmd = mm->mmap; shmd; shmd = shmdnext) {
 		shmdnext = shmd->vm_next;
@@ -686,6 +693,7 @@ asmlinkage long sys_shmdt (char *shmaddr)
 			do_munmap(mm, shmd->vm_start, shmd->vm_end - shmd->vm_start);
 	}
 	up_write(&mm->mmap_sem);
+#endif
 	return 0;
 }
 

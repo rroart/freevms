@@ -922,6 +922,7 @@ static inline int maydump(struct vm_area_struct *vma)
 	 * If we may not read the contents, don't allow us to dump
 	 * them either. "dump_write()" can't handle it anyway.
 	 */
+#ifndef CONFIG_MM_VMS
 	if (!(vma->vm_flags & VM_READ))
 		return 0;
 
@@ -933,6 +934,20 @@ static inline int maydump(struct vm_area_struct *vma)
 		return 1;
 	if (vma->vm_flags & (VM_READ|VM_EXEC|VM_EXECUTABLE|VM_SHARED))
 		return 0;
+#endif
+#else
+	if (!(vma->rde$l_flags & VM_READ))
+		return 0;
+
+	/* Do not dump I/O mapped devices! -DaveM */
+	if (vma->rde$l_flags & VM_IO)
+		return 0;
+#if 1
+	if (vma->rde$l_flags & (VM_WRITE|VM_GROWSUP|VM_GROWSDOWN))
+		return 1;
+	if (vma->rde$l_flags & (VM_READ|VM_EXEC|VM_EXECUTABLE|VM_SHARED))
+		return 0;
+#endif
 #endif
 	return 1;
 }
@@ -1195,6 +1210,7 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 	dataoff = offset = roundup(offset, ELF_EXEC_PAGESIZE);
 
 	/* Write program headers for segments dump */
+#ifndef CONFIG_MM_VMS
 	for(vma = current->mm->mmap; vma != NULL; vma = vma->vm_next) {
 		struct elf_phdr phdr;
 		size_t sz;
@@ -1235,6 +1251,48 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 		for (addr = vma->vm_start;
 		     addr < vma->vm_end;
 		     addr += PAGE_SIZE) {
+#else
+	for(vma = current->pcb$l_phd->phd$ps_p0_va_list_flink; vma != &current->pcb$l_phd->phd$ps_p0_va_list_flink; vma = vma->rde$ps_va_list_flink) {
+		struct elf_phdr phdr;
+		size_t sz;
+
+		sz = vma->rde$q_region_size;
+
+		phdr.p_type = PT_LOAD;
+		phdr.p_offset = offset;
+		phdr.p_vaddr = vma->rde$ps_start_va;
+		phdr.p_paddr = 0;
+		phdr.p_filesz = maydump(vma) ? sz : 0;
+		phdr.p_memsz = sz;
+		offset += phdr.p_filesz;
+		phdr.p_flags = vma->rde$l_flags & VM_READ ? PF_R : 0;
+		if (vma->rde$l_flags & VM_WRITE) phdr.p_flags |= PF_W;
+		if (vma->rde$l_flags & VM_EXEC) phdr.p_flags |= PF_X;
+		phdr.p_align = ELF_EXEC_PAGESIZE;
+
+		DUMP_WRITE(&phdr, sizeof(phdr));
+	}
+
+	for(i = 0; i < numnote; i++)
+		if (!writenote(&notes[i], file))
+			goto end_coredump;
+
+	DUMP_SEEK(dataoff);
+
+	for(vma = current->pcb$l_phd->phd$ps_p0_va_list_flink; vma != &current->pcb$l_phd->phd$ps_p0_va_list_flink; vma = vma->rde$ps_va_list_flink) {
+		unsigned long addr;
+
+		if (!maydump(vma))
+			continue;
+
+#ifdef DEBUG
+		printk("elf_core_dump: writing %08lx-%08lx\n", vma->vm_start, vma->vm_end);
+#endif
+
+		for (addr = vma->rde$ps_start_va;
+		     addr < (vma->rde$ps_start_va + vma->rde$q_region_size);
+		     addr += PAGE_SIZE) {
+#endif
 			struct page* page;
 			struct vm_area_struct *vma;
 

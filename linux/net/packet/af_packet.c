@@ -1573,7 +1573,11 @@ unsigned int packet_poll(struct file * file, struct socket *sock, poll_table *wa
 
 static void packet_mm_open(struct vm_area_struct *vma)
 {
+#ifndef CONFIG_MM_VMS
 	struct file *file = vma->vm_file;
+#else
+	struct file *file = 0;//vma->vm_file;
+#endif
 	struct inode *inode = file->f_dentry->d_inode;
 	struct socket * sock = &inode->u.socket_i;
 	struct sock *sk = sock->sk;
@@ -1584,7 +1588,11 @@ static void packet_mm_open(struct vm_area_struct *vma)
 
 static void packet_mm_close(struct vm_area_struct *vma)
 {
+#ifndef CONFIG_MM_VMS
 	struct file *file = vma->vm_file;
+#else
+	struct file *file = 0;//vma->vm_file;
+#endif
 	struct inode *inode = file->f_dentry->d_inode;
 	struct socket * sock = &inode->u.socket_i;
 	struct sock *sk = sock->sk;
@@ -1748,10 +1756,16 @@ static int packet_mmap(struct file *file, struct socket *sock, struct vm_area_st
 	int err = -EINVAL;
 	int i;
 
+#ifndef CONFIG_MM_VMS
 	if (vma->vm_pgoff)
 		return -EINVAL;
+#endif
 
+#ifndef CONFIG_MM_VMS
 	size = vma->vm_end - vma->vm_start;
+#else
+	size = vma->rde$q_region_size;
+#endif
 
 	lock_sock(sk);
 	if (po->pg_vec == NULL)
@@ -1760,16 +1774,26 @@ static int packet_mmap(struct file *file, struct socket *sock, struct vm_area_st
 		goto out;
 
 	atomic_inc(&po->mapped);
+#ifndef CONFIG_MM_VMS
 	start = vma->vm_start;
+#else
+	start = vma->rde$ps_start_va;
+#endif
 	err = -EAGAIN;
 	for (i=0; i<po->pg_vec_len; i++) {
 		if (remap_page_range(start, __pa(po->pg_vec[i]),
 				     po->pg_vec_pages*PAGE_SIZE,
+#ifndef CONFIG_MM_VMS
 				     vma->vm_page_prot))
+#else
+				     *(pgprot_t*)&vma->rde$r_regprot.regprt$l_region_prot))
+#endif
 			goto out;
 		start += po->pg_vec_pages*PAGE_SIZE;
 	}
+#ifndef CONFIG_MM_VMS
 	vma->vm_ops = &packet_mmap_ops;
+#endif
 	err = 0;
 
 out:

@@ -26,6 +26,7 @@
 #include <asm/io.h>
 #include <asm/pgalloc.h>
 
+#include <phddef.h>
 #include <rdedef.h>
 
 #ifdef CONFIG_I2C
@@ -186,6 +187,7 @@ static inline int noncached_address(unsigned long addr)
 
 static int mmap_mem(struct file * file, struct vm_area_struct * vma)
 {
+#ifndef CONFIG_MM_VMS
 	unsigned long offset = vma->vm_pgoff << PAGE_SHIFT;
 
 	/*
@@ -209,6 +211,32 @@ static int mmap_mem(struct file * file, struct vm_area_struct * vma)
 			     vma->vm_page_prot))
 		return -EAGAIN;
 	return 0;
+#else
+	unsigned long offset = 0;//vma->vm_pgoff << PAGE_SHIFT;
+	pgprot_t tmp;
+
+	/*
+	 * Accessing memory above the top the kernel knows about or
+	 * through a file pointer that was marked O_SYNC will be
+	 * done non-cached.
+	 */
+	if (noncached_address(offset) || (file->f_flags & O_SYNC))
+		vma->rde$r_regprot.regprt$l_region_prot = (tmp=pgprot_noncached(*(pgprot_t *)vma->rde$r_regprot.regprt$l_region_prot)).pgprot;
+
+	/* Don't try to swap out physical pages.. */
+	vma->rde$l_flags |= VM_RESERVED;
+
+	/*
+	 * Don't dump addresses that are not real memory to a core file.
+	 */
+	if (offset >= __pa(high_memory) || (file->f_flags & O_SYNC))
+		vma->rde$l_flags |= VM_IO;
+
+	if (remap_page_range(vma->rde$ps_start_va, offset, (unsigned long)vma->rde$q_region_size,
+			     *(pgprot_t *)&vma->rde$r_regprot.regprt$l_region_prot))
+		return -EAGAIN;
+	return 0;
+#endif
 }
 
 /*
@@ -397,11 +425,6 @@ static inline size_t read_zero_pagealigned(char * buf, size_t size)
 	/* For private mappings, just map in zero pages. */
 #ifndef CONFIG_MM_VMS
 	for (vma = find_vma(mm, addr); vma; vma = vma->vm_next) {
-#else
-	  // need of course a lot more changes
-	  //for (vma = find_vma(current->pcb$l_phd, addr); vma; vma = vma->rde$ps_va_list_flink) {
-	  for (vma = find_vma(current->pcb$l_phd, addr); vma; vma = 0) {
-#endif
 		unsigned long count;
 
 		if (vma->vm_start > addr || (vma->vm_flags & VM_WRITE) == 0)
@@ -421,6 +444,29 @@ static inline size_t read_zero_pagealigned(char * buf, size_t size)
 		if (size == 0)
 			goto out_up;
 	}
+#else
+	  // need of course a lot more changes
+	  for (vma = find_vma(current->pcb$l_phd, addr); vma!=&current->pcb$l_phd->phd$ps_p0_va_list_flink; vma = vma->rde$ps_va_list_flink) {
+		unsigned long count;
+
+		if (vma->rde$pq_start_va > addr || (vma->rde$l_flags & VM_WRITE) == 0)
+			goto out_up;
+		if (vma->rde$l_flags & VM_SHARED)
+			break;
+		count = (vma->rde$pq_start_va + vma->rde$q_region_size) - addr;
+		if (count > size)
+			count = size;
+
+		zap_page_range(mm, addr, count);
+        	zeromap_page_range(addr, count, PAGE_COPY);
+
+		size -= count;
+		buf += count;
+		addr += count;
+		if (size == 0)
+			goto out_up;
+	}
+#endif
 
 	up_read(&mm->mmap_sem);
 	
@@ -481,10 +527,16 @@ out:
 
 static int mmap_zero(struct file * file, struct vm_area_struct * vma)
 {
+#ifndef CONFIG_MM_VMS
 	if (vma->vm_flags & VM_SHARED)
 		return shmem_zero_setup(vma);
 	if (zeromap_page_range(vma->vm_start, vma->vm_end - vma->vm_start, vma->vm_page_prot))
-		return -EAGAIN;
+#else
+	if (vma->rde$l_flags & VM_SHARED)
+		return shmem_zero_setup(vma);
+	if (zeromap_page_range(vma->rde$ps_start_va, (unsigned long)vma->rde$q_region_size, *(pgprot_t*)&vma->rde$r_regprot.regprt$l_region_prot))
+#endif
+	  return -EAGAIN;
 	return 0;
 }
 

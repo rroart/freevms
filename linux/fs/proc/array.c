@@ -76,6 +76,8 @@
 #include <asm/io.h>
 #include <asm/processor.h>
 
+#include <phddef.h>
+
 /* Gcc optimizes away "strlen(x)" for constant x */
 #define ADDBUF(buffer, string) \
 do { memcpy(buffer, string, strlen(string)); \
@@ -176,13 +178,14 @@ static inline char * task_state(struct task_struct *p, char *buffer)
 	return buffer;
 }
 
-static inline char * task_mem(struct mm_struct *mm, char *buffer)
+static inline char * task_mem(struct mm_struct *mm, struct _phd * phd,char *buffer)
 {
 	struct vm_area_struct * vma;
 	unsigned long data = 0, stack = 0;
 	unsigned long exec = 0, lib = 0;
 
 	down_read(&mm->mmap_sem);
+#ifndef CONFIG_MM_VMS
 	for (vma = mm->mmap; vma; vma = vma->vm_next) {
 		unsigned long len = (vma->vm_end - vma->vm_start) >> 10;
 		if (!vma->vm_file) {
@@ -200,6 +203,25 @@ static inline char * task_mem(struct mm_struct *mm, char *buffer)
 			lib += len;
 		}
 	}
+#else
+	for (vma = phd->phd$ps_p0_va_list_flink; vma!=&phd->phd$ps_p0_va_list_flink; vma = vma->rde$ps_va_list_flink) {
+		unsigned long len = (vma->rde$q_region_size) >> 10;
+		if (/*!vma->vm_file*/0) {
+			data += len;
+			if (vma->rde$l_flags & VM_GROWSDOWN)
+				stack += len;
+			continue;
+		}
+		if (vma->rde$l_flags & VM_WRITE)
+			continue;
+		if (vma->rde$l_flags & VM_EXEC) {
+			exec += len;
+			if (vma->rde$l_flags & VM_EXECUTABLE)
+				continue;
+			lib += len;
+		}
+	}
+#endif
 	buffer += sprintf(buffer,
 		"VmSize:\t%8lu kB\n"
 		"VmLck:\t%8lu kB\n"
@@ -283,7 +305,7 @@ int proc_pid_status(struct task_struct *task, char * buffer)
 		atomic_inc(&mm->mm_users);
 	task_unlock(task);
 	if (mm) {
-		buffer = task_mem(mm, buffer);
+		buffer = task_mem(mm, task->pcb$l_phd, buffer);
 		mmput(mm);
 	}
 	buffer = task_sig(task, buffer);
@@ -319,11 +341,19 @@ int proc_pid_stat(struct task_struct *task, char * buffer)
 	if (mm) {
 		struct vm_area_struct *vma;
 		down_read(&mm->mmap_sem);
+#ifndef CONFIG_MM_VMS
 		vma = mm->mmap;
 		while (vma) {
 			vsize += vma->vm_end - vma->vm_start;
 			vma = vma->vm_next;
 		}
+#else
+		vma = task->pcb$l_phd->phd$ps_p0_va_list_flink;
+		while (vma!=&task->pcb$l_phd->phd$ps_p0_va_list_flink) {
+			vsize += vma->rde$q_region_size;
+			vma = vma->rde$ps_va_list_flink;
+		}
+#endif
 		eip = KSTK_EIP(task);
 		esp = KSTK_ESP(task);
 		up_read(&mm->mmap_sem);
@@ -479,6 +509,7 @@ int proc_pid_statm(struct task_struct *task, char * buffer)
 		atomic_inc(&mm->mm_users);
 	task_unlock(task);
 	if (mm) {
+#ifndef CONFIG_MM_VMS
 		struct vm_area_struct * vma;
 		down_read(&mm->mmap_sem);
 		vma = mm->mmap;
@@ -500,6 +531,29 @@ int proc_pid_statm(struct task_struct *task, char * buffer)
 			else
 				drs += pages;
 			vma = vma->vm_next;
+#else
+		struct vm_area_struct * vma;
+		down_read(&mm->mmap_sem);
+		vma = task->pcb$l_phd->phd$ps_p0_va_list_flink;
+		while (vma!=&task->pcb$l_phd->phd$ps_p0_va_list_flink) {
+			pgd_t *pgd = pgd_offset(mm, (unsigned long)vma->rde$ps_start_va);
+			int pages = 0, shared = 0, dirty = 0, total = 0;
+
+			statm_pgd_range(pgd, vma->rde$ps_start_va, vma->rde$ps_start_va+vma->rde$q_region_size, &pages, &shared, &dirty, &total);
+			resident += pages;
+			share += shared;
+			dt += dirty;
+			size += total;
+			if (vma->rde$l_flags & VM_EXECUTABLE)
+				trs += pages;	/* text */
+			else if (vma->rde$l_flags & VM_GROWSDOWN)
+				drs += pages;	/* stack */
+			else if ((vma->rde$ps_start_va + vma->rde$q_region_size) > 0x60000000)
+				lrs += pages;	/* library */
+			else
+				drs += pages;
+			vma = vma->rde$ps_va_list_flink;
+#endif
 		}
 		up_read(&mm->mmap_sem);
 		mmput(mm);
@@ -548,7 +602,11 @@ static int proc_pid_maps_get_line (char *buf, struct vm_area_struct *map)
 	unsigned long ino;
 	int len;
 
+#ifndef CONFIG_MM_VMS
 	flags = map->vm_flags;
+#else
+	flags = map->rde$l_flags;
+#endif
 
 	str[0] = flags & VM_READ ? 'r' : '-';
 	str[1] = flags & VM_WRITE ? 'w' : '-';
@@ -558,6 +616,7 @@ static int proc_pid_maps_get_line (char *buf, struct vm_area_struct *map)
 
 	dev = 0;
 	ino = 0;
+#ifndef CONFIG_MM_VMS
 	if (map->vm_file != NULL) {
 		dev = map->vm_file->f_dentry->d_inode->i_dev;
 		ino = map->vm_file->f_dentry->d_inode->i_ino;
@@ -569,13 +628,19 @@ static int proc_pid_maps_get_line (char *buf, struct vm_area_struct *map)
 		if(line < buf)
 			line = buf;
 	} else
+#endif
 		line = buf;
 
 	len = sprintf(line,
 		      MAPS_LINE_FORMAT,
+#ifndef CONFIG_MM_VMS
 		      map->vm_start, map->vm_end, str, map->vm_pgoff << PAGE_SHIFT,
+#else
+		      map->rde$ps_start_va, map->rde$q_region_size+map->rde$ps_start_va, str, 0 << PAGE_SHIFT,
+#endif
 		      kdevname(dev), ino);
 
+#ifndef CONFIG_MM_VMS
 	if(map->vm_file) {
 		int i;
 		for(i = len; i < MAPS_LINE_MAX; i++)
@@ -583,6 +648,7 @@ static int proc_pid_maps_get_line (char *buf, struct vm_area_struct *map)
 		len = buf + PAGE_SIZE - line;
 		memmove(buf, line, len);
 	} else
+#endif
 		line[len++] = '\n';
 	return len;
 }
@@ -625,12 +691,20 @@ ssize_t proc_pid_read_maps (struct task_struct *task, struct file * file, char *
 		goto out_free2;
 
 	down_read(&mm->mmap_sem);
+#ifndef CONFIG_MM_VMS
 	map = mm->mmap;
+#else
+	map = task->pcb$l_phd->phd$ps_p0_va_list_flink;
+#endif
 	lineno = 0;
 	loff = 0;
 	if (count > PAGE_SIZE)
 		count = PAGE_SIZE;
+#ifndef CONFIG_MM_VMS
 	while (map) {
+#else
+	while (map!=&task->pcb$l_phd->phd$ps_p0_va_list_flink) {
+#endif
 		int len;
 		if (off > PAGE_SIZE) {
 			off -= PAGE_SIZE;
@@ -656,7 +730,11 @@ next:
 		if (retval >= count)
 			break;
 		if (loff) BUG();
+#ifndef CONFIG_MM_VMS
 		map = map->vm_next;
+#else
+		map = map->rde$ps_va_list_flink;
+#endif
 	}
 	up_read(&mm->mmap_sem);
 	mmput(mm);

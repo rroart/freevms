@@ -318,8 +318,13 @@ static void do_acct_process(long exitcode, struct file *file)
 		down_read(&current->mm->mmap_sem);
 		vma = current->mm->mmap;
 		while (vma) {
+#ifndef CONFIG_MM_VMS
 			vsize += vma->vm_end - vma->vm_start;
 			vma = vma->vm_next;
+#else
+			vsize += vma->rde$q_region_size;
+			vma = vma->rde$ps_va_list_flink;
+#endif
 		}
 		up_read(&current->mm->mmap_sem);
 	}

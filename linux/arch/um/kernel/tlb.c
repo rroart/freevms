@@ -3,6 +3,7 @@
  * Licensed under the GPL
  */
 
+#include "linux/config.h"
 #include "linux/sched.h"
 #include "linux/slab.h"
 #include "linux/bootmem.h"
@@ -198,11 +199,19 @@ void flush_tlb_mm(struct mm_struct *mm)
 	flush_kernel_vm_range(start_vm, end_vm, 0);
 }
 
+#ifndef CONFIG_MM_VMS
 void flush_tlb_page(struct vm_area_struct *vma, unsigned long address)
 {
 	address &= PAGE_MASK;
 	flush_tlb_range(vma->vm_mm, address, address + PAGE_SIZE);
 }
+#else
+void flush_tlb_page2(struct mm_struct * mm, unsigned long address)
+{
+	address &= PAGE_MASK;
+	flush_tlb_range(mm, address, address + PAGE_SIZE);
+}
+#endif
 
 void flush_tlb_all(void)
 {

@@ -38,15 +38,28 @@ int __verify_write(const void * addr, unsigned long size)
 	if (!size)
 		return 1;
 
+#ifndef CONFIG_MM_VMS
 	vma = find_vma(current->mm, start);
 	if (!vma)
 		goto bad_area;
 	if (vma->vm_start > start)
 		goto check_stack;
+#else
+	vma = find_vma(current->pcb$l_phd,addr);
+	if (!vma)
+		goto bad_area;
+	if (vma->rde$ps_start_va > start)
+		goto check_stack;
+#endif
 
 good_area:
+#ifndef CONFIG_MM_VMS
 	if (!(vma->vm_flags & VM_WRITE))
 		goto bad_area;
+#else
+	if (!(vma->rde$l_flags & VM_WRITE))
+		goto bad_area;
+#endif
 	size--;
 	size += start & ~PAGE_MASK;
 	size >>= PAGE_SHIFT;
@@ -65,6 +78,7 @@ good_area:
 			break;
 		size--;
 		start += PAGE_SIZE;
+#ifndef CONFIG_MM_VMS
 		if (start < vma->vm_end)
 			continue;
 		vma = vma->vm_next;
@@ -72,12 +86,26 @@ good_area:
 			goto bad_area;
 		if (!(vma->vm_flags & VM_WRITE))
 			goto bad_area;;
+#else
+		if (start < (vma->rde$ps_start_va + vma->rde$q_region_size))
+			continue;
+		vma = vma->rde$ps_va_list_flink;
+		if (!vma || vma->rde$ps_start_va != start)
+			goto bad_area;
+		if (!(vma->rde$l_flags & VM_WRITE))
+			goto bad_area;;
+#endif
 	}
 	return 1;
 
 check_stack:
+#ifndef CONFIG_MM_VMS
 	if (!(vma->vm_flags & VM_GROWSDOWN))
 		goto bad_area;
+#else
+	if (!(vma->rde$l_flags & VM_GROWSDOWN))
+		goto bad_area;
+#endif
 	if (expand_stack(vma, start) == 0)
 		goto good_area;
 
@@ -135,6 +163,7 @@ void do_BUG(const char *file, int line)
 asmlinkage void do_invalid_op(struct pt_regs *, unsigned long);
 extern unsigned long idt;
 
+#ifndef CONFIG_MM_VMS
 /*
  * This routine handles page faults.  It determines the address,
  * and the problem, and then passes it off to one of the appropriate
@@ -410,3 +439,4 @@ vmalloc_fault:
 		return;
 	}
 }
+#endif

@@ -365,6 +365,7 @@ int pci_mmap_page_range(struct pci_dev *dev, struct vm_area_struct *vma,
 	/* Leave vm_pgoff as-is, the PCI space address is the physical
 	 * address on this platform.
 	 */
+#ifndef CONFIG_MM_VMS
 	vma->vm_flags |= (VM_SHM | VM_LOCKED | VM_IO);
 
 	prot = pgprot_val(vma->vm_page_prot);
@@ -379,6 +380,21 @@ int pci_mmap_page_range(struct pci_dev *dev, struct vm_area_struct *vma,
 			     vma->vm_end - vma->vm_start,
 			     vma->vm_page_prot))
 		return -EAGAIN;
+#else
+	vma->rde$l_flags |= (VM_SHM | VM_LOCKED | VM_IO);
 
+	prot = pgprot_val(*(pgprot_t*)&vma->rde$r_regprot.regprt$l_region_prot);
+	if (boot_cpu_data.x86 > 3)
+		prot |= _PAGE_PCD | _PAGE_PWT;
+	  vma->rde$r_regprot.regprt$l_region_prot = prot;
+
+	/* Write-combine setting is ignored, it is changed via the mtrr
+	 * interfaces on this platform.
+	 */
+	if (remap_page_range(vma->rde$ps_start_va, 0/*vma->vm_pgoff << PAGE_SHIFT*/,
+			     vma->rde$q_region_size,
+			     *(pgprot_t*)&vma->rde$r_regprot.regprt$l_region_prot))
+		return -EAGAIN;
+#endif
 	return 0;
 }

@@ -55,6 +55,7 @@ static int proc_exe_link(struct inode *inode, struct dentry **dentry, struct vfs
 	struct mm_struct * mm;
 	struct vm_area_struct * vma;
 	int result = -ENOENT;
+#ifndef CONFIG_MM_VMS
 	struct task_struct *task = inode->u.proc_i.task;
 
 	task_lock(task);
@@ -79,6 +80,7 @@ static int proc_exe_link(struct inode *inode, struct dentry **dentry, struct vfs
 	up_read(&mm->mmap_sem);
 	mmput(mm);
 out:
+#endif
 	return result;
 }
 
