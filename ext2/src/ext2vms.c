@@ -609,26 +609,27 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     memset(dir.d_name,0,256);
 
     f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|dirflg, 0);
-    if (dirflg) {
-      buf.count = 0;
-      buf.dirent = &dir;
-      error=generic_file_llseek(f, x2p->prev_fp /*fib->fib$l_wcc*//*dir.d_off*/, 0);
-      if (error<0)
-	goto err;
-      error=vfs_readdir(f, fillonedir64, &buf);
-      if (error >= 0)
-	error = buf.count;
-    err:
-      if (error == 0)
-	sts =  SS$_NOMOREFILES;
-      //fib->fib$l_wcc = f->f_pos;
-      x2p->prev_fp = f->f_pos;
-      if (sts!=SS$_NORMAL)
-	x2p->prev_fp=0;
-    } else {
+    buf.count = 0;
+    buf.dirent = &dir;
+    error=generic_file_llseek(f, x2p->prev_fp /*fib->fib$l_wcc*//*dir.d_off*/, 0);
+    if (error<0)
+      goto err;
+    error=vfs_readdir(f, fillonedir64, &buf);
+    if (error >= 0)
+      error = buf.count;
+  err:
+    if (error == 0)
+      sts =  SS$_NOMOREFILES;
+    //fib->fib$l_wcc = f->f_pos;
+    x2p->prev_fp = f->f_pos;
+    if (sts!=SS$_NORMAL)
+      x2p->prev_fp=0;
+
+    if (dir.d_ino==0) {
       dir.d_ino=f->f_dentry->d_inode->i_ino;
       strcpy(dir.d_name,f->f_dentry->d_iname);
     }
+
     filp_close(f,0);
     
     if (0==strcmp(name,"/") && 0==strcmp(dir.d_name,"."))
