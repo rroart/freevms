@@ -172,9 +172,8 @@ void pagefaultast(struct pfast * p) {
     *(unsigned long *)(p->pte)|=_PAGE_RW|_PAGE_DIRTY;
 #endif
 
-  *(unsigned long *)(p->pte)|=_PAGE_NEWPAGE;
-
 #ifdef __arch_um__
+  *(unsigned long *)(p->pte)|=_PAGE_NEWPAGE;
   flush_tlb_range(current->mm, p->address, p->address + PAGE_SIZE);
 #endif
   kfree(p);
@@ -185,7 +184,7 @@ extern int astdeb;
 
 extern int in_atomic;
 
-int makereadast(unsigned long file, unsigned long address, unsigned long pte, unsigned long offset) {
+int makereadast(unsigned long file, unsigned long address, unsigned long pte, unsigned long offset, write_flag) {
   struct _acb * a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
   struct pfast * pf=kmalloc(sizeof(struct pfast),GFP_KERNEL);
   struct _rde * rde;
@@ -195,6 +194,7 @@ int makereadast(unsigned long file, unsigned long address, unsigned long pte, un
   pf->pte=pte;
   rde=mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
   pf->pteentry=rde->rde$r_regprot.regprt$l_region_prot;
+  if (write_flag) pf->pteentry|=_PAGE_RW;
   pf->rde=rde;
   a->acb$b_rmod=0;
   a->acb$l_kast=0;
@@ -351,7 +351,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	      //printk(" pfn pte %x %x ",pfn,*(unsigned long *)pte);
 	    }
 	    //printk(" b ");
-	    makereadast(file,address,pte,offset);	
+	    makereadast(file,address,pte,offset,error_code&2);	
 	    //printk(" a ");
 	    return;
 	  } else { // page file
@@ -731,7 +731,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 	    flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	    
-	    makereadast(file,address,pte,offset);
+	    makereadast(file,address,pte,offset,is_write);
 	    return;
 	  } else { // page file
 	  }
@@ -785,7 +785,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 		mypte->pte$v_gblwrt=0;	
 		*(unsigned long *)pte|=_PAGE_DIRTY;//collided with gblwrt
 		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
-		makereadast(file,address,pte,offset);
+		makereadast(file,address,pte,offset,is_write);
 	      } else { // global zero
 		pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page|PFN$C_GLOBAL,pte);
 		*(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
