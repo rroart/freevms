@@ -4,6 +4,8 @@
 	mkdir -p include/asm-um arch/um/{kernel,lib,mm,include}
 	(cd ../freevms/starlet/src; ln -s sys\$routines.h sysoutines.h)
 	(cd ../freevms/starlet/src; ln -s lib\$routines.h liboutines.h)
+	(cd ../freevms/starlet/src; ln -s cli\$routines.h clioutines.h)
+	(cd ../freevms/starlet/src; ln -s lbr\$routines.h lbroutines.h)
 
 for X in `cd ../freevms/linux; find . \( -name CVS -prune \) -o -type f`; do
 	[ -f $X ] && rm $X
