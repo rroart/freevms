@@ -35,6 +35,7 @@ Shell:
 	DCL
 		Mcr, run
 		Simple @ scripts
+		Basis CLD and CLI$ support
 	DCL builtin
 		define, goto, logout, stop, exit
 		set default/prompt/process
@@ -60,6 +61,7 @@ RTL:
 
 Misc utilities:
 	Backup
+	CDU (mainly parses a CLD file)
 
 Supported hardware configuration:
 	Network interfaces: ne2k and 3c900 (3c905/3c590 might work, untested)
