@@ -41,8 +41,8 @@
 
 /* Some mods by Roar Thronæs */
 
-#include <time.h>               /* C header for $GETTIM to find time */
-#include <stdlib.h>
+#include <linux/time.h>               /* C header for $GETTIM to find time */
+//#include <stdlib.h>
 #include <sys$routines.h>	/* Our header file! */
 #include <ssdef.h>
 #include <descrip.h>

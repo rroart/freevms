@@ -24,7 +24,7 @@
 #include <linux/errno.h>
 #include <linux/kernel.h>
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <linux/string.h>
 //#include <unistd.h>
 //#include <sys/fcntl.h>

@@ -50,7 +50,7 @@ History:
 #include <system_data_cells.h>	/* SYS$ header file */
 #include <sys$routines.h>	/* SYS$ header file */
 #include <ssdef.h>	/* SYS$ header file */
-#include <time.h>		/* C header for $GETTIM to find time */
+#include <linux/time.h>		/* C header for $GETTIM to find time */
 #include<linux/linkage.h>
 
 /*

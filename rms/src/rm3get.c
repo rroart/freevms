@@ -6,7 +6,7 @@
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <linux/ctype.h>
 
 #include <mytypes.h>

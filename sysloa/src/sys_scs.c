@@ -46,7 +46,7 @@
 #include <net/dn_neigh.h>
 #endif
 #include<linux/vmalloc.h>
-#include<sys/errno.h>
+#include<linux/errno.h>
 
 #include <cdldef.h>
 #include <cdrpdef.h>

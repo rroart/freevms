@@ -21,7 +21,7 @@
 
 
 #include <linux/vmalloc.h>
-#include <stdio.h>
+//#include <stdio.h>
 //#include <stdlib.h>
 #include <linux/ctype.h>
 #include <linux/string.h>

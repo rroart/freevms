@@ -24,7 +24,7 @@
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
 
-#include <stdio.h>
+//#include <stdio.h>
 //#include <stdlib.h>
 //#include <memory.h>
 #include <linux/ctype.h>

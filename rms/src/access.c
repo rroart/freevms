@@ -27,7 +27,7 @@
 #include<linux/linkage.h>
 #include<linux/mm.h>
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <linux/string.h>
 //#include <memory.h>
 //#include "ssdef.h"
