@@ -994,7 +994,7 @@ int mmg$frewsle(struct _pcb * p, void * va) {
 
   index=phd->phd$l_wsnext;
   va2=((unsigned long)wsle.wsl$pq_va)&0xfffff000;
-  pte=findpte(p,va2);
+  pte=findpte_new(p->mm,va2);
 
   {
 #ifdef __arch_um__
@@ -1067,13 +1067,13 @@ int mmg$frewslx(struct _pcb * p, void * va,unsigned long * pte, unsigned long in
   return SS$_NORMAL;
 }
 
-unsigned long findpte(struct _pcb * pcb,unsigned long address) {
+unsigned long findpte_new(struct mm_struct *mm, unsigned long address) {
   unsigned long page;
   pgd_t *pgd;
   pmd_t *pmd;
   pte_t *pte;
   page = address & PAGE_MASK;
-  pgd = pgd_offset(pcb->mm, page);
+  pgd = pgd_offset(mm, page);
   pmd = pmd_offset(pgd, page);
   pte = pte_offset(pmd, page);
   return pte;
