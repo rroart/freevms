@@ -114,9 +114,9 @@ asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, uns
     if (gsd) {
       return exe$mgblsc(inadr,retadr,acmode,flags,gsdnam,ident,relpag);
     }
-    gsd=vmalloc(sizeof(struct _gsd));
+    gsd=kmalloc(sizeof(struct _gsd),GFP_KERNEL);
     bzero(gsd,sizeof(struct _gsd));
-    name=vmalloc(dsc->dsc$w_length);
+    name=kmalloc(dsc->dsc$w_length,GFP_KERNEL);
     bcopy(dsc->dsc$a_pointer,name,dsc->dsc$w_length);
     gsd->gsd$l_basepfn=name; //really t_gsdnam
     gsd->gsd$l_ident=ident; //change later

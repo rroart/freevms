@@ -230,7 +230,7 @@ asmlinkage int exe$create_region_32_wrap  (struct struct_args * s) {
 
 asmlinkage int exe$create_region_32  ( unsigned long length, unsigned int region_prot, unsigned int flags, unsigned long long *return_region_id, void **return_va, unsigned long *return_length, unsigned long start_va) {
   struct _rde * rde;
-  rde=vmalloc(sizeof(struct _rde));
+  rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
   bzero(rde,sizeof(struct _rde));
   rde->rde$pq_start_va=start_va;
   rde->rde$q_region_size=length;
