@@ -1,3 +1,6 @@
+// $Id$ 
+// $Locker$
+
 /*
  *  linux/kernel/sched.c
  *
@@ -11,6 +14,8 @@
  *		by Andrea Arcangeli
  *  1998-12-28  Implemented better SMP scheduling by Ingo Molnar
  */
+
+/* More by Roar Thronæs */
 
 /*
  * 'sched.c' is the main kernel file. It contains scheduling primitives
@@ -46,9 +51,8 @@ unsigned securebits = SECUREBITS_DEFAULT; /* systemwide security settings */
 
 extern void mem_use(void);
 
-static unsigned char from_sch$resched=0;
-static struct _pcb PCB;
-static unsigned long SCH$GL_IDLE_CPUS=0;
+static unsigned char from_sch$resched=0; /* because could not goto from sch$resched to sch$sched */
+static unsigned long SCH$GL_IDLE_CPUS=0; /* placed here until further. smp is in this, but not right now */
 
 /*
  * Scheduling quanta.
@@ -139,21 +143,19 @@ void scheduling_functions_start_here(void) { }
  * and TLB miss penalties.
  *
  * Return values:
- *	     0: out of time, recalculate counters (but it might still be
- *		selected)
- *	   +: "goodness" value (the smaller the better)
+ *	   "goodness" value (the smaller the better)
  */
 
 static inline unsigned char goodness(struct task_struct * p)
 {
 	return (1 + p->pcb$b_pri);
-	return (1 + p->pcb$b_pri + 31 - p->pcb$b_prib); /* due to high pris */
 }
 
 /*
  * the 'goodness value' of replacing a process on a given CPU.
  * positive value means 'replace', zero or negative means 'dont'.
  */
+/* We will remove this */
 static inline int preemption_goodness_not(struct task_struct * prev, struct task_struct * p, int cpu)
 {
   //	return goodness(p, cpu, prev->active_mm) - goodness(prev, cpu, prev->active_mm);
@@ -407,6 +409,7 @@ signed long schedule_timeout(signed long timeout)
  * cleans up all remaining scheduler things, without impacting the
  * common case.
  */
+/* We will remove this */
 static inline void __schedule_tail_not(struct task_struct *prev)
 {
 #ifdef CONFIG_SMP
@@ -474,20 +477,27 @@ needs_resched:
 #endif /* CONFIG_SMP */
 }
 
+/* Tried to get rid of this call in entry.S, but it went wrong */
 asmlinkage void schedule_tail(struct task_struct *prev)
 {
   //	__schedule_tail_not(prev);
 }
 
-static struct _pcb * pid1;
+static struct _pcb * pid1; /* Keep track of pid 1. Will be removed in the future */
 
+/* should be straight from the internals */
+/* this is not in use, should have some more things like sch$ and cpu$ globals
+   implemented first */
 void sch$resched() {
 int this_cpu = smp_processor_id();
-	struct list_head *tmp;
-	unsigned int c, weight;
-	struct _pcb *p,*next,*prev;
-  // old=spl(IPL$_SCHED)
-  // svpctx
+  struct list_head *tmp;
+  unsigned int c, weight;
+  struct _pcb *p,*next,*prev;
+
+  // lock sched db, soon
+  // old=spl(IPL$_SCHED) soon to be implemented?
+  // svpctx, do not think we need to do this here
+  // get cpu base when it is implemented	
   // has got no cpu$ yet, but current is here
 	c=current->pcb$b_pri;
 	list_for_each(tmp,&runqueue_head) {
@@ -499,9 +509,9 @@ int this_cpu = smp_processor_id();
 	}
 	current->state=TASK_INTERRUPTIBLE;
 	SCH$GL_IDLE_CPUS=0;
-	// moved:	move_last_runqueue(current);
+	// not yet? del from runq
 	current->need_resched=1;
-	from_sch$resched=1;
+	from_sch$resched=1; /* can not goto */
 	schedule();
 }
 
@@ -523,7 +533,10 @@ int mydebug2=0;
 int mycount=0;
 int delfromrunq=0;
 
-#define sch$sched schedule
+/* should be straight from the internals
+   aboutish implemented */
+
+#define sch$sched schedule /* rename soon */
 asmlinkage void schedule(void)
 {
 	struct schedule_data * sched_data;
@@ -532,16 +545,15 @@ asmlinkage void schedule(void)
 	int this_cpu, c;
 	unsigned char weight;
 
-	if (from_sch$resched == 1) goto try_for_process;
+	if (from_sch$resched == 1) goto try_for_process; /* goto 30$ */
 
 	spin_lock_prefetch(&runqueue_lock);
 
 	if (!current->active_mm) BUG();
 need_resched_back:
 	prev = current;
-	if (prev->pid==3) printk("pid3 was here\n");
-	if (prev->run_list.next==0) printk("n next error %x\n",prev->pid);
-	if (prev->run_list.prev==0) printk("n prev error %x\n",prev->pid);
+	// if (prev->run_list.next==0) printk("n next error %x\n",prev->pid);
+	// if (prev->run_list.prev==0) printk("n prev error %x\n",prev->pid);
 	this_cpu = prev->pcb$l_cpu_id;
 
 	if (unlikely(in_interrupt())) {
@@ -562,14 +574,21 @@ need_resched_back:
 	/*
 	 * this is the scheduler proper:
 	 */
-	if (!pid1 && current->pid == 1) { pid1=current;
-	pid1->pcb$b_pri=20; pid1->pcb$b_prib=24; printk("pid1 first\n"); 
-	mydebug=0; }
+	if (!pid1 && current->pid == 1) { /* this should be moved */
+	  pid1=current;
+	  pid1->pcb$b_pri=20;
+	  pid1->pcb$b_prib=24;
+	  printk("pid 1 here\n"); 
+	  mydebug=0;
+	}
 	//	printk("rep %x %x\n",current,current->pid);
-	if (mydebug) printk("rep %x %x %x %x %x\n",current,current->pid,current->need_resched,current->pcb$b_pri,current->phd$w_quant);
-	if (mydebug2) printk("rep %x %x %x %x %x\n",current,current->pid,current->need_resched,current->pcb$b_pri,current->phd$w_quant);
+	if (mydebug)
+	  printk("rep %x %x %x %x %x\n",current,current->pid,current->need_resched,current->pcb$b_pri,current->phd$w_quant);
+	if (mydebug2)
+	  printk("rep %x %x %x %x %x\n",current,current->pid,current->need_resched,current->pcb$b_pri,current->phd$w_quant);
 
 	delfromrunq=0;
+
 	switch (prev->state) {
 		case TASK_INTERRUPTIBLE:
 			if (signal_pending(prev)) {
@@ -577,17 +596,25 @@ need_resched_back:
 				break;
 			}
 		default:
-		  if (mydebug2) printk("in del from\n");
-		  if (prev->run_list.next==0) { int i; printk("next error %x\n",prev->pid); /*for (i=0;i<1000000000; i++) ;*/ }
-		  if (prev->run_list.prev==0) printk("prev error %x\n",prev->pid);
+		  if (mydebug2)
+		    printk("in del from\n");
+		  if (prev->run_list.next==0) {
+		    /* int i; */
+		    printk("next error %x\n",prev->pid);
+		    /*for (i=0;i<1000000000; i++) ;*/
+		  }
+		  if (prev->run_list.prev==0) 
+		    printk("prev error %x\n",prev->pid);
 		  del_from_runqueue(prev);
 
 		case TASK_RUNNING:;
 	}
 	//			prev->need_resched = 0;
 
- try_for_process:
+try_for_process:
+
 	from_sch$resched=0;
+
 repeat_schedule:
 	/*
 	 * Default process to select..
@@ -596,42 +623,72 @@ repeat_schedule:
 	c = 100;
 	list_for_each(tmp, &runqueue_head) {
 		p = list_entry(tmp, struct task_struct, run_list);
-		if (mydebug2) printk("run %x %x %x %x %x\n",p,p->pid,p->run_list.next,p->run_list.prev,p->need_resched);
-		if (p->pcb$b_prib & 224) p->pcb$b_prib=27;
-		if (p->pcb$b_pri & 224) p->pcb$b_pri=27;
-		   weight = goodness(p);
-		  if (mydebug) printk("wei2 %x %x %x %x %x %x\n",p,p->pid,weight,p->need_resched,p->pcb$b_pri,p->phd$w_quant);
-		  //		  if (c==100 && prev!=p) c=weight, next=p;
-		  if (weight < c && p->need_resched==0)
-				c = weight, next = p;
-		  if (c==100 && weight < c) c=weight, next=p;
+		if (mydebug2)
+		  printk("run %x %x %x %x %x\n",p,p->pid,p->run_list.next,p->run_list.prev,p->need_resched);
+		if (p->pcb$b_prib & 224) /* should be moved too */
+		  p->pcb$b_prib=27;
+		if (p->pcb$b_pri & 224) /* should be moved too */
+		  p->pcb$b_pri=27;
+		weight = goodness(p);
+		if (mydebug)
+		  printk("wei2 %x %x %x %x %x %x\n",p,p->pid,weight,p->need_resched,p->pcb$b_pri,p->phd$w_quant);
+		//	  if (c==100 && prev!=p) c=weight, next=p;
+		if (weight < c && p->need_resched==0)
+		  c = weight, next = p;
+		if (c==100 && weight < c) c=weight, next=p;
 	}
 	//	{ int i; for (i=0; i<10000000; i++ ) ; }
 
 	//	if (c==100) { spin_unlock_irq(&runqueue_lock); goto sch$idle; }
-	if (mydebug) printk("wei %x %x\n",next->pid,c);
-	if (mydebug2) printk("wei %x %x\n",next->pid,c);
-	if (mydebug && ++mycount==500) { int i; __cli(); for (i=0; i<100000000; i++ ) ; mycount=0; __sti(); }
-	if (mydebug2 && ++mycount==500) { int i; __cli(); for (i=0; i<1000000000; i++ ) ; mycount=0; __sti(); }
+	if (mydebug)
+	  printk("wei %x %x\n",next->pid,c);
+	if (mydebug2)
+	  printk("wei %x %x\n",next->pid,c);
+	if (mydebug && ++mycount==500) {
+	  int i;
+	  __cli();
+	  for (i=0; i<100000000; i++ ) ;
+	  mycount=0;
+	  __sti();
+	}
+	if (mydebug2 && ++mycount==500) {
+	  int i;
+	  __cli();
+	  for (i=0; i<1000000000; i++ ) ;
+	  mycount=0;
+	  __sti();
+	}
+
 	/*
 	 * from this point on nothing can prevent us from
 	 * switching to the next task, save this fact in
 	 * sched_data.
 	 */
+
 	prev->need_resched = 0;
-	if (next->pid > 1 && pid1->need_resched==1) { pid1->need_resched=0; pid1->pcb$b_pri=24; pid1->pcb$b_prib=25; printk("pid1\n"); }
+
+	if (next->pid > 1 && pid1->need_resched==1) { /* Need this too? */
+	  pid1->need_resched=0;
+	  pid1->pcb$b_pri=24;
+	  pid1->pcb$b_prib=25;
+	  printk("pid1\n");
+	}
 
 	//	if (next == prev) { next->need_resched=1; goto repeat_schedule; }
-	if (next == prev) {/* printk("next == prev\n");*/ spin_unlock_irq(&runqueue_lock); return; } 
+	if (next == prev) {
+	  /* printk("next == prev\n");*/ 
+	  spin_unlock_irq(&runqueue_lock);
+	  return;
+	} 
 
 	sched_data->curr = next;
-	//if (prev->pid>1) move_last_runqueue(prev);
+	// if (prev->pid>1) move_last_runqueue(prev);
 
 	task_set_cpu(next, this_cpu);
 	spin_unlock_irq(&runqueue_lock);
 
-	 	if (next->pcb$b_pri<next->pcb$b_prib) next->pcb$b_pri++;
-		SCH$GL_IDLE_CPUS=0;
+	if (next->pcb$b_pri<next->pcb$b_prib) next->pcb$b_pri++;
+	SCH$GL_IDLE_CPUS=0;
 
 #ifdef CONFIG_SMP
  	/*
@@ -650,8 +707,16 @@ repeat_schedule:
 	 */
 
 #endif /* CONFIG_SMP */
-	if (prev->pid==2 && prev->run_list.next==0) { int i; printk("o next error %x\n",prev->pid); mydebug=1; /* for(i=0;i<1000000000;i++); */ }
-	if (prev->run_list.prev==0) printk("o prev error %x\n",prev->pid);
+	if (prev->pid==2 && prev->run_list.next==0) {
+	  /* int i; */
+	  if (mydebug2)
+	    printk("o next error %x\n",prev->pid);
+	  mydebug=0; 
+	  /* for(i=0;i<1000000000;i++); */
+	}
+
+	if (prev->run_list.prev==0)
+	  printk("o prev error %x\n",prev->pid);
 
 	kstat.context_swtch++;
 	/*

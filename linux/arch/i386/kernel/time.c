@@ -465,7 +465,6 @@ static int use_tsc;
  * Time Stamp Counter value at the time of the timer interrupt, so that
  * we later on can estimate the time of day more exactly.
  */
-//static void timer_interrupt(int irq, struct pt_regs *regs)
 static void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
 	int count;

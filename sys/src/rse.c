@@ -10,14 +10,7 @@
 extern int mydebug;
 
 int sch$qend(struct _pcb * p) {
-  //	{ int i; for (i=0;i<1000000;i++) ; }
-  //	set_intr_gate(TEST_VECTOR,&test_code);
-  //
-  //	printk("setting our vectors\n\ndoing\n");
-  //	{ int i; for (i=0;i<1000000;i++) ; }
-  //   __asm__ __volatile__("int $0x88\n");
   p->phd$w_quant = -QUANTUM/10;
-  /* p->pcb$b_pri++; why must we have this? */
   p->need_resched = 1;
   if (mydebug) printk("quend %x %x\n",p->pid,p->need_resched);
   {
@@ -26,9 +19,7 @@ int sch$qend(struct _pcb * p) {
     unsigned char c;
     list_for_each(tmp, &runqueue_head) {
       e = list_entry(tmp, struct task_struct, run_list);
-      if (can_schedule(e, this_cpu)) {
 	if (e->pcb$b_pri <= c) c=e->pcb$b_pri, next=e;
-      }
     }
     if (next == e)
       { /* p->need_resched = 0; */ }

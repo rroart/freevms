@@ -1,4 +1,9 @@
 doing pcb/task_struct leads to changes in/with:
 
 CPU structure.
+SCH structure.
 Interrupt/IPLs.
+
+Currently broken:
+MD support
+SMP support

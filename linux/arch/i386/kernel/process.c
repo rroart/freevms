@@ -126,20 +126,20 @@ void cpu_idle (void)
 	init_idle();
 	printk("id %x\n",current->pid);
 	if (current->pid==0) { /* just to be sure */
-	current->pcb$b_prib  = 31;
-	current->pcb$b_pri   = 31;
-	current->phd$w_quant = 0;
-	}
+	  current->pcb$b_prib  = 31;
+	  current->pcb$b_pri   = 31;
+	  current->phd$w_quant = 0;
+	} /* we might not need these settings */
 
 	while (1) {
 		void (*idle)(void) = pm_idle;
-		//		printk("cpu_idle\n");
+		// printk("cpu_idle\n");
 		if (!idle)
 			idle = default_idle;
-		//		printk("bef while\n");
+		// printk("bef while\n");
 		while (!current->need_resched)
 			idle();
-		//		printk("aft while\n");
+		// printk("aft while\n");
 		schedule();
 		check_pgt_cache();
 	}
