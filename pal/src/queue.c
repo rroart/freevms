@@ -15,6 +15,9 @@
 #include<queue.h>
 
 void insque(void * entry, void * pred) {
+  if (entry==pred) panic("same\n");
+  if (entry==*(long *)pred) panic("same\n");
+  if (entry==*(long *)(((long)pred)+4)) panic("same\n");
   int flag=mycli();
   //mycheckaddr();
   *(void **)entry=*(void **)pred;
