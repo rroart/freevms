@@ -14,6 +14,9 @@ export-objs	:= ll_rw_blk.o blkpg.o loop.o DAC960.o genhd.o
 
 obj-y	:= ll_rw_blk.o blkpg.o genhd.o elevator.o
 
+obj-$(CONFIG_IO_VMS)		+= pvdriver.o
+
+ifneq ($(CONFIG_IO_VMS),y)
 obj-$(CONFIG_MAC_FLOPPY)	+= swim3.o
 obj-$(CONFIG_BLK_DEV_FD)	+= floppy.o
 obj-$(CONFIG_AMIGA_FLOPPY)	+= amiflop.o
@@ -33,5 +36,6 @@ obj-$(CONFIG_BLK_DEV_DAC960)	+= DAC960.o
 obj-$(CONFIG_BLK_DEV_NBD)	+= nbd.o
 
 subdir-$(CONFIG_PARIDE) += paride
+endif
 
 include $(TOPDIR)/Rules.make
