@@ -35,8 +35,9 @@
 
 void exe$insertirp(struct _ucb * u, struct _irp * i) {
   //  struct _irp *tmp=((struct _irp *)u)->irp$l_ioqfl; // change to ucb$l_ioqfl
+  struct _irp *head=&u->ucb$l_ioqfl;
   struct _irp *tmp=u->ucb$l_ioqfl;
-  while (tmp!=u && i->irp$b_pri>tmp->irp$b_pri)
+  while (tmp!=head && i->irp$b_pri>tmp->irp$b_pri)
     tmp=tmp->irp$l_ioqfl;
   insque(i,tmp);
 }
