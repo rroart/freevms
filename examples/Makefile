@@ -1,65 +1,65 @@
 all: timer ast time eftim schdwk forcex ef wake synch enq lnm lnm2 qio1 qio2 cef cefw mem memf getjpi crec
 
 timer: timer.c
-	gcc -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.o -o timer
+	gcc -I../starlet/src -I../librtl/src/ timer.c ../starlet/src/starlet.a -o timer
 time: gettim.c
-	gcc -I../starlet/src -I../librtl/src/ gettim.c ../starlet/src/starlet.o -o time
+	gcc -I../starlet/src -I../librtl/src/ gettim.c ../starlet/src/starlet.a -o time
 
 ast: astdel.c
-	gcc -I../starlet/src -I../librtl/src/ astdel.c ../starlet/src/starlet.o -o ast
+	gcc -I../starlet/src -I../librtl/src/ astdel.c ../starlet/src/starlet.a -o ast
 
 eftim: eftim.c
-	gcc -I../starlet/src -I../librtl/src/ eftim.c ../starlet/src/starlet.o -o eftim
+	gcc -I../starlet/src -I../librtl/src/ eftim.c ../starlet/src/starlet.a -o eftim
 
 schdwk: schdwk.c
-	gcc -I../starlet/src -I../librtl/src/ schdwk.c ../starlet/src/starlet.o -o schdwk
+	gcc -I../starlet/src -I../librtl/src/ schdwk.c ../starlet/src/starlet.a -o schdwk
 
 forcex: forcex.c
-	gcc -I../starlet/src -I../librtl/src/ forcex.c ../starlet/src/starlet.o -o forcex
+	gcc -I../starlet/src -I../librtl/src/ forcex.c ../starlet/src/starlet.a -o forcex
 
 ef: ef.c
-	gcc -I../starlet/src -I../librtl/src/ ef.c ../starlet/src/starlet.o -o ef
+	gcc -I../starlet/src -I../librtl/src/ ef.c ../starlet/src/starlet.a -o ef
 
 wake: wake.c
-	gcc -I../starlet/src -I../librtl/src/ wake.c ../starlet/src/starlet.o -o wake
+	gcc -I../starlet/src -I../librtl/src/ wake.c ../starlet/src/starlet.a -o wake
 
 
 synch: synch.c
-	gcc -I../starlet/src -I../librtl/src/ synch.c ../starlet/src/starlet.o -o synch
+	gcc -I../starlet/src -I../librtl/src/ synch.c ../starlet/src/starlet.a -o synch
 
 
 enq: enq.c
-	gcc -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.o -o enq
+	gcc -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.a -o enq
 
 lnm: lnm.c
-	gcc -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starlet.o -o lnm
+	gcc -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starlet.a -o lnm
 
 lnm2: lnm2.c
-	gcc -I../starlet/src -I../librtl/src/ lnm2.c ../starlet/src/starlet.o -o lnm2
+	gcc -I../starlet/src -I../librtl/src/ lnm2.c ../starlet/src/starlet.a -o lnm2
 
 qio1: qio1.c
-	gcc -I../starlet/src -I../librtl/src/ qio1.c ../starlet/src/starlet.o -o qio1
+	gcc -I../starlet/src -I../librtl/src/ qio1.c ../starlet/src/starlet.a -o qio1
 
 qio2: qio2.c
-	gcc -I../starlet/src -I../librtl/src/ qio2.c ../starlet/src/starlet.o -o qio2
+	gcc -I../starlet/src -I../librtl/src/ qio2.c ../starlet/src/starlet.a -o qio2
 
 cef: cef.c
-	gcc -I../starlet/src -I../librtl/src/ cef.c ../starlet/src/starlet.o -o cef
+	gcc -I../starlet/src -I../librtl/src/ cef.c ../starlet/src/starlet.a -o cef
 
 cefw: cefwait.c
-	gcc -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starlet.o -o cefwait
+	gcc -I../starlet/src -I../librtl/src/ cefwait.c ../starlet/src/starlet.a -o cefwait
 
 mem: mem.c
-	gcc -static -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starlet.o -o mem
+	gcc -static -I../starlet/src -I../librtl/src/ mem.c ../starlet/src/starlet.a -o mem
 
 memf: memf.c
-	gcc -static -I../starlet/src -I../librtl/src/ memf.c ../starlet/src/starlet.o -o memf
+	gcc -static -I../starlet/src -I../librtl/src/ memf.c ../starlet/src/starlet.a -o memf
 
 getjpi: getjpi.c
-	gcc -static -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starlet.o -o getjpi
+	gcc -static -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starlet.a -o getjpi
 
 crec: crec.c
-	gcc -static -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.o -o crec
+	gcc -static -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.a -o crec
 
 allum: timerum astum timeum eftimum schdwkum forcexum efum wakeum synchum enqum lnmum lnm2um qio1um qio2um cef cefwum mem memfum getjpium crecum
 
@@ -125,5 +125,5 @@ getjpium: getjpi.c
 
 
 crecum: crec.c
-	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.c -o crecum
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.c ../starlet/src/rms.c -o crecum
 
