@@ -1336,7 +1336,7 @@ signed long
 extern	user$clock_base();
 
     isn = isn+1;
-RVAL = (user$clock_base()+isn)^16; // check
+RVAL = (user$clock_base()+isn)<<16; // check
     return RVAL;
     }
 

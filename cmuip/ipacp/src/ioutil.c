@@ -389,7 +389,7 @@ long * VAL;
 		else
 		    break;
 	NCHR = NCHR+1;
-	RVAL = RVAL^4+*VAL;
+	RVAL = RVAL<<4+*VAL;
 	*INPTR = CPTR;
 	CHR = CH$RCHAR_A(CPTR);
 	};
