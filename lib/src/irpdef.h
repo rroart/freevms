@@ -142,9 +142,11 @@ unsigned long irp$l_iosb;
 unsigned short irp$w_chan;
 unsigned short irp$w_sts;
 unsigned long irp$l_svapte;
+                             /* temporary work-around */ 
+  unsigned long useraddress; /* do not know the pte/buffer stuff yet */
 unsigned short irp$w_boff;
 unsigned short irp$w_empty;
-unsigned short irp$w_bcnt;
+unsigned long irp$l_bcnt;
 unsigned short irp$w_sts2;
 unsigned short irp$w_emptyagain;
 unsigned long irp$l_iost1;
@@ -157,6 +159,14 @@ unsigned long irp$l_seqnum;
 unsigned long irp$l_extend;
 unsigned long irp$l_arb;
 unsigned long irp$l_keydesc;
+  struct _ccb *irp$ps_ccb;
+  unsigned long irp$l_qio_p1;
+  unsigned long irp$l_qio_p2;
+  unsigned long irp$l_qio_p3;
+  unsigned long irp$l_qio_p4;
+  unsigned long irp$l_qio_p5;
+  unsigned long irp$l_qio_p6;
+
   /* copy from cdrp to this area ?*/
   struct _cdrp irp_cdrp;
 };

@@ -58,6 +58,7 @@ asmlinkage int exe$qiow (struct struct_qio * q) {
 asmlinkage int exe$qio (struct struct_qio * q) {
   int func;
   unsigned int c, d;
+  struct _pcb * p=current;
   struct _irp * i;
   exe$clref(q->efn);
   if (q->chan<0 || q->chan>ctl$gl_chindx) return SS$_IVCHAN;
@@ -78,6 +79,13 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   i->irp$l_iosb=q->iosb;
   i->irp$w_chan=q->chan;
   i->irp$w_func=q->func;
+  i->irp$b_pri=p->pcb$b_pri;
+  i->irp$l_qio_p1=q->p1;
+  i->irp$l_qio_p2=q->p2;
+  i->irp$l_qio_p3=q->p3;
+  i->irp$l_qio_p4=q->p4;
+  i->irp$l_qio_p5=q->p5;
+  i->irp$l_qio_p6=q->p6;
   i->irp$l_ucb=ctl$gl_ccbbase[q->chan].ccb$l_ucb;
   i->irp$l_pid=current->pid;
   i->irp$w_sts|=IRP$M_BUFIO; /* no DIRIO because of no mmg$svaptechk */
@@ -85,7 +93,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   /* does it do one or more functions */
   //  for(c=0,d=1;c<64;c++,d=d<1) /* right order? */
   //  if (d&func) {
-  ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[func](i,i->irp$l_pid,i->irp$l_ucb,&ctl$gl_ccbbase[q->chan],func,ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt,q->p1,q->p2,q->p3,q->p4,q->p5,q->p6); // a real beauty, isn't it :)
+  ctl$ga_ccb_table[q->chan].ccb$l_ucb->ucb$l_ddt->ddt$l_fdt->fdt$ps_func_rtn[func](i,p,i->irp$l_ucb,&ctl$gl_ccbbase[q->chan]); // a real beauty, isn't it :)
       //  }
 }
 

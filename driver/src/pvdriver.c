@@ -267,9 +267,6 @@ struct _fdt fdt_floppy = {
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
 
-struct _irp * fglobali;
-struct _ucb * fglobalu;
-
 void floppy_isr (void) {
   void (*func)(void *,void *);
   struct _irp * i;
@@ -278,8 +275,6 @@ void floppy_isr (void) {
   printk("isr\n");
 
   /* have to do this until we get things more in order */
-  i=fglobali;
-  u=fglobalu;
 
   func=u->ucb$l_fpc;
   func(i,u);
@@ -287,48 +282,6 @@ void floppy_isr (void) {
 
 void  floppy_startio2 (struct _irp * i, struct _ucb * u);
 void  floppy_startio3 (struct _irp * i, struct _ucb * u);
-
-void  floppy_startio (struct _irp * i, struct _ucb * u) { 
-  static int first=0;
-  signed long long step1=-10000000;
-
-  printk("times %x %x\n",u->ucb$b_second_time_in_startio,u->ucb$b_third_time_in_startio);
-  //  { int j; for(j=100000000;j;j--);}
-
-#if 0
-  if (first) {
-    int a=*(int *)0x88888888;
-    int b=*(int *)0x82888888;
-    int c=*(int *)0x98888888;
-    int d=*(int *)0xb8888888;
-    insque(0,0);
-  }
-  first++;
-#endif
-
-  printk("firsttime %x %x\n",i,u);
-  fglobali=i;
-  fglobalu=u;
-
-  u->ucb$b_second_time_in_startio=1;
-  ioc$wfikpch(floppy_startio2,0,i,current,u,2,0);
-  //  exe$setimr(0, &step1, nl_isr,0,0);
-  return;
-}
-
-void  floppy_startio2 (struct _irp * i, struct _ucb * u) { 
-  printk("secondtime\n");
-
-  u->ucb$l_fpc=floppy_startio3;
-  exe$iofork(i,u);
-  return;
-}
-
-void  floppy_startio3 (struct _irp * i, struct _ucb * u) { 
-  printk("thirdtime %x %x\n",i,u);
-  ioc$reqcom(SS$_NORMAL,0,u);
-  return;
-};
 
 /* more yet undefined dummies */
 void  floppy_unsolint (void) { };
@@ -347,33 +300,45 @@ void  floppy_mntv_sqd (void) { };
 void  floppy_aux_storage (void) { };
 void  floppy_aux_routine (void) { };
 
-void floppy_read(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c, int funcno, void * fdt, void * p1, long p2, long p3, long p4, long p5, long p6) {
+static inline numblocks(long l) {
+  return (l+511)/512;
+}
+
+void floppy_read(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+
+  /* will eventually be moved to acp$ */
+
+  int blocks=numblocks(i->irp$l_qio_p2);
+  i->useraddress=i->irp$l_qio_p1; /* the temporary workaround */
+  i->irp$w_sts|=IRP$M_FUNC;
+  i->irp$l_abcnt=0;
+  i->irp$l_bcnt=i->irp$l_qio_p2;
+  i->irp$l_obcnt=i->irp$l_qio_p2;
+  i->irp$l_svapte=vmalloc(i->irp$l_qio_p2);
+  i->irp$l_lboff=i->irp$l_qio_p3;
+
   exe$qiodrvpkt(i,p,u);
 };
 
-void floppy_write(void) {
+void floppy_write(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+
+  /* will eventually be moved to acp$ */
+
+  int blocks=numblocks(i->irp$l_qio_p2);
+  i->useraddress=i->irp$l_qio_p1; /* the temporary workaround */
+  i->irp$w_sts|=IRP$M_FUNC;
+  i->irp$l_abcnt=0;
+  i->irp$l_bcnt=i->irp$l_qio_p2;
+  i->irp$l_obcnt=i->irp$l_qio_p2;
+  i->irp$l_svapte=vmalloc(i->irp$l_qio_p2);
+  i->irp$l_lboff=i->irp$l_qio_p3;
+  bcopy(i->irp$l_qio_p1,i->irp$l_svapte,i->irp$l_qio_p2);
+
+  exe$qiodrvpkt(i,p,u);
 
 };
 
-struct _ddt ddt_floppy = {
-  ddt$l_start: floppy_startio,
-  ddt$l_unsolint: floppy_unsolint,
-  ddt$l_functb: floppy_functb,
-  ddt$l_cancel: floppy_cancel,
-  ddt$l_regdump: floppy_regdump,
-  ddt$l_diagbuf: floppy_diagbuf,
-  ddt$l_errorbuf: floppy_errorbuf,
-  ddt$l_unitinit: floppy_unitinit,
-  ddt$l_altstart: floppy_altstart,
-  ddt$l_mntver: floppy_mntver,
-  ddt$l_cloneducb: floppy_cloneducb,
-  ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: floppy_mntv_sssc,
-  ddt$l_mntv_for: floppy_mntv_for,
-  ddt$l_mntv_sqd: floppy_mntv_sqd,
-  ddt$l_aux_storage: floppy_aux_storage,
-  ddt$l_aux_routine: floppy_aux_routine
-};
+struct _ddt ddt_floppy;
 
 /* include a buffered 4th param? */
 extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn);
@@ -453,7 +418,7 @@ void floppy_init2(void) {
   v=&c->crb$l_intd;
 
   v->vec$l_idb=i;
-  // not now  v->vec$ps_isr_code=floppy_isr;
+  // not now? v->vec$ps_isr_code=floppy_isr;
   v->vec$ps_isr_code=floppy_hardint2;
 
   /* for the idb init part */
@@ -1232,6 +1197,8 @@ static struct tq_struct floppy_tq;
 
 static void schedule_bh( void (*handler)(void*) )
 {
+  printk("schedule_bh\n");
+  
 	floppy_tq.routine = (void *)(void *) handler;
 	queue_task(&floppy_tq, &tq_immediate);
 	mark_bh(IMMEDIATE_BH);
@@ -1991,6 +1958,7 @@ void floppy_interrupt2(struct _idb * idb)
 		printk("floppy interrupt on bizarre fdc %d\n",fdc);
 		printk("handler=%p\n", handler);
 		is_alive("bizarre fdc");
+		goto end;
 		return;
 	}
 
@@ -2020,10 +1988,15 @@ void floppy_interrupt2(struct _idb * idb)
 		} while ((ST0 & 0x83) != UNIT(current_drive) && inr == 2 && max_sensei);
 	}
 	if (handler) {
-		schedule_bh( (void *)(void *) handler);
+	  printk("this should hopefully not be here %x\n",handler);
+	  //		schedule_bh( (void *)(void *) handler);
+	  floppyucb.ucb$l_fpc=handler; /* test and cheat */
+	  exe$iofork(floppyucb.ucb$l_irp,&floppyucb); /* test and cheat again */
 	} else
 		FDCS->reset = 1;
 	is_alive("normal interrupt end");
+ end:
+	ioc$wfikpch(floppy_startio2,0,idb->idb$ps_owner->ucb$l_irp,current,idb->idb$ps_owner,2,0);
 }
 
 static void recalibrate_floppy(void)
@@ -2280,7 +2253,9 @@ static int wait_til_done(void (*handler)(void), int interruptible)
 {
 	int ret;
 
-	schedule_bh((void *)(void *)handler);
+	//	schedule_bh((void *)(void *)handler);
+	floppyucb.ucb$l_fpc=handler; /* test and cheat */
+	exe$iofork(floppyucb.ucb$l_irp,&floppyucb); /* test and cheat again */
 
 	if (command_status < 2 && NO_SIGNAL) {
 		DECLARE_WAITQUEUE(wait, current);
@@ -3194,7 +3169,9 @@ static void redo_fd_request(void)
 
 		if (TESTF(FD_NEED_TWADDLE))
 			twaddle();
-		schedule_bh( (void *)(void *) floppy_start);
+		//schedule_bh( (void *)(void *) floppy_start);
+		floppyucb.ucb$l_fpc=floppy_start; /* test and cheat */
+		exe$iofork(floppyucb.ucb$l_irp,&floppyucb); /* test and cheat again */
 #ifdef DEBUGT
 		debugt("queue fd request");
 #endif
@@ -3212,7 +3189,9 @@ static struct cont_t rw_cont={
 static void process_fd_request(void)
 {
 	cont = &rw_cont;
-	schedule_bh( (void *)(void *) redo_fd_request);
+	//	schedule_bh( (void *)(void *) redo_fd_request);
+	floppyucb.ucb$l_fpc=redo_fd_request; /* test and cheat */
+	exe$iofork(floppyucb.ucb$l_irp,&floppyucb); /* test and cheat again */
 }
 
 static void do_fd_request(request_queue_t * q)
@@ -3704,6 +3683,8 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 	}
 	type = TYPE(device);
 	drive = DRIVE(device);
+
+	printk("in fd_ioctl\n");
 
 	/* convert compatibility eject ioctls into floppy eject ioctl.
 	 * We do this in order to provide a means to eject floppy disks before
@@ -4846,5 +4827,86 @@ void floppy_eject(void)
 	}
 }
 #endif
+
+/* more vms stuff at the end */
+
+void  floppy_startio (struct _irp * i, struct _ucb * u) { 
+
+  //  { int j; for(j=100000000;j;j--);}
+
+  /* based on FDRAWCMD part of fd_ioctl */
+
+  int reti;
+
+  struct floppy_raw_cmd myraw;
+
+  unsigned int cmd=FDRAWCMD;
+  unsigned long param=&myraw;
+  struct floppy_raw_cmd * raw_cmd=&myraw;
+
+  printk("firsttime %x %x\n",i,u);
+
+  if (i->irp$w_func&IO$_READVBLK) {
+    myraw.flags |= FD_RAW_READ;
+    myraw.cmd[0]=FD_READ;
+  } else {
+    myraw.flags |= FD_RAW_WRITE;
+    myraw.cmd[0]=FD_WRITE;
+  }
+
+  myraw.cmd[1]=0;
+  myraw.cmd[2]=i->irp$l_lboff/(2*18*512);
+  myraw.cmd[3]=(i->irp$l_lboff&0x3ff)/512;
+  myraw.cmd[4]=4; /* pick one */
+  myraw.cmd[5]=i->irp$l_obcnt;
+  myraw.cmd[6]=18;
+  myraw.cmd[7]=0x6c;
+  myraw.cmd[8]=0xff;
+  myraw.cmd_count=9;
+
+  myraw.kernel_data=i->irp$l_svapte;
+
+  LOCK_FDC(0,1);
+  set_floppy(0);
+  CALL(reti = raw_cmd_ioctl(cmd,(void *) param));
+  process_fd_request();
+
+  ioc$wfikpch(floppy_startio2,0,i,current,u,2,0);
+  return;
+}
+
+void  floppy_startio2 (struct _irp * i, struct _ucb * u) { 
+  printk("secondtime\n");
+
+  u->ucb$l_fpc=floppy_startio3;
+  exe$iofork(i,u);
+  return;
+}
+
+void  floppy_startio3 (struct _irp * i, struct _ucb * u) { 
+  printk("thirdtime %x %x\n",i,u);
+  ioc$reqcom(SS$_NORMAL,0,u);
+  return;
+};
+
+struct _ddt ddt_floppy = {
+  ddt$l_start: floppy_startio,
+  ddt$l_unsolint: floppy_unsolint,
+  ddt$l_functb: floppy_functb,
+  ddt$l_cancel: floppy_cancel,
+  ddt$l_regdump: floppy_regdump,
+  ddt$l_diagbuf: floppy_diagbuf,
+  ddt$l_errorbuf: floppy_errorbuf,
+  ddt$l_unitinit: floppy_unitinit,
+  ddt$l_altstart: floppy_altstart,
+  ddt$l_mntver: floppy_mntver,
+  ddt$l_cloneducb: floppy_cloneducb,
+  ddt$w_fdtsize: 0,
+  ddt$l_mntv_sssc: floppy_mntv_sssc,
+  ddt$l_mntv_for: floppy_mntv_for,
+  ddt$l_mntv_sqd: floppy_mntv_sqd,
+  ddt$l_aux_storage: floppy_aux_storage,
+  ddt$l_aux_routine: floppy_aux_routine
+};
 
 EXPORT_NO_SYMBOLS;

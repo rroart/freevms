@@ -102,7 +102,7 @@ void  null_mntv_sqd (void) { };
 void  null_aux_storage (void) { };
 void  null_aux_routine (void) { };
 
-void nl_read(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c, int funcno, void * fdt, void * p1, long p2, long p3, long p4, long p5, long p6) {
+void nl_read(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   exe$qiodrvpkt(i,p,u);
 };
 

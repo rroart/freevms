@@ -16,7 +16,7 @@ void ioc$initiate(struct _irp * i, struct _ucb * u) {
   u->ucb$l_irp=i;
   u->ucb$l_svapte=i->irp$l_svapte;
   u->ucb$w_boff=i->irp$w_boff;
-  u->ucb$w_bcnt=i->irp$w_bcnt;
+  u->ucb$w_bcnt=i->irp$l_bcnt;
   u->ucb$l_sts&=~(UCB$M_TIMOUT|UCB$M_CANCEL);
   /* no diagnostic buf */
   d=u->ucb$l_ddt;

@@ -17,6 +17,9 @@ bufpost(struct _irp * i) {
   if (i->irp$l_iosb) {
     bcopy(&i->irp$l_iost1,i->irp$l_iosb,8);
   }
+  if (i->irp$l_bcnt) {
+    bcopy(i->irp$l_svapte,i->useraddress,i->irp$l_bcnt);
+  }
   if (a->acb$l_ast) {
     a->acb$b_rmod&=~ACB$M_KAST;
     sch$qast(i->irp$l_pid,PRI$_NULL,i);
