@@ -175,7 +175,7 @@ int makereadast(unsigned long file, unsigned long address, unsigned long pte, un
   bzero(a,sizeof(struct _acb));
   a->acb$l_ast=pagefaultast;
   a->acb$l_astprm=pf;
-  sch$qast(current->pid,0,a);
+  sch$qast(current->pcb$l_pid,0,a);
 }
 
 

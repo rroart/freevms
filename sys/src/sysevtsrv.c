@@ -36,7 +36,7 @@ asmlinkage int exe$readef(unsigned int efn, unsigned int *state) {
 
 asmlinkage int exe$setef(unsigned int efn) {
   struct _pcb * p=current;
-  return sch$postef(p->pid,PRI$_IOCOM,efn);
+  return sch$postef(p->pcb$l_pid,PRI$_IOCOM,efn);
 }
 
 inline unsigned long * getefcp(struct _pcb * p, unsigned long efn) {

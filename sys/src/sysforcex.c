@@ -14,24 +14,33 @@
 #include<cwpsdef.h>
 #include<cdrpdef.h>
 #include<rddef.h>
+#include<ssdef.h>
 
 asmlinkage int exe$exit(unsigned int code);
 
 asmlinkage int exe$forcex(unsigned int *pidadr, void *prcnam, unsigned int code){
   struct _pcb *p;
   struct _acb *a;
+  struct _pcb * retpcb;
+  unsigned long ipid, epid;
+  int sts;
+#if 0
   if (pidadr && ((*pidadr)&0x80000000)) 
     return cwps$forcex(pidadr,prcnam,code);
-  p=exe$nampid2(current,pidadr,prcnam);
+#endif
+  sts=exe$nampid(current,pidadr,prcnam,&retpcb,&ipid,&epid);
+  p=retpcb;
+  if (sts==SS$_REMOTE_PROC)
+    return cwps$forcex(pidadr,prcnam,code);
   vmsunlock(&SPIN_SCHED,0);
   if (!p) return 0;
   p->pcb$l_sts|=PCB$M_FORCPEN;
   a=vmalloc(sizeof(struct _acb));
   bzero(a,sizeof(struct _acb));
-  a->acb$l_pid=p->pid;
+  a->acb$l_pid=p->pcb$l_pid;
   a->acb$l_ast=&exe$exit;
   a->acb$l_astprm=code;
-  return sch$qast(p->pid,PRI$_RESAVL,a);
+  return sch$qast(p->pcb$l_pid,PRI$_RESAVL,a);
   
   /*no cwps*/
 }

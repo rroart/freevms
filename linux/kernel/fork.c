@@ -31,6 +31,7 @@
 #include <pridef.h>
 #include <rdedef.h>
 #include <secdef.h>
+#include <system_data_cells.h>
 
 /* The idle threads do not count.. */
 int nr_threads;
@@ -719,6 +720,12 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	copy_flags(clone_flags, p);
 	p->pid = get_pid(clone_flags);
+	p->pcb$l_pid=alloc_ipid();
+	{
+	  unsigned long *vec=sch$gl_pcbvec;
+	  vec[p->pcb$l_pid&0xffff]=p;
+	}
+	p->pcb$l_epid=exe$ipid_to_epid(p->pcb$l_pid);
 
 	p->run_list.next = NULL;
 	p->run_list.prev = NULL;

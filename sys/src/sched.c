@@ -1675,6 +1675,9 @@ void __init init_idle(void)
 
 extern void init_timervecs (void);
 
+extern unsigned long pcbvec[];
+extern unsigned long seqvec[];
+
 void __init sched_init(void)
 {
   /*
@@ -1692,6 +1695,11 @@ void __init sched_init(void)
   qhead_init(&init_task.pcb$l_astqfl);
   cpu->cpu$l_curpcb=&init_task;
   cpu->cpu$b_cur_pri=16;
+
+  sch$gl_pcbvec=pcbvec;
+  sch$gl_seqvec=seqvec;
+  bzero(sch$gl_pcbvec,MAXPROCESSCNT*sizeof(unsigned long));
+  bzero(sch$gl_seqvec,MAXPROCESSCNT*sizeof(unsigned long));
 
   printk("pid 0 here %x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl); 
   //	{ int i,j; for(j=0;j<2;j++) for(i=0;i<1000000000;i++); }

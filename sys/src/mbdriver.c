@@ -99,7 +99,7 @@ void mb_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
   m->mmb$b_func=func;
   m->mmb$w_msgsize=i->irp$l_qio_p2;
   m->mmb$l_irp=i;
-  m->mmb$l_pid=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb->pid;
+  m->mmb$l_pid=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb->pcb$l_pid;
   if (m->mmb$w_msgsize)
     memcpy(m->mmb$t_data,i->irp$l_qio_p2,m->mmb$w_size);
   savipl=vmslock(&SPIN_MAILBOX,IPL$_MAILBOX);
@@ -123,7 +123,7 @@ void mb_read (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   m->mmb$b_func=func;
   m->mmb$w_msgsize=i->irp$l_qio_p2;
   m->mmb$l_irp=i;
-  m->mmb$l_pid=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb->pid;
+  m->mmb$l_pid=smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb->pcb$l_pid;
   //  if (m->mmb$w_msgsize)
   //    memcpy(m->mmb$t_data,i->irp$l_qio_p2,m->mmb$w_size);
   savipl=vmslock(&SPIN_MAILBOX,IPL$_MAILBOX);

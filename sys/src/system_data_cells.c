@@ -1972,8 +1972,15 @@ struct myq2 {
   unsigned long blink;
 };
 
+unsigned long pcbvec[MAXPROCESSCNT];
+unsigned long seqvec[MAXPROCESSCNT];
+unsigned long csid; // have to use it like this for  now
+
 void __init vms_init(void) {
   int i,j;
+
+  sch$gl_pixwidth=0;
+  for(i=MAXPROCESSCNT;i;i=i>>1) sch$gl_pixwidth++;
 
   for(i=0;i<32;i++) {
     smp$gl_cpu_data[i]=&vmscpus[i];
@@ -2102,4 +2109,10 @@ void __init vms_init3(void) {
 
   mmg$gl_sysphd=&system_phd;
   init_phd(&system_phd);
+
+#ifdef __arch_um__
+  gettimeofday(&xtime, NULL);
+#endif
+  
+  csid = xtime.tv_sec;
 }

@@ -57,12 +57,12 @@ asmlinkage void ioc$iopost(void) {
       return;
     }
   }
-  p=find_process_by_pid(i->irp$l_pid);
+  p=exe$ipid_to_pcb(i->irp$l_pid);
 
 #if 0
   // these two sch should not be here permanently
-  sch$postef(p->pid,PRI$_IOCOM,i->irp$b_efn);
-  sch$qast(p->pid,PRI$_IOCOM,i);
+  sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
+  sch$qast(p->pcb$l_pid,PRI$_IOCOM,i);
 
   return; // the rest is not finished
 #endif
@@ -74,8 +74,8 @@ asmlinkage void ioc$iopost(void) {
   ((struct _acb *) i)->acb$l_kast=dirpost;
   ((struct _acb *) i)->acb$l_astprm=i;
   /* find other class than 1 */
-  sch$postef(p->pid,PRI$_IOCOM,i->irp$b_efn);
-  sch$qast(p->pid,PRI$_IOCOM,i);
+  sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
+  sch$qast(p->pcb$l_pid,PRI$_IOCOM,i);
   goto again;
 
  bufio:
@@ -85,8 +85,8 @@ asmlinkage void ioc$iopost(void) {
   ((struct _acb *) i)->acb$l_kast=bufpost;
   ((struct _acb *) i)->acb$l_astprm=i;
   /* find other class than 1 */
-  sch$postef(p->pid,PRI$_IOCOM,i->irp$b_efn);
-  sch$qast(p->pid,PRI$_IOCOM,i);
+  sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
+  sch$qast(p->pcb$l_pid,PRI$_IOCOM,i);
   goto again;
 
   ioc$bufpost();

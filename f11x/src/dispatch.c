@@ -46,7 +46,7 @@ void f11b$dispatch(struct _irp * i) {
 }
 
 void f11b$dispatcher(void) {
-  int pid=current->pid;
+  int pid=current->pcb$l_pid;
   struct _irp * i;
   int sts;
   int fcode, fmode;

@@ -20,7 +20,7 @@ extern int mydebug5;
 
 int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   int savipl;
-  struct _pcb * p=find_process_by_pid(pid);
+  struct _pcb * p=exe$ipid_to_pcb(pid);
   int status=SS$_NORMAL;
   int kernelmode;
   if (!p) {

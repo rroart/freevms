@@ -171,7 +171,7 @@ asmlinkage int exe$enq(struct struct_enq * s) {
     l->lkb$l_cplastadr=s->astadr;
     l->lkb$l_blkastadr=s->blkastadr;
     l->lkb$l_astprm=s->astprm;
-    l->lkb$l_pid=current->pid;
+    l->lkb$l_pid=current->pcb$l_pid;
     strncpy(r->rsb$t_resnam,d->dsc$a_pointer,d->dsc$w_length);
 
     if (s->flags&LCK$M_SYSTEM) {
@@ -187,7 +187,7 @@ asmlinkage int exe$enq(struct struct_enq * s) {
       //check valid lock
       // check lock access mode
       p=lockidtbl[s->parid];
-      if (current->pid != p->lkb$l_pid) return SS$_IVLOCKID;
+      if (current->pcb$l_pid != p->lkb$l_pid) return SS$_IVLOCKID;
       //check if parent granted, if not return SS$_PARNOTGRANT;
       if (p->lkb$b_state!=LKB$K_CONVERT  || p->lkb$b_state!=LKB$K_GRANTED) 
 	if (p->lkb$l_flags & LCK$M_CONVERT == 0) return SS$_PARNOTGRANT;
@@ -320,19 +320,19 @@ int lck$grant_lock(struct _lkb * l,struct _rsb * r, signed int curmode, signed i
     insque(l->lkb$l_sqfl,r->rsb$l_grqfl);
     l->lkb$b_state=LKB$K_GRANTED;
 
-    sch$postef(current->pid,PRI$_RESAVL,l->lkb$b_efn);
+    sch$postef(current->pcb$l_pid,PRI$_RESAVL,l->lkb$b_efn);
 
     if (l->lkb$l_cplastadr && l->lkb$l_flags&LCK$M_SYNCSTS==0) {
       l->lkb$l_ast=l->lkb$l_cplastadr;
-      sch$qast(current->pid,PRI$_RESAVL,l);
+      sch$qast(current->pcb$l_pid,PRI$_RESAVL,l);
     }
     if (l->lkb$l_ast) {
       /* not implemented */
     }
 
-    sch$qast(current->pid,PRI$_RESAVL,l);
+    sch$qast(current->pcb$l_pid,PRI$_RESAVL,l);
     //if (current->pcb$w_state!=SCH$C_CUR)
-    sch$postef(current->pid,PRI$_RESAVL,l->lkb$b_efn);
+    sch$postef(current->pcb$l_pid,PRI$_RESAVL,l->lkb$b_efn);
 
 }
 

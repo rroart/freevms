@@ -94,6 +94,10 @@ static unsigned char dn_eco_version[3]    = {0x02,0x00,0x00};
 
 struct net_device *decnet_default_device;
 
+int is_cluster_on() {
+  return mypb.pb$w_state==PB$C_OPEN;
+}
+
 inline void dn_nsp_send2(struct sk_buff *skb)
 {
   unsigned short int *pktlen;
@@ -1924,7 +1928,7 @@ void scs_msg_fill_more(struct sk_buff *skb,struct _cdt * cdt, struct _cdrp * cdr
 	bcopy(cdrp->cdrp$l_msg_buf,data,bufsiz);
 
 	cdt->cdt$l_fp_scs_norecv=cdrp;
-	cdt->cdt$l_reserved3=current->pid;
+	cdt->cdt$l_reserved3=current->pcb$l_pid;
 	cdt->cdt$l_reserved4=cdrp->cdrp$l_msg_buf;
 
 	data=skb_put(skb,bufsiz);

@@ -41,7 +41,7 @@ int sch$postef(unsigned long ipid, unsigned long priclass, unsigned long efn) {
   int retval;
   unsigned long * clusteraddr;
   /* sched spinlock */
-  p=find_process_by_pid(ipid);
+  p=exe$ipid_to_pcb(ipid);
   if (!p) return SS$_NONEXPR;
   if (efn>127)
     return SS$_ILLEFC;

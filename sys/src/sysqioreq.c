@@ -136,7 +136,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
   i->irp$l_qio_p5=q->p5;
   i->irp$l_qio_p6=q->p6;
   i->irp$l_ucb=ctl$gl_ccbbase[q->chan].ccb$l_ucb;
-  i->irp$l_pid=current->pid;
+  i->irp$l_pid=current->pcb$l_pid;
   i->irp$l_sts|=IRP$M_BUFIO; /* no DIRIO because of no mmg$svaptechk */
   /* do preprocessing */
   /* does it do one or more functions */
@@ -148,7 +148,7 @@ asmlinkage int exe$qio (struct struct_qio * q) {
       //  }
  earlyerror:
   setipl(0);
-  sch$postef(current->pid,PRI$_NULL,q->efn);
+  sch$postef(current->pcb$l_pid,PRI$_NULL,q->efn);
   return 0;		   
 }
 
@@ -185,11 +185,11 @@ void exe$qioqxqppkt (struct _pcb * p, struct _irp * i) {
   struct _acb *a=&i->irp$l_fqfl;
   //  struct _f11b * f=ctl$gl_f11bxqp;
 
-  a->acb$l_pid=p->pid;
+  a->acb$l_pid=p->pcb$l_pid;
   a->acb$l_ast=f11b$dispatch;
   a->acb$l_astprm=i;
   remque(i,0); // got to get rid of this somewhere, why not here?
-  sch$qast(p->pid,PRI$_RESAVL,a);
+  sch$qast(p->pcb$l_pid,PRI$_RESAVL,a);
 }
 
 

@@ -83,6 +83,12 @@ asmlinkage void exe$creprc(unsigned int *pidadr, void *image, void *input, void 
   // and store it
 #endif  
   // make ipid and epid
+  p->pcb$l_pid=alloc_ipid();
+  {
+    unsigned long *vec=sch$gl_pcbvec;
+    vec[p->pcb$l_pid&0xffff]=p;
+  }
+  p->pcb$l_epid=exe$ipid_to_epid(p->pcb$l_pid);
   // should invoke sch$chse, put this at bottom?
   // setipl(0) and return
 

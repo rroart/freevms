@@ -149,7 +149,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     //printk("chan %x\n",chan);
     u=ctl$gl_ccbbase[chan].ccb$l_ucb;
     i->irp$l_ucb=u;
-    i->irp$l_pid=current->pid;
+    i->irp$l_pid=current->pcb$l_pid;
     i->irp$l_sts|=IRP$M_BUFIO;
     i->irp$l_astprm=i;
     i->irp$l_ast=returnsome;
@@ -176,7 +176,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     //printk("chan %x\n",chan);
     u=ctl$gl_ccbbase[chan].ccb$l_ucb;
     i->irp$l_ucb=u;
-    i->irp$l_pid=current->pid;
+    i->irp$l_pid=current->pcb$l_pid;
     i->irp$l_sts|=IRP$M_BUFIO;
     i->irp$l_astprm=i;
     i->irp$l_ast=returnsome;

@@ -172,7 +172,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
   }
 
 void sch$wake(unsigned long pid) {
-  struct _pcb * p=find_process_by_pid(pid);
+  struct _pcb * p=exe$ipid_to_pcb(pid);
   if (!p) return;
   p->pcb$l_sts |= PCB$M_WAKEPEN;
   sch$rse(p,PRI$_RESAVL,EVT$_WAKE);
@@ -380,6 +380,7 @@ int sch$waitk(struct _pcb * p, struct _wqh * wq) {
     }
   }
   // insque(p,&wq->wqh$l_wqfl); better wait with waitqs? had pcb queue corruption
+  // and: insque for ceb waiting etc is now down in syswait.c
   wq->wqh$l_wqcnt++;
   return sch$waitl(p,wq);
 }
