@@ -243,7 +243,7 @@ int eu$init_tables() {
   return SS$_NORMAL;
 }
 
-int eu_iodb_vmsinit(void) {
+int eu_iodb_vmsinit(int dev) {
 #if 0
   struct _ucb * ucb=&eu$ucb;
   struct _ddb * ddb=&eu$ddb;
@@ -265,6 +265,7 @@ int eu_iodb_vmsinit(void) {
 #endif
 
   ucb -> ucb$w_size = sizeof(struct _ucbnidef); // temp placed
+  ((struct _ucbnidef *)ucb)->ucb$l_extra_l_1=dev;
 
   init_ddb(ddb,&eu$ddt,ucb,"eua");
   init_ucb(ucb, ddb, &eu$ddt, crb);
@@ -294,7 +295,7 @@ int eu_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   return newucb;
 }
 
-int eu_vmsinit(void) {
+int eu_vmsinit(int dev) {
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
 
   unsigned short chan0, chan1, chan2;
@@ -306,7 +307,7 @@ int eu_vmsinit(void) {
 
   printk(KERN_INFO "dev here pre\n");
 
-  ddb=eu_iodb_vmsinit();
+  ddb=eu_iodb_vmsinit(dev);
 
   /* for the fdt init part */
   /* a lot of these? */
@@ -774,8 +775,7 @@ int __init uml_net_probe(void)
 		if(devices[i].user == NULL) continue;
 		eth_configure(&devices[i], i);
 		if (i==0) {
-			struct _ucbnidef * ucb = eu_vmsinit();
-			ucb -> ucb$l_extra_l_1 = devices[0].dev;
+			eu_vmsinit(dev);
 		}
 	}
 	return(0);
