@@ -10,18 +10,48 @@ PC for the same reason.
 
 No new interrupts aside from 0x81 can be implemented yet because of softirqs.
 
-PAL: do CPU stuff like queues, ipls, asts etc in software. (Borrow from FreeBSD?)
-
+System services:
 Find out how to implement system calls/services with more than 6 params.
 
-Will also have to do some preparations for clustering and 64-bits.
+PAL:
+INSQUE, REMQUE are uninterruptible: not implemented yet.
+IPL/Interrupt system: not implemented yet.
+ADAWI, BBCCI, BBSSI, INSQHI, INSQTI, REMQHI, REMTQI are interlocked: niy.
+PROBE: not implemented yet.
+CHMx: not implemented yet.
+ASTs: partly implemented.
+REI: partly implemented.
+SWASTEN: niy.
+SWPCTX, LDPCTX: niy. (less important?)
+BUGCHK: niy. (less important?)
+LDQP, STQP: niy. (less important?)
+more?
 
+CONVENTIONS:
+Remember: bzero following alloc
+Try have have sys$call and param checks, and then calling exe$call?
+(Not the sys$call in starlet.c...)
+
+Non x86 CPUs:
+Just a few ifdefs related to clock interrupts and ticks/quantums.
+
+64-bit:
+No preparations done yet.
+
+Clusters:
+No preparations done yet.
+
+I/O:
+Someone said:
 In i/o services you will want to ensure that layering is possible, a la
 unix streams if convenient (no need really to duplicate the detailed
 VMS driver structures if you can use existing ones). Many VMS facilities
 can be done more cleanly with such layering than DEC ever did them
 with special purpose code all over the place.
+But:
 Meaning having DKDRIVER as layer, and not putting every driver in it?
 I am not sure all of the above I/O things can be done.
+If you say A, you got to say B, etc.
+Hope we do not have to write our own drivers; just putting more routines
+into existing ones.
 
-Remember: bzero following alloc
