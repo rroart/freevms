@@ -222,7 +222,7 @@ void myqio(int rw, int data, int size, int blocknr,kdev_t dev, int block_factor)
     type=IO$_WRITEPBLK;
   else
     type=IO$_READPBLK;
-  sts = exe$qiow(0,(unsigned short)dev2chan(dev),type,&iosb,0,0,
+  sts = sys$qiow(0,(unsigned short)dev2chan(dev),type,&iosb,0,0,
 		     data,size, blocknr*block_factor,MINOR(dev)&31,0,0);
   return sts;
 }
@@ -236,7 +236,7 @@ void vms_submit_bh(int rw, struct buffer_head * bh)
     type=IO$_WRITEPBLK;
   else
     type=IO$_READPBLK;
-  sts = exe$qiow(0,(unsigned short)dev2chan(bh->b_dev),type,&iosb,0,0,
+  sts = sys$qiow(0,(unsigned short)dev2chan(bh->b_dev),type,&iosb,0,0,
 		     bh->b_data,bh->b_size, bh->b_blocknr,MINOR(bh->b_dev)&31,0,0);
   return sts;
 }
@@ -251,7 +251,7 @@ void vms_ll_rw_block(int rw, int nr, struct buffer_head * bhs[],kdev_t dev)
     type=IO$_WRITEPBLK;
   else
     type=IO$_READPBLK;
-  sts = exe$qiow(0,(unsigned short)dev2chan(dev),type,&iosb,0,0,
+  sts = sys$qiow(0,(unsigned short)dev2chan(dev),type,&iosb,0,0,
 		     bh->b_data,bh->b_size, bh->b_blocknr,MINOR(dev)&31,0,0);
 }
 
@@ -265,7 +265,7 @@ void vms_mark_buffer_dirty(struct buffer_head * bh)
     type=IO$_WRITEPBLK;
   else
     type=IO$_READPBLK;
-  sts = exe$qiow(0,(unsigned short)dev2chan(bh->b_dev),type,&iosb,0,0,
+  sts = sys$qiow(0,(unsigned short)dev2chan(bh->b_dev),type,&iosb,0,0,
 		     bh->b_data,bh->b_size, bh->b_blocknr,MINOR(bh->b_dev)&31,0,0);
 }
 
