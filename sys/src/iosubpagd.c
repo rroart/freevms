@@ -39,7 +39,7 @@ int ioc$search(struct return_values *r, void * devnam) {
   struct dsc$descriptor *s=devnam;
   struct _ddb * d=ioc$gl_devlist;
   do {
-    if (!bcmp(d->ddb$t_name,s->dsc$a_pointer,s->dsc$w_length)) {
+    if (!bcmp(d->ddb$t_name,s->dsc$a_pointer,3/* was s->dsc$w_length*/)) {
       r->val1=d->ddb$l_ucb;
       return SS$_NORMAL;
     }
