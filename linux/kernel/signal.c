@@ -518,9 +518,6 @@ printk("SIG queue (%s:%d): %d ", t->comm, t->pid, sig);
 	ret = -EPERM;
 	if (bad_signal(sig, info, t))
 		goto out_nolock;
-	ret = security_ops->task_ops->kill(t, info, sig);
-	if (ret)
-		goto out_nolock;
 
 	/* The null signal is a permissions and process existance probe.
 	   No signal is actually delivered.  Same goes for zombies. */

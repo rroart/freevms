@@ -408,8 +408,6 @@ struct task_struct {
 	void *notifier_data;
 	sigset_t *notifier_mask;
 	
-	void *security;
-
 /* Thread group tracking */
    	u32 parent_exec_id;
    	u32 self_exec_id;
@@ -717,9 +715,7 @@ static inline int fsuser(void)
  * New privilege checks should use this interface, rather than suser() or
  * fsuser(). See include/linux/capability.h for defined capabilities.
  */
-/* capable prototype and code moved to security.[hc] */
-#include <linux/security.h>
-#if 0
+
 static inline int capable(int cap)
 {
 #if 1 /* ok now */
@@ -733,7 +729,6 @@ static inline int capable(int cap)
 	}
 	return 0;
 }
-#endif	/* if 0 */
 
 /*
  * Routines for handling mm_structs

@@ -227,7 +227,6 @@
 #define __NR_madvise1		219	/* delete when C lib stub is removed */
 #define __NR_getdents64		220
 #define __NR_fcntl64		221
-#define __NR_security		223	/* syscall for security modules */
 
 
 

@@ -20,7 +20,6 @@
 #include <linux/vmalloc.h>
 #include <linux/completion.h>
 #include <linux/personality.h>
-#include <linux/security.h>
 
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
@@ -580,10 +579,6 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 			goto fork_out;
 	}
 
-	retval = security_ops->task_ops->create(clone_flags);
-	if (retval)
-		goto fork_out;
-
 	retval = -ENOMEM;
 	p = alloc_task_struct();
 	if (!p)
@@ -655,16 +650,13 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 #endif
 	p->lock_depth = -1;		/* -1 = no lock */
 	p->start_time = jiffies;
-	p->security = NULL;
 
 	INIT_LIST_HEAD(&p->local_pages);
 
 	retval = -ENOMEM;
-	if (security_ops->task_ops->alloc_security(p))
-		goto bad_fork_cleanup;
 	/* copy all the process information */
 	if (copy_files(clone_flags, p))
-		goto bad_fork_cleanup_security;
+		goto bad_fork_cleanup;
 	if (copy_fs(clone_flags, p))
 		goto bad_fork_cleanup_files;
 	if (copy_sighand(clone_flags, p))
@@ -752,8 +744,6 @@ bad_fork_cleanup_fs:
 	exit_fs(p); /* blocking */
 bad_fork_cleanup_files:
 	exit_files(p); /* blocking */
-bad_fork_cleanup_security:
-	security_ops->task_ops->free_security(p);
 bad_fork_cleanup:
 	put_exec_domain(p->exec_domain);
 	if (p->binfmt && p->binfmt->module)

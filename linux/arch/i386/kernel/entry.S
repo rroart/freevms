@@ -620,7 +620,6 @@ ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_getdents64)	/* 220 */
 	.long SYMBOL_NAME(sys_fcntl64)
 	.long SYMBOL_NAME(sys_ni_syscall)	/* reserved for TUX */
-	.long SYMBOL_NAME(sys_security)		/* LSM hook */
 
 
 

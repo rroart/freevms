@@ -28,7 +28,6 @@
 #include <linux/kernel_stat.h>
 #include <linux/completion.h>
 #include <linux/prefetch.h>
-#include <linux/security.h>
 
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
@@ -891,7 +890,6 @@ void scheduling_functions_end_here(void) { }
 asmlinkage long sys_nice(int increment)
 {
 	long newprio;
-	int retval;
 
 	/*
 	 *	Setpriority might change our priority at the same moment.
@@ -912,11 +910,6 @@ asmlinkage long sys_nice(int increment)
 		newprio = -20;
 	if (newprio > 19)
 		newprio = 19;
-
-	retval = security_ops->task_ops->setnice(current, newprio);
-	if (retval)
-		return retval;
-	
 	current->pcb$b_prib = newprio;
 	return 0;
 }
@@ -986,10 +979,6 @@ static int setscheduler(pid_t pid, int policy,
 	    !capable(CAP_SYS_NICE))
 		goto out_unlock;
 
-	retval = security_ops->task_ops->setscheduler(p, policy, &lp);
-	if (retval)
-		goto out_unlock;
-
 	retval = 0;
 	p->policy = policy;
 	p->rt_priority = lp.sched_priority;
@@ -1029,11 +1018,8 @@ asmlinkage long sys_sched_getscheduler(pid_t pid)
 	retval = -ESRCH;
 	read_lock(&tasklist_lock);
 	p = find_process_by_pid(pid);
-	if (p) {
-		retval = security_ops->task_ops->getscheduler(p);
-		if (!retval)
-			retval = p->policy & ~SCHED_YIELD;
-	}
+	if (p)
+		retval = p->policy & ~SCHED_YIELD;
 	read_unlock(&tasklist_lock);
 
 out_nounlock:
@@ -1055,11 +1041,6 @@ asmlinkage long sys_sched_getparam(pid_t pid, struct sched_param *param)
 	retval = -ESRCH;
 	if (!p)
 		goto out_unlock;
-
-	retval = security_ops->task_ops->getscheduler(p);
-	if (retval)
-		goto out_unlock;
-
 	lp.sched_priority = p->rt_priority;
 	read_unlock(&tasklist_lock);
 
@@ -1156,16 +1137,11 @@ asmlinkage long sys_sched_rr_get_interval(pid_t pid, struct timespec *interval)
 	retval = -ESRCH;
 	read_lock(&tasklist_lock);
 	p = find_process_by_pid(pid);
-	if (!p)
-		goto out_unlock;
-
-	retval = security_ops->task_ops->getscheduler(p);
-	if (retval)
-		goto out_unlock;
-
-	jiffies_to_timespec(p->policy & SCHED_FIFO ? 0 : NICE_TO_TICKS(p->pcb$b_prib), &t);
+	if (p)
+		jiffies_to_timespec(p->policy & SCHED_FIFO ? 0 : NICE_TO_TICKS(p->pcb$b_prib), &t);
 	read_unlock(&tasklist_lock);
-	retval = copy_to_user(interval, &t, sizeof(t)) ? -EFAULT : 0;
+	if (p)
+		retval = copy_to_user(interval, &t, sizeof(t)) ? -EFAULT : 0;
 out_nounlock:
 	return retval;
 out_unlock:

@@ -89,7 +89,7 @@ static int badness(struct task_struct *p)
 	 * Superuser processes are usually more important, so we make it
 	 * less likely that we kill those.
 	 */
-	if (!security_ops->capable(p,CAP_SYS_ADMIN) ||
+	if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_ADMIN) ||
 				p->uid == 0 || p->euid == 0)
 		points /= 4;
 
@@ -99,7 +99,7 @@ static int badness(struct task_struct *p)
 	 * tend to only have this flag set on applications they think
 	 * of as important.
 	 */
-	if (!security_ops->capable(p,CAP_SYS_RAWIO))
+	if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_RAWIO))
 		points /= 4;
 #ifdef DEBUG
 	printk(KERN_DEBUG "OOMkill: task %d (%s) got %d points\n",
@@ -153,7 +153,7 @@ void oom_kill_task(struct task_struct *p)
 	p->flags |= PF_MEMALLOC;
 
 	/* This process has hardware access, be more careful. */
-	if (!security_ops->capable(p,CAP_SYS_RAWIO)) {
+	if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_RAWIO)) {
 		force_sig(SIGTERM, p);
 	} else {
 		force_sig(SIGKILL, p);
