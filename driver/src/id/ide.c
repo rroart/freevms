@@ -27,7 +27,9 @@ struct _ucb * ideu;
 static unsigned long startio (struct _irp * i, struct _ucb * u)
 {
   unsigned long sts=SS$_NORMAL;
-  struct request rq;
+  struct request * rq = kmalloc (sizeof(struct request), GFP_KERNEL);
+
+  //printk("ide startio %x %x %x\n",i->irp$l_qio_p1,i->irp$l_qio_p2,i->irp$l_qio_p3);
 
   //  ide_drive_t *drive=u->ucb$l_orb;
 
@@ -40,20 +42,20 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
   switch (i->irp$v_fcode) {
 
     case IO$_WRITEPBLK: {
-      rq.cmd=WRITE;
-      rq.buffer=i->irp$l_qio_p1;
-      rq.nr_sectors=(i->irp$l_qio_p2+511)>>9;
-      i->irp$l_qio_p5=&rq;
-      do_rw_disk(u->ucb$l_orb,&rq,i->irp$l_qio_p3<<1);
+      rq->cmd=WRITE;
+      rq->buffer=i->irp$l_qio_p1;
+      rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
+      i->irp$l_qio_p5=rq;
+      do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3<<1);
       return (sts);
     }
 
     case IO$_READPBLK: {
-      rq.cmd=READ;
-      rq.buffer=i->irp$l_qio_p1;
-      rq.nr_sectors=(i->irp$l_qio_p2+511)>>9;
-      i->irp$l_qio_p5=&rq;
-      do_rw_disk(u->ucb$l_orb,&rq,i->irp$l_qio_p3/*<<1*/);
+      rq->cmd=READ;
+      rq->buffer=i->irp$l_qio_p1;
+      rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
+      i->irp$l_qio_p5=rq;
+      do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3/*<<1*/);
       return (sts);
     }
 
@@ -550,6 +552,7 @@ void ide_input_data (ide_drive_t *drive, void *buffer, unsigned int wcount)
 {
 	byte io_32bit;
 
+	//printk("ideinp %x %x %x\n",drive,buffer,wcount);
 	/* first check if this controller has defined a special function
 	 * for handling polled ide transfers
 	 */

@@ -190,6 +190,7 @@ read_next:
                 return ide_started;
 	}
 
+  kfree(rq);
 	ioc$reqcom(SS$_NORMAL,0,ideu);
 	
         return ide_stopped;
