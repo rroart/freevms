@@ -23,6 +23,7 @@
 #include <rabdef.h>
 #include <fibdef.h>
 #include <fiddef.h>
+#include <iosbdef.h>
 #include <rmsdef.h>
 #include <scbdef.h>
 #include <wcbdef.h>
@@ -424,6 +425,7 @@ unsigned update_create(struct _vcb *vcb,struct dsc$descriptor *fibdsc,struct dsc
 
 unsigned update_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
 {
+  struct _iosb iosb;
     unsigned sts;
     struct _vcb *vcbdev;
     struct _fh2 *head, *head2;
@@ -439,13 +441,16 @@ unsigned update_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
         if ((sts & 1) == 0) return sts;
         start_pos = mapblk + 1;
         if (hdrseq != 0) {
-            sts = accesshead(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,&hdrfid,hdrseq,&head,&headvbn,1);
-            if ((sts & 1) == 0) return sts;
+	  head = f11b_read_header(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,&hdrfid,fcb,&iosb);
+	  sts=iosb.iosb$w_status;
+	  if ((sts & 1) == 0) return sts;
         } else {
-	  sts = gethead (fcb, &head);
+	  head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
+	  sts=iosb.iosb$w_status;
         }
     } else {
-      sts = gethead (fcb, &head);
+      head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
+      sts=iosb.iosb$w_status;
       start_pos = 0;          /* filenum * 3 /indexfsize * volumesize; */
     }
     vcbdev = rvn_to_dev(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,fcb->fcb$b_fid_rvn);
@@ -476,7 +481,8 @@ unsigned update_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
             *mp++ = (start_pos * vcbdev->vcb$l_cluster) >> 16;
             head->fh2$b_map_inuse += 4;
             fcb->fcb$l_efblk += block_count * vcbdev->vcb$l_cluster;
-	    sts = gethead (fcb, &head2);
+	    head2 = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
+	    sts=iosb.iosb$w_status;
             head2->fh2$w_recattr.fat$l_hiblk = VMSSWAP(fcb->fcb$l_efblk * vcbdev->vcb$l_cluster);
             sts = bitmap_modify(vcbdev,start_pos,block_count,0);
         }
@@ -494,7 +500,8 @@ It may be something simple but I haven't had time to look...
 So DON'T use mount/write!!!  */
 
 unsigned deallocfile(struct _fcb *fcb)
-{
+{ 
+  struct _iosb iosb;
     unsigned sts = 1;
     /*
     First mark all file clusters as free in BITMAP.SYS
@@ -520,7 +527,8 @@ unsigned deallocfile(struct _fcb *fcb)
         unsigned headvbn = 0;
 
         struct _fh2 *head;
-	sts = gethead (fcb, &head);
+	head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
+	sts=iosb.iosb$w_status;
         do {
             unsigned ext_seg_num = 0;
             struct _fiddef extfid;
@@ -558,8 +566,9 @@ unsigned deallocfile(struct _fcb *fcb)
                 rvn = extfid.fid$b_rvn;
             }
             if (extfid.fid$w_num != 0 || extfid.fid$b_nmx != 0) {
-                sts = accesshead(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,&extfid,ext_seg_num,&head,&headvbn,1);
-                if ((sts & 1) == 0) break;
+	      head = f11b_read_header(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,&extfid,fcb,&iosb);
+	      sts=iosb.iosb$w_status;
+	      if ((sts & 1) == 0) break;
             } else {
                 break;
             }
@@ -574,6 +583,7 @@ unsigned deallocfile(struct _fcb *fcb)
 
 unsigned accesserase(struct _vcb * vcb,struct _fibdef * fib)
 {
+  struct _iosb iosb;
     struct _fcb *fcb;
     struct dsc$descriptor fibdsc;
     int sts;
@@ -582,7 +592,8 @@ unsigned accesserase(struct _vcb * vcb,struct _fibdef * fib)
     fibdsc.dsc$a_pointer=fib;
     sts = f11b_access(vcb,&fibdsc); // change to irp
     if (sts & 1) {
-      sts = gethead (fcb, &head);
+      head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
+      sts=iosb.iosb$w_status;
       head->fh2$l_filechar |= FH2$M_MARKDEL;
       printk("Accesserase ... \n");
       sts = deaccessfile(fcb);

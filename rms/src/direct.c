@@ -35,6 +35,7 @@
 #include <fatdef.h>
 #include <fcbdef.h>
 #include <iodef.h>
+#include <iosbdef.h>
 #include <irpdef.h>
 #include <ucbdef.h>
 #include <wcbdef.h>
@@ -279,6 +280,7 @@ unsigned insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
                     char *filename,unsigned filelen,
                     unsigned version,struct _fiddef * fid)
 {
+  struct _iosb iosb;
     unsigned sts = 1;
     int inuse = 0;
     struct _fh2 * head;
@@ -356,7 +358,8 @@ unsigned insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
         }
         memset(newbuf,0,BLOCKSIZE);
         eofblk++;
-	gethead(fcb,&head);
+	head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
+	sts=iosb.iosb$w_status;
         head->fh2$w_recattr.fat$l_efblk = VMSWORD(eofblk + 1);
 
         /* First find where the next record is... */
@@ -441,6 +444,7 @@ unsigned delete_ent(struct _fcb * fcb,unsigned curblk,
                     struct _dir * dr,struct _dir1 * de,
                     char *buffer,unsigned eofblk)
 {
+  struct _iosb iosb;
     unsigned sts = 1;
     unsigned ent;
     struct _fh2 * head;
@@ -467,7 +471,8 @@ unsigned delete_ent(struct _fcb * fcb,unsigned curblk,
                 buffer = nxtbuffer;
             }
             if (sts & 1) {
-	      gethead(fcb,&head);
+	      head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
+	      sts=iosb.iosb$w_status;
                 head->fh2$w_recattr.fat$l_efblk = VMSSWAP(eofblk);
                 eofblk--;
             }
@@ -488,6 +493,7 @@ unsigned return_ent(struct _fcb * fcb,unsigned curblk,
                     unsigned short *reslen,struct dsc$descriptor * resdsc,
                     int wildcard)
 {
+  struct _iosb iosb;
     int scale = 10;
     int version = VMSWORD(de->dir$w_version);
     int length = dr->dir$b_namecount;
@@ -527,6 +533,7 @@ unsigned search_ent(struct _fcb * fcb,
                     struct dsc$descriptor * fibdsc,struct dsc$descriptor * filedsc,
                     unsigned short *reslen,struct dsc$descriptor * resdsc,unsigned eofblk,unsigned action)
 {
+  struct _iosb iosb;
     unsigned sts,curblk;
     char *searchspec,*buffer;
     int searchlen,version,wildcard,wcc_flag;
@@ -782,6 +789,7 @@ unsigned direct(struct _vcb * vcb,struct dsc$descriptor * fibdsc,
                 struct dsc$descriptor * filedsc,unsigned short *reslen,
                 struct dsc$descriptor * resdsc,struct _atrdef * atrp, unsigned action, struct _irp *i)
 {
+  struct _iosb iosb;
     struct _fcb *fcb;
     struct _fh2 *head;
     unsigned sts,eofblk;
@@ -799,7 +807,8 @@ unsigned direct(struct _vcb * vcb,struct dsc$descriptor * fibdsc,
     sts = f11b_access(vcb,dummyirp);
     fcb=xqp->primary_fcb;
     if (sts & 1) {
-      gethead(fcb,&head);
+      head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
+      sts=iosb.iosb$w_status;
         if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
             eofblk = VMSSWAP(head->fh2$w_recattr.fat$l_efblk);
             if (VMSWORD(head->fh2$w_recattr.fat$w_ffbyte) == 0) --eofblk;

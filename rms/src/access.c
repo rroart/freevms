@@ -91,13 +91,17 @@ int f11b_read_writevb(struct _irp * i) {
 
 signed int f11b_map_vbn(unsigned int vbn,struct _wcb *wcb) {
   // thing there should be more here?
-  signed int lbn;
+  signed int lbn=-1;
   ioc_std$mapvblk(vbn,0,wcb,0,0,&lbn,0,0);
   return lbn;
 }
 
-void * f11b_read_header(struct _vcb * vcb, unsigned long filenum, struct _fcb * fcb) {
-
+signed int f11b_map_idxvbn(struct _vcb * vcb, unsigned int vbn) {
+  // thing there should be more here?
+  signed int lbn=-1;
+  struct _wcb * wcb=&((struct _fcb *) getidxfcb(vcb))->fcb$l_wlfl;
+  ioc_std$mapvblk(vbn,0,wcb,0,0,&lbn,0,0);
+  return lbn;
 }
 
 void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
@@ -115,12 +119,12 @@ void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lb
   return buf;
 }
 
-void * f11b_search_fcb(struct _vcb * vcb,int filenum)
+void * f11b_search_fcb(struct _vcb * vcb,struct _fiddef * fid)
 {
     struct _fcb * head = &vcb->vcb$l_fcbfl;
     struct _fcb * tmp = head->fcb$l_fcbfl;
     while(tmp!=head) {
-      if (filenum==((tmp->fcb$b_fid_nmx << 16) + tmp->fcb$w_fid_num)) return tmp;
+      if ((tmp->fcb$b_fid_nmx==fid->fid$b_nmx) && (tmp->fcb$w_fid_num==fid->fid$w_num)) return tmp;
       tmp=tmp->fcb$l_fcbfl;
     }
     return 0;
@@ -135,9 +139,12 @@ void iosbret(struct _irp * i,int sts) {
 }
 
 void f11b_read_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
+  struct _iosb iosb;
+  int sts;
   struct _fh2 * head;
   unsigned long fi;
-  gethead(fcb,&head);
+  head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);  
+  sts=iosb.iosb$w_status;
   fi=(unsigned short *)head+head->fh2$b_idoffset;
 
   while(atrp->atr$w_type!=0) {
@@ -156,7 +163,8 @@ void f11b_read_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
     case ATR$C_HEADER:
       {
 	struct _fh2 * head;
-	gethead(fcb,&head);
+	head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);  
+	sts=iosb.iosb$w_status;
 	memcpy(atrp->atr$l_addr,head,atrp->atr$w_size);
 	vfree(head); // wow. freeing something
       }
@@ -273,7 +281,7 @@ unsigned short checksum(vmsword *block)
 
 /* rvn_to_dev() find device from relative volume number */
 
-// half broken
+// half broken. is this switch_volume?
 
 struct _vcb *rvn_to_dev(struct _vcb *vcb,unsigned rvn)
 {
@@ -313,8 +321,9 @@ unsigned writechunk(struct _fcb * fcb,unsigned long vblock, char * buff)
   return phyio_write(ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,pbn,512,buff);
 }
 
-unsigned gethead(struct _fcb * fcb,struct _fh2 **headbuff)
+static unsigned gethead(struct _fcb * fcb,struct _fh2 **headbuff)
 {
+  struct _iosb iosb;
   struct _ucb * ucb=finducb(fcb);
   int vbn;
   int sts;
@@ -322,7 +331,8 @@ unsigned gethead(struct _fcb * fcb,struct _fh2 **headbuff)
   fid.fid$w_num=fcb->fcb$w_fid[0];
   fid.fid$w_seq=fcb->fcb$w_fid[1];
   fid.fid$w_rvn=0;
-  return accesshead(ucb->ucb$l_vcb,&fid,0,headbuff, &vbn, 0);
+  *headbuff=f11b_read_header(ucb->ucb$l_vcb,&fid,fcb,&iosb);
+  return iosb.iosb$w_status;
 }
 
 unsigned writehead(struct _fcb * fcb,struct _fh2 *headbuff)
@@ -335,48 +345,57 @@ unsigned writehead(struct _fcb * fcb,struct _fh2 *headbuff)
 
 }
 
-unsigned accesshead(struct _vcb *vcb,struct _fiddef *fid,unsigned seg_num,
-                    struct _fh2 **headbuff,
-                    unsigned *retidxblk,unsigned wrtflg)
+void * f11b_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb,
+                    unsigned long * retsts)
 {
+  struct _iosb iosb;
   unsigned sts;
+  char * headbuff;
   struct _vcb *vcbdev;
-  unsigned idxblk;
+  unsigned idxvblk, idxlblk;
   struct _fh2 idxfh;
-  vcbdev = rvn_to_dev(vcb,fid->fid$b_rvn);
-  if (vcbdev == NULL) return SS$_DEVNOTMOUNT;
-  if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) return SS$_WRITLCK;
-  idxblk = fid->fid$w_num + (fid->fid$b_nmx << 16) - 1 +
-    VMSWORD(vcbdev->vcb$l_ibmapvbn) + VMSWORD(vcbdev->vcb$l_ibmapsize);
+  struct _fiddef * locfid;
+  vcbdev = rvn_to_dev(vcb,0);
+  if (vcbdev == NULL) {   
+    if (retsts) *retsts = SS$_DEVNOTMOUNT; 
+    return 0; 
+  }
+  //if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) return SS$_WRITLCK;
+  if (fcb) {
+    idxlblk = fcb->fcb$l_hdlbn;
+    locfid=&fcb->fcb$w_fid_num;
+  } else {
+    idxvblk = fid->fid$w_num + (fid->fid$b_nmx << 16) - 1 +
+      VMSWORD(vcbdev->vcb$l_ibmapvbn) + VMSWORD(vcbdev->vcb$l_ibmapsize);
+    idxlblk = f11b_map_idxvbn(vcb,idxvblk);
+    locfid=fid;
+  }
+  xqp->header_lbn=idxlblk;
 #if 0
   if (vcbdev->idxfcb->head != NULL) 
-    if (idxblk >= VMSSWAP(vcbdev->idxfcb->head->fh2$w_recattr.fat$l_efblk)) 
+    if (idxvblk >= VMSSWAP(vcbdev->idxfcb->head->fh2$w_recattr.fat$l_efblk)) 
       phyio_read(vcb->vcb$l_aqb->aqb$l_mount_count,vcb->vcb$l_ibmaplbn,sizeof(struct _fh2),(char *)&idxfh);
 #endif
 #if 0
   not yet
-    if (idxblk >= VMSSWAP(idxfh.fh2$w_recattr.fat$l_efblk)) {
+    if (idxvblk >= VMSSWAP(idxfh.fh2$w_recattr.fat$l_efblk)) {
       {
 	printk("Not in index file\n");
 	return SS$_NOSUCHFILE;
       }
     }
 #endif
-  sts = accesschunk(getidxfcb(vcb),idxblk,(char **) headbuff,
-		    NULL,wrtflg ? 1 : 0,0);
+  //  sts = accesschunk(getidxfcb(vcb),idxvblk,(char **) headbuff,NULL, 0,0);
+
+  headbuff = f11b_read_block(vcb,idxlblk,1,&iosb);
+  sts=iosb.iosb$w_status;
+
   if (sts & 1) {
-    struct _fh2 *head = *headbuff;
-    if (retidxblk) {
-      if (1 /*wrtflg*/) {
-	*retidxblk = idxblk;
-      } else {
-	*retidxblk = 0;
-      }
-    }
-    if (VMSWORD(head->fh2$w_fid.fid$w_num) != fid->fid$w_num ||
-	head->fh2$w_fid.fid$b_nmx != fid->fid$b_nmx ||
-	VMSWORD(head->fh2$w_fid.fid$w_seq) != fid->fid$w_seq ||
-	(head->fh2$w_fid.fid$b_rvn != fid->fid$b_rvn &&
+    struct _fh2 *head = headbuff; 
+    if (VMSWORD(head->fh2$w_fid.fid$w_num) != locfid->fid$w_num ||
+	head->fh2$w_fid.fid$b_nmx != locfid->fid$b_nmx ||
+	VMSWORD(head->fh2$w_fid.fid$w_seq) != locfid->fid$w_seq ||
+	(head->fh2$w_fid.fid$b_rvn != locfid->fid$b_rvn &&
 	 head->fh2$w_fid.fid$b_rvn != 0)) {
       /* lib$signal(SS$_NOSUCHFILE); */
       sts = SS$_NOSUCHFILE;
@@ -389,12 +408,13 @@ unsigned accesshead(struct _vcb *vcb,struct _fiddef *fid,unsigned seg_num,
 	  checksum((vmsword *) head) != VMSWORD(head->fh2$w_checksum)) {
 	sts = SS$_DATACHECK;
       } else {
-	if (VMSWORD(head->fh2$w_seg_num) != seg_num) sts = SS$_FILESEQCHK;
+	//if (VMSWORD(head->fh2$w_seg_num) != seg_num) sts = SS$_FILESEQCHK;
       }
     }
     if ((sts & 1) == 0) deaccesschunk(0,0,0);
   }
-  return sts;
+  if (retsts) *retsts=sts;
+  return headbuff;
 }
 
 
@@ -478,6 +498,7 @@ int get_fm2_val(unsigned short ** mpp, unsigned long * phyblk, unsigned long *ph
 
 int wcb_create_all(struct _fcb * fcb, struct _fh2 * fh2)
 {
+  struct _iosb iosb;
   unsigned int retsts;
   unsigned curvbn=1;
   unsigned extents = 0;
@@ -495,8 +516,10 @@ int wcb_create_all(struct _fcb * fcb, struct _fh2 * fh2)
   }
   if (fh2)
     head=fh2;
-  else
-    retsts = accesshead(ucb->ucb$l_vcb,&fcb->fcb$w_fid,0,&head,NULL,0);
+  else {
+    head = f11b_read_header(ucb->ucb$l_vcb,&fcb->fcb$w_fid,0,&iosb);
+    retsts = iosb.iosb$w_status;
+  }
 #if 0
   if (fcb->fcb$w_fid[0]>1)
     retsts=gethead(0,ucb->ucb$l_vcb,fcb->fcb$w_fid,0,&head,NULL,0);
@@ -652,13 +675,15 @@ unsigned deallocfile(struct _fcb *fcb);
 
 unsigned deaccessfile(struct _fcb *fcb)
 {
+  struct _iosb iosb;
   int sts;
   struct _fh2 * head;
   return SS$_NORMAL;
 #ifdef DEBUG
   printk("Deaccessing file (%x) reference %d\n",fcb->cache.hashval,fcb->cache.refcount);
 #endif
-  sts=gethead(fcb,&head);
+  head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
+  sts=iosb.iosb$w_status;
   if (VMSLONG(head->fh2$l_filechar) & FH2$M_MARKDEL) {
     return deallocfile(fcb);
   }
@@ -666,7 +691,7 @@ unsigned deaccessfile(struct _fcb *fcb)
   return SS$_NORMAL;
 }
 
-void *fcb_create(unsigned filenum,unsigned *retsts)
+static void *fcb_create(unsigned filenum,unsigned *retsts)
 {
   struct _fcb *fcb = (struct _fcb *) vmalloc(sizeof(struct _fcb));
   if (fcb == NULL) {
@@ -681,11 +706,45 @@ void *fcb_create(unsigned filenum,unsigned *retsts)
   return fcb;
 }
 
+void *fcb_create2(struct _fh2 * head,unsigned *retsts)
+{
+  struct _vcb * vcb=xqp->current_vcb;
+  struct _fcb *fcb = (struct _fcb *) vmalloc(sizeof(struct _fcb));
+  bzero(fcb,sizeof(struct _fcb));
+  if (fcb == NULL) {
+    if (retsts) *retsts = SS$_INSFMEM;
+    return;
+  } 
+  qhead_init(&fcb->fcb$l_wlfl);
+
+  fcb->fcb$w_fid_num=head->fh2$w_fid.fid$w_num;
+  fcb->fcb$w_fid_seq=head->fh2$w_fid.fid$w_seq;
+
+  insque(fcb,&vcb->vcb$l_fcbfl);
+
+  fcb->fcb$l_efblk = VMSSWAP(head->fh2$w_recattr.fat$l_hiblk);
+  if (head->fh2$b_idoffset > 39) {
+    fcb->fcb$l_highwater = VMSLONG(head->fh2$l_highwater);
+  } else {
+    fcb->fcb$l_highwater = 0;
+  }
+
+  wcb_create_all(fcb,head);
+
+  if (head->fh2$l_filechar & FH2$M_CONTIG)
+    fcb->fcb$l_stlbn=f11b_map_vbn(1,&fcb->fcb$l_wlfl);
+  fcb->fcb$l_hdlbn=f11b_map_idxvbn(vcb,head->fh2$w_fid.fid$w_num + (head->fh2$w_fid.fid$b_nmx << 16) - 1 + VMSWORD(vcb->vcb$l_ibmapvbn) + VMSWORD(vcb->vcb$l_ibmapsize));
+
+  *retsts=SS$_NORMAL;
+  return fcb;
+}
+
 
 /* accessfile() open up file for access... */
 
 unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
 {
+  struct _iosb iosb;
   unsigned sts=SS$_NORMAL;
   unsigned wrtflg=1;
   struct _fcb *fcb;
@@ -697,7 +756,6 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
   void * atrp=irp->irp$l_qio_p5;
   struct _fibdef * fib=(struct _fibdef *)fibdsc->dsc$a_pointer;
   struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
-  unsigned filenum;
   unsigned action=0;
   if (irp->irp$l_func & IO$M_ACCESS) action=0;
   if (irp->irp$l_func & IO$M_CREATE) action=2;
@@ -707,11 +765,13 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
 	 fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn);
 #endif
 
+  xqp->current_vcb=vcb; // until I can place it somewhere else
 
   if (fib->fib$w_did_num) {
     struct _fh2 * head;
     struct _fcb * fcb=xqp->primary_fcb;
-    gethead(fcb,&head);
+    head = f11b_read_header (vcb, 0, fcb, &iosb);  
+    sts=iosb.iosb$w_status;
     if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
       unsigned eofblk = VMSSWAP(head->fh2$w_recattr.fat$l_efblk);
       if (VMSWORD(head->fh2$w_recattr.fat$w_ffbyte) == 0) --eofblk;
@@ -726,41 +786,25 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
   if ((irp->irp$l_func & IO$M_ACCESS) == 0 && irp->irp$l_qio_p5 == 0)
     return SS$_NORMAL;
 
-  filenum = (fid->fid$b_nmx << 16) + fid->fid$w_num;
-  //if (filenum < 1) { iosbret(irp,SS$_BADPARAM); return SS$_BADPARAM; }
   if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) { iosbret(irp,SS$_WRITLCK);  return SS$_WRITLCK; }
-  if (fid->fid$b_rvn > 1) filenum |= fid->fid$b_rvn << 24;
-  fcb=f11b_search_fcb(vcb,filenum);
-  if (fcb==NULL) {
-    fcb=fcb_create(filenum,&sts);
-    if (fcb) {
-      fcb->fcb$w_fid_num=fid->fid$w_num;
-      fcb->fcb$w_fid_seq=fid->fid$w_seq;
-      insque(fcb,&vcb->vcb$l_fcbfl);
-      wcb_create_all(fcb,0);
-    }
-  }
-  if (fcb == NULL) { iosbret(irp,sts); return sts; }
 
-  xqp->primary_fcb=fcb;
-  xqp->current_window=&fcb->fcb$l_wlfl;
-
-  sts = accesshead(vcb,fid,0,&head,0,wrtflg);
+  fcb=f11b_search_fcb(vcb,fid);
+  head = f11b_read_header(vcb,fid,fcb,&iosb);
+  sts=iosb.iosb$w_status;
   if (sts & 1) {
-    fcb->fcb$l_efblk = VMSSWAP(head->fh2$w_recattr.fat$l_hiblk);
-    if (head->fh2$b_idoffset > 39) {
-      fcb->fcb$l_highwater = VMSLONG(head->fh2$l_highwater);
-    } else {
-      fcb->fcb$l_highwater = 0;
-    }
-    if (head->fh2$l_filechar & FH2$M_CONTIG)
-      fcb->fcb$l_stlbn=f11b_map_vbn(1,&fcb->fcb$l_wlfl);
-    fcb->fcb$l_hdlbn=f11b_map_vbn(fid->fid$w_num + (fid->fid$b_nmx << 16) - 1 + VMSWORD(vcb->vcb$l_ibmapvbn) + VMSWORD(vcb->vcb$l_ibmapsize),&fcb->fcb$l_wlfl);
   } else {
     printk("Accessfile status %d\n",sts);
     iosbret(irp,sts);
     return sts;
   }
+
+  if (fcb==NULL) {
+    fcb=fcb_create2(head,&sts);
+  }
+  if (fcb == NULL) { iosbret(irp,sts); return sts; }
+
+  xqp->primary_fcb=fcb;
+  xqp->current_window=&fcb->fcb$l_wlfl;
 
   if (atrp) f11b_read_attrib(fcb,atrp);
   iosbret(irp,SS$_NORMAL);
@@ -836,6 +880,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
     ucb = fl_init(devnam[device]);
     vcb = (struct _vcb *) vmalloc(sizeof(struct _vcb));
     bzero(vcb,sizeof(struct _vcb));
+    xqp->current_vcb=vcb; // until I can place it somewhere else
     aqb = (struct _aqb *) vmalloc(sizeof(struct _aqb));
     bzero(aqb,sizeof(struct _aqb));
     qhead_init(&aqb->aqb$l_acpqfl);
@@ -903,12 +948,18 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	memcpy(&vcb->vcb$t_volname,home.hm2$t_volname,12);
 	idxfid.fid$b_rvn = device + 1;
 	//sts = accessfile(vcb,&idxfid,&idxfcb,flags & 1);
-	idxfcb=fcb_create(1,&sts);
+	idxhd = f11b_read_block(vcbdev,VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),1, &iosb);
+	idxfcb=fcb_create2(idxhd,&sts);
+#if 0
+	idxfcb=vmalloc(sizeof(struct _fcb));
+	bzero(idxfcb,sizeof(struct _fcb));
+	qhead_init(&idxfcb->fcb$l_wlfl);
 	idxfcb->fcb$w_fid[0]=1;
 	idxfcb->fcb$w_fid[1]=1;
 	insque(idxfcb,&vcb->vcb$l_fcbfl);
-	idxhd = f11b_read_block(vcbdev,VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),1, &iosb);
 	wcb_create_all(idxfcb,idxhd);
+#endif
+
 	if (!(iosb.iosb$w_status & 1)) {
 	  ucb->ucb$l_vcb = NULL;
 	} else {
