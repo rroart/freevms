@@ -235,7 +235,9 @@ MODULE IP(IDENT="4.5c",LANGUAGE(BLISS32),
 extern     TIME_STAMP();
 extern  void    LOG_FAO();
 extern  void    LOG_OUTPUT();
+#if 0
 extern  void    OPR_FAO();
+#endif
 extern   LIB$GET_VM ();
 extern   LIB$GET_VM_PAGE ();
 extern   LIB$FREE_VM();
@@ -769,7 +771,8 @@ ip$send_raw(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 
     if ($$LOGF(LOG$IP))
 	{
-	ip$log(ASCIDNOT("IPSend"),Seg);
+	  $DESCRIPTOR(dsc,"IPSend");
+	ip$log(&dsc,Seg);
 	if (IP$Dest != newip_dest)
 	    {
 		DESC$STR_ALLOC(dststr,20);
@@ -990,7 +993,8 @@ ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 
     if ($$LOGF(LOG$IP))
 	{
-	ip$log(ASCIDNOT("IPSend"),IPHDR);
+	  $DESCRIPTOR(dsc,"IPSend");
+	ip$log(&dsc,IPHDR);
 	if (IP$Dest != newip_dest)
 	    {
 		DESC$STR_ALLOC(dststr,20);
@@ -1125,7 +1129,8 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 	    {
 	    QL$FAO("!%T IP Receive checksum error, sum=!XL!/",0,Sum);
 	    swapbytesiphdr(IP_HDR_SWAP_SIZE,iphdr);
-	    ip$log(ASCIDNOT("(IPrecv)"),iphdr);
+	    $DESCRIPTOR(dsc,"(IPrecv)");
+	    ip$log(&dsc,iphdr);
 	    };
         mm$seg_free(Buf_size,Buf);
 	return;
@@ -1148,8 +1153,10 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 	    XQL$FAO(LOG$IP+LOG$IPERR,
 		    "!%T IP discarded: device length=!SL, IP length=!SL!/",
 		    0,devlen,iplen);
-	    if (! $$LOGF(LOG$IP))
-		ip$log(ASCIDNOT("(IPRecv)"),iphdr);
+	    if (! $$LOGF(LOG$IP)) {
+	      $DESCRIPTOR(dsc,"(IPRecv)");
+		ip$log(&dsc,iphdr);
+	    }
 	    };
 	mm$seg_free(Buf_size,Buf);
 	return;
@@ -1168,8 +1175,10 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
     //!!HACK!!// IP$ISME too slow?
     if (ip$isme(iphdr->iph$dest, FALSE) >= 0)
 	{
-	if ($$LOGF(LOG$IP))
-	    ip$log(ASCIDNOT("IPrecv"),iphdr);
+	  if ($$LOGF(LOG$IP)) {
+	    $DESCRIPTOR(dsc,"IPrecv");
+	    ip$log(&dsc,iphdr);
+	  }
 
 // If this packet is a fragment, then hand it to the reassembly code.
 
@@ -1205,8 +1214,10 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 		if ($$LOGF(LOG$IP+LOG$IPERR))
 		    {
 		    QL$FAO("!%T IPfwd: Cannot route IP destination!/",0);
-		    if (! $$LOGF(LOG$IP))
-			ip$log(ASCIDNOT("IPfwd"),iphdr);
+		    if (! $$LOGF(LOG$IP)) {
+		      $DESCRIPTOR(dsc,"IPfwd");
+			ip$log(&dsc,iphdr);
+		    }
 		    };
 		mm$seg_free(Buf_size,Buf);
 		return;
@@ -1222,8 +1233,10 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 		    {
 		    QL$FAO("!%T struct used * IPfwd to forward to device !SL!/",
 			   0,dev);
-		    if (! $$LOGF(LOG$IP))
-			ip$log(ASCIDNOT("IPfwd"),iphdr);
+		    if (! $$LOGF(LOG$IP)) {
+		      $DESCRIPTOR(dsc,"IPfwd");
+			ip$log(&dsc,iphdr);
+		    }
 		    };
 		mm$seg_free(Buf_size,Buf);
 		return;
@@ -1237,8 +1250,10 @@ void ip$receive (Buf,Buf_size,iphdr,devlen,dev_config)
 		if ($$LOGF(LOG$IP))
 		    {
 		    QL$FAO("!%T IPfwd: packet TTL expired!/",0);
-		    if (! $$LOGF(LOG$IP))
-			ip$log(ASCIDNOT("IPfwd"),iphdr);
+		    if (! $$LOGF(LOG$IP)) {
+		      $DESCRIPTOR(dsc,"IPfwd");
+			ip$log(&dsc,iphdr);
+		    }
 		    };
 		mm$seg_free(Buf_size,Buf);
 		return;
@@ -1304,8 +1319,10 @@ void IP_DISPATCH(iphdr,iplen,HDRLEN,BUF,BUFSIZE)
       {
     case ICMP_PROTOCOL:
 	{
-	if ($$LOGF(LOG$ICMP) & (! $$LOGF(LOG$IP)))
-	    ip$log(ASCIDNOT("ICMRecv"),iphdr);
+	  if ($$LOGF(LOG$ICMP) & (! $$LOGF(LOG$IP))) {
+	    $DESCRIPTOR(dsc,"ICMRecv");
+	    ip$log(&dsc,iphdr);
+	  }
 	icmp$input (SEG,SEGSIZE,iphdr,iplen,BUFSIZE,BUF);
 	};
 	break;
@@ -1515,8 +1532,10 @@ Y:	{
     if ($$LOGF(LOG$IP+LOG$IPERR))
 	{
 	QL$FAO("!%T IP Fragment unusable!/",0);
-	if (! $$LOGF(LOG$IP))
-	    ip$log(ASCIDNOT("IPfrag"),iphdr);
+	if (! $$LOGF(LOG$IP)) {
+	  $DESCRIPTOR(dsc,"IPfrag");
+	    ip$log(&dsc,iphdr);
+	}
 	};
     mm$seg_free(BUFSIZE,BUF);
     }

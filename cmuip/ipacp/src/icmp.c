@@ -156,9 +156,10 @@ ICMP_Hash(IPA)
 
 //Hash an IP address. Returns hash value (index into ICMHTB)
 
-     char * IPA;
+     long IPA;
     {
-    return ((IPA[0]+IPA[1]+IPA[2]+IPA[3]) & ICM_HSHAND);
+      char * IPAP=&IPA;
+    return ((IPAP[0]+IPAP[1]+IPAP[2]+IPAP[3]) & ICM_HSHAND);
     }
 
 ICMP_Find(IPADDR)
@@ -331,8 +332,10 @@ extern	icmp$user_input();
 // Fix the byteswapped packet
 
 	    swapbytesiphdr(IP_HDR_SWAP_SIZE,IPhdr);
-	    if ($$LOGF(LOG$ICMP))
-		ip$log(ASCID("ICMrcv/IP"),IPhdr);
+	    if ($$LOGF(LOG$ICMP)) {
+	      $DESCRIPTOR(dsc,"ICMrcv/IP");
+		ip$log(&dsc,IPhdr);
+	    }
 
 // Calculate lengths, pointer to protocol data
 

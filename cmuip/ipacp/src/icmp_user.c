@@ -239,7 +239,7 @@ struct dsc$descriptor sptr;
 
     QL$FAO(/*%STRING*/("!%T !AS ICMP packet, SEG=!XL, DATA=!XL!/",
 		   "!_CKsum:!_!SL!/"),
-	    0,sptr,Seg,segdata,
+	    0,&sptr,Seg,segdata,
 	   seghdr->icm$cksum);
 
     }
