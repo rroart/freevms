@@ -7,6 +7,7 @@
 #include <ipldef.h>
 #include <internals.h>
 #include <ssdef.h>
+#include <linux/mm.h>
 
 void exe$instimq(struct _tqe * t) {
   static signed int times=-500;
@@ -60,3 +61,10 @@ int exe_std$chkwrtacces (struct _arb *arb, struct _orb *orb, struct _pcb *pcb, s
   // doing nothing right now
   return SS$_NORMAL;
 }
+
+int exe_std$debit_bytcnt_alo(int debit, struct _pcb *pcb, int *alosize_p,void **pool_p) {
+  // not doing everything it should do
+  *pool_p=kmalloc(debit,GFP_KERNEL);
+  return SS$_NORMAL;
+}
+
