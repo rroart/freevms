@@ -1,102 +1,81 @@
-(with the risk of things here being outdated)
+TODO:
+(With the risk of things here being outdated)
 
-Let RMS also use Ext2 with write support.
-Execute programs with execve and imgact on Ods-2.
-Get more/better write-support in.
-Do more SCA/SCS stuff.
-At least look at whatever "device" uml uses and NE2000.
 
+Misc:
+Check use of relative queues; is fork use of & correct?
+Check waitall and wait
+sysimgact use PAGE_ instead of numbers.
+Look at having images as ELF? (Itanic is going to use ELF, it seems)
+Make a make linker autobuild
+Use sys$ with system service call instead in exe$ in ipacp etc, to make asts etc function properly. (Note: doing that in vmsbuffer.c was unstable)
+Try to upgrade 2.4.18 uml part from 11 to the newest
+Use real interrupts instead of calls for sch$reshed iofork etc
+Use setpsli even in more interrupts/exceptions?
+Look at how simple and complex buffers are allocated and freed
+
+CPU/PAL:
 FIX pal
-better RMS compatibilty; check input and output RAB fields (incl l_sts)
-
-Logical support in the DCL and elsewhere
-
-Rewrite ide driver or make it use VMS data structures.
-
-Put RMS ifab/irab in P1.
-
-Fix CONFIG_VMS network drivers.
-
-Gcc 3.4.x compile
-
 Use 2 other cpu modes.
 
-Put ctl$gl_ccb_table in P1.
-
-Use correct interface to network module in CONFIG_VMS (promiscuous mode (NMA$C_PCLI_PRM) needs protocol, but that mode is not yet implemented).
-
-Make a make linker autobuild
-
-Use sys$ with system service call instead in exe$ in ipacp etc, to make asts etc function properly. (Note: doing that in vmsbuffer.c was unstable)
-
+Scheduling:
 Schedule code cleanup.
+Proper deletion of dead processes in the databases (still shows up with sh sys)
+Make pcb$t_lname counted string
 
+Memory management:
+Check page alignment for allocated pools.
+Remove panic in vmsmprotect for not implemented stuff (and implement it)
+Rde with 0 start 0 len?
+Fix pool to conform more with newer versions
+Check global pages paging, creating and deleting.
+Put RMS ifab/irab in P1.
+Put ctl$gl_ccb_table in P1.
 More P1 space.
-Will do more with the IP stuff.
-Might move clustering to just CONFIG_VMS mode, and go from socket to QIO.
 
+Input/output:
+Make echoing work in putnextchar (right before reqcom)
+Check whether ddb$t_name has len first
+Use correct interface to network module in CONFIG_VMS (promiscuous mode (NMA$C_PCLI_PRM) needs protocol, but that mode is not yet implemented).
+Look at how ne2000 is probed
+Rewrite ide driver or make it use VMS data structures.
+Fix CONFIG_VMS network drivers.
+For ide disk set ucb$l_maxblock and more, like in file.c
+After some time even more driver support might be cut/broke (the most).
+
+Logical names:
+Logical support in the DCL and elsewhere
+In syslnm trnlnm only use retlenaddr and not buflen for it.
+
+File system:
 Let RMS also use Ext2 with write support.
 Execute programs with execve and imgact on Ods-2.
 Get more/better write-support in.
+Make import (export) handle text/binary files differently (by param).
+Check if all ~1 in direct.c need +1 (and name[1])
+Ext2 3rd level sizes
+Better RMS compatibilty; check input and output RAB fields (incl l_sts)
+
+Clustering:
+Do MSCP protocol a bit more properly
 Do more SCA/SCS stuff.
-After some time even more driver support might be cut/broke (the most).
+Get getdx to add 2?
+Might move clustering to just CONFIG_VMS mode, and go from socket to QIO.
 
-Try to upgrade 2.4.18 uml part from 11 to the newest
-
+Networking:
 For CMUIP: do checks upon parts with // check // not yet // was. more such?
 Also CMUIP: there was something in telnet that should be lookup upon
 And: Find the latest patch to it.
-
 Check parenthesis and bools in CMUIP and other places.
-
-Use real interrupts instead of calls for sch$reshed iofork etc
-
 Some forgotten // check in tcp_telnet*?
 Also some #if 0 that should later be removed.
-
-check whether ddb$t_name has len first
-make pcb$t_lname counted string
-
-check all local big strings, like DESC$STR_ALLOC 1000 etc. replace?
-
 Find the newest cmuip patches
+Check all local big strings, like DESC$STR_ALLOC 1000 etc. replace?
+Will do more with the IP stuff.
 
-use setpsli even in more interrupts/exceptions?
-
-Look at how ne2000 is probed
-
-Look at how simple and complex buffers are allocated and freed
-
-Make echoing work in putnextchar (right before reqcom)
-
-In syslnm trnlnm only use retlenaddr and not buflen for it.
-
+Compiling:
+Gcc 3.4.x compile
 Check for more of the following in cmuip code (and more):
 signed long vtcb_ptr[0]; and replace with like: long * vtcb_ptr;
 Gcc 3.4 had problems with the first.
 
-sysimgact use PAGE_ instead of numbers.
-
-Look at having images as ELF? (Itanic is going to use ELF, it seems)
-
-Check waitall and wait
-
-Rename librtl/src/starlet.a to librtl.a
-
-Get getdx to add 2?
-
-Proper deletion of dead processes in the databases (still shows up with sh sys)
-
-Do mscp protocol a bit more properly
-
-Check global pages paging, creating and deleting.
-
-Rde with 0 start 0 len?
-
-Fix pool to conform more with newer versions
-
-Check use of relative queues; is fork use of & correct?
-
-Ext2 3rd level sizes
-
-Check page alignment for allocated pools.

@@ -1,102 +1,120 @@
-scheduling (partly)
-asts (partly)
-timing (partly)
-event flags, both local and common (partly)
-process control and communication (partly)
-logicals (partly)
-fork (partly)
-queued i/o (a little bit)
-memory management (a little bit)
-ods2 read/write (partly)
-ods2 initialize
-rms read/write (partly) SEQ (yes) IDX (a little)
-ods5 readonly (partly)
-xqp (barely)
-sca/scs/cluster (barely)
-locks/dlm (barely)
-cwps (forcex only)
-dcl (or something like it)
-vms images
-mailboxes
-P1 space (a little bit)
-edt
-CMUIP with telnetd
-terminal class and pseudo driver
-CONFIGURE process
-SWAPPER process (does simple page in and out)
-linker (simple, static images)
-bliss
-supported network interfaces: ne2k and 3c900 (3c905/3c590 might work, untested)
+The following features are present, from partially to fully implemented.
 
-syscalls/services:
-$adjwsl
-$ascefc
-$asctim
-$assign
-$bintim
-$clref
-$close
-$connect
-$create
-$create_region_32
-$crelnm
-$crelnt
-$creprc
-$crmpsc
-$dclast
-$disconnect
-$display
-$enq
-$erase
-$extend
-$forcex
-$get
-$getdvi
-$getjpi
-$gettim
-$hiber
-$imgact
-$mgblsc
-$mount
-$numtim
-$open
-$parse
-$put
-$qio
-$qiow
-$readef
-$schdwk
-$search
-$setast
-$setddir
-$setef
-$setime
-$setimr
-$setpri
-$setprn
-$synch
-$trnlnm
-$waitfr
-$wake
-some RMS syscalls
+Core kernel features:
+	Control mechanisms: Software interrupts, ASTs
+	Synchronization: Event flags, locks
+	Scheduling, time support, process control and communication
+	Memory management: Working set list, swapper, pools
+	Input/output: QIO, mailboxes, terminal driver
+	Image support for VMS Images and ELF.
+	Miscellaneous: Logical names
 
-cli:
-DCL
-    mcr, run
-    set default/prompt/process/working_set
-    show default/time/devices/system/working_set
-    stop
-    goto, exit
-    logout
-    directory, mount and a few more
-    simple @ scripts
+File system:
+	RMS read/write SEQ (yes) IDX (too little to be usable)
+	RMS can be run on both ODS-2 and Ext2 (but less functionality on Ext2)
+	ODS-2 read/write
+	ODS-5 readonly 
+	ODS-2 initialize
+	DFU doing analyze/disk
+	XQP (for ODS-2, and something like it for Ext2)
 
-utilities:
-backup
-set process
+Clustering:
+	SCA/SCS-ish protocols
+	CONFIGURE process
+	CWPS (forcex/stop only)
+	MSCP (does not currently work due to lost network packets)
 
-librtl:
-strings routines
+Networking:
+	CMUIP (with only incoming telnetd)
 
-loader:
-srm
+Shell:
+	DCL
+		Mcr, run
+		Simple @ scripts
+	DCL builtin
+		define, goto, logout, stop, exit
+		set default/prompt/process
+		show default/time
+	DCL utilities
+		copy, delete, directory, edt, init, mount, search, type
+		create /name_table
+		set working_set
+		show device/system/logical/working_set
+
+Editor:
+	EDT (from Ozone, and can not yet be used fully)
+
+Programming language:
+	Bliss (not directly used, and is under development)
+
+Linker:
+	LINKER (simple, static images)
+
+RTL:
+	STR$
+	LIB$
+
+Misc utilities:
+	Backup
+
+Supported hardware configuration:
+	Network interfaces: ne2k and 3c900 (3c905/3c590 might work, untested)
+	Disk interface: IDE
+
+System calls/services:
+	$adjwsl
+	$ascefc
+	$asctim
+	$assign
+	$bintim
+	$close
+	$clref
+	$connect
+	$create
+	$create_region_32
+	$crelnm
+	$crelnt
+	$crembx
+	$creprc
+	$crmpsc
+	$dassgn
+	$dclast
+	$disconnect
+	$display
+	$enq
+	$erase
+	$expreg
+	$extend
+	$fao
+	$fao
+	$forcex
+	$get
+	$getdvi
+	$getjpi
+	$getsyi
+	$gettim
+	$hiber
+	$imgact
+	$mgblsc
+	$mount
+	$numtim
+	$open
+	$parse
+	$put
+	$qio
+	$qiow
+	$readef
+	$rundwn
+	$schdwk
+	$search
+	$setast
+	$setddir
+	$setef
+	$setime
+	$setimr
+	$setpri
+	$setprn
+	$synch
+	$trnlnm
+	$waitfr
+	$wake

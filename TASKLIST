@@ -1,10 +1,41 @@
 FreeVMS tasklist
 
 1. High priority:
+	CPU/PAL
+	RMS/ODS-2/Ext2 write support
+
+2. Medium priority:
+	GRUB with ODS-2, ODS-2 execute etc
+	VMS image and linker
+	General bugfix, extensions, compliance to ordinary functionality
+
+3. Low priority:
+	Locks
+	Cluster
+	LIBRTL
+	CLI, LBR, CDU, MSG (can live without, but DCL gets ugly without)
+
+4. Yet unknown priority:
+	System service dispatching
+	Condition handling
+	Mutexes
+	CRTL
+	64-bit LE (have to go through the code to handle int, long etc)
+
+5. No priority:
+	SMP
+	Volume shadowing
+	Non-intel
+	64-bit BE
+	See SElinux link
+
+***************************************
+
+Detailed descriptions:
 
   Basic/foundation stuff:
 
-    CPU/PAL, barely started, need more people:	
+    CPU/PAL
 	We will need someone with keen eye for and high knowledge of CPU 
 	semantics to finish IPLs etc, because we need to get synchronization
 	correct on the instruction level, or we will never get it stable.
@@ -22,29 +53,29 @@ FreeVMS tasklist
 		SWASTEN
 		SWPCTX, LDPCTX
 
-	Interrupt/trap/stack functionality needs also implementation.
+	Interrupt/trap/stack functionality
 
-  Data Structure Definitions, some done, need more people.
+  Data Structure Definitions
 
   Kernel:	
 
     Control Mechanisms:
-	ASTs, work on this have started, need more people.
+	ASTs
 
     Synchronization:
-	Lock management (DLM), barely started, need more people.
+	Lock management (DLM)
 
-    Memory management, barely started, need more people.
+    Memory management
 
-    Process and time management, some work done, need more people. 
+    Process and time management
 
-    I/O Subsystem, barely started, need lots of more people.
+    I/O Subsystem
 
-    Logicals, barely started, need more people.
+    Logicals
 
-  ODS-2, work is under way
+  ODS-2
 
-  DCL, will at first be implemented kernel-independent, need more people.
+  DCL
   Suggested order:
 	CLI, LBR
 	CDU, MSG
@@ -92,46 +123,39 @@ FreeVMS tasklist
 		Mainly Process Dynamics chapter.
 
   Basic libraries:
-    LBR, nothing done, vacant.
+    LBR
 
   Other libraries:
-    LIBRTL, parts done, need more people still.
+    LIBRTL
 
-  "SRM", started
+  "SRM"
 
-2. (a bit later) high priority:
   RMS, barely started, need more people.
   "SRM" handling ODS-2
-  Utilities COPY DIRECTORY etc, barely started, vacant
-  VMS image support, linker+compiler support for images, some done.
+  Utilities COPY DIRECTORY etc
+  VMS image support, linker+compiler support for images
   Kernel:
     Control Mechanisms:
-	Condition handling, no work done yet, vacant.
-	System service dispatching, to be done the VMS way, nothing done, vacant.
+	Condition handling
+	System service dispatching
     Synchronization:
 	Spinlocks, the Linux ones are probably usable.
-	Mutexes, nothing done, vacant
-    SMP support, no support yet, vacant 
+	Mutexes
+    SMP support
 
-3. (later) high priority:
-  Clustering, SCA, MSCP etc, barely started, need more people.
+  Clustering, SCA, MSCP etc
   Ordinary security stuff.
   	Start with aiming at
-	http://www.nsa.gov/selinux/doc/inevitability/inevitability.html
+	http://www.nsa.gov/selinux/doc/inevitability/inevitability.html (not?)
 
-Medium priority:
-
-Medium/low priority:
   Non-i386 support.
   64-bit support.
 
-Low priority:
   CRTL, we will continue to try to use libc etc? 
-  Editors, got edt from Ozone, vacant
-  Volume shadowing, nothing done, vacant
+  Editors, got edt from Ozone
+  Volume shadowing
 
-
-
+***************************************
 
 CURRENT/ACTIVE PEOPLE:
 
