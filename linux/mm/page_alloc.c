@@ -685,6 +685,8 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	pgdat->node_start_mapnr = (lmem_map - mem_map);
 	pgdat->nr_zones = 0;
 
+	init_nonpaged(pgdat,totalpages);
+
 	/*
 	 * Initially all pages are reserved - free ones are freed
 	 * up by free_all_bootmem() once the early boot process is
