@@ -38,7 +38,6 @@ mount -t ext2 /dev/loop0 /mnt
 
 mkdir /mnt/boot
 
-cp -p /export/disk5/linux18f/linux/arch/i386/boot/bzImage /mnt/boot/freevms.noiomm
 /dev/MAKEDEV -d /mnt/dev hda hdb fd ptyp ttyS console
 
 mkdir -p /mnt/bin /mnt/sbin /mnt/etc /mnt/usr /mnt/usr/sbin /mnt/usr/bin /mnt/lib

@@ -20,6 +20,8 @@ vms images
 mailboxes
 P1 space (a little bit)
 edt
+CMUIP with telnetd
+terminal class and pseudo driver
 
 syscalls/services:
 $adjwsl
