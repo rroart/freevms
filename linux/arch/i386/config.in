@@ -172,21 +172,8 @@ tristate '/dev/cpu/*/cpuid - CPU information support' CONFIG_X86_CPUID
 
 bool 'VMS Memory Management and I/O' CONFIG_VMS
 
-choice 'High Memory Support' \
-	"off    CONFIG_NOHIGHMEM \
-	 4GB    CONFIG_HIGHMEM4G \
-	 64GB   CONFIG_HIGHMEM64G" off
-if [ "$CONFIG_HIGHMEM4G" = "y" ]; then
-   define_bool CONFIG_HIGHMEM y
-fi
-if [ "$CONFIG_HIGHMEM64G" = "y" ]; then
-   define_bool CONFIG_HIGHMEM y
-   define_bool CONFIG_X86_PAE y
-fi
-
 bool 'Math emulation' CONFIG_MATH_EMULATION
 bool 'MTRR (Memory Type Range Register) support' CONFIG_MTRR
-bool 'Symmetric multi-processing support' CONFIG_SMP
 if [ "$CONFIG_SMP" != "y" ]; then
    bool 'Local APIC support on uniprocessors' CONFIG_X86_UP_APIC
    dep_bool 'IO-APIC support on uniprocessors' CONFIG_X86_UP_IOAPIC $CONFIG_X86_UP_APIC
@@ -196,13 +183,8 @@ if [ "$CONFIG_SMP" != "y" ]; then
    if [ "$CONFIG_X86_UP_IOAPIC" = "y" ]; then
       define_bool CONFIG_X86_IO_APIC y
    fi
-else
-   bool 'Multiquad NUMA system' CONFIG_MULTIQUAD
 fi
 
-if [ "$CONFIG_SMP" = "y" -a "$CONFIG_X86_CMPXCHG" = "y" ]; then
-   define_bool CONFIG_HAVE_DEC_LOCK y
-fi
 endmenu
 
 mainmenu_option next_comment
@@ -324,6 +306,8 @@ if [ "$CONFIG_SCSI" != "n" ]; then
 fi
 endmenu
 
+fi
+
 if [ "$CONFIG_NET" = "y" ]; then
    mainmenu_option next_comment
    comment 'Network device support'
@@ -338,7 +322,7 @@ fi
 #
 # input before char - char/joystick depends on it. As does USB.
 #
-fi
+
 source drivers/char/Config.in
 
 if [ "$CONFIG_VMS" != "y" ]; then

@@ -48,8 +48,6 @@ tristate 'Host filesystem' CONFIG_HOSTFS
 bool 'Management console' CONFIG_MCONSOLE
 dep_bool 'Magic SysRq key' CONFIG_MAGIC_SYSRQ $CONFIG_MCONSOLE
 bool '2G/2G host address space split' CONFIG_HOST_2G_2G
-bool 'Symmetric multi-processing support' CONFIG_UML_SMP
-define_bool CONFIG_SMP $CONFIG_UML_SMP
 string 'Default main console channel initialization' CONFIG_CON_ZERO_CHAN \
 	"fd:0,fd:1"
 string 'Default console channel initialization' CONFIG_CON_CHAN "xterm"
