@@ -288,7 +288,7 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				get_page(ptepage);
 				dst->rss++;
 
-				if (1 && (ptepage->pfn$q_bak&PTE$M_TYP0)) {
+				if (cow==0 && (ptepage->pfn$q_bak&PTE$M_TYP0)) {
 				    pte_t * mypte=&pte;
 				    signed long page = mmg$allocpfn();
 				    unsigned long address2 = (*(unsigned long *)src_pte)&0xfffff000;
