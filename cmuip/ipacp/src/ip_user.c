@@ -80,13 +80,13 @@ MODULE IP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 #include "tcpmacros.h"
 
 #include <ssdef.h>
+#include <descrip.h>
 
 //*** Special literals from USER.BLI ***
 
-extern signed long LITERAL
-    UCB$Q_DDP,
-    UCB$L_CBID,
-    UCB$L_EXTRA;
+#define    UCB$Q_DDP  ucb$q_devdepend //check
+#define    UCB$L_CBID  ucb$q_devdepend
+#define    UCB$L_EXTRA ucb$q_devdepend
 
 // External data items
 
@@ -94,54 +94,52 @@ extern signed long
     IPTTL,
     INTDF,
     AST_In_Progress,
-    LOG_STATE,
+    log_state,
     MIN_PHYSICAL_BUFSIZE,
     MAX_PHYSICAL_BUFSIZE;
 
 // External routines
 
-extern
-
 // MACLIB.MAR
 
- void    Swapbytes,
- void    Movbyt,
-    Calc_Checksum,
+extern  void    Swapbytes();
+extern  void    MOVBYT();
+extern     Calc_Checksum();
 
 // MEMGR.BLI
 
- void    MM$UArg_Free,
-    MM$QBLK_Get,
- void    MM$QBLK_Free,
-    MM$Seg_Get,
- void    MM$Seg_Free,
+extern  void    MM$UArg_Free();
+extern     MM$QBLK_Get();
+extern  void    MM$QBLK_Free();
+extern     MM$Seg_Get();
+extern  void    MM$Seg_Free();
 
 // USER.BLI
 
-    USER$CHECK_ACCESS,
-    USER$Err,
- VOID    IO$POST,
- void    User$Post_IO_Status,
+extern     USER$CHECK_ACCESS();
+extern     USER$Err();
+extern  void    IO$POST();
+extern  void    User$Post_IO_Status();
 
 // IP.BLI
 
- VOID    IP$SET_HOSTS,
-    IP$S}_RAW,
-    IP$S},
+extern  void    IP$SET_HOSTS();
+extern     IP$SEND_RAW();
+extern     IP$SEND();
 
 // NMLOOK.BLI
 
- VOID    NML$CANCEL,
- VOID    NML$GETALST,
- VOID    NML$GETNAME,
+extern  void    NML$CANCEL();
+extern  void    NML$GETALST();
+extern  void    NML$GETNAME();
 
 // IOUTIL.BLI
 
-    GET_IP_ADDR,
- VOID    ASCII_DEC_BYTES,
- VOID    ASCII_HEX_BYTES,
- VOID    LOG_FAO,
- VOID    QL_FAO;
+extern     GET_IP_ADDR();
+extern  void    ASCII_DEC_BYTES();
+extern  void    ASCII_HEX_BYTES();
+extern  void    LOG_FAO();
+extern  void    QL_FAO();
 
 
 //SBTTL "IP data structures"
@@ -150,31 +148,33 @@ extern
 
 struct  IPCB_Structure
 {
-unsigned long     IPCB$Foreign_Host	;	// IP foreign host number
-unsigned long     IPCB$Host_Filter	;	// Receive packets from this host
-unsigned long     IPCB$Proto_Filter	;	// Receive packets to this protocol
-    IPCB$Foreign_Hname	= [$Bytes(MAX_HNAME)],
-    IPCB$Foreign_Hnlen	= [$Short_Integer],
-void *     IPCB$USR_Qhead	;	// User receive request queue
-void *     IPCB$USR_Qtail	;
-void *     IPCB$NR_Qhead	;	// Net receive queue
-void *     IPCB$NR_Qtail	;
-unsigned short int    IPCB$NR_Qcount;
+unsigned long     ipcb$foreign_host	;	// IP foreign host number
+unsigned long     ipcb$host_filter	;	// Receive packets from this host
+unsigned long     ipcb$proto_filter	;	// Receive packets to this protocol
+  char    ipcb$foreign_hname[MAX_HNAME];
+  short int    ipcb$foreign_hnlen;
+void *     ipcb$usr_qhead	;	// User receive request queue
+void *     ipcb$usr_qtail	;
+void *     ipcb$nr_qhead	;	// Net receive queue
+void *     ipcb$nr_qtail	;
+unsigned short int    ipcb$nr_qcount;
 union {
-      unsigned short    IPCB$Flags;
+      unsigned short    ipcb$flags;
 struct {
-unsigned 	IPCB$Wildcard	 : 1;	// IPCB opened with wild FH/LH
-unsigned 	IPCB$Addr_Mode	 : 1;	// User wants IP addresses
-unsigned 	IPCB$Aborting	 : 1;	// IPCB is closing
-unsigned 	IPCB$NMLook	 : 1;	// IPCB has an outstanding name lookup
+unsigned 	ipcb$wildcard	 : 1;	// IPCB opened with wild FH/LH
+unsigned 	ipcb$addr_mode	 : 1;	// User wants IP addresses
+unsigned 	ipcb$aborting	 : 1;	// IPCB is closing
+unsigned 	ipcb$nmlook	 : 1;	// IPCB has an outstanding name lookup
 	  };
 };
-void *     IPCB$IPCBID		;	// IPCB_Table index for this connection
-void *     IPCB$UCB_Adrs	;	// Connection UCB address
-void *     IPCB$UARGS	;	// Uarg block in pending open
-unsigned long    IPCB$User_ID;	// Process ID of owner
-unsigned short    IPCB$PIOchan;	// Process IO channel
+void *     ipcb$ipcbid		;	// IPCB_Table index for this connection
+void *     ipcb$ucb_adrs	;	// Connection UCB address
+void *     ipcb$uargs	;	// Uarg block in pending open
+unsigned long    ipcb$user_id;	// Process ID of owner
+unsigned short    ipcb$piochan;	// Process IO channel
       };
+
+#define IPCB_Size sizeof(struct IPCB_Structure)
 
 #if 0
 LITERAL
@@ -191,7 +191,7 @@ MACRO
 signed long
     IPIPID  = 1,	// Current IP packet ID
     IPCB_Count  = 0,	// Count of active IPCBs
-    IPCB_TABLE : VECTOR[MAX_IPCB+1];// Table of IPCBs
+    ipcb_table[MAX_IPCB+1];// Table of IPCBs
 
 
 
@@ -200,20 +200,20 @@ signed long
     Queue up a log entry to dump out a IP packet.
  */
 
-void Log_IP_Packet(Seg,SwapFlag,SendFlag)
-	struct IP_Structure * Seg;
+void Log_IP_Packet(seg,SwapFlag,SendFlag)
+	struct ip_structure * seg;
     {
     signed long
 	Header_Size,
-	sptr,
 	segdata;
 	struct ip_structure * segcopy;
 	struct ip_structure * seghdr;
+	struct dsc$descriptor sptr;
 
 //!!HACK!!// Make sure this works right.
 
     seghdr = seg;		// Point at segment header
-    Header_Size = Seg->IPH$IHL * 4;	// Calculate header size
+    Header_Size = seg->iph$ihl * 4;	// Calculate header size
     segdata = seg + Header_Size;
     if (SwapFlag)		// Need to byteswap header?
 	{
@@ -225,16 +225,16 @@ void Log_IP_Packet(Seg,SwapFlag,SendFlag)
 // Print first part of info
 
     if (SendFlag)
-	sptr = %ASCID"Sent"
+      sptr = ASCID("Sent");
     else
-	sptr = %ASCID"Received";
+	sptr = ASCID("Received");
 
 // Log the contents of the IP header
 
-    QL$FAO(%STRING("!%T !AS IP packet, SEG=!XL, DATA=!XL, Header size !SL!/",
+    QL$FAO(/*%STRING*/("!%T !AS IP packet, SEG=!XL, DATA=!XL, Header size !SL!/",
 		   "!_CKsum:!_!SL!/"),
 	    0,sptr,seg,segdata,Header_Size,
-	   seghdr->IPH$CheckSum);
+	   seghdr->iph$checksum);
 
     }
 
@@ -242,22 +242,22 @@ void Log_IP_Packet(Seg,SwapFlag,SendFlag)
 IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
     {
     signed long
-	Ucount,
+	ucount,
 	IPCBIX;
 	struct IPCB_Structure * IPCB;
 
-    Ucount = IPCB_Count;
+    ucount = IPCB_Count;
     IPCBIX = 1;
-    while ((Ucount > 0) && (IPCBIX <= Max_IPCB))
+    while ((ucount > 0) && (IPCBIX <= MAX_IPCB))
 	{
-	if ((IPCB = IPCB_Table[IPCBIX]) != 0)
+	if ((IPCB = ipcb_table[IPCBIX]) != 0)
 	    {
-	    IF  ((IPCB->IPCB$Host_Filter == WILD) OR
-		(IPCB->IPCB$Host_Filter == Src$Adrs)) AND
-		((IPCB->IPCB$Proto_Filter == WILD) OR
-		(IPCB->IPCB$Proto_Filter == Protocol)) THEN
+	    if ( ((IPCB->ipcb$host_filter == WILD) ||
+		(IPCB->ipcb$host_filter == Src$Adrs)) &&
+		((IPCB->ipcb$proto_filter == WILD) ||
+		(IPCB->ipcb$proto_filter == Protocol)))
 		return IPCB;
-	    Ucount = Ucount-1;
+	    ucount = ucount-1;
 	    };
 	IPCBIX = IPCBIX + 1;
 	};
@@ -274,18 +274,16 @@ IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
     Queue_User_IP();
 
 void IPU$User_Input ( Src$Adrs,Dst$Adrs,Protocol,
-				BufSize,Buf,SegSize,Seg )
-	struct IP_Structure * Seg;
+				bufsize,Buf,segsize,seg )
+	struct ip_structure * seg;
 {
     signed long
 	Uptr,
-	Ucount,
+	ucount,
 	IPCBIX,
 	sum,
       delete;
 	struct IPCB_Structure * IPCB;
-    LABEL
-	X;
 
 // Assume this packet should be deleted
 
@@ -294,7 +292,7 @@ void IPU$User_Input ( Src$Adrs,Dst$Adrs,Protocol,
 // Log the IP packet if desired
 
     if ($$LOGF(LOG$IP))
-	Log_IP_Packet(Seg,TRUE,FALSE);
+	Log_IP_Packet(seg,TRUE,FALSE);
 
 //!!HACK!!// I deleted this.  It should be done 
 
@@ -305,7 +303,7 @@ void IPU$User_Input ( Src$Adrs,Dst$Adrs,Protocol,
 	{
 //!!HACK!!// Don"t worry if there"e no IPCB.
 	if ($$LOGF(LOG$IP))
-	    QL$FAO("!%T No IPCB found for segment !XL!/",0,Seg);
+	    QL$FAO("!%T No IPCB found for segment !XL!/",0,seg);
 	}
     else
 X:	{
@@ -313,22 +311,23 @@ X:	{
 // Log that it was found
 
 	if ($$LOGF(LOG$IP))
-	    QL$FAO("!%T IPCB !XL found for IP Seg !XL!/",
-		   0,IPCB,Seg);
+	    QL$FAO("!%T IPCB !XL found for IP seg !XL!/",
+		   0,IPCB,seg);
 
 // Make sure the IPCB isn't aborted...
 
-	if (IPCB->IPCB$Aborting)
+	if (IPCB->ipcb$aborting)
 	    {
 	    XQL$FAO(LOG$IP,"!%T IP input !XL for aborted IPCB !XL dropped!/",
-		    0,Seg,IPCB);
-	    LEAVE X;
+		    0,seg,IPCB);
+	    goto leave_x;
 	    };
 
 // Give the segment to the user now.
 
-	delete = Queue_User_IP(IPCB,Seg,SegSize,Buf,Bufsize,0);
-	};
+	delete = Queue_User_IP(IPCB,seg,segsize,Buf,bufsize,0);
+    };
+ leave_x:
 
     }
 
@@ -346,20 +345,19 @@ X:	{
 
  void    DELIVER_IP_DATA();
 
-Queue_User_IP(IPCB,Uptr,Usize,Buf,Bufsize,QB)
+Queue_User_IP(IPCB,Uptr,Usize,Buf,bufsize,QB)
 	struct IPCB_Structure * IPCB;
-	struct queue_blk_structure(QB_NR_Fields) * QB;
+	struct queue_blk_structure(qb_nr_fields) * QB;
     {
     signed long
 	Buf2,
 	QBR;
 extern	MM$QBlk_Get();
-    LITERAL
-	IPCB$NR_Qmax = 5;	// Max input packets permitted on input queue
+#define	IPCB$NR_QMAX 5	// Max input packets permitted on input queue
 
 // See if the input queue is full for this IPCB
 
-    if (IPCB->IPCB$NR_Qcount > IPCB$NR_Qmax)
+    if (IPCB->ipcb$nr_qcount > IPCB$NR_QMAX)
 	{
 	if ($$LOGF(LOG$IP))
 	    QL$FAO("!%T IP at !XL dropped - IPCB NR queue full!/",0,Uptr);
@@ -368,26 +366,26 @@ extern	MM$QBlk_Get();
 
 // We need to make a copy of this IP datagram.
 
-    Buf2 = MM$Seg_Get(Bufsize);	// Get a buffer
+    Buf2 = MM$Seg_Get(bufsize);	// Get a buffer
     Uptr = Buf2 + (Uptr - Buf);
 //!!HACK!!// There's no need to copy the whole buffer, only Usize worth...
-    MOVBYT(Bufsize,Buf,Buf2);
+    MOVBYT(bufsize,Buf,Buf2);
 
 // Allocate a queue block and insert onto user receive queue
 
     if (QB == 0)
 	QB = MM$QBLK_Get();
-    QB->NR$Buf_Size = Bufsize;	// Total size of network buffer
-    QB->NR$Buf = Buf2;		// Pointer to network buffer
-    QB->NR$Ucount = Usize;	// Length of the data
-    QB->NR$Uptr = Uptr;	// Pointer to the data
+    QB->nr$buf_size = bufsize;	// Total size of network buffer
+    QB->nr$buf = Buf2;		// Pointer to network buffer
+    QB->nr$ucount = Usize;	// Length of the data
+    QB->nr$uptr = Uptr;	// Pointer to the data
 
 // If there is a user read outstanding, deliver data, else queue for later
 
-    if (REMQUE(IPCB->IPCB$USR_Qhead,QBR) != Empty_Queue)
-	Deliver_IP_Data(IPCB,QB,QBR)
+    if (REMQUE(IPCB->ipcb$usr_qhead,QBR) != EMPTY_QUEUE) // check
+      Deliver_IP_Data(IPCB,QB,QBR);
     else
-	INSQUE(QB,IPCB->IPCB$NR_Qtail);
+	INSQUE(QB,IPCB->ipcb$nr_qtail);
 
     return TRUE;		// Go ahead and deallocate this segment...
     }
@@ -401,81 +399,81 @@ extern	MM$QBlk_Get();
 
 void Deliver_IP_Data(IPCB,QB,URQ)
 	struct IPCB_Structure * IPCB;
-	struct queue_blk_structure(QB_NR_Fields) * QB;
- 	struct queue_blk_structure(QB_UR_Fields) * URQ;
+	struct queue_blk_structure(qb_nr_fields) * QB;
+ 	struct queue_blk_structure(qb_ur_fields) * URQ;
     {
     signed long
 	FLAGS,
 	ICMTYPE,
-	struct $BBLOCK * IRP[],
-	struct User_RECV_Args * UArgs,
-	struct User_RECV_Args * Sargs,
-	Aptr : IPADR$ADDRESS_BLOCK,
-	struct IP_Structure * Uptr,
-	Ucount;
+	IRP,
+	ucount;
+    struct user_recv_args * Uargs;
+    struct user_recv_args * Sargs;
+  ipadr$address_block * Aptr ;
+	  struct ip_structure * Uptr;
 
 // Determine data start and data count
 
 //!!HACK!!// come back here...
 
-    Ucount = QB->NR$Ucount;
-    Uptr = QB->NR$Uptr;
+    ucount = QB->nr$ucount;
+    Uptr = QB->nr$uptr;
 
 // Truncate to user receive request size
 
-    if (Ucount > URQ->UR$Size)
-	Ucount = URQ->UR$Size;
+    if (ucount > URQ->ur$size)
+	ucount = URQ->ur$size;
 
     if ($$LOGF(LOG$IP))
 	QL$FAO("!%T Posting IP receive,Size=!SL,IPCB=!XL,IRP=!XL,UCB_A=!XL!/",
-	       0,Ucount,IPCB,URQ->UR$IRP_Adrs,URQ->UR$UCB_Adrs);
+	       0,ucount,IPCB,URQ->ur$irp_adrs,URQ->ur$ucb_adrs);
 
 // Copy from our buffer to the user system buffer
 
-    $$KCALL(MOVBYT,Ucount,Uptr,URQ->UR$Data);
+    $$KCALL(MOVBYT,ucount,Uptr,URQ->ur$data);
 
-    UArgs = URQ->UR$UArgs;
+    Uargs = URQ->ur$uargs;
 
 // Copy IP Source and destination addresses to system space Diag Buff
 // First, get the SysBlk address out of the IRP, then copy the Header
-// block from our local copy of UArgs.
+// block from our local copy of Uargs.
 
-    if (Uargs->RE$PH_Buff != 0)
+    if (Uargs->re$ph_buff != 0)
 	{
-	IRP = URQ->UR$IRP_Adrs;
-	Aptr->IPADR$SRC_HOST = Uptr->IPH$Source;
-	Aptr->IPADR$DST_HOST = Uptr->IPH$Dest;
-	Aptr->IPADR$EXT1 = (Uptr)<0,32,0>;	// First long of IP header
-	Aptr->IPADR$EXT2 = (Uptr+8)<0,32,0>;	// Third long of IP header
+	IRP = URQ->ur$irp_adrs;
+	Aptr->ipadr$src_host = Uptr->iph$source;
+	Aptr->ipadr$dst_host = Uptr->iph$dest;
+	Aptr->ipadr$ext1 = ((long*)Uptr)[0];	// First long of IP header
+	Aptr->ipadr$ext2 = ((long*)Uptr)[2];	// Third long of IP header
 	$$KCALL(MOVBYT,IPADR$ADDRESS_BLEN,
-		Aptr,Uargs->RE$PH_Buff);
+		Aptr,Uargs->re$ph_buff);
 	};
 
 // Post the I/O and free up memory
 
-    User$Post_IO_Status(URQ->UR$Uargs,SS$_NORMAL,
-			.Ucount,0,0);
-    MM$UArg_Free(URQ->UR$Uargs);
+    User$Post_IO_Status(URQ->ur$uargs,SS$_NORMAL,
+			ucount,0,0);
+    MM$UArg_Free(URQ->ur$uargs);
 
     MM$QBLK_Free(URQ);
-    MM$Seg_Free(QB->NR$Buf_Size,QB->NR$Buf);
+    MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
     MM$QBLK_Free(QB);
     }
 
 //SBTTL "IPCB_OK - Match connection ID to IPCB address"
 
-IPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
+IPCB_OK(long Conn_ID,long RCaddr,struct user_default_args * Uargs)
     {
 	struct IPCB_Structure * IPCB;
-    MACRO
-	IPCBERR(EC) = (RCaddr = EC; return 0) %;
+
+#define	IPCBERR(EC) { RCaddr = EC; return 0;}
 
 // Range check the connection id. This should never fail, since the user should
 // not be fondling connection IDs.
 
     if ((Conn_ID <= 0) || (Conn_ID > MAX_IPCB))
 	IPCBERR(NET$_CDE);	// Nonexistant connection ID
-    IPCB = IPCB_Table[Conn_ID];
+    IPCB = ipcb_table[Conn_ID];
 
 // Make sure the table had something reasonable for this connection ID
 
@@ -484,8 +482,8 @@ IPCB_OK(Conn_ID,RCaddr,struct User_Default_Args * Uargs)
 
 // Check consistancy of IPCB back-pointer into table
 
-    IF (IPCB->IPCB$IPCBID != Conn_ID) OR
-       (IPCB->IPCB$UCB_ADRS != Uargs->UD$UCB_Adrs) THEN
+    if ((IPCB->ipcb$ipcbid != Conn_ID) ||
+       (IPCB->ipcb$ucb_adrs != Uargs->ud$ucb_adrs))
 	IPCBERR(NET$_CDE);	// Confusion (can this happen?)
 
 // Everything is good - return the IPCB address
@@ -500,43 +498,42 @@ IPCB_Get(IDX)
 extern	LIB$GET_VM();
 extern	LIB$GET_VM_PAGE();
 	struct IPCB_Structure * IPCB;
-    signed long
+	signed long I,
 	IPCBIDX,
 	RC ;
-    LABEL
-	X;
 
 // Find a free slot in the IPCB table
 
 X:  {			// ** Block X **
     IPCBIDX = 0;
     for (I=1;I<=MAX_IPCB;I++)
-	if (IPCB_Table[I] == 0)
-	    LEAVE X WITH (IPCBIDX = I);
+	if (ipcb_table[I] == 0)
+	  { IPCBIDX = I; goto leave_x; }
     return 0;			// Failed to allocate a IPCB
     }			// ** Block X **
+    leave_x:
 
 // Allocate some space for the IPCB
 
 //    LIB$GET_VM(%REF(IPCB_Size*4),IPCB);
-    RC = LIB$GET_VM_PAGE(%REF(((IPCB_Size * 4) / 512) + 1),IPCB);
-    if (NOT RC)
+    RC = LIB$GET_VM_PAGE(/*%REF*/(((IPCB_Size * 4) / 512) + 1),IPCB);
+    if (! RC)
 	FATAL$FAO("IPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 
 // Clear it out and set it in the table
 
-    IPCB_Table[IPCBIDX] = IPCB;
-    CH$FILL(%CHAR(0),IPCB_Size*4,IPCB);
+    ipcb_table[IPCBIDX] = IPCB;
+    CH$FILL(/*%CHAR*/(0),IPCB_Size*4,IPCB);
     IPCB_Count = IPCB_Count+1;
 
 // Initialize queue headers for the IPCB
 
-    IPCB->IPCB$NR_Qhead = IPCB->IPCB$NR_Qtail = IPCB->IPCB$NR_Qhead;
-    IPCB->IPCB$USR_Qhead = IPCB->IPCB$USR_Qtail = IPCB->IPCB$USR_Qhead;
+    IPCB->ipcb$nr_qhead = IPCB->ipcb$nr_qtail = IPCB->ipcb$nr_qhead;
+    IPCB->ipcb$usr_qhead = IPCB->ipcb$usr_qtail = IPCB->ipcb$usr_qhead;
 
 // Set the connection ID
 
-    IPCB->IPCB$IPCBID = IPCBIDX;
+    IPCB->ipcb$ipcbid = IPCBIDX;
 
 // Return the pointer
 
@@ -546,7 +543,7 @@ X:  {			// ** Block X **
 
 //SBTTL "IPCB_Free - Deallocate a IPCB"
 
-void IPCB_Free(IPCBIX,struct IPCB_Structure * IPCB)
+void IPCB_Free(long IPCBIX,struct IPCB_Structure * IPCB)
     {
 extern	LIB$FREE_VM();
 extern	LIB$FREE_VM_PAGE();
@@ -556,83 +553,83 @@ extern	LIB$FREE_VM_PAGE();
 
 // Clear the table entry
 
-    IPCB_Table[IPCBIX] = 0;
+    ipcb_table[IPCBIX] = 0;
 
 // Free the memory and decrement our counter.
 
-//    LIB$FREE_VM(%REF(IPCB_Size*4),IPCB);
-    RC = LIB$FREE_VM_PAGE(%REF(((IPCB_Size * 4) / 512) + 1),IPCB);
-    if (NOT RC)
+//    LIB$FREE_VM(/*%REF*/(IPCB_Size*4),IPCB);
+    RC = LIB$FREE_VM_PAGE(/*%REF*/(((IPCB_Size * 4) / 512) + 1),IPCB);
+    if (! RC)
 	FATAL$FAO("IPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     IPCB_Count = IPCB_Count-1;
     }
 
 //SBTTL "Kill_IP_Requests - purge all I/O requests for a connection"
 
-void Kill_IP_Requests(struct IPCB_Structure * IPCB,RC)
+void Kill_IP_Requests(struct IPCB_Structure * IPCB,long RC)
     {
-	struct queue_blk_structure(QB_UR_Fields) * URQ;
-	struct queue_blk_structure(QB_NR_Fields) * QB;
+	struct queue_blk_structure(qb_ur_fields) * URQ;
+	struct queue_blk_structure(qb_nr_fields) * QB;
 
 // Make sure we aren't doing this more than once
 //
-//   if (IPCB->IPCB$Aborting)
-//	RETURN;
+//   if (IPCB->ipcb$aborting)
+//	return;
 
 // Say that this connection is aborting (prevent future requests)
 
-    IPCB->IPCB$Aborting = TRUE;
+    IPCB->ipcb$aborting = TRUE;
 
 // Cancel any name lookup in progess
 
-    if (IPCB->IPCB$NMLOOK)
+    if (IPCB->ipcb$nmlook)
 	{
 	NML$CANCEL(IPCB, 0, 0);
-	IPCB->IPCB$NMLOOK = FALSE;
+	IPCB->ipcb$nmlook = FALSE;
 	};
 
 // Kill any pending open
 
     NOINT;
-    if (IPCB->IPCB$UARGS != 0)
+    if (IPCB->ipcb$uargs != 0)
 	{
-	USER$Err(IPCB->IPCB$UARGS,RC);
-	IPCB->IPCB$UARGS = 0;
+	USER$Err(IPCB->ipcb$uargs,RC);
+	IPCB->ipcb$uargs = 0;
 	};
     OKINT;
 
 // Purge the user request queue, posting all requests
 
-    while (REMQUE(IPCB->IPCB$USR_Qhead,URQ) != Empty_Queue)
+    while (REMQUE(IPCB->ipcb$usr_qhead,URQ) != EMPTY_QUEUE) // check
 	{
-	User$Post_IO_Status(URQ->UR$Uargs,RC,0,0,0);
-	MM$UArg_Free(URQ->UR$Uargs);
+	User$Post_IO_Status(URQ->ur$uargs,RC,0,0,0);
+	MM$UArg_Free(URQ->ur$uargs);
 	MM$QBlk_Free(URQ);	
 	};
 
 // Purge any received qblocks as well
 
-    while (REMQUE(IPCB->IPCB$NR_Qhead,QB) != Empty_Queue)
+    while (REMQUE(IPCB->ipcb$nr_qhead,QB) != EMPTY_QUEUE) // check
 	{
-	MM$Seg_Free(QB->NR$Buf_Size,QB->NR$Buf);
+	MM$Seg_Free(QB->nr$buf_size,QB->nr$buf);
 	MM$QBlk_Free(QB);
 	};
     }
 
 //SBTTL "IPCB_Close - Close/deallocate a IPCB"
 
-void IPCB_Close(UIDX,struct IPCB_Structure * IPCB,RC)
+void IPCB_Close(long UIDX,struct IPCB_Structure * IPCB, long RC)
     {
     Kill_IP_Requests(IPCB,RC);
     IPCB_FREE(UIDX,IPCB);
     }
 
-void IPCB_Abort(struct IPCB_Structure * IPCB,RC)
+void IPCB_Abort(struct IPCB_Structure * IPCB, long RC)
 //
 // Abort a IPCB - called by IP code.
 //
     {
-    IPCB_CLOSE(IPCB->IPCB$IPCBID,IPCB,RC);
+    IPCB_CLOSE(IPCB->ipcb$ipcbid,IPCB,RC);
     }
 
 
@@ -647,7 +644,7 @@ void IPU$Purge_All_IO (void)
 // Loop for all connections, purge them, and delete them.
 
     for (IPCBIDX=1;IPCBIDX<=MAX_IPCB;IPCBIDX++)
-	if ((IPCB = IPCB_Table[IPCBIDX]) != 0)
+	if ((IPCB = ipcb_table[IPCBIDX]) != 0)
 	    IPCB_Close(IPCBIDX,IPCB,NET$_TE);
     }
 
@@ -661,7 +658,7 @@ void IPU$Purge_All_IO (void)
  void    IP_NMLOOK_DONE();
  void    IP_ADLOOK_DONE();
 
-void IPU$OPEN(struct User_Open_Args * Uargs)
+void IPU$OPEN(struct user_open_args * Uargs)
     {
 	struct IPCB_Structure * IPCB;
     signed long
@@ -669,78 +666,77 @@ void IPU$OPEN(struct User_Open_Args * Uargs)
 	NAMLEN,
 	NAMPTR,
 	UIDX,
-	IPCBPTR,
-	Args : VECTOR[4];
-    LABEL
-	X;
+	ipcbptr,
+	Args[4];
 
     XLOG$FAO(LOG$USER,"!%T IPU$OPEN: PID=!XL,CHAN=!XW,FLAGS=!XL X1=!XL!/",
-	     0,Uargs->OP$PID,Uargs->OP$PIOchan,Uargs->OP$FLAGS,
-	     UArgs->OP$Ext1);
+	     0,Uargs->op$pid,Uargs->op$piochan,Uargs->op$flags,
+	     Uargs->op$ext1);
 
 // First create a IPCB for this connection.
 
     if ((IPCB = IPCB_Get(UIDX)) <= 0)
 	{
 	USER$Err(Uargs,NET$_UCT);
-	RETURN;
+	return;
 	};
 
 // Initialize user mode values
 
-    IPCB->IPCB$UCB_ADRS = Uargs->OP$UCB_Adrs;
-    IPCB->IPCB$User_ID = Uargs->OP$PID;
-    IPCB->IPCB$PIOchan = Uargs->OP$PIOchan;
+    IPCB->ipcb$ucb_adrs = Uargs->op$ucb_adrs;
+    IPCB->ipcb$user_id = Uargs->op$pid;
+    IPCB->ipcb$piochan = Uargs->op$piochan;
 
 // At this point, the connection exists. Write the connection ID
 // back into the Unit Control Block for this connection.
 
-    IPCBptr = Uargs->OP$UCB_Adrs + UCB$L_CBID;
-    $$KCALL(MOVBYT,4,UIDX,IPCBptr);
+    ipcbptr = Uargs->op$ucb_adrs; // check + UCB$L_CBID;
+    $$KCALL(MOVBYT,4,UIDX,ipcbptr);
 
 // Initialize queue headers for the IPCB
 
-    IPCB->IPCB$NR_Qhead = IPCB->IPCB$NR_Qtail = IPCB->IPCB$NR_Qhead;
-    IPCB->IPCB$USR_Qhead = IPCB->IPCB$USR_Qtail = IPCB->IPCB$USR_Qhead;
+    IPCB->ipcb$nr_qhead = IPCB->ipcb$nr_qtail = IPCB->ipcb$nr_qhead;
+    IPCB->ipcb$usr_qhead = IPCB->ipcb$usr_qtail = IPCB->ipcb$usr_qhead;
 
 // Copy user arguments to IPCB
 
-    IPCB->IPCB$Uargs = Uargs;
-    IPCB->IPCB$Host_Filter = Uargs->OP$Src_Host;
-    IPCB->IPCB$Proto_Filter = Uargs->OP$EXT1;
+    IPCB->ipcb$uargs = Uargs;
+    IPCB->ipcb$host_filter = Uargs->op$src_host;
+    IPCB->ipcb$proto_filter = Uargs->op$ext1;
 
 // Handle wildcard host
 
-    NAMPTR = CH$PTR(Uargs->OP$Foreign_Host);
-    NAMLEN = Uargs->OP$Foreign_Hlen;
-    if ((NOT Uargs->OP$ADDR_FLAG) && (NAMLEN == 0))
+    NAMPTR = CH$PTR(Uargs->op$foreign_host);
+    NAMLEN = Uargs->op$foreign_hlen;
+    if ((! Uargs->op$addr_flag) && (NAMLEN == 0))
 	{
-	IPCB->IPCB$Wildcard = TRUE;
-	IPCB->IPCB$Foreign_Host = WILD;
-	IPCB->IPCB$Foreign_Hnlen = 0;
+	IPCB->ipcb$wildcard = TRUE;
+	IPCB->ipcb$foreign_host = WILD;
+	IPCB->ipcb$foreign_hnlen = 0;
 	IP_NMLOOK_DONE(IPCB,SS$_NORMAL,0,0,0,0);
-	RETURN;
+	return;
 	};
 
 // Check for supplied IP address instead of name
 
 X:  {			// *** Block X ***
-    if (Uargs->OP$ADDR_FLAG)
-	IPADDR = Uargs->OP$Foreign_Address
+    if (Uargs->op$addr_flag)
+      IPADDR = Uargs->op$foreign_address;
     else
-	if (GET_IP_ADDR(NAMPTR,IPADDR) LSS 0)
-	    LEAVE X;
-    IPCB->IPCB$Foreign_Hnlen = 0;
-    IPCB->IPCB$Foreign_Host = IPADDR;
+	if (GET_IP_ADDR(NAMPTR,IPADDR) < 0)
+	    goto leave_x;
+    IPCB->ipcb$foreign_hnlen = 0;
+    IPCB->ipcb$foreign_host = IPADDR;
     IP_NMLOOK_DONE(IPCB,SS$_NORMAL,1,IPADDR,0,0);
-    IPCB->IPCB$NMLook = TRUE;
+    IPCB->ipcb$nmlook = TRUE;
     NML$GETNAME(IPADDR,IP_ADLOOK_DONE,IPCB);
-    RETURN;
+    return;
     }			// *** Block X ***
+    leave_x:
 
 // "standard" case, host name is supplied - start name lookup for it
 
-    IPCB->IPCB$NMLook = TRUE;
+    IPCB->ipcb$nmlook = TRUE;
     NML$GETALST(NAMPTR,NAMLEN,IP_NMLOOK_DONE,IPCB);
     }
 
@@ -754,62 +750,62 @@ X:  {			// *** Block X ***
 */
 
 void IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
+	struct IPCB_Structure * IPCB;
     {
     signed long
     RC;
-	struct User_Open_Args * Uargs,
-	struct NetIO_Status_Block * IOSB ;
-    MACRO
-	UOP_ERROR(EC) = 
-	    {
-	    USER$Err(Uargs,EC);
-	    IPCB_FREE(IPCB->IPCB$IPCBID,IPCB);
-	    RETURN;
-	    } %;
+    struct user_open_args * Uargs;
+	 netio_status_block * IOSB ;
+#define	UOP_ERROR(EC) \
+	    { \
+	    USER$Err(Uargs,EC); \
+	    IPCB_FREE(IPCB->ipcb$ipcbid,IPCB); \
+	    return; \
+	    }
 
 // Clear name lookup flag and get uargs
 
     NOINT;
-    IPCB->IPCB$NMLook = FALSE;
-    Uargs = IPCB->IPCB$Uargs;
-    IPCB->IPCB$Uargs = 0;
+    IPCB->ipcb$nmlook = FALSE;
+    Uargs = IPCB->ipcb$uargs;
+    IPCB->ipcb$uargs = 0;
     OKINT;
 
 // Check status of the name lookup
 
-    if (NOT STATUS)
+    if (! STATUS)
 	UOP_ERROR(STATUS);
 
     // Finish up the open
 
 //    if (ADRCNT > 0)
-//	IP$SET_HOSTS(ADRCNT,ADRLST,IPCB->IPCB$Local_Host,
-//		     IPCB->IPCB$Foreign_Host);
+//	IP$SET_HOSTS(ADRCNT,ADRLST,IPCB->ipcb$local_host,
+//		     IPCB->ipcb$foreign_host);
 
     // Done at last - log success
 
     XLOG$FAO(LOG$USER,"!%T UDB_OPEN: Conn idx = !XL, IPCB = !XL!/",
-	     0,IPCB->IPCB$IPCBID,IPCB);
+	     0,IPCB->ipcb$ipcbid,IPCB);
 
 // Verify that we have access to the host set
 
 //!!HACK!!// Should we do this or not??
-//    RC = USER$CHECK_ACCESS(IPCB->IPCB$USER_ID,IPCB->IPCB$Local_Host,
-//		      0,IPCB->IPCB$Foreign_Host,0);
-//    if (NOT RC)
+//    RC = USER$CHECK_ACCESS(IPCB->ipcb$user_id,IPCB->ipcb$local_host,
+//		      0,IPCB->ipcb$foreign_host,0);
+//    if (! RC)
 //	UOP_ERROR(RC);
 
 // Set the foreign host name in the IPCB
 
-    IPCB->IPCB$Foreign_Hnlen = NAMLEN;
+    IPCB->ipcb$foreign_hnlen = NAMLEN;
     if (NAMLEN != 0)
-	CH$MOVE(NAMLEN,NAMPTR,CH$PTR(IPCB->IPCB$Foreign_Hname));
+	CH$MOVE(NAMLEN,NAMPTR,CH$PTR(IPCB->ipcb$foreign_hname));
 
 // Finally, post the status
 
-    IOSB->NSB$STATUS = SS$_NORMAL; // Success return
-    IOSB->NSB$Byte_Count = 0;
-    IOSB->NSB$XSTATUS = 0;
+    IOSB->nsb$status = SS$_NORMAL; // Success return
+    IOSB->nsb$byte_count = 0;
+    IOSB->net_status.nsb$xstatus = 0;
     IO$POST(IOSB,Uargs);
     MM$UArg_Free(Uargs);
     }
@@ -824,17 +820,17 @@ void IP_ADLOOK_DONE(IPCB,STATUS,NAMLEN,NAMPTR)
 
 // Clear pending name lookup flag
 
-    IPCB->IPCB$NMLook = FALSE;
+    IPCB->ipcb$nmlook = FALSE;
 
 // Check status
 
-    if (NOT STATUS)
-	RETURN;
+    if (! STATUS)
+	return;
 
 // Copy the hostname into the IPCB
 
-    IPCB->IPCB$Foreign_Hnlen = NAMLEN;
-    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(IPCB->IPCB$Foreign_Hname));
+    IPCB->ipcb$foreign_hnlen = NAMLEN;
+    CH$MOVE(NAMLEN,NAMPTR,CH$PTR(IPCB->ipcb$foreign_hname));
     }
 
 
@@ -846,7 +842,7 @@ void IP_ADLOOK_DONE(IPCB,STATUS,NAMLEN,NAMPTR)
     associated with a connection.
 */
 
-void IPU$CLOSE(struct User_Close_Args * Uargs)
+void IPU$CLOSE(struct user_close_args * Uargs)
     {
 struct IPCB_Structure * IPCB;
     signed long
@@ -854,15 +850,15 @@ struct IPCB_Structure * IPCB;
 
 // Check for valid IPCB
 
-    if ((IPCB = IPCB_OK(Uargs->CL$Local_Conn_ID,RC,Uargs)) == 0)
+    if ((IPCB = IPCB_OK(Uargs->cl$local_conn_id,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);
-	RETURN;
+	return;
 	};
 
 // Use common routine for closing
 
-    IPCB_Close(Uargs->CL$Local_Conn_ID,IPCB,NET$_CC);
+    IPCB_Close(Uargs->cl$local_conn_id,IPCB,NET$_CC);
 
 // Close done - post user request and free argblk
 
@@ -875,7 +871,7 @@ struct IPCB_Structure * IPCB;
     Abort a IP "connection". Identical in functionality to IPU$CLOSE.
  */
 
-void IPU$ABORT(struct User_Abort_Args * Uargs)
+void IPU$ABORT(struct user_abort_args * Uargs)
     {
 	struct IPCB_Structure * IPCB;
     signed long
@@ -883,15 +879,15 @@ void IPU$ABORT(struct User_Abort_Args * Uargs)
 
 // Check for valid IPCB
 
-    if ((IPCB = IPCB_OK(Uargs->AB$Local_Conn_ID,RC,Uargs)) == 0)
+    if ((IPCB = IPCB_OK(Uargs->ab$local_conn_id,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);
-	RETURN;
+	return;
 	};
 
 // Use common routine for closing
 
-    IPCB_Close(Uargs->AB$Local_Conn_ID,IPCB,NET$_CC);
+    IPCB_Close(Uargs->ab$local_conn_id,IPCB,NET$_CC);
 
 // Done. Clean up.
 
@@ -899,125 +895,125 @@ void IPU$ABORT(struct User_Abort_Args * Uargs)
     MM$UArg_Free(Uargs);
     }
 
-//SBTTL "IPU$S} - send IP packet"
+//SBTTL "IPU$SEND - send IP packet"
 /*
     Handle user send request for IP connection. Form a IP packet from the
     user's data buffer and hand it to IP layer for transmission.
  */
 
-void IPU$S}(struct User_Send_Args * Uargs)
+void IPU$SEND(struct user_send_args * Uargs)
     {
     signed long
 	RC,
 	Flags,
-	Bufsize,
+	bufsize,
 	Buf,
 	LocalAddr, ForeignAddr, Protocol,
-	Segsize,
+	segsize,
 	USize;
-	struct IP_Structure * Seg;
+	struct ip_structure * seg;
 	struct IPCB_Structure * IPCB;
 
 
 // Validate connection ID and get IPCB pointer
 
-    if ((IPCB = IPCB_OK(Uargs->SE$Local_Conn_ID,RC,Uargs)) == 0)
+    if ((IPCB = IPCB_OK(Uargs->se$local_conn_id,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// No such connection
-	RETURN;
+	return;
 	};
 
 //!!HACK!!// Does this size arg mean  anything?
-    XLOG$FAO(LOG$USER,"!%T IP$S}: Conn=!XL, IPCB=!XL, Size=!SL!/",
-	     0,Uargs->SE$Local_Conn_ID,IPCB,Uargs->SE$Buf_size);
+    XLOG$FAO(LOG$USER,"!%T IP$SEND: Conn=!XL, IPCB=!XL, Size=!SL!/",
+	     0,Uargs->se$local_conn_id,IPCB,Uargs->se$buf_size);
 
 // Check for aborted connection
 
-    if (IPCB->IPCB$Aborting)
+    if (IPCB->ipcb$aborting)
 	{
-	XLOG$FAO(LOG$USER,"!%T IPU$S} for aborted IPCB !XL!/",0,IPCB);
+	XLOG$FAO(LOG$USER,"!%T IPU$SEND for aborted IPCB !XL!/",0,IPCB);
 	USER$Err(Uargs,NET$_CC);
-	RETURN;
+	return;
 	};
 
 // Check for invalid buffer size
 
-    if (Uargs->SE$Buf_Size LSS 0)
+    if (Uargs->se$buf_size < 0)
 	{
 	USER$Err(Uargs,NET$_BTS);
-	RETURN;
+	return;
 	};
 
 
 //!!HACK!!// Where's the comment?
-    Flags = Uargs->SE$Flags;
+    Flags = Uargs->se$flags;
 
 // Allocate an output buffer and build an IP packet
 //!!HACK!!// This is silly, why not just use the uarg block.
 //!!HACK!!// Not possible now, but maybe with a little work...
 
-    // Calc total size of IP packet.  Note: Uargs->SE$EXT2 is header size.
-    USize = Uargs->SE$Buf_size;
-    Segsize = Uargs->SE$Buf_size + Uargs->SE$EXT2;
-//    if (SegSize > Max_IP_Data_Size)
-//	SegSize = Max_IP_Data_Size;
+    // Calc total size of IP packet.  Note: Uargs->se$ext2 is header size.
+    USize = Uargs->se$buf_size;
+    segsize = Uargs->se$buf_size + Uargs->se$ext2;
+//    if (segsize > Max_IP_Data_Size)
+//	segsize = Max_IP_Data_Size;
 
 // Use preallocated buffer sizes to reduce dynamic memory load
 
-    bufsize = SegSize + Device_header;
+    bufsize = segsize + DEVICE_HEADER;
     if (bufsize <= MIN_PHYSICAL_BUFSIZE)
-	bufsize = MIN_PHYSICAL_BUFSIZE
+      bufsize = MIN_PHYSICAL_BUFSIZE;
     else
 	if (bufsize <= MAX_PHYSICAL_BUFSIZE)
 	    bufsize = MAX_PHYSICAL_BUFSIZE;
-    Buf = MM$Seg_Get(Bufsize);	// Get a buffer
+    Buf = MM$Seg_Get(bufsize);	// Get a buffer
 //!!HACK!!// Next line is a hack, but it really speeds things up...
-    Seg = Buf + device_header; // Point at IP segment
+    seg = Buf + DEVICE_HEADER; // Point at IP segment
 
 // Copy the user data into the data area
 
-    $$KCALL(MOVBYT,SegSize,Uargs->SE$Data_Start,Seg);
+    $$KCALL(MOVBYT,segsize,Uargs->se$data_start,seg);
 
-    ForeignAddr = Seg->IPH$Dest;
-    LocalAddr = Seg->IPH$Source;
-    Protocol = Seg->IPH$Protocol;
+    ForeignAddr = seg->iph$dest;
+    LocalAddr = seg->iph$source;
+    Protocol = seg->iph$protocol;
 
-    // Use IP$S}_RAW if this is an exact packet
-    if (Flags<0,1,0>)
+    // Use IP$SEND_RAW if this is an exact packet
+    if (Flags&2) // check
 	{
 	// Send packet exactly as the client passed it.
 
 	// Re-arrange bytes and words in IP header
-	SwapBytes ( IP_hdr_swap_size , Seg );
+	SwapBytes ( IP_HDR_SWAP_SIZE , seg );
 
 	// Compute checksum for IP header
-	if (Flags<0,2,0>)
+	if (Flags&4)
 	    {
-	    Seg->IPH$Checksum = 0;
-	    Seg->IPH$Checksum = Calc_Checksum ( Uargs->SE$EXT2 , Seg )
+	    seg->iph$checksum = 0;
+	    seg->iph$checksum = Calc_Checksum ( Uargs->se$ext2 , seg );
 	    };
 
 	if ($$LOGF(LOG$IP))
-	    Log_IP_Packet(Seg,FALSE,TRUE);
+	    Log_IP_Packet(seg,FALSE,TRUE);
 
 	RC = SS$_NORMAL;
-	IF (IP$S}_RAW(Seg->IPH$Dest,Seg,SegSize,1,
-			.Buf,Bufsize) == 0) THEN RC = NET$_NRT;
+	if ((IP$SEND_RAW(seg->iph$dest,seg,segsize,1,
+			Buf,bufsize) == 0)) RC = NET$_NRT;
 	// Post the I/O request back to the user
 
 	User$Post_IO_Status(Uargs,RC,0,0,0);
 	MM$UArg_Free(Uargs);
-	RETURN
+	return;
 	};
 
     // Compute Foreign address, source address, and protocol.
     if (ForeignAddr == WILD)
-	ForeignAddr = IPCB->IPCB$Foreign_Host;
+	ForeignAddr = IPCB->ipcb$foreign_host;
     if ((ForeignAddr == WILD))
 	{
-	MM$Seg_FREE(BufSize,Buf);	// Give back buffer
+	MM$Seg_FREE(bufsize,Buf);	// Give back buffer
 	USER$Err(Uargs,NET$_NOPN);
-	return 0
+	return 0;
 	};
 
 
@@ -1025,19 +1021,19 @@ void IPU$S}(struct User_Send_Args * Uargs)
 	IP$SET_HOSTS(1,ForeignAddr,LocalAddr,ForeignAddr);
 
     if (Protocol == WILD)
-	Protocol = IPCB->IPCB$Proto_Filter;
+	Protocol = IPCB->ipcb$proto_filter;
 
     if ($$LOGF(LOG$IP))
-	Log_IP_Packet(Seg,FALSE,TRUE);
+	Log_IP_Packet(seg,FALSE,TRUE);
 
 // Send the segment to IP (it will deallocate it)
 
     IPIPID = IPIPID+1;	// Increment packet ID
     RC = SS$_NORMAL;
-    IF (IP$S}(LocalAddr,ForeignAddr,IPTOS,IPTTL,
-		   Seg + UArgs->SE$EXT2,USize,
+    if ((IP$SEND(LocalAddr,ForeignAddr,IPTOS,IPTTL,
+		   seg + Uargs->se$ext2,USize,
 		   IPIPID,IPDF,TRUE,Protocol,
-		   Buf,Bufsize) == 0) THEN RC = NET$_NRT;
+		   Buf,bufsize) == 0)) RC = NET$_NRT;
 
 // Post the I/O request back to the user
 
@@ -1054,57 +1050,57 @@ void IPU$S}(struct User_Send_Args * Uargs)
     immediately. Otherwise, queue up the user receive for later.
  */
 
-void IPU$RECEIVE(struct User_Recv_Args * Uargs) 
+void IPU$RECEIVE(struct user_recv_args * Uargs) 
     {
 	struct IPCB_Structure * IPCB;
-	struct queue_blk_structure(QB_NR_Fields) * QB;
-	struct queue_blk_structure(QB_UR_Fields) * URQ;
+	struct queue_blk_structure(qb_nr_fields) * QB;
+	struct queue_blk_structure(qb_ur_fields) * URQ;
     signed long
 	RC;
 
 // Validate connection ID and get IPCB pointer
 
-    if ((IPCB = IPCB_OK(Uargs->RE$Local_Conn_ID,RC,Uargs)) == 0)
+    if ((IPCB = IPCB_OK(Uargs->re$local_conn_id,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// No such connection
-	RETURN;
+	return;
 	};
     XLOG$FAO(LOG$USER,"!%T IPU$RECEIVE: Conn=!XL, IPCB=!XL, Size=!SL!/",
-	     0,Uargs->RE$Local_Conn_ID,IPCB,Uargs->RE$Buf_size);
+	     0,Uargs->re$local_conn_id,IPCB,Uargs->re$buf_size);
 
 // Check for aborted connection
 
-    if (IPCB->IPCB$Aborting)
+    if (IPCB->ipcb$aborting)
 	{
 	XLOG$FAO(LOG$USER,"!%T IPU$RECEIVE for aborted IPCB !XL!/",0,IPCB);
 	USER$Err(Uargs,NET$_CC);
-	RETURN;
+	return;
 	};
 
 // Check for invalid buffer size
 
-    if (Uargs->RE$Buf_Size <= 0)
+    if (Uargs->re$buf_size <= 0)
 	{
 	USER$Err(Uargs,NET$_BTS);
-	RETURN;
+	return;
 	};
 
 // Make a request block for the receive
 
     URQ = MM$QBLK_Get();		// Get a queue block
-    URQ->UR$Size = Uargs->RE$Buf_size; // # of bytes this rq can take
-    URQ->UR$Data = Uargs->RE$Data_Start; // Address of system buffer
-    URQ->UR$IRP_Adrs = Uargs->RE$IRP_Adrs; // IO request packet address
-    URQ->UR$UCB_Adrs = Uargs->RE$UCB_Adrs; // Unit Control Block address
-    URQ->UR$Uargs = Uargs;	// User argument block address
+    URQ->ur$size = Uargs->re$buf_size; // # of bytes this rq can take
+    URQ->ur$data = Uargs->re$data_start; // Address of system buffer
+    URQ->ur$irp_adrs = Uargs->re$irp_adrs; // IO request packet address
+    URQ->ur$ucb_adrs = Uargs->re$ucb_adrs; // Unit Control Block address
+    URQ->ur$uargs = Uargs;	// User argument block address
 
 // If anything is available on the queue, deliver it now, else queue for later
 
     NOINT;
-    if (REMQUE(IPCB->IPCB$NR_Qhead,QB) != Empty_Queue)
-	Deliver_IP_Data(IPCB,QB,URQ)
+    if (REMQUE(IPCB->ipcb$nr_qhead,QB) != EMPTY_QUEUE) // check
+      Deliver_IP_Data(IPCB,QB,URQ);
     else
-	INSQUE(URQ,IPCB->IPCB$USR_Qtail);
+	INSQUE(URQ,IPCB->ipcb$usr_qtail);
     OKINT;
     }
 
@@ -1115,7 +1111,7 @@ void IPU$RECEIVE(struct User_Recv_Args * Uargs)
     Read the host names/numbers for a IP connection.
  */
 
-void IPU$INFO(struct User_Info_Args * Uargs)
+void IPU$INFO(struct user_info_args * Uargs)
     {
 extern	USER$Net_Connection_Info ();
 	struct IPCB_Structure * IPCB;
@@ -1124,19 +1120,19 @@ extern	USER$Net_Connection_Info ();
 
 // Validate the connection ID
 
-    if ((IPCB = IPCB_OK(Uargs->IF$Local_Conn_ID,RC,Uargs)) == 0)
+    if ((IPCB = IPCB_OK(Uargs->if$local_conn_id,RC,Uargs)) == 0)
 	{
 	USER$Err(Uargs,RC);	// Bad connection ID
-	RETURN;
+	return;
 	};
 
 // Give the information back (common TCP/IP routine in USER.BLI)
 
-    USER$Net_Connection_Info(Uargs,IPCB->IPCB$Host_Filter,
-			IPCB->IPCB$Foreign_Host,
+    USER$Net_Connection_Info(Uargs,IPCB->ipcb$host_filter,
+			IPCB->ipcb$foreign_host,
 			0,0,
-			IPCB->IPCB$Foreign_Hname,
-			IPCB->IPCB$Foreign_Hnlen);
+			IPCB->ipcb$foreign_hname,
+			IPCB->ipcb$foreign_hnlen);
     }
 
 
@@ -1146,7 +1142,7 @@ extern	USER$Net_Connection_Info ();
     currently implemented for the TCP protocol.
  */
 
-void IPU$STATUS(struct User_Status_Args * Uargs)
+void IPU$STATUS(struct user_status_args * Uargs)
     {
     USER$Err(Uargs,NET$_NYI);
     }
@@ -1157,10 +1153,10 @@ void IPU$STATUS(struct User_Status_Args * Uargs)
     in functionality to IPU$CLOSE/IPU$ABORT except for calling procedure.
  */
 
-IPU$CANCEL(struct VMS$Cancel_Args * Uargs)
+IPU$CANCEL(struct vms$cancel_args * Uargs)
     {
-	struct IPCB_Structure * IPCB,
-    signed long
+      struct IPCB_Structure * IPCB;
+      signed long I,
 	Fcount;
 
     Fcount = 0;
@@ -1168,16 +1164,16 @@ IPU$CANCEL(struct VMS$Cancel_Args * Uargs)
 // Check all valid IPCB's looking for a match on pid and channel #.
 
     for (I=1;I<=MAX_IPCB;I++)
-	if ((IPCB = IPCB_Table[I]) != 0)
+	if ((IPCB = ipcb_table[I]) != 0)
 	    {
 
 // If the process doing the cancel owns this connection, then delete it.
 
-	    IF (IPCB->IPCB$User_ID == Uargs->VC$PID) AND
-	       (IPCB->IPCB$PIOchan == Uargs->VC$PIOchan) THEN
+	    if ((IPCB->ipcb$user_id == Uargs->vc$pid) &&
+	       (IPCB->ipcb$piochan == Uargs->vc$piochan))
 		{
 		XLOG$FAO(LOG$USER,"!%T IPU$Cancel: IPCB=!XL!/",0,IPCB);
-		IPCB_Close(I,IPCB,NET$_ccan);
+		IPCB_Close(I,IPCB,NET$_CCAN);
 		Fcount = Fcount + 1;
 		};
 	    };
@@ -1190,13 +1186,13 @@ void IPU$Connection_List(RB)
 //
 // Dump out the list of IP connections.
 //
-	struct D$IP_List_Return_Blk * RB;
+	 D$IP_List_Return_Blk RB;
     {
-    signed long
+      signed long I,
 	RBIX;
     RBIX = 1;
     for (I=1;I<=MAX_IPCB-1;I++)
-	if (IPCB_TABLE[I] != 0)
+	if (ipcb_table[I] != 0)
 	    {
 	    RB[RBIX] = I;
 	    RBIX = RBIX + 1;
@@ -1208,52 +1204,48 @@ IPU$IPCB_Dump(IPCBIX,RB)
 //
 // Dump out a single IP connection
 //
-	struct D$IPCB_Dump_Return_BLK * RB;
+ d$ipcb_dump_return_blk * RB;
     {
 	struct IPCB_Structure * IPCB;
-    signed long
-	QB,
+	signed long I,
 	Qcount;
+	struct queue_blk_structure(qb_nr_fields) * QB;
 
 // Validate that there is a real IPCB there
 
-    IF (IPCBIX LSS 1) || (IPCBIX > MAX_IPCB) OR
-       ((IPCB = IPCB_TABLE[IPCBIX]) == 0) THEN
+    if ((IPCBIX < 1) || (IPCBIX > MAX_IPCB) ||
+       ((IPCB = ipcb_table[IPCBIX]) == 0))
 	return FALSE;
 
 // Copy the IPCB contents
 
-    RB->DU$IPCB_Address = IPCB;
-    RB->DU$IPCB_Foreign_Host = IPCB->IPCB$Foreign_Host;
-    RB->DU$IPCB_Local_Host = IPCB->IPCB$Host_Filter;
-    RB->DU$IPCB_Flags = IPCB->IPCB$Flags;
-    RB->DU$IPCB_User_ID = IPCB->IPCB$User_ID;
+    RB->du$ipcb_address = IPCB;
+    RB->du$ipcb_foreign_host = IPCB->ipcb$foreign_host;
+    RB->du$ipcb_local_host = IPCB->ipcb$host_filter;
+    RB->du$ipcb_flags = IPCB->ipcb$flags;
+    RB->du$ipcb_user_id = IPCB->ipcb$user_id;
 
 // Get length of network receive queue
 
-    QB = IPCB->IPCB$NR_Qhead;
+    QB = IPCB->ipcb$nr_qhead;
     Qcount = 0;
-    while ((QB NEQA IPCB->IPCB$NR_Qhead))
+    while ((QB != IPCB->ipcb$nr_qhead))
 	{
-	MAP
-	    struct queue_blk_structure(QB_NR_Fields) * QB;
 	Qcount = Qcount + 1;
-	QB = QB->NR$NEXT;
+	QB = QB->nr$next;
 	};
-    RB->DU$IPCB_NR_Qcount = Qcount;
+    RB->du$ipcb_nr_qcount = Qcount;
 
 // Get length of user receive queue
 
-    QB = IPCB->IPCB$USR_Qhead;
+    QB = IPCB->ipcb$usr_qhead;
     Qcount = 0;
-    while ((QB NEQA IPCB->IPCB$USR_Qhead))
+    while ((QB != IPCB->ipcb$usr_qhead))
 	{
-	MAP
-	    struct queue_blk_structure(QB_UR_Fields) * QB;
 	Qcount = Qcount + 1;
-	QB = QB->UR$NEXT;
+	QB = QB->nr$next; // was: ur$next, but same
 	};
-    RB->DU$IPCB_UR_Qcount = Qcount;
+    RB->du$ipcb_ur_qcount = Qcount;
 
 // Done.
 

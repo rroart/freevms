@@ -172,6 +172,8 @@ typedef struct {
 	};
     } ipadr$address_block;
 
+#define IPADR$ADDRESS_SIZE sizeof(ipadr$address_block)
+#define IPADR$ADDRESS_BLEN IPADR$ADDRESS_SIZE*4
 #define IPADR$UDP_ADDRESS_BLEN 12
 
 /* NET$INFO - return block structure. */
@@ -190,30 +192,38 @@ typedef struct {
     ulong ci$remote_internet_adrs;
     } connection_info_return_block;
 
+#define CONNECTION_INFO_BLKSIZE sizeof(connection_info_return_block)
+#define CONNECTION_INFO_BYTESIZE 4*CONNECTION_INFO_BLKSIZE
+
 
 
 /* NET$GTHST - Return block for Name to Address translation */
-
+// check swap with nmlook?
 typedef struct {
-    ulong gha$nl_adrcnt;		/* Count of addresses */
-    ulong gha$nl_adrlst[MAX_HADDRS];	/* Address list */
-    ulong gha$nl_namlen;		/* Official name length */
-    char	  gha$nl_namstr[MAX_HNAME];	/* Official name string */
-    } gthst_nmlook_block;
+    ulong gha$adrcnt;		/* Count of addresses */
+    ulong gha$adrlst[MAX_HADDRS];	/* Address list */
+    ulong gha$namlen;		/* Official name length */
+    char	  gha$namstr[MAX_HNAME];	/* Official name string */
+    } gthst_adlook_block;
 
+#define GTHST_ADLOOK_RET_ARGS_LENGTH sizeof(gthst_nmlook_block)
 
 /* NET$GTHST - Return block for Address to Name translation */
 
 typedef struct {
+  long ghn$adrcnt;
+  char * ghn$adrlst[4*MAX_HADDRS];
     ulong ghn$namlen;		/* Host name string length */
     char	  ghn$namstr[MAX_HNAME];
-    } gthst_adlook_block;
+    } gthst_nmlook_block;
+
+#define GTHST_NMLOOK_RET_ARGS_LENGTH sizeof(gthst_adlook_block)
 
 /* NET$GTHST - Return block for Name to RR translation */
 
 typedef struct {
-    uword grr$rl_rdlen;		/* Resource data length */
-    char  grr$rl_rdata[];	/* RData followed by name. */
+    uword grr$rdlen;		/* Resource data length */
+    char  grr$rdata[];	/* RData followed by name. */
     } gthst_rrlook_block;
 
 
@@ -265,6 +275,9 @@ typedef struct {
     long dm$nmfr;		/* net recv bufs free */
     } d$mem_alloc_return_blk;
 
+#define D$MEM_ALLOC_RETURN_BLK sizeof(d$mem_alloc_return_blk)
+#define D$MA_BLKSIZE sizeof(d$mem_alloc_return_blk)
+
 /* User return dump blk:  TCP stats. */
 
 typedef struct {
@@ -291,6 +304,8 @@ typedef struct {
     long dm$uptime[2];
     long dm$arps_received;
     } d$tcp_stats_return_blk;
+
+#define D$TS_BLKSIZE sizeof(d$tcp_stats_return_blk)
 
 /* Dump all known local-connection-ids. */
 
@@ -339,6 +354,8 @@ typedef struct {
     long dm$round_trip_time;	/* Measured round-trip-time */
     } d$tcb_dump_return_blk;
 
+#define D$TCB_DUMP_BLKSIZE sizeof(d$tcb_dump_return_blk)
+
 /* Dump list of udpCB's */
 
 #define D$UDP_LIST_BLKSIZE	MAX_UDPCB*4	/* byte size. */
@@ -369,6 +386,7 @@ typedef struct {
     ulong du$udpcb_user_id;		/* Owning process */
     } d$udpcb_dump_return_blk;
 
+#define  D$UDPCB_DUMP_BLKSIZE sizeof(d$udpcb_dump_return_blk) 
 #define  D$DEV_DUMP_BLKSIZE sizeof(d$udpcb_dump_return_blk) 
 
 /* Dump list of ICMPCB's */
@@ -397,6 +415,8 @@ typedef struct {
 	};
     ulong DU$ICMPCB_User_ID;		/* Owning process */
     } D$ICMPCB_Dump_Return_Blk;
+
+#define D$ICMPCB_DUMP_BLKSIZE sizeof(D$ICMPCB_Dump_Return_Blk)
 
 /* Dump list of IPCB's */
 
@@ -466,6 +486,8 @@ typedef struct {
     char    du$devnam_str[DEVNAM_MAX_SIZE];
     char    du$devspec_str[DEVSPEC_MAX_SIZE];
     } d$dev_dump_return_blk;
+
+#define D$User_Return_Blk_Max_Size 128 // check random
 
 #undef word short
 #undef uword unsigned short	

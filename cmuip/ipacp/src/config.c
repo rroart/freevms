@@ -586,7 +586,11 @@ void CNF$Configure_ACP (void)
 
 // if (1st char of line is a "!" then is it a comment & we ignore it.
 
+#if 0	
 	chr = CH$RCHAR(CH$PTR(CFRAB->rab$l_ubf));
+#endif
+	int d=CH$PTR(CFRAB->rab$l_ubf);  // check
+	chr = CH$RCHAR(d);
 	if ((chr != '!') && (chr != ';'))
 	    {
 	    if (linlen > (RECLEN-1))
@@ -700,8 +704,8 @@ struct dsc$descriptor	dev_spec_desc_  = {
 
     devidx = dev_count;
     if (dev_count > DC_Max_Num_Net_Devices-1 )
-	FATAL$FAO(%STRING("Too many network devices in INET$CONFIG, max = ",
-			  %NUMBER(DC_Max_Num_Net_Devices)));
+      FATAL$FAO(/*%STRING*/("Too many network devices in INET$CONFIG, max = ",
+			    /*%NUMBER*/(DC_Max_Num_Net_Devices)));
     dev_count = dev_count+1;
     dev_config = dev_config_tab[devidx].dc_begin;
 
@@ -757,7 +761,7 @@ extern	    DRV$TRANSPORT_INIT();
 //    $INIT_DYNDESC( dev_config ->dc_devname );
     INIT_DYNDESC( dev_config ->dc_devname );
     STR$COPY_DX (dev_config ->dc_devname, dev_desc);
-    STR$APPEND (dev_config ->dc_devname, %ASCID ":");
+    STR$APPEND (dev_config ->dc_devname, ASCID( ":"));
 // skip over field terminator.
     SKIPTO(':');
 
@@ -1208,7 +1212,7 @@ char * PRIVNAMES[] = {
 
 // Define process quotas
 
-struct QUOTA_FIELDS
+struct QUOTA
 {
 char  QTA$TYPE;	// Quota type
 unsigned long    QTA$VALUE;	// Quota value
@@ -1216,8 +1220,6 @@ unsigned long    QTA$VALUE;	// Quota value
 
 #define     QUOTA_SIZE   $FIELD_SET_SIZE
 #define     QUOTA_BLEN   5
-
-#define    QUOTA BLOCK->QUOTA_SIZE 
 
 #define     MAXQUOTA   15		// Max number of quotas to specify
 
@@ -1243,8 +1245,9 @@ KEY_VALUE(KEYTAB,KEYLEN,KEYSTR)
 //
 // Get keyword value from keyword string.
 //
-	long I, * KEYTAB;
+	long * KEYTAB;
     {
+      long I;
     struct dsc$descriptor * CURSTR;
 
     for ( I = 0;  I<= (KEYTAB[-1]-1); I+=2 )
@@ -1267,7 +1270,7 @@ PARSE_PRCPRIVS(PRVBLK)
     {
     signed long
 	PRIVCNT,
-	 PRIVPTR[PVSIZE],
+	 *PRIVPTR,
 	PRIVBUF[STRSIZ],
 	PLEN,
 	CHR;
@@ -1293,7 +1296,7 @@ PARSE_PRCPRIVS(PRVBLK)
 	    PRVBLK[1] = -1;
 	    }
 	else
-	    PRVBLK[PRIVPTR->PVIX] = PRVBLK[PRIVPTR->PVIX] || PRIVPTR->PVAL;
+	  PRVBLK[PRIVPTR[PVIX]] = PRVBLK[PRIVPTR[PVIX]] || PRIVPTR[PVAL]; // check
 	SKIPWHITE();
 
 // Check for end of field separator
@@ -1307,6 +1310,7 @@ PARSE_PRCPRIVS(PRVBLK)
 
     return PRIVCNT;
     }
+
 
 PARSE_PRCQUOTAS(QLIST,QMAX)
 //
@@ -1832,9 +1836,9 @@ GETFIELD(FLDADR)
 	CH$WCHAR_A(CHR,DSTPTR);
 	};
     CH$WCHAR_A(0,DSTPTR);
-    if (cnt == 0)
+    if (CNT == 0)
 	Config_err(ASCID("Bad or null field found"));
-    return cnt;
+    return CNT;
     }
 
 PARSE_NULLFIELD (void)
@@ -1905,7 +1909,7 @@ DESC$STR_ALLOC(oprmsg,80);
 DESC$STR_ALLOC(ipstr,20);
 		DESC$STR_ALLOC(phystr,50);
 		struct dsc$descriptor * devnam;
-	    signed long
+	    struct dsc$descriptor
       stastr;
 
 // Initialize this device

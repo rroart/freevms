@@ -114,6 +114,8 @@ typedef struct {
     ulong	dcmib_ifOutQLen;
     } Device_Configuration_Entry;
 
+#define DC_ENTRY_SIZE sizeof(Device_Configuration_Entry)
+
 /*
 Where:
 !!!HACK!!! Update this table!

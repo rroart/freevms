@@ -559,11 +559,11 @@ unsigned short 	NM##$arg1;	/* Size of argument*/\
 unsigned short	NM##$rrtype;	/* only for grr */\
 }; \
 union { \
-unsigned short 	NM##arg2size;	/* Size of argument*/\
- unsigned short  NM##hstlen;	\
+unsigned short 	NM##$arg2size;	/* Size of argument*/\
+ unsigned short  NM##$hstlen;	\
 }
 
-struct u$gthst_fields 
+struct gthst_args 
 {
   Static_Fields(gh);			// Define the standard fields
   GTHST_Static(gh);			// Define the standard fields
@@ -575,29 +575,29 @@ struct u$gthst_fields
 
 // Name to address function
 
-struct gthst_nmlook_fields 
+struct gthst_nmlook_args 
 {
   Static_Fields(ghn);			// Define the standard fields
   GTHST_Static(ghn);			// and the standard GTHST fields
   char ghn$hstnam[HOST_NAME_MAX_SIZE];
 };
 
-#define    GTHST_NMLOOK_ARGS_LENGTH sizeof(struct GTHST_NMLOOK_Fields)
+#define    GTHST_NMLOOK_ARGS_LENGTH sizeof(struct gthst_nmlook_args)
 
 // Address to name subfunction
 
-struct gthst_adlook_fields 
+struct gthst_adlook_args 
 {
   Static_Fields(gha);			// Define the standard fields
-  GTHST_Static(Gha);			// and the standard GTHST fields
+  GTHST_Static(gha);			// and the standard GTHST fields
   signed long    gha$ipaddr;
 };
 
-#define    GTHST_ADLOOK_ARGS_LENGTH sizeof(struct GTHST_ADLOOK_Fields)
+#define    GTHST_ADLOOK_ARGS_LENGTH sizeof(struct gthst_adlook_args)
 
 // Name to RR function
 
-struct gthst_rrlook_fields 
+struct gthst_rrlook_args 
 {
   Static_Fields(grr);			// Define the standard fields
   GTHST_Static(grr);			// and the standard GTHST fields
@@ -608,7 +608,7 @@ struct gthst_rrlook_fields
 
 // Maintenance Call : DUMP
 
-struct m$dump_fields
+struct debug_dump_args
 {
   Static_Fields(du);			// Define the standard fields
   unsigned short     du$dump_directive;	// Dump function code.
@@ -629,7 +629,7 @@ struct m$dump_fields
 	
 // Maintenance Call : SNMP
 
-struct m$snmp_fields
+struct snmp_args
 {
   Static_Fields(snmp);			// Define the standard fields
   unsigned short     snmp$function;	// SNMP sub-function code.
@@ -643,7 +643,7 @@ struct m$snmp_fields
 	
 // Maintenance Call: EXIT
  
-struct m$exit_fields
+struct debug_exit_args
 {
   Static_Fields(ex);			// Define the standard fields
   unsigned short     ex$flags;	// Not used.
@@ -655,7 +655,7 @@ struct m$exit_fields
 
 // Maintenance Call: PANIC
 
-struct m$panic_fields
+struct debug_panic_args
 {
   Static_Fields(pa);			// Define the standard fields
   unsigned short     pa$flags;	// Not Used.
@@ -667,7 +667,7 @@ struct m$panic_fields
 
 // Maintenance Call: DEBUG
 
-struct m$debug_fields
+struct debug_args
 {
   Static_Fields(de);			// Define the standard fields
   unsigned long     de$level;	// Debug level mask
@@ -679,7 +679,7 @@ struct m$debug_fields
 
 // Maintenance Call: EVENT
 
-struct m$event_fields
+struct event_args
 {
   Static_Fields(ev);			// Define the standard fields
   signed short     ev$buf_size;	// Event buffer size

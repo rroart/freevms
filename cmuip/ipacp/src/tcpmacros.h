@@ -281,6 +281,22 @@ MACRO
         }
 
 // Macro to set $CMKRNL argument list
+#include <stdarg.h>
+
+#define $$KCALL KCALL
+
+static int inline $$KCALL(int (*func)(), ...) {
+	  va_list args;
+	  int argv[16],argc=0;
+	  va_start(args,func);
+	  while(argc<16) {
+	    argv[argc]=va_arg(args,int);
+	    argc++;
+	  }
+	  va_end(args);
+          return func(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15]);
+}
+
 #if 0
     $$KARGS(ANAME)[NAME] =
 	ANAME[%COUNT+1] = NAME; %,

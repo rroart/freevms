@@ -310,42 +310,48 @@ MODULE USER(IDENT="6.7a",LANGUAGE(BLISS32),
 #include "tcpmacros.h"		// Include local macros
 #include <cmuip/central/include/netconfig.h> // Transport devices interface
 
+#include <ssdef.h>
+#include <descrip.h>
+#include <jpidef.h>
+#include <prvdef.h>
+
 //*** N.B. Special UCB extensions used by IP device driver	***
 //*** Take care to always match definitions in IPDRIVER.MAR	***
 //*** Referenced by: TCP_USER.BLI, UDP.BLI, ICMP.BLI		***
 
-signed long LITERAL
-    UCB$Q_DDP	= $BYTEOFFSET(UCB$Q_DEVDEPEND),
-    UCB$L_CBID	= UCB$Q_DDP,	// Control Block associated with UCB
-    UCB$L_EXTRA	= UCB$Q_DDP+4;	// Extra longword for later expansion
+
+#define    UCB$Q_DDP	ucb$q_devdepend // check
+#define    UCB$L_CBID	ucb$l_devdepnd2	// Control Block associated with UCB
+#define    UCB$L_EXTRA	ucb$l_devdepnd3	// Extra longword for later expansion
 
 extern signed long
-    Log_State,
+    log_state,
     Time_2_Exit,
-    MYPID,			// maclib.mar
-    Local_Name : DESC$STR,
-    DEV_Config_Tab: Device_Configuration_Table,
+    mypid;			// maclib.mar
+extern struct dsc$descriptor  *  Local_Name;
+extern Device_Configuration_Entry dev_config_tab[];
 
 // Memory manager dynamic allocation counts (defined in memgr.bli)
 
-    QB_GETS,
-    UA_GETS,
-    MIN_GETS,
-    MAX_GETS,
-    QB_MAX,
-    UA_MAX,
-    MIN_MAX,
-    MAX_MAX,
+extern signed long
+    qb_gets,
+    ua_gets,
+    min_gets,
+    max_gets,
+    qb_max,
+    ua_max,
+    min_max,
+    max_max,
 
 // TCP statistics counters (see tcp.bli global defs).
 
-    TS$UIR,
-    TS$ACO,
-    TS$PCO,
-    TS$DBX,
-    TS$DBR,
-    TS$SR,
-    TS$SX,
+    ts$uir,
+    ts$aco,
+    ts$pco,
+    ts$dbx,
+    ts$dbr,
+    ts$sr,
+    ts$sx,
     ts$duplicate_segs,
     ts$retrans_segs,
     ts$rpz_rxq,
@@ -357,8 +363,6 @@ extern signed long
     ts$seg_bad_cksum,
     ts$badseq,
     ts$servers_forked;
-
-extern
 
 // Rtns from MEMGR.BLI
 
@@ -380,7 +384,7 @@ extern  void    OPR_FAO();
 extern     void Set_IP_device_OFFline();
 extern     User_Requests_Avail();
 extern     void VMS_IO$POST();
-extern     void MovByt();
+extern     void MOVBYT();
 extern     void SwapBytes();
 extern     Time_Stamp();
 
@@ -405,45 +409,44 @@ extern     IP_ISLOCAL();
 // also change the corresponding definitions in the IPDRIVER as well as
 // m$cancel in maclib.mar.
 
-signed long LITERAL
-    M$UNUSED	= 0: UNSIGNED(8),
+#define     M$UNUSED	  0
 
-    U$OPEN	= 1: UNSIGNED(8),
-    U$SEND	= 2: UNSIGNED(8),
-    U$RECV	= 3: UNSIGNED(8),
-    U$CLOSE	= 4: UNSIGNED(8),
-    U$STATUS	= 5: UNSIGNED(8),
-    U$ABORT	= 6: UNSIGNED(8),
-    U$INFO	= 7: UNSIGNED(8),
+#define     U$OPEN	  1
+#define     U$SEND	  2
+#define     U$RECV	  3
+#define     U$CLOSE	  4
+#define     U$STATUS	  5
+#define     U$ABORT	  6
+#define     U$INFO	  7
 
-    U$max_TCP_function = 7,	// for case limit
+#define     U$MAX_TCP_FUNCTION   7	// for case limit
 
 // GTHST (Get host info) function
 
-    U$GTHST	= 8: UNSIGNED(8),
-	GTH_LCLHST = 0,
-	GTH_NMLOOK = 1,
-	GTH_ADLOOK = 2,
-	GTH_RRECLK = 3,
-	GTH_MIN	= GTH_LCLHST,
-	GTH_MAX	= GTH_RRECLK,
+#define       U$GTHST	  8
+#define 	GTH_LCLHST   0
+#define 	GTH_NMLOOK   1
+#define 	GTH_ADLOOK   2
+#define 	GTH_RRECLK   3
+#define 	GTH_MIN	  GTH_LCLHST
+#define 	GTH_MAX	  GTH_RRECLK
 
-    U$max_user_function = 8,	// for case limit
+#define     U$MAX_USER_FUNCTION   8	// for case limit
 
 // Privileged ACP Maintenance Functions.
 
-    M$DUMP	= 9: UNSIGNED(8),
-    M$EXIT	= 10: UNSIGNED(8),
+#define     M$DUMP	  9
+#define     M$EXIT	  10
 			// extra, obsolete function.
-    M$DEBUG	= 11: UNSIGNED(8),
-    M$EVENT	= 12: UNSIGNED(8),
-    M$SNMP	= 13: UNSIGNED(8),
+#define     M$DEBUG	  11
+#define     M$EVENT	  12
+#define     M$SNMP	  13
 
-    M$CANCEL	= 14: UNSIGNED(8),
+#define     M$CANCEL	  14
 
 // Special, internal routine function (for TVT processing)
 
-    M$INTERNAL	= 15: UNSIGNED(8);
+#define     M$INTERNAL	  15
 
 
 
@@ -456,32 +459,34 @@ struct ACCESS_LIST
   long   AC$HOST;
   long    AC$MASK;
 };
+#define    ACCESS_MAX 20
+
+#if 0
 LITERAL
     ACCESS_SIZE = $FIELD_SET_SIZE,
-    ACCESS_MAX = 20;
 MACRO
     ACCESS_LIST = BLOCKVECTOR[ACCESS_MAX,ACCESS_SIZE] FIELD(ACCESS_FIELDS) %;
 
-MACRO
-    ACF$PRIVPORT = 0,1,0 %,	// Check for privileged ports
-    ACF$ARPAHOST = 1,1,0 %,	// Check ARPANET_ACCESS for nonlocal hosts
-    ACF$ALLOPENS = 2,1,0 %;	// Check INTERNET_ACCESS for any open
-BIND
-    ACF_PRIVPORT = 1,		// Bitmask for above...
-    ACF_ARPAHOST = 2,		// "
-    ACF_ALLOPENS = 4;		// "
+#define    ACF$PRIVPORT = 0,1,0 %,	// Check for privileged ports
+#define    ACF$ARPAHOST = 1,1,0 %,	// Check ARPANET_ACCESS for nonlocal hosts
+#define    ACF$ALLOPENS = 2,1,0 %;	// Check INTERNET_ACCESS for any open
+#endif
+
+#define     ACF_PRIVPORT   1		// Bitmask for above...
+#define     ACF_ARPAHOST   2		// "
+#define     ACF_ALLOPENS   4		// "
 
 signed long
     ACCESS_FLAGS  = ACF_PRIVPORT; // Flags for access checks to do
 
 static signed long
     ACHOST_COUNT  = 0,	// Count of hosts
-    ACHOSTS : ACCESS_LIST,	// List of local hosts
     ARPANET_ID  = 0,	// Identifier for ARPANET_ACCESS
     INTERNET_ID  = 0;	// Identifier for INTERNET_ACCESS
-BIND
-    ARPANET_STRING = %ASCID"ARPANET_ACCESS",
-    INTERNET_STRING = %ASCID"INTERNET_ACCESS";
+    struct ACCESS_LIST * ACHOSTS ;	// List of local hosts
+
+#define    ARPANET_STRING ASCID2(14, "ARPANET_ACCESS")
+#define    INTERNET_STRING ASCID2(15, "INTERNET_ACCESS")
 
 //Sbttl "Request VMS to Post users IO request."
 /*
@@ -510,25 +515,25 @@ Side Effects:
 */
 
 
-void IO$POST (IOSB, struct User_Default_Args * UArg)
+void IO$POST (long long * IOSB, struct user_default_args * UArg)
     {
     signed long
 	IRP;
 
     XLOG$FAO(LOG$USER,"!%T IO$POST : Uarg=!XL IRP=!XL UCB=!XL!/",0,
-		.UArg, UArg->UD$IRP_Adrs , UArg->UD$UCB_Adrs );
+		UArg, UArg->ud$irp_adrs , UArg->ud$ucb_adrs );
 
-    IRP = UArg->UD$IRP_Adrs;
-    UArg->UD$IRP_Adrs = 0;
+    IRP = UArg->ud$irp_adrs;
+    UArg->ud$irp_adrs = 0;
 
     if (IRP == 0)
 	{
 	OPR$FAO("!%T No IRP, UCB=!XL Proto=!XB funct=!XB !/",0,
-		UArg->UD$UCB_Adrs,UArg->UD$Protocol,UArg->UD$funct);
-	return FALSE
+		UArg->ud$ucb_adrs,UArg->ud$protocol,UArg->ud$funct);
+	return FALSE;
 	};
 
-    $$KCALL(VMS_IO$POST,IOSB,IRP,UArg->UD$UCB_Adrs);
+    $$KCALL(VMS_IO$POST,IOSB,IRP,UArg->ud$ucb_adrs);
     }
 
 
@@ -568,26 +573,26 @@ Side Effects:
 void USER$POST_IO_STATUS (UARG,STATUS,NBYTES,
  				   FLAGS,ICMCODE)
     {
-	struct  NetIO_Status_Block * IOSB;
+	  netio_status_block * IOSB;
 
 // Fill in Network IO status Block
 
     if (STATUS != SS$_NORMAL)
 	{
-	IOSB->NSB$STATUS = SS$_ABORT;
-	IOSB->NSB$XERROR = STATUS;
+	IOSB->nsb$status = SS$_ABORT;
+	IOSB->net_status.nsb$xerror = STATUS;
 	}
     else
 	{
-	IOSB->NSB$STATUS = SS$_NORMAL;
-	IOSB->NSB$BYTE_COUNT = NBYTES;
-	IOSB->NSB$FLAGS = FLAGS;
-	IOSB->NSB$ICMP_CODE = ICMCODE;
+	IOSB->nsb$status = SS$_NORMAL;
+	IOSB->nsb$byte_count = NBYTES;
+	IOSB->net_status.flags.nsb$flags = FLAGS;
+	IOSB->net_status.nsb$icmp_code = ICMCODE;
 	};
 
 // Queue IRP to IO post-processor
 
-    IO$POST(IOSB, UARG)
+    IO$POST(IOSB, UARG);
 
     }
 
@@ -619,28 +624,28 @@ Side Effects:
 
 */
 
-USER$ERR (struct User_Default_Args * Arg,Err)
+USER$ERR (struct user_default_args * Arg, long Err)
     {
-	struct NETIO_STATUS_BLOCK * IOSB;
+	 netio_status_block * IOSB;
 
 // Fill in Network IO status Block
 
-    IOSB->NSB$STATUS = SS$_ABORT;
-    IOSB->NSB$BYTE_COUNT = 0;
-    IOSB->NSB$XERROR = ERR;
+    IOSB->nsb$status = SS$_ABORT;
+    IOSB->nsb$byte_count = 0;
+    IOSB->net_status.nsb$xerror = Err;
 
 // Make sure we have an IRP!
 
-    if (ARG->UD$IRP_Adrs == 0)
+    if (Arg->ud$irp_adrs == 0)
 	{
 	if ($$LOGF(LOG$USER))
 	    LOG$FAO("!%T No IRP, UArg = !XL UCB=!XL Proto=!XB funct=!XB !/",0,
-		.ARG,ARG->UD$UCB_Adrs,ARG->UD$Protocol,ARG->UD$funct);
-	return FALSE
+		Arg,Arg->ud$ucb_adrs,Arg->ud$protocol,Arg->ud$funct);
+	return FALSE;
 	};
 // Queue IRP to VMS I/O post-processor
 
-    IO$POST(IOSB, ARG);
+    IO$POST(IOSB, Arg);
     MM$UArg_Free(Arg);			// Release user TCP arg block.
 
 // If logging is enabled then output the user error message to the log file.
@@ -675,17 +680,17 @@ Side Effects:
 
 */
 
-void USER$POST_FUNCTION_OK(struct User_Default_Args * Arg)
+void USER$POST_FUNCTION_OK(struct user_default_args * Arg)
     {
     signed long
     IRP;
-	struct NetIO_Status_Block * IOSB;
+	 netio_status_block * IOSB;
 
 // Fill in Network IO status Block
 
-    IOSB->NSB$STATUS = SS$_NORMAL;
-    IOSB->NSB$BYTE_COUNT = 0;
-    IOSB->NSB$XSTATUS = 0;
+    IOSB->nsb$status = SS$_NORMAL;
+    IOSB->nsb$byte_count = 0;
+    IOSB->net_status.nsb$xstatus = 0;
 
 // Queue IRP to IO post-processor
 
@@ -698,55 +703,55 @@ void USER$POST_FUNCTION_OK(struct User_Default_Args * Arg)
 // Common routine used by TCP and UDP to return connection info
 // (local/foreign host numbers,names and ports)
 
-void USER$Net_Connection_Info(struct User_Info_Args * Uargs,
-			     Lcl_Host,Frn_Host,Lcl_Port,Frn_Port,
- 			     Frn_Name,Frn_Nlen)
+void USER$Net_Connection_Info(struct user_info_args * uargs,
+			     long Lcl_Host,long Frn_Host,long Lcl_Port,long Frn_Port,
+ 			     long Frn_Name,long Frn_Nlen)
     {
-	struct Connection_Info_Return_Block * CS;
+	 connection_info_return_block * CS;
 
 // Verify buffer size
 
-    if (Uargs->IF$Buf_Size LSS Connection_Info_ByteSize)
+    if (uargs->if$buf_size < CONNECTION_INFO_BYTESIZE)
 	{
-	USER$Err(Uargs,NET$_BTS);// Buffer Too Small error.
+	USER$Err(uargs,NET$_BTS);// Buffer Too Small error.
 	return;
 	};
 
 // Fill in Connection Information return argument block.
 // Clear Information buffer first.
 
-    CH$FILL(%CHAR(0),Connection_Info_ByteSize,CS);
+    CH$FILL(/*%CHAR*/(0),CONNECTION_INFO_BYTESIZE,CS);
 
 // Do Foreign Host Name (ASCIZ string).
 
-    CH$MOVE(Frn_nlen,Frn_name,CH$PTR(CS->CI$Foreign_Host));
-    CS->CI$FHost_Name_Size = Frn_nlen;
+    CH$MOVE(Frn_Nlen,Frn_Name,CH$PTR(CS->ci$foreign_host));
+    CS->ci$fhost_name_size = Frn_Nlen;
 
 // Local host name
 
     CH$MOVE(Local_Name->dsc$w_length,Local_Name->dsc$a_pointer,
-	    CH$PTR(CS->CI$Local_Host));
-    CS->CI$LHost_Name_Size = Local_Name->dsc$w_length;
+	    CH$PTR(CS->ci$local_host));
+    CS->ci$lhost_name_size = Local_Name->dsc$w_length;
 
 // Local and foreign port numbers.
 
-    CS->CI$Local_Port = (Lcl_Port && %X"FFFF") ;
-    CS->CI$Foreign_Port = (Frn_Port && %X"FFFF") ;
+    CS->ci$local_port = (Lcl_Port && 0xFFFF) ;
+    CS->ci$foreign_port = (Frn_Port && 0xFFFF) ;
   
   
 // Local and remote internet addresses
 
-    CS->CI$Local_internet_adrs = Lcl_Host;
-    CS->CI$Remote_internet_adrs = Frn_Host;
+    CS->ci$local_internet_adrs = Lcl_Host;
+    CS->ci$remote_internet_adrs = Frn_Host;
 
 // Copy block to user/system I/O buffer.
 
-    $$KCALL(MOVBYT,Connection_Info_ByteSize,CS,Uargs->IF$Data_Start);
+    $$KCALL(MOVBYT,CONNECTION_INFO_BYTESIZE,CS,uargs->if$data_start);
   
 // Return the Connection Status to the user by posting the IO request.
 
-    User$Post_IO_Status(Uargs,SS$_NORMAL,Connection_Info_ByteSize,0,0);
-    MM$UArg_Free(Uargs);		// relese user arg block.
+    User$Post_IO_Status(uargs,SS$_NORMAL,CONNECTION_INFO_BYTESIZE,0,0);
+    MM$UArg_Free(uargs);		// relese user arg block.
     }
 
 //SBTTL "Derive an integer Clock base"
@@ -763,8 +768,8 @@ USER$Clock_Base (void)
     signed long
 	Now[2];
 
-    $GETTIM(TimAdr=Now);
-    return (NOW[0]^-20+NOW[1]^12) && %x"7FFF";
+    exe$gettim(Now);
+    return (Now[0]>>20+Now[1]<<12) && 0x7FFF; // check
     }
 
 //SBTTL "Allocate a USER Local Port"
@@ -798,15 +803,14 @@ USER$GET_LOCAL_PORT(Pbase)
     signed long
 	rval;
 
-    Pbase = ..Pbase+1;
-    rval = ..Pbase MOD User_LP_End;
-    if (rval LSS User_LP_Start)
-	rval = rval+User_LP_Start;
-    return rval && %X"7FFF";
+    Pbase = Pbase+1; // check
+    rval = Pbase % USER_LP_END; // check
+    if (rval < USER_LP_START)
+	rval = rval+USER_LP_START;
+    return rval && 0x7FFF;
     }
 
-FORWARD ROUTINE
- void    ACCESS_INIT;
+ void    ACCESS_INIT();
 
 void USER$INIT_ROUTINES (void)
     {
@@ -829,7 +833,7 @@ Function:
 
 Inputs:
 
-	Uargs = IPACP user argument block.
+	uargs = IPACP user argument block.
 
 Outputs:
 
@@ -841,15 +845,15 @@ Side Effects:
 
 */
 
-void Net$Debug(struct Debug_Args * UArgs)
+void Net$Debug(struct debug_args * uargs)
     {
-    switch (UARGS->DE$GROUP)
-	SET
-	case 0: LOG_CHANGE(UARGS->DE$LEVEL);
-	case 1: ACT_CHANGE(UARGS->DE$LEVEL);
-	TES;
+    switch (uargs->de$group)
+      {
+      case 0: LOG_CHANGE(uargs->de$level); break;
+      case 1: ACT_CHANGE(uargs->de$level); break; 
+	};
 
-    USER$Post_Function_OK(Uargs);
+    USER$Post_Function_OK(uargs);
     }
 
 
@@ -862,7 +866,7 @@ Function:
 	of the INET$ACTIVITY log file.
 
 Inputs:
-	Uargs = IPACP user argument block.
+	uargs = IPACP user argument block.
 
 Outputs:
 	None.
@@ -872,26 +876,26 @@ Side Effects:
 
 */
 
-void Net$Event(struct Event_Args * UArgs)
+void Net$Event(struct event_args * uargs)
     {
 extern	MM$Get_Mem(), MM$Free_Mem();
     signed long
 	RC,
 	Buffer;
 
-    if ((RC=MM$Get_Mem(Buffer,UArgs->EV$Buf_Size)) != SS$_NORMAL)
+    if ((RC=MM$Get_Mem(Buffer,uargs->ev$buf_size)) != SS$_NORMAL)
 	{
-	USER$ERR(Uargs,RC);
+	USER$ERR(uargs,RC);
 	return;
 	};
 
-    $$KCALL(MOVBYT, UArgs->EV$Buf_Size, UArgs->EV$Data_Start, Buffer);
+    $$KCALL(MOVBYT, uargs->ev$buf_size, uargs->ev$data_start, Buffer);
 
     ACT$FAO("!%D (PID:!XW) [!AD]!/", 0,
-	    (UArgs->EV$PID)<0,16,0>, UArgs->EV$Buf_Size, Buffer);
+	    ((long)uargs->ev$pid)&0xffff, uargs->ev$buf_size, Buffer); // check pid
 
-    USER$Post_Function_OK(Uargs);
-    MM$Free_Mem(Buffer,UArgs->EV$Buf_Size);
+    USER$Post_Function_OK(uargs);
+    MM$Free_Mem(Buffer,uargs->ev$buf_size);
     }
 
 
@@ -903,7 +907,7 @@ Function:
 	Maintenance level user call.  Used to manipulate the IPACP
 
 Inputs:
-	Uargs = IPACP user argument block.
+	uargs = IPACP user argument block.
 
 Outputs:
 	None.
@@ -938,78 +942,80 @@ Output:
 	buffer is filled with requested dump data.
 */
 
-void NET$SNMP(struct SNMP_Args * Uargs)
+void NET$SNMP(struct snmp_args * uargs)
     {
 extern	SNMP$USER_INPUT(),
 	MM$Get_Mem(), MM$Free_Mem();
-    LITERAL
-	RBBYTES = D$User_Return_Blk_Max_Size,
-	RBSIZE = (RBBYTES+3)/4;		// Largest dump block, in alloc units
+#define	RBBYTES D$User_Return_Blk_Max_Size
+#define	RBSIZE (RBBYTES+3)/4		// Largest dump block, in alloc units
+ char * In_Buff;
     signed long
 	RC,
-	struct VECTOR * In_Buff [,BYTE],
-	Error = False,
+	Error = FALSE,
 	Now[2],			// time as in now.
-	One[2] = {1,0],	// QuadWord of val 1.
-	BufSize  = 0,
+	One[2] = {1,0},	// QuadWord of val 1.
+	bufsize  = 0,
 	RB[RBSIZE];
 
 // Fetch the input data from kernal space.
 
-    if ((RC=MM$Get_Mem(In_Buff,UArgs->SNMP$WBuf_Size)) != SS$_NORMAL)
+    if ((RC=MM$Get_Mem(In_Buff,uargs->snmp$wbuf_size)) != SS$_NORMAL)
 	{
-	USER$ERR(Uargs,RC);
+	USER$ERR(uargs,RC);
 	return;
 	};
 
-    $$KCALL(MOVBYT, UArgs->SNMP$WBuf_Size, UArgs->SNMP$Data_Start, In_Buff);
+    $$KCALL(MOVBYT, uargs->snmp$wbuf_size, uargs->snmp$data_start, In_Buff);
 
 // Determine which Dump Directive we have.
 
 /*
-    switch (Uargs->SNMP$Function)
-    SET
+    switch (uargs->snmp$function)
+    {
 
 // Return the dynamic memory allocation counts, # of times the free list for the
 // specified data structure was empty.  Used to figure out how many free list
 // elements to pre-allocate.
 
-    [SNMP$C_Get,
-     SNMP$C_GetNext,
-     SNMP$C_Store]:
+    case SNMP$C_Get;
+    case SNMP$C_GetNext:
+    case SNMP$C_Store:
 	{
-	Bufsize = UArgs->SNMP$RBuf_Size;
-	Error = SNMP$USER_INPUT(In_Buff,UArgs->SNMP$WBuf_Size,
-			       RB+4,Bufsize)
+	bufsize = uargs->snmp$rbuf_size;
+	Error = SNMP$USER_INPUT(In_Buff,uargs->snmp$wbuf_size,
+			       RB+4,bufsize)
 	};
+	break;
+
     case SNMP$C_Kill:
 */
 
-if ((Uargs->SNMP$Function == 4))
+if ((uargs->snmp$function == 4))
 	{
 extern	    TCP$KILL();
 
 	XLOG$FAO(LOG$USER,"!%T Kill !XL (bsize=!XL)!/",0,
-		 In_Buff[0],Uargs->SNMP$WBuf_Size);
-	Bufsize = 10;
+		 In_Buff[0],uargs->snmp$wbuf_size);
+	bufsize = 10;
 
 	RC = TCP$KILL(In_Buff[0]); // nu? what are you waiting for? kill!!!
-	if (RC != SS$_NORMAL) Error = USER$Err(Uargs,RC);
+	if (RC != SS$_NORMAL) Error = USER$Err(uargs,RC);
 
-	CH$MOVE(BufSize,UPLIT(%ASCII "abcdefghij"),RB+4); // First long is size
+	CH$MOVE(bufsize,UPLIT("abcdefghij"),RB+4); // First long is size
 	}
+
 /*
-    [Otherwise]:
-	Error = USER$Err(Uargs,NET$_IFC); // Illegal Function code.
-    TES;
+    default:
+	Error = USER$Err(uargs,NET$_IFC); // Illegal Function code.
+    };
 
 */
 else
-	Error = USER$Err(Uargs,NET$_IFC); // Illegal Function code.
+	Error = USER$Err(uargs,NET$_IFC); // Illegal Function code.
 
 // Did we have an Error or Illegal Dump directive code?
 
-    MM$Free_Mem(In_Buff,UArgs->SNMP$WBuf_Size);
+    MM$Free_Mem(In_Buff,uargs->snmp$wbuf_size);
 
     if (! Error)
 	{
@@ -1017,21 +1023,21 @@ else
 // Check to see if user buffer is large enough to hold requested data.
 // If not return error: Buffer TOO small.
 
-	if (Uargs->SNMP$RBuf_Size LSS (Bufsize + 4))
-	    USER$Err(Uargs,NET$_BTS)	// user's buffer is TOO small.
+	if (uargs->snmp$rbuf_size < (bufsize + 4))
+	    USER$Err(uargs,NET$_BTS);	// user's buffer is TOO small.
 	else
 	    {
 
 // Copy local data into user's IO request buffer, Build movbyt arg list.
 
-	    RB[0] = Bufsize;
-	    $$KCALL(MOVBYT,Bufsize+4,RB,Uargs->SNMP$Data_Start);
+	    RB[0] = bufsize;
+	    $$KCALL(MOVBYT,bufsize+4,RB,uargs->snmp$data_start);
 
 // Post the user's IO request back to the user.
 
-	    User$Post_IO_Status(Uargs,SS$_NORMAL,BufSize+4,0,0);
-	    MM$UArg_Free(Uargs);	// Release user arg block.
-	    End;
+	    User$Post_IO_Status(uargs,SS$_NORMAL,bufsize+4,0,0);
+	    MM$UArg_Free(uargs);	// Release user arg block.
+	    };
 	};
     }
 
@@ -1064,8 +1070,7 @@ Side Effects:
 
 */
 
-FORWARD ROUTINE
- void    GTHST_Purge;
+ void    GTHST_Purge();
 
 void USER$Purge_All_IO (void)
     {
@@ -1076,14 +1081,14 @@ extern 	void IPU$Purge_All_IO();
     register
 	qb;
     signed long
-	EXPR[2];
-struct User_Default_Args * Uargs;
-struct User_Send_Args * Sargs;
-struct  NetIO_Status_Block * IOSTATUS;
+	expr[2];
+struct user_default_args * uargs;
+struct user_send_args * Sargs;
+  netio_status_block * IOSTATUS;
 
 // Set virtual device IP offline.  Prevent further user io.
 
-    $$KCALL(Set_IP_Device_OffLine);
+    $$KCALL(Set_IP_device_OFFline);
 
 // Purge network I/O for all protocols
 
@@ -1095,23 +1100,23 @@ struct  NetIO_Status_Block * IOSTATUS;
 
 // check the user request queue again just to be safe.
 
-    Expr[0] = 5*Timer_Delta;	// 5 seconds in Delta time format.
-    Expr[1] = -1;
-    $SCHDWK(Daytim=EXPR);
-    $HIBER;			// Make sure ALL IO has been queued.
+    expr[0] = 5*TIMER_DELTA;	// 5 seconds in Delta time format.
+    expr[1] = -1;
+    exe$schdwk(0,0,expr,0);
+    exe$hiber();	// check		// Make sure ALL IO has been queued.
 
 // Purge User request queue.
 // Special case M$Cancel as the IRP came from the IP: driver cancel routine
 // & not from a user process, be sure NOT to post the IO//  USER$Err will delete
 // the uargs block.
 
-    while ((Uargs=$$KCALL(User_Requests_Avail)) != false)
+    while ((uargs=$$KCALL(User_Requests_Avail)) != FALSE)
 	{
 
 // post the user's io request with an error code: tcp is exiting.
 
-	if (Uargs->UD$Funct neq M$Cancel)
-	    User$Post_IO_Status(Uargs,NET$_TE,0,0,0);
+	if (uargs->ud$funct != M$CANCEL)
+	    User$Post_IO_Status(uargs,NET$_TE,0,0,0);
 //!!HACK!!// Don't release the Uarg?
 	};
     }
@@ -1154,15 +1159,14 @@ Side Effects:
 
 */
 
-FORWARD ROUTINE
- void    GTHST_CANCEL;
+ void    GTHST_CANCEL();
 
 User$Brk (void)
     {
       return    SS$_NORMAL;
     }
 
-void VMS$Cancel(struct VMS$Cancel_Args * Uargs)
+void VMS$Cancel(struct vms$cancel_args * uargs)
     {
 extern 	TCP$Cancel();
 extern 	UDP$Cancel();
@@ -1173,33 +1177,37 @@ extern 	IPU$Cancel();
 	proto,
 	Done;
 
-    ucbptr = Uargs->VC$UCB_Adrs + UCB$L_EXTRA;
+    ucbptr = uargs->vc$ucb_adrs; // check + UCB$L_EXTRA;
     $$KCALL(MOVBYT,4,ucbptr,proto);
 
     XLOG$FAO(LOG$USER,"!%T VMS$Cancel: PID=!XL, Chan=!XL, UCB proto=!XL!/",
-	     0,Uargs->VC$PID,Uargs->VC$PIOchan,Proto);
+	     0,uargs->vc$pid,uargs->vc$piochan,proto);
 
     Done = 0;
-    switch (Uargs->VC$Protocol)
-    SET
-    case U$TCP_Protocol:
-	Done = TCP$Cancel(Uargs);
+    switch (uargs->vc$protocol)
+      {
+    case U$TCP_PROTOCOL:
+	Done = TCP$Cancel(uargs);
+	break;
 
-    case U$UDP_Protocol:
-	Done = UDP$Cancel(Uargs);
+    case U$UDP_PROTOCOL:
+	Done = UDP$Cancel(uargs);
+	break;
 
-    case U$ICMP_Protocol:
-	Done = ICMP$Cancel(Uargs);
+    case U$ICMP_PROTOCOL:
+	Done = ICMP$Cancel(uargs);
+	break;
 
-    case U$IP_Protocol:
-	Done = IPU$Cancel(Uargs);
+    case U$IP_PROTOCOL:
+	Done = IPU$Cancel(uargs);
+	break;
 
-    CASE OTHERWISE:
+    default:
 	Done = USER$BRK();
-    TES;
+    };
 
-    GTHST_CANCEL(Uargs);
-    MM$UArg_Free(Uargs);		// Release IPACP argument block
+    GTHST_CANCEL(uargs);
+    MM$UArg_Free(uargs);		// Release IPACP argument block
     }
 
 //Sbttl "NET$Dump - Dump the TCB blocks to a user process"
@@ -1227,84 +1235,81 @@ Output:
 	buffer is filled with requested dump data.
 */
 
-void NET$DUMP(struct Debug_Dump_Args * Uargs)
+void NET$DUMP(struct debug_dump_args * uargs)
     {
 extern	CALCULATE_UPTIME();
 extern	TEK$sys_uptime;
     register
-	struct queue_blk_structure(QB_UR_Fields) * QB;	// queue block pointer.
-    LITERAL
-	RBBYTES = D$User_Return_Blk_Max_Size,
-	RBSIZE = (RBBYTES+3)/4;		// Largest dump block, in alloc units
+	struct queue_blk_structure(qb_ur_fields) * QB;	// queue block pointer.
+#define	RBBYTES D$User_Return_Blk_Max_Size
+#define	RBSIZE (RBBYTES+3)/4		// Largest dump block, in alloc units
     signed long
-	RC,
+	rc,
 	Error = FALSE,
-	BufSize,
+	bufsize,
       count = 0,
 	RB[RBSIZE];
 
 // Determine which Dump Directive we have.
 
-    switch (Uargs->DU$Dump_Directive)
-    SET
+    switch (uargs->du$dump_directive)
+      {
 
 // Return the dynamic memory allocation counts, # of times the free list for the
 // specified data structure was empty.  Used to figure out how many free list
 // elements to pre-allocate.
 
-    case DU$Dynamic_Mem_Alloc:
+    case DU$DYNAMIC_MEM_ALLOC:
 	{
-	Map
-	    struct D$Mem_Alloc_Return_Blk * RB;
-	externAL
-	    QBLK_Count_base : UNSIGNED BYTE,
-	    Uarg_Count_base : UNSIGNED BYTE,
-	    MIN_Seg_Count_base : UNSIGNED BYTE,
-	    MAX_Seg_Count_base : UNSIGNED BYTE,
-	    QBLK_Count : UNSIGNED BYTE,
-	    Uarg_Count : UNSIGNED BYTE,
-	    MIN_Seg_Count : UNSIGNED BYTE,
-	    MAX_Seg_Count : UNSIGNED BYTE;
+	  d$mem_alloc_return_blk * rb = RB;
+	extern char
+	    qblk_count_base,
+	    uarg_count_base ,
+	    min_seg_count_base,
+	    max_seg_count_base,
+	    qblk_count,
+	    uarg_count,
+	    min_seg_count,
+	    max_seg_count;
 
 	rb->dm$qb = qb_gets;	// queue blocks
-	rb->dm$ua = Ua_gets;	// User net io argument blks.
-	rb->dm$cs = 0;		!~~~ OBSOLETE
-	rb->dm$dms = MIN_Gets;	// Minimum (default) size packet buffers
-	rb->dm$nm = MAX_Gets;	// Maximum size packet buffers
+	rb->dm$ua = ua_gets;	// User net io argument blks.
+	rb->dm$cs = 0;		//~~~ OBSOLETE
+	rb->dm$dms = min_gets;	// Minimum (default) size packet buffers
+	rb->dm$nm = max_gets;	// Maximum size packet buffers
 	rb->dm$qbmx = qb_max;	// queue blocks
-	rb->dm$uamx= Ua_max;	// User net io argument blks.
-	rb->dm$csmx = 0;	!~~~ OBSOLETE
-	rb->dm$dmsmx = MIN_max;// Minimum (default) size buffers.
-	rb->dm$nmmx = MAX_max;	// Maximum size buffer.
-	rb->dm$qbal = QBLK_Count_Base;
-	rb->dm$uaal = Uarg_Count_Base;
+	rb->dm$uamx= ua_max;	// User net io argument blks.
+	rb->dm$csmx = 0;	//~~~ OBSOLETE
+	rb->dm$dmsmx = min_max;// Minimum (default) size buffers.
+	rb->dm$nmmx = max_max;	// Maximum size buffer.
+	rb->dm$qbal = qblk_count_base;
+	rb->dm$uaal = uarg_count_base;
 	rb->dm$csal = 0;
-	rb->dm$dmsal = MIN_Seg_Count_Base;
-	rb->dm$nmal = MAX_Seg_Count_base;
-	rb->dm$qbfr = QBLK_Count;
-	rb->dm$uafr = Uarg_Count;
+	rb->dm$dmsal = min_seg_count_base;
+	rb->dm$nmal = max_seg_count_base;
+	rb->dm$qbfr = qblk_count;
+	rb->dm$uafr = uarg_count;
 	rb->dm$csfr = 0;
-	rb->dm$dmsfr = MIN_Seg_Count;
-	rb->dm$nmfr = MAX_Seg_Count;
-	Bufsize	= D$MA_BLKsize;
+	rb->dm$dmsfr = min_seg_count;
+	rb->dm$nmfr = max_seg_count;
+	bufsize	= D$MA_BLKSIZE;
 	};
 
-    case DU$TCP_stats:
+    case DU$TCP_STATS:
 	{
-	MAP
-	    struct D$TCP_Stats_Return_Blk * RB;
+	     d$tcp_stats_return_blk * rb = RB;
 
 	rb->dm$tcpacp_pid		= mypid;
 	rb->dm$user_io_requests		= ts$uir;
 //!!HACK!!//  // storeForward does not belong here...
-	rb->dm$storeForward		= 0;
+	rb->dm$storeforward		= 0;
 	rb->dm$active_conects_opened	= ts$aco;
 	rb->dm$passive_conects_opened	= ts$pco;
 	rb->dm$data_bytes_xmitted	= ts$dbx;
 	rb->dm$data_bytes_recved	= ts$dbr;
 	rb->dm$segs_xmitted		= ts$sx;
 	rb->dm$segs_recved		= ts$sr;
-	rb->dm$Seg_Bad_Chksum		= ts$seg_bad_cksum;
+	rb->dm$seg_bad_chksum		= ts$seg_bad_cksum;
 	rb->dm$badseq			= ts$badseq;
 	rb->dm$duplicate_segs		= ts$duplicate_segs;
 	rb->dm$retrans_segs		= ts$retrans_segs;
@@ -1314,13 +1319,13 @@ extern	TEK$sys_uptime;
 	rb->dm$future_used		= ts$future_used;
 	rb->dm$future_dropped		= ts$future_dropped;
 	rb->dm$future_dups		= ts$future_dups;
-	rb->dm$Servers_Forked		= ts$servers_forked;
+	rb->dm$servers_forked		= ts$servers_forked;
 
 // Compute TCP uptime.
 	CALCULATE_UPTIME();
 	ch$move(8,TEK$sys_uptime,rb->dm$uptime);
 
-	BufSize = D$TS_BlkSize;	// byte size of return blk.
+	bufsize = D$TS_BLKSIZE;	// byte size of return blk.
 	};
 
 // Return all active local-connection-id's otherwise known as the address of the
@@ -1328,88 +1333,88 @@ extern	TEK$sys_uptime;
 // 0th element of return vector is the count of valid tcb addresses in the
 // return vector (ie, counted vector).
 
-    case DU$Local_Connection_ID:
+    case DU$LOCAL_CONNECTION_ID:
 	{
 void 	    TCP$Connection_List();
 	TCP$Connection_List(RB);
-	BufSize = D$lc_id_BlkSize;
+	bufsize = D$LC_ID_BLKSIZE;
 	};
 
 // Dump out a TCB
 
-    case DU$TCB_Dump:
+    case DU$TCB_DUMP:
 	{
 extern	   TCP$TCB_Dump();
-	if (TCP$TCB_Dump(Uargs->DU$ARG0,RB))
-	    BufSize = D$TCB_Dump_BLKsize
+	if (TCP$TCB_Dump(uargs->du$arg0,RB))
+	  bufsize = D$TCB_DUMP_BLKSIZE;
 	else
-	    Error = USER$Err(Uargs,NET$_CDE)
+	  Error = USER$Err(uargs,NET$_CDE);
 	};
 
 // Return all UDP connections (as D$Local_Connection_ID above)
 
-    case DU$UDP_Connections:
+    case DU$UDP_CONNECTIONS:
 	{
 void 	    UDP$Connection_List();
 	UDP$Connection_List(RB);
-	Bufsize = D$UDP_List_Blksize;
+	bufsize = D$UDP_LIST_BLKSIZE;
 	};
 
 // Dump out a UDPCB
 
-    case DU$UDPCB_Dump:
+    case DU$UDPCB_DUMP:
 	{
 extern	    UDP$UDPCB_Dump();
-	if (UDP$UDPCB_Dump(Uargs->DU$Local_Conn_ID,RB))
-	    Bufsize = D$UDPCB_Dump_Blksize
+	if (UDP$UDPCB_Dump(uargs->du$local_conn_id,RB))
+	  bufsize = D$UDPCB_DUMP_BLKSIZE;
 	else
-	    Error = USER$Err(Uargs,NET$_CDE);
+	    Error = USER$Err(uargs,NET$_CDE);
 	};
 
 // Return all ICMP connections (as D$Local_Connection_ID above)
 
-    case DU$ICMP_Connections:
+    case DU$ICMP_CONNECTIONS:
 	{
 extern void 	    ICMP$Connection_List();
 	ICMP$Connection_List(RB);
-	Bufsize = D$ICMP_List_Blksize;
+	bufsize = D$ICMP_LIST_BLKSIZE;
 	};
 
 // Dump out a ICMPCB
 
-    case DU$ICMPCB_Dump:
+    case DU$ICMPCB_DUMP:
 	{
 extern	   ICMP$ICMPCB_Dump();
-	if (ICMP$ICMPCB_DUMP (Uargs->DU$Local_Conn_ID,RB))
-	    Bufsize = D$ICMPCB_Dump_Blksize
+	if (ICMP$ICMPCB_DUMP (uargs->du$local_conn_id,RB))
+	  bufsize = D$ICMPCB_DUMP_BLKSIZE;
 	else
-	    Error = USER$Err(Uargs,NET$_CDE);
+	    Error = USER$Err(uargs,NET$_CDE);
 	};
 
 // Get device-depandent dump from device driver module
 
-    case du$device_dump:
+    case DU$DEVICE_DUMP:
 	{
-	if ((uargs->du$device_idx geq 0) AND
-	   (uargs->du$device_idx leq DC_max_num_net_Devices-1) AND
-	   (Dev_Config_Tab[uargs->du$device_idx,dc_valid_Device]))
+	if ((uargs->du$device_idx >= 0) &&
+	   (uargs->du$device_idx <= DC_Max_Num_Net_Devices-1) &&
+	   (dev_config_tab[uargs->du$device_idx].dc_valid_device))
 	    {		// call device dump routine.
-	    bufsize = Uargs->DU$Buf_Size;
+	    bufsize = uargs->du$buf_size;
 	    if (bufsize > RBBYTES)
 		bufsize = RBBYTES;
-	    rc = (Dev_config_tab[uargs->du$device_idx, dc_rtn_Dump])
-		    (uargs->du$device_idx, uargs->du$ARG1, uargs->du$ARG2,
-		     rb, bufsize);
+	    rc = (dev_config_tab[uargs->du$device_idx].dc_rtn_Dump)
+		    (uargs->du$device_idx, uargs->du$arg1, uargs->du$arg2,
+		     RB, bufsize);
 	    if (! rc)
-		Error = USER$Err(uargs,NET$_epd); // error processing dump
+		Error = USER$Err(uargs,NET$_EPD); // error processing dump
 	    }
 	else
-	    Error = USER$Err(uargs,NET$_bdi); // error: bad device index
+	    Error = USER$Err(uargs,NET$_BDI); // error: bad device index
 	};
 
 // Dump out ARP cache entries.
 
-    CASE DU$ARP_CACHE:
+    case DU$ARP_CACHE:
 	{
 	signed long
 	    USIZE,
@@ -1417,49 +1422,49 @@ extern	   ICMP$ICMPCB_Dump();
 //	externAL ROUTINE
 //	    ARP_DUMP;
 
-	Error = USER$Err(Uargs,NET$_IFC); // Illegal Function code.
+	Error = USER$Err(uargs,NET$_IFC); // Illegal Function code.
 
 // Compute size of return block - make multiple of dump block size
 
-//	USIZE = Uargs->DU$Buf_Size;
+//	USIZE = uargs->du$buf_size;
 //	if (USIZE > RBBYTES)
 //	    USIZE = RBBYTES;
 //	RMOD = USIZE MOD D$ARP_Dump_Blksize;
 //	USIZE = USIZE - RMOD;
 //	if (USIZE <= 0)
-//	    Error = USER$Err(Uargs,NET$_BTS)
+//	    Error = USER$Err(uargs,NET$_BTS)
 //	else
 //	    {
-//	    Bufsize = ARP_DUMP(Uargs->DU$Start_Index,RB,USIZE);
-//	    if (Bufsize LSS 0)
-//		Error = USER$Err(Uargs,NET$_DAE);
+//	    bufsize = ARP_DUMP(uargs->du$start_index,RB,USIZE);
+//	    if (bufsize < 0)
+//		Error = USER$Err(uargs,NET$_DAE);
 //	    };
 	};
 
 // Get list of device indexes.
 
-    case DU$Device_List:
+    case DU$DEVICE_LIST:
 	{
 extern	    CNF$Device_list();
-	Bufsize = CNF$Device_list(RB);
+	bufsize = CNF$Device_list(RB);
 	};
 
-    case DU$Device_Stat:
+    case DU$DEVICE_STAT:
 	{
 extern	    CNF$Device_stat();
-	if (Uargs->DU$Buf_Size LSS DC_Entry_Size*4)
-	    Error = USER$Err(Uargs,NET$_BTS)
-	else if (CNF$Device_stat ( Uargs->DU$ARG0, RB ) == -1)
-	    Error = USER$Err(Uargs,NET$_DAE)
+	if (uargs->du$buf_size < DC_ENTRY_SIZE*4)
+	  Error = USER$Err(uargs,NET$_BTS);
+	else if (CNF$Device_stat ( uargs->du$arg0, RB ) == -1)
+	  Error = USER$Err(uargs,NET$_DAE);
 	else
-	    Bufsize = D$Dev_dump_blksize
+	  bufsize = D$DEV_DUMP_BLKSIZE;
 	};
 
 // Undefined function code - give error
 
-    case Otherwise:
-	Error = USER$Err(Uargs,NET$_IFC); // Illegal Function code.
-    TES;
+    default:
+	Error = USER$Err(uargs,NET$_IFC); // Illegal Function code.
+    };
 
 // Did we have an Error or Illegal Dump directive code?
 
@@ -1469,20 +1474,20 @@ extern	    CNF$Device_stat();
 // Check to see if user buffer is large enough to hold requested data.
 // If not return error: Buffer TOO small.
 
-	if (Uargs->DU$Buf_Size LSS Bufsize)
-	    USER$Err(Uargs,NET$_BTS)	// user's buffer is TOO small.
+	if (uargs->du$buf_size < bufsize)
+	    USER$Err(uargs,NET$_BTS);	// user's buffer is TOO small.
 	else
 	    {
 
 // Copy local data into user's IO request buffer, Build movbyt arg list.
 
-	    $$KCALL(MOVBYT,Bufsize,RB,Uargs->DU$Data_Start);
+	    $$KCALL(MOVBYT,bufsize,RB,uargs->du$data_start);
 
 // Post the user's IO request back to the user.
 
-	    User$Post_IO_Status(Uargs,SS$_NORMAL,BufSize,0,0);
-	    MM$UArg_Free(Uargs);	// Release user arg block.
-	    End;
+	    User$Post_IO_Status(uargs,SS$_NORMAL,bufsize,0,0);
+	    MM$UArg_Free(uargs);	// Release user arg block.
+	    };
 	};
     }
 
@@ -1506,30 +1511,32 @@ Side Effects:
 	IP: device and all clones are set offline.
 */
 
-void Net$EXIT(struct Debug_EXIT_Args * Uargs)
+void Net$EXIT(struct debug_exit_args * uargs)
     {
 
-    XLOG$FAO(LOG$USER,"!%T EXIT requested, User PID: !XL!/",0,Uargs->EX$PID);
+    XLOG$FAO(LOG$USER,"!%T EXIT requested, User PID: !XL!/",0,uargs->ex$pid);
 
-    USER$Post_Function_OK(Uargs);
-    Time_2_Exit = True;		// Set global for exit, rtn: start_network.
+    USER$Post_Function_OK(uargs);
+    Time_2_Exit = TRUE;		// Set global for exit, rtn: start_network.
     $$KCALL(Set_IP_device_OFFline); // mark network device(s) offline.
     }
 
 //SBTTL "Network access check routines"
 
-$FIELD GETJPI_FIELDS (void)
-    SET
-    BUFLEN	= [$Short_Integer],
-    ITEM	= [$Short_Integer],
-    BUFADR	= [$Address],
-    RETLEN	= [$Address],
-    LIST}	= [$Long_Integer]
-    TES;
+struct GETJPI_BLOCK
+{
+  short int    BUFLEN;
+      short int ITEM;
+      void * BUFADR;
+      void * RETLEN;
+      long int LISTEND;
+    };
+#if 0
 LITERAL
     GETJPI_SIZE = $FIELD_SET_SIZE;
 MACRO
     GETJPI_BLOCK = BLOCK->GETJPI_SIZE FIELD(GETJPI_FIELDS) %;
+#endif
 
 User$Privileged(PID)
 //
@@ -1541,20 +1548,20 @@ User$Privileged(PID)
 	struct GETJPI_BLOCK * JPI;
     signed long
 	PRVLEN;
-char PRVBUF[8];
+union _prvdef PRVBUF;
 
 // Fill in GETJPI request block.
 
     JPI->BUFLEN = 4;
     JPI->ITEM = JPI$_CURPRIV;
-    JPI->BUFADR = PRVBUF;
+    JPI->BUFADR = &PRVBUF;
     JPI->RETLEN = PRVLEN;
-    JPI[LIST}] = 0;
+    JPI->LISTEND = 0;
 
 // Request the priviliges for the process.
 
-    if (($GETJPIW(PIDADR=PID,ITMLST=JPI)))
-	if (PRVBUF->PRV$V_PHY_IO || PRVBUF->PRV$V_SETPRV)
+    if ((exe$getjpiw(0,PID,0,JPI,0,0,0)))
+	if (PRVBUF.prv$v_phy_io || PRVBUF.prv$v_setprv)
 	    return SS$_NORMAL;
     return NET$_NOPRV;
     }
@@ -1581,11 +1588,11 @@ Check_ID(PID,ID)
     JPI->ITEM = JPI$_UIC;
     JPI->BUFADR = UICBLK;
     JPI->RETLEN = UICLEN;
-    JPI[LIST}] = 0;
+    JPI->LISTEND = 0;
 
 // Retrieve the UIC for the process
 
-    if (! $GETJPIW(PIDADR=PID,ITMLST=JPI))
+    if (! exe$getjpiw(0,PID,0,JPI,0,0,0))
 	return FALSE;
 
 // Check the rights database for this user
@@ -1593,13 +1600,11 @@ Check_ID(PID,ID)
     UICBLK[1] = 0;
     RDBCTX = 0;
     CURID = ID;
-    WHILE (STATUS = $FIND_HELD(	HOLDER	= UICBLK,
-				ID	= CURID,
-				CONTXT	= RDBCTX)) DO
+    while (STATUS = exe$find_held(UICBLK,ID,0,RDBCTX))
         {
 	if (CURID == ID)
 	    {
-	    $FINISH_RDB(CONTXT = RDBCTX);
+	    exe$finish_rdb(RDBCTX);
 	    return TRUE;
 	    };
 	};
@@ -1610,7 +1615,7 @@ Check_ID(PID,ID)
     }
 
 
-LITERAL WKS$SMTP = 25;		// Well known port number for SMTP
+#define WKS$SMTP 25		// Well known port number for SMTP
 
 USER$CHECK_ACCESS(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
 //
@@ -1618,8 +1623,7 @@ USER$CHECK_ACCESS(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
 // Returns SS$_NORMAL if access is granted, or error code.
 //
     {
-    LABEL
-	X;
+      long I;
 
 // If no access checking is enabled, then skip this routine
 
@@ -1628,29 +1632,30 @@ USER$CHECK_ACCESS(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
 
 // If we're checking acess for any network open, then check for INTERNET_ACCESS
 
-    if (ACCESS_FLAGS<ACF$ALLOPENS>)
+    if (ACCESS_FLAGS&ACF_ALLOPENS)
 	if (! CHECK_ID(PID,INTERNET_ID))
 	    return NET$_NOINA;
 
 // If we're checking access to non-local hosts, then do so
 
-    if (ACCESS_FLAGS<ACF$ARPAHOST>)
+    if (ACCESS_FLAGS&ACF_ARPAHOST)
 X:	{
 
 // If the foreign host is in the "local hosts" list, then allow it.
 
 	for (I=(ACHOST_COUNT-1);I>=0;I--)
-	    if ((FRNHST && ACHOSTS[I,AC$MASK]) == ACHOSTS[I,AC$HOST])
-		LEAVE X;
+	    if ((FRNHST && ACHOSTS[I].AC$MASK) == ACHOSTS[I].AC$HOST)
+		goto leave_x;
 	if (! CHECK_ID(PID,ARPANET_ID))
 	    return NET$_NOANA;
 	};
+    leave_x:
 
 // If the local port is privileged, then require special privilege
 
-    if (ACCESS_FLAGS<ACF$PRIVPORT>)
-	if ((((LCLPRT && %X"FFFF") GEQ Well_Known_LP_Start) AND
-	    ((LCLPRT && %X"FFFF") <= Well_Known_LP_End) && FRNPRT == 0) OR
+    if (ACCESS_FLAGS&ACF_PRIVPORT)
+	if ((((LCLPRT && 0xFFFF) >= WELL_KNOWN_LP_START) &&
+	    ((LCLPRT && 0xFFFF) <= WELL_KNOWN_LP_END) && FRNPRT == 0) ||
 	   (FRNPRT == WKS$SMTP))
 	    if (! User$Privileged(PID))
 		return NET$_NOPRV;
@@ -1670,7 +1675,7 @@ void USER$ACCESS_CONFIG(HOSTNUM,HOSTMASK)
 
 // Make sure there is room for this entry
 
-    if (ACHOST_COUNT GEQ ACCESS_MAX)
+    if (ACHOST_COUNT >= ACCESS_MAX)
 	{
 	    DESC$STR_ALLOC(HSTSTR,20);
 extern void 	    ASCII_DEC_BYTES();
@@ -1681,11 +1686,10 @@ extern void 	    ASCII_DEC_BYTES();
 
 // Insert it into the table
 
-    ACHOSTS[ACHOST_COUNT,AC$HOST] = HOSTNUM;
-    ACHOSTS[ACHOST_COUNT,AC$MASK] = HOSTMASK;
+    ACHOSTS[ACHOST_COUNT].AC$HOST = HOSTNUM;
+    ACHOSTS[ACHOST_COUNT].AC$MASK = HOSTMASK;
     ACHOST_COUNT = ACHOST_COUNT + 1;
     }
-
 
 void ACCESS_INIT (void)
 //
@@ -1697,33 +1701,33 @@ void ACCESS_INIT (void)
 
 // If access to network check enabled, translate INTERNET_ACCESS rights ID
 
-    if (ACCESS_FLAGS<ACF$ALLOPENS>)
+    if (ACCESS_FLAGS&ACF_ALLOPENS)
 	{
-	if (! $ASCTOID(NAME	= INTERNET_STRING,
-			ID	= INTERNET_ID))
+	if (! exe$asctoid(INTERNET_STRING,
+			INTERNET_ID))
 	    {
 	    OPR$FAO("% Failed to find identifier !AS - access check disabled",
 		    INTERNET_STRING);
-	    ACCESS_FLAGS<ACF$ALLOPENS> = 0;
+	    ACCESS_FLAGS&=~ACF_ALLOPENS;
 	    };
 	};
 
 // If ARPANET access check enabled, translate ARPANET_ACCESS rights ID and
 // verify that some hosts exist in the host list.
 
-    if (ACCESS_FLAGS<ACF$ARPAHOST>)
+    if (ACCESS_FLAGS&ACF_ARPAHOST)
 	{
-	if (! $ASCTOID(NAME	= ARPANET_STRING,
-			ID	= ARPANET_ID))
+	if (! exe$asctoid(ARPANET_STRING,
+			ARPANET_ID))
 	    {
 	    OPR$FAO("% Failed to find identifier !AS - access check disabled",
 		    ARPANET_STRING);
-	    ACCESS_FLAGS<ACF$ARPAHOST> = 0;
+	    ACCESS_FLAGS&=~ACF_ARPAHOST;
 	    };
 	if (ACHOST_COUNT == 0)
 	    {
 	    OPR$FAO("% No local hosts list - ARPANET access check disabled");
-	    ACCESS_FLAGS<ACF$ARPAHOST> = 0;
+	    ACCESS_FLAGS&=~ACF_ARPAHOST;
 	    };
 	};
     }
@@ -1747,130 +1751,131 @@ Side effects:
 	Results of query may be cached in the Name Server.
 */
 
-FORWARD ROUTINE
- void    GTHST_NMLOOK_DONE,
- void    GTHST_ADLOOK_DONE,
- void    GTHST_RRLOOK_DONE;
+ void    GTHST_NMLOOK_DONE();
+ void    GTHST_ADLOOK_DONE();
+ void    GTHST_RRLOOK_DONE();
 
-LITERAL
-    NLBSIZE = GTHST_NMLOOK_RET_ARGS_LENGTH*4,
-    ALBSIZE = GTHST_ADLOOK_RET_ARGS_LENGTH*4,
-    RLBSize = 6;
+#define    NLBSIZE GTHST_NMLOOK_RET_ARGS_LENGTH*4
+#define    ALBSIZE GTHST_ADLOOK_RET_ARGS_LENGTH*4
+#define    RLBSize 6
 
-void NET$GTHST(struct GTHST_Args * Uargs)
+void NET$GTHST(struct gthst_args * uargs)
     {
+      long IDX;
 
 // Dispatch the GTHST subfunction
 
-    CASE Uargs->GH$Subfunct FROM GTH_MIN TO GTH_MAX OF
-    SET
+      if (uargs->gh$subfunct >= GTH_MIN && uargs->gh$subfunct <= GTH_MAX)
+	switch ( uargs->gh$subfunct)
+      {
 
 // Local host info - same as name to address-list w/o doing name lookup.
 
-    CASE GTH_LCLHST:
+    case GTH_LCLHST:
 	{
 	signed long
-	    Args: VECTOR[4];
-	    struct GTHST_NMLOOK_RET_ARGS * RBLOCK;
-	BIND
-	    ADRVEC = RBLOCK->GHN$ADRLST : VECTOR;
-	externAL
-	    DEV_COUNT,
-	    DEV_CONFIG_TAB : DEVICE_CONFIGURATION_TABLE;
+	    Args[4];
+	 gthst_nmlook_block * RBLOCK; // check struct gthst_nmlook_args
+	    long *ADRVEC= &RBLOCK->ghn$adrlst;
+	extern 
+	  dev_count;
+	extern
+	  Device_Configuration_Entry dev_config_tab[] ;
 
 // Verify size of return block.
 
-	if (Uargs->GH$BUFSIZE LSS NLBSIZE)
+	if (uargs->gh$bufsize < NLBSIZE)
 	    {
-	    USER$Err(Uargs,NET$_BTS);
+	    USER$Err(uargs,NET$_BTS);
 	    return;
 	    };
 
 // Get the list of addresses from the configuration table
 
-	for (IDX=0;IDX<=(DEV_COUNT-1);IDX++)
-	    ADRVEC[IDX] = DEV_CONFIG_TAB[IDX,DC_IP_ADDRESS];
-	RBLOCK->GHN$ADRCNT = DEV_COUNT;
+	for (IDX=0;IDX<=(dev_count-1);IDX++)
+	    ADRVEC[IDX] = dev_config_tab[IDX].dc_ip_address;
+	RBLOCK->ghn$adrcnt = dev_count;
 
 // Copy the name of the local host from the local info
 
 	CH$MOVE(Local_Name->dsc$w_length,Local_Name->dsc$a_pointer,
-		CH$PTR(RBLOCK->GHN$NAMSTR));
-	RBLOCK->GHN$NAMLEN = Local_Name->dsc$w_length;
+		CH$PTR(RBLOCK->ghn$namstr));
+	RBLOCK->ghn$namlen = Local_Name->dsc$w_length;
 
 // Return data to the user
 
-	$$KCALL(MOVBYT,NLBSIZE,RBLOCK,Uargs->GH$Data_Start);
+	$$KCALL(MOVBYT,NLBSIZE,RBLOCK,uargs->gh$data_start);
 
 // And give them a good status reply
 
-	User$Post_IO_Status(Uargs,SS$_NORMAL,NLBSIZE,0,0);
-	MM$UArg_Free(Uargs);
+	User$Post_IO_Status(uargs,SS$_NORMAL,NLBSIZE,0,0);
+	MM$UArg_Free(uargs);
 	};
+	break;
 
 // Name to address-list lookup
 
-    CASE GTH_NMLOOK:
+    case GTH_NMLOOK:
 	{
-	MAP
-	    struct GTHST_NMLOOK_ARGS * Uargs;
+	    struct gthst_nmlook_args * uargs2=uargs;
 
-	if (Uargs->GHN$BUFSIZE LSS NLBSIZE)
+	if (uargs2->ghn$bufsize < NLBSIZE)
 	    {
-	    USER$Err(Uargs,NET$_BTS);
+	    USER$Err(uargs,NET$_BTS);
 	    return;
 	    };
 
-	NML$GETALST(CH$PTR(Uargs->GHN$HSTNAM),Uargs->GHN$HSTLEN,
-		    GTHST_NMLOOK_DONE,Uargs);
+	NML$GETALST(CH$PTR(uargs2->ghn$hstnam),uargs2->ghn$hstlen,
+		    GTHST_NMLOOK_DONE,uargs2);
 	};
+	break;
 
 // Address to name lookup
 
-    CASE GTH_ADLOOK:
+    case GTH_ADLOOK:
 	{
-	MAP
-	    struct GTHST_ADLOOK_ARGS * Uargs;
+	    struct gthst_adlook_args * uargs2=uargs;
 	signed long
 	    addr;
 
-	if (Uargs->GHA$BUFSIZE LSS ALBSIZE)
+	if (uargs2->gha$bufsize < ALBSIZE)
 	    {
-	    USER$Err(Uargs,NET$_BTS);
+	    USER$Err(uargs2,NET$_BTS);
 	    return;
 	    };
 
 // User argument is IP address - 0 means local address.
 
-	addr = Uargs->GHA$IPADDR;
+	addr = uargs2->gha$ipaddr;
 	if (addr == 0)
-	    addr = Dev_Config_Tab[0,dc_IP_address];
-	NML$GETNAME(addr,GTHST_ADLOOK_DONE,Uargs);
+	  addr = dev_config_tab[0].dc_ip_address;
+	NML$GETNAME(addr,GTHST_ADLOOK_DONE,uargs2);
         };
+	break;
 
 // Domain resource record query.
 
-    CASE GTH_RRECLK:
+    case GTH_RRECLK:
 	{
-	MAP
-	    struct GTHST_RRLOOK_ARGS * Uargs;
+	     struct gthst_rrlook_args * uargs2=uargs;
 
-	if (Uargs->GRR$BUFSIZE LSS RLBSize)
+	if (uargs2->grr$bufsize < RLBSize)
 	    {
-	    USER$Err(Uargs,NET$_BTS);
+	    USER$Err(uargs2,NET$_BTS);
 	    return;
 	    };
 
-	NML$GETRR(Uargs->GRR$RRTYPE,
-		    CH$PTR(Uargs->GRR$HSTNAM),Uargs->GRR$HSTLEN,
-		    GTHST_RRLOOK_DONE,Uargs);
+	NML$GETRR(uargs2->grr$rrtype,
+		    CH$PTR(uargs2->grr$hstnam),uargs2->grr$hstlen,
+		    GTHST_RRLOOK_DONE,uargs2);
 	};
+	break;
 
 // Unknown GTHST function
 
-    CASE OUTRANGE:
-	USER$Err(Uargs,NET$_IGF);
-    TES;
+    default:
+	USER$Err(uargs,NET$_IGF);
+    };
     }
 
 //SBTTL "Name lookup done handler"
@@ -1880,36 +1885,36 @@ void NET$GTHST(struct GTHST_Args * Uargs)
     Post the user request with the completion code.
 */
 
-void GTHST_NMLOOK_DONE(Uargs,Status,Adrcnt,Adrlst,Namlen,Nambuf)
-	struct GTHST_NMLOOK_ARGS * Uargs;
+void GTHST_NMLOOK_DONE(uargs,Status,Adrcnt,Adrlst,namlen,Nambuf)
+	struct gthst_nmlook_args * uargs;
     {
     signed long
-	Args: VECTOR[4];
-	struct GTHST_NMLOOK_RET_ARGS * NLB;
+	Args[4];
+	 gthst_nmlook_block * NLB;
 
 // If an error occurred, give it to the user
 
     if (! Status)
 	{
-	USER$Err(Uargs,Status);
+	USER$Err(uargs,Status);
 	return;
 	};
     
 // Copy the return data into prototype block
 
-    NLB->GHN$ADRCNT = Adrcnt;
-    CH$MOVE(Adrcnt*4,Adrlst,NLB->GHN$ADRLST);
-    NLB->GHN$NAMLEN = Namlen;
-    CH$MOVE(Namlen,Nambuf,NLB->GHN$NAMSTR);
+    NLB->ghn$adrcnt = Adrcnt;
+    CH$MOVE(Adrcnt*4,Adrlst,NLB->ghn$adrlst);
+    NLB->ghn$namlen = namlen;
+    CH$MOVE(namlen,Nambuf,NLB->ghn$namstr);
 
 // Copy the block back to the user.
 
-    $$KCALL(MOVBYT,NLBSIZE,NLB,Uargs->GHN$Data_Start);
+    $$KCALL(MOVBYT,NLBSIZE,NLB,uargs->ghn$data_start);
 
 // And give them a good status reply
 
-    User$Post_IO_Status(Uargs,SS$_NORMAL,NLBSIZE,0,0);
-    MM$UArg_Free(Uargs);
+    User$Post_IO_Status(uargs,SS$_NORMAL,NLBSIZE,0,0);
+    MM$UArg_Free(uargs);
     }
 
 //SBTTL "Address lookup done handler"
@@ -1917,34 +1922,34 @@ void GTHST_NMLOOK_DONE(Uargs,Status,Adrcnt,Adrlst,Namlen,Nambuf)
     Same as above, but for GTH_ADLOOK function.
 */
 
-void GTHST_ADLOOK_DONE(Uargs,Status,Namlen,Nambuf)
-	struct GTHST_ADLOOK_ARGS * Uargs;
+void GTHST_ADLOOK_DONE(uargs,Status,namlen,Nambuf)
+	struct gthst_adlook_args * uargs;
     {
     signed long
-	Args: VECTOR[4];
-	struct GTHST_ADLOOK_RET_ARGS * ALB;
+	Args[4];
+	 gthst_adlook_block * ALB;
 
 // If an error occurred, give it to the user
 
     if (! Status)
 	{
-	USER$Err(Uargs,Status);
+	USER$Err(uargs,Status);
 	return;
 	};
 
 // Build the return block
 
-    ALB->GHA$NAMLEN = namlen;
-    CH$MOVE(Namlen,Nambuf,ALB->GHA$NAMSTR);
+    ALB->gha$namlen = namlen;
+    CH$MOVE(namlen,Nambuf,ALB->gha$namstr);
 
 // Return data to the user
 
-    $$KCALL(MOVBYT,ALBSIZE,ALB,Uargs->GHA$Data_Start);
+    $$KCALL(MOVBYT,ALBSIZE,ALB,uargs->gha$data_start);
 
 // And give them a good status reply
 
-    User$Post_IO_Status(Uargs,SS$_NORMAL,ALBSIZE,0,0);
-    MM$UArg_Free(Uargs);
+    User$Post_IO_Status(uargs,SS$_NORMAL,ALBSIZE,0,0);
+    MM$UArg_Free(uargs);
     }
 
 //SBTTL "RR lookup done handler"
@@ -1954,57 +1959,57 @@ void GTHST_ADLOOK_DONE(Uargs,Status,Namlen,Nambuf)
     Post the user request with the completion code.
 */
 
-void GTHST_RRLOOK_DONE(Uargs,Status,RDLen,RData,Namlen,Nambuf) 
-	struct GTHST_RRLOOK_ARGS * Uargs;
+void GTHST_RRLOOK_DONE(uargs,Status,RDLen,RData,namlen,Nambuf) 
+	 struct gthst_rrlook_args * uargs;
     {
     signed long
 	Args[4];
-	struct GTHST_RRLOOK_RET_ARGS * RLB;
+	 gthst_rrlook_block * RLB;
 
 // If an error occurred, give it to the user
 
     if (! Status)
 	{
-	USER$Err(Uargs,Status);
+	USER$Err(uargs,Status);
 	return;
 	};
     
 // Copy the return data into prototype block
 
-    if (Uargs->GRR$BUFSIZE LSS RLBSize + RDLen)
+    if (uargs->grr$bufsize < RLBSize + RDLen)
 	{
-	USER$Err(Uargs,NET$_BTS);
+	USER$Err(uargs,NET$_BTS);
 	return;
 	};
 
-    RLB->GRR$RDLEN = RDLen;
-//    RLB->GRR$NAMLEN = Namlen;
+    RLB->grr$rdlen = RDLen;
+//    RLB->GRR$NAMLEN = namlen;
 //    CH$MOVE(RDLen,RData,RLB->GRR$DATA);
-//    CH$MOVE(Namlen,Nambuf,RLB->GRR$DATA+.RDLen);
+//    CH$MOVE(namlen,Nambuf,RLB->grr$data+.RDLen);
 
 // Copy the block back to the user.
 
-    $$KCALL(MOVBYT,2,RLB,Uargs->GRR$Data_Start);
-    $$KCALL(MOVBYT,RDLen,Rdata,Uargs->GRR$Data_Start + 2);
-//    $$KCALL(MOVBYT,Namlen,Nambuf,Uargs->GRR$Data_Start + 6 + RDLen);
+    $$KCALL(MOVBYT,2,RLB,uargs->grr$data_start);
+    $$KCALL(MOVBYT,RDLen,RData,uargs->grr$data_start + 2);
+//    $$KCALL(MOVBYT,namlen,Nambuf,uargs->grr$data_start + 6 + RDLen);
 
 // And give them a good status reply
 
-    User$Post_IO_Status(Uargs,SS$_NORMAL, RLBSize + RDLen,0,0);
-    MM$UArg_Free(Uargs);
+    User$Post_IO_Status(uargs,SS$_NORMAL, RLBSize + RDLen,0,0);
+    MM$UArg_Free(uargs);
     }
 
 //SBTTL "GTHST_CANCEL - Cancel GTHST requests for a process"
 
  void    GTHST_CANCEL_ONE();
 
-void GTHST_CANCEL(struct VMS$CANCEL_ARGS * Uargs)
+void GTHST_CANCEL(struct vms$cancel_args * uargs)
 //
 // Search the list of pending GTHST requests looking for match. If found,
 // post it now and delete from the queue.
 //
     {
-    NML$STEP(GTHST_CANCEL_ONE,Uargs);
+    NML$STEP(GTHST_CANCEL_ONE,uargs);
     }
 
 void GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS)
@@ -2012,15 +2017,15 @@ void GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS)
 // Check a single entry from the name lookup queue to see if it belongs to
 // the process that is doing the cancel. If so, we will cancel it.
 //
-     struct VMS$CANCEL_ARGS * VCUARGS;
-	struct User_Default_Args * UARGS;
+     struct vms$cancel_args * VCUARGS;
+	struct user_default_args * UARGS;
     {
 
 // Do sanity check on AST routine. Only GTHST done routines should be attached
 // to GTHST requests.
 
-    if ((ASTADR != GTHST_NMLOOK_DONE) AND
-	(ASTADR != GTHST_ADLOOK_DONE) AND
+    if ((ASTADR != GTHST_NMLOOK_DONE) &&
+	(ASTADR != GTHST_ADLOOK_DONE) &&
 	(ASTADR != GTHST_RRLOOK_DONE))
 	return;
 
@@ -2028,7 +2033,7 @@ void GTHST_CANCEL_ONE(VCUARGS,ASTADR,UARGS)
 // cancel the request (i.e. "finish" it with an error).
 
 
-    if (VCUARGS->VC$UCB_ADRS == UARGS->UD$UCB_ADRS)
+    if (VCUARGS->vc$ucb_adrs == UARGS->ud$ucb_adrs)
 	NML$CANCEL(UARGS,TRUE,NET$_CCAN);
     }
 
@@ -2052,8 +2057,8 @@ void GTHST_PURGE_ONE(COVALUE,ASTADR,UARGS)
 // Do sanity check on AST routine. Only GTHST done routines should be attached
 // to GTHST requests.
 
-    if ((ASTADR != GTHST_NMLOOK_DONE) AND
-	(ASTADR != GTHST_ADLOOK_DONE) AND
+    if ((ASTADR != GTHST_NMLOOK_DONE) &&
+	(ASTADR != GTHST_ADLOOK_DONE) &&
 	(ASTADR != GTHST_RRLOOK_DONE))
 	return;
     NML$CANCEL(UARGS,TRUE,NET$_TE);
@@ -2138,151 +2143,153 @@ extern 	void IPU$RECEIVE();
 extern 	void IPU$INFO();
 extern 	void IPU$STATUS();
     register
-	struct User_Default_Args * ArgBlk;
+	struct user_default_args * argblk;
 
-    while ((ARGBLK=$$KCALL(User_requests_Avail)) != False)
+    while ((argblk=$$KCALL(User_Requests_Avail)) != FALSE)
 	{
 	if ($$LOGF(LOG$USER))
 	    {
 DESC$STR_ALLOC(funcstr,30);
-	    signed long
+struct dsc$descriptor  
 		func;
-	    switch (ArgBlk->UD$Funct)
-	    SET
-	    CASE U$OPEN:	func=%ASCID"TEK$OPEN";
-	    CASE U$SEND: 	func=%ASCID"TEK$SEND";
-	    CASE U$RECV:	func=%ASCID"TEK$RECEIVE";
-	    CASE U$CLOSE:	func=%ASCID"TEK$CLOSE";
-	    CASE U$ABORT:	func=%ASCID"TEK$ABORT";
-	    CASE U$STATUS:	func=%ASCID"TEK$STATUS";
-	    CASE U$INFO:	func=%ASCID"TEK$INFO";
+	    switch (argblk->ud$funct)
+	      {
+	      case U$OPEN:	func=ASCID("TEK$OPEN"); break;
+	    case U$SEND: 	func=ASCID("TEK$SEND"); break;
+	    case U$RECV:	func=ASCID("TEK$RECEIVE"); break;
+	    case U$CLOSE:	func=ASCID("TEK$CLOSE"); break;
+	    case U$ABORT:	func=ASCID("TEK$ABORT"); break;
+	    case U$STATUS:	func=ASCID("TEK$STATUS"); break;
+	    case U$INFO:	func=ASCID("TEK$INFO"); break;
 
-	    CASE U$GTHST:  func=%ASCID"Net$GTHST";
-	    CASE M$DUMP:	func=%ASCID"Net$DUMP";
-	    CASE M$EXIT:	func=%ASCID"Net$EXIT";
-	    CASE M$DEBUG:	func=%ASCID"Net$Debug";
-	    CASE M$EVENT:	func=%ASCID"Net$Event";
-	    CASE M$SNMP:	func=%ASCID"Net$SNMP";
+	    case U$GTHST:  func=ASCID("Net$GTHST"); break;
+	    case M$DUMP:	func=ASCID("Net$DUMP"); break;
+	    case M$EXIT:	func=ASCID("Net$EXIT"); break;
+	    case M$DEBUG:	func=ASCID("Net$Debug"); break;
+	    case M$EVENT:	func=ASCID("Net$Event"); break;
+	    case M$SNMP:	func=ASCID("Net$SNMP"); break;
 
-	    case M$Cancel:	func=%ASCID"VMS$Cancel";
-	    CASE OTHERWISE:
+	    case M$CANCEL:	func=ASCID("VMS$Cancel"); break;
+	    default:
 		    {
-		    $FAO(%ASCID"?User FCN !SL",funcstr->dsc$w_length,funcstr,
-			 argblk->UD$Funct);
-		    func = funcstr;
+		    exe$fao(ASCID("?User FCN !SL"),funcstr->dsc$w_length,funcstr,
+			 argblk->ud$funct);
+		    func = *funcstr;
 		    };
-	    TES;
-	    LOG$FAO("!%T !AS (Proto:!XB), Uargs=!XL,VMSID=!XL,IRP=!XL,UCB=!XL!/",		    0, func, Argblk->UD$Protocol,
-		    Argblk, Argblk->UD$VMS_BLK_ID,
-		    Argblk->UD$IRP_Adrs, Argblk->UD$UCB_Adrs,
-		    Argblk->UD$PID);
+	    };
+	    LOG$FAO("!%T !AS (Proto:!XB), uargs=!XL,VMSID=!XL,IRP=!XL,UCB=!XL!/",		    0, func, argblk->ud$protocol,
+		    argblk, argblk->ud$vms_blk_id,
+		    argblk->ud$irp_adrs, argblk->ud$ucb_adrs,
+		    argblk->ud$pid);
 	    };
 
-	if (Argblk->ud$funct != M$Cancel)
-	    ts$uir = ts$uir + 1 // count arrival of user io request.
-	else VMS$Cancel(ArgBlk);
+	if (argblk->ud$funct != M$CANCEL)
+	    ts$uir = ts$uir + 1; // count arrival of user io request.
+	else VMS$Cancel(argblk);
 
 // dispatch to appro user io request handler routine.  Cover both tcp
 // and maintenance functions.
 
-	if (Argblk->ud$protocol == U$TCP_Protocol)
+	if (argblk->ud$protocol == U$TCP_PROTOCOL)
 	   // Handle TCP functions first to improve speed.
-	   CASE argBlk->ud$funct FROM u$open TO u$max_TCP_function OF
-	   SET
-	   case u$open:	TCP$OPEN(ArgBlk);
-	   case u$send: 	TCP$SEND(ArgBlk);
-	   case u$recv:	TCP$Receive(ArgBlk);
-	   case u$close:	TCP$CLOSE(ArgBlk);
-	   case u$abort:	TCP$ABORT(ArgBlk);
-	   case u$status:	TCP$Status(ArgBlk);
-	   case u$info:	TCP$Info(ArgBlk);
-	   CASE OUTRANGE:	USER$Err(ArgBlk,NET$_IFC); // Illegal Function Code.
+	  if ( argblk->ud$funct >=  U$OPEN && argblk->ud$funct <= U$MAX_TCP_FUNCTION)
+	    switch ( argblk->ud$funct)
+	      {
+	      case U$OPEN:	TCP$OPEN(argblk); break;
+	      case U$SEND: 	TCP$SEND(argblk); break;
+	   case U$RECV:	TCP$Receive(argblk); break;
+	   case U$CLOSE:	TCP$CLOSE(argblk); break;
+	   case U$ABORT:	TCP$ABORT(argblk); break;
+	   case U$STATUS:	TCP$Status(argblk); break;
+	   case U$INFO:	TCP$Info(argblk); break;
+	   default:	USER$Err(argblk,NET$_IFC); // Illegal Function Code.
 
-	   TES
+	      }
 	else
-	CASE argBlk->ud$funct FROM u$open TO u$max_user_function OF
-	SET
+	  if ( argblk->ud$funct >= U$OPEN && argblk->ud$funct <= U$MAX_USER_FUNCTION)
+	    switch ( argblk->ud$funct)
+	      {
 
-	case u$open:
-	    switch (Argblk->ud$protocol)
-	    SET
-	    case U$UDP_Protocol:	UDP$OPEN(ArgBlk);
-	    case U$ICMP_Protocol:	ICMP$OPEN(ArgBlk);
-	    case U$IP_Protocol:	IPU$OPEN(ArgBlk);
-	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
-	    TES;
-
-	case u$send:
-	    switch (Argblk->ud$protocol)
-	    SET
-	    case U$UDP_Protocol:	UDP$SEND(ArgBlk);
-	    case U$ICMP_Protocol:	ICMP$SEND(ArgBlk);
-	    case U$IP_Protocol:	IPU$SEND(ArgBlk);
-	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
-	    TES;
-
-	case u$recv:
-	    switch (Argblk->ud$protocol)
-	    SET
-	    case U$UDP_Protocol:	UDP$Receive(ArgBlk);
-	    case U$ICMP_Protocol:	ICMP$Receive(ArgBlk);
-	    case U$IP_Protocol:	IPU$Receive(ArgBlk);
-	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
-	    TES;
-
-	case u$close:
-	    switch (Argblk->ud$protocol)
-	    SET
-	    case U$UDP_Protocol:	UDP$CLOSE(ArgBlk);
-	    case U$ICMP_Protocol:	ICMP$CLOSE(ArgBlk);
-	    case U$IP_Protocol:	IPU$CLOSE(ArgBlk);
-	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
-	    TES;
-
-	case u$abort:
-	    switch (Argblk->ud$protocol)
-	    SET
-	    case U$UDP_Protocol:	UDP$ABORT(ArgBlk);
-	    case U$ICMP_Protocol:	ICMP$ABORT(ArgBlk);
-	    case U$IP_Protocol:	IPU$ABORT(ArgBlk);
-	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
-	    TES;
-
-	case u$status:
-	    switch (Argblk->ud$protocol)
-	    SET
-	    case U$UDP_Protocol:	UDP$Status(ArgBlk);
-	    case U$ICMP_Protocol:	ICMP$Status(ArgBlk);
-	    case U$IP_Protocol:	IPU$Status(ArgBlk);
-	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
-	    TES;
-
-	case u$info:
-	    switch (Argblk->ud$protocol)
-	    SET
-	    case U$UDP_Protocol:	UDP$Info(ArgBlk);
-	    case U$ICMP_Protocol:	ICMP$Info(ArgBlk);
-	    case U$IP_Protocol:	IPU$Info(ArgBlk);
-	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IPC); // Illegal Protocol Code.
-	    TES;
-
-	case u$gthst:	Net$GTHST(argblk);
-
-	CASE OUTRANGE:
-	    {
-	    switch (argBlk->ud$funct) // check acp maintenance functions
-	    SET
-	    CASE M$DUMP:	Net$DUMP(ArgBlk);
-	    CASE M$EXIT:	Net$EXIT(ArgBlk);
-	    CASE M$DEBUG:	Net$Debug(ArgBlk);
-	    CASE M$EVENT:	Net$Event(ArgBlk);
-	    CASE M$SNMP:	Net$SNMP(ArgBlk);
-//	    case M$Cancel:	VMS$Cancel(ArgBlk);
-	    case M$Cancel:	SS$_NORMAL;
-	    CASE OTHERWISE:USER$Err(ArgBlk,NET$_IFC); // Illegal Function Code.
-	    TES;
+	case U$OPEN:
+	    switch (argblk->ud$protocol)
+	      {
+	    case U$UDP_PROTOCOL:	UDP$OPEN(argblk); break;
+	    case U$ICMP_PROTOCOL:	ICMP$OPEN(argblk); break;
+	    case U$IP_PROTOCOL:	IPU$OPEN(argblk); break;
+	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
 	    };
-	TES;
+
+	case U$SEND:
+	    switch (argblk->ud$protocol)
+	      {
+	    case U$UDP_PROTOCOL:	UDP$SEND(argblk); break;
+	    case U$ICMP_PROTOCOL:	ICMP$SEND(argblk); break;
+	    case U$IP_PROTOCOL:	IPU$SEND(argblk); break;
+	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
+	    };
+
+	case U$RECV:
+	    switch (argblk->ud$protocol)
+	      {
+	    case U$UDP_PROTOCOL:	UDP$Receive(argblk); break;
+	    case U$ICMP_PROTOCOL:	ICMP$Receive(argblk); break;
+	    case U$IP_PROTOCOL:	IPU$Receive(argblk); break;
+	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
+	    };
+
+	case U$CLOSE:
+	    switch (argblk->ud$protocol)
+	      {
+	    case U$UDP_PROTOCOL:	UDP$CLOSE(argblk); break;
+	    case U$ICMP_PROTOCOL:	ICMP$CLOSE(argblk); break;
+	    case U$IP_PROTOCOL:	IPU$CLOSE(argblk); break;
+	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
+	    };
+
+	case U$ABORT:
+	    switch (argblk->ud$protocol)
+	      {
+	    case U$UDP_PROTOCOL:	UDP$ABORT(argblk); break;
+	    case U$ICMP_PROTOCOL:	ICMP$ABORT(argblk); break;
+	    case U$IP_PROTOCOL:	IPU$ABORT(argblk); break;
+	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
+	    };
+
+	case U$STATUS:
+	    switch (argblk->ud$protocol)
+	      {
+	    case U$UDP_PROTOCOL:	UDP$Status(argblk); break;
+	    case U$ICMP_PROTOCOL:	ICMP$Status(argblk); break;
+	    case U$IP_PROTOCOL:	IPU$Status(argblk); break;
+	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
+	    };
+
+	case U$INFO:
+	    switch (argblk->ud$protocol)
+	      {
+	    case U$UDP_PROTOCOL:	UDP$Info(argblk); break;
+	    case U$ICMP_PROTOCOL:	ICMP$Info(argblk); break;
+	    case U$IP_PROTOCOL:	IPU$Info(argblk); break;
+	    default:USER$Err(argblk,NET$_IPC); // Illegal Protocol Code.
+	    };
+
+	      case U$GTHST:	Net$GTHST(argblk); break;
+
+	default:
+	    {
+	    switch (argblk->ud$funct) // check acp maintenance functions
+	      {
+	      case M$DUMP:	Net$DUMP(argblk); break;
+	      case M$EXIT:	Net$EXIT(argblk); break;
+	      case M$DEBUG:	Net$Debug(argblk); break;
+	      case M$EVENT:	Net$Event(argblk); break;
+	      case M$SNMP:	Net$SNMP(argblk); break;
+//	    case M$Cancel:	VMS$Cancel(argblk);
+	    case M$CANCEL:	SS$_NORMAL;
+	    default :USER$Err(argblk,NET$_IFC); // Illegal Function Code.
+	    };
+	    };
+	};
 	};
     }
 
