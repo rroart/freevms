@@ -110,6 +110,7 @@ done
 		ln -s ../../freevms/sys/src/sysgetjpi.c .;
 		ln -s ../../freevms/sys/src/uai.c .;
 		ln -s ../../freevms/sys/src/process_scan.c .;
+		ln -s ../../freevms/sys/src/pagefile.c .;
 		ln -s ../../freevms/rms/src/rm3get.c ;
 		ln -s ../../freevms/rms/src/rmsmisc.h ;
 

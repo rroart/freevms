@@ -20,7 +20,7 @@ If having user mode linux, patch in now, and do ../freevms/linux/prescript.uml.
 (We are based on uml-patch-2.4.18-11, use -p1 -F 100 and such)
 
 Go to /usr/src/freevms and do a make and make install (if uml, see Makefiles for how to compile). Then copy the resulting files from root/.
-(Sorry, got no make install yet)
+If you want to know how to make the linker do: cat linker/src/HOW
 
 UserMode Linux needs the symlinks from /usr/include/{asm,linux}
 to the kernel build place.
@@ -32,7 +32,7 @@ See BUGS regarding uml
 
 NOTE on kernel config with VMS options:
 There is only one option, CONFIG_VMS (replaces and includes CONFIG_VMS_IO/MM)
-Warning: It might be a risky destructive option.
+Warning: It might be a risky destructive option. FS write may be destructive.
 VMS IO works so far only on blockdevices, and the only blockdevices supported
 is the uml "harddisk" and on i386 only ide (may not work with all blocksizes).
 Boot with init=/bin/sh.

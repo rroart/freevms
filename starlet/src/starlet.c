@@ -364,6 +364,54 @@ int sys$device_scan(void *return_devnam, unsigned short int *retlen, void *searc
   return INLINE_SYSCALL($device_scan,5,return_devnam,retlen,search_devnam,itmlst,contxt);
 }
 
+int sys$imgact(void * name, void * dflnam, void * hdrbuf, unsigned long imgctl, unsigned long long * inadr, unsigned long long * retadr, unsigned long long * ident, unsigned long acmode) {
+  struct struct_args s;
+  s.s1=name;
+  s.s2=dflnam;
+  s.s3=hdrbuf;
+  s.s4=imgctl;
+  s.s5=inadr;
+  s.s6=retadr;
+  s.s7=ident;
+  s.s8=acmode;
+  return INLINE_SYSCALL($imgact,1,&s);
+}
+
+int sys$imgsta(void * transfer, void * parseinfo, void * header, void * file, unsigned long linkstatus, unsigned long clistatus) {
+  struct struct_args s;
+  s.s1=transfer;
+  s.s2=parseinfo;
+  s.s3=header;
+  s.s4=file;
+  s.s5=linkstatus;
+  s.s6=clistatus;
+  return INLINE_SYSCALL($imgsta,1,&s);
+}
+
+int sys$purgws  (struct _va_range *inadr) { 
+  return INLINE_SYSCALL($purgws,1,inadr);
+}
+
+int sys$adjwsl  (signed int pagcnt, unsigned int *wsetlm) { 
+  return INLINE_SYSCALL($adjwsl,2,pagcnt, wsetlm);
+}
+
+int sys$lkwset(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
+  return INLINE_SYSCALL($lkwset,3,inadr,retadr,acmode);
+}
+
+int sys$lckpag(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
+  return INLINE_SYSCALL($lckpag,3,inadr,retadr,acmode);
+}
+
+int sys$ulwset(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
+  return INLINE_SYSCALL($ulwset,3,inadr,retadr,acmode);
+}
+
+int sys$ulkpag(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
+  return INLINE_SYSCALL($ulkpag,3,inadr,retadr,acmode);
+}
+
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
 int sys$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }
 int sys$create (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($create,3,fab,err,suc); }

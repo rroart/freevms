@@ -33,7 +33,7 @@ obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \
 	    sysgetsyi.o sysrundwn.o syscreprc.o procstrt.o sysimgact.o \
 	    syssetprt.o syssetprv.o syspurgws.o uai.o sysparprc.o \
 	    sysupdsec.o sysgetjpi.o syssetexv.o process_scan.o \
-	    rm3get.o
+	    rm3get.o pagefile.o
 
 obj-$(CONFIG_UID16) += uid16.o
 obj-$(CONFIG_MODULES) += ksyms.o
