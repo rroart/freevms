@@ -142,6 +142,48 @@ int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int f
   return INLINE_SYSCALL($deq,4,lkid,valblk,acmode,flags);
 }
 
+int sys$dassgn(unsigned short int chan) {
+  return INLINE_SYSCALL($dassgn,1,chan); 
+}
+
+int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam,int flags) {
+  return INLINE_SYSCALL($assign,5,devnam,chan,acmode,mbxnam,flags);
+}
+
+int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
+  struct struct_qio s;
+  s.efn=efn;
+  s.chan=chan;
+  s.func=func;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.p1=p1;
+  s.p2=p2;
+  s.p3=p3;
+  s.p4=p4;
+  s.p5=p5;
+  s.p6=p6;
+  return INLINE_SYSCALL($qiow,1,&s);
+}
+
+int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
+  struct struct_qio s;
+  s.efn=efn;
+  s.chan=chan;
+  s.func=func;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.p1=p1;
+  s.p2=p2;
+  s.p3=p3;
+  s.p4=p4;
+  s.p5=p5;
+  s.p6=p6;
+  return INLINE_SYSCALL($qio,1,&s);
+}
+
 int sys$asctim  (unsigned short int *timlen, void *timbuf,
 		 unsigned long long *timadr, char cvtflg) {
   return INLINE_SYSCALL3($asctim,4,timlen,timbuf,timadr,(unsigned long)cvtflg);

@@ -39,6 +39,9 @@ done
 		ln -s ../../freevms/sys/src/sysqioreq.c .;
 		ln -s ../../freevms/sys/src/sysqiofdt.c .;
 		ln -s ../../freevms/sys/src/sysacpfdt.c .;
+		ln -s ../../freevms/sys/src/sysassign.c .;
+		ln -s ../../freevms/sys/src/sysdassgn.c .;
+		ln -s ../../freevms/sys/src/iosubpagd.c .;
 		ln -s ../../freevms/driver/src/dudriver.c .;
 		ln -s ../../freevms/mscp/src/mscp.c .;
 		ln -s ../../freevms/sysloa/src/sys_scs.c .;

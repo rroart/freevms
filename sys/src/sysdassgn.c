@@ -8,17 +8,7 @@
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
 
-asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam) {
-  /* probe chan */
-  /* probe mbxnam */
-  /* 2 more */
-  struct _ccb * c;
-  struct _ucb * u;
-  *chan = ioc$ffchan();
-  /* lock i/o db */
-  if (*chan) c=&ctl$gl_ccbbase[*chan];
-  if (mbxnam) ioc$searchdev();
-  u=ioc$search(devnam);
+asmlinkage int exe$dassgn(unsigned short int chan) {
 }
 
 

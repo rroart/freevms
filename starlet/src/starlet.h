@@ -68,6 +68,13 @@ int sys$bintim  (void *timbuf, unsigned long long *timadr);
  int sys$trnlnm  (unsigned int *attr, void *tabnam, void
 		  *lognam, unsigned char *acmode, void *itmlst);
 
+int sys$dassgn(unsigned short int chan);
+
+int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam,int flags);
+
+int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
+int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
+
 struct struct_crelnt {
  unsigned int *attr;
  void *resnam;

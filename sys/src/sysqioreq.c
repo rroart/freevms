@@ -25,7 +25,7 @@ void exe$finishio (long long * iosb, struct _irp * i, struct _pcb * p, struct _u
 }
 
 void exe$finishioc (long long * iosb, struct _irp * i, struct _pcb * p, struct _ucb * u) {
-  iosb&=0xffffffff00000000;
+  *iosb&=0xffffffff00000000;
   exe$finishio(iosb,i,p,u);
 }
 
@@ -41,6 +41,8 @@ int exe$insioq (struct _ucb * u, struct _irp * i) {
   /* release fork lock */
   return;
 }
+
+asmlinkage int exe$qiow (void) { /* dummy yet */ };
 
 /* put this into a struct */
 asmlinkage int exe$qio (struct struct_qio * q) {

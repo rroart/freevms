@@ -225,6 +225,10 @@ static inline pid_t setsid(void)
 #define __NR_$asctim       301    
 #define __NR_$bintim          302 
 
+#define __NR_$assign 306
+#define __NR_$dassgn 304
+#define __NR_$qio 305
+#define __NR_$qiow 307
 
 
 #endif

@@ -273,6 +273,10 @@
 #define __NR_$synch            27
 #define __NR_$enq              28
 #define __NR_$deq              29
+#define __NR_$assign           30
+#define __NR_$dassgn           31
+#define __NR_$qio              32
+#define __NR_$qiow             33
 
 #define __NR_$close 1
 #define __NR_$connect 2

@@ -877,6 +877,10 @@ ENTRY(vmssys_call_table)
         .long SYMBOL_NAME(exe$synch)
         .long SYMBOL_NAME(exe$enq)
         .long SYMBOL_NAME(exe$deq)
+        .long SYMBOL_NAME(exe$assign)
+        .long SYMBOL_NAME(exe$dassgn)
+        .long SYMBOL_NAME(exe$qio)
+        .long SYMBOL_NAME(exe$qiow)
 
 	.rept NR_vmssyscalls-(.-vmssys_call_table)/4
 		.long SYMBOL_NAME(sys_$ni_syscall)
