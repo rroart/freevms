@@ -1,5 +1,35 @@
 /*
- * str_find_first_not_in_set.c
+ *	strfind_first_not_in_set
+ *
+ *	Copyright (C) 2003 Andrew Allison
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *The authors may be contacted at:
+ *
+ *	Andrew Allison		freevms@sympatico.ca
+ *
+ *				Andrew Allison
+ *				50 Denlaw Road
+ *				London, Ont
+ *				Canada 
+ *				N6G 3L4
+ *
+ */
+
+/* str_find_first_not_in_set.c
  *
  *      Code for VAX STR$FIND_FIRST_NOT_IN_SET routine
  *
@@ -15,6 +45,12 @@
  *
  *	Feb 7, 1997 - Christof Ziele
  *		Change 'short' to 'unsigned short' in several places.
+ *
+ *	Feb 26, 2004 - Andrew Allison
+ *		Added GNU License
+ *
+ *	Mar 12, 2004 - Andrew Allison
+ *		Return 1 if set-of-characters is empty
  */ 
 
 #include <stdio.h>
@@ -58,7 +94,11 @@ long str$find_first_not_in_set(
 	/*
 	 * Quick exit when goofy stuff passed
 	 */
-	if ((s1_length == 0) || (s2_length == 0))
+	if (s1_length == 0 )
+	{
+		return 1;
+	}
+	if (s2_length == 0)
 	{
 		return 0;
 	}

@@ -1,5 +1,34 @@
 /*
- * str.c
+ * strcompare.c
+ *
+ *	Copyright (C) 2003 Andrew Allison
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *The authors may be contacted at:
+ *
+ *	Andrew Allison		freevms@sympatico.ca
+ *
+ *				Andrew Allison
+ *				50 Denlaw Road
+ *				London, Ont
+ *				Canada 
+ *				N6G 3L4
+ *
+ */
+/*
  *
  *	Code for VAX STR$COMPARE routine
  *
@@ -19,6 +48,12 @@
  *	Feb 19, 1997 - Kevin Handy
  *		Fix so that a shorter string is assumed to be padded
  *		with spaces.
+ *
+ *	Feb 24, 2004 - Andrew Allison
+ *		Inserted GNU License
+ *
+ *	Mar 2, 2004 - Andrew Allison
+ *		Null comparison
  */
 
 #include <stdio.h>
@@ -51,6 +86,7 @@ long str$compare(
 	unsigned short min_length;	/* length of shortest string */
 	long result;			/* Result of comparison */
 
+	result = 0;
 	/*
 	 * Analyze source strings
 	 */
@@ -67,15 +103,14 @@ long str$compare(
 	 * Use 'memcmp' instead of 'strncmp' because we may have NULL's
 	 * in our strings.
 	 */
-	result = memcmp(s1_ptr, s2_ptr, min_length);
-
+	if ( min_length != 0 )
+		result = memcmp(s1_ptr, s2_ptr, min_length);
 	/*
 	 * Work on the result in case of equal in first part, but
 	 * different total lengths.
 	 */
 	if (result == 0)
 	{
-		min_length++;
 		if (s1_length < s2_length)
 		{
 			while ((min_length < s2_length) && (result == 0))
