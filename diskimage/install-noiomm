@@ -1,0 +1,10 @@
+#!/bin/sh
+
+losetup -o 512 /dev/loop0 c.img
+mount -t ext2 /dev/loop0 /mnt
+
+cp -p ../linux/arch/i386/boot/bzImage /mnt/boot/freevms.noiomm
+
+umount /mnt
+losetup -d /dev/loop0
+

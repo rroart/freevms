@@ -1,0 +1,72 @@
+#!/bin/sh
+
+# grub floppy
+
+dd if=/dev/zero count=2880 of=a.img
+mke2fs -F a.img
+mount -t ext2 -o loop a.img /mnt
+
+mkdir -p /mnt/boot/grub
+cp -p grub.conf /mnt/boot/grub
+cp -p grub.conf /mnt/boot/grub/menu.lst
+cp -p /usr/share/grub/i386-redhat/stage* /mnt/boot/grub
+
+umount /mnt
+
+/sbin/grub --batch --device-map=/dev/null <<EOF
+device (fd0) a.img
+root (fd0)
+setup (fd0)
+quit
+EOF
+
+# ext2 fs
+
+dd if=/dev/zero count=65536 of=c.img
+
+sfdisk -C 4 -H 255 -S 63 c.img  << EOF
+c.img1 : start=        0, size=        4, Id= 83
+EOF
+
+losetup -o 512 /dev/loop0 c.img
+
+mke2fs /dev/loop0
+
+umount /mnt
+mount -t ext2 /dev/loop0 /mnt
+
+mkdir /mnt/boot
+
+cp -p /export/disk5/linux18f/linux/arch/i386/boot/bzImage /mnt/boot/freevms.noiomm
+/dev/MAKEDEV -d /mnt/dev hda hdb fd ptyp ttyS console
+
+mkdir -p /mnt/bin /mnt/sbin /mnt/etc /mnt/usr /mnt/usr/sbin /mnt/usr/bin /mnt/lib
+
+cd /bin
+cp -pi cat cp dd df dmesg echo ed grep hostname ln ls mkdir mount mv ps rm sh umount uname /mnt/bin
+
+cd /sbin
+cp -pi fsck fsck.ext2 ifconfig route sash /mnt/sbin
+
+cd /usr/bin
+cp -pi head id /mnt/usr/bin
+
+cd /lib
+cp -pi ld-linux.so.2 libc.so.6 libcom_err.so.2 libdl.so.2 libext2fs.so.2 libpcre.so.0 libtermcap.so.2 libproc.so.2* /mnt/lib
+
+cd /etc
+cp -pi *passwd* *group* *shadow* /mnt/etc
+
+umount /mnt
+losetup -d /dev/loop0
+
+exit 1
+
+#The rest is something which bugs in the usual versions
+#grub --batch <<EOF
+#device (hd0) c.img
+#geometry (hd0) 4 255 63
+#root (hd0)
+#setup (hd0)
+#quit
+#EOF

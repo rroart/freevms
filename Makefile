@@ -26,4 +26,28 @@ rootinstall:
 		cd ..; \
 	done; 
 
+image-install:
+	make rootinstall; \
+	cd diskimage; \
+	./instmnt; \
+	cd ..
+
+image:
+	cd diskimage; \
+	make image; \
+	cd ..
+
+image-kernel-iomm:
+	cd diskimage; \
+	make image-kernel-iomm; \
+	cd ..
+
+image-kernel-noiomm:
+	cd diskimage; \
+	make image-kernel-noiomm; \
+	cd ..
+
+environment:
+	./envscript
+
 include Makefile.kernel

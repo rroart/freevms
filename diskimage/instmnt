@@ -1,0 +1,10 @@
+#!/bin/sh
+
+losetup -o 512 /dev/loop0 c.img
+mount -t ext2 /dev/loop0 /mnt
+
+(tar -C ../rooti386 -clf - .)|(tar -C /mnt -xpf -)
+
+umount /mnt
+losetup -d /dev/loop0
+
