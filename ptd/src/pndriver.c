@@ -291,6 +291,7 @@
 .NOCROSS
 #endif
 //	$ACBDEF				// Define ACB
+#include <bufiodef.h>
 #include <crbdef.h>				// Define CRB
 #if 0
 #include <candef.h>				// Define cancel codes
@@ -327,6 +328,7 @@
 
 #include <system_data_cells.h>
 #include <linux/sched.h>
+void ioc_std$cancelio (signed int chan, struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb);
 
 //
 // Local definitions
@@ -487,7 +489,7 @@ PN$FUNCTAB:
 	.SBTTL	Local Storage - Name of companion device
 #endif
  
-	char * TZSTRING="TZA"; // ascii,  yes
+	char * TZSTRING="tza"; // ascii,  yes // was: TZA, case prob
 #define TZLENGTH 3
 
 
@@ -582,10 +584,10 @@ int PN$FDTREAD(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
     // Everything is ok
     return exe$finishioc(SS$_NORMAL,i,p,u);		// complete I/O request
   buf = i->irp$l_qio_p1;		// Get buffer Address
-  EXE$READCHK(i,p,u,c,buf,size); // check buf	// Do we have access to the buffer
+  exe_std$readchk(i,p,u,buf,size); // check buf	// Do we have access to the buffer
   size+=12;		// Add 12 bytes for buffer header
 
-  sts=EXE$DEBIT_BYTCNT_ALO(size, p, &buf); 	// Verify enough byte quota allocate buffer
+  sts=exe_std$debit_bytcnt_alo(size, p, 0, &buf); 	// Verify enough byte quota allocate buffer
   // and charge process for useage
 
   if (!BLISSIF(sts))			// If error report it
@@ -595,8 +597,10 @@ int PN$FDTREAD(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
   i->irp$l_boff = size;		//  and requested byte count
   size=size; //check			// convert to longword count
 
-  *buf=(long)buf+12;		// Save addr of start of user data
-  buf[1]=i->irp$l_qio_p1;		// Save user buffer address in 2nd
+  struct _bufio * bd=buf;
+  bd->bufio$b_type=DYN$C_BUFIO;
+  bd->bufio$ps_pktdata=(long)buf+12;		// Save addr of start of user data
+  bd->bufio$ps_uva32=i->irp$l_qio_p1;		// Save user buffer address in 2nd
 					// longword
   return	exe$qiodrvpkt(i, p, u);	// Queue I/O packet to start I/O routine
 }
@@ -699,7 +703,7 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     goto	l160;			// Zero size buffer just finish it now
 
   buf	 = i->irp$l_qio_p1;		// Get buffer Address
-  EXE$WRITECHK(i,p,u,c,buf,size);		// Do we have access to the buffer
+  exe_std$writechk(i,p,u,buf,size);		// Do we have access to the buffer
   // No return means no access
   send_tot		 = size;		// Number of characters to send
   pz		 = tz;		// Save away PZ UCB ptr
@@ -763,7 +767,7 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   }
   if (sts>0) {   // check 		// GTR single character
     tty=tz;
-    tty->ucb$w_tt_hold = inp_char;		// Store character in tank
+    tty->tty$b_tank_char = inp_char;		// Store character in tank
     tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal character in tank
   }
   tpd=tz; if	(TTY$M_TP_XOFF&	// See if XOFFED is so then
@@ -802,11 +806,11 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 	 tty->ucb$w_tt_hold)	//
    {			// Otherwise, finish up
 
-     if	(UCB$M_BSY &	-	// PZ ready to take data 
+     if	(UCB$M_BSY &		// PZ ready to take data 
 	 ((struct _ucb *)pz)->ucb$l_sts) {	//
  // Get IRP address
        tz		 = pz;		// Get PZ UCB address
-       ioc$initiate(((struct _ucb *)pz)->ucb$l_irp, tz);		// Now start PZ read 
+       ioc$initiate(u->ucb$l_irp, u);		// Now start PZ read 
      }
    }
 
@@ -816,6 +820,7 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 				NEWIPL=(SP)+		;
 #endif
 
+ pz=tz=u;
  tpd=tz;
  tz=	pz->ucb$l_pz_xucb;
  if	(TTY$M_TP_XOFF&	// See if XOFFED report this special
@@ -1024,7 +1029,8 @@ int PN$CLONE_INIT(struct _ucb * u) {
   // Desired mate = PTY UNIT 0
   // String address for TZA
   // String length
-  int sts=SEARCHDEV(ioc$gl_devlist, TZSTRING, TZLENGTH, &search_ddb);			// Find the DDB
+  search_ddb=ioc$gl_devlist;
+  int sts=SEARCHDEV(&search_ddb, TZSTRING, TZLENGTH);			// Find the DDB
   if (sts) return;				// Device not found
   sts=	SEARCHUNIT(search_ddb,0,&search_ucb);			// Search for specific unit
   if (sts==0) return;				// NOT FOUND: Return
@@ -1079,10 +1085,13 @@ int PN$CLONE_INIT(struct _ucb * u) {
  fn=R0;
  fn(new);  // check				// CALL THE UNIT INIT ROUTINE
  p = ctl$gl_pcb;		// Use current PCB
+#if 0
+ // not yet
  struct _orb * orb	 = new->ucb$l_orb;		// Fetch ORB address
  orb->orb$l_owner = p->pcb$l_uic;		// Set device owner
  orb->orb$b_flags|=ORB$M_PROT_16;	// Indicate using SOGW device protection
  orb->orb$w_prot&=~0xFF;		// Make device S:O:RWLP
+#endif
 
  return;
 }
@@ -1112,14 +1121,14 @@ int PN$CLONE_INIT(struct _ucb * u) {
 //	R0 is trashed
 //	R1 is trashed
 //--
-int SEARCHDEV(struct _ddb * ddb,char * string, int strlen) {				// Search for device name
+int SEARCHDEV(struct _ddb ** ddb,char * string, int strlen) {				// Search for device name
   char * locstr;
   char loclen;
- l10:	ddb = ddb->ddb$l_link;		// Get address of next ddb
-  if (ddb==0) 			// If eql end of list
+ l10:	*ddb = (*ddb)->ddb$l_link;		// Get address of next ddb
+  if (*ddb==0) 			// If eql end of list
  				// indicate search failure
     return 1; // inverted error coding
-  locstr=&ddb->ddb$t_name;	// Get address of generic device name
+  locstr=&(*ddb)->ddb$t_name;	// Get address of generic device name
   loclen=*locstr++;		// Calculate len of string to compare
   if 	(loclen!=strlen)			// Length of names match?
     goto	l10;			// If neq no
@@ -1199,7 +1208,8 @@ int SEARCHUNIT(struct _ddb * ddb, int unit, struct _ucb ** ucb) {				// Search f
 //	R5 - UCB Address
 //
 //--
-int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+int stcnt=0;
+int PN$STARTIO (struct _irp * i, struct _ucb * u) {
   struct _irp * irp;
   struct _tpd_ucb * tpd;
   struct _tz_ucb * tz;
@@ -1210,7 +1220,7 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 #if 0
   .ENABLE LSB
 #endif 
-
+     stcnt++;
      u->ucb$l_svapte=&u->ucb$l_svapte; // check		// Initialize buffer
   //  pointers
  PZ_OUT_LOOP:
@@ -1218,19 +1228,20 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   // Here R5 must point at the PZ device UCB and not at
   //  the UCB of the associated TZ device.
   //
- l5:	if	(u->ucb$l_bcnt<=0)			// Any space left in rd packet
+  if	(u->ucb$l_bcnt<=0)			// Any space left in rd packet
    goto	l50;				// No, Completed I/O
   //
   // Switch to terminal UCB
   //
   tz=u;
   u	 = tz->ucb$l_pz_xucb;		// Set to TZ ucb
+
   //
   // Look for next output in state tank
   //
   // Change Case statement to reflect V4 changes in routines - DEC 
   //
- l10:	tty=u; chr=ffs(*(char*)(((long)&tty->ucb$w_tt_hold+1)))-1; // check
+ tty=u; chr=ffs(*(char*)(((long)&tty->ucb$w_tt_hold+1))); // check
  switch 	((long)chr) {			// Dispatch
  case 1: goto	PZ_PREMPT;			// Send Prempt Characte - DEC 
  case 2: goto PZ_STOP;		// Stop output
@@ -1255,12 +1266,12 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  PZ_DONE:
  u = ((struct _tz_ucb *)u)->ucb$l_tz_xucb;		// Switch UCBs to PZ UCB
  if	(UCB$M_BSY&		// If not BSY then ignore
-	 u->ucb$l_sts==0) goto l47;	// the char
+	 u->ucb$l_sts==0) return;	// the char
  irp = u->ucb$l_irp;		// Restore IRP
- if	(irp->irp$l_bcnt!=	// Any characters moved
+ if	(irp->irp$l_bcnt==	// Any characters moved
 	 u->ucb$l_bcnt)
-   goto	l50;			// Yes complete I/O
- l47:	return;
+   return;
+   			// Yes complete I/O
  //
  // read buffer exhausted
  //
@@ -1275,7 +1286,6 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  //
  irp->irp$l_iost2=0;		// No status
  int R0 = irp->irp$l_iost1;		// Load IOSB return values
- 
  return	ioc$reqcom(R0,0,u);
  //
  // Put the character into the read buffer
@@ -1283,12 +1293,12 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  BUFFER_CHAR:
  u = ((struct _tz_ucb *)u)->ucb$l_tz_xucb;		// Switch UCBs to PZ UCB
  if	(UCB$M_BSY&
-	 u->ucb$l_sts==0) goto l60;	// If no PZ IRP, ignore
+	 u->ucb$l_sts) goto PZ_OUT_LOOP;	// If no PZ IRP, ignore
  char * c =u->ucb$l_svapte;
  *c=chr; // check	// Add character to buffer
  u->ucb$l_svapte++;	// Bump pointer
  u->ucb$l_bcnt--;		// Show character added
- l60:	goto	PZ_OUT_LOOP;		// Go for another char
+ goto	PZ_OUT_LOOP;		// Go for another char
  //
  // Take care of Burst mode R5 must be TZ UCB
  //
@@ -1303,12 +1313,10 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  ucb2 = ((struct _tz_ucb *)u)->ucb$l_tz_xucb;		// Save PZ UCB in R1
  len=0;			// Initialize output size
  if	(((struct _tty_ucb *)u)->ucb$w_tt_outlen>ucb2->ucb$l_bcnt) // Is buffer too small?
-   goto	l61;			// Yes
- len = ((struct _tty_ucb *)u)->ucb$w_tt_outlen;		// Nope, so output all
- goto	l62;
- l61:	len = ucb2->ucb$l_bcnt;		// Just output what we can
+   len = ucb2->ucb$l_bcnt;		// Just output what we can
+ else
+   len = ((struct _tty_ucb *)u)->ucb$w_tt_outlen;		// Nope, so output all
  
- l62:
  memcpy(ucb2->ucb$l_svapte,((struct _tty_ucb *)u)->ucb$l_tt_outadr,len);
  // Transfer burst to the buffer
  
@@ -1317,15 +1325,15 @@ int PN$STARTIO (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
  tty=u;
  tty->ucb$l_tt_outadr+=(long)len;	// Update input pointer
  tty->ucb$w_tt_outlen-=(long)len;	// Update input count
- if (tty->ucb$w_tt_outlen) goto	l65;			// Not the last character
- tty->ucb$w_tt_hold&=~TTY$M_TANK_BURST;	// Reset burst not active
- l65:	u = ((struct _tz_ucb *)u)->ucb$l_tz_xucb;		// Swicht UCBs to PZ UCB
+ if (tty->ucb$w_tt_outlen==0) 			// Not the last character
+   tty->ucb$w_tt_hold&=~TTY$M_TANK_BURST;	// Reset burst not active
+ u = ((struct _tz_ucb *)u)->ucb$l_tz_xucb;		// Swicht UCBs to PZ UCB
  goto	PZ_OUT_LOOP;
  //
  // Get a single char from tt and put in read buffer R5 = TZ UCB
  //
  PZ_CHAR:
- chr = ((struct _tty_ucb *)u)->ucb$w_tt_hold;		// Get the next byte
+ chr = ((struct _tty_ucb *)u)->tty$b_tank_char;		// Get the next byte
  tty=u; tty->ucb$w_tt_hold&=~TTY$M_TANK_HOLD;	// Show tank empty
 		
  goto	BUFFER_CHAR;
@@ -1811,10 +1819,9 @@ static struct _fdt pn$fdt = {
 };
 
 /* more yet undefined dummies */
-int pn$startio (int a,int b) { };
+//int pn$startio (int a,int b) { };
 static void  unsolint (void) { };
 static void  cancel (void) { };
-static void  ioc_std$cancelio (void) { };
 static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
@@ -1829,7 +1836,7 @@ static void  aux_storage (void) { };
 static void  aux_routine (void) { };
 
 static struct _ddt pn$ddt = {
-  ddt$l_start: pn$startio,
+  ddt$l_start: PN$STARTIO,
   ddt$l_unsolint: unsolint,
   ddt$l_fdt: &pn$fdt,
   ddt$l_cancel: 0,
@@ -1848,10 +1855,6 @@ static struct _ddt pn$ddt = {
   ddt$l_aux_storage: aux_storage,
   ddt$l_aux_routine: aux_routine
 };
-
-int pn$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
-
-int pn$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
 extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
 
@@ -1913,7 +1916,7 @@ int pn$init_tables() {
 
   ini_ddt_ctrlinit(&pn$ddt, PN$INITIAL);
   ini_ddt_unitinit(&pn$ddt, 0);
-  ini_ddt_start(&pn$ddt, pn$startio);
+  ini_ddt_start(&pn$ddt, PN$STARTIO);
   ini_ddt_cancel(&pn$ddt, ioc_std$cancelio);
   ini_ddt_end(&pn$ddt);
 
@@ -1955,15 +1958,16 @@ int pn_iodb_vmsinit(void) {
   init_crb(&pn$crb);
 #endif
 
-  ucb -> ucb$w_size = sizeof(struct _tty_ucb); // temp placed // check
-
-  ucb -> ucb$w_unit_seed = 0; // temp placed
-
-  ucb -> ucb$l_sts |= UCB$M_TEMPLATE; // temp placed
-
   init_ddb(ddb,&pn$ddt,ucb,"pna");
   init_ucb(ucb, ddb, &pn$ddt, crb);
   init_crb(crb);
+
+  ucb -> ucb$w_size = sizeof(struct _tty_ucb); // temp placed // check
+
+  ucb -> ucb$w_unit_seed = 1; // was: 0 // check // temp placed
+  ucb -> ucb$w_unit = 0; // temp placed
+
+  ucb -> ucb$l_sts |= UCB$M_TEMPLATE; // temp placed
 
 //  ioc_std$clone_ucb(&pn$ucb,&ucb);
   pn$init_tables();
@@ -1980,7 +1984,7 @@ int pn_iodb_vmsinit(void) {
 int pn_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
-  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&pn$ucb*/,&newucb);
+  //  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&pn$ucb*/,&newucb); // check. skip?
   exe$assign(dsc,&chan,0,0,0);
   registerdevchan(MKDEV(TTYAUX_MAJOR,unitno),chan);
 
