@@ -390,6 +390,13 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	pte_t *pte;
 	unsigned long page;
 
+	//some linux stuff
+	if((address >= start_vm) && (address < end_vm)){
+		flush_tlb_kernel_vm();
+		return(0);
+	}
+	if(mm == NULL) panic("Segfault with no mm");
+
 	//check if ipl>2 bugcheck
 	setipl(IPL$_MMG);
 	spin_lock(&SPIN_MMG);
@@ -438,11 +445,6 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 
 
 	// keep some linux stuff for now
-	if((address >= start_vm) && (address < end_vm)){
-		flush_tlb_kernel_vm();
-		return(0);
-	}
-	if(mm == NULL) panic("Segfault with no mm");
 	catcher = current->thread.fault_catcher;
 	si.si_code = SEGV_MAPERR;
 	down_read(&mm->mmap_sem);
