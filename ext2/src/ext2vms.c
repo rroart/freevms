@@ -552,7 +552,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   x2p->current_vcb=vcb; // until I can place it somewhere else
 
   if (fib->fib$w_did_num) {
-    int fd;
+    int fd=0;
     struct file * f;
     char * name;
     int error=0;
