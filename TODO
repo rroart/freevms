@@ -13,6 +13,7 @@ Try to upgrade 2.4.18 uml part from 11 to the newest
 Use real interrupts instead of calls for sch$reshed iofork etc
 Use setpsli even in more interrupts/exceptions?
 Look at how simple and complex buffers are allocated and freed
+Update FCB at the same time as read/write attrib?
 
 CPU/PAL:
 FIX pal

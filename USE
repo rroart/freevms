@@ -35,6 +35,11 @@ DIRECTORY:
 	directory
 	qualifiers: /file /size /date
 
+CREATE /DIRECTORY:
+	create /directory name
+	Use plain name without [], in directory where it is to be created
+	ODS-2 and non-CONFIG_VMS only.
+
 COPY:
 	copy/import/export
 
@@ -50,7 +55,6 @@ SET PROMPT:
 	DCL only
 
 SET DEFAULT:
-	does only a chdir (directory know nothing about this)
 	set default pathname
 	DCL only
 
