@@ -584,6 +584,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     struct inode * head;
     struct _fcb * fcb=x2p->primary_fcb;
     head = fcb->fcb$l_primfcb;
+    int dirflg=0;
 
     if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
       wildcard=1;
@@ -599,13 +600,15 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 	name[strlen(name)]='/';
 	ext2_vms_to_unix(name+strlen(name),filedsc);
 	strcpy(&x2p->context_save,name);
+	if (strstr(filedsc->dsc$a_pointer,".DIR"))
+	  dirflg=O_DIRECTORY;
     }
 
     dir.d_ino=0;
     dir.d_type=0;
     memset(dir.d_name,0,256);
 
-    f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY, 0);
+    f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|dirflg, 0);
     buf.count = 0;
     buf.dirent = &dir;
     error=generic_file_llseek(f, x2p->prev_fp /*fib->fib$l_wcc*//*dir.d_off*/, 0);
