@@ -7,11 +7,11 @@
 	(cd ../freevms/starlet/src; ln -s cli\$routines.h clioutines.h)
 	(cd ../freevms/starlet/src; ln -s lbr\$routines.h lbroutines.h)
 
-for X in `cd ../freevms/linux; find . \( -name CVS -prune \) -o -type f`; do
+for X in `cd ../freevms/linux; find . -path './arch/um' -prune -o -path './include/asm-um' -prune -o \( -name CVS -prune \) -o -type f`; do
 	[ -f $X ] && rm $X
-	[ -f ../freevms/linux/$X ] && cp -p ../freevms/linux/$X $X;
+	[ -L $X ] && rm $X
+	[ -f ../freevms/linux/$X ] && ln -s `pwd`/../freevms/linux/$X $X;
 done
-	rm -rf include/asm-um arch/um/{kernel,lib,mm,include}
 
 (cd kernel; 	ln -s ../../freevms/sys/src/syssetpri.c .;
 		ln -s ../../freevms/sys/src/syspcntrl.c; 
