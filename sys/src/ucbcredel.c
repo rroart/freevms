@@ -157,6 +157,7 @@ int ioc_std$clone_mscp_ucb (struct _ucb *tmpl_ucb, struct _ucb **new_ucb) {
   status=ioc_std$link_ucb(u);
   if (status!=SS$_NORMAL) goto again; // original weakness?
 
+  ((struct _mscp_ucb *)u)->ucb$w_mscpunit=u->ucb$w_unit;
 
   return SS$_NORMAL;
 }
