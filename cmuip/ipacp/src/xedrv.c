@@ -298,7 +298,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
 	Buff = drv$seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
 	INSQUE ( Buff , XE_Int-> XEI$recv_Qtail  );
 	Buff = Buff + XE_hdr_offset;
-	RC = exe$qio(ASTEFN,XE_chan,IO$_READVBLK,Buff->XERCV$vms_code,
+	RC = exe$qio(ASTEFN,XE_chan,IO$_READVBLK,&Buff->XERCV$vms_code,
 		     XE_receive,  XE_Int,
 		  Buff->XERCV$data,
 		  DRV$MAX_PHYSICAL_BUFSIZE,
@@ -317,7 +317,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
     XE_Int-> xei$arp_buffer  = ARbuf;
     RC = exe$qio(	ARPEFN, XE_Int-> xei$arp_io_chan ,
 		IO$_READVBLK,
-		ARbuf -> ar_ios0 ,
+		&ARbuf -> ar_ios0 ,
 			xe_arprcv, XE_Int,
 			ARbuf->ar_data, ARP_MAX_LEN*4, 0, 0,
 			ARbuf->phys$1, 0);
@@ -600,8 +600,8 @@ xe_startall ( XE_Int , restart )
 		    {
 			DESC$STR_ALLOC(newstr,50);
 
-		    ASCII_Hex_Bytes(newstr,XE_ADR_SIZE,useaddr,
-				    newstr->dsc$w_length);
+		    ASCII_HEX_BYTES(newstr,XE_ADR_SIZE,useaddr,
+				    &newstr->dsc$w_length);
 		    DRV$OPR_FAO("XE address mismatch, using address: !AS",newstr);
 		    };
 		CH$MOVE(XE_ADR_SIZE,CH$PTR(useaddr),CH$PTR(addrs));
@@ -861,8 +861,8 @@ extern 	LIB$GET_VM_PAGE();
     XE_Int->XEI$Flags = 0;	// Just making sure...
 
     // Set-up the receive queue
-    XE_Int->XEI$recv_Qhead = XE_Int->XEI$recv_Qhead;
-    XE_Int->XEI$recv_Qtail = XE_Int->XEI$recv_Qhead;
+    XE_Int->XEI$recv_Qhead = &XE_Int->XEI$recv_Qhead;
+    XE_Int->XEI$recv_Qtail = &XE_Int->XEI$recv_Qhead;
 
     // set double-link between XE_Int and dev_config blocks
     XE_Int-> xei$dev_config  = dev_config;
@@ -1187,7 +1187,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
     NRbuf = NRbuf + XE_hdr_offset;
     RC = exe$qio(ASTEFN,XE_Int->xei$io_chan,
 	      IO$_READVBLK,
-	      NRbuf->XERCV$vms_code, XE_receive, XE_Int,
+	      &NRbuf->XERCV$vms_code, XE_receive, XE_Int,
 	      NRbuf->XERCV$data,
 	      DRV$MAX_PHYSICAL_BUFSIZE,
 0,0,
@@ -1295,7 +1295,7 @@ void xe_arprcv( struct XE_Interface_Structure * XE_Int )
 // restart the arp receive
 //!!HACK!!// what's the EFN for?
     RC = exe$qio(ARPEFN,XE_Int->xei$arp_io_chan,
-		 IO$_READVBLK,ARbuf->ar_ios0,
+		 IO$_READVBLK,&ARbuf->ar_ios0,
 		 xe_arprcv, XE_Int,
 		 ARbuf->ar_data,ARP_MAX_LEN*4,0,0,
 		 ARbuf->phys$1,0);
@@ -1318,7 +1318,7 @@ void xe$arp_xmit(XE_Int,arbuf,arlen,dest)
     {
     signed long
       rc;
-	struct XE_IOSB_STRUCTURE * ios;
+	struct XE_iosb_structure ios_, * ios=&ios_;
 
     DRV$NOINT ;
 

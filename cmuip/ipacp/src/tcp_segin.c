@@ -1475,8 +1475,8 @@ struct segment_structure * seghdr;
 	  outcnt = maxopt;
 	else
 	    outcnt = optcnt;
-	ASCII_Hex_Bytes(optstr,outcnt,seg+TCP_HEADER_SIZE,
-			optstr->dsc$w_length);
+	ASCII_HEX_BYTES(optstr,outcnt,seg+TCP_HEADER_SIZE,
+			&optstr->dsc$w_length);
 	LOG$FAO("!_Options:!_!SL = !AS!/",optcnt,optstr);
 	};
 
@@ -1498,7 +1498,7 @@ struct segment_structure * seghdr;
 	  hexcnt = maxhex;
 	else
 	    hexcnt = datcnt;
-	ASCII_Hex_Bytes(dathex,hexcnt,seg+dataoff,dathex->dsc$w_length);
+	ASCII_HEX_BYTES(dathex,hexcnt,seg+dataoff,&dathex->dsc$w_length);
 	LOG$FAO("!_Data Count: !SL!/!_HEX:!_!AS!/!_ASCII:!_!AF!/",
 		datcnt,dathex,asccnt,seg+dataoff);
 	};
@@ -2654,7 +2654,7 @@ switch (QB->nr$icmp)
 			DESC$STR_ALLOC(fhstr,20);
 //!		    ASCII_DEC_BYTES(fhstr,4,QB->nr$dest_adrs,
 		    ASCII_DEC_BYTES(fhstr,4,QB->nr$dest_adrs,
-				    fhstr->dsc$w_length);
+				    &fhstr->dsc$w_length);
 		    LOG$FAO("!%T ICMP for unknown TCB,FH=!AS,FP=!XL,LP=!XL!/",
 			    0,fhstr,seg->sh$dest_port,seg->sh$source_port);
 		    };

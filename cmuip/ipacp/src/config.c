@@ -1932,8 +1932,8 @@ DESC$STR_ALLOC(ipstr,20);
 //	    ASCII_Hex_Bytes(phystr,dev_config_tab[cdev].dc_phy_size,
 //			    dev_config[cdev,dc_phy_addr],
 //			    phystr->dsc$w_length);
-	    ASCII_Dec_Bytes(ipstr,4,dev_config_tab[J].dc_ip_address,
-			    ipstr->dsc$w_length);
+	    ASCII_DEC_BYTES(ipstr,4,dev_config_tab[J].dc_ip_address,
+			    &ipstr->dsc$w_length);
 	    if (dev_config_tab[cdev].dc_online)
      stastr = ASCID("Online");
 	    else

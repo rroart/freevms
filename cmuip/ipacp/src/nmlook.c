@@ -187,11 +187,11 @@ MACRO
 
 //SBTTL "Constants and OWN data"
 
-struct dsc$descriptor     SRVPRCNAM = ASCID2(6,"NAMRES");	// Name of the resolver process
-struct dsc$descriptor     SYSTABNAM = ASCID2(15,"LNM$SYSTEM_TABLE"); // Logical name of system table
-struct dsc$descriptor     SRVMBXNAM = ASCID2(10,"NAMRES_MBX"); // System-wide logical name of resolver mailbox
-struct dsc$descriptor     ACPMBXNAM = ASCID2(9 ,"IPACP_MBX"); // System-wide logical name of ACP mailbox
-struct dsc$descriptor     MYMBXNAM = ASCID2(9,"IPACP_MBX"); // Temporary name of ACP mailbox
+struct dsc$descriptor     SRVPRCNAM_ = ASCID2(6,"NAMRES"), *SRVPRCNAM=&SRVPRCNAM_;	// Name of the resolver process
+struct dsc$descriptor     SYSTABNAM_ = ASCID2(15,"LNM$SYSTEM_TABLE"), *SYSTABNAM=&SYSTABNAM_; // Logical name of system table
+struct dsc$descriptor     SRVMBXNAM_ = ASCID2(10,"NAMRES_MBX"), *SRVMBXNAM=&SRVMBXNAM_; // System-wide logical name of resolver mailbox
+struct dsc$descriptor     ACPMBXNAM_ = ASCID2(9 ,"IPACP_MBX"), *ACPMBXNAM=&ACPMBXNAM_; // System-wide logical name of ACP mailbox
+struct dsc$descriptor     MYMBXNAM_ = ASCID2(9,"IPACP_MBX"), *MYMBXNAM=&MYMBXNAM_; // Temporary name of ACP mailbox
 long    ACPMBXPRO = 0xFF00;	// Protection: (W:<no>,G:<no>,O:RWLP,S:RWLP)
 
 #define     MBAMAX   MBNMAX*2		// Max mailbox string length
@@ -283,7 +283,7 @@ void NML$INIT (void)
 
 // Initialize state of service to unavailable
 
-    SRVSTATE = SRV$DOWN;
+    SRVSTATE = SRV$INIT; // was: SRV$DOWN; check
     SRVMBXCHN = 0;
     SRVPID = -1;
 
@@ -295,11 +295,16 @@ void NML$INIT (void)
 
 // Create a mailbox for us
 
-    RC = exe$crembx(0, ACPMBXCHN,
+#if 0
+    // not yet
+    RC = exe$crembx(0, &ACPMBXCHN,
 		 MSGMAX,
 		 MSGMAX*MSGCNT,
 		 ACPMBXPRO, 0,
 		 MYMBXNAM, 0, 0);
+#else
+    RC = 1;
+#endif
     if (! RC)
 	{
 	ERROR$FAO("Failed to create ACP mailbox, RC = !XL",RC);
@@ -434,7 +439,7 @@ void NML$GETALST(NAMPTR,NAMLEN,ASTADR,ASTPRM)
 
 // Allocate and initialize a request block for us
 
-    RC = NQE_ALLOC(NQE);
+    RC = NQE_ALLOC(&NQE);
     if (! RC)
 	{
 	(ASTADR)(ASTPRM,RC);
@@ -495,7 +500,7 @@ void NML$GETNAME(ADDR,ASTADR,ASTPRM)
 
 // Allocate and initialize a request block for us
 
-    RC = NQE_ALLOC(NQE);
+    RC = NQE_ALLOC(&NQE);
     if (! RC)
 	{
 	(ASTADR)(ASTPRM,RC);
@@ -544,7 +549,7 @@ void NML$GETRR(RRTYPE,NAMPTR,NAMLEN,ASTADR,ASTPRM)
 
 // Allocate and initialize a request block for us
 
-    RC = NQE_ALLOC(NQE);
+    RC = NQE_ALLOC(&NQE);
     if (! RC)
 	{
 	(ASTADR)(ASTPRM,RC);
@@ -772,6 +777,7 @@ NQE_ALLOC(NQE)
 // to the address of the block on success. On failure, returns network error
 // code indicating the failure reason.
 //
+     long * NQE;
     {
     signed long
 	RC;
@@ -787,8 +793,8 @@ NQE_ALLOC(NQE)
 
     NQE_COUNT = NQE_COUNT + 1;
 //    RC = LIB$GET_VM(%REF(NQE_MAXSIZE),NQE);
-    RC = LIB$GET_VM_PAGE(/*%REF*/((NQE_MAXSIZE / 512) + 1),&NQE);
-    XQL$FAO(LOG$MSG,"!%T NQE_ALLOC, NQE=!XL, RC=!XL!/",0,NQE,RC);
+    RC = LIB$GET_VM_PAGE(/*%REF*/((NQE_MAXSIZE / 512) + 1),NQE);
+    XQL$FAO(LOG$MSG,"!%T NQE_ALLOC, NQE=!XL, RC=!XL!/",0,*NQE,RC);
     return RC;
     }
 

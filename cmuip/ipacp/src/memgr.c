@@ -347,6 +347,7 @@ Side Effects:
 */
 
 mm$get_mem (Addr, Size)
+     long * Addr;
     {
     signed long
 	Pages,
@@ -356,13 +357,13 @@ mm$get_mem (Addr, Size)
     Pages = Pages + 1 ;
     NOINT;			// Hold AST's please...
 //    if (! (RC = LIB$GET_VM(Size,Addr)))
-    if (! (RC = LIB$GET_VM_PAGE(Pages,&Addr)))
+    if (! (RC = LIB$GET_VM_PAGE(Pages,Addr)))
 	Memgr_Fault_Handler(0,RC,0);
     OKINT;
 
 	XLOG$FAO(LOG$MEM,"!%T MM$Get_Mem !XL size !SL!/",0,Addr, Size);
 
-    CH$FILL(0,Size,Addr);	// clean house.....zero fill.
+    CH$FILL(0,Size,*Addr);	// clean house.....zero fill.
 
     return RC;
     }
@@ -887,7 +888,7 @@ void mm$seg_free(Size,Ptr)
 	{
 	if (min_seg_count < min_seg_count_base)
 	    {
-	    INSQue(Ptr,&Free_Minsize_Segs.qtail);
+	    INSQUE(Ptr,&Free_Minsize_Segs.qtail);
 	    min_seg_count = min_seg_count + 1;
 	    Released = TRUE;
 	    }

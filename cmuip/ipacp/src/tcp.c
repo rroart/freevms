@@ -1178,8 +1178,8 @@ void tcp$dump_tcb ( struct tcb_structure * tcb )
 	  }
     stastr.dsc$w_length=strlen(stastr.dsc$a_pointer);
 
-    ASCII_Dec_Bytes(fhstr,4,tcb->foreign_host,fhstr.dsc$w_length);
-    ASCII_Dec_Bytes(lhstr,4,tcb->local_host,lhstr.dsc$w_length);
+    ASCII_DEC_BYTES(&fhstr,4,tcb->foreign_host,&fhstr.dsc$w_length);
+    ASCII_DEC_BYTES(&lhstr,4,tcb->local_host,&lhstr.dsc$w_length);
 
     LOG$FAO(/*%STRING*/("!_PID:!_!XL!_State:!AS(!XL)!/",
 		    "!_FH:!_!AS!_FP:!_!XL (!UL)!/",

@@ -513,9 +513,9 @@ void ICMP_Echo(ICMpkt,ICMlen,IPPKT,IPlen)
 	if ($$LOGF(LOG$ICMP))
 	    {
 	    ASCII_DEC_BYTES(srcstr,4,IPPKT->iph$source,
-			    srcstr->dsc$w_length);
+			    &srcstr->dsc$w_length);
 	    ASCII_DEC_BYTES(dststr,4,IPPKT->iph$dest,
-			    dststr->dsc$w_length);
+			    &dststr->dsc$w_length);
 	    icmp_mib->MIB$icmpOutErrors =
 		icmp_mib->MIB$icmpOutErrors + 1;
 	    QL$FAO("!%T ICMP_ECHO: TTL exceeded, SRC=!AS,DST=!AS,ID=!UL!/",
@@ -537,9 +537,9 @@ void ICMP_Echo(ICMpkt,ICMlen,IPPKT,IPlen)
 	    if ($$LOGF(LOG$ICMP))
 		{
 		ASCII_DEC_BYTES(srcstr,4,IPPKT->iph$source,
-			        srcstr->dsc$w_length);
+			        &srcstr->dsc$w_length);
 		ASCII_DEC_BYTES(dststr,4,IPPKT->iph$dest,
-				dststr->dsc$w_length);
+				&dststr->dsc$w_length);
 
 		icmp_mib->MIB$icmpOutErrors =
 			icmp_mib->MIB$icmpOutErrors + 1;
@@ -641,9 +641,9 @@ void ICMP_Send_DUNR(ICMpkt,ICMlen,IPPKT,IPlen,code)
 	    if ($$LOGF(LOG$ICMP))
 		{
 		ASCII_DEC_BYTES(srcstr,4,IPPKT->iph$source,
-			        srcstr->dsc$w_length);
+			        &srcstr->dsc$w_length);
 		ASCII_DEC_BYTES(dststr,4,IPPKT->iph$dest,
-				dststr->dsc$w_length);
+				&dststr->dsc$w_length);
 
 		icmp_mib->MIB$icmpOutErrors =
 			icmp_mib->MIB$icmpOutErrors + 1;

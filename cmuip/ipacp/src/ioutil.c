@@ -159,12 +159,15 @@ void APPEND_DEC(DPTR,DCNT,NUM,OUTCNT)
 //   NUM - Value to output
 //   OUTCNT - Address of count of bytes output (updated)
 
+     long * OUTCNT;
+long * DPTR;
+long * DCNT;
     {
     signed long
 	DIV,DIG,REM,VAL,FLAG;
     if (NUM == 0)
 	{
-	APPCHR('0',DPTR,DCNT,OUTCNT);
+	APPCHR('0',(*DPTR),*DCNT,*OUTCNT);
 	return;
 	};
     DIV = 1000000000;			// Highest pwr of 10 in 32 bits
@@ -172,7 +175,7 @@ void APPEND_DEC(DPTR,DCNT,NUM,OUTCNT)
     if (VAL < 0)
 	{
 	VAL = -1*VAL;
-	APPCHR('-',DPTR,DCNT,OUTCNT);
+	APPCHR('-',(*DPTR),*DCNT,*OUTCNT);
 	};
     FLAG = 0;
     while (DIV > 0)
@@ -183,7 +186,7 @@ void APPEND_DEC(DPTR,DCNT,NUM,OUTCNT)
 	if ((DIG != 0) || (FLAG != 0))
 	    {
 	    FLAG = FLAG+1;
-	    APPCHR(DIG+'0',DPTR,DCNT,OUTCNT);
+	    APPCHR(DIG+'0',(*DPTR),*DCNT,*OUTCNT);
 	    };
 	VAL = REM;
 	};
@@ -194,28 +197,32 @@ void ASCII_DEC_BYTES(DESC,COUNT,SOURCE,LEN)
 // Write a string of decimal bytes to a string descriptor.
 
      struct dsc$descriptor * DESC;
+long * LEN;
     {
       signed long I,
 	CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
     OUTCNT = 0;
-    CPTR = CH$PTR(SOURCE,0);
+    CPTR = CH$PTR(&SOURCE,0);
     DCNT = DESC->dsc$w_length;
     DPTR = CH$PTR(DESC->dsc$a_pointer,0);
     for (I=(COUNT-1);I>=0;I--)
 	{
 	CURBYTE = CH$RCHAR_A(CPTR);
-	APPEND_DEC(DPTR,DCNT,CURBYTE,OUTCNT);
+	APPEND_DEC(&DPTR,&DCNT,CURBYTE,&OUTCNT);
 	if (I != 0)
 	    APPCHR('.',DPTR,DCNT,OUTCNT);
 	};
-    if (LEN != 0)
-	LEN = MIN(OUTCNT,DESC->dsc$w_length);
+    if (*LEN != 0)
+	*LEN = MIN(OUTCNT,DESC->dsc$w_length);
     }
 
 APPEND_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
 
 // Append a hexidecimal value to a string
 
+     long * DPTR;
+long * DCNT;
+long * OUTCNT;
     {
       signed long I,
 	DIG,VAL;
@@ -228,7 +235,7 @@ APPEND_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
 	  DIG = '0'+DIG;
 	else
 	    DIG = 'A'+DIG-10;
-	APPCHR(DIG,DPTR,DCNT,OUTCNT);
+	APPCHR(DIG,(*DPTR),*DCNT,*OUTCNT);
 	}
     }
 
@@ -237,22 +244,23 @@ void ASCII_HEX_BYTES(DESC,COUNT,SOURCE,LEN)
 // Write a string of hexidecimal bytes to a string descriptor.
 
      struct dsc$descriptor * DESC;
+long * LEN;
     {
       signed long I,
 	CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
-    CPTR = CH$PTR(SOURCE,0);
+    CPTR = CH$PTR(&SOURCE,0);
     DCNT = DESC->dsc$w_length;
     DPTR = CH$PTR(DESC->dsc$a_pointer,0);
     OUTCNT = 0;
     for (I=(COUNT-1);I>=0;I--)
 	{
 	CURBYTE = CH$RCHAR_A(CPTR);
-	APPEND_HEX(DPTR,DCNT,CURBYTE,OUTCNT,2);
+	APPEND_HEX(&DPTR,&DCNT,CURBYTE,&OUTCNT,2);
 	if (I != 0)
 	    APPCHR('-',DPTR,DCNT,OUTCNT);
 	};
-    if (LEN != 0)
-	LEN = MIN(OUTCNT,DESC->dsc$w_length);
+    if (*LEN != 0)
+	*LEN = MIN(OUTCNT,DESC->dsc$w_length);
     }
 
 

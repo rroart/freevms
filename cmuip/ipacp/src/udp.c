@@ -331,7 +331,7 @@ static signed long
     UDPCB_Count  = 0;	// Count of active UDPCBs
 long    UDPCB_TABLE[MAX_UDPCB+1];// Table of UDPCBs
 
-    struct UDP_MIB_struct * udp_mib ;	// UDP Management Information Block
+    struct UDP_MIB_struct udp_mib_, * udp_mib=&udp_mib_ ;	// UDP Management Information Block
 
 
 //SBTTL "UDP packet logger"
@@ -394,7 +394,7 @@ void Log_UDP_Packet(Seg,SwapFlag,SendFlag)
 	  hexcnt = maxhex;
 	else
 	    hexcnt = datalen;
-	ASCII_Hex_Bytes(dathex,hexcnt,segdata,dathex->dsc$w_length);
+	ASCII_HEX_BYTES(dathex,hexcnt,segdata,dathex->dsc$w_length);
 	QL$FAO(/*%STRING*/("!_Data Count: !SL!/",
 		       "!_HEX:!_!AS!/",
 		       "!_ASCII:!_!AF!/"),

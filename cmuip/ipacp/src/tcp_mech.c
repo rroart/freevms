@@ -93,7 +93,7 @@ extern
 
 unsigned long long    Start_Time;	// Quadword time IPACP started.
 unsigned long long    TEK$sys_uptime;	// Quadword delta time since IPACP started.
-struct TCP_MIB_struct * tcp_mib;	// TCP management Information Block
+struct TCP_MIB_struct tcp_mib_, * tcp_mib=&tcp_mib_;	// TCP management Information Block
 
 
 
@@ -157,7 +157,7 @@ void tcp$init (void)
 
     // Allocate the connection list
     ConectSize = max_local_ports;
-    mm$get_mem( ConectPtr , ConectSize * CN$BLK_SIZE * 4 );
+    mm$get_mem( &ConectPtr , ConectSize * CN$BLK_SIZE * 4 );
     for (cidx=0;cidx<=ConectSize-1;cidx++)
 	{				// Initialize connection table
 	ConectPtr[cidx].CN$TCB_List = ConectPtr[cidx].CN$TCB_List;
@@ -167,7 +167,7 @@ void tcp$init (void)
 
     // Allocate the valid TCB table
     vtcb_size = max_conn;
-    mm$get_mem ( vtcb_ptr , (vtcb_size+1) * 4 );
+    mm$get_mem ( &vtcb_ptr , (vtcb_size+1) * 4 );
     CH$FILL ( 0 , (vtcb_size+1) * 4 , vtcb_ptr );
 
     tcp_mib->MIB$tcpRtoAlgorithm= 0;
@@ -241,7 +241,7 @@ extern	MOVBYT();
 	vtcb_size = vtcb_size * 2;
 
 	Old = vtcb_ptr;
-	mm$get_mem( vtcb_ptr , (vtcb_size+1) * 4 );
+	mm$get_mem( &vtcb_ptr , (vtcb_size+1) * 4 );
 	MOVBYT ( (Indx+1) * 4 , Old , vtcb_ptr );
 	mm$free_mem( Old , (Indx+1) * 4 );
 
@@ -504,7 +504,7 @@ extern	MOVBYT(),
 //    ConectSize = ConectSize * 2;
 
     Old = ConectPtr;
-//    mm$get_mem( ConectPtr , ConectSize * CN$Blk_Size * 4 );
+//    mm$get_mem( &ConectPtr , ConectSize * CN$Blk_Size * 4 );
 
     // Initialize the new table.
 //    INCR cidx FROM (Idx) TO (ConectSize-1) DO
@@ -817,9 +817,9 @@ tcb$create (void)
 	RC;	// return code
 
     NOINT;			// Hold AST's please...
-    mm$get_mem ( TCB   , TCB_SIZE*4 );
-    mm$get_mem ( SENDQ , window_default );
-    mm$get_mem ( RECVQ , window_default );
+    mm$get_mem ( &TCB   , TCB_SIZE*4 );
+    mm$get_mem ( &SENDQ , window_default );
+    mm$get_mem ( &RECVQ , window_default );
     OKINT;
 
 //    CH$FILL(%CHAR(0),tcb_size*4,TCB);	// clean house.....zero fill.

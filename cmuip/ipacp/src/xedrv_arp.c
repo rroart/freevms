@@ -264,8 +264,8 @@ DESC$STR_ALLOC(IPSTR,20);
 
 // Translate IP address and physical address into ASCII
 
-    ASCII_DEC_BYTES(IPSTR,4,IPADDR,IPSTR->dsc$w_length);
-    ASCII_HEX_BYTES(PHYSTR,HWLEN,HWADDR,PHYSTR->dsc$w_length);
+    ASCII_DEC_BYTES(IPSTR,4,IPADDR,&IPSTR->dsc$w_length);
+    ASCII_HEX_BYTES(PHYSTR,HWLEN,HWADDR,&PHYSTR->dsc$w_length);
 
 // Queue up a message for later output
 

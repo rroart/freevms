@@ -423,11 +423,11 @@ void ip$init  (void)
 
 // Set the queue to empty.
 
-    RA_QUEUE->qhead = RA_QUEUE->qtail = RA_QUEUE->qhead;
+    RA_QUEUE->qhead = RA_QUEUE->qtail = &RA_QUEUE->qhead;
 
 // Translate time string to quadword value
 
-    RC = exe$bintim( RA_CHECK_TIMESTR,RA_CHECK_TIME);
+    RC = exe$bintim( &RA_CHECK_TIMESTR,&RA_CHECK_TIME);
     if (! RC)
 	FATAL$FAO("$BINTIM failed for RA_CHECK_TIMSTR, RC = !XL",RC);
 
@@ -470,8 +470,8 @@ DESC$STR_ALLOC(DSTSTR,20);
     
 // Build IP source and dest strings
 
-    ASCII_DEC_BYTES(SRCSTR,4,IPHDR->iph$source,SRCSTR->dsc$w_length);
-    ASCII_DEC_BYTES(DSTSTR,4,IPHDR->iph$dest,DSTSTR->dsc$w_length);
+    ASCII_DEC_BYTES(SRCSTR,4,IPHDR->iph$source,&SRCSTR->dsc$w_length);
+    ASCII_DEC_BYTES(DSTSTR,4,IPHDR->iph$dest,&DSTSTR->dsc$w_length);
 
 // Queue up the message
 
@@ -583,7 +583,7 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
     if (LEV > MAX_LEV)
 	{
 	    DESC$STR_ALLOC(DSTSTR,20);
-	ASCII_DEC_BYTES(DSTSTR,4,IPDEST,DSTSTR->dsc$w_length);
+	ASCII_DEC_BYTES(DSTSTR,4,IPDEST,&DSTSTR->dsc$w_length);
 	XQL$FAO(LOG$IP+LOG$IPERR,
 		"!%T IP_ROUTE max recursion depth exceeded, DEST=!AS!/",
 		0,DSTSTR);
@@ -744,7 +744,7 @@ ip$send_raw(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	if ((dev = IP_ROUTE(IP$Dest,newip_src,newip_dest,0)) < 0)
 	    {
 		DESC$STR_ALLOC(dststr,20);
-	    ASCII_DEC_BYTES(dststr,4,IP$Dest,dststr->dsc$w_length);
+	    ASCII_DEC_BYTES(dststr,4,IP$Dest,&dststr->dsc$w_length);
 	    XQL$FAO(LOG$IP+LOG$IPERR,
 		    "!%T IP send failure - no route to !AS!/",
 		    0,dststr);
@@ -767,7 +767,7 @@ ip$send_raw(IP$Dest,Seg,SegSize,Delete_Seg,Buf,Bufsize)
 	if (IP$Dest != newip_dest)
 	    {
 		DESC$STR_ALLOC(dststr,20);
-	    ASCII_DEC_BYTES(dststr,4,newip_dest,dststr->dsc$w_length);
+	    ASCII_DEC_BYTES(dststr,4,newip_dest,&dststr->dsc$w_length);
 	    QL$FAO("!%T IPsend: route is !AS!/",0,dststr);
 	    };
 //	QL$FAO("!%T IPsend: dev index=",1,dev,0)
@@ -931,7 +931,7 @@ ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	if ((dev = IP_ROUTE(IP$Dest,newip_src,newip_dest,0)) < 0)
 	    {
 		DESC$STR_ALLOC(dststr,20);
-	    ASCII_DEC_BYTES(dststr,4,IP$Dest,dststr->dsc$w_length);
+	    ASCII_DEC_BYTES(dststr,4,IP$Dest,&dststr->dsc$w_length);
 	    XQL$FAO(LOG$IP+LOG$IPERR,
 		    "!%T IP send failure - no route to !AS!/",
 		    0,dststr);
@@ -989,7 +989,7 @@ ip$send(IP$Src,IP$Dest,Service,Life,Seg,SegSize,
 	if (IP$Dest != newip_dest)
 	    {
 		DESC$STR_ALLOC(dststr,20);
-	    ASCII_DEC_BYTES(dststr,4,newip_dest,dststr->dsc$w_length);
+	    ASCII_DEC_BYTES(dststr,4,newip_dest,&dststr->dsc$w_length);
 	    QL$FAO("!%T IPsend: route is !AS!/",0,dststr);
 	    };
 //	QL$FAO("!%T IPsend: dev index=",1,dev,0)

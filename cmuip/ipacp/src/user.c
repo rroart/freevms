@@ -883,7 +883,7 @@ extern	mm$get_mem(), mm$free_mem();
 	RC,
 	Buffer;
 
-    if ((RC=mm$get_mem(Buffer,uargs->ev$buf_size)) != SS$_NORMAL)
+    if ((RC=mm$get_mem(&Buffer,uargs->ev$buf_size)) != SS$_NORMAL)
 	{
 	USER$Err(uargs,RC);
 	return;
@@ -959,7 +959,7 @@ extern	SNMP$USER_INPUT(),
 
 // Fetch the input data from kernal space.
 
-    if ((RC=mm$get_mem(In_Buff,uargs->snmp$wbuf_size)) != SS$_NORMAL)
+    if ((RC=mm$get_mem(&In_Buff,uargs->snmp$wbuf_size)) != SS$_NORMAL)
 	{
 	USER$Err(uargs,RC);
 	return;

@@ -119,7 +119,9 @@ CH$MOVE(size, src, addr) {
   printk("CH$MOVE not implemented\n");
 }
 
-INSQUE() {
+INSQUE(x,y) {
+  insque(x,y);
+  return SS$_NORMAL;
   printk("INSQUE not implemented\n");
 }
 
@@ -127,11 +129,13 @@ REMQUE() {
   printk("REMQUE not implemented\n");
 }
 
-MIN() {
+MIN(x,y) {
+  return (x<y ? x :  y);
   printk("MIN not implemented\n");
 }
 
-MAX() {
+MAX(x,y) {
+  return (x>y ? x :  y);
   printk("MAX not implemented\n");
 }
 
@@ -147,7 +151,8 @@ MAXU() {
   printk("MAXU not implemented\n");
 }
 
-ROT() {
+ROT(x,y) {
+  return x>>y;
   printk("ROT not implemented\n");
 }
 
@@ -155,7 +160,7 @@ SwapBytes_not() {
   printk("SwapBytes not implemented\n");
 }
 
-CH$WCHAR_A() {
+CH$WCHAR_A_not() {
   printk("CH$WCHAR_A not implemented\n");
 }
 
@@ -270,11 +275,23 @@ ACT$FAO() {
   printk("ACT$FAO not implemented\n");
 }
 
-ASCII_Dec_Bytes() {
+ASCII_Dec_Bytes_not(DESC,COUNT,SOURCE,LEN) {
+#if 0
+  struct dsc$descriptor * d = DESC;
+  char * s=&SOURCE;
+  snprintf(d->dsc$a_pointer,len,"%d.%d.%d.%d",s[0],s[1],s[2],s[3]);
+  return SS$_NORMAL;
+#endif
   printk("ASCII_Dec_Bytes not implemented\n");
 }
 
-ASCII_Hex_Bytes() {
+ASCII_Hex_Bytes_not(DESC,COUNT,SOURCE,LEN) {
+#if 0
+  struct dsc$descriptor * d = DESC;
+  char * s=&SOURCE;
+  snprintf(d->dsc$a_pointer,len,"%d.%d.%d.%x",s[0],s[1],s[2],s[3]);
+  return SS$_NORMAL;
+#endif
   printk("ASCII_Hex_Bytes not implemented\n");
 }
 
@@ -286,7 +303,7 @@ CH$PLUS() {
   printk("CH$PLUS not implemented\n");
 }
 
-INSQue() {
+INSQue_not() {
   printk("INSQue not implemented\n");
 }
 
