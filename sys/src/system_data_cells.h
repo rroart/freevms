@@ -8,6 +8,7 @@
 #include"../../lib/src/tqedef.h"
 #include"../../lib/src/wqhdef.h"
 #include"../../lib/src/rsbdef.h"
+#include"../../lib/src/ccbdef.h"
 
 extern unsigned long acme$gq_mutex;
 extern unsigned long acme$gq_request_queue;
@@ -127,7 +128,8 @@ extern unsigned long ctl$c_clidatasz;
 extern unsigned long ctl$c_krp_count;
 extern unsigned long ctl$c_krp_size;
 extern unsigned long ctl$c_p1ptr_size;
-extern unsigned long ctl$ga_ccb_table;
+extern struct _ccb ctl$gl_ccbbase[];
+extern struct _ccb ctl$ga_ccb_table[];
 extern unsigned long ctl$ga_les_process;
 extern unsigned long ctl$gb_deflang;
 extern unsigned long ctl$gb_msgmask;

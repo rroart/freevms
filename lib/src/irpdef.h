@@ -123,7 +123,7 @@
 #define	IRP$S_IRPDEF	536
 	
 struct	_irp	{
-struct	_irp	*irp$l_ioqfl;
+struct _irp *irp$l_ioqfl;
 struct _irp *irp$l_ioqbl;
 unsigned short int irp$w_size;
 unsigned char irp$b_type;
@@ -155,6 +155,7 @@ unsigned long irp$l_seqnum;
 unsigned long irp$l_extend;
 unsigned long irp$l_arb;
 unsigned long irp$l_keydesc;
+  /* copy from cdrp to this area */
 };
 
 #endif

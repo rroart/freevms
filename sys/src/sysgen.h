@@ -255,4 +255,6 @@
 #define WS_OPA0                         0   /*        0         0         1 Boolean    D */
 #define XFMAXRATE                     236   /*      236         0       255 Special    D */
 
+#define CHANNELCNT 1024
+
 #endif /* __SYSGEN_LOADED */

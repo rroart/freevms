@@ -5,6 +5,7 @@
 #include"../../freevms/lib/src/ucbdef.h"
 #include"../../freevms/sys/src/system_data_cells.h"
 #include<linux/vmalloc.h>
+#include<linux/linkage.h>
 
 void exe$insertirp(void * u, struct _irp * i) {
   struct _irp *tmp=((struct _irp *)u)->irp$l_ioqfl;
@@ -39,7 +40,7 @@ int exe$insioq (struct _ucb * u, struct _irp * i) {
 }
 
 /* put this into a struct */
-int exe$qio (struct struct_qio * q) {
+asmlinkage int exe$qio (struct struct_qio * q) {
   int func;
   struct _irp * i;
   exe$clref(q->efn);

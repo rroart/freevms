@@ -16,9 +16,10 @@
 
 struct _ccb {
   struct _ucb *ccb$l_ucb;
-  __union  {
+  struct _wcb *ccb$l_wind;
+  union  {
     unsigned int ccb$l_sts;
-    __struct  {
+    struct  {
       unsigned ccb$v_amb        : 1;
       unsigned ccb$v_imgtmp     : 1;
       unsigned ccb$v_rdchkdon   : 1;
@@ -29,34 +30,19 @@ struct _ccb {
       unsigned ccb$v_nowriteacc : 1;
       unsigned ccb$v_clone      : 1;
       unsigned ccb$v_fillme     : 7;
-    } ccb$r_sts_bits;
-  } ccb$r_sts_overlay;
-  unsigned int ccb$l_ioc;
-  struct _irp *ccb$l_dirp;
+    };
+  };
   char ccb$b_amod;
   unsigned char ccb$b_spare_1;
   unsigned short int ccb$w_spare_2;
-  struct _wcb *ccb$l_wind;
-  __union  {
+  unsigned int ccb$l_ioc;
+  struct _irp *ccb$l_dirp;
+  union  {
     int ccb$l_chan;
     unsigned short int ccb$w_chan;
-  } ccb$r_chan_overlay;
+  };
   int ccb$l_reserved;
 };
- 
-#define ccb$l_chan ccb$r_chan_overlay.ccb$l_chan
-#define ccb$l_sts ccb$r_sts_overlay.ccb$l_sts
-#define ccb$v_amb ccb$r_sts_overlay.ccb$r_sts_bits.ccb$v_amb
-#define ccb$v_clone ccb$r_sts_overlay.ccb$r_sts_bits.ccb$v_clone
-#define ccb$v_imgtmp ccb$r_sts_overlay.ccb$r_sts_bits.ccb$v_imgtmp
-#define ccb$v_logchkdon ccb$r_sts_overlay.ccb$r_sts_bits.ccb$v_logchkdon
-#define ccb$v_noreadacc ccb$r_sts_overlay.ccb$r_sts_bits.ccb$v_noreadacc
-#define ccb$v_nowriteacc ccb$r_sts_overlay.ccb$r_sts_bits.ccb$v_nowriteacc
-#define ccb$v_phychkdon ccb$r_sts_overlay.ccb$r_sts_bits.ccb$v_phychkdon
-#define ccb$v_rdchkdon ccb$r_sts_overlay.ccb$r_sts_bits.ccb$v_rdchkdon
-#define ccb$v_wrtchkdon ccb$r_sts_overlay.ccb$r_sts_bits.ccb$v_wrtchkdon
-#define ccb$w_chan ccb$r_chan_overlay.ccb$w_chan
-
  
 #endif
  
