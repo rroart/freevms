@@ -1,6 +1,35 @@
 /*
- * str.c
+ *	strelement.c
  *
+ *	Copyright (C) 2003 Andrew Allison
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *The authors may be contacted at:
+ *
+ *	Andrew Allison		freevms@sympatico.ca
+ *
+ *				Andrew Allison
+ *				50 Denlaw Road
+ *				London, Ont
+ *				Canada 
+ *				N6G 3L4
+ *
+ */
+
+/*
  *	Code for VAX STR$ELEMENT routine
  *
  * Description:
@@ -16,17 +45,28 @@
  *
  *	Feb 7, 1997 - Christof Zeile
  *		Change 'short' to 'unsigned short' in several places.
+ *
+ *	Feb 26, 2004 - Andrew Allison
+ * 		Added GNU License
+ *
+ *	Mar 12, 2004 - Andrew Allison
+ *		If text not found return NULL in destination
+ *		return entire substring if token not found
+ *		if no text present between delimiters return NULL
  */
 
+#include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "descrip.h"
 #include "strdef.h"
+#include "ssdef.h"
 #include "str$routines.h"
 
 /*************************************************************
- * str$append
+ * str$element
  *
  */
 unsigned long str$element(struct dsc$descriptor_s* destination_string,
@@ -45,7 +85,13 @@ unsigned long str$element(struct dsc$descriptor_s* destination_string,
 	char delimiter;			/* Delimiter character */
 	unsigned long result1;
 	unsigned long result = STR$_NORMAL;	/* Result */
-	int element_number = *find_element_number;
+	int element_number;
+
+	element_number = (int) *find_element_number;
+
+//	Did we get a numeric value
+	if ( isdigit((char) element_number + '0') == 0 )
+		return STR$_ILLSTRSPE;
 
 	/*
 	 * Negitive numbers start at first element
@@ -63,6 +109,16 @@ unsigned long str$element(struct dsc$descriptor_s* destination_string,
         str$analyze_sdesc(source_string, &s2_length, &s2_ptr);
 	str$analyze_sdesc(delimiter_string, &s3_length, &s3_ptr);
 
+//	If no delimiter's where found return entire string
+	if ( (s2_ptr != NULL) && (s3_ptr != NULL) )
+	{
+		if ( strstr (s2_ptr, s3_ptr) == NULL) 
+		{
+//			str$copy_dx (destination_string,source_string);
+			return SS$_NORMAL;
+		}
+	}
+
 	/*
 	 * Check out delimiter. Assume '\0' if none given.
 	 */
@@ -71,7 +127,6 @@ unsigned long str$element(struct dsc$descriptor_s* destination_string,
 		return STR$_INVDELIM;
 	}
 	delimiter = *s3_ptr;
-
 	/*
 	 * Look for a sterting position
 	 */
@@ -84,7 +139,6 @@ unsigned long str$element(struct dsc$descriptor_s* destination_string,
 		}
 		res_ptr++;
 	}
-
 
 	/*
 	 * Should now point to result string, or not have a
@@ -110,12 +164,20 @@ unsigned long str$element(struct dsc$descriptor_s* destination_string,
 	/*
 	 * Copy over the result
 	 */
-	s1_ptr = s2_ptr + res_ptr;
-	result1 = str$copy_r(destination_string, &res_length, s1_ptr);
-
-	if (result1 != STR$_NORMAL)
+	if ( res_ptr < s2_length )
+	{	s1_ptr = s2_ptr + res_ptr;
+		result1 = str$copy_r(destination_string, &res_length, s1_ptr);
+	}
+/*
+	else
+	{	str$free1_dx (destination_string);
+		result1 = STR$_NOELEM;
+		result  = STR$_NOELEM;
+	}
+*/
+	if (result1 == STR$_NORMAL)
 	{
-		result = result1;
+		result = SS$_NORMAL;
 	}
 
 	/*
