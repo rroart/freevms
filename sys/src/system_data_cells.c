@@ -1614,7 +1614,7 @@ unsigned long sgn$gl_npag_gentle;
 unsigned long sgn$gl_npag_interval;
 unsigned long sgn$gl_npag_ring_size;
 unsigned long sgn$gl_npagecalc;
-unsigned long sgn$gl_npagedyn;
+unsigned long sgn$gl_npagedyn=0x800000;
 unsigned long sgn$gl_npagerad;
 unsigned long sgn$gl_npagevir;
 unsigned long sgn$gl_p1lwcnt;

@@ -242,13 +242,17 @@ found:
 	return ret;
 }
 
+int in_free_all_bootmem_core=0;
+
 static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 {
 	struct page *page = pgdat->node_mem_map;
 	bootmem_data_t *bdata = pgdat->bdata;
 	unsigned long i, count, total = 0;
 	unsigned long idx;
-	struct page * prev=0;
+	struct page * prev;
+
+	in_free_all_bootmem_core=1;
 
 	if (!bdata->node_bootmem_map) BUG();
 
@@ -279,14 +283,23 @@ static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 	total += count;
 	bdata->node_bootmem_map = NULL;
 
+	prev = 0;
 	page = pgdat->node_mem_map;
 	for (i = 0; i < idx; i++, page++) {
 	  if (!PageReserved(page)) {
-	    if (prev)
+	    if (prev) {
 	      prev->pfn$l_flink=page;
-	    else
+	    } else {
 	      pfn$al_head=page;
-	    page->pfn$l_blink=prev;
+	    }
+	    {
+	      unsigned long * prev2=&page->pfn$l_flink;
+	      prev2++;
+	      *prev2=prev; 
+	      // sick compiler
+	      // it optimized away page->pfn$l_blink=prev
+	      // or interpreted as flink
+	    }
 	    prev=page;
 	    page->pfn$v_loc=PFN$C_FREPAGLST;
 	    page->pfn$v_pagtyp=PFN$C_SYSTEM;
@@ -294,6 +307,8 @@ static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 	}
 	prev->pfn$l_flink=0;
 	pfn$al_tail=prev;
+
+	in_free_all_bootmem_core=0;
 
 	return total;
 }

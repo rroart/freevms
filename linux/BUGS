@@ -1,3 +1,6 @@
 doing something like ctrl-c in a shell gotten by ssh-ing locks the machine. (seems to be gone. wonder why.)
 
-smp is broken.
+smp is probably broken.
+highmem too.
+
+bochs and uml works only partially, i.e. qio1 has problems.

@@ -18,6 +18,6 @@ obj-y	 := memory.o mmap.o filemap.o mprotect.o mlock.o mremap.o \
 
 obj-$(CONFIG_HIGHMEM) += highmem.o
 
-obj-$(CONFIG_MM_VMS) += memoryalc.o vmsbootmem.o
+obj-$(CONFIG_MM_VMS) += memoryalc.o vmsbootmem.o allocpfn.o ptalloc.o
 
 include $(TOPDIR)/Rules.make

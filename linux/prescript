@@ -60,6 +60,8 @@ cd ..;
 cd mm;
 		ln -s ../../freevms/sys/src/memoryalc.c .;
 		ln -s ../../freevms/sys/src/vmsbootmem.c .;
+		ln -s ../../freevms/sys/src/allocpfn.c .;
+		ln -s ../../freevms/sys/src/ptalloc.c .;
 cd ..;
 
 cd drivers/block;
