@@ -84,3 +84,7 @@ Check waitall and wait
 Rename librtl/src/starlet.a to librtl.a
 
 Get getdx to add 2?
+
+Proper deletion of dead processes in the databases (still shows up with sh sys)
+
+Do mscp protocol a bit more properly

@@ -508,6 +508,25 @@ Nisca_snt_dg dispatches to the input routine designated by the connection id.
 
 Clustering is not yet ready for CONFIG_VMS networking.
 
+Configure process
+As described in 4.9 Configure Process (and 4.14)
+Configure scs process poller, which polls for mscp$disk or mscp$tape sysap.
+(It is named scs_std$poll_proc/mbx/mode?)
+I suppose it would also start mbx reading.
+Then it goes into hibernation.
+If the process poller discovers mscp$disk or mscp$tape, it writes to the
+configure mailbox.
+It writes two things; the first is the sysap, the second is the system block 
+address.
+When configure reads the mailbox, it contacts the class driver inititalization
+routine (which one depends on whether the sysap was mscp$disk or mscp$tape).
+The class driver initialization routine connect to the other side, and 
+starts a dialogue about the devices. 
+It will also build eventual new data structures.
+It will also disable polling.
+MSCP protocol use is of set controller characteristics, available attention
+and get unit status.
+
 [linux.init]
 main.c
 

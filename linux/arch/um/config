@@ -2,9 +2,9 @@
 # Automatically generated make config: don't edit
 #
 
-#CONFIG_VMS=y
-#CONFIG_IO_VMS=y
-#CONFIG_MM_VMS=y
+CONFIG_VMS=y
+CONFIG_IO_VMS=y
+CONFIG_MM_VMS=y
 
 CONFIG_USERMODE=y
 # CONFIG_ISA is not set

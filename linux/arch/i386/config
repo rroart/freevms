@@ -2,9 +2,9 @@
 # Automatically generated make config: don't edit
 #
 
-#CONFIG_VMS=y
-#CONFIG_IO_VMS=y
-#CONFIG_MM_VMS=y
+CONFIG_VMS=y
+CONFIG_IO_VMS=y
+CONFIG_MM_VMS=y
 
 CONFIG_X86=y
 CONFIG_ISA=y

@@ -1,8 +1,8 @@
 #ifndef autoconf_h
 #define autoconf_h
 
-#define CONFIG_VMS
 #undef CONFIG_VMS
+#define CONFIG_VMS
 
 #ifdef CONFIG_VMS
 #define CONFIG_IO_VMS
