@@ -19,7 +19,7 @@ endif
 
 obj-y	 := page_io.o \
 	    numa.o oom_kill.o \
-	    swap.o swap_state.o
+	    swap.o swap_state.o allocpfn.o
 
 obj-$(CONFIG_HIGHMEM) += highmem.o
 
@@ -29,7 +29,7 @@ obj-y += page_alloc.o bootmem.o slab.o vmscan.o mmap.o \
 	 mprotect.o mlock.o vmalloc.o shmem.o swapfile.o
 endif
 
-obj-$(CONFIG_MM_VMS) += memoryalc.o vmsbootmem.o allocpfn.o ptalloc.o \
+obj-$(CONFIG_MM_VMS) += memoryalc.o vmsbootmem.o ptalloc.o \
 			vmsslab.o swapper.o wrtmfypag.o \
 			vmsmmap.o vmsfilemap.o vmsmemory.o vmsmremap.o \
 	 		vmsmprotect.o vmsmlock.o vmsvmalloc.o \
