@@ -18,7 +18,7 @@
 #		Merged together my basic and string libraries, so I
 #		only has one subdirectory to worry about.
 #
-CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -I. -I../../starlet/src
+CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -I. -I../../starlet/src -I../../lib/src
 
 
 STROBJ = str.o str__const.o str__is_string_class.o \
@@ -44,7 +44,7 @@ LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 	lib_ab_ebc_asc_rev.o lib_ab_lowercase.o lib_ab_upcase.o \
 	lib_add_times.o lib_addx.o lib_cvt_vectim.o lib_day.o \
 	lib_day_of_week.o lib_mult_delta_time.o lib_sub_times.o \
-	lib_subx.o
+	lib_subx.o libcredir.o
 
 SYSOBJ = sys__combine_date_time.o sys_asctim.o sys_bintim.o \
 	sys_gettim.o sys_numtim.o
@@ -105,3 +105,4 @@ str_trim.o : str_trim.c ../../starlet/src/strdef.h
 str_upcase.o : str_upcase.c ../../starlet/src/strdef.h
 cvt_convert_float.o: cvt_convert_float.c
 libinsqhi.o: libinsqhi.c
+libcredir.o: libcredir.c
