@@ -137,6 +137,7 @@ void exe_std$queue_fork(struct _fkb * fkb) {
   exe$queue_fork(0,fkb);
 }
 
+// replaces exe$fork
 void exe_std$primitive_fork(long fr3, long fr4, struct _fkb * fkb) {
   fkb->fkb$l_fr3=fr3;
   fkb->fkb$l_fr4=fr4;
