@@ -11,6 +11,7 @@
 #include"../../freevms/lib/src/ddbdef.h"
 #include"../../freevms/lib/src/ipldef.h"
 #include"../../freevms/lib/src/dyndef.h"
+#include"../../freevms/starlet/src/ssdef.h"
 #include"../../freevms/starlet/src/iodef.h"
 #include"../../freevms/starlet/src/devdef.h"
 #include"../../freevms/sys/src/system_data_cells.h"
@@ -25,7 +26,7 @@ struct _irp * globali;
 struct _ucb * globalu;
 
 void nl_isr (void) {
-
+  void (*func)(void *,void *);
   struct _irp * i;
   struct _ucb * u;
 
@@ -35,22 +36,19 @@ void nl_isr (void) {
   i=globali;
   u=globalu;
 
-  /* should really call ucb$l_fpc(r5) */
-
-  null_startio(i,u);
-
+  func=u->ucb$l_fpc;
+  func(i,u);
 }
+
+void  null_startio2 (struct _irp * i, struct _ucb * u);
+void  null_startio3 (struct _irp * i, struct _ucb * u);
 
 void  null_startio (struct _irp * i, struct _ucb * u) { 
   static int first=0;
   signed long long step1=-10000000;
-  u->ucb$l_fpc=null_startio;
 
   printk("times %x %x\n",u->ucb$b_second_time_in_startio,u->ucb$b_third_time_in_startio);
   //  { int j; for(j=100000000;j;j--);}
-
-  if (u->ucb$b_third_time_in_startio) goto thirdtime;
-  if (u->ucb$b_second_time_in_startio) goto secondtime;
 
 #if 0
   if (first) {
@@ -66,29 +64,25 @@ void  null_startio (struct _irp * i, struct _ucb * u) {
   printk("firsttime %x %x\n",i,u);
   globali=i;
   globalu=u;
-  exe$setimr(0, &step1, nl_isr,0,0);
 
   u->ucb$b_second_time_in_startio=1;
-  ioc$wfikpch(i,u,8,2);
+  ioc$wfikpch(null_startio2,0,i,current,u,2,0);
+  exe$setimr(0, &step1, nl_isr,0,0);
   return;
+}
 
- secondtime:
+void  null_startio2 (struct _irp * i, struct _ucb * u) { 
   printk("secondtime\n");
 
-  u->ucb$b_third_time_in_startio=1;
+  u->ucb$l_fpc=null_startio3;
   exe$iofork(i,u);
   return;
+}
 
- thirdtime:
+void  null_startio3 (struct _irp * i, struct _ucb * u) { 
   printk("thirdtime %x %x\n",i,u);
-  i=globali;
-  u=globalu; 
-  printk("thirdtime %x %x\n",i,u);
-
-  u->ucb$b_third_time_in_startio=0;
-  u->ucb$b_second_time_in_startio=0;
-  ioc$reqcom(i,u);
-
+  ioc$reqcom(SS$_NORMAL,0,u);
+  return;
 };
 
 /* more yet undefined dummies */

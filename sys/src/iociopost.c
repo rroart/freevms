@@ -6,12 +6,21 @@
 #include"../../freevms/pal/src/ipl.h"
 #include "../../freevms/sys/src/system_data_cells.h"
 
-dirpost(void) {
+dirpost(struct _irp * i) {
   printk("doing dirpost\n");
 }
 
-bufpost(void) {
+bufpost(struct _irp * i) {
+  struct _acb * a=(struct _acb *) i;
   printk("doing bufpost\n");
+  /* do iosb soon? */
+  if (i->irp$l_iosb) {
+    bcopy(&i->irp$l_iost1,i->irp$l_iosb,8);
+  }
+  if (a->acb$l_ast) {
+    a->acb$b_rmod&=~ACB$M_KAST;
+    sch$qast(i->irp$l_pid,PRI$_NULL,i);
+  }
 }
 
 asmlinkage void ioc$iopost(void) {
