@@ -406,6 +406,8 @@ static int ext2_alloc_branch(struct inode *inode,
 		*branch[n].p = branch[n].key;
 		mark_buffer_uptodate(bh, 1);
 		unlock_buffer(bh);
+		vms_mark_buffer_dirty(bh);
+		ext2_sync_inode(inode);
 		//vms_mark_buffer_dirty_inode(bh, inode);
 		goto sync;
 		if (IS_SYNC(inode) || inode->u.ext2_i.i_osync) {
@@ -509,7 +511,7 @@ changed:
  * reachable from inode.
  */
 
-static int ext2_get_block(struct inode *inode, long iblock, struct buffer_head *bh_result, int create)
+/*static*/ int ext2_get_block(struct inode *inode, long iblock, signed long *bh_result, int create, struct _fcb * fcb)
 {
 	int err = -EIO;
 	int offsets[4];
@@ -518,7 +520,7 @@ static int ext2_get_block(struct inode *inode, long iblock, struct buffer_head *
 	unsigned long goal;
 	int left;
 	int depth = ext2_block_to_path(inode, iblock, offsets);
-	panic("ext2_get_block\n");
+
 	if (depth == 0)
 		goto out;
 
@@ -529,9 +531,11 @@ reread:
 	/* Simplest case - block found, no allocation needed */
 	if (!partial) {
 got_it:
-		bh_result->b_dev = inode->i_dev;
-		bh_result->b_blocknr = le32_to_cpu(chain[depth-1].key);
-		bh_result->b_state |= (1UL << BH_Mapped);
+	  //bh_result->b_dev = inode->i_dev;
+		*bh_result = le32_to_cpu(chain[depth-1].key);
+		if (create==0) panic("nocreate\n");
+		e2_fcb_wcb_add_one(fcb,iblock,*bh_result);
+		//		bh_result->b_state |= (1UL << BH_Mapped);
 		/* Clean up and exit */
 		partial = chain+depth-1; /* the whole chain */
 		goto cleanup;
@@ -541,7 +545,7 @@ got_it:
 	if (!create || err == -EIO) {
 cleanup:
 		while (partial > chain) {
-			brelse(partial->bh);
+		  //brelse(partial->bh);
 			partial--;
 		}
 		unlock_kernel();
@@ -569,28 +573,29 @@ out:
 	if (ext2_splice_branch(inode, iblock, chain, partial, left) < 0)
 		goto changed;
 
-	bh_result->b_state |= (1UL << BH_New);
+	//	bh_result->b_state |= (1UL << BH_New);
 	goto got_it;
 
 changed:
 	while (partial > chain) {
-		brelse(partial->bh);
+	  //brelse(partial->bh);
 		partial--;
 	}
 	goto reread;
 }
 
+int generic_commit_write2();
 static int ext2_writepage(struct page *page)
 {
-	return block_write_full_page(page,ext2_get_block);
+	return block_write_full_page2(page,ext2_get_block);
 }
 static int ext2_readpage(struct file *file, struct page *page, struct inode * inode, unsigned long pageno)
 {
-	return block_read_full_page2(page,inode,pageno);
+	return block_read_full_page2(inode,page,pageno);
 }
 static int ext2_prepare_write(struct file *file, struct page *page, unsigned from, unsigned to)
 {
-	return block_prepare_write(page,from,to,ext2_get_block);
+	return block_prepare_write2(page,from,to,ext2_get_block);
 }
 static int ext2_bmap(struct address_space *mapping, long block)
 {
@@ -605,7 +610,7 @@ struct address_space_operations ext2_aops = {
 	writepage: ext2_writepage,
 	sync_page: block_sync_page,
 	prepare_write: ext2_prepare_write,
-	commit_write: generic_commit_write,
+	commit_write: generic_commit_write2,
 	bmap: ext2_bmap,
 	direct_IO: ext2_direct_IO,
 };
@@ -817,7 +822,7 @@ void ext2_truncate (struct inode * inode)
 	iblock = (inode->i_size + blocksize-1)
 					>> EXT2_BLOCK_SIZE_BITS(inode->i_sb);
 
-	block_truncate_page(inode->i_mapping, inode->i_size, ext2_get_block);
+	block_truncate_page(inode, inode->i_size,0);
 
 	n = ext2_block_to_path(inode, iblock, offsets);
 	if (n == 0)
