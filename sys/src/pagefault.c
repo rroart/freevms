@@ -38,6 +38,7 @@
 #include <wcbdef.h>
 #include <wsldef.h>
 #include <va_rangedef.h>
+#include <pfldef.h>
 
 #include <linux/vmalloc.h>
 
@@ -184,6 +185,12 @@ void pagefaultast(struct pfast * p) {
   *(unsigned long *)(p->pte)|=_PAGE_NEWPAGE;
 #endif
   flush_tlb_range(current->mm, p->address, p->address + PAGE_SIZE);
+
+  extern int myswapfile;
+  struct _pfl * pfl = myswapfile;
+  if (p->window=pfl->pfl$l_window)
+    mmg$dallocpagfil1(p->offset>>PAGE_SHIFT);
+
   kfree(p);
 }
 
@@ -387,6 +394,25 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    //printk(" a ");
 	    return;
 	  } else { // page file
+	    extern int myswapfile;
+	    struct _pfl * pfl=myswapfile;
+	    struct _wcb * window=pfl->pfl$l_window;
+	    unsigned long vbn=mypte->pte$v_pgflpag;
+	    struct _rde * rde;
+	    unsigned long offset;// in PAGE_SIZE units
+
+	    offset=vbn<<PAGE_SHIFT;
+	    {
+	      pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+	      mem_map[pfn].pfn$v_loc=PFN$C_ACTIVE;
+	      mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
+	      // *(unsigned long *)pte=pfn // in the future have transition
+	      *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	    }
+	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
+	    printk("soon reading pfl_page %x\n",page);
+	    makereadast(window,pfn,address,pte,offset,error_code&2);	
+	    return;
 	  }
 	}
 
@@ -806,6 +832,25 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	    makereadast(window,pfn,address,pte,offset,is_write);
 	    return;
 	  } else { // page file
+	    extern int myswapfile;
+	    struct _pfl * pfl=myswapfile;
+	    struct _wcb * window=pfl->pfl$l_window;
+	    unsigned long vbn=mypte->pte$v_pgflpag;
+	    struct _rde * rde;
+	    unsigned long offset;// in PAGE_SIZE units
+
+	    offset=vbn<<PAGE_SHIFT;
+	    {
+	      pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+	      mem_map[pfn].pfn$v_loc=PFN$C_ACTIVE;
+	      mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
+	      // *(unsigned long *)pte=pfn // in the future have transition
+	      *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	    }
+	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
+	    printk("soon reading pfl_page %x\n",page);
+	    makereadast(window,pfn,address,pte,offset,is_write);	
+	    return;
 	  }
 	}
 
