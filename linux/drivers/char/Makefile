@@ -22,7 +22,7 @@ obj-y	 += mem.o tty_io.o n_tty.o tty_ioctl.o raw.o pty.o misc.o random.o
 # This list comes from 'grep -l EXPORT_SYMBOL *.[hc]'.
 
 export-objs     :=	console.o keyboard.o sysrq.o \
-			misc.o pty.o random.o selection.o serial.o \
+			pty.o random.o selection.o serial.o \
 			sonypi.o tty_io.o tty_ioctl.o generic_serial.o
 
 mod-subdirs	:=	joystick ftape drm drm-4.0 pcmcia
