@@ -18,6 +18,7 @@
 #include<phddef.h>
 #include <system_data_cells.h>
 #include <internals.h>
+#include <rsndef.h>
 
 kfreebuf(void * d) {
   struct _bufio * bd = d;
@@ -55,7 +56,7 @@ movbuf(struct _irp * i) {
 
     if (bd->bufio$w_size==0) goto end;
     if (bd->bufio$ps_uva32==0) goto end;
-    memcpy(bd->bufio$ps_uva32,bd->bufio$ps_pktdata,bd->bufio$w_size);
+    memcpy(bd->bufio$ps_uva32,bd->bufio$ps_pktdata,i->irp$l_bcnt);
     break;
 
   case DYN$C_CXB:
@@ -88,6 +89,9 @@ bufpost(struct _irp * i) {
   /* do iosb soon? */
 
   movbuf(i);
+
+  if (i->irp$l_sts&IRP$M_MBXIO)
+    sch_std$ravail(RSN$_MAILBOX);
 
   // dirpost to begin here
 
