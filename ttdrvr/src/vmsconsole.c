@@ -3,6 +3,29 @@
 
 // Author. Roar Thronæs.
 // Modified Linux source file, 2001-2004. Based on console.c.
+// Have also used some CMU stuff
+
+//
+//	****************************************************************
+//
+//		Copyright (c) 1992, Carnegie Mellon University
+//
+//		All Rights Reserved
+//
+//	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+//	distribute  this software  provided  that the  above  copyright
+//	notice appears in  all copies and that  any distribution be for
+//	noncommercial purposes.
+//
+//	Carnegie Mellon University disclaims all warranties with regard
+//	to this software.  In no event shall Carnegie Mellon University
+//	be liable for  any special, indirect,  or consequential damages
+//	or any damages whatsoever  resulting from loss of use, data, or
+//	profits  arising  out of  or in  connection  with  the  use  or
+//	performance of this software.
+//
+//	****************************************************************
+//
 
 #include<crbdef.h>
 #include<cdtdef.h>
@@ -26,41 +49,89 @@
 #include<linux/pci.h>
 #include<system_service_setup.h>
 #include<descrip.h>
+#include<ttyucbdef.h>
+#include<ttdef.h>
+#include<tt2def.h>
+#include<ttyvecdef.h>
 
 #include<linux/blkdev.h>
 #include<linux/console.h>
 
-static struct _irp * globali;
-static struct _ucb * globalu;
+void con$startio(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UNIT
+  struct _ucb * ucb = u;
+  struct _tty_ucb * tty=ucb;
+  if (CC==1) {			// Single character
+    tty->tty$b_tank_char = R3;		// Save output character
+    tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal charater in tank
+  } else {
+    tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;	// Signal burst active
+  }
 
-static void  startio3 (struct _irp * i, struct _ucb * u) { 
-  ioc$reqcom(SS$_NORMAL,0,u);
+  //
+  // Here we must do something to notify our mate device that
+  // there is data to pick up
+  //
+  // not?  ucb = ((struct _tz_ucb *)ucb)->ucb$l_tz_xucb;		// Switch to PZ UCB
+  if (ucb) {			// PZ is disconnected: skip
+
+    FORKLOCK();	// Take out PZ device FORK LOCK
+#if 0
+    LOCK=ucb$b_flck(ucb), -	;
+    SAVIPL=-(SP),	-	;
+    PRESERVE=NO
+#endif
+      if (ucb->ucb$l_irp->irp$l_func==IO$_WRITEPBLK) {
+	kfree(ucb->ucb$l_irp->irp$l_svapte);
+	ucb->ucb$l_irp->irp$l_svapte=0;
+	ucb->ucb$l_svapte=0;
+	ucb->ucb$l_sts&=~UCB$M_BSY; // reset this somewhere?
+	return con$fdtwrite(ucb->ucb$l_irp,ctl$gl_pcb,ucb,0);
+	// return ioc$reqcom(SS$_NORMAL,0,u); // not needed
+      } else {
+	u->ucb$l_svapte=u->ucb$l_irp->irp$l_svapte; // workaround
+	int cc;
+	int ch;
+      again:
+	tty$getnextchar(&ch,&cc,u); // do this as con_ucb->tt_class->getnxt
+	if (cc==1)
+	  goto again;
+	return ioc$reqcom(SS$_NORMAL|(1<<16),0,u);
+      }
+#if 0
+      if	(UCB$M_BSY&		// If the device isn't busy,
+		 ucb->ucb$l_sts) 	// then dont do i/o
+
+	ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
+#endif
+    FORKUNLOCK();			// Release PZ drvice FORK LOCK
+#if 0
+    LOCK=ucb$b_flck(ucb), -	;
+    NEWIPL=(SP)+,	-	;
+    PRESERVE=NO,	-	;
+    CONDITION=RESTORE	;
+#endif
+		
   return;
-};
+  } else {
+  //
+  // Come here if we have no PZ control device to send stuff to.  Just
+  // suck all the data we can out of the class driver and throw it away.
+  //
+    ucb=u;
+    tty=ucb;
+    tty->ucb$w_tt_hold&= ~(	TTY$M_TANK_HOLD|	// Nothing in progress now
+				TTY$M_TANK_BURST|
+				TTY$M_TANK_PREMPT);
+  }
+  do {
+    ucb->ucb$l_sts&=~UCB$M_INT; 
+    tty=ucb;
+    long chr, cc;
+    tty->ucb$l_tt_getnxt(&chr,&cc,ucb);
+  } while (tty->ucb$b_tt_outype);
 
-static void  startio2 (struct _irp * i, struct _ucb * u) { 
-  u->ucb$l_fpc=startio3;
-  exe$iofork(i,u);
   return;
-}
-
-static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
-{
-  struct _irp * i;
-  struct _ucb * u;
-  void (*func)();
-
-  if (intr_blocked(20))
-    return;
-  regtrap(REG_INTR,20);
-  setipl(20);
-  /* have to do this until we get things more in order */
-  i=globali;
-  u=globalu;
-
-  func=u->ucb$l_fpc;
-  func(i,u);
-  myrei();
+ 
 }
 
 static struct _fdt op$fdt = {
@@ -68,8 +139,34 @@ static struct _fdt op$fdt = {
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
 
+void con$null(void) { }
+
+struct _tt_port con_port_vector = {
+  //
+  // Added port vector table using VEC macros 
+  //
+  //	    $VECINI	TZ:con$null
+  port_startio:con$startio,
+  port_disconnect:con$null,
+  port_set_line:con$null,
+  port_ds_set:con$null,
+  port_xon:con$null,
+  port_xoff:con$null,
+  port_stop:con$null,
+  port_stop2:con$null,
+  port_abort:con$null,
+  port_resume:con$null,
+  port_set_modem:con$null,
+  port_glyphload:con$null,
+  port_maint:con$null,
+  port_forkret:con$null,
+  port_start_read:con$null,
+  port_middle_read:con$null,
+  port_end_read:con$null,
+  port_cancel:con$null,
+};
+ 
 /* more yet undefined dummies */
-int con$startio (int a,int b ) { }
 static void  unsolint (void) { };
 static void  cancel (void) { };
 static void  ioc_std$cancelio (void) { };
@@ -87,6 +184,9 @@ static void  aux_storage (void) { };
 static void  aux_routine (void) { };
 
 static struct _ddt op$ddt = {
+  ddt$l_start: 0,
+  ddt$l_fdt: 0,
+#if 0
   ddt$l_start: con$startio,
   ddt$l_unsolint: unsolint,
   ddt$l_fdt: &op$fdt,
@@ -104,6 +204,7 @@ static struct _ddt op$ddt = {
   ddt$l_mntv_sqd: mntv_sqd,
   ddt$l_aux_storage: aux_storage,
   ddt$l_aux_routine: aux_routine
+#endif
 };
 
 #if 0
@@ -224,6 +325,14 @@ int op$unit_init (struct _idb * idb, struct _ucb * ucb) {
   
   ucb->ucb$v_online = 1;
 
+  int R0=&con_port_vector; // check TZ$VEC?		// Set TZ port vector table 
+  CLASS_UNIT_INIT(ucb,R0);			
+  struct _tty_ucb * tty;
+  struct _tt_class * R2;
+  tty = ucb;
+  R2	 = tty->ucb$l_tt_class;		// Address class vector table
+  R2->class_setup_ucb(tty);		// Init ucb fields
+
   return SS$_NORMAL;
 }
 
@@ -240,10 +349,12 @@ int op$init_tables() {
   ini_dpt_struc_init(&op$dpt, op$struc_init);
   ini_dpt_struc_reinit(&op$dpt, op$struc_reinit);
   ini_dpt_ucb_crams(&op$dpt, 1/*NUMBER_CRAMS*/);
+  ini_dpt_vector(&op$dpt, con_port_vector);
   ini_dpt_end(&op$dpt);
 
+  // check if ctrlinit needed
   ini_ddt_unitinit(&op$ddt, op$unit_init);
-  ini_ddt_start(&op$ddt, con$startio);
+  ini_ddt_start(&op$ddt, con$startio); // check should be 0?
   ini_ddt_cancel(&op$ddt, ioc_std$cancelio);
   ini_ddt_end(&op$ddt);
 
@@ -266,14 +377,24 @@ int con_iodb_vmsinit(void) {
   struct _ddb * ddb=&op$ddb;
   struct _crb * crb=&op$crb;
 #endif 
-  struct _ucb * ucb=kmalloc(sizeof(struct _ucb),GFP_KERNEL);
+  struct _ucb * ucb=kmalloc(sizeof(struct _tty_ucb),GFP_KERNEL);
   struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,sizeof(struct _ucb));
+  bzero(ucb,sizeof(struct _tty_ucb)); // check
   bzero(ddb,sizeof(struct _ddb));
   bzero(crb,sizeof(struct _crb));
+
+  ucb -> ucb$w_size = sizeof(struct _tty_ucb); // temp placed // check
+
+#if 0
+  // not in this one?
+  ucb -> ucb$w_unit_seed = 1; // was: 0 // check // temp placed
+  ucb -> ucb$w_unit = 0; // temp placed
+#endif
+
+  ucb -> ucb$l_sts |= UCB$M_TEMPLATE; // temp placed
 
 #if 0
   init_ddb(&op$ddb,&op$ddt,&op$ucb,"dqa");
@@ -289,7 +410,7 @@ int con_iodb_vmsinit(void) {
   op$init_tables();
   op$struc_init (crb, ddb, idb, orb, ucb);
   op$struc_reinit (crb, ddb, idb, orb, ucb);
-  op$unit_init (idb, ucb);
+  // not yet?  op$unit_init (idb, ucb);
 
   insertdevlist(ddb);
 
@@ -297,14 +418,18 @@ int con_iodb_vmsinit(void) {
 
 }
 
+int con_ucb = 0;
+
 int con_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
-  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&op$ucb*/,&newucb);
+  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&op$ucb*/,&newucb); // check. skip?
+  op$unit_init (0, newucb); // check. moved here
   exe$assign(dsc,&chan,0,0,0);
   registerucbchan(newucb,chan);
   registerdevchan(MKDEV(TTY_MAJOR,unitno),chan);
 
+  con_ucb = newucb;
 
   return newucb;
 }
@@ -327,7 +452,6 @@ int con_vmsinit(void) {
   /* a lot of these? */
 
   con_iodbunit_vmsinit(ddb,0,&dsc);
-  con_iodbunit_vmsinit(ddb,1,&dsc);
 
   printk(KERN_INFO "dev con here\n");
 

@@ -347,8 +347,17 @@ out:
 }
 
 extern struct _twp kb_twp;
+extern int con_ucb;
 
 void put_queue(int ch)
+{
+  if (ch==16)
+    sys_reboot(LINUX_REBOOT_MAGIC1,LINUX_REBOOT_MAGIC2,LINUX_REBOOT_CMD_RESTART,0);
+  int cc;
+  tty$putnextchar(&ch,&cc,con_ucb); // do this as con_ucb->tt_class->putnxt
+}
+
+void put_queue_not(int ch)
 {
   char * cp=kb_twp.tty$l_wb_map;
   *cp=ch;
