@@ -52,11 +52,17 @@
 #include <net/dn_neigh.h>
 #include <net/dn_fib.h>
 
+#include <linux/utsname.h>
+
+#include <ccdef.h>
+#include <nisca.h>
+#include <ssdef.h>
+
 #define DN_IFREQ_SIZE (sizeof(struct ifreq) - sizeof(struct sockaddr) + sizeof(struct sockaddr_dn))
 
-static char dn_rt_all_end_mcast[ETH_ALEN] = {0xAB,0x00,0x00,0x04,0x00,0x00};
-static char dn_rt_all_rt_mcast[ETH_ALEN]  = {0xAB,0x00,0x00,0x03,0x00,0x00};
-static char dn_hiord[ETH_ALEN]            = {0xAA,0x00,0x04,0x00,0x00,0x00};
+static char dn_rt_all_end_mcast[ETH_ALEN] = {0xAB,0x00,0x04,0x01,0x00,0x00};
+static char dn_rt_all_rt_mcast[ETH_ALEN]  = {0xAB,0x00,0x04,0x01,0x00,0x00};
+static char dn_hiord[ETH_ALEN]            = {0xAB,0x00,0x04,0x01,0x00,0x00}; // remember to add clusterid + 1
 static unsigned char dn_eco_version[3]    = {0x02,0x00,0x00};
 
 extern struct neigh_table dn_neigh_table;
@@ -263,44 +269,7 @@ static int dn_forwarding_proc(ctl_table *table, int write,
 				struct file *filep,
 				void *buffer, size_t *lenp)
 {
-#ifdef CONFIG_DECNET_ROUTER
-	struct net_device *dev = table->extra1;
-	struct dn_dev *dn_db;
-	int err;
-	int tmp, old;
-
-	if (table->extra1 == NULL)
-		return -EINVAL;
-
-	dn_db = dev->dn_ptr;
-	old = dn_db->parms.forwarding;
-
-	err = proc_dointvec(table, write, filep, buffer, lenp);
-
-	if ((err >= 0) && write) {
-		if (dn_db->parms.forwarding < 0)
-			dn_db->parms.forwarding = 0;
-		if (dn_db->parms.forwarding > 2)
-			dn_db->parms.forwarding = 2;
-		/*
-		 * What an ugly hack this is... its works, just. It
-		 * would be nice if sysctl/proc were just that little
-		 * bit more flexible so I don't have to write a special
-		 * routine, or suffer hacks like this - SJW
-		 */
-		tmp = dn_db->parms.forwarding;
-		dn_db->parms.forwarding = old;
-		if (dn_db->parms.down)
-			dn_db->parms.down(dev);
-		dn_db->parms.forwarding = tmp;
-		if (dn_db->parms.up)
-			dn_db->parms.up(dev);
-	}
-
-	return err;
-#else
 	return -EINVAL;
-#endif
 }
 
 static int dn_forwarding_sysctl(ctl_table *table, int *name, int nlen,
@@ -308,38 +277,7 @@ static int dn_forwarding_sysctl(ctl_table *table, int *name, int nlen,
 			void *newval, size_t newlen,
 			void **context)
 {
-#ifdef CONFIG_DECNET_ROUTER
-	struct net_device *dev = table->extra1;
-	struct dn_dev *dn_db;
-	int value;
-
-	if (table->extra1 == NULL)
-		return -EINVAL;
-
-	dn_db = dev->dn_ptr;
-
-	if (newval && newlen) {
-		if (newlen != sizeof(int))
-			return -EINVAL;
-
-		if (get_user(value, (int *)newval))
-			return -EFAULT;
-		if (value < 0)
-			return -EINVAL;
-		if (value > 2)
-			return -EINVAL;
-
-		if (dn_db->parms.down)
-			dn_db->parms.down(dev);
-		dn_db->parms.forwarding = value;
-		if (dn_db->parms.up)
-			dn_db->parms.up(dev);
-	}
-
-	return 0;
-#else
 	return -EINVAL;
-#endif
 }
 
 #else /* CONFIG_SYSCTL */
@@ -662,19 +600,32 @@ done:
 
 static void dn_send_endnode_hello(struct net_device *dev)
 {
-        struct endnode_hello_message *msg;
+        struct _nisca_intro *intro;
+        struct _nisca *msg;
         struct sk_buff *skb = NULL;
         unsigned short int *pktlen;
 	struct dn_dev *dn_db = (struct dn_dev *)dev->dn_ptr;
 
-        if ((skb = dn_alloc_skb(NULL, sizeof(*msg), GFP_ATOMIC)) == NULL)
+        if ((skb = dn_alloc_skb(NULL, sizeof(*msg)+16, GFP_ATOMIC)) == NULL)
 		return;
 
         skb->dev = dev;
 
-        msg = (struct endnode_hello_message *)skb_put(skb,sizeof(*msg));
+        intro = (struct _nisca_intro *)skb_put(skb,sizeof(*msg)+16);
+	* ((char*)intro)= 43;
+	msg = ((char *)intro)+16;
 
-        msg->msgflg  = 0x0D;
+        msg->nisca$b_msg  = NISCA$C_HELLO;
+        msg->nisca$b_reason  = NISCA$M_TR_CTL;
+	msg->nisca$l_maint  = NISCA$M_MAINT;
+	if (strlen(system_utsname.nodename)) {
+	  msg->nisca$t_nodename[0]=4; //strlen(system_utsname.nodename);
+	  memcpy(&msg->nisca$t_nodename[1],system_utsname.nodename,4);
+	} else {
+	  msg->nisca$t_nodename[0]=6;
+	  memcpy(&msg->nisca$t_nodename[1],"NODNAM",6);
+	}
+#if 0
         memcpy(msg->tiver, dn_eco_version, 3);
         memcpy(msg->id, decnet_ether_address, 6);
         msg->iinfo   = DN_RT_INFO_ENDN;
@@ -692,6 +643,7 @@ static void dn_send_endnode_hello(struct net_device *dev)
         msg->mpd     = 0x00;
         msg->datalen = 0x02;
         memset(msg->data, 0xAA, 2);
+#endif
         
         pktlen = (unsigned short *)skb_push(skb,2);
         *pktlen = dn_htons(skb->len - 2);
@@ -702,156 +654,10 @@ static void dn_send_endnode_hello(struct net_device *dev)
 }
 
 
-#ifdef CONFIG_DECNET_ROUTER
-
-#define DRDELAY (5 * HZ)
-
-static int dn_am_i_a_router(struct dn_neigh *dn, struct dn_dev *dn_db)
-{
-	/* First check time since device went up */
-	if ((jiffies - dn_db->uptime) < DRDELAY)
-		return 0;
-
-	/* If there is no router, then yes... */
-	if (!dn_db->router)
-		return 1;
-
-	/* otherwise only if we have a higher priority or.. */
-	if (dn->priority < dn_db->parms.priority)
-		return 1;
-
-	/* if we have equal priority and a higher node number */
-	if (dn->priority != dn_db->parms.priority)
-		return 0;
-
-	if (dn_ntohs(dn->addr) < dn_ntohs(decnet_address))
-		return 1;
-
-	return 0;
-}
-
-static void dn_send_router_hello(struct net_device *dev)
-{
-	int n;
-	struct dn_dev *dn_db = dev->dn_ptr;
-	struct dn_neigh *dn = (struct dn_neigh *)dn_db->router;
-	struct sk_buff *skb;
-	size_t size;
-	unsigned char *ptr;
-	unsigned char *i1, *i2;
-	unsigned short *pktlen;
-
-	if (dn_db->parms.blksize < (26 + 7))
-		return;
-
-	n = dn_db->parms.blksize - 26;
-	n /= 7;
-
-	if (n > 32)
-		n = 32;
-
-	size = 2 + 26 + 7 * n;
-
-	if ((skb = dn_alloc_skb(NULL, size, GFP_ATOMIC)) == NULL)
-		return;
-
-	skb->dev = dev;
-	ptr = skb_put(skb, size);
-
-	*ptr++ = DN_RT_PKT_CNTL | DN_RT_PKT_ERTH;
-	*ptr++ = 2; /* ECO */
-	*ptr++ = 0;
-	*ptr++ = 0;
-	memcpy(ptr, decnet_ether_address, ETH_ALEN);
-	ptr += ETH_ALEN;
-	*ptr++ = dn_db->parms.forwarding == 1 ? 
-			DN_RT_INFO_L1RT : DN_RT_INFO_L2RT;
-	*((unsigned short *)ptr) = dn_htons(dn_db->parms.blksize);
-	ptr += 2;
-	*ptr++ = dn_db->parms.priority; /* Priority */ 
-	*ptr++ = 0; /* Area: Reserved */
-	*((unsigned short *)ptr) = dn_htons((unsigned short)dn_db->parms.t3);
-	ptr += 2;
-	*ptr++ = 0; /* MPD: Reserved */
-	i1 = ptr++;
-	memset(ptr, 0, 7); /* Name: Reserved */
-	ptr += 7;
-	i2 = ptr++;
-
-	n = dn_neigh_elist(dev, ptr, n);
-
-	*i2 = 7 * n;
-	*i1 = 8 + *i2;
-
-	skb_trim(skb, (27 + *i2));
-
-	pktlen = (unsigned short *)skb_push(skb, 2);
-	*pktlen = dn_htons(skb->len - 2);
-
-	skb->nh.raw = skb->data;
-
-	if (dn_am_i_a_router(dn, dn_db)) {
-		struct sk_buff *skb2 = skb_copy(skb, GFP_ATOMIC);
-		if (skb2) {
-			dn_rt_finish_output(skb2, dn_rt_all_end_mcast);
-		}
-	}
-
-	dn_rt_finish_output(skb, dn_rt_all_rt_mcast);
-}
-
-static void dn_send_brd_hello(struct net_device *dev)
-{
-	struct dn_dev *dn_db = (struct dn_dev *)dev->dn_ptr;
-
-	if (dn_db->parms.forwarding == 0)
-		dn_send_endnode_hello(dev);
-	else
-		dn_send_router_hello(dev);
-}
-#else
 static void dn_send_brd_hello(struct net_device *dev)
 {
 	dn_send_endnode_hello(dev);
 }
-#endif
-
-#if 0
-static void dn_send_ptp_hello(struct net_device *dev)
-{
-	int tdlen = 16;
-	int size = dev->hard_header_len + 2 + 4 + tdlen;
-	struct sk_buff *skb = dn_alloc_skb(NULL, size, GFP_ATOMIC);
-	struct dn_dev *dn_db = dev->dn_ptr;
-	int i;
-	unsigned char *ptr;
-	struct dn_neigh *dn = (struct dn_neigh *)dn_db->router;
-
-	if (skb == NULL)
-		return ;
-
-	skb->dev = dev;
-	skb_push(skb, dev->hard_header_len);
-	ptr = skb_put(skb, 2 + 4 + tdlen);
-
-	*ptr++ = DN_RT_PKT_HELO;
-	*((dn_address *)ptr) = decnet_address;
-	ptr += 2;
-	*ptr++ = tdlen;
-
-	for(i = 0; i < tdlen; i++)
-		*ptr++ = 0252;
-
-	if (dn_am_i_a_router(dn, dn_db)) {
-		struct sk_buff *skb2 = skb_copy(skb, GFP_ATOMIC);
-		if (skb2) {
-			dn_rt_finish_output(skb2, dn_rt_all_end_mcast);
-		}
-	}
-
-	dn_rt_finish_output(skb, dn_rt_all_rt_mcast);
-}
-#endif
 
 static int dn_eth_up(struct net_device *dev)
 {
@@ -1178,39 +984,23 @@ static struct rtnetlink_link dnet_rtnetlink_table[RTM_MAX-RTM_BASE+1] =
 	{ NULL,			NULL,			},
 	{ NULL,			NULL,			},
 	{ NULL,			NULL,			},
-
 	{ dn_dev_rtm_newaddr,	NULL,			},
 	{ dn_dev_rtm_deladdr,	NULL,			},
 	{ NULL,			dn_dev_dump_ifaddr,	},
 	{ NULL,			NULL,			},
 
-#ifdef CONFIG_DECNET_ROUTER
-	{ dn_fib_rtm_newroute,	NULL,			},
-	{ dn_fib_rtm_delroute,	NULL,			},
-	{ dn_cache_getroute,	dn_fib_dump,		},
-	{ NULL,			NULL,			},
-#else
 	{ NULL,			NULL,			},
 	{ NULL,			NULL,			},
 	{ dn_cache_getroute,	dn_cache_dump,		},
 	{ NULL,			NULL,			},
-#endif
 	{ NULL,			NULL,			},
 	{ NULL,			NULL,			},
 	{ NULL,			NULL,			},
 	{ NULL,			NULL,			},
-
-#ifdef CONFIG_DECNET_ROUTER
-	{ dn_fib_rtm_newrule,	NULL,			},
-	{ dn_fib_rtm_delrule,	NULL,			},
-	{ NULL,			dn_fib_dump_rules,	},
-	{ NULL,			NULL,			}
-#else
 	{ NULL,			NULL,			},
 	{ NULL,			NULL,			},
 	{ NULL,			NULL,			},
 	{ NULL,			NULL,			}
-#endif
 };
 
 void __init dn_dev_init(void)
@@ -1623,74 +1413,23 @@ void dn_neigh_pointopoint_hello(struct sk_buff *skb)
 }
 
 /*
- * Ethernet router hello message received
- */
-int dn_neigh_router_hello(struct sk_buff *skb)
-{
-	struct rtnode_hello_message *msg = (struct rtnode_hello_message *)skb->data;
-
-	struct neighbour *neigh;
-	struct dn_neigh *dn;
-	struct dn_dev *dn_db;
-	dn_address src;
-
-	src = dn_htons(dn_eth2dn(msg->id));
-
-	neigh = __neigh_lookup(&dn_neigh_table, &src, skb->dev, 1);
-
-	dn = (struct dn_neigh *)neigh;
-
-	if (neigh) {
-		write_lock(&neigh->lock);
-
-		neigh->used = jiffies;
-		dn_db = (struct dn_dev *)neigh->dev->dn_ptr;
-
-		if (!(neigh->nud_state & NUD_PERMANENT)) {
-			neigh->updated = jiffies;
-
-			if (neigh->dev->type == ARPHRD_ETHER)
-				memcpy(neigh->ha, &skb->mac.ethernet->h_source, ETH_ALEN);
-
-			dn->blksize  = dn_ntohs(msg->blksize);
-			dn->priority = msg->priority;
-
-			dn->flags &= ~DN_NDFLAG_P3;
-
-			switch(msg->iinfo & DN_RT_INFO_TYPE) {
-				case DN_RT_INFO_L1RT:
-					dn->flags &=~DN_NDFLAG_R2;
-					dn->flags |= DN_NDFLAG_R1;
-					break;
-				case DN_RT_INFO_L2RT:
-					dn->flags |= DN_NDFLAG_R2;
-			}
-		}
-
-		if (!dn_db->router) {
-			dn_db->router = neigh_clone(neigh);
-		} else {
-			if (msg->priority > ((struct dn_neigh *)dn_db->router)->priority)
-				neigh_release(xchg(&dn_db->router, neigh_clone(neigh)));
-		}
-		write_unlock(&neigh->lock);
-		neigh_release(neigh);
-	}
-
-	kfree_skb(skb);
-	return 0;
-}
-
-/*
  * Endnode hello message received
  */
 int dn_neigh_endnode_hello(struct sk_buff *skb)
 {
-	struct endnode_hello_message *msg = (struct endnode_hello_message *)skb->data;
+	struct _nisca *msg = (struct endnode_hello_message *)skb->data;
 	struct neighbour *neigh;
 	struct dn_neigh *dn;
 	dn_address src;
 
+	msg+=(((long)msg)+16);
+
+	if (0==strncmp("NODNAM",&msg->nisca$t_nodename[1],6))
+	  return 1;
+
+	// next should be more protocol-stuff or first a plain init
+	
+#if 0
 	src = dn_htons(dn_eth2dn(msg->id));
 
 	neigh = __neigh_lookup(&dn_neigh_table, &src, skb->dev, 1);
@@ -1715,74 +1454,11 @@ int dn_neigh_endnode_hello(struct sk_buff *skb)
 		write_unlock(&neigh->lock);
 		neigh_release(neigh);
 	}
+#endif
 
 	kfree_skb(skb);
 	return 0;
 }
-
-
-#ifdef CONFIG_DECNET_ROUTER
-static char *dn_find_slot(char *base, int max, int priority)
-{
-	int i;
-	unsigned char *min = NULL;
-
-	base += 6; /* skip first id */
-
-	for(i = 0; i < max; i++) {
-		if (!min || (*base < *min))
-			min = base;
-		base += 7; /* find next priority */
-	}
-
-	if (!min)
-		return NULL;
-
-	return (*min < priority) ? (min - 6) : NULL;
-}
-
-int dn_neigh_elist(struct net_device *dev, unsigned char *ptr, int n)
-{
-	int t = 0;
-	int i;
-	struct neighbour *neigh;
-	struct dn_neigh *dn;
-	struct neigh_table *tbl = &dn_neigh_table;
-	unsigned char *rs = ptr;
-	struct dn_dev *dn_db = (struct dn_dev *)dev->dn_ptr;
-
-	read_lock_bh(&tbl->lock);
-
-	for(i = 0; i < NEIGH_HASHMASK; i++) {
-		for(neigh = tbl->hash_buckets[i]; neigh != NULL; neigh = neigh->next) {
-			if (neigh->dev != dev)
-				continue;
-			dn = (struct dn_neigh *)neigh;
-			if (!(dn->flags & (DN_NDFLAG_R1|DN_NDFLAG_R2)))
-				continue;
-			if (dn_db->parms.forwarding == 1 && (dn->flags & DN_NDFLAG_R2))
-				continue;
-			if (t == n)
-				rs = dn_find_slot(ptr, n, dn->priority);
-			else
-				t++;
-			if (rs == NULL)
-				continue;
-			dn_dn2eth(rs, dn->addr);
-			rs += 6;
-			*rs = neigh->nud_state & NUD_CONNECTED ? 0x80 : 0x0;
-			*rs |= dn->priority;
-			rs++;
-		}
-	}
-
-	read_unlock_bh(&tbl->lock);
-
-	return t;
-}
-#endif /* CONFIG_DECNET_ROUTER */
-
-
 
 #ifdef CONFIG_PROC_FS
 static int dn_neigh_get_info(char *buffer, char **start, off_t offset, int length)
@@ -3592,7 +3268,7 @@ struct dn_rt_hash_bucket
 extern struct neigh_table dn_neigh_table;
 
 
-static unsigned char dn_hiord_addr[6] = {0xAA,0x00,0x04,0x00,0x00,0x00};
+static unsigned char dn_hiord_addr[6] = {0xAB,0x00,0x04,0x01,0x00,0x00}; // remember to add clusterid + 1
 
 int dn_rt_min_delay = 2*HZ;
 int dn_rt_max_delay = 10*HZ;
@@ -4071,11 +3747,16 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
                 	case DN_RT_PKT_L1RT:
                 	case DN_RT_PKT_L2RT:
                                 return NF_HOOK(PF_DECnet, NF_DN_ROUTE, skb, skb->dev, NULL, dn_route_discard);
-                	case DN_RT_PKT_ERTH:
-				return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, dn_neigh_router_hello);
-
                 	case DN_RT_PKT_EEDH:
 				return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, dn_neigh_endnode_hello);
+		case 43:
+		  {
+		    switch (skb->data[16]) {
+		    case NISCA$C_HELLO:
+		      return NF_HOOK(PF_DECnet, NF_DN_HELLO, skb, skb->dev, NULL, dn_neigh_endnode_hello);
+		    }
+		  }
+		  break;
                 }
         } else {
 		if (dn->parms.state != DN_DEV_S_RU)
@@ -4135,50 +3816,6 @@ error:
 	return err;
 }
 
-#ifdef CONFIG_DECNET_ROUTER
-static int dn_forward(struct sk_buff *skb)
-{
-	struct dn_skb_cb *cb = DN_SKB_CB(skb);
-	struct dst_entry *dst = skb->dst;
-	struct neighbour *neigh;
-	struct net_device *dev = skb->dev;
-	int err = -EINVAL;
-
-	if ((neigh = dst->neighbour) == NULL)
-		goto error;
-
-	/*
-	 * Hop count exceeded.
-	 */
-	err = NET_RX_DROP;
-	if (++cb->hops > 30)
-		goto drop;
-
-	skb->dev = dst->dev;
-
-	/*
-	 * If packet goes out same interface it came in on, then set
-	 * the Intra-Ethernet bit. This has no effect for short
-	 * packets, so we don't need to test for them here.
-	 */
-	if (cb->iif == dst->dev->ifindex)
-		cb->rt_flags |= DN_RT_F_IE;
-	else
-		cb->rt_flags &= ~DN_RT_F_IE;
-
-	return NF_HOOK(PF_DECnet, NF_DN_FORWARD, skb, dev, skb->dev, neigh->output);
-
-
-error:
-	if (net_ratelimit())
-		printk(KERN_DEBUG "dn_forward: This should not happen\n");
-drop:
-	kfree_skb(skb);
-
-	return err;
-}
-#endif
-
 /*
  * Drop packet. This is used for endnodes and for
  * when we should not be forwarding packets from
@@ -4215,49 +3852,6 @@ static int dn_route_output_slow(struct dst_entry **pprt, dn_address dst, dn_addr
 	struct neighbour *neigh = NULL;
 	struct dn_dev *dn_db;
 	unsigned hash;
-#ifdef CONFIG_DECNET_ROUTER
-	struct dn_fib_key key;
-	struct dn_fib_res res;
-	int err;
-
-	key.src = src;
-	key.dst = dst;
-	key.iif = 0;
-	key.oif = 0;
-	key.fwmark = 0;
-	key.scope = RT_SCOPE_UNIVERSE;
-
-	if ((err = dn_fib_lookup(&key, &res)) == 0) {
-		switch(res.type) {
-			case RTN_UNICAST:
-				/*
-				 * This method of handling multipath
-				 * routes is a hack and will change.
-				 * It works for now though.
-				 */
-				if (res.fi->fib_nhs)
-					dn_fib_select_multipath(&key, &res);
-				neigh = __neigh_lookup(&dn_neigh_table, &DN_FIB_RES_GW(res), DN_FIB_RES_DEV(res), 1);
-				err = -ENOBUFS;
-				if (!neigh)
-					break;
-				err = 0;
-				break;
-			case RTN_UNREACHABLE:
-				err = -EHOSTUNREACH;
-				break;
-			default:
-				err = -EINVAL;
-		}
-		dn_fib_res_put(&res);
-		if (err < 0)
-			return err;
-		goto got_route;
-	}
-
-	if (err != -ESRCH)
-		return err;
-#endif 
 
 	/* Look in On-Ethernet cache first */
 	if (!(flags & MSG_TRYHARD)) {
@@ -4356,12 +3950,6 @@ static int dn_route_input_slow(struct sk_buff *skb)
 	unsigned hash;
 	dn_address saddr = cb->src;
 	dn_address daddr = cb->dst;
-#ifdef CONFIG_DECNET_ROUTER
-	struct dn_fib_key key;
-	struct dn_fib_res res;
-	int err;
-#endif
-
 	if (dev == NULL)
 		return -EINVAL;
 
@@ -4414,54 +4002,6 @@ static int dn_route_input_slow(struct sk_buff *skb)
 	return PTR_ERR(neigh);
 
 non_local_input:
-
-#ifdef CONFIG_DECNET_ROUTER
-	/*
-	 * Destination is another node... find next hop in
-	 * routing table here.
-	 */
-
-	key.src = cb->src;
-	key.dst = cb->dst;
-	key.iif = dev->ifindex;
-	key.oif = 0;
-	key.scope = RT_SCOPE_UNIVERSE;
-
-#ifdef CONFIG_DECNET_ROUTE_FWMARK
-	key.fwmark = skb->nfmark;
-#else
-	key.fwmark = 0;
-#endif
-
-	if ((err = dn_fib_lookup(&key, &res)) == 0) {
-		switch(res.type) {
-			case RTN_UNICAST:
-				if (res.fi->fib_nhs)
-					dn_fib_select_multipath(&key, &res);
-				neigh = __neigh_lookup(&dn_neigh_table, &DN_FIB_RES_GW(res), DN_FIB_RES_DEV(res), 1);
-				err = -ENOBUFS;
-				if (!neigh)
-					break;
-				err = 0;
-				dnrt_input = dn_forward;
-				fwmark = key.fwmark;
-				break;
-			case RTN_UNREACHABLE:
-				dnrt_input = dn_blackhole;
-				fwmark = key.fwmark;
-				break;
-			default:
-				err = -EINVAL;
-		}
-		dn_fib_res_put(&res);
-		if (err < 0)
-			return err;
-		goto add_entry;
-	}
-
-	return err;
-
-#endif /* CONFIG_DECNET_ROUTER */
 
 add_entry:
 

@@ -1110,12 +1110,6 @@ static int dn_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 		release_sock(sk);
 		return val;
 
-#ifdef CONFIG_DECNET_ROUTER
-	case SIOCADDRT:
-	case SIOCDELRT:
-		return dn_fib_ioctl(sock, cmd, arg);
-#endif /* CONFIG_DECNET_ROUTER */
-
 	case OSIOCSNETADDR:
 		if (!capable(CAP_NET_ADMIN)) {
 			err = -EPERM;
@@ -2299,10 +2293,6 @@ static int __init decnet_init(void)
 	dn_dev_init();
 	dn_route_init();
 
-#ifdef CONFIG_DECNET_ROUTER
-	dn_fib_init();
-#endif /* CONFIG_DECNET_ROUTER */
-
 #ifdef CONFIG_SYSCTL
 	dn_register_sysctl();
 #endif /* CONFIG_SYSCTL */
@@ -2347,10 +2337,6 @@ static void __exit decnet_exit(void)
 	dn_route_cleanup();
 	dn_dev_cleanup();
 	dn_neigh_cleanup();
-
-#ifdef CONFIG_DECNET_ROUTER
-	dn_fib_cleanup();
-#endif /* CONFIG_DECNET_ROUTER */
 
 	proc_net_remove("myscs");
 }

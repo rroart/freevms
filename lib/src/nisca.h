@@ -124,12 +124,20 @@
 #define NISCA$V_TR_RSVP                0x04
 #define NISCA$V_TR_SEQ                 0x01
 
+struct _nisca_intro {
+  // oops seems this is the dx
+  unsigned short length;
+  unsigned char dst[6];
+  unsigned short group;
+  unsigned char src[6];
+};
+
 struct _nisca {
   /* and before is: ( I think )
-     unsigned short length
+     unsigned short length excluding this 16 b?
      unsigned char dst[6] ab000401+word
+     unsigned word scssystemid? fffe?
      unsigned char src[6] i think
-     unsigned word scssystemid
   */
 
   union {
@@ -150,7 +158,7 @@ struct _nisca {
       unsigned char nisca$b_minor;
       unsigned char nisca$b_major;
       unsigned short nisca$w_eco;
-      t_nodename[8];
+      char nisca$t_nodename[8];
       union {
 	unsigned long nisca$l_port_fcn;
 	unsigned long nisca$l_fcn_bitmasks;
@@ -165,13 +173,13 @@ struct _nisca {
 	  unsigned sys_state:21;
 	};
       };
-      t_rst_port[6];
+      char nisca$t_rst_port[6];
       unsigned char nisca$b_reserved0;
       unsigned char nisca$b_pipe_quota;
       unsigned short nisca$w_p_srv;
       unsigned short nisca$w_r_srv;
       unsigned long long nisca$q_authorize;
-      t_service[16]; /* obsolete? */
+      char nisca$t_service[16]; /* obsolete? */
       unsigned short nisca$w_lcl_chan_seq_num;
       unsigned short nisca$w_buf_buffer_size;
       unsigned long long nisca$q_transmit_time;
