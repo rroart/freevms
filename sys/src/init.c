@@ -1,3 +1,5 @@
+#if 0
+is this the erroneous one?
 #include<linux/vmalloc.h>
 #include"../../freevms/sys/src/system_data_cells.h"
 
@@ -19,3 +21,4 @@ void exe$init(void) {
   vms_mem();
 
 }
+#endif

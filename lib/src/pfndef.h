@@ -75,9 +75,9 @@ struct _plnk {
     };
   };
 };
- 
- 
-struct _pfn {
+
+#define _pfn page
+typedef struct page {
   union  {
     struct _plnk pfn$r_shm_list_link;
     struct _shm_id pfn$r_shm_reg_id;        
@@ -174,7 +174,23 @@ struct _pfn {
   unsigned short int pfn$w_pt_lck_cnt;
   unsigned short int pfn$w_pt_win_cnt;
 
-};
+	struct list_head list;		/* ->mapping has some page lists. */
+	struct address_space *mapping;	/* The inode (or ...) we belong to. */
+	unsigned long index;		/* Our offset within mapping. */
+	struct page *next_hash;		/* Next page sharing our hash bucket in
+					   the pagecache hash table. */
+	atomic_t count;			/* Usage count, see below. */
+	unsigned long flags;		/* atomic flags, some possibly
+					   updated asynchronously */
+	struct list_head lru;		/* Pageout list, eg. active_list;
+					   protected by pagemap_lru_lock !! */
+	wait_queue_head_t wait;		/* Page locked?  Stand in line... */
+	struct page **pprev_hash;	/* Complement to *next_hash. */
+	struct buffer_head * buffers;	/* Buffer maps us to a disk block. */
+	void *virtual;			/* Kernel virtual address (NULL if
+					   not kmapped, ie. highmem) */
+	struct zone_struct *zone;	/* Memory zone we are in. */
+} mem_map_t;
 	
 struct _prvpfn {
   struct _prvpfn *prvpfn$l_sqfl;      
