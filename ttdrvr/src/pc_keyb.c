@@ -14,6 +14,8 @@
 #include<idbdef.h>
 #include<irpdef.h>
 #include<ucbdef.h>
+#include<ttyucbdef.h>
+#include<ttydef.h>
 #include<ddbdef.h>
 #include<ipldef.h>
 #include<dyndef.h>
@@ -107,10 +109,20 @@ static struct _ddt kb$ddt = {
 
 int kbd_pid=0;
 
+// twp might be used for write to console or write with keyboard
+// take the chance that is means writing with keyboard
+// it suits me better right now
+
 char keyq[256];
-int keyqidx=0;
-char * keyqp=&keyq[0];
-char * keyqw=&keyq[0];
+
+struct _twp kb_twp = {
+  tty$l_wb_data : keyq,
+  tty$l_wb_next : keyq,
+  tty$l_wb_map: keyq,
+  tty$l_wb_end : &keyq[256]
+};
+
+// connect this into the ttyucbdef later
 
 int kbd$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   //  return read(0,i->irp$l_qio_p1,i->irp$l_qio_p2);
@@ -123,11 +135,12 @@ int kbd$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   if (count)
     while (count--) {
     repeat:
-      if (keyqw==keyqp) {
+      if (kb_twp.tty$l_wb_map==kb_twp.tty$l_wb_next) {
 	exe$waitfr(1);
 	goto repeat;
       }
-      char c = *keyqp++;
+      char c = *(char*)kb_twp.tty$l_wb_next;
+      kb_twp.tty$l_wb_next=(char*)kb_twp.tty$l_wb_next+1;
       *buffer++=c;
     }
   i->irp$l_iost1 = SS$_NORMAL;

@@ -50,6 +50,7 @@
 #include <linux/pm.h>
 
 #include <pridef.h>
+#include <ttydef.h>
 
 #define SIZE(x) (sizeof(x)/sizeof((x)[0]))
 
@@ -343,30 +344,15 @@ out:
 	sch$postef(kbd_pid, PRI$_IOCOM, 1);
 }
 
+extern struct _twp kb_twp;
 
 void put_queue(int ch)
 {
-#if 0
-	wake_up(&keypress_wait);
-#endif
-	extern	char * keyqp;
-	extern char * keyqw;
-	extern char * keyq;
-	*keyqw++=ch;
-	if (keyqw==&keyq[256])
-	  keyqw=&keyq[0];
-
-	if (tty) {
-#if 0
-		tty_insert_flip_char(tty, ch, 0);
-#if 1
-		//ndef CONFIG_VMS
-		con_schedule_flip(tty);
-#else
-		tty->flip.tqueue.routine(tty);
-#endif
-#endif
-	}
+  char * cp=kb_twp.tty$l_wb_map;
+  *cp=ch;
+  kb_twp.tty$l_wb_map=(char*)kb_twp.tty$l_wb_map+1;
+  if (kb_twp.tty$l_wb_map==kb_twp.tty$l_wb_end)
+    kb_twp.tty$l_wb_map=kb_twp.tty$l_wb_data;
 }
 
 static void puts_queue(char *cp)
