@@ -244,8 +244,8 @@ ENTRY(system_call)
 	movl %eax,EAX(%esp)		# save the return value
 ENTRY(ret_from_sys_call)
 	cli				# need_resched and signals atomic test
-	cmpl $0,need_resched(%ebx)
-	jne reschedule
+#	cmpl $0,need_resched(%ebx)
+#	jne reschedule
 	cmpl $0,sigpending(%ebx)
 	jne signal_return
 restore_all:
@@ -297,7 +297,7 @@ ret_from_exception:
 	jmp restore_all
 
 ALIGN
-reschedule:
+reschedule_not:
 	call SYMBOL_NAME(schedule)    # test
 	jmp ret_from_sys_call
 
@@ -392,7 +392,7 @@ vmsret_from_exception:
 	jmp vmsrestore_all
 
 	ALIGN
-vmsreschedule:
+vmsreschedule_not:
 	call SYMBOL_NAME(schedule)    # test
 	jmp vmsret_from_sys_call
 
