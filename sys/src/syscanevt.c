@@ -13,4 +13,5 @@ asmlinkage int exe$cantim(unsigned long reqidt, unsigned int acmode){
 }
 
 asmlinkage void exe$canwak(void){
+printk("called canwak but not implemented\n");
 }

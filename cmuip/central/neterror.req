@@ -1,0 +1,96 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+! TCP error code definitions.
+
+EXTERNAL LITERAL
+    NET$_IR,			! INSUFFICIENT RESOURCES.
+    NET$_IFC,			! INVALID FUNCTION CODE.
+    NET$_IPC,			! INVALID PROTOCOL CODE.
+    NET$_UCT,			! UNABLE TO CREATE TCB
+    NET$_IFS,			! INVALID FOREIGN SOCKET
+    NET$_ILP,			! INVALID LOCAL PORT
+    NET$_NUC,			! NON-UNIQUE CONNECTION.
+    NET$_CSE,			! CONNECTION TABLE SPACE EXHAUSTED.
+    NET$_NOPRV,			! INSUFFICIENT PRIVILEGES TO USE LOCAL PORT
+    NET$_CIP,			! CONNECTION ILLEGAL FOR THIS PROCESS
+    NET$_CC,			! ERROR: CONNECTION CLOSING
+    NET$_CDE,			! CONNECTION DOES NOT EXIST.
+    NET$_CR,			! ERROR: CONNECTION RESET
+    NET$_FSU,			! Foreign-Socket unspecified.
+    NET$_UNN,			! Unknown Network Node.
+    NET$_VTF,			! Valid-TCB Table Full
+    NET$_CTO,			! Connection TimeOut.
+    NET$_TWT,			! Time-Wait TimeOut.
+    NET$_FTO,			! User function timeout. Network event didn't happen.
+    NET$_CRef,			! Connection REFUSED, RESET in SYN-Recv state. Active open.
+    NET$_CCAN,			! Connection cancelled by process abort.
+    NET$_TE,			! TCP is Exiting.
+    NET$_FIP,			! IO Function in Progress.
+    NET$_BTS,			! User specified buffer is Too small.
+    NET$_ihi,			! invalid known host index
+    NET$_bdi,			! Bad device index
+    NET$_epd,			! error processing device dump
+    NET$_URC,			! Destination Unreachable
+    NET$_IGF,			! Invalid GTHST function
+    NET$_UNA,			! Unknown host name
+    NET$_UNU,			! Unknown host number
+    NET$_NYI,			! User function not yet implemented
+    NET$_NOINA,			! Access to internet not allowed
+    NET$_NOANA,			! Access to ARPANET not allowed
+    NET$_NOPN,			! UDP wildcard connection not open
+    NET$_NOADR,			! Host address not yet resolved
+    NET$_GTHFUL,		! GTHST queue full error
+    NET$_DAE,			! NET$DUMP: Argument error
+    NET$_NMLTO,			! Name-lookup timed-out
+    NET$_NSEXIT,		! Name server is exiting
+    NET$_NONS,			! Name server not running
+    NET$_NSQFULL,		! Name server queue is full
+    NET$_DSDOWN,		! Domain service is unavailable
+    NET$_DSNODS,		! Domain service: no domain servers contacted
+    NET$_DSINCOMP,		! Domain service: incomplete reply
+    NET$_DSNOADDR,		! Domain service: no addresses found
+    NET$_DSNONAME,		! Domain service: no name found
+    NET$_DSFMTERR,		! Domain service: format error in query
+    NET$_DSSRVERR,		! Domain service: server error
+    NET$_DSNAMERR,		! Domain service: name error
+    NET$_DSNOTIMP,		! Domain service: query not implemented
+    NET$_DSREFUSD,		! Domain service: query refused
+    NET$_DSNONSRV,		! Domain service: no usable servers found
+    NET$_DSUNKERR,		! Domain service: unknown server error
+    NET$_DSREFEXC,		! Domain service: maximum referrals exceeded
+    NET$_GREENERR,		! Unknown name lookup failure
+    NET$_GP_INVREQ,		! Name lookup: invalid request
+    NET$_GP_INVINF,		! Name lookup: invalid host info item
+    NET$_GP_INVNAM,		! Name lookup: invalid host name syntax
+    NET$_GP_INVADR,		! Name lookup: invalid host address syntax
+    NET$_GP_INVMBX,		! Name lookup: invalid mailbox syntax
+    NET$_GP_INVCLS,		! Name lookup: invalid domain class
+    NET$_GP_RSBUSY,		! Name lookup: resolver too busy
+    NET$_GP_NONMSR,		! Name lookup: no name server available
+    NET$_GP_NOHINF,		! Name lookup: specified host info unavailable
+    NET$_GP_NOTFND,		! Name lookup: name not found
+    NET$_GP_UNKMBX,		! Name lookup: mailbox not found
+    NET$_GP_NOTIMP,		! Name lookup: function not implemented
+    NET$_GP_TOOBIG,		! Name lookup: reply too big for UDP
+    NET$_GP_NSDOWN,		! Name lookup: all name servers are down
+    NET$_NRT,			! No route to specified address
+    NET$_KILL;			! This connection has been terminated

@@ -1,0 +1,272 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'NETDEVICES Literals, Macros and Structures'
+!++
+! NETDEVICES.REQ	Copyright (c)	Carnegie Mellon University
+! 
+! Description:
+!
+!	Supporting declarations for IP Transport device modules
+!
+! Written By:	Bruce R. Miller		CMU Network Development
+! Date:		06-Feb-1990 (Monday)
+!
+! Modifications:
+!
+! 01/04/91	Bruce R. Miller 	CMU NetDev
+!	Added LOG$DEBUG
+!--
+
+
+
+! IPACP max physical buffer size
+MACRO
+    DRV$MAX_PHYSICAL_BUFSIZE = (.IPACP_Interface [ ACPI$MPBS ]) %;
+
+! IAPCP callback macro.
+MACRO
+    DRV$IP_Receive ( Buf,Buf_size,IPHdr,devlen,dev_config ) =
+	BEGIN
+	    ( .IPACP_Interface [ ACPI$IP_Receive ])( Buf,Buf_size,IPHdr,devlen,dev_config )
+	END
+	%;
+
+! IPACP self-address recognition
+MACRO
+    DRV$IP_ISME =
+	BEGIN
+	    .IPACP_Interface [ ACPI$IP_ISME ]
+	END
+	%;
+
+
+! Wake up the Big Guy
+MACRO
+    DRV$ACPWAKE =
+	BEGIN
+	IF ..IPACP_Interface [ ACPI$SLEEPING ] THEN
+            BEGIN
+	    .IPACP_Interface [ ACPI$SLEEPING ] = FALSE;
+	    $WAKE();
+	    END
+	END
+	%;
+
+! pointer to the IPACP's AST_in_progress flag
+MACRO
+    DRV$AST_in_progress =
+	(.IPACP_Interface [ ACPI$AST_in_progress ]) %;
+
+
+! Interrupt blocking routines
+MACRO
+    DRV$NOINT =
+	BEGIN
+	    ( .IPACP_Interface [ ACPI$NOINT ])( )
+	END
+	%,
+
+    DRV$OKINT =
+	BEGIN
+	    ( .IPACP_Interface [ ACPI$OKINT ])( )
+	END
+	%;
+
+
+! Error reporting routine
+MACRO
+    DRV$Device_Error =
+	BEGIN
+	    ( .IPACP_Interface [ ACPI$Device_Error ])
+	END
+	%;
+
+! Memory management macros
+MACRO
+    DRV$Seg_Get ( Size ) =
+	BEGIN
+	    ( .IPACP_Interface [ ACPI$Seg_Get ])( Size )
+	END
+	%,
+
+    DRV$Seg_Free =
+	    ( .IPACP_Interface [ ACPI$Seg_Free ])
+	%,
+
+    DRV$QBlk_Free ( Pntr ) =
+	BEGIN
+	    ( .IPACP_Interface [ ACPI$QBlk_Free ])( Pntr )
+	END
+	%;
+
+! Here are a bunch of macros stolen from TCPMACROS.REQ
+
+! Note: the next six routines require the IPACP_Interface be declared
+! globally.  IPACP_Interface is a (REF IPACP_Info_Structure) and points
+! to the device module's IPACP Information Structure.
+
+   ! Conditionally do something according to LOG_STATE flags
+
+MACRO
+   $$LOGF(LOGF) = 
+	BEGIN
+	((..IPACP_Interface[ACPI$LOG_STATE] AND (LOGF)) NEQ 0)
+	END
+	%;
+
+    ! Write a message to the IPACP log file.
+MACRO
+    DRV$LOG_FAO(CST) =
+	BEGIN
+	LOCAL
+	     STR_DESC : VECTOR [2];
+
+	STR_DESC[0] = %CHARCOUNT(CST);
+	STR_DESC[1] = UPLIT(CST);
+
+	%IF %NULL(%REMAINING) %THEN
+	    (.IPACP_Interface[ACPI$LOG_FAO])(STR_DESC)
+	%ELSE
+	    (.IPACP_Interface[ACPI$LOG_FAO])(STR_DESC,%REMAINING)
+	%FI
+	END
+	%,
+    DRV$XLOG_FAO(LOGF) =
+	BEGIN
+	IF $$LOGF(LOGF) THEN
+	    DRV$LOG_FAO(%REMAINING)
+        END
+        %;
+
+    ! Queue a message to the IPACP log file.
+MACRO
+    DRV$QL_FAO(CST) =
+	BEGIN
+	LOCAL
+	     STR_DESC : VECTOR [2];
+
+	STR_DESC[0] = %CHARCOUNT(CST);
+	STR_DESC[1] = UPLIT(CST);
+
+	%IF %NULL(%REMAINING) %THEN
+	    (.IPACP_Interface[ACPI$QL_FAO])(STR_DESC);
+	%ELSE
+	    (.IPACP_Interface[ACPI$QL_FAO])(STR_DESC,%REMAINING);
+	%FI
+	END
+	%,
+    DRV$XQL_FAO(LOGF) =
+	BEGIN
+	IF $$LOGF(LOGF) THEN
+	    DRV$QL_FAO(%REMAINING)
+	END
+        %;
+
+MACRO
+    ! Write a message to the console operator
+    DRV$OPR_FAO(CST) =
+	BEGIN
+	LOCAL
+	     STR_DESC : VECTOR [2];
+
+	STR_DESC[0] = %CHARCOUNT(CST);
+	STR_DESC[1] = UPLIT(CST);
+
+	%IF %NULL(%REMAINING) %THEN
+	    (.IPACP_Interface[ACPI$OPR_FAO])(STR_DESC);
+	%ELSE
+	    (.IPACP_Interface[ACPI$OPR_FAO])(STR_DESC,%REMAINING);
+	%FI
+	END
+	%,
+
+    DRV$ERROR_FAO(CST) =
+	BEGIN
+	LOCAL
+	     STR_DESC : VECTOR [2];
+
+	STR_DESC[0] = %CHARCOUNT(CST);
+	STR_DESC[1] = UPLIT(CST);
+
+	%IF %NULL(%REMAINING) %THEN
+	    (.IPACP_Interface[ACPI$ERROR_FAO])(STR_DESC);
+	%ELSE
+	    (.IPACP_Interface[ACPI$ERROR_FAO])(STR_DESC,%REMAINING);
+	%FI
+	END
+	%,
+
+    DRV$WARN_FAO(CST) =
+	BEGIN
+	LOCAL
+	     STR_DESC : VECTOR [2];
+
+	STR_DESC[0] = %CHARCOUNT(CST);
+	STR_DESC[1] = UPLIT(CST);
+
+	%IF %NULL(%REMAINING) %THEN
+	    (.IPACP_Interface[ACPI$ERROR_FAO])(STR_DESC);
+	%ELSE
+	    (.IPACP_Interface[ACPI$ERROR_FAO])(STR_DESC,%REMAINING);
+	%FI
+	END
+	%,
+
+    DRV$FATAL_FAO(CST) =
+	BEGIN
+	LOCAL
+	     STR_DESC : VECTOR [2];
+
+	STR_DESC[0] = %CHARCOUNT(CST);
+	STR_DESC[1] = UPLIT(CST);
+
+	%IF %NULL(%REMAINING) %THEN
+	    (.IPACP_Interface[ACPI$FATAL_FAO])(STR_DESC);
+	%ELSE
+	    (.IPACP_Interface[ACPI$FATAL_FAO])(STR_DESC,%REMAINING);
+	%FI
+	END
+        %;
+
+
+
+!
+! Now we define some literals for use by the device support modules.
+!
+
+! Network logger flag bits - determine what events to log
+
+LITERAL
+    LOG$PHY	= %X'01',	! Packet physical headers
+    LOG$ARP	= %X'02',	! ARP packet info
+    LOG$IP	= %X'04',	! IP packet headers
+    LOG$TCP	= %X'08',	! TCP segment info (packet trace)
+    LOG$TCBDUMP	= %X'10',	! TCB dump on servicing
+    LOG$USER	= %X'20',	! User I/O requests
+    LOG$TCBSTATE= %X'40',	! TCB state changes
+    LOG$TCBCHECK= %X'80',	! TCB servicing timing
+    LOG$TCPERR	= %X'100',	! TCP errors (dropped pkts, etc.)
+    LOG$ICMP	= %X'200',	! ICMP activity
+    LOG$UDP	= %X'400',	! UDP activity
+    LOG$TVT	= %X'800',	! TVT (virtual terminal) activity
+    LOG$IPERR	= %X'1000',	! IP errors (bad routing, etc.)
+    LOG$DEBUG	= %X'2000';	! Temporary statements

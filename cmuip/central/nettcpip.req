@@ -1,0 +1,568 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%(
+
+Module:
+
+	NetTCPIP
+
+Facility:
+
+	A system wide definition file.  This file describes the various
+	structures and protocol headers used in the protocols of the
+	TCP/IP suite.
+
+Author:
+
+	Writen by Bruce R. Miller, borrowing from IP.BLI and Structure.REQ
+
+Modification History:
+
+1.2  11-Nov-1991	Henry W. Miller		USBR
+	Changed SH$ACK and SH$SEG to unsigned long as per RFC1122.
+
+1.1c 29-Mar-1991	Henry W. Miller		USBR
+	Defined IPH$Fragmentation_Data.
+
+1.1b 07-Mar-1991	Henry W. Miller		USBR
+	Added additional ICMP parameters, including RFC1122.
+
+1.1a 13-Jan-1991	Henry W. Miller		USBR
+	Make ICMPTTL and IPTTL configurable variables.
+
+1.1  11-Nov-1990	Bruce R. Miller		CMU NetDev
+	Added all the port definitions from RFC #1060 (Assigned Numbers).
+
+)%
+
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT'; ! Get the BLISS field def. library.
+
+LITERAL
+    ! Define IP-based protocols
+    ICMP_Protocol       = 1,    ! ICMP protocol code
+    TCP_Protocol        = 6,    ! TCP protocol
+    UDP_Protocol        = 17,   ! UDP protocol code
+
+    TCP_PORT_TCPMUX	=     1,	! TCP Port Service Multiplexer
+    TCP_PORT_RJE	=     5,	! Remote Job Entry
+    TCP_PORT_ECHO	=     7,	! Echo
+    TCP_PORT_DISCARD	=     9,	! Discard
+    TCP_PORT_USERS	=    11,	! Active Users
+    TCP_PORT_DAYTIME	=    13,	! Daytime
+    TCP_PORT_QUOTE	=    17,	! Quote of the Day
+    TCP_PORT_CHARGEN	=    19,	! Character Generator
+    TCP_PORT_FTP_DATA	=    20,	! File Transfer [Default Data]
+    TCP_PORT_FTP	=    21,	! File Transfer [Control]
+    TCP_PORT_TELNET	=    23,	! Telnet
+    TCP_PORT_SMTP	=    25,	! Simple Mail Transfer
+    TCP_PORT_NSW_FE	=    27,	! NSW User System FE
+    TCP_PORT_MSG_ICP	=    29,	! MSG ICP
+    TCP_PORT_MSG_AUTH	=    31,	! MSG Authentication
+    TCP_PORT_DSP	=    33,	! Display Support Protocol
+    TCP_PORT_Prv_PS	=    35,	! private printer server
+    TCP_PORT_TIME	=    37,	! Time
+    TCP_PORT_RLP	=    39,	! Resource Location Protocol
+    TCP_PORT_GRAPHICS	=    41,	! Graphics
+    TCP_PORT_NAMESERVER	=    42,	! Host Name Server
+    TCP_PORT_NICNAME	=    43,	! Who Is
+    TCP_PORT_MPM_FLAGS	=    44,	! MPM FLAGS Protocol
+    TCP_PORT_MPM	=    45,	! Message Processing Module [recv]
+    TCP_PORT_MPM_SND	=    46,	! MPM [default send]
+    TCP_PORT_NI_FTP	=    47,	! NI FTP
+    TCP_PORT_LOGIN	=    49,	! Login Host Protocol
+    TCP_PORT_LA_MAINT	=    51,	! IMP Logical Address Maintenance
+    TCP_PORT_DOMAIN	=    53,	! Domain Name Server
+    TCP_PORT_ISI_GL	=    55,	! ISI Graphics Language
+    TCP_PORT_Prv_TA	=    57,	! private terminal access
+    TCP_PORT_Prv_FS	=    59,	! private file service
+    TCP_PORT_NI_MAIL	=    61,	! NI MAIL
+    TCP_PORT_VIA_FTP	=    63,	! VIA Systems - FTP
+    TCP_PORT_TACACS_DS	=    65,	! TACACS-Database Service
+    TCP_PORT_BOOTPS	=    67,	! Bootstrap Protocol Server
+    TCP_PORT_BOOTPC	=    68,	! Bootstrap Protocol Client
+    TCP_PORT_TFTP	=    69,	! Trivial File Transfer
+    TCP_PORT_NETRJS_1	=    71,	! Remote Job Service
+    TCP_PORT_NETRJS_2	=    72,	! Remote Job Service
+    TCP_PORT_NETRJS_3	=    73,	! Remote Job Service
+    TCP_PORT_NETRJS_4	=    74,	! Remote Job Service
+    TCP_PORT_Prv_DOS	=    75,	! any private dial out service
+    TCP_PORT_Prv_RJE	=    77,	! any private RJE service
+    TCP_PORT_FINGER	=    79,	! Finger
+    TCP_PORT_HOSTS2_NS	=    81,	! HOSTS2 Name Server
+    TCP_PORT_MIT_ML_DEV1=    83,	! MIT ML Device
+    TCP_PORT_MIT_ML_DEV2=    85,	! MIT ML Device
+    TCP_PORT_Prv_TL	=    87,	! private terminal link
+    TCP_PORT_SU_MIT_TG	=    89,	! SU/MIT Telnet Gateway
+    TCP_PORT_MIT_DOV	=    91,	! MIT Dover Spooler
+    TCP_PORT_DCP	=    93,	! Device Control Protocol
+    TCP_PORT_SUPDUP	=    95,	! SUPDUP
+    TCP_PORT_SWIFT_RVF	=    97,	! Swift Remote Vitural File Protocol
+    TCP_PORT_TACNEWS	=    98,	! TAC News
+    TCP_PORT_METAGRAM	=    99,	! Metagram Relay
+    TCP_PORT_HOSTNAME	=   101,	! NIC Host Name Server
+    TCP_PORT_ISO_TSAP	=   102,	! ISO-TSAP
+    TCP_PORT_X400	=   103,	! X400
+    TCP_PORT_X400_SND	=   104,	! X400-SND
+    TCP_PORT_CSNET_NS	=   105,	! Mailbox Name Nameserver
+    TCP_PORT_RTELNET	=   107,	! Remote Telnet Service
+    TCP_PORT_POP2	=   109,	! Post Office Protocol - Version 2
+    TCP_PORT_POP3	=   110,	! Post Office Protocol - Version 3
+    TCP_PORT_SUNRPC	=   111,	! SUN Remote Procedure Call
+    TCP_PORT_AUTH	=   113,	! Authentication Service
+    TCP_PORT_SFTP	=   115,	! Simple File Transfer Protocol
+    TCP_PORT_UUCP_PATH	=   117,	! UUCP Path Service
+    TCP_PORT_NNTP	=   119,	! Network News Transfer Protocol
+    TCP_PORT_ERPC	=   121,	! Encore Expedited Remote Proc. Call
+    TCP_PORT_NTP	=   123,	! Network Time Protocol
+    TCP_PORT_LOCUS_MAP	=   125,	! Locus PC-Interface Net Map Server
+    TCP_PORT_LOCUS_CON	=   127,	! Locus PC-Interface Conn Server
+    TCP_PORT_PWDGEN	=   129,	! Password Generator Protocol
+    TCP_PORT_CISCO_FNA	=   130,	! CISCO FNATIVE
+    TCP_PORT_CISCO_TNA	=   131,	! CISCO TNATIVE
+    TCP_PORT_CISCO_SYS	=   132,	! CISCO SYSMAINT
+    TCP_PORT_STATSRV	=   133,	! Statistics Service
+    TCP_PORT_INGRES_NET	=   134,	! INGRES-NET Service
+    TCP_PORT_LOC_SRV	=   135,	! Location Service
+    TCP_PORT_PROFILE	=   136,	! PROFILE Naming System
+    TCP_PORT_NETBIOS_NS	=   137,	! NETBIOS Name Service
+    TCP_PORT_NETBIOS_DGM=   138,	! NETBIOS Datagram Service
+    TCP_PORT_NETBIOS_SSN=   139,	! NETBIOS Session Service
+    TCP_PORT_EMFIS_DATA	=   140,	! EMFIS Data Service
+    TCP_PORT_EMFIS_CNTL	=   141,	! EMFIS Control Service
+    TCP_PORT_BL_IDM	=   142,	! Britton-Lee IDM
+    TCP_PORT_IMAP2	=   143,	! Interim Mail Access Protocol v2
+    TCP_PORT_NEWS	=   144,	! NewS
+    TCP_PORT_UAAC	=   145,	! UAAC Protocol
+    TCP_PORT_ISO_TP0	=   146,	! ISO-IP0
+    TCP_PORT_ISO_IP	=   147,	! ISO-IP
+    TCP_PORT_CRONUS	=   148,	! CRONUS_SUPPORT
+    TCP_PORT_AED_512	=   149,	! AED 512 Emulation Service
+    TCP_PORT_SQL_NET	=   150,	! SQL-NET
+    TCP_PORT_HEMS	=   151,	! HEMS
+    TCP_PORT_BFTP	=   152,	! Background File Transfer Program
+    TCP_PORT_SGMP	=   153,	! SGMP
+    TCP_PORT_NETSC_PROD	=   154,	! NETSC
+    TCP_PORT_NETSC_DEV	=   155,	! NETSC
+    TCP_PORT_SQLSRV	=   156,	! SQL Service
+    TCP_PORT_KNET_CMP	=   157,	! KNET/VM Command/Message Protocol
+    TCP_PORT_PCMail_SRV	=   158,	! PCMail Server
+    TCP_PORT_NSS_Routing=   159,	! NSS-Routing
+    TCP_PORT_SGMP_TRAPS	=   160,	! SGMP-TRAPS
+    TCP_PORT_SNMP	=   161,	! SNMP
+    TCP_PORT_SNMPTRAP	=   162,	! SNMPTRAP
+    TCP_PORT_CMIP_Manage=   163,	! CMIP/TCP Manager
+    TCP_PORT_CMIP_Agent	=   164,	! CMIP/TCP Agent
+    TCP_PORT_XNS_Courier=   165,	! Xerox
+    TCP_PORT_S_Net	=   166,	! Sirius Systems
+    TCP_PORT_NAMP	=   167,	! NAMP
+    TCP_PORT_RSVD	=   168,	! RSVD
+    TCP_PORT_SEND	=   169,	! SEND
+    TCP_PORT_Print_SRV	=   170,	! Network PostScript
+    TCP_PORT_Multiplex	=   171,	! Network Innovations Multiplex
+    TCP_PORT_CL_1	=   172,	! Network Innovations CL/1
+    TCP_PORT_Xyplex_MUX	=   173,	! Xyplex
+    TCP_PORT_MAILQ	=   174,	! MAILQ
+    TCP_PORT_VMNET	=   175,	! VMNET
+    TCP_PORT_GENRAD_MUX	=   176,	! GENRAD-MUX
+    TCP_PORT_XDMCP	=   177,	! X Display Manager Control Protocol
+    TCP_PORT_NextStep	=   178,	! NextStep Window Server
+    TCP_PORT_BGP	=   179,	! Border Gateway Protocol
+    TCP_PORT_RIS	=   180,	! Intergraph
+    TCP_PORT_Unify	=   181,	! Unify
+    TCP_PORT_Unisys_Cam	=   182,	! Unisys-Cam
+    TCP_PORT_OCBinder	=   183,	! OCBinder
+    TCP_PORT_OCServer	=   184,	! OCServer
+    TCP_PORT_Remote_KIS	=   185,	! Remote-KIS
+    TCP_PORT_KIS	=   186,	! KIS Protocol
+    TCP_PORT_ACI	=   187,	! Application Communication Interface
+    TCP_PORT_MUMPS	=   188,	! MUMPS
+    TCP_PORT_QFT	=   189,	! Queued File Transport
+    TCP_PORT_GACP	=   190,	! Gateway Access Control Protocol
+    TCP_PORT_Prospero	=   191,	! Prospero
+    TCP_PORT_OSU_NMS	=   192,	! OSU Network Monitoring System
+    TCP_PORT_SRMP	=   193,	! Spider Remote Monitoring Protocol
+    TCP_PORT_IRC	=   194,	! Internet Relay Chat Protocol
+    TCP_PORT_DN6_NLM_AUD=   195,	! DNSIX Network Level Module Audit
+    TCP_PORT_DN6_SMM_RED=   196,	! DNSIX Session Mgt Module Audit Redirect
+    TCP_PORT_DLS	=   197,	! Directory Location Service
+    TCP_PORT_DLS_Mon	=   198,	! Directory Location Service Monitor
+    TCP_PORT_AT_RMTP	=   201,	! AppleTalk Routing Maintenance
+    TCP_PORT_AT_NBP	=   202,	! AppleTalk Name Binding
+    TCP_PORT_AT_3	=   203,	! AppleTalk Unused
+    TCP_PORT_AT_ECHO	=   204,	! AppleTalk Echo
+    TCP_PORT_AT_5	=   205,	! AppleTalk Unused
+    TCP_PORT_AT_ZIS	=   206,	! AppleTalk Zone Information
+    TCP_PORT_AT_7	=   207,	! AppleTalk Unused
+    TCP_PORT_AT_8	=   208,	! AppleTalk Unused
+    TCP_PORT_SUR_MEAS	=   243,	! Survey Measurement
+    TCP_PORT_LINK	=   245,	! LINK
+    TCP_PORT_DSP3270	=   246,	! Display Systems Protocol
+
+
+    ! UDP ports (RFC1060)
+    UDP_PORT_ECHO	=     7,	! Echo
+    UDP_PORT_DISCARD	=     9,	! Discard
+    UDP_PORT_USERS	=    11,	! Active Users
+    UDP_PORT_DAYTIME	=    13,	! Daytime
+    UDP_PORT_QUOTE	=    17,	! Quote of the Day
+    UDP_PORT_CHARGEN	=    19,	! Character Generator
+    UDP_PORT_TIME	=    37,	! Time
+    UDP_PORT_NAMESERVER	=    42,	! Host Name Server
+    UDP_PORT_NICNAME	=    43,	! Who Is
+    UDP_PORT_DOMAIN	=    53,	! Domain Name Server
+    UDP_PORT_BOOTPS	=    67,	! Bootstrap Protocol Server
+    UDP_PORT_BOOTPC	=    68,	! Bootstrap Protocol Client
+    UDP_PORT_TFTP	=    69,	! Trivial File Transfer
+    UDP_PORT_FINGER	=    79,	! Finger
+    UDP_PORT_SUNRPC	=   111,	! SUN Remote Procedure Call
+    UDP_PORT_AUTH	=   113,	! Authentication Service
+    UDP_PORT_SFTP	=   115,	! Simple File Transfer Protocol
+    UDP_PORT_NTP	=   123,	! Network Time Protocol
+    UDP_PORT_PWDGEN	=   129,	! Password Generator Protocol
+    UDP_PORT_LOC_SRV	=   135,	! Location Service
+    UDP_PORT_SNMP	=   161,	! SNMP
+    UDP_PORT_SNMPTRAP	=   162,	! SNMPTRAP
+    UDP_PORT_CMIP_Manage=   163,	! CMIP/TCP Manager
+    UDP_PORT_CMIP_Agent	=   164,	! CMIP/TCP Agent
+    UDP_PORT_BGP	=   179,	! Border Gateway Protocol
+    UDP_PORT_IRC	=   194,	! Internet Relay Chat Protocol
+
+    ! Define more UDP ports
+    UDP_PORT_NFS 		= 2049;
+
+
+
+%SBTTL 'IP header structure definition'
+
+! This section defines the Internet Protcol (IP) header.  This protocol
+! header is placed in front of the protocol and data from higher layers.
+
+$FIELD IP_Header =
+    SET
+    IPH$Type_service		= [$Byte],
+      $Overlay(IPH$Type_service)
+      IPH$Swap_IHL		= [$Bits(4)],
+      $Continue
+    IPH$IHL			= [$Bits(4)],
+    IPH$Version 		= [$Bits(4)],
+    IPH$Total_Length		= [$Bytes(2)],
+    IPH$Ident			= [$Bytes(2)],
+    IPH$Fragmentation_Data	= [$Bytes(2)],
+      $OVERLAY(IPH$Fragmentation_Data)
+      IPH$Fragment_offset	= [$Bits(13)],
+      IPH$Flags		 	= [$Bits(3)],
+        $OVERLAY(IPH$FLAGS)
+          IPH$MF		= [$Bit],	! More fragments flag
+          IPH$DF		= [$Bit],	! Don't fragment
+          IPH$UNUSED		= [$Bit],	! Unused bit
+        $CONTINUE
+      $CONTINUE
+    IPH$Protocol		= [$Byte],
+    IPH$TTL			= [$Byte],
+    IPH$Checksum		= [$Bytes(2)],
+    IPH$Source			= [$Bytes(4)],
+    IPH$Dest			= [$Bytes(4)]
+    TES;
+
+LITERAL
+    IP_Size  = $FIELD_set_size;
+MACRO
+    IP_Structure = BLOCK[IP_Size] FIELD(IP_Header)%;
+
+LITERAL
+    IP_hdr_shwd_size	= 10,	!IP header size in 16 bit words
+    IP_hdr_swap_size	= 6,	!Number of words of IP header to byteswap
+    IP_hdr_wd_size	= 5,	!IP header size in 32 bit words
+    IP_version		= 4,	!IP version number from DoD spec
+!    IPTTL = 60,			! Time-to-live
+    IPTOS = 0,			! Type of service
+    IPDF = 1,			! Don't fragment flag
+
+! Max bytesize of IP header with options.
+! *** WARNING ***
+!	MUST be a multiple of 4.
+
+    IP_hdr_byte_size =  20,
+
+! Device dependent header (bytes).  Currently covers NSC hyperchannel
+! message-proper & interlan ethernet.
+! *** WARNING ***
+!	MUST be a multiple of 4.
+!!!HACK!!! What a hack!!!  Get rid of this.  Calculate it at run time!
+    Device_Header	= 68;
+
+
+
+%SBTTL 'ICMP message definitions'    
+
+! ICMP message types
+LITERAL
+    ICM_EREPLY = 0,		! Echo reply
+    ICM_DUNREACH = 3,		! Destination Unreachable
+	ICM_DUNR_NET = 0,	! (network unreachable)
+	ICM_DUNR_HOST = 1,	! (host unreachable)
+	ICM_DUNR_PROTOCOL = 2,	! (protocol unreachable)
+	ICM_DUNR_PORT = 3,	! (port unreachable)
+	ICM_DUNR_FRAGMENT = 4,	! (fragmentation needed)
+	ICM_DUNR_SRCROUTE = 5,	! (source route failed)
+	ICM_DUNR_NET_UNK = 6,	! (network unknown)
+	ICM_DUNR_HOST_UNK = 7,	! (host unknown)
+	ICM_DUNR_HOST_ISO = 8,	! (host isolated)
+	ICM_DUNR_NET_FORBID = 9,	! (network forbidden)
+	ICM_DUNR_HOST_FORBID = 10,	! (host forbiden)
+	ICM_DUNR_NET_TOS = 11,		! (net unavailable for TOS)
+	ICM_DUNR_HOST_TOS = 12,		! (host unavailable for TOS)
+    ICM_SQUENCH = 4,
+    ICM_REDIRECT = 5,			! Redirect
+	ICM_REDIRECT_NET = 0,		! (Redirect Network)
+	ICM_REDIRECT_HOST = 1,		! (Redirect Host)
+	ICM_REDIRECT_TOS_NET = 2,	! (Redirect TOS & Network)
+	ICM_REDIRECT_TOS_HOST = 3,	! (Redirect TOS & Host)
+    ICM_ECHO = 8,
+    ICM_TEXCEED = 11,
+	ICM_TEXCEED_INTRANS = 0,    ! TTL exceeded while in transit
+	ICM_TEXCEED_FRAG_REASS = 1, ! Fragment reassambly time exceeded
+    ICM_PPROBLEM = 12,
+    ICM_TSTAMP = 13,
+    ICM_TSREPLY = 14,
+    ICM_IREQUEST = 15,
+    ICM_IREPLY = 16,
+    ICM_AMREQUEST = 17,
+    ICM_AMREPLY = 18,
+    ICM_MIN = ICM_EREPLY,
+    ICM_MAX = ICM_AMREPLY;
+
+! This section defines the Internet Control Message Protcol (ICMP) header.
+
+$FIELD ICMP_Header =
+    SET
+    ICM$EXT1	= [$Bytes(4)],	! Blanket for first longword.
+    $OVERLAY(ICM$EXT1)
+	ICM$CODE	= [$Byte],	! Type-specific code
+	ICM$TYPE	= [$Byte],	! ICMP packet type
+	ICM$CKSUM	= [$Bytes(2)],	! Checksum of ICMP portion
+    $CONTINUE
+    ICM$VAR	= [$Bytes(4)],	! Type-specific data
+    ICM$DATA	= [$Bytes(0)],	! Type-specific additional data
+
+! Type-specific fields:
+
+! Echo request and reply (0,8)
+
+    $OVERLAY(ICM$VAR)
+	ICM$E_ID=[$Bytes(2)],	! Echo - identifier
+	ICM$E_SEQ=[$bytes(2)],	! Echo - sequence number
+    $CONTINUE
+
+! Types with an unused VAR field (3,4,11)
+
+    $OVERLAY(ICM$VAR)
+	ICM$TYP_UNUSED=[$Bytes(4)],	! Unused.  Must be zero.
+    $CONTINUE
+
+! Redirect messages (5)
+
+    $OVERLAY(ICM$VAR)
+	ICM$R_GWY=[$Bytes(4)],	! Redirect - new gateway address
+    $CONTINUE
+
+! Parameter Problem messages (12)
+    $OVERLAY(ICM$VAR)
+	ICM$P_PTR=[$Byte],
+	ICM$P_UNUSD=[$Bytes(3)],
+    $CONTINUE
+
+! Timestamp request and reply (13,14)
+
+    $OVERLAY(ICM$VAR)
+	ICM$T_ID=[$Bytes(2)],	! Timestamp - identifier
+	ICM$T_SEQ=[$Bytes(2)],	! Timestamp - sequence number
+    $CONTINUE
+
+! Information request and reply (15,16)
+
+    $OVERLAY(ICM$VAR)
+	ICM$I_ID=[$Bytes(2)],	! Information - identifier
+	ICM$I_SEQ=[$Bytes(2)],	! Information - sequence number
+    $CONTINUE
+
+! Information request and reply (17,18)
+
+    $OVERLAY(ICM$VAR)
+	ICM$A_ID=[$Bytes(2)],	! Address Mask - identifier
+	ICM$A_SEQ=[$Bytes(2)]	! Address Mask - sequence number
+    $CONTINUE
+    TES;
+
+LITERAL
+    ICMP_Size  = $FIELD_set_size,
+    ICMP_Header_Size  = ICMP_Size*4;
+
+MACRO
+    ICMP_Structure = BLOCK[ICMP_Size] FIELD(ICMP_Header)%;
+
+LITERAL
+    Max_ICMP_Data_Size = 512,	! Max ICMP data size
+!    ICMPTTL = 60,		! Time-to-live
+    ICMPTOS = 0,		! Type of service
+    ICMPDF = 1;			! Don't fragment flag
+
+
+
+%SBTTL 'UDP message definitions'    
+
+! This section defines the User Datagram Protcol structures.
+
+! Define the structure of a UDP packet (after IP header)
+
+$FIELD UDPkt_Fields =
+    SET
+    UP$Source_Port	= [$Bytes(2)], ! UDP source port
+    UP$Dest_Port	= [$Bytes(2)], ! UDP destination port
+    UP$Length		= [$Bytes(2)], ! UDP length (including UDP header)
+    UP$Checksum		= [$Bytes(2)], ! UDP checksum (including pseudo-header)
+    UP$Data		= [$Bytes(0)]  ! UDP data start
+    TES;
+
+LITERAL
+    UDPkt_Length = $Field_Set_Size,
+    UDP_Header_Size = UDPkt_Length*4;
+
+MACRO
+    UDPkt_Structure = BLOCK[UDPkt_Length] FIELD(UDPkt_Fields) %;
+
+
+%SBTTL 'TCP message definitions'    
+
+! This section defines the Transmission Control Protcol structures.
+
+
+%SBTTL 'TCP Segment definition.'
+
+%(
+ This definition covers the entire TCP segment structure which is sent
+ to IP.  For field definitions see the DARPA TCP specification.
+
+
+	=========================================================
+	!							!
+	+			TCP Header			+
+	!							!
+	---------------------------------------------------------
+	!							!
+	+			   Data				+
+	!							!
+	=========================================================
+
+)%
+
+$FIELD Segment_Fields=
+    SET
+    SH$Source_Port		= [$Bytes(2)],	! Source port
+    SH$Dest_Port		= [$Bytes(2)],	! Destination port
+    SH$Seq			= [$ULong],	! Sequence number
+    SH$ACK			= [$ULong],	! ACK number
+    SH$Control_Flags		= [$Bytes(2)],	! For Fast flag clear.
+    $OVERLAY(SH$Control_Flags)
+	SH$C_All_FLAGS		= [$Bits(12)],
+	SH$Data_Offset		= [$Bits(4)],
+    $CONTINUE
+    $OVERLAY(SH$C_All_flags)
+	SH$C_FIN		= [$Bit],	! FIN (close) control
+	SH$C_SYN		= [$Bit],	! SYN (open) control
+	SH$C_RST		= [$Bit],	! RESET control
+	SH$C_EOL		= [$Bit],	! PUSH control
+	SH$C_ACK		= [$Bit],	! ACK control (ACK valid)
+	SH$C_URG		= [$Bit],	! URG control (URG valid)
+	SH$Rsvrd		= [$Bits(6)],	! Unused bits
+    $CONTINUE
+    $OVERLAY(SH$Control_Flags)			! Byteswapped flags
+	SH$BS_C_Rsvrd1		= [$Bits(4)],
+	SH$BS_Data_Offset	= [$Bits(4)],
+	SH$BS_C_FIN		= [$Bit],
+	SH$BS_C_SYN		= [$Bit],
+	SH$BS_C_RST		= [$Bit],
+	SH$BS_C_EOL		= [$Bit],
+	SH$BS_C_ACK		= [$Bit],
+	SH$BS_C_URG		= [$Bit],
+	SH$BS_C_Rsvrd2		= [$Bits(2)],
+    $CONTINUE
+    SH$Window			= [$UWord],	! Window beyond this seq #
+    SH$CheckSum			= [$SWord],	! Segment TCP checksum
+    SH$Urgent			= [$UWord],	! Urgent pointer if URG set
+    SH$Data			= [$Bytes(0)]	! Start of segment data
+    TES;
+
+! Segment TCP options
+
+$FIELD TCP$OPT_FIELDS =
+    SET
+    TCP$OPT_KIND	= [$Byte],	! Option type
+    TCP$OPT_LENGTH	= [$Byte],	! Option length
+    TCP$OPT_DATA	= [$Bytes(0)],	! Additional data for the option
+    $OVERLAY(TCP$OPT_DATA)
+      TCP$OPT_DBYTE	= [$Byte],	! One-byte option data
+    $CONTINUE
+    $OVERLAY(TCP$OPT_DATA)
+      TCP$OPT_DWORD	= [$Bytes(2)],	! Two-byte option data
+    $CONTINUE
+    $OVERLAY(TCP$OPT_DATA)
+      TCP$OPT_DLONG	= [$Bytes(4)]	! Four-byte option data
+    $CONTINUE				!(others require harder processing)
+    TES;
+LITERAL
+    TCP$OPT_SIZE = $FIELD_SET_SIZE;
+MACRO
+    TCP$OPT_BLOCK = BLOCK[TCP$OPT_SIZE] FIELD(TCP$OPT_FIELDS) %;
+
+LITERAL
+    TCP$OPT_KIND_EOL = 0,	! End of options list
+    TCP$OPT_KIND_NOP = 1,	! No-OP option
+    TCP$OPT_KIND_MSS = 2,	! Maximum-segment-size option
+
+    TCP$OPT_LENGTH_MSS = 4;	! Expected length for MSS option
+
+
+! Segment sizes in bytes. actually the following macro is used primarily for
+! mapping attributes to a dynamic data segment via "ref" pointers.
+
+LITERAL
+    Seg_Allocation = $Field_Set_Size;
+MACRO
+    Segment_Structure = Block[Seg_Allocation] Field(Segment_Fields) %,
+    Control_Segment_Structure = BLOCK[Seg_Allocation] Field(Segment_Fields)%;
+
+
+! TCP Segment: header & data sizes.
+
+LITERAL
+    TCP_Data_Offset = 5,			! in 32-bit words.
+    TCP_Header_Size = TCP_Data_OffSet*4,	! in bytes.
+!    Default_Data_Size = 1392,			! default: max size of user
+    Default_Data_Size = 536,			! default: max size of user
+						! data per segment.
+
+! segment option parameters
+
+   opt$seg_dataSize = 2,			! MSS option value
+   opt$max_recv_dataSize = 1392; 		! MSS default value
+

@@ -1,0 +1,658 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%(
+
+Module:
+
+	NETCOMMON
+
+Facility:
+
+	Provide system-wide data structure and literal definitions.
+	This file is intended to contain definitions which are shared
+	by the IPACP, clients, and possibly by NAMRES.
+
+Author:
+
+	Much originally from STRUCTURE.REQ
+	This version by Bruce R. Miller, CMU NetDev, 10am 2/22/90
+	Copyright (c) 1990, Bruce Miller and CMU.
+
+Modification History:
+
+	14-Nov-1991	Henry W. Miller		USBR
+	Changed DM$CONNECTION_TIMEOUT and DM$RT_TIMEOUT to unsigned longs.
+
+	11-Nov-1991	Henry W. Miller		USBR
+	Changed DM$SND_WND, DM$SND_WL and DM$RCV_WND to unsigned long as
+	per RFC1122.
+
+	31-Jan-1991	Henry W. Miller		USBR
+	Change DM$SND_NXT and DM$RCV_NXT to unsigned long as recommended
+	by RFC1122.
+
+)%
+
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT'; ! Get the BLISS field def. library.
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCONFIG';
+
+! Miscellaneous stuff to make life easier.
+
+MACRO
+    DESC$STR_LEN = 8 %,
+    DESC$STR = BLOCK[DESC$STR_LEN,BYTE] %,
+    $DESC_BLK =
+	$BBLOCK[DSC$K_S_BLN] %,
+    $DESC_DSTR =
+	[DSC$W_LENGTH] = 0,
+	[DSC$B_DTYPE] = DSC$K_DTYPE_T,
+	[DSC$B_CLASS] = DSC$K_CLASS_D,
+	[DSC$A_POINTER] = 0 %,
+    DESC$STR_ALLOC(NAME,LEN) =
+	%IF NOT %NULL(LEN) %THEN
+	    %NAME(NAME,'_BUF') : VECTOR[CH$ALLOCATION(LEN)],
+	%FI
+	NAME : $DESC_BLK
+	%IF NOT %NULL(LENGTH) %THEN
+	    PRESET([DSC$B_CLASS] = DSC$K_CLASS_Z,
+		   [DSC$B_DTYPE] = DSC$K_DTYPE_Z,
+		   [DSC$W_LENGTH] = LEN,
+		   [DSC$A_POINTER] = %NAME(NAME,'_BUF'))
+	%FI%;
+
+
+! Name length and address count literals
+
+LITERAL
+    Host_Name_Max_Size	= 128,
+    MAX_HNAME		= Host_Name_Max_Size,
+    MAX_HADDRS		= 20,
+!!!HACK!!! Get rid of this!!!
+    MAX_RRSIZE		= 1024;
+
+LITERAL
+    MAX_UDPCB = 100,		! Max number of UDP connections
+    MAX_ICMPCB = 10,		! Max number of ICMP connections
+    MAX_IPCB = 10;		! Max number of IP connections
+
+! Define protocol codes for open
+
+LITERAL
+    U$TCP_Protocol = 0,		! TCP protocol (default)
+    U$UDP_Protocol = 1,		! UDP protocol
+    U$ICMP_Protocol = 2,	! ICMP protocol
+    U$IP_Protocol = 3;		! IP protocol
+
+
+
+%(
+    Net I/O Status block (Quadword) field definitions. These are basically the
+    same as defined in VMS with the exception of the 2nd longword. The second
+    longword contains the ACP error code, if status is SS$_ABORT, or request
+    flags and status information if status is SS$_NORMAL. Note that the ICMP
+    code field is only defined if the ICMP flag is set, and is only valid for
+    special connections which know about ICMP messages.
+
+	!===============================================================!
+	+     Bytes Transfered		!	VMS Return Code		+
+	!---------------------------------------------------------------!
+	+	    Unused		!     Flags	!   ICMP code	+
+	!===============================================================!
+
+)%
+
+$FIELD NetSB_Fields=
+    SET
+    NSB$STATUS		= [$Bytes(2)],	! VMS status return code
+    NSB$Byte_Count	= [$Bytes(2)],
+    NSB$XSTATUS		= [$Bytes(4)],	! Second status word
+    $OVERLAY(NSB$XSTATUS)
+	NSB$ICMP_CODE	= [$Byte],	! ICMP message code, if ICMP flag set
+	NSB$FLAGS	= [$Byte],	! Request flags
+    $CONTINUE
+    $OVERLAY(NSB$FLAGS)
+	NSB$F_URG	= [$Bit],	! URGENT data bit (not implemented)
+	NSB$F_PUSH	= [$Bit],	! PUSH data bit
+	NSB$F_EOF	= [$Bit],	! EOF (i.e. connection fully closed)
+	NSB$F_ICMP	= [$Bit],	! ICMP message bit
+    $CONTINUE
+    $OVERLAY(NSB$XSTATUS)
+	NSB$XERROR	= [$Bytes(4)]	! ACP error code, if RC = SS$_ABORT
+    $CONTINUE
+    TES;
+
+MACRO
+    NetIO_Status_Block = BLOCK[2] FIELD(NetSB_Fields) %;
+
+LITERAL
+    NSB$URGBIT = 1,		! Bit value for URGENT bit in FLAGS field
+    NSB$PUSHBIT = 2,		! Bit value for PUSH bit
+    NSB$EOFBIT = 4,		! Bit value for EOF bit
+    NSB$ICMPBIT = 8;		! Bit value for ICMP bit
+
+
+
+%SBTTL 'IP protocols header information block definition.'
+
+! This is the definition of the block of data describing UDP, ICMP and IP
+! header information when using the send and receive commands.
+
+! Special adress block for send/receive in non-TCP mode.
+
+$FIELD IPADR$ADDRESS_FIELDS =
+    SET
+    IPADR$SRC_HOST	= [$Bytes(4)],
+    IPADR$DST_HOST	= [$Bytes(4)],
+
+    IPADR$EXTENSION	= [$Bytes(8)],
+    $OVERLAY(IPADR$EXTENSION)
+	IPADR$EXT1	= [$Bytes(4)],
+	IPADR$EXT2	= [$Bytes(4)],
+    $CONTINUE
+    $OVERLAY(IPADR$EXTENSION)
+	IPADR$SRC_PORT	= [$Bytes(2)],
+	IPADR$DST_PORT	= [$Bytes(2)],
+    $CONTINUE
+    $OVERLAY(IPADR$EXTENSION)
+	IPADR$TYPE	= [$Bytes(1)],
+	IPADR$CODE	= [$Bytes(1)],
+	IPADR$CKSUM	= [$Bytes(2)],
+	IPADR$SPECIAL	= [$Bytes(4)]
+    $CONTINUE
+
+    TES;
+LITERAL
+    IPADR$ADDRESS_SIZE = $FIELD_SET_SIZE,
+    IPADR$ADDRESS_BLEN = IPADR$ADDRESS_SIZE * 4,
+    IPADR$UDP_ADDRESS_BLEN = 12;
+MACRO
+    IPADR$ADDRESS_BLOCK = BLOCK[IPADR$ADDRESS_SIZE] FIELD(IPADR$ADDRESS_FIELDS) %;
+
+! NET$INFO - return block structure.
+
+$FIELD Connection_Info_Return_Fields=
+    SET
+    CI$FHost_Name_size	= [$Byte],
+    CI$LHost_Name_size	= [$Byte],
+    CI$Foreign_Host	= [$String(Host_Name_Max_Size)],
+    $ALIGN(Fullword)
+    CI$Foreign_Port	= [$Bytes(4)],
+    $ALIGN(Fullword)
+    CI$Local_Host	= [$String(Host_Name_Max_Size)],
+    $ALIGN(Fullword)
+    CI$Local_Port	= [$Bytes(4)],
+    CI$local_internet_adrs = [$bytes(4)],
+    CI$remote_internet_adrs = [$bytes(4)]
+    TES;
+
+LITERAL
+    Connection_Info_BLKSize = $Field_Set_Size,
+    Connection_Info_ByteSize = Connection_Info_Blksize*4; ! in bytes.
+
+MACRO
+    Connection_Info_Return_Block = 
+	BLOCK[Connection_Info_BLKSIZE] FIELD(Connection_Info_Return_Fields)%;
+
+
+
+
+! Block returned by name lookup function
+
+$FIELD GTHST_NMLOOK_Ret_Fields =	
+    SET
+    GHN$ADRCNT		= [$Bytes(4)],
+    GHN$ADRLST		= [$Bytes(4*Max_Haddrs)],
+    GHN$NAMLEN		= [$Bytes(4)],
+    GHN$NAMSTR		= [$String(Host_Name_Max_Size)]
+    TES;
+
+LITERAL
+    GTHST_NMLOOK_RET_ARGS_LENGTH = $FIELD_SET_SIZE;
+MACRO
+    GTHST_NMLOOK_Ret_Args = BLOCK[GTHST_NMLOOK_RET_ARGS_LENGTH]
+			    FIELD(GTHST_NMLOOK_Ret_FIELDS)%;
+
+! Return block
+
+$FIELD GTHST_ADLOOK_Ret_Fields =	
+    SET
+    GHA$NAMLEN		= [$Bytes(4)],
+    GHA$NAMSTR		= [$String(Host_Name_Max_Size)]
+    TES;
+
+LITERAL
+    GTHST_ADLOOK_RET_ARGS_LENGTH = $FIELD_SET_SIZE;
+MACRO
+    GTHST_ADlook_Ret_Args = BLOCK[GTHST_ADLOOK_RET_ARGS_LENGTH]
+			    FIELD(GTHST_ADLOOK_RET_FIELDS)%;
+
+! Block returned by RR lookup function
+
+$FIELD GTHST_RRLOOK_Ret_Fields =	
+    SET
+    GRR$RDLEN		= [$Bytes(2)],
+    GRR$RDATA		= [$Bytes(0)]
+    TES;
+
+LITERAL
+    GTHST_RRLOOK_RET_ARGS_LENGTH = $FIELD_SET_SIZE;
+MACRO
+    GTHST_RRLOOK_Ret_Args = BLOCK[GTHST_RRLOOK_RET_ARGS_LENGTH]
+			    FIELD(GTHST_RRLOOK_Ret_FIELDS)%;
+
+
+
+! Dump Directive Codes.
+
+LITERAL
+    DU$Dynamic_Mem_Alloc	=  1, ! Memory management counters
+    DU$TCP_Stats		=  2, ! TCP statistic counters
+    DU$Local_Connection_ID	=  3, ! List of active TCP connections
+    DU$TCB_Dump			=  4, ! Contents of a TCB
+    DU$Host_stats		=  5, ! obsolete, unused
+    DU$Known_Host_Index		=  6, ! obsolete, unused
+    DU$device_dump		=  7, ! Device-dependant status
+    DU$UDP_Connections		=  8, ! List of UDP connections
+    DU$UDPCB_Dump		=  9, ! Contents of a UDPCB
+    DU$ARP_Cache		= 10, ! Contents of ARP cache
+    DU$ICMP_Connections		= 11, ! List of ICMP connections
+    DU$ICMPCB_Dump		= 12, ! Contents of a IPCB
+    DU$IP_Connections		= 13, ! List of IP connections
+    DU$IPCB_Dump		= 14, ! Contents of a IPCB
+    DU$Device_List		= 15, ! List of device indexes
+    DU$Device_Stat		= 16; ! Contents of dev_config entry
+
+! Dump return argument block formats.
+
+! Dump Dynamic Memory allocation stats.
+! Dump Directive: DU$Dynamic_mem_Alloc
+
+$FIELD D$Mem_Alloc_fields=
+    SET
+    DM$QB		= [$SLong],	! Queue Blocks
+    DM$UA		= [$SLong],	! UARG Blocks
+    DM$CS		= [$SLong],	! TCP Control segments
+    DM$DMS		= [$SLong],	! default size max segs
+    DM$NM		= [$SLong],	! net mesg receive buffer
+    DM$QBMX		= [$SLong],	! Queue blocks max
+    DM$UAMX		= [$SLong],	! UARG Blocks max
+    DM$CSMX		= [$SLong],	! TCP Control segments max
+    DM$DMSMX		= [$SLong],	! default size max segs max
+    DM$NMMX		= [$SLong],	! net mesg receive buffer max
+    DM$QBAL		= [$SLong],	! qblks allocated
+    DM$UAAL		= [$SLong],	! Uarg blks allocated
+    DM$CSAL		= [$SLong],	! Control segs allocated
+    DM$DMSAL		= [$SLong],	! Default segs allocated
+    DM$NMAL		= [$SLong],	! net recv bufs allocated
+    DM$QBFR		= [$SLong],	! QBlks free
+    DM$UAFR		= [$SLong],	! Uarg blks free
+    DM$CSFR		= [$SLong],	! Control segs free
+    DM$DMSFR		= [$SLong],	! Default segs free
+    DM$NMFR		= [$SLong]	! net recv bufs free
+    TES;
+
+LITERAL
+    D$MA_Blksize	= $Field_Set_Size*4;
+MACRO
+    D$Mem_Alloc_Return_blk = BLOCK[D$MA_Blksize/4]
+			     FIELD(D$Mem_Alloc_fields)%;
+
+! User return dump blk:  TCP stats.
+
+$FIELD D$TCP_Stats_Fields=
+    SET
+    DM$TCPACP_PID		= [$SLong],
+    DM$User_IO_Requests		= [$SLong],
+    DM$StoreForward		= [$SLong],
+    DM$Active_Conects_Opened	= [$SLong],
+    DM$Passive_Conects_Opened	= [$SLong],
+    DM$Data_Bytes_Xmitted	= [$SLong],
+    DM$Data_Bytes_Recved	= [$SLong],
+    DM$Segs_Xmitted		= [$SLong],
+    DM$Segs_Recved		= [$SLong],
+    DM$Seg_Bad_Chksum		= [$SLong],
+    DM$BadSeq			= [$SLong],	! Obsolete
+    DM$Duplicate_Segs		= [$SLong],	! Duplicates received
+    DM$Retrans_Segs		= [$SLong],	! Retransmissions sent
+    DM$RPZ_RXQ			= [$SLong],	! Repacketizer (obsolete)
+    DM$OORW_Segs		= [$SLong],	! out of recv window
+    DM$Future_Rcvd		= [$SLong],	! In, but not at RCV.NXT
+    DM$Future_Used		= [$SLong],	! Future segs later used
+    DM$Future_Dropped		= [$SLong],
+    DM$Future_Dups		= [$SLong],
+    DM$Servers_Forked		= [$SLong],	! Well-known-socket servers run
+    DM$Uptime			= [$Sub_Block(2)],
+    DM$Arps_Received		= [$SLong]
+    TES;
+
+LITERAL
+    D$TS_Blksize	= $Field_Set_Size*4;
+MACRO
+    D$TCP_Stats_Return_Blk = Block[D$TS_Blksize/4]
+			     Field(D$TCP_Stats_fields)%;
+
+! Dump all known local-connection-ids.
+
+!!!HACK!!! OH MY GOD WHAT AM I DOING! I'VE HARD-WIRED IN 100 INSTEAD OF
+!!!HACK!!! MAX_TCB.  DON'T LET THIS CODE GO OUT THE DOOR!!!!!
+!!!HACK!!! remember to improve the dumping interface...
+LITERAL
+    D$LC_ID_Blksize	= 100*4;	! byte size.
+MACRO
+    D$LC_ID_Return_Blk = Vector[D$LC_ID_Blksize/4]%;
+
+! Dump a specified TCB
+
+$FIELD D$TCB_Dump_Fields=
+    SET
+    DM$TCB_Addr		= [$SLong],	! Address of TCB (internal)
+    DM$User_ID		= [$SLong],	! Owning process ID
+    DM$State		= [$SWord],	! Current TCB state
+    DM$Last_State	= [$SWord],
+    DM$Foreign_Host	= [$SLong],	! Foreign host #
+    DM$Foreign_Port	= [$SLong],	! Foreign port #
+    DM$Local_Host	= [$SLong],	! Local host #
+    DM$Local_Port	= [$SLong],	! Local port #
+    DM$User_Recv_QE	= [$SLong],	! # of pending user receives
+    DM$User_Send_QE	= [$SLong],	! # of pending user sends
+    DM$Net_Recv_QE	= [$Slong],	! # of pending receive buffers
+    DM$Future_QE	= [$SLong],	! # of buffers on future queue
+    DM$Rexmit_QE	= [$SLong],	! # of bytes on RX queue
+    DM$Dasm_ptr		= [$SLong],	! Disassembly pointer
+    DM$Dasm_bc		= [$SLong],	! Dissasembly byte count
+    DM$Asm_ptr		= [$SLong],	! Assembly pointer
+    DM$Asm_bc		= [$SLong],	! Assembly byte count
+    DM$ISS		= [$ULong],	! Initial Send Sequence #
+    DM$SND_UNA		= [$ULong],	! # of bytes send but not ACK'ed
+    DM$SND_NXT		= [$ULong],	! Next Send Sequence #
+    DM$SND_WND		= [$ULong],	! Send window count
+    DM$SND_WL		= [$ULong],
+    DM$SND_BS		= [$SLong],
+    DM$IRS		= [$ULong],	! Initial Receive Sequence #
+    DM$RCV_NXT		= [$ULong],	! Next Receive Sequence #
+    DM$RCV_WND		= [$ULong],	! Receive window count
+    DM$RCV_BS		= [$SLong],
+    DM$Conn_TimeOut	= [$ULong],	! Connection dead timeout
+    DM$RT_TimeOut	= [$ULong],	! Retransmission timer
+    DM$Round_Trip_Time	= [$SLong]	! Measured round-trip-time
+    TES;
+
+LITERAL
+    D$TCB_dump_blksize = $Field_set_Size*4;	! byte size
+MACRO
+    D$TCB_Dump_Return_Blk = Block[D$TCB_Dump_blksize/4]
+			    Field(D$TCB_Dump_Fields)%;
+
+! Dump list of udpCB's
+
+LITERAL
+    D$UDP_List_BlkSize	= Max_UDPCB*4;	! byte size.
+MACRO
+    D$UDP_List_Return_Blk = Vector[D$UDP_List_BlkSize/4]%;
+
+
+! Dump of a single UDPCB
+
+$FIELD D$UDPCB_Dump_Fields =
+    SET
+    DU$UDPCB_Address	= [$Address],	! Internal UDPCB address
+    DU$UDPCB_Foreign_Host	= [$Bytes(4)],	! Foreign host number
+    DU$UDPCB_Foreign_Port	= [$UWord],	! Foreign port number
+    DU$UDPCB_Local_Host	= [$Bytes(4)],	! Local host number
+    DU$UDPCB_Local_Port	= [$UWord],	! Local port number
+    DU$UDPCB_NR_Qcount	= [$SLong],	! Count of items on receive queue
+    DU$UDPCB_UR_Qcount	= [$SLong],	! Count of items on user queue
+    DU$UDPCB_Flags	= [$Bytes(2)],	! UDPCB flags
+    $OVERLAY(DU$UDPCB_Flags)
+	DU$UDPCB_Wildcard	= [$Bit],	! Wildcard foreign host/port
+	DU$UDPCB_Raw_Mode	= [$Bit],	! User wants IP headers (not impl)
+	DU$UDPCB_Aborting	= [$Bit],	! Connection is closing
+	DU$UDPCB_NMlook	= [$Bit],	! Name lookup in progress
+	DU$UDPCB_Internal	= [$Bit],	! Connection is internal
+    $CONTINUE
+    DU$UDPCB_User_ID	= [$ULong]	! Owning process
+    TES;
+
+LITERAL
+    D$UDPCB_dump_blksize = $Field_set_Size*4;	! byte size
+MACRO
+    D$UDPCB_Dump_Return_Blk = Block[D$UDPCB_Dump_blksize/4]
+			    Field(D$UDPCB_Dump_Fields)%;
+
+! Dump list of ICMPCB's
+
+LITERAL
+    D$ICMP_List_BlkSize	= Max_ICMPCB*4;	! byte size.
+MACRO
+    D$ICMP_List_Return_Blk = Vector[D$ICMP_List_BlkSize/4]%;
+
+
+! Dump of a single ICMPCB
+
+$FIELD D$ICMPCB_Dump_Fields =
+    SET
+    DU$ICMPCB_Address	= [$Address],	! Internal ICMPCB address
+    DU$ICMPCB_Foreign_Host	= [$Bytes(4)],	! Foreign host number
+    DU$ICMPCB_Local_Host	= [$Bytes(4)],	! Local host number
+    DU$ICMPCB_NR_Qcount	= [$SLong],	! Count of items on receive queue
+    DU$ICMPCB_UR_Qcount	= [$SLong],	! Count of items on user queue
+    DU$ICMPCB_Flags	= [$Bytes(2)],	! ICMPCB flags
+    $OVERLAY(DU$ICMPCB_Flags)
+	DU$ICMPCB_Wildcard	= [$Bit],	! Wildcard foreign host/port
+	DU$ICMPCB_Raw_Mode	= [$Bit],	! User wants IP headers (not impl)
+	DU$ICMPCB_Aborting	= [$Bit],	! Connection is closing
+	DU$ICMPCB_NMlook	= [$Bit],	! Name lookup in progress
+	DU$ICMPCB_Internal	= [$Bit],	! Connection is internal
+    $CONTINUE
+    DU$ICMPCB_User_ID	= [$ULong]	! Owning process
+    TES;
+
+LITERAL
+    D$ICMPCB_dump_blksize = $Field_set_Size*4;	! byte size
+MACRO
+    D$ICMPCB_Dump_Return_Blk = Block[D$ICMPCB_Dump_blksize/4]
+			    Field(D$ICMPCB_Dump_Fields)%;
+
+! Dump list of IPCB's
+
+LITERAL
+    D$IP_List_BlkSize	= Max_IPCB*4;	! byte size.
+MACRO
+    D$IP_List_Return_Blk = Vector[D$IP_List_BlkSize/4]%;
+
+
+! Dump of a single IPCB
+
+$FIELD D$IPCB_Dump_Fields =
+    SET
+    DU$IPCB_Address	= [$Address],	! Internal IPCB address
+    DU$IPCB_Foreign_Host	= [$Bytes(4)],	! Foreign host number
+    DU$IPCB_Local_Host	= [$Bytes(4)],	! Local host number
+    DU$IPCB_NR_Qcount	= [$SLong],	! Count of items on receive queue
+    DU$IPCB_UR_Qcount	= [$SLong],	! Count of items on user queue
+    DU$IPCB_Flags	= [$Bytes(2)],	! IPCB flags
+    $OVERLAY(DU$IPCB_Flags)
+	DU$IPCB_Wildcard	= [$Bit],	! Wildcard foreign host/port
+	DU$IPCB_Raw_Mode	= [$Bit],	! User wants IP headers (not impl)
+	DU$IPCB_Aborting	= [$Bit],	! Connection is closing
+	DU$IPCB_NMlook	= [$Bit],	! Name lookup in progress
+	DU$IPCB_Internal	= [$Bit],	! Connection is internal
+    $CONTINUE
+    DU$IPCB_User_ID	= [$ULong]	! Owning process
+    TES;
+
+LITERAL
+    D$IPCB_dump_blksize = $Field_set_Size*4;	! byte size
+MACRO
+    D$IPCB_Dump_Return_Blk = Block[D$IPCB_Dump_blksize/4]
+			    Field(D$IPCB_Dump_Fields)%;
+
+! Define ARP cache dump block format (single entry)
+
+!!!HACK!!! Should this be defined here?
+LITERAL
+    MAX_ARP_HDW_LEN = 8;
+
+$FIELD DU$ARP_FIELDS =
+    SET
+    DU$ARP_INDEX	= [$UWord],	! Arp cache "index"
+    DU$ARP_DEVICE	= [$UWord],	! Device index
+    DU$ARP_EXPIRE	= [$ULong],	! Expiration time
+    DU$ARP_SAVEQB	= [$ULong],	! Saved QB
+    DU$ARP_FLAGS	= [$UWord],	! Flags
+    $OVERLAY(DU$ARP_FLAGS)
+	DU$ARP_VALID	= [$Bit],	! Entry is valid
+    $CONTINUE
+    DU$ARP_IPADDR	= [$Bytes(4)],	! IP address
+    DU$ARP_HWSIZE	= [$UWord],	! Physical address length
+    DU$ARP_HWADDR	= [$Bytes(MAX_ARP_HDW_LEN)] ! Physical address
+    TES;
+LITERAL
+    D$ARP_Dump_Blksize = $Field_Set_Size*4, ! Byte size
+    D$ARP_Dump_MaxBlksize = 512, ! Max size of block
+    D$ARP_Dump_Maxblk = (D$ARP_Dump_MaxBlksize/D$ARP_Dump_Blksize);
+MACRO
+    D$ARP_Dump_Return_Blk(N) =
+	%IF %NULL(N) %THEN
+	    BLOCK[D$ARP_Dump_Blksize]
+	%ELSE
+	    BLOCKVECTOR[N,D$ARP_Dump_Blksize/4]
+	%FI
+	FIELD(DU$ARP_FIELDS) %;
+
+! Dump list of valid devices
+
+LITERAL
+    D$Device_List_BlkSize	= DC_max_num_net_Devices*4;	! byte size.
+MACRO
+    D$Device_List_Return_Blk = Vector[DC_max_num_net_Devices]%;
+
+! Dump of a single device interface
+
+LITERAL
+    DevNam_Max_Size = 20,
+    DevSpec_Max_Size= 20;
+
+$FIELD D$Dev_Dump_Fields =
+    SET
+    DU$Dev_Address	= [$Address],	! Interface IP address
+    DU$Dev_netmask	= [$Address],	! Interface IP Network Mask
+    DU$Dev_network	= [$Address],	! Interface IP Network
+    DU$Dev_Pck_Xmit	= [$UShort],	! Packet's transmitted
+    DU$Dev_Pck_Recv	= [$UShort],	! Packet's received
+    DU$DevNam_Len	= [$Bytes(2)],
+    DU$DevSpec_Len	= [$Bytes(2)],
+    DU$DevNam_Str	= [$String(DevNam_Max_Size)],
+    DU$DevSpec_Str	= [$String(DevSpec_Max_Size)]
+    TES;
+
+LITERAL
+    D$Dev_dump_blksize = $Field_set_Size*4;	! byte size
+MACRO
+    D$Dev_Dump_Return_Blk = Block[D$Dev_Dump_blksize/4]
+			    Field(D$Dev_Dump_Fields)%;
+
+! Define largest return block size
+
+MACRO
+    $MAXLIT(X,Y)[] =
+	%IF X LSS Y %THEN
+	    UNDECLARE X;
+	    LITERAL X = Y;
+	%FI
+	%IF NOT %NULL(%REMAINING) %THEN
+	    $MAXLIT(X,%REMAINING);
+	%FI%;
+
+Literal
+    D$User_Return_Blk_Max_Size = 0;
+$MAXLIT(D$User_Return_Blk_Max_Size,
+	D$MA_Blksize,D$TS_Blksize,D$LC_ID_Blksize,D$TCB_Dump_Blksize,
+	D$UDP_List_Blksize,D$UDPCB_Dump_Blksize,D$ARP_Dump_MaxBlksize);
+%MESSAGE(%NUMBER(D$User_Return_Blk_Max_Size),' Bytes for max size dump block')
+
+
+
+! Function call (FCALL) codes
+LITERAL
+   NCP$C_NULL		=  0,
+   NCP$C_ACP		=  1,
+   NCP$C_POOL		=  2,
+   NCP$C_LINK		=  3,
+   NCP$C_ARP		=  4,
+   NCP$C_INTERFACE	=  5,
+   NCP$C_ROUTE		=  6,
+   NCP$C_IP		=  7,
+   NCP$C_ICMP		=  8,
+   NCP$C_UDP		=  9,
+   NCP$C_TCP		= 10,
+   NCP$C_SNMP		= 11;
+
+! ACP FCall subfunctions
+LITERAL
+   NCP$C_ACP_NULL		= 0,
+   NCP$C_ACP_START		= 1,
+   NCP$C_ACP_STOP		= 2,
+   NCP$C_ACP_SET_DEBUG		= 3,
+   NCP$C_ACP_SET_ACTLOG		= 4;
+
+! POOL FCall subfunctions
+LITERAL
+   NCP$C_POOL_NULL		= 0,
+   NCP$C_POOL_DUMP		= 1;
+
+! LINK FCall subfunctions
+LITERAL
+   NCP$C_LINK_NULL		= 0,
+   NCP$C_LINK_ADD		= 1;
+
+! INTERFACE FCall subfunctions
+LITERAL
+   NCP$C_INTERFACE_NULL		= 0,
+   NCP$C_INTERFACE_ADD		= 1;
+
+! ROUTE FCall subfunctions
+LITERAL
+   NCP$C_ROUTE_NULL		= 0,
+   NCP$C_ROUTE_ADD		= 1;
+
+! IP FCall subfunctions
+LITERAL
+   NCP$C_IP_NULL		= 0;
+
+! ICMP FCall subfunctions
+LITERAL
+   NCP$C_ICMP_NULL		= 0;
+
+! UDP FCall subfunctions
+LITERAL
+   NCP$C_UDP_NULL		= 0;
+
+! TCP FCall subfunctions
+LITERAL
+   NCP$C_TCP_NULL		= 0,
+   NCP$C_TCP_KILL		= 1;
+
+! SNMP FCall subfunctions
+LITERAL
+   NCP$C_SNMP_NULL		= 0;
+

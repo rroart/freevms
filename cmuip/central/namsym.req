@@ -1,0 +1,282 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';
+
+! Define name resolver constants
+
+LITERAL
+    INASIZ = 4,
+    STRLEN = 128;
+
+! Define the well-known mailbox names
+
+MACRO
+    NAMRES_MBX = 'MBX$NAMRES' %,
+    IPACP_MBX = 'MBX$IPACP' %;
+
+! Define the format of a mailbox IOSB
+
+$FIELD MBX$IOSB_FIELDS =
+    SET
+    MI$STATUS	= [$SHORT],	! Status of the transfer
+    MI$COUNT	= [$SHORT],	! Byte count
+    MI$PID	= [$LONG]	! Sending process ID
+    TES;
+LITERAL
+    MBX$IOSB_SIZE = $FIELD_SET_SIZE;
+MACRO
+    MBX$IOSB = BLOCK[MBX$IOSB_SIZE] FIELD(MBX$IOSB_FIELDS) %;
+
+! Define the format of a mailbox message
+
+LITERAL
+    MSGMAX = 512,		! Max size mailbox message
+    MBNMAX = 10;		! Max length of return mailbox name
+
+$FIELD MAIL$MSG_FIELDS =
+    SET
+    MSG$MBXNLN	= [$SHORT],	! Length of return mailbox name (0 if none)
+    MSG$MBXNAM	= [$STRING(MBNMAX)], ! MBXnnn for return message
+    MSG$DATA	= [$BYTES(0)]	! Start of mailbox data
+    TES;
+LITERAL
+    MAIL$MSG_SIZE = $FIELD_SET_SIZE,
+    MAIL$MSG_BLEN = 2 + MBNMAX,
+    MAX_MAIL$MSG_SIZE = (MSGMAX/4);
+MACRO
+    MAIL$MSG = BLOCK[MAIL$MSG_SIZE] FIELD(MAIL$MSG_FIELDS) %,
+    MAX_MAIL$MSG = BLOCK[MAX_MAIL$MSG_SIZE] FIELD(MAIL$MSG_FIELDS) %;
+
+
+! Define the different types of requests and their replies.
+
+LITERAL
+    NLRQ$CONTROL = 0,		! Name resolver control message
+    NLRQ$NMLOOK = 1,		! Name-lookup
+    NLRQ$ADLOOK = 2,		! Address-lookup
+    NLRQ$RRLOOK = 3,		! Address-lookup
+    NLRQ$PRUNE = 4,		! Address-lookup
+    NLRQ$MIN = NLRQ$CONTROL,	! Minimum request type
+    NLRQ$MAX = NLRQ$PRUNE;	! Max request type
+LITERAL
+    NLRP$CONTROL = NLRQ$CONTROL,
+    NLRP$NMLOOK = NLRQ$NMLOOK,
+    NLRP$ADLOOK = NLRQ$ADLOOK,
+    NLRP$RRLOOK = NLRQ$RRLOOK,
+    NLRP$PRUNE = NLRQ$PRUNE,
+    NLRP$ERROR = -1,		! Message type for error
+    NLRP$MIN = NLRP$ERROR,
+    NLRP$MAX = NLRP$PRUNE;
+
+! Define the common portions of the message
+
+$FIELD RQ$DEFAULT_FIELDS =
+    SET
+    RQ$TYPE	= [$Short],	! Request type
+    RQ$ID	= [$UShort]	! Request identifier
+    TES;
+LITERAL
+    RQ$DEFAULT_SIZE = $FIELD_SET_SIZE;
+MACRO
+    RQ$DEFAULT = BLOCK[RQ$DEFAULT_SIZE] FIELD(RQ$DEFAULT_FIELDS) %;
+
+$FIELD RPLY$DEFAULT_FIELDS =
+    SET
+    RPLY$TYPE	= [$Short],	! Reply type (matches request type)
+    RPLY$ID	= [$UShort]	! Reply ID
+    TES;
+LITERAL
+    RPLY$DEFAULT_SIZE = $FIELD_SET_SIZE;
+MACRO
+    RPLY$DEFAULT = BLOCK[RPLY$DEFAULT_SIZE] FIELD(RPLY$DEFAULT_FIELDS) %;
+
+
+! Define message format for resolver control messages
+
+$FIELD RQ$CONTROL_FIELDS =
+    SET
+    RQCN$TYPE	= [$Short],	! Request type
+    RQCN$ID	= [$UShort],	! Request ID
+    RQCN$CCODE	= [$UShort],	! Control code
+    RQCN$CVALUE	= [$Long]	! Control value
+    TES;
+LITERAL
+    RQ$CONTROL_SIZE = $FIELD_SET_SIZE,
+    RQ$CONTROL_BLEN = 10;
+MACRO
+    RQ$CONTROL = BLOCK[RQ$CONTROL_SIZE] FIELD(RQ$CONTROL_FIELDS) %;
+
+$FIELD RPLY$CONTROL_FIELDS =
+    SET
+    RPCN$TYPE	= [$Short],	! Reply type
+    RPCN$ID	= [$UShort],	! Reply ID
+    RPCN$STATUS	= [$Long]	! Return status from operation
+    TES;
+LITERAL
+    RPLY$CONTROL_SIZE = $FIELD_SET_SIZE,
+    RPLY$CONTROL_BLEN = 8;
+MACRO
+    RPLY$CONTROL = BLOCK[RPLY$CONTROL_SIZE] FIELD(RPLY$CONTROL_FIELDS) %;
+
+LITERAL
+    CNRQ$LOG = 1,		! Set resolver log parameter
+    CNRQ$EXIT = 2,		! Request resolver exit
+    CNRQ$INIT = 3,		! Request resolver reinitialize
+    CNRQ$START = 4,		! NAMRES started (sent to IPACP)
+    CNRQ$STOP = 5,		! NAMRES stopping (sent to IPACP)
+    CNRQ$DUMP = 6,		! Dump DDB to NamRes log.
+    CNRQ$MIN = CNRQ$LOG,
+    CNRQ$MAX = CNRQ$DUMP;
+
+
+! Define mesasge format for error messages (reply only)
+
+$FIELD RPLY$ERROR_FIELDS =
+    SET
+    RPER$TYPE	= [$Short],	! Reply type
+    RPER$ID	= [$UShort],	! Reply ID
+    RPER$ECODE	= [$Long]	! Error code
+    TES;
+LITERAL
+    RPLY$ERROR_SIZE = $FIELD_SET_SIZE,
+    RPLY$ERROR_BLEN = RPLY$ERROR_SIZE*4;
+MACRO
+    RPLY$ERROR = BLOCK[RPLY$ERROR_SIZE] FIELD(RPLY$ERROR_FIELDS) %;
+
+
+! Name lookup request
+
+$FIELD RQ$NMLOOK_FIELDS =
+    SET
+    RQNM$TYPE	= [$Short],	! Request type
+    RQNM$ID	= [$UShort],	! Request identifier
+    RQNM$NAMLEN	= [$Short],	! Length of the name to lookup
+    RQNM$NAMSTR	= [$Bytes(0)]	! Name string
+    TES;
+LITERAL
+    RQ$NMLOOK_SIZE = $FIELD_SET_SIZE,
+    RQ$NMLOOK_BLEN = 6;
+MACRO
+    RQ$NMLOOK = BLOCK[RQ$NMLOOK_SIZE] FIELD(RQ$NMLOOK_FIELDS) %;
+
+$FIELD RPLY$NMLOOK_FIELDS =
+    SET
+    RPNM$TYPE	= [$Short],	! Reply type
+    RPNM$ID	= [$UShort],	! Reply ID
+    RPNM$ADRCNT	= [$Short],	! Count of addresses
+    RPNM$ADRLST	= [$Bytes(4*MAX_HADDRS)], ! Address list
+    RPNM$NAMLEN	= [$Short],	! Length of official name
+    RPNM$NAMSTR	= [$Bytes(0)]	! Official name string
+    TES;
+LITERAL
+    RPLY$NMLOOK_SIZE = $FIELD_SET_SIZE,
+    RPLY$NMLOOK_BLEN = 6+(4*MAX_HADDRS)+2;
+MACRO
+    RPLY$NMLOOK = BLOCK[RPLY$NMLOOK_SIZE] FIELD(RPLY$NMLOOK_FIELDS) %;
+
+
+! Address lookup request
+
+$FIELD RQ$ADLOOK_FIELDS =
+    SET
+    RQAD$TYPE	= [$Short],	! Request type
+    RQAD$ID	= [$UShort],	! Request identifier
+    RQAD$ADDR	= [$Long]	! IP address to lookup
+    TES;
+LITERAL
+    RQ$ADLOOK_SIZE = $FIELD_SET_SIZE,
+    RQ$ADLOOK_BLEN = 8;
+MACRO
+    RQ$ADLOOK = BLOCK[RQ$ADLOOK_SIZE] FIELD(RQ$ADLOOK_FIELDS) %;
+
+$FIELD RPLY$ADLOOK_FIELDS =
+    SET
+    RPAD$TYPE	= [$Short],	! Reply type
+    RPAD$ID	= [$UShort],	! Reply identifier
+    RPAD$NAMLEN	= [$Short],	! Name length
+    RPAD$NAMSTR	= [$Bytes(0)]	! Name string
+    TES;
+LITERAL
+    RPLY$ADLOOK_SIZE = $FIELD_SET_SIZE,
+    RPLY$ADLOOK_BLEN = 6;
+MACRO
+    RPLY$ADLOOK = BLOCK[RPLY$ADLOOK_SIZE] FIELD(RPLY$ADLOOK_FIELDS) %;
+
+
+! Resource Record lookup request
+
+$FIELD RQ$RRLOOK_FIELDS =
+    SET
+    RQRR$TYPE	= [$Short],	! Request type
+    RQRR$ID	= [$UShort],	! Request identifier
+    RQRR$RRTYPE	= [$UShort],
+    RQRR$NAMLEN	= [$Short],	! Length of the name to lookup
+    RQRR$NAMSTR	= [$Bytes(0)]	! Name string
+    TES;
+LITERAL
+    RQ$RRLOOK_SIZE = $FIELD_SET_SIZE,
+    RQ$RRLOOK_BLEN = 6;
+MACRO
+    RQ$RRLOOK = BLOCK[RQ$RRLOOK_SIZE] FIELD(RQ$RRLOOK_FIELDS) %;
+
+$FIELD RPLY$RRLOOK_FIELDS =
+    SET
+    RPRR$TYPE	= [$Short],	! Reply type
+    RPRR$ID	= [$UShort],	! Reply ID
+    RPRR$RDLEN	= [$Short],	! RR size
+!    RPRR$NAMLEN	= [$Short],	! Length of the name to lookup
+    RPRR$RDATA	= [$Bytes(0)]	! Address list
+    TES;
+LITERAL
+    RPLY$RRLOOK_SIZE = $FIELD_SET_SIZE,
+    RPLY$RRLOOK_BLEN = 6;
+MACRO
+    RPLY$RRLOOK = BLOCK[RPLY$RRLOOK_SIZE] FIELD(RPLY$RRLOOK_FIELDS) %;
+
+! Prune request
+
+$FIELD RQ$PRUNE_FIELDS =
+    SET
+    RQPR$TYPE	= [$Short],	! Request type
+    RQPR$ID	= [$UShort],	! Request identifier
+    RQPR$NAMLEN	= [$Short],	! Length of the name to lookup
+    RQPR$NAMSTR	= [$Bytes(0)]	! Name string
+    TES;
+LITERAL
+    RQ$PRUNE_SIZE = $FIELD_SET_SIZE,
+    RQ$PRUNE_BLEN = 6;
+MACRO
+    RQ$PRUNE = BLOCK[RQ$PRUNE_SIZE] FIELD(RQ$PRUNE_FIELDS) %;
+
+$FIELD RPLY$PRUNE_FIELDS =
+    SET
+    RPPR$TYPE	= [$Short],	! Reply type
+    RPPR$ID	= [$UShort]	! Reply ID
+    TES;
+LITERAL
+    RPLY$PRUNE_SIZE = $FIELD_SET_SIZE,
+    RPLY$PRUNE_BLEN = 4;
+MACRO
+    RPLY$PRUNE = BLOCK[RPLY$PRUNE_SIZE] FIELD(RPLY$PRUNE_FIELDS) %;
+
+

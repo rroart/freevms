@@ -1,0 +1,269 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+
+MODULE
+    NetAux (			! miscellaneous user routines
+	LANGUAGE (BLISS32),
+	LIST (NOEXPAND,ASSEMBLY,BINARY,OBJECT),
+	IDENT = 'V01-002',
+	ADDRESSING_MODE (EXTERNAL = LONG_RELATIVE, NONEXTERNAL=LONG_RELATIVE)
+	) =
+BEGIN
+!++
+! NETAUX.BLI	Copyright (c) 1989	Carnegie Mellon University
+!
+! Facility:
+!	Local Runtime Library:
+!
+! Abstract:
+!	A simple User level output routine.
+!
+! Environment:
+!	VAX/VMS operating system and runtime library, user mode process.
+!
+! Author:
+!	Bruce R. Miller		CMU Network Developmewnt
+!
+! Revision History:
+!
+! 14-Sep-1990	Bruce R. Miller		CMU NetDev
+!	1-002	Changed ip: to INET$DEVICE logical.
+!
+!--
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETWORK';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCNTRL';
+
+
+
+
+OWN
+    Mundane_Privs	: $BBLOCK [8];
+
+GLOBAL ROUTINE Become_Super : NOVALUE =
+    BEGIN
+    LOCAL
+	Privs	: $BBLOCK [8],
+	Status;
+
+    Privs [0, 0, 32, 0] = %X'FFFFFFFF';		! Dis-Able These privs
+    Privs [4, 0, 32, 0] = %X'FFFFFFFF';
+    Privs [PRV$V_SETPRV] = 0;			! Except this privs
+
+    Status = $SETPRV (
+		ENBFLG	= 0,			! 0 = Disable, 1 = enable
+		PRVADR	= Privs,
+		PRVPRV	= Mundane_Privs);
+    IF NOT .Status THEN Signal (.Status);
+
+    Privs [0, 0, 32, 0] = 0;		! Enable these privs
+    Privs [4, 0, 32, 0] = 0;
+    Privs [PRV$V_PHY_IO] = 1;
+    Privs [PRV$V_SETPRV] = 1;
+    Privs [PRV$V_SYSPRV] = 1;
+    Privs [PRV$V_CMKRNL] = 1;
+    Privs [PRV$V_NETMBX] = 1;
+    Privs [PRV$V_TMPMBX] = 1;
+
+    Status = $SETPRV (
+		ENBFLG	= 1,			! 0 = Disable, 1 = enable
+		PRVADR	= Privs);
+    IF NOT .Status THEN Signal (.Status);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Become_Mundane : NOVALUE =
+!++
+! Functional Description:
+!
+! Return to the privs that this process had when it called Become_Super.
+!--
+    BEGIN
+    LOCAL
+	DisPrivs	: $BBLOCK [8],
+	Status;
+
+    DisPrivs [0, 0, 32, 0] = %X'FFFFFFFF';		! Disable these privs
+    DisPrivs [4, 0, 32, 0] = %X'FFFFFFFF';
+
+    Status = $SETPRV (
+		ENBFLG	= 0,			! 0 = disable, 1 = enable
+		PRVADR	= DisPrivs);
+    IF NOT .Status THEN Signal (.Status);
+
+    Status = $SETPRV (
+		ENBFLG	= 1,
+		PRVADR	= Mundane_Privs);
+    IF NOT .Status THEN Signal (.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+! Routines to write messages to the IPACP activity log.
+
+OWN
+    RC,
+    NETCHAN : INITIAL (0);
+!    Name_Buf : INITIAL (UPLIT('INET$DEVICE')),
+!    NETNAME : BLOCK[8,BYTE] ADDRESSING_MODE(LONG_RELATIVE) PRESET (
+!				[DSC$W_LENGTH]	= 11,
+!				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+!				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+!				[DSC$A_POINTER]	= Name_Buf);
+
+GLOBAL ROUTINE Open_ACT_Log (channel) : NOVALUE =
+! Create a channel to the IPACP device.  If the caller passes in a channel,
+! use it, otherwise actually open the channel.
+    BEGIN
+    IF .Channel NEQ 0 THEN NETCHAN = .Channel
+    ELSE IF NOT (RC=$ASSIGN (DEVNAM=%ASCID'INET$DEVICE', CHAN=NETCHAN))
+	THEN Signal (.RC);
+    END;
+
+
+GLOBAL ROUTINE ACT_FAO(CSTR) =
+! Do output to activity log file using $FAO to format parameters.
+!!!HACK!!! where's all the error checking?????
+    BEGIN
+    BUILTIN
+	AP;
+    LOCAL
+	RC,
+	Message_BUF : VECTOR[CH$ALLOCATION(512)],
+	Message : BLOCK[8,BYTE] PRESET (
+			[DSC$B_CLASS] = DSC$K_CLASS_Z,
+			[DSC$B_DTYPE] = DSC$K_DTYPE_Z,
+			[DSC$W_LENGTH] = 512,
+			[DSC$A_POINTER] = Message_BUF);
+
+    ! Do the $FAO formatting
+    RC = $FAOL(CTRSTR = .CSTR,
+	       OUTLEN = Message[DSC$W_LENGTH],
+	       OUTBUF = Message,
+	       PRMLST = .AP+8);
+    IF NOT .RC THEN RETURN .RC;
+
+    ! Make sure that there is an open channel...
+    IF .NETCHAN EQL 0 THEN Open_ACT_Log (0);
+
+    ! Send that puppy off
+    NET$EVENT(
+	IOchan	= .NETCHAN,
+	BUFADRS	= .Message[DSC$A_POINTER],
+	BUFSIZE	= .Message[DSC$W_LENGTH]);
+
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Close_ACT_Log : NOVALUE =
+! Deassign the event logging channel to IPACP
+    BEGIN
+    IF NOT (RC = $DASSGN (CHAN=.NETCHAN)) THEN Signal (.RC);
+    END;
+
+
+
+!++
+! A useful formatted printing routine.
+!
+!--
+
+GLOBAL ROUTINE Print_Routine (Control_string)=
+!++
+! Functional Description:
+!
+!	Format and write the formatted string on sys$output:
+!	Usually called through the macro PRINT in NETAUX.L32.
+!--
+BEGIN
+    BUILTIN
+	AP;
+    EXTERNAL ROUTINE
+	LIB$PUT_OUTPUT	: ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Out_Buffer	: VECTOR[256, BYTE],
+	Out_Desc	: BLOCK[8, BYTE],
+	Status;
+
+    Out_Desc[DSC$B_CLASS] = DSC$K_CLASS_Z;
+    Out_Desc[DSC$B_DTYPE] = DSC$K_DTYPE_Z;
+    Out_Desc[DSC$W_LENGTH] = %ALLOCATION (Out_Buffer);
+    Out_Desc[DSC$A_POINTER] = Out_Buffer;
+    Status = $FAOL (
+	CTRSTR = .Control_String,
+	OUTLEN = Out_Desc[DSC$W_LENGTH],
+	OUTBUF = Out_Desc,
+	PRMLST = .AP+8);
+    IF NOT .Status THEN RETURN .Status;
+    LIB$PUT_OUTPUT(Out_Desc)
+END;
+
+
+
+GLOBAL ROUTINE NET_MOPEN (EFN,CHAN,dummy,IOSB,ASTADR,ASTPRM,
+			  P1,P2,P3,P4,P5,P6) =
+    BEGIN
+    EXTERNAL ROUTINE
+	SYS$QIOW	: BLISS ADDRESSING_MODE(GENERAL);
+    LABEL
+	X;
+    LOCAL
+	Status,
+	NetIOSB	: NetIO_Status_Block,
+	Count,
+	Addrs : VECTOR [128];
+
+    Status = SYS$QIOW (0, .CHAN, IO$_SkipFile, NetIOSB,0, 0,
+			Addrs, 128*4, GTH_NAMADR, .P1, 0, 0);
+    IF NOT .Status THEN RETURN .Status;
+    Status = .NetIOSB [NSB$Status];
+    IF .Status EQL SS$_ABORT THEN
+	RETURN .NetIOSB [NSB$XStatus]
+    ELSE IF NOT .Status THEN RETURN .Status;
+
+    INCR I FROM 1 TO .Addrs[0] DO
+	X : BEGIN
+	Status = SYS$QIOW (0, .CHAN, IO$_Create, NetIOSB,0, 0,
+			   .Addrs[.I],.P2,.P3,.P4 OR 4,.P5,.P6);
+	IF NOT .Status THEN LEAVE X;
+	Status = .NetIOSB [NSB$Status];
+	IF .Status EQL SS$_ABORT THEN
+	    Status = .NetIOSB [NSB$XStatus]
+	ELSE IF NOT .Status THEN LEAVE X;
+
+	! We got a good connection...
+
+	!!!HACK!!! Deliver ASTs and set EF.
+
+	RETURN SS$_NORMAL
+	END;
+
+    .Status
+    END;
+
+END ELUDOM

@@ -1,0 +1,264 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'Network configuration Literals, Macros and Structures'
+!++
+! NETCONFIG.REQ	Copyright (c)	Carnegie Mellon University
+! 
+! Description:
+!
+!	Supporting declarations for IP Transport device modules
+!
+! Written By:	Bruce R. Miller		CMU Network Development
+! Date:		06-Feb-1990 (Tuesday)
+!
+! Modifications:
+!--
+
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';
+
+
+%SBTTL 'Network Device Configuration blockvector Entry Fields.'
+
+%(
+
+Here we define the fields of the device configuration table.  Each entry
+describes a network device plus the assigned IO channel # after device
+initialization.  One entry per device.  The fields are initialized by the
+invocation of the "device_init" macro (see dec_config definition in
+devconfig.bli) at compile time and from the file devconfig.txt during acp initialization.
+!!!HACK!!! fix this to use the run-time loadable images.
+)%
+
+$FIELD DC_Fields=
+    SET
+    dc_begin		= [$BYTES(0)],
+    dc_devname		= [$BYTES(8)],
+    dc_devspec		= [$BYTES(8)],
+    dc_dev_interface	= [$Address],
+    dc_ip_address	= [$Long_Integer],	! Device IP address
+    dc_ip_netmask	= [$Long_Integer],	! Device IP network mask
+    dc_ip_network	= [$Long_Integer],	! Device IP network value
+    dc_rtn_Init		= [$Address],
+    dc_rtn_Xmit		= [$Address],
+    dc_rtn_Dump		= [$Address],
+    dc_rtn_check	= [$Address],
+    dc_Send_Qhead	= [$Address],
+    dc_send_Qtail	= [$Address],
+    dc_flags		= [$Long_Integer],
+    $OVERLAY(dc_flags)
+	dc_valid_device	= [$Bit],
+	dc_Online	= [$Bit],
+	dc_is_clone	= [$bit],		! Device is a clone
+    $CONTINUE
+    dc_clone_dev	= [$Long_Integer],
+
+    ! MIB data
+    dcmib_begin		= [$BYTES(0)],		! start of MIB
+    dcmib_ifIndex	= [$Long_Integer],	! Interface index number
+    dcmib_ifDescr	= [$BYTES(8)],		! Interface description string
+    dcmib_ifType	= [$Long_Integer],	! device type
+    dcmib_ifMTU		= [$Long_Integer],	! Max Transfer Unit
+    dcmib_ifSpeed	= [$Long_Integer],	! Bandwidth (bits/second)
+    dcmib_ifPAsize	= [$Address],		! size of Physical Addr
+    dcmib_ifPhysAddress	= [$Address],		! pntr to Physical Addr
+    dcmib_ifAdminStatus	= [$Long_Integer],	! Desired status of interface
+    dcmib_ifOperStatus	= [$Long_Integer],	! Current status of interface
+    dcmib_ifLastState	= [$Long_Integer],	! time of last state change
+    dcmib_ifInOctets	= [$Long_Integer],	! Octets received
+    dcmib_ifInUcastPkts	= [$Long_Integer],	! Unicasts delivered
+    dcmib_ifInNUcastPkts= [$Long_Integer],	! non-Unicasts delivered
+    dcmib_ifInDiscards	= [$Long_Integer],	! good but discarded pckts
+    dcmib_ifInErrors	= [$Long_Integer],	! bad and discarded
+    dcmib_ifInUnknownProtos	= [$Long_Integer],! Unknown protocol fields
+    dcmib_ifOutOctets	= [$Long_Integer],	! 
+    dcmib_ifOutUcastPkts= [$Long_Integer],	! 
+    dcmib_ifOutNUcastPkts	= [$Long_Integer],	! 
+    dcmib_ifOutDiscards	= [$Long_Integer],	! 
+    dcmib_ifOutErrors	= [$Long_Integer],	! 
+    dcmib_ifOutQLen	= [$Long_Integer]	! 
+    TES;
+
+%(
+
+Where:
+!!!HACK!!! Update this table!
+dc_devname	= String descriptor for the device name.
+dc_phy_addr	= Physical device address (bytestream)
+dc_ip_address	= IP address for this interface
+dc_ip_netmask	= IP network mask for this interface
+dc_dev_interface= address of the controller-specific info block
+dc_init_rtn	= Address of routine to initialize the device.
+dc_Xmit_rtn	= Address of routine to transmit packets.
+dc_dump_rtn	= Address of routine to do dump specific functions.
+dc_send_qhead	= Transmit queue head
+dc_send_qtail	= Transmit queue tail.
+dc_recv_qhead	= Receive queue head(Ethernet only).
+dc_recv_qtail	=   "       "   tail    "       "
+dc_restart_time	= How long to leave the ether card shutdown.
+dc_restart_count= Number of times the card has been restarted.
+dc_retry_count	= Current number of consecutive errors from card.
+dc_ARP_buffer   = Pointer to buffer for ARP processing
+dc_io_chan	= VMS IO channel assigned to this device.
+dc_ARP_chan	= VMS IO channel assigned for ARP on this device.
+dc_ARP_block	= Pointer to ARP information block for device.
+dc_phy_size	= Length of physical addresses on device.
+dc_clone_dev	= Device index of real device (for "cloned" devices only).
+dc_valid_device = On if valid dev_config table entry set up during runtime by
+		  device initialization routine.
+dc_online	= On if device was initialized correctly by it's own device
+		  init routine (and is currently available).
+dc_doswap	= On if ARP protocol requires byteswap of multi-byte values.
+dc_need_2_free	= On if buffer free pending during restart (DEUNA/DEQNA only).
+dc_IO_queued	= On if I/O in progress during restart (DEUNA/DEQNA only).
+dc_XE_started	= On if device successfully started (DEUNA/DEQNA only).
+dc_is_clone	= On if device is a clone (multiple IP address).
+)%
+
+LITERAL
+     DC_Max_Num_Net_Devices = 4,	! size of table.
+     DC_Entry_Size = $Field_Set_Size;
+
+MACRO
+    Device_Configuration_Entry =
+	BLOCK[DC_Entry_Size] FIELD(DC_Fields)%;
+MACRO
+    Device_Configuration_Table =
+	BLOCKVECTOR[DC_Max_Num_Net_Devices,DC_Entry_Size] FIELD(DC_Fields)%;
+
+!%ASSIGN(tblsize,%NUMBER(dc_max_num_net_devices)*%NUMBER(dc_entry_size))
+!%MESSAGE(%NUMBER(tblsize),' Longwords allocated to device configuration table')
+
+
+%SBTTL     'Net Send Queue structure definition'
+%(*****************************************************************************
+
+Output segments are placed on the Net Send Q by the Send_IP routine.
+Input datagrams are also placed on this Q by the IP_Receive routine
+if they are destined for another host.  These store-and-forward packets
+include the IP header as well as the segment from higher protocol layers.
+The Net_Send routine is called to empty the Net_Send_Queue.
+
+*******************************************************************************
+)%
+
+$FIELD QB_Net_Send =
+    SET
+    NSQ$Next		= [$Address],
+    NSQ$Last		= [$Address],
+    NSQ$Driver		= [$Address],
+    NSQ$Data		= [$Address],
+    NSQ$Datasize	= [$Bytes(2)],
+    NSQ$IP_Dest		= [$Long_Integer],
+    NSQ$Del_Buf		= [$Address],
+    NSQ$Del_buf_size	= [$Bytes(2)],
+    NSQ$Type		= [$Bytes(2)],
+    NSQ$Retry		= [$Byte],
+    NSQ$Delete		= [$Byte],
+    NSQ$IOSB		= [$bytes(8)]
+    TES;
+
+LITERAL
+    QB_NS_Size = $Field_Set_Size;
+
+! Q head structure definition
+
+$FIELD QH_Net_send =
+    SET
+    NS$Qhead		= [$Address],
+    NS$Qtail		= [$Address]
+    TES;
+
+
+!!!HACK!!! Why are there no comments here? (besides this one?)
+
+$FIELD DI_Fields =
+    SET
+    DI$Init		= [$Address],
+    DI$Xmit		= [$Address],
+    DI$Dump		= [$Address],
+    DI$Check		= [$Address],
+    DI$ARP_Dump		= [$Address]
+    TES;
+
+LITERAL
+    DI$Entry_Size = $Field_Set_Size;
+
+MACRO
+    Device_Info_Structure =
+	BLOCK[DI$Entry_Size] FIELD(DI_Fields)%;
+
+
+
+%(
+	Here we describe the IPACP Information block.  This structure
+	is assembled by the IPACP to describe itself to other modules
+	who wish to interact with it.  It consists of entry points,
+	literals, and pointers to global parameters.
+)%
+
+$FIELD ACPI_Fields =
+    SET
+
+! IAPCP receive callback.
+    ACPI$IP_Receive		= [$Address],
+
+! pointer to IPACP AST flag
+    ACPI$AST_in_progress	= [$Address],
+
+! pointer to IPACP nap control flag
+    ACPI$Sleeping		= [$Address],
+
+! Interrupt blocking routines
+    ACPI$NOINT			= [$Address],
+    ACPI$OKINT			= [$Address],
+
+! Error reporting routine
+    ACPI$Device_Error		= [$Address],
+
+! IPACP self-address recognition
+    ACPI$IP_ISME		= [$Address],
+
+! Memory allocation routines
+    ACPI$Seg_Get		= [$Address],
+    ACPI$Seg_Free		= [$Address],
+    ACPI$QBlk_Free		= [$Address],
+
+! Formatted event logging routines
+    ACPI$LOG_STATE		= [$Address],
+    ACPI$QL_FAO			= [$Address],
+    ACPI$LOG_FAO		= [$Address],
+    ACPI$OPR_FAO		= [$Address],
+    ACPI$ERROR_FAO		= [$Address],
+    ACPI$FATAL_FAO		= [$Address],
+
+! IPACP max physical buffer size
+    ACPI$MPBS			= [$Bytes(2)]
+
+    TES;
+
+LITERAL
+    ACPI$Size = $Field_Set_Size;
+
+MACRO
+    IPACP_Info_Structure =
+	BLOCK[ACPI$Size] FIELD(ACPI_Fields)%;
+

@@ -1,0 +1,798 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+
+MACRO
+    $XPO_IDENT = 'V1.3-51' %;	! Update this with every change to XPORT.REQ
+
+LITERAL
+    XPO$K_VERSION = 1,					! Current XPORT version
+    XPO$K_LEVEL = 3;					!    and level
+
+!
+! XPORT Control Block and Macro Definitions
+!
+
+LITERAL
+    XPO$K_FAILURE =					! Standard XPORT failure routine value
+	%BLISS16( %X'FFFF' )
+	%BLISS32( 0 )
+	%BLISS36( %O'777777' );
+
+COMPILETIME
+    $xpo$temp = 0,					! Temporary variable
+    $xpo$temp1 = 0,
+    $xpo$temp2 = 0,
+    $xpo$key_ok = 0;
+
+MACRO
+    $XPO$FORCE [] =
+	%QUOTE %EXPAND %REMAINING %,
+
+
+    $XPO$REQUIRED( value, parameter_name ) =
+	%IF %NULL(value)
+	%THEN
+	    %WARN( parameter_name, ' parameter must be specified' )
+	    %QUOTE %QUOTE %EXITMACRO
+	%FI %,
+
+
+    $XPO$CONFLICT( list ) =
+	0 %QUOTE %EXPAND $xpo$$conflict(list,%REMAINING) GTR 1 %,
+
+    $xpo$$conflict( list ) [] =
+	%IF NOT %NULL( %QUOTE %EXPAND %REMOVE(list) )
+	%THEN + 1
+	%FI
+	%QUOTE %EXPAND $xpo$$conflict( %REMAINING ) %,
+
+
+    $XPO$KEY_CHECK( value, keyword_list ) =
+	%ASSIGN( $xpo$key_ok, 0 )
+	$xpo$$key_test( value, %REMOVE(keyword_list) )
+	%NUMBER( $xpo$key_ok ) %,
+
+
+    $XPO$KEY_TEST( value, keyword_list, parameter_name ) =
+	%ASSIGN( $xpo$key_ok, 0 )
+	$xpo$$key_test( value, %REMOVE(keyword_list) )
+
+	%IF $xpo$key_ok
+	%THEN
+	    1
+	%ELSE
+	    %PRINT( '"', value, '" is an invalid ', parameter_name, ' parameter value' )
+	    %MESSAGE( '"', value, '" is an invalid ', parameter_name, ' parameter value' )
+	    %WARN(  '... possible values are ', $xpo$key_words( %REMOVE( keyword_list ) ) )
+	    0
+	%FI %,
+
+
+    $xpo$$key_test( value, keyword ) [] =
+
+	%IF %IDENTICAL(value,keyword)
+	%THEN
+	    %ASSIGN( $xpo$key_ok, 1 )
+	%ELSE
+	    $xpo$$key_test( value, %REMAINING )
+	%FI %,
+
+
+    $xpo$key_words[ keyword ] =
+	%IF %COUNT NEQ 0
+	%THEN
+	    ', ',
+	%FI
+	%STRING( keyword ) %,
+
+
+    $XPO$PAREN_TEST( parameter ) =
+	%IF %NULL(parameter)
+	%THEN
+	    0
+	%ELSE
+	    $xpo$$paren( %REMOVE(parameter), parameter )
+	%FI %,
+
+    $xpo$$paren( no_parens, parens ) =
+	%IF %LENGTH EQL 2
+	%THEN
+	    %IF %IDENTICAL( no_parens, parens )
+	    %THEN
+		0
+		%EXITMACRO
+	    %FI
+	%FI
+	1 %,
+
+
+    $XPO$ARG1( arg1 ) =
+	arg1 %,
+
+
+    $XPO$ARG2( arg1, arg2 ) =
+	arg2 %,
+
+
+    $XPO$ARG3( arg1, arg2, arg3 ) =
+	arg3 %,
+
+
+    $XPO$EX_ROUTINE( routine_name, linkage_attr ) =	! Declare an external routine
+	EXTERNAL ROUTINE routine_name :
+
+	%IF %NULL(linkage_attr)
+	%THEN
+	    %BLISS16(BLISS)  %BLISS32(BLISS)  %BLISS36(BLISS36C)
+	%ELSE
+	    linkage_attr
+	%FI
+
+	%BLISS32( ADDRESSING_MODE(LONG_RELATIVE) ) ;  %,
+
+
+    $XPO$EX_FAILURE( failure ) =
+	%IF $xpo$key_check( failure, (XPO$FAILURE, XPO$IO_FAILURE, XPO$PS_FAILURE, XPO$GM_FAILURE, XPO$FM_FAILURE,
+					STR$FAILURE, STR$X_FAILURE, STR$C_FAILURE, STR$A_FAILURE,
+					STR$S_FAILURE, STR$B_FAILURE) )
+	%THEN
+	    %QUOTE %EXPAND $xpo$force( $xpo$ex_routine( failure ) )
+	%FI %,
+
+
+    XPO$I_FAILURE =					! ***** OBSOLETE *****
+	%INFORM( 'XPO$I_FAILURE has been renamed to XPO$IO_FAILURE' )
+	XPO$IO_FAILURE %,
+
+
+    XPO$F_FAILURE =					! ***** OBSOLETE *****
+	%INFORM( 'XPO$F_FAILURE has been renamed to XPO$FM_FAILURE' )
+	XPO$FM_FAILURE %,
+
+
+    XPO$G_FAILURE =					! ***** OBSOLETE *****
+	%INFORM( 'XPO$G_FAILURE has been renamed to XPO$GM_FAILURE' )
+	XPO$GM_FAILURE %,
+
+
+    XPO$P_FAILURE =					! ***** OBSOLETE *****
+	%INFORM( 'XPO$P_FAILURE has been renamed to XPO$PM_FAILURE' )
+	XPO$PM_FAILURE %,
+
+
+    $XPO$DEFAULT( argument, default ) =
+	%IF %NULL(argument)
+	%THEN
+	    default
+	%ELSE
+	    argument
+	%FI %,
+
+
+    $XPO$NAME15 [] =
+	%NAME( %EXACTSTRING( MIN(%CHARCOUNT(%STRING(%REMAINING)),15), 0, %REMAINING ) ) %,
+
+
+    $XPO$VALUE( block, field_name, value ) [] =
+	block[ $XPO$NAME15(block,field_name) ] = value ; %,
+
+
+    $XPO$KEY_NAME( block, keyword ) [] =
+	$XPO$NAME15(block,'K_',keyword) %,
+
+
+    $XPO$KEYWORD( block ) [ keyword ] =
+	%IF %NULL(keyword)
+	%THEN
+	    %WARN('Null keyword specified')
+	%ELSE
+	    block[ $XPO$NAME15(block,'V_',keyword) ] = 1 ;
+	%FI %,
+
+
+    $XPO$SHOW_NUMB( number, base ) [] =
+	%IF number GEQ base
+	%THEN
+	    %ASSIGN( $xpo$temp, number/base )
+	    $XPO$SHOW_NUMB( %NUMBER($xpo$temp), base )
+	%FI
+
+	%ASSIGN( $xpo$temp, number MOD base )
+	%IF $xpo$temp LEQ 9
+	%THEN
+	    %ASSIGN( $xpo$temp, %C'0' + $xpo$temp )
+	%ELSE
+	    %ASSIGN( $xpo$temp, %C'A' + $xpo$temp - 10 )
+	%FI
+	, %CHAR( $xpo$temp ) %,
+
+    $XPO$POSITION ( position ) [] =
+	%IF NOT $xpo$paren_test( position )
+	%THEN
+	    %UPVAL * (position)		! assume fullwords
+	%ELSE
+	    %IF %NULL ( $xpo$arg2( %REMOVE(position) ) )
+	    %THEN
+		%UPVAL * (position)		! assume fullwords
+	    %ELSE
+		%IF $xpo$key_test( $xpo$arg2( %REMOVE(position) ), (FULLWORDS, UNITS), 'POSITION=' )
+		%THEN
+		    %IF %IDENTICAL ( $xpo$arg2( %REMOVE(position) ), FULLWORDS )
+		    %THEN
+			%UPVAL * ($xpo$arg1( %REMOVE(position) ) )
+		    %ELSE
+			$xpo$arg1( %REMOVE(position) )
+		    %FI
+		%ELSE				! return null
+		%FI
+	    %FI
+	%FI %;
+
+
+!
+! XPORT Transportable FIELD definition macros
+!
+
+LITERAL
+    $xpo$bits_byte =					! Bits per "byte"
+		%BLISS16(8) %BLISS32(8) %BLISS36(9),
+
+    $xpo$bits_word = 2 * $xpo$bits_byte;		! Bits per "word"
+
+COMPILETIME						! Compile-time variables:
+    $xpo$full_based = 0,				!    fullword-based structure indicator
+    $xpo$full_index = 0,				!    fullword index (within block)
+    $xpo$bit_index = 0,					!    bit index (within fullword)
+    $xpo$max_fullwd = 0,				!    maximum value index in current block
+    $xpo$max_bit = 0,					!    maximum bit index (within maximum value)
+    $xpo$bits = 0,					!    field size in bits
+    $xpo$1st_actual = 0,				!    first calculated access-acutal
+    $xpo$2nd_actual = 0,				!    second calculated access_actual (bit displacement)
+    $xpo$unit_index = 0,				!    addressable unit index (within block)
+    $xpo$set_size = 0,					!    size of field set in units
+    $xpo$distinct = 0,					!    distinct literal value
+    $xpo$show_field = 0,				!    $SHOW( FIELDS ) indicator
+    $xpo$show_lit = 0,					!    $SHOW( LITERALS ) indicator
+    $xpo$show_info = 0;					!    $SHOW( INFO ) indicator
+
+%IF %BLISS(BLISS32)
+%THEN
+COMPILETIME
+    $xpo$first_$field = 1;
+%FI
+
+MACRO
+    $FIELD =						! Block initialization:
+	%ASSIGN( $xpo$full_based, 1 )			!    fullword-based structure
+	%ASSIGN( $xpo$full_index, 0 )			!    value index (within block)
+	%ASSIGN( $xpo$bit_index, 0 )			!    bit index (within value)
+	%ASSIGN( $xpo$max_fullwd, 0 )			!    maximum value index in current block
+	%ASSIGN( $xpo$max_bit, 0 ) 			!    maximum bit index (within maximum value)
+
+	%IF $xpo$first_$field
+	%THEN
+		%ASSIGN( $xpo$first_$field, 0 )
+	%FI
+
+        FIELD %,
+
+    $UNIT_FIELD =
+	$FIELD
+	%ASSIGN( $xpo$full_based, 0 ) %,		! Change to a unit-based structure
+
+
+    $xpo$field( bits, sign, null_field ) =		! Define a single transportable field
+	%IF bits GTR %BPVAL OR null_field
+	%THEN
+	    %ASSIGN( $xpo$bits, 0 )
+	    %IF NOT null_field
+	    %THEN
+		%IF $xpo$show_info
+		%THEN
+		    %INFORM( 'space reserved for field but null field defined' )
+		%FI
+	    %FI
+	%ELSE
+	    %ASSIGN( $xpo$bits, bits )
+	%FI
+
+	%IF NOT %BLISS(BLISS32) AND
+	    $xpo$bits + $xpo$bit_index GTR %BPVAL
+	%THEN
+	    $ALIGN(FULLWORD)
+	    %IF $xpo$show_info
+	    %THEN
+		%INFORM( 'BLISS fullword alignment has been assumed' )
+	    %FI
+	%FI
+
+								!   generate field specs based on current indices
+	%IF $xpo$full_based
+	%THEN
+	    %ASSIGN( $xpo$1st_actual, $xpo$full_index )
+	    %ASSIGN( $xpo$2nd_actual, $xpo$bit_index )
+	    %ASSIGN( $xpo$unit_index, $xpo$full_index * %UPVAL + $xpo$bit_index / %BPUNIT )
+	%ELSE
+	    %ASSIGN( $xpo$1st_actual, $xpo$full_index * %UPVAL + $xpo$bit_index / %BPUNIT )
+	    %ASSIGN( $xpo$2nd_actual, $xpo$bit_index MOD %BPUNIT )
+	    %ASSIGN( $xpo$unit_index, $xpo$1st_actual )
+	%FI
+
+							! Generate field specification:
+	$xpo$1st_actual,				!    fullword index or addressable unit index
+	$xpo$2nd_actual,				!    bit index within fullword/unit
+	$xpo$bits,					!    field size in bits
+	sign						!    sign extension
+
+	%IF $xpo$show_field
+	%THEN
+	    %PRINT( '			  [',		! Display generated field definition
+		%NUMBER($xpo$1st_actual), ',',
+		%NUMBER($xpo$2nd_actual), ',',
+		%NUMBER($xpo$bits), ',',
+		sign, ']   (+',
+		%IF %BLISS(BLISS32)
+		%THEN
+		    '%X''' $XPO$SHOW_NUMB( $xpo$unit_index, 16 ),
+		%ELSE
+		    '%O''' $XPO$SHOW_NUMB( $xpo$unit_index, 8 ),
+		%FI
+		''')' )
+	%FI
+
+	%ASSIGN( $xpo$full_index, $xpo$full_index + (($xpo$bit_index + bits)/%BPVAL) )	! update current indices
+	%ASSIGN( $xpo$bit_index, ($xpo$bit_index + bits) MOD %BPVAL )
+
+	%IF $xpo$full_index GTR $xpo$max_fullwd OR				! update high-water mark
+	    ($xpo$full_index EQL $xpo$max_fullwd AND
+		$xpo$bit_index GTR $xpo$max_bit)
+	%THEN
+	    %ASSIGN( $xpo$max_fullwd, $xpo$full_index )
+	    %ASSIGN( $xpo$max_bit, $xpo$bit_index )
+	%FI %,
+
+
+    $ALIGN( boundary ) =				! Align next field on a specified boundary
+	%IF NOT $xpo$key_test( boundary, ( BYTE, WORD, FULLWORD, UNIT ) )
+	%THEN
+	    %EXITMACRO
+	%FI
+
+	%IF %IDENTICAL( boundary, FULLWORD )
+	%THEN
+	    %IF $xpo$bit_index GTR 0
+	    %THEN
+		%ASSIGN( $xpo$full_index, $xpo$full_index + 1 )
+		%ASSIGN( $xpo$bit_index, 0 )
+	    %FI
+
+	%FI
+
+	%IF %IDENTICAL( boundary, BYTE )
+	%THEN
+	    %IF ($xpo$bit_index MOD $xpo$bits_byte) EQL 0 %THEN %EXITMACRO %FI
+
+	    %ASSIGN( $xpo$bit_index, $xpo$bit_index - ($xpo$bit_index MOD $xpo$bits_byte) + $xpo$bits_byte )
+	%FI
+
+	%IF %IDENTICAL( boundary, WORD )
+	%THEN
+	    %IF ($xpo$bit_index MOD $xpo$bits_word) EQL 0 %THEN %EXITMACRO %FI
+
+	    %ASSIGN( $xpo$bit_index, $xpo$bit_index - ($xpo$bit_index MOD $xpo$bits_word) + $xpo$bits_word )
+	%FI
+
+	%IF %IDENTICAL( boundary, UNIT )
+	%THEN
+	    %IF ($xpo$bit_index MOD %BPUNIT) EQL 0 %THEN %EXITMACRO %FI
+
+	    %ASSIGN( $xpo$bit_index, $xpo$bit_index - ($xpo$bit_index MOD %BPUNIT) + %BPUNIT )
+	%FI
+
+	%IF $xpo$bit_index GEQ %BPVAL
+	%THEN
+	    %ASSIGN( $xpo$full_index, $xpo$full_index + 1 )
+	    %ASSIGN( $xpo$bit_index, 0 )
+	%FI
+
+	%IF $xpo$full_index GTR $xpo$max_fullwd OR		! if we've passed the high-water mark, update it
+	    ($xpo$full_index EQL $xpo$max_fullwd AND
+		$xpo$bit_index GTR $xpo$max_bit)
+	%THEN
+	    %ASSIGN( $xpo$max_fullwd, $xpo$full_index )
+	    %ASSIGN( $xpo$max_bit, $xpo$bit_index )
+	%FI %,
+
+
+    $OVERLAY( field0, field1 ) =			! Reset value index, etc. to a previously defined field
+	%IF %LENGTH NEQ 1 AND %LENGTH NEQ 4
+	%THEN
+	    %WARN( 'Invalid argument list' )
+	    %EXITMACRO
+	%FI
+
+	%IF %LENGTH EQL 4
+	%THEN
+	    %IF $xpo$full_based
+	    %THEN
+		%ASSIGN( $xpo$full_index, field0 )
+		%ASSIGN( $xpo$bit_index, field1 )
+	    %ELSE
+		%ASSIGN( $xpo$full_index, (field0) / %UPVAL )
+		%ASSIGN( $xpo$bit_index, (field1) + ((field0) MOD %UPVAL) * %BPUNIT )
+	    %FI
+	%ELSE
+	    %IF NOT %DECLARED( %NAME(field0) )
+	    %THEN
+		%WARN( field0, ' is not defined' )
+		%EXITMACRO
+	    %FI
+
+	    %IF $xpo$full_based
+	    %THEN
+		%ASSIGN( $xpo$full_index, %FIELDEXPAND(field0,0) )
+		%ASSIGN( $xpo$bit_index, %FIELDEXPAND(field0,1) )
+	    %ELSE
+		%ASSIGN( $xpo$full_index, %FIELDEXPAND(field0,0) / %UPVAL )
+		%ASSIGN( $xpo$bit_index, %FIELDEXPAND(field0,1) + (%FIELDEXPAND(field0,0) MOD %UPVAL) * %BPUNIT )
+	    %FI
+	%FI
+
+	%IF $xpo$full_index GTR $xpo$max_fullwd OR		! if we've passed the high-water mark, update it
+	    ($xpo$full_index EQL $xpo$max_fullwd AND
+		$xpo$bit_index GTR $xpo$max_bit)
+	%THEN
+	    %ASSIGN( $xpo$max_fullwd, $xpo$full_index )
+	    %ASSIGN( $xpo$max_bit, $xpo$bit_index )
+	%FI %,
+
+
+    $CONTINUE =						! Continue block at high-water-mark
+	%ASSIGN( $xpo$full_index, $xpo$max_fullwd )
+	%ASSIGN( $xpo$bit_index, $xpo$max_bit ) %,
+
+
+    $BASE =
+	%ASSIGN( $xpo$full_index, 0 )
+	%ASSIGN( $xpo$bit_index, 0 )
+	0,0,0,0 %,
+
+
+    $BYTE =					! A single, unsigned "byte"
+	$BYTES(1) %,
+
+    $BYTES( number ) =				! Any number of unsigned bytes
+	$xpo$field( (number) * $xpo$bits_byte, 0, 0 ) %,
+
+    $UWORD = $BYTES(2) %,
+
+    $USHORT = $BYTES(2) %,
+
+    $ULONG = $BYTES(4) %,
+
+    $INTEGER =					! Signed BLISS value (aligned)
+	$xpo$field( %BPVAL, 1, 0 ) %,
+
+
+    $SLONG =					! Signed BLISS value (aligned)
+	$xpo$field( %BPVAL, 1, 0 ) %,
+
+
+    $SWORD =					! Signed BLISS value (aligned)
+	$xpo$field( 2 * $xpo$bits_byte, 1, 0 ) %,
+
+
+    $TINY_INTEGER =					! Signed 1-"byte" value
+	$xpo$field( $xpo$bits_byte, 1, 0 ) %,
+
+
+    $SHORT_INTEGER =					! Signed 2-"byte" value
+	$xpo$field( 2 * $xpo$bits_byte, 1, 0 ) %,
+
+
+    $SHORT =						! Signed 2-"byte" value
+	$xpo$field( 2 * $xpo$bits_byte, 1, 0 ) %,
+
+
+    $LONG_INTEGER =					! Signed 4-"byte" value
+	$xpo$field( 4 * $xpo$bits_byte, 1, 0 ) %,
+
+
+    $LONG =						! Signed 4-"byte" value
+	$xpo$field( 4 * $xpo$bits_byte, 1, 0 ) %,
+
+
+    $Short_unsigned = $xpo$field(2 * $xpo$bits_byte,0,0) %,
+
+
+    $ADDRESS =						! Unsigned address
+	$xpo$field( %BPADDR , 0, 0 ) %,
+
+
+    $POINTER =						! Unsigned character pointer
+	$xpo$field( %BPVAL, 0, 0 ) %,
+
+
+    $BIT =						! Single bit
+	$BITS(1) %,
+
+
+    $BITS( number ) =					! Collection of bits
+	$xpo$field( (number), 0, 0 ) %,
+
+
+    $SUB_BLOCK( fullwords ) =				! Sub-structure
+	$ALIGN(FULLWORD)
+	%IF %NULL(fullwords)
+	%THEN
+	    $xpo$field( 0, 0, 1 )
+	%ELSE
+	    $xpo$field( (fullwords) * %BPVAL, 0, 1 )
+	%FI %,
+
+
+    $STRING( length ) =					! Character string for BLISS16 and BLISS32
+	$ALIGN(UNIT)
+	$xpo$field( (length) * %BPUNIT, 0, 0 ) %,
+
+    $LENGTH =										! *** OBSOLETE ***
+	%INFORM( '$LENGTH is obsolete - use $FIELD_SET_SIZE' )				! *** OBSOLETE ***
+	$FIELD_SET_SIZE %,								! *** OBSOLETE ***
+
+    $FIELD_SET_SIZE =					! Length of field set in fullwords
+	%EXPAND $CONTINUE
+	%IF NOT $xpo$full_based
+	%THEN
+	    %WARN( '$FIELD_SET_SIZE may not be used with $UNIT_FIELD' )
+	%FI
+
+	%ASSIGN( $xpo$set_size, $xpo$full_index + ($xpo$bit_index NEQ 0) )
+	%NUMBER( $xpo$set_size )
+
+	%IF $xpo$show_lit
+	%THEN
+	    %PRINT( '			  ', %NUMBER($xpo$set_size), ' fullwords' )
+	%FI
+
+	%ASSIGN( $xpo$full_based, 1 ) %,
+
+
+    $FIELD_SET_UNITS =					! Length of field set in addressable units
+	%EXPAND $CONTINUE
+	%ASSIGN( $xpo$set_size,  $xpo$full_index * %UPVAL + ( ($xpo$bit_index + %BPUNIT - 1) / %BPUNIT )  )
+	%NUMBER( $xpo$set_size )
+
+	%IF $xpo$show_lit
+	%THEN
+	    %PRINT( '			  ', %NUMBER($xpo$set_size), ' addressable units' )
+	%FI
+
+	%ASSIGN( $xpo$full_based, 1 ) %,
+
+
+    $LITERAL =						! Initialize for constant creation
+	%ASSIGN( $xpo$distinct, 0 )
+	LITERAL %,
+
+
+    $DISTINCT =						! Assign constant value
+	%ASSIGN( $xpo$distinct, $xpo$distinct + 1 )
+	%NUMBER( $xpo$distinct )
+
+	%IF $xpo$show_lit
+	%THEN
+	    %PRINT( '			  ', %NUMBER($xpo$distinct) )
+	%FI %,
+
+
+    $SUB_FIELD( primary, sub0, sub1, sub2, sub3 ) =
+	%IF %LENGTH NEQ 2 AND %LENGTH NEQ 5
+	%THEN
+	    %WARN( 'Invalid argument list' )
+	    0,0,0,0
+	    %EXITMACRO
+	%FI
+
+	%IF NOT %DECLARED( primary )
+	%THEN
+	    %WARN( '"', primary, '" has not been declared' )
+	    0,0,0,0
+	    %EXITMACRO
+	%FI
+
+	%IF %LENGTH EQL 2
+	%THEN
+	    %IF NOT %DECLARED( sub0 )
+	    %THEN
+		%WARN( '"', sub0, '" has not been declared' )
+		0,0,0,0
+		%EXITMACRO
+	    %FI
+										! Generate access-actuals from
+	    %IF $xpo$full_based							! two field names:
+	    %THEN
+		%FIELDEXPAND(primary,0) + %FIELDEXPAND(sub0,0) +		! 1 - fullword index into block
+		    ((%FIELDEXPAND(primary,1) + %FIELDEXPAND(sub0,1)) / %BPVAL ),
+		(%FIELDEXPAND(primary,1) + %FIELDEXPAND(sub0,1)) MOD %BPVAL,	! 2 - bit index into fullword
+	    %ELSE
+		%FIELDEXPAND(primary,0) + %FIELDEXPAND(sub0,0) +		! 1 - unit index into block
+		    ((%FIELDEXPAND(primary,1) + %FIELDEXPAND(sub0,1)) / %BPUNIT ),
+		(%FIELDEXPAND(primary,1) + %FIELDEXPAND(sub0,1)) MOD %BPUNIT,	! 2 - bit index into unit
+	    %FI
+	    %FIELDEXPAND(sub0,2),						! 3 - field size in bits
+	    %FIELDEXPAND(sub0,3)						! 4 - sign extension
+
+	%ELSE									! Generate access-actuals from a
+	    %IF $xpo$full_based							! field name and 4 access-actuals:
+	    %THEN
+		%FIELDEXPAND(primary,0) + sub0 +				! 1 - fullword index into block
+		    ((%FIELDEXPAND(primary,1) + sub1) / %BPVAL ),
+		(%FIELDEXPAND(primary,1) + sub1) MOD %BPVAL,			! 2 - bit index into fullword
+	    %ELSE
+		%FIELDEXPAND(primary,0) + sub0 +				! 1 - unit index into block
+		    ((%FIELDEXPAND(primary,1) + sub1) / %BPUNIT ),
+		(%FIELDEXPAND(primary,1) + sub1) MOD %BPUNIT,			! 2 - bit index into unit
+	    %FI
+	    sub2,								! 3 - field size in bits
+	    sub3								! 4 - sign extension
+	%FI %,
+
+
+    $BLOCK =										! *** OBSOLETE ***
+	%INFORM( 'The $BLOCK macro is obsolete - use BLOCK' )				! *** OBSOLETE ***
+	BLOCK %,									! *** OBSOLETE ***
+
+
+    $BLOCKVECTOR =									! *** OBSOLETE ***
+	%INFORM( 'The $BLOCKVECTOR macro is obsolete - use BLOCKVECTOR' )		! *** OBSOLETE ***
+	BLOCKVECTOR %,									! *** OBSOLETE ***
+
+
+    $UNIT_BLOCK( arg1, arg2 ) =
+	%IF %LENGTH NEQ 0 AND %LENGTH NEQ 1 AND %LENGTH NEQ 2
+	%THEN
+	    %WARN( 'Invalid number of arguments' )
+	    %EXITMACRO
+	%FI
+
+	BLOCK[ arg1
+
+	%IF %LENGTH EQL 2
+	%THEN
+	    , arg2 ;
+	%FI
+
+	%IF NOT %BLISS(BLISS36)
+	%THEN
+	    , BYTE
+	%FI
+	] %,
+
+
+    $UNIT_BLOCKVECTOR( arg1, arg2, arg3, arg4 ) =
+	%IF %LENGTH NEQ 1 AND %LENGTH NEQ 2 AND %LENGTH NEQ 4
+	%THEN
+	    %WARN( 'Invalid number of arguments' )
+	    %EXITMACRO
+	%FI
+
+	BLOCKVECTOR[ arg1
+
+	%IF %LENGTH GTR 1
+	%THEN
+	    , arg2
+	%FI
+
+	%IF %LENGTH EQL 4
+	%THEN
+	    , arg3, arg4
+	%FI
+
+	%IF NOT %BLISS(BLISS36)
+	%THEN
+	    , BYTE
+	%FI
+	] %;
+
+%(
+$LITERAL						! XPO$DUMP data type codes
+	XPO$K_BYTE	= $DISTINCT,
+	XPO$K_BYTES	= $DISTINCT,
+	XPO$K_INTEGER	= $DISTINCT,
+	XPO$K_TINY_INTE	= XPO$K_INTEGER,
+	XPO$K_SHORT_INT	= XPO$K_INTEGER,
+	XPO$K_LONG_INTE	= XPO$K_INTEGER,
+	XPO$K_ADDRESS	= $DISTINCT,
+	XPO$K_POINTER	= $DISTINCT,
+	XPO$K_BIT	= $DISTINCT,
+	XPO$K_BITS	= $DISTINCT,
+	XPO$K_SUB_BLOCK	= $DISTINCT,
+	XPO$K_DESCRIPTO	= $DISTINCT,
+	XPO$K_REF_DESCR	= $DISTINCT,
+	XPO$K_STRING	= $DISTINCT;
+
+)%
+
+%(
+KEYWORDMACRO
+    $XPO_DUMP_FIELD(
+	field_name,					! name of the field to be dumped
+	type,						! field data type
+	value						! field value or address
+	) =
+
+	BEGIN
+	%EXPAND $xpo$force( $xpo$ex_routine( XPO$DUMP_FIELD ) );
+
+	OWN $str$field_name :  %EXPAND $STR_DESCRIPTOR( STRING = %STRING(field_name) );
+
+	XPO$DUMP_FIELD( $str$field_name,  $xpo$name15('XPO$K_',type), value )
+	END %;
+
+
+MACRO
+    $XPO$MASK_SET( prefix, field_name ) [ bit_name ] =
+	%IF %COUNT EQL 0
+	%THEN
+	    %IF NOT %DECLARED(%NAME(prefix,field_name))
+	    %THEN
+		%WARN( prefix, field_name, ' is not defined' )
+		%EXITMACRO
+	    %FI
+	%FI
+
+	%IF NOT %DECLARED(%NAME(prefix,bit_name))
+	%THEN
+	    %WARN( prefix, bit_name, ' is not defined' )
+	%ELSE
+	    %IF %FIELDEXPAND(%NAME(prefix,bit_name),2) NEQ 1
+	    %THEN
+		%WARN( prefix, bit_name, ' is not a 1-bit field' )
+	    %ELSE
+		! The following statements generate a mask declaration similar to the following:
+		!
+		!	mask_name = 1 ^ ( B0 * %BPUNIT + B1 - F0 * %BPUNIT - F1 )
+		!
+		! where the field and bit definition are as follows:
+		!
+		!	field = [ F0, F1, ... ]
+		!	bit   = [ B0, B1, ... ]
+		!
+		%ASSIGN( $xpo$temp,
+			1 ^ ( %FIELDEXPAND(%NAME(prefix,bit_name),0) * %BPUNIT +
+				%FIELDEXPAND(%NAME(prefix,bit_name),1) -
+				%FIELDEXPAND(%NAME(prefix,field_name),0) * %BPUNIT -
+				%FIELDEXPAND(%NAME(prefix,field_name),1) ) )
+
+		%NAME(%EXACTSTRING(%CHARCOUNT(prefix)-2,0,prefix),'M_',bit_name) = %NUMBER( $xpo$temp )
+
+		%IF $xpo$show_lit
+		%THEN
+		    %PRINT( '	',
+			    %EXACTSTRING(%CHARCOUNT(prefix)-2,0,prefix),'M_',bit_name,
+			    '	= ',
+			    %NUMBER( $xpo$temp ) )
+		%FI
+	    %FI
+	%FI %;
+)%
+

@@ -1,0 +1,90 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'NETAUX Literals, Macros and Structures'
+!++
+! NETAUX.REQ	Copyright (c)	Carnegie Mellon University
+! 
+! Description:
+!
+!	Supporting declarations for NETAUX.OBJ
+!
+! Written By:	Bruce R. Miller		CMU Network Development
+! Date:		26-Oct-1989 (Thursday)
+!
+! Modifications:
+!--
+
+MACRO
+    BECOME$SUPER =
+        BEGIN
+	%IF NOT %DECLARED(BECOME_SUPER) %THEN
+	    EXTERNAL ROUTINE BECOME_SUPER;
+	%FI
+	BECOME_SUPER()
+	END
+	%,
+    BECOME$MUNDANE =
+        BEGIN
+	%IF NOT %DECLARED(BECOME_MUNDANE) %THEN
+	    EXTERNAL ROUTINE BECOME_MUNDANE;
+	%FI
+	BECOME_MUNDANE()
+	END
+	%;
+
+MACRO
+    ACT$FAO(CST) =
+        BEGIN
+        %IF NOT %DECLARED(ACT_FAO) %THEN
+            EXTERNAL ROUTINE ACT_FAO;
+        %FI
+        %IF %NULL(%REMAINING) %THEN
+            ACT_FAO(%ASCID %STRING(CST))
+        %ELSE
+	    ACT_FAO(%ASCID %STRING(CST),%REMAINING)
+        %FI
+        END
+        %,
+    SUPER_ACT$FAO(CST) =
+        BEGIN
+	LOCAL
+	    RC;
+
+	BECOME$SUPER;
+	RC = ACT$FAO(CST,%REMAINING);
+	BECOME$MUNDANE;
+	.RC
+        END
+        %;
+
+
+
+! Macro interface to the formatted printing routines
+MACRO
+    Print(X) =	BEGIN
+		   EXTERNAL ROUTINE
+			Print_Routine : ADDRESSING_MODE(LONG_RELATIVE);
+		    Print_Routine(
+			%ASCID X
+			%IF NOT %NULL(%REMAINING) %THEN , %REMAINING %FI
+			)
+		END %;

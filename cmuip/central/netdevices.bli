@@ -1,0 +1,174 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+    NetDevices (			! miscellaneous transport routines
+	LANGUAGE (BLISS32),
+	LIST (NOEXPAND,ASSEMBLY,BINARY,OBJECT),
+	IDENT = 'V01-001',
+	ADDRESSING_MODE (EXTERNAL = GENERAL)
+	) =
+BEGIN
+
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';
+
+!++
+! NETDEVICES.BLI	Copyright (c) 1989	Carnegie Mellon University
+!
+! Facility:
+!	Local Runtime Library:
+!
+! Abstract:
+!	A simple User level output routine.
+!
+! Environment:
+!	VAX/VMS operating system and runtime library, user mode process.
+!
+! Author:
+!	Bruce R. Miller		CMU Network Developmewnt
+!
+! Revision History:
+!
+!--
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETDEVICES';
+
+
+
+MACRO APPCHR(CHR,DPTR,DCNT,OCNT) =
+    IF (DCNT=.DCNT-1) GTR 0 THEN
+        BEGIN
+        OCNT = .OCNT+1;
+        CH$WCHAR_A(CHR,DPTR);
+        END %;
+
+
+
+ROUTINE APPEND_DEC(DPTR,DCNT,NUM,OUTCNT) : NOVALUE =
+
+! Append a decimal value to a string
+!   DPTR - Address of pointer to destination string (updated on return)
+!   DCNT - Address of count of bytes remaining in destination string (updated)
+!   NUM - Value to output
+!   OUTCNT - Address of count of bytes output (updated)
+
+    BEGIN
+    LOCAL
+	DIV,DIG,REM,VAL,FLAG;
+    IF .NUM EQL 0 THEN
+	BEGIN
+	APPCHR(%C'0',.DPTR,.DCNT,.OUTCNT);
+	RETURN;
+	END;
+    DIV = 1000000000;			! Highest pwr of 10 in 32 bits
+    VAL = .NUM;
+    IF .VAL LSS 0 THEN
+	BEGIN
+	VAL = -1*.VAL;
+	APPCHR(%C'-',.DPTR,.DCNT,.OUTCNT);
+	END;
+    FLAG = 0;
+    WHILE .DIV GTR 0 DO
+	BEGIN
+	DIG = .VAL/.DIV;
+	REM = .VAL MOD .DIV;
+	DIV = .DIV/10;
+	IF (.DIG NEQ 0) OR (.FLAG NEQ 0) THEN
+	    BEGIN
+	    FLAG = .FLAG+1;
+	    APPCHR(.DIG+%C'0',.DPTR,.DCNT,.OUTCNT);
+	    END;
+	VAL = .REM;
+	END;
+    END;
+
+GLOBAL ROUTINE ASCII_DEC_BYTES(DESC:REF DESC$STR,COUNT,SOURCE,LEN) : NOVALUE =
+
+! Write a string of decimal bytes to a string descriptor.
+
+    BEGIN
+    LOCAL
+	CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
+    OUTCNT = 0;
+    CPTR = CH$PTR(.SOURCE);
+    DCNT = .DESC[DSC$W_LENGTH];
+    DPTR = CH$PTR(.DESC[DSC$A_POINTER]);
+    DECR I FROM (.COUNT-1) TO 0 DO
+	BEGIN
+	CURBYTE = CH$RCHAR_A(CPTR);
+	APPEND_DEC(DPTR,DCNT,.CURBYTE,OUTCNT);
+	IF .I NEQ 0 THEN
+	    APPCHR(%C'.',DPTR,DCNT,OUTCNT);
+	END;
+    IF .LEN NEQ 0 THEN
+	.LEN = MIN(.OUTCNT,.DESC[DSC$W_LENGTH]);
+    END;
+
+
+
+ROUTINE APPEND_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE) =
+
+! Append a hexidecimal value to a string
+
+    BEGIN
+    BUILTIN
+        ROT;
+    LOCAL
+        DIG,VAL;
+    VAL = ROT(.NUM,(8-.SIZE)*4); ! Position first digit
+    DECR I FROM (.SIZE-1) TO 0 DO
+        BEGIN
+        VAL = ROT(.VAL,4);      ! Rotate highest order 4 bits to lowest
+        DIG = .VAL<0,4>;        ! Get the digit
+        IF .DIG LEQ 9 THEN
+            DIG = %C'0'+.DIG
+        ELSE
+            DIG = %C'A'+.DIG-10;
+        APPCHR(.DIG,.DPTR,.DCNT,.OUTCNT);
+        END
+    END;
+
+GLOBAL ROUTINE ASCII_HEX_BYTES(DESC:REF BLOCK[8,BYTE],COUNT,SOURCE,LEN) : NOVALUE =
+
+! Write a string of hexidecimal bytes to a string descriptor.
+
+    BEGIN
+    LOCAL
+        CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
+
+    CPTR = CH$PTR(.SOURCE);
+    DCNT = .DESC[DSC$W_LENGTH];
+    DPTR = CH$PTR(.DESC[DSC$A_POINTER]);
+    OUTCNT = 0;
+    DECR I FROM (.COUNT-1) TO 0 DO
+        BEGIN
+        CURBYTE = CH$RCHAR_A(CPTR);
+        APPEND_HEX(DPTR,DCNT,.CURBYTE,OUTCNT,2);
+        IF .I NEQ 0 THEN
+            APPCHR(%C'-',DPTR,DCNT,OUTCNT);
+        END;
+    IF .LEN NEQ 0 THEN
+        .LEN = MIN(.OUTCNT,.DESC[DSC$W_LENGTH]);
+    END;
+
+
+END ELUDOM

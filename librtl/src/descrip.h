@@ -224,6 +224,7 @@ struct dsc$descriptor_bfa {
 	
 
 
+#define DSC$K_CLASS_Z	0
 #define DSC$K_CLASS_S	1		
 #define DSC$K_CLASS_D	2		
 #define DSC$K_CLASS_V	3		

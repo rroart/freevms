@@ -1,0 +1,167 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'Define TCP maintenance interface'
+
+! All maintenance functions defined here require VMS PHYSICAL_IO privilege.
+! **** WARNING ****
+!	structures defined here MUST parallel those in STRUCTURE.REQ
+!
+
+LIBRARY 'SYS$LIBRARY:STARLET';		! VMS definitions
+
+LITERAL
+    ARP_HDW_LEN = 8;		!**Must match ARP.REQ**
+
+! Define maintenance $QIO functions
+
+LITERAL
+    TCP$DEBUG	= IO$_DIAGNOSE,
+    TCP$EXIT	= IO$_RELEASE,
+    TCP$PANIC	= IO$_SEEK,
+    TCP$DUMP	= IO$_UNLOAD,
+    TCP$EVENT	= IO$_WRITECHECK,
+    TCP$SNMP	= IO$_RDSTATS;
+
+! Define the logging flag groups
+
+LITERAL
+    DBG$DEBUG		= 0,
+    DBG$ACTIVITY	= 1;
+
+! Define User macros for network maintenance.
+
+KeywordMacro
+
+! Dump a TCB (Transmission Control Block).
+
+NET$DUMP(
+	Dfunc=0,	! Dump directive code.
+	BufAdrs,	! Data buffer address
+	BufSize,	! Buffer Size in bytes.
+	arg0=0,		! argument for dump directive
+	arg1=0,		! argument for dump directive
+	arg2=0,		! argument for dump directive
+	IOchan,		! I/O channel
+	IO$SB,		! I/O Status blk (quadword)
+	Ast$Adr=0,	! Adrs of AST service rtn.
+	Ast$Prm=0,	! AST parameter.
+	EF=0		! Event Flag #.
+	) =
+
+	$QIOW(Chan=IOchan,IOSB=IO$SB,Func=TCP$Dump,EFN=EF,
+		AstAdr=Ast$Adr,astprm=ast$prm,
+		P1 = BufAdrs,
+		P2 = BufSize,
+		P3 = Dfunc,
+		P4 = arg0
+	%IF NOT %NULL(ARG1) %THEN
+		,P5 = ARG1
+	%FI
+	%IF NOT %NULL(ARG2) %THEN
+		,P6 = ARG2
+	%FI
+		) %;
+
+
+!
+!=============================================================================!
+!
+!		ACP maintenance io interface macros
+!
+!=============================================================================!
+!
+
+KEYwordMacro
+
+! Perform an SNMP function
+
+NET$SNMP(
+	SubFunc,	! SNMP sub-funtion
+	WBufAdrs,	! SNMP variable string address
+	WBufSize,	! Buffer Size in bytes
+	RBufAdrs=0,	! SNMP return buffer
+	RBufSize=0,	! Buffer Size in bytes
+	IOchan,		! I/O channel
+	IO$SB,		! I/O Status blk (quadword)
+	Ast$Adr=0,	! Adrs of AST service rtn.
+	Ast$Prm=0,	! AST parameter.
+	EF=0		! Event Flag #.
+	) =
+
+	$QIOW(Chan=IOchan,IOSB=IO$SB,Func=TCP$SNMP,EFN=EF,
+		AstAdr=Ast$Adr,astprm=ast$prm,
+		P1 = SubFunc,
+		P2 = WBufAdrs,
+		P3 = WBufSize,
+		P4 = RBufAdrs,
+		P5 = RBufSize
+		) %,
+
+
+! Force TCP to cleanup & exit.
+
+NET$EXIT(
+	IOchan,		! I/O channel
+	IO$SB,		! I/O Status blk (quadword)
+	Ast$Adr=0,	! Adrs of AST service rtn.
+	Ast$Prm=0,	! AST parameter.
+	EF=0		! Event Flag #.
+	) =
+
+	$QIOW(Chan=IOchan,IOSB=IO$SB,Func=TCP$EXIT,EFN=EF,
+		AstAdr=Ast$Adr,astprm=ast$prm) %,
+
+! Set TCP internal Debug level.
+
+NET$Debug(
+	Level=0,	! Debug event bitmask, 0 means off
+	ConnId=0,	! Specific connection ID to track
+	Group=0,	! Which logging flags to modify
+	IOchan,		! I/O channel
+	IO$SB,		! I/O Status blk (quadword)
+	Ast$Adr=0,	! Adrs of AST service rtn.
+	Ast$Prm=0,	! AST parameter.
+	EF=0		! Event Flag #.
+	) =
+
+	$QIOW(Chan=IOchan,IOSB=IO$SB,Func=TCP$Debug,EFN=EF,
+		AstAdr=Ast$Adr,astprm=ast$prm,
+		P1=Level, P2=ConnID, P3=Group
+		) %,
+
+! Send an activity message to the IPACP.
+
+NET$Event(
+	BufAdrs,	! Data buffer address
+	BufSize,	! Buffer Size in bytes.
+	IOchan,		! I/O channel
+	IO$SB=0,		! I/O Status blk (quadword)
+	Ast$Adr=0,	! Adrs of AST service rtn.
+	Ast$Prm=0,	! AST parameter.
+	EF=0		! Event Flag #.
+	) =
+
+	$QIOW(Chan=IOchan,IOSB=IO$SB,Func=TCP$Event,EFN=EF,
+		AstAdr=Ast$Adr,astprm=ast$prm,
+		P1=BufAdrs, P2=BufSize, P3=0, P4=0, P5=0, P6=0
+		) %;
+

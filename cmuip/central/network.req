@@ -1,0 +1,470 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+! Define Network User Interface.
+
+LIBRARY 'SYS$LIBRARY:STARLET';	! VMS system definitions
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';	! XPORT definitions
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';	! Common defs.
+
+! Define IP QIO function Codes.
+! Use predefined codes which are meaningful only to IP.
+
+LITERAL
+    IP$OPEN	= IO$_create,
+    IP$CLOSE	= IO$_Delete,
+    IP$SEND	= IO$_WriteVBlk,
+    IP$RECEIVE	= IO$_ReadVBlk,
+    IP$ABORT	= IO$_Deaccess,
+    IP$STATUS	= IO$_ACPcontrol,
+    IP$INFO	= IO$_MODIFY,
+
+    IP$GTHST	= IO$_SKIPFILE,
+	GTH_LCLHST	= 0,	! Local host information
+	GTH_NAMADR	= 1,	! Name to address translation
+	GTH_ADRNAM	= 2,	! Address to name translation
+	GTH_RRLOOK	= 3,	! Address to name translation
+
+! OPEN modes
+
+    Active		= 1,	! IP - Connection is ACTIVE
+    Passive		= 0,	! IP - Connection is PASSIVE
+    UDPData		= 1,	! UDP - UDP data only (must match above)
+    UDPAddr		= 0,	! UDP - IP address supplied (must match above)
+    WILD		= 0,	! Wild port specifier.
+    Asynch		= 1,	! $QIO's
+    Synch		= 0,	! $QIOW's
+
+! Open flag bit positions ** Must match STRUCTURE and IPDRIVER **
+
+    OPF$Mode		= 1,
+    OPF$Nowait		= 2,
+    OPF$Addrflag	= 4,
+
+! Send flag bit positions ** Must match STRUCTURE and IPDRIVER **
+!!!HACK!!! Not used...
+    SND$EOLFlag		= 1,
+    SND$UrgentFlag	= 2,
+
+! IPSend flag bit positions ** Must match STRUCTURE and IPDRIVER **
+
+    SND$Exact		= 1,
+    SND$NoCkSum		= 2,
+
+! TCB Connection States
+
+    CS$Closed		= 0,	! (not a real state)
+    CS$Listen		= 1,	! Waiting for SYN
+    CS$SYN_Sent		= 2,	! SYN sent, waiting for SYN-ACK
+    CS$SYN_RECV		= 3,	! SYN received & sent, waiting for ACK
+    CS$Established	= 4,	! Connection ready to send/receive data
+    CS$FIN_Wait_1	= 5,	! CLOSE done, FIN sent, waiting for ACK
+    CS$FIN_Wait_2	= 6,	! ACK of FIN received, waiting for FIN
+    CS$Time_Wait	= 7,	! FINs sent,received,ACKed
+    CS$Close_Wait	= 8,	! FIN received, waiting for user CLOSE
+    CS$Closing		= 9,	! FINs sent&received, waiting for ACK *
+    CS$Last_ACK	        = 10,	! FINs sent&received, waiting for ACK **
+    CS$Reset		= 11,	! (not a TCP state)
+    CS$Inactive		= 12,	! (not a TCP state) Connection is closed
+    CS$NameLook		= 13;	! (not a TCP state) Waiting for name lookup
+
+!* State only reached via FIN-WAIT-1 (local initiation of close)
+!** State only reached via CLOSE-WAIT (remote initiation of close)
+
+! Define the network function macros
+
+MACRO
+    CHKOBS(KWD,KWST,MN) =	! Check for obsolete keywords
+	%IF NOT %NULL(KWD) %THEN
+	    %INFORM(%STRING(MN,' macro using obsolete keyword ',KWST))
+	%FI
+	%,
+    MissingArg(Arg,Mesg)=	! Check for missing arguments
+	%IF %NULL(Arg) %THEN
+	    %ERROR(Mesg)
+	%FI
+	%,
+    $$QIO(MODE) =
+	%IF (MODE EQL ASYNCH) %THEN
+	    $QIO
+	%ELSE
+	    $QIOW
+	%FI
+	%;
+
+KEYWORDMACRO
+
+! NET$OPEN - Open network connection
+
+    NET$OPEN(
+	FHnam=0,		! Address: Foreign-Host name (ASCIZ) string.
+	Foreign_Prt=0,		! Foreign_Port #.
+	Local_Prt=0,		! Local Port #.
+	TimOut=600,		! Send TimeOut in seconds.
+	AddrFlag=0,		! 1 = Have IP address, 0 = have host name
+	OpenNoWait=0,		! 1 = No wait, 0 = wait for completion
+	Protocol=0,		! Open protocol mode
+	OpenMode=Active,	! Default mode is ACTIVE for TCP
+	DBsize,			! OBSOLETE User data buffer size
+	IOMode=Synch,		! Synchronous/Asynchronous mode ($QIOW/$QIO)
+	IOchan,			! I/O Channel Number.
+	IO$SB,			! I/O Status Blk Address
+	Ast$Adr=0,		! Adrs of AST service rtn.
+	Ast$Prm=0,		! AST parameter.
+	EF=0			! Event Flag #.
+	) =
+
+	MissingArg(IOCHAN,'Missing I/O Channel')
+	MissingArg(IO$SB,'Missing I/O Status Block')
+	CHKOBS(DBsize,'DBsize','NET$OPEN')
+	$$QIO(IOMODE) (
+		CHAN	= IOchan,
+		FUNC	= IP$OPEN,
+		EFN	= EF,
+		IOSB	= IO$SB,
+		ASTADR	= Ast$adr,
+		ASTPRM	= Ast$prm,
+		P1	= FHnam,
+		P2	= Foreign_Prt,
+		P3	= Local_Prt,
+		P4	= (Addrflag*OPF$Addrflag)+(OpenNoWait*OPF$Nowait) +
+			  (OpenMode*OPF$Mode),
+		P5	= Protocol,
+		P6	= TimOut
+	)
+    %,
+
+
+! NET$CLOSE - Close a network connection
+
+    NET$CLOSE(
+	LC_ID,			! OBSOLETE, UNUSED Local Connection ID.
+	CloseAbort=0,		! 1 = Abort, 0 = normal close
+	CloseNoWait=0,		! 1 = No wait, 0 = wait for completion
+	IOchan,			! I/O channel
+	IO$SB,			! I/O Status blk (quadword)
+	IOMode=Synch,		! Synchronous/Asynchronous mode ($QIOQ/$QIO)
+	Ast$Adr=0,		! Adrs of AST service rtn.
+	Ast$Prm=0,		! AST parameter.
+	EF=0			! Event Flag #.
+	) =
+
+	CHKOBS(LC_ID,'LC_ID','NET$CLOSE')
+	$$QIO(IOMODE) (
+	    CHAN	= IOchan,
+	    IOSB	= IO$SB,
+	    FUNC	= IP$Close,
+	    EFN		= EF,
+	    ASTADR	= Ast$Adr,
+	    ASTPRM	= Ast$Prm,
+	    P1		= (CloseNoWait^1) + CloseAbort
+	    )
+    %,
+
+
+! NET$ABORT - Abort a network connection (same as close with abort option)
+
+    NET$ABORT(
+	LC_ID,			! OBSOLETE, UNUSED Local Connection ID.
+	IOMode=Synch,		! Synchronous/Asynchronous mode ($QIOW/$QIO)
+	IOchan,			! I/O channel
+	IO$SB,			! I/O Status blk (quadword)
+	EF=0			! Event Flag #.
+	) =
+
+	CHKOBS(LC_ID,'LC_ID','NET$ABORT')
+
+	$$QIO(IOMODE) (
+		CHAN	= IOCHAN,
+	    %IF NOT %NULL(IO$SB) %THEN
+		IOSB	= IO$SB,
+	    %FI
+		Func	= IP$ABORT,
+		EFN	= EF
+	 )
+    %,
+
+
+! NET$SEND - Send data over the network
+
+
+
+    NET$SEND(
+	LC_ID,			! OBSOLETE, UNUSED Local Connection ID.
+	BufAdrs,		! Data buffer address
+	BufSize,		! Buffer Size in bytes.
+	Tag,			! OBSOLETE, UNUSED request identifier tag.
+	Urgent=0,		! NYI Urgent data boolean
+	EOL=0,			! EOL (PUSH) boolean.
+	Addr_Spec=0,		! IP adrss for UDP, ICMP, and IP (address)
+	IOmode=Synch,		! Asynchronous or synchronous
+	IOchan,			! I/O channel
+	IO$SB,			! I/O Status blk (quadword)
+	Ast$Adr=0,		! Adrs of AST service rtn.
+	Ast$Prm=0,		! AST parameter.
+	EF=0			! Event Flag #.
+	) =
+
+	CHKOBS(LC_ID,'LC_ID','NET$SEND')
+	CHKOBS(TAG,'TAG','NET$SEND')
+
+	$$QIO(IOMODE) (
+	    CHAN	= IOchan,
+	    IOSB	= IO$SB,
+	    Func	= IP$Send,
+	    ASTADR	= Ast$Adr,
+	    ASTPRM	= Ast$Prm,
+	    EFN		= EF,
+	    P1		= BufAdrs,
+	    P2		= BufSize,
+	    P4		= EOL,
+	    P5		= Urgent,
+	    P6		= Addr_Spec
+	    )
+    %,
+
+
+! NET$IPSEND - Send data over the network
+
+
+
+    NET$IPSEND(
+	LC_ID,			! OBSOLETE, UNUSED Local Connection ID.
+	BufAdrs,		! Data buffer address
+	BufSize,		! Buffer Size in bytes.
+	Tag,			! OBSOLETE, UNUSED request identifier tag.
+	Exact=0,		! Send-with-header-as-is flag
+	NoCkSum=0,		! dont-generate-checksum flag
+	HeaderSize=0,		! Size (in bytes) of IP header
+	Header=0,		! IP header block (pointer)
+	IOmode=Synch,		! Asynchronous or synchronous
+	IOchan,			! I/O channel
+	IO$SB,			! I/O Status blk (quadword)
+	Ast$Adr=0,		! Adrs of AST service rtn.
+	Ast$Prm=0,		! AST parameter.
+	EF=0			! Event Flag #.
+	) =
+
+	CHKOBS(LC_ID,'LC_ID','NET$SEND')
+	CHKOBS(TAG,'TAG','NET$SEND')
+
+	$$QIO(IOMODE) (
+	    CHAN	= IOchan,
+	    IOSB	= IO$SB,
+	    Func	= IP$Send,
+	    ASTADR	= Ast$Adr,
+	    ASTPRM	= Ast$Prm,
+	    EFN		= EF,
+	    P1		= BufAdrs,
+	    P2		= BufSize,
+	    P4		= (Exact*SND$Exact)+(NoCkSum*SND$NoCksum),
+	    P5		= HeaderSize,
+	    P6		= Header
+	    )
+    %,
+
+
+! NET$RECEIVE - Receive data from the network
+
+    NET$RECEIVE(	      
+	LC_ID,			! OBSOLETE, UNUSED Local Connection ID.
+	BufAdrs,		! Data buffer address
+	BufSize,		! Buffer Size in bytes.
+	Addr_Spec=0,		! IP adrss for UDP, ICMP, and IP (32 bits)
+	Tag,			! OBSOLETE Receive identification tag.
+	IOmode=Synch,		! Asynchronous or synchronous
+	IOchan,			! I/O channel
+	IO$SB,			! I/O Status blk (quadword)
+	Ast$Adr=0,		! Adrs of AST service rtn.
+	Ast$Prm=0,		! AST parameter.
+	EF=0			! Event Flag #.
+	) =
+
+	CHKOBS(LC_ID,'LC_ID','NET$RECEIVE')
+	CHKOBS(TAG,'TAG','NET$RECEIVE')
+
+	$$QIO(IOMODE) (
+	    CHAN	= IOchan,
+	    IOSB	= IO$SB,
+	    FUNC	= IP$Receive,
+	    EFN		= EF,
+	    ASTADR	= Ast$Adr,
+	    ASTPRM	= Ast$Prm,
+	    P1		= BufAdrs,
+	    P2		= BufSize,
+	    P3		= Addr_Spec
+	    )
+    %;
+
+! NET$STATUS - Get status information about a network connection
+
+KEYWORDMACRO
+    NET$STATUS(
+	LC_ID,			! OBSOLETE, UNUSED Local Connection ID.
+	BufAdrs,		! Status buffer address
+	BufSize=Connection_status_ByteSize, ! Buffer Size in bytes.
+	IOchan,			! I/O channel
+	IO$SB,			! I/O Status blk (quadword)
+	EF=0			! Event Flag #.
+	) =
+
+	CHKOBS(LC_ID,'LC_ID','NET$STATUS')
+
+	$QIOW(	CHAN	= IOchan,
+		IOSB	= IO$SB,
+		FUNC	= IP$Status,
+		EFN	= EF,
+		P1	= BufAdrs,
+		P2	= BufSize
+		)
+    %;
+
+! NET$STATUS - Returned Status block structure.
+
+$FIELD Connection_Status_Return_Fields =
+    SET
+    CS$Bytes_Avail	= [$Bytes(2)],
+    CS$State		= [$Byte],
+    CS$Last_State	= [$Byte],
+    CS$Send_Window	= [$Long_Integer],
+    CS$Recv_Window	= [$Long_Integer],
+    CS$User_ID		= [$long_Integer]	! Owning PID
+    TES;
+
+LITERAL
+    Connection_Status_BLKSize = $Field_Set_Size,
+    Connection_status_ByteSize = Connection_status_Blksize*4; ! in bytes.
+MACRO
+    Connection_Status_Return_Block =
+	BLOCK[Connection_Status_BLKSIZE] 
+	FIELD(Connection_Status_Return_Fields) %;
+
+
+! NET$INFO - Request Connection Information.
+! Host names, node description, Port numbers, etc.
+
+KEYWORDMACRO
+    NET$INFO(
+	LC_ID,			! OBSOLETE, UNUSED Local Connection ID.
+	BufAdrs,		! Status buffer address
+	BufSize=Connection_Info_ByteSize, ! Buffer Size in bytes.
+	IOchan,			! I/O channel
+	IO$SB,			! I/O Status blk (quadword)
+	EF=0			! Event Flag #.
+	) =
+
+	CHKOBS(LC_ID,'LC_ID','NET$INFO')
+
+	$QIOW(	CHAN	= IOchan,
+		IOSB	= IO$SB,
+		FUNC	= IP$INFO,
+		EFN	= EF,
+		P1	= BufAdrs,
+		P2	= BufSize
+		)
+    %;
+
+
+! NET$GTHST - Get Host Information
+
+KEYWORDMACRO
+
+    NET$GTHST(
+	BufAdrs,		! Data buffer address
+	Bufsize,		! Buffer size (bytes)
+	Gthfunct,		! GTHST function
+	GTHP1,			! Parameter #1
+	GTHP2=0,		! Parameter #2
+	GTHP3=0,		! Parameter #3
+	IOchan,			! I/O channel
+	IO$SB,			! I/O status block
+	IOmode=Synch,		! Asynchronous or synchronous
+	Ast$Adr=0,		! Addrs of AST service rtn
+	Ast$Prm=0,		! AST parameter
+	EF=0			! Event flag #
+	)=
+
+	$$QIO(IOMODE) (
+	    CHAN	= IOchan,
+	    IOSB	= IO$SB,
+	    FUNC	= IP$GTHST,
+	    ASTADR	= Ast$Adr,
+	    ASTPRM	= Ast$Prm,
+	    EFN=EF,
+	    P1		= Bufadrs,
+	    P2		= Bufsize,
+	    P3		= GTHfunct,
+	    P4		= GTHP1
+	%IF NOT %NULL(GTHP2) %THEN
+	    ,P5		= GTHP2
+	%FI
+	%IF NOT %NULL(GTHP3) %THEN
+	    ,P6		= GTHP3
+	%FI
+	    )
+    %;
+
+
+! NET$GTHST - Return block for Name to Address translation
+
+$FIELD GTHST_NMLOOK_FIELDS =
+    SET
+    GH$NL_ADRCNT	= [$Bytes(4)], ! Count of addresses
+    GH$NL_ADRLST	= [$Bytes(4*MAX_HADDRS)], ! Address list
+    GH$NL_NAMLEN	= [$Bytes(4)], ! Official name length
+    GH$NL_NAMSTR	= [$String(MAX_HNAME)] ! Official name string
+    TES;
+
+LITERAL
+     GTHST_NMLOOK_SIZE = $FIELD_SET_SIZE;
+MACRO
+     GTHST_NMLOOK_BLOCK =
+	 BLOCK[GTHST_NMLOOK_SIZE] FIELD(GTHST_NMLOOK_FIELDS) %;
+
+
+! NET$GTHST - Return block for Address to Name translation
+
+$FIELD GTHST_ADLOOK_FIELDS =
+    SET
+    AL$NAMLEN		= [$Bytes(4)], ! Host name string length
+    AL$NAMSTR		= [$String(MAX_HNAME)] !
+    TES;
+
+LITERAL
+     GTHST_ADLOOK_SIZE = $FIELD_SET_SIZE;
+MACRO
+     GTHST_ADLOOK_BLOCK =
+	 BLOCK[GTHST_ADLOOK_SIZE] FIELD(GTHST_ADLOOK_FIELDS) %;
+
+! NET$GTHST - Return block for Name to RR translation
+
+$FIELD GTHST_RRLOOK_FIELDS =
+    SET
+    GH$RL_RDLEN		= [$Bytes(2)], ! Resource data length
+    GH$RL_RDATA		= [$Bytes(0)]  ! RData followed by name.
+    TES;
+
+LITERAL
+     GTHST_RRLOOK_SIZE = $FIELD_SET_SIZE;
+MACRO
+     GTHST_RRLOOK_BLOCK =
+	 BLOCK[GTHST_RRLOOK_SIZE] FIELD(GTHST_RRLOOK_FIELDS) %;
+

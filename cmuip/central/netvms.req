@@ -1,0 +1,101 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%Title 'VAX / VMS - Standard definitions library file.'
+
+LIBRARY	'SYS$LIBRARY:STARLET';	! VAX/VMS definitions
+LIBRARY	'CMUIP_SRC:[CENTRAL]NETXPORT';	! XPORT definitions
+
+
+! Declare VAX-11 builtin machine instructions
+! See BLISS-32 Users Guide for further details or VAX-11 Architecture.
+
+BUILTIN
+    ROT,			! logical 32-bit rotate.
+    SUBM,			! multi-precision subtraction.
+    ADDM,			! multi-precision add.
+    INSQUE,			! Insert a queue entry
+    INSQHI,			! Insert a queue entry at queue head, interlocked
+    INSQTI,			! Insert a queue entry at queue tail, interlocked
+    REMQUE,			! Remove a queue entry.
+    REMQHI,			! Remove a queue entry at queue head, interlocked.
+    REMQTI,			! Remove a queue entry at queue tail, interlocked.
+    CVTLF,			! convert long to single-prec floating.
+    CVTFL,			! convert floating to long
+    CVTID,			! convert long to float-double(quadword)
+    CVTRDL,			! convert rounded double-float to long
+    DIVD,			! divide double-float => double-float
+    DIVF,			! long-Float divide.
+    EDIV;			! divide quadword by longword ==> long
+
+
+! I/O Status Block Fields
+
+FIELD IO_Status_Fields=
+    SET
+    IOS$Status	= [0,0,16,0],
+    IOS$Size	= [0,16,16,0],
+    IOS$DevChr	= [1,0,32,0]
+    TES;
+
+LITERAL
+    IO_Status_Blk_Size = 2,
+    SS$_Error = 2;
+
+MACRO
+    IO_Status_Blk = BLOCK[IO_Status_Blk_Size] Field(IO_Status_Fields)%,
+    $WORD = %QUOTE $Short_Integer%;
+
+! End of VMS specific definitions.
+! Include some standard definitions.
+
+MACRO
+    True	= (1 EQL 1) %,
+    False	= (1 EQL 0) %,
+    OFF		= 0 %,
+    ON		= 1 %;
+
+LITERAL
+! a few ascii characters.
+
+    CH_NUL	= 0,
+    CH_tab	= 9,
+    CH_sp	= 32,
+    CH_FF	= 12,		! formFeed
+    CH_LF	= 10,		! Line-Feed
+    CH_CR	= 13;		! Carriage-Return
+
+! Queue header definition
+
+$FIELD Queue_Header_Fields =
+    SET
+    QHEAD	= [$Address],
+    QTAIL	= [$Address]
+    TES;
+
+LITERAL
+    Qheader_Size = $FIELD_SET_SIZE;
+
+Macro
+    Queue_Header = BLOCK[QHeader_Size] FIELD(Queue_Header_Fields)%,
+    Queue_Header_Structure(F) = BLOCK[QHeader_Size] FIELD(F)%,
+    QUEUE_VECTOR(N) = BLOCKVECTOR[N,QHEADER_SIZE] FIELD(QUEUE_HEADER_Fields)%;
+
