@@ -147,6 +147,10 @@ MACRO
     %,
 #endif
 	   
+extern 	void OPR_FAO(int, ...);
+extern 	void ERROR_FAO(int, ...);
+extern 	void FATAL_FAO(int, ...);
+
 // Write a message to the console operator
 
 static int inline OPR$FAO(char *c, ...) {
@@ -161,7 +165,7 @@ static int inline OPR$FAO(char *c, ...) {
     argc++;
   }
   va_end(args);
-  return OPR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+  OPR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
 static int inline ERROR$FAO(char *c, ...) {
@@ -176,7 +180,7 @@ static int inline ERROR$FAO(char *c, ...) {
     argc++;
   }
   va_end(args);
-  return ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+  ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
 static int inline WARN$FAO(char *c, ...) {
@@ -191,7 +195,7 @@ static int inline WARN$FAO(char *c, ...) {
     argc++;
   }
   va_end(args);
-  return ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+  ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
 static int inline FATAL$FAO(char *c, ...) {
@@ -206,7 +210,7 @@ static int inline FATAL$FAO(char *c, ...) {
     argc++;
   }
   va_end(args);
-  return FATAL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+  FATAL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
 #if 0
@@ -275,9 +279,9 @@ static int inline FATAL$FAO(char *c, ...) {
 	if (sleeping) \
 	    { \
 	    sleeping = FALSE; \
-	    exe$wake(); \
+	    exe$wake(0,0); \
 	} \
-	}
+	}   /*need to add 0,0 until proper calls are done*/
 
 // Macros to do word and longword byte swapping.
 
