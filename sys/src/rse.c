@@ -113,7 +113,9 @@ int sch$pixscan(void) {
 void sch$chsep(struct _pcb * p,unsigned char newpri) {
   struct _pcb * p2, *p3 , *dummy;
   p3=p->pcb$l_sqfl;
+  mycheckaddr();
   p2=remque(p,dummy);
+  mycheckaddr();
   if (p3==p3->pcb$l_sqfl) {
       if (p2->pcb$w_state==SCH$C_COM) {
 	sch$gl_comqs&=(~(1 << p2->pcb$b_pri));
