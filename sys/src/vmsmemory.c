@@ -52,6 +52,7 @@
 
 #include <ipldef.h>
 #include <rdedef.h>
+#include <va_rangedef.h>
 
 pgprot_t x_to_prot(int x) {
   pgprot_t y;
@@ -393,6 +394,10 @@ void zap_page_range(struct mm_struct *mm, unsigned long address, unsigned long s
 	pgd_t * dir;
 	unsigned long start = address, end = address + size;
 	int freed = 0;
+	struct _va_range inadr;
+
+	inadr.va_range$ps_start_va=address;
+	inadr.va_range$ps_end_va=address+size;
 
 	dir = pgd_offset(mm, address);
 
@@ -406,6 +411,7 @@ void zap_page_range(struct mm_struct *mm, unsigned long address, unsigned long s
 	if (address >= end)
 		BUG();
 	spin_lock(&mm->page_table_lock);
+	exe$purgws(&inadr);
 	flush_cache_range(mm, address, end);
 	tlb = tlb_gather_mmu(mm);
 
