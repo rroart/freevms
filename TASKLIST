@@ -43,6 +43,40 @@ FreeVMS tasklist
   ODS-2, work is under way
 
   DCL, will at first be implemented kernel-independent, need more people.
+	LBR librarian   No kernel stuff (I think)
+		See 
+		$ help lbr
+		http://www.openvms.compaq.com:8000/73final/6100/
+		6100pro_005.html#lib_chap
+	CDU Command Definition Utility  No kernel stuff (I think)
+		See
+		$ help set command
+		http://www.openvms.compaq.com:8000/73final/6100/
+		6100pro.html#cd_chap
+	MSG message     No kernel stuff (I think)
+		See
+		$ help rtl lib lib$signal
+		$ help message 
+		http://www.openvms.compaq.com:8000/73final/6100/
+		6100pro_008.html#msg_chap
+	Internal procedures possible now, some can be developed independently
+		=, assign, call, create/name_table, deassign, define,
+		delete/symbol, eod, exit, gosub, goto, if/then/else/endif,
+		inquire, on, read, recall, return, set control, set prompt,
+		set symbol, set [no]verify, show symbol, show time,
+		show translation, stop, write
+
+	Internal procedures for later (kernel dependent)
+		allocate, attach, cancel, close, connect, continue, 
+		deallocate, debug, deck, define/key, delete/key, deposit,
+		disconnect, eoj, examine, open, set default, set key,
+		set [no]on, set output_rate, set protection, set uic,
+		show default, show key, show protection, show quota,
+		show status, spawn, wait
+
+	Also see: 
+		Look up DCL in the Internals book. 
+		Mainly Process Dynamics chapter.
 
   Basic libraries:
     LBR, nothing done, vacant.
