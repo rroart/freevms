@@ -12,3 +12,9 @@ Answer:		You have to change the line:
 		or grub conf file.
 
 (Written by Andrew Allison)
+
+Question:	Bochs does not boot properly, it hangs somewhere.
+
+Answer:		Try to increse ips.
+
+(Written by Roar Thronaes)
