@@ -6,7 +6,7 @@ install: all
 	cp -p *.com net net2 um/* ../rootum/vms"$$"common/syshlp/examples
 	cp -p *.com net net2 i386/* ../rooti386/vms"$$"common/syshlp/examples
 
-alli386: i386/timer i386/ast i386/time i386/eftim i386/schdwk i386/forcex i386/ef i386/wake i386/synch i386/enq i386/enq2 i386/lnm i386/lnm2 i386/qio1 i386/qio2 i386/cef i386/cefw i386/mem i386/memf i386/getjpi i386/crec i386/getdvi
+alli386: i386/timer i386/ast i386/time i386/eftim i386/schdwk i386/forcex i386/ef i386/wake i386/synch i386/enq i386/enq2 i386/lnm i386/lnm2 i386/qio1 i386/qio2 i386/cef i386/cefw i386/mem i386/memf i386/getjpi i386/crec i386/getdvi i386/inout
 
 dirs:
 	mkdir um || echo um exists
@@ -14,6 +14,7 @@ dirs:
 
 LIB = ../starlet/src/starlet.a
 LIBUM = ../starlet/src/starletum.a
+LIBRTL = ../librtl/src/starlet.a
 
 FLAGS = -static
 
@@ -84,7 +85,10 @@ i386/crec: crec.c $(LIB)
 i386/getdvi: getdvi.c $(LIB)
 	gcc -$(FLAGS) -static -I../starlet/src -I../librtl/src/ getdvi.c ../starlet/src/starlet.a -o i386/getdvi
 
-allum: um/timer um/ast um/time um/eftim um/schdwk um/forcex um/ef um/wake um/synch um/enq um/enq2 um/lnm um/lnm2 um/qio1 um/qio2 um/cef um/cefw um/mem um/memf um/getjpi um/crec um/getdvi
+i386/inout: inout.c $(LIB) $(LIBRTL)
+	gcc -$(FLAGS) -static -I../starlet/src -I../librtl/src/ inout.c $(LIBRTL) ../starlet/src/starlet.a -o i386/inout
+
+allum: um/timer um/ast um/time um/eftim um/schdwk um/forcex um/ef um/wake um/synch um/enq um/enq2 um/lnm um/lnm2 um/qio1 um/qio2 um/cef um/cefw um/mem um/memf um/getjpi um/crec um/getdvi um/inout
 
 UMDEF=-Dcompile_um
 
@@ -154,3 +158,6 @@ um/crec: crec.c $(LIBUM)
 
 um/getdvi: getdvi.c $(LIBUM)
 	gcc -$(FLAGS) -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ getdvi.c ../starlet/src/starletum.a -o um/getdvi
+
+um/inout: inout.c $(LIBUM) $(LIBRTL)
+	gcc -$(FLAGS) -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ inout.c $(LIBRTL) ../starlet/src/starletum.a -o um/inout
