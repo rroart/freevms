@@ -36,30 +36,7 @@ int scs_std$deallomsg(){
 
 }
 
-
-int scs_std$reqdata(){
-
-}
-
-
-int scs_std$senddata(){
-
-}
-
-
-int scs_std$sendmsg2(){
-
-}
-
-
-int scs_std$connect(){
-
-}
-
-
 int scs_std$dconnect(){
 
 }
-
-
 
