@@ -138,8 +138,49 @@ int sys$enq  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigne
   return INLINE_SYSCALL($enq,1,&s);
 }
 
-int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags) {
+int sys$enqw  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id) {
+  struct struct_enq s;
+  s.efn=efn;
+  s.lkmode=lkmode;
+  s.lksb=lksb;
+  s.flags=flags;
+  s.resnam=resnam;
+  s.parid=parid;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.blkastadr=blkastadr;
+  s.acmode=acmode;
+  s.rsdm_id=rsdm_id;
+  //  s.null_arg=null_arg;
+  return INLINE_SYSCALL($enqw,1,&s);
+}
+
+int sys$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags) {
   return INLINE_SYSCALL($deq,4,lkid,valblk,acmode,flags);
+}
+
+int sys$getlki(unsigned int efn, unsigned int *lkidadr,void *itmlst, struct _iosb *iosb, void (*astadr)(int), int astprm, unsigned int reserved) {
+  struct struct_getlki s;
+  s.efn=efn;
+  s.lkidadr=lkidadr;
+  s.itmlst=itmlst;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.reserved=reserved;
+  return INLINE_SYSCALL($getlki,1,&s);
+}
+
+int sys$getlkiw(unsigned int efn, unsigned int *lkidadr,void *itmlst, struct _iosb *iosb, void (*astadr)(int), int astprm, unsigned int reserved) {
+  struct struct_getlki s;
+  s.efn=efn;
+  s.lkidadr=lkidadr;
+  s.itmlst=itmlst;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.reserved=reserved;
+  return INLINE_SYSCALL($getlkiw,1,&s);
 }
 
 int sys$dassgn(unsigned short int chan) {

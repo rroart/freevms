@@ -48,9 +48,15 @@ int sys$synch(unsigned int efn, struct _iosb *iosb);
 
 int sys$readef(unsigned int efn, unsigned int *state);
 
+int sys$enqw  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id);
+
 int sys$enq  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id);
 
-int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags);
+int sys$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags);
+
+int sys$getlki(unsigned int efn, unsigned int *lkidadr,void *itmlst, struct _iosb *iosb, void (*astadr)(int), int astprm, unsigned int reserved);
+
+int sys$getlkiw(unsigned int efn, unsigned int *lkidadr,void *itmlst, struct _iosb *iosb, void (*astadr)(int), int astprm, unsigned int reserved);
 
 int sys$asctim  (unsigned short int *timlen, void *timbuf,
 		 unsigned long long *timadr, char cvtflg);
@@ -110,8 +116,6 @@ struct struct_qio {
   long p6;
 };
 
-#endif
-
 struct struct_enq {
   unsigned int efn;
   unsigned int lkmode;
@@ -126,3 +130,17 @@ struct struct_enq {
   unsigned int rsdm_id;
   unsigned long null_arg;
 };
+
+struct struct_getlki {
+  unsigned int efn;
+  unsigned int *lkidadr;
+  void *itmlst;
+  struct _iosb *iosb;
+  void (*astadr)(int);
+  int astprm;
+  unsigned int reserved;
+};
+
+#endif
+
+
