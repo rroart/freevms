@@ -192,8 +192,10 @@ endif
 
 else
 
-#export-objs := net_init.o
+export-objs := net_init.o
 #obj-y		:= net_init.o
+obj-y		:= setup.o
+#obj-$(CONFIG_NET) += Space.o setup.o net_init.o loopback.o
 
 endif
 

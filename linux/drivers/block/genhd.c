@@ -197,8 +197,8 @@ int __init device_init(void)
 	cpqarray_init();
 #endif
 #ifdef CONFIG_NET
-#ifndef CONFIG_VMS
-	// not yet?
+#if 1
+	// not yet? oh yes
 	net_dev_init();
 #endif
 #endif
