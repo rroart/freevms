@@ -54,7 +54,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
 }
 
 printast(struct _acb * acb) {
-  printk("acb %x %x %x %x\n",acb,acb->acb$l_pid,acb->acb$l_ast,acb->acb$l_astprm);
+  //printk("acb %x %x %x %x\n",acb,acb->acb$l_pid,acb->acb$l_ast,acb->acb$l_astprm);
 }
 
 asmlinkage void sch$astdel(void) {
@@ -70,36 +70,37 @@ asmlinkage void sch$astdel(void) {
 
   spin_lock(&SPIN_SCHED);
  more:
-  setipl(IPL$_SYNCH);
+  setipl(IPL$_SYNCH); // also IPL$_SCHED
 
   /* { int i;
-     printk("here ast\n");
+     //printk("here ast\n");
      for (i=0; i<1000000; i++) ;
      } */
   if (aqempty(&p->pcb$l_astqfl)) {
+    sch$newlvl(p);
     spin_unlock(&SPIN_SCHED);
     return;
   }
   /* { int i,j;
-     printk("here ast2 %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl);
+     //printk("here ast2 %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl);
      for (j=0; j<20; j++) for (i=0; i<1000000000; i++) ;
      } */
   acb=remque(p->pcb$l_astqfl,dummy);
-  printk("here ast2 %x %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl,acb);
+  //printk("here ast2 %x %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl,acb);
   printast(acb);
   //  mydebug5=1;
   //  printk(KERN_EMERG "astdel %x\n",acb);
   if (acb->acb$b_rmod & ACB$M_KAST) {
     acb->acb$b_rmod&=~ACB$M_KAST;
     /* unlock */
-    printk("astdel1 %x \n",acb->acb$l_kast);
+    //printk("astdel1 %x \n",acb->acb$l_kast);
     setipl(IPL$_ASTDEL);
-    p->pcb$b_astact=1;
+    //p->pcb$b_astact=1;
     acb->acb$l_kast(acb->acb$l_astprm);
-    p->pcb$b_astact=0;
+    //p->pcb$b_astact=0;
     goto more;
   }
-  printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
+  //printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
   setipl(IPL$_ASTDEL);
   if (p->pcb$b_asten!=15 || p->pcb$b_astact) { // 15 because no modes yet
     insque(acb,p->pcb$l_astqfl);
@@ -107,7 +108,8 @@ asmlinkage void sch$astdel(void) {
     spin_unlock(&SPIN_SCHED);
     return;
   }
-  p->pcb$b_astact=1;
+  p->pcb$b_astact=0; // 1; wait with this until we get modes
+  setipl(0); // for kernel mode, I think. everything is in kernelmode yet.
   if(acb->acb$l_ast) acb->acb$l_ast(acb->acb$l_astprm); /* ? */
   p->pcb$b_astact=0;
   /*unlock*/
