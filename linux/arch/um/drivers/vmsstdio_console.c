@@ -101,10 +101,24 @@ static struct _ddt op$ddt = {
 
 int con$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   //  return read(0,i->irp$l_qio_p1,i->irp$l_qio_p2);
+  struct tty_struct * tty;
+  init_dev2(chan2dev(i->irp$w_chan ,&tty));
+  u->ucb$l_irp=i;
+  //tty_flip_buffer_push(tty);
+  vms_read_chan(tty, 0, i->irp$l_qio_p1, i->irp$l_qio_p2);
+  if (1) {	
+    struct _ccb * ccb = &ctl$gl_ccbbase[dev2chan(tty->device)];
+    struct _ucb * ucb = ccb->ccb$l_ucb;
+    //	  ioc$reqcom(SS$_NORMAL,0,ucb);
+    ucb->ucb$l_irp->irp$l_iost1 = SS$_NORMAL;
+    com$post(ucb->ucb$l_irp,ucb);
+  }
+  return SS$_NORMAL;
 }
 
 int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
-  return write(1,i->irp$l_qio_p1,i->irp$l_qio_p2);
+  write(1,i->irp$l_qio_p1,i->irp$l_qio_p2);
+  return SS$_NORMAL;
 }
 
 extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
@@ -217,7 +231,7 @@ int con_iodb_vmsinit(void) {
 
 }
 
-int con_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+int con_iodbunit_vmsinit2(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&op$ucb*/,&newucb);
@@ -228,11 +242,23 @@ int con_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   return newucb;
 }
 
+int con_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+  unsigned short int chan;
+  struct _ucb * newucb;
+  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&op$ucb*/,&newucb);
+  exe$assign(dsc,&chan,0,0,0);
+  registerdevchan(MKDEV(TTY_MAJOR,unitno),chan);
+
+
+  return newucb;
+}
+
 int con_vmsinit(void) {
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
 
   unsigned short chan0, chan1, chan2;
   $DESCRIPTOR(dsc,"opa0");
+  $DESCRIPTOR(t0,"opa1");
   unsigned long idb=0,orb=0;
   struct _ccb * ccb;
   struct _ucb * newucb0,*newucb1,*newucb2;
@@ -245,11 +271,11 @@ int con_vmsinit(void) {
   /* for the fdt init part */
   /* a lot of these? */
 
-  con_iodbunit_vmsinit(ddb,1,&dsc);
+  con_iodbunit_vmsinit(ddb,0,&dsc);
+  //con_iodbunit_vmsinit2(ddb,0,&t0);
 
   printk(KERN_INFO "dev con here\n");
 
   // return chan0;
 
 }
-
