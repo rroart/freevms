@@ -642,6 +642,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       fib->fib$b_fid_nmx=0;
     }
 
+    //temp hack to get a dentry
+    f=filp_open(&dir.d_name, O_RDONLY,0);
+    filp_close(f);
+
 #if 0
       sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
       // readdir should be replaced with something like search_ent
