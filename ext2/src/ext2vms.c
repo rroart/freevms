@@ -567,7 +567,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
     dir.d_ino=0;
     dir.d_type=0;
-    dir.d_name=resdsc->dsc$a_pointer;
+    memset(dir.d_name,0,256);
 
     if (fib->fib$l_wcc!=0) {
       dir.d_off=fib->fib$l_wcc; //resdsc->dsc$a_pointer;
