@@ -20,6 +20,7 @@ unsigned long upidlen,epidlen;
  unsigned long wssizelen,wsquotalen,wsextentlen,wsauthlen,wsauthextlen;
 int jpistatus;
  int mypid=getpid();
+ if (mypid==1) mypid=2; 
 
 lst[0].buflen=15;
 lst[0].item_code=JPI$_PRCNAM;
