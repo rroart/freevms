@@ -145,13 +145,17 @@ void lnm_init_prc(struct _pcb * p) {
     lnm$al_dirtbl[1]=ctl$gl_lnmdirect;*/
   myhash=&ahash; //lnmmalloc(sizeof(unsigned long));
   status=lnm$hash(mypartab.dsc$w_length,mypartab.dsc$a_pointer,0xffff,myhash);
+#ifdef LNM_DEBUG 
   lnmprintf("here %x %x\n",myhash,*myhash);
+#endif
 
   hash->entry[2*(*myhash)]=dir_lnmb;
   hash->entry[2*(*myhash)+1]=dir_lnmb;
 
   status=lnm$hash(mytabnam.dsc$w_length,mytabnam.dsc$a_pointer,0xffff,myhash);
+#ifdef LNM_DEBUG 
   lnmprintf("here %x %x\n",myhash,*myhash);
+#endif
 
   hash->entry[2*(*myhash)]=tab_lnmb;
   hash->entry[2*(*myhash)+1]=tab_lnmb;

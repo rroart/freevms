@@ -225,11 +225,15 @@ void lnm_init_sys(void) {
     lnm$al_dirtbl[1]=ctl$gl_lnmdirect;*/
   myhash=&ahash; //lnmmalloc(sizeof(unsigned long));
   status=lnm$hash(mypartab.dsc$w_length,mypartab.dsc$a_pointer,0xffff,myhash);
+#ifdef LNM_DEBUG 
   lnmprintf("here %x %x\n",myhash,*myhash);
+#endif
   lnmhshs.entry[2*(*myhash)]=lnm$system_directory;
   lnmhshs.entry[2*(*myhash)+1]=lnm$system_directory;
   status=lnm$hash(mytabnam.dsc$w_length,mytabnam.dsc$a_pointer,0xffff,myhash);
+#ifdef LNM_DEBUG 
   lnmprintf("here %x %x\n",myhash,*myhash);
+#endif
   lnmhshs.entry[2*(*myhash)]=&lnm_sys;
   lnmhshs.entry[2*(*myhash)+1]=&lnm_sys;
 }

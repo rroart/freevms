@@ -173,7 +173,9 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   struct dsc$descriptor_s * mytabnam, * mypartab;
   if (!(partab)) return -1;
   mypartab=partab;
+#ifdef LNM_DEBUG 
   lnmprintf("partab %s\n",mypartab->dsc$a_pointer);
+#endif
   if (tabnam) mytabnam=tabnam;
   else {
     /*    mytabnam="LNM$something";*/
@@ -193,12 +195,16 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   lnm$lockw();
   RT=(struct struct_rt *) lnmmalloc(sizeof(struct struct_rt));
   bzero(RT,sizeof(struct struct_rt));
+#ifdef LNM_DEBUG 
   //      lnmprintf("");/* this makes a difference somehow */
   //  lnmprintf("this %x\n",mytabnam->dsc$w_length);
   //  lnmprintf("this %x %s\n",mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
   lnmprintf("fir %x\n",ret.mylnmth);
+#endif
   status=lnm$firsttab(&ret,mypartab->dsc$w_length,mypartab->dsc$a_pointer);
+#ifdef LNM_DEBUG 
   lnmprintf("fir %x\n",ret.mylnmth);
+#endif
   if (status==SS$_NOLOGTAB) {
     lnmfree(mylnmb);
     lnmfree(mylnmx);
@@ -277,11 +283,15 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   mylnmth->lnmth$l_byteslm=0;
   mylnmth->lnmth$l_bytes=0;
 
+#ifdef LNM_DEBUG 
   lnmprintf("bef inslogtab %x %s\n",mylnmb->lnmb$b_count,mytabnam->dsc$a_pointer);
+#endif
   status=lnm$inslogtab(&ret,mylnmb);
   //  lnmprintf("exit here\n");
   //  exit(1);
+#ifdef LNM_DEBUG 
   lnmprintf("so far %x\n",status);
+#endif
 
   /* unlock mutex */
   lnm$unlock();
@@ -328,7 +338,9 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
   }
   i->buflen=(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_xlen;
   bcopy((ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,i->bufaddr,i->buflen);
+#ifdef LNM_DEBUG 
   lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
+#endif
   lnm$unlock();
   setipl(0);
   return status;
@@ -387,7 +399,9 @@ main(){
     lnm$al_dirtbl[1]=ctl$gl_lnmdirect;*/
   myhash=lnmmalloc(sizeof(unsigned long));
   status=lnm$hash(mypartab.dsc$w_length,mypartab.dsc$a_pointer,0xffff,myhash);
+#ifdef LNM_DEBUG 
   lnmprintf("here %x %x\n",myhash,*myhash);
+#endif
   lnmhshs.entry[2*(*myhash)]=lnm$system_directory;
   lnmhshs.entry[2*(*myhash)+1]=lnm$system_directory;
   s=lnmmalloc(sizeof(struct struct_crelnt));
@@ -417,7 +431,9 @@ main(){
   i[0].bufaddr=resstring;
   bzero(&i[1],sizeof(struct item_list_3));
   status=exe$trnlnm(0,&mytabnam2,&mynam,0,i);
+#ifdef LNM_DEBUG 
   lnmprintf("end status %x\n",status);
+#endif
   for (c=0;c<LNMSHASHTBL;c++) {
     if (lnmhshs.entry[2*c]) { 
       struct _lnmth * l;
@@ -425,10 +441,14 @@ main(){
       head=lnmhshs.entry[2*c];
       tmp=head;
       do {
+#ifdef LNM_DEBUG 
 	lnmprintf("lnmhshs entry %x %x %s\n",c,tmp,tmp->lnmb$t_name);
+#endif
 	l=&(tmp->lnmxs[0].lnmx$l_xlen);
+#ifdef LNM_DEBUG 
 	lnmprintf("     parent %x\n",l->lnmth$l_parent);
 	lnmprintf("     table %x\n",tmp->lnmb$l_table);
+#endif
 	tmp=tmp->lnmb$l_flink;
       } while (tmp!=head);
     }

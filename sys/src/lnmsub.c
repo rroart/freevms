@@ -38,7 +38,9 @@ int lnm$hash(const int length, const unsigned char * log, const unsigned long ma
   unsigned char *tmp=log;
   unsigned char count=length;
   unsigned long hash=count;
+#ifdef LNM_DEBUG 
   lnmprintf("count %x %x %s\n",count,tmp,tmp);
+#endif
   while (count>3) {
     //  lnmprintf("here %x %x\n",tmp[0],count);
     //tmp[0]=tmp[0]&223;
@@ -91,7 +93,9 @@ int lnm$searchlog(struct struct_lnm_ret * r,int loglen, char * lognam, int tabna
   bzero(rt,sizeof(struct struct_rt));
   bzero(nt,sizeof(struct struct_nt));
 
+#ifdef LNM_DEBUG 
   lnmprintf("searchlog\n");
+#endif
 
   status=lnm$hash(loglen,lognam,0xffff,&ahash);
 
@@ -113,14 +117,18 @@ int lnm$searchlog(struct struct_lnm_ret * r,int loglen, char * lognam, int tabna
   lnm$setup(r, rt, loglen, lognam,nt);
   lnm$table(r, rt, nt);
   lnm$contsearch(r, ahash, hash, nt);
+#ifdef LNM_DEBUG 
   lnmprintf("searchlogexit\n");
+#endif
   return status;
 }
 
 int lnm$search_one(struct struct_lnm_ret * r,int loglen, char * logical, int tabnamlen, char * tablename, char * result) {
   /* lock mutex */
   // lnm$searchlog();
+#ifdef LNM_DEBUG 
   lnmprintf("searchoneexit\n");
+#endif
 #ifdef USERLAND
   exit(1);
 #endif
@@ -132,7 +140,9 @@ int lnm$presearch(struct struct_lnm_ret * r,struct lnmhshs * hashtable, struct s
   unsigned long * myhash;
   // struct _lnmb * mylnmb; not needed?
   myhash=lnmmalloc(sizeof(unsigned long));
+#ifdef LNM_DEBUG 
   lnmprintf("presearch %x %s\n",nt->loglen,nt->lognam);
+#endif
   status=lnm$hash(nt->loglen,nt->lognam,0xffff,myhash);
   status=lnm$contsearch(r,*myhash,hashtable,nt);
   //  r->mylnmb=mylnmb; erroneous?
@@ -144,7 +154,9 @@ int lnm$contsearch(struct struct_lnm_ret * r, int hash, struct lnmhshs * hashtab
   int status;
   int lenstatus;
   struct _lnmb *head, *tmp;
+#ifdef LNM_DEBUG 
   lnmprintf("contsearch\n");
+#endif
   head=hashtable->entry[hash*2];
   if (head) {
     tmp=nt->lnmb_cur;
@@ -183,7 +195,9 @@ int lnm$firsttab(struct struct_lnm_ret * r,int  tabnamlen,  char * tablename) {
   MYNT->loglen=tabnamlen;
   MYNT->lognam=tablename;
 #endif
+#ifdef LNM_DEBUG 
   lnmprintf("firstab %s\n",tablename);
+#endif
   lnm$setup(r,MYRT,tabnamlen,tablename,MYNT);
   lnmfree(MYRT);
 }
@@ -192,12 +206,14 @@ int lnm$setup(struct struct_lnm_ret * r,struct struct_rt * RT,  int tabnamlen, c
   int status;
   RT->depth=0;
   RT->tries=255;
+#ifdef LNM_DEBUG 
   lnmprintf("lnm$setup %x %s\n",tablename, tablename);
+#endif
   status=lnm$lookup(r, RT, tabnamlen, tablename, nt);
   if (status==SS$_NORMAL) RT->context[RT->depth]=r->mylnmb;
   else return status;
   /* cache not implemented */
-  status=lnm$table_srch(r, RT, nt);
+  status=lnm$table_srch(r, RT, nt); // not necessary?
   status=lnm$table(r, RT, nt);
   return status;
 }
@@ -215,7 +231,9 @@ int lnm$lookup(struct struct_lnm_ret * r,struct struct_rt * rt, int loglen, char
   void * hash;
   nt->loglen=loglen;
   nt->lognam=lognam;
+#ifdef LNM_DEBUG 
   lnmprintf("lookup %s %x\n",nt->lognam,nt->loglen);
+#endif
   nt->lnmb=pcb->pcb$l_ns_reserved_q1;
   hash=pcb->pcb$l_affinity_callback;
   status=lnm$presearch(r,hash,nt);
@@ -246,7 +264,9 @@ int lnm$table_srch(struct struct_lnm_ret * r,struct struct_rt *RT, struct struct
     }
     RT->depth++;
     len=lnmx->lnmx$l_xlen;
+#ifdef LNM_DEBUG 
     lnmprintf("tsr %x %s \n",lnmx->lnmx$t_xlation,lnmx->lnmx$t_xlation);
+#endif
     status=lnm$lookup(r,RT,len,lnmx->lnmx$t_xlation,nt);
     lnmx=lnmx->lnmx$l_next;
   } while (lnmx);
@@ -259,9 +279,14 @@ int lnm$inslogtab(struct struct_lnm_ret * r, struct _lnmb * mylnmb) {
   int status;
   unsigned long * myhash;
   myhash=lnmmalloc(sizeof(unsigned long));
+#ifdef LNM_DEBUG 
   lnmprintf("inslog\n");
   lnmprintf("%x %s\n",mylnmb->lnmb$b_count,&(mylnmb->lnmb$t_name[0]));
+#endif
   status=lnm$hash(mylnmb->lnmb$b_count,&(mylnmb->lnmb$t_name[0]),0xffff,myhash);
+
+  // maybe presearch and contsearch is need here also?
+
   if (lnmhshs.entry[2*(*myhash)])
     insque(mylnmb,lnmhshs.entry[2*(*myhash)]);
   else {
