@@ -51,7 +51,7 @@ struct _port {
 
   void * port$a_portqb;
   void * port$a_intr_srv;
-  /* missing word? */
+  unsigned short port$w_short;
   unsigned char port$b_type;
   unsigned char port$b_sub_type;
   unsigned char port$b_vc_num;
@@ -63,7 +63,8 @@ struct _port {
   unsigned char port$b_max_rexmt;
   unsigned char port$b_flck;
   void * port$a_fpc;
-  /* missing quad?  */
+  unsigned long port$l_fr3;
+  unsigned long port$l_fr4;
   union {
     unsigned long long port$q_vc_work;
     unsigned long long port$q_que_first;
@@ -86,7 +87,7 @@ struct _port {
   void * port$a_vcvec0;
   unsigned short port$w_delay_ack;
   unsigned short port$w_delay_seq;
-  unsigned char port$t_nodename[8] /* 6 + word? */;
+  unsigned char port$t_nodename[8];
   unsigned short port$w_sbuf_size;
   unsigned short port$w_lbuf_size;
   unsigned short port$w_sbuf_cnt;
@@ -125,11 +126,14 @@ struct _port {
   unsigned short port$w_eco;
   unsigned long port$l_port_fcn;
   unsigned long port$l_sta_info;
-  unsigned char port$t_rstport[8]  /* really 6? */;
-  unsigned char port$t_mask_sbuf[32] /*?*/;
-  unsigned char port$t_mask_xack[32] /*?*/;
-  unsigned char port$t_mask_xseq[32] /*?*/;
-
+  unsigned char port$t_rstport[6];
+  unsigned short port$w_filler;
+  unsigned char port$t_mask_sbuf[32];
+  unsigned char port$t_mask_xack[32];
+  unsigned char port$t_mask_xseq[32];
+  unsigned char port$al_vec0_hash[256];
+  void * port$a_pdt;
+  void * port$a_ucb;
 }
 
 
