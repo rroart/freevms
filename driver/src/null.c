@@ -105,7 +105,7 @@ void  null_startio3 (struct _irp * i, struct _ucb * u) {
 /* more yet undefined dummies */
 void  null_unsolint (void) { };
 void  null_cancel (void) { };
-void  ioc_std$cancelio (void) { };
+extern void  ioc_std$cancelio (void);
 void  null_regdump (void) { };
 void  null_diagbuf (void) { };
 void  null_errorbuf (void) { };
