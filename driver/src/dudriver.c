@@ -2282,12 +2282,14 @@ mscp_requeue(mi)
 #include<dyndef.h>
 #include<fdtdef.h>
 #include<iodef.h>
+#include<iosbdef.h>
 #include<ipldef.h>
 #include<irpdef.h>
 #include<mscpdef.h>
 #include<pbdef.h>
 #include<pdtdef.h>
 #include<sbdef.h>
+#include<scsdef.h>
 #include<ssdef.h>
 #include<ucbdef.h>
 
@@ -2328,21 +2330,37 @@ struct _fdt fdt_du = {
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
 
+void  du_startio3 (struct _irp * i, struct _ucb * u) { 
+  //printk("thirdtime %x %x\n",i,u);
+  ioc$reqcom(SS$_NORMAL,0,u);
+  return;
+};
+
+void  du_startio2 (struct _irp * i, struct _ucb * u) { 
+  //printk("secondtime\n");
+
+  u->ucb$l_fpc=du_startio3;
+  exe$iofork(i,u);
+  return;
+}
+
 void  du_startio (struct _irp * i, struct _ucb * u) { 
   struct _transfer_commands * m;
-  if (u->ucb$l_devchar2&DEV$M_CDP) {
+  if (1 || u->ucb$l_devchar2&DEV$M_CDP) { // does this anyway
     /* not local? */
     struct _cdrp * c;
     c=(struct _cdrp *) & i->irp$l_fqfl;
     c->cdrp$l_rwcptr=&u->ucb$w_rwaitcnt;
     c->cdrp$l_cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
     c->cdrp$l_rspid=rspid_alloc(c);
-    m=vmalloc(sizeof(struct _transfer_commands));
-    bzero(m,sizeof(struct _transfer_commands));
+    m=vmalloc(1000 /*sizeof(struct _transfer_commands)*/);
+    bzero(m,1000 /*sizeof(struct _transfer_commands)*/);
     ((struct _mscp_basic_pkt *)m)->mscp$l_cmd_ref=c->cdrp$l_rspid;
     ((struct _mscp_basic_pkt *)m)->mscp$w_unit=((struct _mscp_ucb *)u)->ucb$w_mscpunit;
+    c->cdrp$w_cdrpsize=600; //wrong, but we do not use a bufferdescriptor
     c->cdrp$l_msg_buf=m; // ??
     c->cdrp$l_cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
+    ioc$wfikpch(du_startio2,0,i,current,u,2,0);
     switch (i->irp$v_fcode) {
 
     case IO$_READLBLK :
@@ -2442,6 +2460,7 @@ extern int scs_std$deallomsg();
 extern int scs_std$reqdata();
 extern int scs_std$senddata();
 extern int scs_std$sendmsg();
+extern int scs_std$senddg();
 extern int scs_std$connect();
 extern int scs_std$dconnect();
 
@@ -2455,9 +2474,21 @@ extern struct _sb mysb;
 void du_msg() {
 
 }
-void du_dg() {
-
+void du_dg(void * packet, struct _cdt * c, struct _pdt * p) {
+  int sts;
+  struct _iosb iosb;
+  struct _cdrp * cdrp;
+  struct _scs * scs = packet;
+  struct _mscp_basic_pkt * basic = ((unsigned long)packet) + sizeof(*scs);
+  struct _transfer_commands * trans = basic;
+  unsigned long lbn=trans->mscp$l_lbn;
+  char * buf;
+  if (basic->mscp$b_caa==MSCP$K_OP_READ) {
+    bcopy((unsigned long)basic+sizeof(*trans),c->cdt$l_reserved4,512);
+    exe$wake(&c->cdt$l_reserved3,0);
+  }
 }
+
 void du_err() {
 }
 
@@ -2474,6 +2505,8 @@ int mscpcli(void) {
   goto out2;
 }
 #endif
+
+extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long);
 
 void * du_init(char *s) {
   struct _ucb * u;
@@ -2506,12 +2539,13 @@ void * du_init(char *s) {
   ((struct _mscp_ucb *)u)->ucb$l_cddb=c;
   u->ucb$l_pdt=&dupdt;
   pb->pb$l_pdt=&dupdt;
-  ((struct _mscp_ucb *)u)->ucb$l_cdt=find_free_cdt();
+  ((struct _mscp_ucb *)u)->ucb$l_cdt=find_mscp_cdt(); // should be find_free_cdt();
   cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
   cdt->cdt$l_pb=pb;
 
   dupdt.pdt$l_ucb0=u;
   dupdt.pdtvec$l_sendmsg=scs_std$sendmsg;
+  dupdt.pdtvec$l_senddg=scs_std$senddg;
   dupdt.pdtvec$l_allocmsg=scs_std$allocmsg;
   dupdt.pdtvec$l_deallomsg=scs_std$deallomsg;
   dupdt.pdtvec$l_reqdata=scs_std$reqdata;
@@ -2564,9 +2598,9 @@ void * du_init(char *s) {
   qhead_init(&cddb->cddb$l_cdrpqfl);
 
   /* a lot of these? */
-  ini_fdt_act(&fdt_du,IO$_READLBLK,acp_std$readblk);
-  ini_fdt_act(&fdt_du,IO$_READPBLK,acp_std$readblk);
-  ini_fdt_act(&fdt_du,IO$_READVBLK,acp_std$readblk);
+  ini_fdt_act(&fdt_du,IO$_READLBLK,acp_std$readblk,1);
+  ini_fdt_act(&fdt_du,IO$_READPBLK,acp_std$readblk,1);
+  ini_fdt_act(&fdt_du,IO$_READVBLK,acp_std$readblk,1);
   ini_fdt_act(&fdt_du,IO$_WRITELBLK,acp_std$writeblk,1);
   ini_fdt_act(&fdt_du,IO$_WRITEPBLK,acp_std$writeblk,1);
   ini_fdt_act(&fdt_du,IO$_WRITEVBLK,acp_std$writeblk,1);
@@ -2582,7 +2616,7 @@ void * du_init(char *s) {
   mypb.pb$w_state=PB$C_CLOSED;
   mysb.sb$b_type=DYN$C_SCS_SB;
 
-  scs$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drvr");
+  scs$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drvr",0,0,0,0,s);
 
   return u;
 }
@@ -2609,12 +2643,21 @@ int du_writeblk(struct _irp * i, struct _ucb * u, struct _mscp_basic_pkt * m) {
 
 int du_rw(struct _irp * i, struct _mscp_ucb * u, struct _transfer_commands * m) {
   int sts;
+  void (*func)(void *,void *);
   unsigned long *l = &m->mscp$b_buffer;
   m->mscp$l_byte_cnt = i->irp$l_qio_p2;  // change later
   *l= i->irp$l_qio_p1;
   m->mscp$l_lbn = i->irp$l_qio_p3;
   insque(&i->irp$l_fqfl,&u->ucb$l_cddb->cddb$l_cdrpqfl);
-  return u->ucb$l_cddb->cddb$l_pdt->pdtvec$l_sendmsg(i,u->ucb$l_cddb->cddb$l_pdt);
+  u->ucb$l_cddb->cddb$l_pdt->pdtvec$l_senddg(0,0,&i->irp$l_fqfl);
+  exe$hiber();
+  {
+    struct _cdrp * cdrp = &i->irp$l_fqfl;
+    bcopy((unsigned long)cdrp->cdrp$l_msg_buf, i->irp$l_qio_p1,i->irp$l_qio_p2);
+  }
+  // receive something
+  func=i->irp$l_ucb->ucb$l_fpc;
+  func(i,i->irp$l_ucb);
   sts=SS$_NORMAL;
   return sts;
 }

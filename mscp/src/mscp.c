@@ -2273,12 +2273,93 @@ mscp_requeue(mi)
 #include"../../freevms/lib/src/cdtdef.h"
 #include"../../freevms/lib/src/pdtdef.h"
 
+#include<aqbdef.h>
+#include<cdrpdef.h>
+#include<ddbdef.h>
+#include<dyndef.h>
+#include<descrip.h>
+#include<iodef.h>
+#include<iosbdef.h>
+#include<misc.h>
+#include<mscpdef.h>
+#include<scsdef.h>
+#include<ssdef.h>
+#include<ucbdef.h>
+#include<vcbdef.h>
+
+#include<linux/vmalloc.h>
+
 void mscpmyerr(void) {
   /* do nothing yet */
 }
 
-int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
+int get_mscp_chan(char * s) {
+  int sts;
+  int chan;
+  struct _ucb * ucb;
+  struct dsc$descriptor dsc;
+  struct return_values r;
+  struct _vcb * vcb;
+  struct _aqb * aqb;
+  dsc.dsc$w_length=strlen(s);
+  dsc.dsc$a_pointer=s;
+  if (ioc$search(&r,&dsc)==SS$_NORMAL)
+    return ((struct _ucb *)r.val1)->ucb$ps_adp;
+  ucb = fl_init(s);
+  vcb = (struct _vcb *) vmalloc(sizeof(struct _vcb));
+  bzero(vcb,sizeof(struct _vcb));
+  vcb->vcb$b_type=DYN$C_VCB;
+  aqb = (struct _aqb *) vmalloc(sizeof(struct _aqb));
+  bzero(aqb,sizeof(struct _aqb));
+  aqb->aqb$b_type=DYN$C_AQB;
+  qhead_init(&aqb->aqb$l_acpqfl);
+  ucb->ucb$l_vcb=vcb;
+  vcb->vcb$l_aqb=aqb;
+  qhead_init(&vcb->vcb$l_fcbfl);
+  vcb->vcb$l_cache = NULL; // ?
+  sts = phyio_init(strlen(s),ucb->ucb$l_ddb->ddb$t_name,&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
+  sts=exe$assign(&dsc,&chan,0,0,0);
+  ucb->ucb$ps_adp=chan; //wrong field and use, but....
+  return chan;
+}
 
+extern struct _cdt cdtl[1024];
+
+int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
+  int sts;
+  struct _iosb iosb;
+  struct _cdrp * cdrp;
+  struct _scs * scs = packet;
+  struct _cdt * cdt = &cdtl[scs->scs$l_dst_conid];
+  struct _mscp_basic_pkt * basic = ((unsigned long)packet) + sizeof(*scs);
+  struct _transfer_commands * trans = basic;
+  int chan=get_mscp_chan(cdt->cdt$l_condat);
+  unsigned long lbn=trans->mscp$l_lbn;
+  char * buf;
+  cdrp = vmalloc(sizeof(struct _cdrp));
+  bzero(cdrp,sizeof(struct _cdrp));
+  if (basic->mscp$b_opcode == MSCP$K_OP_WRITE) {
+    buf = trans + sizeof(*trans);
+    sts = sys$qiow(0,chan,IO$_WRITELBLK,&iosb,0,0,buf,512,lbn,0,0,0);
+    basic->mscp$b_caa=basic->mscp$b_opcode;
+    basic->mscp$b_opcode = MSCP$K_OP_END;
+    cdrp->cdrp$w_cdrpsize=600;
+    cdrp->cdrp$l_cdt=c;
+    cdrp->cdrp$l_msg_buf=basic;
+    scs_std$senddg(0,0,cdrp);
+  }
+  if (basic->mscp$b_opcode == MSCP$K_OP_READ) {
+    buf = vmalloc(1024);
+    trans = basic = buf;
+    sts = sys$qiow(0,chan,IO$_READLBLK,&iosb,0,0,(unsigned long)buf+sizeof(*trans),512,lbn,0,0,0);
+    //bcopy(buf,trans + sizeof(*trans),512);
+    basic->mscp$b_caa=MSCP$K_OP_READ;
+    basic->mscp$b_opcode = MSCP$K_OP_END;
+    cdrp->cdrp$w_cdrpsize=600;
+    cdrp->cdrp$l_cdt=c;
+    cdrp->cdrp$l_msg_buf=basic;
+    scs_std$senddg(0,0,cdrp);
+  }
 }
 
 void mscpdaemonize() { }

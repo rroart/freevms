@@ -494,13 +494,19 @@ int scs$connect (void (*msgadr)(), void (*dgadr)(), void (*erradr)(), void *rsys
 	struct _cdt *scp = sk;
 	int err = -EISCONN;
 
-	struct _sbnb *s = register_name(lprnam,"");
+	struct _sbnb *s = scs_register_name(lprnam,"");
 	s->sbnb$w_local_index=cdt->cdt$l_lconid;
 	cdt->cdt$w_state = CDT$C_CLOSED;
 
 	sk->cdt$w_state   = CDT$C_CON_SENT;
 
-	dn_nsp_send_conninit2(sk, SCS$C_CON_REQ);
+	dn_nsp_send_conninit2(sk, SCS$C_CON_REQ,rprnam,lprnam,condat);
+
+	for( ; ; ) {
+	  volatile state=sk->cdt$w_state;
+	  if (state==CDT$C_OPEN) goto out2;
+	}
+ out2:
 
 	err = 0;
 out:
@@ -785,6 +791,7 @@ static int dn_ioctl(struct _cdt *sock, unsigned int cmd, unsigned long arg)
 #include<dptdef.h>
 #include<dyndef.h>
 #include<fdtdef.h>
+#include<mscpdef.h> // does not belong here
 #include<pdtdef.h>
 #include<rddef.h>
 #include<rdtdef.h>
@@ -799,6 +806,15 @@ extern struct _cdt cdtl[1024];
 struct _rdt rdt;
 extern struct _scs_rd rdtl[128];
 struct _cdl cdl;
+
+void * find_mscp_cdt(void) {
+  /* remember to fix cdldef */
+  int i;
+  for (i=0; i<100; i++) {
+    if (cdtl[i].cdt$l_rconid) return &cdtl[i];
+  }
+  return 0;
+}
 
 void * find_free_cdt(void) {
   /* remember to fix cdldef */
@@ -819,7 +835,7 @@ int rspid_alloc(struct _cdrp * c) {
   return r->rd$w_seqnum;
 }
 
-void * register_name(char * c1, char * c2) {
+void * scs_register_name(char * c1, char * c2) {
   struct _sbnb * s=vmalloc(sizeof(struct _sbnb));
   bzero(s,sizeof(struct _sbnb));
 
@@ -828,6 +844,16 @@ void * register_name(char * c1, char * c2) {
   insque(s,scs$gq_local_names);
 
   return s;
+}
+
+void * scs_find_name(char * c1) {
+  struct _sbnb * head = &scs$gq_local_names;
+  struct _sbnb * tmp = head->sbnb$l_flink;
+  while(tmp!=head) {
+    if (strcmp(c1,&tmp->sbnb$b_procnam)) return tmp;
+    tmp=tmp->sbnb$l_flink;
+  }
+  return 0;
 }
 
 //static int scs$listen(struct _cdt *sock, int backlog)
@@ -848,7 +874,7 @@ int scs$listen (void (*msgadr)(void *msg_buf, struct _cdt **cdt, struct _pdt *pd
   c->cdt$l_msginput=msgadr;
   c->cdt$l_erraddr=erradr;
 
-  s=register_name(lprnam,prinfo);
+  s=scs_register_name(lprnam,prinfo);
   s->sbnb$w_local_index=c->cdt$l_lconid;
   c->cdt$w_state = CDT$C_LISTEN;
 
@@ -1443,7 +1469,22 @@ static inline int dn_queue_too_long(struct _cdt *scp, struct sk_buff_head *queue
 
 //static int dn_sendmsg(struct _cdt *sock, struct msghdr *msg, int size,struct scm_cookie *scm)
 
-static int dn_sendmsg2(int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (* complete)(void))
+int scs_std$senddg(int disposition_flag, int dg_msg_length, struct _cdrp *cdrp ) {
+  struct _cdt * sk=cdrp->cdrp$l_cdt;
+  struct sk_buff *skb = NULL;
+  if ((skb = dn_alloc_skb2(sk, 1000, GFP_ATOMIC)) == NULL)
+    return;
+
+  scs_msg_fill(skb,sk,0);
+
+  scs_msg_fill_more(skb,sk,cdrp);
+
+  dn_nsp_send2(skb);	
+
+	
+}
+
+static int scs_std$sendmsg(int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (* complete)(void))
 {
 	struct _cdt *sk = cdrp_p->cdrp$l_cdt;
 	struct _cdt *scp = sk;
@@ -1739,7 +1780,7 @@ static struct proto_ops dn_proto_ops = {
 	shutdown:	dn_shutdown,
 	setsockopt:	dn_setsockopt,
 	getsockopt:	dn_getsockopt,
-	sendmsg:	dn_sendmsg2,
+	sendmsg:	scs_std$sendmsg,
 	recvmsg:	dn_recvmsg,
 	mmap:		sock_no_mmap,
 	sendpage:	sock_no_sendpage,
