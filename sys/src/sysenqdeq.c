@@ -80,6 +80,7 @@ int insert_lck(struct _lkb * l) {
 
 asmlinkage int exe$enqw(struct struct_enq * s) {
   int status=exe$enq(s);
+  printk("\n\nremember to do like qiow\n\n");
   if ((status&1)==0) return status;
   return exe$synch(s->efn,s->lksb);
 }
