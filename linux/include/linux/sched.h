@@ -545,7 +545,7 @@ unsigned long pcb$l_capability_seq;
     };
     unsigned short oldpsl;
   };
-  unsigned short pslstk[16];
+  unsigned short pslstk[32];
   unsigned char pslindex;
 };
 /* will need a PCB. PCB is a null PCB placeholder */

@@ -22,11 +22,13 @@ static mydebugi = 0;  // should have no printk in a non-interruptable zone
 
 inline asmlinkage void pushpsli(void) {
   pushpsl();
+#ifdef __arch_um__
   current->psl_cur_mod=0;
   current->psl_prv_mod=0;
   current->psl_is=1;
   current->psl_ipl=22;
   smp$gl_cpu_data[0]->cpu$b_ipl=current->psl_ipl;
+#endif
 }
 
 inline asmlinkage void pushpsl(void) {
@@ -34,7 +36,7 @@ inline asmlinkage void pushpsl(void) {
   //  if (current->pslindex>1)
   //  panic("xyz\n");
   current->pslstk[current->pslindex++]=current->psl;
-  if(current->pslindex<0 || current->pslindex>14) {
+  if(current->pslindex<0 || current->pslindex>30) {
     printk("push %x %x\n",current->pid,current->pslindex);
     panic("push\n");
   }
@@ -50,7 +52,7 @@ inline asmlinkage void poppsl(void) {
   current->oldpsl=current->psl;
   current->psl=current->pslstk[--(current->pslindex)];
   smp$gl_cpu_data[this_cpu]->cpu$b_ipl=current->psl_ipl;
-  if(current->pslindex<0 || current->pslindex>14) {
+  if(current->pslindex<0 || current->pslindex>30) {
     printk("pop %x %x\n",current->pid,current->pslindex);
     if (0) { int dummy;
     unsigned char *i;
@@ -315,6 +317,12 @@ int inline mycli(void) {
   __save_flags(flags);
   retval=flags&0x00000200; /* interrupt enable/disable flag */
   if (in_atomic) {
+#ifdef __i386__
+    long long l;
+    sickinsque(0x10000000,0x20000000);
+    __cli();
+    for(l=0;l;l++) ;
+#endif
     sickinsque(0x10000000,0x20000000);
     panic("test\n");
   }
