@@ -73,12 +73,16 @@
 #define SOFTINT_PERFMON_VECTOR do { __asm__ __volatile__ ("int $0xa7\n"); } while (0);
 #define SOFTINT_MAILBOX_VECTOR do { __asm__ __volatile__ ("int $0xa6\n"); } while (0);
 #define SOFTINT_POOL_VECTOR do { __asm__ __volatile__ ("int $0xa5\n"); } while (0);
-#define SOFTINT_IOLOCK11_VECTOR do { __asm__ __volatile__ ("int $0xa4\n"); } while (0);
-#define SOFTINT_IOLOCK10_VECTOR do { __asm__ __volatile__ ("int $0xa3\n"); } while (0);
-#define SOFTINT_IOLOCK9_VECTOR do { __asm__ __volatile__ ("int $0xa2\n"); } while (0);
+// #define SOFTINT_IOLOCK11_VECTOR do { __asm__ __volatile__ ("int $0xa4\n"); } while (0);
+// #define SOFTINT_IOLOCK10_VECTOR do { __asm__ __volatile__ ("int $0xa3\n"); } while (0);
+// #define SOFTINT_IOLOCK9_VECTOR do { __asm__ __volatile__ ("int $0xa2\n"); } while (0);
+#define SOFTINT_IOLOCK11_VECTOR do { exe$frkipl11dsp(); myrei(); } while (0);
+#define SOFTINT_IOLOCK10_VECTOR do { exe$frkipl10dsp(); myrei(); } while (0);
+#define SOFTINT_IOLOCK9_VECTOR do { exe$frkipl9dsp(); myrei(); } while (0);
+#define SOFTINT_IOLOCK8_VECTOR do { exe$frkipl8dsp(); myrei(); } while (0);
 #define SOFTINT_SYNCH_VECTOR do { __asm__ __volatile__ ("int $0xa1\n"); } while (0);
 //#define SOFTINT_TIMER_VECTOR do { __asm__ __volatile__ ("int $0xa0\n"); } while (0);
-#define SOFTINT_TIMER_VECTOR do { exe$swtimint(); myrei(); } while (0);
+#define SOFTINT_TIMERFORK_VECTOR do { exe$swtimint(); myrei(); } while (0);
 #define SOFTINT_SCS_VECTOR do { __asm__ __volatile__ ("int $0x9f\n"); } while (0);
 #define SOFTINT_SCHED_VECTOR do { __asm__ __volatile__ ("int $0x9e\n"); } while (0);
 #define SOFTINT_MMG_VECTOR do { __asm__ __volatile__ ("int 14\n"); } while (0);
@@ -86,10 +90,10 @@
 #define SOFTINT_FILSYS_VECTOR do { __asm__ __volatile__ ("int $0x9b\n"); } while (0);
 #define SOFTINT_TX_SYNCH_VECTOR do { __asm__ __volatile__ ("int $0x9a\n"); } while (0);
 #define SOFTINT_LCKMGR_VECTOR do { __asm__ __volatile__ ("int $0x99\n"); } while (0);
-#define SOFTINT_IOLOCK8_VECTOR do { __asm__ __volatile__ ("int $0x98\n"); } while (0);
+//#define SOFTINT_IOLOCK8_VECTOR do { __asm__ __volatile__ ("int $0x98\n"); } while (0);
 #define SOFTINT_PORT_VECTOR do { __asm__ __volatile__ ("int $0x97\n"); } while (0);
-#define SOFTINT_TIMERFORK_VECTOR do { __asm__ __volatile__ ("int $0x96\n"); } while (0);
-#define SOFTINT_QUEUEAST_VECTOR do { exe$forkdspth(); myrei(); } while(0);
+//#define SOFTINT_TIMERFORK_VECTOR do { __asm__ __volatile__ ("int $0x96\n"); } while (0);
+#define SOFTINT_QUEUEAST_VECTOR do { exe$frkipl6dsp(); myrei(); } while(0);
 //#define SOFTINT_QUEUEAST_VECTOR do { __asm__ __volatile__ ("int $0x95\n"); } while (0);
 #define SOFTINT_IOPOST_VECTOR do { ioc$iopost(); myrei(); } while (0);
 
@@ -171,6 +175,36 @@ extern unsigned long _stext, _etext;
 extern char _stext, _etext;
 #endif
 
+/* PUSHR_ALL to PUSHPSL corresponds to stuff in entry.S */
+
+#define PUSHR_ALL \
+	"cld\n\t" \
+	"pushl %es\n\t" \
+	"pushl %ds\n\t" \
+	"pushl %eax\n\t" \
+	"pushl %ebp\n\t" \
+	"pushl %edi\n\t" \
+	"pushl %esi\n\t" \
+	"pushl %edx\n\t" \
+	"pushl %ecx\n\t" \
+	"pushl %ebx\n\t"
+
+#define POPR_ALL	\
+	"popl %ebx\n\t"	\
+	"popl %ecx\n\t"	\
+	"popl %edx\n\t"	\
+	"popl %esi\n\t"	\
+	"popl %edi\n\t"	\
+	"popl %ebp\n\t"	\
+	"popl %eax\n\t"	\
+	"popl %ds\n\t"	\
+	"popl %es\n\t"
+
+#define PUSHPSL \
+        PUSHR_ALL \
+        "call pushpsl\n\t" \
+        POPR_ALL 
+
 #define IO_APIC_IRQ(x) (((x) >= 16) || ((1<<(x)) & io_apic_irqs))
 
 #define __STR(x) #x
@@ -239,6 +273,7 @@ __asm__( \
 	"\n" __ALIGN_STR"\n" \
 	"common_interrupt:\n\t" \
 	SAVE_ALL \
+        PUSHPSL \
 	SYMBOL_NAME_STR(call_do_IRQ)":\n\t" \
 	"call " SYMBOL_NAME_STR(do_IRQ) "\n\t" \
 	"jmp ret_from_intr\n");
