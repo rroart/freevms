@@ -715,14 +715,14 @@ Side Effects:
 	    ((long *)BTime)[1] = -1;	// make it delta time.
 	    ((long *)BTime)[0] = rto*CSEC_TIMER_DELTA; // nap size.
 	} else {			// No TCB's
-	    exe$bintim(&Long_Nap,BTime);
+	    exe$bintim(&Long_Nap,&BTime);
 	    Big_Sleep = TRUE;
 	    XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: Long sleep!/",0);
 	}
 
 // Check again for segment arrival & no TCB actions
 
-	    if (queue_empty(&segin.si_qhead) && (((long *)BTime)[0] != 0)) {
+	    if (queue_empty(&segin.si_qhead) && (((long *)&BTime)[0] != 0)) {
 
 
 // If we are doing a BIG sleep then purge the working set to reduce system impact.

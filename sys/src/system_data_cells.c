@@ -2059,8 +2059,8 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   tqe2.tqe$l_fr4=0; /* something? */
   tqe2.tqe$q_time=0;
   tqe2.tqe$q_delta=10000000;
-
-  exe$instimq(&tqe2);
+  insque(&tqe2,exe$gl_tqfl);
+  //  exe$instimq(&tqe2);
 
   vmstimerconf=1;
 

@@ -8,6 +8,7 @@
 #include<ssdef.h>
 #include<tqedef.h>
 #include<cpudef.h>
+#include<dyndef.h>
 #include<system_data_cells.h>
 #include<internals.h>
 #include <statedef.h>
@@ -21,8 +22,9 @@ asmlinkage int exe$setimr  (unsigned int efn, signed long long *daytim,
   struct _tqe * t=kmalloc(sizeof(struct _tqe),GFP_KERNEL);
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
   bzero(t,sizeof(struct _tqe));
+  t->tqe$b_type=DYN$C_TQE;
   exe$clref(efn);
-  if (flags) t->tqe$b_type=TQE$M_CHK_CPUTIM;
+  if (flags) t->tqe$b_rqtype=TQE$M_CHK_CPUTIM;
   if (!daytim) return SS$_ACCVIO;
   if (*daytim<0) {
     time=exe$gq_systime-*daytim;
@@ -55,6 +57,7 @@ asmlinkage int exe$schdwk(unsigned int *pidadr, void *prcnam, signed long long *
   struct _tqe * t=kmalloc(sizeof(struct _tqe),GFP_KERNEL);
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
   bzero(t,sizeof(struct _tqe));
+  t->tqe$b_type=DYN$C_TQE;
   if (*daytim<0) {
     time=exe$gq_systime-*daytim;
   } else {

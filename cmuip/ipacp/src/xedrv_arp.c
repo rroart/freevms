@@ -235,8 +235,8 @@ MACRO ACACHE_BLK = BLOCK->ACACHE_LEN FIELD(ACACHE_FIELDS) %;
 #define     ARP_HSHLEN   128		// Length of hash table
 #define     ARP_HSHAND   ARP_HSHLEN-1	// && value for forming hash values
 static signed long
-    ARP_SWP_TIME [2],	// Delta time to sweep cache
-    ARPHTB [ARP_HSHLEN];
+ARP_SWP_TIME[2],	// Delta time to sweep cache
+  ARPHTB [ARP_HSHLEN];
 
 #define    ARP_SWP_TTXT_STR "0000 00:02:00.00" // Every 2 minutes...
 
@@ -285,14 +285,14 @@ void xearp$init (void)
       signed long I,
 	ARP_SWP_TTXT[2];
 
-    ARP_SWP_TTXT[0] = sizeof( ARP_SWP_TTXT_STR );
+    ARP_SWP_TTXT[0] = sizeof( ARP_SWP_TTXT_STR )-1;
     ARP_SWP_TTXT[1] =  ( ARP_SWP_TTXT_STR );
 
     for (I=0;I<=(ARP_HSHLEN-1);I++)
 	ARPHTB[I] = 0;
-    exe$bintim(&ARP_SWP_TTXT,
-	    &ARP_SWP_TIME);
-    exe$setimr(0, &ARP_SWP_TIME,
+    exe$bintim(ARP_SWP_TTXT,
+	    ARP_SWP_TIME);
+    exe$setimr(0, ARP_SWP_TIME,
 	    ARP_SWEEP, 0, 0);
     }
 
@@ -913,7 +913,7 @@ struct ACACHE_BLK * ACPTR;
 // Reset sweep timer
 
     exe$setimr(0  ,  ARP_SWP_TIME,
-	     ARP_SWEEP);    
+	     ARP_SWEEP, 0, 0);    
     }
 
 //SBTTL "ARP_DUMP - Dump ARP cache"
