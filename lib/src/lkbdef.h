@@ -74,11 +74,11 @@ struct _lkb {
   unsigned char lkb$b_grmode;
   unsigned char lkb$b_state;
   unsigned char lkb$b_efn;
-  void *lkb$q_sqfl;
-  void *lkb$q_sqbl;
-  void *lkb$q_ownqfl;
-  void *lkb$q_ownqbl;
-  struct _lkb *lkb$q_parent;
+  void *lkb$l_sqfl;
+  void *lkb$l_sqbl;
+  void *lkb$l_ownqfl;
+  void *lkb$l_ownqbl;
+  struct _lkb *lkb$l_parent;
   unsigned short lkb$w_refcnt;
   unsigned char lkb$b_tslt;
   unsigned char lib$b_res;
@@ -86,6 +86,7 @@ struct _lkb {
   unsigned int lkb$l_remlkid;
   unsigned int lkb$l_csid;
   int (*lkb$pq_oldblkast)();
+  unsigned int lkb$l_duetime;
 };
  
 #endif
