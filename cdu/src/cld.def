@@ -1,0 +1,5 @@
+DEFTREECODE (STMT, "stmt", 'e', 1)
+DEFTREECODE (DEFINE_VERB_STMT, "define_verb_stmt", 'e', 2)
+DEFTREECODE (VERB_CLAUSE, "verb_clause", 'e', 1)
+DEFTREECODE (IMAGE_CLAUSE, "image_clause", 'e', 1)
+DEFTREECODE (ROUTINE_CLAUSE, "routine_clause", 'e', 1)

@@ -2,6 +2,6 @@ define verb dir2
 	image directory
 	routine dir
 
-define verb dfu
+define verb dfu2
 	image dfu
-	routine verifycommand
+	routine verify_command
