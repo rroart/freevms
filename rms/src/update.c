@@ -666,7 +666,7 @@ unsigned f11b_delete(struct _vcb * vcb,struct _irp * irp)
   unsigned short *reslen=irp->irp$l_qio_p3;
   struct dsc$descriptor * resdsc=irp->irp$l_qio_p4;
   struct _fibdef * fib=fibdsc->dsc$a_pointer;
-  int sts;
+  int sts=0;
   struct _fh2 *  head;
   unsigned action=1;
 
