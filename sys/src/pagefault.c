@@ -290,7 +290,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	 * context, we must not take the fault..
 	 */
 	//	if (in_interrupt() || !mm)
-	if (mm=&init_mm)
+	if (mm==&init_mm)
 		goto no_context;
 	if (!mm)
 		goto no_context;
