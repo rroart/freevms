@@ -229,7 +229,7 @@ extern syscall_handler_t um_time;
 extern syscall_handler_t um_stime;
 
 extern syscall_handler_t  exe$testtest           ;
-extern syscall_handler_t  exe$setpri		 ;
+extern syscall_handler_t  exe$setpri_wrap		 ;
 extern syscall_handler_t  exe$crelnt             ;
 extern syscall_handler_t  exe$setprn             ;
 extern syscall_handler_t  exe$dclast             ;
@@ -329,9 +329,9 @@ extern syscall_handler_t exe$ulwset ;
 extern syscall_handler_t exe$ulkpag ;
 extern syscall_handler_t exe$purgws ;
 extern syscall_handler_t exe$creprc           ;
-extern syscall_handler_t exe$imgact           ;
+extern syscall_handler_t exe$imgact_wrap           ;
 extern syscall_handler_t exe$imgfix           ;
-extern syscall_handler_t exe$imgsta           ;
+extern syscall_handler_t exe$imgsta_wrap           ;
 extern syscall_handler_t exe$dclexh           ;
 extern syscall_handler_t exe$rundwn           ;
 extern syscall_handler_t exe$sndjbc           ;
@@ -596,7 +596,7 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_fremovexattr ] = sys_ni_syscall,
 
 	[ __NR_$testtest ] = sys_ni_syscall          ,
-	[ __NR_$setpri ] = exe$setpri		,
+	[ __NR_$setpri ] = exe$setpri_wrap		,
 	[ __NR_$crelnt ] = exe$crelnt            ,
 	[ __NR_$setprn ] = exe$setprn            ,
 	[ __NR_$dclast ] = exe$dclast            ,
@@ -694,9 +694,9 @@ syscall_handler_t *sys_call_table[] = {
 	[ __NR_$ulkpag ] = exe$ulkpag,
 	[ __NR_$purgws ] = exe$purgws,
 	[ __NR_$creprc           ] = exe$creprc          ,
-	[ __NR_$imgact           ] = exe$imgact          ,
+	[ __NR_$imgact           ] = exe$imgact_wrap          ,
 	[ __NR_$imgfix           ] = exe$imgfix          ,
-	[ __NR_$imgsta           ] = exe$imgsta          ,
+	[ __NR_$imgsta           ] = exe$imgsta_wrap          ,
 	[ __NR_$dclexh           ] = exe$dclexh          ,
 	[ __NR_$rundwn           ] = exe$rundwn          ,
 	[ __NR_$sndjbc           ] = exe$sndjbc          ,
