@@ -1,3 +1,6 @@
+#include<libdef.h>
+#include<ssdef.h>
+
 unsigned long long not_my_event_flags = 0xffffffff;
 // 1 taken, 0 free
 
@@ -11,9 +14,20 @@ int lib$get_ef(long * l) {
   int flag;
   flag=ffs(my_event_flags);
   if (flag==0)
-    return 0;
+    return LIB$_INSEF;
   *l=flag-1+32;
   my_event_flags&=~(1<<(*l));
   // no error condition returned yet; 
-  return 1;
+  return SS$_NORMAL;
+}
+
+int lib$free_ef(int event) {
+  int flag;
+  if (event<32)
+    return LIB$_EF_RESSYS;
+  event-=32;
+  flag=test_and_clear_bit(event,&my_event_flags);
+  if (flag==0)
+    return LIB$_EF_ALRFRE;
+  return SS$_NORMAL;
 }
