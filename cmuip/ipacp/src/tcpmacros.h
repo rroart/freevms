@@ -250,7 +250,7 @@ static    OPR$FAO(CST, ...)
 #define    OKINT { \
   extern signed long ast_in_progress; \
   extern signed long intdf; \
-	if (! ast_in_progress && (intdf = intdf-1) == 0) \
+	if (! ast_in_progress && (intdf = intdf-1) < 0) \
 	    ENABLE_AST \
 }
 
