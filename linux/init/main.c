@@ -582,6 +582,8 @@ asmlinkage void __init start_kernel(void)
 	trap_init();
 	puts("puts 7\n");
 	init_IRQ();
+	puts("puts 7.5\n");
+	init_sys_p1pp();
 	puts("puts 8\n");
 	vms_init();
 	puts("puts 9\n");
@@ -695,10 +697,15 @@ static void __init do_initcalls(void)
 
 	call = &__initcall_start;
 	do {
+	  //printk ("before call %x\n",call);
+	  //	  { int i; for (i=100000000;i;i--) ; }
 		(*call)();
+		//printk("after call\n");
+		//	  { int i; for (i=100000000;i;i--) ; }
 		call++;
 	} while (call < &__initcall_end);
 
+	//printk("bef flush\n");
 	/* Make sure there is no pending stuff from the initcall sequence */
 	flush_scheduled_tasks();
 }
@@ -911,9 +918,15 @@ static int init(void * unused)
 
 	if (execute_command)
 		execve(execute_command,argv_init,envp_init);
+	printk("Will try to start loginout.\nPress <enter> or something as usual (but within 60 seconds).\n");
+	execve("/vms$common/sysexe/loginout",argv_init,envp_init);
+#if 0
+	// not anymore?
 	execve("/sbin/init",argv_init,envp_init);
 	execve("/etc/init",argv_init,envp_init);
 	execve("/bin/init",argv_init,envp_init);
+#endif
+	printk("Did not find loginout\n");
 	execve("/bin/sh",argv_init,envp_init);
 	panic("No init found.  Try passing init= option to kernel.");
 }
