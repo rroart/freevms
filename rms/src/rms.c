@@ -1342,6 +1342,8 @@ unsigned exe$open(struct _fabdef *fab)
 		   buffer,512,block,0,0,0);
     sts = iosb.iosb$w_status;
   }
+  if (sts==SS$_NORMAL)
+    fab->fab$l_stv=getchan(wccfile->wcf_vcb);
   return sts;
 }
 
@@ -1495,6 +1497,8 @@ unsigned exe$create(struct _fabdef *fab)
     fab->fab$w_ifi = ifi_no;
   }
   if (nam != NULL) nam->nam$l_wcc = 0;
+  if (sts==SS$_NORMAL)
+    fab->fab$l_stv=getchan(wccfile->wcf_vcb);
   return sts;
 }
 
