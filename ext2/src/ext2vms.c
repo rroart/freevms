@@ -924,8 +924,8 @@ int e2_fcb_wcb_add_one(struct _fcb * fcb,signed long vbn,signed long result)
 
 char * ext2_vms_to_unix(struct dsc$descriptor * d) {
   char *c=kmalloc(sizeof(d->dsc$a_pointer)+1);
-  strcpy(c,d->dsc$a_pointer);
   char *d;
+  strcpy(c,d->dsc$a_pointer);
   if (0==strncmp(c,"000000.",7)) {
     c[1]=0;
     c[0]='/';
