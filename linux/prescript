@@ -165,6 +165,5 @@ cd ../..
 
 cd arch/um/drivers;     ln -s ../../../../driver/src/ubdriver.c .;
 )
-h
 
 echo you have read the HOWTO and done a make in ..?
