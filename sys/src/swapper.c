@@ -71,7 +71,9 @@ int kswapd(void *unused)
 	struct task_struct *tsk = current;
 	DECLARE_WAITQUEUE(wait, tsk);
 
+#if 0
 	daemonize();
+#endif
 	strcpy(tsk->pcb$t_lname, "SWAPPER");
 	sigfillset(&tsk->blocked);
 	
