@@ -131,6 +131,7 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
     p->pcb$l_ppgcnt--;
   }
   wsle->wsl$pq_va=0;
+  *(unsigned long*)pte=0;
 
  out:
 
