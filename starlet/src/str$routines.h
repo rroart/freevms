@@ -72,7 +72,7 @@ PROTO unsigned long str$add(const unsigned long* asign, const long* aexp,
 	const struct dsc$descriptor_s* bdigits,
 	unsigned long* csign, long* cexp, struct dsc$descriptor_s* cdigits);
 
-PROTO void str$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
+PROTO short int str$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
 	unsigned short* word_integer_length, char** data_address);
 
 PROTO unsigned long str$append(struct dsc$descriptor_s* destination_string,
@@ -93,8 +93,8 @@ PROTO long str$compare_eql(
 PROTO long str$compare_multi(
 	const struct dsc$descriptor_s* first_source_string,
 	const struct dsc$descriptor_s* second_source_string,
-	const long* flags_value,
-	const long* foreign_language);
+	const unsigned long* flags_value,
+	const unsigned long* foreign_language);
 
 PROTO unsigned long str$concat(struct dsc$descriptor_s* destination_string,
 	...);
@@ -109,7 +109,7 @@ PROTO unsigned long str$copy_r(struct dsc$descriptor_s* destination_string,
 PROTO unsigned long str$divide(
 	const unsigned long* asign, const long* aexp, const struct dsc$descriptor_s* a_digits,
 	const unsigned long* bsign, const long* bexp, const struct dsc$descriptor_s* b_digits,
-	const long* total_digits, const long* round_truncate_indicator,
+	const long* total_digits, const unsigned long* round_truncate_indicator,
 	unsigned long* csign, long* cexp, struct dsc$descriptor_s* cdigits);
 
 PROTO unsigned long str$dupl_char(struct dsc$descriptor_s* destination_string,
@@ -132,7 +132,7 @@ PROTO long str$find_first_not_in_set(
 PROTO unsigned long str$find_first_substring(
 	const struct dsc$descriptor_s* source_string,
 	long* index,
-	long* substring_index, ...);
+	long* substring_index, struct dsc$descriptor_s *sub, ...);
 
 PROTO unsigned long str$free1_dx(struct dsc$descriptor_s* string_descriptor);
 
@@ -151,7 +151,7 @@ PROTO unsigned long str$len_extr(struct dsc$descriptor_s* destination_string,
 PROTO unsigned long str$match_wild(const struct dsc$descriptor_s* candidate_string,
 	const struct dsc$descriptor_s* pattern_string);
 
-PROTO unsigned long str$mul(const unsigned long* asign, const long aexp,
+PROTO unsigned long str$mul(const unsigned long* asign, const long* aexp,
 	const struct dsc$descriptor_s* adigits,
 	const unsigned long* bsign, const long* bexp,
 	const struct dsc$descriptor_s* bdigits,
@@ -188,11 +188,14 @@ PROTO unsigned long str$right(struct dsc$descriptor_s* destination_string,
 	const struct dsc$descriptor_s* source_string,
 	const long* start_position);
 
-PROTO unsigned long str$round(const long* places, unsigned long* flags,
+PROTO unsigned long str$round(const long* places, const unsigned long* flags,
 	const unsigned long* asign, const long* aexp,
 	const struct dsc$descriptor_s* adigits,
+#if 0
+// where does this come from?
 	const unsigned long* bsign, const long* bexp,
 	const struct dsc$descriptor_s* bdigits,
+#endif
 	unsigned long* csign, long* cexp,
 	struct dsc$descriptor_s* cdigits);
 

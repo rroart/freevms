@@ -30,11 +30,21 @@ int lib$bbcci(const int *,void *), lib$bbssi(const int *,void *);
 
 unsigned long lib$callg(const void *,const unsigned long (*)()); 
 
+#if 0
+// not now
 unsigned long lib$char(void *,const char *);
+#else
+unsigned long lib$char(struct dsc$descriptor_s*, const char*);
+#endif
 
 unsigned long lib$compare_uid();
 
+#if 0
 unsigned long lib$convert_date_string(const void *,void *,...);
+// not now?
+#else
+unsigned long lib$convert_date_string(const struct dsc$descriptor_s *,long long *,unsigned long *,unsigned long *, unsigned short *,unsigned long *);
+#endif
 
 unsigned long lib$crc(const void *,const long *,const void *);
 
@@ -70,7 +80,12 @@ unsigned long lib$cvtf_to_internal_time(const unsigned long *,const float *,void
 
 unsigned long lib$cvt_vectim(const void *,void *);
 
+#if 0
+// not now
 unsigned long lib$date_time(void *);
+#else
+unsigned long lib$date_time(struct dsc$descriptor_s *);
+#endif
 
 unsigned long lib$day(long *, const void*, int*);
 
@@ -88,7 +103,12 @@ unsigned long lib$delete_symbol(const void *,...);
 
 unsigned long lib$delete_vm_zone(const unsigned long *);
 
+#if 0
+// not now
 unsigned long lib$digit_sep(void *,...);
+#else
+unsigned long lib$digit_sep(struct dsc$descriptor_s *,unsigned short *);
+#endif
 
 unsigned long lib$disable_ctrl(const unsigned long *,...);
 
