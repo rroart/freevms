@@ -249,7 +249,7 @@ int eu_iodb_vmsinit(void) {
   struct _ddb * ddb=&eu$ddb;
   struct _crb * crb=&eu$crb;
 #endif 
-  struct _ucbnidef * ucb=kmalloc(sizeof(struct _ucbnidef),GFP_KERNEL);
+  struct _ucb * ucb=kmalloc(sizeof(struct _ucbnidef),GFP_KERNEL);
   struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
@@ -263,6 +263,8 @@ int eu_iodb_vmsinit(void) {
   init_ucb(&eu$ucb, &eu$ddb, &eu$ddt, &eu$crb);
   init_crb(&eu$crb);
 #endif
+
+  ucb -> ucb$w_size = sizeof(struct _ucbnidef); // temp placed
 
   init_ddb(ddb,&eu$ddt,ucb,"eua");
   init_ucb(ucb, ddb, &eu$ddt, crb);
@@ -315,6 +317,7 @@ int eu_vmsinit(void) {
 
   // return chan0;
 
+  return ddb->ddb$ps_ucb->ucb$l_link;
 }
 
 int eu$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
