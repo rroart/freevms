@@ -6,7 +6,7 @@ install: all
 	cp -p *.com net net2 um/* ../rootum/vms"$$"common/syshlp/examples
 	cp -p *.com net net2 i386/* ../rooti386/vms"$$"common/syshlp/examples
 
-alli386: i386/timer i386/ast i386/time i386/eftim i386/schdwk i386/forcex i386/ef i386/wake i386/synch i386/enq i386/lnm i386/lnm2 i386/qio1 i386/qio2 i386/cef i386/cefw i386/mem i386/memf i386/getjpi i386/crec i386/getdvi
+alli386: i386/timer i386/ast i386/time i386/eftim i386/schdwk i386/forcex i386/ef i386/wake i386/synch i386/enq i386/enq2 i386/lnm i386/lnm2 i386/qio1 i386/qio2 i386/cef i386/cefw i386/mem i386/memf i386/getjpi i386/crec i386/getdvi
 
 dirs:
 	mkdir um || echo um exists
@@ -48,6 +48,9 @@ i386/synch: synch.c $(LIB)
 i386/enq: enq.c $(LIB)
 	gcc -$(FLAGS) -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starlet.a -o i386/enq
 
+i386/enq2: enq2.c $(LIB)
+	gcc -$(FLAGS) -I../starlet/src -I../librtl/src/ enq2.c ../starlet/src/starlet.a -o i386/enq2
+
 i386/lnm: lnm.c $(LIB)
 	gcc -$(FLAGS) -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starlet.a -o i386/lnm
 
@@ -81,7 +84,7 @@ i386/crec: crec.c $(LIB)
 i386/getdvi: getdvi.c $(LIB)
 	gcc -$(FLAGS) -static -I../starlet/src -I../librtl/src/ getdvi.c ../starlet/src/starlet.a -o i386/getdvi
 
-allum: um/timer um/ast um/time um/eftim um/schdwk um/forcex um/ef um/wake um/synch um/enq um/lnm um/lnm2 um/qio1 um/qio2 um/cef um/cefw um/mem um/memf um/getjpi um/crec um/getdvi
+allum: um/timer um/ast um/time um/eftim um/schdwk um/forcex um/ef um/wake um/synch um/enq um/enq2 um/lnm um/lnm2 um/qio1 um/qio2 um/cef um/cefw um/mem um/memf um/getjpi um/crec um/getdvi
 
 UMDEF=-Dcompile_um
 
@@ -115,6 +118,9 @@ um/synch: synch.c $(LIBUM)
 
 um/enq: enq.c $(LIBUM)
 	gcc -$(FLAGS) $(UMDEF) -I../starlet/src -I../librtl/src/ enq.c ../starlet/src/starletum.a -o um/enq
+
+um/enq2: enq2.c $(LIBUM)
+	gcc -$(FLAGS) $(UMDEF) -I../starlet/src -I../librtl/src/ enq2.c ../starlet/src/starletum.a -o um/enq2
 
 um/lnm: lnm.c $(LIBUM)
 	gcc -$(FLAGS) $(UMDEF) -I../starlet/src -I../librtl/src/ lnm.c ../starlet/src/starletum.a -o um/lnm
