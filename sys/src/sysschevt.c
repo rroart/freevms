@@ -18,7 +18,7 @@ asmlinkage int exe$setimr  (unsigned int efn, signed long long *daytim,
 		 void (*astadr)(long), unsigned
 		 long reqidt, unsigned int flags) {
   unsigned long long time;
-  struct _tqe * t=vmalloc(sizeof(struct _tqe));
+  struct _tqe * t=kmalloc(sizeof(struct _tqe),GFP_KERNEL);
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
   bzero(t,sizeof(struct _tqe));
   exe$clref(efn);
@@ -37,7 +37,7 @@ asmlinkage int exe$setimr  (unsigned int efn, signed long long *daytim,
   t->tqe$b_rqtype=TQE$C_TMSNGL;
   t->tqe$l_pid=cpu->cpu$l_curpcb->pcb$l_pid;
   t->tqe$b_efn=efn;
-  printast((struct _acb * )t);
+  //printast((struct _acb * )t);
   cpu->cpu$l_curpcb->pcb$w_state=SCH$C_LEF; /* put it here until ... */
   exe$instimq(t);
 }
@@ -52,7 +52,7 @@ asmlinkage int exe$schdwk(unsigned int *pidadr, void *prcnam, signed long long *
   if (!p) return;
   {
   unsigned long long time;
-  struct _tqe * t=vmalloc(sizeof(struct _tqe));
+  struct _tqe * t=kmalloc(sizeof(struct _tqe),GFP_KERNEL);
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
   bzero(t,sizeof(struct _tqe));
   if (*daytim<0) {
@@ -65,7 +65,7 @@ asmlinkage int exe$schdwk(unsigned int *pidadr, void *prcnam, signed long long *
   if (reptim) t->tqe$q_delta=-(*reptim);
   t->tqe$b_rqtype=TQE$C_WKSNGL;
   if (reptim) t->tqe$b_rqtype|=TQE$M_REPEAT;
-  printast((struct _acb * )t);
+  //printast((struct _acb * )t);
   exe$instimq(t);
   }
 }
