@@ -714,10 +714,6 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	if (((unsigned long)mypte)<0xa0000000)
 	  goto skip;
 
-	if (page==0x80c2000) {
-	  printk("%x\n",page);
-	}
-
 	mmg$frewsle(current,address);
 
 	// different forms of invalid ptes?
