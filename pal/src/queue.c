@@ -16,22 +16,22 @@
 
 void insque(void * entry, void * pred) {
   int flag=mycli();
-mycheckaddr();
+  //mycheckaddr();
   *(void **)entry=*(void **)pred;
   *(void **)(entry+4)=pred;
   *(void **)((*(void **)pred)+4)=entry;
   *(void **)pred=entry;
-mycheckaddr();
+  //mycheckaddr();
   mysti(flag);
 }
 
 unsigned long remque(void * entry, void * addr) {
   int flag=mycli();
-mycheckaddr();
+  //mycheckaddr();
   *(void **)(*(void **)(entry+4))=*(void **)entry;
   *(void **)((*(void **)entry)+4)=*(void **)(entry+4);
   addr=entry;
-mycheckaddr();
+  //mycheckaddr();
   mysti(flag);
   return (unsigned long) addr;
 }
