@@ -21,9 +21,31 @@ struct _myhead {
 // this has its parallell in exe$alonpagvar
 int exe$allocate_pool(int requestsize, int pooltype, int alignment, unsigned int * allocatedsize, void ** returnblock) {
   int reqsize=requestsize;
-  unsigned int alosize_p=allocatedsize;
+  unsigned int * alosize_p=allocatedsize;
   void ** pool_p=returnblock;
   int sts=SS$_NORMAL;
+
+  // extra from alononpaged
+  if (reqsize&63)
+    reqsize=((reqsize>>6)+1)<<6; // mm book said something about align 64
+
+  *alosize_p=reqsize;
+
+  struct _npool_data * pooldata = exe$gs_bap_npool;
+  struct _lsthds * lsthd = pooldata->npool$ar_lsthds;
+  struct _myhead * array = &lsthd->lsthds$q_listheads;
+
+  if (reqsize<=8192) {
+    *pool_p = exe$lal_remove_first(&array[reqsize>>6]);
+    if (*pool_p) {
+      check_packet(*pool_p,reqsize,0);
+      poison_packet(*pool_p,reqsize,0);
+    }
+  } 
+  // extra end
+
+  if (*pool_p) 
+    return sts;
 
   sts=exe$allocate(reqsize , &exe$gq_bap_variable, 0 , alosize_p, pool_p);
 
@@ -32,9 +54,11 @@ int exe$allocate_pool(int requestsize, int pooltype, int alignment, unsigned int
   if (sts==SS$_NORMAL)
     return sts;
 
+#if 0
   struct _npool_data * pooldata = exe$gs_bap_npool;
   struct _lsthds * lsthd = pooldata->npool$ar_lsthds;
   void * array = &lsthd->lsthds$q_listheads;
+#endif
 
   sts = exe$reclaim_pool_aggressive(exe$gs_bap_npool);
   sts=exe$allocate(reqsize , &exe$gq_bap_variable, 0 , alosize_p, pool_p);
@@ -71,6 +95,7 @@ void exe$deallocate_pool(void * returnblock, int pooltype, int size) {
 
   if (size<=8192) {
     exe$lal_insert_first(pool, &array[size>>6]);
+    poison_packet(pool,size,1);
   } else {
     int sts=exe$deallocate(pool, exe$gq_bap_variable, size);
   }
