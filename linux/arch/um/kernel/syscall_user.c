@@ -117,8 +117,14 @@ int do_syscall(void *task, int pid)
 
 	if((syscall != __NR_sigreturn) &&
 	   ((unsigned long *) PT_IP(proc_regs) >= &_stext) && 
-	   ((unsigned long *) PT_IP(proc_regs) <= &_etext))
+	   ((unsigned long *) PT_IP(proc_regs) <= &_etext)) {
+		unsigned long long i = 1, j = 80;
+		unsigned long * l;
+		printk("trace myself %x %x\n",syscall,(unsigned long *) PT_IP(proc_regs));
+		for(l=&i; j; j--, l++) printk("%x ",*l); 
+		printk("\n");
 		tracer_panic("I'm tracing myself and I can't get out");
+	}
 
 	if(ptrace(PTRACE_POKEUSER, pid, PT_SYSCALL_NR_OFFSET, 
 		  __NR_getpid) < 0)
