@@ -270,22 +270,34 @@ struct _crb nullcrb;
 struct _ccb nullccb;
 #endif
 
-void __fl_init(void) {
+int file_iodb_vmsinit(void) {
+#if 0
   struct _ucb * ucb=&file$ucb;
   struct _ddb * ddb=&file$ddb;
   struct _crb * crb=&file$crb;
+#endif
+  struct _ucb * ucb=kmalloc(sizeof(struct _ucb),GFP_KERNEL);
+  struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
+  struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
   struct _ccb * ccb;
   struct _ucb * newucb,newucb1;
+  struct _ddb * newddb;
 
 //  ioc_std$clone_ucb(&file$ucb,&ucb);
   bzero(ucb,sizeof(struct _ucb));
   bzero(ddb,sizeof(struct _ddb));
   bzero(crb,sizeof(struct _crb));
 
+#if 0
   init_ddb(&file$ddb,&file$ddt,&file$ucb,"dfa");
   init_ucb(&file$ucb, &file$ddb, &file$ddt, &file$crb);
   init_crb(&file$crb);
+#endif
+
+  init_ddb(ddb,&file$ddt,ucb,"dfa");
+  init_ucb(ucb, ddb, &file$ddt, crb);
+  init_crb(crb);
 
   file$init_tables();
   file$struc_init (crb, ddb, idb, orb, ucb);
@@ -293,6 +305,12 @@ void __fl_init(void) {
   file$unit_init (idb, ucb);
 
   insertdevlist(ddb);
+
+  return ddb;
+}
+
+void __fl_init(void) {
+  file_iodb_vmsinit();
 }
 
 struct _ucb * myfilelist[50];
@@ -305,10 +323,29 @@ insertfillist(struct _ucb *u, char *s) {
   myfilelist[myfilelistptr++]=u;
 }
 
-struct _ucb * fl_init(char * s) {
+int file_iodbunit_vmsinit(struct _ddb * ddb,int unitno, void * d) {
   struct _ucb * newucb;
 
-  ioc_std$clone_ucb(&file$ucb,&newucb);
+  ioc_std$clone_ucb(ddb->ddb$l_ucb/*&file$ucb*/,&newucb);
+
+  return newucb;
+}
+
+extern struct _sb mysb;
+
+struct _ucb * fl_init(char * s) {
+  struct _ucb * newucb;
+  struct _ddb * ddb=ioc$gl_devlist;
+
+  while(ddb) {
+    if (ddb->ddb$ps_sb==0 || ddb->ddb$ps_sb==&mysb)
+      if (!bcmp(ddb->ddb$t_name,"dfa",3)) 
+	goto out;
+    ddb=ddb->ddb$ps_link;
+  }
+ out:
+
+  ioc_std$clone_ucb(ddb->ddb$l_ucb/*&file$ucb*/,&newucb);
 
   newucb->ucb$l_orb=myfilelistptr;
 

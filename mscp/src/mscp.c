@@ -91,7 +91,14 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
   struct _mscp_basic_pkt * basic = ((unsigned long)packet) + sizeof(*scs);
   void * next = basic;
   struct _transfer_commands * trans = basic;
-  int chan=get_mscp_chan(cdt->cdt$l_condat);
+  unsigned short int chan;//wasint chan =get_mscp_chan(cdt->cdt$l_condat);
+  char * nam;
+  $DESCRIPTOR(devnam,"d0a0");
+  nam=devnam.dsc$a_pointer;
+  nam[1]=basic->mscp$b_caa;
+  nam[3]=48+basic->mscp$w_unit;
+
+  exe$assign(&devnam,&chan,0,0,0);
 
   if (hrbq==0) qhead_init(&hrbq);
 
@@ -164,6 +171,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     i->irp$l_rspid=scs1->scs$l_rspid;
     exe$insioq(i,u);
   }
+  exe$dassgn(chan);
   return;
  write:
   {
@@ -192,6 +200,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     i->irp$l_rspid=scs1->scs$l_rspid;
     exe$insioq(i,u);
   }
+  exe$dassgn(chan);
   return;
 }
 

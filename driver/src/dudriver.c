@@ -98,6 +98,7 @@ void  du_startio (struct _irp * i, struct _ucb * u) {
     bzero(m,1000 /*sizeof(struct _transfer_commands)*/);
     ((struct _mscp_basic_pkt *)m)->mscp$l_cmd_ref=c->cdrp$l_rspid;
     ((struct _mscp_basic_pkt *)m)->mscp$w_unit=((struct _mscp_ucb *)u)->ucb$w_mscpunit;
+    ((struct _mscp_basic_pkt *)m)->mscp$b_caa=u->ucb$l_ddb->ddb$t_name[1]; // use this as unit type?
     c->cdrp$w_cdrpsize=600; //wrong, but we do not use a bufferdescriptor
     c->cdrp$l_msg_buf=m; // ??
     c->cdrp$l_xct_len=512;
@@ -291,7 +292,7 @@ int du$init_tables() {
 void * find_free_cdt(void);
 
 extern struct _pb mypb;
-extern struct _sb mysb;
+extern struct _sb othersb;
 
 void du_msg(void * packet, struct _cdt * c, struct _pdt * p) {
   du_dg(packet,c,p);
@@ -348,26 +349,31 @@ int mscpcli(void) {
 }
 #endif
 
-void __du_init(void) {
+int du_iodb_vmsinit(void) {
+#if 0
   struct _ucb * ucb=&du$ucb;
   struct _ddb * ddb=&du$ddb;
   struct _crb * crb=&du$crb;
+#endif
+  struct _ucb * ucb=kmalloc(sizeof(struct _mscp_ucb),GFP_KERNEL);
+  struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
+  struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
   struct _ccb * ccb;
   struct _ucb * newucb,newucb1;
-  struct _cddb * cddb;
-  struct _pb * pb;
-  struct _cdt * cdt;
-  struct _ucb * u = ucb;
-
 //  ioc_std$clone_ucb(&du$ucb,&ucb);
   bzero(ucb,sizeof(struct _mscp_ucb));
   bzero(ddb,sizeof(struct _ddb));
   bzero(crb,sizeof(struct _crb));
 
+#if 0
   init_ddb(&du$ddb,&du$ddt,&du$ucb,"dua");
   init_ucb(&du$ucb, &du$ddb, &du$ddt, &du$crb);
   init_crb(&du$crb);
+#endif
+  init_ddb(ddb,&du$ddt,ucb,"dua");
+  init_ucb(ucb, ddb, &du$ddt, crb);
+  init_crb(crb);
 
   du$init_tables();
   du$struc_init (crb, ddb, idb, orb, ucb);
@@ -376,25 +382,11 @@ void __du_init(void) {
 
   insertdevlist(ddb);
 
-  // specific cluster stuff here 
+  return ddb;
+}
 
-  pb=vmalloc(sizeof(struct _pb));
-  bzero(pb,sizeof(struct _pb));
-
-  cddb=vmalloc(sizeof(struct _cddb));
-  bzero(cddb,sizeof(struct _cddb));
-  
-  qhead_init(&cddb->cddb$l_cdrpqfl);
-  cddb->cddb$l_pdt=&dupdt;
-  ((struct _mscp_ucb *)u)->ucb$l_cddb=cddb;
-
-  u->ucb$l_pdt=&dupdt;
-  pb->pb$l_pdt=&dupdt;
-  ((struct _mscp_ucb *)u)->ucb$l_cdt=find_mscp_cdt(); // should be find_free_cdt();
-  cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
-  cdt->cdt$l_pb=pb;
-
-  dupdt.pdt$l_ucb0=u;
+void dupdt_init(void) {
+  // not yet? dupdt.pdt$l_ucb0=u;
   dupdt.pdtvec$l_sendmsg=scs_std$sendmsg;
   dupdt.pdtvec$l_senddg=scs_std$senddg;
   dupdt.pdtvec$l_allocmsg=scs_std$allocmsg;
@@ -408,7 +400,47 @@ void __du_init(void) {
   qhead_init(&dupdt.pdt$q_comqh);
   qhead_init(&dupdt.pdt$q_comq2);
   qhead_init(&dupdt.pdt$q_comq3);
+}
 
+void  du_iodb_clu_vmsinit(struct _ucb * u) {
+  struct _cddb * cddb;
+  struct _pb * pb;
+  struct _cdt * cdt;
+
+  pb=kmalloc(sizeof(struct _pb),GFP_KERNEL);
+  bzero(pb,sizeof(struct _pb));
+
+  cddb=kmalloc(sizeof(struct _cddb),GFP_KERNEL);
+  bzero(cddb,sizeof(struct _cddb));
+  
+  qhead_init(&cddb->cddb$l_cdrpqfl);
+  cddb->cddb$l_pdt=&dupdt;
+  ((struct _mscp_ucb *)u)->ucb$l_cddb=cddb;
+
+  u->ucb$l_pdt=&dupdt;
+  pb->pb$l_pdt=&dupdt;
+  ((struct _mscp_ucb *)u)->ucb$l_cdt=find_mscp_cdt(); // should be find_free_cdt();
+  cdt=((struct _mscp_ucb *)u)->ucb$l_cdt;
+  cdt->cdt$l_pb=pb;
+}
+
+void __du_init(void) {
+  struct _ddb * ddb;
+
+  // specific cluster stuff here 
+
+  ddb = du_iodb_vmsinit();
+  du_iodb_clu_vmsinit(ddb->ddb$l_ucb);
+  dupdt_init();
+}
+
+int du_iodbunit_vmsinit(struct _ddb * ddb,int unitno, void * d) {
+  struct _ucb * newucb;
+
+  ioc_std$clone_mscp_ucb(ddb->ddb$l_ucb/*&file$ucb*/,&newucb);
+  //ioc_std$clone_mscp_ucb(/*ddb->ddb$l_ucb*/&du$ucb,&newucb);
+
+  return newucb;
 }
 
 //extern struct _ucb file$ucb;
@@ -425,14 +457,12 @@ void * du_init(char *s) {
 
   mypb.pb$b_type=DYN$C_SCS_PB;
   mypb.pb$w_state=PB$C_CLOSED;
-  mysb.sb$b_type=DYN$C_SCS_SB;
+  othersb.sb$b_type=DYN$C_SCS_SB;
 
   ioc_std$clone_mscp_ucb(&du$ucb,&newucb);
 
   insertfillist(newucb,s);
 
-  scs_std$connect(du_msg,du_dg,du_err,0,0,"mscp$disk","vms$disk_cl_drv",0,0,0,0,s);
-  // should be vms$disk_cl_drvr but use null-term for now
   return newucb;
 }
 

@@ -1033,8 +1033,16 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
   if (sizeof(struct _hm2) != 512 || sizeof(struct _fh2) != 512) return SS$_NOTINSTALL;
   for (device = 0; device < devices; device++) {
     //printk("Trying to mount %s\n",devnam[device]);
-    if (strchr(devnam[device],'_')) {
-      ucb = du_init(devnam[device]);
+    if (strchr(devnam[device],'$')) {
+      int chan;
+      extern struct _ccb ctl$ga_ccb_table[];
+      struct dsc$descriptor dsc;
+      dsc.dsc$a_pointer=devnam[device];
+      dsc.dsc$w_length=strlen(devnam[device]);
+
+      sts=exe$assign(&dsc,&chan,0,0,0);
+      ucb = ctl$ga_ccb_table[chan].ccb$l_ucb;
+      //ucb = du_init(devnam[device]);
       islocal=0;
     } else {
       struct dsc$descriptor dsc;
