@@ -731,7 +731,7 @@ int exttwo_read_writevb(struct _irp * i) {
   if (i->irp$v_fcode==IO$_WRITEVBLK) {
     exttwo_write_block(vcb,i->irp$l_qio_p1,lbn,blocks,&iosb);
   } else {
-    buffer=exttwo_read_block(vcb,lbn,blocks,&iosb);
+    buffer=exttwo_read_block(vcb,lbn,blocks*2,&iosb);
     memcpy(i->irp$l_qio_p1,buffer+512*rest,512);
     vfree(buffer);
   }
