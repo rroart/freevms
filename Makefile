@@ -1,5 +1,5 @@
-SUBDIRS = starlet librtl cliutl backup dir pal dcl
-SUBDIRSINST = dir dcl
+SUBDIRS = starlet librtl cliutl backup dir init pal dcl
+SUBDIRSINST = dir dcl init
 SUBDIRS2 = examples
 
 all:
