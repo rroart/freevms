@@ -24,28 +24,28 @@ directory${EXE}: directory.o $(LIB)
 	cp -p directory i386/directory
 	[ -f directory.exe ] && cp -p directory.exe i386/directory.exe
 	cd i386
-	cd i386; ln directory copy
-	cd i386; ln directory import
-	cd i386; ln directory export
-	cd i386; ln directory delete
-	cd i386; ln directory difference
-	cd i386; ln directory extend
-	cd i386; ln directory help
-	cd i386; ln directory show
-	cd i386; ln directory search
-	cd i386; ln directory type
-	cd i386; ln directory mount
-	cd i386; [ -f directory.exe ] && ln directory.exe copy.exe
-	cd i386; [ -f directory.exe ] && ln directory.exe import.exe
-	cd i386; [ -f directory.exe ] && ln directory.exe export.exe
-	cd i386; [ -f directory.exe ] && ln directory.exe delete.exe
-	cd i386; [ -f directory.exe ] && ln directory.exe difference.exe
-	cd i386; [ -f directory.exe ] && ln directory.exe extend.exe
-	cd i386; [ -f directory.exe ] && ln directory.exe help.exe
-	cd i386; [ -f directory.exe ] && ln directory.exe show.exe
-	cd i386; [ -f directory.exe ] && ln directory.exe search.exe
-	cd i386; [ -f directory.exe ] && ln directory.exe type.exe
-	cd i386; [ -f directory.exe ] && ln directory.exe mount.exe
+	cd i386; ln -f directory copy
+	cd i386; ln -f directory import
+	cd i386; ln -f directory export
+	cd i386; ln -f directory delete
+	cd i386; ln -f directory difference
+	cd i386; ln -f directory extend
+	cd i386; ln -f directory help
+	cd i386; ln -f directory show
+	cd i386; ln -f directory search
+	cd i386; ln -f directory type
+	cd i386; ln -f directory mount
+	cd i386; [ -f directory.exe ] && ln -f directory.exe copy.exe
+	cd i386; [ -f directory.exe ] && ln -f directory.exe import.exe
+	cd i386; [ -f directory.exe ] && ln -f directory.exe export.exe
+	cd i386; [ -f directory.exe ] && ln -f directory.exe delete.exe
+	cd i386; [ -f directory.exe ] && ln -f directory.exe difference.exe
+	cd i386; [ -f directory.exe ] && ln -f directory.exe extend.exe
+	cd i386; [ -f directory.exe ] && ln -f directory.exe help.exe
+	cd i386; [ -f directory.exe ] && ln -f directory.exe show.exe
+	cd i386; [ -f directory.exe ] && ln -f directory.exe search.exe
+	cd i386; [ -f directory.exe ] && ln -f directory.exe type.exe
+	cd i386; [ -f directory.exe ] && ln -f directory.exe mount.exe
 	cd ..
 
 UMDEF=-Dcompile_um -I.
