@@ -807,5 +807,6 @@ unsigned direct(struct _vcb * vcb,struct dsc$descriptor * fibdsc,
             if (sts & 1) sts = dests;
         }
     }
+    iosbret(i,sts);
     return sts;
 }
