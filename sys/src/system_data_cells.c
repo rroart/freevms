@@ -2082,6 +2082,7 @@ void __init vms_init2(void) {
 
   nl_init(); /* first */  
   rnd_init();
+  xqp_init();
 #if 0
 #ifdef CONFIG_BLK_DEV_FD_VMS
   vms_floppy_init();
