@@ -574,8 +574,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
   x2p->current_vcb=vcb; // until I can place it somewhere else
 
-  if (fib->fib$w_fid_num==4 && fib->fib$w_fid_seq==4 && fib->fib$w_did_num==0 && fib->fib$w_did_seq==0)
+  if (fib->fib$w_fid_num==4 && fib->fib$w_fid_seq==4 && fib->fib$w_did_num==0 && fib->fib$w_did_seq==0) {
     memset(&x2p->context_save,0,54);
+    x2p->prev_fp=0;
+  }
 
 
   if (fib->fib$w_did_num) {
