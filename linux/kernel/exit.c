@@ -498,7 +498,8 @@ fake_volatile:
 	  if (task_on_comqueue(tsk))
 	    remque(tsk,dum);
 #endif
-	SOFTINT_RESCHED_VECTOR;
+	//	SOFTINT_RESCHED_VECTOR; // maybe not, instead:
+	sch$sched(0);
 	//sch$resched();
 	printk("before bug\n");
 #if 0
