@@ -96,6 +96,11 @@ asmlinkage void sch$astdel(void) {
     //printk("astdel1 %x \n",acb->acb$l_kast);
     setipl(IPL$_ASTDEL);
     //p->pcb$b_astact=1;
+    if (((unsigned long)acb->acb$l_kast<4096)) {
+      int i;
+      printk("kast %x\n",acb->acb$l_kast);
+      for(i=0;i<2000000000;i++) ;
+    }
     acb->acb$l_kast(acb->acb$l_astprm);
     //p->pcb$b_astact=0;
     goto more;
@@ -110,6 +115,11 @@ asmlinkage void sch$astdel(void) {
   }
   p->pcb$b_astact=0; // 1; wait with this until we get modes
   setipl(0); // for kernel mode, I think. everything is in kernelmode yet.
+  if (((unsigned long)acb->acb$l_ast<4096)) {
+    int i;
+    printk("kast %x\n",acb->acb$l_ast);
+    for(i=0;i<2000000000;i++) ;
+  }
   if(acb->acb$l_ast) acb->acb$l_ast(acb->acb$l_astprm); /* ? */
   p->pcb$b_astact=0;
   /*unlock*/
