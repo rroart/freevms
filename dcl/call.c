@@ -37,15 +37,39 @@
 #include "dcl.h"
 
 int
-call(unsigned char *argument, dcl$env *env)
+call(dcl$arg *arg, dcl$env *env)
 {
-	char			*argv[4];
+	char			**qualifiers;
 
+	dcl$arg			*current;
+
+	int				i;
+	int				number_of_qualifiers;
 	int				status;
 
 	pid_t			pid;
 
-	argument = next_argument(argument);
+	number_of_qualifiers = 0;
+	current = arg;
+
+	while(current != NULL)
+	{
+		number_of_qualifiers++;
+		current = (*current).next;
+	}
+
+	if ((qualifiers = malloc((number_of_qualifiers + 1) *
+			sizeof(unsigned char *))) == NULL)
+	{
+		return(DCL$FAILURE);
+	}
+
+	for(qualifiers[number_of_qualifiers] = NULL,
+			current = arg, i = number_of_qualifiers - 1; i >= 0; i--)
+	{
+		qualifiers[i] = (*current).argument;
+		current = (*current).next;
+	}
 
 	if ((pid = fork()) < 0)
 	{
@@ -54,12 +78,8 @@ call(unsigned char *argument, dcl$env *env)
 
 	if (pid == 0)
 	{
-		argv[0] = "sh";
-		argv[1] = "-c";
-		argv[2] = argument;
-		argv[3] = NULL;
-
-		execvp("/bin/sh", argv);
+		execvp(qualifiers[0], qualifiers);
+		// int execv()
 
 		/*
 		 * Child process has returned an error.
@@ -75,5 +95,6 @@ call(unsigned char *argument, dcl$env *env)
 		}
 	}
 
+	free(qualifiers);
 	return(DCL$SUCCESS);
 }

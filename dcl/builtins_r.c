@@ -49,5 +49,41 @@ RUN
      Process).
 */
 {
-	return(call(argument, env));
+	dcl$arg				*arg;
+	dcl$arg				*new;
+
+	int					status;
+
+	arg = NULL;
+
+	while((*argument) != 0)
+	{
+		argument = next_argument(argument);
+
+		if ((new = malloc(sizeof(dcl$arg))) == NULL)
+		{
+			return(DCL$FAILURE);
+		}
+
+		(*new).next = arg;
+		(*new).argument = argument;
+		arg = new;
+
+		/* Fixer les problèmes de parenthèses */
+		while(((*argument) != ' ') && ((*argument) != 0))
+		{
+			argument++;
+		}
+
+		if ((*argument) == ' ')
+		{
+			(*argument) = 0;
+			argument++;
+		}
+	}
+
+	status = call(arg, env);
+
+	free(arg);
+	return(status);
 }

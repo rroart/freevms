@@ -166,6 +166,12 @@
 		struct dcl_command	*next;
 	} dcl$command;
 
+	typedef struct dcl_arg
+	{
+		unsigned char		*argument;
+		struct dcl_arg		*next;
+	} dcl$arg;
+
 
 /*
 --------------------------------------------------------------------------------
@@ -177,7 +183,7 @@
 			unsigned char *name, int (*function)(), int type,
 			int qualifier,...);
 
-	int call(unsigned char *argument, dcl$env *env);
+	int call(dcl$arg *arguments, dcl$env *env);
 	int commands_init(dcl$command **commands);
 	int get_compat_flag(dcl$command *command, int flag);
 	int loop(dcl$command *commands, dcl$env *env);
