@@ -463,7 +463,8 @@ struct task_struct {
   unsigned long pcb$l_pid;             
   unsigned long pcb$l_epid;             
   unsigned long pcb$l_eowner;
-  // not ready for this yet?  struct _phd * pcb$l_phd;
+  // not ready for this yet? 
+  struct _phd * pcb$l_phd;          //note overlapping stuff. move it.
 
   unsigned short pcb$w_aptcnt;
   unsigned short pcb$w_mtxcnt;
