@@ -171,3 +171,6 @@ int ioc_std$clone_mscp_ucb (struct _ucb *tmpl_ucb, struct _ucb **new_ucb) {
   return SS$_NORMAL;
 }
 
+int ioc$delete_ucb() {
+  printk("IOC$DELETE_UCB not impl\n");
+}
