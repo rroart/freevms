@@ -149,6 +149,8 @@ struct _lnmb lnm_sys_dir = {
   lnmb$t_name : "LNM$SYSTEM_DIRECTORY",
 };
 
+long lnm_sys_dir_p = &lnm_sys_dir;
+
 struct _lnmth lnm_sys_dir_table_header={
   lnmth$l_flags:LNMTH$M_SHAREABLE|LNMTH$M_DIRECTORY,
   lnmth$l_hash : 0,
@@ -221,7 +223,8 @@ void lnm_init_sys(void) {
   lnm_sys_table_header.lnmth$l_hash = &lnmhshs;
   lnm_sys.lnmb$l_table=&lnm_sys_dir_table_header; // beware this and over
 
-  lnm$al_dirtbl[0]=&lnm_sys_dir;
+  lnm$al_dirtbl[0]=&lnm_sys_dir_p;
+  lnm$al_dirtbl[1]=&ctl$gl_lnmdirect;
 
   /*ctl$gl_lnmdirect=LNM$PROCESS_DIRECTORY;
     lnm$al_dirtbl[0]=LNM$SYSTEM_DIRECTORY;
