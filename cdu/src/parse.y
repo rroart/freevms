@@ -163,8 +163,16 @@ K_DEFINE K_TYPE T_NAME type_clause_list
 ;
 
 define_verb:
-K_DEFINE K_VERB T_NAME verb_clause_list
-{ $$ = build_nt(DEFINE_VERB_STMT,$3,$4); }
+K_DEFINE K_VERB
+{
+  tnamemode=1; 
+}
+T_NAME
+{
+  tnamemode=0; 
+}
+verb_clause_list
+{ $$ = build_nt(DEFINE_VERB_STMT,$4,$6); }
 ;
 
 verb_clause_list:
@@ -185,9 +193,16 @@ K_CLIFLAGS cli_flag_list
   $$ = build_nt(CLIFLAGS_CLAUSE, $2)
 }
 |
-K_CLIROUTINE T_NAME
+K_CLIROUTINE
 {
-  $$ = build_nt(CLIROUTINE_CLAUSE, $2)
+  tnamemode=1; 
+}
+T_NAME
+{
+  tnamemode=0; 
+}
+{
+  $$ = build_nt(CLIROUTINE_CLAUSE, $3)
 }
 |
 K_DISALLOW bool_expr_list
@@ -195,9 +210,16 @@ K_DISALLOW bool_expr_list
   $$ = build_nt(DISALLOW_CLAUSE, $2)
 }
 |
-K_IMAGE T_NAME
+K_IMAGE
 {
-  $$ = build_nt(IMAGE_CLAUSE, $2);
+  tnamemode=1; 
+}
+T_NAME
+{
+  tnamemode=0; 
+}
+{
+  $$ = build_nt(IMAGE_CLAUSE, $3);
 }
 |
 K_NODISALLOWS
