@@ -46,7 +46,7 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   i->irp$l_iost2=iosb2;
   //  exetimeout=0;
   //    { int i,j; for(j=0;j<20;j++) for(i=0;i<1000000000;i++); }
-  printk("reqcom %x\n",i);
+  //printk("reqcom %x\n",i);
   //if (i==0) { int i,j; for(j=0;j<200;j++) for(i=0;i<10000000;i++); }
   if (i==0) {
     printk("i should not be 0\n");
@@ -71,14 +71,14 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
 
   qemp=aqempty(u->ucb$l_ioqfl);
   if (qemp) goto end;
-  printk("ioq %x %x",i,u->ucb$l_ioqfl);
+  //printk("ioq %x %x",i,u->ucb$l_ioqfl);
   i=remque(u->ucb$l_ioqfl,i);
-  printk("ioq %x %x",i,u->ucb$l_ioqfl);
+  //printk("ioq %x %x",i,u->ucb$l_ioqfl);
   ioc$initiate(i,u);
  end:
   if (aqempty(u->ucb$l_ioqfl))
     u->ucb$l_sts&=~UCB$M_BSY;
-  printk("end of reqcom\n");
+  //printk("end of reqcom\n");
 }
 
 void ioc_std$reqcom(int iosb1, int iosb2, struct _ucb * u) {

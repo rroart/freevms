@@ -69,11 +69,11 @@ asmlinkage void exe$forkdspth(int i) {
     return;
   regtrap(REG_INTR, i);
   setipl(i);
-  printk("forkdspth\n");
+  //printk("forkdspth\n");
   fq=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[i-6]; /* so far */
   while (!aqempty(fq)) {
     f=remque(fq,dummy);
-    printk("forking entry %x\n",f);
+    //printk("forking entry %x\n",f);
     func=f->fkb$l_fpc;
     vmslock(forklock_table[i-6].spin, -1);
     func(f->fkb$l_fr3,f);

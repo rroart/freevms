@@ -29,7 +29,7 @@ asmlinkage int exe$setimr  (unsigned int efn, signed long long *daytim,
   } else {
     time=*daytim;
   }
-  printk("astadr %x\n",astadr);
+  //printk("astadr %x\n",astadr);
   t->tqe$l_ast=astadr;
   //  printk("astadr2 %x\n",t->tqe$l_fpc);
   t->tqe$l_astprm=reqidt;
