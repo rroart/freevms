@@ -467,6 +467,17 @@ void __handle_sysrq_nolock(int key, struct pt_regs *pt_regs,
 	console_loglevel = 7;
 	printk(KERN_INFO "Cur %x pid %x pri %x prib %x stat %x while %x\n",current,current->pid,current->pcb$b_pri,current->pcb$b_prib,current->state,in_idle_while);
 	printk(KERN_INFO "Round %x %x\n",round_and_round,nr_running);
+	if (mydebug6) {
+		switch (mydebug5) {
+			case 0:
+				mydebug5=1;
+				break;
+			case 1:
+				mydebug5=0;
+				break;
+		}
+		current->need_resched=1;
+	}
 	if (mydebug6) printcom();
 	
   if (mydebug5==2) {

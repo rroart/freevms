@@ -465,17 +465,17 @@ void show_regs(struct pt_regs * regs)
 {
 	unsigned long cr0 = 0L, cr2 = 0L, cr3 = 0L, cr4 = 0L;
 
-	printk("\n");
-	printk("Pid: %d, comm: %20s\n", current->pid, current->pcb$t_lname);
-	printk("EIP: %04x:[<%08lx>] CPU: %d",0xffff & regs->xcs,regs->eip, smp_processor_id());
+	printk(KERN_EMERG "\n");
+	printk(KERN_EMERG "Pid: %d, comm: %20s\n", current->pid, current->pcb$t_lname);
+	printk(KERN_EMERG "EIP: %04x:[<%08lx>] CPU: %d",0xffff & regs->xcs,regs->eip, smp_processor_id());
 	if (regs->xcs & 3)
-		printk(" ESP: %04x:%08lx",0xffff & regs->xss,regs->esp);
-	printk(" EFLAGS: %08lx    %s\n",regs->eflags, print_tainted());
-	printk("EAX: %08lx EBX: %08lx ECX: %08lx EDX: %08lx\n",
+		printk(KERN_EMERG " ESP: %04x:%08lx",0xffff & regs->xss,regs->esp);
+	printk(KERN_EMERG " EFLAGS: %08lx    %s\n",regs->eflags, print_tainted());
+	printk(KERN_EMERG "EAX: %08lx EBX: %08lx ECX: %08lx EDX: %08lx\n",
 		regs->eax,regs->ebx,regs->ecx,regs->edx);
-	printk("ESI: %08lx EDI: %08lx EBP: %08lx",
+	printk(KERN_EMERG "ESI: %08lx EDI: %08lx EBP: %08lx",
 		regs->esi, regs->edi, regs->ebp);
-	printk(" DS: %04x ES: %04x\n",
+	printk(KERN_EMERG " DS: %04x ES: %04x\n",
 		0xffff & regs->xds,0xffff & regs->xes);
 
 	__asm__("movl %%cr0, %0": "=r" (cr0));
@@ -488,7 +488,7 @@ void show_regs(struct pt_regs * regs)
 		".long 1b,2b			\n"
 		".previous			\n"
 		: "=r" (cr4): "0" (0));
-	printk("CR0: %08lx CR2: %08lx CR3: %08lx CR4: %08lx\n", cr0, cr2, cr3, cr4);
+	printk(KERN_EMERG "CR0: %08lx CR2: %08lx CR3: %08lx CR4: %08lx\n", cr0, cr2, cr3, cr4);
 	show_trace(&regs->esp);
 }
 

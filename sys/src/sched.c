@@ -305,7 +305,8 @@ int task_on_comqueue(struct _pcb *p) {
     if(*(unsigned long *)tmp == tmp) {; } else {
       tmp2=tmp;
       do {
-	if (tmp2 == p) found=1;
+	//	if (tmp2 == p) found=1;
+	if (tmp2 == p && tmp2->pcb$l_sqfl!=tmp) found=1;
 	tmp2=tmp2->pcb$l_sqfl;
       } while (tmp2!=tmp);
     }
@@ -1250,22 +1251,22 @@ static void show_task(struct task_struct * p)
 	int state;
 	static const char * stat_nam[] = { "R", "S", "D", "Z", "T", "W" };
 
-	printk("%-13.13s ", p->pcb$t_lname);
+	printk(KERN_EMERG "%-13.13s ", p->pcb$t_lname);
 	state = p->state ? ffz(~p->state) + 1 : 0;
 	if (((unsigned) state) < sizeof(stat_nam)/sizeof(char *))
 		printk(stat_nam[state]);
 	else
-		printk(" ");
+		printk(KERN_EMERG " ");
 #if (BITS_PER_LONG == 32)
 	if (p == current)
-		printk(" current  ");
+		printk(KERN_EMERG " current  ");
 	else
-		printk(" %08lX ", thread_saved_pc(&p->thread));
+		printk(KERN_EMERG " %08lX ", thread_saved_pc(&p->thread));
 #else
 	if (p == current)
-		printk("   current task   ");
+		printk(KERN_EMERG "   current task   ");
 	else
-		printk(" %016lx ", thread_saved_pc(&p->thread));
+		printk(KERN_EMERG " %016lx ", thread_saved_pc(&p->thread));
 #endif
 	{
 		unsigned long * n = (unsigned long *) (p+1);
@@ -1273,23 +1274,15 @@ static void show_task(struct task_struct * p)
 			n++;
 		free = (unsigned long) n - (unsigned long)(p+1);
 	}
-	printk("%5lu %5d %6d ", free, p->pid, p->p_pptr->pid);
+	printk(KERN_EMERG "%5lu %5d %6d ", free, p->pid, p->p_pptr->pid);
 	if (p->p_cptr)
-		printk("%5d ", p->p_cptr->pid);
+		printk(KERN_EMERG "%5d ", p->p_cptr->pid);
 	else
-		printk("      ");
-	if (p->p_ysptr)
-		printk("%7d", p->p_ysptr->pid);
-	else
-		printk("       ");
-	if (p->p_osptr)
-		printk(" %5d", p->p_osptr->pid);
-	else
-		printk("      ");
+		printk(KERN_EMERG "      ");
 	if (!p->mm)
-		printk(" (L-TLB)\n");
+		printk(KERN_EMERG " (L-TLB)\n");
 	else
-		printk(" (NOTLB)\n");
+		printk(KERN_EMERG " (NOTLB)\n");
 
 	{
 		extern void show_trace_task(struct task_struct *tsk);
@@ -1317,13 +1310,13 @@ void show_state(void)
 	struct task_struct *p;
 
 #if (BITS_PER_LONG == 32)
-	printk("\n"
+	printk(KERN_EMERG "\n"
 	       "                         free                        sibling\n");
-	printk("  task             PC    stack   pid father child younger older\n");
+	printk(KERN_EMERG "  task             PC    stack   pid father child younger older\n");
 #else
-	printk("\n"
+	printk(KERN_EMERG "\n"
 	       "                                 free                        sibling\n");
-	printk("  task                 PC        stack   pid father child younger older\n");
+	printk(KERN_EMERG "  task                 PC        stack   pid father child younger older\n");
 #endif
 	read_lock(&tasklist_lock);
 	for_each_task(p) {

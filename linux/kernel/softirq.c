@@ -65,8 +65,8 @@ asmlinkage void do_softirq()
 	long flags;
 	__u32 mask;
 
-		if (in_interrupt())
-			return;
+	if (in_interrupt())
+		return;
 
 	local_irq_save(flags);
 
@@ -367,7 +367,7 @@ static int ksoftirqd(void * __bind_cpu)
 	int cpu = cpu_logical_map(bind_cpu);
 
 	daemonize();
-	current->pcb$b_prib = 31; /* should really be the opposite */
+	current->pcb$b_prib = 27; /* should be higher */
 	sigfillset(&current->blocked);
 
 	/* Migrate to the right CPU */
