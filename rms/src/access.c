@@ -537,6 +537,7 @@ struct _fh2 *premap_indexf(struct _fcb *fcb,struct _ucb *ucb,unsigned *retsts)
     return NULL;
   }
   head = (struct _fh2 *) vmalloc(sizeof(struct _fh2));
+  *(unsigned long *)head=0;
   if (head == NULL) {
     *retsts = SS$_INSFMEM;
   } else {
@@ -1059,6 +1060,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       if (!islocal)
 	dsc.dsc$a_pointer=((char *) dsc.dsc$a_pointer)+1;
       sts=exe$assign(&dsc,&chan,0,0,0);
+      xqp->io_channel=chan;
       ucb->ucb$ps_adp=chan; //wrong field and use, but....
       //sts = device_lookup(strlen(devnam[device]),devnam[device],1,&ucbret);
       //if (!(sts & 1)) break;
@@ -1126,7 +1128,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	  if (1) {
 	    struct _fibdef mapfib = {0,2,2,1,0};
 	    struct dsc$descriptor mapdsc;
-	    struct _irp * dummyirp = vmalloc(sizeof(struct _irp));
+	    struct _irp * dummyirp = kmalloc(sizeof(struct _irp),GFP_KERNEL);
 	    mapdsc.dsc$w_length=sizeof(struct _fibdef);
 	    mapdsc.dsc$a_pointer=&mapfib;
 	    bzero(dummyirp,sizeof(struct _irp));
