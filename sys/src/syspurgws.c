@@ -15,6 +15,7 @@
 #include<ssdef.h>
 #include<va_rangedef.h>
 #include<wsldef.h>
+#include<vmspte.h>
 
 int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
 #ifdef CONFIG_VMS
