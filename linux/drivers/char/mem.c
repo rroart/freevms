@@ -26,6 +26,8 @@
 #include <asm/io.h>
 #include <asm/pgalloc.h>
 
+#include <rdedef.h>
+
 #ifdef CONFIG_I2C
 extern int i2c_init_all(void);
 #endif
@@ -382,6 +384,10 @@ static inline size_t read_zero_pagealigned(char * buf, size_t size)
 {
 	struct mm_struct *mm;
 	struct vm_area_struct * vma;
+#ifndef CONFIG_MM_VMS
+#else
+	//	struct _rde * vma;
+#endif
 	unsigned long addr=(unsigned long)buf;
 
 	mm = current->mm;
@@ -393,7 +399,8 @@ static inline size_t read_zero_pagealigned(char * buf, size_t size)
 	for (vma = find_vma(mm, addr); vma; vma = vma->vm_next) {
 #else
 	  // need of course a lot more changes
-	  for (vma = 0; vma == 1; vma = 0) {
+	  //for (vma = find_vma(current->pcb$l_phd, addr); vma; vma = vma->rde$ps_va_list_flink) {
+	  for (vma = find_vma(current->pcb$l_phd, addr); vma; vma = 0) {
 #endif
 		unsigned long count;
 
