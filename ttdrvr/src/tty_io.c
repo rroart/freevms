@@ -1054,6 +1054,18 @@ static void release_dev(struct file * filp)
 	release_mem(tty, idx);
 }
 
+is_tty_fops(struct file * f) {
+return f->f_op==&tty_fops;
+}
+
+open_tty() {
+  int fd=get_unused_fd();
+  struct file * f=get_empty_filp();
+  f->f_op=&tty_fops;
+  f->f_mode=FMODE_READ|FMODE_WRITE;
+  fd_install(fd, f);
+}
+
 /*
  * tty_open and tty_release keep up the tty count that contains the
  * number of opens done on a tty. We cannot use the inode-count, as
