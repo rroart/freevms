@@ -60,7 +60,7 @@ extern int wait_for_stop(int pid, int sig, int cont_type);
 extern void *add_signal_handler(int sig, void (*handler)(int));
 extern void signal_init(void);
 extern int start_fork_tramp(void *arg, unsigned long temp_stack, 
-			    int clone_flags, int (*tramp)(void *));
+			    int clone_flags, int (*tramp)(void *), int);
 extern void trace_myself(void);
 extern void timer(void);
 extern void get_profile_timer(void);

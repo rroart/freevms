@@ -87,11 +87,21 @@ struct tramp {
 	unsigned long temp_stack;
 	int flags;
 	int pid;
+	int uml_map;
 };
 
 /* See above for why sigkill is here */
 
 int sigkill = SIGKILL;
+
+extern int ctl$gl_pcb;
+
+static inline struct task_struct * old_get_cur(void)
+{
+	struct task_struct *cur;
+	__asm__("andl %%esp,%0; ":"=r" (cur) : "0" (~0UL));
+	return cur;
+}
 
 int outer_tramp(void *arg)
 {
@@ -100,14 +110,14 @@ int outer_tramp(void *arg)
 
 	t = arg;
 	t->pid = clone(t->tramp, (void *) t->temp_stack + page_size()/2,
-		       t->flags, t->tramp_data);
+		       t->flags & ~CLONE_VM, t);
 	if(t->pid > 0) wait_for_stop(t->pid, SIGSTOP, PTRACE_CONT);
 	kill(getpid(), sig);
 	exit(0);
 }
 
 int start_fork_tramp(void *thread_arg, unsigned long temp_stack, 
-		     int clone_flags, int (*tramp)(void *))
+		     int clone_flags, int (*tramp)(void *), int nr)
 {
 	struct tramp arg;
 	unsigned long sp;
@@ -122,6 +132,7 @@ int start_fork_tramp(void *thread_arg, unsigned long temp_stack,
 	arg.tramp_data = thread_arg;
 	arg.temp_stack = temp_stack;
 	arg.flags = clone_flags;
+	arg.uml_map = nr;
 
 	/* Start the process and wait for it to kill itself */
 	new_pid = clone(outer_tramp, (void *) sp, clone_flags, &arg);

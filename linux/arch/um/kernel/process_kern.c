@@ -39,15 +39,15 @@
 #include "sigcontext.h"
 #include "2_5compat.h"
 
+#include <system_data_cells.h>
+
 static inline struct task_struct * get_cur_task(void)
 {
-        struct task_struct *cur_task;
-        __asm__("andl %%esp,%0; ":"=r" (cur_task) : "0" (~8191UL));
-        return cur_task;
+	return ctl$gl_pcb;
 }
  
 //#define cur_task get_cur_task()
-#define cur_task ({ int dummy; (struct task_struct *) CURRENT_TASK(dummy); })
+#define cur_task ((struct task_struct *) CURRENT_TASK())
 
 struct cpu_task cpu_tasks[NR_CPUS] = { [0 ... NR_CPUS - 1] = { -1, NULL } };
 
@@ -136,8 +136,28 @@ static void new_thread_handler(int sig)
 		do_exit(0);
 }
 
+struct tramp {
+	int (*tramp)(void *);
+	void *tramp_data;
+	unsigned long temp_stack;
+	int flags;
+	int pid;
+	int uml_map;
+};
+
 static int new_thread_proc(void *stack)
 {
+//	printk("uml_map %x %x %x\n",t->uml_map, ctl$gl_pcb,old_get_cur());
+	struct tramp * t = stack;
+	if (t->uml_map) {
+		//	printk("bef un\n");
+		unmap(0x7ffff000,4096);
+		//printk("middle\n");
+		map(0x7ffff000, t->uml_map, PAGE_SIZE, 1, 1, 0);
+		//printk("aft map\n");
+	}
+//	printk("uml_map %x %x %x\n",t->uml_map, ctl$gl_pcb,old_get_cur());
+	stack = t->tramp_data;
 	block_signals();
 	init_new_thread(stack, new_thread_handler);
 	usr1_pid(getpid());
@@ -283,6 +303,7 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long sp,
 		unsigned long stack_top, struct task_struct * p, 
 		struct pt_regs *regs)
 {
+// borrowed nr for uml_map to avoid change .h and recompile
 	int new_pid;
 	unsigned long stack;
 	int (*tramp)(void *);
@@ -310,7 +331,7 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long sp,
 	clone_flags &= CLONE_VM;
 	p->thread.temp_stack = stack;
 	new_pid = start_fork_tramp((void *) p->thread.kernel_stack, stack,
-				   clone_flags, tramp);
+				   clone_flags, tramp, nr);
 	if(new_pid < 0){
 		printk(KERN_ERR "copy_thread : clone failed - errno = %d\n", 
 		       -new_pid);
@@ -323,8 +344,10 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long sp,
 		if(sp != 0) PT_REGS_SP(&p->thread.regs) = sp;
 	}
 	else {
+#if 0
 		p->mm = NULL;
 		p->active_mm = NULL;
+#endif
 	}
 	p->thread.extern_pid = new_pid;
 
@@ -367,7 +390,7 @@ int new_thread(int nr, unsigned long clone_flags, unsigned long sp,
 	clone_flags &= CLONE_VM;
 	p->thread.temp_stack = stack;
 	new_pid = start_fork_tramp((void *) p->thread.kernel_stack, stack,
-				   clone_flags, tramp);
+				   clone_flags, tramp, nr);
 	if(new_pid < 0){
 		printk(KERN_ERR "copy_thread : clone failed - errno = %d\n", 
 		       -new_pid);
@@ -380,8 +403,11 @@ int new_thread(int nr, unsigned long clone_flags, unsigned long sp,
 		if(sp != 0) PT_REGS_SP(&p->thread.regs) = sp;
 	}
 	else {
+#if 0
+// set in syscreprc
 		p->mm = NULL;
 		p->active_mm = NULL;
+#endif
 	}
 	p->thread.extern_pid = new_pid;
 
