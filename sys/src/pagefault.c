@@ -290,13 +290,15 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	 * context, we must not take the fault..
 	 */
 	//	if (in_interrupt() || !mm)
+	if (mm=&init_mm)
+		goto no_context;
 	if (!mm)
 		goto no_context;
 
 	if (address<PAGE_SIZE)
 	  goto bad_area;
 
-	if (address>0xd0000000)
+	if (address>0x90000000)
 	  goto bad_area;
 
 	page = address & PAGE_MASK;
@@ -706,7 +708,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	if (address<PAGE_SIZE)
 	  goto skip;
 
-	if (address>0xc0000000)
+	if (address>0x80000000)
 	  goto skip;
 
 	if (in_atomic) { 
@@ -727,7 +729,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	pte = pte_offset(pmd, page);
 
 	mypte = pte;
-	if (((unsigned long)mypte)<0xa0000000)
+	if (((unsigned long)mypte)<0x80000000)
 	  goto skip;
 
 	mmg$frewsle(current,address);
