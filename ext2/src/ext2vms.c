@@ -540,9 +540,8 @@ static int fillonedir64(void * __buf, const char * name, int namlen, loff_t offs
   buf->count++;
   dirent = buf->dirent;
   dirent->d_ino=ino;
-  dirent->d_offset=offset;
-  dirent->d_namlen=namlen;
-  bcopy_to_user(name, dirent->d_name, namlen);
+  dirent->d_off=offset;
+  bcopy(name, dirent->d_name, namlen);
   dirent->d_name[namlen]=0;
   return 0;
 }
