@@ -1,0 +1,14 @@
+Question:	I compiled and install the kernel. As soon as my computer
+		begins to boot with the new kernel, my machine reboots.
+Answer:		You probability selected the wrong CPU in the make config
+		procedure.
+
+Question:	My computer looks like it booting normally except you get
+		the error:
+                        I have no root and I want to scream.
+Answer:		You have to change the line:
+			root=/LABEL to root=/dev/hd??
+		where ?? is your appropriate / partition in your lilo
+		or grub conf file.
+
+(Written by Andrew Allison)
