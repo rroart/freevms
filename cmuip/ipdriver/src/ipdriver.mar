@@ -1,0 +1,2450 @@
+;
+;	****************************************************************
+;
+;		Copyright (c) 1992, Carnegie Mellon University
+;
+;		All Rights Reserved
+;
+;	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+;	distribute  this software  provided  that the  above  copyright
+;	notice appears in  all copies and that  any distribution be for
+;	noncommercial purposes.
+;
+;	Carnegie Mellon University disclaims all warranties with regard
+;	to this software.  In no event shall Carnegie Mellon University
+;	be liable for  any special, indirect,  or consequential damages
+;	or any damages whatsoever  resulting from loss of use, data, or
+;	profits  arising  out of  or in  connection  with  the  use  or
+;	performance of this software.
+;
+;	****************************************************************
+;
+	.TITLE	IPDRIVER - Internet Protocol Virtual Device Driver
+	.IDENT	/6.6/
+	.Library /sys$library:lib.mlb/
+	.enable sup
+	.disable debug,traceback
+
+; FACILITY:
+;
+;	Internet Protocol Virtual/Sharable network device driver. Similar
+;	to DEC's "net:" device.
+;
+; ABSTRACT:
+;
+;	This driver provides a sharable virtual device which queues
+;	I/O Requests to the IPACP (Internet Protocol ACP).  This driver
+;	builds Argument blocks for the ACP user interface handler.
+;	Various	VMS QIO function codes have been redefined to fit the
+;	IP network functionality:  Format of NET$xxxx (VMS counterpart).
+;
+;	NET$OPEN (IO$_Create)
+;		OPEN a network connection.
+;	NET$SEND (IO$_WRITELBLK)
+;		Transmit data over the network.
+;	NET$RECEIVE (IO$_READLBLK)
+;		Receive data from the network
+;	NET$CLOSE (IO$_Delete)
+;		Close a network connection.
+;	NET$ABORT (IO$_Deaccess)
+;		ABORT a network connection
+;	NET$NCP (IO$_ACPCONTROL)
+;		Perform an Network Kernal Control operation.
+;
+; The network IO status is returned in the traditional VMS IO status block.
+; Here we redefine some of the fields to reflect network operatons.
+; If the VMS return code is SS$_NORMAL then the IO operation completed 
+; successfully.  Otherwise the Error code will a traditional VMS error code.
+; If the error code is not SS$_ABORT then the error was detected in the virtual
+; device (IP:) driver & will reflect the error ala VMS (SS$_ACCVIO etc.).
+; If the VMS error code is SS$_ABORT then the error was detected in IP &
+; the net error code field will reflect the actual error (SS$_Abort is used as
+; a VMS error escape).  During the NET$OPEN call, the 2nd bliss fullword
+; is the Local-connection_ID if the VMS return code is SS$_NORMAL otherwise
+; the net error field reflects the error.  The IO request TAG identifies the
+; IO request for those who use asynchronous IO ($qio).  The flags field
+; indicates URGENT data & EOL (End Of Letter) conditions. Note that the ICMP
+; code field is only defined for special connections which can return ICMP
+; messages and only if the ICMP flag is set.
+;
+;
+;	!===============================================================!
+;	+     Bytes Transfered		!	VMS Return Code		+
+;	!---------------------------------------------------------------!
+;	+	    Unused		!     Flags	!   ICMP code	+
+;	!===============================================================!
+;
+; Privileges Required:
+;
+;	NETMBX
+;	PHY_IO for maintenance functions.
+;
+; AUTHOR:
+;
+;	Bruce R. Miller		CMU Network Development
+;	Originaly Stan C. Smith		29-Sep-1981
+;
+; Modification History:
+;
+
+;++
+; For VAX-VMS V4 systems, uncomment the following line
+;--
+
+;;;;;VMS_V4=1
+
+
+	.SBTTL	External and local symbol definitions
+
+;
+; External symbols
+;
+
+	$AQBDEF				; ACP queue block.
+	$CCBDEF				; Channel Control Block.
+	$CRBDEF				; Channel request block
+	$DCDEF				; Device classes and types
+	$DDBDEF				; Device data block
+	$DDTDEF				; Driver Dispatch Table
+	$DEVDEF				; Device characteristics
+	$IDBDEF				; Interrupt data block
+	$IODEF				; I/O function codes
+	$IPLDEF				; Hardware IPL definitions
+	$IRPDEF				; I/O request packet
+	$JIBDEF				; Job Information Block fields.
+	$PCBDEF				; Process Control Blk.
+	$SSDEF				; System status codes
+	$UCBDEF				; Unit control block
+	$VCBDEF				; Volume Control block.
+	$VECDEF				; Interrupt vector block
+	$DYNDEF				; 
+	$ORBDEF				; Object-Rights Block
+
+; Let's add some fields to the UCB, hmmm?
+
+	$DEFINI UCB
+. = UCB$K_LENGTH
+
+$DEF	UCB$L_ADDRMODE	.BLKL	1
+
+$DEF	IP_UCB_K_LENGTH
+
+	$DEFEND
+
+;
+; Local symbols
+;
+
+;
+; Argument list (AP) offsets for device-dependent QIO parameters
+;
+
+P1	= 0				; First QIO parameter
+P2	= 4				; Second QIO parameter
+P3	= 8				; Third QIO parameter
+P4	= 12				; Fourth QIO parameter
+P5	= 16				; Fifth QIO parameter
+P6	= 20				; Sixth QIO parameter
+
+;
+; Other constants
+;
+
+Max_Usize		= 8192	; Maximum size of user buffer
+FH_Name_Size		= 128	; max Foreign Host name string size(bytes).
+
+TCP_PROTOCOL		= 0	; Protocol code for TCP
+UDP_PROTOCOL		= 1	; Protocol code for UDP
+ICMP_PROTOCOL		= 2	; Protocol code for ICMP
+IP_PROTOCOL		= 3	; Protocol code for IP
+
+; Address specification fields (3 longwords) for connectionless protocols.
+;
+;	!===============================================================!
+;	+			   Source Host				+
+;	!---------------------------------------------------------------!
+;	+			Destination Host			+
+;	!---------------------------------------------------------------!
+;	+	Destination Port	|	   Source Port		+
+;	!===============================================================!
+
+	$DEFINI	IPADR
+
+$DEF	IPADR$SRC_HOST	.BLKL	1	; Source host
+$DEF	IPADR$DST_HOST	.BLKL	1	; Destination host
+$DEF	IPADR$EXT1	.BLKL	1	; Header info longword #1
+	IPADR$UDP_SIZE	= .
+$DEF	IPADR$EXT2	.BLKL	1	; Header info longword #2
+	IPADR$SIZE	= .
+
+	$DEFEND	IPADR
+
+
+; System buffer header fields (3 longwords) Supported by VMS
+;
+;	!===============================================================!
+;	+	Within this blk, start Address of user data		+
+;	!---------------------------------------------------------------!
+;	+	User's Buffer Address (process address)			+
+;	!---------------------------------------------------------------!
+;	+	VMS Dynamic data structure header fields		+
+;	!---------------------------------------------------------------!
+;	+		|		|		| 1st Data Byte	+
+;	!===============================================================!
+
+	$DEFINI	SB
+
+$DEF	SB$L_Data_Adrs			; within this blk, data start adrs
+			.BLKL	1
+$DEF	SB$L_Users_Buf_Adrs		; user's buffer address
+			.BLKL	1
+$DEF	SB$W_Type			; VMS Block type field
+			.BLKW	1
+$DEF	SB$W_Size			; VMS Block size field
+			.BLKW	1
+$DEF	SB$B_Data			; start of actual data
+			.BLKB	1
+
+	$DEFEND	SB
+
+; UCB device dependant words for IP device
+; The UCB has one quadword builtin for device-dependant use. We will use the
+; first longword of this to store the connection control block address and the
+; second to store the protocol type (TCP, UDP, ICMP, or IP).
+
+UCB$L_CBID	= UCB$Q_DEVDEPEND
+UCB$L_PROTOCOL	= UCB$Q_DEVDEPEND+4
+
+
+; ACP argument block fields.  This definition also includes the fields
+; definied in the SB block which must match exactly as they are used by
+; VMS to communicate between the user and the device driver.  The ACP
+; reads these fields as arguments to a user network I/O request.  See 
+; NET$OPEN routine for graphic desc.
+
+	$DEFINI	AB			; Basic argument block
+
+$DEF	AB$L_DATA_ADRS			; WITHIN THIS BLOCK, START OF Data
+			.BLKL	1
+$DEF	AB$L_Users_Buf_Adrs		; user's buffer start address
+			.BLKL	1
+$DEF	AB$L_Blk_ID			; VMS dynamic block ID fields
+			.BLKL	1
+$DEF	AB$L_IRP_Adrs			; Associated IRP address
+			.BLKL	1
+$DEF	AB$L_UCB_Adrs			; Unit Control Blk
+			.BLKL	1
+$DEF	AB$L_PID			; User's PID
+			.BLKL	1
+$DEF	AB$W_UARGSIZE			; Size of the argument block
+			.BLKW	1
+$DEF	AB$B_Funct			; ACP function code
+			.BLKB	1
+$DEF	AB$B_Protocol			; ACP protocol code
+			.BLKB	1
+$DEF	AB$B_Data			; start of User Arguments
+			.BLKB	0
+	AB$COM_END = .			; End of common fields
+
+	$DEFEND	AB			; End of common block
+
+
+; Define additional fields for OPEN block
+
+	$DEFINI	OP
+
+. = AB$COM_END
+
+OPF$MODE	= 1			; Mask for mode bit
+OPF$NOWAIT	= 2			; Mask for no-wait bit
+OPF$ADDRFLAG	= 4			; Mask for address flag bit
+
+; Note about OP$FLAGS:
+; OP$MODE also is used in UDP.  A 0 means address headers are in the data buff.
+
+$DEF	OP$SRC_HOST	.BLKL	1	; Source host
+$DEF	OP$DST_HOST	.BLKL	1	; Destination host
+$DEF	OP$EXT1		.BLKL	1	; Header info longword #1
+$DEF	OP$EXT2		.BLKL	1	; Header info longword #2
+
+$DEF	OP$FLAGS	.BLKW	1	; Open flags
+	_VIELD	OP,0,<-
+		<Mode,1,M>,-		; Open mode (1=active,0=passive)
+		<NoWait,1,M>,-		; No-wait mode
+		<AddrFlag,1,M>,-	; Argument is IP address, not name
+	>
+$DEF	OP$TIMEOUT	.BLKW	1	; Open timeout
+$DEF	OP$PIOCHAN	.BLKW	1	; Process I/O channel
+$DEF	OP$FOREIGN_HLEN	.BLKW	1	; Length of foreign host name
+$DEF	OP$FOREIGN_HOST	.BLKB	FH_NAME_SIZE
+$DEF	OP$BLK_SIZE	.BLKB	0	; Size of open block
+
+	$DEFEND	OP
+
+OP$ALL_SIZE = OP$BLK_SIZE		; Set size to allocate
+.IF GREATER <IRP$C_Length-OP$BLK_SIZE>
+    OP$ALL_SIZE = IRP$C_Length		; Round up small blocks...
+.ENDC
+
+; Define additional fields for CLOSE/ABORT
+
+	$DEFINI	CL
+. = AB$COM_END
+
+$DEF	CL$FLAGS	.BLKW	1	; Close flags
+$DEF	CL$TIMEOUT	.BLKW	1	; Close timeout
+$DEF	CL$LCID		.BLKL	1	; Connection ID
+$DEF	CL$BLK_SIZE	.BLKB	0	; Size of close block
+
+	$DEFEND CL
+;~~~ This should be MAX(CL$BLK_SIZE,IRP$C_LENGTH)
+CL$ALL_SIZE = IRP$C_Length
+
+
+; Define additional fields for SEND
+
+	$DEFINI	SE
+
+. = AB$COM_END				; Append to common block
+
+SEF$EOL_BIT = 1				; Mask for EOL bit
+SEF$URGENT_BIT = 1			; Mask for Urgent bit
+
+$DEF	SE$SRC_HOST	.BLKL	1	; Source host
+$DEF	SE$DST_HOST	.BLKL	1	; Destination host
+$DEF	SE$EXT1		.BLKL	1	; Header info longword #1
+$DEF	SE$EXT2		.BLKL	1	; Header info longword #2
+
+$DEF	SE$FLAGS	.BLKW	1	; Flags
+	_VIELD	SE,0,<-
+		<XMODE,1,M>,-		; Obsolete
+		<EOL,1,M>,-		; End Of Letter
+		<URG,1,M>-		; Urgent data present
+	>
+$DEF	SE$TIMEOUT	.BLKW	1	; Send timeout
+$DEF	SE$LCID		.BLKL	1	; Connection-ID
+$DEF	SE$BUFSIZE	.BLKW	1	; User buffer size
+$DEF	SE$BLK_SIZE	.BLKB	0	; SEND block size
+$DEF	SE$DATA		.BLKB	MAX_USIZE ; Start of user data in block
+$DEF	SE$MAX_SIZE	.BLKB	0	; Max send block size
+
+	$DEFEND	SE
+
+
+; Define additional fields for RECEIVE
+; N.B. INFO and STATUS also use this size block.
+
+	$DEFINI	RE
+
+. = AB$COM_END				; Append to common block
+
+$DEF	RE$SRC_HOST	.BLKL	1	; Source host
+$DEF	RE$DST_HOST	.BLKL	1	; Destination host
+$DEF	RE$EXT1		.BLKL	1	; Header info longword #1
+$DEF	RE$EXT2		.BLKL	1	; Header info longword #2
+
+$DEF	RE$FLAGS	.BLKW	1	; Flags
+$DEF	RE$TIMEOUT	.BLKW	1	; Receive timeout
+$DEF	RE$LCID		.BLKL	1	; Connection-ID
+$DEF	RE$Alt_IO	.BLKL	1	; Alt_IO entry point
+$DEF	RE$PH_Buff	.BLKL	1	; Proto Header buffer Pntr
+$DEF	RE$BUFSIZE	.BLKW	1	; User buffer size
+$DEF	RE$BLK_SIZE	.BLKB	0	; RECEIVE block size
+$DEF	RE$DATA		.BLKB	MAX_Usize ; Start of user data in block
+$DEF	RE$MAX_SIZE	.BLKB	0	; Max READ block
+
+	$DEFEND	RE
+
+
+; Define additional fields for STATUS and INFO
+
+	$DEFINI	ST
+
+. = AB$COM_END				; Append to common block
+
+$DEF	ST$FLAGS	.BLKW	1	; Flags
+$DEF	ST$TIMEOUT	.BLKW	1	; Timeout
+$DEF	ST$LCID		.BLKL	1	; Connection-ID
+$DEF	ST$BUFSIZE	.BLKW	1	; User buffer size
+$DEF	ST$BLK_SIZE	.BLKB	0	; info/status block size
+$DEF	ST$DATA		.BLKB	MAX_Usize ; Start of user data in block
+$DEF	ST$MAX_SIZE	.BLKB	0	; Max READ block
+
+	$DEFEND	ST
+
+; Define additional fields for GTHST
+
+	$DEFINI	GH
+
+. = AB$COM_END				; Append to common block
+
+$DEF	GH$FLAGS	.BLKW	1	; Flags (currently unused)
+$DEF	GH$FUNCT	.BLKW	1	; GTHST function code
+$DEF	GH$BUFSIZE	.BLKW	1	; User's buffer size
+$DEF	GH$ARG1		.BLKW	1	; First argument to GTHST
+$DEF	GH$ARG2SIZE	.BLKW	1	; Length of second argument
+$DEF	GH$ARG2		.BLKB	FH_NAME_SIZE ; Second argument to GTHST
+$DEF	GH$BLK_SIZE	.BLKB	0	; Size of basic GTHST block
+$DEF	GH$UDATA	.BLKB	MAX_USIZE ; Area to return data to user
+$DEF	GH$MAX_SIZE	.BLKB	0	; Max size of GTHST block
+
+	$DEFEND	GH
+
+
+; Additional fields for debugging functions
+
+	$DEFINI DB
+
+. = AB$COM_END				; Append to common block
+
+$DEF	DB$LEVEL	.BLKL	1	; Debugging level
+$DEF	DB$LCID		.BLKL	1	; Connection ID
+$DEF	DB$GROUP	.BLKL	1	; Which logging flags to modify
+$DEF	DB$BLK_SIZE	.BLKB	0	; Max DEBUG block size
+
+	$DEFEND DB
+
+
+;Additional fields for Dump function
+
+	$DEFINI DU
+
+. = AB$COM_END				; Append to common block
+
+$DEF	DU$FUNCT	.BLKW	1	; Dump subfunction
+$DEF	DU$TIMEOUT	.BLKW	1	; Timeout (obsolete, unused)
+$DEF	DU$ARG0		.BLKL	1	; Argument #0
+$DEF	DU$ARG1		.BLKL	1	; Argument #1
+$DEF	DU$ARG2		.BLKL	1	; Argument #2
+$DEF	DU$BUFSIZE	.BLKW	1	; User buffer size
+$DEF	DU$BLK_SIZE	.BLKB	0	; Basic buffer size
+$DEF	DU$DATA		.BLKB	MAX_USIZE ; User data area
+$DEF	DU$MAX_SIZE	.BLKB	0	; Maximum buffer size
+
+	$DEFEND DU
+
+
+; Define additional fields for EVENT
+
+	$DEFINI	EV
+
+. = AB$COM_END				; Append to common block
+
+$DEF	EV$BUFSIZE	.BLKW	1	; User buffer size
+$DEF	EV$BLK_SIZE	.BLKB	0	; EVENT block size
+$DEF	EV$DATA		.BLKB	MAX_USIZE ; Start of user data in block
+$DEF	EV$MAX_SIZE	.BLKB	0	; Max send block size
+
+	$DEFEND	EV
+
+
+;Additional fields for NCP function
+
+	$DEFINI NCP
+
+. = AB$COM_END				; Append to common block
+
+$DEF	NCP$FUNCT	.BLKW	1	; NCP function
+$DEF	NCP$MISC	.BLKW	1	; NCP subfunction
+$DEF	NCP$WBUFSIZE	.BLKW	1	; User buffer size
+$DEF	NCP$RBUFSIZE	.BLKW	1	; User buffer size
+$DEF	NCP$BLK_SIZE	.BLKB	0	; Basic buffer size
+$DEF	NCP$DATA	.BLKB	MAX_USIZE ; User data area
+$DEF	NCP$MAX_SIZE	.BLKB	0	; Maximum buffer size
+
+	$DEFEND NCP
+
+
+; User QIO function codes, func parameter of $qio
+
+IP$OPEN		= IO$_CREATE
+IP$SEND		= IO$_WRITELBLK
+IP$RECEIVE	= IO$_READLBLK
+IP$CLOSE	= IO$_DELETE
+IP$STATUS	= IO$_ACPCONTROL
+IP$ABORT	= IO$_DEACCESS
+IP$INFO		= IO$_MODIFY
+IP$DUMP		= IO$_UNLOAD
+IP$EXIT		= IO$_RELEASE
+IP$DEBUG	= IO$_DIAGNOSE
+
+; GTHST (Get host information) $QIO function code
+
+IP$GTHST	= IO$_SKIPFILE
+
+; EVENT (Send activity data) $QIO function code
+
+IP$EVENT	= IO$_WRITECHECK
+
+IP$NCP		= IO$_RDSTATS
+
+; IP Argument block function codes
+; the following user function codes must form a dense list as they are
+; used to generate a case table.
+
+U$OPEN		= 1
+U$SEND		= 2
+U$RECV		= 3
+U$CLOSE		= 4
+U$STATUS	= 5
+U$ABORT		= 6
+U$INFO		= 7
+
+U$GTHST		= 8
+    U$GH_NAMADR = 1		; Domain Name to A-record function
+    U$GH_ADRNAM	= 2		; Address to name function
+    U$GH_RRLOOK = 3		; Domain Name to RR function
+
+; Privileged maintenance calls.
+
+M$DUMP		= 9
+M$EXIT		= 10
+M$DEBUG		= 11
+M$EVENT		= 12
+M$NCP		= 13
+M$CANCEL	= 14
+
+du$known_host_index = 6		; dump sub-function code.
+
+
+	.SBTTL	Standard tables
+
+;
+; Driver prologue table
+;
+; !!!HACK!!! Do we need FLAGS=DPT$M_SVP ?
+
+	DPTAB	-				; DPT-creation macro
+		END=IP_END,-			; End of driver label
+		ADAPTER=NULL,-			; Adapter type
+		FLAGS=DPT$M_SVP,-		; Allocate a PTE
+		UCBSIZE=<IP_UCB_K_Length>,-	; Length of UCB
+		UNLOAD=IP_UNLOAD,-		; Unload the IP driver
+		NAME=IPDRIVER			; Driver name
+	DPT_STORE INIT				; Start of load
+						; initialization table
+.IF DEFINED VMS_V4
+	DPT_STORE UCB,UCB$B_FIPL,B,8		; FORK IPL
+.IF_FALSE
+	DPT_STORE UCB,UCB$B_FLCK,B,SPL$C_IOLOCK8
+.ENDC
+	DPT_STORE UCB,UCB$B_DIPL,B,8		; Device IPL
+	DPT_STORE UCB,UCB$W_REFC,W,0		; Reference Count.
+	DPT_STORE UCB,UCB$L_DEVCHAR,L,<-	; Device characteristics
+		DEV$M_NET!-			;   e.g., network device
+		DEV$M_IDV!-			;   input device
+		DEV$M_ODV!-			;   output device
+		DEV$M_MBX>			;   Mailbox like device.
+	DPT_STORE UCB,UCB$B_DEVCLASS,B,DC$_RealTime	; Realtime for SYE pgm
+	DPT_STORE UCB,UCB$L_STS,L,<UCB$M_Template>; ucb clone template.
+	DPT_STORE UCB,UCB$W_DEVBUFSIZ,W,1024	; Default Buffer size.
+	DPT_STORE UCB,UCB$W_MB_SEED,W,0		; UNIT # SEED.
+;	DPT_STORE UCB,UCB$L_OWNUIC,L,<^X010001>	; [1,1] OWNS THE DEVICE.
+	DPT_STORE UCB,UCB$L_CBID,L,0		; Control Block ID
+	DPT_STORE UCB,UCB$L_PROTOCOL,L,<^XFF>	; Protocol code
+	DPT_STORE ORB,ORB$L_OWNER,L,<^X010001>	; [1,1] OWNS THE DEVICE.
+	DPT_STORE ORB,ORB$B_FLAGS,B,-		; FLags
+				<ORB$M_PROT_16>	; Protection
+	DPT_STORE ORB,ORB$W_PROT,W,0		; Object protection
+	DPT_STORE DDB,DDB$L_ACPD,L,<^A\IP\>	; DEFAULT ACP NAME
+	DPT_STORE DDB,DDB$L_ACPD+3,B,3		; ACP Class
+
+
+; Reinitialize Values on driver re-load
+
+	DPT_STORE REINIT
+	DPT_STORE DDB,DDB$L_DDT,D,IP$DDT	; Address of Driver Dispatch Tbl.
+.IF DEFINED VMS_V4
+	DPT_STORE UCB,UCB$B_FIPL,B,8		; FORK IPL
+.IF_FALSE
+	DPT_STORE UCB,UCB$B_FLCK,B,SPL$C_IOLOCK8
+.ENDC
+	DPT_STORE UCB,UCB$B_DIPL,B,8		; Device IPL
+	DPT_STORE UCB,UCB$W_REFC,W,0		; REFERENCE COUNT.
+	DPT_STORE UCB,UCB$L_DEVCHAR,L,<-	; Device characteristics
+		DEV$M_NET!-			;   e.g., network device
+		DEV$M_IDV!-			;   input device
+		DEV$M_ODV!-			;   output device
+		DEV$M_MBX>			;   Mailbox like device.
+	DPT_STORE UCB,UCB$B_DEVCLASS,B,DC$_RealTime	; Realtime for SYE pgm
+	DPT_STORE UCB,UCB$L_STS,L,<UCB$M_Template>; Template for other units.
+	DPT_STORE UCB,UCB$W_DEVBUFSIZ,W,1024	; Default Buffer size.
+	DPT_STORE UCB,UCB$L_VCB,0		;
+	DPT_STORE UCB,UCB$L_PID,0
+	DPT_STORE UCB,UCB$W_MB_SEED,W,0		; UNIT # SEED.
+	DPT_STORE UCB,UCB$L_PROTOCOL,L,<^XFF>	; Protocol code
+;	DPT_STORE UCB,UCB$L_OWNUIC,L,<^X010001>	; [1,1] OWNS THE DEVICE.
+	DPT_STORE ORB,ORB$L_OWNER,L,<^X010001>	; [1,1] OWNS THE DEVICE.
+	DPT_STORE ORB,ORB$B_FLAGS,B,-		; Flags
+				<ORB$M_PROT_16>	; Protection
+	DPT_STORE ORB,ORB$W_PROT,W,0		; Object protection
+	DPT_STORE DDB,DDB$L_ACPD,L,<^A\IP\>	; DEFAULT ACP NAME
+	DPT_STORE DDB,DDB$L_ACPD+3,B,3		; ACP Class
+
+; Even though this is a pseudo-device SYSGEN insists on a unit initialization
+; routine.  If left out sysgen will crash the system on a connect cmd.  Rtn
+; is just a dummy.  I suspect SYSGEN makes a special check for DEC pseudo-devices
+; hence they don't need this bogus rtn.
+
+;	DPT_STORE CRB,CRB$L_INTD+VEC$L_INITIAL,D, Control_Init
+	DPT_STORE CRB,CRB$L_INTD+VEC$L_UNITINIT,-
+		D,UNIT_INIT
+	DPT_STORE END				; End of initialization
+						; tables
+
+;
+; Driver dispatch table
+;
+
+	DDTAB	DEVNAM=IP,-			; Name of device
+		START=0,-			; Start I/O routine
+		UNSOLIC=0,-			; Unsolicited interrupt
+		FUNCTB=IP_FUNCTABLE,-		; FDT address
+		CANCEL=IP_Cancel,-		; Cancel I/O routine
+		ALTSTART=0,-			; Alternate entry
+		UNITINIT=Unit_Init,-		; Jus' whad it say.
+		REGDMP=0,-			; no Register dump routine
+		DIAGBF=28,-			; Diagnostic buffer size
+		ERLGBF=0			; no Error Log buffer size.
+
+;
+; Function dispatch table
+;
+
+IP_FUNCTABLE:					; FDT for driver
+	FUNCTAB	,-				; Valid I/O functions
+		<READVBLK,-			; Read virtual
+		READLBLK,-			; Read logical
+		READPBLK,-			; Read physical
+		WRITEVBLK,-			; Write virtual
+		WRITELBLK,-			; Write logical
+		WRITEPBLK,-			; Write physical
+		RELEASE,-
+		DIAGNOSE,-
+		CREATE,-
+		DELETE,-
+		ACPCONTROL,-
+		DEACCESS,-
+		SEEK,-
+		ACCESS,-
+		MODIFY,-
+		SKIPFILE,-
+		UNLOAD,-
+		WRITECHECK,-
+		RDSTATS>
+
+; Valid Buffered I/O Functions
+
+	FUNCTAB	,-
+		<READVBLK,-			; RECEIVE.
+		READLBLK,-			;     "
+		READPBLK,-			;     "
+		WRITEVBLK,-			; Send
+		WRITELBLK,-			;     "
+		WRITEPBLK,-			;      "
+		RELEASE,-			; Maintenance: IP Exit
+		DIAGNOSE,-			; Maintenance: DEBUG
+		CREATE,-			; "OPEN" a network connection
+		DELETE,-			; "CLOSE" connection
+		ACPCONTROL,-			; "Status" report
+		MODIFY,-			; Connection Info.
+		DEACCESS,-			; "Abort" connection
+		ACCESS,-			; VMS cancel conns for PID.
+		SKIPFILE,-			; GTHST
+		UNLOAD,-			; IP Maintenance: CB Dump.
+		WRITECHECK,-			; Log event function.
+		RDSTATS>			; NCP access
+
+	FUNCTAB NET_SEND,<WRITELBLK>		; "Send" Function
+
+	FUNCTAB +EXE$ABORTIO,-			; invalid functions.
+		<READVBLK,-			; read virtual,
+		READPBLK>			; and read physical.
+
+	FUNCTAB NET_RECEIVE,<READLBLK>		; Receive Function
+
+	FUNCTAB +EXE$ABORTIO,-			; invalid receive functions.
+		<WRITEVBLK,-			; write virtual,
+		WRITEPBLK>			; and write physical.
+
+	FUNCTAB NET_OPEN,<CREATE>		; "OPEN" a connection.
+
+	FUNCTAB NET_CLOSE,<DELETE>		; CLOSE specified connection.
+
+	FUNCTAB NET_STATUS,<ACPCONTROL>		; Obtain connection status.
+
+	FUNCTAB	NET_INFO,<MODIFY>		; Connection Information.
+
+	FUNCTAB NET_ABORT,<DEACCESS>		; ABORT specified connection.
+
+	FUNCTAB NET_DUMP,<UNLOAD>		; Dump specified CB.
+
+	FUNCTAB NET_EXIT,<RELEASE>		; Orderly shutdown of IP.
+
+	FUNCTAB NET_DEBUG,<DIAGNOSE>		; Set Debug level.
+
+	FUNCTAB	NET_GTHST,<SKIPFILE>		; Get host info.
+
+	FUNCTAB	NET_EVENT,<WRITECHECK>		; Add event to activity log.
+
+	FUNCTAB NET_NCP,<RDSTATS>		; NCP access.
+
+;++
+; IP_UNLOAD, Unload the driver
+;
+; Functional description:
+;
+;	Usefull for dealocating system buffers with COM$DRVDEALMEM.
+;
+;	N.B.  See the VMS Device Support manual section on the
+;	Driver Unloading Routine before modifying this routine.
+;
+; Context:
+;
+;	SYSGEN calls the driver unloading routine at IPL$_POWER.
+;	The driver unloading routine cannot lower IPL.
+;	The driver unloading routine is called in process context.
+;	The driver unloading routine can use all registers.
+;
+; Inputs:
+;
+;	R6	- address of the DDB (device data block)
+;	R10	- address of the DPT (driver prologue table)
+;
+; Outputs:
+;
+;	The driver unloading routine can use all registers.
+;
+;--
+
+IP_UNLOAD:				; Unload device
+	MOVL	#SS$_NORMAL,R0
+	RSB				; Return
+
+
+	.sbttl	Unit Initialization rtn.
+
+; Bogus unit initialization rtn that sysgen can call even though this is
+; a virtual device.  If this rtn is left out sysgen crashes the system on
+; a connect cmd.
+
+;
+; Functional description:
+;
+;	The operating system calls this routine after calling the
+;	controller initialization routine:
+;
+;		at system startup
+;		during driver loading
+;		during recovery from a power failure
+;
+; Inputs:
+;
+;	R4	- address of the CSR (controller status register)
+;	R5	- address of the UCB (unit control block)
+;
+; Outputs:
+;
+;	The routine must preserve all registers except R0-R3.
+;
+;--
+
+Unit_init:
+;	JSB	G^INI$BRK
+	RSB
+
+	.SBTTL	FDT Routine: "OPEN" a Network Connection.
+
+;++
+; OPEN a network connection, QIO func=IP$OPEN
+;
+; Functional description:
+;
+;	The user has requested to "OPEN" a network connection.
+;	Here we verify the QIO parameters & build an argument block.
+;	Finally the IRP (I/O Request Packet) & associated System buffer
+;	( argument block) are queued to the IP ACP.
+;
+;	OPEN argument structure:
+;!!!HACK!!! I think all of the structure definitions in this module are wrong!
+;
+;	=============================================================
+;	+		    Data Start - Not used		    +
+;	!-----------------------------------------------------------!
+;	+		User's Buffer Address - Not used.	    +
+;	!-----------------------------------------------------------!
+;	+		    VMS Block ID longword.		    +
+;	!-----------------------------------------------------------!
+;	+	IRP Address - Used by ACP for IO postprocessing     +
+;	!-----------------------------------------------------------!
+;	+	UCB Address - Used by ACP for IO postprocessing     +
+;	!-----------------------------------------------------------!
+;	+			    PID				    +
+;	!-----------------------------------------------------------!
+;	+	Time Out(secs)	     !       Flags	!  Function +
+;	!-----------------------------------------------------------!
+;	+			Local Port			    +
+;	!-----------------------------------------------------------!
+;	+			Foreign				    +
+;	+			Host				    +
+;	+			ASCIZ				    +
+;	+			Name				    +
+;	+		20 chars max (includes null)		    +
+;	!-----------------------------------------------------------!
+;	+			Foreign Port			    +
+;	!-----------------------------------------------------------!
+;	+	Process IO Channel   !   Buffer Size in Bytes       +
+;	=============================================================
+;
+;
+; Inputs:
+;
+;	R0-R2	- scratch registers
+;	R3	- address of the IRP (I/O request packet)
+;	R4	- address of the PCB (process control block)
+;	R5	- address of the UCB (unit control block)
+;	R6	- address of the CCB (channel control block)
+;	R7	- bit number of the I/O function code
+;	R8	- address of the FDT table entry for this routine
+;	R9-R11	- scratch registers
+;	AP	- address of the 1st function dependent QIO parameter
+;
+; QIO P1 - P6 Parameters
+;
+;	P1 = Address of Foreign Host asciz name or 0 for wild-card Host.
+;	P2 = Foreign Port integer or 0 for wild-card port.
+;	P3 = Local Port integer or 0 to let ACP assign a local port integer.
+;	P4 = Open flags, bit 0 is mode
+;	P5 = Protocol code, 0 = TCP, 1 = UDP, 2 = ICMP, 3 = IP
+;	P6 = Connection time-out in seconds.
+;
+; Outputs:
+;
+;	IRP & associated system buffer (IPACP argument block) are queued to
+;	the IP ACP.
+;
+;	The routine must preserve all registers except R0-R2, and
+;	R9-R11.
+;
+; User Error Returns:
+;
+;	SS$_MEDOFL	= Media is off-line, ACP has died.
+;	SS$_ACCVIO	= Unable to access HOST name string.
+;	SS$_BADPARAM	= Host name string + null byte > 20 characters.
+;	SS$_EXQUOTA	= unable to allocate ACP argument blk.
+;	SS$_INSFMEM	= Same as SS$_EXQUOTA.
+;
+;--
+
+
+NET_OPEN:
+	bsbw	netacp_alive		; network ACP still running?
+;;	jsb	G^INI$BRK
+	clrl	UCB$L_ADDRMODE(R5)	; Now we'll know during NET_SEND...
+
+	cmpb	P5(AP),#UDP_Protocol ; Doing UDP?
+	bneq	2$			; Nope, go on.
+	MOVL	P4(AP),R0		;Temp
+	bitl	#OPF$MODE,P4(AP)	; 
+	bneq	2$			; No, then all is well.
+
+	; Ok, the user is passing the IP addresses in the data buffer.
+	; We are going to make a note of this in the UCB.
+	movl	#1,UCB$L_ADDRMODE(R5)	; Now we'll know during NET_SEND...
+	
+; If the user is supplying an IP address, figure the length
+
+2$:	bitl	#OPF$ADDRFLAG,P4(AP)	; Is he specifying an IP address?
+	beql	5$			; No - check string length
+	movzbl	S^#4,R9			; Length of string
+	movl	R9,R1			; Size of buffer	
+	movl	P1(AP),R0		; Buffer address
+	JSB	G^EXE$WriteCHK		; Check it
+	brb	OP$Buf			; And done
+
+; Determine length of Foreign Host name for copy operation.
+; Did user specify a wild-card host (eg,0)?
+
+5$:	clrl	R9			; assume a wild-card size.
+	tstl	P1(AP)			; see if wildcard specified
+	beql	OP$Buf			; wild-card, continue.
+
+; Check access to specified Foreign Host name.  Since we don't know the
+; actual length we must assume 1 char for access check.
+
+	movl	P1(AP),R0		; get address of String.
+	movzbl	S^#1,R1			; set size
+	JSB	G^EXE$WriteCHK		; if error we don't return here.
+
+; Verify length to be < 128 chars. 127 chars of name + null termination byte.
+
+	locc	S^#0,#FH_NAME_SIZE,(R0)	; find the null
+	BNEQ	10$			; 0 = not found
+
+; String too long, return error
+
+	movzwl	#SS$_BadParam,R0
+	JMP	G^EXE$ABORTIO
+
+; Found the null char, r0 = chars left in string. Compute actual size + null
+
+10$:	subl3	R0,#FH_NAME_SIZE,R9
+	incl	R9			; string size is in R9
+
+; Allocate a system buffer for the ACP argument block
+
+OP$Buf:
+	movzbl	#OP$ALL_SIZE,R1		; default size for buffer.
+	jsb	GetBuf			; allocate & check/account quotas
+
+; Fill in OPEN args.
+; R1 = size in bytes
+; R2 = address of system buffer.
+; R9 = Size of foreign host string
+;
+; copy Foreign Host name to ACP arg blk.
+
+	pushr	#^M<R1,R2,R3,R4,R5>
+	movl	R2,R10		; adrs of system buffer, so movc will be happy.
+
+; Initialize area first
+
+	movc5	#0,OP$Foreign_Host(R10),#0,#FH_Name_Size,OP$Foreign_Host(R10)
+	TSTL	R9			; Foreign Host name Wild?
+	BEQL	OP$FHW			; 0 = yes, do foreign port
+	movc3	R9,@P1(AP),OP$Foreign_Host(R10)
+
+; Here after copy or if wild
+
+OP$FHW:
+	movw	R9,OP$Foreign_Hlen(R10)	; Set foreign host name length
+	popr	#^M<R1,R2,R3,R4,R5>
+
+; Set foreign Port
+
+	movw	P2(AP),OP$Ext1+2(R2)
+
+; Local port
+
+	movw	P3(AP),OP$Ext1(R2)
+
+; Open flags (active/passive)
+
+	movw	P4(AP),OP$Flags(R2)		; O or 1 value
+
+; Time Out in seconds
+
+	movw	P6(AP),OP$TimeOut(R2)
+
+; Set "OPEN" function code and protocol code
+
+	movb	#U$OPEN,AB$B_Funct(R2)	; Set function code
+	movb	P5(AP),R0		; Get protocol code
+	movb	R0,UCB$L_Protocol(R5)	; Set UCB protocol code
+	movb	R0,AB$B_Protocol(R2)	; Set arg blk protocol code
+	movw	#OP$BLK_SIZE,AB$W_UARGSIZE(R2) ; Set argument block size
+
+; Rearrange parameters for a raw IP connection
+
+	cmpb	R0,#IP_PROTOCOL		; Is this an IP connection?
+	bneq	10$			; Nope, go on.
+	movl	P2(AP),OP$Src_Host(R2)	; Address filter
+	movl	P3(AP),OP$Ext1(R2)	; Protocol Filter
+
+; Include Process IO channel which reflects this network connection.
+
+10$:	movw	IRP$W_Chan(R3),OP$PIOCHAN(R2)
+
+; Clear ACP window blk pointer.
+
+	clrl	CCB$L_WIND(R6)
+
+; Queue IRP & ACP arg blk to network acp "IPACP"
+; R5 = ucb adrs
+
+Queue_2_ACP:
+	movl	UCB$L_VCB(R5),R0	; get address of VCB
+.IF DEFINED VMS_V4
+	SetIPL	#IPL$_SYNCH		; synchronize with VMS
+.ENDC
+	incw	VCB$W_Trans(R0)		; include this IRP
+;	movl	#42,IRP$L_EXTEND(R3) ; Mark this...
+	JMP	G^EXE$QIOACPPKT		; to the ACP......
+
+
+	.SBTTL	FDT Routine: "CLOSE/ABORT" a Network Connection.
+
+;++
+; Close a network connection, QIO func=IP$Close.
+; Abort a connection, QIO func=IP$Abort.
+;
+; Functional description:
+;
+;	User has requested a network connection be closed.  A ACP argument
+;	block is generated.
+;
+;	CLOSE/Abort argument block structure:
+;
+;	=============================================================
+;	+		Data Start - Not used.			    +
+;	!-----------------------------------------------------------!
+;	+		Users Buffer Address - Not used.	    +
+;	!-----------------------------------------------------------!
+;	+		VMS Block ID longword.			    +
+;	!-----------------------------------------------------------!
+;	+	IRP Address - Used by ACP for IO postprocessing     +
+;	!-----------------------------------------------------------!
+;	+	UCB Address - Used by ACP for IO postprocessing     +
+;	!-----------------------------------------------------------!
+;	+			PID				    +
+;	!-----------------------------------------------------------!
+;	+	Not Used.	     !       Flags	!  Function +
+;	!-----------------------------------------------------------!
+;	+			Local Connection ID		    +
+;	=============================================================
+;
+; Inputs:
+;
+;	R0-R2	- scratch registers
+;	R3	- address of the IRP (I/O request packet)
+;	R4	- address of the PCB (process control block)
+;	R5	- address of the UCB (unit control block)
+;	R6	- address of the CCB (channel control block)
+;	R7	- bit number of the I/O function code
+;	R8	- address of the FDT table entry for this routine
+;	R9-R11	- scratch registers
+;	AP	- address of the 1st function dependent QIO parameter
+;
+; QIO Parameters:
+;
+;	P1 = Close flags
+;
+; Outputs:
+;
+;	IRP & associated system buffer(ACP argument block) are queue to
+;	the IP ACP.
+;
+;	The routine must preserve all registers except R0-R2, and
+;	R9-R11.
+;
+; User Error Returns:
+;
+;	SS$_MEDOFL	= Media off-line, ACP is not running.
+;	SS$_BADPARAM	= Invalid Local Connection ID (<= 0).
+;	SS$_EXQUOTA	= Unable to allocate ACP argument block.
+;	SS$_INSFMEM	= same as SS$_EXQUOTA.
+;
+;--
+
+NET_Close:
+	movw	#U$Close,R10		; set function for common code.
+;	cmpb	UCB$L_Protocol(R5),#UDP_Protocol
+;	bneq	5$
+;	movw	#UDP$Close,R10
+;5$:
+
+; Do common code/set-up for NET_Close & NET_Abort functions
+
+DO_AB:
+	bsbw	netacp_alive		; network ACP still running?
+
+; Allocate a system buffer(ACP arg blk)
+
+	movzbl	#CL$ALL_SIZE,R1
+	JSB	GetBuf
+
+; Setup arguments - R2 points at ACP arg blk.
+
+	movl	UCB$L_CBID(R5),CL$LCID(R2) ;;; Copy connection-ID
+	movw	P1(AP),CL$FLAGS(R2)	; Copy flags
+	movb	R10,AB$B_Funct(R2)	; set ACP function code
+	movb	UCB$L_Protocol(R5),AB$B_Protocol(R2); Set arg blk protocol code
+	movw	#CL$BLK_SIZE,AB$W_UARGSIZE(R2) ; Set argblk length
+	BRW	Queue_2_ACP		; of to the ACP
+
+
+; "ABORT" function.  Set-up is the same as CLOSE, only difference is
+; ACP Function code.
+
+NET_ABORT:
+	movw	#U$ABORT,R10		; set for common code
+;	cmpb	UCB$L_Protocol(R5),#UDP_Protocol ; Doing UDP?
+;	bneq	5$			; No.
+;	movw	#UDP$ABORT,R10		; Yes - set UDP code
+;5$:
+	BRB	DO_AB			; merge into common code sequence.
+
+; Handle the Bad Local connection ID Error.
+
+Bad_LC_ID:
+	movzwl	#SS$_BadParam,R0
+	JMP	G^EXE$ABORTIO		; return error to user.
+
+.SBTTL	FDT Routines: "ACP Functions: SEND,RECEIVE,STATUS,INFO,DUMP & EVENT".
+
+;++
+; SEND data over the network, QIO Func=IP$SEND=IO$_WRITELBLK.
+; RECEIVE data from the network, QIO Func=IP$RECEIVE=IO$_READLBLK
+; Obtain a connections "STATUS", QIO Func=IP$STATUS=IO$_ACPCONTROL.
+; Retrieve Connection Information, QIO Func=IP$INFO=IO$_MODIFY.
+; DUMP a portion of IP, QIO Func=IP$DUMP=IO$_UNLOAD.
+; Log a significant EVENT (activity), QIO Func=NET$EVENT=IO$_WRITECHECK.
+;
+; Functional description:
+;
+;	ACP argument processing & arg block format for (Send,receive,status,
+;	Info,dump,event) are all very close so we can process them with one rtn
+;	Basic idea is that the user has specified a Data buffer, size &
+;	Local-Connection-ID for all four. Dump is a privileged (physical
+;	IO) function.
+;
+;	ACP argument Block structure:
+;
+;	=============================================================
+;	+	Data Start - Points at user data within this blk.    +
+;	!-----------------------------------------------------------!
+;	+		User's Buffer Address			    +
+;	!-----------------------------------------------------------!
+;	+		VMS Block ID longword.			    +
+;	!-----------------------------------------------------------!
+;	+	IRP Address - Used by ACP for IO postprocessing     +
+;	!-----------------------------------------------------------!
+;	+	UCB Address - Used by ACP for IO postprocessing     +
+;	!-----------------------------------------------------------!
+;	+			PID				    +
+;	!-----------------------------------------------------------!
+;	+	Time Out(secs)	     !Flags or dump code!  Function +
+;	!-----------------------------------------------------------!
+;	+		   Local Connection ID			    +
+;	!-----------------------------------------------------------!
+;	+	Tag		     !		Data Size	    +
+;	!-----------------------------------------------------------!
+;	+	User's Data or Space reserved for data.		    +
+;	+	Size in bytes is found in field "Data Size"	    +
+;	=============================================================
+;
+;
+; Inputs:
+;
+;	R0-R2	- scratch registers
+;	R3	- address of the IRP (I/O request packet)
+;	R4	- address of the PCB (process control block)
+;	R5	- address of the UCB (unit control block)
+;	R6	- address of the CCB (channel control block)
+;	R7	- bit number of the I/O function code
+;	R8	- address of the FDT table entry for this routine
+;	R9-R11	- scratch registers
+;	AP	- address of the 1st function dependent QIO parameter
+;
+; QIO Parameters:
+;
+;!!!HACK!!! this is wrong!
+;
+;	P1 = Buffer address
+;	P2 = Size of buffer in bytes
+;	P3 = 
+;		Send: EOL flag (Bit 0),  Urgent flag (Bit 1).
+;		Recv: Address spec. block (for UDP, ICMP, and IP)
+;	     	Dump: Dump function code.
+;	P4 =
+;		Send: Address spec. block (for UDP, ICMP, and IP)
+;		Dump: Local connection id (adrs of CB to be dumped).
+;		   adrs of asciz hostname string (known host index dump fcn).
+;		   Known Network host table index, host stats function.
+;
+; Outputs:
+;
+;	IRP & associated system buffer(ACP argument block) are queued to
+;	the IP ACP.
+;
+;	The routine must preserve all registers except R0-R2, and
+;	R9-R11.
+;
+; User Error Returns:
+;
+; SS$_MEDOFL		= Network ACP not running.
+; SS$_BADPARAM		= Invalid Local Connection ID (<= 0).
+; SS$_EXQUOTA		= Unable to allocate ACP Arg block or Buffer TOO large.
+; SS$_INSFMEM		= Unable to allocate ACP argument block.
+; SS$_ACCVIO		= Buffer access violation.
+; SS$_ILLCNTRLFUNC	= Illegal ACP function code. (Internal Error).
+;
+;--
+
+
+
+NET_Send:
+	bsbw	netacp_alive		; network ACP still running?
+
+	cmpb	UCB$L_Protocol(R5),#IP_Protocol ; Doing IP?
+	bneq	2$				; Nope, go on.
+	brw	IP_Send				; Yep... Treat it special.
+		
+2$:	cmpb	UCB$L_Protocol(R5),#UDP_Protocol ; Doing UDP?
+	bneq	3$				; Nope, go on.
+	tstl	UCB$L_ADDRMODE(R5)		; Addr in data buffer?
+	beql	3$				; nope
+	movl	P1(AP),P6(AP)			; P6 = addr buffer
+	addl2	#IPADR$UDP_SIZE,P1(AP)		; bump up buff addr by 3 longs
+	subl2	#IPADR$UDP_SIZE,P2(AP)		; bump dn buff size by 3 longs
+
+; Check for access to user specified IP addresses, if given.
+3$:	tstl	P6(AP)			; Was address specified?
+	beql	5$			; If not, go on.  Otherwise...
+	movl	P6(AP),R0		; get address
+	movzbl	S^#16,R1		; set size to 4 longs
+	jsb	G^EXE$WriteChk		; check access, set IRP$W_BCNT.
+
+; Check for access to user specified data buffer
+5$:	movl	P2(AP),R1		; get the size
+	bgtr	10$			; must be gtr 0
+
+; Return error on bad size or bad local connection ID.
+
+	movzwl	#SS$_BadParam,R0
+	JMP	G^EXE$ABORTIO
+
+; Did user request more than we want to give em?
+
+10$:	cmpl	R1,#MAX_USIZE
+	BLEQ	15$			; OK, check buffer access.
+
+; Requested buffer TOO large, return error.
+
+	movzwl	#SS$_INSFMEM,R0
+	JMP	G^EXE$AbortIO
+
+; Check the access.  Both system rtns (EXE$.....CHK) do NOT return if
+; an error occurs but pass control to QIO error handler.
+
+15$:	movl	P1(AP),R0		; get address
+	jsb	G^EXE$WriteChk		; check access, set IRP$W_BCNT.
+
+; Allocate ACP IRP buffer
+; If requested data buffer + ACP args <= IRP size, use IRP size.
+; This is to prevent dynamic non-paged pool fragmentation.
+; R1 = size (bytes) of system buffer needed.
+
+	addl3	#SE$BLK_SIZE,P2(AP),R1	; Fit in IRP size
+	cmpl	#IRP$K_Length,R1
+	Blss	20$			; User larger of the two sizes.
+	movzbl	#IRP$K_Length,R1
+20$:	JSB	GetBuf			; allocate/check quotas.
+
+; Set:
+; user's buffer address in ACP arg blk.
+; Data size
+; Local Connection ID or Dump fuction code.
+; I/O Request Tag
+; R2 = address of ACP arg block
+
+	; Move the data into the Arg Blk.
+	pushr	#^M<R1,R2,R3,R4,R5>
+	movc3	P2(AP),@P1(AP),SE$DATA(R2)
+	popr	#^M<R1,R2,R3,R4,R5>
+
+	tstl	P6(AP)				; Was address specified?
+	beql	23$				; If not, go on.  Otherwise...
+	movl	P6(AP),R0			; get address
+	movl	IPADR$SRC_HOST(R0),SE$Src_Host(R2) ; Set local host
+	movl	IPADR$DST_HOST(R0),SE$Dst_Host(R2) ; Set remote host
+	movl	IPADR$EXT1(R0),SE$EXT1(R2) 	; Set first header extension
+	movl	IPADR$EXT2(R0),SE$EXT2(R2) 	; Set second header extension
+	jmp	24$
+
+; No ADDRESS BLOCK given; clear out proto header fields to ddefault.
+23$:	movl	#0,SE$Src_Host(R2)		; Clear local host
+	movl	#0,SE$Dst_Host(R2)		; Clear remote host
+	movl	#0,SE$EXT1(R2)			; Clear first header extension
+	movl	#0,SE$EXT2(R2)			; Clear second header extension
+
+; Test / Set End Of Letter (EOL) & Urgent data (URG) Flags in ACP arg blk
+
+24$:	bitl	#SEF$EOL_Bit,P4(AP)		; Did e set the EOL bit?
+	beql	25$				; No? - check urgent bit.
+	bisb	#SE_M_EOL,SE$Flags(R2)		; Set it in the IRP flags
+
+25$:	bitl	#SEF$Urgent_Bit,P5(AP)		; Did e set the urgent bit?
+	beql	Send_Common			; No?
+	bisb	#SE_M_URG,SE$Flags(R2)		; Set it in the IRP flags
+
+Send_Common:
+	movl	UCB$L_CBID(R5),SE$LCID(R2)	; Connection ID
+	movl	P1(AP),AB$L_Users_Buf_Adrs(R2)
+	movw	P2(AP),SE$BUFSIZE(R2)		; amount of user data in bytes
+	movb	#U$SEND,AB$B_Funct(R2)		; Set function code
+	movw	#SE$BLK_SIZE,AB$W_UARGSIZE(R2)	; Set argblk length
+	movb	UCB$L_Protocol(R5),AB$B_Protocol(R2); Set arg blk protocol code
+
+
+; Copy data to system buffer
+; Send data starts in User argument block after the send arguments.
+
+Send$Copy_data:
+;!!!HACK!!! Is any of this redundant?
+	movab	SE$DATA(R2),AB$L_Data_Adrs(R2)
+	Brw	Queue_2_ACP
+
+IP_Send:
+
+; Check for access to user specified IP addresses, if given.
+
+;	JSB	G^INI$BRK	; Execute BPT (BreakPoint) instruction)
+;	movl	P5(AP),R1
+
+	ashl	#2,P5(AP),P5(AP)		; Convert longs to bytes
+
+	tstl	P6(AP)			; Was header specified?
+	beql	7$			; If not, abort.  Otherwise...
+	movl	P6(AP),R0		; get address
+	movl	P5(AP),R1		; Get header size..
+;!!!HACK!!! Should be #20 until above hack is fixed
+	cmpl	R1,#20		; at least 5 longs?
+	blss	7$			; too small, you lose...
+
+	jsb	G^EXE$WriteChk		; check access, set IRP$W_BCNT.
+
+; Check for access to user specified data buffer
+
+5$:	movl	P2(AP),R1		; get the size
+	bgtr	10$			; must be gtr 0
+
+; Return error on bad size or bad local connection ID.
+
+7$:	movzwl	#SS$_BadParam,R0
+	MOVL	P5(AP),R0
+	JMP	G^EXE$ABORTIO
+
+; Did user request more than we want to give em?
+
+10$:	cmpl	R1,#MAX_USIZE
+	BLEQ	15$			; OK, check buffer access.
+
+; Requested buffer TOO large, return error.
+
+	movzwl	#SS$_INSFMEM,R0
+	JMP	G^EXE$AbortIO
+
+; Check the access.  Both system rtns (EXE$.....CHK) do NOT return if
+; an error occurs but pass control to QIO error handler.
+
+15$:	movl	P1(AP),R0		; get address
+	jsb	G^EXE$WriteChk		; check access, set IRP$W_BCNT.
+
+; Allocate ACP IRP buffer
+; If requested data buffer + ACP args <= IRP size, use IRP size.
+; This is to prevent dynamic non-paged pool fragmentation.
+; R1 = size (bytes) of system buffer needed.
+
+	addl3	#SE$BLK_SIZE,P2(AP),R1	; Fit in IRP size
+	addl2	P5(AP),R1		; Add header size
+	cmpl	#IRP$K_Length,R1
+	Blss	20$			; User larger of the two sizes.
+	movzbl	#IRP$K_Length,R1
+20$:	JSB	GetBuf			; allocate/check quotas.
+
+; Set:
+; IP specific fields in ACP arg blk.
+; R2 = address of ACP arg block
+
+;!!!HACK!!! Why am I doing this?  The IPACP can get this data directly
+	movl	P6(AP),R0			; get address
+	movl	12(R0),SE$Src_Host(R2)		; Set local host
+	movl	16(R0),SE$Dst_Host(R2)		; Set remote host
+	movb	9(R0),SE$EXT1(R2) 		; Set protocol
+	movl	P5(AP),SE$EXT2(R2)	 	; Set header size
+
+	; Set EXACT and NOCHKSM Flags in ACP arg blk
+	movl	P4(AP),SE$Flags(R2)
+
+	; Move the data into the Arg Blk.
+	pushr	#^M<R1,R2,R3,R4,R5>
+	; First copy the header (preserving R2)
+	pushl	R2
+	movc3	P5(AP),@P6(AP),SE$DATA(R2)
+	popl	R2
+	; Now copy the data...
+	addl2	P5(AP),R2
+	movc3	P2(AP),@P1(AP),SE$DATA(R2)
+	popr	#^M<R1,R2,R3,R4,R5>
+
+	brw	Send_Common			; return to main routine
+
+
+NET_Receive:				; Receive data from network
+
+	movl	#16,R9			; Size of Addr Block
+
+2$:	cmpb	UCB$L_Protocol(R5),#UDP_Protocol ; Doing UDP?
+	bneq	3$				; Nope, go on.
+	movl	#12,R9				; UDP addr blk only 12 bytes
+	tstl	UCB$L_ADDRMODE(R5)		; Addr in data buffer?
+	beql	3$				; nope
+	movl	P1(AP),P3(AP)			; P3 = addr buffer
+	addl2	#IPADR$UDP_SIZE,P1(AP)		; bump up buff addr by 3 longs
+	subl2	#IPADR$UDP_SIZE,P2(AP)		; bump dn buff size by 3 longs
+
+; Check for access to user specified IP addresses, if given.
+3$:	tstl	P3(AP)			; Was address specified?
+	beql	5$			; If not, go on.  Otherwise...
+
+	movl	P3(AP),R0		; get address
+	movl	R9,R1			; set addr blk size to 3 or 4 longs
+	jsb	G^EXE$ReadChk		; check access, set IRP$W_BCNT.
+
+5$:	movw	#U$Recv,R11		; Receive request code
+	bsbw	netacp_alive		; network ACP still running?
+
+; Check for access to user specified data buffer
+
+	movl	P2(AP),R1		; get the size
+	bgtr	10$			; < 0 gives an error
+
+; Return error on bad size or bad local connection ID.
+
+	movzwl	#SS$_BadParam,R0
+	JMP	G^EXE$ABORTIO
+
+10$:	cmpl	R1,#MAX_USIZE		; Make sure he isn't asking too much
+	BLEQ	15$			; OK, check buffer access.
+
+; Requested buffer TOO large, return error.
+
+	movzwl	#SS$_INSFMEM,R0
+	JMP	G^EXE$AbortIO
+
+; Check the access.  Both system rtns (EXE$.....CHK) do NOT return if
+; an error occurs but returns to QIO error handler.
+; ReadCHK sets: IRP$W_BCNT & IRP$V_Func in IRP$W_STS(read function).
+
+15$:	movl	P1(AP),R0		; get address
+	JSB	G^EXE$ReadChk
+
+; Allocate a ACP arg block buffer.
+; Requested data buffer + ACP args <= IRP size, use IRP size.
+; This is to prevent dynamic non-paged pool fragmentation.
+; R1 = size (bytes) of system buffer needed.
+
+	addl3	#RE$BLK_SIZE,P2(AP),R1	; Fit in IRP size
+	cmpl	#IRP$K_Length,R1
+	Blss	20$			; User larger of the two sizes.
+	movzbl	#IRP$K_Length,R1
+20$:	JSB	GetBuf			; allocate/check quotas.
+
+; Set:
+; user's buffer address in ACP arg blk.
+; Data size
+; Local Connection ID
+; I/O Request Tag
+; R2 = address of ACP arg block
+
+	movl	UCB$L_CBID(R5),RE$LCID(R2)	; Connection ID
+	movl	P1(AP),AB$L_Users_Buf_Adrs(R2)
+	movw	P2(AP),RE$BUFSIZE(R2)		; amount of user data in bytes
+	movb	R11,AB$B_Funct(R2)		; Set function code
+	movb	UCB$L_Protocol(R5),AB$B_Protocol(R2); Set arg blk protocol code
+	movw	#RE$BLK_SIZE,AB$W_UARGSIZE(R2)	; Set argument block size
+
+	CLRL	RE$PH_Buff(R2)		; Pass addr to Uargs
+	tstl	P3(AP)			; Was address specified?
+	beql	30$			; If not, go on.  Otherwise...
+
+	; !!!HACK!!! I think this code is UHG-lee!
+	movzbl	R9,R1
+	PUSHL	R2
+	JSB	GetDiag			; allocate diagnostic buffer
+	movl	R2,R1
+	POPL	R2
+
+	movl	P3(AP),SB$L_Users_Buf_Adrs(R1) ; Point to user's P0 buffer.
+	movl	R1,IRP$L_DIAGBUF(R3)	; point at system buffer.
+	bisw2	#IRP$M_DIAGBUF,IRP$W_STS(R3) ; Set diagbuff flag in the IRP.
+	movl	SB$L_Data_Adrs(R1),RE$PH_Buff(R2) ; Pass addr to Uargs
+	movl	R9,SB$W_Size(R1)
+
+; Queue IRP & ACP arg blk to network acp "IPACP"
+
+30$:
+; We must set the system buffer data start address so that
+	; the IPACP won't over-write the Uargs we need for post-processing.
+	; !!!HACK!!! This is no longer necessary (w/o Finishio)
+	MOVAB	RE$Data(R2),AB$L_DATA_ADRS(R2)	; reset sysbuff data start
+
+	; Now send that puppy off to see the world...
+	BRW	Queue_2_ACP			; finish up (not really)
+
+
+
+; Common routines for Info & Status.
+
+NET_Status:				; Request connection status
+	movw	#U$Status,R11		; Status request code
+	brw	NET_R_Common		; Go to common code
+
+NET_Info:				; Request connection info
+	movw	#U$Info,R11		; Info request code
+
+; Info & Status requests join here, with R11 containing the request code.
+
+NET_R_Common:
+	bsbw	netacp_alive		; network ACP still running?
+
+; Check for access to user specified data buffer
+
+	movl	P2(AP),R1		; get the size
+	bgtr	10$			; < 0 gives an error
+
+; Return error on bad size or bad local connection ID.
+
+	movzwl	#SS$_BadParam,R0
+	JMP	G^EXE$ABORTIO
+
+10$:	cmpl	R1,#MAX_USIZE		; Make sure he isn't asking too much
+	BLEQ	15$			; OK, check buffer access.
+
+; Requested buffer TOO large, return error.
+
+	movzwl	#SS$_INSFMEM,R0
+	JMP	G^EXE$AbortIO
+
+; Check the access.  Both system rtns (EXE$.....CHK) do NOT return if
+; an error occurs but returns to QIO error handler.
+; ReadCHK sets: IRP$W_BCNT & IRP$V_Func in IRP$W_STS(read function).
+
+15$:	movl	P1(AP),R0		; get address
+	JSB	G^EXE$ReadChk
+
+; Allocate a ACP arg block buffer.
+; Requested data buffer + ACP args <= IRP size, use IRP size.
+; This is to prevent dynamic non-paged pool fragmentation.
+; R1 = size (bytes) of system buffer needed.
+
+	addl3	#ST$BLK_SIZE,P2(AP),R1	; Fit in IRP size
+	cmpl	#IRP$K_Length,R1
+	Blss	20$			; User larger of the two sizes.
+	movzbl	#IRP$K_Length,R1
+20$:	JSB	GetBuf			; allocate/check quotas.
+
+; Set:
+; user's buffer address in ACP arg blk.
+; Data size
+; Local Connection ID
+; I/O Request Tag
+; R2 = address of ACP arg block
+
+	movl	UCB$L_CBID(R5),ST$LCID(R2)	; Connection ID
+	movl	P1(AP),AB$L_Users_Buf_Adrs(R2)
+	movw	P2(AP),ST$BUFSIZE(R2)		; amount of user data in bytes
+	movb	R11,AB$B_Funct(R2)		; Set function code
+	movb	UCB$L_Protocol(R5),AB$B_Protocol(R2); Set arg blk protocol code
+	movw	#ST$BLK_SIZE,AB$W_UARGSIZE(R2)	; Set argument block size
+
+	Brw	Queue_2_ACP			; finish up
+
+
+; Network dump debugging function.
+; Basically a read function, but a little bit different.
+
+NET_Dump:
+	bsbw	netacp_alive		; network ACP still running?
+
+; Check for access to user specified data buffer
+
+	movl	P2(AP),R1		; get the size
+	bgtr	10$			; < 0 gives an error
+
+; Return error on bad size or bad local connection ID.
+
+	movzwl	#SS$_BadParam,R0
+	JMP	G^EXE$ABORTIO
+
+; Did user request more than we want to give em?
+
+10$:	cmpl	R1,#DU$MAX_SIZE		; Is he asking for too much?
+	BLEQ	15$			; OK, check buffer access.
+
+; Requested buffer TOO large, return error.
+
+	movzwl	#SS$_INSFMEM,R0
+	JMP	G^EXE$AbortIO
+
+; Check the access.  Both system rtns (EXE$.....CHK) do NOT return if
+; an error occurs but returns to QIO error handler.
+; ReadCHK sets: IRP$W_BCNT & IRP$V_Func in IRP$W_STS(read function).
+
+15$:	movl	P1(AP),R0		; get address
+	JSB	G^EXE$ReadChk
+
+; Allocate a ACP arg block buffer.
+; If requested data buffer + ACP args <= IRP size, use IRP size.
+; This is to prevent dynamic non-paged pool fragmentation.
+; R1 = size (bytes) of system buffer needed.
+
+	addl3	#DU$BLK_SIZE,P2(AP),R1	; Fit in IRP size
+	cmpl	#IRP$K_Length,R1
+	Blss	20$			; User larger of the two sizes.
+	movzbl	#IRP$K_Length,R1
+20$:	JSB	GetBuf			; allocate/check quotas.
+
+; Set:
+; user's buffer address in ACP arg blk.
+; Data size
+; Dump function code
+; I/O Request Tag
+; R2 = address of ACP arg block
+
+	movl	P1(AP),AB$L_Users_Buf_Adrs(R2)
+	movw	P2(AP),DU$BUFSIZE(R2)		; amount of user data in bytes
+	movw	P3(AP),DU$FUNCT(R2)		; dump directive
+	movl	P4(AP),DU$ARG0(R2)		; Argument #0
+	movl	P5(AP),DU$ARG1(R2)		; Argument #1
+	movl	P6(AP),DU$ARG2(R2)		; Argument #2
+	movb	#M$DUMP,AB$B_Funct(R2)		; set ACP function code
+	movb	#255,AB$B_Protocol(R2); Set arg blk protocol code
+	movw	#DU$BLK_SIZE,AB$W_UARGSIZE(R2)	; set UARG block size
+	brw	Queue_2_ACP
+
+
+; Network NCP function.
+; Delivery a buffer of commands to the IPACP.  Return the results to
+; the client
+
+NET_NCP:
+	bsbw	netacp_alive		; network ACP still running?
+
+	movl	P5(AP),R1		; get the size
+	blss	7$			; < 0 gives an error
+
+; Check for access to user specified return buff, if given.
+	tstl	P4(AP)			; Was address specified?
+	beql	5$			; If not, go on.  Otherwise...
+	movl	P4(AP),R0		; get address
+	jsb	G^EXE$ReadChk		; check access, set IRP$W_BCNT.
+
+; Check for access to user specified data buffer
+
+5$:	movl	P3(AP),R1		; get the size
+	bgtr	10$			; < 0 gives an error
+
+; Return error on bad size or bad local connection ID.
+
+7$:	movzwl	#SS$_BadParam,R0
+	JMP	G^EXE$ABORTIO
+
+; Did user request more than we want to give em?
+
+10$:	cmpl	R1,#DU$MAX_SIZE		; Is he asking for too much?
+	BLEQ	15$			; OK, check buffer access.
+
+; Requested buffer TOO large, return error.
+
+	movzwl	#SS$_INSFMEM,R0
+	JMP	G^EXE$AbortIO
+
+; Check the access.  Both system rtns (EXE$.....CHK) do NOT return if
+; an error occurs but returns to QIO error handler.
+; ReadCHK sets: IRP$W_BCNT & IRP$V_Func in IRP$W_STS(read function).
+
+15$:	movl	P2(AP),R0		; get address
+	JSB	G^EXE$WriteChk
+
+; Allocate a ACP arg block buffer.
+; If requested data buffer + ACP args <= IRP size, use IRP size.
+; This is to prevent dynamic non-paged pool fragmentation.
+; R1 = size (bytes) of system buffer needed.
+
+	addl3	#DU$BLK_SIZE,P3(AP),R0	; Size of input IRP
+	addl3	#DU$BLK_SIZE,P5(AP),R1	; Size of output IRP
+	cmpl	R0,R1			; Use the larger of the two
+	BLSS	17$
+	movl	R0,R1			; Use size of input IRP
+17$:	cmpl	#IRP$K_Length,R1
+	Blss	20$			; User larger of the two sizes.
+	movzbl	#IRP$K_Length,R1
+20$:	JSB	GetBuf			; allocate/check quotas.
+
+; Move the data into the Arg Blk.
+	pushr	#^M<R1,R2,R3,R4,R5>
+	movc3	P3(AP),@P2(AP),NCP$DATA(R2)
+	popr	#^M<R1,R2,R3,R4,R5>
+
+; Set:
+; user's buffer address in ACP arg blk.
+; Data size
+; Dump function code
+; I/O Request Tag
+; R2 = address of ACP arg block
+
+	movw	P1(AP),NCP$FUNCT(R2)		; NCP directive
+	movl	P4(AP),AB$L_Users_Buf_Adrs(R2)
+	movw	P3(AP),NCP$WBUFSIZE(R2)	; amount of user data in bytes
+	movw	P5(AP),NCP$RBUFSIZE(R2)	; amount of user data in bytes
+	movb	#M$NCP,AB$B_Funct(R2)		; set ACP function code
+	movb	#255,AB$B_Protocol(R2)		; Set arg blk protocol code
+	movw	#NCP$BLK_SIZE,AB$W_UARGSIZE(R2); set UARG block size
+	movab	NCP$DATA(R2),AB$L_Data_Adrs(R2); buffer start
+	brw	Queue_2_ACP
+
+	.SBTTL	FDT Routines: GTHST - get host info
+
+;++
+;
+; Functional description:
+;
+;	Name translation function argument structure:
+;
+;	=============================================================
+;	+	Data start - Points at user data within the blk	    +
+;	!-----------------------------------------------------------!
+;	+		    User's Buffer Address.		    +
+;	!-----------------------------------------------------------!
+;	+		    VMS Block ID longword.		    +
+;	!-----------------------------------------------------------!
+;	+	IRP Address - Used by ACP for IO postprocessing     +
+;	!-----------------------------------------------------------!
+;	+	UCB Address - Used by ACP for IO postprocessing     +
+;	!-----------------------------------------------------------!
+;	+			    PID				    +
+;	!-----------------------------------------------------------!
+;	+	   Unused	     !  GTHST function	!  Function +
+;	!-----------------------------------------------------------!
+;	+		     Function Arguments			    +
+;	!-----------------------------------------------------------!
+;
+; Inputs:
+;
+;	R0-R2	- scratch registers
+;	R3	- address of the IRP (I/O request packet)
+;	R4	- address of the PCB (process control block)
+;	R5	- address of the UCB (unit control block)
+;	R6	- address of the CCB (channel control block)
+;	R7	- bit number of the I/O function code
+;	R8	- address of the FDT table entry for this routine
+;	R9-R11	- scratch registers
+;	AP	- address of the 1st function dependent QIO parameter
+;
+; QIO P1 - P6 Parameters
+;
+;	P1 = User buffer address
+;	P2 = User buffer size
+;	P3 = GTHST function code
+;	P4 = Function-specific argument
+;	P5 = Function-specific argument
+;	P6 = Function-specific argument
+;
+; Outputs:
+;
+;	IRP & associated system buffer(ACP argument block) are queued to
+;	the IP ACP.
+;
+;	The routine must preserve all registers except R0-R2, and
+;	R9-R11.
+;
+; User Error Returns:
+;
+;	SS$_MEDOFL	= Network ACP not running
+;	SS$_ACCVIO	= Unable to access HOST name string.
+;	SS$_BADPARAM	= Host name string + null byte > 128 characters.
+;	SS$_EXQUOTA	= unable to allocate ACP argument blk.
+;	SS$_INSFMEM	= Same as SS$_EXQUOTA.
+;
+;--
+
+NET_GTHST:
+
+	bsbw	netacp_alive		; Make sure ACP is alive
+
+; Check for access to user data buffer
+
+	movl	P2(AP),R1		; Get the size
+	bgeq	5$			; Good
+
+; Return error on bad size
+
+4$:	movzwl	#SS$_BADPARAM,R0
+	jmp	G^EXE$ABORTIO
+
+5$:
+
+; Check size
+
+	cmpl	R1,#GH$MAX_SIZE
+	bleq	6$			; OK - check buffer access
+	movzwl	#SS$_INSFMEM,R0		; Buffer too large error
+	jmp	G^EXE$ABORTIO
+
+; Check access to buffer
+
+6$:
+	movl	P1(AP),R0		; User buffer address
+	jsb	G^EXE$ReadChk		; Check access
+
+; Buffer ok - now check function-specific arguments
+
+	movzbl	#4,R9			; Assume arguments are one longword
+	movw	P3(AP),R11		; Get subfunction code
+	cmpw	R11,#U$GH_NAMADR	; Doing name to A-rec?
+	beql	7$			; Check name string.
+	cmpw	R11,#U$GH_RRLOOK	; Doing RR lookup?
+	bneq	8$			; No? don't check name string, then.
+
+; For NAMADR and RRLOOK, P4 has pointer to domain name string
+
+7$:	movl	P4(AP),R0		; Get address of string
+	movzbl	S^#1,R1			; Minimal size
+	JSB	G^EXE$ReadChk
+
+; Verify length to be < limit
+
+	locc	S^#0,#FH_NAME_SIZE,(R0)	; Find the null
+	beql	4$			; None - punt
+
+; Calculate string length
+
+	subl3	R0,#FH_NAME_SIZE,R9	; String size into R9
+	incl	R9
+
+; If we are doing an RRLook, check the RR-type parameter (P5).
+
+	cmpw	R11,#U$GH_RRLOOK	; Doing RR lookup?
+	bneq	8$			; No? don't check 2nd arg, then.
+
+	movl	P5(AP),R0		; Get RType arg
+; !!!HACK!!! check bounds here.
+
+; Allocate a system buffer for the argument block
+; R1 = size (bytes) of system buffer needed.
+; R9 = size of GTHST arguments (in addition to basic block)
+
+8$:	addl3	#GH$BLK_SIZE,P2(AP),R1	; Fit in IRP size
+	addl	R9,R1			; Add in argument length
+	cmpl	#IRP$K_Length,R1
+	blss	9$			; User larger of the two sizes.
+	movzbl	#IRP$K_Length,R1
+9$:	JSB	GetBuf			; allocate/check quotas.
+
+; Fill in arguments
+; R1 = Size in bytes
+; R2 = address of system buffer
+; R9 = size of second argument
+; R11 = GTHST subfunction code
+; P1 = address of user's buffer
+; P2 = size of user's buffer
+; P4 = Argument #1 (host name or IP address)
+; P5 = Argument #2 (For RR lookup, this is the resource type arguement)
+; P6 = Argument #3 (undefined for all current functions)
+
+	movl	P1(AP),AB$L_Users_Buf_adrs(R2)
+	movw	P2(AP),GH$BufSize(R2)
+	movb	S^#U$GTHST,AB$B_Funct(R2)
+	movb	#255,AB$B_Protocol(R2); Set arg blk protocol code
+	movw	#GH$BLK_SIZE,AB$W_UARGSIZE(R2)
+	movw	R11,GH$FUNCT(R2)
+	movw	#42,GH$ARG1(R2)		; init agr1...
+	movw	R9,GH$ARG2SIZE(R2)	; Set length of argument
+
+;NAMADR function - copy host name string
+
+	cmpw	R11,#U$GH_NAMADR	; Name to address translation?
+	bneq	12$
+	pushr	#^M<R1,R2,R3,R4,R5>
+	movl	R2,R10			; address of system buffer
+	movc3	R9,@P4(AP),GH$ARG2(R10)
+	popr	#^M<R1,R2,R3,R4,R5>
+	brb	20$			; Common finish
+
+;ADRNAM function
+
+12$:	cmpw	R11,#U$GH_ADRNAM	; Address to name translation?
+	bneq	14$
+	movl	P4(AP),GH$ARG2(R2)
+	brb	20$			; Common finish
+
+;RRLOOK function - copy domain name string
+
+14$:	cmpw	R11,#U$GH_RRLOOK	; Address to name translation?
+	bneq	18$
+	pushr	#^M<R1,R2,R3,R4,R5>
+	movw	P5(AP),GH$ARG1(R2)	; Set length of argument
+	movl	R2,R10			; address of system buffer
+	movc3	R9,@P4(AP),GH$ARG2(R10)
+	popr	#^M<R1,R2,R3,R4,R5>
+;	brb	20$			; Common finish
+
+;Some function we don't know - let the ACP abort it
+
+18$:
+
+; Done - give block to the ACP
+
+20$:
+	brw	Queue_2_ACP
+
+	.SBTTL	FDT Routine: EXIT and Debug routines.
+
+;++
+;
+; All of the following Maintenance ACP functions require the VMS
+; Physical I/O privilege EXCEPT Cancel.
+;
+; EXIT: Force ACP to Cleanup & exit, QIO func=IP$EXIT=IO$_Release.
+; DEBUG: set the level, QIO Func=IP$DEBUG=IO$_Diagnose
+;
+; Functional description:
+;
+;	Exit function causes IPACP to cleanup(dismount device) & exit.
+;	Debug function sets the level of trace information output
+;	by IPACP.
+;
+;
+;	EXIT / DEBUG ACP argument block structure:
+;
+;	=============================================================
+;	+		Data Start - Not used.			    +
+;	!-----------------------------------------------------------!
+;	+		Users Buffer Address - Not used.	    +
+;	!-----------------------------------------------------------!
+;	+		VMS Block ID longword.			    +
+;	!-----------------------------------------------------------!
+;	+	IRP Address - Used by ACP for IO postprocessing     +
+;	!-----------------------------------------------------------!
+;	+	UCB Address - Used by ACP for IO postprocessing     +
+;	!-----------------------------------------------------------!
+;	+			PID				    +
+;	!-----------------------------------------------------------!
+;	+	Not Used.	     !    Debug Level	!  Function +
+;	=============================================================
+;
+; Inputs:
+;
+;	R0-R2	- scratch registers
+;	R3	- address of the IRP (I/O request packet)
+;	R4	- address of the PCB (process control block)
+;	R5	- address of the UCB (unit control block)
+;	R6	- address of the CCB (channel control block)
+;	R7	- bit number of the I/O function code
+;	R8	- address of the FDT table entry for this routine
+;	R9-R11	- scratch registers
+;	AP	- address of the 1st function dependent QIO parameter
+;
+; QIO Parameters:
+;
+;	Exit:
+;		no P1 - P6 parameters
+;	Debug:
+;		P1 = Debug level.
+;		P2 = Connection ID.
+;
+; Outputs:
+;
+;	IRP & associated system buffer(ACP argument block) are queue to
+;	the IP ACP.
+;
+;	The routine must preserve all registers except R0-R2, and
+;	R9-R11.
+;
+; User Error Returns:
+;
+;	SS$_MEDOFL  = Network ACP is NOT running.
+;	SS$_EXQUOTA = Unable to allocate ACP argument block.
+;	SS$_INSFMEM = same as SS$_EXQUOTA.
+;
+;--
+
+NET_EXIT:
+	bsbw	netacp_alive		; network ACP still running?
+	movl	#IRP$K_Length,R1
+	JSB	GetBuf			; allocate & check/account quotas
+	movb	#M$EXIT,AB$B_Funct(R2)	; set ACP function code
+	movb	#255,AB$B_Protocol(R2); Set arg blk protocol code
+	movw	#DB$BLK_SIZE,AB$W_UARGSIZE(R2)
+	Brw	Queue_2_ACP
+
+; Set the ACP debug level.  Determines the amount of trace data the ACP
+; will generate.
+
+NET_DEBUG:
+	bsbw	netacp_alive		; network ACP still running?
+	movl	#IRP$K_Length,R1	; default size
+	jsb	GetBuf
+	movb	#M$DEBUG,AB$B_Funct(R2)	; set ACP function code
+	movb	#255,AB$B_Protocol(R2); Set arg blk protocol code
+	movw	#DB$BLK_SIZE,AB$W_UARGSIZE(R2)
+	movl	P1(AP),DB$LEVEL(R2)	; set debug level
+	movl	P2(AP),DB$LCID(R2)	; connection-ID (if any)
+	movl	P3(AP),DB$GROUP(R2)	; and logging type (ie. DEBUG,ACTIVITY)
+	Brw	Queue_2_ACP
+
+
+
+NET_Event:
+	bsbw	netacp_alive		; network ACP still running?
+
+; Check for access to user specified data buffer
+
+	movl	P2(AP),R1		; get the size
+	bgtr	10$			; must be gtr 0
+
+; Return error on bad size or bad local connection ID.
+
+	movzwl	#SS$_BadParam,R0
+	JMP	G^EXE$ABORTIO
+
+; Did user request more than we want to give em?
+
+10$:	cmpl	R1,#MAX_USIZE
+	BLEQ	15$			; OK, check buffer access.
+
+; Requested buffer TOO large, return error.
+
+	movzwl	#SS$_INSFMEM,R0
+	JMP	G^EXE$AbortIO
+
+; Check the access.  Both system rtns (EXE$.....CHK) do NOT return if
+; an error occurs but returns to QIO error handler.
+
+15$:	movl	P1(AP),R0		; get address
+	jsb	G^EXE$WriteChk		; check access, set IRP$W_BCNT.
+
+; Allocate ACP IRP buffer
+; If requested data buffer + ACP args <= IRP size, use IRP size.
+; This is to prevent dynamic non-paged pool fragmentation.
+; R1 = size (bytes) of system buffer needed.
+
+	addl3	#EV$BLK_SIZE,P2(AP),R1	; Fit in IRP size
+	cmpl	#IRP$K_Length,R1
+	Blss	20$			; User larger of the two sizes.
+	movzbl	#IRP$K_Length,R1
+20$:	JSB	GetBuf			; allocate/check quotas.
+
+; Set:
+; user's buffer address in arg blk.
+; Data size
+;
+; R2 = address of ACP arg block
+
+	movl	P1(AP),AB$L_Users_Buf_Adrs(R2)
+	movw	P2(AP),EV$BUFSIZE(R2)		; amount of user data in bytes
+
+	movb	#M$EVENT,AB$B_Funct(R2)		; Set function code
+	movb	#255,AB$B_Protocol(R2); Set arg blk protocol code
+	movw	#EV$BLK_SIZE,AB$W_UARGSIZE(R2)	; Set argblk length
+
+; Copy data to system buffer
+; Event data starts in User argument block after the event arguments.
+
+Event$Copy_data:
+	movab	EV$DATA(R2),AB$L_Data_Adrs(R2)
+	pushr	#^M<R1,R2,R3,R4,R5>
+	movc3	P2(AP),@P1(AP),EV$DATA(R2)
+	popr	#^M<R1,R2,R3,R4,R5>
+	Brw	Queue_2_ACP
+
+
+	.SBTTL	GetBuf - Allocate a System buffer & Check resources.
+
+;++
+; Allocate a Nonpaged-Pool system buffer to be used as a ACP argument block.
+; Let I/O post-processing rtns deallocate this buffer.
+;
+; Inputs:
+;
+;	R0,R2	- scratch registers
+;	R1	- Size (in bytes) of requested buffer.
+;	R3	- address of the IRP (I/O request packet)
+;	R4	- address of the PCB (process control block)
+;	R5	- address of the UCB (unit control block)
+;	R6	- address of the CCB (channel control block)
+;	R7	- bit number of the I/O function code
+;	R8	- address of the FDT table entry for this routine
+;	R9-R11	- scratch registers
+;	AP	- address of the 1st function dependent QIO parameter
+;
+;
+; Outputs:
+;
+; Routine returns to caller on success Otherwise JMP's to EXE$ABORTIO.
+;
+;   Success:
+;	R1 = Size of allocated system buffer, rounded to next 16 byte boundary.
+;	R2 = Address of newly allocated system buffer.
+;	IRP$L_SVAPTE - points at buffer
+;	IRP$B_BOFF = size of buffer in bytes.
+;	Selected ACP Argument block fields are set:
+;	 AB$L_PID = Pid of requesting process
+;	 AB$L_IRP_Adrs = address of IRP so ACP can find it again.
+;	 AB$L_Data_Adrs = address of actual data within this block.  Used
+;	 by VMS I/O post processing rtns to copy (RECEIVE request) data from
+;	 this system buffer to the user specified buffer.  Address is
+;	 actually the start of the ACP argument block (portion after the
+;	 VMS default block header).
+;
+;	The routine must preserve all registers except R0-R2.
+;
+; User Error Returns:
+;
+;	SS$_EXQUOTA = Unable to allocate ACP argument block.
+;	SS$_INSFMEM = same as SS$_EXQUOTA.
+;
+;--
+
+	.Enabl	LSB
+
+GetBuf:
+	pushr	#^M<R1,R3>
+.IF	DEFINED	VMS_V4
+	JSB	G^EXE$BufQuoPrc		; Can we afford the buffer?
+.IF_FALSE
+	JSB	G^EXE$DEBIT_BYTCNT_ALO
+.ENDC
+	popr	#^M<R1,R3>
+	Blbs	R0,10$
+
+; Couldn't afford buffer allocation, return error
+
+	popl	r1			; clear JSB return address
+	JMP	G^EXE$ABORTIO
+
+; Quota OK
+
+10$:
+.IF	DEFINED	VMS_V4
+	pushl	R3			; save IRP address
+	JSB	G^EXE$ALLOCBUF		; get a buffer
+	popl	R3
+	Blbs	R0,20$			; Success?
+
+; Unable to allocate system buffer
+
+	popl	R1
+	JMP	G^EXE$ABORTIO
+
+; Handle accounting chores.
+; R1 = size of system buffer
+; R2 = address
+; charge job for resources
+
+20$:	movl	PCB$L_JIB(R4),R0	; get Job Information blk adrs
+	subl2	R1,JIB$L_BytCnt(R0)	; charge it!
+
+; Set IRP fields
+.ENDC
+	movl	R2,IRP$L_SVAPTE(R3)	; point at system buffer.
+	movw	R1,IRP$W_BOFF(R3)	; total size of system buffer
+
+; Set system buffer block header
+
+	movab	AB$B_Data(R2),SB$L_Data_Adrs(R2)
+
+; Set standard ACP arg blk fields
+
+;	movl	IRP$L_PID(R3),AB$L_PID(R2)	; include the process PID
+	movl	IRP$L_PID(R3),R0		; Transform the internal PID
+	JSB	G^EXE$IPID_TO_EPID		; to external PID format
+	movl	R0,AB$L_PID(R2)
+	movl	R3,AB$L_IRP_Adrs(R2)		; IRP address
+	movl	R5,AB$L_UCB_Adrs(R2)		; unit control blk address.
+	clrw	AB$B_Funct(R2)			; clear function
+	clrw	AB$W_UARGSIZE(R2)		; and argblk size
+	RSB					; return to caller
+
+	.DSABL	LSB
+
+	.SBTTL	GetDiag - Allocate a System buffer & Check resources.
+
+;++
+; Allocate a Nonpaged-Pool system buffer to be used as a diagnostic buffer.
+; This diagnostic buffer is used to return the protocol headers.
+; Let I/O post-processing rtns deallocate this buffer.
+;
+; Inputs:
+;
+;	R0,R2	- scratch registers
+;	R1	- Size (in bytes) of requested buffer.
+;	R3	- address of the IRP (I/O request packet)
+;	R4	- address of the PCB (process control block)
+;	R5	- address of the UCB (unit control block)
+;	R6	- address of the CCB (channel control block)
+;	R7	- bit number of the I/O function code
+;	R8	- address of the FDT table entry for this routine
+;	R9-R11	- scratch registers
+;	AP	- address of the 1st function dependent QIO parameter
+;
+;
+; Outputs:
+;
+; Routine returns to caller on success Otherwise JMP's to EXE$ABORTIO.
+;
+;   Success:
+;	R1 = Size of allocated system buffer, rounded to next 16 byte boundary.
+;	R2 = Address of newly allocated system buffer.
+;	IRP$L_DIAGBUF - points at buffer
+;	Selected ACP Argument block fields are set:
+;	 AB$L_Data_Adrs = address of actual data within this block.  Used
+;	 by VMS I/O post processing rtns to copy (RECEIVE request) data from
+;	 this system buffer to the user specified buffer.  Address is
+;	 actually the start of the ACP argument block (portion after the
+;	 VMS default block header).
+;
+;	The routine must preserve all registers except R0-R2.
+;
+; User Error Returns:
+;
+;	SS$_EXQUOTA = Unable to allocate ACP argument block.
+;	SS$_INSFMEM = same as SS$_EXQUOTA.
+;
+;--
+
+	.Enabl	LSB
+
+GetDiag:
+;N.B. We don't debit the diagnostic buffer against the BytCnt since
+; we are not credited upon IO-completion.
+
+	movl	R1,R9
+	addl2	#12,R1			; Add in system buffer header size
+	pushr	#^M<R1,R3>
+	JSB	G^EXE$ALLOCBUF
+	popr	#^M<R1,R3>
+	Blbs	R0,10$
+
+; Couldn't allocate, return error
+
+	popl	r1			; clear JSB return address
+	JMP	G^EXE$ABORTIO
+
+10$:
+
+; Set system buffer block header
+	movab	SB$B_Data(R2),SB$L_Data_Adrs(R2)
+
+; Set standard ACP arg blk fields
+
+	RSB					; return to caller
+
+	.DSABL	LSB
+
+	.SBTTL	IP-FINISHIO, Finish I/O routine
+
+;++
+; IP_FINISHIO, perform special I/O post processing.
+;
+; Functional description:
+;
+; Inputs:
+;
+;	R5	- address of the current IRP (I/O request packet)
+;
+; Outputs:
+;
+;	The routine must preserve all registers except R0-R2 and R4.
+;
+; Function:
+;!!!HACK!!! This is no longer used.
+;	When a user requests a RECEIVE and provides the IPDriver with
+;	a special address buffer, the IPDriver will build an IRP with
+;	the address of this routine in the IRP$L_PID field.  When the
+;	IOC$IOPOST interrupt attempts to post-process the IRP, it will
+;	Look at the IRP$L_PID field and see that the high bit is set,
+;	since the driver lives in system space (S0), and it will know
+;	to call our routine with a JSB.  After we receive control, we
+;	can copy the "protocol header" fields of the UArg system block
+;	into the user supplied buffer.  We must return control to
+;	IOC$IOPOST with an RSB.
+;--
+
+IP_FINISHIO:	; Start processing something the IPACP has posted to us.
+
+	JSB	G^INI$BRK	; Execute BPT (BreakPoint) instruction)
+
+	Pushr	#^M<R3,R5>			; Let's save these...
+
+; R3 := IRP, R5 := UCB
+	MOVL	R5,R3
+	MOVL	IRP$L_UCB(R3),R5
+
+; We're back!
+	MOVL	IRP$L_EXTEND(R3),IRP$L_PID(R3)	; restore orig. PID
+	MOVL	IRP$L_PID(R3),R0		; for debugging
+
+; Let's put the UArg system block in R1
+	movl	IRP$L_SVAPTE(R3),R1;		; Find UArgs.
+	tstl	R1				; Do we still have them?
+	beql	10$				; If not, go on.  Otherwise...
+
+; Make sure client has supplied a buffer; put it in R0.
+	MOVL	RE$PH_Buff(R1),R0		; for debugging
+	tstl	R0				; Do we still have them?
+	beql	10$				; If not, go on.  Otherwise...
+
+; Skip the transfer for now...
+;	BRW	10$				; Forget the rest...
+
+;
+;!!!HACK!!! We should check accessability of the buffer here! (maybe?)
+; If it's not accessable, fill in IOSB fields!
+;	movl	RE$Src_Host(R1),IPADR$SRC_HOST(R0) ; Set local host
+;	movl	RE$Dst_Host(R1),IPADR$DST_HOST(R0) ; Set remote host
+;	movl	RE$EXT1(R1),IPADR$EXT1(R0) 	; Set first header extension
+;	movl	RE$EXT2(R1),IPADR$EXT2(R0) 	; Set second header extension
+
+10$:
+	JSB	G^COM$POST	; post-it.
+
+	Popr	#^M<R3,R5>	; restoration
+	RSB			; bring it on home, Jimmy.
+
+
+	.SBTTL	IP-CANCEL, Cancel I/O routine
+
+;++
+; IP_CANCEL, CANCELS a Connection for the requesting process.
+;
+; Functional description:
+;
+;	Action is to build a fake IRP with the PID of the process & channel #
+;	for which the cancel IO was requested.
+;	The IRP$W_FUNC field to equal IO$_CLEAN, IRP$W_Chan = IO channel with
+;	IRP$L_SVAPTE = 0.  This combination indicates to ACP
+;	(User_requests_avail rtn) routine that a connection cancel should be
+;	performed for the sepcified PID/Channel #.
+;
+; Inputs:
+;
+;	R2	- negated value of the channel index number
+;	R3	- address of the current IRP (I/O request packet)
+;	R4	- address of the PCB (process control block) for the
+;		  process canceling I/O
+;	R5	- address of the UCB (unit control block)
+;
+; Outputs:
+;
+;	Fake IRP is queued to the IPACP process to cancel IO for the specified
+;	PID/channel # pair.
+;	The routine must preserve all registers except R0-R3.
+;
+;--
+
+IP_CANCEL:				; Cancel an I/O operation
+	Pushr	#^M<R3,R4,R5,R6>
+
+; Have we cancelled this connection before? (UCB$V_Cancel will be set).
+; Reason for this test is that BOTH the cancel IO system service ($CANCEL)
+; and $DEASGN call this routine.  If a user process is stopped via a Control-C
+; then when the image gets a forced exit SYSRUNDWN will cancel ALL IO & then
+; deassign all assigned IO channels thus calling this routine twice.  By being
+; aware of the cancel bit in the UCB we can prevent bothering the IPACP a
+; second time.  One must remember that the UCB's for this device are cloned &
+; you get a NEW UCB every time you assign the device "IP:".  This is why we
+; don't step on others with the cancel bit.
+ 
+.IF	DEFINED VMS_V4
+	BBSC	#UCB$V_Cancel,UCB$L_STS(R5),Finish_Cancel
+	BBC	#DEV$V_AVL,UCB$L_DEVCHAR(R5),Finish_Cancel
+.IF_FALSE
+	bbcc	#UCB$V_CANCEL, UCB$L_STS(R5), 1$
+	BRW	Finish_Cancel
+1$:	BBS	#DEV$V_AVL, UCB$L_DEVCHAR(R5),2$
+	BRW	Finish_Cancel
+
+; Sanity check
+	TSTL	UCB$L_VCB(R5)
+	BNEQ	2$
+	BRW	Finish_Cancel
+.ENDC
+
+; First IO cancel, flag as such.
+
+2$:	Bisl	#UCB$M_Cancel,UCB$L_STS(R5)	; flag IO is cancelled.
+	movl	R2,R6				; save channel #
+	movzbl	#IRP$C_Length,R1		; IRP size in bytes.
+	JSB	G^EXE$ALONONPAGED		; allocate an IRP for the ACP
+	Blbs	R0,3$				; set = normal
+	BRW	Finish_Cancel			; clear = error.
+
+; Init the IRP, R2 = IRP address.
+
+3$:	movzbw	#IRP$C_Length,IRP$W_Size(R2)
+	movb	#DYN$C_IRP,IRP$B_Type(R2)
+	clrl	IRP$L_SVAPTE(R2)		; NO ACP argblk.
+	movzbw	#IO$_CLEAN,IRP$W_FUNC(R2)	; Clean up connection.
+	movb	#4,IRP$B_PRI(R2)		; process base priority.
+	movl	PCB$L_PID(R4),IRP$L_PID(R2)	; PID of requestor.
+	movw	R6,IRP$W_Chan(R2)		; channel #
+	movl	R5,IRP$L_UCB(R2)		; UCB address
+;	movl	UCB$L_PROTOCOL(R5),IRP$L_WIND(R2)	; protocol
+	movl	UCB$L_PROTOCOL(R5),IRP$L_EXTEND(R2)	; protocol
+
+; Queue Fake IRP to ACP.
+
+	movl	R2,R3				; for insertirp.
+	movl	UCB$L_VCB(R5),R2		; VCB adrs
+	movl	VCB$L_AQB(R2),R2		; asrs of ACP Q listhead.
+.IF	DEFINED	VMS_V4
+	JSB	G^EXE$INSERTIRP			; Q it!
+.IF_FALSE
+; Warning: V5 change! EXE$INSERTIPR no longer works! ACP queues are
+; now self-relative!
+;	JSB	G^EXE$INSERTIRP			; Q it!
+	CLRL	R0
+8$:	INSQTI	(R3), (R2)			; stuff in the queue
+	BGEQU	9$				; Made it
+	AOBLSS	#900000, R0, 8$			; Nope try again
+	BUG_CHECK	BADQHDR, FATAL
+
+9$:
+.ENDC
+	Bneq	Finish_Cancel
+
+; Wake ACP
+
+	movl	AQB$L_ACPPID(R2),R1
+.IF	DEFINED	VMS_V4
+	JSB	G^SCH$WAKE
+.IF_FALSE
+	LOCK	LOCKNAME=SCHED
+	JSB	G^SCH$WAKE
+	UNLOCK	LOCKNAME=SCHED
+.ENDC
+
+Finish_Cancel:
+	Popr	#^M<R3,R4,R5,R6>
+	RSB					; Return
+
+.sbttl	Netacp_alive, Check if network acp process is alive.
+
+;++
+; Netacp_alive - Check if the network ACP is still running.
+;
+; Functional description:
+;
+;	check device available bit in ucb.  Bit is cleared if acp exits.
+;
+; Inputs:
+;
+;	R3	- address of the current IRP (I/O request packet)
+;	R5	- address of the UCB (unit control block)
+;
+; Outputs:
+;
+;	returns if acp is running
+;	otherwise, pop return address from stack and jmp to abort io rtn.
+;	The routine must preserve all registers except R0-R3.
+;--
+
+Netacp_alive:
+	Bbs	#DEV$V_AVL,UCB$L_DevChar(R5),5$
+	movzwl	#SS$_MEDOFL,R0		; ACP is not running, return error.
+	popl	r1			; remove return address
+	jmp	g^exe$abortio		; abort io request.
+5$:
+	rsb				; acp is alive, return
+
+
+
+;++
+; Label that marks the end of the driver
+;--
+
+IP_END:				; Last location in driver
+	.END

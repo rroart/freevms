@@ -1,0 +1,3554 @@
+MODULE fake_vm (IDENT = 'X01-005',
+		ADDRESSING_MODE (EXTERNAL    = GENERAL,
+				 NONEXTERNAL = LONG_RELATIVE)) =
+BEGIN
+
+!++
+! FAKE_VM - Special VM and EFN handling.
+!
+! FAKE_VM intercepts the following routines in LIBRTL:
+!
+!   LIB$GET_VM		The general get VM routine.
+!			[FAKE_VM does *not* handle zones!]
+!
+!   LIB$FREE_VM		The general free VM routine.
+!			[FAKE_VM does *not* handle zones!]
+!
+!   LIB$SGET1_DD	The get dynamic string routine.
+!
+!   LIB$SFREE1_DD	The free one dynamic string routine.
+!
+!   LIB$SFREEN_DD	The free n dynamic strings routine.
+!
+!   LIB$GET_EF		The general get EFN routine.
+!
+!   LIB$FREE_EF		The general free EFN routine.
+!
+! And, as of VMS V5.2, the following:
+!
+!   LIB$VM_MALLOC	The memory allocate routine.
+!
+!   LIB$VM_CALLOC	The cleared memory allocate routine.
+!
+!   LIB$VM_REALLOC	The memory reallocate routine.
+!
+!   LIB$VM_FREE		The memory free routine.
+!
+! FAKE_VM intercepts the following routines in VAXCRTL[G]
+! provided that the VAXCRTL[G] shareable image was included
+! when the image containing FAKE_VM was linked:
+!
+!   MALLOC		The memory allocate routine.
+!
+!   CALLOC		The cleared memory allocate routine.
+!
+!   REALLOC		The memory reallocate routine.
+!
+!   FREE		The memory free routine.
+!
+!   CFREE		The memory free routine.
+!
+!   VAXC$MALLOC_OPT	The optimized memory allocate routine.
+!
+!   VAXC$CALLOC_OPT	The optimized cleared memory allocate routine.
+!
+!   VAXC$REALLOC_OPT	The optimized memory reallocate routine.
+!
+!   VAXC$FREE_OPT	The optimized memory free routine.
+!
+!   VAXC$CFREE_OPT	The optimized memory free routine.
+!
+! FAKE_VM intercepts the following routines in DECW$XLIBSHR
+! provided that the DECW$XLIBSHR shareable image was included
+! when the image containing FAKE_VM was linked:
+!
+!   XMEMORY_MALLOC	The memory allocate routine.
+!
+!   XMEMORY_CALLOC	The cleared memory allocate routine.
+!
+!   XMEMORY_REALLOC	The memory reallocate routine.
+!
+!   XMEMORY_FREE	The memory free routine.
+!
+! After you link FAKE_VM into your image, you must enable the interception
+! of the about routines by calling one of two special routines.  This
+! enabling of interception must be done before the image starts, so the
+! call to the appropriate special routine must either be done by your
+! image itself as its first step or by using the debugger to call the
+! correct special routine.
+!
+! To intercept all calls made by any part of your combined image (including
+! all used shareable images, etc.) use the following:
+!	DBG> DEPOSIT FAKE_VM_STRING_OFF = 1
+!	DBG> CALL FAKE_VM_INTERCEPT_XFER_VECTOR
+! The string routines should be disabled because FAKE_VM does not intercept
+! the full set of string oriented routines.
+!
+! To intercept all calls made by your image (not including any used shareable
+! images, etc.) use the following:
+!	DBG> CALL FAKE_VM_INTERCEPT_EXIT_VECTOR
+!
+! All errors are announced by writing a message to SYS$OUTPUT starting with
+! %FAKE_VM.  After any message the debugger is usually (see below) invoked
+! by signaling SS$_DEBUG.  While in the debugger, you can call some special
+! reporting routines (see below).  When FAKE_VM signals the debugger with
+! SS$_DEBUG, it includes a debugger command to (re-)display the message it
+! generated.  While in the debugger you can redisplay the message by using:
+!	DBG> EXAMINE/ASCIC FAKE_VM_MESSAGE
+!
+! FAKE_VM has various processing parameters you can manage from the debugger,
+! or in some cases, via global literal definitions at link time.
+!
+!   Enabling logging of all intercepted calls:
+!	DBG> DEPOSIT FAKE_VM_LOG = 1
+!	or define the global literal FAKE_VM_LOG_ENABLE as 1.
+!
+!   Disabling all special processing (must be done before image starts):
+!	DBG> DEPOSIT FAKE_VM_OFF = 1
+!	or define the global literal FAKE_VM_DISABLE as 1.
+!
+!   Disabling dynamic string processing (must be done before image starts):
+!	DBG> DEPOSIT FAKE_VM_STRING_OFF = 1
+!	or define the global literal FAKE_VM_STRING_DISABLE as 1.
+!
+!   Disabling EFN processing (must be done before image starts):
+!	DBG> DEPOSIT FAKE_VM_EFN_OFF = 1
+!	or define the global literal FAKE_VM_EFN_DISABLE as 1.
+!
+!   Force the loading of VAXCRTL (not G!) routines (must be done before
+!   image starts):
+!	DBG> DEPOSIT FAKE_VM_VAXCRTL_LOAD = 1
+!	or define the global literal FAKE_VM_VAXCRTL_REQUEST as 1.
+!
+!   Force the loading of DECW$XLIBSHR routines (must be done before
+!   image starts):
+!	DBG> DEPOSIT FAKE_VM_XLIBSHR_LOAD = 1
+!	or define the global literal FAKE_VM_XLIBSHR_REQUEST as 1.
+!
+!   Disabling interception of VAXCRTL[G] routines (must be done before
+!   image starts):
+!	DBG> DEPOSIT FAKE_VM_VAXCRTL_OFF = 1
+!	or define the global literal FAKE_VM_VAXCRTL_DISABLE as 1.
+!
+!   Disabling interception of DECW$XLIBSHR routines (must be done before
+!   image starts):
+!	DBG> DEPOSIT FAKE_VM_XLIBSHR_OFF = 1
+!	or define the global literal FAKE_VM_XLIBSHR_DISABLE as 1.
+!
+!   Disabling the actual freeing of memory (freed memory is zapped to a
+!   special pattern, but is not actually freed) (must be done before image
+!   starts):
+!	DBG> DEPOSIT FAKE_VM_REAL_FREE_OFF = 1
+!	or define the global literal FAKE_VM_REAL_FREE_DISABLE as 1.
+!
+!   Changing the actual memory get/free algorithms so unique pages of
+!   memory are gotten and are freed by removing them from the address
+!   space (must be done before the image starts):
+!	DBG> DEPOSIT FAKE_VM_REAL_FREE_OFF = 3
+!	or define the global literal FAKE_VM_REAL_FREE_DISABLE as 3.
+!
+!   Disabling the zapping of freed memory to a special pattern and disabling
+!   the actual freeing of memory (must be done before image starts):
+!	DBG> DEPOSIT FAKE_VM_REAL_FREE_OFF = 5
+!	or define the global literal FAKE_VM_REAL_FREE_DISABLE as 5.
+!
+!   Changing the memory histogram bucket size (the default is 4; must be
+!   done before image starts):
+!	DBG> DEPOSIT FAKE_VM_MEMORY_BUCKET_SIZE = n
+!	or define the global literal FAKE_VM_MEMORY_BUCKET_DEFAULT as n.
+!
+!   Changing the string histogram bucket size (the default is 1; must be
+!   done before image starts):
+!	DBG> DEPOSIT FAKE_VM_STRING_BUCKET_SIZE = n
+!	or define the global literal FAKE_VM_STRING_BUCKET_DEFAULT as n.
+!
+!   Enabling activating debugger on messages (the default):
+!	DBG> DEPOSIT FAKE_VM_STOP = 1
+!   Disabling activating debugger on messages:
+!	DBG> DEPOSIT FAKE_VM_STOP = 0
+!
+!   Enabling checking of the active list each call:
+!	DBG> DEPOSIT FAKE_VM_CHECK_ACTIVE_LIST = 1
+!   Disabling checking of the active list each call (the default):
+!	DBG> DEPOSIT FAKE_VM_CHECK_ACTIVE_LIST = 0
+!
+!   Changing the memory/string histogram report width (the default is 80):
+!	DBG> DEPOSIT FAKE_VM_HISTOGRAM_WIDTH = n
+!
+! FAKE_VM has various reporting routines that can be called from the debugger.
+! The reports normally go to SYS$OUTPUT, but can be directed to somewhere
+! else by using the debugging to set the desired file specification using:
+!	DBG> DEPOSIT/ASCIC FAKE_VM_OUTPUT = 'dev:[dir]file.type'
+! Any deposited file specification remains in effect until explicitly
+! cleared, e.g., by using:
+!	DBG> DEPOSIT/BYTE FAKE_VM_OUTPUT = 0
+!
+!   Dumping the allocated memory/string list with only headers:
+!	DBG> CALL FAKE_VM
+!
+!   Dumping the allocated memory/string list with headers and the first 4
+!   longwords of data:
+!	DBG> CALL FAKE_VM (0)
+!
+!   Dumping the allocated memory/string list with the works:
+!	DBG> CALL FAKE_VM (1)
+!
+!   Dumping erring packets with only headers:
+!	DBG> CALL FAKE_VM (-1)
+!
+!   Dumping erring packets with headers and the first 4 longwords of data:
+!	DBG> CALL FAKE_VM (-1, 0)
+!
+!   Dumping erring packets with the works:
+!	DBG> CALL FAKE_VM (-1, 1)
+!
+!   Dumping a selected entry on the allocated memory/string list with only
+!   the header:
+!	DBG> CALL FAKE_VM (address)
+!
+!   Dumping a selected entry on the allocated memory/string list with the
+!   header and the first 4 longwords of data:
+!	DBG> CALL FAKE_VM (address, 0)
+!
+!   Dumping a selected entry on the allocated memory/string list with the
+!   works:
+!	DBG> CALL FAKE_VM (address, 1)
+!
+!   Dumping the memory/string histograms:
+!	DBG> CALL FAKE_VM_HISTOGRAM
+!
+!   Dumping the allocated EFN list:
+!	DBG> CALL FAKE_VM_EFN
+!--
+
+LIBRARY
+    'SYS$LIBRARY:STARLET';
+
+PSECT
+    OWN    = _FAKE_VM_DATA
+	(READ,   WRITE, EXECUTE, NOSHARE, PIC, ALIGN (3)),
+    GLOBAL = _FAKE_VM_DATA
+	(READ,   WRITE, EXECUTE, NOSHARE, PIC, ALIGN (3)),
+    CODE   = _FAKE_VM_CODE
+	(READ, NOWRITE, EXECUTE,   SHARE, PIC, ALIGN (2)),
+    PLIT   = _FAKE_VM_CODE
+	(READ, NOWRITE, EXECUTE,   SHARE, PIC, ALIGN (2));
+
+FORWARD ROUTINE
+    ast_reenable,
+    load_image       : NOVALUE,
+    set_intercept    : NOVALUE,
+    fake_vm_intercept_exit_vector,
+    fake_vm_intercept_xfer_vector,
+    check_active_list,
+    find_in_active_list,
+    load_fab_rab     : NOVALUE,
+    fake_vm,
+    fake_vm_report,
+    fake_vm_histogram,
+    fake_vm_efn,
+    do_log           : NOVALUE,
+    call_debug       : NOVALUE,
+    add_to_histogram : NOVALUE,
+    fake_vm_get_vm,
+    fake_vm_free_vm,
+    fake_vm_sget1_dd,
+    fake_vm_sfree1_dd,
+    fake_vm_sfreen_dd,
+    fake_vm_get_ef,
+    fake_vm_free_ef,
+    fake_vm_malloc,
+    fake_vm_calloc,
+    fake_vm_realloc,
+    fake_vm_free,
+    fake_vm_dummy_free,
+    fake_vm_malloc_opt,
+    fake_vm_calloc_opt,
+    fake_vm_realloc_opt,
+    fake_vm_free_opt,
+    fake_vm_dummy_free_opt,
+    fake_vm_xmemory_malloc,
+    fake_vm_xmemory_calloc,
+    fake_vm_xmemory_realloc,
+    fake_vm_xmemory_free,
+    fake_vm_xmemory_dummy_free,
+    fake_vm_lib_malloc,
+    fake_vm_lib_calloc,
+    fake_vm_lib_realloc,
+    fake_vm_lib_free,
+    fake_vm_lib_dummy_free;
+
+EXTERNAL ROUTINE
+    lib$find_image_symbol,
+    lib$free_ef,
+    lib$free_vm,
+    lib$get_ef,
+    lib$get_input,
+    lib$get_vm,
+    lib$put_output,
+    lib$sfree1_dd,
+    lib$sfreen_dd,
+    lib$sget1_dd,
+    lib$sig_to_ret,
+    lib$signal,
+    lib$stop;
+
+EXTERNAL ROUTINE
+    c$$translate     : WEAK,
+    malloc           : WEAK,
+    calloc           : WEAK,
+    realloc          : WEAK,
+    free             : WEAK,
+    cfree            : WEAK,
+    vaxc$malloc_opt  : WEAK,
+    vaxc$calloc_opt  : WEAK,
+    vaxc$realloc_opt : WEAK,
+    vaxc$free_opt    : WEAK,
+    vaxc$cfree_opt   : WEAK,
+    xmemory_malloc   : WEAK,
+    xmemory_calloc   : WEAK,
+    xmemory_realloc  : WEAK,
+    xmemory_free     : WEAK,
+    lib$vm_malloc    : WEAK,
+    lib$vm_calloc    : WEAK,
+    lib$vm_realloc   : WEAK,
+    lib$vm_free      : WEAK;
+
+EXTERNAL LITERAL
+    fake_vm_log_enable            : WEAK,
+    fake_vm_disable               : WEAK,
+    fake_vm_string_disable        : WEAK,
+    fake_vm_efn_disable           : WEAK,
+    fake_vm_vaxcrtl_request       : WEAK,
+    fake_vm_xlibshr_request       : WEAK,
+    fake_vm_vaxcrtl_disable       : WEAK,
+    fake_vm_xlibshr_disable       : WEAK,
+    fake_vm_real_free_disable     : WEAK,
+    fake_vm_memory_bucket_default : WEAK,
+    fake_vm_string_bucket_default : WEAK,
+    lib$_intlogerr;
+
+KEYWORDMACRO
+    $ast_disable (use_sig_to_ret) =
+	LOCAL
+	    ast_status : VOLATILE,
+	    sig_to_ret : VOLATILE;
+
+	ENABLE
+	    ast_reenable (ast_status, sig_to_ret);
+
+	%IF NOT %NULL (use_sig_to_ret)
+	%THEN
+	    sig_to_ret = 1;
+	%FI
+
+	IF $SETAST (ENBFLG = 0) EQLU SS$_WASSET
+	THEN
+	    ast_status = 1; %;
+
+MACRO
+    $ast_enable =
+       (BEGIN
+	IF .ast_status
+	THEN
+	    $SETAST (ENBFLG = 1);
+	END) %;
+
+MACRO
+    $do_log (string) =
+       (BEGIN
+	do_log (UPLIT BYTE (10 + %CHARCOUNT (string), '%FAKE_VM, ', string),
+		%REMAINING);
+	END) %;
+
+MACRO
+    $call_debug (string) =
+       (BEGIN
+	errors = .errors + 1;
+	call_debug (UPLIT BYTE (10 + %CHARCOUNT (string), '%FAKE_VM, ', string),
+		    %REMAINING);
+	END) %;
+
+MACRO
+    $call_debug_histo (string) =
+       (BEGIN
+	root [histo_errors] = .root [histo_errors] + 1;
+	call_debug (UPLIT BYTE (10 + %CHARCOUNT (string), '%FAKE_VM, ', string),
+		    %REMAINING);
+	END) %;
+
+MACRO
+    $call_debug_efn (string) =
+       (BEGIN
+	call_debug (UPLIT BYTE (10 + %CHARCOUNT (string), '%FAKE_VM, ', string),
+		    %REMAINING);
+	END) %;
+
+MACRO
+    $call_same_args [] =
+       (BEGIN
+	BUILTIN
+	    AP,
+	    CALLG;
+	CALLG (.AP, %REMAINING)
+	END) %;
+
+MACRO
+    $load_desc (desc) =
+       (BEGIN
+	desc [0] = %CHARCOUNT (%REMAINING);
+	desc [1] = UPLIT BYTE (%REMAINING);
+	END) %;
+
+MACRO
+    $stop_if [] =
+       (BEGIN
+	LOCAL
+	    status;
+	status = %REMAINING;
+	IF NOT .status
+	THEN
+	    RETURN lib$stop (.status);
+	END) %;
+
+LITERAL
+    mem_flk =  0,
+    mem_blk =  1,
+    mem_alc =  2,
+    mem_siz =  3,
+    mem_typ =  4,
+    mem_pc1 =  5,
+    mem_pc2 =  6,
+    mem_pc3 =  7,
+    mem_pc4 =  8,
+    mem_pc5 =  9,
+    mem_pc6 = 10,
+    mem_pc7 = 11,
+    mem_pc8 = 12,
+    mem_pc9 = 13,
+    mem_lg1 = 14,
+    mem_lg2 = 15,
+    mem_dat = 16;
+
+LITERAL
+    err_min           = 0,
+    err_not_in_list   = 0,
+    err_not_same_size = 1,
+    err_not_same_addr = 2,
+    err_bad_leading   = 3,
+    err_bad_trailing  = 4,
+    err_ok            = 5,
+    err_max           = 5;
+
+LITERAL
+    memory_bucket_default   =  4,
+    string_bucket_default   =  1,
+    histogram_width_default = 80;
+
+LITERAL
+    histo_gram    = 0,
+    histo_size    = 1,
+    histo_bucket  = 2,
+    histo_biggest = 3,
+    histo_errors  = 4,
+    histo_vector  = 5;
+
+LITERAL
+    efn_vector = 64;
+
+GLOBAL
+    fake_vm_log                : INITIAL (fake_vm_log_enable),
+    fake_vm_off                : INITIAL (fake_vm_disable),
+    fake_vm_string_off         : INITIAL (fake_vm_string_disable),
+    fake_vm_efn_off            : INITIAL (fake_vm_efn_disable),
+    fake_vm_vaxcrtl_load       : INITIAL (fake_vm_vaxcrtl_request),
+    fake_vm_xlibshr_load       : INITIAL (fake_vm_xlibshr_request),
+    fake_vm_vaxcrtl_off        : INITIAL (fake_vm_vaxcrtl_disable),
+    fake_vm_xlibshr_off        : INITIAL (fake_vm_xlibshr_disable),
+    fake_vm_real_free_off      : INITIAL (fake_vm_real_free_disable),
+    fake_vm_memory_bucket_size : INITIAL (fake_vm_memory_bucket_default),
+    fake_vm_string_bucket_size : INITIAL (fake_vm_string_bucket_default),
+    fake_vm_stop               : INITIAL (1),
+    fake_vm_check_active_list  : INITIAL (0),
+    fake_vm_histogram_width    : INITIAL (histogram_width_default),
+    fake_vm_output             : VECTOR [1 + 132, BYTE],
+    fake_vm_message            : VECTOR [1 + 132, BYTE];
+
+OWN
+    image_loaded : INITIAL (0),
+    disabled,
+    string_disabled,
+    efn_disabled,
+    vaxcrtl_disabled,
+    xlibshr_disabled,
+    real_free_disabled,
+    log_fab      : $fab_decl,
+    log_rab      : $rab_decl,
+    active_list  : VECTOR [2],
+    errors,
+    memory_histo : VECTOR [histo_vector],
+    string_histo : VECTOR [histo_vector],
+    efn_list     : VECTOR [efn_vector];
+
+OWN
+    get_vm_exit,		get_vm_xfer,		get_vm_addr,
+    free_vm_exit,		free_vm_xfer,		free_vm_addr,
+    sget1_dd_exit,		sget1_dd_xfer,		sget1_dd_addr,
+    sfree1_dd_exit,		sfree1_dd_xfer,		sfree1_dd_addr,
+    sfreen_dd_exit,		sfreen_dd_xfer,		sfreen_dd_addr,
+    get_ef_exit,		get_ef_xfer,		get_ef_addr,
+    free_ef_exit,		free_ef_xfer,		free_ef_addr;
+
+OWN
+    c$$translate_exit,		c$$translate_xfer,	c$$translate_addr;
+
+OWN
+    malloc_exit,		malloc_xfer,		malloc_addr,
+    calloc_exit,		calloc_xfer,		calloc_addr,
+    realloc_exit,		realloc_xfer,		realloc_addr,
+    free_exit,			free_xfer,		free_addr,
+    cfree_exit,			cfree_xfer,		cfree_addr;
+
+OWN
+    malloc_opt_exit,		malloc_opt_xfer,	malloc_opt_addr,
+    calloc_opt_exit,		calloc_opt_xfer,	calloc_opt_addr,
+    realloc_opt_exit,		realloc_opt_xfer,	realloc_opt_addr,
+    free_opt_exit,		free_opt_xfer,		free_opt_addr,
+    cfree_opt_exit,		cfree_opt_xfer,		cfree_opt_addr;
+
+OWN
+    xmemory_malloc_exit,	xmemory_malloc_xfer,	xmemory_malloc_addr,
+    xmemory_calloc_exit,	xmemory_calloc_xfer,	xmemory_calloc_addr,
+    xmemory_realloc_exit,	xmemory_realloc_xfer,	xmemory_realloc_addr,
+    xmemory_free_exit,		xmemory_free_xfer,	xmemory_free_addr;
+
+OWN
+    lib_malloc_exit,		lib_malloc_xfer,	lib_malloc_addr,
+    lib_calloc_exit,		lib_calloc_xfer,	lib_calloc_addr,
+    lib_realloc_exit,		lib_realloc_xfer,	lib_realloc_addr,
+    lib_free_exit,		lib_free_xfer,		lib_free_addr;
+
+LITERAL
+    call_name_size = 1 + 13;
+
+BIND
+    get_call_name = UPLIT BYTE (10, 'LIB$GET_VM   ',
+				12, 'LIB$SGET1_DD ',
+				 5, 'ALLOC        ',
+				 9, 'ALLOC_OPT    ',
+				13, 'XMEMORY_ALLOC',
+				12, 'LIB$VM_ALLOC ',
+				 3, '???          ',
+				13, 'already freed')
+		  : VECTOR [8 * call_name_size, BYTE];
+
+BIND
+    free_call_name = UPLIT BYTE (11, 'LIB$FREE_VM  ',
+				 13, 'LIB$SFREE1_DD',
+				  4, 'FREE         ',
+				  8, 'FREE_OPT     ',
+				 12, 'XMEMORY_FREE ',
+				 11, 'LIB$VM_FREE  ',
+				  3, '???          ',
+				 13, 'already freed')
+		   : VECTOR [8 * call_name_size, BYTE];
+
+ROUTINE ast_reenable (sig_vec : REF BLOCK [, BYTE],
+		      mch_vec : REF BLOCK [, BYTE],
+		      usr_vec : REF VECTOR) =
+    BEGIN
+
+    IF .sig_vec [CHF$L_SIG_NAME] NEQU SS$_DEBUG
+    THEN
+	IF .sig_vec [CHF$L_SIG_NAME] EQLU SS$_UNWIND
+	THEN
+	    BEGIN
+	    IF ..usr_vec [1]
+	    THEN
+		$SETAST (ENBFLG = 1);
+	    END
+	ELSE
+	    IF ..usr_vec [2]
+	    THEN
+		RETURN $call_same_args (lib$sig_to_ret);
+
+    RETURN SS$_RESIGNAL;
+
+    END;
+
+ROUTINE load_image : NOVALUE =
+    BEGIN
+
+    ROUTINE exit_vec_get_vm          = RETURN lib$get_vm;
+    ROUTINE exit_vec_free_vm         = RETURN lib$free_vm;
+    ROUTINE exit_vec_sget1_dd        = RETURN lib$sget1_dd;
+    ROUTINE exit_vec_sfree1_dd       = RETURN lib$sfree1_dd;
+    ROUTINE exit_vec_sfreen_dd       = RETURN lib$sfreen_dd;
+    ROUTINE exit_vec_get_ef          = RETURN lib$get_ef;
+    ROUTINE exit_vec_free_ef         = RETURN lib$free_ef;
+
+    ROUTINE exit_vec_c$$translate    = RETURN c$$translate;
+
+    ROUTINE exit_vec_malloc          = RETURN malloc;
+    ROUTINE exit_vec_calloc          = RETURN calloc;
+    ROUTINE exit_vec_realloc         = RETURN realloc;
+    ROUTINE exit_vec_free            = RETURN free;
+    ROUTINE exit_vec_cfree           = RETURN cfree;
+
+    ROUTINE exit_vec_malloc_opt      = RETURN vaxc$malloc_opt;
+    ROUTINE exit_vec_calloc_opt      = RETURN vaxc$calloc_opt;
+    ROUTINE exit_vec_realloc_opt     = RETURN vaxc$realloc_opt;
+    ROUTINE exit_vec_free_opt        = RETURN vaxc$free_opt;
+    ROUTINE exit_vec_cfree_opt       = RETURN vaxc$cfree_opt;
+
+    ROUTINE exit_vec_xmemory_malloc  = RETURN xmemory_malloc;
+    ROUTINE exit_vec_xmemory_calloc  = RETURN xmemory_calloc;
+    ROUTINE exit_vec_xmemory_realloc = RETURN xmemory_realloc;
+    ROUTINE exit_vec_xmemory_free    = RETURN xmemory_free;
+
+    ROUTINE exit_vec_lib_malloc      = RETURN lib$vm_malloc;
+    ROUTINE exit_vec_lib_calloc      = RETURN lib$vm_calloc;
+    ROUTINE exit_vec_lib_realloc     = RETURN lib$vm_realloc;
+    ROUTINE exit_vec_lib_free        = RETURN lib$vm_free;
+
+    ROUTINE real_addr (exit_vec_rout : REF BLOCK [, BYTE],
+		       exit_addr     : REF VECTOR [1],
+		       xfer_addr     : REF VECTOR [1],
+		       rout_addr     : REF VECTOR [1],
+		       image_to_load : REF VECTOR [, BYTE],
+		       name          : REF VECTOR [, BYTE]) : NOVALUE =
+	BEGIN
+
+	ROUTINE find_addr (image_to_load : REF VECTOR [, BYTE],
+			   name          : REF VECTOR [, BYTE],
+			   xfer_addr     : REF VECTOR [1],
+			   rout_addr     : REF VECTOR [1]) : NOVALUE =
+	    BEGIN
+
+	    ROUTINE find_image_symbol =
+		BEGIN
+		ENABLE
+		    lib$sig_to_ret;
+		RETURN $call_same_args (lib$find_image_symbol);
+		END;
+
+	    LOCAL
+		image  : VECTOR [2],
+		symbol : VECTOR [2],
+		xfer   : REF BLOCK [, BYTE],
+		rout   : REF BLOCK [, BYTE];
+
+	    image [0] = .image_to_load [0];
+	    image [1] = image_to_load [1];
+
+	    symbol [0] = .name [0];
+	    symbol [1] = name [1];
+
+	    IF NOT find_image_symbol (image [0], symbol [0], xfer_addr [0])
+	    THEN
+		BEGIN
+		xfer_addr [0] = 0;
+		RETURN;
+		END;
+
+	    xfer = .xfer_addr [0];
+
+	    !				      L^              JMP
+	    IF .xfer [2, 0, 16, 0] NEQU ((%X'0EF' * 256) + %X'017')
+	    THEN
+		RETURN lib$stop (lib$_intlogerr);
+
+	    rout = xfer [8, 0, 0, 0] + .xfer [4, 0, 32, 0] - 2;
+	    rout_addr [0] = rout [0, 0, 0, 0];
+
+	    IF .rout [0, 0, 16, 0] NEQU .xfer [0, 0, 16, 0]
+	    THEN
+		RETURN lib$stop (lib$_intlogerr);
+
+	    END;
+
+	LOCAL
+	    rout : REF BLOCK [, BYTE],
+	    xfer : REF BLOCK [, BYTE];
+
+	exit_addr [0] = 0;
+	xfer_addr [0] = 0;
+	rout_addr [0] = 0;
+
+	IF .exit_vec_rout [0, 0, 16, 0] NEQU 0
+	THEN
+	    RETURN lib$stop (lib$_intlogerr);
+
+	!					  RET               R0
+	IF .exit_vec_rout [8, 0, 16, 0] NEQU ((%X'004' * 256) + %X'050')
+	THEN
+	    RETURN lib$stop (lib$_intlogerr);
+
+	!					  @L^             MOVAB
+	IF .exit_vec_rout [2, 0, 16, 0] NEQU ((%X'0FF' * 256) + %X'09E')
+	THEN
+	    BEGIN
+
+	    !						 @#             MOVAB
+	    IF  (.exit_vec_rout [2, 0, 16, 0] EQLU ((%X'09F' * 256) + %X'09E'))
+	    AND (.exit_vec_rout [4, 0, 32, 0] EQLA 0)
+	    THEN
+		BEGIN
+
+		IF image_to_load [0] NEQA 0
+		THEN
+		    find_addr (image_to_load [0],
+			       name [0],
+			       xfer_addr [0],
+			       rout_addr [0]);
+
+		RETURN;
+
+		END;
+
+	    !					       L^             MOVAB
+	    IF .exit_vec_rout [2, 0, 16, 0] NEQU ((%X'0EF' * 256) + %X'09E')
+	    THEN
+		RETURN lib$stop (lib$_intlogerr);
+
+	    rout = exit_vec_rout [8, 0, 0, 0] + .exit_vec_rout [4, 0, 32, 0];
+	    rout_addr [0] = rout [0, 0, 0, 0];
+
+	    RETURN;
+
+	    END;
+
+	xfer = exit_vec_rout [8, 0, 0, 0] + .exit_vec_rout [4, 0, 32, 0];
+	exit_addr [0] = xfer [0, 0, 0, 0];
+
+	xfer = .xfer [0, 0, 32, 0];
+	xfer_addr [0] = xfer [0, 0, 0, 0];
+
+	!				  L^              JMP
+	IF .xfer [2, 0, 16, 0] NEQU ((%X'0EF' * 256) + %X'017')
+	THEN
+	    RETURN lib$stop (lib$_intlogerr);
+
+	rout = xfer [8, 0, 0, 0] + .xfer [4, 0, 32, 0] - 2;
+	rout_addr [0] = rout [0, 0, 0, 0];
+
+	IF .rout [0, 0, 16, 0] NEQU .xfer [0, 0, 16, 0]
+	THEN
+	    RETURN lib$stop (lib$_intlogerr);
+
+	END;
+
+    LOCAL
+	image_to_load : REF VECTOR [, BYTE];
+
+    disabled           = .fake_vm_off;
+    string_disabled    = .fake_vm_string_off  OR .disabled;
+    efn_disabled       = .fake_vm_efn_off     OR .disabled;
+    vaxcrtl_disabled   = .fake_vm_vaxcrtl_off OR .disabled;
+    xlibshr_disabled   = .fake_vm_xlibshr_off OR .disabled;
+    real_free_disabled = .fake_vm_real_free_off;
+
+    active_list [0] = active_list [0];
+    active_list [1] = active_list [0];
+
+    errors = 0;
+
+    memory_histo [histo_gram]    = 0;
+    memory_histo [histo_size]    = 0;
+    memory_histo [histo_bucket]  = .fake_vm_memory_bucket_size;
+    IF .memory_histo [histo_bucket] EQLU 0
+    THEN
+	memory_histo [histo_bucket] = memory_bucket_default;
+    memory_histo [histo_biggest] = 0;
+    memory_histo [histo_errors]  = 0;
+
+    string_histo [histo_gram]    = 0;
+    string_histo [histo_size]    = 0;
+    string_histo [histo_bucket]  = .fake_vm_string_bucket_size;
+    IF .string_histo [histo_bucket] EQLU 0
+    THEN
+	string_histo [histo_bucket] = string_bucket_default;
+    string_histo [histo_biggest] = 0;
+    string_histo [histo_errors]  = 0;
+
+    CH$FILL (0, %ALLOCATION (efn_list), efn_list [0]);
+
+    real_addr (exit_vec_get_vm,
+			get_vm_exit,
+			get_vm_xfer,
+			get_vm_addr,
+			0,
+			0);
+    real_addr (exit_vec_free_vm,
+			free_vm_exit,
+			free_vm_xfer,
+			free_vm_addr,
+			0,
+			0);
+    real_addr (exit_vec_sget1_dd,
+			sget1_dd_exit,
+			sget1_dd_xfer,
+			sget1_dd_addr,
+			0,
+			0);
+    real_addr (exit_vec_sfree1_dd,
+			sfree1_dd_exit,
+			sfree1_dd_xfer,
+			sfree1_dd_addr,
+			0,
+			0);
+    real_addr (exit_vec_sfreen_dd,
+			sfreen_dd_exit,
+			sfreen_dd_xfer,
+			sfreen_dd_addr,
+			0,
+			0);
+    real_addr (exit_vec_get_ef,
+			get_ef_exit,
+			get_ef_xfer,
+			get_ef_addr,
+			0,
+			0);
+    real_addr (exit_vec_free_ef,
+			free_ef_exit,
+			free_ef_xfer,
+			free_ef_addr,
+			0,
+			0);
+
+    image_to_load = 0;
+    IF NOT .vaxcrtl_disabled
+    THEN
+	IF .fake_vm_vaxcrtl_load
+	THEN
+	    image_to_load = UPLIT BYTE (%ASCIC 'VAXCRTL');
+
+    real_addr (exit_vec_c$$translate,
+			c$$translate_exit,
+			c$$translate_xfer,
+			c$$translate_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'C$$TRANSLATE'));
+
+    real_addr (exit_vec_malloc,
+			malloc_exit,
+			malloc_xfer,
+			malloc_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'MALLOC'));
+    real_addr (exit_vec_calloc,
+			calloc_exit,
+			calloc_xfer,
+			calloc_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'CALLOC'));
+    real_addr (exit_vec_realloc,
+			realloc_exit,
+			realloc_xfer,
+			realloc_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'REALLOC'));
+    real_addr (exit_vec_free,
+			free_exit,
+			free_xfer,
+			free_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'FREE'));
+    real_addr (exit_vec_cfree,
+			cfree_exit,
+			cfree_xfer,
+			cfree_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'CFREE'));
+
+    real_addr (exit_vec_malloc_opt,
+			malloc_opt_exit,
+			malloc_opt_xfer,
+			malloc_opt_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'VAXC$MALLOC_OPT'));
+    real_addr (exit_vec_calloc_opt,
+			calloc_opt_exit,
+			calloc_opt_xfer,
+			calloc_opt_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'VAXC$CALLOC_OPT'));
+    real_addr (exit_vec_realloc_opt,
+			realloc_opt_exit,
+			realloc_opt_xfer,
+			realloc_opt_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'VAXC$REALLOC_OPT'));
+    real_addr (exit_vec_free_opt,
+			free_opt_exit,
+			free_opt_xfer,
+			free_opt_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'VAXC$FREE_OPT'));
+    real_addr (exit_vec_cfree_opt,
+			cfree_opt_exit,
+			cfree_opt_xfer,
+			cfree_opt_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'VAXC$CFREE_OPT'));
+
+    image_to_load = 0;
+    IF NOT .xlibshr_disabled
+    THEN
+	IF .fake_vm_xlibshr_load
+	THEN
+	    image_to_load = UPLIT BYTE (%ASCIC 'DECW$XLIBSHR');
+
+    real_addr (exit_vec_xmemory_malloc,
+			xmemory_malloc_exit,
+			xmemory_malloc_xfer,
+			xmemory_malloc_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'XMEMORY_MALLOC'));
+    real_addr (exit_vec_xmemory_calloc,
+			xmemory_calloc_exit,
+			xmemory_calloc_xfer,
+			xmemory_calloc_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'XMEMORY_CALLOC'));
+    real_addr (exit_vec_xmemory_realloc,
+			xmemory_realloc_exit,
+			xmemory_realloc_xfer,
+			xmemory_realloc_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'XMEMORY_REALLOC'));
+    real_addr (exit_vec_xmemory_free,
+			xmemory_free_exit,
+			xmemory_free_xfer,
+			xmemory_free_addr,
+			image_to_load [0],
+			UPLIT BYTE (%ASCIC 'XMEMORY_FREE'));
+
+    real_addr (exit_vec_lib_malloc,
+			lib_malloc_exit,
+			lib_malloc_xfer,
+			lib_malloc_addr,
+			0,
+			0);
+    real_addr (exit_vec_lib_calloc,
+			lib_calloc_exit,
+			lib_calloc_xfer,
+			lib_calloc_addr,
+			0,
+			0);
+    real_addr (exit_vec_lib_realloc,
+			lib_realloc_exit,
+			lib_realloc_xfer,
+			lib_realloc_addr,
+			0,
+			0);
+    real_addr (exit_vec_lib_free,
+			lib_free_exit,
+			lib_free_xfer,
+			lib_free_addr,
+			0,
+			0);
+
+    image_loaded = 1;
+
+    END;
+
+ROUTINE set_intercept (intercept_rout) : NOVALUE =
+    BEGIN
+
+    IF NOT .disabled
+    THEN
+	BEGIN
+
+	(.intercept_rout) (0,
+				  .get_vm_exit,
+				  .get_vm_xfer,
+				  .get_vm_addr,
+			   fake_vm_get_vm);
+	(.intercept_rout) (0,
+				  .free_vm_exit,
+				  .free_vm_xfer,
+				  .free_vm_addr,
+			   fake_vm_free_vm);
+
+	IF NOT .string_disabled
+	THEN
+	    BEGIN
+	    (.intercept_rout) (0,
+				      .sget1_dd_exit,
+				      .sget1_dd_xfer,
+				      .sget1_dd_addr,
+			       fake_vm_sget1_dd);
+	    (.intercept_rout) (0,
+				      .sfree1_dd_exit,
+				      .sfree1_dd_xfer,
+				      .sfree1_dd_addr,
+			       fake_vm_sfree1_dd);
+	    (.intercept_rout) (0,
+				      .sfreen_dd_exit,
+				      .sfreen_dd_xfer,
+				      .sfreen_dd_addr,
+			       fake_vm_sfreen_dd);
+	    END;
+
+	IF NOT .efn_disabled
+	THEN
+	    BEGIN
+	    (.intercept_rout) (0,
+				      .get_ef_exit,
+				      .get_ef_xfer,
+				      .get_ef_addr,
+			       fake_vm_get_ef);
+	    (.intercept_rout) (0,
+				      .free_ef_exit,
+				      .free_ef_xfer,
+				      .free_ef_addr,
+			       fake_vm_free_ef);
+	    END;
+
+	IF NOT .vaxcrtl_disabled
+	THEN
+	    BEGIN
+	    (.intercept_rout) (1,
+				      .malloc_exit,
+				      .malloc_xfer,
+				      .malloc_addr,
+			       fake_vm_malloc);
+	    (.intercept_rout) (1,
+				      .calloc_exit,
+				      .calloc_xfer,
+				      .calloc_addr,
+			       fake_vm_calloc);
+	    (.intercept_rout) (1,
+				      .realloc_exit,
+				      .realloc_xfer,
+				      .realloc_addr,
+			       fake_vm_realloc);
+	    (.intercept_rout) (1,
+				      .free_exit,
+				      .free_xfer,
+				      .free_addr,
+			       fake_vm_free);
+	    (.intercept_rout) (1,
+				      .cfree_exit,
+				      .cfree_xfer,
+				      .cfree_addr,
+			       fake_vm_free);
+	    (.intercept_rout) (1,
+				      .malloc_opt_exit,
+				      .malloc_opt_xfer,
+				      .malloc_opt_addr,
+			       fake_vm_malloc_opt);
+	    (.intercept_rout) (1,
+				      .calloc_opt_exit,
+				      .calloc_opt_xfer,
+				      .calloc_opt_addr,
+			       fake_vm_calloc_opt);
+	    (.intercept_rout) (1,
+				      .realloc_opt_exit,
+				      .realloc_opt_xfer,
+				      .realloc_opt_addr,
+			       fake_vm_realloc_opt);
+	    (.intercept_rout) (1,
+				      .free_opt_exit,
+				      .free_opt_xfer,
+				      .free_opt_addr,
+			       fake_vm_free_opt);
+	    (.intercept_rout) (1,
+				      .cfree_opt_exit,
+				      .cfree_opt_xfer,
+				      .cfree_opt_addr,
+			       fake_vm_free_opt);
+	    END;
+
+	IF NOT .xlibshr_disabled
+	THEN
+	    BEGIN
+	    (.intercept_rout) (1,
+				      .xmemory_malloc_exit,
+				      .xmemory_malloc_xfer,
+				      .xmemory_malloc_addr,
+			       fake_vm_xmemory_malloc);
+	    (.intercept_rout) (1,
+				      .xmemory_calloc_exit,
+				      .xmemory_calloc_xfer,
+				      .xmemory_calloc_addr,
+			       fake_vm_xmemory_calloc);
+	    (.intercept_rout) (1,
+				      .xmemory_realloc_exit,
+				      .xmemory_realloc_xfer,
+				      .xmemory_realloc_addr,
+			       fake_vm_xmemory_realloc);
+	    (.intercept_rout) (1,
+				      .xmemory_free_exit,
+				      .xmemory_free_xfer,
+				      .xmemory_free_addr,
+			       fake_vm_xmemory_free);
+	    END;
+
+	(.intercept_rout) (1,
+				  .lib_malloc_exit,
+				  .lib_malloc_xfer,
+				  .lib_malloc_addr,
+			   fake_vm_lib_malloc);
+	(.intercept_rout) (1,
+				  .lib_calloc_exit,
+				  .lib_calloc_xfer,
+				  .lib_calloc_addr,
+			   fake_vm_lib_calloc);
+	(.intercept_rout) (1,
+				  .lib_realloc_exit,
+				  .lib_realloc_xfer,
+				  .lib_realloc_addr,
+			   fake_vm_lib_realloc);
+	(.intercept_rout) (1,
+				  .lib_free_exit,
+				  .lib_free_xfer,
+				  .lib_free_addr,
+			   fake_vm_lib_free);
+
+	END;
+
+    END;
+
+GLOBAL ROUTINE fake_vm_intercept_exit_vector =
+    BEGIN
+
+    ROUTINE exit_intercept (replace,
+			    exit_addr : REF VECTOR [1],
+			    xfer_addr : REF BLOCK [, BYTE],
+			    real_addr : REF BLOCK [, BYTE],
+			    new_addr  : REF BLOCK [, BYTE]) : NOVALUE =
+	BEGIN
+
+	LOCAL
+	    do_replace,
+	    old_base   : REF VECTOR [, BYTE],
+	    save_pages : VECTOR [512 * 2, BYTE],
+	    inadr      : VECTOR [2];
+
+	IF real_addr [0, 0, 0, 0] EQLA 0
+	THEN
+	    RETURN;
+
+	do_replace = 0;
+	old_base = exit_addr [0] AND (NOT (512 - 1));
+	IF old_base [0] EQLA 0
+	THEN
+	    BEGIN
+	    IF NOT .replace
+	    THEN
+		RETURN;
+	    do_replace = 1;
+	    old_base = real_addr [0, 0, 0, 0] AND (NOT (512 - 1));
+	    END;
+
+	CH$MOVE (%ALLOCATION (save_pages), old_base [0], save_pages [0]);
+
+	inadr [0] = old_base [0];
+	inadr [1] = old_base [0] + %ALLOCATION (save_pages) - 1;
+	$stop_if ($CRETVA (INADR = inadr));
+
+	CH$MOVE (%ALLOCATION (save_pages), save_pages [0], old_base [0]);
+
+	IF .do_replace
+	THEN
+	    BEGIN
+	    real_addr [2, 0,  8, 0] = %X'0FA'; ! CALLG
+	    real_addr [3, 0,  8, 0] = %X'06C'; ! (AP)
+	    real_addr [4, 0,  8, 0] = %X'09F'; ! @#
+	    real_addr [5, 0, 32, 0] = new_addr [0, 0, 0, 0];
+	    real_addr [9, 0,  8, 0] = %X'004'; ! RET
+	    END
+	ELSE
+	    exit_addr [0] = new_addr [0, 0, 0, 0];
+
+	$stop_if ($SETPRT (INADR = inadr, PROT = PRT$C_UR));
+
+	END;
+
+    $ast_disable ();
+
+    IF .image_loaded
+    THEN
+	BEGIN
+	$ast_enable;
+	RETURN lib$_intlogerr;
+	END;
+
+    load_image ();
+
+    set_intercept (exit_intercept);
+
+    $ast_enable;
+
+    RETURN 1;
+
+    END;
+
+GLOBAL ROUTINE fake_vm_intercept_xfer_vector =
+    BEGIN
+
+    ROUTINE xfer_intercept (replace,
+			    exit_addr : REF VECTOR [1],
+			    xfer_addr : REF BLOCK [, BYTE],
+			    real_addr : REF BLOCK [, BYTE],
+			    new_addr  : REF BLOCK [, BYTE]) : NOVALUE =
+	BEGIN
+
+	LOCAL
+	    old_base   : REF VECTOR [, BYTE],
+	    save_pages : VECTOR [512 * 2, BYTE],
+	    inadr      : VECTOR [2];
+
+	IF real_addr [0, 0, 0, 0] EQLA 0
+	THEN
+	    RETURN;
+
+	old_base = xfer_addr [0, 0, 0, 0] AND (NOT (512 - 1));
+	IF .replace
+	THEN
+	    old_base = real_addr [0, 0, 0, 0] AND (NOT (512 - 1));
+	IF old_base [0] EQLA 0
+	THEN
+	    RETURN;
+
+	CH$MOVE (%ALLOCATION (save_pages), old_base [0], save_pages [0]);
+
+	inadr [0] = old_base [0];
+	inadr [1] = old_base [0] + %ALLOCATION (save_pages) - 1;
+	$stop_if ($CRETVA (INADR = inadr));
+
+	CH$MOVE (%ALLOCATION (save_pages), save_pages [0], old_base [0]);
+
+	IF .replace
+	THEN
+	    BEGIN
+	    real_addr [2, 0,  8, 0] = %X'0FA'; ! CALLG
+	    real_addr [3, 0,  8, 0] = %X'06C'; ! (AP)
+	    real_addr [4, 0,  8, 0] = %X'09F'; ! @#
+	    real_addr [5, 0, 32, 0] = new_addr [0, 0, 0, 0];
+	    real_addr [9, 0,  8, 0] = %X'004'; ! RET
+	    END
+	ELSE
+	    BEGIN
+	    xfer_addr [0, 0, 16, 0] = .new_addr [0, 0, 16, 0];
+	    xfer_addr [4, 0, 32, 0] = new_addr [2, 0, 0, 0]
+				    - xfer_addr [8, 0, 0, 0];
+	    END;
+
+	$stop_if ($SETPRT (INADR = inadr, PROT = PRT$C_UR));
+
+	END;
+
+    $ast_disable ();
+
+    IF .image_loaded
+    THEN
+	BEGIN
+	$ast_enable;
+	RETURN lib$_intlogerr;
+	END;
+
+    load_image ();
+
+    set_intercept (xfer_intercept);
+
+    $ast_enable;
+
+    RETURN 1;
+
+    END;
+
+ROUTINE check_active_list (found : REF VECTOR [1]) =
+    BEGIN
+
+    LOCAL
+	status,
+	root : REF VECTOR,
+	curr : REF VECTOR;
+
+    ENABLE
+	lib$sig_to_ret;
+
+    IF found [0] NEQA 0
+    THEN
+	found [0] = 0;
+
+    status = err_ok;
+
+    root = active_list;
+    curr = root [0];
+
+    WHILE 1
+    DO
+	BEGIN
+
+	curr = .curr [mem_flk];
+	IF curr [0] EQLA root [0]
+	THEN
+	    EXITLOOP;
+
+	IF found [0] NEQA 0
+	THEN
+	    found [0] = curr [0];
+
+	IF NOT CH$EQL (2 * 4, curr [mem_lg1],
+		       0,     curr [0],
+		       -1)
+	THEN
+	    BEGIN
+	    status = err_bad_leading;
+	    (curr [mem_typ]) <16, 16, 0> = .(curr [mem_typ]) <16, 16, 0> + 1;
+	    IF found [0] NEQA 0
+	    THEN
+		RETURN .status;
+	    END;
+
+	IF NOT CH$EQL (4 * 4, curr [mem_dat] + .curr [mem_siz],
+		       0,     curr [0],
+		       -1)
+	THEN
+	    BEGIN
+	    status = err_bad_trailing;
+	    (curr [mem_typ]) <16, 16, 0> = .(curr [mem_typ]) <16, 16, 0> + 1;
+	    IF found [0] NEQA 0
+	    THEN
+		RETURN .status;
+	    END;
+
+	END;
+
+    IF found [0] NEQA 0
+    THEN
+	found [0] = 0;
+
+    RETURN .status;
+
+    END;
+
+ROUTINE find_in_active_list (size, addr : REF VECTOR, found : REF VECTOR [1]) =
+    BEGIN
+
+    LOCAL
+	root : REF VECTOR,
+	curr : REF VECTOR;
+
+    ENABLE
+	lib$sig_to_ret;
+
+    found [0] = 0;
+
+    root = active_list;
+    curr = root [0];
+
+    WHILE 1
+    DO
+	BEGIN
+
+	curr = .curr [mem_flk];
+	IF curr [0] EQLA root [0]
+	THEN
+	    RETURN err_not_in_list;
+
+	IF addr [0] GEQA curr [0]
+	THEN
+	    IF addr [0] LSSA (curr [0] + .curr [mem_alc])
+	    THEN
+		BEGIN
+
+		found [0] = curr [0];
+
+		IF addr [0] EQLA curr [mem_dat]
+		THEN
+		    BEGIN
+
+		    IF .size EQLU .curr [mem_siz]
+		    THEN
+			EXITLOOP;
+
+		    (curr [mem_typ]) <16, 16, 0> =
+					.(curr [mem_typ]) <16, 16, 0> + 1;
+		    RETURN err_not_same_size;
+
+		    END;
+
+		(curr [mem_typ]) <16, 16, 0> =
+					.(curr [mem_typ]) <16, 16, 0> + 1;
+		RETURN err_not_same_addr;
+
+		END;
+
+	END;
+
+    IF NOT CH$EQL (2 * 4, curr [mem_lg1],
+		   0,     curr [0],
+		   -1)
+    THEN
+	BEGIN
+	(curr [mem_typ]) <16, 16, 0> = .(curr [mem_typ]) <16, 16, 0> + 1;
+	RETURN err_bad_leading;
+	END;
+
+    IF NOT CH$EQL (4 * 4, curr [mem_dat] + .curr [mem_siz],
+		   0,     curr [0],
+		   -1)
+    THEN
+	BEGIN
+	(curr [mem_typ]) <16, 16, 0> = .(curr [mem_typ]) <16, 16, 0> + 1;
+	RETURN err_bad_trailing;
+	END;
+
+    RETURN err_ok;
+
+    END;
+
+ROUTINE load_fab_rab (fab : REF $fab_decl,
+		      rab : REF $rab_decl,
+		      dnm : REF VECTOR [, BYTE]) : NOVALUE =
+    BEGIN
+
+    LOCAL
+	fnm : REF VECTOR [, BYTE];
+
+    fnm = fake_vm_output [0];
+    IF .fnm [0] EQLU 0
+    THEN
+	fnm = UPLIT BYTE (%ASCIC 'SYS$OUTPUT:');
+
+    $fab_init (fab = .fab,
+	       org = seq,
+	       rfm = var,
+	       rat = cr,
+	       fop = sqo,
+	       fns = .fnm [0],
+	       fna = fnm [1],
+	       dns = .dnm [0],
+	       dna = dnm [1]);
+
+    $rab_init (rab = .rab,
+	       fab = .fab);
+
+    END;
+
+GLOBAL ROUTINE fake_vm (flag_or_addr, more_flag) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT;
+
+    BIND
+	mem_types = UPLIT BYTE (%ASCIC 'Memory',
+				%ASCIC 'String',
+				%ASCIC 'Malloc',
+				%ASCIC 'MalOpt',
+				%ASCIC 'Xalloc',
+				%ASCIC 'LibMal',
+				%ASCIC '??????',
+				%ASCIC '<free>') : VECTOR [(1 + 6) * 4, BYTE];
+
+    LOCAL
+	fab  : $fab_decl,
+	rab  : $rab_decl,
+	flag,
+	addr : REF VECTOR,
+	desc : VECTOR [2],
+	buff : VECTOR [132, BYTE],
+	head,
+	root : REF VECTOR,
+	curr : REF VECTOR,
+	faod : VECTOR [2],
+	errs;
+
+    $ast_disable (use_sig_to_ret = yes);
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    check_active_list (0);
+
+    load_fab_rab (fab, rab, UPLIT BYTE (%ASCIC 'FAKE_VM.LIS'));
+
+    $stop_if ($create (fab = fab));
+    $stop_if ($connect (rab = rab));
+
+    flag = 0;
+    addr = 0;
+    IF ACTUALCOUNT () NEQU 0
+    THEN
+	IF .flag_or_addr EQLU 1
+	THEN
+	    flag = -1
+	ELSE
+	    IF .flag_or_addr LSSU 1
+	    THEN
+		flag = 1
+	    ELSE
+		BEGIN
+		addr = .flag_or_addr;
+		IF ACTUALCOUNT () GEQU 2
+		THEN
+		    BEGIN
+		    flag = 1;
+		    IF .more_flag
+		    THEN
+			flag = -1;
+		    END;
+		END;
+
+    desc [1] = buff [0];
+
+    head = 0;
+
+    root = active_list;
+    curr = root [0];
+
+    WHILE 1
+    DO
+	BEGIN
+
+	curr = .curr [mem_flk];
+	IF curr [0] EQLA root [0]
+	THEN
+	    EXITLOOP;
+
+	IF (IF addr [0] EQLA 0
+	    THEN
+		1
+	    ELSE
+		IF  (addr [0] EQL -1)
+		AND (.(curr [mem_typ]) <16, 16, 0> NEQU 0)
+		THEN
+		    1
+		ELSE
+		    IF  (addr [0] GEQA curr [0])
+		    AND (addr [0] LSSA (curr [0] + .curr [mem_alc]))
+		    THEN
+			1
+		    ELSE
+			0)
+	THEN
+	    BEGIN
+
+	    IF NOT .head
+	    THEN
+		BEGIN
+
+		$load_desc (faod, 'Still active memory list:');
+		rab [rab$w_rsz] = .faod [0];
+		rab [rab$l_rbf] = .faod [1];
+		$stop_if ($put (rab = rab));
+
+		head = 1;
+
+		END;
+
+	    $load_desc (faod,
+	'!6AC:    Size: !XL    Addr: !XL     No errors!+     From PC: !XL');
+	    errs = .(curr [mem_typ]) <16, 16, 0>;
+	    IF .errs NEQU 0
+	    THEN
+		$load_desc (faod,
+	'!6AC:    Size: !XL    Addr: !XL  Errors: !XL From PC: !XL');
+	    desc [0] = %ALLOCATION (buff);
+	    $stop_if ($FAO (faod, desc, desc,
+			    mem_types [(1 + 6) * (.curr [mem_typ] AND (8 - 1))],
+			    .curr [mem_siz],
+			    curr [mem_dat],
+			    .errs,
+			    .curr [mem_pc1]));
+	    rab [rab$w_rsz] = .desc [0];
+	    rab [rab$l_rbf] = .desc [1];
+	    $stop_if ($put (rab = rab));
+
+	    $load_desc (faod,
+	'        From PC: !XL From PC: !XL From PC: !XL From PC: !XL');
+	    desc [0] = %ALLOCATION (buff);
+	    $stop_if ($FAO (faod, desc, desc,
+			    .curr [mem_pc2],
+			    .curr [mem_pc3],
+			    .curr [mem_pc4],
+			    .curr [mem_pc5]));
+	    rab [rab$w_rsz] = .desc [0];
+	    rab [rab$l_rbf] = .desc [1];
+	    $stop_if ($put (rab = rab));
+
+	    $load_desc (faod,
+	'        From PC: !XL From PC: !XL From PC: !XL From PC: !XL');
+	    desc [0] = %ALLOCATION (buff);
+	    $stop_if ($FAO (faod, desc, desc,
+			    .curr [mem_pc6],
+			    .curr [mem_pc7],
+			    .curr [mem_pc8],
+			    .curr [mem_pc9]));
+	    rab [rab$w_rsz] = .desc [0];
+	    rab [rab$l_rbf] = .desc [1];
+	    $stop_if ($put (rab = rab));
+
+	    IF .flag
+	    THEN
+		BEGIN
+
+		LOCAL
+		    data : REF VECTOR,
+		    size,
+		    nmbr;
+
+		data = curr [mem_dat];
+		size = .curr [mem_siz];
+
+		WHILE 1
+		DO
+		    BEGIN
+
+		    nmbr = 4 * 4;
+		    IF .size LSSU (4 * 4)
+		    THEN
+			nmbr = .size;
+
+		    $load_desc (faod, ' !XL !XL !XL !XL !16AF !6XL');
+		    desc [0] = %ALLOCATION (buff);
+		    $stop_if ($FAO (faod, desc, desc,
+				    .data [3], .data [2], .data [1], .data [0],
+				    .nmbr, data [0],
+				    data [0] - curr [mem_dat]));
+
+		    IF .nmbr LSSU (4 * 4)
+		    THEN
+			BEGIN
+
+			LOCAL
+			    blnk;
+
+			blnk = ((4 * 4) - .nmbr) * 2;
+			blnk = .blnk + 1 + (.blnk / (4 * 2));
+			CH$FILL (' ', .blnk, .desc [1]);
+
+			END;
+
+		    rab [rab$w_rsz] = .desc [0];
+		    rab [rab$l_rbf] = .desc [1];
+		    $stop_if ($put (rab = rab));
+
+		    IF .flag GEQ 0
+		    THEN
+			EXITLOOP;
+
+		    data = data [4];
+		    size = .size - .nmbr;
+		    IF .size EQLU 0
+		    THEN
+			EXITLOOP;
+
+		    END;
+
+		END;
+
+	    END;
+
+	END;
+
+    IF .disabled
+    THEN
+	BEGIN
+
+	$load_desc (faod, 'FAKE_VM processing has been *disabled*');
+	rab [rab$w_rsz] = .faod [0];
+	rab [rab$l_rbf] = .faod [1];
+	$stop_if ($put (rab = rab));
+
+	END
+    ELSE
+	BEGIN
+
+	IF NOT .head
+	THEN
+	    BEGIN
+
+	    $load_desc (faod, 'All memory has been returned');
+	    IF addr [0] NEQA 0
+	    THEN
+		BEGIN
+		$load_desc (faod, 'Specified address not in active list');
+		IF addr [0] EQL -1
+		THEN
+		    $load_desc (faod, 'No erring packets found');
+		END;
+	    rab [rab$w_rsz] = .faod [0];
+	    rab [rab$l_rbf] = .faod [1];
+	    $stop_if ($put (rab = rab));
+
+	    END;
+
+	IF .string_disabled
+	THEN
+	    BEGIN
+
+	    $load_desc (faod, 'FAKE_VM string processing has been *disabled*');
+	    rab [rab$w_rsz] = .faod [0];
+	    rab [rab$l_rbf] = .faod [1];
+	    $stop_if ($put (rab = rab));
+
+	    END;
+
+	END;
+
+    $load_desc (faod, 'FAKE_VM has announced !UL error!%S');
+    desc [0] = %ALLOCATION (buff);
+    $stop_if ($FAO (faod, desc, desc, .errors));
+    rab [rab$w_rsz] = .desc [0];
+    rab [rab$l_rbf] = .desc [1];
+    $stop_if ($put (rab = rab));
+
+    $stop_if ($disconnect (rab = rab));
+    $stop_if ($close (fab = fab));
+
+    $ast_enable;
+
+    RETURN 1;
+
+    END;
+
+GLOBAL ROUTINE fake_vm_report =
+    BEGIN
+
+    $ast_disable (use_sig_to_ret = yes);
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF (IF check_active_list (0) NEQ err_ok
+	THEN
+	    1
+	ELSE
+	    IF .errors NEQU 0
+	    THEN
+		1
+	    ELSE
+		BEGIN
+		LOCAL
+		    curr : REF VECTOR;
+		curr = .active_list [0];
+		IF curr [0] EQLA active_list [0]
+		THEN
+		    0
+		ELSE
+		    IF (curr [0] NEQA .active_list [1])
+		    OR (.curr [mem_pc1] LSSA %X'40000000')
+		    THEN
+			1
+		    ELSE
+			0
+		END)
+    THEN
+	BEGIN
+
+	LOCAL
+	    prompt : VECTOR [2];
+
+	prompt [0] = %CHARCOUNT (7, '%%%%% Memory leaks! %%%%%', 7);
+	prompt [1] = UPLIT BYTE (7, '%%%%% Memory leaks! %%%%%', 7);
+
+	$stop_if (lib$put_output (prompt));
+
+	WHILE 1
+	DO
+	    BEGIN
+
+	    MACRO
+		$prompt =
+		    'Debugger (D), List (L), or file name? ' %;
+
+	    LOCAL
+		buffer : VECTOR [132, BYTE],
+		answer : VECTOR [2],
+		sts;
+
+	    answer [0] = %ALLOCATION (buffer);
+	    answer [1] = buffer [0];
+
+	    prompt [0] = %CHARCOUNT ($prompt);
+	    prompt [1] = UPLIT BYTE ($prompt);
+
+	    sts = lib$get_input (answer, prompt, answer [0]);
+	    IF .sts EQLU rms$_eof
+	    THEN
+		EXITLOOP;
+	    IF NOT .sts
+	    THEN
+		BEGIN
+		$ast_enable;
+		RETURN .sts;
+		END;
+
+	    IF .answer [0] NEQU 0
+	    THEN
+		IF (.answer [0] EQLU 1)
+		AND ((.buffer [0] EQLU 'd')
+		  OR (.buffer [0] EQLU 'D'))
+		THEN
+		    lib$signal (SS$_DEBUG)
+		ELSE
+		    BEGIN
+
+		    fake_vm_output [0] = 0;
+		    IF (.answer [0] NEQU 1)
+		    OR ((.buffer [0] NEQU 'l')
+		    AND (.buffer [0] NEQU 'L'))
+		    THEN
+			BEGIN
+			fake_vm_output [0] = .answer [0];
+			CH$MOVE (.answer [0],
+				 buffer [0],
+				 fake_vm_output [1]);
+			END;
+
+		    sts = fake_vm ();
+		    fake_vm_output [0] = 0;
+		    IF NOT .sts
+		    THEN
+			BEGIN
+			$ast_enable;
+			RETURN .sts;
+			END;
+
+		    END;
+
+	    END;
+
+	END;
+
+    $ast_enable;
+
+    RETURN 1;
+
+    END;
+
+GLOBAL ROUTINE fake_vm_histogram =
+    BEGIN
+
+    ROUTINE do_histogram (rab  : REF $rab_decl,
+			  head : REF VECTOR,
+			  root : REF VECTOR) : NOVALUE =
+	BEGIN
+
+	LITERAL
+	    overhead =  20,
+	    fudge    = 100;
+
+	LOCAL
+	    desc  : VECTOR [2],
+	    buff  : VECTOR [1000, BYTE],
+	    faod  : VECTOR [2],
+	    usable,
+	    divisor,
+	    divisor2,
+	    histo : REF VECTOR,
+	    bucket;
+
+	desc [1] = buff [0];
+
+	rab [rab$w_rsz] = .head [0];
+	rab [rab$l_rbf] = .head [1];
+	$stop_if ($put (rab = .rab));
+
+	$load_desc (faod, '!UL bucket!%S of !UL byte!%S, !UL error!%S');
+	desc [0] = %ALLOCATION (buff);
+	$stop_if ($FAO (faod, desc, desc, .root [histo_size],
+					  .root [histo_bucket],
+					  .root [histo_errors]));
+	rab [rab$w_rsz] = .desc [0];
+	rab [rab$l_rbf] = .desc [1];
+	$stop_if ($put (rab = .rab));
+
+	usable = .fake_vm_histogram_width - overhead - 1;
+	IF (.usable LSS 20)
+	OR (.usable GTR (%ALLOCATION (buff) - overhead - 1))
+	THEN
+	    usable = histogram_width_default - overhead - 1;
+	divisor = ((.root [histo_biggest] * fudge) / .usable) + 1;
+	divisor2 = .divisor / 2;
+
+	histo = .root [histo_gram];
+	bucket = 0;
+	WHILE 1
+	DO
+	    BEGIN
+
+	    LOCAL
+		remainder,
+		whole,
+		half,
+		small;
+
+	    IF .bucket GEQU .root [histo_size]
+	    THEN
+		EXITLOOP;
+
+	    IF .histo [.bucket] EQLU 0
+	    THEN
+		BEGIN
+
+		LOCAL
+		    new_bucket,
+		    skipped;
+
+		new_bucket = .bucket;
+		WHILE 1
+		DO
+		    BEGIN
+		    new_bucket = .new_bucket + 1;
+		    IF .histo [.new_bucket] NEQU 0
+		    THEN
+			EXITLOOP;
+		    END;
+
+		skipped = .new_bucket - .bucket;
+		IF .skipped GEQU 10
+		THEN
+		    BEGIN
+
+		    bucket = .new_bucket;
+
+		    $load_desc (faod, ' !9UL skipped |');
+		    desc [0] = %ALLOCATION (buff);
+		    $stop_if ($FAO (faod, desc, desc, .skipped));
+		    rab [rab$w_rsz] = .desc [0];
+		    rab [rab$l_rbf] = .desc [1];
+		    $stop_if ($put (rab = .rab));
+
+		    END;
+
+		END;
+
+	    remainder = .histo [.bucket] * fudge;
+	    whole = .remainder / .divisor;
+	    remainder = .remainder - (.whole * .divisor);
+	    half = 0;
+	    small = 0;
+	    IF .remainder GTRU .divisor2
+	    THEN
+		half = 1
+	    ELSE
+		IF .whole EQLU 0
+		THEN
+		    IF .remainder NEQU 0
+		    THEN
+			small = 1;
+
+	    $load_desc (faod, '!XL !9UL |!#*X!#**!#*>');
+	    desc [0] = %ALLOCATION (buff);
+	    $stop_if ($FAO (faod, desc, desc, .bucket * .root [2],
+					      .histo [.bucket],
+					      .whole,
+					      .half,
+					      .small));
+	    rab [rab$w_rsz] = .desc [0];
+	    rab [rab$l_rbf] = .desc [1];
+	    $stop_if ($put (rab = .rab));
+
+	    bucket = .bucket + 1;
+
+	    END;
+
+	END;
+
+    LOCAL
+	fab  : $fab_decl,
+	rab  : $rab_decl,
+	head : VECTOR [2];
+
+    $ast_disable (use_sig_to_ret = yes);
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    load_fab_rab (fab, rab, UPLIT BYTE (%ASCIC 'FAKE_VM.LIS'));
+
+    $stop_if ($create (fab = fab));
+    $stop_if ($connect (rab = rab));
+
+    IF .disabled
+    THEN
+	BEGIN
+
+	$load_desc (head, 'FAKE_VM processing has been *disabled*');
+	rab [rab$w_rsz] = .head [0];
+	rab [rab$l_rbf] = .head [1];
+	$stop_if ($put (rab = rab));
+
+	END
+    ELSE
+	BEGIN
+
+	$load_desc (head, 'Memory size histogram:');
+	do_histogram (rab, head, memory_histo [0]);
+
+	IF .string_disabled
+	THEN
+	    BEGIN
+
+	    $load_desc (head, 'FAKE_VM string processing has been *disabled*');
+	    rab [rab$w_rsz] = .head [0];
+	    rab [rab$l_rbf] = .head [1];
+	    $stop_if ($put (rab = rab));
+
+	    END
+	ELSE
+	    BEGIN
+
+	    $load_desc (head, 'String size histogram:');
+	    do_histogram (rab, head, string_histo [0]);
+
+	    END;
+
+	END;
+
+    $stop_if ($disconnect (rab = rab));
+    $stop_if ($close (fab = fab));
+
+    $ast_enable;
+
+    RETURN 1;
+
+    END;
+
+GLOBAL ROUTINE fake_vm_efn =
+    BEGIN
+
+    LOCAL
+	fab  : $fab_decl,
+	rab  : $rab_decl,
+	faod : VECTOR [2],
+	efns : VECTOR [2],
+	some_efn,
+	desc : VECTOR [2],
+	buff : VECTOR [80, BYTE];
+
+    $ast_disable (use_sig_to_ret = yes);
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    load_fab_rab (fab, rab, UPLIT BYTE (%ASCIC 'FAKE_VM.LIS'));
+
+    $stop_if ($create (fab = fab));
+    $stop_if ($connect (rab = rab));
+
+    IF .efn_disabled
+    THEN
+	BEGIN
+
+	$load_desc (faod, 'FAKE_VM processing has been *disabled*');
+	rab [rab$w_rsz] = .faod [0];
+	rab [rab$l_rbf] = .faod [1];
+	$stop_if ($put (rab = rab));
+
+	END
+    ELSE
+	BEGIN
+
+	efns [0] = -1;
+	efns [1] = -1;
+	$ASSUME (efn_vector, EQLU, 64)
+
+	WHILE (.get_ef_addr) (some_efn)
+	DO
+	    IF .some_efn GEQU efn_vector
+	    THEN
+		BEGIN
+		(.free_ef_addr) (some_efn);
+		EXITLOOP;
+		END
+	    ELSE
+		BEGIN
+		MAP
+		    efns : BITVECTOR;
+		efns [.some_efn] = 0;
+		END;
+
+	INCR i FROM 0 TO (efn_vector - 1)
+	DO
+	    BEGIN
+	    MAP
+		efns : BITVECTOR;
+	    IF NOT .efns [.i]
+	    THEN
+		(.free_ef_addr) (i);
+	    END;
+
+	desc [1] = buff [0];
+
+	$load_desc (faod, 'Current inuse EFNs: !XL !XL');
+	desc [0] = %ALLOCATION (buff);
+	$stop_if ($FAO (faod, desc, desc, .efns [1], .efns [0]));
+	rab [rab$w_rsz] = .desc [0];
+	rab [rab$l_rbf] = .desc [1];
+	$stop_if ($put (rab = rab));
+
+	INCR i FROM 0 TO (efn_vector - 1)
+	DO
+	    IF .efn_list [.i] NEQA 0
+	    THEN
+		BEGIN
+		$load_desc (faod, ' EFN !UL allocated from PC !XL');
+		desc [0] = %ALLOCATION (buff);
+		$stop_if ($FAO (faod, desc, desc, .i, .efn_list [.i]));
+		rab [rab$w_rsz] = .desc [0];
+		rab [rab$l_rbf] = .desc [1];
+		$stop_if ($put (rab = rab));
+		END;
+
+	END;
+
+    $stop_if ($disconnect (rab = rab));
+    $stop_if ($close (fab = fab));
+
+    $ast_enable;
+
+    RETURN 1;
+
+    END;
+
+ROUTINE do_log (string : REF VECTOR [, BYTE], params) : NOVALUE =
+    BEGIN
+
+    LOCAL
+	buff : VECTOR [132, BYTE],
+	desc : VECTOR [2],
+	faod : VECTOR [2];
+
+    IF .log_fab [fab$w_ifi] EQLU 0
+    THEN
+	BEGIN
+
+	load_fab_rab (log_fab, log_rab, UPLIT BYTE (%ASCIC 'FAKE_VM_LOG.LOG'));
+
+	$stop_if ($create (fab = log_fab));
+	$stop_if ($connect (rab = log_rab));
+
+	END;
+
+    desc [0] = %ALLOCATION (buff);
+    desc [1] = buff [0];
+
+    faod [0] = .string [0];
+    faod [1] = string [1];
+
+    $stop_if ($FAOL (CTRSTR = faod,
+		     OUTBUF = desc,
+		     OUTLEN = desc,
+		     PRMLST = params));
+
+    log_rab [rab$w_rsz] = .desc [0];
+    log_rab [rab$l_rbf] = .desc [1];
+    $stop_if ($put (rab = log_rab));
+    $stop_if ($flush (rab = log_rab));
+
+    END;
+
+ROUTINE call_debug (string : REF VECTOR [, BYTE], params) : NOVALUE =
+    BEGIN
+
+    LOCAL
+	desc : VECTOR [2],
+	faod : VECTOR [2];
+
+    desc [0] = %ALLOCATION (fake_vm_message) - 1;
+    desc [1] = fake_vm_message [1];
+
+    faod [0] = .string [0];
+    faod [1] = string [1];
+
+    $stop_if ($FAOL (CTRSTR = faod,
+		     OUTBUF = desc,
+		     OUTLEN = desc,
+		     PRMLST = params));
+    fake_vm_message [0] = .desc [0];
+
+    $stop_if (lib$put_output (desc));
+
+    IF .fake_vm_stop
+    THEN
+	$stop_if (lib$signal (SS$_DEBUG, 1,
+			UPLIT BYTE (%ASCIC 'EXAMINE/ASCIC FAKE_VM_MESSAGE')));
+
+    END;
+
+ROUTINE add_to_histogram (root : REF VECTOR, size) : NOVALUE =
+    BEGIN
+
+    LOCAL
+	index,
+	histo : REF VECTOR;
+
+    index = .size / .root [histo_bucket];
+
+    IF .index GEQU .root [histo_size]
+    THEN
+	BEGIN
+
+	LOCAL
+	    new_len,
+	    new_mem : REF VECTOR,
+	    status,
+	    copy_len,
+	    zero_len,
+	    old_ptr : REF VECTOR,
+	    new_ptr : REF VECTOR;
+
+	new_len = (.index + 1) * 4;
+	status = (.get_vm_addr) (new_len, new_mem);
+	IF NOT .status
+	THEN
+	    BEGIN
+	    $call_debug_histo ('histogram LIB$GET_VM failed: Status = !XL',
+			       .status);
+	    RETURN;
+	    END;
+
+	copy_len = .root [histo_size] * 4;
+	zero_len = .new_len - .copy_len;
+
+	old_ptr = .root [histo_gram];
+	new_ptr = new_mem [0];
+
+	WHILE 1
+	DO
+	    BEGIN
+	    LOCAL
+		len;
+	    len = .copy_len;
+	    IF .len GTRU 65535
+	    THEN
+		len = 65535;
+	    new_ptr = CH$MOVE (.len, old_ptr [0], new_ptr [0]);
+	    old_ptr = old_ptr [0] + .len;
+	    copy_len = .copy_len - .len;
+	    IF .copy_len EQLU 0
+	    THEN
+		EXITLOOP;
+	    END;
+
+	WHILE 1
+	DO
+	    BEGIN
+	    LOCAL
+		len;
+	    len = .zero_len;
+	    IF .len GTRU 65535
+	    THEN
+		len = 65535;
+	    new_ptr = CH$FILL (0, .len, new_ptr [0]);
+	    zero_len = .zero_len - .len;
+	    IF .zero_len EQLU 0
+	    THEN
+		EXITLOOP;
+	    END;
+
+	IF .root [histo_gram] NEQA 0
+	THEN
+	    BEGIN
+	    new_len = .root [histo_size] * 4;
+	    status = (.free_vm_addr) (new_len, root [histo_gram]);
+	    IF NOT .status
+	    THEN
+		$call_debug_histo ('histogram LIB$FREE_VM failed: Status = !XL',
+				   .status);
+	    END;
+
+	root [histo_gram] = new_mem [0];
+	root [histo_size] = .index + 1;
+
+	END;
+
+    histo = .root [histo_gram];
+    histo [.index] = .histo [.index] + 1;
+
+    IF .histo [.index] GTRU .root [histo_biggest]
+    THEN
+	root [histo_biggest] = .histo [.index];
+
+    END;
+
+ROUTINE fake_vm_get_vm (size : REF VECTOR [1],
+			addr : REF VECTOR [1],
+			zone : REF VECTOR [1]) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT,
+	FP,
+	INSQUE;
+
+    MAP
+	FP : REF BLOCK [, BYTE];
+
+    MACRO
+	$load [] =
+	   (BEGIN
+	    my_ptr [0] = %REMAINING;
+	    my_ptr = my_ptr [1];
+	    END) %;
+
+    LOCAL
+	my_root  : REF VECTOR,
+	my_type,
+	my_frame : REF BLOCK [, BYTE],
+	my_status,
+	my_addr  : REF VECTOR,
+	my_size,
+	my_asize,
+	my_ptr   : REF VECTOR;
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF (IF ACTUALCOUNT () LSSU 2
+	THEN
+	    1
+	ELSE
+	    IF ACTUALCOUNT () EQLU 2
+	    THEN
+		0
+	    ELSE
+		IF ACTUALCOUNT () GTRU 3
+		THEN
+		    1
+		ELSE
+		    IF zone [0] EQLA 0
+		    THEN
+			0
+		    ELSE
+			IF .zone [0] EQLU 0
+			THEN
+			    0
+			ELSE
+			    BEGIN
+			    $ast_enable;
+			    RETURN $call_same_args (.get_vm_addr);
+			    END)
+    THEN
+	$call_debug ('LIB$GET_VM incorrect argument count: !UL',
+		     ACTUALCOUNT ());
+
+    my_root  = memory_histo [0];
+    my_type  = 0;
+    my_frame = FP [0, 0, 0, 0];
+    IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_sget1_dd)
+    AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_sfree1_dd)
+    THEN
+	BEGIN
+	my_root  = string_histo [0];
+	my_type  = .my_type + 1;
+	my_frame = .my_frame [SF$L_SAVE_FP];
+	END
+    ELSE
+	IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_malloc)
+	AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_dummy_free)
+	THEN
+	    BEGIN
+	    my_type  = 2;
+	    my_frame = .my_frame [SF$L_SAVE_FP];
+	    IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_malloc_opt)
+	    AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_dummy_free_opt)
+	    THEN
+		BEGIN
+		my_type  = .my_type + 1;
+		my_frame = .my_frame [SF$L_SAVE_FP];
+		END
+	    ELSE
+		IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_xmemory_malloc)
+		AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_xmemory_dummy_free)
+		THEN
+		    BEGIN
+		    my_type  = .my_type + 1;
+		    my_type  = .my_type + 1;
+		    my_frame = .my_frame [SF$L_SAVE_FP];
+		    END
+		ELSE
+		    IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_lib_malloc)
+		    AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_lib_dummy_free)
+		    THEN
+			BEGIN
+			my_type  = .my_type + 1;
+			my_type  = .my_type + 1;
+			my_type  = .my_type + 1;
+			my_frame = .my_frame [SF$L_SAVE_FP];
+			END;
+	    END;
+
+    IF .fake_vm_check_active_list
+    THEN
+	BEGIN
+
+	my_status = check_active_list (my_addr);
+	CASE .my_status FROM err_min TO err_max OF
+	    SET
+
+	    [err_bad_leading] :
+		$call_debug ('Bad leading guards: Size = !XL, Addr = !XL',
+			     .my_addr [mem_siz],
+			     my_addr [mem_dat]);
+
+	    [err_bad_trailing] :
+		$call_debug ('Bad trailing guards: Size = !XL, Addr = !XL',
+			     .my_addr [mem_siz],
+			     my_addr [mem_dat]);
+
+	    [err_ok] :
+		;
+
+	    [INRANGE, OUTRANGE] :
+		$call_debug ('Bad active list: Status = !XL, Last entry = !XL',
+			     .my_status,
+			     my_addr [0]);
+
+	    TES;
+
+	END;
+
+    my_size  = .size [0];
+    my_asize = (mem_dat * 4) + .my_size + (4 * 4);
+    my_addr  = 0;
+
+    IF  .real_free_disabled
+    AND .real_free_disabled <1, 1, 0>
+    THEN
+	BEGIN
+
+	LOCAL
+	    retadr : VECTOR [2];
+
+	$stop_if ($EXPREG (PAGCNT = (.my_asize + 511) / 512, RETADR = retadr));
+
+	my_addr = .retadr [0];
+
+	my_status = 1;
+
+	END
+    ELSE
+	my_status = (.get_vm_addr) (my_asize, my_addr);
+
+    IF NOT .my_status
+    THEN
+	BEGIN
+
+	$call_debug ('!AC failed: Status = !XL, Size = !XL',
+		     get_call_name [.my_type * call_name_size],
+		     .my_status,
+		     .my_asize);
+
+	addr [0] = 0;
+
+	$ast_enable;
+
+	RETURN .my_status;
+
+	END;
+
+    my_ptr = my_addr [mem_alc];
+
+    $load (.my_asize);
+    $load (.my_size);
+
+    $load (.my_type);
+
+    INCR i FROM 0 TO (mem_pc9 - mem_pc1)
+    DO
+	BEGIN
+	LOCAL
+	    prev_pc;
+	prev_pc = 0;
+	IF my_frame [0, 0, 0, 0] NEQA 0
+	THEN
+	    BEGIN
+	    prev_pc  = .my_frame [SF$L_SAVE_PC];
+	    my_frame = .my_frame [SF$L_SAVE_FP];
+	    END;
+	$load (.prev_pc);
+	END;
+
+    $load (-1);
+    $load (-1);
+
+    add_to_histogram (my_root [0], .my_size);
+
+    addr [0] = my_ptr [0];
+
+    WHILE 1
+    DO
+	BEGIN
+
+	LOCAL
+	    fill_cnt;
+
+	fill_cnt = .my_size;
+	IF .fill_cnt GTRU 65535
+	THEN
+	    fill_cnt = 65535;
+
+	my_ptr = CH$FILL (%B'10101010', .fill_cnt, my_ptr [0]);
+
+	my_size = .my_size - .fill_cnt;
+	IF .my_size EQLU 0
+	THEN
+	    EXITLOOP;
+
+	END;
+
+    $load (-1);
+    $load (-1);
+    $load (-1);
+    $load (-1);
+
+    INSQUE (my_addr [0], active_list);
+
+    IF .fake_vm_log
+    THEN
+	$do_log (
+    '!AC: Size: !XL, Addr: !XL, From PCs: !XL !XL !XL !XL !XL !XL !XL !XL !XL',
+		 get_call_name [.my_type * call_name_size],
+		 .my_addr [mem_siz],
+		 my_addr  [mem_dat],
+		 .my_addr [mem_pc1],
+		 .my_addr [mem_pc2],
+		 .my_addr [mem_pc3],
+		 .my_addr [mem_pc4],
+		 .my_addr [mem_pc5],
+		 .my_addr [mem_pc6],
+		 .my_addr [mem_pc7],
+		 .my_addr [mem_pc8],
+		 .my_addr [mem_pc9]);
+
+    $ast_enable;
+
+    RETURN .my_status;
+
+    END;
+
+ROUTINE fake_vm_free_vm (size : REF VECTOR [1],
+			 addr : REF VECTOR [1],
+			 zone : REF VECTOR [1]) =
+    BEGIN
+
+    LABEL
+	continue;
+
+    BUILTIN
+	ACTUALCOUNT,
+	FP,
+	REMQUE;
+
+    MAP
+	FP : REF BLOCK [, BYTE];
+
+    LOCAL
+	my_type,
+	my_frame : REF BLOCK [, BYTE],
+	my_status,
+	my_addr  : REF VECTOR,
+	my_ptr   : REF VECTOR,
+	my_size;
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF (IF ACTUALCOUNT () LSSU 2
+	THEN
+	    1
+	ELSE
+	    IF ACTUALCOUNT () EQLU 2
+	    THEN
+		0
+	    ELSE
+		IF ACTUALCOUNT () GTRU 3
+		THEN
+		    1
+		ELSE
+		    IF zone [0] EQLA 0
+		    THEN
+			0
+		    ELSE
+			IF .zone [0] EQLU 0
+			THEN
+			    0
+			ELSE
+			    BEGIN
+			    $ast_enable;
+			    RETURN $call_same_args (.free_vm_addr);
+			    END)
+    THEN
+	$call_debug ('LIB$FREE_VM incorrect argument count: !UL',
+		     ACTUALCOUNT ());
+
+    my_type  = 0;
+    my_frame = FP [0, 0, 0, 0];
+    IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_sfree1_dd)
+    AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_sfreen_dd)
+    THEN
+	BEGIN
+	my_type  = .my_type + 1;
+	my_frame = .my_frame [SF$L_SAVE_FP];
+	END
+    ELSE
+	IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_malloc)
+	AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_dummy_free)
+	THEN
+	    BEGIN
+	    my_type  = 2;
+	    my_frame = .my_frame [SF$L_SAVE_FP];
+	    IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_malloc_opt)
+	    AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_dummy_free_opt)
+	    THEN
+		BEGIN
+		my_type  = .my_type + 1;
+		my_frame = .my_frame [SF$L_SAVE_FP];
+		END
+	    ELSE
+		IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_xmemory_malloc)
+		AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_xmemory_dummy_free)
+		THEN
+		    BEGIN
+		    my_type  = .my_type + 1;
+		    my_type  = .my_type + 1;
+		    my_frame = .my_frame [SF$L_SAVE_FP];
+		    END
+		ELSE
+		    IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_lib_malloc)
+		    AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_lib_dummy_free)
+		    THEN
+			BEGIN
+			my_type  = .my_type + 1;
+			my_type  = .my_type + 1;
+			my_type  = .my_type + 1;
+			my_frame = .my_frame [SF$L_SAVE_FP];
+			END;
+	    END;
+
+    IF .fake_vm_check_active_list
+    THEN
+	BEGIN
+
+	my_status = check_active_list (my_addr);
+	CASE .my_status FROM err_min TO err_max OF
+	    SET
+
+	    [err_bad_leading] :
+		$call_debug ('Bad leading guards: Size = !XL, Addr = !XL',
+			     .my_addr [mem_siz],
+			     my_addr [mem_dat]);
+
+	    [err_bad_trailing] :
+		$call_debug ('Bad trailing guards: Size = !XL, Addr = !XL',
+			     .my_addr [mem_siz],
+			     my_addr [mem_dat]);
+
+	    [err_ok] :
+		;
+
+	    [INRANGE, OUTRANGE] :
+		$call_debug ('Bad active list: Status = !XL, Last entry = !XL',
+			     .my_status,
+			     my_addr [0]);
+
+	    TES;
+
+	END;
+
+    continue : BEGIN
+
+    my_status = find_in_active_list (.size [0], .addr [0], my_addr);
+    CASE .my_status FROM err_min TO err_max OF
+	SET
+
+	[err_not_in_list] :
+	    BEGIN
+	    $call_debug ('!AC not in active list: Size = !XL, Addr = !XL',
+			 free_call_name [.my_type * call_name_size],
+			 .size [0],
+			 .addr [0]);
+	    my_addr = 0;
+	    END;
+
+	[err_not_same_size] :
+	    $call_debug ('!AC not same size: Old = !XL, New = !XL, Addr = !XL',
+			 free_call_name [.my_type * call_name_size],
+			 .my_addr [mem_siz],
+			 .size [0],
+			 .addr [0]);
+
+	[err_not_same_addr] :
+	    $call_debug ('!AC not same addr: Old = !XL, New = !XL',
+			 free_call_name [.my_type * call_name_size],
+			 my_addr [mem_dat],
+			 .addr [0]);
+
+	[err_bad_leading] :
+	    $call_debug ('!AC bad leading guards: Size = !XL, Addr = !XL',
+			  free_call_name [.my_type * call_name_size],
+			 .size [0],
+			 .addr [0]);
+
+	[err_bad_trailing] :
+	    $call_debug ('!AC bad trailing guards: Size = !XL, Addr = !XL',
+			  free_call_name [.my_type * call_name_size],
+			 .size [0],
+			 .addr [0]);
+
+	[err_ok] :
+	    BEGIN
+	    IF .my_type <0, 16, 0> NEQU .(my_addr [mem_typ]) <0, 16, 0>
+	    THEN
+		BEGIN
+		(my_addr [mem_typ]) <16, 16, 0> =
+					.(my_addr [mem_typ]) <16, 16, 0> + 1;
+		$call_debug (
+			'!AC freeing !AC allocation: Size = !XL, Addr = !XL',
+			     free_call_name [.my_type * call_name_size],
+			     get_call_name [(.my_addr [mem_typ] AND (8 - 1))
+					  * call_name_size],
+			     .size [0],
+			     .addr [0]);
+		END;
+	    IF .(my_addr [mem_typ]) <16, 16, 0> EQLU 0
+	    THEN
+		LEAVE continue;
+	    my_type = 0;
+	    END;
+
+	[INRANGE, OUTRANGE] :
+	    BEGIN
+	    $call_debug ('!AC found bad active list: Status = !XL',
+			 free_call_name [.my_type * call_name_size],
+			 .my_status);
+	    my_addr = 0;
+	    END;
+
+	TES;
+
+    IF my_addr [0] NEQA 0
+    THEN
+	(my_addr [mem_typ]) <0, 16, 0> = 7;
+
+    $ast_enable;
+
+    IF .my_type NEQU 0
+    THEN
+	RETURN lib$_intlogerr;
+
+    RETURN 1;
+
+    END; ! of "continue"
+
+    REMQUE (my_addr [0], my_ptr);
+
+    IF .fake_vm_log
+    THEN
+	BEGIN
+	INCR i FROM 0 TO (mem_pc9 - mem_pc1)
+	DO
+	    BEGIN
+	    LOCAL
+		prev_pc;
+	    prev_pc = 0;
+	    IF my_frame [0, 0, 0, 0] NEQA 0
+	    THEN
+		BEGIN
+		prev_pc  = .my_frame [SF$L_SAVE_PC];
+		my_frame = .my_frame [SF$L_SAVE_FP];
+		END;
+	    my_ptr [mem_pc1 + .i] = .prev_pc;
+	    END;
+	$do_log (
+    '!AC: Size: !XL, Addr: !XL, From PCs: !XL !XL !XL !XL !XL !XL !XL !XL !XL',
+		 free_call_name [.my_type * call_name_size],
+		 .size [0],
+		 .addr [0],
+		 .my_ptr [mem_pc1],
+		 .my_ptr [mem_pc2],
+		 .my_ptr [mem_pc3],
+		 .my_ptr [mem_pc4],
+		 .my_ptr [mem_pc5],
+		 .my_ptr [mem_pc6],
+		 .my_ptr [mem_pc7],
+		 .my_ptr [mem_pc8],
+		 .my_ptr [mem_pc9]);
+	END;
+
+    my_size = .my_ptr [mem_alc];
+
+    IF NOT .real_free_disabled <2, 1, 0>
+    THEN
+	BEGIN
+
+	LOCAL
+	    fill_len,
+	    fill_cnt;
+
+	fill_len = .my_size;
+
+	WHILE 1
+	DO
+	    BEGIN
+
+	    fill_cnt = .fill_len;
+	    IF .fill_cnt GTRU 65535
+	    THEN
+		fill_cnt = 65535;
+
+	    my_ptr = CH$FILL (%B'01010101', .fill_cnt, my_ptr [0]);
+
+	    fill_len = .fill_len - .fill_cnt;
+	    IF .fill_len EQLU 0
+	    THEN
+		EXITLOOP;
+
+	    END;
+
+	END;
+
+    IF .real_free_disabled
+    THEN
+	BEGIN
+
+	IF .real_free_disabled <1, 1, 0>
+	THEN
+	    BEGIN
+
+	    LOCAL
+		inadr : VECTOR [2];
+
+	    inadr [0] = my_addr [0];
+	    inadr [1] = .inadr [0] + .my_size - 1;
+
+	    $stop_if ($DELTVA (INADR = inadr));
+
+	    END;
+
+	$ast_enable;
+
+	RETURN 1;
+
+	END;
+
+    my_status = (.free_vm_addr) (my_size, my_addr);
+
+    IF NOT .my_status
+    THEN
+	$call_debug ('!AC failed: Status = !XL, Size = !XL, Addr = !XL',
+		     free_call_name [.my_type * call_name_size],
+		     .my_status,
+		     .my_size,
+		     my_addr [0]);
+
+    $ast_enable;
+
+    RETURN .my_status;
+
+    END;
+
+ROUTINE fake_vm_sget1_dd (size : REF VECTOR [1],
+			  addr : REF BLOCK [, BYTE]) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT;
+
+    LOCAL
+	my_status;
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF ACTUALCOUNT () NEQU 2
+    THEN
+	$call_debug ('LIB$SGET1_DD incorrect argument count: !UL',
+		     ACTUALCOUNT ());
+
+    my_status = 1;
+
+    IF .size [0] GTRU 65535
+    THEN
+	BEGIN
+
+	$call_debug ('LIB$SGET1_DD failed: Size = !XL, Addr = !XL',
+		     .size [0], addr [0, 0, 0, 0]);
+
+	$ast_enable;
+
+	RETURN lib$_intlogerr;
+
+	END;
+
+    IF .addr [dsc$b_class] NEQU dsc$k_class_d
+    THEN
+	$call_debug ('LIB$SGET1_DD warning: Class not dynamic, Addr = !XL',
+		     addr [0, 0, 0, 0]);
+
+    IF .addr [dsc$a_pointer] NEQA 0
+    THEN
+	BEGIN
+
+	$call_debug ('LIB$SGET1_DD warning: LIB$SFREE1_DD needed, Addr = !XL',
+		     addr [0, 0, 0, 0]);
+
+	my_status = fake_vm_sfree1_dd (addr [0, 0, 0, 0]);
+
+	IF NOT .my_status
+	THEN
+	    BEGIN
+	    $ast_enable;
+	    RETURN .my_status;
+	    END;
+
+	END;
+
+    addr [dsc$w_length]  = .size [0];
+    addr [dsc$b_class]   = dsc$k_class_d;
+
+    my_status = fake_vm_get_vm (size [0], addr [dsc$a_pointer]);
+
+    IF NOT .my_status
+    THEN
+	BEGIN
+
+	addr [dsc$w_length]  = 0;
+	addr [dsc$a_pointer] = 0;
+
+	END;
+
+    $ast_enable;
+
+    RETURN .my_status;
+
+    END;
+
+ROUTINE fake_vm_sfree1_dd (addr : REF BLOCK [, BYTE]) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT;
+
+    LOCAL
+	my_status;
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF ACTUALCOUNT () NEQU 1
+    THEN
+	$call_debug ('LIB$SFREE1_DD incorrect argument count: !UL',
+		     ACTUALCOUNT ());
+
+    my_status = 1;
+
+    IF .addr [dsc$b_class] NEQU dsc$k_class_d
+    THEN
+	BEGIN
+
+	$call_debug ('LIB$SFREE1_DD warning: Class not dynamic, Addr = !XL',
+		     addr [0, 0, 0, 0]);
+
+	$ast_enable;
+
+	RETURN lib$_intlogerr;
+
+	END;
+
+    IF .addr [dsc$a_pointer] NEQA 0
+    THEN
+	BEGIN
+
+	LOCAL
+	    my_size;
+
+	my_size = .addr [dsc$w_length];
+
+	my_status = fake_vm_free_vm (my_size, addr [dsc$a_pointer]);
+
+	IF .my_status EQLU lib$_intlogerr
+	THEN
+	    my_status = 1;
+
+	END;
+
+    addr [dsc$w_length]  = 0;
+    addr [dsc$a_pointer] = 0;
+
+    $ast_enable;
+
+    RETURN .my_status;
+
+    END;
+
+ROUTINE fake_vm_sfreen_dd (cnt  : REF VECTOR [1],
+			   addr : REF BLOCK [, BYTE]) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT;
+
+    LOCAL
+	my_status;
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF ACTUALCOUNT () NEQU 2
+    THEN
+	$call_debug ('LIB$SFREEN_DD incorrect argument count: !UL',
+		     ACTUALCOUNT ());
+
+    my_status = 1;
+
+    INCR i FROM 1 to .cnt [0]
+    DO
+	BEGIN
+
+	my_status = fake_vm_sfree1_dd (addr [(.i - 1) * 8, 0, 0, 0]);
+
+	IF NOT .my_status
+	THEN
+	    EXITLOOP;
+
+	END;
+
+    $ast_enable;
+
+    RETURN .my_status;
+
+    END;
+
+ROUTINE fake_vm_get_ef (addr : REF VECTOR [1]) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT,
+	FP;
+
+    MAP
+	FP : REF BLOCK [, BYTE];
+
+    LOCAL
+	my_status,
+	my_efn;
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF ACTUALCOUNT () NEQU 1
+    THEN
+	$call_debug_efn ('LIB$GET_EF incorrect argument count: !UL',
+			 ACTUALCOUNT ());
+
+    my_status = (.get_ef_addr) (addr [0]);
+
+    IF NOT .my_status
+    THEN
+	$call_debug_efn ('LIB$GET_EF failed: Status = !XL', .my_status)
+    ELSE
+	BEGIN
+	my_efn = .addr [0];
+	IF .my_efn GEQU efn_vector
+	THEN
+	    $call_debug_efn ('EFN too big: !UL', .my_efn)
+	ELSE
+	    BEGIN
+	    IF .efn_list [.my_efn] NEQA 0
+	    THEN
+		$call_debug_efn ('EFN !UL already allocated by !XL',
+				 .my_efn, .efn_list [.my_efn]);
+	    efn_list [.my_efn] = .FP [SF$L_SAVE_PC];
+	    END;
+	END;
+
+    $ast_enable;
+
+    RETURN .my_status;
+
+    END;
+
+ROUTINE fake_vm_free_ef (addr : REF VECTOR [1]) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT;
+
+    LOCAL
+	my_status,
+	my_efn;
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF ACTUALCOUNT () NEQU 1
+    THEN
+	$call_debug_efn ('LIB$FREE_EF incorrect argument count: !UL',
+			 ACTUALCOUNT ());
+
+    my_efn = .addr [0];
+
+    my_status = (.free_ef_addr) (addr [0]);
+
+    IF NOT .my_status
+    THEN
+	$call_debug_efn ('LIB$FREE_EF failed: Status = !XL', .my_status)
+    ELSE
+	IF .my_efn GEQU efn_vector
+	THEN
+	    $call_debug_efn ('EFN too big: !UL', .my_efn)
+	ELSE
+	    BEGIN
+	    IF .efn_list [.my_efn] EQLA 0
+	    THEN
+		$call_debug_efn ('EFN !UL not allocated', .my_efn);
+	    efn_list [.my_efn] = 0;
+	    END;
+
+    $ast_enable;
+
+    RETURN .my_status;
+
+    END;
+
+ROUTINE fake_vm_malloc (size) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT;
+
+    LOCAL
+	my_size,
+	my_addr : REF VECTOR [, BYTE],
+	my_status;
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF ACTUALCOUNT () NEQU 1
+    THEN
+	$call_debug ('MALLOC incorrect argument count: !UL',
+		     ACTUALCOUNT ());
+
+    my_size = .size;
+
+    my_status = fake_vm_get_vm (my_size, my_addr);
+
+    IF NOT .my_status
+    THEN
+	BEGIN
+
+	IF .c$$translate_addr NEQA 0
+	THEN
+	    (.c$$translate_addr) (.my_status);
+
+	my_addr = 0;
+
+	END;
+
+    $ast_enable;
+
+    RETURN my_addr [0];
+
+    END;
+
+ROUTINE fake_vm_calloc (num1, num2) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT;
+
+    LOCAL
+	my_size,
+	my_addr : REF VECTOR [, BYTE],
+	my_status,
+	my_ptr  : REF VECTOR [, BYTE],
+	fill_cnt;
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF ACTUALCOUNT () NEQU 2
+    THEN
+	$call_debug ('CALLOC incorrect argument count: !UL',
+		     ACTUALCOUNT ());
+
+    my_size = .num1 * .num2;
+
+    my_status = fake_vm_get_vm (my_size, my_addr);
+
+    IF .my_status
+    THEN
+	BEGIN
+
+	my_ptr = my_addr [0];
+
+	WHILE 1
+	DO
+	    BEGIN
+
+	    fill_cnt = .my_size;
+	    IF .fill_cnt GTRU 65535
+	    THEN
+		fill_cnt = 65535;
+
+	    my_ptr = CH$FILL (0, .fill_cnt, my_ptr [0]);
+
+	    my_size = .my_size - .fill_cnt;
+	    IF .my_size EQLU 0
+	    THEN
+		EXITLOOP;
+
+	    END;
+
+	END
+    ELSE
+	BEGIN
+
+	IF .c$$translate_addr NEQA 0
+	THEN
+	    (.c$$translate_addr) (.my_status);
+
+	my_addr = 0;
+
+	END;
+
+    $ast_enable;
+
+    RETURN my_addr [0];
+
+    END;
+
+ROUTINE fake_vm_realloc (addr : REF VECTOR [, BYTE], size) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT,
+	FP;
+
+    MAP
+	FP : REF BLOCK [, BYTE];
+
+    LOCAL
+	my_addr  : REF VECTOR,
+	my_size,
+	my_status,
+	my_alloc : REF VECTOR,
+	delta,
+	my_frame : REF BLOCK [, BYTE];
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF ACTUALCOUNT () NEQU 2
+    THEN
+	$call_debug ('REALLOC incorrect argument count: !UL',
+		     ACTUALCOUNT ());
+
+    my_addr = addr [0];
+    IF my_addr [0] EQLA 0
+    THEN
+	$call_debug ('REALLOC with zero old address: Size = !XL',
+		     .size)
+    ELSE
+	BEGIN
+
+	my_size = .my_addr [mem_siz - mem_dat];
+
+	my_status = find_in_active_list (.my_size, my_addr [0], my_alloc);
+	CASE .my_status FROM err_min TO err_max OF
+	    SET
+
+	    [err_not_in_list] :
+		BEGIN
+		$call_debug (
+		    'REALLOC not in active list: Size = !XL, Addr = !XL',
+			     .my_size,
+			     my_addr [0]);
+		my_addr = 0;
+		END;
+
+	    [err_not_same_size] :
+		BEGIN
+		$call_debug (
+		    'REALLOC not same size: Old = !XL, New = !XL, Addr = !XL',
+			     .my_alloc [mem_siz],
+			     .my_size,
+			     my_addr [0]);
+		my_addr = 0;
+		END;
+
+	    [err_not_same_addr] :
+		BEGIN
+		$call_debug ('REALLOC not same addr: Old = !XL, New = !XL',
+			     my_alloc [mem_dat],
+			     my_addr [0]);
+		my_addr = 0;
+		END;
+
+	    [err_bad_leading] :
+		$call_debug (
+		    'REALLOC bad leading guards: Size = !XL, Addr = !XL',
+			     .my_size,
+			     my_addr [0]);
+
+	    [err_bad_trailing] :
+		$call_debug (
+		    'REALLOC bad trailing guards: Size = !XL, Addr = !XL',
+			     .my_size,
+			     my_addr [0]);
+
+	    [err_ok] :
+		;
+
+	    [INRANGE, OUTRANGE] :
+		BEGIN
+		$call_debug ('REALLOC found bad active list: Status = !XL',
+			     .my_status);
+		my_addr = 0;
+		END;
+
+	    TES;
+
+	IF my_addr [0] NEQA 0
+	THEN
+	    BEGIN
+
+	    delta = .my_size - .size;
+	    IF .delta GEQ 0
+	    THEN
+		BEGIN
+
+		my_addr [mem_siz - mem_dat] = .size;
+
+		my_frame = FP [0, 0, 0, 0];
+		IF  (.my_frame [SF$L_SAVE_PC] GEQA fake_vm_malloc_opt)
+		AND (.my_frame [SF$L_SAVE_PC] LSSA fake_vm_xmemory_dummy_free)
+		THEN
+		    my_frame = .my_frame [SF$L_SAVE_FP];
+
+		INCR i FROM 0 TO (mem_pc9 - mem_pc1)
+		DO
+		    BEGIN
+		    LOCAL
+			prev_pc;
+		    prev_pc = 0;
+		    IF my_frame [0, 0, 0, 0] NEQA 0
+		    THEN
+			BEGIN
+			prev_pc  = .my_frame [SF$L_SAVE_PC];
+			my_frame = .my_frame [SF$L_SAVE_FP];
+			END;
+		    my_addr [mem_pc1 + .i - mem_dat] = .prev_pc;
+		    END;
+
+		IF .delta GTRU 65535
+		THEN
+		    delta = 65535;
+		CH$FILL (-1, .delta, my_addr [0] + .size);
+
+		$ast_enable;
+
+		RETURN my_addr [0];
+
+		END;
+
+	    END;
+
+	END;
+
+    my_size = .size;
+
+    my_status = fake_vm_get_vm (my_size, my_alloc);
+
+    IF .my_status
+    THEN
+	BEGIN
+
+	IF my_addr [0] NEQA 0
+	THEN
+	    BEGIN
+
+	    LOCAL
+		move_src : REF VECTOR [, BYTE],
+		move_dst : REF VECTOR [, BYTE],
+		move_amt;
+
+	    move_src = my_addr [0];
+	    move_dst = my_alloc [0];
+	    move_amt = .my_addr [mem_siz - mem_dat];
+
+	    WHILE 1
+	    DO
+		BEGIN
+
+		LOCAL
+		    move_cnt;
+
+		move_cnt = .move_amt;
+		IF .move_cnt GTRU 65535
+		THEN
+		    move_cnt = 65535;
+
+		move_dst = CH$MOVE (.move_cnt, move_src [0], move_dst [0]);
+		move_src = move_src [.move_cnt];
+
+		move_amt = .move_amt - .move_cnt;
+		IF .move_amt EQLU 0
+		THEN
+		    EXITLOOP;
+
+		END;
+
+	    my_status = fake_vm_free_vm (my_addr [mem_siz - mem_dat], my_addr);
+
+	    IF NOT .my_status
+	    THEN
+		$call_debug ('REALLOC free of old failed: Status = !XL',
+			     .my_status);
+
+	    END;
+
+	END
+    ELSE
+	BEGIN
+
+	IF .c$$translate_addr NEQA 0
+	THEN
+	    (.c$$translate_addr) (.my_status);
+
+	my_alloc = 0;
+
+	END;
+
+    $ast_enable;
+
+    RETURN my_alloc [0];
+
+    END;
+
+ROUTINE fake_vm_free (addr : REF VECTOR [, BYTE]) =
+    BEGIN
+
+    BUILTIN
+	ACTUALCOUNT;
+
+    LOCAL
+	my_return,
+	my_addr : REF VECTOR,
+	my_size,
+	my_status;
+
+    $ast_disable ();
+
+    IF NOT .image_loaded
+    THEN
+	load_image ();
+
+    IF ACTUALCOUNT () NEQU 1
+    THEN
+	$call_debug ('FREE incorrect argument count: !UL',
+		     ACTUALCOUNT ());
+
+    my_return = 0;
+
+    my_addr = addr [0];
+    IF my_addr [0] NEQA 0
+    THEN
+	BEGIN
+
+	my_size = .my_addr [mem_siz - mem_dat];
+
+	my_status = fake_vm_free_vm (my_size, my_addr);
+
+	IF NOT .my_status
+	THEN
+	    IF .my_status NEQU lib$_intlogerr
+	    THEN
+		BEGIN
+
+		IF .c$$translate_addr NEQA 0
+		THEN
+		    (.c$$translate_addr) (.my_status);
+
+		my_return = -1;
+
+		END;
+
+	END;
+
+    $ast_enable;
+
+    RETURN .my_return;
+
+    END;
+
+ROUTINE fake_vm_dummy_free = RETURN 0;
+
+ROUTINE fake_vm_malloc_opt     = RETURN $call_same_args (fake_vm_malloc);
+
+ROUTINE fake_vm_calloc_opt     = RETURN $call_same_args (fake_vm_calloc);
+
+ROUTINE fake_vm_realloc_opt    = RETURN $call_same_args (fake_vm_realloc);
+
+ROUTINE fake_vm_free_opt       = RETURN $call_same_args (fake_vm_free);
+
+ROUTINE fake_vm_dummy_free_opt = RETURN 0;
+
+ROUTINE fake_vm_xmemory_malloc     = RETURN $call_same_args (fake_vm_malloc);
+
+ROUTINE fake_vm_xmemory_calloc     = RETURN $call_same_args (fake_vm_calloc);
+
+ROUTINE fake_vm_xmemory_realloc    = RETURN $call_same_args (fake_vm_realloc);
+
+ROUTINE fake_vm_xmemory_free       = RETURN $call_same_args (fake_vm_free);
+
+ROUTINE fake_vm_xmemory_dummy_free = RETURN 0;
+
+ROUTINE fake_vm_lib_malloc     = RETURN $call_same_args (fake_vm_malloc);
+
+ROUTINE fake_vm_lib_calloc     = RETURN $call_same_args (fake_vm_calloc);
+
+ROUTINE fake_vm_lib_realloc    = RETURN $call_same_args (fake_vm_realloc);
+
+ROUTINE fake_vm_lib_free       = RETURN $call_same_args (fake_vm_free);
+
+ROUTINE fake_vm_lib_dummy_free = RETURN 0;
+
+END
+ELUDOM

@@ -1,0 +1,351 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'Define IPACP TCP related structures'
+%(
+
+Module:
+
+	TCP.REQ
+
+Facility:
+
+	Define the TCP related things (but not TCP itself)
+
+Author:
+
+	Bruce R. Miller, CMU Network Development
+	Borrowing Heavily from other modules.
+	Copyright (c) 1986,1987,1990 Carnegie-Mellon University
+
+Modification history:
+
+	10-Dec-1991	Henry W. Miller		USBR
+	Add TCB variable SND_Delay_Timer, to implement RFC1122 SWS
+	avoidance algorithim.
+
+	05-Dec-1991	Henry W. Miller		USBR
+	Add SND_ACK_Threshold variable to TCB.
+	Make TCB[ACK_Size] an unsigned long.
+
+	13-Nov-1991	Henry W. Miller		USBR
+	Add Delayed_ACK_Timer to TCB.
+	Make flag word in TCB a long.  (We ran out of bits)
+	Remove old obsolete crap.
+
+	11-Nov-1991	Henry W. Miller		USBR
+	Change SND_WL to unsigned longs as per RFC1122.
+
+	17-Sep-1991	Henry W. Miller		USBR
+	Bring retransmission parameters into line with RFC1122.
+	Add flag in TCB for disabling Nagle algorithim.
+
+	25-Jan-1991	Henry W. Miller		USBR
+	Make WINDOW_DEFAULT and ACK_THRESHOLD configurable variables.
+
+	15-Jan-1991	Henry W. Miller		USBR
+	Changed SND_WND, RCV_WND, and Old_RCV_WND to unsigned long values
+	as recommended by RFC1122.
+
+	13-Jan-1991	Henry W. Miller		USBR
+	Comment out TCPTTL; now a configurable variable.
+
+)%
+
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETVMS';
+LIBRARY 'STRUCTURE';
+
+
+%SBTTL 'Literals'
+
+LITERAL
+
+! TCB Connection States
+
+    CS$Closed		= 0: UNSIGNED(8),	! fictious, TCB does NOT exist.
+    CS$Listen		= 1: UNSIGNED(8),
+    CS$SYN_Sent		= 2: UNSIGNED(8),
+    CS$SYN_RECV		= 3: UNSIGNED(8),
+    CS$Established	= 4: UNSIGNED(8),
+    CS$FIN_Wait_1	= 5: UNSIGNED(8),
+    CS$FIN_Wait_2	= 6: UNSIGNED(8),
+    CS$Time_Wait	= 7: UNSIGNED(8),
+    CS$Close_Wait	= 8: UNSIGNED(8),
+    CS$Closing		= 9: UNSIGNED(8),
+    CS$Last_ACK		= 10: UNSIGNED(8),
+    CS$Reset		= 11: UNSIGNED(8),
+    CS$Inactive		= 12: UNSIGNED(8),
+    CS$NameLook		= 13: UNSIGNED(8),
+
+! Control Segment type identifiers
+
+    M$SYN = 1: UNSIGNED(8),	! Send a SYN control segment
+    M$FIN = 2: UNSIGNED(8),
+    M$ACK = 3: UNSIGNED(8),
+    M$RST = 4: UNSIGNED(8),
+    M$SYN_ACK = 5: UNSIGNED(8),	! SYN & ack together.
+
+! Misc.
+
+    TCPTOS = 0,			! IP Service type: Datagram,Highest Reliablity
+				! Reliability over speed, Speed: High.
+    TCPDF = FALSE,		! OK to fragment datagrams
+    SND_Q_MAX = 8,		! Max number of buffered user sends.
+
+! Misc Time Values in Hundredths seconds.
+
+    Max_Seg_LifeTime = 2*Minute,	! seconds.
+    Min_RT_TimeOut = 1*Csec,	! Min allowable retransmission time
+    Max_RT_TimeOut = 4*Minute,	! Max allowable Retransmission time.
+    Base_RT_TimeOut = 3*CSEC,	! Base (initial) Round Trip timer.
+    PROBE_IVAL = Minute,	! Inactivity probe timer
+    ack_interval = Minute,	! spontaneous ack interval timer.
+    Delayed_ACK_Interval = 20,	! Delayed ACK interval, 200ms
+    SQUENCH_Interval = 2*CSEC,	! Source Quench Interval, 2 Seconds
+    Function_TimeOut = 10*Csec,	! User function.
+    Active_Open_Timeout = 30*Csec,! Amount of time for active open to happen
+    Passive_Open_Timeout = DaySec, ! Amount of time for passive open
+    NameLook_Timeout = 2*Minute,! How long to wait for name lookup
+    Close_Timeout = 2*Minute,	! How long to wait for connection to close
+    CONN_TIMEOUT = 10*Minute,	! How long before connection is dead
+    RX_TIMEVAL = 4*Minute,	! Retransmit queue time limit
+    Inactive_TCB_TimeOut = 5*Csec, ! Time which a TCB will remain inactive
+				! before being deleted.
+    Default_Send_timeOut = 300*Csec;! Time allowed for a user's buffer
+				! to be sent.
+
+
+%SBTTL 'Define a TCB: (Transmission Control Block) data structure.'
+%(
+
+Define a TCB: (Transmission Control Block) data structure.
+
+The basic requirements of a TCB are derived from the DOD TCP document, page 19.
+The TCB is the data structure which TCP uses to control a specific connection.
+All active connections (e.g., NOT closed) have an associated TCB.  
+Each TCB can be located two ways:
+1) Local_Connection_ID is the address of the TCB
+2) Each local port has associated a linked-list of TCB's which use that local
+   port as part of a connection (socket-pair).
+When the TCB is on the free TCB list (Free_TCB_List, Queue header) the
+fields LP_Next & LP_Back are used as forward & backwards queue pointers.
+)%
+
+$FIELD  TCB_Fields =
+    Set
+    LP_Next		= [$Address],	! LP queue Forward Link pointer.
+    LP_Back		= [$Address],	! LP queue, Backwards Link.
+    Foreign_Host	= [$Bytes(4)],	! Foreign host address
+    Foreign_Port	= [$ULong],	! Foreign port
+    Local_Host		= [$Bytes(4)],	! Local address of connection
+    Local_Port		= [$ULong],	! Local Port #
+    RF_Qhead		= [$Address],	! Network: received "future" seg queue
+    RF_Qtail		= [$Address],
+    RF_Qcount		= [$SLong],	! Count of items on future queue
+    UR_QHead		= [$Address],	! User: receive Data request queue.
+    UR_QTail		= [$Address],
+    SND_QHead		= [$Address],	! User: send Segment request queue
+    SND_QTail		= [$Address],
+
+!
+! Security		= [$SWord],	! not implememted.
+! Precedance		= [$SWord],	! not implememted.
+
+! Send sequence number variables
+! Bytes(4) gives 32-Bit unsigned integer for mod 32 arith.
+
+    $Align(Fullword)
+    SND_UNA		= [$ULong],	! send unacknowledged seq #
+    SND_NXT		= [$ULong],	! next send seq #
+    SND_WND		= [$ULong],	! send window
+    SND_WL		= [$ULong],	! Last window update.
+    SND_BS		= [$SLong],	! send buffer size
+    SND_UP		= [$ULong],	! urgent pointer
+    SND_MAX_WND		= [$ULong],	! Maximum Send Window
+    ISS			= [$ULong],	! Initial Send sequence number.
+    SND_Pptr		= [$ULong],	! Send PUSH pointer
+
+! Send circular queue variables
+
+    CQF$DEF('SND_Q_'),			! Send data queue
+    CQF$DEF('SRX_Q_'),			! Retransmission data queue
+
+! Receive Sequence variables
+
+    RCV_NXT		= [$ULong],	! next expected sequence #
+    Old_RCV_NXT		= [$ULong],	! RCV.NXT last time ACK sent
+    RCV_WND		= [$ULong],	! window
+    Old_RCV_WND		= [$ULong],	! RCV.WND last time ACK sent
+    RCV_BS		= [$SLong],	! buffer size in bytes
+    RCV_UP		= [$ULong],	! Receive urgent pointer
+    IRS			= [$ULong],	! Initial receive sequence #
+    RCV_DUptr		= [$ULong],	! Last sequence # delivered to user
+    RCV_Pptr		= [$ULong],	! Receive PUSH pointer
+
+! Receive circular queue variables
+
+    CQF$DEF('RCV_Q_'),			! Receive data queue
+
+! Misc connection information
+
+    UCB_ADRS		= [$Address],	! UCB address for this TCB
+    VTCB_INDEX		= [$ULong],	! VALID_TCB index for this TCB
+    User_ID		= [$ULong],	! Owning process ID
+    RX_Timer		= [$ULong],	! Time to do retransmit for this TCB
+    RX_Timeout		= [$ULong],	! Retransmission time-out for TCB
+    RX_Count		= [$SLong],	! # of retransmissions done
+    RX_SEQ		= [$ULong],	! Retransmission sequence start
+    RX_CTL		= [$Bytes(4)],	! Control segment type
+    Xmit_Start_Time	= [$ULong],	! Time first item queued on RX timer
+    Time_Wait_Timer	= [$ULong],	! Time_Wait Counter.
+!    $OVERLAY(time_wait_timer)
+    ACK_Timer		= [$ULong],	! spontaneous ack timer.
+!    $CONTINUE
+    Delayed_ACK_Timer	= [$ULong],	! Delayed ACK timer.
+    SQUENCH_Timer	= [$ULong],	! Source Quench timer.
+    User_Timeval	= [$ULong],	! Amount of time before idle
+    User_Timeout	= [$ULong],	! Time which connection will be closed
+    Probe_time		= [$ULong],	! time when we need to probe again
+    Connection_TimeOut	= [$ULong],	! Time which connection will be reset.
+    InActive_Timeout	= [$ULong],	! time which conn will be deleted.
+    Function_Timer	= [$ULong],	! User function timeout.
+    TVTDATA		= [$Address],	! Pointer to TVT data block if IS_TVT
+    Timeout_Routine	= [$Address],	! For TVT's, internal timeout routine
+    ArgBlk		= [$Address],	! Points at user's i/o request argblk.
+    Round_Trip_Time	= [$ULong],	! Time required for segment to be ACKed
+    Calculated_RTO	= [$ULong],	! Calculated retransmission timeout
+    Curr_User_Function	= [$Byte],	! Current user function being timed.
+    State		= [$Byte],	! Current state of this connection
+    Last_State		= [$Byte],	! Last state of this connection.
+    Con_Index		= [$Byte],	! Connection Table index for local port
+    Process_IO_Chan	= [$bytes(2)],	! IO channel for this connection.
+    Max_seg_data_size	= [$bytes(2)],	! max size data receiver will accept
+    Max_eff_data_size	= [$bytes(2)],	! max effective size data receiver will accept
+    Duplicate_segs	= [$bytes(2)],	! duplicate segments.
+    OORW_segs		= [$bytes(2)],	! Out Of Recv Window segments.
+    Inactive_Code	= [$SLong],	! Reason TCB was set inactive.
+    ACK_size		= [$Ulong],	! # of data bytes to be ack'ed.
+    SND_ACK_Threshold	= [$ULong],	! Number of bytes before window update
+    SND_Delay_Timer	= [$ULong],	! Time to wait before forcing send
+    TCB$Flags		= [$ULong],	! Reserve some space for flags
+    $OVERLAY(TCB$Flags)
+	Active_Open	= [$Bit],	! Active open performed.
+	Open_NoWait	= [$Bit],	! Wait-mode of OPEN in progress
+	Close_NoWait	= [$Bit],	! Wait-mode of CLOSE in progress
+	Pending_Close 	= [$Bit],	! FIN segment needs to be sent.
+	Pending_ACK	= [$Bit],	! ACK segment needs to be sent.
+	Pending_IO	= [$Bit],	! ARGBLK pts at an user IO request.
+	Data_2_Send	= [$Bit],	! User data needs to be sent.
+	EOF		= [$Bit],	! TCB Closing, All data delivered.
+	Is_Aborted	= [$Bit],	! TCB is aborted - drop incoming data
+	SND_Push_Flag	= [$Bit],	! Push pending on SEND
+	RCV_Push_Flag	= [$Bit],	! Push seen on receive
+	NMLook_Flag	= [$Bit],	! Name or address lookup in progress
+	IS_Synched	= [$Bit],	! OK to send ACKs, connection synched
+	FIN_RCVD	= [$Bit],	! Valid FIN received in FIN-WAIT-2
+	IS_TVT		= [$Bit],	! TCB is a TVT (virtual terminal)
+	DE_Nagle	= [$Bit],	! Turn off Nagle algorithim
+	SQUENCH		= [$Bit],	! Source Quench received
+	NBWRITE		= [$Bit],	! Network Buffer busy
+	TCP_DF		= [$Bit],	! Don't Fragment bit
+    $CONTINUE
+    Foreign_Hnlen	= [$SWord],	! Length of foreign host name
+    Foreign_Hname	= [$Bytes(Max_Hname)]	! Foreign host name
+    TES;
+
+! Set the size of one TCB
+
+LITERAL
+    TCB_Size = $Field_Set_Size;		! in BLISS Fullwords.
+
+MACRO TCB_Structure = Block[TCB_Size] Field(TCB_Fields)% ;
+%MESSAGE(%NUMBER(tcb_size),' longwords per tcb')
+
+%SBTTL 'Connection Table definitions.'
+%(
+
+The connection table is the data structure used to identify unique network
+connections.  Each element in the table consists of a TCB list (Queue Header)
+& the local port number.  For every connection that has the same
+local-port you will find the TCB (Transmission Control Blk) in the TCB list
+for this local-port.  The primary reason behind this structure is to facilate
+connection OPEN processing in the verification that a requested connection
+pair (Foreign_Socket & Local_Socket) represent a unique connection.  We can't
+have duplicates or ambiguities.  If the local_port field is (-1) then this
+connection table entry is available.  As one might have guessed there is a
+limit to the number of unique local-ports that are active at any given time.
+I suspect as time flows the size of this table will have to be increased.
+See the literals & macro definitions following.  The actual global data
+declaration is in TCP.BLI.
+
+)%
+
+
+$FIELD CN$Fields =
+    SET
+    CN$TCB_List		= [$Address],	! This port's TCB list. Queue head prt.
+    CN$TCB_Tail		= [$Address],	! Queue tail ptr.
+    CN$Local_Port	= [$LONG]	! Local Port #.
+    TES;
+
+LITERAL
+    Conect_Tbl_Size = 4,		! # of blocks in connection blockvector
+    Initial_TCBs = 2,			! Initial size of Valid TCB table
+    CN$Blk_Size = $Field_Set_Size,	! Size in longs
+    CN$Blk_BLen = 10;			! Size in bytes
+
+MACRO
+    Connection_Table_Structure = BLOCKVECTOR[Conect_Tbl_Size,CN$Blk_Size] 
+				 FIELD(CN$Fields) %;
+%ASSIGN(tblsize,%NUMBER(conect_tbl_size)*%NUMBER(cn$blk_size))
+%MESSAGE(%NUMBER(tblsize),' Longwords allocated to Connection Table')
+
+
+%SBTTL 'Definition of structure for WKS server process table & SYN-wait list'
+
+$FIELD  WK_Server_Fields=
+    SET
+    WKS$Port		= [$Long_Integer],
+    WKS$Process		= [$Bytes(8)],		! ASCID descriptor.
+    WKS$IMAGE		= [$Bytes(8)],
+    WKS$Stat		= [$Long_Integer],
+    WKS$Priv		= [$Bytes(8)],
+    WKS$Quotas		= [$Address],
+    WKS$Input		= [$Bytes(8)],		! ASCID descriptor.
+    WKS$Output		= [$Bytes(8)],		! ASCID descriptor.
+    WKS$Error		= [$Bytes(8)],		! ASCID descriptor.
+    WKS$Prior		= [$Long_Integer],
+    WKS$MaxSrv		= [$Long_Integer],
+    WKS$SYN_Qcount	= [$Long_Integer],
+    WKS$SYN_Qhead	= [$Address],
+    WKS$SYN_Qtail	= [$Address]
+    TES;
+
+LITERAL
+    WKS_Block_Size = $Field_Set_Size,
+    WKS_Table_Size = 20;
+
+MACRO 
+    WKS_Structure = BLOCKVECTOR[WKS_Table_Size,WKS_Block_Size]
+		    FIELD(WK_Server_Fields) %;
+

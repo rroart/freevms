@@ -1,0 +1,337 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'SNMP - Simple Network Monitoring Protocol data structures'
+%(
+
+Module:
+
+	SNMP
+
+
+Author:
+
+	Bruce R. Miller, CMU Network Development
+	February 22, 1990
+	Copyright (c) 1990, Bruce Miller and CMU
+
+
+
+	Definitions for SNMP (RFC 1067) implementation.
+***********************************************************
+	Copyright 1990 by Carnegie Mellon University
+
+                      All Rights Reserved
+
+Permission to use, copy, modify, and distribute this software and its 
+documentation for any purpose and without fee is hereby granted, 
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in 
+supporting documentation, and that the name of CMU not be
+used in advertising or publicity pertaining to distribution of the
+software without specific, written prior permission.  
+
+CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+SOFTWARE.
+******************************************************************/
+)%
+
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';    ! Get the BLISS transportablity library.
+LIBRARY 'ASN1';
+!
+! IMPORTANT NOTE!!!!
+!
+!	Don't change these structures with out also changing the
+!	Magic Numbers!!!
+!
+
+
+!
+! Error codes:
+!
+!
+! These must not clash with SNMP error codes (all positive).
+!
+
+LITERAL
+
+    PARSE_ERROR	= -1,
+    BUILD_ERROR	= -2,
+
+    SID_MAX_LEN		= 64,
+    MAX_NAME_LEN	= 64,  ! number of subid's in a objid
+
+    READ	= 1,
+    WRITE	= 0,
+
+    RONLY	= %x'0AAAA',	! read access for everyone
+    RWRITE	= %x'0AABA',	! add write access for community private
+    NOACCESS 	= %x'0000',	! no access for anybody
+
+    INTEGER	= ASN_INTEGER,
+    STRING	= ASN_OCTET_STR,
+    OBJID	= ASN_OBJECT_ID,
+    NULLOBJ	= ASN_NULL,
+
+! defined types (from the SMI, RFC 1065)
+    IPADDRESS	= (ASN_APPLICATION OR 0),
+    COUNTER	= (ASN_APPLICATION OR 1),
+    GAUGE	= (ASN_APPLICATION OR 2),
+    TIMETICKS	= (ASN_APPLICATION OR 3),
+    OPAQUE	= (ASN_APPLICATION OR 4);
+
+
+!
+! IP group MIB (Management Information Block)
+!
+! Note:  The IP group magic in SNMP_VARS assumes that every field is a long.
+$FIELD IP_group_MIB_fields =
+    SET
+    IPMIB$ipForwarding		= [$Long_Integer],
+    IPMIB$ipDefaultTTL		= [$Long_Integer],
+    IPMIB$ipInReceives		= [$Long_Integer],
+    IPMIB$ipInHdrErrors		= [$Long_Integer],
+    IPMIB$ipInAddrErrors	= [$Long_Integer],
+    IPMIB$ipForwDatagrams	= [$Long_Integer],
+    IPMIB$ipInUnknownProtos	= [$Long_Integer],
+    IPMIB$ipInDiscards		= [$Long_Integer],
+    IPMIB$ipInDelivers		= [$Long_Integer],
+    IPMIB$ipOutRequests		= [$Long_Integer],
+    IPMIB$ipOutDiscards		= [$Long_Integer],
+    IPMIB$ipOutNoRoutes		= [$Long_Integer],
+    IPMIB$ipReasmTimeout	= [$Long_Integer],
+    IPMIB$ipReasmReqds		= [$Long_Integer],
+    IPMIB$ipReasmOKs		= [$Long_Integer],
+    IPMIB$ipReasmFails		= [$Long_Integer],
+    IPMIB$ipFragOKs		= [$Long_Integer],
+    IPMIB$ipFragFails		= [$Long_Integer],
+    IPMIB$ipFragCreates		= [$Long_Integer]
+    TES;
+
+LITERAL
+    IP_group_MIB_Size	= $Field_Set_Size;
+
+MACRO
+    IP_group_MIB_struct = BLOCK[IP_group_MIB_Size] FIELD(IP_group_MIB_fields)%;
+
+
+!
+! ICMP group MIB (Management Information Block)
+!
+$FIELD ICMP_MIB_fields =
+    SET
+    MIB$icmpInMsgs		= [$Long_Integer],
+    MIB$icmpInErrors		= [$Long_Integer],
+    MIB$icmpInDestUnreachs	= [$Long_Integer],
+    MIB$icmpInTimeExcds		= [$Long_Integer],
+    MIB$icmpInParamProbs	= [$Long_Integer],
+    MIB$icmpInSrcQuenchs	= [$Long_Integer],
+    MIB$icmpInRedirects		= [$Long_Integer],
+    MIB$icmpInEchos		= [$Long_Integer],
+    MIB$icmpInEchoReps		= [$Long_Integer],
+    MIB$icmpInTimeStamps	= [$Long_Integer],
+    MIB$icmpInTimeStampreps	= [$Long_Integer],
+    MIB$icmpInAddrMasks		= [$Long_Integer],
+    MIB$icmpInAddrMaskReps	= [$Long_Integer],
+    MIB$icmpOutMsgs		= [$Long_Integer],
+    MIB$icmpOutErrors		= [$Long_Integer],
+    MIB$icmpOutDestUnreachs	= [$Long_Integer],
+    MIB$icmpOutTimeExcds	= [$Long_Integer],
+    MIB$icmpOutParamProbs	= [$Long_Integer],
+    MIB$icmpOutSrcQuenchs	= [$Long_Integer],
+    MIB$icmpOutRedirects	= [$Long_Integer],
+    MIB$icmpOutEchos		= [$Long_Integer],
+    MIB$icmpOutEchoReps		= [$Long_Integer],
+    MIB$icmpOutTimeStamps	= [$Long_Integer],
+    MIB$icmpOutTimeStampReps	= [$Long_Integer],
+    MIB$icmpOutAddrMasks	= [$Long_Integer],
+    MIB$icmpOutAddrMaskReps	= [$Long_Integer]
+    TES;
+
+LITERAL
+    ICMP_MIB_Size	= $Field_Set_Size;
+
+MACRO
+    ICMP_MIB_struct = BLOCK[ICMP_MIB_Size] FIELD(ICMP_MIB_fields)%;
+
+
+!
+! UDP group MIB (Management Information Block)
+!
+$FIELD UDP_MIB_fields =
+    SET
+    MIB$UDPINDATAGRAMS	= [$Long_Integer],
+    MIB$UDPNOPORTS	= [$Long_Integer],
+    MIB$UDPINERRORS	= [$Long_Integer],
+    MIB$UDPOUTDATAGRAMS	= [$Long_Integer]
+    TES;
+
+LITERAL
+    UDP_MIB_Size	= $Field_Set_Size;
+MACRO
+    UDP_MIB_struct = BLOCK[UDP_MIB_Size] FIELD(UDP_MIB_fields)%;
+
+
+!
+! TCP group MIB (Management Information Block)
+!
+$FIELD TCP_MIB_fields =
+    SET
+    MIB$tcpRtoAlgorithm	= [$Long_Integer],
+    MIB$tcpRtoMin	= [$Long_Integer],
+    MIB$tcpRtoMax	= [$Long_Integer],
+    MIB$tcpMaxConn	= [$Long_Integer],
+    MIB$tcpActiveOpens	= [$Long_Integer],
+    MIB$tcpPassiveOpens	= [$Long_Integer],
+    MIB$tcpAttemptFails	= [$Long_Integer],
+    MIB$tcpEstabResets	= [$Long_Integer],
+    MIB$tcpCurrEstab	= [$Long_Integer],
+    MIB$tcpInSegs	= [$Long_Integer],
+    MIB$tcpOutSegs	= [$Long_Integer],
+    MIB$tcpRetransSegs	= [$Long_Integer]
+    TES;
+
+LITERAL
+    TCP_MIB_Size	= $Field_Set_Size;
+MACRO
+    TCP_MIB_struct = BLOCK[TCP_MIB_Size] FIELD(TCP_MIB_fields)%;
+
+
+
+!
+! Magic Numbers
+!
+LITERAL
+    ! sysVar magic
+    VERSION_DESCR	= 0,
+    VERSION_ID		= 1,
+    UPTIME		= 2,
+    CFG_NNETS		= 3,
+
+    ! ifTable magic
+    IFINDEX		= 1,
+    IFDESCR		= 2,
+    IFTYPE		= 3,
+    IFMTU		= 4,
+    IFSPEED		= 5,
+    IFPHYSADDRESS	= 6,
+    IFADMINSTATUS	= 7,
+    IFOPERSTATUS	= 8,
+    IFLASTSTATE		= 9,
+    IFINOCTETS		= 10,
+    IFINUCASTPKTS	= 11,
+    IFINNUCASTPKTS	= 12,
+    IFINDISCARDS	= 13,
+    IFINERRORS		= 14,
+    IFINUNKNOWNPROTOS	= 15,
+    IFOUTOCTETS		= 16,
+    IFOUTUCASTPKTS	= 17,
+    IFOUTNUCASTPKTS	= 18,
+    IFOUTDISCARDS	= 19,
+    IFOUTERRORS 	= 20,
+    IFOUTQLEN		= 21,
+
+    ! IP group magic
+    IPFORWARDING	= 1,
+    IPDEFAULTTTL 	= 2,
+    IPINRECEIVES 	= 3,
+    IPINHDRERRORS 	= 4,
+    IPINADDRERRORS 	= 5,
+    IPFORWDATAGRAMS 	= 6,
+    IPINUNKNOWNPROTOS 	= 7,
+    IPINDISCARDS 	= 8,
+    IPINDELIVERS 	= 9,
+    IPOUTREQUESTS 	= 10,
+    IPOUTDISCARDS 	= 11,
+    IPOUTNOROUTES 	= 12,
+    IPREASMTIMEOUT 	= 13,
+    IPREASMREQDS 	= 14,
+    IPREASMOKS 		= 15,
+    IPREASMFAILS 	= 16,
+    IPFRAGOKS 		= 17,
+    IPFRAGFAILS 	= 18,
+    IPFRAGCREATES 	= 19,
+
+    ! IP Address Table magic
+    IPADADDR		= 1,
+    IPADIFINDEX		= 2,
+    IPADNETMASK		= 3,
+    IPADBCASTADDR	= 4,
+
+    ! ICMP group magic
+    ICMPINMSGS		= 1,
+    ICMPINERRORS	= 2,
+    ICMPINDESTUNREACHS	= 3,
+    ICMPINTIMEEXCDS	= 4,
+    ICMPINPARMPROBS	= 5,
+    ICMPINSRCQUENCHS	= 6,
+    ICMPINREDIRECTS	= 7,
+    ICMPINECHOS		= 8,
+    ICMPINECHOREPS	= 9,
+    ICMPINTIMESTAMPS	= 10,
+    ICMPINTIMESTAMPREPS	= 11,
+    ICMPINADDRMASKS	= 12,
+    ICMPINADDRMASKREPS	= 13,
+    ICMPOUTMSGS		= 14,
+    ICMPOUTERRORS	= 15,
+    ICMPOUTDESTUNREACHS	= 16,
+    ICMPOUTTIMEEXCDS	= 17,
+    ICMPOUTPARMPROBS	= 18,
+    ICMPOUTSRCQUENCHS	= 19,
+    ICMPOUTREDIRECTS	= 20,
+    ICMPOUTECHOS	= 21,
+    ICMPOUTECHOREPS	= 22,
+    ICMPOUTTIMESTAMPS	= 23,
+    ICMPOUTTIMESTAMPREPS= 24,
+    ICMPOUTADDRMASKS	= 25,
+    ICMPOUTADDRMASKREPS	= 26,
+
+    ! TCP group magic
+    tcpRtoAlgorithm	= 1,
+    tcpRtoMin		= 2,
+    tcpRtoMax		= 3,
+    tcpMaxConn		= 4,
+    tcpActiveOpens	= 5,
+    tcpPassiveOpens	= 6,
+    tcpAttemptFails	= 7,
+    tcpEstabResets	= 8,
+    tcpCurrEstab	= 9,
+    tcpInSegs		= 10,
+    tcpOutSegs		= 11,
+    tcpRetransSegs	= 12,
+
+    ! TCP Connection Table magic
+    tcpConnState	= 1,
+    tcpConnLocalAddress	= 2,
+    tcpConnLocalPort	= 3,
+    tcpConnRemAddress	= 4,
+    tcpConnRemPort	= 5,
+
+    ! UDP group magic
+    UDPINDATAGRAMS	= 1,
+    UDPINNOPORTS	= 2,
+    UDPINERRORS		= 3,
+    UDPOUTDATAGRAMS	= 4;

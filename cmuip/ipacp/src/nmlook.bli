@@ -1,0 +1,1243 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'NMLOOK - Mailbox name lookup service'
+!++
+! Module:
+!
+!	NMLOOK - Handle IPACP name lookup requests.
+!
+! Facility:
+!
+!	Provides host name and address translation by talking to the system
+!	name resolver through mailboxes.
+!
+! Abstract:
+!
+!	Exports the following routines for host name processing:
+!
+!	    NML$CONFIG(IMNAME,PRIOR,STATS,PRIVS,QUOTAS) : NOVALUE
+!		Get the name resolver process configuration info from the config
+!		file. Called from CONFIG module when this information is read.
+!	    NML$INIT : NOVALUE
+!		Initialize name lookup state. Create IPACP mailbox and start
+!		name resolver process if none exists. Must be called before any
+!		other functions may be performed.
+!	    NML$GETALST(NAMPTR,NAMLEN,ASTADR,ASTPRM) : NOVALUE
+!		Enqueue name translation. AST routine will be called when the
+!		request completes. AST routine calling sequence is:
+!		(.ASTADR)(.ASTPRM,<RC>,<ADRCNT>,<ADRLST>,<NAMLEN>,<NAMPTR>)
+!	    NML$GETNAME(ADDR,ASTADR,ASTPRM) : NOVALUE
+!		Enqueue address translation. AST routine will be called when
+!		the request completes. AST routine calling sequence is:
+!		(.ASTADR)(.ASTPRM,<RC>,<NAMLEN>,<NAMPTR>)
+!	    NML$GETRR(RRTYPE,NAMPTR,NAMLEN,ASTADR,ASTPRM) : NOVALUE
+!		Enqueue name translation. AST routine will be called when the
+!		request completes. AST routine calling sequence is:
+!		(.ASTADR)(.ASTPRM,<RC>,<RDLEN>,<RDATA>,<NAMLEN>,<NAMPTR>)
+!	    NML$CANCEL(ASTPRM,ASTFLG,STATUS) =
+!		Delete an entry from the queue. Returns count of requests
+!		found.
+!	    NML$STEP(COADDR) : NOVALUE =
+!		Step through the queue, calling the user coroutine for each
+!		queue entry.
+!	    NML$PURGE(STATUS) : NOVALUE =
+!		Purge the name lookup queue and shutdown the name resolver.
+!
+! Author:
+!
+!	Vince Fuller, CMU-CSD, February, 1987
+!	Copyright (c) 1987, Vince Fuller and Carnegie-Mellon University
+!
+! Edit history:
+!
+! 1.2b	18-Jul-1991	Henry W. Miller		USBR
+!	Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
+!	and LIB$FREE_VM.
+!
+! 1.2a	17-Jul-1991	Henry W. Miller		USBR
+!	Fix comments from "server" to "resolver".
+!	Updated IDENT.
+!	Comment out LOG$MSG; now defined in TCPMACROS.
+!	Corrected some spelling errors.
+!
+! 1.2  15-Jun-89, Edit by BRM (Bruce R. Miller)	CMU Network Development
+!	Added NML$GETRR routine.
+!
+!	31-OCT-1988	Dale Moore	CMU-CS/RI
+!	Store the name string in dynamic descriptors.  They
+!	are easier to work with than descriptors created with
+!	LIB$GET_VM.
+!
+! 1.1  10-Sep-87, Edit by VAF
+!	Copy but don't count the null for name lookup requests.
+!
+! 1.0  24-Feb-87, Edit by VAF
+!	Original version.
+!--
+
+MODULE NMLOOK(IDENT='1.2b',LANGUAGE(BLISS32),
+	      ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
+			      NONEXTERNAL=LONG_RELATIVE),
+	      LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
+	      OPTIMIZE,OPTLEVEL=3,ZIP) =
+BEGIN
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETVMS';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETERROR';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NAMSYM';
+LIBRARY 'TCPMACROS';
+
+!LITERAL
+!!!HACK!!! Why is this temporary
+!    LOG$MSG = %X'800';		! Temporary
+
+EXTERNAL ROUTINE
+    LIB$GET_VM : BLISS ADDRESSING_MODE(GENERAL),
+    LIB$GET_VM_PAGE : BLISS ADDRESSING_MODE(GENERAL),
+    LIB$FREE_VM : BLISS ADDRESSING_MODE(GENERAL),
+    LIB$FREE_VM_PAGE : BLISS ADDRESSING_MODE(GENERAL),
+    QL_FAO : NOVALUE,
+    LOG_FAO : NOVALUE,
+    OPR_FAO : NOVALUE,
+    TIME_STAMP,
+    USER$Clock_Base;
+
+EXTERNAL
+    MYUIC,
+    LOG_STATE,
+    AST_IN_PROGRESS,
+    INTDF;
+
+
+%SBTTL 'Define name lookup queue entry'
+
+! The name lookup queue contains an entry for each pending request. The request
+! consists of a header describing it, followed by the mailbox message for it.
+
+$FIELD NQENTRY_FIELDS =
+    SET
+    NQE$NEXT	= [$Address],	! Pointer to next item on queue
+    NQE$PREV	= [$Address],	! Pointer to previous item on queue
+    NQE$ID	= [$UShort],	! Request ID
+    NQE$TYPE	= [$UShort],	! Request type
+    NQE$LENGTH	= [$UShort],	! Request buffer length
+    NQE$FLAGS	= [$Ushort],	! Request flags
+    $OVERLAY(NQE$FLAGS)
+      NQE$F_XMIT= [$Bit],	! Request has been successfully transmitted
+    $CONTINUE
+    NQE$TIME	= [$Long],	! Time request was enqueued
+    NQE$ASTADR	= [$Address],	! Address of routine to call when done
+    NQE$ASTPRM	= [$Address],	! Parameter to AST routine
+    NQE$IOSB	= [$Bytes(8)],	! IOSB for mailbox send
+    NQE$DATA	= [$Bytes(0)]	! Mailbox message buffer
+    TES;
+LITERAL
+    NQENTRY_SIZE = $FIELD_SET_SIZE,
+    NQENTRY_BLEN = NQENTRY_SIZE*4;
+MACRO
+    NQENTRY(SIZ) = 
+	%IF %NULL(SIZ) %THEN
+	    BLOCK[NQENTRY_SIZE]
+	%ELSE
+	    BLOCK[NQENTRY_SIZE + SIZ]
+	%FI
+	FIELD(NQENTRY_FIELDS) %;
+
+
+! Definition of a mail message buffer
+
+$FIELD MAIL$BUF_FIELDS =
+    SET
+    MB$IOSB	= [$BYTES(8)],	! IOSB for receive
+    MB$DATA	= [$BYTES(0)]	! Data area
+    TES;
+LITERAL
+    MAIL$BUF_SIZE = $FIELD_SET_SIZE;
+MACRO
+    MAIL$BUF = BLOCK[MAIL$BUF_SIZE] FIELD(MAIL$BUF_FIELDS) %,
+    MAX_MAIL$BUF = BLOCK[MAIL$BUF_SIZE + (MSGMAX/4)] FIELD(MAIL$BUF_FIELDS) %;
+
+%SBTTL 'Constants and OWN data'
+
+BIND
+    SRVPRCNAM = %ASCID'NAMRES',	! Name of the resolver process
+    SYSTABNAM = %ASCID'LNM$SYSTEM_TABLE', ! Logical name of system table
+    SRVMBXNAM = %ASCID NAMRES_MBX, ! System-wide logical name of resolver mailbox
+    ACPMBXNAM = %ASCID IPACP_MBX, ! System-wide logical name of ACP mailbox
+    MYMBXNAM = %ASCID'IPACP_MBX', ! Temporary name of ACP mailbox
+    ACPMBXPRO = %X'FF00';	! Protection: (W:<no>,G:<no>,O:RWLP,S:RWLP)
+
+LITERAL
+    MBAMAX = MBNMAX*2,		! Max mailbox string length
+    MSGCNT = 10,		! Number of receive messages to buffer
+    NQE_QLIMIT = 20,		! Max length of request queue
+    SRV$DOWN = -1,		! Resolver is unavailable
+    SRV$INIT = 0,		! Resolver is initializing
+    SRV$UP = 1;			! Resolver is up
+
+OWN
+    SRVSTATE,			! Resolver state
+    SRVMBXCHN,			! I/O channel on nameresolver mailbox
+    SRVPID,			! PID of the nameresolver
+    ACPMBXCHN,			! I/O channel on ACP mailbox
+    RCVBUF : MAX_MAIL$BUF,	! Receive buffer
+    MYMBA_BUF : BLOCK[CH$ALLOCATION(MBAMAX)],
+    MYMBA_LEN,
+    MYMBA_ATTR,
+    NQE_QUEUE : QUEUE_HEADER	! Request queue
+	PRESET([QHEAD] = NQE_QUEUE,
+	       [QTAIL] = NQE_QUEUE),
+    NQE_COUNT,			! Count of blocks currently allocated
+    CURQID,			! Current request ID
+    SRVIMGNAME : DESC$STR PRESET (	! Name resolver process name
+			[DSC$W_LENGTH]	= 0,
+			[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+			[DSC$B_CLASS]	= DSC$K_CLASS_D,
+			[DSC$A_POINTER]	= 0),
+    SRVPRIOR,			! Name resolver priority
+    SRVSTATUS,			! Name resolver status flags
+    SRVPRIVS : VECTOR[2],	! Name resolver privileges
+    SRVQUOTAS : REF VECTOR;	! Name resolver quotas
+
+%SBTTL 'NML$CONFIG - Configure name resolver process'
+
+GLOBAL ROUTINE NML$CONFIG(IMNAME_A,PRIOR,STATUS,PRIVS, QUOTAS) : NOVALUE =
+!
+! Copy the configuration information about the name resolver into this module.
+! This information is used by NML$INIT when creating the name resolver process.
+!
+    BEGIN
+    BIND
+	IMNAME	= .IMNAME_A	: $BBLOCK;
+    EXTERNAL ROUTINE
+	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL);
+    MAP
+	PRIVS	: REF VECTOR[2],
+	QUOTAS	: REF $BBLOCK;
+    LOCAL
+	RC,
+	STRPTR,
+	QUOPTR;
+
+! Setup the descriptor of for the image name and allocate the string
+
+    RC = STR$COPY_DX (SRVIMGNAME, IMNAME);
+    IF NOT .RC THEN
+	FATAL$FAO('NML$CONFIG - failed to allocate string, RC = !XL',.RC);
+
+! Allocate the block for the process quota list
+
+    RC = LIB$GET_VM(%REF(.Quotas[DSC$W_LENGTH]),QUOPTR);
+    IF NOT .RC THEN
+	FATAL$FAO('NML$CONFIG - failed to allocate quolst, RC = !XL',.RC);
+    CH$MOVE(.QUOTAS [DSC$W_LENGTH],.QUOTAS [DSC$A_POINTER],.QUOPTR);
+    SRVQUOTAS = .QUOPTR;
+
+! Copy the remaining values into their appropriate places
+
+    SRVPRIOR = .PRIOR;		! Resolver priority
+    SRVSTATUS = .STATUS;	! Resolver process status flags
+    SRVPRIVS[0] = .PRIVS[0];	! Resolver privileges
+    SRVPRIVS[1] = .PRIVS[1];
+    END;
+
+%SBTTL 'NML$INIT - Initialize module state'
+
+FORWARD ROUTINE
+    MBX_RECV_AST : NOVALUE,
+    CHECK_SERVER,
+    SEND_CONTROL : NOVALUE;
+
+GLOBAL ROUTINE NML$INIT : NOVALUE =
+!
+! Create a mailbox for this process and start the name resolver.
+! The name resolver will let us know when it is ready to start accepting
+! requests.
+!
+    BEGIN
+    LOCAL
+	RC,
+	ITMLIST : $ITMLST_DECL(ITEMS=3);
+
+! Initialize state of service to unavailable
+
+    SRVSTATE = SRV$DOWN;
+    SRVMBXCHN = 0;
+    SRVPID = -1;
+
+! Initialize the request queue and initial request number
+
+    CURQID = USER$Clock_Base();
+    NQE_QUEUE[QHEAD] = NQE_QUEUE[QTAIL] = NQE_QUEUE;
+    NQE_COUNT = 0;
+
+! Create a mailbox for us
+
+    RC = $CREMBX(CHAN	= ACPMBXCHN,
+		 MAXMSG	= MSGMAX,
+		 BUFQUO	= MSGMAX*MSGCNT,
+		 PROMSK	= ACPMBXPRO,
+		 LOGNAM	= MYMBXNAM);
+    IF NOT .RC THEN
+	BEGIN
+	ERROR$FAO('Failed to create ACP mailbox, RC = !XL',.RC);
+	RETURN;
+	END;
+
+! Get the real name of the mailbox and create a system-wide logical to point
+! to it. We want the name to be accessable to all, but for the mailbox to go
+! away if this process aborts.
+
+    $ITMLST_INIT(ITMLST=ITMLIST,
+	(ITMCOD=LNM$_ATTRIBUTES,BUFADR=MYMBA_ATTR),
+	(ITMCOD=LNM$_STRING,BUFADR=MYMBA_BUF,BUFSIZ=MBAMAX,RETLEN=MYMBA_LEN),
+	(ITMCOD=0,BUFSIZ=0,BUFADR=0)
+    );
+    RC = $TRNLNM(ATTR = %REF(LNM$M_CASE_BLIND),
+		 TABNAM = %ASCID'LNM$TEMPORARY_MAILBOX',
+		 LOGNAM = MYMBXNAM,
+		 ITMLST = ITMLIST);
+    IF NOT .RC THEN
+	BEGIN
+	ERROR$FAO('$TRNLNM failed for ACP mailbox, RC = !XL',.RC);
+	RETURN;
+	END;
+    IF (.MYMBA_ATTR AND LNM$M_EXISTS) EQL 0 THEN
+	BEGIN
+	ERROR$FAO('$TRNLNM claims mailbox name nonexistant!!');
+	RETURN;
+	END;
+
+! Now, create the system-wide logical to point at it
+
+    $ITMLST_INIT(ITMLST=ITMLIST,
+	(ITMCOD=LNM$_STRING,BUFADR=MYMBA_BUF,BUFSIZ=.MYMBA_LEN),
+	(ITMCOD=0,BUFSIZ=0,BUFADR=0)
+    );
+    RC = $CRELNM(TABNAM = SYSTABNAM,
+		 LOGNAM = ACPMBXNAM,
+		 ITMLST = ITMLIST);
+    IF NOT .RC THEN
+	BEGIN
+	ERROR$FAO('$CRELNM failed for ACP mailbox, RC = !XL',.RC);
+	RETURN;
+	END;
+
+! Start an initial read on the mailbox
+
+    RC = $QIO(	FUNC	= IO$_READVBLK,
+		CHAN	= .ACPMBXCHN,
+		IOSB	= RCVBUF[MB$IOSB],
+		P1	= RCVBUF[MB$DATA],
+		P2	= MSGMAX,
+		ASTADR	= MBX_RECV_AST,
+		ASTPRM	= RCVBUF);
+    IF NOT .RC THEN
+	BEGIN
+	ERROR$FAO('Queued read failed for mailbox, RC = !XL',.RC);
+	RETURN;
+	END;
+
+! Check to see if NAMRES mailbox exists yet. If not, we'll start the resolver.
+
+    IF CHECK_SERVER() THEN
+	BEGIN
+	SEND_CONTROL(CNRQ$START,0); ! Tell it that the network is here
+	SRVSTATE = SRV$UP	! Resolver should be ready now
+	END
+    ELSE
+	BEGIN
+
+! Make sure the initialization was done properly.
+
+	IF .SRVIMGNAME[DSC$W_LENGTH] EQL 0 THEN
+	    BEGIN
+	    ERROR$FAO('Failed to create NAMRES - configuration info missing');
+	    SRVSTATE = SRV$DOWN;
+	    RETURN;
+	    END;
+
+! Start the name resolver process - it will notify us when it is ready.
+
+	RC = $CREPRC(IMAGE	= SRVIMGNAME,
+		     PRCNAM	= SRVPRCNAM,
+		     UIC	= .MYUIC,
+		     PIDADR	= SRVPID,
+		     BASPRI	= .SRVPRIOR,
+		     STSFLG	= .SRVSTATUS,
+		     PRVADR	= SRVPRIVS,
+		     QUOTA	= .SRVQUOTAS
+		     );
+	IF NOT .RC THEN
+	    BEGIN
+	    ERROR$FAO('$CREPRC for NAMRES failed, RC = !XL',.RC);
+	    RETURN;
+	    END;
+	SRVSTATE = SRV$INIT;	! Resolver is initializing
+	END;
+    END;
+
+%SBTTL 'NML$GETALST - Translate name to address list'
+
+FORWARD ROUTINE
+    NQE_ALLOC,
+    NQE_DEALLOC : NOVALUE,
+    NQE_ENQUEUE : NOVALUE,
+    NQE_XMIT;
+
+GLOBAL ROUTINE NML$GETALST(NAMPTR,NAMLEN,ASTADR,ASTPRM) : NOVALUE =
+!
+! Request a name to address translation. Build the request and transmit it
+! to the name resolver.  Receive decode routine will finish the request when
+! a reply has been received for it.
+!
+    BEGIN
+    LOCAL
+	RC,
+	CPTR,
+	MSLEN,
+	NQE : REF NQENTRY(),
+	MSBUF : REF MAIL$MSG,
+	RQBUF : REF RQ$NMLOOK;
+
+! Log the request
+
+    XLOG$FAO(LOG$MSG,'!%T NML$GETALST: name is !AD!/',0,.NAMLEN,.NAMPTR);
+
+! Allocate and initialize a request block for us
+
+    RC = NQE_ALLOC(NQE);
+    IF NOT .RC THEN
+	BEGIN
+	(.ASTADR)(.ASTPRM,.RC);
+	RETURN;
+	END;
+
+! Build the request in it.
+
+    MSBUF = NQE[NQE$DATA];
+    RQBUF = MSBUF[MSG$DATA];
+    RQBUF[RQNM$TYPE] = NLRQ$NMLOOK;
+    RQBUF[RQNM$ID] = (CURQID = .CURQID + 1);
+
+! Note: the -1 is because the count included the null. We copy the null but
+! don't count it in the buffer for NAMRES.
+
+    RQBUF[RQNM$NAMLEN] = .NAMLEN-1;
+    CPTR = CH$MOVE(.NAMLEN,.NAMPTR,CH$PTR(RQBUF[RQNM$NAMSTR]));
+    MSLEN = CH$DIFF(.CPTR,CH$PTR(.MSBUF));
+
+! Enqueue the request and transmit it.
+
+    NQE[NQE$TYPE] = NLRQ$NMLOOK;
+    NQE[NQE$ASTADR] = .ASTADR;
+    NQE[NQE$ASTPRM] = .ASTPRM;
+    NQE_ENQUEUE(.NQE,.CURQID,.MSLEN,.MSBUF);
+    END;
+
+%SBTTL 'NML$GETNAME - Translate address to name'
+
+GLOBAL ROUTINE NML$GETNAME(ADDR,ASTADR,ASTPRM) : NOVALUE =
+!
+! Request an address to name translation. Build the request and send it to
+! the name resolver.  Receive decode routine will finish the request when the
+! reply comes in.
+!
+    BEGIN
+    LOCAL
+	RC,
+	MSLEN,
+	NQE : REF NQENTRY(),
+	MSBUF : REF MAIL$MSG,
+	RQBUF : REF RQ$ADLOOK;
+
+! Log the request
+
+    IF $$LOGF(LOG$MSG) THEN
+	BEGIN
+	LOCAL
+	    INA : VECTOR[4,BYTE];
+	INA = .ADDR;
+	QL$FAO('!%T NML$GETNAME: address is !UB.!UB.!UB.!UB!/',
+	       0,.INA[0],.INA[1],.INA[2],.INA[3]);
+	END;
+
+! Allocate and initialize a request block for us
+
+    RC = NQE_ALLOC(NQE);
+    IF NOT .RC THEN
+	BEGIN
+	(.ASTADR)(.ASTPRM,.RC);
+	RETURN;
+	END;
+
+! Build the request in it.
+
+    MSBUF = NQE[NQE$DATA];
+    RQBUF = MSBUF[MSG$DATA];
+    RQBUF[RQAD$TYPE] = NLRQ$ADLOOK;
+    RQBUF[RQAD$ID] = (CURQID = .CURQID + 1);
+    RQBUF[RQAD$ADDR] = .ADDR;
+    MSLEN = RQ$ADLOOK_BLEN + MAIL$MSG_BLEN;
+
+! Enqueue the request and transmit it.
+
+    NQE[NQE$TYPE] = NLRQ$ADLOOK;
+    NQE[NQE$ASTADR] = .ASTADR;
+    NQE[NQE$ASTPRM] = .ASTPRM;
+    NQE_ENQUEUE(.NQE,.CURQID,.MSLEN,.MSBUF);
+    END;
+
+%SBTTL 'NML$GETRR - Translate name to resource record'
+
+GLOBAL ROUTINE NML$GETRR(RRTYPE,NAMPTR,NAMLEN,ASTADR,ASTPRM) : NOVALUE =
+!
+! Request a name to RR translation. Build the request and transmit it
+! to the name resolver.  Receive decode routine will finish the request when
+! a reply has been received for it.
+!
+    BEGIN
+    LOCAL
+	RC,
+	CPTR,
+	MSLEN,
+	NQE : REF NQENTRY(),
+	MSBUF : REF MAIL$MSG,
+	RQBUF : REF RQ$RRLOOK;
+
+! Log the request
+
+    XLOG$FAO(LOG$MSG,'!%T NML$GETRR: type is !XL, name is !AD!/',0,
+		.RRTYPE, .NAMLEN, .NAMPTR);
+
+! Allocate and initialize a request block for us
+
+    RC = NQE_ALLOC(NQE);
+    IF NOT .RC THEN
+	BEGIN
+	(.ASTADR)(.ASTPRM,.RC);
+	RETURN;
+	END;
+
+! Build the request in it.
+
+    MSBUF = NQE[NQE$DATA];
+    RQBUF = MSBUF[MSG$DATA];
+    RQBUF[RQRR$TYPE] = NLRQ$RRLOOK;
+    RQBUF[RQRR$ID] = (CURQID = .CURQID + 1);
+
+! Note: the -1 is because the count included the null. We copy the null but
+! don't count it in the buffer for NAMRES.
+
+    RQBUF[RQRR$RRTYPE] = .RRTYPE;
+    RQBUF[RQRR$NAMLEN] = .NAMLEN-1;
+    CPTR = CH$MOVE(.NAMLEN,.NAMPTR,CH$PTR(RQBUF[RQRR$NAMSTR]));
+    MSLEN = CH$DIFF(.CPTR,CH$PTR(.MSBUF));
+
+! Enqueue the request and transmit it.
+
+    NQE[NQE$TYPE] = NLRQ$RRLOOK;
+    NQE[NQE$ASTADR] = .ASTADR;
+    NQE[NQE$ASTPRM] = .ASTPRM;
+    NQE_ENQUEUE(.NQE,.CURQID,.MSLEN,.MSBUF);
+    END;
+
+%SBTTL 'NML$CANCEL - Cancel name lookup request'
+
+GLOBAL ROUTINE NML$CANCEL(ASTPRM,ASTFLG,STATUS) =
+!
+! Search the name lookup queue for the specified request and delete it,
+! optionally calling the "done" routine with the specified status.
+!
+    BEGIN
+    LOCAL
+	NQE : REF NQENTRY(),
+	NXNQE : REF NQENTRY(),
+	RC;
+
+! Search the queue for the request
+
+    RC = 0;
+    NQE = .NQE_QUEUE[QHEAD];
+    WHILE .NQE NEQ NQE_QUEUE DO
+	BEGIN
+	NXNQE = .NQE[NQE$NEXT];
+
+! On match, optionally call the AST routine then delete the request.
+
+	IF .NQE[NQE$ASTPRM] EQL .ASTPRM THEN
+	    BEGIN
+	    XQL$FAO(LOG$MSG,'!%T NML$CANCEL - Deleting NQE !XL!/',0,.NQE);
+	    RC = .RC + 1;
+	    REMQUE(.NQE,NQE);
+	    IF .ASTFLG NEQ 0 THEN
+		(.NQE[NQE$ASTADR])(.NQE[NQE$ASTPRM],.STATUS);
+	    NQE_DEALLOC(.NQE);
+	    END;
+
+! Advance to next request
+
+	NQE = .NXNQE;
+	END;
+
+! Return the count of requests found and deleted
+
+    RETURN .RC;
+    END;
+
+%SBTTL 'NML$STEP - Examine the name lookup queue, calling coroutine'
+
+GLOBAL ROUTINE NML$STEP(COADDR,COVALUE) : NOVALUE =
+!
+! Examine the name lookup queue, calling the user coroutine with the AST
+! address and AST parameter of the entry. This makes it easy for the CANCEL
+! handler in the ACP to find any requests belonging to a process.
+!
+    BEGIN
+    LOCAL
+	NQE : REF NQENTRY(),
+	NXNQE : REF NQENTRY();
+
+! Walk the queue
+
+    NQE = .NQE_QUEUE[QHEAD];
+    WHILE .NQE NEQ NQE_QUEUE DO
+	BEGIN
+	NXNQE = .NQE[NQE$NEXT];
+	(.COADDR)(.COVALUE,.NQE[NQE$ASTADR],.NQE[NQE$ASTPRM]);
+	NQE = .NXNQE;
+	END;
+    END;
+
+GLOBAL ROUTINE NML$PURGE(STATUS) : NOVALUE =
+!
+! Purge the name lookup queue and tell the name resolver to shutdown.
+! Called just before the ACP exits.
+!
+    BEGIN
+    LOCAL
+	RC,
+	NQE : REF NQENTRY(),
+	NXNQE : REF NQENTRY();
+
+! Tell the name resolver that the network is exiting.
+
+    IF .SRVMBXCHN NEQ 0 THEN
+	SEND_CONTROL(CNRQ$STOP,.STATUS);
+
+! Flush our mailbox logical name
+
+    RC = $DELLNM(TABNAM = SYSTABNAM,
+		 LOGNAM = ACPMBXNAM);
+    IF NOT .RC THEN
+	ERROR$FAO('$DELLNM failed for !AS, RC = !XL',ACPMBXNAM,.RC);
+
+! Delete our mailbox
+
+    RC = $DELMBX(CHAN	= .ACPMBXCHN);
+    IF NOT .RC THEN
+	ERROR$FAO('$DELMBX failed for ACP mailbox, RC = !XL',.RC);
+
+! Walk the queue, purging all requests
+
+    NQE = .NQE_QUEUE[QHEAD];
+    WHILE .NQE NEQ NQE_QUEUE DO
+	BEGIN
+	NXNQE = .NQE[NQE$NEXT];
+	REMQUE(.NQE,NQE);
+	(.NQE[NQE$ASTADR])(.NQE[NQE$ASTPRM],.STATUS);
+	NQE_DEALLOC(.NQE);
+	NQE = .NXNQE;
+	END;
+    END;
+
+%SBTTL 'Debugging routine to dump out the queue contents'
+
+FORWARD ROUTINE
+    NQE_DUMP : NOVALUE;
+
+ROUTINE NML$DUMP : NOVALUE =
+!
+! Walk the queue, dumping out each entry. For debugging purposes only.
+!
+    BEGIN
+    LOCAL
+	NQE : REF NQENTRY(),
+	PNQE : REF NQENTRY(),
+	NOW;
+
+    NOW = TIME_STAMP();
+    LOG$FAO('NQE count is !SL, TIME is !XL, QHEAD=!XL, QTAIL=!XL!/',
+	    .NQE_COUNT,.NOW,.NQE_QUEUE[QHEAD],.NQE_QUEUE[QTAIL]);
+    NQE = .NQE_QUEUE[QHEAD];
+    PNQE = NQE_QUEUE;
+    WHILE .NQE NEQ NQE_QUEUE DO
+	BEGIN
+	NQE_DUMP(.NQE);
+	IF .NQE[NQE$PREV] NEQ .PNQE THEN
+	    BEGIN
+	    LOG$FAO('** List link error, PREV should be !XL **!/',.PNQE);
+	    EXITLOOP;
+	    END;
+	PNQE = .NQE;
+	NQE = .NQE[NQE$NEXT];
+	END;
+    END;
+
+
+ROUTINE NQE_DUMP(NQE : REF NQENTRY()) : NOVALUE =
+!
+! Dump out a single queue entry.
+!
+    BEGIN
+    LOG$FAO(%STRING('NQE at !XL, NEXT=!XL, PREV=!XL!/',
+		    '  TYPE=!UL, LEN=!UL, FLAGS=!XW, TIME=!XL!/',
+		    '  ASTADR=!XL, ASTPRM=!XL!/'),
+	    .NQE,.NQE[NQE$NEXT],.NQE[NQE$PREV],
+	    .NQE[NQE$TYPE],.NQE[NQE$LENGTH],.NQE[NQE$FLAGS],.NQE[NQE$TIME],
+	    .NQE[NQE$ASTADR],.NQE[NQE$ASTPRM]);
+    END;
+
+ROUTINE SEND_CONTROL(CCODE,CVALUE) : NOVALUE =
+!
+! Build and send a control message to the name resolver.
+!
+    BEGIN
+    LITERAL
+	CONTROL_MSGSIZE = RQ$CONTROL_BLEN + MAIL$MSG_BLEN;
+    OWN
+	MSBUF : MAX_MAIL$MSG;
+    LOCAL
+	RC,
+	RQBUF : REF RQ$CONTROL;
+
+! Set up the request buffer
+
+    RQBUF = MSBUF[MSG$DATA];
+    RQBUF[RQCN$TYPE] = NLRQ$CONTROL;
+    RQBUF[RQCN$ID] = (CURQID = .CURQID + 1);
+    RQBUF[RQCN$CCODE] = .CCODE;
+    RQBUF[RQCN$CVALUE] = .CVALUE;
+
+! Indicate no reply wanted in message header
+
+    MSBUF[MSG$MBXNLN] = 0;
+
+! Send the message off to the name resolver
+
+    RC = $QIO(	FUNC	= IO$_WRITEVBLK OR IO$M_NOW,
+		CHAN	= .SRVMBXCHN,
+		P1	= MSBUF,
+		P2	= CONTROL_MSGSIZE);
+    IF NOT .RC THEN
+	ERROR$FAO('Failed to send NAMRES control message, RC = !XL',.RC);
+    END;
+
+%SBTTL 'Request queue management routines'
+
+LITERAL
+    NQE_MAXSIZE = NQENTRY_BLEN + MSGMAX;
+
+ROUTINE NQE_ALLOC(NQE) =
+!
+! Allocate a full-size queue block from dynamic memory. Sets the NQE parameter
+! to the address of the block on success. On failure, returns network error
+! code indicating the failure reason.
+!
+    BEGIN
+    LOCAL
+	RC;
+
+! Verify that we should do this.
+
+    IF .SRVSTATE EQL SRV$DOWN THEN
+	RETURN NET$_NONS;
+    IF .NQE_COUNT GEQ NQE_QLIMIT THEN
+	RETURN NET$_NSQFULL;
+
+! Allocate the block
+
+    NQE_COUNT = .NQE_COUNT + 1;
+!    RC = LIB$GET_VM(%REF(NQE_MAXSIZE),.NQE);
+    RC = LIB$GET_VM_PAGE(%REF((NQE_MAXSIZE / 512) + 1),.NQE);
+    XQL$FAO(LOG$MSG,'!%T NQE_ALLOC, NQE=!XL, RC=!XL!/',0,..NQE,.RC);
+    RETURN .RC;
+    END;
+
+
+
+ROUTINE NQE_DEALLOC(NQE) : NOVALUE =
+!
+! Deallocate a queue block, decrementing count.
+!
+    BEGIN
+    LOCAL
+	RC;
+    MAP
+	NQE : REF NQENTRY();
+
+! Deallocate the memory, using LIB$FREE_VM
+
+!    RC = LIB$FREE_VM(%REF(NQE_MAXSIZE),NQE);
+    RC = LIB$FREE_VM_PAGE(%REF((NQE_MAXSIZE / 512) + 1),NQE);
+    IF NOT .RC THEN
+	FATAL$FAO('NQE_DEALLOC - LIB$FREE_VM failure, RC = !XL',.RC);
+    XQL$FAO(LOG$MSG,'!%T NQE_DEALLOC, NQE = !XL!/',0,.NQE);
+
+! Decrement count of allocated blocks and return success
+
+    NQE_COUNT = .NQE_COUNT - 1;
+    RETURN SS$_NORMAL;
+    END;
+
+ROUTINE NQE_ENQUEUE(NQE,QRYID,MSLEN,MSBUF) : NOVALUE =
+!
+! Insert a new request onto the request queue and transmit it.
+! Fills in the message header, puts it on NQE_QUEUE, and calls NQE_XMIT to
+! transmit the query.
+!
+    BEGIN
+    MAP
+	NQE : REF NQENTRY(),
+	MSBUF : REF MAIL$MSG;
+
+! First, fill in our return mailbox in the message header.
+
+    MSBUF[MSG$MBXNLN] = .MYMBA_LEN;
+    CH$MOVE(.MYMBA_LEN,CH$PTR(MYMBA_BUF),CH$PTR(MSBUF[MSG$MBXNAM]));
+
+! Next, finish setting up the request header
+
+    NQE[NQE$TIME] = TIME_STAMP();
+    NQE[NQE$LENGTH] = .MSLEN;
+    NQE[NQE$ID] = .QRYID;
+    NQE[NQE$F_XMIT] = 0;
+
+! Insert it into the queue
+
+    INSQUE(.NQE,.NQE_QUEUE[QTAIL]);
+
+! Do logging, if necessary
+
+    XQL$FAO(LOG$MSG,'!%T NQE_ENQUEUE, NQE=!XL, ID=!XL, LEN=!SL, TIME=!UL!/',
+	    0,.NQE,.NQE[NQE$ID],.MSLEN,.NQE[NQE$TIME]);
+
+! Transmit the request if the resolver is ready to take it.
+
+    IF .SRVSTATE GEQ SRV$UP THEN
+	NQE_XMIT(.NQE);
+    END;
+
+ROUTINE NQE_DELETE(NQE,ASTFLG,STATUS) : NOVALUE =
+!
+! Delete an entry from the queue, optionally calling the AST routine with the
+! specified status code.
+!
+    BEGIN
+    MAP
+	NQE : REF NQENTRY();
+
+    XQL$FAO(LOG$MSG,'!%T NQE_DELETE of NQE !XL, ID !XL!/',0,.NQE,.NQE[NQE$ID]);
+
+! First, unlink the request from the queue
+
+    REMQUE(.NQE,NQE);
+
+! Next, call the AST routine if that is requested
+
+    IF .ASTFLG NEQ 0 THEN
+	(.NQE[NQE$ASTADR])(.NQE[NQE$ASTPRM],.STATUS);
+
+! Finally, deallocate the queue entry
+
+    NQE_DEALLOC(.NQE);
+    END;
+
+FORWARD ROUTINE
+    NQE_XMIT_DONE : NOVALUE;
+
+ROUTINE NQE_XMIT(NQE) =
+!
+! Transmit a request to the name resolver.  Returns SS$_NORMAL on success, or
+! $QIO failure code on failure.
+!
+    BEGIN
+    MAP
+	NQE : REF NQENTRY();
+    LOCAL
+	RC;
+
+    XQL$FAO(LOG$MSG,'!%T NQE_XMIT of NQE !XL, ID !XL!/',0,.NQE,.NQE[NQE$ID]);
+    RC = $QIO(	CHAN	= .SRVMBXCHN,
+		FUNC	= IO$_WRITEVBLK,
+		IOSB	= NQE[NQE$IOSB],
+		P1	= NQE[NQE$DATA],
+		P2	= .NQE[NQE$LENGTH],
+		ASTADR	= NQE_XMIT_DONE,
+		ASTPRM	= .NQE);
+
+! Check the state of the send. We should probably do something useful here if
+! it fails (like shutdown the name service and report the error to the opr).
+
+    IF NOT .RC THEN
+	BEGIN
+	XQL$FAO(LOG$MSG,'!%T NQE_XMIT failed, RC=!XL, NQE=!XL, ID=!XL!/',
+		0,.RC,.NQE,.NQE[NQE$ID]);
+	RETURN .RC;
+	END;
+    RETURN SS$_NORMAL;
+    END;
+
+ROUTINE NQE_XMIT_DONE(NQE) : NOVALUE =
+!
+! AST routine for mailbox send done.
+!
+    BEGIN
+    MAP
+	NQE : REF NQENTRY();
+    LOCAL
+	IOSB : REF MBX$IOSB,
+	RC;
+
+! Check the status & set transmit done flag. We should probably do something
+! useful if an error occurs here.
+
+    IOSB = NQE[NQE$IOSB];
+    RC = .IOSB[MI$STATUS];
+    XQL$FAO(LOG$MSG,'!%T NQE_XMIT_DONE, NQE=!XL, RC=!XL!/',0,.NQE,.RC);
+    NQE[NQE$F_XMIT] = 1;
+    END;
+
+ROUTINE XMIT_REQUESTS : NOVALUE =
+!
+! Transmit all of the pending requests when the name resolver has come online.
+!
+    BEGIN
+    LOCAL
+	NQE : REF NQENTRY(),
+	NXNQE : REF NQENTRY();
+
+! Loop for the entire queue transmitting any requests which have not been
+! tranmitted successfully yet.
+
+    NQE = .NQE_QUEUE[QHEAD];
+    WHILE .NQE NEQ NQE_QUEUE DO
+	BEGIN
+	NXNQE = .NQE[NQE$NEXT];
+	IF NOT (.NQE[NQE$F_XMIT]) THEN
+	    NQE_XMIT(.NQE);
+	NQE = .NXNQE;
+	END;
+    END;
+
+%SBTTL 'Mailbox message receiving routines'
+
+FORWARD ROUTINE
+    DECODE_REPLY : NOVALUE;
+
+ROUTINE MBX_RECV_AST(MBUF) : NOVALUE =
+!
+! Come here when mailbox read completes. Read and decode the message.
+! Note that currently, we use a static buffer for reading the incoming message,
+! !!!HACK!!!
+! though this code can easily handle dynamic buffers.
+!
+    BEGIN
+    MAP
+	MBUF : REF MAIL$BUF;
+    LOCAL
+	RC,
+	RCVLEN,
+	RCVPID,
+	RCVMSG : REF MAIL$MSG,
+	RCVIOSB : REF MBX$IOSB;
+
+! Get the status of the message
+
+    RCVMSG = MBUF[MB$DATA];
+    RCVIOSB = MBUF[MB$IOSB];
+    RC = .RCVIOSB[MI$STATUS];
+
+! Check error
+
+    IF NOT .RC THEN
+	BEGIN
+	FATAL$FAO('Mailbox read failure, RC = !XL',.RC);
+	RETURN;
+	END;
+
+! Success. Retrieve message length and PID; call decoding routine.
+
+    RCVLEN = .RCVIOSB[MI$COUNT]-MAIL$MSG_BLEN;
+    RCVPID = .RCVIOSB[MI$PID];
+    XQL$FAO(LOG$MSG,'!%T NS msg received, LEN=!SL, PID=!XL!/',
+	    0,.RCVIOSB[MI$COUNT],.RCVPID);
+    IF .RCVLEN GTR 0 THEN
+	DECODE_REPLY(.RCVPID,.RCVLEN,RCVMSG[MSG$DATA]);
+
+! Queue up another read
+
+    RC = $QIO(	FUNC	= IO$_READVBLK,
+		CHAN	= .ACPMBXCHN,
+		IOSB	= .RCVIOSB,
+		P1	= .RCVMSG,
+		P2	= MSGMAX,
+		ASTADR	= MBX_RECV_AST,
+		ASTPRM	= .MBUF);
+    IF NOT .RC THEN
+	BEGIN
+	ERROR$FAO('Queued read failed for mailbox, RC = !XL',.RC);
+	RETURN;
+	END;
+    END;
+
+FORWARD ROUTINE
+    CONTROL_MSG : NOVALUE;
+
+ROUTINE DECODE_REPLY(PID,RLEN,RBUF) : NOVALUE =
+    BEGIN
+    MAP
+	RBUF : REF RPLY$DEFAULT;
+    LOCAL
+	RTYPE,
+	RID,
+	NQE : REF NQENTRY(),
+	NXNQE : REF NQENTRY(),
+	FOUND,
+	NAMLEN,
+	NAMPTR,
+	ASTADR,
+	ASTPRM;
+
+! Handle control message specially
+
+    RTYPE = .RBUF[RPLY$TYPE];
+    IF .RTYPE EQL NLRP$CONTROL THEN
+	BEGIN
+	CONTROL_MSG(.PID,.RLEN,.RBUF);
+	RETURN;
+	END;
+    IF (.RTYPE LSS NLRP$MIN) OR (.RTYPE GTR NLRP$MAX) THEN
+	BEGIN
+	XQL$FAO(LOG$MSG,'!%T Unknown NS msg type !SL received, PID=!XL!/',
+		0,.RTYPE,.PID);
+	RETURN;
+	END;
+
+! For all others, find the request that this reply is for and handle it.
+
+    FOUND = 0;
+    RID = .RBUF[RPLY$ID];
+    NQE = .NQE_QUEUE[QHEAD];
+    WHILE .NQE NEQ NQE_QUEUE DO
+	BEGIN
+	NXNQE = .NQE[NQE$NEXT];
+
+! Check the ID of the reply against the request ID...
+
+	IF .RID EQL .NQE[NQE$ID] THEN
+	    BEGIN
+
+! Have a match. Dequeue & finish request according to the reply type
+
+	    FOUND = .FOUND + 1;
+	    REMQUE(.NQE,NQE);
+	    ASTADR = .NQE[NQE$ASTADR];
+	    ASTPRM = .NQE[NQE$ASTPRM];
+	    CASE .RTYPE FROM NLRP$MIN TO NLRP$MAX OF
+	    SET
+	    [NLRP$ERROR]:	! Error reply - abort request
+		BEGIN
+		MAP
+		    RBUF : REF RPLY$ERROR;
+
+		XQL$FAO(LOG$MSG,'!%T NS error reply, ID=!XL, ERR=!XL!/',
+			0,.RBUF[RPER$ID],.RBUF[RPER$ECODE]);
+		(.ASTADR)(.ASTPRM,.RBUF[RPER$ECODE]);
+		END;
+
+	    [NLRP$CONTROL]:	! Not possible at this level
+		0;
+
+	    [NLRP$NMLOOK]:	! Name lookup reply
+		BEGIN
+		MAP
+		    RBUF : REF RPLY$NMLOOK;
+		LOCAL
+		    ADRCNT,
+		    ADRLST;
+
+		ADRCNT = .RBUF[RPNM$ADRCNT];
+		ADRLST = RBUF[RPNM$ADRLST];
+		NAMLEN = .RBUF[RPNM$NAMLEN];
+		NAMPTR = RBUF[RPNM$NAMSTR];
+		XQL$FAO(LOG$MSG,
+			'!%T NS NMLOOK reply, ID=!XL, #ADDR=!SL, NAME=!AD!/',
+			0,.RBUF[RPNM$ID],.ADRCNT,.NAMLEN,.NAMPTR);
+		(.ASTADR)(.ASTPRM,SS$_NORMAL,.ADRCNT,.ADRLST,.NAMLEN,.NAMPTR);
+		END;
+
+	    [NLRP$ADLOOK]:	! Address lookup reply
+		BEGIN
+		MAP
+		    RBUF : REF RPLY$ADLOOK;
+
+		NAMLEN = .RBUF[RPAD$NAMLEN];
+		NAMPTR = RBUF[RPAD$NAMSTR];
+		XQL$FAO(LOG$MSG,'!%T NS ADLOOK reply, ID=!XL, name=!AD!/',
+			0,.RBUF[RPAD$ID],.NAMLEN,.NAMPTR);
+		(.ASTADR)(.ASTPRM,SS$_NORMAL,.NAMLEN,.NAMPTR);
+		END;
+	    [NLRP$RRLOOK]:	! RR lookup reply
+		BEGIN
+		MAP
+		    RBUF : REF RPLY$RRLOOK;
+		LOCAL
+		    RDLEN,
+		    RDATA;
+
+		RDLEN = .RBUF[RPRR$RDLEN];
+		RDATA = RBUF[RPRR$RDATA];
+!		NAMLEN = .RBUF[RPRR$NAMLEN];
+!		NAMPTR = RBUF[RPRR$DATA] + .RDLEN;
+		XQL$FAO(LOG$MSG,
+			'!%T NS RRLOOK reply, ID=!XL, SIZE=!SL, RDATA=!AD /',
+			0,.RBUF[RPRR$ID],.RDLEN,
+			.RDLEN,.RDATA);
+		(.ASTADR)(.ASTPRM,SS$_NORMAL,.RDLEN,.RDATA,.NAMLEN,.NAMPTR);
+		END;
+	    [INRANGE]:	! Not possible at this level
+		0
+	    TES;
+
+! Deallocate the queue entry
+
+	    NQE_DEALLOC(.NQE);
+	    END;
+
+! Check next queue entry...
+
+	NQE = .NXNQE;
+	END;
+
+! If the request wasn't found in the queue, report the error
+
+    IF .FOUND LEQ 0 THEN
+	XQL$FAO(LOG$MSG,'!%T DECODE_REPLY failed to find RQ !XL, TYPE !SL!/',
+		0,.RID,.RTYPE);
+    END;
+
+ROUTINE CONTROL_MSG(PID,RLEN,RBUF) : NOVALUE =
+!
+! Handle a resolver control message. We are interested in being told when
+! either the name resolver goes away or when it has become ready. Note that
+! control messages are generally one-way, so we don't care about control
+! replies.
+!
+    BEGIN
+    MAP
+	RBUF : REF RQ$CONTROL;
+    LOCAL
+	CTYPE;
+
+! Dispatch the control types we handle.
+
+    CTYPE = .RBUF[RQCN$CCODE];
+    SELECTONE .CTYPE OF
+    SET
+    [CNRQ$START]:		! Resolver has finished starting
+	BEGIN
+	XQL$FAO(LOG$MSG,'!%T NS Control: NS is up, PID=!XL!/',0,.PID);
+	IF CHECK_SERVER() THEN
+	    BEGIN
+	    SRVSTATE = SRV$UP;	! Indicate that everything is ready
+	    XMIT_REQUESTS();	! And send all queued requests to the resolver
+	    END;
+	END;
+
+    [CNRQ$STOP]:		! Resolver is shutting down
+	BEGIN
+	XQL$FAO(LOG$MSG,'!%T NS Control: NS shutting down, PID=!XL!/',0,.PID);
+	$DASSGN(CHAN = .SRVMBXCHN);
+	SRVSTATE = SRV$DOWN;	! Service is unavailable
+	SRVMBXCHN = 0;		! No channel defined
+	SRVPID = 0;		! And no PID defined
+	END;
+
+    [OTHERWISE]:
+	BEGIN
+	XQL$FAO(LOG$MSG,'!%T Unknown NS control msg, CCODE=!SL, PID=!XL!/',
+		0,.CTYPE,.PID);
+	END;
+    TES;
+    END;
+
+ROUTINE CHECK_SERVER =
+!
+! Check for the existance of the NAMRES process and the name resolver system
+! logical name. If both are found, set SRVMBXCHN and SRVPID accordingly and
+! return TRUE. Else, return FALSE.
+!
+    BEGIN
+    LOCAL
+	RC,
+	DEVCHN,
+	PID,
+	ITMLIST : $ITMLST_DECL(ITEMS=3);
+
+! First, try to assign a channel on the name resolver mailbox.
+
+    RC = $ASSIGN(DEVNAM = SRVMBXNAM,
+		 CHAN	= DEVCHN);
+    IF NOT .RC THEN
+	RETURN FALSE;
+
+! Now, look for a process with the name "NAMRES"
+! N.B. NAMRES must run with the same group as IPACP for this to work. This is
+! desirable in any case, since we don't want imposters claiming to be the
+! name resolver process.
+
+    $ITMLST_INIT(ITMLST=ITMLIST,
+	(ITMCOD=JPI$_PID,BUFADR=PID),
+	(ITMCOD=0,BUFSIZ=0,BUFADR=0)
+    );
+    RC = $GETJPIW(PRCNAM = SRVPRCNAM,
+		  ITMLST = ITMLIST);
+    IF NOT .RC THEN
+	BEGIN
+	$DASSGN(CHAN	= .DEVCHN);
+	RETURN FALSE;
+	END;
+
+! Got what we want. Set up the info & return.
+
+    XQL$FAO(LOG$MSG,'!%T NS is UP, PID is !XL!/',0,.PID);
+    SRVMBXCHN = .DEVCHN;
+    SRVPID = .PID;
+    RETURN TRUE;
+    END;
+
+END
+ELUDOM

@@ -1,0 +1,265 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+!!!HACK!!! I need a header here!
+
+LIBRARY 'CMUIP_SRC:[central]NETXPORT';		! VMS specifics
+
+%Sbttl   'XE Driver Literals'
+
+LITERAL
+    XE_IP_type	= %X'800',	!Ethernet IP packet type
+    XE_ARP_type = %X'806',	!Ethernet ARP packet type
+    XE_hdr_len	= 14,		!Byte len of Ethernet xmit header
+    XE_MINSIZE	= 46,		!Minimum length of an Ethernet packet
+    XE_hdr_offset = 0,		!Allow this much space before rcv pkts
+    XE_max_retries = 5,		!Maximum retries on send errors
+    XE_FFFF	= %X'FFFF',	!HIgh values
+    IOS_len	= 8,		!Byte length of standard QIO IOSB
+    ASTEFN	= 3,		!Value of event flag for AST routines
+    ARPEFN	= 5,		!Value of event flag for ARP routine
+    Qhead_len	= 8,		!Byte length of standard VMS Q header
+    XE_ADR_SIZE = 6;		! Byte length of an Ethernet address
+
+LITERAL
+    XEDMP$ARP_Entry	= 1;	! Get an ARP cache entry.
+
+
+
+! This structure defines the interface information that is specific
+! to the EtherNet driver.
+!!!HACK!!! Document these fields
+
+$FIELD  XE_Interface_Fields = 
+    SET
+    XEI$dev_config		= [$Address],
+    XEI$IO_Chan			= [$bytes(4)],
+    XEI$ARP_IO_Chan		= [$bytes(4)],
+    XEI$rcvhdrs			= [$Address],
+    XEI$recv_Qhead		= [$Address],
+    XEI$recv_Qtail		= [$Address],
+    XEI$ARP_Buffer		= [$Address],
+    XEI$ARP_Block		= [$Address],
+    XEI$Phy_Size		= [$bytes(2)],
+    XEI$Phy_Addr		= [$bytes(6)],
+    XEI$restart_time		= [$Bytes(4)],
+    XEI$restart_count		= [$bytes(2)],
+    XEI$retry_count		= [$bytes(2)],
+    XEI$max_retry		= [$bytes(2)],
+    XEI$MPBS			= [$bytes(2)],
+    XEI$curhdr			= [$bytes(2)],
+    XEI$Flags			= [$Bytes(2)],
+    $OVERLAY(XEI$Flags)
+	XEI$need_2_free	= [$bit],	! XEshutdown buf free pending
+	XEI$IO_queued	= [$bit],	! XE I/O has been started
+	XEI$XE_decnet	= [$bit],	! XE DECNET address seen
+	XEI$XE_started	= [$bit]	! XE started at least once
+    TES;
+
+LITERAL XE_Interface_size = $Field_set_size;
+MACRO XE_Interface_Structure = BLOCK[XE_Interface_size] FIELD(XE_Interface_Fields)%;
+
+
+
+%Sbttl   'XE Driver Structures'
+
+! This structure defines an address for an DEC Ethernet device.  It is
+! general purpose in that it may be used for either a source or a
+! destination address in any format.
+
+$FIELD  XE_address =
+    SET
+    XE_addr_L0         = [$bytes(4)],
+       $Overlay(XE_addr_L0)
+       XE_addr_0        = [$bytes(2)],
+       XE_addr_1        = [$bytes(2)],
+       $Continue
+    XE_addr_L1         = [$bytes(4)],
+       $Overlay(XE_addr_L1)
+       XE_addr_2        = [$bytes(2)],
+       XE_addr_3        = [$bytes(2)]
+       $Continue
+    TES;
+
+LITERAL XE_Addr_size = $Field_set_size;
+MACRO XE_addrs_structure = BLOCK[XE_addr_size] FIELD(XE_address)%;
+
+
+! This structure defines the VMS I/O status block for the XE_Driver
+
+$FIELD XE_iosb =
+    SET
+    XE$vms_code        = [$short_integer],
+    XE$tran_size       = [$short_integer],
+    XE$cmd_status      = [$bytes(2)],
+    XE$error_summary   = [$byte],
+    XE$iosb_unused2    = [$byte]
+    TES;
+
+LITERAL XE_iosb_len = $Field_set_size;
+MACRO XE_iosb_structure = BLOCK[XE_iosb_len] FIELD(XE_iosb)%;
+
+! Structure of DEC ethernet setup package
+
+$FIELD XE_setup =
+    Set
+    XE$c_pcli_bus      = [$bytes(2)],
+    XE$l_buffer_length = [$bytes(4)],
+    XE$c_pcli_bfn      = [$bytes(2)],
+    XE$l_number_buff   = [$bytes(4)],
+    XE$c_pcli_pad      = [$bytes(2)],
+    XE$l_padding       = [$bytes(4)],
+    XE$c_pcli_pty      = [$bytes(2)],
+    XE$l_protocol      = [$bytes(4)],
+    XE$c_pcli_prm      = [$bytes(2)],
+    XE$l_promiscuous   = [$bytes(4)],
+    XE$c_pcli_dch      = [$bytes(2)],
+    XE$l_data_chain    = [$bytes(4)],
+    XE$c_pcli_con      = [$bytes(2)],
+    XE$l_control_mode  = [$bytes(4)],
+    XE$c_pcli_mca      = [$bytes(2)],
+    XE$w_mca_length    = [$bytes(2)],
+    XE$w_mca_mode      = [$bytes(2)],
+    XE$L_mca_address   = [$bytes(XE_ADR_SIZE)],
+    XE$setup_end       = [$bytes(0)],
+
+! Extended area for use when setting physical address
+
+    XE$c_pcli_pha      = [$bytes(2)],
+    XE$w_pcli_phlen    = [$bytes(2)],
+    XE$w_pcli_phmode   = [$bytes(2)],
+    XE$l_pcli_phaddr   = [$bytes(XE_ADR_SIZE)],
+    XE$setup_pha_end   = [$bytes(0)]
+    TES;
+
+LITERAL XE_setup_len = $Field_set_size;
+MACRO XE_setup_structure = BLOCK[XE_setup_len] FIELD(XE_setup)%;
+
+$FIELD XE_setup_descriptor =
+    SET
+    XE$setup_length    = [$bytes(4)],
+    XE$setup_address   = [$address]
+    TES;
+
+LITERAL XE_sdesc_len = $Field_set_size;
+MACRO XE_sdesc_structure = BLOCK[XE_sdesc_len] FIELD(XE_setup_descriptor)%;
+
+! Structure of DEC ethernet sensing package
+
+! The structure of this critter is copied from the XEDRIVER source.
+! The IO$_SENSEMODE function with a P2 parameter always returns every
+! parameter that will fit into the provided buffer. If the structure
+! of the parameter table in XEDRIVER changes this block will not be
+! valid. This is checked by comparing the id codes filled in by the
+! QIO of items that are used with their NMA$ counterparts.
+!
+!$FIELD XE_sense_info =
+!    SET
+!    XE$id_pcli_acc     = [$bytes(2)],  !Access mode for protocol type
+!    XE$val_pcli_acc    = [$bytes(4)],
+!    XE$id_pcli_pro     = [$bytes(2)],  !Protocol selection mode
+!    XE$val_pcli_pro    = [$bytes(4)],
+!    XE$id_pcli_bus     = [$bytes(2)],  !Buffer size
+!    XE$val_pcli_bus    = [$bytes(4)],
+!    XE$id_pcli_bfn     = [$bytes(2)],  !Number of buffers
+!    XE$val_pcli_bfn    = [$bytes(4)],
+!    XE$id_pcli_pha     = [$bytes(2)],  !Physical address
+!    XE$id_pha_count    = [$bytes(2)],
+!    XE$device_addr     = [$bytes(6)],  !device address - 6 byte string
+!    XE$sense_end       = [$byte]
+!    TES;
+!
+!LITERAL XE_sense_len = $Field_set_size;
+!MACRO XE_sense_blk = BLOCK[XE_sense_len] FIELD(XE_sense_info)%;
+
+FIELD XE_Sense =
+    SET
+    XE_Sense_Param	= [0,  0, 12, 0],
+    XE_Sense_Type	= [0, 12,  1, 0],
+    XE_Sense_NotUsed	= [0, 13,  2, 0],
+    XE_Sense_Zero	= [0, 15,  1, 0],
+    ! If the Type bit EQL 0
+    XE_Sense_Value	= [2,  0, 32, 0],
+    ! If the Type bit EQL 1
+    XE_Sense_Length	= [2,  0, 16, 0],
+    XE_Sense_String	= [4,  0,  0, 0]
+    TES;
+LITERAL
+    XE_SS_BYTEOFF = 4,
+    XE_TYPE_AND_VALUE = 6;
+
+MACRO
+    XE_Param_Size (Buffer) =
+	BEGIN
+	IF .$BBLOCK [Buffer, XE_Sense_Type] THEN
+	    .$BBLOCK [Buffer, XE_Sense_Length] + XE_SS_BYTEOFF
+	ELSE
+	    XE_TYPE_AND_VALUE
+	END%;
+
+! Receive buffer Q structure
+
+$FIELD QB_XE_rcv =
+    SET
+    XERCV$next		= [$address],
+    XERCV$last		= [$address],
+    XERCV$vms_code	= [$short_integer],
+    XERCV$tran_size	= [$short_integer],
+    XERCV$cmd_status	= [$bytes(2)],
+    XERCV$error_summary	= [$byte],
+    XERCV$iosb_unused2	= [$byte],
+    XERCV$data		= [$byte]
+    TES;
+
+LITERAL XERCV_QB_len = $Field_set_size;
+MACRO XERCV_QB_structure = BLOCK[XERCV_QB_len] FIELD(QB_XE_rcv)%;
+
+! Structure of ethernet send buffer header
+
+$FIELD XE_send =
+    SET
+    XESND$dest	       = [$bytes(6)],
+    $OVERLAY(XESND$dest)
+	XESND$dst1     = [$bytes(4)],
+	XESND$dst2     = [$bytes(2)],
+    $CONTINUE
+    XESND$type         = [$bytes(2)]
+    TES;
+
+LITERAL XESND_len = $Field_set_size;
+MACRO XESND_structure = BLOCK[XESND_len] FIELD(XE_send)%;
+
+! Structure of ethernet receive buffer header
+
+$FIELD XE_recv = 
+    SET
+    XERCV$buf		= [$bytes(16)],	! Entire buffer
+    $Overlay(XERCV$buf)
+	XERCV$dst	= [$bytes(6)],
+	XERCV$src	= [$bytes(6)],
+	XERCV$type	= [$bytes(2)],
+	XERCV$fill	= [$bytes(2)]
+    $Continue
+    TES;
+
+LITERAL XERCV_len = $Field_set_size;
+MACRO XERCV_structure = BLOCK[XESND_len] FIELD(XE_recv)%;
+

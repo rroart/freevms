@@ -1,0 +1,1398 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%Title 'Ethernet device driver'
+%Sbttl 'Driver overview'
+%(
+
+Module:
+
+          XE_driver
+
+Facility:
+
+          DEC Ethernet device driver
+
+Abstract:
+
+          XE_driver provides upper level protocols with access to the DEC
+          Ethernet controller device.  This module has three main routines:
+	  XE_init, XE_xmit and XE_receive. XE_init is called at initialization
+	  time to setup the ethernet device. XE_xmit is called during run time
+	  to send network packets to the network.  It is normally called by the
+	  IP_send routine but may be called by any other routine in the network
+	  module. XE_receive is always initiated by an AST from the DEC device
+	  driver within the VMS system.  The AST's are initially setup by the
+	  XE_init routine and subsequently setup by XE_receive itself.
+
+Author:
+
+	  Original author Tim Fallon
+	  Previous versions by Kevin Carosso and Ned Freed
+	  This version by Vince Fuller, CMU-CSD, Spring/Summer, 1986
+	  Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
+
+
+Modification History:
+
+	09-Aug-1991	Henry W. Miller		USBR
+	Numerous changes:
+
+	Search STARLET for VMS 5.4.
+	Print out buffer size in decimal in XE_StartIO().
+	In XE_StartDEV(), use MAX_RCV_BUF parameter rather than 4.
+	Use LIB$GET_VM_PAGE/LIB$FREE_VM_PAGE rather than LIB$GET_VM/
+	LIB$FREE_VM.
+	Go NOINT/OKINT during critical phase in XE$XMIT() and XE$ARP_XMIT().
+
+*** Begin CMU change log ***
+
+	02-Feb-1990	Bruce R. Miller		CMU NetDev
+	Added a Device_Info table so that this module can be compiled
+	into a run-time loadable image, instead of having to be
+	linked directly with the IPACP.
+
+	01-Sep-1989	Bruce R. Miller		CMU NetDev
+	Restructured code to retry a failed operation a number
+	of times before failing.  The number of times to retry
+	a read is contained in the variable RETRY_COUNT and is
+	settable using the VARIABLE command in the internet.config
+	file.
+
+	30-Aug-1989	Bruce R. Miller		CMU NetDev
+	Special handling of SS$_BADPARAM return code from XE startup $QIO.
+
+	??-Aug-1989	Bruce R. Miller		CMU NetDev
+	Added code to handle SS$_ABORT return code from $QIO read.
+
+	03-Jul-1989	Bruce R. Miller		CMU NetDev
+	More verbose description of $ASSIGN failures.
+
+	08-FEB-1989	Dale Moore	CMU-CS/RI
+	Now receive only Broadcast packets and not all mutlicast
+	packets.
+
+	14-NOV-1988	Dale Moore	CMU-CS/RI
+	Added changes suggested by Jerry Lotto.  He mentioned
+	getting them from Kevin Carrusso.  They involve dealing
+	with brain dead DEQNA's. 
+
+4.1  19-Nov-87, Edit by VAF
+	Use $ACPWAKE macro to wakeup ACP.
+
+4.0  31-Jul-87, Edit by VAF
+	Enable multicast/broadcast on ARP port (needed for newer devices).
+
+3.9  23-Mar-87, Edit by VAF
+	Use dynamic global MAX_PHYSICAL_BUFSIZE when allocating receive
+	buffers. Simplify calling sequence of IP_RECEIVE.
+	Simplify format of NSQ blocks.
+
+3.8  24-Feb-87, Edit by VAF
+	Q_MESSAGE has been flushed. Use QL_FAO (QL$FAO,XQL$FAO).
+	Keep track of number of XE restarts.
+
+3.7   6-Feb-87, Edit by VAF
+	Change references to "DEUNA/DEQNA" to be "DEC Ethernet" or "XE".
+
+3.6  17-Oct-86, Edit by VAF
+	Allow XE_ARP_XMIT to fail recoverably... Sigh.
+
+3.5  28-Oct-86, Edit by VAF
+	In XE_XMIT, know about new ARP_CHECK -1 return - indicates that packet
+	is being held by ARP routines for later retransmission.
+
+3.4  18-Jul-86, Edit by VAF
+	In XE_XMIT, take out bogus retry stuff. REMQUE the Qblk at the start
+	of the routine.
+
+3.3  15-Jul-86, Edit by VAF
+	Make sure in-progress buffer is deallocated on read error.
+
+3.2  19-Jun-86, Edit by VAF
+	Pass device index up to IP.
+
+3.1  11-Jun-86, Edit by VAF
+	Allow ARP read to fail.
+	Only play the "is decnet there" game the first time that the DEQNA
+	is successfully started. Typically, if it "goes away" it is because
+	DECNET was slow to restart its part of the device.
+
+3.0  29-May-86, Edit by Dale and Vince
+	Rewrite sense-mode code. Use hardware address if "physical" address
+	is not valid (i.e. decnet isn't running).
+
+2.9  29-May-86, Edit by VAF
+	New NOINT/OKINT scheme. Initialize ARP parameters AFTER device is
+	started, so that the physical address is correct.
+
+2.8  13-May-86, Edit by VAF
+	Redo error/restart stuff to be consistant, correctly deassign read
+	buffers, etc.
+
+2.7   9-May-86, Edit by VAF
+	Disable ASTs and do $CANCEL in shutdown routine.
+	Issue a $WAKE in restart routine.
+
+2.6  29-Apr-86, Edit by VAF
+	Don't issue $WAKE calls in here.
+
+2.5  15-Apr-86, Edit by VAF
+	Changes for new, general ARP interface.
+	Treat addresses as 6-byte long strings, not as two partial words.
+	Remove a lot of byteswapping of addresses.
+
+2.4   7-Apr-86, Edit by VAF
+	New logging stuff. Log physical address in receive AST routines.
+	Use Q_MESSAGE not LOG_OUTPUT when writing log info.
+
+2.3  31-Mar-86, Edit by VAF
+	Various changes, fixes to 2.2 change.
+
+2.2   5-Mar-86, Edit by VAF
+	Add code in XE_RECEIVE to restart the DEQNA when it gets wedged.
+
+2.1  21-Feb-86, Edit by VAF
+	Put ARP origination code in here. *NB* this ARP code is temporary
+	and is not very general. It was put here so that I could change
+	the interface between IP and the device driver to its eventual final
+	state. **This code will be replaced by a more general ARP mechanism
+	someday (hopefully, soon) ***
+	Flush "known hosts" table.
+
+*** End CMU change log ***
+
+          1.0 - Original release
+          1.1 - Removed buffer copies.  Higher level protocols now sends a
+                buffer that has space in front to put device control info.
+                Also implemented the XE_hdr_offset to allow for different
+                device control information on store-and-forward buffers.
+	  1.2 - Assign ethernet packet type to be compatiable with berkely
+		4.2 unix.
+	  2.0 - Converted from Interlan driver to DEUNA/DEQNA driver.
+	  2.01 - Add ARP responder (Rick Watson U.Texas)
+)%
+
+
+%Sbttl   'Module definitions'
+
+MODULE XE_DRIVER(IDENT='5.0a',LANGUAGE(BLISS32),
+		 ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
+				 NONEXTERNAL=LONG_RELATIVE),
+		 LIST(EXPAND,TRACE,NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
+		 OPTIMIZE,OPTLEVEL=3,ZIP)=
+!!!HACK!!! Add code to shut-down an interface permanently...
+!!!HACK!!! Make sure errors are handled correctly.
+
+BEGIN
+
+!LIBRARY 'SYS$LIBRARY:STARLET';	! VMS system defintions
+LIBRARY 'SYS$LIBRARY:LIB';	! VMS system defintions
+
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETTCPIP';		! Required for UDP check
+LIBRARY 'CMUIP_SRC:[central]NETXPORT';		! VMS specifics
+LIBRARY 'CMUIP_SRC:[central]NETCOMMON';	! CMU-OpenVMS/IP
+LIBRARY 'CMUIP_SRC:[central]NETVMS';		! VMS specifics
+LIBRARY 'CMUIP_SRC:[central]NETCONFIG';	! Device interface specs.
+LIBRARY 'CMUIP_SRC:[central]NETDEVICES';	! Helpfull macros...
+
+LIBRARY 'XEDRV';
+LIBRARY 'XEARP';
+
+EXTERNAL ROUTINE
+
+! NETMACLIB.OBJ
+    Time_Stamp,
+    SwapBytes,
+
+! NETDEVICES.OBJ
+     ASCII_HEX_BYTES,
+
+! XEDRV_ARP.BLI
+
+    XEARP$DEV_INIT : NOVALUE,
+    XEARP$CHECK,
+    XEARP$INPUT : NOVALUE;
+
+FORWARD ROUTINE
+    XE_Receive : NOVALUE,
+    XE_ArpRcv :  NOVALUE;
+
+BIND
+    XE_BROADCAST = UPLIT (BYTE (REP 6 OF (%X'FF')));
+
+MACRO
+    ! Description of this device
+    XE_description = 'Digital Ethernet Card'%;
+
+OWN
+    ! String descriptor used to hold description
+    XE_descriptor : VECTOR[2];
+
+
+%SBTTL 'Declare the device information block used to describe entry points.'
+
+OWN
+    ! DRV$Device_Info is a list of everything we want the IPACP
+    ! to know about us...  Initialized by ROUTINE DRV$TRANSPORT_INIT.
+    DRV$Device_Info : Device_Info_Structure;
+
+GLOBAL
+    ! The IPACP_Interface tells us all about the IPACP.  It gives us
+    ! entry points, literals and global pointers.  See NETDEVICES.REQ
+    ! for a complete explaination of this structure.
+    ! Note: This pointer must be named "IPACP_Interface"
+    IPACP_Interface : REF IPACP_Info_Structure;
+
+
+
+FORWARD ROUTINE
+    XE_Shutdown : NOVALUE;
+
+MACRO XE$ERR(XE_Int) =
+    BEGIN
+    DRV$OPR_FAO(%REMAINING);
+    XE_Shutdown(XE_Int,true);
+    END
+    %;
+
+
+
+%SBTTL 'Start asynchronous I/O on the DEC ethernet'
+
+ROUTINE XE_StartIO ( XE_Int : REF XE_Interface_Structure) =
+    BEGIN
+    LOCAL
+	RC,
+	Buff: REF XERCV_QB_structure,
+	ARbuf: REF XE_ARP_STRUCTURE;
+    BIND
+	rcvhdrs = .XE_Int[XEI$rcvhdrs] : BLOCKVECTOR[MAX_RCV_BUF,XERCV_LEN]
+					 FIELD(XE_RECV),
+	XE_chan = XE_Int[XEI$IO_Chan],
+	XAR_chan = XE_Int[XEI$ARP_IO_chan];
+
+! Supply four receive buffers to device controller
+
+    DRV$OPR_FAO ('XEDRV: MPBS = !SL',DRV$MAX_PHYSICAL_BUFSIZE);
+
+    XE_Int[XEI$curhdr] = 0;
+    INCR I FROM 0 TO (MAX_RCV_BUF-1) DO
+	BEGIN	! Get buffer, put on Q and issue IO$_READVBLK function
+	Buff = DRV$Seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
+	INSQUE ( .Buff , .XE_Int [ XEI$recv_Qtail ] );
+	Buff = .Buff + XE_hdr_offset;
+	RC = $QIO(chan=.XE_chan, EFN=ASTEFN, IOSB=Buff[XERCV$vms_code],
+		  Func = IO$_READVBLK,
+		  P1 = Buff[XERCV$data],
+		  P2 = DRV$MAX_PHYSICAL_BUFSIZE,
+		  P5 = rcvhdrs[.I,XERCV$buf],
+		  astadr = XE_receive, astprm = .XE_Int);
+	IF .RC NEQ SS$_Normal THEN
+	    BEGIN     ! Error issuing set receive buffer command
+	    XE$ERR(.XE_Int,'XE queue read request failure, RC=!XL',.RC);
+	    Return 0;
+	    END
+	END;
+
+! get ARP buffer and issue a receive qio
+
+    ARbuf = DRV$Seg_get(XE_ARP_LEN*4);
+    XE_Int [ XEI$ARP_buffer ] = .ARbuf;
+    RC = $QIO(	chan = .XE_Int [ XEI$ARP_IO_chan ], EFN = ARPEFN,
+		IOSB = ARbuf [ ar_ios0 ],
+		Func = IO$_READVBLK,
+		P1 = ARbuf[ar_data], P2=ARP_MAX_LEN*4,
+		P5 = ARbuf[phys$1],
+		astadr = XE_ArpRcv, astprm = .XE_Int);
+    IF .RC NEQ SS$_Normal THEN
+	BEGIN
+	XE$ERR(.XE_Int,'XE ARP queued read failure, RC=!XL',.RC);
+	RETURN 0;
+	END;
+
+! Indicate that I/O has been started
+
+    XE_Int[XEI$IO_queued] = TRUE;
+    RETURN -1;
+    END;
+
+
+
+%SBTTL 'Start the device'
+
+ROUTINE XE_StartDev ( XE_Int , setflag , setaddr ) =
+
+! This routine initializes the ethernet device to receive IP packets.
+! Issue start command to the controller.
+! Accepts:
+!   XE_INT	EtherNet interface info block
+!   SETFLAG	TRUE if device physical address needs to be set
+!   SETADDR	If SETFLAG, then physical address to set
+! Returns:
+!   0 (false) on failure, device not started
+!  -1 (true) on success, device ready, reads queued
+
+    BEGIN
+    MAP
+	XE_Int : REF XE_Interface_Structure;
+    LOCAL
+	RC,
+	IOS: XE_iosb_structure,
+	Setup: XE_setup_structure,
+	Paramdescr: XE_sdesc_structure,
+	plen;
+
+! Build the nasty setup block required by the ethernet device
+
+    Setup[XE$c_pcli_bus]      = NMA$C_PCLI_BUS;
+    Setup[XE$l_buffer_length] = DRV$MAX_PHYSICAL_BUFSIZE;
+    Setup[XE$c_pcli_bfn]      = NMA$C_PCLI_BFN;
+    Setup[XE$l_number_buff]   = MAX_RCV_BUF;
+    Setup[XE$c_pcli_pad]      = NMA$C_PCLI_PAD;
+    Setup[XE$l_padding]       = NMA$C_STATE_OFF;
+    Setup[XE$c_pcli_pty]      = NMA$C_PCLI_PTY;
+    Setup[XE$c_pcli_prm]      = NMA$C_PCLI_PRM;
+    Setup[XE$l_promiscuous]   = NMA$C_STATE_OFF;
+    Setup[XE$c_pcli_dch]      = NMA$C_PCLI_DCH;
+    Setup[XE$l_data_chain]    = NMA$C_STATE_OFF;
+    Setup[XE$c_pcli_con]      = NMA$C_PCLI_CON;
+    Setup[XE$l_control_mode]  = NMA$C_LINCN_NOR;
+
+
+! Change XE$W_mca_mode to NMA$C_LINMC_SET if you want IP broadcasts.
+
+    Setup [XE$c_pcli_mca]     = NMA$C_PCLI_MCA;
+    Setup [XE$W_MCA_Length]   = 2 + XE_ADR_SIZE;
+    Setup [XE$W_MCA_MODE]     = NMA$C_LINMC_CLR;
+    CH$MOVE (XE_ADR_SIZE, XE_BROADCAST, Setup [XE$L_MCA_Address]);
+
+! If he wants us to set the physical address, then do so.
+
+    IF .setflag THEN
+	BEGIN
+	Setup[XE$c_pcli_pha] = NMA$C_PCLI_PHA;
+	Setup[XE$w_pcli_phlen] = XE_ADR_SIZE+2;
+	Setup[XE$w_pcli_phmode] = NMA$C_LINMC_SET;
+	CH$MOVE(XE_ADR_SIZE,CH$PTR(.setaddr),CH$PTR(setup[XE$l_pcli_phaddr]));
+	plen = Setup[XE$setup_pha_end] - Setup;
+	END
+    ELSE
+	plen = Setup[XE$setup_end] - Setup;
+
+! Set up for IP protocol on this channel
+
+    Setup[XE$l_protocol]      = XE_IP_type;	! IP
+    Swapbytes(1,Setup[XE$l_protocol]);
+
+    Paramdescr[XE$setup_length] = .plen;
+    Paramdescr[XE$setup_address] = Setup;
+
+! Issue the startup command to controller
+
+    RC = $QIOW (chan = .XE_Int[XEI$IO_chan], EFN = 1, IOSB = ios,
+		Func = IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP, P2 = Paramdescr);
+    IF NOT( (.RC EQL SS$_Normal) and (.IOS[XE$vms_code] EQL SS$_Normal) ) THEN
+	BEGIN
+	IF .IOS[XE$vms_code] EQL SS$_BADPARAM THEN
+	   XE$ERR(.XE_Int,'XE startup failure, RC=!XL,VMS_code=!XL,Param=!XL',
+	       .RC,.IOS[XE$VMS_Code],.IOS[1,0,32,0])
+	ELSE
+	   XE$ERR(.XE_Int,'XE startup failure, RC=!XL,VMS_code=!XL,Xfer size=!SL',
+	       .RC,.IOS[XE$VMS_Code],.IOS[XE$Tran_size]);
+	RETURN 0;
+	END;
+
+! Modify the setup block for the arp responder
+
+    Setup[XE$l_protocol] = XE_ARP_type;
+    Setup[XE$W_mca_mode] = NMA$C_LINMC_SET;
+
+    Swapbytes(1,Setup[XE$l_protocol]);
+    Paramdescr[XE$setup_length] = Setup[XE$setup_end] - Setup;
+    Paramdescr[XE$setup_address] = Setup;
+
+! Issue the startup command to controller
+
+    RC = $QIOW (chan = .XE_Int[XEI$ARP_IO_chan], EFN = 1, IOSB = ios,
+		Func = IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP, P2 = Paramdescr);
+    IF NOT( (.RC EQL SS$_Normal) AND (.IOS[XE$vms_code] EQL SS$_Normal) ) THEN
+	BEGIN	! Startup command failed
+	XE$ERR(.XE_Int,
+	       'XE ARP startup failure, RC=!XL,VMS_code=!XL,Xfer size=!SL',
+	       .RC,.IOS[XE$VMS_Code],.IOS[XE$Tran_size]);
+	RETURN 0;
+	END;
+
+! Everything OK - return TRUE value
+
+    RETURN -1;
+    END;
+
+ROUTINE XE_SenseDev( XE_Int : REF XE_Interface_Structure,
+		     phaddr : REF XE_Addrs_structure,
+		     hwaddr : REF XE_Addrs_structure,
+		     online) =
+!
+! Read status of device.
+!   phaddr	pointer to area to store "physical" (decnet) address
+!   hwaddr	pointer to area to store hardware address
+!   online	true if device has been started successfully.
+!
+    BEGIN
+    LOCAL
+	RC,
+!!!HACK!!! What's wrong with XE_sense_blk?
+!	Sense: 	XE_sense_blk,	
+	Sense:	$BBLOCK [512],
+	Paramdescr: XE_sdesc_structure,
+	IOS: XE_iosb_structure;
+
+! Get info from controller
+
+    Paramdescr[XE$setup_length] = %ALLOCATION (Sense);
+    Paramdescr[XE$setup_address] = Sense;
+
+    rc = $QIOW (chan = .XE_Int[XEI$IO_chan], EFN = 1, IOSB = ios,
+		Func = IO$_SENSEMODE+IO$M_CTRL, P2 = Paramdescr);
+    IF NOT ((.rc eql ss$_normal) AND (.IOS[XE$vms_code])) THEN
+	BEGIN			! Statistics call failed
+	XE$ERR(.XE_Int,
+	       'XE sense mode QIOW failure, RC=!XL,VMS_Code=!XL,Xfer size=!SL',
+	       .RC,.IOS[XE$VMS_code],.IOS[XE$tran_size]);
+	RETURN 0;
+	END;
+
+    Paramdescr [XE$SETUP_LENGTH] = .IOS [XE$Tran_Size];
+
+    WHILE .Paramdescr [XE$SETUP_LENGTH] GTRU 0 DO
+	BEGIN
+	BIND
+	    Param = .Paramdescr [XE$SETUP_ADDRESS] : $BBLOCK FIELD (XE_Sense);
+
+	Paramdescr [XE$SETUP_LENGTH] = .Paramdescr [XE$SETUP_LENGTH] - 
+				XE_Param_Size (Param);
+	Paramdescr [XE$SETUP_ADDRESS] = .Paramdescr [XE$SETUP_ADDRESS] +
+				XE_Param_Size (Param);
+
+	SELECTONEU .Param[XE_Sense_Param] OF
+	SET
+	[NMA$C_PCLI_PHA]:
+	    CH$MOVE(XE_ADR_SIZE,CH$PTR(Param[XE_Sense_String]),
+		    CH$PTR(.phaddr));
+
+	[NMA$C_PCLI_HWA]:
+	    CH$MOVE(XE_ADR_SIZE,CH$PTR(Param[XE_Sense_String]),
+		    CH$PTR(.hwaddr));
+	TES
+	END;
+
+! See if the device is online
+!Ignore the timeout bit for DEQNA's
+
+!!!HACK!!! there may be a problem with XE$cmd_status.
+    .online = (.IOS[XE$cmd_status] AND %X'0FF00') EQL XM$M_STS_ACTIVE;
+
+! Return success
+
+    RETURN -1;
+    END;
+
+%SBTTL 'Start device - top-level'
+
+ROUTINE XE_StartAll ( XE_Int , restart ) =
+    BEGIN
+    MAP
+	XE_Int : REF XE_Interface_Structure;
+    LOCAL
+	online,
+	dev_config : REF Device_Configuration_Entry,
+	addrs: REF XE_addrs_structure,
+	hwaddr: XE_addrs_structure,
+	phaddr: XE_addrs_structure,
+	useaddr: REF XE_addrs_structure;
+
+! Point at out current idea of the device address
+
+    addrs = XE_Int [ XEI$phy_addr ];
+
+! Try to start the device
+
+    IF NOT XE_StartDev(.XE_Int,0,0) THEN
+	RETURN 0;
+
+! Only check for DECNET and set ARP address the first time that we successfully
+! start the device up. Otherwise, when (not IF) the first error causes the
+! device to be shut-off, we run the risk of wedging everything.
+
+    IF .XE_Int[XEI$XE_started] THEN
+	BEGIN
+
+! If we've been started before, just make sure that our address agrees.
+! If not, it probably means that DECNET was slow to get started and we
+! need to wait for it.
+
+	IF NOT XE_SenseDev(.XE_Int,phaddr,hwaddr,online) THEN
+	    RETURN 0;
+	IF .XE_Int[XEI$XE_decnet] THEN
+	    useaddr = phaddr
+	ELSE
+	    useaddr = hwaddr;
+	IF CH$NEQ(XE_ADR_SIZE,CH$PTR(.useaddr),
+		  XE_ADR_SIZE,CH$PTR(XE_Int[XEI$phy_addr])) THEN
+	    BEGIN
+	    DRV$OPR_FAO('XE restart failed - address mismatch');
+	    XE_Shutdown(.XE_Int,true);
+	    RETURN 0;
+	    END;
+	END
+    ELSE
+	BEGIN
+
+! Get device address
+
+	IF NOT XE_SenseDev(.XE_Int,phaddr,hwaddr,online) THEN
+	    RETURN 0;
+
+! Remember that it was started at least once
+
+	    XE_Int[XEI$XE_started] = TRUE;
+
+! If no "physical" (DECNET) address, then restart device and set address
+
+	    IF CH$EQL(XE_ADR_SIZE,CH$PTR(phaddr),
+		      XE_ADR_SIZE,CH$PTR(XE_BROADCAST)) THEN
+		BEGIN
+		XE_Shutdown(.XE_Int,0);
+		IF NOT XE_StartDev(.XE_Int,true,hwaddr) THEN
+		    RETURN 0;
+		useaddr = hwaddr;
+		XE_Int[XEI$XE_decnet] = FALSE;
+		END
+	    ELSE
+		BEGIN		! Remember that we had DECNET
+		XE_Int[XEI$XE_decnet] = TRUE;
+		useaddr = phaddr;
+		END;
+
+! Check against address specified in CONFIG - report if different
+
+	    IF CH$NEQ(XE_ADR_SIZE,CH$PTR(.useaddr),
+		      XE_ADR_SIZE,CH$PTR(.addrs)) THEN
+		BEGIN
+		IF CH$NEQ(XE_ADR_SIZE,CH$PTR(.addrs),
+			  XE_ADR_SIZE,CH$PTR(UPLIT(0,0))) THEN
+		    BEGIN
+		    LOCAL
+			DESC$STR_ALLOC(newstr,50);
+
+		    ASCII_Hex_Bytes(newstr,XE_ADR_SIZE,.useaddr,
+				    newstr[DSC$W_LENGTH]);
+		    DRV$OPR_FAO('XE address mismatch, using address: !AS',newstr);
+		    END;
+		CH$MOVE(XE_ADR_SIZE,CH$PTR(.useaddr),CH$PTR(.addrs));
+		END;
+
+! Initialize ARP parameters for this device
+
+!!!HACK!!! Trim this down...
+    	XEARP$DEV_INIT(.XE_Int,AR$HRD_ETHER,XE_IP_TYPE,.addrs,XE_ARP_HLEN,1,0);
+	END;
+
+! Start I/O on the device
+
+    XE_StartIO ( .XE_Int );
+
+! Say that this device is finally ready
+    dev_config = .XE_Int [XEI$Dev_config];
+!    dev_config [dc_online] = .online;
+    dev_config [dc_online] = True;
+
+    RETURN True;
+    END;
+
+
+
+LITERAL
+    EMPTY_QUEUE = 3 : UNSIGNED(8);
+
+LITERAL
+    XE_RESTART_TIME = 5*100;		! How long to leave shutdown
+
+ROUTINE XE_FreeBufs ( XE_Int : REF XE_Interface_Structure ) : NOVALUE =
+
+! AST routine to deallocate XE read buffers on error.
+! Scheduled by shutdown routine.
+
+    BEGIN
+    LOCAL
+	BUFF : REF XERCV_QB_Structure;
+
+! Flush IP buffers
+
+    WHILE REMQUE ( .XE_Int [ XEI$recv_Qhead ] , BUFF ) NEQ EMPTY_QUEUE DO
+	DRV$Seg_Free ( DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len + IOS_len) , .BUFF );
+
+! Release the ARP buffer
+
+    IF (BUFF=.XE_Int[XEI$ARP_buffer]) NEQ 0 THEN
+	BEGIN
+	DRV$Seg_Free ( XE_ARP_LEN*4 , .BUFF );
+	XE_Int [ XEI$ARP_buffer ] = 0;
+	END;
+
+! Say that this has been done.
+
+    XE_Int [ XEI$need_2_free ] = FALSE;
+    END;
+
+ROUTINE XE_Shutdown ( XE_Int , restart ) : NOVALUE =
+!
+! Shut the device controller down. Issue shutdown command to controller
+! if online, set offline, general cleanup.
+! 
+
+    BEGIN
+    MAP
+	XE_Int : REF XE_Interface_Structure;
+    LOCAL
+	RC,
+	now,
+	dev_config : REF Device_Configuration_Entry,
+	IOS : XE_iosb_structure;
+
+! Disallow ASTs
+
+    DRV$NOINT;
+
+    now =  Time_Stamp();
+
+! Set device offline.
+    dev_config = .XE_Int [XEI$Dev_config];
+    dev_config [dc_online] = False;
+
+! If it should be restarted, then say when
+
+    IF .restart NEQ 0 THEN
+	BEGIN
+	XE_Int [ XEI$restart_time ] = .now + XE_RESTART_TIME;
+	DRV$Device_Error();
+	END
+    ELSE
+	XE_Int [ XEI$restart_time ] = 0;
+
+! Shutdown the IP channel
+
+    IF .XE_Int[XEI$IO_chan] NEQ 0 THEN
+	BEGIN
+	$CANCEL(chan=.XE_Int[XEI$IO_chan]);
+	RC = $QIOW( chan=.XE_Int[XEI$IO_chan], EFN=1, IOSB=IOS,
+		    Func=IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN);
+	IF (.RC NEQ SS$_Normal) OR (.IOS[XE$VMS_CODE] NEQ SS$_NORMAL) THEN
+	    BEGIN
+	    DRV$Warn_FAO('XE shutdown QIOW failure, EC = !XL',.RC);
+	    DRV$Fatal_FAO('XE shutdown failure, EC = !XL',.IOS[XE$VMS_CODE]);
+	    END;
+	END;
+
+! Shutdown the ARP channel
+
+    IF .XE_Int[XEI$ARP_IO_chan] NEQ 0 THEN
+	BEGIN
+	$CANCEL(chan=.XE_Int[XEI$ARP_IO_chan]);
+	RC = $QIOW( chan=.XE_Int[XEI$ARP_IO_chan], EFN=1, IOSB=IOS,
+		    Func=IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN);
+	IF (.RC NEQ SS$_Normal) OR (.IOS[XE$VMS_CODE] NEQ SS$_NORMAL) THEN
+	    BEGIN
+	    DRV$Warn_FAO('XE ARP shutdown QIOW failure, EC = !XL',.RC);
+	    DRV$Fatal_FAO('XE ARP shutdown failure, EC = !XL',.IOS[XE$VMS_CODE]);
+	    RETURN;
+	    END;
+	END;
+
+! Schedule AST to deallocate all buffers
+
+    IF .XE_Int[XEI$IO_queued] THEN
+	BEGIN
+	XE_Int[XEI$IO_queued] = FALSE;
+	XE_Int[XEI$need_2_free] = TRUE;
+	$DCLAST(astadr = XE_FreeBufs, astprm = .XE_Int);
+	END;
+
+! Allow AST's again
+    DRV$OKINT;
+
+    END;
+
+%SBTTL	'Ethernet driver check routine'
+! Routine to call whenever the device is offline and shouldn't be.
+
+GLOBAL ROUTINE XE$CHECK ( dev_config : REF Device_Configuration_Entry )
+								: NOVALUE =
+    BEGIN
+    LOCAL
+	now;
+    BIND
+	XE_Int = dev_config [ dc_dev_interface ] : REF XE_Interface_Structure;
+
+
+    now = Time_Stamp();
+    IF .now GTR .XE_Int[XEI$restart_time] THEN
+	BEGIN
+	IF (NOT .XE_Int[XEI$need_2_free]) AND
+	   XE_StartAll(.XE_Int,true) THEN
+	    BEGIN		! Device restarted OK
+	    XE_Int[XEI$restart_time] = 0;
+	    XE_Int[XEI$retry_count] = 0;
+	    XE_Int[XEI$restart_count] = .XE_Int[XEI$restart_count] + 1;
+	    DRV$OPR_FAO('XE (DEC ENET) restarted, count = !SL',
+		    .XE_Int[XEI$restart_count]);
+!!!HACK!!! Is it OK to move this to after $ACPWAKE
+!	    Dev_attn = .Dev_attn-1;
+	    DRV$ACPWAKE;		! Special event...
+	    ! Return -1 to decrement the # of devices needing attention.
+	    RETURN -1
+	    END
+	ELSE			! Wait a while and try again...
+	    XE_Int[XEI$restart_time] = .now + XE_RESTART_TIME;
+	END;
+
+! Return 0 since device still needs attention.
+	0
+    END;
+
+%Sbttl   'Ethernet driver init routine'
+%(*****************************************************************************
+
+   Function:
+
+      Initialize the DEC Ethernet Device
+        1.  Assign the device.
+        2.  Issue the startup command to configure, self-test, and put
+            the thing online.
+	3.  Do an IO$_SENSEMODE to obtain hardware address.
+        4.  Check hardware address with configuration file.
+        5.  If address is incorrect set it to the configuration file value.
+        6.  Get 4 buffers and issue 4 IO$_READVBLK functions with AST's.
+
+   Inputs:
+
+	dev_config : pointer to address of the device configuration entry
+
+   Outputs:
+
+      XE_Int is allocated and initialized.
+      Device channel number is stored in XE_Int and online bit is set
+
+*******************************************************************************
+)%
+
+!!!HACK!!! Should there be XE$Init and XE$Init_Controller?
+!!!HACK!!!  XE$Init_Class and XE$Init_Port
+
+ROUTINE XE$init ( dev_config : REF Device_Configuration_Entry ,
+		  IPACP_Int, max_retry, MPBS) : NOVALUE =
+    BEGIN
+    EXTERNAL ROUTINE
+	XEARP$INIT,
+	LIB$GET_VM : ADDRESSING_MODE(GENERAL),
+	LIB$GET_VM_PAGE : ADDRESSING_MODE(GENERAL);
+    LOCAL
+	RC,
+	rcvhdrs,
+	XE_Int : REF XE_Interface_Structure,
+	XE_Chan,
+	XAR_Chan;
+
+! Setup the global
+    IPACP_Interface = .IPACP_Int;
+
+! Hold AST's until done here
+    DRV$NOINT;
+
+! Initialize the ARP module
+    XEARP$INIT();
+
+! Assign Ethernet Controller
+    IF NOT (rc=$Assign (devnam = dev_config[dc_devname], chan = XE_chan))
+    THEN     ! Ethernet controller assign failed
+	BEGIN
+	DRV$Fatal_FAO('XE $ASSIGN failure (dev="!AS"), EC = !XL',
+		    dev_config[dc_devname],.rc);
+	RETURN
+	END;
+
+!  Assign the channel for the arp responder
+    IF NOT (rc=$Assign(devnam = dev_config[dc_devname],chan=XAR_chan))
+    THEN     ! Ethernet controller assign failed
+	BEGIN
+	DRV$Fatal_FAO('XE $ASSIGN failure (dev="!AS"), EC = !XL',
+		    dev_config[dc_devname],.rc);
+	RETURN
+	END;
+
+! Allocate and Initialize the XE controller block
+    ! Allocate VM
+    !!!HACK!!! When are we going to deallocate this?  Ever?
+!    IF NOT (LIB$GET_VM(%REF(XE_Interface_size*4),XE_Int)) THEN
+    IF NOT (LIB$GET_VM_PAGE(%REF(((XE_Interface_size * 4) / 512) + 1),XE_Int)) THEN
+	BEGIN	! Couldn't allocate memory for controller block
+	DRV$Fatal_FAO('XE LIB$GET_VM failure (dev="!AS"), EC = !XL' ,
+		    dev_config[dc_devname],.rc);
+	RETURN
+	END;
+
+    ! Zero out the memory block
+    CH$FILL(%CHAR(0),XE_Interface_size*4,.XE_Int);
+
+    ! Fill in the blanks...
+    XE_Int[XEI$IO_chan] = .XE_chan;
+    XE_Int[XEI$ARP_IO_chan] = .XAR_chan;
+    XE_Int[XEI$Phy_Size] = 6;	! Ether addrs are 6 bytes long (48 bits)
+    XE_Int[XEI$max_retry] = .max_retry;	! Maximum # of conseq. retries allowed
+    XE_Int[XEI$MPBS] = .MPBS;	! Maximum Physical Buffer Size
+    XE_Int[XEI$Flags] = 0;	! Just making sure...
+
+    ! Set-up the receive queue
+    XE_Int[XEI$recv_Qhead] = XE_Int[XEI$recv_Qhead];
+    XE_Int[XEI$recv_Qtail] = XE_Int[XEI$recv_Qhead];
+
+    ! set double-link between XE_Int and dev_config blocks
+    XE_Int [ XEI$dev_config ] = .dev_config;
+    dev_config [ dc_dev_interface ]  = .XE_Int;
+
+! Allocate and Initialize the XE receive headers
+    ! Allocate VM
+    !!!HACK!!! When are we going to deallocate this?  Ever?
+!    IF NOT (LIB$GET_VM(%REF(MAX_RCV_BUF*XERCV_LEN*4),rcvhdrs)) THEN
+    IF NOT (LIB$GET_VM_PAGE(%REF(((MAX_RCV_BUF*XERCV_LEN*4)/512)+1),rcvhdrs)) THEN
+	BEGIN	! Couldn't allocate memory for receive headers
+	DRV$Fatal_FAO('XE LIB$GET_VM failure (dev="!AS"), RC=!XL',
+		    dev_config[dc_devname],.rc);
+	RETURN
+	END;
+
+    XE_Int[XEI$rcvhdrs] = .rcvhdrs;
+    XE_Int[XEI$curhdr] = 0;	! current ethernet header to use
+
+! Start the device
+    XE_Startall(.XE_Int,false);
+
+! Fill in the dev_config ifTable fields
+    BEGIN
+    BIND
+	desc = dev_config[dcmib_ifDescr] : $BBLOCK[8];
+
+!    dev_config[dcmib_ifIndex] = -1;	! Filled by IPACP
+
+    desc[DSC$W_LENGTH] = .XE_Descriptor[0];
+    desc[dsc$A_POINTER] = .XE_Descriptor[1];
+
+    dev_config[dcmib_ifType] = 6;		! EtherNet
+    dev_config[dcmib_ifMTU] = DRV$MAX_PHYSICAL_BUFSIZE;
+    dev_config[dcmib_ifSpeed] = 10000000;	! bits/second
+
+    dev_config[dcmib_ifPAsize] = .XE_Int[XEI$Phy_Size];
+    dev_config[dcmib_ifPhysAddress] = XE_Int[XEI$Phy_Addr];
+
+    dev_config[dcmib_ifAdminStatus] = 2;	! start
+!    dev_config[dcmib_ifOperStatus] = 2;		! start
+
+    dev_config[dcmib_ifLastState] = 0;
+    dev_config[dcmib_ifInOctets] = 0;
+    dev_config[dcmib_ifInUcastPkts] = 0;
+    dev_config[dcmib_ifInErrors] = 0;
+    dev_config[dcmib_ifInUnknownProtos] = 0;
+    dev_config[dcmib_ifOutOctets] = 0;
+    dev_config[dcmib_ifOutUcastPkts] = 0;
+    dev_config[dcmib_ifOutNUcastPkts] = 0;
+    dev_config[dcmib_ifOutDiscards] = 0;
+    dev_config[dcmib_ifOutErrors] = 0;
+    dev_config[dcmib_ifOutQLen] = 0;
+    END;
+
+! Ok to take AST's again
+    DRV$OKINT;
+
+    END;
+
+
+%Sbttl   'Ethernet driver xmit'
+%(*****************************************************************************
+
+Function:
+
+     This routine is called by the higher level protocol to transmit a
+     datagram to the DEC Ethernet controller.  All information about a datagram
+     is found on the Net_send_Q for this device.  Each Q entry will be 
+     processed and deleted from the Q.
+
+Inputs:
+
+     dev_config - dev_config table entry for this device.
+     Net_send_queue on the dev_config table entry for this device
+
+Outputs:
+
+     None.
+
+*******************************************************************************
+)%
+
+MACRO
+    XE_LOG(MSG,IPADDR,HWADDR) =
+    BEGIN
+    LOCAL
+	STR_DESC : VECTOR [2];
+    EXTERNAL ROUTINE
+	XEARP$LOG : NOVALUE;
+
+    STR_DESC[0] = %CHARCOUNT(MSG);
+    STR_DESC[1] = UPLIT(MSG);
+
+    XEARP$LOG(STR_DESC,IPADDR,6,HWADDR);
+    END %;
+
+GLOBAL ROUTINE XE$xmit ( dev_config : REF Device_Configuration_Entry )
+								: NOVALUE =
+    BEGIN
+    LABEL
+	X;
+    LOCAL
+	RC,
+	IOS: XE_IOSB_structure,
+	QB: REF BLOCK[] Field(QB_net_send),
+	Addrs: XE_addrs_structure,
+	Sbuf: REF XESND_Structure,
+	IPHDR: REF IP_Structure,
+	Sen_size,
+	ARstat,
+	AddrCheck,
+	xchan;
+    BIND
+	XE_Int = dev_config [ dc_dev_interface ] : REF XE_Interface_Structure;
+
+    DRV$NOINT;
+! Check if a request is on the Net_send_Q for this device
+
+    IF (REMQUE(.Dev_config[dc_send_Qhead],QB)) EQL Empty_Queue THEN
+	RETURN;			! The Q is empty
+
+    ARstat = 0;			! Assume we will deallocate the packet
+
+! Make sure device is online
+
+    IF NOT .Dev_config[dc_online] THEN
+	BEGIN			! Device is offline
+	DRV$XQL_FAO(LOG$PHY,'!%T XE device !XL offline (xmit)!/',0,.XE_Int);
+	END
+    ELSE
+X:	BEGIN
+
+! Position for Ethernet device header
+
+	Sbuf = .QB[NSQ$Data] - XE_hdr_len;
+	IPHDR = .QB[NSQ$Data];
+! IPH$TTL in the swapped header is really IPH$Protocol
+	IF (.IPHDR[IPH$TTL] Eql UDP_Protocol) AND
+	   (.IPHDR[IPH$Dest] Eqlu ((NOT .DEV_CONFIG[DC_IP_NETMASK]) OR
+		.DEV_CONFIG[DC_IP_NETWORK])) THEN
+	    BEGIN
+	    CH$MOVE(XE_ADR_SIZE, CH$PTR(XE_Broadcast), CH$PTR(ADDRS));
+	    ARstat = 1;
+	    END
+	ELSE
+	    ARstat = XEARP$CHECK(.XE_Int,.QB[NSQ$IP_DEST],ADDRS,.QB);
+	IF .ARstat GTR 0 THEN
+	    BEGIN		! Have an address
+
+! Fill in Ethernet header information
+
+	    IF $$LOGF(LOG$PHY) THEN
+		XE_LOG('XE IP xmit',.QB[NSQ$IP_DEST],ADDRS);
+
+	    CH$MOVE(XE_ADR_SIZE,CH$PTR(addrs),Sbuf[XESND$dest]);
+	    Sbuf[XESND$type] = XE_IP_type;
+	    Swapbytes(1,Sbuf[XESND$Type]);
+
+	    xchan = .XE_Int[XEI$IO_chan];
+
+! Send packet to controller
+
+!!!HACK!!! What's the EFN for?
+	    Sen_size = MAX(.QB[NSQ$Datasize],XE_MINSIZE);
+	    RC = $QIOW(	CHAN	= .xchan,
+			EFN	= 1,
+			FUNC	= IO$_WRITEVBLK,
+			IOSB	= IOS,
+			P1	= .QB[NSQ$Data],
+			P2	= .Sen_size,
+			P5	= .Sbuf);
+
+! Check for $QIO error
+
+	    IF NOT (.RC) THEN
+		BEGIN
+		XE$ERR(.XE_Int,'XE $QIO error (send),RC=!XL',.RC);
+		LEAVE X;
+		END;
+
+! Check for device driver error
+
+	    IF .IOS[XE$vms_code] NEQ SS$_Normal THEN
+		BEGIN
+		XE$ERR(.XE_Int,'XE driver error (send),VMS_code=!XL',
+		       .IOS[XE$vms_code]);
+		LEAVE X;
+		END;
+
+! Check for controller error
+
+	    IF (.IOS[XE$cmd_status] AND %X'0FF00') NEQ XM$M_STS_ACTIVE THEN
+		BEGIN
+		DRV$XLOG_FAO(LOG$PHY,'%T XE command error !XW!/',
+				0,.IOS[XE$cmd_status]);
+		LEAVE X;
+		END;
+	    END;
+	END;	! End of block X:
+
+! Delete buffer and release QBlk if ARP didn't claim them and deletable
+
+    IF .ARstat GEQ 0 THEN
+	BEGIN
+	IF .QB[NSQ$delete] THEN
+	    DRV$Seg_free(.QB[NSQ$del_buf_size],.QB[NSQ$del_buf]);
+	DRV$Qblk_free(.QB);
+	END;
+    DRV$OKINT;
+    END;
+
+%SBTTL   'Ethernet driver recv'
+%(*****************************************************************************
+
+Function:
+
+     This routine is an AST interrupt routine.  It is started when the
+     Ethernet controller system driver has received a packet and issues an
+     AST to this routine.  The packet is passed to the higher protocol for
+     processing.  A new buffer is rented, put on the receive Queue and then
+     passed to the device for subsequent packet arrivals.
+
+Inputs:
+
+     XE_Int : address of ethernet interface information block
+
+Outputs:
+
+     Calls IP_Receive to deliver the datagram.
+
+*******************************************************************************
+)%
+
+ROUTINE XE_receive ( XE_Int : REF XE_Interface_Structure ) : NOVALUE =
+    BEGIN
+    LOCAL
+	rcvix,
+	Rbuf: REF XERCV_QB_structure,
+	Nrbuf : REF XERCV_QB_Structure,
+	dev_config : REF Device_Configuration_Entry,
+	RC,
+	IRC,
+	Error_Flag : INITIAL(0);
+    BIND
+	rcvhdrs = .XE_Int[XEI$rcvhdrs] : BLOCKVECTOR[MAX_RCV_BUF,XERCV_LEN]
+					 FIELD(XE_RECV);
+
+    dev_config = .XE_Int [ XEI$dev_config ];
+
+! Set flag indicating interrupt in progress
+
+    DRV$AST_in_Progress = True;
+
+! If device not online, then give message and punt
+
+    IF NOT .dev_config[dc_online] THEN
+	BEGIN
+
+!~~	DRV$OPR_FAO('XE receive AST when offline');
+	DRV$AST_in_Progress = False;
+	RETURN;
+	END;
+
+! Get first input packet off of the queue
+!!!HACK!!! What if the first packet wasn't the one which $QIO returned?
+    REMQUE(.XE_Int[XEI$recv_Qhead],Rbuf);
+    Rbuf = .Rbuf + XE_hdr_offset;
+    rcvix = .XE_Int[XEI$curhdr];
+
+    IF (RC = .Rbuf[XERCV$vms_code]) NEQ SS$_Normal THEN
+	BEGIN
+!	Error_Flag = 1;
+	SELECT .RBUF[XERCV$VMS_CODE] OF
+	    SET
+	    [SS$_ABORT] :
+		DRV$OPR_FAO('XE abort, cmd_status=!XW, error_summary=!XB',
+  			.RBUF[XERCV$cmd_status],.RBUF[XERCV$error_summary]);
+	    [SS$_DATAOVERUN,SS$_TIMEOUT] :
+		BEGIN
+		DRV$OPR_FAO('XE read error (timeout/overrun), RC=!XL',.RC);
+		DRV$OPR_FAO('DEBUG - bytes received=!XL',.Rbuf[XERCV$tran_size]);
+		END;
+	    [OTHERWISE] :
+		DRV$OPR_FAO('XE: VMS Error, cmd_status=!XW, error_summary=!XB',
+  			.RBUF[XERCV$cmd_status],.RBUF[XERCV$error_summary]);
+	    TES
+	END;
+
+    !Ignore the timeout bit for DEQNA's
+    IF (.Rbuf[XERCV$cmd_status]  AND %X'0FF00') NEQ XM$M_STS_ACTIVE THEN
+	BEGIN
+	Error_Flag = 1;
+	! Error from board
+	DRV$OPR_FAO('XE status error.  Status = !XL',
+		     .Rbuf[XERCV$cmd_status] AND %X'0FF00');
+	END;
+
+    IF .Error_Flag THEN
+	BEGIN
+	IF .XE_Int[XEI$retry_count] GEQ .XE_Int[XEI$max_retry] THEN
+	    XE$ERR(.XE_Int,'XE retried !ZB times.',.XE_Int[XEI$retry_count])
+	ELSE
+	    BEGIN
+	    ! Stuff this packet back on the queue for deallocation
+	    Rbuf = .Rbuf - XE_hdr_Offset;
+	    INSQUE(.Rbuf, .XE_Int[XEI$recv_Qtail]);
+	    XE_Int[XEI$retry_count] = .XE_Int[XEI$retry_count]+1;
+	    DRV$AST_in_Progress = False;
+	    RETURN;
+	    END
+	END
+    ELSE
+        XE_Int[XEI$retry_count] = 0;
+
+! Get another buffer and put it on the receive Q for this device
+
+    XE_Int[XEI$curhdr] = .XE_Int[XEI$curhdr]+1;
+    IF .XE_Int[XEI$curhdr] GTR (MAX_RCV_BUF-1) THEN
+	XE_Int[XEI$curhdr] = 0;
+
+    NRbuf = DRV$Seg_get(DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len));
+    INSQUE(.NRbuf,.XE_Int[XEI$recv_Qtail]);
+    NRbuf = .NRbuf + XE_hdr_offset;
+    RC = $QIO(chan=.XE_Int[XEI$IO_chan], EFN=ASTEFN,
+	      Func=IO$_READVBLK,
+	      IOSB=NRbuf[XERCV$vms_code], Astadr=XE_Receive, Astprm=.XE_Int,
+	      P1=NRbuf[XERCV$data],
+	      P2=DRV$MAX_PHYSICAL_BUFSIZE,
+	      P5=rcvhdrs[.XE_Int[XEI$curhdr],XERCV$buf]);
+
+! Check for recoverable error. This hack is necessary because the DEQNA
+! is known to get wedged, and the driver gives back SS$_DEVINACT when this
+! happens.
+
+    IF NOT .RC THEN
+	BEGIN
+	IF .RC EQL SS$_DEVINACT THEN
+	    BEGIN
+	    ! Stuff the packet back on the queue for deallocation
+	    Rbuf = .Rbuf - XE_hdr_Offset;
+	    INSQUE(.Rbuf, .XE_Int[XEI$recv_Qtail]);
+	    XE$ERR(.XE_Int,'XE $QIO read error (dev_inact), RC=!XL',.RC);
+	    END
+	ELSE
+	    DRV$Fatal_FAO('Ethernet $QIO queue read error, EC = !XL',.RC);
+	END
+    ELSE
+	BEGIN
+
+! Send datagram to IP
+
+	IF $$LOGF(LOG$PHY) THEN
+	    XE_LOG('XE IP receive',0,rcvhdrs[.rcvix,XERCV$src]);
+
+	dev_config[dcmib_ifInOctets] = .dev_config[dcmib_ifInOctets] +
+		.Rbuf[XERCV$tran_size] + XE_hdr_len;
+
+	DRV$IP_Receive(.Rbuf-XE_hdr_offset,
+		   DRV$MAX_PHYSICAL_BUFSIZE+(Qhead_len+IOS_len),
+		   Rbuf[XERCV$data],.Rbuf[XERCV$tran_size],.dev_config);
+	END;
+
+    DRV$AST_in_Progress = False;
+    END;
+
+
+%Sbttl   'Ethernet driver arp recv'
+%(*****************************************************************************
+
+Function:
+
+     This routine is an AST interrupt routine.  It is started when the
+     Ethernet controller system driver has received an ARP packet and issues
+     an AST to this routine. ARP packet is passed to ARP module for processing.
+
+Inputs:
+
+     XE_Int - Controller info block for this interface
+
+*******************************************************************************
+)%
+ROUTINE XE_ArpRcv( XE_Int : REF XE_Interface_Structure ): NOVALUE =
+    BEGIN
+    BIND
+	dev_config = XE_Int[XEI$Dev_Config] : REF Device_Configuration_Entry;
+    LOCAL
+	ARbuf : REF XE_ARP_STRUCTURE,
+	usflag,
+	tpa,
+	I,
+	spa,
+	Route,
+	RC;
+
+! Set flag indicating interrupt in progress
+
+    DRV$AST_in_Progress = True;
+
+! Check for bogosity
+
+    IF NOT .dev_config[dc_online] THEN
+	BEGIN
+!~~	Send_2_Operator(%ASCID 'XE ARP receive AST when offline');
+	DRV$AST_in_Progress = False;
+	RETURN;
+	END;
+
+! check status of receive
+
+    ARbuf = .XE_Int[XEI$ARP_buffer];
+    IF ((.ARbuf[ar_ios0] NEQ SS$_Normal) AND
+       (.ARbuf[ar_ios0] NEQ SS$_DATAOVERUN)) THEN
+	! Error from DEC driver
+	IF .ARbuf[ar_ios0] EQL SS$_ABORT THEN
+	    DRV$OPR_FAO('XE abort, cmd_status=!XW, error_summary=!XB',
+  			.ARBUF[ar_ios2],.ARBUF[ar_ios3])
+	ELSE
+	    DRV$Error_FAO('XE ARP receive error (ugh), EC = !XL',.ARbuf[ar_ios0]);
+
+    IF $$LOGF(LOG$PHY) THEN
+	XE_LOG('XE ARP receive',0,ARbuf[phys$2]);
+
+! Packet is OK at the hardware level - hand it up to the ARP module
+
+    XEARP$INPUT(.XE_Int,ARBUF[AR_DATA]);
+
+! restart the arp receive
+!!!HACK!!! what's the EFN for?
+    RC = $QIO(	chan=.XE_Int[XEI$ARP_IO_chan], EFN=ARPEFN,
+		IOSB=ARbuf[ar_ios0],Func=IO$_READVBLK,
+		P1=ARbuf[ar_data], P2=ARP_MAX_LEN*4,
+		P5=ARbuf[phys$1],
+		astadr=XE_ArpRcv, astprm=.XE_Int);
+    IF .RC NEQ SS$_Normal THEN
+	XE$ERR(.XE_Int,'XE ARP read failure, RC = !XL',.RC);
+
+    DRV$AST_in_Progress = False;
+    END;
+
+
+%SBTTL 'ARP transmit routine'
+
+GLOBAL ROUTINE XE$ARP_XMIT(XE_Int,arbuf,arlen,dest) : NOVALUE =
+
+! Finish packaging of ARP packet and transmit it.
+! ARBUF points to the ARP data portion of the packet - header space has been
+! reserved before it, if needed.
+
+    BEGIN
+    MAP
+	XE_Int : REF XE_Interface_Structure;
+    LOCAL
+	rc,
+	ios : XE_IOSB_STRUCTURE;
+
+    DRV$NOINT ;
+
+! 0 for destination means he wants us to do a broadcast.
+
+    IF .dest EQL 0 THEN
+	dest = xe_broadcast;
+
+! Write the ARP to the network (don't need to build any header info)
+
+    rc = $QIOW(	CHAN=.XE_Int[XEI$ARP_IO_chan], FUNC=IO$_WRITEVBLK,
+		IOSB=ios, P1=.arbuf, P2=.arlen, P5=.dest);
+    IF .rc NEQ SS$_NORMAL THEN
+	BEGIN
+	XE$ERR(.XE_Int,'XE ARP xmit failure, RC = !XL',.rc);
+	Signal(.RC)
+	END
+    ELSE
+	IF $$LOGF(LOG$PHY) THEN
+	    XE_LOG('XE ARP xmit',0,.dest);
+    DRV$OKINT ;
+    END;
+
+%SBTTL 'Perform device specific DUMP functions'
+
+GLOBAL ROUTINE XE$dump(dev_config, funct, arg, buffer, sizeAdrs) =
+    BEGIN
+    EXTERNAL ROUTINE
+	XE$ARP_DUMP;
+
+
+    SELECTONE .funct OF
+	SET
+	[XEDMP$ARP_Entry] :
+	    BEGIN
+	    .sizeAdrs = XE$ARP_DUMP ( .arg, .buffer, ..sizeAdrs);
+	    SS$_NORMAL
+	    END;
+	[Otherwise] :
+	    0
+	TES
+    END;
+
+
+
+GLOBAL ROUTINE DRV$TRANSPORT_INIT =
+! Initialize the transport information/entry vector
+! Must be done at run time to avoid .ADDRESS fixups...
+    BEGIN
+
+    ! Fill in the EtherNet description string
+    XE_descriptor[0] = %CHARCOUNT(XE_description);
+    XE_descriptor[1] = UPLIT(XE_description);
+
+    ! Provide the XEDRV entry points
+    DRV$Device_Info[DI$Init]	= XE$Init;
+    DRV$Device_Info[DI$Xmit]	= XE$XMit;
+    DRV$Device_Info[DI$Dump]	= XE$Dump;
+    DRV$Device_Info[DI$Check]	= XE$Check;
+
+    DRV$Device_Info
+    END;
+
+
+END
+ELUDOM
+

@@ -1,0 +1,369 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'Define RFC 855 TELNET protocol'
+%(
+
+Module:
+
+	TELNET.REQ
+
+Facility:
+
+	Define the TELNET Virtual Terminal Protocol as according to RFC 855.
+
+Author:
+
+	Dale Moore, CMU-CSD, April, 1986
+	Copyright (c) 1986,1987 Carnegie-Mellon University
+
+Modification history:
+
+1.1  05-Sep-89, Edit by BRM
+	Added new options.
+
+1.0  21-Jul-87, Edit by VAF
+	Convert from TELNET.R32 used with TELNET user program for use with new
+	ACP TELNET facility (change was just to remove extraneous definitions).
+
+2.2  Dec 1991 J. Clement	Rice University		JC
+	Added TTY_CHAN for EIGHTBIT, PASTHRU characteristics.
+	Moved QCB macros to here.
+
+2.3	16-Dec-1991	Henry W. Miller		USBR
+	Change TVT flag word to ULONG - we were running out of bits
+	Added TVT$JAM bit.
+
+2.4	7-Jan-1992	John Clement
+	Added TVT$HOLD bit
+)%
+
+LIBRARY 'SYS$LIBRARY:STARLET';	! VMS system definitions
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';
+
+LITERAL
+    TELNET$K_Debug	= 0;
+
+!++
+! Constants from RFC855
+!--
+
+LITERAL
+    Telnet$K_EOR	= 239,	! End of Record marker
+    Telnet$K_SE		= 240,	! End of subnegotiation parameters
+    Telnet$K_NOP	= 241,	! No operation
+    Telnet$K_Data_Mark	= 242,	! The data stream portion of a Synch
+			 	! This should always be accompanied
+				! by a TCP Urgent notification.
+    Telnet$K_Brk	= 243, 	! NVT character BRK
+    Telnet$K_IP		= 244,	! The function IP Interrupt Process
+    Telnet$K_AO		= 245,	! The function AO Abort output
+    Telnet$K_AYT	= 246,	! The function AYT Are You There
+    Telnet$K_EC		= 247,	! The function EC Erase character
+    Telnet$K_EL		= 248,	! The function EL Erase Line
+    Telnet$K_GA		= 249,	! The function GA Go Ahead
+    Telnet$K_SB		= 250,	! Indicates that what follows is
+				! subnegotiation of the indicated
+				! option
+    Telnet$K_WILL	= 251,	! Indicates the desire to begin
+				! performing, or confirmation that
+				! you are now performing, the
+				! indicated option
+    Telnet$K_WONT	= 252,	! Indicates the refusal to perform,
+			 	! or continue performing, the
+			 	! indicated option.
+    Telnet$K_DO		= 253,	! Indicates the request that the
+			 	! other party perform, or
+			 	! confirmation that you are expecting
+			 	! the other party to perform, the
+			 	! indicated option.
+    Telnet$K_DONT	= 254,	! Indicates the demand that the
+			 	! other party stop performing,
+			 	! or confirmation that you are no
+			 	! longer expecting the other party
+			 	! to perform, the indicated option.
+    Telnet$K_IAC	= 255,	! Data Byte 255.
+
+!++
+!   Constants from RFC946.
+!--
+
+    Telnet$K_TTLFMT	= 0;
+
+
+!++
+!   The Telnet TCP connection is established between the user's port U
+!   and the server's port L.  The server listens on its well known port L
+!   for such connections.  Since a TCP connection is full duplex and
+!   identified by the pair of ports, the server can engage in many
+!   simultaneous connections involving it's port L and different user
+!   ports U.
+!
+!   Port Assignment
+!
+!      When used for remote user access to service hosts (i.e., remote
+!      terminal access) this protocol is assigned server port 23 (27
+!      octal).  That is L=23.
+!--
+LITERAL
+    Telnet$K_SERVER_PORT	= 23;
+
+!++
+! I'm not sure where these are defined, but they should be defined
+! in some telnet options rfc
+! for more info see rfc855
+!--
+LITERAL
+    Telnet$K_Number_Of_Options  = 036,
+
+    Telnet$K_Binary		= 000,
+    Telnet$K_Echo		= 001,
+    Telnet$K_Reconnect		= 002,
+    Telnet$K_SUPRGA		= 003,
+    Telnet$K_Size_Negotiation	= 004,
+    Telnet$K_Status		= 005,
+    Telnet$K_Timing_Mark	= 006,
+    Telnet$K_Remote_Trans_Echo	= 007,
+    Telnet$K_Line_Width		= 008,
+    Telnet$K_Page_Size		= 009,
+    Telnet$K_CR_Disposition	= 010,
+    Telnet$K_Tab_Stops		= 011,
+    Telnet$K_Tab_Disposition	= 012,
+    Telnet$K_FF_Disposition	= 013,
+    Telnet$K_Vertical_Tabs	= 014,
+    Telnet$K_VT_Disposition	= 015,
+    Telnet$K_LF_Disposition	= 016,
+    Telnet$K_Extended_Ascii	= 017,
+    Telnet$K_Logout		= 018,
+    Telnet$K_Byte_Macro		= 019,
+    Telnet$K_Data_Entry		= 020,
+    Telnet$K_SUPDUP		= 021,
+    Telnet$K_SUPDUP_Output	= 022,
+    Telnet$K_Location		= 023,
+    Telnet$K_Terminal_Type	= 024,
+    Telnet$K_End_of_Record	= 025,
+    Telnet$K_User_Id		= 026,
+    Telnet$K_Output_Marking	= 027,
+    Telnet$K_Location_Number	= 028,
+    Telnet$K_3270_Regime        = 029,
+    Telnet$K_X3_PAD             = 030,
+    Telnet$K_Window_Size        = 031,
+    Telnet$K_Terminal_Speed     = 032,
+    Telnet$K_Toggle_Flow_Control= 033,
+    Telnet$K_LineMode           = 034,
+    Telnet$K_X_Display_Location = 035,
+ 
+    Telnet$K_Extended		= 255,
+    Telnet$K_MINOPT		= Telnet$K_Binary,
+    Telnet$K_MAXOPT		= Telnet$K_X_Display_Location;
+
+LITERAL
+    Option$K_Terminal_Type_Is	= 0,
+    Option$K_Terminal_Type_Send	= 1,
+
+    Option$K_TTYLOC_Format_64	= 0,
+
+    Option$K_Terminal_Speed_Is	= 0,
+    Option$K_Terminal_Speed_Send= 1,
+
+    Option$K_Tog_Flow_Cntl_OFF	= 0,
+    Option$K_Tog_Flow_Cntl_ON	= 1,
+
+    Option$K_Linemode_Mode              = 1,
+    Option$K_Linemode_Forwardmask       = 2,
+    Option$K_Linemode_SLC               = 3,
+
+    Option$K_Linemode_Mode_EDIT         = 0,
+    Option$K_Linemode_Mode_TRAPSIG      = 1,
+    Option$K_Linemode_Mode_ACK          = 2,
+
+    Option$K_Linemode_SLC_MaxOpt        = 18,
+    SLC_SYNCH		= 1,
+    SLC_BRK		= 2,
+    SLC_IP		= 3,
+    SLC_AO		= 4,
+    SLC_AYT		= 5,
+    SLC_EOR		= 6,
+    SLC_ABORT		= 7,
+    SLC_EOF		= 8,
+    SLC_SUSP		= 9,
+    SLC_EC		= 10,
+    SLC_EL		= 11,
+    SLC_EW		= 12,
+    SLC_RP		= 13,
+    SLC_LNEXT		= 14,
+    SLC_XON		= 15,
+    SLC_XOFF		= 16,
+    SLC_FORW1		= 17,
+    SLC_FORW2		= 18,
+
+    ! These codes go in the first 2 bits of the function byte.
+    SLC_DEFAULT		= 3,
+    SLC_VALUE		= 2,
+    SLC_CANTCHANGE	= 1,
+    SLC_NOSUPPORT	= 0;
+
+MACRO   ! Define the fields in the function modifier byte of the SLC's.
+
+    SLC$F_Level         = 0, 2%,
+    SLC$F_FlushOut      = 2, 1%,
+    SLC$F_FlushIn       = 3, 1%,
+    SLC$F_Ack           = 4, 1%;
+
+!++						! JC Begin
+! These macros describe the characteristics of the PTY terminal
+!--
+MACRO
+    QCB$B_CLASS		= 0, 0,  8, 0%,
+    QCB$B_TYPE		= 1, 0,  8, 0%,
+    QCB$W_PAGE_WIDTH	= 2, 0, 16, 0%,
+    QCB$L_CHARISTICS	= 4, 0, 24, 0%,
+    QCB$B_PAGE_LENGTH	= 7, 0,  8, 0%,
+    QCB$L_EXTEND_CHAR	= 8, 0, 32, 0%;
+LITERAL
+    QCB$K_Size	= 12;				! JC End
+
+
+! Define the format of a TELNET option block
+
+$FIELD OPT$FIELDS =
+    SET
+    OPT$BASE	= [$BYTES(0)],	! Base address of block
+    OPT$STATE	= [$BIT],	! Option state (TRUE=on,FALSE=off)
+    OPT$CURRENT	= [$BIT],	! Nonzero if currently negotiating the option
+    OPT$PREFER	= [$BITS(2)],	! What we'd prefer for the option state
+    $ALIGN(FULLWORD)
+    OPT$ON_RTN	= [$ADDRESS],	! Routine to turn the option on
+    OPT$OFF_RTN	= [$ADDRESS],	! Routine to turn the option off
+    OPT$SUB_RTN	= [$ADDRESS]	! Routine to handle subnegotiation
+    TES;
+
+LITERAL
+    OPT$SIZE = $Field_Set_Size,
+    OPT$BLEN = OPT$SIZE*4;
+MACRO
+    OPT$BLOCK = BLOCK[OPT$SIZE] FIELD(OPT$FIELDS)%,
+    OPT$LIST = BLOCKVECTOR[TELNET$K_MAXOPT+1,OPT$SIZE] FIELD(OPT$FIELDS)%;
+LITERAL
+    OPT$LSTBLEN = (OPT$SIZE*(TELNET$K_MAXOPT+1))*4;
+
+! Values for OPT$PREFER field
+
+LITERAL
+    OPT$STATE_OFF	= 0,
+    OPT$STATE_ON	= 1,
+    OPT$DONT_CARE	= 2;
+
+
+
+! Define the format of a TVT data block.
+
+LITERAL
+    TVT_MBX_BUFLEN = 256,	! Size of PTY mailbox message buffer
+    TVT_TTY_BUFLEN = 512,	! Size of PTY read/write buffers
+    TVT_NEG_BUFLEN = 128,	! Size of negotiation output buffer
+    TVT_SUB_BUFLEN = 128,	! Size of subnegotiation input buffer
+    PTY_BUFFER_SIZE = 32 ;	! Size of PTY internal buffer
+				! (From PZDRIVER.MAR and TZDRIVER.MAR
+				! BUFFER_SIZE parameter)
+$FIELD TVT$FIELDS =
+    SET
+    TVT$TCB	= [$ADDRESS],		! Backpointer to owning TCB
+    TVT$PTY_CHN	= [$BYTES(4)],		! The PTY device channel
+    TVT$MBX_CHN	= [$BYTES(4)],		! The PTY mailbox device channel
+    TVT$NEG_BUF	= [$BYTES(TVT_NEG_BUFLEN)], ! Buffer for negotiations
+    TVT$NEG_CNT	= [$BYTES(2)],		! Number of bytes in buffer
+    TVT$NEG_EQP	= [$ADDRESS],		! ENQ pointer into negotiation buffer
+    TVT$NEG_DQP	= [$ADDRESS],		! DEQ pointer into negotiation buffer
+    TVT$SUB_BUF	= [$BYTES(TVT_SUB_BUFLEN)], ! Buffer for reading subnegotiation
+    TVT$SUB_CNT	= [$BYTES(2)],		! Number of bytes in buffer
+    TVT$SUB_PTR	= [$ADDRESS],		! Pointer to current byte
+    TVT$RD_BUF	= [$BYTES(TVT_TTY_BUFLEN)], ! Buffer for PTY read
+    TVT$RD_BCNT	= [$BYTES(2)],		! Number of bytes in the buffer
+    TVT$RD_PTR	= [$ADDRESS],		! Pointer to current byte
+    TVT$RD_IOSB	= [$BYTES(8)],		! IOSB for read operation
+    TVT$WR_BUF	= [$BYTES(TVT_TTY_BUFLEN)], ! Buffer for PTY write
+    TVT$WR_BCNT	= [$BYTES(2)],		! Number of bytes in the buffer
+    TVT$WR_ICNT	= [$LONG],		! Number of bytes read
+    TVT$WR_OCNT	= [$LONG],		! Number of bytes written
+!    TVT$WR_PTR	= [$ADDRESS],		! Pointer to current byte
+    TVT$WR_IPTR	= [$LONG],		! Index of current byte read
+    TVT$WR_OPTR	= [$LONG],		! Index of current byte written
+    TVT$WR_IOSB	= [$BYTES(8)],		! IOSB for write operation
+    TVT$MBX_BUF	= [$BYTES(TVT_MBX_BUFLEN)],
+    TVT$MBX_IOSB= [$BYTES(8)],		! IOSB for mailbox
+    TVT$NRSTATE	= [$BYTES(2)],		! Current TVT read state
+    TVT$FLAGS	= [$ULONG],		! Flags describing the TVT
+    $OVERLAY(TVT$FLAGS)
+	TVT$CANCEL	= [$BIT],	! TVT is being deassigned
+	TVT$PREAD	= [$BIT],	! PTY read is in progress
+	TVT$PWRITE	= [$BIT],	! PTY write is in progress
+	TVT$NREAD	= [$BIT],	! Network read is in progress
+	TVT$NWRITE	= [$BIT],	! Network write is in progress
+	TVT$NR_CR	= [$BIT],	! Last network character was a CR
+	TVT$NR_LF	= [$BIT],	! Last network character was a LF
+	TVT$NR_SB	= [$BIT],	! Currently reading a subnegotiation
+	TVT$NW_IAC	= [$BIT],	! Need to send an IAC to the network
+	TVT$DO_PID	= [$BIT],	! Keep trying to call 
+	TVT$GAG		= [$BIT],	! PTY buffer too full, must write or die
+	TVT$CTRL	= [$BIT],	! Special control character seen
+	TVT$JAM		= [$BIT],	! Network output currently jammed
+	TVT$Hold	= [$BIT],	! Hold off PTY_Write until PID created
+	TVT$TTSET	= [$BIT],	! TTY device changed.
+    $CONTINUE
+    TVT$TTYLOC		= [$BYTES(8)],	! TTYLOC data for the connection
+    TVT$TTYTYPE		= [$BYTES(4)],	! VMS terminal type
+    TVT$TTYDEPEND	= [$BYTES(4)],	! VMS terminal mode
+    TVT$TTYDEPEND2	= [$BYTES(4)],	! VMS terminal mode (the sequel)
+    TVT$LCLOPTS	= [$BYTES(OPT$LSTBLEN)], ! Local options state
+    TVT$REMOPTS	= [$BYTES(OPT$LSTBLEN)], ! Remote options state
+    TVT$LM_FORWARD_MASK = [$BYTES(32)],
+    TVT$LM_MODE = [$BYTES(1)],
+    TVT$LM_FLAGS = [$BYTES(1)],
+    $OVERLAY(TVT$LM_FLAGS)
+	TVT$LM_Use_FM = [$BIT],
+    $CONTINUE
+    TVT$Type_descr	= [$BYTES(DSC$K_Z_BLN)],
+    TVT$TERMINAL_TYPE	= [$BYTES(16)],		! Terminal type string JC Beg
+    TVT$KILL_TERMINAL_TYPE	= [$BYTES(1)],	! Terminal Negotiation count
+    TVT$Device_Descr	= [$BYTES(DSC$K_Z_BLN)],
+    TVT$TTY_DEVSTR	= [$BYTES[20]],		! Terminal name string
+    TVT$TTY_CHN		= [$BYTES(4)],		! The TTY channel
+    TVT$TTY_IOSTAT	= [$BYTES(8)],		! The TTY IO status
+    TVT$TTY_Char	= [$BYTES(QCB$K_Size)],	! The TTY DevDEP char JC End
+    TVT$DATA_END = [$BYTES(0)]
+    TES;
+LITERAL
+    TVT$SIZE = $Field_Set_Size;
+MACRO
+    TVT$BLOCK = BLOCK[TVT$SIZE] FIELD(TVT$FIELDS) %;
+
+! Literals which define the TVT state
+
+LITERAL
+    TVT$STATE_NORMAL = 0,	! Normal (last char not an IAC)
+    TVT$STATE_IAC = 1,		! IAC seen (start negotiation)
+    TVT$STATE_WILL = 2,		! IAC WILL seen
+    TVT$STATE_WONT = 3,		! IAC WONT seen
+    TVT$STATE_DO = 4,		! IAC DO seen
+    TVT$STATE_DONT = 5,		! IAC DONT seen
+    TVT$STATE_MIN = TVT$STATE_NORMAL,
+    TVT$STATE_MAX = TVT$STATE_DONT;

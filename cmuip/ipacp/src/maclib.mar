@@ -1,0 +1,1634 @@
+;
+;	****************************************************************
+;
+;		Copyright (c) 1992, Carnegie Mellon University
+;
+;		All Rights Reserved
+;
+;	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+;	distribute  this software  provided  that the  above  copyright
+;	notice appears in  all copies and that  any distribution be for
+;	noncommercial purposes.
+;
+;	Carnegie Mellon University disclaims all warranties with regard
+;	to this software.  In no event shall Carnegie Mellon University
+;	be liable for  any special, indirect,  or consequential damages
+;	or any damages whatsoever  resulting from loss of use, data, or
+;	profits  arising  out of  or in  connection  with  the  use  or
+;	performance of this software.
+;
+;	****************************************************************
+;
+	.Title	MACLIB - Macro level VMS I/O Interface Routines.
+	.Ident	'2.4-1'
+;
+; Comment out the following line if NOT building for VMS V4 (in other
+; words comment out if you want a V5 driver).
+;
+;	VMS_V4 = 1
+
+	.Enable	SUP
+;	.Enable Debug,TraceBack
+	.Disable Debug,TraceBack
+
+	.Library /SYS$LIBRARY:LIB.MLB/
+
+	.PSECT	Locked_Section,LONG
+
+;++
+;
+; Facility:
+;
+;	Tektronix Network: BLISS-32 callable VMS I/O System Interface rtns.
+;
+; Abstract:
+;
+;	1) MOUNT_ip_DEVICE
+;		Mount the VMS pseudo network device, not DEC's "NET" device but
+;		one of our own creation.
+;		This routine is called by IPACP during startup procedures.  The
+;		entire purpose is to make the pseudo device available to all
+;		users & let IPACP know about where the ACP queue of user I/O
+;		requests lives.
+;		VMS data structures for the VCB (Volume Control Blk) & AQB (ACP
+;		queue blk) are allocated out of non-paged pool.  The final
+;		structure is as follows:
+;
+;		UCB ==> VCB ==> AQB
+;
+;		The AQB holds the queue of user I/O request packets (IRP's).
+;
+;	2) DISMOUNT_IP_DEVICE
+;		Dismount the IPACP volume.
+;
+;	3) USER_REQUESTS_AVAIL
+;		Check ACP queue of user I/O requests.
+;
+;	4) VMS_IO$POST
+;		Finish the user's I/O request by handing the IRP to VMS
+;		standard IO post processing routines.
+;
+;	5) MOVBYT
+;		Move bytes fast with movc3 hardware instruction.
+;
+;	6) TIME_STAMP
+;		Get time in hundredths of seconds since system boot.
+;		Use EXE$GL_ABSTIM.  This means that we really only have
+;		a resolution down to the second, but that shouldn't
+;		adversely affect anything for IP's purposes.  Previous
+;		code had to go into kernel mode to read from processor
+;		register, but that was enormous overhead (IP seems to
+;		get the time for a lot of stuff while handling segments)
+;		and wouldn't work on a uVAX (PR$_TODR processor register
+;		is no longer defined in VMS V4 for that reason).
+;
+;	7) SWAPBYTES
+;		Swap bytes within a 16-bit word.
+;
+;	8) ZERO_BLK
+;		Zero block of bytes with movc5 instruction.
+;
+;	9) CALC_CHECKSUM
+;
+;		Calculate a checksum for a block of memory.
+;
+; Author:
+;
+;	Stan C. Smith	10-4-81
+;
+; Mode:
+;
+;	Both Kernel (VMS data structure access) & user mode routines.
+;
+; Assembly Instructions:
+;
+;	MACRO MACLIB.MAR
+;
+; Modification History:
+;
+; *** Begin CMU change log ***
+;
+; 2.7	12-Jul-1991	Marc A. Shannon		CMU Group N
+;	Fixed problem where VCB$L_RVT was pointing to the wrong place
+;	and a reference to "LOGVOLNAM" would crash the system.
+;
+; 2.6	14-Sep-1990	Bruce R. Miller		CMU Network Development
+;	Changed _IP0: to INET$DEVICE logical.
+;
+; 2.5	27-Nov-1989	Bruce R. Miller		CMU Network Development
+;	Removed bias towards TCP processing in order to put TCP, UDP,
+;	ICMP, and IP on an equal footing.  Changed m$cancel to be 15.
+;
+;	24-JAN-1988	Chris HO		USC-UCS
+;	fixed V5 locks
+;
+; 2.4	23-Jan-89	Bruce R. Miller, Pete Neergaard, Marc Shannon.
+;	Corrected check for end of UCB chain when mounting and dismounting
+;	IP device.  Modified routines Mount_IP_Device, and 
+;	Set_IP_Device_Offline.  Previously code would overshoot the end of 
+;	the UCB list and attempt to dereference null pointer when executing
+;	in SMP context.
+;
+; 2.3	04-JUN-88	Lon Willett (Utah) and Dale Moore (CMU)
+;	Changed Checksuming routines and added additional code
+;	comments about checksumming.
+;
+; 2.2  30-Jul-87, Edit by VAF
+;		Implement CQ_DEQUEUE and CQ_ENQUEUE here.
+;		Minor cleanup in USER_REQUESTS_AVAIL.
+;
+; 2.1  23-Jan-87, Edit by VAF
+;		Device driver now passes the size of the UARG block so we
+;		know how much to copy into the ACP's local copy. Device driver
+;		must be version 2.8 or later and ACP version 6.0 or later.
+;
+; 2.0  23-Jul-86, Edit by VAF
+;		Pass protocol code and connection id (both from UCB) in
+;		cancel processing.
+;
+; 1.9  16-Jul-86, Edit by VAF
+;		Flush extraneous and confusing definitions.
+;
+; 1.8   1-JUL-86, Dale Moore
+;		Change references from THC to IPDRIVER.
+;
+; 1.7  22-May-86, Edit by VAF
+;		In CANCEL processing, pass UCB address in argument block.
+;
+; 1.6   7-May-86, Edit by VAF
+;		In CANCEL processing, convert internal PID to external PID.
+;
+;*** End CMU change log ***
+;
+; 1.1 [2-10-82]	Stan Smith
+;		Orginal version
+;
+; 1.2 [6-10-82] Stan Smith
+;		Included device offline testing/setting back when mount occurs.
+;		This prevents users from doing IO to a non-existant ACP & hanging
+;		the user's process.
+;
+; 1.3 [8-16-82] Stan Smith
+;		Blank filled the ACP volume name "TCPACP" total length is 12 bytes.
+;
+; 1.4 [3-16-83]	Stans Smith
+;		Force dev$m_avl off before we start to mount device "thc".
+;		Prevents users from doing IO to a device that's not mounted.
+;
+; 1.5 [6-11-83] stan
+;		During vms io posting (vms_io$post) if the irp is in error then
+;		force the io function to be a write thus preventing a useless
+;		copy from system buffer to user buffer.  On success, if the
+;		io function is a read (irp$v_func=true in irp$w_sts), then
+;		set the actual # of bytes received in irp$w_bcnt instead of
+;		original requested amount.  save some time.
+;--
+
+.SBTTL	System & Local Symbol definitions
+
+; VMS External Definitions.
+
+	$ARBDEF		; Access Rights Block defs.
+	$AQBDEF		; ACP Queue Block
+	$CHFDEF		; Condition Handler Facility.
+	$IRPDEF		; I/O Request Packet
+	$UCBDEF		; Unit Control Block
+	$VCBDEF		; Volume Control Block.
+
+.IF	NOT_DEFINED	VMS_V4
+	$CPUDEF				; VMS Version 5.0 SMP
+.ENDC
+	$CRBDEF				; channel request block
+	$DCDEF				; device classes and types
+	$DDBDEF				; device data block
+	$DEVDEF				; device characteristics
+	$IDBDEF				; interrupt data block
+	$IODEF				; I/O function codes
+	$IPLDEF				; hardware IPL definitions
+	$SSDEF				; system status codes
+	$VECDEF				; interrupt vector block
+	$FKBDEF				; define fork block offsets
+	$DYNDEF
+	$PCBDEF
+	$PR780DEF
+
+
+; Local symbols
+
+M$Cancel	= 14	; IP user function code, Cancel connections for PID.
+FALSE		= 0	; Bliss definition of false.
+
+; The following definitions are copied from the Network virtual device
+; driver "ip"; Module(IPDRIVER.MAR).
+; IPACP argument block fields.  This definition also includes the fields
+; definied in the SB block.  The IP ACP reads these fields as arguments
+; to a user network I/O request. This block defines a CANCEL request only.
+
+UCB$L_TCBID	= UCB$Q_DEVDEPEND
+UCB$L_PROTOCOL	= UCB$Q_DEVDEPEND+4
+
+	$DEFINI	AB			; ARGUMENT BLOCK
+
+; These first fields are general function fields.
+
+$DEF	AB$L_DATA_ADRS			; WITHIN THIS BLOCK, START OF Data
+			.BLKL	1
+$DEF	AB$L_Users_Buf_Adrs		; user's buffer start address
+			.BLKL	1
+$DEF	AB$L_Blk_ID			; VMS dynamic block ID fields
+			.BLKL	1
+$DEF	AB$L_IRP_Adrs			; Associated IRP address
+			.BLKL	1
+$DEF	AB$L_UCB_Adrs			; Unit Control Blk
+			.BLKL	1
+$DEF	AB$L_PID			; User's PID
+			.BLKL	1
+$DEF	AB$W_UARGSIZE			; Size of the UARG block
+			.BLKW	1
+$DEF	AB$B_Funct			; ACP function code
+			.BLKB	1
+$DEF	AB$B_Protocol			; ACP Protocol code
+			.BLKB	1
+
+; The following are CANCEL specific fields.
+
+;$DEF	AB$W_Protocol			; Protocol code for CANCEL
+;			.BLKW	1
+$DEF	AB$W_IOchan			; IO channel for CANCEL
+			.BLKW	1
+$DEF	AB$L_TCBID
+			.BLKL	1	; Connection ID for CANCEL
+$DEF	AB$SIZE
+			.BLKB	0	; Size of this block
+
+	$DEFEND	AB
+
+.SBTTL	Local Data Declarations
+
+;Shared_Device::	.ASCID /_ip0:/	; name of shared pseudo device
+Shared_Device::	.ASCID /INET$DEVICE/	; name of shared pseudo device
+
+; These globals are known to IP.
+
+UCB_Adrs::	.LONG	0	; adrs of UCB
+ACP_QB_Adrs::	.LONG	0
+VCB_Adrs::	.LONG	0
+MYUIC::		.LONG	0
+mypid::		.LONG	0
+
+; Range of pages which get locked in WS because they raise IPL & we
+; can't afford any page faults here!
+
+Locked_Range:
+		.LONG	Begin_Lock
+		.LONG	End_Lock
+
+; IO Status block used by user_requests_avail rtn: when an IRP appears
+; but has not come from the network pseudo-device driver (ie, IRP$L_SVAPTE
+; is 0).  In this case the IRP is turned over to VMS IO post-processing
+; via a calls to VMS_IO$POST rtn.  The IOSB is used as an arg to VMS_IO$POST.
+
+IOSB:	.LONG	0
+	.LONG	0
+
+NO_ArgBlk::	.LONG	0
+Funct::		.LONG	0
+
+.SBTTL	Mount_ip_DEVICE - Mount the Pseudo device "ip".
+
+;++
+; MOUNT_ip_DEVICE, Mount Sharable Pseudo Device for all users.
+;
+; Functional Description:
+;
+;	Find the UCB (Unit Control Block) & build the VMS data structures
+;	which define a mounted volume.  Final structure is:
+;
+;	UCB ==> VCB ==> AQB
+;
+;	AQB (ACP Queue Blk) contains the queue list head of user I/O
+;	request packets.
+;
+; Calling Sequence:
+;
+;	$CMKRNL(routin=Mount_ip_Device);
+;
+; INPUTS:
+;
+;	None.
+;
+; Outputs:
+;
+;	Appropriate Error return codes.
+;	OTHERWISE -  SS$_NORMAL with the volume correctly mounted & VMS is happy.
+;
+; Side Effects:
+;
+;	Global locations set:
+;
+;		UCB_ADRS	- Unit Control Blk address
+;		ACP_QB_Adrs	- AQB address
+;		VCB_Adrs	- Volume Control Block address.
+;
+;	Pages containing the Mounting, IO request checking & IO posting
+;	are all locked in the working set.  Main reason is IPL is often
+;	elevated to IPL_SYNCH & we can't have page-faults that high.
+;
+;--
+
+.ENTRY	Mount_ip_Device,^M<R2,R3,R4,R5,R6,R7,R8>
+
+Begin_Lock::
+	$LKWSET_S	Locked_Range	; lock us in the working set.	
+	MOVAL	Shared_Device,R1	; point @ Pseudo device desc.
+	BSBW	Find_UCB		; locate the UCB
+	BLBS	R0,2$			; OK ?
+
+; Unable to find UCB,  return error here.
+
+	MOVZWL	#SS$_NOSUCHDEV,R0	; No such device error.
+	RET
+
+; found UCB, R1 = UCB address
+; Check if volume is already mounted.
+
+2$:
+	MOVL	R1,UCB_Adrs			; save UCB address
+	MOVL	R1,R5				; UCB ptr.
+	BICL	#DEV$M_AVL,UCB$L_DevChar(R5)	; disallow any user io.
+	BBS	#Dev$V_MNT,UCB$L_DevChar(R5),25$
+	BRW	Not_Mounted
+
+; Volume is mounted, Set globals & leave
+
+25$:	MOVZWL	#SS$_VOLINV,R0		; assume error
+	MOVL	UCB$L_VCB(R5),R1	; get VCB address
+	BNEQ	3$			; OK
+	JMP	Dismount		; oops, clean up.
+3$:
+	MOVL	R1,VCB_Adrs		; save VCB address.
+	MOVL	VCB$L_AQB(R1),R2	; get AQB address
+	BNEQ	4$
+	JMP	Dismount		; Error: Clean up
+4$:
+	MOVL	R2,ACP_QB_Adrs		; save AQB address
+
+; Indicate we now own the device, set my PID in ACP queue blk.
+
+	BSBW	Lock_IODB
+
+.IF	DEFINED VMS_V4
+	SETIPL	#IPL$_SYNCH		; synchronize with VMS
+.IF_FALSE
+	FORKLOCK -			; UCB$B_FLCK(R5)
+		SAVIPL=-(SP), -
+		PRESERVE=NO
+.ENDC
+
+	MOVL	PCB$L_PID(R4),AQB$L_ACPPID(R2)	; set new owner PID.
+	MOVL	PCB$L_PID(R4),mypid	; save for net$dump rtn.
+	MOVL	PCB$L_ARB(R4),R1	; adrs of ARB
+	MOVL	ARB$L_UIC(R1),MyUIC	; save my UIC.
+
+.IF NOT_DEFINED VMS_V4
+	FORKUNLOCK -			; UCB$B_FLCK(R5)
+		NEWIPL=(SP)+, -
+		PRESERVE=NO
+.ENDC
+	BSBW	UnLock_IODB
+
+.IF	DEFINED VMS_V4
+	SETIPL	#0				; timeshare
+.ENDC
+
+ALL_Done:
+
+; Mark device "ip0:" as ONline, mounted & Available.
+; Check for any cloned ip devices & mark them also.  Case of ACP crash
+; & user's had ip devices assigned. crash sets device offline & clears
+; avail.
+; R5 = UCB adrs
+
+.IF	DEFINED VMS_V4
+	DSBINT	UCB$B_FIPL(R5)			; synch with VMS
+.ENDC
+10$:
+.IF NOT_DEFINED VMS_V4
+	DEVICELOCK	-			;
+		SAVIPL=-(SP),-			;
+		PRESERVE=NO			;
+.ENDC
+	BISW	#UCB$M_ONline,UCB$W_STS(R5)
+	BISL	#DEV$M_AVL!DEV$M_MNT,UCB$L_DevChar(R5)
+	MOVL	UCB$L_LINK(R5),R1		; Get next UCB
+.IF NOT_DEFINED VMS_V4
+	DEVICEUNLOCK -
+		NEWIPL=(SP)+, -
+		PRESERVE=NO
+.ENDC
+	MOVL	R1, R5
+	BNEQ	10$
+.IF	DEFINED VMS_V4
+	ENBINT					; reset IPL
+.ENDC
+	MOVZWL	#SS$_NORMAL,R0
+BYE:
+	RET
+
+; Device is NOT Mounted, Mount it.
+; R5 = UCB address
+
+Not_Mounted:
+	BSBW	Build_ACP_QB		; build & link ACP Queue blk.
+	CMPL	#SS$_INSFMEM,R0		; OK?
+	BEQL	Bye			; EQL means Error.
+	MOVL	Acp_QB_Adrs,R8		; for build_VCB
+	BSBW	Build_VCB
+	BLBS	R0,All_Done
+	JMP	dismount		; lbs = Error.
+
+.SBTTL	LOCK_IODB - Lock the I/O Database
+
+;++
+; FUNCTIONAL DESCRIPTION:
+;
+;	Lock the I/O database mutex
+;
+; Call Sequence:
+;
+;	BSB LOCK_IODB
+;
+; Inputs:
+;
+;	None.
+;
+; Outputs:
+;
+;	R4 = My PCB address
+;
+; Side Effects:
+;
+;	I/O Data Base Mutex is locked.
+;	IPL set to IPL$_ASTDEL
+;
+;--
+
+LOCK_IODB:
+	MOVL	G^CTL$GL_PCB,R4		; get my PCB address
+	JMP	G^SCH$IOLOCKW		; lock & return
+
+.SBTTL	UNLOCK_IODB - Unlock the I/O Database
+
+;++
+;
+; Functional Description
+;
+;	Unlock the I/O Database mutex
+;
+; Calling Sequence:
+;
+;	BSBW UNLOCK_IODB
+;
+; Inputs:
+;
+;	None.
+;
+; Outputs:
+;
+;	R4 = My PCB address
+;
+; Side Effects:
+;
+;	I/O Database mutex is unlocked
+;	IPL set to 0
+;
+;--
+
+UNLOCK_IODB:
+	MOVL	G^CTL$GL_PCB,R4
+	JSB	G^SCH$IOUNLOCK			; unlock I/O database
+.IF	DEFINED VMS_V4
+	SETIPL	#0				; timeshare
+.ENDC
+	RSB
+
+.SBTTL	FIND_UCB - Locate specified Unit Control Block.
+
+;++
+;
+; Functional Description:
+;
+;	Search the system list of DDB (Device Data Blocks) trying to
+;	match the specified DEVICE.
+;
+; Calling Sequence
+;
+;	BSBW FIND_UCB
+;
+; Inputs:
+;
+;	R1 = Address of Device descriptor (.ASCID)
+;
+; Outputs:
+;
+;	R0 - LBC => error
+;	     LBS Then R1 = Address of Desired UCB.
+;
+;--
+
+FIND_UCB:
+	BSBW	Lock_IODB
+	JSB	G^IOC$SearchDev		; find the UCB
+	MOVQ	R0,-(SP)		; save return info
+	BSBW	UNlock_IODB
+	MOVQ	(SP)+,R0		; restore info
+	RSB				; return
+
+.SBTTL	BUILD_ACP_QB - build the ACP Queue Blk structure
+
+;++
+; Functional Description:
+;
+;	Build the ACP queue block data structure in NON-paged dynamic
+;	pool space.  Here we find the queue of IRP's (I/O Request Packets)
+;	as set up by the QIO Function Dispatch routines.  ACP QB (AQB)
+;	is linked in the system list of ACP Queue blocks.
+
+;
+; Inputs:
+;
+;	R5 = UCB address
+;
+; Outputs:
+;
+;	R0 = return Code.
+;		SS$_INFSMEM - Allocation Error.
+;
+; Side Effects:
+;
+;	May return with SS$_INFSMEM if unable to allocate dynamic
+;	non-paged pool.
+;	ACP_QB_Adrs = Address of AQB constructed.
+;	IO database is locked/unlocked while at IPL_SYNCH when AQB is
+;	linked into system AQB list.
+;
+;--
+
+Build_ACP_QB:
+	MOVZBL	#AQB$C_Length,R1
+	JSB	G^Exe$Alononpaged		; get chunck of non-paged pool.
+	BLBS	R0,5$				; Error?
+
+; Return error, unable to allocate non-paged pool.
+
+	MOVZWL	#SS$_INSFMEM,R0
+	RSB
+
+; Fill in AQB.
+; R2 = address of AQB
+
+5$:
+	MOVL	R2,ACP_QB_Adrs			; save address
+	MOVW	#AQB$C_Length,AQB$W_Size(R2)	; set block size.
+	MOVB	#DYN$C_AQB,AQB$B_Type(R2)	; blk type
+	MOVB	#AQB$K_NET,AQB$B_ACPType(R2)	; say its a Network AQB
+	CLRB	AQB$B_Class(R2)			; ACP class (noclass...)
+	MOVB	#AQB$M_Unique,AQB$B_Status(R2)	; ACP unique to this device.
+.IF	DEFINED VMS_V4
+	MOVL	R2,AQB$L_ACPQFL(R2)		; set IRP queue ptrs.
+	MOVL	R2,AQB$L_ACPQBL(R2)		; & back link.
+.IF_FALSE
+; WARNING: V5 change! V5 uses self-relative ACP queues!
+	CLRL	AQB$L_ACPQFL(R2)		; Init IRP queue ptrs
+	CLRL	AQB$L_ACPQBL(R2)		; & back link.
+.ENDC
+	CLRB	AQB$B_MntCnt(R2)		; init mount count
+
+; Link this AQB into the system list.  Instert at front of list
+
+	MOVL	R2,R8				; save AQB adrs
+
+	BSBW	Lock_IODB			; lock IO datbase
+.IF	DEFINED VMS_V4
+	SETIPL	#IPL$_SYNCH			; Synchronize with VMS
+.IF_FALSE
+	FORKLOCK	-			;
+		SAVIPL=-(SP),-		;
+		PRESERVE=NO		;
+.ENDC
+
+	MOVL	PCB$L_PID(R4),AQB$L_ACPPID(R2)	; set owner PID
+	MOVL	PCB$L_PID(R4),mypid		; save for net$dump rtn.
+	MOVAB	G^IOC$GL_AQBList,R1		; adrs of system list
+	MOVL	(R1),AQB$L_Link(R8)		; set forward link
+	MOVL	R8,(R1)				; set list head.
+
+; Save my UIC
+
+	MOVL	PCB$L_ARB(R4),R1		; addres ARB
+	MOVL	ARB$L_UIC(R1),MyUIC		; my uic.
+.IF NOT_DEFINED	VMS_V4
+	FORKUNLOCK	-
+		NEWIPL=(SP)+,-		;
+		PRESERVE=NO		;
+.ENDC
+	JSB	Unlock_IODB			; unlock & return
+	RSB
+
+.SBTTL	BUILD_VCB - Build A volume Control block.
+
+;++
+;
+; Functional Description:
+;
+;	Allocate & build the VMS Volume control block from nonpaged pool.
+;	VCB is pointed to by the UCB & VCB points to the AQB.
+;	Here we link the entire chain together.
+;
+; Inputs:
+;
+;	R5 = UCB address
+;	R8 = AQB address.
+;
+; Outputs:
+;
+;	LBC(R0) THEN Error
+;	LBS(R0) THEN success.
+;
+; Side Effects:
+;
+;	UCB ==> VCB ==> AQB.  Chain is initialized.
+;	AQB mount count is set to traditional ACP idle count (1).
+;	VCB_Adrs = address of Volume-Control-Blk.
+;
+;--
+
+BUILD_VCB:
+	MOVZBL	#VCB$C_Length,R1		; size of VCB
+	JSB	G^EXE$Alononpaged		; allocate nonpaged pool.
+	BLBC	R0,10$				; Error? punt if yes.
+
+; Fill in the VCB
+; R2 = address of VCB
+
+	MOVL	r2,VCB_Adrs			; save address.
+	MOVB	#DYN$C_VCB,VCB$B_Type(R2)	; set blk type
+	MOVZBW	#VCB$C_Length,VCB$W_Size(R2)	; set blk size
+	MOVW	#1,VCB$W_Trans(R2)		; Traditional ACP idle count
+	CLRW	VCB$W_RVN(R2)			; Clear number of rel. volumes
+	CLRB	VCB$B_Status(R2)
+	MOVZBW	#1,VCB$W_Mcount(R2)		; 1 volume mounted.
+	MOVL	#^A/Net /,VCB$T_VolName(R2)	; set volume name
+	MOVL	#^A/Devi/,VCB$T_Volname+4(R2)	; 2nd part of name.
+	MOVL	#^A/ce  /,VCB$T_Volname+8(R2)	; blank filled (12 chars total).
+	INCB	AQB$B_MntCnt(R8)		; say volume is mounted.
+
+; Link AQB to VCB
+
+	MOVL	R8,VCB$L_AQB(R2)		; VCB ==> AQB
+
+; Link UCB into the UCB$L_RVT to prevent crashes from users requesting
+; DVI$_LOGVOLNAM
+
+	MOVL	R5,VCB$L_RVT(R2)		; VCB$L_RVT ==> UCB (?)
+
+; link VCB to UCB
+
+	MOVL	R2,UCB$L_VCB(R5)		; UCB ==> VCB
+	MOVZWL	#SS$_Normal,R0
+10$:
+	RSB
+
+.SBTTL	Set ip Device Off-line
+
+;++
+;
+Function:
+;
+;	Mark the ip0 device as offline & unavailable.
+;	routine called at Kernel mode access.
+;
+; Inputs:
+;
+;	None.
+;
+; Implicit INputs:
+;
+;	UCB_adrs = address of ip0 UCB(Unit Control Blk).
+;	Access mode = kernel, so we can touch ucb's.
+;
+; Outputs:
+;
+;	None.
+;
+; Side Effects:
+;
+;	Device "ip0:" is marked as OFFLINE & DEV$M_AVL is cleared.
+;	all cloned UCB's for this controller are also marked offline.
+;
+;--
+
+.Entry	Set_ip_Device_OffLine,^M<R5>
+
+	MOVL	UCB_Adrs,R5			; adrs of ip0: (base device).
+	BGEQ	15$				; good UCB address? must be system address
+.IF	DEFINED VMS_V4
+	DSBINT	UCB$B_DIPL(R5)			; synch UCB access.
+.ENDC
+10$:
+.IF NOT_DEFINED VMS_V4
+	DEVICELOCK		-		;
+		SAVIPL=-(SP),-			;
+		PRESERVE=NO			;
+.ENDC
+	BICW	#UCB$M_ONline,UCB$W_STS(R5)	; for show dev, mark offline.
+	BICL	#DEV$M_AVL,UCB$L_DevChar(R5)
+	MOVL	UCB$L_LINK(R5), R1		; get next UCB
+.IF NOT_DEFINED VMS_V4
+	DEVICEUNLOCK -
+		NEWIPL=(SP)+, -
+		PRESERVE=NO
+.ENDC
+	MOVL	R1, R5
+	BNEQ	10$
+.IF	DEFINED VMS_V4
+	ENBINT					; restore previous IPL.
+.ENDC
+15$:
+	RET
+
+.SBTTL	DISMOUNT - Dismount the ACP volume & deallocate the data structures.
+
+;++
+;
+; Functional Description:
+;
+;	Dismount the volume from the pseudo device.  Deallocate VMS data
+;	structures AQB,VCB.  Unhook the AQB from the system list.
+;
+; Calling Sequence:
+;
+;	JMP DISMOUNT
+;
+; Inputs:
+;
+;	R0 = Error code.
+;	R5 = UCB address
+;
+; Outputs:
+;
+;	Appro. return code.
+;
+; Side Effects:
+;
+;	Routine returns after cleaning up the UCB.
+;
+;--
+
+DISMOUNT:
+	PUSHL	R0			; save the return code
+.IF	DEFINED VMS_V4
+	DSBINT	UCB$B_DIPL(R5)		; Save IPL & set new IPL to Device IPL.
+.IF_FALSE
+	DEVICELOCK		-		;
+		SAVIPL=-(SP),-			;
+		PRESERVE=NO			;
+.ENDC
+	BICL	#DEV$M_MNT!DEV$M_AVL,UCB$L_DevChar(R5)	; clear Avail & mounted.
+	CLRW	UCB$W_REFC(R5)		; no references
+;	CLRL	UCB$L_OWNUIC(R5)
+	CLRL	UCB$L_PID(R5)
+	CLRL	UCB$L_VCB(R5)		; clean up UCB link
+.IF	DEFINED VMS_V4
+	ENBINT				; reset IPL level.
+.IF_FALSE
+	DEVICEUNLOCK			-	;
+		NEWIPL=(SP)+,		-	;
+		PRESERVE=NO
+.ENDC
+	MOVL	VCB_Adrs,R0		; get VCB adrs
+	BEQL	5$			; OK ?
+	JSB	G^EXE$Deanonpaged	; dealllocate space.
+
+; Deallocate ACP Queue blk
+
+5$:
+	MOVL	ACP_QB_Adrs,R8
+	BEQL	100$			; OK?
+
+; Unhook AQB from system list
+; AQB list is a singly linked list.
+
+	BSBW	Lock_IODB		; lock IO database
+.IF DEFINED VMS_V4
+	DSBINT	#IPL$_SYNCH		; Save Current IPL & set new IPL.
+.IF_FALSE
+	FORKLOCK	-		;
+		SAVIPL=-(SP),-		;
+		PRESERVE=NO		;
+.ENDC
+	MOVAB	G^IOC$GL_AQBLIST,R1	; system AQB list head
+	MOVL	(R1),R0			; 1st AQB pointer.
+	CMPL	R8,R0			; 1st AQB?
+	BNEQ	70$			; IF NEQ THEN "NO"
+
+; 1st AQB in system list.
+
+	MOVL	AQB$L_LINK(R8),(R1)	; link it in
+	BRB	90$			; done
+
+; try next AQB in list
+
+70$:
+	CMPL	AQB$L_Link(R0),R8	; is this it?
+	BEQL	80$			; EQl = yes.
+
+; advance to next AQB
+
+	MOVL	AQB$L_LINK(R0),R0	; get next link
+	BRB	70$			; loop
+
+;
+
+80$:
+	MOVL	AQB$L_LINK(R8),AQB$L_LINK(R0)	; relink
+90$:
+.IF	DEFINED VMS_V4
+	ENBINT				; restore IPL
+.ENDC
+	MOVL	R8,R0			; for deallocation rtn.
+	JSB	G^EXE$DEANONPAGED
+.IF	NOT_DEFINED VMS_V4
+	FORKUNLOCK	-
+		NEWIPL=(SP)+,-		;
+		PRESERVE=NO		;
+.ENDC
+	BSBW	Unlock_IODB		; unlock IO database.
+; all done
+
+100$:	POPL	r0			; get return code
+	RET
+
+
+
+.SBTTL	USER REQUESTS AVAIL - Get User I/O requests for IP.
+
+;++
+;
+; Functional Description:
+;
+;	Check the ACP queue block list head to see if any user IRP's have
+;	been queued to IP.  If IRP's present return the IP argument
+;	block pointer or FALSE(0).
+;	***** Warning *****
+;	If the IPACP argument block function is M$CANCEL then the IRP is NOT
+;	from a user process & MUST NOT be posted as with normal IRPs.
+;
+; Calling Sequence:
+;
+;	$CMKRNL(routin=User_Requests_AVAIL);
+;
+; Inputs:
+;
+;	Kernel Mode.
+;	Global	ACP_QB_Adrs is valid, device/volume is mounted.
+;
+; Outputs:
+;
+;	R0 = TCP argument block address if IRP's were present
+;	OR R0 = False(0) if no IRP's present.
+;
+; Side Effects:
+;
+;	If there are IRP's & associated system-buffer(IPACP argblk) then
+;	allocate a IP process local argblk & copy the IP arguments from the
+;	system buffer to the local buffer.  This is performed so we don't have
+;	to be in kernel mode all the time (debug tools avail).  If the IRP
+;	has no associated IPACP argument block buffer (ie, IRP$L_SVAPTE = 0)
+;	then assume the IRP was sent by VMS & check if IO function was IO$_CLEAN.
+;	If TRUE then build a fake IPACP user argument block which indicates to 
+;	IPACP that a connection for the specified "PID & IO-chan" should be RESET.
+;	VMS will call the ip: IO cancel routine in the case of Control-C
+;	image rundown (closing open channels) & when the device is deasigned.
+;
+;__
+
+.Entry USER_Requests_Avail,^M<R2,R3,R4,R5>
+
+Try_Again:
+	MOVL	ACP_QB_Adrs,R0		; Network AQB address
+	BGEQ	1$			; Valid system address? < 0 = OK.
+.IF	DEFINED VMS_V4
+	REMQUE	@AQB$L_ACPQFL(R0),R2
+.IF_FALSE
+	REMQHI	AQB$L_ACPQFL(R0),R2
+.ENDC
+	BVC	5$
+
+; Queue was empty, return false(0)
+
+1$:	CLRL	R0
+	RET
+
+; Queue contained at least 1 IRP.  Get IPACP argument blk address.
+; R2 = address of IRP
+
+5$:
+	MOVL	IRP$L_SVAPTE(R2),R0	; get address of system IPACP argblk.
+	BEQL	NO_IPACP_Arg_Blk		; EQL means we have an error.
+
+; Copy IPACP argument block from the system buffer (Kernel mode access) to
+; IP local process space.  Entire idea is to execute at user level & only
+; be in Kernel mode when we have to (no debug tools to speak of for kernel
+; mode).  Anyway we allocate an ACP argument block & copy just the ACP argument
+; block, not the data.  When we access the data(send) or copy data to the
+; system buffer(receive) we must be in Kernel mode.
+; R0 = ACP argblk address
+; R2 = IRP address
+
+	MOVL	R0,R2			; save system argblk adrs.
+	CALLS	#0,MM$UArg_Get		; allocate IP process space
+					; Returns in R0
+
+; copy the argblk system-space ==> IP-Local-space.
+
+	PUSHL	R0			; Save the argument block address
+	MOVZWL	AB$W_UARGSIZE(R2),R1	; Get fullword count value
+	MOVC3	R1,(R2),(R0)		; Copy data from system to local copy
+	POPL	R0			; Return local copy pointer
+	RET
+
+; IRP has no associated system buffer (ACP argument block).  This indicates
+; the IRP did not come from the pseudo-device driver & therefore the IPACP
+; will choke on it.  Check if the function code is IO$_CLEAN.  IF TRUE
+; then the user process has been interrupted (Control C or Y) & we must cancel
+; a Connection for this PID & IO channel.  Build a fake ACP argblk with the
+; IP function M$Cancel which will RESET the connection for the specified PID
+; & channel #. IF the check was false then just return the IRP to VMS IO
+; post-processing with an SS$_Normal return code.
+
+NO_IPACP_Arg_Blk:
+	INCL	NO_ArgBlk
+	MOVZWL	IRP$W_Func(R2),R4	; Get IO function code.
+	MOVL	R4,Funct
+	CMPW	#IO$_CLEAN,R4		; ACP cancel?
+	BNEQ	UR$Post			; No, post IO as SS$_Normal
+
+; User image is in rundown (exit) state & has canceled IO
+; Build an IPACP user argblk & return it with the IP function code M$CANCEL.
+; This will cancel a connection for the specified PID & channel #.
+; VMS will cancel IO on each channel assigned to the "ip" device.
+; Remember: This fake IRP Must NOT be posted to VMS IO post rtns.  System crash
+; will occur.
+
+	CALLS	#0,MM$UArg_Get		; get a IPACP user argument blk.
+	MOVL	R0,R5			; save argblk adrs
+;;;	MOVL	IRP$L_PID(R2),AB$L_PID(R5)	; set PID in IPACP argblk.
+	MOVL	IRP$L_PID(R2),R0	; Transform internal PID
+	JSB	G^EXE$IPID_TO_EPID	; to external PID format
+	MOVL	R0,AB$L_PID(R5)		; Set in argument block
+	MOVL	IRP$L_UCB(R2),R0	; Get UCB address
+	MOVL	R0,AB$L_UCB_ADRS(R5)	; Set UCB address in argblk
+;	MOVB	UCB$L_Protocol(R0),AB$B_Protocol(R5) ; Set protocol code
+	MOVL	UCB$L_TCBID(R0),AB$L_TCBID(R5)	; Connection ID
+	MOVB	#M$Cancel,AB$B_Funct(R5)	; IP function code
+	MOVW	#AB$SIZE,AB$W_UARGSIZE(R5)	; Size of the argblk
+	MOVW	IRP$W_Chan(R2),AB$W_IOchan(R5)	; include channel #.
+
+	MOVB	IRP$L_EXTEND(R2),AB$B_Protocol(R5) ;
+
+	MOVL	R2,R0			; point at Fake IRP.
+	JSB	G^COM$DRVDEALMEM	; release Fake IRP.
+	MOVL	R5,R0			; return IPACP argblk pointer.
+	RET
+
+; Release/post the IO as SS$_Normal
+; R2 = IRP address.
+
+UR$Post:
+	PUSHL	IRP$L_UCB(R2)		; UCB address
+	PUSHL	R2			; IRP address
+	MOVZWL	#SS$_Normal,IOSB	; set return status
+	PUSHAQ	IOSB			; address of IOSB
+	CALLS	#3,VMS_IO$POST
+	BRW	Try_Again		; dismiss this & look for more.
+
+.SBTTL	VMS_IO$POST - Hand User's IRP to VMS IO Post-processing.
+
+;++
+;
+; Functional Description:
+;
+;	Fill in IRP IOST1 & IOST2 fields, insert IRP in IO post-processing
+;	queue.  If 1st entry in the queue then request IOPOST software
+;	interrupt.
+;
+; Calling Sequence:
+;
+;	$CMKRNL(routin=VMS_IO$POST,ArgLst=args);
+;
+; Inputs:
+;
+;	Kernel mode.
+;	0(AP)	Number of arguments to follow.
+;	4(AP)	IOSB address
+;	8(AP)	IRP address
+;	12(AP)	UCB address
+;
+; Outputs:
+;
+;	None - BLISS NOVALUE routine.
+;
+; Side Effects:
+;
+;	if the iosb low-bit is clear, indicating an error, then
+;	force the io function in irp$w_sts to be a write function.  This
+;	eliminates the needless copy of bogus data from the system buffer to
+;	the user's buffer.  Force irp$v_func to be "0".
+;
+;	When the successful function is a read (irp$v_func=true in irp$w_sts),
+;	then set irp$w_bcnt to reflect the actual # of bytes received instead
+;	of the original requested amount.
+;
+;	If IRP is only member of IO post process queue then a
+;	software interrupt (IOPOST) is requested.
+;--
+
+; Local stack (AP) offsets, CALLS sets stack in this fashion.
+
+IOSB$Adrs	= 4
+IRP$Adrs	= 8
+UCB$Adrs	=12
+
+
+.ENTRY	VMS_IO$POST,^M<R2>
+
+	MOVL	IRP$Adrs(AP),R1		; get IRP address
+	MOVL	UCB$Adrs(AP),R2		; UCB address
+	INCL	UCB$L_OPCNT(R2)		; increase operation count
+
+; Adjust volume transaction count.
+
+	MOVL	VCB_Adrs,R0		; adrs Volume control blk.
+	DECW	VCB$W_Trans(R0)		; indicate transaction has finished.
+	MOVQ	@IOSB$Adrs(AP),IRP$L_IOST1(R1)	; set IOST1 & 2
+
+; if lbc (low bit clear) {error indicator} then clear irp$v_func in
+; irp$w_sts to prevent useless copy by kernel mode iopost ast routine
+
+	BLBS	IRP$L_IOST1(r1),1$
+	BICW2	#IRP$M_FUNC,IRP$W_STS(r1) ; error - fake a write function.
+	BRB	5$			; time to post!
+1$:
+
+; set actual bytes number transfered if this is a read function
+
+	BBC	#IRP$V_FUNC,IRP$W_STS(R1),5$
+	MOVW	IRP$L_IOST1+2(R1),IRP$W_BCNT(r1)  ; set bytes to give user.
+5$:
+
+; insert IRP into I/O post process queue.
+
+.IF	DEFINED VMS_V4
+	INSQUE	(R1),@L^IOC$GL_PSBL	; in it goes
+.IF_FALSE
+	FIND_CPU_DATA R2
+	INSQUE	(R1),@CPU$L_PSBL(R2)	; in it goes
+.ENDC
+	BNEQ	10$			; Neq = not 1st in queue
+
+; 1st IRP in queue, request IOPOST interrupt
+
+	SOFTINT	#IPL$_IOPOST
+10$:
+	RET
+
+End_Lock::		; end of locked pages
+
+.SBTTL	Move Bytes "FAST" with movc3 instruction.
+
+;++
+;
+; Function Description:
+;
+;	Move bytes via the movc3 instruction.  Copy same number of
+;	bytes from source to destination.
+;
+; calling Sequence:
+;
+;	BLISS callable rtn "CALLS" linkage:  MOVBYT(Size,SRC,DEST)
+;		Warning:  SRC & DEST are addresses!
+; Inputs:
+;
+;	0(AP)	count of args on stack
+;	4(AP)	Number of bytes to move
+;	8(AP)	Source address
+;	12(AP)	Destination address
+;
+; Outputs:
+;
+;	None.
+;
+; All registers preserved
+;
+;--
+
+; "AP" pointer offsets, calls arguments
+
+Size	= 4
+Src	= 8
+Dest	= 12
+
+MovByt::
+	.WORD	^M<R2,R3,R4,R5>
+	MOVC3	Size(AP),@Src(AP),@Dest(AP)
+	RET
+
+.SBTTL	Time_Stamp - Get time in hundredths of a second.
+
+;++
+;
+; Function:
+;
+;	Get time in hundredths seconds since Jan of cur year.  Use this time instead
+;	of QUAD-word system time since its costs less space & is easier to
+;	deal with (eg, comparisons).  Read system global "EXE$GL_ABSTIM".
+
+;
+; Calling Sequence:
+;
+;	CALLS from BLISS standard.
+;
+; Inputs:
+;
+;	None.
+;
+; Outputs:
+;
+;	R0 = time in hundredths seconds since Jan 1 of current year
+;	(longword value).
+;
+;--
+
+.Entry	Time_Stamp, 0
+
+;	MOVL	@#EXE$GL_ABSTIM, R0	; Get system interval timer
+;	MULL2	#100, R0		; Convert seconds to 100ths
+	PUSHL	R1			; Save R1 from being tromped on
+	MOVQ	@#EXE$GQ_SYSTIME, R0	; copy the current time into R0/R1
+	BICL2	#^XFFFF8000, R1
+	EDIV	#100000, R0, R0, R1 ; Convert with R0 in 100ths
+	POPL	R1
+	RET
+
+
+
+.SBTTL Swap bytes on word boundaries.
+
+;++
+;
+;Function:
+;
+;	Routine will swap the low address byte of a word with the
+;	high address byte of the word.
+;
+;Calling Convention:
+;
+;	VMS CALLS
+;
+;Inputs:
+;
+;	0(AP) - Number of arguments on stack.
+;	4(AP) - Number of contiguous words to swap bytes} in.
+;	8(AP) - Word address of where to start swapping.
+;
+;Outputs:
+;
+;	None
+;
+;Side Effects:
+;
+;	None
+;
+;--
+
+WrdCnt	= 4					; AP offset to # of words to swap
+Start	= 8					; start address.
+
+.ENTRY  SWAPBYTES,^M<>
+
+	MOVL	Start(AP),R1			; starting word address.
+Swp_Loop:
+	MOVB	(R1),R0				; low ==> temp
+	MOVB	1(R1),(R1)+			; high ==> low
+	MOVB	R0,(R1)+			; temp ==> High
+	SOBGTR	WrdCnt(AP),Swp_Loop		; decr word's left to do
+	RET
+
+.SBTTL	Zero block of bytes.
+
+;++
+;
+; Function:
+;
+;	Zero a block of bytes.
+;
+; Inputs:
+;
+;	4(AP)	# of bytes to zero.
+;	8(AP)	Starting address.
+;
+; Outputs:
+;
+;	None.
+;
+; Side Effects:
+;
+;	Consecuative bytes are zeroed.
+;
+;--
+
+Count	= 0
+Size	= 4
+Adrs	= 8
+
+.ENTRY	Zero_Blk,^M<R2,R3,R4,R5>
+
+	MOVC5	#0,@Adrs(AP),#0,Size(AP),@Adrs(AP)
+	RET
+
+.SBTTL	Calculate Checksums
+
+;++
+;
+; Function:
+;
+;	Generate a 16-bit one's-complement of the one's complement
+;	sum of series of 16 bit words.
+;	See TCP DARPA document for details.
+;
+; Number Systems Lesson:
+;
+;	One's complement arithemetic is different than Two's complement
+;	arithmetic.  Two's complement arithmetic is what is used on the
+;	on the VAX.  The positive numbers are the same in one's Complement
+;	and two's complement.  For two's complement however, NOT X = - X.
+;	The complement of a number is the negative of the number.  This
+;	Results in two values for 0, %X'0000' (positive zero) and
+;	 %X'FFFF' (negative zero).
+;	
+;	Addition of two's complement can be performed without regard
+;	to the sign of the numbers involved.  This is done by simply
+;	adding the binary representations and ignoring any carry.
+;		(-5) + (-2) = 1011 + 1110 = 11001 = 1001 = -7
+;
+;	Addition of one's complement numbers can be performed without
+;	regard to the sign of the numbers involved.  This is done by
+;	adding the binary representation of the numbers involved and
+;	then adding one if a carry occurred.
+;		(-1) + 6 = 1110 + 0110 = 10100 = 0100 + 1 = 0101 = 5
+;
+; Algorithm:
+;
+;	We treat the data to be checksummed as an arry of 32 bit
+;	integers.  We keep a running 32 bit sum of the 32 bit integers.
+;
+;	Sum = 0;
+;	Incr I FROM 0 TO .Size - 1 DO
+;		Sum = .Sum + .Data [.I] + Carry;
+;
+;	We can use two's complement addition to keep this running sum
+;	as long as we add with carry. Then we add in any pieces of the
+;	data that wasn't a full 32 bits.
+;	Once the 32 bit sum is computed, we can fold the top 16 bits
+;	into the bottom 16 bits.
+;
+;	Sum = .Sum <0, 16> + .Sum <16, 16>;
+;
+;	But this folding may produce yet another carry. So we do it twice.
+;
+;	If you want you can think of the bits as being in a ring, where
+;	any carry (out of the high bits) would be pushed into the low
+;	bits.
+;
+;		       00
+;		  15        01
+;		14            02
+;	       13              03
+;	       12              04
+;		11            05
+;		 10          06
+;		   09      07
+;		       08
+;                     
+;
+;	We then complement the result of the summing and check for
+;	value of 0 and return only -0.
+;			
+;
+; Calling Sequence:
+;
+;	Standard CALLS:
+;	    CALC_CHECKSUM(Byte_Count,Start);
+;	    GEN_CHECKSUM(Byte_Count,Start,SrcA,DstA,Ptcl_Type)
+;
+; Inputs:
+;
+;	4(AP) : Byte_Count = # of 8-bit bytes to checksum as words.
+;	8(AP) : Start = Starting byte address.
+;    Additionally, for GEN_CHECKSUM:
+;	12(AP): SrcA = Source IP address
+;	16(AP): DstA = Destination IP address
+;	20(AP): Ptcl_Type = Protocol type of packet
+;
+; Outputs:
+;
+;
+;	My interpretation of "one's complement sum" is the true sum
+;	modulo 2^16-1.  Thus, it will be a value in the range 0 .. 2^16-2,
+;	i.e. -0 is not a legal "one's complement sum", but -0 is.
+;
+;	Thus the "one's complement of the one's complement sum" 
+;	will be a value in the range 1 to 2^16-1.  So the IP header
+;	checksum and TCP checksum should never be zero.  (UDP specifies
+;	the interpretation of putting a zero in the checksum field).
+;	Under the robustness principle: accept a value of "0" where
+;	it should be "-0".  I don't believe that IP or TCP should
+;	skip verifying the checksum (as UDP does) when the checksum
+;	field is 0, because checksumming for IP and TCP is not optional.
+;
+;	The one's complement sum of a good packet will be 0.  Of
+;	course the checksum routines return the "one's complement of
+;	the one's complement sum", so apply a NOT before comparing
+;	against 0. But be aware that this routine returns 16 bits in
+;	R0, so you must NOT only 16 bits worth.
+;
+; Side Effects:
+;
+;	None.
+;
+;--
+
+; Argument Point stack offsets.
+
+Byte_Count	= 4
+Start		= 8
+Srca	= 12				; Source IP address
+  Srca0	= 12				; First 16-bit word
+  Srca1	= 14				; Second 16-bit word
+Dsta	= 16				; Destination IP address
+  Dsta0	= 16				; First 16-bit word
+  Dsta1	= 18				; Second 16-bit word
+PtclT	= 20				; Protocol type
+
+;++
+; Gen_Checksum - Generate checksum for UDP and TCP.
+; Adds in the protocol fields and the IP addresses, then joins Calc_Checksum.
+; N.B. We jump directly into Calc_Checksum, so the offsets for Length and Start
+; must be the same and we must make sure to save the same registers that
+; Calc_Checksum uses.
+;--
+
+.Entry	Gen_Checksum,^M<R2>
+
+	MOVZWL	Byte_Count(AP),R0	; Put byte count in R0
+	ASHL	#-2,R0,R2		; Put fullword count in R2
+	;; Must use byte count rotated +/- 8 bits
+	;; Must use protocol rotated +/- 8 bits
+	;; (Because net stuff wants Big Endian byte order)
+	ASHL	#8,R0,R0		; Start with byte count
+	INSV	Ptclt(AP),#24,#8,R0	; Add in protocol (only 8 bits wide)
+	ADDL	Srca(AP),R0		; Add in source addr
+	ADWC	Dsta(AP),R0		; Add in dest addr (and carry)
+	BRB	Calc_Check0		; Join Calc_Checksum routine
+
+;++
+; Calc_Checksum - one's compliment checksum routine.
+;--
+
+.Entry	Calc_Checksum,^M<R2>
+
+	CLRL	R0			; Start with a zero checksum
+	MOVZWL	Byte_Count(AP),R2
+	ASHL	#-2,R2,R2		; Put fullword count in R2
+					; (and clear Carry)
+Calc_Check0:				; Point where Gen_Checksum joins in
+	;; R0 and PSW-Carry contain initial 32 bit checksum
+	;; R2 contains fullword count
+	;; Start(AP) is pointer to 1st byte
+	;; Byte_Count(AP) contains byte count
+	MOVL	Start(AP),R1		; starting address.
+	SOBGEQ	R2,CLop			; enter loop
+	BRB	Odd_Word		; (no fullwords)
+Clop:	ADWC	(R1)+,R0		; add in next fullword and Carry
+	SOBGEQ	R2,CLop			; get next one
+Odd_Word:
+	;; Check for extra word
+	BBC	#1,Byte_Count(AP),Odd_Byte
+	MOVZWL	(R1)+,R2		; get next word
+	ADWC	R2,R0			; add it in (and the Carry)
+Odd_Byte:
+	;; Check for extra byte
+	BLBC	Byte_Count(AP),Reduce16
+	MOVZBL	(R1)+,R2		; get next byte
+	ADWC	R2,R0			; add it in (and the Carry)
+Reduce16:
+	;; We have the sum modulo 2**32-1 (actually: protocol and bytecount
+	;; from Gen_Checksum are strange, but are eqv mod 2**16-1)
+	;; Now reduce mod 2**16-1
+	EXTZV	#16,#16,R0,R2		; extract HO word
+;	INSV	#0,#16,#16,R0		; clear HO word
+	MOVZWL	R0,R0
+	ADWC	R2,R0			; add HO and LO words (and Carry)
+	BBCC	#16, R0, Comp		; clear carry out of LO word
+					; (and branch if short word result)
+	INCW	R0			; add carry in
+	BCC	Comp			; branch if no more carry
+	INCW	R0			; else add final carry in
+					; (this INCW can't produce a carry)
+Comp:	;; Complement the word
+	MCOMW	R0,R0
+	BEQL	ZSum
+	RET
+ZSum:	;; Return 0 as FFFF
+	MCOMW	R0,R0
+	RET
+;.Entry	Gen_Checksum,^M<R3,R4>
+;
+;	MOVL	PtclT(AP),R0		; Start with the protocol code
+;	ADDL	Byte_Count(AP),R0	; Add the length
+;; Do a byte swap - isn't there an easier way?
+;	EXTV	#8,#8,R0,R1		; D C B A	B
+;	INSV	R0,#8,#8,R0		; D C A A	B
+;	MOVB	R1,R0			; D C A B	B
+;	ROTL	#16,R0,R0		; A B D C	B
+;	EXTV	#8,#8,R0,R1		; A B D C	D
+;	INSV	R0,#8,#8,R0		; A B C C	D
+;	MOVB	R1,R0			; A B C D	D
+;	MOVZWL	Srca0(AP),R1		; Get first word of source addr
+;	ADDL	R1,R0			; Add it
+;	MOVZWL	Srca1(AP),R1		; Get second word of source addr
+;	ADDL	R1,R0
+;	MOVZWL	Dsta0(AP),R1		; Get first word of dest addr
+;	ADDL	R1,R0
+;	MOVZWL	Dsta1(AP),R1		; Get second word of dest addr
+;	ADDL	R1,R0
+;	BRB	Calc_Check0		; Join Calc_Checksum routine
+;
+;;++
+;; Calc_Checksum - one's compliment checksum routine.
+;;--
+;
+;.Entry	Calc_Checksum,^M<R3,R4>
+;
+;	CLRL	R0			; Start with a zero checksum
+;
+;Calc_Check0:				; Point where Gen_Checksum joins in
+;
+;	MOVL	Start(AP),R4		; starting address.
+;	MOVL	Byte_Count(AP),R3
+;	TSTL	R3			; anything to do?
+;	BGTR	10$			; >0 = yes.
+;	RET				; 0 count.
+;10$:
+;	ASHL	#-1,R3,R3		; convert bytes to words.
+;	TSTL	R3			; any words to do?
+;	BEQL	Odd_BC			; 0 = 1 byte to do....
+;	CLRL	R1			; clean up high word of R1
+;Clop:
+;	MOVW	(R4)+,R1		; get a word
+;	ADDL	R1,R0			; longword arith.
+;	SOBGTR	R3,Clop			; more to come?
+;
+;; Check for ODD byte count
+;
+;ODD_BC:
+;	BLBC	Byte_Count(AP),Chk_OVFL
+;	MOVZBL	(R4),R1			; get ODD byte padded with 0 byte.
+;	ADDL	R1,R0
+;
+;; Add in any overflow
+;
+;CHk_OVFL:
+;	EXTZV	#16,#16,R0,R1		; extract overflow.
+;	BEQL	Comp			; 0 = done
+;	BICL2	#^XFFFF0000,R0		; AND to 16-bits.
+;	ADDL	R1,R0			; add to checksum
+;	BRB	Chk_OVFL
+;
+;; Complement & mask to 16-bits.
+;
+;Comp:
+;	XORW	#^X0FFFF,R0		; Complement to 16-bits.
+;	RET
+
+.SBTTL	Circular byte queue manipulation routines
+
+; These routines are written in MACRO for two reasons:
+;    1) Speed. They are used a lot and should be as fast as possible.
+;    2) Precision. Since the circular queues can be modified at AST level, it
+;	it critical that the pointers and counters be updated atomically. We
+;	can't really trust the BLISS compiler to take care of that.
+
+; Define the format of the circular queue - must match STRUCTURE.REQ
+
+	$DEFINI CQ			; Circular queue
+$DEF	CQ$QUEUE	.BLKB	0	; Address of the queue structure
+$DEF	CQ$BASE		.BLKL	1	; Base address of queue buffer
+$DEF	CQ$END		.BLKL	1	; End address of queue buffer
+$DEF	CQ$SIZE		.BLKW	1	; Size of the queue
+$DEF	CQ$COUNT	.BLKW	1	; Number of bytes on the queue
+$DEF	CQ$ENQP		.BLKL	1	; Pointer to first free byte on queue
+$DEF	CQ$DEQP		.BLKL	1	; Pointer to first used byte on queue
+	$DEFEND CQ
+
+
+; CQ_Enqueue(CQ,SRC,Scount)
+; Enqueue bytes onto a circular queue. Called via $CMKRNL when enqueueing from
+; user's system buffer.
+
+CQ	= 4				; Queue header
+SRC	= 8				; Destination address
+SCOUNT	= 12				; Number of bytes
+
+.ENTRY CQ_Enqueue,^M<R2,R3,R4,R5,R6,R7>
+
+	MOVL	CQ(AP),R7		; Get queue address
+	SUBL3	CQ$ENQP(R7),CQ$END(R7),R6 ; Find space left to end
+	CMPL	R6,SCOUNT(AP)		; Does he want all we have till end?
+	BLEQ	10$			; Yes - need two moves, then
+	MOVC3	SCOUNT(AP),@SRC(AP),@CQ$ENQP(R7) ; Do the move
+	MOVL	R3,CQ$ENQP(R7)		; Update the queue pointer
+	ADDW2	SCOUNT(AP),CQ$COUNT(R7) ; And update the count
+	RET
+10$:					; Here on pointer-wrap case
+	MOVC3	R6,@SRC(AP),@CQ$ENQP(R7) ; Move till end of queue
+	MOVL	CQ$BASE(R7),R3		; Reset pointer to start of queue
+	SUBL3	R6,SCOUNT(AP),R6	; Compute how much we need from Q base
+	BLEQ	20$			; Have anything left?
+	MOVC3	R6,(R1),(R3)		; Yes - finish the copy
+20$:
+	MOVL	R3,CQ$ENQP(R7)		; Update the queue pointer
+	ADDW2	SCOUNT(AP),CQ$COUNT(R7) ; And update the count
+	RET				; And done.
+
+
+; CQ_Dequeue(CQ,Dest,Dcount)
+; Dequeue bytes from a cirucular queue. Called via $CMKRNL when dequeuing to
+; user's system buffer.
+
+CQ	= 4				; Queue header
+DEST	= 8				; Destination address
+DCOUNT	= 12				; Number of bytes
+
+.ENTRY CQ_Dequeue,^M<R2,R3,R4,R5,R6,R7>
+
+	MOVL	CQ(AP),R7		; Get queue address
+	SUBL3	CQ$DEQP(R7),CQ$END(R7),R6 ; Find space left to end
+	CMPL	R6,DCOUNT(AP)		; Does he want all we have till end?
+	BLEQ	10$			; Yes - need two moves, then
+	MOVC3	DCOUNT(AP),@CQ$DEQP(R7),@DEST(AP) ; Do the move
+	MOVL	R1,CQ$DEQP(R7)		; Update the queue pointer
+	SUBW2	DCOUNT(AP),CQ$COUNT(R7) ; And update the count
+	RET
+10$:					; Here on pointer-wrap case
+	MOVC3	R6,@CQ$DEQP(R7),@DEST(AP) ; Move till end of queue
+	MOVL	CQ$BASE(R7),R1		; Reset pointer to start of queue
+	SUBL3	R6,DCOUNT(AP),R6	; Compute count we need from Q base
+	BLEQ	20$			; Have anything left?
+	MOVC3	R6,(R1),(R3)		; Yes - finish the copy
+20$:
+	MOVL	R1,CQ$DEQP(R7)		; Update the queue pointer
+	SUBW2	DCOUNT(AP),CQ$COUNT(R7) ; And update the count
+	RET				; And done.
+
+
+; CQ_DeqCopy(CQ,Dest,Dcount)
+; Same as CQ_Dequeue, except queue pointer/count is not updated.
+
+CQ	= 4				; Queue header
+DEST	= 8				; Destination address
+DCOUNT	= 12				; Number of bytes
+
+.ENTRY CQ_DeqCopy,^M<R2,R3,R4,R5,R6,R7>
+
+	MOVL	CQ(AP),R7		; Get queue address
+	SUBL3	CQ$DEQP(R7),CQ$END(R7),R6 ; Find space left to end
+	CMPL	R6,DCOUNT(AP)		; Does he want all we have till end?
+	BLEQ	10$			; Yes - need two moves, then
+	MOVC3	DCOUNT(AP),@CQ$DEQP(R7),@DEST(AP) ; Do the move
+;;;	MOVL	R1,CQ$DEQP(R7)		; Update the queue pointer
+;;;	SUBW2	DCOUNT(AP),CQ$COUNT(R7) ; And update the count
+	RET
+10$:					; Here on pointer-wrap case
+	MOVC3	R6,@CQ$DEQP(R7),@DEST(AP) ; Move till end of queue
+	MOVL	CQ$BASE(R7),R1		; Reset pointer to start of queue
+	SUBL3	R6,DCOUNT(AP),R6	; Compute count we need from Q base
+	BLEQ	20$			; Have anything left?
+	MOVC3	R6,(R1),(R3)		; Yes - finish the copy
+20$:
+;;;	MOVL	R1,CQ$DEQP(R7)		; Update the queue pointer
+;;;	SUBW2	DCOUNT(AP),CQ$COUNT(R7) ; And update the count
+	RET				; And done.
+
+.END

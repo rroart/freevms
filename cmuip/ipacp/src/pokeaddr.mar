@@ -1,0 +1,349 @@
+;
+;	****************************************************************
+;
+;		Copyright (c) 1992, Carnegie Mellon University
+;
+;		All Rights Reserved
+;
+;	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+;	distribute  this software  provided  that the  above  copyright
+;	notice appears in  all copies and that  any distribution be for
+;	noncommercial purposes.
+;
+;	Carnegie Mellon University disclaims all warranties with regard
+;	to this software.  In no event shall Carnegie Mellon University
+;	be liable for  any special, indirect,  or consequential damages
+;	or any damages whatsoever  resulting from loss of use, data, or
+;	profits  arising  out of  or in  connection  with  the  use  or
+;	performance of this software.
+;
+;	****************************************************************
+;
+	.title	POKEADDR - Poke the IP Address into P1 space (remotely)
+	.sbttl	Copyright notice
+	.ident	'V6.4'
+;
+; Code borrowed from SHODEF.MAR to execute an AST on behalf of another
+; process cleanly.  Original copyright below...
+;
+;	.ident	'V1.00'
+;NOTICE: .ascii	'Copyright ) 1989 John Hascall, All Rights Reserved'
+;
+; Author:	John Hascall, Iowa State University Computation Center
+; Written:	25 March 1989
+; Updates:	(none)
+; Restrictions:	This program or any part thereof may be used for any
+;		non-commercial use provided this notice is included.
+;		Commercial use is not allowed.  No warranty is expressed
+;		or implied.
+
+
+	.page
+	.sbttl	Description
+;
+; POKEADDR:	This procedure will, when passed with the arguments
+;		described below, modify the destination's process's
+;		P1 space, namely CTL$T_NODENAME and CTL$T_REMOTEID
+;		to correctly identify the remote connection for
+;		security purposes.
+;
+; How it works:
+;
+;	1)  We use SYS$CMKRNL to execute a routine (LOCAL_KERNEL_CODE) in
+;	    kernel mode.  In this routine we:
+;		a)  Convert the target processes external PID to its
+;		    internal PID.
+;		b)  Disable Interrupts
+;		c)  Allocate a buffer (KMB) in system space.  This buffer
+;		    includes an ACB, room for the default, and room for
+;		    a routine (THEIR_KAST) which we copy into it.
+;		d)  Using the ACB in KMB we queue a special kernel mode
+;		    AST (KAST) to the target process.
+;		e)  We re-enable interrupts and return.
+;
+;	--- At some unknown time we then... ---
+;
+;		T1) The KAST (THEIR_KAST) executes in the cotext of the target
+;		    process (IPL is 2).
+;		T2) We copy the information in the KMB to the target process's
+;		    P1 space.
+;		T3) We re-use the ACB (at the head of the KMB) to queue a KAST
+;		    back to the original process, and return.
+;
+;		O1) The KAST (OUR_KAST) executes in the context of the original
+;		    process (IPL is 2).
+;		O2) The KMB is deallocated.
+;
+
+
+	.page
+	.sbttl	Libraries
+
+	.library	'SYS$LIBRARY:LIB.MLB'
+	.link		'SYS$SYSTEM:SYS.STB'/selective_search
+
+
+	.page
+	.sbttl	Definitions - System
+
+	$ACBDEF				; AST Control Block
+	$DSCDEF				; Descriptors
+	$DYNDEF				; Dynamic Data Structures
+	$IPLDEF				; Interrupt Priority Level
+	$PCBDEF				; Process Control Block
+	$SSDEF				; System Service Return Codes
+
+
+	.page
+	.sbttl	Definitions - Local Constants
+
+KAST_BLOCK	= <<ACB$M_KAST@8>!<DYN$C_ACB>>
+DYNAMIC_STRING	= <<DSC$K_CLASS_D@24>!<DSC$K_DTYPE_T@16>>
+
+
+	.page
+	.sbttl	Definitions - Local Control Blocks
+;
+; Kernel Mode Buffer
+;
+	$DEFINI	KMB,,ACB$K_LENGTH
+$DEF	KMB$L_OURPID	.blkl	1
+$DEF	KMB$T_NODEADDR	.blkb	6+1
+$DEF	KMB$T_NODENAME	.blkb	6+1
+$DEF	KMB$T_REMOTEID	.blkb	16+1
+$DEF	KMB$K_LENGTH
+$DEF	KMB$Z_CODE			; kernel code goes here
+	$DEFEND	KMB
+;
+Net_Nodename:	.ascic	/TCP-IP/
+;
+; Buffer for IP addresses
+;
+Net_Binary:	.blkl	1
+Net_Addr:	.blkq	1
+Number_Space:	.blkb	5
+
+	.page
+	.sbttl	Definitions - Macro
+
+	.macro	IF_ERR	GOTO,?OK
+	BLBS	R0,OK
+	BRW	GOTO
+OK:
+	.endm
+
+
+	.page
+	.sbttl	Code
+	.psect	Code,Rd,NoWrt,Exe
+	.entry	POKEADDR,^M<R11>
+;
+; Inputs:	4(AP)	- Target process's PID
+;		8(AP)	- remote IP address
+;		12(AP)	- remote port
+;
+; get into kernel mode
+;
+	$CLREF_S	EFN=#17
+
+	PUSHL	12(AP)			; build argument list on stack
+	PUSHL	8(AP)
+	PUSHL	4(AP)
+	PUSHL	#3
+	PUSHAL	(SP)
+	PUSHAB	LOCAL_KERNEL_CODE
+	CALLS	#2,g^SYS$CMKRNL
+	MOVAB	12(SP),SP		; clean stack
+
+; What the hell are we waiting for??? - BRM
+;	$WAITFR_S	EFN=#17
+
+	RET
+
+
+	.page
+	.sbttl	LOCAL_KERNEL_CODE
+;
+; Inputs:	4(AP)	- PID of remote process
+;		8(AP)	- IP address to be stored away
+;		12(AP)	- port number "  "   "      "
+; Outputs:		- KMB allocated
+;			- KAST queued to target process
+;
+	.entry	LOCAL_KERNEL_CODE,^M<R2,R3,R4,R5,R6,R7,R8,R11>
+;
+; convert from external to internal PID
+;
+	MOVL	4(AP),R0
+	JSB	g^EXE$EPID_TO_IPID
+	MOVL	R0,R8			; save R0 (internal Pid)
+	BNEQ	10$
+	MOVL	#SS$_NONEXPR,R0
+	BRW	102$
+;	RET
+
+10$:	DSBINT	#IPL$_ASTDEL		; don't deliver any ASTs now!
+;
+; allocate kernel-mode control block + space for KAST routine
+;
+	MOVAB	THEIR_KAST,R7
+	MOVAB	THEIR_KAST_END,R6
+	SUBL2	R7,R6			; size of KAST routine
+	ADDL3	#KMB$K_LENGTH,R6,R1	;  + size of KMB
+	JSB	g^EXE$ALONONPAGED
+	BLBS	R0,20$
+	MOVL	#SS$_INSFMEM,R0
+	BRW	101$
+
+20$:
+;
+; set up "TCP-IP" in the kernel block...
+;
+	PUSHR	#^M<R1,R2,R3,R4,R5>
+	PUSHAB	KMB$T_NODENAME(R2)
+	PUSHAB	Net_NodeName
+	CALLS	#2,COPY_DATA
+
+	CLRL	R5
+	MOVAB	KMB$T_REMOTEID(R2),R3
+	MOVB	#15,(R3)+
+
+	MOVL	8(AP),Net_Binary
+	MOVL	#<DYNAMIC_STRING!3>,Net_Addr
+	MOVAL	Number_Space,Net_Addr+4
+	MOVB	#^A/./,Number_Space+3
+
+22$:	PUSHL	#1			; input-value-size
+	PUSHL	#3			; number-of-digits
+	PUSHAL	Net_Addr
+	PUSHAB	Net_Binary[R5]
+	CALLS	#4,g^OTS$CVT_L_TU
+
+	BLBS	R0,23$			; too far away to use BLBC to 89$
+	BRW	100$
+
+23$:	MOVL	Number_Space,(R3)+
+	AOBLEQ	#3,R5,22$
+
+; Copy over the port number
+;
+; Personal comment: This field is called a text field, but is interpreted
+; by VMS as a (oddly enough) binary field.  The length is 4, but I don't
+; know what would happen if I actually copied a longword into it.
+
+	MOVB	#4,KMB$T_NODEADDR(R2)
+	MOVZWL	12(AP),KMB$T_NODEADDR+1(R2)
+
+;
+; copy THEIR_KAST into system space
+;
+25$:
+	MOVC3	R6,(R7),KMB$Z_CODE(R2)
+	POPR	#^M<R1,R2,R3,R4,R5>
+;
+; fill in the ACB at the head of the KMB
+;
+	MOVL	R2,R3			; R3 steps through ACB/KMB
+	CLRQ	(R3)+			; clear ACB$L_ASTQFL, ACB$L_ASTQBL
+	MOVW	R1,(R3)+		; ACB$W_SIZE
+	MOVW	#KAST_BLOCK,(R3)+	; ACB$B_TYPE, ACB$B_RMOD
+	MOVL	R8,(R3)+		; ACB$L_PID (prev saved internal PID)
+	MOVAB	OUR_KAST,(R3)+		; ACB$L_AST
+	MOVL	R11,(R3)+		; ACB$L_ASTPRM
+	MOVAB	KMB$Z_CODE(R2),(R3)+	; ACB$L_KAST (system copy of THEIR_KAST)
+	MOVL	PCB$L_PID(R4),(R3)+	; KMB$L_OURPID (internal)
+;
+; queue special kernel mope AST to other process
+;
+	MOVL	R2,R5			; R5 -> ACB
+	MOVL	#4,R2			; priority increment class
+	JSB	g^SCH$QAST
+
+	ENBINT				; re-enable interrupts
+99$:	RET
+
+100$:	; We should free up that memory now... - BRM
+101$:	ENBINT				; re-enable interrupts
+102$:	$SETEF_S	EFN=#17
+	RET
+
+
+	.page
+	.sbttl	OUR_KAST
+;
+; Inputs:	R4	- address of our PCB
+;		R5	- address of our ACB (KMB)
+; Outputs:		- default copied to UMB
+;			- KMB de-allocated
+;			- event flag 17 set
+;
+OUR_KAST:
+;
+; copy def-dir-spec from KMB (system space) to UMB (in our P0 space)
+;
+	MOVL	R5,R0
+;
+; return the KMB to non-paged pool (R0->KMB)
+;
+	JSB	g^EXE$DEANONPAGED
+;
+; set event flag for out waiting main thread
+;
+	$SETEF_S	EFN=#17
+	RSB
+
+
+
+	.page
+	.sbttl	THEIR_KAST
+;
+; Inputs:	R4	- address of PCB (target process)
+;		R5	- address of ACB (KMB)
+; Outputs:		- default copied to KMB
+;			- KAST queued to original process
+;
+THEIR_KAST:				; R5 -> KMB(ACB)
+;
+; copy remote info to per-process P1 space from KMB (in system space)
+;
+	PUSHL	#CTL$T_NODEADDR
+	PUSHAB	KMB$T_NODEADDR(R5)
+	CALLS	#2,B^COPY_DATA		; relative to use the kernel copy
+
+	PUSHL	#CTL$T_REMOTEID
+	PUSHAB	KMB$T_REMOTEID(R5)
+	CALLS	#2,B^COPY_DATA
+
+	PUSHL	#CTL$T_NODENAME
+	PUSHAB	KMB$T_NODENAME(R5)
+	CALLS	#2,B^COPY_DATA
+
+;
+; queue ast back to our (the original) process
+;
+	BISB2	#ACB$M_KAST,ACB$B_RMOD(R5)	; re-set the KAST flag
+	MOVL	KMB$L_OURPID(R5),ACB$L_PID(R5)
+	MOVL	ACB$L_AST(R5),ACB$L_KAST(R5)
+	MOVL	#4,R2			; priority increment class
+	JMP	g^SCH$QAST
+
+	.sbttl	COPY_DATA
+; Inputs:	4(AP)	- Address of source data (counted string)
+;		8(AP)	- Destination address
+; Outputs:		- Data copied to destination
+;
+	.entry	COPY_DATA,^M<R2,R3,R4,R5>
+
+	MOVL	4(AP),R1
+	MOVL	8(AP),R2
+
+	MOVZBL	(R1),R3		; get length
+	MOVB	(R1)+,(R2)+	; copy string length
+	MOVC3	R3,(R1),(R2)	; copy string itself
+
+	RET
+
+THEIR_KAST_END:
+
+
+	.end

@@ -1,0 +1,258 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'IP Routing layer'
+%SBTTL 'InterNet Routing Overview.'
+%(
+
+Module:
+
+	ROUTE
+
+Facility:
+
+	Routing facility
+
+Abstract:
+
+	Given an IP address, this module determains which interface
+	to send it out of.  The Routing Information Block (RIB) 
+	consists of the list of route knows to the IPACP.  Route
+	look-up is augmented by the 
+
+Author:
+
+	Bruce R. Miller, CMU Network Development, 1991
+	Copyright (c) 1991, Carnegie-Mellon University
+
+Modification History:
+
+)%
+
+
+%SBTTL 'Module Definition'
+
+MODULE ROUTE
+	 (MAIN = Main,IDENT='1.0',LANGUAGE(BLISS32),
+	  ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
+			  NONEXTERNAL=LONG_RELATIVE),
+	  LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
+	  OPTIMIZE,OPTLEVEL=3,ZIP)=
+BEGIN
+
+LIBRARY 'SYS$LIBRARY:STARLET';	! VMS system definitions
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';		! BLISS transportablity package
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';	! CMU-OpenVMS/IP common decls
+LIBRARY 'CMUIP_SRC:[central]NETCONFIG'; 	! Tranport devices interface
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETVMS';		! VMS specifics
+LIBRARY 'CMUIP_SRC:[CENTRAL]NetTCPIP';		! IP definitions
+LIBRARY 'STRUCTURE';		! TCB & Segment Structure definition
+LIBRARY 'TCPMACROS';		! Local macros
+
+
+
+%(
+	Entry Points:
+
+	ROUTE$IP_route ( IPaddr )
+
+		Returns interface number.
+)%
+
+
+
+%(
+	Organization:
+)%
+
+
+%SBTTL 'Route Entry definition'
+
+$FIELD Route_Fields =
+    SET
+    Route_QHead		= [$Long_Integer],	! Next route
+    Route_QTail		= [$Long_Integer],	! Previous route
+
+    Route_Create_Time	= [$Long_Integer],	! Creation Time
+
+    Route_Next_Hop	= [$Long_Integer],	! Route's router
+    Route_Network	= [$Long_Integer],	! Network Mask
+    Route_NetMask	= [$Long_Integer],	! Network Mask
+    Route_Mask_NOB	= [$Long_Integer],	! Mask number-of-bits
+
+    Route_Inum		= [$Long_Integer],	! Interface Number
+
+    Route_TOS		= [$Long_Integer],	! Route Type-of-Service
+    Route_IS_Class	= [$Long_Integer],	! Route IS-IS Class
+    Route_OSPF_Class	= [$Long_Integer]	! Route OSPF Class
+    TES;
+
+LITERAL
+    Router_Entry_size = $Field_Set_Size,
+    Router_Entry_blen = 4*Router_Entry_size;
+
+MACRO
+    Router_Entry = BLOCK[Router_Entry_size] FIELD(Route_Fields)%;
+
+
+
+%SBTTL 'IP Cache Entry definition'
+
+$FIELD IPCache_Fields =
+    SET
+    IPcache_QHead		= [$Long_Integer],	! Next route
+    IPcache_QTail		= [$Long_Integer],	! Previous route
+
+    IPcache_Addr		= [$Long_Integer],	! IP address
+
+    IPcache_Route		= [$Address]		! Route Entry ptr
+    TES;
+
+LITERAL
+    IPcache_Entry_size = $Field_Set_Size,
+    IPcache_Entry_blen = 4*Router_Entry_size;
+
+MACRO
+    IPcache_Entry = BLOCK[IPcache_Entry_size] FIELD(IPcache_Fields)%;
+
+
+%SBTTL 'ARP Cache Entry definition'
+
+$FIELD ARPCache_Fields =
+    SET
+    ARPcache_QHead		= [$Long_Integer],	! Next route
+    ARPcache_QTail		= [$Long_Integer],	! Previous route
+    ARPcache_Valid		= [$Long_Integer],	! cache entry valid?
+
+    ARPcache_Inum		= [$Long_Integer],	! Interface Number
+    ARPcache_AddrSize		= [$Long_Integer],	! address size
+    ARPcache_AddrData		= [$bytes(Max_ARPaddr_size)],	! address size
+    TES;
+
+LITERAL
+    ARPcache_Entry_size = $Field_Set_Size,
+    ARPcache_Entry_blen = 4*Router_Entry_size;
+
+MACRO
+    ARPcache_Entry = BLOCK[ARPcache_Entry_size] FIELD(ARPcache_Fields)%;
+
+
+
+LITERAL
+    Route_LockName	= %ASCID'Route_Lock',
+    IPcache_LockName	= %ASCID'IPcache_Lock',
+    ARPcache_LockName	= %ASCID'ARPcache_Lock';
+
+OWN
+    ! Linked list of route entries
+    Route_List	: VECTOR [2],
+    nRoutes,
+
+    ! The IP address cache
+    IP_Cache	: REF BLOCKVECTOR[,IPcache_Entry],
+    IPcache_size,
+    IPcache_LSB	: 
+
+    ! The ARP cache
+    ARP_Cache	: REF BLOCKVECTOR[,ARPcache_Entry];
+    ARPcache_size;
+
+
+%SBTTL 'Route module initialization'
+!++
+!
+!
+!
+!
+!--
+
+GLOBAL ROUTINE ROUTE$Init ( ARP_Cache_Size , IP_Cache_Size ) =
+    BEGIN
+
+    ! Initialize route list
+    Route_List[1] = Route_List[0] = 0;
+    nRoutes = 0,
+
+    ! Allocate and initialize the IP cache
+    MM$Get_Mem ( IP_Cache, .IP_Cache_Size );
+    CH$FILL(0, .IP_Cache_Size * IPcache_Entry_blen, .IP_Cache );
+    IPcache_size = 0;
+
+    ! Allocate and initialize the ARP cache
+    MM$Get_Mem ( ARP_Cache, .ARP_Cache_Size );
+    CH$FILL(0, .ARP_Cache_Size * ARPcache_Entry_blen, .ARP_Cache );
+    ARPcache_size = 0;
+
+    END;
+
+
+!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
+!								!
+!	ARP cache routines					!
+!								!
+!---------------------------------------------------------------!
+
+
+!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
+!								!
+!	IP cache routines					!
+!								!
+!---------------------------------------------------------------!
+
+
+!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
+!								!
+!	Route List routines					!
+!								!
+!---------------------------------------------------------------!
+
+
+
+GLOBAL ROUTINE ROUTE$Add (	Next_Hop, Network, NetMask,
+				Inum,
+				TOS, IS_Class, OSPF_Class ) =
+
+    BEGIN
+    LOCAL
+	RE : REF Router_Entry;
+
+    ! Allocate and initialize the router entry
+    MM$Get_Mem( RE , Router_Entry_blen );
+    RE[Route_QHead] = RE[Route_QTail] = 0;
+    RE[Route_Next_Hop] = .Next_Hop;
+    RE[Route_Network] = .Network;
+    RE[Route_NetMask] = .NetMask;
+    RE[Route_Mask_NOB] = Calc_NOB(.NetMask);
+    RE[Route_Inum] = .Inum;
+    RE[Route_TOS] = .TOS;
+    RE[Route_IS_Class] = .IS_Class;
+    RE[Route_OSPF_Class] = .OSPF_Class;
+
+    NOINT;
+
+    INSQUE(
+
+    OKINT;
+    END;
+
+ROUTINE Main =
+    BEGIN
+    END;

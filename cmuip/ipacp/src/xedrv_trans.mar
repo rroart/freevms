@@ -1,0 +1,61 @@
+;
+;	****************************************************************
+;
+;		Copyright (c) 1992, Carnegie Mellon University
+;
+;		All Rights Reserved
+;
+;	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+;	distribute  this software  provided  that the  above  copyright
+;	notice appears in  all copies and that  any distribution be for
+;	noncommercial purposes.
+;
+;	Carnegie Mellon University disclaims all warranties with regard
+;	to this software.  In no event shall Carnegie Mellon University
+;	be liable for  any special, indirect,  or consequential damages
+;	or any damages whatsoever  resulting from loss of use, data, or
+;	profits  arising  out of  or in  connection  with  the  use  or
+;	performance of this software.
+;
+;	****************************************************************
+;
+	.Title	XEDrv_Transfer - IPACP XE driver support module trns. vec.
+
+;
+; XEDrv_Trans.Mar
+;
+; Description:
+;
+;	The XEDrv.exe image is a loadable run-time image which
+;	provides the IPACP with access to DEC Ethernet cards.
+;
+;	Transfer Vector for the XE driver support module:  The vector
+;	provides the hooks for a standardized set of routines which
+;	allow the IPACP to communicate to various communication
+;	devices in a device-independant manner.  The transfer
+;	vector points to a Device_Info_Structure as defined in
+;	Device
+;
+;	The transfer vector is needed to build it as a shareable image.
+;	Macro is the only language that can build the tranfer vector
+;	in the way that is expected by the shareable libraries.
+;	Macro is the only language that can generate the necessary
+;	object language text information relocation record for manipulating
+;	the symbol name address.
+;
+; Written By:	Bruce R. Miller		02-Feb-1990	CMU NetDev
+;
+; Modifications:
+;
+;---------------------------------------------------------------------------
+;
+; Shareable image transfer vector
+;
+	.PSECT	$TRANSFER$	PIC,USR,CON,REL,LCL,SHR,NOEXE,RD,NOWRT,QUAD
+
+	.ALIGN QUAD
+	.TRANSFER	DRV$TRANSPORT_INIT
+	.MASK		DRV$TRANSPORT_INIT
+	JMP		G^DRV$TRANSPORT_INIT+2
+
+	.END

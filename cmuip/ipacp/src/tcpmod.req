@@ -1,0 +1,1459 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MACRO
+    IPACP_Version_String = 'IP_ACP(V6.6-5) ' %,  !Becomes ACP process name.
+    IPACP_Version_Name = %ASCID IPACP_Version_String%,
+    IPACP_Date_String = '06-Mar-1992' %,	! Date of last change
+!    IPACP_Who_String = 'SYNFUL@CMUTEK.CC.CMU.EDU' %;! Author of last change
+    IPACP_Who_String = 'HENRYM@SACUSR.MP.USBR.GOV' %;! Author of last change
+
+%(
+
+ACP Modification History
+
+Module	Routine		Nature of Change
+
+*** CMU change log (in reverse chronological order) ***
+
+---------------
+   IPACP 7.0	[24 Jan 1991]	Bruce R. Miller		CMU Network Development
+---------------
+
+	Rewrote the whole damn thing in C.  Redesigned everything.
+	Call it a nervous tick.
+
+---------------
+   IPACP 6.6	[07 Dec 1990]	Bruce R. Miller		CMU Network Development
+---------------
+
+Apologized profusely for not keeping this file up to date during 6.5.
+Also apologized profusely for not keeping this file up to date during 6.6.
+Finally admitted that I hate updating this stupid file.
+
+---------------
+   IPACP 6.5	[14 JUN 1989]	Bruce R. Miller		CMU Network Development
+---------------
+
+All:
+	Re-organized the module structure.  Added full UDP, ICMP, and IP
+	user access support.  Added interface (through IPDriver) to the
+	new generic RR-lookup ability of the Name Resolver.
+
+New Modules:
+	MAIN:		Handles general IPACP responsibilities
+	TCP_Mech:	Implementation specific ADTs
+	NFS_hook:	an NFS stub
+	SNMP_hook:	SNMP input and access to IPACP data structures
+	SNMP.OLB:	CMU's SNMP code
+	IP_User:	User interface to IP layer
+	ICMP_User:	User interface to ICMP layer
+	ICMP:		Moved ICMP code here
+
+SNMP:
+	Added support for SYSTEM, ifTable, ...
+
+---------------
+   IPACP 6.4	[06 SEP 1988]	Dale Moore
+---------------
+ARP.BLI
+	Fixed use of uninitialized variable.  Probably was causing
+	bogus ARP entries.
+
+TCP_MAIN.BLI
+	On retransmit of SYN (with options), set the length correctly.
+
+TCP_TELENT.BLI
+	Negotiate for SUPRGA in both directions.  Also ignore IAC <silly>.
+
+MACLIB.MAR
+	Changed Checksum routines at suggestion of Lon Willet of Utah.
+	His contribution to MACLIB seem to be a faster implementation
+	that what we had before.
+
+		[06-JUN-1988]	Dale Moore
+TCP_SEGIN.BLI
+	Do not process FIN when window size is not large enough to
+	accomodate it and the data in the packet.
+
+---------------
+   IPACP 6.3	[22 Nov 1987]	Vince Fuller
+---------------
+
+General changes:
+
+	Start of general cleanup and attempt to improve performance.
+	Rewrite circular queue handling routines in MACRO for performance.
+	Affected modules: STRUCTURE,TCP_MAIN,TCP_SEGIN,TCP_USER,MEMGR,MACLIB.
+	Add internal processing of incoming TELNET traffic. Affected modules:
+	STRUCTURE,TCP_MAIN,TCP_SEGIN,TCP_USER,MEMGR,TCP_TELNET (new module).
+	Create $$KCALL macro for facilitating $CMKRNL calls. Will also allow
+	us to easily remove $CMKRNL calls if we decide to make the entire ACP
+	run in kernel mode. Affected modules: TCPMACROS,TCP_*,UDP,USER.
+	Make IP tell higher levels about routing failures. TCP will now flush
+	connections when it cannot send SYN/SYN-ACK's; UDP sends will now fail
+	whenever routing failure occurs. Affected modules: TCP_USER,TCP_SEGIN,
+	TCP_MAIN,IP,UDP.
+	Log IP errors according to new LOG$IPERR flag. Affected modules:
+	IP,TCPMACROS.
+
+
+STRUCTURE.REQ
+
+	Flush bogus options definitons from segment structure.
+	Add new structure which describes the format of a TCP option.
+
+XEDRV.BLI
+
+	Explicitly enable multicast/broadcast for ARP port - required for new
+	DEBNT ethernet device. Disable multicast/broadcast for IP port.
+
+CONFIG.BLI
+
+	Add network device type field rather than deriving device type from the
+	device name. This allows easy addition of new devices which use the
+	same $QIO interface as existing devices.
+	Add TELNET_SERVICE variable - controls whether or not to use internal
+	TELNET server if no server is specified.
+	Flush TMPJNL and PRMJNL priviliges - don't exist in VMS 4.6.
+
+TCP_SEGIN.BLI
+
+	Rewrite segment input options processing to be able to process any and
+	all currently defined TCP options (RFC793). Fix FORK_SERVER to allow
+	more than 9 servers (bug prevented two-digit numbers from working).
+
+TCP_MAIN.BLI
+
+	Rewrite segment options insertion to allow future, general extension
+	should it be necessary.
+
+TCP_USER.BLI
+
+	In TCP$OPEN, be sure to set the current user function in the TCB when
+	doing name lookup - if the value is 0, it matched the "internal"
+	function value, which expected a routine setup in the TCB to handle
+	timeouts. The result was an access violation for opens on bad host
+	names.
+
+USER.BLI
+
+	Change the value of M$INTERNAL from 0 to 25 to prevent lossage such
+	as the above.
+
+UDP.BLI
+
+	Don't check checksums for packets with checksums of 0...
+
+NMLOOK.BLI
+
+	Don't include null in name length when doing name lookups (but do copy
+	it, for NAMSRV's convenience).
+
+ARP.BLI
+
+	Fix bug that was causing us to create ARP cache entries with bogus
+	hardware address lengths (in particular, lengths of 0).
+
+
+---------------
+   IPACP 6.2	[10 Jun 1987]	Vince Fuller
+---------------
+
+General changes:
+
+	Remove all hostname processing from the ACP itself into a new name
+	server accessible via mailbox service. There is an incompatable device
+	driver change that accompanies this (setting host name length in the
+	OPEN and GTHST argument blocks), so this version will not work with
+	anything older than 6.2 of IPDRIVER.
+	Changed modules: TCPMACROS,STRUCTURE,USER,TCP_MAIN,TCP_USER,UDP,CONFIG.
+	Flushed modules: hostname processing - GREEN, DOMAIN, HOSTS.
+	Flush "net message queue" and replace with simple error message queue.
+	Also, make error logging issue $WAKE requests, so that the messages are
+	written to the logfile in a timely manner.
+	Changed modules: TCP_MAIN,IOUTIL,IP,ARP,XEDRV.
+	Don't go from FIN-WAIT-2 into TIME-WAIT until all pending user data has
+	been delivered to the user.
+	Changes modules: STRUCTURE,TCP_SEGIN,TCP_USER.
+	Restructure the format of the ACP IOSB: flush the I/O request tags
+	(they have been mostly unimplemented for some time now), flush obsolete
+	local connection ID field, flush obsolete TCP error field, add EOF flag
+	and ICMP flag, add ICMP code field.
+	Changed modules: STRUCTURE,VMS,UDP,TCP_MAIN,TCP_SEGIN,TCP_USER,USER.
+	Flush the three old standard-sized memory segments - replace with two
+	new dynamic packet buffer sizes - "minimum" and "maximum". Add code to
+	startup configuration to set maximum segment size.
+	Changed modules: STRUCTURE,USER,TCP_MAIN,MEMGR,CONFIG,XEDRV.
+
+XEDRV.BLI
+
+    	Minor change to report number of XE restarts.
+	Simplify NSQ interface to IP.
+
+USER.BLI
+
+	Add a new GTHST function, GTH_LCLHST, which returns the name to address
+	translation information for the local host. Difference is, this new
+	function does not generate a name lookup request.
+
+TCP_USER.BLI
+
+	Rearrange CHECK_ACCESS to avoid allocating connection table entries
+	in the event of a CHECK_ACCESS failure.
+
+UDP.BLI
+
+	Add support for "address" mode UDP connections. This mode allows the
+	user to specify the IP addresses and UDP ports when sending and to read
+	the IP addresses and UDP ports when receiving. Idea is to let a single
+	process control all of the UDP traffic on a local port with a single
+	UDP connection. Special changes to UDP ICMP code to allow these special
+	connections to read ICMP messages rather than being aborted by them.
+	Check for aborted status of UCB before queueing input message or
+	user request.
+
+IP.BLI
+
+	Add support for IP fragment reassembly. Simplify NSQ interface to
+	the device driver level. Do better logging in a few places.
+	Add support for ICMP echo packets.
+
+STRUCTURE.REQ
+
+	Minor restructuring of GTHST definitions.
+	Minor changes to format of OPEN request block.
+
+
+---------------
+   IPACP 6.1	[18 Feb 1987]	Vince Fuller
+---------------
+
+General changes:
+
+	Major change is addition of mechanism to control access to network via
+	configuration options and the rights-list identifiers INTERNET_ACCESS
+	and ARPANET_ACCESS. Modules affected: CONFIG,USER,TCP_USER,UDP.
+	Make it easy to switch from Green protocol to Domain protocol when we
+	are ready (via setting GREENSWITCH/DOMAINSWITCH); also make it easy to
+	remove all logging code at compile time (via setting LOGSWITCH).
+	Affected modules: TCPMACROS,TCP_MAIN,TCP_USER,UDP,USER,CONFIG, and the
+	extension of the DEBUG.REQ require file into MACROSWI.REQ.
+	Make improvements to the format of error messages and fix some bugs
+	in the error logging facilities.
+	Affected modules: TCPMACROS,CONFIG,IOUTIL.
+	Rename the TCP modules into more recognizable names.
+
+USER.BLI
+
+	Change check for privileged user to look at PHY_IO privilige, not the
+	group number. Move special UCB definitions into this module (removed
+	from TCP_USER.BLI). Fix NET$INFO to really return the local port number
+	in the appropriate field (was returning foreign port number).
+
+TCP_USER.BLI
+
+	Rewrite a lot of the TCP$OPEN code to make it simpler and cleaner.
+	Add support for open with IP address instead of host name.
+
+TCP_MAIN.BLI
+
+	Indicate modification date in ACP startup message.
+
+TCP_SEGIN.BLI
+
+	Modify WKS structure to also have privilige bits to give to process.
+	Update send window when going from SYN-RECV state into ESTABLISHED
+	state. Fixes a problem with some hosts that initiate connections with
+	zero windows.
+
+UDP.BLI
+
+	Fix a bug in UDP_ADLOOK_DONE - it wasn't using the correct count when
+	copying the name length into the UCB (trashed memory). Rewrite the UDP
+	open code to avoid doing name lookup for internal opens - this allows
+	us to do the open all at once, instead of waiting for an AST routine.
+	Add support for opening connection with IP address instead of name.
+
+GREEN.BLI
+
+	Modify UDP open to pass IP address instead of name in order to
+	correspond to the change in IUDP_OPEN.
+
+CONFIG.BLI
+
+	Add VAXstation-2000 'ES' device (same as DEUNA/DEQNA). Change text
+	references to DEUNA/DEQNA to be 'DEC Ethernet'. Add support for
+	privileges in the WKS records.
+
+XEDRV.BLI
+
+	Change various messages to refer to 'DEC Ethernet' instead of
+	DEUNA/DEQNA (since there are now other devices using this driver).
+
+---------------
+   IPACP 6.0	[23 Jan 1987]	Vince Fuller
+---------------
+
+General changes:
+
+	Incompatable change in format of user argument blocks to correspond
+	to new device driver (version 2.8). Change involves passing the size of
+	the argument block so that MACLIB copies the correct amount of data
+	from the system buffer. Affected modules: STRUCTURE.REQ, MACLIB.MAR,
+	IPDRIVER.MAR. Only user-visible change should be to fix NET$OPEN's for
+	long host names.
+
+---------------
+   IPACP 5.9	[10 Dec 1986]	Vince Fuller
+---------------
+
+General changes:
+
+	Rewrite checksumming routines in VAX MACRO, change calling sequences.
+	Affected modules: MACLIB, IP, TCP, SEGIN.
+
+TCP.BLI
+
+	Minor changes to logging.
+
+SEGIN.BLI
+
+	Fix code that wraps around the RX pointer (in ACK-RXQ).
+
+TCP_USER.BLI
+
+	Forgot to set initial Calculated_RTO field.
+
+
+XEDRV.BLI
+
+	Allow XE_ARP_XMIT to fail recoverably.
+
+
+---------------
+   IPACP 5.8	[12 Nov 1986]	Vince Fuller
+---------------
+
+General changes:
+
+	Add copyright notices to all modules.
+
+TCP.BLI
+
+	Add some debugging code.
+	Include count of bytes on retransmission queue when determining how
+	much data may be added to the send circular queue.
+	Set initial retransmission time to 5 seconds - it was 1 second as a
+	kluge to speed things up when ARP ate the first packet.
+	Make some adjustments to the retransmission timer calculations.
+	Move SYN_WAIT_LIST timeout code into it's own routine in SEGIN.
+
+SEGIN.BLI
+
+	Modify the calcultion of the smoothed round trip time and the
+	retransmission timeout to agree with RFC793, page 41.
+	Future queue limit is now dynamic, set at config time.
+	Localize the well-known-port data structures to this module.
+	Make the well-known-port stuff be dynamically set at config time,
+	extend to include priority value for starting servers.
+	Flush the SYN_WAIT_LIST - incorporate it into the WKS data structure.
+	Limit the number of outstanding SYN's, both per-port and in general.
+	Generally clean up code dealing with the WKS stuff.
+
+CONFIG.BLI
+
+	Add "VARIABLE" command to set tuning variables (such as the future
+	queue limit, IP forwarding, and the maximum number of SYN's we keep).
+	Add "WKS" command to define well-known ports and their servers.
+
+GREEN.BLI
+
+	Add caching of name server responses.
+	Add code to select fastest name server based on round-trip-time between
+	time we send a request and time we receive a corresponding reply.
+
+ARP.BLI
+
+	Change ARP cache strategy to create ARP cache entry when query is first
+	enqueued. Keep around the IP packet (and QBlock) that caused the ARP to
+	be sent and retransmit it when the ARP reply comes in. Minor changes
+	made to debugging user call block format to be able to read this new
+	information.
+
+XEDRV.BLI
+
+	Know about changes to ARP.
+
+STRUCTURE.REQ
+
+	Flush WKServer definition - it is no longer global.
+
+
+---------------
+   IPACP 5.7	[30 Sep 1986]	Vince Fuller
+---------------
+
+General changes:
+
+	Various bugfixes.
+
+TCP_USER.BLI
+
+	Modify TCP CANCEL processing to not purge retransmit queue - this
+	screws up retransmission of FINs required for graceful close.
+
+TCP.BLI
+
+	In INACTIVATE_TCB, check for attempt to inactivate an already inactive
+	connection and don't do it - issue an error instead.
+	Rewrite retransmission code to be able to build segments with both
+	data and control information.
+
+SEGIN.BLI
+
+	Bump RF_QMAX (max future queue length) from 5 to 8.
+	Rewrite (restore) retransmission queue purging routine to clear all
+	of the retransmission info. This routine was erroneously deleted when
+	it should have been modified to work with the circular queues.
+	Do a close on TCBs that go into CLOSE-WAIT if the owning process has
+	gone away (i.e. TCB is aborted) - if we don't do this, the TCB stays
+	in CLOSE-WAIT forever, since no one will do a close on it.
+
+GREEN.BLI
+
+	When giving an error return, use the Green protocol error rather than
+	a hard host table failure - green protocol error may be temporary and
+	recoverable later.
+
+UDP.BLI
+
+	Make IUDP_CLOSE call UCB_CLOSE with the proper number of arguments.
+
+---------------
+   IPACP 5.6	[12 Sep 1986]	Vince Fuller
+---------------
+
+General changes:
+
+	Add support for "cloning" physical devices - this allows us to
+	associate multiple IP addresses with a single interface.
+	Various bug fixes, enumerated below.
+
+TCP_USER.BLI
+
+	Fix 2nd phase of open to not set the TCB host addresses if the
+	foreign host was wild. Previously, the local address was being set
+	in all cases to the default host.
+	Make OPEN look on SYN wait list when processing passive open requests.
+	For some reason, this code was either removed or was never there.
+
+SEGIN.BLI
+
+	Clean up and enhance some debugging code.
+	Start address to name lookup on foreign host when it is resolved (i.e.
+	when wildcard-foreign [passive] connection receives its first packet).
+
+IP.BLI
+
+	Minor changes to support "cloned" devices.
+	Fix some bugs in the handling of multi-homed hosts - in particular,
+	don't override higher level's choice of source IP address.
+
+ARP.BLI
+
+	Allow support for "cloned" devices - in particular, the ARP module
+	now allows any IP address on input, not just the one that corresponds
+	to the receiving device. **N.B.** This should be tested on a real
+	multi-homed host to make sure it doesn't cause problems. Also, the IP
+	address used on output is now directly copied from the input packet.
+
+CONFIG.BLI
+
+	Add support for "cloned" devices. In particular, this means:
+	    - Checking for duplicate device names, and marking the duplicates
+	      as "clones"
+	    - Making sure that "cloned" devices are never initialized, since
+	      they refer to already-initialized devices
+	    - Minor changes in the configuration output to show the a clone's
+	      physical address & status to be that of the real device.
+
+---------------
+   IPACP 5.5	[29 Aug 1986]	Vince Fuller
+---------------
+
+General changes:
+
+	Add debugging dump function to read ARP cache (USER & ARP modules)
+	Use Green Protocol network name lookup for translating between
+	host names and IP addresses. For the time being, we still use the
+	host table as a backup mechanism.
+	Add ARP cache sweeping.
+
+CONFIG.BLI
+
+	Don't do gateway or name server initialization here. Read the info from
+	the file and call appropriate routines in GREEN and IP modules.
+
+GREEN.BLI
+
+	New module. Implement CMU "Green Protocol" name lookups.
+
+HOSTS.BLI
+
+	Modify to facilitate calling from GREEN module.
+
+IP.BLI
+
+	Isolate IP gateway structure to this module. Put gateway initialization
+	code here (moved from CONFIG).
+	Move SET_HOSTS routine here - IP should make address routing decisions.
+
+TCP.BLI
+
+	Add LOCAL_NAME global variable - holds local host name.
+	Add CS$NAMELOOK - Name lookup wait state.
+	Make CLOSE_TCB know about CS$NAMELOOK state.
+	Make CLOSE_TCB know about pending name lookup to cancel it.
+	Use GREEN_GETNAME to fetch LOCAL_NAME.
+	Clear TCB[PENDING_IO] and TCB[ARGBLK] more consistantly.
+	Add call to ARP_INIT during main initialization.
+
+TCP_USER.BLI
+
+	Modify TCP$OPEN routine to use network name lookup functions.
+	Clear TCB[PENDING_IO] and TCB[ARGBLK] more consistantly.
+
+USER.BLI
+
+	Remove SET_HOSTS routine from this module.
+	Return local host name from LOCAL_NAME - don't do name lookup.
+	Modify user GTHST functions to use network name lookup mechanism.
+
+UDP.BLI
+
+	Modify UDP$OPEN to use network name lookup mechanism.
+	Add internal entry points to UDP functions for GREEN module's use.
+
+ARP.BLI
+
+	Many changes, bug fixes primarily to accomidate cache sweeping.
+	Try to refresh cache entries when they have aged away half of their
+	lives - we send directed ARPs to try to update our cache time.
+
+
+---------------
+   IPACP 5.4	[7 Aug 1986]	Vince Fuller
+---------------
+
+General changes:
+
+	Re-do buffering scheme between user and TCP to use circular byte queues
+	instead of queue blocks. This prevents the ACP from unexpectedly
+	running out of memory and is a cleaner implementation.
+	Implement UDP.
+	Add LOG$TCPERR logging flag - controls logging of TCP errors.
+	Add LOG$ICMP logging flag - controls logging for ICMP messages.
+
+CONFIG.BLI
+
+	Add code to initialize name server table.
+
+MACLIB.MAR
+
+	Flush extraneous and confusing definitions.
+	Pass protocol code and connection id in cancel request.
+
+MEMGR.BLI
+
+	Make all memory queue counters global for examination.
+	Add code to track allocation and queue movement of QBLKs.
+	Modify TCB creation/deletion to allocate/delete circular queues.
+
+SEGIN.BLI
+
+	Put a limit on the number of future queue segments per TCB.
+	Send an ACK out when something is placed on the future queue.
+	Debugging code for tracking QBlks.
+	Make sure segment is dropped when unusable text received.
+	Drop incoming segments when TCB has been aborted.
+	Clean up RST processing a bit.
+	Really drop data associated with SYNs.
+	Get rid of network received segments queue - copy incoming segment
+	data onto circular queue.
+	Redo retransmission handling to use circular queue.
+
+TCP.BLI
+
+	Add status cell to record future queue duplicates.
+	Add status cell to record segments dropped because TCB aborted.
+	Add status cell to record segments dropped because receive q full.
+	Fix CLOSE_TCB to be able to clear TCB pointer.
+	Make rearrangements to allow support of UDP protocol.
+	Write routines for enq/deq on circular byte queues.
+	Make data sending routine use circular byte queue.
+	Make retransmission code use circular byte queue.
+
+TCP_USER.BLI
+
+	Split this module off from USER.BLI to handle TCP-specific functions.
+	Modify user interface to use circular byte queues.
+
+USER.BLI
+
+	Return the new status counters in the statistics block.
+	Change initial sequence number generation to use clock base as the
+	upper 16 bits of the sequence number.
+	Change local port generation to start at clock base and procede
+	incrementally from there.
+	Return more memory management counters.
+	Separate hair of setting host addresses into its own routine.
+	Change CLOSE_TCB to take reference to TCB address so that it can
+	clear the address on successful close.
+	More logging of user functions.
+	Add debugging of QBlk motion when delivering to user.
+	Split off TCP-specific routines into TCP_USER.BLI
+	Add hooks for implementing UDP.
+
+IP.BLI
+
+	Make IP_RECEIVE know what device produced the packet.
+	Undelete forwarding code, and put under ip_forwarding_ok variable.
+	Make forwarding code not forward to the same device from which it
+	received a packet.
+	When logging IP sends, indicate first-hop destination when different
+	from final destination (i.e. when routing is performed).
+	Change method of allocating dynamic strings in QL_FAO.
+	Do ICMP logging based on LOG$ICMP.
+	Move GEN_CHECKSUM routine here, since it is used by protocols other
+	than just TCP (UDP in particular).
+
+UDP.BLI
+
+	Write the real implementation of this module.
+
+XEDRV.BLI
+
+	Make ARP read errors recoverable.
+	Only check for (non)existance of DECNET the first time that the DEQNA
+	is successfully started.
+	Pass device index to IP_RECEIVE routine.
+	Properly deallocate in-progress buffer on read error.
+	Remove ethernet retry crud in XE_XMIT. It isn't really appropriate.
+
+---------------
+   IPACP 5.3	[9 July 1986]	Vince Fuller & Dale Moore
+---------------
+
+General changes:
+
+	The user interface has been completely changed as to be incompatable
+	with previous versions of the ACP and device driver:
+	   - THC: device renamed to be IP: device. All user programs changed to
+	     know about this.
+	   - "local-connection-id's" have been removed from all normal user
+	     $QIO calls.
+	   - Connection index is now stored in connection UCB and is passed
+	     to the ACP for all normal user requests.
+	Add support for future segments queue. This greatly improves
+	performance between hosts connected by slow gateways (particularly
+	to TOPS-20 hosts).
+	Fix some oversights where LAST-ACK state wasn't handled.
+
+SEGIN.BLI
+
+	Redo sequence number checking to be simpler and to handle all cases
+	where sequence numbers wraparound between positive and negative.
+
+TCP.BLI
+
+	Don't go into FIN-WAIT-1 state until FIN is actually sent. Bug caused
+	connections to hang when close done with buffered data to send.
+	Add status cells for future segment processing.
+
+USER.BLI
+
+	Change algorithms for generating user ports and for generating
+	initial sequence numbers to be more useful.
+
+IP.BLI
+
+	Put back IP forwarding code under control of ip_forwarding
+	configuration switch.
+	Fix forwarding code to remember what interface a packet came from and
+	not to ever forward out through that interface. If someone is so lost
+	that he are misdirecting packets like that, we can't help him.
+	Make logging code indicate when IP is routing via a gateway.
+
+XEDRV.BLI
+
+	Pass device index to IP for forwarding support.
+
+
+---------------
+   IPACP 5.2	[12 June 1986]   Vince Fuller
+---------------
+
+General changes:
+
+	All TEK user programs have been flushed in favor of new user programs
+	being written here at CMU.
+	Get rid of XPORT I/O routines.
+	Redo all of the logging code. Make it use $FAO and make it be bitmask
+	driven to allow specification of various events to log.
+	Try to generally clean up, bring into conformance with specification,
+	and improve performance.
+	Use standard VMS error signalling facility - return signallable IPACP
+	errors to the user.
+	Implement "Nagle" algorithm (RFC896) to increase output packet size.
+	Do buffering of user send requests in ACP-local buffers to improve
+	asynchronous characteristics of user sends.
+	Eliminate a lot of byteswapping by leaving IP addresses in net order.
+	Don't generate a lot of unnecessary ACKs.
+	Implement blocking close function. Close is not posted until connection
+	gets at least to the TIME-WAIT state.
+	Don't just reset connections due to cancel functions. Make an effort
+	to really close the connection first.
+	Make close and cancel both timeout after a while.
+	Add LAST_ACK to the TCP state machine.
+	Implement more general and correct mechanism for blocking AST's - the
+	old scheme didn't allow for nesting of AST disabling.
+	Increase limit on foreign host name to 128 bytes.
+
+SEGIN.BLI
+
+	Fix sequence number testing to handle all cases that overlap with our
+	RCV.NXT. Old test only accepted segments at RCV.NXT.
+	Move TCP input AST routine into SEGIN to improve organization.
+	Add ICMP support at the TCP level.
+	Move some code to user module that was more appropriate there.
+	Make TCB state change code be routines, not macros.
+	Make LOG_SEGMENT print some of the data and options, make it know about
+	byteswapped packets that exist under some conditions.
+	Don't delete TCB when ACK of FIN received - enter Time_Wait state in
+	accordance with the specification.
+	Count incoming segments and data octets in new cells of TCB. Try to use
+	this info to improve user data delivery time.
+
+TCP.BLI
+
+	Implement connection timeouts correctly, add keep-alive probing for
+	inactive connections.
+	Move some code that belongs here from user module.
+	Support for ICMP status when trying to send outgoing packets.
+	Implement minimum retransmission time of 1 sec.
+	Add hack to set initial retransmission time to 1 sec since our ARP
+	implementation currently drops the first packet to a new host.	
+	Retransmission timeout is different than inactive connection timeout.
+	Have Build_Header turn off pending_ACK flag when it makes an ACK.
+	Allow data to be delivered in FIN-WAIT-1 and FIN-WAIT-2 states (in
+	accordance with the spec)
+	Improve efficiency of next TCB service time calculation for the
+	Wait_For_Something_2_Do routine.
+	Add code to compress retransmission queue at retransmission time.
+	Make SEND_DATA return count sent - so we know if we need to send
+	an ACK when SEND_DATA didn't send anything.
+
+USER.BLI
+
+	Handle overlapping segments (since SEGIN can now accept them).
+	Fix a bug in the checksum algorithm - it wasn't doing carry right.
+	Implement user connection timeout - time at which connection will
+	be closed if it is simply idle (as opposed to dead).
+	Remove/add code from/to this module that did/didn't belong here.
+	Add user interface to host name translation (GTHST user function).
+	Don't call SEND_DATA in main user processing routing - it can confuse
+	things and doesn't really help anything.
+	Make all connections (not just passive) wait for connection to
+	finish openening. Add OP$NOWAIT open mode for immediate return (users
+	can either use this or can use $QIO for open instead of $QIOW).
+	Don't call SEND_DATA in NET$SEND routine - see above.
+	Add CL$NOWAIT mode for nonblocking user close function.
+	In Purge_All_User_IO, call and don't duplicate the code that is in
+	Kill_Pending_Requests.
+
+IOUTIL.BLI
+
+	New module - put all I/O routines here (OPR_FAO, LOG_FAO, etc.).
+
+HOSTS.BLI
+
+	Change to use IOUTIL routines, not to use ASCIZ when printing errors.
+
+IP.BLI
+
+	Major changes to add ICMP support.
+	Add hooks for supporting UDP and other future protocols.
+	Remove all ARP code from here.
+	Add loopback of packets addressed to local host.
+	Don't log IP packets that aren't addressed to us - too many garbage
+	broadcast IP packets to be useful.
+	Do $WAKE calls in IP module, not in device drivers.
+
+CONFIG.BLI
+
+	Suport variable-length hardware addresses for device independance -
+	hardware addresses in config file are now strings of hex bytes.
+	Add hooks for 3MB ethernet (EN) device.
+	Report device status, hardware, and IP address when initialized.
+	Add timer handling for restarting wedged device.
+
+ARP.BLI
+
+	New module. Implement Address Resolution Protocol as a common module
+	callable by the device drivers and IP. It should be possible to add
+	ARP support for new devices with minimal effort.
+
+UDP.BLI
+
+	New module. Currently only stubs for ICMP and IP input handling.
+
+XEDRV.BLI
+
+	Add a lot of code for handling $QIO erros and restarting the DEQNA
+	when it gets wedged.
+	Changes to interface to new ARP module.
+	Change the way hardware and IP addresses are handled to reduce the
+	amount of byteswapping done.
+	Rewrite sense-mode code to correctly step through sense info.
+	Make driver handle non-DECNET system.
+
+STRUCTURE.REQ
+
+	Heavily modified to support changes enumerated above.
+
+IPDRIVER.MAR
+
+	Change from THCDRIVER TO IPDRIVER.
+	Flush all of the UDP function codes - it will done differently.
+	Add GTHST user function code.
+	Add flags for CLOSE function.
+	Rearrange the way request blocks are generated - separate common
+	part from function-specific part.
+
+MACLIB.MAR
+
+	In CANCEL function, pass UCB address in argument block.
+	In CANCEL function, convert internal PID to external PID before
+	placing in argument block. Old CANCEL function never worked.
+
+NETERROR.REQ, NETERROR.MSG
+
+	New system library files that define the network error messages.
+
+NETWORK.REQ, NETCNTRL.REQ, NETMACROS.REQ, NETVMS.REQ
+
+	Modify to standardize interface (with STRUCTURE.REQ, among other
+	things) and install as system libraries.
+
+
+---------------
+    tcpacp 5.1  [24-Feb-86]   Vince Fuller
+---------------
+
+	Begin major overhaul to provide real "Internet" service. Many other
+	miscellaneous changes made than enumerated below.
+
+CONFIG.BLI
+
+	Generally reorganize code for easier modification.
+	Add code to give an IP address to each interface.
+	Add code to support gateways.
+
+TCP.BLI
+
+	Flush bogus "known_hosts" table and associated routines.
+	Change logical name definitions from "TCP$xxx" to "INET$xxx".
+	Flush TEK scheme for IP address definition.
+
+USER.BLI
+
+	Flush junk as for tcp.bli above.
+	Add Local_Host field to TCB - specifies which interface IP
+	address is to be used for a connection.
+	Miscellaneous changes along these lines.
+
+SEGIN.BLI
+
+	Flush junk as above.
+
+IP.BLI
+
+	First pass at implementing more general IP routing scheme.
+	Remove ARP code from this module - code was a bogus hack.
+	Pass first-hop IP address to device driver - let it do ARP.
+
+HOSTS.BLI
+
+	New module. Provides support for NIC format host table.
+
+XEDRV.BLI
+
+	Move temporary ARP support into this module; remove from IP.
+
+STRUCTURE.DEF
+
+	Modified to support all of the above changes.
+
+
+---------------
+    tcpacp 5.0.0  [2/10/86]   Eric Crane
+---------------
+
+user.bli,ip.bli,xedrv.bli,structure.def
+
+	Installed code from University of Texas for Ethernet Address
+	reslution.
+
+tcp.mod
+
+	Changed format of the Version identification to reflect that
+	we will be an IP Access Control Program
+
+*** End CMU change log ***
+
+----------------
+   tcpacp 1.0
+----------------
+
+tcp.bli 	[9-9-82] Stan C. Smith, Started this change history require file.
+
+segin.bli	[9-10-82] Stan
+
+	Process_Received_Segments:
+
+		Combined duplicate booleans Delete_QB & Delete_Seg into single
+		delete flag which indicates wheather the network segment & Queue
+		block should be deleted. (Low-bit set = delete).
+
+		Return code check from Check_well_known_port modified to cover
+		duplicate segs on syn-wait-list instead of lumping this condition
+		with segs for unknown connection.
+
+	Check_well_known_port:
+
+		return code expanded to (-1,0,1) to differentiate between segs
+		which are destined for an unknown connection, duplicates of a seg
+		on the SYN wait list & those segs for well-known local port.
+
+	Decode_Segment:
+
+		RESET received in SYN-Wait state will now be passed thru
+		ack processing & be picked-up by reset process thus clobbering
+		the connection. Before connection was not being reset!  Connection
+		is reset if the seg ACK is invalid.
+
+User.bli	[9-11-82] stan
+
+	TCB_OK
+
+		Remove unnecessary IF conditional.  Place check for inactive
+		connection within INCR loop.
+
+----------------
+   tcpacp 1.1
+----------------
+
+segin.bli	[10-13-82] stan
+
+	Decode_Segment
+
+		When checking for data in the current segment do NOT attempt
+		to ACK or deliver the user data, just set the pending_ack flag.
+		When all segments have been processed then we scan thru all tcb's
+		& deliver user data & ACK the segment(s).  This attempts to prevent
+		the SWS (Silly Window Syndrome) from occuring.  Also the user gets
+		data in bigger chunks.
+		
+devconfig.bli	[10-15-82] tim & stan
+
+	devconfig
+
+		Added network device configuration table to provide a network
+		device interface layer beneath IP.
+
+ip.bli		[10-15-82] tim
+
+	major revisions
+
+		Modified ip ==> physical network interface to call network device
+		processing routines via the device configuration table.
+
+	check_net_send_q
+
+		Returns true if there are datagrams yet to be transmitted successfully.
+
+nidrv.bli	[10-15-82] tim
+
+	new module
+
+		Handle the Interlan ethernet board NI1010.  Provide the device
+		processing routines (xmit,receive & init).
+
+hcdrv.bli	[10-22-82] tim
+
+	new module
+
+		Old parts of IP which interfaced to NSC hyperchannel A400, unibus
+		PI-13. Implements the Hyperchannel device processing routines
+		(xmit, receive & init) all interface thru the device config table.
+
+----------------
+   tcpacp 1.2
+----------------
+
+segin.bli	[10-22-82] stan
+
+	Reset_unknown_connection
+
+		When generating a reset for an unknown connection _& the
+		received segment did NOT have ACK asserted then include
+		syn/fin in sequence space computation.
+
+user.bli	[10-25-82] stan
+
+	vms$cancel
+
+		Fixed a case of retransmission queue being purged when the connection
+		state was one of the fin-wait states.  Symptom was connection would
+		never close because FIN segment was being deleted from the rexmit
+		queue before it was acked.  Solution:  purge only the user send &
+		receive queues & only if NOT in fin-wait do we actually purge all
+		the tcb queues.
+
+structure.def	[3-7-83] tim
+
+	WKS$ definitions
+
+		Include a field in the Well Known Server field definition for
+		the process status flags used in creprc system service call.
+
+segin.bli	[3-7-83] stan
+
+	Fork_Server
+
+		Include $creprc status flags when forking a server.  Enable
+		or disable accounting.
+
+tcp.bli		[3-16-83] stan
+
+	mainline
+
+		Mount network virtual device "ip" before doing any tcp
+		initialization.
+
+maclib.mar	[3-16-83]
+
+	mount_ip_device
+
+		Force dev$m_avl bit off in UCB before doing the mount.
+		This prevents any early users from doing IO to the "IP"
+		device before it's ready, has been known to crash the system.
+
+----------------
+   tcpacp 1.3
+----------------
+
+	TCP header max receive buffersize option implemented.
+
+structure.def	[4-16-83] stans
+
+		modified segment structure definition to include segment option
+		field.  Only option supported is the max data per segment kind.
+		tcb definition modified to include a field which represents the
+		max data size per segment which the receiver will accept
+		(max_recv_data_size).
+
+user.bli
+
+	send_ctl
+
+		send max recv data per segment with syn & syn_ack segments.
+
+	build_header
+
+		additional calling argument which reflects the number of options
+		present in the specified segment.
+
+segin.bli
+
+	decode_seg
+
+		process segment option during Listen & syn-sent states.
+		set tcb field [max_recv_data_size] from segment option "max
+		recv data per seg".  This value limits the amount of data which
+		will be sent (rtn:send_data); defaults to 512 bytes.
+
+memgr.bli
+		moved global definition "max_network_seg_size" to structure.def.
+
+tcp.bli
+		moved global (segment, seg header) size definitions from tcp.bli to
+		structure.def for consistant definition placement.
+
+----------------
+   tcpacp 1.4
+----------------
+
+	Network devices are now configured from a file as opposed to compile-
+	time constants.  Device address, name and device specific bit flags.
+
+devconfig.bli	[4-28-83] stan
+
+	configure_network_devices
+
+		Added this routine to handle runtime device initialization
+		from devconfig.txt file as opposed to compiletime init.
+		At this time only the vms device name (used in $assign ss.)
+		and the physical device address are initialized during acp
+		startup.
+
+tcp.bli		[5-19-83] stan
+
+	error_processor
+
+		fatal_error macros now generates a call to this routine. Message
+		is sent to operators console then acp will exit.
+
+----------------
+   tcpacp 2.0
+----------------
+
+	Entire segment send sequence has been modifed.  TCP now rents a buffer
+	large enough for tcp-header + data + IP-header + device-header.  All
+	header copies have been eliminated.
+
+tcp.bli		[5-23-83] stan
+
+	check_rexmit_queue
+
+		Additional call parameters to reflect buffer/bufsize, which are
+		pointers to the single large send buffer.
+
+user.bli	[5-23-83]
+
+	send_data
+	send_ctl
+	build_header
+
+		All modified to use buf/bufsize ptrs for the containing buffer
+		while seg/segsize reflect the segment within the large buffer.
+
+ip.bli		[5-24-83] stan
+
+	send_ip
+
+		call parameters for buf/bufsize.
+
+hcdrv.bli	[5-24-83] stan
+nidrv.bli	[5-24-83] stan
+
+	xx_xmit
+
+		call parameters for buf/bufsize plus elimination of ip/tcp
+		header copies.
+
+----------------
+   tcpacp 2.1
+----------------
+
+segin.bli	[6-6-83] stan
+
+	reset_unknown_connection
+
+		moved reset and seg ACK flag determination to user:(build_header).
+
+user.bli
+
+	build_header
+
+		special case the segment header control flag "reset".  Determine
+		if ACK flag should be true or false.
+
+----------------
+   tcpacp 2.2
+----------------
+
+maclib.mar	[6-12-83] stan
+
+	vms_io$post
+
+		1) if io request was in error (ie, low-bit of status word = 0)
+		   then force the io request to be a write operation (ipr$v_func
+		   in irp$w_sts equals 0).  This eliminates a needless kernel
+		   ast routine data copy.
+
+		2) If io function is a READ and successful, then set irp$w_bcnt
+		   to be the actual number of bytes input, instead of the total
+		   requested by the user.
+
+----------------
+   tcpacp 2.3
+----------------
+
+tcp.bli		[6-13-83] stan
+
+	service_connections
+
+		During connection timeout processing: check connection owner
+		process also owns sub-processes.  If true, then update the
+		connection timeout value and let the connection run.  Otherwise
+		inactivate the connection.  This attempts to solve the problem
+		of ftp cmd connection timeouts on LONG, SLOW data transfers.
+
+----------------
+   tcpacp 2.4
+----------------
+
+tcp.bli
+user.bli
+segin.bli
+memgr.bli
+
+	external literal declarations
+
+		force byte-size allocation for some external literals.
+
+	register declarations in some routines to help compiler out, squeeze
+	some more speed.
+
+----------------
+   tcpacp 3.0
+----------------
+
+user.bli
+
+	process_user_requests
+		use case statement instead of selectone, generates faster code.
+
+	net$udp_(send,status,receive)
+		partially implemented UDP (User Datagram Protocol) user functions.
+
+	deliver_user_data
+		try to beat silly-window-syndrome.  Do not update receive window
+		until the "ack_threshold" has been reached.  This forces window
+		update to be >= global literal "ack_threshold".
+
+tcp.bli
+
+	defined global literal "ack_threshold".
+
+structure.def
+
+	a) new "wordsize" item "ack_size" in tcb data structure.  In cases of
+	< "ack_threshold" updates to receive window value is accumulated here
+	until "ack_threshold" is reached then a REAL window update is performed.
+	see module(user.bli) rtn(deliver_user_data).
+
+	b) modified known host table entry definition to hold counters for host
+	specific tallies.
+
+
+----------------
+   tcpacp 3.1	[8-4-83] stan
+----------------
+
+user.bli
+
+	added new net$dump routines to return stats associated with a particular
+	host.
+
+----------------
+   tcpacp 3.2	[9-13-83] stan
+----------------
+
+tcp.bli
+
+	rewrote routine "read_known_hosts_file" to take advantage of new
+	understanding of how xport string procedures work.  You can scan thru
+	a string (hosts.txt file record) using $str_scan function instead of
+	doing it manually.
+
+----------------
+   tcpacp 3.3	[9-13-83] stan
+----------------
+
+tcp.bli
+
+	a) "read-known-hosts" now processes aliases by filling in the host-alias
+	table.  Aliases no longer occupy an entry in the known-host table but
+	have a pointer back to the original entry.
+
+	b) spontaneous ack's are generated for established connections where
+	the ack_time has expired.
+
+	c) defined ack_interval for spontaneous ack generation.  Increased
+	ack_threshold to 1024, amount of receive window accumulated before
+	window update.
+
+structure.def
+
+	defined host_alias table.
+
+user.bli
+
+	"decode_network_host" rtn now looks for alias in the host_alias table.
+
+
+----------------
+   tcpacp 3.4	[12-27-83] stan
+----------------
+
+ip.bli
+user.bli
+structure.def
+
+	rename net$dump field from user_io_posted => storeForward.  Modified
+	netdump.bli to output store & forward trafic.
+
+structure.def
+ipdriver.mar
+user.bli
+config.bli
+nidrv.bli
+hcdrv.bli
+nidrvstub.bli
+hcdrvstub.bli
+
+	support for new device dump function, sub-function of net$dump.
+	currently only supports hyperchannel dump local adapter stats.
+
+----------------
+   tcpacp 3.5	[1-4-84] stan
+----------------
+
+tcp.bli
+tcp.mod
+
+	network acp process name now reflects the acp version.
+	ONline announcement moved to tcp.bli module.
+
+----------------
+   tcpacp 3.6	[1-24-84] stan
+----------------
+
+structure.def
+user.bli
+	net$info call now returns local and remote internet addresses.
+	expanded user return block length byte two longwords.
+
+----------------
+   tcpacp 3.7	[1-24-84] stan
+----------------
+
+	code review:
+	Stopped scanning entire valid_tcb table, use tcb_count and only process
+	that number of entries in the valid_tcb table.  Realized approx 20kbaud
+	sink server increase.
+
+----------------
+   tcpacp 3.8	[1-25-84] stan
+----------------
+
+structure.def
+		all retransmission time counters are unsigned longwords.
+user.bli
+	retrans_enqueue
+		place a max on the rexmission time value.  Round-trip time was
+		growing too large, 1st rexmit timeout was taking 30+ mins.
+segin.bli
+	ack_rt_queue
+		make time counters unsigned longwords.
+
+----------------
+   tcpacp 3.9	[1-30-84] stan
+----------------
+
+tcp.bli
+	data-declaration
+		removed "rt_delta" global literal as it is no longer used.
+		included support for 4.2 bsd unix style ftp server.
+user.bli
+	net$open
+		active opens may now specify a local port.  Abolished concept
+		of aous (active open user specified) local ports.
+
+---------------
+  tcpacp 3.9.1  [4-23-84] jefft
+----------------
+    
+structure.def
+
+     changed literal Max_Known_Hosts from 55 to 75.
+  
+     changed literal max_host_alias from 7 to 40.
+
+---------------
+    tcpacp 3.9.2  [10/25/84]   stans
+---------------
+
+user.bli
+
+        changed the way ports were handled so passive opens will accept
+        port numbers in the range of 1024 through 65535.  This was done
+        to accomodate Berkeley 4.2 systems.
+
+---------------
+    tcpacp 4.0	[5/1/85] noelan olson
+---------------
+
+tcp.bli
+
+	Replaced obsolete system services.
+
+hpwd.mar, setuser.mar
+
+	Upgrade the password hashing algorithm to VMS V4.
+
+server.bli
+
+	Added code to rebuild rights identifiers for the logged in user.
+	Code comes from init_user of loginout.exe.
+
+maclib.mar
+
+	Modified the routine to find time of day.  The time-of-day-register
+	is processor specific so I replaced it with a call to EXE$_GETTODR.
+
+tenet.com
+
+	In order to get the subprocesses to talk to the servers, it required
+	adding a shareable table (see MAILBOX.COM).  
+
+ptydriver.mar, vtp.bli, vtpsvr.bli
+
+	A new PTYDRIVER is used that is significantly changed from the V3.
+	This driver was rewritten by Kevin Carosso.
+
+---------------
+    tcpacp 4.1  [5/30/85]   noelan olson
+---------------
+
+tcp,user,segin,ip
+
+	Changed to use multiple internet addresses for gatewaying between
+	networks.
+
+memgr
+	Changed to track current overrun and maximum size of preallocated
+	queues.
+
+)%

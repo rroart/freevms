@@ -1,0 +1,1843 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'User Datagram Protocol Handler'
+%SBTTL 'User Datagram Protocol Handler Overview'
+%(
+
+Module:
+
+	UDP
+
+Facility:
+
+	User Datagram Protocol (UDP) handler
+
+Abstract:
+
+	UDP provides the user with a potentially unreliable datagram
+	service via the Internet Protocol (IP). This module handles the
+	UDP interface between the user and the IP layer.
+
+Author:
+
+	Vince Fuller, CMU-CSD, March, 1986
+	Copyright (c) 1986, 1987, Vince Fuller and Carnegie-Mellon University
+
+Modification History
+
+4.0e	21-Jan-1992	Marc A. Shannon		CMU Group N
+	Don't compute checksum for UDP packets going out from here to IP
+	since a broadcast packet (to 255.255.255.255) will need its checksum
+	recomputed when the destination address is changed to the local
+	broadcast (something like 128.2.255.255).
+
+4.0d	28-Aug-1991	Henry W. Miller		USBR
+	Range check size of buffers and return NET$_IR if requested
+	buffer size is greater than Max_UDP_Data_Size.
+
+4.0c	18-Jul-1991	Henry W. Miller		USBR
+	Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
+	and LIB$FREE_VM, and check return status.
+
+4.0b	30-May-1991	Henry W. Miller		USBR
+	In UDP_COPEN_DONE(), log failures.
+
+4.0a	13-Jan-1991	Henry W. Miller		USBR
+	Make UDPTTL a configurable variable.
+	Updated IDENT.
+
+	10-Sep-1990     Henry W. Miller 	USBR
+	Make UDP_CSEND() use DEFTTL.
+
+4.0   04-Dec-1989, Bruce R. Miller	CMU Network Development
+	Restructured the UDP packet.  Wildcard receives are passed
+	by the driver into a user supplied buffer instead of being
+	appended to the begining of the user's data buffer.
+
+	Removed the Internal UDP processing.  No one uses it anymore.
+	Changed name UCB to UDPCB to avoid confusion with Unit
+	Control Blocks.  Removed address mode.  UDP address can
+	now be spedified with a user supplid buffer.
+
+3.7   11-FEB-1988, Dale Moore
+	On UDP$SEND and ADDR_MODE check to see if sufficient bytes
+	given by user for udp header. If not return BTS.
+
+3.6  19-Nov-87, Edit by VAF
+	Know about IP$SEND failures and give user return status of NET$_NRT
+	on failures (no route to destination).
+
+3.5  23-Sep-87, Edit by VAF
+	Don't check checksums for packets with no checksums (i.e. checksum=0)
+	Believe it or not, there are still weenies out there who don't put
+	checksums in their UDP packets...
+
+3.4  30-Jul-87, Edit by VAF
+	Use $$KCALL macro instead of using $CMKRNL directly.
+
+3.3  26-Mar-87, Edit by VAF
+	Check for aborted UCB status when receiving UDP messages from the
+	network and when queuing user send and receive requests.
+
+3.2  23-Mar-87, Edit by VAF
+	Use TCP's packet buffer sizes for speed.
+
+3.1  10-Mar-87, Edit by VAF
+	Make "address-mode" also handle the UDP ports, so one connection can
+	handle packets to/from multiple foreign ports. Note that the local
+	port is always resolved at open time and cannot be set this way.
+
+3.0   3-Mar-87, Edit by VAF
+	Change calling sequence of User$Post_IO_Status. Add facility for
+	returning ICMP messages to the user for "address mode" connections.
+
+2.9   2-Mar-87, Edit by VAF
+	Add support for klugy "address mode" - allows user to specify the IP
+	addresses for each UDP$SEND and returns the IP addresses of the input
+	packet for each UDP$RECEIVE.
+
+2.8  19-Feb-87, Edit by VAF
+	Use new name lookup routines.
+	Fix a bug in UCB_FIND - infinite loop if no UCB's...
+
+2.7  18-Feb-87, Edit by VAF
+	Support open with IP address instead of host name.
+
+2.6  12-Feb-87, Edit by VAF
+	Modifications for domain service.
+
+2.5   5-Feb-87, Edit by VAF
+	Call USER$CHECK_ACCESS for user UDP opens.
+
+2.4   4-Feb-87, Edit by VAF
+	Recode UDP open to avoid name lookup for internal opens.
+
+2.3   3-Feb-87, Edit by VAF
+	Fix bug in UDP_ADLOOK_DONE - was using the name pointer as the name
+	length when copying it back to the UCB. Crashes ACP.
+
+2.2  10-Dec-86, Edit by VAF
+	Change order of arguments to Gen_Checksum.
+
+2.1   2-Oct-86, Edit by VAF
+	On ICMP errors, don't close internal UCB's - just abort all of their
+	pending requests. Internal UCB's have to take care of themselves...
+
+2.0  30-Sep-86, Edit by VAF
+	Make IUDP_CLOSE give the correct number of arguments to UCB_CLOSE.
+
+1.9  14-Aug-86, Edit by VAF
+	Be NOINT when examining UCB[UCB$ARGBLK].
+	Make Kill_UDP_Reqeuests also post UCB[UCB$ARGBLK].
+
+1.8  13-Aug-86, Edit by VAF
+	Add UDP debugging dump routines.
+
+1.7  12-Aug-86, Edit by VAF
+	Add internal entry points for use by ACP green protocol module.
+
+1.6  12-Aug-86, Edit by VAF
+	Make UDP$OPEN use the green protocol name lookup routines.
+
+1.5   9-Aug-86, Edit by VAF
+	Don't use SET_HOSTS any more - domain system makes things too
+	complicated to use common routine for both TCP and UDP.
+
+1.4   4-Aug-86, Edit by VAF
+	Forgot to post request in UDP$CLOSE/UDP$ABORT.
+
+1.3  31-Jul-86, Edit by VAF
+	Debugging, general reorganization.
+
+1.2  29-Jul-86, Edit by VAF
+	Start working on the real implementation.
+
+1.1  23-Jul-86, Edit by VAF
+	Add stub routines for user interface.
+
+1.0  24-Mar-86, Edit by VAF
+	Original, nonfunctional stub routines for IP interface.
+)%
+
+%SBTTL 'Module definition'	
+
+MODULE UDP( IDENT='4.0e',LANGUAGE(BLISS32),
+	    ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
+			    NONEXTERNAL=LONG_RELATIVE),
+	    LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
+	    OPTIMIZE,OPTLEVEL=3,ZIP)=
+
+BEGIN
+
+! Include standard definition files
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETERROR';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETVMS';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETTCPIP';
+LIBRARY 'STRUCTURE';
+LIBRARY 'TCPMACROS';
+LIBRARY 'SNMP';
+
+!*** Special literals from USER.BLI ***
+
+EXTERNAL LITERAL
+    UCB$Q_DDP,
+    UCB$L_CBID,
+    UCB$L_EXTRA;
+
+! External data items
+
+EXTERNAL
+    INTDF,
+    AST_In_Progress,
+    UDP_User_LP,
+    LOG_STATE,
+    MIN_PHYSICAL_BUFSIZE,
+    MAX_PHYSICAL_BUFSIZE;
+
+! External routines
+
+EXTERNAL ROUTINE
+
+! MACLIB.MAR
+
+    Swapbytes : NOVALUE,
+    Movbyt : NOVALUE,
+
+! MEMGR.BLI
+
+    MM$UArg_Free : NOVALUE,
+    MM$QBLK_Get,
+    MM$QBLK_Free : NOVALUE,
+    MM$Seg_Get,
+    MM$Seg_Free : NOVALUE,
+
+! USER.BLI
+
+    USER$GET_LOCAL_PORT,
+    USER$CHECK_ACCESS,
+    USER$Err,
+    IO$POST : NOVALUE,
+    User$Post_IO_Status : NOVALUE,
+
+! IP.BLI
+
+    IP$SET_HOSTS : NOVALUE,
+    IP$SEND,
+    Gen_Checksum,
+
+! NMLOOK.BLI
+
+    NML$CANCEL : NOVALUE,
+    NML$GETALST : NOVALUE,
+    NML$GETNAME : NOVALUE,
+
+! IOUTIL.BLI
+
+    GET_IP_ADDR,
+    ASCII_DEC_BYTES : NOVALUE,
+    ASCII_HEX_BYTES : NOVALUE,
+    LOG_FAO : NOVALUE,
+    QL_FAO : NOVALUE,
+
+! SNMP.BLI
+
+    SNMP$NET_INPUT,
+
+! RPC.BLI
+
+    RPC$INPUT,
+    RPC$CHECK_PORT;
+
+GLOBAL
+    UDPTTL	: INITIAL (32);
+
+EXTERNAL
+    SNMP_SERVICE,
+    RPC_SERVICE;
+
+
+%SBTTL 'UDP data structures'
+
+LITERAL
+    Max_UDP_Data_Size = 16384,	! Max UDP data size
+    UDPTOS = 0,			! Type of service
+    UDPDF = FALSE;		! Don't fragment flag (try fragmenting)
+
+! Define the 'UDPCB' - UDP analogue of TCB.
+
+$FIELD  UDPCB_Fields =
+    SET
+    UDPCB$Foreign_Host	= [$Ulong],	! UDP foreign host number
+    UDPCB$Foreign_Port	= [$Ulong],	!     foreign port
+    UDPCB$Local_Host	= [$Ulong],	!     local host
+    UDPCB$Local_Port	= [$Ulong],	!     local port
+    UDPCB$Foreign_Hname	= [$Bytes(MAX_HNAME)],
+    UDPCB$Foreign_Hnlen	= [$Short_Integer],
+    UDPCB$USR_Qhead	= [$Address],	! User receive request queue
+    UDPCB$USR_Qtail	= [$Address],
+    UDPCB$NR_Qhead	= [$Address],	! Net receive queue
+    UDPCB$NR_Qtail	= [$Address],
+    UDPCB$NR_Qcount	= [$Short_Integer],
+    UDPCB$Flags		= [$Bytes(2)],
+    $OVERLAY(UDPCB$Flags)
+	UDPCB$Wildcard	= [$Bit],	! UDPCB opened with wild FH/FP/LH
+	UDPCB$Addr_Mode	= [$Bit],	! IP addresses in data buffer
+	UDPCB$Aborting	= [$Bit],	! UDPCB is closing
+	UDPCB$NMLook	= [$Bit],	! UDPCB has an outstanding name lookup
+    $CONTINUE
+    UDPCB$UDPCBID	= [$Address],	! UDPCB_Table index for this connection
+    UDPCB$UCB_Adrs	= [$Address],	! Connection UDPCB address
+    UDPCB$UArgs		= [$Address],	! Uarg block in pending open
+    UDPCB$User_ID	= [$Bytes(4)],	! Process ID of owner
+    UDPCB$PIOchan	= [$Bytes(2)]	! Process IO channel
+    TES;
+
+LITERAL
+    UDPCB_Size = $Field_Set_Size;
+MACRO
+    UDPCB_Structure = BLOCK[UDPCB_Size] FIELD(UDPCB_Fields) %;
+%MESSAGE(%NUMBER(UDPCB_Size),' longwords per UDPCB')
+
+
+%SBTTL 'UDP data storage'
+
+OWN
+    UDPIPID : INITIAL(1),	! Current IP packet ID
+    UDPCB_Count : INITIAL(0),	! Count of active UDPCBs
+    UDPCB_TABLE : VECTOR[MAX_UDPCB+1];! Table of UDPCBs
+
+GLOBAL
+    UDP_MIB : UDP_MIB_struct;	! UDP Management Information Block
+
+
+%SBTTL 'UDP packet logger'
+%(
+    Queue up a log entry to dump out a UDP packet.
+ )%
+
+ROUTINE Log_UDP_Packet(Seg,SwapFlag,SendFlag) : NOVALUE =
+    BEGIN
+    MAP
+	Seg : REF UDPkt_Structure;
+    LOCAL
+	sptr,
+	segdata,
+	segcopy : UDPkt_Structure,
+	seghdr : REF UDPkt_Structure;
+
+    seghdr = .seg;		! Point at segment header
+    segdata = .seg + UDP_Header_Size;
+    IF .SwapFlag THEN		! Need to byteswap header?
+	BEGIN
+	CH$MOVE(UDP_Header_Size,CH$PTR(.seg),CH$PTR(segcopy)); ! Make a copy
+	seghdr = segcopy;	! Point at this version...
+	SwapBytes(UDP_Header_Size/2,.seghdr); ! Swap header bytes
+	END;
+
+! Print first part of info
+
+    IF .SendFlag THEN
+	sptr = %ASCID'Sent'
+    ELSE
+	sptr = %ASCID'Received';
+
+! Log the contents of the UDP header
+
+    QL$FAO(%STRING('!%T !AS UDP packet, SEG=!XL, DATA=!XL!/',
+		   '!_SrcPrt:!_!XL (!UL)!_DstPrt:!_!XL (!UL)!/',
+		   '!_Length:!_!SL!_CKsum:!_!SL!/'),
+	    0,.sptr,.seg,.segdata,
+	   .seghdr[UP$Source_Port],.seghdr[UP$Source_Port],
+	   .seghdr[UP$Dest_Port],.seghdr[UP$Dest_Port],
+	   .seghdr[UP$Length],.seghdr[UP$Checksum]);
+
+! If there is any data in the segment, then dump it, too
+
+    IF .seghdr[UP$Length] GTR UDP_Header_Size THEN
+	BEGIN
+	LITERAL
+	    maxhex = 20,
+	    maxasc = 50;
+	LOCAL
+	    datalen,
+	    asccnt,
+	    hexcnt,
+	    DESC$STR_ALLOC(dathex,maxhex*3);
+	datalen = .seghdr[UP$Length] - UDP_Header_Size;
+	IF .datalen GTR maxasc THEN
+	    asccnt = maxasc
+	ELSE
+	    asccnt = .datalen;
+	IF .datalen GTR maxhex THEN
+	    hexcnt = maxhex
+	ELSE
+	    hexcnt = .datalen;
+	ASCII_Hex_Bytes(dathex,.hexcnt,.segdata,dathex[DSC$W_LENGTH]);
+	QL$FAO(%STRING('!_Data Count: !SL!/',
+		       '!_HEX:!_!AS!/',
+		       '!_ASCII:!_!AF!/'),
+	       .datalen,dathex,.asccnt,.segdata);
+	END;
+    END;
+
+%SBTTL 'UDPCB_Find - look up UDP control block'
+
+ROUTINE UDPCB_Find(Src$Adrs,Src$Port,Dest$Port) =
+    BEGIN
+    LOCAL
+	Ucount,
+	UDPCBIX,
+	UDPCB : REF UDPCB_Structure;
+
+    Ucount = .UDPCB_Count;
+    UDPCBIX = 1;
+    WHILE (.Ucount GTR 0) AND (.UDPCBIX LEQ Max_UDPCB) DO
+	BEGIN
+	IF (UDPCB = .UDPCB_Table[.UDPCBIX]) NEQ 0 THEN
+	    BEGIN
+	    IF ((.UDPCB[UDPCB$Foreign_Host] EQL WILD) OR
+		(.UDPCB[UDPCB$Foreign_Host] EQL .Src$Adrs)) AND
+	       ((.UDPCB[UDPCB$Foreign_Port] EQL WILD) OR
+	        (.UDPCB[UDPCB$Foreign_Port] EQL .Src$Port)) AND
+	       (.UDPCB[UDPCB$Local_Port] EQL .Dest$Port) THEN
+		RETURN .UDPCB;
+	    Ucount = .Ucount-1;
+	    END;
+	UDPCBIX = .UDPCBIX + 1;
+	END;
+    RETURN 0;
+    END;
+
+
+%SBTTL 'UDP input handler'
+%(
+    Come here at AST level when input packet is determined to be UDP packet.
+    At present, all UDP input handling is done at AST level, so we search
+    the UDPCB list and queue the UDP packet for deliver here.
+)%
+
+FORWARD ROUTINE
+    UDP_SEND,
+    Queue_User_UDP;
+
+GLOBAL ROUTINE UDP$Input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg): NOvalue=
+    BEGIN
+    MAP
+	Seg : REF UDPkt_Structure;
+    LOCAL
+	RC,
+	Uptr,
+	Ucount,
+	RPC_index,
+	UDPCBIX,
+	sum,
+	delete,
+	Aptr : REF IPADR$ADDRESS_BLOCK,
+	UDPCB : REF UDPCB_Structure;
+    LABEL
+	X1,X2;
+
+! Assume this packet should be deleted
+
+    delete = TRUE;
+
+! Log the UDP packet if desired
+
+    IF $$LOGF(LOG$UDP) THEN
+	Log_UDP_Packet(.Seg,TRUE,FALSE);
+
+! Verify UDP checksum, if there is one
+
+    IF .Seg[UP$Checksum] NEQ 0 THEN
+	BEGIN
+	sum = Gen_Checksum(.Segsize,.Seg,.Src$Adrs,.Dest$Adrs,UDP_Protocol);
+	IF .sum NEQU %X'FFFF' THEN
+	    BEGIN			! Bad checkum - log & drop packet
+	    UDP_MIB[MIB$udpInErrors] = .UDP_MIB[MIB$udpInErrors] + 1;
+	    IF $$LOGF(LOG$UDP) THEN
+		QL$FAO('!%T UDP seg !XL dropped on bad checksum (!XL)!/',0,
+			.Seg,.sum);
+	    RETURN;
+	    END;
+	END;
+
+! Fix byte order of the UDP header
+
+    SwapBytes(UDP_Header_Size/2,.Seg);
+
+    
+! Setup pointer to UDP data and UDP data size
+
+    Uptr = .Seg + UDP_Header_Size;
+    Ucount = .SegSize - UDP_Header_Size;
+
+    ! Check to see if it's an RPC port
+    IF (.RPC_SERVICE AND
+	((RPC_index = RPC$CHECK_PORT(.Seg[UP$Dest_Port])) GEQ 0)) THEN
+	BEGIN
+	LOCAL
+	    out_len,
+	    out_buff : VECTOR [16384,BYTE];
+
+	! Keep count
+	UDP_MIB[MIB$udpInDatagrams] = .UDP_MIB[MIB$udpInDatagrams] + 1;
+
+	out_len = 16384; ! initial size of buffer
+
+	! Pass the UDP data to the Port Mapper module
+	! The results are returned in out_buff, size in out_len
+	RC = RPC$INPUT( .RPC_index, .Src$Adrs,.Dest$Adrs,
+			     .Seg[UP$Source_Port],.Seg[UP$Dest_Port],
+			     .UCount,.Uptr,out_buff,out_len);
+        IF (.RC AND (.out_len GTR 0)) THEN
+	    BEGIN
+	    ! Send off the reply datagram
+	    RC = UDP_SEND(.Dest$Adrs,.Src$Adrs,
+			  .Seg[UP$Dest_Port],.Seg[UP$Source_Port],
+		 	  out_buff,.out_len);
+	    IF .RC NEQ SS$_NORMAL THEN
+		XLOG$FAO(LOG$UDP,'!%T UDP RPC reply error, RC=!XL!/',0,.RC);
+	    END;
+
+	! Release the input datagram buffer
+	IF .delete THEN
+	    MM$Seg_Free(.Bufsize,.Buf);
+
+	RETURN	! Don't pass this buffer on to the upper layers
+	END;
+
+! Check to see if it's an SNMP packet
+    IF (.Seg[UP$Dest_Port] EQL UDP_PORT_SNMP) AND .SNMP_SERVICE THEN
+	BEGIN
+	LOCAL
+	    out_len,
+	    out_buff : VECTOR [512,BYTE];
+
+	! Keep count
+	UDP_MIB[MIB$udpInDatagrams] = .UDP_MIB[MIB$udpInDatagrams] + 1;
+
+	out_len = 512; ! initial size of buffer
+
+	! Pass the UDP data to the SNMP module
+	! The results are returned in out_buff, size in out_len
+	RC = SNMP$NET_INPUT( .Src$Adrs,.Dest$Adrs,
+			     .Seg[UP$Source_Port],.Seg[UP$Dest_Port],
+			     .UCount,.Uptr,out_buff,out_len);
+
+	! Send off the reply datagram
+	RC = UDP_SEND(.Dest$Adrs,.Src$Adrs,
+		      .Seg[UP$Dest_Port],.Seg[UP$Source_Port],
+		      out_buff,.out_len);
+	IF .RC NEQ SS$_NORMAL THEN
+	    XLOG$FAO(LOG$UDP,'!%T UDP SNMP reply error, RC=!XL!/',0,.RC);
+
+	! Release the input datagram buffer
+	IF .delete THEN
+	    MM$Seg_Free(.Bufsize,.Buf);
+
+	RETURN	! Don't pass this buffer on to the upper layers
+	END;
+
+! Try to match the input packet up with a UDPCB
+
+    UDPCB = UDPCB_Find(.Src$Adrs,.Seg[UP$Source_Port],.Seg[UP$Dest_Port]);
+    IF .UDPCB EQL 0 THEN
+	BEGIN
+	UDP_MIB[MIB$udpNoPorts] = .UDP_MIB[MIB$udpNoPorts] + 1;
+	IF $$LOGF(LOG$UDP) THEN
+	    QL$FAO('!%T No UDPCB found for segment !XL, SP=!SL, DP=!SL!/',
+		   0,.Seg,.Seg[UP$Source_Port],.Seg[UP$Dest_Port]);
+	END
+    ELSE
+X2:	BEGIN
+
+! Log that it was found
+
+	IF $$LOGF(LOG$UDP) THEN
+	    QL$FAO('!%T UDPCB !XL found for UDP !XL, SP=!SL, DP=!SL!/',
+		   0,.Seg,.UDPCB,.Seg[UP$Source_Port],.Seg[UP$Dest_Port]);
+
+! Make sure the UDPCB isn't aborted...
+
+	IF .UDPCB[UDPCB$Aborting] THEN
+	    BEGIN
+	    XQL$FAO(LOG$UDP,'!%T UDP input !XL for aborted UDPCB !XL dropped!/',
+		    0,.Seg,.UDPCB);
+	    LEAVE X2;
+	    END;
+
+! "Normal" UDPCB's stop being wildcarded when they receive something....
+
+!	IF NOT .UDPCB[UDPCB$ADDR_MODE] THEN
+!	    BEGIN
+
+! If the connection was wildcarded, resolve hosts and ports now
+
+!	    IF .UDPCB[UDPCB$Wildcard] THEN
+	    IF 0 THEN
+		BEGIN
+		UDPCB[UDPCB$Wildcard] = FALSE;
+		SELECT TRUE OF
+		SET
+		[.UDPCB[UDPCB$Foreign_Host] EQL WILD]:
+		    UDPCB[UDPCB$Foreign_Host] = .Src$Adrs;
+
+		[.UDPCB[UDPCB$Local_Host] EQL WILD]:
+		    UDPCB[UDPCB$Local_Host] = .Dest$Adrs;
+
+		[.UDPCB[UDPCB$Foreign_Port] EQL WILD]:
+		    UDPCB[UDPCB$Foreign_Port] = .Seg[UP$Source_Port];
+		TES;
+		END;
+!	    END;		! (non ADDR_MODE case)
+
+! Kluge. Overwrite the UDP/IP header in the buffer, since we don't need it.
+!!!HACK!!!
+	Aptr = .Uptr - IPADR$UDP_ADDRESS_BLEN;
+	Ucount = .Ucount + IPADR$UDP_ADDRESS_BLEN;
+	APTR[IPADR$SRC_PORT] = .Seg[UP$Source_Port];
+	APTR[IPADR$DST_PORT] = .Seg[UP$Dest_Port];
+	APTR[IPADR$SRC_HOST] = .Src$Adrs;
+	APTR[IPADR$DST_HOST] = .Dest$Adrs;
+
+! Give the segment to the user now.
+
+	delete = Queue_User_UDP (.UDPCB,.Aptr,.Ucount,.Buf,.Bufsize,0);
+	END; ! End of block X2
+
+! If the packet hasn't been given to the user, delete it now
+
+    IF .delete THEN
+	MM$Seg_Free(.Bufsize,.Buf);
+    END;
+
+%SBTTL 'ICMP input handler for UDP'
+%(
+    Handles ICMP messages received in response to our UDP packets.
+    For "normal" UDP connections, ICMP messages generally cause connection
+    aborts. For "address-mode" connections, ICMP messages are delivered to
+    the user.
+)%
+
+FORWARD ROUTINE
+    Deliver_UDP_Data : NOVALUE,
+    UDPCB_ABORT : NOVALUE;
+
+GLOBAL ROUTINE UDP$ICMP(ICMtype,ICMex,IPsrc,IPdest,UDPptr,UDPlen,
+			buf,bufsize) : NOVALUE =
+!ICMtype - ICMP packet type
+!ICMex - extra data from ICMP packet (pointer for ICM_PPROBLEM)
+!IPsrc - source address of offending packet
+!IPdest - destination address of offending packet
+!UDPptr - first 64-bits of data from offending packet
+!UDPlen - calculated octet count of data
+!Buf - address of network buffer
+!Bufsize - size of network buffer
+
+    BEGIN
+    MAP
+	UDPptr : REF UDPkt_Structure;
+    LOCAL
+	UDPCB : REF UDPCB_Structure,
+	delete;
+    LABEL
+	X;
+
+! Fix byte order of the UDP header
+
+    IF $$LOGF(LOG$ICMP+LOG$UDP) THEN
+	QL$FAO('!%T UDP$ICMP UDPlen !SL Bufsize !SL!/',0,.UDPlen,.Bufsize);
+    SwapBytes(.UDPlen/2,.UDPptr);
+
+! Find the connection that this ICMP message is for
+! Remember that the ICMP/IP message is what we originally sent, so the
+! hosts and ports are reversed. UDPCB_FIND(FRN_HOST,FRN_PORT,LCL_PORT)
+
+    delete = TRUE;
+    UDPCB = UDPCB_Find(.IPdest,.UDPptr[UP$Dest_Port],.UDPptr[UP$Source_Port]);
+    IF .UDPCB EQL 0 THEN
+	BEGIN			! Bogus UDP/ICMP message
+	IF $$LOGF(LOG$ICMP) THEN
+	    BEGIN
+	    LOCAL
+		DESC$STR_ALLOC(fhstr,20);
+
+	    ASCII_DEC_BYTES(fhstr,4,IPdest,fhstr[DSC$W_LENGTH]);
+	    QL$FAO('!%T ICMP for unknown UDPCB, FH=!AS, FP=!XL, LP=!XL!/',
+		    0,fhstr,.UDPptr[UP$Dest_Port],.UDPptr[UP$Source_Port]);
+	    END;
+	END
+    ELSE
+X:	BEGIN			! Good UDP/ICMP message
+	IF $$LOGF(LOG$ICMP+LOG$UDP) THEN
+	    QL$FAO('!%T ICMP type !SL for UDPCB !XL!/',0,.ICMtype,.UDPCB);
+
+! Ignore the packet, if the connection is aborted
+
+	IF .UDPCB[UDPCB$Aborting] THEN
+	    BEGIN
+	    XQL$FAO(LOG$UDP,'!%T ICMP message for aborted UDPCB !XL dropped!/',
+		       0,.UDPCB);
+	    LEAVE X;
+	    END;
+
+! ADDR_MODE UDPCB's get the ICMP message delivered to them, with IOSB flags set
+! indicating that this is an ICMP message and the ICMP error code
+!!!HACK!!! How will we send back the ICMP message?
+!!!HACK!!! Are you sure???
+	IF 1 THEN
+	    BEGIN
+	    LOCAL
+		QB : REF Queue_BLK_Structure(QB_NR_Fields),
+		Uptr : REF IPADR$ADDRESS_BLOCK,
+		Ucount;
+	    EXTERNAL ROUTINE
+		MM$QBlk_Get;
+
+! Allocate and setup the fields in the QB. ** N.B. We overwrite part of the IP
+! header, so be careful if you change the size of the UDPUSER block **
+
+	    QB = MM$QBLK_Get();
+	    QB[NR$ICMP] = TRUE;
+	    QB[NR$ICM_TYPE] = .ICMtype;
+	    QB[NR$ICM_CODE] = 0;
+	    QB[NR$ICM_EX] = .ICMex;
+	    Uptr = .UDPptr - IPADR$UDP_ADDRESS_BLEN;
+	    Uptr[IPADR$SRC_HOST] = .IPDest;
+	    Uptr[IPADR$DST_HOST] = .IPSrc;
+	    Uptr[IPADR$SRC_PORT] = .UDPptr[UP$Dest_Port];
+	    Uptr[IPADR$DST_PORT] = .UDPptr[UP$Source_Port];
+	    Ucount = .UDPlen + IPADR$UDP_ADDRESS_BLEN;
+	    delete = Queue_User_UDP(.UDPCB,.Uptr,.Ucount,.Buf,.Bufsize,.QB);
+	    END
+	ELSE
+	    BEGIN
+
+! Normal connections are generally aborted.
+
+	    SELECTONE .ICMtype OF
+	    SET
+	    [ICM_DUNREACH]:	! Destination Unreachable - abort connection
+		BEGIN
+		UDPCB_Abort(.UDPCB,NET$_URC);
+		IF $$LOGF(LOG$ICMP OR LOG$UDP) THEN
+		    QL$FAO(
+		       '!%T UDPCB !XL killed by ICMP Destination Unreachable!/',
+		       0,.UDPCB);
+		END;
+
+	    [ICM_TEXCEED]:	! Time exceeded - abort
+		BEGIN
+		UDPCB_Abort(.UDPCB,NET$_CTO);
+		IF $$LOGF(LOG$ICMP OR LOG$UDP) THEN
+		    QL$FAO('!%T UDPCB !XL killed by ICMP Time Exceeded!/',
+			   0,.UDPCB);
+		END;
+
+	    [ICM_SQUENCH]:	! Source quench - currently unsupported
+		BEGIN
+		0;
+		END;
+
+	    [ICM_REDIRECT]:	! Redirect - not supported in this module
+		BEGIN
+		0;
+		END;
+
+	    [ICM_PPROBLEM]:	! Parameter problem - not yet supported
+		BEGIN
+		0;
+		END;
+	    TES;
+	    END;
+	END;
+
+! In any case, free up the buffer
+! No, dont't clear the buffer.  What if ICMP needs it?
+    IF .delete THEN
+	MM$Seg_Free(.Bufsize,.Buf);
+    END;
+
+%SBTTL 'Queue_User_UDP - Queue up UDP packet for delivery to user'
+%(
+    Called by UDP$Input at AST level when an input packet matches a
+    user UDP "connection". Function of this routine is to either deliver
+    the UDP packet to the user (if a user read request is available) or
+    queue it for later deliver.
+    Returns TRUE if the UDP packet has been fully disposed of (i.e. the
+    caller may deallocate the packet), FALSE otherwise (i.e. the packet
+    has been placed on a queue and may not be deallocated yet).
+ )%
+
+ROUTINE Queue_User_UDP(UDPCB,Uptr,Usize,Buf,Bufsize,QB) =
+    BEGIN
+    MAP
+	UDPCB : REF UDPCB_Structure,
+	QB : REF Queue_BLK_Structure(QB_NR_Fields);
+    LOCAL
+	QBR;
+    EXTERNAL ROUTINE
+	MM$QBlk_Get;
+    LITERAL
+	UDPCB$NR_Qmax = 5;	! Max input packets permitted on input queue
+
+! See if the input queue is full for this UDPCB
+
+    IF .UDPCB[UDPCB$NR_Qcount] GTR UDPCB$NR_Qmax THEN
+	BEGIN
+	UDP_MIB[MIB$udpInErrors] = .UDP_MIB[MIB$udpInErrors] + 1;
+	IF $$LOGF(LOG$UDP) THEN
+	    QL$FAO('!%T UDP at !XL dropped - UDPCB NR queue full!/',0,.Uptr);
+	RETURN TRUE;		! Drop the packet - no room
+	END;
+
+! Allocate a queue block and insert onto user receive queue
+
+    IF .QB EQL 0 THEN
+	QB = MM$QBLK_Get();
+    QB[NR$Buf_Size] = .Bufsize;	! Total size of network buffer
+    QB[NR$Buf] = .Buf;		! Pointer to network buffer
+    QB[NR$Ucount] = .Usize;	! Length of the data
+    QB[NR$Uptr] = .Uptr;	! Pointer to the data
+
+! If there is a user read outstanding, deliver data, else queue for later
+
+    IF REMQUE(.UDPCB[UDPCB$USR_Qhead],QBR) NEQ Empty_Queue THEN
+	Deliver_UDP_Data (.UDPCB,.QB,.QBR)
+    ELSE
+	INSQUE(.QB,.UDPCB[UDPCB$NR_Qtail]);
+    RETURN FALSE;		! Don't deallocate this segment...
+    END;
+
+%SBTTL 'Deliver_UDP_Data - Deliver UDP data to user'
+%(
+    Perform actual delivery of UDP packet to a user request.
+    UDP packet is copied into the user buffer and the user I/O request
+    is posted.
+ )%
+
+ROUTINE Deliver_UDP_Data(UDPCB,QB,URQ) : NOVALUE =
+    BEGIN
+    MAP
+	UDPCB : REF UDPCB_Structure,
+	QB : REF Queue_Blk_Structure(QB_NR_Fields),
+	URQ : REF Queue_Blk_Structure(QB_UR_Fields);
+    LOCAL
+	FLAGS,
+	ICMTYPE,
+	IRP : REF $BBLOCK[],
+	PID,
+	UArgs : REF User_RECV_Args,
+	Sargs : REF User_RECV_Args,
+	Aptr,
+	Uptr,
+	Ucount;
+
+! Determine data start and data count
+
+    Ucount = .QB[NR$Ucount] - IPADR$UDP_ADDRESS_BLEN;
+    Uptr = .QB[NR$Uptr] + IPADR$UDP_ADDRESS_BLEN;
+    Aptr = .QB[NR$Uptr];
+
+! Truncate to user receive request size
+
+!!!HACK!!! You can't just drop data like that!  Or can you?
+    IF .Ucount GTR .URQ[UR$Size] THEN
+	Ucount = .URQ[UR$Size];
+
+    IF $$LOGF(LOG$UDP) THEN
+	QL$FAO('!%T Posting UDP receive,Size=!SL,UDPCB=!XL,IRP=!XL,UDPCB_A=!XL PID=!XL!/',
+	       0,.Ucount,.UDPCB,.URQ[UR$IRP_Adrs],.URQ[UR$UCB_Adrs],PID);
+
+! Copy from our buffer to the user system buffer
+
+    $$KCALL(MOVBYT,.Ucount,.Uptr,.URQ[UR$Data]);
+
+! Copy UDP Source and destination addresses to system space Diag Buff
+
+    UArgs = .URQ[UR$UArgs];
+    IRP = .URQ[UR$IRP_Adrs];
+    IF .Uargs[RE$PH_Buff] NEQ 0 THEN
+	$$KCALL(MOVBYT,IPADR$UDP_ADDRESS_BLEN,
+		.Aptr,.Uargs[RE$PH_Buff]);
+
+! Post the I/O and free up memory
+
+    ICMTYPE = 0;
+    FLAGS = 0;
+    IF .QB[NR$ICMP] THEN
+	BEGIN
+	ICMTYPE = .QB[NR$ICM_TYPE];
+	FLAGS = .FLAGS OR NSB$ICMPBIT;
+	END;
+    User$Post_IO_Status(.URQ[UR$Uargs],SS$_NORMAL,
+			.Ucount,.FLAGS,.ICMTYPE);
+    MM$UArg_Free(.URQ[UR$Uargs]);
+
+    MM$QBLK_Free(.URQ);
+    MM$Seg_Free(.QB[NR$Buf_Size],.QB[NR$Buf]);
+    MM$QBLK_Free(.QB);
+    UDP_MIB[MIB$udpInDatagrams] = .UDP_MIB[MIB$udpInDatagrams] + 1;
+    END;
+
+%SBTTL 'UDPCB_OK - Match connection ID to UDPCB address'
+
+ROUTINE UDPCB_OK(Conn_ID,RCaddr,Uargs : REF User_Default_Args) =
+    BEGIN
+    LOCAL
+	UDPCB : REF UDPCB_Structure;
+    MACRO
+	UDPCBERR(EC) = (.RCaddr = EC; RETURN 0) %;
+
+! Range check the connection id. This should never fail, since the user should
+! not be fondling connection IDs.
+
+    IF (.Conn_ID LEQ 0) OR (.Conn_ID GTR MAX_UDPCB) THEN
+	UDPCBERR(NET$_CDE);	! Nonexistant connection ID
+    UDPCB = .UDPCB_Table[.Conn_ID];
+
+! Make sure the table had something reasonable for this connection ID
+
+    IF .UDPCB LEQ 0 THEN
+	UDPCBERR(NET$_CDE);	! UDPCB has been deleted (possible)
+
+! Check consistancy of UDPCB back-pointer into table
+
+    IF (.UDPCB[UDPCB$UDPCBID] NEQ .Conn_ID) OR
+       (.UDPCB[UDPCB$UCB_ADRS] NEQ .Uargs[UD$UCB_Adrs]) THEN
+	UDPCBERR(NET$_CDE);	! Confusion (can this happen?)
+
+! Everything is good - return the UDPCB address
+
+    RETURN .UDPCB;
+    END;
+
+%SBTTL 'UDPCB_Get - Allocate and initialize one UDPCB'
+
+ROUTINE UDPCB_Get(IDX,Src$Port) =
+    BEGIN
+    EXTERNAL ROUTINE
+	LIB$GET_VM	: ADDRESSING_MODE(GENERAL),
+	LIB$GET_VM_PAGE	: ADDRESSING_MODE(GENERAL);
+    LOCAL
+	Ucount,
+	UDPCB : REF UDPCB_Structure,
+	UDPCBIDX,
+	RC ;
+    LABEL
+	X;
+
+! Check to make sure we haven't already allocated this local port
+
+    Ucount = .UDPCB_Count;
+    UDPCBIDX = 1;
+    WHILE (.Ucount GTR 0) AND (.UDPCBIDX LEQ Max_UDPCB) DO
+	BEGIN
+	IF (UDPCB = .UDPCB_Table[.UDPCBIDX]) NEQ 0 THEN
+	    BEGIN
+	    IF (.UDPCB[UDPCB$Local_Port] EQL .Src$Port) THEN
+		RETURN 0;
+	    Ucount = .Ucount-1;
+	    END;
+	UDPCBIDX = .UDPCBIDX + 1;
+	END;
+
+! Find a free slot in the UDPCB table
+
+X:  BEGIN			! ** Block X **
+    UDPCBIDX = 0;
+    INCR I FROM 1 TO MAX_UDPCB DO
+	IF .UDPCB_Table[.I] EQL 0 THEN
+	    LEAVE X WITH (UDPCBIDX = .I);
+    RETURN 0;			! Failed to allocate a UDPCB
+    END;			! ** Block X **
+
+! Allocate some space for the UDPCB
+
+!    LIB$GET_VM(%REF(UDPCB_Size*4),UDPCB);
+    RC = LIB$GET_VM_PAGE(%REF(((UDPCB_Size * 4) / 512) + 1),UDPCB);
+    IF NOT .RC THEN
+	FATAL$FAO('UDPCB_GET - LIB$GET_VM failure, RC=!XL',.RC);
+
+! Clear it out and set it in the table
+
+    UDPCB_Table[.UDPCBIDX] = .UDPCB;
+    CH$FILL(%CHAR(0),UDPCB_Size*4,.UDPCB);
+    UDPCB_Count = .UDPCB_Count+1;
+
+! Initialize queue headers for the UDPCB
+
+    UDPCB[UDPCB$NR_Qhead] = UDPCB[UDPCB$NR_Qtail] = UDPCB[UDPCB$NR_Qhead];
+    UDPCB[UDPCB$USR_Qhead] = UDPCB[UDPCB$USR_Qtail] = UDPCB[UDPCB$USR_Qhead];
+
+! Set the connection ID
+
+    UDPCB[UDPCB$UDPCBID] = .UDPCBIDX;
+
+! Return the pointer
+
+    .IDX = .UDPCBIDX;
+    RETURN .UDPCB;
+    END;
+
+%SBTTL 'UDPCB_Free - Deallocate a UDPCB'
+
+ROUTINE UDPCB_Free(UDPCBIX,UDPCB : REF UDPCB_Structure) : NOVALUE =
+    BEGIN
+    EXTERNAL ROUTINE
+	LIB$FREE_VM		: ADDRESSING_MODE(GENERAL),
+	LIB$FREE_VM_PAGE	: ADDRESSING_MODE(GENERAL);
+    LOCAL
+	RC ;
+
+! Clear the table entry
+
+    UDPCB_Table[.UDPCBIX] = 0;
+
+! Free the memory and decrement our counter.
+
+!    LIB$FREE_VM(%REF(UDPCB_Size*4),UDPCB);
+    RC = LIB$FREE_VM_PAGE(%REF(((UDPCB_Size * 4) / 512) + 1),UDPCB);
+    IF NOT .RC THEN
+	FATAL$FAO('UDPCB_FREE - LIB$FREE_VM failure, RC=!XL',.RC);
+    UDPCB_Count = .UDPCB_Count-1;
+    END;
+
+%SBTTL 'Kill_UDP_Requests - purge all I/O requests for a connection'
+
+ROUTINE Kill_UDP_Requests(UDPCB : REF UDPCB_Structure,RC) : NOVALUE =
+    BEGIN
+    LOCAL
+	URQ : REF Queue_Blk_Structure(QB_UR_Fields),
+	QB : REF Queue_Blk_Structure(QB_NR_Fields);
+
+! Make sure we aren't doing this more than once
+!
+!   IF .UDPCB[UDPCB$Aborting] THEN
+!	RETURN;
+
+! Say that this connection is aborting (prevent future requests)
+
+    UDPCB[UDPCB$Aborting] = TRUE;
+
+! Cancel any name lookup in progess
+
+    IF .UDPCB[UDPCB$NMLOOK] THEN
+	BEGIN
+	NML$CANCEL(.UDPCB, 0, 0);
+	UDPCB[UDPCB$NMLOOK] = FALSE;
+	END;
+
+! Kill any pending open
+
+    NOINT;
+    IF .UDPCB[UDPCB$UARGS] NEQ 0 THEN
+	BEGIN
+	USER$Err(.UDPCB[UDPCB$UARGS],.RC);
+	UDPCB[UDPCB$UARGS] = 0;
+	END;
+    OKINT;
+
+! Purge the user request queue, posting all requests
+
+    WHILE REMQUE(.UDPCB[UDPCB$USR_Qhead],URQ) NEQ Empty_Queue DO
+	BEGIN
+	    User$Post_IO_Status(.URQ[UR$Uargs],.RC,0,0,0);
+	    MM$UArg_Free(.URQ[UR$Uargs]);
+	    MM$QBlk_Free(.URQ);	
+	END;
+
+! Purge any received qblocks as well
+
+    WHILE REMQUE(.UDPCB[UDPCB$NR_Qhead],QB) NEQ Empty_Queue DO
+	BEGIN
+	MM$Seg_Free(.QB[NR$Buf_Size],.QB[NR$Buf]);
+	MM$QBlk_Free(.QB);
+	END;
+    END;
+
+%SBTTL 'UDPCB_Close - Close/deallocate a UDPCB'
+
+ROUTINE UDPCB_Close(UIDX,UDPCB : REF UDPCB_Structure,RC) : NOVALUE =
+    BEGIN
+    Kill_UDP_Requests(.UDPCB,.RC);
+    UDPCB_FREE(.UIDX,.UDPCB);
+    END;
+
+ROUTINE UDPCB_Abort(UDPCB : REF UDPCB_Structure,RC) : NOVALUE =
+!
+! Abort a UDPCB - called by ICMP code.
+!
+    BEGIN
+    UDPCB_CLOSE(.UDPCB[UDPCB$UDPCBID],.UDPCB,.RC)
+    END;
+
+
+
+%SBTTL 'Purge_All_UDP_IO - delete UDP database before network exits'
+
+GLOBAL ROUTINE UDP$Purge_All_IO : NOVALUE =
+    BEGIN
+    LOCAL
+	UDPCBIDX,
+	UDPCB : REF UDPCB_Structure;
+
+! Loop for all connections, purge them, and delete them.
+
+    INCR UDPCBIDX FROM 1 TO MAX_UDPCB DO
+	IF (UDPCB = .UDPCB_Table[.UDPCBIDX]) NEQ 0 THEN
+	    UDPCB_Close(.UDPCBIDX,.UDPCB,NET$_TE);
+    END;
+
+%SBTTL 'UDP_Conn_Unique - Check for unique UDP connection'
+%(
+    Verify that a given set of Local Port, Foreign Host, Foreign Port
+    are not already in use by an existing UDP connection.
+    Returns TRUE if the connection is unique, false otherwise.
+ )%
+
+ROUTINE UDP_Conn_Unique(LP,FH,FP) =
+    BEGIN
+    LOCAL
+	UDPCB : REF UDPCB_Structure,
+	Ucount;
+
+    Ucount = .UDPCB_Count;
+    INCR I FROM 1 TO MAX_UDPCB DO
+	IF (UDPCB = UDPCB_Table[.I]) NEQ 0 THEN
+	    BEGIN
+	    IF (.UDPCB[UDPCB$Foreign_Host] EQL .FH) AND
+	       (.UDPCB[UDPCB$Foreign_Port] EQL .FP) AND
+	       (.UDPCB[UDPCB$Local_Port] EQL .LP) THEN
+		RETURN FALSE;
+	    IF (Ucount = .Ucount-1) LEQ 0 THEN
+		RETURN TRUE;
+	    END;
+    RETURN TRUE;
+    END;
+
+%SBTTL 'UDP$OPEN - open a UDP "connection"'
+%(
+    Open a UDP "connection". Create a UDP Control Block, which serves as a
+    place to hang incoming packets and user receive requests.
+ )%
+
+FORWARD ROUTINE
+    UDP_COPEN_DONE,
+    UDP_NMLOOK_DONE : NOVALUE,
+    UDP_ADLOOK_DONE : NOVALUE;
+
+GLOBAL ROUTINE UDP$OPEN(Uargs : REF User_Open_Args) : NOVALUE =
+    BEGIN
+    LOCAL
+	ProtoHdr : REF IPADR$Address_Block,
+	IPADDR,
+	NAMLEN,
+	NAMPTR : VECTOR[4,BYTE],
+	UIDX,
+	UDPCB : REF UDPCB_Structure,
+	UDPCBPTR,
+	Args : VECTOR[4];
+    LABEL
+	X;
+
+    XLOG$FAO(LOG$USER,'!%T UDP$OPEN: PID=!XL,CHAN=!XL,FLAGS=!XL X1=!XL!/',
+	     0,.Uargs[OP$PID],.Uargs[OP$PIOchan],.Uargs[OP$FLAGS],
+	     .UArgs[OP$Ext1]);
+
+    ProtoHdr = Uargs[OP$ProtoHdrBlk];
+
+! First create a UDPCB for this connection.
+
+    IF (UDPCB = UDPCB_Get(UIDX,.ProtoHdr[IPADR$SRC_PORT])) LEQ 0 THEN
+	BEGIN
+	USER$Err(.Uargs,NET$_UCT);
+	RETURN;
+	END;
+
+! Initialize user mode values
+
+    UDPCB[UDPCB$UCB_ADRS] = .Uargs[OP$UCB_Adrs];
+    UDPCB[UDPCB$User_ID] = .Uargs[OP$PID];
+    UDPCB[UDPCB$PIOchan] = .Uargs[OP$PIOchan];
+
+! At this point, the connection exists. Write the connection ID
+! back into the Unit Control Block for this connection.
+
+    UDPCBptr = .Uargs[OP$UCB_Adrs] + UCB$L_CBID;
+    $$KCALL(MOVBYT,4,UIDX,.UDPCBptr);
+
+! Initialize queue headers for the UDPCB
+
+    UDPCB[UDPCB$NR_Qhead] = UDPCB[UDPCB$NR_Qtail] = UDPCB[UDPCB$NR_Qhead];
+    UDPCB[UDPCB$USR_Qhead] = UDPCB[UDPCB$USR_Qtail] = UDPCB[UDPCB$USR_Qhead];
+
+! Copy user arguments to UDPCB
+
+    IF (.Uargs[OP$Mode] EQL OP$MODE_UDPADDR) THEN
+	UDPCB[UDPCB$ADDR_MODE] = TRUE;
+    ProtoHdr = Uargs[OP$ProtoHdrBlk];
+    UDPCB[UDPCB$Local_Port] = .ProtoHdr[IPADR$SRC_PORT];
+    UDPCB[UDPCB$Foreign_Port] = .ProtoHdr[IPADR$DST_PORT];
+    IF .UDPCB[UDPCB$Foreign_Port] EQL WILD THEN
+	UDPCB[UDPCB$Wildcard] = TRUE;
+
+! Handle wildcard host
+
+    NAMPTR = CH$PTR(Uargs[OP$Foreign_Host]);
+    NAMLEN = .Uargs[OP$Foreign_Hlen];
+    IF (.NAMLEN EQL 0) AND (NOT .Uargs[OP$ADDR_FLAG]) THEN
+	BEGIN
+	UDPCB[UDPCB$Wildcard] = TRUE;
+	UDPCB[UDPCB$Foreign_Host] = WILD;
+	UDPCB[UDPCB$Foreign_Hnlen] = 0;
+	UDPCB[UDPCB$Local_Host] = WILD;
+	UDPCB[UDPCB$Uargs] = .Uargs;
+	UDP_NMLOOK_DONE(.UDPCB,SS$_NORMAL,0,0,0,0);
+	RETURN;
+	END;
+
+! Check for supplied IP address instead of name
+
+X:  BEGIN			! *** Block X ***
+    IF .Uargs[OP$ADDR_FLAG] THEN
+	IPADDR = .Uargs[OP$Foreign_Address]
+    ELSE
+	IF GET_IP_ADDR(NAMPTR,IPADDR) LSS 0 THEN
+	    LEAVE X;
+    UDPCB[UDPCB$Foreign_Hnlen] = 0;
+    UDPCB[UDPCB$Uargs] = .Uargs;
+    UDP_NMLOOK_DONE(.UDPCB,SS$_NORMAL,1,IPADDR,0,0);
+    UDPCB[UDPCB$NMLook] = TRUE;
+    NML$GETNAME(.IPADDR,UDP_ADLOOK_DONE,.UDPCB);
+    RETURN;
+    END;			! *** Block X ***
+
+! "standard" case, host name is supplied - start name lookup for it
+
+    UDPCB[UDPCB$Uargs] = .Uargs;
+    UDPCB[UDPCB$NMLook] = TRUE;
+    NML$GETALST(.NAMPTR,.NAMLEN,UDP_NMLOOK_DONE,.UDPCB);
+    END;
+
+
+
+%SBTTL 'UDP_NMLOOK_DONE - Second phase of UDP$OPEN when namelookup done'
+%(
+    Come here when the foreign host name has been resolved.
+    At this point, we set the local & foreign hosts/ports in the UDPCB
+    and post the users open request.
+)%
+
+ROUTINE UDP_NMLOOK_DONE(UDPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE =
+    BEGIN
+    MAP
+	UDPCB : REF UDPCB_Structure;
+    LOCAL
+	RC,
+	Uargs : REF User_Open_Args,
+	IOSB : NetIO_Status_Block;
+    MACRO
+	UOP_ERROR(EC) = 
+	    BEGIN
+	    USER$Err(.Uargs,EC);
+	    UDPCB_FREE(.UDPCB[UDPCB$UDPCBID],.UDPCB);
+	    RETURN;
+	    END %;
+
+! Clear name lookup flag and get uargs
+
+    NOINT;
+    UDPCB[UDPCB$NMLook] = FALSE;
+    Uargs = .UDPCB[UDPCB$Uargs];
+    UDPCB[UDPCB$Uargs] = 0;
+    OKINT;
+
+! Check status of the name lookup
+
+    IF NOT .STATUS THEN
+	UOP_ERROR(.STATUS);
+
+! Finish up the common part of the open
+
+    RC = UDP_COPEN_DONE(.UDPCB,.ADRCNT,.ADRLST);
+    IF NOT .RC THEN
+	UOP_ERROR(.RC);
+
+! Verify that we have access to the host/port set
+
+    RC = USER$CHECK_ACCESS(.UDPCB[UDPCB$USER_ID],.UDPCB[UDPCB$Local_Host],
+		      .UDPCB[UDPCB$Local_Port],.UDPCB[UDPCB$Foreign_Host],
+		      .UDPCB[UDPCB$Foreign_Port]);
+    IF NOT .RC THEN
+	UOP_ERROR(.RC);
+
+! Set the foreign host name in the UDPCB
+
+    UDPCB[UDPCB$Foreign_Hnlen] = .NAMLEN;
+    IF .NAMLEN NEQ 0 THEN
+	CH$MOVE(.NAMLEN,.NAMPTR,CH$PTR(UDPCB[UDPCB$Foreign_Hname]));
+
+! Finally, post the status
+
+    IOSB[NSB$STATUS] = SS$_NORMAL; ! Success return
+    IOSB[NSB$Byte_Count] = 0;
+    IOSB[NSB$XSTATUS] = 0;
+    IO$POST(IOSB,.Uargs);
+    MM$UArg_Free(.Uargs);
+    END;
+
+%SBTTL 'UDP_COPEN_DONE - Common user UDP open done routine'
+
+ROUTINE UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST) =
+    BEGIN
+    LOCAL
+	IP_Address ;
+    MAP
+	UDPCB : REF UDPCB_Structure;
+
+! Set local and foreign host numbers according to our info
+
+    IF .ADRCNT GTR 0 THEN
+	IP$SET_HOSTS(.ADRCNT,.ADRLST,UDPCB[UDPCB$Local_Host],
+		     UDPCB[UDPCB$Foreign_Host]);
+
+! Now, check that this connection is unique and get a local port, if needed.
+
+    IF .UDPCB[UDPCB$Local_Port] NEQ WILD THEN
+	BEGIN
+	IF NOT UDP_Conn_Unique(.UDPCB[UDPCB$Local_Port],.UDPCB[UDPCB$Foreign_Host],
+			       .UDPCB[UDPCB$Foreign_Port]) THEN
+	    RETURN NET$_NUC;
+	END
+    ELSE
+	BEGIN
+	LITERAL
+	    Max_LP_Tries = 100;
+
+! Try a bunch of times to find a unique local port...
+
+	INCR I FROM 1 TO Max_LP_Tries DO
+	    BEGIN
+	    LOCAL
+		LP;
+	    LP = USER$GET_LOCAL_PORT(UDP_User_LP);
+	    IF UDP_Conn_Unique(.LP,.UDPCB[UDPCB$Foreign_Host],
+			       .UDPCB[UDPCB$Foreign_Port]) THEN
+		EXITLOOP (UDPCB[UDPCB$Local_Port] = .LP);
+	    END;
+
+! If it failed, then no connections available - punt
+
+	IF .UDPCB[UDPCB$Local_Port] EQL 0 THEN
+	    BEGIN
+	    XLOG$FAO(LOG$USER,'!%T UDB_COPEN: Conn failed !/', 0);
+	    ACT$FAO('!%D Open UDP Port failed !/', 0 );
+	    RETURN NET$_CSE;
+	    END ;
+	END;
+
+! Done at last - log success
+
+    XLOG$FAO(LOG$USER,'!%T UDB_COPEN: Conn idx = !XL, UDPCB = !XL!/',
+	     0,.UDPCB[UDPCB$UDPCBID],.UDPCB);
+    IP_Address = .UDPCB[UDPCB$Foreign_Host] ;
+    ACT$FAO('!%D Open UDP Port !UW (!UW) <!UB.!UB.!UB.!UB>!/',0,
+	.UDPCB[UDPCB$Local_Port],
+	.UDPCB[UDPCB$Foreign_Port],
+	.IP_Address<0,8>,.IP_Address<8,8>,
+	.IP_Address<16,8>,.IP_Address<24,8>
+		   );
+    RETURN SS$_NORMAL;
+    END;
+
+%SBTTL 'UDP_ADLOOK_DONE - Finish UDP address to name lookup'
+
+ROUTINE UDP_ADLOOK_DONE(UDPCB,STATUS,NAMLEN,NAMPTR) : NOVALUE =
+    BEGIN
+    MAP
+	UDPCB : REF UDPCB_Structure;
+
+! Clear pending name lookup flag
+
+    UDPCB[UDPCB$NMLook] = FALSE;
+
+! Check status
+
+    IF NOT .STATUS THEN
+	RETURN;
+
+! Copy the hostname into the UDPCB
+
+    UDPCB[UDPCB$Foreign_Hnlen] = .NAMLEN;
+    CH$MOVE(.NAMLEN,.NAMPTR,CH$PTR(UDPCB[UDPCB$Foreign_Hname]));
+    END;
+
+%SBTTL 'UDP$CLOSE - close UDP "connection"'
+%(
+    Close a UDP "connection". Kills any receive requests that haven't
+    finished yet and deallocates the UDPCB and any other data structures
+    associated with a connection.
+)%
+
+GLOBAL ROUTINE UDP$CLOSE(Uargs : REF User_Close_Args) : NOVALUE =
+    BEGIN
+    LOCAL
+	UDPCB : REF UDPCB_Structure,
+	RC;
+
+! Check for valid UDPCB
+
+    IF (UDPCB = UDPCB_OK(.Uargs[CL$Local_Conn_ID],RC,.Uargs)) EQL 0 THEN
+	BEGIN
+	USER$Err(.Uargs,.RC);
+	RETURN;
+	END;
+
+! Use common routine for closing
+
+    UDPCB_Close(.Uargs[CL$Local_Conn_ID],.UDPCB,NET$_CC);
+
+! Close done - post user request and free argblk
+
+    User$Post_IO_Status(.Uargs,SS$_NORMAL,0,0,0);
+    MM$UArg_Free(.Uargs);
+    END;
+
+%SBTTL 'UDP$ABORT - abort UDP "connection"'
+%(
+    Abort a UDP "connection". Identical in functionality to UDP$CLOSE.
+ )%
+
+GLOBAL ROUTINE UDP$ABORT(Uargs : REF User_Abort_Args) : NOVALUE =
+    BEGIN
+    LOCAL
+	UDPCB : REF UDPCB_Structure,
+	RC;
+
+! Check for valid UDPCB
+
+    IF (UDPCB = UDPCB_OK(.Uargs[AB$Local_Conn_ID],RC,.Uargs)) EQL 0 THEN
+	BEGIN
+	USER$Err(.Uargs,.RC);
+	RETURN;
+	END;
+
+! Use common routine for closing
+
+    UDPCB_Close(.Uargs[AB$Local_Conn_ID],.UDPCB,NET$_CC);
+
+! Done. Clean up.
+
+    User$Post_IO_Status(.Uargs,SS$_NORMAL,0,0,0);
+    MM$UArg_Free(.Uargs);
+    END;
+
+%SBTTL 'UDP$SEND - send UDP packet'
+%(
+    Handle user send request for UDP connection. Form a UDP packet from the
+    user's data buffer and hand it to IP layer for transmission.
+ )%
+
+GLOBAL ROUTINE UDP$SEND(Uargs : REF User_Send_Args) : NOVALUE =
+    BEGIN
+    LOCAL
+	RC,
+	ForeignAddr,LocalAddr,
+	ForeignPort,LocalPort,
+	Uaddr : REF IPADR$ADDRESS_BLOCK,
+	UDPCB : REF UDPCB_Structure;
+
+! Validate connection ID and get UDPCB pointer
+
+    IF (UDPCB = UDPCB_OK(.Uargs[SE$Local_Conn_ID],RC,.Uargs)) EQL 0 THEN
+	BEGIN
+	USER$Err(.Uargs,.RC);	! No such connection
+	RETURN;
+	END;
+    XLOG$FAO(LOG$USER,'!%T UDP$SEND: Conn=!XL, UDPCB=!XL, Size=!SL, X1=!XL, X2=!XL!/',
+	     0,.Uargs[SE$Local_Conn_ID],.UDPCB,.Uargs[SE$Buf_size],
+	     .Uargs[SE$EXT1],.Uargs[SE$EXT2]);
+
+! Check for aborted connection
+
+    IF .UDPCB[UDPCB$Aborting] THEN
+	BEGIN
+	XLOG$FAO(LOG$USER,'!%T UDP$SEND for aborted UDPCB !XL!/',0,.UDPCB);
+	USER$Err(.Uargs,NET$_CC);
+	RETURN;
+	END;
+
+! Check for invalid buffer size
+
+    IF .Uargs[SE$Buf_Size] LSS 0 THEN
+	BEGIN
+	USER$Err(.Uargs,NET$_BTS);
+	RETURN;
+	END;
+
+    IF .Uargs[SE$Buf_Size] GTR Max_UDP_Data_Size THEN
+	BEGIN
+	USER$Err(.Uargs,NET$_IR);
+	RETURN;
+	END;
+
+! Check for "address mode" connection and set host addresses from user buffer
+! in that case.
+
+    Uaddr = Uargs[SE$ProtoHdrBlk];
+
+    ForeignAddr = .UAddr[IPADR$DST_HOST];
+    IF .ForeignAddr EQL WILD THEN
+	ForeignAddr = .UDPCB[UDPCB$Foreign_Host];
+
+    LocalAddr = .UAddr[IPADR$SRC_HOST];
+    IF .LocalAddr EQL WILD THEN
+    IP$SET_HOSTS(1,ForeignAddr,LocalAddr,ForeignAddr);
+
+    LocalPort = .UAddr[IPADR$SRC_PORT];
+    IF .LocalPort EQL WILD THEN
+	LocalPort = .UDPCB[UDPCB$Local_Port];
+
+    ForeignPort = .UAddr[IPADR$DST_PORT];
+    IF .ForeignPort EQL WILD THEN
+	ForeignPort = .UDPCB[UDPCB$Foreign_Port];
+
+   IF (.ForeignAddr EQL WILD) OR (.ForeignPort EQL WILD) THEN
+	BEGIN
+	USER$Err(.Uargs,NET$_NOPN);
+	RETURN
+	END;
+
+! Do common portion of the send
+
+    RC = UDP_SEND(.LocalAddr, .ForeignAddr, .LocalPort, .ForeignPort,
+		  .Uargs[SE$Data_Start], .Uargs[SE$Buf_size] );
+
+! Post the I/O request back to the user
+
+    User$Post_IO_Status(.Uargs,.RC,0,0,0);
+    MM$UArg_Free(.Uargs);
+    END;
+
+
+
+%SBTTL 'UDP_SEND - Common routine for sending UDP datagrams'
+
+GLOBAL ROUTINE UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
+			  UData, USize ) =
+!
+! Returns success or failure of IP$SEND.
+!
+    BEGIN
+    LOCAL
+	RC,
+	Bufsize,
+	Buf,
+	Seg : REF UDPkt_Structure,
+	Segsize;
+
+! Allocate an output buffer and build an IP packet
+
+    IF .Usize GTR Max_UDP_Data_Size THEN
+	Usize = Max_UDP_Data_Size;
+
+! Use preallocated buffer sizes to reduce dynamic memory load
+
+    bufsize = .Usize + UDP_Header_Size + IP_hdr_byte_size + Device_header;
+    IF .bufsize LEQ .MIN_PHYSICAL_BUFSIZE THEN
+	bufsize = .MIN_PHYSICAL_BUFSIZE
+    ELSE
+	IF .bufsize LEQ .MAX_PHYSICAL_BUFSIZE THEN
+	    bufsize = .MAX_PHYSICAL_BUFSIZE;
+    Buf = MM$Seg_Get(.Bufsize);	! Get a buffer
+    Seg = .Buf + device_header + IP_hdr_byte_size; ! Point at UDP segment
+    Segsize = .Usize+UDP_Header_Size; ! Length of segment + UDP header
+
+! Set up the UDP header
+
+    Seg[UP$Source_Port] = .LocalPort;
+    Seg[UP$Dest_Port] = .ForeignPort;
+    Seg[UP$Length] = .Segsize;
+    Seg[UP$Checksum] = 0;
+
+! Copy the user data into the data area
+
+    $$KCALL(MOVBYT,.Usize,.UData,Seg[UP$Data]);
+
+! Log the UDP packet if desired
+
+    IF $$LOGF(LOG$UDP) THEN
+	Log_UDP_Packet(.Seg,FALSE,TRUE);
+
+! Swap the header bytes and compute the checksum
+! No longer compute the checksum as it is now done in IP (see header comments)
+
+    SwapBytes(UDP_Header_Size/2,.Seg);
+!    Seg[UP$Checksum]=Gen_Checksum(.Segsize,.Seg,.LocalAddr,.ForeignAddr,
+!				  UDP_Protocol);
+
+! Send the segment to IP (it will deallocate it)
+
+    UDPIPID = .UDPIPID+1;	! Increment packet ID
+    RC = IP$SEND(.LocalAddr,.ForeignAddr,UDPTOS,.UDPTTL,
+		   .Seg,.Segsize,.UDPIPID,UDPDF,TRUE,UDP_Protocol,
+		   .Buf,.Bufsize);
+
+    UDP_MIB[MIB$udpOutDatagrams] = .UDP_MIB[MIB$udpOutDatagrams] + 1;
+
+    ! Return an appropriate code.
+    IF .RC EQL 0 THEN
+	NET$_NRT
+    ELSE SS$_NORMAL
+    END;
+
+
+
+%SBTTL 'UDP$RECEIVE - receive a UDP packet'
+%(
+    Handle user receive request for UDP connection. If there is a packet
+    available on the UDP receive queue, then deliver it to the user
+    immediately. Otherwise, queue up the user receive for later.
+ )%
+
+GLOBAL ROUTINE UDP$RECEIVE(Uargs : REF User_Recv_Args) : NOVALUE =
+    BEGIN
+    LOCAL
+	UDPCB : REF UDPCB_Structure,
+	QB : REF Queue_Blk_Structure(QB_NR_Fields),
+	URQ : REF Queue_Blk_Structure(QB_UR_Fields),
+	RC;
+
+! Validate connection ID and get UDPCB pointer
+
+    IF (UDPCB = UDPCB_OK(.Uargs[RE$Local_Conn_ID],RC,.Uargs)) EQL 0 THEN
+	BEGIN
+	USER$Err(.Uargs,.RC);	! No such connection
+	RETURN;
+	END;
+    XLOG$FAO(LOG$USER,'!%T UDP$RECEIVE: Conn=!XL, UDPCB=!XL, Size=!SL!/',
+	     0,.Uargs[RE$Local_Conn_ID],.UDPCB,.Uargs[RE$Buf_size]);
+
+! Check for aborted connection
+
+    IF .UDPCB[UDPCB$Aborting] THEN
+	BEGIN
+	XLOG$FAO(LOG$USER,'!%T UDP$RECEIVE for aborted UDPCB !XL!/',0,.UDPCB);
+	USER$Err(.Uargs,NET$_CC);
+	RETURN;
+	END;
+
+! Check for invalid buffer size
+
+    IF .Uargs[RE$Buf_Size] LEQ 0 THEN
+	BEGIN
+	USER$Err(.Uargs,NET$_BTS);
+	RETURN;
+	END;
+
+    IF .Uargs[RE$Buf_Size] GTR Max_UDP_Data_Size THEN
+	BEGIN
+	USER$Err(.Uargs,NET$_IR);
+	RETURN;
+	END;
+
+! Make a request block for the receive
+
+    URQ = MM$QBLK_Get();		! Get a queue block
+    URQ[UR$Size] = .Uargs[RE$Buf_size]; ! # of bytes this rq can take
+    URQ[UR$Data] = .Uargs[RE$Data_Start]; ! Address of system buffer
+    URQ[UR$IRP_Adrs] = .Uargs[RE$IRP_Adrs]; ! IO request packet address
+    URQ[UR$UCB_Adrs] = .Uargs[RE$UCB_Adrs]; ! Unit Control Block address
+    URQ[UR$Uargs] = .Uargs;	! User argument block address
+
+! If anything is available on the queue, deliver it now, else queue for later
+
+    NOINT;
+    IF REMQUE(.UDPCB[UDPCB$NR_Qhead],QB) NEQ Empty_Queue THEN
+	Deliver_UDP_Data(.UDPCB,.QB,.URQ)
+    ELSE
+	INSQUE(.URQ,.UDPCB[UDPCB$USR_Qtail]);
+    OKINT;
+    END;
+
+
+
+%SBTTL 'UDP$INFO - get info about UDP "connection"'
+%(
+    Read the host names/numbers and the ports for a UDP connection.
+ )%
+
+GLOBAL ROUTINE UDP$INFO(Uargs : REF User_Info_Args) : NOVALUE =
+    BEGIN
+    EXTERNAL ROUTINE
+	USER$Net_Connection_Info : NOVALUE;
+    LOCAL
+	UDPCB : REF UDPCB_Structure,
+	RC;
+
+! Validate the connection ID
+
+    IF (UDPCB = UDPCB_OK(.Uargs[IF$Local_Conn_ID],RC,.Uargs)) EQL 0 THEN
+	BEGIN
+	USER$Err(.Uargs,.RC);	! Bad connection ID
+	RETURN;
+	END;
+
+! Give the information back (common TCP/UDP routine in USER.BLI)
+
+    USER$Net_Connection_Info(.Uargs,.UDPCB[UDPCB$Local_Host],.UDPCB[UDPCB$Foreign_Host],
+			.UDPCB[UDPCB$Local_Port],.UDPCB[UDPCB$Foreign_Port],
+			UDPCB[UDPCB$Foreign_Hname],.UDPCB[UDPCB$Foreign_Hnlen]);
+    END;
+
+
+%SBTTL 'UDP$STATUS - get status of UDP "connection"'
+%(
+    This routine is a placeholder for the network STATUS command, which is
+    currently implemented for the UDP protocol.
+ )%
+
+GLOBAL ROUTINE UDP$STATUS(Uargs : REF User_Status_Args) : NOVALUE =
+    BEGIN
+    USER$Err(.Uargs,NET$_NYI);
+    END;
+
+%SBTTL 'UDP$CANCEL - Handle VMS cancel for UDP connection'
+%(
+    Handle process abort/$CANCEL request for a UDP connection. Identical
+    in functionality to UDP$CLOSE/UDP$ABORT except for calling procedure.
+ )%
+
+GLOBAL ROUTINE UDP$CANCEL(Uargs : REF VMS$Cancel_Args) =
+    BEGIN
+    LOCAL
+	UDPCB : REF UDPCB_Structure,
+	Fcount;
+
+    Fcount = 0;
+
+! Check all valid UDPCB's looking for a match on pid and channel #.
+
+    INCR I FROM 1 TO MAX_UDPCB DO
+	IF (UDPCB = .UDPCB_Table[.I]) NEQ 0 THEN
+	    BEGIN
+
+! If the process doing the cancel owns this connection, then delete it.
+
+	    IF (.UDPCB[UDPCB$User_ID] EQLU .Uargs[VC$PID]) AND
+	       (.UDPCB[UDPCB$PIOchan] EQL .Uargs[VC$PIOchan]) THEN
+		BEGIN
+		XLOG$FAO(LOG$USER,'!%T UDP$Cancel: UDPCB=!XL!/',0,.UDPCB);
+		UDPCB_Close(.I,.UDPCB,NET$_ccan);
+		Fcount = .Fcount + 1;
+		END;
+	    END;
+    RETURN .Fcount;
+    END;
+
+%SBTTL 'UDP dump routines'
+
+GLOBAL ROUTINE UDP$Connection_List(RB) : NOVALUE =
+!
+! Dump out the list of UDP connections.
+!
+    BEGIN
+    MAP
+	RB : REF D$UDP_List_Return_Blk;
+    LOCAL
+	RBIX;
+    RBIX = 1;
+    INCR I FROM 1 TO MAX_UDPCB-1 DO
+	IF .UDPCB_TABLE[.I] NEQ 0 THEN
+	    BEGIN
+	    RB[.RBIX] = .I;
+	    RBIX = .RBIX + 1;
+	    END;
+    RB[0] = .RBIX - 1;
+    END;
+
+GLOBAL ROUTINE UDP$UDPCB_DUMP(UDPCBIX,RB) =
+!
+! Dump out a single UDP connection
+!
+    BEGIN
+    MAP
+	RB : REF D$UDPCB_Dump_Return_BLK;
+    LOCAL
+	UDPCB : REF UDPCB_Structure,
+	QB,
+	Qcount;
+
+! Validate that there is a real UDPCB there
+
+    IF (.UDPCBIX LSS 1) OR (.UDPCBIX GTR MAX_UDPCB) OR
+       ((UDPCB = .UDPCB_TABLE[.UDPCBIX]) EQL 0) THEN
+	RETURN FALSE;
+
+! Copy the UDPCB contents
+
+    RB[DU$UDPCB_Address] = .UDPCB;
+    RB[DU$UDPCB_Foreign_Host] = .UDPCB[UDPCB$Foreign_Host];
+    RB[DU$UDPCB_Foreign_Port] = .UDPCB[UDPCB$Foreign_Port];
+    RB[DU$UDPCB_Local_Host] = .UDPCB[UDPCB$Local_Host];
+    RB[DU$UDPCB_Local_Port] = .UDPCB[UDPCB$Local_Port];
+    RB[DU$UDPCB_Flags] = .UDPCB[UDPCB$Flags];
+    RB[DU$UDPCB_User_ID] = .UDPCB[UDPCB$User_ID];
+
+! Get length of network receive queue
+
+    QB = .UDPCB[UDPCB$NR_Qhead];
+    Qcount = 0;
+    WHILE (.QB NEQA UDPCB[UDPCB$NR_Qhead]) DO
+	BEGIN
+	MAP
+	    QB : REF Queue_Blk_Structure(QB_NR_Fields);
+	Qcount = .Qcount + 1;
+	QB = .QB[NR$NEXT];
+	END;
+    RB[DU$UDPCB_NR_Qcount] = .Qcount;
+
+! Get length of user receive queue
+
+    QB = .UDPCB[UDPCB$USR_Qhead];
+    Qcount = 0;
+    WHILE (.QB NEQA UDPCB[UDPCB$USR_Qhead]) DO
+	BEGIN
+	MAP
+	    QB : REF Queue_Blk_Structure(QB_UR_Fields);
+	Qcount = .Qcount + 1;
+	QB = .QB[UR$NEXT];
+	END;
+    RB[DU$UDPCB_UR_Qcount] = .Qcount;
+
+! Done.
+
+    RETURN TRUE;
+    END;
+
+END
+ELUDOM

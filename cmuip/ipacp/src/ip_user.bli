@@ -1,0 +1,1274 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'Internet Protocol User Interface'
+%SBTTL 'Internet Protocol User Interface Overview'
+%(
+
+Module:
+
+	IP_User
+
+Facility:
+
+	Internet Protocol (IP) User Interface
+
+Abstract:
+
+	IP provides the user with a access to IP service.
+	This module handles the IP interface between the user
+	and the IP layer.
+
+Author:
+
+	Bruce R. Miller, CMU Network Development, Nov. 1989
+	Copyright (c) 1989, Carnegie-Mellon University
+
+Modification History:
+
+1.0c	18-Jul-1991	Henry W. Miller		USBR
+	Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
+	and LIB$FREE_VM, and check return status.
+
+1.0b	09-Jul-1991	Henry W. Miller		USBR
+	Added STARLET for VMS 5.4.
+
+1.0a	13-Jan-1991	Henry W. Miller		USBR
+	Make ICMPTTL a configurable variable.
+
+)%
+
+%SBTTL 'Module definition'	
+
+MODULE IP_User (IDENT='1.0c',LANGUAGE(BLISS32),
+	    ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
+			    NONEXTERNAL=LONG_RELATIVE),
+	    LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
+	    OPTIMIZE,OPTLEVEL=3,ZIP)=
+
+BEGIN
+
+! Include standard definition files
+
+!LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'SYS$LIBRARY:LIB';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETERROR';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETVMS';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NetTCPIP';			! IP & ICMP definitions
+LIBRARY 'STRUCTURE';
+LIBRARY 'TCPMACROS';
+
+!*** Special literals from USER.BLI ***
+
+EXTERNAL LITERAL
+    UCB$Q_DDP,
+    UCB$L_CBID,
+    UCB$L_EXTRA;
+
+! External data items
+
+EXTERNAL
+    IPTTL,
+    INTDF,
+    AST_In_Progress,
+    LOG_STATE,
+    MIN_PHYSICAL_BUFSIZE,
+    MAX_PHYSICAL_BUFSIZE;
+
+! External routines
+
+EXTERNAL ROUTINE
+
+! MACLIB.MAR
+
+    Swapbytes : NOVALUE,
+    Movbyt : NOVALUE,
+    Calc_Checksum,
+
+! MEMGR.BLI
+
+    MM$UArg_Free : NOVALUE,
+    MM$QBLK_Get,
+    MM$QBLK_Free : NOVALUE,
+    MM$Seg_Get,
+    MM$Seg_Free : NOVALUE,
+
+! USER.BLI
+
+    USER$CHECK_ACCESS,
+    USER$Err,
+    IO$POST : NOVALUE,
+    User$Post_IO_Status : NOVALUE,
+
+! IP.BLI
+
+    IP$SET_HOSTS : NOVALUE,
+    IP$SEND_RAW,
+    IP$SEND,
+
+! NMLOOK.BLI
+
+    NML$CANCEL : NOVALUE,
+    NML$GETALST : NOVALUE,
+    NML$GETNAME : NOVALUE,
+
+! IOUTIL.BLI
+
+    GET_IP_ADDR,
+    ASCII_DEC_BYTES : NOVALUE,
+    ASCII_HEX_BYTES : NOVALUE,
+    LOG_FAO : NOVALUE,
+    QL_FAO : NOVALUE;
+
+
+%SBTTL 'IP data structures'
+
+! Define the 'IPCB' - IP analogue of TCB.
+
+$FIELD  IPCB_Fields =
+    SET
+    IPCB$Foreign_Host	= [$Ulong],	! IP foreign host number
+    IPCB$Host_Filter	= [$Ulong],	! Receive packets from this host
+    IPCB$Proto_Filter	= [$Ulong],	! Receive packets to this protocol
+    IPCB$Foreign_Hname	= [$Bytes(MAX_HNAME)],
+    IPCB$Foreign_Hnlen	= [$Short_Integer],
+    IPCB$USR_Qhead	= [$Address],	! User receive request queue
+    IPCB$USR_Qtail	= [$Address],
+    IPCB$NR_Qhead	= [$Address],	! Net receive queue
+    IPCB$NR_Qtail	= [$Address],
+    IPCB$NR_Qcount	= [$Short_Integer],
+    IPCB$Flags		= [$Bytes(2)],
+    $OVERLAY(IPCB$Flags)
+	IPCB$Wildcard	= [$Bit],	! IPCB opened with wild FH/LH
+	IPCB$Addr_Mode	= [$Bit],	! User wants IP addresses
+	IPCB$Aborting	= [$Bit],	! IPCB is closing
+	IPCB$NMLook	= [$Bit],	! IPCB has an outstanding name lookup
+    $CONTINUE
+    IPCB$IPCBID		= [$Address],	! IPCB_Table index for this connection
+    IPCB$UCB_Adrs	= [$Address],	! Connection UCB address
+    IPCB$UARGS	= [$Address],	! Uarg block in pending open
+    IPCB$User_ID	= [$Bytes(4)],	! Process ID of owner
+    IPCB$PIOchan	= [$Bytes(2)]	! Process IO channel
+    TES;
+
+LITERAL
+    IPCB_Size = $Field_Set_Size;
+MACRO
+    IPCB_Structure = BLOCK[IPCB_Size] FIELD(IPCB_Fields) %;
+%MESSAGE(%NUMBER(IPCB_Size),' longwords per IPCB')
+
+
+
+%SBTTL 'IP data storage'
+
+GLOBAL
+    IPIPID : INITIAL(1),	! Current IP packet ID
+    IPCB_Count : INITIAL(0),	! Count of active IPCBs
+    IPCB_TABLE : VECTOR[MAX_IPCB+1];! Table of IPCBs
+
+
+
+%SBTTL 'IP packet logger'
+%(
+    Queue up a log entry to dump out a IP packet.
+ )%
+
+ROUTINE Log_IP_Packet(Seg,SwapFlag,SendFlag) : NOVALUE =
+    BEGIN
+    MAP
+	Seg : REF IP_Structure;
+    LOCAL
+	Header_Size,
+	sptr,
+	segdata,
+	segcopy : IP_Structure,
+	seghdr : REF IP_Structure;
+
+!!!HACK!!! Make sure this works right.
+
+    seghdr = .seg;		! Point at segment header
+    Header_Size = .Seg[IPH$IHL] * 4;	! Calculate header size
+    segdata = .seg + .Header_Size;
+    IF .SwapFlag THEN		! Need to byteswap header?
+	BEGIN
+	CH$MOVE(.Header_Size,CH$PTR(.seg),CH$PTR(segcopy)); ! Make a copy
+	seghdr = segcopy;	! Point at this version...
+	SwapBytes(.Header_Size/2,.seghdr); ! Swap header bytes
+	END;
+
+! Print first part of info
+
+    IF .SendFlag THEN
+	sptr = %ASCID'Sent'
+    ELSE
+	sptr = %ASCID'Received';
+
+! Log the contents of the IP header
+
+    QL$FAO(%STRING('!%T !AS IP packet, SEG=!XL, DATA=!XL, Header size !SL!/',
+		   '!_CKsum:!_!SL!/'),
+	    0,.sptr,.seg,.segdata,.Header_Size,
+	   .seghdr[IPH$CheckSum]);
+
+    END;
+
+%SBTTL 'IPCB_Find - look up IP control block'
+ROUTINE IPCB_Find(Src$Adrs,Dst$Adrs,Protocol) =
+    BEGIN
+    LOCAL
+	Ucount,
+	IPCBIX,
+	IPCB : REF IPCB_Structure;
+
+    Ucount = .IPCB_Count;
+    IPCBIX = 1;
+    WHILE (.Ucount GTR 0) AND (.IPCBIX LEQ Max_IPCB) DO
+	BEGIN
+	IF (IPCB = .IPCB_Table[.IPCBIX]) NEQ 0 THEN
+	    BEGIN
+	    IF  ((.IPCB[IPCB$Host_Filter] EQL WILD) OR
+		(.IPCB[IPCB$Host_Filter] EQL .Src$Adrs)) AND
+		((.IPCB[IPCB$Proto_Filter] EQL WILD) OR
+		(.IPCB[IPCB$Proto_Filter] EQL .Protocol)) THEN
+		RETURN .IPCB;
+	    Ucount = .Ucount-1;
+	    END;
+	IPCBIX = .IPCBIX + 1;
+	END;
+    RETURN 0;
+    END;
+
+%SBTTL 'IP input handler'
+%(
+    Come here at AST level when input packet is determined to be IP packet.
+    At present, all IP input handling is done at AST level, so we search
+    the IPCB list and queue the IP packet for deliver here.
+)%
+
+FORWARD ROUTINE
+    Queue_User_IP;
+
+GLOBAL ROUTINE IPU$User_Input ( Src$Adrs,Dst$Adrs,Protocol,
+				BufSize,Buf,SegSize,Seg ): NOvalue=
+    BEGIN
+    MAP
+	Seg : REF IP_Structure;
+    LOCAL
+	Uptr,
+	Ucount,
+	IPCBIX,
+	sum,
+	delete,
+	IPCB : REF IPCB_Structure;
+    LABEL
+	X;
+
+! Assume this packet should be deleted
+
+    delete = TRUE;
+
+! Log the IP packet if desired
+
+    IF $$LOGF(LOG$IP) THEN
+	Log_IP_Packet(.Seg,TRUE,FALSE);
+
+!!!HACK!!! I deleted this.  It should be done 
+
+! Try to match the input packet up with a IPCB
+!!!HACK!!! What if there's more than one IPCB for this address?
+    IPCB = IPCB_Find ( .Src$Adrs , .Dst$Adrs , .Protocol );
+    IF .IPCB EQL 0 THEN
+	BEGIN
+!!!HACK!!! Don't worry if there'e no IPCB.
+	IF $$LOGF(LOG$IP) THEN
+	    QL$FAO('!%T No IPCB found for segment !XL!/',0,.Seg);
+	END
+    ELSE
+X:	BEGIN
+
+! Log that it was found
+
+	IF $$LOGF(LOG$IP) THEN
+	    QL$FAO('!%T IPCB !XL found for IP Seg !XL!/',
+		   0,.IPCB,.Seg);
+
+! Make sure the IPCB isn't aborted...
+
+	IF .IPCB[IPCB$Aborting] THEN
+	    BEGIN
+	    XQL$FAO(LOG$IP,'!%T IP input !XL for aborted IPCB !XL dropped!/',
+		    0,.Seg,.IPCB);
+	    LEAVE X;
+	    END;
+
+! Give the segment to the user now.
+
+	delete = Queue_User_IP(.IPCB,.Seg,.SegSize,.Buf,.Bufsize,0);
+	END;
+
+    END;
+
+
+%SBTTL 'Queue_User_IP - Queue up IP packet for delivery to user'
+%(
+    Called by IP_Input at AST level when an input packet matches a
+    user IP "connection". Function of this routine is to either deliver
+    the IP packet to the user (if a user read request is available) or
+    queue it for later deliver.
+    Returns TRUE if the IP packet has been fully disposed of (i.e. the
+    caller may deallocate the packet), FALSE otherwise (i.e. the packet
+    has been placed on a queue and may not be deallocated yet).
+ )%
+
+FORWARD ROUTINE
+    DELIVER_IP_DATA : NOVALUE;
+
+ROUTINE Queue_User_IP(IPCB,Uptr,Usize,Buf,Bufsize,QB) =
+    BEGIN
+    MAP
+	IPCB : REF IPCB_Structure,
+	QB : REF Queue_BLK_Structure(QB_NR_Fields);
+    LOCAL
+	Buf2,
+	QBR;
+    EXTERNAL ROUTINE
+	MM$QBlk_Get;
+    LITERAL
+	IPCB$NR_Qmax = 5;	! Max input packets permitted on input queue
+
+! See if the input queue is full for this IPCB
+
+    IF .IPCB[IPCB$NR_Qcount] GTR IPCB$NR_Qmax THEN
+	BEGIN
+	IF $$LOGF(LOG$IP) THEN
+	    QL$FAO('!%T IP at !XL dropped - IPCB NR queue full!/',0,.Uptr);
+	RETURN TRUE;		! Drop the packet - no room
+	END;
+
+! We need to make a copy of this IP datagram.
+
+    Buf2 = MM$Seg_Get(.Bufsize);	! Get a buffer
+    Uptr = .Buf2 + (.Uptr - .Buf);
+!!!HACK!!! There's no need to copy the whole buffer, only .Usize worth...
+    MOVBYT(.Bufsize,.Buf,.Buf2);
+
+! Allocate a queue block and insert onto user receive queue
+
+    IF .QB EQL 0 THEN
+	QB = MM$QBLK_Get();
+    QB[NR$Buf_Size] = .Bufsize;	! Total size of network buffer
+    QB[NR$Buf] = .Buf2;		! Pointer to network buffer
+    QB[NR$Ucount] = .Usize;	! Length of the data
+    QB[NR$Uptr] = .Uptr;	! Pointer to the data
+
+! If there is a user read outstanding, deliver data, else queue for later
+
+    IF REMQUE(.IPCB[IPCB$USR_Qhead],QBR) NEQ Empty_Queue THEN
+	Deliver_IP_Data(.IPCB,.QB,.QBR)
+    ELSE
+	INSQUE(.QB,.IPCB[IPCB$NR_Qtail]);
+
+    RETURN TRUE;		! Go ahead and deallocate this segment...
+    END;
+
+%SBTTL 'Deliver_IP_Data - Deliver IP data to user'
+%(
+    Perform actual delivery of IP packet to a user request.
+    IP packet is copied into the user buffer and the user I/O request
+    is posted.
+ )%
+
+ROUTINE Deliver_IP_Data(IPCB,QB,URQ) : NOVALUE =
+    BEGIN
+    MAP
+	IPCB : REF IPCB_Structure,
+	QB : REF Queue_Blk_Structure(QB_NR_Fields),
+ 	URQ : REF Queue_Blk_Structure(QB_UR_Fields);
+    LOCAL
+	FLAGS,
+	ICMTYPE,
+	IRP : REF $BBLOCK[],
+	UArgs : REF User_RECV_Args,
+	Sargs : REF User_RECV_Args,
+	Aptr : IPADR$ADDRESS_BLOCK,
+	Uptr : REF IP_Structure,
+	Ucount;
+
+! Determine data start and data count
+
+!!!HACK!!! come back here...
+
+    Ucount = .QB[NR$Ucount];
+    Uptr = .QB[NR$Uptr];
+
+! Truncate to user receive request size
+
+    IF .Ucount GTR .URQ[UR$Size] THEN
+	Ucount = .URQ[UR$Size];
+
+    IF $$LOGF(LOG$IP) THEN
+	QL$FAO('!%T Posting IP receive,Size=!SL,IPCB=!XL,IRP=!XL,UCB_A=!XL!/',
+	       0,.Ucount,.IPCB,.URQ[UR$IRP_Adrs],.URQ[UR$UCB_Adrs]);
+
+! Copy from our buffer to the user system buffer
+
+    $$KCALL(MOVBYT,.Ucount,.Uptr,.URQ[UR$Data]);
+
+    UArgs = .URQ[UR$UArgs];
+
+! Copy IP Source and destination addresses to system space Diag Buff
+! First, get the SysBlk address out of the IRP, then copy the Header
+! block from our local copy of UArgs.
+
+    IF .Uargs[RE$PH_Buff] NEQ 0 THEN
+	BEGIN
+	IRP = .URQ[UR$IRP_Adrs];
+	Aptr[IPADR$SRC_HOST] = .Uptr[IPH$Source];
+	Aptr[IPADR$DST_HOST] = .Uptr[IPH$Dest];
+	Aptr[IPADR$EXT1] = (.Uptr)<0,32,0>;	! First long of IP header
+	Aptr[IPADR$EXT2] = (.Uptr+8)<0,32,0>;	! Third long of IP header
+	$$KCALL(MOVBYT,IPADR$ADDRESS_BLEN,
+		Aptr,.Uargs[RE$PH_Buff]);
+	END;
+
+! Post the I/O and free up memory
+
+    User$Post_IO_Status(.URQ[UR$Uargs],SS$_NORMAL,
+			.Ucount,0,0);
+    MM$UArg_Free(.URQ[UR$Uargs]);
+
+    MM$QBLK_Free(.URQ);
+    MM$Seg_Free(.QB[NR$Buf_Size],.QB[NR$Buf]);
+    MM$QBLK_Free(.QB);
+    END;
+
+%SBTTL 'IPCB_OK - Match connection ID to IPCB address'
+
+ROUTINE IPCB_OK(Conn_ID,RCaddr,Uargs : REF User_Default_Args) =
+    BEGIN
+    LOCAL
+	IPCB : REF IPCB_Structure;
+    MACRO
+	IPCBERR(EC) = (.RCaddr = EC; RETURN 0) %;
+
+! Range check the connection id. This should never fail, since the user should
+! not be fondling connection IDs.
+
+    IF (.Conn_ID LEQ 0) OR (.Conn_ID GTR MAX_IPCB) THEN
+	IPCBERR(NET$_CDE);	! Nonexistant connection ID
+    IPCB = .IPCB_Table[.Conn_ID];
+
+! Make sure the table had something reasonable for this connection ID
+
+    IF .IPCB LEQ 0 THEN
+	IPCBERR(NET$_CDE);	! IPCB has been deleted (possible)
+
+! Check consistancy of IPCB back-pointer into table
+
+    IF (.IPCB[IPCB$IPCBID] NEQ .Conn_ID) OR
+       (.IPCB[IPCB$UCB_ADRS] NEQ .Uargs[UD$UCB_Adrs]) THEN
+	IPCBERR(NET$_CDE);	! Confusion (can this happen?)
+
+! Everything is good - return the IPCB address
+
+    RETURN .IPCB;
+    END;
+
+%SBTTL 'IPCB_Get - Allocate and initialize one IPCB'
+
+ROUTINE IPCB_Get(IDX) =
+    BEGIN
+    EXTERNAL ROUTINE
+	LIB$GET_VM 	: ADDRESSING_MODE(GENERAL),
+	LIB$GET_VM_PAGE	: ADDRESSING_MODE(GENERAL);
+    LOCAL
+	IPCB : REF IPCB_Structure,
+	IPCBIDX,
+	RC ;
+    LABEL
+	X;
+
+! Find a free slot in the IPCB table
+
+X:  BEGIN			! ** Block X **
+    IPCBIDX = 0;
+    INCR I FROM 1 TO MAX_IPCB DO
+	IF .IPCB_Table[.I] EQL 0 THEN
+	    LEAVE X WITH (IPCBIDX = .I);
+    RETURN 0;			! Failed to allocate a IPCB
+    END;			! ** Block X **
+
+! Allocate some space for the IPCB
+
+!    LIB$GET_VM(%REF(IPCB_Size*4),IPCB);
+    RC = LIB$GET_VM_PAGE(%REF(((IPCB_Size * 4) / 512) + 1),IPCB);
+    IF NOT .RC THEN
+	FATAL$FAO('IPCB_GET - LIB$GET_VM failure, RC=!XL',.RC);
+
+! Clear it out and set it in the table
+
+    IPCB_Table[.IPCBIDX] = .IPCB;
+    CH$FILL(%CHAR(0),IPCB_Size*4,.IPCB);
+    IPCB_Count = .IPCB_Count+1;
+
+! Initialize queue headers for the IPCB
+
+    IPCB[IPCB$NR_Qhead] = IPCB[IPCB$NR_Qtail] = IPCB[IPCB$NR_Qhead];
+    IPCB[IPCB$USR_Qhead] = IPCB[IPCB$USR_Qtail] = IPCB[IPCB$USR_Qhead];
+
+! Set the connection ID
+
+    IPCB[IPCB$IPCBID] = .IPCBIDX;
+
+! Return the pointer
+
+    .IDX = .IPCBIDX;
+    RETURN .IPCB;
+    END;
+
+%SBTTL 'IPCB_Free - Deallocate a IPCB'
+
+ROUTINE IPCB_Free(IPCBIX,IPCB : REF IPCB_Structure) : NOVALUE =
+    BEGIN
+    EXTERNAL ROUTINE
+	LIB$FREE_VM		: ADDRESSING_MODE(GENERAL),
+	LIB$FREE_VM_PAGE	: ADDRESSING_MODE(GENERAL);
+
+    LOCAL
+	RC ;
+
+! Clear the table entry
+
+    IPCB_Table[.IPCBIX] = 0;
+
+! Free the memory and decrement our counter.
+
+!    LIB$FREE_VM(%REF(IPCB_Size*4),IPCB);
+    RC = LIB$FREE_VM_PAGE(%REF(((IPCB_Size * 4) / 512) + 1),IPCB);
+    IF NOT .RC THEN
+	FATAL$FAO('IPCB_FREE - LIB$FREE_VM failure, RC=!XL',.RC);
+    IPCB_Count = .IPCB_Count-1;
+    END;
+
+%SBTTL 'Kill_IP_Requests - purge all I/O requests for a connection'
+
+ROUTINE Kill_IP_Requests(IPCB : REF IPCB_Structure,RC) : NOVALUE =
+    BEGIN
+    LOCAL
+	URQ : REF Queue_Blk_Structure(QB_UR_Fields),
+	QB : REF Queue_Blk_Structure(QB_NR_Fields);
+
+! Make sure we aren't doing this more than once
+!
+!   IF .IPCB[IPCB$Aborting] THEN
+!	RETURN;
+
+! Say that this connection is aborting (prevent future requests)
+
+    IPCB[IPCB$Aborting] = TRUE;
+
+! Cancel any name lookup in progess
+
+    IF .IPCB[IPCB$NMLOOK] THEN
+	BEGIN
+	NML$CANCEL(.IPCB, 0, 0);
+	IPCB[IPCB$NMLOOK] = FALSE;
+	END;
+
+! Kill any pending open
+
+    NOINT;
+    IF .IPCB[IPCB$UARGS] NEQ 0 THEN
+	BEGIN
+	USER$Err(.IPCB[IPCB$UARGS],.RC);
+	IPCB[IPCB$UARGS] = 0;
+	END;
+    OKINT;
+
+! Purge the user request queue, posting all requests
+
+    WHILE REMQUE(.IPCB[IPCB$USR_Qhead],URQ) NEQ Empty_Queue DO
+	BEGIN
+	User$Post_IO_Status(.URQ[UR$Uargs],.RC,0,0,0);
+	MM$UArg_Free(.URQ[UR$Uargs]);
+	MM$QBlk_Free(.URQ);	
+	END;
+
+! Purge any received qblocks as well
+
+    WHILE REMQUE(.IPCB[IPCB$NR_Qhead],QB) NEQ Empty_Queue DO
+	BEGIN
+	MM$Seg_Free(.QB[NR$Buf_Size],.QB[NR$Buf]);
+	MM$QBlk_Free(.QB);
+	END;
+    END;
+
+%SBTTL 'IPCB_Close - Close/deallocate a IPCB'
+
+ROUTINE IPCB_Close(UIDX,IPCB : REF IPCB_Structure,RC) : NOVALUE =
+    BEGIN
+    Kill_IP_Requests(.IPCB,.RC);
+    IPCB_FREE(.UIDX,.IPCB);
+    END;
+
+ROUTINE IPCB_Abort(IPCB : REF IPCB_Structure,RC) : NOVALUE =
+!
+! Abort a IPCB - called by IP code.
+!
+    BEGIN
+    IPCB_CLOSE(.IPCB[IPCB$IPCBID],.IPCB,.RC);
+    END;
+
+
+%SBTTL 'IPU$Purge_All_IO - delete IP database before network exits'
+
+GLOBAL ROUTINE IPU$Purge_All_IO : NOVALUE =
+    BEGIN
+    LOCAL
+	IPCBIDX,
+	IPCB : REF IPCB_Structure;
+
+! Loop for all connections, purge them, and delete them.
+
+    INCR IPCBIDX FROM 1 TO MAX_IPCB DO
+	IF (IPCB = .IPCB_Table[.IPCBIDX]) NEQ 0 THEN
+	    IPCB_Close(.IPCBIDX,.IPCB,NET$_TE);
+    END;
+
+
+%SBTTL 'IPU$OPEN - open a user IP "connection"'
+%(
+    Open an IP "connection". Create a IP Control Block, which serves as a
+    place to hang incoming packets and user receive requests.
+ )%
+
+FORWARD ROUTINE
+    IP_NMLOOK_DONE : NOVALUE,
+    IP_ADLOOK_DONE : NOVALUE;
+
+GLOBAL ROUTINE IPU$OPEN(Uargs : REF User_Open_Args) : NOVALUE =
+    BEGIN
+    LOCAL
+	IPADDR,
+	NAMLEN,
+	NAMPTR,
+	UIDX,
+	IPCB : REF IPCB_Structure,
+	IPCBPTR,
+	Args : VECTOR[4];
+    LABEL
+	X;
+
+    XLOG$FAO(LOG$USER,'!%T IPU$OPEN: PID=!XL,CHAN=!XW,FLAGS=!XL X1=!XL!/',
+	     0,.Uargs[OP$PID],.Uargs[OP$PIOchan],.Uargs[OP$FLAGS],
+	     .UArgs[OP$Ext1]);
+
+! First create a IPCB for this connection.
+
+    IF (IPCB = IPCB_Get(UIDX)) LEQ 0 THEN
+	BEGIN
+	USER$Err(.Uargs,NET$_UCT);
+	RETURN;
+	END;
+
+! Initialize user mode values
+
+    IPCB[IPCB$UCB_ADRS] = .Uargs[OP$UCB_Adrs];
+    IPCB[IPCB$User_ID] = .Uargs[OP$PID];
+    IPCB[IPCB$PIOchan] = .Uargs[OP$PIOchan];
+
+! At this point, the connection exists. Write the connection ID
+! back into the Unit Control Block for this connection.
+
+    IPCBptr = .Uargs[OP$UCB_Adrs] + UCB$L_CBID;
+    $$KCALL(MOVBYT,4,UIDX,.IPCBptr);
+
+! Initialize queue headers for the IPCB
+
+    IPCB[IPCB$NR_Qhead] = IPCB[IPCB$NR_Qtail] = IPCB[IPCB$NR_Qhead];
+    IPCB[IPCB$USR_Qhead] = IPCB[IPCB$USR_Qtail] = IPCB[IPCB$USR_Qhead];
+
+! Copy user arguments to IPCB
+
+    IPCB[IPCB$Uargs] = .Uargs;
+    IPCB[IPCB$Host_Filter] = .Uargs[OP$Src_Host];
+    IPCB[IPCB$Proto_Filter] = .Uargs[OP$EXT1];
+
+! Handle wildcard host
+
+    NAMPTR = CH$PTR(Uargs[OP$Foreign_Host]);
+    NAMLEN = .Uargs[OP$Foreign_Hlen];
+    IF (NOT .Uargs[OP$ADDR_FLAG]) AND (.NAMLEN EQL 0) THEN
+	BEGIN
+	IPCB[IPCB$Wildcard] = TRUE;
+	IPCB[IPCB$Foreign_Host] = WILD;
+	IPCB[IPCB$Foreign_Hnlen] = 0;
+	IP_NMLOOK_DONE(.IPCB,SS$_NORMAL,0,0,0,0);
+	RETURN;
+	END;
+
+! Check for supplied IP address instead of name
+
+X:  BEGIN			! *** Block X ***
+    IF .Uargs[OP$ADDR_FLAG] THEN
+	IPADDR = .Uargs[OP$Foreign_Address]
+    ELSE
+	IF GET_IP_ADDR(NAMPTR,IPADDR) LSS 0 THEN
+	    LEAVE X;
+    IPCB[IPCB$Foreign_Hnlen] = 0;
+    IPCB[IPCB$Foreign_Host] = .IPADDR;
+    IP_NMLOOK_DONE(.IPCB,SS$_NORMAL,1,IPADDR,0,0);
+    IPCB[IPCB$NMLook] = TRUE;
+    NML$GETNAME(.IPADDR,IP_ADLOOK_DONE,.IPCB);
+    RETURN;
+    END;			! *** Block X ***
+
+! "standard" case, host name is supplied - start name lookup for it
+
+    IPCB[IPCB$NMLook] = TRUE;
+    NML$GETALST(.NAMPTR,.NAMLEN,IP_NMLOOK_DONE,.IPCB);
+    END;
+
+
+
+%SBTTL 'IP_NMLOOK_DONE - Second phase of IPU$OPEN when namelookup done'
+%(
+    Come here when the foreign host name has been resolved.
+    At this point, we set the local & foreign hosts in the IPCB
+    and post the users open request.
+)%
+
+ROUTINE IP_NMLOOK_DONE(IPCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR) : NOVALUE =
+    BEGIN
+    MAP
+	IPCB : REF IPCB_Structure;
+    LOCAL
+	RC,
+	Uargs : REF User_Open_Args,
+	IOSB : NetIO_Status_Block;
+    MACRO
+	UOP_ERROR(EC) = 
+	    BEGIN
+	    USER$Err(.Uargs,EC);
+	    IPCB_FREE(.IPCB[IPCB$IPCBID],.IPCB);
+	    RETURN;
+	    END %;
+
+! Clear name lookup flag and get uargs
+
+    NOINT;
+    IPCB[IPCB$NMLook] = FALSE;
+    Uargs = .IPCB[IPCB$Uargs];
+    IPCB[IPCB$Uargs] = 0;
+    OKINT;
+
+! Check status of the name lookup
+
+    IF NOT .STATUS THEN
+	UOP_ERROR(.STATUS);
+
+    ! Finish up the open
+
+!    IF .ADRCNT GTR 0 THEN
+!	IP$SET_HOSTS(.ADRCNT,.ADRLST,IPCB[IPCB$Local_Host],
+!		     IPCB[IPCB$Foreign_Host]);
+
+    ! Done at last - log success
+
+    XLOG$FAO(LOG$USER,'!%T UDB_OPEN: Conn idx = !XL, IPCB = !XL!/',
+	     0,.IPCB[IPCB$IPCBID],.IPCB);
+
+! Verify that we have access to the host set
+
+!!!HACK!!! Should we do this or not??
+!    RC = USER$CHECK_ACCESS(.IPCB[IPCB$USER_ID],.IPCB[IPCB$Local_Host],
+!		      0,.IPCB[IPCB$Foreign_Host],0);
+!    IF NOT .RC THEN
+!	UOP_ERROR(.RC);
+
+! Set the foreign host name in the IPCB
+
+    IPCB[IPCB$Foreign_Hnlen] = .NAMLEN;
+    IF .NAMLEN NEQ 0 THEN
+	CH$MOVE(.NAMLEN,.NAMPTR,CH$PTR(IPCB[IPCB$Foreign_Hname]));
+
+! Finally, post the status
+
+    IOSB[NSB$STATUS] = SS$_NORMAL; ! Success return
+    IOSB[NSB$Byte_Count] = 0;
+    IOSB[NSB$XSTATUS] = 0;
+    IO$POST(IOSB,.Uargs);
+    MM$UArg_Free(.Uargs);
+    END;
+
+
+
+%SBTTL 'IP_ADLOOK_DONE - Finish IP address to name lookup'
+
+ROUTINE IP_ADLOOK_DONE(IPCB,STATUS,NAMLEN,NAMPTR) : NOVALUE =
+    BEGIN
+    MAP
+	IPCB : REF IPCB_Structure;
+
+! Clear pending name lookup flag
+
+    IPCB[IPCB$NMLook] = FALSE;
+
+! Check status
+
+    IF NOT .STATUS THEN
+	RETURN;
+
+! Copy the hostname into the IPCB
+
+    IPCB[IPCB$Foreign_Hnlen] = .NAMLEN;
+    CH$MOVE(.NAMLEN,.NAMPTR,CH$PTR(IPCB[IPCB$Foreign_Hname]));
+    END;
+
+
+
+%SBTTL 'IPU$CLOSE - close IP "connection"'
+%(
+    Close an IP "connection". Kills any receive requests that haven't
+    finished yet and deallocates the IPCB and any other data structures
+    associated with a connection.
+)%
+
+GLOBAL ROUTINE IPU$CLOSE(Uargs : REF User_Close_Args) : NOVALUE =
+    BEGIN
+    LOCAL
+	IPCB : REF IPCB_Structure,
+	RC;
+
+! Check for valid IPCB
+
+    IF (IPCB = IPCB_OK(.Uargs[CL$Local_Conn_ID],RC,.Uargs)) EQL 0 THEN
+	BEGIN
+	USER$Err(.Uargs,.RC);
+	RETURN;
+	END;
+
+! Use common routine for closing
+
+    IPCB_Close(.Uargs[CL$Local_Conn_ID],.IPCB,NET$_CC);
+
+! Close done - post user request and free argblk
+
+    User$Post_IO_Status(.Uargs,SS$_NORMAL,0,0,0);
+    MM$UArg_Free(.Uargs);
+    END;
+
+%SBTTL 'IPU$ABORT - abort IP "connection"'
+%(
+    Abort a IP "connection". Identical in functionality to IPU$CLOSE.
+ )%
+
+GLOBAL ROUTINE IPU$ABORT(Uargs : REF User_Abort_Args) : NOVALUE =
+    BEGIN
+    LOCAL
+	IPCB : REF IPCB_Structure,
+	RC;
+
+! Check for valid IPCB
+
+    IF (IPCB = IPCB_OK(.Uargs[AB$Local_Conn_ID],RC,.Uargs)) EQL 0 THEN
+	BEGIN
+	USER$Err(.Uargs,.RC);
+	RETURN;
+	END;
+
+! Use common routine for closing
+
+    IPCB_Close(.Uargs[AB$Local_Conn_ID],.IPCB,NET$_CC);
+
+! Done. Clean up.
+
+    User$Post_IO_Status(.Uargs,SS$_NORMAL,0,0,0);
+    MM$UArg_Free(.Uargs);
+    END;
+
+%SBTTL 'IPU$SEND - send IP packet'
+%(
+    Handle user send request for IP connection. Form a IP packet from the
+    user's data buffer and hand it to IP layer for transmission.
+ )%
+
+GLOBAL ROUTINE IPU$SEND(Uargs : REF User_Send_Args) : NOVALUE =
+    BEGIN
+    LOCAL
+	RC,
+	Flags,
+	Bufsize,
+	Buf,
+	LocalAddr, ForeignAddr, Protocol,
+	Seg : REF IP_Structure,
+	Segsize,
+	USize,
+	IPCB : REF IPCB_Structure;
+
+
+! Validate connection ID and get IPCB pointer
+
+    IF (IPCB = IPCB_OK(.Uargs[SE$Local_Conn_ID],RC,.Uargs)) EQL 0 THEN
+	BEGIN
+	USER$Err(.Uargs,.RC);	! No such connection
+	RETURN;
+	END;
+
+!!!HACK!!! Does this size arg mean  anything?
+    XLOG$FAO(LOG$USER,'!%T IP$SEND: Conn=!XL, IPCB=!XL, Size=!SL!/',
+	     0,.Uargs[SE$Local_Conn_ID],.IPCB,.Uargs[SE$Buf_size]);
+
+! Check for aborted connection
+
+    IF .IPCB[IPCB$Aborting] THEN
+	BEGIN
+	XLOG$FAO(LOG$USER,'!%T IPU$SEND for aborted IPCB !XL!/',0,.IPCB);
+	USER$Err(.Uargs,NET$_CC);
+	RETURN;
+	END;
+
+! Check for invalid buffer size
+
+    IF .Uargs[SE$Buf_Size] LSS 0 THEN
+	BEGIN
+	USER$Err(.Uargs,NET$_BTS);
+	RETURN;
+	END;
+
+
+!!!HACK!!! Where's the comment?
+    Flags = .Uargs[SE$Flags];
+
+! Allocate an output buffer and build an IP packet
+!!!HACK!!! This is silly, why not just use the uarg block.
+!!!HACK!!! Not possible now, but maybe with a little work...
+
+    ! Calc total size of IP packet.  Note: .Uargs[SE$EXT2] is header size.
+    USize = .Uargs[SE$Buf_size];
+    Segsize = .Uargs[SE$Buf_size] + .Uargs[SE$EXT2];
+!    IF .SegSize GTR Max_IP_Data_Size THEN
+!	SegSize = Max_IP_Data_Size;
+
+! Use preallocated buffer sizes to reduce dynamic memory load
+
+    bufsize = .SegSize + Device_header;
+    IF .bufsize LEQ .MIN_PHYSICAL_BUFSIZE THEN
+	bufsize = .MIN_PHYSICAL_BUFSIZE
+    ELSE
+	IF .bufsize LEQ .MAX_PHYSICAL_BUFSIZE THEN
+	    bufsize = .MAX_PHYSICAL_BUFSIZE;
+    Buf = MM$Seg_Get(.Bufsize);	! Get a buffer
+!!!HACK!!! Next line is a hack, but it really speeds things up...
+    Seg = .Buf + device_header; ! Point at IP segment
+
+! Copy the user data into the data area
+
+    $$KCALL(MOVBYT,.SegSize,.Uargs[SE$Data_Start],.Seg);
+
+    ForeignAddr = .Seg[IPH$Dest];
+    LocalAddr = .Seg[IPH$Source];
+    Protocol = .Seg[IPH$Protocol];
+
+    ! Use IP$SEND_RAW if this is an exact packet
+    IF .Flags<0,1,0> THEN
+	BEGIN
+	! Send packet exactly as the client passed it.
+
+	! Re-arrange bytes and words in IP header
+	SwapBytes ( IP_hdr_swap_size , .Seg );
+
+	! Compute checksum for IP header
+	IF .Flags<0,2,0> THEN
+	    BEGIN
+	    Seg[IPH$Checksum] = 0;
+	    Seg[IPH$Checksum] = Calc_Checksum ( .Uargs[SE$EXT2] , .Seg )
+	    END;
+
+	IF $$LOGF(LOG$IP) THEN
+	    Log_IP_Packet(.Seg,FALSE,TRUE);
+
+	RC = SS$_NORMAL;
+	IF (IP$SEND_RAW(.Seg[IPH$Dest],.Seg,.SegSize,1,
+			.Buf,.Bufsize) EQL 0) THEN RC = NET$_NRT;
+	! Post the I/O request back to the user
+
+	User$Post_IO_Status(.Uargs,.RC,0,0,0);
+	MM$UArg_Free(.Uargs);
+	RETURN
+	END;
+
+    ! Compute Foreign address, source address, and protocol.
+    IF .ForeignAddr EQL WILD THEN
+	ForeignAddr = .IPCB[IPCB$Foreign_Host];
+    IF (.ForeignAddr EQL WILD) THEN
+	BEGIN
+	MM$Seg_FREE(.BufSize,.Buf);	! Give back buffer
+	USER$Err(.Uargs,NET$_NOPN);
+	RETURN 0
+	END;
+
+
+    IF .LocalAddr EQL WILD THEN
+	IP$SET_HOSTS(1,ForeignAddr,LocalAddr,ForeignAddr);
+
+    IF .Protocol EQL WILD THEN
+	Protocol = .IPCB[IPCB$Proto_Filter];
+
+    IF $$LOGF(LOG$IP) THEN
+	Log_IP_Packet(.Seg,FALSE,TRUE);
+
+! Send the segment to IP (it will deallocate it)
+
+    IPIPID = .IPIPID+1;	! Increment packet ID
+    RC = SS$_NORMAL;
+    IF (IP$SEND(.LocalAddr,.ForeignAddr,IPTOS,.IPTTL,
+		   .Seg + .UArgs[SE$EXT2],.USize,
+		   .IPIPID,IPDF,TRUE,.Protocol,
+		   .Buf,.Bufsize) EQL 0) THEN RC = NET$_NRT;
+
+! Post the I/O request back to the user
+
+    User$Post_IO_Status(.Uargs,.RC,0,0,0);
+    MM$UArg_Free(.Uargs);
+    END;
+
+
+
+%SBTTL 'IPU$RECEIVE - receive a IP packet'
+%(
+    Handle user receive request for IP connection. If there is a packet
+    available on the IP receive queue, then deliver it to the user
+    immediately. Otherwise, queue up the user receive for later.
+ )%
+
+GLOBAL ROUTINE IPU$RECEIVE(Uargs : REF User_Recv_Args) : NOVALUE =
+    BEGIN
+    LOCAL
+	IPCB : REF IPCB_Structure,
+	QB : REF Queue_Blk_Structure(QB_NR_Fields),
+	URQ : REF Queue_Blk_Structure(QB_UR_Fields),
+	RC;
+
+! Validate connection ID and get IPCB pointer
+
+    IF (IPCB = IPCB_OK(.Uargs[RE$Local_Conn_ID],RC,.Uargs)) EQL 0 THEN
+	BEGIN
+	USER$Err(.Uargs,.RC);	! No such connection
+	RETURN;
+	END;
+    XLOG$FAO(LOG$USER,'!%T IPU$RECEIVE: Conn=!XL, IPCB=!XL, Size=!SL!/',
+	     0,.Uargs[RE$Local_Conn_ID],.IPCB,.Uargs[RE$Buf_size]);
+
+! Check for aborted connection
+
+    IF .IPCB[IPCB$Aborting] THEN
+	BEGIN
+	XLOG$FAO(LOG$USER,'!%T IPU$RECEIVE for aborted IPCB !XL!/',0,.IPCB);
+	USER$Err(.Uargs,NET$_CC);
+	RETURN;
+	END;
+
+! Check for invalid buffer size
+
+    IF .Uargs[RE$Buf_Size] LEQ 0 THEN
+	BEGIN
+	USER$Err(.Uargs,NET$_BTS);
+	RETURN;
+	END;
+
+! Make a request block for the receive
+
+    URQ = MM$QBLK_Get();		! Get a queue block
+    URQ[UR$Size] = .Uargs[RE$Buf_size]; ! # of bytes this rq can take
+    URQ[UR$Data] = .Uargs[RE$Data_Start]; ! Address of system buffer
+    URQ[UR$IRP_Adrs] = .Uargs[RE$IRP_Adrs]; ! IO request packet address
+    URQ[UR$UCB_Adrs] = .Uargs[RE$UCB_Adrs]; ! Unit Control Block address
+    URQ[UR$Uargs] = .Uargs;	! User argument block address
+
+! If anything is available on the queue, deliver it now, else queue for later
+
+    NOINT;
+    IF REMQUE(.IPCB[IPCB$NR_Qhead],QB) NEQ Empty_Queue THEN
+	Deliver_IP_Data(.IPCB,.QB,.URQ)
+    ELSE
+	INSQUE(.URQ,.IPCB[IPCB$USR_Qtail]);
+    OKINT;
+    END;
+
+
+
+%SBTTL 'IPU$INFO - get info about IP "connection"'
+%(
+    Read the host names/numbers for a IP connection.
+ )%
+
+GLOBAL ROUTINE IPU$INFO(Uargs : REF User_Info_Args) : NOVALUE =
+    BEGIN
+    EXTERNAL ROUTINE
+	USER$Net_Connection_Info : NOVALUE;
+    LOCAL
+	IPCB : REF IPCB_Structure,
+	RC;
+
+! Validate the connection ID
+
+    IF (IPCB = IPCB_OK(.Uargs[IF$Local_Conn_ID],RC,.Uargs)) EQL 0 THEN
+	BEGIN
+	USER$Err(.Uargs,.RC);	! Bad connection ID
+	RETURN;
+	END;
+
+! Give the information back (common TCP/IP routine in USER.BLI)
+
+    USER$Net_Connection_Info(.Uargs,.IPCB[IPCB$Host_Filter],
+			.IPCB[IPCB$Foreign_Host],
+			0,0,
+			IPCB[IPCB$Foreign_Hname],
+			.IPCB[IPCB$Foreign_Hnlen]);
+    END;
+
+
+%SBTTL 'IPU$STATUS - get status of IP "connection"'
+%(
+    This routine is a placeholder for the network STATUS command, which is
+    currently implemented for the TCP protocol.
+ )%
+
+GLOBAL ROUTINE IPU$STATUS(Uargs : REF User_Status_Args) : NOVALUE =
+    BEGIN
+    USER$Err(.Uargs,NET$_NYI);
+    END;
+
+%SBTTL 'IPU$CANCEL - Handle VMS cancel for IP connection'
+%(
+    Handle process abort/$CANCEL request for a IP connection. Identical
+    in functionality to IPU$CLOSE/IPU$ABORT except for calling procedure.
+ )%
+
+GLOBAL ROUTINE IPU$CANCEL(Uargs : REF VMS$Cancel_Args) =
+    BEGIN
+    LOCAL
+	IPCB : REF IPCB_Structure,
+	Fcount;
+
+    Fcount = 0;
+
+! Check all valid IPCB's looking for a match on pid and channel #.
+
+    INCR I FROM 1 TO MAX_IPCB DO
+	IF (IPCB = .IPCB_Table[.I]) NEQ 0 THEN
+	    BEGIN
+
+! If the process doing the cancel owns this connection, then delete it.
+
+	    IF (.IPCB[IPCB$User_ID] EQLU .Uargs[VC$PID]) AND
+	       (.IPCB[IPCB$PIOchan] EQL .Uargs[VC$PIOchan]) THEN
+		BEGIN
+		XLOG$FAO(LOG$USER,'!%T IPU$Cancel: IPCB=!XL!/',0,.IPCB);
+		IPCB_Close(.I,.IPCB,NET$_ccan);
+		Fcount = .Fcount + 1;
+		END;
+	    END;
+    RETURN .Fcount;
+    END;
+
+%SBTTL 'IP dump routines'
+
+GLOBAL ROUTINE IPU$Connection_List(RB) : NOVALUE =
+!
+! Dump out the list of IP connections.
+!
+    BEGIN
+    MAP
+	RB : REF D$IP_List_Return_Blk;
+    LOCAL
+	RBIX;
+    RBIX = 1;
+    INCR I FROM 1 TO MAX_IPCB-1 DO
+	IF .IPCB_TABLE[.I] NEQ 0 THEN
+	    BEGIN
+	    RB[.RBIX] = .I;
+	    RBIX = .RBIX + 1;
+	    END;
+    RB[0] = .RBIX - 1;
+    END;
+
+GLOBAL ROUTINE IPU$IPCB_Dump(IPCBIX,RB) =
+!
+! Dump out a single IP connection
+!
+    BEGIN
+    MAP
+	RB : REF D$IPCB_Dump_Return_BLK;
+    LOCAL
+	IPCB : REF IPCB_Structure,
+	QB,
+	Qcount;
+
+! Validate that there is a real IPCB there
+
+    IF (.IPCBIX LSS 1) OR (.IPCBIX GTR MAX_IPCB) OR
+       ((IPCB = .IPCB_TABLE[.IPCBIX]) EQL 0) THEN
+	RETURN FALSE;
+
+! Copy the IPCB contents
+
+    RB[DU$IPCB_Address] = .IPCB;
+    RB[DU$IPCB_Foreign_Host] = .IPCB[IPCB$Foreign_Host];
+    RB[DU$IPCB_Local_Host] = .IPCB[IPCB$Host_Filter];
+    RB[DU$IPCB_Flags] = .IPCB[IPCB$Flags];
+    RB[DU$IPCB_User_ID] = .IPCB[IPCB$User_ID];
+
+! Get length of network receive queue
+
+    QB = .IPCB[IPCB$NR_Qhead];
+    Qcount = 0;
+    WHILE (.QB NEQA IPCB[IPCB$NR_Qhead]) DO
+	BEGIN
+	MAP
+	    QB : REF Queue_Blk_Structure(QB_NR_Fields);
+	Qcount = .Qcount + 1;
+	QB = .QB[NR$NEXT];
+	END;
+    RB[DU$IPCB_NR_Qcount] = .Qcount;
+
+! Get length of user receive queue
+
+    QB = .IPCB[IPCB$USR_Qhead];
+    Qcount = 0;
+    WHILE (.QB NEQA IPCB[IPCB$USR_Qhead]) DO
+	BEGIN
+	MAP
+	    QB : REF Queue_Blk_Structure(QB_UR_Fields);
+	Qcount = .Qcount + 1;
+	QB = .QB[UR$NEXT];
+	END;
+    RB[DU$IPCB_UR_Qcount] = .Qcount;
+
+! Done.
+
+    RETURN TRUE;
+    END;
+END
+ELUDOM
