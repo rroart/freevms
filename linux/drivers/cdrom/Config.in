@@ -1,7 +1,0 @@
-#
-# Multimedia device configuration
-#
-mainmenu_option next_comment
-comment 'Multimedia devices'
-
-endmenu
