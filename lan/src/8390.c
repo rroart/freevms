@@ -1,159 +1,13 @@
-#include<crbdef.h>
-#include<cdtdef.h>
-#include<ddtdef.h>
-#include<dptdef.h>
-#include<fdtdef.h>
-#include<pdtdef.h>
-#include<idbdef.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ddbdef.h>
-#include<ipldef.h>
-#include<dyndef.h>
-#include<ssdef.h>
-#include<iodef.h>
-#include<devdef.h>
-#include<system_data_cells.h>
-#include<ipl.h>
-#include<linux/vmalloc.h>
-#include<linux/pci.h>
-#include<system_service_setup.h>
-#include<descrip.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ucbnidef.h>
 
-#include<linux/skbuff.h>
-
-struct _ucb * erau;
-
-static unsigned long startio (struct _irp * i, struct _ucb * u)
-{
-  unsigned long sts=SS$_NORMAL;
-  struct request * rq = kmalloc (sizeof(struct request), GFP_KERNEL);
-  struct sk_buff skb = dev_alloc_skb(i->irp$l_qio_p2+2);
-  skb->len=i->irp$l_qio_p2;
-  skb->data=i->irp$l_qio_p1;
-  struct net_device dev=i->irp$l_qio_p4;
-
-  //printk("era startio %x %x\n",i->irp$l_qio_p1,i->irp$l_qio_p2);
-
-  erau=u;
-
-  switch (i->irp$v_fcode) {
-
-    case IO$_WRITEPBLK: {
-	  ei_start_xmit(skb,dev);
-      return (sts);
-    }
-
-    case IO$_READPBLK: {
-	  // not really ?
-      return (sts);
-    }
-
-    /* Who knows what */
-
-    default: {
-      return (SS$_BADPARAM);
-    }
-  }
+int er$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
 }
 
-static struct _irp * globali;
-static struct _ucb * globalu;
-
-static void  startio3 (struct _irp * i, struct _ucb * u) { 
-  ioc$reqcom(SS$_NORMAL,0,u);
-  return;
-};
-
-static void  startio2 (struct _irp * i, struct _ucb * u) { 
-  u->ucb$l_fpc=startio3;
-  exe$iofork(i,u);
-  return;
-}
-
-static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
-{
-  struct _irp * i;
-  struct _ucb * u;
-  void (*func)();
-
-  if (intr_blocked(20))
-    return;
-  regtrap(REG_INTR,20);
-  setipl(20);
-  /* have to do this until we get things more in order */
-  i=globali;
-  u=globalu;
-
-  func=u->ucb$l_fpc;
-  func(i,u);
-  myrei();
-}
-
-static struct _fdt fdt = {
-  fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
-  fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
-};
-
-/* more yet undefined dummies */
-//static void  startio ();
-static void  unsolint (void) { };
-static void  functb (void) { };
-static void  cancel (void) { };
-static void  regdump (void) { };
-static void  diagbuf (void) { };
-static void  errorbuf (void) { };
-static void  unitinit (void) { };
-static void  altstart (void) { };
-static void  mntver (void) { };
-static void  cloneducb (void) { };
-static void  mntv_sssc (void) { };
-static void  mntv_for (void) { };
-static void  mntv_sqd (void) { };
-static void  aux_storage (void) { };
-static void  aux_routine (void) { };
-
-static struct _ddt ddt = {
-  ddt$l_start: startio,
-  ddt$l_unsolint: unsolint,
-  ddt$l_functb: functb,
-  ddt$l_cancel: cancel,
-  ddt$l_regdump: regdump,
-  ddt$l_diagbuf: diagbuf,
-  ddt$l_errorbuf: errorbuf,
-  ddt$l_unitinit: unitinit,
-  ddt$l_altstart: altstart,
-  ddt$l_mntver: mntver,
-  ddt$l_cloneducb: cloneducb,
-  ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: mntv_sssc,
-  ddt$l_mntv_for: mntv_for,
-  ddt$l_mntv_sqd: mntv_sqd,
-  ddt$l_aux_storage: aux_storage,
-  ddt$l_aux_routine: aux_routine
-};
-
-static struct _ddb ddb;
-static struct _dpt dpt;
-
-int acp_std$readblk();
-
-extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
-
-int ide_vmsinit(void) {
-  unsigned short chan;
-  $DESCRIPTOR(u0,"era0");
-  struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"era0","erdriver");
-  printk(KERN_INFO "dev here\n");
-  /* for the fdt init part */
-  /* a lot of these? */
-  ini_fdt_act(&fdt,IO$_READLBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt,IO$_READPBLK,acp_std$readblk,1);
-  ini_fdt_act(&fdt,IO$_READVBLK,acp_std$readblk,1);
-  exe$assign(&u0,&chan,0,0,0);
-  registerdevchan(MKDEV(IDE0_MAJOR,0),chan);
-  printk(KERN_INFO "dev here\n");
-  return chan;
+int er$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  int sts = ei_start_xmit  (i, p, u, c); 
+  return sts;
 }
 
 /* 8390.c: A general NS8390 ethernet driver core for linux. */
@@ -411,7 +265,7 @@ void ei_tx_timeout(struct net_device *dev)
 		
 	spin_unlock(&ei_local->page_lock);
 	enable_irq(dev->irq);
-	netif_wake_queue(dev);
+	// not yet? netif_wake_queue(dev);
 }
     
 /**
@@ -422,14 +276,16 @@ void ei_tx_timeout(struct net_device *dev)
  * Sends a packet to an 8390 network device.
  */
  
-static int ei_start_xmit(struct sk_buff *skb, struct net_device *dev)
+static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
 {
+	struct _ucbnidef * ni = u; 
+	struct net_device *dev=ni->ucb$l_extra_l_1;
 	long e8390_base = dev->base_addr;
 	struct ei_device *ei_local = (struct ei_device *) dev->priv;
 	int length, send_length, output_page;
 	unsigned long flags;
 
-	length = skb->len;
+	length = i->irp$l_qio_p2;
 
 	/* Mask interrupts from the ethercard. 
 	   SMP: We have to grab the lock here otherwise the IRQ handler
@@ -499,7 +355,7 @@ static int ei_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	 * trigger the send later, upon receiving a Tx done interrupt.
 	 */
 
-	ei_block_output(dev, length, skb->data, output_page);
+	ei_block_output(dev, length, i->irp$l_qio_p1, output_page);
 	if (! ei_local->txing) 
 	{
 		ei_local->txing = 1;
@@ -531,7 +387,7 @@ static int ei_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	 * reasonable hardware if you only use one Tx buffer.
 	 */
 
-	ei_block_output(dev, length, skb->data, ei_local->tx_start_page);
+	ei_block_output(dev, length, i->irp$l_qio_p1, ei_local->tx_start_page);
 	ei_local->txing = 1;
 	NS8390_trigger_send(dev, send_length, ei_local->tx_start_page);
 	dev->trans_start = jiffies;
@@ -546,7 +402,7 @@ static int ei_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	spin_unlock(&ei_local->page_lock);
 	enable_irq(dev->irq);
 
-	dev_kfree_skb (skb);
+	// check	dev_kfree_skb (skb);
 	ei_local->stat.tx_bytes += send_length;
     
 	return 0;
@@ -805,7 +661,7 @@ static void ei_tx_intr(struct net_device *dev)
 		if (status & ENTSR_OWC)
 			ei_local->stat.tx_window_errors++;
 	}
-	netif_wake_queue(dev);
+	// not yet? netif_wake_queue(dev);
 }
 
 /**
@@ -825,6 +681,9 @@ static void ei_receive(struct net_device *dev)
 	int rx_pkt_count = 0;
 	struct e8390_pkt_hdr rx_frame;
 	int num_rx_pages = ei_local->stop_page-ei_local->rx_start_page;
+
+	extern struct _ucb * eru;
+	struct _ucb * u = eru;
     
 	while (++rx_pkt_count < 10) 
 	{
@@ -885,6 +744,7 @@ static void ei_receive(struct net_device *dev)
 		}
 		 else if ((pkt_stat & 0x0F) == ENRSR_RXOK) 
 		{
+#if 0
 			struct sk_buff *skb;
 			
 			skb = dev_alloc_skb(pkt_len+2);
@@ -897,13 +757,19 @@ static void ei_receive(struct net_device *dev)
 				break;
 			}
 			else
+#endif
 			{
+#if 0
 				skb_reserve(skb,2);	/* IP headers on 16 byte boundaries */
 				skb->dev = dev;
 				skb_put(skb, pkt_len);	/* Make room */
-				ei_block_input(dev, pkt_len, skb, current_offset + sizeof(rx_frame));
+#endif
+				char * buf = kmalloc(4096,GFP_KERNEL);
+				ei_block_input(dev, pkt_len, buf, current_offset + sizeof(rx_frame));
+#if 0
 				skb->protocol=eth_type_trans(skb,dev);
-				netif_rx(skb);
+#endif
+				lan$netif_rx(u, buf);
 				dev->last_rx = jiffies;
 				ei_local->stat.rx_packets++;
 				ei_local->stat.rx_bytes += pkt_len;
@@ -1194,7 +1060,7 @@ int ethdev_init(struct net_device *dev)
 	dev->get_stats	= get_stats;
 	dev->set_multicast_list = &set_multicast_list;
 
-	ether_setup(dev);
+	// not yet?	ether_setup(dev);
         
 	return 0;
 }

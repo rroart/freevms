@@ -110,7 +110,10 @@ static struct ctl_table_header root_table_header =
 static ctl_table kern_table[];
 static ctl_table vm_table[];
 #ifdef CONFIG_NET
+#ifndef CONFIG_VMS
+// not yet?
 extern ctl_table net_table[];
+#endif
 #endif
 static ctl_table proc_table[];
 static ctl_table fs_table[];
@@ -147,7 +150,10 @@ static ctl_table root_table[] = {
 	{CTL_KERN, "kernel", NULL, 0, 0555, kern_table},
 	{CTL_VM, "vm", NULL, 0, 0555, vm_table},
 #ifdef CONFIG_NET
+#ifndef CONFIG_VMS
+	// not yet?
 	{CTL_NET, "net", NULL, 0, 0555, net_table},
+#endif
 #endif
 	{CTL_PROC, "proc", NULL, 0, 0555, proc_table},
 	{CTL_FS, "fs", NULL, 0, 0555, fs_table},

@@ -7,6 +7,8 @@
 
 O_TARGET :=	network.o
 
+ifneq ($(CONFIG_VMS),y)
+
 mod-subdirs :=	ipv4/netfilter netlink sched
 export-objs :=	netsyms.o
 
@@ -23,6 +25,12 @@ obj-y	:= socket.o $(join $(subdir-y), $(patsubst %,/%.o,$(notdir $(subdir-y))))
 ifeq ($(CONFIG_NET),y)
 obj-$(CONFIG_MODULES)		+= netsyms.o
 obj-$(CONFIG_SYSCTL)		+= sysctl_net.o
+endif
+
+else
+
+obj-y	:= socket.o $(join $(subdir-y), $(patsubst %,/%.o,$(notdir $(subdir-y))))
+
 endif
 
 include $(TOPDIR)/Rules.make

@@ -9,12 +9,21 @@ CHAN_OBJS = chan_kern.o chan_user.o line.o
 
 OBJS-y = 
 OBJS-$(CONFIG_SSL) += ssl.o 
+ifneq ($(CONFIG_VMS),y)
 OBJS-$(CONFIG_UML_NET_SLIP) += slip_kern.o slip_user.o
 OBJS-$(CONFIG_UML_NET_ETHERTAP) += ethertap_kern.o ethertap_user.o 
 OBJS-$(CONFIG_UML_NET_TUNTAP) += tuntap_kern.o tuntap_user.o
 OBJS-$(CONFIG_UML_NET_DAEMON) += daemon_kern.o daemon_user.o 
 OBJS-$(CONFIG_UML_NET_MCAST) += mcast_user.o mcast_kern.o 
 OBJS-$(CONFIG_UML_NET) += net_kern.o net_user.o 
+else
+OBJS-$(CONFIG_UML_NET_SLIP) += ../../../../lan/src/um/slip_kern.o slip_user.o
+OBJS-$(CONFIG_UML_NET_ETHERTAP) += ../../../../lan/src/um/ethertap_kern.o ethertap_user.o 
+OBJS-$(CONFIG_UML_NET_TUNTAP) += ../../../../lan/src/um/tuntap_kern.o tuntap_user.o
+OBJS-$(CONFIG_UML_NET_DAEMON) += ../../../../lan/src/um/daemon_kern.o daemon_user.o 
+OBJS-$(CONFIG_UML_NET_MCAST) += ../../../../lan/src/um/mcast_kern.o mcast_user.o 
+OBJS-$(CONFIG_UML_NET) += ../../../../lan/src/um/net_kern.o net_user.o 
+endif
 OBJS-$(CONFIG_MCONSOLE) += mconsole_kern.o mconsole_user.o
 OBJS-$(CONFIG_MMAPPER) += mmapper_kern.o 
 ifneq ($(CONFIG_VMS),y)

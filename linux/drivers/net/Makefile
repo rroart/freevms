@@ -12,6 +12,8 @@ mod-subdirs     :=
 
 O_TARGET := net.o
 
+ifneq ($(CONFIG_VMS),y)
+
 # All of the (potential) objects that export symbols.
 # This list comes from 'grep -l EXPORT_SYMBOL *.[hc]'.
 
@@ -186,6 +188,13 @@ ifneq ($(ARCH),s390)
 ifneq ($(ARCH),s390x)
 obj-y += auto_irq.o
 endif
+endif
+
+else
+
+#export-objs := net_init.o
+#obj-y		:= net_init.o
+
 endif
 
 include $(TOPDIR)/Rules.make

@@ -1,3 +1,318 @@
+#include<crbdef.h>
+#include<cdtdef.h>
+#include<dcdef.h>
+#include<ddtdef.h>
+#include<dptdef.h>
+#include<fdtdef.h>
+#include<pdtdef.h>
+#include<idbdef.h>
+#include<irpdef.h>
+#include<ucbdef.h>
+#include<ucbnidef.h>
+#include<ddbdef.h>
+#include<ipldef.h>
+#include<dyndef.h>
+#include<ssdef.h>
+#include<iodef.h>
+#include<devdef.h>
+#include<system_data_cells.h>
+#include<ipl.h>
+#include<linux/vmalloc.h>
+#include<linux/pci.h>
+#include<system_service_setup.h>
+#include<descrip.h>
+
+#include<linux/blkdev.h>
+
+struct _ucbnidef * eru;
+
+static unsigned long startio (struct _irp * i, struct _ucb * u)
+{
+  unsigned long sts=SS$_NORMAL;
+  struct request * rq = kmalloc (sizeof(struct request), GFP_KERNEL);
+
+  //printk("er startio %x %x %x\n",i->irp$l_qio_p1,i->irp$l_qio_p2,i->irp$l_qio_p3);
+
+  //  er_drive_t *drive=u->ucb$l_orb;
+
+  //i->irp$l_qio_p3 <<= 1;
+#if 0
+  i->irp$l_qio_p3 += partadd(u->ucb$l_orb,i->irp$l_qio_p4);
+#endif
+    //drive->part[i->irp$l_qio_p4].start_sect + drive->sect0;
+
+  eru=u;
+
+  switch (i->irp$v_fcode) {
+
+    case IO$_WRITELBLK:
+    case IO$_WRITEPBLK: {
+      rq->cmd=WRITE;
+      rq->buffer=i->irp$l_qio_p1;
+      rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
+      i->irp$l_qio_p5=rq;
+      do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3);
+      return (sts);
+    }
+
+    case IO$_READLBLK:
+    case IO$_READPBLK: {
+      rq->cmd=READ;
+      rq->buffer=i->irp$l_qio_p1;
+      rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
+      i->irp$l_qio_p5=rq;
+      do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3);
+      return (sts);
+    }
+
+    /* Who knows what */
+
+    default: {
+      return (SS$_BADPARAM);
+    }
+  }
+}
+
+static struct _irp * globali;
+static struct _ucb * globalu;
+
+static void  startio3 (struct _irp * i, struct _ucb * u) { 
+  ioc$reqcom(SS$_NORMAL,0,u);
+  return;
+};
+
+static void  startio2 (struct _irp * i, struct _ucb * u) { 
+  u->ucb$l_fpc=startio3;
+  exe$iofork(i,u);
+  return;
+}
+
+static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
+{
+  struct _irp * i;
+  struct _ucb * u;
+  void (*func)();
+
+  if (intr_blocked(20))
+    return;
+  regtrap(REG_INTR,20);
+  setipl(20);
+  /* have to do this until we get things more in order */
+  i=globali;
+  u=globalu;
+
+  func=u->ucb$l_fpc;
+  func(i,u);
+  myrei();
+}
+
+static struct _fdt er$fdt = {
+  fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
+  fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
+};
+
+/* more yet undefined dummies */
+//static void  startio ();
+static void  unsolint (void) { };
+static void  cancel (void) { };
+static void  ioc_std$cancelio (void) { };
+static void  regdump (void) { };
+static void  diagbuf (void) { };
+static void  errorbuf (void) { };
+static void  unitinit (void) { };
+static void  altstart (void) { };
+static void  mntver (void) { };
+static void  cloneducb (void) { };
+static void  mntv_sssc (void) { };
+static void  mntv_for (void) { };
+static void  mntv_sqd (void) { };
+static void  aux_storage (void) { };
+static void  aux_routine (void) { };
+
+static struct _ddt er$ddt = {
+  ddt$l_start: startio,
+  ddt$l_unsolint: unsolint,
+  ddt$l_fdt: &er$fdt,
+  ddt$l_cancel: cancel,
+  ddt$l_regdump: regdump,
+  ddt$l_diagbuf: diagbuf,
+  ddt$l_errorbuf: errorbuf,
+  ddt$l_unitinit: unitinit,
+  ddt$l_altstart: altstart,
+  ddt$l_mntver: mntver,
+  ddt$l_cloneducb: cloneducb,
+  ddt$w_fdtsize: 0,
+  ddt$l_mntv_sssc: mntv_sssc,
+  ddt$l_mntv_for: mntv_for,
+  ddt$l_mntv_sqd: mntv_sqd,
+  ddt$l_aux_storage: aux_storage,
+  ddt$l_aux_routine: aux_routine
+};
+
+int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int lan$sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int lan$setchar(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int lan$sensechar(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int er$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int er$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
+
+void er$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
+  ucb->ucb$b_flck=IPL$_IOLOCK8;
+  ucb->ucb$b_dipl=IPL$_IOLOCK8;
+
+  ucb->ucb$l_devchar = DEV$M_REC | DEV$M_AVL | DEV$M_CCL | DEV$M_FOD/*| DEV$M_OOV*/;
+
+  ucb->ucb$l_devchar2 = DEV$M_NNM;
+  ucb->ucb$b_devclass = DC$_MISC;
+  ucb->ucb$b_devtype = DT$_TTYUNKN;
+  ucb->ucb$w_devbufsiz = 132;
+
+  ucb->ucb$l_devdepend = 99; // just something to fill
+
+  // dropped the mutex stuff
+
+  return;
+}
+
+void er$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
+  ddb->ddb$ps_ddt=&er$ddt;
+  //dpt_store_isr(crb,nl_isr);
+  return;
+}
+
+int er$unit_init (struct _idb * idb, struct _ucb * ucb) {
+  ucb->ucb$v_online = 0;
+  //ucb->ucb$l_lr_msg_tmo = 0 ; // or offline? // where did this go?
+
+  // idb->idb$ps_owner=&(ucb->ucb$r_ucb); // this is mailbox?
+  // no adp or cram stuff
+
+  // or ints etc
+  
+  ucb->ucb$v_online = 1;
+
+  return SS$_NORMAL;
+}
+
+struct _dpt er$dpt;
+struct _ddb er$ddb;
+struct _ucbnidef er$ucb ;
+struct _crb er$crb;
+
+int er$init_tables() {
+  ini_dpt_name(&er$dpt, "ERDRIVER");
+  ini_dpt_adapt(&er$dpt, 0);
+  ini_dpt_defunits(&er$dpt, 1);
+  ini_dpt_ucbsize(&er$dpt,sizeof(struct _ucbnidef));
+  ini_dpt_struc_init(&er$dpt, er$struc_init);
+  ini_dpt_struc_reinit(&er$dpt, er$struc_reinit);
+  ini_dpt_ucb_crams(&er$dpt, 1/*NUMBER_CRAMS*/);
+  ini_dpt_end(&er$dpt);
+
+  ini_ddt_unitinit(&er$ddt, er$unit_init);
+  ini_ddt_start(&er$ddt, startio);
+  ini_ddt_cancel(&er$ddt, ioc_std$cancelio);
+  ini_ddt_end(&er$ddt);
+
+  /* for the fdt init part */
+  /* a lot of these? */
+
+  ini_fdt_act(&er$fdt,IO$_READLBLK,er$readblk,1);
+  ini_fdt_act(&er$fdt,IO$_READPBLK,er$readblk,1);
+  ini_fdt_act(&er$fdt,IO$_READVBLK,er$readblk,1);
+  ini_fdt_act(&er$fdt,IO$_WRITELBLK,er$writeblk,1);
+  ini_fdt_act(&er$fdt,IO$_WRITEPBLK,er$writeblk,1);
+  ini_fdt_act(&er$fdt,IO$_WRITEVBLK,er$writeblk,1);
+  ini_fdt_act(&er$fdt,IO$_SETMODE,lan$setmode,1);
+  ini_fdt_act(&er$fdt,IO$_SETCHAR,lan$setchar,1);
+  ini_fdt_act(&er$fdt,IO$_SENSEMODE,lan$sensemode,1);
+  ini_fdt_act(&er$fdt,IO$_SENSECHAR,lan$sensechar,1);
+  ini_fdt_end(&er$fdt);
+
+  return SS$_NORMAL;
+}
+
+int er_iodb_vmsinit(void) {
+#if 0
+  struct _ucb * ucb=&er$ucb;
+  struct _ddb * ddb=&er$ddb;
+  struct _crb * crb=&er$crb;
+#endif 
+  struct _ucbnidef * ucb=kmalloc(sizeof(struct _ucbnidef),GFP_KERNEL);
+  struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
+  struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
+  unsigned long idb=0,orb=0;
+
+  bzero(ucb,sizeof(struct _ucbnidef));
+  bzero(ddb,sizeof(struct _ddb));
+  bzero(crb,sizeof(struct _crb));
+
+#if 0
+  init_ddb(&er$ddb,&er$ddt,&er$ucb,"dqa");
+  init_ucb(&er$ucb, &er$ddb, &er$ddt, &er$crb);
+  init_crb(&er$crb);
+#endif
+
+  init_ddb(ddb,&er$ddt,ucb,"era");
+  init_ucb(ucb, ddb, &er$ddt, crb);
+  init_crb(crb);
+
+//  ioc_std$clone_ucb(&er$ucb,&ucb);
+  er$init_tables();
+  er$struc_init (crb, ddb, idb, orb, ucb);
+  er$struc_reinit (crb, ddb, idb, orb, ucb);
+  er$unit_init (idb, ucb);
+
+  insertdevlist(ddb);
+
+  return ddb;
+
+}
+
+int er_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+  unsigned short int chan;
+  struct _ucbnidef * newucb;
+  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&er$ucb*/,&newucb);
+  exe$assign(dsc,&chan,0,0,0);
+  //  registerdevchan(MKDEV(IDE0_MAJOR,unitno),chan);
+
+  eru = newucb;
+
+  return newucb;
+}
+
+int er_vmsinit(void) {
+  //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
+
+  unsigned short chan0, chan1, chan2;
+  $DESCRIPTOR(u0,"era0");
+  unsigned long idb=0,orb=0;
+  struct _ccb * ccb;
+  struct _ucb * newucb0,*newucb1,*newucb2;
+  struct _ddb * ddb;
+
+  printk(KERN_INFO "dev here pre\n");
+
+  ddb=er_iodb_vmsinit();
+
+  /* for the fdt init part */
+  /* a lot of these? */
+
+  er_iodbunit_vmsinit(ddb,0,&u0);
+
+  printk(KERN_INFO "dev here\n");
+
+  // return chan0;
+
+}
+
 /* ne.c: A general non-shared-memory NS8390 ethernet driver for linux. */
 /*
     Written 1992-94 by Donald Becker.
@@ -133,7 +448,7 @@ static void ne_reset_8390(struct net_device *dev);
 static void ne_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr,
 			  int ring_page);
 static void ne_block_input(struct net_device *dev, int count,
-			  struct sk_buff *skb, int ring_offset);
+			  char * buf, int ring_offset);
 static void ne_block_output(struct net_device *dev, const int count,
 		const unsigned char *buf, const int start_page);
 
@@ -462,6 +777,10 @@ static int __init ne_probe1(struct net_device *dev, int ioaddr)
 	dev->open = &ne_open;
 	dev->stop = &ne_close;
 	NS8390_init(dev, 0);
+
+	struct _ucbnidef * ucb = er_vmsinit();
+	ucb -> ucb$l_extra_l_1 = dev;
+
 	return 0;
 
 err_out_kfree:
@@ -553,13 +872,12 @@ static void ne_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr, i
    The NEx000 doesn't share the on-board packet memory -- you have to put
    the packet out through the "remote DMA" dataport using outb. */
 
-static void ne_block_input(struct net_device *dev, int count, struct sk_buff *skb, int ring_offset)
+static void ne_block_input(struct net_device *dev, int count, char * buf, int ring_offset)
 {
 #ifdef NE_SANITY_CHECK
 	int xfer_count = count;
 #endif
 	int nic_base = dev->base_addr;
-	char *buf = skb->data;
 
 	/* This *shouldn't* happen. If it does, it's the last thing you'll see */
 	if (ei_status.dmaing)

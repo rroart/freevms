@@ -54,22 +54,22 @@ static int slip_set_mac(struct sockaddr *hwaddr, void *data)
 	return(0);
 }
 
-static unsigned short slip_protocol(struct sk_buff *skbuff)
+static unsigned short slip_protocol(u, buf)
 {
 	return(htons(ETH_P_IP));
 }
 
-static int slip_read(int fd, struct sk_buff **skb, 
+static int slip_read(int fd, char * buf, int mtu,
 		       struct uml_net_private *lp)
 {
-	return(slip_user_read(fd, (*skb)->mac.raw, (*skb)->dev->mtu, 
+	return(slip_user_read(fd, buf, mtu,
 			      (struct slip_data *) &lp->user));
 }
 
-static int slip_write(int fd, struct sk_buff **skb,
+static int slip_write(int fd, char * buf, int len,
 		      struct uml_net_private *lp)
 {
-	return(slip_user_write(fd, (*skb)->data, (*skb)->len, 
+	return(slip_user_write(fd, buf, len,
 			       (struct slip_data *) &lp->user));
 }
 

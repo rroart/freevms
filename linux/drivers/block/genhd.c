@@ -197,7 +197,10 @@ int __init device_init(void)
 	cpqarray_init();
 #endif
 #ifdef CONFIG_NET
+#ifndef CONFIG_VMS
+	// not yet?
 	net_dev_init();
+#endif
 #endif
 #ifdef CONFIG_ATM
 	(void) atmdev_init();
