@@ -72,7 +72,7 @@ int exe$altquepkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
   /* no smp stuff yet */
 
   d=u->ucb$l_ddt;
-  f=d->ddt$l_start;
+  f=d->ddt$l_altstart;
   f(i,u);
 
   forkunlock(u->ucb$b_flck,savipl);
