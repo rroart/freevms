@@ -1,6 +1,6 @@
 all: dirs alli386 allum
 
-alli386: i386/timer i386/ast i386/time i386/eftim i386/schdwk i386/forcex i386/ef i386/wake i386/synch i386/enq i386/lnm i386/lnm2 i386/qio1 i386/qio2 i386/cef i386/cefw i386/mem i386/memf i386/getjpi i386/crec
+alli386: i386/timer i386/ast i386/time i386/eftim i386/schdwk i386/forcex i386/ef i386/wake i386/synch i386/enq i386/lnm i386/lnm2 i386/qio1 i386/qio2 i386/cef i386/cefw i386/mem i386/memf i386/getjpi i386/crec i386/getdvi
 
 dirs:
 	mkdir um || echo um exists
@@ -70,7 +70,10 @@ i386/getjpi: getjpi.c $(LIB)
 i386/crec: crec.c $(LIB)
 	gcc -static -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starlet.a -o i386/crec
 
-allum: um/timer um/ast um/time um/eftim um/schdwk um/forcex um/ef um/wake um/synch um/enq um/lnm um/lnm2 um/qio1 um/qio2 um/cef um/cefw um/mem um/memf um/getjpi um/crec
+i386/getdvi: getdvi.c $(LIB)
+	gcc -static -I../starlet/src -I../librtl/src/ getdvi.c ../starlet/src/starlet.a -o i386/getdvi
+
+allum: um/timer um/ast um/time um/eftim um/schdwk um/forcex um/ef um/wake um/synch um/enq um/lnm um/lnm2 um/qio1 um/qio2 um/cef um/cefw um/mem um/memf um/getjpi um/crec um/getdvi
 
 UMDEF=-Dcompile_um
 
@@ -132,7 +135,8 @@ um/memf: memf.c $(LIBUM)
 um/getjpi: getjpi.c $(LIBUM)
 	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ getjpi.c ../starlet/src/starletum.a -o um/getjpi
 
-
 um/crec: crec.c $(LIBUM)
 	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ crec.c ../starlet/src/starletum.a -o um/crec
 
+um/getdvi: getdvi.c $(LIBUM)
+	gcc -static -s $(UMDEF) -I../starlet/src -I../librtl/src/ getdvi.c ../starlet/src/starletum.a -o um/getdvi
