@@ -599,6 +599,7 @@ int PN$FDTREAD(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
 
   struct _bufio * bd=buf;
   bd->bufio$b_type=DYN$C_BUFIO;
+  bd->bufio$w_size=size;
   bd->bufio$ps_pktdata=(long)buf+12;		// Save addr of start of user data
   bd->bufio$ps_uva32=i->irp$l_qio_p1;		// Save user buffer address in 2nd
 					// longword
