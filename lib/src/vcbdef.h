@@ -298,7 +298,7 @@ struct _vcb {
   } vcb_0;
 };
 
-#define		vcb$l_aqb		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_aqb
+#define		vcb$l_aqb		vcb_0.vcb_1_2.vcb_1_2_1.vcb$l_aqb
 #define		vcb$l_cache		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_cache
 #define		vcb$l_cluster		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_cluster
 #define		vcb$l_fileprot		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_fileprot
