@@ -324,4 +324,9 @@ mmg$delconpfn(struct _pcb * p, int pfn) {
   }
 }
 
+mmg$delpfnlst(int type, int pfn) {
+  mmg$rempfn(type,&mem_map[pfn]);
+  mmg$relpfn(pfn);
+}
+
 #endif
