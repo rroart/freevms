@@ -1042,7 +1042,7 @@ void * exttwo_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long cou
   struct _iosb myiosb;
   unsigned char * buf = kmalloc(512*count, GFP_KERNEL);
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(0,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,0,0,0);
+  unsigned long sts=sys$qiow(0,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -1050,7 +1050,7 @@ void * exttwo_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long cou
 void * exttwo_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
   struct _iosb myiosb;
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(0,x2p->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,0,0,0);
+  unsigned long sts=sys$qiow(0,x2p->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -1065,7 +1065,7 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
     case ATR$C_RECATTR:
       {
 	struct _fatdef * f=atrp->atr$l_addr;
-	f->fat$b_rtype=FAT$C_SEQUENTIAL << 4;
+	f->fat$b_rtype=(FAT$C_SEQUENTIAL << 4) | FAT$C_FIXED;
 	f->fat$b_rattrib=0;
 	f->fat$w_rsize=0;
 	//printk("readat %x %x\n",head->i_blocks,head->i_size%512);
@@ -1075,7 +1075,7 @@ void exttwo_read_attrib(struct _fcb * fcb,struct inode * inode, struct _atrdef *
 	//printk("readat %x %x %x %x\n",head->i_size,VMSSWAP(f->fat$l_efblk),f->fat$w_ffbyte,VMSSWAP(f->fat$l_hiblk));
 	f->fat$b_bktsize=0;
 	f->fat$b_vfcsize=0;
-	f->fat$w_maxrec=0;
+	f->fat$w_maxrec=512;
 	f->fat$w_defext=0;
 	f->fat$w_gbc=0;
 	f->fat$w_versions=1;
