@@ -124,28 +124,45 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
 
   status=lnm$firsttab(&ret,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
 
+  mylnmb=lnmmalloc(sizeof(struct _lnmb));
+  bzero(mylnmb,sizeof(struct _lnmb));
+  mylnmb->lnmb$l_flink=0;
+  mylnmb->lnmb$l_blink=0;
+  mylnmb->lnmb$w_size=sizeof(struct _lnmb);
+  mylnmb->lnmb$b_type=DYN$C_LNM;
+  mylnmb->lnmb$b_acmode=0;
+  mylnmb->lnmb$l_table=ret.mylnmb;
+  mylnmb->lnmb$b_flags=0;
+  mylnmb->lnmb$b_count=mylognam->dsc$w_length;
+  mylnmb->lnmb$l_lnmx=0;
+  struct _lnmx ** next_lnmx = &mylnmb->lnmb$l_lnmx;
+  strncpy( &(mylnmb->lnmb$t_name[0]),mylognam->dsc$a_pointer,mylognam->dsc$w_length);
+
   for(i=itmlst;i->item_code!=0;i++) {
-    mylnmb=lnmmalloc(sizeof(struct _lnmb));
-    bzero(mylnmb,sizeof(struct _lnmb));
-    mylnmx=lnmmalloc(sizeof(struct _lnmx));
-    bzero(mylnmx,sizeof(struct _lnmx));
-    mylnmb->lnmb$l_flink=0;
-    mylnmb->lnmb$l_blink=0;
-    mylnmb->lnmb$w_size=sizeof(struct _lnmb);
-    mylnmb->lnmb$b_type=DYN$C_LNM;
-    mylnmb->lnmb$b_acmode=0;
-    mylnmb->lnmb$l_table=ret.mylnmb;
-    mylnmb->lnmb$b_flags=0;
-    mylnmb->lnmb$b_count=mylognam->dsc$w_length;
-    mylnmb->lnmb$l_lnmx=mylnmx;
-    strncpy( &(mylnmb->lnmb$t_name[0]),mylognam->dsc$a_pointer,mylognam->dsc$w_length);
-    mylnmx->lnmx$l_xlen=i->buflen;
-    strncpy( &(mylnmx->lnmx$t_xlation[0]),i->bufaddr,i->buflen);
-    mylnmx->lnmx$l_flags=LNMX$M_TERMINAL;
-    mylnmx->lnmx$l_flags|=LNMX$M_XEND;
+    switch (i->item_code) {
+    case LNM$_INDEX:
+      memcpy(&mylnmx->lnmx$l_index,i->bufaddr,4);
+      break;
+    case LNM$_STRING:
+      mylnmx=lnmmalloc(sizeof(struct _lnmx));
+      bzero(mylnmx,sizeof(struct _lnmx));
 
-    status=lnm$inslogtab(&ret,mylnmb);
+      *next_lnmx=mylnmx;
+      next_lnmx=&mylnmx->lnmx$l_next;
 
+      mylnmx->lnmx$l_xlen=i->buflen;
+      strncpy( &(mylnmx->lnmx$t_xlation[0]),i->bufaddr,i->buflen);
+      mylnmx->lnmx$l_flags=LNMX$M_TERMINAL;
+      mylnmx->lnmx$l_flags|=LNMX$M_XEND;
+
+      status=lnm$inslogtab(&ret,mylnmb);
+      break;
+    case LNM$_LNMB_ADDR:
+      memcpy(i->bufaddr,&mylnmb,i->buflen);
+      break;
+    default:
+      printk("yet unknown LNM param %x\n",i->item_code);
+    }
   }
 
   setipl(0); // simulate return int
@@ -336,11 +353,25 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
     setipl(0);
     return status;
   }
-  i->buflen=(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_xlen;
-  bcopy((ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,i->bufaddr,i->buflen);
+  for(i=itmlst;i->item_code!=0;i++) {
+    switch(i->item_code) {
+    case LNM$_INDEX:
+      //i->retlenaddr
+      //memcpy(i->bufaddr,(ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,4);
+      if (*(long*)i->bufaddr!=LNMX$C_BACKPTR)
+	return SS$_BADPARAM;
+      break;
+    case LNM$_STRING:
+      i->buflen=(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_xlen;
+      bcopy((ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,i->bufaddr,i->buflen);
 #ifdef LNM_DEBUG 
-  lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
+      lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
 #endif
+      break;
+    default:
+      printk("another unsupport LNM %x\n",i->item_code);
+    }
+  }
   lnm$unlock();
   setipl(0); // simulate return int
   return status;
@@ -416,17 +447,17 @@ main(){
   s->partab=&mytabnam2;
   s->tabnam=&mytabnam3;
   status=exe$crelnt_wrap(s);
-  i[0].item_code=1;
+  i[0].item_code=LNM$_STRING;
   i[0].buflen=5;
   i[0].bufaddr="mylog";
   bzero(&i[1],sizeof(struct item_list_3));
   status=exe$crelnm(0,&mytabnam2,&mynam,0,i);
-  i[0].item_code=1;
+  i[0].item_code=LNM$_STRING;
   i[0].buflen=6;
   i[0].bufaddr="mylog3";
   bzero(&i[1],sizeof(struct item_list_3));
   status=exe$crelnm(0,&mytabnam2,&mynam2,0,i); 
-  i[0].item_code=1;
+  i[0].item_code=LNM$_STRING;
   i[0].buflen=6;
   i[0].bufaddr=resstring;
   bzero(&i[1],sizeof(struct item_list_3));
