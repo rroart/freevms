@@ -14,12 +14,15 @@
 #include<descrip.h>
 #include<ipldef.h>
 #include<phddef.h>
+#include<pqbdef.h>
 #include<prcdef.h>
 #include<pridef.h>
 #include<rdedef.h>
 #include<secdef.h>
 #include<ssdef.h>
 #include<starlet.h>
+
+#include <linux/sched.h>
 
 #ifndef __arch_um__
 #include<asm/uaccess.h>
@@ -33,6 +36,9 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
   unsigned long stack_here;
   struct _pcb * p, * cur;
   int retval;
+
+  struct dsc$descriptor * imd = image, * ind = input, * oud = output, * erd = error;
+
   unsigned long clone_flags=CLONE_VFORK;
   //check pidadr
   if (stsflg&PRC$M_DETACH) {
@@ -42,7 +48,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
   }
   //setipl(IPL$_ASTDEL);//postpone this?
-  cur=smp$gl_cpu_data[0]->cpu$l_curpcb;
+  cur=ctl$gl_pcb;
   p = alloc_task_struct();
   //bzero(p,sizeof(struct _pcb));//not wise?
   
@@ -76,6 +82,21 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
   // set vms pid
   // check process name
   // do something with pqb
+
+  p->pcb$l_pqb=kmalloc(sizeof(struct _pqb),GFP_KERNEL);
+  memset(p->pcb$l_pqb,0,sizeof(struct _pqb));
+
+  struct _pqb * pqb = p->pcb$l_pqb;
+
+  if (imd)
+    memcpy(pqb->pqb$t_image,imd->dsc$a_pointer,imd->dsc$w_length);
+  if (ind)
+    memcpy(pqb->pqb$t_input,ind->dsc$a_pointer,ind->dsc$w_length);
+  if (oud)
+    memcpy(pqb->pqb$t_output,oud->dsc$a_pointer,oud->dsc$w_length);
+  if (erd)
+    memcpy(pqb->pqb$t_error,erd->dsc$a_pointer,erd->dsc$w_length);
+
   // translate some logicals
   // copy security clearance
   // copy msg
@@ -134,7 +155,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	p->state = TASK_UNINTERRUPTIBLE;
 
 	//copy_flags(clone_flags, p);
-	p->pcb$l_pid = alloc_ipid();
+	// not here?	p->pcb$l_pid = alloc_ipid();
 
 	p->run_list.next = NULL;
 	p->run_list.prev = NULL;
@@ -212,6 +233,9 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	p->p_opptr = current->p_opptr;
 	p->p_pptr = current->p_pptr;
 
+        p->p_opptr = current /*->p_opptr*/;
+        p->p_pptr = current /*->p_pptr*/;
+
 	SET_LINKS(p);
 
 	nr_threads++;
@@ -227,17 +251,41 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
 	// wait, better do execve itself
 
+	memcpy(p->rlim, current->rlim, sizeof(p->rlim));
+
+	qhead_init(&p->pcb$l_sqfl);
+
+	struct mm_struct * mm = mm_alloc();
+	p->mm = mm;
+	p->active_mm = mm;
+
+	p->user = INIT_USER;
+
+	spin_lock(&mmlist_lock);
+	list_add(&mm->mmlist, &p->p_pptr->mm->mmlist);
+	mmlist_nr++;
+	spin_unlock(&mmlist_lock);
+
 #ifdef __arch_um__
+	flush_tlb_mm(mm); // check this
+#endif
+
+	int exe$procstrt(struct _pcb * p);
+#ifdef __arch_um__
+	current->thread.request.u.thread.proc = exe$procstrt;
+	current->thread.request.u.thread.arg = p;
 	retval = new_thread(0, clone_flags, 0, 0, p, 0);
 
 	void * regs = &p->thread.regs;
 #else
 	struct pt_regs * regs = &pidadr;
+	printk("newthread %x\n",p),
+	retval = new_thread(0, clone_flags, 0, 0, p, 0);
 #endif
 
 	int eip=0,esp=0;
 
-	start_thread(regs,eip,esp);
+	//	start_thread(regs,eip,esp);
 
 	sch$chse(p, PRI$_NULL);
 
