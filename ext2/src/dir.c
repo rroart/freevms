@@ -115,7 +115,9 @@ static void ext2_check_page(struct page *page, struct inode *inode, unsigned lon
 	if (offs != limit)
 		goto Eend;
 out:
+#if 0
 	SetPageChecked(page);
+#endif
 	return;
 
 	/* Too bad, we had an error */
@@ -155,8 +157,10 @@ Eend:
 		dir->i_ino, (pageno<<PAGE_CACHE_SHIFT)+offs,
 		(unsigned long) le32_to_cpu(p->inode));
 fail:
+#if 0
 	SetPageChecked(page);
 	SetPageError(page);
+#endif
 }
 
 static struct page * ext2_get_page(struct inode *dir, unsigned long n)
@@ -167,12 +171,16 @@ static struct page * ext2_get_page(struct inode *dir, unsigned long n)
 	if (!IS_ERR(page)) {
 	  //wait_on_page(page);
 		kmap(page);
+#if 0
 		if (!Page_Uptodate(page))
 			goto fail;
 		if (!PageChecked(page))
 			ext2_check_page(page,dir,n);
 		if (PageError(page))
 			goto fail;
+#else
+		ext2_check_page(page,dir,n);
+#endif
 	}
 	return page;
 
@@ -391,14 +399,18 @@ void ext2_set_link(struct inode *dir, struct ext2_dir_entry_2 *de,
 	unsigned to = from + le16_to_cpu(de->rec_len);
 	int err;
 
+#if 0
 	lock_page(page);
+#endif
 	err = block_prepare_write2(NULL, page, from, to, 0);
 	if (err)
 		BUG();
 	de->inode = cpu_to_le32(inode->i_ino);
 	ext2_set_de_type (de, inode);
 	err = ext2_commit_chunk(inode, page, from, to);
+#if 0
 	UnlockPage(page);
+#endif
 	ext2_put_page(page);
 	dir->i_mtime = dir->i_ctime = CURRENT_TIME;
 	ext2_sync_inode (dir);
@@ -452,7 +464,9 @@ int ext2_add_link (struct dentry *dentry, struct inode *inode)
 got_it:
 	from = (char*)de - (char*)page_address(page);
 	to = from + rec_len;
+#if 0
 	lock_page(page);
+#endif
 	err = block_prepare_write2(dir, page, from, to, 0);
 	if (err)
 		goto out_unlock;
@@ -472,7 +486,9 @@ got_it:
 	//mark_inode_dirty(dir);
 	/* OFFSET_CACHE */
 out_unlock:
+#if 0
 	UnlockPage(page);
+#endif
 out_page:
 	ext2_put_page(page);
 out:
@@ -498,7 +514,9 @@ int ext2_delete_entry2 (struct ext2_dir_entry_2 * dir, struct page * page, struc
 	}
 	if (pde)
 		from = (char*)pde - (char*)page_address(page);
+#if 0
 	lock_page(page);
+#endif
 	err = block_prepare_write2(inode, page, from, to, 0);
 	if (err)
 		BUG();
@@ -506,7 +524,9 @@ int ext2_delete_entry2 (struct ext2_dir_entry_2 * dir, struct page * page, struc
 		pde->rec_len = cpu_to_le16(to-from);
 	dir->inode = 0;
 	err = ext2_commit_chunk(inode, page, from, to);
+#if 0
 	UnlockPage(page);
+#endif
 	ext2_put_page(page);
 	inode->i_ctime = inode->i_mtime = CURRENT_TIME;
 	ext2_sync_inode (inode);
@@ -549,7 +569,9 @@ int ext2_make_empty(struct inode *inode, struct inode *parent)
 
 	err = ext2_commit_chunk(inode, page, 0, chunk_size);
 fail:
+#if 0
 	UnlockPage(page);
+#endif
 	page_cache_release(page);
 	return err;
 }

@@ -185,9 +185,11 @@ struct _pfn {
   unsigned short int pfn$w_pt_lck_cnt;
   unsigned short int pfn$w_pt_win_cnt;
 
-  struct list_head list;		/* ->mapping has some page lists. */
+  struct list_head list;	/* for slab */	/* ->mapping has some page lists. */
+#if 0
   struct address_space *mapping;	/* The inode (or ...) we belong to. */
   unsigned long index;		/* Our offset within mapping. */
+#endif
   /*struct page *next_hash;*/		/* Next page sharing our hash bucket in
 					   the pagecache hash table. */
   // count is moved up
@@ -196,11 +198,11 @@ struct _pfn {
 					   updated asynchronously */
   /*struct list_head lru*/;		/* Pageout list, eg. active_list;
 					   protected by pagemap_lru_lock !! */
-	wait_queue_head_t wait;		/* Page locked?  Stand in line... */
+  /*	wait_queue_head_t wait;	*/	/* Page locked?  Stand in line... */
   /*struct page **pprev_hash;*/	/* Complement to *next_hash. */
-  struct buffer_head * buffers;	/* Buffer maps us to a disk block. */
+  /* struct buffer_head * buffers; */	/* Buffer maps us to a disk block. */
   // keep virtual for now; need it for some time for mmg$allocontig_align
-	void *virtual;			/* Kernel virtual address (NULL if
+  /*	void *virtual;*/			/* Kernel virtual address (NULL if
 					   not kmapped, ie. highmem) */
   //struct zone_struct *zone;	/* Memory zone we are in. */
 #ifdef CONFIG_MM_VMS
