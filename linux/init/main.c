@@ -632,8 +632,8 @@ asmlinkage void __init start_kernel(void)
 	}
 #endif
 	mem_init();
-	printk("%%KERNEL-I-DEBUG, After mem_init, before lnm_init\n");
-	lnm_init();
+	printk("%%KERNEL-I-DEBUG, After mem_init, before lnm_init_sys\n");
+	lnm_init_sys();
 	printk("%%KERNEL-I-DEBUG, After lnm_init\n");
 	kmem_cache_sizes_init();
 	printk("%%KERNEL-I-DEBUG, After kmem_cache_size_init\n");
