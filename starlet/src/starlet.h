@@ -86,6 +86,12 @@ int sys$clrast(void);
 
 int sys$setast(char enbflg);
 
+int sys$ascefc(unsigned int efn, void *name, char prot, char perm); 
+
+int sys$dacefc(unsigned int efn);
+
+int sys$dlcefc(void *name);
+
 struct struct_crelnt {
  unsigned int *attr;
  void *resnam;

@@ -307,8 +307,11 @@ extern syscall_handler_t  exe$trnlnm ;
 extern syscall_handler_t  exe$dellnm ;
 extern syscall_handler_t  exe$clrast ;
 extern syscall_handler_t  exe$setast ;
+extern syscall_handler_t  exe$ascefc ;
+extern syscall_handler_t  exe$dacefc ;
+extern syscall_handler_t  exe$dlcefc ;
 
-#define LAST_GENERIC_SYSCALL __NR_$setast
+#define LAST_GENERIC_SYSCALL __NR_$dlcefc
 
 #if LAST_GENERIC_SYSCALL > LAST_ARCH_SYSCALL
 #define LAST_SYSCALL LAST_GENERIC_SYSCALL

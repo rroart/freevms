@@ -4,7 +4,7 @@ FreeVMS tasklist
 
   Basic/foundation stuff:
 
-    CPU, barely started, need more people:	
+    CPU/PAL, barely started, need more people:	
 	We will need someone with keen eye for and high knowledge of CPU 
 	semantics to finish IPLs etc, because we need to get synchronization
 	correct on the instruction level, or we will never get it stable.
@@ -34,7 +34,7 @@ FreeVMS tasklist
     Synchronization:
 	Lock management (DLM), barely started, need more people.
 
-    Memory management, no work done yet, vacant.
+    Memory management, barely started, vacant.
 
     Process and time management, some work done, need more people. 
 
@@ -126,3 +126,12 @@ Low priority:
   CRTL, we will continue to try to use libc etc? 
   Editors, nothing done, vacant
   Volume shadowing, nothing done, vacant
+
+
+
+
+CURRENT/ACTIVE PEOPLE:
+
+Bertrand Joël: Things in dcl/ and srm.
+Magne Mæhre: (Uncommited) ODS-2 (probably some RMS in there, too)
+Roar Thronæs: CPU/PAL, Kernel, Cluster

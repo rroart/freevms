@@ -130,6 +130,9 @@ static inline pid_t setsid(void)
 #undef __NR_$dellnm          
 #undef __NR_$clrast
 #undef __NR_$setast 
+#undef __NR_$ascefc
+#undef __NR_$dacefc
+#undef __NR_$dlcefc
 
 #undef __NR_$close 
 #undef __NR_$connect 
@@ -249,7 +252,9 @@ static inline pid_t setsid(void)
 #define __NR_$dellnm 313
 #define __NR_$clrast 314
 #define __NR_$setast 315
-
+#define __NR_$ascefc 316
+#define __NR_$dacefc 317
+#define __NR_$dlcefc 318
 #endif
 
 /*

@@ -889,6 +889,9 @@ ENTRY(vmssys_call_table)
         .long SYMBOL_NAME(exe$dellnm) 
         .long SYMBOL_NAME(exe$clrast) 
         .long SYMBOL_NAME(exe$setast) 
+        .long SYMBOL_NAME(exe$ascefc) 
+        .long SYMBOL_NAME(exe$dacefc) 
+        .long SYMBOL_NAME(exe$dlcefc) 
 
 	.rept NR_vmssyscalls-(.-vmssys_call_table)/4
 		.long SYMBOL_NAME(sys_$ni_syscall)

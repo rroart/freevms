@@ -166,6 +166,9 @@
 #define __NR_$dellnm 313
 #define __NR_$clrast 314
 #define __NR_$setast 315
+#define __NR_$ascefc 316
+#define __NR_$dacefc 317
+#define __NR_$dlcefc 318
 
 #endif
 

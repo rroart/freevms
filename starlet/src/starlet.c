@@ -246,6 +246,18 @@ int sys$setast(char enbflg) {
   return INLINE_SYSCALL($setast,1,((unsigned long)enbflg));
 }
 
+int sys$ascefc(unsigned int efn, void *name, char prot, char perm) {
+  return INLINE_SYSCALL($ascefc,4,efn,name,(unsigned long) prot, (unsigned long) perm);
+}
+
+int sys$dacefc(unsigned int efn) {
+  return INLINE_SYSCALL($dacefc,1,efn));
+}
+
+int sys$dlcefc(void *name) {
+  return INLINE_SYSCALL($dlcefc,1,name));
+}
+
 int sys$asctim  (unsigned short int *timlen, void *timbuf,
 		 unsigned long long *timadr, char cvtflg) {
   return INLINE_SYSCALL3($asctim,4,timlen,timbuf,timadr,(unsigned long)cvtflg);

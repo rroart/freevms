@@ -285,6 +285,9 @@
 #define __NR_$dellnm           39
 #define __NR_$clrast           40
 #define __NR_$setast           41
+#define __NR_$ascefc           42
+#define __NR_$dacefc           43
+#define __NR_$dlcefc           44
 
 #define __NR_$close 1
 #define __NR_$connect 2
