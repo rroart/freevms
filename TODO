@@ -28,3 +28,5 @@ Use correct interface to network module in CONFIG_VMS
 Make a make linker autobuild
 
 Use sys$ with system service call instead in exe$ in ipacp etc, to make asts etc function properly.
+
+Schedule code cleanup.
