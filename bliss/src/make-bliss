@@ -9,6 +9,7 @@ tar xzf bliss-0_005.tgz
 rm -rf build
 mkdir build
 cd build
-../gcc-3.4.3/configure --enable-languages=bliss --with-included-gettext
+../gcc-3.4.3/configure --enable-languages=bliss --with-included-gettext --prefix=$TOPDIR/bliss
 make bootstrap
+make install
 cd ..
