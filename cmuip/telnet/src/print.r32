@@ -1,0 +1,40 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+%TITLE 'System Services Literals, Macros and Structures'
+!++
+!
+! Print.R32
+! Carnegie Mellon University Computer Science Department
+! Dale Moore March 1983
+
+MACRO
+    Print(X) =	BEGIN
+		   EXTERNAL ROUTINE
+			Print_Help;
+		    Print_Help(
+			%ASCID X
+			%IF NOT %NULL(%REMAINING) %THEN , %REMAINING %FI
+			)
+		END %;
+!  DEC/CMS REPLACEMENT HISTORY, Element PRINT.R32
+!  *1     5-MAR-1991 19:00:29 SYNFUL "Miscellaneous PRINT routine for help"
+!  DEC/CMS REPLACEMENT HISTORY, Element PRINT.R32

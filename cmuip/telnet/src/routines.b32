@@ -1,0 +1,2057 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+    Telnet_Routines (
+	ADDRESSING_MODE (NONEXTERNAL = LONG_RELATIVE),
+	ZIP,OPTIMIZE,OPTLEVEL=3,
+	IDENT='2.0',
+	LIST (ASSEMBLY, BINARY, NOEXPAND),
+	LANGUAGE(BLISS32)) =
+BEGIN
+!++
+! ROUTINES.B32	Copyright (c) 1986	Carnegie Mellon University
+!
+! Description:
+!
+!	Routines called by Telnet.  See Telnet_PARSE.CLD for details
+!
+! Written By:
+!
+! 		Bruce Miller	14-NOV-88	CMU Network Development
+!
+! Modifications:
+!
+!	12-Sep-1990	Bruce R. Miller		CMU NetDev
+!	Changed the help library to reside in CMUTEK_ROOT:[SYSHLP]
+!
+!	10-MAR-1989	Dale Moore	CMU-CS
+!	Modified to Signal ECHO_ON ECHO_OFF conditionally on Debug.
+!
+!	09-JAN-1989	Dale Moore	CMU-CS
+!	Changed the help library to reside in SYS$HELP instead of
+!	SYS$LIBRARY:.  Removed reference to LIBRARY SYS$LIBRARY:CMU_CS.
+!	Replaced them with Print.
+!
+!	Nov 1991	John Clement	Rice University
+!	Fix Binary option
+!	Add Eightbit option
+!	Make Linemode option useful
+!	Set PREFER when wish to negotiate option
+!	in SET KEY If no key specified set it to -1 (Off)
+!	With the exception of ESCAPE, which goes back to the default.
+!	Add SET_CONNECT for automatic reconnection
+!
+!--
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETAUX';
+LIBRARY 'CLI';
+LIBRARY 'TELNET';
+LIBRARY 'OPTION';
+
+COMPILETIME
+    Debug	= 0;
+
+EXTERNAL
+    Connected;
+
+OWN
+	Tmp_String	: $BBLOCK [DSC$K_S_BLN] PRESET(
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= 0);
+
+
+
+ROUTINE Get_String_Entry( string_A, position ) =
+!++
+! Functional Description:
+!
+!	Return the Nth character in a string.
+!--
+BEGIN
+    BIND
+
+	String = .String_A	: $BBLOCK;
+    LOCAL
+	char : BYTE;
+
+    char = .(.String[DSC$A_POINTER] + .position)
+END;
+
+
+
+GLOBAL ROUTINE Convert_Key_to_String (String_A, Key) =
+!++
+! Functional Description:
+!
+!
+!--
+BEGIN
+    BIND
+	String = .String_A;
+    EXTERNAL ROUTINE
+	Append_Char,
+	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL);
+
+    STR$COPY_DX( String , %ASCID'' );
+    CASE .Key FROM -1 TO 127 OF
+	SET
+	[ -1 ] :
+	    BEGIN
+	    STR$COPY_DX( String , %ASCID'None' )
+	    END;
+	[ 0 TO 31 ] :
+	    BEGIN
+	    STR$COPY_DX( String , %ASCID'^' );
+	    Append_Char( String , .Key + 64 )
+	    END;
+	[ 127 ] :
+	    BEGIN
+	    STR$COPY_DX( String , %ASCID'Del' )
+	    END;
+	[INRANGE] :
+	    Append_Char( String , .Key )
+	TES
+
+END;
+
+
+
+GLOBAL ROUTINE Convert_String_to_Key (String_A) =
+!++
+! Functional Description:
+!
+!
+!--
+BEGIN
+    BIND
+	String = .String_A;
+    EXTERNAL
+	TT_Xon_Key,
+	TT_Xoff_Key,
+	TT_CR_Key;
+    EXTERNAL ROUTINE
+	STR$CASE_BLIND_COMPARE
+			: BLISS ADDRESSING_MODE(GENERAL),
+	Cvt_Key;
+    LOCAL
+	Status,
+	Key;
+
+    Key = 0;
+    Status = STR$CASE_BLIND_COMPARE (String, %ASCID 'DEL');
+    IF .Status EQL 0 then RETURN(127);
+    Status = STR$CASE_BLIND_COMPARE (String, %ASCID 'NONE');
+    IF .Status EQL 0 then RETURN(-1);
+    Status = Cvt_Key(String, Key);
+    If NOT .Status Then key = -2;		! Bad syntax ?
+    If (.key GEQ %x'20') AND (.Key LEQ %x'7E') THEN
+	Key = -2;				! Letter ?
+    If .Key EQL 27 THEN Key = -2;		! Escape ?
+    If .Key EQL .TT_CR_KEY THEN Key = -2;	! <CR>
+    If .Key EQL .TT_Xon_KEY THEN Key = -2;	! <Xon>
+    If .Key EQL .TT_Xoff_KEY THEN Key = -2;	! <Xoff>
+    .Key
+
+END;
+
+
+
+GLOBAL ROUTINE Get_Switch_Value (
+	Switch_A,
+	Value_A,
+	Logical_Name_A,
+	Default_Value_A) =
+!++
+! Functional Description:
+!
+!	Routine to return a switch value.  Is (in this module) passed
+!	a descriptor switch and a descriptor return value (into which the
+!	switch value is returned.
+!	If string contains a double quote, it is filtered out.
+!--
+    BEGIN
+    BIND
+	Switch		= .Switch_A		: $BBLOCK,
+	Value		= .Value_A		: $BBLOCK,
+	Logical_Name	= .Logical_Name_A	: $BBLOCK,
+	Default_Value	= .Default_Value_A	: $BBLOCK;
+    EXTERNAL ROUTINE
+	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL);
+    BUILTIN
+	NULLPARAMETER;
+    LOCAL
+	Temp_Buffer	: VECTOR [128, BYTE],
+	Temp_String	: $BBLOCK [DSC$K_S_BLN] PRESET(
+			[DSC$W_LENGTH]	= %ALLOCATION (Temp_Buffer),
+			[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
+			[DSC$B_Class]	= DSC$K_CLASS_Z,
+			[DSC$A_POINTER]	= Temp_Buffer),
+	Status;
+
+    Status = CLI$PRESENT (Switch);
+    IF (.Status EQLU CLI$_PRESENT)
+	THEN CLI$GET_VALUE (Switch, Value);
+    IF (.Status EQLU CLI$_ABSENT) AND NOT NULLPARAMETER (Logical_Name_A)
+	THEN BEGIN
+	LOCAL
+	    Length	: WORD INITIAL (0);
+	IF (
+		$TRNLOG (
+		    LOGNAM = Logical_Name,
+		    RSLLEN = Length,
+		    RSLBUF = Temp_String)
+		EQLU
+		SS$_NORMAL
+	    ) THEN
+	    BEGIN
+	    Status = CLI$_PRESENT;
+	    Temp_String [DSC$W_LENGTH] = .Length;
+	    STR$COPY_DX (Value, Temp_String);
+	    END;
+	END;
+    IF	(.Status EQLU CLI$_ABSENT) AND NOT NULLPARAMETER (Default_Value_A)
+	THEN BEGIN
+	Status = CLI$_DEFAULTED;
+	STR$COPY_DX (Value, Default_Value);
+	END;
+
+    .Status
+    END;
+
+
+
+ROUTINE Get_Yes_No (String, Response) =
+!++
+! Functional Description:
+!
+!	Get a yes or no answer from a string.
+!	Response = TRUE if YES, FALSE if NO
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	STR$CASE_BLIND_COMPARE
+			: BLISS ADDRESSING_MODE(GENERAL);
+    LOCAL
+	Status;
+
+    .Response = 1;
+    Status = STR$CASE_BLIND_COMPARE (.String, %ASCID 'YES');
+    IF .Status EQL 0 THEN RETURN (1);
+    Status = STR$CASE_BLIND_COMPARE (.String, %ASCID 'Y');
+    IF .Status EQL 0 THEN RETURN (1);
+    Status = STR$CASE_BLIND_COMPARE (.String, %ASCID 'TRUE');
+    IF .Status EQL 0 THEN RETURN (1);
+    Status = STR$CASE_BLIND_COMPARE (.String, %ASCID 'T');
+    IF .Status EQL 0 THEN RETURN (1);
+    .Response = 0;
+    Status = STR$CASE_BLIND_COMPARE (.String, %ASCID 'NO');
+    IF .Status EQL 0 THEN RETURN (1);
+    Status = STR$CASE_BLIND_COMPARE (.String, %ASCID 'N');
+    IF .Status EQL 0 THEN RETURN (1);
+    Status = STR$CASE_BLIND_COMPARE (.String, %ASCID 'FALSE');
+    IF .Status EQL 0 THEN RETURN (1);
+    Status = STR$CASE_BLIND_COMPARE (.String, %ASCID 'F');
+    IF .Status EQL 0 THEN RETURN (1);
+
+    0
+    END;
+
+ROUTINE Get_On_Off (String, Response) =
+!++
+! Functional Description:
+!
+!	Get an on or off answer from a string.
+!	Response = TRUE if ON, FALSE if OFF
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	STR$CASE_BLIND_COMPARE
+			: BLISS ADDRESSING_MODE(GENERAL);
+    LOCAL
+	Status;
+
+    .Response = 1;
+    Status = STR$CASE_BLIND_COMPARE (.String, %ASCID 'ON');
+    IF .Status EQL 0 THEN RETURN (1);
+    .Response = 0;
+    Status = STR$CASE_BLIND_COMPARE (.String, %ASCID 'OFF');
+    IF .Status EQL 0 THEN RETURN (1);
+
+    0
+    END;
+
+
+
+GLOBAL ROUTINE Close =
+!++
+! Description:
+!
+!	A routine to close the current Telnet connection.
+!
+! Note:
+!
+!	As the End Of File condition must not be stopped.
+!--
+    BEGIN
+    EXTERNAL
+	Connected;
+    EXTERNAL ROUTINE
+	Close_Conn;
+
+    IF NOT .Connected THEN Signal(Telnet$_Not_Connected)
+    ELSE Close_Conn(0);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Exit_Telnet =
+!++
+! Description:
+!
+!	A CLI Dispatch routine to exit the Telnet Utility.
+!
+! Note:
+!
+!	As the End Of File condition must not be stopped.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Close_Conn;
+
+    Close_Conn(0);
+    RMS$_EOF
+    END;
+
+
+
+GLOBAL ROUTINE Telnet_help =
+!++
+!  COMMAND:	HELP
+!
+!  Will give user a little help.
+!
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Strings_Handler,
+	LBR$OUTPUT_HELP : BLISS ADDRESSING_MODE(GENERAL),
+	Telnet_Get_Input	: BLISS ADDRESSING_MODE(GENERAL),
+	LIB$PUT_OUTPUT	: BLISS ADDRESSING_MODE(GENERAL),
+	STR$FREE1_DX	: BLISS ADDRESSING_MODE(GENERAL);
+    LOCAL
+	Flag,
+	Line		:  VOLATILE $BBLOCK [DSC$K_S_BLN] PRESET (
+					[DSC$W_LENGTH]	= 0,
+					[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+					[DSC$B_CLASS]	= DSC$K_CLASS_D,
+					[DSC$A_POINTER]	= 0),
+	Status;
+    ENABLE
+	Strings_Handler (Line);
+
+    ! Set the help options
+
+    Status = Get_Switch_Value(%ASCID'Help_line',Line);
+    IF NOT .Status THEN
+	IF .Status NEQU CLI$_ABSENT THEN Signal(Telnet$_NO_SWITCH, 1, %ASCID'HELP', .Status);
+
+    Flag = HLP$M_PROMPT OR HLP$M_HELP;
+    Status = LBR$OUTPUT_HELP (
+			LIB$PUT_OUTPUT,
+			0,
+			Line,
+			%ASCID 'CMUIP_ROOT:[SYSHLP]TELNET.HLB',
+			Flag,
+			Telnet_Get_Input);
+!    IF NOT .Status THEN	Signal(Telnet$_ERROR, 0, .Status);
+    IF NOT .Status THEN	Signal( (.Status AND %X'FFFFFFF9') );
+
+    Status = STR$FREE1_DX (Line);
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Do_Negotiate_Options =
+    BEGIN
+    EXTERNAL ROUTINE
+	Negotiate_Options;
+    EXTERNAL
+	Flag_Quiet;
+
+	IF NOT .Flag_Quiet THen
+		Signal(Telnet$_Negotiate);
+
+	Negotiate_Options ();
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Do_Status =
+!++
+! Functional Description:
+!
+!	Print out various statistics dealing with the Telnet connection.
+!--
+    BEGIN
+    EXTERNAL
+	Remote_Host : $BBLOCK,
+	Connected,
+	Activated,
+	TT_Escape_Key,
+	Flag_Debug,
+	Flag_Connect_mode,
+	Flag_AO,
+	Flag_Line_Mode,
+	Flag_LocalChars,
+	TT_Reads,
+	TT_Read_Bytes,
+	TT_Writes,
+	TT_Write_Bytes,
+	TCP_Reads,
+	TCP_Read_Bytes,
+	TCP_Writes,
+	TCP_Write_Bytes;
+    LOCAL
+	Key_String	: $BBLOCK [DSC$K_S_BLN];
+
+    $Init_DynDesc (Key_String);
+
+    IF .Connected THEN Print ('Connected to !AS',Remote_Host)
+    ELSE Print('Not connected.');
+
+    Convert_Key_to_String( Key_String, .TT_Escape_Key );
+    Print ('    Current ESCAPE Key: [!AS]', Key_String);
+
+    IF .Flag_AO THEN Print ('    Aborting Output');
+    IF .Flag_Line_Mode
+	THEN Print ('    Line-Mode activated');
+
+    IF .Flag_Debug
+    THEN BEGIN
+	Print ('');
+	Print ('Net/Term Read/Write stats:');
+	Print ('TT Reads issued      = !9UL', .TT_Reads);
+	Print ('Bytes read from TT   = !9UL', .TT_Read_Bytes);
+	Print ('Net Reads issued     = !9UL', .TCP_Reads);
+	Print ('Bytes read from net  = !9UL', .TCP_Read_Bytes);
+	Print ('TT Writes issued     = !9UL', .TT_Writes);
+	Print ('Bytes written on TT  = !9UL', .TT_Write_Bytes);
+	Print ('Net writes issued    = !9UL', .TCP_Writes);
+	Print ('Bytes written on net = !9UL', .TCP_Write_Bytes);
+	Print ('');
+	END;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_AO =
+!++
+! Functional Description:
+!
+!	Send out a telnet AO command sequence.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Autoflush;
+    EXTERNAL ROUTINE
+	Flag_Urgent,
+	TCP_Write_Urgent,
+	Send_Command_with_Flush;
+
+    IF NOT .Connected THEN
+       BEGIN Signal(Telnet$_Not_Connected); RETURN(SS$_NORMAL) END;
+
+    Send_Command_with_Flush(Telnet$K_AO, .Flag_Autoflush);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_AYT =
+!++
+! Functional Description:
+!
+!	Send out a telnet AYT command sequence.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Send_Command;
+
+    IF NOT .Connected THEN
+       BEGIN Signal(Telnet$_Not_Connected); RETURN(SS$_NORMAL) END;
+
+    Send_Command(Telnet$K_AYT);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_BRK =
+!++
+! Functional Description:
+!
+!	Send out a telnet BRK command sequence.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Autoflush;
+    EXTERNAL ROUTINE
+	Flag_Urgent,
+	TCP_Write_Urgent,
+	Send_Command_with_Flush;
+
+    IF NOT .Connected THEN
+       BEGIN Signal(Telnet$_Not_Connected); RETURN(SS$_NORMAL) END;
+
+    TCP_Write_Urgent = .Flag_Urgent;
+    Send_Command_with_Flush(Telnet$K_BRK, .Flag_Autoflush);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_EC =
+!++
+! Functional Description:
+!
+!	Send out a telnet EC (Erase Character) command sequence.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Send_Command;
+
+    IF NOT .Connected THEN
+       BEGIN Signal(Telnet$_Not_Connected); RETURN(SS$_NORMAL) END;
+
+    Send_Command(Telnet$K_EC);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_EL =
+!++
+! Functional Description:
+!
+!	Send out a telnet EL (erase line) command sequence.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Send_Command;
+
+    Send_Command(Telnet$K_EL);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_Escape =
+!++
+! Functional Description:
+!
+!	Send out a telnet Escape command sequence.
+!--
+    BEGIN
+    EXTERNAL
+	TT_Escape_Key;
+    EXTERNAL ROUTINE
+	Give_To_Net;
+
+!	I'm not sure about this...
+    IF NOT .Connected THEN
+       BEGIN Signal(Telnet$_Not_Connected); RETURN(SS$_NORMAL) END;
+
+    Give_To_Net( TT_Escape_Key );
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_File =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+    EXTERNAL ROUTINE
+	LOG_CLOSE,
+	LOG_OPEN;
+    LOCAL
+	Temp_String	: $BBLOCK [DSC$K_S_BLN],
+	Code,
+	Status;
+
+    $Init_DynDesc (Temp_String);
+    Status = CLI$GET_VALUE( %ascid 'infile_Name' , Temp_String );
+    IF NOT .Status
+    THEN BEGIN
+	Signal( (.Status AND %X'FFFFFFF9') );
+	END
+    ELSE BEGIN
+
+!!!JC	Status = LOG_OPEN(Temp_String);
+	IF .Status then
+	    IF (NOT .Flag_Quiet) THEN
+		Print( ' Pretending to Send  file: [!AS]', Temp_String )
+	ELSE
+		Signal( (.Status AND %X'FFFFFFF9') );
+	END;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_GA =
+!++
+! Functional Description:
+!
+!	Send out a telnet GA command sequence.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Send_Command;
+
+    Send_Command(Telnet$K_GA);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_Timing_mark =
+!++
+! Functional Description:
+!
+!	Send out a telnet GA command sequence.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Negotiate_option;
+
+    Negotiate_Option(Telnet$K_Do,Option$K_Timing_Mark);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_IP =
+!++
+! Functional Description:
+!
+!	Send out a telnet IP command sequence.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Autoflush;
+    EXTERNAL ROUTINE
+	Flag_Urgent,
+	TCP_Write_Urgent,
+	Send_Command_with_Flush;
+
+    IF NOT .Connected THEN
+       BEGIN Signal(Telnet$_Not_Connected); RETURN(SS$_NORMAL) END;
+
+    TCP_Write_Urgent = .Flag_Urgent;
+    Send_Command_with_Flush(Telnet$K_IP, .Flag_Autoflush);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_NOP =
+!++
+! Functional Description:
+!
+!	Send out a telnet NOP command sequence.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Send_Command;
+
+    IF NOT .Connected THEN
+       BEGIN Signal(Telnet$_Not_Connected); RETURN(SS$_NORMAL) END;
+
+    Send_Command(Telnet$K_NOP);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Send_Synch =
+!++
+! Functional Description:
+!
+!	Send out a telnet Synch command sequence.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Flag_Urgent,
+	TCP_Write_Urgent,
+	Send_Command;
+
+!	What the heck do we send here?
+!	JC Send Data_Mark
+!	This should be in urgent mode
+!
+    IF NOT .Connected THEN
+       BEGIN Signal(Telnet$_Not_Connected); RETURN(SS$_NORMAL) END;
+
+    TCP_Write_Urgent = .Flag_Urgent;
+    Send_Command(Telnet$K_Data_Mark);
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Set_Autoflush_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the autoflushing flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Flag_Autoflush;
+
+    IF NOT .Flag_Quiet
+    THEN BEGIN
+    IF .State THEN
+	Signal(TELNET$_Autoflush_on)
+    ELSE
+	Signal(TELNET$_Autoflush_off);
+    END;
+    Flag_Autoflush = .State;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Autoflush_On =
+    BEGIN
+    Set_Autoflush_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Autoflush_Off =
+    BEGIN
+    Set_Autoflush_Mode(0)
+    END;
+
+
+GLOBAL ROUTINE Set_EOL_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the EOL flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	TT_EOL_Type;
+
+    TT_EOL_Type = .State;
+    IF NOT .Flag_Quiet
+    THEN BEGIN
+    IF .State THEN
+	Signal(TELNET$_EOL_Type_CRNULL)
+    ELSE
+	Signal(TELNET$_EOL_Type_CRLF);
+    END;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_EOL_On =
+    BEGIN
+    Set_EOL_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_EOL_Off =
+    BEGIN
+    Set_EOL_Mode(0)
+    END;
+
+
+GLOBAL ROUTINE Set_Binary_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the Binary mode flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	State_Binary;
+    EXTERNAL ROUTINE
+	Negotiate_Option;
+
+!    IF .State_Binary NEQ .State THEN RETURN(SS$_Normal);
+
+!!!    My_Options [Option$K_Binary, Option$V_Prefer] = .state;
+    His_Options [Option$K_Binary, Option$V_Prefer] = .state;
+
+    IF .State THEN
+	BEGIN
+	IF NOT .Flag_Quiet THEN
+	Signal(Telnet$_Try_Binary_ON);
+	Negotiate_Option( Telnet$K_DO, Option$K_Binary );
+	END
+    ELSE
+	BEGIN
+	IF NOT .Flag_Quiet THEN
+	Signal(Telnet$_Try_Binary_OFF);
+	Negotiate_Option( Telnet$K_DONT, Option$K_Binary );
+	END;
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Binary_On =
+    BEGIN
+	Set_Binary_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Binary_Off =
+    BEGIN
+	Set_Binary_Mode(0)
+    END;
+
+
+
+GLOBAL ROUTINE Do_Set_Blocking_On =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+    EXTERNAL ROUTINE
+	Set_Data_Blocking_State;
+
+    IF NOT .Flag_Quiet THEN
+	Signal(TELNET$_Blocking_on);
+    Set_Data_Blocking_State(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Blocking_Off =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+    EXTERNAL ROUTINE
+	Set_Data_Blocking_State;
+
+    IF NOT .Flag_Quiet THEN
+	Signal(TELNET$_Blocking_off);
+    Set_Data_Blocking_State(0)
+    END;
+
+
+GLOBAL ROUTINE Set_Urgent_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the Urgenting flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Flag_Urgent;
+
+    IF NOT .Flag_Quiet
+    THEN BEGIN
+    IF .State THEN
+	Signal(TELNET$_Urgent_on)
+    ELSE
+	Signal(TELNET$_Urgent_off);
+    END;
+    Flag_Urgent = .State;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Urgent_On =
+    BEGIN
+    Set_Urgent_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Urgent_Off =
+    BEGIN
+    Set_Urgent_Mode(0)
+    END;
+
+
+
+GLOBAL ROUTINE Set_Command_Key (command_A) =
+!++
+! Functional Description:
+!
+!
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+    LOCAL
+	Key_ASCIZ	: $BBLOCK [DSC$K_S_BLN],
+	Key_Code,
+	Status;
+
+    $Init_DynDesc (Key_ASCIZ);
+    Status = CLI$GET_VALUE( %ascid 'Key' , Key_ASCIZ );
+    IF NOT .Status
+    THEN BEGIN
+	.command_A = -1;
+	END
+    ELSE BEGIN
+	Key_Code = Convert_String_to_Key( Key_ASCIZ );
+	If .Key_Code EQL -2 THEN BEGIN
+		Print('	Illegal key [!AS]',Key_ASCIZ);
+		END
+	ELSE BEGIN
+		.command_A = .Key_Code;
+		IF NOT .Flag_Quiet THEN
+		    Print ('    Key defined as:  [!AS]', Key_ASCIZ);
+		END;
+	END;
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Key_Escape =
+!++
+! Functional Description:
+!	Bind the Telnet Escape command to a new key (specified in Comand line.).
+!--
+    BEGIN
+    EXTERNAL
+	TT_Escape_Key;
+
+    Set_Command_Key(TT_Escape_Key);
+    IF .TT_Escape_Key EQL -1 THEN TT_Escape_KEy = %X'1E';
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Key_EC =
+!++
+! Functional Description:
+!	Bind the Telnet EC command to a new key (specified in Comand line.).
+!--
+    BEGIN
+    EXTERNAL
+	TT_EC_Key;
+
+    Set_Command_Key(TT_EC_Key)
+    END;
+
+GLOBAL ROUTINE Do_Set_Key_AO =
+!++
+! Functional Description:
+!	Bind the Telnet AO command to a new key (specified in Comand line.).
+!--
+    BEGIN
+    EXTERNAL
+	TT_AO_Key;
+
+    Set_Command_Key(TT_AO_Key)
+    END;
+
+GLOBAL ROUTINE Do_Set_Key_AYT =
+!++
+! Functional Description:
+!	Bind the Telnet AYT command to a new key (specified in Comand line.).
+!--
+    BEGIN
+    EXTERNAL
+	TT_AYT_Key;
+
+    Set_Command_Key(TT_AYT_Key)
+    END;
+
+GLOBAL ROUTINE Do_Set_Key_BRK =
+!++
+! Functional Description:
+!	Bind the Telnet BRK command to a new key (specified in Comand line.).
+!--
+    BEGIN
+    EXTERNAL
+	TT_BRK_Key;
+
+    Set_Command_Key(TT_BRK_Key)
+    END;
+
+GLOBAL ROUTINE Do_Set_Key_Echo =
+!++
+! Functional Description:
+!	Bind the Telnet Echo command to a new key (specified in Comand line.).
+!--
+    BEGIN
+    EXTERNAL
+	TT_Echo_Key;
+
+    Set_Command_Key(TT_Echo_Key)
+    END;
+
+GLOBAL ROUTINE Do_Set_Key_EL =
+!++
+! Functional Description:
+!	Bind the Telnet EL command to a new key (specified in Comand line.).
+!--
+    BEGIN
+    EXTERNAL
+	TT_EL_Key;
+
+    Set_Command_Key(TT_EL_Key)
+    END;
+
+GLOBAL ROUTINE Do_Set_Key_IP =
+!++
+! Functional Description:
+!	Bind the Telnet IP command to a new key (specified in Comand line.).
+!--
+    BEGIN
+    EXTERNAL
+	TT_IP_Key;
+
+    Set_Command_Key(TT_IP_Key)
+    END;
+
+GLOBAL ROUTINE Do_Set_Key_Synch =
+!++
+! Functional Description:
+!	Bind the Telnet Synch command to a new key (specified in Comand line.).
+!--
+    BEGIN
+    EXTERNAL
+	TT_Synch_Key;
+
+    Set_Command_Key(TT_Synch_Key)
+    END;
+
+
+GLOBAL ROUTINE Set_Connect_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the Connectging mode flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Flag_Connect_mode;
+
+    Flag_Connect_mode = .State;
+    IF NOT .Flag_Quiet
+    THEN BEGIN
+    IF .State THEN
+	Signal(TELNET$_Connect_on)
+    ELSE
+	Signal(TELNET$_Connect_off);
+
+    END;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Connect_On =
+    BEGIN
+    Set_Connect_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Connect_Off =
+    BEGIN
+    Set_Connect_Mode(0)
+    END;
+
+
+
+GLOBAL ROUTINE Set_Debug_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the debugging mode flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Flag_Debug;
+
+    Flag_Debug = .State;
+    IF NOT .Flag_Quiet
+    THEN BEGIN
+    IF .State THEN
+	Signal(TELNET$_debug_on)
+    ELSE
+	Signal(TELNET$_debug_off);
+
+    END;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Debug_On =
+    BEGIN
+    Set_Debug_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Debug_Off =
+    BEGIN
+    Set_Debug_Mode(0)
+    END;
+
+
+
+GLOBAL ROUTINE Set_Local_Echo_mode(State) =
+!++
+! Functional Description:
+!
+!	Change the local echoing mode to State.
+!--
+    BEGIN
+    EXTERNAL
+	Activated,
+	Flag_LEcho;
+    EXTERNAL ROUTINE
+	Set_TT_Echo_State,
+	Set_TT_Echo,
+	Set_TT_No_Echo;
+
+    Set_TT_Echo_State(.State);
+
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Set_Local_Echo_Mode_On =
+    BEGIN
+	Set_Local_Echo_Mode(1)
+    END;
+
+GLOBAL ROUTINE Set_Local_Echo_Mode_Off =
+    BEGIN
+	Set_Local_Echo_Mode(0)
+    END;
+
+
+GLOBAL ROUTINE Set_Remote_Echo_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the Echoing mode flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	State_Echo;
+    EXTERNAL ROUTINE
+	Negotiate_Option;
+
+!    IF .State_Echo NEQ .State THEN RETURN(SS$_Normal);
+
+    His_Options [Option$K_Echo, Option$V_Prefer] = .state;
+
+    IF .State THEN
+	BEGIN
+	Negotiate_Option( Telnet$K_DO, Option$K_Echo )
+	END
+    ELSE
+	BEGIN
+	Negotiate_Option( Telnet$K_DONT, Option$K_Echo )
+	END;
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Echo_On =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+
+
+    IF CLI$PRESENT( %ASCID'Local' )
+	THEN BEGIN
+		IF NOT .Flag_Quiet THEN
+			Signal(Telnet$_Echo_ON);
+		My_Options [Option$K_Echo, Option$V_Prefer] = 1;
+		Set_Local_Echo_Mode(1)
+		END
+    ELSE IF CLI$PRESENT( %ASCID'Remote' )
+	THEN BEGIN
+		IF NOT .Flag_Quiet THEN
+			Signal(Telnet$_Rem_Echo_On);
+		Set_Remote_Echo_Mode(1)
+	END
+    ELSE BEGIN
+	IF NOT .Flag_Quiet
+	THEN BEGIN
+		Signal(Telnet$_Echo_On);
+		Signal(Telnet$_Rem_Echo_On);
+	END;
+	My_Options [Option$K_Echo, Option$V_Prefer] = 1;
+	Set_Local_Echo_Mode(1);
+	Set_Remote_Echo_Mode(0);
+	END;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Echo_Off =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+    IF CLI$PRESENT( %ASCID'Local' )
+	THEN BEGIN
+		IF NOT .Flag_Quiet THEN
+			Signal(Telnet$_Echo_Off);
+		My_Options [Option$K_Echo, Option$V_Prefer] = 0;
+		Set_Local_Echo_Mode(0)
+		END
+    ELSE IF CLI$PRESENT( %ASCID'Remote' )
+	THEN BEGIN
+		IF NOT .Flag_Quiet THEN
+			Signal(Telnet$_Rem_Echo_Off);
+		Set_Remote_Echo_Mode(0)
+	END
+    ELSE BEGIN
+	IF NOT .Flag_Quiet
+	THEN BEGIN
+		Signal(Telnet$_Echo_Off);
+		Signal(Telnet$_Rem_Echo_Off);
+	END;
+	My_Options [Option$K_Echo, Option$V_Prefer] = 0;
+	Set_Local_Echo_Mode(0);
+	Set_Remote_Echo_Mode(1);
+	END;
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Set_Eightbit_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the Eightbit command mode flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Eightbit,
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+    EXTERNAL ROUTINE
+	Set_Eightbit,
+	Negotiate_Option;
+
+    My_Options [Option$K_Extended_ASCII, Option$V_Prefer] = .state;
+    His_Options [Option$K_Extended_ASCII, Option$V_Prefer] = .state;
+    Flag_Eightbit = .State;
+
+    SET_Eightbit();
+    IF .State THEN
+	BEGIN
+	Negotiate_Option( Telnet$K_Will, Option$K_Extended_ASCII );
+	Negotiate_Option( Telnet$K_DO, Option$K_Extended_ASCII );
+	END
+    ELSE
+	BEGIN
+	Negotiate_Option( Telnet$K_Wont, Option$K_Extended_ASCII );
+	Negotiate_Option( Telnet$K_DONT, Option$K_Extended_ASCII );
+	END;
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Eightbit_On =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+    IF NOT .Flag_quiet THEN
+	Signal(TELNET$_Eightbit_on);
+	    Set_Eightbit_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Eightbit_Off =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+    IF NOT .Flag_quiet THEN
+	Signal(TELNET$_Eightbit_off);
+	    Set_Eightbit_Mode(0)
+    END;
+
+
+
+GLOBAL ROUTINE Set_Extended_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the extended command mode flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Extended;
+
+    Flag_Extended = .State;
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Extended_On =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+    IF NOT .Flag_Quiet THEN
+	Signal(Telnet$_Extended_on);
+    Set_Extended_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Extended_Off =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+    IF NOT .Flag_Quiet THEN
+	Signal(Telnet$_Extended_off);
+    Set_Extended_Mode(0)
+    END;
+
+
+
+GLOBAL ROUTINE Set_Localchars_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the Localchars mode flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Flag_Localchars;
+
+    IF NOT .Flag_Quiet
+    THEN BEGIN
+    IF .State THEN
+	Signal(TELNET$_Localchars_on)
+    ELSE
+	Signal(TELNET$_Localchars_off);
+    Flag_Localchars = .State;
+    END;
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Localchars_On =
+    BEGIN
+    Set_Localchars_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Localchars_Off =
+    BEGIN
+    Set_Localchars_Mode(0)
+   END;
+
+
+
+GLOBAL ROUTINE Set_Log_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the debugging mode flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	LOG_state;
+
+    IF .LOG_State EQL 0
+    THEN BEGIN
+	Signal(TELNET$_NO_Log);
+	RETURN(1);
+	END;
+    LOG_STATE = (.LOG_STATE AND -2) OR .State;
+
+    IF NOT .Flag_Quiet
+    THEN BEGIN
+    IF .State THEN
+	Signal(TELNET$_Log_on)
+    ELSE
+	Signal(TELNET$_Log_off);
+    END;
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Logfile_Name =
+!++
+! Functional Description:
+!
+!	Set the logfile name
+!
+!--
+    BEGIN
+    EXTERNAL
+	LOG_State,
+	Flag_ALL_LOG,
+	Flag_Quiet;
+    EXTERNAL ROUTINE
+	LOG_CLOSE,
+	LOG_OPEN;
+    LOCAL
+	Temp_String	: $BBLOCK [DSC$K_S_BLN],
+	Code,
+	Status;
+
+    $Init_DynDesc (Temp_String);
+    IF CLI$PRESENT( %ASCID'Close' ) THEN
+	IF LOG_CLOSE() THEN
+		Print(' Closing log file')
+	ELSE
+		Signal(TELNET$_NO_Log);
+
+
+    Status = CLI$PRESENT( %ASCID'ALL_log' );
+    IF .Status THEN
+		Flag_ALL_LOG = 1
+    ELSE IF .Status EQL CLI$_NEGATED THEN
+		Flag_ALL_LOG = 0;
+
+    Status = CLI$GET_VALUE( %ascid 'Logfile_Name' , Temp_String );
+    IF .Status THEN BEGIN
+	Status = LOG_OPEN(Temp_String);
+	IF .Status then
+	    IF NOT .Flag_Quiet THEN
+		Print( ' Setting log file: [!AS]', Temp_String )
+	ELSE
+		Signal( (.Status AND %X'FFFFFFF9') );
+	END;
+
+    IF CLI$PRESENT( %ASCID'DISABLE' )
+	THEN SET_LOG_MODE(0)
+    ELSE IF CLI$PRESENT( %ASCID'ENABLE' )
+	THEN SET_LOG_MODE(1);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Set_Line_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the line-mode flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_line_mode,
+	Line_mode_options,
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+    LOCAL
+	NotState;
+
+!	My_Options [Option$K_LineMode, Option$V_Prefer] = .State;
+	Line_mode_options = .State;
+	If .State NEQ Option$K_Dont_Care
+	THEN BEGIN
+		Flag_Line_Mode = .State;
+		NotState = 1 AND (NOT .State);
+		Set_Local_Echo_Mode(.State);
+		Set_Remote_Echo_Mode(.NotState);
+		END;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Line_Mode_Negotiated =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+
+    IF NOT .Flag_Quiet THEN
+	Signal(TELNET$_Linemode_NEG);
+
+    Set_Line_Mode(Option$K_Dont_Care)
+    END;
+
+GLOBAL ROUTINE Do_Set_Line_Mode_On =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+
+    IF NOT .Flag_Quiet THEN
+	Signal(TELNET$_Linemode_on);
+
+    Set_Line_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Line_Mode_Off =
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+
+    IF NOT .Flag_Quiet THEN
+	Signal(TELNET$_Linemode_off);
+    Set_Line_Mode(0)
+    END;
+
+
+
+GLOBAL ROUTINE Set_Local_Synch_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the local terminal synching mode to State.
+!--
+    BEGIN
+    EXTERNAL
+	Activated,
+	Flag_Quiet,
+	Flag_Local_Synch;
+    EXTERNAL ROUTINE
+	Set_Data_Suspension_State,
+	Set_TT_Synch_State;
+
+    Set_Data_Suspension_State(0);
+    Flag_Local_Synch = .State;
+
+    IF .Activated
+	THEN Set_TT_Synch_State(.State);
+
+    IF NOT .Flag_Quiet THEN BEGIN
+    IF .State THEN
+	Signal(TELNET$_Local_Synch)
+    ELSE
+	Signal(TELNET$_NO_Local_Synch);
+    END;
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Set_Synch_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the Telnet synching mode to State.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Set_Data_Suspension_State;
+    EXTERNAL
+	Flag_Quiet,
+	Flag_Synch;
+
+    Set_Data_Suspension_State(0);
+    Flag_Synch = .State;
+    IF NOT .Flag_Quiet THEN
+    IF .State THEN
+	Signal(TELNET$_Synch_ON)
+    ELSE
+	Signal(TELNET$_Synch_Off);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Set_Remote_Synch_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the Synching mode flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+    EXTERNAL ROUTINE
+	Negotiate_Option;
+
+    His_Options [Option$K_Toggle_Flow_Control, Option$V_Prefer] = .state;
+
+    IF .State THEN
+	BEGIN
+	Negotiate_Option( Telnet$K_DO, Option$K_Toggle_Flow_Control )
+	END
+    ELSE
+	BEGIN
+	Negotiate_Option( Telnet$K_DONT, Option$K_Toggle_Flow_Control )
+	END;
+
+    IF NOT .Flag_Quiet THEN
+    IF .State THEN
+	Signal(TELNET$_Rem_Synch_ON)
+    ELSE
+	Signal(TELNET$_Rem_Synch_Off);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Synch_On =
+    BEGIN
+    IF CLI$PRESENT( %ASCID'Local' )
+	THEN BEGIN
+		Set_Local_Synch_Mode(1)
+	END
+    ELSE
+    IF CLI$PRESENT( %ASCID'remote' )
+	THEN BEGIN
+		Set_remote_Synch_Mode(1)
+	END
+	ELSE Set_Synch_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Synch_Off =
+    BEGIN
+    IF CLI$PRESENT( %ASCID'Local' )
+	THEN BEGIN
+		Set_Local_Synch_Mode(0)
+	END
+    ELSE
+    IF CLI$PRESENT( %ASCID'remote' )
+	THEN BEGIN
+		Set_remote_Synch_Mode(0)
+	END
+	ELSE Set_Synch_Mode(0)
+   END;
+
+
+
+GLOBAL ROUTINE Set_Quiet_Mode(State) =
+!++
+! Functional Description:
+!
+!	Change the Quiet flag to State.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet;
+
+    Flag_Quiet = .State;
+    IF .State THEN
+	Signal(TELNET$_Quiet_on)
+    ELSE
+	Signal(TELNET$_Quiet_off);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Set_Quiet_On =
+    BEGIN
+    Set_Quiet_Mode(1)
+    END;
+
+GLOBAL ROUTINE Do_Set_Quiet_Off =
+    BEGIN
+    Set_Quiet_Mode(0)
+    END;
+
+
+
+GLOBAL ROUTINE Do_Show =
+!++
+! Functional Description:
+!
+!	Print out various parameters dealing with the Telnet session.
+!--
+    BEGIN
+    EXTERNAL
+	LOG_State,
+
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+
+	Flag_ALL_LOG,
+	Flag_AO,
+	Flag_Autoflush,
+	Flag_Connect_mode,
+	Flag_Debug,
+	Flag_Eightbit,
+	Flag_Extended,
+	Flag_LEcho,
+	Flag_Line_Mode,
+	Flag_Local_Synch,
+	Flag_Localchars,
+	Flag_Quiet,
+	Flag_Suspend,
+	Flag_synch,
+	Flag_Urgent,
+	Line_Mode_options,
+
+	TT_AO_Key,
+	TT_AYT_Key,
+	TT_Brk_Key,
+	TT_EC_Key,
+	TT_Echo_Key,
+	TT_EL_Key,
+	TT_EOL_Type,
+	TT_Escape_Key,
+	TT_synch_key,
+	TT_IP_Key;
+!    BIND
+!	Line_Mode_options = My_Options [Option$K_Linemode, 0, 0, 0, 0] :$BBLOCK;
+    LOCAL
+	Key_String	: $BBLOCK [DSC$K_S_BLN];
+
+    $Init_DynDesc (Key_String);
+
+    Print ('');
+    Print ('Flags:');
+    Print('   Abort Output (AO):      !AS',
+          IF .Flag_AO THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Autoflush mode:         !AS',
+          IF .Flag_Autoflush THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Auto Connection:        !AS',
+          IF .Flag_Connect_mode THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Debugging messages:     !AS',
+          IF .Flag_Debug THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   End Of Line:            !AS',
+	  IF 	.TT_EOL_Type
+          	THEN %ASCID'CR-NULL' ELSE  %ASCID'CR-LF');
+    Print('   Extended Command Mode:  !AS',
+          IF .Flag_Extended THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Line Mode:              !AS!AS',
+          IF .Flag_Line_Mode OR .Flag_Localchars THEN
+		%ASCID'ON' ELSE  %ASCID'OFF' ,
+	  IF (.Line_Mode_Options EQL
+		Option$K_Dont_Care) THEN
+		%ASCID' Negotiated' ELSE %ASCID' '
+	);
+    Print('   Local char recognition: !AS',
+          IF .Flag_Localchars THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Local Synch Mode:       !AS',
+          IF .Flag_Local_Synch  THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Synch Mode (Telnet):    !AS',
+          IF .Flag_Synch  THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('         Input Suspend:    !AS',
+          IF .Flag_Suspend  THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Quiet Mode:             !AS',
+          IF .Flag_Quiet THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Urgent Mode:            !AS',
+          IF .Flag_Urgent THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Echo   Local:   !AS',
+          IF .Flag_LEcho THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('         Remote:   !AS',
+	  IF 	.His_Options [Option$K_Echo, Option$V_State]
+          	THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Eightbit  Send: !AS',
+	  IF 	.His_Options [Option$K_Extended_ASCII, Option$V_State]
+		OR .Flag_Eightbit
+          	THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('          Receive: !AS',
+	  IF 	.My_Options [Option$K_Extended_ASCII, Option$V_State]
+		OR .Flag_Eightbit
+          	THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Binary  Send:   !AS',
+	  IF 	.His_Options [Option$K_Binary, Option$V_State]
+          	THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('        Receive:   !AS',
+	  IF 	.My_Options [Option$K_Binary, Option$V_State]
+          	THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    Print('   Logging:        !AS',
+	  IF 	.LOG_State
+          	THEN %ASCID'ON' ELSE  %ASCID'OFF');
+    IF .LOG_State THEN
+    Print('       ALL Logging:!AS',
+	  IF 	.Flag_ALL_Log
+          	THEN %ASCID'ON' ELSE  %ASCID'OFF');
+
+    Print ('');
+    Print ('Command Key bindings:');
+    Convert_Key_to_String( Key_String, .TT_Escape_Key );
+    Print ('    Current ESCAPE Key: [!AS]  !AS', Key_String,
+	IF .Flag_Localchars OR .Flag_Line_Mode
+		THEN %ASCID'ON' ELSE %ASCID'OFF'
+	);
+    Convert_Key_to_String( Key_String, .TT_AO_Key );
+    Print ('    Current AO Key:     [!AS]  !AS', Key_String,
+	IF .Flag_Localchars OR .Flag_Line_Mode
+		 THEN %ASCID'ON' ELSE %ASCID'OFF'
+	);
+    Convert_Key_to_String( Key_String, .TT_AYT_Key );
+    Print ('    Current AYT Key:    [!AS]  !AS', Key_String,
+	IF .Flag_Localchars OR .Flag_Line_Mode
+		 THEN %ASCID'ON' ELSE %ASCID'OFF'
+	);
+    Convert_Key_to_String( Key_String, .TT_Brk_Key );
+    Print ('    Current Brk Key:    [!AS]  !AS', Key_String,
+	IF .Flag_Localchars OR .Flag_Line_Mode
+		 THEN %ASCID'ON' ELSE %ASCID'OFF'
+	);
+    Convert_Key_to_String( Key_String, .TT_EC_Key );
+    Print ('    Current EC Key:     [!AS]  !AS', Key_String,
+	IF .Flag_Localchars AND (NOT .Flag_Line_Mode)
+		THEN %ASCID'ON' ELSE %ASCID'OFF'
+	);
+    Convert_Key_to_String( Key_String, .TT_EL_Key );
+    Print ('    Current EL Key:     [!AS]  !AS', Key_String,
+	IF .Flag_Localchars AND (NOT .Flag_Line_Mode)
+		 THEN %ASCID'ON' ELSE %ASCID'OFF'
+	);
+    Convert_Key_to_String( Key_String, .TT_IP_Key );
+    Print ('    Current IP Key:     [!AS]  !AS', Key_String,
+	IF .Flag_Localchars OR .Flag_Line_Mode
+		 THEN %ASCID'ON' ELSE %ASCID'OFF'
+	);
+    Convert_Key_to_String( Key_String, .TT_Echo_Key );
+    Print ('    Current LEcho Key:  [!AS]  !AS', Key_String,
+	IF .Flag_Localchars OR .Flag_Line_Mode
+		 THEN %ASCID'ON' ELSE %ASCID'OFF'
+	);
+    Convert_Key_to_String( Key_String, .TT_Synch_Key );
+    Print ('    Current Synch Key:  [!AS]  !AS', Key_String,
+	IF .Flag_Localchars OR .Flag_Line_Mode
+		 THEN %ASCID'ON' ELSE %ASCID'OFF'
+	);
+    Print ('');
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Spawn (Command) =
+!++
+! Functional Description:
+!
+!	Call LIB$SPAWN.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Local_Host,
+	Remote_Host;
+    EXTERNAL ROUTINE
+	LIB$SPAWN	: BLISS ADDRESSING_MODE(GENERAL);
+    LOCAL
+	Status;
+
+    Print('');
+    Status = LIB$SPAWN (.Command);
+    IF NOT .Status THEN
+	IF NOT .Status THEN Signal( (.Status AND %X'FFFFFFF9') )
+    ELSE Print('');
+
+    .Status
+    END;
+
+
+
+GLOBAL ROUTINE Do_Attach =
+!++
+! Functional Description:
+!
+!	Deassign any devices that have anything to do with
+!	the terminal and attach to a new process
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Local_Host,
+	Remote_Host;
+    EXTERNAL ROUTINE
+	STR$FREE1_DX	: BLISS ADDRESSING_MODE (GENERAL),
+	LIB$GETJPI	: BLISS ADDRESSING_MODE(GENERAL),
+	LIB$ATTACH	: BLISS ADDRESSING_MODE(GENERAL),
+	Strings_Handler;
+    LOCAL
+	Line		:  VOLATILE $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= 0),
+	namebuf		:  VECTOR [12, BYTE],
+	name		:  VOLATILE $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= %ALLOCATION(namebuf),
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
+				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
+				[DSC$A_POINTER]	= namebuf),
+	pid,
+	Status;
+    ENABLE
+	Strings_Handler (Line);
+
+    pid = 0;
+
+!    Status = Get_Switch_Value(%ASCID'identification',Line);
+    Status = Get_Switch_Value(%ASCID'Process_name',Line);	! Requeste proc.
+    IF .Status
+    THEN BEGIN
+	Status = LIB$GETJPI(%REF(jpi$_PID),0,line,pid,0,0);
+	IF NOT .Status THEN Signal( (.Status AND %X'FFFFFFF9') );
+	END;
+    IF .Pid NEQ 0
+    THEN BEGIN
+!	IF NOT .Flag_QUiet then begin
+!		name [DSC$W_LENGTH]	= %ALLOCATION(namebuf);
+!		Status = LIB$GETJPI(%REF(jpi$_PRCNAM),pid,0,0,name,	! Current process name
+!			name [DSC$W_LENGTH]);
+!		IF NOT .Status THEN Signal( (.Status AND %X'FFFFFFF9') );
+!	        Signal(TELNET$_Attach_to,1,name);
+!	        END;
+	Status = Lib$attach(pid);
+	IF NOT .Status THEN Signal( Telnet$_NOT_ATTACHED,1,line )
+	ELSE IF NOT .Flag_QUiet then begin
+		name [DSC$W_LENGTH]	= %ALLOCATION(namebuf);
+		Status = LIB$GETJPI(%REF(jpi$_PRCNAM),0,0,0,name,	! Current process name
+			name [DSC$W_LENGTH]);
+		IF NOT .Status THEN Signal( (.Status AND %X'FFFFFFF9') );
+	        Signal(TELNET$_Attach_to,1,name);
+		END;
+	END;
+    Status = STR$FREE1_DX (Line);
+    IF NOT .Status THEN Signal(.Status);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Do_Spawn =
+!++
+! Functional Description:
+!
+!	Deassign any devices that have anything to do with
+!	the terminal and spawn a new CLI.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Local_Host,
+	Remote_Host;
+    EXTERNAL ROUTINE
+	LIB$GETJPI	: BLISS ADDRESSING_MODE(GENERAL),
+	STR$FREE1_DX	: BLISS ADDRESSING_MODE (GENERAL),
+	Strings_Handler;
+    LOCAL
+	Line		:  VOLATILE $BBLOCK [DSC$K_S_BLN] PRESET (
+					[DSC$W_LENGTH]	= 0,
+					[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+					[DSC$B_CLASS]	= DSC$K_CLASS_D,
+					[DSC$A_POINTER]	= 0),
+	namebuf		:  VECTOR [12, BYTE],
+	name		:  VOLATILE $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= %ALLOCATION(namebuf),
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_Z,
+				[DSC$B_CLASS]	= DSC$K_CLASS_Z,
+				[DSC$A_POINTER]	= namebuf),
+	Status;
+    ENABLE
+	Strings_Handler (Line);
+
+    Status = Get_Switch_Value(%ASCID'Command_line',Line);
+    IF NOT .Status THEN
+	IF .Status NEQU CLI$_ABSENT THEN
+		Signal(Telnet$_NO_SWITCH, 1, %ASCID'SPAWN', .Status);
+
+    Status = Spawn(Line);
+    IF .Status THEN
+	IF NOT .Flag_QUiet then begin
+		name [DSC$W_LENGTH]	= %ALLOCATION(namebuf);
+		Status = LIB$GETJPI(%REF(jpi$_PRCNAM),0,0,0,name,	! Current process name
+			name [DSC$W_LENGTH]);
+		IF NOT .Status THEN Signal( (.Status AND %X'FFFFFFF9') );
+	        Signal(TELNET$_Attach_to,1,name);
+		END;
+
+    Status = STR$FREE1_DX (Line);
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Reconnect =
+!++
+! Functional Description:
+!
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Connected,
+	Local_Host,
+	Remote_Host;
+    EXTERNAL ROUTINE
+	Restore_Conn,
+	Suspend_Conn;
+    LOCAL
+	Status;
+
+    IF .Connected THEN
+	BEGIN
+		Restore_Conn();
+		$HIBER;
+		IF NOT .Flag_Quiet THEN
+			Signal(TELNET$_RESUME, 1, Local_Host);
+		Print('');
+	END
+    ELSE Signal(Telnet$_Not_Connected);
+
+    SS$_NORMAL
+    END;
+
+FORWARD ROUTINE New_Conn;
+
+GLOBAL ROUTINE Do_Connect =
+!++
+! Functional Description:
+!
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Local_Host,
+	Connected,
+	Remote_Host;
+
+    IF CLI$PRESENT( %ASCID'Host_Name' ) THEN New_Conn()
+    ELSE BEGIN
+	IF (NOT .Flag_QUiet) AND .Connected then
+	        Signal(TELNET$_RESUME, 1, Remote_Host);
+	Print('');
+	Reconnect();
+    END;
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE New_Conn =
+!++
+! Functional Description:
+!
+!--
+    BEGIN
+    EXTERNAL
+	Connected,
+	Local_Host,
+	Remote_Host;
+    EXTERNAL ROUTINE
+	Close_Conn,
+	Open_Conn;
+    LOCAL
+	Host	: $BBLOCK [DSC$K_S_BLN],
+	Status;
+
+    IF .Connected THEN Close_Conn(0);
+
+    $Init_DynDesc (Host);
+    Status = CLI$GET_VALUE( %ASCID 'Host_Name' , Host );
+    IF NOT .Status THEN BEGIN
+	Signal( (.Status AND %X'FFFFFFF9') );
+	RETURN(SS$_NORMAL);
+	END;
+
+    Status = Open_Conn( Host );
+    IF .Status EQL SS$_NORMAL THEN Status = Reconnect();
+
+    .Status
+    END;
+
+GLOBAL ROUTINE Do_Version =
+!++
+!	Print information about current version of Telnet.
+!--
+BEGIN
+    Print('');
+    Print('Current Telnet version is !AS.',version_string);
+    Print('')
+END;
+
+END ELUDOM
+!  DEC/CMS REPLACEMENT HISTORY, Element ROUTINES.B32
+!  *1     5-MAR-1991 19:01:17 SYNFUL "Routines called by Telnet (via Telnet_PARSE)"
+!  DEC/CMS REPLACEMENT HISTORY, Element ROUTINES.B32
+

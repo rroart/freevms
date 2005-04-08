@@ -1,0 +1,2169 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+    TELNET (			! Arpa Internet TELNET
+	LANGUAGE (BLISS32),
+	ADDRESSING_MODE (NONEXTERNAL = LONG_RELATIVE),
+	ZIP,OPTIMIZE,OPTLEVEL=3,
+	LIST (NOEXPAND,ASSEMBLY,NOBINARY),
+	MAIN = Telnet_Main,
+	IDENT = 'V4.1c'
+	) =
+BEGIN
+
+!--
+! Telnet.B32	Copyright (c) 1986	Carnegie Mellon University
+!
+! Facility:
+!
+!	Telnet - Implementation of RFC854 for CMU-OpenVMS/IP code.
+!
+! Abstract:
+!
+!	Uses terminal to provide virtual terminal service to other
+!	machines on the internet.
+!
+! Author:
+!
+!	Dale Moore CMU-CSD	Sept 1983
+!
+! Modifications:
+!
+!	16-Jul-1991	Marc A. Shannon		CMU Group N
+!	Modified terminal input to use mailbox notification
+!	of unsolicited data.  Also, modifed the routine to check
+!	for "successful" completion and to check for more data
+!	if a SS$_TIMEOUT wasn't received.
+!
+!	13-Aug-1990	Henry W. Miller		USBR
+!	Added TELNET EOL toggle switch (TELNET_ESCAPE U).
+!	Moved SIGNAL'ing of TELNET SYNCH to Set_TT_Synch() and
+!	Set_TT_No_Synch().
+!
+!	20-Jul-1990	Henry W. Miller		USBR
+!	Changed default of FLAG_SYNCH to ON.  (Changed it back.  FLAG_SYNCH
+!	is evil; first character typed on user terminal causes TELNET to
+!	die horrible, screaming death).
+!
+!	14-Sep-1990	Bruce R. Miller		CMU Network Development
+!	Changed IP: to INET$DEVICE logical.
+!
+!	02-Jan-1989	Bruce R. Miller		CMU Network Development
+!	Implementing LineMode option from RFC 1116.
+!
+!	27-Jan-1988	Bruce R. Miller		CMU Network Development
+!	Changed MBX_Read_AST to recognize terminal window resizes.
+!
+!	16-Jan-1988	Bruce R. Miller		CMU Network Development
+!	Implemented Terminal Speed option from RFC 1079.
+!
+!	12-Jan-1988	Bruce R. Miller		CMU Network Development
+!	Implemented Remote Flow Control option from RFC 1080.
+!
+!	11-Jan-1988	Bruce R. Miller		CMU Network Development
+!	Changed Do_Parse() so that Drew can type '?' and get help.
+!
+!	12-DEC-1988	Bruce R. Miller		CMU Network Development
+!	Moved existing Telnet Option transition code to module OPTIONS.B32.
+!
+!	06-DEC-1988	Bruce R. Miller		CMU Network Development
+!	Added several options to the escape menu.  Options include:
+!	Are you there?, Break, Enter CLI, etc...
+!
+!	06-DEC-1988	Bruce R. Miller		CMU Network Development
+!	Added a command line interpreter.
+!
+!	16-DEC-1987	Dale Moore	CMU-CS/RI
+!	Changed device 'IP0:' to 'IP:' for some site that noticed a
+!	difference.
+!
+!	26-MAR-1987	Dale Moore	CMU-CS/RI
+!	Added Local Port. Changed Set_TT_Eightbit to work a bit
+!	more asynchronously.
+!
+!	25-FEB-1987	Vince Fuller	CMU-CS/RI
+!	Add preliminary support for TTYLOC and Location subnegotiations.
+!
+!	17-DEC-1986	Dale Moore	CMU-CS/RI
+!	Release V3.0 Changed way options are negotiated.
+!	Changed the way suboptions are handled.
+!	Moved the TCP routines into a seperate module.
+!
+!	Nov-1991	John Clement	Rice Univerisity
+!	Release V4.1
+!	Added Log option
+!	Setup renegotiation when terminal size is changed
+!	Added VT400 terminal type
+!	Added EIGHTBIT, LOG, GENERIC options.
+!	Added Automatic negotiation of Extended_ASCII
+!	Fixed crash when Flag_SYNCH is on
+!	Added TT_Escape_Table to quickly interpret chars.
+!
+!--
+
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'CLI';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETERROR';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETWORK';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETAUX';
+LIBRARY 'TELNET';
+LIBRARY 'OPTION';
+
+FORWARD ROUTINE
+    TT_input_Ast,
+    TT_Read_Ast,
+    TT_Write_Ast,
+    MBX_Read_Ast,
+    Do_TT_Read,
+    Do_TT_Check,
+    Do_TT_Write,
+    DO_MBX_Read,
+    Exit_Handler,
+    Cancel_Chan,
+    Suspend_Conn,
+    Restore_Conn,
+    Open_Conn,
+    Close_Conn;
+
+LITERAL
+!++
+! Description:
+!
+!	The data coming from the terminal drives a simple state machine
+!
+!         /----\
+
+!         |    | Other
+!         V    |
+!       +--------+  Escape    +---------+
+!       |        |----------->|         |
+!  ---->| Normal |            |  Escape |
+!       |        |<-----------|         |
+!       +--------+   Escape   +---------+
+!         ^                       |
+!         |                       | Command (or Other)
+!         \-----------------------/
+!--
+    TT_State_Normal	= 0,
+    TT_State_Escape	= 1;
+
+GLOBAL
+!	Flags used by Telnet
+    Flag_ALL_Log	: INITIAL (0),	! If on log keystrokes.
+    Flag_Autoflush	: INITIAL (1),	! Flush output during commands.
+    Flag_Connect_mode	: INITIAL (1),	! If 1 automatically connect
+    Flag_Debug		: INITIAL (0),	! Print useful information.
+    Flag_Editkeys	: INITIAL (0),	! local character recognition.
+    Flag_Eightbit	: INITIAL (1),	! Trim to 7-bit if off
+    Flag_Extended	: INITIAL (0),	! Escape directly to Telnet>
+    Flag_Host_in_CL	: INITIAL (0),	! Host was given on the command line.
+    Flag_Line_Mode	: INITIAL (0),	! Send a line at a time.
+    Line_mode_options	: INITIAL (Option$K_Dont_Care),
+    Flag_Localchars	: INITIAL (0),	! local character recognition.
+    Flag_Local_Synch	: INITIAL (1),	! Terminal handles Incoming XON/XOFF.
+    Flag_Quiet		: INITIAL (0),	! If set many messages turned off.
+    Flag_Synch		: INITIAL (0),	! Telnet handles Outgoing XON/XOFF
+    Flag_Urgent		: INITIAL (0),	! Use urgent mode for IP, SYNCH, BRK
+
+    Connected		: INITIAL(0),	! Network connection is valid
+    Activated		: INITIAL(0),	! terminal input being sent to NET.
+
+    !--
+    ! Key bindings
+    !++
+    TT_Escape_table	: VECTOR [256, BYTE, UNSIGNED],	! Shows which keys def
+    TT_Escape_Key	: INITIAL(%O'36'),	! Control-^
+    TT_AO_Key		: INITIAL(%O'17'),	! Control-O
+    TT_AYT_Key		: INITIAL(%O'24'),	! Control-T
+    TT_Brk_Key		: INITIAL(%O'31'),	! Control-Y
+    TT_EC_Key		: INITIAL(%X'7F'),	! DEL
+    TT_Echo_Key		: INITIAL(%X'05'),	! Control-E
+    TT_EL_Key		: INITIAL(%X'19'),	! Control-U
+    TT_IP_Key		: INITIAL(%X'03'),	! Control-C
+    TT_SYNCH_Key	: INITIAL(%X'18'),	! Control-X
+    TT_EOF_Key		: INITIAL(%X'1A'),	! Control-Z
+    !
+    !	Permanent Key bindings
+    !
+    TT_Xon_Key		: Initial(%X'11'),	! Control-Q
+    TT_Xoff_Key		: Initial(%X'13'),	! Control-S
+    TT_Cr_Key		: Initial(%X'0D'),	! <CR>
+    TT_Esc_Key		: Initial(%X'1B'),	! <ESC>
+
+    TT_EOL_Type		: INITIAL (0),		! 0 or 1 (CR-LF, CR-NULL)
+
+    !--
+    ! The blocks for the I/O on the terminal.
+    !++
+    TT_Channel		: WORD UNSIGNED,
+
+    ! Reading from the terminal.
+    TT_Read_Buffer	: VECTOR [512, BYTE, UNSIGNED],
+    TT_Read_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_S,
+				[DSC$A_POINTER]	= TT_Read_Buffer),
+    TT_Read_IOSB	: $BBLOCK [8],
+    TT_Read_In_Progress	: INITIAL (0),
+    TT_State		: INITIAL (TT_State_Normal),
+    TT_Reads		: INITIAL (0),
+    TT_Read_Bytes	: INITIAL (0),
+
+    ! Writing to the terminal.
+    TT_Write_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= 0),
+    TT_Write_In_Progress: INITIAL (0),
+    TT_Write_IOSB	: $BBLOCK [8],
+    TT_Writes		: INITIAL (0),
+    TT_Write_Bytes	: INITIAL (0),
+    TT_Need_CRLF	: INITIAL (1),
+
+
+    ! Saved data
+    TT_Page		: INITIAL (0),
+    TT_Width		: INITIAL (0),
+
+    ! Special events concerning the terminal.
+    TT_MBX_Chan		: WORD UNSIGNED,
+    TT_MBX_Buffer	: VECTOR [256, BYTE, UNSIGNED],
+    TT_MBX_IOSB		: $BBLOCK [8];
+
+EXTERNAL ROUTINE
+    Noop_Routine,
+    INIT_TTYLOC,
+    Send_Window_Size_SubOption;
+
+OWN
+    ! Used by the exit handler
+    Final_Status	: LONG,
+    Exit_Block		: $BBLOCK[EXH$K_Size] PRESET (
+			[EXH$L_HANDLER] = Exit_Handler,
+			[EXH$L_NumArgs]	= 1,
+			[EXH$L_Status_A]= Final_Status),
+
+    ! record of TCP endpoints.
+    Remote_Port	: INITIAL (0),
+    Local_Port	: INITIAL (0);
+
+
+
+GLOBAL ROUTINE TT_Read_State_Normal (In_Byte) =
+!++
+! Functional Description:
+!
+!	We've just got a character from the user.
+!	Check to see if it is anything special.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Debug,
+	Flag_Localchars,
+	Flag_LEcho;
+    EXTERNAL ROUTINE
+	Set_Local_Echo_mode,
+	Do_Send_AO,
+	Do_Send_AYT,
+	Do_Send_Brk,
+	Do_Send_EC,
+	Do_Send_EL,
+	Do_Send_ESCAPE,
+	Do_Send_IP,
+	Do_Send_SYNCH,
+	Set_data_Suspension_State,
+	Give_To_Net;
+    LOCAL
+	Status;
+
+    IF .TT_Escape_table[.In_Byte] THEN		! defined escape key ???
+	SELECTONEU .In_Byte OF
+	SET
+	[.TT_Escape_Key] :
+	!++
+	! Here we might want to look at the value of some command line
+	! switch and determine whether we should restore the tty
+	! characteristics and prompt the user for some info.
+	!
+	! But for now we'll just set the state to escape and
+	! let the next character drive the state machine.
+	!-
+	    BEGIN
+	    IF .Flag_Extended OR .Flag_Line_Mode THEN
+		BEGIN
+		TT_State = TT_State_Normal;
+		Suspend_Conn();
+		$WAKE();
+		END
+	    ELSE TT_State = TT_State_Escape;
+	    RETURN(SS$_NORMAL)
+	    END;
+	[.TT_AO_Key] :
+	!++
+	! Send an ABORT OUTPUT (AO) command to the remote telnet.
+	!-
+		BEGIN
+		Do_Send_AO();
+		RETURN(SS$_NORMAL)
+		END;
+	[.TT_AYT_Key] :
+	!++
+	! Send an AYT (Are You There?) command to the remote telnet.
+	!-
+		BEGIN
+		Do_Send_AYT();
+		RETURN(SS$_NORMAL)
+		END;
+	[.TT_Brk_Key] :
+	!++
+	! Send a Break (Brk) command to the remote telnet.
+	!-
+		BEGIN
+		Do_Send_Brk();
+		RETURN(SS$_NORMAL)
+		END;
+	[.TT_EC_Key] :
+	!++
+	! Send an ERASE_CHARACTER (EC) command to the remote telnet.
+	!-
+		BEGIN
+		Do_Send_EC();
+		RETURN(SS$_NORMAL)
+		END;
+	[.TT_EL_Key] :
+	!++
+	! Send an Erase Line (EL) command to the remote telnet.
+	!-
+		BEGIN
+		Do_Send_EL();
+		RETURN(SS$_NORMAL)
+		END;
+	[.TT_IP_Key] :
+	!++
+	! Send an INTERRUPT (IP) command to the remote telnet.
+	!-
+		BEGIN
+		Do_Send_IP();
+		RETURN(SS$_NORMAL)
+		END;
+	[.TT_SYNCH_Key] :
+	!++
+	! Send a Synch command to the remote telnet. (purge unsolicited input)
+	!-
+		BEGIN
+		Do_Send_SYNCH();
+		RETURN(SS$_NORMAL)
+		END;
+	[.TT_Echo_Key] :
+	!++
+	! Toggle on local character echoing.
+	!-
+		BEGIN
+		Set_Local_Echo_Mode(NOT .Flag_Lecho);
+		RETURN(SS$_NORMAL)
+		END;
+	[TT_Xoff_Key] :
+	!++
+	! Don't send the Xoff.  Handle it locally.
+	!-
+		BEGIN
+		Set_Data_Suspension_State(1);
+		IF .Flag_Debug THEN
+	        	Signal(TELNET$_X_off);
+		RETURN(SS$_NORMAL)
+		END;
+	[TT_XON_Key] :
+	!++
+	! Don't send the Xon.  Handle it locally.
+	!-
+		BEGIN
+		Set_Data_Suspension_State(0);
+		IF .Flag_Debug THEN
+	        	Signal(TELNET$_X_On);
+		Do_TT_Write();
+		RETURN(SS$_NORMAL)
+		END;
+	[OTHERWISE] :
+	!++
+	! It is just an ordinary character.   Just insert it.
+	!--
+	TES;
+
+	Give_To_Net (.In_Byte);
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Print_Keys =
+!++
+! Functional Description:
+!
+!	Print out some help on how to deal with telnet.
+!--
+    BEGIN
+    Print ('');
+    Print ('Telnet V4.0: commands available:');
+    Print (' A    Send Are you there command');
+    Print (' B    Send Break command');
+    Print (' C    Close a connection');
+    Print (' D    Toggle Debug mode (On/Off)');
+    Print (' E    Toggle local Echo mode (On/Off)');
+    Print (' G    Toggle localchar (Generic) mode (On/Off)');
+    Print (' H,?  Print this Help message');
+    Print (' I    Enter Interactive mode');
+    Print (' L    Toggle Logfile enable (On/Off)');
+    Print (' N    Negotiate options');
+    Print (' P    Pause/Push (spawn) to a new VMS subprocess');
+    Print (' S    Show Status');
+    Print (' T    Send a timing mark');
+    Print (' U    Toggle Unix End of line type (CR-LF/CR-Null)') ;
+    Print (' X    Toggle XON the local synch mode (On/Off)');
+    Print ('');
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TT_Read_State_Escape (In_Byte) =
+!++
+! Functional Description:
+!
+!	The last character that the user typed was the escape character.
+!	Let's see what this character is and do something about it.
+
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Quiet,
+	Flag_Lecho,
+	LOG_State;
+    EXTERNAL ROUTINE
+	Set_Local_Echo_mode,
+	Local_Host,
+	Remote_Host;
+    EXTERNAL ROUTINE
+	Convert_Key_to_String,
+	Give_To_Net,
+	Do_Negotiate_Options,
+	Do_Send_Timing_mark,
+	Do_Send_Brk,
+	Do_Send_Ayt,
+	Set_Debug_Mode,
+	Set_EOL_Mode,
+	Set_Localchars_Mode,
+	Set_Local_Synch_Mode,
+	Set_Log_Mode,
+	Set_TT_Synch,
+	Set_TT_No_Synch,
+	Suspend_Conn,
+	Restore_Conn,
+	Spawn,
+	TT_Escape_Key,
+	Do_Status;
+    LOCAL
+	Key_String	: $BBLOCK [DSC$K_S_BLN],
+	Status;
+
+    SELECTONEU .In_Byte OF
+	SET
+	[.TT_Escape_Key] :
+	!++
+	! Escape Escape is a quoted escape char.  Just insert the escape
+	! char.
+	!--
+	    BEGIN
+	    Give_To_Net (.In_Byte);
+	    END;
+	['a','A'] :
+	!++
+	! Are you there?  Confirms remote server activity.
+	!--
+	    BEGIN
+	    Do_SEND_AYT();
+	    END;
+	['b','B'] :
+	!++
+	! Break.  Sends a Telnet break command to remote server.
+	!--
+	    BEGIN
+	    DO_SEND_BRK();
+	    END;
+	['c','C'] :
+	!++
+	! Close the connection.
+	!--
+	    BEGIN
+	    Close_Conn(1)
+	    END;
+	['d', 'D'] :
+	!++
+	! Toggle the debug code.  If debugging is on, turn it off.
+	! If debugging is off, turn it on.
+	!--
+	    BEGIN
+		Set_Debug_Mode( NOT .Flag_Debug);
+	    END;
+	['e', 'E'] :
+	!++
+	! Toggle the Local Echo mode.
+	!--
+	    BEGIN
+		Set_Local_Echo_Mode(NOT .Flag_Lecho);
+	    END;
+	['g', 'G'] :
+	!++
+	! Toggle the Local characters (Generic)
+	!--
+	    BEGIN
+		Set_Localchars_Mode(NOT .Flag_Localchars);
+	    END;
+	['h','H','?'] :
+	!++
+	! Help on how to use this.
+	!--
+	    BEGIN
+		Print_Keys ();
+	    END;
+	['i','I'] :
+	!++
+	! Interact.  Enter interactive prompt mode.
+	!--
+	    BEGIN
+		TT_State = TT_State_Normal;
+		Suspend_Conn();		! ignore remote session
+		$WAKE();			! Wake up the Telnet CLI
+	    END;
+	['L', 'l'] :
+	!++
+	! Toggle the LOG mode
+	!--
+	    BEGIN
+		Set_LOG_Mode( NOT .LOG_state);
+	    END;
+	['N', 'n'] :
+	!++
+	! Negotiate.  Resolve any conflicts between States and Prefers.
+	!--
+	    BEGIN
+		Do_Negotiate_Options ();
+	    END;
+	['p','P'] :
+	!++
+	! Pause.  Do a spawn after restore the terminal characteristics.
+	!--
+	    BEGIN
+	    TT_State = TT_State_Normal;
+	    Suspend_Conn();
+	    IF NOT .Flag_QUiet then
+	        Signal(TELNET$_PAUSE, 1, Remote_Host,
+		TELNET$_RETURNING, 1, Local_Host);
+	    Spawn(%ASCID'');
+	    IF NOT .Flag_QUiet then
+	        Signal(TELNET$_RESUME, 1, Remote_Host);
+	    Print('');
+	    Restore_Conn();
+	    END;
+	['S', 's'] :
+	!++
+	! Prints status information.
+	!--
+	    BEGIN
+	    Do_Status();
+	    END;
+	['t','T'] :
+	!++
+	! Sends a timing mark to the remote server.
+	!--
+	    BEGIN
+	    DO_Send_Timing_Mark();
+	    END;
+	['u','U'] :
+	!++
+	! Toggle EOL type
+	!--
+	    BEGIN
+		Set_EOL_MODE( NOT .TT_EOL_Type );
+	    END;
+	['X', 'x'] :
+	!++
+	! Toggle SYNC mode
+	!--
+	    BEGIN
+		Set_Local_Synch_Mode( NOT .Flag_Local_Synch);
+	    END;
+	[OTHERWISE] :
+	!++
+	! The user has typed escape garbage.
+	!--
+	    BEGIN
+		$Init_DynDesc (Key_String);
+		Convert_Key_to_String( Key_String, .TT_Escape_Key );
+		Print ('Type "Control-!AS?" for help.',Key_String);
+	    END;
+	TES;
+	TT_State = TT_State_Normal;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TT_Read_Ast (AstPrm) =
+!--
+! Functional Description:
+!
+!	This routine is called whenever a read has completed on the
+!	terminal device.  We should write it to the IN device (the
+!	user has typed something).
+!
+!
+!	Note: There is generally only one byte in this packet.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	LOG_Output,
+	Do_TCP_Write;
+    EXTERNAL
+	Flag_Debug,
+	Flag_LEcho;
+    LOCAL
+	LOG_State,
+	Read_Size,
+	Flag_Flush,
+	Status;
+
+    TT_Read_In_Progress = 0;
+
+    Status = .TT_Read_iosb [TTIOSB$W_STATUS];
+    IF .Status EQL SS$_CANCEL THEN RETURN (SS$_NORMAL);
+    IF .Status EQL SS$_ABORT THEN RETURN (SS$_NORMAL);
+    IF NOT .Status AND (.Status NEQ SS$_TIMEOUT) THEN Signal(.Status);
+
+    Read_Size = .TT_Read_Iosb [TTIOSB$W_OFFSET] +
+		.TT_Read_IOSB [TTIOSB$W_Term_Size];
+
+    TT_Read_Bytes = .TT_Read_Bytes + .Read_Size;	! For statistics
+
+    Flag_Flush = 0;
+
+    !
+    !	An unresolved question is how often to call DO_TT_CHECK
+    !	This may be often enough.
+    !
+    Do_TT_Check();		! Check terminal settings
+
+    If .Flag_Lecho AND .Flag_ALL_Log AND .LOG_State
+    THEN BEGIN
+	TT_Read_Desc [DSC$W_LENGTH] = .Read_Size;
+	LOG_output(TT_Read_Desc);
+	END;
+
+    INCR I FROM 0 TO .Read_Size - 1 DO
+	BEGIN
+	SELECTONEU .TT_State OF
+	    SET
+	    [ TT_State_Normal ]	:
+		TT_Read_State_Normal (.TT_Read_Buffer [.I]);
+	    [ TT_State_Escape ]	:
+		TT_Read_State_Escape (.TT_Read_Buffer [.I]);
+	    TES;
+	END;
+    TT_Read_Desc [DSC$W_LENGTH] = 0;
+
+!  Read control handled by mailbox...
+! But, if we had a "successful" completion, then we must not have
+! read all the data - go back for more...
+    IF .Status THEN Do_TT_Read ();
+
+!    IF NOT .Flag_Line_Mode OR .Flag_Flush THEN
+	Do_TCP_Write ();
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Do_TT_Read =
+!--
+! Functional Description:
+!
+!	Issue a read on the terminal.
+!	Set up the AST to point to the right places.
+!	When the read from the terminal is complete, telnet will pass
+!	the characters, individually through the TT_Read_State state
+!	machine for processing.
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+    IF .TT_Channel EQL 0 THEN RETURN (SS$_NOIOCHAN);		!JC
+    IF .TT_Read_In_Progress THEN RETURN (SS$_NORMAL);
+    TT_Read_In_Progress = 1;
+
+    TT_Reads = .TT_Reads + 1;
+
+    Status = $QIO (
+	CHAN	= .TT_Channel,
+	FUNC	= IF .Flag_Line_Mode
+			THEN IO$_READVBLK
+		  	ELSE IO$_READVBLK + IO$M_TIMED,
+	IOSB	= TT_Read_IOSB,
+	ASTADR	= TT_Read_Ast,
+	P1 	= TT_Read_Buffer,
+	P2	= %ALLOCATION (TT_Read_Buffer),
+	P3	= 0);
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Do_TT_Write =
+!++
+! Functional Description:
+!
+!	Write whatever is in the tt output buffer to the terminal.
+!--
+    BEGIN
+    EXTERNAL
+	TT_Page,
+	TT_Width,
+	LOG_STATE;
+
+    EXTERNAL ROUTINE
+	LOG_OUTPUT,
+	STR$APPEND	: BLISS ADDRESSING_MODE (GENERAL),
+	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX	: BLISS ADDRESSING_MODE (GENERAL),
+	Do_TCP_Read;
+    OWN
+	Writing_Block	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= 0);
+    LOCAL
+	Status;
+
+    IF .TT_Write_In_Progress THEN
+	BEGIN
+	RETURN (SS$_NORMAL)
+	END;
+
+    IF NOT .Activated THEN RETURN (SS$_NORMAL);
+
+!+
+!	Use this for Telnet from batch
+!-
+    IF .TT_Channel EQL 0
+    THEN BEGIN
+	IF (.TT_Write_Desc [DSC$W_LENGTH] EQLU 0) AND
+		(.TT_Write_IOSB [TTIOSB$W_STATUS] NEQ SS$_ABORT) THEN
+		RETURN (SS$_NORMAL);
+	PRINT('!AS',TT_Write_Desc);
+	IF .LOG_STATE THEN
+	BEGIN
+		LOG_OUTPUT(TT_Write_Desc);
+	END;
+	Status = STR$FREE1_DX (TT_Write_Desc);
+	IF NOT .Status THEN Signal(.Status);
+	Status = $DCLAST (ASTADR = TT_input_Ast);
+	IF NOT .Status THEN Signal(.Status);
+	RETURN (SS$_NORMAL);
+	END;
+
+!+
+!	Use this for Telnet from terminal
+!-
+    Do_TCP_Read ();
+
+    IF (.TT_Write_Desc [DSC$W_LENGTH] EQLU 0) AND
+	(.TT_Write_IOSB [TTIOSB$W_STATUS] NEQ SS$_ABORT) THEN
+	RETURN (SS$_NORMAL);
+
+    TT_Write_In_Progress = 1;
+
+    TT_Writes = .TT_Writes + 1;
+    TT_Write_Bytes = .TT_Write_Bytes + .TT_Write_Desc [DSC$W_LENGTH];
+
+    IF .TT_Write_IOSB [TTIOSB$W_STATUS] NEQ SS$_ABORT THEN
+	BEGIN
+	Status = STR$COPY_DX (Writing_Block, TT_Write_Desc);
+	IF NOT .Status THEN Signal(.Status);
+
+	Status = STR$FREE1_DX (TT_Write_Desc);
+	IF NOT .Status THEN Signal(.Status)
+	END;
+
+	Status = $QIO (
+		FUNC	= IO$_WRITEVBLK,
+		CHAN	= .TT_Channel,
+		IOSB    = TT_Write_IOSB,
+		ASTADR	= TT_Write_Ast,
+		P1	= .Writing_Block [DSC$A_POINTER],
+		P2	= .Writing_Block [DSC$W_LENGTH]);
+	IF NOT .Status THEN Signal(.Status);
+
+	IF .LOG_STATE THEN
+	BEGIN
+		LOG_OUTPUT(Writing_Block);
+	END;
+
+
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Do_TT_Check =
+!++
+! Functional Description:
+!
+!	Check the current TT settings and if changed send
+!	To the server.
+!	This may be called "once in a while"
+!	Written by J. Clement (JC)
+!--
+    BEGIN
+    EXTERNAL
+	TT_Page,
+	TT_Width;
+
+    LOCAL
+	Status,
+	PTY_Char	: $BBLOCK [QCB$K_Size],
+	io_stats : BLOCK[8,BYTE];
+
+    BIND
+	Charistics	= PTY_Char [QCB$L_Charistics]	: $BBLOCK,
+	Extend_Char	= PTY_Char [QCB$L_EXTEND_CHAR]	: $BBLOCK;
+
+
+
+!
+!	Check page size
+!
+	Status = $QIOW (
+		CHAN	= .TT_Channel,
+		FUNC	= IO$_SENSEMODE,
+		IOSB	= io_stats,
+		P1	= PTY_Char,
+		P2	= %ALLOCATION (PTY_Char));
+	IF	(.PTY_Char[QCB$W_BUFFER_SIZE] NEQ .TT_Width) OR
+		(.PTY_Char[QCB$B_PAGE_LENGTH] NEQ .TT_Page)
+	    THEN BEGIN
+		TT_Width =.PTY_Char[QCB$W_BUFFER_SIZE];
+		TT_Page = .PTY_Char[QCB$B_PAGE_LENGTH];
+		Send_Window_Size_SubOption();
+	    END;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TT_Write_Ast (ASTPRM) =
+!++
+! Functional Description:
+!
+!	A write to the terminal has completed.
+!	If necessary start another.
+!--
+    BEGIN
+
+    LOCAL
+	Status;
+
+    TT_Write_In_Progress = 0;
+
+    Status = .TT_Write_IOSB [TTIOSB$W_STATUS];
+    IF NOT .Status AND (.Status NEQ SS$_ABORT) THEN
+	Signal(Telnet$_WRITEFAILED, .Status);
+
+    Do_TT_Write ();
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Do_MBX_Read =
+!++
+! Functional Description:
+!
+!	Do a read on the associated mailbox of the TT read device.
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+    IF .TT_MBX_Chan EQL 0 THEN RETURN(0);		! JC No mailbox ?
+    Status = $QIO (
+		FUNC	= IO$_READVBLK,
+		CHAN	= .TT_MBX_Chan,
+		IOSB	= TT_MBX_IOSB,
+		ASTADR	= MBX_Read_Ast,
+		P1	= TT_Mbx_Buffer,
+		P2	= %ALLOCATION (TT_Mbx_Buffer));
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Mbx_Read_Ast =
+!++
+! Functional Description:
+!
+!	We've just got some sort of message from the
+!	Terminals associated mailbox.  See what it is and
+!	See if we can make any sense of it.
+!--
+    BEGIN
+    BIND
+	Message_Block	= TT_Mbx_Buffer		: $BBLOCK;
+    EXTERNAL
+	TT_Channel,
+	Local_Host;
+    EXTERNAL ROUTINE
+	STR$APPEND	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Message_Type,
+	Status;
+    EXTERNAL
+	TT_Char_Save	: $BBLOCK [12];
+
+    BIND
+	Charistics	= TT_Char_Save [QCB$L_Charistics]	: $BBLOCK,
+	Extend_Char	= TT_Char_Save [QCB$L_EXTEND_CHAR]	: $BBLOCK;
+
+    Status = .TT_MBX_IOSB [0, 0, 16, 0];
+
+    IF .Status EQLU SS$_ABORT THEN RETURN (SS$_NORMAL);
+    IF .Status EQLU SS$_CANCEL THEN RETURN (SS$_NORMAL);
+
+    IF .Status EQLU 0 THEN RETURN (Do_MBX_Read ());
+
+    IF NOT .Status THEN Signal(.Status);
+
+    Message_Type = .Message_Block [0, 0, 16, 0];
+
+    SELECTONE .Message_Type OF
+	SET
+	[MSG$_TRMBRDCST] :
+	    BEGIN
+	    BIND
+		CRLF	= $DESCRIPTOR (%CHAR (13), %CHAR (10))	: $BBLOCK;
+	    LOCAL
+		Broadcast_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+			[DSC$W_LENGTH]	= .Message_Block [20, 0, 16, 0],
+			[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+			[DSC$B_CLASS]	= DSC$K_CLASS_S,
+			[DSC$A_POINTER]	= Message_Block [22, 0, 0, 0]);
+
+!
+!	Check to see if broadcast is originally enabled
+!
+
+	    IF NOT .Charistics[TT$V_NOBRDCST]		! If broadcast
+	    THEN BEGIN					! JC end
+
+	      STR$APPEND (TT_Write_Desc, CRLF);
+	      STR$APPEND (TT_Write_Desc, %ASCID '******* Broadcast on ');
+	      STR$APPEND (TT_Write_Desc, Local_Host);
+	      STR$APPEND (TT_Write_Desc, %ASCID ' *********');
+	      STR$APPEND (TT_Write_Desc, CRLF);
+	      STR$APPEND (TT_Write_Desc, Broadcast_Desc);
+	      STR$APPEND (TT_Write_Desc, CRLF);
+	      STR$APPEND (
+		TT_Write_Desc,
+		%ASCID '********************************************');
+	      STR$APPEND (TT_Write_Desc, CRLF);
+	      DO_TT_Write ();
+	      END
+	    END;
+	[MSG$_TRMHANGUP] :
+	    BEGIN
+	    SS$_NORMAL
+	    END;
+	[MSG$_TRMRESIZE] :
+	    BEGIN
+	    Send_Window_Size_SubOption();
+	    SS$_NORMAL
+	    END;
+	[MSG$_TRMUNSOLIC] :
+	    BEGIN
+	    Do_TT_Read ();
+	    SS$_NORMAL
+	    END;
+	TES;
+
+    Do_Mbx_Read ();
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Cancel_Chan =
+!--
+! Functional Description:
+!
+!	This routine is called from the exit handler.
+!	It cancels any outstanding I/O to the terminal.
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+    Status = $CANCEL (CHAN = .TT_Channel);
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Release_Chan =
+!--
+! Functional Description:
+!
+!	This routine is called from the exit handler and Close_Conn().
+!	It deassigns the I/O devices assigned.
+!--
+    BEGIN
+    EXTERNAL
+	TCP_Channel	: WORD;
+    LOCAL
+	Status;
+
+    Status = Net$Close (
+		IOCHAN = .TCP_Channel,
+		IO$SB = 0);
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = $DASSGN (CHAN = .TCP_Channel);
+    TCP_Channel = 0;			! JC
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Start_Ast =
+!++
+! Functional Description:
+!
+!	Some things to do at startup.  We do this with AST's disabled
+!	(or at AST level).
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Save_Char,
+	Set_Char,
+	Do_TCP_Read,
+	Do_TCP_Write;
+    LOCAL
+	Status;
+
+    Status = Save_Char();
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = Set_Char();
+    IF NOT .Status THEN Signal(.Status);
+
+! Terminal reading provided by mailbox...
+!    Do_TT_Read ();
+    Do_TCP_Read ();
+    Do_MBX_Read ();
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Suspend_Conn =
+!++
+! Functional Description:
+!
+!	Suspend a Telnet connection.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Restore_Char;
+    LOCAL
+	Status;
+
+    IF NOT .Activated THEN RETURN(SS$_NORMAL);
+
+
+    Status = Cancel_Chan();
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = Restore_Char();
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = $DASSGN (CHAN = .TT_Channel);
+    IF NOT .Status THEN Signal(.Status);
+    TT_Channel = 0;			!JC
+
+    IF .TT_MBX_Chan NEQ 0			!JC
+    THEN BEGIN
+	Status = $DASSGN (CHAN = .TT_MBX_Chan);
+	IF NOT .Status THEN Signal(.Status);
+	TT_MBX_Chan = 0;			!JC
+	END;
+
+    Activated = 0;
+
+    SS$_NORMAL
+    END;
+
+
+
+
+GLOBAL ROUTINE Restore_Conn =
+!++
+! Functional Description:
+!
+!	Reactivate a Telnet connection.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_LEcho;
+    EXTERNAL ROUTINE
+	Give_To_Net,
+	Init_Term_Table,
+	LIB$GETDVI	: BLISS ADDRESSING_MODE(GENERAL),
+	LIB$ASN_WTH_MBX	: BLISS ADDRESSING_MODE(GENERAL);
+    LOCAL
+	Read_Size,
+	Dev_Type,
+	Mask,
+	io_stats : BLOCK[8,BYTE],
+	Status;
+
+    IF .Activated THEN RETURN(SS$_NORMAL);
+
+    Init_Term_Table();
+
+!+
+!	Use this for Telnet from batch
+!-
+    Status = LIB$GETDVI (%REF (DVI$_DEVCLASS),
+		0,
+		%ASCID 'SYS$COMMAND:',
+		Dev_Type);
+    IF .Dev_Type NEQU DC$_TERM THEN SIGNAL(TELNET$_NOT_TERM);	! JC Not term.
+    IF .Dev_Type EQL DC$_TERM THEN
+
+!+
+!	Use this for Telnet from terminal
+!-
+
+    Status = LIB$ASN_WTH_MBX (
+		%ASCID 'SYS$COMMAND:',
+		%REF ( %ALLOCATION (TT_MBX_Buffer)),
+		%REF ( %ALLOCATION (TT_MBX_Buffer)),
+		TT_Channel,
+		TT_MBX_Chan);
+
+    IF NOT .Status THEN Signal(.Status);
+
+    Activated = 1;
+
+    Status = $DCLAST (ASTADR = Start_Ast);
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Get_Chan (Remote_Host_A, Remote_Port, Local_Host_A, Local_Port) =
+!--
+! Functional Description:
+!
+!	Open and initialize the Terminal and network devices.
+!--
+    BEGIN
+    BIND
+	Remote_Host	= .Remote_Host_A		: $BBLOCK,
+	Local_Host	= .Local_Host_A			: $BBLOCK;
+    EXTERNAL ROUTINE
+	STR$CONCAT	: BLISS ADDRESSING_MODE (GENERAL),
+	STR$COPY_R	: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX	: BLISS ADDRESSING_MODE (GENERAL);
+    EXTERNAL
+	Local_Address,
+	TCP_Channel	: WORD UNSIGNED;
+    LOCAL
+	Host_ASCIZ	: $BBLOCK [DSC$K_S_BLN],
+	Info_Block	: Connection_Info_Return_Block,
+	TCP_IOSB	: NetIO_Status_Block,
+	Status;
+
+    !++
+    ! Now for the Internet
+    !--
+    Status = $ASSIGN (DEVNAM = %ASCID'INET$DEVICE', CHAN = TCP_Channel);
+    IF NOT .Status THEN Signal(TELNET$_GET_INET, 0, .Status);
+
+    $Init_DynDesc (Local_Host);
+    $Init_DynDesc (Host_ASCIZ);
+
+    Status = STR$CONCAT (Host_ASCIZ, Remote_Host, $DESCRIPTOR (%CHAR (0)));
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = NET$OPEN (
+		FHNAM		= .Host_ASCIZ [DSC$A_POINTER],
+		Foreign_Prt	= .Remote_Port,
+		Local_Prt	= .Local_Port,
+		OpenMode	= ACTIVE,
+		TimOut		= 0,
+		IOCHAN		= .TCP_Channel,
+		IO$SB		= TCP_IOSB);
+!    IF NOT .Status THEN Signal(.Status);
+
+    Status = .TCP_IOSB [NSB$Status];
+    IF .Status EQL SS$_ABORT THEN
+	BEGIN
+	Signal(Telnet$_No_Open, 1, Remote_Host, .TCP_IOSB [NSB$XStatus], 0);
+	RETURN(Telnet$_No_Open)
+	END;
+    IF NOT .Status THEN Signal(Telnet$_NO_Open, 1, Remote_Host, .Status);
+
+    Status = STR$FREE1_DX (Host_ASCIZ);
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = NET$INFO (
+		BUFAdrs	= Info_Block,
+		IOCHAN	= .TCP_Channel,
+		IO$SB	= TCP_IOSB);
+    IF NOT .Status THEN Signal(.Status);
+    Status = .TCP_IOSB [NSB$Status];
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = STR$COPY_R (
+		Remote_Host,
+		%REF (.Info_Block [CI$FHost_Name_Size]),
+		Info_Block [CI$Foreign_Host]);
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = STR$COPY_R (
+		Local_Host,
+		%REF (.Info_Block [CI$LHost_Name_Size]),
+		Info_Block [CI$Local_Host]);
+    IF NOT .Status THEN Signal(.Status);
+    Local_Address = .Info_Block[CI$Local_Internet_Adrs];
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Open_Conn(Remote_Host_A) =
+!--
+! Functional Description:
+!
+!	This routine opens a connection to a remote host.
+!--
+BEGIN
+    BIND
+	Rem_Host	= .Remote_Host_A		: $BBLOCK;
+    EXTERNAL
+	TT_Escape_Key,
+	Local_Host,
+	Remote_Host;
+    EXTERNAL ROUTINE
+	Convert_Key_to_String,
+	Clear_Options,
+	Negotiate_Options,
+	STR$COPY_DX	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Status;
+
+    LOCAL
+	Key_String	: $BBLOCK [DSC$K_S_BLN];
+
+    $Init_DynDesc (Key_String);
+
+    IF .Connected THEN Close_Conn(0);
+
+    Status = STR$COPY_DX(Remote_Host,Rem_Host);
+    IF NOT .Status THEN Signal(.Status);
+    IF NOT .Flag_QUiet then
+	Signal(TELNET$_TRYING, 1, Remote_Host);
+    Status = Get_Chan (Remote_Host, .Remote_Port, Local_Host, .Local_Port);
+    IF .Status EQL Telnet$_No_Open THEN RETURN(.Status);
+
+    Connected = 1;
+    IF NOT .Flag_QUiet then
+	Signal(TELNET$_OPEN, 1, Remote_Host);
+    Convert_Key_to_String( Key_String, .TT_Escape_Key );
+    IF NOT .Flag_QUiet then
+	Print ('Current ESCAPE Key is: [!AS]', Key_String);
+    IF NOT .Flag_QUiet then
+	Print('');
+
+    IF .Remote_Port NEQU TELNET$K_Server_Port
+	THEN
+	    BEGIN
+	    EXTERNAL ROUTINE
+		Set_Line_Mode;
+
+	    Signal(TELNET$_NO_OPTIONS, 0);
+	    Set_Line_Mode(1);
+	    END
+	ELSE
+	    BEGIN
+	    Clear_Options ();
+	    Status = $DCLAST (
+		ASTADR	= Negotiate_Options,
+		ASTPRM	= 0);
+	    IF NOT .Status THEN Signal(.Status);
+	    END;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Exit_Handler (Final_Status_A) =
+!--
+! Functional Description:
+!
+!	This routine is an exit handler.  It cleans up by cleanly
+!	closing the connections.
+!--
+    BEGIN
+    BIND
+	Final_Status	= .Final_Status_A	: LONG UNSIGNED;
+    EXTERNAL ROUTINE
+	LOG_Output,
+	Restore_Char;
+    EXTERNAL
+	Local_Host;
+    LOCAL
+	Status;
+
+    IF .Connected THEN
+	BEGIN
+	IF .Activated THEN
+	    BEGIN
+	    Status = Cancel_Chan ();
+	    IF NOT .Status THEN Signal(.Status);
+
+	    Status = Restore_Char (.TT_Channel);
+	    IF NOT .Status THEN Signal(.Status);
+	    END;
+
+	status = Release_Chan ();
+	IF NOT .Status THEN Signal(.Status);
+	END;
+
+    LOG_Output( $DESCRIPTOR (%CHAR (13), %CHAR (10)) );	! Finish current line
+    IF (.Final_Status EQLU TELNET$_CLOSED) OR
+       (.Final_Status EQLU TELNET$_ABORT) THEN
+	Signal(TELNET$_Returning, 1, Local_Host);
+
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Close_Conn (exit_flag) =
+!++
+! Functional Description:
+!
+!	Close the current connection.
+!--
+    BEGIN
+    EXTERNAL
+	Remote_Host;
+    LOCAL
+	Status;
+
+    IF .Connected THEN
+	BEGIN
+	IF .Activated THEN
+	    BEGIN
+	    Status = Cancel_Chan ();
+	    IF NOT .Status THEN Signal(.Status);
+
+	    Suspend_Conn();
+	    $WAKE();
+	    END;
+
+	status = Release_Chan ();
+	IF NOT .Status THEN Signal(.Status);
+
+        Connected = 0;
+
+	IF NOT .Flag_QUiet then
+		Signal(Telnet$_Conn_Closed,1,Remote_Host)
+	END;
+
+    IF (.exit_flag EQL 1) THEN
+	$EXIT (CODE = TELNET$_CLOSED);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Connection_Closed =
+!++
+! Functional Description:
+!
+!	The current connection was closed. (Received Telnet$_Close signal).
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+    IF NOT .Connected THEN RETURN SS$_NORMAL;
+
+    IF .Flag_Host_in_CL THEN
+	$EXIT (CODE = TELNET$_CLOSED);
+
+    IF .Connected THEN
+	BEGIN
+	Connected = 0;
+	IF .Activated THEN
+	    BEGIN
+	    Status = Cancel_Chan ();
+	    IF NOT .Status THEN Signal(.Status);
+
+	    Suspend_Conn();
+	    Activated = 0;
+	    $WAKE();
+	    END;
+
+	status = Release_Chan ();
+	IF NOT .Status THEN Signal(.Status);
+	END;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Telnet_Handler (Sig_A, Mech_A, Ena_A ) =
+!++
+! Functional Description:
+!
+!	A handler routine for the MAIN Telnet Command Loop.
+!	If we want to handle anything lower than this
+!	We must do it at the Next lower layer.
+!
+!--
+    BEGIN
+
+    BIND
+	Sig		= .Sig_A		: $BBLOCK,
+	Mech		= .Mech_A		: $BBLOCK,
+	Ena		= .Ena_A		: $BBLOCK;
+    BIND
+	Sig_Args	= Sig [CHF$L_Sig_Args]	: LONG,
+	Sig_Name	= Sig [CHF$L_Sig_Name]	: LONG;
+
+    IF .Sig_Name EQLU SS$_UNWIND THEN RETURN (SS$_NORMAL);
+    IF .Sig_Name EQLU CLI$_NOCOMD THEN RETURN (SS$_CONTINUE);
+    IF .Sig_Name EQLU RMS$_EOF THEN RETURN (SETUNWIND ());
+
+    IF .Sig_Name EQLU Telnet$_Closed THEN
+	BEGIN
+	Connection_Closed();
+	RETURN( SS$_NORMAL )
+	END;
+
+    SS$_RESIGNAL
+    END;
+
+
+ROUTINE TT_input_Ast =
+!+
+!	Use this for Telnet from batch
+!-
+    BEGIN
+    EXTERNAL
+	Flag_LEcho;
+    EXTERNAL ROUTINE
+	Give_to_Net,
+	Do_TCP_Write,
+	Telnet_Get_Input,
+	Telnet_Get_Input_NoEcho;
+    LOCAL
+	Status,
+	Length;
+
+	IF NOT .Activated THEN RETURN(SS$_NORMAL);
+
+	TT_Read_Desc [DSC$W_LENGTH] = %ALLOCATION(TT_Read_Buffer);
+
+	Length = 0;
+	If .Flag_LEcho THEN
+	    Status = Telnet_Get_Input(TT_Read_Desc, %ASCID '$ ',length)
+	ELSE
+	    Status = Telnet_Get_Input_NOEcho(TT_Read_Desc, %ASCID '$ ',length);
+	IF .Status EQL RMS$_EOF THEN BEGIN
+		Suspend_Conn();
+		$WAKE();
+		RETURN(SS$_NORMAL);
+		END;
+
+	INCR I FROM 0 TO .Length - 1 DO
+			Give_To_Net (.TT_Read_Buffer [.I]);
+	Give_To_Net (13);	! <CR>
+!!!	Give_To_Net (10);	! <LF>
+	TT_Read_Desc [DSC$W_LENGTH] = 0;
+	Do_TCP_Write ();
+
+    SS$_NORMAL
+    END;
+
+ROUTINE Do_Parse =
+!++
+! Functional Description:
+!
+!	A routine to call the CLI$DCL_Parse routine with the right
+!	arguements.  The reason that this isn't inline is because it
+!	sets up the condition handler for handling the errors and
+!	warnings and Control_C situations.
+!
+!	So, if someone types Control_C while getting input, he
+!	will handle the Control_C in the appropriate fashion.
+!
+! Values Returned:
+!
+!	1) Anything returned by the CLI Routines. Or
+!	2) Anything that TELNET_GET_INPUT would return.
+!
+
+
+! Note: that some CLI routine values are signalled others are merely
+!	returned.
+!--
+    BEGIN
+    EXTERNAL
+	Telnet_Parse;
+    EXTERNAL ROUTINE
+	STR$COMPARE		: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX		: BLISS ADDRESSING_MODE (GENERAL),
+	Telnet_Routine_Handler,
+	Telnet_Get_Input,
+	Telnet_Get_Input_NoEcho;
+    ENABLE
+	Telnet_Routine_Handler;
+    LOCAL
+	Command_Line	: $BBLOCK [DSC$K_S_BLN],
+	Length,Temp,Status;
+
+
+    $Init_DynDesc (Command_Line);
+
+    Temp = 0;
+    Status = Telnet_Get_Input(Command_Line, %ASCID 'Telnet> ',length);
+    IF .Status EQL RMS$_EOF THEN RETURN(RMS$_EOF);
+
+    IF (.length EQL 0) AND
+	(.FLAG_CONNECT_MODE AND .Connected) THEN
+	BEGIN
+	    Temp = CLI$DCL_PARSE (%ASCID 'CONNECT',Telnet_Parse,0,0,0);
+	END
+    ELSE
+    IF NOT STR$COMPARE(Command_Line,%ASCID'?') THEN
+	BEGIN
+	    Temp = CLI$DCL_PARSE (%ASCID 'HELP',Telnet_Parse,0,0,0);
+	END
+    ELSE Temp = CLI$DCL_PARSE (Command_Line,Telnet_Parse,0,0,0);
+
+    Status = STR$FREE1_DX(Command_Line);
+    IF NOT .Status THEN Signal(.Status);
+
+    .Temp
+    END;
+
+
+
+ROUTINE Do_Dispatch =
+!++
+! Functional Description:
+!
+!	A routine to call CLI$DISPATCH.  The reason that it is here
+!	rather than inline, is so we can establish the condition handler
+!	for all the various conditions that might arise.
+!
+! Values Returned:
+!
+!	1) Anything that any of the dispatch routines might return. Or
+!	2) Anything that the CLI routines might return. Or
+!	3) Since Telnet_Routine_Handler Unwinds, anything that is signalled
+!	    by any of the subroutines and unwound.
+!
+! Conditions Signalled:
+!
+!	Most all are signalled.  Except RMS$_EOF.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Telnet_Routine_Handler;
+    ENABLE
+	Telnet_Routine_Handler;
+
+    CLI$DISPATCH ()
+    END;
+
+
+
+ROUTINE Command_Loop =
+!++
+! Functional Description:
+!
+!	This routines prompts for the command and then
+!	dispatches to the correct routine.
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+    WHILE 1 DO
+	BEGIN
+	Status = Do_Parse ();
+	IF .Status THEN Status = Do_Dispatch ();
+	IF .Status EQL RMS$_EOF THEN EXITLOOP
+	END;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Check_Host =
+    BEGIN
+    EXTERNAL ROUTINE
+	Telnet_Routine_Handler,
+	New_Conn;
+    LOCAL
+	Status;
+    ENABLE
+	Telnet_Routine_Handler;
+
+    !++
+    ! Read host from command line
+    !--
+    Status = CLI$PRESENT (%ASCID 'Host_Name');
+    IF NOT .Status THEN RETURN (SS$_NORMAL);
+
+    Flag_Host_in_CL = 1;
+
+    Status = New_Conn();
+    IF NOT .Status THEN $EXIT(CODE = .Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Get_CLI_Flags =
+!--
+! Functional Description:
+!
+!	Parse the arguements on the command line.
+!--
+    BEGIN
+    EXTERNAL
+	TType_Overide	: $BBLOCK [DSC$K_S_BLN],
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+    EXTERNAL
+	TT_Char_Save	: $BBLOCK [12],
+	LOG_STATE;
+    BIND
+	Charistics	= TT_Char_Save [QCB$L_Charistics]	: $BBLOCK,
+	Extend_Char	= TT_Char_Save [QCB$L_EXTEND_CHAR]	: $BBLOCK;
+
+    EXTERNAL ROUTINE
+	Set_Line_Mode,
+	Set_Eightbit,
+	Set_Eightbit_Mode,
+	Save_Char,
+	LOG_OPEN,
+	STR$MATCH_WILD		: BLISS ADDRESSING_MODE (GENERAL),
+	STR$COPY_DX		: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX		: BLISS ADDRESSING_MODE (GENERAL),
+	Cvt_Key,
+	Convert_String_to_Key,
+	Cvt_Port,
+	Get_Switch_Value;
+    LOCAL
+	Temp_String	: $BBLOCK [DSC$K_S_BLN],
+	Status;
+
+    $Init_DynDesc (Temp_String);
+
+!------------------- J. Clement ---------------------------------
+!	This section may be commented out if you do not want EIGHTBIT
+!	Automatically on
+    !++
+    !	Determine what the Characteristics are
+    !--
+
+    Status = $ASSIGN (DEVNAM = %ASCID 'SYS$COMMAND:',CHAN = TT_Channel);
+
+    IF NOT .Status THEN Signal(.Status);
+    Save_Char();			! Get characteristics
+    Status = $DASSGN (CHAN = .TT_Channel);
+    TT_Channel = 0;			!JC
+    IF NOT .Status THEN Signal(.Status);
+
+    !++
+    !	Set the default Flag_Local_Synch from TTSYNC
+    !--
+
+    Flag_Local_Synch = .Charistics [TT$V_TTSYNC];
+
+    !++
+    !	set the EIGHTBIT negotiation
+    !--
+
+    My_Options [Option$K_Extended_ASCII, Option$V_Prefer] =
+		1 AND .Charistics [TT$V_EIGHTBIT];
+    His_Options [Option$K_Extended_ASCII, Option$V_Prefer] =
+		1 AND .Charistics [TT$V_EIGHTBIT];
+    !++
+    !	set the BINARY negotiation
+    !--
+
+    My_Options [Option$K_Binary, Option$V_Prefer] =
+		1 AND .Charistics [TT$V_PASSALL];
+    His_Options [Option$K_Binary, Option$V_Prefer] =
+		1 AND .Charistics [TT$V_PASSALL];
+
+!------------------- J. Clement ---------------------------------
+    !++
+    ! Then Get Autoflush
+    !--
+
+    Status = Get_Switch_Value (%ASCID 'Autoflush'
+			,Temp_String
+			,%ASCID 'TELNET_Autoflush');
+    IF .Status THEN
+	Flag_Autoflush = 1
+    ELSE IF .Status EQL CLI$_NEGATED THEN
+	Flag_Autoflush = 0;
+
+
+    !++
+    ! Then Get Debug
+    !--
+
+    Status = Get_Switch_Value (%ASCID 'Debug'
+			,Temp_String
+			,%ASCID 'TELNET_DEBUG');
+    IF .Status THEN
+	Flag_Debug = 1
+    ELSE IF .Status EQL CLI$_NEGATED THEN
+	Flag_Debug = 0;
+
+    !++
+    ! Then Get Quiet Qualifier
+    !--
+    Status = Get_Switch_Value (%ASCID 'Quiet'
+			,Temp_String
+			,%ASCID 'TELNET_Quiet');
+    IF .Status THEN
+	Flag_Quiet = 1
+    ELSE IF .Status EQL CLI$_NEGATED THEN
+	Flag_Quiet = 0;
+
+    !++
+    ! Then get END_OF_LINE mode
+    !--
+    Status = Get_Switch_Value (%ASCID'End_Of_LINE'
+		,Temp_String
+		,%ASCID 'TELNET_END_OF_LINE'
+		,%ASCID 'LF');
+    If .Status
+	THEN BEGIN
+		IF STR$MATCH_WILD(Temp_string,%ASCID'L*')
+		THEN	TT_EOL_Type = 0
+		ELSE	TT_EOL_Type = 1;
+	END;
+
+    !++
+    ! Then Get All Log
+    !--
+    Status = Get_Switch_Value (%ASCID 'ALL_LOG'
+			,Temp_String
+			,%ASCID 'TELNET_ALL_LOG');
+    IF .Status THEN
+	Flag_ALL_Log = 1
+    ELSE IF .Status EQL CLI$_NEGATED THEN
+	Flag_ALL_Log = 0;
+
+    !++
+    ! Then Get LOG
+    !--
+    IF Get_Switch_Value (%ASCID'log'
+		,Temp_String
+		,%ASCID 'TELNET_LOG')
+	THEN BEGIN
+		Status = LOG_OPEN(Temp_String);
+		IF NOT .Status THEN Signal(.Status);
+	END;
+
+    !++
+    ! Then Get GENERIC
+    !--
+    Status = Get_Switch_Value (%ASCID'generic'
+			,Temp_String
+			,%ASCID 'TELNET_GENERIC');
+    IF .Status THEN
+	Flag_Localchars = 1
+    ELSE IF .Status EQL CLI$_NEGATED THEN
+	Flag_Localchars = 0;
+
+    !++
+    ! Then get Binary mode
+    !--
+    If Get_Switch_Value (%ASCID'Binary'
+			,Temp_String
+			,%ASCID 'TELNET_BINARY')
+	THEN BEGIN
+	My_Options [Option$K_Binary, Option$V_Prefer] = Option$K_Prefer_On;
+	His_Options [Option$K_Binary, Option$V_Prefer] = Option$K_Prefer_On;
+	END;
+
+    !++
+    ! Then set Extended_ASCII mode
+    !--
+    Status = Get_Switch_Value (%ASCID'eightbit'
+			,Temp_String
+			,%ASCID 'TELNET_EIGHTBIT');
+    IF .Status
+    THEN BEGIN
+	Set_Eightbit_Mode(1);
+	END
+    ELSE IF .Status EQL CLI$_NEGATED
+    THEN BEGIN
+	Set_Eightbit_Mode(0);
+	END;
+    Set_Eightbit();			! set Eightbit characteristics.
+
+    !++
+    ! The escape character
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'ESCAPE'
+		,Temp_String
+		,%ASCID 'TELNET_ESCAPE'
+		,%ASCID 'CONTROL-^');
+    IF NOT .Status
+    THEN BEGIN
+	TT_Escape_key = -1;
+	END
+    ELSE BEGIN
+	TT_Escape_Key = Convert_String_to_key( Temp_string );
+	IF .TT_Escape_Key EQL -2 THEN Signal(TELNET$_KEY_SYNTAX
+		, 1, %ASCID 'Escape', Temp_String);
+	END;
+
+    !++
+    ! The local Echo character
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'LECHO'
+		,Temp_String
+		,%ASCID 'TELNET_LECHO'
+		,%ASCID 'CONTROL-E');
+    IF NOT .Status
+    THEN BEGIN
+	TT_Echo_key = -1;
+	END
+    ELSE BEGIN
+	TT_Echo_Key = Convert_String_to_key( Temp_string );
+	IF .TT_Echo_Key EQL -2 THEN Signal(TELNET$_KEY_SYNTAX
+		, 1, %ASCID 'LEcho', Temp_String);
+	END;
+
+    !++
+    ! The AYT character
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'AYT'
+		,Temp_String
+		,%ASCID 'TELNET_AYT'
+		,%ASCID 'CONTROL-T');
+    IF NOT .Status
+    THEN BEGIN
+	TT_AYT_key = -1;
+	END
+    ELSE BEGIN
+	TT_AYT_Key = Convert_String_to_key( Temp_string );
+	IF .TT_AYT_Key EQL -2 THEN Signal(TELNET$_KEY_SYNTAX
+		, 1, %ASCID 'AYT', Temp_String);
+	END;
+
+    !++
+    ! The AO character
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'AO'
+		,Temp_String
+		,%ASCID 'TELNET_AO'
+		,%ASCID 'CONTROL-O');
+    IF NOT .Status
+    THEN BEGIN
+	TT_AO_key = -1;
+	END
+    ELSE BEGIN
+	TT_AO_Key = Convert_String_to_key( Temp_string );
+	IF .TT_AO_Key EQL -2 THEN Signal(TELNET$_KEY_SYNTAX
+		, 1, %ASCID 'AO', Temp_String);
+	END;
+
+    !++
+    ! The BRK character
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'BRK'
+		,Temp_String
+		,%ASCID 'TELNET_BRK'
+		,%ASCID 'CONTROL-B');
+    IF NOT .Status
+    THEN BEGIN
+	TT_BRK_key = -1;
+	END
+    ELSE BEGIN
+	TT_BRK_Key = Convert_String_to_key( Temp_string );
+	IF .TT_BRK_Key EQL -2 THEN Signal(TELNET$_KEY_SYNTAX
+		, 1, %ASCID 'BRK', Temp_String);
+	END;
+
+    !++
+    ! The EC character
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'EC'
+		,Temp_String
+		,%ASCID 'TELNET_EC'
+		,%ASCID '127');
+    IF NOT .Status
+    THEN BEGIN
+	TT_EC_key = -1;
+	END
+    ELSE BEGIN
+	TT_EC_Key = Convert_String_to_key( Temp_string );
+	IF .TT_EC_Key EQL -2 THEN Signal(TELNET$_KEY_SYNTAX
+		, 1, %ASCID 'EC', Temp_String);
+	END;
+
+    !++
+    ! The EL character
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'EL'
+		,Temp_String
+		,%ASCID 'TELNET_EL'
+		,%ASCID 'CONTROL-U');
+    IF NOT .Status
+    THEN BEGIN
+	TT_EL_key = -1;
+	END
+    ELSE BEGIN
+	TT_EL_Key = Convert_String_to_key( Temp_string );
+	IF .TT_EL_Key EQL -2 THEN Signal(TELNET$_KEY_SYNTAX
+		, 1, %ASCID 'EL', Temp_String);
+	END;
+
+    !++
+    ! The IP character
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'IP'
+		,Temp_String
+		,%ASCID 'TELNET_IP'
+		,%ASCID 'CONTROL-C');
+    IF NOT .Status
+    THEN BEGIN
+	TT_IP_key = -1;
+	END
+    ELSE BEGIN
+	TT_IP_Key = Convert_String_to_key( Temp_string );
+	IF .TT_IP_Key EQL -2 THEN Signal(TELNET$_KEY_SYNTAX
+		, 1, %ASCID 'IP', Temp_String);
+	END;
+
+    !++
+    ! The SYNCH character
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'SYNCH'
+		,Temp_String
+		,%ASCID 'TELNET_SYNCH'
+		,%ASCID 'CONTROL-X');
+    IF NOT .Status
+    THEN BEGIN
+	TT_SYNCH_key = -1;
+	END
+    ELSE BEGIN
+	TT_SYNCH_Key = Convert_String_to_key( Temp_string );
+	IF .TT_SYNCH_Key EQL -2 THEN Signal(TELNET$_KEY_SYNTAX
+		, 1, %ASCID 'SYNCH', Temp_String);
+	END;
+
+    !++
+    ! !!!HACK!!! We need a comment here!!!
+    !--
+    Status = Get_Switch_Value (%ASCID 'EDITKEYS'
+			,Temp_String
+			,%ASCID 'TELNET_EDITKEYS');
+    IF .Status THEN
+	Flag_Editkeys = 1
+    ELSE IF .Status EQL CLI$_NEGATED THEN
+	Flag_Editkeys = 0;
+
+    !++
+    ! Do we want our connection to be line-by-line?
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'LINEMODE'
+		,Temp_String
+		,%ASCID 'TELNET_LINEMODE');
+    IF .Status
+    THEN BEGIN
+	Set_Line_Mode(1);
+	END
+    ELSE IF .Status EQL CLI$_NEGATED
+    THEN BEGIN
+	Set_Line_Mode(0);
+	END;
+
+    !++
+    ! Which Port we are coming From
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'LOCAL_PORT'
+		,Temp_String
+		,%ASCID 'TELNET_LOCAL_PORT'
+		,%ASCID '0');
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = Cvt_Port (Temp_String, Local_Port);
+    IF NOT .Status THEN Signal(TELNET$_PORT_SYNTAX, 1, Temp_String);
+
+    !++
+    ! Now which port we are going to
+    !--
+    Status = Get_Switch_Value (
+		%ASCID 'PORT'
+		,Temp_String
+		,%ASCID 'TELNET_PORT'
+		,%ASCID 'TELNET');
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = Cvt_Port (Temp_String, Remote_Port);
+    IF NOT .Status THEN Signal(TELNET$_PORT_SYNTAX, 1, Temp_String);
+
+    !++
+    !  Get terminal type
+    !--
+    STR$COPY_DX ( TType_Overide , %ASCID'' );
+    Status = Get_Switch_Value (
+		%ASCID 'TERMINAL_TYPE'
+		,Temp_String
+		,%ASCID 'TELNET_TERMINAL_TYPE'
+		,%ASCID '');
+    IF NOT .Status THEN Signal(.Status)
+    ELSE STR$COPY_DX ( TType_Overide , Temp_String );
+
+
+    !++
+    ! Get XOFF switch
+    !--
+    Status = Get_Switch_Value(%ASCID 'XOFF'
+			,Temp_String
+			,%ASCID 'TELNET_XOFF');
+    IF .Status THEN
+	Flag_Local_Synch = 1
+    ELSE IF .Status EQL CLI$_NEGATED THEN
+	Flag_Local_Synch = 0;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Telnet_Main =
+!--
+! Functional Description:
+!
+!	The main routine.  Parse the arguements. Get the log file.
+!	Start the I/O. Then Hibernate while the AST's do all the
+!	work.
+!--
+    BEGIN
+    ENABLE
+	Telnet_Handler;
+    EXTERNAL ROUTINE
+	STR$APPEND	: BLISS ADDRESSING_MODE (GENERAL),
+	Init_Control_C,
+	Telnet_SMG_Init;
+    LOCAL
+	Status;
+
+    !++
+    ! Initialize location info for this terminal.
+    !--
+    INIT_TTYLOC();
+
+    Telnet_SMG_Init ();
+
+    Get_CLI_Flags();
+
+    Status = $DCLEXH (DESBLK = Exit_Block);
+    IF NOT .Status THEN Signal(.Status);
+
+    Init_Control_C();
+
+    Check_Host();
+
+    Command_Loop();
+
+    SS$_NORMAL
+    END;
+
+END ELUDOM
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNET.B32
+!  *2    13-MAR-1991 22:07:46 SYNFUL "If output aborts, try again"
+!  *1     5-MAR-1991 19:01:52 SYNFUL "Main Telnet module to provide virtual terminal service"
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNET.B32
+

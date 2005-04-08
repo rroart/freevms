@@ -1,0 +1,192 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+!++
+! Option.R32
+!
+! Description:
+!
+!	A data structure to store all of the necessary info about
+!	a telnet option.
+!
+! Written By:
+!
+!	Dale Moore	15-DEC-1986	CMU-CS/RI
+!
+! Modifications:
+!--
+!LIBRARY 'TELNET';
+
+MACRO
+    Option$V_State		=  0,  0,  1, 0%,
+    Option$V_Negotiating	=  0,  1,  1, 0%,
+    Option$V_Prefer		=  0,  2,  2, 0%,
+    Option$V_Special		=  0,  4,  1, 0%,
+    Option$L_Turn_On		=  4,  0, 32, 0%,
+    Option$L_Turn_Off		=  8,  0, 32, 0%,
+    Option$L_SubOption		= 12,  0, 32, 0%;
+
+LITERAL
+    !++
+    ! Option$V_State values
+    ! State_Off must be zero, because off is the default and
+    ! it saves us to preset the stuff to zero.
+    !--
+    Option$K_State_Off		=  0,
+    Option$K_State_On		=  1,
+
+    !++
+    ! Option$V_Negotiating values
+    ! Not_Negotiating must be zero, because it is the default and
+    ! it saves us on presetting the stuff
+    !--
+    Option$K_Not_Negotiating	=  0,
+    Option$K_Negotiating	=  1,
+
+    !++
+    ! Option$V_Prefer values
+    ! Prefer_Off must be zero, because it is the default and
+    ! it saves us on presetting the stuff
+    !--
+    Option$K_Prefer_Off		=  Option$K_State_Off,
+    Option$K_Prefer_On		=  Option$K_State_On,
+    Option$K_Dont_Care		=  Option$K_Prefer_On + 1,
+
+    !++
+    ! Option$V_Special values
+    ! Sensitive must be zero, because it is the default and
+    ! it saves us on presetting the stuff.  Callous means
+    ! always call the state transition routines, no matter
+    ! what state the option is already in.
+    !--
+    Option$K_Sensitive		=  0,
+    Option$K_Callous		=  1,
+
+
+    !++
+    ! The size of an option table or option block
+    !--
+    Option$K_Size		= 16;
+
+
+!++
+! Basicly from RFC #1011. -brm.
+! Augmented with options proposed since then. -brm.
+!--
+LITERAL
+    Option$K_Number_Of_Options	= 036,
+
+    Option$K_Binary		= 000,
+    Option$K_Echo		= 001,
+    Option$K_Reconnect		= 002,
+    Option$K_SUPRGA		= 003,
+    Option$K_Size_Negotiation	= 004,
+    Option$K_Status		= 005,
+    Option$K_Timing_Mark	= 006,
+    Option$K_Remote_Trans_Echo	= 007,
+    Option$K_Line_Width		= 008,
+    Option$K_Page_Size		= 009,
+    Option$K_CR_Disposition	= 010,
+    Option$K_Tab_Stops		= 011,
+    Option$K_Tab_Disposition	= 012,
+    Option$K_FF_Disposition	= 013,
+    Option$K_Vertical_Tabs	= 014,
+    Option$K_VT_Disposition	= 015,
+    Option$K_LF_Disposition	= 016,
+    Option$K_Extended_Ascii	= 017,
+    Option$K_Logout		= 018,
+    Option$K_Byte_Macro		= 019,
+    Option$K_Data_Entry		= 020,
+    Option$K_SUPDUP		= 021,
+    Option$K_SUPDUP_Output	= 022,
+    Option$K_Location		= 023,
+    Option$K_Terminal_Type	= 024,
+    Option$K_End_of_Record	= 025,
+    Option$K_User_Id		= 026,
+    Option$K_Output_Marking	= 027,
+    Option$K_Location_Number	= 028,
+    Option$K_3270_Regime	= 029,
+    Option$K_X3_PAD		= 030,
+    Option$K_Window_Size	= 031,
+    Option$K_Terminal_Speed	= 032,
+    Option$K_Toggle_Flow_Control= 033,
+    Option$K_Linemode		= 034,
+    Option$K_X_Display_Location	= 035,
+
+    Option$K_Extended		= 255;
+
+LITERAL
+    Option$K_Terminal_Type_Is	= 0,
+    Option$K_Terminal_Type_Send	= 1,
+
+    Option$K_TTYLOC_Format_64	= 0,
+
+    Option$K_Terminal_Speed_Is	= 0,
+    Option$K_Terminal_Speed_Send= 1,
+
+    Option$K_Tog_Flow_Cntl_OFF	= 0,
+    Option$K_Tog_Flow_Cntl_ON	= 1,
+
+    Option$K_Linemode_Mode		= 1,
+    Option$K_Linemode_Forwardmask	= 2,
+    Option$K_Linemode_SLC		= 3,
+
+    Option$K_Linemode_Mode_EDIT		= 0,
+    Option$K_Linemode_Mode_TRAPSIG	= 1,
+    Option$K_Linemode_Mode_ACK		= 2,
+
+    Option$M_Linemode_Mode_Mask		= 3,
+
+    Option$K_Limemode_SLC_MaxOpt	= 18,
+    SLC_SYNCH		= 1,
+    SLC_BRK		= 2,
+    SLC_IP		= 3,
+    SLC_AO		= 4,
+    SLC_AYT		= 5,
+    SLC_EOR		= 6,
+    SLC_ABORT		= 7,
+    SLC_EOF		= 8,
+    SLC_SUSP		= 9,
+    SLC_EC		= 10,
+    SLC_EL		= 11,
+    SLC_EW		= 12,
+    SLC_RP		= 13,
+    SLC_LNEXT		= 14,
+    SLC_XON		= 15,
+    SLC_XOFF		= 16,
+    SLC_FORW1		= 17,
+    SLC_FORW2		= 18,
+
+    ! These codes go in the first 2 bits of the function byte.
+    SLC_DEFAULT		= 3,
+    SLC_VALUE		= 2,
+    SLC_CANTCHANGE	= 1,
+    SLC_NOSUPPORT	= 0;
+
+MACRO	! Define the fields in the function modifier byte of the SLC.
+    SLC$F_Lvl		= 0, 2%,
+    SLC$F_FlushOut	= 2, 1%,
+    SLC$F_FlushIn	= 3, 1%,
+    SLC$F_Ack		= 4, 1%;
+
+!  DEC/CMS REPLACEMENT HISTORY, Element OPTION.R32
+!  *1     5-MAR-1991 18:58:44 SYNFUL "Data structure definition to store all necessary info about a telnet option"
+!  DEC/CMS REPLACEMENT HISTORY, Element OPTION.R32

@@ -1,0 +1,1495 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+    OPTIONS (			! Arpa Internet TELNET
+	LANGUAGE (BLISS32),
+	ADDRESSING_MODE (NONEXTERNAL=LONG_RELATIVE,EXTERNAL=LONG_RELATIVE),
+	ZIP,OPTIMIZE,OPTLEVEL=3,
+	LIST (NOEXPAND,ASSEMBLY,NOBINARY),
+	IDENT = 'V4.0'
+	) =
+BEGIN
+
+!--
+! Options.B32	Copyright (c) 1988	Carnegie Mellon University
+!
+! Facility:
+!
+!	Telnet - Implementation of RFC854 for CMU-OpenVMS/IP code.
+!
+! Abstract:
+!
+!	Contains all of the option-specific state transition code.
+!	This way we concentrate all the the code for turning options
+!	on and off in one module.
+!
+! Author:
+!
+!	12-DEC-88	Bruce R. Miller		CMU Network Development
+!
+! Modifications:
+!
+!	23-May-1988	Bruce R. Miller		CMU Network Development
+!	Adding support for the new Linemode Option.
+!
+!	12-Jan-1988	Bruce R. Miller		CMU Network Development
+!	Fixed Terminal-Type subnegotiation to try increasingly more
+!	general terminal types.
+!
+!	12-DEC-1988	Bruce R. Miller		CMU Network Development
+!	Collected all of Dale Moore's option handling code into this module.
+!
+!	Nov-1991	John Clement	Rice University
+!	Save Current Terminal width/length
+!	Fix a bug that should send actual terminal type if user specified
+!	one is rejected.
+!--
+
+
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'TELNET';
+LIBRARY 'OPTION';
+
+EXTERNAL
+    Flag_Debug;
+
+EXTERNAL ROUTINE
+    Noop_Routine		: BLISS ADDRESSING_MODE (GENERAL),
+    Set_Local_Echo_Mode_Off	: BLISS ADDRESSING_MODE (GENERAL),
+    Set_Local_Echo_Mode_On	: BLISS ADDRESSING_MODE (GENERAL),
+    Set_TT_No_Echo		: BLISS ADDRESSING_MODE (GENERAL),
+    Set_TT_Echo			: BLISS ADDRESSING_MODE (GENERAL),
+    Set_TT_Eightbit_State	: BLISS ADDRESSING_MODE (GENERAL);
+
+FORWARD ROUTINE
+    Got_TM,
+    Return_TM,
+
+    Send_Terminal_Location,
+    Send_TTYLOC_SubOption,
+
+    Set_Eightbit,
+
+    Set_Line_mode_on,
+    Set_Line_mode_off,
+
+    Terminal_Type_Option,
+    Start_TType_Option,
+
+    User_ID_Option,
+
+    Send_Page_Size_SubOption,
+    Send_Line_Width_SubOption,
+    Send_Window_Size_SubOption,
+
+    Terminal_Speed_Option,
+
+    Toggle_Flow_Control_On,
+    Toggle_Flow_Control_Off,
+    Toggle_Flow_Control_Option,
+
+    Linemode_On,
+    Linemode_Off,
+    Linemode_Option;
+
+
+
+GLOBAL
+    His_Options	: BLOCKVECTOR [Option$K_Number_Of_Options, Option$K_Size, BYTE]
+    PRESET (
+	[Option$K_Binary, Option$V_State]	= Option$K_State_Off,
+	[Option$K_Binary, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Binary, Option$V_Prefer]	= Option$K_Dont_Care,
+	[Option$K_Binary, Option$L_Turn_On]	= Noop_Routine,
+	[Option$K_Binary, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_Binary, Option$L_SubOption]	= Noop_Routine,
+
+	[Option$K_Echo, Option$V_State] 	= Option$K_State_Off,
+	[Option$K_Echo, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Echo, Option$V_Prefer]	= Option$K_Prefer_On,
+	[Option$K_Echo, Option$V_Special]	= Option$K_Callous,
+	[Option$K_Echo, Option$L_Turn_On] 	= Set_Line_Mode_Off,
+	[Option$K_Echo, Option$L_Turn_Off]	= Set_LINE_Mode_On,
+	[Option$K_Echo, Option$L_SubOption]	= Noop_Routine,
+
+	[Option$K_SUPRGA, Option$V_State]	= Option$K_State_Off,
+	[Option$K_SUPRGA, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_SUPRGA, Option$V_Prefer]	= Option$K_Prefer_On,
+	[Option$K_SUPRGA, Option$L_Turn_On]	= Noop_Routine,
+	[Option$K_SUPRGA, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_SUPRGA, Option$L_SubOption]	= Noop_Routine,
+
+	[Option$K_Extended_ASCII, Option$V_State]	= Option$K_State_Off,
+	[Option$K_Extended_ASCII, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Extended_ASCII, Option$V_Prefer]	= Option$K_Dont_Care,
+	[Option$K_Extended_ASCII, Option$L_Turn_On]	= Set_EightBit,
+	[Option$K_Extended_ASCII, Option$L_Turn_Off]	= Set_EightBit,
+	[Option$K_Extended_ASCII, Option$L_SubOption]	= Noop_Routine,
+
+	[Option$K_Timing_Mark, Option$V_State]	= Option$K_State_Off,
+	[Option$K_Timing_Mark, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Timing_Mark, Option$V_Prefer]	= Option$K_Prefer_Off,
+	[Option$K_Timing_Mark, Option$V_Special]	= Option$K_Callous,
+	[Option$K_Timing_Mark, Option$L_Turn_On]	= Got_TM,
+	[Option$K_Timing_Mark, Option$L_Turn_Off]	= Got_TM,
+	[Option$K_Timing_Mark, Option$L_SubOption]	= Noop_Routine,
+
+	[Option$K_Terminal_Type, Option$V_State]
+						= Option$K_State_Off,
+	[Option$K_Terminal_Type, Option$V_Negotiating]
+						= Option$K_Not_Negotiating,
+	[Option$K_Terminal_Type, Option$V_Prefer]
+						= Option$K_Prefer_Off,
+	[Option$K_Terminal_Type, Option$L_Turn_On]
+						= Noop_Routine,
+	[Option$K_Terminal_Type, Option$L_Turn_Off]
+						= Noop_Routine,
+	[Option$K_Terminal_Type, Option$L_SubOption]
+						= Noop_Routine,
+
+	[Option$K_Terminal_Speed, Option$V_State]
+						= Option$K_State_Off,
+	[Option$K_Terminal_Speed, Option$V_Negotiating]
+						= Option$K_Not_Negotiating,
+	[Option$K_Terminal_Speed, Option$V_Prefer]
+						= Option$K_Prefer_Off,
+	[Option$K_Terminal_Speed, Option$L_Turn_On]
+						= Noop_Routine,
+	[Option$K_Terminal_Speed, Option$L_Turn_Off]
+						= Noop_Routine,
+	[Option$K_Terminal_Speed, Option$L_SubOption]
+						= Noop_Routine,
+
+	[Option$K_Toggle_Flow_Control, Option$V_State]
+						= Option$K_State_Off,
+	[Option$K_Toggle_Flow_Control, Option$V_Negotiating]
+						= Option$K_Not_Negotiating,
+	[Option$K_Toggle_Flow_Control, Option$V_Prefer]
+						= Option$K_Prefer_Off,
+	[Option$K_Toggle_Flow_Control, Option$L_Turn_On]
+						= Noop_Routine,
+	[Option$K_Toggle_Flow_Control, Option$L_Turn_Off]
+						= Noop_Routine,
+	[Option$K_Toggle_Flow_Control, Option$L_SubOption]
+						= Noop_Routine,
+
+	[Option$K_LineMode, Option$V_State]	= Option$K_State_Off,
+	[Option$K_LineMode, Option$V_Negotiating] = Option$K_Not_Negotiating,
+	[Option$K_LineMode, Option$V_Prefer]	= Option$K_Prefer_Off,
+	[Option$K_LineMode, Option$L_Turn_On]	= Noop_Routine,
+	[Option$K_LineMode, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_LineMode, Option$L_SubOption]	= Noop_Routine
+	),
+
+    My_Options : BLOCKVECTOR [Option$K_Number_Of_Options, Option$K_Size, BYTE]
+	PRESET (
+	[Option$K_Binary, Option$V_State]	= Option$K_State_Off,
+	[Option$K_Binary, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Binary, Option$V_Prefer]	= Option$K_Dont_Care,
+	[Option$K_Binary, Option$L_Turn_On]	= Set_EightBit,
+	[Option$K_Binary, Option$L_Turn_Off]	= Set_EightBit,
+	[Option$K_Binary, Option$L_SubOption]	= Noop_Routine,
+!
+! Echo back to server ??? NEVER
+!
+	[Option$K_Echo, Option$V_State] 	= Option$K_State_Off,
+	[Option$K_Echo, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Echo, Option$V_Prefer]	= Option$K_Prefer_off,
+	[Option$K_Echo, Option$L_Turn_On] 	= Noop_Routine,
+	[Option$K_Echo, Option$L_Turn_Off]	= Noop_Routine,
+
+	[Option$K_SUPRGA, Option$V_State]	= Option$K_State_Off,
+	[Option$K_SUPRGA, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_SUPRGA, Option$V_Prefer]	= Option$K_Prefer_On,
+	[Option$K_SUPRGA, Option$L_Turn_On]	= Noop_Routine,
+	[Option$K_SUPRGA, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_SUPRGA, Option$L_SubOption]	= Noop_Routine,
+
+	[Option$K_Timing_Mark, Option$V_State]	= Option$K_State_Off,
+	[Option$K_Timing_Mark, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Timing_Mark, Option$V_Prefer]	= Option$K_Prefer_Off,
+	[Option$K_Timing_Mark, Option$V_Special]	= Option$K_Callous,
+	[Option$K_Timing_Mark, Option$L_Turn_On]	= Return_TM,
+	[Option$K_Timing_Mark, Option$L_Turn_Off]	= Return_TM,
+	[Option$K_Timing_Mark, Option$L_SubOption]	= Noop_Routine,
+
+
+	! Line Width
+	[Option$K_Line_width, Option$V_State]		= Option$K_State_Off,
+	[Option$K_Line_width, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Line_width, Option$V_Prefer]		= Option$K_Dont_Care,
+	[Option$K_Line_width, Option$L_Turn_On]		= Send_Line_width_SubOption,
+	[Option$K_Line_width, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_Line_width, Option$L_SubOption]	= Noop_Routine,
+
+	! Page Size
+	[Option$K_Page_Size, Option$V_State]		= Option$K_State_Off,
+	[Option$K_Page_Size, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Page_Size, Option$V_Prefer]		= Option$K_Dont_Care,
+	[Option$K_Page_Size, Option$L_Turn_On]		= Send_Page_Size_SubOption,
+	[Option$K_Page_Size, Option$L_Turn_Off]		= Noop_Routine,
+	[Option$K_Page_Size, Option$L_SubOption]	= Noop_Routine,
+
+	[Option$K_Extended_ASCII, Option$V_State]	= Option$K_State_Off,
+	[Option$K_Extended_ASCII, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Extended_ASCII, Option$V_Prefer]	= Option$K_Dont_Care,
+	[Option$K_Extended_ASCII, Option$L_Turn_On]	= Set_EightBit,
+	[Option$K_Extended_ASCII, Option$L_Turn_Off]	= Set_EightBit,
+
+	[Option$K_Location, Option$V_State]	= Option$K_State_Off,
+	[Option$K_Location, Option$V_Negotiating]
+						= Option$K_Not_Negotiating,
+	[Option$K_Location, Option$V_Prefer]	= Option$K_Prefer_On,
+	[Option$K_Location, Option$L_Turn_On]	= Send_Terminal_Location,
+	[Option$K_Location, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_Location, Option$L_SubOption]	= Noop_Routine,
+
+	[Option$K_Terminal_Type, Option$V_State]	= Option$K_State_Off,
+	[Option$K_Terminal_Type, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Terminal_Type, Option$V_Prefer]	= Option$K_Prefer_On,
+	[Option$K_Terminal_Type, Option$L_Turn_On]	= Start_TType_Option,
+	[Option$K_Terminal_Type, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_Terminal_Type, Option$L_SubOption]	= Terminal_Type_Option,
+
+!!!	[Option$K_User_Id, Option$V_State]		= Option$K_State_Off,
+!!!	[Option$K_User_Id, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+!!!	[Option$K_User_Id, Option$V_Prefer]		= Option$K_Prefer_On,
+!!!	[Option$K_User_Id, Option$L_Turn_On]		= Noop_Routine,
+!!!	[Option$K_User_Id, Option$L_Turn_Off]		= Noop_Routine,
+!!!	[Option$K_User_Id, Option$L_SubOption]		= User_Id_Option,
+
+	[Option$K_Location_Number, Option$V_State]	= Option$K_State_Off,
+	[Option$K_Location_Number, Option$V_Negotiating]= Option$K_Not_Negotiating,
+	[Option$K_Location_Number, Option$V_Prefer]	= Option$K_Prefer_On,
+	[Option$K_Location_Number, Option$L_Turn_On]	= Send_TTYLOC_SubOption,
+	[Option$K_Location_Number, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_Location_Number, Option$L_SubOption]	= Send_TTYLOC_SubOption,
+
+	! Window Size Option
+	[Option$K_Window_Size, Option$V_State]		= Option$K_State_Off,
+	[Option$K_Window_Size, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Window_Size, Option$V_Prefer]		= Option$K_Prefer_On,
+	[Option$K_Window_Size, Option$L_Turn_On]	= Send_Window_Size_SubOption,
+	[Option$K_Window_Size, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_Window_Size, Option$L_SubOption]	= Noop_Routine,
+
+	! Terminal Speed option
+	[Option$K_Terminal_Speed, Option$V_State]	= Option$K_State_Off,
+	[Option$K_Terminal_Speed, Option$V_Negotiating]	= Option$K_Not_Negotiating,
+	[Option$K_Terminal_Speed, Option$V_Prefer]	= Option$K_Dont_Care,
+	[Option$K_Terminal_Speed, Option$L_Turn_On]	= Noop_Routine,
+	[Option$K_Terminal_Speed, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_Terminal_Speed, Option$L_SubOption]	= Terminal_Speed_Option,
+
+	! Remote Flow Control option
+	[Option$K_Toggle_Flow_Control, Option$V_State]
+						= Option$K_State_Off,
+	[Option$K_Toggle_Flow_Control, Option$V_Negotiating]
+						= Option$K_Not_Negotiating,
+	[Option$K_Toggle_Flow_Control, Option$V_Prefer]
+						= Option$K_Prefer_On,
+	[Option$K_Toggle_Flow_Control, Option$L_Turn_On]
+						= Toggle_Flow_Control_On,
+	[Option$K_Toggle_Flow_Control, Option$L_Turn_Off]
+						= Toggle_Flow_Control_Off,
+	[Option$K_Toggle_Flow_Control, Option$L_SubOption]
+						= Toggle_Flow_Control_Option,
+
+	! Dave Borman's proposed Linemode option
+	! (The option to end all options...)
+	[Option$K_LineMode, Option$V_State]	= Option$K_State_Off,
+	[Option$K_LineMode, Option$V_Negotiating] = Option$K_Not_Negotiating,
+	[Option$K_LineMode, Option$V_Prefer]	= Option$K_Prefer_off,
+	[Option$K_LineMode, Option$L_Turn_On]	= Noop_Routine,
+	[Option$K_LineMode, Option$L_Turn_Off]	= Noop_Routine,
+	[Option$K_LineMode, Option$L_SubOption]	= Noop_Routine
+!!!JC	[Option$K_LineMode, Option$L_Turn_On]	= Linemode_on,
+!!!JC	[Option$K_LineMode, Option$L_Turn_Off]	= Linemode_off,
+!!!JC	[Option$K_LineMode, Option$L_SubOption]	= Linemode_Option
+	);
+
+
+
+GLOBAL BIND
+    State_Binary = My_Options[Option$K_Binary,Option$V_State],
+    State_Eightbit = My_Options[Option$K_Extended_ASCII,Option$V_State],
+    State_Echo = My_Options[Option$K_Echo,Option$V_State];
+
+GLOBAL ROUTINE SET_Eightbit =
+!++
+!	Set the TERMINAL to EIGHTBIT if appropriate
+!	This sets the terminal to EIGHTBIT if we have
+!	Binary , Extended_ASCII, or FLAG_Eightbit ON
+!
+!--
+BEGIN
+    LOCAL
+	State;
+    EXTERNAL
+	TT_In_Mask,
+	TT_Out_Mask,
+	State_Eightbit,
+	State_Binary,
+	Flag_Eightbit;
+
+	TT_In_Mask = %X'7F';
+	IF	.My_Options [Option$K_Extended_ASCII, Option$V_State]
+	    OR	.My_Options [Option$K_Binary, Option$V_State]
+	    OR	.Flag_Eightbit
+		THEN TT_In_Mask = %X'FF';
+
+	TT_Out_Mask = %X'7F';
+	IF	.His_Options [Option$K_Extended_ASCII, Option$V_State]
+	    OR	.His_Options [Option$K_Binary, Option$V_State]
+	    OR	.Flag_Eightbit
+		THEN TT_Out_Mask = %X'FF';
+
+	State = .State_Eightbit OR State_Binary OR .Flag_Eightbit;
+	Set_TT_Eightbit_State (State);
+    ss$_normal
+END;
+
+
+!
+!
+!Options implemented so far:
+!
+! Code:	RFC:	Option name:
+!----------------------------
+!  0	  856	Binary Transmission
+!  1	  857	Echo
+!  3	  858	Suppress Go Ahead (Ignored)
+!  6	  860	Timing-Mark
+! 17	  698	Extended ASCII ???
+! 24	  884	Terminal Type option
+! 23	  779 	Terminal Location option
+! 28	  946	Terminal Location Number option
+! 31	 1073	Terminal Window Size option
+! 32	 1079	Terminal Speed option
+! 33	 1080	Toggle_Flow_Control
+! 32	 1184	Linemode
+
+
+
+!++
+! Option: 	Binary Transmission
+! Code:		0
+! RFC:		856
+!
+! The code for this Option is located in the Telnet_Term module
+! in the routines Set_TT_Eightbit() and Set_TT_No_Eightbit().
+!
+!--
+
+
+
+!++
+! Option: 	Echo
+! Code:		1
+! RFC:		857
+!
+! The code for this Option is located in the Telnet_Term module
+! in the routines Set_TT_Echo() and Set_TT_No_Echo().
+!
+!--
+
+
+
+!++
+! Option: 	Timing-Mark
+! Code:		6
+! RFC:		860
+!
+! Handles timing mark.
+!
+!--
+
+GLOBAL ROUTINE Got_TM =
+!++
+!	Got a WILL/WONT Timing-Mark.
+!	For the moment we need to make sure data-blocking is off.
+!--
+BEGIN
+    EXTERNAL ROUTINE
+	Set_Data_Blocking_State	: BLISS ADDRESSING_MODE (GENERAL);
+
+	Set_Data_Blocking_State(0)
+END;
+
+GLOBAL ROUTINE Return_TM =
+!++
+!	Got a DO/DONT Timing-Mark.
+!	Need to reset our own state.
+!--
+BEGIN
+    My_Options[Option$K_Timing_Mark,Option$V_State] = Option$K_State_Off
+END;
+
+
+
+!++
+! Option: 	Extended ASCII
+! Code:		17
+! RFC:		698
+!
+! The code for this Option is located in the Telnet_Term module
+! in the routines Set_TT_Eightbit() and Set_TT_No_Eightbit().
+! NOTE: This is only partially implemented it will not accept 9 bit chars.
+!
+!--
+
+
+!++
+! Option: 	Terminal Location option
+! Code:		23
+! RFC:		946
+!--
+
+GLOBAL ROUTINE Send_TTYLOC_SubOption =
+!++
+! Functional Description:
+!
+!	We've got the go ahead from the remote site to send the
+!	terminal Location number.  We must now figure out what
+!	the number is and send it.
+!--
+    BEGIN
+    EXTERNAL
+	Local_Address,
+	Local_TTY;
+    EXTERNAL ROUTINE
+	SEND_TCP_SUBOPTION	: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX 		: BLISS ADDRESSING_MODE (GENERAL),
+	STR$CONCAT 		: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	LOCDESC : $BBLOCK[DSC$K_S_BLN],
+	HOSTDESC : $BBLOCK[DSC$K_S_BLN]
+		    PRESET([DSC$W_LENGTH] = 4,
+			   [DSC$B_DTYPE] = DSC$K_DTYPE_Z,
+			   [DSC$B_CLASS] = DSC$K_CLASS_Z,
+			   [DSC$A_POINTER] = Local_Address),
+	TTYDESC : $BBLOCK[DSC$K_S_BLN]
+		    PRESET([DSC$W_LENGTH] = 4,
+			   [DSC$B_DTYPE] = DSC$K_DTYPE_Z,
+			   [DSC$B_CLASS] = DSC$K_CLASS_Z,
+			   [DSC$A_POINTER] = Local_TTY),
+	Status;
+
+! Make sure that we have agreed to do this.
+
+    IF .My_Options [Option$K_Location_Number, Option$V_State] NEQ
+	Option$K_State_ON THEN
+	RETURN (SS$_NORMAL);
+
+! Build the subnegotiation string. Format is:
+! <format><host><tty>
+! <format> is a 1-byte format code. We use format 0, which has
+! <host> is a 4-byte host number
+! <tty> is a 4-byte tty number
+
+    $INIT_DYNDESC(LOCDESC);
+
+    Status = STR$CONCAT(LOCDESC,
+			$DESCRIPTOR( %CHAR(Option$K_TTYLOC_FORMAT_64)),
+			HOSTDESC,
+			TTYDESC);
+    IF NOT .Status THEN
+	SIGNAL(.Status);
+
+! Send the subnegotiation
+
+    Send_TCP_SubOption (Option$K_Location_Number, LOCDESC);
+
+    Status = STR$FREE1_DX (LOCDESC);
+    IF NOT .Status THEN
+	SIGNAL(.Status);
+
+! Indicate that we did this.
+
+    IF .Flag_Debug THEN
+	SIGNAL(Telnet$_S_TTYLOC, 3, 0, .Local_Address, .Local_TTY);
+
+    SS$_NORMAL
+    END;
+
+
+
+!++
+! Option: 	Terminal Location Number option
+! Code:		23
+! RFC:		946
+!--
+
+FORWARD ROUTINE
+    SET_LOCATION : NOVALUE;
+
+GLOBAL ROUTINE Send_Terminal_Location =
+!++
+! Functional Description:
+!
+!	We've got the go ahead to send the location string.
+!	find out what that location string is and send it.
+!--
+    BEGIN
+    EXTERNAL
+	Local_Location;
+    EXTERNAL ROUTINE
+	SEND_TCP_SUBOPTION	: BLISS ADDRESSING_MODE (GENERAL);
+
+! Make sure that we have agreed to do this.
+
+!!!jC    IF .My_Options [Option$K_Location_Number, Option$V_State] NEQ
+!!!jC	Option$K_State_ON THEN
+!!!jC	RETURN (SS$_NORMAL);
+
+! Setup the terminal location string based on our info
+
+     SET_LOCATION();
+
+! Send it to the remote end.
+
+    Send_TCP_SubOption (Option$K_Location,Local_Location);
+
+! Indicate that we did this.
+
+    IF .Flag_Debug THEN
+	SIGNAL(Telnet$_S_Location, 1, 0, Local_Location);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE INIT_TTYLOC : NOVALUE =
+!++
+! Initialize the terminal location information about this terminal. Sets up
+! LOCAL_TTY and LOCATION strings according to local info.
+! Currently unimplemented.
+!--
+    BEGIN
+    EXTERNAL
+	LOCAL_TTY,
+	Local_Location	: $BBLOCK[DSC$K_S_BLN];
+
+    LOCAL_TTY = -1;		! "Any terminal on this system"
+    $INIT_DYNDESC(Local_Location); ! No location string known
+    END;
+
+ROUTINE SET_LOCATION : NOVALUE =
+!++
+! Set the location string to "Via <local host>" if no location is known.
+!--
+    BEGIN
+    EXTERNAL
+	Local_Host,
+	Local_Location	: $BBLOCK[DSC$K_S_BLN];
+    EXTERNAL ROUTINE
+	STR$CONCAT 	: BLISS ADDRESSING_MODE (GENERAL);
+    IF .Local_Location[DSC$W_LENGTH] EQL 0 THEN
+	BEGIN
+	STR$CONCAT(Local_Location,%ASCID'Via ',Local_Host);
+	END;
+    END;
+
+
+
+!++
+! Option: 	Terminal Type option
+! Code:		24
+! RFC:		884
+!
+! Terminal_Type option routines
+!--
+
+GLOBAL
+    TType_Overide   : $BBLOCK [DSC$K_S_BLN] PRESET(
+                        [DSC$W_LENGTH]  = 0,
+                        [DSC$B_DTYPE]   = DSC$K_DTYPE_T,
+                        [DSC$B_Class]   = DSC$K_CLASS_D,
+                        [DSC$A_POINTER] = 0);
+
+OWN
+    Tried_User_TType,
+    Term_Type_Index;
+
+GLOBAL ROUTINE Start_TType_Option =
+!++
+! Functional Description:
+!
+BEGIN
+    EXTERNAL ROUTINE
+	Get_Telnet_Terminal_Type	: BLISS ADDRESSING_MODE (GENERAL);
+
+    Tried_User_TType=0;
+    IF .TType_Overide[DSC$W_LENGTH] EQL 0 THEN
+	Tried_User_TType=1;
+
+    Get_Telnet_Terminal_Type (Term_Type_Index)
+END;
+
+GLOBAL ROUTINE Terminal_Type_Option (Desc_A) =
+!++
+! Functional Description:
+!
+!	We've just received an IAC Terminal Type SubOption.
+!	Take a look and see if it is Send tty suboption.
+!	If it is, send the tty type.
+!--
+    BEGIN
+    BIND
+	Desc		= .Desc_A		: $BBLOCK,
+	Desc_Vec	= .Desc [DSC$A_POINTER]	: VECTOR [, BYTE],
+	Command		= Desc_Vec [0]		: BYTE UNSIGNED;
+    EXTERNAL
+	Term_Table :	BLOCKVECTOR [, TTab$K_Size, BYTE];
+    EXTERNAL ROUTINE
+	STR$CONCAT		: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX		: BLISS ADDRESSING_MODE (GENERAL),
+	Send_TCP_SubOption	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	SubOption_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= 0),
+	Status;
+
+    !++
+    ! Have I agreed to send tty type?
+    !--
+    IF .My_Options [Option$K_Terminal_Type, Option$V_State] NEQ
+	Option$K_State_ON
+	THEN RETURN (SS$_NORMAL);
+
+    !++
+    ! Is the Sub Option one byte?
+    !--
+    IF (.Desc [DSC$W_LENGTH] NEQ 1)
+	THEN RETURN (SS$_NORMAL);
+
+    !++
+    ! Is the suboption a request for terminal type?
+    !--
+    IF (.Command NEQ Option$K_Terminal_Type_Send)
+	THEN RETURN (SS$_NORMAL);
+
+    IF .Flag_Debug THEN Signal (Telnet$_R_TTYTYPE_Send, 1, 0);
+    !++
+    ! It is now OK for us to send the terminal type
+    !--
+
+    Status = STR$CONCAT (SubOption_Desc,
+		$DESCRIPTOR ( %CHAR (Option$K_Terminal_Type_Is)),
+		IF .Tried_User_TType THEN
+		    .Term_Table[.Term_Type_Index,TTab$L_NAME]
+		ELSE TType_Overide);
+
+    IF NOT .Status THEN Signal (.Status);
+
+    Send_TCP_SubOption (Option$K_Terminal_Type, SubOption_Desc);
+
+    IF .Flag_Debug THEN Signal (Telnet$_S_TTYTYPE, 1, 0, SubOption_Desc);
+
+    IF .Tried_User_TType AND			! JC
+      (.Term_Table[.Term_Type_Index,TTab$W_NEXT] NEQ -1) THEN
+	Term_Type_Index = .Term_Table[.Term_Type_Index,TTab$W_NEXT];
+
+    Tried_User_TType=1;
+
+    Status = STR$FREE1_DX (SubOption_Desc);
+    IF NOT .Status THEN Signal (.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE User_Id_Option (Desc_A) =
+!++
+! Functional Description:
+!
+!	We've just received an IAC User ID SubOption.
+!	Take a look and see if it is Send suboption.
+!	If it is, send the User ID
+!--
+    BEGIN
+    BIND
+	Desc		= .Desc_A		: $BBLOCK,
+	Desc_Vec	= .Desc [DSC$A_POINTER]	: VECTOR [, BYTE],
+	Command		= Desc_Vec [0]		: BYTE UNSIGNED;
+    EXTERNAL
+	Term_Table :	BLOCKVECTOR [, TTab$K_Size, BYTE];
+    EXTERNAL ROUTINE
+	STR$CONCAT		: BLISS ADDRESSING_MODE (GENERAL),
+	STR$TRANSLATE		: BLISS ADDRESSING_MODE (GENERAL),
+	LIB$GETJPI		: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX		: BLISS ADDRESSING_MODE (GENERAL),
+	Send_TCP_SubOption	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Username_str	: BLOCKVECTOR [12,BYTE],
+	Username	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 12,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_S,
+				[DSC$A_POINTER]	= Username_str),
+
+	SubOption_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= 0),
+	Status;
+
+    !++
+    ! Have I agreed to send User ID?
+    !--
+    IF .My_Options [Option$K_User_Id, Option$V_State] NEQ
+	Option$K_State_ON
+	THEN RETURN (SS$_NORMAL);
+
+    !++
+    ! Is the Sub Option one byte?
+    !--
+    IF (.Desc [DSC$W_LENGTH] NEQ 1)
+	THEN RETURN (SS$_NORMAL);
+
+    !++
+    ! Is the suboption a request for User ID?
+    !--
+    IF (.Command NEQ Option$K_Terminal_Type_Send)
+	THEN RETURN (SS$_NORMAL);
+
+!!!    IF .Flag_Debug THEN Signal (Telnet$_R_TTYTYPE_Send, 1, 0);
+    !++
+    ! It is now OK for us to send the terminal type
+    !--
+
+    Status = LIB$GETJPI(%REF(JPI$_USERNAME)
+		,0,0,0,Username,Username[DSC$W_LENGTH] );
+    Status = STR$CONCAT (SubOption_Desc,
+		$DESCRIPTOR ( %CHAR (Option$K_Terminal_Type_Is)),
+		Username);
+
+    IF NOT .Status THEN Signal (.Status);
+
+    Send_TCP_SubOption (Option$K_User_Id, SubOption_Desc);
+
+    IF .Flag_Debug THEN Signal (Telnet$_S_USER_ID, 1, 0, SubOption_Desc);
+
+    Status = STR$FREE1_DX (SubOption_Desc);
+    IF NOT .Status THEN Signal (.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+!++
+! Option: 	Terminal Window Size option
+! Code:		31
+! RFC:		1073
+!--
+
+GLOBAL ROUTINE Send_Window_Size_SubOption =
+!++
+! Functional Description:
+!
+!	We've got the go ahead from the remote site to send the
+!	terminal window size.  We must now figure out what
+!	that is and send it.
+!--
+    BEGIN
+    EXTERNAL
+	TT_Page,
+	TT_Width;
+
+    EXTERNAL ROUTINE
+	Append_Char		: BLISS ADDRESSING_MODE (GENERAL),
+	Get_Window_Size		: BLISS ADDRESSING_MODE (GENERAL),
+	SEND_TCP_SUBOPTION	: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX 		: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	LOCDESC : $BBLOCK[DSC$K_S_BLN],
+	Status;
+
+    ! Make sure that we have agreed to do this.
+    IF .My_Options [Option$K_Window_Size, Option$V_State] NEQ
+	Option$K_State_ON THEN
+	RETURN (SS$_NORMAL);
+
+    ! Initialize and build the subnegotiation string. Format is:
+    ! <NAWS code><16-bit width><16-bit height>
+    $INIT_DYNDESC(LOCDESC);
+
+    Get_Window_Size(TT_Page, TT_Width);
+
+    ! Add the screen width to the subnegotiation string.
+    Append_Char(LOCDESC, .TT_Width<8,8,0>);
+    Append_Char(LOCDESC, .TT_Width<0,8,0>);
+
+    ! Add the screen height to the subnegotiation string.
+    Append_Char(LOCDESC, .TT_Page<8,8,0>);
+    Append_Char(LOCDESC, .TT_Page<0,8,0>);
+
+    ! Send the subnegotiation
+    Send_TCP_SubOption (Option$K_Window_Size, LOCDESC);
+
+    Status = STR$FREE1_DX (LOCDESC);
+    IF NOT .Status THEN
+	SIGNAL(.Status);
+
+    ! Indicate that we did this.
+    IF .Flag_Debug THEN
+	SIGNAL(Telnet$_S_Window_Size, 3, 0, .TT_Width, .TT_Page);
+
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Send_Line_Width_SubOption =
+!++
+! Functional Description:
+!
+!	We've got the go ahead from the remote site to send the
+!	terminal window size.  We must now figure out what
+!	that is and send it.
+!--
+    BEGIN
+    EXTERNAL
+	TT_Page,
+	TT_Width;
+
+    EXTERNAL ROUTINE
+	Append_Char		: BLISS ADDRESSING_MODE (GENERAL),
+	Get_Window_Size		: BLISS ADDRESSING_MODE (GENERAL),
+	SEND_TCP_SUBOPTION	: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX 		: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	LOCDESC : $BBLOCK[DSC$K_S_BLN],
+	Status;
+
+!!!jC    ! Make sure that we have agreed to do this.
+!!!jC    IF .My_Options [Option$K_Line_Width, Option$V_State] NEQ
+!!!jC	Option$K_State_ON THEN
+!!!jC	RETURN (SS$_NORMAL);
+
+    ! Initialize and build the subnegotiation string. Format is:
+    ! <NAWS code><16-bit width><16-bit height>
+    $INIT_DYNDESC(LOCDESC);
+
+    Get_Window_Size(TT_Page, TT_Width);
+
+    ! Add the screen width to the subnegotiation string.
+    Append_Char(LOCDESC, .TT_Width<8,8,0>);
+    Append_Char(LOCDESC, .TT_Width<0,8,0>);
+
+    ! Add the screen height to the subnegotiation string.
+!!!    Append_Char(LOCDESC, .TT_Page<8,8,0>);
+!!!    Append_Char(LOCDESC, .TT_Page<0,8,0>);
+
+    ! Send the subnegotiation
+    Send_TCP_SubOption (Option$K_Line_Width, LOCDESC);
+
+    Status = STR$FREE1_DX (LOCDESC);
+    IF NOT .Status THEN
+	SIGNAL(.Status);
+
+    ! Indicate that we did this.
+    IF .Flag_Debug THEN
+	SIGNAL(Telnet$_S_Line_Width, 2, 0, .TT_Width);
+
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Send_Page_Size_SubOption =
+!++
+! Functional Description:
+!
+!	We've got the go ahead from the remote site to send the
+!	terminal window size.  We must now figure out what
+!	that is and send it.
+!--
+    BEGIN
+    EXTERNAL
+	TT_Page,
+	TT_Width;
+
+    EXTERNAL ROUTINE
+	Append_Char		: BLISS ADDRESSING_MODE (GENERAL),
+	Get_Window_Size		: BLISS ADDRESSING_MODE (GENERAL),
+	SEND_TCP_SUBOPTION	: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX 		: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	LOCDESC : $BBLOCK[DSC$K_S_BLN],
+	Status;
+
+    ! Make sure that we have agreed to do this.
+!!!jC    IF .My_Options [Option$K_Page_Size, Option$V_State] NEQ
+!!!jC	Option$K_State_ON THEN
+!!!jC	RETURN (SS$_NORMAL);
+
+    ! Initialize and build the subnegotiation string. Format is:
+    ! <NAWS code><16-bit width><16-bit height>
+    $INIT_DYNDESC(LOCDESC);
+
+    Get_Window_Size(TT_Page, TT_Width);
+
+    ! Add the screen width to the subnegotiation string.
+!!!    Append_Char(LOCDESC, .TT_Width<8,8,0>);
+!!!    Append_Char(LOCDESC, .TT_Width<0,8,0>);
+
+    ! Add the screen height to the subnegotiation string.
+    Append_Char(LOCDESC, .TT_Page<8,8,0>);
+    Append_Char(LOCDESC, .TT_Page<0,8,0>);
+
+    ! Send the subnegotiation
+    Send_TCP_SubOption (Option$K_Page_Size, LOCDESC);
+
+    Status = STR$FREE1_DX (LOCDESC);
+    IF NOT .Status THEN
+	SIGNAL(.Status);
+
+    ! Indicate that we did this.
+    IF .Flag_Debug THEN
+	SIGNAL(Telnet$_S_Page_Size, 2, 0, .TT_Page);
+
+    SS$_NORMAL
+    END;
+
+
+
+!++
+! Option: 	Terminal Speed option
+! Code:		32
+! RFC:		1079
+!
+! Terminal_Speed option routines
+!--
+
+GLOBAL ROUTINE Terminal_Speed_Option (Desc_A) =
+!++
+! Functional Description:
+!
+!	We've just received an IAC Terminal_Speed SubOption.
+!	Take a look and see if it is Send tty suboption.
+!	If it is, send the tty speed.
+!	This is currently not used.
+!--
+    BEGIN
+    BIND
+	Desc		= .Desc_A		: $BBLOCK,
+	Desc_Vec	= .Desc [DSC$A_POINTER]	: VECTOR [, BYTE],
+	Command		= Desc_Vec [0]		: BYTE UNSIGNED;
+    EXTERNAL ROUTINE
+	STR$CONCAT		: BLISS ADDRESSING_MODE (GENERAL),
+	STR$FREE1_DX		: BLISS ADDRESSING_MODE (GENERAL),
+	Send_TCP_SubOption	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	SubOption_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= 0),
+	Status;
+
+    !++
+    ! Have I agreed to send tty speed?
+    !--
+    IF .My_Options [Option$K_Terminal_Speed, Option$V_State] NEQ
+	Option$K_State_ON
+	THEN RETURN (SS$_NORMAL);
+
+    !++
+    ! Is the Sub Option one byte?
+    !--
+    IF (.Desc [DSC$W_LENGTH] NEQ 1)
+	THEN RETURN (SS$_NORMAL);
+
+    !++
+    ! Is the suboption a request for terminal speed?
+    !--
+    IF (.Command NEQ Option$K_Terminal_Speed_Send)
+	THEN RETURN (SS$_NORMAL);
+
+    IF .Flag_Debug THEN Signal (Telnet$_R_TTYSPEED_Send, 1, 0);
+    !++
+    ! It is now OK for us to send the terminal speed.
+    !	Send a small lie. and say 9600. JC
+    !--
+
+    Status = STR$CONCAT (SubOption_Desc,
+		$DESCRIPTOR (%CHAR (Option$K_Terminal_Speed_Is)),
+		%ASCID'9600,9600');
+
+    IF NOT .Status THEN Signal (.Status);
+
+    Send_TCP_SubOption (Option$K_Terminal_Speed, SubOption_Desc);
+
+    IF .Flag_Debug THEN Signal (Telnet$_S_TTYSPEED, 1, 0, SubOption_Desc);
+
+    Status = STR$FREE1_DX (SubOption_Desc);
+    IF NOT .Status THEN Signal (.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+!++
+! Option: 	Toggle_Flow_Control
+! Code:		33
+! RFC:		1080
+!
+! Handles remote enabling and disabling of flow control.
+!
+! The code for this Option is located in the Telnet module
+! in the routine TOGGLE_FLOW_CONTROL_OPTION().
+!
+!--
+
+GLOBAL ROUTINE Toggle_Flow_Control_On =
+!++
+! Functional Description:
+!
+!	We've just received a DO Toggle Flow Control Option.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Local_Synch;
+    EXTERNAL ROUTINE
+	Set_TT_Synch	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Status;
+
+    Flag_Local_Synch = 1;
+    Set_TT_Synch();
+    IF .Flag_Debug THEN Signal (Telnet$_R_Tog_Flow_Cntl_ON, 1, 0);
+
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Toggle_Flow_Control_Off =
+!++
+! Functional Description:
+!
+!	We've just received a DONT Toggle Flow Control Option.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Local_Synch;
+    EXTERNAL ROUTINE
+	Set_TT_NO_Synch	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Status;
+
+    Flag_Local_Synch = 0;
+    Set_TT_NO_Synch();
+    IF .Flag_Debug THEN Signal (Telnet$_R_Tog_Flow_Cntl_OFF, 1, 0);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Toggle_Flow_Control_Option (Desc_A) =
+!++
+! Functional Description:
+!
+!	We've just received an IAC Toggle Flow Control SubOption.
+!--
+    BEGIN
+    BIND
+	Desc		= .Desc_A		: $BBLOCK,
+	Desc_Vec	= .Desc [DSC$A_POINTER]	: VECTOR [, BYTE],
+	Command		= Desc_Vec [0]		: BYTE UNSIGNED;
+    LOCAL
+	Status;
+
+    !++
+    ! Have I agreed to allow remote flow control?
+    !--
+    IF .My_Options [Option$K_Toggle_Flow_Control, Option$V_State] NEQ
+	Option$K_State_ON
+	THEN RETURN (SS$_NORMAL);
+
+    !++
+    ! Is the Sub Option one byte?
+    !--
+    IF (.Desc [DSC$W_LENGTH] NEQ 1)
+	THEN RETURN (SS$_NORMAL);
+
+    !++
+    ! What kind of suboption is it?
+    !--
+    IF (.Command EQL Option$K_Tog_Flow_Cntl_ON) THEN
+	Toggle_Flow_Control_On()
+    ELSE IF (.Command EQL Option$K_Tog_Flow_Cntl_OFF) THEN
+	Toggle_Flow_Control_Off()
+    ELSE RETURN (SS$_NORMAL);
+
+    SS$_NORMAL
+    END;
+
+
+
+!++
+! Option: 	Linemode
+! Code:		34
+! RFC:		1116
+!
+! Handles terminal character processing on the client side of a Telnet conn..
+!
+!--
+
+ROUTINE Set_Line_mode_state(State) =
+!++
+! Functional Description:
+!
+!	Set Line_mode state
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Init_Term_Table,
+	SET_TT_Echo_State;
+    EXTERNAL
+	Flag_Debug,
+	Line_mode_options,
+	Flag_Line_mode;
+!    BIND
+!	Line_Mode_options = My_Options [Option$K_Linemode, 0, 0, 0, 0] :$BBLOCK;
+
+    IF .Line_Mode_Options EQL Option$K_Dont_Care
+     THEN BEGIN
+	IF .Flag_Line_Mode XOR .State			! Not in line mode ?
+	THEN BEGIN
+	    Flag_Line_mode = .State;
+	    Init_Term_Table();
+	    IF .Flag_Debug THEN
+		IF .State THEN	Signal(TELNET$_Linemode_on)
+		ELSE		Signal(TELNET$_Linemode_off);
+	    END;
+	END;
+	Set_TT_Echo_State(.State);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Set_Line_mode_On =
+!++
+! Functional Description:
+!
+!	Set Line_mode state on
+!--
+    BEGIN
+    Set_Line_mode_state(1);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Set_Line_mode_Off =
+!++
+! Functional Description:
+!
+!	Set Line_mode state off
+!--
+    BEGIN
+    Set_Line_mode_state(0);
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Linemode_On =
+!++
+! Functional Description:
+!
+!	Turn on Linemode Option.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Send_TCP_SubOption	: BLISS ADDRESSING_MODE (GENERAL);
+    EXTERNAL
+	Flag_Editkeys;
+    LOCAL
+	SubOption_Data	: VECTOR[4,BYTE],
+	SubOption_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 4,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= SubOption_Data),
+	Status;
+
+    IF .Flag_Debug THEN Signal (Telnet$_R_LineMode_ON, 1, 0);
+
+    ! If we want to use local editing keys, send them over.
+    ! If not (default), ask for the remote side's settings.
+    IF .Flag_Editkeys THEN
+	BEGIN
+	SubOption_Data[0] = Option$K_Linemode_SLC;
+	SubOption_Data[1] = 0;
+	SubOption_Data[2] = 0;
+	SubOption_Data[3] = 0;
+	!!!HACK!!! ???
+	Send_TCP_SubOption ( Option$K_Linemode , SubOption_Desc )
+	END
+! send all current values
+    ELSE
+	BEGIN
+	SubOption_Data[0] = Option$K_Linemode_SLC;
+	SubOption_Data[1] = 0;
+	SubOption_Data[2] = SLC_DEFAULT;
+	SubOption_Data[3] = 0;
+	!!!HACK!!! ???
+	Send_TCP_SubOption ( Option$K_Linemode , SubOption_Desc )
+	END;
+! send 0,def,0
+
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Linemode_Off =
+!++
+! Functional Description:
+!
+!	Turn off the Linemode Option.
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+	IF .Flag_Debug THEN Signal (Telnet$_R_LineMode_OFF, 1, 0);
+
+    SS$_NORMAL
+    END;
+
+
+
+FORWARD ROUTINE
+    Linemode_SubOp_Mode,
+    Linemode_SubOp_Forwardmask,
+    Linemode_SubOp_SLC;
+
+EXTERNAL ROUTINE
+    Append_Char	: BLISS ADDRESSING_MODE (GENERAL);
+
+GLOBAL ROUTINE Linemode_Option (Desc_A) =
+!++
+! Functional Description:
+!
+!	We've just received an IAC Line SubOption.
+!--
+    BEGIN
+    BIND
+	Desc		= .Desc_A		: $BBLOCK,
+	Desc_Vec	= .Desc [DSC$A_POINTER]	: VECTOR [, BYTE];
+    LOCAL
+	Request,
+	SubOp,
+	Status;
+
+    !++
+    ! Have I agreed to allow Linemode control?
+    !--
+    IF .My_Options[Option$K_LineMode, Option$V_State] NEQ Option$K_State_ON
+	THEN RETURN (SS$_NORMAL);
+
+    !++
+    ! Is the Sub Option long enough?
+    !--
+    IF (.Desc[DSC$W_LENGTH] LSS 2)
+	THEN RETURN (SS$_NORMAL);
+
+    !++
+    ! What kind of suboption is it?
+    !--
+    IF .Desc_Vec[0] EQL Option$K_LineMode_Mode THEN
+	Linemode_SubOp_MODE (.Desc_Vec[1])
+    ELSE IF .Desc_Vec[0] EQL Option$K_LineMode_SLC THEN
+	Linemode_SubOp_SLC(Desc_Vec[1],.Desc[DSC$W_LENGTH] - 1)
+    ELSE IF .Desc_Vec[1] EQL Option$K_LineMode_Forwardmask THEN
+	Linemode_SubOp_Forwardmask(.Desc_Vec[0],Desc_Vec[2],.Desc[DSC$W_LENGTH] - 2);
+
+    SS$_NORMAL
+    END;
+
+
+OWN	! storage for Linemode related variables.
+    Linemode_FM_Neg_State : INITIAL(Option$K_Not_Negotiating),
+    Linemode_SLC_Neg_State : INITIAL(Option$K_Not_Negotiating);
+
+GLOBAL	! storage for Linemode related variables.
+    Forward_Mask : VECTOR[32,BYTE] INITIAL(REP 8 of (0)),
+    LineMode_Forward_Mask : BITVECTOR[256] INITIAL(REP 8 of (0)),
+    Linemode_Modeflags : INITIAL(0),
+    Linemode_FM_State : INITIAL(Option$K_State_Off);
+
+EXTERNAL
+    SLC_Table : BLOCKVECTOR[Option$K_Limemode_SLC_MaxOpt+1, SLC$K_Size, BYTE];
+
+ROUTINE Linemode_SubOp_Mode ( Mask ) =
+    BEGIN
+    EXTERNAL ROUTINE
+	Send_TCP_SubOption	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	New_Mask : BYTE,
+	Mode_EDIT,Mode_TRAPSIG,
+	SubOption_Data	: VECTOR[2,BYTE],
+	SubOption_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 2,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= SubOption_Data);
+
+    ! If the ACK bit is set, don't do anything.
+    IF .Mask<Option$K_LineMode_MODE_ACK,1> THEN RETURN SS$_NORMAL;
+
+    Mask = .Mask AND Option$M_Linemode_Mode_Mask;	! mask the mask.
+
+    ! Is the new mask different?
+    IF .Mask NEQ .Linemode_Modeflags THEN
+	BEGIN
+	Linemode_Modeflags = .Mask;
+	Mask<Option$K_Linemode_Mode_ACK,1> = 1;
+	SubOption_Data[0] = Option$K_Linemode_Mode;
+	SubOption_Data[1] = .Mask;
+	!!!HACK!!! ???
+	Send_TCP_SubOption ( Option$K_Linemode , SubOption_Desc )
+	END;
+
+    SS$_NORMAL
+    END;
+
+
+ROUTINE Linemode_SubOp_Forwardmask ( Action , Data_A , Length ) =
+    BEGIN
+    BIND
+	Data = .Data_A : VECTOR[,BYTE];
+    LOCAL
+	SrcI : INITIAL(0),
+	DstI : INITIAL(0);
+    BIND
+	Curr_FMask = Forward_Mask : VECTOR[32,BYTE];
+
+    SELECT .Action OF
+	SET
+	[Telnet$K_DO] :
+	    BEGIN
+!!!HACK!!! Should check for double IACs? Should check for Binary mode?
+	    WHILE .SrcI LSS .Length DO
+		BEGIN
+		Curr_FMask[.DstI] = .Data[.SrcI];
+		DstI = .DstI + 1;
+		SrcI = .SrcI + 1
+	 	END;
+	    Linemode_FM_State = Option$K_State_On;
+	    END;
+	[Telnet$K_DONT] :
+	    Linemode_FM_State = Option$K_State_Off;
+!	[Telnet$K_WILL,Telnet$K_WONT] :
+	TES;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Process_SLC(Code,Modifier,SPC0,Reply_Desc) =
+    BEGIN
+    MAP
+	Reply_Desc	: $BBLOCK [DSC$K_S_BLN];
+    LOCAL
+	Level,
+	Char_Def : REF $BBlock[SLC$K_Size];
+
+    IF (.Code LSS 0) OR (.Code GTR Option$K_Limemode_SLC_MaxOpt) THEN
+	RETURN SS$_NORMAL;
+
+    Level = Modifier<SLC$F_Lvl>;
+    Char_Def = SLC_Table[.Code,SLC$A_BEGINING] ;
+
+    ! 1) Check if the new and old values are the same.
+    IF (.SPC0 EQL .Char_Def[SLC$B_CURRENT]) THEN RETURN(SS$_NORMAL);
+
+    ! 2) Same level / different value
+    !	 If Ack bit is set, use the given value.
+    IF ((.Level EQL (.Char_Def[SLC$B_STATUS])<SLC$F_Lvl>) AND
+	(.Modifier<SLC$F_Ack>)) THEN
+	BEGIN
+	Char_Def[SLC$B_CURRENT] = .SPC0;
+	RETURN SS$_NORMAL
+	END;
+
+    ! 3) "Do we agree?"
+    ! !!!HACK!!!  what do I do here?
+    ! Hardwired/specific/arbitrary code?
+    IF (1) THEN
+	SELECT .Level OF
+	SET
+	[SLC_DEFAULT] : 0;
+	[SLC_VALUE] : 0;
+	[SLC_CANTCHANGE] : 0;
+	[SLC_NOSUPPORT] :
+	BEGIN
+	! Yes, we agree.
+	Modifier<SLC$F_Ack> = 1;
+	Append_Char(Reply_Desc,.Code);
+	Append_Char(Reply_Desc,.Modifier);
+	Append_Char(Reply_Desc,.SPC0);
+	END
+	TES;
+
+    ! 4) No, we disagree;
+
+    SS$_NORMAL
+    END;
+
+ROUTINE Linemode_SubOp_SLC(Data_A, Length) =
+    BEGIN
+    EXTERNAL ROUTINE
+	Send_TCP_SubOption	: BLISS ADDRESSING_MODE (GENERAL);
+    BIND
+	Data = .Data_A : VECTOR [, BYTE];
+    LOCAL
+	Reply_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= 0);
+
+    WHILE .LENGTH GEQ 3 DO
+	BEGIN
+	Process_SLC(.Data[0], .Data[1], .Data[2], Reply_Desc);
+	Length = .Length - 3;
+	Data = Data[3]
+	END;
+
+    IF .Reply_Desc[DSC$W_LENGTH] GTR 0 THEN
+	Send_TCP_SubOption ( Option$K_Linemode , Reply_Desc );
+
+    SS$_NORMAL
+    END;
+
+END ELUDOM
+!  DEC/CMS REPLACEMENT HISTORY, Element OPTIONS.B32
+!  *1     5-MAR-1991 18:59:08 SYNFUL "Contains all the option-specific state transition code"
+!  DEC/CMS REPLACEMENT HISTORY, Element OPTIONS.B32
+

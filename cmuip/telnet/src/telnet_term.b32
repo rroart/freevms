@@ -1,0 +1,868 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+    Telnet_Term (
+	LANGUAGE (BLISS32),
+	ADDRESSING_MODE (NONEXTERNAL=LONG_RELATIVE,EXTERNAL=LONG_RELATIVE),
+	ZIP,OPTIMIZE,OPTLEVEL=3,
+	LIST (ASSEMBLY, NOBINARY, NOEXPAND)) =
+BEGIN
+
+!++
+! Telnet_Term.B32
+!
+!	Copyright (c) 1987	Carnegie Mellon University
+!
+! Description:
+!
+!	Generally deal with terminal specifics.
+!
+! Written By:
+!
+!	Bruce Miller	06-DEC-1988	CMU Network Development
+!	Module created with various routines collected from other modules.
+!
+! Modifications:
+!
+!	Henry W. Miller	14-Aug-1990	USBR
+!	In Set_TT_Synch() and Set_TT_No_Synch(), SIGNAL the change
+!	in state.
+!
+!	Bruce Miller	15-DEC-1988	CMU Network Development
+!	Added pastboard creation in order to determain certain terminal
+!	characteristics such as height and width
+!
+!	John Clement	5-Dec-1991	Rice University (JC)
+!	Fix negotiations.
+!
+!--
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'TELNET';
+LIBRARY 'OPTION';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETAUX';
+
+EXTERNAL
+    TT_MBX_Chan,
+    TT_Channel,
+    Flag_Debug;
+
+GLOBAL
+    Flag_LEcho		: INITIAL(0),	! Initially off
+    TT_Char_Save	: $BBLOCK [12],
+    TT_Char_Curr	: $BBLOCK [12];
+
+OWN
+    TT_Class,				! JC
+    Pasteboard_Id,
+    Keyboard_Pass	:INITIAL(0),
+    KeyBoard_Id,
+    Key_Table_Id,
+    preserve_screen : INITIAL(1);	! Don't clear screen on startup.
+
+EXTERNAL
+    term_rows,
+    term_columns;
+
+BIND
+	Charistics	= TT_Char_Curr [QCB$L_Charistics]	: $BBLOCK, ! JC
+	Extend_Char	= TT_Char_Curr [QCB$L_EXTEND_CHAR]	: $BBLOCK;
+
+
+GLOBAL ROUTINE Telnet_SMG_Init =
+!++
+! Description:
+!
+!	Initialize the terminal related stuff (yeah, that's right. stuff.)
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	SMG$CREATE_PASTEBOARD		: BLISS ADDRESSING_MODE (GENERAL),
+	SMG$CREATE_VIRTUAL_KEYBOARD	: BLISS ADDRESSING_MODE (GENERAL),
+	SMG$DELETE_VIRTUAL_KEYBOARD	: BLISS ADDRESSING_MODE (GENERAL),
+	SMG$CREATE_KEY_TABLE		: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Status;
+
+    Status = 1;
+    If .Pasteboard_Id EQL 0 THEN
+    Status = SMG$CREATE_PASTEBOARD (
+	Pasteboard_Id,		! We use this to get information about displ.
+	0,			! Output device.  default is 'SYS$OUTPUT'
+	term_rows,		! height of the screen.
+	term_columns,		! width of the screen.
+	preserve_screen		! Should we clear the screen?
+	);
+
+    IF NOT .Status THEN Signal(.Status);
+
+    If .KeyBoard_Id NEQ 0 THEN BEGIN
+	Status = SMG$DELETE_VIRTUAL_KEYBOARD (KeyBoard_Id);
+	IF NOT .Status THEN Signal(.Status);
+	END;
+
+    Status = SMG$CREATE_VIRTUAL_KEYBOARD (KeyBoard_Id,
+		If .Keyboard_Pass THEN
+			%ASCID 'SYS$COMMAND:'
+		ELSE
+			%ASCID 'SYS$INPUT:'   );
+    Keyboard_Pass = 1;
+    IF NOT .Status THEN Signal(.Status);
+
+    If .Key_Table_Id EQL 0 THEN
+    Status = SMG$CREATE_KEY_TABLE (Key_Table_Id);
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Telnet_GET_Input (Get_Str_A, Prompt_Str_A, Out_Len_A) =
+!++
+! Functional Description:
+!
+!	This routine is used to get input for cli$dcl_parse.
+!	The format of the arguements must be the same as
+!	LIB$GET_INPUT.
+!
+!	I like SMG 'cause it gives us command recall.
+!	And eventually, we might wanna use SMG for output.
+!--
+    BEGIN
+    BIND
+	Get_Str		= .Get_Str_A		: $BBLOCK,
+	Prompt_Str	= .Prompt_Str_A		: $BBLOCK,
+	Out_Len		= .Out_Len_A		: WORD UNSIGNED;
+    EXTERNAL ROUTINE
+	SMG$READ_COMPOSED_LINE
+			: BLISS ADDRESSING_MODE (GENERAL);
+    EXTERNAL LITERAL
+	SMG$_EOF;
+    LOCAL
+	Status;
+
+    Status = 0;
+    WHILE .Status EQL 0
+    DO BEGIN
+	Status = SMG$READ_COMPOSED_LINE (
+		%REF (.KeyBoard_Id),
+		%REF (.Key_Table_Id),
+		Get_Str,
+		Prompt_Str,
+		Out_Len);
+
+	IF .Status EQL SMG$_EOF
+	THEN BEGIN
+		IF Keyboard_Pass THEN RETURN (RMS$_EOF);
+		Telnet_SMG_Init();
+		Status = 0;
+	END;
+    END;
+
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Telnet_GET_Input_NoEcho (Get_Str_A, Prompt_Str_A) =
+!++
+! Functional Description:
+!
+!	Just like Telnet_Get_Input only we don't echo what the user
+!	has typed.
+!
+!	Only we use SMG$READ_STRING instead of SMG$READ_COMPOSED_LINE
+!	cause we want to do the read without echo.
+!--
+    BEGIN
+    BIND
+	Get_Str		= .Get_Str_A		: $BBLOCK,
+	Prompt_Str	= .Prompt_Str_A		: $BBLOCK;
+    EXTERNAL ROUTINE
+	SMG$READ_STRING
+			: BLISS ADDRESSING_MODE (GENERAL);
+    EXTERNAL LITERAL
+	SMG$_EOF;
+    LOCAL
+	Status;
+
+    Status = 0;
+    WHILE .Status EQL 0
+    DO BEGIN
+	Status = SMG$READ_STRING (
+		%REF (.KeyBoard_Id),		! Keyboard Id
+		Get_Str,			! Received Text
+		Prompt_Str,			! Prompt string
+		0,				! Max-Length
+		%REF (TRM$M_TM_NOECHO),		! Modifiers
+		0,				! timeout
+		0,				! terminator-set
+		0);				! Received string length
+
+	IF .Status EQL SMG$_EOF
+	THEN BEGIN
+		IF Keyboard_Pass THEN RETURN (RMS$_EOF);
+		Telnet_SMG_Init();
+		Status = 0;
+	END;
+    END;
+
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Save_Char =
+!++
+! Functional Description:
+!
+!	Save the terminal characteristics so that we can restore them
+!	later.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	LIB$GETDVI	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	io_stats : BLOCK[8,BYTE],
+	Status;
+
+    TT_Class = 0;
+
+    IF .TT_Channel EQL 0 THEN RETURN(SS$_NORMAL);		! JC
+
+    Status = LIB$GETDVI (%REF (DVI$_DEVCLASS),			! JC
+		%REF (.tt_Channel),
+		0,
+		TT_Class);
+
+    IF .TT_Class NEQU DC$_TERM THEN RETURN(SS$_NORMAL);	! JC
+
+    Status = $QIOW (
+	CHAN	= .TT_Channel,
+	FUNC	= IO$_SENSEMODE,
+	IOSB	= io_stats,
+	P1	= TT_Char_Save,
+	P2	= %ALLOCATION (TT_Char_Save));
+    IF NOT .Status THEN Signal(.Status);
+    Status = .io_stats[0,0,16,0];
+    IF NOT .Status THEN Signal(.Status);
+    IF Term_Rows EQL 0 THEN
+	Term_Rows = TT_Char_Save[QCB$B_Page_Length];
+    IF Term_Columns EQL 0 THEN
+	Term_Columns = TT_Char_Save[QCB$W_Buffer_Size];
+
+
+    SS$_NORMAL
+    END;
+
+
+ROUTINE Escape_Ast (IN_Byte) =
+!++
+! Functional Description:
+!
+!	A Control-something has been typed.  Now exit to control mode.
+!	Added by JC
+!
+!	We've just got a character from the user.
+!	Check to see if it is anything special.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Line_Mode,
+	Flag_Autoflush,
+	Activated;			! If connected
+    EXTERNAL ROUTINE
+	TT_Read_State_Normal,
+	Do_TCP_Write;
+
+    LOCAL
+	Status;
+
+	TT_Read_State_Normal(.IN_Byte);
+!	IF NOT .Flag_Line_Mode OR .Flag_Flush THEN
+		Do_TCP_Write ();
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Set_Char =
+!--
+! Functional Description:
+!
+!	We want everything the user types on his terminal to be fed
+!	directly into the subprocess.  We have to set the terminal
+!	into passall and noecho (the IN will take care of echos).
+!	This routine will set the terminal to be noecho and passall.
+!	Although fullduplex is usually the default, just make sure.
+!
+! Informal Parameters:
+!
+!	TT_Channel	- The channel assigned to the terminal.
+!
+! Exceptions:
+!
+!	If the channel is not of a terminal device, scream bloody murder.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	TT_Read_State_normal;
+    EXTERNAL
+	State_Binary,
+	State_Eightbit,
+	Flag_Eightbit,						! JC
+	Flag_Synch,
+	Flag_Local_Synch,
+	Flag_Line_Mode;
+    EXTERNAL
+	TT_AO_Key,			! Control-O	(Abort output)
+	TT_AYT_Key,			! Control-T	(Are you There?)
+	TT_Brk_Key,			! Control-B	(Break)
+	TT_Echo_Key,			! Control-E	(Toggle echo)
+	TT_EC_Key,			! Delete	(Erase CHar)
+	TT_EL_Key,			! Control-U	(Erase Line)
+	TT_Synch_Key,			! Control-X	(Kill unsolicited)
+	TT_Escape_Key,			! Control-^	(Escape)
+	TT_Xon_Key,
+	TT_Xoff_Key,
+	TT_IP_Key,			! Control-C	(INterrupt process)
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],	! JC
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];	! JC
+    LOCAL
+	Mask	: VECTOR[2],
+	io_stats : BLOCK[8,BYTE],
+	i		: BYTE,
+	Status		: LONG;
+
+
+    IF .TT_Class NEQU DC$_TERM THEN RETURN(SS$_NORMAL);	! JC
+
+    IF INCR i from 1 to 5 DO
+	BEGIN
+	Status = $QIOW (
+	    CHAN	= .TT_Channel,
+	    FUNC	= IO$_SENSEMODE,
+	    IOSB	= io_stats,
+	    P1	= TT_Char_Curr,
+	    P2	= %ALLOCATION (TT_Char_Curr));
+	IF NOT .Status THEN RETURN .Status;
+	Status = .io_stats[0,0,16,0];
+	IF NOT .Status THEN Signal(.Status);
+
+	! Why does this sometimes fail?!?!?!!?!?!?!
+	IF .TT_Char_Curr[QCB$B_CLASS] EQL DC$_TERM
+	    THEN EXITLOOP DC$_TERM;
+	.TT_Char_Curr[QCB$B_CLASS]
+    END NEQU DC$_TERM THEN Signal(TELNET$_NOT_TERM, 0);	! Not terminal
+
+
+    Mask[0]	= 0;
+    Mask[1]	=	(1 ^ .TT_Escape_Key)	OR
+			(1 ^ .TT_AO_Key)	OR
+			(1 ^ .TT_AYT_Key)	OR
+			(1 ^ .TT_Echo_Key)	OR
+			(1 ^ .TT_Brk_Key)	OR
+			(1 ^ .TT_IP_Key)	OR
+			(1 ^ .TT_Synch_Key)	OR
+			(1 ^ .TT_Xon_Key)	OR
+			(1 ^ .TT_Xoff_Key);
+
+    IF .Flag_Line_Mode THEN			! JC If linemode is on
+      Status = $QIOW (
+	CHAN	=.TT_Channel,
+	FUNC	= IO$_SETMODE OR IO$M_OUTBAND,
+	IOSB	= io_stats,
+	P1	= Escape_AST,			! JC Enable Escape AST
+!!!	P1	= TT_Read_State_normal,		! JC Enable Escape AST
+	P2	= Mask)				! JC end
+    ELSE
+      Status = $QIOW (				! JC Begin
+	CHAN	=.TT_Channel,
+	FUNC	= IO$_SETMODE OR IO$M_OUTBAND,
+	IOSB	= io_stats,
+	P1	= 0);				! JC Cancel AST
+
+    Charistics [TT$V_HALFDUP] = 0;
+    Charistics [TT$V_NOBRDCST] = 1;		!!!JC
+
+    Extend_Char [TT2$V_BRDCSTMBX] = 1;
+    Extend_Char [TT2$V_PASTHRU] = NOT .Flag_Line_Mode;
+
+    Charistics [TT$V_NOECHO] = NOT .Flag_LEcho;
+    My_Options [Option$K_Echo, Option$V_State] = .Flag_LEcho;	! JC
+    Charistics [TT$V_EIGHTBIT] = .State_Binary OR .State_Eightbit
+			OR .Flag_Eightbit;			! JC
+		! ugly reference! -brm
+    Charistics [TT$V_TTSYNC] = .Flag_Local_Synch AND (NOT .Flag_Synch);
+
+    IF .Term_rows GTR 0 THEN
+	BEGIN
+	TT_Char_curr[QCB$B_Page_Length] = .Term_rows;
+	TT_Char_Curr[QCB$W_Buffer_Size] = .Term_columns
+	END;
+
+    Status = $QIOW (
+	CHAN	=.TT_Channel,
+	FUNC	= IO$_SETMODE,
+	IOSB	= io_stats,
+	P1	= TT_Char_Curr,
+	P2	= %ALLOCATION (TT_Char_Curr));
+    IF NOT .Status THEN RETURN .Status;
+    Status = .io_stats[0,0,16,0];
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = $QIOW (
+	CHAN	=.TT_Channel,
+	FUNC	= IO$_WRITEVBLK + IO$M_ENABLMBX,
+	IOSB	= io_stats,
+	P1	= 0,
+	P2	= 0);
+    IF NOT .Status THEN RETURN .Status;
+    Status = .io_stats[0,0,16,0];
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Restore_Char =
+!--
+! Functional Description:
+!
+!	On exit we need to reset the terminal to be echo and no passall.
+!	For now we'll just leave it in fullduplex.
+!
+! InFormal Parameters:
+!
+!	TT_Channel - The channel of the terminal.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Do_TT_Read;
+    LOCAL
+	io_stats : BLOCK[8,BYTE],
+	Status		: LONG;
+
+    IF .TT_Class NEQU DC$_TERM THEN RETURN(SS$_NORMAL);
+
+    Status = $QIOW (
+	CHAN	= .TT_Channel,
+	FUNC	= IO$_SETMODE,
+	IOSB	= io_stats,
+	P1	= TT_Char_Save,
+	P2	= %ALLOCATION (TT_Char_Save)
+	);
+    IF NOT .Status THEN RETURN .Status;
+    Status = .io_stats[0,0,16,0];
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Set_TT_Echo_State (State) =
+!++
+! Functional Description:
+!
+!	Set the terminal to (not) echo the characters.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Debug,
+	Activated;
+    EXTERNAL ROUTINE
+	Do_TT_Read;
+    LOCAL
+	io_stats : BLOCK[8,BYTE],
+	Status;
+
+!!!JC    Charistics [TT$V_NOECHO] = NOT .State;
+
+    Flag_LEcho = .State;
+
+    IF .Flag_Debug THEN
+	If .State THEN	Signal(Telnet$_Echo_ON)
+	ELSE		Signal(Telnet$_Echo_Off);
+    IF .TT_Channel EQL 0 THEN RETURN(SS$_NORMAL);	! No TT ?
+
+    IF NOT .Activated THEN RETURN(SS$_NORMAL);		! Not active ?
+
+    Status = $CANCEL (CHAN = .TT_Channel);
+    IF NOT .Status THEN Signal(.Status);
+
+    Set_Char();
+
+    !++
+    ! We are already executing at AST_level.  So we can't just issue
+    ! another read, because there is still a read in progress (although
+    ! we know that it has been cancelled).
+    !
+    ! So we issue this as an ast.  I suspect that the ast has already been
+    ! queued for delivery for the $cancel.
+    !--
+    Status = $DCLAST (ASTADR = DO_TT_Read);
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Set_TT_Echo =
+!++
+! Functional Description:
+!
+!	Set the terminal to echo the characters.
+!--
+    BEGIN
+    Set_TT_Echo_State(1);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Set_TT_No_Echo =
+!++
+! Functional Description:
+!
+!	Set the terminal to not echo the characters.
+!--
+    BEGIN
+    Set_TT_Echo_State(0);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Set_TT_Eightbit_State (State) =
+!++
+! Functional Description:
+!
+!	Set the eightbit state terminal.
+!
+!--
+    BEGIN
+    EXTERNAL
+	State_Eightbit,
+	Activated;
+    EXTERNAL ROUTINE
+	Set_CHar,
+	Do_TT_Read;
+    LOCAL
+	io_stats : BLOCK[8,BYTE],
+	Status;
+
+
+    IF .TT_Channel EQL 0 THEN RETURN(SS$_NORMAL);	! No TT ?
+
+    IF NOT .Activated THEN RETURN(SS$_NORMAL);		! Not active ?
+
+    Status = $CANCEL (CHAN = .TT_Channel);
+    IF NOT .Status THEN Signal(.Status);
+
+    Set_Char();
+
+    !++
+    ! We are already executing at AST_level.  So we can't just issue
+    ! another read, because there is still a read in progress (although
+    ! we know that it has been cancelled).
+    !
+    ! So we issue this as an ast.  I suspect that the ast has already been
+    ! queued for delivery for the $cancel.
+    !--
+    Status = $DCLAST (ASTADR = DO_TT_Read);
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Set_TT_No_Eightbit =
+!++
+! Functional Description:
+!
+!	Set the terminal not to be an eightbit terminal.
+!
+!--
+    BEGIN
+    Set_TT_Eightbit_State(0)
+    END;
+
+GLOBAL ROUTINE Set_TT_Eightbit =
+!++
+! Functional Description:
+!
+!	Set the terminal to be an eightbit terminal.
+!
+!--
+    BEGIN
+    Set_TT_Eightbit_State(1)
+    END;
+
+
+
+GLOBAL ROUTINE Set_TT_Synch_State (State) =
+!++
+! Functional Description:
+!
+!	Control whether the local terminaloutput is controlled by
+!	Control-S and Control-Q.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Do_TT_Read;
+    LOCAL
+	io_stats : BLOCK[8,BYTE],
+	Status;
+
+    IF .TT_Channel EQL 0 THEN RETURN(SS$_NORMAL);
+
+    IF .TT_Class NEQU DC$_TERM THEN RETURN(SS$_NORMAL);
+
+    Status = $QIOW (
+	CHAN	= .TT_Channel,
+	FUNC	= IO$_SENSEMODE,
+	IOSB	= io_stats,
+	P1	= TT_Char_Curr,
+	P2	= %ALLOCATION (TT_Char_Curr));
+    IF NOT .Status THEN RETURN .Status;
+    Status = .io_stats[0,0,16,0];
+    IF NOT .Status THEN Signal(.Status);
+
+    IF .Charistics [TT$V_TTSYNC] EQL  .State THEN RETURN(SS$_NORMAL);
+
+    Charistics [TT$V_TTSYNC] = .State;
+!    Extend_Char [TT2$V_XON] = .State;
+
+    Status = $CANCEL (CHAN = .TT_Channel);
+    IF NOT .Status THEN Signal(.Status);
+
+    Status = $QIOW (
+	CHAN	=.TT_Channel,
+	FUNC	= IO$_SETMODE,
+	IOSB	= io_stats,
+	P1	= TT_Char_Curr,
+	P2	= %ALLOCATION (TT_Char_Curr));
+    IF NOT .Status THEN RETURN .Status;
+    Status = .io_stats[0,0,16,0];
+    IF NOT .Status THEN Signal(.Status);
+
+    !++
+    ! We are already executing at AST_level.  So we can't just issue
+    ! another read, because there is still a read in progress (although
+    ! we know that it has been cancelled).
+    !
+    ! So we issue this as an ast.  I suspect that the ast has already been
+    ! queued for delivery for the $cancel.
+    !--
+    Status = $DCLAST (ASTADR = DO_TT_Read);
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Set_TT_Synch =
+!++
+! Functional Description:
+!
+!	Set the the local driver to interpret Control-S and Control-Q
+!	for flow control.
+!--
+    BEGIN
+    Set_TT_Synch_State(1);
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Set_TT_NO_Synch =
+!++
+! Functional Description:
+!
+!	Set the the local driver to not interpret Control-S and Control-Q
+!	for flow control.
+!--
+    BEGIN
+    Set_TT_Synch_State(0);
+
+    SS$_NORMAL
+    END;
+
+
+
+OWN
+	Term_Class	: LONG UNSIGNED,	! Terminal type
+	Term_Channel;				! Terminal channel
+
+FORWARD ROUTINE Setup_Control_C;
+
+ROUTINE Control_C_Ast (ASTPRM) =
+!++
+! Functional Description:
+!
+!	A Control-C has been typed.  ReEnable for another, then
+!	Signal the condition, which will probably unwind the stack.
+!	Do not Signal(JC)
+!--
+    BEGIN
+	Setup_Control_C ();
+
+!!!JC	Signal(Telnet$_Control_C, 0, SS$_CONTROLC);
+
+    SS$_NORMAL
+    END;
+
+ROUTINE Setup_Control_C =
+!++
+! Functional Description:
+!--
+    BEGIN
+    LOCAL
+	io_stats : BLOCK[8,BYTE],
+	Status;
+
+    IF .Term_Class NEQU DC$_TERM THEN RETURN(SS$_NORMAL);	! JC
+
+    Status = $QIOW (
+			Chan   = .Term_Channel,
+			Func   = IO$_SETMODE OR IO$M_CTRLCAST,
+			IOSB	= io_stats,
+			P1     = Control_C_Ast);
+    IF NOT .Status THEN Signal( (.Status AND %X'FFFFFFF9') );
+    Status = .io_stats[0,0,16,0];
+    IF NOT .Status THEN Signal( (.Status AND %X'FFFFFFF9') );
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Init_Control_C =
+!++
+! Functional Description:
+!
+!	Will set up the I/O request for the control-c trap.
+!
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	LIB$GETDVI	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Status;
+
+    !++
+    ! See if we've already started things.
+    !--
+    IF .Term_Channel NEQ 0 THEN RETURN (SS$_NORMAL);
+
+    Status = $ASSIGN(	DEVNAM = %ASCID'SYS$COMMAND:',
+			CHAN   = Term_Channel);
+    IF NOT .Status THEN	Signal(Telnet$_ERROR, 0, .Status);
+
+    Status = LIB$GETDVI (%REF (DVI$_DEVCLASS), %REF (.Term_Channel), 0, Term_Class);
+    IF NOT .Status THEN	Signal(Telnet$_ERROR, 0, .Status);
+
+    !++
+    !  If device isn't terminal, don't start control-C trap
+    !--
+    IF .Term_Class NEQU DC$_TERM THEN SIGNAL(TELNET$_NOT_TERM);	! JC Not Terminal
+    IF .Term_Class NEQU DC$_TERM THEN RETURN(SS$_NORMAL);	! JC
+
+    Setup_Control_C ();
+
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Clean_Up_Control_C =
+!++
+! Functional Description:
+!
+!	Will cancel I/O request and deassign the channel.
+!--
+
+    BEGIN
+    LOCAL
+	io_stats : BLOCK[8,BYTE],
+    	Status;
+
+    IF .Term_Class EQL DC$_TERM
+    THEN BEGIN
+	Status = $CANCEL (Chan  = .Term_Channel);
+	IF NOT .Status THEN Signal(.Status);
+	END;
+
+    Status = $DASSGN (Chan  = .Term_Channel);
+    Term_Class = 0;
+    Term_Channel = 0;
+    IF NOT .Status THEN Signal(.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Get_Window_Size (rows,columns) =
+!--
+! Functional Description:
+!
+!--
+    BEGIN
+    LOCAL
+	Chan,
+	io_stats : BLOCK[8,BYTE],
+	TT_Char : $BBLOCK[12],
+	Status		: LONG;
+
+!!!    Status = $ASSIGN(DEVNAM=%ASCID'SYS$OUTPUT:', CHAN=chan);
+!!!    IF NOT .Status THEN Signal(.Status);
+
+
+    IF .Term_Class NEQU DC$_TERM
+    THEN BEGIN
+	TT_Char[7,0,8,0] = 80;
+	TT_Char[2,0,16,0] = 24;
+	END
+    ELSE BEGIN
+    Status = $QIOW (
+	CHAN	= .Term_Channel,
+	FUNC	= IO$_SENSEMODE,
+	IOSB	= io_stats,
+	P1	= TT_Char,
+	P2	= %ALLOCATION (TT_Char));
+    IF NOT .Status THEN Signal(.Status);
+
+!!!    Status = $DASSGN(CHAN = .chan);
+!!!    IF NOT .Status THEN Signal(.Status);
+    END;
+
+    Term_Rows = TT_Char_curr[QCB$B_Page_Length] = .rows = .TT_Char[7,0,8,0];
+    Term_Columns = TT_Char_Curr[QCB$W_Buffer_Size] = .columns = .TT_Char[2,0,16,0];
+
+    SS$_NORMAL
+    END;
+
+END ELUDOM
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNET_TERM.B32
+!  *2     5-MAR-1991 19:49:17 SYNFUL "Only signal [NO_]LOCAL_SYNCH if .Flag_Debug is true"
+!  *1     5-MAR-1991 19:08:49 SYNFUL "Deal with terminal specifics for Telnet connection"
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNET_TERM.B32
+

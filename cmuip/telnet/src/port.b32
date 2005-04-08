@@ -1,0 +1,150 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+    Port_Parse (			! Port string parser
+	LANGUAGE (BLISS32),
+	ADDRESSING_MODE (NONEXTERNAL = LONG_RELATIVE),
+	ZIP,OPTIMIZE,OPTLEVEL=3,
+	LIST (NOEXPAND, ASSEMBLY, NOBINARY),
+	IDENT = 'V01-001'
+	)=
+BEGIN
+
+!++
+!    Port.B32	Copyright (c) 1986	Carnegie Mellon University
+!
+! Description:
+!
+!	Parse various forms of specifying a TCP Port
+!
+! Written By: 	Dale Moore	07-MAR-1986	CMU-CS/RI
+!
+! Modifications:
+!
+!	26-MAR-1987	Dale Moore	CMU-CS/RI
+!	Made the Port be a Longword.
+!--
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'SYS$LIBRARY:TPAMAC';
+
+ROUTINE Store_Number =
+!++
+! Functional Description:
+!
+!	A Lib$Tparse Routine.  The current token (A number) is the
+!	numeric representation for the escape character.
+!--
+    BEGIN
+    BUILTIN
+	AP;
+    BIND
+	TParse_Block	= .AP				: $BBLOCK,
+	Current_Token	= TParse_Block [TPA$L_TOKENCNT]	: $BBLOCK,
+	Token_Value	= TParse_BLock [TPA$L_NUMBER]	: $BBLOCK;
+
+    IF .Token_Value GTRU %X'FFFF' THEN RETURN (0);
+    TParse_Block [TPA$L_PARAM] = .Token_Value;
+    SS$_NORMAL
+    END;
+
+$Init_State (Port_State_Table, Port_Key_Table);
+
+$State (Port_Syntax,
+	((Port_Name_Syntax)),
+	((Port_Number_Syntax)));
+$State (,
+	(TPA$_EOS, TPA$_EXIT));
+
+$State (Port_Name_Syntax,
+	('RJE',		TPA$_EXIT, , , ,   5),
+	('ECHO',	TPA$_EXIT, , , ,   7),
+	('DISCARD',	TPA$_EXIT, , , ,   9),
+	('USERS',	TPA$_EXIT, , , ,  11),
+	('DAYTIME',	TPA$_EXIT, , , ,  13),
+	('NETSTAT',	TPA$_EXIT, , , ,  15),
+	('QUOTE',	TPA$_EXIT, , , ,  17),
+	('FTP',		TPA$_EXIT, , , ,  21),
+	('TELNET',	TPA$_EXIT, , , ,  23),
+	('SMTP',	TPA$_EXIT, , , ,  25),
+	('TIME',	TPA$_EXIT, , , ,  37),
+	('RLP',		TPA$_EXIT, , , ,  39),
+	('NAMESERVER',	TPA$_EXIT, , , ,  42),
+	('NICNAME',	TPA$_EXIT, , , ,  43),
+	('LOGIN',	TPA$_EXIT, , , ,  49),
+	('DOMAIN',	TPA$_EXIT, , , ,  53),
+	('TFTP',	TPA$_EXIT, , , ,  69),
+	('FINGER',	TPA$_EXIT, , , ,  79),
+	('POP2',	TPA$_EXIT, , , , 109),
+	('AUTH',	TPA$_EXIT, , , , 113),
+	('UUCPPATH',	TPA$_EXIT, , , , 117),
+	('UNTP',	TPA$_EXIT, , , , 119));
+
+$State (Port_Number_Syntax,
+	(TPA$_DECIMAL, TPA$_EXIT, Store_Number),
+	('%'));
+$State (,
+	('D', Number_Decimal),
+	('X', Number_Hex),
+	('O', Number_Octal));
+$State (Number_Decimal,
+	(TPA$_DECIMAL, TPA$_EXIT, Store_Number));
+$State (Number_Hex,
+	(TPA$_HEX, TPA$_EXIT, Store_Number));
+$State (Number_Octal,
+	(TPA$_OCTAL, TPA$_EXIT, Store_Number));
+
+GLOBAL ROUTINE Cvt_Port (This_String_A, Value_A) =
+!++
+! Functional Description:
+!
+!	This routine converts various specifications for character sequences
+!	to the actual value.
+!
+!	For example, the strings 'CONTROL-^', 'CNTRL-^', '^^', '30', '%D30',
+!	'%X1E' and '%O36' all represent the same value.
+!--
+    BEGIN
+    BIND
+	This_String	= .This_String_A		: $BBLOCK[],
+	Value		= .Value_A			: WORD UNSIGNED;
+    EXTERNAL ROUTINE
+	LIB$TPARSE	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	TParse_Block	: $BBLOCK [TPA$K_LENGTH0] PRESET (
+		[TPA$L_COUNT]		= TPA$K_COUNT0,
+		[TPA$L_OPTIONS]		= TPA$M_BLANKS,
+		[TPA$L_STRINGCNT]	= .This_String[DSC$W_LENGTH],
+		[TPA$L_STRINGPTR]	= .This_String[DSC$A_POINTER]),
+	Status;
+
+    Status = LIB$TPARSE (TParse_Block, Port_State_Table, Port_Key_Table);
+    IF NOT .Status THEN RETURN (.Status);
+    Value = .TParse_Block [TPA$L_PARAM];
+    SS$_NORMAL
+    END;
+END
+ELUDOM
+!  DEC/CMS REPLACEMENT HISTORY, Element PORT.B32
+!  *1     5-MAR-1991 18:59:43 SYNFUL "Parse various forms of specifying a TCP port"
+!  DEC/CMS REPLACEMENT HISTORY, Element PORT.B32
+

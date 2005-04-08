@@ -1,0 +1,1009 @@
+!
+!	****************************************************************
+!
+!		Copyright (c) 1992, Carnegie Mellon University
+!
+!		All Rights Reserved
+!
+!	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+!	distribute  this software  provided  that the  above  copyright
+!	notice appears in  all copies and that  any distribution be for
+!	noncommercial purposes.
+!
+!	Carnegie Mellon University disclaims all warranties with regard
+!	to this software.  In no event shall Carnegie Mellon University
+!	be liable for  any special, indirect,  or consequential damages
+!	or any damages whatsoever  resulting from loss of use, data, or
+!	profits  arising  out of  or in  connection  with  the  use  or
+!	performance of this software.
+!
+!	****************************************************************
+!
+MODULE Telnet_parse
+!++
+! Telnet_Parse.CLD
+!
+!	Copyright (C) 1987	Carnegie Mellon University
+!
+! Description:
+!
+!	Define commands associated with the Telnet utility.
+!
+! Written By:
+!
+!	14-NOV-1988	Bruce Miller	CMU Network Development
+!
+! Modifications:
+!
+!	Bruce Miller	Jan 1989	CMU Network Development
+!	Added many new commands.
+!
+!--
+
+
+DEFINE VERB Attach
+!++
+! Description:
+!
+!	Attach to another process
+!
+! Syntax:
+!
+!	Telnet> Attach name
+!--
+  ROUTINE Do_attach
+  PARAMETER P1, LABEL = process_name, VALUE
+  Qualifier IDENTIFICATION
+	nonnegatable
+	value(required)
+
+DEFINE VERB Close
+!++
+! Description:
+!
+!  Close connection to remote without exiting Telnet
+!
+! Syntax:
+!
+!	Telnet> CLOSE
+!--
+  ROUTINE Close
+    NOQUALIFIERS
+
+
+
+DEFINE VERB Connect SYNONYM C
+!++
+! Description:
+!
+!  Close connection to remote without exiting Telnet
+!
+! Syntax:
+!
+!	Telnet> CONNECT [Remote_Host_Name]
+!--
+  ROUTINE Do_Connect
+  PARAMETER P1, LABEL = Host_Name
+
+
+
+DEFINE VERB Exit SYNONYM Quit
+!++
+! Description:
+!
+!	Leave the Telnet utility.  Will close any open connections.
+!
+! Syntax:
+!
+!	Telnet> EXIT
+!--
+    ROUTINE Exit_Telnet
+    NOPARAMETERS
+
+
+
+DEFINE VERB Negotiate
+!++
+! Description:
+!
+!	Forces Telnet to ReNegotiate remote options
+!
+! Syntax:
+!
+!	Telnet> NEGOTIATE
+!--
+  ROUTINE do_Negotiate_Options
+
+
+
+DEFINE VERB Help
+!++
+! Description:
+!
+!	Obtain help by looking up info in telnet help library.
+!
+! Syntax:
+!
+!	Telnet> HELP [Help_Line]
+!--
+  ROUTINE Telnet_Help
+  PARAMETER P1, LABEL = Help_Line, VALUE (TYPE = $Rest_of_Line)
+
+
+
+DEFINE VERB Open
+!++
+! Description:
+!
+!	Open a connection to a remote host.
+!
+! Syntax:
+!
+!	Telnet> OPEN Remote_Host_Name
+!--
+  ROUTINE New_Conn
+  PARAMETER P1, LABEL = Host_Name, VALUE(REQUIRED)
+
+
+
+DEFINE VERB Send
+!++
+! Description:
+!
+!	Send a Telnet command to the remote server.
+!
+! Syntax:
+!
+!	Telnet> Send <Command>
+!--
+  PARAMETER P1, Label= Command,  Prompt="Command",
+	VALUE(REQUIRED,TYPE=Send_Options)
+
+  DEFINE TYPE Send_Options
+    KEYWORD AO, SYNTAX = Send_AO
+    KEYWORD AYT, SYNTAX = Send_AYT
+    KEYWORD BRK, SYNTAX = Send_BRK
+    KEYWORD EC, SYNTAX = Send_EC
+    KEYWORD EL, SYNTAX = Send_EL
+    KEYWORD Escape, SYNTAX = Send_Escape
+    KEYWORD FILE, Syntax = Send_file
+    KEYWORD GA, SYNTAX = Send_GA
+    KEYWORD IP, SYNTAX = Send_IP
+    KEYWORD NOP, SYNTAX = Send_NOP
+    KEYWORD Synch, SYNTAX = Send_Synch
+    KEYWORD Timing_Mark, SYNTAX = Send_Timing_mark
+
+DEFINE SYNTAX Send_AO
+!++
+! Description:
+!	Send a Telnet AO command to the remote server.
+!--
+  ROUTINE Do_Send_AO
+
+DEFINE SYNTAX Send_AYT
+!++
+! Description:
+!	Send a Telnet AYT command to the remote server.
+!--
+  ROUTINE Do_Send_AYT
+
+DEFINE SYNTAX Send_BRK
+!++
+! Description:
+!	Send a Telnet BRK command to the remote server.
+!--
+  ROUTINE Do_Send_BRK
+
+DEFINE SYNTAX Send_EC
+!++
+! Description:
+!	Send a Telnet EC command to the remote server.
+!--
+  ROUTINE Do_Send_EC
+
+DEFINE SYNTAX Send_EL
+!++
+! Description:
+!	Send a Telnet EL command to the remote server.
+!--
+  ROUTINE Do_Send_EL
+
+DEFINE SYNTAX Send_Escape
+!++
+! Description:
+!	Send a Telnet Escape command to the remote server.
+!--
+  ROUTINE Do_Send_Escape
+
+DEFINE SYNTAX Send_file
+!++
+! Description:
+!	Send a Telnet File to the remote server.
+!--
+  ROUTINE Do_Send_File
+  PARAMETER P1, LABEL=Option, VALUE(Required)
+  PARAMETER P2, LABEL = infile_Name,
+	VALUE(REQUIRED,type=$infile)
+
+DEFINE SYNTAX Send_GA
+!++
+! Description:
+!	Send a Telnet GA command to the remote server.
+!--
+  ROUTINE Do_Send_GA
+
+DEFINE SYNTAX Send_IP
+!++
+! Description:
+!	Send a Telnet IP command to the remote server.
+!--
+  ROUTINE Do_Send_IP
+
+DEFINE SYNTAX Send_NOP
+!++
+! Description:
+!	Send a Telnet NOP command to the remote server.
+!--
+  ROUTINE Do_Send_NOP
+
+DEFINE SYNTAX Send_Synch
+!++
+! Description:
+!	Send a Telnet Synch command to the remote server.
+!--
+  ROUTINE Do_Send_Synch
+
+DEFINE SYNTAX Send_Timing_mark
+!++
+! Description:
+!	Send a Telnet Timing_mark command to the remote server.
+!--
+  ROUTINE Do_Send_Timing_mark
+
+
+
+DEFINE VERB Set
+!++
+! Description:
+!
+!	Set or modify various option in Telnet.
+!
+! Syntax:
+!
+!	Telnet> SET Option
+!--
+  PARAMETER P1, LABEL = Option, Prompt="What",
+                 VALUE (REQUIRED, TYPE = Set_Options)
+
+    DEFINE TYPE Set_Options
+    KEYWORD Abort_output	SYNTAX = Set_Blocking
+    KEYWORD Autoflush	SYNTAX = Set_Autoflush
+    KEYWORD Binary	SYNTAX = Set_Binary
+    KEYWORD Blocking	SYNTAX = Set_Blocking
+    KEYWORD Command,	SYNTAX = Set_Key
+    KEYWORD Connect,	SYNTAX = Set_Connect
+    KEYWORD Debug,	SYNTAX = Set_Debug
+    KEYWORD Echo,	SYNTAX = Set_Echo
+    KEYWORD Eightbit,	SYNTAX = Set_Eightbit
+    KEYWORD END_OF_LINE,	SYNTAX = Set_EOL
+    KEYWORD Extended,	SYNTAX = Set_Extended
+    KEYWORD Host,	SYNTAX = Set_Host
+    KEYWORD Generic,	SYNTAX = Set_Localchars
+    KEYWORD Localchars,	SYNTAX = Set_Localchars
+    KEYWORD Log,	SYNTAX = Set_Log
+    KEYWORD Mode,	SYNTAX = Set_Mode
+    KEYWORD Synch,	SYNTAX = Set_Synch
+    KEYWORD Quiet,	SYNTAX = Set_Quiet
+    KEYWORD Urgent,	SYNTAX = Set_Urgent
+
+
+
+DEFINE SYNTAX Set_Autoflush
+!++
+! Description:
+!
+!	Change between Autoflush and no autoflush
+!
+! Syntax:
+!
+!	Telnet> SET AUTOFLUSH <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Autoflush_Options)
+
+  DEFINE TYPE Set_Autoflush_Options
+  KEYWORD On, SYNTAX = Set_Autoflush_On
+  KEYWORD Off, SYNTAX = Set_Autoflush_Off
+
+DEFINE SYNTAX Set_Autoflush_On
+!++
+! Description:
+!
+!	Turn on autoflush mode.
+!--
+  ROUTINE Do_Set_Autoflush_On
+
+DEFINE SYNTAX Set_Autoflush_Off
+!++
+! Description:
+!
+!	Turn off autoflush mode.
+!--
+  ROUTINE Do_Set_Autoflush_Off
+
+
+
+DEFINE SYNTAX Set_Binary
+!++
+! Description:
+!
+!	Change between 7-bit and 8-bit transmission mode.
+!
+! Syntax:
+!
+!	Telnet> SET BINARY <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Binary_Options)
+
+  DEFINE TYPE Set_Binary_Options
+  KEYWORD On, SYNTAX = Set_Binary_On
+  KEYWORD Off, SYNTAX = Set_Binary_Off
+
+DEFINE SYNTAX Set_Binary_On
+!++
+! Description:
+!
+!	Turn on 8-bit transmission mode.
+!--
+  ROUTINE Do_Set_Binary_On
+
+DEFINE SYNTAX Set_Binary_Off
+!++
+! Description:
+!
+!	Turn on 7-bit transmission mode.
+!--
+  ROUTINE Do_Set_Binary_Off
+
+
+
+DEFINE SYNTAX Set_Blocking
+!++
+! Description:
+!
+!	Turn off/on blocking of incoming data from the net.
+!	When turned on, all non-IAC'ed data from the net is discarded.
+!
+! Syntax:
+!
+!	Telnet> SET Blocking <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Blocking_Options)
+
+  DEFINE TYPE Set_Blocking_Options
+  KEYWORD On, SYNTAX = Set_Blocking_On
+  KEYWORD Off, SYNTAX = Set_Blocking_Off
+
+DEFINE SYNTAX Set_Blocking_On
+!++
+! Description:
+!
+!	Turn on data blocking.
+!--
+  ROUTINE Do_Set_Blocking_On
+
+DEFINE SYNTAX Set_Blocking_Off
+!++
+! Description:
+!
+!	Turn of data blocking.
+!--
+  ROUTINE Do_Set_Blocking_Off
+
+
+
+DEFINE SYNTAX Set_Key
+!++
+! Description:
+!
+!	Bind a Telnet command to a key.
+!
+! Syntax:
+!
+!	Telnet> SET COMMAND <Command> <key-sequence>
+!--
+  PARAMETER P1, Label= Option, VALUE(Required)
+  PARAMETER P2, Label= Command,  Prompt="Command",
+	VALUE(REQUIRED,TYPE=Set_Key_Options)
+  PARAMETER P3, Label= Key,  Prompt="Key", VALUE
+
+  DEFINE TYPE Set_Key_Options
+    KEYWORD AO, SYNTAX = Set_Key_AO
+    KEYWORD AYT, SYNTAX = Set_Key_AYT
+    KEYWORD BRK, SYNTAX = Set_Key_BRK
+    KEYWORD EC, SYNTAX = Set_Key_EC
+    KEYWORD EL, SYNTAX = Set_Key_EL
+    KEYWORD Escape, SYNTAX = Set_Key_Escape
+    KEYWORD IP, SYNTAX = Set_Key_IP
+    KEYWORD LECHO, SYNTAX = Set_Key_Lecho
+
+
+DEFINE SYNTAX Set_Key_AO
+!++
+! Description:
+!	Set the key binding for the Telnet AO command.
+!--
+  ROUTINE Do_Set_Key_AO
+
+DEFINE SYNTAX Set_Key_AYT
+!++
+! Description:
+!	Set the key binding for the Telnet AYT command.
+!--
+  ROUTINE Do_Set_Key_AYT
+
+DEFINE SYNTAX Set_Key_BRK
+!++
+! Description:
+!	Set the key binding for the Telnet BRK command.
+!--
+  ROUTINE Do_Set_Key_BRK
+
+DEFINE SYNTAX Set_Key_EC
+!++
+! Description:
+!	Set the key binding for the Telnet EC command.
+!--
+  ROUTINE Do_Set_Key_EC
+
+DEFINE SYNTAX Set_Key_Escape
+!++
+! Description:
+!	Set the key binding for the Telnet Escape command.
+!--
+  ROUTINE Do_Set_Key_Escape
+
+DEFINE SYNTAX Set_Key_EL
+!++
+! Description:
+!	Set the key binding for the Telnet EL command.
+!--
+  ROUTINE Do_Set_Key_EL
+
+DEFINE SYNTAX Set_Key_IP
+!++
+! Description:
+!	Set the key binding for the Telnet IP command.
+!--
+  ROUTINE Do_Set_Key_IP
+
+DEFINE SYNTAX Set_Key_LEcho
+!++
+! Description:
+!	Set the key binding for the Telnet Echo command.
+!--
+  ROUTINE Do_Set_Key_Echo
+
+DEFINE SYNTAX Set_Key_Synch
+!++
+! Description:
+!	Set the key binding for the Telnet Synch (Data Mark) command.
+!--
+  ROUTINE Do_Set_Key_Synch
+
+
+
+DEFINE SYNTAX Set_Connect
+!++
+! Description:
+!
+!	Change Connecting mode.
+!
+! Syntax:
+!
+!	Telnet> SET Connect <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Connect_Options)
+
+  DEFINE TYPE Set_Connect_Options
+  KEYWORD On, SYNTAX = Set_Connect_On
+  KEYWORD Off, SYNTAX = Set_Connect_Off
+
+DEFINE SYNTAX Set_Connect_On
+!++
+! Description:
+!
+!	Turn on Connecting mode.
+!
+! Syntax:
+!
+!	Telnet> SET Connect ON
+!--
+  ROUTINE Do_Set_Connect_On
+
+DEFINE SYNTAX Set_Connect_Off
+!++
+! Description:
+!
+!	Turn off Connecting mode.
+!
+! Syntax:
+!
+!	Telnet> SET Connect OFF
+!--
+  ROUTINE Do_Set_Connect_Off
+
+
+
+DEFINE SYNTAX Set_Debug
+!++
+! Description:
+!
+!	Change debugging mode.
+!
+! Syntax:
+!
+!	Telnet> SET DEBUG <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Debug_Options)
+
+  DEFINE TYPE Set_Debug_Options
+  KEYWORD On, SYNTAX = Set_Debug_On
+  KEYWORD Off, SYNTAX = Set_Debug_Off
+
+DEFINE SYNTAX Set_Debug_On
+!++
+! Description:
+!
+!	Turn on debugging mode.
+!
+! Syntax:
+!
+!	Telnet> SET DEBUG ON
+!--
+  ROUTINE Do_Set_Debug_On
+
+DEFINE SYNTAX Set_Debug_Off
+!++
+! Description:
+!
+!	Turn off debugging mode.
+!
+! Syntax:
+!
+!	Telnet> SET DEBUG OFF
+!--
+  ROUTINE Do_Set_Debug_Off
+
+
+
+DEFINE SYNTAX Set_Echo
+!++
+! Description:
+!
+!	Turn echoing off and on.
+!
+! Syntax:
+!
+!	Telnet> SET ECHO [ /REMOTE | /LOCAL ] <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Echo_Options)
+  QUALIFIER Remote
+  QUALIFIER Local
+  DISALLOW Remote AND Local
+
+  DEFINE TYPE Set_Echo_Options
+  KEYWORD On, SYNTAX = Set_Echo_On
+  KEYWORD Off, SYNTAX = Set_Echo_Off
+
+DEFINE SYNTAX Set_Echo_On
+!++
+! Description:
+!	Turn on echo mode.
+!--
+  ROUTINE Do_Set_Echo_On
+
+DEFINE SYNTAX Set_Echo_Off
+!++
+! Description:
+!	Turn off echo mode.
+!--
+  ROUTINE Do_Set_Echo_Off
+
+
+
+DEFINE SYNTAX Set_Eightbit
+!++
+! Description:
+!
+!	Change between 7-bit and 8-bit transmission mode.
+!
+! Syntax:
+!
+!	Telnet> SET Eightbit <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Eightbit_Options)
+
+  DEFINE TYPE Set_Eightbit_Options
+  KEYWORD On, SYNTAX = Set_Eightbit_On
+  KEYWORD Off, SYNTAX = Set_Eightbit_Off
+
+DEFINE SYNTAX Set_Eightbit_On
+!++
+! Description:
+!
+!	Turn on 8-bit transmission mode.
+!--
+  ROUTINE Do_Set_Eightbit_On
+
+DEFINE SYNTAX Set_Eightbit_Off
+!++
+! Description:
+!
+!	Turn on 7-bit transmission mode.
+!--
+  ROUTINE Do_Set_Eightbit_Off
+
+
+
+DEFINE SYNTAX Set_Extended
+!++
+! Description:
+!
+!	Turn Extended command mode off and on.
+!	When turned on, the Telnet ESCAPE will bring the user to Telnet>
+!
+! Syntax:
+!
+!	Telnet> SET EXTENDED <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Extended_Options)
+
+  DEFINE TYPE Set_Extended_Options
+  KEYWORD On, SYNTAX = Set_Extended_On
+  KEYWORD Off, SYNTAX = Set_Extended_Off
+
+DEFINE SYNTAX Set_Extended_On
+!++
+! Description:
+!	Turn on extended command mode.
+!--
+  ROUTINE Do_Set_Extended_On
+
+DEFINE SYNTAX Set_Extended_Off
+!++
+! Description:
+!	Turn off extended command mode.
+!--
+  ROUTINE Do_Set_Extended_Off
+
+
+
+DEFINE SYNTAX Set_Host
+!++
+! Description:
+!
+!	Open a connection to a remote host.
+!
+! Syntax:
+!
+!	Telnet> SET HOST [Remote_Host_Name]
+!--
+  ROUTINE New_Conn
+  PARAMETER P1, VALUE(Required)
+  PARAMETER P2, LABEL = Host_Name, VALUE(REQUIRED)
+
+
+
+DEFINE SYNTAX Set_Localchars
+!++
+! Description:
+!
+!	Change local character recognition mode.
+!
+! Syntax:
+!
+!	Telnet> SET LOCALCHARS <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Localchars_Options)
+
+  DEFINE TYPE Set_Localchars_Options
+  KEYWORD On, SYNTAX = Set_Localchars_On
+  KEYWORD Off, SYNTAX = Set_Localchars_Off
+
+DEFINE SYNTAX Set_Localchars_On
+!++
+! Description:
+!	Turn on local character recognition mode.
+!--
+  ROUTINE Do_Set_Localchars_On
+
+DEFINE SYNTAX Set_Localchars_Off
+!++
+! Description:
+!	Turn off local character recognition mode.
+!--
+  ROUTINE Do_Set_Localchars_Off
+
+
+
+DEFINE SYNTAX Set_Log
+!++
+! Description:
+!
+!	Specify the Telnet log file.
+!
+! Syntax:
+!
+!	Telnet> SET LOG [Logfile_Name]
+!--
+  ROUTINE Do_Set_Logfile_name
+  PARAMETER P1, LABEL=Option, VALUE(Required)
+  PARAMETER P2, LABEL = Logfile_Name,
+	VALUE(type=$outfile)
+  Qualifier ENABLE
+  Qualifier DISABLE
+  Qualifier CLOSE
+  Qualifier ALL_LOG
+  DISALLOW ENABLE AND DISABLE
+
+
+DEFINE SYNTAX Set_Mode
+!++
+! Description:
+!
+!	Change local character recognition mode.
+!
+! Syntax:
+!
+!	Telnet> SET MODE <CHARACTER or LINE>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=mode, PROMPT="Line or Character",
+                VALUE(REQUIRED, TYPE=Set_Mode_Options)
+
+  DEFINE TYPE Set_Mode_Options
+  KEYWORD Character, SYNTAX = Set_Mode_Char
+  KEYWORD Line, SYNTAX = Set_Mode_Line
+  KEYWORD Negotiated, SYNTAX = Set_Mode_Negotiated
+
+DEFINE SYNTAX Set_Mode_Char
+!++
+! Description:
+!	Turn on Telnet character-at-a-time mode.
+!--
+  ROUTINE Do_Set_Line_Mode_Off
+
+DEFINE SYNTAX Set_Mode_Line
+!++
+! Description:
+!	Turn on Telnet line-at-a-time mode.
+!--
+  ROUTINE Do_Set_Line_Mode_On
+
+DEFINE SYNTAX Set_Mode_Negotiated
+!++
+! Description:
+!	Set Line mode negotiated
+!--
+  ROUTINE Do_Set_Line_Mode_Negotiated
+
+
+DEFINE SYNTAX Set_EOL
+!++
+! Description:
+!
+!	Change local character recognition END_OF_LINE.
+!
+! Syntax:
+!
+!	Telnet> SET END_OF_LINE <LF or NULL>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=END_OF_LINE, PROMPT="Line or Character",
+                VALUE(REQUIRED, TYPE=Set_EOL_Options)
+
+  DEFINE TYPE Set_EOL_Options
+  KEYWORD LF, SYNTAX = Set_EOL_OFF
+  KEYWORD NULL, SYNTAX = Set_EOL_ON
+
+DEFINE SYNTAX Set_EOL_OFF
+!++
+! Description:
+!	Turn on CR-LF terminator
+!--
+  ROUTINE Do_Set_EOL_Off
+
+DEFINE SYNTAX Set_EOL_ON
+!++
+! Description:
+!	Turn on CR-NULL terminator
+!--
+  ROUTINE Do_Set_EOL_On
+
+
+DEFINE SYNTAX Set_Synch
+!++
+! Description:
+!
+!	Turn Synching (XON/XOFF) off and on.
+!
+! Syntax:
+!
+!	Telnet> SET SYNCH [/LOCAL] <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Synch_Options)
+  QUALIFIER Remote
+  QUALIFIER Local
+  DISALLOW Remote AND Local
+
+  DEFINE TYPE Set_Synch_Options
+  KEYWORD On, SYNTAX = Set_Synch_On
+  KEYWORD Off, SYNTAX = Set_Synch_Off
+
+DEFINE SYNTAX Set_Synch_On
+!++
+! Description:
+!	Turn on Synch mode.
+!--
+  ROUTINE Do_Set_Synch_On
+
+DEFINE SYNTAX Set_Synch_Off
+!++
+! Description:
+!	Turn off Synch mode.
+!--
+  ROUTINE Do_Set_Synch_Off
+
+
+
+DEFINE SYNTAX Set_Quiet
+!++
+! Description:
+!
+!	Change between Quiet and no Quiet
+!
+! Syntax:
+!
+!	Telnet> SET Quiet <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Quiet_Options)
+
+  DEFINE TYPE Set_Quiet_Options
+  KEYWORD On, SYNTAX = Set_Quiet_On
+  KEYWORD Off, SYNTAX = Set_Quiet_Off
+
+DEFINE SYNTAX Set_Quiet_On
+!++
+! Description:
+!
+!	Turn on Quiet mode.
+!--
+  ROUTINE Do_Set_Quiet_On
+
+DEFINE SYNTAX Set_Quiet_Off
+!++
+! Description:
+!
+!	Turn off Quiet mode.
+!--
+  ROUTINE Do_Set_Quiet_Off
+
+
+
+DEFINE SYNTAX Set_Urgent
+!++
+! Description:
+!
+!	Change between Urgent and no Urgent
+!
+! Syntax:
+!
+!	Telnet> SET Urgent <On_Off>
+!--
+  PARAMETER P1, Label=Option, VALUE(Required)
+  PARAMETER P2, Label=On_Off, PROMPT="On or Off?",
+                VALUE(REQUIRED, TYPE=Set_Urgent_Options)
+
+  DEFINE TYPE Set_Urgent_Options
+  KEYWORD On, SYNTAX = Set_Urgent_On
+  KEYWORD Off, SYNTAX = Set_Urgent_Off
+
+DEFINE SYNTAX Set_Urgent_On
+!++
+! Description:
+!
+!	Turn on Urgent mode.
+!--
+  ROUTINE Do_Set_Urgent_On
+
+DEFINE SYNTAX Set_Urgent_Off
+!++
+! Description:
+!
+!	Turn off Urgent mode.
+!--
+  ROUTINE Do_Set_Urgent_Off
+
+
+
+DEFINE VERB Show
+!++
+! Description:
+!
+!	Display information about current session.
+!
+! Syntax:
+!
+!	Telnet> Show
+!--
+  ROUTINE Do_Show
+
+
+
+DEFINE VERB Spawn
+!++
+! Description:
+!
+!	Spawn a CLI process.
+!
+! Syntax:
+!
+!	Telnet> SPAWN
+!--
+  ROUTINE Do_Spawn
+  PARAMETER P1, LABEL = Command_Line, VALUE (TYPE = $Rest_of_Line)
+
+
+
+DEFINE VERB Status
+!++
+! Description:
+!
+!	Display information about current connection.
+!
+! Syntax:
+!
+!	Telnet> STATUS
+!--
+  ROUTINE Do_Status
+
+
+
+DEFINE VERB Version
+!++
+! Description:
+!
+!	Display information about this Telnet version.
+!
+! Syntax:
+!
+!	Telnet> VERSION
+!--
+  ROUTINE Do_Version
+
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNET_PARSE.CLD
+!  *1     5-MAR-1991 19:06:40 SYNFUL "Define commands associated with the Telnet utility"
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNET_PARSE.CLD
+

@@ -1,0 +1,165 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+    Key_Parse (			! Escape string parser
+	LANGUAGE (BLISS32),
+	ADDRESSING_MODE (NONEXTERNAL = LONG_RELATIVE),
+	ZIP,OPTIMIZE,OPTLEVEL=3,
+	LIST (NOEXPAND, ASSEMBLY, NOBINARY),
+	IDENT = 'V01-001'
+	)=
+BEGIN
+
+!++
+!    Key.B32		Copyright (c) 1986	Carnegie Mellon University
+!
+! Description:
+!
+!	Parse various forms of specifying a keyboard key.
+!
+! Written By: 	Dale Moore	07-MAR-1986	CMU-CS/RI
+!
+! Modifications:
+!	Bruce R. Miller		09-Jan-89	CMU Network Development
+!	Changed name to Key.b32 and generalized routines.
+!--
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'SYS$LIBRARY:TPAMAC';
+
+ROUTINE Store_Control =
+!++
+! Functional Description:
+!
+!	A LIB$TParse routine.   The current token (a single character)
+!	is a description for a control character.
+!--
+    BEGIN
+    BUILTIN
+	AP;
+    BIND
+	TParse_Block	= .AP				: $BBLOCK,
+	Current_Token	= TParse_Block [TPA$L_TOKENCNT]	: $BBLOCK,
+	First_Char	= .Current_Token [DSC$A_POINTER]: BYTE UNSIGNED;
+
+    IF .Current_Token [DSC$W_LENGTH] NEQ 1 THEN RETURN (0);
+    SELECTONE .First_Char OF
+	SET
+	['?'] :
+	    TParse_Block [TPA$L_PARAM] = 127;
+	['@', 'A' TO 'Z', '[', '\', ']', '^', '_'] :
+	    TParse_Block [TPA$L_PARAM] = .First_Char AND %X'1F';
+	[OTHERWISE] :
+	    RETURN (0);
+	TES;
+
+    SS$_NORMAL
+    END;
+
+ROUTINE Store_Number =
+!++
+! Functional Description:
+!
+!	A Lib$Tparse Routine.  The current token (A number) is the
+!	numeric representation for the escape character.
+!--
+    BEGIN
+    BUILTIN
+	AP;
+    BIND
+	TParse_Block	= .AP				: $BBLOCK,
+	Current_Token	= TParse_Block [TPA$L_TOKENCNT]	: $BBLOCK,
+	Token_Value	= TParse_BLock [TPA$L_NUMBER]	: $BBLOCK;
+
+    IF .Token_Value GTRU %X'7F' THEN RETURN (0);
+    TParse_Block [TPA$L_PARAM] = .Token_Value;
+    SS$_NORMAL
+    END;
+
+$Init_State (State_Table, Key_Table);
+
+$State (Key_Syntax,
+	((Control_Syntax)),
+	((Number_Syntax)));
+$State (,
+	(TPA$_EOS, TPA$_EXIT));
+
+$State (Control_Syntax,
+	('CONTROL'),
+	('CNTRL'),
+	('^', Control_Char));
+$State (,
+	('-'));
+$State (Control_Char,
+	(TPA$_ANY, TPA$_EXIT, Store_Control));
+
+$State (Number_Syntax,
+	(TPA$_DECIMAL, TPA$_EXIT, Store_Number),
+	('%'));
+$State (,
+	('D', Number_Decimal),
+	('X', Number_Hex),
+	('O', Number_Octal));
+$State (Number_Decimal,
+	(TPA$_DECIMAL, TPA$_EXIT, Store_Number));
+$State (Number_Hex,
+	(TPA$_HEX, TPA$_EXIT, Store_Number));
+$State (Number_Octal,
+	(TPA$_OCTAL, TPA$_EXIT, Store_Number));
+
+
+
+GLOBAL ROUTINE Cvt_Key (This_String_A, Value_A) =
+!++
+! Functional Description:
+!
+!	This routine converts various specifications for character sequences
+!	to the actual value.  It is usually called to convert a user-
+!	supplied string into a value that the keyboard can submit.
+!
+!	For example, the strings 'CONTROL-^', 'CNTRL-^', '^^', '30', '%D30',
+!	'%X1E' and '%O36' all represent the same keyboard value.
+!--
+    BEGIN
+    BIND
+	This_String	= .This_String_A		: $BBLOCK[],
+	Value		= .Value_A			: BYTE UNSIGNED;
+    EXTERNAL ROUTINE
+	LIB$TPARSE	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	TParse_Block	: $BBLOCK [TPA$K_LENGTH0] PRESET (
+		[TPA$L_COUNT]		= TPA$K_COUNT0,
+		[TPA$L_OPTIONS]		= TPA$M_BLANKS,
+		[TPA$L_STRINGCNT]	= .This_String[DSC$W_LENGTH],
+		[TPA$L_STRINGPTR]	= .This_String[DSC$A_POINTER]),
+	Status;
+
+    Status = LIB$TPARSE (TParse_Block, State_Table, Key_Table);
+    IF NOT .Status THEN RETURN (.Status);
+    Value = .TParse_Block [TPA$L_PARAM];
+    SS$_NORMAL
+    END;
+
+END ELUDOM
+!  DEC/CMS REPLACEMENT HISTORY, Element KEY.B32
+!  *1     5-MAR-1991 18:57:25 SYNFUL "Parse various forms of specifying a keyboard key"
+!  DEC/CMS REPLACEMENT HISTORY, Element KEY.B32

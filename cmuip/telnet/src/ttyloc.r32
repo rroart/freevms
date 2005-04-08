@@ -1,0 +1,75 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+!++
+!
+! TTYLOC.R32	Copyright (c) 1986	Carnegie Mellon University
+!
+! Description:
+!
+!	Well known constants and data structures for the terminal
+!	location server.
+!
+! Written By:	Pete Neergard	Jul-1986	CMU-CS/RI
+!
+!
+! Modifications:
+!
+!	10-SEP-1986	Dale Moore	CMU-CS/RI
+!	Added this module comment header.
+!
+!--
+
+LITERAL
+    TTYLOC$K_Version_Number		= 1,
+
+    TTYLOC$K_Store_64Bit		= 1,
+    TTYLOC$K_Retrieve_Location		= 2,
+    TTYLOC$K_Retrieve_64Bit		= 3,
+    TTYLOC$K_Store_String		= 4,
+
+    TTYLOC$K_Location_Found		= 1,
+    TTYLOC$K_Location_Not_Found		= 2;
+
+MACRO
+    TTYLOC$L_Version			=  0, 0, 32, 0%,
+    TTYLOC$L_Operation			=  4, 0, 32, 0%,
+    TTYLOC$L_Host_Number		=  8, 0, 32, 0%,
+    TTYLOC$L_Terminal_Number		= 12, 0, 32, 0%,
+    TTYLOC$B_Terminal_Length		= 16, 0,  8, 0%,
+    TTYLOC$T_Terminal_String		= 17, 0,  0, 0%,
+    TTYLOC$B_Ans_MBox_Len		= 28, 0,  8, 0%,
+    TTYLOC$T_Ans_MBox			= 29, 0,  0, 0%,
+    TTYLOC$B_Location_Length		= 40, 0,  8, 0%,
+    TTYLOC$T_Location_String		= 41, 0,  0, 0%,
+    !++
+    ! The format of the messages that are sent back 
+    !--
+
+    TTYLOC$L_Found_Status		=  0, 0, 32, 0%,
+    TTYLOC$L_Return_Host		=  4, 0, 32, 0%,
+    TTYLOC$L_Return_Term		=  8, 0, 32, 0%,
+ 
+    TTYLOC$B_Return_Length		=  0, 0,  8, 0%,
+    TTYLOC$T_Return_String		=  1, 0,  0, 0%;
+!  DEC/CMS REPLACEMENT HISTORY, Element TTYLOC.R32
+!  *1     5-MAR-1991 19:09:49 SYNFUL "Well known constants and data structures for terminal location server"
+!  DEC/CMS REPLACEMENT HISTORY, Element TTYLOC.R32

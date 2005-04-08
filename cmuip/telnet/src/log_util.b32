@@ -1,0 +1,281 @@
+%TITLE 'Input/Output Utilities'
+!++
+!
+! Module:
+!
+!	LOG_UTIL
+!
+! Facility:
+!
+!	LOG Output utility routines
+!
+! Abstract:
+!
+!	Provides a standard library of routines for LOG output
+!
+! Author:
+!
+!    Taken from:
+!	Vince Fuller, CMU-CSD, April 1986
+!	Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
+!
+!    Written by:
+!	1.0	John Clement Nov 1991
+!	Rice University, Houston, Tx.
+!
+! Modification history:
+!
+!--
+
+
+MODULE LOG_UTIL(IDENT='1.0C',LANGUAGE(BLISS32),
+	      ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
+			      NONEXTERNAL=LONG_RELATIVE),
+	      LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
+	      OPTIMIZE,OPTLEVEL=3,ZIP)=
+BEGIN
+LIBRARY 'SYS$LIBRARY:STARLET';
+!!!LIBRARY 'SYS$LIBRARY:LIB';
+LIBRARY 'CMUTEK_SRC:[CENTRAL]NETCOMMON';
+
+
+%SBTTL 'Log file handling routines'
+
+OWN
+    LOG_FAB 	: $FAB(	FNM = 'TELNET.LOG',
+			DNM = 'TELNET.LOG',
+			FAC = PUT,		! Do record I/O
+!!!			FAC = BIO,		! Do block I/O
+			SHR = GET,		! Allow others to read
+			FOP = (SQO),		! Sequential only
+			MRS = 0,		! No max record size
+!!!			RFM = STMLF,		! Output is stream LF
+			ORG = SEQ),
+    LOG_RAB	: $RAB(FAB = LOG_FAB),
+    log_buffer	: VECTOR [256, BYTE, UNSIGNED],
+    log_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+			[DSC$W_LENGTH]	= 0,
+			[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+			[DSC$B_CLASS]	= DSC$K_CLASS_D,
+			[DSC$A_POINTER]	= log_buffer),
+
+    print_buffer	: VECTOR [256, BYTE, UNSIGNED],
+    print_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+			[DSC$W_LENGTH]	= 0,
+			[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+			[DSC$B_CLASS]	= DSC$K_CLASS_D,
+			[DSC$A_POINTER]	= log_buffer),
+
+    SEND_FAB 	: $FAB(	FNM = 'TELNET.TXT',
+			DNM = 'TELNET.TXT',
+			FAC = GET,
+			SHR = GET,
+			FOP = (SQO),
+!!!			MRS = 0,		! No max record size
+!!!			RFM = STMLF,		! Output is stream LF
+			ORG = SEQ),
+    SEND_RAB 	: $RAB(FAB = SEND_FAB);
+
+GLOBAL
+    SEND_STATE	: INITIAL(0),
+    LOG_STATE	: INITIAL(0);
+
+MACRO
+    TRUE = (0 EQL 0) %,
+    FALSE = (0 EQL 1) %;
+
+
+GLOBAL ROUTINE LOG_OPEN(LOG_NAME) =
+!
+! Open the log/trace file for debug & trace recording.
+! Output: LOG_FAB setup for stream output.
+! Returns: TRUE if successfully opened.
+!
+    BEGIN
+	MAP
+		LOG_NAME	: REF DESC$STR;
+	EXTERNAL ROUTINE
+		LOG_CLOSE;
+	LOCAL
+		RC;
+	IF .LOG_STATE NEQ 0 THEN
+		LOG_CLOSE();
+	LOG_FAB[FAB$B_FNS] = .LOG_NAME[DSC$W_LENGTH];
+	LOG_FAB[FAB$L_FNA] = .LOG_NAME[DSC$A_POINTER];
+	RC = $CREATE(FAB = LOG_FAB);
+	IF NOT .RC THEN
+	BEGIN
+		RETURN .RC;
+	END;
+	RC = $CONNECT(RAB = LOG_RAB);
+	IF NOT .RC THEN
+	BEGIN
+		RETURN .RC;
+	END;
+	LOG_STATE = -1;
+	SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE LOG_CLOSE =
+!
+!	Close a log file if it is open
+!	Return: True if successfully closed.
+!
+    BEGIN
+    LOCAL Status;
+    IF .LOG_STATE NEQ 0
+    THEN BEGIN
+	LOG_STATE = 0;
+	IF .LOG_DESC[DSC$W_LENGTH] GTR 0
+	THEN BEGIN
+	    LOG_RAB[RAB$W_RSZ] = .LOG_DESC[DSC$W_LENGTH];
+	    LOG_RAB[RAB$L_RBF] = .LOG_DESC[DSC$A_POINTER];
+
+	    Status = $PUT(RAB = LOG_RAB);
+	    IF NOT .Status
+	    THEN BEGIN
+		SIGNAL(.Status);
+		RETURN FALSE;
+		END;
+	    END;
+!!!HACK!!! Take out this Flush!
+!!!	Status = $FLUSH(RAB = LOG_RAB);
+!!!	IF NOT .Status THEN
+!!!	BEGIN
+!!!		SIGNAL(.Status);
+!!!		RETURN FALSE;
+!!!	END;
+	LOG_DESC[DSC$W_LENGTH] = 0;
+	Status = $FLUSH(RAB = LOG_RAB);
+	IF NOT .Status THEN
+	BEGIN
+		SIGNAL(.Status);
+	END;
+	$DISCONNECT(RAB = LOG_RAB);
+	$CLOSE(FAB = LOG_FAB);
+	RETURN TRUE;
+	END
+    ELSE
+	RETURN FALSE;
+    END;
+
+
+GLOBAL ROUTINE LOG_OUTPUT(Desc_A)	: NOVALUE =
+!
+! Output a string to the log file.
+! Desc_A is the address of a string descriptor.
+!
+    BEGIN
+    BIND
+	Desc		= .Desc_A		: $BBLOCK,
+	Desc_Vec	= .DESC[DSC$A_POINTER]	: VECTOR[,Byte];
+    LOCAL
+	CHR,
+	i,
+	Status;
+
+    IF .LOG_STATE EQL 0 THEN RETURN(1);
+
+    INCR I FROM	0 TO .DESC[DSC$W_Length]-1
+    DO BEGIN
+	CHR = .Desc_Vec[.I];
+	LOG_BUFFER[.LOG_DESC[DSC$W_LENGTH]] = .CHR;
+	LOG_DESC[DSC$W_LENGTH] = .LOG_DESC[DSC$W_LENGTH] +1;
+	IF	(.LOG_DESC[DSC$W_LENGTH] GEQ %ALLOCATION(LOG_BUFFER)) OR
+		(.CHR EQL %CHAR(10))
+	THEN BEGIN
+!!!	    IF CHR EQL %CHAR(10) THEN
+!!!		LOG_DESC[DSC$W_LENGTH] = .LOG_DESC[DSC$W_LENGTH] -1;
+	    LOG_RAB[RAB$W_RSZ] = .LOG_DESC[DSC$W_LENGTH];
+	    LOG_RAB[RAB$L_RBF] = .LOG_DESC[DSC$A_POINTER];
+
+	    Status = $PUT(RAB = LOG_RAB);
+	    IF NOT .Status THEN
+	    BEGIN
+		SIGNAL(.Status);
+		RETURN FALSE;
+		END;
+	    LOG_DESC[DSC$W_LENGTH] = 0;
+	    END;
+
+	END;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE SEND_OPEN(SEND_NAME) =
+!
+! Open a file for input.
+! Output: SEND_FAB setup for stream output.
+! Returns: TRUE if successfully opened.
+
+    BEGIN
+	MAP
+		SEND_NAME	: REF DESC$STR;
+	EXTERNAL ROUTINE
+		SEND_CLOSE;
+	LOCAL
+		RC;
+	IF .SEND_STATE NEQ 0 THEN
+		SEND_CLOSE();
+	SEND_FAB[FAB$B_FNS] = .SEND_NAME[DSC$W_LENGTH];
+	SEND_FAB[FAB$L_FNA] = .SEND_NAME[DSC$A_POINTER];
+	RC = $CREATE(FAB = SEND_FAB);
+	IF NOT .RC THEN
+	BEGIN
+		RETURN .RC;
+	END;
+	RC = $CONNECT(RAB = SEND_RAB);
+	IF NOT .RC THEN
+	BEGIN
+		RETURN .RC;
+	END;
+	SEND_STATE = -1;
+	SS$_NORMAL
+    END;
+GLOBAL ROUTINE SEND_CLOSE =
+    BEGIN
+    LOCAL Status;
+    IF .SEND_STATE NEQ 0 THEN
+	BEGIN
+	Status = $FLUSH(RAB = SEND_RAB);
+	IF NOT .Status THEN
+	BEGIN
+		SIGNAL(.Status);
+	END;
+	$DISCONNECT(RAB = SEND_RAB);
+	$CLOSE(FAB = SEND_FAB);
+	RETURN TRUE;
+	END
+    ELSE
+	RETURN FALSE;
+    END;
+
+GLOBAL ROUTINE SEND_INPUT(INDESC)	: NOVALUE =
+
+! INput a string to the log file.
+! INDESC is the address of a string descriptor.
+
+    BEGIN
+    MAP
+	INDESC	: REF DESC$STR;
+    LOCAL
+	Status;
+    IF .SEND_STATE NEQ 0
+    THEN BEGIN
+
+	SEND_RAB[RAB$W_RSZ] = .INDESC[DSC$W_LENGTH];
+	SEND_RAB[RAB$L_RBF] = .INDESC[DSC$A_POINTER];
+
+	Status = $GET(RAB = SEND_RAB);
+	IF NOT .Status THEN
+	BEGIN
+		SIGNAL(.Status);
+		RETURN FALSE;
+		END;
+	END;
+    END;
+
+
+END
+ELUDOM
+

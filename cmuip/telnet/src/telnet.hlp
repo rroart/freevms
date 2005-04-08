@@ -1,0 +1,688 @@
+!
+!	****************************************************************
+!
+!		Copyright (c) 1992, Carnegie Mellon University
+!
+!		All Rights Reserved
+!
+!	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+!	distribute  this software  provided  that the  above  copyright
+!	notice appears in  all copies and that  any distribution be for
+!	noncommercial purposes.
+!
+!	Carnegie Mellon University disclaims all warranties with regard
+!	to this software.  In no event shall Carnegie Mellon University
+!	be liable for  any special, indirect,  or consequential damages
+!	or any damages whatsoever  resulting from loss of use, data, or
+!	profits  arising  out of  or in  connection  with  the  use  or
+!	performance of this software.
+!
+!	****************************************************************
+!
+!++
+! Telnet.Hlp	Copyright (c) 1986	Carnegie Mellon University
+!
+! Description:
+!
+!	A VMS help library file describing the Telnet utility and
+!	its parameters and switches.
+!
+! Written By:	Dale Moore	CMU-CS/RI
+!
+! Modifications:
+!
+!	26-MAR-1987	Dale Moore	CMU-CS/RI
+!	Added /Local_Port
+!
+!	Nov-1991	John Clement	Rice University
+!	Added /BINARY
+!	Added /EIGHTBIT
+!	Added /LOG
+!	Added complete list of ESCAPE characters
+!	Added section on NEW features
+!
+!--
+1 TELNET
+ Terminal service to remote internet host.
+
+ Format
+     TELNET [host] [/qualifiers]
+
+     Telnet is used to communicate with another host on the ARPA/Internet
+     using the TELNET protocol.
+
+     Once a connection has been opened, telnet enters input mode. In
+     this mode,  text typed is sent to the remote host.  To issue telnet
+     commands when in input mode, precede them with the telnet "escape
+     character" (default control-^).  To send the escape character, you
+     must type it twice.
+
+2 Parameters
+ host
+
+    The host may be either an internet address, or an internet host name.
+    An internet host name is generally several names separated by periods
+    For example: "CMUTEK.CC.CMU.EDU"
+
+    The format of the internet address is four unsigned bytes separated
+    by periods.  For example "128.2.35.56".
+
+    If the name is omitted then you will get the telnet prompt:
+
+	Telnet>
+
+    You may the use the telnet commands to setup telnet.
+    For more information about the telnet commands type HELP at the
+    Telnet> prompt.
+
+2 Qualifiers
+/ALL_LOG
+
+	/ALL_LOG
+	/NOALL_LOG		(D)
+
+ Include the terminal input in the log file, when local echoing is on.
+
+ Normally the typed input is not included in the log file, for security
+ reasons when line mode is on.  This is to prevent your password from
+ appearing in the log file.  If you need the typed input as well as the
+ output you should use this qualifier.  The typed input will only be put
+ into the log file when local echoing is on.  You may prevent the password
+ from being in the log file by using /GENERIC and pressing Control-E to
+ modify the local echo state.
+
+ Another way to prevent unintended information from being in the log file
+ is to create it only after you have logged in.  Then use the Escape command
+ "L" to turn logging on or off as needed.
+
+ If Logical TELNET_ALL_LOG is defined then it defaults to on.
+	example:	$ DEFINE TELNET_ALL_LOG TRUE
+
+ This is the same as the command
+	Telnet> SET LOG/ALL_LOG
+
+/AO
+
+	/AO=AO-char
+	/AO="''F$LOGICAL("TELNET_AO")'"	(D)
+	/AO=CONTROL-O			(D)
+	/NOAO
+
+ This qualifier specifies the telnet AO (Abort output) character.
+ The default value is CONTROL-O.
+
+ If /NOAO is specified then there is no AO character.
+
+ If Logical TELNET_AO is defined then it selects the AO character.
+	example:	$ DEFINE TELNET_AO ^N
+
+ This is the same as the command
+	Telnet> SET COMMAND AO CONTROL-N
+
+ For more information See: /ESCAPE
+
+/AUTOFLUSH
+
+	/AUTOFLUSH		(D)
+	/NOAUTOFLUSH
+
+  When LOCALCHARS (/GENERIC) is enabled and autoflush is on
+  Telnet will automatically flush all network data when
+	IP(Interrupt process), BRK(Disconnect), or AO(Abort Output)
+  are sent to the remote host.
+
+  This kills unwanted output to your screen.
+
+/AYT
+
+	/AYT=AYT-char
+	/AYT="''F$LOGICAL("TELNET_AYT")'"	(D)
+	/AYT=CONTROL-T			(D)
+	/NOAYT
+
+ This qualifier specifies the telnet AYT (Are You There?) character.
+ The default value is CONTROL-T.
+
+ If /NOAYT is specified then there is no AYT character.
+
+ If Logical TELNET_AYT is defined then it selects the AYT character.
+	example:	$ DEFINE TELNET_AYT ^N
+
+ This is the same as the command
+	Telnet> SET COMMAND AYT CONTROL-N
+
+ For more information See: /ESCAPE
+
+/BINARY
+
+	/BINARY
+	/NOBINARY		(D)
+
+ Sends/Receives the data as binary and ignores all special characters.
+ The remote system is set into EIGHTBIT and PASSALL modes.
+ The escape character is not disabled.  To disable it you must use
+	/NOESCAPE
+
+ If the terminal is set to /PASSALL then binary defaults to on.
+ If Logical TELNET_BINARY is defined the binary defaults to on.
+	example:	$ DEFINE TELNET_BINARY TRUE
+
+
+ This is the same as the command
+	Telnet> SET BINARY ON
+
+/BRK
+
+	/BRK=BRK-char
+	/BRK="''F$LOGICAL("TELNET_BRK")'"	(D)
+	/BRK=CONTROL-B			(D)
+	/NOBRK
+
+ This qualifier specifies the telnet BRK (Break) character.
+ The default value is CONTROL-B. This corresponds to CONTROL-D on
+ Unix systems And CONTROL-Y on VMS systems.
+
+ If /NOBRK is specified then there is no BRK character.
+
+ If Logical TELNET_BRK is defined then it selects the BRK character.
+	example:	$ DEFINE TELNET_BRK ^N
+
+ This is the same as the command
+	Telnet> SET COMMAND BRK CONTROL-N
+
+ For more information See: /ESCAPE
+
+/DEBUG
+
+	/DEBUG
+	/NODEBUG		(D)
+ Print out some information regarding the telnet option
+ negotiation protocol.
+
+ If Logical TELNET_DEBUG is defined then it defaults to on.
+	example:	$ DEFINE TELNET_DEBUG TRUE
+
+ This is the same as the command
+	Telnet> SET DEBUG ON
+
+/EC
+
+	/EC=EC-char
+	/EC="''F$LOGICAL("TELNET_EC")'"	(D)
+	/EC=DEL				(D)
+	/NOEC
+
+ This qualifier specifies the telnet EC (Erase Character) character.
+ The default value is DEL.
+
+ If /NOEC is specified then there is no EC character.
+
+ If Logical TELNET_EC is defined then it selects the EC character.
+	example:	$ DEFINE TELNET_EC ^N
+
+ This is the same as the command
+	Telnet> SET COMMAND EC CONTROL-N
+
+ For more information See: /ESCAPE
+
+/EIGHTBIT
+
+	/EIGHTBIT
+	/NOEIGHTBIT
+
+	/EIGHTBIT
+ Selects Eightbit (Extended ASCII) mode for the terminal. TELNET will
+ send 8-bit characters regardless of the outcome of the negotiations.
+ This is necessary when using TELNET to MULTINET, but not when going to
+ Wollengong or CMU-OpenVMS/IP.
+
+	/NOEIGHTBIT
+ Forbids Eightbit (Extended ASCII) mode for the terminal.
+ This turns off automatic negotiation.
+
+ Normally this is negotiated with the remote machine.  If your terminal
+ is set /EIGHTBIT then Telnet will attempt to negotiate the Extended
+ ASCII characteristic.
+
+ If Logical TELNET_EIGHTBIT is defined then it defaults to on.
+	example:	$ DEFINE TELNET_EIGHTBIT TRUE
+
+ This is the same as the command
+	Telnet> SET EIGHTBIT ON
+
+/EL
+
+	/EL=EL-char
+	/EL="''F$LOGICAL("TELNET_EL")'"	(D)
+	/EL=CONTROL-U			(D)
+	/NOEL
+
+ This qualifier specifies the telnet EL (Erase Line) character.
+ The default value is CONTROL-U.
+
+ If /NOEL is specified then there is no EL character.
+
+ If Logical TELNET_EL is defined then it selects the EL character.
+	example:	$ DEFINE TELNET_EL ^N
+
+ This is the same as the command
+	Telnet> SET COMMAND EL CONTROL-N
+
+ For more information See: /ESCAPE
+
+/END_OF_LINE
+
+	/END_OF_LINE={LF|NULL}
+	/END_OF_LINE="''F$LOGICAL("TELNET_END_OF_LINE")'"	(D)
+	/END_OF_LINE=LF				(D)
+
+ Selects the line terminator.
+ Default=LF
+
+ If logical TELNET_END_OF_LINE is defined as LF or NULL it
+ selects the end of line character.
+	example:	$ DEFINE TELNET_END_OF_LINE NULL
+
+ This is the same as the command
+	Telnet> SET END_OF_LINE NULL
+
+
+/ESCAPE
+
+	/ESCAPE=escape-char
+	/ESCAPE="''F$LOGICAL("TELNET_ESCAPE")'"	(D)
+	/ESCAPE=CONTROL-^			(D)
+	/NOESCAPE
+
+ This qualifier specifies the telnet escape character.
+ When typed it either accepts a single character "Escape" command
+ of it returns to Telnet command mode.
+
+ The default value is CONTROL-^.
+ If /NOESCAPE is specified then there is no escape character.
+
+ Several formats are allowed.  All of the examples below specify the same
+ value.
+ /ESCAPE=CONTROL-^ /ESCAPE=CNTRL-^    /ESCAPE=^^
+ /ESCAPE=%O036     /ESCAPE=%D030      /ESCAPE=30   /ESCAPE=%X1E
+
+ Printable characters are not allowed.
+ The following are also excluded: ^S ^Q ^M and ^[
+
+ To send the escape character to the remote system, it must be typed twice.
+
+ If Logical TELNET_ESCAPE is defined then it selects the ESCAPE character.
+	example:	$ DEFINE TELNET_ESCAPE ^N
+
+ This is the same as the command
+	Telnet> SET COMMAND ESCAPE CONTROL-N
+
+/GENERIC
+
+	/GENERIC
+	/NOGENERIC		(D)
+
+ This selects Local interpretation of the generic Telnet functions.
+ This corresponds to keys:
+
+	Delete		Erase Character
+	Control-B	Break (Disconnect)
+	Control-C	Interrupt process
+	Control-E	Toggle Echo
+	Control-O	Kill Output
+	Control-T	Are You There
+	Control-U	Erase line
+	Control-X	Kill unsolicited input
+
+ This provides machine independent interpretation of these characters.
+
+ If Logical TELNET_GENERIC is defined then it defaults to on.
+	example:	$ DEFINE TELNET_GENERIC TRUE
+
+ This is the same as the command:
+	Telnet> SET LOCALCHARS ON
+
+/IP
+
+	/IP=IP-char
+	/IP="''F$LOGICAL("TELNET_IP")'"	(D)
+	/IP=CONTROL-C			(D)
+	/NOIP
+
+ This qualifier specifies the telnet IP (Interrupt Process) character.
+ The default value is CONTROL-C.
+
+ If /NOIP is specified then there is no IP character.
+
+ If Logical TELNET_IP is defined then it selects the IP character.
+	example:	$ DEFINE TELNET_IP ^N
+
+ This is the same as the command
+	Telnet> SET COMMAND IP CONTROL-N
+
+ For more information See: /ESCAPE
+
+/LECHO
+
+	/LECHO=LECHO-char
+	/LECHO="''F$LOGICAL("TELNET_LECHO")'"	(D)
+	/LECHO=CONTROL-E			(D)
+	/NOLECHO
+
+ This qualifier specifies the telnet LECHO (Toggle local echo) character.
+ The default value is CONTROL-E.
+
+ If /NOLECHO is specified then there is no LECHO character.
+
+ If Logical TELNET_LECHO is defined then it selects the LECHO character.
+	example:	$ DEFINE TELNET_LECHO ^N
+
+ This is the same as the command
+	Telnet> SET COMMAND LECHO CONTROL-N
+
+ For more information See: /ESCAPE
+
+/LINEMODE
+
+	/LINEMODE
+	/NOLINEMODE
+
+ If specified this selects either Line or character mode.
+
+ Line mode does not transmit anything to the remote host until the
+	entire line has been typed.
+ Character mode (NOLINE) transmits each character individually to
+	the remote host, and usually depends on the remote host to
+	echo the character.
+
+ If Unspecified linemode is selected whenever the remote host will
+ not echo.  Whenever LINEMODE is selected then GENERIC and Extended
+ command mode are automatically enabled.
+
+ If you define logical TELNET_LINEMODE then Linemode is enabled.
+	example:	$ DEFINE TELNET_LINEMODE TRUE
+
+ This is the same as the command:
+	Telnet> SET MODE {LINE|CHARACTER|NEGOTIATED}
+
+ Note: Using /NOLINE is useful when Telnetting to machines that toggle
+ linemode.  In particular the NeXt machine does this.  By turning off
+ linemode this toggling is prevented.  Essentially NeXt toggles on
+ linemode while it is writing data to the terminal.
+
+/LOCAL_PORT
+
+	/LOCAL_PORT=decimal_number
+	/LOCAL_PORT=port_name
+	/PORT="''F$LOGICAL("TELNET_LOCAL_PORT")'"	(D)
+	/LOCAL_PORT=0			(D)
+
+ Useful only as a debugging tool.  Ordinary mortals should never use this
+ switch.
+
+/LOG
+
+	/LOG[=filename]
+	/LOG="''F$LOGICAL("TELNET_LOG")'"	(D)
+	/NOLOG					(D)
+
+ This qualifier specifies an output log file.  The default file name is
+ TELNET.LOG.
+
+ If Logical TELNET_LOG is defined then it specifies the log file.
+	example:	$ DEFINE TELNET_LOG my_telnet_session
+	Then the log file will be MY_TELNET_SESSION.LOG
+
+ Everything you see on the screen will be put into the log file.
+
+ This is the same as the Command:
+	Telnet> SET LOG filename
+
+/PORT
+
+	/PORT=decimal_number
+	/PORT=port_name
+	/PORT="''F$LOGICAL("TELNET_PORT")'"	(D)
+	/PORT=TELNET				(D)
+
+ Useful only as a debugging tool.  Ordinary mortals should never use this
+ switch.
+
+/QUIET
+
+	/QUIET
+	/NOQUIET	(D)
+
+ /QUIET turns off many messages.
+ If you define logical TELNET_QUIET then quiet is enabled.
+	example:	$ DEFINE TELNET_QUIET TRUE
+
+ This is the same as the command:
+	Telnet> SET QUIET ON
+
+/SYNCH
+
+	/SYNCH=SYNCH-char
+	/SYNCH="''F$LOGICAL("TELNET_SYNCH")'"	(D)
+	/SYNCH=CONTROL-X			(D)
+	/NOSYNCH
+
+ This qualifier specifies the telnet SYNCH character.
+ The default value is CONTROL-X.
+
+ The SYNCH character kills all previously sent but unread characters.
+
+ If /NOSYNCH is specified then there is no SYNCH character.
+
+
+ If Logical TELNET_SYNCH is defined then it selects the SYNCH character.
+	example:	$ DEFINE TELNET_SYNCH ^N
+
+ This is the same as the command
+	Telnet> SET COMMAND SYNCH CONTROL-N
+
+ For more information See: /ESCAPE
+
+/TERMINAL_TYPE
+
+	/TERMINAL_TYPE=type
+	/TERMINAL_TYPE="''F$LOGICAL("TELNET_TERMINAL_TYPE")'"	(D)
+
+ This qualifier specifies the terminal type.  If the remote system does
+ not understand this it may ask again, and the actual terminal type will
+ then be sent.  If the actual terminal type is not understood then a
+ lower type (usually VT100) will be sent.  This option is generally not
+ necessary, as the type is usually negotiated correctly.
+
+ Logical TELNET_TERMINAL_TYPE may be defined to specify the terminal type.
+	example:	$ DEFINE TELNET_TERMINAL_TYPE VT240
+
+ It is expected that this will set the following terminal characteristics:
+	Device_Type, Form, Tab, Wrap, Scope, Printer_port,
+	SIXEL, Regis, Ansi_CRT, Block_Mode, Advanced_Video, Edit_Mode
+	DECCRTn
+
+/XOFF
+
+	/XOFF
+	/NOXOFF		(D)
+
+ Specifies that XOFF (Control-S) and XON (Control-Q) are to be handled
+ locally rather than transmitted to the remote site.
+
+ This is the same as the command:
+	Telnet> SET XOFF ON
+
+ If Logical TELNET_XOFF is defined then it defaults to on.
+	example:	$ DEFINE TELNET_XOFF TRUE
+
+2 Commands
+
+  The following single character escape commands are available.
+
+  A	Send	Are you there? (Control-T)
+  B	Send	Break command (Control-B)
+  C	Close.  Aborts and closes a TELNET connection to a remote host.
+  D	Toggle	Debug.  Switch the value between (On/Off)
+  E	Toggle	local Echo.  Switch the value between (On/Off)
+  G	Toggle	localchar (Generic).  Switch the value between (On/Off)
+  I	Interactive mode.  In this mode you may issue More commands.
+  L	Toggle	Log.  Switch the value between (On/Off)
+  N	Negotiate options.  This is slightly useless as only
+  	unnegotiated options are tried.  They just fail again.
+  P	Pause. Temporarily return the local host using a
+  	subprocess.  To return using telnet, logout of the subprocess
+	or ATTACH to the telnet process.
+  S	Show the current status
+  T	Send	Timing mark
+  U	Toggle	Unix (End of line mode)
+	Switch the value between (CR-LF/CR-NULL)
+  X	XOFF.  Depending on the current setting, changes XOFF-XON
+  	to be handled remotely or locally.
+  ?, H	Help.  Some help is printed on the screen.
+
+   To enter one of these commands, precede it with the escape character.
+   To send the escape character to the remote system, you must type the
+   escape character twice.
+
+2 Logicals
+
+    The following logical symbols are used by Telnet:
+
+    SYS$OUTPUT       Is the output device (Your screen)
+    SYS$INPUT        Is the Telnet command input device.
+    SYS$COMMAND      Is the Telnet keyboard input device.
+                     This is used once the link is established to the
+                     remote host.  This must currently be a valid terminal
+                     device.
+
+	The following define default options for Telnet:
+
+    TELNET_ALL_LOG       Input logging mode
+    TELNET_AO            Abort output character
+    TELNET_AYT           Are You There character
+    TELNET_BINARY        Binary mode
+    TELNET_BRK           Break character
+    TELNET_DEBUG         Debug mode
+    TELNET_EC            Erase character character
+    TELNET_EIGHTBIT      8 bit mode
+    TELNET_EL            Erase line character
+    TELNET_END_OF_LINE   END_OF_LINE character (LF/NULL)
+    TELNET_ESCAPE        Escape character
+    TELNET_GENERIC       Localchars mode
+    TELNET_IP            Interrupt process character
+    TELNET_LECHO         Local echo mode
+    TELNET_LINEMODE      Line mode
+    TELNET_LOCAL_PORT    Local port number
+    TELNET_LOG           Log file name
+    TELNET_PORT          Remote port number
+    TELNET_SYNCH         Telnet Synch character
+    TELNET_TERMINAL_TYPE Terminal type
+    TELNET_QUIET         Quiet mode
+    TELNET_XOFF          Local XOFF mode
+
+2 Command__files
+
+  You may execute telnet inside a command file under the following rules:
+  1.	You must be at an interactive terminal.
+  2.	SYS$COMMAND must point to the terminal.  This is true if you have
+	not changed it.
+  3.	The Telnet commands will be take from SYS$INPUT until a "$" is
+	encountered in the first column.  Normally SYS$INPUT is the
+	command file.
+  4.	Telnet may not currently be run from a non INTERACTIVE session.
+
+2 Examples
+ The following command will connect your terminal to G.CS.CMU.EDU.
+
+	$ TELNET/ESCAPE=CONTROL-A G.CS.CMU.EDU
+ To return to the local host , you can logout, or use a telnet
+ escape command.
+
+2 New_Features
+ Added by:	John Clement
+		Bonner Lab
+		Rice University
+		Houston, Tx
+
+ New Features:
+
+ The terminal type, window size negotiation has been fixed.  If you are
+ using this on a workstation and you change the window size,  the window
+ size will be also changed on the remote host.
+
+ If a remote node says it won't echo characters then Telnet will use
+ Line mode.
+
+ Line mode now works fairly well.
+
+ The Show command has been extended.
+
+ New Qualifiers:
+
+	/[NO]AUTOFLUSH Select autoflush mode
+	/[NO]EIGHTBIT will allow 8-bit date to be transmitted without
+		using binary mode.
+	/[NO]GENERIC will set LOCALCHARS.
+	/END_OF_LINE={LF|NULL] will set the end of line terminator.
+	/LOG=filename will put all output into a log file
+	/NOESCAPE turns off the escape character.
+	/[NO]QUIET	Turns off many messages
+	/[NO]AYT /[NO]AO /[NO]BRK /[NO]EC /[NO]EL /[NO]IP /[NO]SYNCH
+		allow you to change other LOCALCHARS.
+
+
+ New Extended commands:
+	ATTACH process_name
+	SET LOG filename /ENABLE/DISABLE/CLOSE/ALL_LOG
+	SET END_OF_LINE {LF|NULL}	Select end of line
+	SET COMMAND AYT			Select AYT key
+	SET COMMAND SYNCH		Selects Purge input character
+	SET COMMAND LECHO		Select echo Local key
+	SET QUIET {ON|OFF}		Turn on or off informational messages
+	SET URGENT {ON|OFF}		Change Urgent mode for IP, BRK, SYNCH
+	SEND SYNCH			Kill unsolicited input
+
+ New single key commands:
+	E	Toggle local echo mode (On/Off)
+	L	Toggle Logging (On/Off)
+
+
+2 Errors
+    Most error messages are self explanatory.
+    The folowing messages may need some extra explanaton:
+
+    GET_INET	<Did not find any Internet device>
+		Probably CMU-OpenVMS/IP has not been started or the IPACP has
+		exited.  Contact your system manager.
+
+    NOT_TERM	<Can't run Telnet on non-terminal device>
+		You attempted to run Telnet in a batch process or
+		you have redefined SYS$COMMAND
+
+2 Fixes
+ Nov 1991 - J. Clement - /TERMINAL_TYPE
+	VT100 was sent instead of actual type if the requested type was
+	rejected.  This was fixed so the actual type is sent.
+
+ Most of the Telnet fatal exits have been removed.  In particular the
+ various options may be set by telnet commands even when no connection
+ is currently available.
+
+ The Crash when SET SYNCH ON has been fixed.
+
+2 Bugs
+
+ 1.	Command SET FILE does not work
+
+ Note
+ ----
+
+ It is important that both TTSYNC and HOSTSYNC be enabled either on the
+ Telnet client (Local host) or the server (Remote host).  If both are
+ disabled, then Telnet may hang up.
+
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNET.HLP
+!  *1     5-MAR-1991 19:02:41 SYNFUL "VMS help library file for the Telnet utility"
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNET.HLP
+

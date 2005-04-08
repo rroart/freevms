@@ -1,0 +1,75 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+    Print (			! Test message facilities
+	LANGUAGE (BLISS32),
+	LIST (NOEXPAND,ASSEMBLY,NOBINARY),
+	IDENT = 'V01-001'
+	) =
+BEGIN
+!++
+! Print.B32	Copyright (c) 1986	Carnegie Mellon University
+!
+! Facility:
+!	Local Runtime Library:
+!
+! Abstract:
+!	A simple User level output routine.
+!
+! Environment:
+!	VAX/VMS operating system and runtime library, user mode process.
+!
+! Author:
+!	Dale Moore CMU-CSD Jan 1983
+!
+! Revision History:
+!
+!--
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+
+GLOBAL ROUTINE Print_Help (Control_string, P1)=
+    BEGIN
+    EXTERNAL ROUTINE
+	LIB$PUT_OUTPUT	: ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Out_Buffer	: VECTOR[256, BYTE],
+	Out_Desc	: BLOCK[8, BYTE],
+	Status;
+
+    Out_Desc[DSC$B_CLASS] = DSC$K_CLASS_Z;
+    Out_Desc[DSC$B_DTYPE] = DSC$K_DTYPE_Z;
+    Out_Desc[DSC$W_LENGTH] = %ALLOCATION (Out_Buffer);
+    Out_Desc[DSC$A_POINTER] = Out_Buffer;
+    Status = $FAOL (
+	CTRSTR = .Control_String,
+	OUTLEN = Out_Desc[DSC$W_LENGTH],
+	OUTBUF = Out_Desc,
+	PRMLST = P1);
+    IF NOT .Status THEN RETURN .Status;
+    LIB$PUT_OUTPUT(Out_Desc)
+    END;
+END
+ELUDOM
+!  DEC/CMS REPLACEMENT HISTORY, Element PRINT.B32
+!  *1     5-MAR-1991 18:59:54 SYNFUL "A simple user level output routine"
+!  DEC/CMS REPLACEMENT HISTORY, Element PRINT.B32

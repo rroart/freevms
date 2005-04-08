@@ -1,0 +1,58 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+!++
+! CLI.R32	Copyright (c) 1986	CMU-CS/RI
+!
+! Description:
+!
+!	Definitions for the Command Line Interpreter Utility.
+!
+! Written By:	Dale Moore	CMU-CS/RI
+!
+! Modifications:
+!
+!--
+
+EXTERNAL LITERAL
+    CLI$_INVROUT,
+    CLI$_NORMAL,
+    CLI$_IVVERB,
+    CLI$_ABVERB,
+    CLI$_IVKEYW,
+    CLI$_NOCOMD,
+    CLI$_COMMA,
+    CLI$_LOCPRES,
+    CLI$_LOCNEG,
+    CLI$_CONCAT,
+    CLI$_NEGATED,
+    CLI$_DEFAULTED,
+    CLI$_ABSENT,
+    CLI$_PRESENT;
+
+EXTERNAL ROUTINE
+    CLI$PRESENT: BLISS ADDRESSING_MODE(GENERAL),
+    CLI$GET_VALUE: BLISS ADDRESSING_MODE(GENERAL),
+    CLI$DCL_PARSE: BLISS ADDRESSING_MODE(GENERAL),
+    CLI$DISPATCH: BLISS ADDRESSING_MODE(GENERAL);
+!  DEC/CMS REPLACEMENT HISTORY, Element CLI.R32
+!  *1     5-MAR-1991 18:55:53 SYNFUL "Definitions for the Command Line Interpreter Utility"
+!  DEC/CMS REPLACEMENT HISTORY, Element CLI.R32

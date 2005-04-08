@@ -1,0 +1,1990 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+    Telnet_Common (
+	LANGUAGE (BLISS32),
+	ZIP,OPTIMIZE,OPTLEVEL=3,
+	LIST (NOEXPAND, ASSEMBLY, BINARY),
+	IDENT = 'V3.2') =
+BEGIN
+
+!++
+! Telnet_Common.B32
+!
+! Description:
+!
+!	Common routines for telnet and telnet_server
+!
+! Written By:
+!
+!	Dale Moore	15-DEC-1986	CMU-CS/RI
+!
+! Modifications:
+!
+!	13-Aug-1990     Henry W. Miller USBR
+!	Added toggle code for TELNET_EOL_TYPE.
+!
+!	12-Jan-1988	Bruce Miller	CMU Network Development
+!	Get_Telnet_Term_Type() now returns an index into Term_Tab.
+!	Add a field to Term_Tab entries which specifies what entry
+!	to try next.
+!
+!	02-SEP-1987	Dale Moore	CMU-CS/RI
+!	Changed the Wont and Dont option handling.
+!	The spec says ...
+!		Clearly, a party may refuse a request to enable,
+!		and must never refuse a request to disable some
+!		option since all parties must be prepared to support
+!		the NVT.
+!
+!	Nov-1991	John Clement	Rice University
+!	Added Terminal type VT400
+!	Removed all Prefix DEC- from terminal type as it does not work
+!	To many systems.  In additon neither Wollengong nor Multinet use it!
+!
+!	If Negotate_option called and no connection set up a preference.
+!	And do not negotiate.
+!--
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETERROR';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETWORK';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETAUX';
+LIBRARY 'TELNET';
+LIBRARY 'OPTION';
+
+%IF Telnet$K_Debug
+    %THEN
+    LIBRARY 'CMUIP_SRC:[CENTRAL]NETAUX';
+    %FI
+
+EXTERNAL
+    Flag_Debug;
+
+LITERAL
+    Char_Null	= %X'00',
+    Char_LF	= %X'0A',
+    Char_CR	= %X'0D',
+    Char_XOFF	= %X'13',
+    Char_XON	= %X'11';
+
+LITERAL
+!++
+! Description:
+!
+!	The data coming from the network drives a state machine.
+!
+!          |   /---------\
+!          |   |         |
+!          v   v         |
+!	+--------+ Other |
+!       |        |-------/
+!       | Normal |<------------------------------------------------\
+!   /-->|        |<--\                                             |
+!   |   +--------+   | Abort Output                                |
+!   |     | ^        | Noop                     Other              |
+!   |  IAC| |        | Break                    /---\              |
+!   |     | | IAC    | Interrupt                |   |              | SE
+!   |     V |        |                          |   V              |
+!   |   +--------+   |     +--------+         +--------+  IAC    +--------+
+!   |   |        |---/     |        |         |        |-------->|        |
+!   |   |  IAC   |-------->|   SB   |-------->|   SP   |         |   SE   |
+!   |   |        |    SB   |        |  Any    |        |<--------|        |
+!   |   +--------+         +--------+         +--------+   IAC   +--------+
+!   |     | | | |
+!   |     | | | \--------------------------------------------------\
+!   |     | | \-----------------------------------\                |
+!   |     | \-----------------\                   |                |
+!   |     |                   |                   |                |
+!   |     | Do                | Dont              | Will           | Wont
+!   |     |                   |                   |                |
+!   |     V                   V                   V                V
+!   |   +--------+         +--------+         +--------+         +--------+
+!   |   |        |         |        |         |        |         |        |
+!   |   |   DO   |         |  DONT  |         |  WILL  |         |  WONT  |
+!   |   |        |         |        |         |        |         |        |
+!   |   +--------+         +--------+         +--------+         +--------+
+!   |     |                   |                   |                |
+!   |     | Any               | Any               | Any            | Any
+!   |     |                   |                   |                |
+!   \-----/-------------------/-------------------/----------------/
+!--
+    TCP_State_Normal	= 0,
+    TCP_State_IAC	= 1,
+    TCP_State_SB	= 2,
+    TCP_State_SP	= 3,
+    TCP_State_SE	= 4,
+    TCP_State_WILL	= 5,
+    TCP_State_WONT	= 6,
+    TCP_State_DO	= 7,
+    TCP_State_DONT	= 8;
+
+FORWARD ROUTINE
+    TCP_Read_State_Normal,
+    TCP_Read_State_IAC,
+    TCP_Read_State_SB,
+    TCP_Read_State_SP,
+    TCP_Read_State_SE,
+    TCP_Read_State_Will,
+    TCP_Read_State_Wont,
+    TCP_Read_State_Do,
+    TCP_Read_State_Dont,
+    Noop_Routine;
+
+GLOBAL
+    TT_In_Mask		: Initial (%X'7F'),
+    TT_Out_Mask		: Initial (%X'7F'),
+    TCP_Channel		: WORD UNSIGNED,
+    TCP_Read_Buffer	: VECTOR [1024, BYTE, UNSIGNED],
+    TCP_Read_IOSB	: NetIO_Status_Block,
+    TCP_Read_In_Progress: INITIAL (0),
+    TCP_Reads		: INITIAL (0),
+    TCP_Read_Bytes	: INITIAL (0),
+    TCP_Write_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+ 				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= 0),
+    TCP_Write_In_Progress: INITIAL (0),
+    TCP_Write_IOSB	: NetIO_Status_Block,
+    TCP_Writes		: INITIAL (0),
+    TCP_Write_Bytes	: INITIAL (0),
+    TCP_Write_Urgent	: INITIAL (0),
+
+    Default_Option_Table	: $BBLOCK [Option$K_Size] PRESET (
+			[Option$V_State]	= Option$K_State_Off,
+			[Option$V_Negotiating]	= Option$K_Not_Negotiating,
+			[Option$V_Prefer]	= Option$K_Prefer_Off,
+			[Option$L_Turn_On]	= Noop_Routine,
+			[Option$L_Turn_Off]	= Noop_Routine,
+			[Option$L_SubOption]	= Noop_Routine);
+
+GLOBAL
+    Local_Host	:  $BBLOCK[DSC$K_S_BLN] PRESET(
+			[DSC$W_LENGTH] = 0,
+			[DSC$B_DTYPE] = DSC$K_DTYPE_T,
+			[DSC$B_Class] = DSC$K_CLASS_D,
+			[DSC$A_POINTER] = 0),
+    Local_Address	: LONG,
+    Local_TTY		: LONG,
+    Local_Location	: $BBLOCK[DSC$K_S_BLN] PRESET(
+			[DSC$W_LENGTH] = 0,
+			[DSC$B_DTYPE] = DSC$K_DTYPE_T,
+			[DSC$B_CLASS] = DSC$K_CLASS_D,
+			[DSC$A_POINTER] = 0),
+    Remote_Host	: $BBLOCK[DSC$K_S_BLN] PRESET(
+			[DSC$W_LENGTH] = 0,
+			[DSC$B_DTYPE] = DSC$K_DTYPE_T,
+			[DSC$B_Class] = DSC$K_CLASS_D,
+			[DSC$A_POINTER] = 0);
+
+
+
+GLOBAL
+    Option_Names :	VECTOR [Option$K_Number_Of_Options+1]
+    PRESET (
+	[Option$K_Binary] 		= %ASCID'Transmit-Binary',
+	[Option$K_Echo] 		= %ASCID'Echo',
+	[Option$K_Reconnect] 		= %ASCID'Reconnect',
+	[Option$K_SUPRGA] 		= %ASCID'Suppress-Go-Ahead',
+	[Option$K_Size_Negotiation] 	= %ASCID'Size_Negotiation',
+	[Option$K_Status] 		= %ASCID'Status',
+	[Option$K_Timing_Mark] 		= %ASCID'Timing-Mark',
+	[Option$K_Remote_Trans_Echo] 	= %ASCID'Remote_Trans_Echo',
+	[Option$K_Line_Width] 		= %ASCID'Line_Width',
+	[Option$K_Page_Size] 		= %ASCID'Page_Size',
+	[Option$K_CR_Disposition] 	= %ASCID'CR_Disposition',
+	[Option$K_Tab_Stops] 		= %ASCID'Tab_Stops',
+	[Option$K_Tab_Disposition] 	= %ASCID'Tab_Disposition',
+	[Option$K_FF_Disposition] 	= %ASCID'FF_Disposition',
+	[Option$K_Vertical_Tabs] 	= %ASCID'Vertical_Tabs',
+	[Option$K_VT_Disposition] 	= %ASCID'VT_Disposition',
+	[Option$K_LF_Disposition] 	= %ASCID'LF_Disposition',
+	[Option$K_Extended_Ascii] 	= %ASCID'Extended_Ascii',
+	[Option$K_Logout] 		= %ASCID'Logout',
+	[Option$K_Byte_Macro] 		= %ASCID'Byte_Macro',
+	[Option$K_Data_Entry] 		= %ASCID'Data_Entry',
+	[Option$K_SUPDUP] 		= %ASCID'SUPDUP',
+	[Option$K_SUPDUP_Output] 	= %ASCID'SUPDUP_Output',
+	[Option$K_Location] 		= %ASCID'Location',
+	[Option$K_Terminal_Type] 	= %ASCID'Terminal_Type',
+	[Option$K_End_of_Record] 	= %ASCID'End_of_Record',
+	[Option$K_User_Id] 		= %ASCID'User_Id',
+	[Option$K_Output_Marking] 	= %ASCID'Output_Marking',
+	[Option$K_Location_Number] 	= %ASCID'Location_Number',
+	[Option$K_3270_Regime]	 	= %ASCID'3270_Regime',
+	[Option$K_X3_PAD]	 	= %ASCID'X3_PAD',
+	[Option$K_Window_Size]	 	= %ASCID'Window_Size',
+	[Option$K_Terminal_Speed] 	= %ASCID'Terminal_Speed',
+	[Option$K_Toggle_Flow_Control] 	= %ASCID'Toggle_Flow_Control',
+	[Option$K_Linemode] 		= %ASCID'Linemode',
+	[Option$K_X_Display_Location] 	= %ASCID'X_Display_Location',
+	[Option$K_Number_Of_Options]	= %ASCID'Undefined option'
+    );
+
+
+
+GLOBAL
+    SLC_Table :	BLOCKVECTOR [Option$K_Limemode_SLC_MaxOpt+1, SLC$K_Size, BYTE]
+    PRESET (
+	[SLC_SYNCH,SLC$B_DEFAULT] 	= 0,
+	[SLC_SYNCH,SLC$F_LEVEL] 	= SLC_DEFAULT,
+
+	[SLC_BRK,SLC$B_DEFAULT] 	= 0,
+	[SLC_BRK,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_IP,SLC$B_DEFAULT] 		= %O'03',	! Control-C
+	[SLC_IP,SLC$F_LEVEL] 		= SLC_DEFAULT,
+
+	[SLC_AO,SLC$B_DEFAULT]	 	= %O'17',	! Control-O
+	[SLC_AO,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_AYT,SLC$B_DEFAULT] 	= %O'24',	! Control-T,
+	[SLC_AYT,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_EOR,SLC$B_DEFAULT] 	= 0,
+	[SLC_EOR,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_ABORT,SLC$B_DEFAULT] 	= %O'31',	! Control-Y
+	[SLC_ABORT,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_EOF,SLC$B_DEFAULT] 	= %O'32',	! Control-Z
+	[SLC_EOF,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_SUSP,SLC$B_DEFAULT] 	= 0,
+	[SLC_SUSP,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_EC,SLC$B_DEFAULT] 		= %O'177',	! DEL
+	[SLC_EC,SLC$F_LEVEL] 		= SLC_DEFAULT,
+
+	[SLC_EL,SLC$B_DEFAULT] 		= %O'25',	! Control-U
+	[SLC_EL,SLC$F_LEVEL] 		= SLC_DEFAULT,
+
+	[SLC_EW,SLC$B_DEFAULT] 		= 10,		! Control-J
+	[SLC_EW,SLC$F_LEVEL] 		= SLC_DEFAULT,
+
+	[SLC_RP,SLC$B_DEFAULT] 		= %O'22',	! Control-R
+	[SLC_RP,SLC$F_LEVEL] 		= SLC_DEFAULT,
+
+	[SLC_LNEXT,SLC$B_DEFAULT] 	= 0,
+	[SLC_LNEXT,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_XON,SLC$B_DEFAULT] 	= %O'21',       ! Control-Q
+	[SLC_XON,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_XOFF,SLC$B_DEFAULT] 	= %O'23',       ! Control-S
+	[SLC_XOFF,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_FORW1,SLC$B_DEFAULT] 	= 0,
+	[SLC_FORW1,SLC$F_LEVEL]	 	= SLC_DEFAULT,
+
+	[SLC_FORW2,SLC$B_DEFAULT] 	= 0,
+	[SLC_FORW2,SLC$F_LEVEL]	 	= SLC_DEFAULT
+    );
+
+
+GLOBAL
+    Term_Table :	BLOCKVECTOR [82, TTab$K_Size, BYTE]
+    ! Note that in the presets, whenever a terminal family is defined,
+    ! I send the lowest numbered member of that family.
+    !
+    !	J. Clement (JC)	Dec 1991
+    !	This has been extended to include all terminal types know to DEC
+    !	Bonner Lab, Rice University, Houston, Tx
+    !
+    PRESET (
+	[0,TTab$W_TYPE] = -1,
+	[0,TTab$W_NEXT] = 82,		! The number of entries
+
+!## Family of unknown terminals
+
+	[1,TTab$W_TYPE] = TT$_UNKNOWN,
+	[1,TTab$L_NAME] = %ASCID'UNKNOWN',
+	[1,TTab$W_NEXT] = 1,
+
+	! Obsolete terminals
+
+	[2,TTab$W_TYPE] = TT$_VT05,
+	[2,TTab$L_NAME] = %ASCID'VT05',
+	[2,TTab$W_NEXT] = 2+1,
+	[3,TTab$W_TYPE] = TT$_VT05,
+	[3,TTab$L_NAME] = %ASCID'DEC-VT05',
+	[3,TTab$W_NEXT] = 3,
+
+	! Strange terminals
+
+	[4,TTab$W_TYPE] = TT$_VT80,
+	[4,TTab$L_NAME] = %ASCID'VT80',
+	[4,TTab$W_NEXT] = 4+1,
+	[5,TTab$W_TYPE] = TT$_VT80,
+	[5,TTab$L_NAME] = %ASCID'DEC-VT80',
+	[5,TTab$W_NEXT] = 5,
+
+	[6,TTab$W_TYPE] = TT$_TQ_BTS,
+	[6,TTab$L_NAME] = %ASCID'TQ_BTS',
+	[6,TTab$W_NEXT] = 6,
+
+	[7,TTab$W_TYPE] = TT$_TEK401X,
+	[7,TTab$L_NAME] = %ASCID'TEK',
+	[7,TTab$W_NEXT] = 7,
+
+	! Foreign Terminals
+
+	[8,TTab$W_TYPE] = TT$_FT1,
+	[8,TTab$L_NAME] = %ASCID'FT1',
+	[8,TTab$W_NEXT] = 8+1,
+	[9,TTab$W_TYPE] = TT$_FT1,
+	[9,TTab$L_NAME] = %ASCID'DEC-FT1',
+	[9,TTab$W_NEXT] = 9,
+
+	[10,TTab$W_TYPE] = TT$_FT2,
+	[10,TTab$L_NAME] = %ASCID'FT2',
+	[10,TTab$W_NEXT] = 10+1,
+	[11,TTab$W_TYPE] = TT$_FT2,
+	[11,TTab$L_NAME] = %ASCID'DEC-FT2',
+	[11,TTab$W_NEXT] = 11,
+
+	[12,TTab$W_TYPE] = TT$_FT3,
+	[12,TTab$L_NAME] = %ASCID'FT3',
+	[12,TTab$W_NEXT] = 12+1,
+	[13,TTab$W_TYPE] = TT$_FT3,
+	[13,TTab$L_NAME] = %ASCID'DEC-FT3',
+	[13,TTab$W_NEXT] = 13,
+
+	[14,TTab$W_TYPE] = TT$_FT4,
+	[14,TTab$L_NAME] = %ASCID'FT4',
+	[14,TTab$W_NEXT] = 14+1,
+	[15,TTab$W_TYPE] = TT$_FT4,
+	[15,TTab$L_NAME] = %ASCID'DEC-FT4',
+	[15,TTab$W_NEXT] = 15,
+
+	[16,TTab$W_TYPE] = TT$_FT5,
+	[16,TTab$L_NAME] = %ASCID'FT5',
+	[16,TTab$W_NEXT] = 16+1,
+	[17,TTab$W_TYPE] = TT$_FT5,
+	[17,TTab$L_NAME] = %ASCID'DEC-FT5',
+	[17,TTab$W_NEXT] = 17,
+
+	[18,TTab$W_TYPE] = TT$_FT6,
+	[18,TTab$L_NAME] = %ASCID'FT6',
+	[18,TTab$W_NEXT] = 18+1,
+	[19,TTab$W_TYPE] = TT$_FT6,
+	[19,TTab$L_NAME] = %ASCID'DEC-FT6',
+	[19,TTab$W_NEXT] = 19,
+
+	[20,TTab$W_TYPE] = TT$_FT7,
+	[20,TTab$L_NAME] = %ASCID'FT7',
+	[20,TTab$W_NEXT] = 20+1,
+	[21,TTab$W_TYPE] = TT$_FT7,
+	[21,TTab$L_NAME] = %ASCID'DEC-FT7',
+	[21,TTab$W_NEXT] = 21,
+
+	[22,TTab$W_TYPE] = TT$_FT8,
+	[22,TTab$L_NAME] = %ASCID'FT8',
+	[22,TTab$W_NEXT] = 22+1,
+	[23,TTab$W_TYPE] = TT$_FT8,
+	[23,TTab$L_NAME] = %ASCID'DEC-FT8',
+	[23,TTab$W_NEXT] = 23,
+
+	! Printers
+
+	[24,TTab$W_TYPE] = TT$_LQP02,
+	[24,TTab$L_NAME] = %ASCID'LQP02',
+	[24,TTab$W_NEXT] = 24,
+
+	[25,TTab$W_TYPE] = TT$_LN03,
+	[25,TTab$L_NAME] = %ASCID'LN03',
+	[25,TTab$W_NEXT] = 25,
+
+	[26,TTab$W_TYPE] = TT$_LN01K,
+	[26,TTab$L_NAME] = %ASCID'LN01K',
+	[26,TTab$W_NEXT] = 26,
+
+	! This should be DEC stuff
+
+!## Family of harcopy terminals
+
+	[27,TTab$W_TYPE] = TT$_LAX,
+	[27,TTab$L_NAME] = %ASCID'LAX',
+	[27,TTab$W_NEXT] = 27+1,
+	[28,TTab$W_TYPE] = TT$_LAX,
+	[28,TTab$L_NAME] = %ASCID'DEC-LAX',
+	[28,TTab$W_NEXT] = 28,
+
+	[29,TTab$W_TYPE] = TT$_LA120,
+	[29,TTab$L_NAME] = %ASCID'LA120',
+	[29,TTab$W_NEXT] = 29+1,
+	[30,TTab$W_TYPE] = TT$_LA120,
+	[30,TTab$L_NAME] = %ASCID'DEC-LA120',
+	[30,TTab$W_NEXT] = 27,
+
+	[31,TTab$W_TYPE] = TT$_LA12,
+	[31,TTab$L_NAME] = %ASCID'LA12',
+	[31,TTab$W_NEXT] = 31+1,
+	[32,TTab$W_TYPE] = TT$_LA12,
+	[32,TTab$L_NAME] = %ASCID'DEC-LA12',
+	[32,TTab$W_NEXT] = 27,
+
+	[33,TTab$W_TYPE] = TT$_LA100,
+	[33,TTab$L_NAME] = %ASCID'LA100',
+	[33,TTab$W_NEXT] = 33+1,
+	[34,TTab$W_TYPE] = TT$_LA100,
+	[34,TTab$L_NAME] = %ASCID'DEC-LA100',
+	[34,TTab$W_NEXT] = 27,
+
+	[35,TTab$W_TYPE] = TT$_LA24,
+	[35,TTab$L_NAME] = %ASCID'LA24',
+	[35,TTab$W_NEXT] = 35+1,
+	[36,TTab$W_TYPE] = TT$_LA24,
+	[36,TTab$L_NAME] = %ASCID'DEC-LA24',
+	[36,TTab$W_NEXT] = 27,
+
+	[37,TTab$W_TYPE] = TT$_LA84,
+	[37,TTab$L_NAME] = %ASCID'LA84',
+	[37,TTab$W_NEXT] = 37+1,
+	[38,TTab$W_TYPE] = TT$_LA84,
+	[38,TTab$L_NAME] = %ASCID'DEC-LA84',
+	[38,TTab$W_NEXT] = 27,
+
+	[39,TTab$W_TYPE] = TT$_LA210,
+	[39,TTab$L_NAME] = %ASCID'LA210',
+	[39,TTab$W_NEXT] = 39+1,
+	[40,TTab$W_TYPE] = TT$_LA210,
+	[40,TTab$L_NAME] = %ASCID'DEC-LA210',
+	[40,TTab$W_NEXT] = 27,
+
+	[41,TTab$W_TYPE] = TT$_LA80,
+	[41,TTab$L_NAME] = %ASCID'LA80',
+	[41,TTab$W_NEXT] = 41+1,
+	[42,TTab$W_TYPE] = TT$_LA80,
+	[42,TTab$L_NAME] = %ASCID'DEC-LA80',
+	[42,TTab$W_NEXT] = 27,
+
+!## Sub Family
+
+	[43,TTab$W_TYPE] = TT$_LA34,
+	[43,TTab$L_NAME] = %ASCID'LA34',
+	[43,TTab$W_NEXT] = 43+1,
+	[44,TTab$W_TYPE] = TT$_LA34,
+	[44,TTab$L_NAME] = %ASCID'DEC-LA34',
+	[44,TTab$W_NEXT] = 27,
+
+!## Sub Sub Family
+
+	[45,TTab$W_TYPE] = TT$_LA36,
+	[45,TTab$L_NAME] = %ASCID'LA36',
+	[45,TTab$W_NEXT] = 45+1,
+	[46,TTab$W_TYPE] = TT$_LA36,
+	[46,TTab$L_NAME] = %ASCID'DEC-LA36',
+	[46,TTab$W_NEXT] = 43,
+
+	[47,TTab$W_TYPE] = TT$_LA38,
+	[47,TTab$L_NAME] = %ASCID'LA38',
+	[47,TTab$W_NEXT] = 47+1,
+	[48,TTab$W_TYPE] = TT$_LA38,
+	[48,TTab$L_NAME] = %ASCID'DEC-LA38',
+	[48,TTab$W_NEXT] = 45,
+
+
+!## Family of VT5X video terminals
+
+	[49,TTab$W_TYPE] = TT$_VT5X,
+	[49,TTab$L_NAME] = %ASCID'VT5X',
+	[49,TTab$W_NEXT] = 49+1,
+	[50,TTab$W_TYPE] = TT$_VT5X,
+	[50,TTab$L_NAME] = %ASCID'DEC-VT5X',
+	[50,TTab$W_NEXT] = 50,
+
+	[51,TTab$W_TYPE] = TT$_VT52,
+	[51,TTab$L_NAME] = %ASCID'VT52',
+	[51,TTab$W_NEXT] = 51+1,
+	[52,TTab$W_TYPE] = TT$_VT52,
+	[52,TTab$L_NAME] = %ASCID'DEC-VT52',
+	[52,TTab$W_NEXT] = 49,
+
+	[53,TTab$W_TYPE] = TT$_VT55,
+	[53,TTab$L_NAME] = %ASCID'VT55',
+	[53,TTab$W_NEXT] = 53+1,
+	[54,TTab$W_TYPE] = TT$_VT55,
+	[54,TTab$L_NAME] = %ASCID'DEC-VT55',
+	[54,TTab$W_NEXT] = 49,
+
+	! The neXt three entries should be 'DEC-VT10n',
+	! but I wanted it to actually work.
+
+!## Family of ANSI terminals
+! ANSI terminals With optional AVO
+
+	[55,TTab$W_TYPE] = TT$_VT100,
+	[55,TTab$L_NAME] = %ASCID'VT100',
+	[55,TTab$W_NEXT] = 55+1,
+	[56,TTab$W_TYPE] = TT$_VT100,
+	[56,TTab$L_NAME] = %ASCID'DEC-VT100',
+	[56,TTab$W_NEXT] = 56,
+
+	[57,TTab$W_TYPE] = TT$_VT105,
+	[57,TTab$L_NAME] = %ASCID'VT105',
+	[57,TTab$W_NEXT] = 57+1,
+	[58,TTab$W_TYPE] = TT$_VT105,
+	[58,TTab$L_NAME] = %ASCID'DEC-VT105',
+	[58,TTab$W_NEXT] = 55,
+
+	[59,TTab$W_TYPE] = TT$_VT125,
+	[59,TTab$L_NAME] = %ASCID'VT125',
+	[59,TTab$W_NEXT] = 59+1,
+	[60,TTab$W_TYPE] = TT$_VT125,
+	[60,TTab$L_NAME] = %ASCID'DEC-VT125',
+	[60,TTab$W_NEXT] = 55,
+
+! ANSI terminals Without AVO
+
+	[61,TTab$W_TYPE] = TT$_VT101,
+	[61,TTab$L_NAME] = %ASCID'VT101',
+	[61,TTab$W_NEXT] = 61+1,
+	[62,TTab$W_TYPE] = TT$_VT101,
+	[62,TTab$L_NAME] = %ASCID'DEC-VT101',
+	[62,TTab$W_NEXT] = 55,
+
+! ANSI terminals With AVO
+
+	[63,TTab$W_TYPE] = TT$_VT102,
+	[63,TTab$L_NAME] = %ASCID'VT102',
+	[63,TTab$W_NEXT] = 63+1,
+	[64,TTab$W_TYPE] = TT$_VT102,
+	[64,TTab$L_NAME] = %ASCID'DEC-VT102',
+	[64,TTab$W_NEXT] = 55,
+
+	[65,TTab$W_TYPE] = TT$_VT131,
+	[65,TTab$L_NAME] = %ASCID'VT131',
+	[65,TTab$W_NEXT] = 65+1,
+	[66,TTab$W_TYPE] = TT$_VT131,
+	[66,TTab$L_NAME] = %ASCID'DEC-VT131',
+	[66,TTab$W_NEXT] = 55,
+
+	[67,TTab$W_TYPE] = TT$_VT132,
+	[67,TTab$L_NAME] = %ASCID'VT132',
+	[67,TTab$W_NEXT] = 67+1,
+	[68,TTab$W_TYPE] = TT$_VT132,
+	[68,TTab$L_NAME] = %ASCID'DEC-VT132',
+	[68,TTab$W_NEXT] = 55,
+
+	[69,TTab$W_TYPE] = TT$_VT173,
+	[69,TTab$L_NAME] = %ASCID'VT173',
+	[69,TTab$W_NEXT] = 69+1,
+	[70,TTab$W_TYPE] = TT$_VT173,
+	[70,TTab$L_NAME] = %ASCID'DEC-VT173',
+	[70,TTab$W_NEXT] = 55,
+
+	[71,TTab$W_TYPE] = TT$_VK100,
+	[71,TTab$L_NAME] = %ASCID'VK100',
+	[71,TTab$W_NEXT] = 71+1,
+	[72,TTab$W_TYPE] = TT$_VK100,
+	[72,TTab$L_NAME] = %ASCID'DEC-VK100',
+	[72,TTab$W_NEXT] = 55,
+
+	[73,TTab$W_TYPE] = TT$_Pro_Series,
+	[73,TTab$L_NAME] = %ASCID'DECPRO',
+	[73,TTab$W_NEXT] = 73+1,
+	[74,TTab$W_TYPE] = TT$_Pro_Series,
+	[74,TTab$L_NAME] = %ASCID'PRO',
+	[74,TTab$W_NEXT] = 74+1,
+	[75,TTab$W_TYPE] = TT$_Pro_Series,
+	[75,TTab$L_NAME] = %ASCID'DEC-PRO',
+	[75,TTab$W_NEXT] = 55,
+
+!## Sub Family VT200_series
+
+	[76,TTab$W_TYPE] = TT$_VT200_Series,
+	[76,TTab$L_NAME] = %ASCID'VT200',
+	[76,TTab$W_NEXT] = 76+1,
+	[77,TTab$W_TYPE] = TT$_VT200_Series,
+	[77,TTab$L_NAME] = %ASCID'DEC-VT200',
+	[77,TTab$W_NEXT] = 55,
+
+
+!## Sub Sub Family VT300_series
+
+	[78,TTab$W_TYPE] = TT$_VT300_Series,
+	[78,TTab$L_NAME] = %ASCID'VT300',
+	[78,TTab$W_NEXT] = 78+1,
+	[79,TTab$W_TYPE] = TT$_VT300_Series,
+	[79,TTab$L_NAME] = %ASCID'DEC-VT300',
+	[79,TTab$W_NEXT] = 76,
+
+!## Sub Sub Sub Family VT400_series
+
+	[80,TTab$W_TYPE] = TT$_VT400_Series,
+	[80,TTab$L_NAME] = %ASCID'VT400',
+	[80,TTab$W_NEXT] = 80+1,
+	[81,TTab$W_TYPE] = TT$_VT400_Series,
+	[81,TTab$L_NAME] = %ASCID'DEC-VT400',
+	[81,TTab$W_NEXT] = 78
+	);
+
+
+
+GLOBAL	! height and width of the display
+    term_rows    : INITIAL(0),
+    term_columns : INITIAL(0);
+
+OWN
+    TCP_State		: INITIAL (TCP_State_Normal),
+    TCP_State_Routine	: VECTOR [9] PRESET (
+		[TCP_State_Normal]	= TCP_Read_State_Normal,
+		[TCP_State_IAC]		= TCP_Read_State_IAC,
+		[TCP_State_SB]		= TCP_Read_State_SB,
+		[TCP_State_SP]		= TCP_Read_State_SP,
+		[TCP_State_SE]		= TCP_Read_State_SE,
+		[TCP_State_Will]	= TCP_Read_State_Will,
+		[TCP_State_Wont]	= TCP_Read_State_Wont,
+		[TCP_State_Do]		= TCP_Read_State_Do,
+		[TCP_State_Dont]	= TCP_Read_State_Dont),
+
+    TCP_SubOption,
+    TCP_SubOption_Param	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 0,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+ 				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= 0);
+
+GLOBAL
+    ! When 1, discard incoming data from the net.
+    Flag_AO : INITIAL(0),
+
+    ! When 1, don't send incoming data from net to the terminal (yet).
+    Flag_Suspend : INITIAL(0);
+
+
+
+GLOBAL ROUTINE Set_Data_Blocking_State (State) =
+!++
+!	When this state is on (State == 1), normal (non-IAC'd) data
+!	received from the net will not be discarded.
+!	Setting the State to 0 will resume normal data passing.
+!	This is usefull when we want to ignore data for a while,
+!	as we do when we are performing a telnet command with autoflush
+!	on.
+!--
+BEGIN
+    Flag_AO = .State
+END;
+
+
+
+GLOBAL ROUTINE Set_Data_Suspension_State (State) =
+!++
+!	When this state is on (State == 1), normal (non-IAC'd) data
+!	received from the net will not be sent on to the terminal immediately.
+!	Setting the State to 0 will resume normal data passing.
+!	This is usefull when we want to suspend data for a while,
+!	as we do when we are locally handling XON/XOFF.
+!--
+BEGIN
+    Flag_Suspend = .State
+END;
+
+
+
+ROUTINE Option_Name ( option ) =
+! Returns a pointer to an option name descriptor, given an option number.
+BEGIN
+    IF (.option LSS 0) OR (.option GTR Option$K_Number_Of_Options-1) THEN
+       Signal( TELNET$_OPTION_OOR, 1, .option )
+    ELSE RETURN( .Option_Names[.option] );
+    .Option_Names[Option$K_Number_Of_Options]
+END;
+
+
+
+GLOBAL ROUTINE Get_Telnet_Terminal_Type (Type_Index_A) =
+!++
+! Functional Description:
+!
+!	Convert what VMS knows as a terminal type (by possibly using SMG)
+!	to a terminal type that TELNET knows about.
+!--
+    BEGIN
+    BIND
+	Type_Index = .Type_Index_A;
+    EXTERNAL ROUTINE
+	LIB$GETDVI	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	i,type,
+	Status;
+
+    Status = LIB$GETDVI (%REF(DVI$_DEVTYPE),0,%ASCID'SYS$OUTPUT',type,0,0);
+    IF NOT .Status THEN Signal (.Status);
+
+    ! search for term_type number in Term_Table.
+    INCR i FROM 1 TO .Term_Table[0,TTab$W_NEXT] DO
+	IF .Term_Table[.i,TTab$W_TYPE] EQL .type THEN
+	   BEGIN
+	   Type_Index = .i;
+	   RETURN( SS$_NORMAL )
+	   END;
+
+    Type_Index = 0;
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Init_Term_Table : NOVALUE =
+!++
+! Functional Description:
+!
+!	Fill in the terminal name in the Term_Tab list.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Synch,
+	Flag_Line_mode,
+	Flag_Localchars,
+	TT_Escape_table : VECTOR [256, BYTE, UNSIGNED],
+	TT_Escape_Key,
+	TT_AO_Key,
+	TT_AYT_Key,
+	TT_Brk_Key,
+	TT_EC_Key,
+	TT_Echo_Key,
+	TT_EL_Key,
+	TT_IP_Key,
+	TT_Synch_Key,
+	TT_Xon_Key,
+	TT_Xoff_key;
+    LOCAL
+	Status,
+	I;
+
+    INCR I FROM 0 TO 255 DO tt_Escape_Table[.i] = 0;
+
+    IF .TT_Escape_Key GEQ 0 AND .TT_Escape_Key LEQ 255 THEN
+		TT_Escape_TABLE[.TT_Escape_Key] = 1;
+    Status = 0;
+    IF .Flag_Localchars OR .Flag_Line_mode
+    THEN BEGIN
+	Status = .Status + .TT_Escape_TABLE[.TT_AO_Key];
+	IF .TT_AO_Key GEQ 0 AND .TT_AO_Key LEQ 255 THEN
+		TT_Escape_TABLE[.TT_AO_Key] = 1;
+	Status = .Status + .TT_Escape_TABLE[.TT_AYT_Key];
+	IF .TT_AYT_Key GEQ 0 AND .TT_AYT_Key LEQ 255 THEN
+		TT_Escape_TABLE[.TT_AYT_Key] = 1;
+	Status = .Status + .TT_Escape_TABLE[.TT_Brk_Key];
+	IF .TT_Brk_Key GEQ 0 AND .TT_Brk_Key LEQ 255 THEN
+		TT_Escape_TABLE[.TT_Brk_Key] = 1;
+	IF NOT .Flag_Line_mode THEN BEGIN
+		Status = .Status + .TT_Escape_TABLE[.TT_Ec_Key];
+		IF .TT_Ec_Key GEQ 0 AND .TT_Ec_Key LEQ 255 THEN
+			TT_Escape_TABLE[.TT_Ec_Key] = 1;
+		Status = .Status + .TT_Escape_TABLE[.TT_El_Key];
+		IF .TT_El_Key GEQ 0 AND .TT_El_Key LEQ 255 THEN
+			TT_Escape_TABLE[.TT_El_Key] = 1;
+		END;
+	Status = .Status + .TT_Escape_TABLE[.TT_Echo_Key];
+	IF .TT_Echo_Key GEQ 0 AND .TT_Echo_Key LEQ 255 THEN
+		TT_Escape_TABLE[.TT_Echo_Key] = 1;
+	Status = .Status + .TT_Escape_TABLE[.TT_Ip_Key];
+	IF .TT_Ip_Key GEQ 0 AND .TT_Ip_Key LEQ 255 THEN
+		TT_Escape_TABLE[.TT_Ip_Key] = 1;
+	Status = .Status + .TT_Escape_TABLE[.TT_Synch_Key];
+	IF .TT_Synch_Key GEQ 0 AND .TT_Synch_Key LEQ 255 THEN
+		TT_Escape_TABLE[.TT_Synch_Key] = 1;
+	END;
+
+    IF .Flag_Synch
+    THEN BEGIN
+	Status = .Status + .TT_Escape_TABLE[.TT_Xon_Key];
+	IF .TT_Xon_Key GEQ 0 AND .TT_Xon_Key LEQ 255 THEN
+		TT_Escape_TABLE[.TT_Xon_Key] = 1;
+	Status = .Status + .TT_Escape_TABLE[.TT_Xoff_Key];
+	IF .TT_Xoff_Key GEQ 0 AND .TT_Xoff_Key LEQ 255 THEN
+		TT_Escape_TABLE[.TT_Xoff_Key] = 1;
+	END;
+
+    If .Status NEQ 0 THEN Signal(Telnet$_Duplicate_keys);
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Append_Char (Desc_A, Char) =
+!++
+! Functional Description:
+!
+!	Append a character to the end of descriptor.
+!--
+    BEGIN
+    BIND
+	Desc	= .Desc_A	: $BBLOCK;
+    EXTERNAL ROUTINE
+	STR$APPEND	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Char_Desc	: $BBLOCK [DSC$K_S_BLN] PRESET (
+				[DSC$W_LENGTH]	= 1,
+				[DSC$B_DTYPE]	= DSC$K_DTYPE_T,
+				[DSC$B_CLASS]	= DSC$K_CLASS_D,
+				[DSC$A_POINTER]	= Char),
+	Status;
+
+    Status = STR$APPEND (Desc, Char_Desc);
+    IF NOT .Status THEN Signal (.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+FORWARD ROUTINE TCP_Write_Ast;
+
+GLOBAL ROUTINE Do_TCP_Write =
+!++
+! Functional Description:
+!
+!	Write whatever is in the TCP_Write_Desc to the remote system.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	STR$FREE1_DX	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Status;
+
+    IF .TCP_Channel EQL 0 THEN Return (SS$_NOIOCHAN);		! JC
+
+    IF .TCP_Write_In_Progress THEN RETURN (SS$_NORMAL);
+
+    IF .TCP_Write_Desc [DSC$W_LENGTH] EQLU 0 THEN RETURN (SS$_NORMAL);
+
+    TCP_Write_In_Progress = 1;
+
+    TCP_Writes = .TCP_Writes + 1;
+
+    TCP_Write_Bytes = .TCP_Write_Bytes + .TCP_Write_Desc [DSC$W_LENGTH];
+
+    Status = NET$SEND (
+	BufAdrs	= .TCP_Write_Desc [DSC$A_POINTER],
+	BufSize	= .TCP_Write_Desc [DSC$W_LENGTH],
+	IOMODE	= ASYNCH,
+	EOL	= 1,
+	Urgent	= .TCP_Write_Urgent,
+	IOCHAN	= .TCP_Channel,
+	IO$SB	= TCP_Write_IOSB,
+	AST$ADR	= TCP_Write_Ast);
+
+    TCP_Write_Urgent = 0;
+    IF NOT .Status THEN Signal (.Status);
+
+    Status = STR$FREE1_DX (TCP_Write_Desc);
+    IF NOT .Status THEN Signal (.Status);
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TCP_Write_Ast (ASTPRM) =
+!++
+! Functional Description:
+!
+!	Our write on the TCP has finished.  See if we've managed
+!	to get any more data that should be sent to the remote site.
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+    TCP_Write_In_Progress = 0;
+
+    Status = .TCP_Write_IOSB  [NSB$Status];
+
+    IF (.Status EQLU SS$_ABORT) AND
+	(.TCP_Write_IOSB [NSB$XStatus] EQLU NET$_CC)
+	THEN
+	   RETURN( Signal(TELNET$_CLOSED) )
+    ELSE IF (.Status EQLU SS$_ABORT)
+	THEN Signal (TELNET$_TCP_Send, 0, .Status,
+		.TCP_Write_IOSB [NSB$XStatus], 0)
+    ELSE IF NOT .Status
+	THEN Signal (TELNET$_TCP_Send, 0, .Status);
+
+    Do_Tcp_Write ();
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Enqueue_TCP_Misc (First_Byte) =
+!++
+! Functional Description:
+!
+!	Append a single byte command to the TCP write buffer.
+!	Used to implement AYT, AO, etc...
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Debug;
+    LOCAL
+	Status;
+
+    Append_Char (TCP_Write_Desc, Telnet$K_IAC);
+    Append_Char (TCP_Write_Desc, .First_Byte);
+
+    ! Perhaps these should be somewhere else...
+    IF .Flag_Debug
+	THEN BEGIN
+	SELECTONEU .First_Byte OF
+	    SET
+	    [TELNET$K_AO] :
+		Signal (TELNET$_S_COMM, 2, 0, %ASCID'AO (Abort output)');
+	    [TELNET$K_AYT] :
+		Signal (TELNET$_S_COMM, 2, 0, %ASCID'AYT (Are you there?)');
+	    [TELNET$K_BRK] :
+		Signal (TELNET$_S_COMM, 2, 0, %ASCID'BRK (Break/Disconnect)');
+	    [TELNET$K_EC] :
+		Signal (TELNET$_S_COMM, 2, 0, %ASCID'EC (Erase Char)');
+	    [TELNET$K_EL] :
+		Signal (TELNET$_S_COMM, 2, 0, %ASCID'EL (Erase Line)');
+	    [TELNET$K_GA] :
+		Signal (TELNET$_S_COMM, 2, 0, %ASCID'GA (Go Ahead)');
+	    [TELNET$K_IP] :
+		Signal (TELNET$_S_COMM, 2, 0, %ASCID'IP (Interrupt Process)');
+	    [TELNET$K_NOP] :
+		Signal (TELNET$_S_COMM, 2, 0, %ASCID'NOP (No Operation)');
+	    [TELNET$K_Data_Mark] :
+		Signal (TELNET$_S_COMM, 2, 0,
+			%ASCID'SYNCH (Erase Unsolicited Chars)');
+	    [OTHERWISE] :
+		Signal (TELNET$_S_COMM_UNKNOWN, 2, 0, .First_Byte);
+	    TES;
+	END;
+    SS$_NORMAL
+    END;
+
+GLOBAL ROUTINE Send_TCP_Misc (First_Byte) =
+!++
+! Functional Description:
+!
+!	Send a single byte command to remote nvt.
+!	Used to implement AYT, AO, etc...
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+    IF .TCP_Channel EQL 0 THEN Return (SS$_NOIOCHAN);		! JC
+
+    Enqueue_TCP_Misc(.First_Byte);
+
+    Do_TCP_Write ();
+
+    SS$_NORMAL
+    END;
+
+
+
+MACRO
+    !++
+    ! Some abbreviations used in sending option negotiations
+    !--
+    Send_Do   (Option) = Send_TCP_Option (Telnet$K_Do  , Option)%,
+    Send_Dont (Option) = Send_TCP_Option (Telnet$K_Dont, Option)%,
+    Send_Will (Option) = Send_TCP_Option (Telnet$K_Will, Option)%,
+    Send_Wont (Option) = Send_TCP_Option (Telnet$K_Wont, Option)%;
+
+
+
+GLOBAL ROUTINE Send_TCP_Option (First_Byte, Second_Byte) =
+!++
+! Functional Description:
+!
+!	Send a Negotiated option to remote nvt.
+!--
+    BEGIN
+    MAP
+	First_Byte : BYTE,
+	Second_Byte : BYTE;
+    LOCAL
+	Status;
+
+    IF .TCP_Channel EQL 0 THEN Return (SS$_NOIOCHAN);		! JC
+
+    Append_Char (TCP_Write_Desc, Telnet$K_IAC);
+    Append_Char (TCP_Write_Desc, .First_Byte);
+    Append_Char (TCP_Write_Desc, .Second_Byte);
+
+    Status = Do_TCP_Write ();
+
+    IF .Flag_Debug
+	THEN BEGIN
+	SELECTONEU .First_Byte OF
+	    SET
+	    [TELNET$K_DO] :
+		Signal (TELNET$_S_DO, 2, 0, Option_Name(.Second_Byte));
+	    [TELNET$K_DONT] :
+		Signal (TELNET$_S_DONT, 2, 0, Option_Name(.Second_Byte));
+	    [TELNET$K_WILL] :
+		Signal (TELNET$_S_WILL, 2, 0, Option_Name(.Second_Byte));
+	    [TELNET$K_WONT] :
+		Signal (TELNET$_S_WONT, 2, 0, Option_Name(.Second_Byte));
+	    TES;
+	END;
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Send_TCP_SubOption (Option, Param_A) =
+!++
+! Functional Description:
+!
+!	Send a suboption to the remote site.  Make sure to correctly
+!	quote any special characters (IAC).
+!--
+    BEGIN
+    BIND
+	Param	= .Param_A		: $BBLOCK;
+
+    IF .TCP_Channel EQL 0 THEN Return (SS$_NOIOCHAN);		! JC
+
+    Append_Char (TCP_Write_Desc, Telnet$K_IAC);
+    Append_Char (TCP_Write_Desc, Telnet$K_SB);
+    Append_Char (TCP_Write_Desc, .Option);
+
+    INCR I FROM 0 TO .Param [DSC$W_LENGTH] - 1 DO
+	BEGIN
+	BIND
+	    This_Byte	= .I + .Param[DSC$A_POINTER]	: BYTE UNSIGNED;
+	IF .This_Byte EQLU TELNET$K_IAC
+	    THEN Append_Char (TCP_Write_Desc, Telnet$K_IAC);
+	Append_Char (TCP_Write_Desc, .This_Byte);
+	END;
+
+    Append_Char (TCP_Write_Desc, Telnet$K_IAC);
+    Append_Char (TCP_Write_Desc, Telnet$K_SE);
+
+    Do_TCP_Write ();
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Set_State_On (Option_Block_A) =
+!++
+! Functional Description:
+!
+!	For a particular option, set the state to be on.
+!	We are no longer negotiating.
+!	If the state is Off then change it to on and invoke the
+!	transition routine.
+!--
+    BEGIN
+    BIND
+	Option_Block	= .Option_Block_A	: $BBLOCK;
+
+    IF (.Option_Block [Option$V_State] EQL Option$K_State_Off) OR
+       (.Option_Block [Option$V_Special] EQL Option$K_Callous)
+	THEN BEGIN
+	Option_Block [Option$V_State] = Option$K_State_On;
+	IF (.Option_Block [Option$L_Turn_On] NEQ 0) THEN
+	    (.Option_Block [Option$L_Turn_On]) ();
+	END;
+
+    SS$_NORMAL
+    END;
+
+ROUTINE Set_State_Off (Option_Block_A) =
+    BEGIN
+    BIND
+	Option_Block	= .Option_Block_A	: $BBLOCK;
+
+    IF (.Option_Block [Option$V_State] EQL Option$K_State_On) OR
+       (.Option_Block [Option$V_Special] EQL Option$K_Callous)
+	THEN BEGIN
+	Option_Block [Option$V_State] = Option$K_State_Off;
+	IF (.Option_Block [Option$L_Turn_Off] NEQ 0) THEN
+	    (.Option_Block [Option$L_Turn_Off]) ();
+	END;
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Noop_Routine =
+!++
+! Functional Description:
+!
+!	This routine is good for Data Structures that require the
+!	address of a routine.  It is also good for functions that
+!	require the address of the routine as a parameter.
+!--
+    BEGIN
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE Give_To_Term (In_Byte) =
+!++
+! Functional Description:
+!
+!	We've received some non IAC'd data from the network.
+!	Send the data to the terminal.
+!
+! Algorithm:
+!
+!	Is described by the below Finite State Machine.  The transitions
+!	are labelled "Input Character"/"Character Buffered".
+!
+!         /-----\
+!         | X/X |
+!         |     V
+!       +---------+       CR/CR       +-----------+  CR/CR
+!       |         |------------------>|           |----------\
+! ----->| Normal  |                   |    CR     |          |
+!       |         |<------------------|           |<---------/
+!       +---------+      X/X          +-----------+
+!            ^                              |
+!            |     LF or NULL/Nothing       |
+!            \------------------------------/
+!
+!
+! Note:
+!
+!	When I read the spec (RFC 854), I interpreted the the above Finite
+!	State machine a bit differently.  I thought that the transition
+!	labelled "LF or Null/Nothing" should be just "Null/Nothing".  But
+!	it appears as though some of local terminal concentrators and the
+!	4.2 BSD unix telnet utilities send CR-LF-LF if a user would type
+!	CR-LF.  So although I don't think that they are correct, I think
+!	that I'll just have to go along with 'em.  Humor 'em.  Dale Moore.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Do_TT_Check;
+    EXTERNAL
+	TT_Write_Desc	: $BBLOCK,
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+    LITERAL
+	TT_State_Normal	= 0,
+	TT_State_CR	= 1;
+    EXTERNAL
+	TT_Need_CRLF;
+    OWN
+	TT_State	: INITIAL (TT_State_Normal);
+
+    ! Are we ignoring normal net data?
+    IF .Flag_AO THEN RETURN(SS$_NORMAL);
+
+    IF .My_Options [Option$K_Binary, Option$V_State] EQL Option$K_State_On
+	THEN BEGIN
+	Append_Char (TT_Write_Desc, .In_Byte);
+	RETURN (SS$_NORMAL);
+	END;
+
+    In_Byte = .In_Byte AND .TT_In_Mask;
+
+    SELECTONE .TT_State OF
+	SET
+	[TT_State_Normal] :
+	    BEGIN
+	    IF .In_Byte EQL Char_CR
+		THEN TT_State = TT_State_CR;
+	    Append_Char (TT_Write_Desc, .In_Byte);
+	    END;
+	[TT_State_CR]:
+	    BEGIN
+    !
+    !	An unresolved question is how often to call DO_TT_CHECK
+    !	At least after a <CR>
+    !
+	    Do_TT_Check();		! Check terminal settings
+	    SELECTONE .In_Byte OF
+		SET
+		[Char_Null]	:
+		    BEGIN
+		    TT_State = TT_State_Normal
+		    END;
+		[Char_CR]	:
+		    BEGIN
+		    Append_Char (TT_Write_Desc, .In_Byte);
+		    END;
+		[Char_LF]	:
+		    BEGIN
+		    IF .TT_Need_CRLF
+			THEN Append_Char (TT_Write_Desc, Char_LF);
+		    TT_State = TT_State_Normal
+		    END;
+		[OTHERWISE]	:
+		    BEGIN
+		    Append_Char (TT_Write_Desc, .In_Byte);
+		    TT_State = TT_State_Normal
+		    END;
+		TES;
+	    END;
+	TES;
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Give_To_Net (In_Byte) =
+!++
+! Functional Description:
+!
+!	We've received a character from the terminal.  We must now send
+!	it out on the network.
+!
+! Algorithm:
+!
+!	Is described by the Finite State Machine Below.  The transitions
+!	are labelled "Output Character"/"Character(s) Buffered".
+!
+!         /-----\
+!         | X/X |
+!         |     V
+!	+---------+   CR/CR-LF
+!	|         |------------\
+!  ---->|  Normal |            |
+!	|         |<-----------/
+!	+---------+
+!--
+    BEGIN
+    EXTERNAL
+	TT_Need_CRLF,
+	TT_EOL_Type,
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+
+    IF .His_Options [Option$K_Binary, Option$V_State] EQL Option$K_State_On
+	THEN BEGIN
+	Append_Char (TCP_Write_Desc, .In_Byte);
+	IF .In_Byte EQL Telnet$K_IAC
+	    THEN Append_Char (TCP_Write_Desc, Telnet$K_IAC);
+	END
+    ELSE
+	BEGIN
+	In_Byte = .In_Byte AND .TT_Out_Mask;
+	Append_Char (TCP_Write_Desc, .In_Byte);
+	IF (.In_Byte EQL Char_CR) AND (.TT_Need_CRLF) THEN
+	    SELECTONE .TT_EOL_Type OF
+		SET
+		[0]		: Append_Char (TCP_Write_Desc, Char_LF);
+		[OTHERWISE]	: Append_Char (TCP_Write_Desc, Char_NULL);
+		TES;
+	END;
+
+!    IF .Forward_Mask_Flag EQL Option$K_State_On
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TCP_Read_State_Normal (In_Byte) =
+!++
+! Functional Description:
+!
+!	We've just received a character from the remote site.
+!	Check to see if it is an IAC.  If it is an IAC, the
+!	next few subsequent characters might have to be handled
+!	special.
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+    SELECTONE .In_Byte OF
+	SET
+	[TELNET$K_IAC] :
+	    TCP_State = TCP_State_IAC;
+	[OTHERWISE] :
+	    Give_To_Term (.In_Byte);
+	TES;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TCP_Read_State_IAC (In_Byte) =
+!++
+! Functional Description:
+!
+!	The last character that we received was an IAC.
+!	This character should give us some more info about
+!	what the remote site is trying to do.
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+    SELECTONE .In_Byte OF
+	SET
+	[TELNET$K_IAC] :
+	!++
+	! Two IAC's in a row,  means that a single IAC was quoted.
+	!--
+	    BEGIN
+	    Give_To_Term (Telnet$K_IAC);
+	    TCP_State = TCP_State_Normal;
+	    END;
+	[TELNET$K_DONT] :		! Option Negotiation
+	    TCP_State = TCP_State_DONT;
+	[TELNET$K_DO] :			! Option Negotiation
+	    TCP_State = TCP_State_DO;
+	[TELNET$K_WONT] :		! Option Negotiation
+	    TCP_State = TCP_State_Wont;
+	[TELNET$K_WILL] :		! Option Negotiation
+	    TCP_State = TCP_State_Will;
+	[TELNET$K_SB] :			! Subnegotiation Begin
+	    TCP_State = TCP_State_SB;
+	[TELNET$K_AYT] :
+	!++
+	! We are to send back to the remote NVT some visible
+	! (.i.e) printable evidence that the AYT was received.
+	!--
+	    BEGIN
+	    TCP_State = TCP_State_Normal;
+	    END;
+	[TELNET$K_NOP] :
+	!++
+	! Ignore the nop
+	!--
+	    TCP_State = TCP_State_Normal;
+	[TELNET$K_Data_Mark] :
+	!++
+	! I don't know how, but this is Data Mark.  Maybe, somehow,
+	! it came in with a TCP urgent notification.  The data mark
+	! is a synchronizing mark which indicates that any special
+	! signal has already occurred and the recipient can return
+	! to normal processing of the data stream.
+	!
+	! When in normal mode, (which i guess this is) a Data mark
+	! is a no operation.
+	!--
+	    TCP_State = TCP_State_Normal;
+	[TELNET$K_Brk] :
+	!++
+	! Intended to indicate that the break key or the attention key
+	! was hit.
+	!--
+	    TCP_State = TCP_State_Normal;
+	[TELNET$K_IP] :
+	!++
+	! Suspend, abort, terminate or interrupt the process
+	!--
+	    TCP_State = TCP_State_Normal;
+	[TELNET$K_AO] :
+	!++
+	! Abort Output
+	!--
+	    TCP_State = TCP_State_Normal;
+	[TELNET$K_EC] :
+	!++
+	! Erase character
+	!--
+	    TCP_State = TCP_State_Normal;
+	[TELNET$K_EL] :
+	!++
+	! Erase Line
+	!--
+	    TCP_State = TCP_State_Normal;
+	[TELNET$K_GA] :
+	!++
+	! Go ahead (for stupid half duplex terminals)
+	!--
+	    TCP_State = TCP_State_Normal;
+	[OTHERWISE] :
+	    TCP_State = TCP_State_Normal;
+	TES;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TCP_Read_State_SB (In_Byte) =
+!++
+! Functional Description:
+!
+!	We have begun suboption negotiation. This byte is telling us
+!	what option the data is for.
+!--
+    BEGIN
+
+    !++
+    ! Store which option the following data is for
+    !--
+    TCP_SubOption = .In_Byte;
+
+    !++
+    ! Change the state to indicate that the data following is part
+    ! of the suboption parameter
+    !--
+    TCP_State = TCP_State_SP;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TCP_Read_State_SP (In_Byte) =
+    BEGIN
+    LOCAL
+	Status;
+
+    SELECTONE .In_Byte OF
+	SET
+	[TELNET$K_IAC] :
+	!++
+	! A SE (Suboption End) must be preceeded with an IAC
+	!--
+	    TCP_State = TCP_State_SE;
+	[OTHERWISE] :
+	    BEGIN
+	    !++
+	    ! We want to buffer the info that we have about this suboption
+	    !--
+	    Append_Char (TCP_SubOption_Param, .In_Byte);
+	    IF NOT .Status THEN Signal (.Status);
+
+	    !++
+	    ! Change the state to indicate that the data is following is
+	    ! also part of the suboption parameter.
+	    !--
+	    TCP_State = TCP_State_SP;
+	    END;
+	TES;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TCP_Read_State_SE (In_Byte) =
+!++
+! Functional Description:
+!
+!	The last character that we saw was an IAC in a Suboption.
+!	If the current character is IAC then that means quoted IAC.
+!	If the current character is SE then we've ended the suboption.
+!	Otherwise, someone screwed up.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	STR$FREE1_DX	: BLISS ADDRESSING_MODE (GENERAL);
+    EXTERNAL
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+    LOCAL
+	Status;
+
+    SELECTONE .In_Byte OF
+	SET
+	[TELNET$K_SE] :
+	!++
+	! End of suboption.  Process the suboption.
+	!--
+	    BEGIN
+	    BIND
+		Option_Table	=
+		    IF .TCP_SubOption LSS Option$K_Number_Of_Options
+			THEN My_Options [.TCP_SubOption, 0, 0, 0, 0]
+			ELSE Default_Option_Table		: $BBLOCK;
+
+	    IF (.Option_Table [Option$L_SubOption] NEQ 0) THEN
+		(.Option_Table [Option$L_SubOption]) (TCP_SubOption_Param);
+
+	    Status = STR$FREE1_DX (TCP_SubOption_Param);
+	    IF NOT .Status THEN Signal (.Status);
+	    TCP_State = TCP_State_Normal;
+	    END;
+	[TELNET$K_IAC] :
+	!++
+	! A quoted IAC, Buffer the character.
+	!--
+	    BEGIN
+	    Append_Char (TCP_SubOption_Param, .In_Byte);
+	    TCP_State = TCP_State_SP;
+	    END;
+	[OTHERWISE] :
+	!++
+	! Someone goofed.
+	!--
+	    Signal (TELNET$_PROTOCOL, 0);
+	TES;
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TCP_Read_State_WILL (In_Byte) =
+!++
+! Functional Description:
+!
+!	We receive a WILL, handle it according to what the Option Table and
+!	the Transition Table tell us to do.
+!
+!--
+    BEGIN
+    EXTERNAL
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+    BIND
+	Option		= In_Byte				: BYTE,
+	Option_Table	=
+	    IF .Option LSS Option$K_Number_Of_Options
+		THEN His_Options [.Option, 0, 0, 0, 0]
+		ELSE Default_Option_Table			: $BBLOCK;
+
+    IF .Flag_Debug THEN Signal (TELNET$_R_WILL, 2, 0,Option_Name(.Option));
+    TCP_State = TCP_State_Normal;
+
+    !++
+    ! See if we are currently negotiating this option
+    !--
+    IF .Option_Table [Option$V_Negotiating] EQL Option$K_Negotiating
+	THEN BEGIN
+	Option_Table [Option$V_Negotiating] = Option$K_Not_Negotiating;
+	Set_State_On (Option_Table)
+	END
+
+    !++
+    ! Is the state currently off?
+    !--
+    ELSE IF .Option_Table [Option$V_State] EQL Option$K_State_Off
+	THEN
+	IF (.Option_Table [Option$V_Prefer] EQL Option$K_Prefer_On) OR
+	   (.Option_Table [Option$V_Prefer] EQL Option$K_Dont_Care)
+	    THEN (Send_Do (.Option); Set_State_On (Option_Table) )
+	    ELSE Send_Dont (.Option);
+
+    SS$_NORMAL
+    END;
+
+ROUTINE TCP_Read_State_WONT (In_Byte) =
+!++
+! Functional Description:
+!
+!	Receive a WONT, hadle it accoring to how the Option Table and the
+!	Transition Table tell us to.
+!--
+    BEGIN
+    EXTERNAL
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+    BIND
+	Option		= In_Byte				: BYTE,
+	Option_Table	=
+	    IF .Option LSS Option$K_Number_Of_Options
+		THEN His_Options [.Option, 0, 0, 0, 0]
+		ELSE Default_Option_Table			: $BBLOCK;
+
+    IF .Flag_Debug THEN Signal (TELNET$_R_WONT, 2, 0, Option_Name(.In_Byte));
+    TCP_State = TCP_State_Normal;
+
+    !++
+    ! See if we are currently negotiating this option
+    !--
+    IF .Option_Table [Option$V_Negotiating] EQL Option$K_Negotiating
+	THEN BEGIN
+	Option_Table [Option$V_Negotiating] = Option$K_Not_Negotiating;
+	Set_State_Off (Option_Table)
+	END
+
+    !++
+    ! Is the state currently On?
+    !
+    ! Remember, if someone really really want to turn off an option
+    ! and head back toward the NVT, we aint suppose to get in the way.
+    !--
+    ELSE IF .Option_Table [Option$V_State] EQL Option$K_State_On
+	THEN (Send_Dont (.Option); Set_State_Off (Option_Table));
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TCP_Read_State_DO (In_Byte) =
+!++
+! Functional Description:
+!
+!	Receive a DO, handle it according to how the Option Table and the
+!	Transition Table tell us to.
+!--
+    BEGIN
+    EXTERNAL
+	My_Options	: BLOCKVECTOR [,Option$K_Size, BYTE];
+    BIND
+	Option		= In_Byte				: BYTE,
+	Option_Table	=
+		IF .Option LSS Option$K_Number_Of_Options
+		    THEN My_Options [.Option, 0, 0, 0, 0]
+		    ELSE Default_Option_Table			: $BBLOCK;
+
+    IF .Flag_Debug THEN Signal (TELNET$_R_DO, 2, 0,Option_name(.Option));
+    TCP_State = TCP_State_Normal;
+
+    !++
+    ! See if we are currently negotiating this option
+    !--
+    IF .Option_Table [Option$V_Negotiating] EQL Option$K_Negotiating
+	THEN BEGIN
+	Option_Table [Option$V_Negotiating] = Option$K_Not_Negotiating;
+	Set_State_On (Option_Table)
+	END
+
+    !++
+    ! Is the state currently off?
+    !--
+    ELSE IF .Option_Table [Option$V_State] EQL Option$K_State_Off
+	THEN
+	IF (.Option_Table [Option$V_Prefer] EQL Option$K_Prefer_On) OR
+	   (.Option_Table [Option$V_Prefer] EQL Option$K_Dont_Care)
+	    THEN (Send_Will (.Option); Set_State_On (Option_Table) )
+	    ELSE Send_Wont (.Option);
+
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TCP_Read_State_DONT (In_Byte) =
+!++
+! Functional Description:
+!
+!	Receive a DONT, handle it according to how the Option Table and the
+!	Transition Table tell us to.
+!--
+    BEGIN
+    EXTERNAL
+	My_Options	: BLOCKVECTOR [,Option$K_Size, BYTE];
+    BIND
+	Option		= In_Byte				: BYTE,
+	Option_Table	=
+		IF .Option LSS Option$K_Number_Of_Options
+		    THEN My_Options [.Option, 0, 0, 0, 0]
+		    ELSE Default_Option_Table			: $BBLOCK;
+
+    IF .Flag_Debug THEN Signal (TELNET$_R_DONT, 2, 0, Option_name(.Option));
+    TCP_State = TCP_State_Normal;
+
+
+    !++
+    ! See if we are currently negotiating this option
+    !--
+    IF .Option_Table [Option$V_Negotiating] EQL Option$K_Negotiating
+	THEN BEGIN
+	Option_Table [Option$V_Negotiating] = Option$K_Not_Negotiating;
+	Set_State_Off (Option_Table)
+	END
+
+    !++
+    ! Is the state currently on
+    !
+    ! Remember if someone wants to head back toward the NVT we shouldn't
+    ! stand in the way.
+    !--
+    ELSE IF .Option_Table [Option$V_State] EQL Option$K_State_On
+	THEN (Send_Wont (.Option); Set_State_Off (Option_Table));
+
+    SS$_NORMAL
+    END;
+
+
+
+FORWARD ROUTINE TCP_Read_Ast;
+
+GLOBAL ROUTINE Do_TCP_Read =
+!--
+! Functional Description:
+!
+!	Issue a read on the IN device.
+!	Set up the AST to point to the right places.
+!--
+    BEGIN
+    LOCAL
+	Status;
+
+    IF .TCP_Read_In_Progress THEN RETURN (SS$_NORMAL);
+
+    TCP_Reads = .TCP_Reads + 1;
+
+    Status = NET$RECEIVE (
+	BufAdrs	= TCP_Read_Buffer,
+	BufSize	= %ALLOCATION (TCP_Read_Buffer),
+	IOMODE	= ASYNCH,
+	AST$ADR	= TCP_Read_Ast,
+	IOCHAN	= .TCP_Channel,
+	IO$SB	= TCP_Read_IOSB);
+
+    TCP_Read_In_Progress = 1;
+
+    IF NOT .Status THEN RETURN .Status;
+    SS$_NORMAL
+    END;
+
+
+
+ROUTINE TCP_Read_Ast  =
+!--
+! Functional Description:
+!
+!	This routine is called every time a read completes on the
+!	IN device.
+!--
+    BEGIN
+    EXTERNAL ROUTINE
+	Do_TT_Write;
+    LOCAL
+	Status;
+
+    TCP_Read_In_Progress = 0;
+
+    Status = .TCP_Read_IOSB [NSB$Status];
+
+    IF (.Status EQLU SS$_CANCEL)
+	THEN $EXIT (CODE = TELNET$_CLOSED)
+    ELSE IF (.Status EQLU SS$_ABORT) AND
+	(.TCP_Read_IOSB [NSB$XStatus] EQLU NET$_CC)
+	THEN RETURN( Signal(TELNET$_CLOSED) )
+    ELSE IF (.Status EQLU SS$_ABORT)
+	THEN Signal (Telnet$_TCP_Recv, 0, .Status,
+		.TCP_Read_IOSB [NSB$XStatus], 0)
+    ELSE IF (.Status EQLU SS$_ENDOFFILE)
+	THEN RETURN( Signal(TELNET$_CLOSED) )
+    ELSE IF NOT .Status
+	THEN Signal (Telnet$_TCP_Recv, 0, .Status);
+
+    TCP_Read_Bytes = .TCP_Read_Bytes + .TCP_Read_IOSB [NSB$Byte_Count];
+
+    INCR I TO .TCP_Read_IOSB [NSB$Byte_Count] - 1 DO
+	(.TCP_State_Routine [.TCP_State]) (.TCP_Read_Buffer [.I]);
+
+    ! Are we suspending normal net data?
+    ! THIS SHOULD NOT BE HERE LONG!!!! -brm
+    IF .Flag_Suspend THEN RETURN(SS$_NORMAL);
+
+    Do_TT_Write ();
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Negotiate_Option ( Offer, Option) =
+!++
+! Functional Description:
+!
+!	For both my options and his options, find any option
+!	that is not in the state that we want, and take appropriate
+!	actions to try and change the situation.
+!--
+    BEGIN
+    EXTERNAL
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+    BIND
+	My_Option	= My_Options [.Option, 0, 0, 0, 0] : BLOCK,
+	His_Option	= His_Options [.Option, 0, 0, 0, 0] : BLOCK;
+
+!!!    IF .Offer EQL Option$K_State_On		! Set preference
+!!!    THEN BEGIN
+!!!	My_Option[Option$v_Prefer] = Option$K_Prefer_on;
+!!!	His_Option[Option$v_Prefer] = Option$K_Prefer_on;
+!!!	END
+!!!    ELSE BEGIN
+!!!	My_Option[Option$v_Prefer] = Option$K_Prefer_Off;
+!!!	His_Option[Option$v_Prefer] = Option$K_Prefer_Off;
+!!!	END;
+
+    IF .TCP_Channel EQL 0			! If no channel exit
+    THEN BEGIN
+	RETURN SS$_NORMAL;
+	END;
+
+    SELECTONE .Offer OF
+	SET
+	[TELNET$K_WILL] :
+	    IF My_Option[Option$V_State] NEQ Option$K_State_On THEN
+		BEGIN
+		Send_Will (.Option);
+		My_Option[Option$V_Negotiating] = Option$K_Negotiating
+		END;
+	[TELNET$K_DO] :
+	    IF His_Option[Option$V_State] NEQ Option$K_State_On THEN
+		BEGIN
+		His_Option[Option$V_Negotiating] = Option$K_Negotiating;
+		Send_Do (.Option);
+		END;
+	[TELNET$K_WONT] :
+	    IF My_Option[Option$V_State] NEQ Option$K_State_Off THEN
+		BEGIN
+		Send_Wont (.Option);
+		My_Option[Option$V_Negotiating] = Option$K_Negotiating
+		END;
+	[TELNET$K_DONT] :
+	    IF His_Option[Option$V_State] NEQ Option$K_State_Off THEN
+		BEGIN
+		Send_Dont (.Option);
+		His_Option[Option$V_Negotiating] = Option$K_Negotiating;
+		END
+	TES;
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Send_Command ( Command_Code ) =
+!++
+! Functional Description:
+!
+!	Send out a telnet command sequence (such as AYT?).
+!	Get command code as a parameter.
+!--
+    BEGIN
+    Send_TCP_misc( .Command_Code );
+
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Send_Command_with_Flush ( Command_Code, flushp ) =
+!++
+! Functional Description:
+!
+!	Send out a telnet command sequence (such as AYT?).
+!	Get command code as a parameter.
+!	Send TM request afterwards and discard output until
+!	TM negotiation is finished.
+!--
+    BEGIN
+
+    EXTERNAL ROUTINE
+	Set_Data_Blocking_State;
+	SEND_TCP_MISC;
+
+    IF .flushp THEN Set_Data_Blocking_State(1);
+    Enqueue_TCP_misc( .Command_Code );
+    IF .flushp THEN Negotiate_Option(Telnet$K_Do,Option$K_Timing_Mark)
+    ELSE Do_TCP_Write();
+
+    SS$_NORMAL
+    END;
+
+
+
+GLOBAL ROUTINE Negotiate_Options =
+!++
+! Functional Description:
+!
+!	For both my options and his options, find any option
+!	that is not in the state that we want, and take appropriate
+!	actions to try and change the situation.
+!--
+    BEGIN
+    EXTERNAL
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+
+    INCR Option FROM 0 TO Option$K_Number_Of_Options - 1 DO
+	BEGIN
+	BIND
+	    Option_Block	= My_Options [.Option, 0, 0, 0, 0]
+								: $BBLOCK;
+
+	IF (.Option_Block [Option$V_State] EQL Option$K_State_Off) AND
+	   (.Option_Block [Option$V_Prefer] EQL Option$K_Prefer_On)
+	    THEN BEGIN
+	    Send_Will (.Option);
+	    Option_Block [Option$V_Negotiating] = Option$K_Negotiating;
+	    END
+	ELSE IF (.Option_Block [Option$V_State] EQL Option$K_State_On) AND
+	   (.Option_Block [Option$V_Prefer] EQL Option$K_Prefer_Off)
+	    THEN BEGIN
+	    Send_Wont (.Option);
+	    Option_Block [Option$V_Negotiating] = Option$K_Negotiating;
+	    END
+	END;
+
+    INCR Option FROM 0 TO Option$K_Number_Of_Options - 1 DO
+	BEGIN
+	BIND
+	    Option_Block	= His_Options [.Option, 0, 0, 0, 0]
+								: $BBLOCK;
+
+	IF (.Option_Block [Option$V_State] EQL Option$K_State_Off) AND
+	   (.Option_Block [Option$V_Prefer] EQL Option$K_Prefer_On)
+	    THEN BEGIN
+	    Send_Do (.Option);
+	    Option_Block [Option$V_Negotiating] = Option$K_Negotiating
+	    END
+	ELSE IF (.Option_Block [Option$V_State] EQL Option$K_State_On) AND
+	   (.Option_Block [Option$V_Prefer] EQL Option$K_Prefer_Off)
+	    THEN BEGIN
+	    Send_Dont (.Option);
+	    Option_Block [Option$V_Negotiating] = Option$K_Negotiating
+	    END
+	END;
+
+    SS$_NORMAL
+    END;
+
+
+GLOBAL ROUTINE Clear_Options =
+!++
+! Functional Description:
+!
+!	For both my options and his options, find any option
+!	that is not in the state that we want, and take appropriate
+!	actions to try and change the situation.
+!--
+    BEGIN
+    EXTERNAL
+	Flag_Eightbit,
+	My_Options	: BLOCKVECTOR [, Option$K_Size, BYTE],
+	His_Options	: BLOCKVECTOR [, Option$K_Size, BYTE];
+
+    IF NOT .Flag_Eightbit
+    THEN BEGIN
+	TT_In_Mask = %X'7F';
+	TT_Out_Mask = %X'7F';
+    END;
+
+    INCR Option FROM 0 TO Option$K_Number_Of_Options - 1 DO
+	Set_State_Off(My_Options[.Option,0,0,0,0]);
+
+    INCR Option FROM 0 TO Option$K_Number_Of_Options - 1 DO
+	His_Options[.Option,Option$V_State] = Option$K_State_Off;
+
+
+
+    SS$_NORMAL
+    END;
+
+END ELUDOM
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNET_COMMON.B32
+!  *1     5-MAR-1991 19:05:13 SYNFUL "Common routines for Telnet and Telnet_Server"
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNET_COMMON.B32
+

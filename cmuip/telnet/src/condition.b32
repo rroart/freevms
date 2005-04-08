@@ -1,0 +1,326 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+    Condition (
+	ADDRESSING_MODE (NONEXTERNAL = LONG_RELATIVE),
+	LANGUAGE (BLISS32),
+	LIST (ASSEMBLY, NOBINARY, NOEXPAND)) =
+BEGIN
+
+!++
+! Description:
+!
+!	Some routines for the Telnet utility to manage how errors and
+!	special conditions are handled.
+!
+! Written By:
+!
+!	Dale Moore	CMU-CS/RI	12-OCT-1987
+!
+! Modifications:
+!
+!	09-JAN-1989	Dale Moore	CMU-CS
+!	Removed reference to SYS$LIBRARY:CMU_CS.
+!	Replaced with Print.
+!--
+
+LIBRARY 'SYS$LIBRARY:STARLET';
+LIBRARY 'Telnet';
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETAUX';
+LIBRARY 'CLI';
+
+LITERAL
+    Cond_Abort		= 0,
+    Cond_Continue	= 1,
+    Cond_Exit		= 2;
+
+OWN
+    Cntrl_C_Condition	: INITIAL (Cond_Abort),
+    Error_Condition	: INITIAL (Cond_Abort),
+    Severe_Condition	: INITIAL (Cond_Exit),
+    Warning_Condition	: INITIAL (Cond_Continue);
+
+
+GLOBAL ROUTINE Strings_Handler (Sig_A, Mech_A, Ena_A) =
+!++
+! Funtional Description:
+!
+!	If you are a routine that has a chance of being unwound,
+!	and you have dynamic strings, then this is a good condition
+!	handler for you to establish.
+!
+!	Since most all of the routines in the Telnet utility can be
+!	unwound (by Control_C AST Signals), this is used most
+!	anywhere there is dynamic strings.
+!--
+    BEGIN
+    BIND
+	Sig		= .Sig_A		: $BBLOCK,
+	Mech		= .Mech_A		: $BBLOCK,
+	Ena		= .Ena_A		: VECTOR;
+    EXTERNAL ROUTINE
+	STR$FREE1_DX	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Status;
+
+    IF (.Sig [CHF$L_Sig_Name] EQL SS$_UNWIND)
+	THEN BEGIN
+	INCR I FROM 1 TO .Ena [0] DO
+	    BEGIN
+	    Status = STR$FREE1_DX (.Ena [.I]);
+	    IF NOT .Status THEN Signal (.Status);
+	    END;
+	END;
+
+    SS$_RESIGNAL
+    END;
+
+ROUTINE Do_Abort (Sig_A, Mech_A) =
+!++
+! Functional Description:
+!
+!	From the status of the various condition settings,
+!	I'm suppose to abort whatever I'm doing and go to the Telnet>
+!	prompt.
+!--
+    BEGIN
+    BIND
+	Sig		= .Sig_A		: $BBLOCK,
+	Mech		= .Mech_A		: $BBLOCK;
+    BIND
+	Sig_Args	= Sig [CHF$L_Sig_Args]	: LONG,
+	Sig_Name	= Sig [CHF$L_Sig_Name]	: LONG,
+	Sig_Name_Block	= Sig_Name		: $BBLOCK;
+
+    Sig_Args = .Sig_Args - 2;
+    $PUTMSG (MSGVEC = Sig);
+    Mech [CHF$L_MCH_SAVR0] = .Sig_Name;
+    SETUNWIND ()
+    END;
+
+
+
+ROUTINE Do_Continue (Sig_A) =
+!++
+! Functional Description:
+!
+!	Merely display the message and continue as though nothing happened.
+!--
+    BEGIN
+    BIND
+	Sig		= .Sig_A		: $BBLOCK,
+	Sig_Args	= Sig [CHF$L_Sig_Args]	: LONG;
+
+    Sig_Args = .Sig_Args - 2;
+    $PUTMSG (MSGVEC = Sig);
+    SS$_CONTINUE
+    END;
+
+
+
+ROUTINE Do_Exit (Sig_A) =
+!++
+! Functional Description:
+!
+!	Display the error message and exit the Telnet utility.
+!--
+    BEGIN
+    BIND
+	Sig		= .Sig_A		: $BBLOCK,
+	Sig_Args	= Sig [CHF$L_Sig_Args]	: LONG,
+	Sig_Name	= Sig [CHF$L_Sig_Name]	: LONG;
+
+    Sig_args = .Sig_Args - 2;
+    $PUTMSG (MSGVEC = Sig);
+    $EXIT (CODE = .Sig_Name OR STS$M_INHIB_MSG)
+    END;
+
+
+
+GLOBAL ROUTINE Telnet_Routine_Handler (Sig_A, Mech_A, Ena_A) =
+!++
+! Functional Description:
+!
+!	Here is where we check the condition that has been raised or
+!	signalled.  If it is something that we check for then we
+!	see what we are to do about it.
+!
+!--
+    BEGIN
+    BIND
+	Sig		= .Sig_A		: $BBLOCK,
+	Mech		= .Mech_A		: $BBLOCK,
+	Ena		= .Ena_A		: $BBLOCK;
+    BIND
+	Sig_Args	= Sig [CHF$L_Sig_Args]	: LONG,
+	Sig_Name	= Sig [CHF$L_Sig_Name]	: LONG,
+	Sig_Name_Block	= Sig_Name		: $BBLOCK;
+
+    IF .Sig_Name EQLU SS$_UNWIND THEN RETURN (SS$_NORMAL);
+
+    IF .Sig_Name EQLU SS$_ACCVIO THEN
+	BEGIN
+	RETURN( SS$_RESIGNAL )
+	END;
+
+    IF .Sig_Name EQLU Telnet$_Closed THEN
+	BEGIN
+	RETURN( SS$_RESIGNAL )
+	END;
+
+    IF (.Sig_Name EQL Telnet$_CONTROL_C) AND (.Cntrl_C_Condition EQL Cond_Abort)
+	THEN RETURN (Do_Abort (Sig, Mech));
+    IF (.Sig_Name EQL Telnet$_CONTROL_C) AND (.Cntrl_C_Condition EQL Cond_Continue)
+	THEN RETURN (SS$_CONTINUE);
+    IF (.Sig_Name EQL Telnet$_CONTROL_C) AND (.Cntrl_C_Condition EQL Cond_Exit)
+	THEN RETURN (Do_Exit (Sig));
+
+    IF (.Sig_Name_Block [STS$V_SEVERITY] EQL STS$K_ERROR) AND
+	(.Error_Condition EQL Cond_Abort)
+	THEN RETURN (Do_Abort (Sig, Mech));
+    IF (.Sig_Name_Block [STS$V_SEVERITY] EQL STS$K_ERROR) AND
+	(.Error_Condition EQL Cond_Continue)
+	THEN RETURN (Do_Continue (Sig));
+    IF (.Sig_Name_Block [STS$V_SEVERITY] EQL STS$K_ERROR) AND
+	(.Error_Condition EQL Cond_Exit)
+	THEN RETURN (Do_Exit (Sig));
+
+    IF (.Sig_Name_Block [STS$V_SEVERITY] EQL STS$K_SEVERE) AND
+	(.Severe_Condition EQL Cond_Abort)
+	THEN RETURN (Do_Abort (Sig, Mech));
+    IF (.Sig_Name_Block [STS$V_SEVERITY] EQL STS$K_SEVERE) AND
+	(.Severe_Condition EQL Cond_Continue)
+	THEN RETURN (Do_Continue (Sig));
+    IF (.Sig_Name_Block [STS$V_SEVERITY] EQL STS$K_SEVERE) AND
+	(.Severe_Condition EQL Cond_Exit)
+	THEN RETURN (Do_Exit (Sig));
+
+    IF (.Sig_Name_Block [STS$V_SEVERITY] EQL STS$K_WARNING) AND
+	(.Warning_Condition EQL Cond_Abort)
+	THEN RETURN (Do_Abort (Sig, Mech));
+    IF (.Sig_Name_Block [STS$V_SEVERITY] EQL STS$K_WARNING) AND
+	(.Warning_Condition EQL Cond_Continue)
+	THEN RETURN (Do_Continue (Sig));
+    IF (.Sig_Name_Block [STS$V_SEVERITY] EQL STS$K_WARNING) AND
+	(.Warning_Condition EQL Cond_Exit)
+	THEN RETURN (Do_Exit (Sig));
+
+    SS$_RESIGNAL
+    END;
+
+
+
+GLOBAL ROUTINE
+!++
+! Functional Description:
+!
+!	A CLI dispatch routine.  Tells what to do in the case of
+!	a Control-C.
+!--
+    On_ControlC_Abort = (Cntrl_C_Condition = Cond_Abort),
+    On_ControlC_Continue = (Cntrl_C_Condition = Cond_Continue),
+    On_ControlC_Exit = (Cntrl_C_Condition = Cond_Exit);
+
+
+
+GLOBAL ROUTINE
+!++
+! Functional Description:
+!
+!	A CLI dispatch routine.  Tells what to do in the case of
+!	an Error
+!--
+    On_Error_Abort = (Error_Condition = Cond_Abort),
+    On_Error_Continue = (Error_Condition = Cond_Continue),
+    On_Error_Exit = (Error_Condition = Cond_Exit);
+
+
+
+GLOBAL ROUTINE
+!++
+! Functional Description:
+!
+!	A CLI dispatch routine.  Tells what to do in the case of
+!	a Severe Error
+!--
+    On_Severe_Abort = (Severe_Condition = Cond_Abort),
+    On_Severe_Continue = (Severe_Condition = Cond_Continue),
+    On_Severe_Exit = (Severe_Condition = Cond_Exit);
+
+
+
+GLOBAL ROUTINE
+!++
+! Functional Description:
+!
+!	A CLI dispatch routine.  Tells what to do in the case of
+!	a Warning
+!--
+    On_Warning_Abort = (Warning_Condition = Cond_Abort),
+    On_Warning_Continue = (Warning_Condition = Cond_Continue),
+    On_Warning_Exit = (Warning_Condition = Cond_Exit);
+
+
+
+GLOBAL ROUTINE Show_Conditions =
+!++
+! Functional Description:
+!
+!	Display for the user what the current settings of the
+!	various condition handling arrangements are.
+!--
+    BEGIN
+
+    SELECTONE .Cntrl_C_Condition OF
+	SET
+	[Cond_Abort]		: Print ('ON Control_C Abort');
+	[Cond_Continue]		: Print ('ON Control_C Continue');
+	[Cond_Exit]		: Print ('ON Control_C Exit');
+	TES;
+    SELECTONE .Error_Condition OF
+	SET
+	[Cond_Abort]		: Print ('ON Error Abort');
+	[Cond_Continue]		: Print ('ON Error Continue');
+	[Cond_Exit]		: Print ('ON Error Exit');
+	TES;
+    SELECTONE .Severe_Condition OF
+	SET
+	[Cond_Abort]		: Print ('ON Severe Abort');
+	[Cond_Continue]		: Print ('ON Severe Continue');
+	[Cond_Exit]		: Print ('ON Severe Exit');
+	TES;
+    SELECTONE .Warning_Condition OF
+	SET
+	[Cond_Abort]		: Print ('ON Warning Abort');
+	[Cond_Continue]		: Print ('ON Warning Continue');
+	[Cond_Exit]		: Print ('ON Warning Exit');
+	TES;
+
+
+    SS$_NORMAL
+    END;
+
+END
+ELUDOM
+!  DEC/CMS REPLACEMENT HISTORY, Element CONDITION.B32
+!  *1     5-MAR-1991 18:56:46 SYNFUL "Some routines for the Telnet utility to manage errors/conditions"
+!  DEC/CMS REPLACEMENT HISTORY, Element CONDITION.B32

@@ -1,0 +1,249 @@
+%(
+	****************************************************************
+
+		Copyright (c) 1992, Carnegie Mellon University
+
+		All Rights Reserved
+
+	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+	distribute  this software  provided  that the  above  copyright
+	notice appears in  all copies and that  any distribution be for
+	noncommercial purposes.
+
+	Carnegie Mellon University disclaims all warranties with regard
+	to this software.  In no event shall Carnegie Mellon University
+	be liable for  any special, indirect,  or consequential damages
+	or any damages whatsoever  resulting from loss of use, data, or
+	profits  arising  out of  or in  connection  with  the  use  or
+	performance of this software.
+
+	****************************************************************
+)%
+MODULE
+	TTYLoc (
+		IDENT = 'V01-001',
+		LIST(EXPAND,ASSEMBLY,NOBINARY),
+		LANGUAGE (BLISS32)
+		) =
+
+BEGIN
+!++
+! TTYLOC.B32	Copyright (c) 1986	Carnegie Mellon University
+!
+! Abstract:
+!	This Module contains the routines to talk to the TTY_Server in order
+!	to retrieve the terminal location information.  Telnet needs to tell
+!	the TTY_Server about the host it is talking to and the 64 bit number 
+!	associated with the terminal.  So, it must determine which terminal
+!	is talking to it, ie PTA2:, and find out the 64 bit number for that 
+!	terminal from the TTY_Server.
+!
+! Author:
+!
+!	15-JUL-1986	Pete Neergaard	CMU-CS/RI
+!
+! Modifications:
+!--
+
+
+LIBRARY 'SYS$LIBRARY:LIB';
+LIBRARY 'TTYLOC';
+
+MACRO
+	IOSB$W_STATUS 	= 0, 0, 16, 0%;
+
+
+
+ROUTINE Can_Timer =
+BEGIN
+
+    $CANTIM (REQIDT = 1)
+
+END;
+
+
+ROUTINE Too_Long =
+BEGIN
+
+    SS$_NORMAL
+END;
+
+
+ROUTINE Set_Timer =
+BEGIN
+    BIND
+	Ten_Seconds	= UPLIT LONG (-1*1000*1000*10*10, -1) : $BBLOCK;
+
+    $SETIMR(EFN = 0, DAYTIM = Ten_Seconds, ASTADR = Too_Long, REQIDT = 1)
+
+END;
+
+
+
+GLOBAL ROUTINE Get_TTYLoc_Mailbox (Channel_A, MailBox_Name_A) =
+BEGIN
+    BIND	
+	Channel		= .Channel_A		: WORD UNSIGNED,
+	MailBox_Name	= .MailBox_Name_A	: $BBLOCK;
+    EXTERNAL ROUTINE
+	STR$COPY_R	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	MailBox_Name_Vec	: VECTOR [64, BYTE],
+	MailBox_Name_Len	: LONG UNSIGNED,
+	List			: $ITMLST_DECL (ITEMS = 2),
+	Status;
+
+    !++
+    ! Create the mailbox
+    !--
+    Status = $CREMBX (CHAN = Channel);
+    IF NOT .Status THEN Signal (.Status);
+
+    !++
+    ! Initialize the item list
+    !--
+    $ITMLST_INIT ( ITMLST = List,
+	(   ITMCOD = DVI$_DEVNAM,
+	    BUFADR = MailBox_Name_Vec,
+	    BUFSIZ = %ALLOCATION (MailBox_Name_Vec),
+	    RETLEN = MailBox_Name_Len));
+
+    !++
+    ! Get the device information
+    !--
+    Status = $GETDVIW (CHAN = .Channel, ITMLST = List);
+    IF NOT .Status THEN Signal (.Status);
+
+    !++
+    ! Move the device name into the descriptor
+    !--
+    Status = STR$COPY_R (MailBox_Name, 
+				%REF(.MailBox_Name_Len), MailBox_Name_Vec);
+    IF NOT .Status THEN Signal (.Status);
+
+    SS$_NORMAL
+
+END;
+
+
+
+
+GLOBAL ROUTINE Retrieve_TTYLoc_Info(Term_Name_A,Term_Name_Len_A,
+					Host_Number_A,Term_Number_A) =
+BEGIN
+!++
+!	With the name of the terminal, we must ask the TTY_Server what the 
+!	64 Bit number for the terminal is.
+!--
+
+    BIND
+	Term_Name	= .Term_Name_A : $BBLOCK,
+	Term_Name_Len	= .Term_Name_Len_A : WORD UNSIGNED,
+	Host_Number	= .Host_Number_A : LONG UNSIGNED,
+	Term_Number	= .Term_Number_A : LONG UNSIGNED;
+    EXTERNAL ROUTINE
+	STR$COPY_R	: BLISS ADDRESSING_MODE (GENERAL);
+    LOCAL
+	Input_Buffer		: $BBLOCK[256],
+	Buffer			: $BBLOCK[50],
+	Mbx_Iosb		: $BBLOCK [8],
+	MailBox_Name		: $BBLOCK [DSC$K_S_BLN],
+	In_Channel,
+	Out_Channel,
+	Length,
+	Status;
+
+    !++
+    ! Get TTY_Server mailbox so as to communicate with it.
+    !--
+    Status = $ASSIGN(DEVNAM=%ASCID'TTYLOC_MAILBOX_2',CHAN=Out_Channel);
+    If NOT .Status THEN
+      BEGIN
+	Host_Number = 0;
+	Term_Number = 0;
+	Return(SS$_NORMAL)
+      END;
+
+    !++
+    ! Get another local mailbox, so the TTY_Server can talk back to you.
+    !--
+    $Init_DynDesc(Mailbox_Name);
+    Get_TTYLoc_Mailbox(In_Channel,MailBox_Name);
+
+    Buffer[TTYLOC$L_Version] = TTYLOC$K_Version_Number;
+    Buffer[TTYLOC$L_Operation] = TTYLOC$K_Retrieve_64Bit;
+    Buffer[TTYLOC$L_Host_Number] = 0;
+    Buffer[TTYLOC$L_Terminal_Number] = 0;
+    Buffer[TTYLOC$B_Terminal_Length] = .Term_Name_Len;
+    CH$MOVE (
+	.Term_Name_Len,
+	Term_Name,
+	Buffer [TTYLOC$T_Terminal_String]);
+    Buffer[TTYLOC$B_Ans_MBox_Len] = .MailBox_Name [DSC$W_LENGTH];
+    CH$MOVE (
+	.MailBox_Name [DSC$W_LENGTH],
+	.MailBox_Name [DSC$A_POINTER],
+	Buffer[TTYLOC$T_Ans_MBox]);
+
+    !++
+    !Send buffer to TTY_Server
+    !--
+    Status = $QIOW(
+	    EFN		= 0,
+	    CHAN	= .Out_Channel,
+	    FUNC	= IO$_WRITEVBLK,
+	    IOSB	= Mbx_Iosb,
+	    P1		= Buffer,
+	    P2		= %ALLOCATION (Buffer)
+	    );
+
+    If NOT .Status THEN Signal (.Status);
+    Status = .Mbx_Iosb[IOSB$W_STATUS];
+    If NOT .Status THEN Signal (.Status);
+
+    !++
+    ! Get infomation from TTY_Server
+    !--
+    Set_Timer();
+    Status = $QIO(
+	    EFN		= 0,
+	    CHAN	= .In_Channel,
+	    FUNC	= IO$_READVBLK,
+	    IOSB	= Mbx_Iosb,
+	    P1		= Input_Buffer,
+	    P2		= %ALLOCATION (Input_Buffer)
+	    );
+    If NOT .Status THEN Signal (.Status);
+    Can_Timer();
+
+    Status = $WAITFR (EFN = 0);
+    IF NOT .Status THEN Signal (.Status);
+
+    Status = .Mbx_Iosb[IOSB$W_STATUS];
+    If NOT .Status THEN Signal (.Status);
+
+    If .Input_Buffer[TTYLOC$L_Found_Status] EQL TTYLOC$K_Location_Found THEN
+	BEGIN
+	    Host_Number = .Input_Buffer[TTYLOC$L_Return_Host];
+	    Term_Number = .Input_Buffer[TTYLOC$L_Return_Term];
+	END
+    ELSE
+	BEGIN
+	    Host_Number = 0;
+	    Term_Number = 0;
+	END;
+
+    Status = $DELMBX (Chan = .In_Channel);
+    If NOT .Status THEN Signal (.Status);
+    Status = $DASSGN (CHAN = .Out_Channel);
+    If NOT .Status THEN Signal (.Status);
+
+    SS$_NORMAL
+
+END;
+
+END
+ELUDOM
+!  DEC/CMS REPLACEMENT HISTORY, Element TTYLOC.B32
+!  *1     5-MAR-1991 19:09:33 SYNFUL "Module with routines to talk to TTY_Server"
+!  DEC/CMS REPLACEMENT HISTORY, Element TTYLOC.B32

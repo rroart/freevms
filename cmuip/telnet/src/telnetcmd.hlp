@@ -1,0 +1,866 @@
+!
+!	****************************************************************
+!
+!		Copyright (c) 1992, Carnegie Mellon University
+!
+!		All Rights Reserved
+!
+!	Permission  is  hereby  granted   to  use,  copy,  modify,  and
+!	distribute  this software  provided  that the  above  copyright
+!	notice appears in  all copies and that  any distribution be for
+!	noncommercial purposes.
+!
+!	Carnegie Mellon University disclaims all warranties with regard
+!	to this software.  In no event shall Carnegie Mellon University
+!	be liable for  any special, indirect,  or consequential damages
+!	or any damages whatsoever  resulting from loss of use, data, or
+!	profits  arising  out of  or in  connection  with  the  use  or
+!	performance of this software.
+!
+!	****************************************************************
+!
+!++
+! TelnetCMD.HLP
+!
+!	Copyright (C)	1988	Carnegie Mellon University
+!
+! Description:
+!
+!	This is the source for the Telnet Help Library.
+!
+! Written By:
+!
+!	Bruce Miller	Nov 1988	CMU Network Development
+!
+! Modifications:
+!
+!	Bruce Miller	Jan 1989	CMU Network Development
+!	Updated to reflect new commands.
+!
+!	John Clement	Nov 1991	Rice University
+!	Updated to reflect new /LOG command
+!	Added table of ESC chars.
+!	Added SET END_OF_LINE
+!	Added SET AO,AYT,EC,EL,BRK.......
+!
+!
+!--
+1 Overview
+
+ Telnet is designed to provide virtual terminal service between a variety
+ of hosts.  In the simplest form it can provide a transport for all
+ characters you type to the remote host, and a transport back of the host's
+ response.
+
+ To connect to a remote host:
+	$ TELNET hostname
+
+ Unfortunately if the remote host is uses a dissimilar operating system,
+ you may not like the way that it operates.  For example the remote host
+ may not use the "Delete" key (Ascii-127) for erasing characters.  It may
+ not use Control-C to kill processes and so on.  To fix this problem.
+	$ TELNET hostname/generic
+
+ This will use translate your local definitions for Delete, Interrupt
+ Process... to a generic command to the remote host.
+
+ If you need to capture the results of your remote session:
+	$ TELNET hostname/log=filename
+
+ Everything that the remote host types will be included in the specified
+ file.
+
+ You may also change your TELNET options on the fly.  While in Telnet
+ type Control-^ (hold down control and press the "^" key), then press the
+ "I" key.  This puts you back into Telnet command mode.  For more information
+ while in command mode type HELP.
+
+1 Escapes
+
+  The following single character escape commands are available.
+
+  A	Send	Are you there? (Control-T)
+  B	Send	Break command (Control-B)
+  C	Close.  Aborts and closes a TELNET connection to a remote host.
+  D	Toggle	Debug.  Switch the value between (On/Off)
+  E	Toggle	local Echo.  Switch the value between (On/Off)
+  G	Toggle	localchar (Generic).  Switch the value between (On/Off)
+  I	Interactive mode.  In this mode you may issue More commands.
+  L	Toggle	Log.  Switch the value between (On/Off)
+  N	Negotiate options.  This is slightly useless as only
+  	unnegotiated options are tried.  They just fail again.
+  P	Pause. Temporarily return the local host using a
+  	subprocess.  To return using telnet, logout of the subprocess
+	or ATTACH to the telnet process.
+  S	Show the current status
+  T	Send	Timing mark
+  U	Toggle	Unix (End of line mode)
+	Switch the value between (CR-LF/CR-NULL)
+  X	XOFF.  Depending on the current setting, changes XOFF-XON
+  	to be handled remotely or locally.
+  ?, H	Help.  Some help is printed on the screen.
+
+  To enter one of these commands, precede it with the escape character.
+  To send the escape character to the remote system, you must type the
+  escape character twice.
+
+1 ATTACH
+
+  This command will attach your terminal to another process.
+
+  Format:
+
+	Telnet> ATTACH [process name] [/IDENTIFICATION=nnnn]
+
+  You may spawn a process, then rather than logging out from it
+  you may reattach to Telnet.  Later on you may reattach to the
+  spawned process.
+
+  Some of this command may not be fully implemented.
+
+1 CLOSE
+
+  This command will cause the current connection to the remote host
+  to be closed, if such a connection exists.  Telnet will only EXIT
+  at this point if the remote host name was given on the command line
+  when the Telnet utility was invoked.
+
+  Format:
+
+	Telnet> CLOSE
+
+2 Examples
+
+  In the example below we are first connected to a machine called
+  VB.CC.CMU.EDU.  After we issue the close command we then connect to
+  a machine called B.GP.CS.CMU.EDU.
+
+  $
+  %TELNET-S-RESUME, Resume telnet to SPIFF.ANDREW.CMU.EDU
+  Telnet> close
+  %TELNET-S-CONN_CLOSED, Connection closed to VB.CC.CMU.EDU
+  Telnet> close
+  %TELNET-I-NOT_CONNECTED, No remote host.
+  Telnet> open B.GP.CS.CMU.EDU
+[etc...]
+
+
+1 CONNECT
+
+  Activate a connection by bringing it into the foreground.  If the
+  optional Remote_Host_Name is supplied, any current connection is
+  closed and a new one is opened as if the OPEN command had been issued.
+  If the host parameter is omitted, the current remote connection, if
+  one exists is brought into the foreground and given control.
+
+  Format:
+
+	Telnet> CONNECT [Remote_Host_Name]
+
+  If you have SET CONNECT ON then connection is automatically made when
+  you press "Return".
+
+2 Examples
+
+  Telnet> open a.gp.cs.cmu.edu
+  %TELNET-I-TRYING, Trying to connect to A.GP.CS.CMU.EDU
+  %TELNET-S-OPEN, Connection opened to A.GP.CS.CMU.EDU
+  A.GP.CS.CMU.EDU TCP Telnet service
+  4.3 BSD UNIX (A.GP.CS.CMU.EDU) (ttyQ5)
+[Escape to Telnet prompt]
+  Telnet> connect
+  login:
+[Escape to Telnet prompt]
+  Telnet> connect vb
+  VB.CC.CMU.EDU VAX/VMS (CMU) TELNET Service
+[etc...]
+
+1 EXIT
+
+  Close the connection to the remote host and exit Telnet.
+
+  Format:
+
+	Telnet> EXIT
+
+	Synonym:
+		QUIT
+
+  This is the normal command for leaving the Telnet utility.
+
+2 Examples
+
+  In the example below the exit command is used to exit Telnet.
+
+	Telnet> exit
+	$
+
+1 NEGOTIATE
+
+  This forces Telnet to attempt to Renegotiate options with the remote
+  host
+
+1 HELP
+
+  Typing HELP at the Telnet> prompt invokes the Telnet Help Facility
+  presented in the standard VMS format.  Typing HELP followed by a topic,
+  such as OPEN, will give you specific help on that topic.
+
+  Format:
+
+	Telnet> HELP [ Topic [ Subtopic [...] ] ]
+
+2 Example
+
+  For help on the various options of the "Set Command" command, type:
+
+	Telnet> HELP SET COMMAND
+
+2 Hints
+
+  You're in the HELP facility right now, silly.
+
+1 OPEN
+
+  The Open command creates a connection to a remote host.  You will
+  automatically be connected and the session will be brought to the
+  foreground.
+
+  Format:
+
+	Telnet> OPEN [Remote-Host-Name]
+
+2 Parameters
+
+  Remote-Host-Name
+
+  This is the internet address of the remote machine.  It may be
+  expressed symbolicly, or as a 4 byte IP address (ie. 128.2.232.18).
+
+2 Examples
+
+  Telnet> open a.gp.cs.cmu.edu
+  %TELNET-I-TRYING, Trying to connect to A.GP.CS.CMU.EDU
+  %TELNET-S-OPEN, Connection opened to A.GP.CS.CMU.EDU
+
+  A.GP.CS.CMU.EDU TCP Telnet service
+  4.3 BSD UNIX (A.GP.CS.CMU.EDU) (ttyQ5)
+
+  login:
+[etc...]
+
+1 QUIT
+
+  This is a synonym for EXIT.
+
+1 SEND
+
+  Send a Telnet command to the remote host.
+
+  Format:
+
+	Telnet> SEND [ command ]
+
+2 AO
+
+  Abort Output.
+
+2 AYT
+
+  Are you there?  The remote server should insert an affirmative response
+  into the data stream (, if it is in fact there, otherwise, don't
+  expect a response).
+
+2 Brk
+
+  Break.
+
+  Send the Telnet Break command.  This may cause you to be disconnected
+  from the remote system.  On a VAX using CMU-OpenVMS/IP it will be the
+  same as Control-Y.  On most UNIX systems it will be the same as Control-D.
+
+2 EC
+
+  Erase character.
+
+  Tell the remote Telnet server to erase the current input line.
+
+2 EL
+
+  Erase Line.
+
+  Tell the remote Telnet server to erase the current input line.
+
+2 FILE
+
+  Insert contents of file into Telnet's outgoing data stream.
+
+  Format:
+
+	Telnet> SEND FILE <file-name>
+
+  Not implemented yet.
+
+2 GA
+
+  Go Ahead
+
+  Sends a Go ahead command to the remote host.
+
+2 IP
+
+  Interrupt Process.
+
+  Tell the remote Telnet server to Interrupt it's current task.
+
+2 NOP
+
+  No Operation.
+
+  Tell the remote Telnet server to do nothing in particular.
+
+2 SYNCH
+
+  Syncronize input.
+
+  Tell the remote Telnet server kill all characters waiting to be read.
+
+2 TIMING_MARK
+
+  Sends A timing mark
+
+  If Debug is on you will see something similar to the following:
+
+  %TELNET-I-S_DO, 17:00:20.77 Sent Do [Timing-Mark]
+  %TELNET-I-R_WILL, 17:00:20.88 Received Will [Timing-Mark]
+
+1 SET
+
+  Defines or changes various defaults and options, both for local and
+  remote systems.
+
+  Format:
+
+	Telnet> SET option
+
+2 ABORT_OUTPUT
+
+  Synonym for: Blocking
+
+2 AUTOFLUSH
+
+  When autoflush mode is on, sending a telnet command such as AO, IP
+  or Break will cause Telnet to discard any data received from the net
+  until the remote telnet confirms completion of the command.
+
+  Format:
+
+	Telnet> SET AUTOFLUSH <ON or OFF>
+
+  Default:OFF
+
+  You may also do this when you start Telnet by:
+	TELNET /[NO]AUTOFLUSH
+
+2 BINARY
+
+  Turn 8-bit binary transmission mode on and off.
+
+  From RFC 856:  With the binary transmission option in effect, the
+  receiver should interpret characters received from the transmitter
+  which are not preceded with IAC as 8 bit binary data, with the exception
+  of IAC followed by IAC which stands for the 8 bit binary data with
+  the decimal value 255.
+
+  Format:
+
+	Telnet> SET BINARY <ON or OFF>
+
+  Default:OFF
+
+  You may also do this when you start Telnet by:
+	TELNET /[NO]BINARY
+
+  You may wish to use SET EIGHTBIT as this has other consequences.
+
+2 BLOCKING
+
+  Setting blocking on causes Telnet to discard non-IAC'ed data that it
+  receives from the net (IAC'ed data is information used internally by
+  the two communicating Telnets.)  This function is provided to that the
+  user may explicitly control data blocking.  For instance, if Telnet
+  is ever "stuck" in data-blocking mode because of a flaky server, the
+  user can turn data-passing back on.  This command is discouraged, since
+  unlink AO the remote host can not implicitly turn data blocking back on.
+
+  Generally the you should send the AO (Abort Output) or IP (Interrupt
+  Process) commands instead which will implicitly turn data blocking on
+  and off.  The remote host can then enable output when it needs to send
+  important information.
+
+  Format:
+
+	Telnet> SET BLOCKING <ON or OFF>
+
+  Default:OFF
+
+2 COMMAND
+
+  Bind a Telnet command code to a key sequence.
+
+  Format:
+
+	Telnet> SET COMMAND command [key-sequence]
+
+  Except for the escape key, these keys are not interpreted unless
+  Telnet is in LOCALCHARS (generic) mode.  The current key bindings
+  can be displayed with the Telnet SHOW command.
+
+  If the Key-Sequence is omitted the key is undefined, except for the
+  Escape key.
+
+3 Key-sequence
+
+ Several formats are allowed.  You may specify the key as a number or as a
+ character preceded by either CONTROL-, CNTRL-, or ^
+ All of the examples below specify the same value:
+
+ "CONTROL-^"     "CNTRL-^"        "^^"
+ %O036           %D030            30       %X1E
+
+ The delete key may be specified as "DEL"
+ To turn off the key specifiy "NONE"
+
+ The following keys are not allowed: ^S ^Q ^M and ^[
+ In addition values between 32 (%X20) and 127 (%X7E) are not allowed.
+
+3 AO
+
+  Abort Output. (Default:[^O])
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]AO[=key]
+
+3 AYT
+
+  Are You there. (Default:[^T])
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]AYT[=key]
+
+3 BRK
+
+  Break.  (Default:[^Y])
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]BRK[=key]
+
+3 LECHO
+
+  Local Echo key. (Default:[^E])
+
+  When pressed this switches the local echo mode between On and Off.
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]AYT[=key]
+
+3 EC
+
+  Erase Character. (Default:[^?])
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]EC[=key]
+
+3 EL
+
+  Erase Line. (Default:[^U])
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]EL[=key]
+
+3 Escape
+
+  Define the Telnet escape sequence. (Default:[^^])
+  If the key-Sequence is omitted then it is reset to [^^]
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]Escape[=key]
+
+3 IP
+
+  Interrupt Process. (Default:[^C])
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]IP[=key]
+
+3 SYNCH
+
+  Syncronize (Default:[^X])
+
+  This kills all previously sent characters that have not yet been read.
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]SYNCH[=key]
+
+
+3 Warning
+
+  BUG/Feature:
+
+  It is possible to set different commands to the same key.  This
+  may have unknown results.  You will be warned of this problem by
+  the message:
+
+	Duplicate command key definitions exist
+
+  This message will only be issued when the key has been defined and
+  enabled.
+
+  The Escape key is guaranteed to work, so you can easily get back
+  to the command line and fix the problem.
+
+2 CONNECT
+
+  When ON the connection is automatically reestablished if you input
+  a blank line.  When OFF you must enter a CONNECT command to reconnect.
+  CONNECT ON is the way that most other implementations of Telnet
+  operate.
+
+  Format:
+
+	Telnet> SET CONNECT <ON or OFF>
+
+  Default:ON
+
+  Note:	This is different from the old version to conform to the
+	behavior of most other versions of Telnet.
+
+2 DEBUG
+
+  Display debugging information on local terminal, including Telnet
+  option negotiations, and some Telnet commands transmitted.
+
+  Format:
+
+	Telnet> SET DEBUG <ON or OFF>
+
+  Default:OFF
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]DEBUG
+
+2 ECHO
+
+  Sets the Echo mode.
+  If the qualifiers are omitted then the local terminal will echo the
+  the characters and the remote driver will not if on is selected.
+
+  Format:
+
+	Telnet> SET ECHO [/LOCAL] [/REMOTE] <ON or OFF>
+
+  This is normally negotiated.
+
+3 Qualifiers
+/LOCAL
+
+  This allows you to control only local echoing.
+  The terminal driver will echo most characters typed on the keyboard
+  if SET ECHO /LOCAL ON is specified.
+
+/REMOTE
+
+  This allows you to control only remote echoing.
+  Requests that the remote host echo back all characters sent to it
+  if SET ECHO /REMOTE ON is specified.
+
+2 EIGHTBIT
+
+  Set EIGHTBIT Extended ASCII mode.
+
+  Format:
+
+	Telnet> SET EIGHTBIT <ON or OFF>
+
+  Default:ON
+
+  When on, Telnet will transmit data as 8-bit extended ASCII characters,
+  rather than 7-bit.
+
+  When off, Telnet will only transmit data as 7-bit ASCII characters,
+  rather than 8-bit.
+
+  Theoretically this should be negotiated, but in fact it is not
+  by most systems.
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]EIGHTBIT
+
+2 END_OF_LINE
+
+  Format:
+
+	Telnet> SET END_OF_LINE {LF|NULL}
+
+  Default:LF
+
+  Selects the End Of Line to be either CR-LF or CR-NULL.
+  This is also set by single character u command.
+
+  You may also modify this when you start Telnet by:
+	TELNET /END_OF_LINE=option
+
+2 EXTENDED
+
+  When set, the Telnet escape key will return the user to extended
+  command mode.  When turned off, the escape key will cause Telnet to
+  accept a one character command code (See "HELP Escape").
+
+  Format:
+
+	Telnet> SET EXTENDED <ON or OFF>
+
+  Default:OFF
+
+2 GENERIC
+
+  This is a synonym for LOCALCHARS
+
+2 HOST
+
+  Open the connection to a remote host.
+
+  Format:
+
+	Telnet> SET HOST host-name
+
+  If a connection is already open, the connection will be closed
+  and a new connection will be opened to the specified host.
+  Same as OPEN.
+
+2 LOCALCHARS
+
+  Set local character recognition.
+
+  Format:
+
+	Telnet> SET LOCALCHARS <ON or OFF>
+
+  Default:OFF
+
+  When this is in effect, the DEL, ^U, ^T ... are interpreted locally,
+  and passed to the server as as a "generic" command EC, EL, AYT....
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]GENERIC
+
+  This is automatically enabled in Line Mode.
+
+2 LOG
+
+  Opens a log file
+
+  Format:
+
+	Telnet>  SET LOG [filename] [/Qualifiers]
+
+  Default:No log file
+
+  You may also select a log file when you start Telnet by:
+	TELNET /[NO]LOG[=filename] [/[NO]ALL_LOG]
+
+3 Overview
+
+ The log file is a very simple file which contains all of the characters
+ sent by the remote host, including carriage returns and line feeds.
+ If printed it should give an exact duplicate of the session.
+
+ If wish to edit it and include it into another file you must
+ remove the extra detrious sent by the other host.
+ Each line will be terminated after a line feed or when it reaches
+ 256 characters.
+
+3 Parameters
+
+ The filename is the name of the log file.  If omitted no new file is
+ opened.
+
+3 Qualifiers
+/ALL_LOG
+
+	/ALL_LOG
+	/NOALL_LOG
+
+ Normally the typed input is not included in the log file, for security
+ reasons when line mode is on.  This is to prevent your password from
+ appearing in the log file.  If you need the typed input as well as the
+ output you should use this qualifier.  The typed input will only be put
+ into the log file when local echoing is on.  You may prevent the password
+ from being in the log file by using LOCALCHARS and pressing Control-E to
+ modify the local echo state.
+
+ Another way to prevent unintended information from being in the log file
+ is to create it only after you have logged in.  Then use the Escape command
+ "L" to turn logging on or off as needed.
+
+ This option remains unchanged unless the qualifier is specified.
+
+  You may also modify this when you start Telnet by:
+	TELNET /[NO]ALL_LOG
+
+/CLOSE
+
+ Closes the current log file and stops logging.
+
+/DISABLE
+
+ Stops logging to the current log file.
+
+/ENABLE
+
+ Resumes logging to the current log file.
+
+2 MODE
+
+  Select either line or character mode
+
+  Format:
+
+	Telnet>	SET MODE {CHARACTER|LINE!NEGOTIATED}
+
+  This is normally negotiated with the remote host.
+
+3 CHARACTER
+
+  Data is transmitted a line at a time
+  Local echoing is disabled and remote echoing is enabled.
+
+3 LINE
+
+  Data is transmitted a line at a time.
+  Local echoing, LOCALCHARS, and Extended command mode are enabled
+  while remote echoing is disabled.  This should not be used with
+  interactive video editors.
+
+  If LOCALCHARS is also turned on, the EC and EL key are never
+  enabled in Line mode.
+
+3 NEGOTIATED
+
+  This option allows line mode to be negotiated by the remote host.
+  If the remote host won't echo characters or if the remote host
+  request line mode then the MODE is set to LINE.
+
+2 QUIET
+  Select either Quiet or Verbose mode
+
+  Format:
+
+	Telnet>	SET QUIET {ON|OFF}
+
+  Default:ON
+
+  When Quiet mode is on most informational messages are omitted.
+  When off you will be notified of the results of various actions.
+
+2 SYNCH
+
+  Synch mode.
+
+  Format:
+
+	Telnet> SET SYNCH [/LOCAL] <ON or OFF>
+
+  Default:OFF
+
+  This specifies whether the local terminal, Telnet, or the remote
+  terminal will perform The synchronization via XON/XOFF.
+
+  If no qualifier is specified:
+	On selects synch by the local Telnet this is similar to
+		SET TERM/HOSTSYNC
+	    It will turn off terminal output when XON or XOFF is
+	    Generated by the terminal (Ctrl-S/Ctrl-Q)
+
+	Off selects synch by the terminal driver if it has been
+	    enabled.
+
+	If you have already SET TERM/HOSTSYNC then the TELNET
+	program does not receive the XON/XOFF characters and the
+	setting of SYNCH is irrelevant.
+
+
+3 Qualifiers
+/LOCAL
+
+  Specifies that you are turning on or off the Synch. for the local
+  terminal.  When ON the sych is rapid.  When off it is slower, but
+  the remote node just holds the data.
+  ON is equivalent to setting
+
+	SET TERM/TTSYNC		for the local terminal
+	SET TERM/NOTTSYNC	for the remote terminal
+
+  The default is set by the setting of TTSYNC when Telnet is entered.
+
+2 URGENT
+  Select Urgent mode
+
+  Format:
+
+	Telnet>	SET URGENT {ON|OFF}
+
+  Default:OFF
+
+  When Urgent mode is on the IP, BRK, and SYNCH commands are sent
+  urgently.
+
+1 SHOW
+
+  Displays session information.
+  This shows you what options have been selected, and what command
+  keys are defined.
+
+1 SPAWN
+
+  Spawns a CLI process.  Type LOGOUT or ATTACH to return to Telnet.
+  Example:
+
+	Telnet> SPAWN
+	$ .....
+	$ ....
+	$ LOGOUT
+	Telnet>
+    or ...
+
+	$ Attach process_name
+    or ...
+
+	Telnet> SPAWN Dcl_command
+
+1 STATUS
+
+  Displays connection information.
+  This is the same as the single key command "S".
+
+  If debug is on then extra information will be printed about
+  the number of characters transmitted and so on.
+
+1 VERSION
+
+  Displays information about current version of Telnet.
+
+1 Bugs
+
+ Note
+ ----
+
+ It is important that both TTSYNC and HOSTSYNC be enabled either on the
+ Telnet client (Local host) or the server (Remote host).  If both are
+ disabled, then Telnet may hang up.
+
+
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNETCMD.HLP
+!  *1     5-MAR-1991 19:04:37 SYNFUL "Source for the Telnet HELP library"
+!  DEC/CMS REPLACEMENT HISTORY, Element TELNETCMD.HLP
+
