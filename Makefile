@@ -2,6 +2,8 @@ VMSSUBDIRS = starlet librtl cld cdu cliutl backup dir init login dcl edt dfu mou
 VMSSUBDIRSINST = cld cliutl dir dcl login init edt dfu mount copy delete dif util32
 VMSSUBDIRS2 = examples
 
+export BLISS = $(TOPDIR)/bliss/bin/gcc
+
 export LIBGCC = $(shell gcc -print-libgcc-file-name)
 
 export LIBC = /usr/lib/libc.a
@@ -114,5 +116,10 @@ build-grub:
 	cd grub/src; \
 	make build-grub; \
 	cd ../..
+
+telnet:
+	cd cmuip/telnet/src; \
+	make; \
+	cd ../../..
 
 include Makefile.kernel
