@@ -169,6 +169,9 @@ telnetmsg.o:
 starlet.req:
 	ln -s ../../../starlet/src/starlet.req .
 
+tpamac.req:
+	ln -s ../../../starlet/src/tpamac.req .
+
 netaux.req:
 	ln -s ../../central/netaux.req .
 
