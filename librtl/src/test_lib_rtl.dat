@@ -205,6 +205,39 @@ AASB some_code
 lib$do_command
 clear the screen
 clear some_code
+lib$ediv
+Divide by zero
+0 1 0 0 SS$_INTDIV
+lib$ediv
+1 Divided by 1
+1 1 1 0 SS$_NORMAL
+lib$ediv
+1 Divided by 2
+2 1 0 1 SS$_NORMAL
+lib$ediv
+2 Divided by 1
+1 2 2 0 SS$_NORMAL
+lib$ediv
+5 Divided by 2
+2 5 2 1 SS$_NORMAL
+lib$ediv
+4 Divided by 2
+2 4 2 0 SS$_NORMAL
+lib$ediv
+4600387192 Divided by 4096
+4096 4600387192 1123141 1656 SS$_NORMAL
+lib$ediv
+4600387192 Divided by 2 
+2 4600387192 305419896 0 SS$_INTOVF
+lib$ediv
+-4600387192 Divided by 2 
+2 4600387192  305419896 0 SS$_INTOVF
+lib$ediv
+4600387192 Divided by 2 
+2 8070450532247928800 -32 0 SS$_INTOVF
+lib$ediv
+Test remainder is cleared  
+2 4600387192 305419896 9 SS$_INTOVF
 lib$enable_ctrl
 NULL input
 NULL 0 SS$_NORMAL

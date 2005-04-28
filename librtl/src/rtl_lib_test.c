@@ -112,6 +112,7 @@ int testlibdigit_sep		(FILE *fptr, int *fstatus, char *cont);
 int testlibdisable_ctrl		(FILE *fptr, int *fstatus, char *cont);
 int testlibdo_command		(FILE *fptr, int *fstatus, char *cont);
 int testlibenable_ctrl		(FILE *fptr, int *fstatus, char *cont);
+int testlibediv			(FILE *fptr, int *fstatus, char *cont);
 int testlibestablish  		(FILE *fptr, int *fstatus, char *cont);
 int testlibexpand_nodename	(FILE *fptr, int *fstatus, char *cont);
 int testlibfid_to_name		(FILE *fptr, int *fstatus, char *cont);
@@ -202,6 +203,9 @@ flist[]={
 #if 0
 {"lib$disable_ctrl",		&testlibdisable_ctrl},
 {"lib$do_command",		&testlibdo_command},
+#endif
+{"lib$ediv",			&testlibediv},
+#if 0
 {"lib$enable_ctrl",		&testlibenable_ctrl},
 {"lib$establish",		&testlibestablish},
 {"lib$expand_nodename",		&testlibexpand_nodename},
@@ -1429,7 +1433,47 @@ return 0;
 }
 
 /************************************************/
+#endif
+ 
+int	testlibediv (FILE *fptr, int *fstatus, char *cont)
+{
+char	pv1[256],pv2[255],pv3[255],pv4[255],presult[30];
+unsigned long result_code;
+long 	divisor, quotient, remainder;
+long long dividend;
 
+	printf ("Test LIB$EDIV \n");
+	printf ("\n\n");
+
+	*fstatus = fscanf (fptr,scan5,pv1,pv2,pv3,pv4,presult);
+
+	divisor   = atol  (pv1);
+	dividend  = atoll (pv2);
+	quotient  = atol  (pv3);
+	remainder = atol  (pv4);
+
+	printf ("Input Dvidend     %lli \n",dividend);
+	printf ("Input Divisor /   %li  \n",divisor);
+	printf ("Input Quotient    %li  \n",quotient);
+	printf ("Input Remainder   %li  \n",remainder);
+	printf ("\n\n");
+
+	quotient  = 0;
+	remainder = 0;
+
+	result_code = lib$ediv (&divisor, &dividend, &quotient, &remainder);
+
+	print_result_code (presult,result_code,cont);
+	printf ("\n\n");
+
+	printf ("Output Dvidend    %lli \n",dividend);
+	printf ("Output Divisor /  %li  \n",divisor);
+	printf ("Output Quotient   %li  \n",quotient);
+	printf ("Output Remainder  %li  \n",remainder);
+
+	return 0;
+}
+#if 0
 int	testlibenable_ctrl (FILE *fptr, int *fstatus, char *cont)
 {
 unsigned long  result,mask,oldmask;

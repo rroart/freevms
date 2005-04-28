@@ -54,7 +54,7 @@ LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 	libdate_time.o libdigit_sep.o libutil.o libanalyze_sdesc_64.o \
 	libasnmbx.o lib_char.o \
 	libcli.o \
-	liblocc.o libmatchc.o  libmovc3.o \
+	liblocc.o libmatchc.o  libmovc3.o libediv.o \
 	sysgetmsg.o sysgeterrno.o
 
 SYSOBJ = sys__combine_date_time.o sys_asctim.o sys_bintim.o \

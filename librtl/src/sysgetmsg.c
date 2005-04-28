@@ -102,6 +102,9 @@ switch ( strmsgid)
 	case SS$_INTOVF:	// 1148
 			strcpy (bufadr,"Integer Overflow");
 			break;
+	case SS$_INTDIV:	// 1156
+			strcpy (bufadr,"Integer Divide By Zero");
+			break;
 }
 return;
 }
