@@ -125,7 +125,10 @@ unsigned long lib$disable_ctrl(const unsigned long *,...);
 
 unsigned long lib$do_command(const void *);
 
-unsigned long lib$ediv(const long *,const void *,long *,long *);
+unsigned long lib$ediv( const   signed long int *divisor,
+                        const   signed long long *dividend,
+                                signed long int *quotient,
+                                signed long int *remainder );
 
 unsigned long lib$emodd(const double *,const unsigned char *,const double *,long *,double *),
 	      lib$emodf(const float *,const unsigned char *,const float *,long *,float *),
