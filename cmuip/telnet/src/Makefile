@@ -164,7 +164,7 @@ telnetmsg.o:
 	touch telnetmsg.o
 
 %.o: %.b32
-	$(CC) $< -o $@
+	$(CC) -c $< -o $@
 
 starlet.req:
 	ln -s ../../../starlet/src/starlet.req .
