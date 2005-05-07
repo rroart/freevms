@@ -166,6 +166,9 @@ telnetmsg.o:
 %.o: %.b32
 	$(CC) -c $< -o $@
 
+lib.req:
+	ln -s ../../../lib/src/lib.req .
+
 starlet.req:
 	ln -s ../../../starlet/src/starlet.req .
 
@@ -190,4 +193,4 @@ netxport.req:
 netconfig.req:
 	ln -s ../../central/netconfig.req .
 
-links: starlet.req netaux.req netcommon.req neterror.req network.req netxport.req netconfig.req
+links: starlet.req netaux.req netcommon.req neterror.req network.req netxport.req netconfig.req lib.req ttyloc.req
