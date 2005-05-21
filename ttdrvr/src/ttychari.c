@@ -21,7 +21,15 @@
 int tty$putnextchar(int * chr, int * CC, struct _ucb * u) {
   *CC=0;
   struct _tty_ucb * tty=u;
+  struct _ltrm_ucb * lt=u;
   struct _tt_type_ahd * ahd = tty->ucb$l_tt_typahd;
+
+#if 0
+  if (*chr<32) {
+    // handle out-of-band chars
+    com_std$delctrlastp(&lt->ucb$l_tl_bandque, u, lt->ucb$l_tl_ctlpid, *chr, 0);
+  }
+#endif
 
   if (tty->tty$v_st_read==0) {
     if (u->ucb$l_devdepend&TT$M_NOTYPEAHD) {
