@@ -20,6 +20,7 @@ Check if cleanup to 0x40000000 kills 0x3f000000?
 Deallocate kernel cli/dcl symbols
 Consider unifiying qualifier and parameter code?
 DCL ambiguity check
+Big cleanup regarding int/long
 
 CPU/PAL:
 FIX pal
