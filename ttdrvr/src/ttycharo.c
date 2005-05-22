@@ -79,7 +79,17 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
   bd_txt[bd->tty$w_rb_txtoff]=*c;
   bd->tty$w_rb_txtoff++;
 
+  con$startio((int)*chr, u, (int)*CC);
+
+  // use tt_term etc instead?
+  if (*c==13) {
+    tty->tty$v_st_eol=1;
+    ioc$reqcom(SS$_NORMAL,0,u);
+  }
+
+#if 0
   ioc$reqcom(SS$_NORMAL,0,u); // not needed here? bad place?
+#endif
 
   return 1;
 
