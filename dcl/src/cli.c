@@ -624,6 +624,12 @@ unsigned long main (int argc, char *argv[])
 
   vms_mm = check_vms_mm(argc,argv);
 
+  if (vms_mm) {
+    short chan;
+    unsigned long long iosb;
+    // eventually handle ascii 0-31 asts.
+  }
+
   /* Put argc/argv's in symbols oz_arg0... Set symbol oz_nargs to the number of values. */
 
   setscriptsyms (argc, (const char **)argv);
@@ -831,13 +837,16 @@ unsigned long main (int argc, char *argv[])
 	//scanf("%s",cmdbuf);
 	//programmed with buffer overflow possibility
 	bzero(cmdbuf,CMDSIZ);
-	// was: read(0,cmdbuf,CMDSIZ);
+#if 1
+	read(0,cmdbuf,CMDSIZ);
+#else
       again:
 	read(1,&cmdbuf[idx],1);
 	c=cmdbuf[idx++];
 	fprintf(stdout,"%c",c);
 	fflush(stdout);
 	if (c!='\n' && c!='\r') goto again;
+#endif
       }
 
       cmdlen=strlen(cmdbuf)-1;
