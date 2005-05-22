@@ -524,6 +524,7 @@ static ssize_t tty_read(struct file * file, char * buf, size_t count,
 
 	lock_kernel();
 
+	// remember to add terminator stuff in here
 	sts = exe$qiow(0,chan,IO$_READPBLK,&iosb,0,0,
 				 buf,count,0,0,0,0);
 	i = count;
