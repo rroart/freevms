@@ -3087,6 +3087,114 @@ static int pm_con_request(struct pm_dev *dev, pm_request_t rqst, void *data)
 	return 0;
 }
 
+void myout(int tty, int p1, int p2) {
+	int c, tc, ok, n = 0, draw_x = -1;
+	unsigned int currcons=0;
+	unsigned long draw_from = 0, draw_to = 0;
+	u16 himask, charmask;
+	const unsigned char *orig_buf = NULL;
+	int orig_count;
+
+	const unsigned char *buf=p1;
+	int count=p2;
+
+#ifdef VT_BUF_VRAM_ONLY
+#define FLUSH do { } while(0);
+#else
+#define FLUSH if (draw_x >= 0) { \
+	sw->con_putcs(vc_cons[currcons].d, (u16 *)draw_from, (u16 *)draw_to-(u16 *)draw_from, y, draw_x); \
+	draw_x = -1; \
+	}
+#endif
+
+	acquire_console_sem();
+
+	himask = hi_font_mask;
+	charmask = himask ? 0x1ff : 0xff;
+
+	/* undraw cursor first */
+	if (IS_FG)
+		hide_cursor(currcons);
+
+	while (count) {
+		c = *buf;
+		buf++;
+		n++;
+		count--;
+
+		tc = translate[toggle_meta ? (c|0x80) : c];
+
+                /* If the original code was a control character we
+                 * only allow a glyph to be displayed if the code is
+                 * not normally used (such as for cursor movement) or
+                 * if the disp_ctrl mode has been explicitly enabled.
+                 * Certain characters (as given by the CTRL_ALWAYS
+                 * bitmap) are always displayed as control characters,
+                 * as the console would be pretty useless without
+                 * them; to display an arbitrary font position use the
+                 * direct-to-font zone in UTF-8 mode.
+                 */
+                ok = tc && (c >= 32 ||
+                            (!utf && !(((disp_ctrl ? CTRL_ALWAYS
+                                         : CTRL_ACTION) >> c) & 1)))
+                        && (c != 127 || disp_ctrl)
+			&& (c != 128+27);
+
+		if (vc_state == ESnormal && ok) {
+			/* Now try to find out how to display it */
+			tc = conv_uni_to_pc(vc_cons[currcons].d, tc);
+			if ( tc == -4 ) {
+                                /* If we got -4 (not found) then see if we have
+                                   defined a replacement character (U+FFFD) */
+                                tc = conv_uni_to_pc(vc_cons[currcons].d, 0xfffd);
+
+				/* One reason for the -4 can be that we just
+				   did a clear_unimap();
+				   try at least to show something. */
+				if (tc == -4)
+				     tc = c;
+                        } else if ( tc == -3 ) {
+                                /* Bad hash table -- hope for the best */
+                                tc = c;
+                        }
+			if (tc & ~charmask)
+                                continue; /* Conversion failed */
+
+			if (need_wrap || decim)
+				FLUSH
+			if (need_wrap) {
+				cr(currcons);
+				lf(currcons);
+			}
+			if (decim)
+				insert_char(currcons, 1);
+			scr_writew(himask ?
+				     ((attr << 8) & ~himask) + ((tc & 0x100) ? himask : 0) + (tc & 0xff) :
+				     (attr << 8) + tc,
+				   (u16 *) pos);
+			if (DO_UPDATE && draw_x < 0) {
+				draw_x = x;
+				draw_from = pos;
+			}
+			if (x == video_num_columns - 1) {
+				need_wrap = decawm;
+				draw_to = pos+2;
+			} else {
+				x++;
+				draw_to = (pos+=2);
+			}
+			continue;
+		}
+		FLUSH
+		do_con_trol(tty, currcons, c);
+	}
+	FLUSH
+	release_console_sem();
+
+	return n;
+#undef FLUSH
+}
+
 /*
  *	Visible symbols for modules
  */

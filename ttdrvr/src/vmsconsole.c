@@ -58,6 +58,8 @@
 #include<linux/blkdev.h>
 #include<linux/console.h>
 
+extern struct tty_driver console_driver;
+
 void con$startio(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UNIT
   struct _ucb * ucb = u;
   struct _tty_ucb * tty=ucb;
@@ -95,6 +97,14 @@ void con$startio(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UN
 	return con$fdtwrite(ucb->ucb$l_irp,ctl$gl_pcb,ucb,0);
 	// return ioc$reqcom(SS$_NORMAL,0,u); // not needed
       } else {
+#if 0
+	console_driver.put_char(ucb, R3);
+	con_put_char_alt(ucb, R3);
+	con$fdtwrite(ucb->ucb$l_irp,ctl$gl_pcb,ucb,0);
+#endif
+	myout(ucb, &R3, 1);
+	return SS$_NORMAL;
+#if 0
 	u->ucb$l_svapte=u->ucb$l_irp->irp$l_svapte; // workaround
 	int cc;
 	int ch;
@@ -103,6 +113,7 @@ void con$startio(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UN
 	if (cc==1)
 	  goto again;
 	return ioc$reqcom(SS$_NORMAL|(1<<16),0,u);
+#endif
       }
 #if 0
       if	(UCB$M_BSY&		// If the device isn't busy,
@@ -265,8 +276,6 @@ static void puts(const char *s)
   outb_p(0xff & (pos >> 1), vidport+1);
 }
 #endif
-
-extern struct tty_driver console_driver;
 
 long pidtab[1024];
 long pididx=0;
