@@ -63,6 +63,7 @@ Make import (export) handle text/binary files differently (by param).
 Check if all ~1 in direct.c need +1 (and name[1])
 Ext2 3rd level sizes
 Better RMS compatibilty; check input and output RAB fields (incl l_sts)
+RMS to handle terminal I/O better
 
 Clustering:
 Do MSCP protocol a bit more properly
