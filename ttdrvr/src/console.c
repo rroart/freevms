@@ -1508,8 +1508,10 @@ static void do_con_trol(struct _ucb *tty, unsigned int currcons, int c)
 		return;
 	case 10: case 11: case 12:
 		lf(currcons);
+#if 0
 		if (!is_kbd(lnm))
 			return;
+#endif
 	case 13:
 		cr(currcons);
 		return;
