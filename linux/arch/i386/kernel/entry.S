@@ -624,7 +624,13 @@ ENTRY(iolock11_vector)
         call SYMBOL_NAME(exe$frkipl11dsp)
         POPR_ALL
         REI
+	
+ENTRY(test_exe)
+	iret
 
+ENTRY(test_sup)
+	iret
+		
 .data
 ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_ni_syscall)	/* 0  -  old "setup()" system call*/

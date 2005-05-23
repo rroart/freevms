@@ -206,6 +206,11 @@ asmlinkage long sys_$ni_syscall3(void)
 	return -ENOSYS;
 }
 
+asmlinkage long sys_$ni_syscall4(void)
+{
+	return -ENOSYS;
+}
+
 static int proc_sel(struct task_struct *p, int which, int who)
 {
 	if(p->pcb$l_pid)

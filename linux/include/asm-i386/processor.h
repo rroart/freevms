@@ -403,7 +403,10 @@ struct thread_struct {
 	0,0, /* back_link, __blh */				\
 	sizeof(init_stack) + (long) &init_stack, /* esp0 */	\
 	__KERNEL_DS, 0, /* ss0 */				\
-	0,0,0,0,0,0, /* stack1, stack2 */			\
+	0x7ff90000, /* esp1 */ \
+	__EXECUTIVE_DS, 0, /* ss1 */ \
+	0x7ff80000, /* esp2 */ \
+	__SUPERVISOR_DS, 0, /* ss2 */ \
 	0, /* cr3 */						\
 	0,0, /* eip,eflags */					\
 	0,0,0,0, /* eax,ecx,edx,ebx */				\

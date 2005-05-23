@@ -371,7 +371,7 @@ ignore_int:
  * of tasks we can have..
  */
 #define IDT_ENTRIES	256
-#define GDT_ENTRIES	(__TSS(NR_CPUS))
+#define GDT_ENTRIES	((__TSS(NR_CPUS))+4) /* add two for supervisor. -roart */
 
 
 .globl SYMBOL_NAME(idt)
@@ -453,8 +453,12 @@ ENTRY(gdt_table)
 	.quad 0x00cf92000000ffff	/* 0x18 kernel 4GB data at 0x00000000 */
 	.quad 0x00cffa000000ffff	/* 0x23 user   4GB code at 0x00000000 */
 	.quad 0x00cff2000000ffff	/* 0x2b user   4GB data at 0x00000000 */
+	.quad 0x00cfba000000ffff	/* 0x31 executive   4GB code at 0x00000000 */
+	.quad 0x00cfb2000000ffff	/* 0x39 executive   4GB data at 0x00000000 */
+#if 0	
 	.quad 0x0000000000000000	/* not used */
 	.quad 0x0000000000000000	/* not used */
+#endif	
 	/*
 	 * The APM segments have byte granularity and their bases
 	 * and limits are set at run time.
@@ -464,3 +468,7 @@ ENTRY(gdt_table)
 	.quad 0x00009a0000000000	/* 0x50 APM CS 16 code (16 bit) */
 	.quad 0x0040920000000000	/* 0x58 APM DS    data */
 	.fill NR_CPUS*4,8,0		/* space for TSS's and LDT's */
+	.quad 0x00cfda000000ffff	/* 0x82 supervisor   4GB code at 0x00000000 */
+	.quad 0x00cfd2000000ffff	/* 0x8a supervisor   4GB data at 0x00000000 */
+	.quad 0x0000000000000000	/* not used */
+	.quad 0x0000000000000000	/* not used */

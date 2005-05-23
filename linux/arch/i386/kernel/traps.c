@@ -797,6 +797,34 @@ do { \
 } while (0)
 
 
+#define _set_gate_exe(gate_addr,type,dpl,addr) \
+do { \
+  int __d0, __d1; \
+  __asm__ __volatile__ ("movw %%dx,%%ax\n\t" \
+	"movw %4,%%dx\n\t" \
+	"movl %%eax,%0\n\t" \
+	"movl %%edx,%1" \
+	:"=m" (*((long *) (gate_addr))), \
+	 "=m" (*(1+(long *) (gate_addr))), "=&a" (__d0), "=&d" (__d1) \
+	:"i" ((short) (0x8000+(dpl<<13)+(type<<8))), \
+	 "3" ((char *) (addr)),"2" (__EXECUTIVE_CS << 16)); \
+} while (0)
+
+
+#define _set_gate_sup(gate_addr,type,dpl,addr) \
+do { \
+  int __d0, __d1; \
+  __asm__ __volatile__ ("movw %%dx,%%ax\n\t" \
+	"movw %4,%%dx\n\t" \
+	"movl %%eax,%0\n\t" \
+	"movl %%edx,%1" \
+	:"=m" (*((long *) (gate_addr))), \
+	 "=m" (*(1+(long *) (gate_addr))), "=&a" (__d0), "=&d" (__d1) \
+	:"i" ((short) (0x8000+(dpl<<13)+(type<<8))), \
+	 "3" ((char *) (addr)),"2" (__SUPERVISOR_CS << 16)); \
+} while (0)
+
+
 /*
  * This needs to use 'idt_table' rather than 'idt', and
  * thus use the _nonmapped_ version of the IDT, as the
@@ -1012,6 +1040,12 @@ void __init trap_init(void)
 		set_intr_gate(IOLOCK10_VECTOR,&iolock10_vector);
 		set_intr_gate(IOLOCK11_VECTOR,&iolock11_vector);
 	puts("puts 6.22\n");
+
+	//	set_intr_gate(0xb0,&iolock11_vector);
+	extern sys_$ni_syscall4(void), test_sup(), test_exe();
+	_set_gate_exe(idt_table+0xb0,15,3,test_exe);
+	_set_gate_sup(idt_table+0xb1,15,3,test_sup);
+	puts("puts 6.22.5\n");
 
 	/*
 	 * default LDT is a single-entry callgate to lcall7 for iBCS
