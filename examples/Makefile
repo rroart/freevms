@@ -9,7 +9,7 @@ install: all
 #	install *.com net net2 INET"$$"CONFIG um/* ../rootum/vms"$$"common/syshlp/examples
 #	install *.com net net2 INET"$$"CONFIG i386/* ../rooti386/vms"$$"common/syshlp/examples
 
-alli386: i386/timer i386/ast i386/time i386/eftim i386/schdwk i386/forcex i386/ef i386/wake i386/synch i386/enq i386/enq2 i386/lnm i386/lnm2 i386/qio1 i386/qio2 i386/cef i386/cefw i386/mem i386/memf i386/getjpi i386/crec i386/getdvi i386/inout i386/mbx i386/creprc i386/hi i386/hi.exe
+alli386: i386/timer i386/ast i386/time i386/eftim i386/schdwk i386/forcex i386/ef i386/wake i386/synch i386/enq i386/enq2 i386/lnm i386/lnm2 i386/qio1 i386/qio2 i386/cef i386/cefw i386/mem i386/memf i386/getjpi i386/crec i386/getdvi i386/inout i386/mbx i386/creprc i386/hi i386/hi.exe i386/modes
 
 dirs:
 	install -d um
@@ -102,6 +102,9 @@ i386/hi: hi.o $(VMSLIBS)
 
 i386/hi.exe: hi.o $(VMSLIBS)
 	../linker/src/linker $(LINKPRE) hi.o $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/hi.exe
+
+i386/modes: modes.o $(VMSLIBS)
+	gcc -$(FLAGS) -static -I../starlet/src -I../librtl/src/ modes.c $(VMSLIBS) -o i386/modes
 
 allum: um/timer um/ast um/time um/eftim um/schdwk um/forcex um/ef um/wake um/synch um/enq um/enq2 um/lnm um/lnm2 um/qio1 um/qio2 um/cef um/cefw um/mem um/memf um/getjpi um/crec um/getdvi um/inout um/mbx um/creprc
 
