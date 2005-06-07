@@ -2,14 +2,14 @@
 CFLAGS=
 CPPFLAGS=
 CC=
-rm -rf binutils-2.15
-tar xzf binutils-2.15.tar.gz
-cd binutils-2.15
-patch -p1 < ../linker-0_0_57
+rm -rf binutils-2.16
+tar xzf binutils-2.16.tar.gz
+cd binutils-2.16
+patch -p1 < ../linker-0_1_6
 cd ..
 mkdir build
 cd build
-../binutils-2.15/configure --target=i386-free-vms
+../binutils-2.16/configure --target=i386-free-vms
 make
 cd ..
 [ -f build/ld/ld-new ] && ln -sf build/ld/ld-new linker
