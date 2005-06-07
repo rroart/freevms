@@ -21,6 +21,7 @@ Deallocate kernel cli/dcl symbols
 Consider unifiying qualifier and parameter code?
 DCL ambiguity check
 Big cleanup regarding int/long
+Load and reloc dynamic libs once and for all, globally.
 
 CPU/PAL:
 FIX pal

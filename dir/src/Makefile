@@ -3,7 +3,7 @@ FLAGS = -static
 EXTERNAL = ../../cdu/src/cdu.a
 EXTERNAL2 = ../../cdu/src/cdu2.a
 
-all: i386/directory${EXE} i386/directory${NOEXE} i386/directory${EXE_ELF} um/directory${EXE} um/directory${NOEXE} um/directory${EXE_ELF}
+all: i386/directory${EXE} i386/directory${NOEXE} i386/directory${EXE_ELF} i386/ddirectory${EXE} i386/ddirectory${NOEXE} i386/ddirectory${EXE_ELF} um/directory${EXE} um/directory${NOEXE} um/directory${EXE_ELF}
 
 clean:
 	rm *.o um/* i386/*
@@ -29,6 +29,23 @@ i386/directory${EXE_ELF}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
 i386/directory${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
 	install -d i386
 	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o i386/directory${EXE}
+
+starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
+	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
+
+librtl$(EXE_ELF): $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
+	ln -s $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
+
+i386/ddirectory${NOEXE}: $(VMSLIBS_EXE_ELF) $(OBJS) $(EXTERNAL2) starlet$(EXE_ELF) librtl$(EXE_ELF) 
+	install -d i386
+	gcc -g $(OBJS) starlet$(EXE_ELF) librtl$(EXE_ELF) $(EXTERNAL2) -o i386/ddirectory${NOEXE}
+
+i386/ddirectory${EXE_ELF}: $(VMSDLIBS_EXE_ELF) $(OBJS) $(EXTERNAL2) starlet$(EXE_ELF) librtl$(EXE_ELF) 
+	ld -Bshareable $(VMS_LD_RPATH) $(OBJS) starlet$(EXE_ELF) librtl$(EXE_ELF) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/ddirectory${EXE_ELF}
+
+i386/ddirectory${EXE}: $(VMSDLIBS_EXE) $(OBJS) $(EXTERNAL2)
+	install -d i386
+	$(LINKER) $(OBJS) $(TOPDIR)/starlet/src/i386/starlet.exe $(TOPDIR)/librtl/src/i386/librtl.exe $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o i386/ddirectory${EXE}
 
 UMDEF=-Dcompile_um -I.
 

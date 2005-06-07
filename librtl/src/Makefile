@@ -21,8 +21,7 @@
 CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -I. -I../../starlet/src -I../../lib/src
 
 
-STROBJ = str__const.o str__is_string_class.o \
-	str__resize.o \
+STROBJ = \
 	str_analyze_sdesc.o stranalyze_sdesc_64.o \
 	str_append.o str_blind_compare.o \
 	str_compare.o str_compare_eql.o str_concat.o \
@@ -55,6 +54,7 @@ LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 	libasnmbx.o lib_char.o \
 	libcli.o \
 	liblocc.o libmatchc.o  libmovc3.o libediv.o \
+	libexpand_nodename.o sys__combine_date_time.o \
 	sysgetmsg.o sysgeterrno.o
 
 SYSOBJ = sys__combine_date_time.o sys_asctim.o sys_bintim.o \
@@ -65,8 +65,14 @@ CVTOBJ = cvt_convert_float.o
 QUELIB = libinsqhi.o
 
 STRLIB = librtl.a
+ELFLIB = i386/librtl$(EXE_ELF)
+EXELIB = i386/librtl$(EXE)
 
-all : $(STRLIB) tests
+all : $(STRLIB) $(ELFLIB) $(EXELIB) tests
+
+install: all
+	install -d ../../rooti386/vms"$$"common/syslib
+	install i386/*.ele ../../rooti386/vms"$$"common/syslib
 
 clean :
 	- rm *.o
@@ -88,6 +94,17 @@ rtl_lib_test : rtl_lib_test.c $(STRLIB) $(SYSLIB)
 
 $(STRLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 	ar -rv $(STRLIB) $?
+
+$(EXELIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
+	install -d i386
+	$(LINKER) -Bshareable $? ../../starlet/src/i386/starlet$(EXE) -o $(EXELIB)
+
+starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
+	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
+
+$(ELFLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB) starlet$(EXE_ELF)
+	install -d i386
+	ld -Bshareable $? starlet$(EXE_ELF) $(LIBGCC) -o $(ELFLIB)
 
 str.o : str.c ../../starlet/src/strdef.h
 str__const.o : str__const.c ../../starlet/src/strdef.h
@@ -128,3 +145,6 @@ libffs.o: libffs.c
 libinsv.o: libinsv.c
 libextv.o: libextv.c
 libextzv.o: libextzv.c
+
+libasnmbx.o: libasnmbx.c
+	gcc -I$(TOPDIR)/starlet/src -I. -c libasnmbx.c

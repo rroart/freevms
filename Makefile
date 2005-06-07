@@ -1,5 +1,5 @@
 VMSSUBDIRS = starlet librtl cld cdu cliutl backup dir init login dcl edt dfu mount copy delete dif util32
-VMSSUBDIRSINST = cld cliutl dir dcl login init edt dfu mount copy delete dif util32
+VMSSUBDIRSINST = starlet librtl cld cliutl dir dcl login init edt dfu mount copy delete dif util32
 VMSSUBDIRS2 = examples
 
 export BLISS = $(TOPDIR)/bliss/bin/gcc
@@ -8,17 +8,22 @@ export LIBGCC = $(shell gcc -print-libgcc-file-name)
 
 export LIBC = /usr/lib/libc.a
 
+export EXE = .exe
+export NOEXE =
+export EXE_ELF = .ele
+
+export VMS_RPATH = -Wl,-rpath,/vms"$$$$"common/syslib
+export VMS_LD_RPATH = -rpath /vms"$$$$"common/syslib
+
 export VMSLIBS = $(TOPDIR)/librtl/src/librtl.a $(TOPDIR)/starlet/src/starlet.a
+export VMSDLIBS_EXE = $(TOPDIR)/librtl/src/i386/librtl$(EXE) $(TOPDIR)/starlet/src/i386/starlet$(EXE)
+export VMSDLIBS_EXE_ELF = $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF) $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 export VMSLIBSUM = $(TOPDIR)/librtl/src/librtl.a $(TOPDIR)/starlet/src/starletum.a 
 export LINKER = $(TOPDIR)/linker/src/linker
 
 export LINKPRE = -Bstatic
 #export LINKPRE = -Bstatic -s 
 export LINKPOST = /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/libc.a
-
-export EXE = .exe
-export NOEXE =
-export EXE_ELF = .ele
 
 export ROOTI386 = $(TOPDIR)/rooti386
 export ROOTUM = $(TOPDIR)/rootum

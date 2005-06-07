@@ -439,6 +439,8 @@ unsigned int cli$dispatch(int userarg){
 
   sts=sys$imgact(&aname,&dflnam,hdrbuf,0,0,0,0,0);
   printf("imgact got sts %x\n",sts);
+  sts=sys$imgfix();
+  printf("imgfix got sts %x\n",sts);
 
   if (sts!=SS$_NORMAL) return sts;
 

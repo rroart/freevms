@@ -145,3 +145,152 @@ define verb import
 define verb dfu
 	image dfu
 	routine verify_command
+
+define verb dcopy
+	image dcopy
+	routine copy
+	parameter p1
+	parameter p2
+
+define syntax ddelete_symbol
+	cliroutine delete_symbol
+	parameter p1
+
+define verb ddelete
+	image ddelete
+	routine del
+	parameter p1
+	qualifier symbol,syntax=delete_symbol
+
+define verb ddifference
+	image ddiff
+	routine diff
+	parameter p1
+	parameter p2
+
+define verb ddirectory
+	image ddirectory
+	routine dir
+	parameter p1
+	qualifier date
+	qualifier file_id
+	qualifier size
+
+define verb dmount
+	image dvmount
+	routine domount
+	parameter p1
+
+define verb dsearch
+	image dsearch
+	routine search
+	parameter p1
+	parameter p2
+
+define verb dtype
+	image dtype
+	routine typ
+	parameter p1
+
+define syntax dshow_default
+	cliroutine dshow_default
+	parameter p1
+
+define syntax dshow_symbol
+	cliroutine dshow_symbol
+	parameter p1
+
+define syntax dshow_logical
+	cliroutine dshow_logical
+	parameter p1
+	qualifier table,value(required)
+
+define syntax dshow_system
+	cliroutine dshow_system
+
+define syntax dshow_time
+	cliroutine dshow_time
+
+define syntax dshow_devices
+	cliroutine dshow_devices
+
+define syntax dshow_working_set
+	cliroutine dshow_working_set
+
+define syntax dset_default
+	cliroutine dset_default
+	parameter p1
+
+define syntax dset_prompt
+	cliroutine dset_prompt
+	parameter p1
+
+define syntax dset_process
+	cliroutine dset_process
+	qualifier identification,value(required)
+
+define syntax dset_working_set
+	cliroutine dset_working_set
+	qualifier quota,value(required)
+	qualifier extent,value(required)
+
+define type dset_something
+	keyword default, syntax = dset_default
+	keyword prompt, syntax = dset_prompt
+	keyword process, syntax = dset_process
+	keyword working_set, syntax = dset_working_set
+
+define type dshow_something
+	keyword default, syntax = dshow_default
+	keyword symbol, syntax = dshow_symbol
+	keyword logical, syntax = dshow_logical
+	keyword system, syntax = dshow_system
+	keyword time, syntax = dshow_time
+	keyword devices, syntax = dshow_devices
+	keyword working_set, syntax = dshow_working_set
+
+define verb dset
+	parameter p1,label=something,value(type=dset_something)
+
+define verb dshow
+	parameter p1,label=something,value(type=dshow_something)
+
+define syntax dname_table
+	cliroutine dcreate_name_table
+	parameter p1
+
+define verb dcreate 
+	image dcreate
+	routine main
+	qualifier directory
+	qualifier name_table,syntax=dname_table
+	parameter p1
+
+define verb dstop
+	cliroutine dstop
+	parameter p1
+	qualifier identification, value(required)
+
+define verb ddefine
+	cliroutine ddefine
+	qualifier table, value(required)
+	parameter p1
+	parameter p2
+
+define verb dexport
+	image dcopy
+	routine export
+	qualifier binary
+	parameter p1
+	parameter p2
+
+define verb dimport
+	image dcopy
+	routine import
+	parameter p1
+	parameter p2
+
+define verb ddfu
+	image ddfu
+	routine verify_command
+

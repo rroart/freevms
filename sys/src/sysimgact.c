@@ -66,6 +66,14 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   ihid=(unsigned long)ehdr32+ehdr32->ihd$w_imgidoff;
   vers=(unsigned long)ehdr32+ehdr32->ihd$w_version_array_off;
   debug=(unsigned long)ehdr32+ehdr32->ihd$w_symdbgoff;
+  ctl$gl_iaflnkptr=(unsigned long)ehdr32+ehdr32->ihd$l_iafva; // wrong? temp
+  ctl$gl_fixuplnk=f; // wrong? temp
+#if 0
+  img_inadr.va_range$ps_start_va=0x3e000000;
+  img_inadr.va_range$ps_end_va=0x3e000000+(((f->f_dentry->d_inode->i_size>>12)+1)<<12);
+  exe$create_region_32 ((f->f_dentry->d_inode->i_size>>12)+1,0x45|_PAGE_RW ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
+  exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,ctl$gl_iaflnkptr,0,0);
+#endif
 
   if (ehdr32->ihd$w_majorid!=IHD$K_MAJORID)
     return 0;
@@ -80,6 +88,86 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
       section=buffer+512*(no+1);
       continue;
     }
+    if (section->isd$v_gbl==1) {
+      goto skip_it;
+    }
+    int rw = section->isd$l_flags&ISD$M_WRT;
+
+    int base = 0;
+    if (inadr) {
+      struct _va_range * addr = inadr;
+      base = addr->va_range$ps_start_va;
+    } 
+
+    img_inadr.va_range$ps_start_va=base+(section->isd$v_vpn<<PAGE_SHIFT);
+    img_inadr.va_range$ps_end_va=img_inadr.va_range$ps_start_va+section->isd$w_pagcnt*PAGE_SIZE;
+#ifdef __arch_um__
+    exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x51 ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
+#else
+    int rwfl=0;
+    if (rw)
+      rwfl=_PAGE_RW;
+    exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x45|rwfl ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
+#endif
+    exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,section->isd$l_vbn,0,0);
+  skip_it:
+    section=(unsigned long)section+section->isd$w_size;
+  }
+
+  section=buffer;
+
+  while (section<(buffer+512*ehdr32->ihd$b_hdrblkcnt)) {
+    if (section->isd$w_size==0)
+      break;
+    if (section->isd$w_size==0xffffffff) {
+      int no=((unsigned long)section-(unsigned long)buffer)>>9;
+      section=buffer+512*(no+1);
+      continue;
+    }
+    if (section->isd$v_gbl==0) {
+      goto skip_it2;
+    }
+    
+    int sts;
+    char * path;
+    int pathlen;
+    path="SYS$SYSTEM:";
+    pathlen=strlen(path);
+    char image[256];
+    memset(image,0,256);
+    char * imagebase=&section->isd$t_gblnam;
+    char * imgnam = imagebase;
+    int len = strlen(imgnam);
+    memcpy(image,path,pathlen);
+    memcpy(image+pathlen,imagebase,strlen(imagebase));
+#if 0
+    memcpy(image+pathlen+strlen(imagebase),".exe",4);
+    image[pathlen+strlen(imagebase)+4]=0;
+#endif
+
+    struct dsc$descriptor aname;
+    struct dsc$descriptor dflnam;
+    aname.dsc$w_length=len;
+    aname.dsc$a_pointer=imgnam;
+    dflnam.dsc$w_length=pathlen+strlen(imagebase)+4*0;
+    dflnam.dsc$a_pointer=image;
+
+    char * hdrbuf=kmalloc(512,GFP_KERNEL); // leak
+    memset(hdrbuf, 0, 512);
+
+    img_inadr.va_range$ps_start_va=img_inadr.va_range$ps_end_va;
+    img_inadr.va_range$ps_end_va=0;
+
+    struct _va_range out;
+    sts=exe$imgact(&aname,&dflnam,hdrbuf,0,&img_inadr,&out,0,0);
+    img_inadr.va_range$ps_start_va=out.va_range$ps_end_va;
+
+    printk("imgact got sts %x\n",sts);
+#if 0
+    sts=exe$imgfix();
+    printf("imgfix got sts %x\n",sts);
+#endif
+
     int rw = section->isd$l_flags&ISD$M_WRT;
 
     img_inadr.va_range$ps_start_va=section->isd$v_vpn<<PAGE_SHIFT;
@@ -93,9 +181,16 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x45|rwfl ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
 #endif
     exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,section->isd$l_vbn,0,0);
-
+  skip_it2:
     section=(unsigned long)section+section->isd$w_size;
   }
+
+  if (retadr) {
+    struct _va_range * r=retadr;
+    r->va_range$ps_start_va=0;
+    r->va_range$ps_end_va=img_inadr.va_range$ps_end_va;
+  }
+
 #endif
   return SS$_NORMAL;
 

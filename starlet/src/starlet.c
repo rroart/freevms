@@ -288,7 +288,7 @@ int sys$cretva (struct _va_range *inadr, struct _va_range *retadr, unsigned int 
 }
 
 int sys$expreg(unsigned int pagcnt, struct _va_range *retadr,unsigned int acmode, char region) {
-  return INLINE_SYSCALL($expreg,4,pagcnt,retadr,acmode,region);
+  return INLINE_SYSCALL($expreg,4,pagcnt,retadr,acmode,(int)region);
 }
 int sys$deltva(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
   return INLINE_SYSCALL($deltva,3,inadr,retadr,acmode);
