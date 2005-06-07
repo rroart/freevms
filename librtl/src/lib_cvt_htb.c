@@ -58,7 +58,7 @@ static int xtoi(char ch)
  * str$trim
  *
  */
-unsigned long lib$cvt_dtb(int byte_count, const char* source_string,
+unsigned long lib$cvt_htb(int byte_count, const char* source_string,
 	long* result)
 {
 	int Loop;			/* Loop for characters */
