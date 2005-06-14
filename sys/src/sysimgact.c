@@ -11,6 +11,7 @@
 
 #include<descrip.h>
 
+#include<iafdef.h>
 #include<ihadef.h>
 #include<ihddef.h>
 #include<ihidef.h>
@@ -18,6 +19,7 @@
 #include<ihsdef.h>
 #include<ihvndef.h>
 #include<isddef.h>
+#include<shldef.h>
 
 #include<imcbdef.h>
 
@@ -47,6 +49,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   char * buffer;
   mm_segment_t fs;
   loff_t pos=0;
+  int no;
   struct _imcb * im = kmalloc(sizeof(struct _imcb),GFP_KERNEL);
   bzero(im,sizeof(struct _imcb));
   //  im->imcb$b_type
@@ -61,13 +64,19 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   im->imcb$l_flink=img$gl_imcb_list;
   img$gl_imcb_list=im;
 
+  int base = 0;
+  if (inadr) {
+    struct _va_range * addr = inadr;
+    base = addr->va_range$ps_start_va;
+  } 
+
   active=(unsigned long)ehdr32+ehdr32->ihd$w_activoff;
   section=(unsigned long)ehdr32+ehdr32->ihd$w_size;
   ihid=(unsigned long)ehdr32+ehdr32->ihd$w_imgidoff;
   vers=(unsigned long)ehdr32+ehdr32->ihd$w_version_array_off;
   debug=(unsigned long)ehdr32+ehdr32->ihd$w_symdbgoff;
-  ctl$gl_iaflnkptr=(unsigned long)ehdr32+ehdr32->ihd$l_iafva; // wrong? temp
-  ctl$gl_fixuplnk=f; // wrong? temp
+  //ctl$gl_iaflnkptr=(unsigned long)ehdr32+ehdr32->ihd$l_iafva; // wrong? temp
+
 #if 0
   img_inadr.va_range$ps_start_va=0x3e000000;
   img_inadr.va_range$ps_end_va=0x3e000000+(((f->f_dentry->d_inode->i_size>>12)+1)<<12);
@@ -93,12 +102,6 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     }
     int rw = section->isd$l_flags&ISD$M_WRT;
 
-    int base = 0;
-    if (inadr) {
-      struct _va_range * addr = inadr;
-      base = addr->va_range$ps_start_va;
-    } 
-
     img_inadr.va_range$ps_start_va=base+(section->isd$v_vpn<<PAGE_SHIFT);
     img_inadr.va_range$ps_end_va=img_inadr.va_range$ps_start_va+section->isd$w_pagcnt*PAGE_SIZE;
 #ifdef __arch_um__
@@ -108,13 +111,21 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     if (rw)
       rwfl=_PAGE_RW;
     exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x45|rwfl ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
-#endif
+#endif 
+    // printk("range %x %x\n",img_inadr.va_range$ps_start_va,img_inadr.va_range$ps_end_va);
     exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,section->isd$l_vbn,0,0);
   skip_it:
     section=(unsigned long)section+section->isd$w_size;
   }
 
+  struct _iaf * iaf=(unsigned long)base+(((int)ehdr32->ihd$l_iafva)<<9);
+  iaf->iaf$l_fixuplnk=ctl$gl_fixuplnk;
+  ctl$gl_fixuplnk=iaf;
+  iaf->iaf$l_iaflink=hdrbuf;
+  iaf->iaf$l_permctx=base;
   section=buffer;
+
+  no=0;
 
   while (section<(buffer+512*ehdr32->ihd$b_hdrblkcnt)) {
     if (section->isd$w_size==0)
@@ -131,7 +142,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     int sts;
     char * path;
     int pathlen;
-    path="SYS$SYSTEM:";
+    path="SYS$LIBRARY:";
     pathlen=strlen(path);
     char image[256];
     memset(image,0,256);
@@ -158,9 +169,29 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     img_inadr.va_range$ps_start_va=img_inadr.va_range$ps_end_va;
     img_inadr.va_range$ps_end_va=0;
 
+    struct _shl * shlst = (long)iaf+iaf->iaf$l_shlstoff;
+    int shli=no;
+    shlst[shli].shl$l_baseva=img_inadr.va_range$ps_start_va;
+
+    struct _iaf * tmpiaf=ctl$gl_fixuplnk;
+    for(;tmpiaf;tmpiaf=tmpiaf->iaf$l_fixuplnk) {
+      struct _ihd * ihd=tmpiaf->iaf$l_iaflink;
+      struct _ihi * ihi=(unsigned long)ihd+ihd->ihd$w_imgidoff;
+      //printk("cmp %s %s %x\n",&ihi->ihi$t_imgnam[1],imgnam,ihi->ihi$t_imgnam[0]);
+      if (0==strncmp(&ihi->ihi$t_imgnam[1],imgnam,ihi->ihi$t_imgnam[0])) {
+	//printk("%s already loaded\n",imgnam);
+	int shli=no;
+	struct _shl * shlst2=(long)tmpiaf+tmpiaf->iaf$l_shlstoff;
+	shlst[shli].shl$l_baseva=shlst2[0].shl$l_baseva;
+	goto skip_it2;
+      }
+    }
+
     struct _va_range out;
+    printk("Loading image %s from %s\n",imgnam,image);
     sts=exe$imgact(&aname,&dflnam,hdrbuf,0,&img_inadr,&out,0,0);
     img_inadr.va_range$ps_start_va=out.va_range$ps_end_va;
+    img_inadr.va_range$ps_end_va=out.va_range$ps_end_va;
 
     printk("imgact got sts %x\n",sts);
 #if 0
@@ -168,6 +199,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     printf("imgfix got sts %x\n",sts);
 #endif
 
+#if 0
     int rw = section->isd$l_flags&ISD$M_WRT;
 
     img_inadr.va_range$ps_start_va=section->isd$v_vpn<<PAGE_SHIFT;
@@ -180,9 +212,12 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
       rwfl=_PAGE_RW;
     exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x45|rwfl ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
 #endif
+    //printk("range %x %x\n",img_inadr.va_range$ps_start_va,img_inadr.va_range$ps_end_va);
     exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,section->isd$l_vbn,0,0);
+#endif
   skip_it2:
     section=(unsigned long)section+section->isd$w_size;
+    no++;
   }
 
   if (retadr) {
