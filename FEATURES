@@ -36,6 +36,7 @@ Shell:
 		Mcr, run
 		Simple @ scripts
 		Basis CLD and CLI$ support
+		Simple symbol support
 	DCL builtin
 		define, goto, logout, stop, exit
 		set default/prompt/process
@@ -53,7 +54,7 @@ Programming language:
 	Bliss (not directly used, and is under development)
 
 Linker:
-	LINKER (simple, static images)
+	LINKER (simple, static images. Can do some dynamic linking.)
 
 RTL:
 	STR$

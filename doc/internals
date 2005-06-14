@@ -217,7 +217,6 @@ P0 space layout:
 
 0x8048000: ELF
 
-0x3e000000: fixup, temp placed
 0x3f000000: cdu space
 0x40000000: ELF shared libs
 

@@ -73,6 +73,7 @@ all : $(STRLIB) $(ELFLIB) $(EXELIB) tests
 install: all
 	install -d ../../rooti386/vms"$$"common/syslib
 	install i386/*.ele ../../rooti386/vms"$$"common/syslib
+	install i386/*.exe ../../rooti386/vms"$$"common/syslib
 
 clean :
 	- rm *.o
@@ -97,7 +98,7 @@ $(STRLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 
 $(EXELIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 	install -d i386
-	$(LINKER) -Bshareable $? ../../starlet/src/i386/starlet$(EXE) -o $(EXELIB)
+	$(LINKER) -Bshareable $? ../../starlet/src/i386/starlet$(EXE) ../../crtl/src/i386/crtl$(EXE) -o $(EXELIB)
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)

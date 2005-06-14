@@ -407,6 +407,10 @@ int sys$imgact(void * name, void * dflnam, void * hdrbuf, unsigned long imgctl, 
   return INLINE_SYSCALL($imgact,1,&s);
 }
 
+int sys$imgfix() {
+  return INLINE_SYSCALL($imgfix,0);
+}
+
 int sys$imgsta(void * transfer, void * parseinfo, void * header, void * file, unsigned long linkstatus, unsigned long clistatus) {
   struct struct_args s;
   s.s1=transfer;

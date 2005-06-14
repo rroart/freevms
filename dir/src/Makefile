@@ -45,7 +45,7 @@ i386/ddirectory${EXE_ELF}: $(VMSDLIBS_EXE_ELF) $(OBJS) $(EXTERNAL2) starlet$(EXE
 
 i386/ddirectory${EXE}: $(VMSDLIBS_EXE) $(OBJS) $(EXTERNAL2)
 	install -d i386
-	$(LINKER) $(OBJS) $(TOPDIR)/starlet/src/i386/starlet.exe $(TOPDIR)/librtl/src/i386/librtl.exe $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o i386/ddirectory${EXE}
+	$(LINKER) $(OBJS) $(TOPDIR)/starlet/src/i386/starlet.exe $(TOPDIR)/librtl/src/i386/librtl.exe $(LIBGCC) $(EXTERNAL2) /usr/lib/crt1.o /usr/lib/crti.o $(LIBGCC) -o i386/ddirectory${EXE}
 
 UMDEF=-Dcompile_um -I.
 
