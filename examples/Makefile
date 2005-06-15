@@ -6,6 +6,7 @@ clean:
 install: all
 	install -d ../rootum/vms"$$"common/syshlp/examples
 	install -d ../rooti386/vms"$$"common/syshlp/examples
+	install i386/cef.exe ../rooti386/vms"$$"common/syshlp/examples
 #	install *.com net net2 INET"$$"CONFIG um/* ../rootum/vms"$$"common/syshlp/examples
 #	install *.com net net2 INET"$$"CONFIG i386/* ../rooti386/vms"$$"common/syshlp/examples
 
