@@ -98,7 +98,7 @@ $(STRLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 
 $(EXELIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 	install -d i386
-	$(LINKER) -Bshareable $? ../../starlet/src/i386/starlet$(EXE) ../../crtl/src/i386/crtl$(EXE) -o $(EXELIB)
+	$(LINKER) -Bshareable $? ../../starlet/src/i386/starlet$(EXE) -o $(EXELIB)
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
