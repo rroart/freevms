@@ -37,6 +37,7 @@ int lib$put_output(void * v) {
   } else {
     fab = output_fab;
     rab = output_rab;
+    sys$connect(rab,0,0); // check. fix later. should not really be here
   }
 
   rab->rab$l_rbf = dsc->dsc$a_pointer ;
