@@ -25,7 +25,7 @@ tty$setup_ucb(struct _ucb * u){
   if (tty->ucb$l_tt_logucb==0) {
     tty->ucb$l_tt_logucb=u;
     lt->ucb$l_tl_phyucb=u; // maybe this one, too?
-    u->ucb$l_devchar=DEV$M_AVL;
+    u->ucb$l_devchar|=DEV$M_AVL;
     u->ucb$l_devchar2&=~DEV$M_RED;
     tty->ucb$w_tt_cursor=1;
     tty->ucb$w_tt_hold=0;
