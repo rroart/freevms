@@ -57,3 +57,4 @@ struct WCCFILE {
 
 #define IFI_MAX 64
 extern struct WCCFILE *ifi_table[];
+extern struct _ifbdef *ifb_table[];
