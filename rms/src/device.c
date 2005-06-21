@@ -124,7 +124,7 @@ extern int myfilelistptr;
 extern char root_device_name[];
 extern struct _ccb ctl$ga_ccb_table[];
 
-unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **retdev)
+unsigned device_lookup(unsigned devlen,char *devnam,int create,short int *retchan)
 {
     struct _ucb *dev;
     int i;
@@ -154,7 +154,7 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **ret
     if (dev == NULL) {
         if (sts == SS$_ITEMNOTFOUND) sts = SS$_NOSUCHDEV;
     } else {
-        *retdev = dev;
+        *retchan = chan;
         sts = SS$_NORMAL;
     }
     
