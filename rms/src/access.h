@@ -23,7 +23,7 @@
 #endif
 
 void fid_copy(struct _fiddef *dst,struct _fiddef *src,unsigned rvn);
-unsigned device_lookup(unsigned devlen,char *devnam,int create,struct _ucb **retdev);
+unsigned device_lookup(unsigned devlen,char *devnam,int create,short int *retchan);
 
 unsigned dismount(struct _vcb *vcb);
 unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],struct _vcb **vcb);
