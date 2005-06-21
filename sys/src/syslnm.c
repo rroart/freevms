@@ -131,7 +131,7 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
   mylnmb->lnmb$w_size=sizeof(struct _lnmb);
   mylnmb->lnmb$b_type=DYN$C_LNM;
   mylnmb->lnmb$b_acmode=0;
-  mylnmb->lnmb$l_table=ret.mylnmb;
+  mylnmb->lnmb$l_table=ret.mylnmb->lnmb$l_table;
   mylnmb->lnmb$b_flags=0;
   mylnmb->lnmb$b_count=mylognam->dsc$w_length;
   mylnmb->lnmb$l_lnmx=0;
