@@ -40,7 +40,7 @@ struct _lnmb lnm_prc_dir = {
   lnmb$l_lnmx : 0,
   lnmb$l_table : 0,
   lnmb$b_flags : LNM$M_NO_ALIAS|LNM$M_TABLE|LNM$M_NO_DELETE,
-  lnmb$b_count : 22,
+  lnmb$b_count : 21,
   lnmb$t_name : "LNM$PROCESS_DIRECTORY",
 };
 
@@ -74,7 +74,7 @@ struct _lnmb lnm_prc = {
   lnmb$l_lnmx : 0,
   lnmb$l_table : 0,
   lnmb$b_flags : LNM$M_NO_ALIAS|LNM$M_TABLE,
-  lnmb$b_count : 18,
+  lnmb$b_count : 17,
   lnmb$t_name : "LNM$PROCESS_TABLE",
 };
 
@@ -122,11 +122,11 @@ void lnm_init_prc(struct _pcb * p) {
   struct _lnmth * tab_lnmth = kmalloc(sizeof(struct _lnmth),GFP_KERNEL);
   
   memcpy(dir_lnmb, &lnm_prc_dir, sizeof(struct _lnmb));
-  memcpy(dir_lnmx, &lnm_prc_dir, sizeof(struct _lnmx));
-  memcpy(dir_lnmth, &lnm_prc_dir, sizeof(struct _lnmth));
-  memcpy(tab_lnmb, &lnm_prc_dir, sizeof(struct _lnmb));
-  memcpy(tab_lnmx, &lnm_prc_dir, sizeof(struct _lnmx));
-  memcpy(tab_lnmth, &lnm_prc_dir, sizeof(struct _lnmth));
+  memcpy(dir_lnmx, &lnm_prc_dir_xlat, sizeof(struct _lnmx));
+  memcpy(dir_lnmth, &lnm_prc_dir_table_header, sizeof(struct _lnmth));
+  memcpy(tab_lnmb, &lnm_prc, sizeof(struct _lnmb));
+  memcpy(tab_lnmx, &lnm_prc_xlat, sizeof(struct _lnmx));
+  memcpy(tab_lnmth, &lnm_prc_table_header, sizeof(struct _lnmth));
 
   ctl$gl_lnmdirect = dir_lnmb;
   ctl$gl_lnmhash = hash;
@@ -140,14 +140,10 @@ void lnm_init_prc(struct _pcb * p) {
   dir_lnmth->lnmth$l_hash = hash;
   tab_lnmth->lnmth$l_hash = hash;
   tab_lnmb->lnmb$l_table=tab_lnmth; // beware this and over
-
-  itm[0].item_code=LNM$_STRING;
-  itm[0].buflen=6;
-  itm[0].bufaddr="opa0:";
-  bzero(&itm[1],sizeof(struct item_list_3));
-
-  exe$crelnm(0,&mytabnam,&sysinput,0,itm);
-  exe$crelnm(0,&mytabnam,&sysoutput,0,itm);
+  dir_lnmth->lnmth$l_name=dir_lnmb;
+  tab_lnmth->lnmth$l_name=tab_lnmb;
+  dir_lnmb->lnmb$l_lnmx=dir_lnmx;
+  tab_lnmb->lnmb$l_lnmx=tab_lnmx;
 
   //lnm$al_dirtbl[1]=&lnm_prc_dir;
 
@@ -175,6 +171,25 @@ void lnm_init_prc(struct _pcb * p) {
   dir_lnmb->lnmb$l_blink=dir_lnmb;
   tab_lnmb->lnmb$l_flink=tab_lnmb;
   tab_lnmb->lnmb$l_blink=tab_lnmb;
+
+  itm[0].item_code=LNM$_STRING;
+#if 0
+  itm[0].buflen=6;
+  itm[0].bufaddr="opa0:";
+#else
+  itm[0].buflen=5; //strlen(p->pcb$t_terminal);
+  char * myterm = kmalloc(5, GFP_KERNEL);
+  memcpy(myterm, p->pcb$t_terminal, 4);
+  myterm[4]=':';
+  itm[0].bufaddr=myterm; //p->pcb$t_terminal;
+  //printk("Terminal %s\n",p->pcb$t_terminal);
+#endif
+  bzero(&itm[1],sizeof(struct item_list_3));
+
+  exe$crelnm(0,&mytabnam,&sysinput,0,itm);
+  exe$crelnm(0,&mytabnam,&sysoutput,0,itm);
+
+  kfree(myterm);
 }
 
 int exe$procstrt(struct _pcb * p) {
