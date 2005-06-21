@@ -173,7 +173,7 @@ int lnm$contsearch(struct struct_lnm_ret * r, int hash, struct lnmhshs * hashtab
     do {
       /*if (tmp->lnmb$b_count>nt->loglen) return SS$_NOLOGNAM; not yet*/
       if (tmp->lnmb$b_count==nt->loglen) {
-	lenstatus=strcmp(nt->lognam,tmp->lnmb$t_name);
+	lenstatus=strncmp(nt->lognam,tmp->lnmb$t_name,nt->loglen);
 	if (lenstatus==0) {
 	  if (nt->lnmth && nt->lnmth!=tmp->lnmb$l_table) { 
 	  } else { 
@@ -298,11 +298,17 @@ int lnm$inslogtab(struct struct_lnm_ret * r, struct _lnmb * mylnmb) {
 
   // maybe presearch and contsearch is need here also?
 
-  if (lnmhshs.entry[2*(*myhash)])
-    insque(mylnmb,lnmhshs.entry[2*(*myhash)]);
+  struct lnmhshs * hashtable = &lnmhshs;
+  if (mylnmb->lnmb$l_table && mylnmb->lnmb$l_table->lnmth$l_hash)
+    hashtable=mylnmb->lnmb$l_table->lnmth$l_hash;
+  else
+    printk("zero hashtable\n");
+
+  if (hashtable->entry[2*(*myhash)])
+    insque(mylnmb,hashtable->entry[2*(*myhash)]);
   else {
-    lnmhshs.entry[2*(*myhash)]=mylnmb;
-    lnmhshs.entry[2*(*myhash)+1]=mylnmb;
+    hashtable->entry[2*(*myhash)]=mylnmb;
+    hashtable->entry[2*(*myhash)+1]=mylnmb;
     mylnmb->lnmb$l_flink=mylnmb;
     mylnmb->lnmb$l_blink=mylnmb;
   }
@@ -370,14 +376,14 @@ void lnm$unlockw(void) {
 
 #endif
 
-int search_log_prc(char * name, char ** retname, int * retsize) {
+int search_log_prc(char * name, int namelen, char ** retname, int * retsize) {
   $DESCRIPTOR(prc,"LNM$PROCESS_TABLE");
   int sts;
   int retlen;
   struct item_list_3 itm[2];
   struct dsc$descriptor mytabnam, mynam;
   char resstring[LNM$C_NAMLENGTH]="";
-  mynam.dsc$w_length=strlen(name);
+  mynam.dsc$w_length=namelen;
   mynam.dsc$a_pointer=name;
   itm[0].item_code=LNM$_STRING;
   itm[0].buflen=LNM$C_NAMLENGTH;
@@ -395,14 +401,14 @@ int search_log_prc(char * name, char ** retname, int * retsize) {
   return sts;
 }
 
-int search_log_sys(char * name, char ** retname, int * retsize) {
+int search_log_sys(char * name, int namelen, char ** retname, int * retsize) {
   $DESCRIPTOR(sys,"LNM$SYSTEM_TABLE");
   int sts;
   int retlen;
   struct item_list_3 itm[2];
   struct dsc$descriptor mytabnam, mynam;
   char resstring[LNM$C_NAMLENGTH]="";
-  mynam.dsc$w_length=strlen(name);
+  mynam.dsc$w_length=namelen;
   mynam.dsc$a_pointer=name;
   itm[0].item_code=LNM$_STRING;
   itm[0].buflen=LNM$C_NAMLENGTH;
@@ -424,16 +430,16 @@ int search_log_repl(char * name, char ** retname, int * retsize) {
   int namelen=strlen(name);
   char * myname=kmalloc(namelen,GFP_KERNEL);
   memcpy(myname,name,namelen);
-  sts=search_log_prc(myname,retname,retsize);
+  sts=search_log_prc(myname,namelen,retname,retsize);
   if (sts&1) goto ret; 
-  sts=search_log_sys(myname,retname,retsize);
+  sts=search_log_sys(myname,namelen,retname,retsize);
   if (sts&1) goto ret;
   char * semi = strchr(myname,':');
   if (semi==0) goto ret;
   * semi = 0;
-  sts=search_log_prc(myname,retname,retsize);
+  sts=search_log_prc(myname,semi-myname,retname,retsize);
   if (sts&1) goto found;
-  sts=search_log_sys(myname,retname,retsize);
+  sts=search_log_sys(myname,semi-myname,retname,retsize);
   if ((sts&1)==0) goto ret;
 
  found: 
