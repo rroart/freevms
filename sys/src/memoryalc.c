@@ -505,6 +505,7 @@ struct _gen {
 #else
   int gen$w_size; //change to l;
 #endif
+  int gen$l_poison;
 };
 
 // drop alignment later
@@ -528,6 +529,7 @@ int exe$allocate(int requestsize, void ** poolhead, int alignment, unsigned int 
 	next=(long)next+requestsize;
 	next->gen$l_flink=nextnext;
 	next->gen$w_size=newsize;
+	next->gen$l_poison=0x87654321;
 	nextnext=next;
       }
       cur->gen$l_flink=nextnext;
@@ -556,6 +558,7 @@ int exe$deallocate(void * returnblock, void ** poolhead, int size) {
  
   middle->gen$w_size=size;
   middle->gen$l_flink=nextnext;
+  middle->gen$l_poison=0x87654321;
 
   if (next && nextnext && ((unsigned long)next+next->gen$w_size)==(unsigned long)middle && ((unsigned long)middle+middle->gen$w_size)==nextnext) {
     next->gen$w_size+=middle->gen$w_size+nextnext->gen$w_size;
