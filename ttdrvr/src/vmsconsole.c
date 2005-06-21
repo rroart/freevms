@@ -303,8 +303,8 @@ int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
 #else
   tty->ucb$l_tt_wrtbuf->tty$l_wb_irp->irp$l_iost1 = SS$_NORMAL;
   i=tty->ucb$l_tt_wrtbuf->tty$l_wb_irp;
-  if (i->irp$l_func!=11)
-    printk("XXX\n");
+  if (i->irp$l_func!=IO$_WRITEPBLK && i->irp$l_func!=IO$_WRITEVBLK)
+    printk("XXX %x\n",i->irp$l_func);
   i->irp$l_svapte=0;
 #endif
 #if 0
@@ -322,10 +322,10 @@ void op$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, str
   ucb->ucb$b_flck=IPL$_IOLOCK8;
   ucb->ucb$b_dipl=IPL$_IOLOCK8;
 
-  ucb->ucb$l_devchar = DEV$M_REC | DEV$M_AVL | DEV$M_CCL /*| DEV$M_OOV*/;
+  ucb->ucb$l_devchar = DEV$M_REC | DEV$M_IDV | DEV$M_ODV | DEV$M_TRM | DEV$M_AVL | DEV$M_CCL /*| DEV$M_OOV*/;
 
   ucb->ucb$l_devchar2 = DEV$M_NNM;
-  ucb->ucb$b_devclass = DC$_MISC;
+  ucb->ucb$b_devclass = DC$_TERM;
   ucb->ucb$b_devtype = DT$_TTYUNKN;
   ucb->ucb$w_devbufsiz = 132;
 
@@ -454,7 +454,9 @@ int con_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&op$ucb*/,&newucb); // check. skip?
   op$unit_init (0, newucb); // check. moved here
   exe$assign(dsc,&chan,0,0,0);
+#if 0
   registerucbchan(newucb,chan);
+#endif
   registerdevchan(MKDEV(TTY_MAJOR,unitno),chan);
 
   con_ucb = newucb;
