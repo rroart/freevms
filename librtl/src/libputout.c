@@ -32,6 +32,8 @@ int lib$put_output(void * v) {
     rab->rab$l_fab = fab;
     sys$create(fab,0,0);
     sys$connect(rab,0,0);
+    output_fab = fab;
+    output_rab = rab;
   } else {
     fab = output_fab;
     rab = output_rab;
