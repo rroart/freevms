@@ -201,7 +201,7 @@ struct _lnmb lnm_sys_dir = {
   lnmb$l_lnmx : &lnm_sys_dir_xlat,
   lnmb$l_table : &lnm_sys_dir_table_header,
   lnmb$b_flags : LNM$M_NO_ALIAS|LNM$M_TABLE|LNM$M_NO_DELETE,
-  lnmb$b_count : 21,
+  lnmb$b_count : 20,
   lnmb$t_name : "LNM$SYSTEM_DIRECTORY",
 };
 
@@ -237,7 +237,7 @@ struct _lnmb lnm_sys = {
   lnmb$l_lnmx : &lnm_sys_xlat,
   lnmb$l_table : &lnm_sys_table_header,
   lnmb$b_flags : LNM$M_NO_ALIAS|LNM$M_TABLE,
-  lnmb$b_count : 17,
+  lnmb$b_count : 16,
   lnmb$t_name : "LNM$SYSTEM_TABLE",
 };
 
