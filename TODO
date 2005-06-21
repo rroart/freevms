@@ -22,6 +22,8 @@ Consider unifiying qualifier and parameter code?
 DCL ambiguity check
 Big cleanup regarding int/long
 Load and reloc dynamic libs once and for all, globally.
+Replace shark with piraya or something.
+Redo translated ch$ in cmuip to fit with libbli
 
 CPU/PAL:
 FIX pal
@@ -51,6 +53,7 @@ Rewrite ide driver or make it use VMS data structures.
 Fix CONFIG_VMS network drivers.
 For ide disk set ucb$l_maxblock and more, like in file.c
 After some time even more driver support might be cut/broke (the most).
+In trandevnam make it use lnm$file_dev.
 
 Logical names:
 Logical support in the DCL and elsewhere
@@ -64,6 +67,7 @@ Make import (export) handle text/binary files differently (by param).
 Check if all ~1 in direct.c need +1 (and name[1])
 Ext2 3rd level sizes
 Better RMS compatibilty; check input and output RAB fields (incl l_sts)
+RMS to handle ext2 files with holes.
 RMS to handle terminal I/O better
 
 Clustering:

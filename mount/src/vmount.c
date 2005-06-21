@@ -145,6 +145,7 @@ struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 unsigned dodismount(int argc,char *argv[],int qualc,char *qualv[])
 {
     struct DEV *dev;
+    // note that device lookup interface has changed, fix later 
     register int sts = device_lookup(strlen(argv[1]),argv[1],0,&dev);
     if (sts & 1) {
         if (dev->vcb != NULL) {
