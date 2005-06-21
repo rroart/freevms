@@ -431,6 +431,7 @@ kdev_t chan2dev(unsigned short chan) {
 }
 
 
+#if 0
 static unsigned long ucbchan[256];
 
 registerucbchan(unsigned long dev,unsigned short chan) {
@@ -460,7 +461,7 @@ int ucb2chan(unsigned long dev,  unsigned short * chan) {
 unsigned long chan2ucb(unsigned short chan) {
   return ucbchan[chan];
 }
-
+#endif
 
 void null$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
   ucb->ucb$b_flck=IPL$_IOLOCK8;

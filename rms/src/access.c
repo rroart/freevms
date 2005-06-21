@@ -492,12 +492,15 @@ void * getvcb(void) {
   return xqp->current_vcb;
 }
 
-int getchan(struct _vcb * v) {
+#if 0
+// remove later?
+int getchan_not(struct _vcb * v) {
   unsigned short int c;
   if (ucb2chan(v, &c))
     return c;
   return ((struct _ucb *)v->vcb$l_rvt)->ucb$ps_adp;
 }
+#endif
 
 extern struct _ucb * myfilelist[50];
 extern char * myfilelists[50];
