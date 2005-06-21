@@ -1370,6 +1370,8 @@ void * exttwo_search_fcb2(struct _vcb * vcb,struct _fiddef * fid)
     return 0;
 }
 
+#if 0
+//not used?
 unsigned long e2_access_file(const char *name) {
   char result[256];
   unsigned long reslen;
@@ -1418,6 +1420,7 @@ unsigned long e2_access_file(const char *name) {
   sts = iosb.iosb$w_status;
   return sts;
 }
+#endif
 
 unsigned long get_x2p_prim_fcb() {
   return 	  x2p->primary_fcb;
