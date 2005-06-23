@@ -75,10 +75,6 @@ void  com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid) {
   }
 }
 
-void  com_std$delctrlast (struct _acb **acb_lh, struct _ucb *ucb, int matchchar, int *inclchar_p) {
-  com_std$delctrlastp(acb_lh, ucb, 0, matchchar, inclchar_p);
-}
-
 void  com_std$delctrlastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid, int matchchar, int *inclchar_p) {
   struct _acb * next, * cur = acb_lh;
   while (cur->acb$l_astqfl) {
@@ -100,6 +96,10 @@ void  com_std$delctrlastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid, int
       cur=next;
     }
   }
+}
+
+void  com_std$delctrlast (struct _acb **acb_lh, struct _ucb *ucb, int matchchar, int *inclchar_p) {
+  com_std$delctrlastp(acb_lh, ucb, 0, matchchar, inclchar_p);
 }
 
 void  com_std$drvdealmem (void *ptr) {
