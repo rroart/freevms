@@ -253,7 +253,7 @@ asmlinkage int exe$imgfix(void) {
 	char type=(*tmp)&0xff;
 	int symo=(*tmp)>>8;
 	tmp=&adr->r_offset;
-	Elf32_External_Sym * p;
+	Elf32_External_Sym * p = 0; // or -1?
 	struct _ihd * ihd=iaf->iaf$l_iaflink;
 	struct _ihs * ihs=(unsigned long)ihd+ihd->ihd$w_symdbgoff;
 	int symtab = (long)iaf->iaf$l_permctx+0xf000+(ihs->ihs$l_dstvbn<<9); // check

@@ -163,7 +163,7 @@ asmlinkage int exe$expreg(unsigned int pagcnt, struct _va_range *retadr,unsigned
 #else
   int prot_pte=0x45|_PAGE_RW;
 #endif
-  int sts;
+  int sts = SS$_NORMAL;
   // region is default 0, and region rde are not used like in vms
 
   // select corresponding rde...
@@ -249,7 +249,7 @@ int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection
 
   pgd_t *pgd;
   pmd_t *pmd;
-  pte_t *pte;
+  pte_t *pte = 0;
   struct mm_struct * mm=current->mm;
   unsigned long address=va;
   

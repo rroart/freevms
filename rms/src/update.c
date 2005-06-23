@@ -512,7 +512,7 @@ unsigned f11b_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
   unsigned sts;
   struct _vcb *vcbdev;
   struct _fh2 *head;
-  unsigned headvbn;
+  unsigned headvbn = 0;
   struct _fiddef hdrfid;
   unsigned hdrseq;
   unsigned start_pos = 0;

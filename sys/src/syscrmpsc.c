@@ -46,7 +46,7 @@ asmlinkage int exe$mgblsc(struct _va_range *inadr, struct _va_range *retadr, uns
   char * name;
   struct _secdef * sec, * pstl;
   unsigned long long return_ident;
-  char * return_gsnam;
+  char * return_gsnam = 0; // not yet used?
   struct _gsd * gsd;
   unsigned long prot_pte=0x400; //get gpti here
   void * first=inadr->va_range$ps_start_va;
@@ -105,7 +105,7 @@ asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, uns
     struct dsc$descriptor * dsc = gsdnam;
     char * name;
     unsigned long long return_ident;
-    char * return_gsnam;
+    char * return_gsnam = 0; // not yet used?
     struct _gsd * gsd;
     struct _mypte gpte;
     prot_pte=((struct _phd *)mmg$gl_sysphd)->phd$l_pst_free<<PAGE_SHIFT;

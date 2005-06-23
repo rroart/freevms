@@ -88,7 +88,7 @@ mycheckaddr(unsigned int ctl){
 #if 1
   int nr0=nr_running;
   int i,n=0,m=0;
-  struct _pcb  *tmp2;
+  struct _pcb  *tmp2 = 0;
   unsigned long tmp;
   int pan=0;
   for(i=0;i<32;i++) {
@@ -693,10 +693,10 @@ asmlinkage void schedule(void) {
 asmlinkage void sch$sched(int from_sch$resched) {
   int cpuid = smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid]; 
-  struct _pcb *next, *curpcb;
+  struct _pcb *next = 0, *curpcb;
   int curpri, affinity;
   unsigned char tmppri;
-  unsigned long qhead;
+  unsigned long qhead = 0;
   int after, before;
 
   curpcb=cpu->cpu$l_curpcb;

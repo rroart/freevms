@@ -655,8 +655,8 @@ extern char root_device_name[64];
 unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],struct _vcb **retvcb)
 {
   struct _iosb iosb;
-  unsigned device,sts;
-  struct _vcb *vcb;
+  unsigned device,sts = SS$_NORMAL;
+  struct _vcb *vcb = 0;
   struct _vcb *vcbdev;
   struct _ucb *ucb;
   struct ext2_super_block home;

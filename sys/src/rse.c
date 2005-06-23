@@ -121,7 +121,7 @@ int sch$pixscan(void) {
 int myp3, myp2, mycomq, mypri, sqfl;
 
 void sch$chsep(struct _pcb * p,unsigned char newpri) {
-  struct _pcb * p2, *p3 , *dummy;
+  struct _pcb * p2, *p3 , *dummy = 0;
   p3=p->pcb$l_sqfl;
   myp3=p3;
   mycheckaddr(0);
@@ -211,7 +211,7 @@ void sch$swpwake(void) {
 }
 
 void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
-  unsigned long dummy;
+  unsigned long dummy = 0;
   struct _pcb *p2;
 
   switch (event) {

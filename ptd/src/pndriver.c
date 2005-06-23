@@ -1401,7 +1401,7 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   char * buf;
   int size;
   struct _acb ** acb_p;
-  int devdep2;
+  int devdep2 = 0;
   struct _ucb * tz;
   int sts=SS$_NOSUCHDEV;	// Assume no TZ device
   tz=u;
@@ -1986,7 +1986,7 @@ int pn_iodb_vmsinit(void) {
 
 int pn_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
-  struct _ucb * newucb;
+  struct _ucb * newucb = 0;
   //  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&pn$ucb*/,&newucb); // check. skip?
   exe$assign(dsc,&chan,0,0,0);
   registerdevchan(MKDEV(TTYAUX_MAJOR,unitno),chan);

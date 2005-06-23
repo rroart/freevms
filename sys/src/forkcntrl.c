@@ -68,7 +68,7 @@ asmlinkage void exe$frkipl11dsp(void) {
 
 asmlinkage void exe$forkdspth(int i) {
   void (*func)(void *,void *, void *);
-  struct _fkb * f, * dummy, * fq;
+  struct _fkb * f, * dummy = 0, * fq;
   if (intr_blocked(i))
     return;
   regtrap(REG_INTR, i);

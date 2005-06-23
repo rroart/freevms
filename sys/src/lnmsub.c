@@ -413,6 +413,7 @@ int search_log_sys(char * name, int namelen, char ** retname, int * retsize) {
   itm[0].item_code=LNM$_STRING;
   itm[0].buflen=LNM$C_NAMLENGTH;
   itm[0].bufaddr=resstring;
+  itm[0].retlenaddr=&retlen;
   bzero(&itm[1],sizeof(struct item_list_3));
   sts = exe$trnlnm(0, &sys, &mynam, 0, itm);
 

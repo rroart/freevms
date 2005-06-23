@@ -64,7 +64,7 @@ static check_dup(struct _ucb * u, long * l) {
   }
   struct _ucb * head=u ;
   struct _ucb * tmp=head->ucb$l_link;
-  struct _ucbnidef * ni;
+  struct _ucbnidef * ni = 0;
   while (tmp) {
     ni = tmp;
     if (proto == ni->ucb$l_ni_pty) break;
@@ -255,7 +255,7 @@ int lan$netif_rx(struct _ucb * u, void * bdsc) {
   struct _cxb * cb1 = bdsc;
   struct _cxb * cb2 = cb1->cxb$l_link; 
   int proto=ntohs(lan$eth_type_trans(u, cb1->cxb$ps_pktdata));
-  struct _ucbnidef * ni;
+  struct _ucbnidef * ni = 0;
   struct _ucb * head=u;
   struct _ucb * tmp=u->ucb$l_link;
 

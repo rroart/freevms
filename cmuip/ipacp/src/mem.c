@@ -76,7 +76,7 @@ void Make_Zone (void)
 	User_Zone,
 	Status;
 
-    Status = LIB$CREATE_VM_ZONE(Real_Zone) ;
+    Status = LIB$CREATE_VM_ZONE(&Real_Zone) ;
     XLOG$FAO(LOG$MEM,"!%T MAKE_ZONE: Status: !SL, Zone: !SL!/",
 	0, Status, Real_Zone) ;
     if (! Status)
@@ -84,7 +84,7 @@ void Make_Zone (void)
 	Signal (Status);
 	};
 
-    Status = LIB$CREATE_USER_VM_ZONE(User_Zone, Real_Zone,
+    Status = LIB$CREATE_USER_VM_ZONE(&User_Zone, &Real_Zone,
 	Get_Mem,
 	Free_Mem,
 	Reset_Mem,
@@ -145,11 +145,11 @@ void Mem_Stat (void)
 	nbytes,
 	Status;
 
-    Status = LIB$STAT_VM(/*%REF*/(1), ngets) ;
+    Status = LIB$STAT_VM(/*%REF*/(1), &ngets) ;
     if (! Status) Signal (Status);
-    Status = LIB$STAT_VM(/*%REF*/(2), nfrees) ;
+    Status = LIB$STAT_VM(/*%REF*/(2), &nfrees) ;
     if (! Status) Signal (Status);
-    Status = LIB$STAT_VM(/*%REF*/(3), nbytes) ;
+    Status = LIB$STAT_VM(/*%REF*/(3), &nbytes) ;
     XLOG$FAO(LOG$MEM,"!%T MEM_STAT: Gets: !SL, Frees: !SL, Bytes: !SL!/",
 	0,ngets, nfrees, nbytes);
     if (! Status) Signal (Status);

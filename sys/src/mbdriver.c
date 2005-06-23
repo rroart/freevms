@@ -226,7 +226,7 @@ int mb$fdt_read (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
 
   int func=i->irp$l_func;
   struct _mb_ucb * mu=u;
-  struct __srb * s;
+  struct __srb * s = 0;
   int savipl;
   int skip=0;
   
@@ -323,7 +323,7 @@ enum { read_equal, read_less, read_more };
 
 void mb$finishread(struct _ucb * u) {
   struct _mb_ucb * mu = u;
-  struct __srb * s;
+  struct __srb * s = 0;
   int room_ast=0;
   int not_done;
 

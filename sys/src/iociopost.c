@@ -122,7 +122,7 @@ bufpost(struct _irp * i) {
 }
 
 asmlinkage void ioc$iopost(void) {
-  struct _irp * i;
+  struct _irp * i = 0;
   struct _pcb * p;
 
   if (intr_blocked(IPL$_IOPOST))

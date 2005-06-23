@@ -1197,7 +1197,7 @@ out:
 
 int make_pages_present(unsigned long addr, unsigned long end)
 {
-	int ret, len, write;
+	int ret = 0, len, write;
 	struct _rde * vma;
 
 	//	vma = find_vma(current->mm, addr);

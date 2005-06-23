@@ -2293,7 +2293,7 @@ l20:	movl	PCB$L_JIB(R4),R0	// get Job Information blk adrs
 // .ENDC
 #endif
   struct SB * buf = kmalloc (req_size,GFP_KERNEL); 
-	struct AB * ab_buf;
+	struct AB * ab_buf = 0;
 	i->irp$l_svapte=buf;	// point at system buffer.
 	i->irp$l_boff=req_size;	// total size of system buffer
 

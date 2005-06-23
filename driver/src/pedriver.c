@@ -23,7 +23,8 @@
 #include<ucbdef.h>
 
 int scs_std$sendmsg(struct _irp * i, struct _pdt * p) {
-  char * buf;
+  char * buf = 0;
+  printk("check this sendmsg\n");
   insque(buf,&p->pdt$q_comqh);
 }
 

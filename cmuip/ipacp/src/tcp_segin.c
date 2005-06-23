@@ -1085,6 +1085,9 @@ extern	PokeAddr ();
 		     STSFLG=.WKS_LIST[Idx,WKS$Stat],
 		     QUOTA = WKS_LIST[Idx,WKS$Quotas]
 		     );
+#else
+	RC = 0;
+	NewPID = 0;
 #endif
 
 // See if it worked.

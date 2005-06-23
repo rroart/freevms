@@ -64,7 +64,7 @@ int astdeb=0;
 asmlinkage void sch$astdel(void) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
   struct _pcb * p=ctl$gl_pcb;
-  struct _acb * dummy, *acb;
+  struct _acb * dummy = 0, *acb;
 
   /*lock*/
   if (intr_blocked(IPL$_ASTDEL))

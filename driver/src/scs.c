@@ -728,7 +728,7 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
   char devnam[16];
   int num, i;
   char type;
-  struct _ddb * ddb;
+  struct _ddb * ddb = 0;
   struct _ucb * ucb;
   struct dsc$descriptor d;
   d.dsc$w_length=4;

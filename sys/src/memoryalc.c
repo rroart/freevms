@@ -165,7 +165,7 @@ struct page * fastcall __alloc_pages(unsigned int gfp_mask, unsigned int order, 
 {
         unsigned long flags;
 	unsigned long min;
-	zone_t *zone, * classzone;
+	zone_t *zone, * classzone = 0;
 	struct page * page, *tmp;
 	int freed;
 	signed long pfn;

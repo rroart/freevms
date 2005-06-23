@@ -135,9 +135,9 @@ asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb
   convert=flags&LCK$M_CONVERT;
   if (!convert) {
     /* new lock */
-    struct _rsb * res;
+    struct _rsb * res = 0;
     struct _rsb * old;
-    struct _lkb * lck, *par = 0;
+    struct _lkb * lck = 0, *par = 0;
     struct dsc$descriptor * resnamdsc;
     int sserror=0;
 

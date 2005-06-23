@@ -490,7 +490,7 @@ void TZ$INITLINE(struct _idb * idb, struct _ucb * ucb)				// RESET SINGLE LINE
 {
   int R3,R4,R6,R7,R8,R9;
   struct _tt_class * R0;
-  struct _ucb * R1;
+  struct _ucb * R1 = 0;
   struct _tty_ucb * tty;
   struct _tt_class * R2;
   R0=&port_vector; // check TZ$VEC?		// Set TZ port vector table 
@@ -606,7 +606,7 @@ void TZ$DISCONNECT(struct _ucb * ucb, int r0) {
   int R3;
   if (r0) return;			// If no hangup, skip all this.
  
-  struct _tz_ucb * tz;
+  struct _tz_ucb * tz = 0; // check
   ucb = tz->ucb$l_tz_xucb;		// Get PZ UCB
   if (ucb) {			// If disconnected, ignore
     R3 = ucb->ucb$l_amb;		// Load Associated Mailbox of PZ UCB
@@ -1124,7 +1124,7 @@ int tz_iodb_vmsinit(void) {
 
 int tz_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
-  struct _ucb * newucb;
+  struct _ucb * newucb = 0;
   // ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&tz$ucb*/,&newucb); // check. skip?
   exe$assign(dsc,&chan,0,0,0);
   registerdevchan(MKDEV(TTYAUX_MAJOR,unitno),chan);

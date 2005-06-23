@@ -67,7 +67,7 @@ asmlinkage int exe$ascefc(unsigned int efn, void *name, char prot, char perm) {
 asmlinkage int exe$dacefc(unsigned int efn) {
   unsigned long * efcp;
   struct _pcb * p;
-  int retval;
+  int retval = SS$_NORMAL;
   struct _ceb * c;
   if (efn<64 || efn >127) 
     return SS$_ILLEFC;

@@ -104,7 +104,7 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
   struct struct_lnm_ret ret= {0,0};
   struct _lnmb * mylnmb;
   struct _lnmth * mylnmth;
-  struct _lnmx * mylnmx;
+  struct _lnmx * mylnmx = 0;
   struct dsc$descriptor * mytabnam=tabnam;
   struct dsc$descriptor * mylognam=lognam;
   struct item_list_3 * i,j;
@@ -188,7 +188,7 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   struct _orb * myorb;
   long * trailer;
   struct struct_rt * RT;
-  struct dsc$descriptor_s * mytabnam, * mypartab;
+  struct dsc$descriptor_s * mytabnam = 0, * mypartab;
   if (!(partab)) return 0;
   mypartab=partab;
 #ifdef LNM_DEBUG 

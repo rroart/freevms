@@ -1236,7 +1236,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 {
   struct _iosb iosb;
   unsigned device,sts;
-  struct _vcb *vcb;
+  struct _vcb *vcb = 0;
   struct _vcb *vcbdev;
   struct _ucb *ucb;
   struct _hm2 home;

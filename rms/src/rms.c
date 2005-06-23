@@ -1179,7 +1179,7 @@ unsigned exe$display(struct _fabdef *fab)
     struct _atrdef atr[8];
 
     void * myfi$t_filename;
-    unsigned short myfi$w_revision;
+    unsigned short myfi$w_revision = 0;
     unsigned long long myfi$q_credate;
     unsigned long long myfi$q_revdate;
     unsigned long long myfi$q_expdate;

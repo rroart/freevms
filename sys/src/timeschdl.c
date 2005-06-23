@@ -129,7 +129,7 @@ asmlinkage void exe$swtimint(void) {
   /* check tqe from EXE$GL_TQFL */
   if (smp_processor_id()==0) {
     if (vmstimerconf && exe$gq_systime>=exe$gq_1st_time) {
-      struct _tqe * t, * dummy;
+      struct _tqe * t, * dummy=0;
       //    printk(".");
       //if (times>=0 && times<5)   printtq(exe$gl_tqfl);
       //if (times>=0 && times<5)   printtq(exe$gl_tqfl->tqe$l_tqfl);

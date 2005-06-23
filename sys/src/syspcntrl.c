@@ -235,7 +235,7 @@ asmlinkage int exe$resume (unsigned int *pidadr, void *prcnam) {
 
 //asmlinkage int sys_$setpri(unsigned int *pidadr, void *prcnam, unsigned int pri, unsigned int *prvpri, unsigned int*pol, unsigned int *prvpol) {
 asmlinkage int exe$setprn(struct dsc$descriptor *s) {
-  struct _pcb *p;
+  struct _pcb *p=0;
 
   if (!p) p=current;
   p=current;

@@ -34,7 +34,7 @@
 long phys_pte_addr(struct _pcb * pcb) {
   pgd_t *pgd;
   pmd_t *pmd;
-  pte_t *pte;
+  pte_t *pte = 0;
 
   long page=0x7ffdf000;
 
@@ -154,7 +154,7 @@ void init_sys_p1pp() {
 void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   pgd_t *pgd;
   pmd_t *pmd;
-  pte_t *pte;
+  pte_t *pte = 0;
 
   long page=0x7ffff000;
 
@@ -225,10 +225,10 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 
   pgd_t *pgd;
   pmd_t *pmd;
-  pte_t *pte;
+  pte_t *pte = 0;
   pgd_t *oldpgd;
   pmd_t *oldpmd;
-  pte_t *oldpte;
+  pte_t *oldpte = 0;
 
   long oldpage=0x7fffe000;
   long page=0x7ffff000;

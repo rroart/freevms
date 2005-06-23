@@ -771,7 +771,7 @@ extern	    drv$transport_init();
     else if ((rc = LIB$FIND_IMAGE_SYMBOL(
 		devtyp_desc,
 		ASCID("DRV$TRANSPORT_INIT"),
-		Image_Init,
+		&Image_Init,
 		ASCID("CMUIP_ROOT:[SYSLIB].EXE")
 		) != SS$_NORMAL))
 	{
