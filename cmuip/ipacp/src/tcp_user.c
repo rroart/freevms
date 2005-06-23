@@ -227,7 +227,7 @@ extern signed long
     ts$aco,
     ts$pco;
 extern unsigned long   CONN_TIMEVAL;
-extern    unsigned long * vtcb_ptr[0];
+extern    unsigned long * vtcb_ptr;
 
 // Rtns from TCP_MECH.BLI
 
