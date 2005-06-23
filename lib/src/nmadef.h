@@ -66,7 +66,7 @@
 #define		NMA$M_CNT_WIH		0x4000
 #define		NMA$S_NMADEF		2
 	
-typedef struct _nma {
+struct _nma {
   union  {
     struct  {
       unsigned nma$v_opt_ent		: 3;

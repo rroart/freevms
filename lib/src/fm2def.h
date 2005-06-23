@@ -12,7 +12,7 @@
 #define FM2$C_LENGTH1 4
 #define FM2$S_FM2DEF 4
 	
-typedef struct _fm2 {
+struct _fm2 {
   union  {
     unsigned short int fm2$w_word0;
     struct  {
