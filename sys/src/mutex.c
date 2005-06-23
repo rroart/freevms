@@ -40,7 +40,7 @@ void sch_std$ravail(int rsn) {
   int savipl=vmslock(&SPIN_SCHED,IPL$_MAILBOX);
   struct _wqh * wq=sch$gq_mwait;
   struct _pcb * p=wq->wqh$l_wqfl;
-  for (;p!=wq;p->pcb$l_sqfl) {
+  for (;p!=wq;p=p->pcb$l_sqfl) {
     if (p->pcb$l_efwm==rsn) {
       wq->wqh$l_wqcnt--;
       sch$chse(p,PRI$_RESAVL);
