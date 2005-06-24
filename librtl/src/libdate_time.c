@@ -66,7 +66,7 @@ local_time = localtime (&time_ptr);
 
 // determine if daylight saving time is in effect
 if (local_time->tm_isdst > 0 )			// DST in effect
-	(unsigned long) time_ptr += 3600;
+	time_ptr += 3600;
 else if ( local_time->tm_isdst == 0 )		// DST not in effect
 	;
 else if ( local_time->tm_isdst < 0 )		// Flag not used
