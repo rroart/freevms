@@ -69,7 +69,7 @@ both	: telnet.hlb telnet.exe
 	echo "$ ! Done building Telnet"
 
 telnet_server.a		: telnet_server.o telnet_common.o print.o telnetmsg.o
-	ar -rv telnet_server.o telnet_common.o print.o telnetmsg.o
+	ar -rv telnet_server.a telnet_server.o telnet_common.o print.o telnetmsg.o
 
 telnet_server.exe	: telnet_server.a
 	$(link) $(linkflags) \
@@ -78,14 +78,22 @@ telnet_server.exe	: telnet_server.a
 		cmuip_src:[central]neterror.o \
 		cmuip_src:[central]netlib.a/lib
 
-telnet.a	: telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o
-	ar -rv telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o
+# dummies yet
+telnet_parse.o:
+	touch telnet_parse.c
+	gcc -c telnet_parse.c
+
+telnetmsg.o:
+	touch telnetmsg.c.
+	gcc -c telnetmsg.c
+
+telnet.a	: telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o main.o
+	ar -rv telnet.a telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o
 
 telnet.exe	: telnet.a
-	$(link) $(linkflags) telnet.a/lib/include=telnet \
-		telnet.opt/opt\
-		cmuip_src:[central]neterror.o \
-		cmuip_src:[central]netlib.a/lib
+	gcc $(link) $(linkflags) main.o telnet.a ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a -o telnet.exe
+#		cmuip_src:[central]neterror.o 
+#		cmuip_src:[central]netlib.a/lib
 
 telnet_server.o	: telnet_server.b32 telnet.req option.req
 

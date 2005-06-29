@@ -7,6 +7,7 @@ bugs present in pure gcc 3.0.1 was gone in pure 3.1.
 There are still problems related to anonymous structure initialization.
 
 Our bugs/features:
+See also TODO.
 
 Generally:
 No smp support (is probably broken).
@@ -34,8 +35,10 @@ For CONFIG_VMS:
 RMS $get does not work in IPACP CNF$Configure_ACP.
 With ext2 copy there are some fs problems. (See fsck)
 With ext2 truncate is broke/not implemented.
-You may now get panics with the new console driver
+You may now get panics with the new console driver.
 The pseudo and console drivers may not always work properly.
 There are console driver problems with sh, use DCL.
-It bugs and loops with ast in ast
-Telnet may give double output, and may not work for long.
+It bugs and loops with ast in ast.
+Telnet may not work for long.
+Telnet gets problems with the first input line.
+Telnet used with lib$put_output may bug the terminal i/o-system.

@@ -11,6 +11,7 @@ bugs present in pure gcc 3.0.1 was gone in pure 3.1.
 With recent gcc/Redhat uml gets backtrace problems and is partially broken.
 Use gcc 2.96 etc with uml.
 As recent gcc as 3.4 can now be used. (But some new problems are there)
+Gcc 4.0 might be too early.
 
 Linker (experimental):
 The linker must be made.
