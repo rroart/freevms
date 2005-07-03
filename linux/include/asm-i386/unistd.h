@@ -353,6 +353,9 @@
 #define __NR_$get_region_info  101
 #define __NR_$getdviw          102
 #define __NR_$cli              103
+#define __NR_$setprv           104
+#define __NR_$cancel           105
+#define __NR_$getjpiw          106
 
 #define __NR_$close 1
 #define __NR_$connect 2

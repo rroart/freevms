@@ -347,6 +347,18 @@ int sys$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itml
   return INLINE_SYSCALL($getjpi,1,&s);
 }
 
+int sys$getjpiw(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long long astprm) {
+  struct struct_getjpi s;
+  s.efn=efn;
+  s.pidadr=pidadr;
+  s.prcnam=prcnam;
+  s.itmlst=itmlst;
+  s.iosb=iosb;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  return INLINE_SYSCALL($getjpiw,1,&s);
+}
+
 int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, unsigned long long *nullarg) {
   struct struct_getdvi s;
   s.efn=efn;
@@ -493,6 +505,14 @@ int sys$getsyiw(unsigned int efn, unsigned int *csidadr, void *nodename, void *i
 
 int sys$cli(void * cliv, int par1, int par2) {
   return INLINE_SYSCALL($cli,3,cliv, par1, par2);
+}
+
+int sys$setprv (char enbflg, struct _generic_64 *prvadr, char prmflg, struct _generic_64 *prvprv) {
+  return INLINE_SYSCALL($setprv,4,enbflg, prvadr, prmflg, prvprv);
+}
+
+int sys$cancel (unsigned short int chan) {
+  return INLINE_SYSCALL($cancel,1,(int)chan);
 }
 
 int sys$setddir (struct dsc$descriptor *newdir,unsigned short *oldlen, struct dsc$descriptor *olddir) { return INLINE_SYSCALL1($setddir,3,newdir,oldlen,olddir); }

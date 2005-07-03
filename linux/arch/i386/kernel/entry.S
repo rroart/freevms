@@ -981,6 +981,9 @@ ENTRY(vmssys_call_table)
 	.long SYMBOL_NAME(exe$get_region_info)
 	.long SYMBOL_NAME(exe$getdviw_wrap)
 	.long SYMBOL_NAME(exe$cli)
+	.long SYMBOL_NAME(exe$setprv)
+	.long SYMBOL_NAME(exe$cancel)
+	.long SYMBOL_NAME(exe$getjpiw_wrap)
 
 	.rept NR_vmssyscalls-(.-vmssys_call_table)/4
 		.long SYMBOL_NAME(sys_$ni_syscall)
