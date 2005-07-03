@@ -118,6 +118,7 @@ location_t input_location;
 %type <type_node_p> verb_clause any_list type_clause parameter_clause_list
 %type <type_node_p> qualifier_clause_list_start qualifier_clause_list
 %type <type_node_p> parameter_clause_list_start name_or_string
+%type <type_node_p> value_clauses_start maybe_comma
 
 %{
 %}
@@ -279,11 +280,11 @@ K_SYNONYM T_NAME
 qualifier_clause_list_start:
 { $$ = 0; }
 |
-',' qualifier_clause_list { $$ = $2; }
+maybe_comma qualifier_clause_list { $$ = $2; }
 ;
 
 qualifier_clause_list:
-qualifier_clause_list ',' qualifier_clause { $$ = chainon ($1, $3); }
+qualifier_clause_list maybe_comma qualifier_clause { $$ = chainon ($1, $3); }
 |
 qualifier_clause
 ;
@@ -297,14 +298,14 @@ T_NAME
 {
   tnamemode=0; 
 }
-',' keyword_clause_list
+maybe_comma keyword_clause_list
 {
   $$ = build_nt(KEYWORD_CLAUSE, $3, $6);
 }
 ;
 
 keyword_clause_list:
-keyword_clause_list ',' keyword_clause { $$ = chainon ($1, $3); }
+keyword_clause_list maybe_comma keyword_clause { $$ = chainon ($1, $3); }
 |
 keyword_clause
 ;
@@ -382,9 +383,9 @@ K_SYNTAX '=' T_NAME
   $$ = build_nt(SYNTAX_CLAUSE, $3)
 }
 |
-K_VALUE '(' value_clauses ')'
+K_VALUE value_clauses_start
 {
-  $$ = build_nt(VALUE_CLAUSE, $3)
+  $$ = build_nt(VALUE_CLAUSE, $2)
 }
 ;
 
@@ -455,6 +456,12 @@ cli_flag_list:
 cli_flag_list ',' cli_flag { $$ = chainon ($1, $3); }
 |
 cli_flag
+;
+
+value_clauses_start:
+'(' value_clauses ')' { $$ = $2; }
+|
+{ $$ = 0; }
 ;
 
 value_clauses:
@@ -585,12 +592,17 @@ T_NAME
 T_STRING
 ;
 
+maybe_comma:
+|
+','
+;
+
 %%
 
 yyerror (char *s)
 {
-  if (s) error("\n\n%s\n",s); 
-  error("Nu b;lev det fel %d\n",input_location.line);
+  if (s) fprintf(stderr, "\n\n%s\n",s); 
+  fprintf(stderr, "Nu b;lev det fel %d\n",input_location.line);
 }
 
 void 
