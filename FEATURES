@@ -1,12 +1,17 @@
 The following features are present, from partially to fully implemented.
 
+Supported hardware configuration:
+	Console: VGA
+	Network interfaces: ne2k and 3c900 (3c905/3c590 might work, untested)
+	Disk interface: IDE
+
 Core kernel features:
 	Control mechanisms: Software interrupts, ASTs
 	Synchronization: Event flags, locks
 	Scheduling, time support, process control and communication
 	Memory management: Working set list, swapper, pools
 	Input/output: QIO, mailboxes, terminal driver
-	Image support for VMS Images and ELF.
+	Image support: VMS Images and ELF
 	Miscellaneous: Logical names
 
 File system:
@@ -63,10 +68,6 @@ RTL:
 Misc utilities:
 	Backup
 	CDU (mainly parses a CLD file)
-
-Supported hardware configuration:
-	Network interfaces: ne2k and 3c900 (3c905/3c590 might work, untested)
-	Disk interface: IDE
 
 System calls/services:
 	$adjwsl

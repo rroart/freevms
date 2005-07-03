@@ -31,7 +31,7 @@ cdu.a: parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o 
 
 parse.h: parse.c parse.y
 parse.c: parse.y
-	if $(BISON) $(BISONFLAGS) -d -o p$$$$.c parse.y; then \
+	if $(BISON) -v $(BISONFLAGS) -d -o p$$$$.c parse.y; then \
 		grep '^#define[       ]*YYEMPTY' p$$$$.c >> p$$$$.h ; \
 		test -f p$$$$.output && mv -f p$$$$.output parse.output ; \
 		mv -f p$$$$.c parse.c ; mv -f p$$$$.h parse.h ; \
