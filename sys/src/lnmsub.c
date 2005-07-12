@@ -173,7 +173,20 @@ int lnm$contsearch(struct struct_lnm_ret * r, int hash, struct lnmhshs * hashtab
     do {
       /*if (tmp->lnmb$b_count>nt->loglen) return SS$_NOLOGNAM; not yet*/
       if (tmp->lnmb$b_count==nt->loglen) {
+#if 0
 	lenstatus=strncmp(nt->lognam,tmp->lnmb$t_name,nt->loglen);
+#else
+	// do caseless anyway
+	int i;
+	for(i=0,lenstatus=0;i<nt->loglen && lenstatus==0;i++) {
+	  char c1,c2;
+	  c1=nt->lognam[i];
+	  c2=tmp->lnmb$t_name[i];
+	  if (c1>='A' && c1<='Z') c1|=0x20;
+	  if (c2>='A' && c2<='Z') c2|=0x20;
+	  lenstatus=c1-c2;
+	}
+#endif
 	if (lenstatus==0) {
 	  if (nt->lnmth && nt->lnmth!=tmp->lnmb$l_table) { 
 	  } else { 
