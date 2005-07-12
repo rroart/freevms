@@ -108,6 +108,8 @@ void lnm_init_prc(struct _pcb * p) {
   $DESCRIPTOR(mytabnam,"LNM$PROCESS_TABLE");
   $DESCRIPTOR(sysinput,"SYS$INPUT");
   $DESCRIPTOR(sysoutput,"SYS$OUTPUT");
+  $DESCRIPTOR(syserror,"SYS$ERROR");
+  $DESCRIPTOR(syscommand,"SYS$COMMAND");
 
   struct item_list_3 itm[2];
 
@@ -188,6 +190,8 @@ void lnm_init_prc(struct _pcb * p) {
 
   exe$crelnm(0,&mytabnam,&sysinput,0,itm);
   exe$crelnm(0,&mytabnam,&sysoutput,0,itm);
+  exe$crelnm(0,&mytabnam,&syserror,0,itm);
+  exe$crelnm(0,&mytabnam,&syscommand,0,itm);
 
   kfree(myterm);
 }
