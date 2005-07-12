@@ -124,6 +124,8 @@ int ioc_std$trandevnam (void * descr_p, int flags, char *buf, int *outlen, void 
   int sts;
   $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
   struct dsc$descriptor * mytabnam = &mytabnam_;
+  $DESCRIPTOR(mytabnam2_, "LNM$PROCESS_TABLE");
+  struct dsc$descriptor * mytabnam2 = &mytabnam2_;
   struct item_list_3 itm[2];
   itm[0].item_code=LNM$_STRING;
   itm[0].buflen=4;
@@ -131,7 +133,18 @@ int ioc_std$trandevnam (void * descr_p, int flags, char *buf, int *outlen, void 
   itm[0].bufaddr=buf;
   bzero(&itm[1],sizeof(struct item_list_3));
   *out_p=buf;
+  struct dsc$descriptor * d = descr_p, descr;
+  descr.dsc$a_pointer=d->dsc$a_pointer;
+  char * c = strchr(d->dsc$a_pointer,':'); // get rid of colon here
+  if (c)
+    descr.dsc$w_length=(long)c-(long)d->dsc$a_pointer;
+  else
+    descr.dsc$w_length=d->dsc$w_length;
+  descr_p=&descr;
   sts=exe$trnlnm(0,mytabnam,descr_p,0,itm);
+  if (sts&1)
+    return sts;
+  sts=exe$trnlnm(0,mytabnam2,descr_p,0,itm);
   return sts;
 }
 
