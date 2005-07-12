@@ -60,9 +60,18 @@ LDEBUG		= /NODEBUG /NOTRACE
 BFLAGS		= /OBJECT=$(MMS$TARGET_NAME) $(DEBUG) /TERM=STATISTICS /LIST
 LINKFLAGS	= /EXEC=$(MMS$TARGET_NAME) $(LDEBUG) /MAP/SYM
 
-all: links telnet
+all: links telnet install
 
-telnet	: telnet.exe
+clean:
+	rm *.o um/* i386/*
+
+install: all
+	install -d ../../../rootum/vms$$common/sysexe
+	install -d ../../../rooti386/vms$$common/sysexe
+	install i386/*.* ../../../rooti386/vms"$$"common/sysexe
+#	install um/*.* ../../../rootum/vms"$$"common/sysexe
+
+telnet	: i386/telnet${EXE} i386/telnet${NOEXE} i386/telnet$(EXE_ELF)
 	echo "$ ! Done building Telnet"
 
 both	: telnet.hlb telnet.exe
@@ -79,10 +88,6 @@ telnet_server.exe	: telnet_server.a
 		cmuip_src:[central]netlib.a/lib
 
 # dummies yet
-telnet_parse.o:
-	touch telnet_parse.c
-	gcc -c telnet_parse.c
-
 telnetmsg.o:
 	touch telnetmsg.c.
 	gcc -c telnetmsg.c
@@ -90,8 +95,20 @@ telnetmsg.o:
 telnet.a	: telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o main.o
 	ar -rv telnet.a telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o
 
-telnet.exe	: telnet.a
-	gcc $(link) $(linkflags) main.o telnet.a ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a -o telnet.exe
+i386/telnet$(EXE)	: telnet.a netaux.o
+#	gcc -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet$(EXE)
+	install -d i386
+#	$(LINKER) $(LINKPRE) /usr/lib/libc.a main.o netaux.o telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o ../../../librtl/src/librtl.a ../../../cdu/src/parse.o ../../../cdu/src/lex.o ../../../cdu/src/cdumain.o ../../../cdu/src/tree.o ../../../cdu/src/stringpool.o ../../../cdu/src/hashtable.o ../../../cdu/src/cld-lang.o ../../../cdu/src/cli.o ../../../cdu/src/cli2.o ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a /usr/lib/libdl.a --start-group $(LIBGCC) /usr/lib/libc.a --end-group -o i386/telnet${EXE}
+
+i386/telnet$(NOEXE)	: telnet.a netaux.o
+	install -d i386
+	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet$(NOEXE)
+#		cmuip_src:[central]neterror.o 
+#		cmuip_src:[central]netlib.a/lib
+
+i386/telnet$(EXE_ELF)	: telnet.a netaux.o
+	install -d i386
+	ld -Bshareable main.o netaux.o telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a /usr/lib/libc.a -o i386/telnet$(EXE_ELF)
 #		cmuip_src:[central]neterror.o 
 #		cmuip_src:[central]netlib.a/lib
 
@@ -103,7 +120,11 @@ telnet_term.o	: telnet_term.b32 print.req
 
 telnet_common.o	: telnet_common.b32 option.req print.req
 
-telnet_parse.o	: telnet_parse.cld
+telnet_parse.o  : telnet_parse.c
+	gcc -I$(TOPDIR)/cdu/src -c telnet_parse.c
+
+telnet_parse.c	: telnet_parse.cld
+	../../../cdu/src/cdu telnet_parse.cld
 
 telnet.hlb	: telnetcmd.hlp
 	library /create /help telnet.hlb telnetcmd.hlp
@@ -201,4 +222,10 @@ netxport.req:
 netconfig.req:
 	ln -s ../../central/netconfig.req .
 
-links: starlet.req netaux.req netcommon.req neterror.req network.req netxport.req netconfig.req lib.req ttyloc.req
+netcntrl.req:
+	ln -s ../../central/netcntrl.req .
+
+netaux.b32:
+	ln -s ../../central/netaux.bli netaux.b32
+
+links: starlet.req netaux.req netcommon.req neterror.req network.req netxport.req netconfig.req lib.req ttyloc.req netaux.b32 netcntrl.req
