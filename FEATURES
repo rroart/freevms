@@ -68,6 +68,7 @@ RTL:
 Misc utilities:
 	Backup
 	CDU (mainly parses a CLD file)
+	MSG (generates numbers only)
 
 System calls/services:
 	$adjwsl

@@ -1,4 +1,4 @@
-VMSSUBDIRS = crtl starlet librtl cld cdu cliutl backup dir init login dcl edt dfu mount copy delete dif util32
+VMSSUBDIRS = crtl starlet librtl cld cdu msgfil cliutl backup dir init login dcl edt dfu mount copy delete dif util32
 VMSSUBDIRSINST = crtl starlet librtl cld cliutl dir dcl login init edt dfu mount copy delete dif util32
 VMSSUBDIRS2 = examples
 

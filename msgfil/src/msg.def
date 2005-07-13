@@ -1,0 +1,6 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
+DEFTREECODE (PREFIX, "prefix", 'e', 2)
