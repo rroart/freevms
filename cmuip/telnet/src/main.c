@@ -241,6 +241,7 @@ void * get_cli_int(char * c) {
 
 int vms_mm = 1;
 
+#if 0
 int
 telnet$_get_inet=1,
 telnet$_not_term=2,
@@ -342,6 +343,7 @@ telnet$_no_options=97,
 telnet$_pause=98,
 telnet$_returning=99,
 telnet$_resume=100;
+#endif
 
 int smg$_eof=27;
 

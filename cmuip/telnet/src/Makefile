@@ -88,9 +88,8 @@ telnet_server.exe	: telnet_server.a
 		cmuip_src:[central]netlib.a/lib
 
 # dummies yet
-telnetmsg.o:
-	touch telnetmsg.c.
-	gcc -c telnetmsg.c
+telnetmsg.c: ../../../msgfil/src/message telnetmsg.msg
+	../../../msgfil/src/message telnetmsg.msg
 
 telnet.a	: telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o main.o
 	ar -rv telnet.a telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o
@@ -188,9 +187,6 @@ telnet.src	: \
 
 %.req: %.r32
 	ln -s $< $@
-
-telnetmsg.o:
-	touch telnetmsg.o
 
 %.o: %.b32
 	$(CC) -c $< -o $@
