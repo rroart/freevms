@@ -12,9 +12,9 @@ sys$dclexh() {
   return 1;
 }
 
-sys$trnlog() {
-  printf("trnlog not implemented\n");
-  return 0;
+sys$trnlog(void * lognam, short * rsllen, void * rslbuf) {
+  $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
+  return lib$get_logical(lognam, rslbuf, rsllen, &tab_dsc, 0, 0, 0, 0, 0);
 }
 
 sys$putmsg() {

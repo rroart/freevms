@@ -191,6 +191,12 @@ telnet.src	: \
 %.o: %.b32
 	$(CC) -c $< -o $@
 
+telnet.o: telnet.b32
+	$(CC) -c $< -o $@ -fminimum-actuals=4
+
+routines.o: routines.b32
+	$(CC) -c $< -o $@ -fminimum-actuals=4
+
 lib.req:
 	ln -s ../../../lib/src/lib.req .
 

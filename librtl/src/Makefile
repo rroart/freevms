@@ -55,6 +55,7 @@ LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 	libcli.o \
 	liblocc.o libmatchc.o  libmovc3.o libediv.o \
 	libgetdvi.o libgetjpi.o libgetsyi.o \
+	libgetlog.o \
 	libexpand_nodename.o sys__combine_date_time.o \
 	sysgetmsg.o sysgeterrno.o
 
