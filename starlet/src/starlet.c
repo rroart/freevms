@@ -362,6 +362,7 @@ int sys$getjpiw(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itm
 int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, unsigned long long *nullarg) {
   struct struct_getdvi s;
   s.efn=efn;
+  s.chan=chan;
   s.devnam=devnam;
   s.itmlst=itmlst;
   s.iosb=iosb;
@@ -374,6 +375,7 @@ int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *it
 int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, unsigned long long *nullarg) {
   struct struct_getdvi s;
   s.efn=efn;
+  s.chan=chan;
   s.devnam=devnam;
   s.itmlst=itmlst;
   s.iosb=iosb;
