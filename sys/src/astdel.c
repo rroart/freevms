@@ -2,6 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+// Author. Roger Tucker.
 
 #include <linux/linkage.h>
 #include <system_data_cells.h>
@@ -22,16 +23,18 @@ void sch$newlvl(struct _pcb *p);
 
 int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   int savipl;
-  struct _pcb * p=exe$ipid_to_pcb(pid);
   int status=SS$_NORMAL;
   int kernelmode;
-  if (!p) {
-    return SS$_NONEXPR;
-  }
   /* lock */
   savipl=getipl();
-  spin_lock(&SPIN_SCHED);
   setipl(IPL$_SYNCH);
+  spin_lock(&SPIN_SCHED);
+  struct _pcb * p=exe$ipid_to_pcb(pid);
+  if (!p) {
+    spin_unlock(&SPIN_SCHED);
+    setipl(savipl);
+    return SS$_NONEXPR;
+  }
   insque(a,&p->pcb$l_astqfl);
   if ((a->acb$b_rmod & ACB$M_KAST)==0)
     kernelmode=a->acb$b_rmod & 3;
