@@ -8,7 +8,9 @@ setunwind() {
 }
 
 sys$dclexh() {
+#if 0
   printf("dclexh not implemented\n");
+#endif
   return 1;
 }
 
@@ -35,11 +37,6 @@ lib$spawn() {
 lib$attach() {
   printf("attach not implemented\n");
   return 1;
-}
-
-lib$tparse() {
-  printf("lib$tparse not implemented\n");
-  return 0;
 }
 
 int
