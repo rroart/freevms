@@ -47,7 +47,7 @@ BEGIN
 LIBRARY 'SYS$LIBRARY:STARLET';
 LIBRARY 'SYS$LIBRARY:TPAMAC';
 
-ROUTINE Store_Number =
+ROUTINE Store_Number (TP_A) =
 !++
 ! Functional Description:
 !
@@ -55,10 +55,8 @@ ROUTINE Store_Number =
 !	numeric representation for the escape character.
 !--
     BEGIN
-    BUILTIN
-	AP;
     BIND
-	TParse_Block	= .AP				: $BBLOCK,
+	TParse_Block	= .TP_A				: $BBLOCK,
 	Current_Token	= TParse_Block [TPA$L_TOKENCNT]	: $BBLOCK,
 	Token_Value	= TParse_BLock [TPA$L_NUMBER]	: $BBLOCK;
 

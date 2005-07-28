@@ -46,7 +46,7 @@ BEGIN
 LIBRARY 'SYS$LIBRARY:STARLET';
 LIBRARY 'SYS$LIBRARY:TPAMAC';
 
-ROUTINE Store_Control =
+ROUTINE Store_Control (TP_A) =
 !++
 ! Functional Description:
 !
@@ -54,10 +54,8 @@ ROUTINE Store_Control =
 !	is a description for a control character.
 !--
     BEGIN
-    BUILTIN
-	AP;
     BIND
-	TParse_Block	= .AP				: $BBLOCK,
+	TParse_Block	= .TP_A				: $BBLOCK,
 	Current_Token	= TParse_Block [TPA$L_TOKENCNT]	: $BBLOCK,
 	First_Char	= .Current_Token [DSC$A_POINTER]: BYTE UNSIGNED;
 
@@ -75,7 +73,7 @@ ROUTINE Store_Control =
     SS$_NORMAL
     END;
 
-ROUTINE Store_Number =
+ROUTINE Store_Number (TP_A) =
 !++
 ! Functional Description:
 !
@@ -83,10 +81,8 @@ ROUTINE Store_Number =
 !	numeric representation for the escape character.
 !--
     BEGIN
-    BUILTIN
-	AP;
     BIND
-	TParse_Block	= .AP				: $BBLOCK,
+	TParse_Block	= .TP_A				: $BBLOCK,
 	Current_Token	= TParse_Block [TPA$L_TOKENCNT]	: $BBLOCK,
 	Token_Value	= TParse_BLock [TPA$L_NUMBER]	: $BBLOCK;
 
