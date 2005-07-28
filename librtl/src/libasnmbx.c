@@ -29,7 +29,7 @@ int lib$asn_wth_mbx (void * device_name , long * maximum_message_size, long * bu
   itmlst[0].buflen=16;
   itmlst[0].retlenaddr=&retlen;
   itmlst[0].bufaddr=retbuf;
-  itmlst[0].item_code=0;
+  itmlst[1].item_code=0;
 
   sts=sys$getdviw(0,*mailbox_channel,0,itmlst,&iosb,0,0,0);
 

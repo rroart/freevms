@@ -37,7 +37,7 @@ int lib$getsyi(signed int * item_code, void * resultant_value, void * resultant_
   itmlst[0].buflen=buflen;
   itmlst[0].retlenaddr=retlenaddr;
   itmlst[0].bufaddr=bufaddr;
-  itmlst[0].item_code=0;
+  itmlst[1].item_code=0;
 
   sts=sys$getsyiw(efn,cluster_system_id,node_name,itmlst,&iosb,0,0,0);
 

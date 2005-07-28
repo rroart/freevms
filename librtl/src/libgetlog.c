@@ -34,7 +34,7 @@ int lib$get_logical(void * logical_name , void * resultant_string, unsigned shor
   itmlst[0].buflen=buflen;
   itmlst[0].retlenaddr=retlenaddr;
   itmlst[0].bufaddr=bufaddr;
-  itmlst[0].item_code=0;
+  itmlst[1].item_code=0;
 
   sts=sys$trnlnm(0,table_name,logical_name,acmode,itmlst);
 

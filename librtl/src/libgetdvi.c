@@ -38,7 +38,7 @@ int lib$getdvi(signed int * item_code, unsigned short int * channel, void * devi
   itmlst[0].buflen=buflen;
   itmlst[0].retlenaddr=retlenaddr;
   itmlst[0].bufaddr=bufaddr;
-  itmlst[0].item_code=0;
+  itmlst[1].item_code=0;
 
   sts=sys$getdviw(efn,*channel,devnam,itmlst,&iosb,0,0,0);
 

@@ -37,7 +37,7 @@ int lib$getjpi(signed int * item_code, unsigned int * process_id, void * process
   itmlst[0].buflen=buflen;
   itmlst[0].retlenaddr=retlenaddr;
   itmlst[0].bufaddr=bufaddr;
-  itmlst[0].item_code=0;
+  itmlst[1].item_code=0;
 
   sts=sys$getjpiw(efn,process_id,process_name,itmlst,&iosb,0,0,0);
 
