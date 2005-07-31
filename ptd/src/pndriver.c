@@ -1438,17 +1438,12 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   //
   buf	 = i->irp$l_qio_p1;		// ADDRESS USER BUFFER
   size=i->irp$l_qio_p2;		// GET SIZE ARGUMENT
-  if (size==0) goto	l1;			// Default ?
-  if	(size<8)			// Compare it
-    goto	l4;			// Too small ?
- l1:	devtype=((char *)buf)[1];		// Get Type
+  if (size>0 && size<8) goto	BAD_SET;// Too small ?
+  devtype=((char *)buf)[1];		// Get Type
   bufsiz=((short *)buf)[1];		// Width
-  if	(bufsiz>511)			// Test it
-    goto	l4;			// Too big ?
-  if (bufsiz!=511) goto	l5;	// check		// Too small ?
- l4:
-  goto	BAD_SET	;		// Bad size
- l5:	devdep=((long *)buf)[1];		// Page/characteristics
+  if	(bufsiz==0 || bufsiz>=511)			// Test it
+    goto	BAD_SET;		// Too small ? Too big ?
+  devdep=((long *)buf)[1];		// Page/characteristics
   if	(size>=12)			// DID HE ASK FOR 2ND ?
     devdep2=((long *)buf)[2];		// Get extended char.
   tz = ((struct _tty_ucb *)tz)->ucb$l_tt_logucb;		// Switch to logical device if one exists
@@ -1599,7 +1594,7 @@ int PN$FDTSENSEM (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
 								       SAVIPL=-(SP),	-	// SAVE CURRENT IPL
 								       PRESERVE=YES		;
 #endif
-  devclass = tz->ucb$b_devclass;		// BUILD TYPE, AND BUFFER SIZE
+  devclass = *(int*)(&tz->ucb$b_devclass);		// BUILD TYPE, AND BUFFER SIZE
   devdep = tz->ucb$l_devdepend;		//RETURN 1ST CHARACTERISTICS LONGWORD
   devdep2=	tz->ucb$l_devdepnd2&~spec_chr; // check //AND 2ND LONGWORD (IF REQUESTED)
   speed= ((struct _tty_ucb *)tz)->ucb$w_tt_speed; // check // RETURN SPEED
@@ -1680,8 +1675,8 @@ int PN$FDTSENSEC(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
 								       SAVIPL=-(SP)		// SAVE CURRENT IPL
 #endif
 
-  devclass=((struct _tty_ucb *)tz)->ucb$b_tt_detype; // check //BUILD TYPE, AND BUFFER SIZE
-  devclass=	DC$_TERM;		// BUILD DEVICE CLASS
+  devclass=*(int*)(&((struct _tty_ucb *)tz)->ucb$w_tt_desize) & 0xffffff00; //BUILD TYPE, AND BUFFER SIZE
+  devclass|=	DC$_TERM;		// BUILD DEVICE CLASS
   devdep = ((struct _tty_ucb *)tz)->ucb$l_tt_dechar;		//RETURN 1ST CHARACTERISTICS LONGWORD
   devdep2=	((struct _tty_ucb *)tz)->ucb$l_tt_decha1&~spec_chr; // check // AND 2ND LONGWORD (IF REQUESTED)
   speed=((struct _tty_ucb *)tz)->	ucb$w_tt_despee; // check // RETURN SPEED
