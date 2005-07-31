@@ -110,7 +110,11 @@ int tty$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
 int tty$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
-int tty$fdtsetmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) { }
+int tty$fdtset(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int tty$fdtsensec(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
+int tty$fdtsensem(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
 extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
 
@@ -183,7 +187,10 @@ int tt$init_tables() {
   ini_fdt_act(&tt$fdt,IO$_WRITELBLK,tty$fdtwrite,1);
   ini_fdt_act(&tt$fdt,IO$_WRITEPBLK,tty$fdtwrite,1);
   ini_fdt_act(&tt$fdt,IO$_WRITEVBLK,tty$fdtwrite,1);
-  ini_fdt_act(&tt$fdt,IO$_SETMODE,tty$fdtsetmode,1);
+  ini_fdt_act(&tt$fdt,IO$_SENSECHAR,tty$fdtsensec,1);
+  ini_fdt_act(&tt$fdt,IO$_SENSEMODE,tty$fdtsensem,1);
+  ini_fdt_act(&tt$fdt,IO$_SETCHAR,tty$fdtset,1);
+  ini_fdt_act(&tt$fdt,IO$_SETMODE,tty$fdtset,1);
   ini_fdt_end(&tt$fdt);
 
   return SS$_NORMAL;

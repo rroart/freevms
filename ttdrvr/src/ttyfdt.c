@@ -114,3 +114,151 @@ int tty$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   return sts;
 }
 
+int tty$fdtset(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  // stripped down pn$fdtset
+  short bufsiz;
+  char * buf;
+  int size;
+  struct _acb ** acb_p = 0;
+  int sts=SS$_NOSUCHDEV;	// Assume no TZ device
+  struct _ltrm_ucb * lt = u;
+  if (u==0)	goto SET_ABORT;		// No TZ UCB exit
+#if 0
+  switch (i->irp$l_qio_p4) { 	// Figure out what to set // check
+  }
+#endif
+  int act=i->irp$l_func&IO$M_FMODIFIERS;
+  switch (act) {
+  case 0: goto SET_MODE;		// Page, type ....
+  case IO$M_CTRLCAST: goto SET_CTRLC; 
+  case IO$M_CTRLYAST: goto SET_CTRLY; 
+  case IO$M_OUTBAND: goto SET_OUTBAND; 
+  default:
+    sts=SS$_BADPARAM;	// Assume we were passed something bad.
+    return exe_std$abortio(i,p,u,sts);
+  }		//
+  //;;JC------------------- END Modified by J. Clement -------------------------
+
+ BAD_SET:
+  sts=SS$_BADPARAM;	// Assume we were passed something bad.
+ SET_ABORT:
+  return exe_std$abortio(i,p,u,sts);
+
+  //
+  //;;JC------------------- Modified by J. Clement -------------------------
+  //	This will set page size, and dev characteristics.
+  //
+ SET_MODE:
+  //
+  //	Set the mode
+  //
+  buf	 = i->irp$l_qio_p1;		// ADDRESS USER BUFFER
+  size=i->irp$l_qio_p2;		// GET SIZE ARGUMENT
+  if (size>0 && size<8) goto	BAD_SET;// Too small ?
+  bufsiz=((short *)buf)[1];		// Width
+  if	(bufsiz==0 || bufsiz>=511)			// Test it
+    goto	BAD_SET;		// Too small ? Too big ?
+  if	(size>=12)			// DID HE ASK FOR 2ND ?
+    { }		// Check content, maybe?
+
+  // check whether something we set earlier is consistent
+  if (lt->ucb$l_tl_phyucb) {
+    struct _tty_ucb * tty = lt->ucb$l_tl_phyucb;
+    if (u!=tty->ucb$l_tt_logucb)
+      printk("<0>" "tty error in set\n");
+  }
+  return exe$qiodrvpkt (i,p,u); 
+
+ SET_CTRLC:
+  acb_p=&lt->ucb$l_tl_ctrlc;
+  goto SET_CMN;
+ SET_CTRLY:
+  acb_p=&lt->ucb$l_tl_ctrly;
+ SET_CMN:
+  // check whether something we set earlier is consistent
+  if (lt->ucb$l_tl_phyucb) {
+    struct _tty_ucb * tty = lt->ucb$l_tl_phyucb;
+    if (u!=tty->ucb$l_tt_logucb)
+      printk("<0>" "tty error in set2\n");
+  }
+  sts = com_std$setattnast(i,p,u,c,acb_p);	// Insert into AST list
+  return exe$finishioc(sts,i,p,u);		// Complete request
+
+ SET_OUTBAND:
+  acb_p=&lt->ucb$l_tl_bandque;
+  // check whether something we set earlier is consistent
+  if (lt->ucb$l_tl_phyucb) {
+    struct _tty_ucb * tty = lt->ucb$l_tl_phyucb;
+    if (u!=tty->ucb$l_tt_logucb)
+      printk("<0>" "tty error in set3\n");
+  }
+  void * dummy;
+  sts = com_std$setctrlast(i,p,u,c,acb_p,lt->ucb$l_tl_outband,&dummy);	// Insert into AST list
+  return exe$finishioc(sts,i,p,u);		// Complete request
+}
+
+int tty$fdtsensem (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  int devclass;
+  int devdep;
+  int size, *buf, spec_chr, devdep2, speed, parity;
+  struct _ucb * ucb;
+  VERIFY_SENSE(&size,&buf,i,p,u,c);		// VERIFY USER STORAGE
+  if (u==0) {		// Have UCB
+    //	If no TZ device abort with SS$_NOSUCHDEV
+    // Save error reason
+    return exe_std$abortio(i,p,u,SS$_NOSUCHDEV);		// Abort request
+  }
+  ucb = u;		// Switch to logical device if one exists
+  spec_chr=GET_DCL(u);			// BUILD SPECIAL CHARACTERISTICS
+
+  devclass = *(int*)(&ucb->ucb$b_devclass);		// BUILD TYPE, AND BUFFER SIZE
+  devdep = ucb->ucb$l_devdepend;		//RETURN 1ST CHARACTERISTICS LONGWORD
+  devdep2=	ucb->ucb$l_devdepnd2&~spec_chr; // check //AND 2ND LONGWORD (IF REQUESTED)
+  speed= ((struct _tty_ucb *)ucb)->ucb$w_tt_speed; // check // RETURN SPEED
+  parity= ((struct _tty_ucb *)ucb)->ucb$b_tt_parity; // check // RETURN PARITY INFO
+  parity=(long)parity&~0xFF000000;		// ZERO HIGH BYTE
+  parity = ((struct _tty_ucb*)ucb)->ucb$b_tt_crfill;		// AND CR/LF FILL
+
+  *buf=devclass;			// RETURN USER DATA
+  buf[1]=devdep;		//
+  if	(size>=12)			// DID HE ASK FOR 2ND ?
+    buf[2]=devdep2;		//
+  // RETURN IOSB DATA
+  //expanded	goto	CMN_EXIT;		// EXIT RETURNING R0,R1	
+  return exe$finishio(speed|SS$_NORMAL,parity,i,p,u);	// check	// COMPLETE REQUEST IOSB WORD 0,1
+}
+
+int tty$fdtsensec (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  long devclass;
+  long devdep;
+  int size, *buf, spec_chr, devdep2, speed, parity;
+  struct _ucb * ucb;
+  VERIFY_SENSE(&size,&buf,i,p,u,c);		// VERIFY USER STORAGE
+  if (u==0)	{		// Have UCB
+    //	If no TZ device abort with SS$_NOSUCHDEV
+    // Save error reason
+    return exe_std$abortio(i,p,u,SS$_NOSUCHDEV);		// Abort request
+  }
+  ucb = u;
+  if (((struct _ltrm_ucb *)u)->ucb$l_tl_phyucb)
+    ucb = ((struct _ltrm_ucb *)u)->ucb$l_tl_phyucb;
+  spec_chr=GET_DCL(ucb);			// BUILD SPECIAL CHARACTERISTICS
+
+  devclass=*(int*)(&((struct _tty_ucb *)ucb)->ucb$w_tt_desize) & 0xffffff00; //BUILD TYPE, AND BUFFER SIZE
+  devclass|=	DC$_TERM;		// BUILD DEVICE CLASS
+  devdep = ((struct _tty_ucb *)ucb)->ucb$l_tt_dechar;		//RETURN 1ST CHARACTERISTICS LONGWORD
+  devdep2=	((struct _tty_ucb *)ucb)->ucb$l_tt_decha1&~spec_chr; // check // AND 2ND LONGWORD (IF REQUESTED)
+  speed=((struct _tty_ucb *)ucb)->	ucb$w_tt_despee; // check // RETURN SPEED
+  parity=((struct _tty_ucb *)ucb)->	ucb$b_tt_depari; // RETURN PARITY INFO
+  parity	&=~0xFF000000;		// ZERO HIGH BYTE
+  parity = ((struct _tty_ucb *)ucb)->ucb$b_tt_decrf;		// AND CR/LF FILL
+
+  *buf=devclass;			// RETURN USER DATA
+  buf[1]=devdep;		//
+  if 	(size>=12)			// DID HE ASK FOR 2ND ?
+    buf[2]=devdep2;		;
+  // RETURN IOSB DATA
+  //expanded	goto	CMN_EXIT;		// EXIT RETURNING R0,R1	
+  return exe$finishio(speed|SS$_NORMAL,parity,i,p,u);	// check 	// COMPLETE REQUEST IOSB WORD 0,1
+}
+
