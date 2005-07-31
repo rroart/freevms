@@ -327,9 +327,9 @@ void op$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, str
   ucb->ucb$l_devchar2 = DEV$M_NNM;
   ucb->ucb$b_devclass = DC$_TERM;
   ucb->ucb$b_devtype = DT$_TTYUNKN;
-  ucb->ucb$w_devbufsiz = 132;
+  ucb->ucb$w_devbufsiz = 80;
 
-  ucb->ucb$l_devdepend = 99; // just something to fill
+  ucb->ucb$l_devdepend = 24; // just something to fill
 
   // dropped the mutex stuff
 
