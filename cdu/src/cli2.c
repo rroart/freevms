@@ -33,7 +33,7 @@ int my_cdu_search_next(int i, int type, char * s, int size, int * retval) {
     int dlen=size; 
     int len=strlen(name->cdu$t_name);
     int min=len<dlen?len:dlen;
-    if (my_cdu_root[i].cdu$b_type==type && strncmp(name->cdu$t_name,s,min)==0) {
+    if (my_cdu_root[i].cdu$b_type==type && strncasecmp(name->cdu$t_name,s,min)==0) {
       if (retval)
 	*retval=i;
       return 1;
@@ -66,6 +66,12 @@ unsigned int cli$get_value(void *entity_desc, void *retdesc,short * retlen) {
     e=elem;
     int valuecdu=my_cdu_root[e].cdu$l_value;
     char * vname = my_cdu_root[valuecdu].cdu$t_name;
+    {
+      if (ret->dsc$b_class==DSC$K_CLASS_D && ret->dsc$b_dtype==DSC$K_DTYPE_T && ret->dsc$a_pointer==0 && ret->dsc$w_length==0) {
+	ret->dsc$a_pointer=malloc(strlen(vname));
+	ret->dsc$w_length=strlen(vname);
+      }
+    }
     memcpy(ret->dsc$a_pointer,vname,strlen(vname));
     if (retlen)
       *retlen=strlen(vname);
