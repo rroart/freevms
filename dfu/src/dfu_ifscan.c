@@ -1977,8 +1977,7 @@ int verify_command(int mask)
   }
 /* Get device name */
 #if 1
-  status = parse_item("device", &device_descr, 0, &dummy , 0); // not yet
-  status = parse_item("p1", &device_descr, 0, &dummy , 0);
+  status = parse_item("device", &device_descr, 0, &dummy , 0);
   if (status == 1) 
   { if (strindex(&device,":",64) == -1) 
       {
