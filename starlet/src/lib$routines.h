@@ -43,19 +43,14 @@ unsigned long lib$callg(const void *,const unsigned long (*)());
 
 #if 0
 // not now
-unsigned long lib$char(void *,const char *);
-#else
-unsigned long lib$char(struct dsc$descriptor_s*, const char*);
-#endif
+unsigned long lib$char(void *,const char *); #else unsigned long lib$char(struct dsc$descriptor_s*, const char*); #endif
 
 unsigned long lib$compare_uid();
 
 #if 0
-unsigned long lib$convert_date_string(const void *,void *,...);
-// not now?
+unsigned long lib$convert_date_string(const void *,void *,...); // not now?
 #else
-unsigned long lib$convert_date_string(const struct dsc$descriptor_s *,long long *,unsigned long *,unsigned long *, unsigned short *,unsigned long *);
-#endif
+unsigned long lib$convert_date_string(const struct dsc$descriptor_s *,long long *,unsigned long *,unsigned long *, unsigned short *,unsigned long *); #endif
 
 unsigned long lib$crc(const void *,const long *,const void *);
 
@@ -95,8 +90,7 @@ unsigned long lib$cvt_vectim(const void *,void *);
 // not now
 unsigned long lib$date_time(void *);
 #else
-unsigned long lib$date_time(struct dsc$descriptor_s *);
-#endif
+unsigned long lib$date_time(struct dsc$descriptor_s *); #endif
 
 unsigned long lib$day(long *, const void*, int*);
 
@@ -116,10 +110,7 @@ unsigned long lib$delete_vm_zone(const unsigned long *);
 
 #if 0
 // not now
-unsigned long lib$digit_sep(void *,...);
-#else
-unsigned long lib$digit_sep(struct dsc$descriptor_s *,unsigned short *);
-#endif
+unsigned long lib$digit_sep(void *,...); #else unsigned long lib$digit_sep(struct dsc$descriptor_s *,unsigned short *); #endif
 
 unsigned long lib$disable_ctrl(const unsigned long *,...);
 
@@ -172,7 +163,7 @@ unsigned long lib$format_date_time(void *,...);
 
 unsigned long lib$free_date_time_context();
 
-unsigned long lib$free_ef(const unsigned long *);
+unsigned int lib$free_ef(const unsigned int *efn);
 
 unsigned long lib$free_lun(const long *);
 
@@ -188,7 +179,7 @@ unsigned long lib$get_common(void *,...);
 
 unsigned long lib$get_date_format(void *,...);
 
-unsigned long lib$get_ef(unsigned long *);
+unsigned int lib$get_ef(unsigned int *efn);
 
 unsigned long lib$get_foreign(void *,...);
 
@@ -284,7 +275,7 @@ unsigned long lib$remqti(void *,void *,...);
 
 unsigned long lib$rename_file(const void *,const void *,...);
 
-unsigned long lib$reserve_ef(const unsigned long *);
+unsigned int lib$reserve_ef(const unsigned int *efn);
 
 unsigned long lib$reset_vm_zone(const unsigned long *);
 
