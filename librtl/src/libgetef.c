@@ -1,42 +1,196 @@
-#include<libdef.h>
-#include<ssdef.h>
+/*
+**  lib$get_ef(unsigned int *efn) - allocate an event flag
+**  lib$free_ef(unsigned int *efn) - free an event flag
+**  lib$reserve_ef(unsigned int *efn) - reserve a specific event flag
+**
+**	Author: Roger Tucker, Aug 9th, 2005
+**
+**		Made AST/thread reentrant by looping if already allocated in get_ef()
+**		Fixed proto-types to match VMS
+**		Allow freeing of event flags 1-23
+**		Added routine reserve_ef()
+**		Added comments
+**		Added regression test and verified with AXP VMS 8.2
+*/
 
-#include<linux/bitops.h>
+#define __NEW_STARLET
+#include <lib$routines.h>			/* Verify my public prototypes */
+#include <libdef.h>				/* lib messages */
+#include <ssdef.h>				/* system messages */
 
-unsigned long long not_my_event_flags = 0xffffffff;
-// 1 taken, 0 free
-
-unsigned long my_event_flags = 0xffffffff; // because of ffs? 32-63
-// 0 taken, 1 free. due to ffs.
-
-// all 0-31 are system reserved or pre-reserved
-// 0 is special. 24-31 are officially reserved, rest are pre-.
-
-// should start with 63 instead of 32
-
-int lib$get_ef(long * l) {
-  int flag;
-  flag=ffs(my_event_flags);
-  if (flag==0)
-    return LIB$_INSEF;
-  *l=flag-1+32;
-#if 0
-  my_event_flags&=~(1<<(*l));
+#ifndef __vms					/* Real VMS */
+#include <string.h>
+#include <linux/bitops.h>			/* Need Atomic bit operations */
 #else
-  clear_bit(flag-1, &my_event_flags);
+#include <builtins.h>
+#pragma __required_pointer_size long
+int _ffsll(unsigned long long bits);
+int test_and_clear_bit(int pos, void *bits); int test_and_set_bit(int pos, void *bits);
 #endif
-  // no error condition returned yet; 
-  return SS$_NORMAL;
-}
 
-int lib$free_ef(int * event) {
-  int flag;
-  int ev=*event;
-  if (ev<32)
-    return LIB$_EF_RESSYS;
-  ev-=32-1+1;
-  flag=test_and_set_bit(ev,&my_event_flags);
-  if (flag)
-    return LIB$_EF_ALRFRE;
-  return SS$_NORMAL;
-}
+/*
+** Local bit mask of reserved event flags.  0 = reserved, 1=free.
+**	Note: This is in process space so it could get trashed by a run-away pointer.
+**
+** Event flags are a little strange.  There are 64 local event flags, numbered 0-63.
+**     Event flags 0 and 24-31 are permantly reserved, and cannot be allocated or freed.
+**     Event flags 1-23 are initially reserved, but can be freed, then allocated.
+**     Event flags 32-63 are initially free and can be reserved.
+**     Event flags over 63 are for common event flags.
+** Reserved event flags are shared for all threads and AST reentrant, so changing
+** them must be atomic.  The first event flag to be allocated is 63.
+** The low order bit represents event flag 63.
+*/
+
+static volatile unsigned long long efn_flags = 0x00000000ffffffffULL;
+
+/*
+**  lib$get_ef(unsigned int *efn) - allocate an event flag.
+**              efn - Number allocated, or -1 if no local event flag was available.
+**      returns:  SS$_NORMAL - Event flag allocated
+**                LIB$INSEF - If no more event flags available for allocation.
+*/
+
+unsigned int lib$get_ef(unsigned int *efn)			/* allocate an event flag */
+    {
+    *efn = -1;							/* get_ef return -1 if not allocated */
+    int bit;
+    int flag;
+    do
+	{
+	bit = ffsll(efn_flags);					/* Find the first free event flag */
+	if (bit == 0) return LIB$_INSEF;			/* No more event flags */
+	flag = test_and_clear_bit(bit-1, (void *)&efn_flags);	/* Get bit and clear - ATOMIC! */
+	} while (!flag);					/* If set - an AST or thread beat me here */
+    *efn = 64 - bit;						/* return the event flag allocated */
+    return SS$_NORMAL;
+    }
+
+/*
+**  lib$free_ef(const unsigned int *efn) - free an event flag
+**
+**     Event flags 0 and 24-31 are permantly reserved, and cannot be allocated or freed.
+**     Event flags 1-23 are initially reserved, but can be freed, then allocated.
+**     Event flags 32-63 are initially free and can be reserved.
+**
+**	returns:
+**		SS$_NORMAL      - Routine successfully completed.
+**		LIB$_EF_ALRFRE  - Event flag already free.
+**		LIB$_EF_RESSYS  - Event flag reserved to system.
+**			This is returned if efn is outside the ranges of 1-23 and 32-63.
+*/
+
+unsigned int lib$free_ef(const unsigned int *efn)		/* Free an event flag */
+    {
+    unsigned long status = LIB$_EF_RESSYS;			/* Event flag reserved to system */
+    int ef = *efn;
+    if ((ef >= 1 && ef <= 23) || (ef >= 32 && ef <= 63))	/* Make sure it's in range */
+	{
+	status = SS$_NORMAL;					/* Assume success */
+	int flag = test_and_set_bit(63-ef, (void *)&efn_flags);	/* Get bit and set - ATOMIC! */
+	if (flag) status = LIB$_EF_ALRFRE;			/* If already free */
+	}
+    return status;
+    }
+
+/*
+**  lib$reserve_ef() - reserve a specific event flag number
+**		To deallocate use LIB$FREE_EF.
+**
+**	returns:
+**		SS$_NORMAL - Routine successfully completed.
+**		LIB$_EF_ALRRES - event flag already reserved
+**		LIB$_EF_RESSYS - Event flag reserved to system.
+**			This is returned if efn is outside the ranges of 1-23 and 32-63.
+*/
+
+unsigned int lib$reserve_ef(const unsigned int *efn)
+    {
+    unsigned long status = LIB$_EF_RESSYS;			/* Event flag reserved to system */
+    int ef = *efn;
+    if ((ef >= 1 && ef <= 23) || (ef >= 32 && ef <= 63))	/* Make sure it's in range */
+	{
+	status = SS$_NORMAL;					/* Assume success */
+	int flag = test_and_clear_bit(63-ef, (void *)&efn_flags);/* Get bit and set - ATOMIC! */
+	if (!flag) status = LIB$_EF_ALRRES;			/* If already reserved */
+	}
+    return status;
+    }
+
+
+
+#ifdef _vms
+int ffsll(unsigned long long bits)
+    {
+    int pos = 0;
+    for (int i = 0; i < 64; i++)
+	{
+	if (bits & 0x01) { pos = i+1; break; }
+	bits = bits >> 1;
+	}
+    return pos;
+    }
+int test_and_clear_bit(int pos, void *bits)			/* Not atomic but good enough for testing */
+    {
+    unsigned long long *p = (unsigned long long *)bits;
+    int test = (*p >> pos) & 0x01;				/* Get the bit */
+    if (test) *p &= ~(1LL << pos);				/* Clear it */
+    return test;
+    }
+int test_and_set_bit(int pos, void *bits)			/* Not atomic but good enough for testing */
+    {
+    unsigned long long *p = (unsigned long long *)bits;
+    int test = (*p >> pos) & 0x01;				/* Get the bit */
+    if (!test) *p |= (1LL << pos);				/* set it */
+    return test;
+    }
+#endif
+
+#ifdef TEST_ROUTINE
+
+#include <stdio.h>
+int main()
+    {
+    int i;
+    for (i = 0; i < 65; i++)
+      {
+      unsigned int efn1 = i;
+      unsigned long status = lib$free_ef(&efn1);
+      printf("freed efn %d, status %ld\n",efn1,status);
+      }
+
+    for (i = 0; i < 64; i++)
+        {
+        unsigned int efn1;
+        unsigned long status = lib$get_ef(&efn1);
+        printf("Got efn %d, status %ld\n",efn1, status);
+        }
+
+    for (i = 0; i < 65; i++)
+      {
+      unsigned int efn1 = i;
+      unsigned long status = lib$free_ef(&efn1);
+      printf("freed efn %d, status %ld\n",efn1,status);
+      }
+    for (i = 0; i < 65; i++)
+      {
+      unsigned int efn1 = i;
+      unsigned long status = lib$free_ef(&efn1);
+      printf("freed efn %d, status %ld\n",efn1,status);
+      }
+
+    for (i = 0; i < 65; i++)
+        {
+        unsigned int efn1 = i;
+	unsigned long status = lib$reserve_ef(&efn1);
+        printf("Reserved efn %d, status = %ld\n",efn1, status);
+        }
+    for (i = 0; i < 65; i++)
+        {
+        unsigned int efn1 = i;
+	unsigned long status = lib$reserve_ef(&efn1);
+        printf("Reserved efn %d, status = %ld\n",efn1, status);
+        }
+    return 0;
+    }
+#endif
