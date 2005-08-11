@@ -42,6 +42,7 @@ unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
 	 */
 	switch(dest->dsc$b_class)
 	{
+	case DSC$K_CLASS_Z:
 	case DSC$K_CLASS_S:
 	case DSC$K_CLASS_SD:
 	case DSC$K_CLASS_A:

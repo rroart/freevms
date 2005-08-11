@@ -44,6 +44,7 @@ unsigned long str$$is_string_class(const struct dsc$descriptor_s* test_string)
 	 */
 	switch (test_string->dsc$b_class)
 	{
+	case DSC$K_CLASS_Z:
 	case DSC$K_CLASS_S:
 	case DSC$K_CLASS_SD:
 	case DSC$K_CLASS_VS:
