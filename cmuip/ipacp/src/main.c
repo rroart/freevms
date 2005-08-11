@@ -801,7 +801,7 @@ void Main (void) {
 
 	  itm[0].item_code=LNM$_STRING;
 	  itm[0].buflen=4;
-	  itm[0].bufaddr=mydevice;
+	  itm[0].bufaddr="ipa0";
 	  bzero(&itm[1],sizeof(struct item_list_3));
 	  sts=exe$crelnm(0,mytabnam,dev,0,itm);
 
@@ -825,10 +825,10 @@ void Main (void) {
     rc = exe$trnlnm(0,tabnam,logical_netname, 0,items);
     if (rc == SS$_NOLOGNAM ||  !rc) {
 	myname.dsc$w_length = 14; // set the proper length since fixed string.
-        memcpy(&myname.dsc$a_pointer,"Noname Network",14);
+        myname.dsc$a_pointer = "Noname Network";
    } else {
 	myname.dsc$w_length  = eqv_len;
-        memcpy(&myname.dsc$a_pointer,eqv_name,eqv_len);
+        myname.dsc$a_pointer = eqv_name;
    }
 
 // Record starting time.
@@ -982,10 +982,10 @@ struct dsc$descriptor myname;
 
   if (rc == SS$_NOLOGNAM || rc==0) {
 	myname.dsc$w_length = 14; // set the proper length since fixed string.
-        memcpy(&myname.dsc$a_pointer,"Noname Network",14);
+        myname.dsc$a_pointer="Noname Network";
    } else {
 	myname.dsc$w_length  = eqv_len;
-        memcpy(&myname.dsc$a_pointer,eqv_name,eqv_len);
+        myname.dsc$a_pointer = eqv_name;
 }
 
 // Record starting time.
