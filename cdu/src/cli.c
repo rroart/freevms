@@ -291,11 +291,29 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 	}
       } else { // ordinary param?
 	p = my_alloc_cdu(CDU$C_PARAMETER);
+#if 0
 	n = my_alloc_cdu(CDU$C_NAME);
 	my_cdu_root[p].cdu$l_name = n;
 	struct _cdu * np = &my_cdu_root[n];
 	np->cdu$t_name[0]='p';
 	np->cdu$t_name[1]='0'+pn;
+#else
+	{
+	  int i;
+	  int count;
+	  int total;
+	  i = cdu->cdu$l_parameters;
+	  for(total=0;i;total++)
+	    i=cdu_root[i].cdu$l_next;
+	  i = cdu->cdu$l_parameters;
+	  for(count=total-pn;count;count--)
+	    i=cdu_root[i].cdu$l_next;
+	  n = my_alloc_cdu(CDU$C_NAME);
+	  my_cdu_root[p].cdu$l_name = n;
+	  struct _cdu * np = &my_cdu_root[n];
+	  *np=cdu_root[cdu_root[i].cdu$l_name]; // memcpy included
+	}
+#endif
 	v = my_alloc_cdu(CDU$C_NAME);
 	struct _cdu * vp = &my_cdu_root[v];
 	my_cdu_root[p].cdu$l_value = v;
@@ -401,12 +419,21 @@ unsigned int cli$dispatch(int userarg){
   if (cdu->cdu$t_name[0])
     routine = cdu->cdu$t_name;
 
+#if 0
   if ((*cur_cdu)->cdu$l_flags&CDU$M_INTERNAL) {
     value=get_cli_int(routine);
     func=value;
     internal=1;
     goto skip;
   }
+#else
+  value=get_cli_int(routine);
+  if (value) {
+    func=value;
+    internal=1;
+    goto skip;
+  }
+#endif
 
   if (vms_mm==0) goto ele;
 
