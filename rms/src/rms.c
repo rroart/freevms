@@ -1129,6 +1129,8 @@ unsigned exe$put(struct _rabdef *rab)
     int wbuf_len=512;
     if (ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)
       wbuf_len=reclen;
+    if (wbuf_len==0)
+      return SS$_NORMAL;
     sts = sys$qiow(0,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_WRITEVBLK,&iosb,0,0,
 		   buffer,wbuf_len,block,0,0,0);
     sts = iosb.iosb$w_status;
