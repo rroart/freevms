@@ -328,7 +328,7 @@ extern signed long
     log_state,
     Time_2_Exit,
     mypid;			// maclib.mar
-extern struct dsc$descriptor  *  Local_Name;
+extern struct dsc$descriptor  Local_Name;
 extern Device_Configuration_Entry dev_config_tab[];
 
 // Memory manager dynamic allocation counts (defined in memgr.bli)
@@ -731,9 +731,9 @@ void user$net_connection_info(struct user_info_args * uargs,
 
 // Local host name
 
-    CH$MOVE(Local_Name->dsc$w_length,Local_Name->dsc$a_pointer,
+    CH$MOVE(Local_Name.dsc$w_length,Local_Name.dsc$a_pointer,
 	    CH$PTR(CS->ci$local_host,0));
-    CS->ci$lhost_name_size = Local_Name->dsc$w_length;
+    CS->ci$lhost_name_size = Local_Name.dsc$w_length;
 
 // Local and foreign port numbers.
 
@@ -1801,9 +1801,9 @@ void net$gthst(struct gthst_args * uargs)
 
 // Copy the name of the local host from the local info
 
-	CH$MOVE(Local_Name->dsc$w_length,Local_Name->dsc$a_pointer,
+	CH$MOVE(Local_Name.dsc$w_length,Local_Name.dsc$a_pointer,
 		CH$PTR(RBLOCK->ghn$namstr,0));
-	RBLOCK->ghn$namlen = Local_Name->dsc$w_length;
+	RBLOCK->ghn$namlen = Local_Name.dsc$w_length;
 
 // Return data to the user
 
