@@ -54,7 +54,7 @@
 
 #define OPF$Mode	1
 #define OPF$Nowait	2
-#define OPF$Addrfla	4
+#define OPF$Addrflag	4
 
 /* Send flag bit positions ** Must match STRUCTURE and IPDRIVER ** */
 /*!!!HACK!!! Not used...*/
