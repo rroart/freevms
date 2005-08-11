@@ -196,6 +196,7 @@ MODULE TCP_USER(IDENT="3.7",LANGUAGE(BLISS32),
 
 #include <ssdef.h>
 #include <descrip.h>
+#include <ucbdef.h>
 
 #if 0
 XQDEFINE			// (maybe) define queue debugging externals
@@ -203,7 +204,7 @@ XQDEFINE			// (maybe) define queue debugging externals
 
 //*** Special literals from USER.BLI ***
 
-#define    UCB$L_CBID	ucb$l_devdepnd2	// Control Block associated with UCB
+#define    UCB$L_CBID	ucb$l_devdepend	// Control Block associated with UCB
 
 extern signed long /* LITERAL*/
     UCB$Q_DDP,
@@ -1776,7 +1777,7 @@ void tcp$open(struct user_open_args * Uargs)
     XLOG$FAO(LOG$USER,"!%T TCP$OPEN: PID=!XL,CHAN=!XL,FLAGS=!XL!/",
 	     0,Uargs->op$pid,Uargs->op$piochan,Uargs->op$flags);
 
-    ProtoHdr = Uargs->op$protohdrblk;
+    ProtoHdr = &Uargs->op$protohdrblk;
 
 // Handle easy errors before creating TCB, etc...
 
@@ -1853,10 +1854,10 @@ void tcp$open(struct user_open_args * Uargs)
 
 // Setup TCB ID in UCB - move 4-byte TCB index into system UCB
 
-    ucbptr = Uargs->op$ucb_adrs ; // not yet+ UCB$L_CBID;
+    ucbptr = &((struct _ucb *)Uargs->op$ucb_adrs)->UCB$L_CBID ; // check
 
 	// check
-    $$KCALL(MOVBYT,4,TCB->vtcb_index,ucbptr);
+    $$KCALL(MOVBYT,4,&TCB->vtcb_index,ucbptr);
 
 // Remember Uargs for TCP_NMLOOK_DONE
 
@@ -1891,7 +1892,7 @@ X:  {			// *** Block X ***
 
     TCB->foreign_hnlen = 0;
     TCB->pending_io = TRUE;                 //[VU] Satisfy new validity test
-    TCP_NMLOOK_DONE(TCB,SS$_NORMAL,1,IPADDR,0,0);
+    TCP_NMLOOK_DONE(TCB,SS$_NORMAL,1,&IPADDR,0,0);
     TCB->nmlook_flag = TRUE;
     NML$GETNAME(IPADDR,tcp$adlook_done,TCB);
     return;
@@ -2042,7 +2043,7 @@ void TCP_NMLOOK_DONE(TCB,STATUS,ADRCNT,ADRLST,NAMLEN,NAMPTR)
 		     0,TCB->foreign_port,TCB->foreign_port);
 	    do
 		{
-		LP = user$get_local_port(TCP_User_LP);
+		LP = user$get_local_port(&TCP_User_LP);
 		ok =check_unique_conn(LP,TCB->foreign_host,
 				       TCB->foreign_port,&CN_Index);
  		if (ok == ERROR)

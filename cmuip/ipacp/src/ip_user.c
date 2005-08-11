@@ -81,6 +81,7 @@ MODULE IP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 
 #include <ssdef.h>
 #include <descrip.h>
+#include <ucbdef.h>
 
 #undef TCP_DATA_OFFSET
 #include <net/checksum.h>
@@ -90,7 +91,7 @@ MODULE IP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 
 #define    UCB$Q_DDP  ucb$q_devdepend //check
 #define    UCB$L_CBID  ucb$q_devdepend
-#define    UCB$L_EXTRA ucb$q_devdepend
+#define    UCB$L_EXTRA ucb$q_devdepend2
 
 // External data items
 
@@ -701,8 +702,8 @@ void ipu$open(struct user_open_args * Uargs)
 // At this point, the connection exists. Write the connection ID
 // back into the Unit Control Block for this connection.
 
-    ipcbptr = Uargs->op$ucb_adrs; // check + UCB$L_CBID;
-    $$KCALL(MOVBYT,4,UIDX,ipcbptr);
+    ipcbptr = &((struct _ucb *)Uargs->op$ucb_adrs)->UCB$L_CBID ; // check
+    $$KCALL(MOVBYT,4,&UIDX,ipcbptr);
 
 // Initialize queue headers for the IPCB
 
@@ -738,7 +739,7 @@ X:  {			// *** Block X ***
 	    goto leave_x;
     IPCB->ipcb$foreign_hnlen = 0;
     IPCB->ipcb$foreign_host = IPADDR;
-    IP_NMLOOK_DONE(IPCB,SS$_NORMAL,1,IPADDR,0,0);
+    IP_NMLOOK_DONE(IPCB,SS$_NORMAL,1,&IPADDR,0,0);
     IPCB->ipcb$nmlook = TRUE;
     NML$GETNAME(IPADDR,IP_ADLOOK_DONE,IPCB);
     return;

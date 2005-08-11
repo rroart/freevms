@@ -82,15 +82,11 @@ MODULE ICMP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 
 #include <ssdef.h>
 #include <descrip.h>
+#include <ucbdef.h>
 
 //*** Special literals from USER.BLI ***
 
-#if 0
-extern signed long 
-    UCB$Q_DDP,
-    UCB$L_CBID,
-    UCB$L_EXTRA;
-#endif
+#define    UCB$L_CBID	ucb$l_devdepend	// Control Block associated with UCB
 
 // External data items
 
@@ -717,7 +713,7 @@ void icmp$open(struct user_open_args * uargs)
 // At this point, the connection exists. Write the connection ID
 // back into the Unit Control Block for this connection.
 
-    icmpcbptr = uargs->op$ucb_adrs; // not yet  + UCB$L_CBID;
+    icmpcbptr = &((struct _ucb *)uargs->op$ucb_adrs)->UCB$L_CBID ; // check
     $$KCALL(MOVBYT,4,UIDX,icmpcbptr);
 
 // Initialize queue headers for the ICMPCB
@@ -752,7 +748,7 @@ X:  {			// *** Block X ***
 	    goto leave_x;
     ICMPCB->ICMPCB$Foreign_Hnlen = 0;
     ICMPCB->icmpcb$uargs = uargs;
-    ICMP_NMLOOK_DONE(ICMPCB,SS$_NORMAL,1,IPADDR,0,0);
+    ICMP_NMLOOK_DONE(ICMPCB,SS$_NORMAL,1,&IPADDR,0,0);
     ICMPCB->icmpcb$nmlook = TRUE;
     NML$GETNAME(IPADDR,ICMP_ADLOOK_DONE,ICMPCB);
     return;

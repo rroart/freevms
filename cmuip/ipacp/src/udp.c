@@ -203,6 +203,7 @@ MODULE UDP( IDENT="4.0e",LANGUAGE(BLISS32),
 
 #include <ssdef.h>
 #include <descrip.h>
+#include <ucbdef.h>
 
 #undef TCP_DATA_OFFSET
 #include <net/checksum.h>
@@ -211,10 +212,7 @@ MODULE UDP( IDENT="4.0e",LANGUAGE(BLISS32),
 
 //*** Special literals from USER.BLI ***
 
-extern signed long
-    UCB$Q_DDP,
-    UCB$L_CBID,
-    UCB$L_EXTRA;
+#define    UCB$L_CBID  ucb$q_devdepend
 
 // External data items
 
@@ -1172,7 +1170,7 @@ void udp$open(struct user_open_args * Uargs)
 // At this point, the connection exists. Write the connection ID
 // back into the Unit Control Block for this connection.
 
-    udpcbptr = Uargs->op$ucb_adrs; // not yet + UCB$L_CBID;
+    udpcbptr = &((struct _ucb *)Uargs->op$ucb_adrs)->UCB$L_CBID ; // check
     $$KCALL(MOVBYT,4,UIDX,udpcbptr);
 
 // Initialize queue headers for the UDPCB
@@ -1215,7 +1213,7 @@ X:  {			// *** Block X ***
 	    goto leave_x;
     UDPCB->udpcb$foreign_hnlen = 0;
     UDPCB->udpcb$uargs = Uargs;
-    UDP_NMLOOK_DONE(UDPCB,SS$_NORMAL,1,IPADDR,0,0);
+    UDP_NMLOOK_DONE(UDPCB,SS$_NORMAL,1,&IPADDR,0,0);
     UDPCB->udpcb$nmlook = TRUE;
     NML$GETNAME(IPADDR,UDP_ADLOOK_DONE,UDPCB);
     return;
