@@ -54,6 +54,8 @@ Fix CONFIG_VMS network drivers.
 For ide disk set ucb$l_maxblock and more, like in file.c
 After some time even more driver support might be cut/broke (the most).
 In trandevnam make it use lnm$file_dev.
+Tty_read with correct size read.
+Acpqfl change from absolute to relative.
 
 Logical names:
 Logical support in the DCL and elsewhere
