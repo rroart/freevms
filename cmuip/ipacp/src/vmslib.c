@@ -385,8 +385,9 @@ Gen_Checksum_not() {
   printk("Gen_Checksum not implemented\n");
 }
 
-find_cpu_data() {
-  printk("find_cpu_data not implemented\n");
+find_cpu_data(long * l) {
+  int cpuid = smp_processor_id();
+  * l=smp$gl_cpu_data[cpuid];
 }
 
 Queue_Not_Empty_not() {
