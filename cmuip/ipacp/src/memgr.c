@@ -614,7 +614,7 @@ Side Effects:
 */
 
 
-void mm$uarg_get (void)
+mm$uarg_get (void)
     {
       long R0 = 0;
 #if 0
