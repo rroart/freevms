@@ -9,6 +9,12 @@ setunwind() {
 
 sys$dclexh() {
 #if 0
+  #define _IONBF 2
+  #define NULL 0
+  extern struct _IO_FILE * stdout;
+  setvbuf(stdout, NULL, _IONBF, 0);
+#endif
+#if 0
   printf("dclexh not implemented\n");
 #endif
   return 1;
@@ -68,7 +74,14 @@ smg$read_composed_line(unsigned int * keyboard_id ,unsigned int * key_table_id ,
   struct dsc$descriptor * in , * out;
   in = resultant_string;
   out = prompt_string;
+#if 0
   printf("%s",out->dsc$a_pointer);
+#else
+  $DESCRIPTOR(as,"!AS");
+  print_routine(&as,out);
+  in->dsc$a_pointer=malloc(50); // leak;
+  in->dsc$w_length=50;
+#endif
   short int len = read(0,in->dsc$a_pointer,in->dsc$w_length);
   if (*resultant_length)
     *resultant_length=len;
