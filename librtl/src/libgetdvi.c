@@ -40,7 +40,11 @@ int lib$getdvi(signed int * item_code, unsigned short int * channel, void * devi
   itmlst[0].bufaddr=bufaddr;
   itmlst[1].item_code=0;
 
-  sts=sys$getdviw(efn,*channel,devnam,itmlst,&iosb,0,0,0);
+  int chan = 0;
+  if (channel)
+    chan = *channel;
+
+  sts=sys$getdviw(efn,chan,devnam,itmlst,&iosb,0,0,0);
 
   if ((sts&1)==0)
     return sts;
