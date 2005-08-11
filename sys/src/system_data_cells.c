@@ -2128,6 +2128,7 @@ void __init vms_init4(void) {
   ft_vmsinit();
   pn_vmsinit();
   tz_vmsinit();
+  ip4_vmsinit();
 #endif
   void exe$reclaim_pool_gentle(void * pool);
   signed long long time=-10000000*60;
