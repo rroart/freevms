@@ -172,8 +172,10 @@ typedef struct {
 	};
     } ipadr$address_block;
 
+#if 0
 #define IPADR$ADDRESS_SIZE sizeof(ipadr$address_block)
-#define IPADR$ADDRESS_BLEN IPADR$ADDRESS_SIZE*4
+#endif
+#define IPADR$ADDRESS_BLEN sizeof(ipadr$address_block)
 #define IPADR$UDP_ADDRESS_BLEN 12
 
 /* NET$INFO - return block structure. */
@@ -184,16 +186,18 @@ typedef struct {
     uchar ci$foreign_host[HOST_NAME_MAX_SIZE];
     short fill;
     ulong ci$foreign_port;
-    short fill_1;
+  // short fill_1;
     uchar ci$local_host[HOST_NAME_MAX_SIZE];
+  // short fill_2;
     ulong ci$local_port;
-    short fill_2;
     ulong ci$local_internet_adrs;
     ulong ci$remote_internet_adrs;
     } connection_info_return_block;
 
+#if 0
 #define CONNECTION_INFO_BLKSIZE sizeof(connection_info_return_block)
-#define CONNECTION_INFO_BYTESIZE 4*CONNECTION_INFO_BLKSIZE
+#endif
+#define CONNECTION_INFO_BYTESIZE sizeof(connection_info_return_block)
 
 
 
@@ -467,8 +471,10 @@ typedef struct {
     } d$arp_dump_return_blk_entry;
 
 #define D$ARP_DUMP_BLKSIZE    sizeof(d$arp_dump_return_blk_entry)
+#if 0
 #define D$ARP_DUMP_MAXBLKSIZE 512	/* Max size of block */
 #define D$ARP_DUMP_MAXBLK (D$ARP_DUMP_MAXBLKSIZE/sizeof(D$ARP_DUMP_RETURN_BLK_ENTRY))
+#endif
 
 /* Dump of a single device interface */
 
