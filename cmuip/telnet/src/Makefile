@@ -230,4 +230,4 @@ netcntrl.req:
 netaux.b32:
 	ln -s ../../central/netaux.bli netaux.b32
 
-links: starlet.req netaux.req netcommon.req neterror.req network.req netxport.req netconfig.req lib.req ttyloc.req netaux.b32 netcntrl.req
+links: starlet.req netaux.req netcommon.req neterror.req network.req netxport.req netconfig.req lib.req ttyloc.req netaux.b32 netcntrl.req tpamac.req
