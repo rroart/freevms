@@ -2,31 +2,9 @@ So far:
 
 About GCC/Distributions.
 Due to use of anonymous structures a more recent gcc is needed.
-You might need gcc "2.96" from recent RedHat; someone may have had success with
-gcc 3.x.
-Redhat 7.2 with gcc "2.96" works. There are anonymous structure offset bugs
-that has been coded around.
-Redhat 8.0 with gcc 3.2 (RedHat patched) works. The anonymous structure offset
-bugs present in pure gcc 3.0.1 was gone in pure 3.1.
-With recent gcc/Redhat uml gets backtrace problems and is partially broken.
-Use gcc 2.96 etc with uml.
+Current gcc used is at 3.3/3.4.
 As recent gcc as 3.4 can now be used. (But some new problems are there)
 Gcc 4.0 might be too early.
-
-Linker (experimental):
-The linker must be made.
-If you want to know how to make the linker do: 
-make download-linker
-make build-linker
-Then do make vmsall etc
-
-Bliss:
-make download-bliss
-make build-bliss
-
-No longer needed symlinks:
-UserMode Linux no longer needs the symlinks from /usr/include/{asm,linux}
-to the kernel build place.
 
 NOTE on kernel build:
 If complaints about modversion.h, do a make update-modverfile.
@@ -41,64 +19,44 @@ Boot with init=/bin/sh or init=/vms\$common/sysexe/dcl
 
 Example build i386:
 tar xzf freevms-0_1_2.tgz
-cd freevms/linux
-./prescript
+cd freevms
+./envscript
 cd ..
-make symlinks
-make linux/include/linux/compile.h
-maybe do make update-modverfile
+cd freevms386.iomm
 make bzImage
-
-Example build um:
-tar xzf freevms-0_1_2.tgz
-cd freevms/linux
-./prescript
-cd ..
-make symlinks ARCH=um
-make linux/include/linux/compile.h ARCH=um
-maybe do make update-modverfile ARCH=um
-make linux/linux ARCH=um
-
-For VMS I/O and MM:
-Add
-CONFIG_VMS=y
-CONFIG_IO_VMS=y
-CONFIG_MM_VMS=y
-to a suitable linux/arch/*/config
-Edit linux/include/linux/autoconf.h to have CONFIG_VMS defined
-
-Example build of user environment:
-cd .. or cd freevms
 make download-bliss
 make build-bliss
 make download-linker
 make build-linker
+make download-grub
+make build-grub
 make vmsall
-make vmsinstall
-cp -rpv rooti386/. /		(if you are using the same computer)
-(The resulting VFS root should have /vms$common)
-
-Running stuff:
-	Without CONFIG_VMS:
-		Do not expect X to work.
-	With CONFIG_VMS:
-		Boot with single-user bash or dcl.
+make rootinstall
+make image
+make image-install
+make image-kernel-iomm
 
 Bochs:
 	Configure with at least 
 	--enable-debugger --enable-ne2000 --enable-cpu-level=6
 	maybe also with --enable-sse
 
-Automation:
+Bochs use:
 	Use make image to make a floppy and disk image.
 	Set bochs to boot the floppy grub image, and set
 	c.img to cyl=4, heads=255, spt=63
 	The make image script works on RedHat 9, and may need some
 	tailoring other places.
+
 	Use make image-install to install the FreeVMS binaries to be
 	found in /vms$common.
 	Use make image-kernel-iomm and image-kernel-noiomm to install
 	the CONFIG_VMS and non-CONFIG_VMS kernels, respectively.
-	Use make environment or ./envscript to set up the build
-	environments for 386 and uml for both CONFIG_VMS and without,
-	up to the point where you do make bzImage or make linux/linux ARCH=um.
+
+Bochsrc FreeVMS-related config:
+	floppya: 1_44=a.img, status=inserted
+	diskc: file="c.img", cyl=8, heads=255, spt=63
+	boot: a
+	ne2k: ioaddr=0x280, irq=9, mac=b0:c4:20:00:00:00, ethmod=linux, ethdev=eth0 (on c.img, on c2.img it must be different) 
+
+	ips: must be properly set to work. test yourself.
