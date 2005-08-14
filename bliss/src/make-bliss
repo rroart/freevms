@@ -2,6 +2,24 @@
 CFLAGS=
 CPPFLAGS=
 CC=
+FLEXVER=`flex --version`
+FLEXVER=`flex --version|cut -f2 -d\ `
+FLEXVERTEST=`echo $FLEXVER|cut -f1 -d\.`
+if [ $FLEXVERTEST == version ]; then
+FLEXVER=`flex --version|cut -f3 -d\ `
+fi
+FLEXVER1=`echo $FLEXVER|cut -f1 -d\.`
+FLEXVER2=`echo $FLEXVER|cut -f2 -d\.`
+FLEXVER3=`echo $FLEXVER|cut -f3 -d\.`
+echo $FLEXVER1 $FLEXVER2 $FLEXVER3
+if [ $FLEXVER1 -eq 2 ]; then
+if [ $FLEXVER2 -eq 5 ]; then
+if [ $FLEXVER3 -gt 4 ]; then
+echo Must use no more recent flex than 2.5.4
+exit 1
+fi
+fi
+fi
 rm -rf gcc-3.4.3
 bunzip2 -dc gcc-3.4.3.tar.bz2|tar xpf -
 ln -sf gcc-3.4.3 bliss
