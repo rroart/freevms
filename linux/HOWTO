@@ -5,6 +5,7 @@ Due to use of anonymous structures a more recent gcc is needed.
 Current gcc used is at 3.3/3.4.
 As recent gcc as 3.4 can now be used. (But some new problems are there)
 Gcc 4.0 might be too early.
+No more recent flex than 2.5.4 must be used.
 
 NOTE on kernel build:
 If complaints about modversion.h, do a make update-modverfile.
