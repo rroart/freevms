@@ -230,6 +230,13 @@ int tty$wrtstartio(struct _irp * i,struct _ucb * u) {
 	tty$getnextchar(&chr, &CC, u);
 
 	tty=u;
+	if (tty->ucb$b_tt_outype==0) { // find other place for this
+	  i->irp$l_iost1=SS$_NORMAL;
+	  if (i->irp$l_iosb) {
+	    short * s = i->irp$l_iosb;
+	    *s=SS$_NORMAL;
+	  }
+	}
 	if (tty->ucb$b_tt_outype==0) //check
 	  return sts;
 	fn = ttp->port_startio;
