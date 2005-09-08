@@ -474,7 +474,7 @@ mm$qblk_get (void)
 //!!HACK!!!~~~ Should record allocator here ~~~
     XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Get !XL size !SL!/",0,Hptr, Pages);
     Hptr->MEM$ISFREE = FALSE;	// QB is no longer free
-    INSQUE(Hptr,&USED_Qblks.qtail); // Insert on used queue
+    INSQUE(Hptr,USED_Qblks.qtail); // Insert on used queue
     return(ptr);
     }
 
@@ -524,7 +524,7 @@ void mm$qblk_free(Ptr)
 	{			// Free a permanent block - just put on free Q
 //~~~ Record deallocator here ~~~
 	Hptr->MEM$ISFREE = TRUE;
-	INSQUE(Hptr,&FREE_Qblks.qtail);
+	INSQUE(Hptr,FREE_Qblks.qtail);
 	qblk_count = qblk_count + 1;
 	}
     else
@@ -577,7 +577,7 @@ void QBLK_Init (void)
 	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE*4,Hptr);
 	Hptr->MEM$ISFREE = TRUE;
 	Hptr->MEM$ISPERM = TRUE;
-	INSQUE(Hptr,&FREE_Qblks.qtail);
+	INSQUE(Hptr,FREE_Qblks.qtail);
 	};
     }
 
@@ -681,7 +681,7 @@ void mm$uarg_free(Ptr)
 	{
 //!!HACK!!// can an exception right here cause 
 //!!HACK!!// CPU 00 -- DOUBLDEALO, Double deallocation of memory block????
-	INSQUE(Ptr,&FREE_Uargs.qtail);
+	INSQUE(Ptr,FREE_Uargs.qtail);
 	uarg_count = uarg_count + 1;
 	}
     else
@@ -732,7 +732,7 @@ void uarg_init (void)
 	if (BLISSIFNOT(RC = (LIB$GET_VM_PAGE(Pages, &Ptr))))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Init !XL size !SL!/",0,Ptr, Pages);
-	INSQUE(Ptr,&FREE_Uargs.qtail);
+	INSQUE(Ptr,FREE_Uargs.qtail);
 	};
     }
 
@@ -888,7 +888,7 @@ void mm$seg_free(Size,Ptr)
 	{
 	if (min_seg_count < min_seg_count_base)
 	    {
-	    INSQUE(Ptr,&Free_Minsize_Segs.qtail);
+	    INSQUE(Ptr,Free_Minsize_Segs.qtail);
 	    min_seg_count = min_seg_count + 1;
 	    Released = TRUE;
 	    }
@@ -901,7 +901,7 @@ void mm$seg_free(Size,Ptr)
 	{
 	if (max_seg_count < max_seg_count_base)
 	    {
-	    INSQUE(Ptr,&Free_Maxsize_Segs.qtail);
+	    INSQUE(Ptr,Free_Maxsize_Segs.qtail);
 	    max_seg_count = max_seg_count + 1;
 	    Released = TRUE;
 	    }
@@ -968,7 +968,7 @@ void seg_init (void)
 	if (BLISSIFNOT(RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
-	INSQUE(Ptr,&Free_Minsize_Segs.qtail);
+	INSQUE(Ptr,Free_Minsize_Segs.qtail);
 	};
 
 // Allocate maximum size segments
@@ -981,7 +981,7 @@ void seg_init (void)
 	if (BLISSIFNOT(RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
-	INSQUE(Ptr,&Free_Maxsize_Segs.qtail);
+	INSQUE(Ptr,Free_Maxsize_Segs.qtail);
 	};
     }
 
