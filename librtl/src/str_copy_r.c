@@ -79,7 +79,7 @@ char* s1_ptr;			/* Pointer to first string */
 
 
 if (source_string_address != NULL )
-	s2_length = strlen (source_string_address);
+	s2_length = * word_integer_source_length;
 else
 	s2_length = 0;
 	/*
