@@ -93,7 +93,17 @@ bufpost(struct _irp * i) {
   //printk("doing bufpost\n");
   /* do iosb soon? */
 
+#define         IO$_WRITEPBLK           11
+#define         IO$_WRITELBLK           32
+#define         IO$_WRITEVBLK           48
+  int fcode = i->irp$l_func&63;
+  int skipmovbuf = (fcode==IO$_WRITEPBLK) || (fcode==IO$_WRITELBLK) || (fcode==IO$_WRITEVBLK); // temp workaround
+  if (skipmovbuf)
+    goto skipit;
+
   movbuf(i);
+
+ skipit:
 
   if (i->irp$l_sts&IRP$M_MBXIO)
     sch_std$ravail(RSN$_MAILBOX);
