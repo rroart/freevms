@@ -1612,7 +1612,7 @@ int net_receive(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   // We must set the system buffer data start address so that
   // the IPACP won't over-write the Uargs we need for post-processing.
   // !!!HACK!!! This is no longer necessary (w/o Finishio)
-  ab_buf->ab$data_start=buf->re$data;	// reset sysbuff data start
+  buf->re$data_start=&buf->re$data;	// reset sysbuff data start
 
   // Now send that puppy off to see the world...
   return queue_2_acp(i,p,u);			// finish up (not really)
