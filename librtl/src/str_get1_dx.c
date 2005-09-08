@@ -116,7 +116,8 @@ if (character_string->dsc$a_pointer != NULL)
 			DOSIGNAL(STR$_INSVIRMEM);
 			return STR$_INSVIRMEM;
 		}
-		for (i=0; i < *word_integer_length; i++)
+		int minlen = character_string->dsc$w_length < *word_integer_length ? character_string->dsc$w_length : *word_integer_length;
+		for (i=0; i < minlen; i++)
 		    new_memory[i] = character_string->dsc$a_pointer[i];
 
 		free(character_string->dsc$a_pointer);
