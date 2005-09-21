@@ -47,7 +47,6 @@ struct WCCDIR {
 
 struct WCCFILE {
     struct _fabdef *wcf_fab;
-    struct _vcb *wcf_vcb;
     int wcf_status;
     struct _fibdef wcf_fib;
     char wcf_result[MAX_FILELEN];
