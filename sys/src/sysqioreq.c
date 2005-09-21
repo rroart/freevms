@@ -79,7 +79,7 @@ int exe$altquepkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
   return SS$_NORMAL;
 }
 
-void exe$finishio (long status1, long status2, struct _irp * i, struct _pcb * p, struct _ucb * u) {
+int exe$finishio (long status1, long status2, struct _irp * i, struct _pcb * p, struct _ucb * u) {
   /* do iosb stuff */
   i->irp$l_iost1=status1;
   i->irp$l_iost2=status2;
@@ -87,10 +87,12 @@ void exe$finishio (long status1, long status2, struct _irp * i, struct _pcb * p,
   insque(i,smp$gl_cpu_data[smp_processor_id()]->cpu$l_psbl);
   SOFTINT_IOPOST_VECTOR;
   forkunlock(u->ucb$b_flck,-1);
+  setipl(0);
+  return SS$_NORMAL;
 }
 
-void exe$finishioc (long status, struct _irp * i, struct _pcb * p, struct _ucb * u) {
-  exe$finishio(status,0,i,p,u);
+int exe$finishioc (long status, struct _irp * i, struct _pcb * p, struct _ucb * u) {
+  return exe$finishio(status,0,i,p,u);
 }
 
 int exe$insioq (struct _irp * i, struct _ucb * u) {
