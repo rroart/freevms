@@ -263,16 +263,8 @@ unsigned do_search(struct _fabdef *fab,struct WCCFILE *wccfile)
     struct WCCDIR *wcc;
     struct dsc$descriptor fibdsc,resdsc;
     struct _namdef *nam = fab->fab$l_nam;
-#if 0
-    if (ucb2chan(wccfile->wcf_vcb,&dummy))
-      return SS$_NORMAL;
-#endif
     wcc = &wccfile->wcf_wcd;
-    if (fab->fab$w_ifi != 0) return RMS$_IFI;
-
-    int ifi_no = 1;
-    while (ifi_alloc[ifi_no] != fab && ifi_no < IFI_MAX) ifi_no++;
-
+    int ifi_no = fab->fab$w_ifi;
     if (ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)
       return SS$_NORMAL;
 
@@ -435,8 +427,12 @@ unsigned do_search(struct _fabdef *fab,struct WCCFILE *wccfile)
         }
     }
     // cleanup_wcf(wccfile); no, I know this is still in use
-    if (nam != NULL) nam->nam$l_wcc = 0;
+    if (sts == RMS$_NMF)
+      if (nam != NULL) nam->nam$l_wcc = 0;
+#if 0
+    // check whether this should be done
     fab->fab$w_ifi = 0;         /* must dealloc memory blocks! */
+#endif
     return sts;
 }
 
@@ -445,13 +441,17 @@ unsigned do_search(struct _fabdef *fab,struct WCCFILE *wccfile)
 
 unsigned exe$search(struct _fabdef *fab)
 {
-  struct _iosb iosb={0};
+    int sts;
     struct _namdef *nam = fab->fab$l_nam;
     struct WCCFILE *wccfile;
     if (nam == NULL) return RMS$_NAM;
     wccfile = (struct WCCFILE *) nam->nam$l_wcc;
     if (wccfile == NULL) return RMS$_WCC;
-    return do_search(fab,wccfile);
+    if (fab->fab$w_ifi != 0) return RMS$_IFI;
+    fab->fab$w_ifi = nam->namdef$$_fill_7[0]; // borrow this instead of nam$l_wcc;
+    sts = do_search(fab,wccfile);
+    fab->fab$w_ifi = 0;
+    return sts;
 }
 
 
@@ -461,13 +461,51 @@ char default_buffer[DEFAULT_SIZE];
 char *default_name = "DKA200:[000000].;";
 int default_size[] = {7,8,0,1,1};
 
+int alloc_ifab(struct _fabdef * fab) {
+  int sts = 1;
+  int ifi_no = 1;
+  while (ifi_alloc[ifi_no] != NULL && ifi_no < IFI_MAX) ifi_no++;
+  if (ifi_no >= IFI_MAX) return RMS$_IFI;
+
+  ifi_alloc[ifi_no]=fab;
+  if (ifb_table[ifi_no]==0) {
+    int alosize;
+    char * buffer;
+    struct _ifbdef * ifb;
+    sts=exe_std$alononpaged(sizeof(struct _ifbdef),&alosize,&ifb);
+    memset(ifb, 0, sizeof(struct _ifbdef));
+    ifb_table[ifi_no]=ifb;
+  }
+
+  fab->fab$w_ifi = ifi_no;
+
+  return SS$_NORMAL;
+}
+
+int set_ifab(struct _fabdef * fab, int size, char * name) {
+  int sts;
+  int ifi_no = fab->fab$w_ifi;
+  struct _ucb *dev;
+  short int chan;
+
+  sts = device_lookup(size,name,0,&chan);
+  if ((sts & 1) == 0) return sts;
+  dev = ctl$ga_ccb_table[chan].ccb$l_ucb;
+  struct _ifbdef * ifb;
+  ifb = ifb_table[ifi_no];
+  ifb->ifb$l_devchar = dev->ucb$l_devchar;
+  ifb->ifb$l_devchar2 = dev->ucb$l_devchar2;
+  ifb->ifb$w_chnl = chan;
+
+  return SS$_NORMAL;
+}
 
 /* Function to perform RMS parse.... */
 
 unsigned do_parse(struct _fabdef *fab,struct WCCFILE **wccret)
 {
     int sts;
-    struct WCCFILE *wccfile;
+    struct WCCFILE *wccfile = 0;
     char *fna;
     int fns;
     sts = search_log_repl(fab->fab$l_fna,&fna,&fns);
@@ -478,14 +516,13 @@ unsigned do_parse(struct _fabdef *fab,struct WCCFILE **wccret)
     char *dna = fab->fab$l_dna;
     struct _namdef *nam = fab->fab$l_nam;
     int fna_size[5] = {0, 0, 0, 0, 0},dna_size[5] = {0, 0, 0, 0, 0};
-    if (fab->fab$w_ifi != 0) return RMS$_IFI;
-        if (nam != NULL) if (nam->nam$l_wcc == 0) {
-            cleanup_wcf((struct WCCFILE *) nam->nam$l_wcc);
-            nam->nam$l_wcc = 0;
-        }
+    if (nam != NULL) if (nam->nam$l_wcc == 0) {
+      cleanup_wcf((struct WCCFILE *) nam->nam$l_wcc);
+      nam->nam$l_wcc = 0;
+    }
     /* Break up file specifications... */
 
-	sts = name_delim(fna,fns/*fab->fab$b_fns*/,fna_size);
+    sts = name_delim(fna,fns/*fab->fab$b_fns*/,fna_size);
     if ((sts & 1) == 0) return sts;
     if (dna) {
         sts = name_delim(dna,fab->fab$b_dns,dna_size);
@@ -493,13 +530,14 @@ unsigned do_parse(struct _fabdef *fab,struct WCCFILE **wccret)
     }
     /* Make WCCFILE entry for rest of processing */
 
-    {
+    if (nam != NULL) wccfile = nam->nam$l_wcc;
+
+    if (wccfile == 0) {
         wccfile = (struct WCCFILE *) kmalloc(sizeof(struct WCCFILE) + 256, GFP_KERNEL);
 	bzero(wccfile,sizeof(struct WCCFILE) + 256);
         if (wccfile == NULL) return SS$_INSFMEM;
 memset(wccfile,0,sizeof(struct WCCFILE)+256);
         wccfile->wcf_fab = fab;
-        wccfile->wcf_vcb = NULL;
         wccfile->wcf_status = 0;
         wccfile->wcf_wcd.wcd_status = 0;
     }
@@ -606,46 +644,26 @@ memset(wccfile,0,sizeof(struct WCCFILE)+256);
     /* Now build up WCC structures as required */
 
     if (sts) {
-        int dirlen,dirsiz;
-        char *dirnam;
-        struct WCCDIR *wcc;
-        struct _ucb *dev;
+	struct WCCDIR *wcc;
+	int dirlen,dirsiz;
+	char *dirnam;
+	
+	sts = set_ifab(fab, fna_size[0], wccfile->wcf_result);
+	if ((sts & 1) == 0) return sts;
+
+	int ifi_no = fab->fab$w_ifi;
+	struct _ifbdef * ifb;
+	ifb = ifb_table[ifi_no];
 	short int chan;
-        sts = device_lookup(fna_size[0],wccfile->wcf_result,0,&chan);
-	dev= ctl$ga_ccb_table[chan].ccb$l_ucb;
-        if ((sts & 1) == 0) return sts;
-
-	int ifi_no = 1;
-#if 0
-	while (ifi_alloc[ifi_no] != NULL && ifi_no < IFI_MAX) ifi_no++;
-#else
-	while (ifi_alloc[ifi_no] != fab && ifi_no < IFI_MAX) ifi_no++;
-#endif
-#if 0
-	fab->fab$w_ifi = ifi_no;
-#endif
-
-	if (ifb_table[ifi_no]==0) {
-	  int alosize;
-	  char * buffer;
-	  struct _ifbdef * ifb;
-	  sts=exe_std$alononpaged(sizeof(struct _ifbdef),&alosize,&ifb);
-	  memset(ifb, 0, sizeof(struct _ifbdef));
-	  ifb_table[ifi_no]=ifb;
-	  ifb->ifb$l_devchar=dev->ucb$l_devchar;
-	  ifb->ifb$l_devchar2=dev->ucb$l_devchar2;
-	  ifb->ifb$w_chnl=chan;
-	}
-
+	chan = ifb->ifb$w_chnl;
+	struct _ucb *dev;
+	dev = ctl$ga_ccb_table[chan].ccb$l_ucb;
 	int disk_or_tape = (dev->ucb$l_devchar & DEV$M_TRM)==0;
 	if (!disk_or_tape) {
 	  ifi_table[ifi_no] = wccfile;
-	  fab->fab$w_ifi = ifi_no;
 	  return SS$_DEVNOTMOUNT;
 	}
-        if ((wccfile->wcf_vcb = dev->ucb$l_vcb) == NULL && disk_or_tape) return SS$_DEVNOTMOUNT;
-	if (wccfile->wcf_vcb == 0)
-	  wccfile->wcf_vcb = dev;
+        if (dev->ucb$l_vcb == NULL && disk_or_tape) return SS$_DEVNOTMOUNT;
         wcc = &wccfile->wcf_wcd;
         wcc->wcd_prev = NULL;
         wcc->wcd_next = NULL;
@@ -668,7 +686,7 @@ memset(wccfile,0,sizeof(struct WCCFILE)+256);
         dirsiz = dirlen;
         do {
             char *dirend = dirnam + dirsiz;
-            if (dircache(wccfile->wcf_vcb,dirnam,dirsiz,&wcc->wcd_dirid)) break;
+            if (dircache(0,dirnam,dirsiz,&wcc->wcd_dirid)) break;
             while (dirsiz > 0) {
                 dirsiz--;
                 if (char_delim[*--dirend & 127]) break;
@@ -728,10 +746,17 @@ memset(wccfile,0,sizeof(struct WCCFILE)+256);
 
 unsigned exe$parse(struct _fabdef *fab)
 {
-  struct _iosb iosb={0};
+    int sts;
     struct _namdef *nam = fab->fab$l_nam;
     if (nam == NULL) return RMS$_NAM;
-    return do_parse(fab,NULL);
+    if (fab->fab$w_ifi != 0) return RMS$_IFI;
+    sts = alloc_ifab(fab);
+    if ((sts&1)==0)
+      return sts;
+    sts = do_parse(fab,NULL);
+    nam->namdef$$_fill_7[0] = fab->fab$w_ifi; // borrow this instead of nam$l_wcc;
+    fab->fab$w_ifi = 0;
+    return sts;
 }
 
 
@@ -1282,7 +1307,6 @@ unsigned exe$display(struct _fabdef *fab)
 
 unsigned exe$close(struct _fabdef *fab)
 {
-  struct _iosb iosb={0};
     int sts=SS$_NORMAL;
     int ifi_no = fab->fab$w_ifi;
     if (ifi_no < 1 || ifi_no >= IFI_MAX) return RMS$_IFI;
@@ -1315,9 +1339,10 @@ unsigned exe$open(struct _fabdef *fab)
     struct dsc$descriptor fibdsc;
     struct _atrdef atr[2];
     if (fab->fab$w_ifi != 0) return RMS$_IFI;
-    while (ifi_alloc[ifi_no] != NULL && ifi_no < IFI_MAX) ifi_no++;
-    if (ifi_no >= IFI_MAX) return RMS$_IFI;
-    ifi_alloc[ifi_no]=fab;
+    sts = alloc_ifab(fab);
+    if ((sts&1)==0)
+      return sts;
+    ifi_no = fab->fab$w_ifi;
     if (nam != NULL) {
         wccfile = (struct WCCFILE *) nam->nam$l_wcc;
     }
@@ -1334,6 +1359,7 @@ unsigned exe$open(struct _fabdef *fab)
         }
     } else {
         sts = 1;
+	sts = set_ifab(fab, fab->fab$l_nam->nam$b_dev, wccfile->wcf_result);
     }
     atr[0].atr$w_type=ATR$C_HEADER;
     atr[0].atr$w_size=ATR$S_HEADER;
@@ -1458,9 +1484,10 @@ unsigned exe$erase(struct _fabdef *fab)
     struct WCCFILE *wccfile = NULL;
     struct _namdef *nam = fab->fab$l_nam;
     if (fab->fab$w_ifi != 0) return RMS$_IFI;
-    while (ifi_alloc[ifi_no] != NULL && ifi_no < IFI_MAX) ifi_no++;
-    if (ifi_no >= IFI_MAX) return RMS$_IFI;
-    ifi_alloc[ifi_no]=fab;
+    sts = alloc_ifab(fab);
+    if ((sts&1)==0)
+      return sts;
+    ifi_no = fab->fab$w_ifi;
     if (nam != NULL) {
         wccfile = (struct WCCFILE *) fab->fab$l_nam->nam$l_wcc;
     }
@@ -1476,6 +1503,7 @@ unsigned exe$erase(struct _fabdef *fab)
         }
     } else {
         sts = 1;
+	sts = set_ifab(fab, fab->fab$l_nam->nam$b_dev, wccfile->wcf_result);
     }
     if (sts & 1) {
         struct _fibdef fibblk;
@@ -1529,9 +1557,10 @@ unsigned exe$create(struct _fabdef *fab)
   struct _atrdef atr[2];
   struct _fatdef recattr;
   if (fab->fab$w_ifi != 0) return RMS$_IFI;
-  while (ifi_alloc[ifi_no] != NULL && ifi_no < IFI_MAX) ifi_no++;
-  if (ifi_no >= IFI_MAX) return RMS$_IFI;
-  ifi_alloc[ifi_no]=fab;
+  sts = alloc_ifab(fab);
+  if ((sts&1)==0)
+    return sts;
+  ifi_no = fab->fab$w_ifi;
   if (nam != NULL) {
     wccfile = (struct WCCFILE *) fab->fab$l_nam->nam$l_wcc;
   }
@@ -1548,6 +1577,7 @@ unsigned exe$create(struct _fabdef *fab)
     }
   } else {
     sts = 1;
+    sts = set_ifab(fab, fab->fab$l_nam->nam$b_dev, wccfile->wcf_result);
   }
   if (sts & 1) {
     struct _fibdef fibblk;
@@ -1617,9 +1647,10 @@ unsigned exe$extend(struct _fabdef *fab)
   struct WCCFILE *wccfile = NULL;
   struct _namdef *nam = fab->fab$l_nam;
   if (fab->fab$w_ifi != 0) return RMS$_IFI;
-  while (ifi_alloc[ifi_no] != NULL && ifi_no < IFI_MAX) ifi_no++;
-  if (ifi_no >= IFI_MAX) return RMS$_IFI;
-  ifi_alloc[ifi_no]=fab;
+  sts = alloc_ifab(fab);
+  if ((sts&1)==0)
+    return sts;
+  ifi_no = fab->fab$w_ifi;
   if (nam != NULL) {
     wccfile = (struct WCCFILE *) fab->fab$l_nam->nam$l_wcc;
   }
@@ -1635,6 +1666,7 @@ unsigned exe$extend(struct _fabdef *fab)
     }
   } else {
     sts = 1;
+    sts = set_ifab(fab, fab->fab$l_nam->nam$b_dev, wccfile->wcf_result);
   }
   fibdsc.dsc$w_length = sizeof(struct _fibdef);
   fibdsc.dsc$a_pointer = (char *) &fibblk;
