@@ -161,12 +161,23 @@ int tty$fdtset(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
   if	(size>=12)			// DID HE ASK FOR 2ND ?
     { }		// Check content, maybe?
 
+  if (size==0)
+    size=12;
+  if (size>20)
+    size=20;
+  memcpy(&i->irp$l_media, buf, size);
+
   // check whether something we set earlier is consistent
   if (lt->ucb$l_tl_phyucb) {
     struct _tty_ucb * tty = lt->ucb$l_tl_phyucb;
     if (u!=tty->ucb$l_tt_logucb)
       printk("<0>" "tty error in set\n");
   }
+#if 0
+  // not yet?
+  sts = exe$altquepkt (i,p,u);
+  return sts;
+#endif
   return exe$qiodrvpkt (i,p,u); 
 
  SET_CTRLC:

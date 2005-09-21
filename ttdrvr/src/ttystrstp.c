@@ -143,6 +143,7 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
       int size;
       int devdep2 = 0;
       buf = i->irp$l_qio_p1;		// ADDRESS USER BUFFER
+      buf = &i->irp$l_media;
       size=i->irp$l_qio_p2;		// GET SIZE ARGUMENT
       devtype=((char *)buf)[1];		// Get Type
       bufsiz=((short *)buf)[1];		// Width
