@@ -878,8 +878,9 @@ struct OPT$BLOCK * LCLOPTS = &TVT->TVT$LCLOPTS ;
 	CHRPTR,
 	CHRCNT,
 	CHWPTR,
-	CHR,
 	NEGCNT ;
+    signed long CHR;
+
 
 // Empty out PTY, so we can accept more input
 
