@@ -155,7 +155,7 @@ unsigned dir(int userarg)
     date_sts=cli$present(&date);
     size_sts=cli$present(&size);
     file_id_sts=cli$present(&file_id);
-    int options=date_sts|size_sts|file_id_sts;
+    int options=(date_sts|size_sts|file_id_sts)&1;
     $DESCRIPTOR(p, "p1");
     char c[80];
     struct dsc$descriptor o;
