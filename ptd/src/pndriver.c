@@ -883,7 +883,6 @@ int PN$CANCEL(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   struct _ccb * R6=c;
   struct _acb ** acb_p;
   int R0,R1;
-  struct _tpd_ucb * tpd;
   struct _ucb * tz = u;
   struct _tz_ucb * real_tz;
   struct _tty_ucb * tty;
