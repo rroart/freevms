@@ -48,6 +48,7 @@ int tty$startio (int,int);
 static void  unsolint (void) { };
 static void  cancel (void) { };
 static void  ioc_std$cancelio (void) { };
+static void  tty$cancelio ();
 static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
@@ -65,7 +66,7 @@ static struct _ddt tt$ddt = {
   ddt$l_start: tty$startio,
   ddt$l_unsolint: unsolint,
   ddt$l_fdt: &tt$fdt,
-  ddt$l_cancel: cancel,
+  ddt$l_cancel: tty$cancelio,
   ddt$l_regdump: regdump,
   ddt$l_diagbuf: diagbuf,
   ddt$l_errorbuf: errorbuf,
@@ -176,7 +177,7 @@ int tt$init_tables() {
 
   ini_ddt_unitinit(&tt$ddt, tt$unit_init);
   ini_ddt_start(&tt$ddt, tty$startio);
-  ini_ddt_cancel(&tt$ddt, ioc_std$cancelio);
+  ini_ddt_cancel(&tt$ddt, tty$cancelio);
   ini_ddt_end(&tt$ddt);
 
   /* for the fdt init part */

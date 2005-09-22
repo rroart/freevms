@@ -273,3 +273,72 @@ int tty$fdtsensec (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _cc
   return exe$finishio(speed|SS$_NORMAL,parity,i,p,u);	// check 	// COMPLETE REQUEST IOSB WORD 0,1
 }
 
+int tty$cancelio(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {					// Cancel PZ usage
+  struct _ccb * R6=c;
+  struct _acb ** acb_p;
+  int R0,R1;
+  struct _ucb * tz = u;
+  struct _tz_ucb * real_tz;
+  struct _tty_ucb * tty;
+  signed int index=ctl$gl_ccbbase-c;
+  int sts;
+  ioc_std$cancelio(index,i,p,u);			// Call the cancel routine
+  if	(UCB$M_CANCEL&tz->ucb$l_sts) {	// Branch if not for this guy
+    R1=0;
+    sts=	SS$_ABORT;			// Status is request canceled
+    tz->ucb$l_sts&=~(UCB$M_BSY|UCB$M_CANCEL);			// Clear unit status flags
+    ioc$reqcom(sts,R1,tz);			// Complete request
+  }
+  if	(tz->ucb$l_refc)			// Last Deassign
+    return;				// No, just exit
+  // wait with the rest
+#if 0
+  //
+  // Last DEASSIGN we need to get rid of AST's 
+  //
+  R6			 = index;		// Save the Channel number
+  real_tz=tz;
+  struct _ltrm_ucb * lt = u;
+  if (lt->ucb$l_tl_phyucb)
+  tz=	real_tz->ucb$l_pz_xucb;		// Switch to TZ UCB
+  if (tz==0) goto	l20;				// if not there, skip
+  real_tz=tz;
+  acb_p=&	real_tz->ucb$l_tz_xon_ast;		// Get XON list head address
+  if	(*acb_p)			// Any ast to deliver
+    // EQL 0 do not flush it
+    com_std$flushattns(p,tz,index,acb_p);		// Flush it
+  real_tz= tz; acb_p=&real_tz->ucb$l_tz_xoff_ast;	// Get XOFF list head address
+  if	(*acb_p)			// Any ast to deliver
+    // EQL 0 do not flush it
+    com_std$flushattns(p,tz,index,acb_p);		// Flush it
+  real_tz=tz; acb_p=&real_tz->ucb$l_tz_set_ast;		// Get SET_LINE list head address
+  if	(*acb_p)			// Any ast to deliver
+    // EQL 0 do not flush it
+    com_std$flushattns(p,tz,index,acb_p);		// Flush it
+  //
+  // Do a DISCONNECT on the TZ device.
+  //
+
+  real_tz=tz; real_tz->ucb$l_tz_xucb=0;		// Clear backlink to PZ device
+  tz->ucb$l_sts|=	UCB$M_DELETEUCB;  // Set it to go bye-bye
+  tz->ucb$l_sts&=~UCB$M_ONLINE;	// Mark offline
+  tz->ucb$l_sts&=~UCB$M_INT; 	// Don't expect interrupt
+  tty=tz;
+  R1=	tty->ucb$l_tt_logucb;		// Look at logical term UCB
+  if	(((struct _ucb *)R1)->ucb$l_refc==0) {			// See if TZ has any references
+    // If so, go and do disconnect
+    ioc$delete_ucb();		// if not, delete the UCB
+    goto	l20;
+  }	
+  R0=0;				// indicate that we must hangup
+  tty=tz;
+  R1=	tty->ucb$l_tt_class;
+  ((struct _tt_class *)R1)->class_disconnect();		// Force disconnect
+ l20:
+  tz=u;
+  real_tz=tz;
+  real_tz->ucb$l_pz_xucb=0;		// Clear link to deleted TZ
+  u->ucb$l_sts|=UCB$M_DELETEUCB;	// Set our own delete bit
+  return;
+#endif
+}
