@@ -84,7 +84,14 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
   // use tt_term etc instead?
   if (*c==13) {
     tty->tty$v_st_eol=1;
-    ioc$reqcom(SS$_NORMAL,0,u);
+    struct _irp * irp = u->ucb$l_irp;
+    int bcnt = 0;
+    if (irp) {
+      //      bcnt = (long)ahd->tty$l_ta_put - (long)ahd->tty$l_ta_data;
+      bcnt = bd->tty$w_rb_txtoff;
+      bcnt = bcnt << 16;
+    }
+    ioc$reqcom(SS$_NORMAL | bcnt,0,u);
   }
 
 #if 0
