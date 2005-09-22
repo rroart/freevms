@@ -111,6 +111,7 @@
 #include <iosbdef.h>
 #include <pridef.h>
 #include <iodef.h>
+#include <misc.h>
 #include <descrip.h>
 #include <ucbdef.h>
 #include <system_data_cells.h>
@@ -512,7 +513,7 @@ static ssize_t tty_read(struct file * file, char * buf, size_t count,
 	struct tty_struct * tty;
 	struct inode *inode;
 	int sts;
-	unsigned long long iosb = 0;
+	struct iosb iosb;
 
 	short int chan = 0;
 	struct _pcb * p = ctl$gl_pcb;
@@ -527,7 +528,7 @@ static ssize_t tty_read(struct file * file, char * buf, size_t count,
 	// remember to add terminator stuff in here
 	sts = exe$qiow(0,chan,IO$_READPBLK,&iosb,0,0,
 				 buf,count,0,0,0,0);
-	i = count;
+	i = iosb.iolen;
 
 	unlock_kernel();
 
