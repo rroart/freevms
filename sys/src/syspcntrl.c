@@ -100,6 +100,7 @@ int exe$ipid_to_epid(unsigned long pid) {
   long seqno = seq[pid&0xffff]-1;
   return ((csid&0xff)<<21) | (seqno<<shift) | (pid&0xffff);
 }
+
 int exe$a_pid_to_ipid(unsigned long pid) {// remove this
   int i;
   unsigned long *vec=sch$gl_pcbvec;
@@ -110,11 +111,15 @@ int exe$a_pid_to_ipid(unsigned long pid) {// remove this
   return ((csid&0xff)<<21) | (seqno<<shift) | (pid&0xffff);
 }
 
-asmlinkage int exe$hiber(void) {
+void fixup_hib_pc(void * dummy) {
+  char ** addr = dummy + 0x28;
+  (*addr)-=7;
+}
+
+asmlinkage int exe$hiber(int dummy) {
   /* spinlock sched */
   struct _pcb * p=current;
   vmslock(&SPIN_SCHED,IPL$_SCHED);
-  
 #if 0
   if (p->pcb$l_sts & PCB$M_WAKEPEN) {
     p->pcb$l_sts&=~PCB$M_WAKEPEN;
@@ -129,6 +134,7 @@ asmlinkage int exe$hiber(void) {
     return SS$_NORMAL;
   }
   /* cwps stuff not yet */
+  fixup_hib_pc(&dummy);
   int ret = sch$wait(p,sch$gq_hibwq);
   setipl(0); // unstandard, but sch$wait might leave at ipl 8
   return ret;
