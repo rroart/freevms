@@ -12,7 +12,7 @@
 #include <system_data_cells.h>
 #include <internals.h>
 
-int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
+int exe$wait(unsigned int efn, unsigned int mask, int waitallflag, void * dummy) {
   struct _pcb * p=ctl$gl_pcb;
   int efncluster=(efn&224)>>5;
   unsigned long * clusteraddr;
@@ -47,6 +47,12 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   if (!waitallflag && (mask & *clusteraddr)) {
   out:
     /* unlock sched */
+    {}
+#if 0
+    void * dummy = &efn;
+    char ** pc = dummy+0x38;
+    (*pc)+=7;
+#endif
     return SS$_NORMAL;
   }
 
@@ -62,18 +68,19 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag) {
   p->pcb$l_efwm=~mask;
 
   insque(p,&wq->wqh$l_wqfl); // temporary... see about corruption in rse.c
+  fixup_hib_pc(dummy);
   sch$wait(p,wq);
   return SS$_NORMAL;
 }
 
 int exe$waitfr(unsigned int efn) {
-  return exe$wait(efn,1<<(efn&31),0);
+  return exe$wait(efn,1<<(efn&31),0,&efn);
 }
 
 int exe$wflor(unsigned int efn, unsigned int mask) {
-  return exe$wait(efn,mask,0);
+  return exe$wait(efn,mask,0,&efn);
 }
 
 int exe$wfland(unsigned int efn, unsigned int mask) {
-  return exe$wait(efn,mask,1);
+  return exe$wait(efn,mask,1,&efn);
 }
