@@ -11,6 +11,7 @@
 #include <ssdef.h>
 #include <misc.h>
 #include <phddef.h>
+#include<pridef.h>
 
 // this behaves like getjpiw for now
 
@@ -18,6 +19,7 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
   struct _pcb * p;
   int sts;
   struct item_list_3 * it=itmlst;
+  exe$clref(efn);
   sts=exe$pscan_next_id(&p);
   if (sts==0)
     return SS$_NOMOREPROC;
@@ -78,6 +80,13 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
     }
     it++;
   }
+
+  struct _pcb * pcb = ctl$gl_pcb;
+  sch$postef(pcb->pcb$l_pid, PRI$_NULL, efn);
+
+  if (iosb)
+    iosb->iosb$w_status=SS$_NORMAL;
+
   return SS$_NORMAL;
 }
 

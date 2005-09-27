@@ -8,8 +8,11 @@
 #include<syidef.h>
 #include<ssdef.h>
 #include<misc.h>
+#include<pridef.h>
 #include<sbdef.h>
 #include<starlet.h>
+
+#include<linux/sched.h>
 
 extern struct _sb mysb;
 
@@ -48,6 +51,13 @@ asmlinkage int exe$getsyi(unsigned int efn, unsigned int *csidadr, void *nodenam
     }
     it++;
   }
+
+  struct _pcb * pcb = ctl$gl_pcb;
+  sch$postef(pcb->pcb$l_pid, PRI$_NULL, efn);
+
+  if (iosb)
+    iosb->iosb$w_status=SS$_NORMAL;
+
   return SS$_NORMAL;
 }
 

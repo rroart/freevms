@@ -11,7 +11,10 @@
 #include<system_data_cells.h>
 #include<misc.h>
 #include<ddbdef.h>
+#include<pridef.h>
 #include<ucbdef.h>
+
+#include<linux/sched.h> 
 
 struct _generic_64 {
   long long l;
@@ -121,6 +124,9 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
     }
     it++;
   }
+
+  struct _pcb * pcb = ctl$gl_pcb;
+  sch$postef(pcb->pcb$l_pid, PRI$_NULL, efn);
 
   if (iosb)
     iosb->iosb$w_status=SS$_NORMAL;
