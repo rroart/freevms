@@ -332,6 +332,20 @@ ENTRY(vmssystem_call)
 	jne vmstracesys
 	cmpl $(NR_vmssyscalls),%eax
 	jae vmsbadsys
+	/*
+	cmpl $15,%eax
+	je do_minus2
+	cmpl $6,%eax
+	je do_minus2
+	cmpl $7,%eax
+	je do_minus2
+	cmpl $8,%eax
+	je do_minus2
+	jmp normal_call
+do_minus2:
+	subl $0x7,0x28(%esp)
+normal_call:		
+	*/
 	call *SYMBOL_NAME(vmssys_call_table)(,%eax,4)
 syscall_common:
         movl %eax,EAX(%esp)		# save the return value

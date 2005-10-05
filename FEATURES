@@ -34,7 +34,7 @@ Clustering:
 	MSCP (does not currently work due to lost network packets)
 
 Networking:
-	CMUIP (with only incoming telnetd)
+	CMUIP (can now do both outgoing and ingoing TCP/IP)
 
 Shell:
 	DCL
@@ -56,7 +56,7 @@ Editor:
 	EDT (from Ozone, and can not yet be used fully)
 
 Programming language:
-	Bliss (not directly used, and is under development)
+	Bliss (is under development)
 
 Linker:
 	LINKER (simple, static images. Can do some dynamic linking.)
