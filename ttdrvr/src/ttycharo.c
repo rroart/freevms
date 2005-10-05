@@ -76,8 +76,41 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
 
   struct _tt_readbuf * bd = u->ucb$l_svapte;
   char * bd_txt = bd->tty$l_rb_txt;
-  bd_txt[bd->tty$w_rb_txtoff]=*c;
-  bd->tty$w_rb_txtoff++;
+
+  switch (*c) {
+  case 4:
+    bd->tty$w_rb_linoff--;
+    break;
+  case 5:
+    bd->tty$w_rb_linoff=bd->tty$w_rb_txtoff;
+    break;
+  case 6:
+    bd->tty$w_rb_linoff++;
+    break;
+  case 8:
+    bd->tty$w_rb_linoff=0;
+    break;
+  case 127:
+#if 0
+    *chr=9;
+#endif
+  case 9:
+    {
+      bd->tty$w_rb_txtoff--;
+      bd->tty$w_rb_linoff--;
+      int i=bd->tty$w_rb_linoff;
+      for(;i<bd->tty$w_rb_txtoff;i++) 
+	bd_txt[i]=bd_txt[i+1];
+    }
+    break;
+  default:
+    {
+      bd_txt[bd->tty$w_rb_linoff]=*c;
+      bd->tty$w_rb_txtoff++;
+      bd->tty$w_rb_linoff++;
+    }
+    break;
+  }
 
   con$startio((int)*chr, u, (int)*CC);
 
