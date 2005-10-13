@@ -20,6 +20,7 @@ int lib$asn_wth_mbx (void * device_name , long * maximum_message_size, long * bu
   int retlen;
   char retbuf[16];
   struct dsc$descriptor d;
+  int efn;
 
   int sts=sys$crembx(0,mailbox_channel,*maximum_message_size,*buffer_quota,0,0,0,0);
   if ((sts&1)==0)
@@ -31,11 +32,25 @@ int lib$asn_wth_mbx (void * device_name , long * maximum_message_size, long * bu
   itmlst[0].bufaddr=retbuf;
   itmlst[1].item_code=0;
 
-  sts=sys$getdviw(0,*mailbox_channel,0,itmlst,&iosb,0,0,0);
+#ifndef __KERNEL__
+  sts = lib$get_ef(&efn);
+  if ((sts&1)==0)
+    return sts;
+#else
+  efn = 0;
+#endif
+
+  sts=sys$getdviw(efn,*mailbox_channel,0,itmlst,&iosb,0,0,0);
 
   if ((sts&1)==0)
     return sts;
   
+#ifndef __KERNEL__
+  sts = lib$free_ef(&efn);
+  if ((sts&1)==0)
+    return sts;
+#endif
+
   d.dsc$a_pointer=retbuf;
   d.dsc$w_length=retlen;
 
