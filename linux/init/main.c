@@ -943,6 +943,8 @@ static int init(void * unused)
         init_cwps();
 
 #ifdef CONFIG_VMS
+	extern void job_control();
+	kernel_thread(job_control, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	extern void Main(void);
 	extern char * mydevice;
 	probe_units();
