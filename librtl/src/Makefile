@@ -85,7 +85,7 @@ clean :
 	- rm test_addx
 	- rm test_date
 
-tests: teststr test_str_element test_addx rtl_lib_test rtl_str_test
+tests: teststr test_str_element test_addx rtl_lib_test rtl_str_test test_ile test_libgetef
 # not: test_date
 
 teststr : teststr.c $(STRLIB)
@@ -94,6 +94,8 @@ test_addx : test_addx.c $(STRLIB)
 test_date : test_date.c $(STRLIB)
 rtl_str_test : rtl_str_test.c $(STRLIB) $(SYSLIB)
 rtl_lib_test : rtl_lib_test.c $(STRLIB) $(SYSLIB)
+test_ile : test_ile.c $(STRLIB) $(SYSLIB)
+test_libgetef : test_libgetef.c $(STRLIB) $(SYSLIB)
 
 $(STRLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 	ar -rv $(STRLIB) $?

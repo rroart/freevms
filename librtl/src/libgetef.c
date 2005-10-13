@@ -1,7 +1,7 @@
 /*
 **  lib$get_ef(unsigned int *efn) - allocate an event flag
-**  lib$free_ef(unsigned int *efn) - free an event flag
-**  lib$reserve_ef(unsigned int *efn) - reserve a specific event flag
+**  lib$free_ef(const unsigned int *efn) - free an event flag
+**  lib$reserve_ef(const unsigned int *efn) - reserve a specific event flag
 **
 **	Author: Roger Tucker
 **
@@ -11,30 +11,49 @@
 **		Added routine reserve_ef()
 **		Added comments
 **		Added regression test and verified with AXP VMS 8.2
+**
+**	On realVMS compile with /POINTER=64.
 */
 
 #define __USE_GNU
 
 #define __NEW_STARLET
-#include <lib$routines.h>			/* Verify my public proto-types */
-#include <libdef.h>				/* lib messages */
-#include <ssdef.h>				/* system messages */
+#include <lib$routines.h>					/* Verify my public proto-types */
+#include <libdef.h>						/* lib messages */
+#include <ssdef.h>						/* system messages */
 
-#ifndef __vms					/* Real VMS? */
-#include <string.h>				/* Needed for ffsll */
-#include <linux/bitops.h>			/* Need Atomic bit operations */
-extern int ffsll(unsigned long long bits);	/* BUG?  should be in string.h */
-#else						/* for testing on real VMS */
+#ifndef __vms							/* Real VMS? */
+#include <string.h>						/* Needed for ffsll */
+#include <linux/bitops.h>					/* Need Atomic bit operations */
+extern int ffsll(unsigned long long bits);			/* BUG?  should be in string.h */
+
+#else								/* for testing on real VMS */
 #include <builtins.h>
-#pragma __required_pointer_size long
-int ffsll(unsigned long long bits);
-int test_and_clear_bit(int pos, void *bits);
-int test_and_set_bit(int pos, void *bits);
+int test_and_clear_bit(int pos, volatile void *bits)		/* Atomic test and clear bit */
+    {
+    return !__INTERLOCKED_TESTBITCC_QUAD(bits,pos);		/* Returns the complement of the bit!!! */
+//  return !_BBCCI(pos, bits);					/* Also works even if pos > 32 */
+    }
+int test_and_set_bit(int pos, volatile void *bits)		/* Atomic test and set bit */
+    {
+    return __INTERLOCKED_TESTBITSS_QUAD(bits,pos);
+//  return _BBSSI(pos, bits);					/* Also works even if pos > 32 */
+   }
+/* Returns the first set bit position+1, or zero if non found in quadward bit mask */
+int ffsll(unsigned long long bits)
+    {
+    int pos = 0;
+    for (int i = 0; i < 64; i++)
+	{
+	if (bits & 0x01) { pos = i+1; break; }
+	bits = bits >> 1;
+	}
+    return pos;
+    }
 #endif
 
-
 /*
-** Local bit mask of reserved event flags.  0 = reserved, 1=free.
+** Local bit mask of reserved event flags:  0 = reserved, 1 = free.
 **	Note: This is in process space so it could get trashed by a run-away pointer.
 **
 ** Event flags are a little strange.  There are 64 local event flags, numbered 0-63.
@@ -63,11 +82,11 @@ unsigned int lib$get_ef(unsigned int *efn)			/* allocate an event flag */
     int flag;
     do
 	{
-	bit = ffsll(efn_flags);			/* Find the first free event flag */
+	bit = ffsll(efn_flags);					/* Find the first free (set) event flag */
 	if (bit == 0) return LIB$_INSEF;			/* No more event flags */
 	flag = test_and_clear_bit(bit-1, (volatile void *)&efn_flags);
 								/* Get bit and clear - ATOMIC! */
-	} while (!flag);					/* If set - an AST or thread beat me here */
+	} while (flag == 0);					/* If already clear - another AST or thread beat me here */
     *efn = 64 - bit;						/* return the event flag allocated */
     return SS$_NORMAL;
     }
@@ -124,79 +143,3 @@ unsigned int lib$reserve_ef(const unsigned int *efn)
 	}
     return status;
     }
-
-#ifdef _vms
-int ffsll(unsigned long long bits)
-    {
-    int pos = 0;
-    for (int i = 0; i < 64; i++)
-	{
-	if (bits & 0x01) { pos = i+1; break; }
-	bits = bits >> 1;
-	}
-    return pos;
-    }
-int test_and_clear_bit(int pos, void *bits)			/* Not atomic but good enough for testing */
-    {
-    unsigned long long *p = (unsigned long long *)bits;
-    int test = (*p >> pos) & 0x01;				/* Get the bit */
-    if (test) *p &= ~(1LL << pos);				/* Clear it */
-    return test;
-    }
-int test_and_set_bit(int pos, void *bits)			/* Not atomic but good enough for testing */
-    {
-    unsigned long long *p = (unsigned long long *)bits;
-    int test = (*p >> pos) & 0x01;				/* Get the bit */
-    if (!test) *p |= (1LL << pos);				/* set it */
-    return test;
-    }
-#endif
-
-#ifdef TEST_ROUTINE
-#include <stdio.h>
-
-int main()
-    {
-    int i;
-    for (i = 0; i < 65; i++)
-      {
-      unsigned int efn1 = i;
-      unsigned int status = lib$free_ef(&efn1);
-      printf("freed efn %d, status %d\n",efn1,status);
-      }
-
-    for (i = 0; i < 64; i++)
-        {
-        unsigned int efn1;
-        unsigned int status = lib$get_ef(&efn1);
-        printf("Got efn %d, status %d\n",efn1, status);
-        }
-
-    for (i = 0; i < 65; i++)
-      {
-      unsigned int efn1 = i;
-      unsigned int status = lib$free_ef(&efn1);
-      printf("freed efn %d, status %d\n",efn1,status);
-      }
-    for (i = 0; i < 65; i++)
-      {
-      unsigned int efn1 = i;
-      unsigned int status = lib$free_ef(&efn1);
-      printf("freed efn %d, status %d\n",efn1,status);
-      }
-
-    for (i = 0; i < 65; i++)
-        {
-        unsigned int efn1 = i;
-	unsigned int status = lib$reserve_ef(&efn1);
-        printf("Reserved efn %d, status = %d\n",efn1, status);
-        }
-    for (i = 0; i < 65; i++)
-        {
-        unsigned int efn1 = i;
-	unsigned int status = lib$reserve_ef(&efn1);
-        printf("Reserved efn %d, status = %d\n",efn1, status);
-        }
-    return 0;
-    }
-#endif
