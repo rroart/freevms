@@ -160,6 +160,14 @@ Mutexes have been tried attempted, but are wrong.
 
 Event flags
 
+There are some internal event flags used.
+
+Event flag 26 is not yet used.
+Event flag 27 is not yet used.
+Event flag 28 is used by terminal I/O in tty_io. 
+Event flag 29 is used in rm3get and rms.
+Event flag 30 is used by vmsbuffer, EXT2 ext2vms and ODS2 access.
+
 ****************
 
 Lock management

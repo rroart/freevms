@@ -526,7 +526,7 @@ static ssize_t tty_read(struct file * file, char * buf, size_t count,
 	lock_kernel();
 
 	// remember to add terminator stuff in here
-	sts = exe$qiow(0,chan,IO$_READPBLK,&iosb,0,0,
+	sts = exe$qiow(28,chan,IO$_READPBLK,&iosb,0,0,
 				 buf,count,0,0,0,0);
 	i = iosb.iolen;
 
@@ -554,7 +554,7 @@ static ssize_t tty_write(struct file * file, const char * buf, size_t count,
 	struct _ucb *u=ctl$gl_ccbbase[chan].ccb$l_ucb;
 
 	//	sts = exe$qio(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_WRITEPBLK,0/*&iosb*/,0,0,
-	sts = exe$qio(0,chan,IO$_WRITEPBLK,0/*&iosb*/,0,0,
+	sts = exe$qio(28,chan,IO$_WRITEPBLK,0/*&iosb*/,0,0,
 				 buf,count,0,0,0,0);
 
 	exe$dassgn(chan);

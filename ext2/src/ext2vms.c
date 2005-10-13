@@ -50,6 +50,8 @@
 #include <fibdef.h>
 #include <fiddef.h>
 
+#define EXT2_EF 30
+
 char * ext2_vms_to_unix(char * name,struct dsc$descriptor * dsc);
 void * exttwo_search_fcb2(struct _vcb * vcb,struct _fiddef * fid);
 unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp);
@@ -442,7 +444,7 @@ void myqio(int rw, int data, int size, int blocknr,kdev_t dev, int block_factor)
     type=IO$_WRITEPBLK;
   else
     type=IO$_READPBLK;
-  sts = sys$qiow(0,(unsigned short)dev2chan(dev),type,&iosb,0,0,
+  sts = sys$qiow(EXT2_EF,(unsigned short)dev2chan(dev),type,&iosb,0,0,
 		     data,size, blocknr*block_factor,MINOR(dev)&31,0,0);
   return sts;
 }
@@ -456,7 +458,7 @@ void vms_submit_bh(int rw, struct buffer_head * bh)
     type=IO$_WRITEPBLK;
   else
     type=IO$_READPBLK;
-  sts = sys$qiow(0,(unsigned short)dev2chan(bh->b_dev),type,&iosb,0,0,
+  sts = sys$qiow(EXT2_EF,(unsigned short)dev2chan(bh->b_dev),type,&iosb,0,0,
 		     bh->b_data,bh->b_size, bh->b_blocknr,MINOR(bh->b_dev)&31,0,0);
   return sts;
 }
@@ -471,7 +473,7 @@ void vms_ll_rw_block(int rw, int nr, struct buffer_head * bhs[],kdev_t dev)
     type=IO$_WRITEPBLK;
   else
     type=IO$_READPBLK;
-  sts = sys$qiow(0,(unsigned short)dev2chan(dev),type,&iosb,0,0,
+  sts = sys$qiow(EXT2_EF,(unsigned short)dev2chan(dev),type,&iosb,0,0,
 		     bh->b_data,bh->b_size, bh->b_blocknr,MINOR(dev)&31,0,0);
 }
 
@@ -485,7 +487,7 @@ void vms_mark_buffer_dirty(struct buffer_head * bh)
     type=IO$_WRITEPBLK;
   else
     type=IO$_READPBLK;
-  sts = sys$qiow(0,(unsigned short)dev2chan(bh->b_dev),type,&iosb,0,0,
+  sts = sys$qiow(EXT2_EF,(unsigned short)dev2chan(bh->b_dev),type,&iosb,0,0,
 		     bh->b_data,bh->b_size, bh->b_blocknr,MINOR(bh->b_dev)&31,0,0);
 }
 
@@ -721,7 +723,7 @@ unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],s
 #define HOME_LIMIT 5
       for (hba = 1; hba <= HOME_LIMIT; hba++) {
 	//printk("bef qio %x %x\n",hba,chan);
-	sts = sys$qiow(0,chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct ext2_super_block),hba,root_device_name[3]-48,0,0);
+	sts = sys$qiow(EXT2_EF,chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct ext2_super_block),hba,root_device_name[3]-48,0,0);
 	//	printk("aft qio %x\n",sts);
 	if (!(sts & 1)) break;
 #if 0
@@ -1042,7 +1044,7 @@ void * exttwo_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long cou
   struct _iosb myiosb;
   unsigned char * buf = kmalloc(512*count, GFP_KERNEL);
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(0,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+  unsigned long sts=sys$qiow(EXT2_EF,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -1050,7 +1052,7 @@ void * exttwo_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long cou
 void * exttwo_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
   struct _iosb myiosb;
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(0,x2p->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+  unsigned long sts=sys$qiow(EXT2_EF,x2p->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -1407,7 +1409,7 @@ unsigned long e2_access_file(const char *name) {
   fibblk.fib$w_fid_seq = fibblk.fib$w_did_seq;
   fibblk.fib$w_did_num = 0;
   fibblk.fib$w_did_seq = 0;
-  sts = sys$qiow(0,getchan(x2p->current_vcb),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
+  sts = sys$qiow(EXT2_EF,getchan(x2p->current_vcb),IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
 		 &fibdsc,&fildsc,&reslen,&resdsc,0,0);
   sts = iosb.iosb$w_status;
 
@@ -1415,7 +1417,7 @@ unsigned long e2_access_file(const char *name) {
   fibblk.fib$w_did_seq = fibblk.fib$w_fid_seq;
   fibblk.fib$w_fid_num = 0;
   fibblk.fib$w_fid_seq = 0;
-  sts = sys$qiow(0,getchan(x2p->current_vcb),IO$_ACCESS,&iosb,0,0,
+  sts = sys$qiow(EXT2_EF,getchan(x2p->current_vcb),IO$_ACCESS,&iosb,0,0,
 		 &fibdsc,&fildsc,&reslen,&resdsc,0,0);
   sts = iosb.iosb$w_status;
   return sts;

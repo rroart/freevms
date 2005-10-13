@@ -65,6 +65,8 @@
 #include <iodef.h>
 #include <misc.h>
 
+#define EXT2_EF 30
+
 #define MAX_BUF_PER_PAGE (PAGE_CACHE_SIZE / 512)
 #define NR_RESERVED (10*MAX_BUF_PER_PAGE)
 #define MAX_UNUSED_BUFFERS NR_RESERVED+20 /* don't ever have more than this 
@@ -515,7 +517,7 @@ struct buffer_head * bread(kdev_t dev, int block, int size)
 	 //printk(KERN_INFO "qiow2 %x,%x,%x,%x | ",dev,dev2chan(dev),size,block);
 	 //printk(KERN_INFO "q2 %x,%x|",dev,block);
 
-	 sts = exe$qiow(0,dev2chan(dev),IO$_READPBLK,&iosb,0,0,
+	 sts = exe$qiow(EXT2_EF,dev2chan(dev),IO$_READPBLK,&iosb,0,0,
 			bh -> b_data,size,block,MINOR(dev)&31,0,0);
 
 	 set_bit(BH_Uptodate, &bh->b_state);
@@ -586,7 +588,7 @@ static int __block_write_full_page2(struct inode *inode, struct page *page, unsi
 	    if (err)
 	      goto out;
 	  }
-	  sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
+	  sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
 			 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 
 	  turns++;
@@ -657,7 +659,7 @@ static int __block_prepare_write(struct inode *inode, struct page *page,
 	   if (block_end > to || block_start < from)
 	     flush_dcache_page(page);
 	   if ((block_start < from || block_end > to)) {
-	     sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
+	     sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
 			    kaddr+turns*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 	   }
 	}
@@ -699,7 +701,7 @@ static int __block_commit_write(struct inode *inode, struct page *page,
 		if (block_end <= from || block_start >= to) {
 		  partial = 1;
 		} else {
-		  sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
+		  sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
 				 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 		}
 	}
@@ -764,7 +766,7 @@ int block_read_full_page2(struct inode *inode,struct page *page, unsigned long p
 
 	   nr++;
 
-	   sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
+	   sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
 			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 
 	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
@@ -817,7 +819,7 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 
 	   nr++;
 
-	   sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
+	   sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
 			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 
 	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
@@ -1212,7 +1214,7 @@ int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsig
 		  type=IO$_READPBLK;
 		else
 		  type=IO$_WRITEPBLK;
-		sts = exe$qiow(0,(unsigned short)dev2chan(inode->i_dev),type,&iosb,0,0,
+		sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),type,&iosb,0,0,
 			       bh.b_data,blocksize, bh.b_blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 		//		blocks[i] = bh.b_blocknr;
 	}

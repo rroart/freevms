@@ -108,7 +108,7 @@ int rms$get_idx(struct _rabdef * rab) {
   atr[1].atr$w_type=0;
   fibdsc.dsc$w_length=sizeof(struct _fibdef);
   fibdsc.dsc$a_pointer=&ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fib;
-  sts = sys$qiow(0,ifb_table[rab->rab$l_fab->fab$w_ifi]->ifb$w_chnl,IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
+  sts = sys$qiow(RMS_EF,ifb_table[rab->rab$l_fab->fab$w_ifi]->ifb$w_chnl,IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
 		 &fibdsc,0,0,0,atr,0);
   sts = iosb.iosb$w_status;
 
@@ -123,7 +123,7 @@ int rms$get_idx(struct _rabdef * rab) {
 
   block=datavbn;
 
-  sts = sys$qiow(0,ifb_table[rab->rab$l_fab->fab$w_ifi]->ifb$w_chnl,IO$_READVBLK,&iosb,0,0,
+  sts = sys$qiow(RMS_EF,ifb_table[rab->rab$l_fab->fab$w_ifi]->ifb$w_chnl,IO$_READVBLK,&iosb,0,0,
 		 buffer,512,block,0,0,0);
   sts = iosb.iosb$w_status;
 
