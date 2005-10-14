@@ -612,7 +612,7 @@ void TZ$DISCONNECT(struct _ucb * ucb, int r0) {
     R3 = ucb->ucb$l_amb;		// Load Associated Mailbox of PZ UCB
     if (R3) {			// If EQL then no mailbox
       int R4 =	MSG$_TRMHANGUP;	// Load Message Type
-      exe_std$sndevmsg();		// Send the message
+      exe_std$sndevmsg(R3, R4, ucb);		// Send the message
     }
   }
  return;
