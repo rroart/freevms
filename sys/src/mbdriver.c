@@ -111,8 +111,8 @@ int mb$fdt_sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _
     sum+=tmp->mmb$w_datasize;
     tmp=tmp->mmb$l_msgqfl;
   }
-  retsts=(retsts<<16)+u->ucb$w_msgcnt+(sum<<32);
-  return exe$finishioc(retsts,i,p,u);
+  retsts=(retsts)+(u->ucb$w_msgcnt<<16);
+  return exe$finishio(retsts,sum,i,p,u);
 }
 
 int mb$fdt_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
@@ -412,7 +412,7 @@ void mb$finishread(struct _ucb * u) {
 
       if (msg->mmb$l_irp) {
 	struct _irp * wirp=msg->mmb$l_irp;
-	wirp->irp$l_iost1=wirp->irp$l_bcnt + (SS$_NORMAL<<16);
+	wirp->irp$l_iost1= (wirp->irp$l_bcnt<<16) + SS$_NORMAL;
 	wirp->irp$l_iost2 = exe$ipid_to_epid(msg->mmb$l_pid);
 	com$post(wirp,u);
       }
@@ -420,7 +420,7 @@ void mb$finishread(struct _ucb * u) {
       if (i->irp$l_svapte!=msg)
 	com_std$drvdealmem(msg);
 
-      i->irp$l_iost1=i->irp$l_bcnt + (retstatus<<16);
+      i->irp$l_iost1= (i->irp$l_bcnt<<16) + retstatus;
       i->irp$l_iost2 = exe$ipid_to_epid(msg->mmb$l_pid);
 
       com$post(i,u);
@@ -460,7 +460,7 @@ void mb$finishread(struct _ucb * u) {
       msg->mmb$l_datastart+=i->irp$l_bcnt;
     
       i->irp$l_bcnt=s->srb$w_datasize;
-      i->irp$l_iost1=i->irp$l_bcnt + (SS$_NORMAL<<16);
+      i->irp$l_iost1= (i->irp$l_bcnt<<16) + SS$_NORMAL;
       i->irp$l_iost2 = exe$ipid_to_epid(msg->mmb$l_pid);
 
       com$post(i,u);
@@ -499,7 +499,7 @@ void mb$finishread(struct _ucb * u) {
 
       if (msg->mmb$l_irp) {
 	struct _irp * wirp=msg->mmb$l_irp;
-	wirp->irp$l_iost1=wirp->irp$l_bcnt + (SS$_NORMAL<<16);
+	wirp->irp$l_iost1= (wirp->irp$l_bcnt<<16) + SS$_NORMAL;
 	wirp->irp$l_iost2 = exe$ipid_to_epid(msg->mmb$l_pid);
 	com$post(wirp,u);
       } 
@@ -519,7 +519,7 @@ void mb$finishread(struct _ucb * u) {
 	  i->irp$l_bcnt=s->srb$w_datasize;
 	  remque(i,0);
     
-	  i->irp$l_iost1= s->srb$w_datasize + (SS$_NORMAL<<16);
+	  i->irp$l_iost1=  (s->srb$w_datasize<<16) + SS$_NORMAL;
 	  i->irp$l_iost2 = exe$ipid_to_epid(msg->mmb$l_pid);
 
 	  com$post(i,u);
@@ -800,16 +800,17 @@ int exe_std$wrtmailbox (struct _mb_ucb *mb_ucb, int msgsiz, void *msg,...) {
 
 int exe_std$sndevmsg(struct _mb_ucb *mb_ucb, int msgtyp, struct _ucb *ucb) {
   struct _ucb * u=mb_ucb;
-  long message[2];
+  long message[8];
   //spinlock
   if (u->ucb$b_devclass != DC$_MAILBOX)
     return SS$_DEVNOTMBX;
-  message[0]=msgtyp + (u->ucb$w_unit << 16);
+  message[0]=msgtyp + (ucb->ucb$w_unit << 16);
   message[1]=0;
 
   // too lazy to do ioc$cvt_devnam
+  sprintf(&message[1],"%s%d",&ucb->ucb$l_ddb->ddb$t_name[1],ucb->ucb$w_unit);
 
-  return exe_std$wrtmailbox(mb_ucb,8,message);
+  return exe_std$wrtmailbox(mb_ucb,32,message);
 }
 
 int mb$chanunwait(struct _ucb * u, struct _ccb * c) {
