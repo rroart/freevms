@@ -94,6 +94,7 @@ void con$startio(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UN
 	ucb->ucb$l_svapte=0;
 	ucb->ucb$l_sts&=~UCB$M_BSY; // reset this somewhere?
 #endif
+	tty->tty$v_st_write=0;
 	return con$fdtwrite(ucb->ucb$l_irp,ctl$gl_pcb,ucb,0);
 	// return ioc$reqcom(SS$_NORMAL,0,u); // not needed
       } else {
