@@ -16,7 +16,9 @@ int waitcheck(struct _pcb *p, unsigned long priclass, unsigned long * efp, unsig
   unsigned long tmp;
   if (efp!=clusteraddr) return;
   tmp=(*clusteraddr)&~p->pcb$l_efwm;
+#if 0
   *clusteraddr&=~p->pcb$l_efwm;
+#endif
   if (!tmp) return;
   // tmp=~(p->pcb$l_sts&(~PCB$M_WALL)); // what?
   // if (!tmp && tmp!=p->pcb$l_efwm) return; // what?
