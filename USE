@@ -165,6 +165,13 @@ DCL:
 CMUIP:
 	see example file INET$CONFIG.
 
+Telnet:
+	do something like sh sys first, then run /vms$common/sysexe/telnet.ele.
+	do connect ipv4-address.
+	it is possible to telnet to another FreeVMS node.
+	Note that with the CMUIP telnetd, there is I/O-problems with the
+	first line, so just press enter on it.
+
 ******************************
 
 NOTES/bugs general:

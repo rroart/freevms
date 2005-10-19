@@ -32,6 +32,7 @@ make build-linker
 make download-grub
 make build-grub
 make vmsall
+make telnet (remember to change close to close2 in routines.b32)
 make rootinstall
 make image
 make image-install
