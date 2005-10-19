@@ -12,6 +12,7 @@
 #include <ttytadef.h>
 #include <ucbdef.h>
 #include <system_data_cells.h>
+#include <msgdef.h>
 #include <ssdef.h>
 
 #include <ddbdef.h>
@@ -35,6 +36,17 @@ int tty$putnextchar(int * chr, int * CC, struct _ucb * u) {
     if (u->ucb$l_devdepend&TT$M_NOTYPEAHD) {
       tty->ucb$b_tt_outype=0;
       return;
+    }
+
+    if (u->ucb$l_amb) {
+      exe_std$sndevmsg(u->ucb$l_amb, MSG$_TRMUNSOLIC, u);
+      goto out;
+    } else {
+      // not yet, after jobctl process is started. same as below.
+#if 1
+      exe_std$sndevmsg(sys$ar_jobctlmb, MSG$_TRMUNSOLIC, u);
+      goto out;
+#endif
     }
 
     // if owned then insert
