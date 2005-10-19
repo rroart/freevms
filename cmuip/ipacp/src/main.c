@@ -860,7 +860,7 @@ void Main (void) {
 
 #define    IPACP_Version_String "IP_ACP(V6.6-5.001) "  //Becomes ACP process name.
 #define    IPACP_Version_Name IPACP_Version_String
-#define    IPACP_Date_String "16-Sep-2005" 	// Date of last change
+#define    IPACP_Date_String "18-Oct-2005" 	// Date of last change
 #define    IPACP_Who_String "roart" // Author of last change
 
 // Announce that we exist.
