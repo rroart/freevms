@@ -344,7 +344,7 @@ static int inline $$KCALL(int (*func)(), ...) {
    // Conditionally do something according to LOG_STATE flags
 
 #define   $$LOGF(logf) \
-	((log_state && (logf)) != 0)
+	((log_state & (logf)) != 0)
 
 #if 0
 // Macros for output to log and opr and the activity log.
@@ -413,8 +413,12 @@ static int inline $$KCALL(int (*func)(), ...) {
 
 #else				// Don't want logging macros - make them null
 
+#if 0
 #define $$LOGF SSLOGF
 static inline    $$LOGF(/*LOGF*/)  { } ;		// $$LOGF always fails
+#else
+#define $$LOGF(dummy) 0
+#endif
 static inline    LOG$OUT(/*XSTR*/)  { } ;	// LOG$OUT does nothing
 static inline    XLOG$OUT(/*LOGF*/)  { } ;	// XLOG$OUT 
 static inline    LOG$FAO(/*CST*/)  { } ;		// LOG$FAO 
