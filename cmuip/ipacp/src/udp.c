@@ -496,7 +496,11 @@ void udp$input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 	{
 	signed long
 	  out_len;
+#if 0
 	unsigned char out_buff  [16384]; // check will destroy stack and pcb
+#else
+	unsigned char * out_buff = kmalloc(16384, GFP_KERNEL);
+#endif
 
 	// Keep count
 	udp_mib->MIB$UDPINDATAGRAMS = udp_mib->MIB$UDPINDATAGRAMS + 1;
@@ -517,6 +521,10 @@ void udp$input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 	    if (RC != SS$_NORMAL)
 		XLOG$FAO(LOG$UDP,"!%T UDP RPC reply error, RC=!XL!/",0,RC);
 	    };
+
+#if 1
+	kfree(out_buff);
+#endif
 
 	// Release the input datagram buffer
 	if (delete)
