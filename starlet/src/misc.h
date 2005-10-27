@@ -36,4 +36,14 @@ struct lock_blk {
 
 // #define VMS_BLOCK_FACTOR 2 not! this is dangerous!
 
+struct _exh {
+  long exh$l_flink;
+  long exh$l_handler;
+  long exh$l_numargs;
+  char exh$b_numargs;
+  char exh$l_mbz[3];
+  long exh$l_status_a;
+  long exh$l_first_arg;
+};
+
 #endif
