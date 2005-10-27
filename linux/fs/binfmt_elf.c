@@ -51,8 +51,10 @@
 #include <phddef.h>
 #include <secdef.h>
 #include <system_data_cells.h>
+#include <descrip.h>
 #include <dyndef.h>
 #include <fcbdef.h>
+#include <ssdef.h>
 
 static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs);
 static int load_elf_library(struct file*);
@@ -610,6 +612,8 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	}
 
 	/* Flush all traces of the currently running executable */
+	if (bprm->loader)
+	  goto skip_something;
 	retval = flush_old_exec(bprm);
 	if (retval)
 		goto out_free_dentry;
@@ -620,7 +624,10 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	current->mm->end_code = 0;
 	current->mm->mmap = NULL;
 	current->flags &= ~PF_FORKNOEXEC;
+ skip_something:
 	elf_entry = (unsigned long) elf_ex.e_entry;
+	if (bprm->loader)
+	  goto skip_something2;
 
 	/* Do this so that we can load the interpreter, if need be.  We will
 	   change some of these later */
@@ -636,6 +643,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	   the image should be loaded at fixed address, not at a variable
 	   address. */
 
+ skip_something2:
 	for(i = 0, elf_ppnt = elf_phdata; i < elf_ex.e_phnum; i++, elf_ppnt++) {
 		int elf_prot = 0, elf_flags;
 		unsigned long vaddr;
@@ -749,6 +757,9 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 
 	compute_creds(bprm);
 	current->flags &= ~PF_FORKNOEXEC;
+	if (bprm->loader) {
+	  bprm->p=bprm->loader+4096;
+	}
 	bprm->p = (unsigned long)
 	  create_elf_tables((char *)bprm->p,
 			bprm->argc,
@@ -796,6 +807,10 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 		up_write(&current->mm->mmap_sem);
 	}
 
+	if (bprm->loader) {
+	  retval = elf_entry;
+	  goto out;
+	}
 #ifdef ELF_PLAT_INIT
 	/*
 	 * The ABI may specify that certain registers be set up in special
@@ -1396,6 +1411,56 @@ static void __exit exit_elf_binfmt(void)
 {
 	/* Remove the COFF and ELF loaders. */
 	unregister_binfmt(&elf_format);
+}
+
+int exe$imgact_elf(void * name, void * hdrbuf) {
+  struct dsc$descriptor * dscdflnam = name;
+  char * filename = dscdflnam->dsc$a_pointer;
+  struct linux_binprm bprm;
+  struct file * file = 0;
+  int retval = SS$_NORMAL; 
+#ifdef CONFIG_VMS
+  file = rms_open_exec(filename);
+#endif
+  if (file) goto fcb_found;
+  
+  file = open_exec(filename);
+
+  retval = PTR_ERR(file);
+  //printk("here 5\n");
+  if (IS_ERR(file))
+    return retval;
+  
+ fcb_found:
+  bprm.p = PAGE_SIZE*MAX_ARG_PAGES-sizeof(void *);
+  memset(bprm.page, 0, MAX_ARG_PAGES*sizeof(bprm.page[0])); 
+  
+  bprm.file = file;
+  bprm.filename = filename;
+  bprm.sh_bang = 0;
+  bprm.loader = hdrbuf;
+  bprm.exec = 0; // to skip destructiveness
+  bprm.argc = 0;
+  bprm.envc = 0;
+  //  bprm.argv = 0;
+#ifdef CONFIG_VMS
+  if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
+    retval = rms_prepare_binprm(&bprm);
+  else
+#endif
+    retval = prepare_binprm(&bprm);
+  void * func = load_elf_binary(&bprm, 0);
+  struct elfhdr * elf = hdrbuf;
+#if 0
+  elf->e_entry = func;
+#else
+  long * addr=&elf->e_ident;
+  *addr=bprm.p;
+  addr=&elf->e_version;
+  *addr=func;
+#endif
+
+  return SS$_NORMAL;
 }
 
 module_init(init_elf_binfmt)
