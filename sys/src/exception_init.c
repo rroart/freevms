@@ -160,7 +160,7 @@ int sys$dclast(void (*astadr)(__unknown_params), unsigned long astprm, unsigned 
 
 // not the right place, but the closest I could find
 
-asmlinkage void exe$cmkrnl(int (*routine)(),int * args) {
+asmlinkage void exe$cmkrnl_not(int (*routine)(),int * args) {
   //basically check privs
   //if ok, do an int 0x85 (new one) with routine and args as params
   //at int 0x85 I suppose privs must be checked again
@@ -168,7 +168,7 @@ asmlinkage void exe$cmkrnl(int (*routine)(),int * args) {
   //I suppose a stupid cpu can do this
 }
 
-asmlinkage void exe$cmexec(int (*routine)(),int * args) {
+asmlinkage void exe$cmexec_not(int (*routine)(),int * args) {
   //basically check privs
   //if ok, do an int 0x85 (new one) with routine and args as params
   //at int 0x85 I suppose privs must be checked again
