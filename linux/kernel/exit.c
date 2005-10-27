@@ -541,7 +541,7 @@ NORET_TYPE void complete_and_exit(struct completion *comp, long code)
 
 asmlinkage long sys_exit(int error_code)
 {
-	do_exit((error_code&0xff)<<8);
+	exe$exit((error_code&0xff)<<8);
 }
 
 asmlinkage long sys_wait4(pid_t pid,unsigned int * stat_addr, int options, struct rusage * ru)
