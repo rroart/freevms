@@ -161,7 +161,9 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
     }
   }
   mycheckaddr(0);
+#if 0
   p->pcb$l_sts&=~PCB$M_WAKEPEN; // got to have this somewhere, here works
+#endif
 }
 
 // need more statequeues before sch$chse*
