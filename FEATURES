@@ -35,6 +35,7 @@ Clustering:
 
 Networking:
 	CMUIP (can now do both outgoing and ingoing TCP/IP)
+	Telnet client
 
 Shell:
 	DCL

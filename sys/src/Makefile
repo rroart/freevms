@@ -31,7 +31,7 @@ obj-y     = sched.o \
 	    sysupdsec.o sysgetjpi.o syssetexv.o process_scan.o \
 	    pagefile.o comdrvsub.o syscancel.o swapper.o syssndmsg.o \
 	    shell.o memoryalc.o look_aside_list.o memoryalc_dyn.o \
-	    memoryalc_pool.o syscli.o
+	    memoryalc_pool.o syscli.o syschgmod.o
 
 ifeq ($(CONFIG_VMS),y)
 export-objs := vmsfilemap.o vmsbuffer.o
