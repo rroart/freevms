@@ -40,7 +40,11 @@ asmlinkage int exe$rundwn(int mode) {
 
   // $deq
 
+#ifdef CONFIG_VMS
   mmg$imgreset();
+#else
+  // maybe for non-C. too?
+#endif
 
   // another dassgn round
 
