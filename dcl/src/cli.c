@@ -48,6 +48,7 @@
 
 #include<dlfcn.h>
 #include<linux/bitops.h>
+#include<linux/elf.h>
 
 #define oz_util_h_console stdout
 
@@ -3917,6 +3918,44 @@ static unsigned long extcommand (unsigned long h_input, unsigned long h_output, 
 /*									*/
 /************************************************************************/
 
+static int myfunc(int (*func)(),void * start, int count) {
+  __asm__ __volatile__(
+		       "pushl %ebx\n\t"
+		       "pushl %ecx\n\t"
+		       "pushl %edx\n\t"
+		       "pushl %edi\n\t"
+		       "pushl %esi\n\t"
+		       "movl 0x8(%ebp),%eax\n\t"
+		       "movl 0xc(%ebp),%esi\n\t"
+		       "movl 0x10(%ebp),%ecx\n\t"
+		       "movl $0x400,%ecx\n\t"
+		       "movl %ecx,%edx\n\t" 
+		       "subl $0x1000,%esp\n\t"
+		       "movl %esp,%edi\n\t"
+		       "rep ; movsl\n\t"
+		       "jmp *%eax\n\t"
+		       );
+  // return eax default?
+}
+
+static int mymyfunc(int dummy,int (*func)(),void * start, int count) {
+  long * ret = &func;
+  ret=&dummy;
+  struct _exh exh;
+  memset(&exh, 0, sizeof(exh));
+  exh.exh$l_handler=ret[-1];
+  exh.exh$l_first_arg=&ret[-1];
+  int sts = sys$dclexh(&exh);
+  return myfunc(*func,start,count);
+}
+
+static int mymymyfunc(int (*func)(),void * start, int count) {
+  register int __res;
+  __asm__ ( "movl %%ebp,%%eax\n\t" :"=a" (__res) );
+  mymyfunc(__res,*func,start,count);
+  __asm__ ( "movl (%esp),%ebp\n\t" );
+}
+
 static unsigned long runimage (unsigned long h_error, Runopts *runopts, const char *image, int argc, const char *argv[])
 
 {
@@ -3931,15 +3970,14 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
   int len = strlen(argv[0]);
   //  if (strcasecmp (argv[-1], "creprc") == 0) goto do_creprc;
   if (0==strncmp(".ele",argv[0]+len-4,4)) goto do_dl;
-  if (strncmp(".exe",argv[0]+len-4,4)) goto do_fork;
 
   aname.dsc$w_length=len-4;
   aname.dsc$a_pointer=argv[0];
   dflnam.dsc$w_length=len;
   dflnam.dsc$a_pointer=argv[0];
 
-  hdrbuf=malloc(512);
-  memset(hdrbuf, 0, 512);
+  hdrbuf=malloc(512 * 8);
+  memset(hdrbuf, 0, 512 * 8);
 
   sts=sys$imgact(&aname,&dflnam,hdrbuf,0,0,0,0,0);
   printf("imgact got sts %x\n",sts);
@@ -3948,19 +3986,34 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
 
   if (sts!=SS$_NORMAL) return sts;
 
-  active=(unsigned long)hdrbuf+hdrbuf->ihd$w_activoff;
+  if (hdrbuf->ihd$w_majorid==IHD$K_MAJORID && hdrbuf->ihd$w_minorid==IHD$K_MINORID) {
+    active=(unsigned long)hdrbuf+hdrbuf->ihd$w_activoff;
 
 #if 0
-  // can't do this, for some reason it causes pagefault
-  char * str = argv[0];
-  str[len-4]=0;
+    // can't do this, for some reason it causes pagefault
+    char * str = argv[0];
+    str[len-4]=0;
 #endif
 
-  func=active->iha$l_tfradr1;
-
-  printf("entering image? %x\n",func);
-  func(argc,argv++);
-  printf("after image\n");
+    func=active->iha$l_tfradr1;
+    printf("entering image? %x\n",func);
+    func(argc,argv++);
+    printf("after image\n");
+  } else {
+    struct elfhdr * elf = hdrbuf;
+    func = elf->e_entry;
+    printf("entering image? %x\n",func);
+    long arg=0;
+    long *addr=&elf->e_version;
+    if (*addr!=func) {
+      arg=func;
+      func=*addr;
+    }
+    addr=&elf->e_ident;
+    int offset = ((long)(*addr)) - ((long)elf);
+    sts = mymymyfunc(func,*addr,(4096-offset)>>2);
+    printf("after image\n");
+  }
 
   sys$rundwn();
 
