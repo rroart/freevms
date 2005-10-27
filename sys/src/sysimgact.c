@@ -34,12 +34,12 @@ asmlinkage int exe$imgact_wrap(struct struct_args * s) {
 }
 
 asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned long imgctl, unsigned long long * inadr, unsigned long long * retadr, unsigned long long * ident, unsigned long acmode) {
-#ifdef CONFIG_VMS
   struct dsc$descriptor *dscname=name;
   struct dsc$descriptor *dscdflnam=dflnam;
   struct file * f;
   struct _ihd * header=hdrbuf;
   struct _ihd * ehdr32=header;
+#ifdef CONFIG_VMS
   struct _iha * active;
   struct _isd * section;
   struct _ihi * ihid;
@@ -60,6 +60,10 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   set_fs(KERNEL_DS);
   rms_generic_file_read(f, header, 512, &pos);
   set_fs(fs);
+
+  if (ehdr32->ihd$w_majorid!=IHD$K_MAJORID || ehdr32->ihd$w_minorid!=IHD$K_MINORID) {
+    return exe$imgact_elf(dscdflnam,ehdr32);
+  }
 
   im->imcb$l_flink=img$gl_imcb_list;
   img$gl_imcb_list=im;
@@ -226,7 +230,15 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     r->va_range$ps_end_va=img_inadr.va_range$ps_end_va;
   }
 
+#else
+  loff_t pos=0;
+  mm_segment_t fs;
+  f=open_exec(dscdflnam->dsc$a_pointer);
+  if (f==0) return 0;
+  fs = get_fs();
+  set_fs(KERNEL_DS);
+  generic_file_read(f, header, 512, &pos);
+  set_fs(fs);
+  return exe$imgact_elf(dscdflnam,ehdr32);
 #endif
-  return SS$_NORMAL;
-
 }
