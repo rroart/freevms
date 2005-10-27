@@ -20,8 +20,8 @@ OBJS = cli.o clicall.o
 
 i386/dcl${NOEXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL)
 	install -d i386
-	gcc -s -static $(OBJS) $(EXTERNAL) $(VMSLIBS) -ldl -o i386/dcl${NOEXE}
-	gcc -g -static $(OBJS) $(EXTERNAL) $(VMSLIBS) -ldl -o i386/dcld${NOEXE}
+	gcc -s -static -Wl,-Telf_i386.x $(OBJS) $(EXTERNAL) $(VMSLIBS) -ldl -o i386/dcl${NOEXE}
+	gcc -g -static -Wl,-Telf_i386.x $(OBJS) $(EXTERNAL) $(VMSLIBS) -ldl -o i386/dcld${NOEXE}
 
 i386/dcl${EXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL)
 	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(VMSLIBS) /usr/lib/libdl.a /usr/lib/libiberty.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dcl${EXE}
