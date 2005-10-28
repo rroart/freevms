@@ -388,7 +388,7 @@ int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *i
 int sys$fao(void * ctrstr , short int * outlen , void * outbuf , ...) {
   struct struct_args s;
   va_list args;
-  int * argv=&s;
+  int * argv = (int *)&s;
   int argc=0;
   va_start(args,outbuf);
   while(argc<15) { // check. should be 17.
@@ -410,14 +410,14 @@ int sys$device_scan(void *return_devnam, unsigned short int *retlen, void *searc
 
 int sys$imgact(void * name, void * dflnam, void * hdrbuf, unsigned long imgctl, unsigned long long * inadr, unsigned long long * retadr, unsigned long long * ident, unsigned long acmode) {
   struct struct_args s;
-  s.s1=name;
-  s.s2=dflnam;
-  s.s3=hdrbuf;
-  s.s4=imgctl;
-  s.s5=inadr;
-  s.s6=retadr;
-  s.s7=ident;
-  s.s8=acmode;
+  s.s1 = (unsigned long) name;
+  s.s2 = (unsigned long) dflnam;
+  s.s3 = (unsigned long) hdrbuf;
+  s.s4 = (unsigned long) imgctl;
+  s.s5 = (unsigned long) inadr;
+  s.s6 = (unsigned long) retadr;
+  s.s7 = (unsigned long) ident;
+  s.s8 = (unsigned long) acmode;
   return INLINE_SYSCALL($imgact,1,&s);
 }
 
@@ -427,12 +427,12 @@ int sys$imgfix() {
 
 int sys$imgsta(void * transfer, void * parseinfo, void * header, void * file, unsigned long linkstatus, unsigned long clistatus) {
   struct struct_args s;
-  s.s1=transfer;
-  s.s2=parseinfo;
-  s.s3=header;
-  s.s4=file;
-  s.s5=linkstatus;
-  s.s6=clistatus;
+  s.s1 = (unsigned long) transfer;
+  s.s2 = (unsigned long) parseinfo;
+  s.s3 = (unsigned long) header;
+  s.s4 = (unsigned long) file;
+  s.s5 = (unsigned long) linkstatus;
+  s.s6 = (unsigned long) clistatus;
   return INLINE_SYSCALL($imgsta,1,&s);
 }
 
@@ -466,42 +466,42 @@ int sys$ulkpag(struct _va_range *inadr, struct _va_range *retadr, unsigned int a
 
 int sys$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr, unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, unsigned short int mbxunt, unsigned int stsflg) {
   struct struct_args s;
-s.s1=pidadr;
-s.s2=image;
-s.s3=input;
-s.s4=output;
-s.s5=error;
-s.s6=prvadr;
-s.s7=quota;
-s.s8=prcnam;
-s.s9=baspri;
-s.s10=uic;
-s.s11=mbxunt;
-s.s12=stsflg;
- return INLINE_SYSCALL($creprc,1,&s);
+  s.s1 = (unsigned long) pidadr;
+  s.s2 = (unsigned long) image;
+  s.s3 = (unsigned long) input;
+  s.s4 = (unsigned long) output;
+  s.s5 = (unsigned long) error;
+  s.s6 = (unsigned long) prvadr;
+  s.s7 = (unsigned long) quota;
+  s.s8 = (unsigned long) prcnam;
+  s.s9 = (unsigned long) baspri;
+  s.s10 = (unsigned long) uic;
+  s.s11 = (unsigned long) mbxunt;
+  s.s12 = (unsigned long) stsflg;
+  return INLINE_SYSCALL($creprc,1,&s);
 }
 
 int sys$getsyi(unsigned int efn, unsigned int *csidadr, void *nodename, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long astprm) {
   struct struct_args s;
-  s.s1=efn;
-  s.s2=csidadr;
-  s.s3=nodename;
-  s.s4=itmlst;
-  s.s5=iosb;
-  s.s6=astadr;
-  s.s7=astprm;
+  s.s1 = (unsigned long) efn;
+  s.s2 = (unsigned long) csidadr;
+  s.s3 = (unsigned long) nodename;
+  s.s4 = (unsigned long) itmlst;
+  s.s5 = (unsigned long) iosb;
+  s.s6 = (unsigned long) astadr;
+  s.s7 = (unsigned long) astprm;
   return INLINE_SYSCALL($getsyi,1,&s);
 }
 
 int sys$getsyiw(unsigned int efn, unsigned int *csidadr, void *nodename, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long astprm) {
   struct struct_args s;
-  s.s1=efn;
-  s.s2=csidadr;
-  s.s3=nodename;
-  s.s4=itmlst;
-  s.s5=iosb;
-  s.s6=astadr;
-  s.s7=astprm;
+  s.s1 = (unsigned long) efn;
+  s.s2 = (unsigned long) csidadr;
+  s.s3 = (unsigned long) nodename;
+  s.s4 = (unsigned long) itmlst;
+  s.s5 = (unsigned long) iosb;
+  s.s6 = (unsigned long) astadr;
+  s.s7 = (unsigned long) astprm;
   return INLINE_SYSCALL($getsyiw,1,&s);
 }
 
@@ -517,7 +517,11 @@ int sys$cancel (unsigned short int chan) {
   return INLINE_SYSCALL($cancel,1,(int)chan);
 }
 
-int sys$setddir (struct dsc$descriptor *newdir,unsigned short *oldlen, struct dsc$descriptor *olddir) { return INLINE_SYSCALL1($setddir,3,newdir,oldlen,olddir); }
+int sys$cmkrnl(int (*routin)(__unknown_params), unsigned int *arglst) {
+  return INLINE_SYSCALL($cmkrnl,2,routin,arglst);
+}
+
+int sys$setddir (void * newdiraddr, unsigned short int * lengthaddr, void * curdiraddr) { return INLINE_SYSCALL1($setddir,3,newdiraddr,lengthaddr,curdiraddr); }
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }
 int sys$connect (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($connect,3,fab,err,suc); }
 int sys$create (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($create,3,fab,err,suc); }
@@ -553,6 +557,18 @@ int sys$setdfprot (struct _fab * fab, void * err, void * suc) { return INLINE_SY
 int sys$ssvexc (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($ssvexc,3,fab,err,suc); }
 int sys$rmsrundwn (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($rmsrundwn,3,fab,err,suc); }
 
+int sys$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmlst, struct _iosb *iosb, void (*astadr)(__unknown_params), int astprm) {
+  struct struct_args s;
+  s.s1 = (unsigned long) efn;
+  s.s2 = (unsigned long) contxt;
+  s.s3 = (unsigned long) usrnam;
+  s.s4 = (unsigned long) itmlst;
+  s.s5 = (unsigned long) iosb;
+  s.s6 = (unsigned long) astadr;
+  s.s7 = (unsigned long) astprm;
+  return INLINE_SYSCALL($getuai,1,&s);
+}
+
 int sys$asctim  (unsigned short int *timlen, void *timbuf,
 		 unsigned long long *timadr, char cvtflg) {
   return INLINE_SYSCALL3($asctim,4,timlen,timbuf,timadr,(unsigned long)cvtflg);
@@ -560,6 +576,10 @@ int sys$asctim  (unsigned short int *timlen, void *timbuf,
 
 int sys$bintim  (void *timbuf, unsigned long long *timadr) {
   return INLINE_SYSCALL3($bintim,2,timbuf,timadr);
+}
+
+int sys$dclexh(void *desblk) {
+  return INLINE_SYSCALL($dclexh,1,desblk);
 }
 
 #if 0
@@ -576,6 +596,7 @@ struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 struct _xabkeydef cc$rms_xabkey = {XAB$C_KEY,XAB$C_KEYLEN};
 #endif
 
-signal(int s) {
+void signal(int s) {
+  extern void exit(int);
   exit(s);
 }

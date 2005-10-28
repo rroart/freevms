@@ -1,18 +1,46 @@
 #ifndef starlet_h
 #define starlet_h
+/*
+** System Service Entry Points.
+*/
 
-#include"misc.h"
-#include"lksbdef.h"
+struct _iosb;
+struct _generic_64;
+struct _lksb;
 
-/* rename eventually to sys$routines.h */
+#define __unknown_params 
 
 int sys$testcode(void); 
 
-int sys$setprn  ( void *prcnam);
+/*
+** sys$setprn() - set process name.
+**	prcnam - address of string descriptor for new process name
+*/
+int sys$setprn(/* const */ void *prcnam);
 
-int sys$setpri(unsigned int *pidadr, void *prcnam, unsigned int pri, unsigned int *prvpri, unsigned int*pol, unsigned int *prvpol);
+/*
+** sys$setpri() - set process priority
+**	pidadr - address of process id, or zero
+**	prcnam - address of string descriptor of process name, or zero
+**	pri - new base priority
+**	prvpri - address to receive previous priority, or zero
+**	pol - address of new scheduling policy, or zero
+**	prvpol - address to receive previous sched policy or zero.
+*/
 
-int sys$dclast( void (*astadr)(unsigned long), unsigned long astprm, unsigned int acmode);
+int sys$setpri(unsigned int *pidadr, /* const */ void *prcnam,
+	unsigned int pri, unsigned int *prvpri,
+	unsigned int *pol, unsigned int *prvpol);
+
+/*
+** sys$dclast() - declare an AST routine to the current process
+**	astadr - address of AST routine
+**	astprm - ast parameter passed to AST routine
+**	acmode - mode for AST routine.
+*/
+
+int sys$dclast(void (*astadr)(unsigned long),
+	unsigned long astprm, unsigned int acmode);
 
 int sys$waitfr(unsigned int efn);
 
@@ -79,10 +107,13 @@ int sys$dassgn(unsigned short int chan);
 
 int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam,int flags);
 
-struct _iosb;
+int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func,
+	struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm,
+	void *p1, long p2, long  p3, long p4, long p5, long p6);
 
-int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
-int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
+int sys$qio(unsigned int efn, unsigned short int chan, unsigned int func,
+	struct _iosb *iosb, void(*astadr)(__unknown_params), long astprm,
+	void *p1, long p2, long  p3, long p4, long p5, long p6);
 
 int sys$clrast(void);
 
@@ -275,5 +306,3 @@ unsigned long long *nullarg;
 };
 
 #endif
-
-
