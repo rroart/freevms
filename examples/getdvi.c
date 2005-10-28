@@ -3,6 +3,7 @@
 #include <descrip.h> 
 #include <dvidef.h>
 #include <starlet.h>
+#include <misc.h>
 
 main(){
 int i;

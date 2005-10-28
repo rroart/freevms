@@ -43,6 +43,7 @@
 #include<ihddef.h>
 #include<ihadef.h>
 #include<syidef.h>
+#include<misc.h>
 
 #include <string.h>
 
