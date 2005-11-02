@@ -306,7 +306,18 @@ int exe$procstrt(struct _pcb * p) {
   set_fs(KERNEL_DS);
  
   // this is an actual system call
-  execve(pqb->pqb$t_image,0,0); //(,regs);
+  void ** argv = 0;
+  void * args[2];
+#ifdef CONFIG_VMS
+  int found = strcmp(pqb->pqb$t_input,"[vms$common.sysexe]startup.com")==0;
+  found |= strcmp(pqb->pqb$t_input,"[vms$common.sysexe]install.com")==0;
+  if (found) {
+    argv=args;
+    args[1]=0;
+    args[0]=pqb->pqb$t_input;
+  }
+#endif
+  execve(pqb->pqb$t_image,argv,0); //(,regs);
   set_fs(fs);
 
   if (0) {

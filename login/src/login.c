@@ -209,7 +209,7 @@ struct passwd mypwd = {
 
 char    hostaddress[4];		/* used in checktty.c */
 char	*hostname;		/* idem */
-static char	*username, *tty_name, *tty_number;
+static char	*username/*, *tty_name, *tty_number*/;
 static char	thishost[100];
 static int	failures = 1;
 static pid_t	pid;
@@ -304,7 +304,7 @@ main(int argc, char **argv)
     register char *p;
     int ask, fflag, hflag, pflag, cnt, errsv;
     int passwd_req;
-    char *domain, *ttyn;
+    char *domain/* , *ttyn*/;
     char tbuf[MAXPATHLEN + 2], tname[sizeof(_PATH_TTY) + 10];
     char *termenv;
     char *childArgv[10];
@@ -313,6 +313,11 @@ main(int argc, char **argv)
     char *salt, *pp;
 #ifdef CHOWNVCS
     char vcsn[20], vcsan[20];
+#endif
+
+#if 0
+  int stsflg = ctl$gl_creprc_flags;
+  // check for PRC$M_NOUAF sometime
 #endif
 
     pid = getpid();
@@ -346,10 +351,11 @@ main(int argc, char **argv)
     strncpy(thishost, tbuf, sizeof(thishost));
     domain = index(tbuf, '.');
     
-    username = tty_name = hostname = NULL;
+    username = /*tty_name =*/ hostname = NULL;
     fflag = hflag = pflag = 0;
     passwd_req = 1;
 
+#if 0
     while ((ch = getopt(argc, argv, "fh:p")) != -1)
       switch (ch) {
 	case 'f':
@@ -391,6 +397,14 @@ main(int argc, char **argv)
       }
     argc -= optind;
     argv += optind;
+#endif
+    if (0==strcmp(argv[0],"[vms$common.sysexe]startup.com")) {
+      execve("/vms$common/sysexe/dcl",argv,0);
+    }
+    if (0==strcmp(argv[0],"[vms$common.sysexe]install.com")) {
+      execve("/vms$common/sysexe/dcl",argv,0);
+    }
+#if 0
     if (*argv) {
 	char *p = *argv;
 	username = strdup(p);
@@ -400,11 +414,13 @@ main(int argc, char **argv)
 	while(*p)
 	    *p++ = ' ';
     } else
+#endif
         ask = 1;
 
     for (cnt = getdtablesize(); cnt > 2; cnt--)
       close(cnt);
-    
+
+#if 0    
     ttyn = ttyname(0);
 
     if (ttyn == NULL || *ttyn == '\0') {
@@ -437,17 +453,22 @@ main(int argc, char **argv)
     /* set pgid to pid */
     setpgrp();
     /* this means that setsid() will fail */
-    
+#endif
+
     {
+#if 0    
 	struct termios tt, ttt;
 	
 	tcgetattr(0, &tt);
 	ttt = tt;
 	ttt.c_cflag &= ~HUPCL;
+#endif
 
+#if 0
 	/* These can fail, e.g. with ttyn on a read-only filesystem */
 	chown(ttyn, 0, 0);
 	chmod(ttyn, TTY_MODE);
+#endif
 
 #if 0
 	// not yet?
@@ -458,11 +479,13 @@ main(int argc, char **argv)
 	signal(SIGHUP, SIG_DFL);
 #endif
 
+#if 0
 	/* open stdin,stdout,stderr to the tty */
 	opentty(ttyn);
 	
 	/* restore tty modes */
 	tcsetattr(0,TCSAFLUSH,&tt);
+#endif
     }
 
     openlog("login", LOG_ODELAY, LOG_AUTHPRIV);
@@ -474,8 +497,6 @@ main(int argc, char **argv)
 #endif
 
     for (cnt = 0;; ask = 1) {
-
-      getchar();
 
 	if (ask) {
 	    fflag = 0;
@@ -528,6 +549,7 @@ main(int argc, char **argv)
 
 	break; // goto out of this
 
+#if 0
 	/*
 	 * If trying to log in as root, but with insecure terminal,
 	 * refuse the login attempt.
@@ -547,6 +569,7 @@ main(int argc, char **argv)
 		     pwd->pw_name, tty_name);
 	    continue;
 	}
+#endif
 
 	/*
 	 * If no pre-authentication and a password exists
@@ -636,9 +659,11 @@ main(int argc, char **argv)
 #endif
     endpwent();
 
+#if 0
     chown(ttyn, pwd->pw_uid,
 	  (gr = getgrnam(TTYGRPNAME)) ? gr->gr_gid : pwd->pw_gid);
     chmod(ttyn, TTY_MODE);
+#endif
 
 #ifdef CHOWNVCS
     /* if tty is one of the VC's then change owner and mode of the 
@@ -702,9 +727,11 @@ main(int argc, char **argv)
 #ifdef DO_PS_FIDDLING
     setproctitle("login", username);
 #endif
-    
+
+#if 0    
     if (!strncmp(tty_name, "ttyS", 4))
       syslog(LOG_INFO, _("DIALUP AT %s BY %s"), tty_name, pwd->pw_name);
+#endif
     
     /* allow tracking of good logins.
        -steve philp (sphilp@mail.alliance.net) */
@@ -712,15 +739,15 @@ main(int argc, char **argv)
     if (pwd->pw_uid == 0) {
 	if (hostname)
 	  syslog(LOG_NOTICE, _("ROOT LOGIN ON %s FROM %s"),
-		 tty_name, hostname);
+		 "tty" /*tty_name*/, hostname);
 	else
-	  syslog(LOG_NOTICE, _("ROOT LOGIN ON %s"), tty_name);
+	  syslog(LOG_NOTICE, _("ROOT LOGIN ON %s"), "tty" /*tty_name*/);
     } else {
 	if (hostname) 
-	  syslog(LOG_INFO, _("LOGIN ON %s BY %s FROM %s"), tty_name, 
+	  syslog(LOG_INFO, _("LOGIN ON %s BY %s FROM %s"), "tty" /*tty_name*/, 
 		 pwd->pw_name, hostname);
 	else 
-	  syslog(LOG_INFO, _("LOGIN ON %s BY %s"), tty_name, 
+	  syslog(LOG_INFO, _("LOGIN ON %s BY %s"), "tty" /*tty_name*/, 
 		 pwd->pw_name);
     }
 
@@ -928,14 +955,14 @@ badlogin(const char *name) {
 		 hostname, name);
 	else
 	  syslog(LOG_NOTICE, _("LOGIN FAILURE ON %s, %s"),
-		 tty_name, name);
+		 "tty" /*tty_name*/, name);
     } else {
 	if (hostname)
 	  syslog(LOG_NOTICE, _("%d LOGIN FAILURES FROM %s, %s"),
 		 failures, hostname, name);
 	else
 	  syslog(LOG_NOTICE, _("%d LOGIN FAILURES ON %s, %s"),
-		 failures, tty_name, name);
+		 failures, "tty" /*tty_name*/, name);
     }
 }
 

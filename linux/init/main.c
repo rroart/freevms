@@ -18,6 +18,8 @@
 #define __KERNEL_SYSCALLS__
 
 #include <system_data_cells.h>
+#include <descrip.h>
+#include <prcdef.h>
 
 #include <linux/config.h>
 #include <linux/proc_fs.h>
@@ -424,6 +426,7 @@ static int __init quiet_kernel(char *str)
 }
 
 int mount_root_vfs=1;
+int install_ods2=0;
 
 static int __init novfs(char *str)
 {
@@ -482,6 +485,11 @@ static void __init parse_options(char *line)
 			 * So we ignore all arguments entered _before_ init=... [MJ]
 			 */
 			args = 0;
+			continue;
+		}
+		if (!strncmp(line,"install",7)) {
+			line += 7;
+			install_ods2 = 1;
 			continue;
 		}
 		if (checksetup(line))
@@ -971,8 +979,27 @@ static int init(void * unused)
 #endif
 	if (execute_command)
 		execve(execute_command,argv_init,envp_init);
+#if 0
 	printk("Will try to start loginout.\nPress <enter> or something as usual (but within 60 seconds).\n");
 	execve("/vms$common/sysexe/loginout",argv_init,envp_init);
+#else
+#if 0
+	$DESCRIPTOR(image,"[vms$common.sysexe]loginout");
+	$DESCRIPTOR(out,"SYS$OUTPUT");
+#else
+	$DESCRIPTOR(image,"/vms$common/sysexe/loginout");
+	$DESCRIPTOR(out,"opa0:");
+#endif
+	$DESCRIPTOR(in,"[vms$common.sysexe]startup.com");
+	$DESCRIPTOR(in2,"[vms$common.sysexe]install.com");
+	$DESCRIPTOR(name,"STARTUP");
+
+	if (install_ods2)
+	  exe$creprc(0,&image,&in2,&out,&out,0,0,&name,8,0,0,PRC$M_NOUAF);
+	else
+	  exe$creprc(0,&image,&in,&out,&out,0,0,&name,8,0,0,PRC$M_NOUAF);
+	sys$hiber();
+#endif
 #if 0
 	// not anymore?
 	execve("/sbin/init",argv_init,envp_init);
