@@ -26,7 +26,7 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   struct _ccb * c;
   struct _ucb * u;
   struct _ddb * d;
-  struct return_values r,r2;
+  struct return_values r,r2={0,0};
   //  printk("here assign\n");
   status=ioc$ffchan(chan);
   if (status!=SS$_NORMAL) return status;
