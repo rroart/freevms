@@ -443,6 +443,8 @@ int con_iodb_vmsinit(void) {
 
   insertdevlist(ddb);
 
+  //opa$ar_ucb0=ucb;
+
   return ddb;
 
 }
@@ -461,6 +463,7 @@ int con_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   registerdevchan(MKDEV(TTY_MAJOR,unitno),chan);
 
   con_ucb = newucb;
+  opa$ar_ucb0 = newucb;
 
   return newucb;
 }

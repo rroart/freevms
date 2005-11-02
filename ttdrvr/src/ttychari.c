@@ -38,6 +38,12 @@ int tty$putnextchar(int * chr, int * CC, struct _ucb * u) {
       return;
     }
 
+    if (u==opa$ar_ucb0) {
+      return exe_std$sndevmsg(sys$ar_jobctlmb, MSG$_TRMUNSOLIC, u);
+      // fix it so the return statement is not needed (crash otherwise)
+      goto out;
+    }
+
     if (u->ucb$l_amb) {
       exe_std$sndevmsg(u->ucb$l_amb, MSG$_TRMUNSOLIC, u);
       goto out;
