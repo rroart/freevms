@@ -492,12 +492,12 @@ static unsigned long wait_events (unsigned long nevents, unsigned long *h_events
 static unsigned long int_allocate_device      (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_change_password      (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_create_logical_name  (int userarg);
+static unsigned long int_write  (int userarg);
 static unsigned long int_create_logical_table (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_create_symbol        (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_deallocate_device    (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_delete_logical_name  (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_delete_logical_table (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
-static unsigned long int_echo                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_exit                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_logout                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_goto                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
@@ -555,6 +555,7 @@ struct cli_struct cliroutines[]={
 {  "show_symbol",          show_symbol, },
 {  "delete_symbol",          delete_symbol, },
 {  "stop", int_stop, },
+{  "write", int_write, },
 { 0, 0 , },
 };
 
@@ -640,6 +641,23 @@ unsigned long main (int argc, char *argv[])
 
   pn = "oz_cli";
   if (argc > 0) pn = argv[0];
+
+  int script_exit = 0;
+
+  if (argv[0] && 0==strcmp(argv[0],"[vms$common.sysexe]startup.com")) {
+    void * myargv[2];
+    myargv[0]="/vms$common/sysexe/startup.com";
+    myargv[1]=0;
+    int_script(h_s_input, h_s_output, h_s_error, "startup", 0, 1, myargv);
+    script_exit=1;
+  }
+  if (argv[0] && 0==strcmp(argv[0],"[vms$common.sysexe]install.com")) {
+    void * myargv[2];
+    myargv[0]="/vms$common/sysexe/install.com";
+    myargv[1]=0;
+    int_script(h_s_input, h_s_output, h_s_error, "startup", 0, 1, myargv);
+    script_exit=1;
+  }
 
   for (i = 1; i < argc; i ++) {
 
@@ -796,16 +814,34 @@ unsigned long main (int argc, char *argv[])
 	scriptread.atblock = 1;
 	scriptpos=scriptread.atbyte;
 
+      do_again:
+	{}
+	int dont=0;
+	if (scriptbuffer[scriptpos]=='$')
+	  scriptpos++;
+	while(scriptpos<scriptlen && scriptbuffer[scriptpos]==' ')
+	  scriptpos++;
+	if (scriptbuffer[scriptpos]=='!') {
+	  scriptpos++;
+	  dont=1;
+	}
+	while(scriptpos<scriptlen && scriptbuffer[scriptpos]==' ')
+	  scriptpos++;
 	start=scriptpos;
 	while(scriptpos<scriptlen && scriptbuffer[scriptpos]!='\n')
 	  scriptpos++;
 	scriptpos++;
+	if (dont)
+	  goto do_again;
+	bzero(cmdbuf,CMDSIZ);
 	bcopy(&scriptbuffer[start],cmdbuf,scriptpos-start);
 	cmdbuf[scriptpos-start]=0;
 	sts=SS$_NORMAL;
 	if(scriptpos>scriptlen)
 	  sts=SS$_ENDOFFILE;
 	scriptread.atbyte=scriptpos;
+	if (sts==SS$_ENDOFFILE && script_exit)
+	  exit(0);
       }
 #if 0
       // why???
@@ -858,7 +894,7 @@ unsigned long main (int argc, char *argv[])
       p = proclabels (cmdbuf);						/* process any labels that are present */
       if (skiplabel[0] == 0) {						/* ignore line if skipping to a particular label */
 	if (verify) fprintf (h_s_output, "%s\n", cmdbuf);	/* ok, echo if verifying turned on */
-	if (1) {
+	if (1 && cmdbuf[0]!='@') {
 	  struct dsc$descriptor d;
 	  d.dsc$a_pointer=cmdbuf;
 	  d.dsc$w_length=cmdlen;
@@ -3270,7 +3306,7 @@ static unsigned long int_create_logical_name (int userarg)
   o3.dsc$w_length=80;
   memset (f, 0, 80);
 
-  int retlen;
+  short int retlen;
 
   sts = cli$present(&p);
   if ((sts&1)==0)
@@ -3634,18 +3670,55 @@ static unsigned long delete_logical (unsigned long h_error, const char *default_
 /*									*/
 /************************************************************************/
 
-static unsigned long int_echo (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
+static unsigned long int_write (int userarg)
 {
-  int i;
+  unsigned long sts;
+  short int chan;
 
-  for (i = 0; i < argc; i ++) {
-    if (i == 0) fprintf (h_output, "%s", argv[i]);
-    else fprintf (h_output, " %s", argv[i]);
-  }
-  fprintf (h_output, "\n");
+  $DESCRIPTOR(p, "p1");
+  $DESCRIPTOR(p2, "p2");
 
-  return (SS$_NORMAL);
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+  memset (c, 0, 80);
+
+  char e[80];
+  struct dsc$descriptor o2;
+  o2.dsc$a_pointer=e;
+  o2.dsc$w_length=80;
+  memset (e, 0, 80);
+
+  int retlen, retlen2;
+
+  sts = cli$present(&p);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = cli$present(&p2);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = cli$get_value(&p, &o, &retlen);
+  o.dsc$w_length=retlen;
+
+  sts = cli$get_value(&p2, &o2, &retlen2);
+  o2.dsc$w_length=retlen2;
+
+  sts = sys$assign (&o, &chan, 0, 0, 0);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = sys$qio (0, chan, IO$_WRITELBLK, 0, 0, 0, o2.dsc$a_pointer, o2.dsc$w_length, 0, 0, 0, 0);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = sys$dassgn (chan);
+  if ((sts&1)==0)
+    return sts;
+
+  return (sts);
 }
 
 /************************************************************************/
