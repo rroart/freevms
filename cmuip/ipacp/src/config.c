@@ -575,10 +575,11 @@ void CNF$Configure_ACP (void)
     long prev_xqp_fcb = get_xqp_prim_fcb();
     long prev_x2p_fcb = get_x2p_prim_fcb();
 #endif
-    if (BLISSIFNOT((RC = exe$open(CFFAB)) &&
+    if (BLISSIFNOT(BLISSIF(RC = exe$open(CFFAB)) &&
 	    BLISSIF(RC = exe$connect(CFRAB))))
 	{
-	send_2_operator(ASCIDNOT( "Unable to access INET$CONFIG:"));
+	$DESCRIPTOR(dsc, "Unable to access INET$CONFIG:");
+	send_2_operator(&dsc);
 	exe$exit(RC);
 	};
 
