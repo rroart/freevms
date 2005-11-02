@@ -48,6 +48,10 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
   unsigned long clone_flags=CLONE_VFORK;
   //check pidadr
+
+  ctl$gl_creprc_flags = stsflg;
+  // check for PRC$M_NOUAF sometime
+
   if (stsflg&PRC$M_DETACH) {
 
   }
