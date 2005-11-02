@@ -15,7 +15,11 @@ int jobctl_unsolicit(struct dsc$descriptor * term) {
   // in addition to term some more data is ordinarily sent to this routine.
   // normally received by a permanent mailbox
   // not yet $DESCRIPTOR(log, "[vms$common.sysexe]loginout");
-   $DESCRIPTOR(log, "[vms$common.sysexe]dcl");
+#if 0
+  $DESCRIPTOR(log, "[vms$common.sysexe]dcl");
+#else
+  $DESCRIPTOR(log, "/vms$common/sysexe/dcl");
+#endif
   int defpri = DEFPRI;
   int uic=0x00010004;
   long long priv = PRV$M_TMPMBX | PRV$M_NETMBX | PRV$M_SETPRV;
