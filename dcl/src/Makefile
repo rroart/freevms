@@ -1,7 +1,7 @@
 EXTERNAL = ../../cliutl/src/show.a ../../cliutl/src/set.a ../../cdu/src/cdu.a ../../cdu/src/cdu2.a ../../cdu/src/dcltables.o
 
 #all: i386/dcl${NOEXE} i386/dcl${EXE} um/dcl${NOEXE} um/dcl${EXE}
-all: i386/dcl${NOEXE} um/dcl${NOEXE}
+all: i386/dcl${NOEXE} um/dcl${NOEXE} startup.com install.com
 
 clean:
 	rm *.o um/* i386/*
@@ -11,6 +11,7 @@ install: all
 	install -d ../../rooti386/vms"$$"common/sysexe
 	install um/* ../../rootum/vms"$$"common/sysexe
 	install i386/* ../../rooti386/vms"$$"common/sysexe
+	install *.com ../../rooti386/vms"$$"common/sysexe
 
 OBJS = cli.o clicall.o
 

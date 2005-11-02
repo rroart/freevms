@@ -103,6 +103,7 @@ MODULE NMLOOK(IDENT="1.2b",LANGUAGE(BLISS32),
 #endif
 
 #include <starlet.h>
+#include <misc.h>
      // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";
 #include <cmuip/central/include/netcommon.h>
 #include "netvms.h"

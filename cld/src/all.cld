@@ -142,6 +142,11 @@ define verb import
 	parameter p1
 	parameter p2
 
+define verb write
+	cliroutine write
+        parameter p1
+        parameter p2
+
 define verb dfu
 	image dfu
 	routine verify_command
