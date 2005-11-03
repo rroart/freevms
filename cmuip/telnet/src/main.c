@@ -7,7 +7,7 @@ setunwind() {
   return 1;
 }
 
-sys$dclexh() {
+sys$dclexh_not() {
 #if 0
   #define _IONBF 2
   #define NULL 0
