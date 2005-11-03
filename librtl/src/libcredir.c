@@ -18,6 +18,7 @@
 #include<rms.h>
 #include<uicdef.h>
 #include<fh2def.h>
+#include <misc.h> 
 
 // change to w_[df]id_rvn from b_ later
 

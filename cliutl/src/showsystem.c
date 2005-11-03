@@ -9,6 +9,7 @@
 #include <jpidef.h>
 #include <starlet.h>
 #include <syidef.h>
+#include <misc.h>
 
 static char * states[]={"NONE","COLPG","MWAIT","CEF","PFW","LEF","LEFO","HIB","HIBO","SUSP","SUSPO","FPG","COM","COMO","CUR"};
 

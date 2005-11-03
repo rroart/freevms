@@ -8,6 +8,7 @@
 #include <descrip.h> 
 #include <jpidef.h>
 #include <starlet.h>
+#include <misc.h> 
 
 show_working_set(){
 int i;

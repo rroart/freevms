@@ -8,6 +8,7 @@
 #include <descrip.h> 
 #include <dvidef.h>
 #include <starlet.h>
+#include <misc.h>
 
 show_device(){
 int i;

@@ -8,6 +8,7 @@
 #include <descrip.h> 
 #include <lnmdef.h>
 #include <starlet.h>
+#include <misc.h> 
 
 // this will be a bit limited because we can not use the kernel routines for
 // now, but instead the system services

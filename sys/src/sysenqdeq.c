@@ -11,6 +11,7 @@
 #include<system_data_cells.h>
 #include<lckdef.h>
 #include<lckctxdef.h>
+#include<lksbdef.h>
 #include<misc.h>
 #include<ssdef.h>
 #include<starlet.h>
