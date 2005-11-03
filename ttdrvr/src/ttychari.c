@@ -38,11 +38,13 @@ int tty$putnextchar(int * chr, int * CC, struct _ucb * u) {
       return;
     }
 
+#if 0
     if (u==opa$ar_ucb0) {
       return exe_std$sndevmsg(sys$ar_jobctlmb, MSG$_TRMUNSOLIC, u);
       // fix it so the return statement is not needed (crash otherwise)
       goto out;
     }
+#endif
 
     if (u->ucb$l_amb) {
       exe_std$sndevmsg(u->ucb$l_amb, MSG$_TRMUNSOLIC, u);
@@ -50,7 +52,7 @@ int tty$putnextchar(int * chr, int * CC, struct _ucb * u) {
     } else {
       // not yet, after jobctl process is started. same as below.
 #if 1
-      exe_std$sndevmsg(sys$ar_jobctlmb, MSG$_TRMUNSOLIC, u);
+      return exe_std$sndevmsg(sys$ar_jobctlmb, MSG$_TRMUNSOLIC, u);
       goto out;
 #endif
     }
