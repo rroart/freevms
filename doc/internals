@@ -104,6 +104,7 @@ hw_irq.h
 Software interrupts
 
 For the time begin, these are implemented by routine calls.
+Now replaced by ordinary software interrupts.
 (Had some problem with spending too much time in interrupts and not getting out if I used an actual softint)
 
 [linux.arch.i386.kernel]
@@ -182,6 +183,14 @@ Time support
 
 ****************
 
+Process control
+
+The services hiber and wait work about as usual.
+Note that fixup_hib_pc is central in the semantics, it edits the eip
+return address, which was pushed on the stack when the interrupt occured.
+
+****************
+
 Scheduling
 
 This was implemented early.
@@ -221,7 +230,7 @@ Memory management system services
 
 P0 space layout:
 0x10000: VMS images
-0x10000: ele also?
+0x40000000: ele also?
 
 0x8048000: ELF
 
@@ -230,6 +239,7 @@ P0 space layout:
 
 P1 space layout:
 
+0x60000000: temp place of cli dcl
 0x7ff8000: future suporvisor stack, temp placed
 0x7ff9000: future executive stack, temp placed
 
@@ -261,13 +271,14 @@ Working set list dynamics
 
 Swapper
 
-Not implemented yet.
+Not working properly.
+Partial implementation.
 
 ****************
 
 Pool management
 
-This is partially implemented, but not in use yet.
+This is partially implemented, but not in much use yet.
 
 ****************
 
@@ -418,6 +429,20 @@ Process creation
 
 Image initiation
 
+There are 3 kind of images.
+The .exe, which are VMS-like, and works only under CONFIG_VMS.
+The .ele, which are ELF shared object, can be run under CONFIG_VMS.
+Ordinary ELF executables and shared objects.
+The .exe, .ele and ELF executables can be loaded and run from DCL with run.
+The addition of ELF executables is very recent, and may have problems.
+DCL commands in other images is .exe for CONFIG_VMS, and .ele for
+non-CONFIG_VMS.
+That is because .ele is a more recent addition, and the dl library may not
+understand VMS paths.
+
+Creprc can handle ordinary ELF executables.
+Not sure whether support for .exe is tested and working.
+
 ****************
 
 Process dynamics
@@ -435,6 +460,49 @@ The Modular Executive
 Bootstrap procedures
 
 The Linux ones are used.
+
+****************
+
+CLI
+
+DCL is the only CLI.
+
+DCL is able to load ordinary Linux ELF, run them and return.
+Since the ELF binary loader inside the kernel, load_elf_binary, and the
+outside loader, /lib/ld-something, is tuned to being used with fork/exec,
+and the ld-something is supposed to be used unchanged, a lot of hairy
+stuff got implemented.
+Everything destructive is left out of load_binary_elf when loading an
+image, bprm->loader is set when doing it.
+When DCL calls imgact and imgact finds out it is an ordinary Linux image,
+it goes into imgact_elf, where non-destructiveness i set and calls
+load_elf_binary.
+When imgact is called, is it with with a header buffer of 4096 bytes.
+Of course, the header does use all of it, the top of it will
+get what the user stack normally gets, since with fork/exec a specially
+made stack is made for it.
+
+Every Linux ELF image calls exit at the end, so therefore sys_exit goes
+into exe$exit, and there it checks something exit-handler like.
+Both saved eip and esp from user level must be changed.
+If there is no exit handler, it goes into ordinary process deletion.
+
+The exit handler is made by dclexh, which gets a kind of special one from DCL.
+
+When DCL loads an image, the initial stack is put in a buffer.
+A stack crafting function is called with the entry address, source stack
+address and size.
+The first function called takes care of restoring ebp, which gets destroyed
+after the image has exited; it exits and continues on the instruction
+following mymyfunc(__res,*func,start,count).
+The ebp is not currently used when calling, it is saved on the stack, but
+is a dummy to the next function.
+The next function sets up the exit handler to make it return to somewhere
+usable.
+The inner function sets up the stack and jumps to the entry address.
+
+Note that elf startup code is replicated a lot in kernel and userland
+(as with some .exe symbol table code).
 
 ****************
 
@@ -587,6 +655,7 @@ Things to be checked upon is marked // check
 Linker
 
 There is a linker that can make static FreeVMS binaries.
+There is possible to use dynamic linking, but it is not recommended.
 
 ****************
 
@@ -594,7 +663,7 @@ Bliss
 
 There is a bliss compiler under development.
 It is implemented under gcc.
-There are no plans for FreeVMS to depend on it.
+Currently the CMUIP telnet client depends on it.
 
 ****************
 
