@@ -24,7 +24,7 @@ dfu_tables.c: ../../cdu/src/cdu dfu_tables.cld
 
 i386/dfu${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL)
 	install -d i386
-	gcc -g -static $(OBJS) $(VMSLIBS) $(EXTERNAL) -ldl -o i386/dfu${NOEXE}
+	gcc -g -static $(OBJS) $(VMSLIBS) $(EXTERNAL) -ldl -lelf -o i386/dfu${NOEXE}
 
 i386/dfu${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) 
 	install -d i386
@@ -32,7 +32,7 @@ i386/dfu${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL)
 
 um/dfu${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL)
 	install -d um
-	gcc $(FLAGS) -g $(OBJS) $(VMSLIBSUM) $(EXTERNAL) -ldl -o um/dfu${NOEXE}
+	gcc $(FLAGS) -g $(OBJS) $(VMSLIBSUM) $(EXTERNAL) -ldl -lelf -o um/dfu${NOEXE}
 
 um/dfu${EXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL) 
 	install -d um

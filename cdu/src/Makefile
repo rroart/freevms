@@ -17,14 +17,14 @@ install: all
 	install um/* ../../rootum/vms"$$"common/sysexe/
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
-cdu: parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o cli.h
-	gcc  -g -static parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o -ldl -liberty $(VMSLIBS) -o cdu
+cdu: parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o elf.o cli.h
+	gcc  -g -static parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o elf.o -ldl -liberty -lelf $(VMSLIBS) -o cdu
 
 cdu2.a: cli2.o
 	ar r cdu2.a cli2.o
 
-cdu.a: parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o cli.h
-	ar r cdu.a parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o
+cdu.a: parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o elf.o cli.h
+	ar r cdu.a parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o elf.o
 
 %.o: %.c cli.h
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
