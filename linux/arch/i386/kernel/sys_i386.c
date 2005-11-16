@@ -59,8 +59,11 @@ static inline long do_mmap2(
 	error = do_mmap_pgoff(file, addr, len, prot, flags, pgoff);
 	up_write(&current->mm->mmap_sem);
 
+#ifndef CONFIG_VMS
 	if (file)
 		fput(file);
+#endif
+
 out:
 	return error;
 }
