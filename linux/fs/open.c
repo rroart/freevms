@@ -26,6 +26,7 @@
 
 #include <dyndef.h>
 #include <fcbdef.h>
+#include <fabdef.h>
 
 #define special_file(m) (S_ISCHR(m)||S_ISBLK(m)||S_ISFIFO(m)||S_ISSOCK(m))
 
@@ -781,6 +782,7 @@ out:
 	return error;
 }
 
+#ifndef CONFIG_VMS
 asmlinkage long sys_open(const char * filename, int flags, int mode)
 {
 	char * tmp;
@@ -815,6 +817,34 @@ out_error:
 	fd = error;
 	goto out;
 }
+#else
+asmlinkage long sys_open(const char * filename, int flags, int mode)
+{
+	int fd, error;
+	struct file *file=0;
+	int err = 0;
+	struct _fabdef fab = cc$rms_fab;
+	int sts;
+
+	long prev_xqp_fcb = get_xqp_prim_fcb();
+	long prev_x2p_fcb = get_x2p_prim_fcb();
+
+	fab.fab$l_fna = filename;
+	fab.fab$b_fns = strlen(fab.fab$l_fna);
+	if ((sts = exe$open(&fab)) & 1) {
+	  long xqp_fcb = get_xqp_prim_fcb();
+	  long x2p_fcb = get_x2p_prim_fcb();
+	  if (xqp_fcb!=prev_xqp_fcb)
+	    file=xqp_fcb;
+	  else
+	    file=x2p_fcb;
+	  exe$close(&fab);
+	}
+	fd = get_unused_fd();
+	fd_install(fd, file);
+	return fd;
+}
+#endif
 
 #ifndef __alpha__
 
@@ -883,7 +913,11 @@ asmlinkage long sys_close(unsigned int fd)
 	FD_CLR(fd, files->close_on_exec);
 	__put_unused_fd(files, fd);
 	write_unlock(&files->file_lock);
+#ifndef CONFIG_VMS
 	return filp_close(filp, files);
+#else
+	return 0;
+#endif
 
 out_unlock:
 	write_unlock(&files->file_lock);

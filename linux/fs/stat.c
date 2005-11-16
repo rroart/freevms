@@ -19,16 +19,22 @@
 
 #include <asm/uaccess.h>
 
+#include <fcbdef.h>
+
 /*
  * Revalidate the inode. This is required for proper NFS attribute caching.
  */
 static __inline__ int
 do_revalidate(struct dentry *dentry)
 {
+#ifndef CONFIG_VMS 
 	struct inode * inode = dentry->d_inode;
 	if (inode->i_op && inode->i_op->revalidate)
 		return inode->i_op->revalidate(dentry);
 	return 0;
+#else
+	return 0;
+#endif
 }
 
 
@@ -52,6 +58,7 @@ static int cp_old_stat(struct inode * inode, struct __old_kernel_stat * statbuf)
 		warncount = 0;
 	}
 
+#ifndef CONFIG_VMS
 	tmp.st_dev = kdev_t_to_nr(inode->i_dev);
 	tmp.st_ino = inode->i_ino;
 	tmp.st_mode = inode->i_mode;
@@ -67,6 +74,20 @@ static int cp_old_stat(struct inode * inode, struct __old_kernel_stat * statbuf)
 	tmp.st_atime = inode->i_atime;
 	tmp.st_mtime = inode->i_mtime;
 	tmp.st_ctime = inode->i_ctime;
+#else
+	struct _fcb * fcb = inode;
+	tmp.st_dev = fcb->fcb$w_fid_dirnum;
+	tmp.st_ino = fcb->fcb$w_fid [1] + (fcb->fcb$w_fid [2] << 16);
+	tmp.st_mode = 0x755;
+	tmp.st_nlink = 1;
+	SET_OLDSTAT_UID(tmp, fcb->fcb$w_uicmember);
+	SET_OLDSTAT_GID(tmp, fcb->fcb$w_uicgroup);
+	tmp.st_rdev = fcb->fcb$w_fid_dirnum;
+	tmp.st_size = fcb->fcb$l_filesize;
+	tmp.st_atime = 0;
+	tmp.st_mtime = 0;
+	tmp.st_ctime = 0;
+#endif
 	return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
 }
 
@@ -78,6 +99,7 @@ static int cp_new_stat(struct inode * inode, struct stat * statbuf)
 	unsigned int blocks, indirect;
 
 	memset(&tmp, 0, sizeof(tmp));
+#ifndef CONFIG_VMS
 	tmp.st_dev = kdev_t_to_nr(inode->i_dev);
 	tmp.st_ino = inode->i_ino;
 	tmp.st_mode = inode->i_mode;
@@ -129,6 +151,20 @@ static int cp_new_stat(struct inode * inode, struct stat * statbuf)
 		tmp.st_blocks = inode->i_blocks;
 		tmp.st_blksize = inode->i_blksize;
 	}
+#else
+	struct _fcb * fcb = inode;
+	tmp.st_dev = fcb->fcb$w_fid_dirnum;
+	tmp.st_ino = fcb->fcb$w_fid [1] + (fcb->fcb$w_fid [2] << 16);
+	tmp.st_mode = 0x755;
+	tmp.st_nlink = 1;
+	SET_STAT_UID(tmp, fcb->fcb$w_uicmember);
+	SET_STAT_GID(tmp, fcb->fcb$w_uicgroup);
+	tmp.st_rdev = fcb->fcb$w_fid_dirnum;
+	tmp.st_size = fcb->fcb$l_filesize;
+	tmp.st_atime = 0;
+	tmp.st_mtime = 0;
+	tmp.st_ctime = 0;
+#endif
 	return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
 }
 
@@ -138,6 +174,7 @@ static int cp_new_stat(struct inode * inode, struct stat * statbuf)
  * For backward compatibility?  Maybe this should be moved
  * into arch/i386 instead?
  */
+#ifndef CONFIG_VMS
 asmlinkage long sys_stat(char * filename, struct __old_kernel_stat * statbuf)
 {
 	struct nameidata nd;
@@ -152,8 +189,22 @@ asmlinkage long sys_stat(char * filename, struct __old_kernel_stat * statbuf)
 	}
 	return error;
 }
+#else
+asmlinkage long sys_stat(char * filename, struct __old_kernel_stat * statbuf)
+{
+	struct nameidata nd;
+	int error = 0;
+
+	int fd = sys_open(filename, 0, 0);
+	void * f = fget(fd);
+	if (!error)
+	  error = cp_old_stat(f, statbuf);
+	return error;
+}
+#endif
 #endif
 
+#ifndef CONFIG_VMS
 asmlinkage long sys_newstat(char * filename, struct stat * statbuf)
 {
 	struct nameidata nd;
@@ -168,6 +219,19 @@ asmlinkage long sys_newstat(char * filename, struct stat * statbuf)
 	}
 	return error;
 }
+#else
+asmlinkage long sys_newstat(char * filename, struct stat * statbuf)
+{
+	struct nameidata nd;
+	int error = 0;
+
+	int fd = sys_open(filename, 0, 0);
+	void * f = fget(fd);
+	if (!error)
+	  error = cp_new_stat(f, statbuf);
+	return error;
+}
+#endif
 
 #if !defined(__alpha__) && !defined(__sparc__) && !defined(__ia64__) && !defined(CONFIG_ARCH_S390) && !defined(__hppa__) && !defined(__x86_64__)
 
@@ -175,6 +239,7 @@ asmlinkage long sys_newstat(char * filename, struct stat * statbuf)
  * For backward compatibility?  Maybe this should be moved
  * into arch/i386 instead?
  */
+#ifndef CONFIG_VMS
 asmlinkage long sys_lstat(char * filename, struct __old_kernel_stat * statbuf)
 {
 	struct nameidata nd;
@@ -189,11 +254,24 @@ asmlinkage long sys_lstat(char * filename, struct __old_kernel_stat * statbuf)
 	}
 	return error;
 }
+#else
+asmlinkage long sys_lstat(char * filename, struct __old_kernel_stat * statbuf)
+{
+	struct nameidata nd;
+	int error = 0;
 
+	int fd = sys_open(filename, 0, 0);
+	void * f = fget(fd);
+	if (!error)
+	  error = cp_old_stat(f, statbuf);
+	return error;
+}
+#endif
 #endif
 
 asmlinkage long sys_newlstat(char * filename, struct stat * statbuf)
 {
+#ifndef CONFIG_VMS
 	struct nameidata nd;
 	int error;
 
@@ -205,6 +283,16 @@ asmlinkage long sys_newlstat(char * filename, struct stat * statbuf)
 		path_release(&nd);
 	}
 	return error;
+#else
+	struct nameidata nd;
+	int error = 0;
+
+	int fd = sys_open(filename, 0, 0);
+	void * f = fget(fd);
+	if (!error)
+	  error = cp_new_stat(f, statbuf);
+	return error;
+#endif
 }
 
 #if !defined(__alpha__) && !defined(__sparc__) && !defined(__ia64__) && !defined(CONFIG_ARCH_S390) && !defined(__hppa__) && !defined(__x86_64__)
@@ -215,6 +303,7 @@ asmlinkage long sys_newlstat(char * filename, struct stat * statbuf)
  */
 asmlinkage long sys_fstat(unsigned int fd, struct __old_kernel_stat * statbuf)
 {
+#ifndef CONFIG_VMS
 	struct file * f;
 	int err = -EBADF;
 
@@ -228,12 +317,22 @@ asmlinkage long sys_fstat(unsigned int fd, struct __old_kernel_stat * statbuf)
 		fput(f);
 	}
 	return err;
+#else
+	struct nameidata nd;
+	int error = 0;
+
+	void * f = fget(fd);
+	if (!error)
+	  error = cp_old_stat(f, statbuf);
+	return error;
+#endif
 }
 
 #endif
 
 asmlinkage long sys_newfstat(unsigned int fd, struct stat * statbuf)
 {
+#ifndef CONFIG_VMS
 	struct file * f;
 	int err = -EBADF;
 
@@ -247,6 +346,15 @@ asmlinkage long sys_newfstat(unsigned int fd, struct stat * statbuf)
 		fput(f);
 	}
 	return err;
+#else
+	struct nameidata nd;
+	int error = 0;
+
+	void * f = fget(fd);
+	if (!error)
+	  error = cp_new_stat(f, statbuf);
+	return error;
+#endif
 }
 
 asmlinkage long sys_readlink(const char * path, char * buf, int bufsiz)
@@ -282,6 +390,7 @@ static long cp_new_stat64(struct inode * inode, struct stat64 * statbuf)
 	unsigned int blocks, indirect;
 
 	memset(&tmp, 0, sizeof(tmp));
+#ifndef CONFIG_VMS 
 	tmp.st_dev = kdev_t_to_nr(inode->i_dev);
 	tmp.st_ino = inode->i_ino;
 #ifdef STAT64_HAS_BROKEN_ST_INO
@@ -332,6 +441,20 @@ static long cp_new_stat64(struct inode * inode, struct stat64 * statbuf)
 		tmp.st_blocks = inode->i_blocks;
 		tmp.st_blksize = inode->i_blksize;
 	}
+#else
+	struct _fcb * fcb = inode;
+	tmp.st_dev = fcb->fcb$w_fid_dirnum;
+	tmp.st_ino = fcb->fcb$w_fid [1] + (fcb->fcb$w_fid [2] << 16);
+	tmp.st_mode = 0x755;
+	tmp.st_nlink = 1;
+	tmp.st_uid = fcb->fcb$w_uicmember;
+	tmp.st_gid = fcb->fcb$w_uicgroup;
+	tmp.st_rdev = fcb->fcb$w_fid_dirnum;
+	tmp.st_size = fcb->fcb$l_filesize;
+	tmp.st_atime = 0;
+	tmp.st_mtime = 0;
+	tmp.st_ctime = 0;
+#endif
 	return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
 }
 
@@ -340,7 +463,11 @@ asmlinkage long sys_stat64(char * filename, struct stat64 * statbuf, long flags)
 	struct nameidata nd;
 	int error;
 
+#ifndef CONFIG_VMS 
 	error = user_path_walk(filename, &nd);
+#else
+	error = 0;
+#endif
 	if (!error) {
 		error = do_revalidate(nd.dentry);
 		if (!error)
@@ -355,7 +482,11 @@ asmlinkage long sys_lstat64(char * filename, struct stat64 * statbuf, long flags
 	struct nameidata nd;
 	int error;
 
+#ifndef CONFIG_VMS 
 	error = user_path_walk_link(filename, &nd);
+#else
+	error = 0;
+#endif
 	if (!error) {
 		error = do_revalidate(nd.dentry);
 		if (!error)
@@ -382,12 +513,16 @@ asmlinkage long sys_fstat64(unsigned long fd, struct stat64 * statbuf, long flag
 
 	f = fget(fd);
 	if (f) {
+#ifndef CONFIG_VMS 
 		struct dentry * dentry = f->f_dentry;
 
 		err = do_revalidate(dentry);
 		if (!err)
 			err = cp_new_stat64(dentry->d_inode, statbuf);
 		fput(f);
+#else
+		err = cp_new_stat64(f, statbuf);
+#endif
 	}
 	return err;
 }

@@ -13,6 +13,8 @@
 #include <linux/dnotify.h>
 
 #include <asm/uaccess.h>
+#include <dyndef.h>
+#include <fcbdef.h>
 
 struct file_operations generic_ro_fops = {
 	llseek:		generic_file_llseek,
@@ -151,6 +153,10 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 
 	ret = -EBADF;
 	file = fget(fd);
+#ifdef CONFIG_VMS
+	if (file && ((struct _fcb *)(file))->fcb$b_type==DYN$C_FCB)
+	  goto do_fcb;
+#endif
 	if (file) {
 		if (file->f_mode & FMODE_READ) {
 #ifdef CONFIG_VMS
@@ -175,6 +181,21 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 	skip2: {}
 	}
 	return ret;
+#ifdef CONFIG_VMS
+ do_fcb:
+	{}
+
+	struct _fcb * fcb;
+	unsigned long offset;
+
+	ret = -EBADF;
+	file = fget(fd);
+	fcb = file;
+	offset = fcb->fcb$l_reserve1;
+	ret = rms_kernel_read(file, offset, buf, count);
+	fcb->fcb$l_reserve1 += ret;
+	return ret;
+#endif
 }
 
 asmlinkage ssize_t sys_write(unsigned int fd, const char * buf, size_t count)
