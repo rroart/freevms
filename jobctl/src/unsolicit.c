@@ -15,7 +15,7 @@ int jobctl_unsolicit(struct dsc$descriptor * term) {
   // in addition to term some more data is ordinarily sent to this routine.
   // normally received by a permanent mailbox
   // not yet $DESCRIPTOR(log, "[vms$common.sysexe]loginout");
-#if 0
+#if 1
   $DESCRIPTOR(log, "[vms$common.sysexe]dcl");
 #else
   $DESCRIPTOR(log, "/vms$common/sysexe/dcl");
