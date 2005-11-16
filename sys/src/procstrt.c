@@ -280,6 +280,11 @@ int exe$procstrt(struct _pcb * p) {
 
   if (strncmp(".exe",pqb->pqb$t_image+len-4,4)) goto do_execve;
 
+  xqp_init2();
+#ifdef CONFIG_VMS
+  exttwo_init2();
+#endif
+
   aname.dsc$w_length=len-4;
   aname.dsc$a_pointer=pqb->pqb$t_image;
   dflnam.dsc$w_length=len;

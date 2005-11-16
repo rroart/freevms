@@ -2107,9 +2107,9 @@ void __init vms_init2(void) {
   exe$gq_systime+=xtime.tv_sec;
   exe$gq_systime*=10000000;
 
-  xqp_init();
+  xqp_init2();
 #ifdef CONFIG_VMS
-  exttwo_init();
+  exttwo_init2();
 #endif
 
 #if 0

@@ -126,16 +126,26 @@ unsigned long audit_arglist[16];
 unsigned long prev_fp;
 };
 
+#if 0
 struct __exttwo xe2ps[1]; // number of pids 
 
 struct __exttwo *x2p;
-
+#else
+struct __exttwo *x2p = 0x7fff1000;
+#endif
 void __init exttwo_init(void) {
+#if 0
   int i;
   for(i=0;i<1;i++) {
     qhead_init(&xe2ps[i].exttwo_head);
   }
   x2p = &xe2ps[0];
+#endif
+}
+
+void exttwo_init2(void * vcb) {
+  qhead_init(&x2p->exttwo_head);
+  x2p->current_vcb = vcb;
 }
 
 void exttwo$dispatch(struct _irp * i) {
@@ -153,6 +163,8 @@ void exttwo$dispatcher(void) {
   while (!aqempty(&x2p->exttwo_head)) {
     i=remque(x2p->exttwo_head,0);
     x2p->io_channel=i->irp$w_chan;
+    x2p->current_ucb=i->irp$l_ucb;
+    x2p->current_vcb=((struct _ucb *)x2p->current_ucb)->ucb$l_vcb;
     fcode=i->irp$v_fcode;
     fmode=i->irp$v_fmod;
     iosbret(i,SS$_NORMAL);
@@ -654,6 +666,8 @@ int ext2_wcb_create_all(struct _fcb * fcb, struct inode * inode)
 
 extern char root_device_name[64];
 
+void * global_e2_vcb = 0;
+
 unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],struct _vcb **retvcb)
 {
   struct _iosb iosb;
@@ -683,6 +697,7 @@ unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],s
     }
     vcb = (struct _vcb *) kmalloc(sizeof(struct _vcb),GFP_KERNEL);
     bzero(vcb,sizeof(struct _vcb));
+    global_e2_vcb = vcb;
     vcb->vcb$b_type=DYN$C_VCB;
     x2p->current_vcb=vcb; // until I can place it somewhere else
     aqb = (struct _aqb *) kmalloc(sizeof(struct _aqb),GFP_KERNEL);

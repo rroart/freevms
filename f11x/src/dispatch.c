@@ -32,15 +32,25 @@
 void f11b$dispatcher(void);
 unsigned f11b_modify(struct _vcb * vcb, struct _irp * irp);
 
+#if 0
 struct __xqp xqps[1]; // number of pids 
 
 struct __xqp * xqp=&xqps[0];
+#else
+struct __xqp * xqp=0x7fff0000;
+#endif
 
 void __init xqp_init(void) {
+#if 0
   int i;
   for(i=0;i<1;i++) {
     qhead_init(&xqps[i].xqp_head);
   }
+#endif
+}
+
+void xqp_init2(void) {
+  qhead_init(&xqp->xqp_head);
 }
 
 void f11b$dispatch(struct _irp * i) {
@@ -58,6 +68,8 @@ void f11b$dispatcher(void) {
   while (!aqempty(&xqp->xqp_head)) {
     i=remque(xqp->xqp_head,0);
     xqp->io_channel=i->irp$w_chan;
+    xqp->current_ucb=i->irp$l_ucb;
+    xqp->current_vcb=((struct _ucb *)xqp->current_ucb)->ucb$l_vcb;
     fcode=i->irp$v_fcode;
     fmode=i->irp$v_fmod;
     iosbret(i,SS$_NORMAL);

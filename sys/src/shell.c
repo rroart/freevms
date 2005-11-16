@@ -73,18 +73,26 @@ void init_sys_p1pp() {
   pgd_t *pgd;
   pmd_t *pmd;
   pte_t *pte;
+  pte_t *pte2;
+  pte_t *pte3;
 
   long page=0x7ffff000;
+  long x2p=0x7fff0000;
+  long e2p=0x7fff1000;
 
   struct mm_struct * mm=&init_mm;
 
   long pt=alloc_bootmem_pages(4096);
   long pa=alloc_bootmem_pages(4096);
+  long x2=alloc_bootmem_pages(4096);
+  long e2=alloc_bootmem_pages(4096);
 
   puts("alloced pt pa\n");
 
   memset(pt,0,4096);
   memset(pa,0,4096);
+  memset(x2,0,4096);
+  memset(e2,0,4096);
 
   puts("memset them\n");
 
@@ -104,8 +112,12 @@ void init_sys_p1pp() {
 
 #ifdef __arch_um__
   pte = pte_offset(pmd, page);
+  pte2 = pte_offset(pmd, x2p);
+  pte3 = pte_offset(pmd, e2p);
 #else
   pte = pte_offset(((pmd_t*)__pa(pmd)), page);
+  pte2 = pte_offset(((pmd_t*)__pa(pmd)), x2p);
+  pte3 = pte_offset(((pmd_t*)__pa(pmd)), e2p);
 #endif
 
   char c[40];
@@ -116,8 +128,12 @@ void init_sys_p1pp() {
 
 #ifdef __arch_um__
   long pfn=pa>>12;
+  long pfn2=x2>>12;
+  long pfn3=e2>>12;
 #else
   long pfn=__pa(pa)>>12;
+  long pfn2=__pa(x2)>>12;
+  long pfn3=__pa(e2)>>12;
 #endif
 
 #ifdef __arch_um__
@@ -133,16 +149,22 @@ void init_sys_p1pp() {
 #else
 #define _PAGE_NEWPAGE 0
   *(unsigned long *)pte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+  *(unsigned long *)pte2=((unsigned long)/*__va*/(pfn2*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+  *(unsigned long *)pte3=((unsigned long)/*__va*/(pfn3*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
   puts("pte content\n");
   ctl$gl_pcb=&init_task_union;
   puts("ctl$gl_pcb set\n");
   flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
+  flush_tlb_range(pcb->mm, x2p, x2p + PAGE_SIZE);
+  flush_tlb_range(pcb->mm, e2p, e2p + PAGE_SIZE);
   puts("flush\n");
   ctl$gl_chindx=42;
   puts("42\n");
   if ( (*(unsigned long*)0x7ffff000)==42)
     puts("still 42\n");
   memset(page,0,PAGE_SIZE); // must zero content also
+  memset(x2p,0,PAGE_SIZE); // must zero content also
+  memset(e2p,0,PAGE_SIZE); // must zero content also
   puts("memset page\n");
   if ( (*(unsigned long*)0x7ffff000)==0)
     puts("not 42\n");

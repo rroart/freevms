@@ -82,6 +82,12 @@ int kswapd(void *unused)
 	exe$schdwk(0,0,&time,0);
 	sys$hiber();
 
+	xqp_init2();
+#ifdef CONFIG_VMS
+	extern void * global_e2_vcb;
+	exttwo_init2(global_e2_vcb);
+#endif
+
 #if 0
 	daemonize();
 #endif

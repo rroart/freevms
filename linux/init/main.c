@@ -896,6 +896,11 @@ int scs_init_done = 0;
 static int init(void * unused)
 {
 	lock_kernel();
+	xqp_init2();
+#ifdef CONFIG_VMS
+	extern void * global_e2_vcb;
+	exttwo_init2(global_e2_vcb);
+#endif
 	do_basic_setup();
 	printk("%%KERNEL-I-DEBUG, After do_basic_setup\n");
 #ifdef CONFIG_VMS
