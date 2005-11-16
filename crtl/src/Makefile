@@ -2,8 +2,10 @@
 all: i386/crtl${EXE}
 
 install: all
-	install -d ../../rooti386/vms"$$"common/syslib
-	install i386/*.exe ../../rooti386/vms"$$"common/syslib
+	#install -d ../../rooti386/vms"$$"common/syslib
+	#install i386/*.exe ../../rooti386/vms"$$"common/syslib
+	rm -f ../../rooti386/vms"$$"common/syslib/crtl.exe
+	touch ../../rooti386/vms"$$"common/syslib/crtl.exe
 
 libc-start.o: /usr/lib/libc.a
 	ar x /usr/lib/libc.a
