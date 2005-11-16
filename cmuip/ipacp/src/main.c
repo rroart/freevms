@@ -786,6 +786,11 @@ void Main (void) {
 	struct dsc$descriptor * logical_netname = &logical_netname_, * tabnam = &tabnam_; 
 
 	// some extra temp stuff here
+	xqp_init2();
+#ifdef CONFIG_VMS
+	extern void * global_e2_vcb;
+	exttwo_init2(global_e2_vcb);
+#endif
 	if (1) {
 	  int sts;
 	  $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
@@ -860,7 +865,7 @@ void Main (void) {
 
 #define    IPACP_Version_String "IP_ACP(V6.6-5.001) "  //Becomes ACP process name.
 #define    IPACP_Version_Name IPACP_Version_String
-#define    IPACP_Date_String "2-Nov-2005" 	// Date of last change
+#define    IPACP_Date_String "15-Nov-2005" 	// Date of last change
 #define    IPACP_Who_String "roart" // Author of last change
 
 // Announce that we exist.

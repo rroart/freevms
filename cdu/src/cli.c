@@ -554,6 +554,16 @@ unsigned int cli$dispatch(int userarg){
 
   memcpy(image,path,pathlen);
   memcpy(image+pathlen,imagebase,strlen(imagebase));
+
+  int fildes=open(image, 0);
+  if (fildes) {
+    close(fildes);
+    image[pathlen+strlen(imagebase)]=0;
+    load_elf(image);
+    func = elf_get_symbol(image, routine);
+    goto skip;
+  }
+
   memcpy(image+pathlen+strlen(imagebase),".ele",4);
   image[pathlen+strlen(imagebase)+4]=0;
   printf("Opening %s\n",image);

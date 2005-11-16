@@ -599,7 +599,8 @@ void CNF$Configure_ACP (void)
     else
       filp=x2p_fcb;
     int offs = 0;
-    while ((offs=CFRAB->rab$w_rsz=rms_kernel_read(filp,offs,CFBUF,512))>0)
+    // temp workaround: with ods2 it read an empty second block
+    while ((offs=CFRAB->rab$w_rsz=rms_kernel_read(filp,offs,CFBUF,512))>0 && CFBUF[0])
 #else
     while (exe$get(CFRAB)&1)
 #endif

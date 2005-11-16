@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <libelf.h>
