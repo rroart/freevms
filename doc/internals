@@ -240,6 +240,8 @@ P0 space layout:
 P1 space layout:
 
 0x60000000: temp place of cli dcl
+0x7fff0000: xqp
+0x7fff1000: e2p
 0x7ff8000: future suporvisor stack, temp placed
 0x7ff9000: future executive stack, temp placed
 
@@ -432,7 +434,9 @@ Image initiation
 There are 3 kind of images.
 The .exe, which are VMS-like, and works only under CONFIG_VMS.
 The .ele, which are ELF shared object, can be run under CONFIG_VMS.
-Ordinary ELF executables and shared objects.
+Ordinary ELF executables and shared objects can be run from no-CONFIG_VMS.
+Most recently added is the possibility to load an ordinary ELF executable and
+run a routine from it.
 The .exe, .ele and ELF executables can be loaded and run from DCL with run.
 The addition of ELF executables is very recent, and may have problems.
 DCL commands in other images is .exe for CONFIG_VMS, and .ele for
@@ -649,6 +653,18 @@ The CMU TCP/IP written mainly in bliss was translated to C.
 
 Some calls it does has been implemented as empty routines to make it link.
 Things to be checked upon is marked // check
+
+Is currently running as a process.
+It should be possible to make it run as a non-process.
+It should be possible to use its generic engine for clustering. 
+The main loop is do ... while in Main.
+Locally initiated requests may now go straight to processing, without
+the process needing wakeup. (user$process_user_requests?).
+Received data from the net may be handled directly without wakeup.
+(This part is SEG$Process_Received_Segments.)
+Handling connections is now done by tcp$service_connections, this might
+be run by a setimr.
+Regular cluster broadcasts may also be done by a setimr.
 
 ****************
 
