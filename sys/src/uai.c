@@ -43,11 +43,11 @@ myopenfile(char * filename, char * rmsfilename) {
 myread(void * file, void * buf, int size) {
   unsigned long long pos=0;
 #ifdef CONFIG_VMS
-    int size=rms_generic_file_read(file,buf,size,&pos);
+    int retsize=rms_generic_file_read(file,buf,size,&pos);
 #else
-    int size=generic_file_read(file,buf,size,&pos);
+    int retsize=generic_file_read(file,buf,size,&pos);
 #endif
-    return size;
+    return retsize;
 }
 
 int mysearch(void * buf, int size, char * name) {
