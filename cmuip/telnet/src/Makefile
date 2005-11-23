@@ -101,13 +101,13 @@ i386/telnet$(EXE)	: telnet.a netaux.o
 
 i386/telnet$(NOEXE)	: telnet.a netaux.o
 	install -d i386
-	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet$(NOEXE)
+	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet$(NOEXE)
 #		cmuip_src:[central]neterror.o 
 #		cmuip_src:[central]netlib.a/lib
 
 i386/telnet$(EXE_ELF)	: telnet.a netaux.o
 	install -d i386
-	ld -Bshareable main.o netaux.o telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a /usr/lib/libc.a -o i386/telnet$(EXE_ELF)
+	ld -Bshareable main.o netaux.o telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a /usr/lib/libc.a -o i386/telnet$(EXE_ELF)
 #		cmuip_src:[central]neterror.o 
 #		cmuip_src:[central]netlib.a/lib
 
