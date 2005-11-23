@@ -21,3 +21,6 @@ losetup -d /dev/loop1
 
 umount /mnt
 losetup -d /dev/loop0
+
+echo Just ignore misc segmentation faults just as long it was not oops
+
