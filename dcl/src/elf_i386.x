@@ -67,14 +67,14 @@ SECTIONS
   .rodata         : { *(.rodata .rodata.* .gnu.linkonce.r.*) }
   .rodata1        : { *(.rodata1) }
   .eh_frame_hdr : { *(.eh_frame_hdr) }
-  .eh_frame       : ONLY_IF_RO { KEEP (*(.eh_frame)) }
-  .gcc_except_table   : ONLY_IF_RO { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
+  /* not yet? .eh_frame       : ONLY_IF_RO { KEEP (*(.eh_frame)) } */
+  /* not yet? .gcc_except_table   : ONLY_IF_RO { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) } */
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
   . = ALIGN (0x1000) - ((0x1000 - .) & (0x1000 - 1)); . = DATA_SEGMENT_ALIGN (0x1000, 0x1000);
   /* Exception handling  */
-  .eh_frame       : ONLY_IF_RW { KEEP (*(.eh_frame)) }
-  .gcc_except_table   : ONLY_IF_RW { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
+  /* not yet? .eh_frame       : ONLY_IF_RW { KEEP (*(.eh_frame)) } */
+  /* not yet? .gcc_except_table   : ONLY_IF_RW { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) } */
   /* Thread Local Storage sections  */
   .tdata	  : { *(.tdata .tdata.* .gnu.linkonce.td.*) }
   .tbss		  : { *(.tbss .tbss.* .gnu.linkonce.tb.*) *(.tcommon) }
@@ -123,7 +123,7 @@ SECTIONS
   .data.rel.ro : { *(.data.rel.ro.local) *(.data.rel.ro*) }
   .dynamic        : { *(.dynamic) }
   .got            : { *(.got) }
-  . = DATA_SEGMENT_RELRO_END (12, .);
+  /* not yet? . = DATA_SEGMENT_RELRO_END (12, .); */
   .got.plt        : { *(.got.plt) }
   .data           :
   {
