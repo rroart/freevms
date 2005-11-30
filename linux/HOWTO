@@ -7,6 +7,11 @@ As recent gcc as 3.4 can now be used. (But some new problems are there)
 Gcc 4.0 might be too early.
 No more recent flex than 2.5.4 must be used.
 
+Also tested distributions:
+Debian Sarge (gcc-3.3)
+	Install ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev
+	Have loop support or module.
+
 NOTE on kernel build:
 If complaints about modversion.h, do a make update-modverfile.
 Make dep in linux is broken, so you might have to do make bzImage twice.
@@ -62,3 +67,12 @@ Bochsrc FreeVMS-related config:
 	ne2k: ioaddr=0x280, irq=9, mac=b0:c4:20:00:00:00, ethmod=linux, ethdev=eth0 (on c.img, on c2.img it must be different) 
 
 	ips: must be properly set to work. test yourself.
+
+NOTE on VFS ODS2 module autobuild:
+Use sarge (stable).
+Install module-assistant and debhelper.
+Do dpkg -i ods2-source_0.9.3.w3p1_all.deb.
+Do m-a prepare, m-a update, m-a get ods2, m-a a-i ods2.
+Run the following after you have got a working system on ext2:
+dcl/src/install.sh
+
