@@ -35,6 +35,8 @@ int diffsizebitmap;
 char strmsg[30];
 unsigned char volnam[20];
 unsigned char *owner  = "SYSTEM";
+int ibmaplbn;
+short ibmapsize;
 
 void do_checksum(unsigned char *line){
         unsigned short int checksum=0;
@@ -114,8 +116,10 @@ struct _fi2*pFI2;
     pHM2$->hm2$w_cluster=clustersize;
     pHM2$->hm2$w_ibmapvbn=VMSWORD(clustersize*4+1); 
     pHM2$->hm2$l_ibmaplbn=VMSLONG(clustersize*4);
+    ibmaplbn=pHM2$->hm2$l_ibmaplbn;
     pHM2$->hm2$l_maxfiles=(maxfiles);
     pHM2$->hm2$w_ibmapsize=VMSWORD(roundup( ( (double) pHM2$->hm2$l_maxfiles)/4096 ));
+    ibmapsize=pHM2$->hm2$w_ibmapsize;
     pHM2$->hm2$w_resfiles=10;
     do_checksum_count(out_line,(short *)&pHM2$->hm2$w_checksum1-(short*)pHM2$);
     pHM2$->hm2$w_extend=clustersize;
@@ -151,9 +155,17 @@ struct _fi2*pFI2;
     strcpy(pFI2->fi2$t_filename,"INDEXF.SYS;1");
         // map area
     pFM2 = (struct FM2_C_FORMAT2 *) (out_line+(2*pFH2->fh2$b_mpoffset));
-    pFM2->fm2$w_word0=indexfilesize-1+32768; //Add 32768 for format type
+    pFM2->fm2$w_word0=(ibmaplbn+ibmapsize)-1+16384; //Add 16384 for format type
     pFM2->fm2$v_count2=0;
-    pFH2->fh2$b_map_inuse=2;
+    pFM2++;
+    pFM2->fm2$w_word0=16-1+16384;
+    pFM2->fm2$v_count2=ibmaplbn+ibmapsize;
+    pFM2++;
+#if 0
+    pFM2->fm2$w_word0=indexfilesize-(pHM2$->hm2$l_ibmaplbn+pHM2$->hm2$w_ibmapsize+16)-1+16384;
+    pFM2->fm2$v_count2=pHM2$->hm2$l_ibmaplbn+pHM2$->hm2$w_ibmapsize;
+#endif
+    pFH2->fh2$b_map_inuse=2*2;
 	//file attribs
     pFH2->fh2$w_recattr.fat$b_rtype=1;
     pFH2->fh2$w_recattr.fat$w_rsize=512;
@@ -192,8 +204,17 @@ struct _fi2*pFI2;
     strcpy(pFI2->fi2$t_filename,"INDEXF.SYS;1");
         // map area
     pFM2 = (struct FM2_C_FORMAT2 *) (out_line+(2*pFH2->fh2$b_mpoffset));
-    pFM2->fm2$w_word0=indexfilesize-1+32768; //VMSWORD((indexfilesize-1) + 32768); //Add 32768 for format type
-    pFH2->fh2$b_map_inuse=2;
+    pFM2->fm2$w_word0=(ibmaplbn+ibmapsize)-1+16384; //Add 16384 for format type
+    pFM2->fm2$v_count2=0;
+    pFM2++;
+    pFM2->fm2$w_word0=16-1+16384;
+    pFM2->fm2$v_count2=ibmaplbn+ibmapsize;
+    pFM2++;
+#if 0
+    pFM2->fm2$w_word0=indexfilesize-(pHM2$->hm2$l_ibmaplbn+pHM2$->hm2$w_ibmapsize+16)-1+16384;
+    pFM2->fm2$v_count2=pHM2$->hm2$l_ibmaplbn+pHM2$->hm2$w_ibmapsize;
+#endif
+    pFH2->fh2$b_map_inuse=2*2;
 	//file attribs
     pFH2->fh2$w_recattr.fat$b_rtype=1;
     pFH2->fh2$w_recattr.fat$w_rsize=VMSWORD(512);
@@ -224,7 +245,7 @@ struct _fi2*pFI2;
     storagebitmapsize=roundup( ( (double) (volumesize/clustersize))/4096);
     bitmapfilesize=clustersize*(roundup(((double) (storagebitmapsize+1))/clustersize));
     diffsizebitmap=bitmapfilesize-1-storagebitmapsize;
-    pFM2->fm2$w_word0=bitmapfilesize-1+32768;
+    pFM2->fm2$w_word0=bitmapfilesize-1+16384;
     pFM2->fm2$v_count2=(indexfilesize+clustersize);
     pFH2->fh2$b_map_inuse=2;
 	//file attribs
@@ -278,7 +299,7 @@ struct _fi2*pFI2;
     strcpy(pFI2->fi2$t_filename,"000000.DIR;1");
         // map area
     pFM2 = (struct FM2_C_FORMAT2 *) (out_line+(2*pFH2->fh2$b_mpoffset));
-    pFM2->fm2$w_word0=(clustersize-1)+32768;
+    pFM2->fm2$w_word0=(clustersize-1)+16384;
     pFM2->fm2$v_count2=indexfilesize;
     pFH2->fh2$b_map_inuse=2; //3;
     pFH2->fh2$w_recattr.fat$b_rtype=2;
