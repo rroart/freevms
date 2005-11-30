@@ -340,7 +340,7 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
                         if (sts & 1) {
                             *work_ptr |= 1 << bit_no;
                             modify_flag = 1;
-                            if ((*headbuff)->fh2$w_checksum != 0 && (*headbuff)->fh2$w_fid.fid$w_num != 0 &&
+                            if (*headbuff && (*headbuff)->fh2$w_checksum != 0 && (*headbuff)->fh2$w_fid.fid$w_num != 0 &&
                                 (VMSLONG((*headbuff)->fh2$l_filechar) & FH2$M_MARKDEL) == 0) {
                                 sts = deaccesschunk(0,0,0);
 				writechunk(getidxfcb(vcbdev),idxblk,*headbuff);
@@ -352,7 +352,40 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
 				writechunk(getidxfcb(vcbdev),map_block,bitmap);
 				newvbn=f11b_map_idxvbn(vcbdev,idxblk);
 				if (newvbn==-1) {
-				  sts=f11b_extend(getidxfcb(vcbdev),1,1);
+				  writechunk(getidxfcb(vcbdev),map_block,bitmap);
+				  unsigned start_pos = 0;
+				  unsigned block_count = 1;
+				  sts = bitmap_search(vcbdev,&start_pos,&block_count);
+				  struct _fcb * fcb = getidxfcb(vcbdev);
+				  struct _fh2 * head;
+				  unsigned long long iosb;
+				  head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);
+				  unsigned short *mp,*map;
+				  map = mp = (unsigned short *) head + head->fh2$b_mpoffset + head->fh2$b_map_inuse;
+				  *mp++ = (3 << 14) | ((block_count *vcbdev->vcb$l_cluster - 1) >> 16);
+				  *mp++ = (block_count * vcbdev->vcb$l_cluster - 1) & 0xffff;
+				  *mp++ = (start_pos * vcbdev->vcb$l_cluster) & 0xffff;
+				  *mp++ = (start_pos * vcbdev->vcb$l_cluster) >> 16;
+				  head->fh2$b_map_inuse += 4;
+				  add_wcb(fcb,map);
+				  fcb->fcb$l_efblk += block_count * vcbdev->vcb$l_cluster;
+				  //head2 = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);
+				  //sts=iosb.iosb$w_status;
+				  head->fh2$w_recattr.fat$l_hiblk = VMSSWAP(fcb->fcb$l_efblk * vcbdev->vcb$l_cluster);
+				  fcb->fcb$l_highwater += block_count * vcbdev->vcb$l_cluster;;
+				  head->fh2$l_highwater += block_count * vcbdev->vcb$l_cluster;;
+				  writehead(fcb,head);
+				  sts = bitmap_modify(vcbdev,start_pos,block_count,0);
+#if 0
+				  int blkcount;
+				  sts = accesschunk(idxfcb, vcb->vcb$l_ibmapvbn + vcb->vcb$l_ibmapsize, (char **) &fhi,&blkcount,1,0); // check. wrong mapsize use
+				  
+				  writechunk(idxfcb,vcb->vcb$l_ibmapvbn + vcb->vcb$l_ibmapsize, fhi);
+#endif
+				  //sts=f11b_extend(getidxfcb(vcbdev),vcbdev->vcb$l_cluster,1);
+
+
+				  sts = accesschunk(getidxfcb(vcbdev),idxblk,(char **) headbuff,NULL,1,0);
 				}
                                 return SS$_NORMAL;
                             }
