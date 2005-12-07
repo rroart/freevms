@@ -138,7 +138,9 @@ static inline int mprotect_fixup_start(struct _rde * vma, struct _rde ** pprev,
 {
 	struct _rde * n, * prev = *pprev;
 
+#if 0
 	panic("fixup_start not implemented yet\n");
+#endif
 
 	*pprev = vma;
 
