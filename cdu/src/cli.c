@@ -405,7 +405,7 @@ unsigned int cli$dispatch(int userarg){
   char * myargv[4]={"",myp1,myp1,myp1};
   char image[256];
   char * path;
-  int pathlen;
+  int pathlen = 0;
   int n;
   char * imagebase;
   struct _cdu * cdu;
@@ -435,14 +435,34 @@ unsigned int cli$dispatch(int userarg){
   }
 #endif
 
-  if (vms_mm==0) goto ele;
-
-  path="SYS$SYSTEM:";
-  pathlen=strlen(path);
   n = (*cur_cdu)->cdu$l_image;
   imagebase = cdu_root[n].cdu$t_name;
+  int len = strlen(imagebase);
+
+  int is_ele=0;
+  if (vms_mm==0 || 0==strncmp(".ele",imagebase+len-4,4)) goto skipthis;
+  if (vms_mm==0 || 0==strncmp("_ele",imagebase+len-4,4)) {
+  skipthis:
+    if (vms_mm) image[pathlen+len-4]=0;
+    is_ele=1;
+  }
+
+  if (is_ele) {
+    path="/vms$common/sysexe/";
+    pathlen=strlen(path);
+  } else {
+    path="SYS$SYSTEM:";
+    pathlen=strlen(path);
+  }
+
   memcpy(image,path,pathlen);
   memcpy(image+pathlen,imagebase,strlen(imagebase));
+
+  if (is_ele && vms_mm) image[pathlen+len-4]=0;
+  if (is_ele && vms_mm) imagebase[len-4]=0;
+  if (is_ele)
+    goto ele;
+
   memcpy(image+pathlen+strlen(imagebase),".exe",4);
   image[pathlen+strlen(imagebase)+4]=0;
 
@@ -454,7 +474,6 @@ unsigned int cli$dispatch(int userarg){
   struct _iha * active;
   struct _va_range inadr;
   char * imgnam = imagebase;
-  int len = strlen(imgnam);
 
   aname.dsc$w_length=len;
   aname.dsc$a_pointer=imgnam;
@@ -547,22 +566,15 @@ unsigned int cli$dispatch(int userarg){
  ele:
   {}
 
-  path="/vms$common/sysexe/";
-  pathlen=strlen(path);
-  n = (*cur_cdu)->cdu$l_image;
-  imagebase = cdu_root[n].cdu$t_name;
-
-  memcpy(image,path,pathlen);
-  memcpy(image+pathlen,imagebase,strlen(imagebase));
-
   int fildes=open(image, 0);
-  if (fildes) {
+  if (fildes>0) {
     close(fildes);
     image[pathlen+strlen(imagebase)]=0;
     load_elf(image);
     func = elf_get_symbol(image, routine);
     goto skip;
   }
+ skip_if_mm:
 
   memcpy(image+pathlen+strlen(imagebase),".ele",4);
   image[pathlen+strlen(imagebase)+4]=0;
@@ -570,6 +582,7 @@ unsigned int cli$dispatch(int userarg){
   handle = dlopen(image,RTLD_NOW);
   if (handle==0) {
     printf("dlopen: %s\n",dlerror());
+    fflush(stdout);
     return 0;
   }
   dlerror(); // clear error
