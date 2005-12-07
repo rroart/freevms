@@ -147,6 +147,9 @@ define verb write
         parameter p1
         parameter p2
 
+define verb telnet
+	image telnet_ele
+
 define verb dfu
 	image dfu
 	routine verify_command
