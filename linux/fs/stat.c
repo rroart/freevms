@@ -78,7 +78,9 @@ static int cp_old_stat(struct inode * inode, struct __old_kernel_stat * statbuf)
 	struct _fcb * fcb = inode;
 	tmp.st_dev = fcb->fcb$w_fid_dirnum;
 	tmp.st_ino = fcb->fcb$w_fid [1] + (fcb->fcb$w_fid [2] << 16);
-	tmp.st_mode = 0x755;
+	tmp.st_mode = 0755;
+	if (fcb->fcb$v_dir) 
+	  tmp.st_mode |= S_IFDIR;
 	tmp.st_nlink = 1;
 	SET_OLDSTAT_UID(tmp, fcb->fcb$w_uicmember);
 	SET_OLDSTAT_GID(tmp, fcb->fcb$w_uicgroup);
@@ -155,7 +157,9 @@ static int cp_new_stat(struct inode * inode, struct stat * statbuf)
 	struct _fcb * fcb = inode;
 	tmp.st_dev = fcb->fcb$w_fid_dirnum;
 	tmp.st_ino = fcb->fcb$w_fid [1] + (fcb->fcb$w_fid [2] << 16);
-	tmp.st_mode = 0x755;
+	tmp.st_mode = 0755;
+	if (fcb->fcb$v_dir) 
+	  tmp.st_mode |= S_IFDIR;
 	tmp.st_nlink = 1;
 	SET_STAT_UID(tmp, fcb->fcb$w_uicmember);
 	SET_STAT_GID(tmp, fcb->fcb$w_uicgroup);
@@ -197,6 +201,8 @@ asmlinkage long sys_stat(char * filename, struct __old_kernel_stat * statbuf)
 
 	int fd = sys_open(filename, 0, 0);
 	void * f = fget(fd);
+	if (f==0)
+	  error = -ENOENT;
 	if (!error)
 	  error = cp_old_stat(f, statbuf);
 	return error;
@@ -227,6 +233,8 @@ asmlinkage long sys_newstat(char * filename, struct stat * statbuf)
 
 	int fd = sys_open(filename, 0, 0);
 	void * f = fget(fd);
+	if (f==0)
+	  error = -ENOENT;
 	if (!error)
 	  error = cp_new_stat(f, statbuf);
 	return error;
@@ -262,6 +270,8 @@ asmlinkage long sys_lstat(char * filename, struct __old_kernel_stat * statbuf)
 
 	int fd = sys_open(filename, 0, 0);
 	void * f = fget(fd);
+	if (f==0)
+	  error = -ENOENT;
 	if (!error)
 	  error = cp_old_stat(f, statbuf);
 	return error;
@@ -289,6 +299,8 @@ asmlinkage long sys_newlstat(char * filename, struct stat * statbuf)
 
 	int fd = sys_open(filename, 0, 0);
 	void * f = fget(fd);
+	if (f==0)
+	  error = -ENOENT;
 	if (!error)
 	  error = cp_new_stat(f, statbuf);
 	return error;
@@ -322,6 +334,8 @@ asmlinkage long sys_fstat(unsigned int fd, struct __old_kernel_stat * statbuf)
 	int error = 0;
 
 	void * f = fget(fd);
+	if (f==0)
+	  error = -ENOENT;
 	if (!error)
 	  error = cp_old_stat(f, statbuf);
 	return error;
@@ -351,6 +365,8 @@ asmlinkage long sys_newfstat(unsigned int fd, struct stat * statbuf)
 	int error = 0;
 
 	void * f = fget(fd);
+	if (f==0)
+	  error = -ENOENT;
 	if (!error)
 	  error = cp_new_stat(f, statbuf);
 	return error;
@@ -445,7 +461,9 @@ static long cp_new_stat64(struct inode * inode, struct stat64 * statbuf)
 	struct _fcb * fcb = inode;
 	tmp.st_dev = fcb->fcb$w_fid_dirnum;
 	tmp.st_ino = fcb->fcb$w_fid [1] + (fcb->fcb$w_fid [2] << 16);
-	tmp.st_mode = 0x755;
+	tmp.st_mode = 0755;
+	if (fcb->fcb$v_dir) 
+	  tmp.st_mode |= S_IFDIR;
 	tmp.st_nlink = 1;
 	tmp.st_uid = fcb->fcb$w_uicmember;
 	tmp.st_gid = fcb->fcb$w_uicgroup;
@@ -460,14 +478,11 @@ static long cp_new_stat64(struct inode * inode, struct stat64 * statbuf)
 
 asmlinkage long sys_stat64(char * filename, struct stat64 * statbuf, long flags)
 {
+#ifndef CONFIG_VMS
 	struct nameidata nd;
 	int error;
 
-#ifndef CONFIG_VMS 
 	error = user_path_walk(filename, &nd);
-#else
-	error = 0;
-#endif
 	if (!error) {
 		error = do_revalidate(nd.dentry);
 		if (!error)
@@ -475,6 +490,28 @@ asmlinkage long sys_stat64(char * filename, struct stat64 * statbuf, long flags)
 		path_release(&nd);
 	}
 	return error;
+#else
+	struct nameidata nd;
+	int error = 0;
+
+	int fd = sys_open(filename, 0, 0);
+	void * f = fget(fd);
+	extern int mount_root_vfs;
+	if (mount_root_vfs==0 && f==0) {
+	  char c[256];
+	  int len = strlen(filename);
+	  memcpy(c, filename, len);
+	  memcpy(c+len, ".dir", 4);
+	  c[len+4]=0;
+	  fd = sys_open(c, 0, 0);
+	  f = fget(fd);
+	}
+	if (f==0)
+	  error = -ENOENT;
+	if (!error)
+	  error = cp_new_stat64(f, statbuf);
+	return error;
+#endif
 }
 
 asmlinkage long sys_lstat64(char * filename, struct stat64 * statbuf, long flags)
