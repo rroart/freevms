@@ -1009,7 +1009,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   if (fcb==NULL) {
     //    fcb=fcb_create2(head,&sts);
   }
-  if (fcb == NULL) { iosbret(irp,sts); return sts; }
+  if (fcb == NULL) { sts=SS$_NOSUCHFILE; iosbret(irp,sts); return sts; }
 
   x2p->primary_fcb=fcb;
   x2p->current_window=&fcb->fcb$l_wlfl;
@@ -1258,6 +1258,9 @@ void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
   fcb->fcb$l_efblk = inode -> i_blocks; //?
   fcb->fcb$l_filesize = inode -> i_size; //?
 
+  if (S_ISDIR(inode->i_mode))
+    fcb->fcb$v_dir = 1;
+
   ext2_wcb_create_all(fcb,inode);
 
   //  fcb->fcb$l_hdlbn=f11b_map_idxvbn(vcb,head->fh2$w_fid.fid$w_num + (head->fh2$w_fid.fid$b_nmx << 16) - 1 + VMSWORD(vcb->vcb$l_ibmapvbn) + VMSWORD(vcb->vcb$l_ibmapsize));
@@ -1366,6 +1369,37 @@ char * ext2_vms_to_unix(char * name,struct dsc$descriptor * dsc) {
   if (c[strlen(c)-1]=='.')
     c[strlen(c)-1]=0;
   return c;
+}
+
+extern int mount_root_vfs;
+
+int path_unix_to_vms(char * new, char * old) {
+  int len = strlen(old);
+  memcpy(new, old, len);
+  new[len]=0;
+  if (mount_root_vfs)
+    return 1;
+  char * c;
+  c = strchr(new, '/');
+  if (c)
+    *c = '[';
+  c = strrchr(new, '/');
+  if (c)
+    *c = ']';
+  while (c = strchr(new, '/'))
+    *c = '.';
+  return 1;
+}
+
+int convert_soname(char * name) {
+  if (mount_root_vfs)
+    return 1;
+  char * c = strstr(name, ".so.");
+  if (c)
+    memcpy(c, ".ele", 4);
+  if (c)
+    c[4]=0;
+  return 1;
 }
 
 void ext2_translate_fid (struct _vcb * vcb, struct _fiddef * fid) {
