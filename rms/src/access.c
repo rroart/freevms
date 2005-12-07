@@ -1042,7 +1042,7 @@ unsigned deaccessfile(struct _fcb *fcb)
   return SS$_NORMAL;
 }
 
-static void *fcb_create(unsigned filenum,unsigned *retsts)
+static void *fcb_create_not(unsigned filenum,unsigned *retsts)
 {
   struct _fcb *fcb = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
   if (fcb == NULL) {
@@ -1083,6 +1083,10 @@ void *fcb_create2(struct _fh2 * head,unsigned *retsts)
   } else {
     fcb->fcb$l_highwater = 0;
   }
+  fcb->fcb$l_filesize = (VMSSWAP(head->fh2$w_recattr.fat$l_efblk)) << 9; // fix filesize use later
+
+  if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY)
+    fcb->fcb$v_dir = 1;
 
   wcb_create_all(fcb,head);
 
