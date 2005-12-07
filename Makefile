@@ -66,7 +66,8 @@ rootinstall:
 		cd $$X; \
 		make install; \
 		cd ..; \
-	done; 
+	done; \
+	make -f Makefile.linux install
 
 image-install:
 	make rootinstall; \
