@@ -826,10 +826,14 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 	struct _fabdef fab = cc$rms_fab;
 	int sts;
 
+	char vms_filename[256];
+	path_unix_to_vms(vms_filename, filename);
+	convert_soname(vms_filename);
+
 	long prev_xqp_fcb = get_xqp_prim_fcb();
 	long prev_x2p_fcb = get_x2p_prim_fcb();
 
-	fab.fab$l_fna = filename;
+	fab.fab$l_fna = vms_filename;
 	fab.fab$b_fns = strlen(fab.fab$l_fna);
 	if ((sts = exe$open(&fab)) & 1) {
 	  long xqp_fcb = get_xqp_prim_fcb();
@@ -839,7 +843,8 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 	  else
 	    file=x2p_fcb;
 	  exe$close(&fab);
-	}
+	} else
+	  return -1;
 	fd = get_unused_fd();
 	fd_install(fd, file);
 	return fd;
