@@ -647,6 +647,7 @@ unsigned long main (int argc, char *argv[])
   if (argv[0] && 0==strcmp(argv[0],"[vms$common.sysexe]startup.com")) {
     void * myargv[2];
     myargv[0]="/vms$common/sysexe/startup.com";
+    myargv[0]=argv[0];
     myargv[1]=0;
     int_script(h_s_input, h_s_output, h_s_error, "startup", 0, 1, myargv);
     script_exit=1;
