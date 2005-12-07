@@ -3,6 +3,12 @@
 losetup -o 512 /dev/loop0 c.img
 mount -t ext2 /dev/loop0 /mnt
 
+rm -f /mnt/lib/starlet.ele /mnt/lib/librtl.ele
+rm -f /mnt/sbin/{fsck,fsck.ext2,ifconfig,route,sash}
+rm -f /mnt/bin/{cat,cp,dd,df,dmesg,echo,ed,grep,hostname,ln,ls,mkdir,mount,mv,ps,rm,umount,uname}
+rm -f /mnt/usr/bin/{head,id}
+rm -f /mnt/lib/{libcom_err.so.2,libext2fs.so.2,libpcre.so.0,libtermcap.so.2,libproc.so.2,libm.so.6,libreadline.so.4}
+
 (tar -C ../rooti386 -clf - .)|(tar -C /mnt -xpf -)
 
 umount /mnt
@@ -10,6 +16,12 @@ losetup -d /dev/loop0
 
 losetup -o 512 /dev/loop0 c2.img
 mount -t ext2 /dev/loop0 /mnt
+
+rm -f /mnt/lib/starlet.ele /mnt/lib/librtl.ele
+rm -f /mnt/sbin/{fsck,fsck.ext2,ifconfig,route,sash}
+rm -f /mnt/bin/{cat,cp,dd,df,dmesg,echo,ed,grep,hostname,ln,ls,mkdir,mount,mv,ps,rm,umount,uname}
+rm -f /mnt/usr/bin/{head,id}
+rm -f /mnt/lib/{libcom_err.so.2,libext2fs.so.2,libpcre.so.0,libtermcap.so.2,libproc.so.2,libm.so.6,libreadline.so.4}
 
 (tar -C ../rooti386 -clf - .)|(tar -C /mnt -xpf -)
 
