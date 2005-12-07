@@ -18,8 +18,7 @@
 #		Merged together my basic and string libraries, so I
 #		only has one subdirectory to worry about.
 #
-CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -I. -I../../starlet/src -I../../lib/src
-
+CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -I. -I../../starlet/src -I../../lib/src -DNOKERNEL
 
 STROBJ = \
 	str_analyze_sdesc.o stranalyze_sdesc_64.o \
@@ -66,6 +65,12 @@ CVTOBJ = cvt_convert_float.o
 
 QUELIB = libinsqhi.o
 
+STROBJ_PIC = $(addprefix pic/,$(STROBJ))
+LIBOBJ_PIC = $(addprefix pic/,$(LIBOBJ))
+SYSOBJ_PIC = $(addprefix pic/,$(SYSOBJ))
+CVTOBJ_PIC = $(addprefix pic/,$(STROBJ))
+QUELIB_PIC = $(addprefix pic/,$(QUELIB))
+
 STRLIB = librtl.a
 ELFLIB = i386/librtl$(EXE_ELF)
 EXELIB = i386/librtl$(EXE)
@@ -107,9 +112,13 @@ $(EXELIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 
-$(ELFLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB) starlet$(EXE_ELF)
+$(ELFLIB) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC) starlet$(EXE_ELF)
 	install -d i386
-	ld -Bshareable $? starlet$(EXE_ELF) $(LIBGCC) -o $(ELFLIB)
+	ld -Bshareable $(VMS_LD_RPATH) $? starlet$(EXE_ELF) $(LIBGCC) -o $(ELFLIB)
+
+pic/%.o: %.c 
+	install -d pic
+	$(CC) -fpic -fPIC $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -c -o $@ $<
 
 str.o : str.c ../../starlet/src/strdef.h
 str__const.o : str__const.c ../../starlet/src/strdef.h
@@ -152,4 +161,4 @@ libextv.o: libextv.c
 libextzv.o: libextzv.c
 
 libasnmbx.o: libasnmbx.c
-	gcc -I$(TOPDIR)/starlet/src -I. -c libasnmbx.c
+
