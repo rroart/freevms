@@ -398,12 +398,21 @@ main(int argc, char **argv)
     argc -= optind;
     argv += optind;
 #endif
+#if 0
     if (0==strcmp(argv[0],"[vms$common.sysexe]startup.com")) {
       execve("/vms$common/sysexe/dcl",argv,0);
     }
     if (0==strcmp(argv[0],"[vms$common.sysexe]install.com")) {
       execve("/vms$common/sysexe/dcl",argv,0);
     }
+#else
+    if (0==strcmp(argv[0],"[vms$common.sysexe]startup.com")) {
+      execve("[vms$common.sysexe]dcl",argv,0);
+    }
+    if (0==strcmp(argv[0],"[vms$common.sysexe]install.com")) {
+      execve("[vms$common.sysexe]dcl",argv,0);
+    }
+#endif
 #if 0
     if (*argv) {
 	char *p = *argv;

@@ -992,7 +992,13 @@ static int init(void * unused)
 	$DESCRIPTOR(image,"[vms$common.sysexe]loginout");
 	$DESCRIPTOR(out,"SYS$OUTPUT");
 #else
-	$DESCRIPTOR(image,"/vms$common/sysexe/loginout");
+	$DESCRIPTOR(image_1,"[vms$common.sysexe]loginout");
+	$DESCRIPTOR(image_2,"/vms$common/sysexe/loginout");
+	struct dsc$descriptor * image;
+	if (mount_root_vfs)
+	  image = &image_2;
+	else
+	  image = &image_1;
 	$DESCRIPTOR(out,"opa0:");
 #endif
 	$DESCRIPTOR(in,"[vms$common.sysexe]startup.com");
@@ -1000,9 +1006,9 @@ static int init(void * unused)
 	$DESCRIPTOR(name,"STARTUP");
 
 	if (install_ods2)
-	  exe$creprc(0,&image,&in2,&out,&out,0,0,&name,8,0,0,PRC$M_NOUAF);
+	  exe$creprc(0,image,&in2,&out,&out,0,0,&name,8,0,0,PRC$M_NOUAF);
 	else
-	  exe$creprc(0,&image,&in,&out,&out,0,0,&name,8,0,0,PRC$M_NOUAF);
+	  exe$creprc(0,image,&in,&out,&out,0,0,&name,8,0,0,PRC$M_NOUAF);
 	sys$hiber();
 #endif
 #if 0
