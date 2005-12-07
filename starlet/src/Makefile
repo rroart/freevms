@@ -4,9 +4,9 @@ install: all
 	install -d ../../rooti386/vms"$$"common/syslib
 	install i386/*.* ../../rooti386/vms"$$"common/syslib
 
-i386/starlet${EXE_ELF}: starlet.o rms.o errno.o
+i386/starlet${EXE_ELF}: pic/starlet.o pic/rms.o pic/errno.o
 	install -d i386
-	ld -Bshareable starlet.o rms.o errno.o -o i386/starlet${EXE_ELF}
+	ld -Bshareable pic/starlet.o pic/rms.o pic/errno.o -o i386/starlet${EXE_ELF}
 
 i386/starlet${EXE}: starlet.o rms.o errno.o
 	install -d i386
@@ -29,3 +29,7 @@ vmsopt.o:	vmsopt.c
 
 errno.o: 	errno.c
 		gcc -c errno.c
+
+pic/%.o: %.c
+		install -d pic
+		gcc -fpic -fPIC -c -I$(TOPDIR)/starlet/src $< -o $@
