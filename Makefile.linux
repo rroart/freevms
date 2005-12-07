@@ -1,0 +1,34 @@
+all:
+
+install: dirs ld-linux libc libdl libncurses sh
+
+dirs:
+	install -d $(ROOTI386)/bin/
+	install -d $(ROOTI386)/lib/
+
+ld-linux: $(ROOTI386)/lib/ld-linux.so.2 $(ROOTI386)/lib/ld-linux.ele
+
+libc: $(ROOTI386)/lib/libc.so.6  $(ROOTI386)/lib/libc.ele
+
+libdl: $(ROOTI386)/lib/libdl.so.2  $(ROOTI386)/lib/libdl.ele
+
+libncurses: $(ROOTI386)/lib/libncurses.so.5
+
+sh: $(ROOTI386)/bin/sh
+
+$(ROOTI386)/lib/%: /lib/%
+	install $< $@
+
+$(ROOTI386)/bin/%: /bin/%
+	install $< $@
+
+$(ROOTI386)/lib/ld-linux.ele: /lib/ld-linux.so.2
+	install /lib/ld-linux.so.2 $(ROOTI386)/lib/ld-linux.ele
+
+$(ROOTI386)/lib/libc.ele: /lib/libc.so.6
+	install /lib/libc.so.6 $(ROOTI386)/lib/libc.ele
+
+$(ROOTI386)/lib/libdl.ele: /lib/libdl.so.2
+	install /lib/libdl.so.2 $(ROOTI386)/lib/libdl.ele
+
+
