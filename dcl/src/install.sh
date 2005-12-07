@@ -7,9 +7,10 @@ mount -t ods2 /dev/loop0 /mnt
 losetup -o 512 /dev/loop1 c.img
 mount -t ext2 /dev/loop1 /mnt2
 
-#mkdir /mnt/lib.dir
+mkdir /mnt/lib.dir
 mkdir /mnt/vms\$common.dir
 mkdir /mnt/vms\$common.dir/sysexe.dir
+mkdir /mnt/vms\$common.dir/syslib.dir
 install ../linux/arch/i386/boot/bzImage /mnt/freevms1.elf
 install ../rooti386/vms\$common/sysexe/copy.exe /mnt/vms\$common.dir/sysexe.dir/
 install ../rooti386/vms\$common/sysexe/create.exe /mnt/vms\$common.dir/sysexe.dir/
@@ -22,9 +23,14 @@ install /mnt2/vms\$common/sysexe/pagefile.sys /mnt/vms\$common.dir/sysexe.dir/pa
 install ../rooti386/vms\$common/sysexe/search.exe /mnt/vms\$common.dir/sysexe.dir/
 install ../rooti386/vms\$common/sysexe/startup.com /mnt/vms\$common.dir/sysexe.dir/
 install ../rooti386/vms\$common/sysexe/type.exe /mnt/vms\$common.dir/sysexe.dir/
-[ -f ../rooti386/vms\$common/sysexe/telnet.ele ] && install ../rooti386/vms\$common/sysexe/telnet.ele /mnt/vms\$common.dir/sysexe.dir/telnet.ele
+[ -f ../rooti386/vms\$common/sysexe/telnet.ele ] && install ../rooti386/vms\$common/sysexe/telnet.ele /mnt/vms\$common.dir/sysexe.dir/
 install ../rooti386/vms\$common/sysexe/vmount.exe /mnt/vms\$common.dir/sysexe.dir/
+install ../rooti386/vms\$common/syslib/starlet.ele /mnt/vms\$common.dir/syslib.dir/
+install ../rooti386/vms\$common/syslib/librtl.ele /mnt/vms\$common.dir/syslib.dir/
 [ -f /mnt2/INET\$CONFIG ] && install /mnt2/INET\$CONFIG /mnt/INET\$CONFIG.
+install ../rooti386/lib/ld-linux.ele /mnt/lib.dir/
+install ../rooti386/lib/libc.ele /mnt/lib.dir/
+install ../rooti386/lib/libdl.ele /mnt/lib.dir/
 
 umount /mnt2
 losetup -d /dev/loop1
