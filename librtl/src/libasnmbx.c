@@ -8,7 +8,7 @@
 #include <descrip.h>
 #include <dvidef.h>
 
-#ifdef __KERNEL__
+#ifndef NOKERNEL
 #define sys$assign exe$assign
 #define sys$getdviw exe$getdviw
 #define sys$crembx exe$crembx
