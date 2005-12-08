@@ -1052,8 +1052,8 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 #endif
 	//printk("after lnm_init_prc\n");
 
-	xqp_init2();
 #ifdef CONFIG_VMS
+	xqp_init2();
 	extern void * global_e2_vcb;
 	exttwo_init2(global_e2_vcb);
 #endif
