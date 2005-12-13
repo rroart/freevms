@@ -838,7 +838,8 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 	if ((sts = exe$open(&fab)) & 1) {
 	  long xqp_fcb = get_xqp_prim_fcb();
 	  long x2p_fcb = get_x2p_prim_fcb();
-	  if (xqp_fcb!=prev_xqp_fcb)
+	  extern int mount_root_vfs;
+	  if (mount_root_vfs==0 || xqp_fcb!=prev_xqp_fcb)
 	    file=xqp_fcb;
 	  else
 	    file=x2p_fcb;
