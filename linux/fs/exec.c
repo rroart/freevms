@@ -418,15 +418,20 @@ struct file *rms_open_exec(const char *name)
 	struct _fabdef fab = cc$rms_fab;
 	int sts;
 
+	char vms_filename[256];
+	path_unix_to_vms(vms_filename, name);
+	convert_soname(vms_filename);
+
 	long prev_xqp_fcb = get_xqp_prim_fcb();
 	long prev_x2p_fcb = get_x2p_prim_fcb();
 
-	fab.fab$l_fna = name;
+	fab.fab$l_fna = vms_filename;
 	fab.fab$b_fns = strlen(fab.fab$l_fna);
 	if ((sts = exe$open(&fab)) & 1) {
 	  long xqp_fcb = get_xqp_prim_fcb();
 	  long x2p_fcb = get_x2p_prim_fcb();
-	  if (xqp_fcb!=prev_xqp_fcb)
+	  extern int mount_root_vfs;
+	  if (mount_root_vfs==0 || xqp_fcb!=prev_xqp_fcb)
 	    file=xqp_fcb;
 	  else
 	    file=x2p_fcb;
