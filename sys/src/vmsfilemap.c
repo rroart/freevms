@@ -268,7 +268,7 @@ void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_
 		if (fcb->fcb$l_fill_5)
 		end_index = inode->i_size >> PAGE_CACHE_SHIFT;
 		else
-		end_index = fcb->fcb$l_efblk + 1;  
+		  end_index = 10000; //not yet: fcb->fcb$l_efblk + 1;  
 
 		if (index > end_index)
 			break;
