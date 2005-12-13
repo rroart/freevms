@@ -149,6 +149,7 @@ define verb write
 
 define verb telnet
 	image telnet_ele
+	routine main
 
 define verb dfu
 	image dfu

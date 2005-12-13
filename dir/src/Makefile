@@ -37,12 +37,12 @@ starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 librtl$(EXE_ELF): $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 	ln -s $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 
-i386/ddirectory${NOEXE}: $(VMSLIBS_EXE_ELF) $(OBJS) $(EXTERNAL2) starlet$(EXE_ELF) librtl$(EXE_ELF) 
+i386/ddirectory${NOEXE}: $(VMSLIBS_EXE_ELF) $(OBJS) $(EXTERNAL2) starlet$(EXE_ELF) librtl$(EXE_ELF)
 	install -d i386
 	gcc -g $(OBJS) starlet$(EXE_ELF) librtl$(EXE_ELF) $(EXTERNAL2) -o i386/ddirectory${NOEXE}
 
-i386/ddirectory${EXE_ELF}: $(VMSDLIBS_EXE_ELF) $(OBJS) $(EXTERNAL2) starlet$(EXE_ELF) librtl$(EXE_ELF) 
-	ld -Bshareable $(VMS_LD_RPATH) $(OBJS) starlet$(EXE_ELF) librtl$(EXE_ELF) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/ddirectory${EXE_ELF}
+i386/ddirectory${EXE_ELF}: $(VMSLIBS_EXE_ELF) $(OBJS) $(EXTERNAL2) starlet$(EXE_ELF) librtl$(EXE_ELF)
+	ld -Bshareable $(VMS_LD_RPATH) $(OBJS) starlet$(EXE_ELF) librtl$(EXE_ELF) $(EXTERNAL2) -lc $(LIBGCC) -o i386/ddirectory${EXE_ELF}
 
 i386/ddirectory${EXE}: $(VMSDLIBS_EXE) $(OBJS) $(EXTERNAL2)
 	install -d i386
