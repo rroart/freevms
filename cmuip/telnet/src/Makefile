@@ -68,7 +68,8 @@ clean:
 install: all
 	install -d ../../../rootum/vms$$common/sysexe
 	install -d ../../../rooti386/vms$$common/sysexe
-	install i386/*.* ../../../rooti386/vms"$$"common/sysexe
+	rm -f ../../../rooti386/vms"$$"common/sysexe/telnet.*
+	install i386/telnet ../../../rooti386/vms"$$"common/sysexe
 #	install um/*.* ../../../rootum/vms"$$"common/sysexe
 
 telnet	: i386/telnet${EXE} i386/telnet${NOEXE} i386/telnet$(EXE_ELF)
@@ -102,7 +103,10 @@ i386/telnet$(EXE)	: telnet.a netaux.o
 i386/telnet$(NOEXE)	: telnet.a netaux.o
 	install -d i386
 	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet$(NOEXE)
-	gcc -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/dtelnet$(NOEXE)
+	strip -K main i386/telnet$(NOEXE)
+	gcc -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl /usr/lib/libelf.a netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/dtelnet$(NOEXE)
+	strip -K main i386/dtelnet$(NOEXE)
+# must strip, otherwise binary becomes too big and has read problems 
 #		cmuip_src:[central]neterror.o 
 #		cmuip_src:[central]netlib.a/lib
 
