@@ -114,11 +114,18 @@ bad:
 	return retval;
 #else
 	struct _fcb * fcb = file;
-	if (origin == 0 /*SEEK_SET*/) 
-	  fcb->fcb$l_reserve1 = offset;
-	else
-	  fcb->fcb$l_reserve1 += offset;
-	return 0;
+	switch (origin) {
+	case 2:
+	  /*SEEK_END*/ 
+	  offset += fcb->fcb$l_filesize;
+	  break;
+	case 1:
+	  /*SEEK_CUR*/
+	  offset += fcb->fcb$l_reserve1;
+	  break;
+	}
+	fcb->fcb$l_reserve1 = offset;
+	return offset;
 #endif
 }
 
