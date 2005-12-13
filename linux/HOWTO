@@ -31,7 +31,7 @@ cd ..
 cd freevms386.iomm
 make bzImage
 make download-bliss
-make build-bliss
+make build-bliss (run twice, for some reason first run quits with an error)
 make download-linker
 make build-linker
 make download-grub
@@ -39,9 +39,9 @@ make build-grub
 make vmsall
 make telnet (remember to change close to close2 in routines.b32)
 make rootinstall
-make image
-make image-install
-make image-kernel-iomm
+make image (as root)
+make image-install (as root)
+make image-kernel-iomm (as root)
 
 Bochs:
 	Configure with at least 
