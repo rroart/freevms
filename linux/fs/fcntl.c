@@ -272,7 +272,11 @@ static long do_fcntl(unsigned int fd, unsigned int cmd,
 			set_close_on_exec(fd, arg&1);
 			break;
 		case F_GETFL:
+#ifndef CONFIG_VMS
 			err = filp->f_flags;
+#else
+			err = O_RDONLY;
+#endif
 			break;
 		case F_SETFL:
 			lock_kernel();
@@ -348,7 +352,9 @@ asmlinkage long sys_fcntl(unsigned int fd, unsigned int cmd, unsigned long arg)
 
 	err = do_fcntl(fd, cmd, arg, filp);
 
+#ifndef CONFIG_VMS
  	fput(filp);
+#endif
 out:
 	return err;
 }
@@ -378,7 +384,9 @@ asmlinkage long sys_fcntl64(unsigned int fd, unsigned int cmd, unsigned long arg
 			err = do_fcntl(fd, cmd, arg, filp);
 			break;
 	}
+#ifndef CONFIG_VMS
 	fput(filp);
+#endif
 out:
 	return err;
 }

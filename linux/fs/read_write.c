@@ -99,6 +99,7 @@ asmlinkage off_t sys_lseek(unsigned int fd, off_t offset, unsigned int origin)
 
 	retval = -EBADF;
 	file = fget(fd);
+#ifndef CONFIG_VMS
 	if (!file)
 		goto bad;
 	retval = -EINVAL;
@@ -111,6 +112,14 @@ asmlinkage off_t sys_lseek(unsigned int fd, off_t offset, unsigned int origin)
 	fput(file);
 bad:
 	return retval;
+#else
+	struct _fcb * fcb = file;
+	if (origin == 0 /*SEEK_SET*/) 
+	  fcb->fcb$l_reserve1 = offset;
+	else
+	  fcb->fcb$l_reserve1 += offset;
+	return 0;
+#endif
 }
 
 #if !defined(__alpha__)
@@ -388,6 +397,10 @@ asmlinkage ssize_t sys_pread(unsigned int fd, char * buf,
 
 	ret = -EBADF;
 	file = fget(fd);
+#ifdef CONFIG_VMS
+	if (file && ((struct _fcb *)(file))->fcb$b_type==DYN$C_FCB)
+	  goto do_fcb;
+#endif
 	if (!file)
 		goto bad_file;
 	if (!(file->f_mode & FMODE_READ))
@@ -405,9 +418,28 @@ asmlinkage ssize_t sys_pread(unsigned int fd, char * buf,
 	if (ret > 0)
 		dnotify_parent(file->f_dentry, DN_ACCESS);
 out:
+#ifndef CONFIG_VMS
 	fput(file);
+#endif
 bad_file:
 	return ret;
+#ifdef CONFIG_VMS
+ do_fcb:
+	{}
+
+	struct _fcb * fcb;
+	unsigned long offset;
+
+	ret = -EBADF;
+	file = fget(fd);
+	fcb = file;
+	offset = pos;
+	ret = rms_kernel_read(file, offset, buf, count);
+#if 0
+	fcb->fcb$l_reserve1 += ret;
+#endif
+	return ret;
+#endif
 }
 
 asmlinkage ssize_t sys_pwrite(unsigned int fd, const char * buf,
