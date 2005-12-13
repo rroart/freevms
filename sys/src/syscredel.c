@@ -388,6 +388,7 @@ asmlinkage int exe$create_region_32  ( unsigned long length, unsigned int region
   struct _rde * rde;
   rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
   bzero(rde,sizeof(struct _rde));
+  rde->rde$b_type=30; // fix later
   rde->rde$pq_start_va=start_va;
   rde->rde$q_region_size=length;
   rde->rde$l_flags=flags;

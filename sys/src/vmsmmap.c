@@ -760,8 +760,9 @@ static void free_pgtables(struct mm_struct * mm, struct _rde *prev,
 	}
 	for (;;) {
 	  struct _rde *next = 0;//prev->vm_next;
+	  next = prev->rde$ps_va_list_flink;
 
-		if (next) {
+	  if (next && next->rde$b_type==30 /*fix later*/) {
 			if (next->rde$pq_start_va < start) {
 				prev = next;
 				continue;
