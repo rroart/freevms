@@ -22,7 +22,7 @@ File system:
 	ODS-2 initialize
 	DFU doing analyze/disk
 	XQP (for ODS-2, and something like it for Ext2)
-	ODS-2 can have bootable kernel
+	ODS-2 can have bootable kernel and user environment
 
 Bootloader:
 	GRUB with ODS-2 support to boot kernel
