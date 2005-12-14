@@ -326,6 +326,7 @@ out:
  * We do this by temporarily clearing all FS-related capabilities and
  * switching the fsuid/fsgid around to the real ones.
  */
+#ifndef CONFIG_VMS
 asmlinkage long sys_access(const char * filename, int mode)
 {
 	struct nameidata nd;
@@ -365,6 +366,32 @@ asmlinkage long sys_access(const char * filename, int mode)
 
 	return res;
 }
+#else
+asmlinkage long sys_access(const char * filename, int mode)
+{
+	int fd, error;
+	struct file *file=0;
+	int err = 0;
+	struct _fabdef fab = cc$rms_fab;
+	int sts;
+
+	if (mode & ~S_IRWXO)	/* where's F_OK, X_OK, W_OK, R_OK? */
+		return -EINVAL;
+
+	char vms_filename[256];
+	path_unix_to_vms(vms_filename, filename);
+	convert_soname(vms_filename);
+
+	fab.fab$l_fna = vms_filename;
+	fab.fab$b_fns = strlen(fab.fab$l_fna);
+	if ((sts = exe$open(&fab)) & 1) {
+	  exe$close(&fab);
+	} else
+	  return -1;
+	return 0;
+
+}
+#endif
 
 asmlinkage long sys_chdir(const char * filename)
 {
