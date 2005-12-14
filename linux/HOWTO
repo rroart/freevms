@@ -52,7 +52,7 @@ Bochs use:
 	Use make image to make a floppy and disk image.
 	Set bochs to boot the floppy grub image, and set
 	c.img to cyl=4, heads=255, spt=63
-	The make image script works on RedHat 9, and may need some
+	The make image script works on Debian stable, and may need some
 	tailoring other places.
 
 	Use make image-install to install the FreeVMS binaries to be
