@@ -20,15 +20,19 @@
 typedef struct symbol symbol;
 
 struct symbol { symbol *next;
+  int namelen;
   char name[MAXSYMNAM];
   //Symtype symtype;
   //unsigned long (*func) (Symbol *symbol, char *strp, char **rtnp, void *valuep);
   //unsigned long ivalue;
+  int svaluelen;
   char svalue[1];
 };
 
 int add_sym(struct dsc$descriptor * sym, struct dsc$descriptor * val) {
   symbol * s = kmalloc(sizeof(symbol)+64/*sym->dsc$w_length*/);
+  s->namelen=sym->dsc$w_length;
+  s->svaluelen=val->dsc$w_length;
   memcpy(s->name,sym->dsc$a_pointer,sym->dsc$w_length);
   memcpy(s->svalue,val->dsc$a_pointer,val->dsc$w_length);
   s->next=((symbol *)ctl$ag_clidata)/*->next*/;
@@ -37,13 +41,14 @@ int add_sym(struct dsc$descriptor * sym, struct dsc$descriptor * val) {
 
 int mod_sym(symbol * sym, struct dsc$descriptor * val) {
   symbol * s = sym;
+  s->svaluelen=val->dsc$w_length;
   memcpy(s->svalue,val->dsc$a_pointer,val->dsc$w_length);
 }
 
 int find_sym(struct dsc$descriptor * sym) {
   symbol * tmp = ctl$ag_clidata;
   while (tmp) {
-    if (0==strcmp(sym->dsc$a_pointer,&tmp->name))
+    if (tmp->namelen==sym->dsc$w_length && 0==strncmp(sym->dsc$a_pointer,&tmp->name,tmp->namelen))
       return tmp;
     tmp=tmp->next;
   }
@@ -55,7 +60,7 @@ int del_sym(struct dsc$descriptor * sym) {
   if (a==0) return 0;
   symbol ** tmp = &ctl$ag_clidata;
   while (*tmp) {
-    if (0==strcmp(sym->dsc$a_pointer,&(*tmp)->name))
+    if ((*tmp)->namelen==sym->dsc$w_length && 0==strncmp(sym->dsc$a_pointer,&(*tmp)->name,(*tmp)->namelen))
       break;
     tmp=(*tmp); // next
   }
@@ -94,7 +99,7 @@ asmlinkage int exe$cli(void * cliv, int par1, int par2) {
       symbol * s = find_sym(&cli2->cli$q_namdesc);
       if (s) {
 	struct dsc$descriptor * d = &cli2->cli$q_valdesc;
-	d->dsc$w_length=strlen(s->svalue);
+	d->dsc$w_length=s->svaluelen;
 	memcpy(d->dsc$a_pointer,s->svalue,d->dsc$w_length);
       }
     }
