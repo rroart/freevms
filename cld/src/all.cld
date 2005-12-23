@@ -79,7 +79,10 @@ define syntax set_prompt
 
 define syntax set_process
 	cliroutine set_process
+	parameter p1
 	qualifier identification,value(required)
+	qualifier name,value(required)
+	qualifier priority,value(required)
 
 define syntax set_working_set
 	cliroutine set_working_set
@@ -150,6 +153,12 @@ define verb write
 define verb telnet
 	image telnet_ele
 	routine main
+
+define verb analyze
+	qualifier system,value,syntax=analyze_system
+
+define syntax analyze_system
+	image sda_ele
 
 define verb dfu
 	image dfu
