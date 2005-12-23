@@ -48,6 +48,7 @@ static int file_ioctl(struct file *filp,unsigned int cmd,unsigned long arg)
 
 asmlinkage long sys_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 {	
+#ifndef CONFIG_VMS
 	struct file * filp;
 	unsigned int flag;
 	int on, error = -EBADF;
@@ -113,4 +114,7 @@ asmlinkage long sys_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 
 out:
 	return error;
+#else
+	return 0;
+#endif
 }
