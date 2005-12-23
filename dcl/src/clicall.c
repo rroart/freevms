@@ -34,6 +34,7 @@ int show_symbol() {
   sts = cli$get_value(&p, &o, &retlen);
   struct dsc$descriptor *sym=&o;
   struct dsc$descriptor *val=&q;
+  sym->dsc$w_length=retlen;
 #if 0
   sym->dsc$a_pointer=symstr;
   sym->dsc$w_length=strlen(symstr);
@@ -55,6 +56,7 @@ int delete_symbol() {
   sts = cli$present(&p);
   sts = cli$get_value(&p, &o, &retlen);
   struct dsc$descriptor *sym=&o;
+  sym->dsc$w_length=retlen;
 #if 0
   sym->dsc$a_pointer=symstr;
   sym->dsc$w_length=strlen(symstr);
