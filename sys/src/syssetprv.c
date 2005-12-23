@@ -17,6 +17,7 @@ asmlinkage int exe$setprv(char enbflg, struct _generic_64 *prvadr, char prmflg, 
   if (p)
     *p=pcb->pcb$l_priv;
   long long * l = *(long long*)prvadr;
+  p = prvadr;
   if (enbflg)
     pcb->pcb$l_priv|=*p;
   else
