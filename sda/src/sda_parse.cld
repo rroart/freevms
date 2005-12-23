@@ -1,0 +1,15 @@
+module sda_parse
+
+define syntax show_device
+	cliroutine show_device
+	parameter p1
+
+define type show_something
+	keyword device, syntax = show_device
+
+define verb exit
+	cliroutine sda_exit
+
+define verb show
+	parameter p1,label=something,value(type=show_something)
+
