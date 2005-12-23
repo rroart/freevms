@@ -4542,32 +4542,6 @@ static unsigned long int_set_process (unsigned long h_input, unsigned long h_out
 {
   unsigned long sts;
 
-  $DESCRIPTOR(p, "p1");
-  $DESCRIPTOR(d, "identification");
-
-  char c[80];
-  struct dsc$descriptor o;
-  o.dsc$a_pointer=c;
-  o.dsc$w_length=80;
-
-  int retlen;
-
-  sts = cli$present(&d);
-
-  printf("sts %x\n",sts);
-
-  sts = cli$get_value(&d, &o, &retlen);
-
-  printf("sts %x %x %s\n",sts,retlen,o.dsc$a_pointer);
-
-  sts = cli$present(&p);
-
-  printf("sts %x\n",sts);
-
-  sts = cli$get_value(&p, &o, &retlen);
-
-  printf("sts %x %x %s\n",sts,retlen,o.dsc$a_pointer);
-
   /* We should have exactly one argument - the process name */
 
   set_process(argc,argv);
@@ -4629,7 +4603,7 @@ static unsigned long int_show_datetime (unsigned long h_input, unsigned long h_o
 
   sys$gettim(&now);
   sys$asctim(0,&atimenow,&now,0);
-  fprintf (h_output, "%s\n",atimenow.dsc$a_pointer);
+  printf ("%s\n",atimenow.dsc$a_pointer);
   return (SS$_NORMAL);
 }
 

@@ -14,17 +14,65 @@
 /* Don't know anywhere else to put this */
 
 set_process(int argc, char**argv){
-  int pid=1;
-  struct dsc$descriptor d;
-  if (0==strncmp(argv[0],"/name",strlen(argv[0]))) {
-    d.dsc$w_length=strlen(argv[1]);
-    d.dsc$a_pointer=argv[1];
+  $DESCRIPTOR(p, "p1");
+  $DESCRIPTOR(id, "identification");
+  $DESCRIPTOR(na, "name");
+  $DESCRIPTOR(pr, "priority");
+
+  char idstr[80];
+  struct dsc$descriptor idval;
+  idval.dsc$a_pointer=idstr;
+  idval.dsc$w_length=80;
+
+  char nastr[80];
+  struct dsc$descriptor naval;
+  naval.dsc$a_pointer=nastr;
+  naval.dsc$w_length=80;
+
+  char prstr[80];
+  struct dsc$descriptor prval;
+  prval.dsc$a_pointer=prstr;
+  prval.dsc$w_length=80;
+
+  int sts, idsts, nasts, prsts;
+  int retlen;
+
+  sts = cli$present(&p);
+#if 0
+  if (0)
+    sts = cli$get_value(&p, &o, &retlen);
+#endif
+
+  idsts = cli$present(&id);
+
+  int pid = 0;
+
+  if (idsts & 1) {
+    idsts = cli$get_value(&id, &idval, &retlen);
+    pid = strtol(id.dsc$a_pointer,0,16);
+  }
+
+  nasts = cli$present(&na);
+
+  if (nasts & 1) {
+    nasts = cli$get_value(&na, &naval, &retlen);
+    struct dsc$descriptor d;
+    d.dsc$a_pointer=naval.dsc$a_pointer;
+    d.dsc$w_length=retlen;
     sys$setprn(&d);
-    return SS$_NORMAL;
   }
-  if (0==strncmp(argv[0],"/priority",strlen(argv[0]))) {
-    sys$setpri(0,0,atoi(argv[1]),0,0,0);
-    return SS$_NORMAL;
+
+  prsts = cli$present(&pr);
+
+  if (prsts & 1) {
+    prsts = cli$get_value(&pr, &prval, &retlen);
+    int pri = atoi(prval.dsc$a_pointer);
+    int pidaddr = 0;
+    if (pid)
+      pidaddr = &pid;
+    sys$setpri(pid, 0, pri, 0, 0, 0);
   }
+
+  return SS$_NORMAL;
 } 
 
