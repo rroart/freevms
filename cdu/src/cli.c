@@ -306,7 +306,7 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 	  for(total=0;i;total++)
 	    i=cdu_root[i].cdu$l_next;
 	  i = cdu->cdu$l_parameters;
-	  for(count=total-pn;count;count--)
+	  for(count=total-pn;count>0;count--)
 	    i=cdu_root[i].cdu$l_next;
 	  n = my_alloc_cdu(CDU$C_NAME);
 	  my_cdu_root[p].cdu$l_name = n;
