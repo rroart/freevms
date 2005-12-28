@@ -66,8 +66,8 @@ clean:
 	rm *.o um/* i386/*
 
 install: all
-	install -d ../../../rootum/vms$$common/sysexe
-	install -d ../../../rooti386/vms$$common/sysexe
+	install -d ../../../rootum/vms"$$"common/sysexe
+	install -d ../../../rooti386/vms"$$"common/sysexe
 	rm -f ../../../rooti386/vms"$$"common/sysexe/telnet.*
 	install i386/telnet ../../../rooti386/vms"$$"common/sysexe
 #	install um/*.* ../../../rootum/vms"$$"common/sysexe
