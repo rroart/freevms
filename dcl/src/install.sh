@@ -16,16 +16,19 @@ mkdir /mnt/vms\$common.dir/sysexe.dir
 mkdir /mnt/vms\$common.dir/syslib.dir
 $INSTALL ../linux/arch/i386/boot/bzImage /mnt/freevms1.elf
 $INSTALL ../rooti386/vms\$common/sysexe/copy.exe /mnt/vms\$common.dir/sysexe.dir/
+$INSTALL ../rooti386/vms\$common/sysexe/authorize /mnt/vms\$common.dir/sysexe.dir/authorize.
 $INSTALL ../rooti386/vms\$common/sysexe/create.exe /mnt/vms\$common.dir/sysexe.dir/
 $INSTALL ../rooti386/vms\$common/sysexe/dcl /mnt/vms\$common.dir/sysexe.dir/dcl.
 $INSTALL ../rooti386/vms\$common/sysexe/delete.exe /mnt/vms\$common.dir/sysexe.dir/
 $INSTALL ../rooti386/vms\$common/sysexe/diff.exe /mnt/vms\$common.dir/sysexe.dir/
 $INSTALL ../rooti386/vms\$common/sysexe/directory.exe /mnt/vms\$common.dir/sysexe.dir/
+$INSTALL ../rooti386/vms\$common/sysexe/install /mnt/vms\$common.dir/sysexe.dir/install.
 $INSTALL ../rooti386/vms\$common/sysexe/loginout /mnt/vms\$common.dir/sysexe.dir/loginout.
 $INSTALL /mnt2/vms\$common/sysexe/pagefile.sys /mnt/vms\$common.dir/sysexe.dir/pagefile.sys
 $INSTALL ../rooti386/vms\$common/sysexe/search.exe /mnt/vms\$common.dir/sysexe.dir/
 $INSTALL ../rooti386/vms\$common/sysexe/sda /mnt/vms\$common.dir/sysexe.dir/sda.
 $INSTALL ../rooti386/vms\$common/sysexe/startup.com /mnt/vms\$common.dir/sysexe.dir/
+$INSTALL ../rooti386/vms\$common/sysexe/sysuaf.dat /mnt/vms\$common.dir/sysexe.dir/
 $INSTALL ../rooti386/vms\$common/sysexe/type.exe /mnt/vms\$common.dir/sysexe.dir/
 [ -f ../rooti386/vms\$common/sysexe/telnet ] && $INSTALL ../rooti386/vms\$common/sysexe/telnet /mnt/vms\$common.dir/sysexe.dir/telnet.
 $INSTALL ../rooti386/vms\$common/sysexe/vmount.exe /mnt/vms\$common.dir/sysexe.dir/
