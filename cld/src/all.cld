@@ -160,6 +160,10 @@ define verb analyze
 define syntax analyze_system
 	image sda_ele
 
+define verb install
+	image install_ele
+	routine main
+
 define verb dfu
 	image dfu
 	routine verify_command
