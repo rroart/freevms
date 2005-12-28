@@ -42,10 +42,14 @@ myopenfile(char * filename, char * rmsfilename) {
 
 myread(void * file, void * buf, int size) {
   unsigned long long pos=0;
+#if 0
 #ifdef CONFIG_VMS
     int retsize=rms_generic_file_read(file,buf,size,&pos);
 #else
     int retsize=generic_file_read(file,buf,size,&pos);
+#endif
+#else
+    int retsize = kernel_read(file,0,buf,size);
 #endif
     return retsize;
 }
@@ -66,7 +70,7 @@ int mysearch(void * buf, int size, char * name) {
   return 0;
 }
 
-void * mylinesearch(void * buf, char sep, int convert, char * dest) {
+void * mylinesearch(void * buf, char sep, int convert, char * dest, int * retlen) {
   char * c, *b, *n;
   int i=0;
   b=buf;
@@ -77,7 +81,9 @@ void * mylinesearch(void * buf, char sep, int convert, char * dest) {
       int i = simple_strtoll(b,0,10);
       memcpy(dest,&i,4);
     } else {
-      memcpy(dest,&n,4);
+      memcpy(dest,&b,4);
+      if (retlen)
+	*retlen=c-b;
     }
     b=c+1;
     return b;
@@ -86,10 +92,13 @@ void * mylinesearch(void * buf, char sep, int convert, char * dest) {
 }
 
 struct myuaf {
+  int usernamelen;
   char * username;
+  int passwordlen;
   char * password;
   int uid;
   int gid;
+  int fullnamelen;
   char * fullname;
   int priv;
 };
@@ -103,23 +112,23 @@ int exe$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmls
   if (line==0)
     return SS$_BADPARAM; // maybe this?
   struct myuaf myuaf;
-  char * newbuf=buf;
-  newbuf=mylinesearch(newbuf,':',0,&myuaf.username);
-  newbuf=mylinesearch(newbuf,':',0,&myuaf.password);
-  newbuf=mylinesearch(newbuf,':',1,&myuaf.uid);
-  newbuf=mylinesearch(newbuf,':',1,&myuaf.gid);
-  newbuf=mylinesearch(newbuf,':',0,&myuaf.fullname);
-  newbuf=mylinesearch(newbuf,':',1,&myuaf.priv);
+  char * newbuf=line;
+  newbuf=mylinesearch(newbuf,':',0,&myuaf.username,&myuaf.usernamelen);
+  newbuf=mylinesearch(newbuf,':',0,&myuaf.password,&myuaf.passwordlen);
+  newbuf=mylinesearch(newbuf,':',1,&myuaf.uid,0);
+  newbuf=mylinesearch(newbuf,':',1,&myuaf.gid,0);
+  newbuf=mylinesearch(newbuf,':',0,&myuaf.fullname,&myuaf.fullnamelen);
+  newbuf=mylinesearch(newbuf,':',1,&myuaf.priv,0);
 
   struct _ile3 * it=itmlst;
   while (it->ile3$w_code) {
     int * bufaddr_int = it->ile3$ps_bufaddr;
     switch (it->ile3$w_code) {
     case UAI$_USERNAME:
-      memcpy(bufaddr_int, myuaf.username, strlen(myuaf.username));
+      memcpy(bufaddr_int, myuaf.username, myuaf.usernamelen);
       break;
     case UAI$_PASSWORD:
-      memcpy(bufaddr_int, myuaf.password, strlen(myuaf.password));
+      memcpy(bufaddr_int, myuaf.password, myuaf.passwordlen);
       break;
     case UAI$_MEM:
       memcpy(bufaddr_int, &myuaf.uid, 4);
@@ -128,7 +137,7 @@ int exe$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmls
       memcpy(bufaddr_int, &myuaf.gid, 4);
       break;
     case UAI$_OWNER:
-      memcpy(bufaddr_int, myuaf.fullname, strlen(myuaf.fullname));
+      memcpy(bufaddr_int, myuaf.fullname, myuaf.fullnamelen);
       break;
     case UAI$_PRIV:
     case UAI$_DEF_PRIV:
