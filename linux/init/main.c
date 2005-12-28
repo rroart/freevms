@@ -1005,10 +1005,11 @@ static int init(void * unused)
 	$DESCRIPTOR(in2,"[vms$common.sysexe]install.com");
 	$DESCRIPTOR(name,"STARTUP");
 
+	long long priv = -1;
 	if (install_ods2)
-	  exe$creprc(0,image,&in2,&out,&out,0,0,&name,8,0,0,PRC$M_NOUAF);
+	  exe$creprc(0,image,&in2,&out,&out,&priv,0,&name,8,0x40001,0,PRC$M_NOUAF);
 	else
-	  exe$creprc(0,image,&in,&out,&out,0,0,&name,8,0,0,PRC$M_NOUAF);
+	  exe$creprc(0,image,&in,&out,&out,&priv,0,&name,8,0x40001,0,PRC$M_NOUAF);
 	sys$hiber();
 #endif
 #if 0

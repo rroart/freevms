@@ -54,6 +54,7 @@ mmg$imgreset() {
   // mmg$sectblrst
 
   // reset priv mask
+  ctl$gl_pcb->pcb$l_priv=ctl$gq_procpriv;
 
   ctl$gl_imghdrbf=0;
 

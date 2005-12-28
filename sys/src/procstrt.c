@@ -267,6 +267,9 @@ int exe$procstrt(struct _pcb * p) {
 
   struct _pqb * pqb = p->pcb$l_pqb;
 
+  ctl$gq_procpriv = pqb->pqb$q_prvmsk;
+  p->pcb$l_priv=ctl$gq_procpriv;
+
   int len = strlen(pqb->pqb$t_image);
 
 #ifdef __arch_um__

@@ -642,6 +642,8 @@ extern struct exec_domain	default_exec_domain;
     blocked:		{{0}},						\
     alloc_lock:		SPIN_LOCK_UNLOCKED,				\
     journal_info:	NULL,						\
+    pcb$l_priv:		-1,						\
+    pcb$l_uic:		0x40001,						\
 }
 
 

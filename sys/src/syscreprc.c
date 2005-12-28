@@ -87,6 +87,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
     strncpy(p->pcb$t_lname,s->dsc$a_pointer,s->dsc$w_length);
   }
   // set priv
+  p->pcb$l_priv=ctl$gl_pcb->pcb$l_priv;
   // set pris
   p->pcb$b_prib=31-baspri;
   p->pcb$b_pri=31-baspri-6;
@@ -94,6 +95,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
   p->pcb$w_quant=-QUANTUM;
   
   // set uic
+  p->pcb$l_uic=ctl$gl_pcb->pcb$l_uic;
   // set vms pid
   // check process name
   // do something with pqb
@@ -102,6 +104,8 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
   memset(p->pcb$l_pqb,0,sizeof(struct _pqb));
 
   struct _pqb * pqb = p->pcb$l_pqb;
+
+  pqb->pqb$q_prvmsk = ctl$gq_procpriv;
 
   if (imd)
     memcpy(pqb->pqb$t_image,imd->dsc$a_pointer,imd->dsc$w_length);

@@ -57,6 +57,11 @@ void init_p1pp_long(unsigned long addr, signed long offset, signed long val) {
   *valp=val;
 }
 
+void init_p1pp_long_long(unsigned long addr, signed long offset, signed long long val) {
+  signed long long * valp=addr+offset;
+  *valp=val;
+}
+
 void init_p1pp_data(struct _pcb * pcb, struct _phd * phd,signed long offset) {
   init_p1pp_long(&ctl$gl_pcb,offset,pcb);
   init_p1pp_long(&ctl$gl_phd,offset,phd);
@@ -171,6 +176,7 @@ void init_sys_p1pp() {
 #endif
 
   init_p1pp_data(pcb,phd,0);
+  ctl$gq_procpriv=ctl$gl_pcb->pcb$l_priv;
 }
 
 void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
@@ -240,6 +246,7 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
 #endif
 
   init_p1pp_data(pcb,phd,0);
+  ctl$gq_procpriv=ctl$gl_pcb->pcb$l_priv;
 }
 
 int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, struct _phd * oldphd) {
@@ -371,6 +378,7 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 #endif
 
   init_p1pp_data(pcb,phd,-4096);
+  init_p1pp_long_long(&ctl$gq_procpriv,-4096,ctl$gq_procpriv);
   init_p1pp_long(&ctl$gl_lnmhash,-4096,ctl$gl_lnmhash);
   init_p1pp_long(&ctl$gl_lnmdirect,-4096,ctl$gl_lnmdirect);
   //printk("init p1pp data\n");
