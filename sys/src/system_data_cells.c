@@ -470,7 +470,7 @@ unsigned long exe$gl_hwname_length;
 unsigned long exe$gl_hwtype_length;
 unsigned long exe$gl_imgreg_pages;
 unsigned long exe$gl_itb_entries;
-unsigned long exe$gl_known_files;
+unsigned long exe$gl_known_files=0;
 unsigned long exe$gl_ldr_cnt;
 unsigned long exe$gl_ldr_seq;
 unsigned long exe$gl_limbolen;
