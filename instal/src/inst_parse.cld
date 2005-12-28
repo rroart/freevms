@@ -1,0 +1,9 @@
+module inst_parse
+
+define verb exit
+	cliroutine inst_exit
+
+define verb add
+	parameter p1
+	cliroutine inst_add
+	qualifier privileged, value(list)

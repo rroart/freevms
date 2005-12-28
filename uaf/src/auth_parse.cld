@@ -1,0 +1,8 @@
+module auth_parse
+
+define verb exit
+	cliroutine auth_exit
+
+define verb show
+	parameter p1
+	cliroutine auth_show
