@@ -29,6 +29,40 @@
 
 #include<ssdef.h>
 
+#include<kfedef.h>
+
+int img$known_image(struct dsc$descriptor * name, void ** kfe_p) {
+  struct _kfe * kfe = exe$gl_known_files;
+  for (;kfe;kfe = kfe->kfe$l_kfelink) {
+    char * tmpstr;
+    char * kfestr = &kfe->kfe$l_obsolete_1;
+    tmpstr = strrchr(kfestr,']');
+    if (tmpstr==0)
+      tmpstr=strrchr(kfestr,':');
+    if (tmpstr==0)
+      tmpstr=strrchr(kfestr,'/');
+    if (tmpstr)
+      kfestr=tmpstr+1;
+    char * namestr=name->dsc$a_pointer;
+    int namelen=name->dsc$w_length;
+    tmpstr = strrchr(namestr,']');
+    if (tmpstr==0)
+      tmpstr=strrchr(namestr,':');
+    if (tmpstr==0)
+      tmpstr=strrchr(namestr,'/');
+    if (tmpstr)
+      namelen-=1+tmpstr-namestr;
+    if (tmpstr)
+      namestr=tmpstr+1;
+    if (0==strncmp(kfestr,namestr,namelen)) {
+      if (kfe_p)
+	*kfe_p=kfe;
+      return 1;
+    }
+  }
+  return 0;
+}
+
 asmlinkage int exe$imgact_wrap(struct struct_args * s) {
   return exe$imgact(s->s1,s->s2,s->s3,s->s4,s->s5,s->s6,s->s7,s->s8);
 }
@@ -55,6 +89,12 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   //  im->imcb$b_type
   f=rms_open_exec(dscdflnam->dsc$a_pointer);
   if (f==0) return 0;
+
+  struct _kfe * kfe;
+  if (img$known_image(dscdflnam,&kfe))
+    ctl$gl_pcb->pcb$l_priv|=kfe->kfe$q_procpriv;
+  // do the same with phd copy
+
   im->imcb$l_context=f;//w_chan too small, temp place
   fs = get_fs();
   set_fs(KERNEL_DS);
