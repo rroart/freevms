@@ -54,7 +54,7 @@ unsigned int cli$get_value(void *entity_desc, void *retdesc,short * retlen) {
   int min; 
   struct _cdu * cdu = *my_cdu;
   int sts=0;
-  
+  static int list_offset=0;
   int e; 
   int elem;
   e = cdu->cdu$l_parameters; 
@@ -65,6 +65,7 @@ unsigned int cli$get_value(void *entity_desc, void *retdesc,short * retlen) {
   if (sts&1) {
     e=elem;
     int valuecdu=my_cdu_root[e].cdu$l_value;
+    int is_list=my_cdu_root[e].cdu$l_flags & CDU$M_LIST;
     char * vname = my_cdu_root[valuecdu].cdu$t_name;
     {
       if (ret->dsc$b_class==DSC$K_CLASS_D && ret->dsc$b_dtype==DSC$K_DTYPE_T && ret->dsc$a_pointer==0 && ret->dsc$w_length==0) {
@@ -72,10 +73,35 @@ unsigned int cli$get_value(void *entity_desc, void *retdesc,short * retlen) {
 	ret->dsc$w_length=strlen(vname);
       }
     }
-    memcpy(ret->dsc$a_pointer,vname,strlen(vname));
+    char * src = vname;
+    int srclen = strlen(vname);
+    if (is_list) {
+      if (list_offset==0 && vname[0]!='(') {
+	list_offset = srclen;
+	goto single;
+      }
+      if (list_offset && (vname[list_offset]==')' || vname[list_offset]==0)) {
+	sts = 0;
+	list_offset = 0;
+	goto end;
+      }
+      if (list_offset==0 && vname[0]=='(') {
+	list_offset++;
+      }
+      int start=list_offset;
+      while (vname[list_offset] && vname[list_offset]!=',' && vname[list_offset]!=')')
+	list_offset++;
+      src=vname+start;
+      srclen=list_offset-start;
+      if (vname[list_offset]==',')
+	list_offset++;
+    }
+  single:
+    memcpy(ret->dsc$a_pointer,src,srclen);
     if (retlen)
       *retlen=strlen(vname);
   }
+ end:
   if (sts&1)
     return SS$_NORMAL;
   else
