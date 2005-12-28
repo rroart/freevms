@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 // like memcpy
 
 int memcpy(void *dest, const void *src, int n);

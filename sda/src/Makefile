@@ -14,7 +14,7 @@ clean:
 install: all
 	install -d ../../rootum/vms$$common/sysexe
 	install -d ../../rooti386/vms$$common/sysexe
-	install i386/* ../../rooti386/vms"$$"common/sysexe
+	install i386/sda ../../rooti386/vms"$$"common/sysexe
 
 OBJS = sdamain.o sda_parse.o device.o misc.o
 

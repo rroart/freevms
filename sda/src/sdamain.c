@@ -1,3 +1,8 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+
 #include<stdio.h>
 
 #include<descrip.h> 
@@ -34,14 +39,10 @@ extern long sda_parse[];
 int do_ret = 0;
 
 main() {
-  // tmp fix
-  long mask[2] = { 1, 0 }; // PRV$V_CMKRNL
-  sys$setprv( 1, mask, 1, 0 );
-
   printf("\nFreeVMS system analyzer\n\n");
 
   while(!do_ret) {
-    printf("SDA>"); 
+    printf("SDA> "); 
     fflush(stdout);
 
     char command_str[256];
