@@ -165,6 +165,7 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
   }
 
   struct dsc$descriptor * com = command_string;
+  *comdsc = com;
   struct _cdu * cdu_root = table;
   *root_cdu=table;
 
@@ -255,6 +256,7 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 	  endunit++;
 	int v = my_alloc_cdu(CDU$C_NAME);
 	my_cdu_root[q].cdu$l_value=v;
+	my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
 	struct _cdu * np = &my_cdu_root[v];
 	memcpy(np->cdu$t_name,line,endunit-line);
       }
@@ -456,15 +458,15 @@ unsigned int cli$dispatch(int userarg){
   }
 
   memcpy(image,path,pathlen);
-  memcpy(image+pathlen,imagebase,strlen(imagebase));
+  memcpy(image+pathlen,imagebase,len);
 
   if (is_ele && vms_mm) image[pathlen+len-4]=0;
-  if (is_ele && vms_mm) imagebase[len-4]=0;
+  if (is_ele && vms_mm) len-=4;
   if (is_ele)
     goto ele;
 
-  memcpy(image+pathlen+strlen(imagebase),".exe",4);
-  image[pathlen+strlen(imagebase)+4]=0;
+  memcpy(image+pathlen+len,".exe",4);
+  image[pathlen+len+4]=0;
 
   unsigned long sts;
   struct dsc$descriptor aname;
@@ -477,7 +479,7 @@ unsigned int cli$dispatch(int userarg){
 
   aname.dsc$w_length=len;
   aname.dsc$a_pointer=imgnam;
-  dflnam.dsc$w_length=pathlen+strlen(imagebase)+4;
+  dflnam.dsc$w_length=pathlen+len+4;
   dflnam.dsc$a_pointer=image;
 
   hdrbuf=malloc(512);
@@ -569,15 +571,15 @@ unsigned int cli$dispatch(int userarg){
   int fildes=open(image, 0);
   if (fildes>0) {
     close(fildes);
-    image[pathlen+strlen(imagebase)]=0;
+    image[pathlen+len]=0;
     load_elf(image);
     func = elf_get_symbol(image, routine);
     goto skip;
   }
  skip_if_mm:
 
-  memcpy(image+pathlen+strlen(imagebase),".ele",4);
-  image[pathlen+strlen(imagebase)+4]=0;
+  memcpy(image+pathlen+len,".ele",4);
+  image[pathlen+len+4]=0;
   printf("Opening %s\n",image);
   handle = dlopen(image,RTLD_NOW);
   if (handle==0) {
