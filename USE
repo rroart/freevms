@@ -1,38 +1,47 @@
-starting uml example:
-	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=/vms\$common/sysexe/dcl
+Bochsrc FreeVMS-related config:
+	floppya: 1_44=a.img, status=inserted
+	ata0-master: type=disk, path=c.img, cylinders=8, heads=255, spt=63
+	boot: a
+	Skip ne2k if you just downloaded and tried the image.
+	ne2k: ioaddr=0x280, irq=9, mac=b0:c4:20:00:00:00, ethmod=linux, ethdev=eth0 (on c.img, on c2.img it must be different) 
 
-config file:
-	/vms\$common/sysexe/params.dat must have
-	SCSNODE=name
-	SCSDEVICE=eua0
-	(or whatever device it is)
-	This replaces/will replace the use of hostname for clustering
+	ips: must be properly set to work. test yourself.
+
+The default is DCL for CONFIG_VMS mode.
+
+When booting bochs, there are mainly 4 usable choices:
+ x freevms.iomm.dcl                                                        x
+ x freevms.iomm.default                                                    x
+ x freevms.iomm.ods2.dcl                                                   x
+ x freevms.iomm.ods2.default                                               x
+
+The ODS-2 named are of course with ODS-2, and the rest with ext2 root.
+The DCL choice jumps straight into DCL (just as if you had a conversational
+boot, set startup_p1 "min" and set /startup opa0:), the default does
+a subset of startup, and you have to press a key to get a DCL CLI.
+
+When ext2 root / is mounted under RMS, it is possible to do type [etc]group.
 
 running commands:
 	DCL: typically command
-	/bin/sh: /vms\$common/sysexe/command
-	note: abbreviation may not work
+	/bin/sh: /vms\$common/sysexe/command (only for non-CONFIG_VMS,
+		and if starting commands this way is still supported)
+	note: abbreviation may or may not work
+
+General utilities:
+
+DCL:
+	if not too much crashed, it can be rebooted with ctrl-p
+	exe images are now the default with commands
+	old fork/exec commands can be run with _ prefixed.
 
 RUN/MCR:
 	use them as "usual"
 	no qualifiers
-	DCL only.
+	do not run .ele files in CONFIG_VMS mode.
 	
-set symbol:
+Set symbol:
 	sym = val
-
-MOUNT:
-	Local file ODS2 image
-	Go to image directory
-	mount filename
-
-	Cluster mount
-	The other file image must be mounted
-	mount other$dfa0
-	Then use as dir other$dfa0 etc
-
-INIT: 
-	init filename volume-name size
 
 DELETE:
 	file or symbol
@@ -41,6 +50,7 @@ DELETE:
 DIRECTORY:
 	directory
 	qualifiers: /file /size /date
+	should only be used with ODS-2.
 
 CREATE /DIRECTORY:
 	create /directory name
@@ -54,37 +64,30 @@ DIFFERENCE/SEARCH/TYPE:
 	as is, no qualifiers
 
 SET PROCESS:
-	has some problems for now?
-	DCL only
+	qualifiers: /name /priority
 
 SET PROMPT:
 	set prompt string OR set prompt
-	DCL only
 
 SET DEFAULT:
 	set default pathname
-	DCL only
 
 SHOW DEFAULT:
 	show default	
-	DCL only
 
 SHOW DEVICES:
 	at current only shows drivers
 	show devices
-	DCL only
+	386 ide devices partitions show up as dqa0 etc. (hdb2 -> dqb2 etc)
 
 SHOW SYSTEM:
 	show system
-	DCL only
 
 SHOW SYMBOL:
 	show symbol sym
-	DCL only
 
 SHOW TIME:
 	show time
-	DCL only
 
 STOP:
 	It can now be given hexadecimal numbers 
@@ -94,20 +97,70 @@ STOP:
 
 	stop /id=proc
 	stop name
-	DCL only (unless you use /vms\$common/syshlp/examples/forcex)
 
 DEFINE:
 	define /table table logical equivalence
-	DCL only
 
 CREATE /NAME_TABLE
 	create /name_table /parent_table parent name
 	create /name_table name
-	DCL only
 
 SHOW LOGICAL:
 	show logical /table table logical
-	DCL only
+
+SHOW WORKING_SET:
+	show working_set
+
+SET WORKING_SET:
+	adds or subtracts to working set quota
+	does not work exactly to specs
+	set working_set /quota=delta
+	set working_set /extent=delta
+
+Networking:
+
+CMUIP:
+	Skip this if you just downloaded and tried the image.
+	see example file INET$CONFIG.
+	DEVICE_INIT:ETHER:era0:00-00-00-00-00-00:192.168.0.42:255.255.0.0
+	VARIABLE:TELNET_SERVICE:1
+	GATEWAY:gateway.com:192.168.0.1:0.0.0.0:0.0.0.0
+
+Telnet:
+	Start with telnet.
+	do connect ipv4-address.
+	it is possible to telnet to another FreeVMS node, no other.
+	Note that with the CMUIP telnetd, there is I/O-problems with the
+	first line, so just press enter on it.
+
+System administration utilities:
+
+ANALYZE /SYSTEM:
+	has show device and exit
+
+AUTHORIZE:
+	run sys$system:authorize
+	show user
+	does not return to DCL
+
+INSTALL:
+	install add/priv=(list) file
+
+MOUNT:
+	Local ODS2 image
+	Go to image directory
+	Mount dqa2 (if using ext2 root).
+
+	Mount file (not partition) (option is not recently tested).
+	Must be a file in /. 
+
+	Cluster mount
+	The other file image must be mounted
+	mount other$dfa0
+	Then use as dir other$dfa0 etc
+
+INIT: 
+	From shell on compiler box (no DCL): init filename volume-name size 
 
 DFU:
 	dfu (run from bash)
@@ -116,6 +169,7 @@ DFU:
 ******************************
 
 Clustering:
+Do not use this now, wait until we get a new network engine.
 Now works with CONFIG_VMS (without, there are problems with timer queue?).
 You need to have the nodename in params.dat.
 The two first letters in the nodename must be different.
@@ -127,65 +181,23 @@ Later you may see something about probing and MSCP units.
 Wait until you see these kernel messages.
 Currently "disabled" due to new CONFIGURE: Then you can do mount other$dfa0 etc.
 
+config file:
+	/vms\$common/sysexe/params.dat must have
+	SCSNODE=name
+	SCSDEVICE=eua0
+	(or whatever device it is)
+	This replaces/will replace the use of hostname for clustering
+
 ******************************
 
-Only for CONFIG_VMS:
+Outdated, as working uml is dead:
+
+starting uml example:
+	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=/vms\$common/sysexe/dcl
 
 UML ubd devices show up as daa0 etc.
-386 ide devices partitions show up as dqa0 etc. (hdb2 -> dqb2 etc)
-Ext2 root / is mounted under RMS, and it is possible to do dir [etc] etc.
-It is possible to do type [etc]group
 
 starting uml example:
 	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=[vms\$common.sysexe]dcl
 	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=[bin]sh
 
-MOUNT:
-	can mount daa0 and dqa0
-
-SHOW WORKING_SET:
-	show working_set
-	DCL only
-
-SET WORKING_SET:
-	adds or subtracts to working set quota
-	does not work exactly to specs
-	set working_set /quota=delta
-	set working_set /extent=delta
-	DCL only
-
-run a VMS image file:
-	do mcr/run on a file with name.exe
-
-DCL:
-	if not too much crashed, it can be rebooted with ctrl-p
-	exe images are now the default with commands
-	old fork/exec commands can be run with _ prefixed.
-
-CMUIP:
-	see example file INET$CONFIG.
-
-Telnet:
-	do something like sh sys first, then run /vms$common/sysexe/telnet.ele.
-	do connect ipv4-address.
-	it is possible to telnet to another FreeVMS node.
-	Note that with the CMUIP telnetd, there is I/O-problems with the
-	first line, so just press enter on it.
-
-******************************
-
-NOTES/bugs general:
-
-ODS2 write-support seems to have gotten some problems.
-Do not expect DECnet to work (collides with cluster code)
-Logicals only can be used with show logical, define and create /name_table;
-nowhere else yet. (And only without nesting.)
-
-******************************
-
-NOTES/bugs CONFIG_VMS:
-
-A more experimental config; do not boot to more than /bin/sh or DCL.
-Write support on ext2 has some (minor?) bugs or faults or shortcomings.
-RMS dir can not be done on ext2 root /.
-/bin/sh and other shellscripting does not work.

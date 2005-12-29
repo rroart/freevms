@@ -70,6 +70,9 @@ Misc utilities:
 	Backup
 	CDU (mainly parses a CLD file)
 	MSG (generates numbers only)
+	Authorize (with show only)
+	Install (with add only)
+	Analyze/system (wit show dev only)
 
 System calls/services:
 	$adjwsl

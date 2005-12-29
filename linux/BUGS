@@ -28,8 +28,10 @@ Init crashes with keventd after rc.sysinit has finished.
 Cluster networking on a real PC hangs one of them.
 Creprc has some output problems.
 Process sessions has some problems.
-The 60 sec limit and one login only for loginout. (panics).
+The 60 sec limit and one login only for loginout. (panics). (not anymore).
 Ods-2 may get problems with directory file > 1.
+Logicals only can be used with show logical, define and create /name_table;
+nowhere else yet. (And only without nesting.)
 
 For CONFIG_VMS:
 RMS $get does not work in IPACP CNF$Configure_ACP.
@@ -44,3 +46,5 @@ Telnet gets problems with the first input line.
 Telnet used with lib$put_output may bug the terminal i/o-system.
 RMS parse/do_parse not quite according to spec (manual), since open can
 not reset parse state.
+RMS dir can not be done on ext2 root /.
+/bin/sh and other shellscripting does not work.

@@ -1,25 +1,47 @@
+Criterias for major/minor version bumps?:
+
+Previous:
+0.1: ODS-2 grub support, kernel boot and dcl start.
+0.2: ODS-2 about as usable as Ext2.
+
+Next (A-G in more or less probable order)?:
+0.F: New cluster network engine, based on CMU IP stack engine.
+0.G. More CWPS
+0.E: A much more developed CLI 
+0.C: Locks in active use
+0.D: DLM
+0.B: ODS-5 (FI5) and Unix compatibility.
+0.A: Security features.
+1.0/2.0: FreeVMS being able to recompile itself on FreeVMS.
+
 FreeVMS tasklist
 
 1. High priority:
 	CPU/PAL
-	RMS/ODS-2/Ext2 write support
+	LIBRTL
+	CLI, CDU
+	Better terminal driver
 
 2. Medium priority:
-	GRUB with ODS-2, ODS-2 execute etc
 	VMS image and linker
+	MSG
 	General bugfix, extensions, compliance to ordinary functionality
+	SMG
+	ODS-5 (FI5) and Unix compatibility.
 
 3. Low priority:
 	Locks
-	Cluster
-	LIBRTL
-	CLI, LBR, CDU, MSG (can live without, but DCL gets ugly without)
+	Cluster (will increase later in 0.2.x-cycle)
+	LBR
+	Full RMS (with more than SEQ)
+	Full ODS-2 (with extended headers, volume set etc)
+	Security features
 
 4. Yet unknown priority:
 	System service dispatching
 	Condition handling
 	Mutexes
-	CRTL
+	CRTL (probably none, should go for using libc)
 	64-bit LE (have to go through the code to handle int, long etc)
 
 5. No priority:
@@ -97,7 +119,7 @@ Detailed descriptions:
 		$ help set command
 		http://www.openvms.compaq.com:8000/73final/6100/
 		6100pro.html#cd_chap
-	MSG message     No kernel stuff (I think)
+	MSG message     Some kernel stuff
 		See
 		$ help rtl lib lib$signal
 		$ help message 
@@ -124,14 +146,14 @@ Detailed descriptions:
 
   Basic libraries:
     LBR
+    SMG, depends on better terminal driver
 
   Other libraries:
     LIBRTL
 
-  "SRM"
+  "SRM", will be using Grub with ODS-2 support.
 
-  RMS, barely started, need more people.
-  "SRM" handling ODS-2
+  RMS
   Utilities COPY DIRECTORY etc
   VMS image support, linker+compiler support for images
   Kernel:
@@ -143,16 +165,16 @@ Detailed descriptions:
 	Mutexes
     SMP support
 
-  Clustering, SCA, MSCP etc
+  Clustering, SCA, MSCP etc. Base ourselves on the CMU IP stack engine?
   Ordinary security stuff.
   	Start with aiming at
 	http://www.nsa.gov/selinux/doc/inevitability/inevitability.html (not?)
 
-  Non-i386 support.
-  64-bit support.
+  Non-i386 support, will not be done.
+  64-bit support, AMD64.
 
   CRTL, we will continue to try to use libc etc? 
-  Editors, got edt from Ozone
+  Editors (got edt from Ozone), depends on better terminal driver and maybe SMG
   Volume shadowing
 
 ***************************************

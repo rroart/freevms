@@ -18,10 +18,7 @@ Make dep in linux is broken, so you might have to do make bzImage twice.
 
 NOTE on kernel config with VMS options:
 There is only one option, CONFIG_VMS (replaces and includes CONFIG_VMS_IO/MM)
-Warning: It might be a risky destructive option. FS write may be destructive.
-VMS IO works so far only on blockdevices, and the only blockdevices supported
-is the uml "harddisk" and on i386 only ide.
-Boot with init=/bin/sh or init=/vms\$common/sysexe/dcl
+Do not boot with init=/bin/sh.
 
 Example build i386:
 tar xzf freevms-0_1_2.tgz
@@ -42,14 +39,15 @@ make rootinstall
 make image (as root)
 make image-install (as root)
 make image-kernel-iomm (as root)
-(Then create a INET$CONFIG)
+(Then create an INET$CONFIG)
 (Then do the steps in NOTE on VFS ODS2 module autobuild, or equivalents)
 ./dcl/src/install.sh
 
+Next see the USE file (after compiling or installing bochs).
+
 Bochs:
 	Configure with at least 
-	--enable-debugger --enable-ne2000 --enable-cpu-level=6
-	maybe also with --enable-sse
+	--enable-debugger --enable-ne2000 --enable-cpu-level=6 --enable-sse
 
 Bochs use:
 	Use make image to make a floppy and disk image.
@@ -62,14 +60,6 @@ Bochs use:
 	found in /vms$common.
 	Use make image-kernel-iomm and image-kernel-noiomm to install
 	the CONFIG_VMS and non-CONFIG_VMS kernels, respectively.
-
-Bochsrc FreeVMS-related config:
-	floppya: 1_44=a.img, status=inserted
-	diskc: file="c.img", cyl=8, heads=255, spt=63
-	boot: a
-	ne2k: ioaddr=0x280, irq=9, mac=b0:c4:20:00:00:00, ethmod=linux, ethdev=eth0 (on c.img, on c2.img it must be different) 
-
-	ips: must be properly set to work. test yourself.
 
 NOTE on VFS ODS2 module autobuild:
 Use sarge (stable).
