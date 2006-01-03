@@ -1192,6 +1192,7 @@ X:	    {
 		};
 	    };
 	    };
+	    break;
 
 	case TVT$STATE_WILL:	// Process the WILL according to option state
 	    TVT_READ_WILL(TVT,CHR);
@@ -2398,8 +2399,8 @@ void TVT_SEND_SUBOP(TVT,OPTION,DATA_A,size)
 //
 	struct TVT$BLOCK * TVT;
     {
-      long i,
-	data = DATA_A;
+      long i;
+      char * data = &DATA_A;
 unsigned char
 	Char ;
 
