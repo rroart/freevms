@@ -8,6 +8,7 @@
 #include <ttytadef.h>
 #include <system_data_cells.h>
 #include <ttyrbdef.h>
+#include <tt2def.h>
 #include <ssdef.h>
 #include <irpdef.h>
 #include <dyndef.h>
@@ -82,12 +83,14 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
     bd->tty$w_rb_linoff--;
     break;
   case 5:
+    bd->tty$b_rb_rvffil=bd->tty$w_rb_txtoff-bd->tty$w_rb_linoff; // borrow
     bd->tty$w_rb_linoff=bd->tty$w_rb_txtoff;
     break;
   case 6:
     bd->tty$w_rb_linoff++;
     break;
   case 8:
+    bd->tty$b_rb_rvffil=bd->tty$w_rb_linoff; // borrow
     bd->tty$w_rb_linoff=0;
     break;
   case 127:
@@ -103,16 +106,24 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
 	bd_txt[i]=bd_txt[i+1];
     }
     break;
+  case 13:
+    {
+      bd_txt[bd->tty$w_rb_txtoff++]=*c;
+      bd_txt[bd->tty$w_rb_txtoff]=0;
+    }
+    break;
   default:
     {
       bd_txt[bd->tty$w_rb_linoff]=*c;
-      bd->tty$w_rb_txtoff++;
       bd->tty$w_rb_linoff++;
+      if (bd->tty$w_rb_linoff>bd->tty$w_rb_txtoff)
+	bd->tty$w_rb_txtoff = bd->tty$w_rb_linoff;
     }
     break;
   }
 
-  con$startio((int)*chr, u, (int)*CC);
+  if (u->ucb$l_devchar2&TT2$M_LOCALECHO)
+    con$startio((int)*chr, u, (int)*CC);
 
   // use tt_term etc instead?
   if (*c==13) {
