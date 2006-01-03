@@ -54,6 +54,7 @@
 #include<tt2def.h>
 #include<ttyvecdef.h>
 #include<ttydef.h>
+#include<ttyrbdef.h>
 
 #include<linux/blkdev.h>
 #include<linux/console.h>
@@ -103,7 +104,54 @@ void con$startio(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UN
 	con_put_char_alt(ucb, R3);
 	con$fdtwrite(ucb->ucb$l_irp,ctl$gl_pcb,ucb,0);
 #endif
-	myout(ucb, &R3, 1);
+	struct _tt_readbuf * bd = u->ucb$l_svapte;
+	int count = 1;
+	char * buf = &R3;
+	char stkbuf[64];
+
+	if (count==1) {
+	  switch (R3) {
+	  case 4:
+	    count=3;
+	    buf="\33[D";
+	    break;
+	  case 5:
+	    buf="\33[11C";
+	    sprintf(stkbuf,"\33[%dC",bd->tty$b_rb_rvffil);
+	    buf=stkbuf;
+	    count=strlen(buf);
+	    if (bd->tty$b_rb_rvffil==0)
+	      count=0;
+	    break;
+	  case 6:
+	    count=3;
+	    buf="\33[C";
+	    break;
+	  case 8:
+#if 0
+	    buf="\33[G";
+#else
+	    sprintf(stkbuf,"\33[%dD",bd->tty$b_rb_rvffil);
+	    buf=stkbuf;
+#endif
+	    count=strlen(buf);
+	    if (bd->tty$b_rb_rvffil==0)
+	      count=0;
+	    break;
+	  case 127:
+	    count=4;
+	    buf="\x8\33[P";
+	    break;
+	  }
+	}
+
+#if 0
+	for (;count;count--,buf++)
+	myout(ucb,buf,1);
+#else
+	if (count)
+	myout(ucb, buf, count);
+#endif
 	return SS$_NORMAL;
 #if 0
 	u->ucb$l_svapte=u->ucb$l_irp->irp$l_svapte; // workaround
@@ -325,7 +373,7 @@ void op$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, str
 
   ucb->ucb$l_devchar = DEV$M_REC | DEV$M_IDV | DEV$M_ODV | DEV$M_TRM | DEV$M_AVL | DEV$M_CCL /*| DEV$M_OOV*/;
 
-  ucb->ucb$l_devchar2 = DEV$M_NNM;
+  ucb->ucb$l_devchar2 = DEV$M_NNM | TT2$M_LOCALECHO;
   ucb->ucb$b_devclass = DC$_TERM;
   ucb->ucb$b_devtype = DT$_TTYUNKN;
   ucb->ucb$w_devbufsiz = 80;
