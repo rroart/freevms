@@ -1457,7 +1457,7 @@ static void reset_terminal(int currcons, int do_clear)
 	set_leds();
 #endif
 
-	cursor_type = CUR_DEFAULT;
+	cursor_type = CUR_DEF; // was -AULT
 	complement_mask = s_complement_mask;
 
 	default_attr(currcons);
@@ -2418,8 +2418,10 @@ static void con_flush_chars(struct _ucb *tty)
 {
 	struct vt_struct *vt;
 
+#if 0
 	if (in_interrupt())	/* from flush_to_ldisc */
 		return;
+#endif
 
 	pm_access(pm_con);
 	lock_kernel();
@@ -3192,6 +3194,8 @@ void myout(int tty, int p1, int p2) {
 	}
 	FLUSH
 	release_console_sem();
+
+	con_flush_chars(0);
 
 	return n;
 #undef FLUSH
