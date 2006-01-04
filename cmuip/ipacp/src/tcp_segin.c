@@ -1653,7 +1653,7 @@ struct segment_structure * SEG;
 	switch (OPTR->tcp$opt_kind)
 	  {
 	case TCP$OPT_KIND_EOL:	// End of options list
-	    break;
+	    goto exitloop;
 
 	case TCP$OPT_KIND_NOP:	// No-op option
 	    OPTR = (long)OPTR + 1;	// Advance pointer by one byte
@@ -1688,10 +1688,12 @@ struct segment_structure * SEG;
 		     "!%T ?Bad TCP option type !SL, size !SL for TCB !XL!/",
 		     0,OPTR->tcp$opt_kind,OPTR->tcp$opt_length,TCB);
 	    OPTR = (long)OPTR + OPTR->tcp$opt_length;
+	    goto exitloop;
 	    // not yet break;		// Can't procede, since length may not be valid
 	    };
 	};
 	};
+    exitloop:
     }
 
 //SBTTL "Decode-Segment: Figure out what to do with a network segment."
