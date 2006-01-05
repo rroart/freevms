@@ -5,7 +5,7 @@ EXTERNAL2 = ../../cdu/src/cdu2.a
 VMLINUX = ../../linux/vmlinux 
 LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux 
 
-all: i386/authorize${NOEXE} i386/authorize${EXE_ELF} uafgen
+all: i386/authorize${NOEXE} i386/authorize${EXE_ELF} uafgen i386/sysuaf.dat
 # i386/authorize${EXE} 
 
 clean:
