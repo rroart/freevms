@@ -71,6 +71,8 @@ int auth$show() {
   int sts = cli$present(&p);
   if (sts&1) {
     sts = cli$get_value(&p, &o, &retlen);
+    if (c[retlen-1]==13)
+      c[--retlen]=0;
     o.dsc$w_length=retlen;
   }
 

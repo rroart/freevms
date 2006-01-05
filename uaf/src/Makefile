@@ -5,7 +5,7 @@ EXTERNAL2 = ../../cdu/src/cdu2.a
 VMLINUX = ../../linux/vmlinux 
 LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux 
 
-all: i386/authorize${NOEXE} i386/authorize${EXE_ELF}
+all: i386/authorize${NOEXE} i386/authorize${EXE_ELF} uafgen
 # i386/authorize${EXE} 
 
 clean:
@@ -15,7 +15,7 @@ install: all
 	install -d ../../rootum/vms$$common/sysexe
 	install -d ../../rooti386/vms$$common/sysexe
 	install i386/authorize ../../rooti386/vms"$$"common/sysexe
-	install sysuaf.dat ../../rooti386/vms"$$"common/sysexe
+	install i386/sysuaf.dat ../../rooti386/vms"$$"common/sysexe
 
 OBJS = authmain.o auth_parse.o authshow.o authmisc.o
 
@@ -45,3 +45,9 @@ auth_parse.o: auth_parse.c
 auth_parse.c: auth_parse.cld
 	../../cdu/src/cdu auth_parse.cld
 
+uafgen: uafgen.o sysuaf.dat
+	gcc uafgen.o -o uafgen
+
+i386/sysuaf.dat: uafgen sysuaf.dat
+	install -d i386
+	./uafgen
