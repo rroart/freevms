@@ -877,7 +877,8 @@ unsigned long main (int argc, char *argv[])
 	//programmed with buffer overflow possibility
 	bzero(cmdbuf,CMDSIZ);
 #if 1
-	read(0,cmdbuf,CMDSIZ);
+	cmdlen = read(0,cmdbuf,CMDSIZ);
+	printf("\n");
 #else
       again:
 	read(1,&cmdbuf[idx],1);

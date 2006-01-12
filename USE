@@ -1,3 +1,5 @@
+Current as of FreeVMS 0.2.2.
+
 Bochsrc FreeVMS-related config:
 	floppya: 1_44=a.img, status=inserted
 	ata0-master: type=disk, path=c.img, cylinders=8, heads=255, spt=63
@@ -32,8 +34,7 @@ General utilities:
 
 DCL:
 	if not too much crashed, it can be rebooted with ctrl-p
-	exe images are now the default with commands
-	old fork/exec commands can be run with _ prefixed.
+	Ctrl-D/E/F/H and backspace also works.
 
 RUN/MCR:
 	use them as "usual"
@@ -130,8 +131,6 @@ Telnet:
 	Start with telnet.
 	do connect ipv4-address.
 	it is possible to telnet to another FreeVMS node, no other.
-	Note that with the CMUIP telnetd, there is I/O-problems with the
-	first line, so just press enter on it.
 
 System administration utilities:
 

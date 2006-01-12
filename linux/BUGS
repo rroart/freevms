@@ -42,7 +42,6 @@ The pseudo and console drivers may not always work properly.
 There are console driver problems with sh, use DCL.
 It bugs and loops with ast in ast.
 Telnet may not work for long.
-Telnet gets problems with the first input line.
 Telnet used with lib$put_output may bug the terminal i/o-system.
 RMS parse/do_parse not quite according to spec (manual), since open can
 not reset parse state.

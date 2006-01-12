@@ -4,7 +4,7 @@ Previous:
 0.1: ODS-2 grub support, kernel boot and dcl start.
 0.2: ODS-2 about as usable as Ext2.
 
-Next (A-G in more or less probable order)?:
+Next (A-H in more or less probable order)?:
 0.F: New cluster network engine, based on CMU IP stack engine.
 0.G. More CWPS
 0.E: A much more developed CLI 
@@ -12,6 +12,7 @@ Next (A-G in more or less probable order)?:
 0.D: DLM
 0.B: ODS-5 (FI5) and Unix compatibility.
 0.A: Security features.
+0.H: PAL (no 1.0 without it)
 1.0/2.0: FreeVMS being able to recompile itself on FreeVMS.
 
 FreeVMS tasklist
