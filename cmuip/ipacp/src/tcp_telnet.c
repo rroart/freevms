@@ -2142,7 +2142,7 @@ void MBX_READ_DONE(TVT)
 	    {
 	    XLOG$FAO(LOG$TCPERR,"!%T TVT hangup signal for TCB x!XL!/",
 		     0,TVT->TVT$TCB);
-	    tcp$tcb_close(TVT->TVT$TCB);
+	    tcp$tcb_close(&TVT->TVT$TCB);
 //	    AST_IN_PROGRESS = FALSE;
 //	    OKINT ;
 	    return;

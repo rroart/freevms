@@ -2527,7 +2527,7 @@ struct queue_blk_structure(qb_nr_fields) * QBN;
 	    {
 	    tcp$set_tcb_state(TCB,CS$CLOSE_WAIT);
 	    if ((TCB->is_aborted || TCB->is_tvt))
-		tcp$tcb_close(TCB);
+		tcp$tcb_close(&TCB);
 	    };
 	    break;
 

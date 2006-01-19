@@ -591,7 +591,7 @@ void Cancel_TCB( TCB , Idx , Uargs , P2)
 // Indicate TCB is aborted, and initiate a close on it
 
 	    TCB->is_aborted = TRUE;
-	    tcp$tcb_close(XTCB);
+	    tcp$tcb_close(&XTCB);
 	    if (XTCB != 0)
 		{
 		TCB->curr_user_function = M$CANCEL;
@@ -1567,7 +1567,7 @@ void tcp$close(struct user_close_args * Uargs)
 // Initiate close at TCP level.
 
     XTCB = TCB;
-    if ((RC=tcp$tcb_close(XTCB)) != 0)
+    if ((RC=tcp$tcb_close(&XTCB)) != 0)
 	{
 	USER$Err(Uargs,RC);	// Connection Closing.
 	return;
