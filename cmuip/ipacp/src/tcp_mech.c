@@ -726,7 +726,6 @@ TCB_Find(lclport,frnaddr,frnport)
     LP = lclport & 0xFFFF ;
     FP = frnport & 0xFFFF ;
     result=0;
-    cn_idx = Find_Local_Port(LP);
     if ((cn_idx = Find_Local_Port(LP)) != ERROR)
 	{
 	TCB = ConectPtr[cn_idx].CN$TCB_List; // point at TCB.
