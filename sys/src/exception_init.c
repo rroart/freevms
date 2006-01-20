@@ -82,6 +82,14 @@ int sys$hiber(void) {
 int sys$dclast(void (*astadr)(__unknown_params), unsigned long astprm, unsigned int acmode) {
   return INLINE_SYSCALL($dclast,3,astadr,astprm,acmode);
 }
+
+int sys$setast(char enbflg) {
+  return INLINE_SYSCALL($setast,1,((unsigned long)enbflg));
+}
+
+int sys$dassgn(unsigned short int chan) {
+  return INLINE_SYSCALL($dassgn,1,chan); 
+}
 #endif
 
 #ifdef __arch_um__

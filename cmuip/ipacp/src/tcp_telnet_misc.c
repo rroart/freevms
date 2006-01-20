@@ -1061,7 +1061,7 @@ void Set_DEVDEP_DONE(TVT)
 
 	XLOG$FAO(LOG$TELNEG,"!%T Set_DEVDEP_Done:!/",0);
 	if (*tty_chan == 0) return(SS$_NORMAL);
-	Status = exe$dassgn (*tty_chan);
+	Status = sys$dassgn (*tty_chan);
 	if (! Status)
 		    XLOG$FAO(LOG$TELERR
 		    ,"!%T Set_DEVDEP_Done: DASSGN status=!UL!/",0,Status);
@@ -1288,7 +1288,7 @@ void set_devdep(TVT)
 		 {
 		    XLOG$FAO(LOG$TELERR
 			,"!%T Set_DEVDEP: SETMODE TTY status=!UL!/",0,Status);
-		    Status = exe$dassgn ( tty_chan);
+		    Status = sys$dassgn ( tty_chan);
 		    TVT->TVT$TTY_CHN = 0; // was: tty_chan = 0;
 		};
 	    };

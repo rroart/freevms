@@ -249,9 +249,9 @@ static int inline FATAL$FAO(char *c, ...) {
 // If AST_IN_Progress then don't bother with AST blocking as AST will block
 // delivery of other AST as same access mode.
 
-#define    DISABLE_AST exe$setast(0);
+#define    DISABLE_AST sys$setast(0);
 
-#define    ENABLE_AST exe$setast(1);
+#define    ENABLE_AST sys$setast(1);
 
 // Enable/disable interrupts (AST's). These are the macros that should
 // really be used, since they restore the AST state to its previous value

@@ -1106,7 +1106,7 @@ struct user_send_args * Sargs;
     expr[0] = 5*TIMER_DELTA;	// 5 seconds in Delta time format.
     expr[1] = -1;
     exe$schdwk(0,0,expr,0);
-    exe$hiber();	// check		// Make sure ALL IO has been queued.
+    sys$hiber();	// check		// Make sure ALL IO has been queued.
 
 // Purge User request queue.
 // Special case M$Cancel as the IRP came from the IP: driver cancel routine
