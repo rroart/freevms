@@ -1836,7 +1836,7 @@ static struct _ddt pn$ddt = {
   ddt$l_start: PN$STARTIO,
   ddt$l_unsolint: unsolint,
   ddt$l_fdt: &pn$fdt,
-  ddt$l_cancel: 0,
+  ddt$l_cancel: PN$CANCEL,
   ddt$l_regdump: regdump,
   ddt$l_diagbuf: diagbuf,
   ddt$l_errorbuf: errorbuf,
