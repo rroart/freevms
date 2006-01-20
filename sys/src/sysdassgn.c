@@ -18,7 +18,9 @@ asmlinkage int exe$dassgn(unsigned short int chan) {
   int sts = ioc$verify_chan(chan, &ccb);
   if ((sts & 1) == 0) 
     return sts;
-  // call exe$canceln, which is not yet implemented
+  // call exe$canceln, but not implemented, do $cancel instead
+  // cancel is according to the book going to get the code, but how?
+  sts = exe$cancel(chan, 0 /*CAN$C_DASSGN*/); // does not read param
   // call verify_chan again, in case of asts
   // check ccb$l_wind and close the file
   // check ccb$w_ioc to see if outstanding io

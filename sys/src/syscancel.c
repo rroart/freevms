@@ -47,6 +47,7 @@ asmlinkage int exe$cancel(unsigned short int chan) {
     ddt=ucb->ucb$l_ddt;
     f=ddt->ddt$l_cancel;
     f(irp,pcb,ucb,ccb);
+  // cancel is according to the book going to get the code from $canceln, but how?
   }
   setipl(0);
   return SS$_NORMAL;
