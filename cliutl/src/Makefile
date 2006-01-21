@@ -2,10 +2,12 @@
 # $Locker$
 
 EXTERNAL2 = ../../cdu/src/cdu2.a
+VMLINUX = ../../linux/vmlinux 
+LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux 
 
 FLAGS = -static
 
-all: set.a show.a i386/create${NOEXE} i386/create${EXE} i386/create${EXE_ELF} um/create${NOEXE} um/create${EXE} um/create${EXE_ELF} i386/type${NOEXE} i386/type${EXE} i386/type${EXE_ELF} um/type${NOEXE} um/type${EXE} um/type${EXE_ELF}
+all: set.a show.a i386/create${NOEXE} i386/create${EXE} i386/create${EXE_ELF} um/create${NOEXE} um/create${EXE} um/create${EXE_ELF} i386/type${NOEXE} i386/type${EXE} i386/type${EXE_ELF} um/type${NOEXE} um/type${EXE} um/type${EXE_ELF} i386/show${NOEXE}
 
 clean:
 	rm *.o *.a i386/* um/*
@@ -15,6 +17,7 @@ install: all
 	install -d ../../rooti386/vms"$$"common/sysexe
 	install um/*.* ../../rootum/vms"$$"common/sysexe/
 	install i386/*.* ../../rooti386/vms"$$"common/sysexe
+	install i386/show ../../rooti386/vms"$$"common/sysexe
 
 setproces: setproces.o
 	gcc -o setproces setproces.o ../../starlet/src/vmsopt.a $(VMSLIBS)
@@ -22,8 +25,8 @@ setproces: setproces.o
 set.a: setproces.o setwork.o
 	ar r set.a setproces.o setwork.o
 
-show.a: showsystem.o showdevice.o showwork.o showlog.o
-	ar r show.a showsystem.o showdevice.o showwork.o showlog.o
+show.a: showsystem.o showdevice.o showwork.o showlog.o showmemory.o misc.o
+	ar r show.a showsystem.o showdevice.o showwork.o showlog.o showmemory.o misc.o
 
 %.o: %.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
@@ -72,3 +75,7 @@ um/type${EXE_ELF}: $(VMSLIBSUM) type.o $(EXTERNAL2)
 um/type${EXE}: $(VMSLIBSUM) type.o
 	install -d um
 	$(LINKER) $(LINKPRE) type.o $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o um/type${EXE}
+
+i386/show${NOEXE}: show.a showmain.o $(VMLINUX)
+	install -d i386
+	gcc -g -static showmain.o show.a -lc $(VMSLIBS) $(EXTERNAL2) $(LINKVMLINUX) -o i386/show${NOEXE}

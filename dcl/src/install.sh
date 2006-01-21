@@ -30,6 +30,7 @@ $INSTALL ../rooti386/vms\$common/sysexe/sda /mnt/vms\$common.dir/sysexe.dir/sda.
 $INSTALL ../rooti386/vms\$common/sysexe/startup.com /mnt/vms\$common.dir/sysexe.dir/
 $INSTALL ../rooti386/vms\$common/sysexe/sysuaf.dat /mnt/vms\$common.dir/sysexe.dir/
 $INSTALL ../rooti386/vms\$common/sysexe/type.exe /mnt/vms\$common.dir/sysexe.dir/
+$INSTALL ../rooti386/vms\$common/sysexe/show /mnt/vms\$common.dir/sysexe.dir/show.
 [ -f ../rooti386/vms\$common/sysexe/telnet ] && $INSTALL ../rooti386/vms\$common/sysexe/telnet /mnt/vms\$common.dir/sysexe.dir/telnet.
 $INSTALL ../rooti386/vms\$common/sysexe/vmount.exe /mnt/vms\$common.dir/sysexe.dir/
 $INSTALL ../rooti386/vms\$common/syslib/starlet.ele /mnt/vms\$common.dir/syslib.dir/
