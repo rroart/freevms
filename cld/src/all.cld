@@ -69,6 +69,10 @@ define syntax show_devices
 define syntax show_working_set
 	cliroutine show_working_set
 
+define syntax show_memory
+	image show_ele
+	routine show_memory
+
 define syntax set_default
 	cliroutine set_default
 	parameter p1
@@ -103,6 +107,7 @@ define type show_something
 	keyword time, syntax = show_time
 	keyword devices, syntax = show_devices
 	keyword working_set, syntax = show_working_set
+	keyword memory, syntax = show_memory
 
 define verb set
 	parameter p1,label=something,value(type=set_something)
