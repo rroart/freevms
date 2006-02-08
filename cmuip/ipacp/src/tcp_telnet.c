@@ -785,8 +785,8 @@ void TELNET_CLOSE(TCB)
 
 	NOINT;
 	TVT->TVT$CANCEL = TRUE;
-	exe$dassgn(TVT->TVT$PTY_CHN);
-	exe$dassgn(TVT->TVT$MBX_CHN);
+	sys$dassgn(TVT->TVT$PTY_CHN);
+	sys$dassgn(TVT->TVT$MBX_CHN);
 	sys$dclast(TELNET_CLOSE_DONE,
 		TVT);
 	OKINT;
