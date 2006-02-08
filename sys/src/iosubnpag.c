@@ -60,7 +60,12 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   setipl(IPL$_IOPOST);
   
   qemp=rqempty(&ioc$gq_postiq);
+  long * l2=&ioc$gq_postiq;
+  long l=((long)l2)+(*l2);
+  if (i==l)
+    goto skip_it;
   insqti(i,&ioc$gq_postiq);
+ skip_it:
   if (!qemp) goto notempty;
 
   if (smp_processor_id()==0) {
