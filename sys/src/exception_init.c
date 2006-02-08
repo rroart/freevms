@@ -28,6 +28,7 @@ int exe$synch(unsigned int efn, struct _iosb *iosb) {
 }
 
 int exe$clrast(void) {
+  return cmod$astexit(); // check. should be system call?
   printk("this does not work yet (how to implement?), and is strongly discouraged in real VMS too\n");
 }
 
@@ -89,6 +90,10 @@ int sys$setast(char enbflg) {
 
 int sys$dassgn(unsigned short int chan) {
   return INLINE_SYSCALL($dassgn,1,chan); 
+}
+
+int sys$clrast() {
+  return INLINE_SYSCALL($clrast,0); 
 }
 #endif
 
