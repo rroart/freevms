@@ -897,6 +897,9 @@ static int init(void * unused)
 {
 	lock_kernel();
 #ifdef CONFIG_VMS
+	user_spaceable();
+#endif
+#ifdef CONFIG_VMS
 	xqp_init2();
 	extern void * global_e2_vcb;
 	exttwo_init2(global_e2_vcb);

@@ -385,6 +385,33 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
   return uml_map;
 }
 
+#ifdef CONFIG_VMS
+int user_spaceable() {
+  struct _pcb * pcb = ctl$gl_pcb;
+  extern int exe$astdel();
+  pgd_t *pgd;
+  pmd_t *pmd;
+  pte_t *pte = 0;
+
+  long page=exe$astdel;
+
+  struct mm_struct * mm=pcb->mm;
+
+  pgd = pgd_offset(mm, page);
+  pmd = pmd_alloc(mm, pgd, page);
+  if (pmd) {
+    pte = pte_alloc(mm, pmd, page);
+  }
+  if (pte) {
+    long * ptep = pte;
+    *ptep|=_PAGE_USER;
+    ptep=pmd;
+    *ptep|=_PAGE_USER;
+    flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
+  }
+}
+#endif
+
 #define P1PP __attribute__ ((section ("p1pp")))
 
 unsigned short ctl$gw_nmioch P1PP ;
