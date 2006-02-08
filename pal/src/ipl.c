@@ -172,6 +172,8 @@ inline void regtrap(char type, char param) {
   /* remember to disable interrupt during this */
   int flag=mycli();
   int cpu=smp_processor_id();
+  int saved_psl_is=current->psl_is;
+  int saved_psl_ipl=current->psl_ipl;
   pushpsl(); /* should be at the end of this  */
   switch (type) {
   case REG_INTR:
@@ -188,6 +190,9 @@ inline void regtrap(char type, char param) {
     current->psl_prv_mod=current->psl_cur_mod;
     current->psl_cur_mod=param;
     /*  not fully implemented */
+    current->psl_is=saved_psl_is;
+    current->psl_ipl=saved_psl_ipl;
+    smp$gl_cpu_data[cpu]->cpu$b_ipl=current->psl_ipl;
     break;
     
   default:
