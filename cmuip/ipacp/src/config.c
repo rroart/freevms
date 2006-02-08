@@ -382,7 +382,7 @@ extern 	void QL_FAO();
     IPACP_Int ->  ACPI$Sleeping  	= sleeping;
 
     // pointer to IPACP AST_in_progress flag
-    IPACP_Int ->  ACPI$AST_in_progress  	= ast_in_progress;
+    IPACP_Int ->  ACPI$AST_in_progress  	= &ast_in_progress;
 
     // Interrupt blocking routines
     IPACP_Int ->  ACPI$NOINT 		= MAIN$NOINT;

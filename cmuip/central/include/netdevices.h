@@ -61,7 +61,7 @@
 
 
 /* pointer to the IPACP's AST_in_progress flag */
-#define DRV$AST_IN_PROGRESS (IPACP_Interface->ACPI$AST_in_progress)
+#define DRV$AST_IN_PROGRESS (*IPACP_Interface->ACPI$AST_in_progress)
 
 
 /* Interrupt blocking routines */
