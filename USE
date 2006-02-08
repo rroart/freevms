@@ -1,4 +1,4 @@
-Current as of FreeVMS 0.2.2.
+Current as of FreeVMS 0.2.3.
 
 Bochsrc FreeVMS-related config:
 	floppya: 1_44=a.img, status=inserted
@@ -8,6 +8,9 @@ Bochsrc FreeVMS-related config:
 	ne2k: ioaddr=0x280, irq=9, mac=b0:c4:20:00:00:00, ethmod=linux, ethdev=eth0 (on c.img, on c2.img it must be different) 
 
 	ips: must be properly set to work. test yourself.
+
+Qemu use:
+	qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio
 
 The default is DCL for CONFIG_VMS mode.
 
@@ -81,6 +84,9 @@ SHOW DEVICES:
 	show devices
 	386 ide devices partitions show up as dqa0 etc. (hdb2 -> dqb2 etc)
 
+SHOW MEMORY:
+	show memory
+
 SHOW SYSTEM:
 	show system
 
@@ -131,6 +137,9 @@ Telnet:
 	Start with telnet.
 	do connect ipv4-address.
 	it is possible to telnet to another FreeVMS node, no other.
+	When using the local CMUIP telnet client, there is now more
+	negotiations, and this may trigger errors due to missing
+	initializations in the original code.
 
 System administration utilities:
 

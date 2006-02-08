@@ -45,6 +45,8 @@ Check global pages paging, creating and deleting.
 Put RMS ifab/irab in P1.
 Put ctl$gl_ccb_table in P1.
 More P1 space.
+Check whether it was wise having the kernel text readable for exe$astdel.
+Why is there no need for iret at the end of exe$astdel?
 
 Input/output:
 Make echoing work in putnextchar (right before reqcom)
