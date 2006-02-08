@@ -165,6 +165,7 @@ asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int f
   bzero(i,sizeof(struct _irp));
   i->irp$b_type=DYN$C_IRP;
   i->irp$b_efn=efn;
+  i->irp$b_rmod=p->psl_prv_mod;
   i->irp$l_ast=astadr;
   i->irp$l_astprm=astprm;
   i->irp$l_iosb=iosb;
