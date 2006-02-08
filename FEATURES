@@ -2,7 +2,8 @@ The following features are present, from partially to fully implemented.
 
 Supported hardware configuration:
 	Console: VGA
-	Network interfaces: ne2k and 3c900 (3c905/3c590 might work, untested)
+	Network interfaces: ne2k and ne2k-pci
+			    3c900 (3c905/3c590 might work, untested)
 	Disk interface: IDE
 
 Core kernel features:
