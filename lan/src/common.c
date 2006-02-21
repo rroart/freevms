@@ -40,6 +40,8 @@
 #include "../../cmuip/ipacp/src/xedrv.h"
 #include "../../cmuip/central/include/netconfig.h"
 
+char * mydevice = 0;
+
 #define LAN_DEBUG
 #undef LAN_DEBUG
 
@@ -724,8 +726,10 @@ config_in_dev(struct in_device ** in) {
   in_dev->ifa_list=in_ifa;
   if (!in_dev)
     return NULL;
+#if 0
   in_ifa-> ifa_address = dev_config_tab[0].dc_ip_address;
   in_ifa-> ifa_mask = dev_config_tab[0].dc_ip_netmask;
+#endif
 }
 
 struct net_device mynetdevice;
