@@ -1743,7 +1743,7 @@ tcp$send_data(struct tcb_structure * tcb)
     if (tcb->snd_q_count < tcb->snd_q_size)
 	{
 	qb = tcb->snd_qhead;
-	while (qb != tcb->snd_qhead)
+	while (qb != &tcb->snd_qhead)
 	    {
 	    signed long
 	      nqb;
