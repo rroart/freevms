@@ -386,21 +386,19 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 }
 
 #ifdef CONFIG_VMS
-int user_spaceable() {
+int user_spaceable_addr(void * addr) {
   struct _pcb * pcb = ctl$gl_pcb;
-  extern int exe$astdel();
   pgd_t *pgd;
   pmd_t *pmd;
   pte_t *pte = 0;
-
-  long page=exe$astdel;
+  long page=addr;
 
   struct mm_struct * mm=pcb->mm;
 
   pgd = pgd_offset(mm, page);
-  pmd = pmd_alloc(mm, pgd, page);
+  pmd = pmd_offset(pgd, page);
   if (pmd) {
-    pte = pte_alloc(mm, pmd, page);
+    pte = pte_offset(pmd, page);
   }
   if (pte) {
     long * ptep = pte;
@@ -409,6 +407,17 @@ int user_spaceable() {
     *ptep|=_PAGE_USER;
     flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
   }
+}
+
+int user_spaceable() {
+  extern int exe$astdel();
+  user_spaceable_addr(exe$astdel);
+  user_spaceable_addr(&exe$gq_systime);
+#if 0
+  extern struct desc_struct gdt_table[];
+  long long * l=&gdt_table[2];
+  *l|=0x0000600000000000;
+#endif
 }
 #endif
 
