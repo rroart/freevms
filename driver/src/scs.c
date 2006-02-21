@@ -635,7 +635,8 @@ int nisca_snt_dg (char * buf) {
   {
     void (*fn)(void *,void *,void *);
 #if 0
-    int savipl=setipl(0); // still something funny someplace
+    int savipl=getipl();
+    setipl(0); // still something funny someplace
     int savis=current->psl_is;
     current->psl_is=0;
 #endif
@@ -652,7 +653,8 @@ int nisca_snt_dg (char * buf) {
   if (basic->mscp$b_opcode == MSCP$K_OP_END) {
     du_dg(addr,cdt,0);
   } else {
-    int savipl=setipl(0); // still something funny someplace
+    int savipl=getipl();
+    setipl(0); // still something funny someplace
     int savis=current->psl_is;
     current->psl_is=0;
     mscplisten(addr,cdt,0);
@@ -1017,7 +1019,8 @@ int do_opc_dispatch(struct sk_buff *skb)
 }
 
 #ifdef CONFIG_VMS
-extern signed long XE_BROADCAST[];
+//extern signed long XE_BROADCAST[];
+signed long XE_BROADCAST[3]= { -1 , -1 , -1}; // check
 
 scs_startdev ( scs_int2 , setflag , setaddr)
 
