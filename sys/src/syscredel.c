@@ -40,7 +40,8 @@ int vava=0;
 int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
 #ifdef CONFIG_VMS
   //spinlock  , too
-  int savipl=setipl(IPL$_MMG);
+  int savipl=getipl();
+  setipl(IPL$_MMG);
   if ((unsigned long)va>=0x3ff000) {
     //   vava=1;
   }
