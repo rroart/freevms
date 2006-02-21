@@ -1,4 +1,6 @@
-Current as of FreeVMS 0.2.3.
+Current as of FreeVMS 0.2.4.
+	Warning: there may be some more unstability compared to 0.2.3
+	due to changes in AST system and modes to resemble VMS more.
 
 Bochsrc FreeVMS-related config:
 	floppya: 1_44=a.img, status=inserted
