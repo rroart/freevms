@@ -966,8 +966,30 @@ static int init(void * unused)
 	probe_units();
 	if (mydevice==0)
 	  printk("%%KERNEL-I-DEBUG, No network module. Can not start IPACP.\n");
+#if 0
 	else
 	  kernel_thread(Main, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
+#else
+	if (1) {
+#if 0
+	  $DESCRIPTOR(image,"[vms$common.sysexe]ipacp");
+	  $DESCRIPTOR(out,"SYS$OUTPUT");
+#else
+	  $DESCRIPTOR(image_1,"[vms$common.sysexe]ipacp");
+	  $DESCRIPTOR(image_2,"/vms$common/sysexe/ipacp");
+	  struct dsc$descriptor * image;
+	  if (mount_root_vfs)
+	    image = &image_2;
+	  else
+	    image = &image_1;
+	  $DESCRIPTOR(out,"opa0:");
+#endif
+	  $DESCRIPTOR(name,"IPACP");
+	  
+	  long long priv = -1;
+	  exe$creprc(0,image,0,&out,&out,&priv,0,&name,8,0x40001,0,PRC$M_NOUAF);
+	}
+#endif
 	if (mydevice==0)
 	  printk("%%KERNEL-I-DEBUG, No network module. Can not start clustering.\n");
 	else {
