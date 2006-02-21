@@ -257,6 +257,8 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 
 	//check if ipl>2 bugcheck
 
+        if (address==0x5a5a5a5a)
+          die("5a\n",regs,error_code);
 	if (address==0x5a5a5a5a)
 	  panic("poisoned\n");
 
@@ -270,10 +272,11 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	  return;
 
 	regtrap(REG_INTR,IPL$_MMG);
+#endif
 
 	setipl(IPL$_MMG);
 	//spin_lock(&SPIN_SCHED);
-#endif
+
 	//some linux stuff
 	tsk = current;
 
