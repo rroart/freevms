@@ -30,6 +30,7 @@ Call sys$cli for lib$get_foreign?
 CPU/PAL:
 FIX pal
 Use 2 other cpu modes.
+Use regtrap default for others.
 
 Scheduling:
 Schedule code cleanup.

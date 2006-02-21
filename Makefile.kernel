@@ -1,7 +1,7 @@
 VERSION = 2
 PATCHLEVEL = 4
 SUBLEVEL = 18
-EXTRAVERSION = -FreeVMS_0_2_3
+EXTRAVERSION = -FreeVMS_0_2_4
 
 KERNELRELEASE=$(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
 
@@ -121,14 +121,14 @@ export SVGA_MODE = -DSVGA_MODE=NORMAL_VGA
 
 #export RAMDISK = -DRAMDISK=512
 
-CORE_FILES	=linux/kernel/kernel.o linux/mm/mm.o linux/fs/fs.o linux/ipc/ipc.o sys/src/sys.o driver/src/driver.o mscp/src/mscp_.o sysloa/src/sysloa.o rms/src/rms_.o mount/src/mount.o f11x/src/f11x.o pal/src/pal.o ptd/src/ptd.o cmuip/ipacp/src/ipacp.o jobctl/src/jobctl.o boots/src/boots.o
+CORE_FILES	=linux/kernel/kernel.o linux/mm/mm.o linux/fs/fs.o linux/ipc/ipc.o sys/src/sys.o driver/src/driver.o mscp/src/mscp_.o sysloa/src/sysloa.o rms/src/rms_.o mount/src/mount.o f11x/src/f11x.o pal/src/pal.o ptd/src/ptd.o jobctl/src/jobctl.o boots/src/boots.o
 ifdef CONFIG_VMS
 CORE_FILES	+=ext2/src/exttwo.o ttdrvr/src/ttdrvr.o cmuip/ipdriver/src/ipdriver_.o lan/src/lan.o
 endif
 NETWORKS	=linux/net/network.o
 
 LIBS		=$(TOPDIR)/linux/lib/lib.a
-SUBDIRS		=linux/kernel linux/drivers linux/mm linux/fs linux/net linux/ipc linux/lib sys/src driver/src mscp/src sysloa/src rms/src mount/src f11x/src pal/src ext2/src ttdrvr/src cmuip/ipdriver/src cmuip/ipacp/src lan/src ptd/src jobctl/src boots/src
+SUBDIRS		=linux/kernel linux/drivers linux/mm linux/fs linux/net linux/ipc linux/lib sys/src driver/src mscp/src sysloa/src rms/src mount/src f11x/src pal/src ext2/src ttdrvr/src cmuip/ipdriver/src lan/src ptd/src jobctl/src boots/src
 
 DRIVERS-n :=
 DRIVERS-y :=
