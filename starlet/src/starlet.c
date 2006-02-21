@@ -102,6 +102,10 @@ int sys$schdwk(unsigned int *pidadr, void *prcnam, signed long long * daytim, si
   return INLINE_SYSCALL($schdwk,4,pidadr,prcnam,daytim,reptim);
 }
 
+int sys$canwak(unsigned int *pidadr, void *prcnam) {
+  return INLINE_SYSCALL($canwak,2,pidadr,prcnam);
+}
+
 int sys$gettim (unsigned long long * timadr) {
   return INLINE_SYSCALL($gettim,1,timadr);
 }
@@ -124,6 +128,10 @@ int sys$exit(unsigned int code) {
 
 int sys$forcex(unsigned int *pidadr, void *prcnam, unsigned int code) {
   return INLINE_SYSCALL($forcex,3,pidadr,prcnam,code);
+}
+
+int sys$setrwm(int flags) {
+  return INLINE_SYSCALL($setrwm,1,flags);
 }
 
 int sys$setef(unsigned int efn) {
@@ -359,6 +367,10 @@ int sys$getjpiw(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itm
   return INLINE_SYSCALL($getjpiw,1,&s);
 }
 
+int sys$sndopr(void *msgbuf, unsigned short int chan) {
+  return INLINE_SYSCALL($sndopr,2,msgbuf,(int)chan);
+}
+
 int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, unsigned long long *nullarg) {
   struct struct_getdvi s;
   s.efn=efn;
@@ -517,9 +529,17 @@ int sys$cancel (unsigned short int chan) {
   return INLINE_SYSCALL($cancel,1,(int)chan);
 }
 
-int sys$cmkrnl(int (*routin)(__unknown_params), unsigned int *arglst) {
+int sys$cmkrnl(int (*routin)(), unsigned int *arglst) {
   return INLINE_SYSCALL($cmkrnl,2,routin,arglst);
 }
+
+int sys$asctoid(void *name, unsigned int *id, unsigned int *attrib) {
+  return INLINE_SYSCALL($asctoid,3,name,id,attrib);
+} 
+     
+int sys$find_held  (struct _generic_64 *holder, unsigned int *id, unsigned int *attrib, unsigned int *contxt) {
+  return INLINE_SYSCALL($find_held,4,holder,id,attrib,contxt);
+}     
 
 int sys$setddir (void * newdiraddr, unsigned short int * lengthaddr, void * curdiraddr) { return INLINE_SYSCALL1($setddir,3,newdiraddr,lengthaddr,curdiraddr); }
 int sys$close (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($close,3,fab,err,suc); }

@@ -32,7 +32,7 @@ obj-y     = sched.o \
 	    pagefile.o comdrvsub.o syscancel.o swapper.o syssndmsg.o \
 	    shell.o memoryalc.o look_aside_list.o memoryalc_dyn.o \
 	    memoryalc_pool.o syscli.o syschgmod.o \
-	    system_service_dispatcher.o
+	    system_service_dispatcher.o vmslib.o
 
 ifeq ($(CONFIG_VMS),y)
 export-objs := vmsfilemap.o vmsbuffer.o

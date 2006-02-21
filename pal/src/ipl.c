@@ -36,6 +36,10 @@ inline asmlinkage void setpsli(void) {
   ctl$gl_pcb->psl_intr=1;
 }
 
+inline void setpslmod(int mod) {
+  ctl$gl_pcb->psl_cur_mod=ctl$gl_pcb->psl_prv_mod=mod&3; // check. pretend user mode
+}
+
 inline asmlinkage void pushpsli(void) {
   pushpsl();
 #if 0
