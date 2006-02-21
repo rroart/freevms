@@ -121,6 +121,11 @@ ENOSYS = 38
 	call setpsli; \
         POPR_ALL; 
 
+#define PSLINTR \
+        PUSHR_ALL; \
+	call setpsli; \
+        POPR_ALL; 
+
 #define REI \
         PUSHR_ALL; \
         call myrei; \
@@ -236,7 +241,7 @@ ENTRY(ret_from_fork)
  */
 
 ENTRY(system_call)
-        PUSHPSLINTR
+#        PUSHPSLINTR
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -244,6 +249,14 @@ ENTRY(system_call)
 	jne tracesys
 	cmpl $(NR_syscalls),%eax
 	jae badsys
+	pushl %eax
+	pushl $0x0
+	pushl $0x1
+	call regtrap
+	call setpsli	
+	popl %eax
+	popl %eax
+	popl %eax
 	call *SYMBOL_NAME(sys_call_table)(,%eax,4)
 	movl %eax,EAX(%esp)		# save the return value
 ENTRY(ret_from_sys_call)
@@ -300,7 +313,7 @@ ret_from_exception:
 
 
 ENTRY(vmssystem_call3)
-        PUSHPSLINTR
+#        PUSHPSLINTR
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -308,11 +321,19 @@ ENTRY(vmssystem_call3)
 	jne vmstracesys
 	cmpl $(NR_vmssyscalls3),%eax
 	jae vmsbadsys
+	pushl %eax
+	pushl $0x3
+	pushl $0x1
+	call regtrap
+	call setpsli	
+	popl %eax
+	popl %eax
+	popl %eax
 	call *SYMBOL_NAME(vmssys_call_table3)(,%eax,4)
         jmp syscall_common
 
 ENTRY(vmssystem_call1)
-        PUSHPSLINTR
+#        PUSHPSLINTR
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -320,11 +341,19 @@ ENTRY(vmssystem_call1)
 	jne vmstracesys
 	cmpl $(NR_vmssyscalls1),%eax
 	jae vmsbadsys
+	pushl %eax
+	pushl $0x1
+	pushl $0x1
+	call regtrap
+	call setpsli	
+	popl %eax
+	popl %eax
+	popl %eax
 	call *SYMBOL_NAME(vmssys_call_table1)(,%eax,4)
         jmp syscall_common
 
 ENTRY(vmssystem_call)
-        PUSHPSLINTR
+#        PUSHPSLINTR
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -346,6 +375,14 @@ do_minus2:
 	subl $0x7,0x28(%esp)
 normal_call:		
 	*/
+	pushl %eax
+	pushl $0x0
+	pushl $0x1
+	call regtrap
+	call setpsli	
+	popl %eax
+	popl %eax
+	popl %eax
 	call *SYMBOL_NAME(vmssys_call_table)(,%eax,4)
 syscall_common:
         movl %eax,EAX(%esp)		# save the return value
@@ -401,7 +438,7 @@ vmsret_from_exception:
 	jmp vmsrestore_all
 
 ENTRY(divide_error)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0		# no error code
 	pushl $ SYMBOL_NAME(do_divide_error)
 	ALIGN
@@ -423,6 +460,14 @@ error_code:
 	movl %eax, ORIG_EAX(%esp)
 	movl %ecx, ES(%esp)
 	movl %esp,%edx
+	pushl %eax
+	pushl $0x10
+	pushl $0x0
+	call regtrap
+	call setpsli	
+	popl %eax
+	popl %eax
+	popl %eax
 	pushl %esi			# push the error code
 	pushl %edx			# push the pt_regs pointer
 	movl $(__KERNEL_DS),%edx
@@ -434,13 +479,13 @@ error_code:
 	jmp ret_from_exception
 
 ENTRY(coprocessor_error)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_coprocessor_error)
 	jmp error_code
 
 ENTRY(simd_coprocessor_error)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_simd_coprocessor_error)
 	jmp error_code
@@ -462,7 +507,7 @@ device_not_available_emulate:
 	jmp ret_from_exception
 
 ENTRY(debug)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_debug)
 	jmp error_code
@@ -479,78 +524,78 @@ ENTRY(nmi)
 	RESTORE_ALL
 
 ENTRY(int3)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_int3)
 	jmp error_code
 
 ENTRY(overflow)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_overflow)
 	jmp error_code
 
 ENTRY(bounds)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_bounds)
 	jmp error_code
 
 ENTRY(invalid_op)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_invalid_op)
 	jmp error_code
 
 ENTRY(coprocessor_segment_overrun)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_coprocessor_segment_overrun)
 	jmp error_code
 
 ENTRY(double_fault)
-        PUSHPSL
+#        PUSHPSL
 	pushl $ SYMBOL_NAME(do_double_fault)
 	jmp error_code
 
 ENTRY(invalid_TSS)
-        PUSHPSL
+#        PUSHPSL
 	pushl $ SYMBOL_NAME(do_invalid_TSS)
 	jmp error_code
 
 ENTRY(segment_not_present)
-        PUSHPSL
+#        PUSHPSL
 	pushl $ SYMBOL_NAME(do_segment_not_present)
 	jmp error_code
 
 ENTRY(stack_segment)
-        PUSHPSL
+#        PUSHPSL
 	pushl $ SYMBOL_NAME(do_stack_segment)
 	jmp error_code
 
 ENTRY(general_protection)
-        PUSHPSL
+#        PUSHPSL
 	pushl $ SYMBOL_NAME(do_general_protection)
 	jmp error_code
 
 ENTRY(alignment_check)
-        PUSHPSL
+#        PUSHPSL
 	pushl $ SYMBOL_NAME(do_alignment_check)
 	jmp error_code
 
 ENTRY(page_fault)
-        PUSHPSLINTR
+#        PUSHPSLINTR
 	pushl $ SYMBOL_NAME(do_page_fault)
 	jmp error_code
 
 ENTRY(machine_check)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_machine_check)
 	jmp error_code
 
 ENTRY(spurious_interrupt_bug)
-        PUSHPSL
+#        PUSHPSL
 	pushl $0
 	pushl $ SYMBOL_NAME(do_spurious_interrupt_bug)
 	jmp error_code
@@ -998,6 +1043,7 @@ ENTRY(vmssys_call_table)
 	.long SYMBOL_NAME(exe$setprv)
 	.long SYMBOL_NAME(exe$cancel)
 	.long SYMBOL_NAME(exe$getjpiw_wrap)
+	.long SYMBOL_NAME(exe$sndopr)
 
 	.rept NR_vmssyscalls-(.-vmssys_call_table)/4
 		.long SYMBOL_NAME(sys_$ni_syscall)

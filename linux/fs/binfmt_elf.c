@@ -821,6 +821,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	ELF_PLAT_INIT(regs);
 #endif
 
+	current->pslstk[current->pslindex-1]|=(3<<2 | 3);
 	start_thread(regs, elf_entry, bprm->p);
 	if (current->ptrace & PT_PTRACED)
 		send_sig(SIGTRAP, current, 0);

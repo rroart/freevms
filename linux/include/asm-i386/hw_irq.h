@@ -220,6 +220,16 @@ extern char _stext, _etext;
         "call pushpsli\n\t" \
         POPR_ALL 
 
+#define REGTRAP \
+	"pushl %eax\n\t" \
+	"pushl $0x10\n\t" \
+	"pushl $0x0\n\t" \
+	"call regtrap\n\t" \
+	"call setpsli\n\t" \
+	"popl %eax\n\t" \
+	"popl %eax\n\t" \
+	"popl %eax\n\t"
+
 #define IO_APIC_IRQ(x) (((x) >= 16) || ((1<<(x)) & io_apic_irqs))
 
 #define __STR(x) #x
@@ -244,8 +254,7 @@ extern char _stext, _etext;
 #define IRQ_NAME(nr) IRQ_NAME2(IRQ##nr)
 
 #define GET_CURRENT \
-	"movl %esp, %ebx\n\t" \
-	"andl $-8192, %ebx\n\t"
+	"movl ctl$gl_pcb, %ebx\n\t"
 
 /*
  *	SMP has a few special interrupts for IPI messages
@@ -288,7 +297,7 @@ __asm__( \
 	"\n" __ALIGN_STR"\n" \
 	"common_interrupt:\n\t" \
 	SAVE_ALL \
-        PUSHPSLI \
+        REGTRAP \
 	SYMBOL_NAME_STR(call_do_IRQ)":\n\t" \
 	"call " SYMBOL_NAME_STR(do_IRQ) "\n\t" \
 	"jmp ret_from_intr\n");
