@@ -224,6 +224,11 @@ MODULE XE_DRIVER(IDENT="5.0a",LANGUAGE(BLISS32),
 #include <descrip.h>
 #include <xmdef.h>
 
+#ifndef NOKERNEL
+#define sys$cancel exe$cancel
+#define sys$assign exe$assign
+#endif
+
 // NETMACLIB.OBJ
 extern    Time_Stamp();
 extern     swapbytes();
@@ -698,7 +703,7 @@ void XE_Shutdown ( XE_Int , restart )
 
     if (XE_Int->xei$io_chan != 0)
 	{
-	exe$cancel(XE_Int->xei$io_chan);
+	sys$cancel(XE_Int->xei$io_chan);
 	RC = sys$qiow( 1, XE_Int->xei$io_chan,
 		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS);
 	if ((RC != SS$_NORMAL) || (IOS->xe$vms_code != SS$_NORMAL))
@@ -712,7 +717,7 @@ void XE_Shutdown ( XE_Int , restart )
 
     if (XE_Int->xei$arp_io_chan != 0)
 	{
-	exe$cancel(XE_Int->xei$arp_io_chan);
+	sys$cancel(XE_Int->xei$arp_io_chan);
 	RC = sys$qiow( 1, XE_Int->xei$arp_io_chan,
 		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS);
 	if ((RC != SS$_NORMAL) || (IOS->xe$vms_code != SS$_NORMAL))
@@ -824,7 +829,7 @@ extern 	LIB$GET_VM_PAGE();
     xearp$init();
 
 // Assign Ethernet Controller
-    if (BLISSIFNOT(RC=exe$assign (&dev_config->dc_devname, &XE_Chan, 0, 0, 0)))
+    if (BLISSIFNOT(RC=sys$assign (&dev_config->dc_devname, &XE_Chan, 0, 0, 0)))
          // Ethernet controller assign failed
 	{
 	DRV$FATAL_FAO("XE $ASSIGN failure (dev=), EC = !XL",
@@ -833,7 +838,7 @@ extern 	LIB$GET_VM_PAGE();
 	};
 
 //  Assign the channel for the arp responder
-    if (BLISSIFNOT(RC=exe$assign( &dev_config->dc_devname,&XAR_Chan, 0, 0 ,0)))
+    if (BLISSIFNOT(RC=sys$assign( &dev_config->dc_devname,&XAR_Chan, 0, 0 ,0)))
          // Ethernet controller assign failed
 	{
 	DRV$FATAL_FAO("XE $ASSIGN failure (dev=), EC = !XL",

@@ -1,6 +1,7 @@
 VMSSUBDIRS = crtl starlet librtl cld cdu msgfil cliutl backup dir init login dcl edt dfu mount copy delete dif util32 sda instal uaf
 VMSSUBDIRSINST = crtl starlet librtl cld cliutl dir dcl login init edt dfu mount copy delete dif util32 sda instal uaf
 VMSSUBDIRS2 = examples
+VMSSUBDIRS3 = cmuip/ipacp/src/
 
 export BLISS = $(TOPDIR)/bliss/bin/gcc
 
@@ -42,6 +43,11 @@ vmsall:
 		cd $$X; \
 		make; \
 		cd ..; \
+	done; \
+	for X in $(VMSSUBDIRS3); do \
+		cd $$X; \
+		make; \
+		cd ../../..; \
 	done;
 
 vmsclean:
@@ -54,6 +60,11 @@ vmsclean:
 		cd $$X; \
 		make clean; \
 		cd ..; \
+	done; \
+	for X in $(VMSSUBDIRS3); do \
+		cd $$X; \
+		make clean; \
+		cd ../../..; \
 	done;
 
 rootinstall:
@@ -66,6 +77,11 @@ rootinstall:
 		cd $$X; \
 		make install; \
 		cd ..; \
+	done; \
+	for X in $(VMSSUBDIRS3); do \
+		cd $$X; \
+		make install; \
+		cd ../../..; \
 	done; \
 	make -f Makefile.linux install
 

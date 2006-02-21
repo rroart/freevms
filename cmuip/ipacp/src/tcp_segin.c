@@ -357,6 +357,10 @@ MODULE SEGIN(IDENT="6.7",LANGUAGE(BLISS32),
 #define Calc_Checksum(x,y) ip_compute_csum(y,x)
 #define Gen_Checksum(a,b,c,d,e) csum_tcpudp_magic(c,d,a,e,csum_partial(b,a,0))
 
+#ifndef NOKERNEL
+#define sys$fao exe$fao
+#endif
+
 //XQDEFINE;
 
 extern struct TCP_MIB_struct *     tcp_mib ;   // TCP management Information Block
@@ -1068,7 +1072,7 @@ extern	PokeAddr ();
 	{
 	ProcName->dsc$w_length = PNAMLEN;
 	$DESCRIPTOR(ctr,"!AS.!SL");
-	exe$fao(&ctr,&ProcName->dsc$w_length,ProcName,
+	sys$fao(&ctr,&ProcName->dsc$w_length,ProcName,
 	     WKS_LIST[Idx].WKS$Process,J);
 
 #if 0

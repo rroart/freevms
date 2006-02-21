@@ -117,6 +117,30 @@ MODULE NMLOOK(IDENT="1.2b",LANGUAGE(BLISS32),
 #include <iodef.h>
 #include <jpidef.h>
 
+#ifndef NOKERNEL
+#define sys$qio exe$qio
+#define sys$qiow exe$qiow
+#define sys$assign exe$assign
+#define sys$crembx exe$crembx
+#define sys$faol exe$faol
+#define sys$fao exe$fao
+#define sys$bintim exe$bintim
+#define sys$schdwk exe$schdwk
+#define sys$canwak exe$canwak
+#define sys$crelnm exe$crelnm
+#define sys$dellnm exe$dellnm
+#define sys$delmbx exe$delmbx
+#define sys$trnlnm exe$trnlnm
+#define sys$gettim exe$gettim
+#define sys$numtim exe$numtim
+#define sys$setrwm exe$setrwm
+#define sys$exit exe$exit
+#define sys$getjpiw exe$getjpiw
+#define sys$setprn exe$setprn
+#define sys$creprc exe$creprc
+     // dont touch dassgn
+#endif
+
 //LITERAL
 //!!HACK!!// Why is this temporary
 //    LOG$MSG = %X"800";		// Temporary
@@ -300,7 +324,7 @@ void NML$INIT (void)
 
 #if 0
     // not yet
-    RC = exe$crembx(0, &ACPMBXCHN,
+    RC = sys$crembx(0, &ACPMBXCHN,
 		 MSGMAX,
 		 MSGMAX*MSGCNT,
 		 ACPMBXPRO, 0,
@@ -328,8 +352,8 @@ void NML$INIT (void)
     ITMLIST[2].buflen=0;
     ITMLIST[2].bufaddr=0;
 
-    RC = exe$trnlnm(LNM$M_CASE_BLIND,
-		 ASCID("LNM$TEMPORARY_MAILBOX"),
+    RC = sys$trnlnm(LNM$M_CASE_BLIND,
+		    0 /* not yet: ASCID("LNM$TEMPORARY_MAILBOX") */,
 		 MYMBXNAM, 0,
 		 ITMLIST);
     if (BLISSIFNOT(RC))
@@ -352,7 +376,7 @@ ITMLIST[1].item_code=0;
 ITMLIST[1].buflen=0;
 ITMLIST[1].bufaddr=0;
 
-    RC = exe$crelnm(0 , SYSTABNAM,
+    RC = sys$crelnm(0 , SYSTABNAM,
 		    ACPMBXNAM, 0,
 		 ITMLIST);
     if (BLISSIFNOT(RC))
@@ -363,7 +387,7 @@ ITMLIST[1].bufaddr=0;
 
 // Start an initial read on the mailbox
 
-    RC = exe$qio(0, ACPMBXCHN, IO$_READVBLK,
+    RC = sys$qio(0, ACPMBXCHN, IO$_READVBLK,
 		RCVBUF->MB$IOSB,
 		MBX_RECV_AST,
 		 RCVBUF,
@@ -396,7 +420,7 @@ ITMLIST[1].bufaddr=0;
 
 // Start the name resolver process - it will notify us when it is ready.
 
-	RC = exe$creprc(SRVPID, SRVIMGNAME,0,0,0,
+	RC = sys$creprc(SRVPID, SRVIMGNAME,0,0,0,
 		     SRVPRIVS,
 			SRVQUOTAS,
 		     SRVPRCNAM,
@@ -664,14 +688,14 @@ void NML$PURGE(STATUS)
 
 // Flush our mailbox logical name
 
-    RC = exe$dellnm(SYSTABNAM,
+    RC = sys$dellnm(SYSTABNAM,
 		 ACPMBXNAM, 0);
     if (BLISSIFNOT(RC))
 	ERROR$FAO("$DELLNM failed for !AS, RC = !XL",ACPMBXNAM,RC);
 
 // Delete our mailbox
 
-    RC = exe$delmbx(ACPMBXCHN);
+    RC = sys$delmbx(ACPMBXCHN);
     if (BLISSIFNOT(RC))
 	ERROR$FAO("$DELMBX failed for ACP mailbox, RC = !XL",RC);
 
@@ -758,9 +782,9 @@ void SEND_CONTROL(CCODE,CVALUE)
 
 // Send the message off to the name resolver
 
-    RC = exe$qio(0, SRVMBXCHN,	IO$_WRITEVBLK | IO$M_NOW, 0,
+    RC = sys$qio(0, SRVMBXCHN,	IO$_WRITEVBLK | IO$M_NOW, 0,
 		MSBUF,
-		CONTROL_MSGSIZE);
+		CONTROL_MSGSIZE, 0, 0, 0, 0, 0, 0);
     if (BLISSIFNOT(RC))
 	ERROR$FAO("Failed to send NAMRES control message, RC = !XL",RC);
     }
@@ -896,7 +920,7 @@ NQE_XMIT(NQE)
 	RC;
 
     XQL$FAO(LOG$MSG,"!%T NQE_XMIT of NQE !XL, ID !XL!/",0,NQE,NQE->NQE$ID);
-    RC = exe$qio(0, 	SRVMBXCHN,
+    RC = sys$qio(0, 	SRVMBXCHN,
 		IO$_WRITEVBLK,
 		NQE->NQE$IOSB,
 		 NQE_XMIT_DONE,
@@ -1001,7 +1025,7 @@ void MBX_RECV_AST(MBUF)
 
 // Queue up another read
 
-    RC = exe$qio(0, ACPMBXCHN,	IO$_READVBLK,
+    RC = sys$qio(0, ACPMBXCHN,	IO$_READVBLK,
 		RCVIOSB,
 		 MBX_RECV_AST,
 		 MBUF,
@@ -1182,7 +1206,7 @@ void CONTROL_MSG(PID,RLEN,RBUF)
     case CNRQ$STOP:		// Resolver is shutting down
 	{
 	XQL$FAO(LOG$MSG,"!%T NS Control: NS shutting down, PID=!XL!/",0,PID);
-	exe$dassgn(SRVMBXCHN);
+	sys$dassgn(SRVMBXCHN);
 	SRVSTATE = SRV$DOWN;	// Service is unavailable
 	SRVMBXCHN = 0;		// No channel defined
 	SRVPID = 0;		// And no PID defined
@@ -1212,7 +1236,7 @@ struct item_list_3 ITMLIST[3];
 
 // First, try to assign a channel on the name resolver mailbox.
 
-    RC = exe$assign( SRVMBXNAM,
+    RC = sys$assign( SRVMBXNAM,
 		 &DEVCHN, 0, 0, 0);
     if (BLISSIFNOT(RC))
 	return FALSE;
@@ -1228,11 +1252,11 @@ struct item_list_3 ITMLIST[3];
     ITMLIST[1].buflen=0;
     ITMLIST[1].bufaddr=0;
 
-    RC = exe$getjpiw(0, 0, SRVPRCNAM,
+    RC = sys$getjpiw(0, 0, SRVPRCNAM,
 		  ITMLIST, 0, 0, 0);
     if (BLISSIFNOT(RC))
 	{
-	exe$dassgn(DEVCHN);
+	sys$dassgn(DEVCHN);
 	return FALSE;
 	};
 

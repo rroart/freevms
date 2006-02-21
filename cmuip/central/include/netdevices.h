@@ -37,6 +37,10 @@
 #include<stdarg.h>
 #include<descrip.h>
 
+#ifndef NOKERNEL
+#define sys$wake exe$wake
+#endif
+
 /* IPACP max physical buffer size*/
 #define DRV$MAX_PHYSICAL_BUFSIZE (IPACP_Interface->ACPI$MPBS)
 
@@ -52,10 +56,10 @@
 	{ \
 	if (*(IPACP_Interface->ACPI$Sleeping) == 1) \
 	    { \
-	    extern exe$wake(); \
+	    extern sys$wake(); \
 	     \
 	    IPACP_Interface->ACPI$Sleeping = FALSE; \
-	    exe$wake(); \
+	    sys$wake(); \
 	    } \
 	}
 

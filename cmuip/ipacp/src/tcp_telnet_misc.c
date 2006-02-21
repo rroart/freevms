@@ -80,6 +80,17 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 #include<lnmdef.h>
 #include<misc.h>
 
+#ifndef NOKERNEL
+#define sys$faol exe$faol
+#define sys$fao exe$fao
+#define sys$gettim exe$gettim
+#define sys$schdwk exe$schdwk
+#define sys$assign exe$assign
+#define sys$getjpiw exe$getjpiw
+#define sys$getdviw exe$getdviw
+#define sys$trnlnm exe$trnlnm
+#endif
+
 
 
 //++
@@ -535,7 +546,7 @@ Print (control_string, P1)
     Out_Desc->dsc$b_dtype = DSC$K_DTYPE_Z;
     Out_Desc->dsc$w_length = sizeof (Out_Buffer);
     Out_Desc->dsc$a_pointer = Out_Buffer;
-    Status = exe$faol ( // check
+    Status = sys$faol ( // check
 	 control_string,
 	 &Out_Desc->dsc$w_length,
 	 Out_Desc,
@@ -1126,7 +1137,7 @@ void set_devdep(TVT)
 		IO$_SENSEMODE,
 		&io_stats,
   0,0,
-		&PTY_Char,
+		PTY_Char,
 		QCB$K_SIZE,
 0,0,0,0);
 
@@ -1154,7 +1165,7 @@ void set_devdep(TVT)
 
 #if 0
 	// not yet
-	telnet_passall = exe$trnlnm(0, &lnm_proc, &lnm_pass, 0, itm); // JC
+	telnet_passall = sys$trnlnm(0, &lnm_proc, &lnm_pass, 0, itm); // JC
 #else
 	telnet_passall = 0;
 #endif
@@ -1203,7 +1214,7 @@ void set_devdep(TVT)
 		IO$_SETMODE,
 		&io_stats,
   0, 0,
-		&PTY_Char,
+		PTY_Char,
 		QCB$K_SIZE,
 0,0,0,0);
 
@@ -1242,7 +1253,7 @@ void set_devdep(TVT)
 	Item_List[0].item_code=DVI$_UNIT;
 	Item_List[0].bufaddr=&Unit_Number;
 	Item_List[1].item_code=0; // check
-	Status = exe$getdviw (0,pty_chan,0,Item_List, 0, 0);		// Get unit
+	Status = sys$getdviw (0,pty_chan,0,Item_List, 0, 0);		// Get unit
 	// seems C can not fill in the rest with 0?
 
 //!!JC	XLOG$FAO(LOG$TELNEG
@@ -1250,20 +1261,20 @@ void set_devdep(TVT)
 //!!JC		,Unit_Number);
 
 	ptynam->dsc$w_length = sizeof(ptystr);
-	Status = exe$trnlnm (0, &lnm_proc, &lnm_pty, 0, itm); // JC
+	Status = sys$trnlnm (0, &lnm_proc, &lnm_pty, 0, itm); // JC
 
 	Status = Status == SS$_NORMAL;
 	$DESCRIPTOR(ctr,"_!ASA!UL:");
 	if (Status)
-	  Status = exe$fao(&ctr,devnam,devnam,ptynam,Unit_Number); // check
+	  Status = sys$fao(&ctr,devnam,devnam,ptynam,Unit_Number); // check
 	if (Status)
-	  Status = exe$getdviw (0,0,devnam,Item_List,0,0);
+	  Status = sys$getdviw (0,0,devnam,Item_List,0,0);
 
 //!!JC	xlog$fao(LOG$TELNEG
 //!!JC			,"!%T Set_DEVDEP: TTY_TERM == "!AS""
 //!!JC			,0,devnam);			// Concatonate
 
-	Status = exe$assign(devnam,&tty_chan,0,0,0);		// Open new channel
+	Status = sys$assign(devnam,&tty_chan,0,0,0);		// Open new channel
 
 
 	if (! Status)					// No channel ?
@@ -1281,7 +1292,7 @@ void set_devdep(TVT)
   0,
 			Set_DEVDEP_DONE,
 		        TVT,
-			&PTY_Char,
+			PTY_Char,
 			QCB$K_SIZE,
 0,0,0,0);		// Set front end
 		if (! Status)

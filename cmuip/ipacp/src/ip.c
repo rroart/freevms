@@ -227,6 +227,10 @@ MODULE IP(IDENT="4.5c",LANGUAGE(BLISS32),
 #include <ssdef.h>
 #include <descrip.h>
 
+#ifndef NOKERNEL
+#define sys$setimr exe$setimr
+#endif
+
 #undef TCP_DATA_OFFSET
 #include <net/checksum.h>
 #define Calc_Checksum(x,y) ip_compute_csum(y,x)
@@ -434,7 +438,7 @@ void ip$init  (void)
 
 // Translate time string to quadword value
 
-    RC = exe$bintim( &RA_CHECK_TIMESTR,&RA_CHECK_TIME);
+    RC = sys$bintim( &RA_CHECK_TIMESTR,&RA_CHECK_TIME);
     if (BLISSIFNOT(RC))
 	FATAL$FAO("$BINTIM failed for RA_CHECK_TIMSTR, RC = !XL",RC);
 
@@ -1429,7 +1433,7 @@ X:  {			// *** Block X ***
 	    FIRST = queue_empty(RA_QUEUE);
 	    INSQUE(RAPTR,RA_QUEUE->qtail);
 	    if (FIRST)
-		exe$setimr(0, RA_CHECK_TIME, IP_FRAGMENT_CHECK, 0, 0);
+		sys$setimr(0, RA_CHECK_TIME, IP_FRAGMENT_CHECK, 0, 0);
 	    };
 	RAPTR->ra$buf = mm$seg_get(16384);
 	RAPTR->ra$bufsize = 16384;
@@ -1583,5 +1587,5 @@ void IP_FRAGMENT_CHECK  (void)
 // If there are still entries on the reassembly queue, then requeue us
 
     if (! queue_empty(RA_QUEUE))
-	exe$setimr(0, RA_CHECK_TIME, IP_FRAGMENT_CHECK, 0, 0);
+	sys$setimr(0, RA_CHECK_TIME, IP_FRAGMENT_CHECK, 0, 0);
     }

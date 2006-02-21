@@ -478,6 +478,20 @@ extern     mount_ip_device();
 #include "structure.h"
 #include "neterror.h"
 
+#ifndef NOKERNEL
+#define sys$bintim exe$bintim
+#define sys$schdwk exe$schdwk
+#define sys$canwak exe$canwak
+#define sys$crelnm exe$crelnm
+#define sys$trnlnm exe$trnlnm
+#define sys$gettim exe$gettim
+#define sys$setrwm exe$setrwm
+#define sys$exit exe$exit
+#define sys$getjpiw exe$getjpiw
+#define sys$setprn exe$setprn
+// not sys$hiber is the same
+#endif
+
 //EXTERNAL
     // TCP_MECH.BLI
 extern unsigned long long Start_Time;	// Quadword time IPACP started.
@@ -505,9 +519,10 @@ local_namestr[MAX_HNAME];
     ast_in_progress=FALSE, // AST service rtn executing.
     Time_2_Exit=FALSE,// Main processing loop control.
     sleeping=FALSE;	// Nap control.
-    struct dsc$descriptor myname = {
+    struct dsc$descriptor myname_ = {
 dsc$w_length : 128,
 dsc$a_pointer : mynamestr };
+struct dsc$descriptor * myname = &myname_;
     struct dsc$descriptor Local_Name= {
 dsc$w_length:MAX_HNAME,
 dsc$a_pointer:local_namestr};
@@ -715,7 +730,7 @@ Side Effects:
 	    ((long *)&BTime)[1] = -1;	// make it delta time.
 	    ((long *)&BTime)[0] = rto*CSEC_TIMER_DELTA; // nap size.
 	} else {			// No TCB's
-	    exe$bintim(&Long_Nap,&BTime);
+	    sys$bintim(&Long_Nap,&BTime);
 	    Big_Sleep = TRUE;
 	    XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: Long sleep!/",0);
 	}
@@ -735,7 +750,7 @@ Side Effects:
 
 // Snoooooozzzzzz!!!!!!!!!!!!
 
-	    exe$schdwk(0,0,&BTime,0); // Schedule a wake-up.
+	    sys$schdwk(0,0,&BTime,0); // Schedule a wake-up.
 	    sleeping = TRUE;	// So AST Handler can wake us.
 	    sys$hiber();
 
@@ -748,7 +763,7 @@ Side Effects:
 // processing.
 
 	    sleeping = FALSE;
-	    exe$canwak();
+	    sys$canwak();
 	    } else {
 	    XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: Not sleeping!/",0);
 	    }
@@ -760,9 +775,15 @@ Side Effects:
 
 void    INIT_PROCNAME(void);
 
-char * mydevice = 0;
-
+#ifdef NOKERNEL
+void main (void) {
+#else
 void Main (void) {
+#endif
+#ifndef NOKERNEL
+  //current->pslstk[current->pslindex-1]|=(3<<2 | 3);
+  setpslmod(3); // check. pretend user mode
+#endif
   $DESCRIPTOR(logical_netname_,"INET$NETWORK_NAME");
 #if 0
     BUILTIN
@@ -785,11 +806,13 @@ void Main (void) {
 	$DESCRIPTOR(tabnam_,"LNM$SYSTEM_TABLE"); //check shorten later
 	struct dsc$descriptor * logical_netname = &logical_netname_, * tabnam = &tabnam_; 
 
+#ifndef NOKERNEL
 	// some extra temp stuff here
 	xqp_init2();
 #ifdef CONFIG_VMS
 	extern void * global_e2_vcb;
 	exttwo_init2(global_e2_vcb);
+#endif
 #endif
 	if (1) {
 	  int sts;
@@ -802,23 +825,25 @@ void Main (void) {
 	  struct dsc$descriptor * pty = &pty_;
 	  struct dsc$descriptor * pty_term = &pty_term_;
 	  struct item_list_3 itm[2];
+#ifndef NOKERNEL
 	  lnm_init_prc(ctl$gl_pcb); // needs this extra one
+#endif
 
 	  itm[0].item_code=LNM$_STRING;
 	  itm[0].buflen=4;
 	  itm[0].bufaddr="ipa0";
 	  bzero(&itm[1],sizeof(struct item_list_3));
-	  sts=exe$crelnm(0,mytabnam,dev,0,itm);
+	  sts=sys$crelnm(0,mytabnam,dev,0,itm);
 
 	  itm[0].item_code=LNM$_STRING;
 	  itm[0].buflen=4;
 	  itm[0].bufaddr="pna0";
-	  sts=exe$crelnm(0,mytabnam,pty,0,itm);
+	  sts=sys$crelnm(0,mytabnam,pty,0,itm);
 
 	  itm[0].item_code=LNM$_STRING;
 	  itm[0].buflen=3; // should be 2
 	  itm[0].bufaddr="tza"; // should be tz
-	  sts=exe$crelnm(0,mytabnam,pty_term,0,itm);
+	  sts=sys$crelnm(0,mytabnam,pty_term,0,itm);
 
 	}
 	// end of extra temp stuff
@@ -827,18 +852,18 @@ void Main (void) {
 // provide a default name in case tcp$network_name is undefined.
 
 //    Make_Zone() ;
-    rc = exe$trnlnm(0,tabnam,logical_netname, 0,items);
+    rc = sys$trnlnm(0,tabnam,logical_netname, 0,items);
     if (rc == SS$_NOLOGNAM ||  !rc) {
-	myname.dsc$w_length = 14; // set the proper length since fixed string.
-        myname.dsc$a_pointer = "Noname Network";
+	myname->dsc$w_length = 14; // set the proper length since fixed string.
+        myname->dsc$a_pointer = "Noname Network";
    } else {
-	myname.dsc$w_length  = eqv_len;
-        myname.dsc$a_pointer = eqv_name;
+	myname->dsc$w_length  = eqv_len;
+        myname->dsc$a_pointer = eqv_name;
    }
 
 // Record starting time.
 
-    exe$gettim(&Start_Time);
+    sys$gettim(&Start_Time);
 
 // Set process name
 
@@ -859,13 +884,13 @@ void Main (void) {
 
 // Disable resource wait mode
 
-    exe$setrwm(1);
+    sys$setrwm(1);
 
     // borrow from tcpmod.req until we get tcpmod.h
 
 #define    IPACP_Version_String "IP_ACP(V6.6-5.001) "  //Becomes ACP process name.
 #define    IPACP_Version_Name IPACP_Version_String
-#define    IPACP_Date_String "2-Feb-2006" 	// Date of last change
+#define    IPACP_Date_String "21-Feb-2006" 	// Date of last change
 #define    IPACP_Who_String "roart" // Author of last change
 
 // Announce that we exist.
@@ -910,7 +935,7 @@ void Main (void) {
     NML$PURGE(NET$_TE);		// Purge the name server queue
     user$purge_all_io();	// Post any pending user IO.
     LOG$FAO("!%T IPACP exit.!/",0);
-    exe$exit(SS$_NORMAL);	// say goodbye...
+    sys$exit(SS$_NORMAL);	// say goodbye...
 }
 
 
@@ -934,7 +959,7 @@ void INIT_PROCNAME (void) {
 
 // First, obtain our original process name
 
-    rc = exe$getjpiw(0,0,0, &itmlist, 0,0,0);
+    rc = sys$getjpiw(0,0,0, &itmlist, 0,0,0);
     if ( BLISSIFNOT(rc)) {
 	myprclen = 0;
 	WARN$FAO("$GETJPIW failure for process name, RC = %x",rc);
@@ -942,7 +967,7 @@ void INIT_PROCNAME (void) {
 
 // Now, try to set our name as the IPACP.
 
-    rc = exe$setprn(process_name);
+    rc = sys$setprn(process_name);
     if (BLISSIFNOT(rc)) {
       if ( rc == SS$_DUPLNAM )
 	FATAL$FAO("Duplicate network ACP -- exiting");
@@ -963,7 +988,7 @@ void RESET_PROCNAME (void) {
 
 // Reset our process name.
 
-    exe$setprn(namdsc);
+    sys$setprn(namdsc);
 }
 
 void ip4acp_main(void) {
@@ -983,7 +1008,7 @@ struct dsc$descriptor myname;
   items[0].retlenaddr=&eqv_len;
   bzero(&items[1],sizeof(struct item_list_3));
 
-  rc = exe$trnlnm(0,tabnam,lognam,0,items);
+  rc = sys$trnlnm(0,tabnam,lognam,0,items);
 
   if (rc == SS$_NOLOGNAM || rc==0) {
 	myname.dsc$w_length = 14; // set the proper length since fixed string.
@@ -995,7 +1020,7 @@ struct dsc$descriptor myname;
 
 // Record starting time.
 
-    exe$gettim(&Start_Time);
+    sys$gettim(&Start_Time);
 
 // Set process name
 
@@ -1016,7 +1041,7 @@ struct dsc$descriptor myname;
 
 // Disable resource wait mode
 
-    exe$setrwm(1); // check
+    sys$setrwm(1); // check
 
 // Announce that we exist.
 
@@ -1064,6 +1089,6 @@ struct dsc$descriptor myname;
     NML$PURGE(NET$_TE);		// Purge the name server queue
     user$purge_all_io();	// Post any pending user IO.
     LOG$FAO("!%T IPACP exit.!/");
-    exe$exit(SS$_NORMAL);	// say goodbye...
+    sys$exit(SS$_NORMAL);	// say goodbye...
 }
 

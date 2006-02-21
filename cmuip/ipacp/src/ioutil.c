@@ -135,6 +135,25 @@ extern 	void FATAL_FAO(int, ...);
 #include <linux/config.h>
 #include <linux/mm.h>
 
+#ifndef NOKERNEL
+#define sys$open exe$open
+#define sys$close exe$close
+#define sys$get exe$get
+#define sys$exit exe$exit
+#define sys$connect exe$connect
+#define sys$disconnect exe$disconnect
+#define sys$create exe$create
+#define sys$put exe$put
+#define sys$flush exe$flush
+#define sys$faol exe$faol
+#define sys$fao exe$fao
+#define sys$sndopr exe$sndopr
+#define sys$setrwm exe$setrwm
+#else
+#define printk myprintk
+#define kmalloc malloc
+#endif
+
 
 
 #define APPCHR(CHR,DPTR,DCNT,OCNT) \
@@ -433,7 +452,7 @@ LOG_OPEN (void)
 	RC;
 #if 0
     // not yet
-    RC = exe$create( LOGFAB);
+    RC = sys$create( LOGFAB,0,0);
 #else
     RC = 0;
 #endif
@@ -443,7 +462,7 @@ LOG_OPEN (void)
 	    RC, LOGFAB->fab$l_stv);
 	return FALSE;
 	};
-    RC = exe$connect( LOGRAB);
+    RC = sys$connect( LOGRAB,0,0);
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("Log file $CONNECT failed, RC = !XL, STV = !XL",
@@ -457,8 +476,8 @@ LOG_CLOSE (void)
     {
     if (log_state != 0)
 	{
-	exe$disconnect( LOGRAB);
-	exe$close( LOGFAB);
+	sys$disconnect( LOGRAB,0,0);
+	sys$close( LOGFAB,0,0);
 	return TRUE;
 	}
     else
@@ -514,12 +533,12 @@ void LOG_OUTPUT(OUTDESC)
 #endif
 #if 0
 	// not yet. no write support, and rms don't work here
-	RC = exe$put( LOGRAB);
+	RC = sys$put( LOGRAB);
 //!!HACK!!// Take out this Flush!
 	if (( 	(logcount > log_threshold)
 	   ||	(log_state & LOG$FLUSH) ))	// JC
 	 {
-	    RC = exe$flush(LOGRAB);
+	    RC = sys$flush(LOGRAB);
 	    logcount = 0 ;
 	    } ;
 #endif
@@ -535,7 +554,7 @@ void LOG_FAO(CSTR, args)
       RC;
 	DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
 
-    RC = exe$faol(CSTR,
+    RC = sys$faol(CSTR,
 	       &OUTDESC->dsc$w_length,
 	       OUTDESC,
 		  &args); // check. was ap+8
@@ -581,7 +600,7 @@ ACT_OPEN (void)
 	RC;
 #if 0
     // not yet
-    RC = exe$create( ACTFAB);
+    RC = sys$create( ACTFAB,0,0);
 #else
     RC = 0;
 #endif
@@ -590,7 +609,7 @@ ACT_OPEN (void)
 	OPR$FAO("Activity file $CREATE failed, RC = !XL",RC);
 	return FALSE;
 	};
-    RC = exe$connect(ACTRAB);
+    RC = sys$connect(ACTRAB,0,0);
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("Activity file $CONNECT failed, RC = !XL",RC);
@@ -603,8 +622,8 @@ ACT_CLOSE (void)
     {
     if (act_state != 0)
 	{
-	exe$disconnect(ACTRAB);
-	exe$close(ACTFAB);
+	sys$disconnect(ACTRAB,0,0);
+	sys$close(ACTFAB,0,0);
 	return TRUE;
 	}
     else
@@ -657,10 +676,10 @@ void ACT_OUTPUT(OUTDESC)
 
 #if 0
 	// not yet. no write support, and rms don't work here
-	RC = exe$put(ACTRAB);
+	RC = sys$put(ACTRAB);
 	if ((ACTCOUNT > act_threshold))
 	    {
-	    RC = exe$flush(ACTRAB);
+	    RC = sys$flush(ACTRAB);
 	    ACTCOUNT = 0 ;
 	    } ;
 #endif
@@ -676,7 +695,7 @@ void ACT_FAO(CSTR, args)
       RC;
 	DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
 
-    RC = exe$faol(CSTR,
+    RC = sys$faol(CSTR,
 	       &OUTDESC->dsc$w_length,
 	       OUTDESC,
 		  &args); // check. was ap+8
@@ -756,7 +775,7 @@ extern struct dsc$descriptor *	myname;
     MSG->dsc$b_class = DSC$K_CLASS_Z;
     MSG->dsc$b_dtype = DSC$K_DTYPE_Z;
     MSG->dsc$a_pointer = MSGBUF;
-    return exe$sndopr(MSG, 0);
+    return sys$sndopr(MSG, 0);
     }
 
 void OPR_FAO(int CSTR, ...) 
@@ -770,20 +789,20 @@ void OPR_FAO(int CSTR, ...)
 
 	va_list args;
 	va_start(args,CSTR);
-    RC = exe$faol(CSTR,
+    RC = sys$faol(CSTR,
 	        &OUTDESC->dsc$w_length,
 	       OUTDESC,
 		  args); // check. was ap+8
     va_end(args);
     if (BLISSIFNOT(RC))
-	exe$exit( RC);
+	sys$exit( RC);
 
 // Reformat for console output
 
     $DESCRIPTOR(ctr,"IPACP: !AS");
-    RC = exe$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    RC = sys$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (BLISSIFNOT(RC))
-	exe$exit( RC);
+	sys$exit( RC);
     send_2_operator(OPRDESC);
     }
 
@@ -808,7 +827,7 @@ void ERROR_FAO(int CSTR, ...)
 
 	va_list args;
 	va_start(args,CSTR);
-    RC = exe$faol(CSTR,
+    RC = sys$faol(CSTR,
 	       &OUTDESC->dsc$w_length,
 	       OUTDESC,
 		  args); // check. was ap+8
@@ -816,23 +835,23 @@ void ERROR_FAO(int CSTR, ...)
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("ERROR_FAO failure, RC = !XL",RC);
-	exe$exit( RC);
+	sys$exit( RC);
 	};
 
 // Format and send message to the operator
 
     $DESCRIPTOR(ctr,"?IPACP: !AS");
-    RC = exe$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    RC = sys$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (BLISSIFNOT(RC))
-	exe$exit( RC);
+	sys$exit( RC);
     send_2_operator(OPRDESC);
 
 // Format the message for logging - add time+date and EOL
 
     $DESCRIPTOR(ctr2,"!%T !AS!/");
-    RC = exe$fao(&ctr2,&LOGDESC->dsc$w_length,LOGDESC,0,OUTDESC);
+    RC = sys$fao(&ctr2,&LOGDESC->dsc$w_length,LOGDESC,0,OUTDESC);
     if (BLISSIFNOT(RC))
-	exe$exit( RC);
+	sys$exit( RC);
 
 // Make sure we are logging something & log it
 
@@ -859,7 +878,7 @@ void FATAL_FAO(int CSTR, ...)
 
 	va_list args;
 	va_start(args,CSTR);
-    RC = exe$faol(CSTR,
+    RC = sys$faol(CSTR,
 	       &OUTDESC->dsc$w_length,
 	       OUTDESC,
 		  args); // check. was ap+8
@@ -867,21 +886,21 @@ void FATAL_FAO(int CSTR, ...)
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("FATAL_FAO failure, RC = !XL",RC);
-	exe$exit( RC);
+	sys$exit( RC);
 	};
 
 // Format & send message to the operator
 
     $DESCRIPTOR(ctr,"?IPACP: !AS");
-    RC = exe$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
+    RC = sys$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
     if (BLISSIFNOT(RC))
-	exe$exit( RC);
+	sys$exit( RC);
     send_2_operator(OPRDESC);
 
 // Format it for logging
 
     $DESCRIPTOR(ctr2,"!%T !AS!/");
-    RC = exe$fao(&ctr2,&LOGDESC->dsc$w_length,LOGDESC,
+    RC = sys$fao(&ctr2,&LOGDESC->dsc$w_length,LOGDESC,
 	      0,OUTDESC);
 
 // Make sure we are logging something & log it
@@ -890,7 +909,7 @@ void FATAL_FAO(int CSTR, ...)
     LOG_CHANGE(0x80000000 | log_state);
     LOG_OUTPUT(LOGDESC);
     LOG_CHANGE(OLDSTATE);
-    exe$exit( SS$_ABORT);
+    sys$exit( SS$_ABORT);
     }
 
 //SBTTL "Queued message processing"
@@ -965,7 +984,7 @@ void QL_FAO(CSTR, args)
     RC = LIB$SYS_FAOL(CSTR, MDSC->dsc$w_length, MDSC, /*AP+*/8);
 #else
     MDSC->dsc$a_pointer=kmalloc(256,GFP_KERNEL);
-    RC = exe$faol(CSTR, &MDSC->dsc$w_length, MDSC, &args); // check. was AP+etc
+    RC = sys$faol(CSTR, &MDSC->dsc$w_length, MDSC, &args); // check. was AP+etc
 #endif
     if (BLISSIFNOT(RC))
 	{
@@ -1044,7 +1063,7 @@ extern void	RESET_PROCNAME() ;
 
 // Re-enable resource wait mode (for debugging)
 
-    exe$setrwm(0);
+    sys$setrwm(0);
 
     RESET_PROCNAME();
     }
@@ -1078,7 +1097,7 @@ extern void	user$purge_all_io ();
 
     ERROR$FAO("Exception handler: signal name !XL",SIG->chf$l_sig_name);
     user$purge_all_io();
-    exe$flush( LOGRAB);
-    exe$flush( ACTRAB);
+    sys$flush( LOGRAB, 0, 0);
+    sys$flush( ACTRAB, 0, 0);
     return(SS$_RESIGNAL);
     }

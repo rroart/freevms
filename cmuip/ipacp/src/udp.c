@@ -496,7 +496,7 @@ void udp$input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 	{
 	signed long
 	  out_len;
-#if 0
+#ifdef NOKERNEL
 	unsigned char out_buff  [16384]; // check will destroy stack and pcb
 #else
 	unsigned char * out_buff = kmalloc(16384, GFP_KERNEL);
@@ -522,7 +522,7 @@ void udp$input(Src$Adrs,Dest$Adrs,BufSize,Buf,SegSize,Seg)
 		XLOG$FAO(LOG$UDP,"!%T UDP RPC reply error, RC=!XL!/",0,RC);
 	    };
 
-#if 1
+#ifndef NOKERNEL
 	kfree(out_buff);
 #endif
 

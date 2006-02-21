@@ -231,6 +231,11 @@
 
 #include <misc.h>
 
+#ifdef NOKERNEL
+#define kmalloc malloc
+#define kfree free
+#endif
+
 	  // inconsistent naming. avoiding and working around
 #define ab$l_pid vc$pid
 #define ab$l_ucb_adrs vc$ucb_adrs
@@ -379,7 +384,7 @@ long funct=0;
 
 //ENTRY	Mount_ip_Device,^M<R2,R3,R4,R5,R6,R7,R8>
 
-void mount_ip_device() {
+int mount_ip_device() {
   int R0,R3,R6,R7,R8,R9;
   struct _vcb * R1;
   struct _aqb * R2;
@@ -990,6 +995,7 @@ int Dismount() {
 //
 //__
 
+#ifdef NOKERNEL
 //Entry USER_Requests_Avail,^M<R2,R3,R4,R5>
 int user_requests_avail()
 {
@@ -1103,6 +1109,7 @@ int user_requests_avail()
   R0 = VMS_IO$POST(IOSB,R2,R2->irp$l_ucb);
   goto	Try_Again;		// dismiss this & look for more.
 }
+#endif
 
 //SBTTL	VMS_IO$POST - Hand User's IRP to VMS IO Post-processing.
 
@@ -1248,6 +1255,20 @@ int MOVBYT(Size,Src,Dest) {
   MOVC3	(Size,Src,Dest);
   return R0;
 }
+
+//int memcpy(void *dest, const void *src, int n);
+
+static int getmem(const void *src, void *dest, int n) {
+  if (n==0)
+    n = sizeof(void *);
+  long arglst[4];
+  arglst[0]=3;
+  arglst[1]=dest;
+  arglst[2]=src;
+  arglst[3]=n;
+  sys$cmkrnl(memmove, &arglst[0]);
+}
+
 
 //SBTTL	Time_Stamp - Get time in hundredths of a second.
 
@@ -1283,8 +1304,16 @@ int Time_Stamp()
   //	R0 = @EXE$GL_ABSTIM;	// Get system interval timer
   //	MULL2	100, R0		// Convert seconds to 100ths
   /*PUSHL	R1*/			// Save R1 from being tromped on
+#if 0
+  // not yet
   R0 = exe$gq_systime;	// copy the current time into R0/R1
+#if 0
+  exe$gq_systime=0; // one time test
+#endif
   R0 &=	0x7fffffffffff;
+#else
+  getmem(&exe$gq_systime, &R0, 8);
+#endif
   // not yet	R0 = R0/100; R0=R0/1000; // Convert with R0 in 100ths
   /*POPL	R1*/
   return 10*(long)(R0>>20);

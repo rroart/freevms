@@ -13,6 +13,20 @@
 
 #include <stdarg.h>
 
+#ifdef NOKERNEL
+#define printk myprintk
+#define kfree free
+#define kmalloc malloc
+
+void myprintk(char *s) {
+  struct dsc$descriptor dsc;
+  dsc.dsc$a_pointer=s;
+  dsc.dsc$w_length=strlen(s);
+  send_2_operator(&dsc);
+}
+
+#endif
+
 CH$FILL(ch, size, addr) {
   memset(addr,ch, size);
   return addr+size;
@@ -62,28 +76,8 @@ STR$APPEND(x , y)
   printk("STR$APPEND not implemented\n");
 }
 
-STR$CASE_BLIND_COMPARE_not() {
-  printk("STR$CASE_BLIND_COMPARE not implemented\n");
-}
-
 CH$PTR(int X) {
   return X;
-}
-
-CH$PTR_not_again(int X, int par) {
-#if 0
-  int par;
-  va_list args;
-  va_start(args,X);
-  par=va_arg(args,int);
-  va_end(args);
-  printk("ch$ptr %x\n",par);
-#endif
-  return X+par;
-}
-
-CH$PTR_not() {
-  printk("CH$PTR not implemented\n");
 }
 
 int STR$CASE_BLIND_COMPARE(x,y)
@@ -100,14 +94,6 @@ int CH$EQL(n1,ptr1,n2,ptr2) {
 int CH$NEQ(n1,ptr1,n2,ptr2) {
   int n = ( n1 < n2 ? n1 : n2);
   return (memcmp(ptr1,ptr2,n));
-}
-
-CH$NEQ_not() {
-  printk("CH$NEQ not implemented\n");
-}
-
-CH$EQL_not() {
-  printk("CH$EQL not implemented\n");
 }
 
 UPLIT() {
@@ -173,14 +159,6 @@ ROT(x,y) {
   printk("ROT not implemented\n");
 }
 
-SwapBytes_not() {
-  printk("SwapBytes not implemented\n");
-}
-
-CH$WCHAR_A_not() {
-  printk("CH$WCHAR_A not implemented\n");
-}
-
 QL$FAO() {
   printk("QL$FAO not implemented\n");
 }
@@ -217,10 +195,6 @@ WARN$FAO() {
   printk("WARN$FAO not implemented\n");
 }  
  
-LIB$SYS_FAOL_not() {
-  printk("LIB$SYS_FAOL not implemented\n");
-}
-
 ERROR$FAO() {
   printk("ERROR$FAO not implemented\n");
 }
@@ -253,25 +227,9 @@ FORKUNLOCK () {
   printk("FORKUNLOCK not implemented\n");
 }
 
-Lock_IODB_not() {
-  printk("Lock_IODB_not not implemented\n");
-}
-
-UnLock_IODB_not() {
-  printk("UnLock_IODB_not not implemented\n");
-}
-
 ch$move(a,b,c) {
   return CH$MOVE(a,b,c);
   printk("ch$move not implemented\n");
-}
-
-DRV$Fatal_FAO_not() {
-  printk("DRV$Fatal_FAO not implemented\n");
-}
-
-QUEUE_EMPTY_not() {
-  printk("QUEUE_EMPTY not implemented\n");
 }
 
 LIB$CREATE_VM_ZONE() {
@@ -294,26 +252,6 @@ ACT$FAO() {
   printk("ACT$FAO not implemented\n");
 }
 
-ASCII_Dec_Bytes_not(DESC,COUNT,SOURCE,LEN) {
-#if 0
-  struct dsc$descriptor * d = DESC;
-  char * s=&SOURCE;
-  snprintf(d->dsc$a_pointer,len,"%d.%d.%d.%d",s[0],s[1],s[2],s[3]);
-  return SS$_NORMAL;
-#endif
-  printk("ASCII_Dec_Bytes not implemented\n");
-}
-
-ASCII_Hex_Bytes_not(DESC,COUNT,SOURCE,LEN) {
-#if 0
-  struct dsc$descriptor * d = DESC;
-  char * s=&SOURCE;
-  snprintf(d->dsc$a_pointer,len,"%d.%d.%d.%x",s[0],s[1],s[2],s[3]);
-  return SS$_NORMAL;
-#endif
-  printk("ASCII_Hex_Bytes not implemented\n");
-}
-
 Begin_Lock() {
   printk("Begin_Lock not implemented\n");
 }
@@ -321,10 +259,6 @@ Begin_Lock() {
 CH$PLUS(x,y) {
   return x+y;
   printk("CH$PLUS not implemented\n");
-}
-
-INSQue_not() {
-  printk("INSQue not implemented\n");
 }
 
 LIB$ASN_WTH_MBX() {
@@ -355,10 +289,6 @@ Unlock_IODB() {
   printk("Unlock_IODB not implemented\n");
 }
 
-Swapbytes_not() {
-  printk("Swapbytes not implemented\n");
-}
-
 Subm() {
   printk("Subm not implemented\n");
 }
@@ -367,22 +297,8 @@ Addm() {
   printk("Addm not implemented\n");
 }
 
-Calc_Checksum_not(Byte_Count,Start,Srca,Dsta,PtclT) {
-  return Calc_Checksum(Byte_Count,Start,Srca,Dsta,PtclT);
-  printk("Calc_Checksum not implemented\n");
-}
-
-Calc_checksum_not(Byte_Count,Start,Srca,Dsta,PtclT) {
-  return Calc_Checksum(Byte_Count,Start,Srca,Dsta,PtclT);
-  printk("Calc_checksum not implemented\n");
-}
-
 End_Lock() {
   printk("End_Loc not implemented\n");
-}
-
-Gen_Checksum_not() {
-  printk("Gen_Checksum not implemented\n");
 }
 
 find_cpu_data(long * l) {
@@ -390,20 +306,8 @@ find_cpu_data(long * l) {
   * l=smp$gl_cpu_data[cpuid];
 }
 
-Queue_Not_Empty_not() {
-  printk("Queue_Not_Empty not implemented\n");
-}
-
 rpc_service() {
   printk("rpc_service not implemented\n");
-}
-
-drv$qblk_free_not() {
-  printk("drv$qblk_free not implemented\n");
-}
-
-drv$seg_free_not() {
-  printk("drv$seg_free not implemented\n");
 }
 
 Warn_Error() {
@@ -438,36 +342,8 @@ Fatal_Error() {
   printk("Fatal_Error not implemented\n");
 }
 
-DRV$Warn_FAO_not() {
-  printk("DRV$Warn_FAO not implemented\n");
-}
-
-DRV$WARN_FAO_not() {
-  printk("DRV$WARN_FAO not implemented\n");
-}
-
-DRV$QL_FAO_not() {
-  printk("DRV$QL_FAO not implemented\n");
-}
-
-DRV$OPR_FAO_not() {
-  printk("DRV$OPR_FAO not implemented\n");
-}
-
-DRV$Error_FAO_not() {
-  printk("DRV$Error_FAO not implemented\n");
-}
-
 exe$finish_rdb() {
   printk("exe$finish_rdb not implemented\n");
-}
-
-drv$seg_get_not() {
-  printk("drv$seg_ge not implemented\n");
-}
-
-drv$device_error_not() {
-  printk("drv$device_error not implemented\n");
 }
 
 RPC$CHECK_PORT() {
@@ -479,33 +355,9 @@ CH$RCHAR() {
   printk("CH$RCHAR not implemented\n");
 }
 
-DRV$FATAL_FAO_not() {
-  printk("DRV$FATAL_FAO not implemented\n");
-}
-
-DRV$QBLK_Free_not() {
-  printk("DRV$QBLK_Free not implemented\n");
-}
-
-DRV$XLOG_FAO_not() {
-  printk("DRV$XLOG_FAO not implemented\n");
-}
-
 RPC$INPUT() {
   printk("RPC$INPUT not implemented\n");
   return 0;
-}
-
-drv$ip_receive_not() {
-  printk("drv$ip_receive not implemented\n");
-}
-
-SEG$LOG_Segment_not() {
-  printk("SEG$LOG_Segment not implemented\n");
-}
-
-DRV$XQL_FAO_not() {
-  printk("DRV$XQL_FAO not implemented\n");
 }
 
 swapbytesiphdr(x,y) {
@@ -530,11 +382,6 @@ inline BLISSIFNOT(int i) {
   return BLISSIF(i)==0;
 }
 
-malloc_not(size) 
-{
-  return kmalloc(size,GFP_KERNEL);
-}
-
 inline DEVICELOCK(){
   return;
   printk("DEVICELOCK not impl\n");
@@ -546,3 +393,34 @@ inline DEVICEUNLOCK(){
 }
 
 #include "libasnmbx.c"
+
+#ifdef NOKERNEL
+#define panic printf
+static int mycli() {}
+static int mysti() {}
+
+void insque(void * entry, void * pred) {
+  if (entry==pred) panic("same\n");
+  if (entry==*(long *)pred) panic("same\n");
+  if (entry==*(long *)(((long)pred)+4)) panic("same\n");
+  int flag=mycli();
+  //mycheckaddr();
+  *(void **)entry=*(void **)pred;
+  *(void **)(entry+4)=pred;
+  *(void **)((*(void **)pred)+4)=entry;
+  *(void **)pred=entry;
+  //mycheckaddr();
+  mysti(flag);
+}
+
+unsigned long remque(void * entry, void * addr) {
+  int flag=mycli();
+  //mycheckaddr();
+  *(void **)(*(void **)(entry+4))=*(void **)entry;
+  *(void **)((*(void **)entry)+4)=*(void **)(entry+4);
+  addr=entry;
+  //mycheckaddr();
+  mysti(flag);
+  return (unsigned long) addr;
+}
+#endif

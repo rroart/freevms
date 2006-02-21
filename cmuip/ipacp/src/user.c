@@ -315,6 +315,15 @@ MODULE USER(IDENT="6.7a",LANGUAGE(BLISS32),
 #include <jpidef.h>
 #include <prvdef.h>
 
+#ifndef NOKERNEL
+#define sys$faol exe$faol
+#define sys$fao exe$fao
+#define sys$getjpiw exe$getjpiw
+#define sys$asctoid exe$asctoid
+#define sys$find_held exe$find_held
+//#define sys$finish_rdb exe$finish_rdb
+#endif
+
 //*** N.B. Special UCB extensions used by IP device driver	***
 //*** Take care to always match definitions in IPDRIVER.MAR	***
 //*** Referenced by: TCP_USER.BLI, UDP.BLI, ICMP.BLI		***
@@ -770,7 +779,7 @@ user$clock_base (void)
     signed long
 	Now[2];
 
-    exe$gettim(Now);
+    sys$gettim(Now);
     return ((Now[0]>>20)+(Now[1]<<12)) & 0x7FFF; // check
     }
 
@@ -1105,7 +1114,7 @@ struct user_send_args * Sargs;
 
     expr[0] = 5*TIMER_DELTA;	// 5 seconds in Delta time format.
     expr[1] = -1;
-    exe$schdwk(0,0,expr,0);
+    sys$schdwk(0,0,expr,0);
     sys$hiber();	// check		// Make sure ALL IO has been queued.
 
 // Purge User request queue.
@@ -1563,7 +1572,7 @@ union _prvdef PRVBUF;
 
 // Request the priviliges for the process.
 
-    if ((exe$getjpiw(0,PID,0,JPI,0,0,0)))
+    if ((sys$getjpiw(0,PID,0,JPI,0,0,0)))
 	if (PRVBUF.prv$v_phy_io || PRVBUF.prv$v_setprv)
 	    return SS$_NORMAL;
     return NET$_NOPRV;
@@ -1595,7 +1604,7 @@ check_id(PID,ID)
 
 // Retrieve the UIC for the process
 
-    if (! exe$getjpiw(0,PID,0,JPI,0,0,0))
+    if (! sys$getjpiw(0,PID,0,JPI,0,0,0))
 	return FALSE;
 
 // Check the rights database for this user
@@ -1603,7 +1612,7 @@ check_id(PID,ID)
     UICBLK[1] = 0;
     RDBCTX = 0;
     CURID = ID;
-    while ((STATUS = exe$find_held(UICBLK,ID,0,RDBCTX)))
+    while ((STATUS = sys$find_held(UICBLK,ID,0,RDBCTX)))
         {
 	if (CURID == ID)
 	    {
@@ -1706,7 +1715,7 @@ void ACCESS_INIT (void)
 
     if (access_flags&ACF_ALLOPENS)
 	{
-	if (! exe$asctoid(INTERNET_STRING,
+	if (! sys$asctoid(INTERNET_STRING,
 			INTERNET_ID))
 	    {
 	    OPR$FAO("% Failed to find identifier !AS - access check disabled",
@@ -1720,7 +1729,7 @@ void ACCESS_INIT (void)
 
     if (access_flags&ACF_ARPAHOST)
 	{
-	if (! exe$asctoid(ARPANET_STRING,
+	if (! sys$asctoid(ARPANET_STRING,
 			ARPANET_ID))
 	    {
 	    OPR$FAO("% Failed to find identifier !AS - access check disabled",
@@ -2176,7 +2185,7 @@ struct dsc$descriptor
 	    default:
 		    {
 		      $DESCRIPTOR(ctr,"?User FCN !SL");
-		    exe$fao(&ctr,&funcstr->dsc$w_length,funcstr,
+		    sys$fao(&ctr,&funcstr->dsc$w_length,funcstr,
 			 argblk->ud$funct);
 		    func = *funcstr;
 		    };

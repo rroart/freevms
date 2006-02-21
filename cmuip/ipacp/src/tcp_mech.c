@@ -82,6 +82,11 @@ MODULE TCP_MECH(IDENT="1.0c",LANGUAGE(BLISS32),
 
 #include <ssdef.h>
 
+#ifndef NOKERNEL
+#define sys$numtim exe$numtim
+#define sys$gettim exe$gettim
+#endif
+
 extern
     mm$get_mem(), mm$free_mem();
 
@@ -865,6 +870,9 @@ Side Effects:
 
 */
 
+long tcbdel[16384];
+long tcbi=0;
+
 void tcb$delete ( TCB_Ptr )
     {
 extern	TELNET_CLOSE();
@@ -874,6 +882,14 @@ extern	TELNET_CLOSE();
 	struct tcb_structure * TCB;
 
     TCB = TCB_Ptr;
+    long *l=&TCB_Ptr;
+    memcpy(&tcbdel[tcbi], TCB, 20*4);
+    tcbdel[tcbi]=l[-1];
+    tcbdel[tcbi+1]=TCB;
+    tcbdel[tcbi+8]=TCB->tvtdata;
+    tcbi+=20;
+    if (tcbi>16000)
+      tcbi=0;
 
 // Flush any TVT data block.
 
@@ -1033,7 +1049,7 @@ unsigned short	time_buffer[8];
 unsigned long long	One=1,	// QuadWord of val 1.
 	Now;			// time as in now.
 
-    exe$gettim(&Now);	// current time
+    sys$gettim(&Now);	// current time
     Subm(2,Start_Time,Now,Now); // compute uptime.
 
 // Convert to delta system time (ie, multiply by -1)  Problem is that we have
@@ -1045,7 +1061,7 @@ unsigned long long	One=1,	// QuadWord of val 1.
 #endif
     Addm(2,Now,One,TEK$sys_uptime); // compute Delta TCP uptime.
 
-    exe$numtim(time_buffer,TEK$sys_uptime);
+    sys$numtim(time_buffer,TEK$sys_uptime);
 
     // time in hundredth of seconds
     uptime = time_buffer[6] +

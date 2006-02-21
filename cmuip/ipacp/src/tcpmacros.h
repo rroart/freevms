@@ -71,6 +71,10 @@ Change log:
 #include<stdarg.h>
 #include<descrip.h>
 
+#ifndef NOKERNEL
+#define sys$wake exe$wake
+#endif
+
 // Define version-specific debugging flags.
 
 #if 0
@@ -279,7 +283,7 @@ static int inline FATAL$FAO(char *c, ...) {
 	if (sleeping) \
 	    { \
 	    sleeping = FALSE; \
-	    exe$wake(0,0); \
+	    sys$wake(0,0); \
 	} \
 	}   /*need to add 0,0 until proper calls are done*/
 
@@ -316,7 +320,11 @@ static int inline $$KCALL(int (*func)(), ...) {
 	    argc++;
 	  }
 	  va_end(args);
+#ifndef NOKERNEL
           return func(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15]);
+#else
+	  return sys$cmkrnl(func, &argv[0]);
+#endif
 }
 
 #if 0

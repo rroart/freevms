@@ -1762,7 +1762,7 @@ tcp$send_data(struct tcb_structure * tcb)
 // advance to the next entry on the queue.
 
 	    uargs = qb->sn$uargs;
-	    User$Post_IO_Status(uargs,SS$_NORMAL,qb->sn$size,0,0);
+	    user$post_io_status(uargs,SS$_NORMAL,qb->sn$size,0,0);
 	    mm$uarg_free(uargs);
 	    nqb = qb->sn$next;
 	    REMQUE(qb,&qb);

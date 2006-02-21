@@ -132,10 +132,22 @@ MODULE TELNET(IDENT="1.11",LANGUAGE(BLISS32),
 #include<msgdef.h>
 #include<lnmdef.h>
 #include<misc.h>
-
+#include<linux/sched.h>
+#include<acbdef.h>
 extern signed long log_state,
     local_name,
     ast_in_progress;
+
+#ifndef NOKERNEL
+#define sys$faol exe$faol
+#define sys$fao exe$fao
+#define sys$gettim exe$gettim
+#define sys$schdwk exe$schdwk
+#define sys$assign exe$assign
+#define sys$getjpiw exe$getjpiw
+#define sys$getdviw exe$getdviw
+#define sys$trnlnm exe$trnlnm
+#endif
 
 #define     M$INTERNAL	  15
 
@@ -510,19 +522,19 @@ void namelook_done(TVT,rc,namlen,name)
 
     $DESCRIPTOR(ctr,"!AF!AS!UL");
     $DESCRIPTOR(ctr2,"!AF");
-    if (exe$trnlnm(0,&lnm_table,			// JC Get logical
+    if (sys$trnlnm(0,&lnm_table,			// JC Get logical
 		&lnm_nam,				// Pass on port number
 		0,					// JC
 		itm)					// JC
 	== SS$_NORMAL)
-      rc = exe$fao(&ctr,
+      rc = sys$fao(&ctr,
 		&accpornam->dsc$w_length,accpornam,
 		namlen,name,
 		nam,
 		TCB->foreign_port
 			     );
     else
-      rc = exe$fao(ctr2,
+      rc = sys$fao(ctr2,
 		&accpornam->dsc$w_length,accpornam,
 		namlen,name
 		);
@@ -637,12 +649,12 @@ TELNET_OPEN(TCB)
     $DESCRIPTOR(ctr,"!UB.!UB.!UB.!UB!AS!UL");
     $DESCRIPTOR(ctr2,"!UB.!UB.!UB.!UB");
 // Fill in the access port as [n.n.n.n]
-    if (exe$trnlnm(0,&lnm_table,			// JC Get logical
+    if (sys$trnlnm(0,&lnm_table,			// JC Get logical
 		&lnm_nam,	// Pass on port number
 		0,		// JC
 		&itm)				// JC
 	== SS$_NORMAL)
-      RC = exe$fao(&ctr,
+      RC = sys$fao(&ctr,
 		&accpornam->dsc$w_length,accpornam,
 		   TCB->foreign_host&0xff,
 		   (TCB->foreign_host>>8)&0xff,
@@ -652,7 +664,7 @@ TELNET_OPEN(TCB)
 		TCB->foreign_port
 		   );
     else
-      RC = exe$fao(&ctr2,
+      RC = sys$fao(&ctr2,
 		&accpornam->dsc$w_length,accpornam,
 		   TCB->foreign_host&0xff,
 		   (TCB->foreign_host>>8)&0xff,
@@ -708,13 +720,13 @@ TELNET_OPEN(TCB)
 
     nam->dsc$w_length = sizeof(nambuf);
     $DESCRIPTOR(ctr3,"!AS!/");
-    if (exe$trnlnm(0,&lnm_table,				// JC Get logical
+    if (sys$trnlnm(0,&lnm_table,				// JC Get logical
 		&lnm_nam2,		// JC name for banner
 		0,		// JC
 		&itm)				// JC
 	    == SS$_NORMAL)				// JC If got it
 	{
-	  exe$fao(&ctr3				// JC Put into output
+	  sys$fao(&ctr3				// JC Put into output
 		,&TMPDSC->dsc$w_length			// JC buffer
 		,TMPDSC					// JC
 		,nam);					// JC
@@ -754,6 +766,11 @@ TELNET_OPEN(TCB)
     Called from TCB$Delete just before TCB is deallocated.
 */
 
+#ifndef NOKERNEL
+int myasti=0;
+long myasts[1024];
+#endif
+
  void    TELNET_CLOSE_DONE();
 
 void TELNET_CLOSE(TCB)
@@ -783,13 +800,60 @@ void TELNET_CLOSE(TCB)
 
 	NML$CANCEL(TVT,0,0);	// Cancel the name lookup for accpornam
 
+#ifndef NOKERNEL
+	extern struct task_struct * ctl$gl_pcb;
+	struct _acb * head = &ctl$gl_pcb->pcb$l_astqfl;
+	struct _acb * tmp;
+	myasts[myasti++]=0x10;
+	myasts[myasti++]=head;
+	for(tmp=head->acb$l_astqfl;tmp!=head;tmp=tmp->acb$l_astqfl)
+	  myasts[myasti++]=tmp;
+#endif
 	NOINT;
 	TVT->TVT$CANCEL = TRUE;
+#ifndef NOKERNEL
+	myasts[myasti++]=0x11;
+	myasts[myasti++]=head;
+	for(tmp=head->acb$l_astqfl;tmp!=head;tmp=tmp->acb$l_astqfl)
+	  myasts[myasti++]=tmp;
+#endif
 	sys$dassgn(TVT->TVT$PTY_CHN);
+#ifndef NOKERNEL
+	myasts[myasti++]=0x12;
+	myasts[myasti++]=head;
+	for(tmp=head->acb$l_astqfl;tmp!=head;tmp=tmp->acb$l_astqfl)
+	  myasts[myasti++]=tmp;
+	for(tmp=head->acb$l_astqfl;tmp!=head;tmp=tmp->acb$l_astqfl)
+	  myasts[myasti++]=tmp->acb$b_rmod;
+#endif	
 	sys$dassgn(TVT->TVT$MBX_CHN);
+#ifndef NOKERNEL
+	myasts[myasti++]=0x13;
+	myasts[myasti++]=head;
+	for(tmp=head->acb$l_astqfl;tmp!=head;tmp=tmp->acb$l_astqfl)
+	  myasts[myasti++]=tmp;
+	extern signed long ast_in_progress; 
+	extern signed long intdf; 
+	myasts[myasti++]=intdf;
+	myasts[myasti++]=ast_in_progress;
+#endif
 	sys$dclast(TELNET_CLOSE_DONE,
 		TVT);
+#ifndef NOKERNEL
+	myasts[myasti++]=0x14;
+	myasts[myasti++]=head;
+	for(tmp=head->acb$l_astqfl;tmp!=head;tmp=tmp->acb$l_astqfl)
+	  myasts[myasti++]=tmp;
+#endif
 	OKINT;
+#ifndef NOKERNEL
+	myasts[myasti++]=0x15;
+	myasts[myasti++]=head;
+	for(tmp=head->acb$l_astqfl;tmp!=head;tmp=tmp->acb$l_astqfl)
+	  myasts[myasti++]=tmp;
+	if(myasti>1000)
+	  myasti=0;
+#endif
 	};
     }
 
@@ -1576,7 +1640,7 @@ void PTY_SET_OWNER_PID(TVT)
    {
      struct tcb_structure * TCB;
      unsigned char 	devstr[20];
-     struct dsc$descriptor devnam_, *devnam=&devnam;
+     struct dsc$descriptor devnam_, *devnam=&devnam_;
 //!!	devsln,
      unsigned char 	ptynambuf[20];
      struct dsc$descriptor ptynam_ = {
@@ -1607,7 +1671,7 @@ signed long
     Item_List[0].bufaddr=&Unit_Number;
     Item_List[1].item_code=0; // check
 
-    RC = exe$getdviw (0,TVT->TVT$PTY_CHN,0,Item_List,0,0); // seems C can not fill in the rest with 0?
+    RC = sys$getdviw (0,TVT->TVT$PTY_CHN,0,Item_List,0,0); // seems C can not fill in the rest with 0?
     if (BLISSIF(RC))
 	{
 	  Item_List[0].item_code=DVI$_PID;
@@ -1627,16 +1691,16 @@ signed long
 
 	ptynam->dsc$w_length = sizeof(ptynambuf);
 
-	RC = exe$trnlnm(0, &lnm_table,
+	RC = sys$trnlnm(0, &lnm_table,
 		&lnm_nam,		// JC
 		0,		// JC
 		&itm);				// JC
 	if (BLISSIFNOT(RC)) TVT->TVT$DO_PID = 0;		// Cancel
 	$DESCRIPTOR(ctr,"!AS!UL:"); // was: ASA (because tz+a) -_, not needed?
 	if (RC == SS$_NORMAL)
-	  RC = exe$fao(&ctr,&devnam->dsc$w_length,devnam,ptynam,Unit_Number); // check
+	  RC = sys$fao(&ctr,&devnam->dsc$w_length,devnam,ptynam,Unit_Number); // check
 	if (BLISSIF(RC))
-	  RC = exe$getdviw (0,0,devnam,Item_List,0,0); // seems C can not fill int the rest with 0?
+	  RC = sys$getdviw (0,0,devnam,Item_List,0,0); // seems C can not fill int the rest with 0?
 
     XLOG$FAO(LOG$TELNET,"!%T PTY_Set_owner_PID: TTY_TERM=\"!AS\"!/",0,devnam);
 
@@ -1671,7 +1735,9 @@ signed long
 	};
     }
 
-
+    extern int tcbi;
+long tcbii=0;
+long tcbis[1024];
 
  void    PTY_READ_DONE();
 
@@ -1713,6 +1779,11 @@ void PTY_READ(TVT)
     Byte_Count = MIN(Byte_Count, TVT_TTY_BUFLEN) ;
 
 // Initiate a read on the PTY device
+
+    tcbis[tcbii]=tcbi;
+    tcbii++;
+    if (tcbii>1000)
+      tcbii=0;
 
     RC = sys$qio(0,
 		 TVT->TVT$PTY_CHN,

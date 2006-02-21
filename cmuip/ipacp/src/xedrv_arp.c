@@ -139,6 +139,11 @@ MODULE ARP( IDENT="1.9A",LANGUAGE(BLISS32),
 #include <ssdef.h>
 #include <descrip.h>
 
+#ifndef NOKERNEL
+#define sys$setimr exe$setimr
+#define sys$bintim exe$bintim
+#endif
+
 // Externals used by this module
 
 extern
@@ -289,9 +294,9 @@ void xearp$init (void)
 
     for (I=0;I<=(ARP_HSHLEN-1);I++)
 	ARPHTB[I] = 0;
-    exe$bintim(ARP_SWP_TTXT,
+    sys$bintim(ARP_SWP_TTXT,
 	    ARP_SWP_TIME);
-    exe$setimr(0, ARP_SWP_TIME,
+    sys$setimr(0, ARP_SWP_TIME,
 	    ARP_SWEEP, 0, 0);
     }
 
@@ -909,7 +914,7 @@ struct ACACHE_BLK * ACPTR;
 
 // Reset sweep timer
 
-    exe$setimr(0  ,  ARP_SWP_TIME,
+    sys$setimr(0  ,  ARP_SWP_TIME,
 	     ARP_SWEEP, 0, 0);    
     }
 

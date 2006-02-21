@@ -252,6 +252,15 @@ extern 	void FATAL_FAO(int, ...);
 
 #include <asm/uaccess.h>
 
+#ifndef NOKERNEL
+#define sys$open exe$open
+#define sys$close exe$close
+#define sys$get exe$get
+#define sys$exit exe$exit
+#define sys$connect exe$connect
+#define sys$disconnect exe$disconnect
+#endif
+
 #if 0
 extern  void    OPR_FAO();
 #endif
@@ -568,27 +577,31 @@ void CNF$Configure_ACP (void)
 // OPEN the file "config.TXT" & read/decode network device data into blockvector
 // dev_config and memory management info.
 
+#ifndef NOKERNEL
+#ifdef CONFIG_VMS
     fs = get_fs();
     set_fs(get_ds());
 
-#ifdef CONFIG_VMS
     long prev_xqp_fcb = get_xqp_prim_fcb();
     long prev_x2p_fcb = get_x2p_prim_fcb();
 #endif
-    if (BLISSIFNOT(BLISSIF(RC = exe$open(CFFAB)) &&
-	    BLISSIF(RC = exe$connect(CFRAB))))
+#endif
+    if (BLISSIFNOT(BLISSIF(RC = sys$open(CFFAB,0,0)) &&
+	    BLISSIF(RC = sys$connect(CFRAB,0,0))))
 	{
 	$DESCRIPTOR(dsc, "Unable to access INET$CONFIG:");
 	send_2_operator(&dsc);
-	exe$exit(RC);
+	sys$exit(RC);
 	};
 
 // Extract information from each non-comment line of the file
 
     dev_count = 0;		// No devices
 
+#ifndef NOKERNEL 
 #ifdef CONFIG_VMS
 #define RMS_WORKAROUND
+#endif
 #endif
 #ifdef RMS_WORKAROUND
     struct file * filp;
@@ -602,7 +615,7 @@ void CNF$Configure_ACP (void)
     // temp workaround: with ods2 it read an empty second block
     while ((offs=CFRAB->rab$w_rsz=rms_kernel_read(filp,offs,CFBUF,512))>0 && CFBUF[0])
 #else
-    while (exe$get(CFRAB)&1)
+    while (sys$get(CFRAB,0,0)&1)
 #endif
 	{
 	signed long
@@ -669,10 +682,12 @@ void CNF$Configure_ACP (void)
 	}
 	};
 
-    exe$disconnect(CFRAB);
-    exe$close(CFFAB);
+    sys$disconnect(CFRAB,0,0);
+    sys$close(CFFAB,0,0);
 
+#ifndef NOKERNEL
     set_fs(fs);
+#endif
 
 // make sure we did some device configuration here as networks without devices
 // are not really very interesting.
@@ -1997,7 +2012,7 @@ static signed long
 
 void CNF$Check_Sched (void)
     {
-    exe$setimr(	0,  CHECKTIME,
+    sys$setimr(	0,  CHECKTIME,
 		CNF$Check_Devices, 0, 0);
     }
 
