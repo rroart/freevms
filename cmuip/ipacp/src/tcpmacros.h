@@ -313,7 +313,8 @@ static int inline FATAL$FAO(char *c, ...) {
 
 static int inline $$KCALL(int (*func)(), ...) {
 	  va_list args;
-	  int argv[16],argc=0;
+	  int argv[16],argc=1;
+	  argv[0]=15;
 	  va_start(args,func);
 	  while(argc<16) {
 	    argv[argc]=va_arg(args,int);

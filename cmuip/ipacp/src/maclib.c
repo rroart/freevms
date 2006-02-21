@@ -245,6 +245,7 @@
 #define ab$b_protocol vc$protocol
 #define ab$w_iochan vc$piochan
 
+#ifdef NOKERNEL
 #define exe$alononpaged EXE$ALONONPAGED
 #define exe$deanonpaged EXE$DEANONPAGED
 
@@ -257,6 +258,7 @@ int EXE$DEANONPAGED(int * addr) {
   kfree(addr);
   return SS$_NORMAL;
 }
+#endif
 
 // Local symbols
 
@@ -646,7 +648,7 @@ Build_ACP_QB(R5)
   struct _aqb * R2, *R8;
   struct _pcb * R4;
   R1 = AQB$C_LENGTH;
-  R0 = exe$alononpaged(R1,&R2);		// get chunck of non-paged pool.
+  R0 = exe_std$alononpaged(R1,&R3,&R2);		// get chunck of non-paged pool.
   if ((R0&1)==0)				// Error?
 
   // Return error, unable to allocate non-paged pool.
@@ -736,7 +738,7 @@ build_vcb(R5,R8)
   int R0,R1,R3,R4,R6,R7,R9;
   struct _vcb * R2;
   R1 = VCB$C_LENGTH;		// size of VCB
-  R0 = exe$alononpaged(R1,&R2);		// allocate nonpaged pool.
+  R0 = exe_std$alononpaged(R1,&R3,&R2);		// allocate nonpaged pool.
   if ((R0&1)==0) 				// Error? punt if yes.
     return R0;
 
