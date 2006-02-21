@@ -18,16 +18,16 @@ int exe$setast(char enbflg) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
   struct _pcb * p=ctl$gl_pcb;
   int retval;
-  if (p->pcb$b_asten&(1<<p->psl_cur_mod))
+  if (p->pcb$b_asten&(1<<p->psl_prv_mod))
     retval=SS$_WASSET;
   else
     retval=SS$_WASCLR;
   if (p->oldpsl_prv_mod!=PSL$C_USER) {
   back:
     if (enbflg) 
-      p->pcb$b_asten|=(1<<p->psl_cur_mod);
+      p->pcb$b_asten|=(1<<p->psl_prv_mod);
     else
-      p->pcb$b_asten&=~(1<<p->psl_cur_mod);
+      p->pcb$b_asten&=~(1<<p->psl_prv_mod);
     sch$newlvl(p);
     return retval;
   }
