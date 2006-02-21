@@ -17,8 +17,8 @@
 #include <linux/sched.h>
 #include <linux/smp.h>
 
-#undef OLDAST
 #define OLDAST
+#undef OLDAST
 
 #undef ASTDEBUG
 #define ASTDEBUG
@@ -218,7 +218,7 @@ int exe$astdel_wrap2(struct _pcb * p, struct _acb * acb) {
 /*
   ecx scratch
   original call stack: esi
-  0xb8:
+  0xb8/bc? 68/6c from dummy a:
   0: original ret eip
   4: ret cs
   8: flags
@@ -273,8 +273,20 @@ int exe$astdel() {
 
 int exe$astdel_prep2(long stack, long ast, long astprm) {
   __asm__ __volatile__(
+#if 0
 		       "movl %esp,%esi\n\t"
 		       "addl $0xb8,%esi\n\t" // get original call stack
+#else
+		       "movl 0x4(%esp),%esi\n\t"
+		       "addl $0x6c,%esi\n\t" // get original call stack
+#endif
+		       "back_here2:\n\t"
+		       "cmpl $0x10,0x4(%esi)\n\t" // come from kernel mode?
+		       "je from_kernel_mode\n\t" // then go to other code
+		       "cmpl $0x23,0x4(%esi)\n\t"
+		       "je back_here\n\t"
+		       "jmp panic\n\t"
+		       "back_here:\n\t"
 		       "movl 0xc(%esi),%edx\n\t" // get user stack
 		       "addl $-0xc,%edx\n\t" // get new user stack
 		       "movl %esi,%edi\n\t" // get kernel stack
@@ -288,6 +300,18 @@ int exe$astdel_prep2(long stack, long ast, long astprm) {
 		       "\n\t"
 		       "movl $exe$astdel,0x0(%edi)\n\t" // put astdel on kstack
 		       "movl %edx,0xc(%edi)\n\t" // put new ustack on kstack
+		       "ret\n\t"
+		       "\n\t"
+		       "from_kernel_mode:\n\t"
+		       "addl $0x48,%esi\n\t" // next stack, via do_sw_int
+		       "cmpl $0x23,0x4(%esi)\n\t"
+		       "je back_here2\n\t"
+		       "cmpl $0x10,0x4(%esi)\n\t"
+		       "je back_here2\n\t"
+		       "subl $0x48,%esi\n\t" // back
+		       "addl $0x54,%esi\n\t" // next stack, via sw_ast
+		       "jmp back_here2\n\t"
+		       "ret\n\t"
 );
 }
 
@@ -324,10 +348,10 @@ int myacbi=0;
 long myacbs[1024];
 #endif
 
-asmlinkage void sch$astdel(/*int dummy*/) {
+asmlinkage void sch$astdel(int dummy) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
   struct _pcb * p=ctl$gl_pcb;
-  struct _acb * dummy = 0, *acb;
+  struct _acb * acb;
 
   /*lock*/
   if (intr_blocked(IPL$_ASTDEL))
@@ -361,14 +385,16 @@ asmlinkage void sch$astdel(/*int dummy*/) {
      //printk("here ast2 %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl);
      for (j=0; j<20; j++) for (i=0; i<1000000000; i++) ;
      } */
-  acb=remque(p->pcb$l_astqfl,dummy);
+  acb=remque(p->pcb$l_astqfl,0);
 #ifdef ASTDEBUG
   myacbs[myacbi++]=acb;
   myacbs[myacbi++]=acb->acb$l_ast;
   myacbs[myacbi++]=acb->acb$l_astprm;
   myacbs[myacbi++]=acb->acb$b_rmod;
+#if 0
   if (acb->acb$b_rmod&3)
     printk("A %x %x\n",acb,acb->acb$b_rmod);
+#endif
   if (myacbi>1000)
     myacbi=0;
   lastacb=acb;
@@ -412,7 +438,13 @@ asmlinkage void sch$astdel(/*int dummy*/) {
     goto more;
   }
   //printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
-  if (p->pcb$b_asten!=15 || p->pcb$b_astact) { // 15 because no modes yet
+  // avoid leftovers
+  if ((current->pslstk[current->pslindex-1]&3)<(acb->acb$b_rmod&3)) goto out;
+  // skip if disabled
+  if (!test_bit(acb->acb$b_rmod&3,&p->pcb$b_asten)) goto out;
+  // test if busy already
+  if (test_and_set_bit(acb->acb$b_rmod&3,&p->pcb$b_astact)) {
+  out:
 #ifdef ASTDEBUG
     myacbs[myacbi++]=-1;
     myacbs[myacbi++]=acb;
@@ -424,9 +456,13 @@ asmlinkage void sch$astdel(/*int dummy*/) {
     spin_unlock(&SPIN_SCHED);
     return;
   }
+  p->phd$b_astlvl=p->pr_astlvl=(acb->acb$b_rmod & 3) + 1;
+  //unlock
   setipl(IPL$_ASTDEL);
+#ifdef OLDAST
   p->pcb$b_astact=0; // 1; wait with this until we get modes
   setipl(0); // for kernel mode, I think. everything is in kernelmode yet.
+#endif
   if (((unsigned long)acb->acb$l_ast<0x80000000)&&((unsigned long)acb->acb$l_ast>0xb0000000)) {
     int i;
     printk("kast %x\n",acb->acb$l_ast);
@@ -442,7 +478,9 @@ asmlinkage void sch$astdel(/*int dummy*/) {
   //  printk("a3 ");
 #endif
   if (acb->acb$b_rmod&ACB$M_PKAST) {
-    acb->acb$b_rmod&=~ACB$M_PKAST;
+    acb->acb$b_rmod&=~ACB$M_PKAST; // check
+    if (acb->acb$b_rmod&3)
+      printk("error: pkast not kernel mode\n"); 
     if(acb->acb$l_kast) acb->acb$l_kast(acb->acb$l_astprm); /* ? */
   }
 #ifdef __arch_um__
@@ -456,12 +494,17 @@ asmlinkage void sch$astdel(/*int dummy*/) {
   long (*ast)() = acb->acb$l_ast;
   long astprm = acb->acb$l_astprm;
   int rmod = acb->acb$b_rmod;
-  if ((acb->acb$b_rmod&ACB$M_NODELETE)==0) kfree(acb);
 #ifndef OLDAST
-  if (ast && (((long)ast)&0x80000000)==0)/* not yet: (rmod&3) */ { // workaround
-    int sts = exe$astdel_prep(0/*&dummy*/,ast,astprm);
+  if ((acb->acb$b_rmod&(ACB$M_NODELETE|ACB$M_PKAST))==0) kfree(acb);
+  if (rmod&3) {
+    user_spaceable_addr(exe$astdel); // bad temp hack
+    user_spaceable_addr(&dummy); // bad temp hack
+    int sts = exe$astdel_prep(&dummy,ast,astprm);
   } else {
+    setipl(0);
     if(ast) ast(astprm); /* ? */
+    // simulate exe$astdel and cmod$astexit
+    test_and_clear_bit(rmod&3, &p->pcb$b_astact); // check
     sch$newlvl(p);
   }
 #else
@@ -471,9 +514,9 @@ asmlinkage void sch$astdel(/*int dummy*/) {
 #ifdef __i386__
   //      printk("a4 ");
 #endif
+#ifdef OLDAST
   p->pcb$b_astact=0;
   /*unlock*/
-#ifdef OLDAST
   goto more;
 #endif
 }
@@ -489,9 +532,9 @@ void sch$newlvl(struct _pcb *p) {
     newlvl=4;
   else {
     if(p->pcb$l_astqfl->acb$b_rmod & ACB$M_KAST)
-      newlvl=p->pcb$l_astqfl->acb$b_rmod & 3;
-    else
       newlvl=0; // was: p->phd$b_astlvl; /* ? */
+    else
+      newlvl=p->pcb$l_astqfl->acb$b_rmod & 3;
   }
     
   p->phd$b_astlvl=newlvl;
