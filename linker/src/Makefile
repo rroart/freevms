@@ -1,7 +1,5 @@
 binutils-2.16.tar.gz:
-	./download-linker
-
-linker_0_2_5:
+linker-0_2_5:
 	./download-linker
 
 download-linker: binutils-2.16.tar.gz linker-0_2_5
