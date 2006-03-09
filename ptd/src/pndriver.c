@@ -327,8 +327,11 @@
 #endif 
 
 #include <system_data_cells.h>
+#include <com_routines.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
+#include <exe_routines.h>
 #include <linux/sched.h>
-void ioc_std$cancelio (signed int chan, struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb);
 
 //
 // Local definitions
@@ -1041,7 +1044,7 @@ int PN$CLONE_INIT(struct _ucb * u) {
   //
 
   R0	 = u->ucb$l_ddb;		// Find UNIT #0 UCB FOR PZ DEV.
-  R0=R0->ddb$l_ucb;
+  R0=R0->ddb$ps_ucb;
   // check. is R0 meaningless?
   // R5 = UCB to CLONE
   sts=ioc_std$clone_ucb(search_ucb,&new);			// Clone UCB
@@ -1069,7 +1072,6 @@ int PN$CLONE_INIT(struct _ucb * u) {
   //- ---
   R0	 = new->ucb$l_ddt;		// Get DDT
   R0	 = ((struct _ddt *)R0)->ddt$l_unitinit;		// Get Unit Init Addr in DDT
-  extern ioc$return();
   if	(R0!=ioc$return)			// Null Address??
     goto	l50;				// No: Call it
 #if 0
@@ -1166,7 +1168,7 @@ int SEARCHUNIT(struct _ddb * ddb, int unit, struct _ucb ** ucb) {				// Search f
   int sts=0;
   struct _ucb dummy;
   int linkoffset=(long)&dummy.ucb$l_link-(long)&dummy;
-  *ucb=	(long)&ddb->ddb$l_ucb-linkoffset;	//check		// Get address of next ucb address
+  *ucb=	(long)&ddb->ddb$ps_ucb-linkoffset;	//check		// Get address of next ucb address
  l10:	*ucb = (*ucb)->ucb$l_link;		// Get Address of next ucb
   if ((*ucb)==0) goto	l40;			// If EQL then end of list
   if	(unit==(*ucb)->ucb$w_unit)	// Unit number match?
@@ -1289,7 +1291,8 @@ int PN$STARTIO (struct _irp * i, struct _ucb * u) {
  //
  irp->irp$l_iost2=0;		// No status
  int R0 = irp->irp$l_iost1;		// Load IOSB return values
- return	ioc$reqcom(R0,0,u);
+ ioc$reqcom(R0,0,u);
+ return SS$_NORMAL;
  //
  // Put the character into the read buffer
  //
@@ -1482,7 +1485,7 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
 
  SET_CMN:
   //	i->irp$l_qio_p2=0;		// Remove user param (Is this needed?)
-  com_std$setattnast(i,p,u,acb_p);	// Insert into AST list
+  com_std$setattnast(i,p,u,c,acb_p);	// Insert into AST list
   return exe$finishioc(sts,i,p,u);		// Complete request
 
  SET_ACC_PORT:
@@ -1807,7 +1810,9 @@ static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
 
   func=u->ucb$l_fpc;
   func(i,u);
+#if 0
   myrei();
+#endif
 }
 
 static struct _fdt pn$fdt = {
@@ -1846,11 +1851,11 @@ static struct _ddt pn$ddt = {
   ddt$l_mntver: mntver,
   ddt$l_cloneducb: PN$CLONE_INIT,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: mntv_sssc,
-  ddt$l_mntv_for: mntv_for,
-  ddt$l_mntv_sqd: mntv_sqd,
-  ddt$l_aux_storage: aux_storage,
-  ddt$l_aux_routine: aux_routine
+  ddt$ps_mntv_sssc: mntv_sssc,
+  ddt$ps_mntv_for: mntv_for,
+  ddt$ps_mntv_sqd: mntv_sqd,
+  ddt$ps_aux_storage: aux_storage,
+  ddt$ps_aux_routine: aux_routine
 };
 
 extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
@@ -1934,7 +1939,7 @@ int pn$init_tables() {
   return SS$_NORMAL;
 }
 
-int pn_iodb_vmsinit(void) {
+long pn_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&pn$ucb;
   struct _ddb * ddb=&pn$ddb;
@@ -1945,9 +1950,9 @@ int pn_iodb_vmsinit(void) {
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,sizeof(struct _tty_ucb)); // check
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,sizeof(struct _tty_ucb)); // check
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
 #if 0
   init_ddb(&pn$ddb,&pn$ddt,&pn$ucb,"dqa");
@@ -1978,7 +1983,7 @@ int pn_iodb_vmsinit(void) {
 
 }
 
-int pn_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long pn_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb = 0;
   //  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&pn$ucb*/,&newucb); // check. skip?

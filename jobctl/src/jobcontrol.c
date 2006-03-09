@@ -11,6 +11,9 @@
 #include <descrip.h>
 #include <iodef.h>
 #include <ssdef.h>
+#include<starlet.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 #ifdef CONFIG_VMS
 
@@ -19,6 +22,7 @@
 short int mbx_buffer[128];
 short int mailbox_channel=0;
 static unsigned long iosb;
+do_mbx_read();
 
 mbx_read_ast() {
   int unit = mbx_buffer[1];

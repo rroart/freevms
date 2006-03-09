@@ -59,6 +59,8 @@
 #include "cache.h"
 #include "access.h"
 //#include "phyio.h"
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 struct phyio_info {
   unsigned status;
@@ -81,7 +83,7 @@ void *device_create(unsigned devsiz,void *keyval,unsigned *retsts)
     } else {
         unsigned sts;
         struct phyio_info info;
-        sts = phyio_init(devsiz + 1,&dev->ucb$l_ddb->ddb$t_name[1],&dev->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,&info);
+        sts = phyio_init(devsiz + 1,&dev->ucb$l_ddb->ddb$t_name[1],&dev->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,&info,0); // check
         *retsts = sts;
         if (sts & 1) {
             dev->ucb$l_vcb = NULL;

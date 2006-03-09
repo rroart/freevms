@@ -5,7 +5,13 @@ VMSSUBDIRS3 = cmuip/ipacp/src/
 
 export BLISS = $(TOPDIR)/bliss/bin/gcc
 
+TMPARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ -e s/arm.*/arm/ -e s/sa110/arm/)
+
 export LIBGCC = $(shell gcc -print-libgcc-file-name)
+ifeq ($(TMPARCH),x86_64)
+export LIBGCC_EH = $(shell gcc -print-file-name=libgcc_eh.a)
+export LIBGCC += $(LIBGCC_EH)
+endif
 
 export LIBC = /usr/lib/libc.a
 
@@ -17,9 +23,11 @@ export VMS_RPATH = -Wl,-rpath,/vms"$$$$"common/syslib
 export VMS_LD_RPATH = -rpath /vms"$$$$"common/syslib
 
 export VMSLIBS = $(TOPDIR)/librtl/src/librtl.a $(TOPDIR)/starlet/src/starlet.a
+export VMSLIBS_PIC = $(TOPDIR)/librtl/src/librtl_pic.a $(TOPDIR)/starlet/src/starlet_pic.a
 export VMSDLIBS_EXE = $(TOPDIR)/librtl/src/i386/librtl$(EXE) $(TOPDIR)/starlet/src/i386/starlet$(EXE)
 export VMSDLIBS_EXE_ELF = $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF) $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 export VMSLIBSUM = $(TOPDIR)/librtl/src/librtl.a $(TOPDIR)/starlet/src/starletum.a 
+export VMSLIBSUM_PIC = $(TOPDIR)/librtl/src/librtl_pic.a $(TOPDIR)/starlet/src/starletum_pic.a 
 export LINKER = $(TOPDIR)/linker/src/linker
 
 export LINKPRE = -Bstatic
@@ -32,6 +40,11 @@ export ROOTI386_COMMON = $(TOPDIR)/rooti386/vms"$$$$"common
 export ROOTUM_COMMON = $(TOPDIR)/rootum/vms"$$$$"common
 export ROOTI386_COMMON_SYSEXE = $(TOPDIR)/rooti386/vms"$$$$"common/sysexe
 export ROOTUM_COMMON_SYSEXE = $(TOPDIR)/rootum/vms"$$$$"common/sysexe
+
+export EXTERNAL = $(TOPDIR)/cdu/src/cdu.a
+export EXTERNAL_PIC = $(TOPDIR)/cdu/src/cdu_pic.a
+export EXTERNAL2 = $(TOPDIR)/cdu/src/cdu2.a
+export EXTERNAL2_PIC = $(TOPDIR)/cdu/src/cdu2_pic.a
 
 vmsall:
 	for X in $(VMSSUBDIRS); do \

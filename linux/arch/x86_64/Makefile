@@ -36,7 +36,7 @@ export IA32_CC IA32_LD IA32_AS IA32_OBJCOPY IA32_CPP
 LD=$(CROSS_COMPILE)ld -m elf_x86_64
 OBJCOPY=$(CROSS_COMPILE)objcopy -O binary -R .note -R .comment -S
 LDFLAGS=-e stext
-LINKFLAGS =-T $(TOPDIR)/arch/x86_64/vmlinux.lds $(LDFLAGS)
+LINKFLAGS =-T $(TOPDIR)/linux/arch/x86_64/vmlinux.lds $(LDFLAGS)
 
 check_gcc = $(shell if $(CC) $(1) -S -o /dev/null -xc /dev/null > /dev/null 2>&1 ; then echo "$(1)"; else echo "$(2)"; fi)
 
@@ -63,37 +63,37 @@ ifdef CONFIG_MPSC
 CFLAGS += $(call check_gcc,-march=nocona,)
 endif
 
-HEAD := arch/x86_64/kernel/head.o arch/x86_64/kernel/head64.o arch/x86_64/kernel/init_task.o
+HEAD := linux/arch/x86_64/kernel/head.o linux/arch/x86_64/kernel/head64.o linux/arch/x86_64/kernel/init_task.o
 
-SUBDIRS := arch/x86_64/tools $(SUBDIRS) arch/x86_64/kernel arch/x86_64/mm arch/x86_64/lib
-CORE_FILES := arch/x86_64/kernel/kernel.o $(CORE_FILES)
-CORE_FILES +=  arch/x86_64/mm/mm.o
-LIBS := $(TOPDIR)/arch/x86_64/lib/lib.a $(LIBS)
+SUBDIRS := linux/arch/x86_64/tools $(SUBDIRS) linux/arch/x86_64/kernel linux/arch/x86_64/mm linux/arch/x86_64/lib
+CORE_FILES := linux/arch/x86_64/kernel/kernel.o $(CORE_FILES)
+CORE_FILES +=  linux/arch/x86_64/mm/mm.o
+LIBS := $(TOPDIR)/linux/arch/x86_64/lib/lib.a $(LIBS)
 
 ifdef CONFIG_IA32_EMULATION
-SUBDIRS += arch/x86_64/ia32
-CORE_FILES += arch/x86_64/ia32/ia32.o
+SUBDIRS += linux/arch/x86_64/ia32
+CORE_FILES += linux/arch/x86_64/ia32/ia32.o
 endif
 
 ifdef CONFIG_HOSTFS
-SUBDIRS += arch/x86_64/hostfs
-core-$(CONFIG_HOSTFS) += arch/x86_64/hostfs/hostfs.o
+SUBDIRS += linux/arch/x86_64/hostfs
+core-$(CONFIG_HOSTFS) += linux/arch/x86_64/hostfs/hostfs.o
 endif
 
 CORE_FILES += $(core-y)
 
-arch/x86_64/tools: dummy
-	$(MAKE) linuxsubdirs SUBDIRS=arch/x86_64/tools 
+linux/arch/x86_64/tools: dummy
+	$(MAKE) linuxsubdirs SUBDIRS=linux/arch/x86_64/tools 
 
-arch/x86_64/kernel: dummy 
-	$(MAKE) linuxsubdirs SUBDIRS=arch/x86_64/kernel
+linux/arch/x86_64/kernel: dummy 
+	$(MAKE) linuxsubdirs SUBDIRS=linux/arch/x86_64/kernel
 
-arch/x86_64/mm: dummy
-	$(MAKE) linuxsubdirs SUBDIRS=arch/x86_64/mm
+linux/arch/x86_64/mm: dummy
+	$(MAKE) linuxsubdirs SUBDIRS=linux/arch/x86_64/mm
 
-MAKEBOOT = $(MAKE) -C arch/$(ARCH)/boot
+MAKEBOOT = $(MAKE) -C linux/arch/$(ARCH)/boot
 
-vmlinux: arch/x86_64/vmlinux.lds
+linux/vmlinux: linux/arch/x86_64/vmlinux.lds
 
 FORCE: ;
 
@@ -101,35 +101,35 @@ FORCE: ;
 		clean archclean archmrproper archdep checkoffset
 
 checkoffset: FORCE
-	make -C arch/$(ARCH)/tools $(TOPDIR)/include/asm-x86_64/offset.h
+	make -C linux/arch/$(ARCH)/tools $(TOPDIR)/linux/include/asm-x86_64/offset.h
 
-bzImage: checkoffset vmlinux
+bzImage: checkoffset linux/vmlinux
 	@$(MAKEBOOT) bzImage
 
-bzImage-padded: checkoffset vmlinux
+bzImage-padded: checkoffset linux/vmlinux
 	@$(MAKEBOOT) bzImage-padded
 
 tmp:
 	@$(MAKEBOOT) BOOTIMAGE=bzImage zlilo
 
-bzlilo: checkoffset vmlinux
+bzlilo: checkoffset linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=bzImage zlilo
 
-bzdisk: checkoffset vmlinux
+bzdisk: checkoffset linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=bzImage zdisk
 
-install: checkoffset vmlinux
+install: checkoffset linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=bzImage install
 
 archclean:
 	@$(MAKEBOOT) clean
-	@$(MAKE) -C $(TOPDIR)/arch/x86_64/tools clean
+	@$(MAKE) -C $(TOPDIR)/linux/arch/x86_64/tools clean
 
 archmrproper:
-	rm -f $(TOPDIR)/arch/x86_64/tools/offset.h
-	rm -f $(TOPDIR)/arch/x86_64/tools/offset.tmp
-	rm -f $(TOPDIR)/include/asm-x86_64/offset.h
+	rm -f $(TOPDIR)/linux/arch/x86_64/tools/offset.h
+	rm -f $(TOPDIR)/linux/arch/x86_64/tools/offset.tmp
+	rm -f $(TOPDIR)/linux/include/asm-x86_64/offset.h
 
 archdep:
-	@$(MAKE) -C $(TOPDIR)/arch/x86_64/tools all
+	@$(MAKE) -C $(TOPDIR)/linux/arch/x86_64/tools all
 	@$(MAKEBOOT) dep

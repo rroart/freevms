@@ -25,6 +25,8 @@
 
 #include <misc.h>
 
+#include <misc_routines.h>
+
 /*
  * balloc.c contains the blocks allocation and deallocation routines
  */

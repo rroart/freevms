@@ -13,6 +13,8 @@
 #include<asm/hw_irq.h>
 #include<linux/sched.h>
 #include<asm/current.h>
+#include<queue.h>
+long inline mycli(void);
 
 int in_atomic=0;
 unsigned long prev1[20];
@@ -29,7 +31,7 @@ static long stk[1024];
 #endif
 
 inline asmlinkage void pushpsl(void);
-void inline mysti(int flags);
+void inline mysti(int long);
 asmlinkage void myrei (void);
 
 inline asmlinkage void setpsli(void) {
@@ -82,8 +84,10 @@ inline asmlinkage void poppsl(void) {
     int j=0;
     for(i=&dummy;j<400;i++,j++) printk("%x ",*i);
     }
+#if 0
     show_trace(&this_cpu);
     show_trace_task(current);
+#endif
     panic("pop\n");
   }
 }
@@ -350,8 +354,8 @@ asmlinkage void myrei (void) {
   /* also needs some changing mode stacks */
 }
 
-#ifdef __i386__
-void inline mysti(int flags) {
+#if (defined __i386__) || (defined __x86_64__)
+void inline mysti(long flags) {
   in_atomic=0;
   if (flags) __sti();
   spin_unlock(SPIN_ATOMIC);
@@ -365,8 +369,8 @@ void sickinsque(void * entry, void * pred) {
   *(void **)pred=entry;
 }
 
-int inline mycli(void) {
-  int flags, retval;
+long inline mycli(void) {
+  long flags, retval;
   //printk("mycli\n");
   spin_lock(SPIN_ATOMIC);
   __save_flags(flags);

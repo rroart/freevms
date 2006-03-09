@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /* 
  * 32bit ptrace for x86-64.
  *
@@ -24,6 +30,7 @@
 #include <asm/i387.h>
 #include <asm/fpu32.h>
 #include <linux/mm.h>
+#include <misc_routines.h>
 
 /* determines which flags the user has access to. */
 /* 1 = access 0 = no access */

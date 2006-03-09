@@ -22,6 +22,8 @@
 	Shuu Yamaguchi <shuu@wondernetworkresources.com> December 2000
 */
 
+#define errno kernel_errno
+
 #define __KERNEL_SYSCALLS__
 
 #include <linux/config.h>

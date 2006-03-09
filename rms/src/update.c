@@ -44,6 +44,8 @@
 //#include "ssdef.h"
 #include "cache.h"
 #include "access.h"
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 unsigned deaccesshead(struct _fh2 *head,unsigned idxblk);
 unsigned accesshead(struct _vcb *vcb,struct _fiddef *fid,unsigned seg_num,
@@ -578,7 +580,7 @@ unsigned f11b_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
 			 &head->fh2$w_ext_fid,&nhead,&nidxblk);
     if (!(sts & 1)) return sts;
     deaccesshead(head,headvbn);
-    writehead(getidxfcb(vcbdev,head));
+    writehead(getidxfcb(vcbdev),head);
     head = nhead;
     headvbn = nidxblk;
     vcbdev = rvn_to_dev(xqp->current_vcb,head->fh2$w_fid.fid$b_rvn);

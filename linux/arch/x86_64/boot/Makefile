@@ -8,9 +8,9 @@
 # Copyright (C) 1994 by Linus Torvalds
 #
 
-BOOT_INCL =	$(TOPDIR)/include/linux/config.h \
-		$(TOPDIR)/include/linux/autoconf.h \
-		$(TOPDIR)/include/asm/boot.h
+BOOT_INCL =	$(TOPDIR)/linux/include/linux/config.h \
+		$(TOPDIR)/linux/include/linux/autoconf.h \
+		$(TOPDIR)/linux/include/asm/boot.h
 
 zImage: $(CONFIGURE) bootsect setup compressed/vmlinux tools/build
 	$(OBJCOPY) compressed/vmlinux compressed/vmlinux.out
@@ -23,10 +23,10 @@ bzImage: $(CONFIGURE) bbootsect bsetup compressed/bvmlinux tools/build
 bzImage-padded: bzImage
 	dd if=/dev/zero bs=1k count=70 >> bzImage
 
-compressed/vmlinux: $(TOPDIR)/vmlinux
-	@$(MAKE) -C compressed vmlinux
+compressed/vmlinux: $(TOPDIR)/linux/vmlinux
+	@$(MAKE) -C compressed linux/vmlinux
 
-compressed/bvmlinux: $(TOPDIR)/vmlinux
+compressed/bvmlinux: $(TOPDIR)/linux/vmlinux
 	@$(MAKE) -C compressed bvmlinux
 
 zdisk: $(BOOTIMAGE)
@@ -36,11 +36,11 @@ zlilo: $(CONFIGURE) $(BOOTIMAGE)
 	if [ -f $(INSTALL_PATH)/vmlinuz ]; then mv $(INSTALL_PATH)/vmlinuz $(INSTALL_PATH)/vmlinuz.old; fi
 	if [ -f $(INSTALL_PATH)/System.map ]; then mv $(INSTALL_PATH)/System.map $(INSTALL_PATH)/System.old; fi
 	cat $(BOOTIMAGE) > $(INSTALL_PATH)/vmlinuz
-	cp $(TOPDIR)/System.map $(INSTALL_PATH)/
+	cp $(TOPDIR)/linux/System.map $(INSTALL_PATH)/
 	if [ -x /sbin/lilo ]; then /sbin/lilo; else /etc/lilo/install; fi
 
 install: $(CONFIGURE) $(BOOTIMAGE)
-	sh -x ./install.sh $(KERNELRELEASE) $(BOOTIMAGE) $(TOPDIR)/System.map "$(INSTALL_PATH)"
+	sh -x ./install.sh $(KERNELRELEASE) $(BOOTIMAGE) $(TOPDIR)/linux/System.map "$(INSTALL_PATH)"
 
 tools/build: tools/build.c
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ $<
@@ -69,7 +69,7 @@ setup: setup.o
 setup.o: setup.s
 	$(IA32_AS) -o $@ $<
 
-setup.s: setup.S video.S Makefile $(BOOT_INCL) $(TOPDIR)/include/linux/version.h $(TOPDIR)/include/linux/compile.h
+setup.s: setup.S video.S Makefile $(BOOT_INCL) $(TOPDIR)/linux/include/linux/version.h $(TOPDIR)/linux/include/linux/compile.h
 	$(IA32_CPP) $(CPPFLAGS) -traditional -D__ASSEMBLY__ $(SVGA_MODE) $(RAMDISK) $< -o $@
 
 bsetup: bsetup.o
@@ -78,7 +78,7 @@ bsetup: bsetup.o
 bsetup.o: bsetup.s
 	$(IA32_AS) -o $@ $<
 
-bsetup.s: setup.S video.S Makefile $(BOOT_INCL) $(TOPDIR)/include/linux/version.h $(TOPDIR)/include/linux/compile.h
+bsetup.s: setup.S video.S Makefile $(BOOT_INCL) $(TOPDIR)/linux/include/linux/version.h $(TOPDIR)/linux/include/linux/compile.h
 	$(IA32_CPP) $(CPPFLAGS) -D__BIG_KERNEL__ -D__ASSEMBLY__ -traditional $(SVGA_MODE) $(RAMDISK) $< -o $@
 
 dep:

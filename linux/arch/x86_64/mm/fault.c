@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *  linux/arch/x86-64/mm/fault.c
  *
@@ -167,12 +173,13 @@ static int is_prefetch(struct pt_regs *regs, unsigned long addr)
 
 #if 0
 	if (prefetch)
-		printk("%s: prefetch caused page fault at %lx/%lx\n", current->comm,
+		printk("%s: prefetch caused page fault at %lx/%lx\n", current->pcb$t_lname,
 		       regs->rip, addr);
 #endif
 	return prefetch;
 }
 
+#ifndef CONFIG_VMS
 int page_fault_trace; 
 int exception_trace = 1;
 
@@ -323,7 +330,7 @@ bad_area_nosemaphore:
 		    (tsk->sig->action[SIGSEGV-1].sa.sa_handler == SIG_DFL)))
 			printk(KERN_INFO 
 		       "%s[%d]: segfault at %016lx rip %016lx rsp %016lx error %lx\n",
-					tsk->comm, tsk->pid, address, regs->rip,
+					tsk->pcb$t_lname, tsk->pcb$l_pid, address, regs->rip,
 					regs->rsp, error_code);
 	
 		tsk->thread.cr2 = address;
@@ -346,7 +353,7 @@ no_context:
 		if (0 && exception_trace) 
 		printk(KERN_ERR 
 		       "%s: fixed kernel exception at %lx address %lx err:%ld\n", 
-		       tsk->comm, regs->rip, address, error_code);
+		       tsk->pcb$t_lname, regs->rip, address, error_code);
 		return;
 	}
 
@@ -379,12 +386,14 @@ no_context:
  */
 out_of_memory:
 	up_read(&mm->mmap_sem);
-	if (current->pid == 1) { 
+	if (current->pcb$l_pid == 1) { 
+#if 0
 		tsk->policy |= SCHED_YIELD;
+#endif
 		schedule();
 		goto again;
 	}
-	printk("VM: killing process %s\n", tsk->comm);
+	printk("VM: killing process %s\n", tsk->pcb$t_lname);
 	if (error_code & 4)
 		do_exit(SIGKILL);
 	goto no_context;
@@ -444,3 +453,4 @@ vmalloc_fault:
 		return;
 	}
 }
+#endif

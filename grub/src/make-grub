@@ -1,7 +1,13 @@
 #!/bin/sh
 CFLAGS=
 CPPFLAGS=
+unamem=`uname -m`
+if [ $unamem != x86_64 ]; then
 CC=
+else
+CC=gcc-3.4
+LDFLAGS=-static
+fi
 rm -rf grub-0.95
 tar xzf grub-0.95.tar.gz
 cd grub-0.95

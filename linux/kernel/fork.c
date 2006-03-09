@@ -40,6 +40,10 @@
 #include <statedef.h>
 #include <evtdef.h>
 #include <system_data_cells.h>
+#include <misc_routines.h>
+#include <exe_routines.h>
+#include <sch_routines.h>
+#include <queue.h>
 
 /* The idle threads do not count.. */
 int nr_threads;
@@ -182,29 +186,29 @@ fail_nomem:
 static inline int dup_phd(struct _pcb * p, struct _pcb * old) {
   p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
   if (old->pcb$l_phd)
-    bcopy(old->pcb$l_phd,p->pcb$l_phd,sizeof(struct _phd));
+    memcpy(p->pcb$l_phd,old->pcb$l_phd,sizeof(struct _phd));
   else
-    bzero(p->pcb$l_phd,sizeof(struct _phd));
+    memset(p->pcb$l_phd,0,sizeof(struct _phd));
 #ifdef CONFIG_MM_VMS
   qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
   if (old->pcb$l_phd) {
     if (old->pcb$l_phd->phd$l_wslist) {
-      p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
-      bcopy(old->pcb$l_phd->phd$l_wslist,((void*)p->pcb$l_phd->phd$l_wslist),2048);
+      p->pcb$l_phd->phd$l_wslist=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);
+      memcpy(((void*)p->pcb$l_phd->phd$l_wslist),old->pcb$l_phd->phd$l_wslist,PHD_INT_SIZE*512);
     }
     if (old->pcb$l_phd->phd$l_wslock) {
-      p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
-      bcopy(old->pcb$l_phd->phd$l_wslock,((void*)p->pcb$l_phd->phd$l_wslock),2048);
+      p->pcb$l_phd->phd$l_wslock=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);
+      memcpy(((void*)p->pcb$l_phd->phd$l_wslock),old->pcb$l_phd->phd$l_wslock,PHD_INT_SIZE*512);
     }
     if (old->pcb$l_phd->phd$l_wsdyn) {
-      p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-      bcopy(old->pcb$l_phd->phd$l_wsdyn,((void*)p->pcb$l_phd->phd$l_wsdyn),2048);
+      p->pcb$l_phd->phd$l_wsdyn=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);
+      memcpy(((void*)p->pcb$l_phd->phd$l_wsdyn),old->pcb$l_phd->phd$l_wsdyn,PHD_INT_SIZE*512);
     }
     //p->pcb$l_phd->phd$l_wsnext=0;
     //p->pcb$l_phd->phd$l_wslast=511;
     if (old->pcb$l_phd->phd$l_pst_base_offset) {
       p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
-      bcopy(old->pcb$l_phd->phd$l_pst_base_offset,p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+      memcpy(p->pcb$l_phd->phd$l_pst_base_offset,old->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
     }
   }
 #endif
@@ -236,7 +240,7 @@ inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
 		tmp = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
 		if (!tmp)
 			goto fail_nomem;
-		bcopy(mpnt,tmp,sizeof(struct _rde));
+		memcpy(tmp,mpnt,sizeof(struct _rde));
 		tmp->rde$l_flags &= ~VM_LOCKED;
 
 		/*
@@ -614,6 +618,38 @@ static inline void copy_flags(unsigned long clone_flags, struct task_struct *p)
 	p->flags = new_flags;
 }
 
+#ifdef __x86_64__
+long kernel_thread(int (*fn)(void *), void * arg, unsigned long flags)
+{
+	struct task_struct *task = current;
+	unsigned old_task_dumpable;
+	long ret;
+
+	/* lock out any potential ptracer */
+	task_lock(task);
+	if (task->ptrace) {
+		task_unlock(task);
+		return -EPERM;
+	}
+
+#if 0
+	// not yet?
+	old_task_dumpable = task->task_dumpable;
+	task->task_dumpable = 0;
+#endif
+	task_unlock(task);
+
+	ret = arch_kernel_thread(fn, arg, flags);
+
+	/* never reached in child process, only in parent */
+#if 0
+	current->task_dumpable = old_task_dumpable;
+#endif
+
+	return ret;
+}
+#endif
+
 /*
  *  Ok, this is the main fork-routine. It copies the system process
  * information (task[nr]) and sets up the necessary registers. It also
@@ -730,24 +766,24 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 #if 0
 	p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
 	if (current->pcb$l_phd)
-	  bcopy(current->pcb$l_phd,p->pcb$l_phd,sizeof(struct _phd));
+	  memcpy(p->pcb$l_phd,current->pcb$l_phd,sizeof(struct _phd));
 	else
-	  bzero(p->pcb$l_phd,sizeof(struct _phd));
+	  memset(p->pcb$l_phd,0,sizeof(struct _phd));
 
 #ifdef CONFIG_MM_VMS
 	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
 	{
 	  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
-	  p->pcb$l_phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
-	  p->pcb$l_phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
-	  p->pcb$l_phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-	  bzero((void*)p->pcb$l_phd->phd$l_wslist,2048);
-	  bzero((void*)p->pcb$l_phd->phd$l_wslock,2048);
-	  bzero((void*)p->pcb$l_phd->phd$l_wsdyn,2048);
+	  p->pcb$l_phd->phd$l_wslist=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);
+	  p->pcb$l_phd->phd$l_wslock=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);
+	  p->pcb$l_phd->phd$l_wsdyn=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);
+	  memset((void*)p->pcb$l_phd->phd$l_wslist,0,PHD_INT_SIZE*512);
+	  memset((void*)p->pcb$l_phd->phd$l_wslock,0,PHD_INT_SIZE*512);
+	  memset((void*)p->pcb$l_phd->phd$l_wsdyn,0,PHD_INT_SIZE*512);
 	  //p->pcb$l_phd->phd$l_wsnext=0;
 	  //p->pcb$l_phd->phd$l_wslast=511;
 	  p->pcb$l_phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
-	  bzero((void*)p->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+	  memset((void*)p->pcb$l_phd->phd$l_pst_base_offset,0,PROCSECTCNT*sizeof(struct _secdef));
 	  //p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
 	  //p->pcb$l_phd->phd$l_pst_free=0;
 	}

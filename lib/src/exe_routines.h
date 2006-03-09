@@ -26,7 +26,7 @@ int   exe_std$alloc_bufio_32 (struct _irp *irp, struct _pcb *pcb, void *uva32, i
 int   exe_std$alloc_bufio_64 (struct _irp *irp, struct _pcb *pcb, VOID_PQ uva64, int pktdatsiz);
 int   exe_std$alloc_diagbuf (struct _irp *irp, VOID_PQ uva64, int pktdatsiz);
 int   exe_std$allocbuf (int reqsize, int32 *alosize_p, void **bufptr_p);
-int   exe_std$allocceb (int32 *alosize_p, struct _ceb **ceb_p);
+int   exe_std$allocceb (int *alosize_p, struct _ceb **ceb_p);
 int   exe_std$allocirp (struct _irp **irp_p);
 int   exe_std$allocjib (int32 *alosize_p, struct _jib **jib_p);
 int   exe_std$allocpcb (int32 *alosize_p, struct _pcb **pcb_p);
@@ -142,7 +142,10 @@ int   exe_std$nam_to_pcb(int *pid_p,void *prcnam_p,int nsa_id,struct _pcb *pcb,
 
 int   exe_std$oneparm (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
 void  exe_std$outzstring (char *string);
+#if 0
+// not yet
 void  exe_std$primitive_fork (long long fr3, long long fr4, struct _fkb *fkb);
+#endif
 void  exe_std$primitive_fork_wait (long long fr3, long long fr4, struct _fkb *fkb);
 int   exe_std$prober (VOID_PQ buf, int bufsiz, int acmode);
 int   exe_std$prober_dsc (void *dsc_p);
@@ -235,13 +238,93 @@ int exe$primitive_mcheck(int vec);
 int exe$setup_memtest_env(void);
 int exe$clear_memtest_env(void);
 
-
-
-#define exe$event_notify EXE$EVENT_NOTIFY
 void exe$event_notify (unsigned long long event_mask);
 
-#ifdef __INITIAL_POINTER_SIZE			 
-#pragma __required_pointer_size __restore		 
-#endif
+void * exe$ipid_to_pcb(unsigned long pid); // check int
+void * exe$epid_to_pcb(unsigned long pid);
+int exe$epid_to_ipid(unsigned long pid);
+int exe$ipid_to_epid(unsigned long pid);
+int exe$a_pid_to_ipid(unsigned long pid);
+void exe$iofork(struct _irp * i, struct _ucb * u);
+unsigned name_delim(char *str,int len,int size[5]);
+unsigned dircache(struct _vcb *vcb,char *dirnam,int dirlen,struct _fiddef *dirid);
+unsigned do_search(struct _fabdef *fab,struct WCCFILE *wccfile);
+unsigned exe$search(struct _fabdef *fab);
+unsigned do_parse(struct _fabdef *fab,struct WCCFILE **wccret);
+unsigned exe$parse(struct _fabdef *fab);
+unsigned exe$setddir(struct dsc$descriptor *newdir,unsigned short *oldlen,struct dsc$descriptor *olddir);
+unsigned exe$connect(struct _rabdef *rab);
+unsigned exe$disconnect(struct _rabdef *rab);
+unsigned exe$get(struct _rabdef *rab);
+unsigned exe$put(struct _rabdef *rab);
+unsigned exe$display(struct _fabdef *fab);
+unsigned exe$close(struct _fabdef *fab);
+unsigned exe$open(struct _fabdef *fab);
+unsigned exe$erase(struct _fabdef *fab);
+unsigned exe$create(struct _fabdef *fab);
+unsigned exe$extend(struct _fabdef *fab);
+int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb ** retpcb, unsigned long * retipid, unsigned long *retepid);
+void exe$instimq(struct _tqe * t);
+int exe$synch(unsigned int efn, struct _iosb *iosb);
+int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u);
+int exe$qiodrvpkt (struct _irp * i, struct _pcb * p, struct _ucb * u);
+int exe$finishio (long status1, long status2, struct _irp * i, struct _pcb * p, struct _ucb * u);
+int exe$finishioc (long status, struct _irp * i, struct _pcb * p, struct _ucb * u);
+void com$post(struct _irp * i, struct _ucb * u);
+int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf, const void *timadra, unsigned long cvtflg);
+int exe$imgact_elf(void * name, void * hdrbuf);
+int exe$pscan_next_id(struct _pcb ** p);
+int exe$alophycntg(unsigned long * va, unsigned long num);
+int exe$alononpaged();
+int exe$deanonpaged();
+int exe$allocate(int requestsize, void ** poolhead, int alignment, unsigned int * allocatedsize, void ** returnblock);
+int exe$deallocate(void * returnblock, void ** poolhead, int size);
+int exe_std$allocxyz(int *alosize_p, struct _tqe **tqe_p, int type, int size);
+int exe_std$allocbuf (int reqsize, int *alosize_p, void **bufptr_p);
+int exe_std$allocceb(int *alosize_p, struct _ceb **ceb_p);
+int exe_std$allocirp(struct _irp **irp_p);
+int exe_std$alloctqe(int *alosize_p, struct _tqe **tqe_p);
+int exe$alononpagvar (int reqsize, int *alosize_p, void **pool_p);
+int exe_std$alononpaged (int reqsize, int *alosize_p, void **pool_p);
+int exe_std$deanonpgdsiz(void *pool, int size);
+int exe_std$deanonpaged (void *pool);
+int exe$flushlists(void * pool, int size);
+int exe$allocate_pool(int requestsize, int pooltype, int alignment, unsigned int * allocatedsize, void ** returnblock);
+exe$extendpool(void * pool);
+void exe$reclaim_pool_aggressive(void * pool);
+void exe$reclaim_pool_gentle(void * pool);
+void exe$insertirp(struct _ucb * u, struct _irp * i);
+
+#include <linux/linkage.h>
+
+asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam, int flags);
+asmlinkage int exe$exit(unsigned int code);
+asmlinkage int exe$setpri(unsigned int *pidadr, void *prcnam, unsigned int pri, unsigned int *prvpri, unsigned int*pol, unsigned int *prvpol);
+asmlinkage int exe$setimr  (unsigned int efn, signed long long *daytim, void (*astadr)(long), unsigned long reqidt, unsigned int flags);
+asmlinkage int exe$clref(unsigned int efn);
+asmlinkage int exe$gettim(unsigned long long *timadr);
+int exe$numtim(unsigned short timbuf[7], struct TIME *timadra);
+int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra);
+asmlinkage int exe$gettim(unsigned long long *timadr);
+asmlinkage int exe$cancel(unsigned short int chan);
+asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
+asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *reslen, unsigned int *quota, unsigned short *promsk, void *tabnam, void *partab, unsigned char *acmode);
+asmlinkage exe$dellnm  (void *tabnam, void *lognam, unsigned char *acmode);
+asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
+asmlinkage int exe$create_region_32  ( unsigned long length, unsigned int region_prot, unsigned int flags, unsigned long long *return_region_id, void **return_va, unsigned long *return_length, unsigned long start_va);
+asmlinkage int exe$deltva(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode);
+asmlinkage int exe$imgsta(void * transfer, void * parseinfo, void * header, void * file, unsigned long linkstatus, unsigned long clistatus);
+asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned long imgctl, unsigned long long * inadr, unsigned long long * retadr, unsigned long long * ident, unsigned long acmode);
+asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam, unsigned long long * ident, unsigned int relpag, unsigned /*short*/ long chan, unsigned int pagcnt, unsigned int vbn, unsigned int prot,unsigned int pfc);
+asmlinkage int exe$schdwk(unsigned int *pidadr, void *prcnam, signed long long * daytim, signed long long * reptim);
+asmlinkage int exe$cretva (struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode);
+void exe_std$primitive_fork(long fr3, long fr4, struct _fkb * fkb);
+asmlinkage int exe$dassgn(unsigned short int chan);
+int exe$insioq (struct _irp * i, struct _ucb * u);
+asmlinkage int exe$forcex(unsigned int *pidadr, void *prcnam, unsigned int code);
+asmlinkage int exe$mount(void *itmlst);
+asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr, unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, unsigned short int mbxunt, unsigned int stsflg,...);
+asmlinkage int exe$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk, unsigned int acmode, void *lognam, long flags,...);
+asmlinkage int exe$setprn(struct dsc$descriptor *s);
 
 #endif 

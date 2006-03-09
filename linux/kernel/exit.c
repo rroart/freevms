@@ -28,6 +28,7 @@
 
 #include <system_data_cells.h>
 #include <phddef.h>
+#include <exe_routines.h>
 
 extern void sem_exit (void);
 extern struct task_struct *child_reaper;

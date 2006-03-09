@@ -11,6 +11,7 @@
 #include <misc.h>
 
 static int myfunc(int (*func)(),void * start, int count) {
+#ifdef __i386__
   __asm__ __volatile__(
 		       "pushl %ebx\n\t"
 		       "pushl %ecx\n\t"
@@ -28,6 +29,7 @@ static int myfunc(int (*func)(),void * start, int count) {
 		       "jmp *%eax\n\t"
 		       );
   // return eax default?
+#endif
 }
 
 static int mymyfunc(int dummy,int (*func)(),void * start, int count) {
@@ -43,9 +45,11 @@ static int mymyfunc(int dummy,int (*func)(),void * start, int count) {
 
 static int mymymyfunc(int (*func)(),void * start, int count) {
   register int __res;
+#ifdef __i386__
   __asm__ ( "movl %%ebp,%%eax\n\t" :"=a" (__res) );
   mymyfunc(__res,*func,start,count);
   __asm__ ( "movl (%esp),%ebp\n\t" );
+#endif
 }
 
 static int dummy_routine(void) {

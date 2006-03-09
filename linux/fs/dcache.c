@@ -32,6 +32,8 @@
 
 #include <asm/uaccess.h>
 
+#include <misc_routines.h>
+
 #define DCACHE_PARANOIA 1
 /* #define DCACHE_DEBUG 1 */
 

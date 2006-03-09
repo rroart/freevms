@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *	Low-Level PCI Support for PC
  *
@@ -26,6 +32,12 @@
 #include <asm/proto.h>
 
 #include "pci-x86_64.h"
+
+#if 1
+/*static*/ inline void acpi_noirq_set(void) { }
+/*static*/ inline void acpi_disable_pci(void) { acpi_noirq_set(); }
+/*static*/ inline int acpi_irq_balance_set(char *str) { return 0; }
+#endif
 
 unsigned int pci_probe = PCI_PROBE_CONF1 | PCI_PROBE_CONF2;
 
@@ -680,9 +692,10 @@ unsigned int pcibios_assign_all_busses(void)
 	return (pci_probe & PCI_ASSIGN_ALL_BUSSES) ? 1 : 0;
 }
 
-int pcibios_enable_device(struct pci_dev *dev, int mask)
+int pcibios_enable_device(struct pci_dev *dev/* not yet:, int mask*/)
 {
 	int err;
+	int mask = 0xffffffff; // check
 
 	if ((err = pcibios_enable_resources(dev, mask)) < 0)
 		return err;

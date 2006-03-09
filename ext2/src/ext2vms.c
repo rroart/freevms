@@ -12,6 +12,9 @@
 #include<linux/mm.h>
 #include<linux/dirent.h>
 #include<linux/file.h>
+#ifdef __x86_64__
+#include<linux/init.h>
+#endif
 
 #include<system_data_cells.h>
 
@@ -49,6 +52,13 @@
 
 #include <fibdef.h>
 #include <fiddef.h>
+
+#include <queue.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <starlet.h>
+
+#include <linux/slab.h>
 
 #define EXT2_EF 30
 
@@ -447,7 +457,7 @@ int exttwo_io_done(struct _irp * i) {
   return f11b_io_done(i);
 }
 
-void myqio(int rw, int data, int size, int blocknr,kdev_t dev, int block_factor)
+void myqio(long rw, long data, long size, long blocknr,kdev_t dev, long block_factor)
 {
   int sts;
   int type;
@@ -529,7 +539,7 @@ int ext2_wcb_create_all(struct _fcb * fcb, struct inode * inode)
   int phyblk=stphyblk;
   int l1=0,l2=0,l3=0;
   int l1p=0,l2p=0,l3p=0;
-  long *b1,*b2,*b3;
+  int *b1,*b2,*b3;
  
   retsts=0;
   for(i=0;i<15;i++)
@@ -629,7 +639,7 @@ int ext2_wcb_create_all(struct _fcb * fcb, struct inode * inode)
 
     if (contin==0) {
       struct _wcb * wcb = (struct _wcb *) kmalloc(sizeof(struct _wcb),GFP_KERNEL);
-      bzero(wcb,sizeof(struct _wcb));
+      memset(wcb,0,sizeof(struct _wcb));
       if (wcb == NULL) {
 	retsts = SS$_INSFMEM;
 	return retsts;
@@ -696,12 +706,12 @@ unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],s
       islocal=1;
     }
     vcb = (struct _vcb *) kmalloc(sizeof(struct _vcb),GFP_KERNEL);
-    bzero(vcb,sizeof(struct _vcb));
+    memset(vcb,0,sizeof(struct _vcb));
     global_e2_vcb = vcb;
     vcb->vcb$b_type=DYN$C_VCB;
     x2p->current_vcb=vcb; // until I can place it somewhere else
     aqb = (struct _aqb *) kmalloc(sizeof(struct _aqb),GFP_KERNEL);
-    bzero(aqb,sizeof(struct _aqb));
+    memset(aqb,0,sizeof(struct _aqb));
     aqb->aqb$b_type=DYN$C_AQB;
     qhead_init(&aqb->aqb$l_acpqfl);
     aqb->aqb$l_acppid=1;
@@ -808,7 +818,7 @@ static int fillonedir64(void * __buf, const char * name, int namlen, loff_t offs
   dirent = buf->dirent;
   dirent->d_ino=ino;
   dirent->d_off=offset;
-  bcopy(name, dirent->d_name, namlen);
+  memcpy(dirent->d_name, name, namlen);
   dirent->d_name[namlen]=0;
   return 0;
 }
@@ -820,7 +830,11 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   unsigned wrtflg=1;
   struct _fcb *fcb;
   //  struct _fh2 *head;
+#ifdef __i386__
   char name[256], *tmpname;
+#else
+  char * name = kmalloc(256,GFP_KERNEL), *tmpname;
+#endif
   struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
   struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
   unsigned short *reslen=irp->irp$l_qio_p3;
@@ -893,6 +907,9 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     if (IS_ERR(f)) {
       sts=SS$_NOSUCHFILE;
       if ( (sts & 1) == 0 && (irp->irp$v_fcode != IO$_CREATE)) { 
+#ifndef __i386__
+	kfree(name);
+#endif
 #if 0
 	memset(&x2p->context_save,0,54);
 #endif
@@ -932,7 +949,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       *reslen=strlen(dir.d_name);
       dir.d_name[(*reslen)++]=';';
       dir.d_name[(*reslen)++]='1';
-      bcopy(dir.d_name,resdsc->dsc$a_pointer,*reslen);
+      memcpy(resdsc->dsc$a_pointer,dir.d_name,*reslen);
       //printk("resdsc %s %x\n",resdsc->dsc$a_pointer,*reslen);
     }
     if (dir.d_ino!=2) {
@@ -976,6 +993,9 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       // readdir should be replaced with something like search_ent
 #endif
   }
+#ifndef __i386__
+  kfree(name);
+#endif
 
   if ( (sts & 1) == 0) { 
     memset(&x2p->context_save,0,54);
@@ -1239,7 +1259,7 @@ void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
   struct _vcb * vcb=x2p->current_vcb;
   struct _fcb *fcb4;
   struct _fcb *fcb = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
-  bzero(fcb,sizeof(struct _fcb));
+  memset(fcb,0,sizeof(struct _fcb));
   if (fcb == NULL) {
     if (retsts) *retsts = SS$_INSFMEM;
     return;
@@ -1271,7 +1291,7 @@ void *ext2_fcb_create(struct inode * inode,unsigned *retsts)
   if (inode->i_ino!=2) return fcb;
 
   fcb4 = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
-  bcopy(fcb,fcb4,sizeof(struct _fcb));
+  memcpy(fcb4,fcb,sizeof(struct _fcb));
   if (fcb == NULL) {
     if (retsts) *retsts = SS$_INSFMEM;
     return;
@@ -1333,7 +1353,7 @@ int e2_fcb_wcb_add_one(struct _fcb * fcb,signed long vbn,signed long result)
   }
 
   wcb = (struct _wcb *) kmalloc(sizeof(struct _wcb),GFP_KERNEL);
-  bzero(wcb,sizeof(struct _wcb));
+  memset(wcb,0,sizeof(struct _wcb));
   if (wcb == NULL) {
     retsts = SS$_INSFMEM;
     return retsts;

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *	linux/arch/x86_64/kernel/irq.c
  *
@@ -667,8 +673,10 @@ out:
 	desc->handler->end(irq);
 	spin_unlock(&desc->lock);
 
+#ifndef CONFIG_VMS
 	if (softirq_pending(cpu))
 		do_softirq();
+#endif
 	return 1;
 }
 

@@ -1,11 +1,14 @@
 FLAGS = -static
 
-EXTERNAL = ../../cdu/src/cdu.a
-EXTERNAL2 = ../../cdu/src/cdu2.a
 VMLINUX = ../../linux/vmlinux 
 LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux 
 
+ifneq ($(ARCH),x86_64)
 all: i386/install${NOEXE} i386/install${EXE_ELF}
+else
+all: i386/install${NOEXE}
+endif
+
 # i386/install${EXE} 
 
 clean:
@@ -16,10 +19,31 @@ install: all
 	install -d ../../rooti386/vms$$common/sysexe
 	install i386/install ../../rooti386/vms"$$"common/sysexe
 
+ifeq ($(ARCH),x86_64)
+MODEL = -mcmodel=medium
+else
+MODEL =
+endif
+
 OBJS = instmain.o inst_parse.o instadd.o instmisc.o
+OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 %.o: %.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+
+pic/%.o: %.c
+	install -d pic
+	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+
+instadd.o: instadd.c
+	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+
+instmisc.o: instmisc.c
+	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+
+pic/instadd.o: instadd.c
+	install -d pic
+	gcc $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 i386/install$(EXE): $(VMSLIBS) $(OBJS) $(EXTERNAL) $(EXTERNAL2) $(VMLINUX)
 	install -d i386
@@ -29,8 +53,10 @@ i386/install${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(EXTERNAL2) $(VMLINUX)
 	install -d i386
 	gcc -g -static $(OBJS) -lc $(EXTERNAL) $(EXTERNAL2) $(VMSLIBS) /usr/lib/libelf.a /usr/lib/libdl.a $(LINKVMLINUX) -o i386/install${NOEXE}
 
-i386/install${EXE_ELF}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(EXTERNAL2) $(VMLINUX)
-	ld -Bshareable $(OBJS) $(EXTERNAL) $(EXTERNAL2) $(VMSLIBS) /usr/lib/libelf.a /usr/lib/libdl.a $(LIBC) $(LIBGCC) --just-symbols=$(VMLINUX) -o i386/install${EXE_ELF}
+ifneq ($(ARCH),x86_64)
+i386/install${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC) $(EXTERNAL2_PIC) $(VMLINUX)
+	ld -Bshareable $(OBJS_PIC) $(EXTERNAL_PIC) $(EXTERNAL2_PIC) $(VMSLIBS_PIC) /usr/lib/libelf.a /usr/lib/libdl.a $(LIBC) $(LIBGCC) --just-symbols=$(VMLINUX) -o i386/install${EXE_ELF}
+endif
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)

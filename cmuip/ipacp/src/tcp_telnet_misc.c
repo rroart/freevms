@@ -79,6 +79,7 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 #include<dvidef.h>
 #include<lnmdef.h>
 #include<misc.h>
+#include<starlet.h>
 
 #ifndef NOKERNEL
 #define sys$faol exe$faol
@@ -1253,7 +1254,7 @@ void set_devdep(TVT)
 	Item_List[0].item_code=DVI$_UNIT;
 	Item_List[0].bufaddr=&Unit_Number;
 	Item_List[1].item_code=0; // check
-	Status = sys$getdviw (0,pty_chan,0,Item_List, 0, 0);		// Get unit
+	Status = sys$getdviw (0,pty_chan,0,Item_List, 0, 0, 0, 0);		// Get unit
 	// seems C can not fill in the rest with 0?
 
 //!!JC	XLOG$FAO(LOG$TELNEG
@@ -1268,7 +1269,7 @@ void set_devdep(TVT)
 	if (Status)
 	  Status = sys$fao(&ctr,devnam,devnam,ptynam,Unit_Number); // check
 	if (Status)
-	  Status = sys$getdviw (0,0,devnam,Item_List,0,0);
+	  Status = sys$getdviw (0,0,devnam,Item_List,0,0,0,0);
 
 //!!JC	xlog$fao(LOG$TELNEG
 //!!JC			,"!%T Set_DEVDEP: TTY_TERM == "!AS""

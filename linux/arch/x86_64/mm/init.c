@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *  linux/arch/x86_64/mm/init.c
  *
@@ -83,8 +89,10 @@ void show_mem(void)
 		total++;
 		if (PageReserved(mem_map+i))
 			reserved++;
+#ifndef CONFIG_VMS
 		else if (PageSwapCache(mem_map+i))
 			cached++;
+#endif
 		else if (page_count(mem_map+i))
 			shared += page_count(mem_map+i) - 1;
 	}
@@ -313,6 +321,7 @@ void __init init_memory_mapping(void)
 
 void __init zap_low_mappings (void)
 {
+#ifndef CONFIG_VMS
 	int i;
 	for (i = 0; i < NR_CPUS; i++) {
 		if (cpu_pda[i].level4_pgt) 
@@ -320,6 +329,7 @@ void __init zap_low_mappings (void)
 	}
 
 	flush_tlb_all();
+#endif
 }
 
 #ifndef CONFIG_DISCONTIGMEM

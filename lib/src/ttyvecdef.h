@@ -75,10 +75,10 @@ struct _tt_port {
   int (*port_glyphload)();
   int (*port_maint)();
   int (*port_forkret)();
-  struct _fdt *port_fdt;
-  unsigned int port_start_read;
-  unsigned int port_middle_read;
-  unsigned int port_end_read;
+  int (*port_fdt)();
+  void (*port_start_read)();
+  void (*port_middle_read)();
+  void (*port_end_read)();
   void (*port_cancel)();
 };
 

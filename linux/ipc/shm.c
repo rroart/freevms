@@ -29,6 +29,7 @@
 #include <linux/mman.h>
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
+#include <misc_routines.h>
 
 #include "util.h"
 

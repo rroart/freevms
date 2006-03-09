@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /* $Id$
  * ioctl32.c: Conversion between 32bit and 64bit native ioctls.
  *
@@ -60,8 +66,10 @@
 #include <linux/if_tun.h>
 #include <linux/ctype.h>
 #include <linux/wireless.h>
+#if 0
 #include <net/bluetooth/bluetooth.h>
 #include <net/bluetooth/rfcomm.h>
+#endif
 #if defined(CONFIG_BLK_DEV_LVM) || defined(CONFIG_BLK_DEV_LVM_MODULE)
 /* Ugh. This header really is not clean */
 #define min min
@@ -102,8 +110,10 @@
 #include <linux/atm_suni.h>
 #include <linux/mtd/mtd.h>
 
+#if 0
 #include <net/bluetooth/bluetooth.h>
 #include <net/bluetooth/hci.h>
+#endif
 
 #include <linux/usb.h>
 #include <linux/usbdevice_fs.h>
@@ -475,6 +485,7 @@ struct ifconf32 {
 #ifdef CONFIG_NET
 static int dev_ifname32(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
+#ifndef CONFIG_VMS
 	struct net_device *dev;
 	struct ifreq32 ifr32;
 	int err;
@@ -492,6 +503,7 @@ static int dev_ifname32(unsigned int fd, unsigned int cmd, unsigned long arg)
 	
 	err = copy_to_user((struct ifreq32 *)arg, &ifr32, sizeof(struct ifreq32));
 	return (err ? -EFAULT : 0);
+#endif
 }
 #endif
 
@@ -1945,6 +1957,7 @@ extern int tty_ioctl(struct inode * inode, struct file * file, unsigned int cmd,
 
 static int vt_check(struct file *file)
 {
+#ifndef CONFIG_VMS
 	struct tty_struct *tty;
 	struct inode *inode = file->f_dentry->d_inode;
 	
@@ -1965,6 +1978,7 @@ static int vt_check(struct file *file)
 	if (current->tty == tty || suser())
 		return 1;
 	return 0;                                                    
+#endif
 }
 
 struct consolefontdesc32 {
@@ -4110,6 +4124,7 @@ COMPATIBLE_IOCTL(SOUND_MIXER_GETLEVELS)
 COMPATIBLE_IOCTL(SOUND_MIXER_SETLEVELS)
 COMPATIBLE_IOCTL(OSS_GETVERSION)
 /* AUTOFS */
+#if 0
 COMPATIBLE_IOCTL(AUTOFS_IOC_READY)
 COMPATIBLE_IOCTL(AUTOFS_IOC_FAIL)
 COMPATIBLE_IOCTL(AUTOFS_IOC_CATATONIC)
@@ -4120,6 +4135,7 @@ COMPATIBLE_IOCTL(AUTOFS_IOC_PROTOSUBVER)
 COMPATIBLE_IOCTL(AUTOFS_IOC_ASKREGHOST)
 COMPATIBLE_IOCTL(AUTOFS_IOC_TOGGLEREGHOST)
 COMPATIBLE_IOCTL(AUTOFS_IOC_ASKUMOUNT)
+#endif
 /* DEVFS */
 COMPATIBLE_IOCTL(DEVFSDIOC_GET_PROTO_REV)
 COMPATIBLE_IOCTL(DEVFSDIOC_SET_EVENT_MASK)
@@ -4209,6 +4225,7 @@ COMPATIBLE_IOCTL(RNDADDENTROPY)
 COMPATIBLE_IOCTL(RNDZAPENTCNT)
 COMPATIBLE_IOCTL(RNDCLEARPOOL)
 /* Bluetooth ioctls */
+#if 0
 COMPATIBLE_IOCTL(HCIDEVUP)
 COMPATIBLE_IOCTL(HCIDEVDOWN)
 COMPATIBLE_IOCTL(HCIDEVRESET)
@@ -4238,6 +4255,7 @@ COMPATIBLE_IOCTL(BNEPCONNADD)
 COMPATIBLE_IOCTL(BNEPCONNDEL)
 COMPATIBLE_IOCTL(BNEPGETCONNLIST)
 COMPATIBLE_IOCTL(BNEPGETCONNINFO)
+#endif
 /* Misc. */
 COMPATIBLE_IOCTL(0x41545900)		/* ATYIO_CLKR */
 COMPATIBLE_IOCTL(0x41545901)		/* ATYIO_CLKW */
@@ -4472,6 +4490,7 @@ HANDLE_IOCTL(MTRRIOC32_DEL_PAGE_ENTRY, mtrr_ioctl32)
 HANDLE_IOCTL(MTRRIOC32_GET_PAGE_ENTRY, mtrr_ioctl32)
 HANDLE_IOCTL(MTRRIOC32_KILL_PAGE_ENTRY, mtrr_ioctl32)
 /* wireless */
+#if 0
 HANDLE_IOCTL(SIOCGIWRANGE, do_wireless_ioctl)
 HANDLE_IOCTL(SIOCSIWSPY, do_wireless_ioctl)
 HANDLE_IOCTL(SIOCGIWSPY, do_wireless_ioctl)
@@ -4485,6 +4504,7 @@ HANDLE_IOCTL(SIOCSIWNICKN, do_wireless_ioctl)
 HANDLE_IOCTL(SIOCGIWNICKN, do_wireless_ioctl)
 HANDLE_IOCTL(SIOCSIWENCODE, do_wireless_ioctl)
 HANDLE_IOCTL(SIOCGIWENCODE, do_wireless_ioctl)
+#endif
 COMPATIBLE_IOCTL(SIOCGIWNAME)
 
 COMPATIBLE_IOCTL(SIOCSIFNAME)
@@ -4702,7 +4722,7 @@ asmlinkage long sys32_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg
 			    sprintf(buf, "%02x", buf[1]);
 			printk("ioctl32(%s:%d): Unknown cmd fd(%d) "
 			       "cmd(%08x){%s} arg(%08x) on %s\n",
-			       current->comm, current->pid,
+			       current->pcb$t_lname, current->pcb$l_pid,
 			       (int)fd, (unsigned int)cmd, buf, (unsigned int)arg,
 			       fn);
 			if (path) 

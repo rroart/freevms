@@ -1,4 +1,4 @@
-all: starlet.a i386/starlet${EXE_ELF} i386/starlet${EXE} starletum.a
+all: starlet.a i386/starlet${EXE_ELF} i386/starlet${EXE} starletum.a starlet_pic.a
 
 install: all
 	install -d ../../rooti386/vms"$$"common/syslib
@@ -12,14 +12,30 @@ i386/starlet${EXE}: starlet.o rms.o errno.o
 	install -d i386
 	$(LINKER) -Bshareable starlet.o rms.o errno.o -o i386/starlet${EXE}
 
-starlet.a: vmsopt.a starlet.o starlet.h
-	gcc -c starlet.c
+OBJS = starlet.o rms.o
+OBJS_PIC = $(addprefix pic/,$(OBJS))
+
+starletum.a: starlet.a
+ifneq ($(ARCH),x86_64)
 	gcc -Dcompile_um -c starlet.c -o starletum.o
-	gcc -c -I../../starlet/src rms.c
-	ar r starlet.a starlet.o rms.o
+	gcc -fPIC -fpic -Dcompile_um -c starlet.c -o starletum_pic.o
+else
+	gcc -c starlet.c -o starletum.o
+	gcc -fPIC -fpic -c starlet.c -o starletum_pic.o
+endif
+	gcc -fPIC -fpic -c -I. rms.c -o rms_pic.o
 	ar r starletum.a starletum.o rms.o
-	ranlib starlet.a
 	ranlib starletum.a
+	ar r starletum_pic.a starletum_pic.o rms_pic.o
+	ranlib starletum_pic.a
+
+starlet.a: $(OBJS)
+	ar rv starlet.a $(OBJS)
+	ranlib starlet.a
+
+starlet_pic.a: $(OBJS_PIC)
+	ar rv starlet_pic.a $(OBJS_PIC)
+	ranlib starlet_pic.a
 
 vmsopt.a:	vmsopt.o
 		rm vmsopt.a; ar q vmsopt.a vmsopt.o; ranlib vmsopt.a
@@ -30,6 +46,9 @@ vmsopt.o:	vmsopt.c
 errno.o: 	errno.c
 		gcc -c errno.c
 
+%.o: %.c
+		gcc -c -I. $< -o $@
+
 pic/%.o: %.c
 		install -d pic
-		gcc -fpic -fPIC -c -I$(TOPDIR)/starlet/src $< -o $@
+		gcc -fpic -fPIC -c -I. $< -o $@

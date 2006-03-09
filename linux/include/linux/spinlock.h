@@ -3,6 +3,8 @@
 
 #include <linux/config.h>
 
+#include <asm/system.h>
+
 /*
  * These are the generic versions of the spinlocks and read-write
  * locks..
@@ -35,6 +37,23 @@
 						if (!__r) local_bh_enable();   \
 						__r; })
 
+/* Must define these before including other files, inline functions need them */
+
+#include <linux/stringify.h>
+
+#define LOCK_SECTION_NAME			\
+	".text.lock." __stringify(KBUILD_BASENAME)
+
+#define LOCK_SECTION_START(extra)		\
+	".subsection 1\n\t"			\
+	extra					\
+	".ifndef " LOCK_SECTION_NAME "\n\t"	\
+	LOCK_SECTION_NAME ":\n\t"		\
+	".endif\n\t"
+
+#define LOCK_SECTION_END			\
+	".previous\n\t"
+
 #ifdef CONFIG_SMP
 #include <asm/spinlock.h>
 
@@ -51,9 +70,10 @@
 /*
  * Your basic spinlocks, allowing only a single CPU anywhere
  *
- * Most gcc versions have a nasty bug with empty initializers.
+ * Some older gcc versions had a nasty bug with empty initializers.
+ * (XXX: could someone please confirm whether egcs 1.1 still has this bug?)
  */
-#if (__GNUC__ > 2)
+#if (__GNUC__ > 2 || __GNUC_MINOR__ > 95)
   typedef struct { } spinlock_t;
   #define SPIN_LOCK_UNLOCKED (spinlock_t) { }
 #else
@@ -114,9 +134,10 @@ typedef struct {
  * irq-safe write-lock, but readers can get non-irqsafe
  * read-locks.
  *
- * Most gcc versions have a nasty bug with empty initializers.
+ * Some older gcc versions had a nasty bug with empty initializers.
+ * (XXX: could someone please confirm whether egcs 1.1 still has this bug?)
  */
-#if (__GNUC__ > 2)
+#if (__GNUC__ > 2 || __GNUC_MINOR__ > 91)
   typedef struct { } rwlock_t;
   #define RW_LOCK_UNLOCKED (rwlock_t) { }
 #else
@@ -126,7 +147,7 @@ typedef struct {
 
 #define rwlock_init(lock)	do { } while(0)
 #define read_lock(lock)		(void)(lock) /* Not "unused variable". */
-#define read_unlock(lock)	do { } while(0)
+#define read_unlock(lock)	(void)(lock) /* Not "unused variable". */
 #define write_lock(lock)	(void)(lock) /* Not "unused variable". */
 #define write_unlock(lock)	do { } while(0)
 
@@ -138,4 +159,20 @@ typedef struct {
 extern int atomic_dec_and_lock(atomic_t *atomic, spinlock_t *lock);
 #endif
 
+#ifdef CONFIG_SMP
+#include <linux/cache.h>
+
+typedef union {
+    spinlock_t lock;
+    char fill_up[(SMP_CACHE_BYTES)];
+} spinlock_cacheline_t __attribute__ ((aligned(SMP_CACHE_BYTES)));
+
+#else	/* SMP */
+
+typedef struct {
+    spinlock_t lock;
+} spinlock_cacheline_t;
+
+
+#endif
 #endif /* __LINUX_SPINLOCK_H */

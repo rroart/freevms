@@ -7,6 +7,8 @@
 #include <prcdef.h>
 #include <prvdef.h>
 #include <sysgen.h>
+#include <linux/string.h>
+#include <exe_routines.h>
 
 // This shall later be implemented in a process
 

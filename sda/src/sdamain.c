@@ -7,7 +7,9 @@
 
 #include<descrip.h> 
 
+#ifdef __i386__
 int errno;
+#endif
 
 int show_device(int mask);
 int sda$exit(int mask);

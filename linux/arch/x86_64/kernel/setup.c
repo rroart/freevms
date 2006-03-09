@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *  linux/arch/x86-64/kernel/setup.c
  *
@@ -360,7 +366,10 @@ void __init setup_arch(char **cmdline_p)
 #endif
 #endif
 
+#if 0
+	// not yet
 	num_mappedpages = end_pfn;
+#endif
 }
 
 static int __init get_model_name(struct cpuinfo_x86 *c)

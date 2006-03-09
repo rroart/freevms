@@ -1395,7 +1395,9 @@ extern int discard_bh_page(struct page *, unsigned long, int);
 #define block_invalidate_page(page) discard_bh_page(page, 0, 0)
 extern int block_symlink(struct inode *, const char *, int);
 extern int block_write_full_page(struct page*, get_block_t*);
+extern int block_write_full_page2(struct inode *inode, struct page *page, unsigned long pageno);
 extern int block_read_full_page(struct page*, get_block_t*);
+extern int block_read_full_page2(struct inode *inode,struct page *page, unsigned long pageno);
 extern int block_prepare_write(struct page*, unsigned, unsigned, get_block_t*);
 extern int cont_prepare_write(struct page*, unsigned, unsigned, get_block_t*,
 				unsigned long *);

@@ -111,7 +111,7 @@ int       ioc$kp_wfikpch (struct _kpb *kpb, int tmo, int newipl);
 int       ioc$kp_wfirlch (struct _kpb *kpb, int tmo, int newipl);
 void  ioc_std$last_chan (int chan, struct _pcb *pcb, struct _ucb *ucb);
 void  ioc_std$last_chan_ambx (struct _pcb *pcb, struct _ucb *ucb);
-int   ioc_std$link_ucb (struct _ucb *ucb, ... ); /* [ struct _ucb **outucb_p ] */
+int   ioc_std$link_ucb (struct _ucb *ucb); //was :, ... ); /* [ struct _ucb **outucb_p ] */
 int       ioc$load_map (struct _adp *adp, struct _crctx *crctx, struct _pte *svapte, int boff,
                         void **dma_addr_p);
 int   ioc_std$lock_dev (int lockmode, void *lock_val_p, struct _pcb *pcb, struct _ucb *ucb,
@@ -143,11 +143,11 @@ void  ioc_std$primitive_wfikpch (struct _irp *irp, long long fr4, struct _ucb *u
 void  ioc_std$primitive_wfirlch (struct _irp *irp, long long fr4, struct _ucb *ucb, 
                                  int tmo, int restore_ipl); 
 
-#ifdef  __INITIAL_POINTER_SIZE	/* Defined if support for 64-bit pointers */
+#ifdef  __x86_64__
 int   ioc_std$ptetopfn (struct _pte_PQ pte);
 #else
 int   ioc_std$ptetopfn (struct _pte *pte);
-#endif /* __INITIAL_POINTER_SIZE */
+#endif
 
 
 void *ioc_std$putbyte (void *sva, char data, struct _ucb *ucb);
@@ -210,7 +210,7 @@ int       ioc$unmap_io (struct _adp *adp, unsigned long long *iohandle);
 int       ioc$unreserve_scb (int count, int32 vector_list[]);
 int   ioc_std$update_dev_wwid_list (struct _wwid *wwid_ptr, char *devnam); 
 VOID_PQ ioc_std$va_to_pa (VOID_PQ va, VOID_PPQ pa_p);
-int       ioc$verify_chan (int16 chan, struct _ccb **ccb_p);
+int       ioc$verify_chan (unsigned short int chan, struct _ccb **ccb_p);
 void  ioc_std$wakacp (struct _ucb *ucb, struct _irp *irp); 
 int       ioc$write_io (struct _adp *adp, unsigned long long *iohandle, int offset,
 			int length, void *data_p);
@@ -219,9 +219,17 @@ int       ioc$write_pci_config (struct _adp *adp, int pci_node, int offset,
 int	  ioc_std$getsyi_cpu_specific (int getsyi_code, unsigned char *buffer,
                                        int *buffer_length);
 
-#ifdef __INITIAL_POINTER_SIZE			 /* Defined whenever ptr size pragmas supported */
-#pragma __required_pointer_size __restore		 /* Restore the previously-defined required ptr size */
-#endif
+void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u);
+ioc$bufpost(struct _irp * i);
+void ioc$initiate(struct _irp * i, struct _ucb * u);
+extern int ioc$searchdev(struct return_values *r, void * devnam);
+int ioc$search(struct return_values *r, void * devnam);
+int ioc$ffchan(unsigned short int *chan);
+int ioc$verify_chan(unsigned short int chan, struct _ccb ** ccbp);
+int ioc$scan_iodb_usrctx(struct _ddb **d);
+void ioc$wfikpch(void * nextfunc, void * timeoutfunc, struct _irp * i, unsigned long fr4, struct _ucb * u, int timeout, int oldipl);
+int ioc_std$clone_mscp_ucb (struct _ucb *tmpl_ucb, struct _ucb **new_ucb);
+int ioc$delete_ucb();
 
 #endif
 

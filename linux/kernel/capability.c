@@ -13,6 +13,7 @@
 
 #include <linux/mm.h>
 #include <asm/uaccess.h>
+#include <misc_routines.h>
 
 kernel_cap_t cap_bset = CAP_INIT_EFF_SET;
 

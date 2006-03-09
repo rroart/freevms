@@ -20,6 +20,11 @@
 #include <iodef.h>
 
 #include <system_data_cells.h>
+#include <misc_routines.h>
+#include <ioc_routines.h>
+#include <sch_routines.h>
+#include <queue.h>
+#include <linux/slab.h>
 
 ptd$cancel( unsigned short chan) {
 

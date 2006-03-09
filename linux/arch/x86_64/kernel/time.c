@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *  linux/arch/x86-64/kernel/time.c
  *
@@ -40,7 +46,7 @@ unsigned long __wall_jiffies __section_wall_jiffies;
 struct timeval __xtime __section_xtime;
 struct timezone __sys_tz __section_sys_tz;
 
-static inline void rdtscll_sync(unsigned long *tsc)
+/*static*/ inline void rdtscll_sync(unsigned long *tsc)
 {
 	sync_core();
 	rdtscll(*tsc);
@@ -135,7 +141,7 @@ void do_settimeofday(struct timeval *tv)
  * sheet for details.
  */
 
-static void set_rtc_mmss(unsigned long nowtime)
+/*static*/ void set_rtc_mmss(unsigned long nowtime)
 {
 	int real_seconds, real_minutes, cmos_minutes;
 	unsigned char control, freq_select;
@@ -485,7 +491,9 @@ static int __init notsc_setup(char *str)
 	return 1;
 } 
 
+void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs);
 static struct irqaction irq0 = { timer_interrupt, SA_INTERRUPT, 0, "timer", NULL, NULL};
+//static struct irqaction irq0 = { exe$hwclkint, SA_INTERRUPT, 0, "timer", NULL, NULL};
 
 void __init time_init(void)
 {

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *  linux/arch/x86-64/traps.c
  *
@@ -70,6 +76,19 @@ asmlinkage void alignment_check(void);
 asmlinkage void machine_check(void);
 asmlinkage void spurious_interrupt_bug(void);
 asmlinkage void call_debug(void);
+
+asmlinkage void test_code(void);
+asmlinkage void astdel_vector(void);
+asmlinkage void resched_vector(void);
+asmlinkage void iopost_vector(void);
+asmlinkage void queueast_vector(void);
+asmlinkage void timerfork_vector(void);
+asmlinkage void iolock8_vector(void);
+asmlinkage void sched_vector(void);
+asmlinkage void timer_vector(void);
+asmlinkage void iolock9_vector(void);
+asmlinkage void iolock10_vector(void);
+asmlinkage void iolock11_vector(void);
 
 static inline void conditional_sti(struct pt_regs *regs)
 {
@@ -292,7 +311,7 @@ void show_registers(struct pt_regs *regs)
 	printk("CPU %d ", cpu);
 	__show_regs(regs);
 	printk("Process %s (pid: %d, stackpage=%08lx)\n",
-		cur->comm, cur->pid, 4096+(unsigned long)cur);
+		cur->pcb$t_lname, cur->pcb$l_pid, 4096+(unsigned long)cur);
 
 	/*
 	 * When in-kernel, we also print out the stack and code at the
@@ -430,7 +449,7 @@ static void do_trap(int trapnr, int signr, char *str,
 		    (tsk->sig->action[signr-1].sa.sa_handler == SIG_DFL)))
 			printk(KERN_INFO
 			       "%s[%d] trap %s rip:%lx rsp:%lx error:%lx\n",
-			       tsk->comm, tsk->pid, str,
+			       tsk->pcb$t_lname, tsk->pcb$l_pid, str,
 			       regs->rip,regs->rsp,error_code); 
 		if (info)
 			force_sig_info(signr, info, tsk);
@@ -519,7 +538,7 @@ asmlinkage void do_general_protection(struct pt_regs * regs, long error_code)
 		    (tsk->sig->action[SIGSEGV-1].sa.sa_handler == SIG_DFL)))
 			printk(KERN_INFO
 		       "%s[%d] general protection rip:%lx rsp:%lx error:%lx\n",
-			       tsk->comm, tsk->pid,
+			       tsk->pcb$t_lname, tsk->pcb$l_pid,
 			       regs->rip,regs->rsp,error_code); 
 		force_sig(SIGSEGV, tsk);
 		return;
@@ -869,6 +888,26 @@ void __init trap_init(void)
 #ifdef CONFIG_IA32_EMULATION
 	set_system_gate(IA32_SYSCALL_VECTOR, ia32_syscall);
 #endif
+	set_system_gate(IA32_VMSSYSCALL_VECTOR,&vms_system_call);
+	set_system_gate(IA32_VMSSYSCALL_VECTOR1,&vms_system_call1);
+	set_system_gate(IA32_VMSSYSCALL_VECTOR3,&vms_system_call3); /* will need to figure out where the user mode setup is */
+	//              set_intr_gate(TEST_VECTOR,&test_code);
+	set_intr_gate(ASTDEL_VECTOR,&astdel_vector);
+	set_intr_gate(RESCHED_VECTOR,&resched_vector);
+	set_intr_gate(IOPOST_VECTOR,&iopost_vector);
+	set_intr_gate(QUEUEAST_VECTOR,&queueast_vector);
+	set_intr_gate(TIMERFORK_VECTOR,&timerfork_vector);
+	set_intr_gate(IOLOCK8_VECTOR,&iolock8_vector);
+	set_intr_gate(SCHED_VECTOR,&sched_vector);
+	set_intr_gate(TIMER_VECTOR,&timer_vector);
+	set_intr_gate(IOLOCK9_VECTOR,&iolock9_vector);
+	set_intr_gate(IOLOCK10_VECTOR,&iolock10_vector);
+	set_intr_gate(IOLOCK11_VECTOR,&iolock11_vector);
+
+	//      set_intr_gate(0xb0,&iolock11_vector);
+	extern sys_$ni_syscall4(void), test_sup(), test_exe();
+	//       _set_gate_exe(idt_table+0xb0,15,3,test_exe);
+	//     _set_gate_sup(idt_table+0xb1,15,3,test_sup);
 
 	/*
 	 * Should be a barrier for any external CPU state.

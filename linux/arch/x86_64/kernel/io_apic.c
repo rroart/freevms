@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *	Intel IO-APIC support for multi-Pentium hosts.
  *
@@ -662,6 +668,17 @@ next:
 	current_vector += 8;
 	if (current_vector == IA32_SYSCALL_VECTOR)
 		goto next;
+
+	if (current_vector == IA32_SYSCALL_VECTOR ||
+	    current_vector == IA32_VMSSYSCALL_VECTOR  ||
+	    current_vector == IA32_VMSSYSCALL_VECTOR1  ||
+	    current_vector == IA32_VMSSYSCALL_VECTOR3 ||
+	    current_vector == 0xb0 ||
+	    current_vector == 0xb1 ||
+	    (current_vector >= ASTDEL_VECTOR &&
+	     current_vector <= POWER_VECTOR) 
+	    ) 
+	  goto next;
 
 	if (current_vector > FIRST_SYSTEM_VECTOR) {
 		offset++;
@@ -1693,6 +1710,8 @@ static inline void check_timer(void)
  *   for any interrupt handling anyway.
  */
 #define PIC_IRQS	(1<<2)
+#define acpi_ioapic 0
+// check
 
 void __init setup_IO_APIC(void)
 {

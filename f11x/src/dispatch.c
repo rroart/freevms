@@ -28,6 +28,11 @@
 #include<linux/init.h>
 #include<linux/sched.h>
 #include<asm/current.h>
+#include <queue.h>
+#include <ipl.h>
+#include <misc_routines.h>
+#include <ioc_routines.h>
+#include <sch_routines.h>
 
 void f11b$dispatcher(void);
 unsigned f11b_modify(struct _vcb * vcb, struct _irp * irp);

@@ -24,8 +24,12 @@
 #include<system_data_cells.h>
 #include<ucbdef.h>
 #include<vcbdef.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
 
 #include<linux/mm.h>
+#include <linux/slab.h>
 
 struct _fdt file$fdt = {
   fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
@@ -121,7 +125,6 @@ void  file_startio3 (int fr3, int fr4, struct _ucb * u) {
 /* more yet undefined dummies */
 void  file_unsolint (void) { };
 void  file_cancel (void) { };
-static void  ioc_std$cancelio (void) { };
 void  file_regdump (void) { };
 void  file_diagbuf (void) { };
 void  file_errorbuf (void) { };
@@ -170,11 +173,11 @@ struct _ddt file$ddt = {
   ddt$l_mntver: file_mntver,
   ddt$l_cloneducb: file_cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: file_mntv_sssc,
-  ddt$l_mntv_for: file_mntv_for,
-  ddt$l_mntv_sqd: file_mntv_sqd,
-  ddt$l_aux_storage: file_aux_storage,
-  ddt$l_aux_routine: file_aux_routine
+  ddt$ps_mntv_sssc: file_mntv_sssc,
+  ddt$ps_mntv_for: file_mntv_for,
+  ddt$ps_mntv_sqd: file_mntv_sqd,
+  ddt$ps_aux_storage: file_aux_storage,
+  ddt$ps_aux_routine: file_aux_routine
 };
 
 /* include a buffered 4th param? */
@@ -271,7 +274,7 @@ struct _crb nullcrb;
 struct _ccb nullccb;
 #endif
 
-int file_iodb_vmsinit(void) {
+long file_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&file$ucb;
   struct _ddb * ddb=&file$ddb;
@@ -286,9 +289,9 @@ int file_iodb_vmsinit(void) {
   struct _ddb * newddb;
 
 //  ioc_std$clone_ucb(&file$ucb,&ucb);
-  bzero(ucb,sizeof(struct _dt_ucb));
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,sizeof(struct _dt_ucb));
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
 #if 0
   init_ddb(&file$ddb,&file$ddt,&file$ucb,"dfa");
@@ -326,10 +329,10 @@ insertfillist(struct _ucb *u, char *s) {
   myfilelist[myfilelistptr++]=u;
 }
 
-int file_iodbunit_vmsinit(struct _ddb * ddb,int unitno, void * d) {
+long file_iodbunit_vmsinit(struct _ddb * ddb,int unitno, void * d) {
   struct _ucb * newucb;
 
-  ioc_std$clone_ucb(ddb->ddb$l_ucb/*&file$ucb*/,&newucb);
+  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&file$ucb*/,&newucb);
 
   return newucb;
 }
@@ -342,13 +345,13 @@ struct _ucb * fl_init(char * s) {
 
   while(ddb) {
     if (ddb->ddb$ps_sb==0 || ddb->ddb$ps_sb==&mysb)
-      if (!bcmp(&ddb->ddb$t_name[1],"dfa",3)) 
+      if (!memcmp(&ddb->ddb$t_name[1],"dfa",3)) 
 	goto out;
     ddb=ddb->ddb$ps_link;
   }
  out:
 
-  ioc_std$clone_ucb(ddb->ddb$l_ucb/*&file$ucb*/,&newucb);
+  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&file$ucb*/,&newucb);
 
   newucb->ucb$l_orb=myfilelistptr;
 

@@ -59,8 +59,13 @@
 #include <vcdef.h>
 #include <xmdef.h>
 #include <prcpoldef.h>
+#include <queue.h>
+#include <exe_routines.h>
+#include <scs_routines.h>
+#include <misc_routines.h>
 
 #include "../../cmuip/ipacp/src/xedrv.h"
+#include <starlet.h>
 
 extern struct _pb mypb;
 extern struct _sb mysb;
@@ -71,6 +76,9 @@ extern struct _cdt cdtl[1024];
 extern struct _rdt rdt;
 extern struct _scs_rd rdtl[128];
 extern struct _cdl cdl;
+
+scs_startio ( int dummy );
+int scs_rcv2(char * bufh, char * buf);
 
 #define NF_SCS_HELLO              5
 
@@ -279,7 +287,7 @@ static timers=5;
 static void scs_dev_set_timer()
 {
   struct timer_list * timer=kmalloc(sizeof(struct timer_list),GFP_KERNEL);
-  bzero(timer,sizeof(timer));
+  memset(timer,0,sizeof(timer));
 
   timer->data = (unsigned long)scs_default_device;
   timer->function = scs_dev_timer_func;
@@ -560,11 +568,11 @@ int opc_msgrec(char * buf) {
     // do an accept or reject
     //cdt->cdt$w_state=CDT$C_REJ_SENT
     //scs_msg_ctl_comm(cdt,SCS$C_REJ_REQ);
-    scs_std$accept(0,0,0,0,0,0,0,0,0,0,0,0,cdt,0);
+    scs_std$accept(0,0,0,0,0,0,0,0,0,0,0,0,cdt,0,0);
     cdt->cdt$l_condat=kmalloc(16,GFP_KERNEL);
     cdt->cdt$l_lprocnam=kmalloc(16,GFP_KERNEL);
-    bcopy(&scs->scs$b_con_dat,cdt->cdt$l_condat,16);
-    bcopy(&scs->scs$t_dst_proc,cdt->cdt$l_lprocnam,16);
+    memcpy(cdt->cdt$l_condat,&scs->scs$b_con_dat,16);
+    memcpy(cdt->cdt$l_lprocnam,&scs->scs$t_dst_proc,16);
     sbnb=scs_find_name(cdt->cdt$l_lprocnam);
     //    cdt->cdt$l_lconid=sbnb->sbnb$w_local_index;
     cdt->cdt$l_msginput=cdtl[sbnb->sbnb$w_local_index].cdt$l_msginput;
@@ -755,7 +763,7 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
 #ifndef __arch_um__
     if (0==strncmp(devnam,"dqa",3)) {
       ddb=ide_iodb_vmsinit(1);
-      du_iodb_clu_vmsinit(ddb->ddb$l_ucb);
+      du_iodb_clu_vmsinit(ddb->ddb$ps_ucb);
     }
 #endif
 #endif
@@ -763,7 +771,7 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
       ddb=du_iodb_vmsinit();
     if (0==strncmp(devnam,"dfa",3)) {
       ddb=du_iodb_vmsinit(); // was file_
-      du_iodb_clu_vmsinit(ddb->ddb$l_ucb);
+      du_iodb_clu_vmsinit(ddb->ddb$ps_ucb);
       ddb->ddb$t_name[2]='f';
     }
     break;
@@ -1043,7 +1051,7 @@ scs_startdev ( scs_int2 , setflag , setaddr)
 	struct XE_setup_structure Setup_, * Setup= &Setup_;
 	struct XE_sdesc_structure Paramdescr_, * Paramdescr= &Paramdescr_;
 
-	bzero(Setup,sizeof(struct XE_setup_structure));
+	memset(Setup,0,sizeof(struct XE_setup_structure));
 
 	scs_int->sei$rcvhdrs = kmalloc(MAX_RCV_BUF*16, GFP_KERNEL);
 	memset(scs_int->sei$rcvhdrs, 0, MAX_RCV_BUF*16);
@@ -1109,7 +1117,7 @@ scs_startdev ( scs_int2 , setflag , setaddr)
 // Issue the startup command to controller
 
     RC = exe$qiow (1, scs_int->sei$io_chan,
-		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr);
+		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr,0,0,0,0);
     if (!( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
 	{
 	if (IOS->xe$vms_code == SS$_BADPARAM)

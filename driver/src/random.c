@@ -67,11 +67,11 @@ struct _ddt ddt_rnd = {
   ddt$l_mntver: rnd_mntver,
   ddt$l_cloneducb: rnd_cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: rnd_mntv_sssc,
-  ddt$l_mntv_for: rnd_mntv_for,
-  ddt$l_mntv_sqd: rnd_mntv_sqd,
-  ddt$l_aux_storage: rnd_aux_storage,
-  ddt$l_aux_routine: rnd_aux_routine
+  ddt$ps_mntv_sssc: rnd_mntv_sssc,
+  ddt$ps_mntv_for: rnd_mntv_for,
+  ddt$ps_mntv_sqd: rnd_mntv_sqd,
+  ddt$ps_aux_storage: rnd_aux_storage,
+  ddt$ps_aux_routine: rnd_aux_routine
 };
 
 /* include a buffered 4th param? */
@@ -90,7 +90,7 @@ void rnd_init(void) {
   struct _ucb * u;
   //  u=vmalloc(sizeof(struct _ucb));
   u=&randomucb;
-  bzero(u,sizeof(struct _ucb));
+  memset(u,0,sizeof(struct _ucb));
   u->ucb$b_type=DYN$C_UCB;
   u->ucb$b_flck=IPL$_IOLOCK8;
   /* devchars? */

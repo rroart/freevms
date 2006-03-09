@@ -39,6 +39,10 @@
 #include <asm/io.h>
 #include <asm/bitops.h>
 
+#ifdef __x86_64__
+#define ide__sti() __sti()
+#endif
+
 /*
  * A Verbose noise maker for debugging on the attempted transfer rates.
  */

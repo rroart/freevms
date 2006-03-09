@@ -1,7 +1,5 @@
 FLAGS = -static
 
-EXTERNAL = ../../cdu/src/cdu.a ../../cdu/src/cdu2.a
-
 all: i386/dfu${NOEXE} um/dfu${NOEXE}
 # i386/dfu${EXE} um/dfu${EXE} 
 
@@ -22,18 +20,18 @@ OBJS = dfu.o dfu_bitmap.o dfu_filedir.o dfu_ifscan.o dfu_tables.o
 dfu_tables.c: ../../cdu/src/cdu dfu_tables.cld
 	../../cdu/src/cdu dfu_tables.cld
 
-i386/dfu${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL)
+i386/dfu${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(EXTERNAL2)
 	install -d i386
-	gcc -g -static $(OBJS) $(VMSLIBS) $(EXTERNAL) -ldl -lelf -o i386/dfu${NOEXE}
+	gcc -g -static $(OBJS) $(VMSLIBS) $(EXTERNAL) $(EXTERNAL2) -ldl -lelf -o i386/dfu${NOEXE}
 
-i386/dfu${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) 
+i386/dfu${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(EXTERNAL2) 
 	install -d i386
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(EXTERNAL) /usr/lib/libdl.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dfu${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(EXTERNAL) $(EXTERNAL2) /usr/lib/libdl.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dfu${EXE}
 
-um/dfu${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL)
+um/dfu${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL) $(EXTERNAL2)
 	install -d um
-	gcc $(FLAGS) -g $(OBJS) $(VMSLIBSUM) $(EXTERNAL) -ldl -lelf -o um/dfu${NOEXE}
+	gcc $(FLAGS) -g $(OBJS) $(VMSLIBSUM) $(EXTERNAL) $(EXTERNAL2) -ldl -lelf -o um/dfu${NOEXE}
 
-um/dfu${EXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL) 
+um/dfu${EXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL) $(EXTERNAL2) 
 	install -d um
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(EXTERNAL) /usr/lib/libdl.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/dfu${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(EXTERNAL) $(EXTERNAL2) /usr/lib/libdl.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/dfu${EXE}

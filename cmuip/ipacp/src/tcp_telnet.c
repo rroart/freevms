@@ -115,7 +115,7 @@ MODULE TELNET(IDENT="1.11",LANGUAGE(BLISS32),
 
 #include<descrip.h> 
 
-// not yet #include <starlet.h>	// VMS system definitions
+#include <starlet.h>	// VMS system definitions
 // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS common definitions
 #include <cmuip/central/include/neterror.h>	// Network error codes
 #include "netvms.h"
@@ -681,7 +681,7 @@ TELNET_OPEN(TCB)
 		     accpornam->dsc$a_pointer,	// Buffer
 		     accpornam->dsc$w_length,	// Size
 		     0,
-		     4,0,0,0,0				// Sub-func #4
+		     4,0,0				// Sub-func #4
 			);
 
 // Fill in the actual name after name resolution
@@ -838,7 +838,7 @@ void TELNET_CLOSE(TCB)
 	myasts[myasti++]=ast_in_progress;
 #endif
 	sys$dclast(TELNET_CLOSE_DONE,
-		TVT);
+		TVT, 0);
 #ifndef NOKERNEL
 	myasts[myasti++]=0x14;
 	myasts[myasti++]=head;
@@ -888,7 +888,7 @@ void TELNET_INPUT(TCB)
 
 #ifdef USE_ASTS
     sys$dclast(PTY_WRITE,
-	    TCB->tvtdata);
+	    TCB->tvtdata, 0);
 #else
     PTY_WRITE(TCB->tvtdata);
 #endif
@@ -911,7 +911,7 @@ void TELNET_OUTPUT(TCB)
 
 #ifdef USE_ASTS
     sys$dclast(PTY_READ,
-	    TCB->tvtdata);
+	    TCB->tvtdata, 0);
 #else
     PTY_READ(TCB->tvtdata);
 #endif
@@ -1671,7 +1671,7 @@ signed long
     Item_List[0].bufaddr=&Unit_Number;
     Item_List[1].item_code=0; // check
 
-    RC = sys$getdviw (0,TVT->TVT$PTY_CHN,0,Item_List,0,0); // seems C can not fill in the rest with 0?
+    RC = sys$getdviw (0,TVT->TVT$PTY_CHN,0,Item_List,0,0,0,0); // seems C can not fill in the rest with 0?
     if (BLISSIF(RC))
 	{
 	  Item_List[0].item_code=DVI$_PID;
@@ -1700,7 +1700,7 @@ signed long
 	if (RC == SS$_NORMAL)
 	  RC = sys$fao(&ctr,&devnam->dsc$w_length,devnam,ptynam,Unit_Number); // check
 	if (BLISSIF(RC))
-	  RC = sys$getdviw (0,0,devnam,Item_List,0,0); // seems C can not fill int the rest with 0?
+	  RC = sys$getdviw (0,0,devnam,Item_List,0,0,0,0); // seems C can not fill int the rest with 0?
 
     XLOG$FAO(LOG$TELNET,"!%T PTY_Set_owner_PID: TTY_TERM=\"!AS\"!/",0,devnam);
 
@@ -1893,7 +1893,7 @@ struct PTY$IOSB * IOSB = &TVT->TVT$RD_IOSB;
 	if (((TVT->TVT$RD_BCNT > 0) || (Byte_Count > 0)))
 	    {
 	    sys$dclast(PTY_READ,
-		TVT);
+		TVT, 0);
 	    } ;
 #else
 	$ACPWAKE;

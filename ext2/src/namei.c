@@ -39,6 +39,8 @@
 #include <linux/ext2_fs.h>
 #include <linux/pagemap.h>
 
+#include <misc_routines.h>
+
 /*
  * Couple of helper functions - make the code slightly cleaner.
  */

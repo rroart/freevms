@@ -40,3 +40,10 @@ unsigned update_freecount(struct _vcb *vcbdev,unsigned *retcount);
 unsigned update_create(struct _vcb *vcb,struct _irp * i);
 unsigned update_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);
 unsigned short checksum(vmsword *block);
+
+void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb);
+void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb);
+struct _fcb * getidxfcb(struct _vcb * vcb);
+unsigned writehead(struct _fcb * fcb,struct _fh2 *headbuff);
+void * f11b_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb, unsigned long * retsts);
+

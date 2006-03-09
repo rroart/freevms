@@ -29,6 +29,7 @@
 #include <linux/init.h>
 #include <linux/file.h>
 #include <linux/string.h>
+#include <exe_routines.h>
 
 /*
  * For hysterical raisins we keep the same inumbers as in the old procfs.

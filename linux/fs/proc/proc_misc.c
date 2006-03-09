@@ -338,7 +338,11 @@ static int partitions_read_proc(char *page, char **start, off_t off,
 static int interrupts_read_proc(char *page, char **start, off_t off,
 				 int count, int *eof, void *data)
 {
+#ifndef __x86_64__
 	int len = get_irq_list(page);
+#else
+	int len = 0;
+#endif
 	return proc_calc_metrics(page, start, off, count, eof, len);
 }
 #endif

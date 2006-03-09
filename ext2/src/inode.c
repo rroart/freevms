@@ -39,6 +39,8 @@
 
 #include <misc.h>
 
+#include <misc_routines.h>
+
 MODULE_AUTHOR("Remy Card and others");
 MODULE_DESCRIPTION("Second Extended Filesystem");
 MODULE_LICENSE("GPL");
@@ -595,7 +597,7 @@ changed:
 int generic_commit_write2();
 static int ext2_writepage(struct page *page)
 {
-	return block_write_full_page2(page,ext2_get_block);
+	return block_write_full_page2(page,ext2_get_block,0);
 }
 static int ext2_readpage(struct file *file, struct page *page, struct inode * inode, unsigned long pageno)
 {
@@ -603,7 +605,7 @@ static int ext2_readpage(struct file *file, struct page *page, struct inode * in
 }
 static int ext2_prepare_write(struct file *file, struct page *page, unsigned from, unsigned to)
 {
-	return block_prepare_write2(page,from,to,ext2_get_block);
+	return block_prepare_write2(page,from,to,ext2_get_block,0);
 }
 static int ext2_bmap(struct address_space *mapping, long block)
 {

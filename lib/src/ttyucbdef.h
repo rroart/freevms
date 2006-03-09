@@ -8,7 +8,7 @@ struct _ltrm_ucb {
   struct _acb *ucb$l_tl_ctrly;        
   struct _acb *ucb$l_tl_ctrlc;        
   unsigned int ucb$l_tl_outband;      
-  int ucb$l_tl_bandque;               
+  long ucb$l_tl_bandque;               
   struct _ucb *ucb$l_tl_phyucb;       
   unsigned int ucb$l_tl_ctlpid;       
   unsigned long long ucb$q_tl_brkthru;  

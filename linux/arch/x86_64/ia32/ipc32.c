@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/fs.h> 
@@ -176,6 +182,11 @@ struct ipc_kludge {
 #define SHMCTL		24
 
 #define IPCOP_MASK(__x)	(1UL << (__x))
+
+#if 1
+// temp
+int sys_semtimedop() {printk("sys_semtimedop not impl\n");}
+#endif
 
 static int
 ipc_parse_version32 (int *cmd)
@@ -633,6 +644,8 @@ shmctl32 (int first, int second, void *uptr)
 asmlinkage long
 sys32_ipc (u32 call, int first, int second, int third, u32 ptr, u32 fifth)
 {
+#if 0
+  // not yet
 	int version;
 
 	version = call >> 16; /* hack for backward compatibility */
@@ -687,6 +700,7 @@ sys32_ipc (u32 call, int first, int second, int third, u32 ptr, u32 fifth)
 		return shmctl32(first, second, (void *)AA(ptr));
 
 	}
+#endif
 	return -ENOSYS;
 }
 

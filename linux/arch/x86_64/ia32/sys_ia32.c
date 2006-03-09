@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  * sys_ia32.c: Conversion between 32bit and 64bit native syscalls. Based on
  *             sys_sparc32 
@@ -18,6 +24,17 @@
  *
  * $Id$
  */
+
+#if 0
+#include <linux/kernel.h>
+#ifndef CONFIG_VMS
+// tmp place
+extern void __out_of_line_bug(int line) ATTRIB_NORET;
+int out_of_line_bug(int line) {
+  __out_of_line_bug(line);
+}
+#endif
+#endif
 
 #include <linux/config.h>
 #include <linux/kernel.h>
@@ -3035,7 +3052,7 @@ long sys32_vm86_warning(void)
 	static long warn_time = -(60*HZ); 
 	if (time_before(warn_time + 60*HZ,jiffies)) { 
 		printk(KERN_INFO "%s: vm86 mode not supported on 64 bit kernel\n",
-		       current->comm);
+		       current->pcb$t_lname);
 		warn_time = jiffies;
 	} 
 	return -ENOSYS ;

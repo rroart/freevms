@@ -23,6 +23,8 @@
 
 #include <asm/uaccess.h>
 #include <asm/io.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 //asmlinkage void do_test_code(struct pt_regs *regs, unsigned long error_code) {
 //   asmlinkage void do_test_code(int irq, void *dev_id, struct pt_regs *regs) {

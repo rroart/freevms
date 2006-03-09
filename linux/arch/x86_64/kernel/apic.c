@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *	Local APIC handling, local APIC timers
  *
@@ -955,8 +961,10 @@ void smp_apic_timer_interrupt(struct pt_regs *regs)
 	smp_local_timer_interrupt(regs);
 	irq_exit(cpu, 0);
 
+#ifndef CONFIG_VMS
 	if (softirq_pending(cpu))
 		do_softirq();
+#endif
 }
 
 /*

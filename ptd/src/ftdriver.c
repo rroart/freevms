@@ -26,6 +26,9 @@
 #include<descrip.h>
 #include<ftucbdef.h>
 #include<ftrddef.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
 
 #include<linux/blkdev.h>
 
@@ -59,7 +62,9 @@ static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
 
   func=u->ucb$l_fpc;
   func(i,u);
+#if 0
   myrei();
+#endif
 }
 
 static struct _fdt ft$fdt = {
@@ -71,7 +76,6 @@ static struct _fdt ft$fdt = {
 int ft$startio (int a,int b) { };
 static void  unsolint (void) { };
 static void  cancel (void) { };
-static void  ioc_std$cancelio (void) { };
 static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
@@ -98,11 +102,11 @@ static struct _ddt ft$ddt = {
   ddt$l_mntver: mntver,
   ddt$l_cloneducb: cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: mntv_sssc,
-  ddt$l_mntv_for: mntv_for,
-  ddt$l_mntv_sqd: mntv_sqd,
-  ddt$l_aux_storage: aux_storage,
-  ddt$l_aux_routine: aux_routine
+  ddt$ps_mntv_sssc: mntv_sssc,
+  ddt$ps_mntv_for: mntv_for,
+  ddt$ps_mntv_sqd: mntv_sqd,
+  ddt$ps_aux_storage: aux_storage,
+  ddt$ps_aux_routine: aux_routine
 };
 
 int ft$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
@@ -182,7 +186,7 @@ int ft$init_tables() {
   return SS$_NORMAL;
 }
 
-int ft_iodb_vmsinit(void) {
+long ft_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&ft$ucb;
   struct _ddb * ddb=&ft$ddb;
@@ -193,9 +197,9 @@ int ft_iodb_vmsinit(void) {
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,sizeof(struct _ft_ucb));
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,sizeof(struct _ft_ucb));
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
 #if 0
   init_ddb(&ft$ddb,&ft$ddt,&ft$ucb,"dqa");
@@ -221,7 +225,7 @@ int ft_iodb_vmsinit(void) {
 
 }
 
-int ft_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long ft_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&ft$ucb*/,&newucb);

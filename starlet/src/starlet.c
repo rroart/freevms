@@ -6,9 +6,11 @@
 #endif
 #include<stdarg.h>
 
+#ifndef __x86_64__
 int sys$testcode(void) {
   return INLINE_SYSCALLTEST($setprn,0);
 }
+#endif
 
 int sys$setprn  ( void *prcnam) { 
   return INLINE_SYSCALL($setprn,1,prcnam);
@@ -400,11 +402,11 @@ int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *i
 int sys$fao(void * ctrstr , short int * outlen , void * outbuf , ...) {
   struct struct_args s;
   va_list args;
-  int * argv = (int *)&s;
+  long * argv = (long *)&s;
   int argc=0;
   va_start(args,outbuf);
   while(argc<15) { // check. should be 17.
-    *argv=va_arg(args,int);
+    *argv=va_arg(args,long);
     argv++;
     argc++;
   }

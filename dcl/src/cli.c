@@ -3995,6 +3995,7 @@ static unsigned long extcommand (unsigned long h_input, unsigned long h_output, 
 /************************************************************************/
 
 static int myfunc(int (*func)(),void * start, int count) {
+#ifdef __i386__
   __asm__ __volatile__(
 		       "pushl %ebx\n\t"
 		       "pushl %ecx\n\t"
@@ -4012,6 +4013,7 @@ static int myfunc(int (*func)(),void * start, int count) {
 		       "jmp *%eax\n\t"
 		       );
   // return eax default?
+#endif
 }
 
 static int mymyfunc(int dummy,int (*func)(),void * start, int count) {
@@ -4026,10 +4028,12 @@ static int mymyfunc(int dummy,int (*func)(),void * start, int count) {
 }
 
 static int mymymyfunc(int (*func)(),void * start, int count) {
+#ifdef __i386__
   register int __res;
   __asm__ ( "movl %%ebp,%%eax\n\t" :"=a" (__res) );
   mymyfunc(__res,*func,start,count);
   __asm__ ( "movl (%esp),%ebp\n\t" );
+#endif
 }
 
 static unsigned long runimage (unsigned long h_error, Runopts *runopts, const char *image, int argc, const char *argv[])
@@ -4076,6 +4080,7 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
     func(argc,argv++);
     printf("after image\n");
   } else {
+#ifdef __i386__
     struct elfhdr * elf = hdrbuf;
     func = elf->e_entry;
     printf("entering image? %x\n",func);
@@ -4089,6 +4094,7 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
     int offset = ((long)(*addr)) - ((long)elf);
     sts = mymymyfunc(func,*addr,(4096-offset)>>2);
     printf("after image\n");
+#endif
   }
 
   sys$rundwn();

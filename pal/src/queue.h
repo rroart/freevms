@@ -11,4 +11,10 @@ unsigned long remqti(void * header, void * addr);
 int aqempty(void * q);
 int rqempty(void * q);
 
+void qhead_init(void * l);
+void sickinsque(void * entry, void * pred);
+
+INSQUE(x,y);
+REMQUE(e,a);
+
 #endif

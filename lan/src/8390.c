@@ -10,6 +10,12 @@
 #include <ucbnidef.h>
 #include <ssdef.h>
 
+#include <misc_routines.h>
+
+#include <linux/sched.h>
+
+static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+
 int er$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   return lan$readblk(i,p,u,c);
 }

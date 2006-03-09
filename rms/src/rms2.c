@@ -1,3 +1,5 @@
+#include <linux/kernel.h>
+
 struct _fab; 
 
 int  exe$delete  (struct _fab * fab, void * err, void * suc) { printk("not implemented\n"); }
@@ -26,7 +28,7 @@ int  exe$rmsrundwn  (struct _fab * fab, void * err, void * suc) { printk("not im
 
 // workaround for bug or something
 
-#ifndef __arch_um__
+#ifdef __i386__
 char * strcpy(char * dest,const char *src)
 {
   int d0, d1, d2;

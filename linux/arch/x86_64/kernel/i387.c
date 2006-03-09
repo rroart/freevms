@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *  linux/arch/x86_64/kernel/i387.c
  *
@@ -60,7 +66,7 @@ int save_i387(struct _fpstate *buf)
 		if (err) { 
 			if (exception_trace) 
 				printk("%s[%d] unaligned signal floating point context %p\n", 
-					tsk->comm, tsk->pid, buf); 
+					tsk->pcb$t_lname, tsk->pcb$l_pid, buf); 
 			return err;
 		}
 		stts();

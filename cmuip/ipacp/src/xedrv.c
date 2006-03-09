@@ -223,6 +223,7 @@ MODULE XE_DRIVER(IDENT="5.0a",LANGUAGE(BLISS32),
 #include <nmadef.h>
 #include <descrip.h>
 #include <xmdef.h>
+#include<starlet.h>
 
 #ifndef NOKERNEL
 #define sys$cancel exe$cancel
@@ -413,7 +414,7 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 // Issue the startup command to controller
 
     RC = sys$qiow (1, XE_Int->xei$io_chan,
-		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr);
+		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr, 0, 0, 0, 0);
     if (!( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
 	{
 	if (IOS->xe$vms_code == SS$_BADPARAM)
@@ -437,7 +438,7 @@ XE_StartDev ( XE_Int , setflag , setaddr )
 // Issue the startup command to controller
 
     RC = sys$qiow (1, XE_Int->xei$arp_io_chan,
-		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr);
+		IO$_SETMODE+IO$M_CTRL+IO$M_STARTUP,IOS,0,0,0,Paramdescr,0,0,0,0);
     if (!( (RC == SS$_NORMAL) && (IOS->xe$vms_code == SS$_NORMAL) ))
 	{	// Startup command failed
 	XE$ERR(XE_Int,
@@ -476,7 +477,7 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
     Paramdescr->xe$setup_address = Sense;
 
     RC = sys$qiow (1, XE_Int->xei$io_chan,
-		IO$_SENSEMODE+IO$M_CTRL, IOS, 0, 0, 0, Paramdescr);
+		IO$_SENSEMODE+IO$M_CTRL, IOS, 0, 0, 0, Paramdescr, 0, 0, 0, 0);
     if (! ((RC == SS$_NORMAL) && (IOS->xe$vms_code)))
 	{			// Statistics call failed
 	XE$ERR(XE_Int,
@@ -705,7 +706,7 @@ void XE_Shutdown ( XE_Int , restart )
 	{
 	sys$cancel(XE_Int->xei$io_chan);
 	RC = sys$qiow( 1, XE_Int->xei$io_chan,
-		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS);
+		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS, 0, 0, 0, 0, 0, 0, 0, 0);
 	if ((RC != SS$_NORMAL) || (IOS->xe$vms_code != SS$_NORMAL))
 	    {
 	    DRV$WARN_FAO("XE shutdown QIOW failure, EC = !XL",RC);
@@ -719,7 +720,7 @@ void XE_Shutdown ( XE_Int , restart )
 	{
 	sys$cancel(XE_Int->xei$arp_io_chan);
 	RC = sys$qiow( 1, XE_Int->xei$arp_io_chan,
-		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS);
+		    IO$_SETMODE+IO$M_CTRL+IO$M_SHUTDOWN,IOS, 0, 0, 0, 0, 0, 0, 0, 0);
 	if ((RC != SS$_NORMAL) || (IOS->xe$vms_code != SS$_NORMAL))
 	    {
 	    DRV$WARN_FAO("XE ARP shutdown QIOW failure, EC = !XL",RC);
@@ -734,7 +735,7 @@ void XE_Shutdown ( XE_Int , restart )
 	{
 	XE_Int->XEI$IO_queued = FALSE;
 	XE_Int->XEI$need_2_free = TRUE;
-	sys$dclast( XE_FreeBufs, XE_Int);
+	sys$dclast( XE_FreeBufs, XE_Int, 0);
 	};
 
 // Allow AST's again

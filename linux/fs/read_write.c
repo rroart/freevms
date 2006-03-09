@@ -15,6 +15,7 @@
 #include <asm/uaccess.h>
 #include <dyndef.h>
 #include <fcbdef.h>
+#include <misc_routines.h>
 
 struct file_operations generic_ro_fops = {
 	llseek:		generic_file_llseek,

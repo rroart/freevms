@@ -1,6 +1,10 @@
-/*
- * misc.c
- * 
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006.
+
+/* 
  * This is a collection of several routines from gzip-1.0.3 
  * adapted for Linux.
  *
@@ -351,7 +355,7 @@ int decompress_kernel(struct moveparams *mv, void *rmode)
 	else setup_output_buffer_if_we_run_high(mv);
 
 	makecrc();
-	putstr(".\nDecompressing Linux...");
+	putstr(".\nDecompressing FreeVMS...");
 	gunzip();
 	putstr("done.\nBooting the kernel.\n");
 	if (high_loaded) close_output_buffer_if_we_run_high(mv);

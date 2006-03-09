@@ -162,6 +162,11 @@
 #include <linux/kmod.h>
 #endif /* CONFIG_KMOD */
 
+#ifdef __x86_64__
+#define ide_release_region(from,extent) release_region((from), (extent))
+#define ide__sti() __sti()
+#endif
+
 /* default maximum number of failures */
 #define IDE_DEFAULT_MAX_FAILURES 	1
 

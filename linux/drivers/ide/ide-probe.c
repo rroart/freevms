@@ -58,6 +58,13 @@
 #include <asm/uaccess.h>
 #include <asm/io.h>
 
+#ifdef __x86_64__
+#define ide_request_region(from,extent,name) request_region((from), (extent), (name))
+#define ide_check_region(from,extent) check_region((from), (extent))
+#define ide__sti() __sti()
+#define ide_request_irq(irq,hand,flg,dev,id) request_irq((irq),(hand),(flg),(dev),(id))
+#endif
+
 static inline void do_identify (ide_drive_t *drive, byte cmd)
 {
 	int bswap = 1;

@@ -101,12 +101,22 @@ i386/creprc: creprc.c $(VMSLIBS)
 hi.o: hi.c
 	gcc -c hi.c
 
+ifeq ($(ARCH),i386)
 i386/hi: hi.o $(VMSLIBS)
 	../linker/src/linker -L../linker/src/build/ld -melf_i386 -Bstatic hi.o $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/hi
 	ld -Bshareable hi.o $(LIBC) -o i386/hi.exe2
+else
+i386/hi:
+	touch i386/hi
+endif
 
+ifeq ($(ARCH),i386)
 i386/hi.exe: hi.o $(VMSLIBS)
 	../linker/src/linker $(LINKPRE) hi.o $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/hi.exe
+else
+i386/hi.exe:
+	touch i386/hi.exe
+endif
 
 i386/modes: modes.o $(VMSLIBS)
 	gcc -$(FLAGS) -static -I../starlet/src -I../librtl/src/ modes.c $(VMSLIBS) -o i386/modes

@@ -61,6 +61,9 @@
 #include<fabdef.h>
 #include<ccbdef.h>
 #include<ucbdef.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <queue.h>
 
 int core_uses_pid;
 
@@ -418,7 +421,11 @@ struct file *rms_open_exec(const char *name)
 	struct _fabdef fab = cc$rms_fab;
 	int sts;
 
+#ifdef __i386__
 	char vms_filename[256];
+#else
+	char * vms_filename = kmalloc(256,GFP_KERNEL);
+#endif
 	path_unix_to_vms(vms_filename, name);
 	convert_soname(vms_filename);
 
@@ -437,6 +444,9 @@ struct file *rms_open_exec(const char *name)
 	    file=x2p_fcb;
 	  exe$close(&fab);
 	}
+#ifndef __i386__
+	kfree(vms_filename);
+#endif
 	return file;
 }
 #endif
@@ -1217,17 +1227,17 @@ fail:
 }
 
 init_phd(struct _phd * phd) {
-	bzero(phd,sizeof(struct _phd));
+	memset(phd,0,sizeof(struct _phd));
 #ifdef CONFIG_MM_VMS
 	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
 	{
 	  qhead_init(&phd->phd$ps_p0_va_list_flink);
-	  phd->phd$l_wslist=kmalloc(4*512,GFP_KERNEL);
-	  phd->phd$l_wslock=kmalloc(4*512,GFP_KERNEL);
-	  phd->phd$l_wsdyn=kmalloc(4*512,GFP_KERNEL);
-	  bzero((void*)phd->phd$l_wslist,4*512);
-	  bzero((void*)phd->phd$l_wslock,4*512);
-	  bzero((void*)phd->phd$l_wsdyn,4*512);
+	  phd->phd$l_wslist=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);
+	  phd->phd$l_wslock=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);
+	  phd->phd$l_wsdyn=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);
+	  memset((void*)phd->phd$l_wslist,0,PHD_INT_SIZE*512);
+	  memset((void*)phd->phd$l_wslock,0,PHD_INT_SIZE*512);
+	  memset((void*)phd->phd$l_wsdyn,0,PHD_INT_SIZE*512);
 	  phd->phd$l_wsquota=PQL_DWSQUOTA;
 	  phd->phd$l_wsauthext=PQL_DWSEXTENT;
 	  phd->phd$l_wsextent=PQL_DWSEXTENT;
@@ -1244,7 +1254,7 @@ init_phd(struct _phd * phd) {
 	  }
 #endif
 	  phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
-	  bzero((void*)phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
+	  memset((void*)phd->phd$l_pst_base_offset,0,PROCSECTCNT*sizeof(struct _secdef));
 	  phd->phd$l_pst_last=PROCSECTCNT-1;
 	  phd->phd$l_pst_free=0;
 	}

@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /* 
  * 32bit Socket syscall emulation. Based on arch/sparc64/kernel/sys_sparc32.c.
  *
@@ -224,6 +230,7 @@ static void put_cmsg32(struct msghdr *kmsg, int level, int type,
 
 static void scm_detach_fds32(struct msghdr *kmsg, struct scm_cookie *scm)
 {
+#ifndef CONFIG_VMS
 	struct cmsghdr32 *cm = (struct cmsghdr32 *) kmsg->msg_control;
 	int fdmax = (kmsg->msg_controllen - sizeof(struct cmsghdr32)) / sizeof(int);
 	int fdnum = scm->fp->count;
@@ -272,6 +279,7 @@ static void scm_detach_fds32(struct msghdr *kmsg, struct scm_cookie *scm)
 	 * usage counts incremented, so we just free the list.
 	 */
 	__scm_destroy(scm);
+#endif
 }
 
 /* In these cases we (currently) can just copy to data over verbatim
@@ -414,6 +422,7 @@ out:
 
 asmlinkage long sys32_recvmsg(int fd, struct msghdr32 *user_msg, unsigned int user_flags)
 {
+#ifndef CONFIG_VMS
 	struct iovec iovstack[UIO_FASTIOV];
 	struct msghdr kern_msg;
 	char addr[MAX_SOCK_ADDR];
@@ -494,6 +503,7 @@ out:
 	if(err < 0)
 		return err;
 	return len;
+#endif
 }
 
 extern asmlinkage int sys_setsockopt(int fd, int level, int optname,

@@ -7,7 +7,9 @@
 
 #include<descrip.h> 
 
+#ifdef __i386__
 int errno;
+#endif
 
 int inst$add(int mask);
 int inst$exit(int mask);

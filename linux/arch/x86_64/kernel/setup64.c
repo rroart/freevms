@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /* 
  * X86-64 specific CPU setup.
  * Copyright (C) 1995  Linus Torvalds
@@ -243,8 +249,10 @@ void __init cpu_init (void)
 
 	atomic_inc(&init_mm.mm_count);
 	current->active_mm = &init_mm;
+#if 0
 	if(current->mm)
 		BUG();
+#endif
 	enter_lazy_tlb(&init_mm, current, nr);
 
 	set_tss_desc(nr, t);

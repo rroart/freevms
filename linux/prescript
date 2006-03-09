@@ -5,10 +5,16 @@
 	(cd ../starlet/src; ln -s cli\$routines.h clioutines.h)
 	(cd ../starlet/src; ln -s lbr\$routines.h lbroutines.h)
 
+unamem=`uname -m`
+
 mkdir include2
 cd include2
 ln -s `pwd`/../include/linux .
+if [ $unamem == x86_64 ]; then
+ln -s `pwd`/../include/asm-x86_64 asm
+else
 ln -s `pwd`/../include/asm-i386 asm
+fi
 cd ..
 
 	(cd drivers/ide; ln -s ../../../driver/src/id/ide.c myide.c )

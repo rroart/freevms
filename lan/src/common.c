@@ -30,6 +30,10 @@
 #include<descrip.h>
 
 #include <iosbdef.h>
+#include <queue.h>
+#include <com_routines.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 #include<linux/mm.h>
 #include<linux/if_ether.h>
@@ -37,8 +41,15 @@
 #include <linux/netdevice.h>
 #include <linux/inetdevice.h>
 
+#ifdef __x86_64__
+#include <linux/init.h>
+#endif
+
 #include "../../cmuip/ipacp/src/xedrv.h"
 #include "../../cmuip/central/include/netconfig.h"
+#include <ioc_routines.h>
+
+config_in_dev(struct in_device ** in);
 
 char * mydevice = 0;
 
@@ -296,8 +307,8 @@ int lan$netif_rx(struct _ucb * u, void * bdsc) {
   cb2->cxb$ps_uva32=i->irp$l_qio_p1;
   i->irp$l_iost1=SS$_NORMAL|(cb2->cxb$w_length<<16);
   i->irp$l_iost2=0x0800;
-  return com$post(i,tmp);
-
+  com$post(i,tmp);
+  return SS$_NORMAL;
 }
 
 int lan$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
@@ -541,6 +552,7 @@ int __init net_dev_init(void)
 	 *	Initialise network devices
 	 */
 	 
+	void __init net_device_init(void);
 	net_device_init();
 
 	return 0;
@@ -740,6 +752,7 @@ probe_units() {
 #if 0
   bzero(&mynetdevice,sizeof(mynetdevice));
 #endif
+  int __init ne_probe(struct net_device *dev);
   ne_probe(&mynetdevice);
 #if 0
   bzero(&mynetdevice2,sizeof(mynetdevice2));

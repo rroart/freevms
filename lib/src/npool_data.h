@@ -34,7 +34,11 @@ struct _lsthds {
   unsigned int lsthds$l_pooltype;
   struct _npool_data *lsthds$ps_npool_data;
   char lsthds$b_filler3 [4];
+#ifdef __i386__
   unsigned long long lsthds$q_listheads [129];
+#else
+  unsigned long long lsthds$q_listheads [129][2];
+#endif
   unsigned long long lsthds$q_filler4;
   unsigned long long lsthds$q_filler5;
   unsigned long long lsthds$q_listcounters [129];

@@ -48,6 +48,7 @@
 #include "direct.h"
 
 #include "rmsmisc.h"
+#include <starlet.h>
 
 unsigned long inline buffer_offset(unsigned long buffer, unsigned long offset) {
   return buffer+offset;
@@ -146,8 +147,8 @@ int rms$get_idx(struct _rabdef * rab) {
     count=mymin(primkeylen,rab->rab$b_ksz);
 
     if (0==strncmp(key,rab->rab$l_kbf,count)) {
-      bcopy(key,rab->rab$l_ubf,primkeylen);
-      bcopy(rest+2,primkeylen+rab->rab$l_ubf,restlen);
+      memcpy(rab->rab$l_ubf,key,primkeylen);
+      memcpy(primkeylen+rab->rab$l_ubf,rest+2,restlen);
       rab->rab$w_rsz=primkeylen+restlen;
       return SS$_NORMAL;
     }

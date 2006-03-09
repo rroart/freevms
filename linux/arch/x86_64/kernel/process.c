@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *  linux/arch/x86-64/kernel/process.c
  *
@@ -58,6 +64,8 @@
 
 #include <linux/irq.h>
 
+#include <system_data_cells.h>
+
 asmlinkage extern void ret_from_fork(void);
 
 int hlt_counter;
@@ -104,6 +112,7 @@ static void default_idle(void)
  */
 static void poll_idle (void)
 {
+#if 0
 	int oldval;
 
 	__sti();
@@ -121,7 +130,15 @@ static void poll_idle (void)
 			"rep; nop;"
 			"je 2b;"
 				: :"m" (current->need_resched));
+#else
+	printk("got probs\n");
+#endif
 }
+
+extern int done_init_idle;
+int in_idle_while;
+unsigned long round_and_round;
+
 
 /*
  * The idle thread. There's no useful work to be
@@ -133,8 +150,17 @@ void cpu_idle (void)
 {
 	/* endless idle loop with no priority at all */
 	init_idle();
-	current->nice = 20;
-	current->counter = -100;
+	printk("id %x\n",current->pcb$l_pid);	
+	printk("idle %x %x %x\n",done_init_idle,current,&init_task);
+	printk("pid 0 here again%x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl); 
+	{ int i; for(i=0;i<10000000;i++) ; }
+	if (current->pcb$l_pid==0) { /* just to be sure */
+	  current->pcb$b_prib  = 24;
+	  current->pcb$b_pri   = 24;
+	  current->pcb$b_prib  = 31;
+	  current->pcb$b_pri   = 31;
+	  current->pcb$w_quant = 0;
+	} /* we might not need these settings */
 
 	while (1) {
 		void (*idle)(void) = pm_idle;
@@ -375,7 +401,7 @@ void __show_regs(struct pt_regs * regs)
 	unsigned int ds,cs,es; 
 
 	printk("\n");
-	printk("Pid: %d, comm: %.20s %s\n", current->pid, current->comm, print_tainted());
+	printk("Pid: %d, comm: %.20s %s\n", current->pcb$l_pid, current->pcb$t_lname, print_tainted());
 	printk("RIP: %04lx:", regs->cs & 0xffff);
 	printk_address(regs->rip); 
 	printk("\nRSP: %04lx:%016lx  EFLAGS: %08lx\n", regs->ss, regs->rsp, regs->eflags);
@@ -468,7 +494,7 @@ void release_thread(struct task_struct *dead_task)
 		// temporary debugging check
 		if (ldt) {
 			printk("WARNING: dead process %8s still has LDT? <%p>\n",
-					dead_task->comm, ldt);
+					dead_task->pcb$t_lname, ldt);
 			BUG();
 		}
 	}
@@ -510,6 +536,57 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long rsp,
 	childregs = ((struct pt_regs *) (THREAD_SIZE + (unsigned long) p)) - 1;
 
 	*childregs = *regs;
+
+	childregs->rax = 0;
+	childregs->rsp = rsp;
+	if (rsp == ~0) {
+		childregs->rsp = (unsigned long)childregs;
+	}
+
+	p->thread.rsp = (unsigned long) childregs;
+	p->thread.rsp0 = (unsigned long) (childregs+1);
+	p->thread.userrsp = current->thread.userrsp; 
+
+	p->thread.rip = (unsigned long) ret_from_fork;
+
+	p->thread.fs = me->thread.fs;
+	p->thread.gs = me->thread.gs;
+
+	asm("mov %%gs,%0" : "=m" (p->thread.gsindex));
+	asm("mov %%fs,%0" : "=m" (p->thread.fsindex));
+	asm("mov %%es,%0" : "=m" (p->thread.es));
+	asm("mov %%ds,%0" : "=m" (p->thread.ds));
+
+	unlazy_fpu(current);	
+	p->thread.i387 = current->thread.i387;
+
+	if (unlikely(me->thread.io_bitmap_ptr != NULL)) { 
+		p->thread.io_bitmap_ptr = kmalloc((IO_BITMAP_SIZE+1)*4, GFP_KERNEL);
+		if (!p->thread.io_bitmap_ptr) 
+			return -ENOMEM;
+		memcpy(p->thread.io_bitmap_ptr, me->thread.io_bitmap_ptr, 
+		       (IO_BITMAP_SIZE+1)*4);
+	} 
+
+	return 0;
+}
+
+int exe$procstrt(struct _pcb * p);
+
+int new_thread(int nr, unsigned long clone_flags, unsigned long rsp, 
+		unsigned long unused,
+	struct task_struct * p, struct pt_regs * regs)
+{
+	struct pt_regs * childregs;
+	struct task_struct *me = current;
+
+	childregs = ((struct pt_regs *) (THREAD_SIZE + (unsigned long) p)) - 1;
+
+#if 0
+	*childregs = *regs;
+#else
+	memset(childregs,0,sizeof(*childregs));
+#endif
 
 	childregs->rax = 0;
 	childregs->rsp = rsp;

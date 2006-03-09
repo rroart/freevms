@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /* ptrace.c */
 /* By Ross Biro 1/23/92 */
 /*
@@ -22,6 +28,7 @@
 #include <asm/processor.h>
 #include <asm/i387.h>
 #include <asm/debugreg.h>
+#include <misc_routines.h>
 
 /*
  * does not yet catch signals sent when the child dies.

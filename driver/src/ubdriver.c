@@ -23,6 +23,7 @@
 #include<descrip.h>
 #include<system_data_cells.h>
 #include<ipl.h>
+#include <ioc_routines.h>
 #include<linux/vmalloc.h>
 
 //#include<stdio.h>
@@ -100,11 +101,11 @@ struct _ddt ubd$ddt = {
   ddt$l_mntver: mntver,
   ddt$l_cloneducb: cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: mntv_sssc,
-  ddt$l_mntv_for: mntv_for,
-  ddt$l_mntv_sqd: mntv_sqd,
-  ddt$l_aux_storage: aux_storage,
-  ddt$l_aux_routine: aux_routine
+  ddt$ps_mntv_sssc: mntv_sssc,
+  ddt$ps_mntv_for: mntv_for,
+  ddt$ps_mntv_sqd: mntv_sqd,
+  ddt$ps_aux_storage: aux_storage,
+  ddt$ps_aux_routine: aux_routine
 };
 
 void startio (struct _irp * i, struct _ucb * u) { 
@@ -693,7 +694,7 @@ static request_queue_t *ubd_get_queue(kdev_t device)
 	return(ubd_queue);
 }
 
-int ubd_iodb_vmsinit(void) {
+long ubd_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&ubd$ucb;
   struct _ddb * ddb=&ubd$ddb;
@@ -729,7 +730,7 @@ int ubd_iodb_vmsinit(void) {
   return ddb;
 }
 
-int ubd_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long ubd_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short chan;
   struct _ccb * ccb;
   struct _ucb * newucb;

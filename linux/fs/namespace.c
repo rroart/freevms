@@ -721,6 +721,10 @@ long do_mount(char * dev_name, char * dir_name, char *type_page,
 
 	/* Basic sanity checks */
 
+#ifdef __x86_64__
+	extern void *kernel_memchr(const void *s, int c, size_t n);
+#define memchr kernel_memchr
+#endif
 	if (!dir_name || !*dir_name || !memchr(dir_name, 0, PAGE_SIZE))
 		return -EINVAL;
 	if (dev_name && !memchr(dev_name, 0, PAGE_SIZE))

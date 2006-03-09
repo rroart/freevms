@@ -65,9 +65,16 @@ struct _cdu {
 #define cdu$t_name u3.cdu$t_name
 #endif
 
+#ifdef __i386__
 static struct _cdu ** cur_cdu=0x3f000000;
 static struct _cdu ** my_cdu=0x3f000004;
 static struct _cdu ** root_cdu=0x3f000008;
 static void ** comdsc = 0x3f00000c; 
+#else
+static struct _cdu ** cur_cdu=0x3f000000;
+static struct _cdu ** my_cdu=0x3f000008;
+static struct _cdu ** root_cdu=0x3f000010;
+static void ** comdsc = 0x3f000018; 
+#endif
 
 #endif

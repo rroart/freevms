@@ -123,15 +123,15 @@ int set_command(mask)
     matstreamlf, matstreamcr, matdirect, matindex, matrelat, matseq,
     matebyte, mateblock, matconfirm, matuic;
   static struct { unsigned short atr_size, atr_type;
-                  int atr_address; } 
-    acb[9] =  { {32, ATR$C_RECATTR, (int) &attrib }, 
-      { 8, ATR$C_ASCDATES, (int) &ascdates },
-      { 8, ATR$C_CREDATE, (int) &credate } , 
-      { 8, ATR$C_REVDATE, (int) &revdate } , 
-      { 8, ATR$C_BAKDATE, (int) &bakdate } , 
-      { 8, ATR$C_EXPDATE, (int) &expdate } , 
-      { 4, ATR$C_UIC, (int) &old_uic } ,
-      { 4, ATR$C_UCHAR, (int) &uchar } , { 0, 0, 0 } };
+                  void * atr_address; } 
+    acb[9] =  { {32, ATR$C_RECATTR, (long) &attrib }, 
+      { 8, ATR$C_ASCDATES, (long) &ascdates },
+      { 8, ATR$C_CREDATE, (long) &credate } , 
+      { 8, ATR$C_REVDATE, (long) &revdate } , 
+      { 8, ATR$C_BAKDATE, (long) &bakdate } , 
+      { 8, ATR$C_EXPDATE, (long) &expdate } , 
+      { 4, ATR$C_UIC, (long) &old_uic } ,
+      { 4, ATR$C_UCHAR, (long) &uchar } , { 0, 0, 0 } };
   FILE *ip;
   $DESCRIPTOR(devnam_descr , devnam);
   $DESCRIPTOR(xname_descr , xname);
@@ -442,10 +442,10 @@ int delete_file(unsigned short id[3], unsigned short dchan,
   static unsigned int uchar;
   unsigned int tmp, status2;
   static struct { unsigned short atr_size, atr_type;
-                  int atr_address; } 
-    d_acb[4] =  { {86, ATR$C_ASCNAME, (int) &file[0]}, 
-      {6, ATR$C_BACKLINK, (int) &back[0]},
-      { 4, ATR$C_UCHAR, (int) &uchar} , {0, 0, 0} };
+                  void * atr_address; } 
+    d_acb[4] =  { {86, ATR$C_ASCNAME, (long) &file[0]}, 
+      {6, ATR$C_BACKLINK, (long) &back[0]},
+      { 4, ATR$C_UCHAR, (long) &uchar} , {0, 0, 0} };
   struct {int fiblen; struct fibdef *fibadr;} dfib_descr;
   unsigned int func;
                              
@@ -561,9 +561,9 @@ int delete_directory(unsigned int dchan, unsigned short f_id[3],
   static short attrib[16];
   static struct fibdef fib; 
   static struct { unsigned short atr_size, atr_type;
-                  int atr_address; } 
-    acb[3] =  { { 4, ATR$C_UCHAR, (int) &uchar} , 
-      { 32, ATR$C_RECATTR, (int) &attrib}, 
+                  void * atr_address; } 
+    acb[3] =  { { 4, ATR$C_UCHAR, (long) &uchar} , 
+      { 32, ATR$C_RECATTR, (long) &attrib}, 
       {0, 0, 0} };
   struct {int fiblen; struct fibdef *fibadr;} fib_descr;
   struct _d_e *dir_entry;
@@ -1401,8 +1401,8 @@ void create_dir (char *crea_file, int all_size)
   struct NAM nam;
   short i, channel, buf[256];
   static struct { unsigned short atr_size, atr_type;
-                  int atr_address; } 
-    acb[2] =  { { ATR$S_UCHAR, ATR$C_UCHAR, (int) &uchar}, {0, 0, 0} };
+                  void * atr_address; } 
+    acb[2] =  { { ATR$S_UCHAR, ATR$C_UCHAR, (long) &uchar}, {0, 0, 0} };
 
 
   buf[0] = -1;
@@ -1476,9 +1476,9 @@ int compdir (char *comp_file, Boolean matoutput)
   static short attrib[16];
   static unsigned int uchar;
   static struct { unsigned short atr_size, atr_type;
-                  int atr_address; } 
-    acb[3] =  { {32, ATR$C_RECATTR, (int) &attrib}, 
-                { 4, ATR$C_UCHAR, (int) &uchar} ,
+                  void * atr_address; } 
+    acb[3] =  { {32, ATR$C_RECATTR, (long) &attrib}, 
+                { 4, ATR$C_UCHAR, (long) &uchar} ,
                 {0, 0, 0} };
   struct {int fiblen; struct fibdef *fibadr;} fibdescr;
   static char res_str[255], exp_str[255], devnam[15];
@@ -1800,11 +1800,11 @@ int scan_directories(int *rvt, int rvn, int cnt, int max, Boolean matoutput)
   static struct { short lendir;
 	 char dirnam[198]; } dirrec, filrec;
   static struct { unsigned short atr_size, atr_type;
-                  int atr_address; } 
-    acb[3] =  { {32, ATR$C_RECATTR, (int) &attrib}, 
-                {200, ATR$C_FILE_SPEC, (int) &dirrec}, {0, 0, 0} },
-    acb_fil[3] =  { {6, ATR$C_BACKLINK, (int) &did.fid_num}, 
-                {200, ATR$C_FILE_SPEC, (int) &filrec}, {0, 0, 0} };
+                  void * atr_address; } 
+    acb[3] =  { {32, ATR$C_RECATTR, (long) &attrib}, 
+                {200, ATR$C_FILE_SPEC, (long) &dirrec}, {0, 0, 0} },
+    acb_fil[3] =  { {6, ATR$C_BACKLINK, (long) &did.fid_num}, 
+                {200, ATR$C_FILE_SPEC, (long) &filrec}, {0, 0, 0} };
   int i, j, k, n, nr, newi, x, vbn, e_blk, maxi, func, dir_cnt;
   static char devnam[64], savnam[86], oldnam[86], fulldevnam[64];
   unsigned int fid, bakfid, acp_stat, xrvn;

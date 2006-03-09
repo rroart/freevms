@@ -31,6 +31,8 @@
 #include <linux/ext2_fs.h>
 #include <linux/pagemap.h>
 
+#include <misc_routines.h>
+
 typedef struct ext2_dir_entry_2 ext2_dirent;
 
 extern struct address_space_operations ext2_aops;

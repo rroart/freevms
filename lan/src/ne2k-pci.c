@@ -26,6 +26,7 @@
 #include<linux/pci.h>
 #include<system_service_setup.h>
 #include<descrip.h>
+#include <misc_routines.h>
 
 // lots of patch stuff overlaps with ne2k.c and is to be found there
 

@@ -118,4 +118,8 @@ SECTIONS
 
 
   .comment 0 : { *(.comment) }
+
+p1pp 0x7ffff000 (NOLOAD): {
+*(p1pp)
+}
 }

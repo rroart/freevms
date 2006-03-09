@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 #include <linux/config.h>
 #include <linux/module.h>
 #include <linux/smp.h>
@@ -171,7 +177,12 @@ EXPORT_SYMBOL_NOVERS(strchr);
 EXPORT_SYMBOL_NOVERS(strcat);
 EXPORT_SYMBOL_NOVERS(strcmp);
 EXPORT_SYMBOL_NOVERS(strncat);
+#if 0
+#ifdef __x86_64__
+#define memchr kernel_memchr
+#endif
 EXPORT_SYMBOL_NOVERS(memchr);
+#endif
 EXPORT_SYMBOL_NOVERS(strrchr);
 EXPORT_SYMBOL_NOVERS(strnlen);
 EXPORT_SYMBOL_NOVERS(memcmp);
@@ -186,8 +197,10 @@ EXPORT_SYMBOL(atomic_dec_and_lock);
 
 EXPORT_SYMBOL(die_chain);
 
+#ifndef CONFIG_VMS
 extern void do_softirq_thunk(void);
 EXPORT_SYMBOL_NOVERS(do_softirq_thunk);
+#endif
 
 extern unsigned long __supported_pte_mask; 
 EXPORT_SYMBOL(__supported_pte_mask);

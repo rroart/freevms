@@ -39,6 +39,9 @@
 #include <system_data_cells.h>
 #include <ucbdef.h>
 #include <vcdef.h>
+#include<starlet.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 extern struct _pb mypb;
 extern struct _sb mysb;

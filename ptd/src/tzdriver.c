@@ -281,6 +281,10 @@
 #endif
 
 #include <system_data_cells.h>
+#include <com_routines.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
+#include <exe_routines.h>
 
 #include <linux/kernel.h>
 
@@ -912,6 +916,8 @@ struct _tt_port port_vector = {
 #include<descrip.h>
 #include<ftucbdef.h>
 #include<ftrddef.h>
+#include <com_routines.h>
+#include <ioc_routines.h>
 
 #include<linux/blkdev.h>
 
@@ -945,7 +951,9 @@ static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
 
   func=u->ucb$l_fpc;
   func(i,u);
+#if 0
   myrei();
+#endif
 }
 
 static struct _fdt tz$fdt = {
@@ -957,7 +965,6 @@ static struct _fdt tz$fdt = {
 //int tz$startio (int a,int b) { };
 static void  unsolint (void) { };
 static void  cancel (void) { };
-static void  ioc_std$cancelio (void) { };
 static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
@@ -1056,7 +1063,7 @@ int tz$init_tables() {
   ini_dpt_ucb_crams(&tz$dpt, 1/*NUMBER_CRAMS*/);
   ini_dpt_flags(&tz$dpt, DPT$M_NOUNLOAD);
   ini_dpt_adptype(&tz$dpt, 0);
-  ini_dpt_vector(&tz$dpt, port_vector);
+  ini_dpt_vector(&tz$dpt, &port_vector);
   ini_dpt_end(&tz$dpt);
 
   ini_ddt_ctrlinit(&tz$ddt, TZ$INITIAL);
@@ -1078,7 +1085,7 @@ int tz$init_tables() {
   return SS$_NORMAL;
 }
 
-int tz_iodb_vmsinit(void) {
+long tz_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&tz$ucb;
   struct _ddb * ddb=&tz$ddb;
@@ -1089,9 +1096,9 @@ int tz_iodb_vmsinit(void) {
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,sizeof(struct _tz_ucb));
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,sizeof(struct _tz_ucb));
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
 #if 0
   init_ddb(&tz$ddb,&tz$ddt,&tz$ucb,"dqa");
@@ -1122,7 +1129,7 @@ int tz_iodb_vmsinit(void) {
 
 }
 
-int tz_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long tz_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb = 0;
   // ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&tz$ucb*/,&newucb); // check. skip?

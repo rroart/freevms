@@ -72,10 +72,11 @@ CVTOBJ_PIC = $(addprefix pic/,$(STROBJ))
 QUELIB_PIC = $(addprefix pic/,$(QUELIB))
 
 STRLIB = librtl.a
+STRLIB_PIC = librtl_pic.a
 ELFLIB = i386/librtl$(EXE_ELF)
 EXELIB = i386/librtl$(EXE)
 
-all : $(STRLIB) $(ELFLIB) $(EXELIB) tests
+all : $(STRLIB) $(STRLIB_PIC) $(ELFLIB) $(EXELIB) tests
 
 install: all
 	install -d ../../rooti386/vms"$$"common/syslib
@@ -104,6 +105,9 @@ test_libgetef : test_libgetef.c $(STRLIB) $(SYSLIB)
 
 $(STRLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 	ar -rv $(STRLIB) $?
+
+$(STRLIB_PIC) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC)
+	ar -rv $(STRLIB_PIC) $?
 
 $(EXELIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
 	install -d i386

@@ -25,7 +25,10 @@
 #include<ipl.h>
 #include<linux/pci.h>
 #include<system_service_setup.h>
+#include <ioc_routines.h>
 #include<descrip.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 #include<linux/blkdev.h>
 
@@ -56,7 +59,9 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
       rq->buffer=i->irp$l_qio_p1;
       rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
       i->irp$l_qio_p5=rq;
+#if 0
       do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3);
+#endif
       return (sts);
     }
 
@@ -66,7 +71,9 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
       rq->buffer=i->irp$l_qio_p1;
       rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
       i->irp$l_qio_p5=rq;
+#if 0
       do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3);
+#endif
       return (sts);
     }
 
@@ -108,7 +115,9 @@ static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
 
   func=u->ucb$l_fpc;
   func(i,u);
+#if 0
   myrei();
+#endif
 }
 
 static struct _fdt er$fdt = {
@@ -120,7 +129,6 @@ static struct _fdt er$fdt = {
 //static void  startio ();
 static void  unsolint (void) { };
 static void  cancel (void) { };
-static void  ioc_std$cancelio (void) { };
 static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
@@ -147,11 +155,11 @@ static struct _ddt er$ddt = {
   ddt$l_mntver: mntver,
   ddt$l_cloneducb: cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: mntv_sssc,
-  ddt$l_mntv_for: mntv_for,
-  ddt$l_mntv_sqd: mntv_sqd,
-  ddt$l_aux_storage: aux_storage,
-  ddt$l_aux_routine: aux_routine
+  ddt$ps_mntv_sssc: mntv_sssc,
+  ddt$ps_mntv_for: mntv_for,
+  ddt$ps_mntv_sqd: mntv_sqd,
+  ddt$ps_aux_storage: aux_storage,
+  ddt$ps_aux_routine: aux_routine
 };
 
 int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
@@ -244,7 +252,7 @@ int er$init_tables() {
   return SS$_NORMAL;
 }
 
-int er_iodb_vmsinit(int dev) {
+long er_iodb_vmsinit(int dev) {
 #if 0
   struct _ucb * ucb=&er$ucb;
   struct _ddb * ddb=&er$ddb;
@@ -255,9 +263,9 @@ int er_iodb_vmsinit(int dev) {
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,sizeof(struct _ucbnidef));
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,sizeof(struct _ucbnidef));
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
 #if 0
   init_ddb(&er$ddb,&er$ddt,&er$ucb,"dqa");
@@ -284,7 +292,7 @@ int er_iodb_vmsinit(int dev) {
 
 }
 
-int er_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long er_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucbnidef * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&er$ucb*/,&newucb);

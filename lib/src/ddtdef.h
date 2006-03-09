@@ -41,11 +41,11 @@ struct _ddt {
   void (*ddt$ps_altstart_2)();
   void (*ddt$ps_altstart_jsb)();
   void (*ddt$ps_mntver_2)();
-  int ddt$l_mntv_sssc;
-  int ddt$l_mntv_for;
-  int ddt$l_mntv_sqd;
-  int ddt$l_aux_storage;
-  int ddt$l_aux_routine;
+  int (*ddt$ps_mntv_sssc)();
+  int (*ddt$ps_mntv_for)();
+  int (*ddt$ps_mntv_sqd)();
+  int (*ddt$ps_aux_storage)();
+  int (*ddt$ps_aux_routine)();
   void (*ddt$ps_channel_assign_2)();
   int (*ddt$ps_cancel_selective_2)();
   unsigned int ddt$is_stack_bcnt;

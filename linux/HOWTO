@@ -9,8 +9,11 @@ No more recent flex than 2.5.4 must be used.
 
 Also tested distributions:
 Debian Sarge (gcc-3.3)
-	Install ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev
+	Install ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic
 	Have loop support or module.
+For x86_64:
+Ubunty breezy:
+	Install also gcc-3.3 gcc-3.4 ia32-libs-dev
 
 NOTE on kernel build:
 If complaints about modversion.h, do a make update-modverfile.
@@ -48,6 +51,7 @@ Next see the USE file (after compiling or installing bochs).
 Bochs:
 	Configure with at least 
 	--enable-debugger --enable-ne2000 --enable-cpu-level=6 --enable-sse
+	And maybe --enable-pci --enable-x86-64 --enable-sse2 remove sse
 
 Bochs use:
 	Use make image to make a floppy and disk image.

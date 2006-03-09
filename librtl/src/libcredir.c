@@ -127,8 +127,8 @@ static struct {unsigned short iosb_1;
   unsigned int length; short spec; 
   } iostat;
   static struct { unsigned short atr_size, atr_type;
-                  int atr_address; } 
-    acb[2] =  { { ATR$S_UCHAR, ATR$C_UCHAR, (int) &uchar}, {0, 0, 0} };
+                  void * atr_address; } 
+    acb[2] =  { { ATR$S_UCHAR, ATR$C_UCHAR, &uchar}, {0, 0, 0} };
 
 
   buf[0] = -1;

@@ -16,20 +16,25 @@ install: all
 	install um/*.* ../../rootum/vms"$$"common/sysexe
 
 OBJS = directory.o
+OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 %.o: %.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+
+pic/%.o: %.c 
+	install -d pic
+	gcc -fpic -fPIC -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 i386/directory${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
 	install -d i386
 	gcc -g -static $(OBJS) $(VMSLIBS) $(EXTERNAL2) -o i386/directory${NOEXE}
 
-i386/directory${EXE_ELF}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
-	ld -Bshareable $(OBJS) $(VMSLIBS) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o i386/directory${EXE_ELF}
+i386/directory${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL2_PIC)
+	ld -Bshareable $(OBJS_PIC) $(VMSLIBS_PIC) $(EXTERNAL2_PIC) -lc $(LIBGCC) -o i386/directory${EXE_ELF}
 
 i386/directory${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL2)
 	install -d i386
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o i386/directory${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(LIBGCC) $(EXTERNAL2) --start-group $(LINKPOST) $(LIBGCC) --end-group -o i386/directory${EXE}
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
@@ -37,25 +42,40 @@ starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 librtl$(EXE_ELF): $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 	ln -s $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 
+ifeq ($(ARCH),x86_64)
+i386/ddirectory${NOEXE}:
+	touch i386/ddirectory${NOEXE}
+else
 i386/ddirectory${NOEXE}: $(VMSLIBS_EXE_ELF) $(OBJS) $(EXTERNAL2) starlet$(EXE_ELF) librtl$(EXE_ELF)
 	install -d i386
 	gcc -g $(OBJS) starlet$(EXE_ELF) librtl$(EXE_ELF) $(EXTERNAL2) -o i386/ddirectory${NOEXE}
+endif
 
+ifeq ($(ARCH),x86_64)
+i386/ddirectory${EXE_ELF}:
+	touch i386/ddirectory${EXE_ELF}
+else
 i386/ddirectory${EXE_ELF}: $(VMSLIBS_EXE_ELF) $(OBJS) $(EXTERNAL2) starlet$(EXE_ELF) librtl$(EXE_ELF)
 	ld -Bshareable $(VMS_LD_RPATH) $(OBJS) starlet$(EXE_ELF) librtl$(EXE_ELF) $(EXTERNAL2) -lc $(LIBGCC) -o i386/ddirectory${EXE_ELF}
+endif
 
+ifeq ($(ARCH),x86_64)
+i386/ddirectory${EXE}:
+	touch i386/ddirectory${EXE}
+else
 i386/ddirectory${EXE}: $(VMSDLIBS_EXE) $(OBJS) $(EXTERNAL2)
 	install -d i386
 	$(LINKER) $(OBJS) $(TOPDIR)/starlet/src/i386/starlet.exe $(TOPDIR)/librtl/src/i386/librtl.exe $(LIBGCC) $(EXTERNAL2) /usr/lib/crt1.o /usr/lib/crti.o $(LIBGCC) -o i386/ddirectory${EXE}
+endif
 
 UMDEF=-Dcompile_um -I.
 
 um/directory${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
 	install -d um
 	gcc -g -static $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) -o um/directory${NOEXE}
-um/directory${EXE_ELF}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL2)
-	ld -Bshareable $(OBJS) $(VMSLIBSUM) $(EXTERNAL2) $(LIBC) $(LIBGCC) -o um/directory${EXE_ELF}
+um/directory${EXE_ELF}: $(VMSLIBSUM_PIC) $(OBJS_PIC) $(EXTERNAL2_PIC)
+	ld -Bshareable $(OBJS_PIC) $(VMSLIBSUM_PIC) $(EXTERNAL2_PIC) -lc $(LIBGCC) -o um/directory${EXE_ELF}
 
 um/directory${EXE}: $(VMSLIBSUM) $(OBJS)
 	install -d um
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL2) $(LINKPOST) $(LIBGCC) -o um/directory${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL2) --start-group $(LINKPOST) $(LIBGCC) --end-group -o um/directory${EXE}

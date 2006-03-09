@@ -24,12 +24,22 @@
 #include<ipl.h>
 #include<linux/vmalloc.h>
 #include<linux/pci.h>
+#include<linux/ide.h>
 #include<system_service_setup.h>
 #include<descrip.h>
+#include <misc_routines.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <queue.h>
 
 #include<linux/blkdev.h>
 
 struct _ucb * ideu;
+
+static int partadd(ide_drive_t *drive, int part);
+ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned long block);
+int ideprobe_init (void);
+int idedisk_init (void);
 
 static unsigned long startio (struct _irp * i, struct _ucb * u)
 {
@@ -90,25 +100,6 @@ static void  startio2 (struct _irp * i, struct _ucb * u) {
   return;
 }
 
-static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
-{
-  struct _irp * i;
-  struct _ucb * u;
-  void (*func)();
-
-  if (intr_blocked(20))
-    return;
-  regtrap(REG_INTR,20);
-  setipl(20);
-  /* have to do this until we get things more in order */
-  i=globali;
-  u=globalu;
-
-  func=u->ucb$l_fpc;
-  func(i,u);
-  myrei();
-}
-
 static struct _fdt ide$fdt = {
   fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
   fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
@@ -118,7 +109,6 @@ static struct _fdt ide$fdt = {
 //static void  startio ();
 static void  unsolint (void) { };
 static void  cancel (void) { };
-static void  ioc_std$cancelio (void) { };
 static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
@@ -145,11 +135,11 @@ static struct _ddt ide$ddt = {
   ddt$l_mntver: mntver,
   ddt$l_cloneducb: cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: mntv_sssc,
-  ddt$l_mntv_for: mntv_for,
-  ddt$l_mntv_sqd: mntv_sqd,
-  ddt$l_aux_storage: aux_storage,
-  ddt$l_aux_routine: aux_routine
+  ddt$ps_mntv_sssc: mntv_sssc,
+  ddt$ps_mntv_for: mntv_for,
+  ddt$ps_mntv_sqd: mntv_sqd,
+  ddt$ps_aux_storage: aux_storage,
+  ddt$ps_aux_routine: aux_routine
 };
 
 int acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
@@ -246,7 +236,7 @@ int ide$init_tables() {
   return SS$_NORMAL;
 }
 
-int ide_iodb_vmsinit(int mscp) {
+long ide_iodb_vmsinit(int mscp) {
 #if 0
   struct _ucb * ucb=&ide$ucb;
   struct _ddb * ddb=&ide$ddb;
@@ -260,9 +250,9 @@ int ide_iodb_vmsinit(int mscp) {
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,ucb_size/*sizeof(struct _ucb)*/);
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,ucb_size/*sizeof(struct _ucb)*/);
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
   ucb -> ucb$w_size = ucb_size; // temp placed // check
 
@@ -288,7 +278,7 @@ int ide_iodb_vmsinit(int mscp) {
 
 }
 
-int ide_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long ide_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&ide$ucb*/,&newucb);
@@ -491,6 +481,11 @@ int ide_vmsinit(void) {
 #ifdef CONFIG_KMOD
 #include <linux/kmod.h>
 #endif /* CONFIG_KMOD */
+
+#ifdef __x86_64__
+#define ide_release_region(from,extent) release_region((from), (extent))
+#define ide__sti() __sti()
+#endif
 
 /* default maximum number of failures */
 #define IDE_DEFAULT_MAX_FAILURES 	1
@@ -714,7 +709,7 @@ void ide_input_data (ide_drive_t *drive, void *buffer, unsigned int wcount)
 {
 	byte io_32bit;
 
-	//printk("ideinp %x %x %x\n",drive,buffer,wcount);
+	//printk("ideinp %lx %lx %lx\n",drive,buffer,wcount);
 	/* first check if this controller has defined a special function
 	 * for handling polled ide transfers
 	 */
@@ -4151,7 +4146,7 @@ __setup("", ide_setup);
 static int partadd(ide_drive_t *drive, int part) {
   //  int i;
   //for(i=0;i<16;i++) printk("part %x %x %x\n",drive->part[i].start_sect,drive->sect0,drive->part[i].nr_sects);
-  //printk("part %x %x\n",drive->part[part].start_sect,drive->sect0);
+  //printk("part %lx %lx\n",drive->part[part].start_sect,drive->sect0);
   //printk("part %x %x\n",drive,part);
   //{ int i; for(i=0;i<1000000;i++) ; }
 return drive->part[part].start_sect + drive->sect0;

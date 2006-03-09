@@ -28,7 +28,16 @@ extern pgd_t boot_vmalloc_pgt[];
 
 extern void paging_init(void);
 
+#if 0
 #define swapper_pg_dir NULL
+#else
+#if 0
+// not yet
+#define swapper_pg_dir init_level4_pgt
+#else
+#define swapper_pg_dir level3_ident_pgt
+#endif
+#endif
 
 /* Caches aren't brain-dead on the intel. */
 #define flush_cache_all()			do { } while (0)
@@ -311,6 +320,8 @@ extern void __handle_bad_pmd_kernel(pmd_t * pmd);
 #define	pmd_bad(x)	\
 	((pmd_val(x) & (~PAGE_MASK & (~_PAGE_USER))) != _KERNPG_TABLE )
 
+#define __page_address(page) ({ PAGE_OFFSET + (((page) - mem_map) << PAGE_SHIFT); })
+#define page_address(page) __page_address(page)
 #define pages_to_mb(x) ((x) >> (20-PAGE_SHIFT))
 
 #ifndef CONFIG_DISCONTIGMEM

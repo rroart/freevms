@@ -82,6 +82,27 @@ extern int irda_device_init(void);
 #include <asm/smp.h>
 #endif
 
+#include <starlet.h>
+#include <misc_routines.h>
+#include <exe_routines.h>
+
+void __init vms_init(void);
+void __init vms_init2(void);
+void __init vms_init4(void);
+void __init vms_init3(void);
+int /*__init*/ scs_init(void);
+int scs_init2(void);
+void vms_mount(void);
+void vms2_mount(void);
+int dlminit(void);
+init_cwps();
+void cre_syscommon(char * name);
+probe_units();
+void lnm_init_sys(void);
+open_tty();
+int mscp(void);
+void early_printk(const char *fmt, ...);
+
 /*
  * Versions of gcc older than that listed below may actually compile
  * and link okay, but the end product can have subtle run time bugs.
@@ -593,43 +614,43 @@ asmlinkage void __init start_kernel(void)
  * Interrupts are still disabled. Do necessary setups, then
  * enable them
  */
-	puts("puts 1\n");
+	kernel_puts("puts 1\n");
 	lock_kernel();
-	puts("puts 2\n");
+	kernel_puts("puts 2\n");
 	printk(linux_banner);
-	puts("puts 3\n");
+	kernel_puts("puts 3\n");
 	setup_arch(&command_line);
-	puts("puts 4\n");
+	kernel_puts("puts 4\n");
 	printk("Kernel command line: %s\n", saved_command_line);
-	puts("puts 5\n");
+	kernel_puts("puts 5\n");
 	parse_options(command_line);
-	puts("puts 6\n");
-	trap_init();
-	puts("puts 7\n");
-	init_IRQ();
-	puts("puts 7.5\n");
+	kernel_puts("puts 7.5\n");
 	init_sys_p1pp();
-	puts("puts 8\n");
+	kernel_puts("puts 6\n");
+	trap_init();
+	kernel_puts("puts 7\n");
+	init_IRQ();
+	kernel_puts("puts 8\n");
 	vms_init();
-	puts("puts 9\n");
+	kernel_puts("puts 9\n");
 	sched_init();
-	puts("puts 10\n");
+	kernel_puts("puts 10\n");
 #ifndef CONFIG_VMS
 	softirq_init();
-	puts("puts 11\n");
+	kernel_puts("puts 11\n");
 #endif
 	time_init();
-	puts("puts 12\n");
+	kernel_puts("puts 12\n");
 	vms_init2();
-	puts("puts 13\n");
+	kernel_puts("puts 13\n");
 	/*
 	 * HACK ALERT! This is early. We're enabling the console before
 	 * we've done PCI setups etc, and console_init() must be aware of
 	 * this. But we do want output early, in case something goes wrong.
 	 */
-	puts("puts 14\n");
+	kernel_puts("puts 14\n");
 	console_init();
-	puts("puts 15\n");
+	kernel_puts("puts 15\n");
 #ifdef CONFIG_MODULES
 	init_modules();
 #endif
@@ -643,7 +664,7 @@ asmlinkage void __init start_kernel(void)
 		prof_buffer = (unsigned int *) alloc_bootmem(size);
 	}
 
-	puts("puts 16\n");
+	kernel_puts("puts 16\n");
 	kmem_cache_init();
 	sti();
 	pgtable_cache_init();
@@ -966,8 +987,8 @@ static int init(void * unused)
 	probe_units();
 	if (mydevice==0)
 	  printk("%%KERNEL-I-DEBUG, No network module. Can not start IPACP.\n");
-#if 0
 	else
+#if 0
 	  kernel_thread(Main, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 #else
 	if (1) {
@@ -1064,7 +1085,7 @@ void scroll(void)
     vidmem[i] = ' ';
 }
 
-void puts(const char *s)
+void kernel_puts(const char *s)
 {
   int x,y,pos;
   char c;
@@ -1104,7 +1125,13 @@ void puts(const char *s)
 #endif
 
 #ifdef __arch_um__
-void puts(const char *s) {
+void kernel_puts(const char *s) {
   printk("%s",s);
+}
+#endif
+
+#ifdef __x86_64__
+void kernel_puts(const char *s) {
+  early_printk("%s",s);
 }
 #endif

@@ -77,6 +77,11 @@
 #include "direct.h"
 
 #include "rmsmisc.h"
+#include <starlet.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+
+#include <linux/slab.h>
 
 #if 0
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
@@ -384,7 +389,7 @@ unsigned do_search(struct _fabdef *fab,struct WCCFILE *wccfile)
                     if ((wccfile->wcf_status & STATUS_RECURSE) && wcc->wcd_prev == NULL) {
                         struct WCCDIR *newwcc;
                         newwcc = (struct WCCDIR *) kmalloc(sizeof(struct WCCDIR) + 8,GFP_KERNEL);
-			bzero(newwcc,sizeof(struct WCCDIR) + 8);
+			memset(newwcc,0,sizeof(struct WCCDIR) + 8);
                         newwcc->wcd_next = wcc->wcd_next;
                         newwcc->wcd_prev = wcc;
                         newwcc->wcd_wcc = 0;
@@ -534,7 +539,7 @@ unsigned do_parse(struct _fabdef *fab,struct WCCFILE **wccret)
 
     if (wccfile == 0) {
         wccfile = (struct WCCFILE *) kmalloc(sizeof(struct WCCFILE) + 256, GFP_KERNEL);
-	bzero(wccfile,sizeof(struct WCCFILE) + 256);
+	memset(wccfile,0,sizeof(struct WCCFILE) + 256);
         if (wccfile == NULL) return SS$_INSFMEM;
 memset(wccfile,0,sizeof(struct WCCFILE)+256);
         wccfile->wcf_fab = fab;
@@ -705,7 +710,7 @@ memset(wccfile,0,sizeof(struct WCCFILE)+256);
                 seglen++;
             } while (dirsiz + seglen < dirlen);
             wcd = (struct WCCDIR *) kmalloc(sizeof(struct WCCDIR) + seglen + 8, GFP_KERNEL);
-	    bzero(wcd,sizeof(struct WCCDIR) + seglen + 8);
+	    memset(wcd,0,sizeof(struct WCCDIR) + seglen + 8);
             wcd->wcd_wcc = 0;
             wcd->wcd_status = 0;
             wcd->wcd_prelen = 0;
@@ -1400,10 +1405,10 @@ unsigned exe$open(struct _fabdef *fab)
 	  sts = iosb.iosb$w_status;
 	}
 	key=kmalloc(sizeof(struct _prologue_key),GFP_KERNEL);
-	bcopy(buffer_offset(buffer,offset),key,sizeof(struct _prologue_key));
+	memcpy(key,buffer_offset(buffer,offset),sizeof(struct _prologue_key));
 	xabkey=kmalloc(sizeof(struct _xabkeydef),GFP_KERNEL);
 	xabkey->xab$b_cod=XAB$C_KEY;
-	bcopy(key,((unsigned long)xabkey)+2,sizeof(struct _prologue_key));
+	memcpy(key,((unsigned long)xabkey)+2,sizeof(struct _prologue_key));
 	xabkey->xab$l_dvb=key->key$l_ldvbn;
 	xabkey->xab$l_nxt=wccfile->xab;
 	wccfile->xab=xabkey;

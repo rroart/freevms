@@ -73,16 +73,15 @@
 #include "cache.h"
 #include "access.h"
 #include <misc.h>
+#include <starlet.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
+#include <queue.h>
+
+#include <linux/slab.h>
 
 #define XQP_EF 30
-
-void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb);
-void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb);
-struct _fcb * getidxfcb(struct _vcb * vcb);
-unsigned writehead(struct _fcb * fcb,struct _fh2 *headbuff);
-void * f11b_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb,
-			unsigned long * retsts);
-
 
 #define DEBUGx
 
@@ -269,7 +268,7 @@ int f11b_read_writevb(struct _irp * i) {
 
 signed int f11b_map_vbn(unsigned int vbn,struct _wcb *wcb) {
   // thing there should be more here?
-  signed int lbn=-1;
+  signed long lbn=-1;
   ioc_std$mapvblk(vbn,0,wcb,0,0,&lbn,0,0);
   return lbn;
 }
@@ -806,7 +805,7 @@ int add_wcb(struct _fcb * fcb, unsigned short * map)
   if (phylen!=0) {
 
     wcb = (struct _wcb *) kmalloc(sizeof(struct _wcb), GFP_KERNEL);
-    bzero(wcb,sizeof(struct _wcb));
+    memset(wcb,0,sizeof(struct _wcb));
     if (wcb == NULL) {
       retsts = SS$_INSFMEM;
       return retsts;
@@ -871,7 +870,7 @@ int wcb_create_all(struct _fcb * fcb, struct _fh2 * fh2)
     if (phylen!=0) {
 
       wcb = (struct _wcb *) kmalloc(sizeof(struct _wcb),GFP_KERNEL);
-      bzero(wcb,sizeof(struct _wcb));
+      memset(wcb,0,sizeof(struct _wcb));
       if (wcb == NULL) {
 	retsts = SS$_INSFMEM;
 	return retsts;
@@ -1063,7 +1062,7 @@ void *fcb_create2(struct _fh2 * head,unsigned *retsts)
 {
   struct _vcb * vcb=xqp->current_vcb;
   struct _fcb *fcb = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
-  bzero(fcb,sizeof(struct _fcb));
+  memset(fcb,0,sizeof(struct _fcb));
   if (fcb == NULL) {
     if (retsts) *retsts = SS$_INSFMEM;
     return;
@@ -1286,11 +1285,11 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       islocal=1;
     }
     vcb = (struct _vcb *) kmalloc(sizeof(struct _vcb),GFP_KERNEL);
-    bzero(vcb,sizeof(struct _vcb));
+    memset(vcb,0,sizeof(struct _vcb));
     vcb->vcb$b_type=DYN$C_VCB;
     xqp->current_vcb=vcb; // until I can place it somewhere else
     aqb = (struct _aqb *) kmalloc(sizeof(struct _aqb),GFP_KERNEL);
-    bzero(aqb,sizeof(struct _aqb));
+    memset(aqb,0,sizeof(struct _aqb));
     aqb->aqb$b_type=DYN$C_AQB;
     qhead_init(&aqb->aqb$l_acpqfl);
     ucb->ucb$l_vcb=vcb;
@@ -1368,7 +1367,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	idxfcb=fcb_create2(idxhd,&sts);
 #if 0
 	idxfcb=vmalloc(sizeof(struct _fcb));
-	bzero(idxfcb,sizeof(struct _fcb));
+	memset(idxfcb,0,sizeof(struct _fcb));
 	qhead_init(&idxfcb->fcb$l_wlfl);
 	idxfcb->fcb$w_fid[0]=1;
 	idxfcb->fcb$w_fid[1]=1;
@@ -1387,7 +1386,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	    struct _irp * dummyirp = kmalloc(sizeof(struct _irp),GFP_KERNEL);
 	    mapdsc.dsc$w_length=sizeof(struct _fibdef);
 	    mapdsc.dsc$a_pointer=&mapfib;
-	    bzero(dummyirp,sizeof(struct _irp));
+	    memset(dummyirp,0,sizeof(struct _irp));
 	    dummyirp->irp$l_qio_p1=&mapdsc;
 	    dummyirp->irp$l_ucb=ucb;
 	    dummyirp->irp$l_func=IO$_ACCESS|IO$M_ACCESS;

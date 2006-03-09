@@ -15,6 +15,8 @@
 #include <hm2def.h>
 #include "../../rms/src/cache.h"
 #include "../../rms/src/access.h"
+#include <linux/slab.h>
+#include <misc_routines.h>
 
 static struct {
   char * from, * to;

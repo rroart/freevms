@@ -24,8 +24,15 @@
 #include<ucbdef.h>
 #include<vcbdef.h>
 #include<system_data_cells.h>
+#include <queue.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
+#include <scs_routines.h>
 
 #include<linux/vmalloc.h>
+#include <linux/slab.h>
+#include<starlet.h>
 
 void mscpmyerr(void) {
   /* do nothing yet */
@@ -45,17 +52,17 @@ int get_mscp_chan(char * s) {
     return ((struct _ucb *)r.val1)->ucb$ps_adp;
   ucb = fl_init(s);
   vcb = (struct _vcb *) kmalloc(sizeof(struct _vcb),GFP_KERNEL);
-  bzero(vcb,sizeof(struct _vcb));
+  memset(vcb,0,sizeof(struct _vcb));
   vcb->vcb$b_type=DYN$C_VCB;
   aqb = (struct _aqb *) kmalloc(sizeof(struct _aqb),GFP_KERNEL);
-  bzero(aqb,sizeof(struct _aqb));
+  memset(aqb,0,sizeof(struct _aqb));
   aqb->aqb$b_type=DYN$C_AQB;
   qhead_init(&aqb->aqb$l_acpqfl);
   ucb->ucb$l_vcb=vcb;
   vcb->vcb$l_aqb=aqb;
   qhead_init(&vcb->vcb$l_fcbfl);
   vcb->vcb$l_cache = NULL; // ?
-  sts = phyio_init(strlen(s),s,&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0);
+  sts = phyio_init(strlen(s),s,&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0,0); // check
   dsc.dsc$a_pointer=do_file_translate(s);
   dsc.dsc$w_length=strlen(dsc.dsc$a_pointer);
   sts=exe$assign(&dsc,&chan,0,0,0);
@@ -127,8 +134,8 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     unsigned long lbn=trans->mscp$l_lbn;
     struct _hrb * hrb=kmalloc(sizeof(struct _hrb),GFP_KERNEL);
     cdrp = vmalloc(sizeof(struct _cdrp));
-    bzero(cdrp,sizeof(struct _cdrp));
-    bzero(hrb,sizeof(struct _hrb));
+    memset(cdrp,0,sizeof(struct _cdrp));
+    memset(hrb,0,sizeof(struct _hrb));
     hrb->hrb$l_lbn=lbn;
     hrb->hrb$l_cmd_time=scs1->scs$l_rspid; // wrong, but have to have some id...
     insque(hrb,&hrbq);
@@ -159,7 +166,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
 	gtbas->mscp$w_status=MSCP$K_ST_OFFLN;
 
       struct _cdrp * cdrp = vmalloc(sizeof(struct _cdrp));
-      bzero(cdrp,sizeof(struct _cdrp));
+      memset(cdrp,0,sizeof(struct _cdrp));
 
       cdrp->cdrp$w_cdrpsize=400;
       cdrp->cdrp$l_rspid=scs_std$alloc_rspid(0,0,cdrp,0);
@@ -195,8 +202,8 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
 #ifndef __arch_um__
 #ifdef CONFIG_VMS
 	  ddb=ide_iodb_vmsinit(1);
-	  du_iodb_clu_vmsinit(ddb->ddb$l_ucb);
-	  struct _ucb * ucb = ddb->ddb$l_ucb;
+	  du_iodb_clu_vmsinit(ddb->ddb$ps_ucb);
+	  struct _ucb * ucb = ddb->ddb$ps_ucb;
 	  ucb->ucb$l_ddt=&du$ddt;
 #endif
 #endif
@@ -232,7 +239,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     struct _hrb * hrb = find_hrb(scs1->scs$l_rspid);
     //printk("mscpread\n");
     remque(hrb,hrb);
-    bzero(i,sizeof(struct _irp));
+    memset(i,0,sizeof(struct _irp));
     iosb->iosb$w_status=0;
     i->irp$b_type=DYN$C_IRP;
     i->irp$w_chan=chan;
@@ -262,7 +269,7 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
     struct _hrb * hrb = find_hrb(scs1->scs$l_rspid);
     //printk("mscpwrite\n");
     remque(hrb,hrb);
-    bzero(i,sizeof(struct _irp));
+    memset(i,0,sizeof(struct _irp));
     iosb->iosb$w_status=0;
     i->irp$b_type=DYN$C_IRP;
     i->irp$w_chan=chan;
@@ -291,8 +298,8 @@ extern struct _pdt dupdt;
 void returnsome(struct _irp * i) {
   struct _cdrp * cdrp = vmalloc(sizeof(struct _cdrp));
   struct _mscp_basic_pkt * basic = vmalloc(sizeof(struct _mscp_basic_pkt));
-  bzero(cdrp,sizeof(struct _cdrp));
-  bzero(basic,sizeof(struct _mscp_basic_pkt));
+  memset(cdrp,0,sizeof(struct _cdrp));
+  memset(basic,0,sizeof(struct _mscp_basic_pkt));
   //basic->mscp$b_caa=MSCP$K_OP_READ;
   basic->mscp$b_opcode = MSCP$K_OP_END;
   basic->mscp$l_cmd_ref=0;
@@ -331,8 +338,8 @@ void mscp_talk_with(char * node, char * sysap) {
   int unit;
   struct _cdrp * cdrp = vmalloc(sizeof(struct _cdrp));
   struct _mscp_basic_pkt * basic = vmalloc(sizeof(struct _mscp_basic_pkt));
-  bzero(cdrp,sizeof(struct _cdrp));
-  bzero(basic,sizeof(struct _mscp_basic_pkt));
+  memset(cdrp,0,sizeof(struct _cdrp));
+  memset(basic,0,sizeof(struct _mscp_basic_pkt));
   //basic->mscp$b_caa=MSCP$K_OP_READ;
   for (unit=1;unit < 5; unit ++) {
     exe$schdwk(0,0,&time,0);

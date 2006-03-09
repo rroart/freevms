@@ -27,6 +27,14 @@
 #include<linux/vmalloc.h>
 #include<ttyucbdef.h>
 #include<ttyvecdef.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
+#include <linux/slab.h>
+#include <queue.h>
+
+int null$unit_init (struct _idb * idb, struct _ucb * ucb);
+int null$init_tables();
 
 void null$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb);
 void null$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb);
@@ -56,7 +64,9 @@ void nl_isr (void) {
 
   func=u->ucb$l_fpc;
   func(i,u);
+#if 0
   myrei();
+#endif
 }
 
 void  null_startio2 (struct _irp * i, struct _ucb * u);
@@ -107,7 +117,6 @@ void  null_startio3 (struct _irp * i, struct _ucb * u) {
 /* more yet undefined dummies */
 void  null_unsolint (void) { };
 void  null_cancel (void) { };
-extern void  ioc_std$cancelio (void);
 void  null_regdump (void) { };
 void  null_diagbuf (void) { };
 void  null_errorbuf (void) { };
@@ -142,11 +151,11 @@ struct _ddt null$ddt = {
   ddt$l_mntver: null_mntver,
   ddt$l_cloneducb: null_cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: null_mntv_sssc,
-  ddt$l_mntv_for: null_mntv_for,
-  ddt$l_mntv_sqd: null_mntv_sqd,
-  ddt$l_aux_storage: null_aux_storage,
-  ddt$l_aux_routine: null_aux_routine
+  ddt$ps_mntv_sssc: null_mntv_sssc,
+  ddt$ps_mntv_for: null_mntv_for,
+  ddt$ps_mntv_sqd: null_mntv_sqd,
+  ddt$ps_aux_storage: null_aux_storage,
+  ddt$ps_aux_routine: null_aux_routine
 };
 
 struct _dpt null$dpt;
@@ -163,8 +172,8 @@ void nl_init(void) {
   crb=&null$crb;
   ddb=&null$ddb;
   //ioc_std$clone_ucb(&null$ucb,&ucb);
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
   insertdevlist(ddb);
 
@@ -186,7 +195,7 @@ void nl_init(void) {
 extern inline void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long);
 
 /* move this later */
-insertdevlist(struct _ddb *d) {
+void insertdevlist(struct _ddb *d) {
     d->ddb$ps_link=ioc$gl_devlist;
     ioc$gl_devlist=d;
 }
@@ -361,10 +370,10 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
   struct _ucb * u=vmalloc(sizeof(struct _ucb));
   struct _crb * c=vmalloc(sizeof(struct _crb));
   struct _idb * idb=vmalloc(sizeof(struct _idb));
-  bzero(c,sizeof(struct _crb));
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(u,sizeof(struct _ucb));
-  bzero(idb,sizeof(struct _idb));
+  memset(c,0,sizeof(struct _crb));
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(u,0,sizeof(struct _ucb));
+  memset(idb,0,sizeof(struct _idb));
 
   dpt->dpt$t_name[0]=strlen(sdpt);
   memcpy(&dpt->dpt$t_name[1],sdpt,dpt->dpt$t_name[0]);
@@ -406,7 +415,7 @@ struct _ucb * makeucbetc(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt
 
 static unsigned long devchan[256];
 
-registerdevchan(unsigned long dev,unsigned short chan) {
+void registerdevchan(unsigned long dev,unsigned short chan) {
   //  devchan[chan]=MAJOR(dev);
   devchan[chan]=dev;
   printk("registerdevchan dev %x at chan %x\n",devchan[chan],chan);

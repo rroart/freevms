@@ -216,6 +216,12 @@
 #include <pcbdef.h>
 	  // not yet PR780DEF
 
+#ifdef __x86_64__
+#define _LINUX_STRING_H_
+	  //#include <linux/slab.h>
+#include <linux/types.h>
+#include <string.h>
+#endif
 #include <linux/sched.h>
 
 #include <system_data_cells.h>
@@ -228,6 +234,10 @@
 
 #include <asm/hw_irq.h>
 #include <linux/mm.h>
+#ifdef __x86_64__
+#include <linux/slab.h>
+#include <string.h>
+#endif
 
 #include <misc.h>
 
@@ -602,7 +612,13 @@ int find_ucb(R1, U)
   int sts;
 
   R0 = lock_iodb(&R4);
+#ifdef __x86_64__
+  extern int ioc$searchdev();
+  int (*fn)()=ioc$searchdev;
+  sts = fn(&r,R1);
+#else
   sts = ioc$searchdev(&r,R1);		// find the UCB
+#endif
   *U=r.val1;
   // not yet	-(SP) = R0;		// save return info
   R0 = unlock_iodb(&R4);
@@ -648,7 +664,13 @@ Build_ACP_QB(R5)
   struct _aqb * R2, *R8;
   struct _pcb * R4;
   R1 = AQB$C_LENGTH;
+#ifdef __x86_64__
+  int exe_std$alononpaged (int reqsize, int *alosize_p, void **pool_p);
+  int (*fn)()=exe_std$alononpaged;
+  R0 = fn(R1,&R3,&R2);		// get chunck of non-paged pool.
+#else
   R0 = exe_std$alononpaged(R1,&R3,&R2);		// get chunck of non-paged pool.
+#endif
   if ((R0&1)==0)				// Error?
 
   // Return error, unable to allocate non-paged pool.
@@ -672,7 +694,15 @@ Build_ACP_QB(R5)
   R2->aqb$l_acpqfl = 0;		// Init IRP queue ptrs
   R2->aqb$l_acpqbl = 0;		// & back link.
 #endif
+#ifdef __x86_64__
+ {
+  void qhead_init(void * l);
+  void (*fn)()=qhead_init;
+  fn(&R2->aqb$l_acpqfl);  // check. fix and change later
+ }
+#else
   qhead_init(&R2->aqb$l_acpqfl);  // check. fix and change later
+#endif
   R2->aqb$b_mntcnt = 0;		// init mount count
 
   // Link this AQB into the system list.  Instert at front of list
@@ -738,7 +768,13 @@ build_vcb(R5,R8)
   int R0,R1,R3,R4,R6,R7,R9;
   struct _vcb * R2;
   R1 = VCB$C_LENGTH;		// size of VCB
+#ifdef __x86_64__
+  int exe_std$alononpaged (int reqsize, int *alosize_p, void **pool_p);
+  int (*fn)()=exe_std$alononpaged;
+  R0 = fn(R1,&R3,&R2);		// allocate nonpaged pool.
+#else  
   R0 = exe_std$alononpaged(R1,&R3,&R2);		// allocate nonpaged pool.
+#endif
   if ((R0&1)==0) 				// Error? punt if yes.
     return R0;
 
@@ -897,7 +933,15 @@ int Dismount() {
 #endif
     R0 = vcb_adrs;		// get VCB adrs
   if (R0)			// OK ?
+#ifdef __x86_64__
+    {
+      int exe_std$deanonpaged (void *pool);
+      int (*fn)()=exe_std$deanonpaged;
+      R0 = fn(R0);	// dealllocate space.
+    }
+#else
     R0 = exe$deanonpaged(R0);	// dealllocate space.
+#endif
 
   // Deallocate ACP Queue blk
 
@@ -943,7 +987,13 @@ int Dismount() {
   ENBINT				// restore IPL
 #endif
     R0 = R8;			// for deallocation rtn.
+#ifdef __x86_64__
+  int exe_std$deanonpaged (void *pool);
+  int (*fn)()=exe_std$deanonpaged;
+  R0 = fn(R0);
+#else
   R0 = exe$deanonpaged(R0);
+#endif
 #ifndef VMS_V4
   FORKUNLOCK(R5->ucb$b_flck,-1);
 #endif
@@ -1012,7 +1062,13 @@ int user_requests_avail()
 #ifdef VMS_V4
   REMQUE	@R0->aqb$l_acpqfl,R2
 #else
+#ifdef __x86_64__
+    int aqempty(void * q);
+  int (*fn)()=aqempty;
+    int wasempty=fn(R0->aqb$l_acpqfl);
+#else
     int wasempty=aqempty(R0->aqb$l_acpqfl);
+#endif
 #if 0
   REMQHI	(R0->aqb$l_acpqfl,R2);
 #endif
@@ -1079,7 +1135,15 @@ int user_requests_avail()
   R5 = R0;			// save argblk adrs
   //;;	R5->ab$l_pid = R2->irp$l_pid;	// set PID in IPACP argblk.
   R0 = R2->irp$l_pid;	// Transform internal PID
-  R0 = exe$ipid_to_epid();	// to external PID format
+#ifdef __x86_64__
+ {
+  int exe$ipid_to_epid(unsigned long pid);
+  int (*fn)()=exe$ipid_to_epid;
+  R0 = fn(R0);	// to external PID format
+ }
+#else
+  R0 = exe$ipid_to_epid(R0);	// to external PID format
+#endif
   R5->ab$l_pid = R0;		// Set in argument block
   R0 = R2->irp$l_ucb;	// Get UCB address
   R5->ab$l_ucb_adrs = R0;	// Set UCB address in argblk
@@ -1201,7 +1265,13 @@ int VMS_IO$POST(IOSB$ADRS,IRP$ADRS, UCB$ADRS)
   INSQUE	(R1),@L^IOC$GL_PSBL	// in it goes
 #else
     find_cpu_data(&R2);
+#ifdef __x86_64__
+  int aqempty(void * q);
+  int (*fn)()=aqempty;
+  int wasempty=fn(((struct _cpu *)R2)->cpu$l_psbl);
+#else
   int wasempty=aqempty(((struct _cpu *)R2)->cpu$l_psbl);
+#endif
   INSQUE	((R1),((struct _cpu *)R2)->cpu$l_psbl);	// in it goes
 #endif
   if (wasempty) 			// Neq = not 1st in queue

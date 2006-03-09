@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /*
  *  linux/arch/x86_64/kernel/signal.c
  *
@@ -30,6 +36,8 @@
 #include <asm/uaccess.h>
 #include <asm/i387.h>
 #include <asm/proto.h>
+
+void sig_exit(int sig, int exit_code, struct siginfo *info);
 
 #define DEBUG_SIG 0
 
@@ -202,7 +210,7 @@ asmlinkage long sys_rt_sigreturn(struct pt_regs regs)
 		goto badframe;
 
 #if DEBUG_SIG
-	printk("%d sigreturn rip:%lx rsp:%lx frame:%p rax:%lx\n",current->pid,regs.rip,regs.rsp,frame,eax);
+	printk("%d sigreturn rip:%lx rsp:%lx frame:%p rax:%lx\n",current->pcb$l_pid,regs.rip,regs.rsp,frame,eax);
 #endif
 
 	if (__copy_from_user(&st, &frame->uc.uc_stack, sizeof(st)))
@@ -326,7 +334,7 @@ static void setup_rt_frame(int sig, struct k_sigaction *ka, siginfo_t *info,
 	if (ka->sa.sa_flags & SA_RESTORER) {
 		err |= __put_user(ka->sa.sa_restorer, &frame->pretcode);
 	} else {
-		printk("%s forgot to set SA_RESTORER for signal %d.\n", current->comm, sig); 
+		printk("%s forgot to set SA_RESTORER for signal %d.\n", current->pcb$t_lname, sig); 
 		goto give_sigsegv; 
 	}
 
@@ -334,7 +342,7 @@ static void setup_rt_frame(int sig, struct k_sigaction *ka, siginfo_t *info,
 		goto give_sigsegv;
 
 #if DEBUG_SIG
-	printk("%d old rip %lx old rsp %lx old rax %lx\n", current->pid,regs->rip,regs->rsp,regs->rax);
+	printk("%d old rip %lx old rsp %lx old rax %lx\n", current->pcb$l_pid,regs->rip,regs->rsp,regs->rax);
 #endif
 
 	/* Set up registers for signal handler */
@@ -365,7 +373,7 @@ static void setup_rt_frame(int sig, struct k_sigaction *ka, siginfo_t *info,
 
 #if DEBUG_SIG
 	printk("SIG deliver (%s:%d): sp=%p pc=%p ra=%p\n",
-		current->comm, current->pid, frame, regs->rip, frame->pretcode);
+		current->pcb$t_lname, current->pcb$l_pid, frame, regs->rip, frame->pretcode);
 #endif
 
 	return;
@@ -385,7 +393,7 @@ handle_signal(unsigned long sig, struct k_sigaction *ka,
 	      siginfo_t *info, sigset_t *oldset, struct pt_regs * regs)
 {
 #if DEBUG_SIG
-	printk("handle_signal pid:%d sig:%lu rip:%lx rsp:%lx regs=%p\n", current->pid, sig, 
+	printk("handle_signal pid:%d sig:%lu rip:%lx rsp:%lx regs=%p\n", current->pcb$l_pid, sig, 
 		regs->rip, regs->rsp, regs);
 #endif
 
@@ -487,7 +495,7 @@ int do_signal(struct pt_regs *regs, sigset_t *oldset)
 				info.si_signo = signr;
 				info.si_errno = 0;
 				info.si_code = SI_USER;
-				info.si_pid = current->p_pptr->pid;
+				info.si_pid = current->p_pptr->pcb$l_pid;
 				info.si_uid = current->p_pptr->uid;
 			}
 
@@ -512,7 +520,7 @@ int do_signal(struct pt_regs *regs, sigset_t *oldset)
 			int exit_code = signr;
 
 			/* Init gets no signals it doesn't want.  */
-			if (current->pid == 1)			      
+			if (current->pcb$l_pid == 1)			      
 				continue;
 
 			switch (signr) {
@@ -579,7 +587,7 @@ void signal_fault(struct pt_regs *regs, void *frame, char *where)
 	struct task_struct *me = current; 
 	if (exception_trace)
 		printk("%s[%d] bad frame in %s frame:%p rip:%lx rsp:%lx orax:%lx\n",
-	       me->comm,me->pid,where,frame,regs->rip,regs->rsp,regs->orig_rax); 
+	       me->pcb$t_lname,me->pcb$l_pid,where,frame,regs->rip,regs->rsp,regs->orig_rax); 
 
 	force_sig(SIGSEGV, me); 
 } 

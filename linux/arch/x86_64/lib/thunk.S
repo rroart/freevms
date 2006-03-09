@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 	/*
 	 * Save registers before calling assembly functions. This avoids
 	 * disturbance of register allocation in some inline assembly constructs.
@@ -34,9 +40,11 @@
 	thunk rwsem_down_read_failed_thunk,rwsem_down_read_failed
 	thunk rwsem_down_write_failed_thunk,rwsem_down_write_failed
 	thunk rwsem_wake_thunk,rwsem_wake
-#endif	
+#endif
+#ifndef CONFIG_VMS	
 	thunk do_softirq_thunk,do_softirq
-	
+#endif
+		
 	thunk __down_failed,__down
 	thunk_retrax __down_failed_interruptible,__down_interruptible
 	thunk_retrax __down_failed_trylock,__down_trylock

@@ -859,6 +859,10 @@ struct vfsmount *do_kern_mount(char *type, int flags, char *name, void *data)
 	struct vfsmount *mnt = NULL;
 	struct super_block *sb;
 
+#ifdef __x86_64__
+	extern void *kernel_memchr(const void *s, int c, size_t n);
+#define memchr kernel_memchr
+#endif
 	if (!type || !memchr(type, 0, PAGE_SIZE))
 		return ERR_PTR(-EINVAL);
 

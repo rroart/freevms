@@ -250,7 +250,7 @@ int eu$init_tables() {
   return SS$_NORMAL;
 }
 
-int eu_iodb_vmsinit(int dev) {
+long eu_iodb_vmsinit(int dev) {
 #if 0
   struct _ucb * ucb=&eu$ucb;
   struct _ddb * ddb=&eu$ddb;
@@ -290,7 +290,7 @@ int eu_iodb_vmsinit(int dev) {
 
 }
 
-int eu_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long eu_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucbnidef * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&er$ucb*/,&newucb);
@@ -304,7 +304,7 @@ int eu_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
 
 extern char * mydevice;
 
-int eu_vmsinit(int dev) {
+long eu_vmsinit(int dev) {
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
 
   unsigned short chan0, chan1, chan2;

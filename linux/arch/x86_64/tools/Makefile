@@ -1,5 +1,5 @@
 
-TARGET = $(TOPDIR)/include/asm-x86_64/offset.h
+TARGET = $(TOPDIR)/linux/include/asm-x86_64/offset.h
 
 all: 
 

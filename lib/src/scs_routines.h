@@ -1,23 +1,30 @@
 #ifndef scs_routines_h
 #define scs_routines_h
 
+#if 0
 #include <ints.h>
 #include <bddef.h>
 #include <bdlptrdef.h>
 #include <bnamdef.h>
+#endif
 #include <cdrpdef.h>
 #include <cdtdef.h>
 #include <far_pointers.h>
 #include <fkbdef.h>
 #include <kpbdef.h>
 #include <pbdef.h>
+#if 0
 #include <pbodef.h>
+#endif
 #include <pdtdef.h>
 #include <rddef.h>
 #include <rdtdef.h>
 #include <sbdef.h>
+#if 0
+// not yet
 #include <sbodef.h>
 #include <sppbdef.h>
+#endif
 
 int   scs_std$accept ( void (*msgadr_p)( unsigned int msg_length, void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
 	void (*dgadr_p)( unsigned int dg_status, unsigned int dg_length, void *dg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
@@ -137,7 +144,7 @@ int   scs_std$fast_sendmsg_request ( void *svapte_boff_bcnt_p, struct _pdt *pdt_
 int   scs_std$find_bd( struct _bdlptr *bdlt_p, struct _bnam bnam, struct _bufdesc **bd_p );
 
 
-int   scs_std$find_rdte ( int rspid, struct _scs_struct _rd **rdte_p );
+int   scs_std$find_rdte ( int rspid, struct _scs__rd **rdte_p );
 
 
 int   scs_std$init_bdlt( struct _pdt *pdt_p );

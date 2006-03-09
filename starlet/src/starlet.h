@@ -42,6 +42,8 @@ int sys$setpri(unsigned int *pidadr, /* const */ void *prcnam,
 int sys$dclast(void (*astadr)(unsigned long),
 	unsigned long astprm, unsigned int acmode);
 
+int sys$hiber(void);
+
 int sys$waitfr(unsigned int efn);
 
 int sys$wfland(unsigned int efn, unsigned int mask);

@@ -249,6 +249,9 @@ void ide_setup_ports(	hw_regs_t *hw,
 			ide_ack_intr_t *ack_intr,
 			int irq);
 
+#ifdef __x86_64__
+#include <asm/io.h>
+#endif
 #include <asm/ide.h>
 
 /*

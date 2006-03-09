@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /* 
  * Handle the memory map.
  * The functions here do the job until bootmem takes over.
@@ -592,6 +598,7 @@ void __init parse_mem_cmdline (char ** cmdline_p)
 		else if (!memcmp(from,"apic",4)) {
 			extern int ioapic_force;
 			ioapic_force = 1;
+			extern int skip_ioapic_setup; // check 
 			skip_ioapic_setup = 0;
 		}
 		else if (!memcmp(from, "noexec=", 7)) { 

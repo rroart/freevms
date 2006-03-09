@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 /* Written 2000 by Andi Kleen */
 /* This program is never executed, just its assembly is examined for offsets 
    (this trick is needed to get cross compiling right) */  
@@ -32,7 +38,9 @@ int main(void)
 	ENTRY(need_resched); 
 	ENTRY(exec_domain); 
 	ENTRY(ptrace); 
+#if 0
 	ENTRY(processor);
+#endif
 	ENTRY(need_resched); 
 	ENTRY(thread); 
 #undef ENTRY

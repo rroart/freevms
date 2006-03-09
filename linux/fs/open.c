@@ -27,6 +27,8 @@
 #include <dyndef.h>
 #include <fcbdef.h>
 #include <fabdef.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 #define special_file(m) (S_ISCHR(m)||S_ISBLK(m)||S_ISFIFO(m)||S_ISSOCK(m))
 
@@ -917,6 +919,8 @@ int filp_close(struct file *filp, fl_owner_t id)
 	}
 #ifndef CONFIG_VMS
 #define is_tty_fops(x) 0
+#else
+	extern is_tty_fops(struct file * f);
 #endif
 	if (!is_tty_fops(filp)) {
 	  fcntl_dirnotify(0, filp, 0);

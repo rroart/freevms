@@ -70,7 +70,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "langhooks.h"
 #endif
 
-int ggc_calloc (int s1, int s2);
+long ggc_calloc (long s1, long s2);
 
 #define htab_create_ggc(SIZE, HASH, EQ, DEL) \
   htab_create_alloc (SIZE, HASH, EQ, DEL, ggc_calloc, NULL)

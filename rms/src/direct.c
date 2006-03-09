@@ -62,6 +62,8 @@
 #include "cache.h"
 #include "access.h"
 #include "direct.h"
+#include <linux/slab.h>
+#include <misc_routines.h>
 
 #define DEBUGx on
 #define BLOCKSIZE 512
@@ -804,7 +806,7 @@ unsigned direct(struct _vcb * vcb,struct dsc$descriptor * fibdsc,
     struct _fibdef dirfib;
     struct dsc$descriptor dirdsc;
     struct _irp * dummyirp=kmalloc(sizeof(struct _irp),GFP_KERNEL);
-    bcopy(i,dummyirp,sizeof(struct _irp));
+    memcpy(dummyirp,i,sizeof(struct _irp));
     dirdsc.dsc$w_length=sizeof(struct _fibdef);
     dirdsc.dsc$a_pointer=&dirfib;
     memcpy(&dirfib,fib,sizeof(struct _fibdef));

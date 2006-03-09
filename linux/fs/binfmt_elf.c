@@ -55,6 +55,7 @@
 #include <dyndef.h>
 #include <fcbdef.h>
 #include <ssdef.h>
+#include <misc_routines.h>
 
 static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs);
 static int load_elf_library(struct file*);
@@ -818,7 +819,11 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	 * example.  This macro performs whatever initialization to
 	 * the regs structure is required.
 	 */
+#ifdef __i386__
 	ELF_PLAT_INIT(regs);
+#else
+	ELF_PLAT_INIT(regs, 0);
+#endif
 #endif
 
 	current->pslstk[current->pslindex-1]|=(3<<2 | 3);
@@ -1414,6 +1419,7 @@ static void __exit exit_elf_binfmt(void)
 	unregister_binfmt(&elf_format);
 }
 
+#ifndef IA32_EMULATOR
 int exe$imgact_elf(void * name, void * hdrbuf) {
   struct dsc$descriptor * dscdflnam = name;
   char * filename = dscdflnam->dsc$a_pointer;
@@ -1463,6 +1469,7 @@ int exe$imgact_elf(void * name, void * hdrbuf) {
 
   return SS$_NORMAL;
 }
+#endif 
 
 module_init(init_elf_binfmt)
 module_exit(exit_elf_binfmt)

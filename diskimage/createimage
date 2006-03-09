@@ -1,5 +1,13 @@
 #!/bin/sh
 
+unamem=`uname -m`
+
+if [ $unamem == x86_64 ]; then
+ARCH=x86_64
+else
+ARCH=i386
+fi
+
 [ -f ../grub/src/build/grub/grub ] || ( echo build grub first; exit 1 )
 [ -f ../init/src/init ] || ( echo build init first; exit 1 )
 

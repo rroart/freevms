@@ -75,7 +75,7 @@ struct _secdef {
   unsigned int sec$l_secxfl;
   unsigned int sec$l_secxbl;
   unsigned int sec$l_pfc;
-  int sec$l_window;
+  long sec$l_window; // check. was: int
   unsigned int sec$l_vbn;
   union  {
     unsigned int sec$l_flags;

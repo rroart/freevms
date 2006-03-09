@@ -21,6 +21,8 @@
 #include <linux/sched.h>
 
 #include <asm/uaccess.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 /*
  * SLAB caches for signal bits.
@@ -147,6 +149,40 @@ flush_signal_handlers(struct task_struct *t)
 		ka++;
 	}
 }
+
+#ifdef __x86_64__
+/*
+ * sig_exit - cause the current task to exit due to a signal.
+ */
+
+void
+sig_exit(int sig, int exit_code, struct siginfo *info)
+{
+	struct task_struct *t;
+
+	sigaddset(&current->pending.signal, sig);
+	recalc_sigpending(current);
+	current->flags |= PF_SIGNALED;
+
+	/* Propagate the signal to all the tasks in
+	 *  our thread group
+	 */
+	if (info && (unsigned long)info != 1
+	    && info->si_code != SI_TKILL) {
+		read_lock(&tasklist_lock);
+#if 0
+		// not yet
+		for_each_thread(t) {
+			force_sig_info(sig, info, t);
+		}
+#endif
+		read_unlock(&tasklist_lock);
+	}
+
+	do_exit(exit_code);
+	/* NOTREACHED */
+}
+#endif
 
 /* Notify the system that a driver wants to block all signals for this
  * process, and wants to be notified if any signals at all were to be
@@ -999,6 +1035,39 @@ sys_kill(int pid, int sig)
 
 	return kill_something_info(sig, &info, pid);
 }
+
+#ifdef __x86_64__
+/*
+ *  Kill only one task, even if it's a CLONE_THREAD task.
+ */
+asmlinkage long
+sys_tkill(int pid, int sig)
+{
+       struct siginfo info;
+       int error;
+       struct task_struct *p;
+
+       /* This is only valid for single tasks */
+       if (pid <= 0)
+           return -EINVAL;
+
+       info.si_signo = sig;
+       info.si_errno = 0;
+       // not yet: info.si_code = SI_TKILL;
+       info.si_code = SI_USER;
+       info.si_pid = current->pcb$l_pid;
+       info.si_uid = current->uid;
+
+       read_lock(&tasklist_lock);
+       p = find_task_by_pid(pid);
+       error = -ESRCH;
+       if (p) {
+               error = send_sig_info(sig, &info, p);
+       }
+       read_unlock(&tasklist_lock);
+       return error;
+}
+#endif
 
 asmlinkage long
 sys_rt_sigqueueinfo(int pid, int sig, siginfo_t *uinfo)

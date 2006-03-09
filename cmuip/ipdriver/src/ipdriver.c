@@ -138,6 +138,18 @@
 #include "../../central/include/netcommon.h"
 #include "../../central/include/network.h"
 
+#include <queue.h>
+#include <com_routines.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <sch_routines.h>
+
+#include <linux/slab.h>
+
+int getbuf(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *c, void ** newbuf, int req_size);
+int net_r_common(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c, int val);
+int net_close_abort_common(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c, int val);
+
 // Let's add some fields to the UCB, hmmm?
 
 struct IP_UCB {
@@ -564,9 +576,6 @@ int netacp_alive(struct _ucb * u) ;
 int net_close(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) ;
 int net_info(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) ;
 
-int exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, unsigned long s);
-
-
 static struct _fdt ip4$fdt
 #if 0
  = {
@@ -696,7 +705,7 @@ int ip4$init_tables() {
   return SS$_NORMAL;
 }
 
-int ip4_iodb_vmsinit(void) {
+long ip4_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&ip4$ucb;
   struct _ddb * ddb=&ip4$ddb;
@@ -707,9 +716,9 @@ int ip4_iodb_vmsinit(void) {
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,sizeof(struct _ucb)); // check
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,sizeof(struct _ucb)); // check
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
 #if 0
   init_ddb(&ip4$ddb,&ip4$ddt,&ip4$ucb,"dqa");
@@ -742,7 +751,7 @@ int ip4_iodb_vmsinit(void) {
 
 }
 
-int ip4_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long ip4_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb = 0;
   //  ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&ip4$ucb*/,&newucb); // check. skip?
@@ -1018,7 +1027,7 @@ int net_open(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
 #if 0
     movc5	#0,OP$Foreign_Host(R10),#0,#FH_NAME_SIZE,OP$Foreign_Host(R10)
 #endif
-    bzero(&buf->op$foreign_host,FH_NAME_SIZE);
+    memset(&buf->op$foreign_host,0,FH_NAME_SIZE);
   if (strlen(i->irp$l_qio_p1))	// Foreign Host name Wild?
 	  			// 0 = yes, do foreign port
     memcpy(&buf->op$foreign_host,i->irp$l_qio_p1,strlen(i->irp$l_qio_p1));
@@ -2499,7 +2508,7 @@ int ip_finishio(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   //	movl	RE$EXT2(R1),IPADR$EXT2(R0) 	// Set second header extension
 
  l10:
-  sts = com$post(i,u);	// post-it.
+  com$post(i,u);	// post-it.
 
 #if 0
   Popr	#^M<R3,R5>	// restoration
@@ -2569,7 +2578,7 @@ int ip_cancel(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
 
   u->ucb$l_sts|=UCB$M_CANCEL;		// flag IO is cancelled.
   newirp=kmalloc(sizeof(struct _irp),GFP_KERNEL);
-  bzero(newirp, sizeof(struct _irp));
+  memset(newirp,0, sizeof(struct _irp));
 
   // Init the IRP, R2 = IRP address.
 

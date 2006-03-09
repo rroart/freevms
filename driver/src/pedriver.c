@@ -21,6 +21,7 @@
 #include<pdtdef.h>
 #include<ssdef.h>
 #include<ucbdef.h>
+#include<queue.h>
 
 int scs_std$sendmsg(struct _irp * i, struct _pdt * p) {
   char * buf = 0;

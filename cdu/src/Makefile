@@ -6,7 +6,7 @@ FLAGS = -static
 LEX = flex
 BISON = bison
 
-all: cdu cdu.a cdu2.a dcltables.o
+all: cdu cdu.a cdu2.a cdu_pic.a cdu2_pic.a dcltables.o
 
 clean:
 	rm *.o *.a cdu
@@ -17,17 +17,32 @@ install: all
 	install um/* ../../rootum/vms"$$"common/sysexe/
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
-cdu: parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o elf.o cli.h
-	gcc  -g -static parse.o lex.o main.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o elf.o -ldl -liberty -lelf $(VMSLIBS) -o cdu
+OBJS = parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o elf.o
+OBJS2 = cli2.o
+OBJS_PIC = $(addprefix pic/,$(OBJS))
+OBJS2_PIC = $(addprefix pic/,$(OBJS2))
 
-cdu2.a: cli2.o
-	ar r cdu2.a cli2.o
+cdu:  cli.o elf.o cli.h main.o $(OBJS)
+	gcc  -g -static main.o $(OBJS) -ldl -liberty -lelf $(VMSLIBS) -o cdu
 
-cdu.a: parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o elf.o cli.h
-	ar r cdu.a parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o cli.o elf.o
+cdu2.a: $(OBJS2)
+	ar r cdu2.a $(OBJS2)
+
+cdu.a: $(OBJS) cli.h
+	ar r cdu.a $(OBJS)
+
+cdu2_pic.a: $(OBJS2_PIC)
+	ar r cdu2_pic.a $(OBJS2_PIC)
+
+cdu_pic.a: $(OBJS_PIC) cli.h
+	ar r cdu_pic.a $(OBJS_PIC)
 
 %.o: %.c cli.h
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+
+pic/%.o: %.c 
+	install -d pic
+	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 parse.h: parse.c parse.y
 parse.c: parse.y

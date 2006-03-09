@@ -33,6 +33,8 @@ OBJS =	\
 	string.o		\
 	write_file.o
 
+OBJS_PIC = $(addprefix pic/,$(OBJS))
+
 CC = gcc -g -O2 -c
 
 EXTERNAL =
@@ -147,16 +149,23 @@ string.o: string.c
 write_file.o: write_file.c
 	$(CC) write_file.c
 
+pic/%.o: %.c
+	install -d pic
+	$(CC) -fpic -fPIC -c -o $@ $<
+
+pic/os.linux.o: os.c
+	$(CC) -fPIC -fpic -o pic/os.linux.o os.c
+
 i386/edt${NOEXE}: $(LIB) $(EXTERNAL)
 	install -d i386
 	gcc -g -static $(OBJS) $(EXTERNAL) -o i386/edt${NOEXE}
 
-i386/edt${EXE_ELF}: $(LIB) $(EXTERNAL)
-	ld -Bshareable $(OBJS) $(LIBC) $(LIBGCC) -o i386/edt${EXE_ELF}
+i386/edt${EXE_ELF}: $(LIB) $(EXTERNAL_PIC) $(OBJS_PIC)
+	ld -Bshareable $(OBJS_PIC) -lc $(LIBGCC) -o i386/edt${EXE_ELF}
 
 i386/edt${EXE}: $(LIB) $(EXTERNAL)
 	install -d i386
-	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/edt${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) --start-group $(LINKPOST) $(LIBGCC) --end-group -o i386/edt${EXE}
 
 um/edt${NOEXE}: $(LIBUM) $(EXTERNAL)
 	install -d um
@@ -164,8 +173,8 @@ um/edt${NOEXE}: $(LIBUM) $(EXTERNAL)
 
 um/edt${EXE}: $(LIB) $(EXTERNAL)
 	install -d um
-	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/edt${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) --start-group $(LINKPOST) $(LIBGCC) --end-group -o um/edt${EXE}
 
-um/edt${EXE_ELF}: $(LIB) $(EXTERNAL)
-	ld -Bshareable $(OBJS) $(LIBC) $(LIBGCC) -o um/edt${EXE_ELF}
+um/edt${EXE_ELF}: $(LIB) $(EXTERNAL_PIC)
+	ld -Bshareable $(OBJS_PIC) -lc $(LIBGCC) -o um/edt${EXE_ELF}
 

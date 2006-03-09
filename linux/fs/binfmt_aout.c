@@ -86,6 +86,7 @@ if (file->f_op->llseek) { \
 
 static int aout_core_dump(long signr, struct pt_regs * regs, struct file *file)
 {
+#ifndef __x86_64__
 	mm_segment_t fs;
 	int has_dumped = 0;
 	unsigned long dump_start, dump_size;
@@ -188,6 +189,7 @@ static int aout_core_dump(long signr, struct pt_regs * regs, struct file *file)
 end_coredump:
 	set_fs(fs);
 	return has_dumped;
+#endif
 }
 
 /*

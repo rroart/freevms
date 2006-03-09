@@ -5,7 +5,7 @@
 #
 
 HEAD = head.o
-SYSTEM = $(TOPDIR)/vmlinux
+SYSTEM = $(TOPDIR)/linux/vmlinux
 
 OBJECTS = $(HEAD) misc.o
 

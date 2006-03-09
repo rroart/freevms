@@ -30,7 +30,11 @@ extern inline void savipl(void);
 
 /* no smp yet */
 inline void setipl(unsigned char i);
+inline int getipl();
 
 //extern int prespl(unsigned char new);
+
+inline char intr_blocked(unsigned char this);
+inline void regtrap(char type, char param);
 
 #endif

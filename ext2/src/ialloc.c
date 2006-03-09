@@ -26,6 +26,8 @@
 
 #include <misc.h>
 
+#include <misc_routines.h>
+
 /*
  * ialloc.c contains the inodes allocation and deallocation routines
  */

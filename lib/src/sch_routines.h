@@ -43,4 +43,25 @@ void   sch_std$unlockexec (struct _mtx *mtx);
 void   sch_std$unlockexec_quad (struct _mutex *mutex);
 int    sch_std$wake (int ipid, struct _pcb **pcb_p);
 
+#include<linux/spinlock.h>
+
+void sch$rse(struct _pcb * p, unsigned char class, unsigned char event);
+void sch$change_cur_priority(struct _pcb *p, unsigned char newpri);
+int sch$wait(struct _pcb * p, struct _wqh * wq);
+void sch$wake(unsigned long pid);
+void sch$swpwake(void);
+int sch$qast(unsigned long pid, int priclass, struct _acb * a);
+void sch$one_sec(void);
+int sch$postef(unsigned long ipid, unsigned long priclass, unsigned long efn);
+void sch_std$ravail(int rsn);
+void sch$newlvl(struct _pcb *p);
+void sch$lockw(spinlock_t * s);
+void sch$iolockw(void);
+void sch$unlockw(spinlock_t * s);
+void sch$iounlockw(void);
+void sch$iounlock(void);
+void sch$chsep(struct _pcb * p,unsigned char newpri);
+void sch$chse(struct _pcb * p, unsigned char class);
+void sch$chsep2(struct _pcb * p,unsigned char newpri); 
+
 #endif

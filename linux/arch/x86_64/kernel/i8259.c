@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006  
+
 #include <linux/linkage.h>
 #include <linux/config.h>
 #include <linux/ptrace.h>
@@ -405,7 +411,15 @@ void __init init_IRQ(void)
 	 */
 	for (i = 0; i < NR_IRQS; i++) {
 		int vector = FIRST_EXTERNAL_VECTOR + i;
-		if (vector != IA32_SYSCALL_VECTOR) {
+		if (vector != IA32_SYSCALL_VECTOR &&
+		    vector != IA32_VMSSYSCALL_VECTOR  &&
+		    vector != IA32_VMSSYSCALL_VECTOR1  &&
+		    vector != IA32_VMSSYSCALL_VECTOR3 &&
+		    vector != 0xb0 &&
+		    vector != 0xb1 &&
+		    ! (vector >= ASTDEL_VECTOR &&
+		       vector <= POWER_VECTOR) 
+		  ) {
 			set_intr_gate(vector, interrupt[i]);
 		}
 	}

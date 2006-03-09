@@ -63,6 +63,8 @@
 #include <irpdef.h>
 #include <ssdef.h>
 #include <ucbdef.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
 
 #ifdef CONFIG_BLK_DEV_PDC4030
 #define IS_PDC4030_DRIVE (HWIF(drive)->chipset == ide_pdc4030)
@@ -411,7 +413,7 @@ ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned lon
   if (myindex==1024) myindex=0;
 #endif
   if (block>0x1f000)
-    printk("block %x\n",block);
+    printk("block %lx\n",block);
   //myidecount++;
   //printk(KERN_INFO "do_rw_disk %x %x %x\n",drive,rq,block);
   //printk(KERN_INFO "do_rw_disk %x %x %x\n",rq->nr_sectors,rq,block);

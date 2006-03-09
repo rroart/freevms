@@ -38,6 +38,8 @@ struct _phd {
   unsigned short int phd$w_size;
   unsigned char phd$b_type;
   char phd$$_spare_1;
+#ifdef __i386__
+#define PHD_INT_SIZE 4 
   unsigned int phd$l_wslist;
   unsigned int phd$l_wslock;
   unsigned int phd$l_wsdyn;
@@ -57,6 +59,29 @@ struct _phd {
   unsigned int phd$l_dfpfc;
   unsigned int phd$l_pgtbpfc;
   unsigned int phd$l_astlm;
+#else
+  // these are relative offset, not use yet
+#define PHD_INT_SIZE 8 
+  unsigned long phd$l_wslist;
+  unsigned long phd$l_wslock;
+  unsigned long phd$l_wsdyn;
+  unsigned long phd$l_wsnext;
+  unsigned long phd$l_wslast;
+  unsigned long phd$l_wsextent;
+  unsigned long phd$l_wsquota;
+  unsigned long phd$l_dfwscnt;
+  unsigned long phd$l_cpulim;
+  unsigned long phd$l_pst_base_offset;
+  unsigned long phd$l_pst_last;
+  unsigned long phd$l_pst_free;
+  unsigned long phd$l_iorefc;
+  unsigned long long phd$q_next_region_id;
+  long phd$$_spare_2;
+  unsigned long phd$l_emptpg;
+  unsigned long phd$l_dfpfc;
+  unsigned long phd$l_pgtbpfc;
+  unsigned long phd$l_astlm;
+#endif
   union  {
     int phd$l_pst_base_max;
     int phd$l_fredoff;

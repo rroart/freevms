@@ -25,6 +25,7 @@
 
 extern unsigned long max_mapnr;
 extern unsigned long num_physpages;
+extern unsigned long num_mappedpages;
 extern void * high_memory;
 extern int page_cluster;
 /* The inactive_clean lists are per zone. */

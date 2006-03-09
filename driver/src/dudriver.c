@@ -30,6 +30,13 @@
 #include<ssdef.h>
 #include<ucbdef.h>
 #include<rddef.h>
+#include<queue.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <sch_routines.h>
+#include <scs_routines.h>
+#include <misc_routines.h>
+#include <linux/slab.h>
 
 int acp_std$modify(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 
@@ -97,7 +104,7 @@ void  du_startio (struct _irp * i, struct _ucb * u) {
     scs_std$find_rdte( c->cdrp$l_rspid, &r);
     r->rd$l_cdrp=c;
     m=vmalloc(1000 /*sizeof(struct _transfer_commands)*/);
-    bzero(m,1000 /*sizeof(struct _transfer_commands)*/);
+    memset(m,0,1000 /*sizeof(struct _transfer_commands)*/);
     ((struct _mscp_basic_pkt *)m)->mscp$l_cmd_ref=c->cdrp$l_rspid;
     ((struct _mscp_basic_pkt *)m)->mscp$w_unit=((struct _mscp_ucb *)u)->ucb$w_mscpunit;
     ((struct _mscp_basic_pkt *)m)->mscp$b_caa=u->ucb$l_ddb->ddb$t_name[2]; // use this as unit type?
@@ -162,7 +169,6 @@ void  du_startio (struct _irp * i, struct _ucb * u) {
 /* more yet undefined dummies */
 void  du_unsolint (void) { };
 void  du_cancel (void) { };
-static void  ioc_std$cancelio (void) { };
 void  du_regdump (void) { };
 void  du_diagbuf (void) { };
 void  du_errorbuf (void) { };
@@ -190,11 +196,11 @@ struct _ddt du$ddt = {
   ddt$l_mntver: du_mntver,
   ddt$l_cloneducb: du_cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: du_mntv_sssc,
-  ddt$l_mntv_for: du_mntv_for,
-  ddt$l_mntv_sqd: du_mntv_sqd,
-  ddt$l_aux_storage: du_aux_storage,
-  ddt$l_aux_routine: du_aux_routine
+  ddt$ps_mntv_sssc: du_mntv_sssc,
+  ddt$ps_mntv_for: du_mntv_for,
+  ddt$ps_mntv_sqd: du_mntv_sqd,
+  ddt$ps_aux_storage: du_aux_storage,
+  ddt$ps_aux_routine: du_aux_routine
 };
 
 extern int acp_std$readblk();
@@ -318,12 +324,12 @@ void du_dg(void * packet, struct _cdt * c, struct _pdt * p) {
   struct _irp dummyirp;
   struct _irp * irp = ((unsigned long)cdrp)-((unsigned long)((unsigned long)&dummyirp.irp$l_fqfl-(unsigned long)&dummyirp));
   struct _acb * a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
-  bzero(a,sizeof(struct _acb));
+  memset(a,0,sizeof(struct _acb));
 
   if (ppd->ppd$b_opc==PPD$C_SNDDAT) {
     struct _scs_rd * rd=&rdtl[scs1->scs$l_rspid];
     struct _cdrp * cdrp = rd->rd$l_cdrp;
-    bcopy(next,cdrp->cdrp$l_msg_buf,512);
+    memcpy(next,cdrp->cdrp$l_msg_buf,512);
   }
 
   //a->acb$l_ast=((struct _cdrp *)c->cdt$l_fp_scs_norecv)->cdrp$l_fpc;
@@ -351,7 +357,7 @@ int mscpcli(void) {
 }
 #endif
 
-int du_iodb_vmsinit(void) {
+long du_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&du$ucb;
   struct _ddb * ddb=&du$ddb;
@@ -364,9 +370,9 @@ int du_iodb_vmsinit(void) {
   struct _ccb * ccb;
   struct _ucb * newucb,newucb1;
 //  ioc_std$clone_ucb(&du$ucb,&ucb);
-  bzero(ucb,sizeof(struct _mscp_ucb));
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,sizeof(struct _mscp_ucb));
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
   ucb -> ucb$w_size = sizeof(struct _mscp_ucb); // temp placed // check
 
@@ -412,10 +418,10 @@ void  du_iodb_clu_vmsinit(struct _ucb * u) {
   struct _cdt * cdt;
 
   pb=kmalloc(sizeof(struct _pb),GFP_KERNEL);
-  bzero(pb,sizeof(struct _pb));
+  memset(pb,0,sizeof(struct _pb));
 
   cddb=kmalloc(sizeof(struct _cddb),GFP_KERNEL);
-  bzero(cddb,sizeof(struct _cddb));
+  memset(cddb,0,sizeof(struct _cddb));
   
   qhead_init(&cddb->cddb$l_cdrpqfl);
   cddb->cddb$l_pdt=&dupdt;
@@ -437,15 +443,15 @@ void __du_init(void) {
   // specific cluster stuff here 
 
   ddb = du_iodb_vmsinit();
-  du_iodb_clu_vmsinit(ddb->ddb$l_ucb);
+  du_iodb_clu_vmsinit(ddb->ddb$ps_ucb);
   dupdt_init();
 }
 
-int du_iodbunit_vmsinit(struct _ddb * ddb,int unitno, void * d) {
+long du_iodbunit_vmsinit(struct _ddb * ddb,int unitno, void * d) {
   struct _ucb * newucb;
 
-  ioc_std$clone_mscp_ucb(ddb->ddb$l_ucb/*&file$ucb*/,&newucb);
-  //ioc_std$clone_mscp_ucb(/*ddb->ddb$l_ucb*/&du$ucb,&newucb);
+  ioc_std$clone_mscp_ucb(ddb->ddb$ps_ucb/*&file$ucb*/,&newucb);
+  //ioc_std$clone_mscp_ucb(/*ddb->ddb$ps_ucb*/&du$ucb,&newucb);
 
   return newucb;
 }
@@ -517,7 +523,7 @@ void du_rw_more(struct _irp * i) {
   struct _cdrp * cdrp = &i->irp$l_fqfl;
   unsigned int sts;
   void (*func)(void *,void *);
-  bcopy((unsigned long)cdrp->cdrp$l_msg_buf, i->irp$l_qio_p1,i->irp$l_qio_p2);
+  memcpy(i->irp$l_qio_p1,(unsigned long)cdrp->cdrp$l_msg_buf, i->irp$l_qio_p2);
   // receive something
   func=i->irp$l_ucb->ucb$l_fpc;
   func(i,i->irp$l_ucb);
