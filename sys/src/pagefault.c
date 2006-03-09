@@ -56,6 +56,9 @@ int do_wp_page(struct mm_struct *mm, struct _rde * vma, unsigned long address, p
 
 #ifdef __x86_64__
 #include <asm/kdebug.h>
+#else
+extern void die(const char *,struct pt_regs *,long);
+asmlinkage void do_invalid_op(struct pt_regs *, unsigned long);
 #endif
 
 #undef OLDINT
