@@ -1,6 +1,14 @@
 #include <descrip.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 
 int errno;
+
+int print_routine (long, ...);
+
+int lib$get_logical(void * logical_name , void * resultant_string, unsigned short * resultant_length , void * table_name, int * max_index , unsigned int * index , unsigned char * acmode , unsigned int * flags); // temp fix
 
 setunwind() {
   printf("setunwind not implemented\n");
@@ -22,7 +30,7 @@ sys$dclexh_not() {
 
 sys$trnlog(void * lognam, short * rsllen, void * rslbuf) {
   $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
-  return lib$get_logical(lognam, rslbuf, rsllen, &tab_dsc, 0, 0, 0, 0, 0);
+  return lib$get_logical(lognam, rslbuf, rsllen, &tab_dsc, 0, 0, 0, 0);
 }
 
 sys$putmsg() {
