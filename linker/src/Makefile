@@ -1,7 +1,8 @@
-binutils-2.15.tar.gz:
+binutils-2.16.tar.gz:
+linker_0_2_5:
 	./download-linker
 
-download-linker: binutils-2.15.tar.gz
+download-linker: binutils-2.16.tar.gz linker-0_2_5
 
 build-linker: build/ld/ld-new
 
