@@ -1,4 +1,5 @@
 #include<starlet.h>
+#include<stdio.h>
 
 extern struct _pcb * ctl$gl_pcb;
 
@@ -11,9 +12,11 @@ getpcb(){
 }
 
 main(){
+#if 0
 #ifdef __i386__
 	long arg=0;
 	sys$cmkrnl(getpcb,&arg);
 	printf("%x\n",pcb);
+#endif
 #endif
 }

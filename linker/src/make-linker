@@ -5,11 +5,16 @@ CC=
 rm -rf binutils-2.16
 tar xzf binutils-2.16.tar.gz
 cd binutils-2.16
-patch -p1 < ../linker-0_1_6
+patch -p1 < ../linker-0_2_5
 cd ..
 mkdir build
 cd build
+unamem=`uname -m`
+if [ $unamem == x86_64 ]; then
+../binutils-2.16/configure --target=x86_64-free-vms
+else
 ../binutils-2.16/configure --target=i386-free-vms
+fi
 make
 cd ..
 [ -f build/ld/ld-new ] && ln -sf build/ld/ld-new linker

@@ -214,7 +214,11 @@ int mmg$vfysecflg(void);
 int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte);
 int mmg$purgwspag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte);
 signed long mmg$allocpfn(void);
+#ifdef __x86_64__
 signed long mmg$rempfn(unsigned long type, int pfn);
+#else
+signed long mmg$rempfn(unsigned long type, struct _pfn * pfn);
+#endif
 mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index,int pte);
 mmg$delpfnlst(int type, int pfn);
 mmg$dalcstxscn(void);

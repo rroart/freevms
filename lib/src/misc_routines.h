@@ -19,6 +19,7 @@ void init_sys_p1pp();
 void init_p1pp(struct _pcb * pcb, struct _phd * phd);
 int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, struct _phd * oldphd);
 int user_spaceable();
+int user_spaceable_addr(void * addr);
 int inline insrde(struct _rde * elem, struct _rde * head);
 inline void *find_task_by_pid(int pid);
 
@@ -88,7 +89,11 @@ int is_cluster_on();
 inline struct task_struct *find_process_by_pid(pid_t pid);
 void lck$searchdlck(void);
 inline void rdtscll_sync(unsigned long *tsc);
+#ifdef __x86_64__
 void set_rtc_mmss(unsigned long nowtime);
+#else
+int set_rtc_mmss(unsigned long nowtime);
+#endif
 void fixup_hib_pc(void * dummy);
 mycheckaddr(unsigned int ctl);
 int task_on_comqueue(struct _pcb *p);
