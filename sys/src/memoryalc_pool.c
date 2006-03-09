@@ -12,10 +12,13 @@
 #include<npool_data.h>
 #include<ssdef.h>
 #include<system_data_cells.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <mmg_routines.h>
 
 struct _myhead {
   struct _myhead * hd$l_flink;
-  int hd$l_seq;
+  long hd$l_seq;
 };
 
 void exe$reclaim_pool_aggressive(void * pool);

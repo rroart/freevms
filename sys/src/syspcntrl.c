@@ -15,6 +15,10 @@
 #include<ipldef.h>
 #include<descrip.h>
 #include <system_data_cells.h>
+#include <exe_routines.h>
+#include <sch_routines.h>
+#include <misc_routines.h>
+#include <ipl.h>
 #include <internals.h>
 
 /* Author: Roar Thronæs */
@@ -112,11 +116,19 @@ int exe$a_pid_to_ipid(unsigned long pid) {// remove this
 }
 
 void fixup_hib_pc(void * dummy) {
+#ifdef __i386__
   char ** addr = dummy + 0x28;
   (*addr)-=7;
+#else
+  char ** addr = dummy + 0xa0;
+  (*addr)-=9;
+#endif
 }
 
-asmlinkage int exe$hiber(int dummy) {
+asmlinkage int exe$hiber(long dummy) {
+#ifdef __x86_64__
+  __asm__ __volatile__ ("movq %%rsp,%0; ":"=r" (dummy) );
+#endif
   /* spinlock sched */
   struct _pcb * p=current;
   vmslock(&SPIN_SCHED,IPL$_SCHED);
@@ -134,7 +146,11 @@ asmlinkage int exe$hiber(int dummy) {
     return SS$_NORMAL;
   }
   /* cwps stuff not yet */
+#ifdef __i386__
   fixup_hib_pc(&dummy);
+#else
+  fixup_hib_pc(dummy);
+#endif
   int ret = sch$wait(p,sch$gq_hibwq);
   setipl(0); // unstandard, but sch$wait might leave at ipl 8
   return ret;
@@ -235,8 +251,12 @@ asmlinkage int exe$resume (unsigned int *pidadr, void *prcnam) {
   int sts=exe$nampid(current,pidadr,prcnam,&retpcb,&retipid,&retepid);
   p=retpcb;
   vmsunlock(&SPIN_SCHED,0);
-  if (p) return sch$rse(p,PRI$_RESAVL,EVT$_RESUME);
+  if (p) {
+    sch$rse(p,PRI$_RESAVL,EVT$_RESUME);
+    return;
+  }
   /* no cwps here either */
+  return SS$_NORMAL;
 }
 
 //asmlinkage int sys_$setpri(unsigned int *pidadr, void *prcnam, unsigned int pri, unsigned int *prvpri, unsigned int*pol, unsigned int *prvpol) {

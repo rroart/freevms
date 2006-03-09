@@ -63,6 +63,10 @@
 #include <system_data_cells.h>
 #include <ucbdef.h>
 #include <vcdef.h>
+#include <starlet.h>
+#include <queue.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 struct _pb mypb;
 struct _sb mysb;
@@ -73,6 +77,8 @@ struct _sb othersb;
 void scs_lower_level_send(struct _cdrp * cdrp, struct _scs * scs);
 void * find_free_cdt(void);
 void * scs_register_name(char * c1, char * c2);
+void __init scs_dev_init(void);
+void __exit scs_dev_cleanup(void);
 
 /*
  * scs_address is kept in network order, scs_ether_address is kept
@@ -287,8 +293,8 @@ int /*__init*/ scs_init(void) {
   struct file * file=0;
   unsigned long long pos=0;
 
-  bzero(cdtl,1024*sizeof(sizeof (struct _cdt)));
-  bzero(rdtl,128*sizeof(sizeof(struct _rdt)));
+  memset(cdtl,0,1024*sizeof(sizeof (struct _cdt)));
+  memset(rdtl,0,128*sizeof(sizeof(struct _rdt)));
 
   scs$gl_cdl=&cdl;
   //cdl$l_freecdt=&cdtl;
@@ -615,7 +621,7 @@ int ddb_transfer(struct _cdt * conf_cdt) {
       memcpy(b,&ddb->ddb$t_name,16);
       b+=16;
       *b++=DYN$C_UCB;
-      ucb=ddb->ddb$l_ucb;
+      ucb=ddb->ddb$ps_ucb;
       *b++=ucb->ucb$w_unit_seed;
     }
     ddb=ddb->ddb$ps_link;

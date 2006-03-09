@@ -4,4 +4,4 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
-int errno;
+int kernel_errno;

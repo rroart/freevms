@@ -8,6 +8,7 @@
 #include <ucbdef.h>
 #include <ccbdef.h>
 #include <linux/sched.h>
+#include <exe_routines.h>
 
 int acp_std$access(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   return exe$qioacppkt(i,p,u);

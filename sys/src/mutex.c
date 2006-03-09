@@ -4,11 +4,13 @@
 // Author. Roar Thronæs.
 
 #include<system_data_cells.h>
+#include<ipl.h>
 #include<internals.h>
 #include<pridef.h>
 #include<wqhdef.h>
 #include<linux/sched.h>
 #include<ipldef.h>
+#include <sch_routines.h>
 
 // definitely needs reimplementation
 

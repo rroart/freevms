@@ -8,7 +8,9 @@
 #include<asm/hw_irq.h>
 #include<system_data_cells.h>
 #include<ipldef.h>
+#include<ipl.h>
 #include<phddef.h>
+#include <sch_routines.h>
 
 asmlinkage void exe$resched(void) {
   int ipl=getipl();

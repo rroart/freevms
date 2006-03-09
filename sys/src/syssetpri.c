@@ -10,6 +10,8 @@
 #include<ssdef.h>
 #include<evtdef.h>
 #include<pridef.h>
+#include <exe_routines.h>
+#include <sch_routines.h>
 
 /* Author: Roar Thronæs */
 

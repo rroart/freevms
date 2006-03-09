@@ -11,6 +11,8 @@
 #include<pridef.h>
 #include<sbdef.h>
 #include<starlet.h>
+#include <exe_routines.h>
+#include <sch_routines.h>
 
 #include<linux/sched.h>
 
@@ -31,7 +33,7 @@ asmlinkage int exe$getsyi(unsigned int efn, unsigned int *csidadr, void *nodenam
   while (it->item_code) {
     switch (it->item_code) {
     case SYI$_SCSNODE:
-      bcopy(&mysb.sb$t_nodename,it->bufaddr,15);
+      memcpy(it->bufaddr,&mysb.sb$t_nodename,15);
       break;
 
     case SYI$_LASTFLD:
@@ -41,7 +43,7 @@ asmlinkage int exe$getsyi(unsigned int efn, unsigned int *csidadr, void *nodenam
 #else
 	int mem=0;
 #endif
-	bcopy(&mem,it->bufaddr,4);
+	memcpy(it->bufaddr,&mem,4);
       }
       break;
 

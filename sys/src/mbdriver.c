@@ -27,6 +27,13 @@
 #include <descrip.h>
 #include <vms_drivers.h>
 #include <iosbdef.h>
+#include <com_routines.h>
+#include <queue.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
+#include <sch_routines.h>
+#include <linux/slab.h>
 
 #define irp$l_nopartnerqfl irp$l_fqfl
 #define irp$l_nopartnerqbl irp$l_fqbl
@@ -151,7 +158,7 @@ int mb$fdt_write (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
 
   m=kmalloc(sizeof(struct __mmb)+i->irp$l_qio_p2,GFP_KERNEL);
   if (m) {
-    bzero(m,sizeof(struct __mmb)+i->irp$l_qio_p2);
+    memset(m,0,sizeof(struct __mmb)+i->irp$l_qio_p2);
     m->mmb$w_size=sizeof(struct __mmb)+i->irp$l_qio_p2;
     m->mmb$b_type=DYN$C_BUFIO;
     m->mmb$b_func=func;
@@ -261,7 +268,7 @@ int mb$fdt_read (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   if ((func & IO$M_STREAM) && ! skip) {
     s=kmalloc(sizeof(struct __srb)+i->irp$l_qio_p2,GFP_KERNEL);
     if (s) {
-      bzero(s,sizeof(struct __srb)+i->irp$l_qio_p2);
+      memset(s,0,sizeof(struct __srb)+i->irp$l_qio_p2);
       s->srb$w_size=sizeof(struct __srb)+i->irp$l_qio_p2;
       s->srb$b_type=DYN$C_BUFIO;
       s->srb$b_func=func;
@@ -552,7 +559,6 @@ static struct _fdt mb$fdt = {
 static void  startio () { };
 static void  unsolint (void) { };
 static void  cancel (void) { };
-//static void  ioc_std$cancelio (void) { };
 static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
@@ -579,11 +585,11 @@ static struct _ddt mb$ddt = {
   ddt$l_mntver: mntver,
   ddt$l_cloneducb: cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: mntv_sssc,
-  ddt$l_mntv_for: mntv_for,
-  ddt$l_mntv_sqd: mntv_sqd,
-  ddt$l_aux_storage: aux_storage,
-  ddt$l_aux_routine: aux_routine
+  ddt$ps_mntv_sssc: mntv_sssc,
+  ddt$ps_mntv_for: mntv_for,
+  ddt$ps_mntv_sqd: mntv_sqd,
+  ddt$ps_aux_storage: aux_storage,
+  ddt$ps_aux_routine: aux_routine
 };
 
 #undef ini_fdt_act
@@ -667,7 +673,7 @@ int mb$init_tables() {
   return SS$_NORMAL;
 }
 
-int mb_iodb_vmsinit(void) {
+long mb_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&mb$ucb;
   struct _ddb * ddb=&mb$ddb;
@@ -680,9 +686,9 @@ int mb_iodb_vmsinit(void) {
 
   mbucb0=ucb;
 
-  bzero(ucb,sizeof(struct _ucb));
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,sizeof(struct _ucb));
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
 #if 0
   init_ddb(&mb$ddb,&mb$ddt,&mb$ucb,"mba");
@@ -708,7 +714,7 @@ int mb_iodb_vmsinit(void) {
 
 }
 
-int mb_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long mb_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&mb$ucb*/,&newucb);
@@ -761,7 +767,7 @@ int exe_std$wrtmailbox (struct _mb_ucb *mb_ucb, int msgsiz, void *msg,...) {
   // orreturn exe$abortio(SS$_MBTOOSML,i,p,u);
   //  int savipl=vmslock(&SPIN_MAILBOX,IPL$_MAILBOX);
   m=kmalloc(sizeof(struct __mmb)+msgsiz,GFP_KERNEL);
-  bzero(m,sizeof(struct __mmb)+msgsiz);
+  memset(m,0,sizeof(struct __mmb)+msgsiz);
   m->mmb$w_size=sizeof(struct __mmb)+msgsiz;
   m->mmb$b_type=DYN$C_BUFIO;
   m->mmb$b_func=0;

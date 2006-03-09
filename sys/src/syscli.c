@@ -12,6 +12,7 @@
 #include <descrip.h>
 #include <ssdef.h>
 #include <system_data_cells.h>
+#include <linux/slab.h>
 
 // remember ctl$ag_clidata
 
@@ -30,7 +31,7 @@ struct symbol { symbol *next;
 };
 
 int add_sym(struct dsc$descriptor * sym, struct dsc$descriptor * val) {
-  symbol * s = kmalloc(sizeof(symbol)+64/*sym->dsc$w_length*/);
+  symbol * s = kmalloc(sizeof(symbol)+64/*sym->dsc$w_length*/, GFP_KERNEL);
   s->namelen=sym->dsc$w_length;
   s->svaluelen=val->dsc$w_length;
   memcpy(s->name,sym->dsc$a_pointer,sym->dsc$w_length);

@@ -519,7 +519,7 @@ char * strstr(const char * s1,const char * s2)
  * returns the address of the first occurrence of @c, or %NULL
  * if @c is not found
  */
-void *memchr(const void *s, int c, size_t n)
+void *kernel_memchr(const void *s, int c, size_t n)
 {
 	const unsigned char *p = s;
 	while (n-- != 0) {

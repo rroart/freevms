@@ -12,6 +12,8 @@
 #include <misc.h>
 #include <phddef.h>
 #include<pridef.h>
+#include <exe_routines.h>
+#include <sch_routines.h>
 
 // this behaves like getjpiw for now
 
@@ -26,15 +28,15 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
   while (it->item_code) {
     switch (it->item_code) {
     case JPI$_PRCNAM:
-      bcopy(&p->pcb$t_lname,it->bufaddr,15);
+      memcpy(it->bufaddr,&p->pcb$t_lname,15);
       break;
 
     case JPI$_PID:
-      bcopy(&p->pcb$l_epid,it->bufaddr,4);
+      memcpy(it->bufaddr,&p->pcb$l_epid,4);
       break;
 
     case JPI$_MASTER_PID:
-      bcopy(&p->pcb$l_pid,it->bufaddr,4);
+      memcpy(it->bufaddr,&p->pcb$l_pid,4);
       break;
 
     case JPI$_STATE:

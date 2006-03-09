@@ -64,6 +64,7 @@
 #include <pridef.h>
 #include <iodef.h>
 #include <misc.h>
+#include <misc_routines.h>
 
 #define EXT2_EF 30
 
@@ -396,8 +397,8 @@ struct buffer_head * getblk(kdev_t dev, int block, int size)
 
 	 bh -> b_dev = dev;
 	 bh -> b_data = kmalloc(size, GFP_KERNEL);
-	 bh -> b_blocknr = block;
-	 bh -> b_size = size;
+	 bh -> b_blocknr = (long)block;
+	 bh -> b_size = (long)size;
 	 return bh;
 }
 
@@ -511,11 +512,11 @@ struct buffer_head * bread(kdev_t dev, int block, int size)
 
 	 bh -> b_dev = dev;
 	 bh -> b_data = kmalloc(size, GFP_KERNEL);
-	 bh -> b_size = size;
-	 bh -> b_blocknr = block;
+	 bh -> b_size = (long)size;
+	 bh -> b_blocknr = (long)block;
 
 	 //printk(KERN_INFO "qiow2 %x,%x,%x,%x | ",dev,dev2chan(dev),size,block);
-	 //printk(KERN_INFO "q2 %x,%x|",dev,block);
+	 //printk(KERN_INFO "q2 %lx,%lx|",dev,block);
 
 	 sts = exe$qiow(EXT2_EF,dev2chan(dev),IO$_READPBLK,&iosb,0,0,
 			bh -> b_data,size,block,MINOR(dev)&31,0,0);
@@ -809,6 +810,7 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 	   } else {
 	     continue;
 	   }
+	   //printk("b %lx %lx %lx %lx\n",fcb,blocknr,iblock,lblock);
 #if 0
 	   // file holes not supported yet
 	   memset(kmap(page) + i*blocksize, 0, blocksize);
@@ -819,6 +821,7 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 
 	   nr++;
 
+	   //printk("p3 %lx %lx %lx %lx %lx %lx\n",page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 	   sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
 			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
 

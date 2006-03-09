@@ -29,6 +29,10 @@ inline void panic(char * c) { }
 #include<ssdef.h>
 #include<descrip.h>
 #include<misc.h>
+#include <exe_routines.h>
+#include <sch_routines.h>
+#include <misc_routines.h>
+#include <linux/slab.h>
 #endif
 
 /* Author: Roar Thronæs */
@@ -96,8 +100,8 @@ int lnm$searchlog(struct struct_lnm_ret * r,int loglen, char * lognam, int tabna
   struct _pcb * pcb = ctl$gl_pcb; 
   struct struct_rt * rt=lnmmalloc(sizeof(struct struct_rt));
   struct struct_nt * nt=lnmmalloc(sizeof(struct struct_nt));
-  bzero(rt,sizeof(struct struct_rt));
-  bzero(nt,sizeof(struct struct_nt));
+  memset(rt,0,sizeof(struct struct_rt));
+  memset(nt,0,sizeof(struct struct_nt));
 
 #ifdef LNM_DEBUG 
   lnmprintf("searchlog\n");
@@ -212,9 +216,9 @@ int lnm$firsttab(struct struct_lnm_ret * r,int  tabnamlen,  char * tablename) {
   struct struct_rt * MYRT;
   struct struct_nt * MYNT;
   MYRT=(struct struct_rt *)lnmmalloc(sizeof(struct struct_rt));
-  bzero(MYRT,sizeof(struct struct_rt));
+  memset(MYRT,0,sizeof(struct struct_rt));
   MYNT=(struct struct_rt *)lnmmalloc(sizeof(struct struct_rt));
-  bzero(MYNT,sizeof(struct struct_rt));
+  memset(MYNT,0,sizeof(struct struct_rt));
 #if 0
   MYNT->loglen=tabnamlen;
   MYNT->lognam=tablename;
@@ -402,7 +406,7 @@ int search_log_prc(char * name, int namelen, char ** retname, int * retsize) {
   itm[0].buflen=LNM$C_NAMLENGTH;
   itm[0].bufaddr=resstring;
   itm[0].retlenaddr=&retlen;
-  bzero(&itm[1],sizeof(struct item_list_3));
+  memset(&itm[1],0,sizeof(struct item_list_3));
   sts = exe$trnlnm(0, &prc, &mynam, 0, itm);
 
   if (sts&1) {
@@ -427,7 +431,7 @@ int search_log_sys(char * name, int namelen, char ** retname, int * retsize) {
   itm[0].buflen=LNM$C_NAMLENGTH;
   itm[0].bufaddr=resstring;
   itm[0].retlenaddr=&retlen;
-  bzero(&itm[1],sizeof(struct item_list_3));
+  memset(&itm[1],0,sizeof(struct item_list_3));
   sts = exe$trnlnm(0, &sys, &mynam, 0, itm);
 
   if (sts&1) {

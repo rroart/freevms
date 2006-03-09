@@ -22,6 +22,7 @@
 #include <ipldef.h>
 #include <phddef.h>
 #include <rdedef.h>
+#include <misc_routines.h>
 
 static inline int mlock_fixup_all(struct _rde * vma, int newflags)
 {

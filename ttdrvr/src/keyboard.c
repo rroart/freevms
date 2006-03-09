@@ -55,6 +55,8 @@
 #include <ssdef.h>
 
 #include <linux/reboot.h>
+#include <sch_routines.h>
+#include <misc_routines.h>
 
 #define SIZE(x) (sizeof(x)/sizeof((x)[0]))
 

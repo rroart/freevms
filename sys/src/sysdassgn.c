@@ -12,6 +12,8 @@
 #include<system_data_cells.h>
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
 
 asmlinkage int exe$dassgn(unsigned short int chan) {
   struct _ccb * ccb;
@@ -20,7 +22,7 @@ asmlinkage int exe$dassgn(unsigned short int chan) {
     return sts;
   // call exe$canceln, but not implemented, do $cancel instead
   // cancel is according to the book going to get the code, but how?
-  sts = exe$cancel(chan, 0 /*CAN$C_DASSGN*/); // does not read param
+  sts = exe$cancel(chan /*, 0 CAN$C_DASSGN*/); // does not read param
   // call verify_chan again, in case of asts
   // check ccb$l_wind and close the file
   // check ccb$w_ioc to see if outstanding io

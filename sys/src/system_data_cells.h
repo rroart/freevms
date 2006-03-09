@@ -1352,8 +1352,13 @@ extern unsigned long rms$gq_reserved08;
 extern unsigned long rms$gq_reserved09;
 extern unsigned long rms$gq_reserved10;
 extern unsigned long sch$al_cpu_cap;
+#ifdef __i386__
 extern unsigned long long sch$aq_comh[33];
 extern unsigned long long sch$aq_comoh[33];
+#else
+extern unsigned long long sch$aq_comh[33][2];
+extern unsigned long long sch$aq_comoh[33][2];
+#endif
 extern  unsigned long long * sch$aq_comot; /* really 32 */
 extern unsigned long long * sch$aq_comt;
 extern struct _wqh sch$aq_wqhdr[12];
@@ -1925,5 +1930,97 @@ extern spinlock_t SPIN_TIMER;
 extern spinlock_t SPIN_PR_LK8;
 extern spinlock_t SPIN_IOLOCK8;
 
+#ifdef __x86_64__
+
+#define P1PP_BASE 0x7ffff000
+#define P1PP_UNIT 0x8
+
+#define ctl$gl_pcb (*((struct _pcb **)(((long)P1PP_BASE) + 0)))
+#define ctl$gl_phd (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 1)))
+#define ctl$gw_nmioch (*((unsigned short *)(((long)P1PP_BASE) + P1PP_UNIT * 2)))
+#define ctl$gl_chindx (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 3)))
+#define ctl$gl_lnmhash (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 4)))
+#define ctl$gl_lnmdirect (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 5)))
+#define ctl$al_stack (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 6)))
+#define ctl$gq_lnmtbl_cache (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 10)))
+#define ctl$gl_cmsupr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 12)))
+#define ctl$gl_cmuser (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 13)))
+#define ctl$gl_cmhandler (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 14)))
+#define ctl$aq_excvec (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 15)))
+#define ctl$gl_thexec (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 23)))
+#define ctl$gl_thsupr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 24)))
+#define ctl$gq_common (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 25)))
+#define ctl$gl_getmsg (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 27)))
+#define ctl$al_stacklim (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 28)))
+#define ctl$gl_ctlbasva (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 32)))
+#define ctl$gl_imghdrbf (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 33)))
+#define ctl$gl_imglstptr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 34)))
+#define ctl$gq_allocreg (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 35)))
+#define ctl$gq_mountlst (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 37)))
+#define ctl$t_username (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 39)))
+#define ctl$t_account (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 41)))
+#define ctl$gq_login (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 42)))
+#define ctl$gl_finalsts (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 44)))
+#define ctl$gl_wspeak (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 45)))
+#define ctl$gl_virtpeak (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 46)))
+#define ctl$gl_volumes (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 47)))
+#define ctl$gq_istart (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 48)))
+#define ctl$gl_icputim (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 50)))
+#define ctl$gq_ifaults (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 51)))
+#define ctl$gl_ifaultio (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 53)))
+#define ctl$gl_iwspeak (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 54)))
+#define ctl$gl_ipagefl (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 55)))
+#define ctl$gl_idiocnt (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 56)))
+#define ctl$gl_ibiocnt (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 57)))
+#define ctl$gl_ivolumes (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 58)))
+#define ctl$t_nodeaddr (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 59)))
+#define ctl$t_nonename (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 60)))
+#define ctl$t_remoteid (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 61)))
+#define ctl$gq_procpriv (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 62)))
+#define ctl$gl_usrchmk (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 63)))
+#define ctl$gl_usrchme (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 64)))
+#define ctl$gl_powerast (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 65)))
+#define ctl$gb_pwrmode (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 66)))
+#define ctl$gb_ssfilter (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 67)))
+#define ctl$gb_reenable_asts (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 68)))
+#define ctl$al_finalexc (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 69)
+#define ctl$gl_ccbbase (*((struct _ccb * *)(((long)P1PP_BASE) + P1PP_UNIT * 73)))
+#define ctl$gq_dbgarea (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 74)))
+#define ctl$gl_rmsbase (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 75)))
+#define ctl$gl_ppmsg (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 76)))
+#define ctl$gb_msgmask (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 78)))
+#define ctl$gb_deflang (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 79)))
+#define ctl$gw_ppmsgchn (*((unsigned short *)(((long)P1PP_BASE) + P1PP_UNIT * 80)))
+#define ctl$gl_usrundwn (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 81)))
+#define ctl$gl_ruf (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 82)))
+#define ctl$gl_sitespec (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 83)))
+#define ctl$gl_knownfil (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 84)))
+#define ctl$al_ipastvec (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 85)))
+#define ctl$gl_cmcntx (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 93)))
+#define ctl$gl_aiflnkptr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 94)))
+#define ctl$gl_f11bxqp (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 95)))
+#define ctl$gq_p0alloc (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 96)))
+#define ctl$gl_prcallcnt (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 98)))
+#define ctl$gl_rdiptr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 99)))
+#define ctl$gl_lnmdirseq (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 100)))
+#define ctl$gq_helpflags (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 101)))
+#define ctl$gq_termchar (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 102)))
+#define ctl$gl_krpfl (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 103)))
+#define ctl$gl_krpbl (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 104)))
+#define ctl$gl_creprc_flags (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 105)))
+#define ctl$gl_thcount (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 106)))
+#define ctl$gq_cwps_q1 (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 109)))
+#define ctl$gq_cwps_q2 (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 111)))
+#define ctl$gl_cwps_l1 (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 113)))
+#define ctl$gl_cwps_l2 (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 114)))
+#define ctl$gl_cwps_l3 (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 115)))
+#define ctl$gl_cwps_l4 (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 116)))
+#define ctl$gl_prcprm_kdata2 (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 117)))
+#define ctl$gl_usrundwn_exec (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 118)))
+#define ctl$ag_clidata (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 119)))
+#define ctl$gl_fixuplnk (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 120)))
+#define ctl$gl_iaflnkptr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 121)))
+#endif
 #endif
  
+unsigned long long inline unix_to_vms_time(unsigned long l);

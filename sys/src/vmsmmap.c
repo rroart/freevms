@@ -31,6 +31,9 @@
 #include <va_rangedef.h>
 #include <dyndef.h>
 #include <fcbdef.h>
+#include <queue.h>
+#include <misc_routines.h>
+#include <exe_routines.h>
 
 struct vm_area_struct * find_vma_intersection2(struct mm_struct * mm, unsigned long start_addr, unsigned long end_addr);
 
@@ -1041,7 +1044,12 @@ void exit_mmap(struct mm_struct * mm)
 		BUG();
 #endif
 
+	//printk("cpt %x %x %x %x\n",mm, FIRST_USER_PGD_NR, USER_PTRS_PER_PGD -1);
+#ifdef __i386__
 	clear_page_tables(mm, FIRST_USER_PGD_NR, USER_PTRS_PER_PGD -1 ); // don't clobber P1
+#else
+	clear_page_tables(mm, FIRST_USER_PGD_NR, 1 ); // don't clobber P1
+#endif
 }
 
 /* Insert vm structure into process list sorted by address

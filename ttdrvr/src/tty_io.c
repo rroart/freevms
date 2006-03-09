@@ -116,9 +116,11 @@
 #include <ucbdef.h>
 #include <system_data_cells.h>
 #include <ccbdef.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 #ifdef CONFIG_VT
-#if 0
+#if 1
 extern void con_init_devfs (void);
 #endif
 #endif

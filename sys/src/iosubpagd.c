@@ -16,8 +16,10 @@
 #include<sbdef.h>
 #include<system_data_cells.h>
 #include<sysgen.h>
+#include <ioc_routines.h>
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
+#include <exe_routines.h>
 
 int ioc$ffchan(unsigned short int *chan) {
   unsigned short int i;
@@ -97,8 +99,8 @@ int ioc$search(struct return_values *r, void * devnam) {
       goto next;
     if (sb && 0!=strncmp(&sb->sb$t_nodename[1],node,nodelen))
       goto next;
-    if (!bcmp(&d->ddb$t_name[1],device,3/* was s->dsc$w_length*/)) {
-      struct _ucb * tmp = d->ddb$l_ucb;
+    if (!memcmp(&d->ddb$t_name[1],device,3/* was s->dsc$w_length*/)) {
+      struct _ucb * tmp = d->ddb$ps_ucb;
       char * c=device;
 #if 0
       char unit=dsc$strtol(&c[3], devstrlen-3-(device-devstr), 0, 10); // was: c[3]-48;
@@ -111,10 +113,10 @@ int ioc$search(struct return_values *r, void * devnam) {
 	if (unit==tmp->ucb$w_unit)
 	  goto out;
 	tmp=tmp->ucb$l_link;
-      } while (tmp && tmp!=d->ddb$l_ucb);
+      } while (tmp && tmp!=d->ddb$ps_ucb);
       return SS$_NOSUCHDEV;
     out:
-      r->val1=tmp; // was d->ddb$l_ucb;
+      r->val1=tmp; // was d->ddb$ps_ucb;
       return SS$_NORMAL;
     }
   next:
@@ -144,7 +146,7 @@ int ioc_std$trandevnam (void * descr_p, int flags, char *buf, int *outlen, void 
   itm[0].buflen=4;
   itm[0].retlenaddr=outlen;
   itm[0].bufaddr=buf;
-  bzero(&itm[1],sizeof(struct item_list_3));
+  memset(&itm[1],0,sizeof(struct item_list_3));
   *out_p=buf;
   struct dsc$descriptor * d = descr_p, descr;
   descr.dsc$a_pointer=d->dsc$a_pointer;

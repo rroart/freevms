@@ -15,6 +15,7 @@
 #include <asm/current.h>
 #include <linux/kernel.h>
 #include <asm/hw_irq.h>
+#include <queue.h>
 
 asmlinkage void exe$forkdspth(int i);
 void exe$fork(struct _irp * i, struct _ucb * u);

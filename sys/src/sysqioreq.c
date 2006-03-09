@@ -12,6 +12,7 @@
 #include<ddtdef.h>
 #include<dyndef.h>
 #include<fdtdef.h>
+#include<ipl.h>
 #include<internals.h>
 #include<iodef.h>
 #include<ipldef.h>
@@ -28,6 +29,12 @@
 #include<linux/kernel.h>
 #include<asm/hw_irq.h>
 #include "../../starlet/src/sysdep.h"
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <sch_routines.h>
+#include <ioc_routines.h>
+#include <queue.h>
+#include <linux/slab.h>
 
 void exe$qioqe2ppkt (struct _pcb * p, struct _irp * i);
 void exe$qioqxqppkt (struct _pcb * p, struct _irp * i);
@@ -45,7 +52,7 @@ void exe$insertirp(struct _ucb * u, struct _irp * i) {
   insque(i,tmp);
 }
 
-int exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, unsigned long s) {
+int exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, int qio_sts) {
   // acquire forklock etc
   forklock(u->ucb$b_flck,-1);
 #if 0
@@ -60,7 +67,7 @@ int exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, unsigned 
   SOFTINT_IOPOST_VECTOR;
 
   forkunlock(u->ucb$b_flck,-1);
-  return s;
+  return qio_sts;
 }
 
 void exe$altqueuepkt (void) {}
@@ -162,7 +169,7 @@ asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int f
   setipl(IPL$_ASTDEL);
   /*check proc quota*/
   i=kmalloc(sizeof(struct _irp),GFP_KERNEL);
-  bzero(i,sizeof(struct _irp));
+  memset(i,0,sizeof(struct _irp));
   i->irp$b_type=DYN$C_IRP;
   i->irp$b_efn=efn;
   i->irp$b_rmod=p->psl_prv_mod;

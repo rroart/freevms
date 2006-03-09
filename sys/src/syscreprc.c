@@ -22,8 +22,13 @@
 #include<secdef.h>
 #include<ssdef.h>
 #include<starlet.h>
+#include <queue.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <sch_routines.h>
 
 #include <linux/sched.h>
+#include <linux/slab.h>
 
 #ifndef __arch_um__
 #include<asm/uaccess.h>

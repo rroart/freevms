@@ -5,6 +5,7 @@
 
 #include<system_data_cells.h>
 #include<linux/kernel.h>
+#include <asm/uaccess.h>
 #include <asm/hw_irq.h>
 #include <vms_drivers.h>
 #include <ipldef.h>
@@ -13,8 +14,13 @@
 #include <acbdef.h>
 #include <tastdef.h>
 #include <ttyucbdef.h>
+#include <com_routines.h>
+#include <sch_routines.h>
+#include <ipl.h>
+#include <queue.h>
 
 #include <linux/mm.h>
+#include <linux/slab.h>
 
 void  com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid);
 

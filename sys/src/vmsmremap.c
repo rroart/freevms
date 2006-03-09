@@ -23,6 +23,7 @@
 #include <ipldef.h>
 #include <phddef.h>
 #include <rdedef.h>
+#include <misc_routines.h>
 
 extern int vm_enough_memory(long pages);
 
@@ -156,7 +157,9 @@ static inline unsigned long move_vma(struct _rde * vma,
 			if ((prev->rde$pq_start_va + prev->rde$q_region_size) == next->rde$pq_start_va && can_vma_merge(next, prev->rde$l_flags)) {
 				spin_lock(&mm->page_table_lock);
 				prev->rde$q_region_size = next->rde$q_region_size;
+#if 0
 				__vma_unlink(mm, next, prev);
+#endif
 				spin_unlock(&mm->page_table_lock);
 
 				mm->map_count--;

@@ -10,10 +10,13 @@
 #include<cpudef.h>
 #include<dyndef.h>
 #include<system_data_cells.h>
+#include <ipl.h>
 #include<internals.h>
 #include <statedef.h>
 #include<linux/vmalloc.h>
 #include<linux/smp.h>
+#include <linux/slab.h>
+#include <exe_routines.h>
 
 asmlinkage int exe$setimr  (unsigned int efn, signed long long *daytim,
 		 void (*astadr)(long), unsigned
@@ -21,7 +24,7 @@ asmlinkage int exe$setimr  (unsigned int efn, signed long long *daytim,
   unsigned long long time;
   struct _tqe * t=kmalloc(sizeof(struct _tqe),GFP_KERNEL);
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
-  bzero(t,sizeof(struct _tqe));
+  memset(t,0,sizeof(struct _tqe));
   t->tqe$b_type=DYN$C_TQE;
   exe$clref(efn);
   if (flags) t->tqe$b_rqtype=TQE$M_CHK_CPUTIM;
@@ -56,7 +59,7 @@ asmlinkage int exe$schdwk(unsigned int *pidadr, void *prcnam, signed long long *
   unsigned long long time;
   struct _tqe * t=kmalloc(sizeof(struct _tqe),GFP_KERNEL);
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
-  bzero(t,sizeof(struct _tqe));
+  memset(t,0,sizeof(struct _tqe));
   t->tqe$b_type=DYN$C_TQE;
   if (*daytim<0) {
     time=exe$gq_systime-*daytim;

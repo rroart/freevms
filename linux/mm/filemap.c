@@ -1739,6 +1739,14 @@ out:
 	return retval;
 }
 
+#ifdef __x86_64__
+asmlinkage ssize_t sys_sendfile64(int out_fd, int in_fd, loff_t *offset, size_t count)
+{
+  printk("sendfile64 not imp\n");
+  return -1;
+}
+#endif
+
 static ssize_t do_readahead(struct file *file, unsigned long index, unsigned long nr)
 {
 	struct address_space *mapping = file->f_dentry->d_inode->i_mapping;

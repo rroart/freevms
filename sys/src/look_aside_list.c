@@ -5,9 +5,9 @@
 
 struct _myhead {
   struct _myhead * hd$l_flink;
-  int hd$l_seq;
+  long hd$l_seq;
 };
-
+#include<linux/kernel.h>
 void *exe$lal_remove_first(void *listhead) {
   struct _myhead * h=listhead;
   struct _myhead * ret = h->hd$l_flink;

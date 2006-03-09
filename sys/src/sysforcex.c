@@ -9,12 +9,18 @@
 #include<acbdef.h>
 #include<pridef.h>
 #include<ipldef.h>
+#include<ipl.h>
 #include<internals.h>
 #include<system_data_cells.h>
 #include<cwpsdef.h>
 #include<cdrpdef.h>
 #include<rddef.h>
 #include<ssdef.h>
+#include <linux/slab.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <sch_routines.h>
+#include <scs_routines.h>
 
 asmlinkage int exe$exit(unsigned int code);
 
@@ -36,7 +42,7 @@ asmlinkage int exe$forcex(unsigned int *pidadr, void *prcnam, unsigned int code)
   if (!p) return 0;
   p->pcb$l_sts|=PCB$M_FORCPEN;
   a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
-  bzero(a,sizeof(struct _acb));
+  memset(a,0,sizeof(struct _acb));
   a->acb$l_pid=p->pcb$l_pid;
   a->acb$l_ast=&exe$exit;
   a->acb$l_astprm=code;
@@ -58,7 +64,7 @@ int cwps$forcex(unsigned int *pidadr, void *prcnam, unsigned int code){
   cwpssrv->cwpssrv$b_subtype=CWPSSRV$K_FORCEX;
   if (pidadr) cwpssrv->cwpssrv$l_sought_epid=*pidadr&0x7fffffff;
   cwpsfex->cwpsfex$l_code=code;
-  bzero(c,sizeof(struct _cdrp));
+  memset(c,0,sizeof(struct _cdrp));
   c->cdrp$l_rwcptr=0;
   c->cdrp$l_rspid=scs_std$alloc_rspid(0,0,c,0);
   scs_std$find_rdte( c->cdrp$l_rspid, &r);

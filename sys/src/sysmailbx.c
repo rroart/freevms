@@ -12,10 +12,16 @@
 #include <misc.h>
 #include <ssdef.h>
 #include <ipldef.h>
+#include <ipl.h>
 #include <ccbdef.h>
 #include <cmbdef.h>
 #include <lnmdef.h>
 #include <ucbdef.h>
+#include <queue.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
+#include <sch_routines.h>
 
 int clone_init_ucb() {
   extern struct _mb_ucb * mbucb0;

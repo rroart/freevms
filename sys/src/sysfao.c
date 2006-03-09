@@ -8,6 +8,8 @@
 #include<system_data_cells.h>
 #include<ssdef.h>
 #include<stdarg.h>
+#include <exe_routines.h>
+#include <linux/string.h>
 
 asmlinkage int exe$faol(void * ctrstr , short int * outlen , void * outbuf , int * prmlst) {
   int * argv=prmlst;

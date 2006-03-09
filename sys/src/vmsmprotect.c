@@ -23,6 +23,7 @@
 #include <phddef.h>
 #include <rdedef.h>
 #include <secdef.h>
+#include <misc_routines.h>
 
 static inline void change_pte_range(pmd_t * pmd, unsigned long address,
 	unsigned long size, pgprot_t newprot)
@@ -113,7 +114,9 @@ static inline int mprotect_fixup_all(struct _rde * vma, struct _rde ** pprev,
 	    /*!vma->vm_file && */ !(vma->rde$l_flags & VM_SHARED)) {
 		spin_lock(&mm->page_table_lock);
 		prev->rde$q_region_size = vma->rde$q_region_size;
+#if 0
 		__vma_unlink(mm, vma, prev);
+#endif
 		spin_unlock(&mm->page_table_lock);
 
 		kmem_cache_free(vm_area_cachep, vma);

@@ -8,7 +8,7 @@
 #include <ucbdef.h>
 #include <ttyvecdef.h>
 #include <ttyucbdef.h>
-
+#include <queue.h>
 #include <ttytadef.h> // not here according to manual
 #include <linux/mm.h> // need to do above
 

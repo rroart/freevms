@@ -27,6 +27,9 @@
 #include<descrip.h>
 #include<ttyucbdef.h>
 #include<ttyvecdef.h>
+#include <ioc_routines.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 #include<linux/blkdev.h>
 
@@ -47,7 +50,6 @@ static struct _fdt tt$fdt = {
 int tty$startio (int,int);
 static void  unsolint (void) { };
 static void  cancel (void) { };
-static void  ioc_std$cancelio (void) { };
 static void  tty$cancelio ();
 static void  regdump (void) { };
 static void  diagbuf (void) { };
@@ -75,11 +77,11 @@ static struct _ddt tt$ddt = {
   ddt$l_mntver: mntver,
   ddt$l_cloneducb: cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: mntv_sssc,
-  ddt$l_mntv_for: mntv_for,
-  ddt$l_mntv_sqd: mntv_sqd,
-  ddt$l_aux_storage: aux_storage,
-  ddt$l_aux_routine: aux_routine
+  ddt$ps_mntv_sssc: mntv_sssc,
+  ddt$ps_mntv_for: mntv_for,
+  ddt$ps_mntv_sqd: mntv_sqd,
+  ddt$ps_aux_storage: aux_storage,
+  ddt$ps_aux_routine: aux_routine
 };
 
   extern tty$getnextchar();
@@ -197,7 +199,7 @@ int tt$init_tables() {
   return SS$_NORMAL;
 }
 
-int tty_iodb_vmsinit(void) {
+long tty_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&tt$ucb;
   struct _ddb * ddb=&tt$ddb;
@@ -208,9 +210,9 @@ int tty_iodb_vmsinit(void) {
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,sizeof(struct _ucb));
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,sizeof(struct _ucb));
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
 #if 0
   init_ddb(&tt$ddb,&tt$ddt,&tt$ucb,"dqa");
@@ -234,7 +236,7 @@ int tty_iodb_vmsinit(void) {
 
 }
 
-int tty_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long tty_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&tt$ucb*/,&newucb);

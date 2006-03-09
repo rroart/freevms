@@ -21,9 +21,19 @@
 #include <tqedef.h>
 #include <dyndef.h>
 #include <cebdef.h>
+#include <misc_routines.h>
+#include <mmg_routines.h>
+#include <exe_routines.h>
 
 #undef VMS_MM_DEBUG 
 #define VMS_MM_DEBUG
+
+#undef OLDINT
+#define OLDINT
+
+#ifdef __x86_64__
+#undef OLDINT
+#endif
 
 #if 0
 // fix these later? they are presumably dead 
@@ -140,7 +150,11 @@ static void fastcall __free_pages_ok (struct page *page, unsigned int order)
 
 	if (!in_free_all_bootmem_core)
 	  for(i=0;i<(1 << order);i++,page++) {
+#ifdef OLDINT
 	    mmg$dallocpfn(page);
+#else
+	    mmg$dallocpfn(page-mem_map);
+#endif
 	    //memlist_del(&page->list);
 	  }
 
@@ -408,6 +422,7 @@ void __init free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	pgdat->node_start_mapnr = (lmem_map - mem_map);
 	pgdat->nr_zones = 0;
 
+	void __init init_nonpaged(void *pgdat, unsigned long totalpages);
 	init_nonpaged(pgdat,totalpages);
 
 #if 0
@@ -604,12 +619,12 @@ int exe_std$allocbuf (int reqsize, int *alosize_p, void **bufptr_p) {
   return exe_std$allocxyz(alosize_p,bufptr_p,DYN$C_BUFIO,reqsize);
 }
 
-int exe_std$allocceb(int *alosize_p, struct _tqe **ceb_p) {
+int exe_std$allocceb(int *alosize_p, struct _ceb **ceb_p) {
   int size=sizeof(struct _ceb);
   return exe_std$allocxyz(alosize_p,ceb_p,DYN$C_CEB,size);
 }
 
-int exe_std$allocirp(struct _tqe **irp_p) {
+int exe_std$allocirp(struct _irp **irp_p) {
   int alosize_p;
   int size=sizeof(struct _irp);
   return exe_std$allocxyz(&alosize_p,irp_p,DYN$C_IRP,size);
@@ -622,32 +637,44 @@ int exe_std$alloctqe(int *alosize_p, struct _tqe **tqe_p) {
 
 int poison_packet(char * packet, int size, int deall) {
 #ifdef VMS_MM_DEBUG
-  long * l = packet;
+  int * l = packet; // check. fix later.
   char poisonc=0x42;
   int poison=0x12345678;
   if (deall)
     poison=0x87654321;
   if (deall)
     poisonc=0xbd;
+#ifdef __i386__
   l[2]=poison;
   memset(packet+12,poisonc,size-12);
+#else
+  l[4]=poison;
+  memset(packet+20,poisonc,size-20);
+#endif
 #endif
 }
 
 int check_packet(char * packet, int size, int deall) {
 #ifdef VMS_MM_DEBUG
   deall=!deall;
-  long * l = packet;
+  int * l = packet; // check. fix later.
   char poisonc=0x42;
   int poison=0x12345678;
   if (deall)
     poison=0x87654321;
   if (deall)
     poisonc=0xbd;
+#ifdef __i386__
   if (l[2]!=poison) 
-    panic("poison %x %x != %x\n",l,l[2],poison);
+    panic("poison %lx %x != %x\n",l,l[2],poison);
   char * c = packet + 12;
   size-=12;
+#else
+  if (l[4]!=poison) 
+    panic("poison %lx %x != %x\n",l,l[4],poison);
+  char * c = packet + 20;
+  size-=20;
+#endif
   for(;size;size--,c++) 
     if (*c!=poisonc) panic("poisonc %x %x %x\n",size,c,poisonc);
 #endif

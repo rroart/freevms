@@ -13,13 +13,16 @@
 #include<npool_data.h>
 #include<ssdef.h>
 #include<system_data_cells.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <mmg_routines.h>
 
 // move this later
 //unsigned long long ioc$gq_listheads[128];
 
 struct _myhead {
   struct _myhead * hd$l_flink;
-  int hd$l_seq;
+  long hd$l_seq;
 };
 
 struct mymap {
@@ -91,7 +94,7 @@ int exe$alononpagvar (int reqsize, int *alosize_p, void **pool_p) {
   struct _lsthds * lsthd = pooldata->npool$ar_lsthds;
   void * array = &lsthd->lsthds$q_listheads;
 
-  sts = exe$reclaim_pool_aggressive(exe$gs_npp_npool);
+  exe$reclaim_pool_aggressive(exe$gs_npp_npool);
   sts=exe$allocate(reqsize , &exe$gl_nonpaged, 0 , alosize_p, pool_p);
 
   if (sts==SS$_NORMAL)

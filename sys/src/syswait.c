@@ -10,9 +10,16 @@
 #include <ipldef.h>
 #include <ssdef.h>
 #include <system_data_cells.h>
+#include <misc_routines.h>
+#include <sch_routines.h>
+#include <ipl.h>
 #include <internals.h>
+#include <queue.h>
 
 int exe$wait(unsigned int efn, unsigned int mask, int waitallflag, void * dummy) {
+#ifdef __x86_64__
+  __asm__ __volatile__ ("movq %%rsp,%0; ":"=r" (dummy) );
+#endif
   struct _pcb * p=ctl$gl_pcb;
   int efncluster=(efn&224)>>5;
   unsigned long * clusteraddr;

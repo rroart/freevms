@@ -62,6 +62,9 @@
 #include <va_rangedef.h>
 #include <vmspte.h>
 #include <wsldef.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <mmg_routines.h>
 
 pgprot_t x_to_prot(int x) {
   pgprot_t y;
@@ -102,6 +105,7 @@ void __free_pte(pte_t pte)
 	struct page *page = pte_page(pte);
 	if ((!VALID_PAGE(page)) || PageReserved(page))
 		return;
+	void fastcall set_page_dirty(struct page *page);
 	if (pte_dirty(pte))
 		set_page_dirty(page);		
 	//	free_page_and_swap_cache(page);
@@ -287,7 +291,7 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				    *(unsigned long *)mypte|=_PAGE_PRESENT;
 				    *(unsigned long *)mypte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
 				    //flush_tlb_range(current->mm, address2, address2 + PAGE_SIZE);
-				    bcopy(address2,__va(page*PAGE_SIZE),PAGE_SIZE);
+				    memcpy(__va(page*PAGE_SIZE),address2,PAGE_SIZE);
 				    //map(address2,(__va(page*PAGE_SIZE)),PAGE_SIZE,1,1,1);
 				    //*(unsigned long *)pte|=1;
 				  }
@@ -340,9 +344,9 @@ skip_copy_pte_range:		address = (address + PMD_SIZE) & PMD_MASK;
 				      panic("die is cast\n");
 				    }
 #ifdef __arch_um__
-				    bcopy(address2,__va(page*PAGE_SIZE),PAGE_SIZE);
+				    memcpy(__va(page*PAGE_SIZE),address2,PAGE_SIZE);
 #else
-				    bcopy(__va(address2),__va(page*PAGE_SIZE),PAGE_SIZE);
+				    memcpy(__va(page*PAGE_SIZE),__va(address2),PAGE_SIZE);
 #endif
 				} else {
 				  static int mydebugg = 0;

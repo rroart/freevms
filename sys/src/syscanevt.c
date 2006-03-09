@@ -11,6 +11,7 @@
 #include<system_data_cells.h>
 
 #include <tqedef.h>
+#include <exe_routines.h>
 
 asmlinkage int exe$cantim(unsigned long reqidt, unsigned int acmode){
   exe_std$rmvtimq(acmode,reqidt,0,0);

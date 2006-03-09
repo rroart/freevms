@@ -8,6 +8,8 @@
 
 #include <ipldef.h>
 #include <system_data_cells.h>
+#include <ipl.h>
+#include <sch_routines.h>
 
 asmlinkage int cmod$astexit() {
   struct _pcb * p = ctl$gl_pcb;

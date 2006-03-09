@@ -26,6 +26,7 @@
 #include<linux/pci.h>
 #include<system_service_setup.h>
 #include<descrip.h>
+#include <ioc_routines.h>
 
 #include<linux/blkdev.h>
 
@@ -71,7 +72,6 @@ static struct _fdt kb$fdt = {
 int kbd$startio (int a,int b ) { }
 static void  unsolint (void) { };
 static void  cancel (void) { };
-static void  ioc_std$cancelio (void) { };
 static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
@@ -98,11 +98,11 @@ static struct _ddt kb$ddt = {
   ddt$l_mntver: mntver,
   ddt$l_cloneducb: cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: mntv_sssc,
-  ddt$l_mntv_for: mntv_for,
-  ddt$l_mntv_sqd: mntv_sqd,
-  ddt$l_aux_storage: aux_storage,
-  ddt$l_aux_routine: aux_routine
+  ddt$ps_mntv_sssc: mntv_sssc,
+  ddt$ps_mntv_for: mntv_for,
+  ddt$ps_mntv_sqd: mntv_sqd,
+  ddt$ps_aux_storage: aux_storage,
+  ddt$ps_aux_routine: aux_routine
 };
 
 int kbd$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
@@ -186,7 +186,7 @@ int kb$init_tables() {
   return SS$_NORMAL;
 }
 
-int kbd_iodb_vmsinit(void) {
+long kbd_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&kb$ucb;
   struct _ddb * ddb=&kb$ddb;
@@ -223,7 +223,7 @@ int kbd_iodb_vmsinit(void) {
 
 }
 
-int kbd_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long kbd_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&kb$ucb*/,&newucb);

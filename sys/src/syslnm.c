@@ -42,7 +42,10 @@ struct lnmhshp lnmhshp;
 #include<lnmsub.h>
 #include<sysgen.h> 
 #include<system_data_cells.h>
+#include<ipl.h>
 #include<internals.h>
+#include <misc_routines.h>
+#include <linux/slab.h>
 #endif
 
 /* Author: Roar Thronæs */
@@ -113,19 +116,19 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
   setipl(IPL$_ASTDEL);
 
   mylnmb=lnmmalloc(sizeof(struct _lnmb));
-  bzero(mylnmb,sizeof(struct _lnmb));
+  memset(mylnmb,0,sizeof(struct _lnmb));
   mylnmth=lnmmalloc(sizeof(struct _lnmth));
-  bzero(mylnmth,sizeof(struct _lnmth));
+  memset(mylnmth,0,sizeof(struct _lnmth));
 
   RT=(struct struct_rt *) lnmmalloc(sizeof(struct struct_rt));
-  bzero(RT,sizeof(struct struct_rt));
+  memset(RT,0,sizeof(struct struct_rt));
 
   lnm$lockw();
 
   status=lnm$firsttab(&ret,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
 
   mylnmb=lnmmalloc(sizeof(struct _lnmb));
-  bzero(mylnmb,sizeof(struct _lnmb));
+  memset(mylnmb,0,sizeof(struct _lnmb));
   mylnmb->lnmb$l_flink=0;
   mylnmb->lnmb$l_blink=0;
   mylnmb->lnmb$w_size=sizeof(struct _lnmb);
@@ -145,7 +148,7 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
       break;
     case LNM$_STRING:
       mylnmx=lnmmalloc(sizeof(struct _lnmx));
-      bzero(mylnmx,sizeof(struct _lnmx));
+      memset(mylnmx,0,sizeof(struct _lnmx));
 
       *next_lnmx=mylnmx;
       next_lnmx=&mylnmx->lnmx$l_next;
@@ -200,19 +203,19 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   }
   setipl(IPL$_ASTDEL);
   mylnmb=lnmmalloc(sizeof(struct _lnmb));
-  bzero(mylnmb,sizeof(struct _lnmb));
+  memset(mylnmb,0,sizeof(struct _lnmb));
   mylnmx=lnmmalloc(sizeof(struct _lnmx));
-  bzero(mylnmx,sizeof(struct _lnmx));
+  memset(mylnmx,0,sizeof(struct _lnmx));
   mylnmth=lnmmalloc(sizeof(struct _lnmth));
-  bzero(mylnmth,sizeof(struct _lnmth));
+  memset(mylnmth,0,sizeof(struct _lnmth));
   myorb=lnmmalloc(sizeof(struct _orb));
-  bzero(myorb,sizeof(struct _orb));
+  memset(myorb,0,sizeof(struct _orb));
   trailer=lnmmalloc(sizeof(long));
 
   /* mutex lock */
   lnm$lockw();
   RT=(struct struct_rt *) lnmmalloc(sizeof(struct struct_rt));
-  bzero(RT,sizeof(struct struct_rt));
+  memset(RT,0,sizeof(struct struct_rt));
 #ifdef LNM_DEBUG 
   //      lnmprintf("");/* this makes a difference somehow */
   //  lnmprintf("this %x\n",mytabnam->dsc$w_length);
@@ -368,7 +371,7 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
 	long * l=i->retlenaddr;
 	*l=i->buflen; // check
       }
-      bcopy((ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,i->bufaddr,i->buflen);
+      memcpy(i->bufaddr,(ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,i->buflen);
 #ifdef LNM_DEBUG 
       lnmprintf("found lnm %x %s\n",i->bufaddr,i->bufaddr);
 #endif
@@ -405,7 +408,7 @@ main(){
 
   /*    lnm$system_directory_b=lnmmalloc(sizeof(struct _lnmth));*/
   lnm$system_directory=lnmmalloc(sizeof(struct _lnmb));
-  bzero(lnm$system_directory,sizeof(struct _lnmb));
+  memset(lnm$system_directory,0,sizeof(struct _lnmb));
   lnm$system_directory->lnmb$l_flink=lnm$system_directory;
   lnm$system_directory->lnmb$l_blink=lnm$system_directory;
   lnm$system_directory->lnmb$b_type=DYN$C_LNM;
@@ -455,17 +458,17 @@ main(){
   i[0].item_code=LNM$_STRING;
   i[0].buflen=5;
   i[0].bufaddr="mylog";
-  bzero(&i[1],sizeof(struct item_list_3));
+  memset(&i[1],0,sizeof(struct item_list_3));
   status=exe$crelnm(0,&mytabnam2,&mynam,0,i);
   i[0].item_code=LNM$_STRING;
   i[0].buflen=6;
   i[0].bufaddr="mylog3";
-  bzero(&i[1],sizeof(struct item_list_3));
+  memset(&i[1],0,sizeof(struct item_list_3));
   status=exe$crelnm(0,&mytabnam2,&mynam2,0,i); 
   i[0].item_code=LNM$_STRING;
   i[0].buflen=6;
   i[0].bufaddr=resstring;
-  bzero(&i[1],sizeof(struct item_list_3));
+  memset(&i[1],0,sizeof(struct item_list_3));
   status=exe$trnlnm(0,&mytabnam2,&mynam,0,i);
 #ifdef LNM_DEBUG 
   lnmprintf("end status %x\n",status);
@@ -517,18 +520,18 @@ void cre_syscommon(char * name) {
   itm[0].item_code=LNM$_STRING;
   itm[0].buflen=strlen(myname);
   itm[0].bufaddr=myname;
-  bzero(&itm[1],sizeof(struct item_list_3));
+  memset(&itm[1],0,sizeof(struct item_list_3));
   sts=exe$crelnm(0,mytabnam,dev,0,itm);
 
   itm[0].item_code=LNM$_STRING;
   itm[0].buflen=strlen(myname2);
   itm[0].bufaddr=myname2;
-  bzero(&itm[1],sizeof(struct item_list_3));
+  memset(&itm[1],0,sizeof(struct item_list_3));
   sts=exe$crelnm(0,mytabnam,dev2,0,itm);
 
   itm[0].item_code=LNM$_STRING;
   itm[0].buflen=strlen(myname3);
   itm[0].bufaddr=myname3;
-  bzero(&itm[1],sizeof(struct item_list_3));
+  memset(&itm[1],0,sizeof(struct item_list_3));
   sts=exe$crelnm(0,mytabnam,dev3,0,itm);
 }

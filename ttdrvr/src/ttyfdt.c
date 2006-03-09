@@ -28,8 +28,13 @@
 #include<ttyucbdef.h>
 #include<ttydef.h>
 #include<ttyrbdef.h>
+#include <com_routines.h>
+#include <ioc_routines.h>
 
 #include<linux/blkdev.h>
+
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 // maybe use _twp and _tt_readbuf for these two?
 int xyz=0;

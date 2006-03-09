@@ -30,6 +30,8 @@
 #include <ttyvecdef.h>
 #include <ttytadef.h>
 #include <tt2def.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
 
 unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 {
@@ -159,7 +161,8 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 	u->ucb$l_devdepnd2 = devdep2;		// Set 2nd CHARACTERISTICS LONGWORD
       }
       sts=	SS$_NORMAL;		// Damn, it worked!
-      return ioc$reqcom(sts,0,u);
+      ioc$reqcom(sts,0,u);
+      return sts;
 #if 0
       return exe$finishioc(sts,i,p,u);		// Complete request
 #endif

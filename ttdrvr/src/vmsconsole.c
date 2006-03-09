@@ -55,6 +55,10 @@
 #include<ttyvecdef.h>
 #include<ttydef.h>
 #include<ttyrbdef.h>
+#include <ioc_routines.h>
+#include <exe_routines.h>
+#include <com_routines.h>
+#include <misc_routines.h>
 
 #include<linux/blkdev.h>
 #include<linux/console.h>
@@ -236,7 +240,6 @@ struct _tt_port con_port_vector = {
 /* more yet undefined dummies */
 static void  unsolint (void) { };
 static void  cancel (void) { };
-static void  ioc_std$cancelio (void) { };
 static void  regdump (void) { };
 static void  diagbuf (void) { };
 static void  errorbuf (void) { };
@@ -266,11 +269,11 @@ static struct _ddt op$ddt = {
   ddt$l_mntver: mntver,
   ddt$l_cloneducb: cloneducb,
   ddt$w_fdtsize: 0,
-  ddt$l_mntv_sssc: mntv_sssc,
-  ddt$l_mntv_for: mntv_for,
-  ddt$l_mntv_sqd: mntv_sqd,
-  ddt$l_aux_storage: aux_storage,
-  ddt$l_aux_routine: aux_routine
+  ddt$ps_mntv_sssc: mntv_sssc,
+  ddt$ps_mntv_for: mntv_for,
+  ddt$ps_mntv_sqd: mntv_sqd,
+  ddt$ps_aux_storage: aux_storage,
+  ddt$ps_aux_routine: aux_routine
 #endif
 };
 
@@ -426,7 +429,7 @@ int op$init_tables() {
   ini_dpt_struc_init(&op$dpt, op$struc_init);
   ini_dpt_struc_reinit(&op$dpt, op$struc_reinit);
   ini_dpt_ucb_crams(&op$dpt, 1/*NUMBER_CRAMS*/);
-  ini_dpt_vector(&op$dpt, con_port_vector);
+  ini_dpt_vector(&op$dpt, &con_port_vector);
   ini_dpt_end(&op$dpt);
 
   // check if ctrlinit needed
@@ -448,7 +451,7 @@ int op$init_tables() {
   return SS$_NORMAL;
 }
 
-int con_iodb_vmsinit(void) {
+long con_iodb_vmsinit(void) {
 #if 0
   struct _ucb * ucb=&op$ucb;
   struct _ddb * ddb=&op$ddb;
@@ -459,9 +462,9 @@ int con_iodb_vmsinit(void) {
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
   unsigned long idb=0,orb=0;
 
-  bzero(ucb,sizeof(struct _tty_ucb)); // check
-  bzero(ddb,sizeof(struct _ddb));
-  bzero(crb,sizeof(struct _crb));
+  memset(ucb,0,sizeof(struct _tty_ucb)); // check
+  memset(ddb,0,sizeof(struct _ddb));
+  memset(crb,0,sizeof(struct _crb));
 
   ucb -> ucb$w_size = sizeof(struct _tty_ucb); // temp placed // check
 
@@ -499,7 +502,7 @@ int con_iodb_vmsinit(void) {
 
 int con_ucb = 0;
 
-int con_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
+long con_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&op$ucb*/,&newucb); // check. skip?

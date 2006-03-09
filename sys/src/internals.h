@@ -1,3 +1,5 @@
+#include<ipl.h>
+
 void qhead_init(void * l);
 
 static int inline vmslock(spinlock_t * lockname,signed int lockipl) {

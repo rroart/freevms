@@ -6,6 +6,8 @@
 #include <ssdef.h>
 #include <starlet.h>
 #include <iosbdef.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 #include<linux/linkage.h>
 #include<asm/unistd.h>
@@ -29,13 +31,19 @@ int exe$synch(unsigned int efn, struct _iosb *iosb) {
 
 int exe$clrast(void) {
   return cmod$astexit(); // check. should be system call?
+#if 0
   printk("this does not work yet (how to implement?), and is strongly discouraged in real VMS too\n");
+#endif
 }
 
-extern /*asmlinkage*/ int exe$qio(unsigned int efn, unsigned /*short*/ int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
-extern /*asmlinkage*/ int exe$qiow(unsigned int efn, unsigned /*short*/ int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
+extern asmlinkage int exe$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
+extern asmlinkage int exe$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
 
-#ifdef __i386__
+#ifdef __x86_64__
+void __set_errno(){}
+#endif
+
+#if (defined __i386__) || (defined __x86_64__)
 int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6) {
   struct struct_qio s;
   s.efn=efn;

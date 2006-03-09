@@ -30,6 +30,9 @@
 #include<ssdef.h>
 
 #include<kfedef.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <linux/slab.h>
 
 int img$known_image(struct dsc$descriptor * name, void ** kfe_p) {
   struct _kfe * kfe = exe$gl_known_files;
@@ -85,7 +88,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   loff_t pos=0;
   int no;
   struct _imcb * im = kmalloc(sizeof(struct _imcb),GFP_KERNEL);
-  bzero(im,sizeof(struct _imcb));
+  memset(im,0,sizeof(struct _imcb));
   //  im->imcb$b_type
   f=rms_open_exec(dscdflnam->dsc$a_pointer);
   if (f==0) return 0;

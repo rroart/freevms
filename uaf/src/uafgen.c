@@ -11,6 +11,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef __x86_64__
+#define MYSIZE 8
+#else
+#define MYSIZE 4
+#endif
+
 int mysearch(void * buf, int size, char * name) {
   char * c, *b, *n;
   int i=0;
@@ -36,9 +42,9 @@ void * mylinesearch(void * buf, char sep, int convert, char * dest, int * retlen
     c=strchr(b,sep);
     if (convert) {
       int i = strtoll(b,0,10);
-      memcpy(dest,&i,4);
+      memcpy(dest,&i,MYSIZE);
     } else {
-      memcpy(dest,&b,4);
+      memcpy(dest,&b,MYSIZE);
       if (retlen)
 	*retlen=c-b;
     }

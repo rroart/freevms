@@ -11,6 +11,8 @@
 #include <cpudef.h>
 #include <ssdef.h>
 #include <system_data_cells.h>
+#include <misc_routines.h>
+#include <sch_routines.h>
 
 inline unsigned long * getefcp(struct _pcb * p, unsigned long efn) {
   return &p->pcb$l_efcs + ((efn&96)>>5);

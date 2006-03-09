@@ -16,8 +16,12 @@
 #include <ssdef.h>
 
 #include <ddbdef.h>
+#include <com_routines.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 #include <linux/mm.h>
+#include <linux/slab.h>
 
 int tty$putnextchar(int * chr, int * CC, struct _ucb * u) {
   *CC=0;

@@ -14,7 +14,10 @@
 #include<statedef.h>
 #include<cpudef.h>
 #include<system_data_cells.h>
+#include<ipl.h>
 #include<internals.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 #include<queue.h>
 
 extern int mydebug;
@@ -145,7 +148,11 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
     p2->pcb$w_state=SCH$C_COMO;
     p2->state=TASK_RUNNING;
     mycheckaddr(0);
+#ifdef __i386__
     insque(p2,*(unsigned long *)&sch$aq_comot[newpri]);
+#else
+    insque(p2,*(unsigned long *)&sch$aq_comoh[newpri][1]);
+#endif
     sch$gl_comoqs|=(1 << newpri);
     mycheckaddr(0);
     return;
@@ -156,7 +163,11 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
   mycheckaddr(0);
   if (!task_on_comqueue(p2)) {
     if (p2!=ctl$gl_pcb) { // another temp workaround
+#ifdef __i386__
       insque(p2,*(unsigned long *)&sch$aq_comt[newpri]);
+#else
+      insque(p2,*(unsigned long *)&sch$aq_comh[newpri][1]);
+#endif
       sch$gl_comqs|=(1 << newpri);
     }
   }
@@ -327,7 +338,11 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
     (p->pcb$w_state)++;
     mycheckaddr(0);
     sch$gl_comoqs=sch$gl_comoqs | (1 << tmppri);
+#ifdef __i386__
     qhead=*(unsigned long *)&sch$aq_comot[tmppri];
+#else
+    qhead=*(unsigned long *)&sch$aq_comoh[tmppri][1];
+#endif
     insque(p,qhead);
     mycheckaddr(0);
   }
@@ -439,7 +454,11 @@ void sch$chsep2(struct _pcb * p,unsigned char newpri) {
     p2->state=TASK_RUNNING;
     p2->pcb$w_state = SCH$C_CUR;
     mycheckaddr(0);
+#ifdef __i386__
     insque(p2,*(unsigned long *)&sch$aq_comot[newpri]);
+#else
+    insque(p2,*(unsigned long *)&sch$aq_comoh[newpri][1]);
+#endif
     sch$gl_comoqs|=(1 << newpri);
     mycheckaddr(0);
     return;
@@ -449,7 +468,11 @@ void sch$chsep2(struct _pcb * p,unsigned char newpri) {
   p2->state=TASK_RUNNING;
   p2->pcb$w_state = SCH$C_CUR;
   mycheckaddr(0);
+#ifdef __i386__
   insque(p2,*(unsigned long *)&sch$aq_comt[newpri]);
+#else
+  insque(p2,*(unsigned long *)&sch$aq_comh[newpri][1]);
+#endif
   sch$gl_comqs|=(1 << newpri);
   mycheckaddr(0);
 }

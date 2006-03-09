@@ -12,6 +12,10 @@
 #include <system_data_cells.h>
 #include<rdedef.h>
 #include<phddef.h>
+#include <queue.h>
+#include <mmg_routines.h>
+#include <exe_routines.h>
+#include <linux/slab.h>
 
 mmg$imgreset() {
   // rm$reset (in rmsreset)

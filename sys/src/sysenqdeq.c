@@ -9,6 +9,7 @@
 #include<linux/vmalloc.h>
 #include<asm/current.h>
 #include<system_data_cells.h>
+#include<ipl.h>
 #include<lckdef.h>
 #include<lckctxdef.h>
 #include<lksbdef.h>
@@ -22,6 +23,12 @@
 #include<pridef.h>
 #include<descrip.h>
 #include<cdrpdef.h>
+#include <queue.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <scs_routines.h>
+#include <sch_routines.h>
+#include <linux/slab.h>
 
 // no vmslock etc here yet
 
@@ -74,7 +81,7 @@ dlm_err(){}
 
 void lck$snd_granted(struct _lkb * lck) {
   struct _cdrp * cdrp = vmalloc(sizeof(struct _cdrp));
-  bzero(cdrp,sizeof(struct _cdrp));
+  memset(cdrp,0,sizeof(struct _cdrp));
   cdrp->cdrp$l_val1=lck->lkb$l_remlkid;
   cdrp->cdrp$l_val2=lck-lockidtbl[0];
   if (!dlmconnected) {
@@ -159,9 +166,9 @@ asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb
     }
 
     res=kmalloc(sizeof(struct _rsb),GFP_KERNEL);
-    bzero(res,sizeof(struct _rsb));
+    memset(res,0,sizeof(struct _rsb));
     lck=kmalloc(sizeof(struct _lkb),GFP_KERNEL);
-    bzero(lck,sizeof(struct _lkb));
+    memset(lck,0,sizeof(struct _lkb));
 
     lck->lkb$b_efn=efn;
     lck->lkb$l_flags=flags;

@@ -12,6 +12,8 @@
 #include <ssdef.h>
 #include <irpdef.h>
 #include <dyndef.h>
+#include <ioc_routines.h>
+#include <misc_routines.h>
 
 int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
  again:

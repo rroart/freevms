@@ -9,6 +9,7 @@
 #include <asm/hw_irq.h>
 #include <asm/current.h>
 #include <system_data_cells.h>
+#include <ipl.h>
 #include <internals.h>
 #include<queue.h>
 #include<ddtdef.h>
@@ -16,6 +17,7 @@
 #include<irpdef.h>
 #include<ipldef.h>
 #include<ddbdef.h>
+#include <ioc_routines.h>
 
 #include <linux/sched.h>
 

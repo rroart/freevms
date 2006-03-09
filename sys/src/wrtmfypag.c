@@ -20,6 +20,10 @@
 #include<pfndef.h>
 #include<pfldef.h>
 #include<wcbdef.h>
+#include <linux/slab.h>
+#include <linux/init.h>
+#include <misc_routines.h>
+#include <mmg_routines.h>
 
 #if 0
 struct _irp * mpw$gl_irpfl = &mpw$gl_irpfl;
@@ -62,7 +66,7 @@ void mmg$purgempl(unsigned long command) {
   mpw$gb_state=command;
 
   struct _irp * i=kmalloc(sizeof(struct _irp),GFP_KERNEL);
-  bzero(i,sizeof(struct _irp));
+  memset(i,0,sizeof(struct _irp));
   // remember that cdrp place is borrowed to use as pte array etc
   i->irp$b_type=DYN$C_INIT;
 #if 0

@@ -50,6 +50,8 @@
 #include <queue.h>
 #include<system_service_setup.h>
 #include <internals.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 #ifdef __arch_um__
 #include <asm-i386/hw_irq.h>
 #endif
@@ -200,7 +202,11 @@ void printcom2(void) {
   unsigned long tmp;
   printk(KERN_EMERG "cpusch %x\n",sch$gl_comqs);
   for(i=16;i<32;i++) {
+#ifdef __i386__
     tmp=&sch$aq_comt[i];
+#else
+    tmp=&sch$aq_comh[i][1];
+#endif
     if(*(unsigned long *)tmp == tmp) {; } else {
       tmp2=tmp;
       printk(KERN_EMERG "com %x ",i);
@@ -426,7 +432,11 @@ static inline int try_to_wake_up(struct task_struct * p, int synchronous)
   //  p->pcb$b_pri=p->pcb$b_prib-3;  /* boost */ /* not here */
   curpri=p->pcb$b_pri;
   if (mydebug4) printk("add tyr %x %x\n",p->pcb$l_pid,curpri);
+#ifdef __i386__
   qhead=*(unsigned long *)&sch$aq_comt[curpri];
+#else
+  qhead=*(unsigned long *)&sch$aq_comh[curpri][1];
+#endif
   if (mydebug4) printk("eq qhead %x %x %x %x\n",
 		       (unsigned long *)qhead,(unsigned long *)(qhead+4),
 		       *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
@@ -639,7 +649,11 @@ asmlinkage void sch$resched(void) {
     sch$gl_comqs=sch$gl_comqs | (1 << curpri);
     //    curpcb->state=TASK_INTERRUPTIBLE; /* soon SCH$C_COM ? */
     curpcb->pcb$w_state=SCH$C_COM;
+#ifdef __i386__    
     qhead=*(unsigned long *)&sch$aq_comt[curpri];
+#else
+    qhead=*(unsigned long *)&sch$aq_comh[curpri][1];
+#endif
     if (!task_on_comqueue(curpcb)) {
       if (curpcb==qhead) panic(" a panic\n");
       insque(curpcb,qhead);

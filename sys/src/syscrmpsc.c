@@ -12,6 +12,7 @@
 #include<fcbdef.h>
 #include<gsddef.h>
 #include<ipldef.h>
+#include<ipl.h>
 #include<phddef.h>
 #include<rdedef.h>
 #include<secdef.h>
@@ -20,6 +21,11 @@
 #include<va_rangedef.h>
 #include<vmspte.h>
 #include<wsldef.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <mmg_routines.h>
+#include <queue.h>
+#include <linux/slab.h>
 
 asmlinkage int exe$crmpsc_wrap(struct struct_crmpsc * s) {
 #ifdef CONFIG_VMS
@@ -66,7 +72,7 @@ asmlinkage int exe$mgblsc(struct _va_range *inadr, struct _va_range *retadr, uns
 }
 
 /* no short int yet*/
-asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam, unsigned long long * ident, unsigned int relpag, unsigned /*short*/ int chan, unsigned int pagcnt, unsigned int vbn, unsigned int prot,unsigned int pfc) {
+asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam, unsigned long long * ident, unsigned int relpag, unsigned /*short*/ long chan, unsigned int pagcnt, unsigned int vbn, unsigned int prot,unsigned int pfc) {
   // we will just have to pretend this fd is chan and offset i vbn (mmap)?
   // fd -> file, have a version with file = fget(fd);
 
@@ -123,9 +129,9 @@ asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, uns
       return exe$mgblsc(inadr,retadr,acmode,flags,gsdnam,ident,relpag);
     }
     gsd=kmalloc(sizeof(struct _gsd),GFP_KERNEL);
-    bzero(gsd,sizeof(struct _gsd));
+    memset(gsd,0,sizeof(struct _gsd));
     name=kmalloc(dsc->dsc$w_length,GFP_KERNEL);
-    bcopy(dsc->dsc$a_pointer,name,dsc->dsc$w_length);
+    memcpy(name,dsc->dsc$a_pointer,dsc->dsc$w_length);
     gsd->gsd$l_basepfn=name; //really t_gsdnam
     gsd->gsd$l_ident=ident; //change later
     gsd->gsd$l_flags=flags;

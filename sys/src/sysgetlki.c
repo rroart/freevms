@@ -18,6 +18,7 @@
 #include<pridef.h>
 #include<descrip.h>
 #include<cdrpdef.h>
+#include <exe_routines.h>
 
 asmlinkage int exe$getlki(unsigned long efn, unsigned long *lkidadr,void *itmlst, struct _iosb *iosb, void (*astadr)(), long astprm,unsigned long reserved) {
 }

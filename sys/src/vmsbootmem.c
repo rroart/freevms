@@ -28,6 +28,13 @@
 
 #include <system_data_cells.h>
 
+#undef OLDINT
+#define OLDINT
+
+#ifdef __x86_64__
+#undef OLDINT
+#endif
+
 /*
  * Access to this subsystem has to be serialized externally. (this is
  * true for the boot process anyway)
@@ -292,31 +299,74 @@ static unsigned long __init free_all_bootmem_core(pg_data_t *pgdat)
 	bdata->node_bootmem_map = NULL;
 
 	prev = 0;
+#ifndef OLDINT
+	int previ = 0;
+#endif
 	page = pgdat->node_mem_map;
 	page++;
 	for (i = 1; i < idx; i++, page++) { // skip physical 0
 	  if (!PageReserved(page)) {
 	    sch$gl_freecnt++;
 	    if (prev) {
+#ifdef OLDINT
 	      prev->pfn$l_flink=page;
+#else
+	      prev->pfn$l_flink=i; // was: page;
+#endif
 	    } else {
+#ifdef OLDINT
 	      pfn$al_head[PFN$C_FREPAGLST]=page;
+#else
+	      pfn$al_head[PFN$C_FREPAGLST]=i; // was: page;
+#endif
 	    }
 	    {
+#ifdef OLDINT
 	      unsigned long * prev2=&page->pfn$l_flink;
+#else
+	      unsigned int * prev2=&page->pfn$l_flink;
+#endif
 	      prev2++;
+#ifdef OLDINT
 	      *prev2=prev; 
+#else
+	      *prev2=previ; // was: prev; 
+#endif
 	      // sick compiler
 	      // it optimized away page->pfn$l_blink=prev
 	      // or interpreted as flink
 	    }
+#ifdef OLDINT
 	    prev=page;
+#else
+	    prev=page;
+	    previ=i;
+#endif
 	    page->pfn$v_loc=PFN$C_FREPAGLST;
 	    page->pfn$v_pagtyp=PFN$C_SYSTEM;
 	  }
 	}
 	prev->pfn$l_flink=0;
+#ifdef OLDINT
 	pfn$al_tail[PFN$C_FREPAGLST]=prev;
+#else
+	pfn$al_tail[PFN$C_FREPAGLST]=i; // was: prev;
+#endif
+if (0) {
+  int k,l,m[24];
+  l=pfn$al_head[0];
+  for(k=0;k<24;k++) {
+    printk("%lx ",l);
+    m[k]=mem_map[l].pfn$l_blink;
+    l=mem_map[l].pfn$l_flink;
+  }
+  printk("\n");
+  l=pfn$al_head[0];
+  for(k=0;k<24;k++) {
+    printk("%lx ",m[k]);
+  }
+  printk("\n");
+ }
 
 	pfn$al_head[PFN$C_MFYPAGLST]=0;
 	pfn$al_tail[PFN$C_MFYPAGLST]=0;

@@ -4,6 +4,9 @@
 // Author. Roar Thronæs.
 
 #include<linux/vmalloc.h>
+#ifdef __x86_64__
+#include<linux/init.h>
+#endif
 #include<system_data_cells.h>
 #include<dyndef.h>
 #include<queue.h>
@@ -11,6 +14,9 @@
 #include<rddef.h>
 #include<cdtdef.h>
 #include<syidef.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <linux/slab.h>
 
 /* Author: Roar Thronæs */
 
@@ -569,6 +575,9 @@ unsigned long exe$gl_ticklength=100000;
 #ifdef __i386
 unsigned long exe$gl_ticklength=100000;
 #endif
+#ifdef __x86_64__
+unsigned long exe$gl_ticklength=100000;
+#endif
 unsigned long exe$gl_tickwidth;
 unsigned long exe$gl_time_control;
 unsigned long exe$gl_time_deviation;
@@ -576,7 +585,11 @@ unsigned long exe$gl_timeadjust;
 unsigned long exe$gl_tmv_svabuf;
 unsigned long exe$gl_tmv_svapte;
 struct _tqe * exe$gl_tqfl;
+#ifdef __i386__
 unsigned long long tqehead;
+#else
+unsigned long long tqehead[2];
+#endif
 unsigned long exe$gl_transition_year;
 unsigned long exe$gl_ubdelay;
 unsigned long exe$gl_unicode_upcase_version;
@@ -1382,10 +1395,17 @@ unsigned long rms$gq_reserved08;
 unsigned long rms$gq_reserved09;
 unsigned long rms$gq_reserved10;
 unsigned long sch$al_cpu_cap;
+#ifdef __i386__
 unsigned long long sch$aq_comh[33];
 unsigned long long sch$aq_comoh[33];
+#else
+unsigned long long sch$aq_comh[33][2];
+unsigned long long sch$aq_comoh[33][2];
+#endif
+#ifdef __i386__
 unsigned long long * sch$aq_comot;
 unsigned long long * sch$aq_comt;
+#endif
 struct _wqh sch$aq_wqhdr[12];
 unsigned long sch$ar_cap_priv;
 unsigned long sch$ar_class_name;
@@ -2008,8 +2028,15 @@ void __init vms_init(void) {
   smp$gl_cpu_data[0]->cpu$l_curpcb = &init_task_union;
 
   sch$gl_idle_cpus=0;
+#ifdef __i386__
   sch$aq_comot=(void *)sch$aq_comoh+4;
   sch$aq_comt=(void *)sch$aq_comh+4;
+#else
+#if 0
+  sch$aq_comot=(void *)sch$aq_comoh+8;
+  sch$aq_comt=(void *)sch$aq_comh+8;
+#endif
+#endif
 
   for(i=0;i<32;i++) {
     struct _pcb * tmp;
@@ -2109,7 +2136,7 @@ void __init vms_init2(void) {
 
   xqp_init2();
 #ifdef CONFIG_VMS
-  exttwo_init2();
+  exttwo_init2(0);
 #endif
 
 #if 0

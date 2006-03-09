@@ -52,6 +52,7 @@ History:
 #include <ssdef.h>	/* SYS$ header file */
 #include <linux/time.h>		/* C header for $GETTIM to find time */
 #include<linux/linkage.h>
+#include <linux/string.h>
 
 /*
  * Special function that is not really part of SYS$ library
@@ -80,7 +81,7 @@ asmlinkage int exe$gettim(unsigned long long *timadr)
     printk("gettim got accvio addr\n");
     return SS$_ACCVIO;
   }
-  bcopy(&exe$gq_systime,timadr,8);
+  memcpy(timadr,&exe$gq_systime,8);
 #if 0
   printk("setime %x %x\n",tmp[0],tmp[1]);
   printk("setime %x %x\n",tmp2[0],tmp2[1]);

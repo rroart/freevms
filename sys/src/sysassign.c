@@ -14,7 +14,10 @@
 #include<ccbdef.h>
 #include <ddtdef.h>
 #include<system_data_cells.h>
+#include <ioc_routines.h>
 #include<linux/linkage.h>
+#include <sch_routines.h>
+#include <ioc_routines.h>
 
 #include <descrip.h>
 

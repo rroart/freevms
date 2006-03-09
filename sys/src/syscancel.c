@@ -15,8 +15,11 @@
 #include<ucbdef.h>
 #include<ccbdef.h>
 #include<system_data_cells.h>
+#include <queue.h>
+#include <ipl.h>
 #include<linux/linkage.h>
 #include<linux/sched.h>
+#include <exe_routines.h>
 
 asmlinkage int exe$cancel(unsigned short int chan) {
   setipl(IPL$_ASTDEL);

@@ -9,10 +9,12 @@
 #include <cpudef.h>
 #include <psldef.h>
 #include <ssdef.h>
+#include <sch_routines.h>
 #include <linux/smp.h>
 #include <asm/current.h>
 #include <linux/sched.h>
 #include <linux/vmalloc.h>
+#include <linux/slab.h>
 
 int exe$setast(char enbflg) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
@@ -39,7 +41,7 @@ int exe$dclast(void (*astadr)(__unknown_params), unsigned long astprm, unsigned 
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
   struct _pcb * p=ctl$gl_pcb;
   struct _acb * a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
-  bzero(a,sizeof(struct _acb));
+  memset(a,0,sizeof(struct _acb));
   a->acb$l_pid=p->pcb$l_pid;
   a->acb$l_ast=astadr;
   a->acb$l_astprm=astprm;

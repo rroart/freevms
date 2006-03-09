@@ -21,6 +21,7 @@
 
 extern unsigned long max_mapnr;
 extern unsigned long num_physpages;
+extern unsigned long num_mappedpages;
 extern void * high_memory;
 extern int page_cluster;
 /* The inactive_clean lists are per zone. */
@@ -262,6 +263,8 @@ extern void FASTCALL(set_page_dirty(struct page *));
 #define SetPageReferenced(page)	set_bit(PG_referenced, &(page)->pfn$l_page_state)
 #define ClearPageReferenced(page)	clear_bit(PG_referenced, &(page)->pfn$l_page_state)
 #define PageTestandClearReferenced(page)	test_and_clear_bit(PG_referenced, &(page)->pfn$l_page_state)
+#else
+#define PageLocked(x) (0)
 #endif
 #define PageSlab(page)		test_bit(PG_slab, &(page)->pfn$l_page_state)
 #define PageSetSlab(page)	set_bit(PG_slab, &(page)->pfn$l_page_state)

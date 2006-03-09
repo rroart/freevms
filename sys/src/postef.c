@@ -10,7 +10,11 @@
 #include<evtdef.h>
 #include<ipldef.h>
 #include<system_data_cells.h>
+#include<ipl.h>
 #include<internals.h>
+#include <exe_routines.h>
+#include <sch_routines.h>
+#include <misc_routines.h>
 
 int waitcheck(struct _pcb *p, unsigned long priclass, unsigned long * efp, unsigned long * clusteraddr) {
   unsigned long tmp;

@@ -42,6 +42,7 @@
 /* Some mods by Roar Thronæs */
 
 #include <linux/time.h>               /* C header for $GETTIM to find time */
+#include <linux/string.h>
 //#include <stdlib.h>
 #include <sys$routines.h>	/* Our header file! */
 #include <ssdef.h>
@@ -72,6 +73,7 @@ struct TIME {
     unsigned char time[8];
 };
 
+#include <exe_routines.h>
 
 const char month_names[] = "-JAN-FEB-MAR-APR-MAY-JUN-JUL-AUG-SEP-OCT-NOV-DEC-";
 

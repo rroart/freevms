@@ -19,6 +19,11 @@
 #include <system_data_cells.h>
 #include <internals.h>
 #include <rsndef.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <sch_routines.h>
+#include <queue.h>
+#include <linux/slab.h>
 
 kfreebuf(void * d) {
   struct _bufio * bd = d;
@@ -119,7 +124,7 @@ bufpost(struct _irp * i) {
   // decr ccb$w_ioc
 
   if (i->irp$l_iosb) {
-    bcopy(&i->irp$l_iost1,i->irp$l_iosb,8);
+    memcpy(i->irp$l_iosb,&i->irp$l_iost1,8);
   }
 
   // do an eventually setting of common event flag
@@ -189,7 +194,7 @@ asmlinkage void ioc$iopost(void) {
   sch$qast(p->pcb$l_pid,PRI$_IOCOM,i);
   goto again;
 
-  ioc$bufpost();
+  ioc$bufpost(0);
 }
 
 ioc$bufpost(struct _irp * i){
@@ -198,7 +203,8 @@ ioc$bufpost(struct _irp * i){
   i->irp$l_astprm=i; // think this belongs here too
 }
 
+#if 0
 void ioc$myiopost(struct _pcb * p,unsigned long priclass) {
-  sch$postef(p->pcb$l_pid,priclass);
+  sch$postef(p->pcb$l_pid,priclass,0);
 }
-
+#endif

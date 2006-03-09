@@ -7,7 +7,9 @@
 
 #include<descrip.h> 
 
+#ifdef __i386__
 int errno;
+#endif
 
 int auth$show(int mask);
 int auth$exit(int mask);

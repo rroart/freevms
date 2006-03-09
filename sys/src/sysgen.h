@@ -226,7 +226,10 @@
 #define TTY_DEFCHAR2                 4098  /*      4098         0        -1 Bit-Encode  */
 #define TTY_DIALTYPE                    0  /*         0         0       255 Bit-Encode  */
 #define TTY_DMASIZE                    64   /*       64         0     65535 Bytes      D */
+#if 0
+// not yet
 #define TTY_PARITY                     24  /*        24         0       255 Special     */
+#endif
 #define TTY_RSPEED                      0  /*         0         0        17 Special     */
 #define TTY_SCANDELTA            10000000  /*  10000000    100000        -1 100Ns       */
 #define TTY_SILOTIME                    8  /*         8         0       255 Ms          */

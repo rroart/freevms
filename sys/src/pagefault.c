@@ -40,8 +40,30 @@
 #include <wsldef.h>
 #include <va_rangedef.h>
 #include <pfldef.h>
+#include <mmg_functions.h>
 
 #include <linux/vmalloc.h>
+
+#ifdef __x86_64__
+#include <asm/hardirq.h>
+#endif
+
+#include <misc_routines.h>
+#include <mmg_routines.h>
+#include <sch_routines.h>
+
+int do_wp_page(struct mm_struct *mm, struct _rde * vma, unsigned long address, pte_t *page_table, pte_t pte);
+
+#ifdef __x86_64__
+#include <asm/kdebug.h>
+#endif
+
+#undef OLDINT
+#define OLDINT
+
+#ifdef __x86_64__
+#undef OLDINT
+#endif
 
 unsigned long findpte_new(struct mm_struct *mm, unsigned long address);
 
@@ -433,7 +455,11 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	      if ((*(unsigned long *)pte)&_PAGE_PRESENT) goto notyet;
 	      int loc=mem_map[pfn].pfn$v_loc;
 	      if (loc<=PFN$C_BADPAGLST) {
+#ifdef OLDINT
 		mmg$rempfn(loc,&mem_map[pfn]);
+#else
+		mmg$rempfn(loc,pfn);
+#endif
 		mem_map[pfn].pfn$v_loc=PFN$C_ACTIVE;
 		mmg$makewsle(tsk,tsk->pcb$l_phd,address,pte,pfn);
 		*(unsigned long *)pte|=_PAGE_PRESENT;
@@ -739,8 +765,9 @@ vmalloc_fault:
 		return;
 	}
 }
+#endif
 
-#else 
+#ifdef __arch_um__
 
 unsigned long segv(unsigned long address, unsigned long ip, int is_write, 
 		   int is_user)
@@ -872,7 +899,11 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	      if ((*(unsigned long *)pte)&_PAGE_PRESENT) goto notyet;
 	      int loc=mem_map[pfn].pfn$v_loc;
 	      if (loc<=PFN$C_BADPAGLST) {
+#ifdef OLDINT
 		mmg$rempfn(loc,&mem_map[pfn]);
+#else
+		mmg$rempfn(loc,pfn);
+#endif
 		mem_map[pfn].pfn$v_loc=PFN$C_ACTIVE;
 		mmg$makewsle(tsk,tsk->pcb$l_phd,address,pte,pfn);
 		*(unsigned long *)pte|=_PAGE_PRESENT;
@@ -1229,4 +1260,575 @@ unsigned long findpte_new(struct mm_struct *mm, unsigned long address) {
   return pte;
 }
 
+#ifdef __x86_64__
+
+/* Sometimes the CPU reports invalid exceptions on prefetch.
+   Check that here and ignore.
+   Opcode checker based on code by Richard Brunner */
+static int is_prefetch(struct pt_regs *regs, unsigned long addr)
+{ 
+	unsigned char *instr = (unsigned char *)(regs->rip);
+	int scan_more = 1;
+	int prefetch = 0; 
+	unsigned char *max_instr = instr + 15;
+
+	/* Avoid recursive faults for this common case */
+	if (regs->rip == addr)
+		return 0; 
+
+	if (regs->cs & (1<<2))
+		return 0;
+
+	while (scan_more && instr < max_instr) { 
+		unsigned char opcode;
+		unsigned char instr_hi;
+		unsigned char instr_lo;
+
+		if (__get_user(opcode, instr))
+			break; 
+
+		instr_hi = opcode & 0xf0; 
+		instr_lo = opcode & 0x0f; 
+		instr++;
+
+		switch (instr_hi) { 
+		case 0x20:
+		case 0x30:
+			/* Values 0x26,0x2E,0x36,0x3E are valid x86
+			   prefixes.  In long mode, the CPU will signal
+			   invalid opcode if some of these prefixes are
+			   present so we will never get here anyway */
+			scan_more = ((instr_lo & 7) == 0x6);
+			break;
+			
+		case 0x40:
+			/* In AMD64 long mode, 0x40 to 0x4F are valid REX prefixes
+			   Need to figure out under what instruction mode the
+			   instruction was issued ... */
+			/* Could check the LDT for lm, but for now it's good
+			   enough to assume that long mode only uses well known
+			   segments or kernel. */
+			scan_more = ((regs->cs & 3) == 0) || (regs->cs == __USER_CS);
+			break;
+			
+		case 0x60:
+			/* 0x64 thru 0x67 are valid prefixes in all modes. */
+			scan_more = (instr_lo & 0xC) == 0x4;
+			break;		
+		case 0xF0:
+			/* 0xF0, 0xF2, and 0xF3 are valid prefixes in all modes. */
+			scan_more = !instr_lo || (instr_lo>>1) == 1;
+			break;			
+		case 0x00:
+			/* Prefetch instruction is 0x0F0D or 0x0F18 */
+			scan_more = 0;
+			if (__get_user(opcode, instr)) 
+				break;
+			prefetch = (instr_lo == 0xF) &&
+				(opcode == 0x0D || opcode == 0x18);
+			break;			
+		default:
+			scan_more = 0;
+			break;
+		} 
+	}
+
+#if 0
+	if (prefetch)
+		printk("%s: prefetch caused page fault at %lx/%lx\n", current->pcb$t_lname,
+		       regs->rip, addr);
+#endif
+	return prefetch;
+}
+
+#define _PAGE_NEWPAGE 0
+
+int page_fault_trace; 
+int exception_trace = 1;
+
+/*
+ * This routine handles page faults.  It determines the address,
+ * and the problem, and then passes it off to one of the appropriate
+ * routines.
+ *
+ * error_code:
+ *	bit 0 == 0 means no page found, 1 means protection fault
+ *	bit 1 == 0 means read, 1 means write
+ *	bit 2 == 0 means kernel, 1 means user-mode
+ *      bit 3 == 1 means fault was an instruction fetch
+ */
+asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
+{
+	struct task_struct *tsk;
+	struct mm_struct *mm;
+	struct _rde * vma;
+	unsigned long address;
+	unsigned long page;
+	signed long pfn;
+	unsigned long fixup;
+	int write;
+	siginfo_t info;
+	pgd_t *pgd;
+	pmd_t *pmd;
+	pte_t *pte;
+	struct _mypte * mypte;
+
+	/* get the address */
+	__asm__("movq %%cr2,%0":"=r" (address));
+
+	if (regs->eflags & X86_EFLAGS_IF)
+		__sti();
+
+#ifdef CONFIG_CHECKING
+	if (1 ||page_fault_trace) 
+		printk("pagefault rip:%lx rsp:%lx cs:%lu ss:%lu address %lx error %lx\n",
+		       regs->rip,regs->rsp,regs->cs,regs->ss,address,error_code); 
+
+
+	{ 
+		unsigned long gs; 
+		struct x8664_pda *pda = cpu_pda + safe_smp_processor_id(); 
+		rdmsrl(MSR_GS_BASE, gs); 
+		if (gs != (unsigned long)pda) { 
+			wrmsrl(MSR_GS_BASE, pda); 
+			printk("page_fault: wrong gs %lx expected %p\n", gs, pda);
+		}
+	}
+#endif
+			
+	//check if ipl>2 bugcheck
+
+	if (address==0x5a5a5a5a)
+	  panic("poisoned\n");
+
+	if (in_atomic) { 
+	  printk("atomic addr %x\n",address);
+	  address=0x11111111;
+	}
+
+#if 0
+	if (intr_blocked(IPL$_MMG))
+	  return;
+
+	regtrap(REG_INTR,IPL$_MMG);
+
+	setipl(IPL$_MMG);
+	//spin_lock(&SPIN_SCHED);
+#endif
+	//some linux stuff
+	tsk = current;
+	mm = tsk->mm;
+	info.si_code = SEGV_MAPERR;
+
+	if (in_atomic) { 
+	  printk("atomic addr %x\n",address);
+	  address=0x11111111;
+	}
+
+	tsk->pcb$l_phd->phd$l_pageflts++;
+
+	/* 5 => page not present and from supervisor mode */
+	if (unlikely(!(error_code & 5) &&
+		     ((address >= VMALLOC_START && address <= VMALLOC_END) ||
+		      (address >= MODULES_VADDR && address <= MODULES_END))))
+		goto vmalloc_fault;
+  
+	/*
+	 * If we're in an interrupt or have no user
+	 * context, we must not take the fault..
+	 */
+	if (mm==&init_mm)
+		goto no_context;
+	if (in_interrupt() || !mm)
+		goto bad_area_nosemaphore;
+
+	if (address<PAGE_SIZE)
+	  goto bad_area;
+
+	/* 
+	 * Work around K8 errata #100. See the K8 specification update for 
+	 * details. Any code segment in LDT is compatibility mode.
+	 */
+	if ((regs->cs == __USER32_CS || (regs->cs & (1<<2))) &&
+		(address >> 32))
+		return;
+
+#if 0
+	page = address & PAGE_MASK;
+	pgd = pgd_offset(mm, page);
+	pmd = pmd_offset(pgd, page);
+#else
+	page = address & PAGE_MASK;
+	pgd = pgd_offset(mm, page);
+	pmd = pmd_alloc(mm, pgd, page);
+	pte = pte_alloc(mm, pmd, page);
+#endif
+
+	if (0) /* not yet (!(pte_present(pmd))) */ { 
+	  // transform it
+	  printk("transform it\n");
+	}
+#if 0
+	pte = pte_offset(pmd, page);
+#endif
+	mypte=pte;
+	//printk("fault3 %lx %lx %lx %lx %lx",page,pgd,pmd,pte,*(long*)pte);
+	mmg$frewsle(current,address);
+
+	//printk(" pte %x ",*(unsigned long *)pte);
+
+	// different forms of invalid ptes?
+	// 0 valid bit, and...?
+	// how to differentiate between
+	// demandzeropage, transitionpage, invalidglobalpage, pageinpfile or
+	//   in image file
+	// Use bit 9-11, they are available for os use.
+	// 11 and 10 reflect vax pte 26 22  (and 9 for 21)
+	// 0 0 pfn=0 demand zero page
+	// 0 0 pfn!=0 page in transition
+	// 0 1 pfn=gpti invalid global page
+	// 1 0 pfn=misc page is in page file
+	// 1 1 page is in image file
+
+	if ((*(unsigned long *)pte)&_PAGE_TYP1) { // page or image file
+	  if ((*(unsigned long *)pte)&_PAGE_TYP0) { // image file
+	    unsigned long index=(*(unsigned long *)pte)>>PAGE_SHIFT;
+	    struct _secdef *pstl=current->pcb$l_phd->phd$l_pst_base_offset;
+#if 0
+	    struct _secdef *sec=&pstl[index];
+	    struct _wcb * window=sec->sec$l_window;
+	    unsigned long vbn=sec->sec$l_vbn;
+	    struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+	    unsigned long offset;// in PAGE_SIZE units
+#else
+	    struct _secdef *sec;
+	    struct _wcb * window;
+	    unsigned long vbn;
+	    struct _rde * rde;
+	    unsigned long offset;// in PAGE_SIZE units
+
+	    if (index>64) {
+	      printk("wrong %x %x %x %x\n",address,page,pte,*pte);
+	      die("Wrong\n",regs,error_code);
+	      panic("Wrong\n");
+	    }
+	    sec=&pstl[index];
+	    window=sec->sec$l_window;
+	    vbn=sec->sec$l_vbn;
+	    rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+#endif
+	    if (rde==0) printk("vma0 address %x\n",address);
+	    //printk(" i pstl sec window vbn rde %x %x %x %x %x %x\n",index,pstl,sec,window,vbn,rde);
+	    offset=((address-(unsigned long)rde->rde$pq_start_va)>>PAGE_SHIFT)+(vbn>>3);
+	    //printk(" offs %x ",offset);
+	    //page_cache_read(window, offset);
+	    //file->f_dentry->d_inode->i_mapping->a_ops->readpage(file, page);
+
+	    //printk(" a ");
+	    {
+	      pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+	      mem_map[pfn].pfn$v_loc=PFN$C_ACTIVE;
+	      mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
+	      // *(unsigned long *)pte=pfn // in the future have transition
+	      *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	      //printk(" pfn pte %x %x ",pfn,*(unsigned long *)pte);
+	    }
+	    //printk(" b ");
+	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
+	    makereadast(window,pfn,address,pte,offset,error_code&2);	
+	    //printk(" a ");
+	    return;
+	  } else { // page file
+	    extern int myswapfile;
+	    struct _pfl * pfl=myswapfile;
+	    struct _wcb * window=pfl->pfl$l_window;
+	    unsigned long vbn=mypte->pte$v_pgflpag;
+	    struct _rde * rde;
+	    unsigned long offset;// in PAGE_SIZE units
+
+	    offset=vbn<<PAGE_SHIFT;
+	    {
+	      pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+	      mem_map[pfn].pfn$v_loc=PFN$C_ACTIVE;
+	      mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
+	      // *(unsigned long *)pte=pfn // in the future have transition
+	      *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+	    }
+	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
+	    printk("soon reading pfl_page %x %x %x %x\n",vbn,pte,*(long*)pte,page);
+	    makereadast(window,pfn,address,pte,offset,error_code&2);	
+	    return;
+	  }
+	}
+
+	if (!((*(unsigned long *)pte)&_PAGE_TYP1)) { //zero transition or global
+	  if (!((*(unsigned long *)pte)&_PAGE_TYP0)) {
+	    if ((*(unsigned long *)pte)&0xffffffff) { //transition
+	      long pfn=mypte->pte$v_pfn;
+	      if (pfn>=num_physpages) goto notyet;
+	      if (pte!=mem_map[pfn].pfn$q_pte_index) goto notyet;
+	      if ((*(unsigned long *)pte)&_PAGE_PRESENT) goto notyet;
+	      int loc=mem_map[pfn].pfn$v_loc;
+	      if (loc<=PFN$C_BADPAGLST) {
+#ifdef OLDINT
+		mmg$rempfn(loc,&mem_map[pfn]);
+#else
+		mmg$rempfn(loc,pfn);
+#endif
+		mem_map[pfn].pfn$v_loc=PFN$C_ACTIVE;
+		mmg$makewsle(tsk,tsk->pcb$l_phd,address,pte,pfn);
+		*(unsigned long *)pte|=_PAGE_PRESENT;
+		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
+	      }
+	      if (loc==PFN$C_WRTINPROG ) {
+		// mmg$rempfn(loc,&mem_map[pfn]); // not needed?
+		mem_map[pfn].pfn$v_loc=PFN$C_ACTIVE;
+		mmg$makewsle(tsk,tsk->pcb$l_phd,address,pte,pfn);
+		*(unsigned long *)pte|=_PAGE_PRESENT;
+		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
+	      }
+	      //printk("put transition page back in %x %x %x\n",loc,pte,address);
+	      return;
+	    notyet:
+	      {}
+	    } else { // zero page demand?
+	      {
+		struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_HIGHER, IPL$_ASTDEL);
+		if (address<rde->rde$ps_start_va && address>=(rde->rde$ps_start_va-PAGE_SIZE)) {
+		  rde->rde$ps_start_va-=PAGE_SIZE;
+		  rde->rde$l_region_size+=PAGE_SIZE;
+		}
+		{
+		  pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
+		  mem_map[pfn].pfn$v_loc=PFN$C_ACTIVE;
+		  mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
+		  mem_map[pfn].pfn$l_page_state|=PFN$M_MODIFY;
+		  *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+		  if (page==0) {
+		    printk("wrong %x %x %x %x\n",address,page,pte,*pte);
+		    die("Wrong\n",regs,error_code);
+		    panic("Wrong\n");
+		  }
+		  flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
+		  memset(page,0,PAGE_SIZE); // must zero content also
+		  if ((error_code&2)==0) {
+		    *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_USER|_PAGE_ACCESSED;
+		    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
+		  }
+		}
+	      }
+	      return;
+	    }
+	  } else {
+	  }
+	  
+
+	}
+
+again:
+	down_read(&mm->mmap_sem);
+
+	// vma = find_vma(mm, address);
+	vma = mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
+	if (!vma)
+		goto bad_area;
+	if (vma->rde$ps_start_va <= address)
+		goto good_area;
+	if (!(vma->rde$l_flags & VM_GROWSDOWN))
+		goto bad_area;
+	if (error_code & 4) {
+		// XXX: align red zone size with ABI 
+		if (address + 128 < regs->rsp)
+			goto bad_area;
+	}
+	if (expand_stack2(vma, address))
+		goto bad_area;
+/*
+ * Ok, we have a good vm_area for this memory access, so
+ * we can handle it..
+ */
+good_area:
+	info.si_code = SEGV_ACCERR;
+	write = 0;
+	switch (error_code & 3) {
+		default:	/* 3: write, present */
+			/* fall through */
+		case 2:		/* write, not present */
+			if (!(vma->rde$l_flags & VM_WRITE))
+				goto bad_area;
+			write++;
+			pfn=mypte->pte$v_pfn;
+                        mem_map[pfn].pfn$l_page_state=PFN$M_MODIFY;
+			break;
+		case 1:		/* read, present */
+			goto bad_area;
+		case 0:		/* read, not present */
+			if (!(vma->rde$l_flags & (VM_READ | VM_EXEC)))
+				goto bad_area;
+	}
+
+	/*
+	 * If for any reason at all we couldn't handle the fault,
+	 * make sure we exit gracefully rather than endlessly redo
+	 * the fault.
+	 */
+	//switch (handle_mm_fault(mm, vma, address, write)) {
+	switch (do_wp_page(mm, vma, address, pte, *pte)) {
+	case 1:
+		tsk->min_flt++;
+		break;
+	case 2:
+		tsk->maj_flt++;
+		break;
+	case 0:
+		goto do_sigbus;
+	default:
+		goto out_of_memory;
+	}
+
+	up_read(&mm->mmap_sem);
+	return;
+
+/*
+ * Something tried to access memory that isn't in our memory map..
+ * Fix it, but check if it's kernel or user first..
+ */
+bad_area:
+	up_read(&mm->mmap_sem);
+
+bad_area_nosemaphore:
+	/* User mode accesses just cause a SIGSEGV */
+	if (error_code & 4) {
+		if (is_prefetch(regs, address))
+			return;
+
+		if (exception_trace && !(tsk->ptrace & PT_PTRACED) && 
+		    (tsk->sig->action[SIGSEGV-1].sa.sa_handler == SIG_IGN ||
+		    (tsk->sig->action[SIGSEGV-1].sa.sa_handler == SIG_DFL)))
+			printk(KERN_INFO 
+		       "%s[%d]: segfault at %016lx rip %016lx rsp %016lx error %lx\n",
+					tsk->pcb$t_lname, tsk->pcb$l_pid, address, regs->rip,
+					regs->rsp, error_code);
+	
+		tsk->thread.cr2 = address;
+		/* Kernel addresses are always protection faults */
+		tsk->thread.error_code = error_code | (address >= TASK_SIZE);
+		tsk->thread.trap_no = 14;
+		info.si_signo = SIGSEGV;
+		info.si_errno = 0;
+		/* info.si_code has been set above */
+		info.si_addr = (void *)address;
+		force_sig_info(SIGSEGV, &info, tsk);
+		return;
+	}
+
+no_context:
+	
+	/* Are we prepared to handle this kernel fault?  */
+	if ((fixup = search_exception_table(regs->rip)) != 0) {
+		regs->rip = fixup;
+		if (0 && exception_trace) 
+		printk(KERN_ERR 
+		       "%s: fixed kernel exception at %lx address %lx err:%ld\n", 
+		       tsk->pcb$t_lname, regs->rip, address, error_code);
+		return;
+	}
+
+	if (is_prefetch(regs, address))
+		return;
+
+/*
+ * Oops. The kernel tried to access some bad page. We'll have to
+ * terminate things with extreme prejudice.
+ */
+
+	unsigned long flags; 
+	prepare_die(&flags);
+	if (address < PAGE_SIZE)
+		printk(KERN_ALERT "Unable to handle kernel NULL pointer dereference");
+	else
+		printk(KERN_ALERT "Unable to handle kernel paging request");
+	printk(KERN_ALERT " at %016lx RIP: ", address); 
+	printk_address(regs->rip);
+	dump_pagetable(address);
+	__die("Oops", regs, error_code);
+	/* Executive summary in case the oops scrolled away */
+	printk(KERN_EMERG "CR2: %016lx\n", address);
+	exit_die(flags);
+	do_exit(SIGKILL);
+
+/*
+ * We ran out of memory, or some other thing happened to us that made
+ * us unable to handle the page fault gracefully.
+ */
+out_of_memory:
+	up_read(&mm->mmap_sem);
+	if (current->pcb$l_pid == 1) { 
+#if 0
+		tsk->policy |= SCHED_YIELD;
+#endif
+		schedule();
+		goto again;
+	}
+	printk("VM: killing process %s\n", tsk->pcb$t_lname);
+	if (error_code & 4)
+		do_exit(SIGKILL);
+	goto no_context;
+
+do_sigbus:
+	up_read(&mm->mmap_sem);
+
+	/* Kernel mode? Handle exceptions or die */
+	if (!(error_code & 4))
+		goto no_context;
+		
+	if (is_prefetch(regs, address))
+		return;
+
+	tsk->thread.cr2 = address;
+	tsk->thread.error_code = error_code;
+	tsk->thread.trap_no = 14;
+	info.si_signo = SIGBUS;
+	info.si_errno = 0;
+	info.si_code = BUS_ADRERR;
+	info.si_addr = (void *)address;
+	force_sig_info(SIGBUS, &info, tsk);
+	return;
+
+
+vmalloc_fault:
+	{
+		pgd_t *pgd;
+		pmd_t *pmd;
+		pte_t *pte; 
+
+		/* 
+		 * x86-64 has the same kernel 3rd level pages for all CPUs.
+		 * But for vmalloc/modules the TLB synchronization works lazily,
+		 * so it can happen that we get a page fault for something
+		 * that is really already in the page table. Just check if it
+		 * is really there and when yes flush the local TLB. 
+		 */
+#if 0
+		printk("vmalloc fault %lx index %lu\n",address,pml4_index(address));
+		dump_pagetable(address);
+#endif
+
+		pgd = pgd_offset_k(address);
+		if (pgd != current_pgd_offset_k(address)) 
+			goto bad_area_nosemaphore;	 
+		if (!pgd_present(*pgd))
+			goto bad_area_nosemaphore;
+		pmd = pmd_offset(pgd, address);
+		if (!pmd_present(*pmd))
+			goto bad_area_nosemaphore;
+		pte = pte_offset(pmd, address); 
+		if (!pte_present(*pte))
+			goto bad_area_nosemaphore; 
+
+		__flush_tlb_all();		
+		return;
+	}
+}
+#endif
 #endif

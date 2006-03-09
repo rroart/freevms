@@ -16,6 +16,10 @@
 #include<descrip.h>
 #include <system_data_cells.h>
 #include <internals.h>
+#include <misc_routines.h>
+#include <exe_routines.h>
+#include <queue.h>
+#include <linux/vmalloc.h>
 
 // Author. Roar Thronæs.
 
@@ -52,7 +56,7 @@ asmlinkage int exe$ascefc(unsigned int efn, void *name, char prot, char perm) {
     qhead_init(&c->ceb$l_wqfl);
     c->ceb$l_state=SCH$C_CEF;
     c->ceb$t_efcnam[0]=((struct dsc$descriptor *)name)->dsc$w_length;
-    bcopy(((struct dsc$descriptor *)name)->dsc$a_pointer,&c->ceb$t_efcnam[1],c->ceb$t_efcnam[0]);
+    memcpy(&c->ceb$t_efcnam[1],((struct dsc$descriptor *)name)->dsc$a_pointer,c->ceb$t_efcnam[0]);
     insque(c,first);
     tmp=c;
   }

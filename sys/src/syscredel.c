@@ -20,6 +20,12 @@
 #include <va_rangedef.h>
 #include <vmspte.h>
 #include <wsldef.h>
+#include <ipl.h>
+#include <queue.h>
+#include <mmg_functions.h>
+#include <exe_routines.h>
+#include <mmg_routines.h>
+#include <linux/slab.h>
 
 // mmg$credel
 // mmg$crepag
@@ -219,6 +225,7 @@ int inline insrde(struct _rde * elem, struct _rde * head) {
   }
 #endif
   insque(elem,prev); // ins at pred
+  return 1;
 }
 
 int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte);
@@ -388,7 +395,7 @@ asmlinkage int exe$create_region_32_wrap  (struct struct_args * s) {
 asmlinkage int exe$create_region_32  ( unsigned long length, unsigned int region_prot, unsigned int flags, unsigned long long *return_region_id, void **return_va, unsigned long *return_length, unsigned long start_va) {
   struct _rde * rde;
   rde=kmalloc(sizeof(struct _rde),GFP_KERNEL);
-  bzero(rde,sizeof(struct _rde));
+  memset(rde,0,sizeof(struct _rde));
   rde->rde$b_type=30; // fix later
   rde->rde$pq_start_va=start_va;
   rde->rde$q_region_size=length;

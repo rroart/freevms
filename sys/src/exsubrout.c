@@ -5,9 +5,13 @@
 
 #include <system_data_cells.h>
 #include <ipldef.h>
+#include <ipl.h>
 #include <internals.h>
 #include <ssdef.h>
+#include <queue.h>
+
 #include <linux/mm.h>
+#include <linux/slab.h>
 
 void exe$instimq(struct _tqe * t) {
   static signed int times=-500;

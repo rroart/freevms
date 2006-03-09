@@ -13,6 +13,8 @@
 #include<ssdef.h>
 #include<uafdef.h>
 #include<uaidef.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 asmlinkage void exe$check_access    (void) { }
 asmlinkage void exe$getuai_not          (void) { }

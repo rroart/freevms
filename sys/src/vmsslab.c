@@ -547,6 +547,10 @@ static inline int kmem_check_poison_obj (kmem_cache_t *cachep, void *addr)
 		addr += BYTES_PER_WORD;
 		size -= 2*BYTES_PER_WORD;
 	}
+#ifdef __x86_64__
+#define memchr kernel_memchr
+void *kernel_memchr(const void *s, int c, size_t n);
+#endif
 	end = memchr(addr, POISON_END, size);
 	if (end != (addr+size-1))
 		return 1;

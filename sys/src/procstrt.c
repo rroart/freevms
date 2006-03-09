@@ -22,6 +22,9 @@
 #include "asm/ptrace.h"
 #include <asm/pgalloc.h>
 #include <asm/uaccess.h>
+#include <linux/slab.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
 
 struct _lnmth lnm_prc_dir_table_header;
 
@@ -101,7 +104,7 @@ void lnm_init_prc(struct _pcb * p) {
   int status;
 
   struct lnmhshp * hash = kmalloc (sizeof(struct lnmhshp),GFP_KERNEL);
-  bzero(hash,sizeof(struct lnmhshp));
+  memset(hash,0,sizeof(struct lnmhshp));
 
   $DESCRIPTOR(mypartab,"LNM$PROCESS_DIRECTORY");
 
@@ -186,7 +189,7 @@ void lnm_init_prc(struct _pcb * p) {
   itm[0].bufaddr=myterm; //p->pcb$t_terminal;
   //printk("Terminal %s\n",p->pcb$t_terminal);
 #endif
-  bzero(&itm[1],sizeof(struct item_list_3));
+  memset(&itm[1],0,sizeof(struct item_list_3));
 
   exe$crelnm(0,&mytabnam,&sysinput,0,itm);
   exe$crelnm(0,&mytabnam,&sysoutput,0,itm);
@@ -208,7 +211,12 @@ int exe$procstrt(struct _pcb * p) {
   //  p=ctl$gl_pcb;
   flush_tlb_mm(p->mm);
 #else
+#ifdef __i386__
   __asm__ ("movl %%edi,%0; ":"=r" (p));
+#endif
+#ifdef __x86_64__
+  __asm__ ("movq %%rdi,%0; ":"=r" (p));
+#endif
   // warning: very risky one, chance
 #endif
   // get pcb and copy pqb
@@ -285,7 +293,7 @@ int exe$procstrt(struct _pcb * p) {
 
   xqp_init2();
 #ifdef CONFIG_VMS
-  exttwo_init2();
+  exttwo_init2(0);
 #endif
 
   aname.dsc$w_length=len-4;

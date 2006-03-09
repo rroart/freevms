@@ -14,11 +14,18 @@
 #include <queue.h>
 #include <ipldef.h>
 #include <ipl.h>
+#include <exe_routines.h>
+#include <sch_routines.h>
 #include <linux/sched.h>
 #include <linux/smp.h>
+#include <linux/slab.h>
 
 #define OLDAST
 #undef OLDAST
+
+#ifdef __x86_64__
+#define OLDAST
+#endif
 
 #undef ASTDEBUG
 #define ASTDEBUG
@@ -84,7 +91,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   /* just simple insert , no pris yet */
   //printk("bef rse\n");
   if (p->pcb$w_state!=SCH$C_CUR)
-    status=sch$rse(p, priclass, EVT$_AST);
+    sch$rse(p, priclass, EVT$_AST);
   else {
     struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
     struct _pcb * curp=ctl$gl_pcb;
@@ -129,6 +136,7 @@ printast(struct _acb * acb) {
   kernel ss
 */
 
+#ifdef __i386__
 int exe$astdel_old() {
   struct _acb * acb;
   __asm__ ( "movl 0x0(%%esp),%%eax\n\t" :"=a" (acb) );
@@ -338,6 +346,7 @@ int exe$astdel_prep(long a, long b, long c) {
 		       "popl %ebp\n\t"
 		       );
 }
+#endif
 
 int astdeb=0;
 #ifdef ASTDEBUG
@@ -415,11 +424,13 @@ asmlinkage void sch$astdel(int dummy) {
     //printk("astdel1 %x \n",acb->acb$l_kast);
     setipl(IPL$_ASTDEL);
     //p->pcb$b_astact=1;
+#ifdef __i386__
     if (((unsigned long)acb->acb$l_kast<0x80000000)||((unsigned long)acb->acb$l_kast>0xb0000000)) {
       int i;
       printk("kast %x\n",acb->acb$l_kast);
       for(i=0;i<2000000000;i++) ;
     }
+#endif
 #ifdef __i386__
     if (0 && astdeb)
       printk(" a %x ",acb->acb$l_kast);

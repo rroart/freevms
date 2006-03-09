@@ -12,10 +12,13 @@
 #include<ucbdef.h>
 #include<ddbdef.h>
 #include<ssdef.h>
+#include <ioc_routines.h>
+#include <queue.h>
+#include <linux/slab.h>
 
 int ioc_std$link_ucb (struct _ucb *ucb) {
   struct _ucb * u = ucb;
-  struct _ucb * next=u->ucb$l_ddb->ddb$l_ucb;
+  struct _ucb * next=u->ucb$l_ddb->ddb$ps_ucb;
   struct _ucb * prev;
  again:
   prev=next;
@@ -73,7 +76,7 @@ int ioc_std$copy_ucb (struct _ucb *src_ucb, struct _ucb **new_ucb) {
 int ioc_std$create_ucb (struct _pcb *pcb, struct _ucb *ucb, struct _ucb **new_ucb_p) {
   int status;
   //struct _ucb * u=kmalloc(sizeof(struct _ucb),GFP_KERNEL);
-  //bzero(u,sizeof(struct _ucb));
+  //memset(u,0,sizeof(struct _ucb));
   status=ioc_std$clone_ucb (ucb, new_ucb_p);
   return SS$_NORMAL;
 }
@@ -96,7 +99,7 @@ int ioc_std$clone_ucb (struct _ucb *tmpl_ucb, struct _ucb **new_ucb) {
 }
 
 int init_ddb(struct _ddb * ddb, struct _ddt * ddt, struct _ucb * ucb, char * sddb) {
-  bzero(ddb,sizeof(struct _ddb));
+  memset(ddb,0,sizeof(struct _ddb));
   ddb->ddb$b_type=DYN$C_DDB;
   ddb->ddb$l_ddt=ddt;
   ddb->ddb$ps_ucb=ucb;

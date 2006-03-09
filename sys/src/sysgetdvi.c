@@ -13,6 +13,9 @@
 #include<ddbdef.h>
 #include<pridef.h>
 #include<ucbdef.h>
+#include <exe_routines.h>
+#include <ioc_routines.h>
+#include <sch_routines.h>
 
 #include<linux/sched.h> 
 

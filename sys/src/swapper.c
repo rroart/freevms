@@ -4,6 +4,7 @@
 // Author. Roar Thronæs.
 // Modified Linux source file, 2001-2004. Based on *swap*.c.
 
+#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/kernel_stat.h>
 #include <linux/swap.h>
@@ -23,10 +24,14 @@
 #include <dyndef.h>
 #include <lnmdef.h>
 #include <descrip.h>
+#include <starlet.h>
 
 #include <fcbdef.h>
 #include <pfldef.h>
 #include <pflmapdef.h>
+#include <exe_routines.h>
+#include <misc_routines.h>
+#include <mmg_routines.h>
 
 #ifdef CONFIG_VMS
 
@@ -62,7 +67,7 @@ void balance(void) {
     /* no deleted phd check yet */
     // if sch$gb_sip & sch$v_mpw
     // other checks
-    mmg$purgempl();
+    mmg$purgempl(0);
   }
 }
 
