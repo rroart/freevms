@@ -27,6 +27,9 @@
 #include <asm/i387.h>
 #include <asm/debugreg.h>
 
+#include <exe_routines.h>
+#include <misc_routines.h>
+
 /*
  * does not yet catch signals sent when the child dies.
  * in exit.c or in signal.c.

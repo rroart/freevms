@@ -50,7 +50,7 @@
 #include <asm/desc.h>
 #include <asm/irq.h>
 
-
+int vms_handle_IRQ_event(struct _idb * idb, unsigned int irq, struct pt_regs * regs, struct irqaction * action);
 
 /*
  * Linux has a controller-independent x86 interrupt architecture.

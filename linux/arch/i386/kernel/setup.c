@@ -119,6 +119,9 @@
 #include <asm/dma.h>
 #include <asm/mpspec.h>
 #include <asm/mmu_context.h>
+
+#include <misc_routines.h>
+
 /*
  * Machine setup..
  */
@@ -2886,14 +2889,14 @@ void __init cpu_init (void)
 	int nr = smp_processor_id();
 	struct tss_struct * t = &init_tss[nr];
 
-	puts("puts 6_1\n");
+	kernel_puts("puts 6_1\n");
 	if (test_and_set_bit(nr, &cpu_initialized)) {
 		printk(KERN_WARNING "CPU#%d already initialized!\n", nr);
 		for (;;) __sti();
 	}
 	printk(KERN_INFO "Initializing CPU#%d\n", nr);
 
-	puts("puts 6_2\n");
+	kernel_puts("puts 6_2\n");
 	if (cpu_has_vme || cpu_has_tsc || cpu_has_de)
 		clear_in_cr4(X86_CR4_VME|X86_CR4_PVI|X86_CR4_TSD|X86_CR4_DE);
 #ifndef CONFIG_X86_TSC
@@ -2905,39 +2908,39 @@ void __init cpu_init (void)
 	}
 #endif
 
-	puts("puts 6_3\n");
+	kernel_puts("puts 6_3\n");
 	__asm__ __volatile__("lgdt %0": "=m" (gdt_descr));
 	__asm__ __volatile__("lidt %0": "=m" (idt_descr));
-	puts("puts 6_4\n");
+	kernel_puts("puts 6_4\n");
 
 	/*
 	 * Delete NT
 	 */
 	__asm__("pushfl ; andl $0xffffbfff,(%esp) ; popfl");
-	puts("puts 6_5\n");
+	kernel_puts("puts 6_5\n");
 
 	/*
 	 * set up and load the per-CPU TSS and LDT
 	 */
 	atomic_inc(&init_mm.mm_count);
-	puts("puts 6_6\n");
+	kernel_puts("puts 6_6\n");
 	init_task_union.task.active_mm = &init_mm; // was: cur_task
-	puts("puts 6_7\n");
+	kernel_puts("puts 6_7\n");
 #if 0
 // not wrong anymore?
  	if(init_task_union.task.mm) // was: cur_task
 		BUG();
 #endif
-	puts("puts 6_8\n");
+	kernel_puts("puts 6_8\n");
 	enter_lazy_tlb(&init_mm, &init_task_union, nr); // was: current
 
 	t->esp0 = init_task_union.task.thread.esp0; // was: current
 	set_tss_desc(nr,t);
 	gdt_table[__TSS(nr)].b &= 0xfffffdff;
-	puts("puts 6_9\n");
+	kernel_puts("puts 6_9\n");
 	load_TR(nr);
 	load_LDT(&init_mm);
-	puts("puts 6_10\n");
+	kernel_puts("puts 6_10\n");
 
 	/*
 	 * Clear all 6 debug registers:
@@ -2952,11 +2955,11 @@ void __init cpu_init (void)
 	/*
 	 * Force FPU initialization:
 	 */
-	puts("puts 6_11\n");
+	kernel_puts("puts 6_11\n");
 	init_task_union.task.flags &= ~PF_USEDFPU; // was: current
 	init_task_union.task.used_math = 0; // was: current
 	stts();
-	puts("puts 6_12\n");
+	kernel_puts("puts 6_12\n");
 }
 
 /*

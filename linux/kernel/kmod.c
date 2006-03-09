@@ -22,7 +22,9 @@
 	Shuu Yamaguchi <shuu@wondernetworkresources.com> December 2000
 */
 
+#ifdef __x86_64__
 #define errno kernel_errno
+#endif
 
 #define __KERNEL_SYSCALLS__
 
