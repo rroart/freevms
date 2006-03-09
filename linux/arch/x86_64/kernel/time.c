@@ -202,7 +202,7 @@ void do_settimeofday(struct timeval *tv)
 	spin_unlock(&rtc_lock);
 }
 
-static void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
+static void timer_interrupt_not(int irq, void *dev_id, struct pt_regs *regs)
 {
 	static unsigned long rtc_update = 0;
 
@@ -491,6 +491,7 @@ static int __init notsc_setup(char *str)
 	return 1;
 } 
 
+void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs);
 void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs);
 static struct irqaction irq0 = { timer_interrupt, SA_INTERRUPT, 0, "timer", NULL, NULL};
 //static struct irqaction irq0 = { exe$hwclkint, SA_INTERRUPT, 0, "timer", NULL, NULL};

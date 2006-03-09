@@ -351,7 +351,7 @@ int hwclkdone=1;
 #ifdef __x86_64__
 extern unsigned int hpet_tick;					/* HPET clocks / interrupt */
 extern int report_lost_ticks;					/* command line option */
-static void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
+void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
 	static unsigned long rtc_update = 0;
 
