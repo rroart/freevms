@@ -1,7 +1,9 @@
-Current as of FreeVMS 0.2.4.
+Current as of FreeVMS 0.2.5.
 	Warning: there may be some more unstability compared to 0.2.3
+	IPACP has some problems, run without networking.
 	due to changes in AST system and modes to resemble VMS more.
-	For some reason you have to boot bochs from ODS-2.
+	Do not expect much of the x86_64 version; I can not even
+	guarantee it will not catch fire. Basic boot on DCL Ext2. (First.)
 
 Bochsrc FreeVMS-related config:
 	floppya: 1_44=a.img, status=inserted
