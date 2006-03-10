@@ -16,6 +16,8 @@
 #include <ipl.h>
 #include <exe_routines.h>
 #include <sch_routines.h>
+#include <misc_routines.h>
+#include <starlet.h>
 #include <linux/sched.h>
 #include <linux/smp.h>
 #include <linux/slab.h>
@@ -95,8 +97,8 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   else {
     struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
     struct _pcb * curp=ctl$gl_pcb;
-    // if (p==curp) etc // smp not enabled
-    p->pr_astlvl=p->phd$b_astlvl;
+    if (p==curp) // etc // smp not enabled
+      p->pr_astlvl=p->phd$b_astlvl;
   }
   //printk("aft rse\n");
   /* unlock */
@@ -318,6 +320,12 @@ int exe$astdel_prep2(long stack, long ast, long astprm) {
 		       "je back_here2\n\t"
 		       "subl $0x48,%esi\n\t" // back
 		       "addl $0x54,%esi\n\t" // next stack, via sw_ast
+		       "cmpl $0x23,0x4(%esi)\n\t"
+		       "je back_here2\n\t"
+		       "cmpl $0x10,0x4(%esi)\n\t"
+		       "je back_here2\n\t"
+		       "subl $0x54,%esi\n\t" // back
+		       "addl $0x6c,%esi\n\t" // next stack, via cli mycli
 		       "jmp back_here2\n\t"
 		       "ret\n\t"
 );
