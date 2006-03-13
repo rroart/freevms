@@ -552,6 +552,7 @@ unsigned long pcb$l_capability_seq;
   unsigned short pslstk[32];
   unsigned char pslindex;
   long pcb$l_pqb;
+  long ipr_sp[4];
 };
 /* will need a PCB. PCB is a null PCB placeholder */
 
