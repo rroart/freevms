@@ -757,6 +757,7 @@ void fastcall __switch_to(struct task_struct *prev_p, struct task_struct *next_p
 
 	unlazy_fpu(prev_p);
 
+	prev->esp0 = tss->esp0; // PAL
 	/*
 	 * Reload esp0, LDT and the page table pointer:
 	 */
