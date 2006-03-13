@@ -17,5 +17,9 @@ asmlinkage int cmod$astexit() {
   // clear a pcb$l_astact bit
   test_and_clear_bit(p->psl_prv_mod, &p->pcb$b_astact); // check
   sch$newlvl(p);
-
+#ifdef __i386__
+  __asm__ __volatile__(
+		       "addl $0x40, %esp\n\t" // check. rewind stack
+		       );
+#endif
 }
