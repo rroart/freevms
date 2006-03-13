@@ -86,7 +86,9 @@ tsk_ptrace	= 36
 processor	= 52
 */
 ENOSYS = 38
-
+/* whoooo */
+ipr_sp		= 0x738
+		
 #define PUSHR_ALL \
 	cld; \
 	pushl %es; \
@@ -130,6 +132,16 @@ ENOSYS = 38
         PUSHR_ALL; \
         call myrei; \
         POPR_ALL; \
+	pushl %edx		; \
+	movl $init_tss, %edx	; \
+	addl $0x4, %edx		; \
+	movl %esp, (%edx)	; \
+	addl $0x10, (%edx)	; \
+	cmpl $0x10, 0xc(%esp)	; \
+	je 1f			; \
+	addl $0x8, (%edx)	; \
+1:				; \
+	popl %edx		; \
         iret;
 /* also need to do stack changes */
 /* and astlvl checks */
@@ -183,6 +195,20 @@ ENOSYS = 38
 #define GET_CURRENT(reg) \
 	movl ctl$gl_pcb, reg; \
 
+#define SAVE_SP(x) \
+	pushl %eax; \
+	pushl %edi; \
+	movl ctl$gl_pcb, %edi; \
+	addl $ipr_sp, %edi; \
+	movl x+0xc(%esp), %eax; \
+	andl $0x3, %eax; \
+	salw $2,%ax; \
+	addl %eax, %edi; \
+	movl x+0x14(%esp),%eax; \
+	movl %eax, (%edi); \
+	popl %edi; \
+	popl %eax; 
+		
 ENTRY(lcall7)
         PUSHPSL
         pushfl			# We get a different stack layout with call gates,
@@ -242,6 +268,7 @@ ENTRY(ret_from_fork)
 
 ENTRY(system_call)
 #        PUSHPSLINTR
+	SAVE_SP(0)
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -314,6 +341,7 @@ ret_from_exception:
 
 ENTRY(vmssystem_call3)
 #        PUSHPSLINTR
+	SAVE_SP(0)
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -334,6 +362,7 @@ ENTRY(vmssystem_call3)
 
 ENTRY(vmssystem_call1)
 #        PUSHPSLINTR
+	SAVE_SP(0)
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -354,6 +383,7 @@ ENTRY(vmssystem_call1)
 
 ENTRY(vmssystem_call)
 #        PUSHPSLINTR
+	SAVE_SP(0x0)
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -585,6 +615,7 @@ ENTRY(alignment_check)
 
 ENTRY(page_fault)
 #        PUSHPSLINTR
+	SAVE_SP(4)
 	pushl $ SYMBOL_NAME(do_page_fault)
 	jmp error_code
 
