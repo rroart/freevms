@@ -331,6 +331,44 @@ int exe$astdel_prep2(long stack, long ast, long astprm) {
 );
 }
 
+int exe$astdel_prep2_new(long stack, long ast, long astprm) {
+  __asm__ __volatile__(
+		       "movl %esp,%edi\n\t"
+		       "addl $-0x14,%edi\n\t" // get new kernel stack
+		       "movl 0x4(%esp),%edx\n\t" // get user stack
+		       "addl $-0x8,%edx\n\t"
+		       "\n\t"
+		       "movl $exe$astdel,0x0(%edi)\n\t" // put astdel on kstack
+		       "movl $0x23,0x4(%edi)\n\t" // user cseg
+		       "pushfl\n\t"
+		       "popl %ecx\n\t"
+		       "movl %ecx,0x8(%edi)\n\t" // check get a flag reg
+		       "movl %edx,0xc(%edi)\n\t" // put new ustack on kstack
+		       "movl $0x2b,0x10(%edi)\n\t" // user sseg
+		       "\n\t"
+		       "movl 0x8(%esp),%ecx\n\t" // get ast
+		       "movl %ecx,0x0(%edx)\n\t" // put ast as parm on ustack
+		       "movl 0xc(%esp),%ecx\n\t" // get astprm
+		       "movl %ecx,0x4(%edx)\n\t" // put astprm on ustack
+#if 0
+		       "movl %esp,0x8(%edx)\n\t" // put kstack on ustack
+		       "movl 0x0(%esi),%ecx\n\t" // get return eip
+		       "movl %ecx,0x8(%edx)\n\t" // put return eip on ustack
+#endif
+		       "\n\t"
+		       "addl $-0x14, %esp\n\t" // stack move
+		       // check. need myrei here?
+		       "call myrei\n\t"
+#if 1
+		       "movl $init_tss, %edx\n\t"
+		       "addl $0x4, %edx\n\t"
+		       "movl %esp, (%edx)\n\t"
+		       "addl $0x14, (%edx)\n\t"
+#endif
+		       "iret\n\t"
+);
+}
+
 int exe$astdel_prep(long a, long b, long c) {
   __asm__ __volatile__(
 		       "pushl %ebp\n\t"
@@ -342,7 +380,11 @@ int exe$astdel_prep(long a, long b, long c) {
 		       "pushl 0x24(%esp)\n\t"
 		       "pushl 0x24(%esp)\n\t"
 		       "pushl 0x24(%esp)\n\t"
+#if 1
 		       "call exe$astdel_prep2\n\t"
+#else
+		       "call exe$astdel_prep2_new\n\t"
+#endif
 		       "popl %esi\n\t"
 		       "popl %esi\n\t"
 		       "popl %esi\n\t"
@@ -518,7 +560,11 @@ asmlinkage void sch$astdel(int dummy) {
   if (rmod&3) {
     user_spaceable_addr(exe$astdel); // bad temp hack
     user_spaceable_addr(&dummy); // bad temp hack
+#if 0
     int sts = exe$astdel_prep(&dummy,ast,astprm);
+#else
+    int sts = exe$astdel_prep2_new(p->ipr_sp[rmod&3],ast,astprm);
+#endif
   } else {
     setipl(0);
     if(ast) ast(astprm); /* ? */
