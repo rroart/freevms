@@ -342,6 +342,7 @@ int exe$astdel_prep2_new(long stack, long ast, long astprm) {
 		       "movl $0x23,0x4(%edi)\n\t" // user cseg
 		       "pushfl\n\t"
 		       "popl %ecx\n\t"
+		       "andl $0x200,%ecx\n\t" // intr on
 		       "movl %ecx,0x8(%edi)\n\t" // check get a flag reg
 		       "movl %edx,0xc(%edi)\n\t" // put new ustack on kstack
 		       "movl $0x2b,0x10(%edi)\n\t" // user sseg
