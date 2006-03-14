@@ -147,7 +147,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     if (section->isd$v_gbl==1) {
       goto skip_it;
     }
-    int rw = section->isd$l_flags&ISD$M_WRT;
+    int rw = section->isd$l_flags&(ISD$M_WRT|ISD$M_FIXUPVEC);
 
     img_inadr.va_range$ps_start_va=base+(section->isd$v_vpn<<PAGE_SHIFT);
     img_inadr.va_range$ps_end_va=img_inadr.va_range$ps_start_va+section->isd$w_pagcnt*PAGE_SIZE;

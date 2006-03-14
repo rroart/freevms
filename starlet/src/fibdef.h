@@ -118,7 +118,7 @@ struct _fibdef {
     unsigned short fib$w_did_seq;
     unsigned char fib$b_did_rvn;
     unsigned char fib$b_did_nmx;
-    unsigned fib$l_wcc;
+    unsigned long fib$l_wcc; // check. is index. drop long later.
     unsigned fib$w_nmctl;
     unsigned fib$l_exsz;
     unsigned fib$w_exctl;

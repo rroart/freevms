@@ -31,7 +31,7 @@ struct WCCDIR {
     struct WCCDIR *wcd_next;
     struct WCCDIR *wcd_prev;
     int wcd_status;
-    int wcd_wcc;
+    long wcd_wcc;
     int wcd_prelen;
     unsigned short wcd_reslen;
     struct dsc$descriptor wcd_serdsc;

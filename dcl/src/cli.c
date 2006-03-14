@@ -4014,11 +4014,36 @@ static int myfunc(int (*func)(),void * start, int count) {
 		       );
   // return eax default?
 #endif
+#ifdef __x86_64__
+  __asm__ __volatile__(
+		       "pushq %rbx\n\t"
+		       "pushq %rcx\n\t"
+		       "pushq %rdx\n\t"
+		       "pushq %rdi\n\t"
+		       "pushq %rsi\n\t"
+		       "movq %rdi,%rax\n\t"
+		       "movq %rsi,%rsi\n\t"
+		       "movq %rdx,%rcx\n\t"
+		       "movq $0x400,%rcx\n\t"
+		       "movq %rcx,%rdx\n\t" 
+		       "subq $0x1000,%rsp\n\t"
+		       "movq %rsp,%rdi\n\t"
+		       "rep ; movsl\n\t"
+		       "jmpq *%rax\n\t"
+		       );
+  // return eax default?
+#endif
 }
 
 static int mymyfunc(int dummy,int (*func)(),void * start, int count) {
+#ifdef __i386__
   long * ret = &func;
   ret=&dummy;
+#else
+  long * ret;
+  __asm__ __volatile__ ("movq %%rbp,%0; ":"=r" (ret) );
+  ret+=2;
+#endif
   struct _exh exh;
   memset(&exh, 0, sizeof(exh));
   exh.exh$l_handler=ret[-1];
@@ -4028,11 +4053,19 @@ static int mymyfunc(int dummy,int (*func)(),void * start, int count) {
 }
 
 static int mymymyfunc(int (*func)(),void * start, int count) {
-#ifdef __i386__
   register int __res;
+#ifdef __i386__
   __asm__ ( "movl %%ebp,%%eax\n\t" :"=a" (__res) );
   mymyfunc(__res,*func,start,count);
   __asm__ ( "movl (%esp),%ebp\n\t" );
+#endif
+#ifdef __x86_64__
+  __asm__ __volatile__ (
+			"movq %rbp,%rax\n\t"
+			"pushq %rax\n\t"
+			);
+  mymyfunc(__res,*func,start,count);
+  __asm__ ( "movq (%rsp),%rbp\n\t" );
 #endif
 }
 

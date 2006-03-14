@@ -1419,8 +1419,16 @@ static void __exit exit_elf_binfmt(void)
 	unregister_binfmt(&elf_format);
 }
 
-#ifndef IA32_EMULATOR
+#ifdef IA32_EMULATOR
+int exe$imgact_elf_ia32(void * name, void * hdrbuf) {
+#else
+
+#if ELF_CLASS == ELFCLASS32
+#error 
+#endif
+
 int exe$imgact_elf(void * name, void * hdrbuf) {
+#endif
   struct dsc$descriptor * dscdflnam = name;
   char * filename = dscdflnam->dsc$a_pointer;
   struct linux_binprm bprm;
@@ -1461,7 +1469,7 @@ int exe$imgact_elf(void * name, void * hdrbuf) {
 #if 0
   elf->e_entry = func;
 #else
-  long * addr=&elf->e_ident;
+  int * addr=&elf->e_ident; // check. fix later. was: long
   *addr=bprm.p;
   addr=&elf->e_version;
   *addr=func;
@@ -1469,7 +1477,6 @@ int exe$imgact_elf(void * name, void * hdrbuf) {
 
   return SS$_NORMAL;
 }
-#endif 
 
 module_init(init_elf_binfmt)
 module_exit(exit_elf_binfmt)

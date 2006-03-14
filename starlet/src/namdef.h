@@ -276,7 +276,7 @@ struct _namdef {
     };
   };
   union  {
-    unsigned int nam$l_wcc;
+    unsigned long nam$l_wcc; // check. is index. drop long later. was int.
     struct  {
       unsigned namdef$$_fill_1		: 16;
       unsigned nam$v_ifi		: 1;
