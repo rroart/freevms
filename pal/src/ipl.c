@@ -116,8 +116,11 @@ inline void setipl(unsigned char i) {
     printk("ouch %x\n",ctl$gl_pcb->psl_ipl);
 #endif
 #endif
+  if (current->psl_cur_mod)
+    panic("set ipl with no kernel mode\n");
   smp$gl_cpu_data[this_cpu]->cpu$b_ipl=i;
   current->psl_ipl=i;
+  // softints and others?
 #ifdef IPL_DEBUG
   int addr=&this_cpu;
   if (i==0)
@@ -127,6 +130,14 @@ inline void setipl(unsigned char i) {
   if (i==8 && i!=this)
     memcpy((long)stk+64*12,addr,128);
 #endif
+}
+
+/* no smp yet */
+inline void setipl2(unsigned char i) {
+  int this_cpu = smp_processor_id();
+  smp$gl_cpu_data[this_cpu]->cpu$b_ipl=i;
+  current->psl_ipl=i;
+  // softints and others?
 }
 
 inline void __PAL_MTPR_IPL(unsigned char i) {
@@ -346,7 +357,7 @@ asmlinkage void myrei (void) {
 #endif
   if (p->psl_ipl > p->oldpsl_ipl) panic("rei to higher ipl %x %x\n",p->psl_ipl , p->oldpsl_ipl);
     //sickinsque(0x10000000+p->psl_ipl,0x20000000+p->oldpsl_ipl);
-  setipl(current->psl_ipl);
+  setipl2(current->psl_ipl);
   //  if (!in_sw_ast) sw_ast();
   mysti(flag);
   sw_ast();
