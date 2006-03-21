@@ -68,7 +68,28 @@
 
 #define SOFTINT_TEST_VECTOR do { __asm__ __volatile__ ("int $0x88\n"); } while (0);
 
+#define DOSOFTINT(ipl,vector) \
+do { __asm__ __volatile__ ( \
+"pushl %ebx\n\t" \
+"movl ctl$gl_pcb, %ebx\n\t" \
+"movl 0x6e8(%ebx), %ebx\n\t" \
+"sarl $0x4, %ebx\n\t" \
+"andl $0x1f, %ebx\n\t" \
+"cmpl " #ipl ", %ebx\n\t" \
+"jae 1f\n\t" \
+"popl %ebx\n\t" \
+"int " #vector "\n\t" \
+"jmp 2f\n\t" \
+"1:\n\t" \
+"movl smp$gl_cpu_data, %ebx\n\t" \
+"btsw " #ipl ", 0x6(%ebx)\n\t" /* sisr */ \
+"popl %ebx\n\t" \
+"2:\n\t" \
+); \
+} while (0);
+
 #if defined(CONFIG_VMS) && !defined(__arch_um__)
+#if 0
 #define SOFTINT_POWER_VECTOR do { __asm__ __volatile__ ("int $0xaf\n"); } while (0);
 #define SOFTINT_EMB_VECTOR do { __asm__ __volatile__ ("int $0xae\n"); } while (0);
 #define SOFTINT_MCHECK_VECTOR do { __asm__ __volatile__ ("int 18\n"); } while (0);
@@ -99,7 +120,38 @@
 #define SOFTINT_IOPOST_VECTOR do { __asm__ __volatile__ ("int $0x94\n"); } while (0);
 #define SOFTINT_RESCHED_VECTOR do { __asm__ __volatile__ ("int $0x93\n"); } while (0);
 #define SOFTINT_ASTDEL_VECTOR do { __asm__ __volatile__ ("int $0x92\n"); } while (0);
-
+#else
+#define SOFTINT_POWER_VECTOR DOSOFTINT($0x0,$0xaf)
+#define SOFTINT_EMB_VECTOR DOSOFTINT($0x0,$0xae)
+#define SOFTINT_MCHECK_VECTOR DOSOFTINT($0x0,$18)
+#define SOFTINT_MEGA_VECTOR DOSOFTINT($0x0,$0xac)
+#define SOFTINT_IPINTR_VECTOR DOSOFTINT($0x0,$0xab)
+#define SOFTINT_VIRTCONS_VECTOR DOSOFTINT($0x0,$0xaa)
+#define SOFTINT_HWCLK_VECTOR DOSOFTINT($0x0,$0xa9)
+#define SOFTINT_INVALIDATE_VECTOR DOSOFTINT($0x0,$0xa8)
+#define SOFTINT_PERFMON_VECTOR DOSOFTINT($0x0,$0xa7)
+#define SOFTINT_MAILBOX_VECTOR DOSOFTINT($0x0,$0xa6)
+#define SOFTINT_POOL_VECTOR DOSOFTINT($0x0,$0xa5)
+#define SOFTINT_IOLOCK11_VECTOR DOSOFTINT($0x11,$0xa4)
+#define SOFTINT_IOLOCK10_VECTOR DOSOFTINT($0x10,$0xa3)
+#define SOFTINT_IOLOCK9_VECTOR DOSOFTINT($0x9,$0xa2)
+#define SOFTINT_SYNCH_VECTOR DOSOFTINT($0x8,$0xa1)
+#define SOFTINT_TIMER_VECTOR DOSOFTINT($0x8,$0xa0)
+#define SOFTINT_SCS_VECTOR DOSOFTINT($0x8,$0x9f)
+#define SOFTINT_SCHED_VECTOR DOSOFTINT($0x8,$0x9e)
+#define SOFTINT_MMG_VECTOR DOSOFTINT($0x8,$14)
+#define SOFTINT_IO_MISC_VECTOR DOSOFTINT($0x8,$0x9c)
+#define SOFTINT_FILSYS_VECTOR DOSOFTINT($0x8,$0x9b)
+#define SOFTINT_TX_SYNCH_VECTOR DOSOFTINT($0x8,$0x9a)
+#define SOFTINT_LCKMGR_VECTOR DOSOFTINT($0x8,$0x99)
+#define SOFTINT_IOLOCK8_VECTOR DOSOFTINT($0x8,$0x98)
+#define SOFTINT_PORT_VECTOR DOSOFTINT($0x0,$0x97)
+#define SOFTINT_TIMERFORK_VECTOR DOSOFTINT($0x7,$0x96)
+#define SOFTINT_QUEUEAST_VECTOR DOSOFTINT($0x6,$0x95)
+#define SOFTINT_IOPOST_VECTOR DOSOFTINT($0x4,$0x94)
+#define SOFTINT_RESCHED_VECTOR DOSOFTINT($0x3,$0x93)
+#define SOFTINT_ASTDEL_VECTOR DOSOFTINT($0x2,$0x92)
+#endif
 #else
 
 #define SOFTINT_IOLOCK11_VECTOR do { exe$frkipl11dsp(); myrei(); } while (0);

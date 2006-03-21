@@ -236,6 +236,7 @@ inline void regtrap(char type, char param) {
 int block3=0;
 
 inline char intr_blocked(unsigned char this) {
+#ifdef __x86_64__
   int flag=mycli();
   int this_cpu = smp_processor_id();
   struct _pcb * p=current;
@@ -281,6 +282,17 @@ inline char intr_blocked(unsigned char this) {
   p->psl_intr=1;
   mysti(flag);
   return 0;
+#else
+  int this_cpu = smp_processor_id();
+  struct _pcb * p=current;
+  if (mydebugi>1) printk("bl %x %x %x %x\n",p->pcb$l_pid,this,smp$gl_cpu_data[this_cpu]->cpu$w_sisr,p->pslindex);
+  if (this<=smp$gl_cpu_data[this_cpu]->cpu$b_ipl) {
+    if (this<16)
+      panic("should not block\n");
+    return 1;
+  }
+  return 0;
+#endif
 }
 
 asmlinkage void do_sw_int(void) {
@@ -333,10 +345,12 @@ asmlinkage void myrei (void) {
   /* look at REI for this */
   int flag, this_cpu;
   struct _pcb *p=current;
+#ifdef __x86_64__
   if (!p->psl_intr) {
     p->psl_intr=1;
     return; // return if not interrupt did happen
   }
+#endif
   flag=mycli();
   this_cpu=smp_processor_id();
   if (mydebugi>1) printk("bl %x %x %x\n",p->pcb$l_pid,smp$gl_cpu_data[this_cpu]->cpu$b_ipl,smp$gl_cpu_data[this_cpu]->cpu$w_sisr);
