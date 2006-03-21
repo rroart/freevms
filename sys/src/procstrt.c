@@ -215,7 +215,7 @@ int exe$procstrt(struct _pcb * p) {
   __asm__ ("movl %%edi,%0; ":"=r" (p));
 #endif
 #ifdef __x86_64__
-  __asm__ ("movq %%rdi,%0; ":"=r" (p));
+  __asm__ ("movq %%rbx,%0; ":"=r" (p));
 #endif
   // warning: very risky one, chance
 #endif
