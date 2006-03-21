@@ -72,3 +72,8 @@ int exe_std$debit_bytcnt_alo(int debit, struct _pcb *pcb, int *alosize_p,void **
   return SS$_NORMAL;
 }
 
+int exe$prober_simple(void * addr) {
+  char * p = addr;
+  char c = * p;
+  return c;
+}
