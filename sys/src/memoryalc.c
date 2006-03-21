@@ -648,8 +648,8 @@ int poison_packet(char * packet, int size, int deall) {
   l[2]=poison;
   memset(packet+12,poisonc,size-12);
 #else
-  l[4]=poison;
-  memset(packet+20,poisonc,size-20);
+  l[3]=poison;
+  memset(packet+16,poisonc,size-16);
 #endif
 #endif
 }
@@ -670,10 +670,10 @@ int check_packet(char * packet, int size, int deall) {
   char * c = packet + 12;
   size-=12;
 #else
-  if (l[4]!=poison) 
-    panic("poison %lx %x != %x\n",l,l[4],poison);
-  char * c = packet + 20;
-  size-=20;
+  if (l[3]!=poison) 
+    panic("poison %lx %x != %x\n",l,l[3],poison);
+  char * c = packet + 16;
+  size-=16;
 #endif
   for(;size;size--,c++) 
     if (*c!=poisonc) panic("poisonc %x %x %x\n",size,c,poisonc);
