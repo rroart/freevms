@@ -236,7 +236,7 @@ inline void regtrap(char type, char param) {
 int block3=0;
 
 inline char intr_blocked(unsigned char this) {
-#ifdef __x86_64__
+#if 0
   int flag=mycli();
   int this_cpu = smp_processor_id();
   struct _pcb * p=current;
@@ -345,7 +345,7 @@ asmlinkage void myrei (void) {
   /* look at REI for this */
   int flag, this_cpu;
   struct _pcb *p=current;
-#ifdef __x86_64__
+#if 0
   if (!p->psl_intr) {
     p->psl_intr=1;
     return; // return if not interrupt did happen
