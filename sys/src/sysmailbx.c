@@ -23,7 +23,7 @@
 #include <misc_routines.h>
 #include <sch_routines.h>
 
-int clone_init_ucb() {
+long clone_init_ucb() {
   extern struct _mb_ucb * mbucb0;
   //  struct _ucb * mb$ar_ucb0 = &mb$ucb;
   struct _ucb * u;
@@ -37,7 +37,7 @@ int clone_init_ucb() {
   return u;
 }
 
-int find_mb_log(void * lognam) {
+long find_mb_log(void * lognam) {
   $DESCRIPTOR(mytabnam,"LNM$SYSTEM_TABLE");
   struct item_list_3 i[6];
   char c[64];

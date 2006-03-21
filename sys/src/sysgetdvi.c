@@ -134,7 +134,7 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
   if (iosb)
     iosb->iosb$w_status=SS$_NORMAL;
 
-  contxt=d->ddb$l_link;
+  contxt=d->ddb$ps_link;
   if (contxt==0) 
     return SS$_NOMOREDEV;
 

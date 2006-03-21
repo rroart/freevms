@@ -149,7 +149,7 @@ asmlinkage int exe$hiber(long dummy) {
 #ifdef __i386__
   fixup_hib_pc(&dummy);
 #else
-  fixup_hib_pc(dummy);
+  fixup_hib_pc(dummy-0x30);
 #endif
   int ret = sch$wait(p,sch$gq_hibwq);
   setipl(0); // unstandard, but sch$wait might leave at ipl 8

@@ -10,6 +10,7 @@
 #include <linux/config.h>
 #include <linux/kernel.h>
 #include <linux/mm.h>
+#include <misc_routines.h>
 
 #include <stdarg.h>
 
@@ -19,7 +20,7 @@
 #define kmalloc malloc
 #endif
 
-CH$FILL(ch, size, addr) {
+CH$FILL(long ch, long size, long addr) {
   memset(addr,ch, size);
   return addr+size;
   printk("CH$FILL not implemented\n");
@@ -33,16 +34,16 @@ CH$ALLOCATION() {
   printk("CH$ALLOCATION not implemented\n");
 }
 
-CH$PTR(int X) {
+long CH$PTR(long X) {
   return X;
 }
 
-int CH$EQL(n1,ptr1,n2,ptr2) {
+int CH$EQL(long n1,long ptr1,long n2,long ptr2) {
   int n = ( n1 < n2 ? n1 : n2);
   return (0==memcmp(ptr1,ptr2,n));
 }
 
-int CH$NEQ(n1,ptr1,n2,ptr2) {
+int CH$NEQ(long n1,long ptr1,long n2,long ptr2) {
   int n = ( n1 < n2 ? n1 : n2);
   return (memcmp(ptr1,ptr2,n));
 }
@@ -55,7 +56,7 @@ PLIT() {
   printk("PLIT not implemented\n");
 }
 
-CH$MOVE(size, src, addr) {
+long CH$MOVE(long size, long src, long addr) {
   memcpy(addr,src, size);
   return addr+size;
   printk("CH$MOVE not implemented\n");
@@ -100,7 +101,7 @@ FORKUNLOCK () {
   printk("FORKUNLOCK not implemented\n");
 }
 
-ch$move(a,b,c) {
+ch$move(long a, long b, long c) {
   return CH$MOVE(a,b,c);
   printk("ch$move not implemented\n");
 }
@@ -109,7 +110,7 @@ Begin_Lock() {
   printk("Begin_Lock not implemented\n");
 }
 
-CH$PLUS(x,y) {
+CH$PLUS(long x, long y) {
   return x+y;
   printk("CH$PLUS not implemented\n");
 }
@@ -162,7 +163,7 @@ CH$RCHAR() {
 }
 
 //ENTRY  SWAPBYTES,^M<>
-	int swapbytes(WrdCnt,Start)
+	int swapbytes(long WrdCnt, long Start)
 {
   int *R0,*R2,*R3,*R4,*R5,*R6,*R7,*R8,*R9;
   unsigned char * R1 = Start;			// starting word address.

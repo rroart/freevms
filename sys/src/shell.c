@@ -457,6 +457,29 @@ int user_spaceable_addr(void * addr) {
     *ptep|=_PAGE_USER;
     flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
   }
+#else
+  struct _pcb * pcb = ctl$gl_pcb;
+  pgd_t *pgd;
+  pmd_t *pmd;
+  pte_t *pte = 0;
+  long page=((long)addr) & ~0xfff;
+
+  struct mm_struct * mm=pcb->mm;
+
+  pgd = pgd_offset(mm, page);
+  pmd = pmd_alloc(mm, pgd, page);
+  if (pmd) {
+    pte = pte_alloc(mm, pmd, page);
+  }
+  if (pte) {
+    long * ptep = pte;
+    *ptep|=_PAGE_USER;
+    ptep=pmd;
+    *ptep|=_PAGE_USER;
+    ptep=pgd;
+    *ptep|=_PAGE_USER;
+    flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
+  }
 #endif
 }
 
@@ -465,7 +488,9 @@ int user_spaceable() {
   extern int exe$astdel();
   user_spaceable_addr(exe$astdel);
 #endif
+#ifdef __i386__
   user_spaceable_addr(&exe$gq_systime);
+#endif
 #if 0
   extern struct desc_struct gdt_table[];
   long long * l=&gdt_table[2];

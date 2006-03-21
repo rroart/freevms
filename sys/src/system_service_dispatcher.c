@@ -22,4 +22,9 @@ asmlinkage int cmod$astexit() {
 		       "addl $0x40, %esp\n\t" // check. rewind stack
 		       );
 #endif
+#ifdef __x86_64__
+  __asm__ __volatile__(
+		       "addq $0x88, %rsp\n\t" // check. rewind stack
+		       );
+#endif
 }

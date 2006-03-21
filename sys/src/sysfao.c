@@ -12,7 +12,7 @@
 #include <linux/string.h>
 
 asmlinkage int exe$faol(void * ctrstr , short int * outlen , void * outbuf , int * prmlst) {
-  int * argv=prmlst;
+  long * argv=prmlst;
   struct dsc$descriptor * in=ctrstr;
   struct dsc$descriptor * out=outbuf;
   int in_dex=0,out_dex=0;
@@ -168,10 +168,10 @@ asmlinkage int exe$faol(void * ctrstr , short int * outlen , void * outbuf , int
 
 asmlinkage int exe$fao(void * ctrstr , short int * outlen , void * outbuf , ...) {
   va_list args;
-  int argv[18],argc=0;
+  long argv[18],argc=0;
   va_start(args,outbuf);
   while(argc<17) {
-    argv[argc]=va_arg(args,int);
+    argv[argc]=va_arg(args,long);
     argc++;
   }
   va_end(args);
