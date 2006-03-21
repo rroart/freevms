@@ -42,6 +42,10 @@ typedef union {
     struct {int l1,l2; } l;
     } quadword;
 
+typedef union {
+    struct {int l1,l2,l3,l4; } l;
+    } octaword;
+
 #define word short
 #define uword unsigned short	
 #define ushort unsigned short
@@ -55,6 +59,7 @@ typedef union {
 #define ushort unsigned short
 #define ulong unsigned long
 #define uchar unsigned char
+#define uint unsigned int
 
 /* 'Network Device Configuration blockvector Entry Fields.' */
 
@@ -69,12 +74,17 @@ devconfig.bli) at compile time and from the file devconfig.txt during acp initia
 
 typedef struct {
   unsigned char dc_begin[0];
+#ifdef __i386__
     quadword	dc_devname;
     quadword	dc_devspec;
+#else
+    octaword	dc_devname;
+    octaword	dc_devspec;
+#endif
     int		*dc_dev_interface;
-    ulong	dc_ip_address;		/* Device IP address */
-    ulong	dc_ip_netmask;		/* Device IP network mask */
-    ulong	dc_ip_network;		/* Device IP network value */
+    uint	dc_ip_address;		/* Device IP address */
+    uint	dc_ip_netmask;		/* Device IP network mask */
+    uint	dc_ip_network;		/* Device IP network value */
     int		(*dc_rtn_Init)();
     int		(*dc_rtn_Xmit)();
     int		(*dc_rtn_Dump)();
@@ -91,7 +101,11 @@ typedef struct {
 
     /* MIB data */
     ulong	dcmib_ifIndex;		/* Interface index number */
+#ifdef __i386__
   quadword	dcmib_ifDescr;		/* Interface description string */
+#else
+  octaword	dcmib_ifDescr;		/* Interface description string */
+#endif
     ulong	dcmib_ifType;		/* device type */
     ulong	dcmib_ifMTU;		/* Max Transfer Unit */
     ulong	dcmib_ifSpeed;		/* Bandwidth (bits/second) */
@@ -229,7 +243,7 @@ typedef struct {
     int		(*ACPI$IP_ISME)();
 
     /* Memory allocation routines */
-    int		(*ACPI$Seg_Get)();
+    long	(*ACPI$Seg_Get)();
     int		(*ACPI$Seg_Free)();
     int		(*ACPI$QBlk_Free)();
 

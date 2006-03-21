@@ -728,8 +728,8 @@ struct ip_structure
     unsigned char     iph$ttl			;
     unsigned char     iph$protocol		;
     unsigned short     iph$checksum		;
-    unsigned long     iph$source			;
-    unsigned long     iph$dest			;
+    unsigned int     iph$source			;
+    unsigned int     iph$dest			;
   };
 
 #define    IP_SIZE   sizeof(struct IP_Header)
@@ -810,7 +810,7 @@ struct icmp_header
 
 // Type-specific fields:
     union {
-      unsigned long     icm$var	;	// Type-specific data
+      unsigned int     icm$var	;	// Type-specific data
 
 // Echo request and reply (0,8)
       struct {

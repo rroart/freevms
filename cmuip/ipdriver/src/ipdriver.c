@@ -207,11 +207,11 @@ struct IP_UCB {
 
 struct	IPADR {
 
-unsigned long IPADR$Src_Host;	// Source host
-unsigned long IPADR$Dst_Host;	// Destination host
-unsigned long IPADR$Ext1;	// Header info longword #1
+unsigned int IPADR$Src_Host;	// Source host
+unsigned int IPADR$Dst_Host;	// Destination host
+unsigned int IPADR$Ext1;	// Header info longword #1
 #define	IPADR$UDP_SIZE	12
-unsigned long IPADR$Ext2;	// Header info longword #2
+unsigned int IPADR$Ext2;	// Header info longword #2
 #define	IPADR$SIZE	16
 
 };
@@ -373,10 +373,10 @@ struct	RE {
 // . = AB$COM_END				// Append to common block
   struct AB RE$AB;
 
-unsigned long RE$SRC_HOST;	// Source host
-unsigned long RE$DST_HOST;	// Destination host
-unsigned long RE$EXT1	;	// Header info longword #1
-unsigned long RE$EXT2	;	// Header info longword #2
+unsigned int RE$SRC_HOST;	// Source host
+unsigned int RE$DST_HOST;	// Destination host
+unsigned int RE$EXT1	;	// Header info longword #1
+unsigned int RE$EXT2	;	// Header info longword #2
 
 unsigned short int RE$FLAGS;	// Flags
 unsigned short int RE$TIMEOUT;	// Receive timeout

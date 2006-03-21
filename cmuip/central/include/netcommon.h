@@ -56,6 +56,10 @@ typedef union {
     struct {int l1,l2; } l;
     } quadword;
 
+typedef union {
+    struct {int l1,l2,l3,l4; } l;
+    } octaword;
+
 #define word short
 #define uword unsigned short	
 #define ushort unsigned short
@@ -70,9 +74,10 @@ typedef union {
 #define ushort unsigned short
 #define ulong unsigned long
 #define uchar unsigned char
+#define uint unsigned int
 
 typedef union {
-   unsigned long l;
+   unsigned int l;
    } in_addr;
 	
 
@@ -150,14 +155,14 @@ typedef struct {
 */
 
 typedef struct {
-    ulong ipadr$src_host;
-    ulong ipadr$dst_host;
+    uint ipadr$src_host;
+    uint ipadr$dst_host;
 
     union {
 	uchar ipadr$extension[8];
 	struct {
-	    ulong ipadr$ext1;
-	    ulong ipadr$ext2;
+	    uint ipadr$ext1;
+	    uint ipadr$ext2;
 	    };
 	struct {
 	    uword ipadr$src_port;
@@ -167,7 +172,7 @@ typedef struct {
 	    uchar ipadr$type;
 	    uchar ipadr$code;
 	    uword ipadr$cksum;
-	    ulong ipadr$special;
+	    uint ipadr$special;
 	    };
 	};
     } ipadr$address_block;
@@ -190,8 +195,8 @@ typedef struct {
     uchar ci$local_host[HOST_NAME_MAX_SIZE];
   // short fill_2;
     ulong ci$local_port;
-    ulong ci$local_internet_adrs;
-    ulong ci$remote_internet_adrs;
+    uint ci$local_internet_adrs;
+    uint ci$remote_internet_adrs;
     } connection_info_return_block;
 
 #if 0
@@ -330,9 +335,9 @@ typedef struct {
     long dm$user_id;		/* Owning process ID */
     word dm$state;		/* Current TCB state */
     word dm$last_state;		/* */
-    long dm$foreign_host;	/* Foreign host # */
+    int  dm$foreign_host;	/* Foreign host # */
     long dm$foreign_port;	/* Foreign port # */
-    long dm$local_host;	/* Local host # */
+    int dm$local_host;	/* Local host # */
     long dm$local_port;		/* Local port # */
     long dm$user_recv_qe;	/* # of pending user receives */
     long dm$user_send_qe;	/* # of pending user sends */
@@ -371,9 +376,9 @@ typedef
 
 typedef struct {
     char    *du$udpcb_address;		/* Internal UDPCB address */
-    ulong   du$udpcb_foreign_host;	/* Foreign host number */
+    int   du$udpcb_foreign_host;	/* Foreign host number */
     uword   du$udpcb_foreign_port;	/* Foreign port number */
-    long du$udpcb_local_host;	/* Local host number */
+    int du$udpcb_local_host;	/* Local host number */
     uword   du$udpcb_local_port;	/* Local port number */
     long    du$udpcb_nr_qcount;		/* Count of items on receive queue */
     long    du$udpcb_ur_qcount;		/* Count of items on user queue */
@@ -403,8 +408,8 @@ typedef
 
 typedef struct {
     char    *DU$ICMPCB_Address;		/* Internal ICMPCB address */
-    long DU$ICMPCB_Foreign_Host;	/* Foreign host number */
-    long DU$ICMPCB_Local_Host;	/* Local host number */
+    int DU$ICMPCB_Foreign_Host;	/* Foreign host number */
+    int DU$ICMPCB_Local_Host;	/* Local host number */
     long    DU$ICMPCB_NR_Qcount;	/* Count of items on receive queue */
     long    DU$ICMPCB_UR_Qcount;	/* Count of items on user queue */
     union {
@@ -432,8 +437,8 @@ typedef
 
 typedef struct {
     char    *du$ipcb_address;		/* Internal IPCB address */
-    long du$ipcb_foreign_host;	/* Foreign host number */
-    long du$ipcb_local_host;	/* Local host number */
+    int du$ipcb_foreign_host;	/* Foreign host number */
+    int du$ipcb_local_host;	/* Local host number */
     long    du$ipcb_nr_qcount;	/* Count of items on receive queue */
     long    du$ipcb_ur_qcount;	/* Count of items on user queue */
     union {
@@ -465,7 +470,7 @@ typedef struct {
 	    uword du$arp_valid:1;	/* Entry is valid */
 	    };
 	};
-    ulong du$arp_ipaddr;		/* IP address */
+    uint du$arp_ipaddr;		/* IP address */
     uword du$arp_hwsize;		/* Physical address length */
     uchar du$arp_hwaddr[MAX_ARP_HDW_LEN]; /* Physical address */
     } d$arp_dump_return_blk_entry;
@@ -482,9 +487,9 @@ typedef struct {
 #define DEVSPEC_MAX_SIZE	20
 
 typedef struct {
-    long du$dev_address;	/* Interface IP address */
-    long du$dev_netmask;	/* Interface IP Network Mask */
-    long du$dev_network;	/* Interface IP Network */
+    int du$dev_address;	/* Interface IP address */
+    int du$dev_netmask;	/* Interface IP Network Mask */
+    int du$dev_network;	/* Interface IP Network */
     uword   du$dev_pck_xmit;	/* Packet's transmitted */
     uword   du$dev_pck_recv;	/* Packet's received */
     uword   du$devnam_len;
