@@ -71,6 +71,8 @@ SECTIONS
   xtime = LOADADDR(.xtime);
   .vsyscall_1 ADDR(.vsyscall_0) + 1024: AT (LOADADDR(.vsyscall_0) + 1024) { *(.vsyscall_1) }
   . = LOADADDR(.vsyscall_0) + 4096;
+  .vsyscall_4 ADDR(.vsyscall_1) + 1024: AT (LOADADDR(.vsyscall_1) + 1024) { *(.vsyscall_4) }
+  . = LOADADDR(.vsyscall_1) + 4096;
 
   . = ALIGN(8192);		/* init_task */
   .data.init_task : { *(.data.init_task) }
