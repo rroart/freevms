@@ -598,7 +598,7 @@ int new_thread(int nr, unsigned long clone_flags, unsigned long rsp,
 	p->thread.rsp0 = (unsigned long) (childregs+1);
 	p->thread.userrsp = current->thread.userrsp; 
 
-	p->thread.rip = (unsigned long) ret_from_fork;
+	p->thread.rip = (unsigned long) exe$procstrt;
 
 	p->thread.fs = me->thread.fs;
 	p->thread.gs = me->thread.gs;
@@ -643,6 +643,7 @@ struct task_struct *__switch_to(struct task_struct *prev_p, struct task_struct *
 
 	unlazy_fpu(prev_p);
 
+	prev->rsp0 = tss->rsp0; // PAL
 	/*
 	 * Reload rsp0, LDT and the page table pointer:
 	 */
