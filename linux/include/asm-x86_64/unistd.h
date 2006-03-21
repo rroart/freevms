@@ -609,6 +609,7 @@ __SYSCALL(__NR_semtimedop, sys_semtimedop)
 #define __NR_$setprv           104
 #define __NR_$cancel           105
 #define __NR_$getjpiw          106
+#define __NR_$sndopr           107
 
 #define __NR_$close 1
 #define __NR_$connect 2
