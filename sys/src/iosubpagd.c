@@ -20,6 +20,8 @@
 #include<linux/vmalloc.h>
 #include<linux/linkage.h>
 #include <exe_routines.h>
+#include <lnmsub.h>
+#include <lnmstrdef.h>
 
 int ioc$ffchan(unsigned short int *chan) {
   unsigned short int i;
@@ -136,6 +138,7 @@ int ioc$verify_chan(unsigned short int chan, struct _ccb ** ccbp) {
 }
 
 int ioc_std$trandevnam (void * descr_p, int flags, char *buf, int *outlen, void **out_p) {
+#if 0
   int sts;
   $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
   struct dsc$descriptor * mytabnam = &mytabnam_;
@@ -161,6 +164,34 @@ int ioc_std$trandevnam (void * descr_p, int flags, char *buf, int *outlen, void 
     return sts;
   sts=exe$trnlnm(0,mytabnam2,descr_p,0,itm);
   return sts;
+#else
+  int sts;
+  $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
+  struct dsc$descriptor * mytabnam = &mytabnam_;
+  $DESCRIPTOR(mytabnam2_, "LNM$PROCESS_TABLE");
+  struct dsc$descriptor * mytabnam2 = &mytabnam2_;
+  *out_p=buf;
+  struct dsc$descriptor * d = descr_p, descr;
+  descr.dsc$a_pointer=d->dsc$a_pointer;
+  char * c = strchr(d->dsc$a_pointer,':'); // get rid of colon here
+  if (c)
+    descr.dsc$w_length=(long)c-(long)d->dsc$a_pointer;
+  else
+    descr.dsc$w_length=d->dsc$w_length;
+  descr_p=&descr;
+  struct dsc$descriptor * descr_p2 = descr_p;
+  struct struct_lnm_ret ret={0,0};
+  sts=lnm$searchlog(&ret,descr_p2->dsc$w_length,descr_p2->dsc$a_pointer,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
+  if (sts&1)
+    goto found;
+  sts=lnm$searchlog(&ret,descr_p2->dsc$w_length,descr_p2->dsc$a_pointer,mytabnam2->dsc$w_length,mytabnam2->dsc$a_pointer);
+  if ((sts&1)==0)
+    return sts;
+ found:
+  *outlen=(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_xlen;
+  memcpy(buf,(ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,*outlen);
+  return sts;
+#endif
 }
 
 int ioc_std$search (void * descr_p, int flags, void *lock_val_p, struct _ucb **ucb_p, struct _ddb **ddb_p, struct _sb **sb_p) {
