@@ -95,6 +95,18 @@
         call myrei; \
         POPR_ALL;
 
+#define SAVE_TSS_SP \
+	pushq %rdx		; \
+	movq $init_tss, %rdx	; \
+	addq $0x4, %rdx		; /* yes, 4 */ \
+	movq %rsp, (%rdx)	; \
+	addq $0x20, (%rdx)	; \
+	cmpq $0x10, 0x18(%rsp)	; /* check */ \
+	je 1f			; \
+	addq $0x10, (%rdx)	; \
+1:				; \
+	popq %rdx
+
 /* also need to do stack changes */
 /* and astlvl checks */
   
@@ -150,7 +162,21 @@
 	popq %rax
 	.endm
 	
-
+	.macro save_sp x
+	pushq %rax
+	pushq %rdi
+	movq 0x7ffff000, %rdi
+	addq $tsk_ipr_sp, %rdi
+	movq \x+0x18(%rsp), %rax
+	andq $0x3, %rax
+	salw $3,%ax
+	addq %rax, %rdi
+	movq \x+0x28(%rsp),%rax
+	movq %rax, (%rdi)
+	popq %rdi
+	popq %rax
+	.endm
+	
 /*
  * A newly forked process directly context switches into this.
  */ 	
@@ -202,6 +228,7 @@ ENTRY(ret_from_fork)
 ENTRY(system_call)
 	swapgs
 #	PUSHPSLINTR
+	save_sp 0	
 	movq	%rsp,PDAREF(pda_oldrsp) 
 	movq	PDAREF(pda_kernelstack),%rsp
 	regtrapi $1,$0
@@ -230,6 +257,7 @@ sysret_restore_args:
 	REI
 	movq    RIP-ARGOFFSET(%rsp),%rcx
 	RESTORE_ARGS 0,-ARG_SKIP,1
+	SAVE_TSS_SP
 	movq	PDAREF(pda_oldrsp),%rsp
 	swapgs
 	sysretq
@@ -439,6 +467,7 @@ retint_restore_args:
 1:
 retint_restore_args2:		
 	RESTORE_ARGS 0,8						
+	SAVE_TSS_SP
 iret_label:
 	iretq
 	.section __ex_table,"a"
@@ -505,6 +534,7 @@ ENTRY(vms_system_call3)
 	swapgs
 1:
 #	PUSHPSLINTR
+	save_sp 0	
 	regtrapi $1,$3
 	sti
 	SAVE_ARGS 8,0
@@ -527,6 +557,7 @@ ENTRY(vms_system_call1)
 	swapgs
 1:
 #	PUSHPSLINTR
+	save_sp 0	
 	regtrapi $1,$1
 	sti
 	SAVE_ARGS 8,0
@@ -553,6 +584,7 @@ ENTRY(vms_system_call)
 	movq	PDAREF(pda_kernelstack),%rsp
 #endif
 #	PUSHPSLINTR
+	save_sp 0	
 	regtrapi $1,$0
 	sti
 	SAVE_ARGS 8,0 # was:	8,1 
@@ -595,6 +627,7 @@ vms_sysret_restore_args:
 	je   1f
 	swapgs
 1:
+	SAVE_TSS_SP
 	iretq
 			
 vms_sysret_signal:
@@ -800,6 +833,7 @@ vms_retint_restore_args:
 	REI
 1:	
 	RESTORE_ARGS 0,8						
+	SAVE_TSS_SP
 vms_iret_label:	
 	iretq
 	.section __ex_table,"a"
@@ -911,6 +945,7 @@ ENTRY(\x)
 	je   1f
 	swapgs
 1:	
+	SAVE_TSS_SP
 	iretq		
 	.endm
 	
@@ -1104,6 +1139,7 @@ ENTRY(execve)
 	ret
 
 ENTRY(page_fault)
+	save_sp 8	
 	errorentry do_page_fault
 
 ENTRY(coprocessor_error)
@@ -1415,6 +1451,7 @@ ENTRY(vms_sys_call_table)
 	.quad SYMBOL_NAME(exe$setprv)
 	.quad SYMBOL_NAME(exe$cancel)
 	.quad SYMBOL_NAME(exe$getjpiw_wrap)
+	.quad SYMBOL_NAME(exe$sndopr)
 
 #	.rept NR_vmssyscalls-(.-vmssys_call_table)/8
 		.quad SYMBOL_NAME(sys_$ni_syscall)

@@ -19,6 +19,7 @@
 #include <asm/hardirq.h>
 #include <asm/processor.h>
 #include <asm/desc.h>
+#include <cpudef.h>
 
 #define output(x) asm volatile ("--- " x)
 #define outconst(x,y) asm volatile ("--- " x : : "i" (y)) 
@@ -42,7 +43,10 @@ int main(void)
 	ENTRY(processor);
 #endif
 	ENTRY(need_resched); 
-	ENTRY(thread); 
+	ENTRY(thread);
+	ENTRY(ipr_sp);
+	ENTRY(psl);
+	ENTRY(oldpsl);
 #undef ENTRY
 #define ENTRY(entry) outconst("#define pda_" #entry " %0", offsetof(struct x8664_pda, entry))
 	ENTRY(kernelstack); 
@@ -57,6 +61,9 @@ int main(void)
 	ENTRY(cpunumber);
 	ENTRY(irqstackptr);
 	ENTRY(level4_pgt);
+#undef ENTRY
+#define ENTRY(entry) outconst("#define cpu_" #entry " %0", offsetof(struct _cpu, entry))
+	ENTRY(cpu$l_saved_isp);
 #undef ENTRY
 	output("#ifdef __ASSEMBLY__"); 
 	outconst("#define PT_TRACESYS %0", PT_TRACESYS);
