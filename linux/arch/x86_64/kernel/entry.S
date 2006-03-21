@@ -177,10 +177,21 @@
 	popq %rax
 	.endm
 	
+	.macro syscall_save_sp x
+	pushq %rdi
+	movq 0x7ffff000, %rdi
+	addq $tsk_ipr_sp, %rdi
+	addq $0x18, %rdi
+	movq %rsp, (%rdi)
+	addq $0x08, (%rdi)
+	popq %rdi
+	.endm
+	
 /*
  * A newly forked process directly context switches into this.
  */ 	
 ENTRY(ret_from_fork)
+	PUSHPSL	// check. temp workaround
 	movq %rax,%rdi		/* return value of __switch_to -> prev task */
 #	call schedule_tail
 	GET_CURRENT(%rcx)
@@ -228,7 +239,7 @@ ENTRY(ret_from_fork)
 ENTRY(system_call)
 	swapgs
 #	PUSHPSLINTR
-	save_sp 0	
+	syscall_save_sp 0	
 	movq	%rsp,PDAREF(pda_oldrsp) 
 	movq	PDAREF(pda_kernelstack),%rsp
 	regtrapi $1,$0
