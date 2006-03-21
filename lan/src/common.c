@@ -182,7 +182,11 @@ int lan$sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
     
     memcpy(sense->XE_Sense_String,dev->dev_addr,6);
 
+#ifdef __i386__
     sense=(long)sense+10+2; // 2 because of gcc feature/bug
+#else
+    sense=(long)sense+10+2; // 2 because of gcc feature/bug
+#endif
 
     sense->XE_Sense_Param = NMA$C_PCLI_PHA;
     sense->XE_Sense_Type = 1;

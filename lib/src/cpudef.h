@@ -128,7 +128,6 @@ struct {
   unsigned long cpu$l_tenusec;
   unsigned long cpu$l_ubdelay;
   unsigned long cpu$l_nullcpu;
-
 };
  
 struct _sched_ds {
