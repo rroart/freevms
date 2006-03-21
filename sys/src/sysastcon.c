@@ -24,7 +24,7 @@ int exe$setast(char enbflg) {
     retval=SS$_WASSET;
   else
     retval=SS$_WASCLR;
-  if (p->oldpsl_prv_mod!=PSL$C_USER) {
+  if (p->oldpsl_prv_mod!=PSL$C_USER) { // check
   back:
     if (enbflg) 
       p->pcb$b_asten|=(1<<p->psl_prv_mod);
