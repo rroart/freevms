@@ -294,6 +294,7 @@ exe$extendpool(void * pool);
 void exe$reclaim_pool_aggressive(void * pool);
 void exe$reclaim_pool_gentle(void * pool);
 void exe$insertirp(struct _ucb * u, struct _irp * i);
+int exe$prober_simple(void * addr);
 
 #include <linux/linkage.h>
 
