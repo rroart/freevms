@@ -867,7 +867,11 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     struct file * f;
     signed int error=0;
     int dirflg=0;
+#ifdef __i386__
     struct dirent64 dir;
+#else
+    struct dirent64 * dir = kmalloc(sizeof(struct dirent64),GFP_KERNEL);
+#endif
     struct inode * head;
     struct _fcb * fcb=x2p->primary_fcb;
     head = fcb->fcb$l_primfcb;
@@ -875,9 +879,15 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     if (strchr(filedsc->dsc$a_pointer,'*') || strchr(filedsc->dsc$a_pointer,'%'))
       wildcard=1;
 
+#ifdef __i386__
     dir.d_ino=0;
     dir.d_type=0;
     memset(dir.d_name,0,256);
+#else
+    dir->d_ino=0;
+    dir->d_type=0;
+    memset(dir->d_name,0,256);
+#endif
     memset(name,0,256);
 
     if (wildcard || (fib->fib$w_nmctl & FIB$M_WILD)) {
@@ -903,7 +913,11 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
       f=filp_open(name, O_RDONLY|O_NONBLOCK|O_LARGEFILE|dirflg, 0);
     }
     buf.count = 0;
+#ifdef __i386__
     buf.dirent = &dir;
+#else
+    buf.dirent = dir;
+#endif
     if (IS_ERR(f)) {
       sts=SS$_NOSUCHFILE;
       if ( (sts & 1) == 0 && (irp->irp$v_fcode != IO$_CREATE)) { 
@@ -931,13 +945,21 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     if (sts!=SS$_NORMAL)
       x2p->prev_fp=0;
 
+#ifdef __i386__
     if (dir.d_ino==0) {
       dir.d_ino=f->f_dentry->d_inode->i_ino;
       strcpy(dir.d_name,f->f_dentry->d_iname);
     }
+#else
+    if (dir->d_ino==0) {
+      dir->d_ino=f->f_dentry->d_inode->i_ino;
+      strcpy(dir->d_name,f->f_dentry->d_iname);
+    }
+#endif
 
     filp_close(f,0);
-    
+  
+#ifdef __i386__  
     if (0==strcmp(name,"/") && 0==strcmp(dir.d_name,"."))
       strcpy(dir.d_name,"000000.DIR");
     if (0==strcmp(dir.d_name,".."))
@@ -955,6 +977,25 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     if (dir.d_ino!=2) {
       fib->fib$w_fid_num=head->i_dev;
       *(unsigned long*)(&fib->fib$w_fid_seq)=dir.d_ino;
+#else
+    if (0==strcmp(name,"/") && 0==strcmp(dir->d_name,"."))
+      strcpy(dir->d_name,"000000.DIR");
+    if (0==strcmp(dir->d_name,".."))
+      strcpy(dir->d_name,"DOTDOT.DIR");
+    if (0==strcmp(dir->d_name,"."))
+      strcpy(dir->d_name,"DOT.DIR");
+    if (reslen) {
+      // temp workaround for write?
+      *reslen=strlen(dir->d_name);
+      dir->d_name[(*reslen)++]=';';
+      dir->d_name[(*reslen)++]='1';
+      memcpy(resdsc->dsc$a_pointer,dir->d_name,*reslen);
+      //printk("resdsc %s %x\n",resdsc->dsc$a_pointer,*reslen);
+    }
+    if (dir->d_ino!=2) {
+      fib->fib$w_fid_num=head->i_dev;
+      *(unsigned long*)(&fib->fib$w_fid_seq)=dir->d_ino;
+#endif
     } else {
       fib->fib$w_fid_num=4;
       fib->fib$w_fid_seq=4;
@@ -964,9 +1005,15 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 
     //temp hack to get a dentry
     {
+#ifdef __i386__
       char * c=strchr(&dir.d_name,';');
       if (c) *c=0;
       f=filp_open(&dir.d_name, O_RDONLY,0);
+#else
+      char * c=strchr(&dir->d_name,';');
+      if (c) *c=0;
+      f=filp_open(&dir->d_name, O_RDONLY,0);
+#endif
       if (f>=0 && f<0xf0000000) {
 	if (f->f_dentry && f->f_dentry->d_inode)
 	  make_fcb(f->f_dentry->d_inode);
@@ -978,15 +1025,24 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 	  make_fcb(f->f_dentry->d_inode);
 	filp_close(f,0);
       }
+#ifdef __i386__
       dir.d_name[strlen(dir.d_name)]='/';
       strcpy(dir.d_name+strlen(dir.d_name),name);
       f=filp_open(&dir.d_name, O_RDONLY,0);
+#else
+      dir->d_name[strlen(dir->d_name)]='/';
+      strcpy(dir->d_name+strlen(dir->d_name),name);
+      f=filp_open(&dir->d_name, O_RDONLY,0);
+#endif
       if (f>=0 && f<0xf0000000) {
 	if (f->f_dentry && f->f_dentry->d_inode)
 	  make_fcb(f->f_dentry->d_inode);
 	filp_close(f,0);
       }
     }
+#ifndef __i386__
+    kfree(dir);
+#endif
 
 #if 0
       sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
