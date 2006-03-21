@@ -89,6 +89,7 @@ int lnm$hash(const int length, const unsigned char * log, const unsigned long ma
   hash=hash&mask;
   //lnmprintf("here3 %x\n",hash);
   *myhash=hash;
+  //  printk("hash %lx %ls %s %lx\n",length , log, log, hash);
   //lnmprintf("here2 %x %x\n",myhash,hash);
   return SS$_NORMAL;
 }
@@ -217,8 +218,8 @@ int lnm$firsttab(struct struct_lnm_ret * r,int  tabnamlen,  char * tablename) {
   struct struct_nt * MYNT;
   MYRT=(struct struct_rt *)lnmmalloc(sizeof(struct struct_rt));
   memset(MYRT,0,sizeof(struct struct_rt));
-  MYNT=(struct struct_rt *)lnmmalloc(sizeof(struct struct_rt));
-  memset(MYNT,0,sizeof(struct struct_rt));
+  MYNT=(struct struct_nt *)lnmmalloc(sizeof(struct struct_nt));
+  memset(MYNT,0,sizeof(struct struct_nt));
 #if 0
   MYNT->loglen=tabnamlen;
   MYNT->lognam=tablename;
@@ -394,6 +395,7 @@ void lnm$unlockw(void) {
 #endif
 
 int search_log_prc(char * name, int namelen, char ** retname, int * retsize) {
+#if 0
   $DESCRIPTOR(prc,"LNM$PROCESS_TABLE");
   int sts;
   int retlen;
@@ -416,9 +418,27 @@ int search_log_prc(char * name, int namelen, char ** retname, int * retsize) {
     *retsize = retlen;
   } 
   return sts;
+#else
+  $DESCRIPTOR(prc,"LNM$PROCESS_TABLE");
+  int sts;
+  int retlen;
+  struct item_list_3 itm[2];
+  struct dsc$descriptor * mytabnam = &prc;
+  struct struct_lnm_ret ret={0,0};
+  sts = lnm$searchlog(&ret,namelen,name,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
+  if (sts&1) {
+    retlen=(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_xlen;
+    char * c = kmalloc(retlen,GFP_KERNEL);
+    memcpy(c,(ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,retlen);
+    *retname = c;
+    *retsize = retlen;
+  } 
+  return sts;
+#endif
 }
 
 int search_log_sys(char * name, int namelen, char ** retname, int * retsize) {
+#if 0
   $DESCRIPTOR(sys,"LNM$SYSTEM_TABLE");
   int sts;
   int retlen;
@@ -441,6 +461,23 @@ int search_log_sys(char * name, int namelen, char ** retname, int * retsize) {
     *retsize = retlen;
   } 
   return sts;
+#else
+  $DESCRIPTOR(sys,"LNM$SYSTEM_TABLE");
+  int sts;
+  int retlen;
+  struct item_list_3 itm[2];
+  struct dsc$descriptor * mytabnam = &sys;
+  struct struct_lnm_ret ret={0,0};
+  sts = lnm$searchlog(&ret,namelen,name,mytabnam->dsc$w_length,mytabnam->dsc$a_pointer);
+  if (sts&1) {
+    retlen=(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_xlen;
+    char * c = kmalloc(retlen,GFP_KERNEL);
+    memcpy(c,(ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,retlen);
+    *retname = c;
+    *retsize = retlen;
+  } 
+  return sts;
+#endif
 }
 
 int search_log_repl(char * name, char ** retname, int * retsize) {
