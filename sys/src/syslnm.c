@@ -44,6 +44,7 @@ struct lnmhshp lnmhshp;
 #include<system_data_cells.h>
 #include<ipl.h>
 #include<internals.h>
+#include <exe_routines.h>
 #include <misc_routines.h>
 #include <linux/slab.h>
 #endif
@@ -112,6 +113,11 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
   struct dsc$descriptor * mylognam=lognam;
   struct item_list_3 * i,j;
   struct struct_rt * RT;
+
+  if (mytabnam && mytabnam->dsc$a_pointer)
+    exe$prober_simple(mytabnam->dsc$a_pointer); // just eventual page in
+  if (mylognam && mylognam->dsc$a_pointer)
+    exe$prober_simple(mylognam->dsc$a_pointer); // just eventual page in
 
   setipl(IPL$_ASTDEL);
 
@@ -201,6 +207,12 @@ asmlinkage int exe$crelnt (unsigned int *attr, void *resnam, unsigned int *resle
   else {
     /*    mytabnam="LNM$something";*/
   }
+
+  if (mytabnam && mytabnam->dsc$a_pointer)
+    exe$prober_simple(mytabnam->dsc$a_pointer); // just eventual page in
+  if (mypartab && mypartab->dsc$a_pointer)
+    exe$prober_simple(mypartab->dsc$a_pointer); // just eventual page in
+
   setipl(IPL$_ASTDEL);
   mylnmb=lnmmalloc(sizeof(struct _lnmb));
   memset(mylnmb,0,sizeof(struct _lnmb));
@@ -346,6 +358,12 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
   mylognam=lognam;
   mytabnam=tabnam;
   if (!(tabnam && itmlst)) return 0;
+
+  if (mytabnam && mytabnam->dsc$a_pointer)
+    exe$prober_simple(mytabnam->dsc$a_pointer); // just eventual page in
+  if (mylognam && mylognam->dsc$a_pointer)
+    exe$prober_simple(mylognam->dsc$a_pointer); // just eventual page in
+
   /* lock mutex */
   setipl(IPL$_ASTDEL);
   lnm$lockr();
