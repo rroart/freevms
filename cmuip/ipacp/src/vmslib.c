@@ -7,16 +7,19 @@
 
 #include <descrip.h>
 
+#ifndef NOKERNEL
 #include <linux/config.h>
 #include <linux/kernel.h>
 #include <linux/mm.h>
+#endif
 
 #include <stdarg.h>
+#include <stdlib.h>
 
 #ifdef NOKERNEL
 #define printk myprintk
 #define kfree free
-#define kmalloc malloc
+#define kmalloc(x,y) malloc(x)
 
 void myprintk(char *s) {
   struct dsc$descriptor dsc;
@@ -27,7 +30,7 @@ void myprintk(char *s) {
 
 #endif
 
-CH$FILL(ch, size, addr) {
+CH$FILL(long ch, long size, long addr) {
   memset(addr,ch, size);
   return addr+size;
   printk("CH$FILL not implemented\n");
@@ -76,7 +79,7 @@ STR$APPEND(x , y)
   printk("STR$APPEND not implemented\n");
 }
 
-CH$PTR(int X) {
+long CH$PTR(long X) {
   return X;
 }
 
@@ -86,12 +89,12 @@ int STR$CASE_BLIND_COMPARE(x,y)
      return strncmp(x->dsc$a_pointer,y->dsc$a_pointer,y->dsc$w_length);
 }
 
-int CH$EQL(n1,ptr1,n2,ptr2) {
+int CH$EQL(long n1, long ptr1, long n2, long ptr2) {
   int n = ( n1 < n2 ? n1 : n2);
   return (0==memcmp(ptr1,ptr2,n));
 }
 
-int CH$NEQ(n1,ptr1,n2,ptr2) {
+int CH$NEQ(long n1, long ptr1, long n2, long ptr2) {
   int n = ( n1 < n2 ? n1 : n2);
   return (memcmp(ptr1,ptr2,n));
 }
@@ -104,22 +107,19 @@ PLIT() {
   printk("PLIT not implemented\n");
 }
 
-CH$MOVE(size, src, addr) {
+long CH$MOVE(long size, long src, long addr) {
   memcpy(addr,src, size);
   return addr+size;
   printk("CH$MOVE not implemented\n");
 }
 
-INSQUE(x,y) {
+INSQUE(long x, long y) {
   insque(x,y);
   return SS$_NORMAL;
   printk("INSQUE not implemented\n");
 }
 
-REMQUE(e, a)
-     long *e;
-     long *a;
-{
+REMQUE(long * e, long * a) {
   int retval=0;
   if (e==e[1]) retval|=1;
   remque(e,0);
@@ -170,7 +170,13 @@ XQL$FAO() {
 LIB$GET_VM_PAGE(size, addr) 
      long * addr;
 {
-  *addr=kmalloc(4096*(size/8+1),GFP_KERNEL);
+#ifdef __i386__
+  *addr=kmalloc(4096*(size/8+1),GFP_KERNEL); // check
+#else
+  //  *addr=kmalloc(4096*((size>>9)+1),GFP_KERNEL); // check
+  // *addr=kmalloc(4096*(size/8+1),GFP_KERNEL); // check
+  *addr=kmalloc(512*size,GFP_KERNEL); // check
+#endif
   return SS$_NORMAL;
   printk("LIB$GET_VM_PAGE not implemented\n");
 }
@@ -211,7 +217,7 @@ CH$DIFF() {
   printk("CH$DIFF not implemented\n");
 }
 
-LIB$FREE_VM_PAGE(size, addr) {
+LIB$FREE_VM_PAGE(long size, long addr) {
   kfree(addr);
   return SS$_NORMAL;
   printk("LIB$FREE_VM_PAGE not implemented\n");
@@ -227,7 +233,7 @@ FORKUNLOCK () {
   printk("FORKUNLOCK not implemented\n");
 }
 
-ch$move(a,b,c) {
+ch$move(long a, long b, long c) {
   return CH$MOVE(a,b,c);
   printk("ch$move not implemented\n");
 }
@@ -256,7 +262,7 @@ Begin_Lock() {
   printk("Begin_Lock not implemented\n");
 }
 
-CH$PLUS(x,y) {
+CH$PLUS(long x, long y) {
   return x+y;
   printk("CH$PLUS not implemented\n");
 }
@@ -299,11 +305,6 @@ Addm() {
 
 End_Lock() {
   printk("End_Loc not implemented\n");
-}
-
-find_cpu_data(long * l) {
-  int cpuid = smp_processor_id();
-  * l=smp$gl_cpu_data[cpuid];
 }
 
 rpc_service() {
@@ -360,16 +361,16 @@ RPC$INPUT() {
   return 0;
 }
 
-swapbytesiphdr(x,y) {
+swapbytesiphdr(long x, long y) {
   swapbytes(3,y+2);
   swapbytes(1,y+10);
 }
 
-swapbytesicmphdr(x,y) {
+swapbytesicmphdr(long x,long y) {
   swapbytes(1,y+2);
 }
 
-swapbytesseghdr(x,y) {
+swapbytesseghdr(long x, long y) {
   swapbytes(2,y);
   swapbytes(3,y+14);
 }
@@ -399,15 +400,23 @@ inline DEVICEUNLOCK(){
 static int mycli() {}
 static int mysti() {}
 
+#ifdef __i386__
+#define OFFSET 4
+#endif
+
+#ifdef __x86_64__
+#define OFFSET 8
+#endif
+
 void insque(void * entry, void * pred) {
   if (entry==pred) panic("same\n");
   if (entry==*(long *)pred) panic("same\n");
-  if (entry==*(long *)(((long)pred)+4)) panic("same\n");
+  if (entry==*(long *)(((long)pred)+OFFSET)) panic("same\n");
   int flag=mycli();
   //mycheckaddr();
   *(void **)entry=*(void **)pred;
-  *(void **)(entry+4)=pred;
-  *(void **)((*(void **)pred)+4)=entry;
+  *(void **)(entry+OFFSET)=pred;
+  *(void **)((*(void **)pred)+OFFSET)=entry;
   *(void **)pred=entry;
   //mycheckaddr();
   mysti(flag);
@@ -416,8 +425,8 @@ void insque(void * entry, void * pred) {
 unsigned long remque(void * entry, void * addr) {
   int flag=mycli();
   //mycheckaddr();
-  *(void **)(*(void **)(entry+4))=*(void **)entry;
-  *(void **)((*(void **)entry)+4)=*(void **)(entry+4);
+  *(void **)(*(void **)(entry+OFFSET))=*(void **)entry;
+  *(void **)((*(void **)entry)+OFFSET)=*(void **)(entry+OFFSET);
   addr=entry;
   //mycheckaddr();
   mysti(flag);

@@ -14,7 +14,7 @@ int rqempty(void * q);
 void qhead_init(void * l);
 void sickinsque(void * entry, void * pred);
 
-INSQUE(x,y);
-REMQUE(e,a);
+INSQUE(long x, long y);
+REMQUE(long * e, long * a);
 
 #endif

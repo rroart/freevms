@@ -111,9 +111,9 @@ MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
 	      OPTIMIZE,OPTLEVEL=3,ZIP)=
 #endif
 
-extern 	void OPR_FAO(int, ...);
-extern 	void ERROR_FAO(int, ...);
-extern 	void FATAL_FAO(int, ...);
+extern 	void OPR_FAO(long, ...);
+extern 	void ERROR_FAO(long, ...);
+extern 	void FATAL_FAO(long, ...);
 
 #include <starlet.h>
 //LIBRARY "SYS$LIBRARY:LIB";			// JC
@@ -778,7 +778,7 @@ extern struct dsc$descriptor *	myname;
     return sys$sndopr(MSG, 0);
     }
 
-void OPR_FAO(int CSTR, ...) 
+void OPR_FAO(long CSTR, ...) 
 // Send a message to the VMS operator, using $FAO for output formatting.
 
     {
@@ -787,6 +787,7 @@ void OPR_FAO(int CSTR, ...)
     DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
 	DESC$STR_ALLOC(OPRDESC,250); // was: 1000 stack-smasher
 
+#ifdef __i386__
 	va_list args;
 	va_start(args,CSTR);
     RC = sys$faol(CSTR,
@@ -794,6 +795,20 @@ void OPR_FAO(int CSTR, ...)
 	       OUTDESC,
 		  args); // check. was ap+8
     va_end(args);
+#else
+	va_list args;
+	long argv[16],argc=0;
+	va_start(args,CSTR);
+	while(argc<15) { // check. should be 17.
+	  argv[argc]=va_arg(args,long);
+	  argc++;
+	}
+	va_end(args);
+	RC = sys$faol(CSTR,
+		      &OUTDESC->dsc$w_length,
+		      OUTDESC,
+		      argv); // check. was ap+8
+#endif
     if (BLISSIFNOT(RC))
 	sys$exit( RC);
 
@@ -811,7 +826,7 @@ signed long
 
 //SBTTL "Error processing routines - ERROR_FAO, FATAL_FAO"
 
-void ERROR_FAO(int CSTR, ...)
+void ERROR_FAO(long CSTR, ...)
 //
 // Send a message to the console & log the error (OPR_FAO + LOG_FAO)
 //
@@ -825,6 +840,7 @@ void ERROR_FAO(int CSTR, ...)
 
 // Format the message string
 
+#ifdef __i386__
 	va_list args;
 	va_start(args,CSTR);
     RC = sys$faol(CSTR,
@@ -832,6 +848,20 @@ void ERROR_FAO(int CSTR, ...)
 	       OUTDESC,
 		  args); // check. was ap+8
     va_end(args);
+#else
+	va_list args;
+	long argv[16],argc=0;
+	va_start(args,CSTR);
+	while(argc<15) { // check. should be 17.
+	  argv[argc]=va_arg(args,long);
+	  argc++;
+	}
+	va_end(args);
+	RC = sys$faol(CSTR,
+		      &OUTDESC->dsc$w_length,
+		      OUTDESC,
+		      argv); // check. was ap+8
+#endif
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("ERROR_FAO failure, RC = !XL",RC);
@@ -862,7 +892,7 @@ void ERROR_FAO(int CSTR, ...)
     }
 
 
-void FATAL_FAO(int CSTR, ...)
+void FATAL_FAO(long CSTR, ...)
 //
 // Same as above, except also exit the ACP.
 //
@@ -876,6 +906,7 @@ void FATAL_FAO(int CSTR, ...)
 
 // Format the output string
 
+#ifdef __i386__
 	va_list args;
 	va_start(args,CSTR);
     RC = sys$faol(CSTR,
@@ -883,6 +914,21 @@ void FATAL_FAO(int CSTR, ...)
 	       OUTDESC,
 		  args); // check. was ap+8
     va_end(args);
+#else
+	va_list args;
+	long argv[16],argc=0;
+	va_start(args,CSTR);
+	while(argc<15) { // check. should be 17.
+	  argv[argc]=va_arg(args,long);
+	  argc++;
+	}
+	va_end(args);
+	RC = sys$faol(CSTR,
+		      &OUTDESC->dsc$w_length,
+		      OUTDESC,
+		      argv); // check. was ap+8
+#endif
+
     if (BLISSIFNOT(RC))
 	{
 	OPR$FAO("FATAL_FAO failure, RC = !XL",RC);

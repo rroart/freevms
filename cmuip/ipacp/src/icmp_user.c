@@ -148,8 +148,8 @@ extern  void    QL_FAO();
 
 struct  ICMPCB_Structure
     {
-unsigned long     ICMPCB$Foreign_Host	;	// ICMP foreign host number
-unsigned long     ICMPCB$Local_Host	;	//     local host
+unsigned int     ICMPCB$Foreign_Host	;	// ICMP foreign host number
+unsigned int     ICMPCB$Local_Host	;	//     local host
 char    ICMPCB$Foreign_Hname[MAX_HNAME];
 short    ICMPCB$Foreign_Hnlen;
 void *     ICMPCB$USR_Qhead	;	// User receive request queue

@@ -270,6 +270,11 @@ int EXE$DEANONPAGED(int * addr) {
 }
 #endif
 
+find_cpu_data(long * l) {
+  int cpuid = smp_processor_id();
+  * l=smp$gl_cpu_data[cpuid];
+}
+
 // Local symbols
 
 #define M$CANCEL	14	// IP user function code, Cancel connections for PID.
@@ -1427,7 +1432,7 @@ int Time_Stamp()
 #endif
 
 //ENTRY  SWAPBYTES,^M<>
-	int swapbytes(WrdCnt,Start)
+	int swapbytes(long WrdCnt, long Start)
 {
   int *R0,*R2,*R3,*R4,*R5,*R6,*R7,*R8,*R9;
   unsigned char * R1 = Start;			// starting word address.

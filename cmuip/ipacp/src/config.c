@@ -229,9 +229,9 @@ MODULE CONFIG(IDENT="6.6",ZIP,OPTIMIZE,
 	      LIST(NOEXPAND,NOREQUIRE,ASSEMBLY,	OBJECT,BINARY))
 #endif
 
-extern 	void OPR_FAO(int, ...);
-extern 	void ERROR_FAO(int, ...);
-extern 	void FATAL_FAO(int, ...);
+extern 	void OPR_FAO(long, ...);
+extern 	void ERROR_FAO(long, ...);
+extern 	void FATAL_FAO(long, ...);
 
 #include	<starlet.h>	// VMS system definitions
      // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// String descriptor stuff

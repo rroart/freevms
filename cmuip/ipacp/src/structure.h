@@ -233,7 +233,7 @@ struct qb_rt_fields
   signed short int     rt$bufsize;	// byte size of buffer.
   signed short int     rt$segsize;	// Byte size of segment.
   void *     rt$seg;		// Start address of segment.
-  signed long     rt$dest_adrs;		// Destination network adrs.
+  signed int     rt$dest_adrs;		// Destination network adrs.
   signed long     rt$timeout;		// Retransmission timeout
   signed long     rt$maxtimeout;		// expiration time on RX queue
   signed long     rt$start_xmit_time;		// base for round trip calc.
@@ -257,8 +257,8 @@ struct qb_nr_fields
   void *     nr$uptr;		// pointer to new data
   signed long int     nr$ucount;	// count of new data
   signed long int     nr$timeout;
-  signed long int     nr$src_adrs;	// Internet address.
-  signed long int     nr$dest_adrs;	// Internet address.
+  signed int     nr$src_adrs;	// Internet address.
+  signed int     nr$dest_adrs;	// Internet address.
   signed short     nr$src_port;		// SYN wait list: Source Port
   signed short     nr$dest_port;		// SYN wait list: Dest port.
   union {
@@ -399,10 +399,10 @@ struct user_open_args
 {
   Static_Fields(op);			// Define the standard fields
   unsigned char    op$protohdrblk[0];
-  unsigned long     op$src_host;
-  unsigned long     op$dst_host;
-  unsigned long     op$ext1;	// Protocol header extension info
-  unsigned long     op$ext2;	// Protocol header extension info
+  unsigned int     op$src_host;
+  unsigned int     op$dst_host;
+  unsigned int     op$ext1;	// Protocol header extension info
+  unsigned int     op$ext2;	// Protocol header extension info
   union {
     unsigned short     op$flags;	// Open flags
     struct {
@@ -420,7 +420,7 @@ struct user_open_args
   unsigned short     op$foreign_hlen; 	// Length of foreign host name
   union {
     signed char    op$foreign_host[MAX_HNAME]; // ASCIZ FH name
-    signed long      op$foreign_address;	// FH address if OP$ADDR_FLAG set
+    signed int      op$foreign_address;	// FH address if OP$ADDR_FLAG set
   };
 };
 
@@ -442,10 +442,10 @@ struct user_send_args
 {
   Static_Fields(se);			// Define the standard fields
   unsigned char    se$protohdrblk[0];
-  unsigned long     se$src_host;
-  unsigned long     se$dst_host;
-  unsigned long     se$ext1;	// Protocol header extension info
-  unsigned long     se$ext2;	// Protocol header extension info
+  unsigned int     se$src_host;
+  unsigned int     se$dst_host;
+  unsigned int     se$ext1;	// Protocol header extension info
+  unsigned int     se$ext2;	// Protocol header extension info
   union {
     unsigned short     se$flags;
     struct {
@@ -469,10 +469,10 @@ struct user_recv_args
 {
   Static_Fields(re);			// Define the standard fields
   unsigned char     re$protohdrblkp[0];
-  unsigned long     re$src_host;	// Source Host
-  unsigned long     re$dst_host;	// Destination Host
-  unsigned long     re$ext1;	// Protocol header extension info
-  unsigned long     re$ext2;	// Protocol header extension info
+  unsigned int     re$src_host;	// Source Host
+  unsigned int     re$dst_host;	// Destination Host
+  unsigned int     re$ext1;	// Protocol header extension info
+  unsigned int     re$ext2;	// Protocol header extension info
   unsigned short     re$flags;	// No flags defined
   signed short     re$timeout;	// Obsolete, unused
   void *     re$local_conn_id;
@@ -600,7 +600,7 @@ struct gthst_adlook_args
 {
   Static_Fields(gha);			// Define the standard fields
   GTHST_Static(gha);			// and the standard GTHST fields
-  signed long    gha$ipaddr;
+  signed int    gha$ipaddr;
 };
 
 #define    GTHST_ADLOOK_ARGS_LENGTH sizeof(struct gthst_adlook_args)

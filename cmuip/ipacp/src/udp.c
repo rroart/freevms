@@ -295,10 +295,10 @@ extern signed long
 
 struct  UDPCB_Structure
 {
-unsigned long     udpcb$foreign_host	;	// UDP foreign host number
-unsigned long     udpcb$foreign_port	;	//     foreign port
-unsigned long     udpcb$local_host	;	//     local host
-unsigned long     udpcb$local_port	;	//     local port
+unsigned int     udpcb$foreign_host	;	// UDP foreign host number
+unsigned int     udpcb$foreign_port	;	//     foreign port
+unsigned int     udpcb$local_host	;	//     local host
+unsigned int     udpcb$local_port	;	//     local port
 unsigned char     udpcb$foreign_hname	[MAX_HNAME];
 unsigned short int     udpcb$foreign_hnlen	;
 void *     udpcb$usr_qhead	;	// User receive request queue

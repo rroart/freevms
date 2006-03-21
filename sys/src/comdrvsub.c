@@ -45,7 +45,7 @@ void fork_routine(fr3,fr4,fr5) {
   return sch$qast(a->acb$l_pid,PRI$_IOCOM,a);
 }
 
-void dealloc_tast(int arg) {
+void dealloc_tast(long arg) {
   struct _tast * tast = arg;
   tast->tast$v_busy=0;
   if (tast->tast$v_lost)
@@ -141,7 +141,7 @@ int   com_std$flushctrls (struct _pcb *pcb, struct _ucb *ucb, int chan, struct _
   struct _acb * next, * cur = acb_lh;
   while (cur->acb$l_astqfl) {
     next=cur->acb$l_astqfl;
-    struct _tast * t=((int)next)-((int)(&tast->tast$l_flink-(int)tast));
+    struct _tast * t=((long)next)-((long)(&tast->tast$l_flink-(long)tast));
     if (t->tast$l_pid == pcb->pcb$l_pid && t->tast$w_chan == chan) {
       cur->acb$l_astqfl=next->acb$l_astqfl;
       if (t->tast$v_busy) {
@@ -207,7 +207,7 @@ int   com_std$setctrlast (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, 
   struct _acb * next, * cur = acb_lh;
   while (cur->acb$l_astqfl) {
     next=cur->acb$l_astqfl;
-    struct _tast * t=((int)next)-((int)(&tast->tast$l_flink-(int)tast));
+    struct _tast * t=((long)next)-((long)(&tast->tast$l_flink-(long)tast));
     if (t->tast$l_pid == pcb->pcb$l_pid && t->tast$w_chan == ccb->ccb$w_chan) {
       if (t->tast$v_busy) {
 	cur->acb$l_astqfl=next->acb$l_astqfl;

@@ -123,9 +123,16 @@ bufpost(struct _irp * i) {
 
   // decr ccb$w_ioc
 
+#ifdef __i386__
   if (i->irp$l_iosb) {
     memcpy(i->irp$l_iosb,&i->irp$l_iost1,8);
   }
+#else
+  if (i->irp$l_iosb) {
+    memcpy(i->irp$l_iosb,&i->irp$l_iost1,4);
+    memcpy(((long)i->irp$l_iosb)+4,&i->irp$l_iost2,4);
+  }
+#endif
 
   // do an eventually setting of common event flag
 

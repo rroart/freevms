@@ -151,9 +151,9 @@ MACRO
     %,
 #endif
 	   
-extern 	void OPR_FAO(int, ...);
-extern 	void ERROR_FAO(int, ...);
-extern 	void FATAL_FAO(int, ...);
+extern 	void OPR_FAO(long, ...);
+extern 	void ERROR_FAO(long, ...);
+extern 	void FATAL_FAO(long, ...);
 
 // Write a message to the console operator
 
@@ -162,10 +162,10 @@ static int inline OPR$FAO(char *c, ...) {
   d.dsc$w_length=strlen(c);
   d.dsc$a_pointer=c;
   va_list args;
-  int argv[18],argc=0;
+  long argv[18],argc=0;
   va_start(args,c);
   while(argc<18) {
-    argv[argc]=va_arg(args,int);
+    argv[argc]=va_arg(args,long);
     argc++;
   }
   va_end(args);
@@ -177,10 +177,10 @@ static int inline ERROR$FAO(char *c, ...) {
   d.dsc$w_length=strlen(c);
   d.dsc$a_pointer=c;
   va_list args;
-  int argv[18],argc=0;
+  long argv[18],argc=0;
   va_start(args,c);
   while(argc<18) {
-    argv[argc]=va_arg(args,int);
+    argv[argc]=va_arg(args,long);
     argc++;
   }
   va_end(args);
@@ -192,10 +192,10 @@ static int inline WARN$FAO(char *c, ...) {
   d.dsc$w_length=strlen(c);
   d.dsc$a_pointer=c;
   va_list args;
-  int argv[18],argc=0;
+  long argv[18],argc=0;
   va_start(args,c);
   while(argc<18) {
-    argv[argc]=va_arg(args,int);
+    argv[argc]=va_arg(args,long);
     argc++;
   }
   va_end(args);
@@ -207,10 +207,10 @@ static int inline FATAL$FAO(char *c, ...) {
   d.dsc$w_length=strlen(c);
   d.dsc$a_pointer=c;
   va_list args;
-  int argv[18],argc=0;
+  long argv[18],argc=0;
   va_start(args,c);
   while(argc<18) {
-    argv[argc]=va_arg(args,int);
+    argv[argc]=va_arg(args,long);
     argc++;
   }
   va_end(args);
@@ -313,11 +313,11 @@ static int inline FATAL$FAO(char *c, ...) {
 
 static int inline $$KCALL(int (*func)(), ...) {
 	  va_list args;
-	  int argv[16],argc=1;
+	  long argv[16],argc=1;
 	  argv[0]=15;
 	  va_start(args,func);
 	  while(argc<16) {
-	    argv[argc]=va_arg(args,int);
+	    argv[argc]=va_arg(args,long);
 	    argc++;
 	  }
 	  va_end(args);

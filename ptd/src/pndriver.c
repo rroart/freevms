@@ -1130,7 +1130,7 @@ int PN$CLONE_INIT(struct _ucb * u) {
 int SEARCHDEV(struct _ddb ** ddb,char * string, int strlen) {				// Search for device name
   char * locstr;
   char loclen;
- l10:	*ddb = (*ddb)->ddb$l_link;		// Get address of next ddb
+ l10:	*ddb = (*ddb)->ddb$ps_link;		// Get address of next ddb
   if (*ddb==0) 			// If eql end of list
  				// indicate search failure
     return 1; // inverted error coding

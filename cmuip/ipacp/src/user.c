@@ -467,8 +467,8 @@ extern     ip_islocal();
 
 struct ACCESS_LIST
 {
-  long   AC$HOST;
-  long    AC$MASK;
+  int   AC$HOST;
+  int    AC$MASK;
 };
 #define    ACCESS_MAX 20
 

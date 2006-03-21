@@ -216,7 +216,7 @@ struct XE_Sense // check
   unsigned XE_Sense_Zero:1;//	= [0, 15,  1, 0],
   union {
     // If the Type bit EQL 0
-    long XE_Sense_Value; //	= [2,  0, 32, 0],
+    int XE_Sense_Value; //	= [2,  0, 32, 0],
     // If the Type bit EQL 1
     struct {
       short XE_Sense_Length; //	= [2,  0, 16, 0],
@@ -229,10 +229,17 @@ struct XE_Sense // check
 #define     XE_TYPE_AND_VALUE   6
 
 static    XE_Param_Size (struct XE_Sense*  Buffer) {
+#ifdef __i386__
   if ((Buffer)->XE_Sense_Type)  
     return (Buffer->XE_Sense_Length + XE_SS_BYTEOFF) + 2; // gcc bug/feature
   else
     return (XE_TYPE_AND_VALUE)+2; // 2 gcc bug feature?
+#else
+  if ((Buffer)->XE_Sense_Type)  
+    return (Buffer->XE_Sense_Length + XE_SS_BYTEOFF) + 2; // gcc bug/feature
+  else
+    return (XE_TYPE_AND_VALUE)+2; // 2 gcc bug feature?
+#endif
 }
 
 // Receive buffer Q structure
@@ -261,7 +268,7 @@ struct XESND_structure
   union {
     unsigned char     XESND$dest	       [6];
     struct {
-      unsigned long 	XESND$dst1     ;
+      unsigned int 	XESND$dst1     ;
       unsigned short 	XESND$dst2     ;
     };
   };

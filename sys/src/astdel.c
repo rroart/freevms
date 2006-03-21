@@ -25,8 +25,10 @@
 #define OLDAST
 #undef OLDAST
 
+#if 0
 #ifdef __x86_64__
 #define OLDAST
+#endif
 #endif
 
 #undef ASTDEBUG
@@ -342,7 +344,7 @@ int exe$astdel_prep2_new(long stack, long ast, long astprm) {
 		       "movl $0x23,0x4(%edi)\n\t" // user cseg
 		       "pushfl\n\t"
 		       "popl %ecx\n\t"
-		       "andl $0x200,%ecx\n\t" // intr on
+		       "orl $0x200,%ecx\n\t" // intr on
 		       "movl %ecx,0x8(%edi)\n\t" // check get a flag reg
 		       "movl %edx,0xc(%edi)\n\t" // put new ustack on kstack
 		       "movl $0x2b,0x10(%edi)\n\t" // user sseg
@@ -396,6 +398,109 @@ int exe$astdel_prep(long a, long b, long c) {
 		       "popl %ebx\n\t"
 		       "popl %ebp\n\t"
 		       );
+}
+#endif
+
+#ifdef __x86_64__
+int __attribute__ ((section (".vsyscall_4"))) exe$astdel() {
+  __asm__ __volatile__(
+		       "pushfq\n\t"
+		       "pushq %rax\n\t"
+		       "pushq %rbx\n\t"
+		       "pushq %rcx\n\t"
+		       "pushq %rdx\n\t"
+		       "pushq %rbp\n\t"
+		       "pushq %rdi\n\t"
+		       "pushq %rsi\n\t"
+		       "pushq %r8\n\t"
+		       "pushq %r9\n\t"
+		       "pushq %r10\n\t"
+		       "pushq %r11\n\t"
+		       "pushq %r12\n\t"
+		       "pushq %r13\n\t"
+		       "pushq %r14\n\t"
+		       "pushq %r15\n\t"
+		       "callq * %rax\n\t"
+#if 0
+		       "callq sys$clrast\n\t"
+#else
+		       "movq $0x28, %rax\n\t"
+		       "int $0x81\n\t"
+#endif
+#if 0
+		       "movl 0x1c(%esp),%esi\n\t"
+		       "movl %esi,0x20(%esp)\n\t"
+		       "movl %esi,0x24(%esp)\n\t"
+#endif
+		       "popq %r15\n\t"
+		       "popq %r14\n\t"
+		       "popq %r13\n\t"
+		       "popq %r12\n\t"
+		       "popq %r11\n\t"
+		       "popq %r10\n\t"
+		       "popq %r9\n\t"
+		       "popq %r8\n\t"
+		       "popq %rsi\n\t"
+		       "popq %rdi\n\t"
+		       "popq %rbp\n\t"
+		       "popq %rdx\n\t"
+		       "popq %rcx\n\t"
+		       "popq %rbx\n\t"
+		       "popq %rax\n\t"
+		       "popfq\n\t"
+		       "popfq\n\t"
+		       "popfq\n\t"
+		       );
+}
+
+int exe$astdel_prep2_new(long stack, long ast, long astprm) {
+  // rdi rsi rdx
+  __asm__ __volatile__(
+		       "movq %rsi,%rbp\n\t" // remember ast
+		       "movq %rdx,%rbx\n\t" // remember astprm
+		       "movq %rdi,%rdx\n\t" // get user stack
+		       "movq %rsp,%rdi\n\t"
+		       "addq $-0x28,%rdi\n\t" // get new kernel stack
+#if 0
+		       "addq $-0x10,%rdx\n\t"
+#endif
+		       "\n\t"
+		       "movq $exe$astdel,0x0(%rdi)\n\t" // put astdel on kstack
+		       "movq $0x33,0x8(%rdi)\n\t" // user cseg
+		       "pushfq\n\t"
+		       "popq %rcx\n\t"
+		       "orq $0x200,%rcx\n\t" // intr on
+		       "movq %rcx,0x10(%rdi)\n\t" // check get a flag reg
+		       "movq %rdx,0x18(%rdi)\n\t" // put new ustack on kstack
+		       "movq $0x2b,0x20(%rdi)\n\t" // user sseg
+		       "\n\t"
+#if 0
+		       "movq 0x10(%rsp),%rcx\n\t" // get ast
+		       "movq %rcx,0x0(%rdx)\n\t" // put ast as parm on ustack
+		       "movq 0x18(%rsp),%rcx\n\t" // get astprm
+		       "movq %rcx,0x8(%rdx)\n\t" // put astprm on ustack
+#endif
+#if 0
+		       "movq %rsp,0x10(%rdx)\n\t" // put kstack on ustack
+		       "movq 0x0(%rsi),%rcx\n\t" // get return eip
+		       "movq %rcx,0x10(%rdx)\n\t" // put return eip on ustack
+#endif
+		       "\n\t"
+		       "addq $-0x28, %rsp\n\t" // stack move
+		       // check. need myrei here?
+		       "callq myrei\n\t"
+#if 1
+		       "movq $init_tss, %rdx\n\t"
+		       "addq $0x4, %rdx\n\t" // yes, 4
+		       "movq %rsp, (%rdx)\n\t"
+		       "addq $0x28, (%rdx)\n\t"
+#endif
+		       "movq %rbp, %rax\n\t" // ast
+		       "movq %rbx, %rdi\n\t" // astprm
+		       "cli\n\t"
+		       "swapgs\n\t"
+		       "iretq\n\t"
+);
 }
 #endif
 
@@ -559,8 +664,10 @@ asmlinkage void sch$astdel(int dummy) {
 #ifndef OLDAST
   if ((acb->acb$b_rmod&(ACB$M_NODELETE|ACB$M_PKAST))==0) kfree(acb);
   if (rmod&3) {
+#ifdef __i386__
     user_spaceable_addr(exe$astdel); // bad temp hack
     user_spaceable_addr(&dummy); // bad temp hack
+#endif
 #if 0
     int sts = exe$astdel_prep(&dummy,ast,astprm);
 #else

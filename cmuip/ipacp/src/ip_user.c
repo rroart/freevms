@@ -153,9 +153,9 @@ extern  void    QL_FAO();
 
 struct  IPCB_Structure
 {
-unsigned long     ipcb$foreign_host	;	// IP foreign host number
-unsigned long     ipcb$host_filter	;	// Receive packets from this host
-unsigned long     ipcb$proto_filter	;	// Receive packets to this protocol
+unsigned int     ipcb$foreign_host	;	// IP foreign host number
+unsigned int     ipcb$host_filter	;	// Receive packets from this host
+unsigned int     ipcb$proto_filter	;	// Receive packets to this protocol
   char    ipcb$foreign_hname[MAX_HNAME];
   short int    ipcb$foreign_hnlen;
 void *     ipcb$usr_qhead	;	// User receive request queue

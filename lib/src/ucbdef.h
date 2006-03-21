@@ -610,15 +610,15 @@ struct _mb_ucb {
   unsigned int ucb$l_mb_writerrefc;
   struct _irp *ucb$l_mb_readqfl;
   struct _irp *ucb$l_mb_readqbl;
-  int ucb$l_mb_writerwaitqfl;
-  int ucb$l_mb_writerwaitqbl;
-  int ucb$l_mb_readerwaitqfl;
-  int ucb$l_mb_readerwaitqbl;
-  int ucb$l_mb_nowriterwaitqfl;
-  int ucb$l_mb_nowriterwaitqbl;
-  int ucb$l_mb_noreaderwaitqfl;
-  int ucb$l_mb_noreaderwaitqbl;
-  int ucb$l_mb_room_notify;
+  long ucb$l_mb_writerwaitqfl;
+  long ucb$l_mb_writerwaitqbl;
+  long ucb$l_mb_readerwaitqfl;
+  long ucb$l_mb_readerwaitqbl;
+  long ucb$l_mb_nowriterwaitqfl;
+  long ucb$l_mb_nowriterwaitqbl;
+  long ucb$l_mb_noreaderwaitqfl;
+  long ucb$l_mb_noreaderwaitqbl;
+  long ucb$l_mb_room_notify;
   union  {
     void *ucb$l_logadr;
     struct  {

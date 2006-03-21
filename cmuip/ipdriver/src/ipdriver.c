@@ -284,10 +284,10 @@ struct	OP {
 // Note about OP$FLAGS:
 // OP$MODE also is used in UDP.  A 0 means address headers are in the data buff.
 
-unsigned long OP$Src_Host;	// Source host
-unsigned long OP$Dst_Host;	// Destination host
-unsigned long OP$Ext1	;	// Header info longword #1
-unsigned long OP$Ext2	;	// Header info longword #2
+unsigned int OP$Src_Host;	// Source host
+unsigned int OP$Dst_Host;	// Destination host
+unsigned int OP$Ext1	;	// Header info longword #1
+unsigned int OP$Ext2	;	// Header info longword #2
 
 unsigned short int OP$Flags;	// Open flags
 #define OP$M_MODE 1
@@ -339,10 +339,10 @@ struct	SE {
 #define SEF$URGENT_BIT  0			// Mask for Urgent bit
 #if 0
 
-unsigned long SE$Src_Host;	// Source host
-unsigned long SE$Dst_Host;	// Destination host
-unsigned long SE$Ext1	;	// Header info longword #1
-unsigned long SE$Ext2	;	// Header info longword #2
+unsigned int SE$Src_Host;	// Source host
+unsigned int SE$Dst_Host;	// Destination host
+unsigned int SE$Ext1	;	// Header info longword #1
+unsigned int SE$Ext2	;	// Header info longword #2
 
 unsigned short int SE$Flags;	// Flags
 #define SE_M_XMODE 1

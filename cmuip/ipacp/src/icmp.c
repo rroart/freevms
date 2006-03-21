@@ -128,8 +128,8 @@ log_state,
 struct ICM_DBLOCK
 {
 void *     icm$next	;
-unsigned long     icm$address	;
-unsigned long    icm$gwy
+unsigned int     icm$address	;
+unsigned int    icm$gwy
 };
 
 #define    ICM_DSIZE sizeof (struct ICM_DBLOCK)

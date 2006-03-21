@@ -12,6 +12,10 @@ int sys$testcode(void) {
 }
 #endif
 
+#ifdef __x86_64__
+static int syscall_struct() {}
+#endif
+
 int sys$setprn  ( void *prcnam) { 
   return INLINE_SYSCALL($setprn,1,prcnam);
 }
@@ -25,6 +29,9 @@ int sys$setpri( unsigned int * pidadr, void * prcnam, unsigned int pri, unsigned
   s.pol=pol;
   s.prvpol=prvpol;
 
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($setpri,1,&s);
   //  return INLINE_SYSCALL($setpri,6,pidadr,prcnam,pri,prvpri,pol,prvpol);
   /*return r;*/
@@ -46,6 +53,9 @@ int sys$setpri( unsigned int * pidadr, void * prcnam, unsigned int pri, unsigned
    s.tabnam=tabnam;
    s.partab=partab;
    s.acmode=acmode;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($crelnt,1,&s);
 }
 
@@ -162,6 +172,9 @@ int sys$enq  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigne
   s.acmode=acmode;
   s.rsdm_id=rsdm_id;
   //  s.null_arg=null_arg;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($enq,1,&s);
 }
 
@@ -179,6 +192,9 @@ int sys$enqw  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsign
   s.acmode=acmode;
   s.rsdm_id=rsdm_id;
   //  s.null_arg=null_arg;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($enqw,1,&s);
 }
 
@@ -195,6 +211,9 @@ int sys$getlki(unsigned int efn, unsigned int *lkidadr,void *itmlst, struct _ios
   s.astadr=astadr;
   s.astprm=astprm;
   s.reserved=reserved;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($getlki,1,&s);
 }
 
@@ -207,6 +226,9 @@ int sys$getlkiw(unsigned int efn, unsigned int *lkidadr,void *itmlst, struct _io
   s.astadr=astadr;
   s.astprm=astprm;
   s.reserved=reserved;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($getlkiw,1,&s);
 }
 
@@ -232,6 +254,9 @@ int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct
   s.p4=p4;
   s.p5=p5;
   s.p6=p6;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($qiow,1,&s);
 }
 
@@ -249,6 +274,9 @@ int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct 
   s.p4=p4;
   s.p5=p5;
   s.p6=p6;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($qio,1,&s);
 }
 
@@ -282,6 +310,9 @@ int sys$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, uns
   s.acmode=acmode;
   s.lognam=lognam;
   s.flags=flags;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($crembx,1,&s);
 }
 
@@ -313,6 +344,9 @@ int sys$mgblsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int a
   s.gsdnam=gsdnam;
   s.ident=ident;
   s.relpag=relpag;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($mgblsc,1,&s);
 }
 
@@ -330,6 +364,9 @@ int sys$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int a
   s.vbn=vbn;
   s.prot=prot;
   s.pfc=pfc;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($crmpsc,1,&s);
 }
 
@@ -342,6 +379,9 @@ int sys$create_region_32  ( unsigned long length, unsigned int region_prot, unsi
   s.return_va=return_va;
   s.return_length=return_length;
   s.start_va=start_va;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($create_region_32,1,&s);
 }
 
@@ -354,6 +394,9 @@ int sys$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itml
   s.iosb=iosb;
   s.astadr=astadr;
   s.astprm=astprm;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($getjpi,1,&s);
 }
 
@@ -366,6 +409,9 @@ int sys$getjpiw(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itm
   s.iosb=iosb;
   s.astadr=astadr;
   s.astprm=astprm;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($getjpiw,1,&s);
 }
 
@@ -383,6 +429,9 @@ int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *it
   s.astadr=astadr;
   s.astprm=astprm;
   s.nullarg=nullarg;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($getdvi,1,&s);
 }
 
@@ -396,6 +445,9 @@ int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *i
   s.astadr=astadr;
   s.astprm=astprm;
   s.nullarg=nullarg;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($getdviw,1,&s);
 }
 
@@ -411,6 +463,9 @@ int sys$fao(void * ctrstr , short int * outlen , void * outbuf , ...) {
     argc++;
   }
   va_end(args);
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($faol,4,ctrstr,outlen,outbuf,&s); // need not call fao?
 }
 
@@ -432,6 +487,9 @@ int sys$imgact(void * name, void * dflnam, void * hdrbuf, unsigned long imgctl, 
   s.s6 = (unsigned long) retadr;
   s.s7 = (unsigned long) ident;
   s.s8 = (unsigned long) acmode;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($imgact,1,&s);
 }
 
@@ -447,6 +505,9 @@ int sys$imgsta(void * transfer, void * parseinfo, void * header, void * file, un
   s.s4 = (unsigned long) file;
   s.s5 = (unsigned long) linkstatus;
   s.s6 = (unsigned long) clistatus;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($imgsta,1,&s);
 }
 
@@ -492,6 +553,9 @@ int sys$creprc(unsigned int *pidadr, void *image, void *input, void *output, voi
   s.s10 = (unsigned long) uic;
   s.s11 = (unsigned long) mbxunt;
   s.s12 = (unsigned long) stsflg;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($creprc,1,&s);
 }
 
@@ -504,6 +568,9 @@ int sys$getsyi(unsigned int efn, unsigned int *csidadr, void *nodename, void *it
   s.s5 = (unsigned long) iosb;
   s.s6 = (unsigned long) astadr;
   s.s7 = (unsigned long) astprm;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($getsyi,1,&s);
 }
 
@@ -516,6 +583,9 @@ int sys$getsyiw(unsigned int efn, unsigned int *csidadr, void *nodename, void *i
   s.s5 = (unsigned long) iosb;
   s.s6 = (unsigned long) astadr;
   s.s7 = (unsigned long) astprm;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($getsyiw,1,&s);
 }
 
@@ -588,6 +658,9 @@ int sys$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmls
   s.s5 = (unsigned long) iosb;
   s.s6 = (unsigned long) astadr;
   s.s7 = (unsigned long) astprm;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($getuai,1,&s);
 }
 

@@ -43,6 +43,10 @@ extern asmlinkage int exe$qiow(unsigned int efn, unsigned short int chan,unsigne
 void __set_errno(){}
 #endif
 
+#ifdef __x86_64__
+static int syscall_struct() {}
+#endif
+
 #if (defined __i386__) || (defined __x86_64__)
 int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6) {
   struct struct_qio s;
@@ -59,6 +63,9 @@ int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct 
   s.p5=p5;
   s.p6=p6;
   //  return ({ unsigned int resultvar; asm volatile ( "bpushl .L__X'%k2, %k2\n\t" "bmovl .L__X'%k2, %k2\n\t" "movl %1, %%eax\n\t" "int $0x81\n\t" "bpopl .L__X'%k2, %k2\n\t" : "=a" (resultvar) : "i" (__NR_$qio) , "acdSD" (&s) : "memory", "cc"); if (resultvar >= 0xfffff001) { errno= (-resultvar); resultvar = 0xffffffff; } (int) resultvar; });
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($qio,1,&s);
 }
 
@@ -77,6 +84,9 @@ int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct
   s.p5=p5;
   s.p6=p6;
   //  return ({ unsigned int resultvar; asm volatile ( "bpushl .L__X'%k2, %k2\n\t" "bmovl .L__X'%k2, %k2\n\t" "movl %1, %%eax\n\t" "int $0x81\n\t" "bpopl .L__X'%k2, %k2\n\t" : "=a" (resultvar) : "i" (__NR_$qio) , "acdSD" (&s) : "memory", "cc"); if (resultvar >= 0xfffff001) { errno= (-resultvar); resultvar = 0xffffffff; } (int) resultvar; });
+#ifdef __x86_64__
+  syscall_struct();
+#endif
   return INLINE_SYSCALL($qiow,1,&s);
 }
 

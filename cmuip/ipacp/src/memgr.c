@@ -768,7 +768,7 @@ Side Effects:
 */
 
 
-mm$seg_get(Size)
+long mm$seg_get(Size)
     {
       long R0=0;
 #if 0

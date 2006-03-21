@@ -299,9 +299,9 @@ extern signed long log_state;
 struct gateway_structure
 {
 unsigned char    gwy_name[8];		// Gateway name
-long int     gwy_address		;	// Gateway IP address
-long int     gwy_network		;	// IP network served
-long int     gwy_netmask		;	// Mask for that network
+int     gwy_address		;	// Gateway IP address
+int     gwy_network		;	// IP network served
+int     gwy_netmask		;	// Mask for that network
 char    gwy_status;		// Status (nonzero is "up")
     };
 
@@ -327,8 +327,8 @@ struct RA$DATA_BLOCK
 {
 void *     ra$next	;	// Next block on queue
 void *     ra$prev	;	// Previous block on queue
-unsigned long     ra$source;	// Source IP address
-unsigned long     ra$dest;	// Destination IP address
+unsigned int     ra$source;	// Source IP address
+unsigned int     ra$dest;	// Destination IP address
 unsigned short     ra$ident	;	// IP identifier
 void *     ra$buf	;	// Pointer to buffer (first fragment pkt buffer)
 unsigned short     ra$bufsize	;	// Size of buffer
