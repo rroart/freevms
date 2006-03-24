@@ -2008,7 +2008,9 @@ unsigned long pcbvec[MAXPROCESSCNT];
 unsigned long seqvec[MAXPROCESSCNT];
 unsigned long csid; // have to use it like this for  now
 
+#ifdef __i386__
 char boot_cpu_stack[0x4000] __cacheline_aligned;
+#endif
 
 void __init vms_init(void) {
   int i,j;
@@ -2028,7 +2030,9 @@ void __init vms_init(void) {
   }
 
   smp$gl_cpu_data[0]->cpu$l_curpcb = &init_task_union;
+#ifdef __i386__
   smp$gl_cpu_data[0]->cpu$l_saved_isp = &boot_cpu_stack[0x4000];
+#endif
 
   sch$gl_idle_cpus=0;
 #ifdef __i386__
