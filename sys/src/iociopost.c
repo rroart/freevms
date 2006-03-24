@@ -147,10 +147,11 @@ asmlinkage void ioc$iopost(void) {
   struct _irp * i = 0;
   struct _pcb * p;
 
+#ifdef __x86_64__
   if (intr_blocked(IPL$_IOPOST))
     return;
-  
   regtrap(REG_INTR, IPL$_IOPOST);
+#endif
 
   setipl(IPL$_IOPOST);
 

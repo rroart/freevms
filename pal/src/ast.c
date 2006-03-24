@@ -26,7 +26,11 @@ asmlinkage void sw_ast(void) {
   //if (p->psl_is) printk("dropping sw_ast\n");
   if (!p->psl_is)
     if (p->psl_cur_mod >= p->pr_astlvl)
+#if 0
       SOFTINT_ASTDEL_VECTOR;
+#else
+    smp$gl_cpu_data[0]->cpu$w_sisr|=(1<<2);
+#endif
   /* check sw interrupts */
   //in_sw_ast=0;
 }

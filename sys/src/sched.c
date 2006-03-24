@@ -609,10 +609,11 @@ asmlinkage void sch$resched(void) {
   //    old=spl(IPL$_SCHED);
   // svpctx, do not think we need to do this here
 
+#ifdef __x86_64__
   if (intr_blocked(IPL$_RESCHED))
     return;
-
   regtrap(REG_INTR,IPL$_RESCHED);
+#endif
 
   setipl(IPL$_SCHED);
   spin_lock(&SPIN_SCHED);

@@ -116,10 +116,11 @@ void printtq(struct _tqe * t) {
 asmlinkage void exe$swtimint(void) {
   static signed int times=0;
 
+#ifdef __x86_64__
   if (intr_blocked(IPL$_TIMERFORK))
       return;
-
   regtrap(REG_INTR, IPL$_TIMERFORK);
+#endif
 
   setipl(IPL$_TIMERFORK);
 

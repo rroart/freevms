@@ -129,19 +129,104 @@ ipr_sp		= 0x738
         POPR_ALL; 
 
 #define REI \
-        PUSHR_ALL; \
-        call myrei; \
-        POPR_ALL; \
+        PUSHR_ALL		; \
+        call myrei		; \
+        POPR_ALL		; \
+	pushl %esp		; \
+	pushl %edi		; \
 	pushl %edx		; \
+	movl ctl$gl_pcb, %edi	; \
+	testl $0x200, 0x6ec(%edi); \
+	jne 1f			; \
 	movl $init_tss, %edx	; \
-	addl $0x4, %edx		; \
-	movl %esp, (%edx)	; \
-	addl $0x10, (%edx)	; \
-	cmpl $0x10, 0xc(%esp)	; \
-	je 1f			; \
+	addl $0x4, %edx		; /* yes, 4 */ \
+	movl %esp, (%edx)	; /* curmod is 0 for the time being */ \
+	addl $0xc, (%edx)	; /* 14? */ \
+	addl $ipr_sp, %edi	; \
+	movl %esp, (%edi)	; /* curmod is 0 for the time being */ \
+	addl $0xc, (%edi)	; /* 14? */ \
+	cmpl $0x10, 0x10(%esp)	; /* check */ \
+	jmp 3f			; \
+	je 3f			; \
 	addl $0x8, (%edx)	; \
+3:				; \
+	jmp 2f			; \
+1:				; \
+	movl smp$gl_cpu_data, %edi ; \
+	movl %esp, 0x850(%edi)	; \
+	addl $0xc, 0x850(%edi)	; \
+2:				; \
+	movl ctl$gl_pcb, %edi	; \
+	testl $0x200, 0x6e8(%edi); \
+	jne 1f			; \
+	addl $ipr_sp, %edi; \
+	movl (%edi), %edx	; /* curmod is 0 for the time being */ \
+	movl %edx, 0x8(%esp)	; \
+	cmpl $0x10, 0x10(%esp)	; /* check */ \
+	jmp 3f			; \
+	je 3f			; \
+	addl $0x8, (%edx)	; \
+3:				; \
 1:				; \
 	popl %edx		; \
+	popl %edi		; \
+	popl %esp		; \
+	MAYBEDOSOFTINT($0xb,$0xa4) ; \
+	MAYBEDOSOFTINT($0xa,$0xa3) ; \
+	MAYBEDOSOFTINT($0x9,$0xa2) ; \
+	MAYBEDOSOFTINT($0x8,$0x98) ; \
+	MAYBEDOSOFTINT($0x7,$0x96) ; \
+	MAYBEDOSOFTINT($0x6,$0x95) ; \
+	MAYBEDOSOFTINT($0x4,$0x94) ; \
+	MAYBEDOSOFTINT($0x3,$0x93) ; \
+	MAYBEDOSOFTINT($0x2,$0x92) ; \
+	pushl %edi		; \
+	pushl %edx		; \
+	movl ctl$gl_pcb, %edi	; \
+	testl $0x200, 0x6e8(%edi); \
+	jne 1f			; \
+	movl $init_tss, %edx	; \
+	addl $0x4, %edx		; /* yes, 4 */ \
+	movl %esp, (%edx)	; /* curmod is 0 for the time being */ \
+	addl $0x14, (%edx)	; \
+	addl $ipr_sp, %edi	; \
+	movl %esp, (%edi)	; /* curmod is 0 for the time being */ \
+	addl $0x14, (%edi)	; \
+	cmpl $0x10, 0xc(%esp)	; \
+	je 3f			; \
+	addl $0x8, (%edx)	; \
+	addl $0x8, (%edi)	; \
+3:				; \
+	jmp 2f			; \
+1:				; \
+	jmp 42f			; \
+	movl smp$gl_cpu_data, %edi ; \
+	movl %esp, 0x850(%edi)	; \
+	addl $0xc, 0x850(%edi)	; \
+42:				; \
+2:				; \
+	jmp 3f			; \
+	movl ctl$gl_pcb, %edi	; \
+	testl $0x200, 0x6e8(%edi); \
+	jne 1f			; \
+	addl $ipr_sp, %edi; \
+	movl (%edi), %edx	; /* curmod is 0 for the time being */ \
+	movl %edx, 0x8(%esp)	; \
+	cmpl $0x10, 0x10(%esp)	; /* check */ \
+	jmp 3f			; \
+	je 3f			; \
+	addl $0x8, (%edx)	; \
+3:				; \
+1:				; \
+	popl %edx		; \
+	popl %edi		; \
+	iret			; \
+/* the rest made stack problems */ \
+	pushl %eax		; \
+	pushl %edx		; \
+	call do_sw_int		; \
+	popl %edx		; \
+	popl %eax		; \
         iret;
 /* also need to do stack changes */
 /* and astlvl checks */
@@ -195,20 +280,162 @@ ipr_sp		= 0x738
 #define GET_CURRENT(reg) \
 	movl ctl$gl_pcb, reg; \
 
-#define SAVE_SP(x) \
-	pushl %eax; \
-	pushl %edi; \
-	movl ctl$gl_pcb, %edi; \
-	addl $ipr_sp, %edi; \
-	movl x+0xc(%esp), %eax; \
-	andl $0x3, %eax; \
-	salw $2,%ax; \
-	addl %eax, %edi; \
-	movl x+0x14(%esp),%eax; \
-	movl %eax, (%edi); \
-	popl %edi; \
+#define CHM_FIX_SP(x) \
+	pushl %eax		; \
+	pushl %edi		; \
+	pushl %edx		; \
+	movl ctl$gl_pcb, %edi	; \
+	movl $init_tss, %edx	; \
+	addl $0x4, %edx		; \
+	testl $0x200, 0x6e8(%edi); \
+	je 1f			; \
+	call panic		; \
+1:				; \
+	addl $ipr_sp, %edi	; \
+	movl x+0x10(%esp), %eax	; \
+	andl $0x3, %eax		; \
+	je 2f			; \
+	salw $2,%ax		; \
+	addl %eax, %edi		; \
+	addl %eax, %edx		; \
+	addl %eax, %edx		; \
+	cmpl $0xc, %eax 	; \
+	movl x+0x18(%esp),%eax	; \
+	je 4f			; \
+	jmp 3f			; \
+2:				; \
+	movl %esp, %eax		; \
+	addl $0xc, %eax		; \
+3:				; \
+	movl %eax, (%edx)	; \
+4:				; \
+	movl %eax, (%edi)	; \
+	popl %edx		; \
+	popl %edi		; \
 	popl %eax; 
-		
+
+#define INTEXC_FIX_SP(x) \
+	pushl %eax		; \
+	pushl %edi		; \
+	pushl %edx		; \
+	movl ctl$gl_pcb, %edi	; \
+	movl $init_tss, %edx	; \
+	addl $0x4, %edx		; \
+	testl $0x200, 0x6e8(%edi); \
+	jne 1f			; \
+	addl $ipr_sp, %edi	; \
+	movl %esp, (%edi); /* check ekstra */ \
+	movl %esp, (%edx); /* check ekstra */ \
+	addl $0xc, (%edi); /* check ekstra */ \
+	addl $0xc, (%edx); /* check ekstra */ \
+	movl x+0x10(%esp), %eax	; \
+	andl $0x3, %eax		; \
+	je 2f			; \
+	salw $2,%ax		; \
+	addl %eax, %edi		; \
+	addl %eax, %edx		; \
+	addl %eax, %edx		; \
+	cmpl $0xc, %eax 	; \
+	movl x+0x18(%esp),%eax	; \
+	je 4f			; \
+	jmp 3f			; \
+2:				; \
+	movl %esp, %eax		; \
+	addl $0xc, %eax		; \
+3:				; \
+	movl %eax, (%edx)	; \
+4:				; \
+	movl %eax, (%edi)	; \
+1:				; \
+	popl %edx		; \
+	popl %edi		; \
+	popl %eax;
+	
+#define INTEXC_FIX_ISP(x) \
+	pushl %esp		; \
+	pushl %eax		; \
+	pushl %edi		; \
+	pushl %edx		; \
+	movl ctl$gl_pcb, %edi	; \
+	movl $init_tss, %edx	; \
+	addl $0x4, %edx		; \
+	testl $0x200, 0x6e8(%edi); \
+	jne 1f			; \
+	addl $ipr_sp, %edi	; \
+	movl %esp,  (%edi); /* check ekstra */ \
+	movl %esp,  (%edx); /* check ekstra */ \
+	addl $0x10, (%edi); /* check ekstra */ \
+	addl $0x10, (%edx); /* check ekstra */ \
+	movl x+0x14(%esp), %eax	; \
+	andl $0x3, %eax		; \
+	je 2f			; \
+	salw $2,%ax		; \
+	addl %eax, %edi		; \
+	addl %eax, %edx		; \
+	addl %eax, %edx		; \
+	cmpl $0xc, %eax 	; \
+	movl x+0x1c(%esp),%eax	; \
+	je 4f			; \
+	jmp 3f			; \
+2:				; \
+	movl %esp, %eax		; \
+	addl $x, %eax		; \
+	addl $0x10, %eax	; \
+3:				; \
+	movl %eax, (%edx)	; \
+4:				; \
+	movl %eax, (%edi)	; \
+	movl smp$gl_cpu_data, %edi ; \
+	movl 0x850(%edi), %eax	;  \
+	movl %eax, 0xc(%esp) 	; \
+1:				; \
+	popl %edx		; \
+	popl %edi		; \
+	popl %eax		; \
+	popl %esp; 
+	
+#define SOFTINTI(name,ipl) \
+	INTEXC_FIX_ISP(0)	; \
+        PUSHR_ALL		; \
+	pushl ipl		; \
+	pushl $0x0		; \
+	call regtrap		; \
+	addl $0x8, %esp		; \
+        call SYMBOL_NAME(name)	; \
+        POPR_ALL		; \
+        REI
+				
+#define SOFTINTK(name,ipl) \
+	INTEXC_FIX_SP(0)	; \
+        PUSHR_ALL		; \
+	pushl ipl		; \
+	pushl $0x0		; \
+	call regtrap		; \
+	addl $0x8, %esp		; \
+        call SYMBOL_NAME(name)	; \
+	cli			; /* temp workaround? */ \
+        POPR_ALL		; \
+        REI
+				
+#define MAYBEDOSOFTINT(ipl,vector) \
+	pushl %edi		; \
+	movl smp$gl_cpu_data, %edi; \
+	btw ipl, 0x6(%edi)	; /* sisr */ \
+	jnc 1f			; \
+	movl ctl$gl_pcb, %edi	; \
+	movl 0x6e8(%edi), %edi	; \
+	sarl $0x4, %edi		; \
+	andl $0x1f, %edi	; \
+	cmpl ipl, %edi		; \
+	jae 1f			; \
+	popl %edi		; \
+	int vector 		; \
+	jmp 2f			; \
+1:				; \
+	popl %edi		; \
+2:				;
+
+	
 ENTRY(lcall7)
         PUSHPSL
         pushfl			# We get a different stack layout with call gates,
@@ -268,7 +495,7 @@ ENTRY(ret_from_fork)
 
 ENTRY(system_call)
 #        PUSHPSLINTR
-	SAVE_SP(0)
+	CHM_FIX_SP(0)
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -277,12 +504,14 @@ ENTRY(system_call)
 	cmpl $(NR_syscalls),%eax
 	jae badsys
 	pushl %eax
+	pushl %edx
 	pushl $0x0
 	pushl $0x1
 	call regtrap
 	call setpsli	
 	popl %eax
 	popl %eax
+	popl %edx
 	popl %eax
 	call *SYMBOL_NAME(sys_call_table)(,%eax,4)
 	movl %eax,EAX(%esp)		# save the return value
@@ -328,6 +557,23 @@ badsys:
 	jmp ret_from_sys_call
 
 	ALIGN
+#if 0
+ENTRY(common_interrupt)
+	INTEXC_FIX_ISP(4)
+	SAVE_ALL
+	pushl %eax
+	pushl %edx
+	pushl $0x10
+	pushl $0x0
+	call regtrap
+	call setpsli	
+	popl %eax
+	popl %eax
+	popl %edx
+	popl %eax
+call_do_IRQ:	
+	call do_IRQ
+#endif	
 ENTRY(ret_from_intr)
 #        PUSHPSL                         # bad place. do better for new I/O
         GET_CURRENT(%ebx)
@@ -341,7 +587,7 @@ ret_from_exception:
 
 ENTRY(vmssystem_call3)
 #        PUSHPSLINTR
-	SAVE_SP(0)
+	CHM_FIX_SP(0)
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -350,19 +596,21 @@ ENTRY(vmssystem_call3)
 	cmpl $(NR_vmssyscalls3),%eax
 	jae vmsbadsys
 	pushl %eax
+	pushl %edx
 	pushl $0x3
 	pushl $0x1
 	call regtrap
 	call setpsli	
 	popl %eax
 	popl %eax
+	popl %edx
 	popl %eax
 	call *SYMBOL_NAME(vmssys_call_table3)(,%eax,4)
         jmp syscall_common
 
 ENTRY(vmssystem_call1)
 #        PUSHPSLINTR
-	SAVE_SP(0)
+	CHM_FIX_SP(0)
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -371,19 +619,21 @@ ENTRY(vmssystem_call1)
 	cmpl $(NR_vmssyscalls1),%eax
 	jae vmsbadsys
 	pushl %eax
+	pushl %edx
 	pushl $0x1
 	pushl $0x1
 	call regtrap
 	call setpsli	
 	popl %eax
 	popl %eax
+	popl %edx
 	popl %eax
 	call *SYMBOL_NAME(vmssys_call_table1)(,%eax,4)
         jmp syscall_common
 
 ENTRY(vmssystem_call)
 #        PUSHPSLINTR
-	SAVE_SP(0x0)
+	CHM_FIX_SP(0x0)
 	pushl %eax			# save orig_eax
 	SAVE_ALL
 	GET_CURRENT(%ebx)
@@ -406,12 +656,14 @@ do_minus2:
 normal_call:		
 	*/
 	pushl %eax
+	pushl %edx
 	pushl $0x0
 	pushl $0x1
 	call regtrap
 	call setpsli	
 	popl %eax
 	popl %eax
+	popl %edx
 	popl %eax
 	call *SYMBOL_NAME(vmssys_call_table)(,%eax,4)
 syscall_common:
@@ -491,12 +743,14 @@ error_code:
 	movl %ecx, ES(%esp)
 	movl %esp,%edx
 	pushl %eax
+	pushl %edx
 	pushl $0x10
-	pushl $0x0
+	pushl $0x2
 	call regtrap
-	call setpsli	
+	call setpsli
 	popl %eax
 	popl %eax
+	popl %edx
 	popl %eax
 	pushl %esi			# push the error code
 	pushl %edx			# push the pt_regs pointer
@@ -615,7 +869,7 @@ ENTRY(alignment_check)
 
 ENTRY(page_fault)
 #        PUSHPSLINTR
-	SAVE_SP(4)
+	INTEXC_FIX_SP(4)
 	pushl $ SYMBOL_NAME(do_page_fault)
 	jmp error_code
 
@@ -639,6 +893,7 @@ ENTRY(test_code)
         REI
 
 ENTRY(sched_vector)
+	SOFTINTK(schedule,$0x0)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(schedule)
@@ -646,6 +901,7 @@ ENTRY(sched_vector)
         REI
 
 ENTRY(resched_vector)
+	SOFTINTK(sch$resched,$0x3)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(sch$resched)
@@ -653,6 +909,7 @@ ENTRY(resched_vector)
         REI
 
 ENTRY(timer_vector)
+	SOFTINTI(exe$swtimint,$0x7)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$swtimint)
@@ -660,6 +917,7 @@ ENTRY(timer_vector)
         REI
 
 ENTRY(timerfork_vector)
+	SOFTINTI(exe$swtimint,$0x7)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$swtimint)
@@ -667,6 +925,7 @@ ENTRY(timerfork_vector)
         REI
 
 ENTRY(iopost_vector)
+	SOFTINTI(ioc$iopost,$0x4)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(ioc$iopost)
@@ -674,6 +933,7 @@ ENTRY(iopost_vector)
         REI
 
 ENTRY(astdel_vector)
+	SOFTINTK(sch$astdel,$0x2)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(sch$astdel)
@@ -681,6 +941,7 @@ ENTRY(astdel_vector)
         REI
 
 ENTRY(queueast_vector)
+	SOFTINTI(exe$frkipl6dsp,$0x6)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$frkipl6dsp)
@@ -688,6 +949,7 @@ ENTRY(queueast_vector)
         REI
 
 ENTRY(iolock8_vector)
+	SOFTINTI(exe$frkipl8dsp,$0x8)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$frkipl8dsp)
@@ -695,6 +957,7 @@ ENTRY(iolock8_vector)
         REI
 
 ENTRY(iolock9_vector)
+	SOFTINTI(exe$frkipl9dsp,$0x9)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$frkipl9dsp)
@@ -702,6 +965,7 @@ ENTRY(iolock9_vector)
         REI
 
 ENTRY(iolock10_vector)
+	SOFTINTI(exe$frkipl10dsp,$0xa)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$frkipl10dsp)
@@ -709,6 +973,7 @@ ENTRY(iolock10_vector)
         REI
 
 ENTRY(iolock11_vector)
+	SOFTINTI(exe$frkipl11dsp,$0xb)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$frkipl11dsp)

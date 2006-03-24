@@ -198,8 +198,13 @@ inline void regtrap(char type, char param) {
   case REG_INTR:
     current->psl_cur_mod=0;
     current->psl_prv_mod=0;
-    if (param>2)
+    if (param>3)
       current->psl_is=1;
+#if 0
+    // default behaviour
+    else
+      current->psl_is=old isl
+#endif
     /*  not fully implemented */
     current->psl_ipl=param;
     smp$gl_cpu_data[cpu]->cpu$b_ipl=current->psl_ipl;
@@ -216,13 +221,16 @@ inline void regtrap(char type, char param) {
     
   default:
     current->psl_prv_mod=current->psl_cur_mod;
-    current->psl_cur_mod=0;    
+    current->psl_cur_mod=0;
+    // psl is from vector 1:0 is1ipl31 or both saved
     /*  not fully implemented */
     break;
   }
+  // if is 0 ipr old psl curmod iprsp = sp, sp = is or curmod
   /*  not fully implemented */
   if (mydebugi>1) printk("bef %x %x ",param,smp$gl_cpu_data[cpu]->cpu$w_sisr);
   if (type==REG_INTR && param<16) {
+    // enable interrupt
     smp$gl_cpu_data[cpu]->cpu$w_sisr&=~(1<<param);
   }
   if (mydebugi>1) printk("%x\n",smp$gl_cpu_data[cpu]->cpu$w_sisr);
@@ -371,11 +379,16 @@ asmlinkage void myrei (void) {
 #endif
   if (p->psl_ipl > p->oldpsl_ipl) panic("rei to higher ipl %x %x\n",p->psl_ipl , p->oldpsl_ipl);
     //sickinsque(0x10000000+p->psl_ipl,0x20000000+p->oldpsl_ipl);
+  // save old sp oldpsl is and 4 oth
+  // set new pc psl
+  // if is 0 change stack
   setipl2(current->psl_ipl);
   //  if (!in_sw_ast) sw_ast();
   mysti(flag);
   sw_ast();
+#ifdef __x86_64__
   do_sw_int();
+#endif
   /* also needs some changing mode stacks */
 }
 

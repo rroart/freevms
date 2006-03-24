@@ -519,10 +519,11 @@ asmlinkage void sch$astdel(int dummy) {
   struct _acb * acb;
 
   /*lock*/
+#ifdef __x86_64__
   if (intr_blocked(IPL$_ASTDEL))
     return;
-
   regtrap(REG_INTR, IPL$_ASTDEL);
+#endif
 
   spin_lock(&SPIN_SCHED);
 #ifdef ASTDEBUG

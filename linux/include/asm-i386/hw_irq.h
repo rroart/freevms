@@ -132,8 +132,8 @@ do { __asm__ __volatile__ ( \
 #define SOFTINT_PERFMON_VECTOR DOSOFTINT($0x0,$0xa7)
 #define SOFTINT_MAILBOX_VECTOR DOSOFTINT($0x0,$0xa6)
 #define SOFTINT_POOL_VECTOR DOSOFTINT($0x0,$0xa5)
-#define SOFTINT_IOLOCK11_VECTOR DOSOFTINT($0x11,$0xa4)
-#define SOFTINT_IOLOCK10_VECTOR DOSOFTINT($0x10,$0xa3)
+#define SOFTINT_IOLOCK11_VECTOR DOSOFTINT($0xb,$0xa4)
+#define SOFTINT_IOLOCK10_VECTOR DOSOFTINT($0xa,$0xa3)
 #define SOFTINT_IOLOCK9_VECTOR DOSOFTINT($0x9,$0xa2)
 #define SOFTINT_SYNCH_VECTOR DOSOFTINT($0x8,$0xa1)
 #define SOFTINT_TIMER_VECTOR DOSOFTINT($0x8,$0xa0)
@@ -282,6 +282,48 @@ extern char _stext, _etext;
 	"popl %eax\n\t" \
 	"popl %eax\n\t"
 
+#define INTEXC_FIX_ISP(x) \
+	"pushl %esp; \n\t" \
+	"pushl %eax; \n\t" \
+	"pushl %edi; \n\t" \
+	"pushl %edx; \n\t" \
+	"movl ctl$gl_pcb, %edi	; \n\t" \
+	"movl $init_tss, %edx	; \n\t" \
+	"addl $0x4, %edx	; \n\t" \
+	"testl $0x200, 0x6e8(%edi); \n\t" \
+	"jne 1f			; \n\t" \
+	"addl $0x738, %edi; \n\t" /* ipr_sp */ \
+	"movl 0x14(%esp), %eax; \n\t" \
+	"andl $0x3, %eax; \n\t" \
+	"je 2f			; \n\t" \
+	"movl %esp, (%edi); \n\t" /* check ekstra */ \
+	"movl %esp, (%edx); \n\t" /* check ekstra */ \
+	"addl $0x10, (%edi); \n\t" /* check ekstra */ \
+	"addl $0x10, (%edx); \n\t" /* check ekstra */ \
+	"salw $2,%ax; \n\t" \
+	"addl %eax, %edi; \n\t" \
+	"addl %eax, %edx; \n\t" \
+	"addl %eax, %edx; \n\t" \
+	"cmpl $0xc, %eax; \n\t" \
+	"movl 0x1c(%esp),%eax; \n\t" \
+	"je 4f			; \n\t" \
+	"jmp 3f			; \n\t" \
+"2:				; \n\t" \
+	"movl %esp, %eax	; \n\t" \
+	"addl $0x10, %eax	; \n\t" \
+"3:				; \n\t" \
+	"movl %eax, (%edx)	; \n\t" \
+"4:				; \n\t" \
+	"movl %eax, (%edi); \n\t" \
+	"movl smp$gl_cpu_data, %edi ;  \n\t" \
+	"movl 0x850(%edi), %eax		;  \n\t" \
+	"movl %eax, 0xc(%esp) 	; \n\t" \
+"1:	\n\t" \
+	"popl %edx; \n\t" \
+	"popl %edi; \n\t" \
+	"popl %eax; \n\t" \
+	"popl %esp; \n\t"
+	
 #define IO_APIC_IRQ(x) (((x) >= 16) || ((1<<(x)) & io_apic_irqs))
 
 #define __STR(x) #x
@@ -369,6 +411,7 @@ asmlinkage void IRQ_NAME(nr); \
 __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(IRQ) #nr "_interrupt:\n\t" \
+	INTEXC_FIX_ISP(0) \
 	"pushl $"#nr"-256\n\t" \
 	"jmp common_interrupt");
 

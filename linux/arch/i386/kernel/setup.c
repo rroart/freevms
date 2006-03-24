@@ -2934,7 +2934,10 @@ void __init cpu_init (void)
 	kernel_puts("puts 6_8\n");
 	enter_lazy_tlb(&init_mm, &init_task_union, nr); // was: current
 
+#if 0
+	// check. why???
 	t->esp0 = init_task_union.task.thread.esp0; // was: current
+#endif
 	set_tss_desc(nr,t);
 	gdt_table[__TSS(nr)].b &= 0xfffffdff;
 	kernel_puts("puts 6_9\n");

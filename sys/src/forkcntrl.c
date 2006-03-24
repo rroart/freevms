@@ -70,9 +70,11 @@ asmlinkage void exe$frkipl11dsp(void) {
 asmlinkage void exe$forkdspth(int i) {
   void (*func)(void *,void *, void *);
   struct _fkb * f, * dummy = 0, * fq;
+#ifdef __x86_64__
   if (intr_blocked(i))
     return;
   regtrap(REG_INTR, i);
+#endif
   setipl(i);
   //printk("forkdspth\n");
   fq=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[i-6]; /* so far */
