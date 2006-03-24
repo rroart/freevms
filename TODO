@@ -26,6 +26,8 @@ Replace shark with piraya or something.
 Redo translated ch$ in cmuip to fit with libbli
 Have special treatment of imgact to make sure it is reserved
 Call sys$cli for lib$get_foreign?
+Cleanup struct iosb _iosb __iosb 64-bit size and iost1 iost2
+Sched svpctx switches to i-stack; do the same?
 
 CPU/PAL:
 FIX pal
