@@ -1423,8 +1423,10 @@ static void __exit exit_elf_binfmt(void)
 int exe$imgact_elf_ia32(void * name, void * hdrbuf) {
 #else
 
+#ifdef __x86_64__
 #if ELF_CLASS == ELFCLASS32
 #error 
+#endif
 #endif
 
 int exe$imgact_elf(void * name, void * hdrbuf) {
