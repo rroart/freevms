@@ -88,7 +88,7 @@ endif
 
 HEAD := linux/arch/i386/kernel/head.o linux/arch/i386/kernel/init_task.o
 
-SUBDIRS += linux/arch/i386/kernel linux/arch/i386/mm linux/arch/i386/lib
+SUBDIRS += linux/arch/i386/tools linux/arch/i386/kernel linux/arch/i386/mm linux/arch/i386/lib
 
 CORE_FILES := linux/arch/i386/kernel/kernel.o linux/arch/i386/mm/mm.o $(CORE_FILES)
 LIBS := $(TOPDIR)/linux/arch/i386/lib/lib.a $(LIBS) $(TOPDIR)/linux/arch/i386/lib/lib.a
@@ -97,6 +97,9 @@ ifdef CONFIG_MATH_EMULATION
 SUBDIRS += linux/arch/i386/math-emu
 DRIVERS += linux/arch/i386/math-emu/math.o
 endif
+
+linux/arch/i386/tools: dummy
+	$(MAKE) linuxsubdirs SUBDIRS=linux/arch/i386/tools 
 
 linux/arch/i386/kernel: dummy
 	$(MAKE) linuxsubdirs SUBDIRS=linux/arch/i386/kernel
@@ -111,37 +114,45 @@ linux/vmlinux: linux/arch/i386/vmlinux.lds
 FORCE: ;
 
 .PHONY: zImage bzImage compressed zlilo bzlilo zdisk bzdisk install \
-		clean archclean archmrproper archdep
+		clean archclean archmrproper archdep checkoffset
 
-zImage: linux/vmlinux
+checkoffset: FORCE
+	make -C linux/arch/$(ARCH)/tools $(TOPDIR)/linux/include/asm-i386/offset.h
+
+zImage: checkoffset linux/vmlinux
 	@$(MAKEBOOT) zImage
 
-bzImage: linux/vmlinux
+bzImage: checkoffset linux/vmlinux
 	@$(MAKEBOOT) bzImage
 
 compressed: zImage
 
-zlilo: linux/vmlinux
+zlilo: checkoffset linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=zImage zlilo
 
 tmp:
 	@$(MAKEBOOT) BOOTIMAGE=bzImage zlilo
-bzlilo: linux/vmlinux
+bzlilo: checkoffset linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=bzImage zlilo
 
-zdisk: linux/vmlinux
+zdisk: checkoffset linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=zImage zdisk
 
-bzdisk: linux/vmlinux
+bzdisk: checkoffset linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=bzImage zdisk
 
-install: linux/vmlinux
+install: checkoffset linux/vmlinux
 	@$(MAKEBOOT) BOOTIMAGE=bzImage install
 
 archclean:
 	@$(MAKEBOOT) clean
+	@$(MAKE) -C $(TOPDIR)/linux/arch/i386/tools clean
 
 archmrproper:
+	rm -f $(TOPDIR)/linux/arch/i386/tools/offset.h
+	rm -f $(TOPDIR)/linux/arch/i386/tools/offset.tmp
+	rm -f $(TOPDIR)/linux/include/asm-i386/offset.h
 
 archdep:
+	@$(MAKE) -C $(TOPDIR)/linux/arch/i386/tools all
 	@$(MAKEBOOT) dep
