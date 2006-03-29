@@ -193,3 +193,8 @@ inline DEVICEUNLOCK(){
   return;
   printk("DEVICEUNLOCK not impl\n");
 }
+
+long get_eip(long l) {
+  long * m = &l;
+  return m[-1];
+}
