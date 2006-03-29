@@ -51,6 +51,7 @@
 #include <linux/linkage.h>
 #include <asm/segment.h>
 #include <asm/smp.h>
+#include <asm/offset.h>	
 
 EBX		= 0x00
 ECX		= 0x04
@@ -76,18 +77,18 @@ VM_MASK		= 0x00020000
 /*
  * these are offsets into the task-struct.
  */
+#if 0
 state		= 12    /* was 0 */
 flags		= 16
 sigpending	= 20
 addr_limit	= 24
 exec_domain	= 28
 tsk_ptrace	= 36
+#endif	
 /*
 processor	= 52
 */
 ENOSYS = 38
-/* whoooo */
-ipr_sp		= 0x738
 		
 #define PUSHR_ALL \
 	cld; \
@@ -136,13 +137,13 @@ ipr_sp		= 0x738
 	pushl %edi		; \
 	pushl %edx		; \
 	movl ctl$gl_pcb, %edi	; \
-	testl $0x200, 0x6ec(%edi); \
+	testl $0x200, tsk_oldpsl(%edi); \
 	jne 1f			; \
 	movl $init_tss, %edx	; \
 	addl $0x4, %edx		; /* yes, 4 */ \
 	movl %esp, (%edx)	; /* curmod is 0 for the time being */ \
 	addl $0xc, (%edx)	; /* 14? */ \
-	addl $ipr_sp, %edi	; \
+	addl $tsk_ipr_sp, %edi	; \
 	movl %esp, (%edi)	; /* curmod is 0 for the time being */ \
 	addl $0xc, (%edi)	; /* 14? */ \
 	cmpl $0x10, 0x10(%esp)	; /* check */ \
@@ -153,13 +154,13 @@ ipr_sp		= 0x738
 	jmp 2f			; \
 1:				; \
 	movl smp$gl_cpu_data, %edi ; \
-	movl %esp, 0x850(%edi)	; \
-	addl $0xc, 0x850(%edi)	; \
+	movl %esp, cpu_cpul_saved_isp(%edi)	; \
+	addl $0xc, cpu_cpul_saved_isp(%edi)	; \
 2:				; \
 	movl ctl$gl_pcb, %edi	; \
-	testl $0x200, 0x6e8(%edi); \
+	testl $0x200, tsk_psl(%edi); \
 	jne 1f			; \
-	addl $ipr_sp, %edi; \
+	addl $tsk_ipr_sp, %edi; \
 	movl (%edi), %edx	; /* curmod is 0 for the time being */ \
 	movl %edx, 0x8(%esp)	; \
 	cmpl $0x10, 0x10(%esp)	; /* check */ \
@@ -183,13 +184,13 @@ ipr_sp		= 0x738
 	pushl %edi		; \
 	pushl %edx		; \
 	movl ctl$gl_pcb, %edi	; \
-	testl $0x200, 0x6e8(%edi); \
+	testl $0x200, tsk_psl(%edi); \
 	jne 1f			; \
 	movl $init_tss, %edx	; \
 	addl $0x4, %edx		; /* yes, 4 */ \
 	movl %esp, (%edx)	; /* curmod is 0 for the time being */ \
 	addl $0x14, (%edx)	; \
-	addl $ipr_sp, %edi	; \
+	addl $tsk_ipr_sp, %edi	; \
 	movl %esp, (%edi)	; /* curmod is 0 for the time being */ \
 	addl $0x14, (%edi)	; \
 	cmpl $0x10, 0xc(%esp)	; \
@@ -201,15 +202,15 @@ ipr_sp		= 0x738
 1:				; \
 	jmp 42f			; \
 	movl smp$gl_cpu_data, %edi ; \
-	movl %esp, 0x850(%edi)	; \
-	addl $0xc, 0x850(%edi)	; \
+	movl %esp, cpu_cpul_saved_isp(%edi)	; \
+	addl $0xc, cpu_cpul_saved_isp(%edi)	; \
 42:				; \
 2:				; \
 	jmp 3f			; \
 	movl ctl$gl_pcb, %edi	; \
-	testl $0x200, 0x6e8(%edi); \
+	testl $0x200, tsk_psl(%edi); \
 	jne 1f			; \
-	addl $ipr_sp, %edi; \
+	addl $tsk_ipr_sp, %edi; \
 	movl (%edi), %edx	; /* curmod is 0 for the time being */ \
 	movl %edx, 0x8(%esp)	; \
 	cmpl $0x10, 0x10(%esp)	; /* check */ \
@@ -287,11 +288,11 @@ ipr_sp		= 0x738
 	movl ctl$gl_pcb, %edi	; \
 	movl $init_tss, %edx	; \
 	addl $0x4, %edx		; \
-	testl $0x200, 0x6e8(%edi); \
+	testl $0x200, tsk_psl(%edi); \
 	je 1f			; \
 	call panic		; \
 1:				; \
-	addl $ipr_sp, %edi	; \
+	addl $tsk_ipr_sp, %edi	; \
 	movl x+0x10(%esp), %eax	; \
 	andl $0x3, %eax		; \
 	je 2f			; \
@@ -321,9 +322,9 @@ ipr_sp		= 0x738
 	movl ctl$gl_pcb, %edi	; \
 	movl $init_tss, %edx	; \
 	addl $0x4, %edx		; \
-	testl $0x200, 0x6e8(%edi); \
+	testl $0x200, tsk_psl(%edi); \
 	jne 1f			; \
-	addl $ipr_sp, %edi	; \
+	addl $tsk_ipr_sp, %edi	; \
 	movl %esp, (%edi); /* check ekstra */ \
 	movl %esp, (%edx); /* check ekstra */ \
 	addl $0xc, (%edi); /* check ekstra */ \
@@ -359,9 +360,9 @@ ipr_sp		= 0x738
 	movl ctl$gl_pcb, %edi	; \
 	movl $init_tss, %edx	; \
 	addl $0x4, %edx		; \
-	testl $0x200, 0x6e8(%edi); \
+	testl $0x200, tsk_psl(%edi); \
 	jne 1f			; \
-	addl $ipr_sp, %edi	; \
+	addl $tsk_ipr_sp, %edi	; \
 	movl %esp,  (%edi); /* check ekstra */ \
 	movl %esp,  (%edx); /* check ekstra */ \
 	addl $0x10, (%edi); /* check ekstra */ \
@@ -386,7 +387,7 @@ ipr_sp		= 0x738
 4:				; \
 	movl %eax, (%edi)	; \
 	movl smp$gl_cpu_data, %edi ; \
-	movl 0x850(%edi), %eax	;  \
+	movl cpu_cpul_saved_isp(%edi), %eax	;  \
 	movl %eax, 0xc(%esp) 	; \
 1:				; \
 	popl %edx		; \
@@ -423,7 +424,7 @@ ipr_sp		= 0x738
 	btw ipl, 0x6(%edi)	; /* sisr */ \
 	jnc 1f			; \
 	movl ctl$gl_pcb, %edi	; \
-	movl 0x6e8(%edi), %edi	; \
+	movl tsk_psl(%edi), %edi	; \
 	sarl $0x4, %edi		; \
 	andl $0x1f, %edi	; \
 	cmpl ipl, %edi		; \
@@ -450,7 +451,7 @@ ENTRY(lcall7)
 	movl %esp,%ebx
 	pushl %ebx
 	movl ctl$gl_pcb,%ebx	# GET_CURRENT
-	movl exec_domain(%ebx),%edx	# Get the execution domain
+	movl tsk_exec_domain(%ebx),%edx	# Get the execution domain
 	movl 4(%edx),%edx	# Get the lcall7 handler for the domain
 	pushl $0x7
 	call *%edx
@@ -472,7 +473,7 @@ ENTRY(lcall27)
 	movl %esp,%ebx
 	pushl %ebx
 	movl ctl$gl_pcb,%ebx	# GET_CURRENT
-	movl exec_domain(%ebx),%edx	# Get the execution domain
+	movl tsk_exec_domain(%ebx),%edx	# Get the execution domain
 	movl 4(%edx),%edx	# Get the lcall7 handler for the domain
 	pushl $0x27
 	call *%edx
@@ -517,7 +518,7 @@ ENTRY(system_call)
 	movl %eax,EAX(%esp)		# save the return value
 ENTRY(ret_from_sys_call)
 	cli				# need_resched and signals atomic test
-	cmpl $0,sigpending(%ebx)
+	cmpl $0,tsk_sigpending(%ebx)
 	jne signal_return
 restore_all:
 	RESTORE_ALL
@@ -670,7 +671,7 @@ syscall_common:
         movl %eax,EAX(%esp)		# save the return value
 ENTRY(vmsret_from_sys_call)
 	cli				# need_resched and signals atomic test
-	cmpl $0,sigpending(%ebx)
+	cmpl $0,tsk_sigpending(%ebx)
 	jne vmssignal_return
 vmsrestore_all:
 	RESTORE_ALL
