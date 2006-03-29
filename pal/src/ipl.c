@@ -130,6 +130,16 @@ inline void setipl(unsigned char i) {
   if (i==8 && i!=this)
     memcpy((long)stk+64*12,addr,128);
 #endif
+#if 0
+#ifdef __x86_64__
+  asm volatile("movl %0,%%cr8": :"r" (i-16));
+#endif
+#endif
+#if 0
+#ifdef __i386__
+  apic_write(APIC_TASKPRI,i-16);
+#endif
+#endif
 }
 
 /* no smp yet */
@@ -395,8 +405,8 @@ asmlinkage void myrei (void) {
 #if (defined __i386__) || (defined __x86_64__)
 void inline mysti(long flags) {
   in_atomic=0;
+  spin_unlock(&SPIN_ATOMIC);
   if (flags) __sti();
-  spin_unlock(SPIN_ATOMIC);
   //printk("mysti\n");
 }
 
@@ -407,11 +417,15 @@ void sickinsque(void * entry, void * pred) {
   *(void **)pred=entry;
 }
 
+long locki=0;
+long locks[1024];
+
 long inline mycli(void) {
   long flags, retval;
   //printk("mycli\n");
-  spin_lock(SPIN_ATOMIC);
   __save_flags(flags);
+  __cli();
+  spin_lock(&SPIN_ATOMIC);
   retval=flags&0x00000200; /* interrupt enable/disable flag */
   if (in_atomic && in_atomic==current->pcb$l_pid) {
 #ifdef __i386__
@@ -426,7 +440,6 @@ long inline mycli(void) {
     panic("test\n");
   }
   if (in_atomic && in_atomic!=current->pcb$l_pid) printk("halfpancimycli\n");
-  __cli();
   in_atomic=current->pcb$l_pid;
   { unsigned long *l=&flags;
   int i;
@@ -440,12 +453,12 @@ long inline mycli(void) {
 void inline mysti(int flags) { 
   in_atomic=0;
   if (flags) unblock_signals();
-  spin_unlock(SPIN_ATOMIC);
+  spin_unlock(&SPIN_ATOMIC);
 }
 
 int inline mycli(void) {
   int retval=timer_on;
-  spin_lock(SPIN_ATOMIC);
+  spin_lock(&SPIN_ATOMIC);
   if (in_atomic && in_atomic==current->pcb$l_pid) panic("test\n");
   if (in_atomic && in_atomic!=current->pcb$l_pid) printk("halfpancimycli\n");
   block_signals();
