@@ -212,7 +212,11 @@ int exe$procstrt(struct _pcb * p) {
   flush_tlb_mm(p->mm);
 #else
 #ifdef __i386__
+#if 0
   __asm__ ("movl %%edi,%0; ":"=r" (p));
+#else
+  p = ctl$gl_pcb; // check 
+#endif
 #endif
 #ifdef __x86_64__
   __asm__ ("movq %%rbx,%0; ":"=r" (p));
