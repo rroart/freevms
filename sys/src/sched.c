@@ -295,6 +295,8 @@ static FASTCALL(void reschedule_idle(struct task_struct * p));
 static void fastcall reschedule_idle(struct task_struct * p)
 {
 #ifdef CONFIG_SMP
+#if 0
+  // not yet?
 	int this_cpu = smp_processor_id();
 	struct task_struct *tsk, *target_tsk;
 	int cpu, best_cpu, i, max_prio;
@@ -372,7 +374,7 @@ send_now_idle:
 	}
 	return;
 		
-
+#endif
 #else /* UP */
 	int this_cpu = smp_processor_id();
 	struct task_struct *tsk;
@@ -619,9 +621,11 @@ asmlinkage void sch$resched(void) {
   spin_lock(&SPIN_SCHED);
 
   spin_lock_irq(&runqueue_lock); /* eventually change to sched? */
-  release_kernel_lock(curpcb, cpuid);
 
   curpcb=cpu->cpu$l_curpcb;
+
+  release_kernel_lock(curpcb, cpuid);
+
   curpri=cpu->cpu$b_cur_pri;
 
   sch$al_cpu_priority[curpri]=sch$al_cpu_priority[curpri] & (~ cpu->cpu$l_cpuid_mask );
@@ -851,6 +855,8 @@ asmlinkage void sch$sched(int from_sch$resched) {
     goto return_a_reimac;
     return;
   } 
+
+  next->pcb$l_cpu_id = curpcb->pcb$l_cpu_id;
 
   spin_unlock_irq(&runqueue_lock);
   spin_unlock(&SPIN_SCHED);
@@ -1289,6 +1295,8 @@ asmlinkage long sys_sched_yield(void)
 	int nr_pending = nr_running;
 
 #if CONFIG_SMP
+#if 0
+	// not yet?
 	int i;
 
 	// Subtract non-idle processes running on other CPUs.
@@ -1297,6 +1305,7 @@ asmlinkage long sys_sched_yield(void)
 		if (aligned_data[cpu].schedule_data.curr != idle_task(cpu))
 			nr_pending--;
 	}
+#endif
 #else
 	// on UP this process is on the runqueue as well
 	nr_pending--;
@@ -1547,7 +1556,7 @@ extern struct _phd system_phd;
 
 void __init init_idle(void)
 {
-  struct _pcb * cur = smp$gl_cpu_data[0]->cpu$l_curpcb;
+  struct _pcb * cur = smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;
   //	if (current != &init_task && task_on_runqueue(current)) {
   //		printk("UGH! (%d:%d) was on the runqueue, removing.\n",
   //			smp_processor_id(), current->pcb$l_pid);
