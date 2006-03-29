@@ -346,8 +346,10 @@ out:
 #if 0
 	schedule_console_callback();
 #endif
+#if 0
 	extern int kbd_pid;
 	sch$postef(kbd_pid, PRI$_IOCOM, 1);
+#endif
 }
 
 extern struct _twp kb_twp;
