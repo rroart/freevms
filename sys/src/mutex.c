@@ -11,6 +11,10 @@
 #include<linux/sched.h>
 #include<ipldef.h>
 #include <sch_routines.h>
+#include <linux/spinlock.h>
+
+#define ioc$gq_mutex ioc_spin
+static spinlock_t ioc_spin = SPIN_LOCK_UNLOCKED;
 
 // definitely needs reimplementation
 

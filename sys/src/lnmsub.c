@@ -368,6 +368,9 @@ void mysti(void) {
 
 #else
 
+#define lnm$aq_mutex lnm_spin
+static spinlock_t lnm_spin = SPIN_LOCK_UNLOCKED;
+
 void lnm$lock(void) {
   sch$lockw(&lnm$aq_mutex);
 }
