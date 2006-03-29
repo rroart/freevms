@@ -104,7 +104,7 @@ extern void smp_store_cpu_info(int id);		/* Store per CPU info (like the initial
  * so this is correct in the x86 case.
  */
 
-#define smp_processor_id() (current->processor)
+#define smp_processor_id() (current->pcb$l_cpu_id)
 
 static __inline int hard_smp_processor_id(void)
 {

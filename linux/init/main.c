@@ -561,7 +561,7 @@ static void __init smp_init(void)
 	/* Get other processors into their bootup holding patterns. */
 	smp_boot_cpus();
 	wait_init_idle = cpu_online_map;
-	clear_bit(current->processor, &wait_init_idle); /* Don't wait on me! */
+	clear_bit(current->pcb$l_cpu_id, &wait_init_idle); /* Don't wait on me! */
 
 	smp_threads_ready=1;
 	smp_commence();
@@ -614,8 +614,10 @@ asmlinkage void __init start_kernel(void)
  * Interrupts are still disabled. Do necessary setups, then
  * enable them
  */
+#ifdef __x86_64__
 	kernel_puts("puts 1\n");
 	lock_kernel();
+#endif
 	kernel_puts("puts 2\n");
 	printk(linux_banner);
 	kernel_puts("puts 3\n");
@@ -626,6 +628,10 @@ asmlinkage void __init start_kernel(void)
 	parse_options(command_line);
 	kernel_puts("puts 7.5\n");
 	init_sys_p1pp();
+#ifdef __i386__
+	kernel_puts("puts 1\n");
+	lock_kernel();
+#endif
 	kernel_puts("puts 6\n");
 	trap_init();
 	kernel_puts("puts 7\n");

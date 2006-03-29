@@ -816,8 +816,10 @@ static void __init do_boot_cpu (int apicid)
 
 	idle->thread.eip = (unsigned long) start_secondary;
 
+#ifndef CONFIG_VMS
 	del_from_runqueue(idle);
 	unhash_process(idle);
+#endif
 	init_tasks[cpu] = idle;
 
 	/* start_eip had better be page-aligned! */

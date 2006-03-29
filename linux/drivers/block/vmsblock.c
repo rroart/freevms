@@ -18,6 +18,10 @@
 #include <linux/slab.h>
 #include <linux/module.h>
 
+#ifdef CONFIG_VMS
+spinlock_t io_request_lock = SPIN_LOCK_UNLOCKED;
+#endif
+
 /*
  * For the allocated request tables
  */

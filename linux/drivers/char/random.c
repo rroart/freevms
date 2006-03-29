@@ -662,7 +662,9 @@ void batch_entropy_store(u32 a, u32 b, int num)
 
 	new = (batch_head+1) & (batch_max-1);
 	if (new != batch_tail) {
+#ifndef CONFIG_VMS
 		queue_task(&batch_tqueue, &tq_timer);
+#endif
 		batch_head = new;
 	} else {
 		DEBUG_ENT("batch entropy buffer full\n");

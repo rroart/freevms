@@ -416,7 +416,9 @@ EXPORT_SYMBOL(tq_immediate);
 
 #ifdef CONFIG_SMP
 /* Various random spinlocks we want to export */
+#if 0
 EXPORT_SYMBOL(tqueue_lock);
+#endif
 
 /* Big-Reader lock implementation */
 EXPORT_SYMBOL(__brlock_array);

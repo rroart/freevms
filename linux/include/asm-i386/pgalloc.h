@@ -217,6 +217,8 @@ static inline void flush_tlb_range(struct mm_struct *mm,
 
 #include <asm/smp.h>
 
+extern void flush_tlb_page2(struct mm_struct *, unsigned long);
+
 #define local_flush_tlb() \
 	__flush_tlb()
 

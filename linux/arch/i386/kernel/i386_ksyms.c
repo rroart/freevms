@@ -142,7 +142,11 @@ EXPORT_SYMBOL(__global_restore_flags);
 EXPORT_SYMBOL(smp_call_function);
 
 /* TLB flushing */
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(flush_tlb_page);
+#else
+EXPORT_SYMBOL(flush_tlb_page2);
+#endif
 #endif
 
 #ifdef CONFIG_MCA

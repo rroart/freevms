@@ -662,6 +662,8 @@ extern union task_union init_task_union;
 extern struct   mm_struct init_mm;
 extern struct task_struct *init_tasks[NR_CPUS];
 
+#define task_has_cpu(tsk) ((tsk)->cpus_runnable != ~0UL)
+
 /* per-UID process charging. */
 extern struct user_struct * alloc_uid(uid_t);
 extern void free_uid(struct user_struct *);

@@ -209,9 +209,11 @@ static void show(char * str)
 	printk("irq:  %d [",irqs_running());
 	for(i=0;i < smp_num_cpus;i++)
 		printk(" %d",local_irq_count(i));
+#ifndef CONFIG_SMP
 	printk(" ]\nbh:   %d [",spin_is_locked(&global_bh_lock) ? 1 : 0);
 	for(i=0;i < smp_num_cpus;i++)
 		printk(" %d",local_bh_count(i));
+#endif
 
 	printk(" ]\nStack dumps:");
 	for(i = 0; i < smp_num_cpus; i++) {
@@ -264,6 +266,10 @@ static void show(char * str)
  * We have to allow irqs to arrive between __sti and __cli
  */
 # define SYNC_OTHER_CORES(x) __asm__ __volatile__ ("nop")
+#endif
+
+#ifdef CONFIG_SMP
+spinlock_t global_bh_lock = SPIN_LOCK_UNLOCKED;
 #endif
 
 static inline void wait_on_irq(int cpu)
@@ -627,9 +633,12 @@ asmlinkage unsigned int do_IRQ(struct pt_regs regs)
 	 */
 	for (;;) {
 		spin_unlock(&desc->lock);
+#if 0
+		// not yet
 		if (action->vms_interrupt)
 		  vms_handle_IRQ_event(action->idb, irq, &regs, action);
 		else
+#endif
 		  handle_IRQ_event(irq, &regs, action);
 		spin_lock(&desc->lock);
 		
