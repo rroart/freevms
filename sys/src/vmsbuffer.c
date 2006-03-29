@@ -1502,6 +1502,8 @@ void show_buffers(void)
 #endif
 
 #ifdef CONFIG_SMP /* trylock does nothing on UP and so we could deadlock */
+#if 0
+	// not yet
 	if (!spin_trylock(&lru_list_lock))
 		return;
 	for(nlist = 0; nlist < NR_LIST; nlist++) {
@@ -1531,6 +1533,7 @@ void show_buffers(void)
 		       used, lastused, locked, dirty);
 	}
 	spin_unlock(&lru_list_lock);
+#endif
 #endif
 }
 
