@@ -217,6 +217,7 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   if (mm==0)
     mm=&init_mm;
 
+  spin_lock(&mm->page_table_lock);
   pgd = pgd_offset(mm, page);
 
   pmd = pmd_alloc(mm, pgd, page);
@@ -226,6 +227,7 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
     if (pte)
       *(long*)pte=0;
   }
+  spin_unlock(&mm->page_table_lock);
 
 #ifdef CONFIG_VMS
   int pfn=mmg$ininewpfn(pcb,phd,page,pte);
@@ -370,6 +372,7 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 #endif
   //printk(KERN_EMERG "pmd %lx %lx\n",pmd,oldpmd);
 
+  spin_lock(&mm->page_table_lock);
   if (pmd) {
     pte = pte_alloc(mm, pmd, page);
 #if 0
@@ -384,6 +387,7 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
       *(long*)oldpte=0;
 #endif
   }
+  spin_unlock(&mm->page_table_lock);
 
   //printk("%x %x %x %x\n",swapper_pg_dir,pgd,pmd,pte);
   //printk("%x %x %x %x\n",swapper_pg_dir,oldpgd,oldpmd,oldpte);
@@ -445,11 +449,13 @@ int user_spaceable_addr(void * addr) {
 
   struct mm_struct * mm=pcb->mm;
 
+  spin_lock(&mm->page_table_lock);
   pgd = pgd_offset(mm, page);
   pmd = pmd_offset(pgd, page);
   if (pmd) {
     pte = pte_offset(pmd, page);
   }
+  spin_unlock(&mm->page_table_lock);
   if (pte) {
     long * ptep = pte;
     *ptep|=_PAGE_USER;
@@ -466,11 +472,13 @@ int user_spaceable_addr(void * addr) {
 
   struct mm_struct * mm=pcb->mm;
 
+  spin_lock(&mm->page_table_lock);
   pgd = pgd_offset(mm, page);
   pmd = pmd_alloc(mm, pgd, page);
   if (pmd) {
     pte = pte_alloc(mm, pmd, page);
   }
+  spin_unlock(&mm->page_table_lock);
   if (pte) {
     long * ptep = pte;
     *ptep|=_PAGE_USER;

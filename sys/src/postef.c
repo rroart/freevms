@@ -51,9 +51,14 @@ int sch$postef(unsigned long ipid, unsigned long priclass, unsigned long efn) {
   unsigned long * clusteraddr;
   /* sched spinlock */
   p=exe$ipid_to_pcb(ipid);
-  if (!p) return SS$_NONEXPR;
-  if (efn>127)
-    return SS$_ILLEFC;
+  if (!p) {
+    retval = SS$_NONEXPR;
+    goto end;
+  }
+  if (efn>127) {
+    retval = SS$_ILLEFC;
+    goto end;
+  }
   clusteraddr=getefc(p,efn);
   if (efncluster<2) {
     if (test_and_set_bit(efn&31,clusteraddr)) // bbssi

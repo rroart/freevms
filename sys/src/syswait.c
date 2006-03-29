@@ -54,6 +54,7 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag, void * dummy)
   if (!waitallflag && (mask & *clusteraddr)) {
   out:
     /* unlock sched */
+    vmsunlock(&SPIN_SCHED,-1);
     {}
 #if 0
     void * dummy = &efn;
@@ -77,6 +78,7 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag, void * dummy)
   insque(p,&wq->wqh$l_wqfl); // temporary... see about corruption in rse.c
   fixup_hib_pc(dummy);
   sch$wait(p,wq);
+  // check. no unlock here? done in sch$sched
   return SS$_NORMAL;
 }
 

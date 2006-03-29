@@ -175,6 +175,7 @@ asmlinkage exe$crelnm  (unsigned int *attr, void *tabnam, void *lognam, unsigned
 
   status=lnm$inslogtab(&ret,mylnmb);
 
+  lnm$unlock();
   setipl(0); // simulate return int
   return status;
 }

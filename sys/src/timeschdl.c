@@ -128,18 +128,20 @@ asmlinkage void exe$swtimint(void) {
   if (current->pcb$w_quant>=0 && current->pcb$w_quant<128) 
     sch$qend(current);
 
-  vmslock(&SPIN_TIMER,IPL$_TIMER);
-  vmslock(&SPIN_HWCLK,IPL$_HWCLK);
-
   //  printk(".");
   /* check tqe from EXE$GL_TQFL */
   if (smp_processor_id()==0) {
-    if (vmstimerconf && exe$gq_systime>=exe$gq_1st_time) {
+    vmslock(&SPIN_TIMER,IPL$_TIMER);
+    vmslock(&SPIN_HWCLK,IPL$_HWCLK);
+    // get rid of duplicated locking with goto label?
+    while (vmstimerconf && exe$gq_systime>=exe$gq_1st_time) {
       struct _tqe * t, * dummy=0;
       //    printk(".");
       //if (times>=0 && times<5)   printtq(exe$gl_tqfl);
       //if (times>=0 && times<5)   printtq(exe$gl_tqfl->tqe$l_tqfl);
       t=remque(exe$gl_tqfl->tqe$l_tqfl,dummy);
+      vmsunlock(&SPIN_HWCLK,IPL$_TIMER);
+      vmsunlock(&SPIN_TIMER,-1);
       //if (times>=0 && times<5)   printtq(t);
       //if (times>=0 && times<5)   printtq(exe$gl_tqfl);
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_TMSNGL) {
@@ -190,15 +192,17 @@ asmlinkage void exe$swtimint(void) {
 	//if (times>=0 && times<5) printk("i\n");
 	//	insque(t,exe$gl_tqfl); /* move this to a sort */
       }
+      vmslock(&SPIN_TIMER,IPL$_TIMER);
+      vmslock(&SPIN_HWCLK,IPL$_HWCLK);
       exe$gq_1st_time=exe$gl_tqfl->tqe$l_tqfl->tqe$q_time;
     }
+    vmsunlock(&SPIN_HWCLK,IPL$_TIMER);
+    vmsunlock(&SPIN_TIMER,-1);
   }
   //	if (times==4) { unsigned long long i=1;
   //	cli();
   //	for(i=1;i!=0;i++) ;}
   //printk(",");
-  vmsunlock(&SPIN_HWCLK,IPL$_TIMER);
-  vmsunlock(&SPIN_TIMER,-1);
 }
 
 /* vax has 100 Hz clock interrupts. Quantum is in those 10 ns units */
@@ -261,6 +265,8 @@ int hwclkdone=1;
       }
  
 #ifdef CONFIG_X86_IO_APIC
+    extern int timer_ack;
+    extern spinlock_t i8259A_lock;
     if (timer_ack) {
       spin_lock(&i8259A_lock);
       outb(0x0c, 0x20);
@@ -278,7 +284,8 @@ int hwclkdone=1;
     if (exe$gq_systime>=exe$gq_1st_time) 
       SOFTINT_TIMERFORK_VECTOR;
 
-#ifndef CONFIG_SMP
+#ifndef CONFIG_SMP_NOT_NOT
+    // check. do this anyway.
     {
       int user_tick=user_mode(regs);
       struct task_struct *p = current;

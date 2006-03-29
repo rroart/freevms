@@ -182,7 +182,6 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 		 * Try to find the data in the page cache..
 		 */
 
-		spin_lock(&pagecache_lock);
 		page = 0;
 
 		/*
@@ -289,7 +288,6 @@ void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_
 		 * Try to find the data in the page cache..
 		 */
 
-		spin_lock(&pagecache_lock);
 		page = 0;
 
 		/*
@@ -1301,13 +1299,11 @@ static unsigned char mincore_page(struct _rde * vma,
 	struct address_space * as = 0;
 	struct page * page;
 
-	spin_lock(&pagecache_lock);
 	page = 0;
 #if 0
 	if ((page) && (Page_Uptodate(page)))
 #endif
 		present = 1;
-	spin_unlock(&pagecache_lock);
 
 	return present;
 }
