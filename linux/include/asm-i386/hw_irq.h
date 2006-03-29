@@ -21,6 +21,9 @@
 #include <linux/config.h>
 #include <asm/atomic.h>
 #include <asm/irq.h>
+#include <asm/current.h>
+#include <linux/sched.h>
+#include <asm/offset.h>
 
 /*
  * IDT vectors usable for external interrupt sources start
@@ -72,7 +75,7 @@
 do { __asm__ __volatile__ ( \
 "pushl %ebx\n\t" \
 "movl ctl$gl_pcb, %ebx\n\t" \
-"movl 0x6e8(%ebx), %ebx\n\t" \
+"movl 2032(%ebx), %ebx\n\t" \
 "sarl $0x4, %ebx\n\t" \
 "andl $0x1f, %ebx\n\t" \
 "cmpl " #ipl ", %ebx\n\t" \
@@ -290,9 +293,9 @@ extern char _stext, _etext;
 	"movl ctl$gl_pcb, %edi	; \n\t" \
 	"movl $init_tss, %edx	; \n\t" \
 	"addl $0x4, %edx	; \n\t" \
-	"testl $0x200, 0x6e8(%edi); \n\t" \
+	"testl $0x200, 2032(%edi); \n\t" \
 	"jne 1f			; \n\t" \
-	"addl $0x738, %edi; \n\t" /* ipr_sp */ \
+	"addl $2112, %edi; \n\t" /* ipr_sp */ \
 	"movl 0x14(%esp), %eax; \n\t" \
 	"andl $0x3, %eax; \n\t" \
 	"je 2f			; \n\t" \
@@ -363,8 +366,10 @@ asmlinkage void call_##x(void); \
 __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(x) ":\n\t" \
+	INTEXC_FIX_ISP(0) \
 	"pushl $"#v"-256\n\t" \
 	SAVE_ALL \
+        REGTRAP \
 	SYMBOL_NAME_STR(call_##x)":\n\t" \
 	"call "SYMBOL_NAME_STR(smp_##x)"\n\t" \
 	"jmp ret_from_intr\n");
@@ -376,8 +381,10 @@ asmlinkage void call_##x(void); \
 __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(x) ":\n\t" \
+	INTEXC_FIX_ISP(0) \
 	"pushl $"#v"-256\n\t" \
 	SAVE_ALL \
+        REGTRAP \
 	"movl %esp,%eax\n\t" \
 	"pushl %eax\n\t" \
 	SYMBOL_NAME_STR(call_##x)":\n\t" \
