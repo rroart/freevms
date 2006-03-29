@@ -99,7 +99,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   else {
     struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
     struct _pcb * curp=ctl$gl_pcb;
-    if (p==curp) // etc // smp not enabled
+    if (p==cpu->cpu$l_curpcb) // etc // smp not enabled
       p->pr_astlvl=p->phd$b_astlvl;
   }
   //printk("aft rse\n");
@@ -525,7 +525,6 @@ asmlinkage void sch$astdel(int dummy) {
   regtrap(REG_INTR, IPL$_ASTDEL);
 #endif
 
-  spin_lock(&SPIN_SCHED);
 #ifdef ASTDEBUG
   myacbs[myacbi++]=0;
   myacbs[myacbi++]=0x77777777;
@@ -533,6 +532,7 @@ asmlinkage void sch$astdel(int dummy) {
   myacbs[myacbi++]=0x77777777;
 #endif
  more:
+  spin_lock(&SPIN_SCHED);
 #ifdef ASTDEBUG
   checkq(&p->pcb$l_astqfl);
 #endif
@@ -543,8 +543,8 @@ asmlinkage void sch$astdel(int dummy) {
      for (i=0; i<1000000; i++) ;
      } */
   if (aqempty(&p->pcb$l_astqfl)) {
-    sch$newlvl(p);
     spin_unlock(&SPIN_SCHED);
+    sch$newlvl(p);
     return;
   }
   /* { int i,j;
@@ -578,6 +578,7 @@ asmlinkage void sch$astdel(int dummy) {
   if (acb->acb$b_rmod & ACB$M_KAST) {
     acb->acb$b_rmod&=~ACB$M_KAST;
     /* unlock */
+    spin_unlock(&SPIN_SCHED);
     //printk("astdel1 %x \n",acb->acb$l_kast);
     setipl(IPL$_ASTDEL);
     //p->pcb$b_astact=1;
@@ -626,6 +627,7 @@ asmlinkage void sch$astdel(int dummy) {
   }
   p->phd$b_astlvl=p->pr_astlvl=(acb->acb$b_rmod & 3) + 1;
   //unlock
+  spin_unlock(&SPIN_SCHED);
   setipl(IPL$_ASTDEL);
 #ifdef OLDAST
   p->pcb$b_astact=0; // 1; wait with this until we get modes
