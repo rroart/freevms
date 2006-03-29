@@ -29,7 +29,7 @@ asmlinkage void sw_ast(void) {
 #if 0
       SOFTINT_ASTDEL_VECTOR;
 #else
-    smp$gl_cpu_data[0]->cpu$w_sisr|=(1<<2);
+    smp$gl_cpu_data[smp_processor_id()]->cpu$w_sisr|=(1<<2);
 #endif
   /* check sw interrupts */
   //in_sw_ast=0;
