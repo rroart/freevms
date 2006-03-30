@@ -1622,6 +1622,6 @@ void __init sched_init(void)
 	 * The boot idle thread does lazy MMU switching as well:
 	 */
   atomic_inc(&init_mm.mm_count);
-  enter_lazy_tlb(&init_mm, current, cpu);
+  enter_lazy_tlb(&init_mm, current, cpuid);
 }
 

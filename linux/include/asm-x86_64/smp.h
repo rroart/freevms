@@ -83,7 +83,7 @@ extern void smp_store_cpu_info(int id);		/* Store per CPU info (like the initial
 
 #define smp_processor_id() read_pda(cpunumber)
 
-#define stack_smp_processor_id() (stack_current()->processor)
+#define stack_smp_processor_id() (stack_current()->pcb$l_cpu_id)
 
 
 extern __inline int hard_smp_processor_id(void)

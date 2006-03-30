@@ -47,6 +47,7 @@ int main(void)
 	ENTRY(ipr_sp);
 	ENTRY(psl);
 	ENTRY(oldpsl);
+	ENTRY(pcb$l_cpu_id);
 #undef ENTRY
 #define ENTRY(entry) outconst("#define pda_" #entry " %0", offsetof(struct x8664_pda, entry))
 	ENTRY(kernelstack); 

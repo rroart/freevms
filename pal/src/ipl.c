@@ -56,7 +56,11 @@ inline asmlinkage void pushpsli(void) {
 }
 
 inline asmlinkage void pushpsl(void) {
+#ifdef __i386__
   int this_cpu=smp_processor_id();
+#else
+  int this_cpu=0;
+#endif
   //  if (current->pslindex>1)
   //  panic("xyz\n");
   current->pslstk[current->pslindex++]=current->psl;
@@ -73,7 +77,11 @@ inline asmlinkage void pushpsl(void) {
 }
 
 inline asmlinkage void poppsl(void) {
+#ifdef __i386__
   int this_cpu=smp_processor_id();
+#else
+  int this_cpu=current->pcb$l_cpu_id;
+#endif
   current->oldpsl=current->psl;
   current->psl=current->pslstk[--(current->pslindex)];
   smp$gl_cpu_data[this_cpu]->cpu$b_ipl=current->psl_ipl;

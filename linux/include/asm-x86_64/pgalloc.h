@@ -198,6 +198,7 @@ extern void flush_tlb_all(void);
 extern void flush_tlb_current_task(void);
 extern void flush_tlb_mm(struct mm_struct *);
 extern void flush_tlb_page(struct vm_area_struct *, unsigned long);
+extern void flush_tlb_page2(struct mm_struct *, unsigned long);
 
 #define flush_tlb()	flush_tlb_current_task()
 

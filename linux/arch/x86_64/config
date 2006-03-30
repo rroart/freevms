@@ -75,7 +75,7 @@ CONFIG_X86_IO_APIC=y
 CONFIG_X86_LOCAL_APIC=y
 
 # CONFIG_MTRR is not set
-# CONFIG_SMP is not set
+CONFIG_SMP=y
 # CONFIG_HPET_TIMER is not set
 # CONFIG_GART_IOMMU is not set
 # CONFIG_SWIOTLB is not set

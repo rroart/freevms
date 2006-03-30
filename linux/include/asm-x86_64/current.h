@@ -26,6 +26,11 @@ static inline struct task_struct *stack_current(void)
 		: "0" (~(unsigned long)(THREAD_SIZE-1)));
 	return current;
 }
+#else
+static inline struct task_struct *stack_current(void)
+{
+  return ctl$gl_pcb;
+}
 #endif
 
 

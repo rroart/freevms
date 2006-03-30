@@ -292,6 +292,10 @@ static void show(char * str)
 # define SYNC_OTHER_CORES(x) __asm__ __volatile__ ("nop")
 #endif
 
+#ifdef CONFIG_SMP
+spinlock_t global_bh_lock = SPIN_LOCK_UNLOCKED;
+#endif
+
 static inline void wait_on_irq(int cpu)
 {
 	int count = MAXCOUNT;
