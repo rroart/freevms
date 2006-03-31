@@ -348,6 +348,7 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 
  out:
 
+  spin_lock(&mm->page_table_lock);
   pgd = pgd_offset(mm, page);
 #ifdef __i386__
   oldpgd = pgd_offset(oldmm, oldpage);
@@ -372,7 +373,6 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 #endif
   //printk(KERN_EMERG "pmd %lx %lx\n",pmd,oldpmd);
 
-  spin_lock(&mm->page_table_lock);
   if (pmd) {
     pte = pte_alloc(mm, pmd, page);
 #if 0

@@ -1461,10 +1461,12 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	pgd = pgd_offset(mm, page);
 	pmd = pmd_offset(pgd, page);
 #else
+	spin_unlock(&mm->page_table_lock); // check. not quite resolved
 	page = address & PAGE_MASK;
 	pgd = pgd_offset(mm, page);
 	pmd = pmd_alloc(mm, pgd, page);
 	pte = pte_alloc(mm, pmd, page);
+	spin_unlock(&mm->page_table_lock);
 #endif
 
 	if (0) /* not yet (!(pte_present(pmd))) */ { 
