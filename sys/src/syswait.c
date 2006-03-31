@@ -19,6 +19,7 @@
 int exe$wait(unsigned int efn, unsigned int mask, int waitallflag, void * dummy) {
 #ifdef __x86_64__
   __asm__ __volatile__ ("movq %%rsp,%0; ":"=r" (dummy) );
+  dummy+=0x20;
 #endif
   struct _pcb * p=ctl$gl_pcb;
   int efncluster=(efn&224)>>5;

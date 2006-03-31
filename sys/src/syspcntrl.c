@@ -115,12 +115,22 @@ int exe$a_pid_to_ipid(unsigned long pid) {// remove this
   return ((csid&0xff)<<21) | (seqno<<shift) | (pid&0xffff);
 }
 
+#if 0
+long fixi=0;
+long fixs[1024];
+#endif
+
 void fixup_hib_pc(void * dummy) {
 #ifdef __i386__
   char ** addr = dummy + 0x28;
   (*addr)-=7;
 #else
   char ** addr = dummy + 0xa0;
+#if 0
+  fixs[fixi++]=addr;
+  fixs[fixi++]=*addr;
+  if(fixi>1000)fixi=0;
+#endif
   (*addr)-=9;
 #endif
 }
@@ -149,7 +159,7 @@ asmlinkage int exe$hiber(long dummy) {
 #ifdef __i386__
   fixup_hib_pc(&dummy);
 #else
-  fixup_hib_pc(dummy-0x30);
+  fixup_hib_pc(dummy-0x10/*-0x30*/);
 #endif
   int ret = sch$wait(p,sch$gq_hibwq);
   setipl(0); // unstandard, but sch$wait might leave at ipl 8
