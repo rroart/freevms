@@ -18,6 +18,7 @@ void init_p1pp_data(struct _pcb * pcb, struct _phd * phd,signed long offset);
 void init_sys_p1pp();
 void init_p1pp(struct _pcb * pcb, struct _phd * phd);
 int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, struct _phd * oldphd);
+int shell_init_other(struct _pcb * pcb, struct _pcb * oldpcb, long addr, long oldaddr);
 int user_spaceable();
 int user_spaceable_addr(void * addr);
 int inline insrde(struct _rde * elem, struct _rde * head);
