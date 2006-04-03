@@ -629,7 +629,7 @@ unsigned long main (int argc, char *argv[])
 
   if (vms_mm) {
     short chan;
-    unsigned long long iosb;
+    struct _iosb iosb;
     // eventually handle ascii 0-31 asts.
   }
 
