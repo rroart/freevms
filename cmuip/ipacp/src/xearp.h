@@ -85,7 +85,7 @@ MACRO ARP_PKT = BLOCK[ARP_LEN] FIELD(ARP_FIELDS) %;
    union {
      unsigned char     phys$2  [6];	// physical address 2 (source)
      struct {
-       unsigned long 	ar_phy_src1 ;
+       unsigned int 	ar_phy_src1 ;
        unsigned short 	ar_phy_src2 ;
      };
    };

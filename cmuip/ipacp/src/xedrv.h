@@ -51,8 +51,8 @@
 struct  XE_Interface_Structure
 {
   void *     xei$dev_config		;
-  unsigned long     xei$io_chan			;
-  unsigned long     xei$arp_io_chan		;
+  unsigned int     xei$io_chan			;
+  unsigned int     xei$arp_io_chan		;
   void *     XEI$rcvhdrs			;
   void *     XEI$recv_Qhead		;
   void *     XEI$recv_Qtail		;
@@ -60,7 +60,7 @@ struct  XE_Interface_Structure
   void *     XEI$ARP_Block		;
   unsigned short     XEI$Phy_Size		;
   unsigned char     xei$phy_addr		[6];
-  unsigned long     XEI$restart_time		;
+  unsigned int     XEI$restart_time		;
   unsigned short     XEI$restart_count		;
   unsigned short     XEI$retry_count		;
   unsigned short     XEI$max_retry		;
@@ -93,14 +93,14 @@ MACRO XE_Interface_Structure = BLOCK[XE_Interface_size] FIELD(XE_Interface_Field
 struct  XE_addrs_structure
 {
   union {
-    unsigned long     XE_addr_L0         ;
+    unsigned int     XE_addr_L0         ;
     struct {
       unsigned short        XE_addr_0        ;
       unsigned short        XE_addr_1        ;
     };
   };
   union {
-    unsigned long     XE_addr_L1         ;
+    unsigned int     XE_addr_L1         ;
     struct {
       unsigned short        XE_addr_2        ;
       unsigned short        XE_addr_3       ;

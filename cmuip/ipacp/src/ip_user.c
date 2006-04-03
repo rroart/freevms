@@ -528,14 +528,14 @@ X:  {			// ** Block X **
 // Allocate some space for the IPCB
 
 //    LIB$GET_VM(%REF(IPCB_Size*4),IPCB);
-    RC = LIB$GET_VM_PAGE(/*%REF*/(((IPCB_Size * 4) / 512) + 1),&IPCB);
+    RC = LIB$GET_VM_PAGE(/*%REF*/(((IPCB_Size) / 512) + 1),&IPCB);
     if (BLISSIFNOT(RC))
 	FATAL$FAO("IPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 
 // Clear it out and set it in the table
 
     ipcb_table[IPCBIDX] = IPCB;
-    CH$FILL(/*%CHAR*/(0),IPCB_Size*4,IPCB);
+    CH$FILL(/*%CHAR*/(0),IPCB_Size,IPCB);
     IPCB_Count = IPCB_Count+1;
 
 // Initialize queue headers for the IPCB
@@ -570,7 +570,7 @@ extern	LIB$FREE_VM_PAGE();
 // Free the memory and decrement our counter.
 
 //    LIB$FREE_VM(/*%REF*/(IPCB_Size*4),IPCB);
-    RC = LIB$FREE_VM_PAGE(/*%REF*/(((IPCB_Size * 4) / 512) + 1),IPCB);
+    RC = LIB$FREE_VM_PAGE(/*%REF*/(((IPCB_Size) / 512) + 1),IPCB);
     if (BLISSIFNOT(RC))
 	FATAL$FAO("IPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     IPCB_Count = IPCB_Count-1;

@@ -74,6 +74,7 @@ Modification history:
 #include "netcommon.h"
 #include "netvms.h"
 #include "structure.h"
+#include <descrip.h>
 
 
 //SBTTL 'Literals'
@@ -153,12 +154,12 @@ struct  tcb_structure {
     void * lp_next;	// LP queue Forward Link pointer.
     void * lp_back;	// LP queue, Backwards Link.
     unsigned int foreign_host;	// Foreign host address
-    unsigned long foreign_port;	// Foreign port
+    unsigned int foreign_port;	// Foreign port
     unsigned int local_host;	// Local address of connection
-    unsigned long local_port;	// Local Port #
+    unsigned int local_port;	// Local Port #
     void * rf_qhead;	// Network: received "future" seg queue
     void * rf_qtail;
-    signed long rf_qcount;	// Count of items on future queue
+    signed int rf_qcount;	// Count of items on future queue
     void * ur_qhead;	// User: receive Data request queue.
     void * ur_qtail;
     void * snd_qhead;	// User: send Segment request queue
@@ -174,15 +175,15 @@ struct  tcb_structure {
 #if 0
     $Align(Fullword)
 #endif
-    unsigned long snd_una;	// send unacknowledged seq #
-    unsigned long snd_nxt;	// next send seq #
-    unsigned long snd_wnd;	// send window
-    unsigned long snd_wl;	// Last window update.
-    signed long snd_bs;	// send buffer size
-    unsigned long snd_up;	// urgent pointer
-    unsigned long snd_max_wnd;	// Maximum Send Window
-    unsigned long iss;	// Initial Send sequence number.
-    unsigned long snd_pptr;	// Send PUSH pointer
+    unsigned int snd_una;	// send unacknowledged seq #
+    unsigned int snd_nxt;	// next send seq #
+    unsigned int snd_wnd;	// send window
+    unsigned int snd_wl;	// Last window update.
+    signed int snd_bs;	// send buffer size
+    unsigned int snd_up;	// urgent pointer
+    unsigned int snd_max_wnd;	// Maximum Send Window
+    unsigned int iss;	// Initial Send sequence number.
+    unsigned int snd_pptr;	// Send PUSH pointer
 
 // Send circular queue variables
 
@@ -191,15 +192,15 @@ struct  tcb_structure {
 
 // Receive Sequence variables
 
-    unsigned long rcv_nxt;	// next expected sequence #
-    unsigned long old_rcv_nxt;	// RCV.NXT last time ACK sent
-    unsigned long rcv_wnd;	// window
-    unsigned long old_rcv_wnd;	// RCV.WND last time ACK sent
-    signed long rcv_bs;	// buffer size in bytes
-    unsigned long rcv_up;	// Receive urgent pointer
-    unsigned long irs;	// Initial receive sequence #
-    unsigned long rcv_duptr;	// Last sequence # delivered to user
-    unsigned long rcv_pptr;	// Receive PUSH pointer
+    unsigned int rcv_nxt;	// next expected sequence #
+    unsigned int old_rcv_nxt;	// RCV.NXT last time ACK sent
+    unsigned int rcv_wnd;	// window
+    unsigned int old_rcv_wnd;	// RCV.WND last time ACK sent
+    signed int rcv_bs;	// buffer size in bytes
+    unsigned int rcv_up;	// Receive urgent pointer
+    unsigned int irs;	// Initial receive sequence #
+    unsigned int rcv_duptr;	// Last sequence # delivered to user
+    unsigned int rcv_pptr;	// Receive PUSH pointer
 
 // Receive circular queue variables
 
@@ -208,31 +209,31 @@ struct  tcb_structure {
 // Misc connection information
 
     void * ucb_adrs;	// UCB address for this TCB
-    unsigned long vtcb_index;	// VALID_TCB index for this TCB
-    unsigned long user_id;	// Owning process ID
-    unsigned long rx_timer;	// Time to do retransmit for this TCB
-    unsigned long rx_timeout;	// Retransmission time-out for TCB
-    signed long rx_count;	// # of retransmissions done
-    unsigned long rx_seq;	// Retransmission sequence start
-    unsigned long rx_ctl;	// Control segment type
-    unsigned long xmit_start_time;	// Time first item queued on RX timer
+    unsigned int vtcb_index;	// VALID_TCB index for this TCB
+    unsigned int user_id;	// Owning process ID
+    unsigned int rx_timer;	// Time to do retransmit for this TCB
+    unsigned int rx_timeout;	// Retransmission time-out for TCB
+    signed int rx_count;	// # of retransmissions done
+    unsigned int rx_seq;	// Retransmission sequence start
+    unsigned int rx_ctl;	// Control segment type
+    unsigned int xmit_start_time;	// Time first item queued on RX timer
   union {
-    unsigned long time_wait_timer;	// Time_Wait Counter.
-    unsigned long ack_timer;	// spontaneous ack timer.
+    unsigned int time_wait_timer;	// Time_Wait Counter.
+    unsigned int ack_timer;	// spontaneous ack timer.
   };
-    unsigned long delayed_ack_timer;	// Delayed ACK timer.
-    unsigned long squench_timer;	// Source Quench timer.
-    unsigned long user_timeval;	// Amount of time before idle
-    unsigned long user_timeout;	// Time which connection will be closed
-    unsigned long probe_time;	// time when we need to probe again
-    unsigned long connection_timeout;	// Time which connection will be reset.
-    unsigned long inactive_timeout;	// time which conn will be deleted.
-    unsigned long function_timer;	// User function timeout.
+    unsigned int delayed_ack_timer;	// Delayed ACK timer.
+    unsigned int squench_timer;	// Source Quench timer.
+    unsigned int user_timeval;	// Amount of time before idle
+    unsigned int user_timeout;	// Time which connection will be closed
+    unsigned int probe_time;	// time when we need to probe again
+    unsigned int connection_timeout;	// Time which connection will be reset.
+    unsigned int inactive_timeout;	// time which conn will be deleted.
+    unsigned int function_timer;	// User function timeout.
     void * tvtdata;	// Pointer to TVT data block if IS_TVT
     void (* timeout_routine)();	// For TVT's, internal timeout routine
     void * argblk;	// Points at user's i/o request argblk.
-    unsigned long round_trip_time;	// Time required for segment to be ACKed
-    unsigned long calculated_rto;	// Calculated retransmission timeout
+    unsigned int round_trip_time;	// Time required for segment to be ACKed
+    unsigned int calculated_rto;	// Calculated retransmission timeout
     unsigned char curr_user_function;	// Current user function being timed.
     unsigned char state;	// Current state of this connection
     unsigned char last_state;	// Last state of this connection.
@@ -242,12 +243,12 @@ struct  tcb_structure {
     unsigned short int max_eff_data_size;	// max effective size data receiver will accept
     unsigned short int duplicate_segs;	// duplicate segments.
     unsigned short int oorw_segs;	// Out Of Recv Window segments.
-    signed long inactive_code;	// Reason TCB was set inactive.
-    unsigned long ack_size;	// # of data bytes to be ack'ed.
-    unsigned long snd_ack_threshold;	// Number of bytes before window update
-    unsigned long snd_delay_timer;	// Time to wait before forcing send
+    signed int inactive_code;	// Reason TCB was set inactive.
+    unsigned int ack_size;	// # of data bytes to be ack'ed.
+    unsigned int snd_ack_threshold;	// Number of bytes before window update
+    unsigned int snd_delay_timer;	// Time to wait before forcing send
   union {
-    unsigned long tcb$flags;	// Reserve some space for flags
+    unsigned int tcb$flags;	// Reserve some space for flags
     struct {
 	unsigned active_open : 1;	// Active open performed.
 	unsigned open_nowait : 1;	// Wait-mode of OPEN in progress
@@ -303,7 +304,7 @@ declaration is in TCP.BLI.
 struct connection_table_structure {
     void * CN$TCB_List;	// This port's TCB list. Queue head prt.
     void * CN$TCB_Tail;	// Queue tail ptr.
-    long CN$Local_Port;	// Local Port #.
+    int CN$Local_Port;	// Local Port #.
 };
 
     #define CONECT_TBL_SIZE 4		// # of blocks in connection blockvector
@@ -318,18 +319,18 @@ struct connection_table_structure {
 //SBTTL 'Definition of structure for WKS server process table & SYN-wait list'
 
 struct  wks_structure {
-    long int WKS$Port;
-    unsigned long long WKS$Process;		// ASCID descriptor.
-    unsigned long long WKS$IMAGE;
-      long int WKS$Stat;
-    unsigned long long WKS$Priv;
+    int WKS$Port;
+    struct dsc$descriptor WKS$Process;		// ASCID descriptor.
+    struct dsc$descriptor WKS$IMAGE;
+      int WKS$Stat;
+    struct dsc$descriptor WKS$Priv;
     void * WKS$Quotas;
-    unsigned long long WKS$Input;		// ASCID descriptor.
-    unsigned long long WKS$Output;		// ASCID descriptor.
-    unsigned long long WKS$Error;		// ASCID descriptor.
-    long int WKS$Prior;
-    long int WKS$MaxSrv;
-    long int WKS$SYN_Qcount;
+    struct dsc$descriptor WKS$Input;		// ASCID descriptor.
+    struct dsc$descriptor WKS$Output;		// ASCID descriptor.
+    struct dsc$descriptor WKS$Error;		// ASCID descriptor.
+    int WKS$Prior;
+    int WKS$MaxSrv;
+    int WKS$SYN_Qcount;
     void * WKS$SYN_Qhead;
   void * WKS$SYN_Qtail;
 };

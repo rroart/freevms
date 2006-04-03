@@ -352,7 +352,7 @@ struct { long a,b; } Locked_Range={a:	Begin_Lock, b:	End_Lock};
 // is 0).  In this case the IRP is turned over to VMS IO post-processing
 // via a calls to VMS_IO$POST rtn.  The IOSB is used as an arg to VMS_IO$POST.
 
-long long IOSB=0;
+struct _iosb IOSB={0,0,0,0};
 
 long no_argblk=0;
 long funct=0;
@@ -1175,9 +1175,9 @@ int user_requests_avail()
  UR$Post:
   /*PUSHL	R2->IRP$L_UCB*/		// UCB address
   /*PUSHL	R2*/			// IRP address
-  IOSB = SS$_NORMAL;	// set return status
+  IOSB.iosb$w_status = SS$_NORMAL;	// set return status
   /*PUSHAQ	IOSB*/			// address of IOSB
-  R0 = VMS_IO$POST(IOSB,R2,R2->irp$l_ucb);
+  R0 = VMS_IO$POST(&IOSB,R2,R2->irp$l_ucb);
   goto	Try_Again;		// dismiss this & look for more.
 }
 #endif

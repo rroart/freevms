@@ -162,7 +162,7 @@ void tcp$init (void)
 
     // Allocate the connection list
     ConectSize = max_local_ports;
-    mm$get_mem( &ConectPtr , ConectSize * CN$BLK_SIZE * 4 );
+    mm$get_mem( &ConectPtr , ConectSize * CN$BLK_SIZE );
     for (cidx=0;cidx<=ConectSize-1;cidx++)
 	{				// Initialize connection table
 	ConectPtr[cidx].CN$TCB_List = &ConectPtr[cidx].CN$TCB_List;
@@ -172,8 +172,8 @@ void tcp$init (void)
 
     // Allocate the valid TCB table
     vtcb_size = max_conn;
-    mm$get_mem ( &vtcb_ptr , (vtcb_size+1) * 4 );
-    CH$FILL ( 0 , (vtcb_size+1) * 4 , vtcb_ptr );
+    mm$get_mem ( &vtcb_ptr , (vtcb_size+1) * sizeof(long) );
+    CH$FILL ( 0 , (vtcb_size+1) * sizeof(long) , vtcb_ptr );
 
     tcp_mib->MIB$tcpRtoAlgorithm= 0;
     tcp_mib->MIB$tcpRtoMin	= 0;
@@ -246,9 +246,9 @@ extern	MOVBYT();
 	vtcb_size = vtcb_size * 2;
 
 	Old = vtcb_ptr;
-	mm$get_mem( &vtcb_ptr , (vtcb_size+1) * 4 );
-	MOVBYT ( (Indx+1) * 4 , Old , vtcb_ptr );
-	mm$free_mem( Old , (Indx+1) * 4 );
+	mm$get_mem( &vtcb_ptr , (vtcb_size+1) * sizeof(long) );
+	MOVBYT ( (Indx+1) * sizeof(long) , Old , vtcb_ptr );
+	mm$free_mem( Old , (Indx+1) * sizeof(long) );
 
         Indx = Indx + 1;
 	};
@@ -520,10 +520,10 @@ extern	MOVBYT(),
 	ConectPtr[cidx].CN$TCB_Tail = ConectPtr[cidx].CN$TCB_List;
 	ConectPtr[cidx].CN$Local_Port = -1;
 	};
-    MOVBYT ( idx * CN$BLK_SIZE * 4 , Old , ConectPtr );
+    MOVBYT ( idx * CN$BLK_SIZE, Old , ConectPtr );
 
     OKINT;
-    mm$free_mem( Old , idx * CN$BLK_SIZE * 4 );
+    mm$free_mem( Old , idx * CN$BLK_SIZE);
 //    XLOG$FAO(LOG$TCP,"TCP: Grew conect table to !SW entries...!/",ConectSize);
 
 return idx;
@@ -824,7 +824,7 @@ tcb$create (void)
 	RC;	// return code
 
     NOINT;			// Hold AST's please...
-    mm$get_mem ( &TCB   , TCB_SIZE*4 );
+    mm$get_mem ( &TCB   , TCB_SIZE );
     mm$get_mem ( &SENDQ , window_default );
     mm$get_mem ( &RECVQ , window_default );
     OKINT;
@@ -883,7 +883,7 @@ extern	TELNET_CLOSE();
 
     TCB = TCB_Ptr;
     long *l=&TCB_Ptr;
-    memcpy(&tcbdel[tcbi], TCB, 20*4);
+    memcpy(&tcbdel[tcbi], TCB, 20*sizeof(long));
     tcbdel[tcbi]=l[-1];
     tcbdel[tcbi+1]=TCB;
     tcbdel[tcbi+8]=TCB->tvtdata;
@@ -908,7 +908,7 @@ extern	TELNET_CLOSE();
 	mm$free_mem ( TCB->snd_q_base, TCB->snd_q_size ); 
 	mm$free_mem ( TCB->rcv_q_base, TCB->rcv_q_size ); 
 // Then, deallocate the TCB itself
-	mm$free_mem ( TCB_Ptr, TCB_SIZE*4 );
+	mm$free_mem ( TCB_Ptr, TCB_SIZE );
 
 	}
     else

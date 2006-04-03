@@ -974,14 +974,14 @@ X:  {			// ** Block X **
 // Allocate some space for the UDPCB
 
 //    LIB$GET_VM(%REF(UDPCB_Size*4),UDPCB);
-    RC = LIB$GET_VM_PAGE(/*%REF*/(((UDPCB_Size * 4) / 512) + 1),&UDPCB);
+    RC = LIB$GET_VM_PAGE(/*%REF*/(((UDPCB_Size) / 512) + 1),&UDPCB);
     if (BLISSIFNOT(RC))
 	FATAL$FAO("UDPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 
 // Clear it out and set it in the table
 
     UDPCB_TABLE[UDPCBIDX] = UDPCB;
-    CH$FILL(/*%CHAR*/(0),UDPCB_Size*4,UDPCB);
+    CH$FILL(/*%CHAR*/(0),UDPCB_Size,UDPCB);
     UDPCB_Count = UDPCB_Count+1;
 
 // Initialize queue headers for the UDPCB
@@ -1015,7 +1015,7 @@ void udpcb_free(long UDPCBIX,struct UDPCB_Structure * UDPCB)
 // Free the memory and decrement our counter.
 
 //    LIB$FREE_VM(/*%REF*/(UDPCB_Size*4),UDPCB);
-    RC = LIB$FREE_VM_PAGE(/*%REF*/(((UDPCB_Size * 4) / 512) + 1),UDPCB);
+    RC = LIB$FREE_VM_PAGE(/*%REF*/(((UDPCB_Size) / 512) + 1),UDPCB);
     if (BLISSIFNOT(RC))
 	FATAL$FAO("UDPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     UDPCB_Count = UDPCB_Count-1;

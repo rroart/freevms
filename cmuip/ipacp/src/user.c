@@ -1464,7 +1464,7 @@ extern	    cnf$device_list();
     case DU$DEVICE_STAT:
 	{
 extern	    cnf$device_stat();
-	if (uargs->du$buf_size < DC_ENTRY_SIZE*4)
+	if (uargs->du$buf_size < DC_ENTRY_SIZE)
 	  Error = USER$Err(uargs,NET$_BTS);
 	else if (cnf$device_stat ( uargs->du$arg0, RB ) == -1)
 	  Error = USER$Err(uargs,NET$_DAE);
@@ -1767,8 +1767,8 @@ Side effects:
  void    GTHST_ADLOOK_DONE();
  void    GTHST_RRLOOK_DONE();
 
-#define    NLBSIZE GTHST_NMLOOK_RET_ARGS_LENGTH*4
-#define    ALBSIZE GTHST_ADLOOK_RET_ARGS_LENGTH*4
+#define    NLBSIZE GTHST_NMLOOK_RET_ARGS_LENGTH
+#define    ALBSIZE GTHST_ADLOOK_RET_ARGS_LENGTH
 #define    RLBSize 6
 
 void net$gthst(struct gthst_args * uargs)
@@ -2157,6 +2157,9 @@ extern 	void IPU$STATUS();
     register
 	struct user_default_args * argblk;
 
+#ifdef __x86_64__
+    mm$uarg_free(mm$uarg_get()); // check. avoid syscall at all costs
+#endif
     while ((argblk=$$KCALL(user_requests_avail)) != FALSE)
 	{
 	if ($$LOGF(LOG$USER))
@@ -2303,6 +2306,9 @@ struct dsc$descriptor
 	    };
 	    };
 	};
+#ifdef __x86_64__
+    mm$uarg_free(mm$uarg_get()); // check. avoid syscall at all costs
+#endif
 	};
     }
 

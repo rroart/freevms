@@ -527,7 +527,7 @@ X:  {			// ** Block X **
 // Allocate some space for the ICMPCB
 
 //    LIB$GET_VM(%REF(ICMPCB_Size*4),ICMPCB);
-    Pages = ((ICMPCB_Size * 4) / 512) + 1 ;
+    Pages = ((ICMPCB_Size) / 512) + 1 ;
     RC = LIB$GET_VM_PAGE(Pages, &ICMPCB);
     if (BLISSIFNOT(RC))
 	FATAL$FAO("ICMPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
@@ -535,7 +535,7 @@ X:  {			// ** Block X **
 // Clear it out and set it in the table
 
     icmpcb_table[ICMPCBIDX] = ICMPCB;
-    CH$FILL(/*%CHAR*/(0),ICMPCB_Size*4,ICMPCB);
+    CH$FILL(/*%CHAR*/(0),ICMPCB_Size,ICMPCB);
     ICMPCB_Count = ICMPCB_Count+1;
 
 // Initialize queue headers for the ICMPCB
@@ -571,7 +571,7 @@ extern	LIB$FREE_VM_PAGE();
 // Free the memory and decrement our counter.
 
 //    LIB$FREE_VM(%REF(ICMPCB_Size*4),ICMPCB);
-    Pages = ((ICMPCB_Size * 4) / 512) + 1 ;
+    Pages = ((ICMPCB_Size) / 512) + 1 ;
     RC = LIB$FREE_VM_PAGE(Pages, ICMPCB);
     if (BLISSIFNOT(RC))
 	FATAL$FAO("ICMPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);

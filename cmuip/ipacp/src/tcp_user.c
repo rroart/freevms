@@ -680,7 +680,7 @@ void tcp$status(struct user_status_args * Uargs)
 	return;
 	};
 
-    if (Uargs->st$buf_size < SR_BLK_SIZE*4)
+    if (Uargs->st$buf_size < SR_BLK_SIZE)
 	{
 	USER$Err(Uargs,NET$_BTS);// Buffer Too Small error.
 	return;
@@ -710,11 +710,11 @@ void tcp$status(struct user_status_args * Uargs)
 // Fill in MOVBYT arguments.
 
     // check
-    $$KCALL(MOVBYT,SR_BLK_SIZE*4,CS,Uargs->st$data_start);
+    $$KCALL(MOVBYT,SR_BLK_SIZE,CS,Uargs->st$data_start);
   
 // Return the Connection Status to the user by posting the IO request.
   
-    user$post_io_status(Uargs,SS$_NORMAL,SR_BLK_SIZE*4,0,0);
+    user$post_io_status(Uargs,SS$_NORMAL,SR_BLK_SIZE,0,0);
     mm$uarg_free(Uargs);		// release user arg block.
     }
 

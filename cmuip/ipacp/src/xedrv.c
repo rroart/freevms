@@ -319,13 +319,13 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
 
 // get ARP buffer and issue a receive qio
 
-    ARbuf = drv$seg_get(XE_ARP_LEN*4);
+    ARbuf = drv$seg_get(XE_ARP_LEN);
     XE_Int-> xei$arp_buffer  = ARbuf;
     RC = sys$qio(	ARPEFN, XE_Int-> xei$arp_io_chan ,
 		IO$_READVBLK,
 		&ARbuf -> ar_ios0 ,
 			xe_arprcv, XE_Int,
-			ARbuf->ar_data, ARP_MAX_LEN*4, 0, 0,
+			ARbuf->ar_data, ARP_MAX_LEN, 0, 0,
 			ARbuf->phys$1, 0);
     if (RC != SS$_NORMAL)
 	{
@@ -657,7 +657,7 @@ void XE_FreeBufs ( struct XE_Interface_Structure * XE_Int )
 
     if ((BUFF=XE_Int->xei$arp_buffer) != 0)
 	{
-	drv$seg_free ( XE_ARP_LEN*4 , BUFF );
+	drv$seg_free ( XE_ARP_LEN , BUFF );
 	XE_Int-> xei$arp_buffer  = 0;
 	};
 
@@ -851,7 +851,7 @@ extern 	LIB$GET_VM_PAGE();
     // Allocate VM
     //!!HACK!!// When are we going to deallocate this?  Ever?
 //    if (! (LIB$GET_VM(%REF(XE_Interface_size*4),XE_Int)))
-      if (! (LIB$GET_VM_PAGE(/*%REF*/(((XE_Interface_size * 4) / 512) + 1),&XE_Int)))
+      if (! (LIB$GET_VM_PAGE(/*%REF*/(((XE_Interface_size) / 512) + 1),&XE_Int)))
 	{	// Couldn't allocate memory for controller block
 	DRV$FATAL_FAO("XE LIB$GET_VM failure (dev=), EC = !XL" ,
 		    dev_config->dc_devname,RC);
@@ -859,7 +859,7 @@ extern 	LIB$GET_VM_PAGE();
 	};
 
     // Zero out the memory block
-    CH$FILL(/*%CHAR*/(0),XE_Interface_size*4,XE_Int);
+    CH$FILL(/*%CHAR*/(0),XE_Interface_size,XE_Int);
 
     // Fill in the blanks...
     XE_Int->xei$io_chan = XE_Chan;
@@ -881,7 +881,7 @@ extern 	LIB$GET_VM_PAGE();
     // Allocate VM
     //!!HACK!!// When are we going to deallocate this?  Ever?
 //    if (! (LIB$GET_VM(%REF(MAX_RCV_BUF*XERCV_LEN*4),rcvhdrs)))
-      if (! (LIB$GET_VM_PAGE(/*%REF*/(((MAX_RCV_BUF*XERCV_LEN*4)/512)+1),&rcvhdrs)))
+      if (! (LIB$GET_VM_PAGE(/*%REF*/(((MAX_RCV_BUF*XERCV_LEN)/512)+1),&rcvhdrs)))
 	{	// Couldn't allocate memory for receive headers
 	DRV$FATAL_FAO("XE LIB$GET_VM failure (dev=!AS), RC=!XL",
 		    dev_config->dc_devname,RC);
@@ -1308,7 +1308,7 @@ void xe_arprcv( struct XE_Interface_Structure * XE_Int )
     RC = sys$qio(ARPEFN,XE_Int->xei$arp_io_chan,
 		 IO$_READVBLK,&ARbuf->ar_ios0,
 		 xe_arprcv, XE_Int,
-		 ARbuf->ar_data,ARP_MAX_LEN*4,0,0,
+		 ARbuf->ar_data,ARP_MAX_LEN,0,0,
 		 ARbuf->phys$1,0);
     if (RC != SS$_NORMAL)
 	XE$ERR(XE_Int,"XE ARP read failure, RC = !XL",RC);

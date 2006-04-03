@@ -601,7 +601,7 @@ TELNET_OPEN(TCB)
 // Assign a chunk of memory for the TVT data block
 
 //    RC = LIB$GET_VM(%REF(TVT$SIZE*4),TVT);
-    RC = LIB$GET_VM_PAGE(/*%REF*/(((TVT$SIZE * 4) / 512) + 1),&TVT);
+    RC = LIB$GET_VM_PAGE(/*%REF*/(((TVT$SIZE) / 512) + 1),&TVT);
     if (BLISSIFNOT(RC))
 	{
 //~~~ Should we do anything better here?
@@ -614,7 +614,7 @@ TELNET_OPEN(TCB)
 
 // Clear out the TVT data block
 
-    CH$FILL(0,TVT$SIZE*4,CH$PTR(TVT,0));
+    CH$FILL(0,TVT$SIZE,CH$PTR(TVT,0));
     TVT->TVT$TCB = TCB;
 
 // Initialize the options block to the standard initial state
@@ -869,7 +869,7 @@ void TELNET_CLOSE_DONE(TVT)
 // Just deallocate the TVT structure and return.
 
 //    LIB$FREE_VM(%REF(TVT$SIZE*4),TVT);
-    LIB$FREE_VM_PAGE(/*%REF*/(((TVT$SIZE * 4) / 512) + 1),TVT);
+    LIB$FREE_VM_PAGE(/*%REF*/(((TVT$SIZE) / 512) + 1),TVT);
     }
 
 //SBTTL "TELNET_INPUT - Do TCP input for TELNET connection"

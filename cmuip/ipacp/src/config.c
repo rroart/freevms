@@ -539,7 +539,7 @@ cnf$device_list ( RB )
     RB[0] = RBIX - 1;
 
     // return total size in bytes.
-    return RBIX * 4;
+    return RBIX * sizeof(long); // check 
     }
 
 

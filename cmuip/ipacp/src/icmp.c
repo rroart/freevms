@@ -200,7 +200,7 @@ extern	LIB$GET_VM();
 	{
 	signed long
 	    HSHVAL;
-	LIB$GET_VM(/*%REF*/(ICM_DSIZE*4),&ICMblock);
+	LIB$GET_VM(/*%REF*/(ICM_DSIZE),&ICMblock);
 	HSHVAL = ICMP_Hash(IPdest);
 	ICMblock->icm$next = ICMHTB[HSHVAL];
 	ICMHTB[HSHVAL] = ICMblock;

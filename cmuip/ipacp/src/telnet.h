@@ -58,6 +58,7 @@ Modification history:
 
 // not yet #include <starlet.h>	// VMS system definitions
 // not yet #include 'CMUIP_SRC:[CENTRAL]NETXPORT';
+#include <iosbdef.h>
 
 #define     TELNET$K_Debug	  0
 
@@ -300,7 +301,7 @@ struct TVT$BLOCK
   unsigned char    TVT$RD_BUF	 [TVT_TTY_BUFLEN]; // Buffer for PTY read
   unsigned short     TVT$RD_BCNT	;		// Number of bytes in the buffer
   void *     TVT$RD_PTR;			// Pointer to current byte
-  unsigned long long     TVT$RD_IOSB	;		// IOSB for read operation
+  struct _iosb     TVT$RD_IOSB	;		// IOSB for read operation
   unsigned char    TVT$WR_BUF	 [TVT_TTY_BUFLEN]; // Buffer for PTY write
   unsigned short     TVT$WR_BCNT	;		// Number of bytes in the buffer
   long     TVT$WR_ICNT	 ;		// Number of bytes read
@@ -308,9 +309,9 @@ struct TVT$BLOCK
   //    TVT$WR_PTR	= [$ADDRESS],		// Pointer to current byte
   long     TVT$WR_IPTR	 ;		// Index of current byte read
   long     TVT$WR_OPTR	 ;		// Index of current byte written
-  unsigned long long     TVT$WR_IOSB	;		// IOSB for write operation
+  struct _iosb     TVT$WR_IOSB	;		// IOSB for write operation
   unsigned char    TVT$MBX_BUF	 [TVT_MBX_BUFLEN];
-  unsigned long long     TVT$MBX_IOSB;		// IOSB for mailbox
+  struct _iosb     TVT$MBX_IOSB;		// IOSB for mailbox
   unsigned short     TVT$NRSTATE	;		// Current TVT read state
   union {
     unsigned long     TVT$FLAGS	 ;		// Flags describing the TVT
@@ -352,7 +353,7 @@ struct TVT$BLOCK
   unsigned char    TVT$Device_Descr	 [DSC$K_Z_BLN];
   unsigned char    TVT$TTY_DEVSTR	 [20];		// Terminal name string
   unsigned int     TVT$TTY_CHN		;		// The TTY channel
-  unsigned long long     TVT$TTY_IOSTAT	;		// The TTY IO status
+  struct _iosb     TVT$TTY_IOSTAT	;		// The TTY IO status
   unsigned char    TVT$TTY_CHAR	 [QCB$K_SIZE];	// The TTY DevDEP char JC End
   unsigned char    TVT$DATA_END[0];
 }; 

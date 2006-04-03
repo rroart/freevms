@@ -341,7 +341,7 @@ struct ARP_BLK * ARBLK;
       ARBLK = XE_Int->XEI$ARP_Block;
     else
 //	LIB$GET_VM(%REF(ARP_BLK_LEN*4),ARBLK);
-	RC = LIB$GET_VM_PAGE(/*%REF*/(((ARP_BLK_LEN*4) / 512) + 1), &ARBLK);
+	RC = LIB$GET_VM_PAGE(/*%REF*/(((ARP_BLK_LEN) / 512) + 1), &ARBLK);
 	if (BLISSIFNOT(RC))
 	    {
 	    DRV$WARN_FAO("XE ARP memory allocation error, RC=!XL",RC);
@@ -778,7 +778,7 @@ struct ACACHE_BLK * ACPTR;
 // Get a new block and hash the address.
 
 //    LIB$GET_VM(/*%REF*/(ACACHE_LEN*4),ACPTR);
-    RC = LIB$GET_VM_PAGE(/*%REF*/(((ACACHE_LEN * 4) / 512) + 1), &ACPTR);
+    RC = LIB$GET_VM_PAGE(/*%REF*/(((ACACHE_LEN) / 512) + 1), &ACPTR);
     if (BLISSIFNOT(RC))
 	{
 	DRV$WARN_FAO("XE ARP CNEW memory allocation error, RC=!XL",RC);
@@ -901,7 +901,7 @@ struct ACACHE_BLK * ACPTR;
 		// Free up the cache entry's memory.
 
 //		LIB$FREE_VM(/*%REF*/(ACACHE_LEN*4),ACPTR);
-		LIB$FREE_VM_PAGE(/*%REF*/(((ACACHE_LEN * 4) / 512) + 1), ACPTR);
+		LIB$FREE_VM_PAGE(/*%REF*/(((ACACHE_LEN) / 512) + 1), ACPTR);
 		ACPTR = *APREV; // check ..aprev
 		}
 	    else

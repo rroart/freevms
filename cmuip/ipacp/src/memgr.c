@@ -457,19 +457,19 @@ mm$qblk_get (void)
 	NOINT;
 
 //	if (! (LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr)))
-	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1 ) ;
+	Pages = ((((qb_size + MEM$HDR_SIZE)) / 512) + 1 ) ;
 	if (! (LIB$GET_VM_PAGE(Pages, &Hptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 
 	OKINT;
-	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE*4,Hptr);
+	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE,Hptr);
 	Hptr->MEM$ISPERM = FALSE; // Not a permanent qblk
 	qb_gets = qb_gets + 1;	// track this event.
 	if (qb_gets > qb_max)
 	    qb_max = qb_gets;
 	};
 
-    ptr = (long)Hptr + MEM$HDR_SIZE*4; // Point at data area
+    ptr = (long)Hptr + MEM$HDR_SIZE; // Point at data area
     CH$FILL(/*%CHAR*/(0),qb_size*4,ptr);	// fresh qb.
 //!!HACK!!!~~~ Should record allocator here ~~~
     XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Get !XL size !SL!/",0,Hptr, Pages);
@@ -515,7 +515,7 @@ void mm$qblk_free(Ptr)
     signed long
 	Pages	 = 0;
 
-    Hptr = Ptr - MEM$HDR_SIZE*4; // Point at header
+    Hptr = Ptr - MEM$HDR_SIZE; // Point at header
     XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Free !XL size !SL!/",0,Hptr, Pages);
     NOINT;
     REMQUE(Hptr,&Hptr);		// Remove from the used queue
@@ -532,7 +532,7 @@ void mm$qblk_free(Ptr)
 	NOINT;			// Disable AST's
 //!!HACK!!// Why?
 //	if (! (LIB$FREE_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr)))
-	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1) ;
+	Pages = ((((qb_size + MEM$HDR_SIZE)) / 512) + 1) ;
 	if (! (LIB$FREE_VM_PAGE(Pages, Hptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
@@ -570,11 +570,11 @@ void QBLK_Init (void)
     for (J=1;J<=qblk_count;J++)
 	{
 //	LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr);
-	Pages = ((((qb_size + MEM$HDR_SIZE) * 4) / 512) + 1) ;
+	Pages = ((((qb_size + MEM$HDR_SIZE)) / 512) + 1) ;
 	if (BLISSIFNOT(RC = (LIB$GET_VM_PAGE(Pages, &Hptr))))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Init !XL size !SL!/",0,Hptr, Pages);
-	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE*4,Hptr);
+	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE,Hptr);
 	Hptr->MEM$ISFREE = TRUE;
 	Hptr->MEM$ISPERM = TRUE;
 	INSQUE(Hptr,FREE_Qblks.qtail);
@@ -632,7 +632,7 @@ mm$uarg_get (void)
 	{
 	NOINT;			// Disable interrupts, do allocation
 //	if (! (LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),Ptr)))
-	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
+	Pages = (((Max_User_ArgBlk_Size) / 512) + 1) ;
 	if (! (LIB$GET_VM_PAGE(Pages, &Ptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
@@ -641,7 +641,7 @@ mm$uarg_get (void)
 	if (ua_gets > ua_max)
 	    ua_max = ua_gets;
 	};
-    CH$FILL(/*%CHAR*/(0),Max_User_ArgBlk_Size*4,Ptr);
+    CH$FILL(/*%CHAR*/(0),Max_User_ArgBlk_Size,Ptr);
     return(Ptr);
     }
 
@@ -688,7 +688,7 @@ void mm$uarg_free(Ptr)
 	{
 	NOINT;
 //	if (! (LIB$FREE_VM(%REF(Max_User_ArgBlk_Size*4),ptr)))
-	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
+	Pages = (((Max_User_ArgBlk_Size) / 512) + 1) ;
 	if (! (LIB$FREE_VM_PAGE(Pages, Ptr)))
 	    Memgr_Fault_Handler(0,R0,0);
 	OKINT;
@@ -728,7 +728,7 @@ void uarg_init (void)
     for (J=1;J<=uarg_count;J++)
 	{
 //	LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),Ptr);
-	Pages = (((Max_User_ArgBlk_Size * 4) / 512) + 1) ;
+	Pages = (((Max_User_ArgBlk_Size) / 512) + 1) ;
 	if (BLISSIFNOT(RC = (LIB$GET_VM_PAGE(Pages, &Ptr))))
 	    Memgr_Fault_Handler(0,RC,0);
 	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Init !XL size !SL!/",0,Ptr, Pages);
@@ -1032,7 +1032,7 @@ memory to be trashed.
 mm$insque(QBLK,QHDR,QRTN,QID,QVAL)
     {
       struct MEM$HDR_STRUCT * HPTR;
-    HPTR = QBLK - MEM$HDR_SIZE*4;
+    HPTR = QBLK - MEM$HDR_SIZE;
     HPTR->MEM$INSQUERTN = QRTN;
     HPTR->MEM$INSQUEHDR = QHDR;
     HPTR->MEM$INSQUEVAL = QVAL;
@@ -1049,7 +1049,7 @@ mm$remque(QHDR,QBLK,QRTN,QID,QVAL)
 	RVAL;
     if ((RVAL = REMQUE(QHDR,&QBLK)) != EMPTY_QUEUE) // check
 	{
-	HPTR = *QBLK - MEM$HDR_SIZE*4;
+	HPTR = *QBLK - MEM$HDR_SIZE;
 	HPTR->MEM$REMQUERTN = QRTN;
 	HPTR->MEM$REMQUEHDR = QHDR;
 	HPTR->MEM$REMQUEVAL = QVAL;

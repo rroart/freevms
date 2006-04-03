@@ -100,32 +100,32 @@ typedef struct {
   unsigned long int dc_clone_dev;
 
     /* MIB data */
-    ulong	dcmib_ifIndex;		/* Interface index number */
+    uint	dcmib_ifIndex;		/* Interface index number */
 #ifdef __i386__
   quadword	dcmib_ifDescr;		/* Interface description string */
 #else
   octaword	dcmib_ifDescr;		/* Interface description string */
 #endif
-    ulong	dcmib_ifType;		/* device type */
-    ulong	dcmib_ifMTU;		/* Max Transfer Unit */
-    ulong	dcmib_ifSpeed;		/* Bandwidth (bits/second) */
-    ulong	dcmib_ifPAsize;		/* size of Physical Addr */
+    uint	dcmib_ifType;		/* device type */
+    uint	dcmib_ifMTU;		/* Max Transfer Unit */
+    uint	dcmib_ifSpeed;		/* Bandwidth (bits/second) */
+    uint	dcmib_ifPAsize;		/* size of Physical Addr */
     ulong	*dcmib_ifPhysAddress;	/* pntr to Physical Addr */
-    ulong	dcmib_ifAdminStatus;	/* Desired status of interface */
-    ulong	dcmib_ifOperStatus;	/* Current status of interface */
-    ulong	dcmib_ifLastState;	/* time of last state change */
-    ulong	dcmib_ifInOctets;	/* Octets received */
-    ulong	dcmib_ifInUcastPkts;	/* Unicasts delivered */
-    ulong	dcmib_ifInNUcastPkt;	/* non-Unicasts delivered */
-    ulong	dcmib_ifInDiscards;	/* good but discarded pckts */
-    ulong	dcmib_ifInErrors;	/* bad and discarded */
-    ulong	dcmib_ifInUnknownProtos;/* Unknown protocol fields */
-    ulong	dcmib_ifOutOctets;	/*  */
-    ulong	dcmib_ifOutUcastPkts;	/*  */
-    ulong	dcmib_ifOutNUcastPkts;	/*  */
-    ulong	dcmib_ifOutDiscards;	/*  */
-    ulong	dcmib_ifOutErrors;	/*  */
-    ulong	dcmib_ifOutQLen;
+    uint	dcmib_ifAdminStatus;	/* Desired status of interface */
+    uint	dcmib_ifOperStatus;	/* Current status of interface */
+    uint	dcmib_ifLastState;	/* time of last state change */
+    uint	dcmib_ifInOctets;	/* Octets received */
+    uint	dcmib_ifInUcastPkts;	/* Unicasts delivered */
+    uint	dcmib_ifInNUcastPkt;	/* non-Unicasts delivered */
+    uint	dcmib_ifInDiscards;	/* good but discarded pckts */
+    uint	dcmib_ifInErrors;	/* bad and discarded */
+    uint	dcmib_ifInUnknownProtos;/* Unknown protocol fields */
+    uint	dcmib_ifOutOctets;	/*  */
+    uint	dcmib_ifOutUcastPkts;	/*  */
+    uint	dcmib_ifOutNUcastPkts;	/*  */
+    uint	dcmib_ifOutDiscards;	/*  */
+    uint	dcmib_ifOutErrors;	/*  */
+    uint	dcmib_ifOutQLen;
     } Device_Configuration_Entry;
 
 #define DC_ENTRY_SIZE sizeof(Device_Configuration_Entry)
@@ -186,7 +186,7 @@ typedef struct {
     ulong	*NSQ$Driver;
     ulong	*NSQ$Data;
     ushort	NSQ$Datasize;
-    ulong	NSQ$IP_Dest;
+    uint	NSQ$IP_Dest;
     char	*NSQ$Del_Buf;
     ushort	NSQ$Del_buf_size;
     ushort	NSQ$Type;

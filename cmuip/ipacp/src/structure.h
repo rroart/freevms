@@ -207,7 +207,7 @@ struct qb_send_fields
 {
   void *     sn$next;		// Forward Queue Link (Flink).
   void *     sn$last;		// Backwards queue link (Blink).
-  signed long int     sn$size;	// # of bytes to send.
+  signed  int     sn$size;	// # of bytes to send.
   void *     sn$data ;		// Start of data buffer.
   void *     sn$uargs;		// Address of user arg blk.
   signed short int     sn$timeout;	// connection timeout (time).
@@ -234,11 +234,11 @@ struct qb_rt_fields
   signed short int     rt$segsize;	// Byte size of segment.
   void *     rt$seg;		// Start address of segment.
   signed int     rt$dest_adrs;		// Destination network adrs.
-  signed long     rt$timeout;		// Retransmission timeout
-  signed long     rt$maxtimeout;		// expiration time on RX queue
-  signed long     rt$start_xmit_time;		// base for round trip calc.
-  signed long     rt$xmit_count;		// # of transmissions.
-  signed long     rt$seq_end;		// Last sequence # in segment
+  signed int     rt$timeout;		// Retransmission timeout
+  signed int     rt$maxtimeout;		// expiration time on RX queue
+  signed int     rt$start_xmit_time;		// base for round trip calc.
+  signed int     rt$xmit_count;		// # of transmissions.
+  signed int     rt$seq_end;		// Last sequence # in segment
 };
 
 #define    QB_RT_SIZE sizeof(struct qb_rt_fields)
@@ -249,20 +249,20 @@ struct qb_nr_fields
 {
   void *     nr$next;		// FLINK.
   void *     nr$last;		// BLink.
-  signed long int     nr$buf_size;	// byte size of read buffer.
+  signed int     nr$buf_size;	// byte size of read buffer.
   void *     nr$buf;		// Read buffer start.
-  signed long int     nr$size;	// Byte size of TCP segment.
+  signed int     nr$size;	// Byte size of TCP segment.
   void *     nr$seg;		// start of TCP segment.
-  signed long int     nr$data_size;	// # of data bytes available.
+  signed int     nr$data_size;	// # of data bytes available.
   void *     nr$uptr;		// pointer to new data
-  signed long int     nr$ucount;	// count of new data
-  signed long int     nr$timeout;
+  signed int     nr$ucount;	// count of new data
+  signed int     nr$timeout;
   signed int     nr$src_adrs;	// Internet address.
   signed int     nr$dest_adrs;	// Internet address.
   signed short     nr$src_port;		// SYN wait list: Source Port
   signed short     nr$dest_port;		// SYN wait list: Dest port.
   union {
-    signed long     nr$seq_start;		// First usable seqence #
+    signed int     nr$seq_start;		// First usable seqence #
     struct { 			// Reuse for ICMP messages
       signed char 	nr$icm_type;		// ICMP msg type
       signed char 	nr$icm_code;		// ICMP code field
@@ -270,8 +270,8 @@ struct qb_nr_fields
     };  
     void * 	nr$fragptr;		// IP fragment flag/pointer
   };
-  signed long     nr$seq_end;		// Segment's last sequence #.
-  signed long     nr$seq_count;		// Count of usable sequence #s
+  signed int     nr$seq_end;		// Segment's last sequence #.
+  signed int     nr$seq_count;		// Count of usable sequence #s
   union {
     signed char     nr$flags;
     struct {
@@ -290,7 +290,7 @@ struct qb_ur_fields
 {
   void *     ur$next;		// FLINK.
   void *     ur$last;		// Blink
-  signed long int     ur$size;	// # of bytes requested by user.
+  signed int     ur$size;	// # of bytes requested by user.
   void *     ur$data;		// Start of data buffer.
   union {
     struct {
@@ -377,7 +377,7 @@ user argument blocks have at least these arguments.
 void *     NM##$data_start;	/* Start of data within this block.*/\
 void *     NM##$ubuf_adrs;	/* User buffer address.*/\
 int NM$$fill; /* overlap bufiodef */\
-signed long     NM##$vms_blk_id;	/* VMS system dynamic block ID.*/\
+signed int     NM##$vms_blk_id;	/* VMS system dynamic block ID.*/\
 void *     NM##$irp_adrs;	/* I/O Request Packet Address.*/\
 void *     NM##$ucb_adrs;	/* Unit Control Block Address.*/\
 void *     NM##$pid;	/* Owning process ID.*/\
@@ -526,9 +526,9 @@ struct status_return_arg_blk
   signed short     sr$bytes_avail;
   signed char     sr$state;
   signed char     sr$last_state;
-  signed long int     sr$send_window;
-  signed long int     sr$recv_window;
-  signed long int     sr$user_id;
+  signed int     sr$send_window;
+  signed int     sr$recv_window;
+  signed int     sr$user_id;
 };
 
 #define    SR_BLK_SIZE sizeof(struct status_return_arg_blk)
@@ -624,13 +624,13 @@ struct debug_dump_args
   unsigned short     du$dump_directive;	// Dump function code.
   signed short     du$timeout;	// Not used.
   union {
-    unsigned long     du$arg0;	// Argument #0
+    unsigned int     du$arg0;	// Argument #0
     void * 	du$local_conn_id;	// TCB/UDPCB index, DU$TCB_DUMP
     signed char 	du$device_idx;	// device index, DU$DEVICE_DUMP
     signed short 	du$start_index;	// ARP cache index, DU$ARP_CACHE
   };
-  unsigned long     du$arg1;	// Argument #1
-  unsigned long     du$arg2;	// Argument #2
+  unsigned int     du$arg1;	// Argument #1
+  unsigned int     du$arg2;	// Argument #2
   signed short     du$buf_size;	// Size of returned data block
   signed char     du$data;	// Start of return data buffer.
 };
@@ -682,9 +682,9 @@ struct debug_panic_args
 struct debug_args
 {
   Static_Fields(de);			// Define the standard fields
-  unsigned long     de$level;	// Debug level mask
-  unsigned long     de$local_conn_id;	// Connection-ID (NYI)
-  unsigned long     de$group;// glag cluster (DEBUG or ACTIVITY)
+  unsigned int     de$level;	// Debug level mask
+  unsigned int     de$local_conn_id;	// Connection-ID (NYI)
+  unsigned int     de$group;// glag cluster (DEBUG or ACTIVITY)
 };
 
 #define    Debug_Arg_Length sizeof(struct M$DEBUG_Fields)
@@ -712,7 +712,7 @@ struct vms$cancel_args
 {
   Static_Fields(vc);		// Define the standard fields
   signed short     vc$piochan;	// Process IO channel (from IRP)
-  signed long    vc$conn_id;	// Connection ID
+  signed int    vc$conn_id;	// Connection ID
 };
 
 #define    Cancel_Arg_Length sizeof(struct M$VMS_Cancel_Fields)

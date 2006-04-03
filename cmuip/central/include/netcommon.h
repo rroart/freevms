@@ -121,7 +121,7 @@ typedef struct {
     uword nsb$status;		/* VMS status return code */
     uword nsb$byte_count;
     union {
-	ulong nsb$xstatus;	/* Second status word */
+	uint nsb$xstatus;	/* Second status word */
 	struct {
 	    uchar nsb$icmp_code;	/* ICMP mess. code, if ICMP flag set*/
 	    union {
@@ -134,7 +134,7 @@ typedef struct {
 		    };
 		} flags;
 	    };
-	ulong nsb$xerror;	/* ACP error code, if RC = SS$_ABORT */
+	uint nsb$xerror;	/* ACP error code, if RC = SS$_ABORT */
 	} net_status;
     } netio_status_block;
 
@@ -190,11 +190,11 @@ typedef struct {
     uchar ci$lhost_name_size;
     uchar ci$foreign_host[HOST_NAME_MAX_SIZE];
     short fill;
-    ulong ci$foreign_port;
+    uint ci$foreign_port;
   // short fill_1;
     uchar ci$local_host[HOST_NAME_MAX_SIZE];
   // short fill_2;
-    ulong ci$local_port;
+    uint ci$local_port;
     uint ci$local_internet_adrs;
     uint ci$remote_internet_adrs;
     } connection_info_return_block;
@@ -209,9 +209,9 @@ typedef struct {
 /* NET$GTHST - Return block for Name to Address translation */
 // check swap with nmlook?
 typedef struct {
-    ulong gha$adrcnt;		/* Count of addresses */
+    uint gha$adrcnt;		/* Count of addresses */
     ulong gha$adrlst[MAX_HADDRS];	/* Address list */
-    ulong gha$namlen;		/* Official name length */
+    uint gha$namlen;		/* Official name length */
     char	  gha$namstr[MAX_HNAME];	/* Official name string */
     } gthst_adlook_block;
 
@@ -220,9 +220,9 @@ typedef struct {
 /* NET$GTHST - Return block for Address to Name translation */
 
 typedef struct {
-  long ghn$adrcnt;
+  int ghn$adrcnt;
   char * ghn$adrlst[4*MAX_HADDRS];
-    ulong ghn$namlen;		/* Host name string length */
+    uint ghn$namlen;		/* Host name string length */
     char	  ghn$namstr[MAX_HNAME];
     } gthst_nmlook_block;
 
@@ -262,26 +262,26 @@ typedef struct {
 /* Dump Directive: DU$Dynamic_mem_Alloc  */
 
 typedef struct {
-    long dm$qb;			/* Queue Blocks */
-    long dm$ua;			/* UARG Blocks */
-    long dm$cs;			/* TCP Control segments */
-    long dm$dms;		/* default size max segs */
-    long dm$nm;			/* net mesg receive buffer */
-    long dm$qbmx;		/* Queue blocks max */
-    long dm$uamx;		/* UARG Blocks max */
-    long dm$csmx;		/* TCP Control segments max */
-    long dm$dmsmx;		/* default size max segs max */
-    long dm$nmmx;		/* net mesg receive buffer max */
-    long dm$qbal;		/* qblks allocated */
-    long dm$uaal;		/* Uarg blks allocated */
-    long dm$csal;		/* Control segs allocated */
-    long dm$dmsal;		/* Default segs allocated */
-    long dm$nmal;		/* net recv bufs allocated */
-    long dm$qbfr;		/* QBlks free */
-    long dm$uafr;		/* Uarg blks free */
-    long dm$csfr;		/* Control segs free */
-    long dm$dmsfr;		/* Default segs free */
-    long dm$nmfr;		/* net recv bufs free */
+    int dm$qb;			/* Queue Blocks */
+    int dm$ua;			/* UARG Blocks */
+    int dm$cs;			/* TCP Control segments */
+    int dm$dms;		/* default size max segs */
+    int dm$nm;			/* net mesg receive buffer */
+    int dm$qbmx;		/* Queue blocks max */
+    int dm$uamx;		/* UARG Blocks max */
+    int dm$csmx;		/* TCP Control segments max */
+    int dm$dmsmx;		/* default size max segs max */
+    int dm$nmmx;		/* net mesg receive buffer max */
+    int dm$qbal;		/* qblks allocated */
+    int dm$uaal;		/* Uarg blks allocated */
+    int dm$csal;		/* Control segs allocated */
+    int dm$dmsal;		/* Default segs allocated */
+    int dm$nmal;		/* net recv bufs allocated */
+    int dm$qbfr;		/* QBlks free */
+    int dm$uafr;		/* Uarg blks free */
+    int dm$csfr;		/* Control segs free */
+    int dm$dmsfr;		/* Default segs free */
+    int dm$nmfr;		/* net recv bufs free */
     } d$mem_alloc_return_blk;
 
 #define D$MEM_ALLOC_RETURN_BLK sizeof(d$mem_alloc_return_blk)
@@ -290,28 +290,28 @@ typedef struct {
 /* User return dump blk:  TCP stats. */
 
 typedef struct {
-    long dm$tcpacp_pid;
-    long dm$user_io_requests;
-    long dm$storeforward;
-    long dm$active_conects_opened;
-    long dm$passive_conects_opened;
-    long dm$data_bytes_xmitted;
-    long dm$data_bytes_recved;
-    long dm$segs_xmitted;
-    long dm$segs_recved;
-    long dm$seg_bad_chksum;
-    long dm$badseq;
-    long dm$duplicate_segs;
-    long dm$retrans_segs;
-    long dm$rpz_rxq;
-    long dm$oorw_segs;
-    long dm$future_rcvd;
-    long dm$future_used;
-    long dm$future_dropped;
-    long dm$future_dups;
-    long dm$servers_forked;
-    long dm$uptime[2];
-    long dm$arps_received;
+    int dm$tcpacp_pid;
+    int dm$user_io_requests;
+    int dm$storeforward;
+    int dm$active_conects_opened;
+    int dm$passive_conects_opened;
+    int dm$data_bytes_xmitted;
+    int dm$data_bytes_recved;
+    int dm$segs_xmitted;
+    int dm$segs_recved;
+    int dm$seg_bad_chksum;
+    int dm$badseq;
+    int dm$duplicate_segs;
+    int dm$retrans_segs;
+    int dm$rpz_rxq;
+    int dm$oorw_segs;
+    int dm$future_rcvd;
+    int dm$future_used;
+    int dm$future_dropped;
+    int dm$future_dups;
+    int dm$servers_forked;
+    int dm$uptime[2];
+    int dm$arps_received;
     } d$tcp_stats_return_blk;
 
 #define D$TS_BLKSIZE sizeof(d$tcp_stats_return_blk)
@@ -326,41 +326,41 @@ typedef struct {
 
 #define D$LC_ID_BLKSIZE 100*4 /* byte size. */
 typedef
-    ulong D$LC_ID_Return_Blk[D$LC_ID_BLKSIZE/4];
+    uint D$LC_ID_Return_Blk[D$LC_ID_BLKSIZE/4];
 
 /* Dump a specified TCB */
 
 typedef struct {
     long dm$tcb_addr;		/* Address of TCB (internal) */
-    long dm$user_id;		/* Owning process ID */
+    int dm$user_id;		/* Owning process ID */
     word dm$state;		/* Current TCB state */
     word dm$last_state;		/* */
     int  dm$foreign_host;	/* Foreign host # */
-    long dm$foreign_port;	/* Foreign port # */
+    int dm$foreign_port;	/* Foreign port # */
     int dm$local_host;	/* Local host # */
-    long dm$local_port;		/* Local port # */
-    long dm$user_recv_qe;	/* # of pending user receives */
-    long dm$user_send_qe;	/* # of pending user sends */
-    long dm$net_recv_qe;	/* # of pending receive buffers */
-    long dm$future_qe;		/* # of buffers on future queue */
-    long dm$rexmit_qe;		/* # of bytes on RX queue */
+    int dm$local_port;		/* Local port # */
+    int dm$user_recv_qe;	/* # of pending user receives */
+    int dm$user_send_qe;	/* # of pending user sends */
+    int dm$net_recv_qe;	/* # of pending receive buffers */
+    int dm$future_qe;		/* # of buffers on future queue */
+    int dm$rexmit_qe;		/* # of bytes on RX queue */
     long dm$dasm_ptr;		/* Disassembly pointer */
-    long dm$dasm_bc;		/* Dissasembly byte count */
+    int dm$dasm_bc;		/* Dissasembly byte count */
     long dm$asm_ptr;		/* Assembly pointer */
-    long dm$asm_bc;		/* Assembly byte count */
-    long dm$iss;			/* Initial Send Sequence # */
-    long dm$snd_una;		/* # of bytes send but not ACK'ed */
-    long dm$snd_nxt;		/* Next Send Sequence # */
-    long dm$snd_wnd;		/* Send window count */
-    long dm$snd_wl;		/*    DM$SND_BS		= [$SLong], */
-  signed long dm$snd_bs;
-    long dm$irs;		/* Initial Receive Sequence # */
-    long dm$rcv_nxt;		/* Next Receive Sequence # */
-    long dm$rcv_wnd;		/* Receive window count */
-    long dm$rcv_bs;		/* */
-    long dm$conn_timeout;	/* Connection dead timeout */
-    long dm$rt_timeout;		/* Retransmission timer */
-    long dm$round_trip_time;	/* Measured round-trip-time */
+    int dm$asm_bc;		/* Assembly byte count */
+    int dm$iss;			/* Initial Send Sequence # */
+    int dm$snd_una;		/* # of bytes send but not ACK'ed */
+    int dm$snd_nxt;		/* Next Send Sequence # */
+    int dm$snd_wnd;		/* Send window count */
+    int dm$snd_wl;		/*    DM$SND_BS		= [$SLong], */
+  signed int dm$snd_bs;
+    int dm$irs;		/* Initial Receive Sequence # */
+    int dm$rcv_nxt;		/* Next Receive Sequence # */
+    int dm$rcv_wnd;		/* Receive window count */
+    int dm$rcv_bs;		/* */
+    int dm$conn_timeout;	/* Connection dead timeout */
+    int dm$rt_timeout;		/* Retransmission timer */
+    int dm$round_trip_time;	/* Measured round-trip-time */
     } d$tcb_dump_return_blk;
 
 #define D$TCB_DUMP_BLKSIZE sizeof(d$tcb_dump_return_blk)
@@ -370,7 +370,7 @@ typedef struct {
 #define D$UDP_LIST_BLKSIZE	MAX_UDPCB*4	/* byte size. */
 
 typedef
-    ulong D$UDP_LIST_RETURN_BLK[D$UDP_LIST_BLKSIZE/4];
+    uint D$UDP_LIST_RETURN_BLK[D$UDP_LIST_BLKSIZE/4];
 
 /* Dump of a single UDPCB */
 
@@ -380,8 +380,8 @@ typedef struct {
     uword   du$udpcb_foreign_port;	/* Foreign port number */
     int du$udpcb_local_host;	/* Local host number */
     uword   du$udpcb_local_port;	/* Local port number */
-    long    du$udpcb_nr_qcount;		/* Count of items on receive queue */
-    long    du$udpcb_ur_qcount;		/* Count of items on user queue */
+    int    du$udpcb_nr_qcount;		/* Count of items on receive queue */
+    int    du$udpcb_ur_qcount;		/* Count of items on user queue */
     union {
 	uword   du$udpcb_flags;		/* UDPCB flags */
 	struct {
@@ -392,7 +392,7 @@ typedef struct {
 	    uword du$udpcb_internal:1;	/* Connection is internal */
 	    };
 	};
-    ulong du$udpcb_user_id;		/* Owning process */
+    uint du$udpcb_user_id;		/* Owning process */
     } d$udpcb_dump_return_blk;
 
 #define  D$UDPCB_DUMP_BLKSIZE sizeof(d$udpcb_dump_return_blk) 
@@ -402,7 +402,7 @@ typedef struct {
 
 #define D$ICMP_LIST_BLKSIZE	MAX_ICMPCB*4	/* byte size. */
 typedef
-    ulong D$ICMP_LIST_RETURN_BLK[D$ICMP_LIST_BLKSIZE/4];
+    uint D$ICMP_LIST_RETURN_BLK[D$ICMP_LIST_BLKSIZE/4];
 
 /* Dump of a single ICMPCB */
 
@@ -410,8 +410,8 @@ typedef struct {
     char    *DU$ICMPCB_Address;		/* Internal ICMPCB address */
     int DU$ICMPCB_Foreign_Host;	/* Foreign host number */
     int DU$ICMPCB_Local_Host;	/* Local host number */
-    long    DU$ICMPCB_NR_Qcount;	/* Count of items on receive queue */
-    long    DU$ICMPCB_UR_Qcount;	/* Count of items on user queue */
+    int    DU$ICMPCB_NR_Qcount;	/* Count of items on receive queue */
+    int    DU$ICMPCB_UR_Qcount;	/* Count of items on user queue */
     union {
 	uword   DU$ICMPCB_Flags;		/* ICMPCB flags */
 	struct {
@@ -422,7 +422,7 @@ typedef struct {
 	    uword DU$ICMPCB_Internal:1;	/* Connection is internal */
 	    };
 	};
-    ulong DU$ICMPCB_User_ID;		/* Owning process */
+    uint DU$ICMPCB_User_ID;		/* Owning process */
     } D$ICMPCB_Dump_Return_Blk;
 
 #define D$ICMPCB_DUMP_BLKSIZE sizeof(D$ICMPCB_Dump_Return_Blk)
@@ -431,7 +431,7 @@ typedef struct {
 
 #define D$IP_List_BlkSize	MAX_IPCB*4	/* byte size. */
 typedef
-    ulong D$IP_List_Return_Blk[D$IP_List_BlkSize/4];
+    uint D$IP_List_Return_Blk[D$IP_List_BlkSize/4];
 
 /* Dump of a single IPCB */
 
@@ -439,8 +439,8 @@ typedef struct {
     char    *du$ipcb_address;		/* Internal IPCB address */
     int du$ipcb_foreign_host;	/* Foreign host number */
     int du$ipcb_local_host;	/* Local host number */
-    long    du$ipcb_nr_qcount;	/* Count of items on receive queue */
-    long    du$ipcb_ur_qcount;	/* Count of items on user queue */
+    int    du$ipcb_nr_qcount;	/* Count of items on receive queue */
+    int    du$ipcb_ur_qcount;	/* Count of items on user queue */
     union {
 	uword   du$ipcb_flags;		/* IPCB flags */
 	struct {
@@ -451,7 +451,7 @@ typedef struct {
 	    uword du$ipcb_internal:1;	/* Connection is internal */
 	    };
 	};
-    ulong du$ipcb_user_id;		/* Owning process */
+    uint du$ipcb_user_id;		/* Owning process */
     } d$ipcb_dump_return_blk;
 
 /* Define ARP cache dump block format (single entry) *
@@ -462,8 +462,8 @@ typedef struct {
 typedef struct {
     uword du$arp_index;			/* Arp cache "index" */
     uword du$arp_device;		/* Device index */
-    ulong du$arp_expire;		/* Expiration time */
-    ulong du$arp_saveqb;	/* Saved QB */
+    uint du$arp_expire;		/* Expiration time */
+    uint du$arp_saveqb;	/* Saved QB */
     union {
 	uword du$arp_flags;		/* Flags */
 	struct {
