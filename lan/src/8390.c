@@ -21,6 +21,7 @@ int er$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
 }
 
 int er$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  // hardcode this until we get sizeof struct _iosb down from 12 to 8
   if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL|0x080000000000;
   int sts = ei_start_xmit  (i, p, u, c); 
   return sts = SS$_NORMAL;

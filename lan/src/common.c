@@ -159,7 +159,10 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     printk("unknown lan$setmode\n");
   }
 
-  if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL;
+  if (i->irp$l_iosb) {
+    struct _iosb * iosb = i->irp$l_iosb;
+    iosb->iosb$w_status = SS$_NORMAL;
+  }
   return SS$_NORMAL;
 }
 

@@ -360,7 +360,7 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
 				  sts = bitmap_search(vcbdev,&start_pos,&block_count);
 				  struct _fcb * fcb = getidxfcb(vcbdev);
 				  struct _fh2 * head;
-				  unsigned long long iosb;
+				  struct _iosb iosb;
 				  head = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);
 				  unsigned short *mp,*map;
 				  map = mp = (unsigned short *) head + head->fh2$b_mpoffset + head->fh2$b_map_inuse;

@@ -461,7 +461,7 @@ void myqio(long rw, long data, long size, long blocknr,kdev_t dev, long block_fa
 {
   int sts;
   int type;
-  unsigned long long iosb;
+  struct _iosb iosb;
   if (rw)
     type=IO$_WRITEPBLK;
   else
@@ -475,7 +475,7 @@ void vms_submit_bh(int rw, struct buffer_head * bh)
 {
   int sts;
   int type;
-  unsigned long long iosb;
+  struct _iosb iosb;
   if (rw)
     type=IO$_WRITEPBLK;
   else
@@ -489,7 +489,7 @@ void vms_ll_rw_block(int rw, int nr, struct buffer_head * bhs[],kdev_t dev)
 {
   int sts;
   int type;
-  unsigned long long iosb;
+  struct _iosb iosb;
   struct buffer_head * bh=bhs[0];
   if (rw)
     type=IO$_WRITEPBLK;
@@ -504,7 +504,7 @@ void vms_mark_buffer_dirty(struct buffer_head * bh)
   int rw=1;
   int sts;
   int type;
-  unsigned long long iosb;
+  struct _iosb iosb;
   if (rw)
     type=IO$_WRITEPBLK;
   else

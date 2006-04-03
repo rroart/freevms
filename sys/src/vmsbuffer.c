@@ -502,7 +502,7 @@ void __bforget(struct buffer_head * buf)
 struct buffer_head * bread(kdev_t dev, int block, int size)
 {
 	 struct buffer_head * bh;
-	 long long iosb;
+	 struct _iosb iosb;
 	 int sts;
 
 	 bh = kmalloc (sizeof(struct buffer_head), GFP_KERNEL);
@@ -558,7 +558,7 @@ static int __block_write_full_page2(struct inode *inode, struct page *page, unsi
 	unsigned long block;
 	int need_unlock;
 	int sts;
-	unsigned long long iosb;
+	struct _iosb iosb;
 	int turns=0;
 	signed int blocknr;
 	unsigned long blocksize;
@@ -627,7 +627,7 @@ static int __block_prepare_write(struct inode *inode, struct page *page,
 	char *kaddr = kmap(page);
 	int turns = 0;
 	int sts;
-	unsigned long long iosb;
+	struct _iosb iosb;
 	int blocknr;
 
 	blocksize = 1 << inode->i_blkbits;
@@ -685,7 +685,7 @@ static int __block_commit_write(struct inode *inode, struct page *page,
 	struct buffer_head *bh, **arr;
 	int turns=0;
 	int sts;
-	unsigned long long iosb;
+	struct _iosb iosb;
 	signed long blocknr, block;
 	int bbits;
 
@@ -734,7 +734,7 @@ int block_read_full_page2(struct inode *inode,struct page *page, unsigned long p
 	 unsigned int blocksize, blocks;
 	 int nr, i;
 	 int sts;
-	 unsigned long long iosb;
+	 struct _iosb iosb;
 	 int turns;
 	 unsigned long blocknr;
 
@@ -786,7 +786,7 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 	 unsigned int blocksize, blocks;
 	 int nr, i;
 	 int sts;
-	 unsigned long long iosb;
+	 struct _iosb iosb;
 	 int turns;
 	 unsigned long blocknr;
 	 struct inode * inode=fcb->fcb$l_primfcb;
@@ -1165,7 +1165,7 @@ int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsig
 	int length;
 	int sts;
 	int type;
-	unsigned long long iosb;
+	struct _iosb iosb;
 	unsigned long iblock;
 
 	length = iobuf->length;

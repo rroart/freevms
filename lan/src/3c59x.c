@@ -292,6 +292,7 @@ int ec$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
 }
 
 int ec$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  // hardcode this until we get sizeof struct _iosb down from 12 to 8
   if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL|0x080000000000;
   struct net_device * dev = ((struct _ucbnidef *)u)->ucb$l_extra_l_1;
   int (*func)() = dev->hard_start_xmit;

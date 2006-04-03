@@ -110,7 +110,7 @@ int ods2_block_read_full_page3(struct _wcb * wcb,struct page *page, unsigned lon
 	 unsigned int blocksize, blocks;
 	 int nr, i;
 	 int sts;
-	 unsigned long long iosb;
+	 struct _iosb iosb;
 	 int turns;
 	 unsigned long blocknr;
 
@@ -153,7 +153,7 @@ static int __ods2_block_write_full_page2(struct _wcb *wcb, struct page *page, un
 	unsigned long block;
 	int need_unlock;
 	int sts;
-	unsigned long long iosb;
+	struct _iosb iosb;
 	int turns=0;
 	signed int blocknr;
 	unsigned long blocksize;

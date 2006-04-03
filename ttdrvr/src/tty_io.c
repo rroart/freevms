@@ -515,7 +515,7 @@ static ssize_t tty_read(struct file * file, char * buf, size_t count,
 	struct tty_struct * tty;
 	struct inode *inode;
 	int sts;
-	struct iosb iosb;
+	struct _iosb iosb;
 
 	short int chan = 0;
 	struct _pcb * p = ctl$gl_pcb;
@@ -530,7 +530,7 @@ static ssize_t tty_read(struct file * file, char * buf, size_t count,
 	// remember to add terminator stuff in here
 	sts = exe$qiow(28,chan,IO$_READPBLK,&iosb,0,0,
 				 buf,count,0,0,0,0);
-	i = iosb.iolen;
+	i = iosb.iosb$w_bcnt;
 
 	unlock_kernel();
 
@@ -545,7 +545,7 @@ static ssize_t tty_write(struct file * file, const char * buf, size_t count,
 	struct tty_struct * tty;
 	struct inode *inode;
 	int sts;
-	unsigned long long iosb;
+	struct _iosb iosb;
 
 	short int chan = 0;
 	struct _pcb * p = ctl$gl_pcb;

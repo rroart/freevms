@@ -164,7 +164,7 @@ asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int f
   /*check fdt mask*/
   /*check func code*/
   /*check iosb*/
-  if (iosb) *((unsigned long long *)iosb)=0;
+  if (iosb) *((unsigned long long *)iosb)=0; // check. use sizeof later
   int oldipl=getipl(); // unstandard and temporary measure
   setipl(IPL$_ASTDEL);
   /*check proc quota*/
