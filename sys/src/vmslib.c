@@ -196,5 +196,13 @@ inline DEVICEUNLOCK(){
 
 long get_eip(long l) {
   long * m = &l;
+#ifdef __i386__
   return m[-1];
+#else
+#if 0
+  asm volatile("movq %%rip, %0\n\t" :"=m" (m));
+  return m;
+#endif
+  return m[1];
+#endif
 }
