@@ -167,15 +167,21 @@ XQL$FAO() {
   printk("XQL$FAO not implemented\n");
 }
 
+long mymi=0;
+long myms[1024];
+
 LIB$GET_VM_PAGE(size, addr) 
      long * addr;
 {
-#ifdef __i386__
+#if 0
   *addr=kmalloc(4096*(size/8+1),GFP_KERNEL); // check
 #else
   //  *addr=kmalloc(4096*((size>>9)+1),GFP_KERNEL); // check
   // *addr=kmalloc(4096*(size/8+1),GFP_KERNEL); // check
+  myms[mymi++]=size*512;
   *addr=kmalloc(512*size,GFP_KERNEL); // check
+  myms[mymi++]=*addr;
+  if (mymi>1000) mymi=0;
 #endif
   return SS$_NORMAL;
   printk("LIB$GET_VM_PAGE not implemented\n");
@@ -208,7 +214,10 @@ ERROR$FAO() {
 LIB$GET_VM(size, addr) 
      long * addr;
 {
+  myms[mymi++]=size;
   *addr=kmalloc(size,GFP_KERNEL);
+  myms[mymi++]=*addr;
+  if (mymi>1000) mymi=0;
   return SS$_NORMAL;
   printk("LIB$GET_VM not implemented\n");
 }
