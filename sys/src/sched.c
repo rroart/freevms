@@ -618,7 +618,7 @@ asmlinkage void sch$resched(void) {
 #endif
 
   setipl(IPL$_SCHED);
-  spin_lock(&SPIN_SCHED);
+  vmslock(&SPIN_SCHED,-1);
 
   spin_lock_irq(&runqueue_lock); /* eventually change to sched? */
 
@@ -736,7 +736,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   regtrap(REG_INTR,IPL$_SCHED);
 
   setipl(IPL$_SCHED);
-  spin_lock(&SPIN_SCHED);
+  vmslock(&SPIN_SCHED,-1);
 #endif
 
   sch$al_cpu_priority[curpri]=sch$al_cpu_priority[curpri] & (~ cpu->cpu$l_cpuid_mask );
@@ -849,7 +849,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
 #endif
   if (next == curpcb) { /* does not belong in vms, but must be here */
     spin_unlock_irq(&runqueue_lock);
-    spin_unlock(&SPIN_SCHED);
+    vmsunlock(&SPIN_SCHED,-1);
     reacquire_kernel_lock(curpcb);
     //splret();
     goto return_a_reimac;
@@ -859,7 +859,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   next->pcb$l_cpu_id = curpcb->pcb$l_cpu_id;
 
   spin_unlock_irq(&runqueue_lock);
-  spin_unlock(&SPIN_SCHED);
+  vmsunlock(&SPIN_SCHED,-1);
 
   //      if (mydebug5) { int j; for(j=0;j<1000000000;j++) ; }
 
@@ -914,7 +914,13 @@ asmlinkage void sch$sched(int from_sch$resched) {
   if (from_sch$resched==0) {
     // myrei();
   }
+#ifdef __i386__
   switch_to(curpcb, next, curpcb);
+#else
+  long tmp1 = read_pda(level4_pgt);
+  long tmp2 = __pa(next->mm->pgd) | _PAGE_TABLE;
+  switch_to(curpcb, next, curpcb, tmp1, tmp2);
+#endif
 
   /* does not get here */
 
