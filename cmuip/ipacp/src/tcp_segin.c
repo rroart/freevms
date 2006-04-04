@@ -651,7 +651,7 @@ Side Effects:
 */
 
 
-void Send_Reset(struct tcb_structure * TCB,signed long SEQNum)
+void Send_Reset(struct tcb_structure * TCB,signed int SEQNum)
     {
     signed long
 	Sav$Snd_Nxt;

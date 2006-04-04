@@ -185,6 +185,10 @@ struct  tcb_structure {
     unsigned int iss;	// Initial Send sequence number.
     unsigned int snd_pptr;	// Send PUSH pointer
 
+#ifdef __x86_64__
+    char dummy1[0] __attribute__((aligned(8)));
+#endif
+
 // Send circular queue variables
 
     CQF$DEF(snd_q_);			// Send data queue
@@ -203,6 +207,10 @@ struct  tcb_structure {
     unsigned int rcv_pptr;	// Receive PUSH pointer
 
 // Receive circular queue variables
+
+#ifdef __x86_64__
+    char dummy2[0] __attribute__((aligned(8)));
+#endif
 
     CQF$DEF(rcv_q_);			// Receive data queue
 

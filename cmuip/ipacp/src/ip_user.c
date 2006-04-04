@@ -175,7 +175,7 @@ unsigned 	ipcb$nmlook	 : 1;	// IPCB has an outstanding name lookup
 void *     ipcb$ipcbid		;	// IPCB_Table index for this connection
 void *     ipcb$ucb_adrs	;	// Connection UCB address
 void *     ipcb$uargs	;	// Uarg block in pending open
-unsigned long    ipcb$user_id;	// Process ID of owner
+unsigned int    ipcb$user_id;	// Process ID of owner
 unsigned short    ipcb$piochan;	// Process IO channel
       };
 

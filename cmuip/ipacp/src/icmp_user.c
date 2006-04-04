@@ -170,7 +170,7 @@ unsigned 	ICMPCB$Internal	 : 1;	// ICMPCB is open by ACP not user
 void *     icmpcb$icmpcbid		;	// ICMPCB_Table index for this connection
 void *     ICMPCB$UCB_ADRS	;	// Connection UCB address
 void *     icmpcb$uargs	;	// Uarg block in pending open
-long    ICMPCB$User_ID	;	// Process ID of owner
+int    ICMPCB$User_ID	;	// Process ID of owner
 short    ICMPCB$PIOchan	;	// Process IO channel
     };
 

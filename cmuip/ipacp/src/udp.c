@@ -318,7 +318,7 @@ unsigned  	udpcb$nmlook	 : 1;	// UDPCB has an outstanding name lookup
 void *     udpcb$udpcbid	;	// UDPCB_Table index for this connection
 void *     udpcb$ucb_adrs	;	// Connection UDPCB address
 void *     udpcb$uargs		;	// Uarg block in pending open
-unsigned long     udpcb$user_id	;	// Process ID of owner
+unsigned int     udpcb$user_id	;	// Process ID of owner
 unsigned short     udpcb$piochan;// Process IO channel
     };
 

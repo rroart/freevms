@@ -402,7 +402,7 @@ long funct=0;
 //ENTRY	Mount_ip_Device,^M<R2,R3,R4,R5,R6,R7,R8>
 
 int mount_ip_device() {
-  int R0,R3,R6,R7,R8,R9;
+  long R0,R3,R6,R7,R8,R9;
   struct _vcb * R1;
   struct _aqb * R2;
   struct _pcb * R4 = ctl$gl_pcb;
@@ -541,7 +541,7 @@ int mount_ip_device() {
 //
 //--
 
-lock_iodb(int * R4) {
+lock_iodb(long * R4) {
   // not yetR4 = ctl$gl_pcb;		// get my PCB address
   *R4=ctl$gl_pcb;
   return	SCH$IOLOCKW();		// lock & return
@@ -574,8 +574,8 @@ lock_iodb(int * R4) {
 //
 //--
 
-unlock_iodb(int * R4) {
-  int R0,R1,R2,R3,R5,R6,R7,R8,R9;
+unlock_iodb(long * R4) {
+  long R0,R1,R2,R3,R5,R6,R7,R8,R9;
   // not yet R4 = ctl$gl_pcb;
   *R4=ctl$gl_pcb;
   R0 = SCH$IOUNLOCK();			// unlock I/O database
@@ -610,9 +610,10 @@ unlock_iodb(int * R4) {
 //--
 
 int find_ucb(R1, U)
+     long R1;
      struct _ucb ** U;
 {
-  int R0,R2,R3,R4,R5,R6,R7,R8,R9;
+  long R0,R2,R3,R4,R5,R6,R7,R8,R9;
   struct return_values r;
   int sts;
 
@@ -664,7 +665,7 @@ int find_ucb(R1, U)
 Build_ACP_QB(R5)
      struct _ucb * R5;
 {
-  int R0,R3,R6,R7,R9;
+  long R0,R3,R6,R7,R9;
   struct _arb * R1;
   struct _aqb * R2, *R8;
   struct _pcb * R4;
@@ -770,7 +771,7 @@ build_vcb(R5,R8)
      struct _ucb * R5;
      struct _aqb * R8;
 {
-  int R0,R1,R3,R4,R6,R7,R9;
+  long R0,R1,R3,R4,R6,R7,R9;
   struct _vcb * R2;
   R1 = VCB$C_LENGTH;		// size of VCB
 #ifdef __x86_64__
@@ -843,9 +844,9 @@ build_vcb(R5,R8)
 //--
 
 //Entry	Set_ip_Device_OffLine,^M<R5>
-int set_ip_device_offline(UCB_Adrs)
+int set_ip_device_offline(long UCB_Adrs)
 {
-  int R0,R1,R2,R3,R4,R6,R7,R8,R9;
+  long R0,R1,R2,R3,R4,R6,R7,R8,R9;
   struct _ucb * R5;
   R5 = UCB_Adrs;			// adrs of ip0: (base device).
   if (R5>=0)	goto l15;				// good UCB address? must be system address
@@ -908,7 +909,7 @@ int set_ip_device_offline(UCB_Adrs)
 //--
 
 int Dismount() {
-  int R1,R2,R3,R4,R6,R7,R9;
+  long R1,R2,R3,R4,R6,R7,R9;
   struct _ucb * R5;
   struct _aqb * R0,* R8;
  DISMOUNT:
@@ -1056,7 +1057,7 @@ int Dismount() {
 //Entry USER_Requests_Avail,^M<R2,R3,R4,R5>
 int user_requests_avail()
 {
-  int R1,R3,R4,R6,R7,R8,R9;
+  long R1,R3,R4,R6,R7,R8,R9;
   struct _aqb * R0;
   struct _irp * R2;
   struct vms$cancel_args * R5;
@@ -1233,9 +1234,9 @@ int user_requests_avail()
 
 
 //ENTRY	VMS_IO$POST,^M<R2>
-int VMS_IO$POST(IOSB$ADRS,IRP$ADRS, UCB$ADRS)
+int VMS_IO$POST(long IOSB$ADRS, long IRP$ADRS, long UCB$ADRS)
 {
-  int R3,R4,R5,R6,R7,R8,R9;
+  long R3,R4,R5,R6,R7,R8,R9;
   struct _vcb * R0;
   struct _irp * R1;
   struct _ucb * R2;
@@ -1328,7 +1329,7 @@ int VMS_IO$POST(IOSB$ADRS,IRP$ADRS, UCB$ADRS)
 
   //MovByt::
 int MOVBYT(Size,Src,Dest) {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  long R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
   MOVC3	(Size,Src,Dest);
   return R0;
 }
@@ -1376,7 +1377,7 @@ static int getmem(const void *src, void *dest, int n) {
 //Entry	Time_Stamp, 0
 int Time_Stamp()
 {
-  int R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  long R1,R2,R3,R4,R5,R6,R7,R8,R9;
   long long R0;
   //	R0 = @EXE$GL_ABSTIM;	// Get system interval timer
   //	MULL2	100, R0		// Convert seconds to 100ths
@@ -1434,7 +1435,7 @@ int Time_Stamp()
 //ENTRY  SWAPBYTES,^M<>
 	int swapbytes(long WrdCnt, long Start)
 {
-  int *R0,*R2,*R3,*R4,*R5,*R6,*R7,*R8,*R9;
+  long *R0,*R2,*R3,*R4,*R5,*R6,*R7,*R8,*R9;
   unsigned char * R1 = Start;			// starting word address.
  Swp_Loop:
   R0 = *R1;				// low ==> temp
@@ -1477,7 +1478,7 @@ int Time_Stamp()
 //ENTRY	Zero_Blk,^M<R2,R3,R4,R5>
 int Zero_Blk(Count,Size,Adrs)
 {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  long R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
   /*	MOVC5	0,@Adrs,0,Size,@Adrs*/
   // not yet
   return R0;
@@ -1622,7 +1623,7 @@ int Zero_Blk(Count,Size,Adrs)
 //Entry	Gen_Checksum,^M<R2>
 int Gen_Checksum(Byte_Count,Start,Srca,Dsta,ptclt)
 {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  long R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
   R0 = Byte_Count;	// Put byte count in R0
   R2 = R0 >> 2;		// Put fullword count in R2
   // Must use byte count rotated +/- 8 bits
@@ -1645,7 +1646,7 @@ int Gen_Checksum(Byte_Count,Start,Srca,Dsta,ptclt)
 //Entry	Calc_Checksum,^M<R2>
 int Calc_Checksum(Byte_Count,Start,Srca,Dsta,ptclt)
   {
-  int R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
+  long R0,R1,R2,R3,R4,R5,R6,R7,R8,R9;
 	R0 = 0;			// Start with a zero checksum
 	R2 = Byte_Count;
 	R2>>=2;		// Put fullword count in R2
@@ -1654,7 +1655,7 @@ int Calc_Checksum(Byte_Count,Start,Srca,Dsta,ptclt)
   }
 
 int Calc_Check0(R0,R2,Byte_Count,Start,Srca,Dsta,ptclt) {	// Point where Gen_Checksum joins in
-  int *R1,R3,R4,R5,R6,R7,R8,R9,C=R0>>31;
+  long *R1,R3,R4,R5,R6,R7,R8,R9,C=R0>>31;
   // R0 and PSW-Carry contain initial 32 bit checksum
   // R2 contains fullword count
   // Start(AP) is pointer to 1st byte
@@ -1807,9 +1808,9 @@ struct _CQ {			// Circular queue
 #endif
 
 //ENTRY CQ_Enqueue,^M<R2,R3,R4,R5,R6,R7>
-int cq_enqueue(CQ,SRC,SCOUNT)
+int cq_enqueue(long CQ, long SRC, long SCOUNT)
 {
-  int R0,R1,R2,R3,R4,R5,R6,R8,R9;
+  long R0,R1,R2,R3,R4,R5,R6,R8,R9;
   struct _CQ * R7;
   R7 = CQ;		// Get queue address
   R6  = R7->CQ$END - R7->CQ$ENQP;	// Find space left to end
@@ -1849,9 +1850,9 @@ int cq_enqueue(CQ,SRC,SCOUNT)
 #endif
 
 //ENTRY CQ_Dequeue,^M<R2,R3,R4,R5,R6,R7>
-void cq_dequeue(CQ,DEST ,DCOUNT) 
+void cq_dequeue(long CQ, long DEST, long DCOUNT) 
 {
-  int R0,R1,R2,R3,R4,R5,R6,R8,R9;
+  long R0,R1,R2,R3,R4,R5,R6,R8,R9;
   struct _CQ * R7;
   // check all
 
@@ -1892,9 +1893,9 @@ void cq_dequeue(CQ,DEST ,DCOUNT)
 #endif
 
 //ENTRY CQ_DeqCopy,^M<R2,R3,R4,R5,R6,R7>
-void cq_deqcopy(CQ,DEST ,DCOUNT) 
+void cq_deqcopy(long CQ, long DEST, long DCOUNT) 
 {
-  int R0,R1,R2,R3,R4,R5,R6,R8,R9;
+  long R0,R1,R2,R3,R4,R5,R6,R8,R9;
   struct _CQ * R7;
   // check all
   R7=CQ;		// Get queue address

@@ -104,9 +104,9 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 struct ttab$entry
 {
   void *    TTab$L_NAME;
-  long    TTab$W_TYPE;
-  long    TTab$L_DEVDEP;
-  long    TTab$L_DEVDEP2;
+  int    TTab$W_TYPE;
+  int    TTab$L_DEVDEP;
+  int    TTab$L_DEVDEP2;
     };
 
 #define    TTAB$K_SIZE sizeof(struct ttab$entry)

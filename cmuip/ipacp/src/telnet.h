@@ -237,7 +237,7 @@ struct _qcbdef {
   unsigned short  QCB$W_PAGE_WIDTH;
   unsigned char   QCB$L_CHARISTICS[3];
   unsigned char  QCB$B_PAGE_LENGTH;
-  unsigned long QCB$L_EXTEND_CHAR;
+  unsigned int QCB$L_EXTEND_CHAR;
 };
 
 #define    QCB$K_SIZE	12				// JC End
@@ -304,17 +304,17 @@ struct TVT$BLOCK
   struct _iosb     TVT$RD_IOSB	;		// IOSB for read operation
   unsigned char    TVT$WR_BUF	 [TVT_TTY_BUFLEN]; // Buffer for PTY write
   unsigned short     TVT$WR_BCNT	;		// Number of bytes in the buffer
-  long     TVT$WR_ICNT	 ;		// Number of bytes read
-  long     TVT$WR_OCNT	 ;		// Number of bytes written
+  int     TVT$WR_ICNT	 ;		// Number of bytes read
+  int     TVT$WR_OCNT	 ;		// Number of bytes written
   //    TVT$WR_PTR	= [$ADDRESS],		// Pointer to current byte
-  long     TVT$WR_IPTR	 ;		// Index of current byte read
-  long     TVT$WR_OPTR	 ;		// Index of current byte written
+  int     TVT$WR_IPTR	 ;		// Index of current byte read
+  int     TVT$WR_OPTR	 ;		// Index of current byte written
   struct _iosb     TVT$WR_IOSB	;		// IOSB for write operation
   unsigned char    TVT$MBX_BUF	 [TVT_MBX_BUFLEN];
   struct _iosb     TVT$MBX_IOSB;		// IOSB for mailbox
   unsigned short     TVT$NRSTATE	;		// Current TVT read state
   union {
-    unsigned long     TVT$FLAGS	 ;		// Flags describing the TVT
+    unsigned int     TVT$FLAGS	 ;		// Flags describing the TVT
     struct {
       unsigned 	TVT$CANCEL	 : 1;	// TVT is being deassigned
       unsigned 	TVT$PREAD	 : 1;	// PTY read is in progress

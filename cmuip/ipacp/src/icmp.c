@@ -156,7 +156,7 @@ ICMP_Hash(IPA)
 
 //Hash an IP address. Returns hash value (index into ICMHTB)
 
-     long IPA;
+     int IPA;
     {
       char * IPAP=&IPA;
     return ((IPAP[0]+IPAP[1]+IPAP[2]+IPAP[3]) & (ICM_HSHAND));
@@ -170,7 +170,7 @@ ICMP_Find(IPADDR)
 //   nonzero - pointer to ICMP data block for this address.
 //N.B. If ICMP entries are ever timed out, this routine should only be called
 //with AST's disabled.
-
+     int IPADDR;
     {
 	struct ICM_DBLOCK * ICPTR;
     ICPTR = ICMHTB[ICMP_Hash(IPADDR)];
@@ -182,7 +182,7 @@ ICMP_Find(IPADDR)
     return 0;
     }
 
-void ICMP_Add(long GWY_Addr,struct ip_structure * IP_Pkt)
+void ICMP_Add(int GWY_Addr,struct ip_structure * IP_Pkt)
 
 //Here to add an entry to the ICMP routing table.
 //   GWY_Addr has the IP address of a gateway
@@ -215,7 +215,7 @@ icmp$check(IPaddr)
 //Returns:
 //   0	No ICMP routing info
 //  !=0	IP address of gateway from ICMP info.
-
+     int IPaddr;
     {
 	struct ICM_DBLOCK * ICMptr;
     if ((ICMptr = ICMP_Find(IPaddr)) == 0)

@@ -190,7 +190,7 @@ char    NQE$DATA[0];	// Mailbox message buffer
     };
 
 #define    NQENTRY_SIZE sizeof(struct NQENTRY)
-#define    NQENTRY_BLEN NQENTRY_SIZE*4
+#define    NQENTRY_BLEN NQENTRY_SIZE
 
 #define    NQENTRY(SIZ) NQENTRY
 

@@ -216,8 +216,8 @@ MACRO ARP_BLK = BLOCK->ARP_BLK_LEN FIELD(ARP_BLK_FIELDS) %;
 struct ACACHE_BLK
   {
     void  *   AC$NEXT	;	// Next entry on hash chain
-    unsigned long int     AC$EXPIRE	; // Expiration time of this entry
-    unsigned long int     AC$RFTIME	; // Next time to try refresh
+    unsigned int     AC$EXPIRE	; // Expiration time of this entry
+    unsigned int     AC$RFTIME	; // Next time to try refresh
     void *     AC$DEVICE	;	// pntr to dev_config entry of this address
     unsigned int     AC$IPADDR	;	// IP address
     void *     AC$SAVEQB	;	// Pointer to saved IP packet if nonzero

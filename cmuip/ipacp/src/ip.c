@@ -334,12 +334,12 @@ void *     ra$buf	;	// Pointer to buffer (first fragment pkt buffer)
 unsigned short     ra$bufsize	;	// Size of buffer
 void *     ra$data	;	// Pointer to start of protocol data in buffer
 void *     ra$datend	;	// Pointer to first free byte in buffer
-unsigned long     ra$octet	;	// Fragment octet offset we are waiting for
-unsigned long     ra$timeout	;// Timer for how long to wait for fragments
+unsigned int     ra$octet	;	// Fragment octet offset we are waiting for
+unsigned int     ra$timeout	;// Timer for how long to wait for fragments
     };
 
 #define    RA$DATA_SIZE sizeof(struct RA$DATA_BLOCK)
-#define    RA$DATA_BLEN RA$DATA_SIZE*4
+#define    RA$DATA_BLEN RA$DATA_SIZE
 
 #if 0
 MACRO
@@ -566,7 +566,7 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 //   -1 on failure, no route known to that address
 //  >=0 on success, with device index
 
-     long * IPDEST, * IPSRC, * NEWIPDEST; // check
+     int * IPDEST, * IPSRC, * NEWIPDEST; // check
     {
     signed long
 	IDX,GWY;

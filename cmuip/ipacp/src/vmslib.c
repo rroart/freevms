@@ -167,8 +167,13 @@ XQL$FAO() {
   printk("XQL$FAO not implemented\n");
 }
 
+#define IPMEMDEB
+#undef IPMEMDEB
+
+#ifdef IPMEMDEB
 long mymi=0;
 long myms[1024];
+#endif
 
 LIB$GET_VM_PAGE(size, addr) 
      long * addr;
@@ -178,10 +183,14 @@ LIB$GET_VM_PAGE(size, addr)
 #else
   //  *addr=kmalloc(4096*((size>>9)+1),GFP_KERNEL); // check
   // *addr=kmalloc(4096*(size/8+1),GFP_KERNEL); // check
+#ifdef IPMEMDEB
   myms[mymi++]=size*512;
+#endif
   *addr=kmalloc(512*size,GFP_KERNEL); // check
+#ifdef IPMEMDEB
   myms[mymi++]=*addr;
   if (mymi>1000) mymi=0;
+#endif
 #endif
   return SS$_NORMAL;
   printk("LIB$GET_VM_PAGE not implemented\n");
@@ -214,10 +223,14 @@ ERROR$FAO() {
 LIB$GET_VM(size, addr) 
      long * addr;
 {
+#ifdef IPMEMDEB
   myms[mymi++]=size;
+#endif
   *addr=kmalloc(size,GFP_KERNEL);
+#ifdef IPMEMDEB
   myms[mymi++]=*addr;
   if (mymi>1000) mymi=0;
+#endif
   return SS$_NORMAL;
   printk("LIB$GET_VM not implemented\n");
 }
@@ -227,6 +240,11 @@ CH$DIFF() {
 }
 
 LIB$FREE_VM_PAGE(long size, long addr) {
+#ifdef IPMEMDEB
+  myms[mymi++]=size*512+1;
+  myms[mymi++]=addr;
+  if (mymi>1000) mymi=0;
+#endif
   kfree(addr);
   return SS$_NORMAL;
   printk("LIB$FREE_VM_PAGE not implemented\n");
