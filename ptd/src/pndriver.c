@@ -577,7 +577,7 @@ int PZ_UNLOAD()				// Unload device
 	static int dummy1;
 int PN$FDTREAD(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   int sts;
-  int *buf,size;
+  long *buf,size;
   size=i->irp$l_qio_p2;	// Get buffer Size
   if (size==0)
     //
@@ -588,7 +588,11 @@ int PN$FDTREAD(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
     return exe$finishioc(SS$_NORMAL,i,p,u);		// complete I/O request
   buf = i->irp$l_qio_p1;		// Get buffer Address
   exe_std$readchk(i,p,u,buf,size); // check buf	// Do we have access to the buffer
+#ifdef __i386__
   size+=12;		// Add 12 bytes for buffer header
+#else
+  size+=24;		// Add 12 bytes for buffer header
+#endif
 
   sts=exe_std$debit_bytcnt_alo(size, p, 0, &buf); 	// Verify enough byte quota allocate buffer
   // and charge process for useage
@@ -603,7 +607,11 @@ int PN$FDTREAD(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
   struct _bufio * bd=buf;
   bd->bufio$b_type=DYN$C_BUFIO;
   bd->bufio$w_size=size;
+#ifdef __i386__
   bd->bufio$ps_pktdata=(long)buf+12;		// Save addr of start of user data
+#else
+  bd->bufio$ps_pktdata=(long)buf+24;		// Save addr of start of user data
+#endif
   bd->bufio$ps_uva32=i->irp$l_qio_p1;		// Save user buffer address in 2nd
 					// longword
   return	exe$qiodrvpkt(i, p, u);	// Queue I/O packet to start I/O routine
@@ -1724,7 +1732,7 @@ int GET_DCL(struct _ucb * ucb) {
 
 //	This routine verifies that the user buffer is accessable
 
-int VERIFY_SENSE(int **outsize, int **buf, struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {				// SENSE CHAR
+int VERIFY_SENSE(int *outsize, int **buf, struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {				// SENSE CHAR
   //
   //	Output:
   //		buf Points to user buffer

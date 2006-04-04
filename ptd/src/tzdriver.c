@@ -607,7 +607,7 @@ void SET_FORCED_CHARS(struct _ucb * ucb) {
 
 	static int indent_dummy;
 void TZ$DISCONNECT(struct _ucb * ucb, int r0) {
-  int R3;
+  long R3;
   if (r0) return;			// If no hangup, skip all this.
  
   struct _tz_ucb * tz = 0; // check
