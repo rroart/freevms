@@ -101,9 +101,12 @@
 	addq $0x4, %rdx		; /* yes, 4 */ \
 	movq %rsp, (%rdx)	; \
 	addq $0x20, (%rdx)	; \
+	movq %rsp, PDAREF(pda_kernelstack) ; \
+	addq $0x20, PDAREF(pda_kernelstack) ; \
 	cmpq $0x10, 0x18(%rsp)	; /* check */ \
 	je 1f			; \
 	addq $0x10, (%rdx)	; \
+	addq $0x10, PDAREF(pda_kernelstack) ; \
 1:				; \
 	popq %rdx
 
@@ -171,8 +174,12 @@
 	andq $0x3, %rax
 	salw $3,%ax
 	addq %rax, %rdi
+	or %ax, %ax
 	movq \x+0x28(%rsp),%rax
 	movq %rax, (%rdi)
+	jne 1f
+	movq %rax, PDAREF(pda_kernelstack)
+1:	
 	popq %rdi
 	popq %rax
 	.endm
@@ -471,12 +478,12 @@ retint_with_reschedule:
 	jne retint_signal
 retint_restore_args_swapgs:		
 	REI
+	RESTORE_ARGS 0,8						
+	SAVE_TSS_SP
 	swapgs
-	jmp 1f
+	jmp iret_label
 retint_restore_args:				
 	REI
-1:
-retint_restore_args2:		
 	RESTORE_ARGS 0,8						
 	SAVE_TSS_SP
 iret_label:
@@ -634,11 +641,11 @@ vms_sysret_restore_args:
 	sysretq
 #endif
 	REI	
+	SAVE_TSS_SP
 	testl $3,8(%rsp)	# from kernel?
 	je   1f
 	swapgs
 1:
-	SAVE_TSS_SP
 	iretq
 			
 vms_sysret_signal:
@@ -952,11 +959,11 @@ ENTRY(\x)
 	call \sym
 	POPR_ALL
 	REI
+	SAVE_TSS_SP
 	testl $3,8(%rsp)       # from kernel?
 	je   1f
 	swapgs
 1:	
-	SAVE_TSS_SP
 	iretq		
 	.endm
 	
@@ -1003,13 +1010,17 @@ error_test:
 	jne  error_signal
 error_restore_swapgs:
 	REI					
+	RESTORE_REST
+	RESTORE_ARGS 0,8						
+	SAVE_TSS_SP
 	swapgs
-	jmp 1f
+	jmp iret_label
 error_restore:	
 	REI
-1:		
 	RESTORE_REST
-	jmp retint_restore_args2
+	RESTORE_ARGS 0,8						
+	SAVE_TSS_SP
+	jmp iret_label
 	
 error_reschedule:
 	sti
