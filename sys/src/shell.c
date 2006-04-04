@@ -71,6 +71,80 @@ void init_p1pp_data(struct _pcb * pcb, struct _phd * phd,signed long offset) {
   init_p1pp_long(&ctl$gl_chindx,offset,CHANNELCNT);
 }
 
+// do this after init_fork_p1pp
+
+int shell_init_other(struct _pcb * pcb, struct _pcb * oldpcb, long addr, long oldaddr) {
+  pgd_t *pgd;
+  pmd_t *pmd;
+  pte_t *pte = 0;
+  pgd_t *oldpgd;
+  pmd_t *oldpmd;
+  pte_t *oldpte = 0;
+
+  long page=addr;
+  long oldpage=oldaddr;
+
+  struct mm_struct * mm=pcb->mm;
+  struct mm_struct * oldmm=oldpcb->mm;
+
+  if (oldmm==0)
+    oldmm=&init_mm;
+
+  spin_lock(&mm->page_table_lock);
+  pgd = pgd_offset(mm, page);
+#ifdef __i386__
+  oldpgd = pgd_offset(oldmm, oldpage);
+#else
+#if 0
+  if (oldmm->pgd)
+    oldpgd = pgd_offset(oldmm, oldpage);
+  else
+    oldpgd = pgd_offset_k(oldpage);
+#else
+  oldpgd = pgd_offset_k(oldpage);
+#endif
+#endif
+  //printk(KERN_EMERG "mm %lx %lx %lx %lx\n",mm,mm->pgd,oldmm,oldmm->pgd);
+  //printk(KERN_EMERG "pgd %lx %lx\n",pgd,oldpgd);
+
+  pmd = pmd_alloc(mm, pgd, page);
+#ifdef __i386__
+  oldpmd = pmd_alloc(oldmm, oldpgd, oldpage);
+#else
+  oldpmd = pmd_alloc(oldmm, oldpgd, oldpage);
+#endif
+  //printk(KERN_EMERG "pmd %lx %lx\n",pmd,oldpmd);
+
+  if (pmd) {
+    pte = pte_alloc(mm, pmd, page);
+#if 0
+    if (pte)
+      *(long*)pte=0;
+#endif
+  }
+  if (oldpmd) {
+    oldpte = pte_alloc(oldmm, oldpmd, oldpage);
+#if 0
+    if (oldpte)
+      *(long*)oldpte=0;
+#endif
+  }
+  spin_unlock(&mm->page_table_lock);
+
+#ifdef CONFIG_VMS
+  int pfn=mmg$ininewpfn(pcb,pcb->pcb$l_phd,page,pte);
+  mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
+#else
+  int pfn=_alloc_pages(GFP_KERNEL,0)-mem_map;
+#endif
+#define _PAGE_NEWPAGE 0
+  *(unsigned long *)pte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+  *(unsigned long *)oldpte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
+  flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
+  flush_tlb_range(oldpcb->mm, oldpage, oldpage + PAGE_SIZE);
+  memset(oldpage,0,PAGE_SIZE); // must zero content also
+}
+
 void init_sys_p1pp() {
   extern struct _phd system_phd;
   struct _pcb * pcb = &init_task;

@@ -65,6 +65,7 @@ int main(void)
 #undef ENTRY
 #define ENTRY(entry) outconst("#define cpu_" #entry " %0", offsetof(struct _cpu, entry))
 	ENTRY(cpu$l_saved_isp);
+	ENTRY(cpu$ps_pda);
 #undef ENTRY
 	output("#ifdef __ASSEMBLY__"); 
 	outconst("#define PT_TRACESYS %0", PT_TRACESYS);

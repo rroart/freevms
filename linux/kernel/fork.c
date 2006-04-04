@@ -802,6 +802,10 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	if (copy_mm(clone_flags, p))
 		goto bad_fork_cleanup_sighand;
 	int uml_map = init_fork_p1pp(p,p->pcb$l_phd,current,current->pcb$l_phd);
+#ifdef __x86_64__
+	shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x1000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x2000,0x7fffe000);
+#endif
 	//printk("phd %x %x %x\n",tsk,tsk->pcb$l_pid,tsk->pcb$l_phd);
 	//printk("phd %x %x %x\n",current,current->pcb$l_pid,current->pcb$l_phd);
 #ifndef __arch_um__

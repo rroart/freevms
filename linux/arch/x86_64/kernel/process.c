@@ -533,7 +533,11 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long rsp,
 	struct pt_regs * childregs;
 	struct task_struct *me = current;
 
+#if 1
 	childregs = ((struct pt_regs *) (THREAD_SIZE + (unsigned long) p)) - 1;
+#else
+	childregs = (struct pt_regs *) 0x7ffa0000;
+#endif
 
 	*childregs = *regs;
 
@@ -580,7 +584,12 @@ int new_thread(int nr, unsigned long clone_flags, unsigned long rsp,
 	struct pt_regs * childregs;
 	struct task_struct *me = current;
 
+#if 0
 	childregs = ((struct pt_regs *) (THREAD_SIZE + (unsigned long) p)) - 1;
+#else
+	// not yet. related to P1 ksp
+	childregs = (struct pt_regs *) 0x7ffa0000;
+#endif
 
 #if 0
 	*childregs = *regs;
@@ -703,7 +712,12 @@ struct task_struct *__switch_to(struct task_struct *prev_p, struct task_struct *
 	prev->userrsp = read_pda(oldrsp); 
 	write_pda(oldrsp, next->userrsp); 
 	write_pda(pcurrent, next_p); 
+#if 0
 	write_pda(kernelstack, (unsigned long)next_p + THREAD_SIZE - PDA_STACKOFFSET);
+#else
+	// not yet. related to P1 ksp
+	write_pda(kernelstack, (unsigned long)tss->rsp0);
+#endif
 
 	/*
 	 * Now maybe reload the debug registers

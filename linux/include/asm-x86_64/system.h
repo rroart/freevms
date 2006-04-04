@@ -50,9 +50,12 @@ struct save_context_frame {
 	__POP(r15) __POP(r14) __POP(r13) __POP(r12) \
 	__POP(rdi) __POP(rsi)
 
-#define switch_to(prev,next,last) do { void *l; \
+#define switch_to(prev,next,last,pgtp,pgt) do { void *l; \
 	asm volatile(SAVE_CONTEXT					\
 		     "movq %%rsp,%0\n\t"	/* save RSP */		\
+"movq %%rdx, (%%rcx)\n\t" \
+"movq %%cr3, %%rax\n\t" \
+"movq %%rax, %%cr3\n\t" \
 		     "movq %3,%%rsp\n\t"	/* restore RSP */	\
 		     "leaq thread_return(%%rip),%%rax\n\t"		\
 		     "movq %%rax,%1\n\t"	/* save RIP */		\
@@ -63,6 +66,7 @@ struct save_context_frame {
 		     RESTORE_CONTEXT					\
 		     :"=m" (prev->thread.rsp),"=m" (prev->thread.rip), "=a" (l) \
 		     :"m" (next->thread.rsp),"m" (next->thread.rip),	\
+"c" (pgtp),"d" (pgt), \
 		      "S" (next), "D" (prev)				\
 		     :"memory","cc");					\
 	last = l; 							\

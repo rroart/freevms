@@ -614,7 +614,7 @@ asmlinkage void __init start_kernel(void)
  * Interrupts are still disabled. Do necessary setups, then
  * enable them
  */
-#ifdef __x86_64__
+#if 0
 	kernel_puts("puts 1\n");
 	lock_kernel();
 #endif
@@ -628,7 +628,7 @@ asmlinkage void __init start_kernel(void)
 	parse_options(command_line);
 	kernel_puts("puts 7.5\n");
 	init_sys_p1pp();
-#ifdef __i386__
+#if 1
 	kernel_puts("puts 1\n");
 	lock_kernel();
 #endif
@@ -1034,8 +1034,24 @@ static int init(void * unused)
 	goto go;
 #endif
 #endif
+#ifdef __i386__
 	if (execute_command)
 		execve(execute_command,argv_init,envp_init);
+#else
+	if (execute_command) {
+#if 1
+	  // not yet. related to P1 ksp
+	  long * l = 0x7ffa0000;
+	  l[-1]=0;
+	  l[-1-512]=0;
+	  struct tss_struct *tss = init_tss + smp_processor_id();
+	  tss->rsp0 = l;
+	  write_pda(kernelstack, (long) l);
+	  asm ("movq $0x7ffa0000, %rsp");
+#endif
+		execve(execute_command,argv_init,envp_init);
+	}
+#endif
 #if 0
 	printk("Will try to start loginout.\nPress <enter> or something as usual (but within 60 seconds).\n");
 	execve("/vms$common/sysexe/loginout",argv_init,envp_init);

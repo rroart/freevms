@@ -50,8 +50,10 @@ static inline void switch_mm(struct mm_struct *prev, struct mm_struct *next,
 		set_bit(cpu, &next->cpu_vm_mask);
 		set_bit(cpu, &next->context.cpuvalid);
 		/* Re-load page tables */
+#if 0
 		*read_pda(level4_pgt) = __pa(next->pgd) | _PAGE_TABLE;
 		__flush_tlb();
+#endif
 	}
 #ifdef CONFIG_SMP
 	else {
