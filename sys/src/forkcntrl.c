@@ -22,7 +22,7 @@ void exe$fork(struct _irp * i, struct _ucb * u);
 void exe$queue_fork(struct _irp * i, struct _ucb * u);
 
 struct fork_lock_struct {
-  spinlock_t * spin;
+  struct _spl * spin;
   int ipl;
 };
 

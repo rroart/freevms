@@ -17,6 +17,7 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <linux/slab.h>
+#include <spldef.h>
 
 /* Author: Roar Thronæs */
 
@@ -1961,31 +1962,31 @@ struct _scs_rd rdtl[128]; //[scs$gw_rdtcnt];
 
 /* spinlocks */
 
-spinlock_t SPIN_ATOMIC __cacheline_aligned = SPIN_LOCK_UNLOCKED; /* for atomic operations */
+struct _spl SPIN_ATOMIC __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ }; /* for atomic operations */
 
 /* corresponding to ipls */
 
-spinlock_t SPIN_EMB __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_MCHECK __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_MEGA __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_HWCLK __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_VIRTCONS __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_INVALIDATE __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_PERFMON __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_POOL __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_MAILBOX __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_PR_LK11 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_IOLOCK11 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_PR_LK10 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_IOLOCK10 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_PR_LK9 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_IOLOCK9 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_SCHED __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_MMG __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_JIB __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_TIMER __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_PR_LK8 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
-spinlock_t SPIN_IOLOCK8 __cacheline_aligned = SPIN_LOCK_UNLOCKED;
+struct _spl SPIN_EMB __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_MCHECK __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_MEGA __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_HWCLK __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_VIRTCONS __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_INVALIDATE __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_PERFMON __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_POOL __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_MAILBOX __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_PR_LK11 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_IOLOCK11 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_PR_LK10 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_IOLOCK10 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_PR_LK9 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_IOLOCK9 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_SCHED __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_MMG __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_JIB __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_TIMER __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_PR_LK8 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_IOLOCK8 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
 
 struct _phd system_phd;
 
@@ -2027,6 +2028,10 @@ void __init vms_init(void) {
       q->blink=q;
     }
     qhead_init(&smp$gl_cpu_data[i]->cpu$l_psfl);
+#ifdef __x86_64__
+#include <asm/pda.h>
+    smp$gl_cpu_data[i]->cpu$ps_pda=cpu_pda + i;
+#endif
   }
 
   smp$gl_cpu_data[0]->cpu$l_curpcb = &init_task_union;

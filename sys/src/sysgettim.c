@@ -78,7 +78,9 @@ asmlinkage int exe$gettim(unsigned long long *timadr)
   long * tmp=(long *)&exe$gq_systime, *tmp2=(long *)timadr;
   if (!timadr) return SS$_ACCVIO;
   if (timadr<4096) {
+#if 0
     printk("gettim got accvio addr\n");
+#endif
     return SS$_ACCVIO;
   }
   memcpy(timadr,&exe$gq_systime,8);

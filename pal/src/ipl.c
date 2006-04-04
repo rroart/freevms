@@ -14,6 +14,8 @@
 #include<linux/sched.h>
 #include<asm/current.h>
 #include<queue.h>
+#include<internals.h>
+
 long inline mycli(void);
 
 int in_atomic=0;
@@ -413,7 +415,7 @@ asmlinkage void myrei (void) {
 #if (defined __i386__) || (defined __x86_64__)
 void inline mysti(long flags) {
   in_atomic=0;
-  spin_unlock(&SPIN_ATOMIC);
+  vmsunlock(&SPIN_ATOMIC,-1);
   if (flags) __sti();
   //printk("mysti\n");
 }
@@ -433,7 +435,7 @@ long inline mycli(void) {
   //printk("mycli\n");
   __save_flags(flags);
   __cli();
-  spin_lock(&SPIN_ATOMIC);
+  vmslock(&SPIN_ATOMIC,-1);
   retval=flags&0x00000200; /* interrupt enable/disable flag */
   if (in_atomic && in_atomic==current->pcb$l_pid) {
 #ifdef __i386__
@@ -461,12 +463,12 @@ long inline mycli(void) {
 void inline mysti(int flags) { 
   in_atomic=0;
   if (flags) unblock_signals();
-  spin_unlock(&SPIN_ATOMIC);
+  vmsunlock(&SPIN_ATOMIC,-1);
 }
 
 int inline mycli(void) {
   int retval=timer_on;
-  spin_lock(&SPIN_ATOMIC);
+  vmslock(&SPIN_ATOMIC,-1);
   if (in_atomic && in_atomic==current->pcb$l_pid) panic("test\n");
   if (in_atomic && in_atomic!=current->pcb$l_pid) printk("halfpancimycli\n");
   block_signals();

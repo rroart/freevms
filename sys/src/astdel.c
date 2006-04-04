@@ -21,6 +21,7 @@
 #include <linux/sched.h>
 #include <linux/smp.h>
 #include <linux/slab.h>
+#include <internals.h>
 
 #define OLDAST
 #undef OLDAST
@@ -60,10 +61,10 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   /* lock */
   savipl=getipl();
   setipl(IPL$_SYNCH);
-  spin_lock(&SPIN_SCHED);
+  vmslock(&SPIN_SCHED,-1);
   struct _pcb * p=exe$ipid_to_pcb(pid);
   if (!p) {
-    spin_unlock(&SPIN_SCHED);
+    vmsunlock(&SPIN_SCHED,-1);
     setipl(savipl);
     return SS$_NONEXPR;
   }
@@ -104,7 +105,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   }
   //printk("aft rse\n");
   /* unlock */
-  spin_unlock(&SPIN_SCHED);
+  vmsunlock(&SPIN_SCHED,-1);
   setipl(savipl);
   return status;
 }
@@ -532,7 +533,7 @@ asmlinkage void sch$astdel(int dummy) {
   myacbs[myacbi++]=0x77777777;
 #endif
  more:
-  spin_lock(&SPIN_SCHED);
+  vmslock(&SPIN_SCHED,-1);
 #ifdef ASTDEBUG
   checkq(&p->pcb$l_astqfl);
 #endif
@@ -543,7 +544,7 @@ asmlinkage void sch$astdel(int dummy) {
      for (i=0; i<1000000; i++) ;
      } */
   if (aqempty(&p->pcb$l_astqfl)) {
-    spin_unlock(&SPIN_SCHED);
+    vmsunlock(&SPIN_SCHED,-1);
     sch$newlvl(p);
     return;
   }
@@ -578,7 +579,7 @@ asmlinkage void sch$astdel(int dummy) {
   if (acb->acb$b_rmod & ACB$M_KAST) {
     acb->acb$b_rmod&=~ACB$M_KAST;
     /* unlock */
-    spin_unlock(&SPIN_SCHED);
+    vmsunlock(&SPIN_SCHED,-1);
     //printk("astdel1 %x \n",acb->acb$l_kast);
     setipl(IPL$_ASTDEL);
     //p->pcb$b_astact=1;
@@ -622,12 +623,12 @@ asmlinkage void sch$astdel(int dummy) {
 #endif
     insque(acb,&p->pcb$l_astqfl);
     p->phd$b_astlvl=p->pr_astlvl=(acb->acb$b_rmod & 3) + 1;
-    spin_unlock(&SPIN_SCHED);
+    vmsunlock(&SPIN_SCHED,-1);
     return;
   }
   p->phd$b_astlvl=p->pr_astlvl=(acb->acb$b_rmod & 3) + 1;
   //unlock
-  spin_unlock(&SPIN_SCHED);
+  vmsunlock(&SPIN_SCHED,-1);
   setipl(IPL$_ASTDEL);
 #ifdef OLDAST
   p->pcb$b_astact=0; // 1; wait with this until we get modes
@@ -701,7 +702,7 @@ void sch$newlvl(struct _pcb *p) {
   int newlvl;
   int oldipl=getipl();
 
-  spin_lock(&SPIN_SCHED);
+  vmslock(&SPIN_SCHED,-1);
   setipl(IPL$_SYNCH);
 
   if (aqempty(p->pcb$l_astqfl))
@@ -715,7 +716,7 @@ void sch$newlvl(struct _pcb *p) {
     
   p->phd$b_astlvl=newlvl;
   p->pr_astlvl=newlvl;
-  spin_unlock(&SPIN_SCHED);
+  vmsunlock(&SPIN_SCHED,-1);
   setipl(oldipl);
 }
 

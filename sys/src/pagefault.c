@@ -300,7 +300,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 #endif
 
 	setipl(IPL$_MMG);
-	//spin_lock(&SPIN_SCHED);
+	//vmslock(&SPIN_SCHED,-1);
 
 	//some linux stuff
 	tsk = current;
@@ -795,7 +795,7 @@ unsigned long segv(unsigned long address, unsigned long ip, int is_write,
 	regtrap(REG_INTR,IPL$_MMG);
 
 	setipl(IPL$_MMG);
-	//spin_lock(&SPIN_SCHED);
+	//vmslock(&SPIN_SCHED,-1);
 
 	//some linux stuff
 	if((address >= start_vm) && (address < end_vm)){
@@ -1416,7 +1416,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	regtrap(REG_INTR,IPL$_MMG);
 
 	setipl(IPL$_MMG);
-	//spin_lock(&SPIN_SCHED);
+	//vmslock(&SPIN_SCHED,-1);
 #endif
 	//some linux stuff
 	tsk = current;

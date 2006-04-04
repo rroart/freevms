@@ -51,7 +51,7 @@ void mmg$wrtmfypag(void) {
     return;
 #if 0
   setipl(IPL$_MMG);
-  spin_lock(&SPIN_MMG);
+  vmslock(&SPIN_MMG,-1);
 #endif
   mmg$purgempl(MPW$C_MAINTAIN);
 

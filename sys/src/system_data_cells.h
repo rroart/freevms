@@ -9,7 +9,7 @@
 #include<wqhdef.h>
 #include<rsbdef.h>
 #include<ccbdef.h>
-#include<linux/spinlock.h>
+#include<spldef.h>
 
 extern unsigned long acme$gq_mutex;
 extern unsigned long acme$gq_request_queue;
@@ -1904,31 +1904,31 @@ extern struct _cpu vmscpus[32];
 
 /* spinlocks */
 
-extern spinlock_t SPIN_ATOMIC;
+extern struct _spl SPIN_ATOMIC;
 
 /* corresponding to ipls */
 
-extern spinlock_t SPIN_EMB;
-extern spinlock_t SPIN_MCHECK;
-extern spinlock_t SPIN_MEGA;
-extern spinlock_t SPIN_HWCLK;
-extern spinlock_t SPIN_VIRTCONS;
-extern spinlock_t SPIN_INVALIDATE;
-extern spinlock_t SPIN_PERFMON;
-extern spinlock_t SPIN_POOL;
-extern spinlock_t SPIN_MAILBOX;
-extern spinlock_t SPIN_PR_LK11;
-extern spinlock_t SPIN_IOLOCK11;
-extern spinlock_t SPIN_PR_LK10;
-extern spinlock_t SPIN_IOLOCK10;
-extern spinlock_t SPIN_PR_LK9;
-extern spinlock_t SPIN_IOLOCK9;
-extern spinlock_t SPIN_SCHED;
-extern spinlock_t SPIN_MMG;
-extern spinlock_t SPIN_JIB;
-extern spinlock_t SPIN_TIMER;
-extern spinlock_t SPIN_PR_LK8;
-extern spinlock_t SPIN_IOLOCK8;
+extern struct _spl SPIN_EMB;
+extern struct _spl SPIN_MCHECK;
+extern struct _spl SPIN_MEGA;
+extern struct _spl SPIN_HWCLK;
+extern struct _spl SPIN_VIRTCONS;
+extern struct _spl SPIN_INVALIDATE;
+extern struct _spl SPIN_PERFMON;
+extern struct _spl SPIN_POOL;
+extern struct _spl SPIN_MAILBOX;
+extern struct _spl SPIN_PR_LK11;
+extern struct _spl SPIN_IOLOCK11;
+extern struct _spl SPIN_PR_LK10;
+extern struct _spl SPIN_IOLOCK10;
+extern struct _spl SPIN_PR_LK9;
+extern struct _spl SPIN_IOLOCK9;
+extern struct _spl SPIN_SCHED;
+extern struct _spl SPIN_MMG;
+extern struct _spl SPIN_JIB;
+extern struct _spl SPIN_TIMER;
+extern struct _spl SPIN_PR_LK8;
+extern struct _spl SPIN_IOLOCK8;
 
 #ifdef __x86_64__
 

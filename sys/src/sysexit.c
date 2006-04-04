@@ -7,7 +7,8 @@
 #include<misc.h>
 #include<ssdef.h>
 #include<system_data_cells.h>
-
+#include<linux/kernel.h>
+ 
 asmlinkage int exe$exit(unsigned int code) {
 #ifdef __x86_64__
   long dummy;

@@ -10,6 +10,7 @@
 #include<stdarg.h>
 #include <exe_routines.h>
 #include <linux/string.h>
+#include<linux/kernel.h>
 
 asmlinkage int exe$faol(void * ctrstr , short int * outlen , void * outbuf , int * prmlst) {
   long * argv=prmlst;

@@ -1,4 +1,5 @@
 #include<ipl.h>
+#include<spldef.h>
 
 #undef VMSLOCK_DEBUG
 #define VMSLOCK_DEBUG
@@ -10,9 +11,12 @@ extern long locks[1024];
 
 void qhead_init(void * l);
 
-static int inline vmslock(spinlock_t * lockname,signed int lockipl) {
+inline int smp$acquire(struct _spl * spl);
+inline int smp$restore(struct _spl * spl);
+
+static int inline vmslock(struct _spl * lockname,signed int lockipl) {
   int savipl=getipl();
-  spin_lock(lockname);
+  smp$acquire(lockname);
   if (lockipl>=0 && lockipl<=31) setipl(lockipl);
 #ifdef VMSLOCK_DEBUG
   long  x;// = &lockname;
@@ -26,8 +30,8 @@ static int inline vmslock(spinlock_t * lockname,signed int lockipl) {
   return savipl;
 }
 
-static void inline vmsunlock(spinlock_t * lockname,signed int lockipl) {
-  spin_unlock(lockname);
+static void inline vmsunlock(struct _spl * lockname,signed int lockipl) {
+  smp$restore(lockname);
   if (lockipl>=0 && lockipl<=31) setipl(lockipl);
 #ifdef VMSLOCK_DEBUG
   long  x;// = &lockname;

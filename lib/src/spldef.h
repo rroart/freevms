@@ -12,8 +12,8 @@
 #define SPL$K_PC_VEC_CNT 16             
 	
 struct _spl {
-  int spl$l_own_cpu;                  
-  int spl$l_own_cnt;                  
+  long spl$l_own_cpu;                  
+  long spl$l_own_cnt;                  
   unsigned short int spl$w_size;      
   unsigned char spl$b_type;           
   unsigned char spl$b_subtype;        
@@ -202,6 +202,6 @@ struct _spltrh {
   struct _spltre *spltrh$q_entry_ptr; 
   struct _spltre spltrh$r_entry [1];          
 };
- 
+
 #endif 
  

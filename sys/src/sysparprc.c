@@ -11,12 +11,13 @@
 #include<ipl.h>
 #include<phddef.h>
 #include <sch_routines.h>
+#include<internals.h>
 
 asmlinkage void exe$resched(void) {
   int ipl=getipl();
   struct _pcb * p;
   setipl(IPL$_SCHED);
-  spin_lock(&SPIN_SCHED);
+  vmslock(&SPIN_SCHED,-1);
 
   p=ctl$gl_pcb;
   p->pcb$l_onqtime=exe$gl_abstim_tics;
@@ -25,7 +26,7 @@ asmlinkage void exe$resched(void) {
 
   SOFTINT_RESCHED_VECTOR;
 
-  spin_unlock(&SPIN_SCHED);
+  vmsunlock(&SPIN_SCHED,-1);
   setipl(ipl);
 
 }
