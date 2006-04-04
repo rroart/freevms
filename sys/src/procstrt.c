@@ -219,7 +219,11 @@ int exe$procstrt(struct _pcb * p) {
 #endif
 #endif
 #ifdef __x86_64__
+#if 0
   __asm__ ("movq %%rbx,%0; ":"=r" (p));
+#else
+  p = ctl$gl_pcb; // check 
+#endif
 #endif
   // warning: very risky one, chance
 #endif
