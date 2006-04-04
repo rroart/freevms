@@ -137,8 +137,6 @@ ENOSYS = 38
 	pushl %edi		; \
 	pushl %edx		; \
 	movl ctl$gl_pcb, %edi	; \
-	testl $0x200, tsk_oldpsl(%edi); \
-	jne 1f			; \
 	movl $init_tss, %edx	; \
 	addl $0x4, %edx		; /* yes, 4 */ \
 	movl %esp, (%edx)	; /* curmod is 0 for the time being */ \
@@ -151,15 +149,7 @@ ENOSYS = 38
 	je 3f			; \
 	addl $0x8, (%edx)	; \
 3:				; \
-	jmp 2f			; \
-1:				; \
-	movl smp$gl_cpu_data, %edi ; \
-	movl %esp, cpu_cpul_saved_isp(%edi)	; \
-	addl $0xc, cpu_cpul_saved_isp(%edi)	; \
-2:				; \
 	movl ctl$gl_pcb, %edi	; \
-	testl $0x200, tsk_psl(%edi); \
-	jne 1f			; \
 	addl $tsk_ipr_sp, %edi; \
 	movl (%edi), %edx	; /* curmod is 0 for the time being */ \
 	movl %edx, 0x8(%esp)	; \
@@ -168,7 +158,6 @@ ENOSYS = 38
 	je 3f			; \
 	addl $0x8, (%edx)	; \
 3:				; \
-1:				; \
 	popl %edx		; \
 	popl %edi		; \
 	popl %esp		; \
@@ -184,8 +173,6 @@ ENOSYS = 38
 	pushl %edi		; \
 	pushl %edx		; \
 	movl ctl$gl_pcb, %edi	; \
-	testl $0x200, tsk_psl(%edi); \
-	jne 1f			; \
 	movl $init_tss, %edx	; \
 	addl $0x4, %edx		; /* yes, 4 */ \
 	movl %esp, (%edx)	; /* curmod is 0 for the time being */ \
@@ -199,17 +186,9 @@ ENOSYS = 38
 	addl $0x8, (%edi)	; \
 3:				; \
 	jmp 2f			; \
-1:				; \
-	jmp 42f			; \
-	movl smp$gl_cpu_data, %edi ; \
-	movl %esp, cpu_cpul_saved_isp(%edi)	; \
-	addl $0xc, cpu_cpul_saved_isp(%edi)	; \
-42:				; \
 2:				; \
 	jmp 3f			; \
 	movl ctl$gl_pcb, %edi	; \
-	testl $0x200, tsk_psl(%edi); \
-	jne 1f			; \
 	addl $tsk_ipr_sp, %edi; \
 	movl (%edi), %edx	; /* curmod is 0 for the time being */ \
 	movl %edx, 0x8(%esp)	; \
@@ -218,7 +197,6 @@ ENOSYS = 38
 	je 3f			; \
 	addl $0x8, (%edx)	; \
 3:				; \
-1:				; \
 	popl %edx		; \
 	popl %edi		; \
 	iret			; \
@@ -288,10 +266,6 @@ ENOSYS = 38
 	movl ctl$gl_pcb, %edi	; \
 	movl $init_tss, %edx	; \
 	addl $0x4, %edx		; \
-	testl $0x200, tsk_psl(%edi); \
-	je 1f			; \
-	call panic		; \
-1:				; \
 	addl $tsk_ipr_sp, %edi	; \
 	movl x+0x10(%esp), %eax	; \
 	andl $0x3, %eax		; \
@@ -322,8 +296,6 @@ ENOSYS = 38
 	movl ctl$gl_pcb, %edi	; \
 	movl $init_tss, %edx	; \
 	addl $0x4, %edx		; \
-	testl $0x200, tsk_psl(%edi); \
-	jne 1f			; \
 	addl $tsk_ipr_sp, %edi	; \
 	movl %esp, (%edi); /* check ekstra */ \
 	movl %esp, (%edx); /* check ekstra */ \
@@ -347,66 +319,11 @@ ENOSYS = 38
 	movl %eax, (%edx)	; \
 4:				; \
 	movl %eax, (%edi)	; \
-1:				; \
 	popl %edx		; \
 	popl %edi		; \
 	popl %eax;
 	
-#define INTEXC_FIX_ISP(x) \
-	pushl %esp		; \
-	pushl %eax		; \
-	pushl %edi		; \
-	pushl %edx		; \
-	movl ctl$gl_pcb, %edi	; \
-	movl $init_tss, %edx	; \
-	addl $0x4, %edx		; \
-	testl $0x200, tsk_psl(%edi); \
-	jne 1f			; \
-	addl $tsk_ipr_sp, %edi	; \
-	movl %esp,  (%edi); /* check ekstra */ \
-	movl %esp,  (%edx); /* check ekstra */ \
-	addl $0x10, (%edi); /* check ekstra */ \
-	addl $0x10, (%edx); /* check ekstra */ \
-	movl x+0x14(%esp), %eax	; \
-	andl $0x3, %eax		; \
-	je 2f			; \
-	salw $2,%ax		; \
-	addl %eax, %edi		; \
-	addl %eax, %edx		; \
-	addl %eax, %edx		; \
-	cmpl $0xc, %eax 	; \
-	movl x+0x1c(%esp),%eax	; \
-	je 4f			; \
-	jmp 3f			; \
-2:				; \
-	movl %esp, %eax		; \
-	addl $x, %eax		; \
-	addl $0x10, %eax	; \
-3:				; \
-	movl %eax, (%edx)	; \
-4:				; \
-	movl %eax, (%edi)	; \
-	movl smp$gl_cpu_data, %edi ; \
-	movl cpu_cpul_saved_isp(%edi), %eax	;  \
-	movl %eax, 0xc(%esp) 	; \
-1:				; \
-	popl %edx		; \
-	popl %edi		; \
-	popl %eax		; \
-	popl %esp; 
-	
-#define SOFTINTI(name,ipl) \
-	INTEXC_FIX_ISP(0)	; \
-        PUSHR_ALL		; \
-	pushl ipl		; \
-	pushl $0x0		; \
-	call regtrap		; \
-	addl $0x8, %esp		; \
-        call SYMBOL_NAME(name)	; \
-        POPR_ALL		; \
-        REI
-				
-#define SOFTINTK(name,ipl) \
+#define SOFTINT(name,ipl) \
 	INTEXC_FIX_SP(0)	; \
         PUSHR_ALL		; \
 	pushl ipl		; \
@@ -894,7 +811,7 @@ ENTRY(test_code)
         REI
 
 ENTRY(sched_vector)
-	SOFTINTK(schedule,$0x0)
+	SOFTINT(schedule,$0x0)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(schedule)
@@ -902,7 +819,7 @@ ENTRY(sched_vector)
         REI
 
 ENTRY(resched_vector)
-	SOFTINTK(sch$resched,$0x3)
+	SOFTINT(sch$resched,$0x3)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(sch$resched)
@@ -910,7 +827,7 @@ ENTRY(resched_vector)
         REI
 
 ENTRY(timer_vector)
-	SOFTINTI(exe$swtimint,$0x7)
+	SOFTINT(exe$swtimint,$0x7)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$swtimint)
@@ -918,7 +835,7 @@ ENTRY(timer_vector)
         REI
 
 ENTRY(timerfork_vector)
-	SOFTINTI(exe$swtimint,$0x7)
+	SOFTINT(exe$swtimint,$0x7)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$swtimint)
@@ -926,7 +843,7 @@ ENTRY(timerfork_vector)
         REI
 
 ENTRY(iopost_vector)
-	SOFTINTI(ioc$iopost,$0x4)
+	SOFTINT(ioc$iopost,$0x4)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(ioc$iopost)
@@ -934,7 +851,7 @@ ENTRY(iopost_vector)
         REI
 
 ENTRY(astdel_vector)
-	SOFTINTK(sch$astdel,$0x2)
+	SOFTINT(sch$astdel,$0x2)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(sch$astdel)
@@ -942,7 +859,7 @@ ENTRY(astdel_vector)
         REI
 
 ENTRY(queueast_vector)
-	SOFTINTI(exe$frkipl6dsp,$0x6)
+	SOFTINT(exe$frkipl6dsp,$0x6)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$frkipl6dsp)
@@ -950,7 +867,7 @@ ENTRY(queueast_vector)
         REI
 
 ENTRY(iolock8_vector)
-	SOFTINTI(exe$frkipl8dsp,$0x8)
+	SOFTINT(exe$frkipl8dsp,$0x8)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$frkipl8dsp)
@@ -958,7 +875,7 @@ ENTRY(iolock8_vector)
         REI
 
 ENTRY(iolock9_vector)
-	SOFTINTI(exe$frkipl9dsp,$0x9)
+	SOFTINT(exe$frkipl9dsp,$0x9)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$frkipl9dsp)
@@ -966,7 +883,7 @@ ENTRY(iolock9_vector)
         REI
 
 ENTRY(iolock10_vector)
-	SOFTINTI(exe$frkipl10dsp,$0xa)
+	SOFTINT(exe$frkipl10dsp,$0xa)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$frkipl10dsp)
@@ -974,7 +891,7 @@ ENTRY(iolock10_vector)
         REI
 
 ENTRY(iolock11_vector)
-	SOFTINTI(exe$frkipl11dsp,$0xb)
+	SOFTINT(exe$frkipl11dsp,$0xb)
         PUSHR_ALL
 #        call pushpsl
         call SYMBOL_NAME(exe$frkipl11dsp)

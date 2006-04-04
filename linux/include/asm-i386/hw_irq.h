@@ -366,7 +366,6 @@ asmlinkage void call_##x(void); \
 __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(x) ":\n\t" \
-	INTEXC_FIX_ISP(0) \
 	"pushl $"#v"-256\n\t" \
 	SAVE_ALL \
         REGTRAP \
@@ -381,7 +380,6 @@ asmlinkage void call_##x(void); \
 __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(x) ":\n\t" \
-	INTEXC_FIX_ISP(0) \
 	"pushl $"#v"-256\n\t" \
 	SAVE_ALL \
         REGTRAP \
@@ -418,7 +416,6 @@ asmlinkage void IRQ_NAME(nr); \
 __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(IRQ) #nr "_interrupt:\n\t" \
-	INTEXC_FIX_ISP(0) \
 	"pushl $"#nr"-256\n\t" \
 	"jmp common_interrupt");
 
