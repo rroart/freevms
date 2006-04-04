@@ -134,7 +134,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
   // set pcb$l_pqb
 #if 0
   setipl(IPL$_MMG);
-  spin_lock(&SPIN_SCHED);
+  vmslock(&SPIN_SCHED,-1);
   // find vacant slot in pcb vector
   // and store it
 #endif  
@@ -302,7 +302,10 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	init_phd(p->pcb$l_phd);
 
 	init_fork_p1pp(p,p->pcb$l_phd,ctl$gl_pcb,ctl$gl_pcb->pcb$l_phd);
-
+#ifdef __x86_64__
+	shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x1000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x2000,0x7fffe000);
+#endif
 	int exe$procstrt(struct _pcb * p);
 #ifdef __arch_um__
 	current->thread.request.u.thread.proc = exe$procstrt;
