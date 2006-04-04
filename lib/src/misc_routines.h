@@ -219,7 +219,7 @@ exttwo_create(struct _vcb *vcb,struct _irp * i);
 struct _ucb * finducb(struct _fcb * fcb);
 int exe$altquepkt (struct _irp * i, struct _pcb * p, struct _ucb * u);
 int GET_DCL(struct _ucb * ucb);
-int VERIFY_SENSE(int **outsize, int **buf, struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+int VERIFY_SENSE(int *outsize, int **buf, struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 int jobctl_unsolicit(struct dsc$descriptor * term);
 int tty$getnextchar(int * chr, int * CC, struct _ucb * u);
 int tty$putnextchar(int * chr, int * CC, struct _ucb * u);
