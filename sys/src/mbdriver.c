@@ -816,7 +816,7 @@ int exe_std$sndevmsg(struct _mb_ucb *mb_ucb, int msgtyp, struct _ucb *ucb) {
   // too lazy to do ioc$cvt_devnam
   sprintf(&message[1],"%s%d",&ucb->ucb$l_ddb->ddb$t_name[1],ucb->ucb$w_unit);
 
-  return exe_std$wrtmailbox(mb_ucb,32,message);
+  return exe_std$wrtmailbox(mb_ucb,8*sizeof(long),message);
 }
 
 int mb$chanunwait(struct _ucb * u, struct _ccb * c) {

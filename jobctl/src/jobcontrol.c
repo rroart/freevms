@@ -26,7 +26,7 @@ do_mbx_read();
 
 mbx_read_ast() {
   int unit = mbx_buffer[1];
-  char * s = &mbx_buffer[2];
+  char * s = &mbx_buffer[sizeof(long)>>1];
   if (((iosb&0xffff)&1)==0)
     printk("iosb error\n");
   switch(mbx_buffer[0]) {
