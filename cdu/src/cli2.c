@@ -9,6 +9,8 @@
 #include "cli.h"
 
 int my_cdu_search_next(int i, int type, char * s, int size, int * retval) {
+  if (size==0)
+    return 0;
   struct _cdu * my_cdu_root = *my_cdu;
   do {
     struct _cdu * name;

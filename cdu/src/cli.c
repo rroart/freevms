@@ -93,6 +93,8 @@ cdu_strncmp(int cdu, char * n, int size) {
 #endif
 
 int cdu_search_next(int i, int type, char * s, int size, int * retval) {
+  if (size==0)
+    return 0;
   struct _cdu * cdu_root = *root_cdu;
   do {
     struct _cdu * name;
