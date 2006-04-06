@@ -68,14 +68,58 @@ It should be moved sometime.
 What other data struct extensions other than psl do we need to simulate the right CPU?
 The cpu struct is extended with cpu$w_sisr, the pcb struct is extended with pr_astlvl.
 
+CPU considerations:
+VAX has IS.
+AXP has no IS.
+IA64 has no IS?
+I386 has no IS.
+X86_64 has IS, but we will not use it for ordinary interrupts?
+
+I386 has interrupt priorities; from highest and down:
+Reset
+Internal interrupts and exceptions
+Software interrupts
+NMI
+External hardware interrupts 
+
+Only the external ones seems to care about sti/cli.
+
+I386 has nothing suitable for IPL.
+
+The IDT can have 256 interrupts.
+The 32 first are reserved important exceptions.
+The 224 rest are more ordinary.
+
+X86_64 has CR8 with 16 priorities.
+With CR8 set > 0, you must have larger pri to get the interrupt.
+(The 4 high bits denotes priority level, and assigning for it seems
+not to be done, and may take some work.)
+The manual says that the organization of the priority classes is 
+implementation dependent.
+Concluding that x86_64 has nothing usable as IPL either, and that
+we should use software?
+Seems the APIC can use CR8, but not XT-PIC.
+Will be using IPL 0x10 on all external hardware interrups, and use cli/sti
+in them, until future fixes. (That will be the way with XT-PIC i8259.)
+
+For IPL to work a sti must be done after regtrapping.
+
+Does linux dev intr use x86_64 is?
+
 Modules:
 [pal.src]
 ast
 ipl
 queue
 
+[sys.src]
+astdel
+
 [cmuip.ipacp.src]
 vmslib
+
+[linux.include.asm]
+hw_irq
 
 ****************
 

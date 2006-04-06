@@ -28,6 +28,7 @@ Have special treatment of imgact to make sure it is reserved
 Call sys$cli for lib$get_foreign?
 Cleanup struct iosb _iosb __iosb 64-bit size and iost1 iost2
 Sched svpctx switches to i-stack; do the same?
+Move P1 area to 0xffffffff-etc.
 
 CPU/PAL:
 FIX pal
