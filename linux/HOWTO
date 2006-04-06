@@ -68,7 +68,7 @@ Bochs use:
 NOTE on VFS ODS2 module autobuild:
 Use sarge (stable).
 Install module-assistant and debhelper.
-Do dpkg -i ods2-source_0.9.3.w5_all.deb.
+Do dpkg -i ods2-source_0.9.3.w6_all.deb.
 Do m-a prepare, m-a update, m-a get ods2, m-a a-i ods2.
 Run the following after you have got a working system on ext2:
 dcl/src/install.sh

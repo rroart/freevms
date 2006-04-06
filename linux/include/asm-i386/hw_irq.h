@@ -23,7 +23,6 @@
 #include <asm/irq.h>
 #include <asm/current.h>
 #include <linux/sched.h>
-#include <asm/offset.h>
 
 /*
  * IDT vectors usable for external interrupt sources start
