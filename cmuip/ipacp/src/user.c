@@ -776,7 +776,7 @@ void user$net_connection_info(struct user_info_args * uargs,
 
 user$clock_base (void)
     {
-    signed long
+    signed int
 	Now[2];
 
     sys$gettim(Now);
