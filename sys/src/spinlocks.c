@@ -4,6 +4,10 @@
 #include<asm/bitops.h>
 #include<system_data_cells.h>
 
+// define SPINDEF in spinlocks_mon?
+#undef SPINDEB
+#define SPINDEB
+
 inline int smp$acquire(struct _spl * spl) {
   // remember to do a smp enabled check
  again:
@@ -19,7 +23,16 @@ inline int smp$acquire(struct _spl * spl) {
     }
   } else {
     spl->spl$l_own_cpu=smp$gl_cpu_data[ctl$gl_pcb->pcb$l_cpu_id];
+#ifdef SPINDEB
+    if (spl->spl$l_own_cpu==0)
+      panic("cpu 0\n");
+#endif
     spl->spl$l_own_cnt++;
+#ifdef SPINDEB
+    if (spl->spl$l_own_cnt==1) {
+      panic("cnt 1\n");
+#endif
+    }
 #if 0
     // check where the book wanted these
     int intr;
