@@ -149,7 +149,11 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,short int *retcha
     // real disk
     d.dsc$w_length=devlen;
     d.dsc$a_pointer=do_translate(devnam);
-    sts=exe$assign(&d,&chan,0,0,0);
+    int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam,int flags);
+    if (ctl$gl_pcb->psl_cur_mod)
+      sts=sys$assign(&d,&chan,0,0,0);
+    else
+      sts=exe$assign(&d,&chan,0,0,0);
     dev= ctl$ga_ccb_table[chan].ccb$l_ucb;
     
  end:

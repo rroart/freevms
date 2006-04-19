@@ -113,6 +113,10 @@ int sys$dassgn(unsigned short int chan) {
 int sys$clrast() {
   return INLINE_SYSCALL($clrast,0); 
 }
+
+int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam,int flags) {
+  return INLINE_SYSCALL($assign,5,devnam,chan,acmode,mbxnam,flags);
+}
 #endif
 
 #ifdef __arch_um__
