@@ -960,7 +960,8 @@ static inline void __wake_up_common (wait_queue_head_t *q, unsigned int mode,
 
 	CHECK_MAGIC_WQHEAD(q);
 	WQ_CHECK_LIST_HEAD(&q->task_list);
-	
+
+#ifdef __i386__	
 	list_for_each(tmp,&q->task_list) {
 		unsigned int state;
                 wait_queue_t *curr = list_entry(tmp, wait_queue_t, task_list);
@@ -974,6 +975,7 @@ static inline void __wake_up_common (wait_queue_head_t *q, unsigned int mode,
 				break;
 		}
 	}
+#endif
 }
 
 void fastcall __wake_up(wait_queue_head_t *q, unsigned int mode, int nr)
