@@ -16,8 +16,8 @@ inline int smp$restore(struct _spl * spl);
 
 static int inline vmslock(struct _spl * lockname,signed int lockipl) {
   int savipl=getipl();
-  smp$acquire(lockname);
   if (lockipl>=0 && lockipl<=31) setipl(lockipl);
+  smp$acquire(lockname);
 #ifdef VMSLOCK_DEBUG
   long  x;// = &lockname;
   long get_eip(long);

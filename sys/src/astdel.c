@@ -533,11 +533,11 @@ asmlinkage void sch$astdel(int dummy) {
   myacbs[myacbi++]=0x77777777;
 #endif
  more:
+  setipl(IPL$_SYNCH); // also IPL$_SCHED
   vmslock(&SPIN_SCHED,-1);
 #ifdef ASTDEBUG
   checkq(&p->pcb$l_astqfl);
 #endif
-  setipl(IPL$_SYNCH); // also IPL$_SCHED
 
   /* { int i;
      //printk("here ast\n");
@@ -702,8 +702,8 @@ void sch$newlvl(struct _pcb *p) {
   int newlvl;
   int oldipl=getipl();
 
-  vmslock(&SPIN_SCHED,-1);
   setipl(IPL$_SYNCH);
+  vmslock(&SPIN_SCHED,-1);
 
   if (aqempty(p->pcb$l_astqfl))
     newlvl=4;

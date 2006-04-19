@@ -19,6 +19,7 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include<queue.h>
+#include<ipldef.h>
 
 extern int mydebug;
 
@@ -31,7 +32,7 @@ void sch$change_cur_priority(struct _pcb *p, unsigned char newpri);
 int sch$qend(struct _pcb * p) {
   int cpuid=smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid];
-  vmslock(&SPIN_SCHED,-1);
+  vmslock(&SPIN_SCHED,IPL$_SCHED);
 
   p->pcb$l_pixhist=p->pcb$l_pixhist << 1;
   p->pcb$w_quant = -QUANTUM;
