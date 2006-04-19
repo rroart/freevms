@@ -284,47 +284,41 @@ extern char _stext, _etext;
 	"popl %eax\n\t" \
 	"popl %eax\n\t"
 
-#define INTEXC_FIX_ISP(x) \
-	"pushl %esp; \n\t" \
+#define INTEXC_FIX_SP(x) \
 	"pushl %eax; \n\t" \
 	"pushl %edi; \n\t" \
 	"pushl %edx; \n\t" \
 	"movl ctl$gl_pcb, %edi	; \n\t" \
-	"movl $init_tss, %edx	; \n\t" \
+	"movl 0x7a0(%edi), %edx ; \n\t" /* tsk_pcbl_cpu_id */ \
+	"shl $0x8, %edx; \n\t" \
+	"addl $init_tss, %edx	; \n\t" \
 	"addl $0x4, %edx	; \n\t" \
-	"testl $0x200, 2032(%edi); \n\t" \
-	"jne 1f			; \n\t" \
 	"addl $2112, %edi; \n\t" /* ipr_sp */ \
-	"movl 0x14(%esp), %eax; \n\t" \
+	"movl 0x4+0x10(%esp), %eax; \n\t" /* check. manual 4 */ \
 	"andl $0x3, %eax; \n\t" \
 	"je 2f			; \n\t" \
-	"movl %esp, (%edi); \n\t" /* check ekstra */ \
-	"movl %esp, (%edx); \n\t" /* check ekstra */ \
-	"addl $0x10, (%edi); \n\t" /* check ekstra */ \
-	"addl $0x10, (%edx); \n\t" /* check ekstra */ \
+	/*"movl %esp, (%edi); \n\t"*/ /* check ekstra */ \
+	/*"movl %esp, (%edx); \n\t"*/ /* check ekstra */ \
+	/*"addl $0xc, (%edi); \n\t"*/ /* check ekstra */ \
+	/*"addl $0xc, (%edx); \n\t"*/ /* check ekstra */ \
 	"salw $2,%ax; \n\t" \
 	"addl %eax, %edi; \n\t" \
 	"addl %eax, %edx; \n\t" \
 	"addl %eax, %edx; \n\t" \
 	"cmpl $0xc, %eax; \n\t" \
-	"movl 0x1c(%esp),%eax; \n\t" \
+	"movl 0x4+0x18(%esp),%eax; \n\t" /* check. manual 4 */ \
 	"je 4f			; \n\t" \
 	"jmp 3f			; \n\t" \
 "2:				; \n\t" \
 	"movl %esp, %eax	; \n\t" \
-	"addl $0x10, %eax	; \n\t" \
+	"addl $0xc, %eax	; \n\t" \
 "3:				; \n\t" \
 	"movl %eax, (%edx)	; \n\t" \
 "4:				; \n\t" \
 	"movl %eax, (%edi); \n\t" \
-	"movl smp$gl_cpu_data, %edi ;  \n\t" \
-	"movl 0x850(%edi), %eax		;  \n\t" \
-	"movl %eax, 0xc(%esp) 	; \n\t" \
-"1:	\n\t" \
 	"popl %edx; \n\t" \
 	"popl %edi; \n\t" \
-	"popl %eax; \n\t" \
-	"popl %esp; \n\t"
+	"popl %eax; \n\t"
 	
 #define IO_APIC_IRQ(x) (((x) >= 16) || ((1<<(x)) & io_apic_irqs))
 
@@ -366,6 +360,7 @@ __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(x) ":\n\t" \
 	"pushl $"#v"-256\n\t" \
+	INTEXC_FIX_SP(0x4) \
 	SAVE_ALL \
         REGTRAP \
 	SYMBOL_NAME_STR(call_##x)":\n\t" \
@@ -380,6 +375,7 @@ __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(x) ":\n\t" \
 	"pushl $"#v"-256\n\t" \
+	INTEXC_FIX_SP(0x4) \
 	SAVE_ALL \
         REGTRAP \
 	"movl %esp,%eax\n\t" \
@@ -394,6 +390,7 @@ asmlinkage void call_do_IRQ(void); \
 __asm__( \
 	"\n" __ALIGN_STR"\n" \
 	"common_interrupt:\n\t" \
+	INTEXC_FIX_SP(0x4) \
 	SAVE_ALL \
         REGTRAP \
 	SYMBOL_NAME_STR(call_do_IRQ)":\n\t" \
