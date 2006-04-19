@@ -34,6 +34,7 @@ inline void panic(char * c) { }
 #include <misc_routines.h>
 #include <linux/slab.h>
 #include <internals.h>
+#include <mtxdef.h>
 #endif
 
 /* Author: Roar Thronæs */
@@ -370,7 +371,7 @@ void mysti(void) {
 #else
 
 #define lnm$aq_mutex lnm_spin
-static struct _spl lnm_spin = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+static struct _mtx lnm_spin = { 65535 /* mtx$w_sts : 1, mtx$w_owncnt : -1 */ };
 
 void lnm$lock(void) {
   sch$lockw(&lnm$aq_mutex);
