@@ -493,7 +493,7 @@ static void ne_block_output(struct net_device *dev, const int count,
 	E2010	 starts at 0x100 and ends at 0x4000.
 	E2010-x starts at 0x100 and ends at 0xffff.  */
 
-int __init ne_probe(struct net_device *dev)
+int /*__init*/ ne_probe(struct net_device *dev)
 {
 	unsigned int base_addr = dev->base_addr;
 
@@ -521,7 +521,7 @@ int __init ne_probe(struct net_device *dev)
 	return -ENODEV;
 }
 
-static int __init ne_probe_isapnp(struct net_device *dev)
+static int /*__init*/ ne_probe_isapnp(struct net_device *dev)
 {
 	int i;
 
@@ -562,7 +562,7 @@ static int __init ne_probe_isapnp(struct net_device *dev)
 	return -ENODEV;
 }
 
-static int __init ne_probe1(struct net_device *dev, int ioaddr)
+static int /*__init*/ ne_probe1(struct net_device *dev, int ioaddr)
 {
 	int i;
 	unsigned char SA_prom[32];
