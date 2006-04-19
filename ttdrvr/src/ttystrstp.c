@@ -121,6 +121,7 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 	}
 	
 	if (u->ucb$l_sts&UCB$M_INT) return; // here?
+	tty->tty$v_st_read = 1;
 
 	int chr;
 	int CC;
@@ -228,6 +229,7 @@ int tty$wrtstartio(struct _irp * i,struct _ucb * u) {
 	tty->ucb$l_tt_wrtbuf=i->irp$l_svapte;
 
 	if (u->ucb$l_sts&UCB$M_INT) return; // here?
+	tty->tty$v_st_read = 1; // check. wrong place?
 
 	int chr;
 	int CC;

@@ -14,6 +14,7 @@
 #include <dyndef.h>
 #include <ioc_routines.h>
 #include <misc_routines.h>
+#include <linux/kernel.h>
 
 int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
  again:
@@ -59,7 +60,8 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
     return; 
     // return  tty$putnextchar(chr,u); // this made a loop, implement some other way
   }
-  tty->tty$v_st_read=1; // mark reader?
+  if (tty->tty$v_st_read) {
+    //  tty->tty$v_st_read=1; // mark reader?
   if (tty->ucb$l_tt_typahd==0)
     return;
   struct _tt_type_ahd * ahd = tty->ucb$l_tt_typahd;
@@ -78,6 +80,12 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
     ahd->tty$l_ta_get=ahd->tty$l_ta_data;
 
   struct _tt_readbuf * bd = u->ucb$l_svapte;
+  if (bd==0) {
+#if 0
+    printk("%xchr %c %x ",u->ucb$w_unit,*chr,*chr);
+#endif
+    goto tmp_skip;
+  }
   char * bd_txt = bd->tty$l_rb_txt;
 
   switch (*c) {
@@ -130,6 +138,12 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
   // use tt_term etc instead?
   if (*c==13) {
     tty->tty$v_st_eol=1;
+#if 0
+    // not yet? later? gets problems with nmap double 0xd 0xd
+    struct _irp * i = u->ucb$l_irp; // check
+    i->irp$q_tt_state &= ~TTY$M_ST_READ;
+    tty->ucb$q_tt_state &= ~TTY$M_ST_READ; // here?
+#endif
     struct _irp * irp = u->ucb$l_irp;
     int bcnt = 0;
     if (irp) {
@@ -139,10 +153,11 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
     }
     ioc$reqcom(SS$_NORMAL | bcnt,0,u);
   }
-
+  }
 #if 0
   ioc$reqcom(SS$_NORMAL,0,u); // not needed here? bad place?
 #endif
+ tmp_skip:
 
   return 1;
 
