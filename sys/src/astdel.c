@@ -336,6 +336,12 @@ int exe$astdel_prep2(long stack, long ast, long astprm) {
 
 int exe$astdel_prep2_new(long stack, long ast, long astprm) {
   __asm__ __volatile__(
+		       "pushfl\n\t"
+		       "popl %edi\n\t"
+		       "andl $0x200, %edi \n\t"
+		       "je 1f\n\t"
+		       "call panic\n\t"
+		       "1:\n\t"
 		       "movl %esp,%edi\n\t"
 		       "addl $-0x14,%edi\n\t" // get new kernel stack
 		       "movl 0x4(%esp),%edx\n\t" // get user stack
@@ -363,8 +369,17 @@ int exe$astdel_prep2_new(long stack, long ast, long astprm) {
 		       "addl $-0x14, %esp\n\t" // stack move
 		       // check. need myrei here?
 		       "call myrei\n\t"
+		       "pushfl\n\t"
+		       "popl %edi\n\t"
+		       "andl $0x200, %edi \n\t"
+		       "je 1f\n\t"
+		       "call panic\n\t"
+		       "1:\n\t"
 #if 1
-		       "movl $init_tss, %edx\n\t"
+		       "movl ctl$gl_pcb, %edi	;\n\t" \
+		       "movl 0x7a0(%edi), %edx ;\n\t" /* cpuid */ \
+		       "shl $0x8, %edx;\n\t" \
+		       "addl $init_tss, %edx\n\t"
 		       "addl $0x4, %edx\n\t"
 		       "movl %esp, (%edx)\n\t"
 		       "addl $0x14, (%edx)\n\t"
