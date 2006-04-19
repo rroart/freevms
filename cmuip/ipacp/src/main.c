@@ -727,8 +727,8 @@ Side Effects:
 			 0,rto);
 	    }
 
-	    ((long *)&BTime)[1] = -1;	// make it delta time.
-	    ((long *)&BTime)[0] = rto*CSEC_TIMER_DELTA; // nap size.
+	    ((int *)&BTime)[1] = -1;	// make it delta time.
+	    ((int *)&BTime)[0] = rto*CSEC_TIMER_DELTA; // nap size.
 	} else {			// No TCB's
 	    sys$bintim(&Long_Nap,&BTime);
 	    Big_Sleep = TRUE;
@@ -737,7 +737,7 @@ Side Effects:
 
 // Check again for segment arrival & no TCB actions
 
-	    if (queue_empty(&segin->si_qhead) && (((long *)&BTime)[0] != 0)) {
+	    if (queue_empty(&segin->si_qhead) && (((int *)&BTime)[0] != 0)) {
 
 
 // If we are doing a BIG sleep then purge the working set to reduce system impact.
@@ -890,7 +890,7 @@ void Main (void) {
 
 #define    IPACP_Version_String "IP_ACP(V6.6-5.001) "  //Becomes ACP process name.
 #define    IPACP_Version_Name IPACP_Version_String
-#define    IPACP_Date_String "6-Apr-2006" 	// Date of last change
+#define    IPACP_Date_String "9-Apr-2006" 	// Date of last change
 #define    IPACP_Who_String "roart" // Author of last change
 
 // Announce that we exist.

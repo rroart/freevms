@@ -1452,8 +1452,8 @@ void udp$abort(struct user_abort_args * Uargs)
 void udp$send(struct user_send_args * Uargs)
     {
     signed long
-	RC,
-	ForeignAddr,LocalAddr,
+      RC;
+    int ForeignAddr,LocalAddr,
       ForeignPort,LocalPort;
     ipadr$address_block * UAddr;
     struct UDPCB_Structure * UDPCB;

@@ -941,9 +941,9 @@ void icmp$send(struct user_send_args * uargs)
 	RC,
 	bufsize,
 	Buf,
-	LocalAddr, ForeignAddr,
 	Segsize,
 	usize;
+    int LocalAddr, ForeignAddr;
 	 ipadr$address_block * uhead;
 	struct ICMPCB_Structure * ICMPCB;
 
