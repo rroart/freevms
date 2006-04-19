@@ -91,9 +91,17 @@
         POPR_ALL; 
 
 #define REI \
-        PUSHR_ALL; \
-        call myrei; \
-        POPR_ALL;
+	cli			; \
+        PUSHR_ALL		; \
+        call myrei		; \
+	pushfq			; \
+	popq %rdi		; \
+	andq $0x200, %rdi	; \
+	je 111f			; \
+	call panic		; \
+111:				; \
+        POPR_ALL		; \
+	cli			; 
 
 #define SAVE_TSS_SP \
 	pushq %rdx		; \
@@ -997,6 +1005,7 @@ error_action:
 	movq ORIG_RAX(%rsp),%rsi	/* get error code */ 
 	movq $-1,ORIG_RAX(%rsp)
 	call *%rax
+	cli				/* because of page_fault sti */
 	/* r15d: swapgs flag */
 error_exit:
 	testl %r15d,%r15d
