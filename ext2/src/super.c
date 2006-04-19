@@ -481,12 +481,14 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 	 * previously didn't change the revision level when setting the flags,
 	 * so there is a chance incompat flags are set on a rev 0 filesystem.
 	 */
+#if 0
 	if ((i = EXT2_HAS_INCOMPAT_FEATURE(sb, ~EXT2_FEATURE_INCOMPAT_SUPP))) {
 		printk("EXT2-fs: %s: couldn't mount because of "
 		       "unsupported optional features (%x).\n",
 		       bdevname(dev), i);
 		goto failed_mount;
 	}
+#endif
 	if (!(sb->s_flags & MS_RDONLY) &&
 	    (i = EXT2_HAS_RO_COMPAT_FEATURE(sb, ~EXT2_FEATURE_RO_COMPAT_SUPP))){
 		printk("EXT2-fs: %s: couldn't mount RDWR because of "
