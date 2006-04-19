@@ -129,38 +129,20 @@ ENOSYS = 38
 	call setpsli; \
         POPR_ALL; 
 
+#define CLIPAN	\
+	pushl %edi 		; \
+	pushfl			; \
+	popl %edi		; \
+	andl $0x200, %edi	; \
+	je 11f			; \
+	call panic 		; \
+11:				; \
+	popl %edi
+	
 #define REI \
         PUSHR_ALL		; \
         call myrei		; \
         POPR_ALL		; \
-	pushl %esp		; \
-	pushl %edi		; \
-	pushl %edx		; \
-	movl ctl$gl_pcb, %edi	; \
-	movl $init_tss, %edx	; \
-	addl $0x4, %edx		; /* yes, 4 */ \
-	movl %esp, (%edx)	; /* curmod is 0 for the time being */ \
-	addl $0xc, (%edx)	; /* 14? */ \
-	addl $tsk_ipr_sp, %edi	; \
-	movl %esp, (%edi)	; /* curmod is 0 for the time being */ \
-	addl $0xc, (%edi)	; /* 14? */ \
-	cmpl $0x10, 0x10(%esp)	; /* check */ \
-	jmp 3f			; \
-	je 3f			; \
-	addl $0x8, (%edx)	; \
-3:				; \
-	movl ctl$gl_pcb, %edi	; \
-	addl $tsk_ipr_sp, %edi; \
-	movl (%edi), %edx	; /* curmod is 0 for the time being */ \
-	movl %edx, 0x8(%esp)	; \
-	cmpl $0x10, 0x10(%esp)	; /* check */ \
-	jmp 3f			; \
-	je 3f			; \
-	addl $0x8, (%edx)	; \
-3:				; \
-	popl %edx		; \
-	popl %edi		; \
-	popl %esp		; \
 	MAYBEDOSOFTINT($0xb,$0xa4) ; \
 	MAYBEDOSOFTINT($0xa,$0xa3) ; \
 	MAYBEDOSOFTINT($0x9,$0xa2) ; \
@@ -170,10 +152,13 @@ ENOSYS = 38
 	MAYBEDOSOFTINT($0x4,$0x94) ; \
 	MAYBEDOSOFTINT($0x3,$0x93) ; \
 	MAYBEDOSOFTINT($0x2,$0x92) ; \
+	CLIPAN			; \
 	pushl %edi		; \
 	pushl %edx		; \
 	movl ctl$gl_pcb, %edi	; \
-	movl $init_tss, %edx	; \
+	movl tsk_pcbl_cpu_id(%edi), %edx ; \
+	shl $0x8, %edx 		; \
+	addl $init_tss, %edx	; \
 	addl $0x4, %edx		; /* yes, 4 */ \
 	movl %esp, (%edx)	; /* curmod is 0 for the time being */ \
 	addl $0x14, (%edx)	; \
@@ -184,18 +169,6 @@ ENOSYS = 38
 	je 3f			; \
 	addl $0x8, (%edx)	; \
 	addl $0x8, (%edi)	; \
-3:				; \
-	jmp 2f			; \
-2:				; \
-	jmp 3f			; \
-	movl ctl$gl_pcb, %edi	; \
-	addl $tsk_ipr_sp, %edi; \
-	movl (%edi), %edx	; /* curmod is 0 for the time being */ \
-	movl %edx, 0x8(%esp)	; \
-	cmpl $0x10, 0x10(%esp)	; /* check */ \
-	jmp 3f			; \
-	je 3f			; \
-	addl $0x8, (%edx)	; \
 3:				; \
 	popl %edx		; \
 	popl %edi		; \
@@ -264,7 +237,9 @@ ENOSYS = 38
 	pushl %edi		; \
 	pushl %edx		; \
 	movl ctl$gl_pcb, %edi	; \
-	movl $init_tss, %edx	; \
+	movl tsk_pcbl_cpu_id(%edi), %edx ; \
+	shl $0x8, %edx		; \
+	addl $init_tss, %edx	; \
 	addl $0x4, %edx		; \
 	addl $tsk_ipr_sp, %edi	; \
 	movl x+0x10(%esp), %eax	; \
@@ -294,13 +269,15 @@ ENOSYS = 38
 	pushl %edi		; \
 	pushl %edx		; \
 	movl ctl$gl_pcb, %edi	; \
-	movl $init_tss, %edx	; \
+	movl tsk_pcbl_cpu_id(%edi), %edx ; \
+	shl $0x8, %edx		; \
+	addl $init_tss, %edx	; \
 	addl $0x4, %edx		; \
 	addl $tsk_ipr_sp, %edi	; \
-	movl %esp, (%edi); /* check ekstra */ \
-	movl %esp, (%edx); /* check ekstra */ \
-	addl $0xc, (%edi); /* check ekstra */ \
-	addl $0xc, (%edx); /* check ekstra */ \
+	/*movl %esp, (%edi);*/ /* check ekstra */ \
+	/*movl %esp, (%edx);*/ /* check ekstra */ \
+	/*addl $0xc, (%edi);*/ /* check ekstra */ \
+	/*addl $0xc, (%edx);*/ /* check ekstra */ \
 	movl x+0x10(%esp), %eax	; \
 	andl $0x3, %eax		; \
 	je 2f			; \
@@ -337,7 +314,11 @@ ENOSYS = 38
 				
 #define MAYBEDOSOFTINT(ipl,vector) \
 	pushl %edi		; \
-	movl smp$gl_cpu_data, %edi; \
+	movl ctl$gl_pcb, %edi	; \
+	movl tsk_pcbl_cpu_id(%edi), %edi ; \
+	shl $0x2, %edi		; \
+	addl $smp$gl_cpu_data, %edi; \
+	movl (%edi), %edi	; \
 	btw ipl, 0x6(%edi)	; /* sisr */ \
 	jnc 1f			; \
 	movl ctl$gl_pcb, %edi	; \
@@ -678,6 +659,7 @@ error_code:
 	GET_CURRENT(%ebx)
 	call *%edi
 	addl $8,%esp
+	cli # check
 	jmp ret_from_exception
 
 ENTRY(coprocessor_error)
@@ -693,6 +675,7 @@ ENTRY(simd_coprocessor_error)
 	jmp error_code
 
 ENTRY(device_not_available)
+	cli # check
         PUSHPSL
 	pushl $-1		# mark this as an int
 	SAVE_ALL
