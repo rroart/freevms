@@ -3961,6 +3961,9 @@ static unsigned long extcommand (unsigned long h_input, unsigned long h_output, 
       }
     }
 
+  /* Run the image */
+
+  sts = runimage (h_error, &runopts, imagep, argc, argv);
   }
 
   /* Otherwise, look for the command name in the OZ_CLI_TABLES logical name table(s)   */
@@ -3969,9 +3972,6 @@ static unsigned long extcommand (unsigned long h_input, unsigned long h_output, 
     printf("%DCL-W-IVVERB, unrecognized command verb - check validity and spelling\n");
   }
 
-  /* Run the image */
-
-  sts = runimage (h_error, &runopts, imagep, argc, argv);
   return (sts);
 }
 
