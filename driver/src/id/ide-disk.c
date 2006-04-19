@@ -412,8 +412,10 @@ ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned lon
   myindex++;
   if (myindex==1024) myindex=0;
 #endif
+#if 0
   if (block>0x1f000)
     printk("block %lx\n",block);
+#endif
   //myidecount++;
   //printk(KERN_INFO "do_rw_disk %x %x %x\n",drive,rq,block);
   //printk(KERN_INFO "do_rw_disk %x %x %x\n",rq->nr_sectors,rq,block);
