@@ -5,7 +5,11 @@
 #include <linux/kdev_t.h>
 
 char * do_translate(char * from);
+#ifndef CONFIG_VMS
 void * exttwo_search_fcb(struct _vcb * vcb,struct inode * inode);
+#else
+void * exttwo_search_fcb(struct _vcb * vcb,struct _fiddef * fid);
+#endif
 void * exttwo_search_fcb2(struct _vcb * vcb,struct _fiddef * fid);
 struct _fcb * e2_search_fcb(void * v);
 inline unsigned long * getefcp(struct _pcb * p, unsigned long efn);
@@ -66,7 +70,11 @@ void xqp_init2(void);
 void exttwo_init2(void * vcb);
 int init_phd(struct _phd * phd);
 void lnm_init_prc(struct _pcb * p);
+#ifndef CONFIG_VMS
 void make_fcb(struct inode * inode);
+#else
+void make_fcb(struct _fcb * inode);
+#endif
 struct file *rms_open_exec(const char *name);
 int rms_prepare_binprm(struct linux_binprm *bprm);
 struct vm_area_struct * find_vma_intersection2(struct mm_struct * mm, unsigned long start_addr, unsigned long end_addr);
@@ -132,15 +140,28 @@ void kernel_puts(const char *s);
 int poison_packet(char * packet, int size, int deall);
 int check_packet(char * packet, int size, int deall);
 int ods2_block_write_full_page3(struct _wcb * wcb, struct page *page, unsigned long pageno);
+#ifndef CONFIG_VMS
 int block_prepare_write2(struct inode *inode, struct page *page, unsigned from, unsigned to, unsigned long pageno);
 int generic_commit_write2(struct inode * inode, struct page *page, unsigned from, unsigned to, unsigned long pageno);
 int ext2_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsigned long blocknr, int blocksize);
+int ext2_get_block(struct inode *inode, long iblock, signed long *bh_result, int create, struct _fcb * fcb);
+int block_commit_write2(struct inode * inode, struct page *page, unsigned from, unsigned to, unsigned long pageno);
+#if 0
+int ext2_sync_inode (struct inode *inode);
+#endif
+#else
+int block_prepare_write2(struct _fcb *inode, struct page *page, unsigned from, unsigned to, unsigned long pageno);
+int generic_commit_write2(struct _fcb * inode, struct page *page, unsigned from, unsigned to, unsigned long pageno);
+int ext2_direct_IO(int rw, struct _fcb * inode, struct kiobuf * iobuf, unsigned long blocknr, int blocksize);
+int ext2_get_block(struct _vcb * vcb,struct _fcb *inode, long iblock, signed long *bh_result, int create, struct _fcb * fcb);
+int block_commit_write2(struct _fcb * inode, struct page *page, unsigned from, unsigned to, unsigned long pageno);
+#if 0
+int ext2_sync_inode (struct _vcb * vcb, struct _fcb *inode);
+#endif
+#endif
 mypfncheckaddr();
 void vms_submit_bh(int rw, struct buffer_head * bh);
 signed long e2_map_vbn(struct _fcb * fcb, signed long vbn);
-int ext2_get_block(struct inode *inode, long iblock, signed long *bh_result, int create, struct _fcb * fcb);
-int block_commit_write2(struct inode * inode, struct page *page, unsigned from, unsigned to, unsigned long pageno);
-int ext2_sync_inode (struct inode *inode);
 void myqio(long rw, long data, long size, long blocknr,kdev_t dev, long block_factor);
 int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pageno);
 int block_write_full_page3(struct _fcb * fcb, struct page *page, unsigned long pageno);
@@ -209,13 +230,18 @@ void *f11b_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb, u
 void vms_ll_rw_block(int rw, int nr, struct buffer_head * bhs[],kdev_t dev);
 void vms_mark_buffer_dirty(struct buffer_head * bh);
 int e2_fcb_wcb_add_one(struct _fcb * fcb,signed long vbn,signed long result);
+#ifndef CONFIG_VMS
 int ext2_delete_entry2 (struct ext2_dir_entry_2 * dir, struct page * page, struct inode * inode );
+void *exttwo_fcb_create(struct inode * inode, int i_ino, unsigned *retsts);
+#else
+int ext2_delete_entry2 (struct _vcb * vcb, struct ext2_dir_entry_2 * dir, struct page * page, struct _fcb * inode );
+void *exttwo_fcb_create(struct _fcb * inode, int i_ino, unsigned *retsts);
+#endif
 int exttwo_read_writevb(struct _irp * i);
-void *ext2_fcb_create(struct inode * inode,unsigned *retsts);
-exttwo_delete(struct _vcb * vcb,struct _irp * irp);
+unsigned exttwo_delete(struct _vcb * vcb,struct _irp * irp);
 exttwo_modify(struct _vcb * vcb, struct _irp * irp);
 int exttwo_io_done(struct _irp * i);
-exttwo_create(struct _vcb *vcb,struct _irp * i);
+unsigned exttwo_create(struct _vcb *vcb,struct _irp * i);
 struct _ucb * finducb(struct _fcb * fcb);
 int exe$altquepkt (struct _irp * i, struct _pcb * p, struct _ucb * u);
 int GET_DCL(struct _ucb * ucb);

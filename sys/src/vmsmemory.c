@@ -65,6 +65,7 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <mmg_routines.h>
+#include <fcbdef.h>
 
 pgprot_t x_to_prot(int x) {
   pgprot_t y;
@@ -1083,15 +1084,16 @@ static void vmtruncate_list(struct _rde *mpnt, unsigned long pgoff)
  * between the file and the memory map for a potential last
  * incomplete page.  Ugly, but necessary.
  */
-int vmtruncate(struct inode * inode, loff_t offset)
+int vmtruncate(struct _fcb * inode, loff_t offset)
 {
+#if 0
 	unsigned long pgoff;
 	struct address_space *mapping = inode->i_mapping;
 	unsigned long limit;
 
-	if (inode->i_size < offset)
+	if (inode->fcb$l_filesize < offset)
 		goto do_expand;
-	inode->i_size = offset;
+	inode->fcb$l_filesize = offset;
 	spin_lock(&mapping->i_shared_lock);
 	if (!mapping->i_mmap && !mapping->i_mmap_shared)
 		goto out_unlock;
@@ -1113,7 +1115,7 @@ do_expand:
 		goto out_sig;
 	if (offset > inode->i_sb->s_maxbytes)
 		goto out;
-	inode->i_size = offset;
+	inode->fcb$l_filesize = offset;
 
 out_truncate:
 	if (inode->i_op && inode->i_op->truncate) {
@@ -1126,6 +1128,9 @@ out_sig:
 	send_sig(SIGXFSZ, current, 0);
 out:
 	return -EFBIG;
+#else
+	return -EPERM;
+#endif
 }
 
 /*

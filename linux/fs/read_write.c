@@ -179,8 +179,12 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 #ifdef CONFIG_VMS
 		  if (fd<3) goto skip;
 #endif
+#ifndef CONFIG_VMS
 			ret = locks_verify_area(FLOCK_VERIFY_READ, file->f_dentry->d_inode,
 						file, file->f_pos, count);
+#else
+			ret = 0;
+#endif
 			if (!ret) {
 			skip: {}
 				ssize_t (*read)(struct file *, char *, size_t, loff_t *);
@@ -192,8 +196,10 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 #ifdef CONFIG_VMS
 		  if (fd<3) goto skip2;
 #endif
+#ifndef CONFIG_VMS
 		if (ret > 0)
 			dnotify_parent(file->f_dentry, DN_ACCESS);
+#endif
 		fput(file);
 	skip2: {}
 	}
@@ -228,8 +234,12 @@ asmlinkage ssize_t sys_write(unsigned int fd, const char * buf, size_t count)
 		  if (fd<3) goto skip;
 #endif
 			struct inode *inode = file->f_dentry->d_inode;
+#ifndef CONFIG_VMS
 			ret = locks_verify_area(FLOCK_VERIFY_WRITE, inode, file,
 				file->f_pos, count);
+#else
+			ret = 0;
+#endif
 			if (!ret) {
 			skip: {}
 				ssize_t (*write)(struct file *, const char *, size_t, loff_t *);
@@ -241,8 +251,10 @@ asmlinkage ssize_t sys_write(unsigned int fd, const char * buf, size_t count)
 #ifdef CONFIG_VMS
 		  if (fd<3) goto skip2;
 #endif
+#ifndef CONFIG_VMS
 		if (ret > 0)
 			dnotify_parent(file->f_dentry, DN_MODIFY);
+#endif
 		fput(file);
 	skip2: {}
 	}
@@ -303,10 +315,12 @@ static ssize_t do_readv_writev(int type, struct file *file,
 
 	inode = file->f_dentry->d_inode;
 	/* VERIFY_WRITE actually means a read, as we write to user space */
+#ifndef CONFIG_VMS
 	ret = locks_verify_area((type == VERIFY_WRITE
 				 ? FLOCK_VERIFY_READ : FLOCK_VERIFY_WRITE),
 				inode, file, file->f_pos, tot_len);
 	if (ret) goto out;
+#endif
 
 	fnv = (type == VERIFY_WRITE ? file->f_op->readv : file->f_op->writev);
 	if (fnv) {
@@ -346,9 +360,11 @@ out:
 		kfree(iov);
 out_nofree:
 	/* VERIFY_WRITE actually means a read, as we write to user space */
+#ifndef CONFIG_VMS
 	if ((ret + (type == VERIFY_WRITE)) > 0)
 		dnotify_parent(file->f_dentry,
 			(type == VERIFY_WRITE) ? DN_MODIFY : DN_ACCESS);
+#endif
 	return ret;
 }
 
@@ -413,18 +429,22 @@ asmlinkage ssize_t sys_pread(unsigned int fd, char * buf,
 		goto bad_file;
 	if (!(file->f_mode & FMODE_READ))
 		goto out;
+#ifndef CONFIG_VMS
 	ret = locks_verify_area(FLOCK_VERIFY_READ, file->f_dentry->d_inode,
 				file, pos, count);
 	if (ret)
 		goto out;
+#endif
 	ret = -EINVAL;
 	if (!file->f_op || !(read = file->f_op->read))
 		goto out;
 	if (pos < 0)
 		goto out;
 	ret = read(file, buf, count, &pos);
+#ifndef CONFIG_VMS
 	if (ret > 0)
 		dnotify_parent(file->f_dentry, DN_ACCESS);
+#endif
 out:
 #ifndef CONFIG_VMS
 	fput(file);
@@ -463,10 +483,12 @@ asmlinkage ssize_t sys_pwrite(unsigned int fd, const char * buf,
 		goto bad_file;
 	if (!(file->f_mode & FMODE_WRITE))
 		goto out;
+#ifndef CONFIG_VMS
 	ret = locks_verify_area(FLOCK_VERIFY_WRITE, file->f_dentry->d_inode,
 				file, pos, count);
 	if (ret)
 		goto out;
+#endif
 	ret = -EINVAL;
 	if (!file->f_op || !(write = file->f_op->write))
 		goto out;
@@ -474,8 +496,10 @@ asmlinkage ssize_t sys_pwrite(unsigned int fd, const char * buf,
 		goto out;
 
 	ret = write(file, buf, count, &pos);
+#ifndef CONFIG_VMS
 	if (ret > 0)
 		dnotify_parent(file->f_dentry, DN_MODIFY);
+#endif
 out:
 	fput(file);
 bad_file:

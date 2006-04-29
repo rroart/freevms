@@ -19,6 +19,7 @@
 
 #include <asm/uaccess.h>
 
+#include <linux/ext2_fs.h>
 #include <fcbdef.h>
 
 /*
@@ -76,15 +77,15 @@ static int cp_old_stat(struct inode * inode, struct __old_kernel_stat * statbuf)
 	tmp.st_ctime = inode->i_ctime;
 #else
 	struct _fcb * fcb = inode;
-	tmp.st_dev = fcb->fcb$w_fid_dirnum;
-	tmp.st_ino = fcb->fcb$w_fid [1] + (fcb->fcb$w_fid [2] << 16);
+	tmp.st_dev = 0 ; // fcb->fcb$w_fid_dirnum;
+	tmp.st_ino = FCB_FID_TO_INO(fcb);
 	tmp.st_mode = 0755;
 	if (fcb->fcb$v_dir) 
 	  tmp.st_mode |= S_IFDIR;
 	tmp.st_nlink = 1;
 	SET_OLDSTAT_UID(tmp, fcb->fcb$w_uicmember);
 	SET_OLDSTAT_GID(tmp, fcb->fcb$w_uicgroup);
-	tmp.st_rdev = fcb->fcb$w_fid_dirnum;
+	tmp.st_rdev = 0; // fcb->fcb$w_fid_dirnum;
 	tmp.st_size = fcb->fcb$l_filesize;
 	tmp.st_atime = 0;
 	tmp.st_mtime = 0;
@@ -155,15 +156,15 @@ static int cp_new_stat(struct inode * inode, struct stat * statbuf)
 	}
 #else
 	struct _fcb * fcb = inode;
-	tmp.st_dev = fcb->fcb$w_fid_dirnum;
-	tmp.st_ino = fcb->fcb$w_fid [1] + (fcb->fcb$w_fid [2] << 16);
+	tmp.st_dev = 0; // fcb->fcb$w_fid_dirnum;
+	tmp.st_ino = FCB_FID_TO_INO(fcb);
 	tmp.st_mode = 0755;
 	if (fcb->fcb$v_dir) 
 	  tmp.st_mode |= S_IFDIR;
 	tmp.st_nlink = 1;
 	SET_STAT_UID(tmp, fcb->fcb$w_uicmember);
 	SET_STAT_GID(tmp, fcb->fcb$w_uicgroup);
-	tmp.st_rdev = fcb->fcb$w_fid_dirnum;
+	tmp.st_rdev = 0; // fcb->fcb$w_fid_dirnum;
 	tmp.st_size = fcb->fcb$l_filesize;
 	tmp.st_atime = 0;
 	tmp.st_mtime = 0;
@@ -375,6 +376,7 @@ asmlinkage long sys_newfstat(unsigned int fd, struct stat * statbuf)
 
 asmlinkage long sys_readlink(const char * path, char * buf, int bufsiz)
 {
+#ifndef CONFIG_VMS
 	struct nameidata nd;
 	int error;
 
@@ -394,6 +396,9 @@ asmlinkage long sys_readlink(const char * path, char * buf, int bufsiz)
 		path_release(&nd);
 	}
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 
@@ -459,15 +464,15 @@ static long cp_new_stat64(struct inode * inode, struct stat64 * statbuf)
 	}
 #else
 	struct _fcb * fcb = inode;
-	tmp.st_dev = fcb->fcb$w_fid_dirnum;
-	tmp.st_ino = fcb->fcb$w_fid [1] + (fcb->fcb$w_fid [2] << 16);
+	tmp.st_dev = 0;
+	tmp.st_ino = FCB_FID_TO_INO(fcb);
 	tmp.st_mode = 0755;
 	if (fcb->fcb$v_dir) 
 	  tmp.st_mode |= S_IFDIR;
 	tmp.st_nlink = 1;
 	tmp.st_uid = fcb->fcb$w_uicmember;
 	tmp.st_gid = fcb->fcb$w_uicgroup;
-	tmp.st_rdev = fcb->fcb$w_fid_dirnum;
+	tmp.st_rdev = 0; // fcb->fcb$w_fid_dirnum;
 	tmp.st_size = fcb->fcb$l_filesize;
 	tmp.st_atime = 0;
 	tmp.st_mtime = 0;
@@ -521,15 +526,15 @@ asmlinkage long sys_lstat64(char * filename, struct stat64 * statbuf, long flags
 
 #ifndef CONFIG_VMS 
 	error = user_path_walk_link(filename, &nd);
-#else
-	error = 0;
-#endif
 	if (!error) {
 		error = do_revalidate(nd.dentry);
 		if (!error)
 			error = cp_new_stat64(nd.dentry->d_inode, statbuf);
 		path_release(&nd);
 	}
+#else
+	error = 0;
+#endif
 	return error;
 }
 

@@ -276,8 +276,10 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
 #else
   loff_t pos=0;
   mm_segment_t fs;
+#ifndef CONFIG_VMS
   f=open_exec(dscdflnam->dsc$a_pointer);
   if (f==0) return 0;
+#endif
   fs = get_fs();
   set_fs(KERNEL_DS);
   generic_file_read(f, header, 512, &pos);

@@ -21,6 +21,9 @@
 
 int vfs_readdir(struct file *file, filldir_t filler, void *buf)
 {
+#ifdef CONFIG_VMS
+  return -ENOENT;
+#else
 	struct inode *inode = file->f_dentry->d_inode;
 	int res = -ENOTDIR;
 	if (!file->f_op || !file->f_op->readdir)
@@ -37,6 +40,7 @@ int vfs_readdir(struct file *file, filldir_t filler, void *buf)
 	up(&inode->i_sem);
 out:
 	return res;
+#endif
 }
 
 /*
@@ -45,6 +49,7 @@ out:
  * both impossible due to the lock on directory.
  */
 
+#ifndef CONFIG_VMS
 int dcache_readdir(struct file * filp, void * dirent, filldir_t filldir)
 {
 	int i;
@@ -102,6 +107,7 @@ int dcache_readdir(struct file * filp, void * dirent, filldir_t filldir)
 	}
 	return 0;
 }
+#endif
 
 /*
  * Traditional linux readdir() handling..

@@ -304,6 +304,7 @@ struct _vcb {
 #define		vcb$t_volname		vcb_0.vcb_1_2.vcb$t_volname
 #define		vcb$l_rvt		vcb_0.vcb_1_2.vcb$l_rvt
 #define		vcb$l_cache		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_cache
+#define		vcb$l_quocache		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_quocache
 #define		vcb$l_cluster		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_cluster
 #define		vcb$l_fileprot		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_fileprot
 #define		vcb$l_free		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_free

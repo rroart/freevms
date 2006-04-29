@@ -77,7 +77,7 @@ atomic_t shmem_nrpages = ATOMIC_INIT(0); /* Not used right now */
  * It has to be called with the spinlock held.
  */
 
-static void shmem_recalc_inode(struct inode * inode)
+static void shmem_recalc_inode(struct _fcb * inode)
 {
 	unsigned long freed;
 
@@ -318,7 +318,7 @@ shmem_truncate_indirect(struct shmem_inode_info *info, unsigned long index)
 	return shmem_truncate_direct(base, start, len);
 }
 
-static void shmem_truncate (struct inode * inode)
+static void shmem_truncate (struct _fcb * inode)
 {
 	unsigned long index;
 	unsigned long freed = 0;
@@ -338,7 +338,7 @@ static void shmem_truncate (struct inode * inode)
 	up(&info->sem);
 }
 
-static void shmem_delete_inode(struct inode * inode)
+static void shmem_delete_inode(struct _fcb * inode)
 {
 	struct shmem_sb_info *sbinfo = SHMEM_SB(inode->i_sb);
 
@@ -436,7 +436,7 @@ static int shmem_writepage(struct page * page)
 	swp_entry_t *entry, swap;
 	struct address_space *mapping;
 	unsigned long index;
-	struct inode *inode;
+	struct _fcb *inode;
 
 #if 0
 	if (!PageLocked(page))
@@ -510,7 +510,7 @@ getswap:
  * still need to guard against racing with shm_writepage(), which might
  * be trying to move the page to the swap cache as we run.
  */
-static struct page * shmem_getpage_locked(struct shmem_inode_info *info, struct inode * inode, unsigned long idx)
+static struct page * shmem_getpage_locked(struct shmem_inode_info *info, struct _fcb * inode, unsigned long idx)
 {
 	struct address_space * mapping = inode->i_mapping;
 	struct shmem_sb_info *sbinfo;
@@ -629,7 +629,7 @@ wait_retry:
 	goto repeat;
 }
 
-static int shmem_getpage(struct inode * inode, unsigned long idx, struct page **ptr)
+static int shmem_getpage(struct _fcb * inode, unsigned long idx, struct page **ptr)
 {
 	struct shmem_inode_info *info = SHMEM_I(inode);
 	int error;
@@ -662,7 +662,7 @@ struct page * shmem_nopage(struct vm_area_struct * vma, unsigned long address, i
 #if 0
 	struct page * page;
 	unsigned int idx;
-	struct inode * inode = vma->vm_file->f_dentry->d_inode;
+	struct _fcb * inode = vma->vm_file->f_dentry->d_inode;
 
 	idx = (address - vma->vm_start) >> PAGE_CACHE_SHIFT;
 	idx += vma->vm_pgoff;
@@ -678,7 +678,7 @@ struct page * shmem_nopage(struct vm_area_struct * vma, unsigned long address, i
 
 void shmem_lock(struct file * file, int lock)
 {
-	struct inode * inode = file->f_dentry->d_inode;
+	struct _fcb * inode = file->f_dentry->d_inode;
 	struct shmem_inode_info * info = SHMEM_I(inode);
 
 	down(&info->sem);
@@ -690,7 +690,7 @@ static int shmem_mmap(struct file * file, struct vm_area_struct * vma)
 {
 #if 0
 	struct vm_operations_struct * ops;
-	struct inode *inode = file->f_dentry->d_inode;
+	struct _fcb *inode = file->f_dentry->d_inode;
 
 	ops = &shmem_vm_ops;
 	if (!inode->i_sb || !S_ISREG(inode->i_mode))
@@ -701,9 +701,9 @@ static int shmem_mmap(struct file * file, struct vm_area_struct * vma)
 	return 0;
 }
 
-struct inode *shmem_get_inode(struct super_block *sb, int mode, int dev)
+struct _fcb *shmem_get_inode(struct super_block *sb, int mode, int dev)
 {
-	struct inode * inode;
+	struct _fcb * inode;
 	struct shmem_inode_info *info;
 	struct shmem_sb_info *sbinfo = SHMEM_SB(sb);
 
@@ -778,7 +778,7 @@ out:
 
 static struct super_block *shmem_read_super(struct super_block * sb, void * data, int silent)
 {
-	struct inode * inode;
+	struct _fcb * inode;
 	struct dentry * root;
 	unsigned long blocks, inodes;
 	int mode   = S_IRWXUGO | S_ISVTX;
@@ -941,7 +941,7 @@ struct file *shmem_file_setup(char * name, loff_t size)
 {
 	int error;
 	struct file *file;
-	struct inode * inode;
+	struct _fcb * inode;
 	struct dentry *dentry, *root;
 	struct qstr this;
 	int vm_enough_memory(long pages);

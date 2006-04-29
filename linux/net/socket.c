@@ -118,6 +118,7 @@ static ssize_t sock_sendpage(struct file *file, struct page *page,
  *	in the operation structures but are done directly via the socketcall() multiplexor.
  */
 
+#ifndef CONFIG_VMS
 static struct file_operations socket_file_ops = {
 	llseek:		sock_lseek,
 	read:		sock_read,
@@ -132,6 +133,7 @@ static struct file_operations socket_file_ops = {
 	writev:		sock_writev,
 	sendpage:	sock_sendpage
 };
+#endif
 
 /*
  *	The protocol list. Each protocol is registered in here.
@@ -273,6 +275,7 @@ int move_addr_to_user(void *kaddr, int klen, void *uaddr, int *ulen)
 }
 
 #define SOCKFS_MAGIC 0x534F434B
+#ifndef CONFIG_VMS
 static int sockfs_statfs(struct super_block *sb, struct statfs *buf)
 {
 	buf->f_type = SOCKFS_MAGIC;
@@ -506,6 +509,7 @@ void sock_release(struct socket *sock)
 	}
 	sock->file=NULL;
 }
+#endif 
 
 int sock_sendmsg(struct socket *sock, struct msghdr *msg, int size)
 {
@@ -542,6 +546,7 @@ int sock_recvmsg(struct socket *sock, struct msghdr *msg, int size, int flags)
  *	Sockets are not seekable.
  */
 
+#ifndef CONFIG_VMS
 static loff_t sock_lseek(struct file *file, loff_t offset, int whence)
 {
 	return -ESPIPE;
@@ -920,6 +925,7 @@ out:
 	net_family_read_unlock();
 	return i;
 }
+#endif
 
 asmlinkage long sys_socket(int family, int type, int protocol)
 {
@@ -953,6 +959,7 @@ out_release:
 
 asmlinkage long sys_socketpair(int family, int type, int protocol, int usockvec[2])
 {
+#ifndef CONFIG_VMS
 	struct socket *sock1, *sock2;
 	int fd1, fd2, err;
 
@@ -1010,6 +1017,9 @@ out_release_1:
         sock_release(sock1);
 out:
 	return err;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 
@@ -1023,6 +1033,7 @@ out:
 
 asmlinkage long sys_bind(int fd, struct sockaddr *umyaddr, int addrlen)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 	char address[MAX_SOCK_ADDR];
 	int err;
@@ -1034,6 +1045,9 @@ asmlinkage long sys_bind(int fd, struct sockaddr *umyaddr, int addrlen)
 		sockfd_put(sock);
 	}			
 	return err;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 
@@ -1045,6 +1059,7 @@ asmlinkage long sys_bind(int fd, struct sockaddr *umyaddr, int addrlen)
 
 asmlinkage long sys_listen(int fd, int backlog)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 	int err;
 	
@@ -1055,6 +1070,9 @@ asmlinkage long sys_listen(int fd, int backlog)
 		sockfd_put(sock);
 	}
 	return err;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 
@@ -1072,6 +1090,7 @@ asmlinkage long sys_listen(int fd, int backlog)
 
 asmlinkage long sys_accept(int fd, struct sockaddr *upeer_sockaddr, int *upeer_addrlen)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock, *newsock;
 	int err, len;
 	char address[MAX_SOCK_ADDR];
@@ -1114,6 +1133,9 @@ out:
 out_release:
 	sock_release(newsock);
 	goto out_put;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 
@@ -1131,6 +1153,7 @@ out_release:
 
 asmlinkage long sys_connect(int fd, struct sockaddr *uservaddr, int addrlen)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 	char address[MAX_SOCK_ADDR];
 	int err;
@@ -1147,6 +1170,9 @@ out_put:
 	sockfd_put(sock);
 out:
 	return err;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 /*
@@ -1156,6 +1182,7 @@ out:
 
 asmlinkage long sys_getsockname(int fd, struct sockaddr *usockaddr, int *usockaddr_len)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 	char address[MAX_SOCK_ADDR];
 	int len, err;
@@ -1172,6 +1199,9 @@ out_put:
 	sockfd_put(sock);
 out:
 	return err;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 /*
@@ -1181,6 +1211,7 @@ out:
 
 asmlinkage long sys_getpeername(int fd, struct sockaddr *usockaddr, int *usockaddr_len)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 	char address[MAX_SOCK_ADDR];
 	int len, err;
@@ -1193,6 +1224,9 @@ asmlinkage long sys_getpeername(int fd, struct sockaddr *usockaddr, int *usockad
 		sockfd_put(sock);
 	}
 	return err;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 /*
@@ -1204,6 +1238,7 @@ asmlinkage long sys_getpeername(int fd, struct sockaddr *usockaddr, int *usockad
 asmlinkage long sys_sendto(int fd, void * buff, size_t len, unsigned flags,
 			   struct sockaddr *addr, int addr_len)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 	char address[MAX_SOCK_ADDR];
 	int err;
@@ -1238,6 +1273,9 @@ out_put:
 	sockfd_put(sock);
 out:
 	return err;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 /*
@@ -1258,6 +1296,7 @@ asmlinkage long sys_send(int fd, void * buff, size_t len, unsigned flags)
 asmlinkage long sys_recvfrom(int fd, void * ubuf, size_t size, unsigned flags,
 			     struct sockaddr *addr, int *addr_len)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 	struct iovec iov;
 	struct msghdr msg;
@@ -1289,6 +1328,9 @@ asmlinkage long sys_recvfrom(int fd, void * ubuf, size_t size, unsigned flags,
 	sockfd_put(sock);			
 out:
 	return err;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 /*
@@ -1323,6 +1365,8 @@ asmlinkage long sys_setsockopt(int fd, int level, int optname, char *optval, int
 		sockfd_put(sock);
 	}
 	return err;
+#else
+	return -EAFNOSUPPORT;
 #endif
 }
 
@@ -1346,6 +1390,8 @@ asmlinkage long sys_getsockopt(int fd, int level, int optname, char *optval, int
 		sockfd_put(sock);
 	}
 	return err;
+#else
+	return -EAFNOSUPPORT;
 #endif
 }
 
@@ -1356,6 +1402,7 @@ asmlinkage long sys_getsockopt(int fd, int level, int optname, char *optval, int
 
 asmlinkage long sys_shutdown(int fd, int how)
 {
+#ifndef CONFIG_VMS
 	int err;
 	struct socket *sock;
 
@@ -1365,6 +1412,9 @@ asmlinkage long sys_shutdown(int fd, int how)
 		sockfd_put(sock);
 	}
 	return err;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 /*
@@ -1444,6 +1494,8 @@ out_put:
 	sockfd_put(sock);
 out:       
 	return err;
+#else
+	return -EAFNOSUPPORT;
 #endif
 }
 
@@ -1532,6 +1584,8 @@ out_put:
 	sockfd_put(sock);
 out:
 	return err;
+#else
+	return -EAFNOSUPPORT;
 #endif
 }
 
@@ -1551,8 +1605,8 @@ int sock_fcntl(struct file *filp, unsigned int cmd, unsigned long arg)
 	sock = socki_lookup (filp->f_dentry->d_inode);
 	if (sock && sock->ops)
 		return sock_no_fcntl(sock, cmd, arg);
-	return(-EINVAL);
 #endif
+	return(-EINVAL);
 }
 
 /* Argument list sizes for sys_socketcall */
@@ -1572,6 +1626,7 @@ static unsigned char nargs[18]={AL(0),AL(3),AL(3),AL(3),AL(2),AL(3),
 
 asmlinkage long sys_socketcall(int call, unsigned long *args)
 {
+#ifndef CONFIG_VMS
 	unsigned long a[6];
 	unsigned long a0,a1;
 	int err;
@@ -1646,6 +1701,9 @@ asmlinkage long sys_socketcall(int call, unsigned long *args)
 			break;
 	}
 	return err;
+#else
+	return -EAFNOSUPPORT;
+#endif
 }
 
 /*
@@ -1654,6 +1712,7 @@ asmlinkage long sys_socketcall(int call, unsigned long *args)
  *	SOCKET module.
  */
 
+#ifndef CONFIG_VMS
 int sock_register(struct net_proto_family *ops)
 {
 	int err;
@@ -1795,3 +1854,4 @@ int socket_get_info(char *buffer, char **start, off_t offset, int length)
 		len = 0;
 	return len;
 }
+#endif

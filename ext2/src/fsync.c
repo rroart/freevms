@@ -39,20 +39,21 @@
  *	even pass file to fsync ?
  */
 
+#if 0
 int ext2_sync_file(struct file * file, struct dentry *dentry, int datasync)
 {
 	struct inode *inode = dentry->d_inode;
 	return ext2_fsync_inode(inode, datasync);
 }
+#endif
 
+#if 0
 int ext2_fsync_inode(struct inode *inode, int datasync)
 {
 	int err=0;
 	
-#if 0
 	err  = fsync_inode_buffers(inode);
 	err |= fsync_inode_data_buffers(inode);
-#endif
 	if (!(inode->i_state & I_DIRTY))
 		return err;
 	if (datasync && !(inode->i_state & I_DIRTY_DATASYNC))
@@ -61,3 +62,4 @@ int ext2_fsync_inode(struct inode *inode, int datasync)
 	err |= ext2_sync_inode(inode);
 	return err ? -EIO : 0;
 }
+#endif

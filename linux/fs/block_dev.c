@@ -28,6 +28,8 @@
 
 #include <asm/uaccess.h>
 
+#include <queue.h>
+
 #define MAX_BUF_PER_PAGE (PAGE_CACHE_SIZE / 512)
 
 static unsigned long max_block(kdev_t dev)
@@ -226,6 +228,7 @@ static int block_fsync(struct file *filp, struct dentry *dentry, int datasync)
 
 static struct super_block *bd_read_super(struct super_block *sb, void *data, int silent)
 {
+#ifndef CONFIG_VMS
 	static struct super_operations sops = {};
 	struct inode *root = new_inode(sb);
 	if (!root)
@@ -247,6 +250,9 @@ static struct super_block *bd_read_super(struct super_block *sb, void *data, int
 	sb->s_root->d_parent = sb->s_root;
 	d_instantiate(sb->s_root, root);
 	return sb;
+#else
+	return 0;
+#endif
 }
 
 static DECLARE_FSTYPE(bd_type, "bdev", bd_read_super, FS_NOMOUNT);
@@ -265,9 +271,15 @@ static struct list_head bdev_hashtable[HASH_SIZE];
 static spinlock_t bdev_lock __cacheline_aligned_in_smp = SPIN_LOCK_UNLOCKED;
 static kmem_cache_t * bdev_cachep;
 
+#ifndef CONFIG_VMS
 #define alloc_bdev() \
 	 ((struct block_device *) kmem_cache_alloc(bdev_cachep, SLAB_KERNEL))
 #define destroy_bdev(bdev) kmem_cache_free(bdev_cachep, (bdev))
+#else
+//#define alloc_bdev() \
+	 ((struct block_device *) kmem_cache_alloc(bdev_cachep, SLAB_KERNEL))
+#define destroy_bdev(bdev) kfree(bdev)
+#endif
 
 static void init_once(void * foo, kmem_cache_t * cachep, unsigned long flags)
 {
@@ -282,6 +294,7 @@ static void init_once(void * foo, kmem_cache_t * cachep, unsigned long flags)
 	}
 }
 
+#ifndef CONFIG_VMS
 void __init bdev_cache_init(void)
 {
 	int i, err;
@@ -308,6 +321,7 @@ void __init bdev_cache_init(void)
 	if (IS_ERR(bd_mnt))
 		panic("Cannot create bdev pseudo-fs");
 }
+#endif
 
 /*
  * Most likely _very_ bad one - but then it's hardly critical for small
@@ -320,6 +334,7 @@ static inline unsigned long hash(dev_t dev)
 	return tmp & HASH_MASK;
 }
 
+#ifndef CONFIG_VMS
 static struct block_device *bdfind(dev_t dev, struct list_head *head)
 {
 	struct list_head *p;
@@ -333,19 +348,34 @@ static struct block_device *bdfind(dev_t dev, struct list_head *head)
 	}
 	return NULL;
 }
+#endif
 
 struct block_device *bdget(dev_t dev)
 {
 	struct list_head * head = bdev_hashtable + hash(dev);
 	struct block_device *bdev, *new_bdev;
 	spin_lock(&bdev_lock);
+#ifndef CONFIG_VMS
 	bdev = bdfind(dev, head);
+#else
+	bdev = 0;
+#endif
 	spin_unlock(&bdev_lock);
 	if (bdev)
 		return bdev;
+#ifndef CONFIG_VMS
 	new_bdev = alloc_bdev();
+#else
+	new_bdev = kmalloc(sizeof(struct block_device), GFP_KERNEL);
+	memset(new_bdev, 0, sizeof(struct block_device)); 
+#endif
 	if (new_bdev) {
+#ifndef CONFIG_VMS
 		struct inode *inode = new_inode(bd_mnt->mnt_sb);
+#else
+		struct inode *inode = kmalloc(sizeof(struct inode), GFP_KERNEL);
+		memset(inode, 0, sizeof(struct inode));
+#endif
 		if (inode) {
 			kdev_t kdev = to_kdev_t(dev);
 			atomic_set(&new_bdev->bd_count,1);
@@ -359,14 +389,31 @@ struct block_device *bdget(dev_t dev)
 			inode->i_data.gfp_mask = GFP_USER;
 			inode->i_mode = S_IFBLK;
 			spin_lock(&bdev_lock);
+#ifndef CONFIG_VMS
 			bdev = bdfind(dev, head);
+#else
+#if 0
+			bdev = kmalloc(sizeof(struct block_device), GFP_KERNEL);
+			memset(bdev, 0, sizeof(struct block_device)); 
+			qhead_init(bdev);
+#else
+			bdev = 0;
+			qhead_init(new_bdev);
+			qhead_init(&inode->i_devices);
+			qhead_init(&new_bdev->bd_inodes);
+#endif
+#endif
 			if (!bdev) {
+#ifndef CONFIG_VMS
 				list_add(&new_bdev->bd_hash, head);
+#endif
 				spin_unlock(&bdev_lock);
 				return new_bdev;
 			}
 			spin_unlock(&bdev_lock);
+#ifndef CONFIG_VMS
 			iput(new_bdev->bd_inode);
+#endif
 		}
 		destroy_bdev(new_bdev);
 	}
@@ -391,11 +438,14 @@ void bdput(struct block_device *bdev)
 			__bd_forget(list_entry(p, struct inode, i_devices));
 		}
 		spin_unlock(&bdev_lock);
+#ifndef CONFIG_VMS
 		iput(bdev->bd_inode);
+#endif
 		destroy_bdev(bdev);
 	}
 }
  
+#ifndef CONFIG_VMS
 int bd_acquire(struct inode *inode)
 {
 	struct block_device *bdev;
@@ -429,6 +479,7 @@ void bd_forget(struct inode *inode)
 		__bd_forget(inode);
 	spin_unlock(&bdev_lock);
 }
+#endif
 
 static struct {
 	const char *name;
@@ -471,6 +522,7 @@ const struct block_device_operations * get_blkfops(unsigned int major)
 	return ret;
 }
 
+#ifndef CONFIG_VMS
 int register_blkdev(unsigned int major, const char * name, struct block_device_operations *bdops)
 {
 	if (major == 0) {
@@ -504,6 +556,7 @@ int unregister_blkdev(unsigned int major, const char * name)
 	blkdevs[major].bdops = NULL;
 	return 0;
 }
+#endif
 
 /*
  * This routine checks whether a removable media has been changed,
@@ -542,8 +595,10 @@ int check_disk_change(kdev_t dev)
 	printk(KERN_DEBUG "VFS: Disk change detected on device %s\n",
 		bdevname(dev));
 
+#ifndef CONFIG_VMS
 	if (invalidate_device(dev, 0))
 		printk("VFS: busy inodes on changed media.\n");
+#endif
 
 	if (bdops->revalidate)
 		bdops->revalidate(dev);
@@ -614,6 +669,7 @@ int blkdev_get(struct block_device *bdev, mode_t mode, unsigned flags, int kind)
 	return do_open(bdev, bdev->bd_inode, &fake_file);
 }
 
+#ifndef CONFIG_VMS
 int blkdev_open(struct inode * inode, struct file * filp)
 {
 	struct block_device *bdev;
@@ -631,6 +687,7 @@ int blkdev_open(struct inode * inode, struct file * filp)
 
 	return do_open(bdev, inode, filp);
 }	
+#endif
 
 int blkdev_put(struct block_device *bdev, int kind)
 {
@@ -658,10 +715,12 @@ int blkdev_put(struct block_device *bdev, int kind)
 	return ret;
 }
 
+#ifndef CONFIG_VMS
 int blkdev_close(struct inode * inode, struct file * filp)
 {
 	return blkdev_put(inode->i_bdev, BDEV_FILE);
 }
+#endif
 
 static int blkdev_ioctl(struct inode *inode, struct file *file, unsigned cmd,
 			unsigned long arg)
@@ -681,8 +740,8 @@ struct address_space_operations def_blk_aops = {
 };
 
 struct file_operations def_blk_fops = {
-	open:		blkdev_open,
-	release:	blkdev_close,
+  open:		0/*blkdev_open*/,
+  release:	0/*blkdev_close*/,
 	llseek:		block_llseek,
 	read:		generic_file_read,
 	write:		generic_file_write,

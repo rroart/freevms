@@ -261,6 +261,7 @@ static inline void __put_fs_struct(struct fs_struct *fs)
 {
 	/* No need to hold fs->lock if we are killing it */
 	if (atomic_dec_and_test(&fs->count)) {
+#ifndef CONFIG_VMS
 		dput(fs->root);
 		mntput(fs->rootmnt);
 		dput(fs->pwd);
@@ -269,6 +270,7 @@ static inline void __put_fs_struct(struct fs_struct *fs)
 			dput(fs->altroot);
 			mntput(fs->altrootmnt);
 		}
+#endif
 		kmem_cache_free(fs_cachep, fs);
 	}
 }

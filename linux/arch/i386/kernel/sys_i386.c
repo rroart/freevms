@@ -28,6 +28,7 @@
  */
 asmlinkage int sys_pipe(unsigned long * fildes)
 {
+#ifndef CONFIG_VMS
 	int fd[2];
 	int error;
 
@@ -37,6 +38,9 @@ asmlinkage int sys_pipe(unsigned long * fildes)
 			error = -EFAULT;
 	}
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 /* common code for old and new mmaps */
@@ -135,6 +139,7 @@ asmlinkage int old_select(struct sel_arg_struct *arg)
 asmlinkage int sys_ipc (uint call, int first, int second,
 			int third, void *ptr, long fifth)
 {
+#ifndef CONFIG_VMS
 	int version, ret;
 
 	version = call >> 16; /* hack for backward compatibility */
@@ -205,6 +210,9 @@ asmlinkage int sys_ipc (uint call, int first, int second,
 	default:
 		return -EINVAL;
 	}
+#else
+	return -EPERM;
+#endif
 }
 
 /*

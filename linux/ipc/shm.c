@@ -33,6 +33,10 @@
 
 #include "util.h"
 
+#ifdef CONFIG_VMS
+#undef CONFIG_PROC_FS
+#endif
+
 struct shmid_kernel /* private to the kernel */
 {	
 	struct kern_ipc_perm	shm_perm;

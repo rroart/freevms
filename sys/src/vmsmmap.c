@@ -105,8 +105,10 @@ int vm_enough_memory(long pages)
 	 * dentries which will become freeable under VM load, etc.
 	 * Lets just hope all these (complex) factors balance out...
 	 */
+#if 0
 	free += (dentry_stat.nr_unused * sizeof(struct dentry)) >> PAGE_SHIFT;
 	free += (inodes_stat.nr_unused * sizeof(struct inode)) >> PAGE_SHIFT;
+#endif
 
 	return free > pages;
 }

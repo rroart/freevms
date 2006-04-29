@@ -132,7 +132,7 @@ static int ext2_mknod (struct inode * dir, struct dentry *dentry, int mode, int 
 static int ext2_symlink (struct inode * dir, struct dentry * dentry,
 	const char * symname)
 {
-	struct super_block * sb = dir->i_sb;
+	struct ext2_super_block * sb = dir->i_sb;
 	int err = -ENAMETOOLONG;
 	unsigned l = strlen(symname)+1;
 	struct inode * inode;

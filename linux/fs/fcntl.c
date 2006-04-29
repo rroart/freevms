@@ -257,6 +257,7 @@ static long do_fcntl(unsigned int fd, unsigned int cmd,
 		     unsigned long arg, struct file * filp)
 {
 	long err = -EINVAL;
+#ifndef CONFIG_VMS
 
 	switch (cmd) {
 		case F_DUPFD:
@@ -339,6 +340,7 @@ static long do_fcntl(unsigned int fd, unsigned int cmd,
 			break;
 	}
 
+#endif
 	return err;
 }
 

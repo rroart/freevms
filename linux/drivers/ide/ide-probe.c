@@ -857,10 +857,12 @@ static int hwif_init (ide_hwif_t *hwif)
 	
 	hwif->present = 0; /* we set it back to 1 if all is ok below */
 
+#ifndef CONFIG_VMS
 	if (devfs_register_blkdev (hwif->major, hwif->name, ide_fops)) {
 		printk("%s: UNABLE TO GET MAJOR NUMBER %d\n", hwif->name, hwif->major);
 		return (hwif->present = 0);
 	}
+#endif
 	
 	if (init_irq(hwif)) {
 		int i = hwif->irq;
@@ -870,13 +872,17 @@ static int hwif_init (ide_hwif_t *hwif)
 		 */
 		if (!(hwif->irq = ide_default_irq(hwif->io_ports[IDE_DATA_OFFSET]))) {
 			printk("%s: Disabled unable to get IRQ %d.\n", hwif->name, i);
+#ifndef CONFIG_VMS
 			(void) unregister_blkdev (hwif->major, hwif->name);
+#endif
 			return (hwif->present = 0);
 		}
 		if (init_irq(hwif)) {
 			printk("%s: probed IRQ %d and default IRQ %d failed.\n",
 				hwif->name, i, hwif->irq);
+#ifndef CONFIG_VMS
 			(void) unregister_blkdev (hwif->major, hwif->name);
+#endif
 			return (hwif->present = 0);
 		}
 		printk("%s: probed IRQ %d failed, using default.\n",

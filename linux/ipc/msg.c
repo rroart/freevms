@@ -31,6 +31,10 @@
 #include <asm/uaccess.h>
 #include "util.h"
 
+#ifdef CONFIG_VMS
+#undef CONFIG_PROC_FS
+#endif
+
 /* sysctl: */
 int msg_ctlmax = MSGMAX;
 int msg_ctlmnb = MSGMNB;

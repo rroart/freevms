@@ -2708,9 +2708,11 @@ void __init con_init_devfs (void)
 {
 	int i;
 
+#if 0
 	for (i = 0; i < console_driver.num; i++)
 		tty_register_devfs (&console_driver, DEVFS_FL_AOPEN_NOTIFY,
 				    console_driver.minor_start + i);
+#endif
 }
 
 /*

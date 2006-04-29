@@ -33,8 +33,10 @@ asmlinkage void exe$revokid      (void) { }
 myopenfile(char * filename, char * rmsfilename) {
   struct file * file=0;
   extern int mount_root_vfs;
+#ifndef CONFIG_VMS
   if (mount_root_vfs)
     file = filp_open(filename,O_RDONLY,0);
+#endif
   if (!IS_ERR(file)) {
 #ifdef CONFIG_VMS
     file = rms_open_exec(rmsfilename);

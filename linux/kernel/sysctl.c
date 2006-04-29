@@ -39,6 +39,10 @@
 
 #include <asm/uaccess.h>
 
+#ifdef CONFIG_VMS
+#undef CONFIG_PROC_FS
+#endif
+
 #ifdef CONFIG_ROOT_NFS
 #include <linux/nfs_fs.h>
 #endif
@@ -253,7 +257,9 @@ static ctl_table kern_table[] = {
 	 0600, NULL, &proc_dointvec},
 	{KERN_MAX_THREADS, "threads-max", &max_threads, sizeof(int),
 	 0644, NULL, &proc_dointvec},
+#ifndef CONFIG_VMS
 	{KERN_RANDOM, "random", NULL, 0, 0555, random_table},
+#endif
 	{KERN_OVERFLOWUID, "overflowuid", &overflowuid, sizeof(int), 0644, NULL,
 	 &proc_dointvec_minmax, &sysctl_intvec, NULL,
 	 &minolduid, &maxolduid},
@@ -297,6 +303,7 @@ static ctl_table proc_table[] = {
 };
 
 static ctl_table fs_table[] = {
+#ifndef CONFIG_VMS
 	{FS_NRINODE, "inode-nr", &inodes_stat, 2*sizeof(int),
 	 0444, NULL, &proc_dointvec},
 	{FS_STATINODE, "inode-state", &inodes_stat, 7*sizeof(int),
@@ -321,6 +328,7 @@ static ctl_table fs_table[] = {
 	 sizeof(int), 0644, NULL, &proc_dointvec},
 	{FS_LEASE_TIME, "lease-break-time", &lease_break_time, sizeof(int),
 	 0644, NULL, &proc_dointvec},
+#endif
 	{0}
 };
 
@@ -336,12 +344,15 @@ extern void init_irq_proc (void);
 
 void __init sysctl_init(void)
 {
+#ifndef CONFIG_VMS
 #ifdef CONFIG_PROC_FS
 	register_proc_table(root_table, proc_sys_root);
 	init_irq_proc();
 #endif
+#endif
 }
 
+#ifndef CONFIG_VMS
 int do_sysctl(int *name, int nlen, void *oldval, size_t *oldlenp,
 	       void *newval, size_t newlen)
 {
@@ -370,9 +381,11 @@ int do_sysctl(int *name, int nlen, void *oldval, size_t *oldlenp,
 	} while (tmp != &root_table_header.ctl_entry);
 	return -ENOTDIR;
 }
+#endif
 
 extern asmlinkage long sys_sysctl(struct __sysctl_args *args)
 {
+#ifndef CONFIG_VMS
 	struct __sysctl_args tmp;
 	int error;
 
@@ -384,6 +397,9 @@ extern asmlinkage long sys_sysctl(struct __sysctl_args *args)
 			  tmp.newval, tmp.newlen);
 	unlock_kernel();
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 /*

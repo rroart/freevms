@@ -123,6 +123,7 @@ static inline void put_binfmt(struct linux_binfmt * fmt)
  */
 asmlinkage long sys_uselib(const char * library)
 {
+#ifndef CONFIG_VMS
 	struct file * file;
 	struct nameidata nd;
 	int error;
@@ -169,6 +170,9 @@ out:
 exit:
 	path_release(&nd);
 	goto out;
+#else
+	return 0;
+#endif
 }
 
 /*
@@ -376,6 +380,7 @@ int setup_arg_pages(struct linux_binprm *bprm)
 	return 0;
 }
 
+#ifndef CONFIG_VMS
 struct file *open_exec(const char *name)
 {
 	struct nameidata nd;
@@ -412,6 +417,7 @@ out:
 	}
 	goto out;
 }
+#endif
 
 #ifdef CONFIG_VMS
 struct file *rms_open_exec(const char *name)
@@ -437,8 +443,8 @@ struct file *rms_open_exec(const char *name)
 	if ((sts = exe$open(&fab)) & 1) {
 	  long xqp_fcb = get_xqp_prim_fcb();
 	  long x2p_fcb = get_x2p_prim_fcb();
-	  extern int mount_root_vfs;
-	  if (mount_root_vfs==0 || xqp_fcb!=prev_xqp_fcb)
+	  extern int mount_root_ext2;
+	  if (mount_root_ext2==0 || xqp_fcb!=prev_xqp_fcb)
 	    file=xqp_fcb;
 	  else
 	    file=x2p_fcb;
@@ -684,7 +690,11 @@ int flush_old_exec(struct linux_binprm * bprm)
 	if (((struct _fcb *)(bprm->file))->fcb$b_type!=DYN$C_FCB)
 #endif
 	if (bprm->e_uid != current->euid || bprm->e_gid != current->egid || 
+#ifndef CONFIG_VMS
 	    permission(bprm->file->f_dentry->d_inode,MAY_READ))
+#else
+	    1)
+#endif
 		current->mm->dumpable = 0;
 
 	/* An exec changes our domain. We are no longer part of the thread
@@ -785,11 +795,13 @@ int rms_prepare_binprm(struct linux_binprm *bprm)
 {
 	int mode;
 	struct _fcb * fcb = bprm->file;
+#if 0
 	struct inode * inode = fcb->fcb$l_primfcb;
 
 	if (fcb->fcb$l_fill_5)
 	mode = inode->i_mode;
 	else
+#endif
 	mode = 0x755;
 	/*
 	 * Check execute perms again - if the caller has CAP_DAC_OVERRIDE,
@@ -804,17 +816,21 @@ int rms_prepare_binprm(struct linux_binprm *bprm)
 	// no nosuid mount check
 	//if(!(bprm->file->f_vfsmnt->mnt_flags & MNT_NOSUID)) {}
 	/* Set-uid? */
+#if 0
 	if (mode & S_ISUID)
 	  bprm->e_uid = inode->i_uid;
-	
+#endif
+
 	/* Set-gid? */
 	/*
 	 * If setgid is set but no group execute bit then this
 	 * is a candidate for mandatory locking, not a setgid
 	 * executable.
 	 */
+#if 0
 	if ((mode & (S_ISGID | S_IXGRP)) == (S_ISGID | S_IXGRP))
 	  bprm->e_gid = inode->i_gid;
+#endif
 
 	/* We don't have VFS support for capabilities yet */
 	cap_clear(bprm->cap_inheritable);
@@ -1078,7 +1094,9 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 #endif
 	if (file) goto fcb_found;
 
+#ifndef CONFIG_VMS
 	file = open_exec(filename);
+#endif
 
 	retval = PTR_ERR(file);
 	//printk("here 5\n");
@@ -1117,9 +1135,9 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 #ifdef CONFIG_VMS
 	if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
 	  retval = rms_prepare_binprm(&bprm);
-	else
+#else
+	retval = prepare_binprm(&bprm);
 #endif
-	  retval = prepare_binprm(&bprm);
 	//printk("here 4\n");
 	if (retval < 0) 
 		goto out; 
@@ -1179,6 +1197,7 @@ void set_binfmt(struct linux_binfmt *new)
 
 int do_coredump(long signr, struct pt_regs * regs)
 {
+#ifndef CONFIG_VMS
 	struct linux_binfmt * binfmt;
 	char corename[6+sizeof(current->pcb$t_lname)+10];
 	struct file * file;
@@ -1224,6 +1243,9 @@ close_fail:
 fail:
 	unlock_kernel();
 	return retval;
+#else
+	return -EPERM;
+#endif
 }
 
 init_phd(struct _phd * phd) {

@@ -34,6 +34,8 @@
 
 #include <misc_routines.h>
 
+#ifndef CONFIG_VMS
+
 #define DCACHE_PARANOIA 1
 /* #define DCACHE_DEBUG 1 */
 
@@ -1298,3 +1300,15 @@ void __init vfs_caches_init(unsigned long mempages)
 	bdev_cache_init();
 	cdev_cache_init();
 }
+#else
+
+asmlinkage long sys_getcwd(char *buf, unsigned long size)
+{
+  // check. quick and dirty. fix later
+	int error = 0;
+	extern char * default_buffer;
+	memcpy(buf, default_buffer, size);
+	return error;
+}
+
+#endif

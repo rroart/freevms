@@ -40,6 +40,10 @@
 #include "ibm.h"
 #include "ultrix.h"
 
+#include <sys$routines.h>
+#include <misc_routines.h>
+#include <iodef.h>
+
 extern int *blk_size[];
 
 int warn_no_part = 1; /*This is ugly: should make genhd removable media aware*/
@@ -448,7 +452,16 @@ unsigned char *read_dev_sector(struct block_device *bdev, unsigned long n, Secto
 	int sect = PAGE_CACHE_SIZE / 512;
 	struct page *page = alloc_pages(GFP_KERNEL, 0);
 
+#if 0
 	block_read_full_page2(bdev->bd_inode,page,n/sect);
+#else
+#if 0
+	myqio(0, page_address(page), 4096, n, to_kdev_t(bdev->bd_dev), 2);
+#else
+	unsigned long long iosb;
+	int sts = sys$qiow(0,(unsigned short)dev2chan(to_kdev_t(bdev->bd_dev)),IO$_READPBLK,&iosb,0,0, page_address(page),4096,n*2,0,0,0);
+#endif
+#endif
 
 	if (!IS_ERR(page)) {
 #ifndef CONFIG_VMS

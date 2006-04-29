@@ -104,7 +104,7 @@ void invalidate_inode_pages2(struct address_space * mapping)
  * Two-stage data sync: first start the IO, then go back and
  * collect the information..
  */
-int generic_buffer_fdatasync(struct inode *inode, unsigned long start_idx, unsigned long end_idx)
+int generic_buffer_fdatasync(struct _fcb *inode, unsigned long start_idx, unsigned long end_idx)
 {
 	int retval=0;
 
@@ -151,7 +151,7 @@ int filemap_fdatawait(struct address_space * mapping)
  */
 void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * desc, read_actor_t actor)
 {
-	struct inode *inode = filp->f_dentry->d_inode;
+	struct _fcb *inode = filp->f_dentry->d_inode;
 	unsigned long index, offset;
 	struct page *cached_page;
 	int error;
@@ -165,13 +165,13 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 		unsigned long end_index, nr, ret;
 		struct _fcb * fcb;
 
-		end_index = inode->i_size >> PAGE_CACHE_SHIFT;
+		end_index = inode->fcb$l_filesize >> PAGE_CACHE_SHIFT;
 			
 		if (index > end_index)
 			break;
 		nr = PAGE_CACHE_SIZE;
 		if (index == end_index) {
-			nr = inode->i_size & ~PAGE_CACHE_MASK;
+			nr = inode->fcb$l_filesize & ~PAGE_CACHE_MASK;
 			if (nr <= offset)
 				break;
 		}
@@ -244,15 +244,15 @@ void do_generic_file_read(struct file * filp, loff_t *ppos, read_descriptor_t * 
 	filp->f_reada = 1;
 	if (cached_page)
 		page_cache_release(cached_page);
+#if 0
 	UPDATE_ATIME(inode);
+#endif
 }
 
 void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_t * desc, read_actor_t actor)
 {
 	struct _fcb * fcb = filp;
-	struct inode * inode=0;
-	if (fcb->fcb$l_fill_5)
-	  inode = filp->fcb$l_primfcb;
+	struct _fcb * inode=0;
 	unsigned long index, offset;
 	struct page *cached_page;
 	int error;
@@ -265,18 +265,24 @@ void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_
 		struct page *page;
 		unsigned long end_index, nr, ret;
 
+#if 0
+		// not yet
 		if (fcb->fcb$l_fill_5)
-		end_index = inode->i_size >> PAGE_CACHE_SHIFT;
+		end_index = inode->fcb$l_filesize >> PAGE_CACHE_SHIFT;
 		else
+#endif
 		  end_index = 10000; //not yet: fcb->fcb$l_efblk + 1;  
 
 		if (index > end_index)
 			break;
 		nr = PAGE_CACHE_SIZE;
 		if (index == end_index) {
+#if 0
+		  // not yet
 			if (fcb->fcb$l_fill_5)
-			nr = inode->i_size & ~PAGE_CACHE_MASK;
+			nr = inode->fcb$l_filesize & ~PAGE_CACHE_MASK;
 			else
+#endif
 			nr = ((fcb->fcb$l_efblk << 9) + 0 ) & ~PAGE_CACHE_MASK;
 			if (nr <= offset)
 				break;
@@ -351,8 +357,10 @@ void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_
 	*ppos = ((loff_t) index << PAGE_CACHE_SHIFT) + offset;
 	if (cached_page)
 		page_cache_release(cached_page);
+#if 0
 	if (inode)
 	UPDATE_ATIME(inode);
+#endif
 }
 
 static ssize_t generic_file_direct_IO(int rw, struct file * filp, char * buf, size_t count, loff_t offset)
@@ -360,7 +368,7 @@ static ssize_t generic_file_direct_IO(int rw, struct file * filp, char * buf, si
 	ssize_t retval;
 	int new_iobuf, chunk_size, blocksize_mask, blocksize, blocksize_bits, iosize, progress;
 	struct kiobuf * iobuf;
-	struct inode * inode = filp->f_dentry->d_inode;
+	struct _fcb * inode = filp->f_dentry->d_inode;
 
 	new_iobuf = 0;
 	iobuf = filp->f_iobuf;
@@ -375,8 +383,11 @@ static ssize_t generic_file_direct_IO(int rw, struct file * filp, char * buf, si
 		new_iobuf = 1;
 	}
 
+#if 0
+	// not yet
 	blocksize = 1 << inode->i_blkbits;
 	blocksize_bits = inode->i_blkbits;
+#endif
 	blocksize_mask = blocksize - 1;
 	chunk_size = KIO_MAX_ATOMIC_IO << 10;
 
@@ -497,12 +508,12 @@ ssize_t generic_file_read(struct file * filp, char * buf, size_t count, loff_t *
  o_direct:
 	{
 		loff_t pos = *ppos, size;
-		struct inode *inode = filp->f_dentry->d_inode;
+		struct _fcb *inode = filp->f_dentry->d_inode;
 
 		retval = 0;
 		if (!count)
 			goto out; /* skip atime */
-		size = inode->i_size;
+		size = inode->fcb$l_filesize;
 		if (pos < size) {
 			if (pos + count > size)
 				count = size - pos;
@@ -510,7 +521,9 @@ ssize_t generic_file_read(struct file * filp, char * buf, size_t count, loff_t *
 			if (retval > 0)
 				*ppos = pos + retval;
 		}
+#if 0
 		UPDATE_ATIME(filp->f_dentry->d_inode);
+#endif
 		goto out;
 	}
 }
@@ -582,7 +595,7 @@ asmlinkage ssize_t sys_sendfile(int out_fd, int in_fd, off_t *offset, size_t cou
 {
 	ssize_t retval;
 	struct file * in_file, * out_file;
-	struct inode * in_inode, * out_inode;
+	struct _fcb * in_inode, * out_inode;
 
 	/*
 	 * Get input file, and verify that it is ok..
@@ -840,9 +853,11 @@ static int msync_interval(struct _rde * vma,
 		ret = filemap_sync(vma, start, end-start, flags);
 
 		if (!ret && (flags & (MS_SYNC|MS_ASYNC))) {
-			struct inode * inode = file->f_dentry->d_inode;
+			struct _fcb * inode = file->f_dentry->d_inode;
 
+#if 0
 			down(&inode->i_sem);
+#endif
 			//ret = filemap_fdatasync();
 			if (flags & MS_SYNC) {
 				int err;
@@ -856,7 +871,9 @@ static int msync_interval(struct _rde * vma,
 				if (err && !ret)
 					ret = err;
 			}
+#if 0
 			up(&inode->i_sem);
+#endif
 		}
 	}
 	return ret;
@@ -1087,7 +1104,7 @@ static long madvise_willneed(struct _rde * vma,
 	if (!vma->vm_file)
 		return error;
 	file = vma->vm_file;
-	size = (file->f_dentry->d_inode->i_size + PAGE_CACHE_SIZE - 1) >>
+	size = (file->f_dentry->d_inode->fcb$l_filesize + PAGE_CACHE_SIZE - 1) >>
 							PAGE_CACHE_SHIFT;
 #endif
 
@@ -1443,8 +1460,9 @@ out:
 	return error;
 }
 
-inline void remove_suid(struct inode *inode)
+inline void remove_suid(struct _fcb *inode)
 {
+#if 0
 	unsigned int mode;
 
 	/* set S_IGID if S_IXGRP is set, and always set S_ISUID */
@@ -1456,6 +1474,7 @@ inline void remove_suid(struct inode *inode)
 		inode->i_mode &= ~mode;
 		mark_inode_dirty(inode);
 	}
+#endif
 }
 
 /*
@@ -1476,7 +1495,7 @@ inline void remove_suid(struct inode *inode)
 ssize_t
 generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
 {
-	struct inode	*inode = file->f_dentry->d_inode;
+	struct _fcb	*inode = file->f_dentry->d_inode;
 	unsigned long	limit = current->rlim[RLIMIT_FSIZE].rlim_cur;
 	loff_t		pos;
 	struct page	*page, *cached_page;
@@ -1493,7 +1512,9 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
 
 	cached_page = NULL;
 
+#if 0
 	down(&inode->i_sem);
+#endif
 
 	pos = *ppos;
 	err = -EINVAL;
@@ -1509,8 +1530,8 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
 	written = 0;
 
 	/* FIXME: this is for backwards compatibility with 2.4 */
-	if (!S_ISBLK(inode->i_mode) && file->f_flags & O_APPEND)
-		pos = inode->i_size;
+	if (/*!S_ISBLK(inode->i_mode) &&*/ file->f_flags & O_APPEND)
+		pos = inode->fcb$l_filesize;
 
 	/*
 	 * Check whether we've reached the file size limit.
@@ -1552,7 +1573,9 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
 	 *	Linus frestrict idea will clean these up nicely..
 	 */
 	 
-	if (!S_ISBLK(inode->i_mode)) {
+	if (1/*!S_ISBLK(inode->i_mode)*/) {
+#if 0
+	  // not yet
 		if (pos >= inode->i_sb->s_maxbytes)
 		{
 			if (count || pos > inode->i_sb->s_maxbytes) {
@@ -1565,20 +1588,24 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
 
 		if (pos + count > inode->i_sb->s_maxbytes)
 			count = inode->i_sb->s_maxbytes - pos;
+#endif
 	} else {
+#if 0
+	  // not yet
 		if (is_read_only(inode->i_rdev)) {
 			err = -EPERM;
 			goto out;
 		}
-		if (pos >= inode->i_size) {
-			if (count || pos > inode->i_size) {
+#endif
+		if (pos >= inode->fcb$l_filesize) {
+			if (count || pos > inode->fcb$l_filesize) {
 				err = -ENOSPC;
 				goto out;
 			}
 		}
 
-		if (pos + count > inode->i_size)
-			count = inode->i_size - pos;
+		if (pos + count > inode->fcb$l_filesize)
+			count = inode->fcb$l_filesize - pos;
 	}
 
 	err = 0;
@@ -1586,7 +1613,9 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
 		goto out;
 
 	remove_suid(inode);
+#if 0
 	inode->i_ctime = inode->i_mtime = CURRENT_TIME;
+#endif
 	mark_inode_dirty_sync(inode);
 
 	if (file->f_flags & O_DIRECT)
@@ -1668,16 +1697,20 @@ done:
 
 	/* For now, when the user asks for O_SYNC, we'll actually
 	 * provide O_DSYNC. */
+#if 0
 	if (status >= 0) {
-		if ((file->f_flags & O_SYNC) || IS_SYNC(inode))
+	  if ((file->f_flags & O_SYNC) /*|| IS_SYNC(inode)*/)
 			status = generic_osync_inode(inode, OSYNC_METADATA|OSYNC_DATA);
 	}
+#endif
 	
 out_status:	
 	err = written ? written : status;
 out:
 
+#if 0
 	up(&inode->i_sem);
+#endif
 	return err;
 fail_write:
 	status = -EFAULT;
@@ -1686,23 +1719,23 @@ fail_write:
 sync_failure:
 	/*
 	 * If blocksize < pagesize, prepare_write() may have instantiated a
-	 * few blocks outside i_size.  Trim these off again.
+	 * few blocks outside fcb$l_filesize.  Trim these off again.
 	 */
 	kunmap(page);
 #if 0
 	UnlockPage(page);
 #endif
 	page_cache_release(page);
-	if (pos + bytes > inode->i_size)
-		vmtruncate(inode, inode->i_size);
+	if (pos + bytes > inode->fcb$l_filesize)
+		vmtruncate(inode, inode->fcb$l_filesize);
 	goto done;
 
 o_direct:
 	written = generic_file_direct_IO(WRITE, file, (char *) buf, count, pos);
 	if (written > 0) {
 		loff_t end = pos + written;
-		if (end > inode->i_size && !S_ISBLK(inode->i_mode)) {
-			inode->i_size = end;
+		if (end > inode->fcb$l_filesize && 1/*!S_ISBLK(inode->i_mode)*/) {
+			inode->fcb$l_filesize = end;
 			mark_inode_dirty(inode);
 		}
 		*ppos = end;
@@ -1712,8 +1745,10 @@ o_direct:
 	 * Sync the fs metadata but not the minor inode changes and
 	 * of course not the data as we did direct DMA for the IO.
 	 */
+#if 0
 	if (written >= 0 && file->f_flags & O_SYNC)
 		status = generic_osync_inode(inode, OSYNC_METADATA);
+#endif
 	goto out_status;
 }
 

@@ -40,6 +40,7 @@ static int ext2_release_file (struct inode * inode, struct file * filp)
 	return 0;
 }
 
+#if 0
 /*
  * We have mostly NULL's here: the current defaults are ok for
  * the ext2 filesystem.
@@ -58,3 +59,4 @@ struct file_operations ext2_file_operations = {
 struct inode_operations ext2_file_inode_operations = {
 	truncate:	ext2_truncate,
 };
+#endif

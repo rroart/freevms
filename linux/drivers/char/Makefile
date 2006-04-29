@@ -19,7 +19,7 @@ O_TARGET := char.o
 ifndef CONFIG_VMS
 obj-y	 += mem.o tty_io.o n_tty.o tty_ioctl.o raw.o pty.o misc.o random.o
 else
-obj-y	 += mem.o raw.o pty.o misc.o random.o
+obj-y	 += pty.o
 endif
 
 # All of the (potential) objects that export symbols.
@@ -31,7 +31,7 @@ export-objs     :=	console.o keyboard.o sysrq.o \
 			tty_io.o tty_ioctl.o generic_serial.o
 else
 export-objs     :=	sysrq.o \
-			misc.o pty.o random.o selection.o serial.o \
+			pty.o selection.o serial.o \
 			generic_serial.o
 endif
 

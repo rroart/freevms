@@ -29,6 +29,8 @@ Call sys$cli for lib$get_foreign?
 Cleanup struct iosb _iosb __iosb 64-bit size and iost1 iost2
 Sched svpctx switches to i-stack; do the same?
 Move P1 area to 0xffffffff-etc.
+For some reason params.dat must my tried to be opened before you can exe$open
+dcl, figure out why. (With ODS-2)
 
 CPU/PAL:
 FIX pal

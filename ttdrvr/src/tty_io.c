@@ -232,16 +232,16 @@ inline int tty_paranoia_check(struct tty_struct *tty, kdev_t device,
 {
 #ifdef TTY_PARANOIA_CHECK
 	static const char badmagic[] = KERN_WARNING
-		"Warning: bad magic number for tty struct (%s) in %s\n";
+		"Warning: bad magic number for tty struct (%x) in %s\n";
 	static const char badtty[] = KERN_WARNING
-		"Warning: null TTY for (%s) in %s\n";
+		"Warning: null TTY for (%x) in %s\n";
 
 	if (!tty) {
-		printk(badtty, kdevname(device), routine);
+		printk(badtty, device, routine);
 		return 1;
 	}
 	if (tty->magic != TTY_MAGIC) {
-		printk(badmagic, kdevname(device), routine);
+		printk(badmagic, device, routine);
 		return 1;
 	}
 #endif
@@ -267,7 +267,7 @@ static int check_tty_count(struct tty_struct *tty, const char *routine)
 	if (tty->count != count) {
 		printk(KERN_WARNING "Warning: dev (%s) tty->count(%d) "
 				    "!= #fd's(%d) in %s\n",
-		       kdevname(tty->device), tty->count, count, routine);
+		       tty->device, tty->count, count, routine);
 		return count;
        }	
 #endif
@@ -855,24 +855,24 @@ static void release_dev(struct file * filp)
 #ifdef TTY_PARANOIA_CHECK
 	if (idx < 0 || idx >= tty->driver.num) {
 		printk(KERN_DEBUG "release_dev: bad idx when trying to "
-				  "free (%s)\n", kdevname(tty->device));
+				  "free (%s)\n", tty->device);
 		return;
 	}
 	if (tty != tty->driver.table[idx]) {
 		printk(KERN_DEBUG "release_dev: driver.table[%d] not tty "
-				  "for (%s)\n", idx, kdevname(tty->device));
+				  "for (%s)\n", idx, tty->device);
 		return;
 	}
 	if (tty->termios != tty->driver.termios[idx]) {
 		printk(KERN_DEBUG "release_dev: driver.termios[%d] not termios "
 		       "for (%s)\n",
-		       idx, kdevname(tty->device));
+		       idx, tty->device);
 		return;
 	}
 	if (tty->termios_locked != tty->driver.termios_locked[idx]) {
 		printk(KERN_DEBUG "release_dev: driver.termios_locked[%d] not "
 		       "termios_locked for (%s)\n",
-		       idx, kdevname(tty->device));
+		       idx, tty->device);
 		return;
 	}
 #endif
@@ -887,20 +887,20 @@ static void release_dev(struct file * filp)
 		if (o_tty != tty->driver.other->table[idx]) {
 			printk(KERN_DEBUG "release_dev: other->table[%d] "
 					  "not o_tty for (%s)\n",
-			       idx, kdevname(tty->device));
+			       idx, tty->device);
 			return;
 		}
 		if (o_tty->termios != tty->driver.other->termios[idx]) {
 			printk(KERN_DEBUG "release_dev: other->termios[%d] "
 					  "not o_termios for (%s)\n",
-			       idx, kdevname(tty->device));
+			       idx, tty->device);
 			return;
 		}
 		if (o_tty->termios_locked != 
 		      tty->driver.other->termios_locked[idx]) {
 			printk(KERN_DEBUG "release_dev: other->termios_locked["
 					  "%d] not o_termios_locked for (%s)\n",
-			       idx, kdevname(tty->device));
+			       idx, tty->device);
 			return;
 		}
 		if (o_tty->link != tty) {
@@ -1141,9 +1141,15 @@ retry_open:
 	ptmx_found:
 		set_bit(TTY_PTY_LOCK, &tty->flags); /* LOCK THE SLAVE */
 		minor -= driver->minor_start;
+#if 0
 		devpts_pty_new(driver->other->name_base + minor, MKDEV(driver->other->major, minor + driver->other->minor_start));
+#else
+		printk("no new pts\n");
+#endif
+#if 0
 		tty_register_devfs(&pts_driver[major], DEVFS_FL_DEFAULT,
 				   pts_driver[major].minor_start + minor);
+#endif
 		noctty = 1;
 		goto init_dev_done;
 
@@ -1718,7 +1724,9 @@ int tty_register_driver(struct tty_driver *driver)
 	if (driver->flags & TTY_DRIVER_INSTALLED)
 		return 0;
 
+#if 0
 	error = devfs_register_chrdev(driver->major, driver->name, &tty_fops);
+#endif
 	if (error < 0)
 		return error;
 	else if(driver->major == 0)
@@ -1732,11 +1740,13 @@ int tty_register_driver(struct tty_driver *driver)
 	if (tty_drivers) tty_drivers->prev = driver;
 	tty_drivers = driver;
 	
+#if 0
 	if ( !(driver->flags & TTY_DRIVER_NO_DEVFS) ) {
 		for(i = 0; i < driver->num; i++)
 		    tty_register_devfs(driver, 0, driver->minor_start + i);
 	}
 	proc_tty_register_driver(driver);
+#endif
 	return error;
 }
 
@@ -1764,12 +1774,14 @@ int tty_unregister_driver(struct tty_driver *driver)
 	if (!found)
 		return -ENOENT;
 
+#if 0
 	if (othername == NULL) {
 		retval = devfs_unregister_chrdev(driver->major, driver->name);
 		if (retval)
 			return retval;
 	} else
 		devfs_register_chrdev(driver->major, othername, &tty_fops);
+#endif
 
 	if (driver->prev)
 		driver->prev->next = driver->next;
@@ -1795,9 +1807,13 @@ int tty_unregister_driver(struct tty_driver *driver)
 			driver->termios_locked[i] = NULL;
 			kfree(tp);
 		}
+#if 0
 		tty_unregister_devfs(driver, driver->minor_start + i);
+#endif
 	}
+#if 0
 	proc_tty_unregister_driver(driver);
+#endif
 	return 0;
 }
 
@@ -1917,3 +1933,7 @@ void __init tty_init(void)
 	kbd_init();
 #endif
 }
+
+#if 1
+__initcall(tty_init);
+#endif

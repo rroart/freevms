@@ -258,6 +258,10 @@ static void select_bits_free(void *bits, int size)
 asmlinkage long
 sys_select(int n, fd_set *inp, fd_set *outp, fd_set *exp, struct timeval *tvp)
 {
+#ifdef CONFIG_VMS
+  printk("no select\n");
+  return -EINVAL;
+#else
 	fd_set_bits fds;
 	char *bits;
 	long timeout;
@@ -346,6 +350,7 @@ out:
 	select_bits_free(bits, size);
 out_nofds:
 	return ret;
+#endif
 }
 
 #define POLLFD_PER_PAGE  ((PAGE_SIZE) / sizeof(struct pollfd))
@@ -411,6 +416,10 @@ static int do_poll(unsigned int nfds, unsigned int nchunks, unsigned int nleft,
 
 asmlinkage long sys_poll(struct pollfd * ufds, unsigned int nfds, long timeout)
 {
+#ifdef CONFIG_VMS
+  printk("no select\n");
+  return -EINVAL;
+#else
 	int i, j, fdcount, err;
 	struct pollfd **fds;
 	poll_table table, *wait;
@@ -493,4 +502,5 @@ out_fds:
 out:
 	poll_freewait(&table);
 	return err;
+#endif
 }

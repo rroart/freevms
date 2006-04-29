@@ -1792,9 +1792,9 @@ static void lock_get_status(char* out, struct file_lock *fl, int id, char *pfx)
 #endif
 		out += sprintf(out, "%s ",
 			       (fl->fl_type & F_WRLCK) ? "WRITE" : "READ ");
-	out += sprintf(out, "%d %s:%ld ",
+	out += sprintf(out, "%d %x:%ld ",
 		     fl->fl_pid,
-		     inode ? kdevname(inode->i_dev) : "<none>",
+		     inode ? inode->i_dev : 0,
 		     inode ? inode->i_ino : 0);
 	out += sprintf(out, "%Ld ", fl->fl_start);
 	if (fl->fl_end == OFFSET_MAX)

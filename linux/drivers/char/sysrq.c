@@ -150,9 +150,9 @@ static void go_sync(struct super_block *sb, int remount_flag)
 	int orig_loglevel;
 	orig_loglevel = console_loglevel;
 	console_loglevel = 7;
-	printk(KERN_INFO "%sing device %s ... ",
+	printk(KERN_INFO "%sing device %x ... ",
 	       remount_flag ? "Remount" : "Sync",
-	       kdevname(sb->s_dev));
+	       sb->s_dev);
 
 	if (remount_flag) { /* Remount R/O */
 		int ret, flags;

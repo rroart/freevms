@@ -62,16 +62,11 @@
 #include <xabprodef.h>
 #include <ucbdef.h>
 #include <ddbdef.h>
-#include <fh2def.h>
-#include <fm2def.h>
-#include <hm2def.h>
 #include <fcbdef.h>
 #include <scbdef.h>
 #include <wcbdef.h>
 #include <vmstime.h>
-#include "../../f11x/src/x2p.h"
-#include "cache.h"
-#include "access.h"
+#include "x2p.h"
 #include <misc.h>
 #include <starlet.h>
 #include <exe_routines.h>
@@ -80,12 +75,15 @@
 #include <queue.h>
 
 #include <linux/slab.h>
+#include <linux/ext2_fs.h>
 
-#define XQP_EF 30
+#define EXT2_EF 30
 
 #define DEBUGx
 
-void vms2_mount(void) {
+extern struct __exttwo *x2p;
+
+void exttwo_vms2_mount(void) {
         int sts;
         struct VCB *vcb;
 	struct item_list_3 it[3];
@@ -98,10 +96,11 @@ void vms2_mount(void) {
         sts = exe$mount(it);
 }
 
-unsigned long get_xqp_prim_fcb() {
+unsigned long get_x2p_prim_fcb() {
   return 	  x2p->primary_fcb;
 }
 
+#if 0
 int ods2_block_read_full_page3(struct _wcb * wcb,struct page *page, unsigned long pageno)
 {
 	 struct _fcb * fcb = wcb->wcb$l_fcb;
@@ -127,7 +126,7 @@ int ods2_block_read_full_page3(struct _wcb * wcb,struct page *page, unsigned lon
 	 do {
 	   if (iblock < lblock) {
 	     if (fcb)
-	       blocknr=f11b_map_vbn(1+iblock,&fcb->fcb$l_wlfl);
+	       blocknr=exttwo_map_vbn(1+iblock,&fcb->fcb$l_wlfl);
 	     else
 	       blocknr=iblock;
 	   } else {
@@ -136,7 +135,7 @@ int ods2_block_read_full_page3(struct _wcb * wcb,struct page *page, unsigned lon
 
 	   nr++;
 
-	   sts = exe$qiow(XQP_EF,(unsigned short)x2p->io_channel,IO$_READPBLK,&iosb,0,0,
+	   sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_READPBLK,&iosb,0,0,
 			  page_address(page) + i*blocksize,blocksize, blocknr,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
 
 	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
@@ -176,13 +175,13 @@ static int __ods2_block_write_full_page2(struct _wcb *wcb, struct page *page, un
 		 * decisions (block #0 may actually be a valid block)
 		 */
 	  if (fcb)
-	    blocknr=f11b_map_vbn(1+iblock,&fcb->fcb$l_wlfl);
+	    blocknr=exttwo_map_vbn(1+iblock,&fcb->fcb$l_wlfl);
 	  else
 	    blocknr=iblock;
 	  if (blocknr==-1) {
 	    panic("...page2\n");
 	  }
-	  sts = exe$qiow(XQP_EF,(unsigned short)x2p->io_channel,IO$_WRITEPBLK,&iosb,0,0,
+	  sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_WRITEPBLK,&iosb,0,0,
 			 page_address(page)+turns*blocksize,blocksize, blocknr,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
 
 	  turns++;
@@ -242,8 +241,10 @@ done:
 	goto done;
 #endif
 }
+#endif
 
-int ext2_read_writevb(struct _irp * i) {
+#if 0
+int exttwo_read_writevb(struct _irp * i) {
   int lbn;
   char * buffer;
   struct _iosb iosb;
@@ -253,32 +254,34 @@ int ext2_read_writevb(struct _irp * i) {
   int blocks=(i->irp$l_qio_p2+511)/512;
   int j;
   for(j=0; j<blocks; j++) {
-    lbn=f11b_map_vbn(j+i->irp$l_qio_p3,wcb);
+    lbn=exttwo_map_vbn(j+i->irp$l_qio_p3,wcb);
     if (i->irp$v_fcode==IO$_WRITEVBLK) {
-      ext2_write_block(vcb,512*j+i->irp$l_qio_p1,lbn,1,&iosb);
+      exttwo_write_block(vcb,512*j+i->irp$l_qio_p1,lbn,1,&iosb);
     } else {
-      buffer=ext2_read_block(vcb,lbn,1,&iosb);
+      buffer=exttwo_read_block(vcb,lbn,1,&iosb);
       memcpy(512*j+i->irp$l_qio_p1,buffer,512);
       kfree(buffer);
     }
     i->irp$l_iost2+=512;
   }
-  //f11b_io_done(i);
+  //exttwo_io_done(i);
 }
+#endif
 
-signed int f11b_map_vbn(unsigned int vbn,struct _wcb *wcb) {
+signed int ext2_map_vbn(unsigned int vbn,struct _wcb *wcb) {
   // thing there should be more here?
   signed long lbn=-1;
   ioc_std$mapvblk(vbn,0,wcb,0,0,&lbn,0,0);
   return lbn;
 }
 
-signed int f11b_map_idxvbn(struct _vcb * vcb, unsigned int vbn) {
+signed int exttwo_map_idxvbn(struct _vcb * vcb, unsigned int vbn) {
   // thing there should be more here?
   signed int lbn=-1;
   // struct _wcb * wcb=&((struct _fcb *) getidxfcb(vcb))->fcb$l_wlfl;
   // ioc_std$mapvblk(vbn,0,wcb,0,0,&lbn,0,0);
-  struct ext2_super_block * sb = ext2_read_home(vcb);
+#if 0
+  struct ext2_super_block * sb = exttwo_read_home(vcb);
 
   long blocks_per_group = le32_to_cpu(sb->s_blocks_per_group);
   long inodes_per_group = le32_to_cpu(sb->s_inodes_per_group);
@@ -286,7 +289,7 @@ signed int f11b_map_idxvbn(struct _vcb * vcb, unsigned int vbn) {
   long block_size = 1 << (10 + le32_to_cpu(sb->s_log_block_size)); 
   long groups = le32_to_cpu(sb->s_blocks_count)/blocks_per_group;
   if (vcb->vcb$l_quocache == 0)
-    vcb->vcb$l_quocache = ext2_read_block(vcb, 2*vms_block_factor2(block_size),sizeof(gd)*groups);
+    vcb->vcb$l_quocache = exttwo_read_block(vcb, 2*vms_block_factor2(block_size),sizeof(gd)*groups);
   struct ext2_group_desc * gd = vcb->vcb$l_quocache;
 
   vbn--;
@@ -296,58 +299,106 @@ signed int f11b_map_idxvbn(struct _vcb * vcb, unsigned int vbn) {
   lbn = blocks_per_group * group + gd[group].bg_inode_table + groupoff;
 
   return lbn;
+#endif
+	struct buffer_head * bh;
+	struct ext2_inode * raw_inode;
+	unsigned long block_group;
+	unsigned long group_desc;
+	unsigned long desc;
+	unsigned long block;
+	unsigned long offset;
+	struct ext2_group_desc * gdp;
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	int ino = vbn - 1;
+
+	if ((ino != EXT2_ROOT_INO && ino != EXT2_ACL_IDX_INO &&
+	     ino != EXT2_ACL_DATA_INO &&
+	     ino < EXT2_FIRST_INO(sb)) ||
+	    ino > le32_to_cpu(sb->s_inodes_count)) {
+		ext2_error (vcb, "ext2_read_inode",
+			    "bad inode number: %lu", ino);
+		goto bad_inode;
+	}
+	block_group = (ino - 1) / EXT2_INODES_PER_GROUP(sb);
+	if (block_group >= EXT2_GROUPS_COUNT(sb)) {
+		ext2_error (vcb, "ext2_read_inode",
+			    "group >= groups count");
+		goto bad_inode;
+	}
+	group_desc = block_group / EXT2_DESC_PER_BLOCK(sb);
+	desc = block_group & (EXT2_DESC_PER_BLOCK(sb) - 1);
+	gdp = ext2_get_group_desc(vcb, block_group, 0);
+	if (!gdp) {
+		ext2_error (vcb, "ext2_read_inode",
+			    "Descriptor not loaded");
+		goto bad_inode;
+	}
+
+	/*
+	 * Figure out the offset within the block group inode table
+	 */
+	offset = ((ino - 1) % EXT2_INODES_PER_GROUP(sb)) *
+		EXT2_INODE_SIZE(sb);
+	block = le32_to_cpu(gdp[desc].bg_inode_table) +
+		(offset >> EXT2_BLOCK_SIZE_BITS(sb));
+	return block * vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb));
+ bad_inode:
+	return 0;
 }
 
-void * ext2_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
+void * exttwo_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
   struct _iosb myiosb;
   unsigned char * buf = kmalloc(512*count,GFP_KERNEL);
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(XQP_EF,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+  //  printk("r1 %x %x %x %x %x %x\n",EXT2_EF,x2p->io_channel,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0);
+  unsigned long sts=sys$qiow(EXT2_EF,x2p->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
 
-void * ext2_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
+void * exttwo_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
   struct _iosb myiosb;
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(XQP_EF,x2p->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+  unsigned long sts=sys$qiow(EXT2_EF,x2p->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
 
-void * f11b_search_fcb(struct _vcb * vcb,struct _fiddef * fid)
+void * exttwo_search_fcb(struct _vcb * vcb,struct _fiddef * fid)
 {
     struct _fcb * head = &vcb->vcb$l_fcbfl;
     struct _fcb * tmp = head->fcb$l_fcbfl;
     while(tmp!=head) {
-      if ((tmp->fcb$b_fid_nmx==fid->fid$b_nmx) && (tmp->fcb$w_fid_num==fid->fid$w_num)) return tmp;
+      if (FCB_FID_TO_INO(tmp)==FID_TO_INO(fid)) return tmp;
       tmp=tmp->fcb$l_fcbfl;
     }
     return 0;
 }
 
-void iosbret(struct _irp * i,int sts) {
-  if (i && i->irp$l_iosb) {
-    struct _iosb * iosb=i->irp$l_iosb;
-    iosb->iosb$w_status=(unsigned short) sts;
-    //    exe$setef(i->irp$b_efn);
-  }
-}
-
-void ext2_read_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
+void exttwo_read_attrib(struct _fcb * fcb, struct _atrdef * atrp) {
   struct _iosb iosb;
-  int sts;
-  struct ext2_inode * head;
-  unsigned long fi;
-  head = ext2_read_header (x2p->current_vcb, 0, fcb, &iosb);  
-  sts=iosb.iosb$w_status;
-  fi=(unsigned short *)head+head->fh2$b_idoffset;
+  int sts=SS$_NORMAL;
+  struct ext2_inode * head = exttwo_read_header (x2p->current_vcb, 0, fcb, &iosb);
 
   while(atrp->atr$w_type!=0) {
     switch (atrp->atr$w_type) {
     case ATR$C_RECATTR:
       {
-	memcpy(atrp->atr$l_addr,&head->fh2$w_recattr,atrp->atr$w_size);
+	struct _fatdef * f=atrp->atr$l_addr;
+	f->fat$b_rtype=(FAT$C_SEQUENTIAL << 4) | FAT$C_FIXED;
+	f->fat$b_rattrib=0;
+	f->fat$w_rsize=0;
+	//printk("readat %x %x\n",head->i_blocks,head->i_size%512);
+	f->fat$l_hiblk=VMSSWAP((1+head->i_blocks));
+	f->fat$l_efblk=VMSSWAP((1+head->i_size/512));
+	f->fat$w_ffbyte=head->i_size%512;
+	//printk("readat %x %x %x %x\n",head->i_size,VMSSWAP(f->fat$l_efblk),f->fat$w_ffbyte,VMSSWAP(f->fat$l_hiblk));
+	f->fat$b_bktsize=0;
+	f->fat$b_vfcsize=0;
+	f->fat$w_maxrec=512;
+	f->fat$w_defext=0;
+	f->fat$w_gbc=0;
+	f->fat$w_versions=1;
       }
       break;
     case ATR$C_STATBLK:
@@ -356,58 +407,50 @@ void ext2_read_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
 	s->sbk$l_fcb=fcb;
       }
       break;
+#if 0
+      //not now
+      //change to ext2 inode later
     case ATR$C_HEADER:
       {
-	struct ext2_inode * head;
-	head = ext2_read_header (x2p->current_vcb, 0, fcb, &iosb);  
+	struct _fh2 * head;
+	head = exttwo_read_header (x2p->current_vcb, 0, fcb, &iosb);  
 	sts=iosb.iosb$w_status;
 	memcpy(atrp->atr$l_addr,head,atrp->atr$w_size);
 	kfree(head); // wow. freeing something
       }
       break;
+#endif
     case ATR$C_CREDATE:
       {
-	if (head->fh2$w_struclev==0x501)
-	  memcpy(atrp->atr$l_addr,&((struct _fi5 *)fi)->fi5$q_credate,atrp->atr$w_size);
-	else
-	  memcpy(atrp->atr$l_addr,&((struct _fi2 *)fi)->fi2$q_credate,atrp->atr$w_size);
+#if 0
+	*(unsigned long long*)atrp->atr$l_addr=unix_to_vms_time(head->i_ctime);
+#endif
       }  
 	break;
     case ATR$C_REVDATE:
       {
-	if (head->fh2$w_struclev==0x501)
-	  memcpy(atrp->atr$l_addr,&((struct _fi5 *)fi)->fi5$q_revdate,atrp->atr$w_size);
-	else
-	  memcpy(atrp->atr$l_addr,&((struct _fi2 *)fi)->fi2$q_revdate,atrp->atr$w_size);
+#if 0
+	*(unsigned long long*)atrp->atr$l_addr=unix_to_vms_time(head->i_mtime);
+#endif
       }  
 	break;
     case ATR$C_EXPDATE:
       {
-	if (head->fh2$w_struclev==0x501)
-	  memcpy(atrp->atr$l_addr,&((struct _fi5 *)fi)->fi5$q_expdate,atrp->atr$w_size);
-	else
-	  memcpy(atrp->atr$l_addr,&((struct _fi2 *)fi)->fi2$q_expdate,atrp->atr$w_size);
+	*(unsigned long long*)atrp->atr$l_addr=0;
       }  
 	break;
     case ATR$C_BAKDATE:
       {
-	if (head->fh2$w_struclev==0x501)
-	  memcpy(atrp->atr$l_addr,&((struct _fi5 *)fi)->fi5$q_bakdate,atrp->atr$w_size);
-	else
-	  memcpy(atrp->atr$l_addr,&((struct _fi2 *)fi)->fi2$q_bakdate,atrp->atr$w_size);
+	*(unsigned long long*)atrp->atr$l_addr=0;
       }  
 	break;
 	
     case ATR$C_UIC:
-	memcpy(atrp->atr$l_addr,&head->fh2$l_fileowner,atrp->atr$w_size);
+	memcpy(atrp->atr$l_addr,&head->i_uid,atrp->atr$w_size);
 	break;
 
     case ATR$C_FPRO:
-	memcpy(atrp->atr$l_addr,&head->fh2$w_fileprot,atrp->atr$w_size);
-	break;
-
-    case ATR$C_UCHAR:
-	memcpy(atrp->atr$l_addr,&head->fh2$l_filechar,atrp->atr$w_size);
+	memcpy(atrp->atr$l_addr,&head->i_mode,atrp->atr$w_size);
 	break;
 
     default:
@@ -416,80 +459,80 @@ void ext2_read_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
     }
     atrp++;
   }
-  kfree(head);
+  //  vfree(head);
 }
 
-void ext2_write_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
+void exttwo_write_attrib(struct _fcb * fcb, struct _atrdef * atrp) {
   struct _iosb iosb;
-  int sts;
-  struct _atrdef atr[2];
-  struct _fatdef recattr;
-  struct ext2_inode * head;
-  unsigned long fi;
-  head = ext2_read_header (x2p->current_vcb, 0, fcb, &iosb);  
-  sts=iosb.iosb$w_status;
-  fi=(unsigned short *)head+head->fh2$b_idoffset;
+  int sts=SS$_NORMAL;
+  struct ext2_inode * head = exttwo_read_header (x2p->current_vcb, 0, fcb, &iosb);
 
   while(atrp->atr$w_type!=0) {
     switch (atrp->atr$w_type) {
     case ATR$C_RECATTR:
       {
-	memcpy(&head->fh2$w_recattr,atrp->atr$l_addr,atrp->atr$w_size);
+	struct _fatdef * f=atrp->atr$l_addr;
+	//printk("writeat %x %x\n",head->i_size,head->i_blocks);
+	head->i_blocks=VMSSWAP(f->fat$l_hiblk)-1;
+	head->i_size=(VMSSWAP(f->fat$l_efblk)<<9)-512+f->fat$w_ffbyte;
+	//printk("writeat %x %x %x %x\n",head->i_size,VMSSWAP(f->fat$l_efblk),f->fat$w_ffbyte,VMSSWAP(f->fat$l_hiblk));
       }
       break;
     case ATR$C_STATBLK:
       {
-	printk("statblk attribute is read-only\n");
+#if 0
+	// not yet?
+	struct _sbkdef * s=atrp->atr$l_addr;
+	s->sbk$l_fcb=fcb;
+#endif	
       }
       break;
+#if 0
+      //not now
+      //change to ext2 inode later
     case ATR$C_HEADER:
       {
-	printk("header attribute is read-only\n");
+	struct _fh2 * head;
+	head = exttwo_read_header (x2p->current_vcb, 0, fcb, &iosb);  
+	sts=iosb.iosb$w_status;
+	memcpy(atrp->atr$l_addr,head,atrp->atr$w_size);
+	kfree(head); // wow. freeing something
       }
       break;
+#endif
     case ATR$C_CREDATE:
       {
-	if (head->fh2$w_struclev==0x501)
-	  memcpy(&((struct _fi5 *)fi)->fi5$q_credate,atrp->atr$l_addr,atrp->atr$w_size);
-	else
-	  memcpy(&((struct _fi2 *)fi)->fi2$q_credate,atrp->atr$l_addr,atrp->atr$w_size);
+#if 0
+	head->i_ctime=unix_to_vms_time(*(unsigned long long*)atrp->atr$l_addr);
+#endif
       }  
 	break;
     case ATR$C_REVDATE:
       {
-	if (head->fh2$w_struclev==0x501)
-	  memcpy(&((struct _fi5 *)fi)->fi5$q_revdate,atrp->atr$l_addr,atrp->atr$w_size);
-	else
-	  memcpy(&((struct _fi2 *)fi)->fi2$q_revdate,atrp->atr$l_addr,atrp->atr$w_size);
+#if 0
+	head->i_mtime=unix_to_vms_time(*(unsigned long long*)atrp->atr$l_addr);
+#endif
       }  
 	break;
     case ATR$C_EXPDATE:
       {
-	if (head->fh2$w_struclev==0x501)
-	  memcpy(&((struct _fi5 *)fi)->fi5$q_expdate,atrp->atr$l_addr,atrp->atr$w_size);
-	else
-	  memcpy(&((struct _fi2 *)fi)->fi2$q_expdate,atrp->atr$l_addr,atrp->atr$w_size);
+#if 0
+	//*(unsigned long long*)atrp->atr$l_addr=0;
+#endif
       }  
 	break;
     case ATR$C_BAKDATE:
       {
-	if (head->fh2$w_struclev==0x501)
-	  memcpy(&((struct _fi5 *)fi)->fi5$q_bakdate,atrp->atr$l_addr,atrp->atr$w_size);
-	else
-	  memcpy(&((struct _fi2 *)fi)->fi2$q_bakdate,atrp->atr$l_addr,atrp->atr$w_size);
+	//*(unsigned long long*)atrp->atr$l_addr=0;
       }  
 	break;
 	
     case ATR$C_UIC:
-	memcpy(&head->fh2$l_fileowner,atrp->atr$l_addr,atrp->atr$w_size);
+	memcpy(&head->i_uid,atrp->atr$l_addr,atrp->atr$w_size);
 	break;
 
     case ATR$C_FPRO:
-	memcpy(&head->fh2$w_fileprot,atrp->atr$l_addr,atrp->atr$w_size);
-	break;
-
-    case ATR$C_UCHAR:
-	memcpy(&head->fh2$l_filechar,atrp->atr$l_addr,atrp->atr$w_size);
+	memcpy(&head->i_mode,atrp->atr$l_addr,atrp->atr$w_size);
 	break;
 
     default:
@@ -498,15 +541,11 @@ void ext2_write_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
     }
     atrp++;
   }
-  {
-    unsigned short check = checksum((vmsword *) head);
-    head->fh2$w_checksum = VMSWORD(check);
-  }
-  writehead(fcb,head);
-  kfree(head);
+  ext2_sync_inode(x2p->current_vcb, fcb);
+  //  vfree(head);
 }
 
-void * getvcb(void) {
+void * exttwo_getvcb(void) {
   return x2p->current_vcb;
 }
 
@@ -524,101 +563,30 @@ extern struct _ucb * myfilelist[50];
 extern char * myfilelists[50];
 extern int myfilelistptr;
 
-// really really bad
-
-struct _ucb * finducb(struct _fcb * fcb) {
-  int i;
-  struct _ucb *dev;
-  struct _fcb * head, * tmp;
-  for (i=0;i<myfilelistptr;i++) {
-    dev=myfilelist[i];
-    head=&dev->ucb$l_vcb->vcb$l_fcbfl;
-    tmp=head->fcb$l_fcbfl;
-    while (tmp!=head) {
-      if (tmp==fcb) return dev;
-      tmp=tmp->fcb$l_fcbfl;
-    }
-  }
-  return 0;
-}
-
-struct _fcb * getidxfcb(struct _vcb * vcb) {
-  struct _fcb * head = &vcb->vcb$l_fcbfl;
-  struct _fcb * tmp = head->fcb$l_fcbfl;
-  while (tmp!=head) {
-    if (tmp->fcb$w_fid[0]==1 && tmp->fcb$w_fid[0]==1) return tmp;
-    tmp=tmp->fcb$l_fcbfl;
-  }
-  return 0;
-}
-
-struct _fcb * getmapfcb(struct _vcb * vcb) {
-  struct _fcb * head = &vcb->vcb$l_fcbfl;
-  struct _fcb * tmp = head->fcb$l_fcbfl;
-  while (tmp!=head) {
-    if (tmp->fcb$w_fid[0]==2 && tmp->fcb$w_fid[0]==2) return tmp;
-    tmp=tmp->fcb$l_fcbfl;
-  }
-  return 0;
-}
-
-/* checksum() to produce header checksum values... */
-
-unsigned short checksum(vmsword *block)
-{
-  int count = 255;
-  unsigned result = 0;
-  unsigned short *ptr = block;
-  do {
-    unsigned data = *ptr++;
-    result += VMSWORD(data);
-  } while (--count > 0);
-  return result;
-}
-
-
 /* rvn_to_dev() find device from relative volume number */
 
 // half broken. is this switch_volume?
 
-struct _vcb *rvn_to_dev(struct _vcb *vcb,unsigned rvn)
+struct _vcb *exttwo_rvn_to_dev(struct _vcb *vcb,unsigned rvn)
 {
   return vcb;
 }
 
-/* fid_copy() copy fid from file header with default rvn! */
-
-void fid_copy(struct _fiddef *dst,struct _fiddef *src,unsigned rvn)
-{
-  dst->fid$w_num = VMSWORD(src->fid$w_num);
-  dst->fid$w_seq = VMSWORD(src->fid$w_seq);
-  if (src->fid$b_rvn == 0) {
-    dst->fid$b_rvn = rvn;
-  } else {
-    dst->fid$b_rvn = src->fid$b_rvn;
-  }
-  dst->fid$b_nmx = src->fid$b_nmx;
-}
-
 /* deaccesshead() release header from INDEXF... */
 
-unsigned deaccesshead(struct ext2_inode *head,unsigned idxblk)
+unsigned exttwo_deaccesshead(struct ext2_inode *head,unsigned idxblk)
 {
-  if (head && idxblk) {
-    unsigned short check = checksum((vmsword *) head);
-    head->fh2$w_checksum = VMSWORD(check);
-  }
   return deaccesschunk(idxblk,1,1);
 }
 
-unsigned writechunk(struct _fcb * fcb,unsigned long vblock, char * buff)
+unsigned exttwo_writechunk(struct _fcb * fcb,unsigned long vblock, char * buff)
 {
   struct _iosb iosb;
   struct _vcb * vcb = x2p->current_vcb;
   struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
   int pbn;
   int sts=ioc_std$mapvblk(vblock,0,&fcb->fcb$l_wlfl,0,0,&pbn,0,0);
-  sts=sys$qiow(XQP_EF,x2p->io_channel,IO$_WRITELBLK,&iosb,0,0,buff,512,pbn,ucb->ucb$w_fill_0,0,0);
+  sts=sys$qiow(EXT2_EF,x2p->io_channel,IO$_WRITELBLK,&iosb,0,0,buff,512,pbn,ucb->ucb$w_fill_0,0,0);
   return iosb.iosb$w_status;
 }
 
@@ -633,25 +601,21 @@ static unsigned gethead(struct _fcb * fcb,struct ext2_inode **headbuff)
   fid.fid$w_num=fcb->fcb$w_fid[0];
   fid.fid$w_seq=fcb->fcb$w_fid[1];
   fid.fid$w_rvn=0;
-  *headbuff=ext2_read_header(ucb->ucb$l_vcb,&fid,fcb,&iosb);
+  *headbuff=exttwo_read_header(ucb->ucb$l_vcb,&fid,fcb,&iosb);
   return iosb.iosb$w_status;
 }
 
-unsigned writehead(struct _fcb * fcb,struct ext2_inode *headbuff)
+unsigned exttwo_writehead(struct _fcb * fcb,struct ext2_inode *headbuff)
 {
   struct _vcb * vcb = x2p->current_vcb;
   struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
-  struct _fiddef * fid = &headbuff->fh2$w_fid.fid$w_num;
-  unsigned short check = checksum((vmsword *) headbuff);
-  int vbn=fid->fid$w_num + (fid->fid$b_nmx << 16) - 1 +
-    VMSWORD(ucb->ucb$l_vcb->vcb$l_ibmapvbn) + VMSWORD(ucb->ucb$l_vcb->vcb$l_ibmapsize);;
-  //if (headbuff->fh2$w_checksum == VMSWORD(check)) return 1;
-  headbuff->fh2$w_checksum = VMSWORD(check);
-  return writechunk(getidxfcb(ucb->ucb$l_vcb),vbn, headbuff);
-
+  int vbn=FCB_FID_TO_INO(fcb) + 1;
+  ext2_write_inode(x2p->current_vcb, fcb, 1);
+  //  return writechunk(getidxfcb(ucb->ucb$l_vcb),vbn, headbuff);
 }
 
-void * ext2_read_home(struct _vcb * vcb) {
+#if 0
+void * exttwo_read_home(struct _vcb * vcb) {
   char * buf;
   struct ext2_super_block * es;
   unsigned long sb_block = 1;
@@ -682,7 +646,8 @@ void * ext2_read_home(struct _vcb * vcb) {
     offset = (sb_block*BLOCK_SIZE) % blocksize;
   }
 
-  if (!(buf = ext2_read_block(vcb, logic_sb_block*vms_block_factor2(blocksize))),1024) \
+  long long iosb;
+  if (!(buf = exttwo_read_block(vcb, logic_sb_block*vms_block_factor2(blocksize), 1024, &iosb))) 
     {
       printk ("EXT2-fs: unable to read superblock\n");
       return NULL;
@@ -693,17 +658,14 @@ void * ext2_read_home(struct _vcb * vcb) {
    */
   es = (struct ext2_super_block *) (buf + offset);
   if (le16_to_cpu(es->s_magic) != EXT2_SUPER_MAGIC) {
-    if (!silent)
-      printk ("VFS: Can't find ext2 filesystem on dev %s.\n",
-	      bdevname(dev));
-    goto failed_mount;
+    printk ("VFS: Can't find ext2 filesystem on dev.\n");
   }
- failed_mount:
   vcb->vcb$l_cache = es;
   return es;
 }
+#endif
 
-void * ext2_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb,
+void * exttwo_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb,
                     unsigned long * retsts)
 {
   struct _iosb iosb;
@@ -714,25 +676,29 @@ void * ext2_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb,
   signed long idxlblk;
   struct ext2_inode idxfh;
   struct _fiddef * locfid;
-  vcbdev = rvn_to_dev(vcb,0);
+  vcbdev = exttwo_rvn_to_dev(vcb,0);
   if (vcbdev == NULL) {   
     if (retsts) *retsts = SS$_DEVNOTMOUNT; 
     return 0; 
   }
   //if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) return SS$_WRITLCK;
   if (fcb) {
-    idxlblk = fcb->fcb$l_hdlbn;
+    // not yet    idxlblk = fcb->fcb$l_hdlbn;
+    idxlblk = FCB_FID_TO_INO(fcb);
     locfid=&fcb->fcb$w_fid_num;
+    //    printk("ino2 %x ",idxlblk);
   } else {
-    idxvblk = fid->fid$w_seq + (fid->fid$w_rvn << 16);
-    idxlblk = f11b_map_idxvbn(vcb,idxvblk);
+    idxvblk = FID_TO_INO(fid) + 1;
+    idxlblk = exttwo_map_idxvbn(vcb,idxvblk);
+    idxlblk = FID_TO_INO(fid);
     locfid=fid;
+    //    printk("ino3 %x ",idxlblk);
   }
   x2p->header_lbn=idxlblk;
 #if 0
   if (vcbdev->idxfcb->head != NULL) 
     if (idxvblk >= VMSSWAP(vcbdev->idxfcb->head->fh2$w_recattr.fat$l_efblk)) 
-      sys$qiow(XQP_EF,irp->irp$w_chan,IO$_READLBLK,&iosb,0,0,(char *)&idxfh,sizeof(struct ext2_inode),vcb->vcb$l_ibmaplbn,0,0,0);
+      sys$qiow(EXT2_EF,irp->irp$w_chan,IO$_READLBLK,&iosb,0,0,(char *)&idxfh,sizeof(struct ext2_inode),vcb->vcb$l_ibmaplbn,0,0,0);
 #endif
 #if 0
   not yet
@@ -745,41 +711,18 @@ void * ext2_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb,
 #endif
   //  sts = accesschunk(getidxfcb(vcb),idxvblk,(char **) headbuff,NULL, 0,0);
 
-  struct ext2_super_block * sb = ext2_read_home(vcb);
-
-  headbuff = ext2_read_block(vcb,idxlblk,1,&iosb);
+  //  headbuff = exttwo_read_block(vcb,idxlblk,1,&iosb);
+  ext2_read_inode(vcb, 0, idxlblk, &headbuff, &iosb);
   sts=iosb.iosb$w_status;
-
-  if (sts & 1) {
-    struct ext2_inode *head = headbuff; 
-    if (VMSWORD(head->fh2$w_fid.fid$w_num) != locfid->fid$w_num ||
-	head->fh2$w_fid.fid$b_nmx != locfid->fid$b_nmx ||
-	VMSWORD(head->fh2$w_fid.fid$w_seq) != locfid->fid$w_seq ||
-	(head->fh2$w_fid.fid$b_rvn != locfid->fid$b_rvn &&
-	 head->fh2$w_fid.fid$b_rvn != 0)) {
-      /* lib$signal(SS$_NOSUCHFILE); */
-      sts = SS$_NOSUCHFILE;
-    } else {
-      if (head->fh2$b_idoffset < 38 ||
-	  head->fh2$b_idoffset > head->fh2$b_mpoffset ||
-	  head->fh2$b_mpoffset > head->fh2$b_acoffset ||
-	  head->fh2$b_acoffset > head->fh2$b_rsoffset ||
-	  head->fh2$b_map_inuse > head->fh2$b_acoffset - head->fh2$b_mpoffset ||
-	  checksum((vmsword *) head) != VMSWORD(head->fh2$w_checksum)) {
-	sts = SS$_DATACHECK;
-      } else {
-	//if (VMSWORD(head->fh2$w_seg_num) != seg_num) sts = SS$_FILESEQCHK;
-      }
-    }
-    if ((sts & 1) == 0) deaccesschunk(0,0,0);
+  if (0) {
+    int i;
+    for (i=0;i<20;i++) printk("%x ",((unsigned char)headbuff[i]));
+    printk("\n");
   }
+
   if (retsts) *retsts=sts;
   return headbuff;
 }
-
-
-
-
 
 struct WCBKEY_NOT {
   unsigned vbn;
@@ -790,6 +733,7 @@ struct WCBKEY_NOT {
 /* premap_indexf() called to physically read the header for indexf.sys
    so that indexf.sys can be mapped and read into virtual cache.. */
 
+#if 0
 struct ext2_inode *premap_indexf(struct _fcb *fcb,struct _ucb *ucb,unsigned *retsts)
 {
   struct _iosb iosb;
@@ -807,139 +751,151 @@ struct ext2_inode *premap_indexf(struct _fcb *fcb,struct _ucb *ucb,unsigned *ret
     int sts;
 #if 0
     struct _hm2 home;
-    sts = sys$qiow(XQP_EF,irp->irp$w_chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct _hm2),vcbdev->vcb$l_homelbn,0,0,0);
+    sts = sys$qiow(EXT2_EF,irp->irp$w_chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct _hm2),vcbdev->vcb$l_homelbn,0,0,0);
 #endif
-    *retsts = sys$qiow(XQP_EF,x2p->io_channel,IO$_READLBLK,&iosb,0,0, (char *) head,sizeof(struct ext2_inode),VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),((struct _ucb *)vcbdev->vcb$l_rvt)->ucb$w_fill_0,0,0);
+    *retsts = sys$qiow(EXT2_EF,x2p->io_channel,IO$_READLBLK,&iosb,0,0, (char *) head,sizeof(struct ext2_inode),VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),((struct _ucb *)vcbdev->vcb$l_rvt)->ucb$w_fill_0,0,0);
     *retsts = iosb.iosb$w_status;
     if (!(*retsts & 1)) {
       kfree(head);
       head = NULL;
     } else {
-      if (VMSWORD(head->fh2$w_fid.fid$w_num) != 1 ||
-	  head->fh2$w_fid.fid$b_nmx != 0 ||
-	  VMSWORD(head->fh2$w_fid.fid$w_seq) != 1 ||
-	  VMSWORD(head->fh2$w_checksum) != checksum((unsigned short *) head)) {
-	*retsts = SS$_DATACHECK;
-	kfree(head);
-	head = NULL;
-      }
     }
   }
   return head;
 }
-
-int get_fm2_val(unsigned short ** mpp, unsigned long * phyblk, unsigned long *phylen) {
-  unsigned short *mp=*mpp;
-  if (phyblk==0 || phylen==0) return SS$_BADPARAM;
-	switch (VMSWORD(*mp) >> 14) {
-	case FM2$C_PLACEMENT:
-	  *phylen = 0;
-	  (*mpp)++;
-	  break;
-	case FM2$C_FORMAT1:
-	  *phylen = (VMSWORD(*mp) & 0377) + 1;
-	  *phyblk = ((VMSWORD(*mp) & 037400) << 8) | VMSWORD(mp[1]);
-	  (*mpp) += 2;
-	  break;
-	case FM2$C_FORMAT2:
-	  *phylen = (VMSWORD(*mp) & 037777) + 1;
-	  *phyblk = (VMSWORD(mp[2]) << 16) | VMSWORD(mp[1]);
-	  (*mpp) += 3;
-	  break;
-	case FM2$C_FORMAT3:
-	  *phylen = ((VMSWORD(*mp) & 037777) << 16) + VMSWORD(mp[1]) + 1;
-	  *phyblk = (VMSWORD(mp[3]) << 16) | VMSWORD(mp[2]);
-	  (*mpp) += 4;
-	default:
-	  return SS$_FORMAT;
-	}
-	return SS$_NORMAL;
-}
-
-int add_wcb(struct _fcb * fcb, unsigned short * map)
-{
-  struct _iosb iosb;
-  unsigned int retsts;
-  unsigned curvbn=1;
-  unsigned extents = 0;
-  struct ext2_inode *head = 0;
-
-  struct _vcb * vcb = x2p->current_vcb;
-  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb = finducb(fcb); // bad bad
-  unsigned short *mp;
-  unsigned phyblk, phylen;
-  struct _wcb *wcb;
-
-  mp = map;
-  get_fm2_val(&mp,&phyblk,&phylen);
-  if (phylen!=0) {
-
-    wcb = (struct _wcb *) kmalloc(sizeof(struct _wcb), GFP_KERNEL);
-    memset(wcb,0,sizeof(struct _wcb));
-    if (wcb == NULL) {
-      retsts = SS$_INSFMEM;
-      return retsts;
-    }
-
-    wcb->wcb$b_type=DYN$C_WCB;
-    wcb->wcb$l_orgucb=ucb;
-    insque(wcb,&fcb->fcb$l_wlfl);
-    wcb->wcb$l_fcb=fcb;
-    
-    if (fcb->fcb$l_efblk) curvbn=fcb->fcb$l_efblk+1;
-
-    wcb->wcb$l_stvbn=curvbn;
-    wcb->wcb$l_p1_count=phylen;
-    wcb->wcb$l_p1_lbn=phyblk;
-
-    curvbn += phylen;
-
-  }
-  retsts = SS$_NORMAL;
-  return retsts;
-}
+#endif
 
 /* wcb_create() creates a window control block by reading appropriate
    file headers... */
 
-int wcb_create_all(struct _fcb * fcb, struct ext2_inode * fh2)
+int exttwo_wcb_create_all(struct _vcb * vcb, struct _fcb * fcb)
 {
+  struct ext2_super_block * sb = vcb->vcb$l_cache;
+  struct ext2_super_block * s = vcb->vcb$l_cache;
+  int ptrs = EXT2_ADDR_PER_BLOCK(sb);
+  int ptrs_bits = EXT2_ADDR_PER_BLOCK_BITS(sb);
+  const long direct_blocks = EXT2_NDIR_BLOCKS,
+    indirect_blocks = ptrs,
+    double_blocks = (1 << (ptrs_bits * 2));
   struct _iosb iosb;
   unsigned int retsts;
   unsigned curvbn=1;
   unsigned extents = 0;
-  struct ext2_inode *head = 0;
+  int i;
 
-  struct _vcb * vcb = x2p->current_vcb;
-  struct _ucb * ucb = vcb->vcb$l_rvt; // was: finducb(fcb); // bad bad
+  struct _ucb * ucb = finducb(fcb); // bad bad
   unsigned short *mp;
   unsigned short *me;
+  int contin=0;
+  int nextvbn=0;
+  int stvbn=1;
+  int phylen=1;
+  int nextphyblk=1;
+  int * i_data = &fcb->fcb$l_reserve2; // check
+  int stphyblk=i_data[0];
+  int phyblk=stphyblk;
+  int l1=0,l2=0,l3=0;
+  int l1p=0,l2p=0,l3p=0;
+  int *b1,*b2,*b3;
+ 
+  retsts=0;
+  for(i=0;i<15;i++)
+    retsts|=i_data[i];
+  if (retsts==0)
+    return SS$_NORMAL;
 
-  if (head == NULL) {
-    head = premap_indexf(fcb,ucb,&retsts);
-    if (head == NULL) return NULL;
-    head->fh2$w_ext_fid.fid$w_num = 0;
-    head->fh2$w_ext_fid.fid$b_nmx = 0;
-  }
-  if (fh2)
-    head=fh2;
-  else {
-    head = ext2_read_header(ucb->ucb$l_vcb,&fcb->fcb$w_fid,0,&iosb);
-    retsts = iosb.iosb$w_status;
-  }
-#if 0
-  if (fcb->fcb$w_fid[0]>1)
-    retsts=gethead(0,ucb->ucb$l_vcb,fcb->fcb$w_fid,0,&head,NULL,0);
-#endif
-  mp = (unsigned short *) head + head->fh2$b_mpoffset;
-  me = mp + head->fh2$b_map_inuse;
-  while (mp < me) {
-    unsigned phyblk, phylen;
-    struct _wcb *wcb;
-    get_fm2_val(&mp,&phyblk,&phylen);
-    if (phylen!=0) {
+  b1=kmalloc(EXT2_BLOCK_SIZE(s),GFP_KERNEL);
+  b2=kmalloc(EXT2_BLOCK_SIZE(s),GFP_KERNEL);
+  b3=kmalloc(EXT2_BLOCK_SIZE(s),GFP_KERNEL);
 
-      wcb = (struct _wcb *) kmalloc(sizeof(struct _wcb),GFP_KERNEL);
+  for(i=1; i<15 && nextphyblk; 1) {
+
+    phyblk= nextphyblk;
+
+    if (i<12) {
+      nextphyblk=i_data[i];
+      i++;
+    } else {
+      if (i_data[i]==0) {
+	i++;
+	nextphyblk=0;
+      }
+      if (l1==0) {
+	l1=i_data[i];
+	myqio(READ,b1,EXT2_BLOCK_SIZE(s),l1,0,vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)));
+      }
+      if (i==12) {
+	nextphyblk=b1[l1p];
+	l1p++;
+	if (l1p==ptrs) {
+	  l1p=0;
+	  l1=0;
+	  i++;
+	  goto out;
+	}
+      }
+      if (i==13) {
+	if (l2==0) {
+	  l2=b1[l1p];
+	  myqio(READ,b2,EXT2_BLOCK_SIZE(s),l2,0,vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)));
+	}
+	nextphyblk=b2[l2p];
+	l2p++;
+	if (l2p==ptrs) {
+	  l2p=0;
+	  l2=0;
+	  l1p++;
+	}
+	if (l1p==ptrs) {
+	  l1p=0;
+	  l1=0;
+	  i++;
+	}
+      }
+      if (i==14) {
+	// 3rd not supported yet?
+	//i++;
+	printk("beware 3rd level\n");
+	if (l2==0) {
+	  l2=b1[l1p];
+	  myqio(READ,b2,EXT2_BLOCK_SIZE(s),l2,0,vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)));
+	}
+	if (l3==0) {
+	  l3=b2[l2p];
+	  myqio(READ,b2,EXT2_BLOCK_SIZE(s),l3,0,vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)));
+	}
+	nextphyblk=b3[l3p];
+	l3p++;
+	if (l3p==ptrs) {
+	  l3p=0;
+	  l3=0;
+	  l2p++;
+	}
+	if (l2p==ptrs) {
+	  l2p=0;
+	  l2=0;
+	  l1p++;
+	}
+	if (l1p==ptrs) {
+	  l1p=0;
+	  l1=0;
+	  i++;
+	}
+      }
+    }
+
+  out:
+
+    if ((phyblk+1)!=nextphyblk) {
+      contin=0;
+    } else {
+      contin=1;
+      phyblk++;
+      phylen++;
+    }
+
+    if (contin==0) {
+      struct _wcb * wcb = (struct _wcb *) kmalloc(sizeof(struct _wcb),GFP_KERNEL);
       memset(wcb,0,sizeof(struct _wcb));
       if (wcb == NULL) {
 	retsts = SS$_INSFMEM;
@@ -947,26 +903,37 @@ int wcb_create_all(struct _fcb * fcb, struct ext2_inode * fh2)
       }
 
       wcb->wcb$b_type=DYN$C_WCB;
-      wcb->wcb$l_orgucb=ucb;
+      wcb->wcb$l_orgucb=x2p->current_ucb;
       insque(wcb,&fcb->fcb$l_wlfl);
       wcb->wcb$l_fcb=fcb;
 
-      wcb->wcb$l_stvbn=curvbn;
+      wcb->wcb$l_stvbn=stvbn;
       wcb->wcb$l_p1_count=phylen;
-      wcb->wcb$l_p1_lbn=phyblk;
+      wcb->wcb$l_p1_lbn=stphyblk;
+      
+      stvbn += phylen;
+      stphyblk = nextphyblk;
 
-      curvbn += phylen;
+      phylen=1;
+      phyblk=0;
 
     }
+
+
+
   }
+
+  kfree(b1);
+  kfree(b2);
+  kfree(b3);
+
   retsts = SS$_NORMAL;
   return retsts;
 }
 
-
 /* getwindow() find a window to map VBN to LBN ... */
 
-unsigned getwindow(struct _fcb * fcb,unsigned vbn,struct _vcb **devptr,
+unsigned exttwo_getwindow(struct _fcb * fcb,unsigned vbn,struct _vcb **devptr,
 		   unsigned *phyblk,unsigned *phylen,struct _fiddef *hdrfid,
 		   unsigned *hdrseq)
 {
@@ -978,7 +945,7 @@ unsigned getwindow(struct _fcb * fcb,unsigned vbn,struct _vcb **devptr,
 
   wcb = fcb->fcb$l_wlfl;
 
-  *devptr = rvn_to_dev(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,0);
+  *devptr = exttwo_rvn_to_dev(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb,0);
   sts=ioc_std$mapvblk(vbn,0,&fcb->fcb$l_wlfl,0,0,phyblk,0,0);
   *phylen = 1;
   if (hdrfid != NULL) memcpy(hdrfid,&wcb->wcb$l_fcb->fcb$w_fid,sizeof(struct _fiddef));
@@ -994,7 +961,7 @@ unsigned getwindow(struct _fcb * fcb,unsigned vbn,struct _vcb **devptr,
 
 /* deaccesschunk() to deaccess a VIOC (chunk of a file) */
 
-unsigned deaccesschunk(unsigned wrtvbn,
+unsigned exttwo_deaccesschunk(unsigned wrtvbn,
 		       int wrtblks,int reuse)
 {
 #ifdef DEBUG
@@ -1021,9 +988,12 @@ unsigned deaccesschunk(unsigned wrtvbn,
   return SS$_NORMAL;
 }
 
-void *ext2_readvblock(struct _fcb * fcb,unsigned curvbn,unsigned *retsts)
+void *exttwo_readvblock(struct _fcb * fcb,unsigned curvbn,unsigned *retsts)
 {
   struct _iosb iosb;
+  struct _vcb * vcb = x2p->current_vcb;
+  struct ext2_super_block * sb = vcb->vcb$l_cache;
+  int factor = vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb));
   int length;
   char *address = 0;
   length = fcb->fcb$l_efblk - curvbn + 1;
@@ -1037,13 +1007,13 @@ void *ext2_readvblock(struct _fcb * fcb,unsigned curvbn,unsigned *retsts)
       unsigned sts;
       unsigned phyblk,phylen;
       struct _vcb *vcbdev;
-      sts = getwindow(fcb,curvbn,&vcbdev,&phyblk,&phylen,NULL,NULL);
+      sts = exttwo_getwindow(fcb,curvbn,&vcbdev,&phyblk,&phylen,NULL,NULL);
       if (sts & 1) {
 	if (phylen > length) phylen = length;
 	if (fcb->fcb$l_highwater != 0 && curvbn + phylen > fcb->fcb$l_highwater) {
 	  phylen = fcb->fcb$l_highwater - curvbn;
 	}
-	address = ext2_read_block(vcbdev,phyblk,phylen,&iosb);
+	address = exttwo_read_block(vcbdev,factor*phyblk,factor*phylen,&iosb);
 	sts = iosb.iosb$w_status;
       }
       if ((sts & 1) == 0) {
@@ -1067,7 +1037,7 @@ void *ext2_readvblock(struct _fcb * fcb,unsigned curvbn,unsigned *retsts)
 
 /* accesschunk() return pointer to a 'chunk' of a file ... */
 
-unsigned accesschunk(struct _fcb *fcb,unsigned vbn,
+unsigned exttwo_accesschunk(struct _fcb *fcb,unsigned vbn,
 		     char **retbuff,unsigned *retblocks,unsigned wrtblks, struct _irp * irp)
 {
   unsigned sts;
@@ -1076,7 +1046,7 @@ unsigned accesschunk(struct _fcb *fcb,unsigned vbn,
   //  if (vbn < 1 || vbn > fcb->fcb$l_efblk) return SS$_ENDOFFILE;
   if (vbn < 1 || vbn > 100000) { iosbret(irp, SS$_ENDOFFILE); return SS$_ENDOFFILE; } // for second read
 
-  *retbuff = ext2_readvblock(fcb,vbn,&sts);
+  *retbuff = exttwo_readvblock(fcb,vbn,&sts);
 
   if (retblocks) *retblocks=1;
 #if 0
@@ -1094,7 +1064,7 @@ unsigned deallocfile(struct _fcb *fcb);
 
 /* deaccessfile() finish accessing a file.... */
 
-unsigned deaccessfile(struct _fcb *fcb)
+unsigned exttwo_deaccessfile(struct _fcb *fcb)
 {
   struct _iosb iosb;
   int sts;
@@ -1102,11 +1072,8 @@ unsigned deaccessfile(struct _fcb *fcb)
 #ifdef DEBUG
   printk("Deaccessing file (%x) reference %d\n",fcb->cache.hashval,fcb->cache.refcount);
 #endif
-  head = ext2_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
+  head = exttwo_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
   sts=iosb.iosb$w_status;
-  if (VMSLONG(head->fh2$l_filechar) & FH2$M_MARKDEL) {
-    return deallocfile(fcb);
-  }
 
   return SS$_NORMAL;
 }
@@ -1128,7 +1095,7 @@ static void *fcb_create_not(unsigned filenum,unsigned *retsts)
   return fcb;
 }
 
-void *fcb_create2(struct ext2_inode * head,unsigned *retsts)
+void *exttwo_fcb_create2(struct ext2_inode * head, int i_ino, unsigned *retsts)
 {
   struct _vcb * vcb=x2p->current_vcb;
   struct _fcb *fcb = (struct _fcb *) kmalloc(sizeof(struct _fcb),GFP_KERNEL);
@@ -1138,30 +1105,27 @@ void *fcb_create2(struct ext2_inode * head,unsigned *retsts)
     return;
   } 
   fcb->fcb$b_type=DYN$C_FCB;
-  fcb->fcb$l_fill_5 = 0;
+  fcb->fcb$l_fill_5 = 1;
   qhead_init(&fcb->fcb$l_wlfl);
 
-  fcb->fcb$w_fid_num=head->fh2$w_fid.fid$w_num;
-  fcb->fcb$w_fid_seq=head->fh2$w_fid.fid$w_seq;
+  SET_FCB_FID_FROM_INO(fcb, i_ino); 
 
   insque(fcb,&vcb->vcb$l_fcbfl);
 
-  fcb->fcb$l_efblk = VMSSWAP(head->fh2$w_recattr.fat$l_hiblk);
-  if (head->fh2$b_idoffset > 39) {
-    fcb->fcb$l_highwater = VMSLONG(head->fh2$l_highwater);
-  } else {
-    fcb->fcb$l_highwater = 0;
-  }
-  fcb->fcb$l_filesize = (VMSSWAP(head->fh2$w_recattr.fat$l_efblk)) << 9; // fix filesize use later
+  fcb->fcb$l_efblk = head->i_blocks;
+  fcb->fcb$l_highwater = 0;
 
-  if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY)
+  fcb->fcb$l_filesize = head->i_size;
+
+  if (S_ISDIR(le16_to_cpu(head->i_mode)))
+    fcb->fcb$v_isdir = 1;
+  if (S_ISDIR(le16_to_cpu(head->i_mode)))
     fcb->fcb$v_dir = 1;
 
-  wcb_create_all(fcb,head);
+  memcpy(&fcb->fcb$l_reserve2, &head->i_block, 4*EXT2_N_BLOCKS);
+  exttwo_wcb_create_all(vcb, fcb);
 
-  if (head->fh2$l_filechar & FH2$M_CONTIG)
-    fcb->fcb$l_stlbn=f11b_map_vbn(1,&fcb->fcb$l_wlfl);
-  fcb->fcb$l_hdlbn=f11b_map_idxvbn(vcb,head->fh2$w_fid.fid$w_num + (head->fh2$w_fid.fid$b_nmx << 16) - 1 + VMSWORD(vcb->vcb$l_ibmapvbn) + VMSWORD(vcb->vcb$l_ibmapsize));
+  fcb->fcb$l_hdlbn=exttwo_map_idxvbn(vcb,i_ino+1);
 
   *retsts=SS$_NORMAL;
   return fcb;
@@ -1170,7 +1134,7 @@ void *fcb_create2(struct ext2_inode * head,unsigned *retsts)
 
 /* accessfile() open up file for access... */
 
-unsigned ext2_access(struct _vcb * vcb, struct _irp * irp)
+unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 {
   struct _iosb iosb;
   unsigned sts=SS$_NORMAL;
@@ -1184,6 +1148,9 @@ unsigned ext2_access(struct _vcb * vcb, struct _irp * irp)
   void * atrp=irp->irp$l_qio_p5;
   struct _fibdef * fib=(struct _fibdef *)fibdsc->dsc$a_pointer;
   struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
+  struct _fiddef * fids=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_did_num;
+  exttwo_translate_fid(vcb,fid);
+  //  printk("ino %x %x %x\n",FID_TO_INO(fid),FID_TO_INO(fids),irp->irp$l_func);
   unsigned action=0;
   if (irp->irp$l_func & IO$M_ACCESS) action=0;
   if (irp->irp$l_func & IO$M_DELETE) action=1;
@@ -1199,24 +1166,27 @@ unsigned ext2_access(struct _vcb * vcb, struct _irp * irp)
   if (x2p->primary_fcb) {
     struct _fcb * fcb = x2p->primary_fcb;
     if (fid->fid$w_num!=fcb->fcb$w_fid_num)
-      x2p->primary_fcb=0; //f11b_search_fcb(vcb,fid);
+      x2p->primary_fcb=0; //exttwo_search_fcb(vcb,fid);
   }
 
   if (fib->fib$w_did_num) {
     struct ext2_inode * head;
     struct _fcb * fcb=x2p->primary_fcb;
     if (fcb==0)
-      fcb=f11b_search_fcb(vcb,&fib->fib$w_did_num);
-    head = ext2_read_header (vcb, 0, fcb, &iosb);  
+      fcb=exttwo_search_fcb(vcb,&fib->fib$w_did_num);
+    head = exttwo_read_header (vcb, 0, fcb, &iosb);  
     sts=iosb.iosb$w_status;
-    if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY) {
-      unsigned eofblk = VMSSWAP(head->fh2$w_recattr.fat$l_efblk);
-      if (VMSWORD(head->fh2$w_recattr.fat$w_ffbyte) == 0) --eofblk;
-      sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
+    if (S_ISDIR(le16_to_cpu(head->i_mode))) {
+      unsigned eofblk = head->i_blocks;
+      sts = exttwo_search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
     } else {
       sts = SS$_BADIRECTORY;
     }
   }
+
+#if 0
+  printk("ret %x %x\n",ctl$gl_pcb,sts);
+#endif
 
   if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
 
@@ -1225,9 +1195,13 @@ unsigned ext2_access(struct _vcb * vcb, struct _irp * irp)
 
   if (wrtflg && ((vcb->vcb$b_status & VCB$M_WRITE_IF) == 0)) { iosbret(irp,SS$_WRITLCK);  return SS$_WRITLCK; }
 
-  fcb=f11b_search_fcb(vcb,fid);
-  head = ext2_read_header(vcb,fid,fcb,&iosb);
-  sts=iosb.iosb$w_status;
+  fcb=exttwo_search_fcb(vcb,fid);
+  if (FID_TO_INO(fid)==0)
+    sts = SS$_DATACHECK;
+  else {
+    head = exttwo_read_header(vcb,fid,fcb,&iosb);
+    sts=iosb.iosb$w_status;
+  }
   if (sts & 1) {
   } else {
     printk("Accessfile status %d\n",sts);
@@ -1236,7 +1210,7 @@ unsigned ext2_access(struct _vcb * vcb, struct _irp * irp)
   }
 
   if (fcb==NULL) {
-    fcb=fcb_create2(head,&sts);
+    fcb=exttwo_fcb_create2(head, FID_TO_INO(fid), &sts);
   }
   if (fcb == NULL) { iosbret(irp,sts); return sts; }
 
@@ -1245,7 +1219,7 @@ unsigned ext2_access(struct _vcb * vcb, struct _irp * irp)
 
   if (atrp) {
     if (action==0)
-      ext2_read_attrib(fcb,atrp);
+      exttwo_read_attrib(fcb,atrp);
   }
 
   iosbret(irp,SS$_NORMAL);
@@ -1257,7 +1231,7 @@ unsigned ext2_access(struct _vcb * vcb, struct _irp * irp)
 
 /* dismount() finish processing on a volume */
 
-unsigned dismount(struct _vcb * vcb)
+unsigned ext2_dismount(struct _vcb * vcb)
 {
 #if 0
   unsigned sts,device;
@@ -1307,20 +1281,22 @@ unsigned dismount(struct _vcb * vcb)
 
 /* mount() make disk volume available for processing... */
 
-unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],struct _vcb **retvcb)
+unsigned mounte2(unsigned flags,unsigned devices,char *devnam[],char *label[],struct _vcb **retvcb)
 {
   struct _iosb iosb;
-  unsigned device,sts;
+  unsigned device,sts = SS$_NORMAL;
   struct _vcb *vcb = 0;
   struct _vcb *vcbdev;
   struct _ucb *ucb;
-  struct _hm2 home;
+  struct ext2_super_block home;
   struct _aqb *aqb;
   int islocal;
   int isfile=0;
-  if (sizeof(struct _hm2) != 512 || sizeof(struct ext2_inode) != 512) return SS$_NOTINSTALL;
+  if (sizeof(struct ext2_super_block) != 1024) return SS$_NOTINSTALL;
   for (device = 0; device < devices; device++) {
     //printk("Trying to mount %s\n",devnam[device]);
+    int hba;
+    int chan;
     if (strchr(devnam[device],'$')) {
       short int chan;
       extern struct _ccb ctl$ga_ccb_table[];
@@ -1356,12 +1332,14 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
     }
     vcb = (struct _vcb *) kmalloc(sizeof(struct _vcb),GFP_KERNEL);
     memset(vcb,0,sizeof(struct _vcb));
+    global_e2_vcb = vcb;
     vcb->vcb$b_type=DYN$C_VCB;
     x2p->current_vcb=vcb; // until I can place it somewhere else
     aqb = (struct _aqb *) kmalloc(sizeof(struct _aqb),GFP_KERNEL);
     memset(aqb,0,sizeof(struct _aqb));
     aqb->aqb$b_type=DYN$C_AQB;
     qhead_init(&aqb->aqb$l_acpqfl);
+    aqb->aqb$l_acppid=1;
     ucb->ucb$l_vcb=vcb;
     vcb->vcb$l_aqb=aqb;
     if (vcb == NULL) return SS$_INSFMEM;
@@ -1373,8 +1351,6 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
     sts = SS$_NOSUCHVOL;
     //    vcbdev->dev = NULL;
     if (strlen(devnam[device])) {
-      int hba;
-      int chan;
       struct dsc$descriptor dsc;
       if (islocal && isfile)
 	sts = phyio_init(strlen(devnam[device])+1,devnam[device],&ucb->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,0,ucb);
@@ -1391,26 +1367,14 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       //if (!(sts & 1)) break;
       //      ucb->handle=vcbdev->dev->handle;
       for (hba = 1; hba <= HOME_LIMIT; hba++) {
-	sts = sys$qiow(XQP_EF,chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct _hm2),hba,ucb->ucb$w_fill_0,0,0);
+	sts = sys$qiow(EXT2_EF,chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct ext2_super_block),hba,ucb->ucb$w_fill_0,0,0);
 	if (!(sts & 1)) break;
-	if (hba == VMSLONG(home.hm2$l_homelbn) &&
-	    memcmp(home.hm2$t_format,"DECFILE11B  ",12) == 0) break;
+	vcb->vcb$l_quocache = ( chan << 16 ) | ucb->ucb$w_fill_0;
+	if (home.s_magic == EXT2_SUPER_MAGIC)
+	  break;
 	sts = SS$_DATACHECK;
       }
       if (sts & 1) {
-	if (VMSWORD(home.hm2$w_checksum2) != checksum((unsigned short *) &home)) {
-	  sts = SS$_DATACHECK;
-	} else {
-	  if (VMSWORD(home.hm2$w_rvn) != device + 1)
-	    if (VMSWORD(home.hm2$w_rvn) > 1 || device != 0)
-	      sts = SS$_UNSUPVOLSET;
-#if 0
-	  move this
-	    if (vcbdev->vcb$l_aqb->aqb$l_mount_count != NULL) {
-	      sts = SS$_DEVMOUNT;
-	    }
-#endif
-	}
       }
       if (!(sts & 1)) break;
     }
@@ -1422,63 +1386,31 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	struct ext2_inode * idxhd;
 	struct _fcb * mapfcb;
 	//	  vcb->vcb$ibmaplbn = idxfcb->stlbn;
-	vcb->vcb$l_homelbn = home.hm2$l_homelbn;
-	vcb->vcb$l_ibmaplbn = home.hm2$l_ibmaplbn;
-	vcb->vcb$l_ibmapvbn = home.hm2$w_ibmapvbn;
-	vcb->vcb$l_ibmapsize = home.hm2$w_ibmapsize;  // wrong use
-	vcb->vcb$l_cluster = home.hm2$w_cluster;
-	vcb->vcb$l_maxfiles = home.hm2$l_maxfiles;
+	vcb->vcb$l_homelbn = home.s_first_data_block;
+	vcb->vcb$l_ibmaplbn = 0;//home.hm2$l_ibmaplbn;
+	vcb->vcb$l_ibmapvbn = 0;//home.hm2$w_ibmapvbn;
+	vcb->vcb$l_ibmapsize = 0;//home.hm2$w_ibmapsize;  // wrong use
+	vcb->vcb$l_cluster = 0;//home.hm2$w_cluster;
+	vcb->vcb$l_maxfiles = 0;//home.hm2$l_maxfiles;
 	//vcb->vcb$l_free = 500; // how do we compute this?
-	memcpy(&vcb->vcb$t_volname,home.hm2$t_volname,12);
-	vcb->vcb$l_rvt = ucb; // just single volume so far
-	idxfid.fid$b_rvn = device + 1;
-	//sts = accessfile(vcb,&idxfid,&idxfcb,flags & 1);
-	idxhd = ext2_read_block(vcbdev,VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),1, &iosb);
-	idxfcb=fcb_create2(idxhd,&sts);
-#if 0
-	idxfcb=vmalloc(sizeof(struct _fcb));
-	memset(idxfcb,0,sizeof(struct _fcb));
-	qhead_init(&idxfcb->fcb$l_wlfl);
-	idxfcb->fcb$w_fid[0]=1;
-	idxfcb->fcb$w_fid[1]=1;
-	insque(idxfcb,&vcb->vcb$l_fcbfl);
-	wcb_create_all(idxfcb,idxhd);
-#endif
-
+	memcpy(&vcb->vcb$t_volname,devnam[device],12);
+	struct ext2_super_block * sb = &home;
+	long blocks_per_group = le32_to_cpu(sb->s_blocks_per_group);
+	long block_size = 1 << (10 + le32_to_cpu(sb->s_log_block_size));
+	long groups = le32_to_cpu(sb->s_blocks_count)/blocks_per_group;
+	long groupsize = groups * sizeof(struct ext2_group_desc);
+	struct ext2_super_block * homep = kmalloc(sizeof(struct ext2_super_block) + groupsize, GFP_KERNEL);
+	sts = sys$qiow(EXT2_EF,chan,IO$_READLBLK,&iosb,0,0,(char *) homep, sizeof(struct ext2_super_block) + groupsize , hba, ucb->ucb$w_fill_0,0,0);
+	//	memcpy(homep, &home, 1024);
+	vcb->vcb$l_cache = homep;
 	if (!(iosb.iosb$w_status & 1)) {
 	  ucb->ucb$l_vcb = NULL;
 	} else {
+	  //vcbdev->max_cluster = (scb->scb$l_volsize + scb->scb$w_cluster - 1) / scb->scb$w_cluster;
 	  ucb->ucb$l_vcb = vcb;
-	  //insque(idxfcb,&vcb->vcb$l_fcbfl);
-	  if (1) {
-	    struct _fibdef mapfib = {0,2,2,1,0};
-	    struct dsc$descriptor mapdsc;
-	    struct _irp * dummyirp = kmalloc(sizeof(struct _irp),GFP_KERNEL);
-	    mapdsc.dsc$w_length=sizeof(struct _fibdef);
-	    mapdsc.dsc$a_pointer=&mapfib;
-	    memset(dummyirp,0,sizeof(struct _irp));
-	    dummyirp->irp$l_qio_p1=&mapdsc;
-	    dummyirp->irp$l_ucb=ucb;
-	    dummyirp->irp$l_func=IO$_ACCESS|IO$M_ACCESS;
-	    sts = ext2_access(vcb,dummyirp);
-	    mapfcb=getmapfcb(vcb);
-	    if (sts & 1) {
-	      struct _scbdef *scb;
-	      //insque(mapfcb,&vcb->vcb$l_fcbfl);
-	      sts=ioc_std$mapvblk(1,0,&mapfcb->fcb$l_wlfl,0,0,&vcb->vcb$l_sbmaplbn,0,0);
-	      sts = accesschunk(mapfcb,1,(char **) &scb,NULL,0,0);
-	      if (sts & 1) {
-		vcbdev->vcb$l_sbmaplbn=mapfcb->fcb$l_wlfl->wcb$l_p1_lbn;
-		vcbdev->vcb$l_sbmapsize=scb->scb$l_volsize/(512*8*scb->scb$w_cluster)+1;
-		if (scb->scb$w_cluster == home.hm2$w_cluster) {
-		  //vcbdev->max_cluster = (scb->scb$l_volsize + scb->scb$w_cluster - 1) / scb->scb$w_cluster;
-		  sts = update_freecount(vcbdev,&vcbdev->vcb$l_free);
-		  vcbdev->vcb$l_free*=vcbdev->vcb$l_cluster;
-		  printk("Freespace is %d\n",vcbdev->vcb$l_free);
-		}
-	      }
-	    }
-	  }
+	  vcb->vcb$l_rvt = ucb; // just single volume so far
+	  vcbdev->vcb$l_free=home.s_free_blocks_count;
+	  printk("Freespace is %d\n",vcbdev->vcb$l_free);
 	}
       }
     }

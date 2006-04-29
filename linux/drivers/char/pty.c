@@ -86,6 +86,7 @@ static void pty_close(struct tty_struct * tty, struct file * filp)
 	set_bit(TTY_OTHER_CLOSED, &tty->link->flags);
 	if (tty->driver.subtype == PTY_TYPE_MASTER) {
 		set_bit(TTY_OTHER_CLOSED, &tty->flags);
+#ifndef CONFIG_VMS
 #ifdef CONFIG_UNIX98_PTYS
 		{
 			unsigned int major = MAJOR(tty->device) - UNIX98_PTY_MASTER_MAJOR;
@@ -94,6 +95,7 @@ static void pty_close(struct tty_struct * tty, struct file * filp)
 			  - tty->driver.minor_start + tty->driver.name_base );
 			}
 		}
+#endif
 #endif
 		tty_unregister_devfs (&tty->link->driver, MINOR (tty->device));
 		tty_vhangup(tty->link);

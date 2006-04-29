@@ -66,6 +66,10 @@
 #include <ioc_routines.h>
 #include <misc_routines.h>
 
+#ifdef CONFIG_VMS
+#undef CONFIG_PROC_FS
+#endif
+
 #ifdef CONFIG_BLK_DEV_PDC4030
 #define IS_PDC4030_DRIVE (HWIF(drive)->chipset == ide_pdc4030)
 #else
@@ -520,7 +524,9 @@ static int idedisk_open (struct inode *inode, struct file *filp, ide_drive_t *dr
 {
 	MOD_INC_USE_COUNT;
 	if (drive->removable && drive->usage == 1) {
+#if 0
 		check_disk_change(inode->i_rdev);
+#endif
 		/*
 		 * Ignore the return code from door_lock,
 		 * since the open() has already succeeded,

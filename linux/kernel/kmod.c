@@ -40,6 +40,7 @@
 
 extern int max_threads;
 
+#ifndef CONFIG_VMS
 static inline void
 use_init_fs_context(void)
 {
@@ -93,9 +94,11 @@ use_init_fs_context(void)
 	dput(pwd);
 	mntput(pwdmnt);
 }
+#endif
 
 int exec_usermodehelper(char *program_path, char *argv[], char *envp[])
 {
+#ifndef CONFIG_VMS
 	int i;
 	struct task_struct *curtask = current;
 
@@ -142,6 +145,7 @@ int exec_usermodehelper(char *program_path, char *argv[], char *envp[])
 	/* Go, go, go... */
 	if (execve(program_path, argv, envp) < 0)
 		return -errno;
+#endif
 	return 0;
 }
 

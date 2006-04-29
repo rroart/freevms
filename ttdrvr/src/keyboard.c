@@ -220,7 +220,9 @@ void handle_scancode(unsigned char scancode, int down)
 	char raw_mode;
 
 	pm_access(pm_kbd);
+#if 0
 	add_keyboard_randomness(scancode | up_flag);
+#endif
 
 	tty = ttytab? ttytab[fg_console]: NULL;
 	if (tty && (!tty->driver_data)) {

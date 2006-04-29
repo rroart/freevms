@@ -60,6 +60,8 @@ kdev_t ROOT_DEV;
 LIST_HEAD(super_blocks);
 spinlock_t sb_lock = SPIN_LOCK_UNLOCKED;
 
+#ifndef CONFIG_VMS
+
 /*
  * Handling of filesystem drivers list.
  * Rules:
@@ -1132,3 +1134,19 @@ attach_it:
 
 	mntput(vfsmnt);
 }
+
+#else
+
+asmlinkage long sys_sysfs(int option, unsigned long arg1, unsigned long arg2)
+{
+	int retval = -EINVAL;
+	return retval;
+}
+
+asmlinkage long sys_ustat(dev_t dev, struct ustat * ubuf)
+{
+	int err = -EINVAL;
+	return err;
+}
+
+#endif

@@ -336,13 +336,16 @@ int /*__init*/ scs_init(void) {
   scs_std$listen(cf_listen,cf_myerr,"configure","hw conf",0); 
 
   extern int mount_root_vfs;
+#ifndef CONFIG_VMS
   if (mount_root_vfs)
     file = filp_open("/vms$common/sysexe/params.dat",O_RDONLY,0);
+#else
+  file = rms_open_exec("[vms$common.sysexe]params.dat");
+#endif
   if (!IS_ERR(file)) {
     char * c, *b, *n;
     char buf[1024];
 #ifdef CONFIG_VMS
-    file = rms_open_exec("[vms$common.sysexe]params.dat");
     if (file==0)
       goto out2;
     int size=rms_generic_file_read(file,buf,1024,&pos);

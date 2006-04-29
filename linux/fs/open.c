@@ -51,6 +51,7 @@ int vfs_statfs(struct super_block *sb, struct statfs *buf)
 
 asmlinkage long sys_statfs(const char * path, struct statfs * buf)
 {
+#ifndef CONFIG_VMS
 	struct nameidata nd;
 	int error;
 
@@ -63,10 +64,14 @@ asmlinkage long sys_statfs(const char * path, struct statfs * buf)
 		path_release(&nd);
 	}
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 asmlinkage long sys_fstatfs(unsigned int fd, struct statfs * buf)
 {
+#ifndef CONFIG_VMS
 	struct file * file;
 	struct statfs tmp;
 	int error;
@@ -81,10 +86,14 @@ asmlinkage long sys_fstatfs(unsigned int fd, struct statfs * buf)
 	fput(file);
 out:
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 int do_truncate(struct dentry *dentry, loff_t length)
 {
+#ifndef CONFIG_VMS
 	struct inode *inode = dentry->d_inode;
 	int error;
 	struct iattr newattrs;
@@ -99,6 +108,9 @@ int do_truncate(struct dentry *dentry, loff_t length)
 	error = notify_change(dentry, &newattrs);
 	up(&inode->i_sem);
 	return error;
+#else
+	return -EINVAL;
+#endif
 }
 
 static inline long do_sys_truncate(const char * path, loff_t length)
@@ -163,8 +175,12 @@ out:
 
 asmlinkage long sys_truncate(const char * path, unsigned long length)
 {
+#ifndef CONFIG_VMS
 	/* on 32-bit boxen it will cut the range 2^31--2^32-1 off */
 	return do_sys_truncate(path, (long)length);
+#else
+	return -EPERM;
+#endif
 }
 
 static inline long do_sys_ftruncate(unsigned int fd, loff_t length, int small)
@@ -212,19 +228,31 @@ out:
 
 asmlinkage long sys_ftruncate(unsigned int fd, unsigned long length)
 {
+#ifndef CONFIG_VMS
 	return do_sys_ftruncate(fd, length, 1);
+#else
+	return -EPERM;
+#endif
 }
 
 /* LFS versions of truncate are only needed on 32 bit machines */
 #if BITS_PER_LONG == 32
 asmlinkage long sys_truncate64(const char * path, loff_t length)
 {
+#ifndef CONFIG_VMS
 	return do_sys_truncate(path, length);
+#else
+	return -EPERM;
+#endif
 }
 
 asmlinkage long sys_ftruncate64(unsigned int fd, loff_t length)
 {
+#ifndef CONFIG_VMS
 	return do_sys_ftruncate(fd, length, 0);
+#else
+	return -EPERM;
+#endif
 }
 #endif
 
@@ -243,6 +271,7 @@ asmlinkage long sys_ftruncate64(unsigned int fd, loff_t length)
  */
 asmlinkage long sys_utime(char * filename, struct utimbuf * times)
 {
+#ifndef CONFIG_VMS
 	int error;
 	struct nameidata nd;
 	struct inode * inode;
@@ -277,6 +306,9 @@ dput_and_out:
 	path_release(&nd);
 out:
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 #endif
@@ -287,6 +319,7 @@ out:
  */
 asmlinkage long sys_utimes(char * filename, struct timeval * utimes)
 {
+#ifndef CONFIG_VMS
 	int error;
 	struct nameidata nd;
 	struct inode * inode;
@@ -321,6 +354,9 @@ dput_and_out:
 	path_release(&nd);
 out:
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 /*
@@ -397,6 +433,7 @@ asmlinkage long sys_access(const char * filename, int mode)
 
 asmlinkage long sys_chdir(const char * filename)
 {
+#ifndef CONFIG_VMS
 	int error;
 	struct nameidata nd;
 	char *name;
@@ -423,10 +460,14 @@ dput_and_out:
 	path_release(&nd);
 out:
 	return error;
+#else
+	return 0;
+#endif
 }
 
 asmlinkage long sys_fchdir(unsigned int fd)
 {
+#ifndef CONFIG_VMS
 	struct file *file;
 	struct dentry *dentry;
 	struct inode *inode;
@@ -453,10 +494,14 @@ out_putf:
 	fput(file);
 out:
 	return error;
+#else
+	return 0;
+#endif
 }
 
 asmlinkage long sys_chroot(const char * filename)
 {
+#ifndef CONFIG_VMS
 	int error;
 	struct nameidata nd;
 	char *name;
@@ -488,10 +533,14 @@ dput_and_out:
 	path_release(&nd);
 out:
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 asmlinkage long sys_fchmod(unsigned int fd, mode_t mode)
 {
+#ifndef CONFIG_VMS
 	struct inode * inode;
 	struct dentry * dentry;
 	struct file * file;
@@ -521,10 +570,14 @@ out_putf:
 	fput(file);
 out:
 	return err;
+#else
+	return 0;
+#endif
 }
 
 asmlinkage long sys_chmod(const char * filename, mode_t mode)
 {
+#ifndef CONFIG_VMS
 	struct nameidata nd;
 	struct inode * inode;
 	int error;
@@ -553,8 +606,12 @@ dput_and_out:
 	path_release(&nd);
 out:
 	return error;
+#else
+	return 0;
+#endif
 }
 
+#ifndef CONFIG_VMS
 static int chown_common(struct dentry * dentry, uid_t user, gid_t group)
 {
 	struct inode * inode;
@@ -614,9 +671,11 @@ static int chown_common(struct dentry * dentry, uid_t user, gid_t group)
 out:
 	return error;
 }
+#endif
 
 asmlinkage long sys_chown(const char * filename, uid_t user, gid_t group)
 {
+#ifndef CONFIG_VMS
 	struct nameidata nd;
 	int error;
 
@@ -626,10 +685,14 @@ asmlinkage long sys_chown(const char * filename, uid_t user, gid_t group)
 		path_release(&nd);
 	}
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 asmlinkage long sys_lchown(const char * filename, uid_t user, gid_t group)
 {
+#ifndef CONFIG_VMS
 	struct nameidata nd;
 	int error;
 
@@ -639,11 +702,15 @@ asmlinkage long sys_lchown(const char * filename, uid_t user, gid_t group)
 		path_release(&nd);
 	}
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 
 asmlinkage long sys_fchown(unsigned int fd, uid_t user, gid_t group)
 {
+#ifndef CONFIG_VMS
 	struct file * file;
 	int error = -EBADF;
 
@@ -653,6 +720,9 @@ asmlinkage long sys_fchown(unsigned int fd, uid_t user, gid_t group)
 		fput(file);
 	}
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 /*
@@ -669,6 +739,7 @@ asmlinkage long sys_fchown(unsigned int fd, uid_t user, gid_t group)
  * for the internal routines (ie open_namei()/follow_link() etc). 00 is
  * used by symlinks.
  */
+#ifndef CONFIG_VMS
 struct file *filp_open(const char * filename, int flags, int mode)
 {
 	int namei_flags, error;
@@ -686,7 +757,9 @@ struct file *filp_open(const char * filename, int flags, int mode)
 
 	return ERR_PTR(error);
 }
+#endif
 
+#ifndef CONFIG_VMS
 struct file *dentry_open(struct dentry *dentry, struct vfsmount *mnt, int flags)
 {
 	struct file * f;
@@ -748,6 +821,7 @@ cleanup_dentry:
 	mntput(mnt);
 	return ERR_PTR(error);
 }
+#endif
 
 /*
  * Find an empty file descriptor entry, and mark it busy.
@@ -818,8 +892,8 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 	int fd, error;
 
 #ifdef CONFIG_VMS
-	extern int mount_root_vfs;
-	if (mount_root_vfs==0)
+	extern int mount_root_ext2;
+	if (mount_root_ext2==0)
 	  return -EACCES;
 #endif
 #if BITS_PER_LONG != 32
@@ -867,8 +941,8 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 	if ((sts = exe$open(&fab)) & 1) {
 	  long xqp_fcb = get_xqp_prim_fcb();
 	  long x2p_fcb = get_x2p_prim_fcb();
-	  extern int mount_root_vfs;
-	  if (mount_root_vfs==0 || xqp_fcb!=prev_xqp_fcb)
+	  extern int mount_root_ext2;
+	  if (mount_root_ext2==0 || xqp_fcb!=prev_xqp_fcb)
 	    file=xqp_fcb;
 	  else
 	    file=x2p_fcb;
@@ -923,7 +997,9 @@ int filp_close(struct file *filp, fl_owner_t id)
 	extern is_tty_fops(struct file * f);
 #endif
 	if (!is_tty_fops(filp)) {
+#ifndef CONFIG_VMS
 	  fcntl_dirnotify(0, filp, 0);
+#endif
 	  locks_remove_posix(filp, id);
 	  fput(filp);
 	}
@@ -980,11 +1056,21 @@ asmlinkage long sys_vhangup(void)
  * the caller didn't specify O_LARGEFILE.  On 64bit systems we force
  * on this flag in sys_open.
  */
+#ifndef CONFIG_VMS
 int generic_file_open(struct inode * inode, struct file * filp)
 {
 	if (!(filp->f_flags & O_LARGEFILE) && inode->i_size > MAX_NON_LFS)
 		return -EFBIG;
 	return 0;
 }
-
+#else
+int generic_file_open(struct _fcb * inode, struct file * filp)
+{
+#if 0
+	if (!(filp->f_flags & O_LARGEFILE) && inode->i_size > MAX_NON_LFS)
+		return -EFBIG;
+#endif
+	return 0;
+}
+#endif
 EXPORT_SYMBOL(generic_file_open);

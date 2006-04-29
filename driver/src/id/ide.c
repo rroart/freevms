@@ -482,6 +482,10 @@ int ide_vmsinit(void) {
 #include <linux/kmod.h>
 #endif /* CONFIG_KMOD */
 
+#ifdef CONFIG_VMS
+#undef CONFIG_PROC_FS
+#endif
+
 #ifdef __x86_64__
 #define ide_release_region(from,extent) release_region((from), (extent))
 #define ide__sti() __sti()
@@ -1541,7 +1545,11 @@ static ide_startstop_t start_request (ide_drive_t *drive)
 	}
 
 	if (unit >= MAX_DRIVES) {
+#if 0
 		printk("%s: bad device number: %s\n", hwif->name, kdevname(rq->rq_dev));
+#else
+		printk("%s: bad device number: %x\n", hwif->name, rq->rq_dev);
+#endif
 		goto kill_rq;
 	}
 #ifdef DEBUG
@@ -2228,7 +2236,9 @@ int ide_revalidate_disk (kdev_t i_rdev)
 	for (p = 0; p < (1<<PARTN_BITS); ++p) {
 		if (drive->part[p].nr_sects > 0) {
 			kdev_t devp = MKDEV(major, minor+p);
+#if 0
 			invalidate_device(devp, 1);
+#endif
 		}
 		drive->part[p].start_sect = 0;
 		drive->part[p].nr_sects   = 0;
@@ -2440,7 +2450,9 @@ void ide_unregister (unsigned int index)
 		for (p = 0; p < (1<<PARTN_BITS); ++p) {
 			if (drive->part[p].nr_sects > 0) {
 				kdev_t devp = MKDEV(hwif->major, minor+p);
+#if 0
 				invalidate_device(devp, 0);
+#endif
 			}
 		}
 #ifdef CONFIG_PROC_FS
@@ -2516,7 +2528,9 @@ void ide_unregister (unsigned int index)
 	/*
 	 * Remove us from the kernel's knowledge
 	 */
+#if 0
 	unregister_blkdev(hwif->major, hwif->name);
+#endif
 	kfree(blksize_size[hwif->major]);
 	kfree(max_sectors[hwif->major]);
 	kfree(max_readahead[hwif->major]);

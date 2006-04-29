@@ -40,18 +40,22 @@
 #include <misc.h>
 
 #include <misc_routines.h>
+#include <fcbdef.h>
+#include <vcbdef.h>
+
+#include "x2p.h"
 
 MODULE_AUTHOR("Remy Card and others");
 MODULE_DESCRIPTION("Second Extended Filesystem");
 MODULE_LICENSE("GPL");
 
 
-static int ext2_update_inode(struct inode * inode, int do_sync);
+static int ext2_update_inode(struct _vcb * vcb, struct _fcb * inode, int do_sync);
 
 /*
  * Called at each iput()
  */
-void ext2_put_inode (struct inode * inode)
+void ext2_put_inode (struct _fcb * inode)
 {
 	ext2_discard_prealloc (inode);
 }
@@ -59,21 +63,23 @@ void ext2_put_inode (struct inode * inode)
 /*
  * Called at the last iput() if i_nlink is zero.
  */
-void ext2_delete_inode (struct inode * inode)
+void ext2_delete_inode (struct _vcb * vcb, struct _fcb * inode)
 {
 	lock_kernel();
 
+#if 0
 	if (is_bad_inode(inode) ||
-	    inode->i_ino == EXT2_ACL_IDX_INO ||
-	    inode->i_ino == EXT2_ACL_DATA_INO)
+	    ino == EXT2_ACL_IDX_INO ||
+	    ino == EXT2_ACL_DATA_INO)
 		goto no_delete;
 	inode->u.ext2_i.i_dtime	= CURRENT_TIME;
+#endif
 	mark_inode_dirty(inode);
-	ext2_update_inode(inode, IS_SYNC(inode));
-	inode->i_size = 0;
-	if (inode->i_blocks)
-		ext2_truncate (inode);
-	ext2_free_inode (inode);
+	ext2_update_inode(vcb, inode, 1 /*IS_SYNC(inode)*/);
+	inode->fcb$l_filesize = 0;
+	if (inode->fcb$l_efblk)
+		ext2_truncate (vcb, inode);
+	ext2_free_inode (vcb, inode);
 
 	unlock_kernel();
 	return;
@@ -82,8 +88,9 @@ no_delete:
 	clear_inode(inode);	/* We must guarantee clearing of inode... */
 }
 
-void ext2_discard_prealloc (struct inode * inode)
+void ext2_discard_prealloc (struct _fcb * inode)
 {
+#if 0
 #ifdef EXT2_PREALLOCATE
 	lock_kernel();
 	/* Writer: ->i_prealloc* */
@@ -93,21 +100,22 @@ void ext2_discard_prealloc (struct inode * inode)
 		inode->u.ext2_i.i_prealloc_count = 0;
 		inode->u.ext2_i.i_prealloc_block = 0;
 		/* Writer: end */
-		ext2_free_blocks (inode, block, total);
+		ext2_free_blocks (vcb, inode, block, total);
 	}
 	unlock_kernel();
 #endif
+#endif
 }
 
-static int ext2_alloc_block (struct inode * inode, unsigned long goal, int *err)
+static int ext2_alloc_block (struct _vcb * vcb, struct _fcb * inode, unsigned long goal, int *err)
 {
 #ifdef EXT2FS_DEBUG
 	static unsigned long alloc_hits = 0, alloc_attempts = 0;
 #endif
 	unsigned long result;
 
-
-#ifdef EXT2_PREALLOCATE
+#if 0
+	// was: EXT2_PREALLOCATE
 	/* Writer: ->i_prealloc* */
 	if (inode->u.ext2_i.i_prealloc_count &&
 	    (goal == inode->u.ext2_i.i_prealloc_block ||
@@ -123,14 +131,14 @@ static int ext2_alloc_block (struct inode * inode, unsigned long goal, int *err)
 		ext2_debug ("preallocation miss (%lu/%lu).\n",
 			    alloc_hits, ++alloc_attempts);
 		if (S_ISREG(inode->i_mode))
-			result = ext2_new_block (inode, goal, 
+			result = ext2_new_block (vcb, inode, goal, 
 				 &inode->u.ext2_i.i_prealloc_count,
 				 &inode->u.ext2_i.i_prealloc_block, err);
 		else
-			result = ext2_new_block (inode, goal, 0, 0, err);
+			result = ext2_new_block (vcb, inode, goal, 0, 0, err);
 	}
 #else
-	result = ext2_new_block (inode, goal, 0, 0, err);
+	result = ext2_new_block (vcb, inode, goal, 0, 0, err);
 #endif
 	return result;
 }
@@ -183,17 +191,18 @@ static inline int verify_chain(Indirect *from, Indirect *to)
  * get there at all.
  */
 
-static int ext2_block_to_path(struct inode *inode, long i_block, int offsets[4])
+static int ext2_block_to_path(struct _vcb * vcb, struct _fcb *inode, long i_block, int offsets[4])
 {
-	int ptrs = EXT2_ADDR_PER_BLOCK(inode->i_sb);
-	int ptrs_bits = EXT2_ADDR_PER_BLOCK_BITS(inode->i_sb);
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	int ptrs = EXT2_ADDR_PER_BLOCK(sb);
+	int ptrs_bits = EXT2_ADDR_PER_BLOCK_BITS(sb);
 	const long direct_blocks = EXT2_NDIR_BLOCKS,
 		indirect_blocks = ptrs,
 		double_blocks = (1 << (ptrs_bits * 2));
 	int n = 0;
 
 	if (i_block < 0) {
-		ext2_warning (inode->i_sb, "ext2_block_to_path", "block < 0");
+		ext2_warning (vcb, "ext2_block_to_path", "block < 0");
 	} else if (i_block < direct_blocks) {
 		offsets[n++] = i_block;
 	} else if ( (i_block -= direct_blocks) < indirect_blocks) {
@@ -209,7 +218,7 @@ static int ext2_block_to_path(struct inode *inode, long i_block, int offsets[4])
 		offsets[n++] = (i_block >> ptrs_bits) & (ptrs - 1);
 		offsets[n++] = i_block & (ptrs - 1);
 	} else {
-		ext2_warning (inode->i_sb, "ext2_block_to_path", "block > big");
+		ext2_warning (vcb, "ext2_block_to_path", "block > big");
 	}
 	return n;
 }
@@ -243,23 +252,24 @@ static int ext2_block_to_path(struct inode *inode, long i_block, int offsets[4])
  *	or when it reads all @depth-1 indirect blocks successfully and finds
  *	the whole chain, all way to the data (returns %NULL, *err == 0).
  */
-static Indirect *ext2_get_branch(struct inode *inode,
+static Indirect *ext2_get_branch(struct _vcb * vcb, struct _fcb *inode,
 				 int depth,
 				 int *offsets,
 				 Indirect chain[4],
 				 int *err)
 {
-	struct super_block *sb = inode->i_sb;
 	Indirect *p = chain;
 	struct buffer_head *bh;
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
 
 	*err = 0;
 	/* i_data is not going away, no lock needed */
-	add_chain (chain, NULL, inode->u.ext2_i.i_data + *offsets);
+	int * i_data = &inode->fcb$l_reserve2; // check
+	add_chain (chain, NULL, i_data + *offsets);
 	if (!p->key)
 		goto no_block;
 	while (--depth) {
-		bh = sb_bread(sb, le32_to_cpu(p->key)*vms_block_factor(sb->s_blocksize_bits));
+		bh = sb_bread(sb, le32_to_cpu(p->key)*vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)));
 		if (!bh)
 			goto failure;
 		/* Reader: pointers */
@@ -295,9 +305,13 @@ no_block:
  *	Caller must make sure that @ind is valid and will stay that way.
  */
 
-static inline unsigned long ext2_find_near(struct inode *inode, Indirect *ind)
+static inline unsigned long ext2_find_near(struct _vcb * vcb, struct _fcb *inode, Indirect *ind)
 {
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+#if 0
 	u32 *start = ind->bh ? (u32*) ind->bh->b_data : inode->u.ext2_i.i_data;
+#endif
+	u32 *start = ind->bh ? (u32*) ind->bh->b_data : &inode->fcb$l_reserve2;
 	u32 *p;
 
 	/* Try to find previous block */
@@ -313,9 +327,10 @@ static inline unsigned long ext2_find_near(struct inode *inode, Indirect *ind)
 	 * It is going to be refered from inode itself? OK, just put it into
 	 * the same cylinder group then.
 	 */
-	return (inode->u.ext2_i.i_block_group * 
-		EXT2_BLOCKS_PER_GROUP(inode->i_sb)) +
-	       le32_to_cpu(inode->i_sb->u.ext2_sb.s_es->s_first_data_block);
+	int i_block_group = (FCB_FID_TO_INO(inode) - 1) / EXT2_INODES_PER_GROUP(sb);
+	return (i_block_group * 
+		EXT2_BLOCKS_PER_GROUP(sb)) +
+	       le32_to_cpu(sb->s_first_data_block);
 }
 
 /**
@@ -331,16 +346,16 @@ static inline unsigned long ext2_find_near(struct inode *inode, Indirect *ind)
  *	under us we return -EAGAIN.
  */
 
-static inline int ext2_find_goal(struct inode *inode,
+static inline int ext2_find_goal(struct _vcb * vcb, struct _fcb *inode,
 				 long block,
 				 Indirect chain[4],
 				 Indirect *partial,
 				 unsigned long *goal)
 {
 	/* Writer: ->i_next_alloc* */
-	if (block == inode->u.ext2_i.i_next_alloc_block + 1) {
-		inode->u.ext2_i.i_next_alloc_block++;
-		inode->u.ext2_i.i_next_alloc_goal++;
+	if (block == inode->fcb$l_fill_6 + 1) {
+		inode->fcb$l_fill_6++;
+		inode->fcb$l_fill_3++;
 	} 
 	/* Writer: end */
 	/* Reader: pointers, ->i_next_alloc* */
@@ -349,10 +364,10 @@ static inline int ext2_find_goal(struct inode *inode,
 		 * try the heuristic for sequential allocation,
 		 * failing that at least try to get decent locality.
 		 */
-		if (block == inode->u.ext2_i.i_next_alloc_block)
-			*goal = inode->u.ext2_i.i_next_alloc_goal;
+		if (block == inode->fcb$l_fill_6)
+			*goal = inode->fcb$l_fill_3;
 		if (!*goal)
-			*goal = ext2_find_near(inode, partial);
+			*goal = ext2_find_near(vcb, inode, partial);
 		return 0;
 	}
 	/* Reader: end */
@@ -384,23 +399,24 @@ static inline int ext2_find_goal(struct inode *inode,
  *	as described above and return 0.
  */
 
-static int ext2_alloc_branch(struct inode *inode,
+static int ext2_alloc_branch(struct _vcb * vcb, struct _fcb *inode,
 			     int num,
 			     unsigned long goal,
 			     int *offsets,
 			     Indirect *branch)
 {
-	int blocksize = inode->i_sb->s_blocksize;
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	int blocksize = EXT2_BLOCK_SIZE(sb);
 	int n = 0;
 	int err;
 	int i;
-	int parent = ext2_alloc_block(inode, goal, &err);
+	int parent = ext2_alloc_block(vcb, inode, goal, &err);
 
 	branch[0].key = cpu_to_le32(parent);
 	if (parent) for (n = 1; n < num; n++) {
 		struct buffer_head *bh;
 		/* Allocate the next block */
-		int nr = ext2_alloc_block(inode, parent, &err);
+		int nr = ext2_alloc_block(vcb, inode, parent, &err);
 		if (!nr)
 			break;
 		branch[n].key = cpu_to_le32(nr);
@@ -408,7 +424,7 @@ static int ext2_alloc_branch(struct inode *inode,
 		 * Get buffer_head for parent block, zero it out and set 
 		 * the pointer to new one, then send parent to disk.
 		 */
-		bh = sb_getblk(inode->i_sb, parent*vms_block_factor(inode->i_sb->s_blocksize_bits));
+		bh = sb_getblk(sb, parent*vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)));
 		lock_buffer(bh);
 		memset(bh->b_data, 0, blocksize);
 		branch[n].bh = bh;
@@ -417,12 +433,12 @@ static int ext2_alloc_branch(struct inode *inode,
 		mark_buffer_uptodate(bh, 1);
 		unlock_buffer(bh);
 		vms_mark_buffer_dirty(bh);
-		ext2_sync_inode(inode);
+		ext2_sync_inode(vcb, inode);
 		//vms_mark_buffer_dirty_inode(bh, inode);
 		goto sync;
-		if (IS_SYNC(inode) || inode->u.ext2_i.i_osync) {
+		if (1 /*IS_SYNC(inode)*/ || 1 /*inode->u.ext2_i.i_osync*/) {
 		sync:
-			vms_ll_rw_block (WRITE, 1, &bh, inode->i_dev);
+		  vms_ll_rw_block (WRITE, 1, &bh, 0);
 			//wait_on_buffer (bh);
 		}
 		parent = nr;
@@ -434,7 +450,7 @@ static int ext2_alloc_branch(struct inode *inode,
 	for (i = 1; i < n; i++)
 		bforget(branch[i].bh);
 	for (i = 0; i < n; i++)
-		ext2_free_blocks(inode, le32_to_cpu(branch[i].key), 1);
+		ext2_free_blocks(vcb, inode, le32_to_cpu(branch[i].key), 1);
 	return err;
 }
 
@@ -455,7 +471,7 @@ static int ext2_alloc_branch(struct inode *inode,
  *	return -EAGAIN.
  */
 
-static inline int ext2_splice_branch(struct inode *inode,
+static inline int ext2_splice_branch(struct _vcb * vcb, struct _fcb *inode,
 				     long block,
 				     Indirect chain[4],
 				     Indirect *where,
@@ -473,30 +489,32 @@ static inline int ext2_splice_branch(struct inode *inode,
 	/* That's it */
 
 	*where->p = where->key;
-	inode->u.ext2_i.i_next_alloc_block = block;
-	inode->u.ext2_i.i_next_alloc_goal = le32_to_cpu(where[num-1].key);
+	inode->fcb$l_fill_6 = block;
+	inode->fcb$l_fill_3 = le32_to_cpu(where[num-1].key);
 
 	/* Writer: end */
 
 	/* We are done with atomic stuff, now do the rest of housekeeping */
 
+#if 0
 	inode->i_ctime = CURRENT_TIME;
+#endif
 
 	/* had we spliced it onto indirect block? */
 	if (where->bh) {
 	  //		vms_mark_buffer_dirty_inode(where->bh, inode);
 	  goto sync;
-		if (IS_SYNC(inode) || inode->u.ext2_i.i_osync) {
+		if (1 /*IS_SYNC(inode)*/ || 1 /*inode->u.ext2_i.i_osync*/) {
 		sync:
-			vms_ll_rw_block (WRITE, 1, &where->bh, inode->i_dev);
+		  vms_ll_rw_block (WRITE, 1, &where->bh, 0);
 			//			wait_on_buffer(where->bh);
 		}
 	}
 
-	if (IS_SYNC(inode) || inode->u.ext2_i.i_osync)
-		ext2_sync_inode (inode);
+	if (1 /*IS_SYNC(inode)*/ || 1 /*inode->u.ext2_i.i_osync*/)
+		ext2_sync_inode (vcb, inode);
 	else
-		ext2_sync_inode (inode);
+		ext2_sync_inode (vcb, inode);
 	//		mark_inode_dirty(inode);
 	return 0;
 
@@ -504,7 +522,7 @@ changed:
 	for (i = 1; i < num; i++)
 		bforget(where[i].bh);
 	for (i = 0; i < num; i++)
-		ext2_free_blocks(inode, le32_to_cpu(where[i].key), 1);
+		ext2_free_blocks(vcb, inode, le32_to_cpu(where[i].key), 1);
 	return -EAGAIN;
 }
 
@@ -521,7 +539,7 @@ changed:
  * reachable from inode.
  */
 
-/*static*/ int ext2_get_block(struct inode *inode, long iblock, signed long *bh_result, int create, struct _fcb * fcb)
+/*static*/ int ext2_get_block(struct _vcb * vcb, struct _fcb *inode, long iblock, signed long *bh_result, int create, struct _fcb * fcb)
 {
 	int err = -EIO;
 	int offsets[4];
@@ -529,22 +547,22 @@ changed:
 	Indirect *partial;
 	unsigned long goal;
 	int left;
-	int depth = ext2_block_to_path(inode, iblock, offsets);
+	int depth = ext2_block_to_path(vcb, inode, iblock, offsets);
 
 	if (depth == 0)
 		goto out;
 
 	lock_kernel();
 reread:
-	partial = ext2_get_branch(inode, depth, offsets, chain, &err);
+	partial = ext2_get_branch(vcb, inode, depth, offsets, chain, &err);
 
 	/* Simplest case - block found, no allocation needed */
 	if (!partial) {
 got_it:
-	  //bh_result->b_dev = inode->i_dev;
+	  //bh_result->b_dev = 0;
 		*bh_result = le32_to_cpu(chain[depth-1].key);
 		if (create==0) panic("nocreate\n");
-		e2_fcb_wcb_add_one(fcb,iblock,*bh_result);
+		e2_fcb_wcb_add_one(inode /*fcb*/,iblock,*bh_result);
 		//		bh_result->b_state |= (1UL << BH_Mapped);
 		/* Clean up and exit */
 		partial = chain+depth-1; /* the whole chain */
@@ -571,16 +589,16 @@ out:
 	if (err == -EAGAIN)
 		goto changed;
 
-	if (ext2_find_goal(inode, iblock, chain, partial, &goal) < 0)
+	if (ext2_find_goal(vcb, inode, iblock, chain, partial, &goal) < 0)
 		goto changed;
 
 	left = (chain + depth) - partial;
-	err = ext2_alloc_branch(inode, left, goal,
+	err = ext2_alloc_branch(vcb, inode, left, goal,
 					offsets+(partial-chain), partial);
 	if (err)
 		goto cleanup;
 
-	if (ext2_splice_branch(inode, iblock, chain, partial, left) < 0)
+	if (ext2_splice_branch(vcb, inode, iblock, chain, partial, left) < 0)
 		goto changed;
 
 	//	bh_result->b_state |= (1UL << BH_New);
@@ -595,11 +613,13 @@ changed:
 }
 
 int generic_commit_write2();
+#if 0
 static int ext2_writepage(struct page *page)
 {
 	return block_write_full_page2(page,ext2_get_block,0);
 }
-static int ext2_readpage(struct file *file, struct page *page, struct inode * inode, unsigned long pageno)
+#endif
+static int ext2_readpage(struct file *file, struct page *page, struct _fcb * inode, unsigned long pageno)
 {
 	return block_read_full_page2(inode,page,pageno);
 }
@@ -611,10 +631,11 @@ static int ext2_bmap(struct address_space *mapping, long block)
 {
 	return generic_block_bmap(mapping,block,ext2_get_block);
 }
-static int ext2_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsigned long blocknr, int blocksize)
+static int ext2_direct_IO(int rw, struct _fcb * inode, struct kiobuf * iobuf, unsigned long blocknr, int blocksize)
 {
 	return generic_direct_IO(rw, inode, iobuf, blocknr, blocksize, ext2_get_block);
 }
+#if 0
 struct address_space_operations ext2_aops = {
 	readpage: ext2_readpage,
 	writepage: ext2_writepage,
@@ -624,6 +645,7 @@ struct address_space_operations ext2_aops = {
 	bmap: ext2_bmap,
 	direct_IO: ext2_direct_IO,
 };
+#endif
 
 /*
  * Probably it should be a library function... search for first non-zero word
@@ -672,7 +694,7 @@ static inline int all_zeroes(u32 *p, u32 *q)
  *			(no partially truncated stuff there).
  */
 
-static Indirect *ext2_find_shared(struct inode *inode,
+static Indirect *ext2_find_shared(struct _vcb * vcb, struct _fcb *inode,
 				int depth,
 				int offsets[4],
 				Indirect chain[4],
@@ -684,7 +706,7 @@ static Indirect *ext2_find_shared(struct inode *inode,
 	*top = 0;
 	for (k = depth; k > 1 && !offsets[k-1]; k--)
 		;
-	partial = ext2_get_branch(inode, k, offsets, chain, &err);
+	partial = ext2_get_branch(vcb, inode, k, offsets, chain, &err);
 	/* Writer: pointers */
 	if (!partial)
 		partial = chain + k-1;
@@ -730,7 +752,7 @@ no_top:
  *	stored as little-endian 32-bit) and updating @inode->i_blocks
  *	appropriately.
  */
-static inline void ext2_free_data(struct inode *inode, u32 *p, u32 *q)
+static inline void ext2_free_data(struct _vcb * vcb, struct _fcb *inode, u32 *p, u32 *q)
 {
 	unsigned long block_to_free = 0, count = 0;
 	unsigned long nr;
@@ -746,8 +768,8 @@ static inline void ext2_free_data(struct inode *inode, u32 *p, u32 *q)
 				count++;
 			else {
 				//mark_inode_dirty(inode);
-				ext2_sync_inode (inode);
-				ext2_free_blocks (inode, block_to_free, count);
+				ext2_sync_inode (vcb, inode);
+				ext2_free_blocks (vcb, inode, block_to_free, count);
 			free_this:
 				block_to_free = nr;
 				count = 1;
@@ -756,8 +778,8 @@ static inline void ext2_free_data(struct inode *inode, u32 *p, u32 *q)
 	}
 	if (count > 0) {
 	  //		mark_inode_dirty(inode);
-		ext2_sync_inode (inode);
-		ext2_free_blocks (inode, block_to_free, count);
+		ext2_sync_inode (vcb, inode);
+		ext2_free_blocks (vcb, inode, block_to_free, count);
 	}
 }
 
@@ -772,46 +794,52 @@ static inline void ext2_free_data(struct inode *inode, u32 *p, u32 *q)
  *	stored as little-endian 32-bit) and updating @inode->i_blocks
  *	appropriately.
  */
-static void ext2_free_branches(struct inode *inode, u32 *p, u32 *q, int depth)
+static void ext2_free_branches(struct _vcb * vcb, struct _fcb *inode, u32 *p, u32 *q, int depth)
 {
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
 	struct buffer_head * bh;
 	unsigned long nr;
+	int ino = FCB_FID_TO_INO(inode);
 
 	if (depth--) {
-		int addr_per_block = EXT2_ADDR_PER_BLOCK(inode->i_sb);
+		int addr_per_block = EXT2_ADDR_PER_BLOCK(sb);
 		for ( ; p < q ; p++) {
 			nr = le32_to_cpu(*p);
 			if (!nr)
 				continue;
 			*p = 0;
-			bh = sb_bread(inode->i_sb, nr*vms_block_factor(inode->i_sb->s_blocksize_bits));
+			bh = sb_bread(sb, nr*vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)));
 			/*
 			 * A read failure? Report error and clear slot
 			 * (should be rare).
 			 */ 
 			if (!bh) {
-				ext2_error(inode->i_sb, "ext2_free_branches",
+				ext2_error (vcb, "ext2_free_branches",
 					"Read failure, inode=%ld, block=%ld",
-					inode->i_ino, nr);
+					ino, nr);
 				continue;
 			}
-			ext2_free_branches(inode,
+			ext2_free_branches(vcb, inode,
 					   (u32*)bh->b_data,
 					   (u32*)bh->b_data + addr_per_block,
 					   depth);
 			bforget(bh);
-			ext2_free_blocks(inode, nr, 1);
+			ext2_free_blocks(vcb, inode, nr, 1);
 			//mark_inode_dirty(inode);
-			ext2_sync_inode (inode);
+			ext2_sync_inode (vcb, inode);
 		}
 	} else
-		ext2_free_data(inode, p, q);
+		ext2_free_data(vcb, inode, p, q);
 }
 
-void ext2_truncate (struct inode * inode)
+void ext2_truncate (struct _vcb * vcb, struct _fcb * inode)
 {
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+#if 0
 	u32 *i_data = inode->u.ext2_i.i_data;
-	int addr_per_block = EXT2_ADDR_PER_BLOCK(inode->i_sb);
+#endif
+	int * i_data = &inode->fcb$l_reserve2; // check
+	int addr_per_block = EXT2_ADDR_PER_BLOCK(sb);
 	int offsets[4];
 	Indirect chain[4];
 	Indirect *partial;
@@ -820,53 +848,50 @@ void ext2_truncate (struct inode * inode)
 	long iblock;
 	unsigned blocksize;
 
-	if (!(S_ISREG(inode->i_mode) || S_ISDIR(inode->i_mode) ||
-	    S_ISLNK(inode->i_mode)))
-		return;
-	if (IS_APPEND(inode) || IS_IMMUTABLE(inode))
+	if (S_ISDIR(inode->fcb$v_isdir))
 		return;
 
 	ext2_discard_prealloc(inode);
 
-	blocksize = inode->i_sb->s_blocksize;
-	iblock = (inode->i_size + blocksize-1)
-					>> EXT2_BLOCK_SIZE_BITS(inode->i_sb);
+	blocksize = EXT2_BLOCK_SIZE(sb);
+	iblock = (inode->fcb$l_filesize + blocksize-1)
+					>> EXT2_BLOCK_SIZE_BITS(sb);
 
-	block_truncate_page(inode, inode->i_size,0);
+	block_truncate_page(inode, inode->fcb$l_filesize,0);
 
-	n = ext2_block_to_path(inode, iblock, offsets);
+	n = ext2_block_to_path(vcb, inode, iblock, offsets);
 	if (n == 0)
 		return;
 
 	if (n == 1) {
-		ext2_free_data(inode, i_data+offsets[0],
+		ext2_free_data(vcb, inode, i_data+offsets[0],
 					i_data + EXT2_NDIR_BLOCKS);
 		goto do_indirects;
 	}
 
-	partial = ext2_find_shared(inode, n, offsets, chain, &nr);
+	partial = ext2_find_shared(vcb, inode, n, offsets, chain, &nr);
 	/* Kill the top of shared branch (already detached) */
 	if (nr) {
-		ext2_sync_inode (inode);
+		ext2_sync_inode (vcb, inode);
 #if 0
 		if (partial == chain)
 			mark_inode_dirty(inode);
 		else
 			mark_buffer_dirty_inode(partial->bh, inode);
 #endif
-		ext2_free_branches(inode, &nr, &nr+1, (chain+n-1) - partial);
+		ext2_free_branches(vcb, inode, &nr, &nr+1, (chain+n-1) - partial);
 	}
 	/* Clear the ends of indirect blocks on the shared branch */
 	while (partial > chain) {
-		ext2_free_branches(inode,
+		ext2_free_branches(vcb, inode,
 				   partial->p + 1,
 				   (u32*)partial->bh->b_data + addr_per_block,
 				   (chain+n-1) - partial);
 		//		mark_buffer_dirty_inode(partial->bh, inode);
 		goto sync;
-		if (IS_SYNC(inode)) {
+		if (1 /*IS_SYNC(inode)*/) {
 		sync:
-			vms_ll_rw_block (WRITE, 1, &partial->bh, inode->i_dev);
+		  vms_ll_rw_block (WRITE, 1, &partial->bh, 0);
 			//wait_on_buffer (partial->bh);
 		}
 		brelse (partial->bh);
@@ -879,119 +904,149 @@ do_indirects:
 			nr = i_data[EXT2_IND_BLOCK];
 			if (nr) {
 				i_data[EXT2_IND_BLOCK] = 0;
-				ext2_sync_inode (inode);
+				ext2_sync_inode (vcb, inode);
 				//mark_inode_dirty(inode);
-				ext2_free_branches(inode, &nr, &nr+1, 1);
+				ext2_free_branches(vcb, inode, &nr, &nr+1, 1);
 			}
 		case EXT2_IND_BLOCK:
 			nr = i_data[EXT2_DIND_BLOCK];
 			if (nr) {
 				i_data[EXT2_DIND_BLOCK] = 0;
 				//mark_inode_dirty(inode);
-				ext2_sync_inode (inode);
-				ext2_free_branches(inode, &nr, &nr+1, 2);
+				ext2_sync_inode (vcb, inode);
+				ext2_free_branches(vcb, inode, &nr, &nr+1, 2);
 			}
 		case EXT2_DIND_BLOCK:
 			nr = i_data[EXT2_TIND_BLOCK];
 			if (nr) {
 				i_data[EXT2_TIND_BLOCK] = 0;
-				ext2_sync_inode (inode);
+				ext2_sync_inode (vcb, inode);
 				//		mark_inode_dirty(inode);
-				ext2_free_branches(inode, &nr, &nr+1, 3);
+				ext2_free_branches(vcb, inode, &nr, &nr+1, 3);
 			}
 		case EXT2_TIND_BLOCK:
 			;
 	}
+#if 0
 	inode->i_mtime = inode->i_ctime = CURRENT_TIME;
-	if (IS_SYNC(inode))
-		ext2_sync_inode (inode);
+#endif
+	if (1 /*IS_SYNC(inode)*/)
+		ext2_sync_inode (vcb, inode);
 	else
-		ext2_sync_inode (inode);
+		ext2_sync_inode (vcb, inode);
 	//		mark_inode_dirty(inode);
 }
 
-void ext2_read_inode (struct inode * inode)
+void ext2_read_inode (struct _vcb * vcb, struct _fcb * inode, int i_ino, void ** ret, void * iosb)
 {
-	struct buffer_head * bh;
 	struct ext2_inode * raw_inode;
+	char * data;
 	unsigned long block_group;
 	unsigned long group_desc;
 	unsigned long desc;
 	unsigned long block;
 	unsigned long offset;
 	struct ext2_group_desc * gdp;
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	int ino;
+	if (inode)
+	  ino = FCB_FID_TO_INO(inode);
+#if 1
+	else
+	  ino = i_ino;
+#endif
 
-	if ((inode->i_ino != EXT2_ROOT_INO && inode->i_ino != EXT2_ACL_IDX_INO &&
-	     inode->i_ino != EXT2_ACL_DATA_INO &&
-	     inode->i_ino < EXT2_FIRST_INO(inode->i_sb)) ||
-	    inode->i_ino > le32_to_cpu(inode->i_sb->u.ext2_sb.s_es->s_inodes_count)) {
-		ext2_error (inode->i_sb, "ext2_read_inode",
-			    "bad inode number: %lu", inode->i_ino);
+	if ((ino != EXT2_ROOT_INO && ino != EXT2_ACL_IDX_INO &&
+	     ino != EXT2_ACL_DATA_INO &&
+	     ino < EXT2_FIRST_INO(sb)) ||
+	    ino > le32_to_cpu(sb->s_inodes_count)) {
+		ext2_error (vcb, "ext2_read_inode",
+			    "bad inode number: %lu", ino);
 		goto bad_inode;
 	}
-	block_group = (inode->i_ino - 1) / EXT2_INODES_PER_GROUP(inode->i_sb);
-	if (block_group >= inode->i_sb->u.ext2_sb.s_groups_count) {
-		ext2_error (inode->i_sb, "ext2_read_inode",
+	block_group = (ino - 1) / EXT2_INODES_PER_GROUP(sb);
+	if (block_group >= EXT2_GROUPS_COUNT(sb)) {
+		ext2_error (vcb, "ext2_read_inode",
 			    "group >= groups count");
 		goto bad_inode;
 	}
-	group_desc = block_group >> EXT2_DESC_PER_BLOCK_BITS(inode->i_sb);
-	desc = block_group & (EXT2_DESC_PER_BLOCK(inode->i_sb) - 1);
-	bh = inode->i_sb->u.ext2_sb.s_group_desc[group_desc];
-	if (!bh) {
-		ext2_error (inode->i_sb, "ext2_read_inode",
+	group_desc = block_group / EXT2_DESC_PER_BLOCK(sb);
+	desc = block_group & (EXT2_DESC_PER_BLOCK(sb) - 1);
+	if (0) printk("bg %x ino %x pg %x gd %x dp %x ds %x \n",block_group,ino,EXT2_INODES_PER_GROUP(sb),group_desc,EXT2_DESC_PER_BLOCK(sb),desc);
+	gdp = ext2_get_group_desc(vcb, block_group, NULL);
+	if (!gdp) {
+		ext2_error (vcb, "ext2_read_inode",
 			    "Descriptor not loaded");
 		goto bad_inode;
 	}
-
-	gdp = (struct ext2_group_desc *) bh->b_data;
+	desc = 0;
 	/*
 	 * Figure out the offset within the block group inode table
 	 */
-	offset = ((inode->i_ino - 1) % EXT2_INODES_PER_GROUP(inode->i_sb)) *
-		EXT2_INODE_SIZE(inode->i_sb);
+	offset = ((ino - 1) % EXT2_INODES_PER_GROUP(sb)) *
+		EXT2_INODE_SIZE(sb);
 	block = le32_to_cpu(gdp[desc].bg_inode_table) +
-		(offset >> EXT2_BLOCK_SIZE_BITS(inode->i_sb));
-	if (!(bh = sb_bread(inode->i_sb, block*vms_block_factor(inode->i_sb->s_blocksize_bits)))) {
-		ext2_error (inode->i_sb, "ext2_read_inode",
+		(offset >> EXT2_BLOCK_SIZE_BITS(sb));
+	if (0) printk("of %x bl %x %x " , offset, block, gdp[desc].bg_inode_table);
+	if (!(data = exttwo_read_block(vcb, block*vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)), EXT2_BLOCK_SIZE(sb) >> 9, iosb))) {
+		ext2_error (vcb, "ext2_read_inode",
 			    "unable to read inode block - "
-			    "inode=%lu, block=%lu", inode->i_ino, block);
+			    "inode=%lu, block=%lu", ino, block);
 		goto bad_inode;
 	}
-	offset &= (EXT2_BLOCK_SIZE(inode->i_sb) - 1);
-	raw_inode = (struct ext2_inode *) (bh->b_data + offset);
-
-	inode->i_mode = le16_to_cpu(raw_inode->i_mode);
-	inode->i_uid = (uid_t)le16_to_cpu(raw_inode->i_uid_low);
-	inode->i_gid = (gid_t)le16_to_cpu(raw_inode->i_gid_low);
-	if(!(test_opt (inode->i_sb, NO_UID32))) {
-		inode->i_uid |= le16_to_cpu(raw_inode->i_uid_high) << 16;
-		inode->i_gid |= le16_to_cpu(raw_inode->i_gid_high) << 16;
+	offset &= (EXT2_BLOCK_SIZE(sb) - 1);
+	raw_inode = (struct ext2_inode *) (data + offset);
+#if 1
+	if (ret)
+	  *ret = raw_inode;
+	if (inode == 0) {
+	  return;
 	}
+#endif
+
+#if 0
+	inode->i_mode = le16_to_cpu(raw_inode->i_mode);
+#endif
+	if (S_ISDIR(le16_to_cpu(raw_inode->i_mode)))
+	  inode->fcb$v_isdir = 1;
+	inode->fcb$w_uicmember = (uid_t)le16_to_cpu(raw_inode->i_uid_low);
+	inode->fcb$w_uicgroup = (gid_t)le16_to_cpu(raw_inode->i_gid_low);
+	if(!(1/*test_opt (sb, NO_UID32)*/)) {
+		inode->fcb$w_uicmember |= le16_to_cpu(raw_inode->i_uid_high) << 16;
+		inode->fcb$w_uicgroup |= le16_to_cpu(raw_inode->i_gid_high) << 16;
+	}
+#if 0
 	inode->i_nlink = le16_to_cpu(raw_inode->i_links_count);
-	inode->i_size = le32_to_cpu(raw_inode->i_size);
+#endif
+	inode->fcb$l_filesize = le32_to_cpu(raw_inode->i_size);
+#if 0
 	inode->i_atime = le32_to_cpu(raw_inode->i_atime);
 	inode->i_ctime = le32_to_cpu(raw_inode->i_ctime);
 	inode->i_mtime = le32_to_cpu(raw_inode->i_mtime);
 	inode->u.ext2_i.i_dtime = le32_to_cpu(raw_inode->i_dtime);
+#endif
 	/* We now have enough fields to check if the inode was active or not.
 	 * This is needed because nfsd might try to access dead inodes
 	 * the test is that same one that e2fsck uses
 	 * NeilBrown 1999oct15
 	 */
+#if 0
 	if (inode->i_nlink == 0 && (inode->i_mode == 0 || inode->u.ext2_i.i_dtime)) {
 		/* this inode is deleted */
-		brelse (bh);
 		goto bad_inode;
 	}
 	inode->i_blksize = PAGE_SIZE;	/* This is the optimal IO size (for stat), not the fs block size */
-	inode->i_blocks = le32_to_cpu(raw_inode->i_blocks);
+#endif
+	inode->fcb$l_efblk = le32_to_cpu(raw_inode->i_blocks);
+#if 0
 	inode->i_version = ++event;
 	inode->u.ext2_i.i_flags = le32_to_cpu(raw_inode->i_flags);
 	inode->u.ext2_i.i_faddr = le32_to_cpu(raw_inode->i_faddr);
 	inode->u.ext2_i.i_frag_no = raw_inode->i_frag;
 	inode->u.ext2_i.i_frag_size = raw_inode->i_fsize;
 	inode->u.ext2_i.i_file_acl = le32_to_cpu(raw_inode->i_file_acl);
+#endif
+#if 0
 	if (S_ISREG(inode->i_mode))
 		inode->i_size |= ((__u64)le32_to_cpu(raw_inode->i_size_high)) << 32;
 	else
@@ -999,16 +1054,19 @@ void ext2_read_inode (struct inode * inode)
 	inode->i_generation = le32_to_cpu(raw_inode->i_generation);
 	inode->u.ext2_i.i_prealloc_count = 0;
 	inode->u.ext2_i.i_block_group = block_group;
+#endif
 
 	/*
 	 * NOTE! The in-memory inode i_data array is in little-endian order
 	 * even on big-endian machines: we do NOT byteswap the block numbers!
 	 */
+	int * i_data = &inode->fcb$l_reserve2; // check
 	for (block = 0; block < EXT2_N_BLOCKS; block++)
-		inode->u.ext2_i.i_data[block] = raw_inode->i_block[block];
+		i_data[block] = raw_inode->i_block[block];
 
-	if (inode->i_ino == EXT2_ACL_IDX_INO ||
-	    inode->i_ino == EXT2_ACL_DATA_INO)
+#if 0
+	if (ino == EXT2_ACL_IDX_INO ||
+	    ino == EXT2_ACL_DATA_INO)
 		/* Nothing to do */ ;
 	else if (S_ISREG(inode->i_mode)) {
 		inode->i_op = &ext2_file_inode_operations;
@@ -1023,9 +1081,10 @@ void ext2_read_inode (struct inode * inode)
 			inode->i_op = &page_symlink_inode_operations;
 		}
 	} else 
-		init_special_inode(inode, inode->i_mode,
+		init_special_inode(vcb, inode, inode->i_mode,
 				   le32_to_cpu(raw_inode->i_block[0]));
-	brelse (bh);
+#endif
+#if 0
 	inode->i_attr_flags = 0;
 	if (inode->u.ext2_i.i_flags & EXT2_SYNC_FL) {
 		inode->i_attr_flags |= ATTR_FLAG_SYNCRONOUS;
@@ -1043,17 +1102,20 @@ void ext2_read_inode (struct inode * inode)
 		inode->i_attr_flags |= ATTR_FLAG_NOATIME;
 		inode->i_flags |= S_NOATIME;
 	}
+#endif
 	return;
 	
 bad_inode:
+#if 0
 	make_bad_inode(inode);
+#endif
 	return;
 }
 
-static int ext2_update_inode(struct inode * inode, int do_sync)
+static int ext2_update_inode(struct _vcb * vcb, struct _fcb * inode, int do_sync)
 {
-	struct buffer_head * bh;
 	struct ext2_inode * raw_inode;
+	char * data;
 	unsigned long block_group;
 	unsigned long group_desc;
 	unsigned long desc;
@@ -1061,89 +1123,101 @@ static int ext2_update_inode(struct inode * inode, int do_sync)
 	unsigned long offset;
 	int err = 0;
 	struct ext2_group_desc * gdp;
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
 
 	do_sync = 1;
 
-	if ((inode->i_ino != EXT2_ROOT_INO &&
-	     inode->i_ino < EXT2_FIRST_INO(inode->i_sb)) ||
-	    inode->i_ino > le32_to_cpu(inode->i_sb->u.ext2_sb.s_es->s_inodes_count)) {
-		ext2_error (inode->i_sb, "ext2_write_inode",
-			    "bad inode number: %lu", inode->i_ino);
+	int ino = FCB_FID_TO_INO(inode);
+	if ((ino != EXT2_ROOT_INO &&
+	     ino < EXT2_FIRST_INO(sb)) ||
+	     ino > le32_to_cpu(sb->s_inodes_count)) {
+		ext2_error (vcb, "ext2_write_inode",
+			    "bad inode number: %lu", ino);
 		return -EIO;
 	}
-	block_group = (inode->i_ino - 1) / EXT2_INODES_PER_GROUP(inode->i_sb);
-	if (block_group >= inode->i_sb->u.ext2_sb.s_groups_count) {
-		ext2_error (inode->i_sb, "ext2_write_inode",
+	block_group = (ino - 1) / EXT2_INODES_PER_GROUP(sb);
+	if (block_group >= EXT2_GROUPS_COUNT(sb)) {
+		ext2_error (vcb, "ext2_write_inode",
 			    "group >= groups count");
 		return -EIO;
 	}
-	group_desc = block_group >> EXT2_DESC_PER_BLOCK_BITS(inode->i_sb);
-	desc = block_group & (EXT2_DESC_PER_BLOCK(inode->i_sb) - 1);
-	bh = inode->i_sb->u.ext2_sb.s_group_desc[group_desc];
-	if (!bh) {
-		ext2_error (inode->i_sb, "ext2_write_inode",
+	group_desc = block_group / EXT2_DESC_PER_BLOCK(sb);
+	desc = block_group & (EXT2_DESC_PER_BLOCK(sb) - 1);
+	gdp = ext2_get_group_desc(vcb, block_group, 0);	
+	if (!gdp) {
+		ext2_error (vcb, "ext2_write_inode",
 			    "Descriptor not loaded");
 		return -EIO;
 	}
-	gdp = (struct ext2_group_desc *) bh->b_data;
 	/*
 	 * Figure out the offset within the block group inode table
 	 */
-	offset = ((inode->i_ino - 1) % EXT2_INODES_PER_GROUP(inode->i_sb)) *
-		EXT2_INODE_SIZE(inode->i_sb);
+	offset = ((ino - 1) % EXT2_INODES_PER_GROUP(sb)) *
+		EXT2_INODE_SIZE(sb);
 	block = le32_to_cpu(gdp[desc].bg_inode_table) +
-		(offset >> EXT2_BLOCK_SIZE_BITS(inode->i_sb));
-	if (!(bh = sb_bread(inode->i_sb, block*vms_block_factor(inode->i_sb->s_blocksize_bits)))) {
-		ext2_error (inode->i_sb, "ext2_write_inode",
+		(offset >> EXT2_BLOCK_SIZE_BITS(sb));
+	long long iosb;
+	if (!(data = exttwo_read_block(vcb, block*vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)), EXT2_BLOCK_SIZE(sb) >> 9, &iosb))) {
+		ext2_error (vcb, "ext2_write_inode",
 			    "unable to read inode block - "
-			    "inode=%lu, block=%lu", inode->i_ino, block);
+			    "inode=%lu, block=%lu", ino, block);
 		return -EIO;
 	}
-	offset &= EXT2_BLOCK_SIZE(inode->i_sb) - 1;
-	raw_inode = (struct ext2_inode *) (bh->b_data + offset);
+	offset &= EXT2_BLOCK_SIZE(sb) - 1;
+	raw_inode = (struct ext2_inode *) (data + offset);
 
+#if 0
 	raw_inode->i_mode = cpu_to_le16(inode->i_mode);
-	if(!(test_opt(inode->i_sb, NO_UID32))) {
-		raw_inode->i_uid_low = cpu_to_le16(low_16_bits(inode->i_uid));
-		raw_inode->i_gid_low = cpu_to_le16(low_16_bits(inode->i_gid));
+#endif
+	raw_inode->i_mode = 0;
+	if (inode->fcb$v_isdir)
+	  raw_inode->i_mode = cpu_to_le16(S_IFDIR|S_IFREG);
+	if(!(1/*test_opt(sb, NO_UID32)*/)) {
+		raw_inode->i_uid_low = cpu_to_le16(low_16_bits(inode->fcb$w_uicmember));
+		raw_inode->i_gid_low = cpu_to_le16(low_16_bits(inode->fcb$w_uicgroup));
 /*
  * Fix up interoperability with old kernels. Otherwise, old inodes get
  * re-used with the upper 16 bits of the uid/gid intact
  */
-		if(!inode->u.ext2_i.i_dtime) {
-			raw_inode->i_uid_high = cpu_to_le16(high_16_bits(inode->i_uid));
-			raw_inode->i_gid_high = cpu_to_le16(high_16_bits(inode->i_gid));
+		if(!0/*inode->u.ext2_i.i_dtime*/) {
+			raw_inode->i_uid_high = cpu_to_le16(high_16_bits(inode->fcb$w_uicmember));
+			raw_inode->i_gid_high = cpu_to_le16(high_16_bits(inode->fcb$w_uicgroup));
 		} else {
 			raw_inode->i_uid_high = 0;
 			raw_inode->i_gid_high = 0;
 		}
 	} else {
-		raw_inode->i_uid_low = cpu_to_le16(fs_high2lowuid(inode->i_uid));
-		raw_inode->i_gid_low = cpu_to_le16(fs_high2lowgid(inode->i_gid));
+		raw_inode->i_uid_low = cpu_to_le16(fs_high2lowuid(inode->fcb$w_uicmember));
+		raw_inode->i_gid_low = cpu_to_le16(fs_high2lowgid(inode->fcb$w_uicgroup));
 		raw_inode->i_uid_high = 0;
 		raw_inode->i_gid_high = 0;
 	}
-	raw_inode->i_links_count = cpu_to_le16(inode->i_nlink);
-	raw_inode->i_size = cpu_to_le32(inode->i_size);
+	raw_inode->i_links_count = cpu_to_le16(1 /*inode->i_nlink*/);
+	raw_inode->i_size = cpu_to_le32(inode->fcb$l_filesize);
+#if 0
 	raw_inode->i_atime = cpu_to_le32(inode->i_atime);
 	raw_inode->i_ctime = cpu_to_le32(inode->i_ctime);
 	raw_inode->i_mtime = cpu_to_le32(inode->i_mtime);
-	raw_inode->i_blocks = cpu_to_le32(inode->i_blocks);
+#endif
+	raw_inode->i_blocks = cpu_to_le32(inode->fcb$l_efblk - 1);
+#if 0
 	raw_inode->i_dtime = cpu_to_le32(inode->u.ext2_i.i_dtime);
 	raw_inode->i_flags = cpu_to_le32(inode->u.ext2_i.i_flags);
 	raw_inode->i_faddr = cpu_to_le32(inode->u.ext2_i.i_faddr);
 	raw_inode->i_frag = inode->u.ext2_i.i_frag_no;
 	raw_inode->i_fsize = inode->u.ext2_i.i_frag_size;
 	raw_inode->i_file_acl = cpu_to_le32(inode->u.ext2_i.i_file_acl);
+#endif
+#if 0
 	if (S_ISDIR(inode->i_mode))
 		raw_inode->i_dir_acl = cpu_to_le32(inode->u.ext2_i.i_dir_acl);
 	else {
 		raw_inode->i_size_high = cpu_to_le32(inode->i_size >> 32);
 		if (inode->i_size > 0x7fffffffULL) {
-			struct super_block *sb = inode->i_sb;
+			struct super_block *sb = sb;
 			if (!EXT2_HAS_RO_COMPAT_FEATURE(sb,
 					EXT2_FEATURE_RO_COMPAT_LARGE_FILE) ||
-			    EXT2_SB(sb)->s_es->s_rev_level ==
+			    EXT2_SB(sb)->s_rev_level ==
 					cpu_to_le32(EXT2_GOOD_OLD_REV)) {
 			       /* If this is the first large file
 				* created, add a flag to the superblock.
@@ -1153,45 +1227,56 @@ static int ext2_update_inode(struct inode * inode, int do_sync)
 				EXT2_SET_RO_COMPAT_FEATURE(sb,
 					EXT2_FEATURE_RO_COMPAT_LARGE_FILE);
 				unlock_kernel();
-				ext2_write_super(sb);
+				ext2_write_super(vcb);
 			}
 		}
 	}
-	
-	raw_inode->i_generation = cpu_to_le32(inode->i_generation);
-	if (S_ISCHR(inode->i_mode) || S_ISBLK(inode->i_mode))
-		raw_inode->i_block[0] = cpu_to_le32(kdev_t_to_nr(inode->i_rdev));
+#endif	
+
+	raw_inode->i_generation = cpu_to_le32(1 /*inode->i_generation*/);
+	int * i_data = &inode->fcb$l_reserve2; // check
+	if (0 /*S_ISCHR(inode->i_mode) || S_ISBLK(inode->i_mode)*/)
+	  raw_inode->i_block[0] = 0/*cpu_to_le32(kdev_t_to_nr(inode->i_rdev))*/;
 	else for (block = 0; block < EXT2_N_BLOCKS; block++)
-		raw_inode->i_block[block] = inode->u.ext2_i.i_data[block];
+	  raw_inode->i_block[block] = i_data[block]; //check
+	exttwo_write_block(vcb, data, block*vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)), EXT2_BLOCK_SIZE(sb) >> 9, &iosb);
+#if 0
 	vms_mark_buffer_dirty(bh);
+#endif
 	if (do_sync) {
 #if 1
-		vms_ll_rw_block (WRITE, 1, &bh, inode->i_dev);
+#if 0
+	  vms_ll_rw_block (WRITE, 1, &bh, 0);
+#endif
 		//wait_on_buffer (bh);
 #endif
 #if 0
 		sts = exe$qiow(0,(unsigned short)dev2chan(bh->b_dev),IO$_WRITEPBLK,&iosb,0,0,
-			       bh->b_data,bh->b_size, 1,MINOR(inode->i_dev)&31,0,0);
+			       bh->b_data,bh->b_size, 1,MINOR(0)&31,0,0);
 #endif
+#if 0
 		if (buffer_req(bh) && !buffer_uptodate(bh)) {
 			printk ("IO error syncing ext2 inode ["
-				"%s:%08lx]\n",
-				bdevname(inode->i_dev), inode->i_ino);
+				"%x:%08lx]\n",
+				inode->fcb$w_fid_dirnum, ino);
 			err = -EIO;
 		}
+#endif
 	}
+#if 0
 	brelse (bh);
+#endif
 	return err;
 }
 
-void ext2_write_inode (struct inode * inode, int wait)
+void ext2_write_inode (struct _vcb * vcb, struct _fcb * inode, int wait)
 {
 	lock_kernel();
-	ext2_update_inode (inode, wait);
+	ext2_update_inode (vcb, inode, wait);
 	unlock_kernel();
 }
 
-int ext2_sync_inode (struct inode *inode)
+int ext2_sync_inode (struct _vcb * vcb, struct _fcb *inode)
 {
-	return ext2_update_inode (inode, 1);
+	return ext2_update_inode (vcb, inode, 1);
 }

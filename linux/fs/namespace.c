@@ -49,6 +49,7 @@ static inline unsigned long hash(struct vfsmount *mnt, struct dentry *dentry)
 	return tmp & hash_mask;
 }
 
+#ifndef CONFIG_VMS
 struct vfsmount *alloc_vfsmnt(void)
 {
 	struct vfsmount *mnt = kmem_cache_alloc(mnt_cache, GFP_KERNEL); 
@@ -361,6 +362,7 @@ static int do_umount(struct vfsmount *mnt, int flags)
 	up(&mount_sem);
 	return retval;
 }
+#endif
 
 /*
  * Now umount can handle mount points as well as block devices.
@@ -372,6 +374,7 @@ static int do_umount(struct vfsmount *mnt, int flags)
 
 asmlinkage long sys_umount(char * name, int flags)
 {
+#ifndef CONFIG_VMS
 	struct nameidata nd;
 	char *kname;
 	int retval;
@@ -401,6 +404,9 @@ dput_and_out:
 	path_release(&nd);
 out:
 	return retval;
+#else
+	return -EPERM;
+#endif
 }
 
 /*
@@ -412,6 +418,7 @@ asmlinkage long sys_oldumount(char * name)
 	return sys_umount(name,0);
 }
 
+#ifndef CONFIG_VMS
 static int mount_is_safe(struct nameidata *nd)
 {
 	if (capable(CAP_SYS_ADMIN))
@@ -758,10 +765,12 @@ long do_mount(char * dev_name, char * dir_name, char *type_page,
 	path_release(&nd);
 	return retval;
 }
+#endif
 
 asmlinkage long sys_mount(char * dev_name, char * dir_name, char * type,
 			  unsigned long flags, void * data)
 {
+#ifndef CONFIG_VMS
 	int retval;
 	unsigned long data_page;
 	unsigned long type_page;
@@ -798,8 +807,12 @@ out2:
 out1:
 	free_page(type_page);
 	return retval;
+#else
+	return -EPERM;
+#endif
 }
 
+#ifndef CONFIG_VMS
 static void chroot_fs_refs(struct nameidata *old_nd, struct nameidata *new_nd)
 {
 	struct task_struct *p;
@@ -823,6 +836,7 @@ static void chroot_fs_refs(struct nameidata *old_nd, struct nameidata *new_nd)
 	for_each_task_post1(p);
 	read_unlock(&tasklist_lock);
 }
+#endif
 
 /*
  * Moves the current root to put_root, and sets root/cwd of all processes
@@ -839,6 +853,7 @@ static void chroot_fs_refs(struct nameidata *old_nd, struct nameidata *new_nd)
 
 asmlinkage long sys_pivot_root(const char *new_root, const char *put_old)
 {
+#ifndef CONFIG_VMS
 	struct vfsmount *tmp;
 	struct nameidata new_nd, old_nd, parent_nd, root_parent, user_nd;
 	char *name;
@@ -934,6 +949,9 @@ out0:
 out3:
 	spin_unlock(&dcache_lock);
 	goto out2;
+#else
+	return -EPERM;
+#endif
 }
 
 /*
@@ -941,6 +959,7 @@ out3:
  * In 2.5 we'll use ramfs or tmpfs, but for now it's all we need - just
  * something to go with root vfsmount.
  */
+#ifndef CONFIG_VMS
 static struct dentry *rootfs_lookup(struct inode *dir, struct dentry *dentry)
 {
 	d_add(dentry, NULL);
@@ -1128,4 +1147,5 @@ int __init change_root(kdev_t new_root_dev,const char *put_old)
 	return 0;
 }
 
+#endif
 #endif

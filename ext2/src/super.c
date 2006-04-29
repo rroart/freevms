@@ -35,82 +35,108 @@
 
 #include <misc.h>
 #include <misc_routines.h>
+#include <fcbdef.h>
+#include <vcbdef.h>
 
-static void ext2_sync_super(struct super_block *sb,
+#include <iodef.h>
+#define EXT2_EF 30
+#include <sys$routines.h>
+
+static void ext2_sync_super(struct _vcb * vcb,
 			    struct ext2_super_block *es);
 
 static char error_buf[1024];
 
-void ext2_error (struct super_block * sb, const char * function,
+void ext2_error (struct _vcb * vcb, const char * function,
 		 const char * fmt, ...)
 {
 	va_list args;
-	struct ext2_super_block *es = EXT2_SB(sb)->s_es;
+	struct ext2_super_block *sb = vcb->vcb$l_cache;
+	struct ext2_super_block *es = sb;
 
-	if (!(sb->s_flags & MS_RDONLY)) {
-		sb->u.ext2_sb.s_mount_state |= EXT2_ERROR_FS;
+	if (1 /*!(sb->s_flags & MS_RDONLY)*/) {
+#if 0
+		sb->s_mount_state |= EXT2_ERROR_FS;
 		es->s_state =
 			cpu_to_le16(le16_to_cpu(es->s_state) | EXT2_ERROR_FS);
-		ext2_sync_super(sb, es);
+#endif
+		ext2_sync_super(vcb, es);
 	}
 	va_start (args, fmt);
 	vsprintf (error_buf, fmt, args);
 	va_end (args);
+#if 0
 	if (test_opt (sb, ERRORS_PANIC) ||
-	    (le16_to_cpu(sb->u.ext2_sb.s_es->s_errors) == EXT2_ERRORS_PANIC &&
+	    (le16_to_cpu(sb->s_errors) == EXT2_ERRORS_PANIC &&
 	     !test_opt (sb, ERRORS_CONT) && !test_opt (sb, ERRORS_RO)))
 		panic ("EXT2-fs panic (device %s): %s: %s\n",
 		       bdevname(sb->s_dev), function, error_buf);
+#endif
 	printk (KERN_CRIT "EXT2-fs error (device %s): %s: %s\n",
-		bdevname(sb->s_dev), function, error_buf);
+		0/*bdevname(sb->s_dev)*/, function, error_buf);
+#if 0
 	if (test_opt (sb, ERRORS_RO) ||
-	    (le16_to_cpu(sb->u.ext2_sb.s_es->s_errors) == EXT2_ERRORS_RO &&
+	    (le16_to_cpu(sb->s_errors) == EXT2_ERRORS_RO &&
 	     !test_opt (sb, ERRORS_CONT) && !test_opt (sb, ERRORS_PANIC))) {
 		printk ("Remounting filesystem read-only\n");
 		sb->s_flags |= MS_RDONLY;
 	}
+#endif
 }
 
-NORET_TYPE void ext2_panic (struct super_block * sb, const char * function,
+NORET_TYPE void ext2_panic (struct _vcb * vcb, const char * function,
 			    const char * fmt, ...)
 {
 	va_list args;
+	struct ext2_super_block *sb = vcb->vcb$l_cache;
+	struct ext2_super_block *es = sb;
 
-	if (!(sb->s_flags & MS_RDONLY)) {
-		sb->u.ext2_sb.s_mount_state |= EXT2_ERROR_FS;
-		sb->u.ext2_sb.s_es->s_state =
-			cpu_to_le16(le16_to_cpu(sb->u.ext2_sb.s_es->s_state) | EXT2_ERROR_FS);
-		vms_mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
+	if (1 /*!(sb->s_flags & MS_RDONLY)*/) {
+#if 0
+		sb->s_mount_state |= EXT2_ERROR_FS;
+		sb->s_state =
+			cpu_to_le16(le16_to_cpu(sb->s_state) | EXT2_ERROR_FS);
+#endif
+#if 0
+		vms_mark_buffer_dirty(sb->s_sbh);
 		sb->s_dirt = 1;
+#else
+		ext2_write_super(vcb);
+#endif
 	}
 	va_start (args, fmt);
 	vsprintf (error_buf, fmt, args);
 	va_end (args);
+#if 0
 	sb->s_flags |= MS_RDONLY;
+#endif
 	panic ("EXT2-fs panic (device %s): %s: %s\n",
-	       bdevname(sb->s_dev), function, error_buf);
+	       0/*bdevname(sb->s_dev)*/, function, error_buf);
 }
 
-void ext2_warning (struct super_block * sb, const char * function,
+void ext2_warning (struct _vcb * vcb, const char * function,
 		   const char * fmt, ...)
 {
 	va_list args;
+	struct ext2_super_block *sb = vcb->vcb$l_cache;
+	struct ext2_super_block *es = sb;
 
 	va_start (args, fmt);
 	vsprintf (error_buf, fmt, args);
 	va_end (args);
 	printk (KERN_WARNING "EXT2-fs warning (device %s): %s: %s\n",
-		bdevname(sb->s_dev), function, error_buf);
+		0/*bdevname(sb->s_dev)*/, function, error_buf);
 }
 
-void ext2_update_dynamic_rev(struct super_block *sb)
+#if 0
+void ext2_update_dynamic_rev(struct ext2_super_block *sb)
 {
-	struct ext2_super_block *es = EXT2_SB(sb)->s_es;
+	struct ext2_super_block *es = EXT2_SB(sb);
 
 	if (le32_to_cpu(es->s_rev_level) > EXT2_GOOD_OLD_REV)
 		return;
 
-	ext2_warning(sb, __FUNCTION__,
+	ext2_warning( vcb, __FUNCTION__,
 		     "updating to rev %d because of new feature flag, "
 		     "running e2fsck is recommended",
 		     EXT2_DYNAMIC_REV);
@@ -127,34 +153,38 @@ void ext2_update_dynamic_rev(struct super_block *sb)
 	 * can leave it up to e2fsck to clean up any inconsistencies there.
 	 */
 }
+#endif
 
-void ext2_put_super (struct super_block * sb)
+#if 0
+void ext2_put_super (struct ext2_super_block * sb)
 {
 	int db_count;
 	int i;
 
 	if (!(sb->s_flags & MS_RDONLY)) {
-		struct ext2_super_block *es = EXT2_SB(sb)->s_es;
+		struct ext2_super_block *es = EXT2_SB(sb);
 
 		es->s_state = le16_to_cpu(EXT2_SB(sb)->s_mount_state);
-		ext2_sync_super(sb, es);
+		ext2_sync_super(vcb, es);
 	}
 	db_count = EXT2_SB(sb)->s_gdb_count;
 	for (i = 0; i < db_count; i++)
-		if (sb->u.ext2_sb.s_group_desc[i])
-			brelse (sb->u.ext2_sb.s_group_desc[i]);
-	kfree(sb->u.ext2_sb.s_group_desc);
+		if (sb->s_group_desc[i])
+			brelse (sb->s_group_desc[i]);
+	kfree(sb->s_group_desc);
 	for (i = 0; i < EXT2_MAX_GROUP_LOADED; i++)
-		if (sb->u.ext2_sb.s_inode_bitmap[i])
-			brelse (sb->u.ext2_sb.s_inode_bitmap[i]);
+		if (sb->s_inode_bitmap[i])
+			brelse (sb->s_inode_bitmap[i]);
 	for (i = 0; i < EXT2_MAX_GROUP_LOADED; i++)
-		if (sb->u.ext2_sb.s_block_bitmap[i])
-			brelse (sb->u.ext2_sb.s_block_bitmap[i]);
-	brelse (sb->u.ext2_sb.s_sbh);
+		if (sb->s_block_bitmap[i])
+			brelse (sb->s_block_bitmap[i]);
+	brelse (sb->s_sbh);
 
 	return;
 }
+#endif
 
+#if 0
 static struct super_operations ext2_sops = {
 	read_inode:	ext2_read_inode,
 	write_inode:	ext2_write_inode,
@@ -165,7 +195,9 @@ static struct super_operations ext2_sops = {
 	statfs:		ext2_statfs,
 	remount_fs:	ext2_remount,
 };
+#endif
 
+#if 0
 /*
  * This function has been shamelessly adapted from the msdos fs
  */
@@ -289,8 +321,10 @@ static int parse_options (char * options, unsigned long * sb_block,
 	}
 	return 1;
 }
+#endif
 
-static int ext2_setup_super (struct super_block * sb,
+#if 0
+static int ext2_setup_super (struct ext2_super_block * sb,
 			      struct ext2_super_block * es,
 			      int read_only)
 {
@@ -302,10 +336,10 @@ static int ext2_setup_super (struct super_block * sb,
 	}
 	if (read_only)
 		return res;
-	if (!(sb->u.ext2_sb.s_mount_state & EXT2_VALID_FS))
+	if (!(sb->s_mount_state & EXT2_VALID_FS))
 		printk ("EXT2-fs warning: mounting unchecked fs, "
 			"running e2fsck is recommended\n");
-	else if ((sb->u.ext2_sb.s_mount_state & EXT2_ERROR_FS))
+	else if ((sb->s_mount_state & EXT2_ERROR_FS))
 		printk ("EXT2-fs warning: mounting fs with errors, "
 			"running e2fsck is recommended\n");
 	else if ((__s16) le16_to_cpu(es->s_max_mnt_count) >= 0 &&
@@ -320,16 +354,16 @@ static int ext2_setup_super (struct super_block * sb,
 	if (!(__s16) le16_to_cpu(es->s_max_mnt_count))
 		es->s_max_mnt_count = (__s16) cpu_to_le16(EXT2_DFL_MAX_MNT_COUNT);
 	es->s_mnt_count=cpu_to_le16(le16_to_cpu(es->s_mnt_count) + 1);
-	ext2_write_super(sb);
+	ext2_write_super(vcb);
 	if (test_opt (sb, DEBUG))
 		printk ("[EXT II FS %s, %s, bs=%lu, fs=%lu, gc=%lu, "
 			"bpg=%lu, ipg=%lu, mo=%04lx]\n",
 			EXT2FS_VERSION, EXT2FS_DATE, sb->s_blocksize,
-			sb->u.ext2_sb.s_frag_size,
-			sb->u.ext2_sb.s_groups_count,
+			sb->s_frag_size,
+			EXT2_GROUPS_COUNT(sb),
 			EXT2_BLOCKS_PER_GROUP(sb),
 			EXT2_INODES_PER_GROUP(sb),
-			sb->u.ext2_sb.s_mount_opt);
+			sb->s_mount_opt);
 #ifdef CONFIG_EXT2_CHECK
 	if (test_opt (sb, CHECK)) {
 		ext2_check_blocks_bitmap (sb);
@@ -338,24 +372,26 @@ static int ext2_setup_super (struct super_block * sb,
 #endif
 	return res;
 }
+#endif
 
-static int ext2_check_descriptors (struct super_block * sb)
+static int ext2_check_descriptors (struct ext2_super_block * sb)
 {
+#if 0
 	int i;
 	int desc_block = 0;
-	unsigned long block = le32_to_cpu(sb->u.ext2_sb.s_es->s_first_data_block);
+	unsigned long block = le32_to_cpu(sb->s_first_data_block);
 	struct ext2_group_desc * gdp = NULL;
 
 	ext2_debug ("Checking group descriptors");
 
-	for (i = 0; i < sb->u.ext2_sb.s_groups_count; i++)
+	for (i = 0; i < EXT2_GROUPS_COUNT(sb); i++)
 	{
 		if ((i % EXT2_DESC_PER_BLOCK(sb)) == 0)
-			gdp = (struct ext2_group_desc *) sb->u.ext2_sb.s_group_desc[desc_block++]->b_data;
+			gdp = (struct ext2_group_desc *) sb->s_group_desc[desc_block++]->b_data;
 		if (le32_to_cpu(gdp->bg_block_bitmap) < block ||
 		    le32_to_cpu(gdp->bg_block_bitmap) >= block + EXT2_BLOCKS_PER_GROUP(sb))
 		{
-			ext2_error (sb, "ext2_check_descriptors",
+			ext2_error (vcb, "ext2_check_descriptors",
 				    "Block bitmap for group %d"
 				    " not in group (block %lu)!",
 				    i, (unsigned long) le32_to_cpu(gdp->bg_block_bitmap));
@@ -364,17 +400,17 @@ static int ext2_check_descriptors (struct super_block * sb)
 		if (le32_to_cpu(gdp->bg_inode_bitmap) < block ||
 		    le32_to_cpu(gdp->bg_inode_bitmap) >= block + EXT2_BLOCKS_PER_GROUP(sb))
 		{
-			ext2_error (sb, "ext2_check_descriptors",
+			ext2_error (vcb, "ext2_check_descriptors",
 				    "Inode bitmap for group %d"
 				    " not in group (block %lu)!",
 				    i, (unsigned long) le32_to_cpu(gdp->bg_inode_bitmap));
 			return 0;
 		}
 		if (le32_to_cpu(gdp->bg_inode_table) < block ||
-		    le32_to_cpu(gdp->bg_inode_table) + sb->u.ext2_sb.s_itb_per_group >=
+		    le32_to_cpu(gdp->bg_inode_table) + sb->s_itb_per_group >=
 		    block + EXT2_BLOCKS_PER_GROUP(sb))
 		{
-			ext2_error (sb, "ext2_check_descriptors",
+			ext2_error (vcb, "ext2_check_descriptors",
 				    "Inode table for group %d"
 				    " not in group (block %lu)!",
 				    i, (unsigned long) le32_to_cpu(gdp->bg_inode_table));
@@ -383,6 +419,7 @@ static int ext2_check_descriptors (struct super_block * sb)
 		block += EXT2_BLOCKS_PER_GROUP(sb);
 		gdp++;
 	}
+#endif
 	return 1;
 }
 
@@ -405,7 +442,8 @@ static loff_t ext2_max_size(int bits)
 	return res;
 }
 
-struct super_block * ext2_read_super (struct super_block * sb, void * data,
+#if 0
+struct ext2_super_block * ext2_read_super (struct ext2_super_block * sb, void * data,
 				      int silent)
 {
 	struct buffer_head * bh;
@@ -431,9 +469,9 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 	if(blocksize < BLOCK_SIZE )
 	    blocksize = BLOCK_SIZE;
 
-	sb->u.ext2_sb.s_mount_opt = 0;
+	sb->s_mount_opt = 0;
 	if (!parse_options ((char *) data, &sb_block, &resuid, &resgid,
-	    &sb->u.ext2_sb.s_mount_opt)) {
+	    &sb->s_mount_opt)) {
 		return NULL;
 	}
 
@@ -462,7 +500,7 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 	 *       some ext2 macro-instructions depend on its value
 	 */
 	es = (struct ext2_super_block *) (((char *)bh->b_data) + offset);
-	sb->u.ext2_sb.s_es = es;
+	sb = es;
 	sb->s_magic = le16_to_cpu(es->s_magic);
 	if (sb->s_magic != EXT2_SUPER_MAGIC) {
 		if (!silent)
@@ -497,7 +535,7 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 		goto failed_mount;
 	}
 	sb->s_blocksize_bits =
-		le32_to_cpu(EXT2_SB(sb)->s_es->s_log_block_size) + 10;
+		le32_to_cpu(EXT2_SB(sb)->s_log_block_size) + 10;
 	sb->s_blocksize = 1 << sb->s_blocksize_bits;
 
 	sb->s_maxbytes = ext2_max_size(sb->s_blocksize_bits);
@@ -521,7 +559,7 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 			goto failed_mount;
 		}
 		es = (struct ext2_super_block *) (((char *)bh->b_data) + offset);
-		sb->u.ext2_sb.s_es = es;
+		sb = es;
 		if (es->s_magic != le16_to_cpu(EXT2_SUPER_MAGIC)) {
 			printk ("EXT2-fs: Magic mismatch, very weird !\n");
 			goto failed_mount;
@@ -529,46 +567,46 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 	}
 
 	if (le32_to_cpu(es->s_rev_level) == EXT2_GOOD_OLD_REV) {
-		sb->u.ext2_sb.s_inode_size = EXT2_GOOD_OLD_INODE_SIZE;
-		sb->u.ext2_sb.s_first_ino = EXT2_GOOD_OLD_FIRST_INO;
+		sb->s_inode_size = EXT2_GOOD_OLD_INODE_SIZE;
+		sb->s_first_ino = EXT2_GOOD_OLD_FIRST_INO;
 	} else {
-		sb->u.ext2_sb.s_inode_size = le16_to_cpu(es->s_inode_size);
-		sb->u.ext2_sb.s_first_ino = le32_to_cpu(es->s_first_ino);
-		if (sb->u.ext2_sb.s_inode_size != EXT2_GOOD_OLD_INODE_SIZE) {
+		sb->s_inode_size = le16_to_cpu(es->s_inode_size);
+		sb->s_first_ino = le32_to_cpu(es->s_first_ino);
+		if (sb->s_inode_size != EXT2_GOOD_OLD_INODE_SIZE) {
 			printk ("EXT2-fs: unsupported inode size: %d\n",
-				sb->u.ext2_sb.s_inode_size);
+				sb->s_inode_size);
 			goto failed_mount;
 		}
 	}
-	sb->u.ext2_sb.s_frag_size = EXT2_MIN_FRAG_SIZE <<
+	sb->s_frag_size = EXT2_MIN_FRAG_SIZE <<
 				   le32_to_cpu(es->s_log_frag_size);
-	if (sb->u.ext2_sb.s_frag_size)
-		sb->u.ext2_sb.s_frags_per_block = sb->s_blocksize /
-						  sb->u.ext2_sb.s_frag_size;
+	if (sb->s_frag_size)
+		sb->s_frags_per_block = sb->s_blocksize /
+						  sb->s_frag_size;
 	else
 		sb->s_magic = 0;
-	sb->u.ext2_sb.s_blocks_per_group = le32_to_cpu(es->s_blocks_per_group);
-	sb->u.ext2_sb.s_frags_per_group = le32_to_cpu(es->s_frags_per_group);
-	sb->u.ext2_sb.s_inodes_per_group = le32_to_cpu(es->s_inodes_per_group);
-	sb->u.ext2_sb.s_inodes_per_block = sb->s_blocksize /
+	sb->s_blocks_per_group = le32_to_cpu(es->s_blocks_per_group);
+	sb->s_frags_per_group = le32_to_cpu(es->s_frags_per_group);
+	sb->s_inodes_per_group = le32_to_cpu(es->s_inodes_per_group);
+	sb->s_inodes_per_block = sb->s_blocksize /
 					   EXT2_INODE_SIZE(sb);
-	sb->u.ext2_sb.s_itb_per_group = sb->u.ext2_sb.s_inodes_per_group /
-				        sb->u.ext2_sb.s_inodes_per_block;
-	sb->u.ext2_sb.s_desc_per_block = sb->s_blocksize /
+	sb->s_itb_per_group = sb->s_inodes_per_group /
+				        sb->s_inodes_per_block;
+	sb->s_desc_per_block = sb->s_blocksize /
 					 sizeof (struct ext2_group_desc);
-	sb->u.ext2_sb.s_sbh = bh;
+	sb->s_sbh = bh;
 	if (resuid != EXT2_DEF_RESUID)
-		sb->u.ext2_sb.s_resuid = resuid;
+		sb->s_resuid = resuid;
 	else
-		sb->u.ext2_sb.s_resuid = le16_to_cpu(es->s_def_resuid);
+		sb->s_resuid = le16_to_cpu(es->s_def_resuid);
 	if (resgid != EXT2_DEF_RESGID)
-		sb->u.ext2_sb.s_resgid = resgid;
+		sb->s_resgid = resgid;
 	else
-		sb->u.ext2_sb.s_resgid = le16_to_cpu(es->s_def_resgid);
-	sb->u.ext2_sb.s_mount_state = le16_to_cpu(es->s_state);
-	sb->u.ext2_sb.s_addr_per_block_bits =
+		sb->s_resgid = le16_to_cpu(es->s_def_resgid);
+	sb->s_mount_state = le16_to_cpu(es->s_state);
+	sb->s_addr_per_block_bits =
 		log2 (EXT2_ADDR_PER_BLOCK(sb));
-	sb->u.ext2_sb.s_desc_per_block_bits =
+	sb->s_desc_per_block_bits =
 		log2 (EXT2_DESC_PER_BLOCK(sb));
 	if (sb->s_magic != EXT2_SUPER_MAGIC) {
 		if (!silent)
@@ -584,45 +622,45 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 		goto failed_mount;
 	}
 
-	if (sb->s_blocksize != sb->u.ext2_sb.s_frag_size) {
+	if (sb->s_blocksize != sb->s_frag_size) {
 		printk ("EXT2-fs: fragsize %lu != blocksize %lu (not supported yet)\n",
-			sb->u.ext2_sb.s_frag_size, sb->s_blocksize);
+			sb->s_frag_size, sb->s_blocksize);
 		goto failed_mount;
 	}
 
-	if (sb->u.ext2_sb.s_blocks_per_group > sb->s_blocksize * 8) {
+	if (sb->s_blocks_per_group > sb->s_blocksize * 8) {
 		printk ("EXT2-fs: #blocks per group too big: %lu\n",
-			sb->u.ext2_sb.s_blocks_per_group);
+			sb->s_blocks_per_group);
 		goto failed_mount;
 	}
-	if (sb->u.ext2_sb.s_frags_per_group > sb->s_blocksize * 8) {
+	if (sb->s_frags_per_group > sb->s_blocksize * 8) {
 		printk ("EXT2-fs: #fragments per group too big: %lu\n",
-			sb->u.ext2_sb.s_frags_per_group);
+			sb->s_frags_per_group);
 		goto failed_mount;
 	}
-	if (sb->u.ext2_sb.s_inodes_per_group > sb->s_blocksize * 8) {
+	if (sb->s_inodes_per_group > sb->s_blocksize * 8) {
 		printk ("EXT2-fs: #inodes per group too big: %lu\n",
-			sb->u.ext2_sb.s_inodes_per_group);
+			sb->s_inodes_per_group);
 		goto failed_mount;
 	}
 
-	sb->u.ext2_sb.s_groups_count = (le32_to_cpu(es->s_blocks_count) -
+	EXT2_GROUPS_COUNT(sb) = (le32_to_cpu(es->s_blocks_count) -
 				        le32_to_cpu(es->s_first_data_block) +
 				       EXT2_BLOCKS_PER_GROUP(sb) - 1) /
 				       EXT2_BLOCKS_PER_GROUP(sb);
-	db_count = (sb->u.ext2_sb.s_groups_count + EXT2_DESC_PER_BLOCK(sb) - 1) /
+	db_count = (EXT2_GROUPS_COUNT(sb) + EXT2_DESC_PER_BLOCK(sb) - 1) /
 		   EXT2_DESC_PER_BLOCK(sb);
-	sb->u.ext2_sb.s_group_desc = kmalloc (db_count * sizeof (struct buffer_head *), GFP_KERNEL);
-	if (sb->u.ext2_sb.s_group_desc == NULL) {
+	sb->s_group_desc = kmalloc (db_count * sizeof (struct buffer_head *), GFP_KERNEL);
+	if (sb->s_group_desc == NULL) {
 		printk ("EXT2-fs: not enough memory\n");
 		goto failed_mount;
 	}
 	for (i = 0; i < db_count; i++) {
-		sb->u.ext2_sb.s_group_desc[i] = sb_bread(sb, (logic_sb_block + i + 1)*vms_block_factor(sb->s_blocksize_bits));
-		if (!sb->u.ext2_sb.s_group_desc[i]) {
+		sb->s_group_desc[i] = sb_bread(sb, (logic_sb_block + i + 1)*vms_block_factor(sb->s_blocksize_bits));
+		if (!sb->s_group_desc[i]) {
 			for (j = 0; j < i; j++)
-				brelse (sb->u.ext2_sb.s_group_desc[j]);
-			kfree(sb->u.ext2_sb.s_group_desc);
+				brelse (sb->s_group_desc[j]);
+			kfree(sb->s_group_desc);
 			printk ("EXT2-fs: unable to read group descriptors\n");
 			goto failed_mount;
 		}
@@ -633,14 +671,14 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 		goto failed_mount2;
 	}
 	for (i = 0; i < EXT2_MAX_GROUP_LOADED; i++) {
-		sb->u.ext2_sb.s_inode_bitmap_number[i] = 0;
-		sb->u.ext2_sb.s_inode_bitmap[i] = NULL;
-		sb->u.ext2_sb.s_block_bitmap_number[i] = 0;
-		sb->u.ext2_sb.s_block_bitmap[i] = NULL;
+		sb->s_inode_bitmap_number[i] = 0;
+		sb->s_inode_bitmap[i] = NULL;
+		sb->s_block_bitmap_number[i] = 0;
+		sb->s_block_bitmap[i] = NULL;
 	}
-	sb->u.ext2_sb.s_loaded_inode_bitmaps = 0;
-	sb->u.ext2_sb.s_loaded_block_bitmaps = 0;
-	sb->u.ext2_sb.s_gdb_count = db_count;
+	sb->s_loaded_inode_bitmaps = 0;
+	sb->s_loaded_block_bitmaps = 0;
+	sb->s_gdb_count = db_count;
 	/*
 	 * set up enough so that it can read an inode
 	 */
@@ -660,28 +698,51 @@ struct super_block * ext2_read_super (struct super_block * sb, void * data,
 	return sb;
 failed_mount2:
 	for (i = 0; i < db_count; i++)
-		brelse(sb->u.ext2_sb.s_group_desc[i]);
-	kfree(sb->u.ext2_sb.s_group_desc);
+		brelse(sb->s_group_desc[i]);
+	kfree(sb->s_group_desc);
 failed_mount:
 	brelse(bh);
 	return NULL;
 }
+#endif
 
-static void ext2_commit_super (struct super_block * sb,
+#if 0
+static void ext2_commit_super (struct _vcb * vcb,
 			       struct ext2_super_block * es)
 {
+	struct ext2_super_block *sb = vcb->vcb$l_cache;
+	struct ext2_super_block *es = sb;
+#if 0
 	es->s_wtime = cpu_to_le32(CURRENT_TIME);
-	vms_mark_buffer_dirty(sb->u.ext2_sb.s_sbh);
+#endif
+#if 0
+	vms_mark_buffer_dirty(sb->s_sbh);
+#else
+	ext2_write_super(vcb);
+#endif
+#if 0
 	sb->s_dirt = 0;
+#endif
 }
+#endif
 
-static void ext2_sync_super(struct super_block *sb, struct ext2_super_block *es)
+static void ext2_sync_super(struct _vcb * vcb, struct ext2_super_block *es)
 {
+	struct ext2_super_block *sb = vcb->vcb$l_cache;
+	struct ext2_super_block *es = sb;
+#if 0
 	es->s_wtime = cpu_to_le32(CURRENT_TIME);
+#endif
 	//vms_mark_buffer_dirty(EXT2_SB(sb)->s_sbh);
+#if 0
 	vms_ll_rw_block(WRITE, 1, &EXT2_SB(sb)->s_sbh,sb->s_dev);
+#else
+	ext2_write_super(vcb);
+#endif
 	//	wait_on_buffer(EXT2_SB(sb)->s_sbh);
+#if 0
 	sb->s_dirt = 0;
+#endif
 }
 
 /*
@@ -695,56 +756,72 @@ static void ext2_sync_super(struct super_block *sb, struct ext2_super_block *es)
  * set s_state to EXT2_VALID_FS after some corrections.
  */
 
-void ext2_write_super (struct super_block * sb)
+void ext2_write_super (struct _vcb * vcb)
 {
-	struct ext2_super_block * es;
+	struct ext2_super_block *sb = vcb->vcb$l_cache;
+	struct ext2_super_block *es = sb;
 
-	if (!(sb->s_flags & MS_RDONLY)) {
-		es = sb->u.ext2_sb.s_es;
+	if (1 /*!(sb->s_flags & MS_RDONLY)*/) {
+		es = sb;
 
+#if 0
 		if (le16_to_cpu(es->s_state) & EXT2_VALID_FS) {
 			ext2_debug ("setting valid to 0\n");
 			es->s_state = cpu_to_le16(le16_to_cpu(es->s_state) &
 						  ~EXT2_VALID_FS);
 			es->s_mtime = cpu_to_le32(CURRENT_TIME);
-			ext2_sync_super(sb, es);
+			ext2_sync_super(vcb, es);
 		} else
-			ext2_commit_super (sb, es);
+#endif
+		  long long iosb;
+         	  int blocknr = 1;
+		  int block_factor = 2;
+		  void * data = vcb->vcb$l_cache;
+		  long blocks_per_group = le32_to_cpu(sb->s_blocks_per_group);
+		  long block_size = 1 << (10 + le32_to_cpu(sb->s_log_block_size));
+		  long groups = le32_to_cpu(sb->s_blocks_count)/blocks_per_group;
+		  long groupsize = groups * sizeof(struct ext2_group_desc);
+		  int size = sizeof(struct ext2_super_block) + groupsize;
+		  int sts = sys$qiow(EXT2_EF,((int)vcb->vcb$l_quocache)>>16,IO$_WRITEPBLK,&iosb,0,0,
+				     data,size, blocknr*block_factor,((int)vcb->vcb$l_quocache)&31,0,0);
 	}
+#if 0
 	sb->s_dirt = 0;
+#endif
 }
 
-int ext2_remount (struct super_block * sb, int * flags, char * data)
+#if 0
+int ext2_remount (struct ext2_super_block * sb, int * flags, char * data)
 {
 	struct ext2_super_block * es;
-	unsigned short resuid = sb->u.ext2_sb.s_resuid;
-	unsigned short resgid = sb->u.ext2_sb.s_resgid;
+	unsigned short resuid = sb->s_resuid;
+	unsigned short resgid = sb->s_resgid;
 	unsigned long new_mount_opt;
 	unsigned long tmp;
 
 	/*
 	 * Allow the "check" option to be passed as a remount option.
 	 */
-	new_mount_opt = sb->u.ext2_sb.s_mount_opt;
+	new_mount_opt = sb->s_mount_opt;
 	if (!parse_options (data, &tmp, &resuid, &resgid,
 			    &new_mount_opt))
 		return -EINVAL;
 
-	sb->u.ext2_sb.s_mount_opt = new_mount_opt;
-	sb->u.ext2_sb.s_resuid = resuid;
-	sb->u.ext2_sb.s_resgid = resgid;
-	es = sb->u.ext2_sb.s_es;
+	sb->s_mount_opt = new_mount_opt;
+	sb->s_resuid = resuid;
+	sb->s_resgid = resgid;
+	es = sb;
 	if ((*flags & MS_RDONLY) == (sb->s_flags & MS_RDONLY))
 		return 0;
 	if (*flags & MS_RDONLY) {
 		if (le16_to_cpu(es->s_state) & EXT2_VALID_FS ||
-		    !(sb->u.ext2_sb.s_mount_state & EXT2_VALID_FS))
+		    !(sb->s_mount_state & EXT2_VALID_FS))
 			return 0;
 		/*
 		 * OK, we are remounting a valid rw partition rdonly, so set
 		 * the rdonly flag and then mark the partition as valid again.
 		 */
-		es->s_state = cpu_to_le16(sb->u.ext2_sb.s_mount_state);
+		es->s_state = cpu_to_le16(sb->s_mount_state);
 		es->s_mtime = cpu_to_le32(CURRENT_TIME);
 	} else {
 		int ret;
@@ -760,15 +837,17 @@ int ext2_remount (struct super_block * sb, int * flags, char * data)
 		 * store the current valid flag.  (It may have been changed
 		 * by e2fsck since we originally mounted the partition.)
 		 */
-		sb->u.ext2_sb.s_mount_state = le16_to_cpu(es->s_state);
+		sb->s_mount_state = le16_to_cpu(es->s_state);
 		if (!ext2_setup_super (sb, es, 0))
 			sb->s_flags &= ~MS_RDONLY;
 	}
-	ext2_sync_super(sb, es);
+	ext2_sync_super(vcb, es);
 	return 0;
 }
+#endif
 
-int ext2_statfs (struct super_block * sb, struct statfs * buf)
+#if 0
+int ext2_statfs (struct ext2_super_block * sb, struct statfs * buf)
 {
 	unsigned long overhead;
 	int i;
@@ -784,14 +863,14 @@ int ext2_statfs (struct super_block * sb, struct statfs * buf)
 		 * All of the blocks before first_data_block are
 		 * overhead
 		 */
-		overhead = le32_to_cpu(sb->u.ext2_sb.s_es->s_first_data_block);
+		overhead = le32_to_cpu(sb->s_first_data_block);
 
 		/*
 		 * Add the overhead attributed to the superblock and
 		 * block group descriptors.  If the sparse superblocks
 		 * feature is turned on, then not all groups have this.
 		 */
-		for (i = 0; i < EXT2_SB(sb)->s_groups_count; i++)
+		for (i = 0; i < EXT2_GROUPS_COUNT(sb); i++)
 			overhead += ext2_bg_has_super(sb, i) +
 				ext2_bg_num_gdb(sb, i);
 
@@ -799,23 +878,25 @@ int ext2_statfs (struct super_block * sb, struct statfs * buf)
 		 * Every block group has an inode bitmap, a block
 		 * bitmap, and an inode table.
 		 */
-		overhead += (sb->u.ext2_sb.s_groups_count *
-			     (2 + sb->u.ext2_sb.s_itb_per_group));
+		overhead += (EXT2_GROUPS_COUNT(sb) *
+			     (2 + sb->s_itb_per_group));
 	}
 
 	buf->f_type = EXT2_SUPER_MAGIC;
 	buf->f_bsize = sb->s_blocksize;
-	buf->f_blocks = le32_to_cpu(sb->u.ext2_sb.s_es->s_blocks_count) - overhead;
+	buf->f_blocks = le32_to_cpu(sb->s_blocks_count) - overhead;
 	buf->f_bfree = ext2_count_free_blocks (sb);
-	buf->f_bavail = buf->f_bfree - le32_to_cpu(sb->u.ext2_sb.s_es->s_r_blocks_count);
-	if (buf->f_bfree < le32_to_cpu(sb->u.ext2_sb.s_es->s_r_blocks_count))
+	buf->f_bavail = buf->f_bfree - le32_to_cpu(sb->s_r_blocks_count);
+	if (buf->f_bfree < le32_to_cpu(sb->s_r_blocks_count))
 		buf->f_bavail = 0;
-	buf->f_files = le32_to_cpu(sb->u.ext2_sb.s_es->s_inodes_count);
+	buf->f_files = le32_to_cpu(sb->s_inodes_count);
 	buf->f_ffree = ext2_count_free_inodes (sb);
 	buf->f_namelen = EXT2_NAME_LEN;
 	return 0;
 }
+#endif
 
+#if 0
 static DECLARE_FSTYPE_DEV(ext2_fs_type, "ext2", ext2_read_super);
 
 static int __init init_ext2_fs(void)
@@ -827,8 +908,11 @@ static void __exit exit_ext2_fs(void)
 {
 	unregister_filesystem(&ext2_fs_type);
 }
+#endif
 
 EXPORT_NO_SYMBOLS;
 
+#if 0
 module_init(init_ext2_fs)
 module_exit(exit_ext2_fs)
+#endif

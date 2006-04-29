@@ -101,13 +101,16 @@ int kswapd(void *unused)
 	sigfillset(&tsk->blocked);
 
 	struct file * file=0;
+#ifndef CONFIG_VMS
 	extern int mount_root_vfs;
 	if (mount_root_vfs)
 	  file = filp_open("/vms$common/sysexe/pagefile.sys",O_RDONLY,0);
+#else
+	file = rms_open_exec("[vms$common.sysexe]pagefile.sys");
+#endif
 	if (!IS_ERR(file)) {
 	  char * c, *b, *n;
 	  char buf[1024];
-	  file = rms_open_exec("[vms$common.sysexe]pagefile.sys");
 	  if (file==0)
 	    goto out;
 	  if (((struct _fcb *)(file))->fcb$b_type!=DYN$C_FCB) {

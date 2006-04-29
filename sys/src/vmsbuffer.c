@@ -64,7 +64,12 @@
 #include <pridef.h>
 #include <iodef.h>
 #include <misc.h>
+#include <vcbdef.h>
+#include <ucbdef.h>
+#include <linux/ext2_fs.h>
+
 #include <misc_routines.h>
+#include "../../ext2/src/x2p.h"
 
 #define EXT2_EF 30
 
@@ -219,6 +224,7 @@ int sync_buffers(kdev_t dev, int wait)
 
 int fsync_super(struct super_block *sb)
 {
+#if 0
 	kdev_t dev = sb->s_dev;
 	sync_buffers(dev, 0);
 
@@ -232,6 +238,9 @@ int fsync_super(struct super_block *sb)
 	unlock_kernel();
 
 	return sync_buffers(dev, 1);
+#else
+	return 0;
+#endif
 }
 
 int fsync_no_super(kdev_t dev)
@@ -242,6 +251,7 @@ int fsync_no_super(kdev_t dev)
 
 int fsync_dev(kdev_t dev)
 {
+#if 0
 	sync_buffers(dev, 0);
 
 	lock_kernel();
@@ -251,6 +261,9 @@ int fsync_dev(kdev_t dev)
 	unlock_kernel();
 
 	return sync_buffers(dev, 1);
+#else
+	return 0;
+#endif
 }
 
 /*
@@ -274,7 +287,9 @@ asmlinkage long sys_sync(void)
  
 int file_fsync(struct file *filp, struct dentry *dentry, int datasync)
 {
-	struct inode * inode = dentry->d_inode;
+#if 0
+  // not yet
+	struct _fcb * inode = dentry->d_inode;
 	struct super_block * sb;
 	kdev_t dev;
 	int ret;
@@ -291,17 +306,19 @@ int file_fsync(struct file *filp, struct dentry *dentry, int datasync)
 	unlock_super(sb);
 
 	/* .. finally sync the buffers to disk */
-	dev = inode->i_dev;
+	dev = FCB_DEV(inode);
 	ret = sync_buffers(dev, 1);
 	unlock_kernel();
 	return ret;
+#endif
+	return 0;
 }
 
 asmlinkage long sys_fsync(unsigned int fd)
 {
 	struct file * file;
 	struct dentry * dentry;
-	struct inode * inode;
+	struct _fcb * inode;
 	int ret, err;
 
 	ret = -EBADF;
@@ -319,6 +336,8 @@ asmlinkage long sys_fsync(unsigned int fd)
 	}
 
 	/* We need to protect against concurrent writers.. */
+#if 0
+	// not yet
 	down(&inode->i_sem);
 	ret = filemap_fdatasync(inode->i_mapping);
 	err = file->f_op->fsync(file, dentry, 0);
@@ -328,6 +347,7 @@ asmlinkage long sys_fsync(unsigned int fd)
 	if (err && !ret)
 		ret = err;
 	up(&inode->i_sem);
+#endif
 
 out_putf:
 	fput(file);
@@ -339,7 +359,7 @@ asmlinkage long sys_fdatasync(unsigned int fd)
 {
 	struct file * file;
 	struct dentry * dentry;
-	struct inode * inode;
+	struct _fcb * inode;
 	int ret, err;
 
 	ret = -EBADF;
@@ -354,6 +374,8 @@ asmlinkage long sys_fdatasync(unsigned int fd)
 	if (!file->f_op || !file->f_op->fsync)
 		goto out_putf;
 
+#if 0
+	// not yet
 	down(&inode->i_sem);
 	ret = filemap_fdatasync(inode->i_mapping);
 	err = file->f_op->fsync(file, dentry, 1);
@@ -363,6 +385,7 @@ asmlinkage long sys_fdatasync(unsigned int fd)
 	if (err && !ret)
 		ret = err;
 	up(&inode->i_sem);
+#endif
 
 out_putf:
 	fput(file);
@@ -550,7 +573,7 @@ int discard_bh_page(struct page *page, unsigned long offset, int drop_pagecache)
 /*
  * block_write_full_page() is SMP threaded - the kernel lock is not held.
  */
-static int __block_write_full_page2(struct inode *inode, struct page *page, unsigned long pageno)
+static int __block_write_full_page2(struct _fcb *inode, struct page *page, unsigned long pageno)
 {
 	struct _fcb * fcb=e2_search_fcb(inode);
 	unsigned long iblock, lblock;
@@ -562,11 +585,14 @@ static int __block_write_full_page2(struct inode *inode, struct page *page, unsi
 	int turns=0;
 	signed int blocknr;
 	unsigned long blocksize;
+	struct _vcb * vcb = exttwo_get_current_vcb();
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	int i_blkbits = EXT2_BLOCK_SIZE_BITS(sb);
 
-	blocksize = 1 << inode->i_blkbits;
+	blocksize = 1 << i_blkbits;
 
-	block = pageno << (PAGE_CACHE_SHIFT - inode->i_blkbits);
-	iblock = pageno << (PAGE_CACHE_SHIFT - inode->i_blkbits);
+	block = pageno << (PAGE_CACHE_SHIFT - i_blkbits);
+	iblock = pageno << (PAGE_CACHE_SHIFT - i_blkbits);
 
 	i = 0;
 
@@ -585,12 +611,12 @@ static int __block_write_full_page2(struct inode *inode, struct page *page, unsi
 	  else
 	    blocknr=iblock;
 	  if (blocknr==-1) {
-	    err=ext2_get_block(inode, iblock, &blocknr, 1, fcb);
+	    err=ext2_get_block(vcb, inode, iblock, &blocknr, 1, fcb);
 	    if (err)
 	      goto out;
 	  }
-	  sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
-			 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
+	  sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_WRITEPBLK,&iosb,0,0,
+			 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
 
 	  turns++;
 	  block++;
@@ -615,7 +641,7 @@ out:
 	return err;
 }
 
-static int __block_prepare_write(struct inode *inode, struct page *page,
+static int __block_prepare_write(struct _fcb *inode, struct page *page,
 		unsigned from, unsigned to, unsigned long pageno)
 {
 	struct _fcb * fcb=e2_search_fcb(inode);
@@ -630,9 +656,12 @@ static int __block_prepare_write(struct inode *inode, struct page *page,
 	struct _iosb iosb;
 	int blocknr;
 
-	blocksize = 1 << inode->i_blkbits;
+	struct _vcb * vcb = exttwo_get_current_vcb();
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	int i_blkbits = EXT2_BLOCK_SIZE_BITS(sb);
+	blocksize = 1 << i_blkbits;
 
-	bbits = inode->i_blkbits;
+	bbits = i_blkbits;
 	block = pageno << (PAGE_CACHE_SHIFT - bbits);
 
 	for(block_start = 0; turns<(PAGE_SIZE/blocksize);
@@ -649,7 +678,7 @@ static int __block_prepare_write(struct inode *inode, struct page *page,
 	   else
 	     blocknr=block;
 	   if (blocknr==-1) {
-	     err=ext2_get_block(inode, block, &blocknr, 1, fcb);
+	     err=ext2_get_block(vcb, inode, block, &blocknr, 1, fcb);
 	     if (err)
 	       goto out;
 	   }
@@ -660,8 +689,8 @@ static int __block_prepare_write(struct inode *inode, struct page *page,
 	   if (block_end > to || block_start < from)
 	     flush_dcache_page(page);
 	   if ((block_start < from || block_end > to)) {
-	     sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
-			    kaddr+turns*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
+	     sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_READPBLK,&iosb,0,0,
+			    kaddr+turns*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
 	   }
 	}
 	return 0;
@@ -675,7 +704,7 @@ out:
 	return err;
 }
 
-static int __block_commit_write(struct inode *inode, struct page *page,
+static int __block_commit_write(struct _fcb *inode, struct page *page,
 		unsigned from, unsigned to, unsigned long pageno)
 {
 	struct _fcb * fcb=e2_search_fcb(inode);
@@ -689,9 +718,12 @@ static int __block_commit_write(struct inode *inode, struct page *page,
 	signed long blocknr, block;
 	int bbits;
 
-	blocksize = 1 << inode->i_blkbits;
+	struct _vcb * vcb = exttwo_get_current_vcb();
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	int i_blkbits = EXT2_BLOCK_SIZE_BITS(sb);
+	blocksize = 1 << i_blkbits;
 
-	bbits = inode->i_blkbits;
+	bbits = i_blkbits;
 	block = pageno << (PAGE_CACHE_SHIFT - bbits);
 
 	for(block_start = 0;
@@ -702,8 +734,8 @@ static int __block_commit_write(struct inode *inode, struct page *page,
 		if (block_end <= from || block_start >= to) {
 		  partial = 1;
 		} else {
-		  sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_WRITEPBLK,&iosb,0,0,
-				 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
+		  sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_WRITEPBLK,&iosb,0,0,
+				 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
 		}
 	}
 
@@ -727,7 +759,7 @@ static int __block_commit_write(struct inode *inode, struct page *page,
  * mark_buffer_uptodate() functions propagate buffer state into the
  * page struct once IO has completed.
  */
-int block_read_full_page2(struct inode *inode,struct page *page, unsigned long pageno)
+int block_read_full_page2(struct _fcb *inode,struct page *page, unsigned long pageno)
 {
 	 struct _fcb * fcb=e2_search_fcb(inode);
 	 unsigned long iblock, lblock;
@@ -738,11 +770,14 @@ int block_read_full_page2(struct inode *inode,struct page *page, unsigned long p
 	 int turns;
 	 unsigned long blocknr;
 
-	 blocksize = 1 << inode->i_blkbits;
+	 struct _vcb * vcb = exttwo_get_current_vcb();
+	 struct ext2_super_block * sb = vcb->vcb$l_cache;
+	 int i_blkbits = EXT2_BLOCK_SIZE_BITS(sb);
+	 blocksize = 1 << i_blkbits;
 
-	 blocks = PAGE_CACHE_SIZE >> inode->i_blkbits;
-	 iblock = pageno << (PAGE_CACHE_SHIFT - inode->i_blkbits);
-	 lblock = (inode->i_size+blocksize-1) >> inode->i_blkbits;
+	 blocks = PAGE_CACHE_SIZE >> i_blkbits;
+	 iblock = pageno << (PAGE_CACHE_SHIFT - i_blkbits);
+	 lblock = (inode->fcb$l_filesize+blocksize-1) >> i_blkbits;
 
 	 nr = 0;
 	 i = 0;
@@ -767,8 +802,8 @@ int block_read_full_page2(struct inode *inode,struct page *page, unsigned long p
 
 	   nr++;
 
-	   sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
-			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
+	   sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_READPBLK,&iosb,0,0,
+			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
 
 	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
 
@@ -789,13 +824,19 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 	 struct _iosb iosb;
 	 int turns;
 	 unsigned long blocknr;
-	 struct inode * inode=fcb->fcb$l_primfcb;
 
-	 blocksize = 1 << inode->i_blkbits;
+	 struct _vcb * vcb = exttwo_get_current_vcb();
+	 struct ext2_super_block * sb = vcb->vcb$l_cache;
+	 int i_blkbits = EXT2_BLOCK_SIZE_BITS(sb);
+	 blocksize = 1 << i_blkbits;
 
-	 blocks = PAGE_CACHE_SIZE >> inode->i_blkbits;
-	 iblock = pageno << (PAGE_CACHE_SHIFT - inode->i_blkbits);
-	 lblock = (inode->i_size+blocksize-1) >> inode->i_blkbits;
+	 blocks = PAGE_CACHE_SIZE >> i_blkbits;
+	 iblock = pageno << (PAGE_CACHE_SHIFT - i_blkbits);
+#if 0
+	 lblock = (inode->fcb$l_filesize+blocksize-1) >> i_blkbits;
+#else
+	 lblock = fcb->fcb$l_efblk; // check
+#endif
 
 	 nr = 0;
 	 i = 0;
@@ -821,9 +862,9 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 
 	   nr++;
 
-	   //printk("p3 %lx %lx %lx %lx %lx %lx\n",page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
-	   sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),IO$_READPBLK,&iosb,0,0,
-			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
+	   //printk("p3 %lx %lx %lx %lx %lx %lx\n",page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+	   sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_READPBLK,&iosb,0,0,
+			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
 
 	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
 
@@ -835,11 +876,24 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 	 return 0;
 }
 
+// From ext2/src/super.c
+static loff_t ext2_max_size(int bits)
+{
+  loff_t res = EXT2_NDIR_BLOCKS;
+  res += 1LL << (bits-2);
+  res += 1LL << (2*(bits-2));
+  res += 1LL << (3*(bits-2));
+  res <<= bits;
+  if (res > (512LL << 32) - (1 << bits))
+    res = (512LL << 32) - (1 << bits);
+  return res;
+}
+
 /* utility function for filesystems that need to do work on expanding
  * truncates.  Uses prepare/commit_write to allow the filesystem to
  * deal with the hole.  
  */
-int generic_cont_expand(struct inode *inode, loff_t size)
+int generic_cont_expand(struct _fcb *inode, loff_t size)
 {
 	struct page *page;
 	unsigned long index, offset, limit;
@@ -851,7 +905,9 @@ int generic_cont_expand(struct inode *inode, loff_t size)
 		send_sig(SIGXFSZ, current, 0);
 		goto out;
 	}
-	if (size > inode->i_sb->s_maxbytes)
+	struct _vcb * vcb = exttwo_get_current_vcb();
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	if (size > ext2_max_size(EXT2_BLOCK_SIZE_BITS(sb)))
 		goto out;
 
 	offset = (size & (PAGE_CACHE_SIZE-1)); /* Within page */
@@ -860,7 +916,7 @@ int generic_cont_expand(struct inode *inode, loff_t size)
 	** skip the prepare.  make sure we never send an offset for the start
 	** of a block
 	*/
-	if ((offset & (inode->i_sb->s_blocksize - 1)) == 0) {
+	if ((offset & (EXT2_BLOCK_SIZE(sb) - 1)) == 0) {
 		offset++;
 	}
 	index = size >> PAGE_CACHE_SHIFT;
@@ -891,12 +947,15 @@ int cont_prepare_write(struct page *page, unsigned offset, unsigned to, get_bloc
 {
 #if 0
 	struct address_space *mapping = page->mapping;
-	struct inode *inode = mapping->host;
+	struct _fcb *inode = mapping->host;
 	struct page *new_page;
 	unsigned long pgpos;
 	long status;
 	unsigned zerofrom;
-	unsigned blocksize = 1 << inode->i_blkbits;
+	struct _vcb * vcb = exttwo_get_current_vcb();
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	int i_blkbits = EXT2_BLOCK_SIZE_BITS(sb);
+	unsigned blocksize = 1 << i_blkbits;
 	char *kaddr;
 
 	while(page->index > (pgpos = *bytes>>PAGE_CACHE_SHIFT)) {
@@ -980,7 +1039,7 @@ out:
 #endif
 }
 
-int block_prepare_write2(struct inode *inode, struct page *page, unsigned from, unsigned to, unsigned long pageno)
+int block_prepare_write2(struct _fcb *inode, struct page *page, unsigned from, unsigned to, unsigned long pageno)
 {
 	int err = __block_prepare_write(inode, page, from, to, pageno);
 	if (err) {
@@ -992,22 +1051,23 @@ int block_prepare_write2(struct inode *inode, struct page *page, unsigned from, 
 	return err;
 }
 
-int block_commit_write2(struct inode * inode, struct page *page, unsigned from, unsigned to, unsigned long pageno)
+int block_commit_write2(struct _fcb * inode, struct page *page, unsigned from, unsigned to, unsigned long pageno)
 {
 	__block_commit_write(inode,page,from,to,pageno);
 	kunmap(page);
 	return 0;
 }
 
-int generic_commit_write2(struct inode * inode, struct page *page,
+int generic_commit_write2(struct _fcb * inode, struct page *page,
 		unsigned from, unsigned to, unsigned long pageno)
 {
 	loff_t pos = ((loff_t)pageno << PAGE_CACHE_SHIFT) + to;
 	__block_commit_write(inode,page,from,to,pageno);
 	kunmap(page);
-	if (pos > inode->i_size) {
-		inode->i_size = pos;
-		ext2_sync_inode(inode);
+	if (pos > inode->fcb$l_filesize) {
+		inode->fcb$l_filesize = pos;
+		struct _vcb * vcb = exttwo_get_current_vcb();
+		ext2_sync_inode(vcb, inode);
 	}
 	return 0;
 }
@@ -1015,7 +1075,7 @@ int generic_commit_write2(struct inode * inode, struct page *page,
 int block_truncate_page(struct address_space *mapping, loff_t from,get_block_t *get_block)
 {
   // mapping is really inode
-  struct inode * inode = (void*) mapping;
+  struct _fcb * inode = (void*) mapping;
 	struct _fcb * fcb=e2_search_fcb(inode);
 	unsigned long index = from >> PAGE_CACHE_SHIFT;
 	unsigned offset = from & (PAGE_CACHE_SIZE-1);
@@ -1024,7 +1084,10 @@ int block_truncate_page(struct address_space *mapping, loff_t from,get_block_t *
 	int err;
 	int lbn;
 
-	blocksize = 1 << inode->i_blkbits;
+	struct _vcb * vcb = exttwo_get_current_vcb();
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	int i_blkbits = EXT2_BLOCK_SIZE_BITS(sb);
+	blocksize = 1 << i_blkbits;
 	length = offset & (blocksize - 1);
 
 	/* Block boundary? Nothing to do */
@@ -1032,7 +1095,7 @@ int block_truncate_page(struct address_space *mapping, loff_t from,get_block_t *
 		return 0;
 
 	length = blocksize - length;
-	iblock = index << (PAGE_CACHE_SHIFT - inode->i_blkbits);
+	iblock = index << (PAGE_CACHE_SHIFT - i_blkbits);
 	
 	page = alloc_pages(GFP_KERNEL, 0);// was grab_cache_page(mapping, index);
 	err = -ENOMEM;
@@ -1050,7 +1113,7 @@ int block_truncate_page(struct address_space *mapping, loff_t from,get_block_t *
 
 	lbn = e2_map_vbn(fcb,iblock);
 
-	myqio(READ, page_address(page)+pos,blocksize,lbn,inode->i_dev,vms_block_factor(inode->i_blkbits));
+	myqio(READ, page_address(page)+pos,blocksize,lbn,0,vms_block_factor(i_blkbits));
 
 	memset(kmap(page) + offset, 0, length);
 	flush_dcache_page(page);
@@ -1067,10 +1130,10 @@ out:
 	return err;
 }
 
-int block_write_full_page2(struct inode *inode, struct page *page, unsigned long pageno)
+int block_write_full_page2(struct _fcb *inode, struct page *page, unsigned long pageno)
 {
 	struct _fcb * fcb=e2_search_fcb(inode);
-	unsigned long end_index = inode->i_size >> PAGE_CACHE_SHIFT;
+	unsigned long end_index = inode->fcb$l_filesize >> PAGE_CACHE_SHIFT;
 	unsigned offset;
 	int err;
 
@@ -1079,7 +1142,7 @@ int block_write_full_page2(struct inode *inode, struct page *page, unsigned long
 		return __block_write_full_page2(inode, page, pageno);
 
 	/* things got complicated... */
-	offset = inode->i_size & (PAGE_CACHE_SIZE-1);
+	offset = inode->fcb$l_filesize & (PAGE_CACHE_SIZE-1);
 	/* OK, are we completely out? */
 	if (pageno >= end_index+1 || !offset) {
 #if 0
@@ -1109,8 +1172,8 @@ done:
 
 int block_write_full_page3(struct _fcb * fcb, struct page *page, unsigned long pageno)
 {
-	struct inode * inode=fcb->fcb$l_primfcb;
-	unsigned long end_index = inode->i_size >> PAGE_CACHE_SHIFT;
+	struct _fcb * inode=fcb->fcb$l_primfcb;
+	unsigned long end_index = inode->fcb$l_filesize >> PAGE_CACHE_SHIFT;
 	unsigned offset;
 	int err;
 
@@ -1119,7 +1182,7 @@ int block_write_full_page3(struct _fcb * fcb, struct page *page, unsigned long p
 		return __block_write_full_page2(inode, page, pageno);
 
 	/* things got complicated... */
-	offset = inode->i_size & (PAGE_CACHE_SIZE-1);
+	offset = inode->fcb$l_filesize & (PAGE_CACHE_SIZE-1);
 	/* OK, are we completely out? */
 	if (pageno >= end_index+1 || !offset) {
 #if 0
@@ -1150,14 +1213,15 @@ done:
 int generic_block_bmap(struct address_space *mapping, long block, get_block_t *get_block)
 {
 	struct buffer_head tmp;
-	struct inode *inode = mapping->host;
+	struct _fcb *inode = mapping->host;
 	tmp.b_state = 0;
 	tmp.b_blocknr = 0;
-	get_block(inode, block, &tmp, 0);
+	struct _vcb * vcb = exttwo_get_current_vcb();
+	get_block(vcb, inode, block, &tmp, 0);
 	return tmp.b_blocknr;
 }
 
-int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsigned long blocknr, int blocksize, get_block_t * get_block)
+int generic_direct_IO(int rw, struct _fcb * inode, struct kiobuf * iobuf, unsigned long blocknr, int blocksize, get_block_t * get_block)
 {
 	struct _fcb * fcb=e2_search_fcb(inode);
 	int i, nr_blocks, retval=0;
@@ -1170,13 +1234,16 @@ int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsig
 
 	length = iobuf->length;
 	nr_blocks = length / blocksize;
-	iblock = blocknr << (PAGE_CACHE_SHIFT - inode->i_blkbits);
+	struct _vcb * vcb = exttwo_get_current_vcb();
+	struct ext2_super_block * sb = vcb->vcb$l_cache;
+	int i_blkbits = EXT2_BLOCK_SIZE_BITS(sb);
+	iblock = blocknr << (PAGE_CACHE_SHIFT - i_blkbits);
 	/* build the blocklist */
 	for (i = 0; i < nr_blocks; i++, blocknr++) {
 		struct buffer_head bh;
 
 		bh.b_state = 0;
-		bh.b_dev = inode->i_dev;
+		bh.b_dev = 0; // FCB_DEV(inode);
 		bh.b_size = blocksize;
 
 			if (fcb)
@@ -1185,7 +1252,7 @@ int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsig
 			  blocknr=iblock;
 			if (blocknr==-1) {
 			  if (rw!=WRITE) goto out;
-			  retval=ext2_get_block(inode, iblock, &blocknr, 1, fcb);
+			  retval=ext2_get_block(vcb, inode, iblock, &blocknr, 1, fcb);
 			}
 
 		if (retval) {
@@ -1217,14 +1284,14 @@ int generic_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsig
 		  type=IO$_READPBLK;
 		else
 		  type=IO$_WRITEPBLK;
-		sts = exe$qiow(EXT2_EF,(unsigned short)dev2chan(inode->i_dev),type,&iosb,0,0,
-			       bh.b_data,blocksize, bh.b_blocknr*vms_block_factor(inode->i_blkbits),MINOR(inode->i_dev)&31,0,0);
+		sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,type,&iosb,0,0,
+			       bh.b_data,blocksize, bh.b_blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
 		//		blocks[i] = bh.b_blocknr;
 	}
 
 	/* patch length to handle short I/O */
 	iobuf->length = i * blocksize;
-	//	retval = brw_kiovec(rw, 1, &iobuf, inode->i_dev, iobuf->blocks, blocksize);
+	//	retval = brw_kiovec(rw, 1, &iobuf, FCB_DEV(inode), iobuf->blocks, blocksize);
 	/* restore orig length */
 	iobuf->length = length;
  out:
@@ -1439,7 +1506,7 @@ int brw_page(int rw, struct page *page, kdev_t dev, int b[], int size)
   return 0;
 }
 
-int block_symlink(struct inode *inode, const char *symname, int len)
+int block_symlink(struct _fcb *inode, const char *symname, int len)
 {
 	struct page *page = alloc_pages(GFP_KERNEL, 0); //was grab_cache_page
 	int err = -ENOMEM;
@@ -1457,7 +1524,7 @@ int block_symlink(struct inode *inode, const char *symname, int len)
 	 * Notice that we are _not_ going to block here - end of page is
 	 * unmapped, so this will only try to map the rest of page, see
 	 * that it is unmapped (typically even will not look into inode -
-	 * ->i_size will be enough for everything) and zero it out.
+	 * ->fcb$l_filesize will be enough for everything) and zero it out.
 	 * OTOH it's obviously correct and should make the page up-to-date.
 	 */
 	err = block_read_full_page2(inode, page, 0);
@@ -1465,7 +1532,8 @@ int block_symlink(struct inode *inode, const char *symname, int len)
 	page_cache_release(page);
 	if (err < 0)
 		goto fail;
-	ext2_sync_inode(inode);
+	struct _vcb * vcb = exttwo_get_current_vcb();
+	ext2_sync_inode(vcb, inode);
 	return 0;
 fail_map:
 #if 0

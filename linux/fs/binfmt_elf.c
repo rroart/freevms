@@ -1441,7 +1441,9 @@ int exe$imgact_elf(void * name, void * hdrbuf) {
 #endif
   if (file) goto fcb_found;
   
+#ifndef CONFIG_VMS
   file = open_exec(filename);
+#endif
 
   retval = PTR_ERR(file);
   //printk("here 5\n");

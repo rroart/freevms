@@ -82,7 +82,9 @@ obj-$(CONFIG_BLK_DEV_ATARAID)	+= ataraid.o
 obj-$(CONFIG_BLK_DEV_ATARAID_PDC)	+= pdcraid.o
 obj-$(CONFIG_BLK_DEV_ATARAID_HPT)	+= hptraid.o
 
+ifndef CONFIG_VMS
 ide-obj-$(CONFIG_PROC_FS)		+= ide-proc.o
+endif
 
 ifneq ($(CONFIG_VMS),y)
 ide-mod-objs		:= ide.o ide-features.o $(ide-obj-y)

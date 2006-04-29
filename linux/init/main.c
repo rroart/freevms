@@ -446,7 +446,8 @@ static int __init quiet_kernel(char *str)
 	return 1;
 }
 
-int mount_root_vfs=1;
+int mount_root_vfs=0;
+int mount_root_ext2=1;
 int install_ods2=0;
 
 static int __init novfs(char *str)
@@ -454,6 +455,7 @@ static int __init novfs(char *str)
 	if (*str)
 		return 0;
 	mount_root_vfs=0;
+	mount_root_ext2=0;
 	return 1;
 }
 
@@ -697,15 +699,19 @@ asmlinkage void __init start_kernel(void)
 
 	fork_init(mempages);
 	proc_caches_init();
+#ifndef CONFIG_VMS
 	vfs_caches_init(mempages);
+#endif
 	buffer_init(mempages);
 	page_cache_init(mempages);
 #if defined(CONFIG_ARCH_S390)
 	ccwcache_init();
 #endif
 	signals_init();
+#ifndef CONFIG_VMS
 #ifdef CONFIG_PROC_FS
 	proc_root_init();
+#endif
 #endif
 #if defined(CONFIG_SYSVIPC)
 	ipc_init();
@@ -838,9 +844,11 @@ static void __init do_basic_setup(void)
 	tc_init();
 #endif
 
+#ifndef CONFIG_VMS
 	/* Networking initialization needs a process context */ 
 	sock_init();
 	printk("%%KERNEL-I-DEBUG, After sock_init\n");
+#endif
 #ifndef CONFIG_VMS
 	start_context_thread();
 	printk("%%KERNEL-I-DEBUG, After start_context_thread\n");
@@ -860,6 +868,7 @@ static void __init do_basic_setup(void)
 extern void rd_load(void);
 extern void initrd_load(void);
 
+#ifndef CONFIG_VMS
 /*
  * Prepare the namespace - decide what/where to mount, load ramdisks, etc.
  */
@@ -883,11 +892,13 @@ static void prepare_namespace(void)
 	rd_load();
 #endif
 
+#ifndef CONFIG_VMS
 	if (mount_root_vfs)
 	/* Mount the root filesystem.. */
 	mount_root();
 
 	mount_devfs_fs ();
+#endif
 
 #ifdef CONFIG_BLK_DEV_INITRD
 	root_mountflags = real_root_mountflags;
@@ -914,6 +925,7 @@ static void prepare_namespace(void)
 	}
 #endif
 }
+#endif
 
 extern int mydebug5;
 extern int mydebug6;
@@ -934,7 +946,7 @@ static int init(void * unused)
 	do_basic_setup();
 	printk("%%KERNEL-I-DEBUG, After do_basic_setup\n");
 #ifdef CONFIG_VMS
-	if (mount_root_vfs)
+	if (mount_root_ext2)
 	  vms_mount();
 	else
 	  vms2_mount();
@@ -943,8 +955,10 @@ static int init(void * unused)
 	memcpy(default_name,vmsdev,strlen(vmsdev));
 	cre_syscommon(vmsdev);
 #endif
+#ifndef CONFIG_VMS
 	prepare_namespace();
 	printk("%%KERNEL-I-DEBUG, After prepare_namspace\n");
+#endif 
 
 #ifdef CONFIG_VMS
 	probe_units();

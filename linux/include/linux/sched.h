@@ -1026,6 +1026,7 @@ static inline void task_unlock(struct task_struct *p)
 static inline char * d_path(struct dentry *dentry, struct vfsmount *vfsmnt,
 				char *buf, int buflen)
 {
+#ifndef CONFIG_VMS
 	char *res;
 	struct vfsmount *rootmnt;
 	struct dentry *root;
@@ -1039,6 +1040,9 @@ static inline char * d_path(struct dentry *dentry, struct vfsmount *vfsmnt,
 	dput(root);
 	mntput(rootmnt);
 	return res;
+#else
+	return 0;
+#endif
 }
 
 #endif /* __KERNEL__ */

@@ -463,8 +463,10 @@ int handle_IRQ_event(unsigned int irq, struct pt_regs * regs, struct irqaction *
 		action->handler(irq, action->dev_id, regs);
 		action = action->next;
 	} while (action);
+#ifndef CONFIG_VMS
 	if (status & SA_SAMPLE_RANDOM)
 		add_interrupt_randomness(irq);
+#endif
 	__cli();
 
 	irq_exit(cpu, irq);
@@ -1015,7 +1017,9 @@ int setup_irq(unsigned int irq, struct irqaction * new)
 		 * installing a new handler, but is this really a problem,
 		 * only the sysadmin is able to do this.
 		 */
+#ifndef CONFIG_VMS
 		rand_initialize_irq(irq);
+#endif
 	}
 
 	/*
@@ -1169,6 +1173,7 @@ static void register_irq_proc (unsigned int irq)
 	memset(name, 0, MAX_NAMELEN);
 	sprintf(name, "%d", irq);
 
+#ifndef CONFIG_VMS
 	/* create /proc/irq/1234 */
 	irq_dir[irq] = proc_mkdir(name, root_irq_dir);
 
@@ -1189,12 +1194,14 @@ static void register_irq_proc (unsigned int irq)
 		smp_affinity_entry[irq] = entry;
 	}
 #endif
+#endif
 }
 
 unsigned long prof_cpu_mask = -1;
 
 void init_irq_proc (void)
 {
+#ifndef CONFIG_VMS
 	struct proc_dir_entry *entry;
 	int i;
 
@@ -1217,5 +1224,6 @@ void init_irq_proc (void)
 	 */
 	for (i = 0; i < NR_IRQS; i++)
 		register_irq_proc(i);
+#endif
 }
 

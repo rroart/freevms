@@ -131,14 +131,19 @@ EXPORT_SYMBOL(create_bounce);
 
 /* filesystem internal functions */
 EXPORT_SYMBOL(def_blk_fops);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(update_atime);
 EXPORT_SYMBOL(get_fs_type);
 EXPORT_SYMBOL(get_super);
 EXPORT_SYMBOL(drop_super);
+#endif
 EXPORT_SYMBOL(getname);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(names_cachep);
+#endif
 EXPORT_SYMBOL(fput);
 EXPORT_SYMBOL(fget);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(igrab);
 EXPORT_SYMBOL(iunique);
 EXPORT_SYMBOL(iget4);
@@ -153,7 +158,9 @@ EXPORT_SYMBOL(path_release);
 EXPORT_SYMBOL(__user_walk);
 EXPORT_SYMBOL(lookup_one_len);
 EXPORT_SYMBOL(lookup_hash);
+#endif
 EXPORT_SYMBOL(sys_close);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(dcache_lock);
 EXPORT_SYMBOL(d_alloc_root);
 EXPORT_SYMBOL(d_delete);
@@ -166,6 +173,7 @@ EXPORT_SYMBOL(d_instantiate);
 EXPORT_SYMBOL(d_alloc);
 EXPORT_SYMBOL(d_lookup);
 EXPORT_SYMBOL(__d_path);
+#endif
 EXPORT_SYMBOL(mark_buffer_dirty);
 #ifndef CONFIG_VMS
 EXPORT_SYMBOL(set_buffer_async_io); /* for reiserfs_writepage */
@@ -173,32 +181,36 @@ EXPORT_SYMBOL(set_buffer_async_io); /* for reiserfs_writepage */
 EXPORT_SYMBOL(__mark_buffer_dirty);
 EXPORT_SYMBOL(__mark_inode_dirty);
 EXPORT_SYMBOL(get_empty_filp);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(init_private_file);
 EXPORT_SYMBOL(filp_open);
 EXPORT_SYMBOL(filp_close);
 EXPORT_SYMBOL(put_filp);
 EXPORT_SYMBOL(files_lock);
 EXPORT_SYMBOL(check_disk_change);
-#ifndef CONFIG_VMS
 EXPORT_SYMBOL(__invalidate_buffers);
 EXPORT_SYMBOL(invalidate_bdev);
-#endif
 EXPORT_SYMBOL(invalidate_inodes);
 EXPORT_SYMBOL(invalidate_device);
 EXPORT_SYMBOL(invalidate_inode_pages);
 EXPORT_SYMBOL(truncate_inode_pages);
+#endif
 EXPORT_SYMBOL(fsync_dev);
 EXPORT_SYMBOL(fsync_no_super);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(permission);
 EXPORT_SYMBOL(vfs_permission);
 EXPORT_SYMBOL(inode_setattr);
 EXPORT_SYMBOL(inode_change_ok);
 EXPORT_SYMBOL(write_inode_now);
 EXPORT_SYMBOL(notify_change);
+#endif
 EXPORT_SYMBOL(set_blocksize);
 EXPORT_SYMBOL(getblk);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(cdget);
 EXPORT_SYMBOL(cdput);
+#endif
 EXPORT_SYMBOL(bdget);
 EXPORT_SYMBOL(bdput);
 EXPORT_SYMBOL(bread);
@@ -247,6 +259,7 @@ EXPORT_SYMBOL(posix_block_lock);
 EXPORT_SYMBOL(posix_unblock_lock);
 EXPORT_SYMBOL(posix_locks_deadlock);
 EXPORT_SYMBOL(locks_mandatory_area);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(dput);
 EXPORT_SYMBOL(have_submounts);
 EXPORT_SYMBOL(d_find_alias);
@@ -256,9 +269,11 @@ EXPORT_SYMBOL(shrink_dcache_sb);
 EXPORT_SYMBOL(shrink_dcache_parent);
 EXPORT_SYMBOL(find_inode_number);
 EXPORT_SYMBOL(is_subdir);
+#endif
 EXPORT_SYMBOL(get_unused_fd);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(vfs_create);
-EXPORT_SYMBOL(vfs_mkdir);
+EXPORT_SYMBOL(vfs_kdir);
 EXPORT_SYMBOL(vfs_mknod);
 EXPORT_SYMBOL(vfs_symlink);
 EXPORT_SYMBOL(vfs_link);
@@ -266,6 +281,7 @@ EXPORT_SYMBOL(vfs_rmdir);
 EXPORT_SYMBOL(vfs_unlink);
 EXPORT_SYMBOL(vfs_rename);
 EXPORT_SYMBOL(vfs_statfs);
+#endif
 EXPORT_SYMBOL(generic_read_dir);
 EXPORT_SYMBOL(generic_file_llseek);
 EXPORT_SYMBOL(no_llseek);
@@ -279,7 +295,6 @@ EXPORT_SYMBOL(grab_cache_page);
 EXPORT_SYMBOL(grab_cache_page_nowait);
 EXPORT_SYMBOL(read_cache_page);
 EXPORT_SYMBOL(set_page_dirty);
-#endif
 EXPORT_SYMBOL(vfs_readlink);
 EXPORT_SYMBOL(vfs_follow_link);
 EXPORT_SYMBOL(page_readlink);
@@ -292,11 +307,12 @@ EXPORT_SYMBOL(lease_get_mtime);
 EXPORT_SYMBOL(lock_may_read);
 EXPORT_SYMBOL(lock_may_write);
 EXPORT_SYMBOL(dcache_readdir);
+#endif
 
 /* for stackable file systems (lofs, wrapfs, cryptfs, etc.) */
 EXPORT_SYMBOL(default_llseek);
-EXPORT_SYMBOL(dentry_open);
 #ifndef CONFIG_VMS
+EXPORT_SYMBOL(dentry_open);
 EXPORT_SYMBOL(filemap_nopage);
 #endif
 EXPORT_SYMBOL(filemap_sync);
@@ -308,6 +324,7 @@ EXPORT_SYMBOL(unlock_page);
 #endif
 
 /* device registration */
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(register_chrdev);
 EXPORT_SYMBOL(unregister_chrdev);
 EXPORT_SYMBOL(register_blkdev);
@@ -315,6 +332,7 @@ EXPORT_SYMBOL(unregister_blkdev);
 EXPORT_SYMBOL(tty_register_driver);
 EXPORT_SYMBOL(tty_unregister_driver);
 EXPORT_SYMBOL(tty_std_termios);
+#endif
 
 /* block device driver support */
 EXPORT_SYMBOL(blksize_size);
@@ -323,10 +341,14 @@ EXPORT_SYMBOL(blk_size);
 EXPORT_SYMBOL(blk_dev);
 EXPORT_SYMBOL(is_read_only);
 EXPORT_SYMBOL(set_device_ro);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(bmap);
+#endif
 EXPORT_SYMBOL(sync_dev);
 EXPORT_SYMBOL(devfs_register_partitions);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(blkdev_open);
+#endif
 EXPORT_SYMBOL(blkdev_get);
 EXPORT_SYMBOL(blkdev_put);
 EXPORT_SYMBOL(ioctl_by_bdev);
@@ -354,11 +376,13 @@ EXPORT_SYMBOL(do_SAK);
 #endif
 
 /* filesystem registration */
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(register_filesystem);
 EXPORT_SYMBOL(unregister_filesystem);
 EXPORT_SYMBOL(kern_mount);
 EXPORT_SYMBOL(__mntput);
 EXPORT_SYMBOL(may_umount);
+#endif
 
 /* executable format registration */
 EXPORT_SYMBOL(register_binfmt);
@@ -492,9 +516,11 @@ EXPORT_SYMBOL(sscanf);
 EXPORT_SYMBOL(vsprintf);
 EXPORT_SYMBOL(vsnprintf);
 EXPORT_SYMBOL(vsscanf);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(kdevname);
 EXPORT_SYMBOL(bdevname);
 EXPORT_SYMBOL(cdevname);
+#endif
 EXPORT_SYMBOL(simple_strtol);
 EXPORT_SYMBOL(simple_strtoul);
 EXPORT_SYMBOL(simple_strtoull);
@@ -507,27 +533,33 @@ EXPORT_SYMBOL(machine_restart);
 EXPORT_SYMBOL(machine_halt);
 EXPORT_SYMBOL(machine_power_off);
 EXPORT_SYMBOL(_ctype);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(secure_tcp_sequence_number);
 EXPORT_SYMBOL(get_random_bytes);
+#endif
 EXPORT_SYMBOL(securebits);
 EXPORT_SYMBOL(cap_bset);
 EXPORT_SYMBOL(reparent_to_init);
 EXPORT_SYMBOL(daemonize);
 EXPORT_SYMBOL(csum_partial); /* for networking and md */
+#if 1
 EXPORT_SYMBOL(seq_escape);
 EXPORT_SYMBOL(seq_printf);
 EXPORT_SYMBOL(seq_open);
 EXPORT_SYMBOL(seq_release);
 EXPORT_SYMBOL(seq_read);
 EXPORT_SYMBOL(seq_lseek);
+#endif
 
 /* Program loader interfaces */
 EXPORT_SYMBOL(setup_arg_pages);
 EXPORT_SYMBOL(copy_strings_kernel);
 EXPORT_SYMBOL(do_execve);
 EXPORT_SYMBOL(flush_old_exec);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(kernel_read);
 EXPORT_SYMBOL(open_exec);
+#endif
 
 /* Miscellaneous access points */
 EXPORT_SYMBOL(si_meminfo);
@@ -538,24 +570,22 @@ EXPORT_SYMBOL(file_fsync);
 #ifndef CONFIG_VMS
 EXPORT_SYMBOL(fsync_inode_buffers);
 EXPORT_SYMBOL(fsync_inode_data_buffers);
-#endif
 EXPORT_SYMBOL(clear_inode);
+#endif
 EXPORT_SYMBOL(___strtok);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(init_special_inode);
+#endif
 EXPORT_SYMBOL(read_ahead);
 #ifndef CONFIG_VMS
 EXPORT_SYMBOL(get_hash_table);
-#endif
 EXPORT_SYMBOL(get_empty_inode);
 EXPORT_SYMBOL(insert_inode_hash);
 EXPORT_SYMBOL(remove_inode_hash);
-#ifndef CONFIG_VMS
 EXPORT_SYMBOL(buffer_insert_inode_queue);
-#endif
 EXPORT_SYMBOL(make_bad_inode);
 EXPORT_SYMBOL(is_bad_inode);
 EXPORT_SYMBOL(event);
-#ifndef CONFIG_VMS
 EXPORT_SYMBOL(brw_page);
 #endif
 

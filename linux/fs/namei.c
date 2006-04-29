@@ -146,6 +146,7 @@ char * getname(const char * filename)
 	return result;
 }
 
+#ifndef CONFIG_VMS
 /*
  *	vfs_permission()
  *
@@ -213,6 +214,7 @@ int permission(struct inode * inode,int mask)
 	}
 	return vfs_permission(inode, mask);
 }
+#endif
 
 /*
  * get_write_access() gets write permission for a file.
@@ -235,6 +237,7 @@ int permission(struct inode * inode,int mask)
 static spinlock_t arbitration_lock = SPIN_LOCK_UNLOCKED;
 int get_write_access(struct inode * inode)
 {
+#ifndef CONFIG_VMS
 	spin_lock(&arbitration_lock);
 	if (atomic_read(&inode->i_writecount) < 0) {
 		spin_unlock(&arbitration_lock);
@@ -242,8 +245,11 @@ int get_write_access(struct inode * inode)
 	}
 	atomic_inc(&inode->i_writecount);
 	spin_unlock(&arbitration_lock);
+#endif
 	return 0;
 }
+
+#ifndef CONFIG_VMS
 int deny_write_access(struct file * file)
 {
 	spin_lock(&arbitration_lock);
@@ -934,7 +940,9 @@ static inline int lookup_flags(unsigned int f)
 
 	return retval;
 }
+#endif
 
+#ifndef CONFIG_VMS
 int vfs_create(struct inode *dir, struct dentry *dentry, int mode)
 {
 	int error;
@@ -1213,7 +1221,9 @@ enoent:
 fail:
 	return dentry;
 }
+#endif
 
+#ifndef CONFIG_VMS
 int vfs_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev)
 {
 	int error = -EPERM;
@@ -1240,9 +1250,11 @@ exit_lock:
 		inode_dir_notify(dir, DN_CREATE);
 	return error;
 }
+#endif
 
 asmlinkage long sys_mknod(const char * filename, int mode, dev_t dev)
 {
+#ifndef CONFIG_VMS
 	int error = 0;
 	char * tmp;
 	struct dentry * dentry;
@@ -1284,8 +1296,12 @@ out:
 	putname(tmp);
 
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
+#ifndef CONFIG_VMS
 int vfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
 	int error;
@@ -1311,9 +1327,11 @@ exit_lock:
 		inode_dir_notify(dir, DN_CREATE);
 	return error;
 }
+#endif
 
 asmlinkage long sys_mkdir(const char * pathname, int mode)
 {
+#ifndef CONFIG_VMS
 	int error = 0;
 	char * tmp;
 
@@ -1341,6 +1359,9 @@ out:
 	}
 
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 /*
@@ -1360,6 +1381,7 @@ out:
  */
 static void d_unhash(struct dentry *dentry)
 {
+#ifndef CONFIG_VMS
 	dget(dentry);
 	switch (atomic_read(&dentry->d_count)) {
 	default:
@@ -1369,8 +1391,10 @@ static void d_unhash(struct dentry *dentry)
 	case 2:
 		d_drop(dentry);
 	}
+#endif
 }
 
+#ifndef CONFIG_VMS
 int vfs_rmdir(struct inode *dir, struct dentry *dentry)
 {
 	int error;
@@ -1406,9 +1430,11 @@ int vfs_rmdir(struct inode *dir, struct dentry *dentry)
 
 	return error;
 }
+#endif
 
 asmlinkage long sys_rmdir(const char * pathname)
 {
+#ifndef CONFIG_VMS
 	int error = 0;
 	char * name;
 	struct dentry *dentry;
@@ -1447,8 +1473,12 @@ exit1:
 exit:
 	putname(name);
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
+#ifndef CONFIG_VMS
 int vfs_unlink(struct inode *dir, struct dentry *dentry)
 {
 	int error;
@@ -1475,9 +1505,11 @@ int vfs_unlink(struct inode *dir, struct dentry *dentry)
 		inode_dir_notify(dir, DN_DELETE);
 	return error;
 }
+#endif
 
 asmlinkage long sys_unlink(const char * pathname)
 {
+#ifndef CONFIG_VMS
 	int error = 0;
 	char * name;
 	struct dentry *dentry;
@@ -1517,8 +1549,12 @@ slashes:
 	error = !dentry->d_inode ? -ENOENT :
 		S_ISDIR(dentry->d_inode->i_mode) ? -EISDIR : -ENOTDIR;
 	goto exit2;
+#else
+	return -EPERM;
+#endif
 }
 
+#ifndef CONFIG_VMS
 int vfs_symlink(struct inode *dir, struct dentry *dentry, const char *oldname)
 {
 	int error;
@@ -1543,9 +1579,11 @@ exit_lock:
 		inode_dir_notify(dir, DN_CREATE);
 	return error;
 }
+#endif
 
 asmlinkage long sys_symlink(const char * oldname, const char * newname)
 {
+#ifndef CONFIG_VMS
 	int error = 0;
 	char * from;
 	char * to;
@@ -1576,8 +1614,12 @@ out:
 	}
 	putname(from);
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
+#ifndef CONFIG_VMS
 int vfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
 {
 	struct inode *inode;
@@ -1617,6 +1659,7 @@ exit_lock:
 		inode_dir_notify(dir, DN_CREATE);
 	return error;
 }
+#endif
 
 /*
  * Hardlinks are often used in delicate situations.  We avoid
@@ -1629,6 +1672,7 @@ exit_lock:
  */
 asmlinkage long sys_link(const char * oldname, const char * newname)
 {
+#ifndef CONFIG_VMS
 	int error;
 	char * from;
 	char * to;
@@ -1671,8 +1715,12 @@ exit:
 	putname(from);
 
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
+#ifndef CONFIG_VMS
 /*
  * The worst of all namespace operations - renaming directory. "Perverted"
  * doesn't even start to describe it. Somebody in UCB had a heck of a trip...
@@ -1912,9 +1960,11 @@ exit1:
 exit:
 	return error;
 }
+#endif
 
 asmlinkage long sys_rename(const char * oldname, const char * newname)
 {
+#ifndef CONFIG_VMS
 	int error;
 	char * from;
 	char * to;
@@ -1930,8 +1980,12 @@ asmlinkage long sys_rename(const char * oldname, const char * newname)
 	}
 	putname(from);
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
+#ifndef CONFIG_VMS
 int vfs_readlink(struct dentry *dentry, char *buffer, int buflen, const char *link)
 {
 	int len;
@@ -1987,6 +2041,7 @@ int vfs_follow_link(struct nameidata *nd, const char *link)
 {
 	return __vfs_follow_link(nd, link);
 }
+#endif
 
 /* get the link contents into pagecache */
 static char *page_getlink(struct dentry * dentry, struct page **ppage)
@@ -2020,6 +2075,7 @@ sync_fail:
 	return (char*)page;
 }
 
+#ifndef CONFIG_VMS
 int page_readlink(struct dentry *dentry, char *buffer, int buflen)
 {
 	struct page *page = NULL;
@@ -2048,3 +2104,4 @@ struct inode_operations page_symlink_inode_operations = {
 	readlink:	page_readlink,
 	follow_link:	page_follow_link,
 };
+#endif
