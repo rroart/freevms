@@ -1718,7 +1718,7 @@ EXPORT_SYMBOL(tty_unregister_devfs);
  */
 int tty_register_driver(struct tty_driver *driver)
 {
-	int error;
+	int error = 0;
         int i;
 
 	if (driver->flags & TTY_DRIVER_INSTALLED)
