@@ -31,6 +31,7 @@ Sched svpctx switches to i-stack; do the same?
 Move P1 area to 0xffffffff-etc.
 For some reason params.dat must my tried to be opened before you can exe$open
 dcl, figure out why. (With ODS-2)
+At current ioc_std$mapvblk there is a max ods2 partition size of 2T.
 
 CPU/PAL:
 FIX pal

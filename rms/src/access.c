@@ -268,7 +268,7 @@ int f11b_read_writevb(struct _irp * i) {
 
 signed int f11b_map_vbn(unsigned int vbn,struct _wcb *wcb) {
   // thing there should be more here?
-  signed long lbn=-1;
+  signed int lbn=-1;
   ioc_std$mapvblk(vbn,0,wcb,0,0,&lbn,0,0);
   return lbn;
 }
@@ -758,7 +758,7 @@ struct _fh2 *premap_indexf(struct _fcb *fcb,struct _ucb *ucb,unsigned *retsts)
   return head;
 }
 
-int get_fm2_val(unsigned short ** mpp, unsigned long * phyblk, unsigned long *phylen) {
+int get_fm2_val(unsigned short ** mpp, unsigned int * phyblk, unsigned int *phylen) {
   unsigned short *mp=*mpp;
   if (phyblk==0 || phylen==0) return SS$_BADPARAM;
 	switch (VMSWORD(*mp) >> 14) {

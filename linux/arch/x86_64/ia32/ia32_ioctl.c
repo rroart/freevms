@@ -835,6 +835,7 @@ extern __inline__ void sockfd_put(struct socket *sock)
 
 static int routing_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
+#ifndef CONFIG_VMS
 	int ret;
 	void *r = NULL;
 	struct in6_rtmsg r6;
@@ -887,6 +888,9 @@ out:
 		sockfd_put(mysock);
 
 	return ret;
+#else
+	return -EPERM;
+#endif
 }
 
 struct hd_geometry32 {

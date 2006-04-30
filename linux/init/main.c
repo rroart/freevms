@@ -993,11 +993,14 @@ static int init(void * unused)
 	 * trying to recover a really broken machine.
 	 */
 
+#ifdef __i386__
+	// temp disabled on x86_64 due to stack growth
        scs_init();
        mscp();
        //__du_init();
         dlminit();
         init_cwps();
+#endif
 
 #ifdef CONFIG_VMS
 	extern void job_control();
@@ -1036,8 +1039,11 @@ static int init(void * unused)
 	else {
 	  if (scs_init_done==0)
 	    printk("%%KERNEL-I-DEBUG, Nothing in params.dat. Can not start clustering.\n");
+#ifdef __i386__
+	// temp disabled on x86_64 due to stack growth
 	  else
 	    scs_init2();
+#endif
 	}
 #endif
 

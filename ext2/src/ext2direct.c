@@ -60,6 +60,11 @@
 
 #include <linux/ext2_fs.h>
 
+#ifdef __x86_64__
+#define memchr kernel_memchr
+void *kernel_memchr(const void *s, int c, size_t n);
+#endif
+
 #define DEBUGx on
 #define BLOCKSIZE 1024 // check
 #define MAXREC (BLOCKSIZE - 2)

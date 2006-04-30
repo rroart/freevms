@@ -290,6 +290,7 @@ sys32_fstat64(unsigned int fd, struct stat64 *statbuf)
 /* Don't set O_LARGEFILE implicitely. */
 asmlinkage long sys32_open(const char * filename, int flags, int mode)
 {
+#if 0
 	char * tmp;
 	int fd, error;
 
@@ -313,6 +314,9 @@ out_error:
 	put_unused_fd(fd);
 	fd = error;
 	goto out;
+#else
+	return -EPERM;
+#endif
 }
 
 /*
@@ -376,6 +380,7 @@ asmlinkage long sys32_mprotect(unsigned long start, size_t len, unsigned long pr
 asmlinkage long
 sys32_pipe(int *fd)
 {
+#ifndef CONFIG_VMS
 	int retval;
 	int fds[2];
 
@@ -386,6 +391,9 @@ sys32_pipe(int *fd)
 		retval = -EFAULT;
   out:
 	return retval;
+#else
+	return -EPERM;
+#endif
 }
 
 asmlinkage long
@@ -1912,6 +1920,7 @@ struct sysctl_ia32 {
 asmlinkage long
 sys32_sysctl(struct sysctl_ia32 *args32)
 {
+#ifndef CONFIG_VMS
 #ifndef CONFIG_SYSCTL
 	return -ENOSYS; 
 #else
@@ -1955,6 +1964,9 @@ sys32_sysctl(struct sysctl_ia32 *args32)
 		return -EFAULT;
 
 	return ret;
+#endif
+#else
+	return -EPERM;
 #endif
 }
 

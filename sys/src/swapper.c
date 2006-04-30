@@ -84,7 +84,9 @@ int kswapd(void *unused)
 	DECLARE_WAITQUEUE(wait, tsk);
 
 	signed long long time=-10000000*5;
+#ifdef __i386__
 	exe$schdwk(0,0,&time,0);
+#endif
 	sys$hiber();
 
 	xqp_init2();

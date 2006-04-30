@@ -377,6 +377,7 @@ fail:
 
 asmlinkage long sys32_sendmsg(int fd, struct msghdr32 *user_msg, unsigned user_flags)
 {
+#ifndef CONFIG_VMS
 	struct socket *sock;
 	char address[MAX_SOCK_ADDR];
 	struct iovec iov[UIO_FASTIOV];
@@ -418,6 +419,9 @@ out_freeiov:
 		kfree(kern_msg.msg_iov);
 out:
 	return err;
+#else
+	return -EPERM;
+#endif
 }
 
 asmlinkage long sys32_recvmsg(int fd, struct msghdr32 *user_msg, unsigned int user_flags)

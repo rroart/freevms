@@ -31,6 +31,7 @@
  */
 asmlinkage long sys_pipe(unsigned long * fildes)
 {
+#ifndef CONFIG_VMS
 	int fd[2];
 	int error;
 
@@ -40,6 +41,9 @@ asmlinkage long sys_pipe(unsigned long * fildes)
 			error = -EFAULT;
 	}
 	return error;
+#else
+	return -EPERM;
+#endif
 }
 
 long sys_mmap(unsigned long addr, unsigned long len, unsigned long prot, unsigned long flags,

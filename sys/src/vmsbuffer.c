@@ -844,8 +844,14 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 
 	 do {
 	   if (iblock < lblock) {
-	     if (fcb)
+	     if (fcb) {
 	       blocknr=e2_map_vbn(fcb,iblock);
+	       if ((blocknr+1)==0) {
+		 // temp fix before fixing block size check 
+		 printk("ebl %lx %lx %lx\n",fcb, iblock, blocknr);
+		 continue;
+	       }
+	     }
 	     else
 	       blocknr=iblock;
 	   } else {

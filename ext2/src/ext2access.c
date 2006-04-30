@@ -270,7 +270,7 @@ int exttwo_read_writevb(struct _irp * i) {
 
 signed int ext2_map_vbn(unsigned int vbn,struct _wcb *wcb) {
   // thing there should be more here?
-  signed long lbn=-1;
+  signed int lbn=-1;
   ioc_std$mapvblk(vbn,0,wcb,0,0,&lbn,0,0);
   return lbn;
 }

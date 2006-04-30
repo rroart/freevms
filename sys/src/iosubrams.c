@@ -18,7 +18,7 @@
 #include<wcbdef.h>
 #include<ssdef.h>
 
-int ioc_std$mapvblk (unsigned int vbn, unsigned int numbytes, struct _wcb *wcb, struct _irp *irp, struct _ucb *ucb, unsigned long *lbn_p, unsigned *notmapped_p, struct _ucb **new_ucb_p) {
+int ioc_std$mapvblk (unsigned int vbn, unsigned int numbytes, struct _wcb *wcb, struct _irp *irp, struct _ucb *ucb, unsigned int *lbn_p, unsigned *notmapped_p, struct _ucb **new_ucb_p) {
   struct _wcb * head=wcb;
   struct _wcb * tmp=head->wcb$l_wlfl;
   while (tmp!=head) {
