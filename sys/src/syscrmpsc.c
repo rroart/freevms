@@ -9,7 +9,6 @@
 #include <linux/file.h>
 #include <system_data_cells.h>
 #include<descrip.h>
-#include<fcbdef.h>
 #include<gsddef.h>
 #include<ipldef.h>
 #include<ipl.h>
@@ -30,6 +29,7 @@
 asmlinkage int exe$crmpsc_wrap(struct struct_crmpsc * s) {
 #ifdef CONFIG_VMS
   int ret;
+#if 0
   int chan=s->chan;
   struct file * file=0;
   struct _fcb * fcb = 0;
@@ -37,9 +37,11 @@ asmlinkage int exe$crmpsc_wrap(struct struct_crmpsc * s) {
     file=fget(chan);
     fcb=e2_search_fcb(file->f_dentry->d_inode);
   }
-  
-  ret=exe$crmpsc(s->inadr,s->retadr,s->acmode,s->flags,s->gsdnam,s->ident,s->relpag,fcb,s->pagcnt,s->vbn,s->prot,s->pfc);
+#endif  
+  ret=exe$crmpsc(s->inadr,s->retadr,s->acmode,s->flags,s->gsdnam,s->ident,s->relpag,s->chan,s->pagcnt,s->vbn,s->prot,s->pfc);
+#if 0
   if (file) fput(file);
+#endif
   return ret;
 #endif
 }
@@ -100,8 +102,9 @@ asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, uns
     sec->sec$l_unit_cnt=pagcnt;
     sec->sec$l_vpx=first;
 
-    sec->sec$l_ccb=chan;
-    sec->sec$l_window=((struct _fcb*)chan)->fcb$l_wlfl;
+    sec->sec$l_ccb=chan; // check. address later
+    struct _ccb * ccb = &ctl$ga_ccb_table[chan];
+    sec->sec$l_window = ccb->ccb$l_wind;
     mmg$fast_create(p, 0, first, last, (last-first)>>PAGE_SHIFT, prot_pte);
 
     setipl(savipl);
