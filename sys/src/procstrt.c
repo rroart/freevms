@@ -199,6 +199,15 @@ void lnm_init_prc(struct _pcb * p) {
   kfree(myterm);
 }
 
+static char * plus_colon(char * name) {
+  // check. leaky temp fix
+  int len=strlen(name);
+  char * new = kmalloc(len+2,GFP_KERNEL);
+  memcpy(new, name, len);
+  new[len]=':';
+  new[len+1]=0;
+  return new;
+}
 int exe$procstrt(struct _pcb * p) {
 #if 0
 #ifdef __arch_um__
@@ -339,6 +348,26 @@ int exe$procstrt(struct _pcb * p) {
     argv=args;
     args[1]=0;
     args[0]=pqb->pqb$t_input;
+  } else {
+#if 1
+    sys_close(0);
+    sys_close(1);
+    sys_close(2);
+#else
+    ctl$gl_pcb->files->fd[0]=0;
+    ctl$gl_pcb->files->fd[1]=0;
+    ctl$gl_pcb->files->fd[2]=0;
+#endif
+    void sys_open_term();
+#if 1
+    if (pqb->pqb$t_input[0]) sys_open_term(plus_colon(pqb->pqb$t_input));
+    if (pqb->pqb$t_output[0]) sys_open_term(plus_colon(pqb->pqb$t_output));
+    if (pqb->pqb$t_error[0]) sys_open_term(plus_colon(pqb->pqb$t_error));
+#else
+    if (pqb->pqb$t_input[0]) sys_open_term(p->pcb$t_terminal);
+    if (pqb->pqb$t_output[0]) sys_open_term(p->pcb$t_terminal);
+    if (pqb->pqb$t_error[0]) sys_open_term(p->pcb$t_terminal);
+#endif
   }
 #endif
   execve(pqb->pqb$t_image,argv,0); //(,regs);
