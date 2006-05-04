@@ -92,6 +92,7 @@ struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
 // borrowed from starlet/src/rms.c
 
 struct _fabdef cc$rms_fab={FAB$C_BID,FAB$C_BLN,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+struct _rabdef cc$rms_rab={RAB$C_BID,RAB$C_BLN,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 struct _namdef cc$rms_nam={NAM$C_BID,NAM$C_BLN,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 /* Table of file name component delimeters... */
@@ -881,12 +882,17 @@ unsigned exe$get(struct _rabdef *rab)
   atr[1].atr$w_type=0;
   fibdsc.dsc$w_length=sizeof(struct _fibdef);
   fibdsc.dsc$a_pointer=&ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fib;
+#if 0
+  if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM))
+    printk("get %x %x %x\n",ifb_table[fab->fab$w_ifi]->ifb$w_chnl,fab->fab$l_stv,reclen);
+#endif
   if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)==0) {
     sts = sys$qiow(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
 		   &fibdsc,0,0,0,atr,0);
     sts = iosb.iosb$w_status;
   }
 
+  if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)==0)
   {
     unsigned eofblk;
 
@@ -904,6 +910,12 @@ unsigned exe$get(struct _rabdef *rab)
     if (sts == SS$_ENDOFFILE) sts = RMS$_EOF;
     exe_std$deanonpgdsiz(buffer,512);
     return sts;
+  }
+
+  if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)) {
+    cpylen = iosb.iosb$w_bcnt;
+    memcpy(recbuff, buffer, cpylen);
+    goto out;
   }
 
   if (rfm == FAB$C_VAR || rfm == FAB$C_VFC) {
@@ -1006,6 +1018,7 @@ unsigned exe$get(struct _rabdef *rab)
     }
   }
   if (rfm == FAB$C_VFC) cpylen -= rab->rab$l_fab->fab$b_fsz;
+ out:
   rab->rab$w_rsz = cpylen;
   rab->rab$l_rbf = rab->rab$l_ubf;
 
@@ -1077,6 +1090,10 @@ unsigned exe$put(struct _rabdef *rab)
 
   fibdsc.dsc$w_length=sizeof(struct _fibdef);
   fibdsc.dsc$a_pointer=&ifi_table[rab->rab$l_fab->fab$w_ifi]->wcf_fib;
+#if 0
+  if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM))
+    printk("put %x %x\n",ifb_table[fab->fab$w_ifi]->ifb$w_chnl,fab->fab$l_stv);
+#endif
   if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)==0) {
     sts = sys$qiow(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_ACCESS|IO$M_ACCESS,&iosb,0,0,
 		   &fibdsc,0,0,0,atr,0);
@@ -1161,8 +1178,15 @@ unsigned exe$put(struct _rabdef *rab)
       wbuf_len=reclen;
     if (wbuf_len==0)
       return SS$_NORMAL;
-    sts = sys$qiow(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_WRITEVBLK,&iosb,0,0,
+    if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)==0/*rab->rab$v_asy == 0*/)
+      sts = sys$qiow(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_WRITEVBLK,&iosb,0,0,
 		   buffer,wbuf_len,block,0,0,0);
+    else {
+      sts = sys$qio(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_WRITEVBLK,&iosb,0,0,
+		    buffer,wbuf_len,block,0,0,0); // workaround for tza
+    }
+    if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)/*rab->rab$v_asy == 0*/)
+      return 1; // check. do better TRM check later
     sts = iosb.iosb$w_status;
     //block += blocks;
     if (cpylen >= reclen && delim == 0) {
