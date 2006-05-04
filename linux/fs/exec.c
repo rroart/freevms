@@ -57,8 +57,7 @@
 #include<secdef.h>
 #include<sysgen.h>
 #include<dyndef.h>
-#include<fcbdef.h>
-#include<fabdef.h>
+#include<rabdef.h>
 #include<ccbdef.h>
 #include<ucbdef.h>
 #include <exe_routines.h>
@@ -424,7 +423,9 @@ struct file *rms_open_exec(const char *name)
 {
 	struct file *file=0;
 	int err = 0;
+#if 0
 	struct _fabdef fab = cc$rms_fab;
+#endif
 	int sts;
 
 #ifdef __i386__
@@ -435,6 +436,7 @@ struct file *rms_open_exec(const char *name)
 	path_unix_to_vms(vms_filename, name);
 	convert_soname(vms_filename);
 
+#if 0
 	long prev_xqp_fcb = get_xqp_prim_fcb();
 	long prev_x2p_fcb = get_x2p_prim_fcb();
 
@@ -454,6 +456,9 @@ struct file *rms_open_exec(const char *name)
 	kfree(vms_filename);
 #endif
 	return file;
+#else
+	return sys_open(vms_filename,0,0);
+#endif
 }
 #endif
 
@@ -465,8 +470,15 @@ int kernel_read(struct file *file, unsigned long offset,
 	int result = -ENOSYS;
 
 #ifdef CONFIG_VMS
+#if 0
 	if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
+#endif
+#if 0
 	  return rms_kernel_read(file,offset,addr,count);
+#else
+	asmlinkage ssize_t sys_pread(unsigned int fd, char * buf, size_t count, loff_t pos);
+	return sys_pread(file,addr,count,offset);
+#endif
 #endif
 	if (!file->f_op->read)
 		goto fail;
@@ -477,10 +489,13 @@ int kernel_read(struct file *file, unsigned long offset,
 fail:
 	return result;
 }
+
+#if 0
 #ifdef CONFIG_VMS
 int rms_kernel_read(struct file *file, unsigned long offset,
 	char * addr, unsigned long count)
 {
+#if 0
 	mm_segment_t old_fs;
 	loff_t pos = offset;
 	int result = -ENOSYS;
@@ -491,7 +506,19 @@ int rms_kernel_read(struct file *file, unsigned long offset,
 	set_fs(old_fs);
 fail:
 	return result;
+#else
+	struct _rabdef * rab = file;
+	rab->rab$l_ubf = addr;
+	rab->rab$w_usz = count;
+	int block = offset >> 9;
+	rab->rab$w_rfa[0] = block & 0xffff;
+	rab->rab$w_rfa[1] = block >> 16;
+	rab->rab$w_rfa[2] = offset;
+	int sts = exe$get(rab);
+	return rab->rab$w_rsz;
+#endif
 }
+#endif
 #endif
 
 static int exec_mmap(void)
@@ -687,7 +714,9 @@ int flush_old_exec(struct linux_binprm * bprm)
 #endif
 
 #ifdef CONFIG_VMS
+#if 0
 	if (((struct _fcb *)(bprm->file))->fcb$b_type!=DYN$C_FCB)
+#endif
 #endif
 	if (bprm->e_uid != current->euid || bprm->e_gid != current->egid || 
 #ifndef CONFIG_VMS
@@ -855,7 +884,7 @@ int rms_prepare_binprm(struct linux_binprm *bprm)
 	}
 
 	memset(bprm->buf,0,BINPRM_BUF_SIZE);
-	return rms_kernel_read(bprm->file,0,bprm->buf,BINPRM_BUF_SIZE);
+	return kernel_read(bprm->file,0,bprm->buf,BINPRM_BUF_SIZE);
 }
 #endif
 
@@ -1007,14 +1036,18 @@ int search_binary_handler(struct linux_binprm *bprm,struct pt_regs *regs)
 			retval = fn(bprm, regs);
 			if (retval >= 0) {
 				put_binfmt(fmt);
+#if 0
 #ifdef CONFIG_MM_VMS
 				if (((struct _fcb *)(bprm->file))->fcb$b_type!=DYN$C_FCB) {
+#endif
 #endif
 				  allow_write_access(bprm->file);
 				  if (bprm->file)
 				    fput(bprm->file);
 #ifdef CONFIG_MM_VMS
+#if 0
 				}
+#endif
 #endif
 				bprm->file = NULL;
 				current->did_exec = 1;
@@ -1133,7 +1166,9 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	}
 
 #ifdef CONFIG_VMS
+#if 0
 	if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
+#endif
 	  retval = rms_prepare_binprm(&bprm);
 #else
 	retval = prepare_binprm(&bprm);
@@ -1167,7 +1202,11 @@ out:
 	/* Something went wrong, return the inode and free the argument pages*/
 #ifdef CONFIG_VMS
 	printk("uh oh, something went wrong error\n");
+#if 0
 	if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB) {
+#else
+	  if (0) {
+#endif
 #endif
 	allow_write_access(bprm.file);
 	if (bprm.file)

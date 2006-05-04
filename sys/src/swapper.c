@@ -26,7 +26,8 @@
 #include <descrip.h>
 #include <starlet.h>
 
-#include <fcbdef.h>
+#include <fabdef.h>
+#include <rabdef.h>
 #include <pfldef.h>
 #include <pflmapdef.h>
 #include <exe_routines.h>
@@ -115,11 +116,17 @@ int kswapd(void *unused)
 	  char buf[1024];
 	  if (file==0)
 	    goto out;
+#if 0
 	  if (((struct _fcb *)(file))->fcb$b_type!=DYN$C_FCB) {
 	    printk("uh oh, not FCB\n");
 	  }
-	  struct _fcb * fcb = file;
+#endif
+	  struct _rabdef * rab = fget(file);
+	  struct _fabdef * fab = rab->rab$l_fab;
+	  int pages = fab->fab$l_alq >> 3;
+#if 0
 	  int pages=fcb->fcb$l_filesize>>12;
+#endif
 	  int bitmapsiz=pages>>3;
 	  struct _pfl * pfl=kmalloc(sizeof(struct _pfl)+bitmapsiz,GFP_KERNEL);
 	  memset(pfl,0,sizeof(struct _pfl)+bitmapsiz);
@@ -130,12 +137,18 @@ int kswapd(void *unused)
 	  pfl->pfl$b_type=DYN$C_PFL;
 	  pfl->pfl$w_size=sizeof(struct _pfl)+bitmapsiz;
 	  pfl->pfl$l_pgflx=0;
+#if 0
 	  pfl->pfl$l_window=fcb->fcb$l_wlfl;
+#else
+	  int chan = fab->fab$l_stv;
+	  struct _ccb * ccb = &ctl$ga_ccb_table[chan];
+	  pfl->pfl$l_window = ccb->ccb$l_wind;
+#endif
 	  pfl->pfl$l_bitmapsiz=bitmapsiz;
 	  pfl->pfl$l_frepagcnt=pages;
 	  pfl->pfl$l_bitmap=(long)pfl+sizeof(struct _pfl);
 	  pfl->pfl$l_startbyte=(long)pfl+sizeof(struct _pfl);
-	  printk("%%SWAPPER-I-DEBUG, Pagefile installed, pages %x\n",fcb->fcb$l_filesize>>12);
+	  printk("%%SWAPPER-I-DEBUG, Pagefile installed, pages %x\n",pages);
 	  pagefile=1;
 	} else {
 	out:

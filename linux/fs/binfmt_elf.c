@@ -292,11 +292,10 @@ static unsigned long load_elf_interp(struct elfhdr * interp_elf_ex,
 		goto out;
 	if (!elf_check_arch(interp_elf_ex))
 		goto out;
-#ifdef CONFIG_VMS
-	if (((struct _fcb *)interpreter)->fcb$b_type!=DYN$C_FCB)
-#endif
+#ifndef CONFIG_VMS
 	if (!interpreter->f_op || !interpreter->f_op->mmap)
 		goto out;
+#endif
 
 	/*
 	 * If the size of this structure has changed, then punt, since
@@ -336,7 +335,12 @@ static unsigned long load_elf_interp(struct elfhdr * interp_elf_ex,
 	    if (interp_elf_ex->e_type == ET_EXEC || load_addr_set)
 	    	elf_type |= MAP_FIXED;
 
+#ifndef CONFIG_VMS
 	    map_addr = elf_map(interpreter, load_addr + vaddr, eppnt, elf_prot, elf_type);
+#else
+	    map_addr = elf_map(fget(interpreter), load_addr + vaddr, eppnt, elf_prot, elf_type);
+#endif
+	    
 	    if (BAD_ADDR(map_addr))
 	    	goto out_close;
 
@@ -476,11 +480,10 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	if (!elf_check_arch(&elf_ex))
 		goto out;
 
-#ifdef CONFIG_VMS
-	if (((struct _fcb *)(bprm->file))->fcb$b_type!=DYN$C_FCB)
-#endif
+#ifndef CONFIG_VMS
 	  if (!bprm->file->f_op||!bprm->file->f_op->mmap)
 	    goto out;
+#endif
 
 	/* Now read in all of the header information */
 
@@ -498,11 +501,15 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	if (retval < 0)
 		goto out_free_ph;
 
+#ifndef CONFIG_VMS
 	retval = get_unused_fd();
 	if (retval < 0)
 		goto out_free_ph;
 	get_file(bprm->file);
 	fd_install(elf_exec_fileno = retval, bprm->file);
+#else
+	elf_exec_fileno = bprm->file;
+#endif
 
 	elf_ppnt = elf_phdata;
 	elf_bss = 0;
@@ -684,7 +691,11 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 			load_bias = ELF_PAGESTART(ELF_ET_DYN_BASE - vaddr);
 		}
 
+#ifndef CONFIG_VMS
 		error = elf_map(bprm->file, load_bias + vaddr, elf_ppnt, elf_prot, elf_flags);
+#else
+		error = elf_map(fget(bprm->file), load_bias + vaddr, elf_ppnt, elf_prot, elf_flags);
+#endif
 		if (BAD_ADDR(error))
 			continue;
 
@@ -731,13 +742,9 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 						    interpreter,
 						    &interp_load_addr);
 
-#ifdef CONFIG_VMS
-		if (((struct _fcb *)interpreter)->fcb$b_type!=DYN$C_FCB) {
-#endif
+#ifndef CONFIG_VMS
 		allow_write_access(interpreter);
 		fput(interpreter);
-#ifdef CONFIG_VMS
-		}
 #endif
 		kfree(elf_interpreter);
 
@@ -836,13 +843,9 @@ out:
 
 	/* error cleanup */
 out_free_dentry:
-#ifdef CONFIG_VMS
-	if (((struct _fcb *)interpreter)->fcb$b_type!=DYN$C_FCB) {
-#endif
+#ifndef CONFIG_VMS
 	allow_write_access(interpreter);
 	fput(interpreter);
-#ifdef CONFIG_VMS
-	}
 #endif
 out_free_interp:
 	if (elf_interpreter)
@@ -953,25 +956,20 @@ out:
  */
 static int dump_write(struct file *file, const void *addr, int nr)
 {
-#ifdef CONFIG_VMS
-  if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)
-#endif
+#ifndef CONFIG_VMS
     return file->f_op->write(file, addr, nr, &file->f_pos) == nr;
+#endif
   return 0;
 }
 
 static int dump_seek(struct file *file, off_t off)
 {
-#ifdef CONFIG_VMS
-  if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB) {
-#endif
+#ifndef CONFIG_VMS
 	if (file->f_op->llseek) {
 		if (file->f_op->llseek(file, off, 0) != off)
 			return 0;
 	} else
 		file->f_pos = off;
-#ifdef CONFIG_VMS
-  }
 #endif
 	return 1;
 }
@@ -1074,19 +1072,14 @@ static int writenote(struct memelfnote *men, struct file *file)
 	en.n_descsz = men->datasz;
 	en.n_type = men->type;
 
-#ifdef CONFIG_VMS
-	if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB) {
-#endif
+#ifndef CONFIG_VMS
 	DUMP_WRITE(&en, sizeof(en));
 	DUMP_WRITE(men->name, en.n_namesz);
 	/* XXX - cast from long long to long to avoid need for libgcc.a */
 	DUMP_SEEK(roundup((unsigned long)file->f_pos, 4));	/* XXX */
 	DUMP_WRITE(men->data, men->datasz);
 	DUMP_SEEK(roundup((unsigned long)file->f_pos, 4));	/* XXX */
-#ifdef CONFIG_VMS
-	}
 #endif
-
 	return 1;
 }
 #undef DUMP_WRITE
@@ -1123,8 +1116,7 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 	struct elf_prpsinfo psinfo;	/* NT_PRPSINFO */
 
 #ifdef CONFIG_VMS
-	if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
-	  return has_dumped;
+	return has_dumped;
 #endif
 
 	/* first copy the parameters from user space */
@@ -1463,11 +1455,10 @@ int exe$imgact_elf(void * name, void * hdrbuf) {
   bprm.envc = 0;
   //  bprm.argv = 0;
 #ifdef CONFIG_VMS
-  if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
-    retval = rms_prepare_binprm(&bprm);
-  else
+  retval = rms_prepare_binprm(&bprm);
+#else
+  retval = prepare_binprm(&bprm);
 #endif
-    retval = prepare_binprm(&bprm);
   void * func = load_elf_binary(&bprm, 0);
   struct elfhdr * elf = hdrbuf;
 #if 0

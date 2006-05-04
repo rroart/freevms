@@ -979,7 +979,16 @@ static int init(void * unused)
 	if (mount_root_vfs && open("/dev/console", O_RDWR, 0) < 0)
 		printk("Warning: unable to open an initial console.\n");
 #else
+#if 0
 	open_tty();
+#else
+#if 0
+	sys_open("opa0:", 0, 0);
+#else
+	void sys_open_term();
+	sys_open_term("opa0:");
+#endif
+#endif
 #endif
 	printk("%%KERNEL-I-DEBUG, Before dup\n");
 	(void) dup(0);

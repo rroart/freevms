@@ -113,6 +113,7 @@ int init_private_file(struct file *filp, struct dentry *dentry, int mode)
 void fastcall fput(struct file * file)
 {
 #ifndef CONFIG_VMS
+#ifndef CONFIG_VMS
 	struct dentry * dentry = file->f_dentry;
 	struct vfsmount * mnt = file->f_vfsmnt;
 	struct inode * inode = dentry->d_inode;
@@ -143,6 +144,7 @@ void fastcall fput(struct file * file)
 		mntput(mnt);
 #endif
 	}
+#endif
 }
 
 struct file * fastcall fget(unsigned int fd)
@@ -162,6 +164,7 @@ struct file * fastcall fget(unsigned int fd)
 
 void put_filp(struct file *file)
 {
+#ifndef CONFIG_VMS
 	if(atomic_dec_and_test(&file->f_count)) {
 		file_list_lock();
 		list_del(&file->f_list);
@@ -169,6 +172,7 @@ void put_filp(struct file *file)
 		files_stat.nr_free_files++;
 		file_list_unlock();
 	}
+#endif
 }
 
 void file_move(struct file *file, struct list_head *list)

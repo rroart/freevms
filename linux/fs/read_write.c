@@ -14,8 +14,10 @@
 
 #include <asm/uaccess.h>
 #include <dyndef.h>
-#include <fcbdef.h>
+#include <fabdef.h>
+#include <rabdef.h>
 #include <misc_routines.h>
+#include <exe_routines.h>
 
 struct file_operations generic_ro_fops = {
 	llseek:		generic_file_llseek,
@@ -114,6 +116,7 @@ asmlinkage off_t sys_lseek(unsigned int fd, off_t offset, unsigned int origin)
 bad:
 	return retval;
 #else
+#if 0
 	struct _fcb * fcb = file;
 	switch (origin) {
 	case 2:
@@ -125,7 +128,27 @@ bad:
 	  offset += fcb->fcb$l_reserve1;
 	  break;
 	}
-	fcb->fcb$l_reserve1 = offset;
+#else
+	struct _rabdef * rab = file;
+	switch (origin) {
+	case 2:
+	  /*SEEK_END*/ 
+#if 0
+	  offset += fcb->fcb$l_filesize;
+#else
+	  printk("no seek end yet\n");
+#endif
+	  break;
+	case 1:
+	  /*SEEK_CUR*/
+	  offset += 512*(rab->rab$w_rfa[2] + (rab->rab$w_rfa[1] << 16)) + rab->rab$w_rfa[0];
+	  break;
+	}
+	int block = offset >> 9;
+	rab->rab$w_rfa[0] = block & 0xffff;
+	rab->rab$w_rfa[1] = block >> 16;
+	rab->rab$w_rfa[2] = offset;
+#endif
 	return offset;
 #endif
 }
@@ -171,8 +194,55 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 	ret = -EBADF;
 	file = fget(fd);
 #ifdef CONFIG_VMS
+#if 0
 	if (file && ((struct _fcb *)(file))->fcb$b_type==DYN$C_FCB)
 	  goto do_fcb;
+#else
+#if 0
+	printk("sys_read %x %x %x %x\n",ctl$gl_pcb,fd,buf,count);
+#endif
+	int sts;
+	int curcount = count;
+	int retcount = 0;
+	struct _rabdef * rab = file;
+	struct _fabdef * fab = rab->rab$l_fab;
+	char * kbuf = kmalloc(fab->fab$w_mrs, GFP_KERNEL); // check size
+	while (curcount>0) {
+	  rab->rab$l_ubf = kbuf;
+	  rab->rab$w_usz = curcount;
+#if 0
+	  printk("mrs %x\n",fab->fab$w_mrs);
+#endif
+	  if (curcount < fab->fab$w_mrs)
+	    rab->rab$w_usz = fab->fab$w_mrs;
+	  sts = exe$get(rab);
+	  if ((sts&1)==0)
+	    break;
+	  int thiscount = rab->rab$w_rsz;
+	  if (curcount < rab->rab$w_rsz)
+	    thiscount = curcount;
+	  memcpy(buf + retcount, kbuf, thiscount);
+#if 0
+	  printk("memcpy %x %x %x\n",buf + retcount, kbuf, thiscount);
+#endif
+	  curcount -= thiscount;
+	  retcount += thiscount;
+	  if (fab->fab$w_mrs == 0) {
+#if 0
+	    printk("memcpy2 %x %x %x\n", retcount, curcount, thiscount);
+#endif
+	    curcount = 0;
+	  }
+	}
+	kfree(kbuf);
+#if 0
+	printk("sys_read end %x %x %x %x\n",ctl$gl_pcb,fd,sts,retcount);
+#endif
+	if (sts & 1) {
+	  return retcount;
+	} else
+	  return 0;
+#endif
 #endif
 	if (file) {
 		if (file->f_mode & FMODE_READ) {
@@ -205,6 +275,7 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 	}
 	return ret;
 #ifdef CONFIG_VMS
+#if 0
  do_fcb:
 	{}
 
@@ -219,6 +290,7 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 	fcb->fcb$l_reserve1 += ret;
 	return ret;
 #endif
+#endif
 }
 
 asmlinkage ssize_t sys_write(unsigned int fd, const char * buf, size_t count)
@@ -228,6 +300,26 @@ asmlinkage ssize_t sys_write(unsigned int fd, const char * buf, size_t count)
 
 	ret = -EBADF;
 	file = fget(fd);
+#ifdef CONFIG_VMS
+	if (file == 0)
+	  return ret;
+	struct _rabdef * rab = file;
+	struct _fabdef * fab = rab->rab$l_fab;
+	rab->rab$l_rbf = buf;
+	rab->rab$w_rsz = count;
+	if (fab->fab$w_mrs == 0) {
+	  rab->rab$v_asy = 1; // workaround to avoid tza hanging
+	}
+	int sts = exe$put(file);
+	if (sts & 1) {
+	  return count;
+#if 0
+	  unsigned rsz = rab.rab$w_rsz;
+	  return rsz;
+#endif
+	} else
+	  return 0;
+#endif
 	if (file) {
 		if (file->f_mode & FMODE_WRITE) {
 #ifdef CONFIG_VMS
@@ -422,8 +514,18 @@ asmlinkage ssize_t sys_pread(unsigned int fd, char * buf,
 	ret = -EBADF;
 	file = fget(fd);
 #ifdef CONFIG_VMS
+#if 0
 	if (file && ((struct _fcb *)(file))->fcb$b_type==DYN$C_FCB)
 	  goto do_fcb;
+#else
+	struct _rabdef * rab = fget(fd);
+	loff_t curpos =  512*(rab->rab$w_rfa[2] + (rab->rab$w_rfa[1] << 16)) + rab->rab$w_rfa[0];
+#define SEEK_SET 0
+	sys_lseek(fd, pos, SEEK_SET);
+	ret = sys_read(fd, buf, count);
+	sys_lseek(fd, curpos, SEEK_SET);
+	return ret;
+#endif
 #endif
 	if (!file)
 		goto bad_file;
@@ -452,6 +554,7 @@ out:
 bad_file:
 	return ret;
 #ifdef CONFIG_VMS
+#if 0
  do_fcb:
 	{}
 
@@ -467,6 +570,7 @@ bad_file:
 	fcb->fcb$l_reserve1 += ret;
 #endif
 	return ret;
+#endif
 #endif
 }
 

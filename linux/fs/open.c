@@ -25,8 +25,8 @@
 #include <asm/uaccess.h>
 
 #include <dyndef.h>
-#include <fcbdef.h>
 #include <fabdef.h>
+#include <rabdef.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
 
@@ -926,13 +926,21 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 	int fd, error;
 	struct file *file=0;
 	int err = 0;
+#if 0
 	struct _fabdef fab = cc$rms_fab;
+#else
+	struct _fabdef * fab = kmalloc(sizeof(struct _fabdef), GFP_KERNEL);
+	struct _rabdef * rab = kmalloc(sizeof(struct _rabdef), GFP_KERNEL);
+	*fab = cc$rms_fab;
+	*rab = cc$rms_rab;
+#endif
 	int sts;
 
 	char vms_filename[256];
 	path_unix_to_vms(vms_filename, filename);
 	convert_soname(vms_filename);
 
+#if 0
 	long prev_xqp_fcb = get_xqp_prim_fcb();
 	long prev_x2p_fcb = get_x2p_prim_fcb();
 
@@ -949,8 +957,22 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 	  exe$close(&fab);
 	} else
 	  return -1;
+#else
+	fab->fab$l_fna = vms_filename;
+	fab->fab$b_fns = strlen(fab->fab$l_fna);
+	if ((sts = exe$open(fab)) & 1) {
+	  rab->rab$l_fab = fab;
+	  if ((sts = exe$connect(rab)) & 1) {
+	  }
+	} else
+	  return -1;
+#endif
 	fd = get_unused_fd();
+#if 0
 	fd_install(fd, file);
+#else
+	fd_install(fd, rab);
+#endif
 	return fd;
 }
 #endif
@@ -977,8 +999,12 @@ int filp_close(struct file *filp, fl_owner_t id)
 	int retval;
 
 #ifdef CONFIG_VMS
+#if 0
 	if (((struct _fcb *)filp)->fcb$b_type==DYN$C_FCB)
 	    return 0;
+#else
+	return 0;
+#endif
 #endif
 
 	if (!file_count(filp)) {
@@ -1026,9 +1052,16 @@ asmlinkage long sys_close(unsigned int fd)
 	FD_CLR(fd, files->close_on_exec);
 	__put_unused_fd(files, fd);
 	write_unlock(&files->file_lock);
+	if (fd<3) return 0; // temp workaround
 #ifndef CONFIG_VMS
 	return filp_close(filp, files);
 #else
+	struct _rabdef * rab = filp;
+	struct _fabdef * fab = rab->rab$l_fab;
+	exe$disconnect(rab);
+	exe$close(fab);
+	kfree(rab);
+	kfree(fab);
 	return 0;
 #endif
 
@@ -1073,4 +1106,20 @@ int generic_file_open(struct _fcb * inode, struct file * filp)
 	return 0;
 }
 #endif
+
+void sys_open_term(char * name)
+{
+	  struct _fabdef * fab = kmalloc(sizeof(struct _fabdef), GFP_KERNEL);
+	  struct _rabdef * rab = kmalloc(sizeof(struct _rabdef), GFP_KERNEL);
+	  *fab = cc$rms_fab;
+	  *rab = cc$rms_rab;
+	  fab->fab$l_fna = name;
+	  fab->fab$b_fns = strlen(fab->fab$l_fna);
+	  exe$open(fab);
+	  rab->rab$l_fab = fab;
+	  exe$connect(rab);
+	  int fd = get_unused_fd();
+	  fd_install(fd, rab);
+}
+
 EXPORT_SYMBOL(generic_file_open);
