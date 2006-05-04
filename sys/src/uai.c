@@ -5,6 +5,7 @@
 
 // temporary module. should really be at least one privileged shareable image
 
+#include<linux/kernel.h>
 #include<linux/fs.h>
 #include<linux/linkage.h>
 #include<linux/string.h>
@@ -15,6 +16,10 @@
 #include<uaidef.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
+#include <rabdef.h>
+#include <asm/current.h>
+#include <linux/sched.h>
+#include <linux/file.h>
 
 asmlinkage void exe$check_access    (void) { }
 asmlinkage void exe$getuai_not          (void) { }
@@ -60,12 +65,21 @@ myread(void * file, void * buf, int size) {
 }
 
 int exe$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmlst, struct _iosb *iosb, void (*astadr)(__unknown_params), int astprm) {
+#if 0
   void * file = myopenfile("/vms$common/sysexe/sysuaf.dat", "[vms$common.sysexe]sysuaf.dat");
+#else
+  int fd = sys_open("[vms$common.sysexe]sysuaf.dat",0,0);
+#endif
   int gotsize;
   char * charbuf;
   int sts = exe_std$alononpaged(4096, &gotsize, &charbuf);
   struct _uaf * buf = charbuf;
+#if 0
   int read=myread(file,buf,4096);
+#else
+  asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count);
+  int read = sys_read(fd, buf, 4096);
+#endif
   struct dsc$descriptor * user_dsc = usrnam;
   int i;
   for(i=0;i<2;i++)

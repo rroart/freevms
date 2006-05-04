@@ -34,6 +34,12 @@
 #include <misc_routines.h>
 #include <linux/slab.h>
 
+#include <fcbdef.h>
+#include <fabdef.h>
+#include <rabdef.h>
+
+#include <linux/file.h>
+
 int img$known_image(struct dsc$descriptor * name, void ** kfe_p) {
   struct _kfe * kfe = exe$gl_known_files;
   for (;kfe;kfe = kfe->kfe$l_kfelink) {
@@ -93,16 +99,29 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   f=rms_open_exec(dscdflnam->dsc$a_pointer);
   if (f==0) return 0;
 
+#if 0
+  struct _rabdef * rab = fget(f);
+  struct _fabdef * fab = rab->rab$l_fab;
+  int chan = fab->fab$l_stv;
+  printk("imgact chan %x\n",chan);
+  struct _ccb * ccb = &ctl$ga_ccb_table[chan];
+  ccb->ccb$l_wind = 0;
+#endif
+
   struct _kfe * kfe;
   if (img$known_image(dscdflnam,&kfe))
     ctl$gl_pcb->pcb$l_priv|=kfe->kfe$q_procpriv;
   // do the same with phd copy
 
   im->imcb$l_context=f;//w_chan too small, temp place
+#if 0
   fs = get_fs();
   set_fs(KERNEL_DS);
   rms_generic_file_read(f, header, 512, &pos);
   set_fs(fs);
+#else
+  kernel_read(f, 0, header, 512);
+#endif
 
   if (ehdr32->ihd$w_majorid!=IHD$K_MAJORID || ehdr32->ihd$w_minorid!=IHD$K_MINORID) {
     return exe$imgact_elf(dscdflnam,ehdr32);
@@ -280,10 +299,14 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   f=open_exec(dscdflnam->dsc$a_pointer);
   if (f==0) return 0;
 #endif
+#if 0
   fs = get_fs();
   set_fs(KERNEL_DS);
   generic_file_read(f, header, 512, &pos);
   set_fs(fs);
+#else
+  kernel_read(f, 0, header, 512);
+#endif
   return exe$imgact_elf(dscdflnam,ehdr32);
 #endif
 }
