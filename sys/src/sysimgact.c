@@ -99,10 +99,10 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   f=rms_open_exec(dscdflnam->dsc$a_pointer);
   if (f==0) return 0;
 
-#if 0
   struct _rabdef * rab = fget(f);
   struct _fabdef * fab = rab->rab$l_fab;
   int chan = fab->fab$l_stv;
+#if 0
   printk("imgact chan %x\n",chan);
   struct _ccb * ccb = &ctl$ga_ccb_table[chan];
   ccb->ccb$l_wind = 0;
@@ -179,7 +179,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x45|rwfl ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
 #endif 
     // printk("range %x %x\n",img_inadr.va_range$ps_start_va,img_inadr.va_range$ps_end_va);
-    exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,section->isd$l_vbn,0,0);
+    exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/chan,0,section->isd$l_vbn,0,0);
   skip_it:
     section=(unsigned long)section+section->isd$w_size;
   }
