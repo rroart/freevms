@@ -16,6 +16,8 @@
 #include <dyndef.h>
 #include <fabdef.h>
 #include <rabdef.h>
+#include <xabdatdef.h>
+#include <xabfhcdef.h>
 #include <misc_routines.h>
 #include <exe_routines.h>
 
@@ -136,7 +138,11 @@ bad:
 #if 0
 	  offset += fcb->fcb$l_filesize;
 #else
-	  printk("no seek end yet\n");
+	  {}
+	  struct _fabdef * fab = rab->rab$l_fab;
+	  struct _xabdatdef * dat = fab->fab$l_xab;
+	  struct _xabfhcdef * fhc = dat->xab$l_nxt;
+	  offset = ((fhc->xab$l_ebk-1) << 9) + fhc->xab$w_ffb; // check size --
 #endif
 	  break;
 	case 1:

@@ -27,6 +27,8 @@
 #include <dyndef.h>
 #include <fabdef.h>
 #include <rabdef.h>
+#include <xabdatdef.h>
+#include <xabfhcdef.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
 
@@ -929,10 +931,19 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 #if 0
 	struct _fabdef fab = cc$rms_fab;
 #else
+	struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
+	struct _xabdatdef cc$rms_xabdat={XAB$C_DAT,XAB$C_DATLEN,0,0,0,0,0,0,0,0,0,0};
 	struct _fabdef * fab = kmalloc(sizeof(struct _fabdef), GFP_KERNEL);
 	struct _rabdef * rab = kmalloc(sizeof(struct _rabdef), GFP_KERNEL);
+	// remember too free next two
+	struct _xabdatdef * dat = kmalloc(sizeof(struct _xabdatdef), GFP_KERNEL);
+	struct _xabfhcdef * fhc = kmalloc(sizeof(struct _xabfhcdef), GFP_KERNEL);
 	*fab = cc$rms_fab;
 	*rab = cc$rms_rab;
+	*dat = cc$rms_xabdat;
+	*fhc = cc$rms_xabfhc;
+	fab->fab$l_xab = dat;
+	dat->xab$l_nxt = fhc;
 #endif
 	int sts;
 
