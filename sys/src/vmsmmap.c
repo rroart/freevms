@@ -30,10 +30,11 @@
 #include <rdedef.h>
 #include <va_rangedef.h>
 #include <dyndef.h>
-#include <fcbdef.h>
 #include <queue.h>
 #include <misc_routines.h>
 #include <exe_routines.h>
+#include <rabdef.h>
+#include <fabdef.h>
 
 struct vm_area_struct * find_vma_intersection2(struct mm_struct * mm, unsigned long start_addr, unsigned long end_addr);
 
@@ -297,9 +298,11 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr, unsigned lon
 	rb_node_t ** rb_link, * rb_parent;
 	struct _va_range inadr;
 
+#if 0
 	if (file && ((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)
 	  if (file && (!file->f_op || !file->f_op->mmap))
 	    return -ENODEV;
+#endif
 
 	if ((len = PAGE_ALIGN(len)) == 0)
 		return addr;
@@ -348,7 +351,7 @@ munmap_back2:
 	}
 
 	if (file) {
-	  if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB) {
+	  if (0/*((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB*/) {
 		switch (flags & MAP_TYPE) {
 		case MAP_SHARED:
 			if ((prot & PROT_WRITE) && !(file->f_mode & FMODE_WRITE))
@@ -426,9 +429,14 @@ munmap_back:
 	exe$create_region_32 (len,*(unsigned long*)&protection_map[(rde$l_flags>>8) & 0x0f] ,rde$l_flags   ,0,0,0,addr);
 	if (file) {
 	  struct _fcb * fcb=file;
+#if 0
 	  if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)	  
 	    fcb=e2_search_fcb(file->f_dentry->d_inode);
-	  exe$crmpsc(&inadr,0,0,0,0,0,0,/*(unsigned short int)*/fcb,0,pgoff<<3,0,0);
+#endif
+	  struct _rabdef * rab = file;
+	  struct _fabdef * fab = rab->rab$l_fab;
+	  int chan = fab->fab$l_stv;
+	  exe$crmpsc(&inadr,0,0,0,0,0,0,/*(unsigned short int)*/chan,0,pgoff<<3,0,0);
 	} else {
 	  exe$cretva(&inadr,0,0);
 	}
@@ -467,7 +475,9 @@ munmap_back:
 		}
 		//vma->vm_file = file;
 		get_file(file);
+#if 0
 		error = file->f_op->mmap(file, vma);
+#endif
 		if (error)
 			goto unmap_and_free_vma;
 	} else if (flags & MAP_SHARED) {
@@ -483,10 +493,12 @@ munmap_back:
 	 */
 	addr = vma->rde$pq_start_va;
 
+#if 0
 	//vma_link(mm, vma, prev, rb_link, rb_parent);
 	if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)
 	  if (correct_wcount)
 	    atomic_inc(&file->f_dentry->d_inode->i_writecount);
+#endif
 
 out:	
 	mm->total_vm += len >> PAGE_SHIFT;
@@ -497,12 +509,14 @@ out:
 	return addr;
 
 unmap_and_free_vma:
+#if 0
 	if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)
 	  if (correct_wcount)
 	    atomic_inc(&file->f_dentry->d_inode->i_writecount);
 	//vma->vm_file = NULL;
 	if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)
 	  fput(file);
+#endif
 
 	/* Undo any partial mapping done by a device driver. */
 	zap_page_range(mm, vma->rde$pq_start_va, vma->rde$q_region_size);
@@ -563,9 +577,11 @@ unsigned long get_unmapped_area(struct file *file, unsigned long addr, unsigned 
 		return addr;
 	}
 
+#if 0
 	if (file && ((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)
 	  if (file && file->f_op && file->f_op->get_unmapped_area)
 	    return file->f_op->get_unmapped_area(file, addr, len, pgoff, flags);
+#endif
 
 	return arch_get_unmapped_area(file, addr, len, pgoff, flags);
 }
@@ -880,8 +896,10 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
 		 * Fix the mapping, and free the old area if it wasn't reused.
 		 */
 		extra = unmap_fixup(mm, mpnt, st, size, extra);
+#if 0
 		if (file)
 			atomic_inc(&file->f_dentry->d_inode->i_writecount);
+#endif
 	}
 	//validate_mm(mm);
 
