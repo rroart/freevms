@@ -893,6 +893,10 @@ int wcb_create_all(struct _fcb * fcb, struct _fh2 * fh2)
   return retsts;
 }
 
+void set_ccb_wind(short int channel, struct _fcb * fcb) {
+  struct _ccb * ccb = &ctl$ga_ccb_table[channel];
+  ccb->ccb$l_wind = fcb->fcb$l_wlfl; // check. add & later
+}
 
 /* getwindow() find a window to map VBN to LBN ... */
 
@@ -1169,6 +1173,7 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
     fcb=fcb_create2(head,&sts);
   }
   if (fcb == NULL) { iosbret(irp,sts); return sts; }
+  set_ccb_wind(xqp->io_channel, fcb); // temp fix
 
   xqp->primary_fcb=fcb;
   xqp->current_window=&fcb->fcb$l_wlfl;

@@ -1213,6 +1213,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     fcb=exttwo_fcb_create2(head, FID_TO_INO(fid), &sts);
   }
   if (fcb == NULL) { iosbret(irp,sts); return sts; }
+  set_ccb_wind(x2p->io_channel, fcb); // temp fix
 
   x2p->primary_fcb=fcb;
   x2p->current_window=&fcb->fcb$l_wlfl;
