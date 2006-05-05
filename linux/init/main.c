@@ -1077,6 +1077,9 @@ static int init(void * unused)
 	  tss->rsp0 = l;
 	  write_pda(kernelstack, (long) l);
 	  asm ("movq $0x7ffa0000, %rsp");
+#if 1
+	  asm ("subq $0x8, %rsp");
+#endif
 #endif
 		execve(execute_command,argv_init,envp_init);
 	}
