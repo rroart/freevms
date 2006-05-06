@@ -103,20 +103,46 @@
         POPR_ALL		; \
 	cli			; 
 
-#define SAVE_TSS_SP \
+#define INTPANIC \
+	pushq %rdx		; \
+	pushfq			; \
+	popq %rdx		; \
+	andq $0x200, %rdx	; \
+	je 1f			; \
+	call panic		; \
+1:	popq %rdx
+		
+#define SYSRET_SAVE_TSS_SP \
+	pushq %rbx		; \
 	pushq %rdx		; \
 	movq $init_tss, %rdx	; \
 	addq $0x4, %rdx		; /* yes, 4 */ \
 	movq %rsp, (%rdx)	; \
-	addq $0x20, (%rdx)	; \
-	movq %rsp, PDAREF(pda_kernelstack) ; \
-	addq $0x20, PDAREF(pda_kernelstack) ; \
-	cmpq $0x10, 0x18(%rsp)	; /* check */ \
-	je 1f			; \
 	addq $0x10, (%rdx)	; \
+	movq %rsp, PDAREF(pda_kernelstack) ; \
 	addq $0x10, PDAREF(pda_kernelstack) ; \
-1:				; \
-	popq %rdx
+	popq %rdx		; \
+	popq %rbx
+
+#define SAVE_TSS_SP \
+	pushq %rbx		; \
+	pushq %rdx		; \
+	movq $init_tss, %rdx	; \
+	addq $0x4, %rdx		; /* yes, 4 */ \
+	cmpq $0x10, 0x18(%rsp)	; \
+	je 2f			; \
+	movq %rsp, (%rdx)	; \
+	addq $0x38, (%rdx)	; \
+	movq %rsp, PDAREF(pda_kernelstack) ; \
+	addq $0x38, PDAREF(pda_kernelstack) ; \
+	jmp 3f			; \
+2:				; \
+	movq 0x28(%rsp), %rbx	; \
+	movq %rbx, (%rdx)	; \
+	movq %rbx, PDAREF(pda_kernelstack) ; \
+3:				; \
+	popq %rdx		; \
+	popq %rbx
 
 /* also need to do stack changes */
 /* and astlvl checks */
@@ -176,18 +202,29 @@
 	.macro save_sp x
 	pushq %rax
 	pushq %rdi
+	pushq %rdx
 	movq 0x7ffff000, %rdi
+	movq $init_tss, %rdx
+	addq $0x4, %rdx
 	addq $tsk_ipr_sp, %rdi
-	movq \x+0x18(%rsp), %rax
+	movq \x+0x20(%rsp), %rax
 	andq $0x3, %rax
+	je 2f 
 	salw $3,%ax
 	addq %rax, %rdi
-	or %ax, %ax
-	movq \x+0x28(%rsp),%rax
-	movq %rax, (%rdi)
-	jne 1f
+	addq %rax, %rdx
+	cmpq $0x18, %rax
+	movq \x+0x30(%rsp),%rax
+	je 4f
+	jmp 3f
+2:	
+	movq \x+0x30(%rsp), %rax
 	movq %rax, PDAREF(pda_kernelstack)
-1:	
+3:	
+	movq %rax, (%rdx)
+4:			
+	movq %rax, (%rdi)
+	popq %rdx
 	popq %rdi
 	popq %rax
 	.endm
@@ -282,8 +319,9 @@ sysret_with_reschedule:
 sysret_restore_args:
 	REI
 	movq    RIP-ARGOFFSET(%rsp),%rcx
-	RESTORE_ARGS 0,-ARG_SKIP,1
-	SAVE_TSS_SP
+	RESTORE_ARGS 0,8,1 # was -ARG_SKIP, caused no rsp change and overflow
+	INTPANIC
+	SYSRET_SAVE_TSS_SP
 	movq	PDAREF(pda_oldrsp),%rsp
 	swapgs
 	sysretq
@@ -455,6 +493,7 @@ ENTRY(common_interrupt)
 	je   1f
 	swapgs
 1:	cld
+	save_sp 8
 #	PUSHPSLINTR
 #ifdef CONFIG_X86_REMOTE_DEBUG
 	SAVE_ALL
@@ -464,9 +503,11 @@ ENTRY(common_interrupt)
 	leaq -ARGOFFSET(%rsp),%rdi	# arg1 for handler
 #endif
 	regtrapi $0,$0x10
+#if 0
 	addl $1,PDAREF(pda_irqcount)	# XXX: should be merged with irq.c irqcount
 	movq PDAREF(pda_irqstackptr),%rax
 	cmoveq %rax,%rsp
+#endif
 	pushq %rdi			# save old stack
 	call do_IRQ
 	/* 0(%rsp): oldrsp-ARGOFFSET */ 
@@ -487,12 +528,14 @@ retint_with_reschedule:
 retint_restore_args_swapgs:		
 	REI
 	RESTORE_ARGS 0,8						
+	INTPANIC
 	SAVE_TSS_SP
 	swapgs
 	jmp iret_label
 retint_restore_args:				
 	REI
 	RESTORE_ARGS 0,8						
+	INTPANIC
 	SAVE_TSS_SP
 iret_label:
 	iretq
@@ -548,9 +591,12 @@ retint_reschedule:
 	testl $3,136(%rdi)
 	je 1f
 	swapgs
-1:	addl $1,%gs:pda_irqcount
+1:	
+#if 0
+	addl $1,%gs:pda_irqcount
 	movq %gs:pda_irqstackptr,%rax
 	cmoveq %rax,%rsp
+#endif
 	pushq %rdi
 	.endm	
 
@@ -649,6 +695,7 @@ vms_sysret_restore_args:
 	sysretq
 #endif
 	REI	
+	INTPANIC
 	SAVE_TSS_SP
 	testl $3,8(%rsp)	# from kernel?
 	je   1f
@@ -831,9 +878,11 @@ ENTRY(vms_common_interrupt)
 	SAVE_ARGS
 	leaq -ARGOFFSET(%rsp),%rdi	# arg1 for handler
 #endif	
+#if 0	
 	addl $1,PDAREF(pda_irqcount)	# XXX: should be merged with irq.c irqcount
 	movq PDAREF(pda_irqstackptr),%rax
 	cmoveq %rax,%rsp
+#endif	
 	pushq %rdi			# save old stack
 	call do_IRQ
 	/* 0(%rsp): oldrsp-ARGOFFSET */ 
@@ -859,6 +908,7 @@ vms_retint_restore_args:
 	REI
 1:	
 	RESTORE_ARGS 0,8						
+	INTPANIC
 	SAVE_TSS_SP
 vms_iret_label:	
 	iretq
@@ -914,15 +964,19 @@ vms_retint_reschedule:
 	testl $3,136(%rdi)
 	je 1f
 	swapgs
-1:	addl $1,%gs:pda_irqcount
+1:	
+#if 0
+	addl $1,%gs:pda_irqcount
 	movq %gs:pda_irqstackptr,%rax
 	cmoveq %rax,%rsp
+#endif	
 	pushq %rdi
 	.endm	
 
 	.macro BUILD_SMP_INTERRUPT x,v
 ENTRY(\x)
 	push $\v-256
+	save_sp 8
 	IRQ_ENTER
 #	PUSHPSLINTR
 	regtrapi $0,$0x10
@@ -959,6 +1013,7 @@ ENTRY(\x)
 	.endm
 
 	.macro softentry sym
+	save_sp 0
 	testl $3,8(%rsp)       # from kernel?
 	je   1f
 	swapgs
@@ -967,6 +1022,7 @@ ENTRY(\x)
 	call \sym
 	POPR_ALL
 	REI
+	INTPANIC
 	SAVE_TSS_SP
 	testl $3,8(%rsp)       # from kernel?
 	je   1f
@@ -1021,6 +1077,7 @@ error_restore_swapgs:
 	REI					
 	RESTORE_REST
 	RESTORE_ARGS 0,8						
+	INTPANIC
 	SAVE_TSS_SP
 	swapgs
 	jmp iret_label
@@ -1028,6 +1085,7 @@ error_restore:
 	REI
 	RESTORE_REST
 	RESTORE_ARGS 0,8						
+	INTPANIC
 	SAVE_TSS_SP
 	jmp iret_label
 	
@@ -1372,7 +1430,7 @@ ENTRY(test_exe)
 
 ENTRY(test_sup)
 	iretq
-		
+
 .data
 ENTRY(vms_sys_call_table)
 	.quad SYMBOL_NAME(sys_$ni_syscall)	/* 0  -  old "setup()" system call*/
