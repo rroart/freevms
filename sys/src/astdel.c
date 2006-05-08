@@ -510,6 +510,10 @@ int exe$astdel_prep2_new(long stack, long ast, long astprm) {
 		       "addq $0x4, %rdx\n\t" // yes, 4
 		       "movq %rsp, (%rdx)\n\t"
 		       "addq $0x28, (%rdx)\n\t"
+#if 1
+		       "movq %rsp, %gs:0\n\t"
+		       "addq $0x28, %gs:0\n\t"
+#endif
 #endif
 		       "movq %rbp, %rax\n\t" // ast
 		       "movq %rbx, %rdi\n\t" // astprm
