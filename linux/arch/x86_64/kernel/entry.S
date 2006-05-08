@@ -111,7 +111,19 @@
 	je 1f			; \
 	call panic		; \
 1:	popq %rdx
-		
+
+#define RSP0PANIC \
+	testq $0x8, %rsp	; \
+	jne 1f			; \
+	call panic		; \
+1:	
+			
+#define RSP8PANIC \
+	testq $0x8, %rsp	; \
+	je 1f			; \
+	call panic		; \
+1:	
+			
 #define SYSRET_SAVE_TSS_SP \
 	pushq %rbx		; \
 	pushq %rdx		; \
@@ -290,10 +302,10 @@ ENTRY(ret_from_fork)
 
 ENTRY(system_call)
 	swapgs
-#	PUSHPSLINTR
 	syscall_save_sp 0	
 	movq	%rsp,PDAREF(pda_oldrsp) 
 	movq	PDAREF(pda_kernelstack),%rsp
+	RSP8PANIC
 	regtrapi $1,$0
 	sti
 	SAVE_ARGS 8,1
@@ -312,14 +324,12 @@ ret_from_sys_call:
 sysret_with_reschedule:
 	GET_CURRENT(%rcx)
 	cli 
-#	cmpq $0,tsk_need_resched(%rcx)
-#	jne sysret_reschedule
 	cmpl $0,tsk_sigpending(%rcx)
 	jne sysret_signal
 sysret_restore_args:
-	REI
 	movq    RIP-ARGOFFSET(%rsp),%rcx
 	RESTORE_ARGS 0,8,1 # was -ARG_SKIP, caused no rsp change and overflow
+	REI
 	INTPANIC
 	SYSRET_SAVE_TSS_SP
 	movq	PDAREF(pda_oldrsp),%rsp
@@ -333,19 +343,8 @@ sysret_signal:
 	leaq do_signal(%rip),%rax
 	call ptregscall_common	
 sysret_signal_test:
-	GET_CURRENT(%rcx)
 	cli
-#	cmpq $0,tsk_need_resched(%rcx)
-#	je   sysret_restore_args
 	jmp sysret_restore_args
-	sti
-	call schedule
-	jmp sysret_signal_test
-	
-sysret_reschedule:
-	sti
-	call schedule
-	jmp sysret_with_reschedule	
 	
 tracesys:			 
 	SAVE_REST
@@ -386,17 +385,10 @@ intret_test_kernel:
 intret_with_reschedule:
 	GET_CURRENT(%rcx)
 	cli 
-#	cmpq $0,tsk_need_resched(%rcx)
-#	jne intret_reschedule
 	cmpl $0,tsk_sigpending(%rcx)
 	jne intret_signal
 	jmp retint_restore_args_swapgs
 	
-intret_reschedule:
-	sti
-	call schedule
-	jmp intret_with_reschedule	
-
 intret_signal:
 	sti
 	SAVE_REST
@@ -405,15 +397,8 @@ intret_signal:
 	call do_signal
 	RESTORE_REST
 intret_signal_test:		
-	GET_CURRENT(%rcx)
 	cli
-#	cmpq $0,tsk_need_resched(%rcx)
-#	je   retint_restore_args_swapgs
 	jmp retint_restore_args_swapgs
-	sti
-	call schedule
-	# RED-PEN: can we lose signals here?
-	jmp  intret_signal_test
 	
 /* 
  * Certain special system calls that need to save a complete stack frame.
@@ -489,52 +474,43 @@ ENTRY(stub_rt_sigreturn)
 
 /* 0(%rsp): interrupt number */ 
 ENTRY(common_interrupt)
+	RSP8PANIC
 	testl $3,16(%rsp)	# from kernel?
 	je   1f
 	swapgs
 1:	cld
 	save_sp 8
-#	PUSHPSLINTR
 #ifdef CONFIG_X86_REMOTE_DEBUG
 	SAVE_ALL
-	movq %rsp,%rdi
+	movq %rsp, %rdi
 #else			
 	SAVE_ARGS
 	leaq -ARGOFFSET(%rsp),%rdi	# arg1 for handler
 #endif
 	regtrapi $0,$0x10
-#if 0
-	addl $1,PDAREF(pda_irqcount)	# XXX: should be merged with irq.c irqcount
-	movq PDAREF(pda_irqstackptr),%rax
-	cmoveq %rax,%rsp
-#endif
-	pushq %rdi			# save old stack
+	pushq %rdi
 	call do_IRQ
+	popq %rdi
 	/* 0(%rsp): oldrsp-ARGOFFSET */ 
 ENTRY(ret_from_intr)
 	cli
-	popq  %rdi
-	subl $1,PDAREF(pda_irqcount)
-	leaq ARGOFFSET(%rdi),%rsp
 	testl $3,CS(%rdi)	# from kernel?
 	je	retint_restore_args
 	/* Interrupt came from user space */
 retint_with_reschedule:
 	GET_CURRENT(%rcx)
-#	cmpq $0,tsk_need_resched(%rcx) 
-#	jne retint_reschedule
 	cmpl $0,tsk_sigpending(%rcx)
 	jne retint_signal
 retint_restore_args_swapgs:		
-	REI
 	RESTORE_ARGS 0,8						
+	REI
 	INTPANIC
 	SAVE_TSS_SP
 	swapgs
 	jmp iret_label
 retint_restore_args:				
-	REI
 	RESTORE_ARGS 0,8						
+	REI
 	INTPANIC
 	SAVE_TSS_SP
 iret_label:
@@ -561,51 +537,14 @@ retint_signal:
 	RESTORE_REST
 retint_signal_test:		
 	cli
-	GET_CURRENT(%rcx) 
-#	cmpq $0,tsk_need_resched(%rcx) 
-#	je   retint_restore_args_swapgs
 	jmp retint_restore_args_swapgs
-	sti
-	call schedule
-	jmp retint_signal_test			
 			
-retint_reschedule:
-	sti
-	call schedule
-	cli
-	jmp retint_with_reschedule
-		
-/* IF:off, stack contains irq number on origrax */ 	
-	.macro IRQ_ENTER	
-	cld
-	pushq %rdi
-	pushq %rsi
-	pushq %rdx		; 
-	pushq %rcx
-	pushq %rax
-	pushq %r8
-	pushq %r9
-	pushq %r10
-	pushq %r11
-	leaq -48(%rsp),%rdi
-	testl $3,136(%rdi)
-	je 1f
-	swapgs
-1:	
-#if 0
-	addl $1,%gs:pda_irqcount
-	movq %gs:pda_irqstackptr,%rax
-	cmoveq %rax,%rsp
-#endif
-	pushq %rdi
-	.endm	
-
 ENTRY(vms_system_call3)
+	RSP0PANIC
 	testl $3,8(%rsp)	# from kernel?
 	je   1f
 	swapgs
 1:
-#	PUSHPSLINTR
 	save_sp 0	
 	regtrapi $1,$3
 	sti
@@ -624,11 +563,11 @@ ENTRY(vms_system_call3)
 	jmp vms_syscall_common
 	
 ENTRY(vms_system_call1)
+	RSP0PANIC
 	testl $3,8(%rsp)	# from kernel?
 	je   1f
 	swapgs
 1:
-#	PUSHPSLINTR
 	save_sp 0	
 	regtrapi $1,$1
 	sti
@@ -647,15 +586,11 @@ ENTRY(vms_system_call1)
 	jmp vms_syscall_common
 	
 ENTRY(vms_system_call)
+	RSP0PANIC
 	testl $3,8(%rsp)	# from kernel?
 	je   1f
 	swapgs
 1:
-#if 0	
-	movq	%rsp,PDAREF(pda_oldrsp) 
-	movq	PDAREF(pda_kernelstack),%rsp
-#endif
-#	PUSHPSLINTR
 	save_sp 0	
 	regtrapi $1,$0
 	sti
@@ -675,25 +610,13 @@ vms_syscall_common:
 	movq %rax,RAX-ARGOFFSET(%rsp)
 	.globl vms_ret_from_sys_call
 vms_ret_from_sys_call:	
-vms_sysret_with_reschedule:
+vms_iret_with_reschedule:
 	GET_CURRENT(%rcx)
 	cli 
-#	cmpq $0,tsk_need_resched(%rcx)
-#	jne vms_sysret_reschedule
 	cmpl $0,tsk_sigpending(%rcx)
-	jne vms_sysret_signal
-vms_sysret_restore_args:
-#sync with non-v and do rei here?
-#if 0
-	movq    RIP-ARGOFFSET(%rsp),%rcx
-#endif	
+	jne vms_iret_signal
+vms_iret_restore_args:
 	RESTORE_ARGS 0,8
-#if 0	
-	RESTORE_ARGS 0,-ARG_SKIP,1
-	movq	PDAREF(pda_oldrsp),%rsp
-	swapgs
-	sysretq
-#endif
 	REI	
 	INTPANIC
 	SAVE_TSS_SP
@@ -703,26 +626,15 @@ vms_sysret_restore_args:
 1:
 	iretq
 			
-vms_sysret_signal:
+vms_iret_signal:
 	sti
 	xorl %esi,%esi		# oldset
 	leaq -ARGOFFSET(%rsp),%rdi	# regs
 	leaq do_signal(%rip),%rax
 	call vms_ptregscall_common	
-vms_sysret_signal_test:
-	GET_CURRENT(%rcx)
+vms_iret_signal_test:
 	cli
-#	cmpq $0,tsk_need_resched(%rcx)
-#	je   vms_sysret_restore_args
-	jmp vms_sysret_restore_args
-	sti
-	call schedule
-	jmp vms_sysret_signal_test
-	
-vms_sysret_reschedule:
-	sti
-	call schedule
-	jmp vms_sysret_with_reschedule	
+	jmp vms_iret_restore_args
 	
 vms_tracesys:			 
 	SAVE_REST
@@ -751,47 +663,6 @@ vms_badsys:
 	movq $-ENOSYS,RAX-ARGOFFSET(%rsp)
 	jmp vms_ret_from_sys_call
 
-/*
- * Syscall return path ending with IRET.
- * This can be either 64bit calls that require restoring of all registers 
- * (impossible with sysret) or 32bit calls. 	 
- */	
-ENTRY(vms_int_ret_from_sys_call)	
-vms_intret_test_kernel:
-	testl $3,CS-ARGOFFSET(%rsp)		
-	je vms_retint_restore_args
-vms_intret_with_reschedule:
-	GET_CURRENT(%rcx)
-	cli 
-#	cmpq $0,tsk_need_resched(%rcx)
-#	jne vms_intret_reschedule
-	cmpl $0,tsk_sigpending(%rcx)
-	jne vms_intret_signal
-	jmp vms_retint_restore_args_swapgs
-	
-vms_intret_reschedule:
-	sti
-	call schedule
-	jmp vms_intret_with_reschedule	
-
-vms_intret_signal:
-	sti
-	SAVE_REST
-	xorq %rsi,%rsi		# oldset -> arg2 
-	movq %rsp,%rdi		# &ptregs -> arg1		
-	call do_signal
-	RESTORE_REST
-vms_intret_signal_test:		
-	GET_CURRENT(%rcx)
-	cli
-#	cmpq $0,tsk_need_resched(%rcx)
-#	je   vms_retint_restore_args_swapgs
-	jmp vms_retint_restore_args_swapgs
-	sti
-	call schedule
-	# RED-PEN: can we lose signals here?
-	jmp  vms_intret_signal_test
-	
 /* 
  * Certain special system calls that need to save a complete stack frame.
  */ 								
@@ -822,165 +693,26 @@ ENTRY(vms_ptregscall_common)
 	pushq %r11
 	ret
 	
-ENTRY(vms_stub_execve)
-	popq %r11
-	SAVE_REST
-	movq %r11, %r15
-	FIXUP_TOP_OF_STACK %r11
-	call sys_execve
-	GET_CURRENT(%rcx)
-	testl $ASM_THREAD_IA32,tsk_thread+thread_flags(%rcx)
-	jnz exec_32bit
-	RESTORE_TOP_OF_STACK %r11
-	movq %r15, %r11
-	RESTORE_REST
-	push %r11
-	ret
-
 vms_exec_32bit:
 	movq %rax,RAX(%rsp)
 	RESTORE_REST
 	jmp int_ret_from_sys_call
 	
-/*
- * sigreturn is special because it needs to restore all registers on return.
- * This cannot be done with SYSRET, so use the IRET return path instead.
- */                
-ENTRY(vms_stub_rt_sigreturn)
-	addq $8, %rsp		
-	SAVE_REST
-	FIXUP_TOP_OF_STACK %r11
-	call sys_rt_sigreturn
-	movq %rax,RAX(%rsp) # fixme, this could be done at the higher layer
-	RESTORE_REST
-	jmp vms_int_ret_from_sys_call
-
-/* 
- * Interrupt entry/exit.
- *
- * Interrupt entry points save only callee clobbered registers, except
- * for signals again.
- *	
- * Entry runs with interrupts off.	
- */ 
-
-/* 0(%rsp): interrupt number */ 
-ENTRY(vms_common_interrupt)
+	.macro BUILD_SMP_INTERRUPT x,v
+ENTRY(\x)
+	push $\v-256
+	RSP8PANIC
 	testl $3,16(%rsp)	# from kernel?
 	je   1f
 	swapgs
 1:	cld
-	PUSHPSLINTR
-#ifdef CONFIG_X86_REMOTE_DEBUG
-	SAVE_ALL
-	movq %rsp,%rdi
-#else			
+	save_sp 8
 	SAVE_ARGS
 	leaq -ARGOFFSET(%rsp),%rdi	# arg1 for handler
-#endif	
-#if 0	
-	addl $1,PDAREF(pda_irqcount)	# XXX: should be merged with irq.c irqcount
-	movq PDAREF(pda_irqstackptr),%rax
-	cmoveq %rax,%rsp
-#endif	
-	pushq %rdi			# save old stack
-	call do_IRQ
-	/* 0(%rsp): oldrsp-ARGOFFSET */ 
-ENTRY(vms_ret_from_intr)
-	cli
-	popq  %rdi
-	subl $1,PDAREF(pda_irqcount)
-	leaq ARGOFFSET(%rdi),%rsp
-	testl $3,CS(%rdi)	# from kernel?
-	je	retint_restore_args
-	/* Interrupt came from user space */
-vms_retint_with_reschedule:
-	GET_CURRENT(%rcx)
-#	cmpq $0,tsk_need_resched(%rcx) 
-#	jne retint_reschedule
-	cmpl $0,tsk_sigpending(%rcx)
-	jne retint_signal
-vms_retint_restore_args_swapgs:		
-	REI
-	swapgs
-	jmp 1f
-vms_retint_restore_args:				
-	REI
-1:	
-	RESTORE_ARGS 0,8						
-	INTPANIC
-	SAVE_TSS_SP
-vms_iret_label:	
-	iretq
-	.section __ex_table,"a"
-	.align 8
-	.quad vms_iret_label,vms_bad_iret
-	.previous
-	.section .fixup,"ax"
-	/* force a signal here? this matches i386 behaviour */
-vms_bad_iret:
-	/* runs with kernelgs again */	
-	movq $-9999,%rdi	/* better code? */
-	jmp do_exit			
-	.previous	
-
-vms_retint_signal:	
-	sti
-	SAVE_REST
-	movq $-1,ORIG_RAX(%rsp) 			
-	xorq %rsi,%rsi		# oldset
-	movq %rsp,%rdi		# &pt_regs
-	call do_signal
-	RESTORE_REST
-vms_retint_signal_test:		
-	cli
-	GET_CURRENT(%rcx) 
-#	cmpq $0,tsk_need_resched(%rcx) 
-#	je   retint_restore_args_swapgs
-	jmp retint_restore_args_swapgs
-	sti
-	call schedule
-	jmp retint_signal_test			
-			
-vms_retint_reschedule:
-	sti
-	call schedule
-	cli
-	jmp retint_with_reschedule
-		
-/* IF:off, stack contains irq number on origrax */ 	
-	.macro VMS_IRQ_ENTER	
-	cld
-	pushq %rdi
-	pushq %rsi
-	pushq %rdx		; 
-	pushq %rcx
-	pushq %rax
-	pushq %r8
-	pushq %r9
-	pushq %r10
-	pushq %r11
-	leaq -48(%rsp),%rdi
-	testl $3,136(%rdi)
-	je 1f
-	swapgs
-1:	
-#if 0
-	addl $1,%gs:pda_irqcount
-	movq %gs:pda_irqstackptr,%rax
-	cmoveq %rax,%rsp
-#endif	
-	pushq %rdi
-	.endm	
-
-	.macro BUILD_SMP_INTERRUPT x,v
-ENTRY(\x)
-	push $\v-256
-	save_sp 8
-	IRQ_ENTER
-#	PUSHPSLINTR
 	regtrapi $0,$0x10
+	pushq %rdi
 	call smp_\x
+	popq %rdi
 	jmp ret_from_intr
 	.endm
 
@@ -1038,7 +770,6 @@ ENTRY(\x)
  	ALIGN
 error_entry:
 	/* rdi slot contains rax, oldrax contains error code */
-#	PUSHPSL
 	pushq %rsi
 	movq  8(%rsp),%rsi	/* load rax */
 	pushq %rdx
@@ -1069,8 +800,6 @@ error_exit:
 error_test:		
 	cli	
 	GET_CURRENT(%rcx)
-#	cmpq $0,tsk_need_resched(%rcx)
-#	jne  error_reschedule
 	cmpl $0,tsk_sigpending(%rcx)
 	jne  error_signal
 error_restore_swapgs:
@@ -1100,14 +829,8 @@ error_signal:
 	movq %rsp,%rdi
 	call do_signal
 error_signal_test:
-	GET_CURRENT(%rcx)	
 	cli
-#	cmpq $0,tsk_need_resched(%rcx)
-#	je   error_restore_swapgs
 	jmp error_restore_swapgs
-	sti
-	call schedule
-	jmp  error_signal_test
 	
 error_kernelspace:	
 	incl %r15d
@@ -1340,7 +1063,6 @@ ENTRY(test_code)
 ENTRY(sched_vector)
 	softentry schedule
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(schedule)
         POPR_ALL
         REI
@@ -1348,7 +1070,6 @@ ENTRY(sched_vector)
 ENTRY(resched_vector)
 	softentry sch$resched
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(sch$resched)
         POPR_ALL
         REI
@@ -1356,7 +1077,6 @@ ENTRY(resched_vector)
 ENTRY(timer_vector)
 	softentry exe$swtimint
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(exe$swtimint)
         POPR_ALL
         REI
@@ -1364,7 +1084,6 @@ ENTRY(timer_vector)
 ENTRY(timerfork_vector)
 	softentry exe$swtimint
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(exe$swtimint)
         POPR_ALL
         REI
@@ -1372,7 +1091,6 @@ ENTRY(timerfork_vector)
 ENTRY(iopost_vector)
 	softentry ioc$iopost
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(ioc$iopost)
         POPR_ALL
         REI
@@ -1380,7 +1098,6 @@ ENTRY(iopost_vector)
 ENTRY(astdel_vector)
 	softentry sch$astdel	
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(sch$astdel)
         POPR_ALL
         REI
@@ -1388,7 +1105,6 @@ ENTRY(astdel_vector)
 ENTRY(queueast_vector)
 	softentry exe$frkipl6dsp
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(exe$frkipl6dsp)
         POPR_ALL
         REI
@@ -1396,7 +1112,6 @@ ENTRY(queueast_vector)
 ENTRY(iolock8_vector)
 	softentry exe$frkipl8dsp
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(exe$frkipl8dsp)
         POPR_ALL
         REI
@@ -1404,7 +1119,6 @@ ENTRY(iolock8_vector)
 ENTRY(iolock9_vector)
 	softentry exe$frkipl9dsp
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(exe$frkipl9dsp)
         POPR_ALL
         REI
@@ -1412,7 +1126,6 @@ ENTRY(iolock9_vector)
 ENTRY(iolock10_vector)
 	softentry exe$frkipl10dsp
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(exe$frkipl10dsp)
         POPR_ALL
         REI
@@ -1420,7 +1133,6 @@ ENTRY(iolock10_vector)
 ENTRY(iolock11_vector)
 	softentry exe$frkipl11dsp
         PUSHR_ALL
-#        call pushpsl
         call SYMBOL_NAME(exe$frkipl11dsp)
         POPR_ALL
         REI
