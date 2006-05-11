@@ -1134,7 +1134,6 @@ long tz_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   struct _ucb * newucb = 0;
   // ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&tz$ucb*/,&newucb); // check. skip?
   exe$assign(dsc,&chan,0,0,0);
-  registerdevchan(MKDEV(TTYAUX_MAJOR,unitno),chan);
 
 
   return newucb;

@@ -230,7 +230,6 @@ long ft_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   struct _ucb * newucb;
   ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&ft$ucb*/,&newucb);
   exe$assign(dsc,&chan,0,0,0);
-  registerdevchan(MKDEV(TTYAUX_MAJOR,unitno),chan);
 
 
   return newucb;

@@ -511,7 +511,6 @@ long con_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
 #if 0
   registerucbchan(newucb,chan);
 #endif
-  registerdevchan(MKDEV(TTY_MAJOR,unitno),chan);
 
   con_ucb = newucb;
   opa$ar_ucb0 = newucb;
