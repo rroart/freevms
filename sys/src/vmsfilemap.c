@@ -141,6 +141,7 @@ int filemap_fdatawait(struct address_space * mapping)
 	return ret;
 }
 
+#if 0
 /*
  * This is a generic file read routine, and uses the
  * inode->i_op->readpage() function for the actual low-level
@@ -362,6 +363,7 @@ void do_rms_generic_file_read(struct _fcb * filp, loff_t *ppos, read_descriptor_
 	UPDATE_ATIME(inode);
 #endif
 }
+#endif
 
 static ssize_t generic_file_direct_IO(int rw, struct file * filp, char * buf, size_t count, loff_t offset)
 {
@@ -470,6 +472,7 @@ int file_read_actor(read_descriptor_t * desc, struct page *page, unsigned long o
 	return size;
 }
 
+#if 0
 /*
  * This is the "read()" routine for all filesystems
  * that can use the page cache directly.
@@ -556,6 +559,7 @@ ssize_t rms_generic_file_read(struct file * filp, char * buf, size_t count, loff
  out:
 	return retval;
 }
+#endif
 
 static int file_send_actor(read_descriptor_t * desc, struct page *page, unsigned long offset , unsigned long size)
 {
@@ -593,6 +597,7 @@ static int file_send_actor(read_descriptor_t * desc, struct page *page, unsigned
 
 asmlinkage ssize_t sys_sendfile(int out_fd, int in_fd, off_t *offset, size_t count)
 {
+#if 0
 	ssize_t retval;
 	struct file * in_file, * out_file;
 	struct _fcb * in_inode, * out_inode;
@@ -663,6 +668,9 @@ fput_in:
 	fput(in_file);
 out:
 	return retval;
+#else
+	return -EBADF;
+#endif
 }
 
 #ifdef __x86_64__

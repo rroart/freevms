@@ -348,7 +348,12 @@ int /*__init*/ scs_init(void) {
 #ifdef CONFIG_VMS
     if (file==0)
       goto out2;
+#if 0
     int size=rms_generic_file_read(file,buf,1024,&pos);
+#else
+    asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count);
+    int size=sys_read(file, buf, 1024);
+#endif
 #else
     int size=generic_file_read(file,buf,1024,&pos);
 #endif
