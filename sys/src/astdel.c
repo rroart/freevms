@@ -506,7 +506,10 @@ int exe$astdel_prep2_new(long stack, long ast, long astprm) {
 		       // check. need myrei here?
 		       "callq myrei\n\t"
 #if 1
-		       "movq $init_tss, %rdx\n\t"
+		       "movq 0x7ffff000, %rdi\n\t"
+		       "movq 2744(%rdi), %rdx\n\t"
+		       "shl $0x8, %rdx\n\t"
+		       "addq $init_tss, %rdx\n\t"
 		       "addq $0x4, %rdx\n\t" // yes, 4
 		       "movq %rsp, (%rdx)\n\t"
 		       "addq $0x28, (%rdx)\n\t"

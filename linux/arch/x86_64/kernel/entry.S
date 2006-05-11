@@ -125,36 +125,49 @@
 1:	
 			
 #define SYSRET_SAVE_TSS_SP \
-	pushq %rbx		; \
+	pushq %rdi		; \
 	pushq %rdx		; \
-	movq $init_tss, %rdx	; \
+	movq 0x7ffff000, %rdi	; \
+	movq tsk_pcbl_cpu_id(%rdi), %rdx ; \
+	shl $0x8, %rdx		; \
+	addq $init_tss, %rdx	; \
 	addq $0x4, %rdx		; /* yes, 4 */ \
+	addq $tsk_ipr_sp, %rdi	; \
+	movq %rsp, (%rdi)	; \
+	addq $0x10, (%rdi)	; \
 	movq %rsp, (%rdx)	; \
 	addq $0x10, (%rdx)	; \
 	movq %rsp, PDAREF(pda_kernelstack) ; \
 	addq $0x10, PDAREF(pda_kernelstack) ; \
 	popq %rdx		; \
-	popq %rbx
+	popq %rdi
 
 #define SAVE_TSS_SP \
-	pushq %rbx		; \
+	pushq %rdi		; \
 	pushq %rdx		; \
-	movq $init_tss, %rdx	; \
+	movq 0x7ffff000, %rdi	; \
+	movq tsk_pcbl_cpu_id(%rdi), %rdx ; \
+	shl $0x8, %rdx		; \
+	addq $init_tss, %rdx	; \
 	addq $0x4, %rdx		; /* yes, 4 */ \
+	addq $tsk_ipr_sp, %rdi	; \
 	cmpq $0x10, 0x18(%rsp)	; \
 	je 2f			; \
+	movq %rsp, (%rdi)	; \
+	addq $0x38, (%rdi)	; \
 	movq %rsp, (%rdx)	; \
 	addq $0x38, (%rdx)	; \
 	movq %rsp, PDAREF(pda_kernelstack) ; \
 	addq $0x38, PDAREF(pda_kernelstack) ; \
 	jmp 3f			; \
 2:				; \
-	movq 0x28(%rsp), %rbx	; \
-	movq %rbx, (%rdx)	; \
-	movq %rbx, PDAREF(pda_kernelstack) ; \
+	/* not yet: movq 0x28(%rsp), (%rdi) */	; \
+	movq 0x28(%rsp), %rdi	; \
+	movq %rdi, (%rdx)	; \
+	movq %rdi, PDAREF(pda_kernelstack) ; \
 3:				; \
 	popq %rdx		; \
-	popq %rbx
+	popq %rdi
 
 /* also need to do stack changes */
 /* and astlvl checks */
@@ -216,7 +229,9 @@
 	pushq %rdi
 	pushq %rdx
 	movq 0x7ffff000, %rdi
-	movq $init_tss, %rdx
+	movq tsk_pcbl_cpu_id(%rdi), %rdx
+	shl $0x8, %rdx
+	addq $init_tss, %rdx
 	addq $0x4, %rdx
 	addq $tsk_ipr_sp, %rdi
 	movq \x+0x20(%rsp), %rax
