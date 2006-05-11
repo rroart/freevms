@@ -21,11 +21,13 @@
 #include <misc_routines.h>
 #include <exe_routines.h>
 
+#ifndef CONFIG_VMS
 struct file_operations generic_ro_fops = {
 	llseek:		generic_file_llseek,
 	read:		generic_file_read,
 	mmap:		generic_file_mmap,
 };
+#endif
 
 ssize_t generic_read_dir(struct file *filp, char *buf, size_t siz, loff_t *ppos)
 {

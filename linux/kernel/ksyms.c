@@ -130,8 +130,8 @@ EXPORT_SYMBOL(create_bounce);
 #endif
 
 /* filesystem internal functions */
-EXPORT_SYMBOL(def_blk_fops);
 #ifndef CONFIG_VMS
+EXPORT_SYMBOL(def_blk_fops);
 EXPORT_SYMBOL(update_atime);
 EXPORT_SYMBOL(get_fs_type);
 EXPORT_SYMBOL(get_super);
@@ -240,11 +240,15 @@ EXPORT_SYMBOL(generic_commit_write);
 #endif
 EXPORT_SYMBOL(block_truncate_page);
 EXPORT_SYMBOL(generic_block_bmap);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(generic_file_read);
 EXPORT_SYMBOL(do_generic_file_read);
 EXPORT_SYMBOL(generic_file_write);
+#endif
 EXPORT_SYMBOL(generic_file_mmap);
+#ifndef CONFIG_VMS
 EXPORT_SYMBOL(generic_ro_fops);
+#endif
 EXPORT_SYMBOL(generic_buffer_fdatasync);
 #ifndef CONFIG_VMS
 EXPORT_SYMBOL(page_hash_bits);

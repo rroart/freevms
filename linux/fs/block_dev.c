@@ -385,7 +385,11 @@ struct block_device *bdget(dev_t dev)
 			inode->i_rdev = kdev;
 			inode->i_dev = kdev;
 			inode->i_bdev = new_bdev;
+#ifndef CONFIG_VMS
 			inode->i_data.a_ops = &def_blk_aops;
+#else
+			inode->i_data.a_ops = 0;
+#endif
 			inode->i_data.gfp_mask = GFP_USER;
 			inode->i_mode = S_IFBLK;
 			spin_lock(&bdev_lock);
@@ -730,6 +734,7 @@ static int blkdev_ioctl(struct inode *inode, struct file *file, unsigned cmd,
 	return -EINVAL;
 }
 
+#ifndef CONFIG_VMS
 struct address_space_operations def_blk_aops = {
 	readpage: blkdev_readpage,
 	writepage: blkdev_writepage,
@@ -740,8 +745,8 @@ struct address_space_operations def_blk_aops = {
 };
 
 struct file_operations def_blk_fops = {
-  open:		0/*blkdev_open*/,
-  release:	0/*blkdev_close*/,
+  open:		blkdev_open,
+  release:	blkdev_close,
 	llseek:		block_llseek,
 	read:		generic_file_read,
 	write:		generic_file_write,
@@ -749,6 +754,7 @@ struct file_operations def_blk_fops = {
 	fsync:		block_fsync,
 	ioctl:		blkdev_ioctl,
 };
+#endif
 
 const char * bdevname(kdev_t dev)
 {
