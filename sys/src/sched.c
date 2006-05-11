@@ -980,22 +980,26 @@ static inline void __wake_up_common (wait_queue_head_t *q, unsigned int mode,
 
 void fastcall __wake_up(wait_queue_head_t *q, unsigned int mode, int nr)
 {
+#ifndef CONFIG_VMS
 	if (q) {
 		unsigned long flags;
 		wq_read_lock_irqsave(&q->lock, flags);
 		__wake_up_common(q, mode, nr, 0);
 		wq_read_unlock_irqrestore(&q->lock, flags);
 	}
+#endif
 }
 
 void fastcall __wake_up_sync(wait_queue_head_t *q, unsigned int mode, int nr)
 {
+#ifndef CONFIG_VMS
 	if (q) {
 		unsigned long flags;
 		wq_read_lock_irqsave(&q->lock, flags);
 		__wake_up_common(q, mode, nr, 1);
 		wq_read_unlock_irqrestore(&q->lock, flags);
 	}
+#endif
 }
 
 void fastcall complete(struct completion *x)
@@ -1010,6 +1014,7 @@ void fastcall complete(struct completion *x)
 
 void fastcall wait_for_completion(struct completion *x)
 {
+#ifndef CONFIG_VMS
 	spin_lock_irq(&x->wait.lock);
 	if (!x->done) {
 		DECLARE_WAITQUEUE(wait, current);
@@ -1027,6 +1032,7 @@ void fastcall wait_for_completion(struct completion *x)
 	}
 	x->done--;
 	spin_unlock_irq(&x->wait.lock);
+#endif
 }
 
 #define	SLEEP_ON_VAR				\

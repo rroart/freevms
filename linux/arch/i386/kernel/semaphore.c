@@ -62,6 +62,7 @@ static spinlock_t semaphore_lock = SPIN_LOCK_UNLOCKED;
 
 void __down(struct semaphore * sem)
 {
+#if 0
 	struct task_struct *tsk = current;
 	DECLARE_WAITQUEUE(wait, tsk);
 	tsk->state = TASK_UNINTERRUPTIBLE;
@@ -91,10 +92,12 @@ void __down(struct semaphore * sem)
 	remove_wait_queue(&sem->wait, &wait);
 	tsk->state = TASK_RUNNING;
 	wake_up(&sem->wait);
+#endif
 }
 
 int __down_interruptible(struct semaphore * sem)
 {
+#if 0
 	int retval = 0;
 	struct task_struct *tsk = current;
 	DECLARE_WAITQUEUE(wait, tsk);
@@ -142,6 +145,8 @@ int __down_interruptible(struct semaphore * sem)
 	remove_wait_queue(&sem->wait, &wait);
 	wake_up(&sem->wait);
 	return retval;
+#endif
+	return 0;
 }
 
 /*
@@ -154,6 +159,7 @@ int __down_interruptible(struct semaphore * sem)
  */
 int __down_trylock(struct semaphore * sem)
 {
+#if 0
 	int sleepers;
 	unsigned long flags;
 
@@ -169,6 +175,7 @@ int __down_trylock(struct semaphore * sem)
 		wake_up(&sem->wait);
 
 	spin_unlock_irqrestore(&semaphore_lock, flags);
+#endif
 	return 1;
 }
 
