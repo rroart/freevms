@@ -30,6 +30,7 @@
 struct WCCDIR {
     struct WCCDIR *wcd_next;
     struct WCCDIR *wcd_prev;
+    int wcd_size;
     int wcd_status;
     long wcd_wcc;
     int wcd_prelen;

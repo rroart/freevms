@@ -117,6 +117,11 @@ int sys$clrast() {
 int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam,int flags) {
   return INLINE_SYSCALL($assign,5,devnam,chan,acmode,mbxnam,flags);
 }
+
+int sys$trnlnm  (unsigned int *attr, void *tabnam, void
+		 *lognam, unsigned char *acmode, void *itmlst) {
+  return INLINE_SYSCALL($trnlnm,5,attr,tabnam,lognam,acmode,itmlst);
+}
 #endif
 
 #ifdef __arch_um__

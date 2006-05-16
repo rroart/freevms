@@ -485,10 +485,15 @@ int search_log_sys(char * name, int namelen, char ** retname, int * retsize) {
 #endif
 }
 
+#if 0
 int search_log_repl(char * name, char ** retname, int * retsize) {
   int sts;
   int namelen=strlen(name);
+#ifndef __i386__
   char * myname=kmalloc(namelen,GFP_KERNEL);
+#else
+  char myname[namelen];
+#endif
   memcpy(myname,name,namelen);
   sts=search_log_prc(myname,namelen,retname,retsize);
   if (sts&1) goto ret; 
@@ -504,7 +509,14 @@ int search_log_repl(char * name, char ** retname, int * retsize) {
 
  found: 
   {}
+  // check leak newret
+#ifndef __i386__
   char * newret = kmalloc((*retsize)+namelen-strlen(myname),GFP_KERNEL);
+#else
+  char * newret;
+  int alosize;
+  sts = exe_std$alononpaged((*retsize)+namelen-strlen(myname), &alosize, &newret);
+#endif
   memcpy(newret,*retname,(*retsize));
   newret[*retsize]=0;
   if (strchr(newret,':')) {
@@ -520,7 +532,92 @@ int search_log_repl(char * name, char ** retname, int * retsize) {
   //printk("newret %x %s\n",*retsize,newret);
 
  ret:
+#ifndef __i386__
   kfree(myname);
+#endif
   //if (sts&1) printk("ret %s\n",*retname);
   return sts;
 }
+#else
+int search_log_repl(char * name, char ** retname, int * retsize) {
+  int sts;
+  int namelen=strlen(name);
+  int acmode = 0;
+  char * newret;
+  int alosize;
+  sts = exe_std$alononpaged(128, &alosize, &newret);
+
+  struct dsc$descriptor log;
+  log.dsc$a_pointer = name;
+  log.dsc$w_length = strlen(name);
+  $DESCRIPTOR(prc,"LNM$PROCESS_TABLE");
+  $DESCRIPTOR(sys,"LNM$SYSTEM_TABLE");
+  struct _iosb iosb;
+  struct item_list_3 itmlst[2];
+  int retlen;
+  int * retlenaddr;
+  int buflen;
+  void * bufaddr;
+  char s[255];
+  int slen=255;
+
+  // doing some approximations since I can not now decide the return type
+
+  retlenaddr = retsize;
+  
+  buflen = 128;
+  bufaddr = newret;
+  
+  itmlst[0].item_code=LNM$_STRING;
+  itmlst[0].buflen=buflen;
+  itmlst[0].retlenaddr=retlenaddr;
+  itmlst[0].bufaddr=bufaddr;
+  itmlst[1].item_code=0;
+
+  unsigned int sys$trnlnm();
+  sts=sys$trnlnm(0,&prc,&log,acmode,itmlst);
+
+  if (sts&1)
+    goto found;
+
+  sts=sys$trnlnm(0,&sys,&log,acmode,itmlst);
+
+  if (sts&1)
+    goto found;
+
+  char * semi = strchr(name,':');
+  if (semi == 0) 
+    return sts;
+
+  log.dsc$w_length = semi - name;
+
+  sts=sys$trnlnm(0,&prc,&log,acmode,itmlst);
+
+  if (sts&1)
+    goto found;
+
+  sts=sys$trnlnm(0,&sys,&log,acmode,itmlst);
+
+  if ((sts&1)==0)
+    return sts;
+
+ found:
+
+  if (semi == 0)
+    return sts;
+
+  newret[*retsize]=0;
+  if (strchr(newret,':')) {
+    memcpy(newret+(*retsize),semi+1,namelen-(semi-name)-1);
+    (*retsize)--;
+  } else {
+    printk("for RMS sys$input, check\n");
+    newret[*retsize]=':';
+    memcpy(newret+(*retsize),semi,namelen-(semi-name));
+  }
+  *retname=newret;
+  *retsize=(*retsize)+namelen-(semi-name);
+
+  return sts;
+}
+#endif
