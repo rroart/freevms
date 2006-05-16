@@ -4110,9 +4110,15 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
 
     func=active->iha$l_tfradr1;
     printf("entering image? %x\n",func);
+#ifdef __x86_64__
     func(argc,argv++);
+#else
+    // check. related to CLI supervisor
+    mymymyuserfunc(func,argc,argv++,0,0);
+#endif
     printf("after image\n");
   } else {
+#if 0
 #ifdef __i386__
     struct elfhdr * elf = hdrbuf;
     func = elf->e_entry;
@@ -4127,6 +4133,18 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
     int offset = ((long)(*addr)) - ((long)elf);
     sts = mymymyfunc(func,*addr,(4096-offset)>>2);
     printf("after image\n");
+#endif
+#else
+    load_elf(image);
+    struct elfhdr * elf = hdrbuf;
+    func = elf->e_entry;
+    printf("entering image? %x\n",func);
+#ifdef __x86_64__
+    func(argc,argv++);
+#else
+    // check. related to CLI supervisor
+    mymymyuserfunc(func,argc,argv++,0,0);
+#endif
 #endif
   }
 

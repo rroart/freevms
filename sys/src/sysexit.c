@@ -8,6 +8,7 @@
 #include<ssdef.h>
 #include<system_data_cells.h>
 #include<linux/kernel.h>
+#include<asm/segment.h>
  
 asmlinkage int exe$exit(unsigned int code) {
 #ifdef __x86_64__
@@ -20,9 +21,19 @@ asmlinkage int exe$exit(unsigned int code) {
 #ifdef __i386__
     char ** addr = ((long)&code) + 0x28;
     (*addr)=exh->exh$l_handler;
+#if 1
+    // check. related to CLI supervisor
+    addr[-3] = __SUPERVISOR_DS; // temp fix
+    addr[-2] = __SUPERVISOR_DS; // temp fix
+    addr[1] = __SUPERVISOR_CS; // temp fix
+#endif
     if (exh->exh$l_first_arg) {
       addr = ((long)addr) + 0xc;
       *addr = exh->exh$l_first_arg + 4;
+#if 1
+      // check. related to CLI supervisor
+      addr[1] = __SUPERVISOR_DS; // temp fix
+#endif
     }
 #else
     char ** addr = ((long)dummy+0x60);

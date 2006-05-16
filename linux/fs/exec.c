@@ -311,7 +311,10 @@ void put_dirty_page(struct task_struct * tsk, struct page *page, unsigned long a
 out:
 	spin_unlock(&tsk->mm->page_table_lock);
 	__free_page(page);
+#if 0
+	// check. related to CLI supervisor
 	force_sig(SIGKILL, tsk);
+#endif
 	return;
 }
 
@@ -331,7 +334,17 @@ int setup_arg_pages(struct linux_binprm *bprm)
 #define STACK_TOP1 STACK_TOP
 #define STACK_TOP1 0x7ffe0000
 #endif
+
+	// check. related to CLI supervisor
+#ifdef __i386__
+	if (strstr(bprm->filename, "dcl"))
+	  goto supervisor;
+#endif
 	stack_base = STACK_TOP1 - MAX_ARG_PAGES*PAGE_SIZE;
+	goto g;
+ supervisor:
+	stack_base = 0x7ff80000 - MAX_ARG_PAGES*PAGE_SIZE;
+ g:
 
 	bprm->p += stack_base;
 	if (bprm->loader)

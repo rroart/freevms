@@ -23,10 +23,37 @@ static int myfunc(int (*func)(),void * start, int count) {
 		       "movl 0x10(%ebp),%ecx\n\t"
 		       "movl $0x400,%ecx\n\t"
 		       "movl %ecx,%edx\n\t" 
+#if 0
 		       "subl $0x1000,%esp\n\t"
 		       "movl %esp,%edi\n\t"
+#else
+		       // check. related to CLI supervisor
+		       "movl $0x7ffe0000, %edi\n\t"
+		       "subl $0x1000, %edi\n\t"
+#endif
 		       "rep ; movsl\n\t"
+#if 0
 		       "jmp *%eax\n\t"
+#else
+		       // check. related to CLI supervisor
+		       "movl %eax, %edi\n\t"
+		       "movl $0x7ffe0000, %ecx\n\t"
+		       "subl $0x1000, %ecx\n\t"
+		       "movl 0x7ffff0a8, %eax\n\t"
+		       "movl 2124(%eax), %eax\n\t" /* ipr_sp[3] */
+		       "movl %esp, %edx\n\t"
+		       "addl $-0x14, %edx\n\t"
+		       "movl %edi, 0x0(%edx)\n\t"
+		       "movl $0x23, 0x4(%edx)\n\t"
+		       "movl $0x200, 0x8(%edx)\n\t"
+		       "movl %ecx, 0xc(%edx)\n\t"
+		       "movl $0x2b, 0x10(%edx)\n\t"
+		       "addl $-0x14, %esp\n\t"
+		       "movl $0x2b, %eax\n\t"
+		       "movl %eax, %ds\n\t"
+		       "movl %eax, %es\n\t"
+		       "iret\n\t"
+#endif
 		       );
   // return eax default?
 #endif

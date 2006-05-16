@@ -833,8 +833,18 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 #endif
 #endif
 
+	// check. related to CLI supervisor
+#ifdef __i386__
+	if (strstr(bprm->filename, "dcl"))
+	  goto supervisor;
+#endif
 	current->pslstk[current->pslindex-1]|=(3<<2 | 3);
 	start_thread(regs, elf_entry, bprm->p);
+	goto g;
+ supervisor:
+	current->pslstk[current->pslindex-1]|=(2<<2 | 2);
+	start_thread_cli(regs, elf_entry, bprm->p);
+ g:
 	if (current->ptrace & PT_PTRACED)
 		send_sig(SIGTRAP, current, 0);
 	retval = 0;

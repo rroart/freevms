@@ -27,6 +27,8 @@
 
 #include "cli.h"
 
+#include <misc.h>
+
 #define CDU_ROOT_SIZE 1000
 static struct _cdu parse_cdu_root[CDU_ROOT_SIZE];
 int cdu_free = 0;
@@ -616,7 +618,12 @@ unsigned int cli$dispatch(int userarg){
       i=my_cdu_root[i].cdu$l_next;
     }
   }
+#ifdef __x86_64__
   func(userarg,myargv,0,0);
+#else
+  // check. related to CLI supervisor
+  mymymyuserfunc(func,userarg,myargv,0,0);
+#endif
   //func(argc,argv++);
   if (!internal) {
     if (handle==0) {
@@ -628,6 +635,78 @@ unsigned int cli$dispatch(int userarg){
   }
 
   return SS$_NORMAL;
+}
+
+// check. related to CLI supervisor
+static void do_userfunc(long (*func)(), long argc, long argv) {
+  func(argc, argv);
+  sys$exit(0);
+}
+
+// check. related to CLI supervisor
+static int userfunc(long (*func)(), long argc, long argv) {
+#ifdef __i386__
+  __asm__ __volatile__ (
+			"movl $0x7ffdfff0, %edx\n\t"
+			"movl $0, 0(%edx)\n\t"
+			"movl 8(%esp), %eax\n\t"
+			"movl %eax, 4(%edx)\n\t"
+			"movl 12(%esp), %eax\n\t"
+			"movl %eax, 8(%edx)\n\t"
+			"movl 16(%esp), %eax\n\t"
+			"movl %eax, 12(%edx)\n\t"
+			"movl 0x7ffff0a8, %eax\n\t"
+			"movl 2124(%eax), %eax\n\t" /* ipr_sp[3] */
+			"movl %esp, %edx\n\t"
+			"addl $-0x14, %edx\n\t"
+			"movl $do_userfunc, 0x0(%edx)\n\t"
+			"movl $0x23, 0x4(%edx)\n\t"
+			"movl $0x200, 0x8(%edx)\n\t"
+			"movl $0x7ffdfff0, 0xc(%edx)\n\t"
+			"movl $0x2b, 0x10(%edx)\n\t"
+			"addl $-0x14, %esp\n\t"
+			"movl $0x2b, %eax\n\t"
+			"movl %eax, %ds\n\t"
+			"movl %eax, %es\n\t"
+			"iret\n\t"
+			);
+#endif
+}
+
+// check. related to CLI supervisor
+static int mymyuserfunc(int dummy,int (*func)(),void * start, long count) {
+#ifdef __i386__
+  long * ret = &func;
+  ret=&dummy;
+#else
+  long * ret;
+  __asm__ __volatile__ ("movq %%rbp,%0; ":"=r" (ret) );
+  ret+=2;
+#endif
+  struct _exh exh;
+  memset(&exh, 0, sizeof(exh));
+  exh.exh$l_handler=ret[-1];
+  exh.exh$l_first_arg=&ret[-1];
+  int sts = sys$dclexh(&exh);
+  return userfunc(*func,start,count);
+}
+
+// check. related to CLI supervisor
+int mymymyuserfunc(int (*func)(),void * start, long count) {
+  register int __res;
+#ifdef __i386__
+  __asm__ ( "movl %%ebp,%%eax\n\t" :"=a" (__res) );
+  mymyuserfunc(__res,*func,start,count);
+  __asm__ ( "movl (%esp),%ebp\n\t" );
+#endif
+#ifdef __x86_64__
+  __asm__ __volatile__ (
+			"movq %rbp,%rax\n\t"
+			"pushq %rax\n\t"
+			);
+  mymyuserfunc(__res,*func,start,count);
+  __asm__ ( "movq (%rsp),%rbp\n\t" );
+#endif
 }
 
 char * module_name = 0;

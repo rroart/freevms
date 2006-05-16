@@ -429,6 +429,18 @@ struct thread_struct {
 	regs->esp = new_esp;					\
 } while (0)
 
+// check. related to CLI supervisor
+#define start_thread_cli(regs, new_eip, new_esp) do {		\
+	__asm__("movl %0,%%fs ; movl %0,%%gs": :"r" (0));	\
+	set_fs(SUPERVISOR_DS);					\
+	regs->xds = __SUPERVISOR_DS;					\
+	regs->xes = __SUPERVISOR_DS;					\
+	regs->xss = __SUPERVISOR_DS;					\
+	regs->xcs = __SUPERVISOR_CS;					\
+	regs->eip = new_eip;					\
+	regs->esp = new_esp;					\
+} while (0)
+
 /* Forward declaration, a strange C thing */
 struct task_struct;
 struct mm_struct;

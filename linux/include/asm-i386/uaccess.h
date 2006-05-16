@@ -24,6 +24,8 @@
 
 
 #define KERNEL_DS	MAKE_MM_SEG(0xFFFFFFFF)
+#define SUPERVISOR_DS	MAKE_MM_SEG(0xFFFFFFFF)
+// check. related to CLI supervisor
 #define USER_DS		MAKE_MM_SEG(PAGE_OFFSET)
 
 #define get_ds()	(KERNEL_DS)
