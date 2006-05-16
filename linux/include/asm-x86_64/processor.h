@@ -346,6 +346,18 @@ extern void load_gs_index(unsigned);
 	set_fs(USER_DS);							 \
 } while(0) 
 
+#define start_thread_cli(regs,new_rip,new_rsp) do { \
+	asm volatile("movl %0,%%fs; movl %0,%%es; movl %0,%%ds": :"r" (0));	 \
+	load_gs_index(0);							\
+	(regs)->rip = (new_rip);						 \
+	(regs)->rsp = (new_rsp);						 \
+	write_pda(oldrsp, (new_rsp));						 \
+	(regs)->cs = __SUPERVISOR_CS;							 \
+	(regs)->ss = __SUPERVISOR_DS;							 \
+	(regs)->eflags = 0x200;							 \
+	set_fs(SUPERVISOR_DS);							 \
+} while(0) 
+
 struct task_struct;
 struct mm_struct;
 

@@ -221,6 +221,9 @@ void __init cpu_init (void)
 
 	check_efer();
 
+	t->rsp0 = 0x7ffa0000;
+	t->rsp1 = 0x7ff90000;
+	t->rsp2 = 0x7ff80000;
 	t->io_map_base = INVALID_IO_BITMAP_OFFSET;	
 	memset(t->io_bitmap, 0xff, sizeof(t->io_bitmap));
 

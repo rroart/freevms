@@ -354,6 +354,10 @@ ENTRY(gdt_table)
 						#  (+5th nibble of limit)
 					/* __KERNEL32_CS */
 	/* when you add something here fix constant in desc.h */				
+	.quad 0x00afba000000ffff	/* 0x31 executive   4GB code at 0x00000000 */
+	.quad 0x00cfb2000000ffff	/* 0x39 executive   4GB data at 0x00000000 */
+	.quad 0x00afda000000ffff	/* 0x82 supervisor   4GB code at 0x00000000 */
+	.quad 0x00cfd2000000ffff	/* 0x8a supervisor   4GB data at 0x00000000 */
 	.globl gdt_cpu_table
 gdt_cpu_table:	
 	.fill NR_CPUS*PER_CPU_GDT_SIZE,1,0

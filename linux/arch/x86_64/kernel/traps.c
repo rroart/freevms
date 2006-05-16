@@ -889,7 +889,11 @@ void __init trap_init(void)
 	set_system_gate(IA32_SYSCALL_VECTOR, ia32_syscall);
 #endif
 	set_system_gate(IA32_VMSSYSCALL_VECTOR,&vms_system_call);
+#if 1
+	_set_gate_exe(idt_table+IA32_VMSSYSCALL_VECTOR1,15,&vms_system_call1,3,0);
+#else
 	set_system_gate(IA32_VMSSYSCALL_VECTOR1,&vms_system_call1);
+#endif
 	set_system_gate(IA32_VMSSYSCALL_VECTOR3,&vms_system_call3); /* will need to figure out where the user mode setup is */
 	//              set_intr_gate(TEST_VECTOR,&test_code);
 	set_intr_gate(ASTDEL_VECTOR,&astdel_vector);
@@ -908,6 +912,11 @@ void __init trap_init(void)
 	extern sys_$ni_syscall4(void), test_sup(), test_exe();
 	//       _set_gate_exe(idt_table+0xb0,15,3,test_exe);
 	//     _set_gate_sup(idt_table+0xb1,15,3,test_sup);
+
+        extern void exe_cli();
+        extern void exe_sti();
+	_set_gate(idt_table+0xb2,15,exe_cli,1,0);
+	_set_gate(idt_table+0xb3,15,exe_sti,1,0);
 
 	/*
 	 * Should be a barrier for any external CPU state.

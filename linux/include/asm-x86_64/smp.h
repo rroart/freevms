@@ -81,7 +81,11 @@ extern void smp_store_cpu_info(int id);		/* Store per CPU info (like the initial
  * so this is correct in the x86 case.
  */
 
+#if 0
 #define smp_processor_id() read_pda(cpunumber)
+#else
+#define smp_processor_id() (ctl$gl_pcb->pcb$l_cpu_id)
+#endif
 
 #define stack_smp_processor_id() (stack_current()->pcb$l_cpu_id)
 

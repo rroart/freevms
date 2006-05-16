@@ -69,7 +69,7 @@ struct desc_ptr {
 	unsigned long address;
 } __attribute__((packed)) ;
 
-#define __GDT_HEAD_SIZE 64
+#define __GDT_HEAD_SIZE 96 /* was: 64 */
 #define __CPU_DESC_INDEX(x,field) \
 	((x) * sizeof(struct per_cpu_gdt) + offsetof(struct per_cpu_gdt, field) + __GDT_HEAD_SIZE)
 
@@ -86,6 +86,22 @@ static inline void _set_gate(void *adr, unsigned type, unsigned long func, unsig
 	struct gate_struct s; 	
 	s.offset_low = PTR_LOW(func); 
 	s.segment = __KERNEL_CS;
+	s.ist = ist; 
+	s.p = 1;
+	s.dpl = dpl; 
+	s.zero0 = 0;
+	s.zero1 = 0; 
+	s.type = type; 
+	s.offset_middle = PTR_MIDDLE(func); 
+	s.offset_high = PTR_HIGH(func); 
+	copy_16byte(adr, &s);
+} 
+
+static inline void _set_gate_exe(void *adr, unsigned type, unsigned long func, unsigned dpl, unsigned ist)  
+{
+	struct gate_struct s; 	
+	s.offset_low = PTR_LOW(func); 
+	s.segment = __EXECUTIVE_CS;
 	s.ist = ist; 
 	s.p = 1;
 	s.dpl = dpl; 

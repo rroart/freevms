@@ -10,8 +10,8 @@
 #include<system_service_setup.h>
 #include<linux/kernel.h>
 #include<linux/smp.h>
-#include<asm/hw_irq.h>
 #include<linux/sched.h>
+#include<asm/hw_irq.h>
 #include<asm/current.h>
 #include<queue.h>
 #include<internals.h>

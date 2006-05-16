@@ -1073,12 +1073,20 @@ static int init(void * unused)
 	  long * l = 0x7ffa0000;
 	  l[-1]=0;
 	  l[-1-512]=0;
+	  l = 0x7ff90000;
+	  l[-1]=0;
+	  l[-1-512]=0;
+	  l = 0x7ff80000;
+	  l[-1]=0;
+	  l[-1-512]=0;
 	  struct tss_struct *tss = init_tss + smp_processor_id();
 	  tss->rsp0 = l;
+#if 1
 	  write_pda(kernelstack, (long) l);
+#endif
 	  asm ("movq $0x7ffa0000, %rsp");
 #if 1
-	  asm ("subq $0x8, %rsp");
+	  asm ("subq $0x8, %rsp");  // to have 16-byte aligned with fake
 #endif
 #endif
 		execve(execute_command,argv_init,envp_init);

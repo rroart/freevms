@@ -803,6 +803,10 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 		goto bad_fork_cleanup_sighand;
 	int uml_map = init_fork_p1pp(p,p->pcb$l_phd,current,current->pcb$l_phd);
 #ifdef __x86_64__
+	shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x1000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x2000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ff90000-0x1000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ff90000-0x2000,0x7fffe000);
 	shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x1000,0x7fffe000);
 	shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x2000,0x7fffe000);
 #else

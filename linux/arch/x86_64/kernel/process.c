@@ -549,6 +549,8 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long rsp,
 
 	p->thread.rsp = (unsigned long) childregs;
 	p->thread.rsp0 = (unsigned long) (childregs+1);
+        p->ipr_sp[1] = 0x7ff90000; // PAL
+        p->ipr_sp[2] = 0x7ff80000; // PAL
 	p->thread.userrsp = current->thread.userrsp; 
 
 	p->thread.rip = (unsigned long) ret_from_fork;
@@ -605,6 +607,8 @@ int new_thread(int nr, unsigned long clone_flags, unsigned long rsp,
 
 	p->thread.rsp = (unsigned long) childregs;
 	p->thread.rsp0 = (unsigned long) (childregs+1);
+        p->ipr_sp[1] = 0x7ff90000; // PAL
+        p->ipr_sp[2] = 0x7ff80000; // PAL
 	p->thread.userrsp = current->thread.userrsp; 
 
 	p->thread.rip = (unsigned long) exe$procstrt;
@@ -657,6 +661,8 @@ struct task_struct *__switch_to(struct task_struct *prev_p, struct task_struct *
 	 * Reload rsp0, LDT and the page table pointer:
 	 */
 	tss->rsp0 = next->rsp0;
+	tss->rsp1 = next_p->ipr_sp[1]; // PAL
+	tss->rsp2 = next_p->ipr_sp[2]; // PAL
 
 	/* 
 	 * Switch DS and ES.	 

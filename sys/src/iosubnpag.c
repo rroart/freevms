@@ -6,6 +6,7 @@
 #include <linux/kernel.h>
 #include <asmlink.h>
 #include <linux/smp.h>
+#include <linux/sched.h>
 #include <asm/hw_irq.h>
 #include <asm/current.h>
 #include <system_data_cells.h>

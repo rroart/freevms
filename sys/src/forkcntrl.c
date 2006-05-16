@@ -14,6 +14,7 @@
 #include <linux/smp.h>
 #include <asm/current.h>
 #include <linux/kernel.h>
+#include <linux/sched.h>
 #include <asm/hw_irq.h>
 #include <queue.h>
 

@@ -303,6 +303,10 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
 	init_fork_p1pp(p,p->pcb$l_phd,ctl$gl_pcb,ctl$gl_pcb->pcb$l_phd);
 #ifdef __x86_64__
+	shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x1000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x2000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ff90000-0x1000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ff90000-0x2000,0x7fffe000);
 	shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x1000,0x7fffe000);
 	shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x2000,0x7fffe000);
 #else

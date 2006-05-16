@@ -18,6 +18,10 @@
 #define __USER32_DS	__USER_DS 
 #define __KERNEL_COMPAT32_CS 0x08
 
+#define __EXECUTIVE_CS 0x41
+#define __EXECUTIVE_DS 0x49
+#define __SUPERVISOR_CS 0x52
+#define __SUPERVISOR_DS 0x5a
 // check
 
 #endif

@@ -5,8 +5,8 @@
 
 #include<linux/smp.h>
 #include<linux/kernel.h>
-#include<asm/hw_irq.h>
 #include<linux/sched.h>
+#include<asm/hw_irq.h>
 #include<cxbdef.h>
 #include<bufiodef.h>
 #include<dyndef.h>

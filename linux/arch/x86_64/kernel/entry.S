@@ -91,7 +91,16 @@
         POPR_ALL; 
 
 #define REI \
+	pushq %rax		; \
+	movw %cs, %ax		; \
+	test $3, %ax		; \
+	je 1f			; \
+	int $0xb2		; \
+	jmp 2f			; \
+1:				; \
 	cli			; \
+2:				; \
+	popq %rax		; \
         PUSHR_ALL		; \
         call myrei		; \
 	pushfq			; \
@@ -100,8 +109,7 @@
 	je 111f			; \
 	call panic		; \
 111:				; \
-        POPR_ALL		; \
-	cli			; 
+        POPR_ALL
 
 #define INTPANIC \
 	pushq %rdx		; \
@@ -143,6 +151,7 @@
 	popq %rdi
 
 #define SAVE_TSS_SP \
+	pushq %rax		; \
 	pushq %rdi		; \
 	pushq %rdx		; \
 	movq 0x7ffff000, %rdi	; \
@@ -151,23 +160,39 @@
 	addq $init_tss, %rdx	; \
 	addq $0x4, %rdx		; /* yes, 4 */ \
 	addq $tsk_ipr_sp, %rdi	; \
-	cmpq $0x10, 0x18(%rsp)	; \
+	mov %cs, %rax		; \
+	cmpq %rax, 0x20(%rsp)	; \
 	je 2f			; \
+	andq $0x3, %rax		; \
+	shl $0x3, %rax 		; \
+	addq %rax, %rdi		; \
+	addq %rax, %rdx		; \
 	movq %rsp, (%rdi)	; \
-	addq $0x38, (%rdi)	; \
+	addq $0x40, (%rdi)	; \
 	movq %rsp, (%rdx)	; \
-	addq $0x38, (%rdx)	; \
+	addq $0x40, (%rdx)	; \
+	andq %rax, %rax		; \
+	jne 4f			; \
 	movq %rsp, PDAREF(pda_kernelstack) ; \
-	addq $0x38, PDAREF(pda_kernelstack) ; \
+	addq $0x40, PDAREF(pda_kernelstack) ; \
+4:				; \
 	jmp 3f			; \
 2:				; \
-	/* not yet: movq 0x28(%rsp), (%rdi) */	; \
-	movq 0x28(%rsp), %rdi	; \
-	movq %rdi, (%rdx)	; \
+	andq $0x3, %rax		; \
+	shl $0x3, %rax 		; \
+	addq %rax, %rdi		; \
+	addq %rax, %rdx		; \
+	andq %rax, %rax		; \
+	movq 0x30(%rsp), %rax	; \
+	movq %rax, (%rdi)	; \
+	movq %rax, (%rdx)	; \
+	jne 4f			; \
 	movq %rdi, PDAREF(pda_kernelstack) ; \
+4:				; \
 3:				; \
 	popq %rdx		; \
-	popq %rdi
+	popq %rdi		; \
+	popq %rax
 
 /* also need to do stack changes */
 /* and astlvl checks */
@@ -245,7 +270,9 @@
 	je 4f
 	jmp 3f
 2:	
+	andq %rax, %rax
 	movq \x+0x30(%rsp), %rax
+	jne 3f
 	movq %rax, PDAREF(pda_kernelstack)
 3:	
 	movq %rax, (%rdx)
@@ -320,6 +347,14 @@ ENTRY(system_call)
 	syscall_save_sp 0	
 	movq	%rsp,PDAREF(pda_oldrsp) 
 	movq	PDAREF(pda_kernelstack),%rsp
+#if 0
+	movq 0x7ffff000, %rsp
+	movq tsk_pcbl_cpu_id(%rsp), %rsp
+	shl $0x8, %rsp
+	addq $init_tss, %rsp
+	addq $0x4, %rsp
+	movq (%rsp), %rsp
+#endif		
 	RSP8PANIC
 	regtrapi $1,$0
 	sti
@@ -553,7 +588,15 @@ retint_signal:
 retint_signal_test:		
 	cli
 	jmp retint_restore_args_swapgs
-			
+
+ENTRY(exe_sti)
+	orl $0x200, 0x10(%rsp)
+	iretq
+				
+ENTRY(exe_cli)
+	andl $0xfffffdff, 0x10(%rsp)
+	iretq
+				
 ENTRY(vms_system_call3)
 	RSP0PANIC
 	testl $3,8(%rsp)	# from kernel?
@@ -579,13 +622,15 @@ ENTRY(vms_system_call3)
 	
 ENTRY(vms_system_call1)
 	RSP0PANIC
+#if 0	
 	testl $3,8(%rsp)	# from kernel?
 	je   1f
 	swapgs
 1:
+#endif	
 	save_sp 0	
 	regtrapi $1,$1
-	sti
+	int $0xb3
 	SAVE_ARGS 8,0
 	movq  %rax,ORIG_RAX-ARGOFFSET(%rsp)
 #if 0
@@ -627,7 +672,14 @@ vms_syscall_common:
 vms_ret_from_sys_call:	
 vms_iret_with_reschedule:
 	GET_CURRENT(%rcx)
-	cli 
+	movw %cs, %ax
+	test $3, %ax
+	je 1f
+	int $0xb2
+	jmp 2f
+1:
+	cli				# need_resched and signals atomic test
+2:
 	cmpl $0,tsk_sigpending(%rcx)
 	jne vms_iret_signal
 vms_iret_restore_args:
@@ -635,6 +687,11 @@ vms_iret_restore_args:
 	REI	
 	INTPANIC
 	SAVE_TSS_SP
+	pushq %rax
+	movw %cs, %ax
+	cmpw $0x41, %ax
+	popq %rax
+	je 1f
 	testl $3,8(%rsp)	# from kernel?
 	je   1f
 	swapgs
@@ -760,11 +817,11 @@ ENTRY(\x)
 	.endm
 
 	.macro softentry sym
-	save_sp 0
 	testl $3,8(%rsp)       # from kernel?
 	je   1f
 	swapgs
 1:	
+	save_sp 0
 	PUSHR_ALL
 	call \sym
 	POPR_ALL
@@ -801,6 +858,7 @@ error_entry:
 	je error_kernelspace
 	swapgs	
 error_action:
+	save_sp 0x80
 	regtrapi $0,$0x10
 	movq  %rdi,RDI(%rsp) 	
 	movq %rsp,%rdi
@@ -833,11 +891,6 @@ error_restore:
 	SAVE_TSS_SP
 	jmp iret_label
 	
-error_reschedule:
-	sti
-	call schedule
-	jmp  error_test
-
 error_signal:	
 	sti
 	xorq %rsi,%rsi
@@ -966,7 +1019,6 @@ ENTRY(execve)
 	ret
 
 ENTRY(page_fault)
-	save_sp 8	
 	errorentry do_page_fault
 
 ENTRY(coprocessor_error)
