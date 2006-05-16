@@ -140,9 +140,11 @@ ENOSYS = 38
 	popl %edi
 	
 #define REI \
+	CLIPAN			; \
         PUSHR_ALL		; \
         call myrei		; \
         POPR_ALL		; \
+	CLIPAN			; \
 	MAYBEDOSOFTINT($0xb,$0xa4) ; \
 	MAYBEDOSOFTINT($0xa,$0xa3) ; \
 	MAYBEDOSOFTINT($0x9,$0xa2) ; \
@@ -153,25 +155,35 @@ ENOSYS = 38
 	MAYBEDOSOFTINT($0x3,$0x93) ; \
 	MAYBEDOSOFTINT($0x2,$0x92) ; \
 	CLIPAN			; \
+	pushl %eax		; \
 	pushl %edi		; \
 	pushl %edx		; \
+	movl %cs, %eax		; \
+	andl $0x3, %eax		; \
+	shl $0x2,%eax		; \
 	movl ctl$gl_pcb, %edi	; \
 	movl tsk_pcbl_cpu_id(%edi), %edx ; \
 	shl $0x8, %edx 		; \
 	addl $init_tss, %edx	; \
 	addl $0x4, %edx		; /* yes, 4 */ \
-	movl %esp, (%edx)	; /* curmod is 0 for the time being */ \
-	addl $0x14, (%edx)	; \
+	addl %eax, %edx		; /* handle mode */ \
+	addl %eax, %edx		; /* handle mode */ \
+	movl %esp, (%edx)	; \
+	addl $0x18, (%edx)	; \
 	addl $tsk_ipr_sp, %edi	; \
-	movl %esp, (%edi)	; /* curmod is 0 for the time being */ \
-	addl $0x14, (%edi)	; \
-	cmpl $0x10, 0xc(%esp)	; \
+	addl %eax, %edi		; /* handle mode */ \
+	movl %esp, (%edi)	; \
+	addl $0x18, (%edi)	; \
+	cmpl $0x10, 0x10(%esp)	; \
+	movw %cs, %ax		; \
+	cmpw %ax, 0x10(%esp)	; \
 	je 3f			; \
 	addl $0x8, (%edx)	; \
 	addl $0x8, (%edi)	; \
 3:				; \
 	popl %edx		; \
 	popl %edi		; \
+	popl %eax		; \
 	iret			; \
 /* the rest made stack problems */ \
 	pushl %eax		; \
@@ -195,6 +207,21 @@ ENOSYS = 38
 	pushl %ecx; \
 	pushl %ebx; \
 	movl $(__KERNEL_DS),%edx; \
+	movl %edx,%ds; \
+	movl %edx,%es;
+
+#define SAVE_ALL_EXE \
+	cld; \
+	pushl %es; \
+	pushl %ds; \
+	pushl %eax; \
+	pushl %ebp; \
+	pushl %edi; \
+	pushl %esi; \
+	pushl %edx; \
+	pushl %ecx; \
+	pushl %ebx; \
+	movl $(__EXECUTIVE_DS),%edx; \
 	movl %edx,%ds; \
 	movl %edx,%es;
 
@@ -483,6 +510,13 @@ ret_from_exception:
 	jne ret_from_sys_call
 	jmp restore_all
 
+ENTRY(exe_sti)
+	orl $0x200, 0x8(%esp)
+	iret
+
+ENTRY(exe_cli)
+	andl $0xfffffdff, 0x8(%esp)
+	iret
 
 ENTRY(vmssystem_call3)
 #        PUSHPSLINTR
@@ -511,7 +545,7 @@ ENTRY(vmssystem_call1)
 #        PUSHPSLINTR
 	CHM_FIX_SP(0)
 	pushl %eax			# save orig_eax
-	SAVE_ALL
+	SAVE_ALL_EXE
 	GET_CURRENT(%ebx)
 	testb $0x02,tsk_ptrace(%ebx)	# PT_TRACESYS
 	jne vmstracesys
@@ -568,7 +602,14 @@ normal_call:
 syscall_common:
         movl %eax,EAX(%esp)		# save the return value
 ENTRY(vmsret_from_sys_call)
+	movl %cs, %eax
+	test $3, %eax
+	je 1f
+	int $0xb2
+	jmp 2f
+1:	
 	cli				# need_resched and signals atomic test
+2:	
 	cmpl $0,tsk_sigpending(%ebx)
 	jne vmssignal_return
 vmsrestore_all:

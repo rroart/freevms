@@ -468,6 +468,8 @@ void __init init_IRQ(void)
 		    vector != VMSSYSCALL_VECTOR3 &&
 		    vector != 0xb0 &&
 		    vector != 0xb1 &&
+		    vector != 0xb2 &&
+		    vector != 0xb3 &&
 						   ! (vector >= ASTDEL_VECTOR && vector <= POWER_VECTOR)) 
 			set_intr_gate(vector, interrupt[i]);
 	}

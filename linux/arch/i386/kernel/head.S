@@ -467,8 +467,8 @@ ENTRY(gdt_table)
 	.quad 0x00409a0000000000	/* 0x48 APM CS    code */
 	.quad 0x00009a0000000000	/* 0x50 APM CS 16 code (16 bit) */
 	.quad 0x0040920000000000	/* 0x58 APM DS    data */
-	.fill NR_CPUS*4,8,0		/* space for TSS's and LDT's */
 	.quad 0x00cfda000000ffff	/* 0x82 supervisor   4GB code at 0x00000000 */
 	.quad 0x00cfd2000000ffff	/* 0x8a supervisor   4GB data at 0x00000000 */
 	.quad 0x0000000000000000	/* not used */
 	.quad 0x0000000000000000	/* not used */
+	.fill NR_CPUS*4,8,0		/* space for TSS's and LDT's */

@@ -13,7 +13,7 @@
 #define __EXECUTIVE_CS	0x31
 #define __EXECUTIVE_DS	0x39
 
-#define __SUPERVISOR_CS	0x82
-#define __SUPERVISOR_DS	0x8A
+#define __SUPERVISOR_CS	0x62
+#define __SUPERVISOR_DS	0x6A
 
 #endif

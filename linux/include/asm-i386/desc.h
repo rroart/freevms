@@ -34,7 +34,7 @@
  *
  * Entry into gdt where to find first TSS.
  */
-#define __FIRST_TSS_ENTRY 12
+#define __FIRST_TSS_ENTRY 16
 #define __FIRST_LDT_ENTRY (__FIRST_TSS_ENTRY+1)
 
 #define __TSS(n) (((n)<<2) + __FIRST_TSS_ENTRY)

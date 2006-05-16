@@ -565,6 +565,18 @@ next:
 	if (current_vector == SYSCALL_VECTOR)
 		goto next;
 
+        if (current_vector == VMSSYSCALL_VECTOR  ||
+            current_vector == VMSSYSCALL_VECTOR1  ||
+            current_vector == VMSSYSCALL_VECTOR3 ||
+            current_vector == 0xb0 ||
+            current_vector == 0xb1 ||
+            current_vector == 0xb2 ||
+            current_vector == 0xb3 ||
+            (current_vector >= ASTDEL_VECTOR &&
+             current_vector <= POWER_VECTOR)
+            )
+	  goto next;
+
 	if (current_vector > FIRST_SYSTEM_VECTOR) {
 		offset++;
 		current_vector = FIRST_DEVICE_VECTOR + offset;

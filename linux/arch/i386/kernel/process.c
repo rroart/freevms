@@ -633,6 +633,8 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long esp,
 
 	p->thread.esp = (unsigned long) childregs;
 	p->thread.esp0 = (unsigned long) (childregs+1);
+	p->ipr_sp[1] = 0x7ff90000; // PAL
+	p->ipr_sp[2] = 0x7ff80000; // PAL
 
 	p->thread.eip = (unsigned long) ret_from_fork;
 
@@ -664,6 +666,8 @@ int new_thread(int nr, unsigned long clone_flags, unsigned long esp,
 
 	p->thread.esp = (unsigned long) childregs;
 	p->thread.esp0 = (unsigned long) (childregs+1);
+	p->ipr_sp[1] = 0x7ff90000; // PAL
+	p->ipr_sp[2] = 0x7ff80000; // PAL
 
 	p->thread.eip = (unsigned long) exe$procstrt; // or like ret_from_fork;
 
@@ -762,6 +766,8 @@ void fastcall __switch_to(struct task_struct *prev_p, struct task_struct *next_p
 	 * Reload esp0, LDT and the page table pointer:
 	 */
 	tss->esp0 = next->esp0;
+	tss->esp1 = next_p->ipr_sp[1]; // PAL
+	tss->esp2 = next_p->ipr_sp[2]; // PAL
 
 	/*
 	 * Save away %fs and %gs. No need to save %es and %ds, as

@@ -334,7 +334,10 @@ int exe$astdel_prep2(long stack, long ast, long astprm) {
 );
 }
 
-int exe$astdel_prep2_new(long stack, long ast, long astprm) {
+long cstab[4] = { __KERNEL_CS, __EXECUTIVE_CS, __SUPERVISOR_CS, __USER_CS };
+long sstab[4] = { __KERNEL_CS | 8, __EXECUTIVE_CS | 8, __SUPERVISOR_CS | 8, __USER_CS | 8 };
+
+int exe$astdel_prep2_new(long stack, long ast, long astprm, long cs, long ss) {
   __asm__ __volatile__(
 		       "pushfl\n\t"
 		       "popl %edi\n\t"
@@ -348,13 +351,15 @@ int exe$astdel_prep2_new(long stack, long ast, long astprm) {
 		       "addl $-0x8,%edx\n\t"
 		       "\n\t"
 		       "movl $exe$astdel,0x0(%edi)\n\t" // put astdel on kstack
-		       "movl $0x23,0x4(%edi)\n\t" // user cseg
+		       "movl 0x10(%esp),%ecx\n\t" // get mode cseg
+		       "movl %ecx,0x4(%edi)\n\t" // put cseg on stack
 		       "pushfl\n\t"
 		       "popl %ecx\n\t"
 		       "orl $0x200,%ecx\n\t" // intr on
 		       "movl %ecx,0x8(%edi)\n\t" // check get a flag reg
 		       "movl %edx,0xc(%edi)\n\t" // put new ustack on kstack
-		       "movl $0x2b,0x10(%edi)\n\t" // user sseg
+		       "movl 0x14(%esp),%ecx\n\t" // get mode sseg
+		       "movl %ecx,0x10(%edi)\n\t" // put sseg on stack
 		       "\n\t"
 		       "movl 0x8(%esp),%ecx\n\t" // get ast
 		       "movl %ecx,0x0(%edx)\n\t" // put ast as parm on ustack
@@ -384,6 +389,9 @@ int exe$astdel_prep2_new(long stack, long ast, long astprm) {
 		       "movl %esp, (%edx)\n\t"
 		       "addl $0x14, (%edx)\n\t"
 #endif
+		       "movl 0x28(%esp),%ecx\n\t" // get mode sseg
+		       "movl %ecx, %ds\n\t"
+		       "movl %ecx, %es\n\t"
 		       "iret\n\t"
 );
 }
@@ -697,7 +705,11 @@ asmlinkage void sch$astdel(int dummy) {
 #if 0
     int sts = exe$astdel_prep(&dummy,ast,astprm);
 #else
+#ifdef __i386__
+    int sts = exe$astdel_prep2_new(p->ipr_sp[rmod&3],ast,astprm,cstab[rmod&3],sstab[rmod&3]);
+#else
     int sts = exe$astdel_prep2_new(p->ipr_sp[rmod&3],ast,astprm);
+#endif
 #endif
   } else {
     setipl(0);

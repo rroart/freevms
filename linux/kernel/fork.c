@@ -805,6 +805,11 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 #ifdef __x86_64__
 	shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x1000,0x7fffe000);
 	shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x2000,0x7fffe000);
+#else
+	shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x1000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x2000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ff90000-0x1000,0x7fffe000);
+	shell_init_other(p,ctl$gl_pcb,0x7ff90000-0x2000,0x7fffe000);
 #endif
 	//printk("phd %x %x %x\n",tsk,tsk->pcb$l_pid,tsk->pcb$l_phd);
 	//printk("phd %x %x %x\n",current,current->pcb$l_pid,current->pcb$l_phd);

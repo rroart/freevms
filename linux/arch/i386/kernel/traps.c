@@ -1026,7 +1026,11 @@ void __init trap_init(void)
 
 	set_system_gate(SYSCALL_VECTOR,&system_call);
 		set_system_gate(VMSSYSCALL_VECTOR,&vmssystem_call);
+#if 1
+		_set_gate_exe(idt_table+VMSSYSCALL_VECTOR1,15,3,&vmssystem_call1);
+#else
 		set_system_gate(VMSSYSCALL_VECTOR1,&vmssystem_call1);
+#endif
 		set_system_gate(VMSSYSCALL_VECTOR3,&vmssystem_call3); /* will need to figure out where the user mode setup is */
 
 		//		set_intr_gate(TEST_VECTOR,&test_code);
@@ -1045,8 +1049,14 @@ void __init trap_init(void)
 
 	//	set_intr_gate(0xb0,&iolock11_vector);
 	extern sys_$ni_syscall4(void), test_sup(), test_exe();
+#if 0
 	_set_gate_exe(idt_table+0xb0,15,3,test_exe);
 	_set_gate_sup(idt_table+0xb1,15,3,test_sup);
+#endif
+	extern void exe_cli();
+	extern void exe_sti();
+	_set_gate(idt_table+0xb2,15,1,exe_cli);
+	_set_gate(idt_table+0xb3,15,1,exe_sti);
 	kernel_puts("puts 6.22.5\n");
 
 	/*
