@@ -4136,7 +4136,11 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
 #endif
 #else
     load_elf(image);
-    struct elfhdr * elf = hdrbuf;
+#ifdef __i386__
+    Elf32_Ehdr * elf = hdrbuf;
+#else
+    Elf64_Ehdr * elf = hdrbuf;
+#endif
     func = elf->e_entry;
     printf("entering image? %x\n",func);
 #ifdef __x86_64__
