@@ -41,8 +41,10 @@ CPU/PAL:
 FIX pal
 Use 2 other cpu modes.
 Use regtrap default for others.
+Make exe$astdel_prep2_new jmp to entry.S.
 Change ds with astdel and other places?
 Check P1 space user accessability.
+AST for all modes in x86_64.
 
 Scheduling:
 Schedule code cleanup.
