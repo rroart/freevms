@@ -208,7 +208,6 @@ inline void chm(char mode) {
 }
 
 inline void regtrap(char type, char param) {
-  /* remember to disable interrupt during this */
   int flag=mycli();
   int cpu=smp_processor_id();
   int saved_psl_is=current->psl_is;
@@ -414,10 +413,12 @@ asmlinkage void myrei (void) {
 
 #if (defined __i386__) || (defined __x86_64__)
 void inline mysti(long flags) {
+#if 0
   in_atomic=0;
   vmsunlock(&SPIN_ATOMIC,-1);
   if (flags) __sti();
   //printk("mysti\n");
+#endif
 }
 
 void sickinsque(void * entry, void * pred) {
@@ -431,6 +432,8 @@ long locki=0;
 long locks[1024];
 
 long inline mycli(void) {
+#if 0
+  // can not have cli instr with mode 1
   long flags, retval;
   //printk("mycli\n");
   __save_flags(flags);
@@ -456,6 +459,7 @@ long inline mycli(void) {
   for(i=0;i<20;i++) prev1[i]=l[i];
   }
   return retval;
+#endif
 }
 #endif
 
