@@ -42,6 +42,7 @@ FIX pal
 Use 2 other cpu modes.
 Use regtrap default for others.
 Change ds with astdel and other places?
+Check P1 space user accessability.
 
 Scheduling:
 Schedule code cleanup.
