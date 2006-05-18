@@ -41,6 +41,7 @@ CPU/PAL:
 FIX pal
 Use 2 other cpu modes.
 Use regtrap default for others.
+Figure out how to use AMD64 Secure Virtual Machine.
 Make exe$astdel_prep2_new jmp to entry.S.
 Change ds with astdel and other places?
 Check P1 space user accessability.
