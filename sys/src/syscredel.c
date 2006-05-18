@@ -268,7 +268,9 @@ int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection
   pgd = pgd_offset(mm, address);
   pmd = pmd_alloc(mm, pgd, address);
   if (pmd) {
+    spin_lock(&mm->page_table_lock);
     pte = pte_alloc(mm, pmd, address);
+    spin_unlock(&mm->page_table_lock);
   }
 
   *(unsigned long *)pte=newpte; // do this anyway
