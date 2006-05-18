@@ -477,7 +477,10 @@ int __attribute__ ((section (".vsyscall_4"))) exe$astdel() {
 		       );
 }
 
-int exe$astdel_prep2_new(long stack, long ast, long astprm) {
+long cstab[4] = { __KERNEL_CS, __EXECUTIVE_CS, __SUPERVISOR_CS, __USER_CS };
+long sstab[4] = { __KERNEL_DS, __EXECUTIVE_DS , __SUPERVISOR_DS , __USER_DS };
+
+int exe$astdel_prep2_new(long stack, long ast, long astprm, long dummy, long cs, long ss) {
   // rdi rsi rdx
   __asm__ __volatile__(
 		       "movq %rsi,%rbp\n\t" // remember ast
@@ -490,13 +493,13 @@ int exe$astdel_prep2_new(long stack, long ast, long astprm) {
 #endif
 		       "\n\t"
 		       "movq $exe$astdel,0x0(%rdi)\n\t" // put astdel on kstack
-		       "movq $0x33,0x8(%rdi)\n\t" // user cseg
+		       "movq %r8,0x8(%rdi)\n\t" // user cseg
 		       "pushfq\n\t"
 		       "popq %rcx\n\t"
 		       "orq $0x200,%rcx\n\t" // intr on
 		       "movq %rcx,0x10(%rdi)\n\t" // check get a flag reg
 		       "movq %rdx,0x18(%rdi)\n\t" // put new ustack on kstack
-		       "movq $0x2b,0x20(%rdi)\n\t" // user sseg
+		       "movq %r9,0x20(%rdi)\n\t" // user sseg
 		       "\n\t"
 #if 0
 		       "movq 0x10(%rsp),%rcx\n\t" // get ast
@@ -708,7 +711,7 @@ asmlinkage void sch$astdel(int dummy) {
 #ifdef __i386__
     int sts = exe$astdel_prep2_new(p->ipr_sp[rmod&3],ast,astprm,cstab[rmod&3],sstab[rmod&3]);
 #else
-    int sts = exe$astdel_prep2_new(p->ipr_sp[rmod&3],ast,astprm);
+    int sts = exe$astdel_prep2_new(p->ipr_sp[rmod&3],ast,astprm,0,cstab[rmod&3],sstab[rmod&3]);
 #endif
 #endif
   } else {
