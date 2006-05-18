@@ -453,7 +453,7 @@ unsigned int cli$dispatch(int userarg){
     is_ele=1;
   }
 
-  if (is_ele) {
+  if (!vms_mm) {
     path="/vms$common/sysexe/";
     pathlen=strlen(path);
   } else {
@@ -618,12 +618,17 @@ unsigned int cli$dispatch(int userarg){
       i=my_cdu_root[i].cdu$l_next;
     }
   }
+  if (func == 0) {
+    printf("func is 0, error\n");
+    goto no_func;
+  }
 #ifdef __x86_64__
   func(userarg,myargv,0,0);
 #else
   // check. related to CLI supervisor
   mymymyuserfunc(func,userarg,myargv,0,0);
 #endif
+ no_func:
   //func(argc,argv++);
   if (!internal) {
     if (handle==0) {

@@ -4141,7 +4141,16 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
 #else
     Elf64_Ehdr * elf = hdrbuf;
 #endif
+#if 0
     func = elf->e_entry;
+#else
+    char * routine = "main";
+    func = elf_get_symbol(image, routine);
+#endif
+    if (func == 0) {
+      printf("func is 0, error\n");
+      goto no_func;
+    }
     printf("entering image? %x\n",func);
 #ifdef __x86_64__
     func(argc,argv++);
@@ -4149,6 +4158,8 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
     // check. related to CLI supervisor
     mymymyuserfunc(func,argc,argv++,0,0);
 #endif
+  no_func:
+    {}
 #endif
   }
 
