@@ -8,6 +8,7 @@
 #include <asm/uaccess.h>
 #include <asm/hw_irq.h>
 #include <vms_drivers.h>
+#include <cpudef.h>
 #include <ipldef.h>
 #include <pridef.h>
 #include <irpdef.h>
@@ -16,6 +17,7 @@
 #include <ttyucbdef.h>
 #include <com_routines.h>
 #include <sch_routines.h>
+#include <smp_routines.h>
 #include <ipl.h>
 #include <queue.h>
 
@@ -26,7 +28,10 @@ void  com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid);
 
 void com$post(struct _irp * i, struct _ucb * u) {
   insqti(i,&ioc$gq_postiq);
-  SOFTINT_IOPOST_VECTOR;
+  if (ctl$gl_pcb->pcb$l_cpu_id)
+    smp_send_work(CPU$M_IOPOST, 0);
+  else
+    SOFTINT_IOPOST_VECTOR;
 }
 
 void  com_std$delattnast (struct _acb **acb_lh, struct _ucb *ucb) {

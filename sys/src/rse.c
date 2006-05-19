@@ -158,6 +158,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
     mycheckaddr(0);
     return;
   }
+  // and a ipint resched here too, if needed
   //  SOFTINT_RESCHED_VECTOR; not yet?
   p2->pcb$w_state=SCH$C_COM;
   p2->state=TASK_RUNNING;
@@ -363,6 +364,12 @@ void sch$change_cur_priority(struct _pcb *p, unsigned char newpri) {
   tmppri=ffs(sch$gl_comqs);
   tmppri--;
   if (newpri>=tmppri) return;
+#if 0
+  // postpone this. not critical
+  if ()
+    smp_send_work(CPU$M_RESCHED, 0);
+  else
+#endif
   SOFTINT_RESCHED_VECTOR; /* or set need_resched if interrupt probs */
   // interprocessor interrupt not implemented?
 }

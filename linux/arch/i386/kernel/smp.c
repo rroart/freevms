@@ -23,6 +23,8 @@
 #include <asm/pgalloc.h>
 #include <asm/smpboot.h>
 
+#include <smp_routines.h>
+
 /*
  *	Some notes on x86 processor bugs affecting SMP operation:
  *
@@ -644,3 +646,15 @@ asmlinkage void smp_call_function_interrupt(void)
 	}
 }
 
+void smp_send_work(int work, int cpu)
+{
+  struct _cpu * c = smp$gl_cpu_data[cpu];
+  c->cpu$l_work_req |= work; // check. smp
+  send_IPI_mask(1 << cpu, IPINT_VECTOR); 
+}
+
+asmlinkage void smp_ipint_interrupt(void)
+{
+  ack_APIC_irq();
+  smp_work();
+}

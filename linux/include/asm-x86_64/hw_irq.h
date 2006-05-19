@@ -181,6 +181,7 @@ do { __asm__ __volatile__ ( \
 #define RESCHEDULE_VECTOR	0xfc
 /* 0xfa free */
 #define CALL_FUNCTION_VECTOR	0xfb
+#define IPINT_VECTOR		0xfa
 
 /*
  * Local APIC timer IRQ vector is on a different priority level,

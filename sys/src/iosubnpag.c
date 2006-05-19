@@ -19,6 +19,7 @@
 #include<ipldef.h>
 #include<ddbdef.h>
 #include <ioc_routines.h>
+#include <smp_routines.h>
 
 #include <linux/sched.h>
 
@@ -74,6 +75,7 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   if (smp_processor_id()==0) {
     SOFTINT_IOPOST_VECTOR;
   } else {
+    smp_send_work(CPU$M_IOPOST, 0);
     /* request interprocessor interrupt */
   }
  notempty:

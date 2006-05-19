@@ -8,6 +8,7 @@
 #include <system_data_cells.h>
 #include <ssdef.h>
 #include <pridef.h>
+#include <cpudef.h>
 #include <acbdef.h>
 #include <evtdef.h>
 #include <statedef.h>
@@ -17,6 +18,7 @@
 #include <exe_routines.h>
 #include <sch_routines.h>
 #include <misc_routines.h>
+#include <smp_routines.h>
 #include <starlet.h>
 #include <linux/sched.h>
 #include <linux/smp.h>
@@ -102,6 +104,14 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
     struct _pcb * curp=ctl$gl_pcb;
     if (p==cpu->cpu$l_curpcb) // etc // smp not enabled
       p->pr_astlvl=p->phd$b_astlvl;
+    else
+#if 0
+      smp_send_work(CPU$M_UPDASTSR, p->pcb$l_cpu_id);
+#else
+      p->pr_astlvl=p->phd$b_astlvl;
+      // come to think of it, it did not matter, since we emulate
+      // the astlvl in the pcb. ipint not needed, then. 
+#endif
   }
   //printk("aft rse\n");
   /* unlock */

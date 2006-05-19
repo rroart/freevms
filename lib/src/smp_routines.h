@@ -36,4 +36,7 @@ int       smp$system_event_notify(struct _ctd_pq ctd, int event);
 void      smp$timeout (void);
 int	  smp$validate_hw_configuration(int, char **, char **);
 
+void smp_send_work(int work, int cpu);
+void smp_work();
+
 #endif
