@@ -221,8 +221,13 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 #if 0
 	  printk("mrs %x\n",fab->fab$w_mrs);
 #endif
+#if 0
 	  if (curcount < fab->fab$w_mrs)
 	    rab->rab$w_usz = fab->fab$w_mrs;
+#else
+	  if (fab->fab$w_mrs)
+	    rab->rab$w_usz = fab->fab$w_mrs;
+#endif
 	  sts = exe$get(rab);
 	  if ((sts&1)==0)
 	    break;
