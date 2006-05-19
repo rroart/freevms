@@ -22,20 +22,21 @@ static int myfunc(int (*func)(),void * start, int count) {
 		       "movl 0xc(%ebp),%esi\n\t"
 		       "movl 0x10(%ebp),%ecx\n\t"
 		       "movl $0x400,%ecx\n\t"
-		       "movl %ecx,%edx\n\t" 
-#if 0
+		       "movl %ecx,%edx\n\t"
+		       "pushl %eax\n\t"
+		       "call is_user_mode\n\t"
+		       "andl $1, %eax\n\t"
+		       "popl %eax\n\t"
+		       "je 1f\n\t"
 		       "subl $0x1000,%esp\n\t"
 		       "movl %esp,%edi\n\t"
-#else
+		       "rep ; movsl\n\t"
+		       "jmp *%eax\n\t"
+		       "1:\n\t"
 		       // check. related to CLI supervisor
 		       "movl $0x7ffe0000, %edi\n\t"
 		       "subl $0x1000, %edi\n\t"
-#endif
 		       "rep ; movsl\n\t"
-#if 0
-		       "jmp *%eax\n\t"
-#else
-		       // check. related to CLI supervisor
 		       "movl %eax, %edi\n\t"
 		       "movl $0x7ffe0000, %ecx\n\t"
 		       "subl $0x1000, %ecx\n\t"
@@ -53,7 +54,6 @@ static int myfunc(int (*func)(),void * start, int count) {
 		       "movl %eax, %ds\n\t"
 		       "movl %eax, %es\n\t"
 		       "iret\n\t"
-#endif
 		       );
   // return eax default?
 #endif

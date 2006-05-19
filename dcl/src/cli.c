@@ -3994,6 +3994,7 @@ static unsigned long extcommand (unsigned long h_input, unsigned long h_output, 
 /*									*/
 /************************************************************************/
 
+#if 0
 static int myfunc(int (*func)(),void * start, int count) {
 #ifdef __i386__
   __asm__ __volatile__(
@@ -4068,6 +4069,7 @@ static int mymymyfunc(int (*func)(),void * start, int count) {
   __asm__ ( "movq (%rsp),%rbp\n\t" );
 #endif
 }
+#endif
 
 static unsigned long runimage (unsigned long h_error, Runopts *runopts, const char *image, int argc, const char *argv[])
 
@@ -4152,12 +4154,11 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
       goto no_func;
     }
     printf("entering image? %x\n",func);
-#ifdef __x86_64__
-    func(argc,argv++);
-#else
-    // check. related to CLI supervisor
-    mymymyuserfunc(func,argc,argv++,0,0);
-#endif
+    if (is_user_mode())
+      func(argc,argv++);
+    else
+      // check. related to CLI supervisor
+      mymymyuserfunc(func,argc,argv++,0,0);
   no_func:
     {}
 #endif

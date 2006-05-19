@@ -29,6 +29,20 @@
 
 #include <misc.h>
 
+int is_user_mode() {
+  __asm__ __volatile__ (
+			"movw %cs, %ax\n\t"
+			"andw $0x3, %ax\n\t"
+			"cmpw $0x3, %ax\n\t"
+			"je 1f\n\t"
+			"movl $0, %eax\n\t"
+			"jmp 2f\n\t"
+			"1:\n\t"
+			"movl $1, %eax\n\t"
+			"2:\n\t"
+			);
+}
+
 #define CDU_ROOT_SIZE 1000
 static struct _cdu parse_cdu_root[CDU_ROOT_SIZE];
 int cdu_free = 0;
@@ -622,12 +636,11 @@ unsigned int cli$dispatch(int userarg){
     printf("func is 0, error\n");
     goto no_func;
   }
-#ifdef __x86_64__
-  func(userarg,myargv,0,0);
-#else
-  // check. related to CLI supervisor
-  mymymyuserfunc(func,userarg,myargv,0,0);
-#endif
+  if (is_user_mode())
+    func(userarg,myargv,0,0);
+  else
+    // check. related to CLI supervisor
+    mymymyuserfunc(func,userarg,myargv,0,0);
  no_func:
   //func(argc,argv++);
   if (!internal) {
