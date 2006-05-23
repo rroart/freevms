@@ -954,6 +954,8 @@ static int init(void * unused)
 	char * vmsdev = do_translate(root_device_name);
 	memcpy(default_name,vmsdev,strlen(vmsdev));
 	cre_syscommon(vmsdev);
+	int __init kswapd_init(void);
+	kswapd_init();
 #endif
 #ifndef CONFIG_VMS
 	prepare_namespace();

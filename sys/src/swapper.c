@@ -202,7 +202,7 @@ int kswapd(void *unused)
 	}
 }
 
-static int __init kswapd_init(void)
+int __init kswapd_init(void)
 {
 	printk("Starting kswapd\n");
 	swap_setup();
@@ -210,7 +210,9 @@ static int __init kswapd_init(void)
 	return 0;
 }
 
+#if 0
 module_init(kswapd_init)
+#endif
 #endif
 
 struct _lnmth lnm_sys_dir_table_header;
