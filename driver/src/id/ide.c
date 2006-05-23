@@ -2099,6 +2099,8 @@ void ide_intr (int irq, void *dev_id, struct pt_regs *regs)
 		}
 	}
 	spin_unlock_irqrestore(&io_request_lock, flags);
+	if (startstop == ide_stopped)
+		ioc$reqcom(SS$_NORMAL,0,ideu);
 }
 
 /*

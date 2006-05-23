@@ -203,7 +203,6 @@ read_next:
 	}
 
   kfree(rq);
-	ioc$reqcom(SS$_NORMAL,0,ideu);
 	
         return ide_stopped;
 }
@@ -239,11 +238,9 @@ static ide_startstop_t write_intr (ide_drive_t *drive)
 				ide_set_handler (drive, &write_intr, WAIT_CMD, NULL);
                                 return ide_started;
 			}
-			ioc$reqcom(SS$_NORMAL,0,ideu);
 			kfree(rq);
                         return ide_stopped;
 		}
-		ioc$reqcom(SS$_NORMAL,0,ideu);
 		kfree(rq);
 		return ide_stopped;	/* the original code did this here (?) */
 	}
