@@ -1740,7 +1740,7 @@ unsigned long smp$gl_cpu_transition;
 unsigned long smp$gl_cpu_upd_defer;
 unsigned long smp$gl_cpuconf;
 unsigned long smp$gl_cpus_powered;
-unsigned long smp$gl_cpus_present;
+unsigned long smp$gl_cpus_present = 1;
 unsigned long smp$gl_cpus_tested;
 unsigned long smp$gl_dynamic_busywait;
 unsigned long smp$gl_flags;
@@ -2028,6 +2028,8 @@ void __init vms_init(void) {
       q->blink=q;
     }
     qhead_init(&smp$gl_cpu_data[i]->cpu$l_psfl);
+    smp$gl_cpu_data[i]->cpu$l_phy_cpuid = i;
+    smp$gl_cpu_data[i]->cpu$l_cpuid_mask = 1 << i;
 #ifdef __x86_64__
 #include <asm/pda.h>
     smp$gl_cpu_data[i]->cpu$ps_pda=cpu_pda + i;
