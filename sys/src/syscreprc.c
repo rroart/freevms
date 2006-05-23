@@ -286,7 +286,9 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	p->user = INIT_USER;
 
 	spin_lock(&mmlist_lock);
+#if 0
 	list_add(&mm->mmlist, &p->p_pptr->mm->mmlist);
+#endif
 	mmlist_nr++;
 	spin_unlock(&mmlist_lock);
 
