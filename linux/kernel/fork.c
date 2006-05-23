@@ -44,6 +44,8 @@
 #include <exe_routines.h>
 #include <sch_routines.h>
 #include <queue.h>
+#include <internals.h>
+#include <ipldef.h>
 
 /* The idle threads do not count.. */
 int nr_threads;
@@ -120,7 +122,9 @@ spinlock_t lastpid_lock = SPIN_LOCK_UNLOCKED;
 	 * Add it first so that swapoff can see any swap entries.
 	 */
 	spin_lock(&mmlist_lock);
+#if 0
 	list_add(&mm->mmlist, &current->mm->mmlist);
+#endif
 	mmlist_nr++;
 	spin_unlock(&mmlist_lock);
 
@@ -801,6 +805,8 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	dup_phd(p,current);
 	if (copy_mm(clone_flags, p))
 		goto bad_fork_cleanup_sighand;
+	if (clone_flags & 0x00010000)
+	  p->active_mm = p->mm = mm_alloc();
 	int uml_map = init_fork_p1pp(p,p->pcb$l_phd,current,current->pcb$l_phd);
 #ifdef __x86_64__
 	shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x1000,0x7fffe000);
@@ -902,7 +908,9 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	p->state = TASK_INTERRUPTIBLE;
 	p->pcb$w_state = SCH$C_HIB;
 	qhead_init(p); // move this up?
+	vmslock(&SPIN_SCHED,IPL$_SCHED);
 	sch$rse(p,PRI$_RESAVL,EVT$_WAKE); // check if this is right
+	vmsunlock(&SPIN_SCHED,0);
 #endif
 	//	wake_up_process2(p,PRI$_TICOM);		/* do this last */
 	++total_forks;
