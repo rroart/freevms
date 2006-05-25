@@ -16,7 +16,7 @@ void smp_work() {
   struct _cpu * cpu = smp$gl_cpu_data[cpuid];
   if (cpu->cpu$l_work_req & CPU$M_IOPOST) {
     cpu->cpu$l_work_req &= ~CPU$M_IOPOST; // check. smp non-atom spin
-    if (cpuid)
+    if (cpuid != smp$gl_primid)
       printk("iopost ipint for non-primary\n");
     else
       SOFTINT_IOPOST_VECTOR;

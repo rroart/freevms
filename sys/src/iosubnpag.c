@@ -72,7 +72,7 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
  skip_it:
   if (!qemp) goto notempty;
 
-  if (smp_processor_id()==0) {
+  if (smp_processor_id() == smp$gl_primid) {
     SOFTINT_IOPOST_VECTOR;
   } else {
     smp_send_work(CPU$M_IOPOST, 0);

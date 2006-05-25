@@ -28,7 +28,7 @@ void  com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid);
 
 void com$post(struct _irp * i, struct _ucb * u) {
   insqti(i,&ioc$gq_postiq);
-  if (ctl$gl_pcb->pcb$l_cpu_id)
+  if (ctl$gl_pcb->pcb$l_cpu_id != smp$gl_primid)
     smp_send_work(CPU$M_IOPOST, 0);
   else
     SOFTINT_IOPOST_VECTOR;
