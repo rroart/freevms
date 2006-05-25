@@ -153,7 +153,9 @@ void cpu_idle (void)
 	printk("id %x\n",current->pcb$l_pid);	
 	printk("idle %x %x %x\n",done_init_idle,current,&init_task);
 	printk("pid 0 here again%x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl); 
+#if 0
 	{ int i; for(i=0;i<10000000;i++) ; }
+#endif
 	if (current->pcb$l_pid==0) { /* just to be sure */
 	  current->pcb$b_prib  = 24;
 	  current->pcb$b_pri   = 24;

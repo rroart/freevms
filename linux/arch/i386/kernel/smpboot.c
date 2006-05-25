@@ -52,6 +52,10 @@
 #include <asm/mtrr.h>
 #include <asm/pgalloc.h>
 #include <asm/smpboot.h>
+#include <asm/mmu_context.h>
+
+#include <exe_routines.h>
+#include <queue.h>
 
 /* Set if we find a B stepping CPU			*/
 static int smp_b_stepping;
@@ -493,6 +497,14 @@ void __init initialize_secondary(void)
 	 * basically just the stack pointer and the eip.
 	 */
 
+#if 1
+	int hard_cpuid = hard_smp_processor_id();
+	int cpuid = physical_apicid_2_cpu[hard_cpuid];
+	struct _pcb * cur = init_tasks[cpuid];
+	switch_mm((current->mm),(cur->mm),NULL,cpuid);
+	// note that current changes with this
+#endif
+
 	asm volatile(
 		"movl %0,%%esp\n\t"
 		"jmp *%1"
@@ -512,7 +524,7 @@ static int __init fork_by_hand(void)
 	 * don't care about the eip and regs settings since
 	 * we'll never reschedule the forked task.
 	 */
-	return do_fork(CLONE_VM|CLONE_PID, 0, &regs, 0);
+	return do_fork(/*CLONE_VM|*/0x00010000|CLONE_PID, 0, &regs, 0);
 }
 
 /* which physical APIC ID maps to which logical CPU number */
@@ -792,20 +804,26 @@ static void __init do_boot_cpu (int apicid)
 	int timeout, cpu;
 	unsigned long start_eip;
 	unsigned short nmi_high, nmi_low;
+	int epid;
 
+	smp$gl_cpus_present++;
 	cpu = ++cpucount;
 	/*
 	 * We can't use kernel_thread since we must avoid to
 	 * reschedule the child.
 	 */
-	if (fork_by_hand() < 0)
+	if ((epid = fork_by_hand()) < 0)
 		panic("failed fork for CPU %d", cpu);
 
 	/*
 	 * We remove it from the pidhash and the runqueue
 	 * once we got the process:
 	 */
+#if 0
 	idle = init_task.prev_task;
+#else
+	idle = exe$epid_to_pcb(epid);
+#endif
 	if (!idle)
 		panic("No idle process for CPU %d", cpu);
 
@@ -819,8 +837,21 @@ static void __init do_boot_cpu (int apicid)
 #ifndef CONFIG_VMS
 	del_from_runqueue(idle);
 	unhash_process(idle);
+#else
+	long * l = idle->pcb$l_sqfl;
+	remque(&idle->pcb$l_sqfl, 0);
+	if (((long)l)==(*l))
+	  sch$gl_comqs=sch$gl_comqs & (~(1 << idle->pcb$b_pri));
+	idle->pcb$b_prib  = 31;
+	idle->pcb$b_pri   = 31;
+	idle->pcb$w_quant = 0;
+	smp$gl_cpu_data[cpu]->cpu$b_cur_pri = idle->pcb$b_pri;
 #endif
 	init_tasks[cpu] = idle;
+	smp$gl_cpu_data[cpu]->cpu$l_curpcb = idle;
+#if 0
+	smp$gl_cpu_data[cpu]->cpu$l_phy_cpuid = apicid;
+#endif
 
 	/* start_eip had better be page-aligned! */
 	start_eip = setup_trampoline();
@@ -1113,6 +1144,7 @@ void __init smp_boot_cpus(void)
 		/*
 		 * Don't even attempt to start the boot CPU!
 		 */
+		smp$gl_primid = 0; /* or:boot_cpu_apicid? */; // temp
 		if (apicid == boot_cpu_apicid)
 			continue;
 

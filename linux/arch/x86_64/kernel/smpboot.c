@@ -52,6 +52,11 @@
 #include <asm/proto.h>
 #include <asm/acpi.h>
 
+#include <asm/mmu_context.h>
+
+#include <exe_routines.h>
+#include <queue.h>
+
 /* Setup configured maximum number of CPUs to activate */
 unsigned int max_cpus = NR_CPUS;
 
@@ -449,7 +454,18 @@ int __init start_secondary(void *unused)
  */
 void __init initialize_secondary(void)
 {
+#if 0
 	struct task_struct *me = stack_current();
+#else
+        int hard_cpuid = hard_smp_processor_id();
+        int cpuid = x86_apicid_to_cpu[hard_cpuid];
+	struct _pcb * me = init_tasks[cpuid];
+        switch_mm((current->mm),(me->mm),NULL,cpuid);
+	long * l = cpu_pda[cpuid].level4_pgt;
+	*l = __pa(me->mm->pgd) | _PAGE_TABLE;
+	__flush_tlb();
+	// note that current changes with this
+#endif
 
 	/*
 	 * We don't actually need to load the full TSS,
@@ -473,7 +489,7 @@ static int __init fork_by_hand(void)
 	 * don't care about the eip and regs settings since
 	 * we'll never reschedule the forked task.
 	 */
-	return do_fork(CLONE_VM|CLONE_PID, 0, &regs, 0);
+	return do_fork(/*CLONE_VM*/0x00010000|CLONE_PID, 0, &regs, 0);
 }
 
 #if APIC_DEBUG
@@ -520,21 +536,27 @@ static int __init do_boot_cpu (int apicid)
 	unsigned long send_status, accept_status, boot_status, maxlvt;
 	int timeout, num_starts, j, cpu;
 	unsigned long start_eip;
+	int epid;
 
+	smp$gl_cpus_present++;
 	cpu = ++cpucount;
 
 	/*
 	 * We can't use kernel_thread since we must avoid to
 	 * reschedule the child.
 	 */
-	if (fork_by_hand() < 0)
+	if ((epid = fork_by_hand()) < 0)
 		panic("failed fork for CPU %d", cpu);
 
 	/*
 	 * We remove it from the pidhash and the runqueue
 	 * once we got the process:
 	 */
+#if 0
 	idle = init_task.prev_task;
+#else
+	idle = exe$epid_to_pcb(epid);
+#endif
 	if (!idle)
 		panic("No idle process for CPU %d", cpu);
 
@@ -549,8 +571,18 @@ static int __init do_boot_cpu (int apicid)
 #ifndef CONFIG_VMS
 	del_from_runqueue(idle);
 	unhash_process(idle);
+#else
+	long * l = idle->pcb$l_sqfl;
+	remque(&idle->pcb$l_sqfl, 0);
+	if (((long)l)==(*l))
+	  sch$gl_comqs=sch$gl_comqs & (~(1 << idle->pcb$b_pri));
+	idle->pcb$b_prib  = 31;
+	idle->pcb$b_pri   = 31;
+	idle->pcb$w_quant = 0;
+	smp$gl_cpu_data[cpu]->cpu$b_cur_pri = idle->pcb$b_pri;
 #endif
 	cpu_pda[cpu].pcurrent = init_tasks[cpu] = idle;
+	smp$gl_cpu_data[cpu]->cpu$l_curpcb = idle;
 
 	/* start_eip had better be page-aligned! */
 	start_eip = setup_trampoline();
@@ -923,6 +955,7 @@ void __init smp_boot_cpus(void)
 		/*
 		 * Don't even attempt to start the boot CPU!
 		 */
+		smp$gl_primid = 0; /* or:boot_cpu_apicid? */; // temp
 		if (apicid == boot_cpu_id)
 			continue;
 

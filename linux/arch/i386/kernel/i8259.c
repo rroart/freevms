@@ -493,6 +493,8 @@ void __init init_IRQ(void)
 
 	/* IPI for generic function call */
 	set_intr_gate(CALL_FUNCTION_VECTOR, call_function_interrupt);
+
+	set_intr_gate(IPINT_VECTOR, ipint_interrupt);
 #endif	
 
 #ifdef CONFIG_X86_LOCAL_APIC

@@ -957,7 +957,7 @@ ENTRY(arch_kernel_thread)
 
 	# rdi: flags, rsi: usp, rdx: will be &pt_regs
 	movq %rdx,%rdi
-	orq  $CLONE_VM, %rdi
+	orq  $0x00010000 /* $CLONE_VM */, %rdi
 
 	movq $-1, %rsi
 

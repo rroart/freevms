@@ -238,6 +238,7 @@ extern char _stext, _etext;
 extern void reschedule_interrupt(void);
 extern void invalidate_interrupt(void);
 extern void call_function_interrupt(void);
+extern void ipint_interrupt(void);
 extern void apic_timer_interrupt(void);
 extern void spurious_interrupt(void);
 extern void error_interrupt(void);

@@ -4,6 +4,7 @@
 // Author. Roar Thronæs.
 
 #include<linux/kernel.h>
+#include<linux/sched.h> 
 #include<asm/hw_irq.h>
 
 #include<cpudef.h>
