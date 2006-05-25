@@ -600,8 +600,6 @@ int countme=500;
 
 asmlinkage void sch$resched(void) {
   int cpuid = smp_processor_id();
-  if (cpuid != hard_smp_processor_id())
-    panic("cpuid %x %x\n",cpuid,hard_smp_processor_id());
   struct _cpu * cpu=smp$gl_cpu_data[cpuid]; 
   struct _pcb * curpcb;
   unsigned long curpri;
