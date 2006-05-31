@@ -153,6 +153,9 @@ bad:
 	  break;
 	}
 	int block = offset >> 9;
+#ifdef __x86_64__
+	block++;
+#endif
 	rab->rab$w_rfa[0] = block & 0xffff;
 	rab->rab$w_rfa[1] = block >> 16;
 	rab->rab$w_rfa[2] = offset;

@@ -47,6 +47,7 @@ void copy_page(void *, void *);
  */
 typedef struct { unsigned long pte; } pte_t;
 typedef struct { unsigned long pmd; } pmd_t;
+typedef struct { unsigned long pud; } pud_t;
 typedef struct { unsigned long pgd; } pgd_t;
 typedef struct { unsigned long pml4; } pml4_t;
 #define PTE_MASK	PHYSICAL_PAGE_MASK
