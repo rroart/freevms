@@ -29,6 +29,8 @@ FreeVMS tasklist
 	General bugfix, extensions, compliance to ordinary functionality
 	SMG
 	ODS-5 (FI5) and Unix compatibility.
+	64-bit LE (have to go through the code to handle int, long etc)
+	SMP
 
 3. Low priority:
 	Locks
@@ -37,16 +39,14 @@ FreeVMS tasklist
 	Full RMS (with more than SEQ)
 	Full ODS-2 (with extended headers, volume set etc)
 	Security features
+	Mutexes
 
 4. Yet unknown priority:
 	System service dispatching
 	Condition handling
-	Mutexes
 	CRTL (probably none, should go for using libc)
-	64-bit LE (have to go through the code to handle int, long etc)
 
 5. No priority:
-	SMP
 	Volume shadowing
 	Non-intel
 	64-bit BE

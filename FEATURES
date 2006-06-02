@@ -3,17 +3,17 @@ The following features are present, from partially to fully implemented.
 Supported hardware configuration:
 	Console: VGA
 	Network interfaces: ne2k and ne2k-pci
-			    3c900 (3c905/3c590 might work, untested)
+			    3c900/3c905 (3c590 does not)
 	Disk interface: IDE
 
 Core kernel features:
 	Control mechanisms: Software interrupts, ASTs
-	Synchronization: Event flags, locks
+	Synchronization: Event flags, locks, spinlocks, mutexes
 	Scheduling, time support, process control and communication
 	Memory management: Working set list, swapper, pools
 	Input/output: QIO, mailboxes, terminal driver
 	Image support: VMS Images and ELF
-	Miscellaneous: Logical names
+	Miscellaneous: Logical names SMP (only ordinary dual tested)
 
 File system:
 	RMS read/write SEQ (yes) IDX (too little to be usable)
@@ -58,7 +58,7 @@ Editor:
 	EDT (from Ozone, and can not yet be used fully)
 
 Programming language:
-	Bliss (is under development)
+	Bliss (i386, with x86_64 under development)
 
 Linker:
 	LINKER (simple, static images. Can do some dynamic linking.)
@@ -73,62 +73,7 @@ Misc utilities:
 	MSG (generates numbers only)
 	Authorize (with show only)
 	Install (with add only)
-	Analyze/system (wit show dev only)
+	Analyze/system (with show dev only)
 
 System calls/services:
-	$adjwsl
-	$ascefc
-	$asctim
-	$assign
-	$bintim
-	$close
-	$clref
-	$connect
-	$create
-	$create_region_32
-	$crelnm
-	$crelnt
-	$crembx
-	$creprc
-	$crmpsc
-	$dassgn
-	$dclast
-	$disconnect
-	$display
-	$enq
-	$erase
-	$expreg
-	$extend
-	$fao
-	$fao
-	$forcex
-	$get
-	$getdvi
-	$getjpi
-	$getsyi
-	$gettim
-	$hiber
-	$imgact
-	$mgblsc
-	$mount
-	$numtim
-	$open
-	$parse
-	$put
-	$qio
-	$qiow
-	$readef
-	$rundwn
-	$schdwk
-	$search
-	$setast
-	$setddir
-	$setef
-	$setime
-	$setimr
-	$setpri
-	$setprn
-	$synch
-	$trnlnm
-	$waitfr
-	$wake
+	Not listed here anymore

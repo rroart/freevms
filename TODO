@@ -51,6 +51,8 @@ Scheduling:
 Schedule code cleanup.
 Proper deletion of dead processes in the databases (still shows up with sh sys)
 Make pcb$t_lname counted string
+Have reschedule at prescribed places in rse?
+Have sch$rse check ipl 8?
 
 Memory management:
 Check page alignment for allocated pools.

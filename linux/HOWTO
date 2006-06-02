@@ -52,6 +52,7 @@ Bochs:
 	Configure with at least 
 	--enable-debugger --enable-ne2000 --enable-cpu-level=6 --enable-sse
 	And maybe --enable-pci --enable-x86-64 --enable-sse2 remove sse
+	Maybe --enable-smp
 
 Bochs use:
 	Use make image to make a floppy and disk image.
