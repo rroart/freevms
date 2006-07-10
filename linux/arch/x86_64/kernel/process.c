@@ -285,7 +285,10 @@ static void reboot_warm(void)
 	__cli(); 
 		
 	/* restore identity mapping */
+#if 0
+	// not yet
 	init_level4_pgt[0] = __pml4(__pa(level3_ident_pgt) | 7); 
+#endif
 	__flush_tlb_all(); 
 
 	memcpy(__va(WARMBOOT_TRAMP), warm_reboot, warm_reboot_end - warm_reboot); 
