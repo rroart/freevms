@@ -230,7 +230,6 @@ static void inline leave_mm (unsigned long cpu)
 		BUG();
 	clear_bit(cpu, &cpu_tlbstate[cpu].active_mm->cpu_vm_mask);
 	/* flush TLB before it goes away. this stops speculative prefetches */
-	*read_pda(level4_pgt) = __pa(init_mm.pgd) | _PAGE_TABLE;
 	__flush_tlb();
 }
 
@@ -455,6 +454,7 @@ struct call_data_struct {
 	int wait;
 };
 
+static struct call_data_struct data;
 static struct call_data_struct * call_data;
 
 /*
@@ -477,7 +477,6 @@ int smp_call_function (void (*func) (void *info), void *info, int nonatomic,
  * hardware interrupt handler or from a bottom half handler.
  */
 {
-	struct call_data_struct data;
 	int cpus = smp_num_cpus-1;
 
 	if (!cpus)
