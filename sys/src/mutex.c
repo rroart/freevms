@@ -108,7 +108,9 @@ void sch$unlock(struct _mtx * m) {
       // pasted from ravail
       struct _wqh * wq=sch$gq_mwait;
       struct _pcb * p=wq->wqh$l_wqfl;
-      for (;p!=wq;p=p->pcb$l_sqfl) {
+      struct _pcb * next;
+      for (; p!=wq; p=next) {
+	next = p->pcb$l_sqfl;
 	if (p->pcb$l_efwm==rsn) {
 	  wq->wqh$l_wqcnt--;
 	  sch$chse(p,PRI$_RESAVL);
