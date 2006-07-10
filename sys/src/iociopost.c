@@ -157,7 +157,7 @@ asmlinkage void ioc$iopost(void) {
 
   //printk("iopost %x %x %x %x\n",&ioc$gq_postiq,ioc$gq_postiq,current->pid,ioc$gq_postiq>>32); //,&ioc$gq_postiq,ioc$gq_postiq &ioc$gq_postiq,ioc$gq_postiq);
  again:
-  if (!rqempty(&ioc$gq_postiq)) {
+  if (ctl$gl_pcb->pcb$l_cpu_id == smp$gl_primid && !rqempty(&ioc$gq_postiq)) {
     i=remqhi(&ioc$gq_postiq,i);
   } else {
     if (!aqempty(&smp$gl_cpu_data[smp_processor_id()]->cpu$l_psfl)) {
