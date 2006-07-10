@@ -49,7 +49,6 @@ typedef struct { unsigned long long pgd; } pgd_t;
 #define pte_val(x)	((x).pte_low | ((unsigned long long)(x).pte_high << 32))
 #else
 typedef struct { unsigned long pte_low; } pte_t;
-typedef struct { unsigned long pmd; } pmd_t;
 typedef struct { unsigned long pgd; } pgd_t;
 #define pte_val(x)	((x).pte_low)
 #endif
@@ -136,6 +135,8 @@ static __inline__ int get_order(unsigned long size)
 #define __pa(x)			((unsigned long)(x)-PAGE_OFFSET)
 #define __va(x)			((void *)((unsigned long)(x)+PAGE_OFFSET))
 #define virt_to_page(kaddr)	(mem_map + (__pa(kaddr) >> PAGE_SHIFT))
+#define pfn_to_page(pfn)	(mem_map + (pfn)) 
+#define page_to_pfn(page)   ((page) - mem_map)
 #define VALID_PAGE(page)	((page - mem_map) < max_mapnr)
 
 #endif /* __KERNEL__ */

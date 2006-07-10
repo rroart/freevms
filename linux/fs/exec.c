@@ -281,6 +281,7 @@ int copy_strings_kernel(int argc,char ** argv, struct linux_binprm *bprm)
 void put_dirty_page(struct task_struct * tsk, struct page *page, unsigned long address)
 {
 	pgd_t * pgd;
+	pud_t * pud;
 	pmd_t * pmd;
 	pte_t * pte;
 
@@ -289,7 +290,10 @@ void put_dirty_page(struct task_struct * tsk, struct page *page, unsigned long a
 	pgd = pgd_offset(tsk->mm, address);
 
 	spin_lock(&tsk->mm->page_table_lock);
-	pmd = pmd_alloc(tsk->mm, pgd, address);
+	pud = pud_alloc(tsk->mm, pgd, address);
+	if (!pud)
+		goto out;
+	pmd = pmd_alloc(tsk->mm, pud, address);
 	if (!pmd)
 		goto out;
 	pte = pte_alloc(tsk->mm, pmd, address);

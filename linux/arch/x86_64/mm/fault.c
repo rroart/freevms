@@ -71,6 +71,7 @@ static int bad_address(void *p)
 
 void dump_pagetable(unsigned long address)
 {
+#if 0
 	pml4_t *pml4;
 	asm("movq %%cr3,%0" : "=r" (pml4));
 
@@ -98,6 +99,7 @@ ret:
 	return;
 bad:
 	printk("BAD\n");
+#endif
 }
 
 /* Sometimes the CPU reports invalid exceptions on prefetch.

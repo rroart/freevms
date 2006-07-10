@@ -772,22 +772,22 @@ static inline int filemap_sync_pte_range(pmd_t * pmd,
 	return error;
 }
 
-static inline int filemap_sync_pmd_range(pgd_t * pgd,
+static inline int filemap_sync_pmd_range(pud_t * pud,
 	unsigned long address, unsigned long size, 
-	struct _rde *vma, unsigned int flags)
+	struct _rde *vma, unsigned long offset, unsigned int flags)
 {
 	pmd_t * pmd;
 	unsigned long offset, end;
 	int error;
 
-	if (pgd_none(*pgd))
+	if (pud_none(*pud))
 		return 0;
-	if (pgd_bad(*pgd)) {
-		pgd_ERROR(*pgd);
-		pgd_clear(pgd);
+	if (pud_bad(*pud)) {
+		pud_ERROR(*pud);
+		pud_clear(pud);
 		return 0;
 	}
-	pmd = pmd_offset(pgd, address);
+	pmd = pmd_offset(pud, address);
 	offset = address & PGDIR_MASK;
 	address &= ~PGDIR_MASK;
 	end = address + size;
@@ -798,6 +798,36 @@ static inline int filemap_sync_pmd_range(pgd_t * pgd,
 		error |= filemap_sync_pte_range(pmd, address, end - address, vma, offset, flags);
 		address = (address + PMD_SIZE) & PMD_MASK;
 		pmd++;
+	} while (address && (address < end));
+	return error;
+}
+
+static inline int filemap_sync_pud_range(pgd_t * pgd,
+	unsigned long address, unsigned long size, 
+	struct _rde *vma, unsigned int flags)
+{
+	pud_t * pud;
+	unsigned long offset, end;
+	int error;
+
+	if (pgd_none(*pgd))
+		return 0;
+	if (pgd_bad(*pgd)) {
+		pgd_ERROR(*pgd);
+		pgd_clear(pgd);
+		return 0;
+	}
+	pud = pud_offset(pgd, address);
+	offset = address & PGDIR_MASK;
+	address &= ~PGDIR_MASK;
+	end = address + size;
+	if (end > PGDIR_SIZE)
+		end = PGDIR_SIZE;
+	error = 0;
+	do {
+		error |= filemap_sync_pmd_range(pud, address, end - address, vma, offset, flags);
+		address = (address + PUD_SIZE) & PUD_MASK;
+		pud++;
 	} while (address && (address < end));
 	return error;
 }
@@ -820,7 +850,7 @@ int filemap_sync(struct vm_area_struct * vma, unsigned long address,
 	if (address >= end)
 		BUG();
 	do {
-		error |= filemap_sync_pmd_range(dir, address, end - address, vma, flags);
+		error |= filemap_sync_pud_range(dir, address, end - address, vma, flags);
 		address = (address + PGDIR_SIZE) & PGDIR_MASK;
 		dir++;
 	} while (address && (address < end));

@@ -1068,7 +1068,14 @@ void exit_mmap(struct mm_struct * mm)
 #ifdef __i386__
 	clear_page_tables(mm, FIRST_USER_PGD_NR, USER_PTRS_PER_PGD -1 ); // don't clobber P1
 #else
-	clear_page_tables(mm, FIRST_USER_PGD_NR, 1 ); // don't clobber P1
+	//clear_page_tables(mm, FIRST_USER_PGD_NR, 1 ); // don't clobber P1
+	//clear_page_tables(mm, FIRST_USER_PGD_NR, USER_PTRS_PER_PGD -1 ); // don't clobber P1
+#if 0
+	void free_pgd_range(struct mmu_gather **tlb, unsigned long addr, unsigned long end, unsigned long floor, unsigned long ceiling);
+	#include <asm/tlb.h>
+	struct mmu_gather *tlb = tlb_gather_mmu(mm);
+	free_pgd_range(&tlb,  FIRST_USER_ADDRESS, 0x7f000000, FIRST_USER_ADDRESS, 0);
+#endif
 #endif
 }
 

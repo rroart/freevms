@@ -35,6 +35,7 @@
 
 long phys_pte_addr(struct _pcb * pcb) {
   pgd_t *pgd;
+  pud_t *pud;
   pmd_t *pmd;
   pte_t *pte = 0;
 
@@ -44,7 +45,8 @@ long phys_pte_addr(struct _pcb * pcb) {
 
   pgd = pgd_offset(mm, page);
 
-  pmd = pgd;
+  pud = pgd;
+  pmd = pud;
 
   if (pmd) {
     pte = pte_offset(pmd, page);
@@ -75,9 +77,11 @@ void init_p1pp_data(struct _pcb * pcb, struct _phd * phd,signed long offset) {
 
 int shell_init_other(struct _pcb * pcb, struct _pcb * oldpcb, long addr, long oldaddr) {
   pgd_t *pgd;
+  pud_t *pud;
   pmd_t *pmd;
   pte_t *pte = 0;
   pgd_t *oldpgd;
+  pud_t *oldpud;
   pmd_t *oldpmd;
   pte_t *oldpte = 0;
 
@@ -101,17 +105,24 @@ int shell_init_other(struct _pcb * pcb, struct _pcb * oldpcb, long addr, long ol
   else
     oldpgd = pgd_offset_k(oldpage);
 #else
-  oldpgd = pgd_offset_k(oldpage);
+  oldpgd = pgd_offset(oldmm, oldpage);
 #endif
 #endif
   //printk(KERN_EMERG "mm %lx %lx %lx %lx\n",mm,mm->pgd,oldmm,oldmm->pgd);
   //printk(KERN_EMERG "pgd %lx %lx\n",pgd,oldpgd);
 
-  pmd = pmd_alloc(mm, pgd, page);
+  pud = pud_alloc(mm, pgd, page);
 #ifdef __i386__
-  oldpmd = pmd_alloc(oldmm, oldpgd, oldpage);
+  oldpud = pud_alloc(oldmm, oldpgd, oldpage);
 #else
-  oldpmd = pmd_alloc(oldmm, oldpgd, oldpage);
+  oldpud = pud_alloc(oldmm, oldpgd, oldpage);
+#endif
+
+  pmd = pmd_alloc(mm, pud, page);
+#ifdef __i386__
+  oldpmd = pmd_alloc(oldmm, oldpud, oldpage);
+#else
+  oldpmd = pmd_alloc(oldmm, oldpud, oldpage);
 #endif
   //printk(KERN_EMERG "pmd %lx %lx\n",pmd,oldpmd);
 
@@ -152,6 +163,7 @@ void init_sys_p1pp() {
   long phd=pcb->pcb$l_phd;
 
   pgd_t *pgd;
+  pud_t *pud;
   pmd_t *pmd;
   pte_t *pte;
   pte_t *pte2;
@@ -170,6 +182,11 @@ void init_sys_p1pp() {
 
 #ifdef __x86_64__
   long pm=alloc_bootmem_pages(4096);
+#if 0
+  long pu=alloc_bootmem_pages(4096); // already allocated
+#else
+  //  long pu = pud_offset(((pgd_t*)/*__pa*/(pgd)), page);
+#endif
 #endif
 
   kernel_puts("alloced pt pa\n");
@@ -196,16 +213,23 @@ void init_sys_p1pp() {
 #ifdef __i386__
   *(unsigned long *)pgd=__pa(pt)|_PAGE_PRESENT|_PAGE_RW;
 #else
-  *(unsigned long *)pgd=__pa(pm)|_PAGE_PRESENT|_PAGE_RW;
+#if 0
+  *(unsigned long *)pgd=__pa(pu)|_PAGE_PRESENT|_PAGE_RW; // already there
 #endif
 #endif
-
-  kernel_puts("set pgd\n");
+#endif
 
 #ifdef __i386__
-  pmd = pgd; //pmd_offset(pgd, page);
+  kernel_puts("set pgd\n");
+#endif
+
+#ifdef __i386__
+  pud = pgd;
+  pmd = pud; //pmd_offset(pgd, page);
 #else
-  pmd = pmd_offset(((pgd_t*)/*__pa*/(pgd)), page);
+  pud = pud_offset(((pgd_t*)/*__pa*/(pgd)), page);
+  *(unsigned long *)pud=__pa(pm)|_PAGE_PRESENT|_PAGE_RW;
+  pmd = pmd_offset(((pud_t*)/*__pa*/(pud)), page);
   *(unsigned long *)pmd=__pa(pt)|_PAGE_PRESENT|_PAGE_RW;
 #endif
 
@@ -226,7 +250,7 @@ void init_sys_p1pp() {
 #endif
 
   char c[40];
-  sprintf(c,"%x %x %x %x\n",swapper_pg_dir,pgd,pmd,pte);
+  sprintf(c,"%lx %lx %lx %lx %lx\n",swapper_pg_dir,pgd,pud,pmd,pte);
 
   kernel_puts("pte\n");
   kernel_puts(c);
@@ -281,6 +305,7 @@ void init_sys_p1pp() {
 
 void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   pgd_t *pgd;
+  pud_t *pud;
   pmd_t *pmd;
   pte_t *pte = 0;
 
@@ -294,7 +319,9 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   spin_lock(&mm->page_table_lock);
   pgd = pgd_offset(mm, page);
 
-  pmd = pmd_alloc(mm, pgd, page);
+  pud = pud_alloc(mm, pgd, page);
+
+  pmd = pmd_alloc(mm, pud, page);
 
   if (pmd) {
     pte = pte_alloc(mm, pmd, page);
@@ -330,7 +357,12 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   if ( (*(unsigned long*)0x7ffff000)==42)
     printk("still 42\n");
 #endif
+#if 0
   //printk("ms %lx %lx %lx %lx %lx %lx\n",page,0,(long)&ctl$gl_pcb-page,(long)&ctl$gl_pcb+4,0,PAGE_SIZE+4-((long)&ctl$gl_pcb-page));
+  printk("%lx %lx %lx %lx %lx\n",pcb,pgd,pud,pmd,pte);
+  void release_console_sem(void);
+  release_console_sem();
+#endif
 #ifdef __i386__
   memset(page,0,(long)&ctl$gl_pcb-page); // must zero content also, but not ctl$gl_pcb
   memset((long)&ctl$gl_pcb+4,0,PAGE_SIZE+4-((long)&ctl$gl_pcb-page)); // must zero content also
@@ -360,9 +392,11 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
   int uml_map=0;
 
   pgd_t *pgd;
+  pud_t *pud;
   pmd_t *pmd;
   pte_t *pte = 0;
   pgd_t *oldpgd;
+  pud_t *oldpud;
   pmd_t *oldpmd;
   pte_t *oldpte = 0;
 
@@ -433,17 +467,25 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
   else
     oldpgd = pgd_offset_k(oldpage);
 #else
-  oldpgd = pgd_offset_k(oldpage);
+  oldpgd = pgd_offset(oldmm, oldpage);
 #endif
 #endif
   //printk(KERN_EMERG "mm %lx %lx %lx %lx\n",mm,mm->pgd,oldmm,oldmm->pgd);
   //printk(KERN_EMERG "pgd %lx %lx\n",pgd,oldpgd);
 
-  pmd = pmd_alloc(mm, pgd, page);
+  pud = pud_alloc(mm, pgd, page);
 #ifdef __i386__
-  oldpmd = pmd_alloc(oldmm, oldpgd, oldpage);
+  oldpud = pud_alloc(oldmm, oldpgd, oldpage);
 #else
-  oldpmd = pmd_alloc(oldmm, oldpgd, oldpage);
+  oldpud = pud_alloc(oldmm, oldpgd, oldpage);
+#endif
+  //printk(KERN_EMERG "pmd %lx %lx\n",pmd,oldpmd);
+
+  pmd = pmd_alloc(mm, pud, page);
+#ifdef __i386__
+  oldpmd = pmd_alloc(oldmm, oldpud, oldpage);
+#else
+  oldpmd = pmd_alloc(oldmm, oldpud, oldpage);
 #endif
   //printk(KERN_EMERG "pmd %lx %lx\n",pmd,oldpmd);
 
@@ -495,6 +537,12 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
   printk("42\n");
   if ( (*(unsigned long*)0x7fffe000)==42)
     printk("still 42\n");
+#endif
+#if 0
+  printk("%lx %lx %lx %lx %lx\n",oldpcb,oldpgd,oldpud,oldpmd,oldpte);
+  printk("%lx %lx %lx %lx %lx\n",pcb,pgd,pud,pmd,pte);
+  void release_console_sem(void);
+  release_console_sem();
 #endif
   memset(oldpage,0,PAGE_SIZE); // must zero content also
 #if 0

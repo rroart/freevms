@@ -61,7 +61,9 @@ int main(void)
 	ENTRY(pgtable_cache_sz);
 	ENTRY(cpunumber);
 	ENTRY(irqstackptr);
+#if 0
 	ENTRY(level4_pgt);
+#endif
 #undef ENTRY
 #define ENTRY(entry) outconst("#define cpu_" #entry " %0", offsetof(struct _cpu, entry))
 	ENTRY(cpu$l_saved_isp);

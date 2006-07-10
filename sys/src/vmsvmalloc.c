@@ -21,6 +21,7 @@
 
 #include <asm/uaccess.h>
 #include <asm/pgalloc.h>
+#include <asm/pgtable.h>
 
 rwlock_t vmlist_lock = RW_LOCK_UNLOCKED;
 struct vm_struct * vmlist;
@@ -44,7 +45,7 @@ static inline void free_area_pte(pmd_t * pmd, unsigned long address, unsigned lo
 		end = PMD_SIZE;
 	do {
 		pte_t page;
-		page = ptep_get_and_clear(pte);
+		page = ptep_get_and_clear(42, 42, pte); // check
 		address += PAGE_SIZE;
 		pte++;
 		if (pte_none(page))
@@ -59,16 +60,16 @@ static inline void free_area_pte(pmd_t * pmd, unsigned long address, unsigned lo
 	} while (address < end);
 }
 
-static inline void free_area_pmd(pgd_t * dir, unsigned long address, unsigned long size)
+static inline void free_area_pmd(pud_t * dir, unsigned long address, unsigned long size)
 {
 	pmd_t * pmd;
 	unsigned long end;
 
-	if (pgd_none(*dir))
+	if (pud_none(*dir))
 		return;
-	if (pgd_bad(*dir)) {
-		pgd_ERROR(*dir);
-		pgd_clear(dir);
+	if (pud_bad(*dir)) {
+		pud_ERROR(*dir);
+		pud_clear(dir);
 		return;
 	}
 	pmd = pmd_offset(dir, address);
@@ -83,6 +84,30 @@ static inline void free_area_pmd(pgd_t * dir, unsigned long address, unsigned lo
 	} while (address < end);
 }
 
+static inline void free_area_pud(pgd_t * dir, unsigned long address, unsigned long size)
+{
+	pud_t * pud;
+	unsigned long end;
+
+	if (pgd_none(*dir))
+		return;
+	if (pgd_bad(*dir)) {
+		pgd_ERROR(*dir);
+		pgd_clear(dir);
+		return;
+	}
+	pud = pud_offset(dir, address);
+	address &= ~PGDIR_MASK;
+	end = address + size;
+	if (end > PGDIR_SIZE)
+		end = PGDIR_SIZE;
+	do {
+		free_area_pmd(pud, address, end - address);
+		address = (address + PUD_SIZE) & PUD_MASK;
+		pud++;
+	} while (address < end);
+}
+
 void vmfree_area_pages(unsigned long address, unsigned long size)
 {
 	pgd_t * dir;
@@ -91,7 +116,7 @@ void vmfree_area_pages(unsigned long address, unsigned long size)
 	dir = pgd_offset_k(address);
 	flush_cache_all();
 	do {
-		free_area_pmd(dir, address, end - address);
+		free_area_pud(dir, address, end - address);
 		address = (address + PGDIR_SIZE) & PGDIR_MASK;
 		dir++;
 	} while (address && (address < end));
@@ -143,6 +168,26 @@ static inline int alloc_area_pmd(pmd_t * pmd, unsigned long address, unsigned lo
 	return 0;
 }
 
+static inline int alloc_area_pud(pud_t * pud, unsigned long address, unsigned long size, int gfp_mask, pgprot_t prot)
+{
+	unsigned long end;
+
+	address &= ~PGDIR_MASK;
+	end = address + size;
+	if (end > PGDIR_SIZE)
+		end = PGDIR_SIZE;
+	do {
+		pte_t * pte = pmd_alloc(&init_mm, pud, address);
+		if (!pte)
+			return -ENOMEM;
+		if (alloc_area_pte(pte, address, end - address, gfp_mask, prot))
+			return -ENOMEM;
+		address = (address + PUD_SIZE) & PUD_MASK;
+		pud++;
+	} while (address < end);
+	return 0;
+}
+
 inline int vmalloc_area_pages (unsigned long address, unsigned long size,
                                int gfp_mask, pgprot_t prot)
 {
@@ -153,15 +198,15 @@ inline int vmalloc_area_pages (unsigned long address, unsigned long size,
 	dir = pgd_offset_k(address);
 	spin_lock(&init_mm.page_table_lock);
 	do {
-		pmd_t *pmd;
+		pud_t *pud;
 		
-		pmd = pmd_alloc(&init_mm, dir, address);
+		pud = pud_alloc(&init_mm, dir, address);
 		ret = -ENOMEM;
-		if (!pmd)
+		if (!pud)
 			break;
 
 		ret = -ENOMEM;
-		if (alloc_area_pmd(pmd, address, end - address, gfp_mask, prot))
+		if (alloc_area_pud(pud, address, end - address, gfp_mask, prot))
 			break;
 
 		address = (address + PGDIR_SIZE) & PGDIR_MASK;

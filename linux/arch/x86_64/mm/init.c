@@ -127,26 +127,30 @@ static void *spp_getpage(void)
 static void set_pte_phys(unsigned long vaddr,
 			 unsigned long phys, pgprot_t prot)
 {
-	pml4_t *level4;
 	pgd_t *pgd;
+	pud_t *pud;
 	pmd_t *pmd;
 	pte_t *pte;
 
-	level4 = pml4_offset_k(vaddr);
-	if (pml4_none(*level4)) {
-		printk("PML4 FIXMAP MISSING, it should be setup in head.S!\n");
-		return;
-	}
-	pgd = level3_offset_k(level4, vaddr);
+	pgd = pgd_offset_k(vaddr);
 	if (pgd_none(*pgd)) {
-		pmd = (pmd_t *) spp_getpage(); 
-		set_pgd(pgd, __pgd(__pa(pmd) | _KERNPG_TABLE | _PAGE_USER));
-		if (pmd != pmd_offset(pgd, 0)) {
+		pud = (pud_t *) spp_getpage(); 
+		set_pgd(pgd, __pgd(__pa(pud) | _KERNPG_TABLE | _PAGE_USER));
+		if (pud != pud_offset(pgd, 0)) {
 			printk("PAGETABLE BUG #01!\n");
 			return;
 		}
 	}
-	pmd = pmd_offset(pgd, vaddr);
+	pud = pud_offset(pgd, vaddr);
+	if (pud_none(*pud)) {
+		pmd = (pmd_t *) spp_getpage();
+		set_pud(pud, __pud(__pa(pmd) | _KERNPG_TABLE | _PAGE_USER));
+		if (pmd != pmd_offset(pud, 0)) {
+			printk("PAGETABLE BUG #02!\n");
+			return;
+		}
+	}
+	pmd = pmd_offset(pud, vaddr);
 	if (pmd_none(*pmd)) {
 		pte = (pte_t *) spp_getpage();
 		set_pmd(pmd, __pmd(__pa(pte) | _KERNPG_TABLE | _PAGE_USER));
@@ -221,18 +225,19 @@ static __init void unmap_low_page(int i)
 	ti->allocated = 0; 
 } 
 
+#if 0
 static void __init phys_pgd_init(pgd_t *pgd, unsigned long address, unsigned long end)
 { 
-	long i, j; 
+	long i, j, k; 
 
 	i = pgd_index(address);
 	pgd = pgd + i;
 	for (; i < PTRS_PER_PGD; pgd++, i++) {
 		int map; 
-		unsigned long paddr, pmd_phys;
-		pmd_t *pmd;
+		unsigned long paddr, pud_phys;
+		pud_t *pud;
 
-		paddr = (address & PML4_MASK) + i*PGDIR_SIZE; 
+		paddr = (address & PGDIR_MASK) + i*PGDIR_SIZE; 
 		if (paddr >= end) { 
 			for (; i < PTRS_PER_PGD; i++, pgd++) 
 				set_pgd(pgd, __pgd(0)); 
@@ -244,20 +249,101 @@ static void __init phys_pgd_init(pgd_t *pgd, unsigned long address, unsigned lon
 			continue;
 		} 
 
-		pmd = alloc_low_page(&map, &pmd_phys);
-		set_pgd(pgd, __pgd(pmd_phys | _KERNPG_TABLE));
-		for (j = 0; j < PTRS_PER_PMD; pmd++, j++ , paddr += PMD_SIZE) {
+		pud = alloc_low_page(&map, &pud_phys);
+		set_pgd(pgd, __pgd(pud_phys | _KERNPG_TABLE));
+		for (j = 0; j < PTRS_PER_PUD; pud++, j++ , paddr += PUD_SIZE) {
 			unsigned long pe;
+			pmd_t *pmd;
 
 			if (paddr >= end) { 
-				for (; j < PTRS_PER_PMD; j++, pmd++)
-					set_pmd(pmd,  __pmd(0)); 
+				for (; j < PTRS_PER_PUD; j++, pud++)
+					set_pud(pud,  __pud(0)); 
 				break;
 			}
-			pe = _PAGE_PSE | _KERNPG_TABLE | _PAGE_NX | _PAGE_GLOBAL | paddr;
-			pe &= __supported_pte_mask; 
-			set_pmd(pmd, __pmd(pe));
+			set_pud(pud, __pud(pud_phys | _KERNPG_TABLE));
+			for (k = 0; k < PTRS_PER_PMD; pmd++, k++ , paddr += PMD_SIZE) {
+			  unsigned long pe;
+
+			  if (paddr >= end) { 
+			    for (; k < PTRS_PER_PMD; k++, pmd++)
+			      set_pmd(pud,  __pmd(0)); 
+			    break;
+			  }
+			  pe = _PAGE_PSE | _KERNPG_TABLE | _PAGE_NX | _PAGE_GLOBAL | paddr;
+			  pe &= __supported_pte_mask; 
+			  set_pmd(pmd, __pmd(pe));
+			}
 		}
+		unmap_low_page(map);
+	}
+	__flush_tlb();
+} 
+#endif
+
+#define __meminit
+
+static void __meminit
+phys_pmd_init(pmd_t *pmd, unsigned long address, unsigned long end)
+{
+	int i;
+
+	for (i = 0; i < PTRS_PER_PMD; pmd++, i++, address += PMD_SIZE) {
+		unsigned long entry;
+
+		if (address > end) {
+			for (; i < PTRS_PER_PMD; i++, pmd++)
+				set_pmd(pmd, __pmd(0));
+			break;
+		}
+		entry = _PAGE_NX|_PAGE_PSE|_KERNPG_TABLE|_PAGE_GLOBAL|address;
+		entry &= __supported_pte_mask;
+		set_pmd(pmd, __pmd(entry));
+	}
+}
+
+static void __meminit
+phys_pmd_update(pud_t *pud, unsigned long address, unsigned long end)
+{
+	pmd_t *pmd = pmd_offset(pud, (unsigned long)__va(address));
+
+	if (pmd_none(*pmd)) {
+		spin_lock(&init_mm.page_table_lock);
+		phys_pmd_init(pmd, address, end);
+		spin_unlock(&init_mm.page_table_lock);
+		__flush_tlb_all();
+	}
+}
+
+static void __meminit phys_pud_init(pud_t *pud, unsigned long address, unsigned long end)
+{ 
+	long i = pud_index(address);
+
+	pud = pud + i;
+
+	if (after_bootmem && pud_val(*pud)) {
+		phys_pmd_update(pud, address, end);
+		return;
+	}
+
+	for (; i < PTRS_PER_PUD; pud++, i++) {
+		int map; 
+		unsigned long paddr, pmd_phys;
+		pmd_t *pmd;
+
+		paddr = (address & PGDIR_MASK) + i*PUD_SIZE;
+		if (paddr >= end)
+			break;
+
+		if (!after_bootmem && !e820_mapped(paddr, paddr+PUD_SIZE, 0)) {
+			set_pud(pud, __pud(0)); 
+			continue;
+		} 
+
+		pmd = alloc_low_page(&map, &pmd_phys);
+		spin_lock(&init_mm.page_table_lock);
+		set_pud(pud, __pud(pmd_phys | _KERNPG_TABLE));
+		phys_pmd_init(pmd, paddr, end);
+		spin_unlock(&init_mm.page_table_lock);
 		unmap_low_page(map);
 	}
 	__flush_tlb();
@@ -301,15 +387,21 @@ void __init init_memory_mapping(void)
 
 	for (adr = PAGE_OFFSET; adr < end; adr = next) { 
 		int map;
-		unsigned long pgd_phys; 
-		pgd_t *pgd = alloc_low_page(&map, &pgd_phys);
-		next = adr + PML4_SIZE;
+		unsigned long pud_phys; 
+		pgd_t *pgd = alloc_low_page(&map, &pud_phys);
+		pud_t *pud;
+
+		if (after_bootmem)
+		  pud = pud_offset_k(pgd, __PAGE_OFFSET);
+                else
+		  pud = alloc_low_page(&map, &pud_phys);
+		next = adr + PGDIR_SIZE;
 		if (next > end) 
 			next = end; 
 
-		phys_pgd_init(pgd, adr-PAGE_OFFSET, next-PAGE_OFFSET); 
-		set_pml4(init_level4_pgt + pml4_index(adr), 
-			 mk_kernel_pml4(pgd_phys, KERNPG_TABLE));
+		phys_pud_init(pud, __pa(adr), __pa(next));
+		if (!after_bootmem)
+		  set_pgd(pgd_offset_k(adr), mk_kernel_pgd(pud_phys));
 		unmap_low_page(map);   
 	} 
 	asm volatile("movq %%cr4,%0" : "=r" (mmu_cr4_features));
@@ -441,9 +533,14 @@ void __init clear_kernel_mapping(unsigned long address, unsigned long size)
 	
 	for (; address < end; address += LARGE_PAGE_SIZE) { 
 		pgd_t *pgd = pgd_offset_k(address);
+		pud_t *pud;
+		pmd_t *pmd;
 		if (!pgd || pgd_none(*pgd))
 			continue; 
-		pmd_t *pmd = pmd_offset(pgd, address);
+		pud = pud_offset(pgd, address);
+		if (pud_none(*pud))
+			continue; 
+		pmd = pmd_offset(pud, address);
 		if (!pmd || pmd_none(*pmd))
 			continue; 
 		if (0 == (pmd_val(*pmd) & _PAGE_PSE)) { 

@@ -53,6 +53,7 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
   }
   
   pgd_t *pgd = 0;
+  pud_t *pud = 0;
   pmd_t *pmd = 0;
   pte_t *pte = 0;
   unsigned long address=va;
@@ -66,13 +67,14 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
   }
 
   pgd = pgd_offset(mm, address);
-  pmd = pmd_offset(pgd, address);
+  pud = pud_offset(pgd, address);
+  pmd = pmd_offset(pud, address);
   if (pmd && *(long *)pmd) {
     pte = pte_offset(pmd, address);
   }
 
   if (vava)
-    printk("va %x %x %x\n",pgd,pmd,pte);
+    printk("va %lx %lx %lx %lx\n",pgd,pud,pmd,pte);
 
   if (pte==0) {
     setipl(savipl);
@@ -256,6 +258,7 @@ asmlinkage int exe$cretva (struct _va_range *inadr, struct _va_range *retadr, un
 int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
 
   pgd_t *pgd;
+  pud_t *pud;
   pmd_t *pmd;
   pte_t *pte = 0;
   struct mm_struct * mm=current->mm;
@@ -266,7 +269,8 @@ int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection
   }
 
   pgd = pgd_offset(mm, address);
-  pmd = pmd_alloc(mm, pgd, address);
+  pud = pud_alloc(mm, pgd, address);
+  pmd = pmd_alloc(mm, pud, address);
   if (pmd) {
 #ifdef __i386__
     spin_lock(&mm->page_table_lock);

@@ -53,6 +53,7 @@ void module_unmap (void * addr)
 
 void * module_map (unsigned long size)
 {
+#if 0
 	void * addr;
 	struct vm_struct **p, *tmp, *area;
 
@@ -93,6 +94,9 @@ void * module_map (unsigned long size)
 		return NULL;
 	}
 	return addr;
+#else
+	return 0;
+#endif
 }
 
 static int __init mod_vmlist_init(void)

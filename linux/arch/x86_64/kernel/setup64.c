@@ -117,29 +117,16 @@ __setup("noexec32=", nonx32_setup);
 
 void pda_init(int cpu)
 { 
-        pml4_t *level4;
-	
 	if (cpu == 0) {
 		/* others are initialized in smpboot.c */
 		cpu_pda[cpu].pcurrent = init_tasks[cpu];
 		cpu_pda[cpu].irqstackptr = boot_cpu_stack; 
-		level4 = init_level4_pgt; 
 	} else {
 		cpu_pda[cpu].irqstackptr = (char *)
 			__get_free_pages(GFP_ATOMIC, IRQSTACK_ORDER);
 		if (!cpu_pda[cpu].irqstackptr)
 			panic("cannot allocate irqstack for cpu %d\n", cpu); 
-		level4 = (pml4_t *)__get_free_pages(GFP_ATOMIC, 0); 
 	}   
-	if (!level4) 
-		panic("Cannot allocate top level page for cpu %d", cpu); 
-
-	cpu_pda[cpu].level4_pgt = (unsigned long *)level4; 
-	if (level4 != init_level4_pgt)
-		memcpy(level4, &init_level4_pgt, PAGE_SIZE); 
-	set_pml4(level4 + 510, 
-		 mk_kernel_pml4(__pa_symbol(boot_vmalloc_pgt), KERNPG_TABLE));
-	asm volatile("movq %0,%%cr3" :: "r" (__pa(level4))); 
 
 	cpu_pda[cpu].irqstackptr += IRQSTACKSIZE-64;
 	cpu_pda[cpu].cpunumber = cpu; 
@@ -251,7 +238,12 @@ void __init cpu_init (void)
 	}
 
 	atomic_inc(&init_mm.mm_count);
+#if 0
 	current->active_mm = &init_mm;
+#else
+	// set right mm later
+	init_task_union.task.active_mm = &init_mm;
+#endif
 #if 0
 	if(current->mm)
 		BUG();

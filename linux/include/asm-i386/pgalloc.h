@@ -17,12 +17,31 @@
 #define pte_quicklist (current_cpu_data.pte_quick)
 #define pgtable_cache_size (current_cpu_data.pgtable_cache_sz)
 
+#define pmd_populate_kernel(mm, pmd, pte) \
+		set_pmd(pmd, __pmd(_PAGE_TABLE + __pa(pte)))
+
 #define pmd_populate(mm, pmd, pte) \
 		set_pmd(pmd, __pmd(_PAGE_TABLE + __pa(pte)))
 
 /*
  * Allocate and free page tables.
  */
+
+extern pte_t *pte_alloc_one_kernel(struct mm_struct *, unsigned long);
+//extern struct page *pte_alloc_one(struct mm_struct *, unsigned long);
+
+static inline void pte_free_kernel(pte_t *pte)
+{
+	free_page((unsigned long)pte);
+}
+
+static inline void pte_free(struct page *pte)
+{
+	__free_page(pte);
+}
+
+
+#define __pte_free_tlb(tlb,pte) tlb_remove_page((tlb),(pte))
 
 #if defined (CONFIG_X86_PAE)
 /*

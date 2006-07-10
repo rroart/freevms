@@ -461,9 +461,12 @@ void __init initialize_secondary(void)
         int cpuid = x86_apicid_to_cpu[hard_cpuid];
 	struct _pcb * me = init_tasks[cpuid];
         switch_mm((current->mm),(me->mm),NULL,cpuid);
-	long * l = cpu_pda[cpuid].level4_pgt;
+	long * l = me->mm->pgd;
+	asm volatile("movq %0,%%cr3" :: "r" (__pa(l)));
+#if 0
 	*l = __pa(me->mm->pgd) | _PAGE_TABLE;
 	__flush_tlb();
+#endif
 	// note that current changes with this
 #endif
 
@@ -583,6 +586,12 @@ static int __init do_boot_cpu (int apicid)
 #endif
 	cpu_pda[cpu].pcurrent = init_tasks[cpu] = idle;
 	smp$gl_cpu_data[cpu]->cpu$l_curpcb = idle;
+
+#if 0
+	idle->mm->pgd = __get_free_pages(GFP_ATOMIC, 0);
+        memcpy(idle->mm->pgd, &init_level4_pgt, PAGE_SIZE); 
+#endif
+
 
 	/* start_eip had better be page-aligned! */
 	start_eip = setup_trampoline();

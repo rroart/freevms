@@ -14,11 +14,12 @@ struct x8664_pda {
 	int cpunumber;		    /* Logical CPU number */
 	/* XXX: could be a single list */
 	unsigned long *pgd_quick;
+	unsigned long *pud_quick;
 	unsigned long *pmd_quick;
 	unsigned long *pte_quick;
 	unsigned long pgtable_cache_sz;
 	char *irqstackptr;	/* top of irqstack */
-	unsigned long volatile *level4_pgt; 
+	unsigned long volatile *level4_pgt_not; 
 } ____cacheline_aligned;
 
 #define PDA_STACKOFFSET (5*8)

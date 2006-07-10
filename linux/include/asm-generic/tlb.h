@@ -56,12 +56,12 @@ static inline mmu_gather_t *tlb_gather_mmu(struct mm_struct *mm)
 		/* Handle the common case fast, first. */\
 		if ((ctxp)->nr == ~0UL) {\
 			__free_pte(*(pte));\
-			pte_clear((pte));\
+			pte_clear(42, 42, (pte)); /* check */\
 			break;\
 		}\
 		if (!(ctxp)->nr) \
 			(ctxp)->start_addr = (addr);\
-		(ctxp)->ptes[(ctxp)->nr++] = ptep_get_and_clear(pte);\
+		(ctxp)->ptes[(ctxp)->nr++] = ptep_get_and_clear(42, 42, pte); /* check */\
 		(ctxp)->end_addr = (addr) + PAGE_SIZE;\
 		if ((ctxp)->nr >= FREE_PTE_NR)\
 			tlb_finish_mmu((ctxp), 0, 0);\
@@ -102,7 +102,7 @@ typedef struct mm_struct mmu_gather_t;
 #define tlb_finish_mmu(tlb, start, end)	flush_tlb_range(tlb, start, end)
 #define tlb_remove_page(tlb, ptep, addr)	do {\
 		pte_t __pte = *(ptep);\
-		pte_clear(ptep);\
+		pte_clear(42, 42, ptep);/* check */\
 		__free_pte(__pte);\
 	} while (0)
 

@@ -99,7 +99,8 @@ struct vm_area_struct {
 
 #define VM_GROWSDOWN	0x00000100	/* general info on the segment */
 #define VM_GROWSUP	0x00000200
-#define VM_SHM		0x00000400	/* shared memory area, don't swap out */
+#define VM_SHM		0x00000000	/* shared memory area, don't swap out */
+#define VM_PFNMAP	0x00000400	/* Page-ranges managed without "struct page", just pure PFN */
 #define VM_DENYWRITE	0x00000800	/* ETXTBSY on write attempts.. */
 
 #define VM_EXECUTABLE	0x00001000
@@ -435,7 +436,8 @@ extern int remap_page_range(unsigned long from, unsigned long to, unsigned long 
 extern int zeromap_page_range(unsigned long from, unsigned long size, pgprot_t prot);
 
 extern int vmtruncate(struct inode * inode, loff_t offset);
-extern pmd_t *FASTCALL(__pmd_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address));
+extern pud_t *FASTCALL(__pud_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address));
+extern pmd_t *FASTCALL(__pmd_alloc(struct mm_struct *mm, pud_t *pud, unsigned long address));
 extern pte_t *FASTCALL(pte_alloc(struct mm_struct *mm, pmd_t *pmd, unsigned long address));
 extern int handle_mm_fault(struct mm_struct *mm,struct vm_area_struct *vma, unsigned long address, int write_access);
 extern int make_pages_present(unsigned long addr, unsigned long end);
@@ -455,11 +457,23 @@ int get_user_pages(struct task_struct *tsk, struct mm_struct *mm, unsigned long 
  * inlining and the symmetry break with pte_alloc() that does all
  * of this out-of-line.
  */
-static inline pmd_t *pmd_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address)
+static inline pmd_t *pmd_alloc(struct mm_struct *mm, pud_t *pud, unsigned long address)
+{
+	if (pud_none(*pud))
+		return __pmd_alloc(mm, pud, address);
+	return pmd_offset(pud, address);
+}
+
+/*
+ * On a two-level page table, this ends up being trivial. Thus the
+ * inlining and the symmetry break with pte_alloc() that does all
+ * of this out-of-line.
+ */
+static inline pmd_t *pud_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address)
 {
 	if (pgd_none(*pgd))
-		return __pmd_alloc(mm, pgd, address);
-	return pmd_offset(pgd, address);
+		return __pud_alloc(mm, pgd, address);
+	return pud_offset(pgd, address);
 }
 
 extern int pgt_cache_water[2];

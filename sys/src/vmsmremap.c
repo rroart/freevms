@@ -19,6 +19,7 @@
 
 #include <asm/uaccess.h>
 #include <asm/pgalloc.h>
+#include <asm/pgtable.h>
 
 #include <ipldef.h>
 #include <phddef.h>
@@ -30,6 +31,7 @@ extern int vm_enough_memory(long pages);
 static inline pte_t *get_one_pte(struct mm_struct *mm, unsigned long addr)
 {
 	pgd_t * pgd;
+	pud_t * pud;
 	pmd_t * pmd;
 	pte_t * pte = NULL;
 
@@ -42,7 +44,16 @@ static inline pte_t *get_one_pte(struct mm_struct *mm, unsigned long addr)
 		goto end;
 	}
 
-	pmd = pmd_offset(pgd, addr);
+	pud = pud_offset(pgd, addr);
+	if (pud_none(*pud))
+		goto end;
+	if (pud_bad(*pud)) {
+		pud_ERROR(*pud);
+		pud_clear(pud);
+		goto end;
+	}
+
+	pmd = pmd_offset(pud, addr);
 	if (pmd_none(*pmd))
 		goto end;
 	if (pmd_bad(*pmd)) {
@@ -75,7 +86,7 @@ static inline int copy_one_pte(struct mm_struct *mm, pte_t * src, pte_t * dst)
 	pte_t pte;
 
 	if (!pte_none(*src)) {
-		pte = ptep_get_and_clear(src);
+	  pte = ptep_get_and_clear(42, 42, src); // check
 		if (!dst) {
 			/* No dest?  We must put it back. */
 			dst = src;

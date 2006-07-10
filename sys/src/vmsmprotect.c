@@ -51,7 +51,7 @@ static inline void change_pte_range(pmd_t * pmd, unsigned long address,
 			 * bits by wiping the pte and then setting the new pte
 			 * into place.
 			 */
-			entry = ptep_get_and_clear(pte);
+			entry = ptep_get_and_clear(42, 42, pte); // clear
 			set_pte(pte, pte_modify(entry, newprot));
 		}
 		address += PAGE_SIZE;
@@ -59,10 +59,35 @@ static inline void change_pte_range(pmd_t * pmd, unsigned long address,
 	} while (address && (address < end));
 }
 
-static inline void change_pmd_range(pgd_t * pgd, unsigned long address,
+static inline void change_pmd_range(pud_t * pud, unsigned long address,
 	unsigned long size, pgprot_t newprot)
 {
 	pmd_t * pmd;
+	unsigned long end;
+
+	if (pud_none(*pud))
+		return;
+	if (pud_bad(*pud)) {
+		pud_ERROR(*pud);
+		pud_clear(pud);
+		return;
+	}
+	pmd = pmd_offset(pud, address);
+	address &= ~PGDIR_MASK;
+	end = address + size;
+	if (end > PGDIR_SIZE)
+		end = PGDIR_SIZE;
+	do {
+		change_pte_range(pmd, address, end - address, newprot);
+		address = (address + PMD_SIZE) & PMD_MASK;
+		pmd++;
+	} while (address && (address < end));
+}
+
+static inline void change_pud_range(pgd_t * pgd, unsigned long address,
+	unsigned long size, pgprot_t newprot)
+{
+	pud_t * pud;
 	unsigned long end;
 
 	if (pgd_none(*pgd))
@@ -72,15 +97,15 @@ static inline void change_pmd_range(pgd_t * pgd, unsigned long address,
 		pgd_clear(pgd);
 		return;
 	}
-	pmd = pmd_offset(pgd, address);
+	pud = pud_offset(pgd, address);
 	address &= ~PGDIR_MASK;
 	end = address + size;
 	if (end > PGDIR_SIZE)
 		end = PGDIR_SIZE;
 	do {
-		change_pte_range(pmd, address, end - address, newprot);
-		address = (address + PMD_SIZE) & PMD_MASK;
-		pmd++;
+		change_pmd_range(pud, address, end - address, newprot);
+		address = (address + PUD_SIZE) & PUD_MASK;
+		pud++;
 	} while (address && (address < end));
 }
 
@@ -95,7 +120,7 @@ static void change_protection(unsigned long start, unsigned long end, pgprot_t n
 		BUG();
 	spin_lock(&current->mm->page_table_lock);
 	do {
-		change_pmd_range(dir, start, end - start, newprot);
+		change_pud_range(dir, start, end - start, newprot);
 		start = (start + PGDIR_SIZE) & PGDIR_MASK;
 		dir++;
 	} while (start && (start < end));
@@ -215,13 +240,15 @@ static inline int mprotect_fixup_end(struct _rde * vma, struct _rde ** pprev,
 	{
 	  struct _secdef * sec, * pstl;
 	  pgd_t *pgd;
+	  pud_t *pud;
 	  pmd_t *pmd;
 	  pte_t *pte;
 	  unsigned long page=start;
 	  unsigned long secno;
 	  unsigned long count;
 	  pgd = pgd_offset(current->mm, page);
-	  pmd = pmd_offset(pgd, page);
+	  pud = pud_offset(pgd, page);
+	  pmd = pmd_offset(pud, page);
 	  pte = pte_offset(pmd, page);
 	  secno = ((*(unsigned long*)pte)&0xfffff000)>>PAGE_SHIFT;
 	  pstl=current->pcb$l_phd->phd$l_pst_base_offset;
@@ -230,10 +257,12 @@ static inline int mprotect_fixup_end(struct _rde * vma, struct _rde ** pprev,
 	  sec->sec$l_vbn+=(vma->rde$q_region_size>>PAGE_SHIFT);
 	  for (count=start; count<(start+n->rde$q_region_size); count+=PAGE_SIZE) {
 	    pgd_t *pgd;
+	    pud_t *pud;
 	    pmd_t *pmd;
 	    pte_t *pte;
 	    pgd = pgd_offset(current->mm, count);
-	    pmd = pmd_offset(pgd, count);
+	    pud = pud_offset(pgd, count);
+	    pmd = pmd_offset(pud, count);
 	    pte = pte_offset(pmd,count);
 	    if (((*(unsigned long*)pte)&0xfff)==0xc00)
 	      *(unsigned long*)pte = ((*(unsigned long*)pte)&0xfff)|((current->pcb$l_phd->phd$l_pst_free-1)<<PAGE_SHIFT);

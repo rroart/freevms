@@ -63,7 +63,8 @@ extern struct list_head inactive_list;
 
 #define VM_GROWSDOWN	0x00010000	/* general info on the segment */
 #define VM_GROWSUP	0x00020000
-#define VM_SHM		0x00040000	/* shared memory area, don't swap out */
+#define VM_SHM		0x00000000	/* shared memory area, don't swap out */
+#define VM_PFNMAP	0x00040000	/* Page-ranges managed without "struct page", just pure PFN */
 #define VM_DENYWRITE	0x00080000	/* ETXTBSY on write attempts.. */
 
 #define VM_EXECUTABLE	0x00100000
@@ -299,6 +300,9 @@ extern void FASTCALL(set_page_dirty(struct page *));
 /* The array of struct pages */
 extern mem_map_t * mem_map;
 
+#define __page_address(page) ({ PAGE_OFFSET + (((page) - mem_map) << PAGE_SHIFT); })
+#define page_address(page) __page_address(page)
+
 /*
  * There is only one page-allocator function, and two main namespaces to
  * it. The alloc_page*() variants return 'struct page *' and as such
@@ -375,7 +379,8 @@ extern int remap_page_range(unsigned long from, unsigned long to, unsigned long 
 extern int zeromap_page_range(unsigned long from, unsigned long size, pgprot_t prot);
 
 extern int vmtruncate(struct _fcb * inode, loff_t offset);
-extern pmd_t *FASTCALL(__pmd_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address));
+extern pud_t *FASTCALL(__pud_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address));
+extern pmd_t *FASTCALL(__pmd_alloc(struct mm_struct *mm, pud_t *pud, unsigned long address));
 extern pte_t *FASTCALL(pte_alloc(struct mm_struct *mm, pmd_t *pmd, unsigned long address));
 extern int handle_mm_fault(struct mm_struct *mm,struct _rde *vma, unsigned long address, int write_access);
 extern int make_pages_present(unsigned long addr, unsigned long end);
@@ -389,21 +394,67 @@ extern int ptrace_check_attach(struct task_struct *task, int kill);
 
 int get_user_pages(struct task_struct *tsk, struct mm_struct *mm, unsigned long start,
 		int len, int write, int force, struct page **pages, struct _rde **vmas);
+void print_bad_pte(struct vm_area_struct *, pte_t, unsigned long);
 
 /*
  * On a two-level page table, this ends up being trivial. Thus the
  * inlining and the symmetry break with pte_alloc() that does all
  * of this out-of-line.
  */
-static inline pmd_t *pmd_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address)
+static inline pmd_t *pmd_alloc(struct mm_struct *mm, pud_t *pud, unsigned long address)
+{
+	if (pud_none(*pud))
+		return __pmd_alloc(mm, pud, address);
+	return pmd_offset(pud, address);
+}
+
+/*
+ * On a two-level page table, this ends up being trivial. Thus the
+ * inlining and the symmetry break with pte_alloc() that does all
+ * of this out-of-line.
+ */
+static inline pmd_t *pud_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address)
 {
 	if (pgd_none(*pgd))
-		return __pmd_alloc(mm, pgd, address);
-	return pmd_offset(pgd, address);
+		return __pud_alloc(mm, pgd, address);
+	return pud_offset(pgd, address);
 }
 
 extern int pgt_cache_water[2];
 extern int check_pgt_cache(void);
+
+/*
+ * We use mm->page_table_lock to guard all pagetable pages of the mm.
+ */
+#define pte_lock_init(page)	do {} while (0)
+#define pte_lock_deinit(page)	do {} while (0)
+#define pte_lockptr(mm, pmd)	({(void)(pmd); &(mm)->page_table_lock;})
+
+#define pte_offset_map_lock(mm, pmd, address, ptlp)	\
+({							\
+	spinlock_t *__ptl = pte_lockptr(mm, pmd);	\
+	pte_t *__pte = pte_offset_map(pmd, address);	\
+	*(ptlp) = __ptl;				\
+	spin_lock(__ptl);				\
+	__pte;						\
+})
+
+#define pte_unmap_unlock(pte, ptl)	do {		\
+	spin_unlock(ptl);				\
+	pte_unmap(pte);					\
+} while (0)
+
+#define pte_alloc_map(mm, pmd, address)			\
+	((unlikely(!pmd_present(*(pmd))) && __pte_alloc(mm, pmd, address))? \
+		NULL: pte_offset_map(pmd, address))
+
+#define pte_alloc_map_lock(mm, pmd, address, ptlp)	\
+	((unlikely(!pmd_present(*(pmd))) && __pte_alloc(mm, pmd, address))? \
+		NULL: pte_offset_map_lock(mm, pmd, address, ptlp))
+
+#define pte_alloc_kernel(pmd, address)			\
+	((unlikely(!pmd_present(*(pmd))) && __pte_alloc_kernel(pmd, address))? \
+		NULL: pte_offset_kernel(pmd, address))
 
 extern void free_area_init(unsigned long * zones_size);
 extern void free_area_init_node(int nid, pg_data_t *pgdat, struct page *pmap,

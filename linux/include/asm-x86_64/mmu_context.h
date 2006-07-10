@@ -65,8 +65,10 @@ static inline void switch_mm(struct mm_struct *prev, struct mm_struct *next,
 			 * tlb flush IPI delivery. We must reload the page 
 			 * table.
 			 */
+#if 0
 			*read_pda(level4_pgt) = __pa(next->pgd) | _PAGE_TABLE;
 			__flush_tlb();
+#endif
 		}
 		if (!test_and_set_bit(cpu, &next->context.cpuvalid))
 			load_LDT(next);

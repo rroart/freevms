@@ -269,6 +269,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	int write;
 	siginfo_t info;
 	pgd_t *pgd;
+	pud_t *pud;
 	pmd_t *pmd;
 	pte_t *pte;
 	struct _mypte * mypte;
@@ -352,7 +353,8 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 
 	page = address & PAGE_MASK;
 	pgd = pgd_offset(mm, page);
-	pmd = pmd_offset(pgd, page);
+	pud = pud_offset(pgd, page);
+	pmd = pmd_offset(pud, page);
 
 	if (0) /* not yet (!(pte_present(pmd))) */ { 
 	  // transform it
@@ -745,6 +747,7 @@ vmalloc_fault:
 		 */
 		int offset = __pgd_offset(address);
 		pgd_t *pgd, *pgd_k;
+		pud_t *pud, *pud_k;
 		pmd_t *pmd, *pmd_k;
 		pte_t *pte_k;
 
@@ -756,8 +759,14 @@ vmalloc_fault:
 			goto no_context;
 		set_pgd(pgd, *pgd_k);
 		
-		pmd = pmd_offset(pgd, address);
-		pmd_k = pmd_offset(pgd_k, address);
+		pud = pud_offset(pgd, address);
+		pud_k = pud_offset(pgd_k, address);
+		if (!pud_present(*pud_k))
+			goto no_context;
+		set_pud(pud, *pud_k);
+
+		pmd = pmd_offset(pud, address);
+		pmd_k = pmd_offset(pud_k, address);
 		if (!pmd_present(*pmd_k))
 			goto no_context;
 		set_pmd(pmd, *pmd_k);
@@ -1253,11 +1262,13 @@ mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index,int pte) {
 unsigned long findpte_new(struct mm_struct *mm, unsigned long address) {
   unsigned long page;
   pgd_t *pgd = 0;
+  pud_t *pud = 0;
   pmd_t *pmd = 0;
   pte_t *pte = 0;
   page = address & PAGE_MASK;
   pgd = pgd_offset(mm, page);
-  pmd = pmd_offset(pgd, page);
+  pud = pud_offset(pgd, page);
+  pmd = pmd_offset(pud, page);
   if (pmd && *(long *)pmd)
     pte = pte_offset(pmd, page);
   return pte;
@@ -1372,6 +1383,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	int write;
 	siginfo_t info;
 	pgd_t *pgd;
+	pud_t *pud;
 	pmd_t *pmd;
 	pte_t *pte;
 	struct _mypte * mypte;
@@ -1464,7 +1476,8 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	spin_unlock(&mm->page_table_lock); // check. not quite resolved
 	page = address & PAGE_MASK;
 	pgd = pgd_offset(mm, page);
-	pmd = pmd_alloc(mm, pgd, page);
+	pud = pud_alloc(mm, pgd, page);
+	pmd = pmd_alloc(mm, pud, page);
 	pte = pte_alloc(mm, pmd, page);
 	spin_unlock(&mm->page_table_lock);
 #endif
@@ -1804,6 +1817,7 @@ do_sigbus:
 vmalloc_fault:
 	{
 		pgd_t *pgd;
+		pud_t *pud;
 		pmd_t *pmd;
 		pte_t *pte; 
 
@@ -1820,11 +1834,16 @@ vmalloc_fault:
 #endif
 
 		pgd = pgd_offset_k(address);
+#if 0
 		if (pgd != current_pgd_offset_k(address)) 
 			goto bad_area_nosemaphore;	 
+#endif
 		if (!pgd_present(*pgd))
 			goto bad_area_nosemaphore;
-		pmd = pmd_offset(pgd, address);
+		pud = pud_offset(pgd, address);
+		if (!pud_present(*pud))
+			goto bad_area_nosemaphore;
+		pmd = pmd_offset(pud, address);
 		if (!pmd_present(*pmd))
 			goto bad_area_nosemaphore;
 		pte = pte_offset(pmd, address); 
