@@ -529,6 +529,7 @@ struct call_data_struct {
 	int wait;
 };
 
+static struct call_data_struct data;
 static struct call_data_struct * call_data;
 
 /*
@@ -551,7 +552,6 @@ int smp_call_function (void (*func) (void *info), void *info, int nonatomic,
  * hardware interrupt handler, you may call it from a bottom half handler.
  */
 {
-	struct call_data_struct data;
 	int cpus = smp_num_cpus-1;
 
 	if (!cpus)
