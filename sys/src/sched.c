@@ -632,17 +632,24 @@ asmlinkage void sch$resched(void) {
   if (!sch$al_cpu_priority[curpri])
     sch$gl_active_priority=sch$gl_active_priority & (~ (1 << (31-curpri)));
 
+  if (curpcb == idle_task(curpcb->pcb$l_cpu_id))
+    goto out;
+
   if (curpcb->state==TASK_INTERRUPTIBLE)
     if (signal_pending(curpcb)) {
       curpcb->state = TASK_RUNNING;
       curpcb->pcb$w_state = SCH$C_CUR;
     }
 
+#if 0
   if (curpcb->state!=TASK_RUNNING) {
     curpcb->pcb$w_state=SCH$C_LEF; // use here temporarily
   }
+#endif
 
+#if 0
   if (curpcb->state==TASK_RUNNING) {
+#endif
 #ifdef DEBUG_SCHED
     before=numproc();
     //    printcom();
@@ -678,8 +685,11 @@ asmlinkage void sch$resched(void) {
     }
 #endif
 
+  out:
     sch$gl_idle_cpus=0;
+#if 0
   }
+#endif
   sch$sched(1);
 }
 
@@ -848,6 +858,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   if (mydebug4) { int i; for(i=0;i<100000000;i++) ; }
 #endif
   if (next == curpcb) { /* does not belong in vms, but must be here */
+    // handles idle_task
     spin_unlock_irq(&runqueue_lock);
     vmsunlock(&SPIN_SCHED,-1);
     reacquire_kernel_lock(curpcb);
@@ -917,8 +928,8 @@ asmlinkage void sch$sched(int from_sch$resched) {
 #ifdef __i386__
   switch_to(curpcb, next, curpcb);
 #else
-  long tmp1 = read_pda(level4_pgt);
-  long tmp2 = __pa(next->mm->pgd) | _PAGE_TABLE;
+  long tmp1 = 0; // read_pda(level4_pgt);
+  long tmp2 = __pa(next->mm->pgd);
   switch_to(curpcb, next, curpcb, tmp1, tmp2);
 #endif
 
