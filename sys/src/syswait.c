@@ -76,7 +76,9 @@ int exe$wait(unsigned int efn, unsigned int mask, int waitallflag, void * dummy)
     p->pcb$l_sts|=PCB$M_WALL; // maybe reset if this is not the case?
   p->pcb$l_efwm=~mask;
 
+#if 0
   insque(p,&wq->wqh$l_wqfl); // temporary... see about corruption in rse.c
+#endif
   fixup_hib_pc(dummy);
   sch$wait(p,wq);
   // check. no unlock here? done in sch$sched

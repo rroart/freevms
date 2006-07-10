@@ -315,8 +315,9 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
  setpri:
 
  common:
-  //  p2=remque(p,dummy);
-  //  sch$aq_wqhdr[p->pcb$w_state].wqh$l_wqcnt--;
+  // p2=remque(p,dummy);
+  if (p->pcb$w_state < SCH$C_COM)
+    sch$aq_wqhdr[p->pcb$w_state].wqh$l_wqcnt--;
   p->pcb$l_onqtime+=(exe$gl_abstim_tics-p->pcb$l_waitime);
   sch$unwait(p);
   sch$chse(p,class);
@@ -430,7 +431,7 @@ int sch$waitk(struct _pcb * p, struct _wqh * wq) {
       sch$gl_comqs&=(~(1 << p->pcb$b_pri));
     }
   }
-  // insque(p,&wq->wqh$l_wqfl); better wait with waitqs? had pcb queue corruption
+  insque(p,&wq->wqh$l_wqfl); // better wait with waitqs? had pcb queue corruption
   // and: insque for ceb waiting etc is now down in syswait.c
   wq->wqh$l_wqcnt++;
   return sch$waitl(p,wq);

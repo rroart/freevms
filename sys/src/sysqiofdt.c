@@ -28,5 +28,5 @@ int exe_std$iorsnwait (struct _irp * irp, struct _pcb * pcb, struct _ucb * ucb, 
   kfree(irp);
   pcb->pcb$l_efwm=rsn;
   sch$gl_resmask|=(1<<rsn);
-  return sch$wait(pcb,&sch$gq_mwait);
+  return sch$wait(pcb,sch$gq_mwait);
 }
