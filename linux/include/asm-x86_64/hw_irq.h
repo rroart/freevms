@@ -23,7 +23,9 @@
 #include <linux/stddef.h>
 #include <asm/atomic.h>
 #include <asm/irq.h>
+#ifndef ASM_OFFSET_H
 #include <asm/offset.h>
+#endif
 
 #endif
 
