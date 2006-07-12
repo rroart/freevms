@@ -621,6 +621,9 @@ void copy_segments(struct task_struct *p, struct mm_struct *new_mm)
  */
 #define savesegment(seg,value) \
 	asm volatile("movl %%" #seg ",%0":"=m" (*(int *)&(value)))
+#undef savesegment
+#define savesegment(seg,value) \
+	asm volatile("mov %%" #seg ",%0":"=rm" (value))
 
 int copy_thread(int nr, unsigned long clone_flags, unsigned long esp,
 	unsigned long unused,
@@ -775,8 +778,8 @@ void fastcall __switch_to(struct task_struct *prev_p, struct task_struct *next_p
 	 * Save away %fs and %gs. No need to save %es and %ds, as
 	 * those are always kernel segments while inside the kernel.
 	 */
-	asm volatile("movl %%fs,%0":"=m" (*(int *)&prev->fs));
-	asm volatile("movl %%gs,%0":"=m" (*(int *)&prev->gs));
+	asm volatile("mov %%fs,%0":"=rm" (*(int *)&prev->fs));
+	asm volatile("mov %%gs,%0":"=rm" (*(int *)&prev->gs));
 
 	/*
 	 * Restore %fs and %gs.

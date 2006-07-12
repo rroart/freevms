@@ -69,7 +69,6 @@ struct  kml_fsdata
 
 /* super.c */
 struct presto_cache *presto_find_cache(kdev_t dev) ;
-extern struct file_system_type presto_fs_type;
 extern int init_intermezzo_fs(void);
 
 #define CACHE_TYPE_LENGTH       16

@@ -155,7 +155,7 @@ bad:
 	int block = offset >> 9;
 #ifdef __x86_64__
 	block++;
-#endif 
+#endif
 	rab->rab$w_rfa[0] = block & 0xffff;
 	rab->rab$w_rfa[1] = block >> 16;
 	rab->rab$w_rfa[2] = offset;
@@ -416,7 +416,7 @@ static ssize_t do_readv_writev(int type, struct file *file,
 		int len = iov[i].iov_len;
 		if (len < 0)
 			goto out;
-		(u32)tot_len += len;
+		tot_len += len;
 		if (tot_len < tmp || tot_len < (u32)len)
 			goto out;
 	}

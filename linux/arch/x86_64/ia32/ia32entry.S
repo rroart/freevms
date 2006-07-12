@@ -113,8 +113,17 @@ quiet_ni_syscall:
 	PTREGSCALL stub32_fork, sys32_fork
 	PTREGSCALL stub32_clone, sys32_clone
 	PTREGSCALL stub32_vfork, sys32_vfork
-	PTREGSCALL stub32_iopl, sys_iopl
 	PTREGSCALL stub32_rt_sigsuspend, sys_rt_sigsuspend
+
+	.macro PTREGSCALL3 label, func, arg
+	.globl \label
+\label:
+	leaq \func(%rip),%rax
+	leaq -ARGOFFSET+8(%rsp),\arg	/* 8 for return address */
+	jmp  ia32_ptregs_common	
+	.endm
+
+	PTREGSCALL3 stub32_iopl, sys_iopl, %rsi
 
 ENTRY(ia32_ptregs_common)
 	popq %r11

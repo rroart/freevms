@@ -260,6 +260,7 @@ void ext2_free_inode (struct _vcb * vcb, struct _fcb * fcb)
 	sb->s_dirt = 1;
 #endif
 error_return:
+{}
 #if 0
 	unlock_super (sb);
 #endif

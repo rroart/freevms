@@ -631,7 +631,7 @@ static int ext2_bmap(struct address_space *mapping, long block)
 {
 	return generic_block_bmap(mapping,block,ext2_get_block);
 }
-static int ext2_direct_IO(int rw, struct _fcb * inode, struct kiobuf * iobuf, unsigned long blocknr, int blocksize)
+int ext2_direct_IO(int rw, struct _fcb * inode, struct kiobuf * iobuf, unsigned long blocknr, int blocksize)
 {
 	return generic_direct_IO(rw, inode, iobuf, blocknr, blocksize, ext2_get_block);
 }

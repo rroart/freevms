@@ -26,7 +26,11 @@ extern void smp_send_stop(void);
 /*
  * sends a 'reschedule' event to another CPU:
  */
+#if 0
 extern void FASTCALL(smp_send_reschedule(int cpu));
+#else
+extern void smp_send_reschedule(int cpu);
+#endif
 
 
 /*

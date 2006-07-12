@@ -726,7 +726,7 @@ static void ext2_commit_super (struct _vcb * vcb,
 }
 #endif
 
-static void ext2_sync_super(struct _vcb * vcb, struct ext2_super_block *es)
+static void ext2_sync_super(struct _vcb * vcb, struct ext2_super_block *es2)
 {
 	struct ext2_super_block *sb = vcb->vcb$l_cache;
 	struct ext2_super_block *es = sb;

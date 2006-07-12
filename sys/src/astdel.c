@@ -196,12 +196,12 @@ int exe$astdel_wrap(struct _pcb * p, struct _acb * acb) {
 		       "movl 0x0(%esp),%ecx\n\t" // get return eip
 		       "movl %ecx,0x4(%edx)\n\t" // put return eip on ustack
 		       "movl $0x0,0x8(%edx)\n\t"
-		       "movl %cs,0x8(%edx)\n\t"  // put kernel cs on ustack 
+		       "mov %cs,0x8(%edx)\n\t"  // put kernel cs on ustack 
 		       "movl 0x8(%esi),%ecx\n\t" // get user flags
 		       "movl %ecx,0xc(%edx)\n\t" // put user flags on ustack
 		       "movl %edi,0x10(%edx)\n\t" // put new kstack on ustack
 		       "movl $0x0,0x14(%edx)\n\t"
-		       "movl %ss,0x14(%edx)\n\t" // put ss on ustack
+		       "mov %ss,0x14(%edx)\n\t" // put ss on ustack
 		       "\n\t"
 		       "addl $-0x14,%esp\n\t" // set new kernel stack
 		       "iret\n\t" // or myrei?

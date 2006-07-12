@@ -1,7 +1,7 @@
 VERSION = 2
 PATCHLEVEL = 4
 SUBLEVEL = 18
-EXTRAVERSION = -FreeVMS_0_2_11
+EXTRAVERSION = -FreeVMS_0_2_12
 
 KERNELRELEASE=$(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
 
@@ -101,7 +101,13 @@ CPPFLAGS := -D__KERNEL__ -I$(HPATH) -I$(TOPDIR)/sys/src -I$(TOPDIR)/lib/src -I$(
 
 CFLAGS := -Werror-implicit-function-declaration $(CPPFLAGS) -Wall -Wstrict-prototypes -Wno-trigraphs -O2 \
 	  -fomit-frame-pointer -fno-strict-aliasing -fno-common
+CFLAGS += -fno-builtin-sprintf	  
 AFLAGS := -D__ASSEMBLY__ $(CPPFLAGS)
+
+check_gcc = $(shell if $(CC) $(1) -S -o /dev/null -xc /dev/null > /dev/null 2>&1; then echo "$(1)"; else echo "$(2)"; fi)
+
+# disable pointer signedness warnings in gcc 4.0
+CFLAGS += $(call check_gcc,-Wno-pointer-sign,)
 
 #
 # ROOT_DEV specifies the default root-device when making the image.

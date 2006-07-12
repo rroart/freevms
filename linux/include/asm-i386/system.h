@@ -84,7 +84,7 @@ static inline unsigned long _get_base(char * addr)
 #define loadsegment(seg,value)			\
 	asm volatile("\n"			\
 		"1:\t"				\
-		"movl %0,%%" #seg "\n"		\
+		"mov %0,%%" #seg "\n"		\
 		"2:\n"				\
 		".section .fixup,\"ax\"\n"	\
 		"3:\t"				\
@@ -96,7 +96,7 @@ static inline unsigned long _get_base(char * addr)
 		".align 4\n\t"			\
 		".long 1b,3b\n"			\
 		".previous"			\
-		: :"m" (*(unsigned int *)&(value)))
+		: :"rm" (*(unsigned int *)&(value)))
 
 /*
  * Clear and set 'TS' bit respectively
@@ -306,7 +306,7 @@ static inline unsigned long __cmpxchg(volatile void *ptr, unsigned long old,
 #define smp_wmb()	barrier()
 #endif
 
-#define set_mb(var, value) do { xchg(&var, value); } while (0)
+#define set_mb(var, value) do { (void) xchg(&var, value); } while (0)
 #define set_wmb(var, value) do { var = value; wmb(); } while (0)
 
 /* interrupt control.. */

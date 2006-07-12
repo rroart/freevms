@@ -87,6 +87,7 @@ struct frag_hdr {
 #ifdef __KERNEL__
 
 #include <net/sock.h>
+#include <net/snmp.h>
 
 extern struct ipv6_mib		ipv6_statistics[NR_CPUS*2];
 #define IP6_INC_STATS(field)		SNMP_INC_STATS(ipv6_statistics, field)

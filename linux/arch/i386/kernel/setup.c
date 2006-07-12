@@ -2266,6 +2266,7 @@ static void __init init_intel(struct cpuinfo_x86 *c)
 
 	}
 too_many_siblings:
+	{}
 #endif
 }
 

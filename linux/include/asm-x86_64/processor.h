@@ -68,7 +68,6 @@ struct cpuinfo_x86 {
 #define X86_VENDOR_UNKNOWN 0xff
 
 extern struct cpuinfo_x86 boot_cpu_data;
-extern struct tss_struct init_tss[NR_CPUS];
 
 #ifdef CONFIG_SMP
 extern struct cpuinfo_x86 cpu_data[];
@@ -299,6 +298,8 @@ struct tss_struct {
 	u16 io_map_base;
 	u32 io_bitmap[IO_BITMAP_SIZE];
 } __attribute__((packed)) ____cacheline_aligned;
+
+extern struct tss_struct init_tss[NR_CPUS];
 
 struct thread_struct {
 	unsigned long	rsp0;

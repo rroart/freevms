@@ -33,4 +33,10 @@
 #define __attribute_used__	/* not implemented */
 #endif /* __GNUC__ */
 
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
+#define __attribute_const__	__attribute__((__const__))
+#else
+#define __attribute_const__	/* unimplemented */
+#endif
+
 #endif /* __LINUX_COMPILER_H */

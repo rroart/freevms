@@ -153,8 +153,13 @@ static inline void br_read_unlock (enum brlock_indices idx)
 
 /* write path not inlined - it's rare and larger */
 
+#if 0
 extern void FASTCALL(__br_write_lock (enum brlock_indices idx));
 extern void FASTCALL(__br_write_unlock (enum brlock_indices idx));
+#else
+extern void __br_write_lock (enum brlock_indices idx);
+extern void __br_write_unlock (enum brlock_indices idx);
+#endif
 
 static inline void br_write_lock (enum brlock_indices idx)
 {

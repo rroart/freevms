@@ -219,7 +219,11 @@ extern void enable_8259A_irq(unsigned int irq);
 extern int i8259A_irq_pending(unsigned int irq);
 extern void make_8259A_irq(unsigned int irq);
 extern void init_8259A(int aeoi);
+#if 0
 extern void FASTCALL(send_IPI_self(int vector));
+#else
+extern void send_IPI_self(int vector);
+#endif
 extern void init_VISWS_APIC_irqs(void);
 extern void setup_IO_APIC(void);
 extern void disable_IO_APIC(void);

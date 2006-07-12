@@ -560,6 +560,7 @@ static struct net_device *root_dev;
 
 static int probed __initdata = 0;
 
+static void ace_watchdog(struct net_device *dev);
 
 int __devinit acenic_probe (ACE_PROBE_ARG)
 {
@@ -625,7 +626,6 @@ int __devinit acenic_probe (ACE_PROBE_ARG)
 		dev->hard_start_xmit = &ace_start_xmit;
 		dev->features |= NETIF_F_SG | NETIF_F_IP_CSUM;
 		if (1) {
-			static void ace_watchdog(struct net_device *dev);
 			dev->tx_timeout = &ace_watchdog;
 			dev->watchdog_timeo = 5*HZ;
 		}
