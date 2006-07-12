@@ -777,7 +777,7 @@ static inline int filemap_sync_pmd_range(pud_t * pud,
 	struct _rde *vma, unsigned long offset, unsigned int flags)
 {
 	pmd_t * pmd;
-	unsigned long offset, end;
+	unsigned long offset_not, end;
 	int error;
 
 	if (pud_none(*pud))
