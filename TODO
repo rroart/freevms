@@ -65,6 +65,8 @@ Put ctl$gl_ccb_table in P1.
 More P1 space.
 Check whether it was wise having the kernel text readable for exe$astdel.
 Why is there no need for iret at the end of exe$astdel?
+Pagefault with panic on too high ipl.
+Have own buffers for exec mode.
 
 Input/output:
 Make echoing work in putnextchar (right before reqcom)
