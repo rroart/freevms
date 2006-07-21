@@ -302,8 +302,8 @@ int hwclkdone=1;
       //	if (p->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
       // { int i; for (i=0; i<1000000; i++ ) ; }}
       update_one_process(p, user_tick, system, cpu);
-      if (p->pcb$l_pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}  /* Will be removed in the future */
-      if (p->pcb$l_pid==INIT_PID) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}  /* Will be removed in the future */
+      if (p->pcb$l_pid==0) { if (++pid0count>5) { pid0count=0; /*p->need_resched=1;*/}}  /* Will be removed in the future */
+      if (p->pcb$l_pid==INIT_PID) { if (++pid1count>5) { pid1count=0; /*p->need_resched=1;*/}}  /* Will be removed in the future */
       if (p->pcb$l_pid) {
 	p->pcb$l_phd->phd$l_cputim++;
 	p->pcb$w_quant+=QUANTADD;
@@ -447,8 +447,8 @@ void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 
 	int cpu = smp_processor_id();
 	struct _pcb * p = ctl$gl_pcb;
-	if (p->pcb$l_pid==0) { if (++pid0count>5) { pid0count=0; p->need_resched=1;}}  /* Will be removed in the future */
-	if (p->pcb$l_pid==INIT_PID) { if (++pid1count>5) { pid1count=0; p->need_resched=1;}}  /* Will be removed in the future */
+	if (p->pcb$l_pid==0) { if (++pid0count>5) { pid0count=0; /*p->need_resched=1;*/}}  /* Will be removed in the future */
+	if (p->pcb$l_pid==INIT_PID) { if (++pid1count>5) { pid1count=0; /*p->need_resched=1;*/}}  /* Will be removed in the future */
 	if (p->pcb$l_pid) {
 	  p->pcb$l_phd->phd$l_cputim++;
 	  p->pcb$w_quant+=QUANTADD;

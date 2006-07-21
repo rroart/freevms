@@ -230,9 +230,11 @@ rebalance:
 	  return page;
 	}
 
+#if 0
 	current->need_resched=1;
 	__set_current_state(TASK_RUNNING);
 	schedule();
+#endif
 	goto rebalance;
 }
 

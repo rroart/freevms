@@ -838,7 +838,8 @@ ENTRY(sched_vector)
 	SOFTINT(schedule,$0x0)
         PUSHR_ALL
 #        call pushpsl
-        call SYMBOL_NAME(schedule)
+#        call SYMBOL_NAME(schedule)
+	call panic
         POPR_ALL
         REI
 

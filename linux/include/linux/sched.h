@@ -319,7 +319,7 @@ struct task_struct {
 						0-0xFFFFFFFF for kernel-thread
 					 */
 	struct exec_domain *exec_domain;
-	volatile long need_resched;
+	volatile long need_resched_not;
 	unsigned long ptrace;
 
 	int lock_depth;		/* Lock depth */
@@ -347,7 +347,7 @@ struct task_struct {
 	struct list_head run_list;
 	unsigned long sleep_time;
 
-	struct task_struct *next_task, *prev_task; // remember to remove these
+	struct task_struct *next_task_not, *prev_task_not; // remember to remove these
 	struct mm_struct *active_mm;
 	struct list_head local_pages;
 	unsigned int allocation_order, nr_local_pages;

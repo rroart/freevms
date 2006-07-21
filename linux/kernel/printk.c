@@ -546,10 +546,12 @@ void release_console_sem(void)
  */
 void console_conditional_schedule(void)
 {
+#if 0
 	if (console_may_schedule && current->need_resched) {
 		set_current_state(TASK_RUNNING);
 		schedule();
 	}
+#endif
 }
 
 void console_print(const char *s)

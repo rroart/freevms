@@ -490,7 +490,9 @@ void __handle_sysrq_nolock(int key, struct pt_regs *pt_regs,
 				mydebug5=0;
 				break;
 		}
+#if 0
 		current->need_resched=1;
+#endif
 	}
 	if (mydebug6) printcom();
 	
