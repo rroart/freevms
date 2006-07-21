@@ -15,6 +15,8 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <mmg_routines.h>
+#include <internals.h>
+#include <ipldef.h>
 
 struct _myhead {
   struct _myhead * hd$l_flink;
@@ -52,7 +54,9 @@ int exe$allocate_pool(int requestsize, int pooltype, int alignment, unsigned int
   if (*pool_p) 
     return sts;
 
+  int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
   sts=exe$allocate(reqsize , &exe$gq_bap_variable, 0 , alosize_p, pool_p);
+  vmsunlock(&SPIN_POOL, ipl);
 
   // unlock pool
 
@@ -66,22 +70,30 @@ int exe$allocate_pool(int requestsize, int pooltype, int alignment, unsigned int
 #endif
 
   exe$reclaim_pool_aggressive(exe$gs_bap_npool);
+  ipl = vmslock(&SPIN_POOL, IPL$_POOL);
   sts=exe$allocate(reqsize , &exe$gq_bap_variable, 0 , alosize_p, pool_p);
+  vmsunlock(&SPIN_POOL, ipl);
 
   if (sts==SS$_NORMAL)
     return sts;
 
   sts=exe$extendpool(exe$gs_bap_npool);
-  if (sts==SS$_NORMAL)
+  if (sts==SS$_NORMAL) {
+    int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
     sts=exe$allocate(reqsize , &exe$gq_bap_variable, 0 , alosize_p, pool_p);
+    vmsunlock(&SPIN_POOL, ipl);
+  }
 
   if (sts==SS$_NORMAL)
     return sts;
 
   sts=exe$flushlists(exe$gs_bap_npool, reqsize);
 
-  if (sts==SS$_NORMAL)
+  if (sts==SS$_NORMAL) {
+    int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
     sts=exe$allocate(reqsize , &exe$gq_bap_variable, 0 , alosize_p, pool_p);
+    vmsunlock(&SPIN_POOL, ipl);
+  }
 
   return sts;
 }
@@ -102,7 +114,9 @@ void exe$deallocate_pool(void * returnblock, int pooltype, int size) {
     exe$lal_insert_first(pool, &array[size>>6]);
     poison_packet(pool,size,1);
   } else {
+    int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
     int sts=exe$deallocate(pool, exe$gq_bap_variable, size);
+    vmsunlock(&SPIN_POOL, ipl);
   }
   return SS$_NORMAL;
 }
@@ -126,14 +140,20 @@ exe$trim_pool_list(int percentage, void * listhead, void * basepool) {
   cut = hd[trim].hd$l_seq * percentage / 100;
   for (; cut; cut--) {
     void * ret = exe$lal_remove_first(&hd[trim]);
-    if (ret)
+    if (ret) {
+      int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
       exe$deallocate(ret, basepool, 64*trim);
+      vmsunlock(&SPIN_POOL, ipl);
+    }
   }
   cut = hd[64+trim].hd$l_seq * (100 - percentage) / 100;
   for (; cut; cut--) {
     void * ret = exe$lal_remove_first(&hd[64+trim]);
-    if (ret)
+    if (ret) {
+      int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
       exe$deallocate(ret, basepool, 64*(64+trim));
+      vmsunlock(&SPIN_POOL, ipl);
+    }
   }
   trim++;
   if (trim>64)

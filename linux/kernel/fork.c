@@ -682,6 +682,8 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	}
 
 	retval = -ENOMEM;
+	vmslock(&SPIN_SCHED, IPL$_SCHED);
+	vmslock(&SPIN_MMG, IPL$_MMG);
 	p = alloc_task_struct();
 	if (!p)
 		goto fork_out;
@@ -852,6 +854,10 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	p->pcb$w_quant=-QUANTUM;
 
 	qhead_init(&p->pcb$l_lockqfl);
+
+	p->pcb$l_permanent_capability = sch$gl_default_process_cap;
+	p->pcb$l_capability = p->pcb$l_permanent_capability;
+
 	qhead_init(&p->pcb$l_astqfl);
 	p->pcb$b_asten=15;
 	p->phd$b_astlvl=4;
@@ -907,9 +913,11 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 #else
 	p->state = TASK_INTERRUPTIBLE;
 	p->pcb$w_state = SCH$C_HIB;
+	((struct _wqh *)sch$gq_mwait)->wqh$l_wqcnt++; // temp fix
 	qhead_init(p); // move this up?
-	vmslock(&SPIN_SCHED,IPL$_SCHED);
+	//	vmslock(&SPIN_SCHED,IPL$_SCHED);
 	sch$rse(p,PRI$_RESAVL,EVT$_WAKE); // check if this is right
+	vmsunlock(&SPIN_MMG,-1);
 	vmsunlock(&SPIN_SCHED,0);
 #endif
 	//	wake_up_process2(p,PRI$_TICOM);		/* do this last */

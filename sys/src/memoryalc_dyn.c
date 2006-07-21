@@ -16,6 +16,8 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <mmg_routines.h>
+#include <internals.h>
+#include <ipldef.h>
 
 // move this later
 //unsigned long long ioc$gq_listheads[128];
@@ -83,7 +85,9 @@ int exe$alononpagvar (int reqsize, int *alosize_p, void **pool_p) {
   // pool spinlock etc
   int sts=SS$_NORMAL;
 
+  int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
   sts=exe$allocate(reqsize , &exe$gl_nonpaged, 0 , alosize_p, pool_p);
+  vmsunlock(&SPIN_POOL, ipl);
 
   // unlock pool
 
@@ -95,22 +99,30 @@ int exe$alononpagvar (int reqsize, int *alosize_p, void **pool_p) {
   void * array = &lsthd->lsthds$q_listheads;
 
   exe$reclaim_pool_aggressive(exe$gs_npp_npool);
+  ipl = vmslock(&SPIN_POOL, IPL$_POOL);
   sts=exe$allocate(reqsize , &exe$gl_nonpaged, 0 , alosize_p, pool_p);
+  vmsunlock(&SPIN_POOL, ipl);
 
   if (sts==SS$_NORMAL)
     return sts;
 
   sts=exe$extendpool(exe$gs_npp_npool);
-  if (sts==SS$_NORMAL)
+  if (sts==SS$_NORMAL) {
+    int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
     sts=exe$allocate(reqsize , &exe$gl_nonpaged, 0 , alosize_p, pool_p);
+    vmsunlock(&SPIN_POOL, ipl);
+  }
 
   if (sts==SS$_NORMAL)
     return sts;
 
   sts=exe$flushlists(exe$gs_npp_npool, reqsize);
 
-  if (sts==SS$_NORMAL)
+  if (sts==SS$_NORMAL) {
+    int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
     sts=exe$allocate(reqsize , &exe$gl_nonpaged, 0 , alosize_p, pool_p);
+    vmsunlock(&SPIN_POOL, ipl);
+  }
 
   return sts;
 }
@@ -211,7 +223,9 @@ int exe_std$deanonpgdsiz(void *pool, int size) {
     exe$lal_insert_first(pool, &array[size>>6]);
     poison_packet(pool,size,1);
   } else {
+    int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
     int sts=exe$deallocate(pool, exe$gl_nonpaged, size);
+    vmsunlock(&SPIN_POOL, ipl);
   }
   return SS$_NORMAL;
 }
@@ -237,6 +251,8 @@ int exe$flushlists(void * pool, int size) {
     void * ret = exe$lal_remove_first(&hd[i]);
     if (ret==0)
       break;
+    int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
     exe$deallocate(ret, basepool, 64*i);
+    vmsunlock(&SPIN_POOL, ipl);
   }
 }

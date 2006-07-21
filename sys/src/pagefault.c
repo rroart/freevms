@@ -51,6 +51,7 @@
 #include <misc_routines.h>
 #include <mmg_routines.h>
 #include <sch_routines.h>
+#include <internals.h>
 
 int do_wp_page(struct mm_struct *mm, struct _rde * vma, unsigned long address, pte_t *page_table, pte_t pte);
 
@@ -298,9 +299,11 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	  return;
 
 	regtrap(REG_INTR,IPL$_MMG);
-#endif
 
 	setipl(IPL$_MMG);
+#endif
+	
+	vmslock(&SPIN_MMG, IPL$_MMG);
 	//vmslock(&SPIN_SCHED,-1);
 
 	//some linux stuff
@@ -425,6 +428,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    }
 	    //printk(" b ");
 	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
+	    vmsunlock(&SPIN_MMG, -1);
 	    makereadast(window,pfn,address,pte,offset,error_code&2);	
 	    //printk(" a ");
 	    return;
@@ -446,6 +450,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    }
 	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
 	    printk("soon reading pfl_page %x %x %x %x\n",vbn,pte,*(long*)pte,page);
+	    vmsunlock(&SPIN_MMG, -1);
 	    makereadast(window,pfn,address,pte,offset,error_code&2);	
 	    return;
 	  }
@@ -478,6 +483,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	      }
 	      //printk("put transition page back in %x %x %x\n",loc,pte,address);
+	      vmsunlock(&SPIN_MMG, -1);
 	      return;
 	    notyet:
 	      {}
@@ -507,6 +513,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 		  }
 		}
 	      }
+	      vmsunlock(&SPIN_MMG, -1);
 	      return;
 	    }
 	  } else {
@@ -540,6 +547,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
         if(pte_write(*pte)) *pte = pte_mkdirty(*pte);
         //flush_tlb_page2(mm, page);
         //up_read(&mm->mmap_sem);
+	vmsunlock(&SPIN_MMG, -1);
         return(0);
 
 	return;
@@ -627,6 +635,7 @@ good_area:
 			tsk->thread.screen_bitmap |= 1 << bit;
 	}
 	up_read(&mm->mmap_sem);
+	vmsunlock(&SPIN_MMG, -1);
 	return;
 
 /*
@@ -646,6 +655,7 @@ bad_area:
 		/* info.si_code has been set above */
 		info.si_addr = (void *)address;
 		force_sig_info(SIGSEGV, &info, tsk);
+		vmsunlock(&SPIN_MMG, -1);
 		return;
 	}
 
@@ -659,6 +669,7 @@ bad_area:
 
 		if (nr == 6) {
 			do_invalid_op(regs, 0);
+			vmsunlock(&SPIN_MMG, -1);
 			return;
 		}
 	}
@@ -667,6 +678,7 @@ no_context:
 	/* Are we prepared to handle this kernel fault?  */
 	if ((fixup = search_exception_table(regs->eip)) != 0) {
 		regs->eip = fixup;
+		vmsunlock(&SPIN_MMG, -1);
 		return;
 	}
 
@@ -705,8 +717,10 @@ out_of_memory:
 	up_read(&mm->mmap_sem);
 	if (tsk->pcb$l_pid == INIT_PID) {
 	  //		tsk->policy |= SCHED_YIELD;
+#if 0
 	  current->need_resched=1;
 		schedule();
+#endif
 		down_read(&mm->mmap_sem);
 		goto survive;
 	}
@@ -734,6 +748,7 @@ do_sigbus:
 	/* Kernel mode? Handle exceptions or die */
 	if (!(error_code & 4))
 		goto no_context;
+	vmsunlock(&SPIN_MMG, -1);
 	return;
 
 vmalloc_fault:
@@ -774,6 +789,7 @@ vmalloc_fault:
 		pte_k = pte_offset(pmd_k, address);
 		if (!pte_present(*pte_k))
 			goto no_context;
+		vmsunlock(&SPIN_MMG, -1);
 		return;
 	}
 }
@@ -1430,6 +1446,9 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	setipl(IPL$_MMG);
 	//vmslock(&SPIN_SCHED,-1);
 #endif
+
+	vmslock(&SPIN_MMG, IPL$_MMG);
+
 	//some linux stuff
 	tsk = current;
 	mm = tsk->mm;
@@ -1466,7 +1485,10 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	 */
 	if ((regs->cs == __USER32_CS || (regs->cs & (1<<2))) &&
 		(address >> 32))
+	  {
+	    vmsunlock(&SPIN_MMG, -1);
 		return;
+	  }
 
 #if 0
 	page = address & PAGE_MASK;
@@ -1553,6 +1575,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	    }
 	    //printk(" b ");
 	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
+	    vmsunlock(&SPIN_MMG, -1);
 	    makereadast(window,pfn,address,pte,offset,error_code&2);	
 	    //printk(" a ");
 	    return;
@@ -1574,6 +1597,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	    }
 	    flush_tlb_range(tsk->mm, page, page + PAGE_SIZE);
 	    printk("soon reading pfl_page %x %x %x %x\n",vbn,pte,*(long*)pte,page);
+	    vmsunlock(&SPIN_MMG, -1);
 	    makereadast(window,pfn,address,pte,offset,error_code&2);	
 	    return;
 	  }
@@ -1606,6 +1630,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 		flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 	      }
 	      //printk("put transition page back in %x %x %x\n",loc,pte,address);
+	      vmsunlock(&SPIN_MMG, -1);
 	      return;
 	    notyet:
 	      {}
@@ -1635,6 +1660,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 		  }
 		}
 	      }
+	      vmsunlock(&SPIN_MMG, -1);
 	      return;
 	    }
 	  } else {
@@ -1705,6 +1731,7 @@ good_area:
 	}
 
 	up_read(&mm->mmap_sem);
+	vmsunlock(&SPIN_MMG, -1);
 	return;
 
 /*
@@ -1718,7 +1745,10 @@ bad_area_nosemaphore:
 	/* User mode accesses just cause a SIGSEGV */
 	if (error_code & 4) {
 		if (is_prefetch(regs, address))
+		  {
+	    vmsunlock(&SPIN_MMG, -1);
 			return;
+		  }
 
 		if (exception_trace && !(tsk->ptrace & PT_PTRACED) && 
 		    (tsk->sig->action[SIGSEGV-1].sa.sa_handler == SIG_IGN ||
@@ -1737,6 +1767,7 @@ bad_area_nosemaphore:
 		/* info.si_code has been set above */
 		info.si_addr = (void *)address;
 		force_sig_info(SIGSEGV, &info, tsk);
+		vmsunlock(&SPIN_MMG, -1);
 		return;
 	}
 
@@ -1749,11 +1780,15 @@ no_context:
 		printk(KERN_ERR 
 		       "%s: fixed kernel exception at %lx address %lx err:%ld\n", 
 		       tsk->pcb$t_lname, regs->rip, address, error_code);
+		vmsunlock(&SPIN_MMG, -1);
 		return;
 	}
 
 	if (is_prefetch(regs, address))
+	  {
+	    vmsunlock(&SPIN_MMG, -1);
 		return;
+	  }
 
 /*
  * Oops. The kernel tried to access some bad page. We'll have to
@@ -1801,7 +1836,11 @@ do_sigbus:
 		goto no_context;
 		
 	if (is_prefetch(regs, address))
+	  {
+	    vmsunlock(&SPIN_MMG, -1);
+
 		return;
+	  }
 
 	tsk->thread.cr2 = address;
 	tsk->thread.error_code = error_code;
@@ -1811,6 +1850,7 @@ do_sigbus:
 	info.si_code = BUS_ADRERR;
 	info.si_addr = (void *)address;
 	force_sig_info(SIGBUS, &info, tsk);
+	vmsunlock(&SPIN_MMG, -1);
 	return;
 
 
@@ -1851,6 +1891,7 @@ vmalloc_fault:
 			goto bad_area_nosemaphore; 
 
 		__flush_tlb_all();		
+		vmsunlock(&SPIN_MMG, -1);
 		return;
 	}
 }

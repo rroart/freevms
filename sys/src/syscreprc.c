@@ -26,6 +26,7 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <sch_routines.h>
+#include <internals.h>
 
 #include <linux/sched.h>
 #include <linux/slab.h>
@@ -65,6 +66,8 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
   }
   //setipl(IPL$_ASTDEL);//postpone this?
   cur=ctl$gl_pcb;
+  vmslock(&SPIN_SCHED, IPL$_SCHED);
+  vmslock(&SPIN_MMG, IPL$_MMG);
   p = alloc_task_struct();
   //bzero(p,sizeof(struct _pcb));//not wise?
   memset(p,0,sizeof(struct _pcb));
@@ -82,6 +85,8 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
   qhead_init(&p->pcb$l_lockqfl);
   // set capabilities
+  p->pcb$l_permanent_capability = sch$gl_default_process_cap;
+  p->pcb$l_capability = p->pcb$l_permanent_capability;
   // set affinity
   // set default fileprot
   // set arb
@@ -335,6 +340,9 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	//	start_thread(regs,eip,esp);
 
 	sch$chse(p, PRI$_TICOM);
+
+	vmsunlock(&SPIN_MMG,-1);
+	vmsunlock(&SPIN_SCHED,0);
 
 	return SS$_NORMAL;
 
