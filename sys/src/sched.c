@@ -51,7 +51,11 @@
 #include<system_service_setup.h>
 #include <internals.h>
 #include <exe_routines.h>
+#include <sch_routines.h>
 #include <misc_routines.h>
+#include <cpbdef.h>
+#include <rsndef.h>
+#include <statedef.h>
 #ifdef __arch_um__
 #include <asm-i386/hw_irq.h>
 #endif
@@ -734,7 +738,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   //  if (!countme--) { countme=500; printk("."); }
 
   if (from_sch$resched == 1)
-    goto label30$;
+    goto skip_lock;
 
 #if 0
 
@@ -744,14 +748,22 @@ asmlinkage void sch$sched(int from_sch$resched) {
     return;
 
   regtrap(REG_INTR,IPL$_SCHED);
+#endif
 
+  int ipl = getipl();
+  if (ipl != 8 || SPIN_SCHED.spl$l_spinlock == 0)
+    panic("schsch\n");
+
+#if 0
+  // temp workaround
+  // must avoid nesting, since I do not know how to get out of it
   setipl(IPL$_SCHED);
   vmslock(&SPIN_SCHED,-1);
 #endif
 
   sch$al_cpu_priority[curpri]=sch$al_cpu_priority[curpri] & (~ cpu->cpu$l_cpuid_mask );
   if (sch$al_cpu_priority[curpri]) 
-    goto label30$;
+    goto skip_lock;
   sch$gl_active_priority=sch$gl_active_priority & (~ (1 << (31-curpri)));
 
   //if (spl(IPL$_SCHED)) return;
@@ -765,9 +777,10 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
   spin_lock_irq(&runqueue_lock);
 
- label30$:
+ skip_lock:
 
   affinity=0;
+  struct _pcb * aff_next = 0;
 
   tmppri=ffs(sch$gl_comqs);
 #ifdef DEBUG_SCHED
@@ -776,11 +789,17 @@ asmlinkage void sch$sched(int from_sch$resched) {
 #endif
 
   if (!tmppri) {
-    //    goto sch$idle;
+#if 0
+    // spot for more vms sched
+    goto sch$idle;
+#endif
+  go_idle:
     sch$gl_idle_cpus=sch$gl_idle_cpus | (cpu->cpu$l_cpuid_mask);
     next=idle_task(cpuid);
+    goto skip_cap;
   } else {
     tmppri--;
+  gethead:
     qhead=*(unsigned long *)&sch$aq_comh[tmppri];
 #ifdef DEBUG_SCHED
     if (mydebug4) printk("eq qhead %x %x %x %x\n",
@@ -828,7 +847,81 @@ asmlinkage void sch$sched(int from_sch$resched) {
 		       (unsigned long *)qhead,(unsigned long *)(qhead+4),
 		       *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
   /* No DYN check yet */
+ check_pcb_ok:
+#if 0
+  if (next->pcb$b_type != DYN$C_PCB)
+    panic("DYN$C_PCB\n");
+#endif
   /* And no capabilities yet */
+  if ((next->pcb$l_capability & cpu->cpu$l_capability) != next->pcb$l_capability) {
+    if (next->pcb$l_capability & CPB$M_IMPLICIT_AFFINITY) {
+      if (next->pcb$l_affinity == cpu->cpu$l_phy_cpuid)
+	goto skip_cap;
+      next->pcb$b_affinity_skip--;
+      if (next->pcb$b_affinity_skip == 0) {
+	next->pcb$b_affinity_skip = sch$gl_affinity_skip;
+	next->pcb$l_affinity = cpu->cpu$l_phy_cpuid;
+	// because, according to internals (5.2/1.5), implicit does nothing
+	goto skip_cap;
+      }
+      if (!affinity) {
+	affinity = 1;
+	aff_next = next;
+      } 
+      insque(next, ((struct _pcb *)qhead)->pcb$l_sqbl); // check
+      sch$gl_comqs |= 1 << tmppri;
+      if (next != ((struct _pcb *)qhead)->pcb$l_sqfl) { // queue rounded
+	next=(struct _pcb *) remque(qhead,next); // check
+	printk("go check_pcb_ok\n");
+	goto check_pcb_ok;
+      }
+    nextqueue:
+      // need to have find_next_set_bit
+      for(tmppri++; tmppri<32; tmppri++) {
+	if (sch$aq_comh[tmppri]!=&sch$aq_comh[tmppri])
+	  break;
+      }
+      if (tmppri == 32) {
+	if (affinity == 0)
+	  goto go_idle;
+      } else {
+	if (affinity == 0)
+	  goto gethead;
+      }
+      // replace with sch$aq_preempt_mask and sysgen priority_offset
+      if (tmppri<=aff_next->pcb$b_pri) { // check. with =?
+	printk("gethead\n");
+	goto gethead;
+      }
+      next = aff_next->pcb$l_sqfl;
+      remque(aff_next, 0);
+      if (aqempty(aff_next))
+	sch$gl_comqs=sch$gl_comqs & (~(1 << next->pcb$b_pri)); // check original programming error?
+      next->pcb$b_affinity_skip = sch$gl_affinity_skip;
+      next->pcb$l_affinity = cpu->cpu$l_phy_cpuid;
+      // because, according to internals (5.2/1.5), implicit does nothing
+    } else {
+      if (sch$gl_capability_sequence != next->pcb$l_capability_seq)
+	next->pcb$l_current_affinity = sch$calculate_affinity(next->pcb$l_affinity);
+      if ((next->pcb$l_current_affinity & (1 << next->pcb$l_cpu_id)) == 0) {
+	panic("rwait for capability\n");
+	sch$gl_resmask |= RSN$_CPUCAP;
+	next->pcb$l_efwm = RSN$_CPUCAP;
+	next->pcb$w_state = SCH$C_MWAIT;
+	// set wqcnt
+	struct _pcb * pcb = next->pcb$l_sqfl;
+	insque(next,sch$gq_mwait);
+	((struct _wqh *)sch$gq_mwait)->wqh$l_wqcnt++;
+	if (aqempty(pcb))
+	  goto nextqueue;
+	next = pcb;
+	remque(next, 0);
+	goto check_pcb_ok;
+      }
+    }
+  }
+ skip_cap:
+
   cpu->cpu$l_curpcb=next;
   cpu->cpu$b_ipl=next->psl_ipl;
   next->state=TASK_RUNNING;
@@ -852,7 +945,9 @@ asmlinkage void sch$sched(int from_sch$resched) {
   }
 #endif
 
+#if 0
   curpcb->need_resched = 0;
+#endif
 
 #ifdef DEBUG_SCHED
   if (mydebug4) { int i; for(i=0;i<100000000;i++) ; }
@@ -943,10 +1038,18 @@ asmlinkage void sch$sched(int from_sch$resched) {
   return;
  sch$idle:
   //	printk("sch$idle\n");
-  sch$gl_idle_cpus=1;
-  //	for (; sch$gl_idle_cpus ;) ;
-  //    cpu->cpu$b_cur_pri=-1;
-  //	goto label30$;
+  sch$gl_idle_cpus=sch$gl_idle_cpus | (cpu->cpu$l_cpuid_mask);
+  // cpu->cpu$l_curpcb = sch$ar_nullpcb;
+  cpu->cpu$l_curpcb = idle_task(cpuid);
+  cpu->cpu$b_cur_pri=-1;
+  vmsunlock(&SPIN_SCHED,IPL$_RESCHED);
+  for (; sch$gl_idle_cpus & (1<<cpuid); ) nop();
+    //safe_halt();
+  vmslock(&SPIN_SCHED,IPL$_SCHED);
+#if 0
+  cpu->cpu$q_sched_flags |= CPU$M_SCHED;
+#endif
+  goto skip_lock;
   return;
  return_a_reimac:
   if (from_sch$resched==0) {
@@ -1225,7 +1328,9 @@ static int setscheduler(pid_t pid, int policy,
 	//	if (task_on_runqueue(p))
 	//		move_first_runqueue(p);
 
+#if 0
 	current->need_resched = 1;
+#endif
 
 out_unlock:
 	spin_unlock(&runqueue_lock);
@@ -1342,7 +1447,9 @@ asmlinkage long sys_sched_yield(void)
 		 */
 	  //		if (current->pcb$l_sched_policy == PCB$K_SCHED_OTHER)
 	  //			current->pcb$l_sched_policy |= SCHED_YIELD;
+#if 0
 		current->need_resched = 1;
+#endif
 
 		spin_lock_irq(&runqueue_lock);
 		//		move_last_runqueue(current);
