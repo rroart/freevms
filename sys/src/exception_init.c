@@ -122,6 +122,10 @@ int sys$trnlnm  (unsigned int *attr, void *tabnam, void
 		 *lognam, unsigned char *acmode, void *itmlst) {
   return INLINE_SYSCALL($trnlnm,5,attr,tabnam,lognam,acmode,itmlst);
 }
+
+int sys$cmkrnl(int (*routin)(), unsigned int *arglst) {
+  return INLINE_SYSCALL($cmkrnl,2,routin,arglst);
+}
 #endif
 
 #ifdef __arch_um__

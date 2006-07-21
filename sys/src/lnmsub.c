@@ -545,7 +545,8 @@ int search_log_repl(char * name, char ** retname, int * retsize) {
   int acmode = 0;
   char * newret;
   int alosize;
-  sts = exe_std$alononpaged(128, &alosize, &newret);
+  int   rms_std$alononpaged (int reqsize, int32 *alosize_p, void **pool_p);
+  sts = rms_std$alononpaged(128, &alosize, &newret); // check. leak
 
   struct dsc$descriptor log;
   log.dsc$a_pointer = name;
