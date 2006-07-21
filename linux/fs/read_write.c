@@ -222,7 +222,7 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 	  rab->rab$l_ubf = kbuf;
 	  rab->rab$w_usz = curcount;
 #if 0
-	  printk("mrs %x\n",fab->fab$w_mrs);
+	  printk("mrs %x %x\n",fab, fab->fab$w_mrs);
 #endif
 #if 0
 	  if (curcount < fab->fab$w_mrs)
@@ -319,21 +319,50 @@ asmlinkage ssize_t sys_write(unsigned int fd, const char * buf, size_t count)
 #ifdef CONFIG_VMS
 	if (file == 0)
 	  return ret;
+	int sts;
+	int curcount = count;
+	int retcount = 0;
 	struct _rabdef * rab = file;
 	struct _fabdef * fab = rab->rab$l_fab;
-	rab->rab$l_rbf = buf;
-	rab->rab$w_rsz = count;
-	if (fab->fab$w_mrs == 0) {
-	  rab->rab$v_asy = 1; // workaround to avoid tza hanging
-	}
-	int sts = exe$put(file);
-	if (sts & 1) {
-	  return count;
+	char * kbuf = buf;
+	while (curcount>0) {
+	  rab->rab$l_rbf = kbuf;
+#if 0
+	  rab->rab$w_rsz = count;
+#else
+	  rab->rab$w_rsz = curcount;
+#endif
+#if 0
+	  printk("mrs %x %x\n",fab, fab->fab$w_mrs);
+#endif
+
+	  if (fab->fab$w_mrs == 0) {
+	    rab->rab$v_asy = 1; // workaround to avoid tza hanging
+	  }
+#if 0
+	  if (fab->fab$w_mrs)
+	    rab->rab$w_rsz = fab->fab$w_mrs;
+#else
+	  if (rab->rab$w_rsz > 512) 
+	    rab->rab$w_rsz = 512;
+#endif
+	  sts = exe$put(rab);
+	  if ((sts&1)==0)
+	    break;
+	  int thiscount = rab->rab$w_rsz;
+	  if (curcount < rab->rab$w_rsz)
+	    thiscount = curcount;
+	  kbuf += thiscount;
+	  curcount -= thiscount;
+	  retcount += thiscount;
 #if 0
 	  unsigned rsz = rab.rab$w_rsz;
 	  return rsz;
 #endif
-	} else
+	}
+	if (sts & 1)
+	  return retcount;
+	else
 	  return 0;
 #endif
 	if (file) {
