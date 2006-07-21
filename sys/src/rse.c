@@ -17,9 +17,12 @@
 #include<ipl.h>
 #include<internals.h>
 #include <exe_routines.h>
+#include <sch_routines.h>
+#include <smp_routines.h>
 #include <misc_routines.h>
 #include<queue.h>
 #include<ipldef.h>
+#include<cpbdef.h>
 
 extern int mydebug;
 
@@ -65,13 +68,17 @@ int sch$qend(struct _pcb * p) {
 	  sch$change_cur_priority(p,p->pcb$b_pri+1);
 	//	 sch$resched(); /*no interrupt yet*/ /*did not work*/
 	//SOFTINT_RESCHED_VECTOR;
-	 p->need_resched = 1;       
+	// p->need_resched = 1;       
 	 /* lacks some sch stuff */
     }
     else
       {
-	p->need_resched=1;
-	//	SOFTINT_RESCHED_VECTOR; a bit too early. get scheduling in interrupt and crash
+	//p->need_resched=1;
+#if 1
+	SOFTINT_RESCHED_VECTOR; // a bit too early. get scheduling in interrupt and crash
+#else
+	sch$gl_idle_cpus &= ~(1<<p->pcb$l_cpu_id);
+#endif
       }
   }
   vmsunlock(&SPIN_SCHED,-1);
@@ -125,6 +132,9 @@ int sch$pixscan(void) {
 int myp3, myp2, mycomq, mypri, sqfl;
 
 void sch$chsep(struct _pcb * p,unsigned char newpri) {
+  int ipl = getipl();
+  if (ipl != 8 || SPIN_SCHED.spl$l_spinlock == 0)
+    panic("rse %x %x\n",ipl,SPIN_SCHED.spl$l_spinlock);
   struct _pcb * p2, *p3 , *dummy = 0;
   p3=p->pcb$l_sqfl;
   myp3=p3;
@@ -158,22 +168,81 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
     mycheckaddr(0);
     return;
   }
-  // and a ipint resched here too, if needed
-  //  SOFTINT_RESCHED_VECTOR; not yet?
   p2->pcb$w_state=SCH$C_COM;
   p2->state=TASK_RUNNING;
   mycheckaddr(0);
-  if (!task_on_comqueue(p2)) {
-    if (p2!=ctl$gl_pcb) { // another temp workaround
-#ifdef __i386__
-      insque(p2,*(unsigned long *)&sch$aq_comt[newpri]);
-#else
-      insque(p2,*(unsigned long *)&sch$aq_comh[newpri][1]);
+  if (task_on_comqueue(p2))
+    panic("t\n");
+#if 0
+  if (p2==ctl$gl_pcb)  // another temp workaround
+    panic("t2\n");
 #endif
-      sch$gl_comqs|=(1 << newpri);
+  if (sch$gl_idle_cpus || sch$gl_capability_sequence != p2->pcb$l_capability_seq) {
+    // any one idle?
+    // recompute caps if necessary
+    if (sch$gl_capability_sequence != p2->pcb$l_capability_seq)
+      p2->pcb$l_current_affinity = sch$calculate_affinity(p2->pcb$l_affinity);
+    // right cpu idle
+    if (p2->pcb$l_current_affinity & sch$gl_idle_cpus) {
+      if (p2->pcb$l_capability & CPB$M_IMPLICIT_AFFINITY) {
+	int isset = sch$gl_idle_cpus & (1<<p2->pcb$l_affinity);
+	sch$gl_idle_cpus &= ~(1<<p2->pcb$l_affinity);
+	if (isset)
+	  goto do_return;
+      }
+      sch$gl_idle_cpus &= ~p2->pcb$l_current_affinity;
+      goto do_return;
+    }
+    // change to aq_preempt_mask later
+    // anyone at all to preempt?
+    if (sch$gl_active_priority & ((1<<(31-newpri))-1) & (1<<(31-mypri)-1)) {
+      int lowpri=ffs(sch$gl_active_priority);
+      lowpri--;
+      int cpus=sch$al_cpu_priority[31-lowpri];
+      if ((cpus & p2->pcb$l_current_affinity) == 0) {
+	do {
+	  int tmp = (sch$gl_active_priority & ((1<<(31-newpri))-1));
+	  tmp &= ~(1<<lowpri);
+	  lowpri=ffs(tmp);
+	  if(lowpri == 0)
+	    goto do_return;
+	  lowpri--;
+	  int cpus=sch$al_cpu_priority[31-lowpri];
+	} while ((cpus & p2->pcb$l_current_affinity) == 0);
+      }
+      int wanted;
+      if (p2->pcb$l_capability & CPB$M_IMPLICIT_AFFINITY)
+	wanted = p2->pcb$l_affinity;
+      else
+	wanted = ctl$gl_pcb->pcb$l_cpu_id;
+#if 1
+      if (wanted != smp_processor_id())
+	smp_send_work(CPU$M_RESCHED, cpuid);
+      else
+	SOFTINT_RESCHED_VECTOR; /* or set need_resched if interrupt probs */
+#else
+      sch$gl_idle_cpus &= ~(1<<p->pcb$l_cpu_id);
+#endif
+      goto do_return;
     }
   }
+#if 0
+ do_resched:
   mycheckaddr(0);
+  // and a ipint resched here too, if needed
+#if 1
+  SOFTINT_RESCHED_VECTOR; // not yet?
+#else
+  sch$gl_idle_cpus &= ~(1<<p2->pcb$l_cpu_id);
+#endif
+#endif
+ do_return:
+#ifdef __i386__
+  insque(p2,*(unsigned long *)&sch$aq_comt[newpri]);
+#else
+  insque(p2,*(unsigned long *)&sch$aq_comh[newpri][1]);
+#endif
+  sch$gl_comqs|=(1 << newpri);
 #if 0
   p->pcb$l_sts&=~PCB$M_WAKEPEN; // got to have this somewhere, here works
 #endif
@@ -225,9 +294,13 @@ void sch$swpwake(void) {
   return;
 }
 
+// called sch$report_event in 1.5
 void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
   unsigned long dummy = 0;
   struct _pcb *p2;
+  int ipl = getipl();
+  if (ipl != 8 || SPIN_SCHED.spl$l_spinlock == 0)
+    panic("rse %x %x\n",ipl,SPIN_SCHED.spl$l_spinlock);
 
   switch (event) {
   case EVT$_AST:
@@ -356,22 +429,29 @@ void sch$change_cur_priority(struct _pcb *p, unsigned char newpri) {
   /* lacks sch$al_cpu etc stuff */
   int tmppri;
   struct _pcb * p2;
-  int cpuid = smp_processor_id();
+  int cpuid = p2->pcb$l_cpu_id;
   struct _cpu * cpu=smp$gl_cpu_data[cpuid];
-  cpu->cpu$b_cur_pri=newpri;
   p2=ctl$gl_pcb;
-  p2->pcb$b_pri=newpri;
   /* lacks sch$al_cpu etc stuff */
+  sch$al_cpu_priority[cpu->cpu$b_cur_pri]=sch$al_cpu_priority[cpu->cpu$b_cur_pri] & (~cpu->cpu$l_cpuid_mask);
+  if (sch$al_cpu_priority[cpu->cpu$b_cur_pri] == 0)
+    sch$gl_active_priority &= ~(1<<(31-cpu->cpu$b_cur_pri));
+  cpu->cpu$b_cur_pri=newpri;
+  p2->pcb$b_pri=newpri;
+  sch$al_cpu_priority[cpu->cpu$b_cur_pri]=sch$al_cpu_priority[cpu->cpu$b_cur_pri] & (~cpu->cpu$l_cpuid_mask);
+  if (sch$al_cpu_priority[cpu->cpu$b_cur_pri] == 0)
+    sch$gl_active_priority &= ~(1<<(31-cpu->cpu$b_cur_pri));
   tmppri=ffs(sch$gl_comqs);
   tmppri--;
   if (newpri>=tmppri) return;
-#if 0
-  // postpone this. not critical
-  if ()
-    smp_send_work(CPU$M_RESCHED, 0);
+#if 1
+  if (cpuid != smp_processor_id())
+    smp_send_work(CPU$M_RESCHED, cpuid);
   else
+    SOFTINT_RESCHED_VECTOR; /* or set need_resched if interrupt probs */
+#else
+  sch$gl_idle_cpus &= ~(1<<p->pcb$l_cpu_id);
 #endif
-  SOFTINT_RESCHED_VECTOR; /* or set need_resched if interrupt probs */
   // interprocessor interrupt not implemented?
 }
 
@@ -423,7 +503,12 @@ int sch$waitl(struct _pcb * p, struct _wqh * wq) {
 int sch$waitk(struct _pcb * p, struct _wqh * wq) {
   p->pcb$w_state=wq->wqh$l_wqstate;
   p->state=TASK_UNINTERRUPTIBLE;
-  if (task_on_comqueue(p)) {  // scheduling bug fix that may be removed sometime
+#if 0
+  if (!task_on_comqueue(p)) {  // scheduling bug fix that may be removed sometime
+    panic("toc\n");
+  }
+#endif
+  {
     struct _pcb * p3=p->pcb$l_sqfl;
     remque(p,0);
     qhead_init(p); // temp measure since we don't insert into wqs
@@ -443,6 +528,9 @@ int sch$wait(struct _pcb * p, struct _wqh * wq) {
 }
 
 void sch$chsep2(struct _pcb * p,unsigned char newpri) {
+  int ipl = getipl();
+  if (ipl != 8 || SPIN_SCHED.spl$l_spinlock == 0)
+    panic("rse %x %x\n",ipl,SPIN_SCHED.spl$l_spinlock);
   struct _pcb * p2, *p3 , *dummy;
   p3=p->pcb$l_sqfl;
   p2=p;

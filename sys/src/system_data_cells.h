@@ -1351,7 +1351,7 @@ extern unsigned long rms$gq_reserved07;
 extern unsigned long rms$gq_reserved08;
 extern unsigned long rms$gq_reserved09;
 extern unsigned long rms$gq_reserved10;
-extern unsigned long sch$al_cpu_cap;
+extern unsigned long sch$al_cpu_cap[32];
 #ifdef __i386__
 extern unsigned long long sch$aq_comh[33];
 extern unsigned long long sch$aq_comoh[33];
@@ -1382,6 +1382,7 @@ extern unsigned long sch$gl_awsmin_pagelets;
 extern unsigned long sch$gl_awsmin_pages;
 extern unsigned long sch$gl_awstime;
 extern unsigned long sch$gl_borrowlim;
+extern unsigned long sch$gl_capability_sequence;
 extern unsigned long sch$gl_class_sched_mutex;
 extern unsigned long sch$gl_cpu_cap_sum;
 extern unsigned long sch$gl_ctlflags;

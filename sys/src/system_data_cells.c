@@ -15,9 +15,11 @@
 #include<cdtdef.h>
 #include<syidef.h>
 #include <exe_routines.h>
+#include <sch_routines.h>
 #include <misc_routines.h>
 #include <linux/slab.h>
 #include <spldef.h>
+#include <cpbdef.h>
 
 /* Author: Roar Thronæs */
 
@@ -1395,7 +1397,7 @@ unsigned long rms$gq_reserved07;
 unsigned long rms$gq_reserved08;
 unsigned long rms$gq_reserved09;
 unsigned long rms$gq_reserved10;
-unsigned long sch$al_cpu_cap;
+unsigned long sch$al_cpu_cap[32];
 #ifdef __i386__
 unsigned long long sch$aq_comh[33];
 unsigned long long sch$aq_comoh[33];
@@ -1421,19 +1423,20 @@ unsigned long sch$gb_minclasspri;
 unsigned long sch$gb_minprpri;
 unsigned long sch$gb_priority_offset;
 unsigned long sch$gb_rescan;
-unsigned long sch$gl_affinity_skip;
+unsigned long sch$gl_affinity_skip = 2; // check. affinity_skip gen value?
 unsigned long sch$gl_affinity_time;
 unsigned long sch$gl_astdel_k;
 unsigned long sch$gl_awsmin_pagelets;
 unsigned long sch$gl_awsmin_pages;
 unsigned long sch$gl_awstime;
 unsigned long sch$gl_borrowlim;
+unsigned long sch$gl_capability_sequence = 0;
 unsigned long sch$gl_class_sched_mutex;
 unsigned long sch$gl_cpu_cap_sum;
 unsigned long sch$gl_ctlflags;
 unsigned long sch$gl_def_rad_skip_cnt;
-unsigned long sch$gl_default_cpu_cap;
-unsigned long sch$gl_default_process_cap;
+unsigned long sch$gl_default_cpu_cap = CPB$M_RUN; // add quorum later
+unsigned long sch$gl_default_process_cap = CPB$M_RUN; // ditto
 unsigned long sch$gl_exit_queue_rad;
 unsigned long sch$gl_freecnt=0;
 unsigned long sch$gl_freelim=64;
@@ -1469,8 +1472,8 @@ unsigned long sch$gl_wsdec_pagelets;
 unsigned long sch$gl_wsdec_pages;
 unsigned long sch$gl_wsinc_pagelets;
 unsigned long sch$gl_wsinc_pages;
-unsigned long sch$gl_active_priority;
-unsigned long sch$al_cpu_priority[32];
+unsigned long sch$gl_active_priority = 0;;
+unsigned long sch$al_cpu_priority[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 unsigned long sch$gq_affinity_time_int;
 unsigned long sch$gq_cc_per_hardtick;
 unsigned long sch$gq_cc_per_quant;
@@ -2037,6 +2040,12 @@ void __init vms_init(void) {
   }
 
   smp$gl_cpu_data[0]->cpu$l_curpcb = &init_task_union;
+#if 0
+  smp$gl_cpu_data[0]->cpu$l_capability = CPB$M_RUN | CPB$M_PRIMARY;
+#else
+  sch$add_cpu_cap(0, CPB$M_RUN | CPB$M_PRIMARY, 0);
+#endif
+  sch$al_cpu_cap[0]=smp$gl_cpu_data[0]->cpu$l_capability;
 #ifdef __i386__
   smp$gl_cpu_data[0]->cpu$l_saved_isp = &boot_cpu_stack[0x4000];
 #endif
