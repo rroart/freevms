@@ -78,4 +78,12 @@ extern void ht_forall (hash_table *, ht_cb, const void *);
 /* Dump allocation statistics to stderr.  */
 extern void ht_dump_statistics (hash_table *);
 
+// some small temp extras?
+
+long ggc_calloc (long s1, long s2);
+long ggc_alloc(long x);
+long xcalloc (long s, long t);
+long xrealloc(long x, long y);
+long ggc_alloc_tree(length);
+
 #endif /* GCC_HASHTABLE_H */

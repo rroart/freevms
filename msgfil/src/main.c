@@ -10,6 +10,8 @@
 #define false 0
 
 #include <stdio.h>
+#include <string.h>
+#include <libgen.h>
 
 int vms_mm=0;
 

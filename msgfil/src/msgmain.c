@@ -17,28 +17,28 @@ extern void fancy_abort (const char * a, int b, const char * c){
   abort();
 }
 
-int ggc_calloc (int s1, int s2) {
-  int i= malloc(s1*s2);
+long ggc_calloc (long s1, long s2) {
+  long i= malloc(s1*s2);
   memset(i,0,s1*s2);
   return i;
 }
 
-int ggc_alloc(int x) {
+long ggc_alloc(long x) {
   return malloc(x);
 }
 
-int xcalloc (int s, int t) {
+long xcalloc (long s, long t) {
   return malloc(s*t);
 }
 
-int xrealloc(int x, int y) {
+long xrealloc(long x, long y) {
   return xrealloc(x,y);
 }
 
 extern void layout_type (tree y){
 }
 
-int ggc_alloc_tree(length) {
+long ggc_alloc_tree(length) {
   // check
   return malloc(length);
 }

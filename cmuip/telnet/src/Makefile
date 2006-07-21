@@ -72,7 +72,11 @@ install: all
 	install i386/telnet ../../../rooti386/vms"$$"common/sysexe
 #	install um/*.* ../../../rootum/vms"$$"common/sysexe
 
+ifneq ($(ARCH),x86_64)
 telnet	: i386/telnet${EXE} i386/telnet${NOEXE} i386/telnet$(EXE_ELF)
+else
+telnet	: i386/telnet${EXE} i386/telnet${NOEXE}
+endif
 	echo "$ ! Done building Telnet"
 
 both	: telnet.hlb telnet.exe
