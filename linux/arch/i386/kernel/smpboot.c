@@ -55,7 +55,10 @@
 #include <asm/mmu_context.h>
 
 #include <exe_routines.h>
+#include <sch_routines.h>
 #include <queue.h>
+#include <ipldef.h>
+#include <internals.h>
 
 /* Set if we find a B stepping CPU			*/
 static int smp_b_stepping;
@@ -481,6 +484,14 @@ int __init start_secondary(void *unused)
 	 */
 	local_flush_tlb();
 
+#if 0
+	// spot for more vms sched
+	setipl(IPL$_SCHED);
+	vmslock(&SPIN_SCHED,-1);
+	sch$gl_idle_cpus |= (1 << smp_processor_id());
+	sch$sched(1);
+	panic("before idle\n");
+#endif
 	return cpu_idle();
 }
 
@@ -849,6 +860,12 @@ static void __init do_boot_cpu (int apicid)
 #endif
 	init_tasks[cpu] = idle;
 	smp$gl_cpu_data[cpu]->cpu$l_curpcb = idle;
+#if 0
+	smp$gl_cpu_data[cpu]->cpu$l_capability = sch$gl_default_cpu_cap;
+	sch$al_cpu_cap[cpu]=smp$gl_cpu_data[cpu]->cpu$l_capability;
+#else
+	sch$add_cpu_cap(cpu, sch$gl_default_cpu_cap, 0);
+#endif
 #if 0
 	smp$gl_cpu_data[cpu]->cpu$l_phy_cpuid = apicid;
 #endif

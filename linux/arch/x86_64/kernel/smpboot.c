@@ -55,7 +55,10 @@
 #include <asm/mmu_context.h>
 
 #include <exe_routines.h>
+#include <sch_routines.h>
 #include <queue.h>
+#include <ipldef.h>
+#include <internals.h>
 
 /* Setup configured maximum number of CPUs to activate */
 unsigned int max_cpus = NR_CPUS;
@@ -442,6 +445,14 @@ int __init start_secondary(void *unused)
 	 */
 	local_flush_tlb();
 
+#if 0
+	// spot for more vms sched
+	setipl(IPL$_SCHED);
+	vmslock(&SPIN_SCHED,-1);
+	sch$gl_idle_cpus |= (1 << smp_processor_id());
+	sch$sched(1);
+	panic("before idle\n");
+#endif
 	cpu_idle();
 	return 0;
 }
@@ -585,7 +596,12 @@ static int __init do_boot_cpu (int apicid)
 	smp$gl_cpu_data[cpu]->cpu$b_cur_pri = idle->pcb$b_pri;
 #endif
 	cpu_pda[cpu].pcurrent = init_tasks[cpu] = idle;
+#if 0
 	smp$gl_cpu_data[cpu]->cpu$l_curpcb = idle;
+	smp$gl_cpu_data[cpu]->cpu$l_capability = sch$gl_default_cpu_cap;
+#else
+	sch$add_cpu_cap(cpu, sch$gl_default_cpu_cap, 0);
+#endif
 
 #if 0
 	idle->mm->pgd = __get_free_pages(GFP_ATOMIC, 0);

@@ -36,13 +36,15 @@ int main(void)
 	ENTRY(flags); 
 	ENTRY(sigpending); 
 	ENTRY(addr_limit); 
+#if 0
 	ENTRY(need_resched); 
+#endif
 	ENTRY(exec_domain); 
 	ENTRY(ptrace); 
 #if 0
 	ENTRY(processor);
-#endif
 	ENTRY(need_resched); 
+#endif
 	ENTRY(thread);
 	ENTRY(ipr_sp);
 	ENTRY(psl);

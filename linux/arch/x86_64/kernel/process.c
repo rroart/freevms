@@ -98,8 +98,13 @@ static void default_idle(void)
 {
 	if (!hlt_counter) {
 		__cli();
+#if 0
 		if (!current->need_resched)
 			safe_halt();
+#else
+		if (sch$gl_idle_cpus & (1 << current->pcb$l_cpu_id))
+		  safe_halt();
+#endif
 		else
 			__sti();
 	}
@@ -216,7 +221,7 @@ int __init select_idle_routine(struct cpuinfo_x86 *c)
 	return 1;
 }
 
-
+#if 0
 static int __init idle_setup (char *str)
 {
 	if (!strncmp(str, "poll", 4)) {
@@ -231,6 +236,7 @@ static int __init idle_setup (char *str)
 }
 
 __setup("idle=", idle_setup);
+#endif
 
 static struct { long x; } no_idt[3];
 static enum { 

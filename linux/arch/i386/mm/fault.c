@@ -126,9 +126,11 @@ bad_area:
 out_of_memory:
 	if (current->pcb$l_pid == INIT_PID) {
 	  //		current->policy |= SCHED_YIELD;
+#if 0
 	  current->need_resched=1;
 		schedule();
 		goto survive;
+#endif
 	}
 	goto bad_area;
 }

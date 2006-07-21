@@ -88,13 +88,19 @@ void default_idle(void)
 {
 	if (current_cpu_data.hlt_works_ok && !hlt_counter) {
 		__cli();
+#if 0
 		if (!current->need_resched)
 			safe_halt();
+#else
+		if (sch$gl_idle_cpus & (1 << current->pcb$l_cpu_id))
+		  safe_halt();
+#endif
 		else
 			__sti();
 	}
 }
 
+#if 0
 /*
  * On SMP it's slightly faster (but much more power-consuming!)
  * to poll the ->need_resched flag instead of waiting for the
@@ -120,6 +126,7 @@ static void poll_idle (void)
 			"je 2b;"
 				: :"m" (current->need_resched));
 }
+#endif
 
 /*
  * The idle thread. There's no useful work to be
@@ -160,7 +167,7 @@ void cpu_idle (void)
 		in_idle_while=1;
 		//		while (!current->need_resched)
 		//  idle();
-		while (!current->need_resched) {
+		while (sch$gl_idle_cpus & (1 << current->pcb$l_cpu_id)) {
 		  myvar++;
 		  //if (myvar>100) printk("idlingg\n");
 		  idle();
@@ -183,6 +190,7 @@ void cpu_idle (void)
 	}
 }
 
+#if 0
 static int __init idle_setup (char *str)
 {
 	if (!strncmp(str, "poll", 4)) {
@@ -194,6 +202,7 @@ static int __init idle_setup (char *str)
 }
 
 __setup("idle=", idle_setup);
+#endif
 
 static int reboot_mode;
 int reboot_thru_bios;
