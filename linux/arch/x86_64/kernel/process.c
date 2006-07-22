@@ -173,13 +173,14 @@ void cpu_idle (void)
 		void (*idle)(void) = pm_idle;
 		if (!idle)
 			idle = default_idle;
-		while (!current->need_resched)
+		while (sch$gl_idle_cpus & (1 << current->pcb$l_cpu_id))
 			idle();
 		schedule();
 		check_pgt_cache();
 	}
 }
 
+#if 0
 /*
  * This is a kind of hybrid between poll and halt idle routines. This uses new
  * Monitor/Mwait instructions on P4 processors with PNI. We Monitor 
@@ -203,9 +204,11 @@ static void mwait_idle (void)
 		} while (current->need_resched == -1);
 	}
 }
+#endif
 
 int __init select_idle_routine(struct cpuinfo_x86 *c)
 {
+#if 0
 	if (cpu_has(c, X86_FEATURE_MWAIT)) {
 		printk("Monitor/Mwait feature present.\n");
 		/*
@@ -218,6 +221,7 @@ int __init select_idle_routine(struct cpuinfo_x86 *c)
 		}
 		return 1;
 	}
+#endif
 	return 1;
 }
 
