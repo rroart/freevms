@@ -596,8 +596,8 @@ static int __init do_boot_cpu (int apicid)
 	smp$gl_cpu_data[cpu]->cpu$b_cur_pri = idle->pcb$b_pri;
 #endif
 	cpu_pda[cpu].pcurrent = init_tasks[cpu] = idle;
-#if 0
 	smp$gl_cpu_data[cpu]->cpu$l_curpcb = idle;
+#if 0
 	smp$gl_cpu_data[cpu]->cpu$l_capability = sch$gl_default_cpu_cap;
 #else
 	sch$add_cpu_cap(cpu, sch$gl_default_cpu_cap, 0);
