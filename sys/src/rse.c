@@ -217,7 +217,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
 	wanted = ctl$gl_pcb->pcb$l_cpu_id;
 #if 1
       if (wanted != smp_processor_id())
-	smp_send_work(CPU$M_RESCHED, cpuid);
+	smp_send_work(CPU$M_RESCHED, wanted);
       else
 	SOFTINT_RESCHED_VECTOR; /* or set need_resched if interrupt probs */
 #else
@@ -428,10 +428,9 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
 void sch$change_cur_priority(struct _pcb *p, unsigned char newpri) {
   /* lacks sch$al_cpu etc stuff */
   int tmppri;
-  struct _pcb * p2;
+  struct _pcb * p2 = p;
   int cpuid = p2->pcb$l_cpu_id;
   struct _cpu * cpu=smp$gl_cpu_data[cpuid];
-  p2=ctl$gl_pcb;
   /* lacks sch$al_cpu etc stuff */
   sch$al_cpu_priority[cpu->cpu$b_cur_pri]=sch$al_cpu_priority[cpu->cpu$b_cur_pri] & (~cpu->cpu$l_cpuid_mask);
   if (sch$al_cpu_priority[cpu->cpu$b_cur_pri] == 0)
