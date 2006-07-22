@@ -68,7 +68,7 @@ int sch$release_affinity(struct _pcb *pcb) { // check _implicit name
 
 int sch$calculate_affinity(int mask) {
   int i;
-  int new_mask;
+  int new_mask = 0;
   for(i=0; i<32; i++) {
     if ((mask & smp$gl_cpu_data[i]->cpu$l_capability) == mask)
       new_mask |= 1 << i;
