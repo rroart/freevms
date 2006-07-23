@@ -541,6 +541,7 @@ int search_log_repl(char * name, char ** retname, int * retsize) {
 #else
 int search_log_repl(char * name, char ** retname, int * retsize) {
   int sts;
+  char * semi = 0;
   int namelen=strlen(name);
   int acmode = 0;
   char * newret;
@@ -586,7 +587,7 @@ int search_log_repl(char * name, char ** retname, int * retsize) {
   if (sts&1)
     goto found;
 
-  char * semi = strchr(name,':');
+  semi = strchr(name,':');
   if (semi == 0) 
     return sts;
 
@@ -605,7 +606,7 @@ int search_log_repl(char * name, char ** retname, int * retsize) {
  found:
 
   if (semi == 0)
-    return sts;
+    goto ret;
 
   newret[*retsize]=0;
   if (strchr(newret,':')) {
@@ -616,8 +617,9 @@ int search_log_repl(char * name, char ** retname, int * retsize) {
     newret[*retsize]=':';
     memcpy(newret+(*retsize),semi,namelen-(semi-name));
   }
-  *retname=newret;
   *retsize=(*retsize)+namelen-(semi-name);
+ ret:
+  *retname=newret;
 
   return sts;
 }
