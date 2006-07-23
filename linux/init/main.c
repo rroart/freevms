@@ -596,7 +596,9 @@ static void rest_init(void)
   printk("%%KERNEL-I-DEBUG, After first kernel_thread\n");
   fix_init_thread=0;
 	unlock_kernel();
+#if 0
 	current->need_resched = 1;
+#endif
  	cpu_idle();
 } 
 
