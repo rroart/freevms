@@ -225,7 +225,9 @@ int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
     return SS$_NORMAL;
   }
 #endif
+  vmslock(&SPIN_SCHED,IPL$_SCHED);
   sch$wake(a->aqb$l_acppid);
+  vmsunlock(&SPIN_SCHED,-1);
   setipl(0);
   return SS$_NORMAL;
 }
