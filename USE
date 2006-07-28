@@ -1,11 +1,11 @@
-Current as of FreeVMS 0.2.11.
+Current as of FreeVMS 0.2.12.
 	Warning: there may be some more unstability compared to 0.2.3
 	due to changes in AST system and modes to resemble VMS more.
 	Now also changes in interrupts and multiprocessing.
 	Do not use any write on Ext2 file system.
 	IPACP is now working on i386 again, and partially on x86_64.
-	Do not expect much of the x86_64 version; I can not even
-	guarantee it will not catch fire. Basic boot on DCL Ext2. (First.)
+	Do not expect as much of the x86_64 version;
+	it has improved, though, and I have seen no fire yet.
 
 Bochsrc FreeVMS-related config:
 	floppya: 1_44=a.img, status=inserted
