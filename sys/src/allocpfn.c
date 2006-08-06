@@ -532,10 +532,18 @@ int mmg$relpfn(signed int pfn) {
   if (mem_map[pfn].pfn$l_page_state&PFN$M_MODIFY) {
     // do more dealloc
     // maybe backingstore related?
+#ifdef OLDINT
     mmg$inspfn/* really t*/(PFN$C_MFYPAGLST,&mem_map[pfn],0);
+#else
+    mmg$inspfn/* really t*/(PFN$C_MFYPAGLST,pfn,0);
+#endif
 
   } else {
+#ifdef OLDINT
     mmg$inspfn(PFN$C_FREPAGLST,&mem_map[pfn],0); // really inspfnh
+#else
+    mmg$inspfn(PFN$C_FREPAGLST,pfn,0); // really inspfnh
+#endif
   }
 }
 
