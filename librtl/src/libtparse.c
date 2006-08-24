@@ -134,7 +134,7 @@ int char_count;
 
 int
 lib$tparse(void *argument_block ,void *state_table , void *key_table) {
-  struct _tpadef * tpa = argument_block;
+  struct _tpadef * tpa = argument_block; // 64-bit later
   int * start_state = state_table;
   static int action_value;
   char * state, * curpos;
@@ -346,10 +346,10 @@ lib$tparse(void *argument_block ,void *state_table , void *key_table) {
       if (ifval) { // 2
 	if (type&TPA$M_ADDRFLAG) {
 	  long * address, mask;
-	  address = *(long*)state; // 64-bit unclean
+	  address = state + 4 + *(signed int*)state; // tpa$addr // 64-bit unclean
 	  state += 4; // upval
 	  if (type&TPA$M_MASKFLAG) {
-	    mask = *(long*)state; // 64-bit unclean
+	    mask = *(int*)state; // 64-bit unclean
 	    state += 4; // upval
 	    *address|=mask;
 	  } else {
