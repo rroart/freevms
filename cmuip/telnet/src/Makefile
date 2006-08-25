@@ -75,7 +75,7 @@ install: all
 ifneq ($(ARCH),x86_64)
 telnet	: i386/telnet${EXE} i386/telnet${NOEXE} i386/telnet$(EXE_ELF)
 else
-telnet	: i386/telnet${EXE} i386/telnet${NOEXE}
+telnet	: i386/telnet${EXE} i386/telnet${NOEXE} i386/telnet_g${NOEXE}
 endif
 	echo "$ ! Done building Telnet"
 
@@ -109,10 +109,9 @@ i386/telnet$(NOEXE)	: telnet.a netaux.o
 	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet$(NOEXE)
 	strip -K main i386/telnet$(NOEXE)
 	gcc -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl /usr/lib/libelf.a netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/dtelnet$(NOEXE)
-	strip -K main i386/dtelnet$(NOEXE)
-# must strip, otherwise binary becomes too big and has read problems 
-#		cmuip_src:[central]neterror.o 
-#		cmuip_src:[central]netlib.a/lib
+i386/telnet_g$(NOEXE)	: telnet.a netaux.o
+	install -d i386
+	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet_g$(NOEXE)
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
@@ -215,9 +214,13 @@ routines.o: routines.b32
 lib.req:
 	ln -s ../../../lib/src/lib.req .
 
+ifneq ($(ARCH),x86_64)
 starlet.req:
 	ln -s ../../../starlet/src/starlet.req .
-
+else
+starlet.req:
+	ln -s ../../../starlet/src/starlet64.req starlet.req
+endif
 tpamac.req:
 	ln -s ../../../starlet/src/tpamac.req .
 

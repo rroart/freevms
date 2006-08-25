@@ -1,4 +1,13 @@
 #!/bin/sh
+
+unamem=`uname -m`
+
+if [ $unamem == x86_64 ]; then
+ARCH=x86_64
+else
+ARCH=i386
+fi
+
 CFLAGS=
 CPPFLAGS=
 CC=
@@ -27,7 +36,11 @@ tar xzf bliss-0_200.tgz
 rm -rf build
 mkdir build
 cd build
+if [ $unamem == x86_64 ]; then
+../gcc-3.4.3/configure --enable-languages=bliss --with-included-gettext  --prefix=$TOPDIR/bliss --disable-multilib 
+else
 ../gcc-3.4.3/configure --enable-languages=bliss --with-included-gettext --prefix=$TOPDIR/bliss
+fi
 make bootstrap
 make install
 cd ..
