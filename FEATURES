@@ -58,7 +58,7 @@ Editor:
 	EDT (from Ozone, and can not yet be used fully)
 
 Programming language:
-	Bliss (i386, with x86_64 under development)
+	Bliss (i386, x86_64)
 
 Linker:
 	LINKER (simple, static images. Can do some dynamic linking.)

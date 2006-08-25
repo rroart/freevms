@@ -1,4 +1,4 @@
-Current as of FreeVMS 0.2.12.
+Current as of FreeVMS 0.2.13.
 	Warning: there may be some more unstability compared to 0.2.3
 	due to changes in AST system and modes to resemble VMS more.
 	Now also changes in interrupts and multiprocessing.
@@ -6,6 +6,7 @@ Current as of FreeVMS 0.2.12.
 	IPACP is now working on i386 again, and partially on x86_64.
 	Do not expect as much of the x86_64 version;
 	it has improved, though, and I have seen no fire yet.
+	Bliss-64 may have something lacking with req and telnet.
 
 Bochsrc FreeVMS-related config:
 	floppya: 1_44=a.img, status=inserted
