@@ -10,7 +10,7 @@
 #include <ssdef.h>
 #include <starlet.h>
 
-unsigned char lib$ab_asc_ebc[256] = {
+unsigned char lib$ab_asc_ebc_not[256] = {
     0,  1,  2,  3, 55, 45, 46, 47, 22,  5, 37, 11, 12, 13, 14, 15,
    16, 17, 18, 19, 60, 61, 50, 38, 24, 25, 63, 39, 28, 29, 30, 31,
    64, 79,127,123, 91,108, 80,125, 77, 93, 92, 78,107, 96, 75, 97,
@@ -29,7 +29,7 @@ unsigned char lib$ab_asc_ebc[256] = {
   220,221,222,223,234,235,236,237,238,239,250,251,252,253,254,255
 };
 
-unsigned char lib$ab_ebc_asc[256] = {
+unsigned char lib$ab_ebc_asc_not[256] = {
     0,  1,  2,  3,156,  9,134,127,151,141,142, 11, 12, 13, 14, 15,
    16, 17, 18, 19,157,133,  8,135, 24, 25,146,143, 28, 29, 30, 31,
   128,129,130,131,132, 10, 23, 27,136,137,138,139,140,  5,  6,  7,
@@ -47,6 +47,9 @@ unsigned char lib$ab_ebc_asc[256] = {
    92,159, 83, 84, 85, 86, 87, 88, 89, 90,244,245,246,247,248,249,
    48, 49, 50, 51, 52, 53, 54, 55, 56, 57,250,251,252,253,254,255
 };
+
+extern const char lib$ab_asc_ebc[];
+extern const char lib$ab_ebc_asc[];
 
 static char ASCIItoEBCDIC(const unsigned char c)
 {
