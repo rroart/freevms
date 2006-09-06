@@ -79,6 +79,26 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
       *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wsextent;
       break;
 
+    case JPI$_BIOCNT:
+      *(unsigned short *)it->bufaddr=p->pcb$w_biocnt;
+      break;
+
+    case JPI$_BIOLM:
+      *(unsigned short *)it->bufaddr=p->pcb$w_biolm;
+      break;
+
+    case JPI$_DIOCNT:
+      *(unsigned short *)it->bufaddr=p->pcb$w_diocnt;
+      break;
+
+    case JPI$_DIOLM:
+      *(unsigned short *)it->bufaddr=p->pcb$w_diolm;
+      break;
+
+    case JPI$_CPUTIM:
+      *(unsigned int *)it->bufaddr=p->pcb$l_cputim;
+      break;
+
     }
     it++;
   }
