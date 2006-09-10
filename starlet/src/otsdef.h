@@ -1,0 +1,18 @@
+#ifndef otsdef_h
+#define otsdef_h
+
+#define OTS$_FACILITY 23
+#define OTS$_INVSTRDES 1540108
+#define OTS$_FATINTERR 1540116
+#define OTS$_INTDATCOR 1540124
+#define OTS$_IO_CONCLO 1540132
+#define OTS$_INPCONERR 1540140
+#define OTS$_OUTCONERR 1540148
+#define OTS$_STRIS_INT 1540156
+#define OTS$_INSVIRMEM 1540164
+#define OTS$_WRONUMARG 1540172
+
+#define OTS$_USEFLORES 1541120
+ 
+#endif
+ 
