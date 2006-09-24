@@ -55,6 +55,7 @@ LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 	liblocc.o libmatchc.o  libmovc3.o libediv.o \
 	libgetdvi.o libgetjpi.o libgetsyi.o \
 	libgetlog.o libtparse.o libgetfor.o \
+	libwait.o libebcdic.o libbintree.o liblookey.o libtimer.o libvm.o \
 	libexpand_nodename.o sys__combine_date_time.o \
 	sysgetmsg.o sysgeterrno.o
 
@@ -65,11 +66,14 @@ CVTOBJ = cvt_convert_float.o
 
 QUELIB = libinsqhi.o
 
+OTSOBJ = otscvt.o
+
 STROBJ_PIC = $(addprefix pic/,$(STROBJ))
 LIBOBJ_PIC = $(addprefix pic/,$(LIBOBJ))
 SYSOBJ_PIC = $(addprefix pic/,$(SYSOBJ))
 CVTOBJ_PIC = $(addprefix pic/,$(STROBJ))
 QUELIB_PIC = $(addprefix pic/,$(QUELIB))
+OTSOBJ_PIC = $(addprefix pic/,$(OTSOBJ))
 
 STRLIB = librtl.a
 STRLIB_PIC = librtl_pic.a
@@ -103,20 +107,20 @@ rtl_lib_test : rtl_lib_test.c $(STRLIB) $(SYSLIB)
 test_ile : test_ile.c $(STRLIB) $(SYSLIB)
 test_libgetef : test_libgetef.c $(STRLIB) $(SYSLIB)
 
-$(STRLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
+$(STRLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB) $(OTSOBJ)
 	ar -rv $(STRLIB) $?
 
-$(STRLIB_PIC) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC)
+$(STRLIB_PIC) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC) $(OTSOBJ)
 	ar -rv $(STRLIB_PIC) $?
 
-$(EXELIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB)
+$(EXELIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB) $(OTSOBJ)
 	install -d i386
 	$(LINKER) -Bshareable $? ../../starlet/src/i386/starlet$(EXE) -o $(EXELIB)
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 
-$(ELFLIB) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC) starlet$(EXE_ELF)
+$(ELFLIB) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC) $(OTSOBJ_PIC) starlet$(EXE_ELF)
 	install -d i386
 	ld -Bshareable $(VMS_LD_RPATH) $? starlet$(EXE_ELF) $(LIBGCC) -o $(ELFLIB)
 
