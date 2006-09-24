@@ -304,7 +304,7 @@ ROUTINE Get_On_Off (String, Response) =
 
 
 
-GLOBAL ROUTINE Close2 =
+GLOBAL ROUTINE Close =
 !++
 ! Description:
 !
