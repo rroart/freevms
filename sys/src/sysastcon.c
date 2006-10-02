@@ -45,6 +45,9 @@ int exe$dclast(void (*astadr)(__unknown_params), unsigned long astprm, unsigned 
   a->acb$l_pid=p->pcb$l_pid;
   a->acb$l_ast=astadr;
   a->acb$l_astprm=astprm;
+  if (p->psl_prv_mod > acmode)
+    acmode = p->psl_prv_mod;
+  a->acb$b_rmod=acmode;
   sch$qast(p->pcb$l_pid,PRI$_NULL,a);
   return SS$_NORMAL;
 }
