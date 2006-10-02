@@ -673,7 +673,9 @@ static int userfunc(long (*func)(), long argc, long argv) {
 			"movl %eax, 8(%edx)\n\t"
 			"movl 16(%esp), %eax\n\t"
 			"movl %eax, 12(%edx)\n\t"
+			"int $0xb4\n\t"
 			"movl 0x7ffff0a8, %eax\n\t"
+			"movl $0xf, 2032(%eax)\n\t" /* psl */
 			"movl 2124(%eax), %eax\n\t" /* ipr_sp[3] */
 			"movl %esp, %edx\n\t"
 			"addl $-0x14, %edx\n\t"

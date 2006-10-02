@@ -40,7 +40,9 @@ static int myfunc(int (*func)(),void * start, int count) {
 		       "movl %eax, %edi\n\t"
 		       "movl $0x7ffe0000, %ecx\n\t"
 		       "subl $0x1000, %ecx\n\t"
+		       "int $0xb4\n\t"
 		       "movl 0x7ffff0a8, %eax\n\t"
+		       "movl $0xf, 2032(%eax)\n\t" /* psl */
 		       "movl 2124(%eax), %eax\n\t" /* ipr_sp[3] */
 		       "movl %esp, %edx\n\t"
 		       "addl $-0x14, %edx\n\t"
