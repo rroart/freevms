@@ -1057,6 +1057,10 @@ void __init trap_init(void)
 	extern void exe_sti();
 	_set_gate(idt_table+0xb2,15,1,exe_cli);
 	_set_gate(idt_table+0xb3,15,1,exe_sti);
+	extern void sup_cli();
+	extern void sup_sti();
+	_set_gate(idt_table+0xb4,15,2,sup_cli);
+	_set_gate(idt_table+0xb5,15,2,sup_sti);
 	kernel_puts("puts 6.22.5\n");
 
 	/*

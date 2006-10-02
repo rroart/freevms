@@ -518,6 +518,14 @@ ENTRY(exe_cli)
 	andl $0xfffffdff, 0x8(%esp)
 	iret
 
+ENTRY(sup_sti)
+	orl $0x200, 0x8(%esp)
+	iret
+
+ENTRY(sup_cli)
+	andl $0xfffffdff, 0x8(%esp)
+	iret
+
 ENTRY(vmssystem_call3)
 #        PUSHPSLINTR
 	CHM_FIX_SP(0)
