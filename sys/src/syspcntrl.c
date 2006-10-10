@@ -20,10 +20,20 @@
 #include <misc_routines.h>
 #include <ipl.h>
 #include <internals.h>
+#include <prvdef.h>
 
 /* Author: Roar Thronæs */
 
 unsigned long maxprocesscnt=MAXPROCESSCNT;
+
+int exe$process_check_priv(struct _pcb * p) {
+  int priv = ctl$gl_pcb->pcb$l_priv;
+  // check group priv later
+  if (p != ctl$gl_pcb && (priv & PRV$M_WORLD) == 0) {
+    return SS$_NOPRIV;
+  }
+  return SS$_NORMAL;
+}
 
 int inline process_bit_shift() {
   return sch$gl_pixwidth;
@@ -168,6 +178,7 @@ asmlinkage int exe$hiber(long dummy) {
 
 /* return params not as specified */
 int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb ** retpcb, unsigned long * retipid, unsigned long *retepid) {
+  int sts = SS$_NORMAL;
   int ipid;
   unsigned long *vec=sch$gl_pcbvec;
   /* sched spinlock */
@@ -185,6 +196,11 @@ int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb 
     ipid=exe$epid_to_ipid(*pidadr);
     if (ipid==0 && is_cluster_on())
       return SS$_REMOTE_PROC;
+    if (ipid == 0)
+      goto not_found;
+    sts = exe$process_check_priv (vec[ipid&0xffff]);
+    if ((sts & 1) == 0)
+      goto error;
     *retipid=ipid;
     *retpcb=vec[ipid&0xffff];
     *retepid=*pidadr;
@@ -198,6 +214,9 @@ int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb 
       if (vec[i]!=0) { // change to nullpcb later
 	struct _pcb * p=vec[i];
 	if (strncmp(d->dsc$a_pointer,p->pcb$t_lname,d->dsc$w_length)==0) {
+	  sts = exe$process_check_priv (vec[ipid&0xffff]);
+	  if ((sts & 1) == 0)
+	    goto error;
 	  *retipid=vec[i];
 	  *retpcb=p;
 	  return SS$_NORMAL;
@@ -205,11 +224,16 @@ int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb 
       }
       // not clusterable yet?
     }
+    goto not_found;
     return SS$_NORMAL;
   }
   /* should not get here */
+ not_found:
   vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
   return 0;
+ error:
+  vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
+  return sts;
 }
 
 #if 0
