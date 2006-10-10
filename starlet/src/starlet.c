@@ -419,6 +419,42 @@ int sys$sndopr(void *msgbuf, unsigned short int chan) {
   return INLINE_SYSCALL($sndopr,2,msgbuf,(int)chan);
 }
 
+int sys$process_affinity (unsigned int *pidadr, void *prcnam, struct _generic_64 *select_mask, struct _generic_64 *modify_mask, struct _generic_64 *prev_mask, struct _generic_64 *flags,...) {
+  struct struct_args s;
+  s.s1 = pidadr;
+  s.s2 = prcnam;
+  s.s3 = select_mask;
+  s.s4 = modify_mask;
+  s.s5 = prev_mask;
+  s.s6 = flags;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
+  return INLINE_SYSCALL($process_affinity, 1, &s);
+}
+
+int sys$set_implicit_affinity (unsigned int *pidadr, void *prcnam, struct _generic_64 *state, int cpu_id, struct _generic_64 *prev_mask) {
+  return INLINE_SYSCALL($set_implicit_affinity, 5, pidadr, prcnam, state, cpu_id, prev_mask);
+}
+
+int sys$cpu_capabilities (int cpu_id, struct _generic_64 *select_mask, struct _generic_64 *modify_mask, struct _generic_64 *prev_mask, struct _generic_64 *flags) {
+  return INLINE_SYSCALL($cpu_capabilities, 5, cpu_id, select_mask, modify_mask, prev_mask, flags);
+}
+
+int sys$process_capabilities (unsigned int *pidadr, void *prcnam, struct _generic_64 *select_mask, struct _generic_64 *modify_mask, struct _generic_64 *prev_mask, struct _generic_64 *flags) {
+  struct struct_args s;
+  s.s1 = pidadr;
+  s.s2 = prcnam;
+  s.s3 = select_mask;
+  s.s4 = modify_mask;
+  s.s5 = prev_mask;
+  s.s6 = flags;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
+  return INLINE_SYSCALL($process_capabilities, 1, &s);
+}
+
 int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), int astprm, unsigned long long *nullarg) {
   struct struct_getdvi s;
   s.efn=efn;

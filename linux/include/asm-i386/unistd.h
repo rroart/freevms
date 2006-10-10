@@ -357,6 +357,10 @@
 #define __NR_$cancel           105
 #define __NR_$getjpiw          106
 #define __NR_$sndopr           107
+#define __NR_$process_affinity 108
+#define __NR_$set_implicit_affinity 109
+#define __NR_$cpu_capabilities 110
+#define __NR_$process_capabilities 111
 
 #define __NR_$close 1
 #define __NR_$connect 2

@@ -1291,6 +1291,10 @@ ENTRY(vmssys_call_table)
 	.long SYMBOL_NAME(exe$cancel)
 	.long SYMBOL_NAME(exe$getjpiw_wrap)
 	.long SYMBOL_NAME(exe$sndopr)
+	.long SYMBOL_NAME(exe$process_affinity_wrap)
+	.long SYMBOL_NAME(exe$set_implicit_affinity)
+	.long SYMBOL_NAME(exe$cpu_capabilities)
+	.long SYMBOL_NAME(exe$process_capabilities_wrap)
 
 	.rept NR_vmssyscalls-(.-vmssys_call_table)/4
 		.long SYMBOL_NAME(sys_$ni_syscall)

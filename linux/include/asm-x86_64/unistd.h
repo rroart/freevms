@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2006.
+
 #ifndef _ASM_X86_64_UNISTD_H_
 #define _ASM_X86_64_UNISTD_H_
 
@@ -610,6 +616,10 @@ __SYSCALL(__NR_semtimedop, sys_semtimedop)
 #define __NR_$cancel           105
 #define __NR_$getjpiw          106
 #define __NR_$sndopr           107
+#define __NR_$process_affinity 108
+#define __NR_$set_implicit_affinity 109
+#define __NR_$cpu_capabilities 110
+#define __NR_$process_capabilities 111
 
 #define __NR_$close 1
 #define __NR_$connect 2
