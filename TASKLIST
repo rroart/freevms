@@ -147,7 +147,7 @@ Detailed descriptions:
 
   Basic libraries:
     LBR
-    SMG, depends on better terminal driver
+    SMG
 
   Other libraries:
     LIBRTL

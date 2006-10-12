@@ -68,6 +68,9 @@ Check whether it was wise having the kernel text readable for exe$astdel.
 Why is there no need for iret at the end of exe$astdel?
 Pagefault with panic on too high ipl.
 Have own buffers for exec mode.
+Check if asts are run without sti bit.
+Check if cli/elf sup_sti makes trouble.
+Check if we can stop use prv bits in pcb and only use cpu bits.
 
 Input/output:
 Make echoing work in putnextchar (right before reqcom)
@@ -81,6 +84,7 @@ After some time even more driver support might be cut/broke (the most).
 In trandevnam make it use lnm$file_dev.
 Tty_read with correct size read. (now done)
 Acpqfl change from absolute to relative.
+Ctrl-asts with flck (without that ipl queueing crashes).
 
 Logical names:
 Logical support in the DCL and elsewhere

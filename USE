@@ -1,9 +1,10 @@
-Current as of FreeVMS 0.2.13.
+Current as of FreeVMS 0.2.15.
 	Warning: there may be some more unstability compared to 0.2.3
 	due to changes in AST system and modes to resemble VMS more.
 	Now also changes in interrupts and multiprocessing.
 	Do not use any write on Ext2 file system.
 	IPACP is now working on i386 again, and partially on x86_64.
+	Telnet client is now working on i386 again.
 	Do not expect as much of the x86_64 version;
 	it has improved, though, and I have seen no fire yet.
 	Bliss-64 may have something lacking with req and telnet.

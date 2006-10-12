@@ -66,6 +66,7 @@ Linker:
 RTL:
 	STR$
 	LIB$
+	SMG$
 
 Misc utilities:
 	Backup
