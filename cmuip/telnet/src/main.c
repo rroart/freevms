@@ -55,6 +55,7 @@ lib$attach() {
   return 1;
 }
 
+#if 0
 int
 smg$create_pasteboard(unsigned int * pasteboard_id , void * output_device , signed int * number_of_pasteboard_rows , signed int * number_of_pasteboard_columns ,unsigned int * flags , unsigned int * type_of_terminal , void * device_name) {
   *pasteboard_id=0;
@@ -115,6 +116,7 @@ smg$create_virtual_keyboard(unsigned int * keyboard_id , void * input_device , v
   return 1;
   printf("smg$create_virtual_keyboard not implemented\n");
 }
+#endif
 
 int do_attach (int mask);
 int close (int mask);

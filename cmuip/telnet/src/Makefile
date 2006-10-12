@@ -60,6 +60,8 @@ LDEBUG		= /NODEBUG /NOTRACE
 BFLAGS		= /OBJECT=$(MMS$TARGET_NAME) $(DEBUG) /TERM=STATISTICS /LIST
 LINKFLAGS	= /EXEC=$(MMS$TARGET_NAME) $(LDEBUG) /MAP/SYM
 
+SMGRTL 		= ../../../smgrtl/src/smgrtl.a
+
 all: links telnet install
 
 clean:
@@ -106,12 +108,12 @@ i386/telnet$(EXE)	: telnet.a netaux.o
 
 i386/telnet$(NOEXE)	: telnet.a netaux.o
 	install -d i386
-	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet$(NOEXE)
+	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a $(SMGRTL) ../../../bliss/lib/libbli.a -o i386/telnet$(NOEXE)
 	strip -K main i386/telnet$(NOEXE)
-	gcc -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl /usr/lib/libelf.a netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/dtelnet$(NOEXE)
+	gcc -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl /usr/lib/libelf.a netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a $(SMGRTL) ../../../bliss/lib/libbli.a -o i386/dtelnet$(NOEXE)
 i386/telnet_g$(NOEXE)	: telnet.a netaux.o
 	install -d i386
-	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet_g$(NOEXE)
+	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a $(SMGRTL) ../../../bliss/lib/libbli.a -o i386/telnet_g$(NOEXE)
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
@@ -121,7 +123,7 @@ librtl$(EXE_ELF): $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 
 i386/telnet$(EXE_ELF)	: telnet.a netaux.o $(VMSDLIBS_EXE_ELF) $(EXTERNAL2) starlet$(EXE_ELF) librtl$(EXE_ELF)
 	install -d i386
-	ld -Bshareable $(VMS_LD_RPATH) main.o netaux.o telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl /usr/lib/libelf.a starlet$(EXE_ELF) librtl$(EXE_ELF) ../../../bliss/lib/libbli.a -lc -o i386/telnet$(EXE_ELF)
+	ld -Bshareable $(VMS_LD_RPATH) main.o netaux.o telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl /usr/lib/libelf.a starlet$(EXE_ELF) librtl$(EXE_ELF) $(SMGRTL) ../../../bliss/lib/libbli.a -lc -o i386/telnet$(EXE_ELF)
 #		cmuip_src:[central]neterror.o 
 #		cmuip_src:[central]netlib.a/lib
 
@@ -207,6 +209,9 @@ telnet.src	: \
 
 telnet.o: telnet.b32
 	$(CC) -c $< -o $@ -fminimum-actuals=4
+
+telnet_term.o: telnet_term.b32
+	$(CC) -c $< -o $@ -fminimum-actuals=6
 
 routines.o: routines.b32
 	$(CC) -c $< -o $@ -fminimum-actuals=4

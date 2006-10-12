@@ -46,6 +46,7 @@
 #include <strdef.h>
 #include <trmdef.h>
 #include <smgdef.h>
+#include "smgdef2.h"
 
 #define globalvalue int
 #define TRUE 1
@@ -191,7 +192,6 @@ void do_abort(void)
   put_status(2);
 }
 
-#if 0 
 int search_command (int mask)
 
 /*
@@ -396,6 +396,7 @@ int search_command (int mask)
   dummy_descr.dsc$a_pointer = (char *) &dummy_item;
 /* Ident or UIC */
   status = parse_item("ident", &id_descr, 0, &matuic, 0);
+#if 0
   if (matuic == TRUE) 
   { status = SYS$ASCTOID(&id_descr, &uic, 0);
     if ((status & 1) != 1) 
@@ -404,6 +405,7 @@ int search_command (int mask)
       return(status); 
     }
   }
+#endif
   if (matuic == FALSE) 
     status = parse_item("uic", &dummy_descr, &uic, &matuic, 6);
   if ((status &1 ) != 1)
@@ -425,6 +427,7 @@ int search_command (int mask)
   fp = stdout;
 #endif
   clean_flags.fopen = 1;
+#if 0
   if (matsort == FALSE)
     clean_flags.sort = 0;
   else
@@ -433,6 +436,7 @@ int search_command (int mask)
     { singlemsg(0,status); return(status); }
     clean_flags.sort = 1;
   }
+#endif
 /* All qualifiers parsed */
 
   if (matstat == TRUE) status = lib$init_timer();
@@ -457,9 +461,7 @@ int search_command (int mask)
 
   curvol = 1; size = 1;
   ctx.end = FALSE;
-#if 0
   if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_OFF);
-#endif
   while ((curvol <= maxvol) && (!ctx.end))
   { ctx.i = -1; /* Clear context */
     if (rvt[curvol].i_open ==1) 
@@ -737,7 +739,9 @@ int search_command (int mask)
           }
            else
           { out_descr.dsc$w_length = outlen; 
+#if 0
 	    sor$release_rec(&out_descr,0);
+#endif
             out_descr.dsc$w_length = 255; 
           }
 	}  
@@ -821,6 +825,7 @@ nexti: status = get_next_header();
   if (ctrlc == 1) 
   { ctrlc = 0; do_abort();
   }
+#if 0
   if (matsort == TRUE)
   { sprintf(outbuf,"%%DFU-I-SORT, Sorting ... \n");
     put_disp();
@@ -838,6 +843,7 @@ nexti: status = get_next_header();
     }
     sprintf(outbuf," \n"); put_disp();
   }
+#endif
   if (matfragment == FALSE) 
   { sprintf(outbuf,"%%DFU-S-FND , Files found : %d, Size : %d/%d\n",
       fcount,tot_r_size,tot_a_size); put_disp();
@@ -852,9 +858,7 @@ nexti: status = get_next_header();
   if (matstat == TRUE) status = lib$show_timer(0,0,display_stat,0);
   return(1);
 }            
-#endif
 
-#if 0
 int report_command(int mask)
 /*
     Create disk fragmentation report
@@ -933,9 +937,7 @@ int report_command(int mask)
 
   curvol = 1; size = 1;
   ctx.end = FALSE;
-#if 0
   if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_OFF);
-#endif
   while ((curvol <= maxvol) && (!ctx.end))
   { ctx.i = -1; /* Clear context */
     if (rvt[curvol].i_open ==1) 
@@ -1123,8 +1125,10 @@ next_rep: status = get_next_header();
       put_disp(); if (matoutput) fprintf(fp,"%s\n",outbuf);
       sprintf(outbuf," Most fragmented file             : ");
       put_disp(); if (matoutput) fprintf(fp,"%s\n",outbuf);
+#if 0
       status = lib$fid_to_name(&device_descr, &badfid[0],&badfile,
          &outlen, 0, 0);
+#endif
       x = strindex(bfile,"[",255);
       outlen -=x;
       sprintf(outbuf,"    %s%.*s ( %d/%d blocks; %d fragments)\n", 
@@ -1325,6 +1329,7 @@ int undel_command(int mask)
 
 /* Ident or UIC */
   status = parse_item("ident", &id_descr, 0, &matuic, 0);
+#if 0
   if (matuic == TRUE) 
   { status = SYS$ASCTOID(&id_descr, &uic, 0);
     if ((status & 1) != 1) 
@@ -1332,6 +1337,7 @@ int undel_command(int mask)
       put_disp(); singlemsg(0,status); return(status); 
     }
   }
+#endif
   if (matuic == FALSE) 
     status = parse_item("uic", &dummy_descr, &uic, &matuic, 6);
   if ((status &1 ) != 1)
@@ -1417,9 +1423,7 @@ int undel_command(int mask)
   }
 
 /* Loop for all volumes in the set */
-#if 0
   if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_OFF);
-#endif
   while ((curvol <= maxvol) && (!ctx.end))
   { ctx.i = -1;
     if (rvt[curvol].i_open ==1) 
@@ -1546,7 +1550,6 @@ int undel_command(int mask)
 	x = 4; ans[0] = 'n';
 	if (!matlist)
 	  if(!matnoconfirm)
-#if 0
           { if (smg$enable)
             { SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_ON);
               status = SMG$READ_COMPOSED_LINE(&keyb_id, 0, &answer,
@@ -1558,7 +1561,6 @@ int undel_command(int mask)
                  &prompt, &k, 0, &modifiers, 0,0,0,0,0);
            }
 	   else
-#endif
 	    strcpy(ans,"Y");
 	if ((ans[0] == 'y') || (ans[0] == 'Y')) 
 	{  
@@ -1835,7 +1837,6 @@ next_und: status = get_next_header();
   if (matstat == TRUE) status = lib$show_timer(0,0,display_stat,0);
   return(1);
 }
-#endif
 
 int make_syslost(struct f_id *l_fid)
 /* 
@@ -1963,7 +1964,7 @@ int verify_command(int mask)
 
   progress_ind = TRUE;
   y = 0;
-#if 1
+#if 0
   status = parse_item("fix", &dummy_descr, 0, &matfix, 2);
   status = parse_item("rebuild", &dummy_descr, 0, &matreb, 2);
 #else
@@ -1976,7 +1977,6 @@ int verify_command(int mask)
     return(SS$_NOPRIV);
   }
 /* Get device name */
-#if 1
   status = parse_item("device", &device_descr, 0, &dummy , 0);
   if (status == 1) 
   { if (strindex(&device,":",64) == -1) 
@@ -1985,10 +1985,6 @@ int verify_command(int mask)
 	device_descr.dsc$w_length += 1;
       }
   }
-#else
-  memcpy(device,"dfa0:",4);
-  device_descr.dsc$w_length=4;
-#endif
 #if 0
   status = parse_item("statistics", &dummy_descr, 0, &matstat, 2);
   status = parse_item("lock", &dummy_descr, 0, &matlock, 2);
@@ -2054,9 +2050,7 @@ int verify_command(int mask)
 
   curvol = 1; size = 1;
   ctx.end = FALSE;
-#if 0
   if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_OFF);
-#endif
   multalloc = FALSE; 
   while ((curvol <= maxvol) && (!ctx.end))
   { ctx.i = -1; trigger = FALSE;
@@ -2673,9 +2667,7 @@ int build_dir_table(char *dev_str, Boolean matoutput)
 
   curvol = 1; size = 1;
   ctx.end = FALSE;
-#if 0
   if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id,&SMG$M_CURSOR_OFF);
-#endif
   while ((curvol <= maxvol) && (!ctx.end))
   { ctx.i = -1;
     if (rvt[curvol].i_open ==1) 
@@ -2927,7 +2919,6 @@ int parse_item(char *inp, struct dsc$descriptor *return_descr,
   }
   else return(1);
 }
-
 
 void fid_to_name(char * ret_dir)
 /* 

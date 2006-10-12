@@ -40,6 +40,7 @@
 #ifndef IO$M_MOVEFILE
 #define IO$M_MOVEFILE 4096
 #endif
+#include "smgdef2.h"
 
 #define globalvalue int
 #define TRUE 1
@@ -57,6 +58,8 @@
 #define SYS$GETJPIW sys$getjpiw
 #define SYS$GETSYIW sys$getsyiw
 #define SYS$GETDVIW sys$getdviw
+#define CLI$GET_VALUE cli$get_value
+#define CLI$PRESENT cli$present
 
 #define FAB _fabdef
 #define NAM _namdef
@@ -96,7 +99,6 @@ globalvalue DFU_ASSIGN, DFU_NOPRIV;
 
 int display_stat();
 
-#if 0
 int set_command(mask)
 /* 
    Set any file attribute you like!
@@ -196,6 +198,7 @@ int set_command(mask)
   status = parse_item("sequential", &dummy_descr, 0 , &matseq, 2);
 /* Ident or UIC */
   status = parse_item("ident", &id_descr, 0, &matuic, 0);
+#if 0
   if (matuic == TRUE) 
   { status = SYS$ASCTOID(&id_descr, &uic, 0);
     if ((status & 1) != 1) 
@@ -204,6 +207,7 @@ int set_command(mask)
       return(status); 
     }
   }
+#endif
   if (matuic == FALSE) 
     status = parse_item("uic", &dummy_descr, &uic, &matuic, 6);
   if ((status &1 ) != 1)
@@ -306,17 +310,12 @@ int set_command(mask)
       { sprintf(outbuf,"Modify %s ? : ",res_str);
         ans[0] = 'n'; x = 4;
         prompt.dsc$w_length = strlen(outbuf);
-#if 0
         if (smg$enable) 
           status = SMG$READ_COMPOSED_LINE(&keyb_id, 0, &answer,
             &prompt , &x, &disp1_id, &modifiers, 0,0,0,0,0);
          else
           status = SMG$READ_COMPOSED_LINE(&keyb_id, 0, &answer,
             &prompt , &x, 0 , &modifiers, 0,0,0,0,0);
-#else
-	printf("%s",prompt.dsc$a_pointer);
-	read(0,ans,254);
-#endif
         if ((ans[0] == 'a') || (ans[0] == 'A'))
         { matconfirm = FALSE; 
           ans[0] = 'y'; 
@@ -426,7 +425,6 @@ next_name:
   put_disp();
   return(1);
 }
-#endif
 
 int delete_file(unsigned short id[3], unsigned short dchan, 
                   Boolean noremove, Boolean deldir, Boolean nolog,
@@ -720,7 +718,6 @@ next_del:
   return(1);
 }
 
-#if 0
 int parse_tree(short int dchan, char *r_str, Boolean nolog)
 /* 
    Subroutine to parse for all subdirectories.
@@ -766,29 +763,39 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
   sprintf(outbuf,"%%DFU-I-PARSEDIR, Parsing directory tree...");
   put_disp();
   reclen = sizeof(sort_rec);
+#if 0
   status = sor$begin_sort(&keybuf, &reclen, 0,0,0,0,0,0,0,0);
+#endif
   status = SYS$SEARCH(&xfab , 0 , 0);
   while (status != RMS$_NMF)
   { if ((status & 1 ) != 1) 
     { sort_rec.rx_str[xnam.nam$b_rsl] = '\0';
       sprintf(outbuf,"%%DFU-W-NOSUBDIR, no subdirectories found in this tree");
       put_disp();
+#if 0
       sor$end_sort(); return(1);
+#else
+      return(1);
+#endif
     }
      else 
       for (x = xnam.nam$b_rsl; x <=254; x++) sort_rec.rx_str[x] = ' ';
     sort_rec.f_id[0] = xnam.nam$w_fid_num;
     sort_rec.f_id[1] = xnam.nam$w_fid_seq;
     sort_rec.f_id[2] = xnam.nam$w_fid_rvn;
+#if 0
     sor$release_rec(&sort_descr);
+#endif
     status = SYS$SEARCH(&xfab , 0 , 0);
   }
 /* Now sort the results */
+#if 0
   status = sor$sort_merge();
   if ((status & 1) !=1)
   { sor$end_sort(); return(status);
   }
   status = sor$return_rec(&sort_descr);
+#endif
   while (status != SS$_ENDOFFILE)
   { x = strindex (sort_rec.rx_str," ",255); sort_rec.rx_str[x] = '\0';
     if (ctrlc != 1)
@@ -796,14 +803,17 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
       put_disp();
       status = delete_directory(dchan, &sort_rec.f_id[0], 
                   (char *) &sort_rec.rx_str, nolog);
+#if 0
       status = sor$return_rec(&sort_descr);
+#endif
     }
      else status = SS$_ENDOFFILE; /* Stop at CTRL/C */
   }
+#if 0
   sor$end_sort();
+#endif
   return(1);
 }
-#endif
 
 int delete_command(mask)
 /*
@@ -813,7 +823,6 @@ int delete_command(mask)
 
 { static char device[64], dummy[7], dname[160], exp_str[255], 
     res_str[255], t_str[255];
-#if 0
   unsigned long tmp;
   struct FAB fab;
   struct NAM nam;
@@ -970,10 +979,8 @@ int delete_command(mask)
   sprintf(outbuf,"\n%%DFU-I-READY, DELETE command ready");
   put_disp();
   if (matstat) status = lib$show_timer(0,0,display_stat,0);
-#endif
 }  
 
-#if 0
 int defrag_command(mask)
 /*
    Defrag files using the XQP MOVEFILE function.
@@ -1091,7 +1098,6 @@ int defrag_command(mask)
   if (matstat) status = lib$show_timer(0,0,display_stat,0);
   return(1);
 }
-#endif
 
 int move_to_lbn(unsigned short * from, unsigned int lbn_to, 
                 unsigned short chan)
@@ -1236,7 +1242,6 @@ int movefile(char *defr_file, int flag)
   return(status);
 }
 
-#if 0
 int directory_command(mask)
 /*
    Performs the directory command
@@ -1386,7 +1391,6 @@ int directory_command(mask)
   fclose(fp);
   return(1);
 }
-#endif
 
 void create_dir (char *crea_file, int all_size)
 /*
