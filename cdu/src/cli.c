@@ -681,13 +681,14 @@ static int userfunc(long (*func)(), long argc, long argv) {
 			"addl $-0x14, %edx\n\t"
 			"movl $do_userfunc, 0x0(%edx)\n\t"
 			"movl $0x23, 0x4(%edx)\n\t"
-			"movl $0x200, 0x8(%edx)\n\t"
+			"movl $0x202, 0x8(%edx)\n\t" // check
 			"movl $0x7ffdfff0, 0xc(%edx)\n\t"
 			"movl $0x2b, 0x10(%edx)\n\t"
 			"addl $-0x14, %esp\n\t"
 			"movl $0x2b, %eax\n\t"
 			"movl %eax, %ds\n\t"
 			"movl %eax, %es\n\t"
+			"int $0xb5\n\t"
 			"iret\n\t"
 			);
 #endif
