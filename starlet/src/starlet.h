@@ -1,5 +1,8 @@
 #ifndef starlet_h
 #define starlet_h
+
+#include <zarg.h>
+
 /*
 ** System Service Entry Points.
 */
@@ -108,6 +111,7 @@ int sys$trnlnm  (unsigned int *attr, void *tabnam, void
 int sys$dassgn(unsigned short int chan);
 
 int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam,int flags);
+#define sys$assign(...) sys$assign(_buildargz5(__VA_ARGS__))
 
 int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func,
 	struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm,
@@ -170,7 +174,8 @@ int sys$truncate (struct _fab * fab, void * err, void * suc);
 int sys$update (struct _fab * fab, void * err, void * suc);
 int sys$wait (struct _fab * fab, void * err, void * suc);
 int sys$write (struct _fab * fab, void * err, void * suc);
-int sys$filescan (struct _fab * fab, void * err, void * suc);
+int sys$filescan (void *srcstr, void *valuelst, ...);
+#define sys$filescan(...) sys$filescan(_buildargz5(__VA_ARGS__))
 int sys$setddir2 (struct _fab * fab, void * err, void * suc);
 int sys$setdfprot (struct _fab * fab, void * err, void * suc);
 int sys$ssvexc (struct _fab * fab, void * err, void * suc);

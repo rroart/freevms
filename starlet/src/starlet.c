@@ -1,3 +1,4 @@
+#define sys$filescan sys$filescan_not
 #include "starlet.h"
 #include "sysdep.h"
 #include "../../linux/include/asm-i386/unistd.h"
@@ -679,7 +680,8 @@ int sys$truncate (struct _fab * fab, void * err, void * suc) { return INLINE_SYS
 int sys$update (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($update,3,fab,err,suc); }
 int sys$wait (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($wait,3,fab,err,suc); }
 int sys$write (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($write,3,fab,err,suc); }
-int sys$filescan (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($filescan,3,fab,err,suc); }
+#undef sys$filescan
+int sys$filescan (void *srcstr, void *valuelst, unsigned int *fldflags, void *auxout, unsigned short int *retlen) { return INLINE_SYSCALL1($filescan,5,srcstr,valuelst,fldflags,auxout,retlen); }
 int sys$setddir2 (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($setddir,3,fab,err,suc); }
 int sys$setdfprot (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($setdfprot,3,fab,err,suc); }
 int sys$ssvexc (struct _fab * fab, void * err, void * suc) { return INLINE_SYSCALL1($ssvexc,3,fab,err,suc); }

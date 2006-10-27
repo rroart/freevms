@@ -29,6 +29,7 @@
  * str$concat
  *
  */
+#undef str$concat
 unsigned long str$concat(struct dsc$descriptor_s* destination_string,
 	...)
 {

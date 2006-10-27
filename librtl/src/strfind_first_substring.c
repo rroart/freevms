@@ -83,6 +83,7 @@
 #include "str$routines.h"
 /************************************/
 
+#undef str$find_first_substring
 unsigned long str$find_first_substring (const struct dsc$descriptor_s *s1,
 				long *index, long *subindex,
 				struct dsc$descriptor_s *sub, ...)

@@ -24,6 +24,8 @@
  *		Change 'short' to 'unsigned short' in several places.
  */
 
+#undef _buildz
+#define _buildz(...) __VA_ARGS__, 0
 
 /*
  * Used for differences between C and C++
@@ -103,6 +105,7 @@ PROTO long str$compare_multi(
 
 PROTO unsigned long str$concat(struct dsc$descriptor_s* destination_string,
 	...);
+#define str$concat(d, ...) str$concat(d, _buildz(__VA_ARGS__))
 
 PROTO unsigned long str$copy_dx(struct dsc$descriptor_s* destination_string,
 	const struct dsc$descriptor_s* source_string);
@@ -142,6 +145,7 @@ PROTO unsigned long str$find_first_substring(
 	const struct dsc$descriptor_s* source_string,
 	long* index,
 	long* substring_index, struct dsc$descriptor_s *sub, ...);
+#define str$find_first_substring(s, i, si, sub, ...) str$find_first_substring(s, i, si, sub, _buildz(__VA_ARGS__))
 
 PROTO unsigned long str$free1_dx(struct dsc$descriptor_s* string_descriptor);
 
