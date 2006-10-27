@@ -17,6 +17,7 @@
 
 #define RMS$_RTB 98728
 #define RMS$_EOF 98938
+#define RMS$_FLK 98954
 #define RMS$_FNF 98962
 #define RMS$_NMF 99018
 #define RMS$_WCC 99050
