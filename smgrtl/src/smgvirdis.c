@@ -22,6 +22,7 @@ struct virtual_display {
   char * smg$t_buffer;
 };
 
+#undef smg$create_virtual_display
 int smg$create_virtual_display (int * number_of_rows , int * number_of_columns , long * display_id , int * display_attributes , int * video_attributes , int * character_set) {
   int status;
   $DESCRIPTOR(dsc, "sys$input");
@@ -48,6 +49,7 @@ int smg$$insert_viewport(struct virtual_display * s, long ** v) {
   return SS$_NORMAL;
 } 
 
+#undef smg$set_cursor_abs
 int smg$set_cursor_abs (long * display_id , int * start_row, int * start_column) {
   struct virtual_display * smg = *display_id;
   smg->smg$l_x = *start_column;
@@ -58,6 +60,7 @@ int smg$set_cursor_abs (long * display_id , int * start_row, int * start_column)
   return SS$_NORMAL;
 }
 
+#undef smg$set_cursor_rel
 int smg$set_cursor_rel (long * display_id , int * delta_row, int * delta_column) {
   struct virtual_display * smg = *display_id;
   smg->smg$l_x += *delta_column;
@@ -79,6 +82,7 @@ int smg$$cursor (long * display_id) {
 extern int smgunix;
 
 // check connection to paste
+#undef smg$put_chars
 int smg$put_chars ( long * display_id, void * text, int * start_row, int * start_column, int * flags, int * rendition_set, int * rendition_complement, int * character_set) {
   struct dsc$descriptor * dsc = text;
   struct virtual_display * smg = *display_id;
@@ -98,6 +102,7 @@ int smg$put_chars ( long * display_id, void * text, int * start_row, int * start
 }
 
 // check connection to paste
+#undef smg$put_line
 int smg$put_line ( long * display_id, void * text, int * line_advance, int * rendition_set, int * rendition_complement, int * flags, int * direction) {
   struct dsc$descriptor * dsc = text;
   struct virtual_display * smg = *display_id;
@@ -150,7 +155,8 @@ int smg$$display (long * display_id, int row, int column) {
 }
 
 // remap later
-int smg$change_virtual_display (int * number_of_rows , int * number_of_columns , long * display_id , int * display_attributes , int * video_attributes , int * character_set) {
+#undef smg$change_virtual_display
+int smg$change_virtual_display (long * display_id, int * number_of_rows, int * number_of_columns, int * display_attributes, int * video_attributes, int * character_set) {
   int status;
   struct virtual_display * smg = *display_id;
   *display_id = smg;
@@ -205,6 +211,7 @@ int smg$delete_chars ( long * display_id, int * number_of_characters, int * star
 }
 
 // check connection to paste. do not fill? more like erase?
+#undef smg$delete_line
 int smg$delete_line ( long * display_id, int * start_row, int * number_of_rows) {
   struct virtual_display * smg = *display_id;
   // replace later
@@ -222,6 +229,7 @@ int smg$delete_line ( long * display_id, int * start_row, int * number_of_rows) 
 }
 
 // check connection to paste
+#undef smg$insert_chars
 int smg$insert_chars ( long * display_id, void * character_string, int * start_row, int * start_column, int * rendition_set, int * rendition_complement, int * character_set) {
   struct dsc$descriptor * dsc = character_string;
   struct virtual_display * smg = *display_id;
@@ -244,6 +252,7 @@ int smg$insert_chars ( long * display_id, void * character_string, int * start_r
 }
 
 // check connection to paste
+#undef smg$insert_line
 int smg$insert_line ( long * display_id, int * start_row, void * character_string, int * direction, int * rendition_set, int * rendition_complement, int * flags, int * character_set) {
   struct dsc$descriptor * dsc = character_string;
   struct virtual_display * smg = *display_id;
@@ -295,6 +304,7 @@ int smg$erase_chars ( long * display_id, int * number_of_characters, int * start
 }
 
 // check connection to paste.
+#undef smg$erase_line
 int smg$erase_line ( long * display_id, int * start_row, int * number_of_rows) {
   struct virtual_display * smg = *display_id;
   // replace later
@@ -311,6 +321,7 @@ int smg$erase_line ( long * display_id, int * start_row, int * number_of_rows) {
 }
 
 // check connection to paste.
+#undef smg$erase_display
 int smg$erase_display ( long * display_id, int * start_row, int * start_column, int * end_row, int * end_column) {
   struct virtual_display * smg = *display_id;
   // replace later
@@ -334,10 +345,12 @@ int smg$erase_display ( long * display_id, int * start_row, int * start_column, 
   return SS$_NORMAL;
 }
 
+#undef smg$label_border
 int smg$label_border (long * display_id, void * text, int * position_code, int * units, int * rendition_set, int * rendition_complement, int * character_set) {
   return SS$_NORMAL;
 }
 
+#undef smg$put_help_text
 int smg$put_help_text (long * display_id , long * keyboard_id, void * help_topic, int * help_library, int * rendition_set, int * rendition_complement) {
   return SS$_NORMAL;
 }
@@ -351,6 +364,7 @@ int smg$delete_virtual_display (long * display_id) {
   return SS$_NORMAL;
 }
 
+#undef smg$save_physical_screen
 int smg$save_physical_screen (long * pasteboard_id, long * display_id, int * desired_start_row, int * desired_end_row) {
   return SS$_NORMAL;
 }

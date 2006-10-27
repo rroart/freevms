@@ -32,8 +32,9 @@ struct paste_virtual_display {
   long smg$l_top_display_id;
 };
 
+#undef smg$create_pasteboard
 int
-smg$create_pasteboard(unsigned int * pasteboard_id , void * output_device , signed int * number_of_pasteboard_rows , signed int * number_of_pasteboard_columns ,unsigned int * flags , unsigned int * type_of_terminal , void * device_name) {
+smg$create_pasteboard(long * pasteboard_id , void * output_device , signed int * number_of_pasteboard_rows , signed int * number_of_pasteboard_columns ,unsigned int * flags , unsigned int * type_of_terminal , void * device_name) {
   int status;
   *pasteboard_id=0;
 #if 0
@@ -77,14 +78,16 @@ smg$create_pasteboard(unsigned int * pasteboard_id , void * output_device , sign
   return SS$_NORMAL;
 }
 
+#undef smg$delete_pasteboard
 int
-smg$delete_pasteboard(unsigned int * pasteboard_id) {
+smg$delete_pasteboard(long * pasteboard_id, int * flags) {
   free(*pasteboard_id);
   return 1;
 }
 
+#undef smg$erase_pasteboard
 int
-smg$erase_pasteboard (unsigned int * pasteboard_id , void * output_device , signed int * number_of_pasteboard_rows , signed int * number_of_pasteboard_columns ,unsigned int * flags , unsigned int * type_of_terminal , void * device_name) {
+smg$erase_pasteboard (long * pasteboard_id , void * output_device , signed int * number_of_pasteboard_rows , signed int * number_of_pasteboard_columns ,unsigned int * flags , unsigned int * type_of_terminal , void * device_name) {
   // replace later
   char buf[16];
   sprintf (buf, "\33[2J");
@@ -98,6 +101,7 @@ int smg$$get_pasteboard_chan (void * pasteboard_id, short * chan) {
   return SS$_NORMAL;
 }
 
+#undef smg$paste_virtual_display
 int smg$paste_virtual_display (long * display_id, long * pasteboard_id, int * pasteboard_row, int * pasteboard_column, long * top_display_id) {
   struct paste_virtual_display * pvd = malloc (sizeof (struct paste_virtual_display));
   pvd->smg$l_display_id = *display_id;
@@ -127,10 +131,12 @@ int smg$set_cursor_mode (long * pasteboard_id, int * flags) {
   return SS$_NORMAL;
 }
 
+#undef smg$get_broadcast_message
 int smg$get_broadcast_message (long * pasteboard_id, void * message, short * message_length, short * message_type) {
   return SS$_NORMAL;
 }
 
+#undef smg$set_broadcast_trapping
 int smg$set_broadcast_trapping (long * pasteboard_id, long AST_routine, long AST_argument) {
   return SS$_NORMAL;
 }
@@ -139,10 +145,12 @@ int smg$disable_broadcast_trapping (long * pasteboard_id) {
   return SS$_NORMAL;
 }
 
+#undef smg$put_pasteboard
 int smg$put_pasteboard (long * pasteboard_id, long action_routine, long user_argument, int * flags) {
   return SS$_NORMAL;
 }
 
+#undef smg$change_pbd_characteristics
 int smg$change_pbd_characteristics (long * pasteboard_id, int * desired_width, int * width, int * desired_height, int * height, int * desired_background_color, int * background_color) {
   // bitmask problems?
   int old2;

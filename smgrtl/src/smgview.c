@@ -30,6 +30,7 @@ int smg$create_viewport (long * display_id, int * viewport_row_start, int * view
   return SS$_NORMAL;
 }
 
+#undef smg$change_viewport
 int smg$change_viewport (long * display_id, int * viewport_row_start, int * viewport_column_start, int * viewport_number_rows, int * viewport_number_columns) {
   struct viewport * v = *display_id;
   if (viewport_row_start)
@@ -43,6 +44,7 @@ int smg$change_viewport (long * display_id, int * viewport_row_start, int * view
   return SS$_NORMAL;
 }
 
+#undef smg$get_viewport_char
 int smg$get_viewport_char (long * display_id, int * viewport_row_start, int * viewport_column_start, int * viewport_number_rows, int * viewport_number_columns) {
   struct viewport * smg = *display_id;
   if (viewport_row_start)
@@ -56,6 +58,7 @@ int smg$get_viewport_char (long * display_id, int * viewport_row_start, int * vi
   return SS$_NORMAL;
 }
 
+#undef smg$scroll_viewport
 int smg$scroll_viewport (long * display_id, int * direction, int * count) {
   long * display = *display_id;
   struct viewport * smg = *display;

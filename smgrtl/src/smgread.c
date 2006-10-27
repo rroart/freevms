@@ -13,6 +13,7 @@
 
 extern int smgunix;
 
+#undef smg$read_composed_line
 int
 smg$read_composed_line(long * keyboard_id, long * key_table_id ,void * resultant_string ,void * prompt_string ,unsigned short * resultant_length , long * display_id , unsigned int * flags , void * initial_string ,signed int * timeout , unsigned int * rendition_set , unsigned int * rendition_complement , signed short int * word_terminator_code) {
   struct dsc$descriptor * in , * out;
@@ -40,6 +41,7 @@ smg$read_composed_line(long * keyboard_id, long * key_table_id ,void * resultant
   return 1;
 }
 
+#undef smg$read_string
 int
 smg$read_string(long * keyboard_id , void * resultant_string , void * prompt_string , signed int * maximum_length , unsigned int * modifiers , signed int timeout , void * terminator_set , unsigned short int * resultant_length , unsigned short int * word_terminator_code , long * display_id , void * initial_string ,unsigned int * rendition_set ,unsigned int * rendition_complement , void * terminator_string) {
   struct dsc$descriptor * in , * out;

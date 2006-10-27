@@ -13,6 +13,7 @@
 
 extern int smgunix;
 
+#undef smg$set_term_characteristics
 int smg$set_term_characteristics (long * pasteboard_id, int * on_characteristics1, int * on_characteristics2, int * off_characteristics1, int * off_characteristics2, int * old_characteristics1, int * old_characteristics2, int * on_characteristics3, int * off_characteristics3, int * old_characteristics3) {
   short chan;
   smg$$get_pasteboard_chan (*pasteboard_id, &chan);
