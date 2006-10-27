@@ -17,11 +17,11 @@ OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 starletum.a: starlet.a
 ifneq ($(ARCH),x86_64)
-	gcc -Dcompile_um -c starlet.c -o starletum.o
-	gcc -fPIC -fpic -Dcompile_um -c starlet.c -o starletum_pic.o
+	gcc -Dcompile_um -I. -c starlet.c -o starletum.o
+	gcc -fPIC -fpic -Dcompile_um -I. -c starlet.c -o starletum_pic.o
 else
-	gcc -c starlet.c -o starletum.o
-	gcc -fPIC -fpic -c starlet.c -o starletum_pic.o
+	gcc -I. -c starlet.c -o starletum.o
+	gcc -fPIC -fpic -I. -c starlet.c -o starletum_pic.o
 endif
 	gcc -fPIC -fpic -c -I. rms.c -o rms_pic.o
 	ar r starletum.a starletum.o rms.o
