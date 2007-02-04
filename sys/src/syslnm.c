@@ -381,8 +381,11 @@ asmlinkage exe$trnlnm  (unsigned int *attr, void *tabnam, void
     case LNM$_INDEX:
       //i->retlenaddr
       //memcpy(i->bufaddr,(ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,4);
+      memcpy(i->bufaddr,&(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_index,4);
+#if 0
       if (*(long*)i->bufaddr!=LNMX$C_BACKPTR)
 	return SS$_BADPARAM;
+#endif
       break;
     case LNM$_STRING:
       i->buflen=(ret.mylnmb)->lnmb$l_lnmx->lnmx$l_xlen;
