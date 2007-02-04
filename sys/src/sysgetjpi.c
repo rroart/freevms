@@ -96,7 +96,15 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
       break;
 
     case JPI$_CPUTIM:
-      *(unsigned int *)it->bufaddr=p->pcb$l_cputim;
+      *(long long *)it->bufaddr=p->pcb$l_phd->phd$l_cputim;
+      break;
+
+    case JPI$_DIRIO:
+      *(unsigned int *)it->bufaddr=p->pcb$l_phd->phd$l_diocnt;
+      break;
+
+    case JPI$_BUFIO:
+      *(unsigned int *)it->bufaddr=p->pcb$l_phd->phd$l_biocnt;
       break;
 
     }
