@@ -155,6 +155,18 @@ define verb write
         parameter p1
         parameter p2
 
+define verb if
+	cliroutine if
+
+define verb then
+	cliroutine then
+
+define verb else
+	cliroutine else
+
+define verb endif
+	cliroutine endif
+
 define verb telnet
 	image telnet_ele
 	routine main
