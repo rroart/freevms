@@ -324,7 +324,9 @@ void mmput(struct mm_struct *mm)
 		extern struct mm_struct *swap_mm;
 		if (swap_mm == mm)
 			swap_mm = list_entry(mm->mmlist.next, struct mm_struct, mmlist);
+#if 0
 		list_del(&mm->mmlist);
+#endif
 		mmlist_nr--;
 		spin_unlock(&mmlist_lock);
 		exit_mmap(mm);

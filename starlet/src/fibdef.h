@@ -108,6 +108,52 @@
 #define FIB$K_F64LEN 96
 #define FIB$C_F64LEN 96
 
+#define FIB$C_REWINDVOL 1
+#define FIB$C_POSEND 2
+#define FIB$C_NEXTVOL 3
+#define FIB$C_SPACE 4
+#define FIB$C_ILLEGAL 5
+#define FIB$C_REWINDFIL 6
+#define FIB$C_LOCK_VOL 7
+#define FIB$C_UNLK_VOL 8
+
+#define FIB$C_ENA_QUOTA 9
+#define FIB$C_DSA_QUOTA 10
+#define FIB$C_ADD_QUOTA 11
+#define FIB$C_EXA_QUOTA 12
+#define FIB$C_MOD_QUOTA 13
+#define FIB$C_REM_QUOTA 14
+#define FIB$C_USEREOT 15
+#define FIB$C_REMAP 16
+#define FIB$C_CLSEREXCP 17
+#define FIB$C_FLUSH_CACHE 18
+#define FIB$C_FORCE_MV 19
+#define FIB$C_VALIDATE_VOLUME 20
+#define FIB$C_VALIDATE_FILE 21
+#define FIB$C_UPDATE_VOL_PROFILE 22
+#define FIB$C_UPDATE_FIL_PROFILE 23
+#define FIB$C_CHECK_PROTECTION 24
+#define FIB$C_ADD_THREAD 25
+#define FIB$C_REM_THREAD 26
+#define FIB$C_EXA_THREAD 27
+#define FIB$C_CHECK_PATH 28
+#define FIB$C_ENA_DW 29
+#define FIB$C_DSA_DW 30
+#define FIB$K_MTALEN 28
+#define FIB$C_MTALEN 28
+
+#define FIB$C_FID_CACHE 1
+#define FIB$C_EXTENT_CACHE 2
+#define FIB$C_QUOTA_CACHE 3
+#define FIB$C_BFRD_CACHE 4
+#define FIB$C_VBN_CACHE 5
+
+#define FIB$M_ALL_MEM 0x1
+#define FIB$M_ALL_GRP 0x2
+#define FIB$M_MOD_USE 0x4
+#define FIB$M_MOD_PERM 0x8
+#define FIB$M_MOD_OVER 0x10
+
 struct _fibdef {
     unsigned fib$l_acctl;
     unsigned short fib$w_fid_num;
