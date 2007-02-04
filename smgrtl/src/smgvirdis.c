@@ -20,6 +20,7 @@ struct virtual_display {
   int smg$l_x;
   int smg$l_y;
   char * smg$t_buffer;
+  long * smg$l_pasteboard;
 };
 
 #undef smg$create_virtual_display
@@ -46,6 +47,11 @@ int smg$create_virtual_display (int * number_of_rows , int * number_of_columns ,
 int smg$$insert_viewport(struct virtual_display * s, long ** v) {
   *v = s;
   s->smg$l_viewport = v;
+  return SS$_NORMAL;
+} 
+
+int smg$$get_viewport(struct virtual_display * s, long ** v) {
+  *v = s->smg$l_viewport;
   return SS$_NORMAL;
 } 
 
@@ -98,6 +104,7 @@ int smg$put_chars ( long * display_id, void * text, int * start_row, int * start
   char *buf = smg->smg$t_buffer + x + y * smg->smg$l_number_of_columns;
   memcpy (buf, dsc->dsc$a_pointer, dsc->dsc$w_length);
   smg->smg$l_x += dsc->dsc$w_length;
+  smg$$pasteboard_update(smg->smg$l_pasteboard);
   return SS$_NORMAL;
 }
 
@@ -117,6 +124,17 @@ int smg$put_line ( long * display_id, void * text, int * line_advance, int * ren
     smg->smg$l_y += *line_advance;
   else
     smg->smg$l_y++;
+  if (smg->smg$l_y > smg->smg$l_number_of_rows) {
+    y = smg->smg$l_y = smg->smg$l_number_of_rows;
+    x = 0;
+    y--;
+    int lines = 1;
+    char *buf = smg->smg$t_buffer + x + lines * smg->smg$l_number_of_columns;
+    char * c = smg->smg$t_buffer;
+    memcpy (c, buf, (smg->smg$l_number_of_rows - lines) * smg->smg$l_number_of_columns);
+    memset (c + (smg->smg$l_number_of_rows - lines) * smg->smg$l_number_of_columns, 0, smg->smg$l_number_of_columns);
+  }
+  smg$$pasteboard_update(smg->smg$l_pasteboard);
   return SS$_NORMAL;
 }
 
@@ -138,7 +156,7 @@ int smg$$display (long * display_id, int row, int column) {
   int xsize = smg->smg$l_number_of_columns;
   int ysize = smg->smg$l_number_of_rows;
   if (smg->smg$l_viewport)
-    smg$get_viewport_char (smg, &y, &x, &ysize, &xsize);
+    smg$get_viewport_char (&smg, &y, &x, &ysize, &xsize);
   x--;
   y--;
   char buf[2048];
@@ -381,4 +399,9 @@ int smg$ring_bell (long * display_id) {
 
 int smg$repaint_screen (long * pasteboard_id) {
   return SS$_NORMAL;
+}
+
+int smg$$set_display_pasteboard(long * display_id, long * pasteboard_id) {
+  struct virtual_display * smg = display_id;
+  smg->smg$l_pasteboard = pasteboard_id;
 }

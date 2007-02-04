@@ -110,6 +110,7 @@ int smg$paste_virtual_display (long * display_id, long * pasteboard_id, int * pa
   //later top_display
   pvd->smg$l_link = **(long **)pasteboard_id;
   **(long **)pasteboard_id = pvd;
+  smg$$set_display_pasteboard(*display_id, pasteboard_id);
   smg$$display(*display_id, *pasteboard_row, *pasteboard_column);
   return SS$_NORMAL;
 }
@@ -166,3 +167,16 @@ int smg$change_pbd_characteristics (long * pasteboard_id, int * desired_width, i
 int smg$flush_buffer (long * pasteboard_id) {
   return smg$end_pasteboard_update (pasteboard_id);
 }
+
+int smg$$pasteboard_update (long * pasteboard_id) {
+  if (pasteboard_id == 0)
+    return 0;
+  // use this routine in smg$end_pasteboard_update
+  struct pasteboard * smg = *pasteboard_id;
+  struct paste_virtual_display * pvd = smg->smg$l_virtual_display;
+  for (; pvd ; pvd = pvd->smg$l_link) {
+    smg$$display(pvd->smg$l_display_id, pvd->smg$l_pasteboard_row, pvd->smg$l_pasteboard_column);
+  }
+  return SS$_NORMAL;
+}
+

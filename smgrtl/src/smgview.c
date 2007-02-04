@@ -32,7 +32,8 @@ int smg$create_viewport (long * display_id, int * viewport_row_start, int * view
 
 #undef smg$change_viewport
 int smg$change_viewport (long * display_id, int * viewport_row_start, int * viewport_column_start, int * viewport_number_rows, int * viewport_number_columns) {
-  struct viewport * v = *display_id;
+  struct viewport * v;
+  smg$$get_viewport (*display_id, &v);
   if (viewport_row_start)
     v->smg$l_viewport_row_start = *viewport_row_start;
   if (viewport_column_start)
@@ -46,7 +47,8 @@ int smg$change_viewport (long * display_id, int * viewport_row_start, int * view
 
 #undef smg$get_viewport_char
 int smg$get_viewport_char (long * display_id, int * viewport_row_start, int * viewport_column_start, int * viewport_number_rows, int * viewport_number_columns) {
-  struct viewport * smg = *display_id;
+  struct viewport * smg;
+  smg$$get_viewport (*display_id, &smg);
   if (viewport_row_start)
     *viewport_row_start = smg->smg$l_viewport_row_start;
   if (viewport_column_start)
@@ -60,8 +62,8 @@ int smg$get_viewport_char (long * display_id, int * viewport_row_start, int * vi
 
 #undef smg$scroll_viewport
 int smg$scroll_viewport (long * display_id, int * direction, int * count) {
-  long * display = *display_id;
-  struct viewport * smg = *display;
+  struct viewport * smg;
+  smg$$get_viewport (*display_id, &smg);
   int dir = SMG$M_UP;
   if (direction)
     dir = *direction;
@@ -69,12 +71,12 @@ int smg$scroll_viewport (long * display_id, int * direction, int * count) {
   if (count)
     cnt = *count;
   if (dir & SMG$M_UP)
-    smg->smg$l_viewport_row_start--;
+    smg->smg$l_viewport_row_start-=cnt;
   if (dir & SMG$M_DOWN)
-    smg->smg$l_viewport_row_start++;
+    smg->smg$l_viewport_row_start+=cnt;
   if (dir & SMG$M_LEFT)
-    smg->smg$l_viewport_column_start--;
+    smg->smg$l_viewport_column_start-=cnt;
   if (dir & SMG$M_RIGHT)
-    smg->smg$l_viewport_column_start++;
+    smg->smg$l_viewport_column_start+=cnt;
   return SS$_NORMAL;
 }
