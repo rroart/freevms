@@ -1,4 +1,4 @@
-%x lexmacro
+%x lexparam
 
 %{
 
@@ -100,6 +100,10 @@
   int last_eq=0;
 
   int input_line = 0;
+
+  int get_symbol_value = 0;
+
+  int checkq = 0;
 
 #define LEXINIT_INVALID 3
   int which_lex=LEXINIT_INVALID;
@@ -307,8 +311,10 @@ string		\"([^\"\n\f]|\"\")*\"
 illstring	'([^']|'')*'
 name		{letter}({letter}|{digit})*
 delim   "="|":"|","|"/"|"."|"<"|"["|"("|"-"|"*"|"+"|"^"|">"|"]"|")"|";"
+delim2   "="|":"|","|"."|"<"|"["|"("|"-"|"*"|"+"|"^"|">"|"]"|")"|";"
 others	  \"|"#"|"&"|"?"|"@"|\\|"`"|"{"|"|"|"}"|"~"
 any        {digit}|{letter}|{delim}|"%"
+any2        {digit}|{letter}|{delim2}|"%"
 space      [ \t]
 /*optarg "+"|"-"
 hexdigit [0-9a-f]
@@ -330,6 +336,13 @@ hexdigit [0-9a-f]
 {space}+          { }
 
 {delim}				{
+  if (*yytext != '/' && checkq) {
+    if ( (checkq & 2 ) == 0 || *yytext != '=' ) {
+      BEGIN(lexparam);
+      yyless(0);
+      continue;
+    }
+  }
 #if 0
   if (skip_mode && if_mode == 0) {
 	 yyless(yyleng);
@@ -375,6 +388,10 @@ hexdigit [0-9a-f]
   }
 #endif
   long long l = atoll(yytext);
+#ifdef __x86_64__
+  memcpy(yylval.type_node_p.string, yytext, yyleng);
+  yylval.type_node_p.string[yyleng] = 0;
+#endif
   yylval.type_node_p.is_integer = 1;
   yylval.type_node_p.p1 = l;
 
@@ -383,6 +400,11 @@ hexdigit [0-9a-f]
 }
 
 {name}|"."{name}"."				{
+  if (*yytext != '/' && checkq) {
+    BEGIN(lexparam);
+    yyless(0);
+    continue;
+  }
  do_name:
 #if 0
   if (skip_mode && if_mode == 0) {
@@ -401,6 +423,7 @@ hexdigit [0-9a-f]
     if (macromode)
       goto out_do_quote;
 #if 1
+    yylval.type_node_p.is_integer = 0;
     yylval.type_node_p.p1 = yyleng;
     memcpy (yylval.type_node_p.string, yytext, yyleng);
 #else
@@ -419,6 +442,7 @@ hexdigit [0-9a-f]
     {
     onlytname:
 #if 1
+      yylval.type_node_p.is_integer = 0;
       yylval.type_node_p.p1 = yyleng;
       memcpy (yylval.type_node_p.string, yytext, yyleng);
       //yylval.type_node_p=build_string(strlen(yytext),yytext);
@@ -428,6 +452,8 @@ hexdigit [0-9a-f]
 	yylval.type_node_p=copy_node(build_string(strlen(yytext),yytext));
 #endif
       opexpcnt++; // for unary op workaround
+      if ( ! get_symbol_value )
+        return T_NAME;
         extern int vms_mm;
         if (vms_mm) {
 	  struct dsc$descriptor sym, val;
@@ -463,13 +489,19 @@ hexdigit [0-9a-f]
 	}
       return T_NAME;
     }
+  yylval.type_node_p.is_integer = 0;
   yylval.type_node_p.p1 = yyleng;
   memcpy (yylval.type_node_p.string, yytext, yyleng);
   opexpcnt=0; // for unary op workaround
   return key;
 }
 
-"/"{name}				{
+{name}				{
+  if (*yytext != '/' && checkq) {
+    BEGIN(lexparam);
+    yyless(0);
+    continue;
+  }
  do_name2:
 #if 0
   if (skip_mode && if_mode == 0) {
@@ -480,6 +512,13 @@ hexdigit [0-9a-f]
   {}
 #endif
 
+#if 0
+  char * line = yytext + 1;
+  int linlen = yyleng - 1;
+  while (*line==' ')
+    line++, yyleng--;
+#endif
+
   int key=0;
 
   downcase (yytext);
@@ -488,8 +527,14 @@ hexdigit [0-9a-f]
     if (macromode)
       goto out_do_quote2;
 #if 1
+#if 1
+     yylval.type_node_p.is_integer = 0;
      yylval.type_node_p.p1 = yyleng;
      memcpy (yylval.type_node_p.string, yytext, yyleng);
+#else
+     yylval.type_node_p.p1 = linlen;
+     memcpy (yylval.type_node_p.string, line, linlen);
+#endif
 #else
     yylval.type_node_p = maybe_get_identifier(yytext);
     if (yylval.type_node_p==0)
@@ -506,18 +551,25 @@ hexdigit [0-9a-f]
     {
     onlytname2:
 #if 1
+#if 1
+      yylval.type_node_p.is_integer = 0;
       yylval.type_node_p.p1 = yyleng;
       memcpy (yylval.type_node_p.string, yytext, yyleng);
       //yylval.type_node_p=build_string(strlen(yytext),yytext);
+#else
+     yylval.type_node_p.p1 = linlen;
+     memcpy (yylval.type_node_p.string, line, linlen);
+#endif
 #else
       yylval.type_node_p = maybe_get_identifier(yytext);
       if (yylval.type_node_p==0)
 	yylval.type_node_p=copy_node(build_string(strlen(yytext),yytext));
 #endif
       opexpcnt++; // for unary op workaround
-      return T_NAME;
+      return T_QUALIFIER;
     }
   /*yylval.type_str=strdup(yytext);*/
+  yylval.type_node_p.is_integer = 0;
   yylval.type_node_p.p1 = yyleng;
   memcpy (yylval.type_node_p.string, yytext, yyleng);
   //yylval.type_node_p=build_string(strlen(yytext),yytext);
@@ -575,7 +627,12 @@ hexdigit [0-9a-f]
 parse_this(myline);
 		  t = TREE_VALUE(t);
 #else
+#if 0 
 		  int t = parse_this_expr (myline);
+#else
+                  int t = 0;
+                  exit(42);
+#endif
 #endif
 		  push_cond_stack(0);
 #if 1
@@ -626,6 +683,21 @@ parse_this(myline);
   yylval.type_node_p.p1 = yyleng;
   memcpy(yylval.type_node_p.string, yytext, yyleng);
   return T_STRING;
+}
+
+<lexparam>{any2}+			{
+  BEGIN(0);
+  if (skip_mode && if_mode == 0) {
+    yyless(yyleng);
+    break;
+  }
+  struct mymacro * m;
+  /* store that string w/o '' */
+
+  yylval.type_node_p.is_integer = 0;
+  yylval.type_node_p.p1 = yyleng;
+  memcpy(yylval.type_node_p.string, yytext, yyleng);
+  return T_NAME;
 }
 
 ![^\n\f]*[\n\f]			/* ignore trailing comment */ input_line++ ; 
@@ -823,6 +895,7 @@ int something_that_uses_yyunput(void) {
   return 0;
 }
 
+#if 0
 int parse_this_expr (char * this) {
   if (!quiet_flag) printf("parse this %s\n",this);
   expr_parse++;
@@ -848,7 +921,7 @@ int parse_this_expr (char * this) {
   return c_parser_binary_expression3 (&dcl_parser, 0);
 #endif
 }
-
+#endif
 typedef char chartype;
 
 char *
@@ -1103,3 +1176,13 @@ return yylval.type_node_p;
 int cliconditional(int key) {
   return key==K_IF || key==K_THEN || key == K_ELSE || key == K_ENDIF;
 }
+
+#if 0
+void set_start(int value) {
+  yy_start = value;
+}
+
+char get_yytext() {
+  return *yytext;
+}
+#endif

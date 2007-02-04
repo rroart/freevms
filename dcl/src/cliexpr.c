@@ -35,8 +35,6 @@ int truthvalue_false_node = 0;
 
 int truthvalue_true_node = 0;
 
-c_parser dcl_parser;
-
 /* Read in and lex a single token, storing it in *TOKEN.  */
 
 static void
@@ -985,21 +983,20 @@ c_parser_binary_expression (c_parser *parser, struct c_expr *after)
 }
 
 static struct c_expr c_parser_expression (c_parser * p) {
-  return c_parser_binary_expression(p, 0);
-}
-
-void * getparser() {
-  return &dcl_parser;
-}
-
-void initparser() {
-  memset(&dcl_parser, 0, sizeof(c_parser));
-  extern signed int include_stack_ptr;
-  include_stack_ptr = 0;
+  extern int get_symbol_value;
+  get_symbol_value = 1;
+  struct c_expr c = c_parser_binary_expression(p, 0);
+  extern int get_symbol_value;
+  get_symbol_value = 0;
+  return c;
 }
 
 void * c_parser_binary_expression2 (int a, int b) {
+  extern int get_symbol_value;
+  get_symbol_value = 1;
   struct c_expr c = c_parser_binary_expression (getparser(), 0);
+  extern int get_symbol_value;
+  get_symbol_value = 0;
   if (c.value.is_integer)
     printf("INT %d\n",c.value.p1);
   else
@@ -1008,14 +1005,22 @@ void * c_parser_binary_expression2 (int a, int b) {
 }
 
 void * c_parser_binary_expression3 (long a, int b) {
+  extern int get_symbol_value;
+  get_symbol_value = 1;
   struct c_expr c = c_parser_binary_expression (a, 0);
+  extern int get_symbol_value;
+  get_symbol_value = 0;
   if (c.value.is_integer)
     return c.value.p1 & 1;
   return 0;
 }
 
 void * c_parser_binary_expression4 (int a, int b) {
+  extern int get_symbol_value;
+  get_symbol_value = 1;
   struct c_expr c = c_parser_binary_expression (getparser(), 0);
+  extern int get_symbol_value;
+  get_symbol_value = 0;
   if (c.value.is_integer)
     return c.value.p1 & 1;
   return 0;
@@ -1023,7 +1028,11 @@ void * c_parser_binary_expression4 (int a, int b) {
 
 // check boundary
 void * c_parser_binary_expression2_as_string (int a, int b, char * s) {
+  extern int get_symbol_value;
+  get_symbol_value = 1;
   struct c_expr c = c_parser_binary_expression (getparser(), 0);
+  extern int get_symbol_value;
+  get_symbol_value = 0;
   if (c.value.is_integer)
     sprintf(s, "%d\n", c.value.p1);
   else

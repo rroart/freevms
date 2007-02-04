@@ -154,7 +154,15 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 
   char * end = line + len;
 
+#if 1
+  cli_scan_bytes(line, len);
+#endif
+#if 1
+  initparser();
+#endif
+
   int i;
+#if 0
   for (i=len;i;i--)
     if (line[i]>='A' && line[i]<='Z') line[i]+=32;
 
@@ -171,11 +179,19 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
   }
   //printf("line %x %s\n",line,line);
   //printf("endverb %x %s\n",endverb,endverb);
+#endif
+
+  int toktype;
+  char token[256];
+  int toklen;
+  toktype = cli_token(token, &toklen);
 
   i = 0;
   int found = 0;
 
-  found = cdu_search_next(0, CDU$C_VERB, line, endverb-line, &i);
+  found = cdu_search_next(0, CDU$C_VERB, token, toklen, &i);
+
+  int endverb = 0;
 
   *cur_cdu=&cdu_root[i];
   if (!found)
@@ -185,36 +201,52 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
   struct _cdu * my = &my_cdu_root[my_alloc_cdu(CDU$C_VERB)];
   *my_cdu=my;
 
+#if 0
   line=endverb;
+#endif
 
   int pn = 1;
 
+#if 0
   char * endunit = 0;
+#endif
 
-  while (line<end) {
+  extern int checkq;
 
+  checkq = 1;
+  toktype = cli_token(token, &toklen);
+  checkq = 0;
+  while (toktype) {
+
+#if 0
     while (*line==' ')
       line++;
+#endif
 
+#if 0
     endunit = line;
+#endif
 
-    if (*line=='/') {
+    if (toktype == '/') { // T_QUALIFIER
+      toktype = cli_token(token, &toklen);
+#if 0
       line++;
       endunit++;
       while (*endunit!=' ' && *endunit!='/' && *endunit!='=' && endunit < end)
 	endunit++;
+#endif
       int q = my_alloc_cdu(CDU$C_QUALIFIER);
       int n = my_alloc_cdu(CDU$C_NAME);
       my_cdu_root[q].cdu$l_name = n;
       struct _cdu * np = &my_cdu_root[n];
-      memcpy(np->cdu$t_name,line,endunit-line);
+      memcpy(np->cdu$t_name,token,toklen);
       my_cdu_root[q].cdu$l_next=my->cdu$l_qualifiers;
       my->cdu$l_qualifiers=q;
 
       struct _cdu * cdu = (*cur_cdu);
       int s = 0;
       int q2 = cdu->cdu$l_qualifiers;
-      found = cdu_search_next(q2, CDU$C_QUALIFIER, line, endunit-line, &q2);
+      found = cdu_search_next(q2, CDU$C_QUALIFIER, token, toklen, &q2);
       if (q2)
 	s = cdu_root[q2].cdu$l_syntax;
       if (s) {
@@ -224,26 +256,42 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 	  *cur_cdu=&cdu_root[i];
       }
 
+#if 0
       line = endunit;
       while (*line==' ')
 	line++;
       endunit = line;
+#endif
 
-      if (*endunit == '=') {
+      checkq = 3;
+      toktype = cli_token(token, &toklen);
+      checkq = 0;
+
+      if (toktype == '=') {
+#if 0
 	line++;
 	endunit++;
 	while (*endunit!=' ' && *endunit!='/' && endunit < end)
 	  endunit++;
+#endif
+	toktype = cli_token(token, &toklen);
+
 	int v = my_alloc_cdu(CDU$C_NAME);
 	my_cdu_root[q].cdu$l_value=v;
 	my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
 	struct _cdu * np = &my_cdu_root[v];
-	memcpy(np->cdu$t_name,line,endunit-line);
-      }
+	memcpy(np->cdu$t_name,token,toklen);
+      } else
+	continue; // check
 
     } else {
+      // param handling
+      // just swallow until space or /, mostly
+      // later do a refined thingie with $infile, $rest etc
+#if 0
       while (*endunit!=' ' && *endunit!='/' && endunit < end)
 	endunit++;
+#endif
 
       struct _cdu * cdu = (*cur_cdu);
       int p,n,t,v;
@@ -262,7 +310,7 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 	int type = i;
 
 	int keyw = cdu_root[type].cdu$l_keywords;
-	found = cdu_search_next(keyw, CDU$C_KEYWORD, line, endunit-line, &keyw);
+	found = cdu_search_next(keyw, CDU$C_KEYWORD, token, toklen, &keyw);
 
 	if (cdu_root[keyw].cdu$l_syntax) {
 	  
@@ -299,13 +347,18 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 	v = my_alloc_cdu(CDU$C_NAME);
 	struct _cdu * vp = &my_cdu_root[v];
 	my_cdu_root[p].cdu$l_value = v;
-	memcpy(vp->cdu$t_name,line,endunit-line);
+	memcpy(vp->cdu$t_name,token,toklen);
 	my_cdu_root[p].cdu$l_next=my->cdu$l_parameters;
 	my->cdu$l_parameters=p;
 	pn++;
       }
     }
+#if 0
     line = endunit;
+#endif
+    checkq = 1;
+    toktype = cli_token(token, &toklen);
+    checkq = 0;
   }
 
   return CLI$_NORMAL;
