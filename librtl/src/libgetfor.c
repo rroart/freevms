@@ -10,7 +10,11 @@
 
 // use clicall for this some time in the future
 
+#ifdef __i386__
 static void ** comdsc = 0x3f00000c;
+#else
+static void ** comdsc = 0x3f000018; 
+#endif
 
 int lib$get_foreign(void * resultant_string, void * prompt_string, short int * resultant_length, int flags) {
   // fix str$ use later

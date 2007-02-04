@@ -27,6 +27,13 @@
 #include <mmg_routines.h>
 #include <linux/slab.h>
 
+#undef OLDINT
+#define OLDINT
+
+#ifdef __x86_64__
+#undef OLDINT
+#endif
+
 // mmg$credel
 // mmg$crepag
 // mmg$cretva
@@ -141,6 +148,11 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
   }
   wsle->wsl$pq_va=0;
   *(unsigned long*)pte=0;
+#ifdef OLDINT
+  mmg$dallocpfn(pfn);
+#else
+  mmg$dallocpfn(pfn-mem_map);
+#endif
 
  out:
 

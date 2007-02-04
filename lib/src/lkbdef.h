@@ -60,10 +60,10 @@ struct _lkb {
   unsigned short int lkb$w_size;
   unsigned char lkb$b_type;
   unsigned char lkb$b_rmod;
-  unsigned int lkb$l_pid;
-  unsigned int lkb$l_ast;
-  unsigned int lkb$l_astprm;
-  unsigned int lkb$l_kast;
+  unsigned long lkb$l_pid;
+  unsigned long lkb$l_ast;
+  unsigned long lkb$l_astprm;
+  unsigned long lkb$l_kast;
   unsigned long lkb$l_cplastadr;
   unsigned long lkb$l_blkastadr;
   unsigned int lkb$l_flags;
