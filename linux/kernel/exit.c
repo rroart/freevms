@@ -27,8 +27,11 @@
 #include <asm/mmu_context.h>
 
 #include <system_data_cells.h>
+#include <ipldef.h>
 #include <phddef.h>
 #include <exe_routines.h>
+#include <internals.h>
+#include <ttyucbdef.h>
 
 extern void sem_exit (void);
 extern struct task_struct *child_reaper;
@@ -488,6 +491,13 @@ fake_volatile:
 	exit_sighand(tsk);
 	exit_thread();
 
+	if (strncmp(&ctl$gl_pcb->pcb$t_terminal[0],"opa0:",5) == 0) {
+	  // temp fix
+	  // check
+	  struct _tty_ucb * u = opa$ar_ucb0;
+	  u->ucb$q_tt_state = 0;
+	}
+
 	if (current->leader)
 		disassociate_ctty(1);
 
@@ -508,6 +518,7 @@ fake_volatile:
 	    remque(tsk,dum);
 #endif
 	//	SOFTINT_RESCHED_VECTOR; // maybe not, instead:
+	vmslock(&SPIN_SCHED,IPL$_SCHED);
 	sch$sched(0);
 	//sch$resched();
 	printk("before bug\n");
