@@ -172,10 +172,13 @@ struct fibdef {
                     } fib$r_fid_rvn_fields;
                 } fib$r_fid_rvn_overlay;
             } fib$r_fid_fields;
+#if 0
+	// gave offset problem
         __struct  {                     /* File ID fields for ISO 9660      */
             unsigned short int fib$w_fid_dirnum; /*	Directory number of File-Id */
             unsigned int fib$l_fid_recnum; /*	Record number of File-ID    */
             } fib$r_fid_iso_9660_fields;
+#endif
         } fib$r_fid_overlay;
     __union  {
         unsigned short int fib$w_did [3]; /* DIRECTORY ID                   */
@@ -190,10 +193,13 @@ struct fibdef {
                     } fib$r_did_rvn_fields;
                 } fib$r_did_rvn_overlay;
             } fib$r_did_fields;
+#if 0
+	// gave offset problem
         __struct  {                     /* Directory ID fields for ISO 9660 */
             unsigned short int fib$w_did_dirnum; /*	Directory number of File-Id */
             unsigned int fib$l_did_recnum; /*	Record number of File-ID    */
             } fib$r_did_iso_9660_fields;
+#endif
         } fib$r_did_overlay;
     unsigned int fib$l_wcc;             /* WILD CARD CONTEXT                */
     __union  {
