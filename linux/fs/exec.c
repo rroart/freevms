@@ -1145,7 +1145,7 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 #ifdef CONFIG_VMS
 	file = rms_open_exec(filename);
 #endif
-	if (file) goto fcb_found;
+	if (((long)file) >= 0) goto fcb_found;
 
 #ifndef CONFIG_VMS
 	file = open_exec(filename);
