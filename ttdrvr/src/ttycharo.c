@@ -119,6 +119,7 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
   case 13:
     {
       bd_txt[bd->tty$w_rb_txtoff++]=*c;
+      bd_txt[bd->tty$w_rb_txtoff-1]=10;
       bd_txt[bd->tty$w_rb_txtoff]=0;
     }
     break;
@@ -135,8 +136,16 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
   if (u->ucb$l_devchar2&TT2$M_LOCALECHO)
     con$startio((int)*chr, u, (int)*CC);
 
+#if 1
+  // check read 1 kludge
+  struct _irp * temp_irp = lt->ucb$l_tl_phyucb->ucb$l_irp;
+  struct _irp * irp = u->ucb$l_irp;
+  if (irp->irp$l_qio_p2 == 1)
+    goto do_reqcom;
+#endif
+
   // use tt_term etc instead?
-  if (*c==13) {
+  if (*c==13 || *c==10) {
     tty->tty$v_st_eol=1;
 #if 0
     // not yet? later? gets problems with nmap double 0xd 0xd
@@ -144,6 +153,8 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
     i->irp$q_tt_state &= ~TTY$M_ST_READ;
     tty->ucb$q_tt_state &= ~TTY$M_ST_READ; // here?
 #endif
+  do_reqcom:
+    {}
     struct _irp * irp = u->ucb$l_irp;
     int bcnt = 0;
     if (irp) {
