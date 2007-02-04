@@ -1,7 +1,8 @@
+FREEVMS_RELEASE = 0_3_1
 VERSION = 2
 PATCHLEVEL = 4
 SUBLEVEL = 18
-EXTRAVERSION = -FreeVMS_0_3_0
+EXTRAVERSION = -FreeVMS_$(FREEVMS_RELEASE)
 
 KERNELRELEASE=$(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
 
@@ -290,6 +291,7 @@ linux/include/linux/version.h: ./Makefile.kernel
 	@echo \#define UTS_RELEASE \"$(KERNELRELEASE)\" > .ver
 	@echo \#define LINUX_VERSION_CODE `expr $(VERSION) \\* 65536 + $(PATCHLEVEL) \\* 256 + $(SUBLEVEL)` >> .ver
 	@echo '#define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))' >>.ver
+	@echo \#define FREEVMS_RELEASE \"$(FREEVMS_RELEASE)\" >> .ver
 	@mv -f .ver $@
 
 comma	:= ,

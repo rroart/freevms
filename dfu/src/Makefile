@@ -25,16 +25,16 @@ dfu_tables.c: ../../cdu/src/cdu dfu_tables.cld
 
 i386/dfu${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL)
 	install -d i386
-	gcc -g -static $(OBJS) $(VMSLIBS) $(EXTERNAL) $(SMGRTL) $(SORRTL) -ldl -lelf -o i386/dfu${NOEXE}
+	gcc -g -static $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL) $(VMSLIBS) -ldl -lelf -o i386/dfu${NOEXE}
 
 i386/dfu${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL)
 	install -d i386
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(EXTERNAL) $(SMGRTL) $(SORRTL) /usr/lib/libdl.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dfu${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL) $(VMSLIBS) /usr/lib/libdl.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dfu${EXE}
 
 um/dfu${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL)
 	install -d um
-	gcc $(FLAGS) -g $(OBJS) $(VMSLIBSUM) $(EXTERNAL) $(SMGRTL) $(SORRTL) -ldl -lelf -o um/dfu${NOEXE}
+	gcc $(FLAGS) -g $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL) $(VMSLIBSUM) -ldl -lelf -o um/dfu${NOEXE}
 
 um/dfu${EXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL) 
 	install -d um
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(EXTERNAL) $(SMGRTL) $(SORRTL) /usr/lib/libdl.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/dfu${EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL) $(VMSLIBSUM) /usr/lib/libdl.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o um/dfu${EXE}

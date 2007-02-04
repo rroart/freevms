@@ -673,6 +673,7 @@ next:
 	    current_vector == IA32_VMSSYSCALL_VECTOR  ||
 	    current_vector == IA32_VMSSYSCALL_VECTOR1  ||
 	    current_vector == IA32_VMSSYSCALL_VECTOR3 ||
+	    current_vector == IA32_VMSSYSCALL_VECTOR0 ||
 	    current_vector == 0xb0 ||
 	    current_vector == 0xb1 ||
 	    current_vector == 0xb2 ||

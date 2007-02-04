@@ -15,8 +15,8 @@ clean:
 	rm *.o um/* i386/*
 
 install: all
-	install -d ../../rootum/vms$$common/sysexe
-	install -d ../../rooti386/vms$$common/sysexe
+	install -d ../../rootum/vms"$$"common/sysexe
+	install -d ../../rooti386/vms"$$"common/sysexe
 	install i386/sda ../../rooti386/vms"$$"common/sysexe
 
 ifeq ($(ARCH),x86_64)

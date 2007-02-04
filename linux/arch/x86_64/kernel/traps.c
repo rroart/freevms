@@ -895,6 +895,7 @@ void __init trap_init(void)
 	set_system_gate(IA32_VMSSYSCALL_VECTOR1,&vms_system_call1);
 #endif
 	set_system_gate(IA32_VMSSYSCALL_VECTOR3,&vms_system_call3); /* will need to figure out where the user mode setup is */
+	set_system_gate(IA32_VMSSYSCALL_VECTOR0,&vms_system_call0); /* will need to figure out where the user mode setup is */
 	//              set_intr_gate(TEST_VECTOR,&test_code);
 	set_intr_gate(ASTDEL_VECTOR,&astdel_vector);
 	set_intr_gate(RESCHED_VECTOR,&resched_vector);

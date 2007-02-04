@@ -415,6 +415,7 @@ void __init init_IRQ(void)
 		    vector != IA32_VMSSYSCALL_VECTOR  &&
 		    vector != IA32_VMSSYSCALL_VECTOR1  &&
 		    vector != IA32_VMSSYSCALL_VECTOR3 &&
+		    vector != IA32_VMSSYSCALL_VECTOR0 &&
 		    vector != 0xb0 &&
 		    vector != 0xb1 &&
 		    vector != 0xb2 &&

@@ -14,8 +14,8 @@ clean:
 	rm *.o um/* i386/*
 
 install: all
-	install -d ../../rootum/vms$$common/sysexe
-	install -d ../../rooti386/vms$$common/sysexe
+	install -d ../../rootum/vms"$$"common/sysexe
+	install -d ../../rooti386/vms"$$"common/sysexe
 	install i386/authorize ../../rooti386/vms"$$"common/sysexe
 	install i386/sysuaf.dat ../../rooti386/vms"$$"common/sysexe
 

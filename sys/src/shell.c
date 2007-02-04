@@ -721,3 +721,15 @@ unsigned long ctl$ag_clidata P1PP ;
 unsigned long ctl$gl_fixuplnk P1PP ;
 unsigned long ctl$gl_iaflnkptr P1PP ;
 #endif
+
+#ifdef __x86_64__
+int __attribute__ ((section (".vsyscall_5"))) exe$syscall() {
+  __asm__ __volatile__(
+		       "pushq %r10\n\t"
+		       "movq %r10,%rcx\n\t"
+		       "int $0x85\n\t"
+		       "popq %r10\n\t"
+		       "ret\n\t"
+		       );
+}
+#endif

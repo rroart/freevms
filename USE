@@ -1,4 +1,4 @@
-Current as of FreeVMS 0.3.0.
+Current as of FreeVMS 0.3.1.
 	Warning: there may be some more unstability compared to 0.2.3
 	due to changes in AST system and modes to resemble VMS more.
 	Now also changes in interrupts and multiprocessing.
@@ -28,6 +28,9 @@ When booting bochs, there are mainly 4 usable choices:
  x freevms.iomm.default                                                    x
  x freevms.iomm.ods2.dcl                                                   x
  x freevms.iomm.ods2.default                                               x
+and also:
+ x freevms.iomm.bash-static                                                x
+ x freevms.iomm.sash                                                       x
 
 The ODS-2 named are of course with ODS-2, and the rest with ext2 root.
 The DCL choice jumps straight into DCL (just as if you had a conversational

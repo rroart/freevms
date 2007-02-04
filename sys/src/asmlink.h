@@ -26,4 +26,5 @@ asmlinkage int vms_system_call(void);
 asmlinkage int vms_system_call1(void);
 asmlinkage int vms_system_call2(void);
 asmlinkage int vms_system_call3(void);
+asmlinkage int vms_system_call0(void);
 #endif

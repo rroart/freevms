@@ -69,7 +69,7 @@
 #include <misc_routines.h>
 
 struct _pb mypb;
-struct _sb mysb;
+struct _sb mysb = { sb$t_nodename : "MYNODE" };
 struct _pdt mypdt;
 struct _pb otherpb;
 struct _sb othersb;

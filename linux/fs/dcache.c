@@ -1306,7 +1306,7 @@ asmlinkage long sys_getcwd(char *buf, unsigned long size)
 {
   // check. quick and dirty. fix later
 	int error = 0;
-	extern char * default_buffer;
+	extern char default_buffer[];
 	memcpy(buf, default_buffer, size);
 	return error;
 }

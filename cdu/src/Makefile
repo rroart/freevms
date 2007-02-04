@@ -18,7 +18,7 @@ install: all
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
 OBJS_CDU = parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o
-OBJS = cli.o cli2.o clilex.o elf.o
+OBJS = cli.o cli2.o cli3.o clilex.o elf.o
 OBJS_CDU_PIC = $(addprefix pic/,$(OBJS_CDU))
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 

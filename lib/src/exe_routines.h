@@ -256,6 +256,7 @@ unsigned exe$setddir(struct dsc$descriptor *newdir,unsigned short *oldlen,struct
 unsigned exe$connect(struct _rabdef *rab);
 unsigned exe$disconnect(struct _rabdef *rab);
 unsigned exe$get(struct _rabdef *rab);
+unsigned exe$read(struct _rabdef *rab);
 unsigned exe$put(struct _rabdef *rab);
 unsigned exe$display(struct _fabdef *fab);
 unsigned exe$close(struct _fabdef *fab);

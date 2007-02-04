@@ -343,6 +343,10 @@ ENTRY(ret_from_fork)
  */ 			 		
 
 ENTRY(system_call)
+#	subq $0x8, %rsp
+#	movq %rcx, (%rsp)
+#	movq $exe$syscall, %rcx
+#	sysretq
 	swapgs
 	syscall_save_sp 0	
 	movq	%rsp,PDAREF(pda_oldrsp) 
@@ -606,6 +610,29 @@ ENTRY(exe_cli)
 	andl $0xfffffdff, 0x10(%rsp)
 	iretq
 				
+ENTRY(vms_system_call0)
+	RSP0PANIC
+	testl $3,8(%rsp)	# from kernel?
+	je   1f
+	swapgs
+1:
+	save_sp 0	
+	regtrapi $1,$0
+	sti
+	SAVE_ARGS 8,0
+	movq  %rax,ORIG_RAX-ARGOFFSET(%rsp)
+#if 0	
+	movq  %rcx,RIP-ARGOFFSET(%rsp)
+#endif	
+	GET_CURRENT(%rcx)
+	testl $PT_TRACESYS,tsk_ptrace(%rcx)
+	jne vms_tracesys
+	cmpq $__NR_syscall_max,%rax
+	ja vms_badsys
+	movq %r10,%rcx
+	call *sys_call_table(,%rax,8)  # XXX:	 rip relative
+	jmp vms_syscall_common
+	
 ENTRY(vms_system_call3)
 	RSP0PANIC
 	testl $3,8(%rsp)	# from kernel?
