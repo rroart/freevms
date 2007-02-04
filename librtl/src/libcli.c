@@ -19,15 +19,14 @@ int lib$set_symbol(void * symbol , void * value_string, long * table_type_indica
   return SS$_NORMAL;
 }
 
-int lib$get_symbol(void * symbol , void * resultant_string, long * table_type_indicator) {
+int lib$get_symbol(void * symbol , void * resultant_string, short * resultant_length, long * table_type_indicator) {
   struct _clidef1 cli_,*cli=&cli_;
   struct _clidef2 * cli2 = cli;
   cli->cli$b_rqtype=CLI$K_CLISERV;
   cli->cli$w_servcod=CLI$K_GETSYM;
   memcpy(&cli2->cli$q_namdesc,symbol,8);
   memcpy(&cli2->cli$q_valdesc,resultant_string,8);
-  sys$cli(cli);
-  return SS$_NORMAL;
+  return sys$cli(cli);
 }
 
 int lib$delete_symbol(void * symbol, long * table_type_indicator) {
