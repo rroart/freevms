@@ -252,7 +252,9 @@ inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
 		 * link in first so that swapoff can see swap entries.
 		 */
 		pprev = &tmp->rde$ps_va_list_flink;
+		spin_lock(&mm->page_table_lock);
 		retval = copy_page_range(mm, current->mm, tmp);
+		spin_unlock(&mm->page_table_lock);
 
 		if (retval)
 			goto fail_nomem;
