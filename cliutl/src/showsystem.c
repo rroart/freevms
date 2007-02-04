@@ -15,10 +15,14 @@ static char * states[]={"NONE","COLPG","MWAIT","CEF","PFW","LEF","LEFO","HIB","H
 
 show_system(){
 int i;
-struct item_list_3 lst[14], syilst[2];
+struct item_list_3 lst[14], syilst[4];
 char scsnode[16];
 char procname[15];
 char proclen;
+char version[16];
+int versionlen;
+unsigned long long boottime;
+int boottimelen;
 unsigned long upid,epid;
 unsigned long upidlen,epidlen;
  unsigned long state,statelen;
@@ -30,14 +34,34 @@ int jpistatus;
  int sts;
  int retscsnodelen;
 
+unsigned long long now;
+char timestr[23]; 
+$DESCRIPTOR(atimenow, timestr); 
+char timestr2[23]; 
+$DESCRIPTOR(atimenow2, timestr2); 
+
+sys$gettim(&now);
+sys$asctim(0,&atimenow,&now,0);
+
 syilst[0].buflen=16;
-syilst[0].item_code=SYI$_SCSNODE;
-syilst[0].bufaddr=scsnode;
-syilst[0].retlenaddr=&retscsnodelen;
-syilst[1].buflen=0;
-syilst[1].item_code=0;
+syilst[0].item_code=SYI$_VERSION;
+syilst[0].bufaddr=version;
+syilst[0].retlenaddr=&versionlen;
+syilst[1].buflen=16;
+syilst[1].item_code=SYI$_BOOTTIME;
+syilst[1].bufaddr=&boottime;
+syilst[1].retlenaddr=&boottimelen;
+syilst[2].buflen=16;
+syilst[2].item_code=SYI$_SCSNODE;
+syilst[2].bufaddr=scsnode;
+syilst[2].retlenaddr=&retscsnodelen;
+syilst[3].buflen=0;
+syilst[3].item_code=0;
 
  sts=sys$getsyi(0,0,0,syilst,0,0,0);
+
+long long delta = boottime - now;
+sys$asctim(0,&atimenow2,&delta,0);
 
 lst[0].buflen=15;
 lst[0].item_code=JPI$_PRCNAM;
@@ -73,7 +97,8 @@ lst[7].bufaddr=&pageg;
 lst[7].retlenaddr=&pageglen;
 lst[8].buflen=0;
 lst[8].item_code=0;
- printf(" FreeVMS V0.0  on node %6s  NN-OOO-2003 PP:QQ:RR.SS  Uptime  TT XX:YY:ZZ\n",scsnode);
+// printf(" FreeVMS V0.0  on node %6s  NN-OOO-2003 PP:QQ:RR.SS  Uptime  TT XX:YY:ZZ\n",scsnode);
+ printf(" FreeVMS V%s on node %6s  %s  Uptime  %s\n", version, scsnode, timestr, timestr2);
  printf("  Pid    Process Name    State  Pri      I/O       CPU       Page flts  Pages\n");
 
 do {
