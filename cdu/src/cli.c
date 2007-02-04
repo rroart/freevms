@@ -276,11 +276,51 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 #endif
 	toktype = cli_token(token, &toklen);
 
-	int v = my_alloc_cdu(CDU$C_NAME);
-	my_cdu_root[q].cdu$l_value=v;
-	my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
-	struct _cdu * np = &my_cdu_root[v];
-	memcpy(np->cdu$t_name,token,toklen);
+	if (toktype == '(') {
+
+	  toktype = cli_token(token, &toklen);
+
+	  int v = my_alloc_cdu(CDU$C_NAME);
+	  my_cdu_root[q].cdu$l_value=v;
+	  my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
+	  struct _cdu * np = &my_cdu_root[v];
+	  memcpy(np->cdu$t_name,token,toklen);
+
+	  toktype = cli_token(token, &toklen);
+	  if (toktype != ',')
+	    return 0;
+
+	  toktype = cli_token(token, &toklen);
+
+	  while (toktype && toktype != ')') {
+	    int v2 = my_alloc_cdu(CDU$C_NAME);
+	    my_cdu_root[v].cdu$l_next=v2;
+#if 0
+	    my_cdu_root[q].cdu$l_value=v2;
+#endif
+	    my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
+	    struct _cdu * np = &my_cdu_root[v2];
+	    memcpy(np->cdu$t_name,token,toklen);
+
+	    v = v2;
+
+	    toktype = cli_token(token, &toklen);
+	    if (toktype == ')')
+	      continue;
+	    if (toktype != ',')
+	      return 0;
+	    
+	    toktype = cli_token(token, &toklen);
+	  }
+
+	} else {
+
+	  int v = my_alloc_cdu(CDU$C_NAME);
+	  my_cdu_root[q].cdu$l_value=v;
+	  my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
+	  struct _cdu * np = &my_cdu_root[v];
+	  memcpy(np->cdu$t_name,token,toklen);
+	}
       } else
 	continue; // check
 
@@ -515,7 +555,7 @@ unsigned int cli$dispatch(int userarg){
   dflnam.dsc$w_length=pathlen+len+4;
   dflnam.dsc$a_pointer=image;
 
-  hdrbuf=malloc(512);
+  hdrbuf=malloc(512); // little leak
   memset(hdrbuf, 0, 512);
 
   sts=sys$imgact(&aname,&dflnam,hdrbuf,0,0,0,0,0);
