@@ -51,6 +51,10 @@
 #include<linux/bitops.h>
 #include<linux/elf.h>
 
+#if 0
+#include "cliparse.h"
+#endif
+
 #define oz_util_h_console stdout
 
 #define CMDSIZ 4096
@@ -503,6 +507,9 @@ static unsigned long int_logout                 (unsigned long h_input, unsigned
 static unsigned long int_goto                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_help                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_if                   (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_endif                   (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_else                   (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long int_then                  (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_script               (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_set_default          (int userarg);
 static unsigned long int_set_prompt          (int userarg);
@@ -521,7 +528,6 @@ static Command intcmd[] = {
 	0, "logout",               int_logout,                 NULL, "[<status>]", 
 	0, "exit"  ,               int_exit,                 NULL, "[<status>]", 
 	0, "goto",                 int_goto,                 NULL, "<label>",
-	0, "if",                   int_if,                   NULL, "<integervalue> <statement ...>", 
 	0, "@",               int_script,               NULL, "<script_name> [<args> ...]", 
 	// the following are really not internal
 	// waiting for dcltables.exe
@@ -542,6 +548,9 @@ struct cli_struct {
 struct cli_struct cliroutines[]={
 {  "define",  int_create_logical_name,   },
 {  "create_name_table",  int_create_logical_table,   },
+{  "else",              int_else },
+{  "endif",              int_endif },
+{  "if",              int_if },
 {  "set_default",          int_set_default,           },
 {  "set_prompt",           int_set_prompt,            },
 {  "set_process",          int_set_process,           },
@@ -555,6 +564,7 @@ struct cli_struct cliroutines[]={
 {  "show_symbol",          show_symbol, },
 {  "delete_symbol",          delete_symbol, },
 {  "stop", int_stop, },
+{  "then",              int_then },
 {  "write", int_write, },
 { 0, 0 , },
 };
@@ -582,7 +592,7 @@ const char oz_s_logname_defaulttables[] = "DEFAULT";
 const char oz_sys_copyright[] = "C";
 
 int check_vms_mm(int argc, char ** argv) {
-  if (argc==2 && 0==strncmp(argv[1],"not",3))
+  if (argc>=2 && 0==strncmp(argv[1],"not",3))
     return 0;
   int retlenaddr;
   int mem=0;
@@ -603,10 +613,20 @@ int vms_mm;
 
 static char prompt[32]="$ ";
 
+void * gcmdbuf;
+
+long if_then = 0;
+long if_then_cmd = 0;
+
+extern int skip_mode;
+extern int do_skip;
+extern int if_mode;
+
 unsigned long main (int argc, char *argv[])
 
 {
   char cmdbuf[CMDSIZ], *p;
+  gcmdbuf = cmdbuf;
   int i;
   unsigned long cmdlen, sts;
   unsigned long h_event;
@@ -684,6 +704,15 @@ unsigned long main (int argc, char *argv[])
       continue;
     }
 
+    if (strstr (argv[i], ".com")) {
+      void * myargv[2];
+      myargv[0]=argv[i];
+      myargv[1]=0;
+      int_script(h_s_input, h_s_output, h_s_error, "startup", 0, 1, myargv);
+      script_exit=1;
+      continue;
+    }
+
     if (strcmp (argv[i], "not") == 0)
       continue;
 
@@ -695,6 +724,10 @@ unsigned long main (int argc, char *argv[])
     fprintf (h_s_console, "%s\n", oz_sys_copyright);
     startendmsg ("start");
   }
+
+#if 0
+  initparser();
+#endif
 
   /* Set up handle to timer */
 
@@ -778,6 +811,8 @@ unsigned long main (int argc, char *argv[])
 
   while (!exited && (h_s_input != 0)) {
 
+    if (if_then)
+      goto do_if_then;
     /* If control-Y was pressed, wipe out scripts and return to top level */
 
     if (ctrly_hit) {
@@ -889,6 +924,7 @@ unsigned long main (int argc, char *argv[])
 #endif
       }
 
+    do_if_then:
       cmdlen=strlen(cmdbuf)-1;
       //      bcopy(p,cmdbuf,cmdlen);
       //      free(p);
@@ -900,6 +936,20 @@ unsigned long main (int argc, char *argv[])
 	  struct dsc$descriptor d;
 	  d.dsc$a_pointer=cmdbuf;
 	  d.dsc$w_length=cmdlen;
+	  if_then = 0;
+#if 1
+	  cli_scan_string(gcmdbuf);
+#endif
+#if 1
+	  initparser();
+#endif
+	  int key = clilex();
+	  do_skip=0;
+	  if (skip_mode && if_mode == 0 && !cliconditional(key)) {
+	    do_skip=1;
+	  }
+	  if (do_skip)
+	    goto dontexec;
 	  sts = cli$dcl_parse(&d,get_cdu_root(),0,0,0);
 	  if (sts&1)
 	    sts = cli$dispatch(0);
@@ -907,11 +957,60 @@ unsigned long main (int argc, char *argv[])
 	  *cur_cdu=0;
 	  if (sts&1)
 	    goto dontexec;
+	  key = clilex();
+	  if (key == '=') {
+#if 1
+	    cli_scan_string(gcmdbuf);
+#endif
+#if 1
+	    initparser();
+#endif
+	    clilex();
+	    clilex();
+	    char s[256];
+	    c_parser_binary_expression2_as_string (0, 0, s);
+
+#if 0	    
+	    if (!vms_mm) goto no1;
+	    sts = sys$assign (&o, &chan, 0, 0, 0);
+	    if ((sts&1)==0)
+	      return sts;
+	  no1:
+#endif
+#if 0
+	    if (!vms_mm)
+	      printf("%s\n",o2.dsc$a_pointer);
+	    else
+	      sts = sys$qio (0, chan, IO$_WRITEVBLK, 0, 0, 0, o2.dsc$a_pointer, o2.dsc$w_length, 0, 0, 0, 0);
+	    if ((sts&1)==0)
+	      return sts;
+#endif
+	
+#if 0    
+	    if (!vms_mm) goto no2;
+	    sts = sys$dassgn (chan);
+	    if ((sts&1)==0)
+	      return sts;
+#endif
+	    
+	  no2:
+	    {}
+	    char * eq = strchr(gcmdbuf, '=');
+	    int len = ((long)eq) - ((long)gcmdbuf);
+	    char sname[len+1];
+	    memcpy(sname, gcmdbuf, len);
+	    sname[len] = 0;
+	    set_symbol(sname, s);
+	    goto dontexec;
+	  }
 	}
 	fprintf(stderr, "Could not find %s in cld, doing it the old way\n",p);
 	sts = execute (p);						/* execute the command line */
       dontexec:
 	if (sts != SS$_BRANCHSTARTED) symbol -> ivalue = sts;			/* save the new status */
+	if (if_then) {
+	  memcpy (cmdbuf, if_then_cmd, strlen(if_then_cmd));
+	}
       }
     }
   }
@@ -3705,21 +3804,39 @@ static unsigned long int_write (int userarg)
   sts = cli$get_value(&p, &o, &retlen);
   o.dsc$w_length=retlen;
 
+  // not useable yet
   sts = cli$get_value(&p2, &o2, &retlen2);
   o2.dsc$w_length=retlen2;
 
+#if 1
+  cli_scan_string(gcmdbuf);
+#endif
+#if 1
+  initparser();
+#endif
+  clilex();
+  clilex();
+  c_parser_binary_expression2 (0, 0);
+
+  if (!vms_mm) goto no1;
   sts = sys$assign (&o, &chan, 0, 0, 0);
   if ((sts&1)==0)
     return sts;
 
-  sts = sys$qio (0, chan, IO$_WRITELBLK, 0, 0, 0, o2.dsc$a_pointer, o2.dsc$w_length, 0, 0, 0, 0);
+ no1:
+  if (!vms_mm)
+    printf("%s\n",o2.dsc$a_pointer);
+    else
+  sts = sys$qio (0, chan, IO$_WRITEVBLK, 0, 0, 0, o2.dsc$a_pointer, o2.dsc$w_length, 0, 0, 0, 0);
   if ((sts&1)==0)
     return sts;
 
+  if (!vms_mm) goto no2;
   sts = sys$dassgn (chan);
   if ((sts&1)==0)
     return sts;
 
+ no2:
   return (sts);
 }
 
@@ -3870,27 +3987,66 @@ static unsigned long int_if (unsigned long h_input, unsigned long h_output, unsi
   int usedup;
   unsigned long exp, sts;
 
-  /* There must be at least a value and one word to the statement */
+  char * then = strstr (gcmdbuf, "then");
 
-  if (argc < 2) {
-    fprintf (h_error, "oz_cli: missing expression and/or statement\n");
-    return (SS$_IVPARAM);
+  if (then)
+    *then = 0;
+
+  int is_true = 0;
+
+  if (skip_mode==0) {
+#if 1
+    cli_scan_string(gcmdbuf);
+#endif
+#if 1
+    initparser();
+#endif
+    clilex();
+    int t = is_true = c_parser_binary_expression4 (0, 0);
+    if (then == 0) {
+      push_cond_stack(0);
+      skip_mode=get_cond_stack()|((~t) & 1);
+      push_cond_stack(0);
+    }
+  } else {
+    if (then)
+      return SS$_NORMAL;
+    push_cond_stack(0);
+    skip_mode=1;
+    push_cond_stack(0);
   }
 
-  /* Convert the value to an integer */
-
-  exp = oz_hw_atoi (argv[0], &usedup);
-  if (argv[0][usedup] != 0) {
-    fprintf (h_error, "oz_cli: invalid integer value %s\n", argv[0]);
-    return (SS$_BADPARAM);
+  if (skip_mode == 0 && is_true && then) {
+    if_then = is_true;
+    if_then_cmd = then + 5;
   }
 
-  /* If value is non-zero, execute the statement, else nop */
-
-  sts = SS$_BRANCHSTARTED;
-  if (exp) sts = exechopped (argc - 1, argv + 1, NULL, NULL, 0);
+  return SS$_NORMAL;
   return (sts);
 }
+
+static unsigned long int_else (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+
+{
+  skip_mode=get_prev_cond_stack()|!get_cond_stack();
+  //fprintf(stderr,"pel %s\n",yytext); fflush(stderr); 
+  // yyless(5/*yyleng*/);
+  //fprintf(stderr,"pel2 %s\n",yytext); fflush(stderr);
+}
+
+static unsigned long int_endif (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+
+{
+  pop_cond_stack();
+  pop_cond_stack();
+}
+
+static unsigned long int_then (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
+
+{
+  // nothing yet
+}
+
 
 /************************************************************************/
 /*									*/
@@ -4149,6 +4305,7 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
     char * routine = "main";
     func = elf_get_symbol(image, routine);
 #endif
+    // check argv is now dead?
     if (func == 0) {
       printf("func is 0, error\n");
       goto no_func;
