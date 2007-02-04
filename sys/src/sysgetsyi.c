@@ -16,6 +16,8 @@
 
 #include<linux/sched.h>
 
+#include<linux/version.h>
+
 extern struct _sb mysb;
 
 asmlinkage int exe$getsyi(unsigned int efn, unsigned int *csidadr, void *nodename, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long astprm) {
@@ -32,8 +34,16 @@ asmlinkage int exe$getsyi(unsigned int efn, unsigned int *csidadr, void *nodenam
 
   while (it->item_code) {
     switch (it->item_code) {
+    case SYI$_VERSION:
+      memcpy(it->bufaddr, FREEVMS_RELEASE, strlen(FREEVMS_RELEASE));
+      break;
+
     case SYI$_SCSNODE:
       memcpy(it->bufaddr,&mysb.sb$t_nodename,15);
+      break;
+
+    case SYI$_BOOTTIME:
+      memcpy(it->bufaddr,&exe$gq_boottime,8);
       break;
 
     case SYI$_LASTFLD:
