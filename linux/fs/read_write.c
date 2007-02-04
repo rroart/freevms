@@ -254,6 +254,9 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 #if 0
 	printk("sys_read end %x %x %x %x\n",ctl$gl_pcb,fd,sts,retcount);
 #endif
+#define RMS$_EOF 98938
+	if (sts == RMS$_EOF)
+	  return retcount;
 	if (sts & 1) {
 	  return retcount;
 	} else
