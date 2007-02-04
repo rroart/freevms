@@ -459,7 +459,9 @@ void exttwo_read_attrib(struct _fcb * fcb, struct _atrdef * atrp) {
     }
     atrp++;
   }
-  //  vfree(head);
+#if 1
+  kfree(head);
+#endif
 }
 
 void exttwo_write_attrib(struct _fcb * fcb, struct _atrdef * atrp) {
@@ -542,7 +544,9 @@ void exttwo_write_attrib(struct _fcb * fcb, struct _atrdef * atrp) {
     atrp++;
   }
   ext2_sync_inode(x2p->current_vcb, fcb);
-  //  vfree(head);
+#if 1
+  kfree(head);
+#endif
 }
 
 void * exttwo_getvcb(void) {
@@ -1073,6 +1077,7 @@ unsigned exttwo_deaccessfile(struct _fcb *fcb)
   printk("Deaccessing file (%x) reference %d\n",fcb->cache.hashval,fcb->cache.refcount);
 #endif
   head = exttwo_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
+  kfree(head);
   sts=iosb.iosb$w_status;
 
   return SS$_NORMAL;
@@ -1140,7 +1145,7 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   unsigned sts=SS$_NORMAL;
   unsigned wrtflg=1;
   struct _fcb *fcb;
-  struct ext2_inode *head;
+  struct ext2_inode *head = 0;
   struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
   struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
   unsigned short *reslen=irp->irp$l_qio_p3;
@@ -1182,6 +1187,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
     } else {
       sts = SS$_BADIRECTORY;
     }
+#if 1
+    // check leak remaining
+    kfree(head);
+#endif
   }
 
 #if 0
@@ -1204,6 +1213,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   }
   if (sts & 1) {
   } else {
+#if 1
+    // check leak remaining
+    kfree(head);
+#endif
     printk("Accessfile status %d\n",sts);
     iosbret(irp,sts);
     return sts;
@@ -1212,6 +1225,10 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
   if (fcb==NULL) {
     fcb=exttwo_fcb_create2(head, FID_TO_INO(fid), &sts);
   }
+#if 1
+  // check leak remaining
+  kfree(head); 
+#endif
   if (fcb == NULL) { iosbret(irp,sts); return sts; }
   set_ccb_wind(x2p->io_channel, fcb); // temp fix
 

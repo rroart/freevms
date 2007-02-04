@@ -36,6 +36,7 @@
 #include <linux/highuid.h>
 #include <linux/quotaops.h>
 #include <linux/module.h>
+#include <linux/slab.h>
 
 #include <misc.h>
 
@@ -995,7 +996,13 @@ void ext2_read_inode (struct _vcb * vcb, struct _fcb * inode, int i_ino, void **
 		goto bad_inode;
 	}
 	offset &= (EXT2_BLOCK_SIZE(sb) - 1);
+#if 0
 	raw_inode = (struct ext2_inode *) (data + offset);
+#else
+	raw_inode = kmalloc (sizeof (struct ext2_inode), GFP_KERNEL);
+	memcpy (raw_inode, data + offset, sizeof (struct ext2_inode));
+	kfree (data);
+#endif
 #if 1
 	if (ret)
 	  *ret = raw_inode;
@@ -1266,6 +1273,7 @@ static int ext2_update_inode(struct _vcb * vcb, struct _fcb * inode, int do_sync
 #if 0
 	brelse (bh);
 #endif
+	kfree(data);
 	return err;
 }
 

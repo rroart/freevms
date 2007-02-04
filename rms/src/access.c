@@ -1039,9 +1039,10 @@ unsigned deaccessfile(struct _fcb *fcb)
   head = f11b_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
   sts=iosb.iosb$w_status;
   if (VMSLONG(head->fh2$l_filechar) & FH2$M_MARKDEL) {
+    kfree(head);
     return deallocfile(fcb);
   }
-
+  kfree(head);
   return SS$_NORMAL;
 }
 
@@ -1150,6 +1151,7 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
     } else {
       sts = SS$_BADIRECTORY;
     }
+    kfree(head);
   }
 
   if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
@@ -1164,6 +1166,7 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
   sts=iosb.iosb$w_status;
   if (sts & 1) {
   } else {
+    kfree(head);
     printk("Accessfile status %d\n",sts);
     iosbret(irp,sts);
     return sts;
@@ -1172,6 +1175,7 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
   if (fcb==NULL) {
     fcb=fcb_create2(head,&sts);
   }
+  kfree(head);
   if (fcb == NULL) { iosbret(irp,sts); return sts; }
   set_ccb_wind(xqp->io_channel, fcb); // temp fix
 
@@ -1370,6 +1374,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	//sts = accessfile(vcb,&idxfid,&idxfcb,flags & 1);
 	idxhd = f11b_read_block(vcbdev,VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),1, &iosb);
 	idxfcb=fcb_create2(idxhd,&sts);
+	kfree(idxhd);
 #if 0
 	idxfcb=vmalloc(sizeof(struct _fcb));
 	memset(idxfcb,0,sizeof(struct _fcb));

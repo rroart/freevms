@@ -544,7 +544,7 @@ unsigned search_ent(struct _fcb * fcb,
 {
   struct _iosb iosb;
     unsigned sts,curblk;
-    char *searchspec,*buffer;
+    char *searchspec,*buffer = 0;
     int searchlen,version,wildcard,wcc_flag;
     struct _fibdef *fib = (struct _fibdef *) fibdsc->dsc$a_pointer;
     direct_lookups++;
@@ -621,6 +621,8 @@ unsigned search_ent(struct _fcb * fcb,
                     newblk = hiblk = loblk = curblk;
             }
             if (newblk != curblk) {
+ 	        kfree(buffer);
+		buffer = 0;
                 sts = deaccesschunk(0,0,1);
                 if ((sts & 1) == 0) return sts;
                 curblk = newblk;
@@ -628,6 +630,10 @@ unsigned search_ent(struct _fcb * fcb,
         }
     }
 
+    if (buffer) {
+      kfree(buffer);
+      buffer = 0;
+    }
 
     /* Now to read sequentially to find entry... */
 
@@ -724,9 +730,17 @@ unsigned search_ent(struct _fcb * fcb,
                         if (cmp == MAT_EQ) {
                             switch (action) {
                                 case 0:
-                                    return return_ent(fcb,curblk,dr,de,fib,reslen,resdsc,wildcard);
+				  {
+                                    int ret = return_ent(fcb,curblk,dr,de,fib,reslen,resdsc,wildcard);
+				    kfree(buffer);
+				    return ret;
+				  }
                                 case 1:
-                                    return delete_ent(fcb,curblk,dr,de,buffer,eofblk);
+				  {
+                                    int ret = delete_ent(fcb,curblk,dr,de,buffer,eofblk);
+				    kfree(buffer);
+				    return ret;
+				  }
                                 default:
                                     sts = SS$_DUPFILENAME;
                                     break;
@@ -761,6 +775,8 @@ unsigned search_ent(struct _fcb * fcb,
                last one in which case we can't defer an insert any longer!! */
 
             if ((sts & 1) == 0 || action != 2 || (cmp != MAT_GT && curblk < eofblk)) {
+	        kfree(buffer);
+		buffer = 0;
                 unsigned dests = deaccesschunk(0,0,1);
                 if ((dests & 1) == 0) {
                     sts = dests;
@@ -768,6 +784,7 @@ unsigned search_ent(struct _fcb * fcb,
                 }
                 curblk++;
             } else {
+	      // check leak
                 if (version == 0) version = 1;
                 return insert_ent(fcb,eofblk,curblk,buffer,dr,NULL,
                                   searchspec,searchlen,version,(struct _fiddef *) & fib->fib$w_fid_num);

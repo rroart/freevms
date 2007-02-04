@@ -516,10 +516,12 @@ unsigned do_parse(struct _fabdef *fab,struct WCCFILE **wccret)
 {
     int sts;
     struct WCCFILE *wccfile = 0;
-    char *fna;
+    char *fna = 0;
     int fns;
     sts = search_log_repl(fab->fab$l_fna,&fna,&fns);
     if ((sts&1)==0) {
+      if (fna)
+	rms_std$deanonpgdsiz(fna, 128);
       fna=fab->fab$l_fna;
       fns=fab->fab$b_fns;
     }

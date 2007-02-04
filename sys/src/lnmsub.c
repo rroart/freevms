@@ -124,15 +124,20 @@ int lnm$searchlog(struct struct_lnm_ret * r,int loglen, char * lognam, int tabna
     status=lnm$presearch(r, hash, nt);
   }
 
-  if ((status&1)==0) 
+  if ((status&1)==0) {
+    kfree(nt);
+    kfree(rt);
     return status;
+  }
 
   lnm$setup(r, rt, loglen, lognam,nt);
   lnm$table(r, rt, nt);
   lnm$contsearch(r, ahash, hash, nt);
 #ifdef LNM_DEBUG 
   lnmprintf("searchlogexit\n");
-#endif
+#endif 
+  kfree(nt);
+  kfree(rt);
   return status;
 }
 
@@ -231,6 +236,7 @@ int lnm$firsttab(struct struct_lnm_ret * r,int  tabnamlen,  char * tablename) {
 #endif
   lnm$setup(r,MYRT,tabnamlen,tablename,MYNT);
   lnmfree(MYRT);
+  lnmfree(MYNT);
 }
 
 int lnm$setup(struct struct_lnm_ret * r,struct struct_rt * RT,  int tabnamlen, char * tablename, struct struct_nt * nt) {

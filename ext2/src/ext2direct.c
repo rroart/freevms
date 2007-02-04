@@ -561,7 +561,7 @@ unsigned exttwo_search_ent(struct _fcb * fcb,
 {
   struct _iosb iosb;
     unsigned sts,curblk;
-    char *searchspec,*buffer;
+    char *searchspec,*buffer = 0;
     int searchlen,version,wildcard,wcc_flag;
     struct _fibdef *fib = (struct _fibdef *) fibdsc->dsc$a_pointer;
 
@@ -643,15 +643,24 @@ unsigned exttwo_search_ent(struct _fcb * fcb,
 
                         if (sts == MAT_EQ) {
                             switch (action) {
-                                case 0:
-                                    return exttwo_return_ent(fcb,curblk,dr,0,fib,reslen,resdsc,wildcard);
+			    case 0:
+			      {
+                                    int ret = exttwo_return_ent(fcb,curblk,dr,0,fib,reslen,resdsc,wildcard);
+				    kfree(buffer);
+				    return ret;
+			      }
                                 case 1:
-                                    return exttwo_delete_ent(fcb,curblk,dr,0,buffer,eofblk);
+				  {
+                                    int ret = exttwo_delete_ent(fcb,curblk,dr,0,buffer,eofblk);
+				    kfree(buffer);
+				    return ret;
+				  }
                                 default:
                                     sts = SS$_DUPFILENAME;
                                     break;
                             }
                         } else {
+			  // check leak
                             if (sts != MAT_EQ && action == 2) {
                                 return exttwo_insert_ent(fcb,eofblk,curblk,buffer,dr,0,
                                                   searchspec,searchlen,version,(struct _fiddef *) & fib->fib$w_fid_num);
@@ -686,6 +695,8 @@ unsigned exttwo_search_ent(struct _fcb * fcb,
                last one in which case we can't defer an insert any longer!! */
 
             if ((sts & 1) == 0 || action != 2 || (sts != MAT_GT && curblk < eofblk)) {
+  	        kfree(buffer);
+		buffer = 0;
                 unsigned dests = deaccesschunk(0,0,1);
                 if ((dests & 1) == 0) {
                     sts = dests;
@@ -694,6 +705,7 @@ unsigned exttwo_search_ent(struct _fcb * fcb,
                 curblk++;
 		sts = 1;
             } else {
+	      // check leak
                 if (version == 0) version = 1;
                 return exttwo_insert_ent(fcb,eofblk,curblk,buffer,dr,NULL,
                                   searchspec,searchlen,version,(struct _fiddef *) & fib->fib$w_fid_num);
