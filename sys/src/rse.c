@@ -507,6 +507,9 @@ int sch$waitk(struct _pcb * p, struct _wqh * wq) {
     panic("toc\n");
   }
 #endif
+#if 0
+  // check
+  // check
   {
     struct _pcb * p3=p->pcb$l_sqfl;
     remque(p,0);
@@ -515,6 +518,7 @@ int sch$waitk(struct _pcb * p, struct _wqh * wq) {
       sch$gl_comqs&=(~(1 << p->pcb$b_pri));
     }
   }
+#endif
   insque(p,&wq->wqh$l_wqfl); // better wait with waitqs? had pcb queue corruption
   // and: insque for ceb waiting etc is now down in syswait.c
   wq->wqh$l_wqcnt++;
