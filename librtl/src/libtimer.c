@@ -22,9 +22,9 @@ static int set_context(long * context) {
   int len = 0;
   item_code = JPI$_CPUTIM;
   status = lib$getjpi (&item_code, 0, 0, &context[1], 0, &len);
-  item_code = JPI$_BIOCNT;
+  item_code = JPI$_BUFIO;
   status = lib$getjpi (&item_code, 0, 0, &context[2], 0, &len);
-  item_code = JPI$_DIOCNT;
+  item_code = JPI$_DIRIO;
   status = lib$getjpi (&item_code, 0, 0, &context[3], 0, &len);
   item_code = JPI$_PAGEFLTS;
   status = lib$getjpi (&item_code, 0, 0, &context[4], 0, &len);
