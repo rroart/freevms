@@ -98,6 +98,11 @@ bufpost(struct _irp * i) {
   //printk("doing bufpost\n");
   /* do iosb soon? */
 
+  if (i->irp$l_sts & IRP$M_BUFIO) 
+    phd->phd$l_biocnt++;
+  else
+    phd->phd$l_diocnt++;
+
 #define         IO$_WRITEPBLK           11
 #define         IO$_WRITELBLK           32
 #define         IO$_WRITEVBLK           48
@@ -140,7 +145,8 @@ bufpost(struct _irp * i) {
     a->acb$b_rmod&=~ACB$M_KAST;
     a->acb$b_rmod&=~ACB$M_NODELETE;
     sch$qast(i->irp$l_pid,PRI$_NULL,i);
-  }
+  } else
+    kfree(i);
 }
 
 asmlinkage void ioc$iopost(void) {
