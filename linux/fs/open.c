@@ -1064,6 +1064,7 @@ asmlinkage long sys_close(unsigned int fd)
 	__put_unused_fd(files, fd);
 	write_unlock(&files->file_lock);
 	if (fd<3) return 0; // temp workaround
+	if (filp == files->fd[0]) return 0; // another temp workaround
 #ifndef CONFIG_VMS
 	return filp_close(filp, files);
 #else

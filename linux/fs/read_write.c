@@ -228,10 +228,14 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 	  if (curcount < fab->fab$w_mrs)
 	    rab->rab$w_usz = fab->fab$w_mrs;
 #else
+	  if (count > 1)
 	  if (fab->fab$w_mrs)
 	    rab->rab$w_usz = fab->fab$w_mrs;
 #endif
+	  if (count > 1) // temp kludge for read 1
 	  sts = exe$get(rab);
+	  else
+	    sts = exe$read(rab);
 	  if ((sts&1)==0)
 	    break;
 	  int thiscount = rab->rab$w_rsz;

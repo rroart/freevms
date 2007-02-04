@@ -547,8 +547,11 @@ asmlinkage long sys_fstat64(unsigned long fd, struct stat64 * statbuf, long flag
     return 0;
   }
 #endif
-  if (fd<3)
+  if (fd<3) {
+    statbuf->st_mode = 0020000 | 0620;
+    statbuf->st_rdev = (4 << 8) + 1;
     return 0;
+  }
 #endif
 	struct file * f;
 	int err = -EBADF;

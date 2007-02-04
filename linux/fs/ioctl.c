@@ -115,6 +115,14 @@ asmlinkage long sys_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 out:
 	return error;
 #else
+	// temp workaround for bash
+	int * a = arg;
+	if (cmd == TIOCGPGRP)
+	  *a = current->pgrp;
+	if (cmd == TIOCSPGRP)
+	  current->pgrp = *a;
+	if (cmd == TCGETS)
+	  ((struct termios *)a)->c_lflag = ECHOCTL; // check
 	return 0;
 #endif
 }
