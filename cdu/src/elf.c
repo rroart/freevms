@@ -168,6 +168,7 @@ int load_elf(char * filename) {
   int offset = ((long)(*addr)) - ((long)elf);
   sts = mymymyfunc(func,*addr,(4096-offset)>>2);
   printf("after image\n");
+  free (hdrbuf);
   return SS$_NORMAL;
 }
 
@@ -229,7 +230,7 @@ long elf_get_symbol(char * filename, char * name){
 	strtabsh=section;
     }
   if (strtabsh==0 || symtabsh==0)
-    return 0;
+    goto end;
   strtab = (void *) malloc(strtabsh->sh_size);
   lseek(fildes, strtabsh->sh_offset, SEEK_SET);
   read(fildes, strtab, strtabsh->sh_size);
@@ -258,9 +259,10 @@ long elf_get_symbol(char * filename, char * name){
   }
   elf_end(elf);
   elf_end(arf);
-  close(fildes);
-  free(section_headers);
   free(symtab);
   free(strtab);
+ end:
+  free(section_headers);
+  close(fildes);
   return val;
 }

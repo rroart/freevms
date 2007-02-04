@@ -93,12 +93,14 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   mm_segment_t fs;
   loff_t pos=0;
   int no;
-  struct _imcb * im = kmalloc(sizeof(struct _imcb),GFP_KERNEL);
+  struct _imcb * im = kmalloc(sizeof(struct _imcb),GFP_KERNEL); // check leak
   memset(im,0,sizeof(struct _imcb));
   //  im->imcb$b_type
   f=rms_open_exec(dscdflnam->dsc$a_pointer);
-  if (f==0) return 0;
-
+  if (f==0) {
+    kfree(im);
+    return 0;
+  }
   struct _rabdef * rab = fget(f);
   struct _fabdef * fab = rab->rab$l_fab;
   int chan = fab->fab$l_stv;
@@ -256,6 +258,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     struct _va_range out;
     printk("Loading image %s from %s\n",imgnam,image);
     sts=exe$imgact(&aname,&dflnam,hdrbuf,0,&img_inadr,&out,0,0);
+    kfree(hdrbuf);
     img_inadr.va_range$ps_start_va=out.va_range$ps_end_va;
     img_inadr.va_range$ps_end_va=out.va_range$ps_end_va;
 
