@@ -608,7 +608,9 @@ static int copy_pte_range(struct mm_struct *dst_mm, struct mm_struct *src_mm,
 		unsigned long addr, unsigned long end)
 {
 	pte_t *src_pte, *dst_pte;
+#if 0
 	spinlock_t *src_ptl, *dst_ptl;
+#endif
 	int progress = 0;
 	int rss[2];
 
@@ -658,7 +660,9 @@ again:
 #if 0
 	add_mm_rss(dst_mm, rss[0], rss[1]);
 #endif
+#if 0
 	pte_unmap_unlock(dst_pte - 1, dst_ptl);
+#endif
 #if 0
 	cond_resched();
 #endif
