@@ -25,8 +25,13 @@ int lib$getjpi(signed int * item_code, unsigned int * process_id, void * process
     bufaddr = process_id;
     retlenaddr = &retlen;
   } else {
-    buflen = res->dsc$w_length;
-    bufaddr = res->dsc$a_pointer;
+    if (res) {
+      buflen = res->dsc$w_length;
+      bufaddr = res->dsc$a_pointer;
+    } else {
+      buflen = 4;
+      bufaddr = longword_integer_value;
+    }
     if (resultant_length)
       retlenaddr = resultant_length;
     else
