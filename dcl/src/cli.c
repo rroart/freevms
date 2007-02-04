@@ -496,7 +496,10 @@ static unsigned long wait_events (unsigned long nevents, unsigned long *h_events
 static unsigned long int_allocate_device      (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_change_password      (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_create_logical_name  (int userarg);
+static unsigned long int_open  (int userarg);
+static unsigned long int_close  (int userarg);
 static unsigned long int_write  (int userarg);
+static unsigned long int_read  (int userarg);
 static unsigned long int_create_logical_table (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_create_symbol        (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_deallocate_device    (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
@@ -516,6 +519,7 @@ static unsigned long int_set_prompt          (int userarg);
 static unsigned long int_set_process          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_set_working_set          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_stop          (int userarg);
+static unsigned long show_status          (int userarg);
 static unsigned long int_show_datetime        (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_device          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_show_default         (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
@@ -565,7 +569,11 @@ struct cli_struct cliroutines[]={
 {  "delete_symbol",          delete_symbol, },
 {  "stop", int_stop, },
 {  "then",              int_then },
+{  "open", int_open, },
+{  "close", int_close, },
 {  "write", int_write, },
+{  "read", int_read, },
+{  "show_status", show_status, },
 { 0, 0 , },
 };
 
@@ -3765,6 +3773,111 @@ static unsigned long delete_logical (unsigned long h_error, const char *default_
   return (sts);
 }
 
+static unsigned long int_open (int userarg)
+{
+  unsigned long sts;
+  short int chan;
+
+  $DESCRIPTOR(p, "p1");
+  $DESCRIPTOR(p2, "p2");
+
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+  memset (c, 0, 80);
+
+  char e[80];
+  struct dsc$descriptor o2;
+  o2.dsc$a_pointer=e;
+  o2.dsc$w_length=80;
+  memset (e, 0, 80);
+
+  int retlen, retlen2;
+
+  sts = cli$present(&p);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = cli$present(&p2);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = cli$get_value(&p, &o, &retlen);
+  o.dsc$w_length=retlen;
+
+  // not useable yet
+  sts = cli$get_value(&p2, &o2, &retlen2);
+  o2.dsc$w_length=retlen2;
+
+  $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
+  int index = open(e, 0);
+  int len = 4;
+  struct item_list_3 itmlst[3];
+  itmlst[0].item_code=LNM$_STRING;
+  itmlst[0].buflen=strlen(e);
+  itmlst[0].bufaddr=e;
+  itmlst[1].item_code=LNM$_INDEX;
+  itmlst[1].buflen=&len;
+  itmlst[1].retlenaddr=&retlen;
+  itmlst[1].bufaddr=&index;
+  itmlst[2].item_code=0;
+
+  int acmode = 0;
+
+  sts=sys$crelnm(0, &tab_dsc, &o, &acmode, itmlst);
+
+  if ((sts&1)==0)
+    return sts;
+
+  return sts;
+}
+
+static unsigned long int_close (int userarg)
+{
+  unsigned long sts;
+  short int chan;
+
+  $DESCRIPTOR(p, "p1");
+
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+  memset (c, 0, 80);
+
+  int retlen, retlen2;
+
+  sts = cli$present(&p);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = cli$get_value(&p, &o, &retlen);
+  o.dsc$w_length=retlen;
+
+  $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
+  int index;
+  int len = 4;
+  struct item_list_3 itmlst[2];
+  itmlst[0].item_code=LNM$_INDEX;
+  itmlst[0].buflen=&len;
+  itmlst[0].retlenaddr=&retlen;
+  itmlst[0].bufaddr=&index;
+  itmlst[1].item_code=0;
+
+  int acmode = 0;
+
+  sts=sys$trnlnm(0, &tab_dsc, &o, &acmode, itmlst);
+
+  if ((sts&1)==0)
+    return sts;
+
+  // index should really be something like ifi, change later?
+  close (index);
+
+  return SS$_NORMAL;
+}
+
 /************************************************************************/
 /*									*/
 /*	echo <string> ...						*/
@@ -3818,6 +3931,7 @@ static unsigned long int_write (int userarg)
   clilex();
   c_parser_binary_expression2 (0, 0);
 
+#if 0
   if (!vms_mm) goto no1;
   sts = sys$assign (&o, &chan, 0, 0, 0);
   if ((sts&1)==0)
@@ -3837,7 +3951,89 @@ static unsigned long int_write (int userarg)
     return sts;
 
  no2:
+#else
+  $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
+  int index;
+  int len = 4;
+  struct item_list_3 itmlst[2];
+  itmlst[0].item_code=LNM$_INDEX;
+  itmlst[0].buflen=&len;
+  itmlst[0].retlenaddr=&retlen;
+  itmlst[0].bufaddr=&index;
+  itmlst[1].item_code=0;
+
+  int acmode = 0;
+
+  sts=sys$trnlnm(0, &tab_dsc, &o, &acmode, itmlst);
+
+  if ((sts&1)==0)
+    return sts;
+
+  // index should really be something like ifi, change later?
+  write (index, o2.dsc$a_pointer, o2.dsc$w_length);
+#endif
   return (sts);
+}
+
+static unsigned long int_read (int userarg)
+{
+  unsigned long sts;
+  short int chan;
+
+  $DESCRIPTOR(p, "p1");
+  $DESCRIPTOR(p2, "p2");
+
+  char c[80];
+  struct dsc$descriptor o;
+  o.dsc$a_pointer=c;
+  o.dsc$w_length=80;
+  memset (c, 0, 80);
+
+  char e[80];
+  struct dsc$descriptor o2;
+  o2.dsc$a_pointer=e;
+  o2.dsc$w_length=80;
+  memset (e, 0, 80);
+
+  int retlen, retlen2;
+
+  sts = cli$present(&p);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = cli$present(&p2);
+  if ((sts&1)==0)
+    return sts;
+
+  sts = cli$get_value(&p, &o, &retlen);
+  o.dsc$w_length=retlen;
+
+  sts = cli$get_value(&p2, &o2, &retlen2);
+  o2.dsc$w_length=retlen2;
+
+  $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
+  int index;
+  int len = 4;
+  struct item_list_3 itmlst[2];
+  itmlst[0].item_code=LNM$_INDEX;
+  itmlst[0].buflen=&len;
+  itmlst[0].retlenaddr=&retlen;
+  itmlst[0].bufaddr=&index;
+  itmlst[1].item_code=0;
+
+  int acmode = 0;
+
+  sts=sys$trnlnm(0, &tab_dsc, &o, &acmode, itmlst);
+
+  if ((sts&1)==0)
+    return sts;
+
+  char buf[64];
+
+  // index should really be something like ifi, change later?
+  int rd = read (index, buf, 64);
+
+  return set_symbol(e, buf);
 }
 
 /************************************************************************/
@@ -4870,6 +5066,41 @@ static unsigned long int_show_default (unsigned long h_input, unsigned long h_ou
 }
 
 
+static unsigned long show_status (int userarg)
+
+{
+  int status;
+  unsigned long long now;
+  signed long long timevalue; 
+  char timestr[23]; 
+  $DESCRIPTOR(atimenow, timestr); 
+  char timestr2[23]; 
+  $DESCRIPTOR(atimenow2, timestr2); 
+  status = sys$gettim(&timevalue); 
+  sys$asctim(0,&atimenow,&timevalue,0);
+  long long cputim;
+  int biocnt, diocnt, pageflts, wssize;
+  int item_code;
+  int len = 0;
+  item_code = JPI$_CPUTIM;
+  status = lib$getjpi (&item_code, 0, 0, &cputim, 0, &len);
+  item_code = JPI$_BUFIO;
+  status = lib$getjpi (&item_code, 0, 0, &biocnt, 0, &len);
+  item_code = JPI$_DIRIO;
+  status = lib$getjpi (&item_code, 0, 0, &diocnt, 0, &len);
+  item_code = JPI$_PAGEFLTS;
+  status = lib$getjpi (&item_code, 0, 0, &pageflts, 0, &len);
+  item_code = JPI$_WSSIZE;
+  status = lib$getjpi (&item_code, 0, 0, &wssize, 0, &len);
+
+  cputim = -cputim * 100000; // check multiplication
+  sys$asctim(0,&atimenow2,&cputim,0);
+
+  printf("Status on  %s     Elapsed CPU :   %s\n", atimenow.dsc$a_pointer, atimenow2.dsc$a_pointer);
+  printf("Buff. I/O :     %4d    Cur. ws. :    2000    Open files :         0\n",biocnt,wssize);
+  printf("Dir. I/O :      %4d    Phys. Mem. :  xxxx    Page Faults :     %4d\n",diocnt,pageflts);
+  return SS$_NORMAL;
+}
 /************************************************************************/
 /*									*/
 /*	show device [<device_logical_name> ...]				*/
