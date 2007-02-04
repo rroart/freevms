@@ -490,9 +490,10 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    } else { // zero page demand?
 	      {
 		struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_HIGHER, IPL$_ASTDEL);
-		if (address<rde->rde$ps_start_va && address>=(rde->rde$ps_start_va-PAGE_SIZE)) {
-		  rde->rde$ps_start_va-=PAGE_SIZE;
-		  rde->rde$l_region_size+=PAGE_SIZE;
+		if (address<rde->rde$ps_start_va && address>=(rde->rde$ps_start_va-4*PAGE_SIZE)) {
+		  long page_size = rde->rde$ps_start_va - page;
+		  rde->rde$ps_start_va-=page_size;
+		  rde->rde$l_region_size+=page_size;
 		}
 		{
 		  pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
@@ -1637,9 +1638,10 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 	    } else { // zero page demand?
 	      {
 		struct _rde * rde= mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_HIGHER, IPL$_ASTDEL);
-		if (address<rde->rde$ps_start_va && address>=(rde->rde$ps_start_va-PAGE_SIZE)) {
-		  rde->rde$ps_start_va-=PAGE_SIZE;
-		  rde->rde$l_region_size+=PAGE_SIZE;
+		if (address<rde->rde$ps_start_va && address>=(rde->rde$ps_start_va-4*PAGE_SIZE)) {
+		  long page_size = rde->rde$ps_start_va - page;
+		  rde->rde$ps_start_va-=page_size;
+		  rde->rde$l_region_size+=page_size;
 		}
 		{
 		  pfn = mmg$ininewpfn(tsk,tsk->pcb$l_phd,page,pte);
