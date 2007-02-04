@@ -19,12 +19,19 @@ show_memory(){
   int user_freecnt;
   int user_pagefile=0;
 
+  unsigned long long now;
+  char timestr[23]; 
+  $DESCRIPTOR(atimenow, timestr); 
+  sys$gettim(&now);
+  sys$asctim(0,&atimenow,&now,0);
+
   sts = cliutl$getmem(&sch$gl_freecnt, &user_freecnt, 0);
   sts = cliutl$getmem(&max_mapnr, &user_mapnr, 0);
   sts = cliutl$getmem(&pagefile, &user_pagefile, 0);
 
   printf("\n");
-  printf("              System Memory Resources on DD-MMM-2006 14:10:42.12\n");
+  //  printf("              System Memory Resources on DD-MMM-2006 14:10:42.12\n");
+  printf("              System Memory Resources on %s\n", timestr);
   printf("\n");
   printf("Physical Memory Usage (pages):     Total        Free      In Use    Modified\n");
   printf("  Main Memory (%6dMB)           %5d        %5d      %5d       %5d\n",user_mapnr>>8,user_mapnr,user_freecnt,user_mapnr-user_freecnt,0);

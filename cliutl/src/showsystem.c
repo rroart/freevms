@@ -30,6 +30,7 @@ unsigned long upidlen,epidlen;
  unsigned long pagep, pageplen;
  unsigned long pageg, pageglen;
  unsigned long pagef, pageflen;
+ unsigned int dirio, diriolen, bufio, bufiolen;
 int jpistatus;
  int sts;
  int retscsnodelen;
@@ -61,6 +62,7 @@ syilst[3].item_code=0;
  sts=sys$getsyi(0,0,0,syilst,0,0,0);
 
 long long delta = boottime - now;
+int deltalen;
 sys$asctim(0,&atimenow2,&delta,0);
 
 lst[0].buflen=15;
@@ -95,8 +97,20 @@ lst[7].buflen=4;
 lst[7].item_code=JPI$_GPGCNT;
 lst[7].bufaddr=&pageg;
 lst[7].retlenaddr=&pageglen;
-lst[8].buflen=0;
-lst[8].item_code=0;
+lst[8].buflen=4;
+lst[8].item_code=JPI$_DIRIO;
+lst[8].bufaddr=&dirio;
+lst[8].retlenaddr=&diriolen;
+lst[9].buflen=4;
+lst[9].item_code=JPI$_BUFIO;
+lst[9].bufaddr=&bufio;
+lst[9].retlenaddr=&diriolen;
+lst[10].buflen=4;
+lst[10].item_code=JPI$_CPUTIM;
+lst[10].bufaddr=&delta;
+lst[10].retlenaddr=&deltalen;
+lst[11].buflen=0;
+lst[11].item_code=0;
 // printf(" FreeVMS V0.0  on node %6s  NN-OOO-2003 PP:QQ:RR.SS  Uptime  TT XX:YY:ZZ\n",scsnode);
  printf(" FreeVMS V%s on node %6s  %s  Uptime  %s\n", version, scsnode, timestr, timestr2);
  printf("  Pid    Process Name    State  Pri      I/O       CPU       Page flts  Pages\n");
@@ -104,7 +118,9 @@ lst[8].item_code=0;
 do {
 jpistatus=sys$getjpi(0,0,0,lst,0,0,0);
 if (jpistatus == SS$_NORMAL)
-  printf("%8x %-15s %-6s %3x %9x %17s %6x %6x\n",epid,procname,states[state],31-pri,upid,"",pagef,pagep+pageg);
+  delta = -delta * 100000; // check multiplication
+  sys$asctim(0,&atimenow2,&delta,0);
+  printf("%8x %-15s %-6s %3x %9x %17s %6x %6x\n",epid,procname,states[state],31-pri,dirio+bufio,atimenow2.dsc$a_pointer,pagef,pagep+pageg);
 } while (jpistatus == SS$_NORMAL);
 //} while (jpistatus != SS$_NOMOREPROC);
 }
