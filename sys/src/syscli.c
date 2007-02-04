@@ -102,7 +102,8 @@ asmlinkage int exe$cli(void * cliv, int par1, int par2) {
 	struct dsc$descriptor * d = &cli2->cli$q_valdesc;
 	d->dsc$w_length=s->svaluelen;
 	memcpy(d->dsc$a_pointer,s->svalue,d->dsc$w_length);
-      }
+      } else
+	return 0;
     }
     break;
   case CLI$K_DELELCL:
