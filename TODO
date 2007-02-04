@@ -36,6 +36,7 @@ Drop exe$alo in rms.c and use own alo-routines and pool?
 Make sure dcl image and date in memory are non-writable for user?
 Check if DCL could stay in the user level? Then it must have a new sysimgact?
 Put Unix system calls in supervisor level? Or executive?
+Leaks in syscli?
 
 CPU/PAL:
 FIX pal
@@ -89,6 +90,7 @@ Ctrl-asts with flck (without that ipl queueing crashes).
 Logical names:
 Logical support in the DCL and elsewhere
 In syslnm trnlnm only use retlenaddr and not buflen for it.
+Mem leaks.
 
 File system:
 Let RMS also use Ext2 with write support.
@@ -101,6 +103,7 @@ Better RMS compatibilty; check input and output RAB fields (incl l_sts)
 RMS to handle ext2 files with holes.
 RMS to handle terminal I/O better
 Grub to handle more file versions and also directories.
+Mem leaks.
 
 Clustering:
 Do MSCP protocol a bit more properly

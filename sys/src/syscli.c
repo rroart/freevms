@@ -49,6 +49,9 @@ int mod_sym(symbol * sym, struct dsc$descriptor * val) {
 int find_sym(struct dsc$descriptor * sym) {
   symbol * tmp = ctl$ag_clidata;
   while (tmp) {
+#if 0
+    printk("%d %d %s %s ", tmp->namelen, sym->dsc$w_length, sym->dsc$a_pointer,&tmp->name,tmp->namelen);
+#endif
     if (tmp->namelen==sym->dsc$w_length && 0==strncmp(sym->dsc$a_pointer,&tmp->name,tmp->namelen))
       return tmp;
     tmp=tmp->next;

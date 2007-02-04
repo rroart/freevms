@@ -1,4 +1,4 @@
-Current as of FreeVMS 0.3.1.
+Current as of FreeVMS 0.3.2.
 	Warning: there may be some more unstability compared to 0.2.3
 	due to changes in AST system and modes to resemble VMS more.
 	Now also changes in interrupts and multiprocessing.
@@ -72,11 +72,18 @@ CREATE /DIRECTORY:
 	Use plain name without [], in directory where it is to be created
 	ODS-2 and non-CONFIG_VMS only.
 
+CLOSE:
+	parameter logical
+
 COPY:
 	copy/import/export
 
 DIFFERENCE/SEARCH/TYPE:
 	as is, no qualifiers
+
+OPEN:
+	no qualifiers yet
+	parameters the usual logical filename
 
 SET PROCESS:
 	qualifiers: /name /priority
@@ -97,6 +104,9 @@ SHOW DEVICES:
 
 SHOW MEMORY:
 	show memory
+
+SHOW STATUS:
+	show status
 
 SHOW SYSTEM:
 	show system
@@ -134,6 +144,14 @@ SET WORKING_SET:
 	does not work exactly to specs
 	set working_set /quota=delta
 	set working_set /extent=delta
+
+READ:
+	no qualifiers yet
+	parameters logical symbol
+
+WRITE:
+	no qualifiers yet
+	parameters logical something-to-write
 
 Networking:
 

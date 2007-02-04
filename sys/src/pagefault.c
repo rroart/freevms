@@ -98,6 +98,12 @@ signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _
   //  mem_map[pfn].virtual=__va(pfn*PAGE_SIZE); // not necessary
   //mem_map[pfn].count.counter=1;
   mem_map[pfn].pfn$l_pt_pfn=0;
+#if 0
+#ifdef __i386__
+  // check. debug
+  mem_map[pfn].pfn$l_pt_pfn=va;
+#endif
+#endif
   mem_map[pfn].pfn$q_pte_index=0;
   mem_map[pfn].pfn$q_pte_index=pte; // hope it's the right one?
 

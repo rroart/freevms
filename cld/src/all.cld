@@ -73,6 +73,9 @@ define syntax show_memory
 	image show_ele
 	routine show_memory
 
+define syntax show_status
+	cliroutine show_status
+
 define syntax set_default
 	cliroutine set_default
 	parameter p1
@@ -108,6 +111,7 @@ define type show_something
 	keyword devices, syntax = show_devices
 	keyword working_set, syntax = show_working_set
 	keyword memory, syntax = show_memory
+	keyword status, syntax = show_status
 
 define verb set
 	parameter p1,label=something,value(type=set_something)
@@ -150,8 +154,22 @@ define verb import
 	parameter p1
 	parameter p2
 
+define verb open
+	cliroutine open
+        parameter p1
+        parameter p2
+
+define verb close
+	cliroutine close
+        parameter p1
+
 define verb write
 	cliroutine write
+        parameter p1
+        parameter p2
+
+define verb read
+	cliroutine read
         parameter p1
         parameter p2
 

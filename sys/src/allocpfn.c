@@ -330,6 +330,12 @@ signed long mmg$inspfn(unsigned long type, int pfn, int list) {
 
 signed long mmg$dallocpfn(struct _pfn * pageframe) {
   signed long pfn=mmg$inspfn(PFN$C_FREPAGLST,pageframe,0);
+#if 0
+#ifdef __i386__
+  // check. debug
+  pageframe->pfn$l_pt_pfn = (void*) 0x42424242;
+#endif
+#endif
   return pfn;
   // should be tail really
 }

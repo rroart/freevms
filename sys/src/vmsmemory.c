@@ -589,6 +589,12 @@ copy_one_pte(struct mm_struct *dst_mm, struct mm_struct *src_mm,
 	  unsigned long address2 = (*(unsigned long *)src_pte)&0xfffff000;
 
 	  ptepage->pfn$l_refcnt--;
+#if 0
+#ifdef __i386__
+	  // check debug
+	  ptepage->pfn$l_pt_pfn=address2;
+#endif
+#endif
 	  mem_map[page]=*ptepage;
 	  *(unsigned long *)mypte=((unsigned long)(page*PAGE_SIZE))|((*(unsigned long *)mypte)&0xfff);
 	  memcpy(__va(page*PAGE_SIZE),__va(address2),PAGE_SIZE);
@@ -887,6 +893,12 @@ skip_copy_pte_range:		address = (address + PUD_SIZE) & PUD_MASK;
 #endif
 
 				    ptepage->pfn$l_refcnt--;
+#if 0
+#ifdef __i386__
+				    // check debug
+				    ptepage->pfn$l_pt_pfn=address2;
+#endif
+#endif
 				    mem_map[page]=*ptepage;
 #if 0
 				    wsle->wsl$v_valid=1;

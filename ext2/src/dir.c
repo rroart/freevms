@@ -347,7 +347,7 @@ struct ext2_dir_entry_2 * ext2_find_entry (struct _vcb * vcb, struct _fcb * dir,
 	const char *name = dentry->d_name.name;
 	int namelen = dentry->d_name.len;
 	unsigned reclen = EXT2_DIR_REC_LEN(namelen);
-	unsigned long start, n;
+	unsigned long start = 0, n;
 	unsigned long npages = dir_pages(dir);
 	struct page *page = NULL;
 	ext2_dirent * de;
