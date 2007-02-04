@@ -624,7 +624,7 @@ unsigned long exe$gq_bap_num_registrations;
 unsigned long exe$gq_bap_variable;
 unsigned long exe$gq_basimgmtx;
 unsigned long exe$gq_bootcb_d;
-unsigned long exe$gq_boottime;
+unsigned long long exe$gq_boottime;
 unsigned long exe$gq_bugcheck_exclude_pfn;
 unsigned long exe$gq_bugchk_dump_remove_list;
 unsigned long exe$gq_bugchk_process_list;
@@ -2094,6 +2094,8 @@ sch$gq_fpgwq=&sch$aq_wqhdr[11];
   exe$gq_systime+=xtime.tv_sec;
   exe$gq_systime*=10000000;
 
+  exe$gq_boottime = exe$gq_systime;
+
   exe$gl_tqfl=(void *)&tqehead;
   exe$gl_tqfl->tqe$l_tqfl=exe$gl_tqfl;
   exe$gl_tqfl->tqe$l_tqbl=exe$gl_tqfl;
@@ -2156,6 +2158,8 @@ void __init vms_init2(void) {
   exe$gq_systime*=100;
   exe$gq_systime+=xtime.tv_sec;
   exe$gq_systime*=10000000;
+
+  exe$gq_boottime = exe$gq_systime;
 
   xqp_init2();
 #ifdef CONFIG_VMS

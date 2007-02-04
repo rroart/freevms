@@ -585,7 +585,7 @@ extern unsigned long exe$gq_bap_num_registrations;
 extern unsigned long exe$gq_bap_variable;
 extern unsigned long exe$gq_basimgmtx;
 extern unsigned long exe$gq_bootcb_d;
-extern unsigned long exe$gq_boottime;
+extern unsigned long long exe$gq_boottime;
 extern unsigned long exe$gq_bugcheck_exclude_pfn;
 extern unsigned long exe$gq_bugchk_dump_remove_list;
 extern unsigned long exe$gq_bugchk_process_list;
