@@ -1,7 +1,5 @@
 FLAGS = -static
 
-EXTERNAL = ../../cdu/src/cdu.a
-EXTERNAL2 = ../../cdu/src/cdu2.a
 VMLINUX = ../../linux/vmlinux 
 LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux 
 
@@ -37,17 +35,17 @@ pic/%.o: %.c
 	install -d pic
 	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
-i386/authorize$(EXE): $(VMSLIBS) $(OBJS) $(EXTERNAL) $(EXTERNAL2) $(VMLINUX)
+i386/authorize$(EXE): $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 	install -d i386
-	$(LINKER) $(LINKPRE) $(OBJS) $(LIBGCC) $(EXTERNAL) $(EXTERNAL2) $(VMSLIBS) /usr/lib/libelf.a /usr/lib/libdl.a $(LINKPOST) --just-symbols=$(VMLINUX) $(LIBGCC) -o i386/authorize{EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(LIBGCC) $(EXTERNAL) $(VMSLIBS) /usr/lib/libelf.a /usr/lib/libdl.a $(LINKPOST) --just-symbols=$(VMLINUX) $(LIBGCC) -o i386/authorize{EXE}
 
-i386/authorize${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(EXTERNAL2) $(VMLINUX)
+i386/authorize${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 	install -d i386
-	gcc -g -static $(OBJS) -lc $(EXTERNAL) $(EXTERNAL2) $(VMSLIBS) /usr/lib/libelf.a /usr/lib/libdl.a $(LINKVMLINUX) -o i386/authorize${NOEXE}
+	gcc -g -static $(OBJS) -lc $(EXTERNAL) $(VMSLIBS) /usr/lib/libelf.a /usr/lib/libdl.a $(LINKVMLINUX) -o i386/authorize${NOEXE}
 
 ifneq ($(ARCH),x86_64)
-i386/authorize${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC) $(EXTERNAL2_PIC) $(VMLINUX)
-	ld -Bshareable $(OBJS_PIC) $(EXTERNAL_PIC) $(EXTERNAL2_PIC) $(VMSLIBS_PIC) /usr/lib/libelf.a /usr/lib/libdl.a $(LIBC) $(LIBGCC) --just-symbols=$(VMLINUX) -o i386/authorize${EXE_ELF}
+i386/authorize${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC) $(VMLINUX)
+	ld -Bshareable $(OBJS_PIC) $(EXTERNAL_PIC) $(VMSLIBS_PIC) /usr/lib/libelf.a /usr/lib/libdl.a $(LIBC) $(LIBGCC) --just-symbols=$(VMLINUX) -o i386/authorize${EXE_ELF}
 endif
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)

@@ -1,4 +1,4 @@
-Current as of FreeVMS 0.2.15.
+Current as of FreeVMS 0.3.0.
 	Warning: there may be some more unstability compared to 0.2.3
 	due to changes in AST system and modes to resemble VMS more.
 	Now also changes in interrupts and multiprocessing.
@@ -179,8 +179,9 @@ INIT:
 	From shell on compiler box (no DCL): init filename volume-name size 
 
 DFU:
-	dfu (run from bash)
-	commands: verify dfa0, exit; non CONFIG_VMS mode
+	mount dqa2:
+	run sys$system:dfu
+	commands: verify/report dqa2:; CONFIG_VMS mode
 
 ******************************
 

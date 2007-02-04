@@ -102,18 +102,18 @@ telnet.a	: telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routine
 	ar -rv telnet.a telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o
 
 i386/telnet$(EXE)	: telnet.a netaux.o
-#	gcc -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet$(EXE)
+#	gcc -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a -ldl netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a -o i386/telnet$(EXE)
 	install -d i386
 #	$(LINKER) $(LINKPRE) /usr/lib/libc.a main.o netaux.o telnet.o telnetmsg.o telnet_common.o options.o telnet_parse.o routines.o key.o port.o print.o telnet_term.o condition.o log_util.o ../../../librtl/src/librtl.a ../../../cdu/src/parse.o ../../../cdu/src/lex.o ../../../cdu/src/cdumain.o ../../../cdu/src/tree.o ../../../cdu/src/stringpool.o ../../../cdu/src/hashtable.o ../../../cdu/src/cld-lang.o ../../../cdu/src/cli.o ../../../cdu/src/cli2.o ../../../starlet/src/starlet.a ../../../bliss/lib/libbli.a /usr/lib/libdl.a --start-group $(LIBGCC) /usr/lib/libc.a --end-group -o i386/telnet${EXE}
 
 i386/telnet$(NOEXE)	: telnet.a netaux.o
 	install -d i386
-	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a $(SMGRTL) ../../../bliss/lib/libbli.a -o i386/telnet$(NOEXE)
+	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a $(SMGRTL) ../../../bliss/lib/libbli.a -o i386/telnet$(NOEXE)
 	strip -K main i386/telnet$(NOEXE)
-	gcc -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl /usr/lib/libelf.a netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a $(SMGRTL) ../../../bliss/lib/libbli.a -o i386/dtelnet$(NOEXE)
+	gcc -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a -ldl /usr/lib/libelf.a netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a $(SMGRTL) ../../../bliss/lib/libbli.a -o i386/dtelnet$(NOEXE)
 i386/telnet_g$(NOEXE)	: telnet.a netaux.o
 	install -d i386
-	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a $(SMGRTL) ../../../bliss/lib/libbli.a -o i386/telnet_g$(NOEXE)
+	gcc --static -g $(link) $(linkflags) telnet.a ../../../cdu/src/cdu.a -ldl -lelf netaux.o main.o ../../../librtl/src/librtl.a ../../../starlet/src/starlet.a $(SMGRTL) ../../../bliss/lib/libbli.a -o i386/telnet_g$(NOEXE)
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
@@ -121,9 +121,9 @@ starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 librtl$(EXE_ELF): $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 	ln -s $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 
-i386/telnet$(EXE_ELF)	: telnet.a netaux.o $(VMSDLIBS_EXE_ELF) $(EXTERNAL2) starlet$(EXE_ELF) librtl$(EXE_ELF)
+i386/telnet$(EXE_ELF)	: telnet.a netaux.o $(VMSDLIBS_EXE_ELF) $(EXTERNAL) starlet$(EXE_ELF) librtl$(EXE_ELF)
 	install -d i386
-	ld -Bshareable $(VMS_LD_RPATH) main.o netaux.o telnet.a ../../../cdu/src/cdu.a ../../../cdu/src/cdu2.a -ldl /usr/lib/libelf.a starlet$(EXE_ELF) librtl$(EXE_ELF) $(SMGRTL) ../../../bliss/lib/libbli.a -lc -o i386/telnet$(EXE_ELF)
+	ld -Bshareable $(VMS_LD_RPATH) main.o netaux.o telnet.a ../../../cdu/src/cdu.a -ldl /usr/lib/libelf.a starlet$(EXE_ELF) librtl$(EXE_ELF) $(SMGRTL) ../../../bliss/lib/libbli.a -lc -o i386/telnet$(EXE_ELF)
 #		cmuip_src:[central]neterror.o 
 #		cmuip_src:[central]netlib.a/lib
 

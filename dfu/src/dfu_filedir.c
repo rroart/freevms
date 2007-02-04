@@ -32,9 +32,7 @@
 #include "fibdef.h"
 #include "file_hdr.h"
 #include <iodef.h>
-#if 0
 #include <sor$routines.h>
-#endif
 #include <smgdef.h>
 #include <trmdef.h>
 #ifndef IO$M_MOVEFILE
@@ -763,7 +761,7 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
   sprintf(outbuf,"%%DFU-I-PARSEDIR, Parsing directory tree...");
   put_disp();
   reclen = sizeof(sort_rec);
-#if 0
+#if 1
   status = sor$begin_sort(&keybuf, &reclen, 0,0,0,0,0,0,0,0);
 #endif
   status = SYS$SEARCH(&xfab , 0 , 0);
@@ -772,7 +770,7 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
     { sort_rec.rx_str[xnam.nam$b_rsl] = '\0';
       sprintf(outbuf,"%%DFU-W-NOSUBDIR, no subdirectories found in this tree");
       put_disp();
-#if 0
+#if 1
       sor$end_sort(); return(1);
 #else
       return(1);
@@ -783,13 +781,13 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
     sort_rec.f_id[0] = xnam.nam$w_fid_num;
     sort_rec.f_id[1] = xnam.nam$w_fid_seq;
     sort_rec.f_id[2] = xnam.nam$w_fid_rvn;
-#if 0
+#if 1
     sor$release_rec(&sort_descr);
 #endif
     status = SYS$SEARCH(&xfab , 0 , 0);
   }
 /* Now sort the results */
-#if 0
+#if 1
   status = sor$sort_merge();
   if ((status & 1) !=1)
   { sor$end_sort(); return(status);
@@ -803,13 +801,13 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
       put_disp();
       status = delete_directory(dchan, &sort_rec.f_id[0], 
                   (char *) &sort_rec.rx_str, nolog);
-#if 0
+#if 1
       status = sor$return_rec(&sort_descr);
 #endif
     }
      else status = SS$_ENDOFFILE; /* Stop at CTRL/C */
   }
-#if 0
+#if 1
   sor$end_sort();
 #endif
   return(1);

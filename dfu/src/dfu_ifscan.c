@@ -34,9 +34,7 @@
 #include <lib$routines.h>
 #endif
 #include <libdef.h>
-#if 0
 #include <sor$routines.h>
-#endif
 #include <atrdef.h>
 #include <dcdef.h>
 #include <devdef.h>
@@ -427,7 +425,7 @@ int search_command (int mask)
   fp = stdout;
 #endif
   clean_flags.fopen = 1;
-#if 0
+#if 1
   if (matsort == FALSE)
     clean_flags.sort = 0;
   else
@@ -739,7 +737,7 @@ int search_command (int mask)
           }
            else
           { out_descr.dsc$w_length = outlen; 
-#if 0
+#if 1
 	    sor$release_rec(&out_descr,0);
 #endif
             out_descr.dsc$w_length = 255; 
@@ -825,7 +823,7 @@ nexti: status = get_next_header();
   if (ctrlc == 1) 
   { ctrlc = 0; do_abort();
   }
-#if 0
+#if 1
   if (matsort == TRUE)
   { sprintf(outbuf,"%%DFU-I-SORT, Sorting ... \n");
     put_disp();
@@ -3391,7 +3389,7 @@ void cleanup()
   { stat = fclose(fp);
   }
 
-#if 0
+#if 1
   if (clean_flags.sort == 1) 
   { stat = sor$end_sort();
   }

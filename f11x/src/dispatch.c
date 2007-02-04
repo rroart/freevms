@@ -131,6 +131,8 @@ void f11b$dispatcher(void) {
       break;
     default:
       printk ("xqp %x code not implemented yet\n",fcode);
+      if (i->irp$l_iosb)
+	((struct _iosb *)i->irp$l_iosb)->iosb$w_status = 1;
       break;
     }
     if (i) 

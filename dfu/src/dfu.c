@@ -52,10 +52,15 @@
 #define SYS$GETDVIW sys$getdviw
 #define CLI$DCL_PARSE cli$dcl_parse
 #define CLI$DISPATCH cli$dispatch
+#if 0
 unsigned long lib$init_timer() { return SS$_NORMAL; }
 unsigned long lib$show_timer() { return SS$_NORMAL; }
+#endif
 int SYS$DCLEXH() { return SS$_NORMAL; }
 int SYS$CANEXH() { return SS$_NORMAL; }
+
+int SOR$GK_RECORD;
+
 int check_vms_mm() {
   int retlenaddr;
   int mem=0;
@@ -93,6 +98,7 @@ int SYS$DELTVA(long in[2], long ret[2], int a) {
 typedef unsigned long Boolean;
 
 int verify_command(int mask);
+int report_command(int mask);
 
 struct cli_struct {
   char * cliroutine;
@@ -100,6 +106,7 @@ struct cli_struct {
 };
 
 struct cli_struct cliroutines[]={
+{  "report",          report_command,           },
 {  "verify",          verify_command,           },
 { 0, 0 , },
 };

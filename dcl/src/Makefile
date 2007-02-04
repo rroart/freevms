@@ -1,4 +1,6 @@
-EXTERNAL = ../../cliutl/src/show.a ../../cliutl/src/set.a ../../cdu/src/cdu.a ../../cdu/src/cdu2.a ../../cdu/src/dcltables.o
+LEX = flex
+
+EXTERNAL = ../../cliutl/src/show.a ../../cliutl/src/set.a ../../cdu/src/cdu.a ../../cdu/src/dcltables.o
 
 #all: i386/dcl${NOEXE} i386/dcl${EXE} um/dcl${NOEXE} um/dcl${EXE}
 all: i386/dcl${NOEXE} um/dcl${NOEXE} startup.com install.com
@@ -13,11 +15,14 @@ install: all
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 	install *.com ../../rooti386/vms"$$"common/sysexe
 
-OBJS = cli.o clicall.o
+OBJS = cli.o clicall.o cliexpr.o
+#clilex.o
 
 %.o: %.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
+#clilex.c: clilex.l
+#	$(LEX) $(LEXFLAGS) -oclilex.c clilex.l
 
 i386/dcl${NOEXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL)
 	install -d i386

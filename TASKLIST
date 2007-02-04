@@ -3,6 +3,7 @@ Criterias for major/minor version bumps?:
 Previous:
 0.1: ODS-2 grub support, kernel boot and dcl start.
 0.2: ODS-2 about as usable as Ext2.
+0.3: SMP and 64-bit support.
 
 Next (A-H in more or less probable order)?:
 0.F: New cluster network engine, based on CMU IP stack engine.

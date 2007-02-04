@@ -21,7 +21,7 @@ File system:
 	ODS-2 read/write/execute
 	ODS-5 readonly 
 	ODS-2 initialize
-	DFU doing analyze/disk
+	DFU doing analyze/disk (32-bit currently)
 	XQP (for ODS-2, and something like it for Ext2)
 	ODS-2 can have bootable kernel and user environment
 
@@ -36,7 +36,7 @@ Clustering:
 
 Networking:
 	CMUIP (can now do both outgoing and ingoing TCP/IP)
-	Telnet client
+	Telnet client (32-bit only)
 
 Shell:
 	DCL
