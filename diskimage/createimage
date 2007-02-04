@@ -48,12 +48,13 @@ mount -t ext2 /dev/loop0 /mnt
 
 mkdir /mnt/boot
 
-mkdir /mnt/dev
-(cd /mnt/dev; /dev/MAKEDEV hda hdb fd ptyp console )
+#mkdir /mnt/dev
+#(cd /mnt/dev; /dev/MAKEDEV hda hdb fd ptyp console )
 
 mkdir -p /mnt/bin /mnt/sbin /mnt/etc /mnt/usr /mnt/usr/sbin /mnt/usr/bin /mnt/lib
 
 cd /bin
+cp -pi /bin/bash-static /bin/sash /mnt/bin
 #cp -pi cat cp dd df dmesg echo ed grep hostname ln ls mkdir mount mv ps rm sh umount uname /mnt/bin
 cd -
 
@@ -70,7 +71,7 @@ cd /lib
 cd -
 
 cd /etc
-cp -pi *passwd* *group* *shadow* /mnt/etc
+#cp -pi *passwd* *group* *shadow* /mnt/etc
 cd -
 
 mkdir -p /mnt/vms\$common/sysexe
