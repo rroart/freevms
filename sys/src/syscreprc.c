@@ -72,6 +72,11 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
   //bzero(p,sizeof(struct _pcb));//not wise?
   memset(p,0,sizeof(struct _pcb));
 
+  // check more
+  // compensate for no struct clone/copy
+  p->sigmask_lock = SPIN_LOCK_UNLOCKED;
+  p->alloc_lock = SPIN_LOCK_UNLOCKED;
+
   qhead_init(&p->pcb$l_astqfl);
   // and enable ast del to all modes
 
