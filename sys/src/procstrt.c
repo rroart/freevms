@@ -114,7 +114,7 @@ void lnm_init_prc(struct _pcb * p) {
   $DESCRIPTOR(syserror,"SYS$ERROR");
   $DESCRIPTOR(syscommand,"SYS$COMMAND");
 
-  struct item_list_3 itm[2];
+  struct item_list_3 itm[3];
 
   struct _lnmb * lnm$process_directory=&lnm_prc_dir;
   struct _lnmth * lnm$process_directory_table_header=&lnm_prc_dir_table_header;
@@ -189,11 +189,21 @@ void lnm_init_prc(struct _pcb * p) {
   itm[0].bufaddr=myterm; //p->pcb$t_terminal;
   //printk("Terminal %s\n",p->pcb$t_terminal);
 #endif
-  memset(&itm[1],0,sizeof(struct item_list_3));
+  int len = 4;
+  int retlen = 4;
+  int zero = 0, one = 1, two = 2;
+  itm[1].item_code=LNM$_INDEX;
+  itm[1].buflen=&len;
+  itm[1].retlenaddr=&retlen;
+  itm[1].bufaddr=&zero;
+  memset(&itm[2],0,sizeof(struct item_list_3));
 
   exe$crelnm(0,&mytabnam,&sysinput,0,itm);
+  itm[1].bufaddr=&one;
   exe$crelnm(0,&mytabnam,&sysoutput,0,itm);
+  itm[1].bufaddr=&two;
   exe$crelnm(0,&mytabnam,&syserror,0,itm);
+  itm[1].bufaddr=&one;
   exe$crelnm(0,&mytabnam,&syscommand,0,itm);
 
   kfree(myterm);
