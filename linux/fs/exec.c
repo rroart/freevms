@@ -299,8 +299,11 @@ void put_dirty_page(struct task_struct * tsk, struct page *page, unsigned long a
 	pte = pte_alloc(tsk->mm, pmd, address);
 	if (!pte)
 		goto out;
+#if 0
+	// check. temp fix. leaky
 	if (!pte_none(*pte))
 		goto out;
+#endif
 #ifndef CONFIG_VMS
 	lru_cache_add(page);
 #endif
