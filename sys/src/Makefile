@@ -48,3 +48,5 @@ obj-$(CONFIG_VMS) += vmsbootmem.o ptalloc.o \
 obj-$(CONFIG_VMS) += vmsbuffer.o
 
 include $(TOPDIR)/Rules.make
+
+sysgetsyi.o: sysgetsyi.c ../../linux/include/linux/version.h
