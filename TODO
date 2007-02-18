@@ -37,6 +37,7 @@ Make sure dcl image and date in memory are non-writable for user?
 Check if DCL could stay in the user level? Then it must have a new sysimgact?
 Put Unix system calls in supervisor level? Or executive?
 Leaks in syscli?
+Bufio/readbuf offset check. Twp and forkblock offset check.
 
 CPU/PAL:
 FIX pal
@@ -86,6 +87,7 @@ In trandevnam make it use lnm$file_dev.
 Tty_read with correct size read. (now done)
 Acpqfl change from absolute to relative.
 Ctrl-asts with flck (without that ipl queueing crashes).
+Better handling of bufpost and write?
 
 Logical names:
 Logical support in the DCL and elsewhere

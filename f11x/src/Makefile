@@ -4,7 +4,7 @@ O_TARGET := f11x.o
 #obj-y := super.o inode.o vms.o dir.o name.o
 #obj-m    := $(O_TARGET)
 
-obj-y := dispatch.o
+obj-y := dispatch.o access.o direct.o update.o lockers.o
 
 include $(TOPDIR)/Rules.make
 
