@@ -179,7 +179,7 @@ asmlinkage int exe$hiber(long dummy) {
 /* return params not as specified */
 int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb ** retpcb, unsigned long * retipid, unsigned long *retepid) {
   int sts = SS$_NORMAL;
-  int ipid;
+  int ipid = 0;
   unsigned long *vec=sch$gl_pcbvec;
   /* sched spinlock */
   vmslock(&SPIN_SCHED,IPL$_SCHED);

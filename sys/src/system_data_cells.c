@@ -1990,6 +1990,7 @@ struct _spl SPIN_JIB __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : 
 struct _spl SPIN_TIMER __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
 struct _spl SPIN_PR_LK8 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
 struct _spl SPIN_IOLOCK8 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_SCS __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
 
 struct _phd system_phd;
 

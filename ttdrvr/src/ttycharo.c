@@ -41,7 +41,7 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
 	temp_irp=((struct _tty_ucb *)lt->ucb$l_tl_phyucb)->ucb$l_tt_wrtbuf->tty$l_wb_irp;
       // kfree(temp_irp->irp$l_svapte); // have to get rid of this first?
       // or maybe not? got double kfree?
-      temp_irp->irp$l_svapte=0;
+      temp_irp->irp$l_svapte=0; // check. mem leak with free?
       temp_irp->irp$l_iost1=SS$_NORMAL;
       // int status = com$post(temp_irp,lt->ucb$l_tl_phyucb);
       // not working with duplex?      int status = ioc$reqcom(SS$_NORMAL,0,lt->ucb$l_tl_phyucb);
