@@ -73,8 +73,10 @@
 
 //#include <rms.h>
 #include "cache.h"
+#if 0
 #include "access.h"
 #include "direct.h"
+#endif
 
 #include "rmsmisc.h"
 #include <starlet.h>
@@ -1918,7 +1920,7 @@ unsigned exe$open(struct _fabdef *fab)
     }
     if (fab->fab$b_org == FAB$C_IDX) {
       char buffer[512];
-      struct _prologue_key * key;
+      struct _prologue_key * key = 0;
       struct _prologue_area * area;
       struct _xabkeydef * xabkey;
       struct _xaballdef * xaball;

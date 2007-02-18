@@ -25,7 +25,7 @@ else
 MODEL =
 endif
 
-OBJS = sdamain.o sda_parse.o device.o misc.o
+OBJS = sdamain.o sda_parse.o device.o misc.o sda_lock.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 %.o: %.c

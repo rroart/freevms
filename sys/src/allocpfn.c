@@ -358,6 +358,7 @@ signed long mmg$allocontig_align(unsigned long num) {
   int p, first=pfn$al_head[PFN$C_FREPAGLST], next;
   int h, m;
 #endif
+  p = 0;
   //  printk("n %lx\n",num);
  if (0) {
   int k,l,m[24];

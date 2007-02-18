@@ -318,5 +318,6 @@ struct _vcb {
 #define		vcb$l_sbmaplbn		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_sbmaplbn
 #define		vcb$l_sbmapsize		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_sbmapsize
 #define		vcb$l_sbmapvbn		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_sbmapvbn
+#define		vcb$t_volcknam		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$t_volcknam
 
 #endif

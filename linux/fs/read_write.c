@@ -212,7 +212,7 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 #if 0
 	printk("sys_read %x %x %x %x\n",ctl$gl_pcb,fd,buf,count);
 #endif
-	int sts;
+	int sts = 0;
 	int curcount = count;
 	int retcount = 0;
 	struct _rabdef * rab = file;
@@ -326,7 +326,7 @@ asmlinkage ssize_t sys_write(unsigned int fd, const char * buf, size_t count)
 #ifdef CONFIG_VMS
 	if (file == 0)
 	  return ret;
-	int sts;
+	int sts = 0;
 	int curcount = count;
 	int retcount = 0;
 	struct _rabdef * rab = file;

@@ -292,4 +292,11 @@ int new_thread(int nr, unsigned long clone_flags, unsigned long esp,unsigned lon
 
 void set_ccb_wind(short int channel, struct _fcb * fcb);
 
+unsigned device_lookup(unsigned devlen,char *devnam,int create,short int *retchan);
+unsigned deaccesschunk(unsigned wrtvbn,int wrtblks,int reuse);
+unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],struct _vcb **vcb);
+int unlock_xqp(char * prefix, struct __xqp * xqp);
+int serial_file(char * prefix, struct __xqp * xqp, int fid);
+int volume_lock(char * prefix, char * name);
+
 #endif

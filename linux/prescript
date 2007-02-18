@@ -19,5 +19,7 @@ cd ..
 
 	(cd drivers/ide; ln -s ../../../driver/src/id/ide.c myide.c )
 	(cd drivers/ide; ln -s ../../../driver/src/id/ide-disk.c myide-disk.c )
+	(cd drivers/ide; ln -s ../../../driver/src/id/ide-pci.c myide-pci.c )
+	(cd drivers/ide; ln -s ../../../driver/src/id/ide-dma.c myide-dma.c )
 
 echo you have read the HOWTO and done a make in ..?

@@ -23,16 +23,13 @@
 #endif
 
 void fid_copy(struct _fiddef *dst,struct _fiddef *src,unsigned rvn);
-unsigned device_lookup(unsigned devlen,char *devnam,int create,short int *retchan);
 
 unsigned dismount(struct _vcb *vcb);
-unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],struct _vcb **vcb);
 
 unsigned accesserase(struct _vcb *vcb,struct _irp * irp);
 unsigned deaccessfile(struct _fcb *fcb);
 unsigned f11b_access(struct _vcb * vcb,struct _irp * irp);
 
-unsigned deaccesschunk(unsigned wrtvbn,int wrtblks,int reuse);
 unsigned accesschunk(struct _fcb *fcb,unsigned vbn,
                      char **retbuff,unsigned *retblocks,unsigned wrtblks, struct _irp * i);
 unsigned access_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);

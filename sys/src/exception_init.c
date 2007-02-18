@@ -126,6 +126,50 @@ int sys$trnlnm  (unsigned int *attr, void *tabnam, void
 int sys$cmkrnl(int (*routin)(), unsigned int *arglst) {
   return INLINE_SYSCALL($cmkrnl,2,routin,arglst);
 }
+
+int sys$enq  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id) {
+  struct struct_enq s;
+  s.efn=efn;
+  s.lkmode=lkmode;
+  s.lksb=lksb;
+  s.flags=flags;
+  s.resnam=resnam;
+  s.parid=parid;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.blkastadr=blkastadr;
+  s.acmode=acmode;
+  s.rsdm_id=rsdm_id;
+  //  s.null_arg=null_arg;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
+  return INLINE_SYSCALL($enq,1,&s);
+}
+
+int sys$enqw  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id) {
+  struct struct_enq s;
+  s.efn=efn;
+  s.lkmode=lkmode;
+  s.lksb=lksb;
+  s.flags=flags;
+  s.resnam=resnam;
+  s.parid=parid;
+  s.astadr=astadr;
+  s.astprm=astprm;
+  s.blkastadr=blkastadr;
+  s.acmode=acmode;
+  s.rsdm_id=rsdm_id;
+  //  s.null_arg=null_arg;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
+  return INLINE_SYSCALL($enqw,1,&s);
+}
+
+int sys$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags) {
+  return INLINE_SYSCALL($deq,4,lkid,valblk,acmode,flags);
+}
 #endif
 
 #ifdef __arch_um__

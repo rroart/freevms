@@ -12,6 +12,7 @@ int errno;
 #endif
 
 int show_device(int mask);
+int show_locks(int mask);
 int sda$exit(int mask);
 
 struct cli_struct {
@@ -22,6 +23,7 @@ struct cli_struct {
 struct cli_struct cliroutines[]={
   {  "sda_exit", sda$exit, }, 
   {  "show_device", show_device, }, 
+  {  "show_locks", show_locks, }, 
   { 0, 0 , },
 };
 

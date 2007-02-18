@@ -13,8 +13,10 @@
 #include <uicdef.h>
 #include <vcbdef.h>
 #include <hm2def.h>
+#if 0
 #include "../../rms/src/cache.h"
 #include "../../rms/src/access.h"
+#endif
 #include <linux/slab.h>
 #include <misc_routines.h>
 
