@@ -357,7 +357,9 @@ int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   i=tty->ucb$l_tt_wrtbuf->tty$l_wb_irp;
   if (i->irp$l_func!=IO$_WRITEPBLK && i->irp$l_func!=IO$_WRITEVBLK)
     printk("XXX %x\n",i->irp$l_func);
+#if 0
   i->irp$l_svapte=0;
+#endif
 #endif
 #if 0
   com$post(u->ucb$l_irp,u);
