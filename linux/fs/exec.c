@@ -379,6 +379,7 @@ int setup_arg_pages(struct linux_binprm *bprm)
 #else
 		mpnt->rde$pq_start_va = PAGE_MASK & (unsigned long) bprm->p;
 		mpnt->rde$q_region_size = STACK_TOP1 - (unsigned long) mpnt->rde$pq_start_va;
+		mpnt->rde$q_region_size = 0x1000;
 		mpnt->rde$r_regprot.regprt$l_region_prot = _PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED;//PAGE_COPY;
 		mpnt->rde$l_flags = VM_STACK_FLAGS;
 		insrde(mpnt,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
