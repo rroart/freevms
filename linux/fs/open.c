@@ -1070,10 +1070,18 @@ asmlinkage long sys_close(unsigned int fd)
 #else
 	struct _rabdef * rab = filp;
 	struct _fabdef * fab = rab->rab$l_fab;
+	struct _xabdatdef * dat = fab->fab$l_xab;
+	struct _xabfhcdef * fhc = 0;
+	if (dat)
+	  fhc = dat->xab$l_nxt;
 	exe$disconnect(rab);
 	exe$close(fab);
 	kfree(rab);
 	kfree(fab);
+	if (dat)
+	  kfree(dat);
+	if (fhc)
+	  kfree(fhc);
 	return 0;
 #endif
 
