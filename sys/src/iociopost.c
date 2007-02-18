@@ -85,6 +85,7 @@ movbuf(struct _irp * i) {
 
  end:
   kfreebuf(bd);
+  i->irp$l_svapte = 0;
 }
 
 dirpost(struct _irp * i) {
@@ -108,12 +109,13 @@ bufpost(struct _irp * i) {
 #define         IO$_WRITEVBLK           48
   int fcode = i->irp$l_func&63;
   int skipmovbuf = (fcode==IO$_WRITEPBLK) || (fcode==IO$_WRITELBLK) || (fcode==IO$_WRITEVBLK); // temp workaround
-  if (skipmovbuf)
-    goto skipit;
-
-  movbuf(i);
-
- skipit:
+  if (skipmovbuf) {
+    if (i->irp$l_svapte && i->irp$l_svapte!=&i->irp$l_svapte) {
+      kfree(i->irp$l_svapte); // check. sufficient?
+      i->irp$l_svapte = 0;
+    }
+  } else
+    movbuf(i);
 
   if (i->irp$l_sts&IRP$M_MBXIO)
     sch_std$ravail(RSN$_MAILBOX);
