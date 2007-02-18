@@ -92,7 +92,7 @@ static void ext2_check_page(struct _vcb * vcb, struct page *page, struct _fcb *i
 	unsigned limit = PAGE_CACHE_SIZE;
 	ext2_dirent *p;
 	char *error;
-	int i_ino;
+	int i_ino = 0;
 
 	if ((dir->fcb$l_filesize >> PAGE_CACHE_SHIFT) == pageno) {
 		limit = dir->fcb$l_filesize & ~PAGE_CACHE_MASK;
