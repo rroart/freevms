@@ -6,7 +6,6 @@
 // Some lines/parts may be taken from lustre and modified. (Required line)
 
 #include<linux/linkage.h>
-#include<linux/vmalloc.h>
 #include<asm/current.h>
 #include<system_data_cells.h>
 #include<ipl.h>
@@ -29,6 +28,7 @@
 #include <scs_routines.h>
 #include <sch_routines.h>
 #include <linux/slab.h>
+#include <internals.h>
 
 // no vmslock etc here yet
 
@@ -80,7 +80,7 @@ dlm_dg(){}
 dlm_err(){}
 
 void lck$snd_granted(struct _lkb * lck) {
-  struct _cdrp * cdrp = vmalloc(sizeof(struct _cdrp));
+  struct _cdrp * cdrp = kmalloc(sizeof(struct _cdrp), GFP_KERNEL);
   memset(cdrp,0,sizeof(struct _cdrp));
   cdrp->cdrp$l_val1=lck->lkb$l_remlkid;
   cdrp->cdrp$l_val2=lck-lockidtbl[0];
@@ -140,6 +140,7 @@ asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb
   // some tests. one only for now, should be more.
   if (lkmode>LCK$K_EXMODE) return SS$_BADPARAM;
 
+  vmslock(&SPIN_SCS,IPL$_SCS); // check. probably too early
   convert=flags&LCK$M_CONVERT;
   if (!convert) {
     /* new lock */
@@ -201,10 +202,16 @@ asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb
       //check valid lock
       // check lock access mode
       par=lockidtbl[parid];
-      if (current->pcb$l_pid != par->lkb$l_pid) return SS$_IVLOCKID;
+      if (current->pcb$l_pid != par->lkb$l_pid) {
+	vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
+	return SS$_IVLOCKID;
+      }
       //check if parent granted, if not return SS$_PARNOTGRANT;
       if (par->lkb$b_state!=LKB$K_CONVERT  || par->lkb$b_state!=LKB$K_GRANTED) 
-	if ((par->lkb$l_flags & LCK$M_CONVERT) == 0) return SS$_PARNOTGRANT;
+	if ((par->lkb$l_flags & LCK$M_CONVERT) == 0) {
+	    vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
+	    return SS$_PARNOTGRANT;
+	}
       par->lkb$w_refcnt++;
       res->rsb$l_parent = par->lkb$l_rsb; // should not be here?
       //check if uic-specific resource
@@ -278,6 +285,7 @@ asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb
 	  if (flags&LCK$M_NOQUEUE) {
 	    res->rsb$w_lckcnt--;
 	    kfree(lck);
+	    vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
 	    return SS$_NOTQUEUED;
 	  } else {
 	    lck->lkb$b_state=LKB$K_WAITING;
@@ -292,6 +300,7 @@ asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb
 	if (flags&LCK$M_NOQUEUE) {
 	  res->rsb$w_lckcnt--;
 	  kfree(lck);
+	  vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
 	  return SS$_NOTQUEUED;
 	} else {
 	  lck->lkb$b_state=LKB$K_WAITING;
@@ -316,11 +325,13 @@ asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb
     }
   end:
     /* raise ipl */
+    vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
     return retval;
   error:
     /* ipl back */
     kfree(res);
     kfree(lck);
+    vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
     return sserror;
     
   } else { // convert
@@ -332,7 +343,10 @@ asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb
     int newmode;
     lck=lockidtbl[lksb->lksb$l_lkid];
     res=lck->lkb$l_rsb;
-    if (lck->lkb$b_state!=LKB$K_GRANTED) return SS$_CVTUNGRANT;
+    if (lck->lkb$b_state!=LKB$K_GRANTED) {
+      vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
+      return SS$_CVTUNGRANT;
+    }
     lck->lkb$b_efn=efn;
     lck->lkb$l_flags=flags;
     lck->lkb$b_rqmode=lkmode;
@@ -344,6 +358,7 @@ asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb
     //remque(&res->rsb$l_grqfl,dummy); // superfluous
     if (aqempty(res->rsb$l_cvtqfl) && aqempty(res->rsb$l_grqfl)) {
       sts = lck$grant_lock(lck ,res,lck->lkb$b_grmode,lkmode,flags,efn,-1);
+      vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
       return SS$_NORMAL;
     } else { // convert, something in cvtqfl or grqfl
       if (res->rsb$b_cgmode!=lck->lkb$b_grmode) {
@@ -378,11 +393,14 @@ asmlinkage int exe$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb
 	res->rsb$b_cgmode=newmode;
       sts=SS$_NORMAL;
     }
+    vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
     return sts;
   }
+  vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
 }
 
-int lck$deqlock(struct _lkb *lck,int flags) {
+int lck$deqlock(struct _lkb *lck, int flags, unsigned int lkid) {
+  vmslock(&SPIN_SCS,IPL$_SCS);
   struct _rsb * res = lck->lkb$l_rsb;
   int newmode;
 
@@ -401,7 +419,13 @@ int lck$deqlock(struct _lkb *lck,int flags) {
 
   if (lck->lkb$b_state) {
   }
-
+  kfree(lck);
+  lockidtbl[lkid] = lkid + 1;
+  if (aqempty(&res->rsb$l_grqfl) && aqempty(&res->rsb$l_cvtqfl) && aqempty(&res->rsb$l_wtqfl) && aqempty(&res->rsb$l_rrsfl) && aqempty(&res->rsb$l_srsfl)) {
+    remque(res, 0);
+    kfree(res);
+  }
+  vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
 }
 
 asmlinkage int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags) {
@@ -409,13 +433,17 @@ asmlinkage int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, uns
   struct _lkb * lck;
   if (lkid) {
     lck = lockidtbl[lkid];
-    sts = lck$deqlock(lck,flags);
+    sts = lck$deqlock(lck, flags, lkid);
     if (lck->lkb$l_parent!=lck && ((flags&LCK$M_DEQALL)==0)) {
       // sts = SS$_SUBLOCKS;
       goto end;
     }
   } else {
-    // no lockid, dequeue all
+    if (flags & LCK$M_DEQALL) {
+      // no lockid, dequeue all
+    } else {
+      return SS$_SUBLOCKS;
+    }
   }
  end:
   return sts;
