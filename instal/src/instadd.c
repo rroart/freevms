@@ -60,7 +60,7 @@ int inst$find_priv(struct dsc$descriptor * name) {
 }
 
 long long inst$get_priv() {
-  int priv=0;
+  long long priv=0;
   int retlen;
   $DESCRIPTOR(qpriv, "privileged");
   char d[80];
@@ -74,10 +74,16 @@ long long inst$get_priv() {
   while (cli$get_value(&qpriv, &q, &retlen)&1) {
     q.dsc$w_length=retlen;
     int privno=inst$find_priv(&q);
-    if (privno)
+    if (privno && privno < 32)
       priv|=1<<(privno-1);
-    printf("qual %s\n",d);
+    if (privno >= 32) {
+      int priv2 = (1<<(privno-32-1));
+      int * ppriv = &priv;
+      ppriv++;
+      * ppriv |= priv2; // check ugly ugly
+    }
   }
+  printf("priv %llx\n",priv);
   return priv;
 }
 
@@ -102,7 +108,7 @@ int inst$add() {
   memset(&kfe, 0, sizeof(struct _kfe));
   kfe.kfe$l_kfelink=kkfe;
   kfe.kfe$q_procpriv=inst$get_priv();
-  printf("procpriv is %x\n",kfe.kfe$q_procpriv);
+  printf("procpriv is %llx\n",kfe.kfe$q_procpriv);
   memcpy(&kfe.kfe$l_obsolete_1,o.dsc$a_pointer,o.dsc$w_length);
   int retsize=0;
   inst$alononpaged(sizeof(struct _kfe), &retsize, &new_kkfe);
