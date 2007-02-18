@@ -1479,6 +1479,7 @@ int exe$imgact_elf(void * name, void * hdrbuf) {
   addr=&elf->e_version;
   *addr=func;
 #endif
+  // check leak kfree hdrbuf
 
   return SS$_NORMAL;
 }
