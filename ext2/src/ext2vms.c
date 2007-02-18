@@ -165,6 +165,7 @@ void exttwo$dispatcher(void) {
       printk ("x2p %x code not implemented yet\n",fcode);
       break;
     }
+    unlock_xqp("ext2$s", x2p);
     if (i) 
       exttwo_io_done(i);
   }

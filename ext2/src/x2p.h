@@ -43,6 +43,7 @@ unsigned long unrec_count;
 unsigned long unrec_rvn;
 char prev_link[6];
 char context_save[54];
+unsigned int lb_lockid_idx;
 unsigned long lb_lockid[5];
 unsigned long lb_basis[5];
 unsigned long lb_hdrseq[5];

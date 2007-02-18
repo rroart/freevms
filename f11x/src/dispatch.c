@@ -135,6 +135,7 @@ void f11b$dispatcher(void) {
 	((struct _iosb *)i->irp$l_iosb)->iosb$w_status = 1;
       break;
     }
+    unlock_xqp("f11b$s", xqp);
     if (i) 
       f11b_io_done(i);
   }

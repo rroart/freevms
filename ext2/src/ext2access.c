@@ -1114,6 +1114,7 @@ void *exttwo_fcb_create2(struct ext2_inode * head, int i_ino, unsigned *retsts)
   qhead_init(&fcb->fcb$l_wlfl);
 
   SET_FCB_FID_FROM_INO(fcb, i_ino); 
+  fcb->fcb$l_lockbasis = i_ino; // add rvn later
 
   insque(fcb,&vcb->vcb$l_fcbfl);
 
@@ -1167,6 +1168,8 @@ unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
 #endif
 
   x2p->current_vcb=vcb; // until I can place it somewhere else
+
+  x2p->prim_lckindx = serial_file("ext2$s", x2p, fib->fib$w_fid_num);
 
   if (x2p->primary_fcb) {
     struct _fcb * fcb = x2p->primary_fcb;
@@ -1313,7 +1316,7 @@ unsigned mounte2(unsigned flags,unsigned devices,char *devnam[],char *label[],st
   if (sizeof(struct ext2_super_block) != 1024) return SS$_NOTINSTALL;
   for (device = 0; device < devices; device++) {
     //printk("Trying to mount %s\n",devnam[device]);
-    int hba;
+    int hba = 0;
     int chan;
     if (strchr(devnam[device],'$')) {
       short int chan;
@@ -1412,6 +1415,8 @@ unsigned mounte2(unsigned flags,unsigned devices,char *devnam[],char *label[],st
 	vcb->vcb$l_maxfiles = 0;//home.hm2$l_maxfiles;
 	//vcb->vcb$l_free = 500; // how do we compute this?
 	memcpy(&vcb->vcb$t_volname,devnam[device],12);
+	memcpy(&vcb->vcb$t_volcknam,devnam[device],12);
+	volume_lock("ext2$a", &vcb->vcb$t_volcknam);
 	struct ext2_super_block * sb = &home;
 	long blocks_per_group = le32_to_cpu(sb->s_blocks_per_group);
 	long block_size = 1 << (10 + le32_to_cpu(sb->s_log_block_size));
