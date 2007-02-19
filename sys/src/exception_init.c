@@ -128,18 +128,18 @@ int sys$cmkrnl(int (*routin)(), unsigned int *arglst) {
 }
 
 int sys$enq  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id) {
-  struct struct_enq s;
-  s.efn=efn;
-  s.lkmode=lkmode;
-  s.lksb=lksb;
-  s.flags=flags;
-  s.resnam=resnam;
-  s.parid=parid;
-  s.astadr=astadr;
-  s.astprm=astprm;
-  s.blkastadr=blkastadr;
-  s.acmode=acmode;
-  s.rsdm_id=rsdm_id;
+  struct struct_args s;
+  s.s1=efn;
+  s.s2=lkmode;
+  s.s3=lksb;
+  s.s4=flags;
+  s.s5=resnam;
+  s.s6=parid;
+  s.s7=astadr;
+  s.s8=astprm;
+  s.s9=blkastadr;
+  s.s10=acmode;
+  s.s11=rsdm_id;
   //  s.null_arg=null_arg;
 #ifdef __x86_64__
   syscall_struct();
@@ -148,18 +148,18 @@ int sys$enq  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigne
 }
 
 int sys$enqw  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id) {
-  struct struct_enq s;
-  s.efn=efn;
-  s.lkmode=lkmode;
-  s.lksb=lksb;
-  s.flags=flags;
-  s.resnam=resnam;
-  s.parid=parid;
-  s.astadr=astadr;
-  s.astprm=astprm;
-  s.blkastadr=blkastadr;
-  s.acmode=acmode;
-  s.rsdm_id=rsdm_id;
+  struct struct_args s;
+  s.s1=efn;
+  s.s2=lkmode;
+  s.s3=lksb;
+  s.s4=flags;
+  s.s5=resnam;
+  s.s6=parid;
+  s.s7=astadr;
+  s.s8=astprm;
+  s.s9=blkastadr;
+  s.s10=acmode;
+  s.s11=rsdm_id;
   //  s.null_arg=null_arg;
 #ifdef __x86_64__
   syscall_struct();
