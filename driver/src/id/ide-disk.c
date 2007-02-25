@@ -464,6 +464,10 @@ ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned lon
 #endif /* CONFIG_BLK_DEV_PDC4030 */
 	if (rq->cmd == READ) {
 #ifdef CONFIG_BLK_DEV_IDEDMA
+#if 0
+	  // check corresponding comment. local dma force
+	  if (HWIF(drive)->dmaproc)
+#endif
 		if (drive->using_dma && !(HWIF(drive)->dmaproc(ide_dma_read, drive)))
 			return ide_started;
 #endif /* CONFIG_BLK_DEV_IDEDMA */
@@ -955,6 +959,10 @@ int idedisk_init (void)
 		  ccb->ccb$l_ucb->ucb$l_orb=drive;
 		  ((struct _dt_ucb *)ccb->ccb$l_ucb)->ucb$l_maxblock=drive->capacity;
 		  //printk("ccb ucb %x %x %x %x\n",ccb,ccb->ccb$l_ucb,ccb->ccb$l_ucb->ucb$w_unit,drive);
+#if 0
+		  // check corresponding comment. local dma force
+		  drive->using_dma = 1;
+#endif
 		  printk("VMS IDE0 here\n");
 		  //{int i; for(i=0;i<100000000;i++); }
 		}
