@@ -63,6 +63,7 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
       rq->cmd=WRITE;
       rq->buffer=i->irp$l_qio_p1;
       rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
+      rq->current_nr_sectors=(i->irp$l_qio_p2+511)>>9;
       i->irp$l_qio_p5=rq;
       do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3);
       return (sts);
@@ -73,6 +74,7 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
       rq->cmd=READ;
       rq->buffer=i->irp$l_qio_p1;
       rq->nr_sectors=(i->irp$l_qio_p2+511)>>9;
+      rq->current_nr_sectors=(i->irp$l_qio_p2+511)>>9;
       i->irp$l_qio_p5=rq;
       do_rw_disk(u->ucb$l_orb,rq,i->irp$l_qio_p3);
       return (sts);
