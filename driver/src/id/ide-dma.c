@@ -1,3 +1,9 @@
+// $Id$
+// $Locker$
+
+// Author. Roar Thronæs.
+// Modified Linux source file, 2001-2007.
+
 /*
  *  linux/drivers/ide/ide-dma.c		Version 4.10	June 9, 2000
  *
@@ -239,6 +245,7 @@ ide_startstop_t ide_dma_intr (ide_drive_t *drive)
 				i -= rq->current_nr_sectors;
 				ide_end_request(1, HWGROUP(drive));
 			}
+			kfree(rq);
 			return ide_stopped;
 		}
 		printk("%s: dma_intr: bad DMA status (dma_stat=%x)\n", 
@@ -249,7 +256,9 @@ ide_startstop_t ide_dma_intr (ide_drive_t *drive)
 
 static int ide_build_sglist (ide_hwif_t *hwif, struct request *rq)
 {
+#if 0
 	struct buffer_head *bh;
+#endif
 	struct scatterlist *sg = hwif->sg_table;
 	int nents = 0;
 
@@ -260,19 +269,30 @@ static int ide_build_sglist (ide_hwif_t *hwif, struct request *rq)
 		hwif->sg_dma_direction = PCI_DMA_FROMDEVICE;
 	else
 		hwif->sg_dma_direction = PCI_DMA_TODEVICE;
+#if 0
 	bh = rq->bh;
+#else
+	const int bh = 0;
+#endif
 	do {
+#if 0
 		unsigned char *virt_addr = bh->b_data;
 		unsigned int size = bh->b_size;
+#else
+		unsigned char *virt_addr = rq->buffer;
+		unsigned int size = rq->nr_sectors << 9;
+#endif
 
 		if (nents >= PRD_ENTRIES)
 			return 0;
 
+#if 0
 		while ((bh = bh->b_reqnext) != NULL) {
 			if ((virt_addr + size) != (unsigned char *) bh->b_data)
 				break;
 			size += bh->b_size;
 		}
+#endif
 		memset(&sg[nents], 0, sizeof(*sg));
 		sg[nents].address = virt_addr;
 		sg[nents].length = size;
@@ -713,6 +733,10 @@ void ide_setup_dma (ide_hwif_t *hwif, unsigned long dma_base, unsigned int num_p
 
 	if (hwif->chipset != ide_trm290) {
 		byte dma_stat = inb(dma_base+2);
+#if 0
+		outb(inb(dma_base+2)|(0x60), dma_base+2);
+		dma_stat = inb(dma_base+2);
+#endif
 		printk(", BIOS settings: %s:%s, %s:%s",
 		       hwif->drives[0].name, (dma_stat & 0x20) ? "DMA" : "pio",
 		       hwif->drives[1].name, (dma_stat & 0x40) ? "DMA" : "pio");
