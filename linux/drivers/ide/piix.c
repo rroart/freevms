@@ -480,7 +480,9 @@ unsigned int __init pci_init_piix (struct pci_dev *dev, const char *name)
 	if (!piix_proc) {
 		piix_proc = 1;
 		bmide_dev = dev;
+#if 0 
 		piix_display_info = &piix_get_info;
+#endif
 	}
 #endif /* DISPLAY_PIIX_TIMINGS && CONFIG_PROC_FS */
 	return 0;
