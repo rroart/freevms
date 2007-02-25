@@ -1464,8 +1464,10 @@ unsigned exe$put(struct _rabdef *rab)
       sts = sys$qiow(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_WRITEVBLK,&iosb,0,0,
 		   buffer,wbuf_len,block,0,0,0);
     else {
-      sts = sys$qio(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_WRITEVBLK,&iosb,0,0,
+      sts = sys$qio(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_WRITEVBLK,0 /*&iosb*/,0,0,
 		    buffer,wbuf_len,block,0,0,0); // workaround for tza
+      // never give local stack iosb to qio
+      iosb.iosb$w_status = sts; // check. temp workaround
     }
     if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)/*rab->rab$v_asy == 0*/)
       return 1; // check. do better TRM check later
@@ -1676,8 +1678,10 @@ unsigned exe$write(struct _rabdef *rab)
       sts = sys$qiow(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_WRITEVBLK,&iosb,0,0,
 		   buffer,wbuf_len,block,0,0,0);
     else {
-      sts = sys$qio(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_WRITEVBLK,&iosb,0,0,
+      sts = sys$qio(RMS_EF,ifb_table[fab->fab$w_ifi]->ifb$w_chnl,IO$_WRITEVBLK,0 /*&iosb*/,0,0,
 		    buffer,wbuf_len,block,0,0,0); // workaround for tza
+      // never give local stack iosb to qio
+      iosb.iosb$w_status = sts; // check. temp workaround
     }
     if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)/*rab->rab$v_asy == 0*/)
       return 1; // check. do better TRM check later
