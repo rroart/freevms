@@ -47,12 +47,14 @@ asmlinkage int exe$getlki(unsigned long efn, unsigned long *lkidadr,void *itmlst
 
   while (it->item_code) {
     switch (it->item_code) {
+#if 0
     case LKI$_NAMSPACE: // check. borrowing this for address
       memcpy(it->bufaddr, &l, sizeof(long));
       break;
     case LKI$_RANGE: // check. borrowing this for address
       memcpy(it->bufaddr, &l->lkb$l_rsb, sizeof(long));
       break;
+#endif
     case LKI$_RESNAM:
       memcpy(it->bufaddr, &l->lkb$l_rsb->rsb$t_resnam, 12);
       break;
@@ -68,6 +70,7 @@ asmlinkage int exe$getlki(unsigned long efn, unsigned long *lkidadr,void *itmlst
     case LKI$_LOCKS:
       memcpy(it->bufaddr, &l->lkb$w_refcnt, 2);
       break;
+#if 0
     case LKI$_BLOCKER_BR:
       memcpy(it->bufaddr, &l->lkb$b_rqmode, 1);
       break;
@@ -80,6 +83,7 @@ asmlinkage int exe$getlki(unsigned long efn, unsigned long *lkidadr,void *itmlst
     case LKI$_SYSTEM:
       memcpy(it->bufaddr, &l->lkb$b_rmod, 1);
       break;
+#endif
 #if 0
     case LKI$_:
       memcpy(it->bufaddr, &l->lkb$l_, );
