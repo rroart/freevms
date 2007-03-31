@@ -927,6 +927,7 @@ out:
 }
 #endif
 
+#ifndef CONFIG_VMS
 asmlinkage long sys_socket(int family, int type, int protocol)
 {
 #ifndef CONFIG_VMS
@@ -952,6 +953,7 @@ out_release:
 	return -EAFNOSUPPORT;
 #endif
 }
+#endif
 
 /*
  *	Create a pair of connected sockets.
@@ -1031,6 +1033,7 @@ out:
  *	the protocol layer (having also checked the address is ok).
  */
 
+#ifndef CONFIG_VMS
 asmlinkage long sys_bind(int fd, struct sockaddr *umyaddr, int addrlen)
 {
 #ifndef CONFIG_VMS
@@ -1608,6 +1611,7 @@ int sock_fcntl(struct file *filp, unsigned int cmd, unsigned long arg)
 #endif
 	return(-EINVAL);
 }
+#endif
 
 /* Argument list sizes for sys_socketcall */
 #define AL(x) ((x) * sizeof(unsigned long))
@@ -1624,9 +1628,25 @@ static unsigned char nargs[18]={AL(0),AL(3),AL(3),AL(3),AL(2),AL(3),
  *  it is set by the callees. 
  */
 
+asmlinkage int sys_socket();
+asmlinkage int sys_bind();
+asmlinkage int sys_connect();
+asmlinkage int sys_listen();
+asmlinkage int sys_accept();
+asmlinkage int sys_getsockname();
+asmlinkage int sys_getpeername();
+asmlinkage int sys_send();
+asmlinkage int sys_sendto();
+asmlinkage int sys_recv();
+asmlinkage int sys_recvfrom();
+asmlinkage int sys_shutdown();
+asmlinkage int sys_setsockopt();
+asmlinkage int sys_getsockopt();
+asmlinkage int sys_sendmsg();
+asmlinkage int sys_recvmsg();
+
 asmlinkage long sys_socketcall(int call, unsigned long *args)
 {
-#ifndef CONFIG_VMS
 	unsigned long a[6];
 	unsigned long a0,a1;
 	int err;
@@ -1690,20 +1710,24 @@ asmlinkage long sys_socketcall(int call, unsigned long *args)
 		case SYS_GETSOCKOPT:
 			err = sys_getsockopt(a0, a1, a[2], (char *)a[3], (int *)a[4]);
 			break;
+#ifndef __KERNEL__
 		case SYS_SENDMSG:
 			err = sys_sendmsg(a0, (struct msghdr *) a1, a[2]);
 			break;
 		case SYS_RECVMSG:
 			err = sys_recvmsg(a0, (struct msghdr *) a1, a[2]);
 			break;
+#else
+		case SYS_SENDMSG:
+		case SYS_RECVMSG:
+		  err = -EAFNOSUPPORT;
+		  break;
+#endif
 		default:
 			err = -EINVAL;
 			break;
 	}
 	return err;
-#else
-	return -EAFNOSUPPORT;
-#endif
 }
 
 /*
