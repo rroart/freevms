@@ -46,6 +46,10 @@ asmlinkage int exe$getsyi(unsigned int efn, unsigned int *csidadr, void *nodenam
       memcpy(it->bufaddr,&exe$gq_boottime,8);
       break;
 
+    case SYI$_MAXBUF:
+      memcpy(it->bufaddr,&ioc$gw_maxbuf,sizeof(long));
+      break;
+
     case SYI$_LASTFLD:
       {
 #ifdef CONFIG_VMS

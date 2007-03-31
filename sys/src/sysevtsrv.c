@@ -14,6 +14,9 @@
 #include <misc_routines.h>
 #include <sch_routines.h>
 
+#undef MYDEB_EFC
+#define MYDEB_EFC
+
 inline unsigned long * getefcp(struct _pcb * p, unsigned long efn) {
   return &p->pcb$l_efcs + ((efn&96)>>5);
 }
@@ -31,9 +34,26 @@ inline unsigned long * getefcno(unsigned long efn) {
   return ((efn&96)>>5);
 }
 
+#ifdef MYDEB_EFC
+extern long efc[], efcc[];
+#endif
+
 asmlinkage int exe$clref(unsigned int efn) {
   int retval;
   struct _pcb * p=ctl$gl_pcb;
+#ifdef MYDEB_EFC
+  {
+    int pid=p->pcb$l_pid&31;
+    efc[1024*pid+efcc[pid]]=0x80000000|efn;
+    efcc[pid]++;
+    long addr = &efn;
+    addr-=4;
+    efc[1024*pid+efcc[pid]]=*(long*)addr;
+    efcc[pid]++;
+    if (efcc[pid]>1000)
+      efcc[pid]=0;
+  }
+#endif
   int efncluster=(efn&224)>>5;
   unsigned long * clusteraddr;
   clusteraddr=getefc(p,efn);
