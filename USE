@@ -173,7 +173,10 @@ Telnet:
 System administration utilities:
 
 ANALYZE /SYSTEM:
-	has show device, show locks and exit
+	has show device, show locks, show spinlocks and exit
+	examine addr/name or addr/name n
+	show process /index=n
+	show address a
 
 AUTHORIZE:
 	run sys$system:authorize

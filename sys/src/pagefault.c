@@ -298,6 +298,10 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 
 	//check if ipl>2 bugcheck
 
+        if ((address&0xfffff000)==0x5a5a5000)
+          die("5a\n",regs,error_code);
+	if ((address&0xfffff000)==0x5a5a5000)
+	  panic("poisoned\n");
         if (address==0x5a5a5a5a)
           die("5a\n",regs,error_code);
 	if (address==0x5a5a5a5a)

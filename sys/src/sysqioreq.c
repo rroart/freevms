@@ -161,6 +161,10 @@ long lastirp2[32*6];
 /* put this into a struct */
 asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
   int retval = 0;
+#if 0
+  if (chan>1000)
+    panic("chan 1000 %x\n",chan);
+#endif
   unsigned int c, d;
   struct _pcb * p=current;
   struct _irp * i;
