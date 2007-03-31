@@ -21,6 +21,8 @@
 
 #include <descrip.h>
 
+#include <ipl.h>
+
 asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam, int flags) {
   int status;
   /* probe chan */
@@ -71,6 +73,7 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   c->ccb$l_ucb->ucb$l_refc++;
 
   sch$iounlock();
+  setipl(0); // simulate rei
   return status;
 }
 
