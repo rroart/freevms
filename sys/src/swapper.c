@@ -34,6 +34,8 @@
 #include <misc_routines.h>
 #include <mmg_routines.h>
 
+#include <vfddef.h>
+
 #ifdef CONFIG_VMS
 
 struct mm_struct *swap_mm = &init_mm;
@@ -121,7 +123,8 @@ int kswapd(void *unused)
 	    printk("uh oh, not FCB\n");
 	  }
 #endif
-	  struct _rabdef * rab = fget(file);
+	  struct vms_fd * vms_fd = fget(file);
+	  struct _rabdef * rab = vms_fd->vfd$l_fd_p;
 	  struct _fabdef * fab = rab->rab$l_fab;
 	  int pages = fab->fab$l_alq >> 3;
 #if 0

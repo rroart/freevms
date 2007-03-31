@@ -38,6 +38,8 @@
 #include <fabdef.h>
 #include <rabdef.h>
 
+#include <vfddef.h>
+
 #include <linux/file.h>
 
 int img$known_image(struct dsc$descriptor * name, void ** kfe_p) {
@@ -101,7 +103,8 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     kfree(im);
     return 0;
   }
-  struct _rabdef * rab = fget(f);
+  struct vms_fd * vms_fd = fget(f);
+  struct _rabdef * rab = vms_fd->vfd$l_fd_p;
   struct _fabdef * fab = rab->rab$l_fab;
   int chan = fab->fab$l_stv;
 #if 0
