@@ -57,6 +57,8 @@
 #include <ssdef.h>
 #include <misc_routines.h>
 
+#include <vfddef.h>
+
 static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs);
 static int load_elf_library(struct file*);
 static unsigned long elf_map (struct file *, unsigned long, struct elf_phdr *, int, int);
@@ -338,6 +340,8 @@ static unsigned long load_elf_interp(struct elfhdr * interp_elf_ex,
 #ifndef CONFIG_VMS
 	    map_addr = elf_map(interpreter, load_addr + vaddr, eppnt, elf_prot, elf_type);
 #else
+	    struct vms_fd * vms_fd = fget(interpreter);
+	    struct file * file = vms_fd->vfd$l_fd_p;
 	    map_addr = elf_map(fget(interpreter), load_addr + vaddr, eppnt, elf_prot, elf_type);
 #endif
 	    
@@ -694,7 +698,9 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 #ifndef CONFIG_VMS
 		error = elf_map(bprm->file, load_bias + vaddr, elf_ppnt, elf_prot, elf_flags);
 #else
-		error = elf_map(fget(bprm->file), load_bias + vaddr, elf_ppnt, elf_prot, elf_flags);
+		struct vms_fd * vms_fd = fget(bprm->file);
+		struct file * file = vms_fd->vfd$l_fd_p;
+		error = elf_map(file, load_bias + vaddr, elf_ppnt, elf_prot, elf_flags);
 #endif
 		if (BAD_ADDR(error))
 			continue;

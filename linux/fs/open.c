@@ -32,6 +32,8 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 
+#include <vfddef.h>
+
 #define special_file(m) (S_ISCHR(m)||S_ISBLK(m)||S_ISFIFO(m)||S_ISSOCK(m))
 
 int vfs_statfs(struct super_block *sb, struct statfs *buf)
@@ -190,13 +192,15 @@ static inline long do_sys_ftruncate(unsigned int fd, loff_t length, int small)
 	struct inode * inode;
 	struct dentry *dentry;
 	struct file * file;
+	struct vms_fd * vms_fd;
 	int error;
 
 	error = -EINVAL;
 	if (length < 0)
 		goto out;
 	error = -EBADF;
-	file = fget(fd);
+	vms_fd = fget(fd);
+	file = vms_fd->vfd$l_fd_p;
 	if (!file)
 		goto out;
 
@@ -982,7 +986,10 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 #if 0
 	fd_install(fd, file);
 #else
-	fd_install(fd, rab);
+	struct vms_fd * vms_fd = kmalloc(sizeof(struct vms_fd), GFP_KERNEL);
+	vms_fd->vfd$l_is_cmu = 0;
+	vms_fd->vfd$l_fd_p = rab;
+	fd_install(fd, vms_fd);
 #endif
 	return fd;
 }
@@ -1051,12 +1058,17 @@ int filp_close(struct file *filp, fl_owner_t id)
 asmlinkage long sys_close(unsigned int fd)
 {
 	struct file * filp;
+	struct vms_fd * vms_fd;
 	struct files_struct *files = current->files;
 
 	write_lock(&files->file_lock);
 	if (fd >= files->max_fds)
 		goto out_unlock;
-	filp = files->fd[fd];
+	vms_fd = files->fd[fd];
+	int cmu_close();
+	if (vms_fd->vfd$l_is_cmu)
+	  return cmu_close;
+	filp = vms_fd->vfd$l_fd_p;
 	if (!filp)
 		goto out_unlock;
 	files->fd[fd] = NULL;
@@ -1076,6 +1088,7 @@ asmlinkage long sys_close(unsigned int fd)
 	  fhc = dat->xab$l_nxt;
 	exe$disconnect(rab);
 	exe$close(fab);
+	kfree(vms_fd);
 	kfree(rab);
 	kfree(fab);
 	if (dat)
@@ -1127,6 +1140,11 @@ int generic_file_open(struct _fcb * inode, struct file * filp)
 }
 #endif
 
+int stkstk[1024];
+int stkstkcnt=0;
+extern int stk2cnt;
+extern int stk3cnt[];
+
 void sys_open_term(char * name)
 {
 	  struct _fabdef * fab = kmalloc(sizeof(struct _fabdef), GFP_KERNEL);
@@ -1135,11 +1153,24 @@ void sys_open_term(char * name)
 	  *rab = cc$rms_rab;
 	  fab->fab$l_fna = name;
 	  fab->fab$b_fns = strlen(fab->fab$l_fna);
+	  stkstk[stkstkcnt++] = ((int)current) | 2;
+	  stkstk[stkstkcnt++] = current->pcb$l_cpu_id;
+	  stkstk[stkstkcnt++] = stk2cnt;
+	  int pid = ctl$gl_pcb->pcb$l_pid&15;
+	  stkstk[stkstkcnt++] = stk3cnt[pid];
+	  if (stkstkcnt > 1000)
+	    stkstkcnt = 0;
+	  inline int getipl();
+	  if (getipl()>7)
+	    panic("getipl3");
 	  exe$open(fab);
 	  rab->rab$l_fab = fab;
 	  exe$connect(rab);
 	  int fd = get_unused_fd();
-	  fd_install(fd, rab);
+	  struct vms_fd * vms_fd = kmalloc(sizeof(struct vms_fd), GFP_KERNEL);
+	  vms_fd->vfd$l_is_cmu = 0;
+	  vms_fd->vfd$l_fd_p = rab;
+	  fd_install(fd, vms_fd);
 }
 
 EXPORT_SYMBOL(generic_file_open);

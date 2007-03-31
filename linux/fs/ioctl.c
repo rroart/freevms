@@ -11,6 +11,8 @@
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
 
+#include <vfddef.h>
+
 static int file_ioctl(struct file *filp,unsigned int cmd,unsigned long arg)
 {
 	int error;
@@ -115,6 +117,11 @@ asmlinkage long sys_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 out:
 	return error;
 #else
+	struct vms_fd * vms_fd = fget(fd);
+	int cmu_ioctl(int, int, long);
+	if (vms_fd->vfd$l_is_cmu)
+	  return cmu_ioctl(fd, cmd, arg);
+
 	// temp workaround for bash
 	int * a = arg;
 	if (cmd == TIOCGPGRP)

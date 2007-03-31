@@ -20,6 +20,7 @@
 #include <xabfhcdef.h>
 #include <misc_routines.h>
 #include <exe_routines.h>
+#include <vfddef.h>
 
 #ifndef CONFIG_VMS
 struct file_operations generic_ro_fops = {
@@ -103,9 +104,11 @@ asmlinkage off_t sys_lseek(unsigned int fd, off_t offset, unsigned int origin)
 {
 	off_t retval;
 	struct file * file;
+	struct vms_fd * vms_fd;
 
 	retval = -EBADF;
-	file = fget(fd);
+	vms_fd = fget(fd);
+	file = vms_fd->vfd$l_fd_p;
 #ifndef CONFIG_VMS
 	if (!file)
 		goto bad;
@@ -155,6 +158,8 @@ bad:
 	int block = offset >> 9;
 #ifdef __x86_64__
 	block++;
+#else
+	block++;
 #endif
 	rab->rab$w_rfa[0] = block & 0xffff;
 	rab->rab$w_rfa[1] = block >> 16;
@@ -171,10 +176,12 @@ asmlinkage long sys_llseek(unsigned int fd, unsigned long offset_high,
 {
 	int retval;
 	struct file * file;
+	struct vms_fd * vms_fd;
 	loff_t offset;
 
 	retval = -EBADF;
-	file = fget(fd);
+	vms_fd = fget(fd);
+	file = vms_fd->vfd$l_fd_p;
 	if (!file)
 		goto bad;
 	retval = -EINVAL;
@@ -201,9 +208,14 @@ asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 {
 	ssize_t ret;
 	struct file * file;
+	struct vms_fd * vms_fd;
 
 	ret = -EBADF;
-	file = fget(fd);
+	vms_fd = fget(fd);
+	int cmu_read();
+	if (vms_fd->vfd$l_is_cmu)
+	  return cmu_read(fd, buf, count);
+	file = vms_fd->vfd$l_fd_p;
 #ifdef CONFIG_VMS
 #if 0
 	if (file && ((struct _fcb *)(file))->fcb$b_type==DYN$C_FCB)
@@ -320,9 +332,14 @@ asmlinkage ssize_t sys_write(unsigned int fd, const char * buf, size_t count)
 {
 	ssize_t ret;
 	struct file * file;
+	struct vms_fd * vms_fd;
 
 	ret = -EBADF;
-	file = fget(fd);
+	vms_fd = fget(fd);
+	int cmu_write();
+	if (vms_fd->vfd$l_is_cmu)
+	  return cmu_write(fd, buf, count);
+	file = vms_fd->vfd$l_fd_p;
 #ifdef CONFIG_VMS
 	if (file == 0)
 	  return ret;
@@ -516,11 +533,13 @@ asmlinkage ssize_t sys_readv(unsigned long fd, const struct iovec * vector,
 			     unsigned long count)
 {
 	struct file * file;
+	struct vms_fd * vms_fd;
 	ssize_t ret;
 
 
 	ret = -EBADF;
-	file = fget(fd);
+	vms_fd = fget(fd);
+	file = vms_fd->vfd$l_fd_p;
 	if (!file)
 		goto bad_file;
 	if (file->f_op && (file->f_mode & FMODE_READ) &&
@@ -536,11 +555,13 @@ asmlinkage ssize_t sys_writev(unsigned long fd, const struct iovec * vector,
 			      unsigned long count)
 {
 	struct file * file;
+	struct vms_fd * vms_fd;
 	ssize_t ret;
 
 
 	ret = -EBADF;
-	file = fget(fd);
+	vms_fd = fget(fd);
+	file = vms_fd->vfd$l_fd_p;
 	if (!file)
 		goto bad_file;
 	if (file->f_op && (file->f_mode & FMODE_WRITE) &&
@@ -561,16 +582,18 @@ asmlinkage ssize_t sys_pread(unsigned int fd, char * buf,
 {
 	ssize_t ret;
 	struct file * file;
+	struct vms_fd * vms_fd;
 	ssize_t (*read)(struct file *, char *, size_t, loff_t *);
 
 	ret = -EBADF;
-	file = fget(fd);
+	vms_fd = fget(fd);
+	file = vms_fd->vfd$l_fd_p;
 #ifdef CONFIG_VMS
 #if 0
 	if (file && ((struct _fcb *)(file))->fcb$b_type==DYN$C_FCB)
 	  goto do_fcb;
 #else
-	struct _rabdef * rab = fget(fd);
+	struct _rabdef * rab = file; // fget(fd);
 	loff_t curpos =  512*(rab->rab$w_rfa[2] + (rab->rab$w_rfa[1] << 16)) + rab->rab$w_rfa[0];
 #define SEEK_SET 0
 	sys_lseek(fd, pos, SEEK_SET);
@@ -631,10 +654,12 @@ asmlinkage ssize_t sys_pwrite(unsigned int fd, const char * buf,
 {
 	ssize_t ret;
 	struct file * file;
+	struct vms_fd * vms_fd;
 	ssize_t (*write)(struct file *, const char *, size_t, loff_t *);
 
 	ret = -EBADF;
-	file = fget(fd);
+	vms_fd = fget(fd);
+	file = vms_fd->vfd$l_fd_p;
 	if (!file)
 		goto bad_file;
 	if (!(file->f_mode & FMODE_WRITE))

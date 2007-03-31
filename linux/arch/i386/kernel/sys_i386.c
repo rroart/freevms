@@ -22,6 +22,8 @@
 #include <asm/uaccess.h>
 #include <asm/ipc.h>
 
+#include <vfddef.h>
+
 /*
  * sys_pipe() is the normal C calling standard for creating
  * a pipe. It's not the way Unix traditionally does this, though.
@@ -51,10 +53,12 @@ static inline long do_mmap2(
 {
 	int error = -EBADF;
 	struct file * file = NULL;
+	struct vms_fd * vms_fd;
 
 	flags &= ~(MAP_EXECUTABLE | MAP_DENYWRITE);
 	if (!(flags & MAP_ANONYMOUS)) {
-		file = fget(fd);
+		vms_fd = fget(fd);
+		file = vms_fd->vfd$l_fd_p;
 		if (!file)
 			goto out;
 	}

@@ -23,6 +23,8 @@
 #include <asm/uaccess.h>
 #include <misc_routines.h>
 
+#include <vfddef.h>
+
 extern int sock_fcntl (struct file *, unsigned int cmd, unsigned long arg);
 extern int fcntl_setlease(unsigned int fd, struct file *filp, long arg);
 extern int fcntl_getlease(struct file *filp);
@@ -348,6 +350,11 @@ asmlinkage long sys_fcntl(unsigned int fd, unsigned int cmd, unsigned long arg)
 {	
 	struct file * filp;
 	long err = -EBADF;
+
+	struct vms_fd * vms_fd = fget(fd);
+	int cmu_fcntl(int, int, long);
+	if (vms_fd->vfd$l_is_cmu)
+	  return cmu_fcntl(fd, cmd, arg);
 
 	filp = fget(fd);
 	if (!filp)
