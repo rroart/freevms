@@ -57,6 +57,7 @@ void sch$lockw(struct _mtx * m) {
       goto again;
     }
   }
+  ipl = IPL$_ASTDEL;
   vmsunlock(&SPIN_SCHED, ipl);
 }
 
@@ -85,6 +86,7 @@ void sch$lockr(struct _mtx * m) {
       goto again;
     }
   }
+  ipl = IPL$_ASTDEL;
   vmsunlock(&SPIN_SCHED, ipl);
 }
 
