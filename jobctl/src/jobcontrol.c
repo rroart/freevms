@@ -21,7 +21,7 @@
 
 short int mbx_buffer[128];
 short int mailbox_channel=0;
-static unsigned long iosb;
+static unsigned long long iosb;
 do_mbx_read();
 
 mbx_read_ast() {
