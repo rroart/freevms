@@ -1,3 +1,10 @@
+// $Id$
+// $Locker$
+
+// Author. Mike O'Malley
+// Author. Roar Thronæs.
+// Modified LIBCMU source file
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * LIBCMU, Copyright (C) 1993,1994 by Mike O'Malley
  *
@@ -154,21 +161,112 @@
  */
 #define FD_SETSIZE 32
 
+#define readonly const
+// remember: remove network.h netconfig.h neterror.h
+
+#ifdef __KERNEL__
+#define strtoul simple_strtoul
+
+int sys_dup();
+#define dup sys_dup
+int vaxc$errno;
+int EVMSERR;
+int sys_sleep();
+int sys$qio();
+int sys$qiow();
+#define sys$setef exe$setef
+int sys$setef();
+#define sys$clref exe$clref
+int sys$clref();
+int sys$assign();
+#define sys$getsyi exe$getsyi
+int sys$getsyi();
+int sys$waitfr();
+int cfree();
+int sys_recvfrom();
+int sys_sendto();
+int recv();
+#define sys$cancel exe$cancel
+int sys$cancel();
+int lib$get_ef();
+int localtime();
+#define sys$bintim exe$bintim
+int sys$bintim();
+#define sys$setimr exe$setimr
+int sys$setimr();
+#define sys$wflor exe$wflor
+int sys$wflor();
+#define sys$cantim exe$cantim
+int sys$cantim();
+int lib$free_ef();
+int atoi();
+int sys$dassgn();
+int close();
+int malloc();
+int free();
+#define sys$dalloc exe$dalloc
+#define sys$dalloc exe$dassgn
+// check
+int sys$dalloc();
+int sys$trnlnm();
+
+#include <linux/kernel.h>
+#include <linux/string.h>
+#include <linux/ctype.h>
+#include <linux/socket.h>
+#include <linux/time.h>
+#include <linux/in.h>
+#include <linux/slab.h>
+
+#define malloc(x) kmalloc(x, GFP_KERNEL)
+#define cfree kfree
+#define free kfree
+static inline void * calloc(int a, int b) {
+  void * v = kmalloc(a*b, GFP_KERNEL);
+  memset (v, 0, a*b);
+  return v;
+}
+#endif
+
+#ifndef __KERNEL__
+#include <netinet/in.h>
+#include <sys/socket.h>
+#endif
+
+#ifndef __KERNEL__
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#else
+#include <linux/errno.h>
+#endif
 
+#ifndef __KERNEL__
 #include <netdb.h>
+#endif
 
+#ifndef __KERNEL__
 #include <types.h>
 #include <ctype.h>
 #include <time.h>
+#endif
+
 #include <file.h>
+#ifndef __KERNEL__
 #include <ioctl.h>
+#endif
+#ifndef __KERNEL__
 #include <socket.h>
+#endif
+#ifdef __KERNEL__
+#include <linux/file.h>
+#include <vfddef.h>
+#endif
 
 #include <if.h>
+#ifndef __KERNEL__
 #include <in.h>
+#endif
 
 #include <ssdef.h>
 #include <descrip.h>
@@ -179,6 +277,10 @@
 #include <tt2def.h>
 #include <syidef.h>
 
+#ifdef __KERNEL__
+#undef SPECIAL
+#undef MAXBUF;
+#endif
 /*
  * CMU-OpenVMS/IP specific definitions
  */
@@ -210,7 +312,9 @@ int cmu_queue_net_read(int s);
 /*
  * Our private file descriptor table
  */
+#ifndef __KERNEL__
 static struct FD_ENTRY *sd[FD_SETSIZE];
+#endif
 
 /*
  * The default interface name.
@@ -238,7 +342,11 @@ static fd_set sys_exceptfds;	/* does sd have an error*/
 /*
  * Accept event flag so we know when a request comes in
  */
+#ifndef __KERNEL__
 static int accept_net_event;
+#else
+static int accept_net_event = 16; // check
+#endif
 
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -259,7 +367,11 @@ static int accept_net_event;
  *  If successful a socket number is returned, otherwise, a -1 is returned and
  *  errno is set.
  */
+#ifndef __KERNEL__
 int socket(domain,type,protocol)
+#else
+asmlinkage int sys_socket(domain,type,protocol)
+#endif
 int domain,type,protocol;
 {
 
@@ -272,30 +384,51 @@ int	s;
 	/*
 	 * we don't handle any other address formats.
 	 */
+#ifndef __KERNEL__
 	errno = EAFNOSUPPORT;
 	return(-1);
+#else
+	return -EAFNOSUPPORT;
+#endif
     }	
 
     /*
      * Use the dup() routine to aquire a unique discriptor.
      * Make sure it's in our range.
      */
+#ifndef __KERNEL__
     s = dup(0);
+#else
+    s = get_unused_fd();
+#endif
     if (s<0)
 	return(-1);
     else if ((s < 0) || (s > FD_SETSIZE)) {
+#ifndef __KERNEL__
 	errno = ENFILE;
 	return (-1);
+#else
+	return -ENFILE;
+#endif
     }
     FD_SET(s,&sys_validfds);
 
     /*
      * Allocate a file descriptor data structure and initialize it.
      */
+#ifdef __KERNEL__
+    int fd = s;
+    struct FD_ENTRY *sd[FD_SETSIZE];
+#endif
     sd[s] = calloc( 1, sizeof(struct FD_ENTRY));
     sd[s]->domain	= domain;
     sd[s]->type		= type;
-
+#ifdef  __KERNEL__
+    struct vms_fd * vms_fd = kmalloc(sizeof(struct vms_fd), GFP_KERNEL);
+    vms_fd->vfd$l_is_cmu = 1;
+    vms_fd->vfd$l_fd_p = sd[s];
+    fd_install(fd, vms_fd);
+#endif
     /*
      * If not specified select a default protocol
      */
@@ -316,8 +449,12 @@ int	s;
 		sd[s]->protocol = protocol;
 		break;
 	    default:
+#ifndef __KERNEL__
 		errno = EPROTONOSUPPORT;
 		return(-1);
+#else
+		return -EPROTONOSUPPORT;
+#endif
 	}
 
 
@@ -328,8 +465,12 @@ int	s;
     if (MAXBUF == 0) {
 	vaxc$errno = sys$getsyi( 0, 0, 0, &syinfo, 0, 0, 0);
 	if (vaxc$errno != SS$_NORMAL) {
+#ifndef __KERNEL__
 		errno = EVMSERR;
 		return(-1);
+#else
+		return -EVMSERR;
+#endif
 	}
     }
 
@@ -345,8 +486,12 @@ int	s;
      */
     vaxc$errno = sys$assign(&inet_device,&sd[s]->chan,0,0);
     if (vaxc$errno != SS$_NORMAL) {
+#ifndef __KERNEL__
 	errno = EVMSERR;
 	return(-1);
+#else
+	return -EVMSERR;
+#endif
     }
     return(s);
 }
@@ -369,7 +514,11 @@ int	s;
  *	0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
+#ifndef __KERNEL__
 int bind(s,name,namelen)
+#else
+asmlinkage int sys_bind(s,name,namelen)
+#endif
 int			s;	/* socket to bind to	*/
 struct sockaddr		*name;	/* name stuff		*/
 int			namelen;/* length of name stuff	*/
@@ -385,24 +534,41 @@ struct	sockaddr_in *my = name;
 	/*
 	 * we don't handle any other address formats.
 	 */
+#ifndef __KERNEL__
 	errno = EAFNOSUPPORT;
 	return(-1);
+#else
+	return -EAFNOSUPPORT;
+#endif
     }	
 
     /*
      * check for valid socket.
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * see if it's already named
      */
     if (sd[s]->flags & SD_BIND) {
+#ifndef __KERNEL__
 	errno = EINVAL;
 	return(-1);
+#else
+	return -EINVAL;
+#endif
     }
 
     /*
@@ -426,11 +592,18 @@ struct	sockaddr_in *my = name;
 		U$UDP_Protocol, 0);
 
 	if (vaxc$errno != SS$_NORMAL) {
+#ifdef __KERNEL__
+	  int errno;
+#endif
 	    errno = cmu_get_errno(&sd[s]->read_iosb);
 	    sys$qio(0,sd[s]->chan,TCP$ABORT,0,0,0,0,0,0,0,0,0);
 	    FD_SET(s,&sys_exceptfds);
 	    sys$setef(sd[s]->ef);
+#ifndef __KERNEL__
 	    return(-1);
+#else
+	    return -errno;
+#endif
 	}
 
 	FD_SET(s,&sys_writefds);
@@ -466,7 +639,11 @@ struct	sockaddr_in *my = name;
  *	0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
+#ifndef __KERNEL__
 int connect(s,name,namelen)
+#else
+asmlinkage int sys_connect(s,name,namelen)
+#endif
 int s;
 struct sockaddr *name;
 int namelen;
@@ -481,24 +658,41 @@ struct	sockaddr_in *p;
 	/*
 	 * we don't handle any other address formats.
 	 */
+#ifndef __KERNEL__
 	errno = EAFNOSUPPORT;
 	return(-1);
+#else
+	return -EAFNOSUPPORT;
+#endif
     }	
 
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * see if it's already connected
      */
     if ((sd[s]->flags & SD_CONNECTED) != 0) {
+#ifndef __KERNEL__
 	errno = EISCONN;
 	return(-1);
+#else
+	return -EISCONN;
+#endif
     }
 
     /*
@@ -547,7 +741,11 @@ struct	sockaddr_in *p;
      * could there be a timing problem here?  Will the read AST complete (on
      * error) before the next statement?  Lets wait a sec anyway just in case.
      */
+#ifndef __KERNEL__
     sleep(1);
+#else
+    // check    sys_sleep(1);
+#endif
 
     vaxc$errno = sd[s]->read_iosb.NSB$STATUS;
 
@@ -555,10 +753,17 @@ struct	sockaddr_in *p;
      * 0 = read in progress, 1 = read complete data waiting.
      */
     if ((vaxc$errno != 0) && (vaxc$errno != 1)) {
+#ifdef __KERNEL__
+      int errno;
+#endif
 	errno = cmu_get_errno(&sd[s]->read_iosb);
 	FD_SET(s,&sys_exceptfds);
 	sys$setef(sd[s]->ef);
+#ifndef __KERNEL__
 	return(-1);
+#else
+	return -errno;
+#endif
     }
 
     FD_SET(s,&sys_writefds);
@@ -583,7 +788,11 @@ struct	sockaddr_in *p;
  *	0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
+#ifndef __KERNEL__
 int listen(s,backlog)
+#else
+asmlinkage int sys_listen(s,backlog)
+#endif
 int s;
 int backlog;
 {
@@ -591,14 +800,27 @@ int backlog;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     if ((sd[s]->protocol != IPPROTO_TCP) || (sd[s]->type != SOCK_STREAM)) {
+#ifndef __KERNEL__
 	errno = EOPNOTSUPP;
 	return(-1);
+#else
+	return -EOPNOTSUPP;
+#endif
     }
 
     sd[s]->backlog = backlog;
@@ -607,7 +829,9 @@ int backlog;
     /*
      * Allocate an event flag used to signal a blocked accept call
      */
+#ifndef __KERNEL__
     lib$get_ef(&accept_net_event);
+#endif
     sys$clref(accept_net_event);
 
     /*
@@ -644,7 +868,11 @@ int backlog;
  * -1 on error.  Addition error information is specified in the global
  * variable errno.
  */
+#ifndef __KERNEL__
 int accept( s, addr, addrlen)
+#else
+asmlinkage int sys_accept( s, addr, addrlen)
+#endif
 int	s;
 struct	sockaddr *addr;
 int	*addrlen;
@@ -655,17 +883,30 @@ struct	backlogEntry *entry;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * look see if socket is listening
      */
     if ((sd[s]->sock_opts & SO_ACCEPTCONN) == 0) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
@@ -689,8 +930,12 @@ CHECK_QUEUE:
 	    }
 	}
 	else {
+#ifndef __KERNEL__
 	    errno = EWOULDBLOCK;
 	    return(-1);
+#else
+	    return -EWOULDBLOCK;
+#endif
 	}
     }
 
@@ -721,6 +966,10 @@ CHECK_QUEUE:
     /*
      * fill in addr with the connecting entity information
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd2 = fget(ns);
+    sd[ns] = vms_fd2->vfd$l_fd_p;
+#endif
     if (addr != NULL)
     	memcpy (addr,&(sd[ns]->to), (*addrlen < sizeof(struct sockaddr)
 				   ? *addrlen : sizeof(struct sockaddr)));
@@ -749,7 +998,11 @@ CHECK_QUEUE:
  *	Number of bytes read from the socket, -1 on error.  Addition error
  * information is specified in the global variable errno.
  */
+#ifndef __KERNEL__
 int recv(s,buf,len,flags)
+#else
+asmlinkage int sys_recv(s,buf,len,flags)
+#endif
 int	s;
 char	*buf;
 int	len, flags;
@@ -757,19 +1010,36 @@ int	len, flags;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * Must be connected
      */
     if ((sd[s]->flags & SD_CONNECTED) != 0)
+#ifndef __KERNEL__
 	return(recvfrom(s,buf,len,flags,0,0));
+#else
+	return(sys_recvfrom(s,buf,len,flags,0,0));
+#endif
     else {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 }
 
@@ -796,7 +1066,11 @@ int	len, flags;
  *	Number of bytes read from the socket, -1 on error.  Addition error
  * information is specified in the global variable errno.
  */
+#ifndef __KERNEL__
 int recvfrom(s,buf,len,flags,from,fromlen)
+#else
+asmlinkage int sys_recvfrom(s,buf,len,flags,from,fromlen)
+#endif
 int	s;
 char	*buf;
 int	len, flags;
@@ -809,17 +1083,30 @@ struct	sockaddr_in *frm;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * make sure the socket is not shutdown
      */
     if ((sd[s]->ioctl_opts & FREAD) != 0) {
+#ifndef __KERNEL__
 	errno = EPIPE;
 	return(-1);
+#else
+	return -EPIPE;
+#endif
     }
 
 CHECKforDATA:
@@ -828,8 +1115,15 @@ CHECKforDATA:
      */
     if (FD_ISSET(s,&sys_readfds))
 	if (sd[s]->read_iosb.NSB$STATUS != SS$_NORMAL) {
+#ifdef __KERNEL__
+	  int errno;
+#endif
 	    errno = cmu_get_errno(&sd[s]->read_iosb);
+#ifndef __KERNEL__
 	    return(-1);
+#else
+	    return -errno;
+#endif
 	}
 
     /*
@@ -838,8 +1132,12 @@ CHECKforDATA:
      */
     if (!(FD_ISSET(s,&sys_readfds))) {
 	if (sd[s]->ioctl_opts & O_NDELAY) {
+#ifndef __KERNEL__
 	    errno = EWOULDBLOCK;
 	    return(-1);
+#else
+	    return -EWOULDBLOCK;
+#endif
 	}
 	else {
 	    sys$waitfr(sd[s]->ef);
@@ -915,7 +1213,11 @@ CHECKforDATA:
  *	Number of bytes written to the socket, -1 on error.  Addition error
  * information is specified in the global variable errno.
  */
+#ifndef __KERNEL__
 int send(s,msg,len,flags)
+#else
+asmlinkage int sys_send(s,msg,len,flags)
+#endif
 int	s;
 char	*msg;
 int	len, flags;
@@ -923,19 +1225,36 @@ int	len, flags;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * Must be connected
      */
     if ((sd[s]->flags & SD_CONNECTED) != 0)
+#ifndef __KERNEL__
 	return(sendto(s,msg,len,flags,0,0));
+#else
+	return(sys_sendto(s,msg,len,flags,0,0));
+#endif
     else {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 }
 
@@ -961,7 +1280,11 @@ int	len, flags;
  *	Number of bytes written to the socket, -1 on error.  Addition error
  * information is specified in the global variable errno.
  */
+#ifndef __KERNEL__
 int sendto(s,msg,len,flags,to,tolen)
+#else
+asmlinkage int sys_sendto(s,msg,len,flags,to,tolen)
+#endif
 int	s;
 char	*msg;
 int	len, flags;
@@ -970,22 +1293,39 @@ int	tolen;
 {
 struct	sockaddr_in *too;
 IPADR$ADDRESS_BLOCK UDP_ADDR;
+#ifndef __KERNEL__
 static int write_ef = 0;
+#else
+static int write_ef = 17;
+#endif
 
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * make sure the socket is not shutdown
      */
     if ((sd[s]->ioctl_opts & FWRITE) != 0) {
+#ifndef __KERNEL__
 	errno = EPIPE;
 	return(-1);
+#else
+	return -EPIPE;
+#endif
     }
 
     /*
@@ -1001,8 +1341,15 @@ static int write_ef = 0;
 		U$UDP_Protocol, 0);
 
 	if (sd[s]->read_iosb.NSB$STATUS != SS$_NORMAL) {
+#ifdef __KERNEL__
+	  int errno;
+#endif
 	    errno = cmu_get_errno(&sd[s]->read_iosb);
+#ifndef __KERNEL__
 	    return(-1);
+#else
+	    return -errno;
+#endif
 	}
 	sd[s]->flags |= SD_CONNECTED;
 
@@ -1015,8 +1362,12 @@ static int write_ef = 0;
      */
     if (to != NULL)
 	if (to->sa_family != AF_INET) {
+#ifndef __KERNEL__
 	    errno = EAFNOSUPPORT;
 	    return(-1);
+#else
+	    return -EAFNOSUPPORT;
+#endif
 	}
 
     /*
@@ -1040,8 +1391,10 @@ static int write_ef = 0;
     /*
      * get an event flag specific for writing
      */
+#ifndef __KERNEL__
     if (write_ef == 0)
 	lib$get_ef(&write_ef);
+#endif
 
     /*
      * clear the system write ready fds and queue the write
@@ -1069,8 +1422,15 @@ static int write_ef = 0;
     if (vaxc$errno == SS$_NORMAL)
 	return (len);
     else {
+#ifdef __KERNEL__
+      int errno;
+#endif
 	errno = cmu_get_errno(&sd[s]->write_iosb);
+#ifndef __KERNEL__
 	return(-1);
+#else
+	return -errno;
+#endif
     }
 }
 
@@ -1092,21 +1452,38 @@ static int write_ef = 0;
  *	0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
+#ifndef __KERNEL__
 int shutdown(s,how)
+#else
+asmlinkage int sys_shutdown(s,how)
+#endif
 int s, how;
 {
 
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * if not connected the no need to shutdown
      */
     if ((sd[s]->flags & SD_CONNECTED) == 0) {
+#ifndef __KERNEL__
 	errno = ENOTCONN;
 	return(-1);
+#else
+	return -ENOTCONN;
+#endif
     }
 
     switch (how) {
@@ -1121,8 +1498,12 @@ int s, how;
 		sys$cancel(sd[s]->chan);
 		break;
 	default :
+#ifndef __KERNEL__
 	    errno = EINVAL;
 	    return(-1);
+#else
+	    return -EINVAL;
+#endif
     }
     return(0);
 }
@@ -1158,7 +1539,11 @@ int s, how;
  * 0 if the operation timed out, -1 on error.  Addition error information is
  * specified in the global variable errno.
  */
+#ifndef __KERNEL__
 int select(nfds,readfds,writefds,exceptfds,timeout)
+#else
+asmlinkage int sys_select_cmu(nfds,readfds,writefds,exceptfds,timeout)
+#endif
 int	nfds;
 int	*readfds, *writefds, *exceptfds;
 struct	timeval *timeout;
@@ -1174,6 +1559,9 @@ struct dsc$descriptor ascii_time =
 	{20, DSC$K_DTYPE_T, DSC$K_CLASS_S, at };
 
 int	ef_mask;
+#ifdef __KERNEL__
+int errno;
+#endif
 #define EF_BASE 32
 
     readyfds = 0;
@@ -1182,7 +1570,9 @@ int	ef_mask;
     FD_ZERO(&ef_mask);
 
     block = timer_ef = 0;
-
+#ifndef __KERNEL__
+    timer_ef = 18;
+#endif
     maxfds = nfds < FD_SETSIZE ? nfds+1 : FD_SETSIZE;
 
     /*
@@ -1208,39 +1598,51 @@ int	ef_mask;
      */
     if (exceptfds != NULL) {
 	*exceptfds &= maxfds_mask;
-	if ((*exceptfds & sys_validfds) != *exceptfds) {
+	if ((*exceptfds & sys_validfds.fds_bits[0]) != *exceptfds) {
 	    /*
 	     * Set the exceptfds mask to indicate which fd was bad.
 	     */
-	    *exceptfds ^= sys_validfds;
+	    *exceptfds ^= sys_validfds.fds_bits[0];
+#ifndef __KERNEL__
 	    errno = EBADF;
 	    return(-1);
+#else
+	    return -EBADF;
+#endif
 	}
 	all_fds = *exceptfds;
     }
 
     if (writefds != NULL) {
 	*writefds &= maxfds_mask;
-	if ((*writefds & sys_validfds) != *writefds) {
+	if ((*writefds & sys_validfds.fds_bits[0]) != *writefds) {
 	    /*
 	     * Set the exceptfds mask to indicate which fd was bad.
 	     */
-	    *writefds ^= sys_validfds;
+	    *writefds ^= sys_validfds.fds_bits[0];
+#ifndef __KERNEL__
 	    errno = EBADF;
 	    return(-1);
+#else
+	    return -EBADF;
+#endif
 	}
 	all_fds |= *writefds;
     }
 
     if (readfds != NULL) {
 	*readfds &= maxfds_mask;
-	if ((*readfds & sys_validfds) != *readfds) {
+	if ((*readfds & sys_validfds.fds_bits[0]) != *readfds) {
 	    /*
 	     * Set the exceptfds mask to indicate which fd was bad.
 	     */
-	    *readfds ^= sys_validfds;
+	    *readfds ^= sys_validfds.fds_bits[0];
+#ifndef __KERNEL__
 	    errno = EBADF;
 	    return(-1);
+#else
+	    return -EBADF;
+#endif
 	}
 	all_fds |= *readfds;
     }
@@ -1261,12 +1663,20 @@ int	ef_mask;
 		readyfds = -1;
 		goto EXIT;
 	    }
+#ifndef __KERNEL__
 	    lt = localtime(&timeout->tv_sec);
 	    sprintf(at,"0 %02.2d:%02.2d:%02.2d.%02.2d",
 		lt->tm_hour, lt->tm_min, lt->tm_sec, timeout->tv_usec);
 	    ascii_time.dsc$w_length = strlen(at);
 	    sys$bintim(&ascii_time,&t);
+#else
+	    long long * t_p = &t[0];
+	    *t_p = timeout->tv_sec;
+	    *t_p *= -10000000; // check
+#endif
+#ifndef __KERNEL__
 	    lib$get_ef(&timer_ef);
+#endif
 	    sys$setimr(timer_ef,&t,0,timer_ef,0);
 	    FD_SET((timer_ef - EF_BASE),&ef_mask);
 	}
@@ -1276,7 +1686,7 @@ CHECK_DESCRIPTORS:
      * exception file descriptors
      */
     if (exceptfds != NULL)
-	if((ready_fds = sys_exceptfds & *exceptfds) != 0)
+	if((ready_fds = sys_exceptfds.fds_bits[0] & *exceptfds) != 0)
 	    for (i=0; i < maxfds; i++)
 		if (FD_ISSET(i,&ready_fds))
 		    readyfds++;
@@ -1285,7 +1695,7 @@ CHECK_DESCRIPTORS:
      * write file descriptors
      */
     if (writefds != NULL)
-	if((ready_fds = sys_writefds & *writefds) != 0)
+	if((ready_fds = sys_writefds.fds_bits[0] & *writefds) != 0)
 	    for (i=0; i < maxfds; i++)
 		if (FD_ISSET(i,&ready_fds))
 		    readyfds++;
@@ -1294,7 +1704,7 @@ CHECK_DESCRIPTORS:
      * read file descriptors
      */
     if (readfds != NULL)
-	if((ready_fds = sys_readfds & *readfds) != 0)
+	if((ready_fds = sys_readfds.fds_bits[0] & *readfds) != 0)
 	    for (i=0; i < maxfds; i++)
 		if (FD_ISSET(i,&ready_fds))
 		    readyfds++;
@@ -1309,7 +1719,19 @@ CHECK_DESCRIPTORS:
 		    goto EXIT;
 	    for (i=0; i < maxfds; i++)
 		if (FD_ISSET(i,&all_fds))
+#ifdef __KERNEL__
+		  {
+		    int s;
+		    struct vms_fd * vms_fd = fget(i);
+		    struct FD_ENTRY *sd[FD_SETSIZE];
+		    sd[s] = vms_fd->vfd$l_fd_p;
+		    FD_SET((sd[s]->ef - EF_BASE),&ef_mask);
+#else
 		    FD_SET((sd[i]->ef - EF_BASE),&ef_mask);
+#endif __KERNEL__
+#ifdef __KERNEL__
+		  }
+#endif __KERNEL__
 	    sys$wflor(1,ef_mask);
 	    goto CHECK_DESCRIPTORS;
 	}
@@ -1317,14 +1739,16 @@ CHECK_DESCRIPTORS:
 EXIT:
     if (timer_ef != 0) {
 	sys$cantim(timer_ef,0);
+#ifndef __KERNEL__
 	lib$free_ef(&timer_ef);
+#endif
     }
     if (exceptfds != NULL)
-	*exceptfds = (sys_exceptfds & maxfds_mask);
+	*exceptfds = (sys_exceptfds.fds_bits[0] & maxfds_mask);
     if (writefds != NULL)
-	*writefds = (sys_writefds & maxfds_mask);
+	*writefds = (sys_writefds.fds_bits[0] & maxfds_mask);
     if (readfds != NULL)
-	*readfds = (sys_readfds & maxfds_mask);
+	*readfds = (sys_readfds.fds_bits[0] & maxfds_mask);
     return(readyfds);
 }
 
@@ -1345,7 +1769,11 @@ EXIT:
  *	0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
+#ifndef __KERNEL__
 int getsockname(s,name,namelen)
+#else
+asmlinkage int sys_getsockname(s,name,namelen)
+#endif
 int	s;
 struct	sockaddr *name;
 int	*namelen;
@@ -1355,9 +1783,18 @@ int	size;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
@@ -1385,7 +1822,11 @@ int	size;
  *	0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
+#ifndef __KERNEL__
 int getpeername(s,name,namelen)
+#else
+asmlinkage int sys_getpeername(s,name,namelen)
+#endif
 int	s;
 struct	sockaddr *name;
 int	*namelen;
@@ -1398,17 +1839,30 @@ Connection_Info_Return_Block conInfo;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * Must be connected
      */
     if ((sd[s]->flags & SD_CONNECTED) == 0) {
+#ifndef __KERNEL__
 	errno = ENOTCONN;
 	return(-1);
+#else
+	return -ENOTCONN;
+#endif
     }
 
     /*
@@ -1424,8 +1878,15 @@ Connection_Info_Return_Block conInfo;
      * check the qio status
      */
     if (vaxc$errno != SS$_NORMAL) {
+#ifdef __KERNEL__
+      int errno;
+#endif
 	errno = cmu_get_errno(&iosb);
+#ifndef __KERNEL__
 	return (-1);
+#else
+	return -errno;
+#endif
     }
 
     /*
@@ -1469,7 +1930,11 @@ Connection_Info_Return_Block conInfo;
  *	0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
+#ifndef __KERNEL__
 int getsockopt(s,level,optname,optval,optlen)
+#else
+asmlinkage int sys_getsockopt(s,level,optname,optval,optlen)
+#endif
 int	s, level, optname;
 char	*optval;
 int	*optlen;
@@ -1477,16 +1942,29 @@ int	*optlen;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * there are no socket level options at this time.
      */
+#ifndef __KERNEL__
     errno = ENOPROTOOPT;
     return(-1);
+#else
+    return -ENOPROTOOPT;
+#endif
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1507,7 +1985,11 @@ int	*optlen;
  *	0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
+#ifndef __KERNEL__
 int setsockopt(s,level,optname,optval,optlen)
+#else
+asmlinkage int sys_setsockopt(s,level,optname,optval,optlen)
+#endif
 int	s, level, optname;
 char	*optval;
 int	optlen;
@@ -1515,18 +1997,32 @@ int	optlen;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * there are no socket level options at this time.
      */
+#ifndef __KERNEL__
     errno = ENOPROTOOPT;
     return(-1);
+#else
+    return -ENOPROTOOPT;
+#endif
 }
 
+#ifndef __KERNEL__
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int gethostname(char *name, int namelen)
  *
@@ -1765,6 +2261,7 @@ NetIO_Status_Block iosb;
 
     return(&inet_host);
 }
+#endif
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <ioctl.h>
@@ -1789,7 +2286,11 @@ NetIO_Status_Block iosb;
  *	0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
+#ifndef __KERNEL__
 int ioctl(s,request,argp)
+#else
+int cmu_ioctl(s,request,argp)
+#endif
 int	s;
 int	request;
 char	*argp;
@@ -1812,12 +2313,25 @@ NetIO_Status_Block iosb;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
+#ifndef __KERNEL__
     errno = 0;
+#else
+    int errno = 0;
+#endif
 
     switch ((request & 0x0000ff00) >> 8) {
 	case 't' :
@@ -1841,7 +2355,7 @@ NetIO_Status_Block iosb;
 		     */
 		    if ((sd[s]->ioctl_opts & FREAD) != 0)
 			errno = EPIPE;
-		    if (FD_ISSET(s,&sys_readfds))
+		    if (FD_ISSET(s,&sys_readfds.fds_bits[0]))
 			*n = sd[s]->read_iosb.NSB$Byte_Count;
 		    else
 			*n = 0;
@@ -1937,7 +2451,11 @@ NetIO_Status_Block iosb;
 	    }
     }
 
+#ifndef __KERNEL__
     return ( errno == 0 ? 0 : -1);
+#else
+    return -errno;
+#endif
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1958,15 +2476,28 @@ NetIO_Status_Block iosb;
  *	Value of flags or -1 on error.  Addition error information is
  * specified in the global variable errno.
  */
+#ifndef __KERNEL__
 int fcntl(s,request,arg)
+#else
+int cmu_fcntl(s,request,arg)
+#endif
 int s, request, arg;
 {
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     switch (request) {
@@ -1976,8 +2507,12 @@ int s, request, arg;
 	    sd[s]->ioctl_opts = arg;
 	    return(0);
 	default :
+#ifndef __KERNEL__
 	    errno = EINVAL;
 	    return(-1);
+#else
+	    return -EINVAL;
+#endif
     }
 }
 
@@ -2010,19 +2545,36 @@ int	len;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * Must be connected
      */
     if ((sd[s]->flags & SD_CONNECTED) != 0)
+#ifndef __KERNEL__
 	return(recvfrom(s,buf,len,0,0,0));
+#else
+	return(sys_recvfrom(s,buf,len,0,0,0));
+#endif
     else {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 }
 
@@ -2051,19 +2603,36 @@ int	len;
     /*
      * check for valid socket
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 
     /*
      * Must be connected
      */
     if ((sd[s]->flags & SD_CONNECTED) != 0)
+#ifndef __KERNEL__
 	return(sendto(s,msg,len,0,0,0));
+#else
+	return(sys_sendto(s,msg,len,0,0,0));
+#endif
     else {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
 }
 
@@ -2095,8 +2664,17 @@ struct	backlogEntry *entry;
      * if this is not one of our channels then pass it on to the systems
      * close routine.
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL)
+#ifndef __KERNEL__
 	return(close(s));
+#else
+    return(sys_close(s));
+#endif
 
     /*
      * Verify that the channel is indeed open -- in some cases it may not be.
@@ -2112,16 +2690,18 @@ struct	backlogEntry *entry;
     /*
      * Clear all the associated fd bits
      */
-    FD_CLR(s,&sys_validfds);
-    FD_CLR(s,&sys_readfds);
-    FD_CLR(s,&sys_writefds);
-    FD_CLR(s,&sys_exceptfds);
+    FD_CLR(s,&sys_validfds.fds_bits[0]);
+    FD_CLR(s,&sys_readfds.fds_bits[0]);
+    FD_CLR(s,&sys_writefds.fds_bits[0]);
+    FD_CLR(s,&sys_exceptfds.fds_bits[0]);
 
     /*
      * free the various resources that we have accumulated
      */
     if (sd[s]->ef != 0)
+#ifndef __KERNEL__
 	lib$free_ef(&sd[s]->ef);
+#endif
 
     if (sd[s]->rcvbuf != NULL)
 	free(sd[s]->rcvbuf);
@@ -2151,7 +2731,11 @@ struct	backlogEntry *entry;
 
     cfree(sd[s]);
     sd[s] = 0;
+#ifndef __KERNEL__
     close(s);	/* this should free up the duped file descriptor */
+#else
+    sys_close(s);
+#endif
     return(0);
 }
 
@@ -2178,13 +2762,26 @@ char	*name;
 {
 struct	dsc$descriptor dev_name;
 
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(0);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[0] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[0] != NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(-1);
+#else
+	return -EBADF;
+#endif
     }
     sd[0] = calloc( 1, sizeof(struct FD_ENTRY));
-    FD_CLR(0,&sys_readfds);
-    FD_SET(0,&sys_validfds);
+    FD_CLR(0,&sys_readfds.fds_bits[0]);
+    FD_SET(0,&sys_validfds.fds_bits[0]);
+
+#ifdef __KERNEL__
+    int errno;
+#endif
 
     /*
      * copy the `name' to the `my' sockaddr area (seems like a logical place)
@@ -2214,7 +2811,11 @@ struct	dsc$descriptor dev_name;
 	goto ERROR_RETURN;
     }
 
+#ifndef __KERNEL__
     lib$get_ef(&sd[0]->ef);
+#else
+    sd[0]->ef = 32; // check. very bad
+#endif
     sys$clref(sd[0]->ef);
     /*
      * return the address of the socket descriptor so the user can play with
@@ -2226,7 +2827,11 @@ ERROR_RETURN:
     if (sd[0] != NULL)
 	cfree(sd[0]);
     sd[0] = NULL;
+#ifndef __KERNEL__
     return(-1);
+#else
+    return -errno;
+#endif
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2258,8 +2863,13 @@ int	mask;
     /*
      * Clear these system things.
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(0);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[0] = vms_fd->vfd$l_fd_p;
+#endif
     sys$clref(sd[0]->ef);
-    FD_CLR(0, &sys_readfds);
+    FD_CLR(0, &sys_readfds.fds_bits[0]);
 
     if (prompt != NULL)
 	vaxc$errno = sys$qio( 0, sd[0]->chan, flags, &sd[0]->read_iosb,
@@ -2292,9 +2902,18 @@ int	s;
     /*
      * check for valid socket.
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s] == NULL) {
+#ifndef __KERNEL__
 	errno = EBADF;
 	return(0);
+#else
+	return -EBADF;
+#endif
     }
     else
 	return(sd[s]->chan);
@@ -2391,8 +3010,12 @@ char	PSL$C_USER   = 3;
 	return(0);
     }
     else {
+#ifndef __KERNEL__
 	errno = EVMSERR;
 	return(-1);
+#else
+	return -EVMSERR;
+#endif
     }
 }
 
@@ -2692,18 +3315,27 @@ Connection_Info_Return_Block conInfo;
     /*
      * check the stats of the completed open
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s]->read_iosb.NSB$STATUS != SS$_NORMAL) {
 	/* 
 	 * failed; set exceptfds and event
 	 */
-	FD_SET(s,&sys_exceptfds);
+	FD_SET(s,&sys_exceptfds.fds_bits[0]);
 	sys$setef(sd[s]->ef);
     }
 
     /*
      * get a new clean socket like the one we have now
      */
+#ifndef __KERNEL__
     ns = socket(sd[s]->domain, sd[s]->type, sd[s]->protocol);
+#else
+    ns = sys_socket(sd[s]->domain, sd[s]->type, sd[s]->protocol);
+#endif
 
     /*
      * Get connection from information
@@ -2717,6 +3349,10 @@ Connection_Info_Return_Block conInfo;
     /*
      * record from port info in new socket to port info
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd2 = fget(ns);
+    sd[ns] = vms_fd2->vfd$l_fd_p;
+#endif
     to			= &sd[ns]->to;
     to->sin_family	= AF_INET;
     to->sin_port	= htons(conInfo.CI$Foreign_Port);
@@ -2768,7 +3404,7 @@ Connection_Info_Return_Block conInfo;
     /*
      * tell someone how cares that something came in...
      */
-    FD_SET(s,&sys_readfds);
+    FD_SET(s,&sys_readfds.fds_bits[0]);
     sys$setef(accept_net_event);
 
     /*
@@ -2800,9 +3436,18 @@ struct	sockaddr_in *my;
     /*
      * if reads are shutdown on this socket then don't queue the listen
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if ((sd[s]->ioctl_opts & FREAD) != 0) {
+#ifndef __KERNEL__
 	errno = ESHUTDOWN;
 	return(-1);
+#else
+	return -ESHUTDOWN;
+#endif
     }
 
     /*
@@ -2822,8 +3467,15 @@ struct	sockaddr_in *my;
 		0);			/* timeout			    */
 
 	if (vaxc$errno != SS$_NORMAL) {
+#ifdef __KERNEL__
+	  int errno;
+#endif
 	    errno = cmu_get_errno(&sd[s]->read_iosb);
+#ifndef __KERNEL__
 	    return(-1);
+#else
+	    return -errno;
+#endif
 	}
 	sd[s]->flags |= SD_CONNECTED;
     }
@@ -2851,9 +3503,14 @@ int cmu_read_ast(s)
 int	s;	/* file descriptor that is ready. */
 {
 
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     switch (sd[s]->read_iosb.NSB$STATUS) {
 	case SS$_NORMAL:
-	    FD_SET(s,&sys_readfds);
+	    FD_SET(s,&sys_readfds.fds_bits[0]);
 	case SS$_ABORT:
 	case SS$_CANCEL:
 	    /*
@@ -2865,7 +3522,7 @@ int	s;	/* file descriptor that is ready. */
 	    /*
 	     * all other status returns indicate an error
 	     */
-	    FD_SET(s,&sys_exceptfds);
+	    FD_SET(s,&sys_exceptfds.fds_bits[0]);
     }
 
 
@@ -2875,7 +3532,7 @@ int	s;	/* file descriptor that is ready. */
      */
     if ((sd[s]->read_iosb.X.STATUS & 0x0000ff00) == 0x0600) {
 	sd[s]->ioctl_opts |= (FREAD & FWRITE);
-	FD_CLR(s,&sys_validfds);
+	FD_CLR(s,&sys_validfds.fds_bits[0]);
     }
 
     /*
@@ -2901,10 +3558,15 @@ int	s;	/* file descriptor that is ready. */
 int cmu_write_ast(s)
 int	s;	/* file descriptor that is ready. */
 {
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s]->write_iosb.NSB$STATUS == SS$_NORMAL)
-	FD_SET(s,&sys_writefds);
+	FD_SET(s,&sys_writefds.fds_bits[0]);
     else
-	FD_SET(s,&sys_exceptfds);
+	FD_SET(s,&sys_exceptfds.fds_bits[0]);
 
 }
 
@@ -2928,10 +3590,19 @@ int	s;
     /*
      * get and clear an event flag and file descriptor for this read request.
      */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
     if (sd[s]->ef == 0)
+#ifndef __KERNEL__
 	lib$get_ef(&sd[s]->ef);
+#else
+    sd[s]->ef = 32 + s; // check. very bad
+#endif
     sys$clref(sd[s]->ef);
-    FD_CLR(s, &sys_readfds);
+    FD_CLR(s, &sys_readfds.fds_bits[0]);
 
     /*
      * Allocate a receive buffer for reads
@@ -2940,8 +3611,12 @@ int	s;
 	sd[s]->rcvbuf = malloc(sd[s]->rcvbufsize);
     if (sd[s]->rcvbuf == NULL) {
 	sys$qio(0,sd[s]->chan,TCP$ABORT,0,0,0,0,0,0,0,0,0);
+#ifndef __KERNEL__
 	errno = ENOBUFS;
 	return(-1);
+#else
+	return -ENOBUFS;
+#endif
     }
 
     sys$clref(sd[s]->ef);
@@ -2963,10 +3638,17 @@ int	s;
     if (vaxc$errno == SS$_NORMAL)
 	return(0);
     else {
+#ifdef __KERNEL__
+      int errno;
+#endif
 	errno = cmu_get_errno(&sd[s]->read_iosb);
-	FD_SET(s,&sys_exceptfds);
+	FD_SET(s,&sys_exceptfds.fds_bits[0]);
 	sys$setef(sd[s]->ef);
 	sys$qio(0,sd[s]->chan,TCP$ABORT,0,0,0,0,0,0,0,0,0);
+#ifndef __KERNEL__
 	return(-1);
+#else
+	return -errno;
+#endif
     }
 }
