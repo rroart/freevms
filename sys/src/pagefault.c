@@ -265,6 +265,14 @@ int makereadast(unsigned long window, unsigned long pfn, unsigned long address, 
 
 extern unsigned long idt;
 
+#undef DEBUG_PF
+#define DEBUG_PF
+
+#ifdef DEBUG_PF
+long dpf[32*1024];
+long dpfc[32] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+#endif
+
 asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	struct task_struct *tsk;
 	struct mm_struct *mm;
@@ -314,6 +322,26 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 
 	//some linux stuff
 	tsk = current;
+
+#ifdef DEBUG_PF
+	{
+	  int pid2=tsk->pcb$l_pid&31;
+	  dpf[1024*pid2+dpfc[pid2]]=tsk;
+	  dpfc[pid2]++;
+	  dpf[1024*pid2+dpfc[pid2]]=address;
+	  dpfc[pid2]++;
+#if 0
+	  long addr = &pid;
+	  addr-=4;
+	  dpf[1024*pid2+dpfc[pid2]]=*(long*)addr;
+	  dpfc[pid2]++;
+	  dpf[1024*pid2+dpfc[pid2]]=a->acb$l_kast;
+	  dpfc[pid2]++;
+#endif
+	  if (dpfc[pid2]>1000)
+	    dpfc[pid2]=0;
+	}
+#endif
 
 	if (in_atomic) { 
 	  printk("atomic addr %x\n",address);

@@ -790,7 +790,7 @@ unsigned long ioc$gq_mountlst;
 unsigned long ioc$gq_mutex=0;
 unsigned long long ioc$gq_postiq=0;
 unsigned long ioc$gw_lamapreg;
-unsigned long ioc$gw_maxbuf;
+unsigned long ioc$gw_maxbuf = MAXBUF; // check
 unsigned long ioc$gw_mbxbfquo;
 unsigned long ioc$gw_mbxmxmsg;
 unsigned long ioc$gw_mvtimeout;

@@ -16,6 +16,9 @@
 #include <sch_routines.h>
 #include <misc_routines.h>
 
+#undef MYDEB_EFC
+#define MYDEB_EFC
+
 int waitcheck(struct _pcb *p, unsigned long priclass, unsigned long * efp, unsigned long * clusteraddr) {
   unsigned long tmp;
   if (efp!=clusteraddr) return;
@@ -43,8 +46,26 @@ int waitcheck2(struct _pcb *p, unsigned long priclass, unsigned long * efp, unsi
   sch$rse(p,priclass,EVT$_EVENT);
 }
 
+#ifdef MYDEB_EFC
+long efc[32*1024];
+long efcc[32] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+#endif
+
 int sch$postef(unsigned long ipid, unsigned long priclass, unsigned long efn) {
   int savipl=vmslock(&SPIN_SCHED,IPL$_SYNCH);
+#ifdef MYDEB_EFC
+  {
+    int pid=ipid&31;
+    efc[1024*pid+efcc[pid]]=efn;
+    efcc[pid]++;
+    long addr = &ipid;
+    addr-=4;
+    efc[1024*pid+efcc[pid]]=*(long*)addr;
+    efcc[pid]++;
+    if (efcc[pid]>1000)
+      efcc[pid]=0;
+  }
+#endif
   struct _pcb * p, * first;
   int efncluster=getefcno(efn);
   int retval;
