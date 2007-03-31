@@ -45,10 +45,22 @@ void ioc_std$initiate(struct _irp * i, struct _ucb * u) {
 
 extern int exetimeout;
 
+long reqcom[32*1024];
+long reqcomc[32]={ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
 void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   int qemp;
   int savipl;
   struct _irp * i=u->ucb$l_irp;
+  {
+    int pid=i->irp$l_pid&31;
+    reqcom[1024*pid+reqcomc[pid]]=i;
+    reqcomc[pid]++;
+    reqcom[1024*pid+reqcomc[pid]]=i->irp$l_qio_p3;
+    reqcomc[pid]++;
+    if (reqcomc[pid]>1000)
+      reqcomc[pid]=0;
+  }
   i->irp$l_iost1=iosb1; /* ok? */
   i->irp$l_iost2=iosb2;
   //  exetimeout=0;
@@ -61,15 +73,19 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   }
 
   savipl=getipl();
-  setipl(IPL$_IOPOST);
+  if (savipl<IPL$_IOPOST)
+    setipl(IPL$_IOPOST);
   
   qemp=rqempty(&ioc$gq_postiq);
+  insqti(i,&ioc$gq_postiq);
+#if 0
   long * l2=&ioc$gq_postiq;
   long l=((long)l2)+(*l2);
   if (i==l)
     goto skip_it;
   insqti(i,&ioc$gq_postiq);
  skip_it:
+#endif
   if (!qemp) goto notempty;
 
   if (smp_processor_id() == smp$gl_primid) {
