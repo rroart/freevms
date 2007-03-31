@@ -36,6 +36,9 @@
 #include <queue.h>
 #include <linux/slab.h>
 
+#undef MYDEB_IRP
+#define MYDEB_IRP
+
 void exe$qioqe2ppkt (struct _pcb * p, struct _irp * i);
 void exe$qioqxqppkt (struct _pcb * p, struct _irp * i);
 
@@ -149,6 +152,12 @@ asmlinkage int exe$qiow (unsigned int efn, unsigned short int chan,unsigned int 
 
 }
 
+#ifdef MYDEB_IRP
+long lastirp[32];
+long lastirp1[32*20];
+long lastirp2[32*6];
+#endif
+
 /* put this into a struct */
 asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
   int retval = 0;
@@ -188,6 +197,11 @@ asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int f
   i->irp$l_ucb=ctl$gl_ccbbase[chan].ccb$l_ucb;
   i->irp$l_pid=current->pcb$l_pid;
   i->irp$l_sts|=IRP$M_BUFIO; /* no DIRIO because of no mmg$svaptechk */
+#ifdef MYDEB_IRP
+  lastirp[i->irp$l_pid&31]=i;
+  memcpy(&lastirp1[20*(i->irp$l_pid&31)],i,20*4);
+  memcpy(&lastirp2[6*(i->irp$l_pid&31)],&i->irp$l_qio_p1,6*4);
+#endif
   /* do preprocessing */
   /* does it do one or more functions */
   //  for(c=0,d=1;c<64;c++,d=d<1) /* right order? */
@@ -212,9 +226,6 @@ int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
   int wasempty;
   struct _vcb * v=u->ucb$l_vcb;
   struct _aqb * a=v->vcb$l_aqb;
-  wasempty=aqempty(&a->aqb$l_acpqfl);
-  insque(i,&a->aqb$l_acpqfl);
-  if (!wasempty) return SS$_NORMAL;
   if (a->aqb$l_acppid==0) {
     exe$qioqxqppkt(p,i);
     return SS$_NORMAL;
@@ -225,6 +236,9 @@ int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
     return SS$_NORMAL;
   }
 #endif
+  wasempty=aqempty(&a->aqb$l_acpqfl);
+  insque(i,&a->aqb$l_acpqfl);
+  if (!wasempty) return SS$_NORMAL;
   vmslock(&SPIN_SCHED,IPL$_SCHED);
   sch$wake(a->aqb$l_acppid);
   vmsunlock(&SPIN_SCHED,-1);
@@ -255,8 +269,11 @@ void exe$qioqxqppkt (struct _pcb * p, struct _irp * i) {
   a->acb$l_ast=f11b$dispatch;
   a->acb$l_astprm=i;
   a->acb$b_rmod|=ACB$M_NODELETE; // bad idea to free this
+#if 0
   remque(i,0); // got to get rid of this somewhere, why not here?
+#endif
   sch$qast(p->pcb$l_pid,PRI$_RESAVL,a);
+  setipl(0);
 }
 
 #ifdef CONFIG_VMS
@@ -268,7 +285,9 @@ void exe$qioqe2ppkt (struct _pcb * p, struct _irp * i) {
   a->acb$l_ast=exttwo$dispatch;
   a->acb$l_astprm=i;
   a->acb$b_rmod|=ACB$M_NODELETE; // bad idea to free this
+#if 0
   remque(i,0); // got to get rid of this somewhere, why not here?
+#endif
   sch$qast(p->pcb$l_pid,PRI$_RESAVL,a);
 }
 #endif
