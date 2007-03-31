@@ -37,6 +37,9 @@
 #undef ASTDEBUG
 #define ASTDEBUG
 
+#undef MYDEB_AST
+#define MYDEB_AST
+
 extern int mydebug5;
 
 void sch$newlvl(struct _pcb *p);
@@ -56,8 +59,30 @@ static int checkq(struct _acb * head) {
 
 }
 
+#ifdef MYDEB_AST
+long qast[32*1024];
+long qastc[32] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+#endif
+
 int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   int savipl;
+#ifdef MYDEB_AST
+  {
+    int pid2=pid&31;
+    qast[1024*pid2+qastc[pid2]]=a;
+    qastc[pid2]++;
+    qast[1024*pid2+qastc[pid2]]=a->acb$l_ast;
+    qastc[pid2]++;
+    long addr = &pid;
+    addr-=4;
+    qast[1024*pid2+qastc[pid2]]=*(long*)addr;
+    qastc[pid2]++;
+    qast[1024*pid2+qastc[pid2]]=a->acb$l_kast;
+    qastc[pid2]++;
+    if (qastc[pid2]>1000)
+      qastc[pid2]=0;
+  }
+#endif
   int status=SS$_NORMAL;
   int kernelmode;
   /* lock */
@@ -108,7 +133,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
 #if 0
       smp_send_work(CPU$M_UPDASTSR, p->pcb$l_cpu_id);
 #else
-      p->pr_astlvl=p->phd$b_astlvl=0;
+      p->pr_astlvl = p->phd$b_astlvl = 0; // smp$intsr is supposed to zero
       // come to think of it, it did not matter, since we emulate
       // the astlvl in the pcb. ipint not needed, then. 
 #endif

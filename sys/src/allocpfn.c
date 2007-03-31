@@ -9,6 +9,7 @@
 #include <vmspte.h>
 #include <misc_routines.h>
 #include <mmg_routines.h>
+#include <internals.h>
 
 int lasteech=0;
 
@@ -37,6 +38,8 @@ signed long mmg$rempfn(unsigned long type, int pfn);
 #endif
 
 signed long mmg$allocpfn(void) {
+  if (getipl()<8)
+    panic("allocpfn\n");
   signed long pfn=mmg$rempfnh(PFN$C_FREPAGLST);
   if (pfn>=0) {
     //    mem_map[pfn].pfn$l_refcnt=0;
@@ -226,6 +229,8 @@ signed long mmg$inspfn(unsigned long type, struct _pfn * pfn, struct _pfn * list
 signed long mmg$inspfn(unsigned long type, int pfn, int list) {
   int m=pfn, tmp;
 #endif
+  if (getipl()<8)
+    panic("inspfn\n");
 
   lasteech=3;
 
