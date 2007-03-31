@@ -92,6 +92,7 @@
   int one_lexeme=0;
   int balanced_lexemes=0;
   int do_quote=0;
+  int hexmode = 0;
 
   int blipre_lineno=1;
   int blipre_charno=1;
@@ -380,7 +381,30 @@ hexdigit [0-9a-f]
   return *yytext;
 }
 
+{idigit}+			{
+if (!hexmode)
+  goto nohex;
+#if 0
+  if (skip_mode && if_mode == 0) {
+    yyless(yyleng);
+    break;
+  }
+#endif
+  long long l = strtoll(yytext, 0, 16);
+#ifdef __x86_64__
+  memcpy(yylval.type_node_p.string, yytext, yyleng);
+  yylval.type_node_p.string[yyleng] = 0;
+#endif
+  yylval.type_node_p.is_integer = 1;
+  yylval.type_node_p.p1 = l;
+
+  opexpcnt++; // for unary op workaround
+  return T_DIGITS;
+}
+
 {digit}+			{
+nohex:
+{}
 #if 0
   if (skip_mode && if_mode == 0) {
     yyless(yyleng);
