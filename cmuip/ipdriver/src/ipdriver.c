@@ -1028,13 +1028,15 @@ int net_open(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
     movc5	#0,OP$Foreign_Host(R10),#0,#FH_NAME_SIZE,OP$Foreign_Host(R10)
 #endif
     memset(&buf->op$foreign_host,0,FH_NAME_SIZE);
-  if (strlen(i->irp$l_qio_p1))	// Foreign Host name Wild?
+  if (i->irp$l_qio_p1 && strlen(i->irp$l_qio_p1))	// Foreign Host name Wild?
 	  			// 0 = yes, do foreign port
     memcpy(&buf->op$foreign_host,i->irp$l_qio_p1,strlen(i->irp$l_qio_p1));
 
   // Here after copy or if wild
 
-  buf->op$foreign_hlen=strlen(i->irp$l_qio_p1);	// Set foreign host name length
+  buf->op$foreign_hlen=0;
+  if (i->irp$l_qio_p1)
+    buf->op$foreign_hlen=strlen(i->irp$l_qio_p1);	// Set foreign host name length
 
   // Set foreign Port
   // Local port
