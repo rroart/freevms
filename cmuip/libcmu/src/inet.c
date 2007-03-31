@@ -13,9 +13,20 @@
 #module INET "v1.0.1"
 #endif
 
+#ifndef __KERNEL__
 #include <sys/types.h>
 #include <sys/ctype.h>
 #include <stdlib.h>
+#else
+#include <linux/kernel.h>
+#include <linux/string.h>
+#include <linux/ctype.h>
+#include <linux/slab.h>
+#define malloc(x) kmalloc(x, GFP_KERNEL)
+#define cfree kfree
+#define free kfree
+#define strtoul simple_strtoul
+#endif
 #include <netinet/in.h>
 
 #ifndef NULL
