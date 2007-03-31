@@ -108,7 +108,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
 #if 0
       smp_send_work(CPU$M_UPDASTSR, p->pcb$l_cpu_id);
 #else
-      p->pr_astlvl=p->phd$b_astlvl;
+      p->pr_astlvl=p->phd$b_astlvl=0;
       // come to think of it, it did not matter, since we emulate
       // the astlvl in the pcb. ipint not needed, then. 
 #endif
