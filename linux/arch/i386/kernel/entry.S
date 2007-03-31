@@ -936,7 +936,30 @@ ENTRY(test_exe)
 
 ENTRY(test_sup)
 	iret
-		
+
+ENTRY(setipl)
+	pushfl
+	pushl %eax
+	movl 0xc(%esp), %eax
+	pushl %eax
+	call setipl_inner
+	popfl
+	and %eax, %eax
+	je 3f
+	MAYBEDOSOFTINT($0xb,$0xa4)
+	MAYBEDOSOFTINT($0xa,$0xa3)
+	MAYBEDOSOFTINT($0x9,$0xa2)
+	MAYBEDOSOFTINT($0x8,$0x98)
+	MAYBEDOSOFTINT($0x7,$0x96)
+	MAYBEDOSOFTINT($0x6,$0x95)
+	MAYBEDOSOFTINT($0x4,$0x94)
+	MAYBEDOSOFTINT($0x3,$0x93)
+	MAYBEDOSOFTINT($0x2,$0x92)
+3:
+	popl %eax
+	popfl
+	ret
+				
 .data
 ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_ni_syscall)	/* 0  -  old "setup()" system call*/

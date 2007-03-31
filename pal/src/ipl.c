@@ -25,11 +25,15 @@ extern int timer_on;
 
 static mydebugi = 0;  // should have no printk in a non-interruptable zone
 
-#define IPL_DEBUG
 #undef IPL_DEBUG
+#define IPL_DEBUG
 
 #ifdef IPL_DEBUG
-static long stk[1024];
+static long stk[4*1024];
+static long stk2[16*1024];
+long stk2cnt=0;
+static long stk3[16*16*1024];
+long stk3cnt[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 #endif
 
 inline asmlinkage void pushpsl(void);
@@ -117,7 +121,12 @@ inline int __PAL_MFPR_IPL() {
 }
 
 /* no smp yet */
+#ifdef __i386__
+inline int setipl_inner(unsigned char i) {
+  int retipl=ctl$gl_pcb->psl_ipl>i;
+#else
 inline void setipl(unsigned char i) {
+#endif
   int this_cpu = smp_processor_id();
 #ifdef IPL_DEBUG
   int this=ctl$gl_pcb->psl_ipl; 
@@ -138,7 +147,20 @@ inline void setipl(unsigned char i) {
   if (i==2)
     memcpy((long)stk+64*10,addr,128);
   if (i==8 && i!=this)
-    memcpy((long)stk+64*12,addr,128);
+    memcpy((long)stk+64*12+this_cpu*1024,addr,128);
+
+  if (1 || i==8) {
+    stk2[stk2cnt++] = ctl$gl_pcb;
+    memcpy(&stk2[stk2cnt], addr, 15*4);
+    stk2cnt+=15;
+    if (stk2cnt>16000) stk2cnt = 0;
+
+    int pid = ctl$gl_pcb->pcb$l_pid&15;
+    stk3[1024*16*pid+stk3cnt[pid]++] = ctl$gl_pcb;
+    memcpy(&stk3[1024*16*pid+stk3cnt[pid]], addr, 15*4);
+    stk3cnt[pid]+=15;
+    if (stk3cnt[pid]>16000) stk3cnt[pid] = 0;
+  }
 #endif
 #if 0
 #ifdef __x86_64__
@@ -149,6 +171,12 @@ inline void setipl(unsigned char i) {
 #ifdef __i386__
   apic_write(APIC_TASKPRI,i-16);
 #endif
+#endif
+#ifdef __x86_64__
+  // check
+  do_sw_int();
+#else
+  return retipl;
 #endif
 }
 
