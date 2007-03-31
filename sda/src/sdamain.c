@@ -13,7 +13,12 @@ int errno;
 
 int show_device(int mask);
 int show_locks(int mask);
+int show$address(int mask);
+int sda$show_process(int mask);
+int sda$show_spinlocks(int mask);
 int sda$exit(int mask);
+int sda$dump(int mask);
+int sda$examine(int mask);
 
 struct cli_struct {
   char * cliroutine;
@@ -21,9 +26,14 @@ struct cli_struct {
 };
 
 struct cli_struct cliroutines[]={
+  {  "sda_dump", sda$dump, }, 
+  {  "sda_examine", sda$examine, }, 
   {  "sda_exit", sda$exit, }, 
+  {  "show_address", show$address, },
   {  "show_device", show_device, }, 
   {  "show_locks", show_locks, }, 
+  {  "show_process", sda$show_process, }, 
+  {  "show_spinlocks", sda$show_spinlocks, }, 
   { 0, 0 , },
 };
 
@@ -56,7 +66,10 @@ main() {
     command_line.dsc$a_pointer = command_str;
     command_line.dsc$w_length = len;
 
+    extern int hexmode;
+    hexmode = 1; // temp workaround
     int sts = cli$dcl_parse(&command_line, sda_parse, 0, 0, 0);
+    hexmode = 0;
     if (sts&1) 
       cli$dispatch();
   }

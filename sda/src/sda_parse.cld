@@ -8,12 +8,36 @@ define syntax show_locks
 	cliroutine show_locks
 	parameter p1
 
+define syntax show_process
+	cliroutine show_process
+	parameter p1
+	qualifier index,value(required)
+
+define syntax show_address
+	cliroutine show_address
+	parameter p1
+
+define syntax show_spinlocks
+	cliroutine show_spinlocks
+	parameter p1
+
 define type show_something
 	keyword device, syntax = show_device
 	keyword locks, syntax = show_locks
+	keyword spinlocks, syntax = show_spinlocks
+	keyword process, syntax = show_process
+	keyword address, syntax = show_address
 
 define verb exit
 	cliroutine sda_exit
+
+define verb dump
+	cliroutine sda_dump
+
+define verb examine
+	cliroutine sda_examine
+	parameter p1
+	parameter p2
 
 define verb show
 	parameter p1,label=something,value(type=show_something)

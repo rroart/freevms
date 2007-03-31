@@ -25,15 +25,16 @@ else
 MODEL =
 endif
 
-OBJS = sdamain.o sda_parse.o device.o misc.o sda_lock.o
+OBJS = sdamain.o sda_parse.o device.o misc.o sda_lock.o sda_dump.o sda_exam.o \
+	sda_proc.o sda_spin.o sda_addr.o System_map.o sdamap.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 %.o: %.c
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
 
 pic/%.o: %.c
 	install -d pic
-	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
 
 device.o: device.c
 	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
@@ -71,3 +72,5 @@ sda_parse.o: sda_parse.c
 sda_parse.c: sda_parse.cld
 	../../cdu/src/cdu sda_parse.cld
 
+System_map.c: ../../linux/vmlinux make_map.sh
+	./make_map.sh

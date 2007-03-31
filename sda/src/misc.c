@@ -18,6 +18,10 @@ int sda$getmem(const void *src, void *dest, int n) {
   sys$cmkrnl(memcpy, &arglst[0]);
 }
 
+int sda$getmemlong(const void *src, void *dest) {
+  return sda$getmem(src, dest, sizeof (long));
+}
+
 int sda$exit() {
   // not yet exit(0);
   extern int do_ret;
