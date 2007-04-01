@@ -81,7 +81,10 @@ unsigned long findpte_new(struct mm_struct *mm, unsigned long address);
 #ifdef CONFIG_MM_VMS
 
 signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _mypte * pte) {
+  int ipl=getipl();
+  setipl(8); // check
   signed long pfn=mmg$allocpfn();
+  setipl(ipl);
   struct _pfn * page;
   if (pfn&0x80000000) return pfn;
   if ((((int)va)&WSL$M_PAGTYP)>=WSL$C_GLOBAL) {

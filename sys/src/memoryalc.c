@@ -24,6 +24,7 @@
 #include <misc_routines.h>
 #include <mmg_routines.h>
 #include <exe_routines.h>
+#include <ipl.h>
 
 #undef VMS_MM_DEBUG 
 #define VMS_MM_DEBUG
@@ -135,6 +136,8 @@ static void fastcall __free_pages_ok (struct page *page, unsigned int order)
 	base = mem_map;
 
 	spin_lock_irqsave(&zone->lock, flags);
+	int ipl=getipl();
+	setipl(8);
 
 #if 0
 	while (mask + (1 << (MAX_ORDER-1))) {
@@ -158,6 +161,7 @@ static void fastcall __free_pages_ok (struct page *page, unsigned int order)
 	    //memlist_del(&page->list);
 	  }
 
+	setipl(ipl);
 	spin_unlock_irqrestore(&zone->lock, flags);
 
 }
@@ -188,12 +192,15 @@ struct page * fastcall __alloc_pages(unsigned int gfp_mask, unsigned int order, 
 	zone = &thezone;
 
 	spin_lock_irqsave(&zone->lock, flags);
+	int ipl=getipl();
+	setipl(8);
 	if (inallocpfn++) panic("mooo\n");
 	if (order)
 	  pfn=mmg$allocontig_align(1 << order);
 	else
 	  pfn=mmg$allocpfn();
 	inallocpfn--;
+	setipl(ipl);
 	spin_unlock_irqrestore(&zone->lock, flags);
 
 	//	printk("allocated pfn %x %x\n",pfn,1<<order);
@@ -215,12 +222,15 @@ rebalance:
 	try_to_free_pages(classzone, gfp_mask, order);
 
 	spin_lock_irqsave(&zone->lock, flags);
+	ipl=getipl();
+	setipl(8);
 	if (inallocpfn++) panic("mooo\n");
 	if (order)
 	  pfn=mmg$allocontig(1 << order);
 	else
 	  pfn=mmg$allocpfn();
 	inallocpfn--;
+	setipl(ipl);
 	spin_unlock_irqrestore(&zone->lock, flags);
 
 	if (pfn>=0) {
