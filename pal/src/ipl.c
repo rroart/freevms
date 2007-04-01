@@ -26,7 +26,9 @@ extern int timer_on;
 static mydebugi = 0;  // should have no printk in a non-interruptable zone
 
 #undef IPL_DEBUG
+#ifdef __i386__
 #define IPL_DEBUG
+#endif
 
 #ifdef IPL_DEBUG
 static long stk[4*1024];
@@ -174,6 +176,7 @@ inline void setipl(unsigned char i) {
 #endif
 #ifdef __x86_64__
   // check
+  asmlinkage void do_sw_int(void);
   do_sw_int();
 #else
   return retipl;

@@ -1,4 +1,4 @@
-Current as of FreeVMS 0.3.3.
+Current as of FreeVMS 0.3.4.
 	Warning: there may be some more unstability compared to 0.2.3
 	due to changes in AST system and modes to resemble VMS more.
 	Now also changes in interrupts and multiprocessing.
@@ -176,7 +176,7 @@ ANALYZE /SYSTEM:
 	has show device, show locks, show spinlocks and exit
 	examine addr/name or addr/name n
 	show process /index=n
-	show address a
+	show address a (i386 only)
 
 AUTHORIZE:
 	run sys$system:authorize

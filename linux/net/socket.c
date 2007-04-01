@@ -1424,6 +1424,7 @@ asmlinkage long sys_shutdown(int fd, int how)
  *	BSD sendmsg interface
  */
 
+#error
 asmlinkage long sys_sendmsg(int fd, struct msghdr *msg, unsigned flags)
 {
 #ifndef CONFIG_VMS
@@ -1877,5 +1878,17 @@ int socket_get_info(char *buffer, char **start, off_t offset, int length)
 	if (len < 0)
 		len = 0;
 	return len;
+}
+#endif
+
+#ifdef __x86_64__
+asmlinkage int sys_sendmsg(int fd, struct msghdr *msg, unsigned flags)
+{
+	return -EAFNOSUPPORT;
+}
+
+asmlinkage int sys_recvmsg(int fd, struct msghdr *msg, unsigned int flags)
+{
+	return -EAFNOSUPPORT;
 }
 #endif

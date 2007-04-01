@@ -1140,11 +1140,6 @@ int generic_file_open(struct _fcb * inode, struct file * filp)
 }
 #endif
 
-int stkstk[1024];
-int stkstkcnt=0;
-extern int stk2cnt;
-extern int stk3cnt[];
-
 void sys_open_term(char * name)
 {
 	  struct _fabdef * fab = kmalloc(sizeof(struct _fabdef), GFP_KERNEL);
@@ -1153,16 +1148,6 @@ void sys_open_term(char * name)
 	  *rab = cc$rms_rab;
 	  fab->fab$l_fna = name;
 	  fab->fab$b_fns = strlen(fab->fab$l_fna);
-	  stkstk[stkstkcnt++] = ((int)current) | 2;
-	  stkstk[stkstkcnt++] = current->pcb$l_cpu_id;
-	  stkstk[stkstkcnt++] = stk2cnt;
-	  int pid = ctl$gl_pcb->pcb$l_pid&15;
-	  stkstk[stkstkcnt++] = stk3cnt[pid];
-	  if (stkstkcnt > 1000)
-	    stkstkcnt = 0;
-	  inline int getipl();
-	  if (getipl()>7)
-	    panic("getipl3");
 	  exe$open(fab);
 	  rab->rab$l_fab = fab;
 	  exe$connect(rab);

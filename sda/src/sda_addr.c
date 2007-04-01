@@ -24,6 +24,7 @@
 #undef __KERNEL__
 
 int show$address(int mask) {
+#ifdef __i386__
   int retlen;
   $DESCRIPTOR(p, "p1");
   char c[80];
@@ -82,4 +83,5 @@ int show$address(int mask) {
   // printf("\tAlso mapped in SPT window at: %lx\n\n", 0);
 
   printf("\tMapped to physical address %lx\n\n", phys);
+#endif
 }

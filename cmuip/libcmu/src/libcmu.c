@@ -312,6 +312,15 @@ static inline void * calloc(int a, int b) {
 #include "network.h"
 #include "neterror.h"
 
+#define ntohl kern_ntohl
+#define ntohs kern_ntohs
+#define htonl kern_htonl
+#define htons kern_ntons
+unsigned long int ntohl(unsigned long int);
+unsigned short int ntohs(unsigned short int);
+unsigned long int htonl(unsigned long int);
+unsigned short int htons(unsigned short int);
+
 /*
  * And a LIBCMU specific header
  */

@@ -11,6 +11,11 @@
 #module NTOH_HTON "v1.0.0"
 #endif
 
+#define ntohl kern_ntohl
+#define ntohs kern_ntohs
+#define htonl kern_htonl
+#define htons kern_ntons
+
 unsigned long int ntohl(x)
 unsigned long int x;
 {
