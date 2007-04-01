@@ -285,6 +285,29 @@ static inline void * calloc(int a, int b) {
  * CMU-OpenVMS/IP specific definitions
  */
 #include "netconfig.h"
+#define NetIO_Status_Block netio_status_block
+#define IPADR$ADDRESS_BLOCK ipadr$address_block
+#define U$UDP_Protocol U$UDP_PROTOCOL
+#define U$TCP_Protocol U$TCP_PROTOCOL
+#define NSB$STATUS nsb$status
+#define IPADR$DST_PORT ipadr$dst_port
+#define NSB$Byte_Count nsb$byte_count
+#define IPADR$SRC_PORT ipadr$src_port
+#define IPADR$DST_PORT ipadr$dst_port
+#define IPADR$SRC_HOST ipadr$src_host
+#define IPADR$DST_HOST ipadr$dst_host
+#define NSB$XERROR net_status.nsb$xerror
+#define Connection_Info_Return_Block connection_info_return_block
+#define DU$Device_List DU$DEVICE_LIST
+#define DU$Device_Stat DU$DEVICE_STAT
+#define CI$Foreign_Port ci$foreign_port
+#define CI$remote_internet_adrs ci$remote_internet_adrs
+#define D$Dev_Dump_Return_Blk d$dev_dump_return_blk
+#define DU$DevNam_Str du$devnam_str
+#define DU$DevNam_Len du$devnam_len
+#define DU$Dev_Address du$dev_address
+#define X net_status
+#define STATUS nsb$xstatus
 #include "netcommon.h"
 #include "network.h"
 #include "neterror.h"
@@ -2308,7 +2331,11 @@ struct DU$IF_List {
 
 struct ifconf *ifc;
 struct ifreq  *ifr;
+#if 0
 struct D$Dev_Dump_Return_Blk *dd;
+#else
+D$Dev_Dump_Return_Blk *dd;
+#endif
 NetIO_Status_Block iosb;
     /*
      * check for valid socket
