@@ -30,6 +30,11 @@ struct _mypfn {
 #endif
 };
 
+inline static int spinned() {
+  struct _spl * spl = &SPIN_MMG;
+  return test_bit(0,&spl->spl$l_spinlock);
+}
+
 signed long mmg$rempfnh(unsigned long type);
 #ifdef OLDINT
 signed long mmg$rempfn(unsigned long type, struct _pfn * pfn);
@@ -62,6 +67,10 @@ signed long mmg$rempfn(unsigned long type, struct _pfn * pfn) {
 signed long mmg$rempfn(unsigned long type, int pfn) {
   int h;
 #endif
+  if (getipl()<8)
+    panic("rempfn\n");
+  if (!spinned())
+    panic("rempfn not spinlocked\n");
  if (0) {
   int k,l,m[24];
   l=pfn$al_head[0];
@@ -231,6 +240,8 @@ signed long mmg$inspfn(unsigned long type, int pfn, int list) {
 #endif
   if (getipl()<8)
     panic("inspfn\n");
+  if (!spinned())
+    panic("inspfn not spinlocked\n");
 
   lasteech=3;
 
