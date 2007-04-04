@@ -26,6 +26,7 @@
 #include <exe_routines.h>
 #include <mmg_routines.h>
 #include <linux/slab.h>
+#include <internals.h>
 
 #undef OLDINT
 #define OLDINT
@@ -113,7 +114,9 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
     if (mypte->pte$v_typ0==0) {
       if (mypte->pte$v_pfn) { //transition
 	if (mem_map[mypte->pte$v_pfn].pfn$v_loc==PFN$C_FREPAGLST) {
+	  int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
 	  mmg$delpfnlst(PFN$C_FREPAGLST,mypte->pte$v_pfn);
+	  vmsunlock(&SPIN_MMG, ipl);
 	  // do something with pfn shrcnt 
 	  goto skipthis;
 	}
@@ -121,7 +124,9 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
 	if (mem_map[mypte->pte$v_pfn].pfn$v_loc==PFN$C_MFYPAGLST) {
 	  //also check if it has page file backing store
 	  mem_map[mypte->pte$v_pfn].pfn$l_page_state&=~PFN$M_MODIFY;
+	  int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
 	  mmg$delpfnlst(PFN$C_MFYPAGLST,mypte->pte$v_pfn);
+	  vmsunlock(&SPIN_MMG, ipl);
 	  goto skipthis;
 	}
 
@@ -148,11 +153,13 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
   }
   wsle->wsl$pq_va=0;
   *(unsigned long*)pte=0;
+  int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
 #ifdef OLDINT
   mmg$dallocpfn(pfn);
 #else
   mmg$dallocpfn(pfn-mem_map);
 #endif
+  vmsunlock(&SPIN_MMG, ipl);
 
  out:
 
