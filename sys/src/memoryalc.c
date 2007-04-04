@@ -25,6 +25,8 @@
 #include <mmg_routines.h>
 #include <exe_routines.h>
 #include <ipl.h>
+#include <ipldef.h>
+#include <internals.h>
 
 #undef VMS_MM_DEBUG 
 #define VMS_MM_DEBUG
@@ -135,9 +137,8 @@ static void fastcall __free_pages_ok (struct page *page, unsigned int order)
 	page_idx = page - mem_map;
 	base = mem_map;
 
+	int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
 	spin_lock_irqsave(&zone->lock, flags);
-	int ipl=getipl();
-	setipl(8);
 
 #if 0
 	while (mask + (1 << (MAX_ORDER-1))) {
@@ -161,9 +162,8 @@ static void fastcall __free_pages_ok (struct page *page, unsigned int order)
 	    //memlist_del(&page->list);
 	  }
 
-	setipl(ipl);
 	spin_unlock_irqrestore(&zone->lock, flags);
-
+	vmsunlock(&SPIN_MMG, ipl);
 }
 
 #ifndef CONFIG_DISCONTIGMEM
@@ -191,17 +191,16 @@ struct page * fastcall __alloc_pages(unsigned int gfp_mask, unsigned int order, 
 
 	zone = &thezone;
 
+	int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
 	spin_lock_irqsave(&zone->lock, flags);
-	int ipl=getipl();
-	setipl(8);
 	if (inallocpfn++) panic("mooo\n");
 	if (order)
 	  pfn=mmg$allocontig_align(1 << order);
 	else
 	  pfn=mmg$allocpfn();
 	inallocpfn--;
-	setipl(ipl);
 	spin_unlock_irqrestore(&zone->lock, flags);
+	vmsunlock(&SPIN_MMG, ipl);
 
 	//	printk("allocated pfn %x %x\n",pfn,1<<order);
 
@@ -221,17 +220,16 @@ struct page * fastcall __alloc_pages(unsigned int gfp_mask, unsigned int order, 
 rebalance:
 	try_to_free_pages(classzone, gfp_mask, order);
 
+	ipl = vmslock(&SPIN_MMG, IPL$_MMG);
 	spin_lock_irqsave(&zone->lock, flags);
-	ipl=getipl();
-	setipl(8);
 	if (inallocpfn++) panic("mooo\n");
 	if (order)
 	  pfn=mmg$allocontig(1 << order);
 	else
 	  pfn=mmg$allocpfn();
 	inallocpfn--;
-	setipl(ipl);
 	spin_unlock_irqrestore(&zone->lock, flags);
+	vmsunlock(&SPIN_MMG, ipl);
 
 	if (pfn>=0) {
 	  page=&mem_map[pfn];
@@ -354,6 +352,7 @@ void show_free_areas_core(pg_data_t *pgdat)
 
 		total = 0;
 		if (zone->size) {
+			int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
 			spin_lock_irqsave(&zone->lock, flags);
 		 	for (order = 0; order < MAX_ORDER; order++) {
 				head = &(zone->free_area + order)->free_list;
@@ -369,6 +368,7 @@ void show_free_areas_core(pg_data_t *pgdat)
 				printk("%lu*%lukB ", nr, K(1UL) << order);
 			}
 			spin_unlock_irqrestore(&zone->lock, flags);
+			vmsunlock(&SPIN_MMG, ipl);
 		}
 		printk("= %lukB)\n", K(total));
 	}

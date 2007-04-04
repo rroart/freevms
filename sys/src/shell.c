@@ -33,6 +33,8 @@
 #include <misc_routines.h>
 #include <mmg_routines.h>
 
+#include <internals.h>
+
 long phys_pte_addr(struct _pcb * pcb) {
   pgd_t *pgd;
   pud_t *pud;
@@ -143,7 +145,9 @@ int shell_init_other(struct _pcb * pcb, struct _pcb * oldpcb, long addr, long ol
   spin_unlock(&mm->page_table_lock);
 
 #ifdef CONFIG_VMS
+  int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
   int pfn=mmg$ininewpfn(pcb,pcb->pcb$l_phd,page,pte);
+  vmsunlock(&SPIN_MMG, ipl);
   mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 #else
   int pfn=_alloc_pages(GFP_KERNEL,0)-mem_map;
@@ -331,7 +335,9 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   spin_unlock(&mm->page_table_lock);
 
 #ifdef CONFIG_VMS
+  int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
   int pfn=mmg$ininewpfn(pcb,phd,page,pte);
+  vmsunlock(&SPIN_MMG, ipl);
   mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 #else
   int pfn=_alloc_pages(GFP_KERNEL,0)-mem_map;
@@ -509,7 +515,9 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
   //printk("%x %x %x %x\n",swapper_pg_dir,oldpgd,oldpmd,oldpte);
 
 #ifdef CONFIG_VMS
+  int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
   int pfn=mmg$ininewpfn(pcb,phd,page,pte);
+  vmsunlock(&SPIN_MMG, ipl);
   mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
 #else
   int pfn=_alloc_pages(GFP_KERNEL,0)-mem_map;
