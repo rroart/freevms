@@ -24,6 +24,7 @@
 #include <sch_routines.h>
 #include <queue.h>
 #include <linux/slab.h>
+#include <statedef.h>
 
 kfreebuf(void * d) {
   struct _bufio * bd = d;
@@ -146,6 +147,7 @@ bufpost(struct _irp * i) {
   if (a->acb$l_ast) {
     a->acb$b_rmod&=~ACB$M_KAST;
     a->acb$b_rmod&=~ACB$M_NODELETE;
+    sch$postef(pcb->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
     sch$qast(i->irp$l_pid,PRI$_NULL,i);
   } else
     kfree(i);
@@ -206,8 +208,15 @@ asmlinkage void ioc$iopost(void) {
   ((struct _acb *) i)->acb$l_kast=bufpost;
   // not this?  ((struct _acb *) i)->acb$l_astprm=i;
   /* find other class than 1 */
-  sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
-  sch$qast(p->pcb$l_pid,PRI$_IOCOM,i);
+  int savipl=vmslock(&SPIN_SCHED,IPL$_SYNCH);
+  if (p->pcb$w_state != SCH$C_CUR) { // internals book says change order
+    sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
+    sch$qast(p->pcb$l_pid,PRI$_IOCOM,i);
+  } else {
+    sch$qast(i->irp$l_pid,PRI$_IOCOM,i);
+    sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
+  }
+  vmsunlock(&SPIN_SCHED,savipl);
   goto again;
 
   ioc$bufpost(0);
