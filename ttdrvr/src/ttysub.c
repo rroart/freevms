@@ -59,7 +59,9 @@ printk("tty$class_disconnect not impl\n");
 }
 
 tty$class_fork(){
+#if 0
 printk("tty$class_fork not impl\n");
+#endif
 }
 
 tty$powerfail(struct _ucb * u){
@@ -69,3 +71,22 @@ tty$powerfail(struct _ucb * u){
   printk("tty$powerfail\n");
 }
 
+int tty$xon(void * vec, int R3, struct _ucb * u) {
+  struct _tty_ucb * tty = u;
+  struct _tt_port * ttp = tty->ucb$l_tt_port;
+  int (*fn)();
+  fn = ttp->port_xon;
+  fn(vec, 0x11, u); // not yet?
+}
+
+int tty$xoff(void * vec, int R3, struct _ucb * u) {
+  struct _tty_ucb * tty = u;
+  struct _tt_port * ttp = tty->ucb$l_tt_port;
+  int (*fn)();
+  fn = ttp->port_xoff;
+  fn(vec, 0x13, u); // not yet?
+}
+
+int tty$readone(void * vec, int R3, struct _ucb * u) {
+  tty$xoff(vec, R3, u);
+}

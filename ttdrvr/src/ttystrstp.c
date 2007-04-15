@@ -33,6 +33,8 @@
 #include <ioc_routines.h>
 #include <misc_routines.h>
 
+int tty$xon();
+
 unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 {
   unsigned long sts=SS$_NORMAL;
@@ -84,6 +86,8 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 
 	if (u->ucb$l_sts&UCB$M_INT) return; // here?
 
+	tty$xon(0, 0, u);
+
 	int chr;
 	int CC;
 	tty$getnextchar(&chr, &CC, u);
@@ -122,6 +126,8 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
 	
 	if (u->ucb$l_sts&UCB$M_INT) return; // here?
 	tty->tty$v_st_read = 1;
+
+	tty$xon(0, 0, u);
 
 	int chr;
 	int CC;
@@ -231,6 +237,8 @@ int tty$wrtstartio(struct _irp * i,struct _ucb * u) {
 	if (u->ucb$l_sts&UCB$M_INT) return; // here?
 	tty->tty$v_st_read = 1; // check. wrong place?
 
+	tty$xon(0, 0, u);
+
 	int chr;
 	int CC;
 	tty$getnextchar(&chr, &CC, u);
@@ -275,6 +283,8 @@ int tty$wrtstartio(struct _irp * i,struct _ucb * u) {
 	}
 	
 	if (u->ucb$l_sts&UCB$M_INT) return; // here?
+
+	tty$xon(0, 0, u);
 
 	int chr;
 	int CC;

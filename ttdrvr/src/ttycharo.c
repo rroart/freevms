@@ -121,6 +121,14 @@ int tty$getnextchar(int * chr, int * CC, struct _ucb * u) {
       bd_txt[bd->tty$w_rb_txtoff++]=*c;
       bd_txt[bd->tty$w_rb_txtoff-1]=10;
       bd_txt[bd->tty$w_rb_txtoff]=0;
+#if 0
+      *CC=0;
+      tty->ucb$b_tt_outype=0;
+#endif
+#if 1
+      int tty$readone();
+      tty$readone(0, *c, tty);
+#endif
     }
     break;
   default:
