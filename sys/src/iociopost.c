@@ -167,9 +167,12 @@ asmlinkage void ioc$iopost(void) {
 
   //printk("iopost %x %x %x %x\n",&ioc$gq_postiq,ioc$gq_postiq,current->pid,ioc$gq_postiq>>32); //,&ioc$gq_postiq,ioc$gq_postiq &ioc$gq_postiq,ioc$gq_postiq);
  again:
+  vmslock(&SPIN_IOPOST, -1);
   if (ctl$gl_pcb->pcb$l_cpu_id == smp$gl_primid && !rqempty(&ioc$gq_postiq)) {
     i=remqhi(&ioc$gq_postiq,i);
+    vmsunlock(&SPIN_IOPOST, -1);
   } else {
+    vmsunlock(&SPIN_IOPOST, -1);
     if (!aqempty(&smp$gl_cpu_data[smp_processor_id()]->cpu$l_psfl)) {
       i=remque(smp$gl_cpu_data[smp_processor_id()]->cpu$l_psfl,i);
     } else {
@@ -195,8 +198,15 @@ asmlinkage void ioc$iopost(void) {
   ((struct _acb *) i)->acb$l_kast=dirpost;
   // not this? ((struct _acb *) i)->acb$l_astprm=i;
   /* find other class than 1 */
-  sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
-  sch$qast(p->pcb$l_pid,PRI$_IOCOM,i);
+  int savipl=vmslock(&SPIN_SCHED,IPL$_SYNCH);
+  if (p->pcb$w_state != SCH$C_CUR) { // internals book says change order
+    sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
+    sch$qast(p->pcb$l_pid,PRI$_IOCOM,i);
+  } else {
+    sch$qast(i->irp$l_pid,PRI$_IOCOM,i);
+    sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
+  }
+  vmsunlock(&SPIN_SCHED,savipl);
   goto again;
 
  bufio:
@@ -208,7 +218,7 @@ asmlinkage void ioc$iopost(void) {
   ((struct _acb *) i)->acb$l_kast=bufpost;
   // not this?  ((struct _acb *) i)->acb$l_astprm=i;
   /* find other class than 1 */
-  int savipl=vmslock(&SPIN_SCHED,IPL$_SYNCH);
+  savipl=vmslock(&SPIN_SCHED,IPL$_SYNCH);
   if (p->pcb$w_state != SCH$C_CUR) { // internals book says change order
     sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
     sch$qast(p->pcb$l_pid,PRI$_IOCOM,i);
