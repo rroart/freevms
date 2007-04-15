@@ -81,12 +81,8 @@ void con$startio(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UN
   //
   // not?  ucb = ((struct _tz_ucb *)ucb)->ucb$l_tz_xucb;		// Switch to PZ UCB
   if (ucb) {			// PZ is disconnected: skip
-
-    FORKLOCK();	// Take out PZ device FORK LOCK
 #if 0
-    LOCK=ucb$b_flck(ucb), -	;
-    SAVIPL=-(SP),	-	;
-    PRESERVE=NO
+    int savipl = forklock(ucb->ucb$b_flck, ucb->ucb$b_flck);	// Take out PZ device FORK LOCK
 #endif
 #if 0
       if (ucb->ucb$l_irp->irp$l_func==IO$_WRITEPBLK) {
@@ -174,12 +170,8 @@ void con$startio(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UN
 
 	ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
 #endif
-    FORKUNLOCK();			// Release PZ drvice FORK LOCK
 #if 0
-    LOCK=ucb$b_flck(ucb), -	;
-    NEWIPL=(SP)+,	-	;
-    PRESERVE=NO,	-	;
-    CONDITION=RESTORE	;
+    forkunlock(ucb->ucb$b_flck, savipl);			// Release PZ drvice FORK LOCK
 #endif
 		
   return;
