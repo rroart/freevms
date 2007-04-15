@@ -62,6 +62,7 @@ long CH$MOVE(long size, long src, long addr) {
   printk("CH$MOVE not implemented\n");
 }
 
+#if 0
 MIN(x,y) {
   return (x<y ? x :  y);
   printk("MIN not implemented\n");
@@ -144,12 +145,14 @@ Addm() {
 End_Lock() {
   printk("End_Loc not implemented\n");
 }
+#endif
 
 find_cpu_data(long * l) {
   int cpuid = smp_processor_id();
   * l=smp$gl_cpu_data[cpuid];
 }
 
+#if 0
 rpc_service() {
   printk("rpc_service not implemented\n");
 }
@@ -161,6 +164,7 @@ exe$finish_rdb() {
 CH$RCHAR() {
   printk("CH$RCHAR not implemented\n");
 }
+#endif
 
 //ENTRY  SWAPBYTES,^M<>
 	int swapbytes(long WrdCnt, long Start)
@@ -184,6 +188,7 @@ inline BLISSIFNOT(int i) {
   return BLISSIF(i)==0;
 }
 
+#if 0
 inline DEVICELOCK(){
   return;
   printk("DEVICELOCK not impl\n");
@@ -193,6 +198,7 @@ inline DEVICEUNLOCK(){
   return;
   printk("DEVICEUNLOCK not impl\n");
 }
+#endif
 
 long get_eip(long l) {
   long * m = &l;
