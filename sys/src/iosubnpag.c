@@ -23,6 +23,9 @@
 
 #include <linux/sched.h>
 
+#undef MYDEB_REQCOM
+#define MYDEB_REQCOM
+
 void ioc$initiate(struct _irp * i, struct _ucb * u) {
   struct _ddt *d; 
   void (*f)(void *,void *);
@@ -45,22 +48,32 @@ void ioc_std$initiate(struct _irp * i, struct _ucb * u) {
 
 extern int exetimeout;
 
+#ifdef MYDEB_REQCOM
 long reqcom[32*1024];
 long reqcomc[32]={ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+#endif
 
 void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   int qemp;
   int savipl;
   struct _irp * i=u->ucb$l_irp;
+#ifdef MYDEB_REQCOM
   {
+    long addr = &iosb1;
+    addr -= 0x4;
     int pid=i->irp$l_pid&31;
     reqcom[1024*pid+reqcomc[pid]]=i;
     reqcomc[pid]++;
     reqcom[1024*pid+reqcomc[pid]]=i->irp$l_qio_p3;
     reqcomc[pid]++;
+    reqcom[1024*pid+reqcomc[pid]]=*(long*)addr;
+    reqcomc[pid]++;
+    reqcom[1024*pid+reqcomc[pid]]=i;
+    reqcomc[pid]++;
     if (reqcomc[pid]>1000)
       reqcomc[pid]=0;
   }
+#endif
   i->irp$l_iost1=iosb1; /* ok? */
   i->irp$l_iost2=iosb2;
   //  exetimeout=0;
@@ -76,8 +89,10 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   if (savipl<IPL$_IOPOST)
     setipl(IPL$_IOPOST);
   
+  vmslock(&SPIN_IOPOST, -1);
   qemp=rqempty(&ioc$gq_postiq);
   insqti(i,&ioc$gq_postiq);
+  vmsunlock(&SPIN_IOPOST, -1);
 #if 0
   long * l2=&ioc$gq_postiq;
   long l=((long)l2)+(*l2);

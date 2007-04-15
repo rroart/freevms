@@ -310,7 +310,7 @@ static int DT$_TZ = 0xFF;
 //
 // Definitions that follow the standard UCB fields for TZ driver
 //  This will all probably have to be the same as the standard term
- 
+
 struct _tz_ucb {			// Start of UCB definitions
  
   struct _ucb tz$ucb;		// Position at end of UCB
@@ -666,7 +666,7 @@ void TZ$STARTIO(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UNI
   ucb = ((struct _tz_ucb *)ucb)->ucb$l_tz_xucb;		// Switch to PZ UCB
   if (ucb) {			// PZ is disconnected: skip
 
-    FORKLOCK();	// Take out PZ device FORK LOCK
+    int savipl = forklock(ucb->ucb$b_flck, ucb->ucb$b_flck);	// Take out PZ device FORK LOCK
 #if 0
     LOCK=ucb$b_flck(ucb), -	;
     SAVIPL=-(SP),	-	;
@@ -677,7 +677,7 @@ void TZ$STARTIO(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UNI
 
 	ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
 
-    FORKUNLOCK();			// Release PZ drvice FORK LOCK
+    forkunlock(ucb->ucb$b_flck, savipl);			// Release PZ drvice FORK LOCK
 #if 0
     LOCK=ucb$b_flck(ucb), -	;
     NEWIPL=(SP)+,	-	;
@@ -821,7 +821,7 @@ void TZ$FORK(struct _ucb * ucb) {
   ucb = tz->ucb$l_tz_xucb;		// Switch to PZ UCB
   if (ucb==0) return;			// PZ is disconnected: skip
 
-  FORKLOCK();	// Take out PZ device FORK LOCK
+  int savipl = forklock(ucb->ucb$b_flck, ucb->ucb$b_flck);	// Take out PZ device FORK LOCK
 #if 0
   LOCK=ucb$b_flck(ucb), -	;
   SAVIPL=-(SP),	-	;
@@ -833,7 +833,7 @@ void TZ$FORK(struct _ucb * ucb) {
       // Get IRP address
       ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
 
-  FORKUNLOCK();	// Release PZ device FORK LOCK
+  forkunlock(ucb->ucb$b_flck, savipl);	// Release PZ device FORK LOCK
 #if 0
   LOCK=ucb$b_flck(ucb), -	;
   NEWIPL=(SP)+,	-	;
@@ -992,6 +992,7 @@ extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, uns
 void tz$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
   ucb->ucb$b_flck=IPL$_IOLOCK8;
   ucb->ucb$b_dipl=IPL$_IOLOCK8;
+  ucb->ucb$l_dlck=&SPIN_IOLOCK8;
 
   ucb->ucb$l_devchar = DEV$M_REC | DEV$M_IDV | DEV$M_ODV | DEV$M_TRM | DEV$M_CCL;
 

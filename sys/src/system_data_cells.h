@@ -1931,6 +1931,7 @@ extern struct _spl SPIN_TIMER;
 extern struct _spl SPIN_PR_LK8;
 extern struct _spl SPIN_IOLOCK8;
 extern struct _spl SPIN_SCS;
+extern struct _spl SPIN_IOPOST;
 
 #ifdef __x86_64__
 

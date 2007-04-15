@@ -14,6 +14,7 @@
 #include<linux/linkage.h>
 #include <exe_routines.h>
 #include <ioc_routines.h>
+#include <sch_routines.h>
 
 asmlinkage int exe$dassgn(unsigned short int chan) {
   struct _ccb * ccb;
@@ -27,6 +28,7 @@ asmlinkage int exe$dassgn(unsigned short int chan) {
   // check ccb$l_wind and close the file
   // check ccb$w_ioc to see if outstanding io
   // lock io db
+  sch$iolockw();
   ccb->ccb$b_amod=0;
   // disassociate mailbox
   // dec ucb ref count
@@ -34,6 +36,7 @@ asmlinkage int exe$dassgn(unsigned short int chan) {
   // checks and stuff to do if refc == 0
   // do ioc$last_chan
   // ioc$unlock
+  sch$iounlock();
   return SS$_NORMAL;
 }
 

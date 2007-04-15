@@ -332,6 +332,10 @@
 #include <misc_routines.h>
 #include <exe_routines.h>
 #include <linux/sched.h>
+#include <internals.h>
+
+#define DEVICELOCK vmslock
+#define DEVICEUNLOCK vmsunlock
 
 //
 // Local definitions
@@ -754,13 +758,7 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
   tz = pz->ucb$l_pz_xucb;		// Get TZ's UCB address
 
-    DEVICELOCK(); // Take device lock for TZ device
-#if 0
-  LOCKADDR=ucb$l_dlck(tz),- ;
-  LOCKIPL=ucb$b_dipl(tz), - ;
-  SAVIPL=-(SP),	-	;
-  PRESERVE=YES		;
-#endif
+  int savipl = DEVICELOCK(((struct _ucb *)tz)->ucb$l_dlck, ((struct _ucb *)tz)->ucb$b_dipl); // Take device lock for TZ device
 
 #define	TTY$M_TP_XOFF 8
 #define	TTY$V_TP_XOFF 3
@@ -797,12 +795,8 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   if	(send_chr<send_tot)			// All done
    {			// GEQ done so check for echo
 
-     DEVICEUNLOCK();	// More in request release lock 
-#if 0
-     LOCKADDR=ucb$l_dlck(tz), - ; and go back and get it
-				    NEWIPL=(SP)+,	-	;
-     PRESERVE=YES		;
-#endif
+     DEVICEUNLOCK(((struct _ucb *)tz)->ucb$l_dlck, savipl);	// More in request release lock 
+     // and go back and get it
 
      buf	 = i->irp$l_qio_p1;		// Restore users buffer address
      goto	l20;			// 
@@ -827,11 +821,8 @@ int PN$FDTWRITE(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
      }
    }
 
-   DEVICEUNLOCK	();	// Done release lock 
-#if 0
- LOCKADDR=ucb$l_dlck(pz), - ; NOTE PZ & TZ lock are the same
-				NEWIPL=(SP)+		;
-#endif
+   DEVICEUNLOCK	(((struct _ucb *)pz)->ucb$l_dlck, savipl);	// Done release lock 
+   // NOTE PZ & TZ lock are the same
 
  pz=tz=u;
  tpd=tz;
@@ -1457,11 +1448,9 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   if	(size>=12)			// DID HE ASK FOR 2ND ?
     devdep2=((long *)buf)[2];		// Get extended char.
   tz = ((struct _tty_ucb *)tz)->ucb$l_tt_logucb;		// Switch to logical device if one exists
-#if 0
-    DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
-					     LOCKIPL=ucb$b_dipl(tz),-; RAISE IPL
-									 SAVIPL=-(SP)		// SAVE CURRENT IPL
-#endif
+  int savipl = DEVICELOCK(((struct _ucb *)tz)->ucb$l_dlck, ((struct _ucb *)tz)->ucb$b_dipl); //Lock out TZ activity
+  // RAISE IPL
+  // SAVE CURRENT IPL
 
   tz->ucb$b_devtype = devtype;		// BUILD TYPE, AND BUFFER SIZE
   tz->ucb$w_devbufsiz = bufsiz;		// Buffer size
@@ -1470,11 +1459,9 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
     devdep2&=~TT2$M_DCL_MAILBX;	// Kill bad bits
     tz->ucb$l_devdepnd2 = devdep2;		// Set 2nd CHARACTERISTICS LONGWORD
   }
-#if 0
-    DEVICEUNLOCK LOCKADDR=ucb$l_dlck(tz),- ; RELEASE INTERLOCK
-					       NEWIPL=(SP)+,	-	// RESTORE IPL
-					       CONDITION=RESTORE	;
-#endif
+  DEVICEUNLOCK (((struct _ucb *)tz)->ucb$l_dlck, savipl); // RELEASE INTERLOCK
+  // RESTORE IPL
+
     sts=	SS$_NORMAL;		// Damn, it worked!
   return exe$finishioc(sts,i,p,u);		// Complete request
   //;;JC------------------- END Modified by J. Clement -------------------------
@@ -1518,12 +1505,10 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   // Point to the string.
   tz = ((struct _tz_ucb *)tz)->ucb$l_pz_xucb;		// Switch to TZ UCB
 
-#if 0
-    DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
-					     LOCKIPL=ucb$b_dipl(tz),-; RAISE IPL
-									 SAVIPL=-(SP),	-	// SAVE CURRENT IPL
-									 PRESERVE=YES		;
-#endif
+  savipl = DEVICELOCK (((struct _ucb *)tz)->ucb$l_dlck, ((struct _ucb *)tz)->ucb$b_dipl); // Lock out TZ activity
+  // RAISE IPL
+  // SAVE CURRENT IPL
+
   struct _tty_ucb * tty;
   tty=tz;
   tty->ucb$l_tt_accpornam   = ((struct _tz_ucb *)tz)->ucb$l_tz_xucb;		// Point at PZ UCB
@@ -1534,12 +1519,8 @@ int PN$FDTSET(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
   tty->ucb$w_tt_prtctl|=TTY$M_PC_ACCPORNAM;
   sts=SS$_NORMAL;		// Damn, it worked!
 
-#if 0
-    DEVICEUNLOCK LOCKADDR=ucb$l_dlck(tz),- ; RELEASE INTERLOCK
-					       NEWIPL=(SP)+,	-	// RESTORE IPL
-					       CONDITION=RESTORE, -	;
-  PRESERVE=YES		;
-#endif
+  DEVICEUNLOCK (((struct _ucb *)tz)->ucb$l_dlck, savipl); // RELEASE INTERLOCK
+  // RESTORE IPL
 
  SET_ACC_PORT_FINISH:
   // restore PZ UCB
@@ -1598,12 +1579,10 @@ int PN$FDTSENSEM (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
   tz = ((struct _tty_ucb *)tz)->ucb$l_tt_logucb;		// Switch to logical device if one exists
   spec_chr=GET_DCL(tz);			// BUILD SPECIAL CHARACTERISTICS
 
-#if 0
-  DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
-					   LOCKIPL=ucb$b_dipl(tz),-; RAISE IPL
-								       SAVIPL=-(SP),	-	// SAVE CURRENT IPL
-								       PRESERVE=YES		;
-#endif
+  int savipl = DEVICELOCK (((struct _ucb *)tz)->ucb$l_dlck, ((struct _ucb *)tz)->ucb$b_dipl); // Lock out TZ activity
+  // RAISE IPL
+  // SAVE CURRENT IPL
+
   devclass = *(int*)(&tz->ucb$b_devclass);		// BUILD TYPE, AND BUFFER SIZE
   devdep = tz->ucb$l_devdepend;		//RETURN 1ST CHARACTERISTICS LONGWORD
   devdep2=	tz->ucb$l_devdepnd2&~spec_chr; // check //AND 2ND LONGWORD (IF REQUESTED)
@@ -1612,12 +1591,8 @@ int PN$FDTSENSEM (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
   parity=(long)parity&~0xFF000000;		// ZERO HIGH BYTE
   parity = ((struct _tty_ucb*)tz)->ucb$b_tt_crfill;		// AND CR/LF FILL
 
-#if 0
-  DEVICEUNLOCK LOCKADDR=ucb$l_dlck(tz),- ; RELEASE INTERLOCK
-					     NEWIPL=(SP)+,	-	// RESTORE IPL
-					     CONDITION=RESTORE, -	;
-  PRESERVE=YES		;
-#endif
+  DEVICEUNLOCK (((struct _ucb *)tz)->ucb$l_dlck, savipl); // RELEASE INTERLOCK
+  // RESTORE IPL
 
   *buf=devclass;			// RETURN USER DATA
   buf[1]=devdep;		//
@@ -1679,11 +1654,9 @@ int PN$FDTSENSEC(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
 
   spec_chr=GET_DCL(tz);			// BUILD SPECIAL CHARACTERISTICS
 
-#if 0
-  DEVICELOCK LOCKADDR=ucb$l_dlck(tz),- ; Lock out TZ activity
-					   LOCKIPL=ucb$b_dipl(tz),-; RAISE IPL
-								       SAVIPL=-(SP)		// SAVE CURRENT IPL
-#endif
+  int savipl = DEVICELOCK (((struct _ucb *)tz)->ucb$l_dlck, ((struct _ucb *)tz)->ucb$b_dipl); // Lock out TZ activity
+  // RAISE IPL
+  // SAVE CURRENT IPL
 
   devclass=*(int*)(&((struct _tty_ucb *)tz)->ucb$w_tt_desize) & 0xffffff00; //BUILD TYPE, AND BUFFER SIZE
   devclass|=	DC$_TERM;		// BUILD DEVICE CLASS
@@ -1694,11 +1667,8 @@ int PN$FDTSENSEC(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
   parity	&=~0xFF000000;		// ZERO HIGH BYTE
   parity = ((struct _tty_ucb *)tz)->ucb$b_tt_decrf;		// AND CR/LF FILL
 
-#if 0
-  DEVICEUNLOCK LOCKADDR=ucb$l_dlck(tz),- ; RELEASE INTERLOCK
-					     NEWIPL=(SP)+,	-	// RESTORE IPL
-					     CONDITION=RESTORE	;
-#endif
+  DEVICEUNLOCK (((struct _ucb *)tz)->ucb$l_dlck, savipl); // RELEASE INTERLOCK
+  // RESTORE IPL
 
   *buf=devclass;			// RETURN USER DATA
   buf[1]=devdep;		//
@@ -1871,6 +1841,7 @@ extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, uns
 void pn$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
   ucb->ucb$b_flck=IPL$_IOLOCK8;
   ucb->ucb$b_dipl=IPL$_IOLOCK8;
+  ucb->ucb$l_dlck=&SPIN_IOLOCK8;
 
   ucb->ucb$l_devchar = DEV$M_REC | DEV$M_AVL | DEV$M_IDV | DEV$M_ODV;
 

@@ -24,13 +24,17 @@
 #include <linux/mm.h>
 #include <linux/slab.h>
 
+#include <internals.h>
+
 void  com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid);
 
 void com$post(struct _irp * i, struct _ucb * u) {
   int savipl = getipl();
   if (savipl<IPL$_IOPOST)
     setipl(IPL$_IOPOST);
+  vmslock(&SPIN_IOPOST, -1);
   insqti(i,&ioc$gq_postiq);
+  vmsunlock(&SPIN_IOPOST, -1);
   if (ctl$gl_pcb->pcb$l_cpu_id != smp$gl_primid)
     smp_send_work(CPU$M_IOPOST, 0);
   else

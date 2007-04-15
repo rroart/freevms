@@ -39,11 +39,15 @@ static struct fork_lock_struct forklock_table[7]={
 };
 
 int inline forklock(int i, signed int j) {
+  if (i<6 || i == 7 || i > 12)
+    panic("forklock\n");
   if (j==-2) j=forklock_table[i-6].ipl;
   return vmslock(forklock_table[i-6].spin, j);
 }
 
 void inline forkunlock(int i, signed int j) {
+  if (i<6 || i == 7 || i > 12)
+    panic("forkunlock\n");
   if (j==-2) j=forklock_table[i-6].ipl;
   vmsunlock(forklock_table[i-6].spin, j);
 }
