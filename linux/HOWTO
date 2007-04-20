@@ -11,8 +11,9 @@ Also tested distributions:
 Debian Sarge (gcc-3.3)
 	Install ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic sash bash-static
 	Have loop support or module.
+Also: Etch.
 For x86_64:
-Ubunty breezy:
+Ubuntu dapper:
 	Install also gcc-3.3 gcc-3.4 ia32-libs-dev
 
 NOTE on kernel build:
