@@ -1029,7 +1029,7 @@ void QL_FAO(CSTR, args)
     // not yet
     RC = LIB$SYS_FAOL(CSTR, MDSC->dsc$w_length, MDSC, /*AP+*/8);
 #else
-    MDSC->dsc$a_pointer=kmalloc(256,GFP_KERNEL);
+    MDSC->dsc$a_pointer=malloc(256);
     RC = sys$faol(CSTR, &MDSC->dsc$w_length, MDSC, &args); // check. was AP+etc
 #endif
     if (BLISSIFNOT(RC))

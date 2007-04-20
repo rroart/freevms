@@ -126,7 +126,7 @@ $(ELFLIB) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC) $(OTSOBJ_PIC
 
 pic/%.o: %.c 
 	install -d pic
-	$(CC) -fpic -fPIC $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -c -o $@ $<
+	$(CC) -fpic -fPIC $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -I$(HPATH) -c -o $@ $<
 
 str.o : str.c ../../starlet/src/strdef.h
 str__const.o : str__const.c ../../starlet/src/strdef.h

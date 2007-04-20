@@ -48,7 +48,9 @@
 #include <string.h>
 
 #include<dlfcn.h>
+#if 0
 #include<linux/bitops.h>
+#endif
 #include<linux/elf.h>
 
 #if 0

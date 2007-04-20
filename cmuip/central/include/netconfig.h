@@ -264,3 +264,4 @@ typedef struct {
 #undef ushort unsigned short
 #undef ulong unsigned long
 #undef uchar unsigned char
+#undef uint unsigned int

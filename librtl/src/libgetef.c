@@ -23,7 +23,9 @@
 #include <ssdef.h>						/* system messages */
 
 #ifndef __vms							/* Real VMS? */
+#if 0
 #include <string.h>						/* Needed for ffsll */
+#endif
 #include <linux/bitops.h>					/* Need Atomic bit operations */
 extern int ffsll(unsigned long long bits);			/* BUG?  should be in string.h */
 

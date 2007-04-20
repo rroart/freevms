@@ -346,7 +346,9 @@ Side Effects:
 
 void tcp$purge_send_queue(struct tcb_structure * TCB,signed long RC)
     {
+#if 0
     register
+#endif
       struct queue_blk_structure(qb_send_fields) * QB;
 register	struct user_send_args * Uargs;
 
@@ -391,7 +393,9 @@ Side Effects:
 
 void tcp$purge_receive_queue(struct tcb_structure * TCB, signed long RC)
     {
+#if 0
     register
+#endif
 	struct queue_blk_structure(qb_ur_fields) * QB;
 
     while (REMQUE(TCB->ur_qhead,&QB) != EMPTY_QUEUE) // check
@@ -1017,7 +1021,9 @@ Side Effects:
 
 void tcp$deliver_user_data(struct tcb_structure * TCB)
     {
+#if 0
     register
+#endif
 	struct queue_blk_structure(qb_ur_fields) * UQB; // User rcv request queue.
     register
 	datasize,		// Size of data written to users VAS.

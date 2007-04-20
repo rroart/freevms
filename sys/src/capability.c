@@ -51,8 +51,8 @@ int sch$add_cpu_cap(unsigned int cpu_id, unsigned int mask, UINT64_PQ prev_mask_
 int sch$clear_capability(struct _pcb *pcb, unsigned int mask, unsigned int cpu_id, unsigned int flags, UINT64_PQ prev_mask_p) {
   if (prev_mask_p)
     *prev_mask_p = pcb->pcb$l_capability;
-  int mask = 1 << cpu_id;
-  pcb->pcb$l_capability &= ~mask; // check order
+  int mask2 = 1 << cpu_id;
+  pcb->pcb$l_capability &= ~mask2; // check order
   return SS$_NORMAL;
 }
 
@@ -87,8 +87,8 @@ sch$remove_cpu_cap(unsigned int cpu_id, unsigned int mask, UINT64_PQ prev_mask_p
 int sch$set_capability(struct _pcb *pcb, unsigned int mask, unsigned int cpu_id, unsigned int flags, UINT64_PQ prev_mask_p) {
   if (prev_mask_p)
     *prev_mask_p = pcb->pcb$l_capability;
-  int mask = 1 << cpu_id;
-  pcb->pcb$l_capability |= mask; // check order
+  int mask2 = 1 << cpu_id;
+  pcb->pcb$l_capability |= mask2; // check order
   return SS$_NORMAL;
 }
 

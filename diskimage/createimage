@@ -24,7 +24,7 @@ cp -p grub.conf /mnt/boot/grub/menu.lst
 
 umount /mnt
 
-/sbin/grub --batch --device-map=/dev/null <<EOF
+../grub/src/build/grub/grub --batch --device-map=/dev/null <<EOF
 device (fd0) a.img
 root (fd0)
 setup (fd0)

@@ -260,7 +260,7 @@
 #define exe$deanonpaged EXE$DEANONPAGED
 
 int EXE$ALONONPAGED(int size, int * addr) {
-	  *addr=kmalloc(size,GFP_KERNEL);
+	  *addr=malloc(size);
 	  return SS$_NORMAL;
 }
 

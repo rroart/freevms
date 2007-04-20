@@ -1698,6 +1698,7 @@ struct segment_structure * SEG;
 	};
 	};
     exitloop:
+    {}
     }
 
 //SBTTL "Decode-Segment: Figure out what to do with a network segment."

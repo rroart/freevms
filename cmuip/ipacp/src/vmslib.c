@@ -21,6 +21,8 @@
 #define kfree free
 #define kmalloc(x,y) malloc(x)
 
+unsigned long remque(void * entry, void * addr);
+
 void myprintk(char *s) {
   struct dsc$descriptor dsc;
   dsc.dsc$a_pointer=s;

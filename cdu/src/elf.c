@@ -5,7 +5,7 @@
 
 #include <sys/types.h>
 #include <unistd.h>
-#include <libelf.h>
+#include <libelf/libelf.h>
 #include <ssdef.h>
 #include <descrip.h>
 #include <misc.h>
