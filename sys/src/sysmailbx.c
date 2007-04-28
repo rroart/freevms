@@ -114,11 +114,13 @@ asmlinkage int exe$crembx  (char prmflg, unsigned short int *chan, unsigned int 
   /* no priv check yet */
   /* lock i/o database mutex */
   //  printk("here assign\n");
+  /* lock i/o db */
+  sch$iolockw(); // moved up because of global db
   status=ioc$ffchan(chan);
   if (status!=SS$_NORMAL) return status;
   // check priv for prmflg
   /* lock i/o db */
-  sch$iolockw();
+  // sch$iolockw();
   // printk("here assign %x\n", chan);
   // ucb ccb stuff 
   c=&ctl$gl_ccbbase[*chan];

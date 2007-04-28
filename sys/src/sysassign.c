@@ -33,10 +33,12 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan,unsigned int ac
   struct _ddb * d;
   struct return_values r,r2={0,0};
   //  printk("here assign\n");
+  /* lock i/o db */
+  sch$iolockw(); // moved up because of global db
   status=ioc$ffchan(chan);
   if (status!=SS$_NORMAL) return status;
   /* lock i/o db */
-  sch$iolockw();
+  // sch$iolockw();
   // printk("here assign %x\n", chan);
   c=&ctl$gl_ccbbase[*chan];
   c->ccb$b_amod=1; /* wherever this gets set */
