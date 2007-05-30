@@ -12,7 +12,7 @@ O_TARGET := kernel.o
 export-objs = signal.o sys.o kmod.o context.o ksyms.o pm.o exec_domain.o printk.o
 
 obj-y     = dma.o fork.o exec_domain.o panic.o printk.o \
-	    module.o exit.o itimer.o info.o time.o resource.o \
+	    module6.o exit.o itimer.o info.o time.o resource.o \
 	    sysctl.o acct.o capability.o ptrace.o timer.o user.o \
 	    signal.o sys.o kmod.o
 

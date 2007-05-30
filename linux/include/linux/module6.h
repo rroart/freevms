@@ -15,9 +15,11 @@
 #include <linux/kmod.h>
 #include <linux/elf.h>
 #include <linux/stringify.h>
+#if 0
 #include <linux/kobject.h>
 #include <linux/moduleparam.h>
 #include <asm/local.h>
+#endif
 
 #include <asm/module.h>
 
@@ -45,6 +47,7 @@ struct modversion_info
 
 struct module;
 
+#if 0
 struct module_attribute {
         struct attribute attr;
         ssize_t (*show)(struct module_attribute *, struct module *, char *);
@@ -54,12 +57,15 @@ struct module_attribute {
 	int (*test)(struct module *);
 	void (*free)(struct module *);
 };
+#endif
 
+#if 0
 struct module_kobject
 {
 	struct kobject kobj;
 	struct module *mod;
 };
+#endif
 
 /* These are either module local, or the kernel's dummy ones. */
 extern int init_module(void);
@@ -182,6 +188,8 @@ void *__symbol_get_gpl(const char *symbol);
 #define __CRC_SYMBOL(sym, sec)
 #endif
 
+// check. temp fix.
+#define __CRC_SYMBOL(sym, sec)
 /* For every exported symbol, place a struct in the __ksymtab section */
 #define __EXPORT_SYMBOL(sym, sec)				\
 	extern typeof(sym) sym;					\
@@ -214,10 +222,12 @@ void *__symbol_get_gpl(const char *symbol);
 
 #endif
 
+#if 0
 struct module_ref
 {
 	local_t count;
 } ____cacheline_aligned;
+#endif
 
 enum module_state
 {
@@ -226,6 +236,7 @@ enum module_state
 	MODULE_STATE_GOING,
 };
 
+#if 0
 /* Similar stuff for section attributes. */
 #define MODULE_SECT_NAME_LEN 32
 struct module_sect_attr
@@ -234,12 +245,15 @@ struct module_sect_attr
 	char name[MODULE_SECT_NAME_LEN];
 	unsigned long address;
 };
+#endif
 
+#if 0
 struct module_sect_attrs
 {
 	struct attribute_group grp;
 	struct module_sect_attr attrs[0];
 };
+#endif
 
 struct module_param_attrs;
 
@@ -254,7 +268,9 @@ struct module
 	char name[MODULE_NAME_LEN];
 
 	/* Sysfs stuff. */
+#if 0
 	struct module_kobject mkobj;
+#endif
 	struct module_param_attrs *param_attrs;
 	struct module_attribute *modinfo_attrs;
 	const char *version;
@@ -306,8 +322,10 @@ struct module
 	/* The handle returned from unwind_add_table. */
 	void *unwind_info;
 
+#if 0
 	/* Arch-specific module values */
 	struct mod_arch_specific arch;
+#endif
 
 	/* Am I unsafe to unload? */
 	int unsafe;

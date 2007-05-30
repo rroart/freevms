@@ -15,6 +15,9 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#define Elf_Ehdr Elf32_Ehdr
+#define Elf_Shdr Elf32_Shdr
+#define Elf_Sym Elf32_Sym
 #include <linux/moduleloader.h>
 #include <linux/elf.h>
 #include <linux/vmalloc.h>
@@ -32,14 +35,22 @@ void *module_alloc(unsigned long size)
 {
 	if (size == 0)
 		return NULL;
+#if 0
 	return vmalloc_exec(size);
+#else
+	return kmalloc(size, GFP_KERNEL);
+#endif
 }
 
 
 /* Free memory returned from module_alloc */
 void module_free(struct module *mod, void *module_region)
 {
+#if 0
 	vfree(module_region);
+#else
+	kfree(module_region);
+#endif
 	/* FIXME: If module_region == mod->init_region, trim exception
            table entries. */
 }
@@ -123,19 +134,25 @@ int module_finalize(const Elf_Ehdr *hdr,
 	if (alt) {
 		/* patch .altinstructions */
 		void *aseg = (void *)alt->sh_addr;
+#if 0
 		apply_alternatives(aseg, aseg + alt->sh_size);
+#endif
 	}
 	if (locks && text) {
 		void *lseg = (void *)locks->sh_addr;
 		void *tseg = (void *)text->sh_addr;
+#if 0
 		alternatives_smp_module_add(me, me->name,
 					    lseg, lseg + locks->sh_size,
 					    tseg, tseg + text->sh_size);
+#endif
 	}
 	return 0;
 }
 
 void module_arch_cleanup(struct module *mod)
 {
+#if 0
 	alternatives_smp_module_del(mod);
+#endif
 }

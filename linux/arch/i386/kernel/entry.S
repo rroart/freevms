@@ -338,7 +338,24 @@ ENOSYS = 38
 	cli			; /* temp workaround? */ \
         POPR_ALL		; \
         REI
-				
+
+#define LOOPCHECK \
+	pushl %eax		; \
+	movl 0x4(%esp), %eax	; \
+	cmpl %eax, 0x34(%esp)	; \
+	jne 43f			; \
+	cmpl %eax, 0x64(%esp)	; \
+	jne 43f			; \
+	cmpl %eax, 0x94(%esp)	; \
+	jne 43f			; \
+	cmpl %eax, 0xc4(%esp)	; \
+	jne 43f			; \
+	cmpl %eax, 0xf4(%esp)	; \
+	jne 43f			; \
+	nop			; \
+	43:			; \
+	popl %eax		; 
+		
 #define MAYBEDOSOFTINT(ipl,vector) \
 	pushl %edi		; \
 	movl ctl$gl_pcb, %edi	; \

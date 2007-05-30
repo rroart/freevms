@@ -662,7 +662,9 @@ asmlinkage void __init start_kernel(void)
 	console_init();
 	kernel_puts("puts 15\n");
 #ifdef CONFIG_MODULES
+#if 0
 	init_modules();
+#endif
 #endif
 	if (prof_shift) {
 		unsigned int size;
