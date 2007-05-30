@@ -296,8 +296,8 @@ int ide_vmsinit(void) {
 
   unsigned short chan0, chan1, chan2;
   $DESCRIPTOR(u0,"dqa0");
-  $DESCRIPTOR(u1,"dqa1");
-  $DESCRIPTOR(u2,"dqa2");
+  $DESCRIPTOR(u1,"dqa001");
+  $DESCRIPTOR(u2,"dqa002");
   unsigned long idb=0,orb=0;
   struct _ccb * ccb;
   struct _ucb * newucb0,*newucb1,*newucb2;
