@@ -1,4 +1,4 @@
-Current as of FreeVMS 0.3.4.
+Current as of FreeVMS 0.3.6.
 	Warning: there may be some more unstability compared to 0.2.3
 	due to changes in AST system and modes to resemble VMS more.
 	Now also changes in interrupts and multiprocessing.
@@ -100,7 +100,7 @@ SHOW DEFAULT:
 SHOW DEVICES:
 	at current only shows drivers
 	show devices
-	386 ide devices partitions show up as dqa0 etc. (hdb2 -> dqb2 etc)
+	386 ide devices partitions show up as dqa001 etc. (hdb2 -> dqb002 etc)
 
 SHOW MEMORY:
 	show memory
@@ -153,6 +153,11 @@ WRITE:
 	no qualifiers yet
 	parameters logical something-to-write
 
+SYSMAN:
+	io load drivername
+	can only do sysman io load sys$loadable_images:random.exe, and
+	this driver currently does nothing (yet)
+
 Networking:
 
 CMUIP:
@@ -189,7 +194,7 @@ INSTALL:
 MOUNT:
 	Local ODS2 image
 	Go to image directory
-	Mount dqa2 (if using ext2 root).
+	Mount dqa002 (if using ext2 root).
 
 	Mount file (not partition) (option is not recently tested).
 	Must be a file in /. 
@@ -203,9 +208,9 @@ INIT:
 	From shell on compiler box (no DCL): init filename volume-name size 
 
 DFU:
-	mount dqa2:
+	mount dqa002:
 	run sys$system:dfu
-	commands: verify/report dqa2:; CONFIG_VMS mode
+	commands: verify/report dqa002:; CONFIG_VMS mode
 
 ******************************
 
