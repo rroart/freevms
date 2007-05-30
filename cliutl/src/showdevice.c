@@ -14,7 +14,7 @@ show_device(){
 int i;
 struct item_list_3 lst[4];
 char devname[15];
-char devlen;
+short devlen;
 int dvistatus;
 
 lst[0].buflen=15;
