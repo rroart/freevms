@@ -199,6 +199,10 @@ define verb install
 	image install_ele
 	routine main
 
+define verb sysman
+	image sysman_ele
+	routine main
+
 define verb dfu
 	image dfu
 	routine verify_command
