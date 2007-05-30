@@ -70,9 +70,16 @@ asmlinkage int exe$getdvi(unsigned int efn, unsigned short int chan, void *devna
       if (chan!=0 || u!=0 ) {
 	struct _ddb * d = u->ucb$l_ddb;
 	memcpy(it->bufaddr, &d->ddb$t_name[1], 3);
-	snprintf(&it->bufaddr[3],3,"%d",u->ucb$w_unit);
+	if (d->ddb$t_name[1] != 'd')
+	  snprintf(&it->bufaddr[3],3,"%d",u->ucb$w_unit);
+	else
+	  snprintf(&it->bufaddr[3],3,"%03d",u->ucb$w_unit);
       } else {
 	memcpy(it->bufaddr,&d->ddb$t_name[1],15);
+      }
+      if (it->retlenaddr) {
+	short int * len = it->retlenaddr;
+	*len = strlen(it->bufaddr);
       }
       break;
     case DVI$_UNIT:
