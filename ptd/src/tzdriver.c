@@ -1101,12 +1101,6 @@ long tz_iodb_vmsinit(void) {
   memset(ddb,0,sizeof(struct _ddb));
   memset(crb,0,sizeof(struct _crb));
 
-#if 0
-  init_ddb(&tz$ddb,&tz$ddt,&tz$ucb,"dqa");
-  init_ucb(&tz$ucb, &tz$ddb, &tz$ddt, &tz$crb);
-  init_crb(&tz$crb);
-#endif
-
   init_ddb(ddb,&tz$ddt,ucb,"tza");
   init_ucb(ucb, ddb, &tz$ddt, crb);
   init_crb(crb);
