@@ -298,6 +298,7 @@ int ide_vmsinit(void) {
   $DESCRIPTOR(u0,"dqa0");
   $DESCRIPTOR(u1,"dqa001");
   $DESCRIPTOR(u2,"dqa002");
+  $DESCRIPTOR(u3,"dqa003");
   unsigned long idb=0,orb=0;
   struct _ccb * ccb;
   struct _ucb * newucb0,*newucb1,*newucb2;
@@ -313,6 +314,7 @@ int ide_vmsinit(void) {
   ide_iodbunit_vmsinit(ddb,0,&u0);
   ide_iodbunit_vmsinit(ddb,1,&u1);
   ide_iodbunit_vmsinit(ddb,2,&u2);
+  ide_iodbunit_vmsinit(ddb,3,&u3);
 
   printk(KERN_INFO "dev here\n");
 
@@ -2101,6 +2103,21 @@ void ide_intr (int irq, void *dev_id, struct pt_regs *regs)
 		}
 	}
 	spin_unlock_irqrestore(&io_request_lock, flags);
+#if 0
+	if (startstop == ide_stopped)
+  {
+    extern long reqcom[], reqcomc[];
+    long addr = &irq;
+    addr += 0x68;
+    int pid=ideu->ucb$l_irp->irp$l_pid&31;
+    reqcom[1024*pid+reqcomc[pid]]=*(long*)addr;
+    reqcomc[pid]++;
+    reqcom[1024*pid+reqcomc[pid]]=0x42;
+    reqcomc[pid]++;
+    if (reqcomc[pid]>1000)
+      reqcomc[pid]=0;
+  }
+#endif
 	if (startstop == ide_stopped)
 		ioc$reqcom(SS$_NORMAL,0,ideu);
 }

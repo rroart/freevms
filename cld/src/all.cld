@@ -31,7 +31,8 @@ define verb directory
 define verb mount
 	image vmount
 	routine domount
-	parameter p1
+	parameter p1,value(list)
+	qualifier bind
 
 define verb search
 	image search

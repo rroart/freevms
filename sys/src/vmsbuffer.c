@@ -64,6 +64,7 @@
 #include <pridef.h>
 #include <iodef.h>
 #include <misc.h>
+#include <rvtdef.h>
 #include <vcbdef.h>
 #include <ucbdef.h>
 #include <linux/ext2_fs.h>
@@ -615,8 +616,15 @@ static int __block_write_full_page2(struct _fcb *inode, struct page *page, unsig
 	    if (err)
 	      goto out;
 	  }
+	  struct _ucb * ucb;
+	  if (vcb->vcb$l_rvn) {
+	    struct _rvt * rvt = vcb->vcb$l_rvt;
+	    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+	    ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+	  } else 
+	    ucb = vcb->vcb$l_rvt;
 	  sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_WRITEPBLK,&iosb,0,0,
-			 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+			 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),ucb->ucb$w_fill_0,0,0);
 
 	  turns++;
 	  block++;
@@ -689,8 +697,15 @@ static int __block_prepare_write(struct _fcb *inode, struct page *page,
 	   if (block_end > to || block_start < from)
 	     flush_dcache_page(page);
 	   if ((block_start < from || block_end > to)) {
+	     struct _ucb * ucb;
+	     if (vcb->vcb$l_rvn) {
+	       struct _rvt * rvt = vcb->vcb$l_rvt;
+	       struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+	       ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+	     } else 
+	       ucb = vcb->vcb$l_rvt;
 	     sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_READPBLK,&iosb,0,0,
-			    kaddr+turns*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+			    kaddr+turns*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),ucb->ucb$w_fill_0,0,0);
 	   }
 	}
 	return 0;
@@ -734,8 +749,15 @@ static int __block_commit_write(struct _fcb *inode, struct page *page,
 		if (block_end <= from || block_start >= to) {
 		  partial = 1;
 		} else {
+		  struct _ucb * ucb;
+		  if (vcb->vcb$l_rvn) {
+		    struct _rvt * rvt = vcb->vcb$l_rvt;
+		    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+		    ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+		  } else 
+		    ucb = vcb->vcb$l_rvt;
 		  sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_WRITEPBLK,&iosb,0,0,
-				 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+				 page_address(page)+turns*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),ucb->ucb$w_fill_0,0,0);
 		}
 	}
 
@@ -802,8 +824,15 @@ int block_read_full_page2(struct _fcb *inode,struct page *page, unsigned long pa
 
 	   nr++;
 
+	   struct _ucb * ucb;
+	   if (vcb->vcb$l_rvn) {
+	     struct _rvt * rvt = vcb->vcb$l_rvt;
+	     struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+	     ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+	   } else 
+	     ucb = vcb->vcb$l_rvt;
 	   sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_READPBLK,&iosb,0,0,
-			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),ucb->ucb$w_fill_0,0,0);
 
 	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
 
@@ -868,9 +897,16 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 
 	   nr++;
 
-	   //printk("p3 %lx %lx %lx %lx %lx %lx\n",page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+	   //printk("p3 %lx %lx %lx %lx %lx %lx\n",page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),vcb->vcb$l_rvt->rvt$l_ucblst[fcb->fcb$b_fid_rvn]->ucb$w_fill_0,0,0);
+	   struct _ucb * ucb;
+	   if (vcb->vcb$l_rvn) {
+	     struct _rvt * rvt = vcb->vcb$l_rvt;
+	     struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+	     ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+	   } else 
+	     ucb = vcb->vcb$l_rvt;
 	   sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,IO$_READPBLK,&iosb,0,0,
-			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+			  page_address(page) + i*blocksize,blocksize, blocknr*vms_block_factor(i_blkbits),ucb->ucb$w_fill_0,0,0);
 
 	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
 
@@ -1290,8 +1326,15 @@ int generic_direct_IO(int rw, struct _fcb * inode, struct kiobuf * iobuf, unsign
 		  type=IO$_READPBLK;
 		else
 		  type=IO$_WRITEPBLK;
+		struct _ucb * ucb;
+		if (vcb->vcb$l_rvn) {
+		  struct _rvt * rvt = vcb->vcb$l_rvt;
+		  struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+		  ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+		} else 
+		  ucb = vcb->vcb$l_rvt;
 		sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,type,&iosb,0,0,
-			       bh.b_data,blocksize, bh.b_blocknr*vms_block_factor(i_blkbits),((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+			       bh.b_data,blocksize, bh.b_blocknr*vms_block_factor(i_blkbits),ucb->ucb$w_fill_0,0,0);
 		//		blocks[i] = bh.b_blocknr;
 	}
 

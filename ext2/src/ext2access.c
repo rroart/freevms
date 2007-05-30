@@ -587,7 +587,7 @@ unsigned exttwo_writechunk(struct _fcb * fcb,unsigned long vblock, char * buff)
 {
   struct _iosb iosb;
   struct _vcb * vcb = x2p->current_vcb;
-  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
+  struct _ucb * ucb = ((struct _ucb *)vcb->vcb$l_rvt); //was:  struct _ucb * ucb=finducb(fcb);
   int pbn;
   int sts=ioc_std$mapvblk(vblock,0,&fcb->fcb$l_wlfl,0,0,&pbn,0,0);
   sts=sys$qiow(EXT2_EF,x2p->io_channel,IO$_WRITELBLK,&iosb,0,0,buff,512,pbn,ucb->ucb$w_fill_0,0,0);
@@ -598,7 +598,7 @@ static unsigned gethead(struct _fcb * fcb,struct ext2_inode **headbuff)
 {
   struct _iosb iosb;
   struct _vcb * vcb = x2p->current_vcb;
-  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
+  struct _ucb * ucb = ((struct _ucb *)vcb->vcb$l_rvt); //was:  struct _ucb * ucb=finducb(fcb);
   int vbn;
   int sts;
   struct _fiddef fid;
@@ -612,7 +612,7 @@ static unsigned gethead(struct _fcb * fcb,struct ext2_inode **headbuff)
 unsigned exttwo_writehead(struct _fcb * fcb,struct ext2_inode *headbuff)
 {
   struct _vcb * vcb = x2p->current_vcb;
-  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
+  struct _ucb * ucb = ((struct _ucb *)vcb->vcb$l_rvt); //was:  struct _ucb * ucb=finducb(fcb);
   int vbn=FCB_FID_TO_INO(fcb) + 1;
   ext2_write_inode(x2p->current_vcb, fcb, 1);
   //  return writechunk(getidxfcb(ucb->ucb$l_vcb),vbn, headbuff);
@@ -1434,7 +1434,7 @@ unsigned mounte2(unsigned flags,unsigned devices,char *devnam[],char *label[],st
 	} else {
 	  //vcbdev->max_cluster = (scb->scb$l_volsize + scb->scb$w_cluster - 1) / scb->scb$w_cluster;
 	  ucb->ucb$l_vcb = vcb;
-	  vcb->vcb$l_rvt = ucb; // just single volume so far
+	  ((struct _ucb *)vcb->vcb$l_rvt) = ucb; // just single volume so far
 	  vcbdev->vcb$l_free=home.s_free_blocks_count;
 	  printk("Freespace is %d\n",vcbdev->vcb$l_free);
 	}

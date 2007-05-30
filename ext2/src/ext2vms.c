@@ -163,6 +163,7 @@ void exttwo$dispatcher(void) {
       break;
     default:
       printk ("x2p %x code not implemented yet\n",fcode);
+      panic ("x2p %x code not implemented yet\n",fcode);
       break;
     }
     unlock_xqp("ext2$s", x2p);
@@ -590,7 +591,7 @@ unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],s
 	  ucb->ucb$l_vcb = NULL;
 	} else {
 	  ucb->ucb$l_vcb = vcb;
-	  vcb->vcb$l_rvt = ucb; // just single volume so far
+	  ((struct _ucb *)vcb->vcb$l_rvt) = ucb; // just single volume so far
 	  vcbdev->vcb$l_free=home.s_free_blocks_count;
 	  printk("%%MOUNT-I-FREE, Freespace is %d\n",vcbdev->vcb$l_free);
 	}

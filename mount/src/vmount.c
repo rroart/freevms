@@ -105,6 +105,10 @@
 #include <descrip.h>
 #include <fabdef.h>
 #include <fiddef.h>
+#include <uicdef.h>
+#include <hm2def.h>
+#include <iodef.h>
+#include <iosbdef.h>
 #include <misc.h>
 #include <namdef.h>
 #include <rabdef.h>
@@ -168,6 +172,7 @@ unsigned domount(int userarg)
 {
     setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts;
+    $DESCRIPTOR(bind, "bind");
     $DESCRIPTOR(p, "p1");
     char c[80];
     struct dsc$descriptor o;
@@ -178,7 +183,17 @@ unsigned domount(int userarg)
     if ((sts&1)==0)
       return sts;
     int retlen;
-    sts = cli$get_value(&p, &o, &retlen);
+
+    char bindnam[80];
+    struct dsc$descriptor binddes;
+    binddes.dsc$a_pointer=bindnam;
+    binddes.dsc$w_length=80;
+    memset (bindnam, 0, 80);
+    int bind_sts = cli$present(&bind);
+    if (bind_sts&1) {
+      sts = cli$get_value(&bind, &binddes, &retlen);
+      binddes.dsc$w_length = retlen;
+    }
 
     char *dev = c;
     char *lab = 0;
@@ -195,6 +210,30 @@ unsigned domount(int userarg)
         }
     }
 #endif
+    while (cli$get_value(&p, &o, &retlen)&1) {
+      devs[devices++] = strdup(c);
+    }
+    if (bind_sts&1) {
+      for (dev = 0; dev < devices; dev ++) {
+	short int chan;
+	char buf[512];
+	struct _hm2 * hm2 = buf;
+	struct dsc$descriptor dsc;
+	dsc.dsc$w_length = strlen(devices[dev]);
+	dsc.dsc$a_pointer = devices[dev];
+	sts=sys$assign(&dsc,&chan,0,0,0);
+	char * nam = devices[dev];
+	int part = nam[3] - '1';
+	struct _iosb iosb;
+	sts = sys$qiow(0, chan, IO$_READPBLK, &iosb, 0, 0, buf , 512, 1, part, 0, 0);
+	hm2->hm2$w_rvn = dev + 1;
+	memcpy(hm2->hm2$t_strucname, binddes.dsc$a_pointer, binddes.dsc$w_length);
+	sts = sys$qiow(0, chan, IO$_WRITEPBLK, &iosb, 0, 0, buf , 512, 1, part, 0, 0);
+	sys$dassgn(chan);
+      }
+      return 1;
+    }
+#if 0
     devices = 0;
     while (*dev != '\0') {
         devs[devices++] = dev;
@@ -205,6 +244,7 @@ unsigned domount(int userarg)
             break;
         }
     }
+#endif
     if (devices > 0) {
         unsigned i;
         struct VCB *vcb;

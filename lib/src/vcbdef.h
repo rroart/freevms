@@ -301,6 +301,7 @@ struct _vcb {
 #define		vcb$b_status		vcb_0.vcb_1_2.vcb$b_status
 #define		vcb$l_trans		vcb_0.vcb_1_2.vcb$l_trans
 #define		vcb$l_aqb		vcb_0.vcb_1_2.vcb$l_aqb
+#define		vcb$l_rvn		vcb_0.vcb_1_2.vcb$l_rvn
 #define		vcb$t_volname		vcb_0.vcb_1_2.vcb$t_volname
 #define		vcb$l_rvt		vcb_0.vcb_1_2.vcb$l_rvt
 #define		vcb$l_cache		vcb_0.vcb_1_2.vcb_1_2_1.vcb_1_2_1_1.vcb$l_cache

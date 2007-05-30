@@ -66,6 +66,7 @@
 #include <fm2def.h>
 #include <hm2def.h>
 #include <fcbdef.h>
+#include <rvtdef.h>
 #include <scbdef.h>
 #include <wcbdef.h>
 #include <vmstime.h>
@@ -138,8 +139,15 @@ int ods2_block_read_full_page3(struct _wcb * wcb,struct page *page, unsigned lon
 
 	   nr++;
 
+	   struct _ucb * ucb;
+	   if (vcb->vcb$l_rvn) {
+	     struct _rvt * rvt = vcb->vcb$l_rvt;
+	     struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+	     ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+	   } else 
+	     ucb = vcb->vcb$l_rvt;
 	   sts = exe$qiow(XQP_EF,(unsigned short)xqp->io_channel,IO$_READPBLK,&iosb,0,0,
-			  page_address(page) + i*blocksize,blocksize, blocknr,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+			  page_address(page) + i*blocksize,blocksize, blocknr,ucb->ucb$w_fill_0,0,0);
 
 	 } while (i++, iblock++, turns++, turns<(PAGE_SIZE/blocksize));
 
@@ -184,8 +192,15 @@ static int __ods2_block_write_full_page2(struct _wcb *wcb, struct page *page, un
 	  if (blocknr==-1) {
 	    panic("...page2\n");
 	  }
+	  struct _ucb * ucb;
+	  if (vcb->vcb$l_rvn) {
+	    struct _rvt * rvt = vcb->vcb$l_rvt;
+	    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+	    ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+	  } else 
+	    ucb = vcb->vcb$l_rvt;
 	  sts = exe$qiow(XQP_EF,(unsigned short)xqp->io_channel,IO$_WRITEPBLK,&iosb,0,0,
-			 page_address(page)+turns*blocksize,blocksize, blocknr,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+			 page_address(page)+turns*blocksize,blocksize, blocknr,ucb->ucb$w_fill_0,0,0);
 
 	  turns++;
 	  block++;
@@ -287,7 +302,14 @@ void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count
   struct _iosb myiosb;
   unsigned char * buf = kmalloc(512*count,GFP_KERNEL);
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(XQP_EF,xqp->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+  struct _ucb * ucb;
+  if (vcb->vcb$l_rvn) {
+    struct _rvt * rvt = vcb->vcb$l_rvt;
+    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+    ucb = ucblst[vcb->vcb$l_rvn - 1]; // check
+  } else 
+    ucb = vcb->vcb$l_rvt;
+  unsigned long sts=sys$qiow(XQP_EF,xqp->io_channel,IO$_READLBLK,&myiosb,0,0,buf,512*count,phyblk,ucb->ucb$w_fill_0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -295,7 +317,14 @@ void * f11b_read_block(struct _vcb * vcb, unsigned long lbn, unsigned long count
 void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lbn, unsigned long count, struct _iosb * iosb) {
   struct _iosb myiosb;
   unsigned long phyblk=lbn; // one to one
-  unsigned long sts=sys$qiow(XQP_EF,xqp->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,((struct _ucb *)vcb->vcb$l_rvt)->ucb$w_fill_0,0,0);
+  struct _ucb * ucb;
+  if (vcb->vcb$l_rvn) {
+    struct _rvt * rvt = vcb->vcb$l_rvt;
+    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+    ucb = ucblst[vcb->vcb$l_rvn - 1]; // check
+  } else 
+    ucb = vcb->vcb$l_rvt;
+  unsigned long sts=sys$qiow(XQP_EF,xqp->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,ucb->ucb$w_fill_0,0,0);
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -600,7 +629,13 @@ unsigned writechunk(struct _fcb * fcb,unsigned long vblock, char * buff)
 {
   struct _iosb iosb;
   struct _vcb * vcb = xqp->current_vcb;
-  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
+  struct _ucb * ucb;
+  if (vcb->vcb$l_rvn) {
+    struct _rvt * rvt = vcb->vcb$l_rvt;
+    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+    ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+  } else 
+    ucb = vcb->vcb$l_rvt;
   int pbn;
   int sts=ioc_std$mapvblk(vblock,0,&fcb->fcb$l_wlfl,0,0,&pbn,0,0);
   sts=sys$qiow(XQP_EF,xqp->io_channel,IO$_WRITELBLK,&iosb,0,0,buff,512,pbn,ucb->ucb$w_fill_0,0,0);
@@ -611,7 +646,13 @@ static unsigned gethead(struct _fcb * fcb,struct _fh2 **headbuff)
 {
   struct _iosb iosb;
   struct _vcb * vcb = xqp->current_vcb;
-  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
+  struct _ucb * ucb;
+  if (vcb->vcb$l_rvn) {
+    struct _rvt * rvt = vcb->vcb$l_rvt;
+    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+    ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+  } else 
+    ucb = vcb->vcb$l_rvt;
   int vbn;
   int sts;
   struct _fiddef fid;
@@ -625,7 +666,13 @@ static unsigned gethead(struct _fcb * fcb,struct _fh2 **headbuff)
 unsigned writehead(struct _fcb * fcb,struct _fh2 *headbuff)
 {
   struct _vcb * vcb = xqp->current_vcb;
-  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb=finducb(fcb);
+  struct _ucb * ucb;
+  if (vcb->vcb$l_rvn) {
+    struct _rvt * rvt = vcb->vcb$l_rvt;
+    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+    ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+  } else 
+    ucb = vcb->vcb$l_rvt;
   struct _fiddef * fid = &headbuff->fh2$w_fid.fid$w_num;
   unsigned short check = checksum((vmsword *) headbuff);
   int vbn=fid->fid$w_num + (fid->fid$b_nmx << 16) - 1 +
@@ -741,7 +788,15 @@ struct _fh2 *premap_indexf(struct _fcb *fcb,struct _ucb *ucb,unsigned *retsts)
     struct _hm2 home;
     sts = sys$qiow(XQP_EF,irp->irp$w_chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct _hm2),vcbdev->vcb$l_homelbn,0,0,0);
 #endif
-    *retsts = sys$qiow(XQP_EF,xqp->io_channel,IO$_READLBLK,&iosb,0,0, (char *) head,sizeof(struct _fh2),VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),((struct _ucb *)vcbdev->vcb$l_rvt)->ucb$w_fill_0,0,0);
+    struct _vcb * vcb = vcbdev;
+    struct _ucb * ucb;
+    if (vcb->vcb$l_rvn) {
+      struct _rvt * rvt = vcb->vcb$l_rvt;
+      struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+      ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+    } else 
+      ucb = vcb->vcb$l_rvt;
+    *retsts = sys$qiow(XQP_EF,xqp->io_channel,IO$_READLBLK,&iosb,0,0, (char *) head,sizeof(struct _fh2),VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),ucb->ucb$w_fill_0,0,0);
     *retsts = iosb.iosb$w_status;
     if (!(*retsts & 1)) {
       kfree(head);
@@ -797,7 +852,13 @@ int add_wcb(struct _fcb * fcb, unsigned short * map)
   struct _fh2 *head = 0;
 
   struct _vcb * vcb = xqp->current_vcb;
-  struct _ucb * ucb = vcb->vcb$l_rvt; //was:  struct _ucb * ucb = finducb(fcb); // bad bad
+  struct _ucb * ucb;
+  if (vcb->vcb$l_rvn) {
+    struct _rvt * rvt = vcb->vcb$l_rvt;
+    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+    ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+  } else 
+    ucb = vcb->vcb$l_rvt;
   unsigned short *mp;
   unsigned phyblk, phylen;
   struct _wcb *wcb;
@@ -843,7 +904,13 @@ int wcb_create_all(struct _fcb * fcb, struct _fh2 * fh2)
   struct _fh2 *head = 0;
 
   struct _vcb * vcb = xqp->current_vcb;
-  struct _ucb * ucb = vcb->vcb$l_rvt; // was: finducb(fcb); // bad bad
+  struct _ucb * ucb;
+  if (vcb->vcb$l_rvn) {
+    struct _rvt * rvt = vcb->vcb$l_rvt;
+    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+    ucb = ucblst[fcb->fcb$b_fid_rvn - 1];
+  } else 
+    ucb = vcb->vcb$l_rvt;
   unsigned short *mp;
   unsigned short *me;
 
@@ -1260,9 +1327,11 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
   struct _ucb *ucb;
   struct _hm2 home;
   struct _aqb *aqb;
+  struct _vcb * root_vcb;
   int islocal;
   int isfile=0;
   if (sizeof(struct _hm2) != 512 || sizeof(struct _fh2) != 512) return SS$_NOTINSTALL;
+  char strucname[13];
   for (device = 0; device < devices; device++) {
     //printk("Trying to mount %s\n",devnam[device]);
     if (strchr(devnam[device],'$')) {
@@ -1302,6 +1371,8 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       islocal=1;
     }
     vcb = (struct _vcb *) kmalloc(sizeof(struct _vcb),GFP_KERNEL);
+    if (vcb == NULL) return SS$_INSFMEM;
+    vcbdev = vcb;
     memset(vcb,0,sizeof(struct _vcb));
     vcb->vcb$b_type=DYN$C_VCB;
     xqp->current_vcb=vcb; // until I can place it somewhere else
@@ -1309,14 +1380,16 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
     memset(aqb,0,sizeof(struct _aqb));
     aqb->aqb$b_type=DYN$C_AQB;
     qhead_init(&aqb->aqb$l_acpqfl);
-    ucb->ucb$l_vcb=vcb;
     vcb->vcb$l_aqb=aqb;
-    if (vcb == NULL) return SS$_INSFMEM;
     vcb->vcb$b_status = 0;
     if (flags & 1) vcb->vcb$b_status |= VCB$M_WRITE_IF;
     qhead_init(&vcb->vcb$l_fcbfl);
     vcb->vcb$l_cache = NULL; // ?
-    vcbdev = vcb;
+    if (devices > 1) {
+      vcb->vcb$l_rvt = kmalloc (sizeof(struct _rvt) + (devices - 1) * sizeof(long), GFP_KERNEL);
+      memset(vcb->vcb$l_rvt, 0, sizeof(struct _rvt) + (devices - 1) * sizeof(long));
+    }
+    ucb->ucb$l_vcb=vcb;
     sts = SS$_NOSUCHVOL;
     //    vcbdev->dev = NULL;
     if (strlen(devnam[device])) {
@@ -1378,8 +1451,30 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
 	//vcb->vcb$l_free = 500; // how do we compute this?
 	memcpy(&vcb->vcb$t_volname,home.hm2$t_volname,12);
 	memcpy(&vcb->vcb$t_volcknam,home.hm2$t_volname,12);
+	if (home.hm2$w_rvn) {
+	  if (devices == 0) {
+	    root_vcb = vcb;
+	    memcpy(strucname, home.hm2$t_strucname, 12);
+	  } else {
+	    if (0 != strncmp(strucname, home.hm2$t_strucname, 12))
+	      return 0; // check
+	  }
+	}
 	volume_lock("f11b$a", &vcb->vcb$t_volcknam);
-	vcb->vcb$l_rvt = ucb; // just single volume so far
+	if (devices > 1) {
+	  struct _rvt * rvt = vcb->vcb$l_rvt;
+	  struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+	  ucblst [devices] = ucb; // check. just single volume so far?
+	  if (root_vcb != vcb) {
+	    struct _rvt * rvt = root_vcb->vcb$l_rvt;
+	    struct _ucb ** ucblst = rvt->rvt$l_ucblst;
+	    ucblst [devices] = ucb; // check. just for root volume so far?
+	  }
+	  vcb->vcb$l_rvn = devices;
+	} else {
+	  vcb->vcb$l_rvt = ucb;
+	  vcb->vcb$l_rvn = 0;
+	}
 	idxfid.fid$b_rvn = device + 1;
 	//sts = accessfile(vcb,&idxfid,&idxfcb,flags & 1);
 	idxhd = f11b_read_block(vcbdev,VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),1, &iosb);
