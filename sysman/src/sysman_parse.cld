@@ -1,0 +1,21 @@
+module sysman_parse
+
+define syntax io_connect
+	cliroutine io_connect
+	parameter p1
+	qualifier driver_name
+
+define syntax io_load
+	cliroutine io_load
+	parameter p1
+
+define type io_something
+	keyword connect, syntax = io_connect
+	keyword load, syntax = io_load
+
+define verb io
+	parameter p1,label=something,value(type=io_something)
+
+define verb exit
+        cliroutine sm_exit
+
