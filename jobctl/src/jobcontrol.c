@@ -32,11 +32,11 @@ mbx_read_ast() {
   switch(mbx_buffer[0]) {
   case MSG$_TRMUNSOLIC:
     {
-      char t[4];
+      char t[8];
       struct dsc$descriptor term;
-      term.dsc$w_length=4;
+      term.dsc$w_length=strlen(s);
       term.dsc$a_pointer=t;
-      memcpy(t,s,4);
+      memcpy(t,s,term.dsc$w_length);
       printk("s is %s\n",s);
       jobctl_unsolicit(&term);
     }
