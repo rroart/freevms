@@ -27,6 +27,11 @@
  *
  */
 
+/*
+ *	Buffer overflow fix gets -> fgets:
+ *	Pointed out by George John and fixed by Bertrand Joël
+ */
+
 /* Does this system have the magnetic tape ioctls?  The answer is yes for 
    most/all unices, and I think it is yes for VMS 7.x with DECC 5.2 (needs
    verification), but it is no for VMS 6.2.  */
@@ -238,7 +243,7 @@ char	*fn;
 	if(procf && wflag) {
 		printf("extract %s [ny]",filename);
 		fflush(stdout);
-		gets(ans);
+		fgets(ans, 1, stdin);
 		if(*ans != 'y') procf = 0;
 	}
 	if(procf)
