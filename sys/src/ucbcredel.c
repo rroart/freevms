@@ -101,8 +101,8 @@ int ioc_std$clone_ucb (struct _ucb *tmpl_ucb, struct _ucb **new_ucb) {
 int init_ddb(struct _ddb * ddb, struct _ddt * ddt, struct _ucb * ucb, char * sddb) {
   memset(ddb,0,sizeof(struct _ddb));
   ddb->ddb$b_type=DYN$C_DDB;
-  ddb->ddb$l_ddt=ddt;
-  ddb->ddb$ps_ucb=ucb;
+  ddb->ddb$l_ddt=ddt; // check. remove later
+  ddb->ddb$ps_ucb=ucb; // check. remove later
   ddb->ddb$t_name[0]=strlen(sddb);
   memcpy(&ddb->ddb$t_name[1],sddb,ddb->ddb$t_name[0]);
   return SS$_NORMAL;
@@ -114,10 +114,10 @@ int init_ucb(struct _ucb * ucb, struct _ddb * ddb,struct _ddt * ddt, struct _crb
   ucb->ucb$l_crb=crb;
   ucb->ucb$l_ddt=ddt;
 
-  ucb->ucb$l_sts|=UCB$M_TEMPLATE;
+  ucb->ucb$l_sts|=UCB$M_TEMPLATE; // check. (re)move later.
 
-  ucb->ucb$w_unit=9999;
-  ucb->ucb$w_unit_seed=0;
+  ucb->ucb$w_unit=9999; // check. (re)move later.
+  ucb->ucb$w_unit_seed=0; // check. (re)move later.
 
   return SS$_NORMAL;
 }

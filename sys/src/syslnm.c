@@ -525,6 +525,7 @@ void cre_syscommon(char * name) {
   char * myname = "DKA200:[vms$common.]";
   char * myname2 = "DKA200:[vms$common.sysexe]";
   char * myname3 = "DKA200:[vms$common.syslib]";
+  char * myname4 = "DKA200:[vms$common.sys$ldr]";
   $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
   struct dsc$descriptor * mytabnam = &mytabnam_;
   $DESCRIPTOR(dev_, "SYS$COMMON");
@@ -533,6 +534,8 @@ void cre_syscommon(char * name) {
   struct dsc$descriptor * dev2 = &dev2_;
   $DESCRIPTOR(dev3_, "SYS$LIBRARY");
   struct dsc$descriptor * dev3 = &dev3_;
+  $DESCRIPTOR(dev4_, "SYS$LOADABLE_IMAGES");
+  struct dsc$descriptor * dev4 = &dev4_;
   struct item_list_3 itm[2];
   
   memcpy(myname,name,strlen(name));
@@ -556,4 +559,10 @@ void cre_syscommon(char * name) {
   itm[0].bufaddr=myname3;
   memset(&itm[1],0,sizeof(struct item_list_3));
   sts=exe$crelnm(0,mytabnam,dev3,0,itm);
+
+  itm[0].item_code=LNM$_STRING;
+  itm[0].buflen=strlen(myname4);
+  itm[0].bufaddr=myname4;
+  memset(&itm[1],0,sizeof(struct item_list_3));
+  sts=exe$crelnm(0,mytabnam,dev4,0,itm);
 }

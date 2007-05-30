@@ -621,6 +621,8 @@ void mb$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, s
   return;
 }
 
+struct _ucb * mbucb0;
+
 int mb$unit_init (struct _idb * idb, struct _ucb * ucb) {
   ucb->ucb$v_online = 0;
   //ucb->ucb$l_lr_msg_tmo = 0 ; // or offline? // where did this go?
@@ -632,6 +634,12 @@ int mb$unit_init (struct _idb * idb, struct _ucb * ucb) {
   
   ucb->ucb$v_online = 1;
 
+#if 0
+  ucb -> ucb$w_size = sizeof(struct _mb_ucb); // check. temp placed
+#endif
+
+  mbucb0=ucb; // check. only if unit 0?
+
   return SS$_NORMAL;
 }
 
@@ -640,13 +648,11 @@ struct _ddb mb$ddb;
 struct _mb_ucb mb$ucb;
 struct _crb mb$crb;
 
-struct _ucb * mbucb0;
-
 int mb$init_tables() {
   ini_dpt_name(&mb$dpt, "MBDRIVER");
   ini_dpt_adapt(&mb$dpt, 0);
   ini_dpt_defunits(&mb$dpt, 1);
-  ini_dpt_ucbsize(&mb$dpt,sizeof(struct _ucb));
+  ini_dpt_ucbsize(&mb$dpt,sizeof(struct _mb_ucb));
   ini_dpt_struc_init(&mb$dpt, mb$struc_init);
   ini_dpt_struc_reinit(&mb$dpt, mb$struc_reinit);
   ini_dpt_ucb_crams(&mb$dpt, 1/*NUMBER_CRAMS*/);
@@ -679,6 +685,7 @@ long mb_iodb_vmsinit(void) {
   struct _ddb * ddb=&mb$ddb;
   struct _crb * crb=&mb$crb;
 #endif 
+#if 0
   struct _ucb * ucb=kmalloc(sizeof(struct _ucb),GFP_KERNEL);
   struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
   struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
@@ -689,12 +696,6 @@ long mb_iodb_vmsinit(void) {
   memset(ucb,0,sizeof(struct _ucb));
   memset(ddb,0,sizeof(struct _ddb));
   memset(crb,0,sizeof(struct _crb));
-
-#if 0
-  init_ddb(&mb$ddb,&mb$ddt,&mb$ucb,"mba");
-  init_ucb(&mb$ucb, &mb$ddb, &mb$ddt, &mb$crb);
-  init_crb(&mb$crb);
-#endif
 
   ucb -> ucb$w_size = sizeof(struct _mb_ucb); // temp placed
 
@@ -711,9 +712,13 @@ long mb_iodb_vmsinit(void) {
   insertdevlist(ddb);
 
   return ddb;
+#endif
 
+  int load_driver_inner(long, long, long, long);
+  load_driver_inner(mb$init_tables, &mb$ddt, &mb$dpt, &mb$fdt);
 }
 
+#if 0
 long mb_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   unsigned short int chan;
   struct _ucb * newucb;
@@ -723,8 +728,8 @@ long mb_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
   registerdevchan(MKDEV(MB0_MAJOR,unitno),chan);
 #endif
 
-  return newucb;
 }
+#endif
 
 int mb_vmsinit(void) {
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");

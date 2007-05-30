@@ -163,3 +163,29 @@ void ioc_std$cancelio (signed int chan, struct _irp *irp, struct _pcb *pcb, stru
     ucb->ucb$l_sts|=UCB$M_CANCEL; // check. had to add extra - before chan
   }
 }
+
+int ioc$ctrl_init (struct _crb *crb, struct _ddb *ddb) {
+  struct _ddt * ddt = ddb->ddb$l_ddt;
+  int (*ctrlinit_2)() = ddt->ddt$ps_ctrlinit_2;
+  if (ctrlinit_2)
+    ctrlinit_2(0 /* idb */, ddb, crb);
+}
+
+int ioc$unit_init (struct _ucb *ucb) {
+  struct _ddt * ddt = ucb->ucb$l_ddt;
+  int (*unitinit)() = ddt->ddt$l_unitinit;
+  if (unitinit)
+    unitinit(0, ucb);
+  struct _ddb * ddb = ucb->ucb$l_ddb;
+  struct _dpt * dpt = ddb->ddb$ps_dpt;
+  void (*init)() = dpt->dpt$ps_init_pd;
+  void (*reinit)() = dpt->dpt$ps_reinit_pd;
+  long orb = 0;
+  long idb = 0;
+  long crb = 0;
+  struct _ddb * dbb = ucb->ucb$l_ddb;
+  if (init)
+    init(crb, ddb, idb, orb, ucb);
+  if (reinit)
+    reinit(crb, ddb, idb, orb, ucb);
+}
