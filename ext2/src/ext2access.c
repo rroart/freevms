@@ -1332,12 +1332,15 @@ unsigned mounte2(unsigned flags,unsigned devices,char *devnam[],char *label[],st
     } else {
       struct dsc$descriptor dsc;
       short int chan;
-      char buf[5];
+      char buf[7];
       int sts;
-      memcpy(buf,devnam[device],4);
-      buf[4]=0;
+#if 0
+      dsc.dsc$a_pointer=devnam[device];
+#endif
+      dsc.dsc$w_length=strlen(devnam[device]);
+      memcpy(buf,devnam[device],dsc.dsc$w_length);
+      buf[dsc.dsc$w_length]=0;
       dsc.dsc$a_pointer=buf;
-      dsc.dsc$w_length=4;
 
       sts=exe$assign(&dsc,&chan,0,0,0);
 

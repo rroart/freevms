@@ -45,7 +45,7 @@ long int dsc$strtol(const char *nptr, int len, char **endptr, int base) {
   char str[len+1];
   memcpy(str, nptr, len);
   str[len]=0;
-  printk("str %d %x %s\n",len, str, str);
+  //printk("str %d %x %s\n",len, str, str);
   return simple_strtol(str, endptr, base); 
 }
 
@@ -104,9 +104,9 @@ int ioc$search(struct return_values *r, void * devnam) {
     if (!memcmp(&d->ddb$t_name[1],device,3/* was s->dsc$w_length*/)) {
       struct _ucb * tmp = d->ddb$ps_ucb;
       char * c=device;
-#if 0
+#if 1
       char unit=dsc$strtol(&c[3], devstrlen-3-(device-devstr), 0, 10); // was: c[3]-48;
-      printk ("unit %s %d\n",devstr, unit);
+      // printk ("unit %s %d\n",devstr, unit);
 #else
       char unit=c[3]-48;
 #endif
