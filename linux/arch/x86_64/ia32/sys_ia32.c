@@ -2714,6 +2714,7 @@ put_mod_name(char *buf)
 
 static __inline__ struct module *find_module(const char *name)
 {
+#if 0
 	struct module *mod;
 
 	for (mod = module_list; mod ; mod = mod->next) {
@@ -2724,11 +2725,13 @@ static __inline__ struct module *find_module(const char *name)
 	}
 
 	return mod;
+#endif
 }
 
 static int
 qm_modules(char *buf, size_t bufsize, __kernel_size_t32 *ret)
 {
+#if 0
 	struct module *mod;
 	size_t nmod, space, len;
 
@@ -2759,6 +2762,7 @@ calc_space_needed:
 		return -EFAULT;
 	else
 		return -ENOSPC;
+#endif
 }
 
 static int
@@ -2932,6 +2936,7 @@ qm_info(struct module *mod, char *buf, size_t bufsize, __kernel_size_t32 *ret)
 
 asmlinkage int sys32_query_module(char *name_user, int which, char *buf, __kernel_size_t32 bufsize, u32 ret)
 {
+#if 0
 	struct module *mod;
 	int err;
 
@@ -2987,6 +2992,7 @@ asmlinkage int sys32_query_module(char *name_user, int which, char *buf, __kerne
 out:
 	unlock_kernel();
 	return err;
+#endif
 }
 
 struct kernel_sym32 {

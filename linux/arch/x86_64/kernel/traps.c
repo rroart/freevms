@@ -145,6 +145,7 @@ static inline int kernel_text_address(unsigned long addr)
        addr <= (unsigned long) &_etext)
        return 1;
 
+#if 0
    for (mod = module_list; mod != &kernel_module; mod = mod->next) {
        /* mod_bound tests for addr being inside the vmalloc'ed
         * module area. Of course it'd be better to test only
@@ -154,6 +155,7 @@ static inline int kernel_text_address(unsigned long addr)
            break;
        }
    }
+#endif
 
    return retval;
 }

@@ -16,6 +16,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#define Elf_Ehdr Elf64_Ehdr
+#define Elf_Shdr Elf64_Shdr
+#define Elf_Sym Elf64_Sym
+#define ELF64_R_SYM(i) ((i) >> 32)
+#define ELF64_R_TYPE(i) ((i) & 0xffffffff)
 #include <linux/moduleloader.h>
 #include <linux/elf.h>
 #include <linux/vmalloc.h>
@@ -48,11 +53,19 @@ void *module_alloc(unsigned long size)
 	if (size > MODULES_LEN)
 		return NULL;
 
+#if 0
 	area = __get_vm_area(size, VM_ALLOC, MODULES_VADDR, MODULES_END);
+#else
+	area = get_vm_area(size, VM_ALLOC);
+#endif
 	if (!area)
 		return NULL;
 
+#if 0
 	return __vmalloc_area(area, GFP_KERNEL, PAGE_KERNEL_EXEC);
+#else
+	return vmalloc(area);
+#endif
 }
 #endif
 
@@ -164,19 +177,25 @@ int module_finalize(const Elf_Ehdr *hdr,
 	if (alt) {
 		/* patch .altinstructions */
 		void *aseg = (void *)alt->sh_addr;
+#if 0
 		apply_alternatives(aseg, aseg + alt->sh_size);
+#endif
 	}
 	if (locks && text) {
 		void *lseg = (void *)locks->sh_addr;
 		void *tseg = (void *)text->sh_addr;
+#if 0
 		alternatives_smp_module_add(me, me->name,
 					    lseg, lseg + locks->sh_size,
 					    tseg, tseg + text->sh_size);
+#endif
 	}
 	return 0;
 }
 
 void module_arch_cleanup(struct module *mod)
 {
+#if 0
 	alternatives_smp_module_del(mod);
+#endif
 }

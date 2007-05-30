@@ -49,6 +49,13 @@ search_exception_table(unsigned long addr)
 	ret = search_one_table(__start___ex_table, __stop___ex_table-1, addr);
 	return ret;
 #else
+	const struct exception_table_entry *search_module_extables(unsigned long addr);
+        ret = search_one_table(__start___ex_table, __stop___ex_table-1, addr);
+        if (!ret)
+          ret = search_module_extables(addr);
+        return ret;
+
+#if 0
 	/* The kernel is the last "module" -- no need to treat it special.  */
 	struct module *mp;
 
@@ -63,5 +70,6 @@ search_exception_table(unsigned long addr)
 	}
 	spin_unlock_irqrestore(&modlist_lock, flags);
 	return ret;
+#endif
 #endif
 }
