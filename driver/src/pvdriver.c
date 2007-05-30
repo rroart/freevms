@@ -4518,7 +4518,9 @@ int __init floppy_init(void)
 	fd_vmsinit();
 	{
 	  struct _ccb * ccb;
+#if 0
 	  ccb = &ctl$ga_ccb_table[dev2chan(MKDEV(FLOPPY_MAJOR,0))];
+#endif
 	  //ccb->ccb$l_ucb->ucb$l_orb=drive;
 	  printk("VMS DVA0 here\n");
 	}
