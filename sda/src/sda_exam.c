@@ -41,20 +41,23 @@ int sda$examine(int mask) {
   char * semi = strchr (c, ';');
   if (semi)
     *semi = 0;
-#if 0
+#if 1
   // not yet
-  long addr = strtol (c, 0, 16);
+  char * endptr;
+  long long qaddr = strtoll (c, &endptr, 16);
+  long addr = qaddr;
+  long is_addr = c + retlen == endptr;
 #else
   long addr = strtol (c, 0, 10);
-#endif
   long isnot_addr = addr;
-  if (addr == 0) 
+#endif
+  if (!is_addr) 
     sts = sda_find_addr (c, &addr);
   if ((sts&1)==0)
     return sts;
   long size = sizeof(long);
   if (semi) {
-#if 0
+#if 1
     // not yet
     size = strtol (semi+1, 0, 16);
 #else
@@ -67,7 +70,7 @@ int sda$examine(int mask) {
       sts = cli$get_value(&p2, &o2, &retlen);
       o2.dsc$w_length=retlen;
       if (sts&1) {
-#if 0
+#if 1
 	// not yet
 	size = strtol (c2, 0, 16);
 #else
@@ -86,7 +89,7 @@ int sda$examine(int mask) {
   if (!semi) {
     char * name = 0;
     long offset;
-    if (!isnot_addr)
+    if (!is_addr)
       name = c;
     else 
       sts = sda_find_symbol(addr, &name, &offset);

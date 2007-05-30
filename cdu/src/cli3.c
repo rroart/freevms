@@ -17,9 +17,15 @@ cli_token(char * str, int * retlen){
   c_lex_one_token(&token);
   if (token.value.is_integer) {
 #ifdef __i386__
+    memcpy(str, token.value.string, strlen(token.value.string));
+    str[strlen(token.value.string)] = 0;
+#if 0
+    // check. kernel link problem
     sprintf(str, "%d", token.value.p1);
+#endif
 #else
     memcpy(str, token.value.string, strlen(token.value.string));
+    str[strlen(token.value.string)] = 0;
 #endif
     *retlen = strlen(str);
   } else {

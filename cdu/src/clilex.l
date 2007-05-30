@@ -394,6 +394,9 @@ if (!hexmode)
 #ifdef __x86_64__
   memcpy(yylval.type_node_p.string, yytext, yyleng);
   yylval.type_node_p.string[yyleng] = 0;
+#else
+  memcpy(yylval.type_node_p.string, yytext, yyleng);
+  yylval.type_node_p.string[yyleng] = 0;
 #endif
   yylval.type_node_p.is_integer = 1;
   yylval.type_node_p.p1 = l;
@@ -412,7 +415,12 @@ nohex:
   }
 #endif
   long long l = atoll(yytext);
+  if (l == 0 && yyleng > 1 && *yytext != '0')
+    goto nodig;
 #ifdef __x86_64__
+  memcpy(yylval.type_node_p.string, yytext, yyleng);
+  yylval.type_node_p.string[yyleng] = 0;
+#else
   memcpy(yylval.type_node_p.string, yytext, yyleng);
   yylval.type_node_p.string[yyleng] = 0;
 #endif
@@ -424,6 +432,8 @@ nohex:
 }
 
 {name}|"."{name}"."				{
+nodig:
+{}
   if (*yytext != '/' && checkq) {
     BEGIN(lexparam);
     yyless(0);
