@@ -329,8 +329,11 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
 
   if (pmd) {
     pte = pte_alloc(mm, pmd, page);
+#if 0
+    // check. why was this done?
     if (pte)
       *(long*)pte=0;
+#endif
   }
   spin_unlock(&mm->page_table_lock);
 
