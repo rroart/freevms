@@ -453,7 +453,10 @@ void lock_iosb_kast(int par) {
   struct _lkb * lck = par;
   struct _lksb * lksb = lck->lkb$l_lksb;
   if (lck->lkb$l_status&LKB$M_ASYNC) {
-    lksb->lksb$w_status=SS$_NORMAL;
+#if 0
+    if (lksb) // check. temp workaround
+      lksb->lksb$w_status=SS$_NORMAL;
+#endif
     lck->lkb$l_status&=~LKB$M_ASYNC;
   }
   if (lck->lkb$l_status&LKB$M_DCPLAST) {
