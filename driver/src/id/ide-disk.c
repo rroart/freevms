@@ -390,6 +390,8 @@ static ide_startstop_t recal_intr (ide_drive_t *drive)
 
 static int myidecount=0;
 
+#define MYDEB_IDE
+#undef MYDEB_IDE
 #ifdef MYDEB_IDE
 long myindex=0;
 long mystack[1024];
@@ -415,9 +417,9 @@ ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned lon
   lastblk[current->pcb$l_pid&31]=block;
 #if 1
   mystack[myindex]=block;
-  mystack2[myindex]=rq->nr_sectors;
-  mystack3[myindex]=0;
-  mystack4[myindex]=0;
+  mystack2[myindex]=*(int*)ideu->ucb$l_irp->irp$l_iosb; //rq; //->nr_sectors;
+  mystack3[myindex]=ctl$gl_pcb->pcb$l_pid;
+  mystack4[myindex]=exe$gl_abstim_tics;
   myindex++;
   if (myindex==1024) myindex=0;
 #endif
