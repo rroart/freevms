@@ -20,10 +20,44 @@ int er$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
   return lan$readblk(i,p,u,c);
 }
 
+static int ei_timeout(struct _irp * i, struct _ucb * u) {
+  //  startio(i,u);
+  extern struct _ucb * eru;
+  eru->ucb$l_duetim = 0; // check. temp fix
+  void ei_tx_timeout(struct net_device *dev);
+  struct _ucb * ucb = eru;
+  void * dev = ((struct _ucbnidef *)ucb)->ucb$l_extra_l_1;
+  ei_tx_timeout(dev);
+#if 0
+  int er$writeblk();
+  er$writeblk(i, 0, u, 0); // check. temp workaround. makes dups?
+#else
+  forklock(eru->ucb$b_flck, -1);
+  int ioc$reqcom();
+  ioc$reqcom(SS$_NORMAL, 0x0800, eru);
+  forkunlock(eru->ucb$b_flck, -1);
+#endif
+  return 1;
+}
+
 int er$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  int savipl=forklock(u->ucb$b_flck,u->ucb$b_flck);
   // hardcode this until we get sizeof struct _iosb down from 12 to 8
+#if 0
   if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL|0x080000000000;
+#else
+  extern struct _ucb * eru;
+  eru->ucb$l_irp = i;
+#endif
+  int ei_timeout();
+  int ioc$wfikpch();
+#if 1
+  ioc$wfikpch(ei_timeout, ei_timeout, i, eru, eru, 1, 0);
+#else
+  ioc$wfikpch(ei_timeout, ei_timeout, i, u, u, 1, 0);
+#endif
   int sts = ei_start_xmit  (i, p, u, c); 
+  forkunlock(u->ucb$b_flck,savipl);
   return sts = SS$_NORMAL;
 }
 
@@ -422,7 +456,9 @@ static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
 	enable_irq(dev->irq);
 
 	// check	dev_kfree_skb (skb);
+#if 1
 	kfree(buf);
+#endif
 	ei_local->stat.tx_bytes += send_length;
     
 	return 0;
@@ -682,6 +718,19 @@ static void ei_tx_intr(struct net_device *dev)
 			ei_local->stat.tx_window_errors++;
 	}
 	// not yet? netif_wake_queue(dev);
+	{
+	  extern struct _ucb * eru;
+	  struct _irp * i = eru->ucb$l_irp;
+#if 0
+	  if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL|0x080000000000;
+#else
+	  eru->ucb$l_duetim = 0; // check. temp fix
+	  forklock(eru->ucb$b_flck, -1);
+	  int ioc$reqcom();
+	  ioc$reqcom(SS$_NORMAL, 0x0800, eru);
+	  forkunlock(eru->ucb$b_flck, -1);
+#endif
+	}
 }
 
 /**
