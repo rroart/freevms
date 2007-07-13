@@ -60,6 +60,7 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <sch_routines.h>
+#include <ddbdef.h>
 
 extern int pid1count; /* Will be removed in the future */
 extern int pid0count; /* Will be removed in the future */
@@ -91,6 +92,37 @@ void exe$timeout(void) {
   /* do erl$wake() if appropiate ???? */
   /* ecc$reenable() */
   /* scan i/o db etc */
+  {
+    struct _ddb * d=ioc$gl_devlist;
+    if (d == 0) goto skip;
+    do {
+#if 0
+      //    printk("bcmp %s %s\n",d->ddb$t_name,s->dsc$a_pointer);
+      struct _sb * sb=d->ddb$ps_sb;
+      if ((node==0) && sb)
+	goto next;
+      if (node && (sb==0))
+	goto next;
+      if (sb && 0!=strncmp(&sb->sb$t_nodename[1],node,nodelen))
+	goto next;
+#endif
+      struct _ucb * tmp = d->ddb$ps_ucb;
+      do {
+	//printk("unitcmp %x %x\n",unit,tmp->ucb$w_unit);
+	if (tmp->ucb$l_duetim && tmp->ucb$l_duetim < exe$gl_abstim) {
+	  if (tmp->ucb$l_fpc) {
+	    printk("ucb timeout %x %x\n", tmp, tmp->ucb$l_irp);
+	    tmp->ucb$l_fpc(tmp->ucb$l_fr3, tmp->ucb$l_fr4);
+	  }
+	}
+	tmp=tmp->ucb$l_link;
+      } while (tmp && tmp!=d->ddb$ps_ucb);
+    next:
+      d=d->ddb$ps_link;
+    } while (d && d!=ioc$gl_devlist);
+  skip:
+    {}
+  }
   /* scan crbs */
   /* if running monitor... */
   /* scan fork and wait queue. soon to be implemented */
