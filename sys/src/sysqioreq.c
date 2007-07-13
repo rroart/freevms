@@ -36,8 +36,8 @@
 #include <queue.h>
 #include <linux/slab.h>
 
-#undef MYDEB_IRP
 #define MYDEB_IRP
+#undef MYDEB_IRP
 
 void exe$qioqe2ppkt (struct _pcb * p, struct _irp * i);
 void exe$qioqxqppkt (struct _pcb * p, struct _irp * i);
@@ -156,6 +156,12 @@ asmlinkage int exe$qiow (unsigned int efn, unsigned short int chan,unsigned int 
 long lastirp[32];
 long lastirp1[32*20];
 long lastirp2[32*6];
+#if 1
+long myirp[1024*6];
+long myirpc=0;
+#endif
+
+static int qcnt = 0;
 #endif
 
 /* put this into a struct */
@@ -202,9 +208,21 @@ asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int f
   i->irp$l_pid=current->pcb$l_pid;
   i->irp$l_sts|=IRP$M_BUFIO; /* no DIRIO because of no mmg$svaptechk */
 #ifdef MYDEB_IRP
+  i->irp$w_empty=qcnt++;
   lastirp[i->irp$l_pid&31]=i;
+#if 1
   memcpy(&lastirp1[20*(i->irp$l_pid&31)],i,20*4);
   memcpy(&lastirp2[6*(i->irp$l_pid&31)],&i->irp$l_qio_p1,6*4);
+  memcpy(&lastirp2[6*(i->irp$l_pid&31)+5],&exe$gl_abstim_tics,4);
+#endif
+#if 1
+  memcpy(&myirp[myirpc],i,20*4);
+  myirpc+=20;
+  memcpy(&myirp[myirpc],&i->irp$l_qio_p1,6*4);
+  memcpy(&myirp[myirpc+5],&exe$gl_abstim_tics,4);
+  myirpc+=8;
+  if (myirpc>1024) myirpc=0;
+#endif
 #endif
   /* do preprocessing */
   /* does it do one or more functions */

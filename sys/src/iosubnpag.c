@@ -64,11 +64,11 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
     int pid=i->irp$l_pid&31;
     reqcom[1024*pid+reqcomc[pid]]=i;
     reqcomc[pid]++;
-    reqcom[1024*pid+reqcomc[pid]]=i->irp$l_qio_p3;
+    reqcom[1024*pid+reqcomc[pid]]=i->irp$w_empty; //->irp$l_qio_p3;
     reqcomc[pid]++;
-    reqcom[1024*pid+reqcomc[pid]]=*(long*)addr;
+    reqcom[1024*pid+reqcomc[pid]]=((long*)addr)[0];
     reqcomc[pid]++;
-    reqcom[1024*pid+reqcomc[pid]]=i;
+    reqcom[1024*pid+reqcomc[pid]]=exe$gl_abstim_tics;// |(myindex_<<16); //i;
     reqcomc[pid]++;
     if (reqcomc[pid]>1000)
       reqcomc[pid]=0;
