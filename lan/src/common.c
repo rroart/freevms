@@ -319,7 +319,9 @@ int lan$netif_rx(struct _ucb * u, void * bdsc) {
 }
 
 int lan$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  int savipl=forklock(u->ucb$b_flck,u->ucb$b_flck);
   exe$insertirp(u,i);
+  forkunlock(u->ucb$b_flck,savipl);
   return SS$_NORMAL;
 }
 
