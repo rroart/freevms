@@ -56,6 +56,11 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
 
   ideu=u;
 
+#if 1
+  int ide_timeout();
+  ioc$wfikpch(ide_timeout, ide_timeout, i, u, u, 1, 0);
+#endif
+
   switch (i->irp$v_fcode) {
 
     case IO$_WRITELBLK:
@@ -86,6 +91,15 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
       return (SS$_BADPARAM);
     }
   }
+}
+
+static int ide_timeout(struct _irp * i, struct _ucb * u) {
+  //  startio(i,u);
+  ide_drive_t *drive = u->ucb$l_orb;
+  ide_hwgroup_t *hwgroup = HWGROUP(drive);
+  void ide_timer_expiry (unsigned long data);
+  ide_timer_expiry(hwgroup);
+  return 1;
 }
 
 static struct _irp * globali;
@@ -1928,12 +1942,24 @@ void ide_timer_expiry (unsigned long data)
 			__cli();	/* local CPU only, as if we were handling an interrupt */
 			if (hwgroup->poll_timeout != 0) {
 				startstop = handler(drive);
+				forklock(ideu->ucb$b_flck, -1);
+				if (startstop == ide_stopped) // check. temp measure.
+				  ideu->ucb$l_duetim = 0; // and/or set ucb$v_tim?
+				if (startstop == ide_stopped)
+				  ioc$reqcom(SS$_NORMAL,0,ideu);
+				forkunlock(ideu->ucb$b_flck, -1);
 			} else if (drive_is_ready(drive)) {
 				if (drive->waiting_for_dma)
 					(void) hwgroup->hwif->dmaproc(ide_dma_lostirq, drive);
 				(void)ide_ack_intr(hwif);
 				printk("%s: lost interrupt\n", drive->name);
 				startstop = handler(drive);
+				forklock(ideu->ucb$b_flck, -1);
+				if (startstop == ide_stopped) // check. temp measure.
+				  ideu->ucb$l_duetim = 0; // and/or set ucb$v_tim?
+				if (startstop == ide_stopped)
+				  ioc$reqcom(SS$_NORMAL,0,ideu);
+				forkunlock(ideu->ucb$b_flck, -1);
 			} else {
 				if (drive->waiting_for_dma) {
 					startstop = ide_stopped;
@@ -1949,7 +1975,9 @@ void ide_timer_expiry (unsigned long data)
 				hwgroup->busy = 0;
 		}
 	}
+#if 0
 	ide_do_request(hwgroup, 0);
+#endif
 	spin_unlock_irqrestore(&io_request_lock, flags);
 }
 
@@ -2118,8 +2146,12 @@ void ide_intr (int irq, void *dev_id, struct pt_regs *regs)
       reqcomc[pid]=0;
   }
 #endif
+	forklock(ideu->ucb$b_flck, -1);
+	if (startstop == ide_stopped) // check. temp measure.
+	  ideu->ucb$l_duetim = 0; // and/or set ucb$v_tim?
 	if (startstop == ide_stopped)
 		ioc$reqcom(SS$_NORMAL,0,ideu);
+	forkunlock(ideu->ucb$b_flck, -1);
 }
 
 /*
