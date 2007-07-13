@@ -1,4 +1,4 @@
-Current as of FreeVMS 0.3.6.
+Current as of FreeVMS 0.3.7.
 	Warning: there may be some more unstability compared to 0.2.3
 	due to changes in AST system and modes to resemble VMS more.
 	Now also changes in interrupts and multiprocessing.
