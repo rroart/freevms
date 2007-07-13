@@ -291,12 +291,53 @@ int ec$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
   return lan$readblk(i,p,u,c);
 }
 
+static int ec_timeout(struct _irp * i, struct _ucb * u) {
+  //  startio(i,u);
+  ((struct _ucb *)ecu)->ucb$l_duetim = 0; // check. temp fix
+  void vortex_tx_timeout(struct net_device *dev);
+  struct _ucb * ucb = ecu;
+  void * dev = ((struct _ucbnidef *)ucb)->ucb$l_extra_l_1;
+  vortex_tx_timeout(dev);
+#if 0
+  int er$writeblk();
+  er$writeblk(i, 0, u, 0); // check. temp workaround. makes dups?
+#else
+  forklock(((struct _ucb *)ecu)->ucb$b_flck, -1);
+  ioc$reqcom(SS$_NORMAL, 0x0800, ecu);
+  forkunlock(((struct _ucb *)ecu)->ucb$b_flck, -1);
+#endif
+  return 1;
+}
+
 int ec$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
+  int savipl=forklock(u->ucb$b_flck,u->ucb$b_flck);
   // hardcode this until we get sizeof struct _iosb down from 12 to 8
+#if 0
   if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL|0x080000000000;
+#else
+  ((struct _ucb *)ecu)->ucb$l_irp = i;
+#endif
   struct net_device * dev = ((struct _ucbnidef *)u)->ucb$l_extra_l_1;
   int (*func)() = dev->hard_start_xmit;
+  int ec_timeout();
+  static int vortex_start_xmit();
+  static int boomerang_start_xmit();
+#if 1
+#if 1
+  if (func == boomerang_start_xmit)
+	  ioc$wfikpch(ec_timeout, ec_timeout, i, ecu, ecu, 1, 0);
+#else
+  ioc$wfikpch(ec_timeout, ec_timeout, i, u, u, 1, 0);
+#endif
+#endif
   int sts = func  (i, p, u, c); 
+  forkunlock(u->ucb$b_flck,savipl);
+#if 1
+#if 1
+  if (func == vortex_start_xmit)
+#endif
+	  if (i->irp$l_iosb) *(long long *)i->irp$l_iosb=SS$_NORMAL|0x080000000000;
+#endif
   return sts = SS$_NORMAL;
 }
 
@@ -2439,6 +2480,7 @@ static void vortex_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 	spin_lock(&vp->lock);
 
 	status = inw(ioaddr + EL3_STATUS);
+	int orig_status = status;
 
 	if (vortex_debug > 6)
 		printk("vortex_interrupt(). status=0x%4x\n", status);
@@ -2519,6 +2561,13 @@ static void vortex_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 		outw(AckIntr | IntReq | IntLatch, ioaddr + EL3_CMD);
 	} while ((status = inw(ioaddr + EL3_STATUS)) & (IntLatch | RxComplete));
 
+	if (orig_status & TxComplete) {
+		((struct _ucb *)ecu)->ucb$l_duetim = 0; // check. temp fix
+		forklock(((struct _ucb *)ecu)->ucb$b_flck, -1);
+		ioc$reqcom(SS$_NORMAL, 0x0800, ecu);
+		forkunlock(((struct _ucb *)ecu)->ucb$b_flck, -1);
+	}
+
 	if (vortex_debug > 4)
 		printk(KERN_DEBUG "%s: exiting interrupt, status %4.4x.\n",
 			   dev->name, status);
@@ -2548,6 +2597,7 @@ static void boomerang_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 	spin_lock(&vp->lock);
 
 	status = inw(ioaddr + EL3_STATUS);
+	int orig_status = status;
 
 	if (vortex_debug > 6)
 		printk(KERN_DEBUG "boomerang_interrupt. status=0x%4x\n", status);
@@ -2615,6 +2665,7 @@ static void boomerang_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 #endif
 					kfree(skb);
 					vp->tx_skbuff[entry] = 0;
+					orig_status = TxComplete; // check. just once?
 				} else {
 					printk(KERN_DEBUG "boomerang_interrupt: no skb!\n");
 				}
@@ -2653,6 +2704,13 @@ static void boomerang_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 			writel(0x8000, vp->cb_fn_base + 4);
 
 	} while ((status = inw(ioaddr + EL3_STATUS)) & IntLatch);
+
+	if (orig_status & TxComplete) {
+		((struct _ucb *)ecu)->ucb$l_duetim = 0; // check. temp fix
+		forklock(((struct _ucb *)ecu)->ucb$b_flck, -1);
+		ioc$reqcom(SS$_NORMAL, 0x0800, ecu);
+		forkunlock(((struct _ucb *)ecu)->ucb$b_flck, -1);
+	}
 
 	if (vortex_debug > 4)
 		printk(KERN_DEBUG "%s: exiting interrupt, status %4.4x.\n",
@@ -2716,16 +2774,15 @@ static int vortex_rx(struct net_device *dev)
 					while (inw(ioaddr + Wn7_MasterStatus) & 0x8000)
 						;
 					pci_unmap_single(vp->pdev, dma, pkt_len, PCI_DMA_FROMDEVICE);
-					memcpy(cb1->cxb$ps_pktdata, buf, 14);
-					memcpy(cb2->cxb$ps_pktdata, &buf[14], pkt_len - 14);
-					kfree(buf);
-					cb2->cxb$w_length=pkt_len - 14;
-
 				} else {
 					insl(ioaddr + RX_FIFO, buf,
 						 (pkt_len + 3) >> 2);
 				}
 				outw(RxDiscard, ioaddr + EL3_CMD); /* Pop top Rx packet. */
+				memcpy(cb1->cxb$ps_pktdata, buf, 14);
+				memcpy(cb2->cxb$ps_pktdata, &buf[14], pkt_len - 14);
+				kfree(buf);
+				cb2->cxb$w_length=pkt_len - 14;
 #if 0
 				skb->protocol = eth_type_trans(skb, dev);
 #endif
@@ -2803,23 +2860,22 @@ boomerang_rx(struct net_device *dev)
 					   vp->rx_skbuff[entry]->tail,
 					   pkt_len);
 #endif
-				char * buf=vp->rx_skbuff[entry];
-
-				memcpy(cb1->cxb$ps_pktdata, buf, 14);
-				memcpy(cb2->cxb$ps_pktdata, &buf[14], pkt_len - 14);
-				cb2->cxb$w_length=pkt_len - 14;
-
 				vp->rx_copy++;
 			} else {
 				/* Pass up the skbuff already on the Rx ring. */
+#if 0
 				skb = vp->rx_skbuff[entry];
 				vp->rx_skbuff[entry] = NULL;
-#if 0
 				skb_put(skb, pkt_len);
 #endif
 				pci_unmap_single(vp->pdev, dma, PKT_BUF_SZ, PCI_DMA_FROMDEVICE);
 				vp->rx_nocopy++;
 			}
+			char * buf=vp->rx_skbuff[entry];
+			
+			memcpy(cb1->cxb$ps_pktdata, buf, 14);
+			memcpy(cb2->cxb$ps_pktdata, &buf[14], pkt_len - 14);
+			cb2->cxb$w_length=pkt_len - 14;
 #if 0
 			skb->protocol = eth_type_trans(skb, dev);
 #endif
