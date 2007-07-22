@@ -66,7 +66,7 @@ int exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, int qio_s
   // inc process ast quota if v_quota was set
   i->irp$b_rmod&=~ACB$M_QUOTA;
   
-  insque(i,smp$gl_cpu_data[0 /* smp_processor_id() */]->cpu$l_psbl); // check. bug?
+  insque(i,smp$gl_cpu_data[smp$gl_primid /* smp_processor_id() */]->cpu$l_psbl); // check. bug?
   SOFTINT_IOPOST_VECTOR;
 
   forkunlock(u->ucb$b_flck, savipl);
@@ -94,7 +94,7 @@ int exe$finishio (long status1, long status2, struct _irp * i, struct _pcb * p, 
   i->irp$l_iost1=status1;
   i->irp$l_iost2=status2;
   int savipl = forklock(u->ucb$b_flck, u->ucb$b_flck);
-  insque(i,smp$gl_cpu_data[0 /* smp_processor_id() */]->cpu$l_psbl); // check. bug?
+  insque(i,smp$gl_cpu_data[smp$gl_primid /* smp_processor_id() */]->cpu$l_psbl); // check. bug?
   SOFTINT_IOPOST_VECTOR;
   forkunlock(u->ucb$b_flck, savipl);
   setipl(0);
