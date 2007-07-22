@@ -57,7 +57,7 @@ void exe$insertirp(struct _ucb * u, struct _irp * i) {
 
 int exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, int qio_sts) {
   // acquire forklock etc
-  forklock(u->ucb$b_flck,-1);
+  int savipl = forklock(u->ucb$b_flck, u->ucb$b_flck);
 #if 0
   if (i->irp$l_iosb)
     bzero(i->irp$l_iosb,8);
@@ -66,10 +66,10 @@ int exe_std$abortio(struct _irp * i, struct _pcb * p, struct _ucb * u, int qio_s
   // inc process ast quota if v_quota was set
   i->irp$b_rmod&=~ACB$M_QUOTA;
   
-  insque(i,smp$gl_cpu_data[smp_processor_id()]->cpu$l_psbl);
+  insque(i,smp$gl_cpu_data[0 /* smp_processor_id() */]->cpu$l_psbl); // check. bug?
   SOFTINT_IOPOST_VECTOR;
 
-  forkunlock(u->ucb$b_flck,-1);
+  forkunlock(u->ucb$b_flck, savipl);
   return qio_sts;
 }
 
@@ -93,10 +93,10 @@ int exe$finishio (long status1, long status2, struct _irp * i, struct _pcb * p, 
   /* do iosb stuff */
   i->irp$l_iost1=status1;
   i->irp$l_iost2=status2;
-  forklock(u->ucb$b_flck,-1);
-  insque(i,smp$gl_cpu_data[smp_processor_id()]->cpu$l_psbl);
+  int savipl = forklock(u->ucb$b_flck, u->ucb$b_flck);
+  insque(i,smp$gl_cpu_data[0 /* smp_processor_id() */]->cpu$l_psbl); // check. bug?
   SOFTINT_IOPOST_VECTOR;
-  forkunlock(u->ucb$b_flck,-1);
+  forkunlock(u->ucb$b_flck, savipl);
   setipl(0);
   return SS$_NORMAL;
 }
@@ -107,7 +107,7 @@ int exe$finishioc (long status, struct _irp * i, struct _pcb * p, struct _ucb * 
 
 int exe$insioq (struct _irp * i, struct _ucb * u) {
   /* raise ipl */
-  int savipl=forklock(u->ucb$b_flck,u->ucb$b_flck);
+  int savipl=forklock(u->ucb$b_flck, u->ucb$b_flck);
   if (u->ucb$l_sts & UCB$M_BSY)
     exe$insertirp(u,i); // should be &u->ucb$l_ioqfl ?
   else {
