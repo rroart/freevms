@@ -25,15 +25,6 @@
 #include <linux/slab.h>
 #include <internals.h>
 
-#define OLDAST
-#undef OLDAST
-
-#if 0
-#ifdef __x86_64__
-#define OLDAST
-#endif
-#endif
-
 #undef ASTDEBUG
 #define ASTDEBUG
 
@@ -595,9 +586,9 @@ asmlinkage void sch$astdel(int dummy) {
 #endif
 
 #ifdef ASTDEBUG
-  myacbs[myacbi++]=0;
+  myacbs[myacbi++]=ctl$gl_pcb;
   myacbs[myacbi++]=0x77777777;
-  myacbs[myacbi++]=0;
+  myacbs[myacbi++]=ctl$gl_pcb->pcb$l_astqbl;
   myacbs[myacbi++]=0x77777777;
 #endif
  more:
@@ -698,10 +689,6 @@ asmlinkage void sch$astdel(int dummy) {
   //unlock
   vmsunlock(&SPIN_SCHED,-1);
   setipl(IPL$_ASTDEL);
-#ifdef OLDAST
-  p->pcb$b_astact=0; // 1; wait with this until we get modes
-  setipl(0); // for kernel mode, I think. everything is in kernelmode yet.
-#endif
   if (((unsigned long)acb->acb$l_ast<0x80000000)&&((unsigned long)acb->acb$l_ast>0xb0000000)) {
     int i;
     printk("kast %x\n",acb->acb$l_ast);
@@ -733,7 +720,6 @@ asmlinkage void sch$astdel(int dummy) {
   long (*ast)() = acb->acb$l_ast;
   long astprm = acb->acb$l_astprm;
   int rmod = acb->acb$b_rmod;
-#ifndef OLDAST
   if ((acb->acb$b_rmod&(ACB$M_NODELETE|ACB$M_PKAST))==0) kfree(acb);
   if (rmod&3) {
 #ifdef __i386__
@@ -756,17 +742,9 @@ asmlinkage void sch$astdel(int dummy) {
     test_and_clear_bit(rmod&3, &p->pcb$b_astact); // check
     sch$newlvl(p);
   }
-#else
-  if(ast) ast(astprm); /* ? */
-#endif
 #endif
 #ifdef __i386__
   //      printk("a4 ");
-#endif
-#ifdef OLDAST
-  p->pcb$b_astact=0;
-  /*unlock*/
-  goto more;
 #endif
 }
 
