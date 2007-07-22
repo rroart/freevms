@@ -589,7 +589,10 @@ asmlinkage void sch$astdel(int dummy) {
   myacbs[myacbi++]=ctl$gl_pcb;
   myacbs[myacbi++]=0x77777777;
   myacbs[myacbi++]=ctl$gl_pcb->pcb$l_astqbl;
-  myacbs[myacbi++]=0x77777777;
+#if 0
+  myacbs[myacbi++]=((struct _irp *)ctl$gl_pcb->pcb$l_astqfl)->irp$w_empty;
+#endif
+  myacbs[myacbi++]=ctl$gl_pcb->pcb$b_astact;
 #endif
  more:
   setipl(IPL$_SYNCH); // also IPL$_SCHED
@@ -616,7 +619,7 @@ asmlinkage void sch$astdel(int dummy) {
   myacbs[myacbi++]=acb;
   myacbs[myacbi++]=acb->acb$l_ast;
   myacbs[myacbi++]=acb->acb$l_astprm;
-  myacbs[myacbi++]=acb->acb$b_rmod;
+  myacbs[myacbi++]=acb->acb$b_rmod | (ctl$gl_pcb->pcb$b_astact << 16);
 #if 0
   if (acb->acb$b_rmod&3)
     printk("A %x %x\n",acb,acb->acb$b_rmod);
@@ -675,7 +678,7 @@ asmlinkage void sch$astdel(int dummy) {
   if (test_and_set_bit(acb->acb$b_rmod&3,&p->pcb$b_astact)) {
   out:
 #ifdef ASTDEBUG
-    myacbs[myacbi++]=-1;
+    myacbs[myacbi++]=0xff000000 | ((current->pslstk[current->pslindex-1]&3)<<16) | (ctl$gl_pcb->pcb$b_asten << 8) | (ctl$gl_pcb->pcb$b_astact );
     myacbs[myacbi++]=acb;
     myacbs[myacbi++]=acb->acb$l_ast;
     myacbs[myacbi++]=acb->acb$l_astprm;
