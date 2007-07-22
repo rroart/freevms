@@ -989,10 +989,12 @@ int tz$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
 extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
 
+struct _spl SPIN_TZ __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+
 void tz$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
   ucb->ucb$b_flck=IPL$_IOLOCK8;
   ucb->ucb$b_dipl=IPL$_IOLOCK8;
-  ucb->ucb$l_dlck=&SPIN_IOLOCK8;
+  ucb->ucb$l_dlck=&SPIN_TZ;
 
   ucb->ucb$l_devchar = DEV$M_REC | DEV$M_IDV | DEV$M_ODV | DEV$M_TRM | DEV$M_CCL;
 
