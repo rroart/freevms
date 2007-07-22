@@ -8,8 +8,25 @@
 #undef SPINDEB
 #define SPINDEB
 
+#ifdef SPINDEB
+static int spinc = 0;
+long spin[1024];
+#endif
+
 inline int smp$acquire(struct _spl * spl) {
   // remember to do a smp enabled check
+#ifdef SPINDEB
+  long * l = &spl;
+  spin[spinc++]=l[-1];
+  spin[spinc++]=spl;
+  spin[spinc++]=ctl$gl_pcb;
+  spin[spinc++]=l;
+  spin[spinc++]=smp_processor_id();
+  spin[spinc++]=spl->spl$l_own_cnt;
+  spin[spinc++]=ctl$gl_pcb->psl_ipl;
+  spin[spinc++]=0;
+  if(spinc>1000) spinc=0;
+#endif
  again:
   {}
   int bit = test_and_set_bit(0,&spl->spl$l_spinlock);
