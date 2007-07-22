@@ -7,6 +7,9 @@
 #endif
 #include<stdarg.h>
 
+#include <iosbdef.h>
+#include <ssdef.h>
+
 #ifndef __x86_64__
 int sys$testcode(void) {
   return INLINE_SYSCALLTEST($setprn,0);
@@ -241,6 +244,22 @@ int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void 
   return INLINE_SYSCALL($assign,5,devnam,chan,acmode,mbxnam,flags);
 }
 
+static int exe$synch(unsigned int efn, struct _iosb *iosb) {
+  if (!iosb) {
+    sys$waitfr(efn);
+    return SS$_NORMAL;
+  }
+  if (iosb->iosb$w_status) {
+    return SS$_NORMAL;
+  }
+ again:
+  sys$waitfr(efn);
+  if (iosb->iosb$w_status & 0xff)
+    return iosb->iosb$w_status;
+  sys$clref(efn);
+  goto again;
+}
+
 int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
   struct struct_qio s;
   s.efn=efn;
@@ -258,7 +277,9 @@ int sys$qiow(unsigned int efn, unsigned short int chan,unsigned int func, struct
 #ifdef __x86_64__
   syscall_struct();
 #endif
-  return INLINE_SYSCALL($qiow,1,&s);
+  int status = INLINE_SYSCALL($qio,1,&s);
+  if ((status&1)==0) return status;
+  return exe$synch(efn,iosb);
 }
 
 int sys$qio(unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6) {
