@@ -87,9 +87,9 @@ asmlinkage void exe$forkdspth(int i) {
     f=remque(fq,dummy);
     //printk("forking entry %x\n",f);
     func=f->fkb$l_fpc;
-    vmslock(forklock_table[i-6].spin, -1);
+    int savipl = vmslock(forklock_table[i-6].spin, forklock_table[i-6].spin);
     func(f->fkb$l_fr3,f->fkb$l_fr4,f);
-    vmsunlock(forklock_table[i-6].spin, -1);
+    vmsunlock(forklock_table[i-6].spin, savipl);
     fq=smp$gl_cpu_data[smp_processor_id()]->cpu$q_swiqfl[0]; /* so far */
   }
 }
