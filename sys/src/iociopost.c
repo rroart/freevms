@@ -169,12 +169,25 @@ asmlinkage void ioc$iopost(void) {
 
   //printk("iopost %x %x %x %x\n",&ioc$gq_postiq,ioc$gq_postiq,current->pid,ioc$gq_postiq>>32); //,&ioc$gq_postiq,ioc$gq_postiq &ioc$gq_postiq,ioc$gq_postiq);
  again:
-  vmslock(&SPIN_IOPOST, -1);
+  {}
+#if 0
+  int savipl2 = vmslock(&SPIN_IOPOST, 8);
+#else
+    __global_cli();
+#endif
   if (ctl$gl_pcb->pcb$l_cpu_id == smp$gl_primid && !rqempty(&ioc$gq_postiq)) {
     i=remqhi(&ioc$gq_postiq,i);
-    vmsunlock(&SPIN_IOPOST, -1);
+#if 0
+    vmsunlock(&SPIN_IOPOST, savipl2);
+#else
+    __global_sti();
+#endif
   } else {
-    vmsunlock(&SPIN_IOPOST, -1);
+#if 0
+    vmsunlock(&SPIN_IOPOST, savipl2);
+#else
+    __global_sti();
+#endif
     if (!aqempty(&smp$gl_cpu_data[smp_processor_id()]->cpu$l_psfl)) {
       i=remque(smp$gl_cpu_data[smp_processor_id()]->cpu$l_psfl,i);
     } else {
