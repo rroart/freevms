@@ -128,6 +128,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   kernel_read(f, 0, header, 512);
 #endif
 
+  sys_close(f);
   if (ehdr32->ihd$w_majorid!=IHD$K_MAJORID || ehdr32->ihd$w_minorid!=IHD$K_MINORID) {
     return exe$imgact_elf(dscdflnam,ehdr32);
   }

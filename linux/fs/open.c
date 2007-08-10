@@ -989,6 +989,7 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
 	struct vms_fd * vms_fd = kmalloc(sizeof(struct vms_fd), GFP_KERNEL);
 	vms_fd->vfd$l_is_cmu = 0;
 	vms_fd->vfd$l_fd_p = rab;
+	vms_fd->vfd$l_refcnt = 1;
 	fd_install(fd, vms_fd);
 #endif
 	return fd;
@@ -1075,8 +1076,14 @@ asmlinkage long sys_close(unsigned int fd)
 	FD_CLR(fd, files->close_on_exec);
 	__put_unused_fd(files, fd);
 	write_unlock(&files->file_lock);
+#if 0
 	if (fd<3) return 0; // temp workaround
 	if (filp == files->fd[0]) return 0; // another temp workaround
+#else
+	vms_fd->vfd$l_refcnt--;
+	if (vms_fd->vfd$l_refcnt)
+	  return 0;
+#endif
 #ifndef CONFIG_VMS
 	return filp_close(filp, files);
 #else
@@ -1155,6 +1162,7 @@ void sys_open_term(char * name)
 	  struct vms_fd * vms_fd = kmalloc(sizeof(struct vms_fd), GFP_KERNEL);
 	  vms_fd->vfd$l_is_cmu = 0;
 	  vms_fd->vfd$l_fd_p = rab;
+	  vms_fd->vfd$l_refcnt = 1;
 	  fd_install(fd, vms_fd);
 }
 

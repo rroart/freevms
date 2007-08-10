@@ -120,6 +120,8 @@ static inline void allocate_fd(struct files_struct *files,
 	FD_SET(fd, files->open_fds);
 	FD_CLR(fd, files->close_on_exec);
 	write_unlock(&files->file_lock);
+	struct vms_fd * vms_fd = file;
+	vms_fd->vfd$l_refcnt++;
 	fd_install(fd, file);
 }
 
@@ -175,6 +177,8 @@ asmlinkage long sys_dup2(unsigned int oldfd, unsigned int newfd)
 		goto out_fput;
 
 	files->fd[newfd] = file;
+	struct vms_fd * vms_fd = file;
+	vms_fd->vfd$l_refcnt++;
 	FD_SET(newfd, files->open_fds);
 	FD_CLR(newfd, files->close_on_exec);
 	write_unlock(&files->file_lock);

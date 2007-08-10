@@ -46,6 +46,7 @@
 #include <queue.h>
 #include <internals.h>
 #include <ipldef.h>
+#include <vfddef.h>
 
 /* The idle threads do not count.. */
 int nr_threads;
@@ -568,6 +569,9 @@ static int count_open_files(struct files_struct *files, int size)
 		if (f)
 			get_file(f);
 		*new_fds++ = f;
+		struct vms_fd * vms_fd = f;
+		if (vms_fd)
+		  vms_fd->vfd$l_refcnt++;
 	}
 	read_unlock(&oldf->file_lock);
 
