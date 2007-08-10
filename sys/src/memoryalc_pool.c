@@ -46,7 +46,9 @@ int exe$allocate_pool(int requestsize, int pooltype, int alignment, unsigned int
     *pool_p = exe$lal_remove_first(&array[reqsize>>6]);
     if (*pool_p) {
       check_packet(*pool_p,reqsize,0);
+#if 0
       poison_packet(*pool_p,reqsize,0);
+#endif
     }
   } 
   // extra end
@@ -111,8 +113,8 @@ void exe$deallocate_pool(void * returnblock, int pooltype, int size) {
   struct _myhead * array = &lsthd->lsthds$q_listheads;
 
   if (size<=8192) {
-    exe$lal_insert_first(pool, &array[size>>6]);
     poison_packet(pool,size,1);
+    exe$lal_insert_first(pool, &array[size>>6]);
   } else {
     int ipl = vmslock(&SPIN_POOL, IPL$_POOL);
     int sts=exe$deallocate(pool, exe$gq_bap_variable, size);

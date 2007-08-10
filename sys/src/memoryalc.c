@@ -547,7 +547,9 @@ int exe$allocate(int requestsize, void ** poolhead, int alignment, unsigned int 
 
     if (requestsize<=next->gen$w_size) {
       check_packet(next,requestsize,0);
+#if 0
       poison_packet(next,requestsize,0);
+#endif
       *allocatedsize=requestsize;
       *returnblock=next;
       nextnext=next->gen$l_flink;
