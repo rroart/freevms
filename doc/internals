@@ -195,10 +195,19 @@ On uml ASTs in user space makes it crash.
 
 Synchronization techniques
 
-Some atomic and uninterruptible stuff have been attempted, but still a lot remain.
-Interlocked instructions ADAWI, BBCCI, BBSSI, INSQHI, INSQTI, REMQHI, REMQTI mainly remain.
-Spinlocks are implemented (use the Linux mechanisms).
-Mutexes have been tried attempted, but are wrong.
+Some atomic and uninterruptible instructions have been attempted,
+but still a lot remain.
+Interlocked instructions ADAWI, BBCCI, BBSSI, INSQHI, INSQTI, REMQHI, REMQTI
+mainly remain.
+Spinlocks are implemented (used the Linux mechanisms).
+
+Currently, BBCCI and BBSSI are implemented by test_and_clear_bit and
+test_and_set_bit. These use spinlocks.
+
+Currently, REM/INSQ[TH]I are implemented with spinlocks, and an
+explicit spinlock have to be used with it (only SPIN_IOPOST for now).
+
+Mutexes have been implemented, and should follow the internals book.
 
 
 ****************
@@ -569,7 +578,7 @@ Power failure and recovery
 
 Symmetric multiprocessing
 
-Not supported.
+Supported.
 
 ****************
 
@@ -592,6 +601,8 @@ Files-11 and XQP
 ****************
 
 Clustering
+
+Not currently active.
 
 See also doc/sca doc/sca2
 
