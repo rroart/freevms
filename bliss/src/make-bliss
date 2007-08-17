@@ -29,18 +29,18 @@ exit 1
 fi
 fi
 fi
-rm -rf gcc-4.1.1
-bunzip2 -dc gcc-core-4.1.1.tar.bz2|tar xpf -
+rm -rf gcc-4.2.1
+bunzip2 -dc gcc-core-4.2.1.tar.bz2|tar xpf -
 rm bliss
-ln -sf gcc-4.1.1 bliss
-tar xzf bliss-0_210.tgz
+ln -sf gcc-4.2.1 bliss
+tar xzf bliss-0_211.tgz
 rm -rf build
 mkdir build
 cd build
 if [ $unamem == x86_64 ]; then
-../gcc-4.1.1/configure --enable-languages=bliss --with-included-gettext  --prefix=$TOPDIR/bliss --disable-multilib 
+../gcc-4.2.1/configure --enable-languages=bliss --with-included-gettext  --prefix=$TOPDIR/bliss --disable-multilib 
 else
-../gcc-4.1.1/configure --enable-languages=bliss --with-included-gettext --prefix=$TOPDIR/bliss
+../gcc-4.2.1/configure --enable-languages=bliss --with-included-gettext --prefix=$TOPDIR/bliss
 fi
 make bootstrap
 make install
