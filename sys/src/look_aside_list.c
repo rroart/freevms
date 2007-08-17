@@ -11,7 +11,7 @@ struct _myhead {
 #include<linux/kernel.h>
 #include<spldef.h>
 #include<internals.h>
-#include<asm/hardirq.h>
+#include<linux/cache.h>
 
 static struct _spl SPIN_LAL __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
 
