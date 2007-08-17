@@ -291,10 +291,11 @@ int ec$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
   return lan$readblk(i,p,u,c);
 }
 
+static void vortex_tx_timeout(struct net_device *dev);
+
 static int ec_timeout(struct _irp * i, struct _ucb * u) {
   //  startio(i,u);
   ((struct _ucb *)ecu)->ucb$l_duetim = 0; // check. temp fix
-  void vortex_tx_timeout(struct net_device *dev);
   struct _ucb * ucb = ecu;
   void * dev = ((struct _ucbnidef *)ucb)->ucb$l_extra_l_1;
   vortex_tx_timeout(dev);
@@ -309,6 +310,10 @@ static int ec_timeout(struct _irp * i, struct _ucb * u) {
   return 1;
 }
 
+static int vortex_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+static int boomerang_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
+static void vortex_tx_timeout(struct net_device *dev);
+
 int ec$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
   int savipl=forklock(u->ucb$b_flck,u->ucb$b_flck);
   // hardcode this until we get sizeof struct _iosb down from 12 to 8
@@ -320,8 +325,6 @@ int ec$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
   struct net_device * dev = ((struct _ucbnidef *)u)->ucb$l_extra_l_1;
   int (*func)() = dev->hard_start_xmit;
   int ec_timeout();
-  static int vortex_start_xmit();
-  static int boomerang_start_xmit();
 #if 1
 #if 1
   if (func == boomerang_start_xmit)

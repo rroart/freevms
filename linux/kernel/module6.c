@@ -1631,6 +1631,8 @@ static inline void add_kallsyms(struct module *mod,
 }
 #endif /* CONFIG_KALLSYMS */
 
+static unsigned long mod_find_symname(struct module *mod, const char *name);
+
 /* Allocate and load the module: note that size of section 0 is always
    zero, and we rely on this for optional sections. */
 static struct module *load_module(void __user *umod,
@@ -2008,7 +2010,6 @@ static struct module *load_module(void __user *umod,
 	add_kallsyms(mod, sechdrs, symindex, strindex, secstrings);
 
 #if 1
-	static unsigned long mod_find_symname(struct module *mod, const char *name);
 	mod->init = mod_find_symname (mod, "driver$init_tables");
 #endif
 
@@ -2180,12 +2181,11 @@ sys_init_module(void __user *umod,
 		struct _ddt * ddt;
 		struct _dpt * dpt;
 		struct _dpt * fdt;
-		static unsigned long mod_find_symname(struct module *mod, const char *name);
 		ddt = mod_find_symname (mod, "driver$ddt");
 		dpt = mod_find_symname (mod, "driver$dpt");
 		fdt = mod_find_symname (mod, "driver$fdt");
 		printk("ddt dpt %x %x\n", ddt, dpt);
-		int load_driver_inner(long, long, long, long);
+		int load_driver_inner(int (*init_tables)(), struct _ddt * ddt, struct _dpt * dpt, struct _fdt * fdt);
 		load_driver_inner(mod->init, ddt, dpt, fdt);
 	}
 #endif

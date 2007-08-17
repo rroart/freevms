@@ -41,6 +41,8 @@ ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned lon
 int ideprobe_init (void);
 int idedisk_init (void);
 
+static int ide_timeout(struct _irp * i, struct _ucb * u);
+
 static unsigned long startio (struct _irp * i, struct _ucb * u)
 {
   unsigned long sts=SS$_NORMAL;
@@ -57,7 +59,6 @@ static unsigned long startio (struct _irp * i, struct _ucb * u)
   ideu=u;
 
 #if 1
-  int ide_timeout();
   ioc$wfikpch(ide_timeout, ide_timeout, i, u, u, 1, 0);
 #endif
 

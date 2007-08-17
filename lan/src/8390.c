@@ -20,11 +20,13 @@ int er$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
   return lan$readblk(i,p,u,c);
 }
 
+struct net_device;
+void ei_tx_timeout(struct net_device *dev);
+
 static int ei_timeout(struct _irp * i, struct _ucb * u) {
   //  startio(i,u);
   extern struct _ucb * eru;
   eru->ucb$l_duetim = 0; // check. temp fix
-  void ei_tx_timeout(struct net_device *dev);
   struct _ucb * ucb = eru;
   void * dev = ((struct _ucbnidef *)ucb)->ucb$l_extra_l_1;
   ei_tx_timeout(dev);
@@ -171,7 +173,9 @@ int ei_debug = 1;
 /* Index to functions. */
 static void ei_tx_intr(struct net_device *dev);
 static void ei_tx_err(struct net_device *dev);
-static void ei_tx_timeout(struct net_device *dev);
+#if 0
+void ei_tx_timeout(struct net_device *dev);
+#endif
 static void ei_receive(struct net_device *dev);
 static void ei_rx_overrun(struct net_device *dev);
 

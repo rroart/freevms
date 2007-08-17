@@ -1434,7 +1434,7 @@ unsigned mounte2(unsigned flags,unsigned devices,char *devnam[],char *label[],st
 	} else {
 	  //vcbdev->max_cluster = (scb->scb$l_volsize + scb->scb$w_cluster - 1) / scb->scb$w_cluster;
 	  ucb->ucb$l_vcb = vcb;
-	  ((struct _ucb *)vcb->vcb$l_rvt) = ucb; // just single volume so far
+	  vcb->vcb$l_rvt = ucb; // just single volume so far
 	  vcbdev->vcb$l_free=home.s_free_blocks_count;
 	  printk("Freespace is %d\n",vcbdev->vcb$l_free);
 	}
