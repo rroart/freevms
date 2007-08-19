@@ -169,8 +169,8 @@ CMUIP:
 
 Telnet:
 	Start with telnet.
-	do connect ipv4-address.
-	it is possible to telnet to another FreeVMS node, no other.
+	Do connect ipv4-address. (Temporarily out of order.)
+	It is possible to telnet to another FreeVMS node, no other.
 	When using the local CMUIP telnet client, there is now more
 	negotiations, and this may trigger errors due to missing
 	initializations in the original code.

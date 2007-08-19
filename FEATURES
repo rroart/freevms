@@ -37,7 +37,7 @@ Clustering:
 Networking:
 	CMUIP (can now do both outgoing and ingoing TCP/IP)
 	Partial BSD socket interface
-	Telnet client (32-bit only)
+	Telnet client (32-bit only), temporarily out of order
 
 Shell:
 	DCL
