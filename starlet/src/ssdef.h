@@ -167,6 +167,8 @@
 #define SS$_NOWRT	0x03FC	/* 1020 */
 /* Note:  the above set of severe error messages is full!!!! */
 /* Additional severe error messages are in the range hex 2000-2800. */
+#define SS$_PAGTYPVIO	0x0B00	/* 2816 */
+#define SS$_NOSUCHPAG	0x0B08	/* 2824 */
 #define SS$_BADISD	0x2004	/* 8196 */
 #define SS$_RELINK	0x200C	/* 8204 */
 #define SS$_NOTINSTALL	0x2014	/* 8212 */

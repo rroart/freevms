@@ -154,7 +154,7 @@ int mmg_std$alloc_pfn_map_system_va (const int proto_pte, const int page_count,
 #endif
 
 int mmg_std$dealloc_sva (int page_count, VOID_PQ sva);
-int mmg$pteref_64 (VOID_PQ va, struct _rde *rde, PTE_PPQ va_pte);
+//int mmg$pteref_64 (VOID_PQ va, struct _rde *rde, PTE_PPQ va_pte);
 int mmg_std$get_pte_for_va (VOID_PQ const va, struct _phd *const phd, PTE_PQ pte_p);
 void mmg_std$rem_pfn_64 (int pfn, int list, PFN_PQ pfndbe_p);
 void mmg_std$ins_pfnh_64 (int pfn, int list, PFN_PQ pfndbe_p);
