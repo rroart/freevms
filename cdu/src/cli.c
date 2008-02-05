@@ -280,43 +280,98 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 
 	  toktype = cli_token(token, &toklen);
 
+	  int k = my_alloc_cdu(CDU$C_KEYWORD);
 	  int v = my_alloc_cdu(CDU$C_NAME);
-	  my_cdu_root[q].cdu$l_value=v;
+	  my_cdu_root[q].cdu$l_value=k;
+	  my_cdu_root[k].cdu$l_name=v;
 	  my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
 	  struct _cdu * np = &my_cdu_root[v];
 	  memcpy(np->cdu$t_name,token,toklen);
 
 	  toktype = cli_token(token, &toklen);
-	  if (toktype != ',')
+	  if (toktype != ',' && toktype != '=')
 	    return 0;
+
+	  if (toktype == '=') {
+	    toktype = cli_token(token, &toklen);
+	    int v3 = my_alloc_cdu(CDU$C_NAME);
+	    my_cdu_root[k].cdu$l_value=v3;
+	    struct _cdu * np = &my_cdu_root[v3];
+	    memcpy(np->cdu$t_name,token,toklen);
+	    toktype = cli_token(token, &toklen);
+	  }
 
 	  toktype = cli_token(token, &toklen);
 
 	  while (toktype && toktype != ')') {
+	    int k2 = my_alloc_cdu(CDU$C_KEYWORD);
 	    int v2 = my_alloc_cdu(CDU$C_NAME);
-	    my_cdu_root[v].cdu$l_next=v2;
+	    my_cdu_root[k].cdu$l_next=k2;
 #if 0
-	    my_cdu_root[q].cdu$l_value=v2;
+	    my_cdu_root[q].cdu$l_value=k2;
 #endif
-	    my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
+	    my_cdu_root[k2].cdu$l_name=v2;
+	    my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags; // check
 	    struct _cdu * np = &my_cdu_root[v2];
 	    memcpy(np->cdu$t_name,token,toklen);
 
-	    v = v2;
+	    k = k2;
 
 	    toktype = cli_token(token, &toklen);
 	    if (toktype == ')')
 	      continue;
-	    if (toktype != ',')
+	    if (toktype != ',' && toktype != '=')
 	      return 0;
 	    
+	    if (toktype == '=') {
+	      toktype = cli_token(token, &toklen);
+	      int v3 = my_alloc_cdu(CDU$C_NAME);
+	      my_cdu_root[k2].cdu$l_value=v3;
+	      my_cdu_root[k2].cdu$l_flags = CDU$M_LIST; // check
+	      struct _cdu * np = &my_cdu_root[v3];
+	      memcpy(np->cdu$t_name,token,toklen);
+	      //toktype = cli_token(token, &toklen);
+	      if (toktype == ')')
+		continue;
+	      k2 = v3;
+	      while (toktype && toktype != ')') {
+		int k3 = my_alloc_cdu(CDU$C_KEYWORD);
+		int v4 = my_alloc_cdu(CDU$C_NAME);
+		my_cdu_root[k2].cdu$l_next=k3;
+#if 0
+		my_cdu_root[q].cdu$l_value=k3;
+#endif
+		my_cdu_root[k3].cdu$l_name=v4;
+		my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags; // check
+		struct _cdu * np = &my_cdu_root[v4];
+		memcpy(np->cdu$t_name,token,toklen);
+
+		k2 = k3;
+
+		toktype = cli_token(token, &toklen);
+		if (toktype == ')')
+		  goto out_of_inner;
+#if 0
+		if (toktype == '+')
+		  continue;
+#endif
+		if (toktype != '+' && toktype != '=')
+		  return 0;
+	    
+		toktype = cli_token(token, &toklen);
+	      }
+	    }
 	    toktype = cli_token(token, &toklen);
+
+	  out_of_inner:
 	  }
 
 	} else {
 
+	  int k = my_alloc_cdu(CDU$C_KEYWORD);
 	  int v = my_alloc_cdu(CDU$C_NAME);
-	  my_cdu_root[q].cdu$l_value=v;
+	  my_cdu_root[q].cdu$l_value=k;
+	  my_cdu_root[k].cdu$l_name=v;
 	  my_cdu_root[q].cdu$l_flags=cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
 	  struct _cdu * np = &my_cdu_root[v];
 	  memcpy(np->cdu$t_name,token,toklen);
