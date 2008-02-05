@@ -6,7 +6,7 @@ LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux
 
 FLAGS = -static
 
-all: set.a show.a i386/create${NOEXE} i386/create${EXE} i386/create${EXE_ELF} um/create${NOEXE} um/create${EXE} um/create${EXE_ELF} i386/type${NOEXE} i386/type${EXE} i386/type${EXE_ELF} um/type${NOEXE} um/type${EXE} um/type${EXE_ELF} i386/show${NOEXE}
+all: set.a show.a i386/create${NOEXE} i386/create${EXE} i386/create${EXE_ELF} um/create${NOEXE} um/create${EXE} um/create${EXE_ELF} i386/type${NOEXE} i386/type${EXE} i386/type${EXE_ELF} um/type${NOEXE} um/type${EXE} um/type${EXE_ELF} i386/show${NOEXE} i386/set${NOEXE}
 
 clean:
 	rm *.o *.a i386/* um/*
@@ -17,6 +17,7 @@ install: all
 	install um/*.* ../../rootum/vms"$$"common/sysexe/
 	install i386/*.* ../../rooti386/vms"$$"common/sysexe
 	install i386/show ../../rooti386/vms"$$"common/sysexe
+	install i386/set ../../rooti386/vms"$$"common/sysexe
 
 ifeq ($(ARCH),x86_64)
 MODEL = -mcmodel=medium
@@ -27,8 +28,8 @@ endif
 setproces: setproces.o
 	gcc -o setproces setproces.o ../../starlet/src/vmsopt.a $(VMSLIBS)
 
-set.a: setproces.o setwork.o
-	ar r set.a setproces.o setwork.o
+set.a: setproces.o setwork.o setsec.o
+	ar r set.a setproces.o setwork.o setsec.o
 
 show.a: showsystem.o showdevice.o showwork.o showlog.o showmemory.o misc.o
 	ar r show.a showsystem.o showdevice.o showwork.o showlog.o showmemory.o misc.o
@@ -91,3 +92,7 @@ um/type${EXE}: $(VMSLIBSUM) type.o
 i386/show${NOEXE}: show.a showmain.o $(VMLINUX)
 	install -d i386
 	gcc -g -static showmain.o show.a -lc $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/show${NOEXE}
+
+i386/set${NOEXE}: set.a setmain.o $(VMLINUX)
+	install -d i386
+	gcc -g -static setmain.o set.a -lc $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/set${NOEXE}
