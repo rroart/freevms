@@ -65,7 +65,7 @@ DELETE:
 
 DIRECTORY:
 	directory
-	qualifiers: /file /size /date
+	qualifiers: /file /size /date /acl
 
 CREATE /DIRECTORY:
 	create /directory name
@@ -93,6 +93,9 @@ SET PROMPT:
 
 SET DEFAULT:
 	set default pathname
+
+SET SECURITY:
+	set security/acl=(identifier=number,access=read+write+etc)
 
 SHOW DEFAULT:
 	show default	

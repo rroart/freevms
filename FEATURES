@@ -24,6 +24,7 @@ File system:
 	DFU doing analyze/disk (32-bit currently)
 	XQP (for ODS-2, and something like it for Ext2)
 	ODS-2 can have bootable kernel and user environment
+	ODS-2 with unused ACL
 
 Bootloader:
 	GRUB with ODS-2 support to boot kernel
