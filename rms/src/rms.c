@@ -2246,3 +2246,12 @@ unsigned exe$extend(struct _fabdef *fab)
   sts = iosb.iosb$w_status;
   return sts;
 }
+
+int get_ifb_table_chan(int ifi_no) {
+  return ifb_table[ifi_no]->ifb$w_chnl;
+}
+
+void * get_wccfile_fib(struct _fabdef * fab) {
+  struct WCCFILE * wccfile = (struct WCCFILE *) fab->fab$l_nam->nam$l_wcc;
+  return &wccfile->wcf_fib;
+}
