@@ -350,6 +350,7 @@ unsigned dir(int userarg)
 			ace = acep;
 		      }
 		    myout:
+		      {}
                     }
                     printf("\n");
                 }
