@@ -362,7 +362,7 @@ unsigned int cli$dcl_parse(void * command_string ,void * table ,void * param_rou
 	      }
 	    }
 	    toktype = cli_token(token, &toklen);
-
+	    {}
 	  out_of_inner:
 	  }
 
