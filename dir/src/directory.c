@@ -101,12 +101,15 @@
 #define dsc_a_pointer   dsc$a_pointer
 
 #else
+#include <acedef.h>
 #include <mytypes.h>
 #include <descrip.h>
 #include <fabdef.h>
 #include <fiddef.h>
+#include <iledef.h>
 #include <misc.h>
 #include <namdef.h>
+#include <ossdef.h>
 #include <rabdef.h>
 #include <rmsdef.h>
 #include <ssdef.h>
@@ -148,14 +151,16 @@ unsigned dir(int userarg)
 {
     setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts;
+    $DESCRIPTOR(acl, "acl");
     $DESCRIPTOR(date, "date");
     $DESCRIPTOR(size, "size");
     $DESCRIPTOR(file_id, "file_id");
-    int date_sts, size_sts, file_id_sts;
+    int acl_sts, date_sts, size_sts, file_id_sts;
+    acl_sts=cli$present(&acl);
     date_sts=cli$present(&date);
     size_sts=cli$present(&size);
     file_id_sts=cli$present(&file_id);
-    int options=(date_sts|size_sts|file_id_sts)&1;
+    int options=(acl_sts|date_sts|size_sts|file_id_sts)&1;
     $DESCRIPTOR(p, "p1");
     char c[80];
     struct dsc$descriptor o;
@@ -266,6 +271,85 @@ unsigned dir(int userarg)
                         if ((sts & 1) == 0) printf("Asctim error: %d\n",sts);
                         tim[23] = '\0';
                         printf("  %s",tim);
+                    }
+                    if (acl_sts & 1) {
+		      int sts;
+		      $DESCRIPTOR(file, "FILE");
+		      struct dsc$descriptor filename;
+		      filename.dsc$a_pointer = rsa;
+		      filename.dsc$w_length = strlen(rsa);
+		      struct _ile3 itmlst[2];
+		      memset (itmlst, 0, 2 * sizeof(struct _ile3));
+		      int retlen = 0;
+		      char buf[512];
+		      itmlst[0].ile3$w_length = 512;
+		      itmlst[0].ile3$w_code = OSS$_ACL_READ;
+		      itmlst[0].ile3$ps_bufaddr = buf;
+		      itmlst[0].ile3$ps_retlen_addr = &retlen;
+		      sts = sys$get_security(&file, &filename, 0, 0, &itmlst, 0, 0);
+		      // check. todo: ods2 check
+		      unsigned short *mp;
+		      long acep;
+		      struct _acedef * ace;
+		      mp = buf + 2*buf[2];
+		      if (buf[2]==-1 || buf[2]==255)
+			goto myout;
+		      acep = mp;
+		      ace = acep;
+
+		      while (ace->ace$b_size) {
+			switch (ace->ace$b_type) {
+			case ACE$C_AUDIT:
+			  break;
+			case ACE$C_ALARM:
+			  break;
+			case ACE$C_DIRDEF:
+			  break;
+			case ACE$C_INFO:
+			  break;
+			case ACE$C_KEYID:
+			  {
+			    char * access_types[] = {
+			      "",
+			      "READ",
+			      "WRITE",
+			      "EXECUTE",
+			      "DELETE",
+			      "CONTROL",
+			      ""
+			    };
+			    
+			    int access_types_values[] = { 0, ACE$M_READ, ACE$M_WRITE, ACE$M_EXECUTE, ACE$M_DELETE, ACE$M_CONTROL };
+			    
+			    printf("          IDENTIFIER=%x,ACCESS=", ace->ace$l_key);
+			    int i;
+			    int onewritten = 0;
+			    for (i = 0; i <= 5; i++) {
+			      if (access_types_values[i] & ace->ace$l_access) {
+				if (onewritten)
+				  printf("+");
+				printf(access_types[i]);
+				onewritten = 1;
+			      }
+			    }
+			    printf(")\n");
+			  }
+			  break;
+
+			case ACE$C_RMSJNL_AI:
+			case ACE$C_RMSJNL_AT:
+			case ACE$C_RMSJNL_BI:
+			case ACE$C_RMSJNL_RU:
+			case ACE$C_RMSJNL_RU_DEFAULT:
+			  break;
+			default:
+			  printf("ace does not exist\n");
+			  break;
+			}
+			acep += ace->ace$b_size;
+			ace = acep;
+		      }
+		    myout:
                     }
                     printf("\n");
                 }

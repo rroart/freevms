@@ -607,6 +607,10 @@ unsigned f11b_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
       //head2 = f11b_read_header (xqp->current_vcb, 0, fcb, &iosb);
       //sts=iosb.iosb$w_status;
       head->fh2$w_recattr.fat$l_hiblk = VMSSWAP(fcb->fcb$l_efblk * vcbdev->vcb$l_cluster);
+      int aqempty();
+      void head_write_acl();
+      if (!aqempty(fcb->fcb$l_aclfl))
+	head_write_acl(fcb, head);
       writehead(fcb,head);
       sts = bitmap_modify(vcbdev,start_pos,block_count,0);
     }

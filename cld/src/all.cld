@@ -24,6 +24,7 @@ define verb directory
 	image directory
 	routine dir
 	parameter p1
+	qualifier acl
 	qualifier date
 	qualifier file_id
 	qualifier size
@@ -92,6 +93,12 @@ define syntax set_process
 	qualifier name,value(required)
 	qualifier priority,value(required)
 
+define syntax set_security
+	routine set_security
+	image set_ele
+	parameter p1
+	qualifier acl,value(list)
+
 define syntax set_working_set
 	cliroutine set_working_set
 	qualifier quota,value(required)
@@ -101,6 +108,7 @@ define type set_something
 	keyword default, syntax = set_default
 	keyword prompt, syntax = set_prompt
 	keyword process, syntax = set_process
+	keyword security, syntax = set_security
 	keyword working_set, syntax = set_working_set
 
 define type show_something

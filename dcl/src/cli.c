@@ -519,6 +519,7 @@ static unsigned long int_script               (unsigned long h_input, unsigned l
 static unsigned long int_set_default          (int userarg);
 static unsigned long int_set_prompt          (int userarg);
 static unsigned long int_set_process          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+static unsigned long set_security          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_set_working_set          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 static unsigned long int_stop          (int userarg);
 static unsigned long show_status          (int userarg);
@@ -560,6 +561,9 @@ struct cli_struct cliroutines[]={
 {  "set_default",          int_set_default,           },
 {  "set_prompt",           int_set_prompt,            },
 {  "set_process",          int_set_process,           },
+#if 0
+{  "set_security",         set_security,          },
+#endif
 {  "set_working_set",      int_set_working_set,       },
 {  "show_time",            int_show_datetime,         },
 {  "show_devices",         int_show_device,           },

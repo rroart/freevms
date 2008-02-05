@@ -35,6 +35,8 @@
 //#include "phyio.h"
 
 #include <mytypes.h>
+#include <acedef.h>
+#include <acldef.h>
 #include <aqbdef.h>
 #include <atrdef.h>
 #include <ccbdef.h>
@@ -424,6 +426,55 @@ void f11b_read_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
 	memcpy(atrp->atr$l_addr,&head->fh2$l_filechar,atrp->atr$w_size);
 	break;
 
+    case ATR$C_READACL:
+      // or get it from in-core fcb list
+      {
+	unsigned short *mp;
+	long acep;
+	struct _acedef * ace;
+
+	mp = (unsigned short *) head + head->fh2$b_acoffset;
+	acep = mp;
+	ace = acep;
+  
+	while (ace->ace$b_size) {
+	  switch (ace->ace$b_type) {
+	  case ACE$C_AUDIT:
+	    break;
+	  case ACE$C_ALARM:
+	    break;
+	  case ACE$C_DIRDEF:
+	    break;
+	  case ACE$C_INFO:
+	    break;
+	  case ACE$C_KEYID:
+	    break;
+	  case ACE$C_RMSJNL_AI:
+	  case ACE$C_RMSJNL_AT:
+	  case ACE$C_RMSJNL_BI:
+	  case ACE$C_RMSJNL_RU:
+	  case ACE$C_RMSJNL_RU_DEFAULT:
+	  break;
+	default:
+	  panic("ace does not exist\n");
+	  break;
+	  }
+	}
+	struct _acldef * acl = kmalloc(sizeof(struct _acldef), GFP_KERNEL);
+	struct _acedef * newace = kmalloc(ace->ace$b_size, GFP_KERNEL); // check. needed?
+	memcpy(newace, ace, ace->ace$b_size);
+	acl->acl$w_size = sizeof(struct _acldef);
+	acl->acl$b_type = DYN$C_ACL;
+	acl->acl$l_list = newace;
+	insque(acl, &fcb->fcb$l_aclfl);
+	
+	acep += ace->ace$b_size;
+	ace = acep;
+	int size = acep - (long) mp;
+	memcpy(atrp->atr$l_addr, mp, size);
+      }
+      break;
+
     default:
       printk("atr %x not supported\n",atrp->atr$w_type);
       break;
@@ -505,6 +556,22 @@ void f11b_write_attrib(struct _fcb * fcb,struct _atrdef * atrp) {
     case ATR$C_UCHAR:
 	memcpy(&head->fh2$l_filechar,atrp->atr$l_addr,atrp->atr$w_size);
 	break;
+
+    case ATR$C_ADDACLENT:
+      {
+	struct _acedef * ace = atrp->atr$l_addr;
+	struct _acldef * acl = kmalloc(sizeof(struct _acldef), GFP_KERNEL);
+	struct _acedef * newace = kmalloc(ace->ace$b_size, GFP_KERNEL); // check. needed?
+	memcpy(newace, ace, ace->ace$b_size);
+	acl->acl$w_size = sizeof(struct _acldef);
+	acl->acl$b_type = DYN$C_ACL;
+	acl->acl$l_list = newace;
+	insque(acl, &fcb->fcb$l_aclfl);
+	void head_write_acl();
+	if (!aqempty(fcb->fcb$l_aclfl))
+	  head_write_acl(fcb, head);
+      }
+      break;
 
     default:
       printk("atr %x not supported\n",atrp->atr$w_type);
@@ -1144,6 +1211,7 @@ void *fcb_create2(struct _fh2 * head,unsigned *retsts)
   fcb->fcb$b_type=DYN$C_FCB;
   fcb->fcb$l_fill_5 = 0;
   qhead_init(&fcb->fcb$l_wlfl);
+  qhead_init(&fcb->fcb$l_aclfl);
 
   fcb->fcb$w_fid_num=head->fh2$w_fid.fid$w_num;
   fcb->fcb$w_fid_seq=head->fh2$w_fid.fid$w_seq;
@@ -1163,6 +1231,10 @@ void *fcb_create2(struct _fh2 * head,unsigned *retsts)
     fcb->fcb$v_dir = 1;
 
   wcb_create_all(fcb,head);
+
+  void create_fcb_acl();
+  if (head->fh2$b_acoffset != 255)
+    create_fcb_acl(fcb, head);
 
   if (head->fh2$l_filechar & FH2$M_CONTIG)
     fcb->fcb$l_stlbn=f11b_map_vbn(1,&fcb->fcb$l_wlfl);
