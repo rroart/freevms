@@ -1361,6 +1361,8 @@ ENTRY(vms_sys_call_table)
 	.quad SYMBOL_NAME(exe$set_implicit_affinity)
 	.quad SYMBOL_NAME(exe$cpu_capabilities)
 	.quad SYMBOL_NAME(exe$process_capabilities_wrap)
+	.quad SYMBOL_NAME(exe$set_security_wrap)
+	.quad SYMBOL_NAME(exe$get_security_wrap)
 
 #	.rept NR_vmssyscalls-(.-vmssys_call_table)/8
 		.quad SYMBOL_NAME(sys_$ni_syscall)

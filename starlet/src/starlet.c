@@ -647,6 +647,36 @@ int sys$getsyiw(unsigned int efn, unsigned int *csidadr, void *nodename, void *i
   return INLINE_SYSCALL($getsyiw,1,&s);
 }
 
+int sys$set_security(void *clsnam, void *objnam, unsigned int *objhan, unsigned int flags, void *itmlst, unsigned int *contxt, unsigned int *acmode) {
+  struct struct_args s;
+  s.s1 = (unsigned long) clsnam;
+  s.s2 = (unsigned long) objnam;
+  s.s3 = (unsigned long) objhan;
+  s.s4 = (unsigned long) flags;
+  s.s5 = (unsigned long) itmlst;
+  s.s6 = (unsigned long) contxt;
+  s.s7 = (unsigned long) acmode;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
+  return INLINE_SYSCALL($set_security,1,&s);
+}
+
+int sys$get_security(void *clsnam, void *objnam, unsigned int *objhan, unsigned int flags, void *itmlst, unsigned int *contxt, unsigned int *acmode) {
+  struct struct_args s;
+  s.s1 = (unsigned long) clsnam;
+  s.s2 = (unsigned long) objnam;
+  s.s3 = (unsigned long) objhan;
+  s.s4 = (unsigned long) flags;
+  s.s5 = (unsigned long) itmlst;
+  s.s6 = (unsigned long) contxt;
+  s.s7 = (unsigned long) acmode;
+#ifdef __x86_64__
+  syscall_struct();
+#endif
+  return INLINE_SYSCALL($get_security,1,&s);
+}
+
 int sys$cli(void * cliv, int par1, int par2) {
   return INLINE_SYSCALL($cli,3,cliv, par1, par2);
 }

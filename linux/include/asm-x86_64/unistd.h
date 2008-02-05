@@ -620,6 +620,8 @@ __SYSCALL(__NR_semtimedop, sys_semtimedop)
 #define __NR_$set_implicit_affinity 109
 #define __NR_$cpu_capabilities 110
 #define __NR_$process_capabilities 111
+#define __NR_$set_security 112
+#define __NR_$get_security 113
 
 #define __NR_$close 1
 #define __NR_$connect 2
