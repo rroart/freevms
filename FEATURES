@@ -61,6 +61,7 @@ Editor:
 
 Programming language:
 	Bliss (i386, x86_64)
+	GCC variable argument count (i386)
 
 Linker:
 	LINKER (simple, static images. Can do some dynamic linking.)
