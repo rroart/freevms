@@ -31,6 +31,8 @@ fi
 fi
 rm -rf gcc-4.2.1
 bunzip2 -dc gcc-core-4.2.1.tar.bz2|tar xpf -
+tar xzf gcc-vmscall-0_3_11.tar.gz
+patch -p1 < gcc-vmscall/gcc-4.2.1-vmscall.patch
 rm bliss
 ln -sf gcc-4.2.1 bliss
 tar xzf bliss-0_211.tgz

@@ -188,6 +188,7 @@ If you do not produce, someone else's code will be used.)
 
 Andrew Allison: librtl
 Bertrand Joël: srm
+Bojan Nemec: GCC variable argument count on i386
 Roar Thronæs: CPU/PAL, Kernel, Cluster, the rest practically and everywhere
 Roger Tucker: misc synchronization patch, librtl
 Zakaria Yassine: init
