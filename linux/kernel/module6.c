@@ -76,7 +76,9 @@ struct kernel_symbol
 #endif
 #include <asm/uaccess.h>
 #include <asm/semaphore.h>
+#if 0
 #include <asm/cacheflush.h>
+#endif
 #if 0
 #include <linux/license.h>
 #endif
