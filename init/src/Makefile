@@ -16,5 +16,4 @@ initialize.o: initialize.c
 	gcc -c initialize.c
 
 install: all
-	install init ../../rootum/vms"$$"common/sysexe
 	install init ../../rooti386/vms"$$"common/sysexe

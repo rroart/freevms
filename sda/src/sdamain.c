@@ -8,7 +8,7 @@
 #include<descrip.h> 
 
 #ifdef __i386__
-int errno;
+//int errno;
 #endif
 
 int show_device(int mask);

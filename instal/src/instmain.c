@@ -8,7 +8,7 @@
 #include<descrip.h> 
 
 #ifdef __i386__
-int errno;
+//int errno;
 #endif
 
 int inst$add(int mask);

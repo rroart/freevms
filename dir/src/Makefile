@@ -1,16 +1,14 @@
 FLAGS = -static
 
-all: i386/directory${EXE} i386/directory${NOEXE} i386/directory${EXE_ELF} i386/ddirectory${EXE} i386/ddirectory${NOEXE} i386/ddirectory${EXE_ELF} um/directory${EXE} um/directory${NOEXE} um/directory${EXE_ELF}
+all: i386/directory${EXE} i386/directory${NOEXE} i386/directory${EXE_ELF} i386/ddirectory${EXE} i386/ddirectory${NOEXE} i386/ddirectory${EXE_ELF}
 
 clean:
-	rm *.o um/* i386/*
+	rm *.o i386/*
 
 install: all
-	install -d ../../rootum/vms"$$"common/sysexe
 	install -d ../../rooti386/vms"$$"common/sysexe
 	install i386/*.* ../../rooti386/vms"$$"common/sysexe
 	install i386/directory ../../rooti386/vms"$$"common/sysexe
-	install um/*.* ../../rootum/vms"$$"common/sysexe
 
 OBJS = directory.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
@@ -64,15 +62,3 @@ i386/ddirectory${EXE}: $(VMSDLIBS_EXE) $(OBJS) $(EXTERNAL)
 	install -d i386
 	$(LINKER) $(OBJS) $(TOPDIR)/starlet/src/i386/starlet.exe $(TOPDIR)/librtl/src/i386/librtl.exe $(LIBGCC) $(EXTERNAL) /usr/lib/crt1.o /usr/lib/crti.o $(LIBGCC) -o i386/ddirectory${EXE}
 endif
-
-UMDEF=-Dcompile_um -I.
-
-um/directory${NOEXE}: $(VMSLIBSUM) $(OBJS) $(EXTERNAL)
-	install -d um
-	gcc -g -static $(OBJS) $(VMSLIBSUM) $(EXTERNAL) -o um/directory${NOEXE}
-um/directory${EXE_ELF}: $(VMSLIBSUM_PIC) $(OBJS_PIC) $(EXTERNAL_PIC)
-	ld -Bshareable $(OBJS_PIC) $(VMSLIBSUM_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o um/directory${EXE_ELF}
-
-um/directory${EXE}: $(VMSLIBSUM) $(OBJS)
-	install -d um
-	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL) --start-group $(LINKPOST) $(LIBGCC) --end-group -o um/directory${EXE}

@@ -51,6 +51,7 @@
 #if 0
 #include<linux/bitops.h>
 #endif
+#include<sys/types.h>
 #include<linux/elf.h>
 
 #if 0

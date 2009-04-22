@@ -39,15 +39,13 @@ CC = gcc -g -O2 -c
 
 EXTERNAL =
 
-all: $(OBJS) i386/edt${EXE} i386/edt${NOEXE} i386/edt${EXE_ELF} um/edt${EXE} um/edt${NOEXE} um/edt${EXE_ELF}
+all: $(OBJS) i386/edt${EXE} i386/edt${NOEXE} i386/edt${EXE_ELF}
 
 clean:
-	rm *.o um/* i386/*
+	rm *.o i386/*
 
 install: all
-	install -d ../../rootum/vms"$$"common/sysexe
 	install -d ../../rooti386/vms"$$"common/sysexe
-	install um/* ../../rootum/vms"$$"common/sysexe
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
 chrutils.o: chrutils.c
@@ -166,15 +164,4 @@ i386/edt${EXE_ELF}: $(LIB) $(EXTERNAL_PIC) $(OBJS_PIC)
 i386/edt${EXE}: $(LIB) $(EXTERNAL)
 	install -d i386
 	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) --start-group $(LINKPOST) $(LIBGCC) --end-group -o i386/edt${EXE}
-
-um/edt${NOEXE}: $(LIBUM) $(EXTERNAL)
-	install -d um
-	gcc -g -static $(OBJS) $(EXTERNAL) -o um/edt${NOEXE}
-
-um/edt${EXE}: $(LIB) $(EXTERNAL)
-	install -d um
-	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) --start-group $(LINKPOST) $(LIBGCC) --end-group -o um/edt${EXE}
-
-um/edt${EXE_ELF}: $(LIB) $(EXTERNAL_PIC)
-	ld -Bshareable $(OBJS_PIC) -lc $(LIBGCC) -o um/edt${EXE_ELF}
 

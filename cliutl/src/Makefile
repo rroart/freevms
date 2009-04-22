@@ -6,15 +6,13 @@ LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux
 
 FLAGS = -static
 
-all: set.a show.a i386/create${NOEXE} i386/create${EXE} i386/create${EXE_ELF} um/create${NOEXE} um/create${EXE} um/create${EXE_ELF} i386/type${NOEXE} i386/type${EXE} i386/type${EXE_ELF} um/type${NOEXE} um/type${EXE} um/type${EXE_ELF} i386/show${NOEXE} i386/set${NOEXE}
+all: set.a show.a i386/create${NOEXE} i386/create${EXE} i386/create${EXE_ELF} i386/type${NOEXE} i386/type${EXE} i386/type${EXE_ELF} i386/show${NOEXE} i386/set${NOEXE}
 
 clean:
-	rm *.o *.a i386/* um/*
+	rm *.o *.a i386/*
 
 install: all
-	install -d ../../rootum/vms"$$"common/sysexe
 	install -d ../../rooti386/vms"$$"common/sysexe
-	install um/*.* ../../rootum/vms"$$"common/sysexe/
 	install i386/*.* ../../rooti386/vms"$$"common/sysexe
 	install i386/show ../../rooti386/vms"$$"common/sysexe
 	install i386/set ../../rooti386/vms"$$"common/sysexe
@@ -55,17 +53,6 @@ i386/create${EXE}: create.o $(VMSLIBS) $(EXTERNAL)
 	install -d i386
 	$(LINKER) $(LINKPRE) create.o $(VMSLIBS) $(LIBGCC) $(EXTERNAL) --start-group $(LINKPOST) $(LIBGCC) --end-group -o i386/create${EXE}
 
-um/create${NOEXE}: create.o $(VMSLIBSUM) $(EXTERNAL)
-	install -d um
-	gcc $(FLAGS) -g create.o $(VMSLIBSUM) $(EXTERNAL) -o um/create${NOEXE}
-
-um/create${EXE_ELF}: pic/create.o $(VMSLIBSUM_PIC) $(EXTERNAL_PIC)
-	ld -Bshareable pic/create.o $(VMSLIBSUM_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o um/create${EXE_ELF}
-
-um/create${EXE}: create.o $(VMSLIBSUM) $(EXTERNAL)
-	install -d um
-	$(LINKER) $(LINKPRE) create.o $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL) --start-group $(LINKPOST) $(LIBGCC) --end-group -o um/create${EXE}
-
 i386/type${NOEXE}: $(VMSLIBS) type.o $(EXTERNAL)
 	install -d i386
 	gcc -g -static type.o $(VMSLIBS) $(EXTERNAL) -o i386/type${NOEXE}
@@ -76,18 +63,6 @@ i386/type${EXE_ELF}: $(VMSLIBS_PIC) pic/type.o $(EXTERNAL_PIC)
 i386/type${EXE}: $(VMSLIBS) type.o $(EXTERNAL)
 	install -d i386
 	$(LINKER) $(LINKPRE) type.o $(VMSLIBS) $(LIBGCC) $(EXTERNAL) --start-group $(LINKPOST) $(LIBGCC) --end-group -o i386/type${EXE}
-
-UMDEF=-Dcompile_um -I.
-
-um/type${NOEXE}: $(VMSLIBSUM) type.o $(EXTERNAL)
-	install -d um
-	gcc -g -static type.o $(VMSLIBSUM) $(EXTERNAL) -o um/type${NOEXE}
-um/type${EXE_ELF}: $(VMSLIBSUM) pic/type.o $(EXTERNAL_PIC)
-	ld -Bshareable pic/type.o $(VMSLIBSUM_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o um/type${EXE_ELF}
-
-um/type${EXE}: $(VMSLIBSUM) type.o
-	install -d um
-	$(LINKER) $(LINKPRE) type.o $(VMSLIBSUM) $(LIBGCC) $(EXTERNAL) --start-group $(LINKPOST) $(LIBGCC) --end-group -o um/type${EXE}
 
 i386/show${NOEXE}: show.a showmain.o $(VMLINUX)
 	install -d i386

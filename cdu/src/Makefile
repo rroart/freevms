@@ -12,9 +12,7 @@ clean:
 	rm *.o *.a cdu
 
 install: all
-	install -d ../../rootum/vms"$$"common/sysexe
 	install -d ../../rooti386/vms"$$"common/sysexe
-	install um/* ../../rootum/vms"$$"common/sysexe/
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
 OBJS_CDU = parse.o lex.o cdumain.o tree.o stringpool.o hashtable.o cld-lang.o

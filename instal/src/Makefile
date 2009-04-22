@@ -12,10 +12,9 @@ endif
 # i386/install${EXE} 
 
 clean:
-	rm *.o um/* i386/*
+	rm *.o i386/*
 
 install: all
-	install -d ../../rootum/vms"$$"common/sysexe
 	install -d ../../rooti386/vms"$$"common/sysexe
 	install i386/install ../../rooti386/vms"$$"common/sysexe
 

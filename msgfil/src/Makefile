@@ -12,9 +12,7 @@ clean:
 	rm *.o *.a message
 
 install: all
-	install -d ../../rootum/vms"$$"common/sysexe
 	install -d ../../rooti386/vms"$$"common/sysexe
-	install um/* ../../rootum/vms"$$"common/sysexe/
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
 message: parse.o lex.o main.o msgmain.o tree.o stringpool.o hashtable.o msg-lang.o msg.o msg.h

@@ -12,10 +12,9 @@ endif
 # i386/sda${EXE} 
 
 clean:
-	rm *.o um/* i386/*
+	rm *.o i386/*
 
 install: all
-	install -d ../../rootum/vms"$$"common/sysexe
 	install -d ../../rooti386/vms"$$"common/sysexe
 	install i386/sda ../../rooti386/vms"$$"common/sysexe
 
@@ -48,11 +47,11 @@ pic/sda_parse.o: sda_parse.c
 	gcc $(MODEL) -fPIC -fpic -g -c -I$(TOPDIR)/cdu/src -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 sda_spin.o: sda_spin.c
-	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
+	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include/ $< -o $@
 
 pic/sda_spin.o: sda_spin.c
 	install -d pic
-	gcc $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
+	gcc $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include $< -o $@
 
 sda_lock.o: sda_lock.c
 	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@

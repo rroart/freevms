@@ -33,19 +33,11 @@ unamem=`uname -m`
 
 if [ $unamem == x86_64 ]; then
 
-(mkdir freevmsx86_64.noiomm; cd freevmsx86_64.noiomm; ../freevms/myprescript; cd linux; ./prescript; cd ..; doedit; make symlinks; make linux/include/linux/compile.h)
-
 (mkdir freevmsx86_64.iomm; cd freevmsx86_64.iomm; ../freevms/myprescript; cd linux; ./prescript; cd ..; make symlinks; make linux/include/linux/compile.h)
 
 else
 
-(mkdir freevms386.noiomm; cd freevms386.noiomm; ../freevms/myprescript; cd linux; ./prescript; cd ..; doedit; make symlinks; make linux/include/linux/compile.h)
-
-(mkdir freevmsuml.noiomm; cd freevmsuml.noiomm; ../freevms/myprescript; cd linux; ./prescript; cd ..; doedit; make symlinks ARCH=um; make linux/include/linux/compile.h ARCH=um)
-
-(mkdir freevms386.iomm; cd freevms386.iomm; ../freevms/myprescript; cd linux; ./prescript; cd ..; make symlinks; make linux/include/linux/compile.h)
-
-(mkdir freevmsuml.iomm; cd freevmsuml.iomm; ../freevms/myprescript; cd linux; ./prescript; cd ..; make symlinks ARCH=um; make linux/include/linux/compile.h ARCH=um)
+(mkdir freevms386.iomm; cd freevms386.iomm; ../freevms/myprescript; cd linux; ./prescript; cd ..; doedit; make symlinks; make linux/include/linux/compile.h)
 
 fi
 
