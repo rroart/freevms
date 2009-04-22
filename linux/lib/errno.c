@@ -5,7 +5,7 @@
  */
 
 #ifdef __i386__
-int errno;
+int kernel_errno;
 #else
 int kernel_errno;
 #endif

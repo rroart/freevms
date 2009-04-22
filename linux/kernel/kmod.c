@@ -24,6 +24,8 @@
 
 #ifdef __x86_64__
 #define errno kernel_errno
+#else
+#define errno kernel_errno
 #endif
 
 #define __KERNEL_SYSCALLS__

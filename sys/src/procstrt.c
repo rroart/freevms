@@ -5,6 +5,8 @@
 
 #define __KERNEL_SYSCALLS__
 
+#define errno kernel_errno
+
 #include<linux/linkage.h>
 #include<linux/mm.h>
 #include<descrip.h>

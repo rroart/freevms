@@ -245,7 +245,13 @@ asm (".L__X'%ebx = 1\n\t"
      ".endif\n\t"
      ".endm\n\t");
 
-extern int errno;
+//extern int errno;
+#ifndef __KERNEL__
+#include <errno.h>
+#else
+extern int kernel_errno;
+#define errno kernel_errno
+#endif
 
 /* Define a macro which expands inline into the wrapper code for a system
    call.  */

@@ -8,7 +8,7 @@ Gcc 4.0 might be too early.
 No more recent flex than 2.5.4 must be used.
 
 Also tested distributions:
-Debian Sarge (gcc-3.3)
+Debian Sarge (gcc-3.3) and up to lenny
 	Install ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic sash bash-static
 	Have loop support or module.
 Also: Etch.

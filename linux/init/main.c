@@ -17,6 +17,8 @@
 
 #define __KERNEL_SYSCALLS__
 
+#define errno kernel_errno
+
 #include <system_data_cells.h>
 #include <descrip.h>
 #include <prcdef.h>
