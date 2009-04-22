@@ -2,7 +2,7 @@
 
 unamem=`uname -m`
 
-if [ $unamem == x86_64 ]; then
+if [ $unamem = x86_64 ]; then
 ARCH=x86_64
 else
 ARCH=i386
@@ -14,7 +14,7 @@ CC=
 FLEXVER=`flex --version`
 FLEXVER=`flex --version|cut -f2 -d\ `
 FLEXVERTEST=`echo $FLEXVER|cut -f1 -d\.`
-if [ $FLEXVERTEST == version ]; then
+if [ $FLEXVERTEST = version ]; then
 FLEXVER=`flex --version|cut -f3 -d\ `
 fi
 FLEXVER1=`echo $FLEXVER|cut -f1 -d\.`
@@ -39,7 +39,7 @@ tar xzf bliss-0_211.tgz
 rm -rf build
 mkdir build
 cd build
-if [ $unamem == x86_64 ]; then
+if [ $unamem = x86_64 ]; then
 ../gcc-4.2.1/configure --enable-languages=bliss --with-included-gettext  --prefix=$TOPDIR/bliss --disable-multilib 
 else
 ../gcc-4.2.1/configure --enable-languages=bliss --with-included-gettext --prefix=$TOPDIR/bliss
