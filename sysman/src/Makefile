@@ -20,8 +20,10 @@ install: all
 
 ifeq ($(ARCH),x86_64)
 MODEL = -mcmodel=medium
+MODELGCC = gcc-3.4
 else
 MODEL =
+MODELGCC = gcc
 endif
 
 OBJS = sm_load.o sm_main.o sysman_parse.o
@@ -35,22 +37,22 @@ pic/%.o: %.c
 	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
 
 device.o: device.c
-	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/device.o: device.c
 	install -d pic
-	gcc $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/sysman_parse.o: sysman_parse.c
 	install -d pic
-	gcc $(MODEL) -fPIC -fpic -g -c -I$(TOPDIR)/cdu/src -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I$(TOPDIR)/cdu/src -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 sda_spin.o: sda_spin.c
-	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
 
 pic/sda_spin.o: sda_spin.c
 	install -d pic
-	gcc $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
 
 i386/sysman$(EXE): $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 	install -d i386

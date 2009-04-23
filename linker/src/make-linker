@@ -10,7 +10,7 @@ cd ..
 mkdir build
 cd build
 unamem=`uname -m`
-if [ $unamem == x86_64 ]; then
+if [ $unamem = x86_64 ]; then
 ../binutils-2.16/configure --target=x86_64-free-vms
 else
 ../binutils-2.16/configure --target=i386-free-vms

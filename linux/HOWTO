@@ -2,13 +2,12 @@ So far:
 
 About GCC/Distributions.
 Due to use of anonymous structures a more recent gcc is needed.
-Current gcc used is at 3.3/3.4.
-As recent gcc as 3.4 can now be used. (But some new problems are there)
-Gcc 4.0 might be too early.
+As old as gcc 3.4 must be used sometimes.
+Gcc 4.3 might be used mostly.
 No more recent flex than 2.5.4 must be used.
 
 Also tested distributions:
-Debian Sarge (gcc-3.3) and up to lenny
+Debian Sarge (gcc-3.3) and up to lenny. (Not sure of sarge anymore)
 	Install ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic sash bash-static
 	Have loop support or module.
 Also: Etch.

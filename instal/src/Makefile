@@ -20,8 +20,10 @@ install: all
 
 ifeq ($(ARCH),x86_64)
 MODEL = -mcmodel=medium
+MODELGCC = gcc-3.4
 else
 MODEL =
+MODELGCC = gcc
 endif
 
 OBJS = instmain.o inst_parse.o instadd.o instmisc.o
@@ -35,18 +37,18 @@ pic/%.o: %.c
 	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 instadd.o: instadd.c
-	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 instmisc.o: instmisc.c
-	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/instadd.o: instadd.c
 	install -d pic
-	gcc $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/inst_parse.o: inst_parse.c
 	install -d pic
-	gcc $(MODEL) -fPIC -fpic -g -c -I$(TOPDIR)/cdu/src -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I$(TOPDIR)/cdu/src -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 i386/install$(EXE): $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 	install -d i386

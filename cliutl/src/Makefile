@@ -19,8 +19,10 @@ install: all
 
 ifeq ($(ARCH),x86_64)
 MODEL = -mcmodel=medium
+MODELGCC = gcc-3.4
 else
 MODEL =
+MODELGCC = gcc
 endif
 
 setproces: setproces.o
@@ -33,7 +35,7 @@ show.a: showsystem.o showdevice.o showwork.o showlog.o showmemory.o misc.o
 	ar r show.a showsystem.o showdevice.o showwork.o showlog.o showmemory.o misc.o
 
 showmemory.o: showmemory.c
-	gcc $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 %.o: %.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@

@@ -20,8 +20,10 @@ install: all
 
 ifeq ($(ARCH),x86_64)
 MODEL = -mcmodel=medium
+MODELGCC = gcc-3.4
 else
 MODEL =
+MODELGCC = gcc
 endif
 
 OBJS = authmain.o auth_parse.o authshow.o authmisc.o
