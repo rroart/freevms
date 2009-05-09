@@ -1,0 +1,130 @@
+#!/usr/bin/perl
+#
+#	written by Jan Engelhardt <jengelh [at] medozas de>, 2008-06-09
+#	http://jengelh.medozas.de/
+#	released in the Public Domain
+#
+
+use strict;
+use warnings;
+
+my $within_comment = 0;
+my @collect = ();
+
+while (<>) {
+	my $s = $_;
+	chomp $s;
+	if ($s eq "/**") {
+		$within_comment = 1;
+		print;
+		next;
+	}
+	if (!$within_comment) {
+		print;
+		next;
+	}
+	if ($s eq " */") {
+		&proc(\@collect);
+		@collect = ();
+		$within_comment = 0;
+		print;
+		next;
+	}
+
+	$s =~ s/^ \* ?//;
+	push(@collect, $s);
+}
+
+sub proc
+{
+	my $brief = [];
+	my $args  = [];
+	my $desc  = shift @_;
+
+	#
+	#	Split off brief description
+	#
+	my $args_at = -1;
+
+	for (my $i = 0; $i < scalar(@$desc); ++$i) {
+		if ($desc->[$i] =~ /^[\@\%]\w+:(?:\s+.*)?$/) {
+			$args_at = $i;
+			last;
+		}
+	}
+	if ($args_at != -1) {
+		@$brief = splice(@$desc, 0, $args_at);
+	}
+	while (scalar(@$desc) > 0 && $desc->[-1] eq "") {
+		pop(@$desc);
+	}
+
+	#
+	#	Split off args and unwrap their description.
+	#
+	my $desc_at = scalar(@$desc);
+
+	for (my $i = 0; $i < scalar(@$desc); ++$i)
+	{
+		if ($desc->[$i] !~ /^[\@\%\s]/) {
+			$desc_at = $i;
+			last;
+		}
+		while ($#$desc > $i && substr($desc->[$i+1], 0, 1) =~ /^\s/) {
+			my($line) = splice(@$desc, $i+1, 1);
+			$line =~ s/^\s+//;
+			$desc->[$i] .= " $line";
+		}
+	}
+	@$args = splice(@$desc, 0, $desc_at);
+
+	while (scalar(@$desc) > 0 && $desc->[0] eq "") {
+		shift(@$desc);
+	}
+
+	#
+	#	Some postprocessing
+	#
+	if (scalar(@$brief) == 0 && scalar(@$args) == 0 &&
+	    scalar(@$desc) > 3 && $desc->[0] =~ /^\S/ &&
+	    $desc->[1] eq "")
+	{
+		push(@$brief, shift(@$desc));
+		shift(@$desc);
+	}
+
+	#
+	#	Output
+	#
+	if (scalar(@$args) > 0) {
+		for $_ (@$args) {
+			my($type, $key, $description) =
+				($_ =~ /^([\@\%])(.*?):(?:\s+(.*))?/);
+			if (!defined($description)) {
+				$description = "";
+			} else {
+				$description =~ s/[\@\%](\w+)/$1/g;
+			}
+			if (!defined($key)) {
+				print STDERR "kerneldoc-filter: bogus line: $_\n";
+			} elsif ($type eq '@') {
+				print " * \\param $key\n * $description\n *\n";
+			} elsif ($type eq '%') {
+				print " * \\var $key\n * $description\n */\n/**\n";
+			}
+		}
+	}
+
+	if (scalar(@$brief) > 0) {
+		print " * \\brief\n";
+		print " * $_\n" for @$brief;
+		print " *\n";
+	}
+
+	if (scalar(@$desc) > 0) {
+		foreach my $line (@$desc) {
+			$line =~ s/[\@\%](\w+)/$1/g;
+			print " * $line\n";
+		}
+	}
+}
