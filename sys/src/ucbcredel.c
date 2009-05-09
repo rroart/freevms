@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file ucbcredel.c
+   \brief QIO UCB routines for creation and deletion - TODO still more doc
+   \author Roar Thronæs
+*/
 
 #include<ssdef.h>
 #include<misc.h>
@@ -15,6 +20,10 @@
 #include <ioc_routines.h>
 #include <queue.h>
 #include <linux/slab.h>
+
+/**
+   \brief link ucb into ddb list
+*/
 
 int ioc_std$link_ucb (struct _ucb *ucb) {
   struct _ucb * u = ucb;
@@ -35,6 +44,12 @@ int ioc_std$link_ucb (struct _ucb *ucb) {
 
   return SS$_NORMAL;
 }
+
+/**
+   \brief copy ucb
+   \param ucb
+   \param new_ucb
+*/
 
 int ioc_std$copy_ucb (struct _ucb *src_ucb, struct _ucb **new_ucb) {
   int status;
@@ -63,10 +78,13 @@ int ioc_std$copy_ucb (struct _ucb *src_ucb, struct _ucb **new_ucb) {
   u->ucb$l_boff=0;
   u->ucb$l_bcnt=0;
 
+  /** set refcount 1 */
   u->ucb$l_refc=1;
+  /** set device online */
   u->ucb$l_sts|=UCB$M_ONLINE;
+  /** clear template bit */
   u->ucb$l_sts&=~UCB$M_TEMPLATE;
-  // u->ucb$l_charge
+  /** set u->ucb$l_charge - MISSING */
   qhead_init(&u->ucb$l_mb_msgqfl); // probably this too?
 
   *new_ucb = u;
@@ -81,6 +99,12 @@ int ioc_std$create_ucb (struct _pcb *pcb, struct _ucb *ucb, struct _ucb **new_uc
   return SS$_NORMAL;
 }
 
+/**
+   \brief clone a template ucb - see 5.2 21.5.2.2.2
+   \param tmpl_ucb template ucb
+   \param new_ucb
+*/
+
 int ioc_std$clone_ucb (struct _ucb *tmpl_ucb, struct _ucb **new_ucb) {
   int status;
   struct _ucb * u;
@@ -89,11 +113,12 @@ int ioc_std$clone_ucb (struct _ucb *tmpl_ucb, struct _ucb **new_ucb) {
 
   u->ucb$w_unit=tmpl_ucb->ucb$w_unit_seed;
 
+  /** give unique unit number */
  again:
   if (++tmpl_ucb->ucb$w_unit_seed>9999) tmpl_ucb->ucb$w_unit_seed=0;
+  /** link ucb into the ddb's device chain */
   status=ioc_std$link_ucb(u);
   if (status!=SS$_NORMAL) goto again; // original weakness?
-
 
   return SS$_NORMAL;
 }

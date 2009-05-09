@@ -2,7 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-
+/**
+   \file ipl.c
+   \brief CPU ipl implementation
+   \author Roar Thronæs
+ */
 #include<cpudef.h>
 #include<ipldef.h>
 #include<ipl.h>
@@ -42,9 +46,17 @@ inline asmlinkage void pushpsl(void);
 void inline mysti(int long);
 asmlinkage void myrei (void);
 
+/**
+  \brief set "vax" cpu intr flag
+*/
+
 inline asmlinkage void setpsli(void) {
   ctl$gl_pcb->psl_intr=1;
 }
+
+/**
+   \brief set "vax" psl cpu mode
+*/
 
 inline void setpslmod(int mod) {
   ctl$gl_pcb->psl_cur_mod=ctl$gl_pcb->psl_prv_mod=mod&3; // check. pretend user mode
@@ -62,6 +74,10 @@ inline asmlinkage void pushpsli(void) {
 #endif
 #endif
 }
+
+/**
+   \brief push the "vax" psl
+*/
 
 inline asmlinkage void pushpsl(void) {
 #ifdef __i386__
@@ -83,6 +99,10 @@ inline asmlinkage void pushpsl(void) {
   panic("no reason");
 #endif
 }
+
+/**
+   \brief pop the "vax" psl
+*/
 
 inline asmlinkage void poppsl(void) {
 #ifdef __i386__
@@ -114,6 +134,10 @@ inline int savipl(void) {
 }
 #endif
 
+/**
+   \brief return "vax" ipl
+*/
+
 inline int getipl() {
   return current->psl_ipl;
 }
@@ -123,6 +147,13 @@ inline int __PAL_MFPR_IPL() {
 }
 
 /* no smp yet */
+
+/**
+   \brief inner part of "vax" setipl
+   \details also does software_interrupts
+   \param i ipl
+*/
+
 #ifdef __i386__
 inline int setipl_inner(unsigned char i) {
   int retipl=ctl$gl_pcb->psl_ipl>i;
@@ -177,6 +208,7 @@ inline void setipl(unsigned char i) {
 #ifdef __x86_64__
   // check
   asmlinkage void do_sw_int(void);
+  /** do software interrupts */
   do_sw_int();
 #else
   return retipl;
@@ -209,6 +241,10 @@ inline void __PAL_MTPR_IPL(unsigned char i) {
   /* check and do asts */
 }
 
+/**
+    dead code
+*/
+
  inline char spl(unsigned char new) {
   int this_cpu = smp_processor_id();
   if (new<=smp$gl_cpu_data[this_cpu]->cpu$b_ipl) {
@@ -230,6 +266,10 @@ inline int prespl_not(unsigned char new) {
   return 0;
 }
 
+/**
+   check if used
+*/
+
 inline void chm(char mode) {
   int this_cpu=smp_processor_id();
   int cur_mod=current->psl_cur_mod;
@@ -237,6 +277,10 @@ inline void chm(char mode) {
   /* illegal from istack */
   /* different stacks not implemented either */
 }
+
+/**
+   \brief "vax" initiate exception or interrupt - see VARM 2nd page 5.11 277 - 278
+*/
 
 inline void regtrap(char type, char param) {
   int flag=mycli();
@@ -292,6 +336,10 @@ inline void regtrap(char type, char param) {
 }
 
 int block3=0;
+
+/**
+   \brief if "vax" interrupt is blocked due to ipl level
+ */
 
 inline char intr_blocked(unsigned char this) {
 #if 0
@@ -353,6 +401,10 @@ inline char intr_blocked(unsigned char this) {
 #endif
 }
 
+/**
+   \brief execute pending "vax" software interrupts
+*/
+
 asmlinkage void do_sw_int(void) {
   int this_cpu = smp_processor_id();
   int i, j, sisr=smp$gl_cpu_data[this_cpu]->cpu$w_sisr;
@@ -399,6 +451,10 @@ asmlinkage void do_sw_int(void) {
 
 extern int in_sw_ast;
 
+/**
+   \brief "vax" rei - see VARM 2nd 5.12 283-284
+*/
+
 asmlinkage void myrei (void) {
   /* look at REI for this */
   int flag, this_cpu;
@@ -415,9 +471,11 @@ asmlinkage void myrei (void) {
   if (mydebugi>1) printk("befpop %x %x ",p->pcb$l_pid,p->psl_ipl);
   poppsl();
   if (mydebugi>1) printk("%x\n",p->psl_ipl);
+  /** test if tmp2 is a valid psl */
   if (p->psl_is==1 && p->psl_ipl==0) panic("is ipl\n");
   if (p->psl_ipl>0 && p->psl_cur_mod!=0) panic("ipl curmod\n");
   if (p->psl_prv_mod < p->psl_cur_mod) panic("prv curmod\n");
+  /** parts which check for 3rd reserved operand fault */
   if (p->psl_cur_mod < p->oldpsl_cur_mod) panic("rei to higher mode\n");
   if (p->psl_is==1 && p->oldpsl_is==0) panic("is stuff\n");
 #ifdef IPL_DEBUG
@@ -432,15 +490,24 @@ asmlinkage void myrei (void) {
   // save old sp oldpsl is and 4 oth
   // set new pc psl
   // if is 0 change stack
+  /** does not do anything here with saving old stack pointer, setting TP, PC,
+      but somewhere else */
   setipl2(current->psl_ipl);
   //  if (!in_sw_ast) sw_ast();
+  /** stack switch done elsewhere too */
   mysti(flag);
+  /** do "vax" ast delivery check */
   sw_ast();
 #ifdef __x86_64__
+  /** do "vax" check for software interrupts */
   do_sw_int();
 #endif
   /* also needs some changing mode stacks */
 }
+
+/**
+   \brief now dead?
+*/
 
 #if (defined __i386__) || (defined __x86_64__)
 void inline mysti(long flags) {
@@ -452,6 +519,10 @@ void inline mysti(long flags) {
 #endif
 }
 
+/**
+   \brief make it crash and trace
+*/
+
 void sickinsque(void * entry, void * pred) {
   *(void **)entry=*(void **)pred;
   *(void **)(entry+4)=pred;
@@ -461,6 +532,10 @@ void sickinsque(void * entry, void * pred) {
 
 long locki=0;
 long locks[1024];
+
+/**
+   \brief now dead?
+*/
 
 long inline mycli(void) {
 #if 0

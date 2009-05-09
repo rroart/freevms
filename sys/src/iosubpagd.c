@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file iosubpagd.c
+   \brief QIO - TODO still more doc
+   \author Roar Thronæs
+*/
 
 #include<starlet.h>
 #include<iodef.h>
@@ -22,6 +27,11 @@
 #include <exe_routines.h>
 #include <lnmsub.h>
 #include <lnmstrdef.h>
+
+/**
+   \brief find first free i/o channel - see 5.2 21.5.2.1
+   \param chan return value
+*/
 
 int ioc$ffchan(unsigned short int *chan) {
   unsigned short int i;
@@ -51,12 +61,18 @@ long int dsc$strtol(const char *nptr, int len, char **endptr, int base) {
 
 // remember to make this interface like ioc_std$search in ioc_routines.h
 
+/**
+   \brief search for device - see 5.2 21.4.1
+   \param r struct for return ddb etc
+   \param devnam device name
+*/
+
 int ioc$search(struct return_values *r, void * devnam) {
-  // no use of ioc$trandevnam yet 
   char out[255];
   int outlen;
   char * outagain;
   memset(out,0,255); // suspect outlen is not quite operative
+  /** translate devnam argument to device */
   int sts = ioc_std$trandevnam(devnam, 0, out, &outlen, &outagain);
   /* ddb d not needed? */
   /* real device, no logical. do not have logicals yet */
@@ -92,6 +108,7 @@ int ioc$search(struct return_values *r, void * devnam) {
       if (device[i]>='A' && device[i]<='Z') device[i]|=0x20;
     }
   }
+  /** search i/o db for name */
   do {
     //    printk("bcmp %s %s\n",d->ddb$t_name,s->dsc$a_pointer);
     struct _sb * sb=d->ddb$ps_sb;
@@ -120,6 +137,8 @@ int ioc$search(struct return_values *r, void * devnam) {
     out:
       r->val1=tmp; // was d->ddb$ps_ucb;
       return SS$_NORMAL;
+      /** access check - MISSING */
+      /** if cluster device, do ioc$lock_dev - MISSING */
     }
   next:
     d=d->ddb$ps_link;
@@ -127,15 +146,26 @@ int ioc$search(struct return_values *r, void * devnam) {
   return SS$_NOSUCHDEV;
 }
 
+/**
+   \brief verify that the chann is legal - see 5.2 21.5.3
+   \param chan channel
+   \param ccbp return value
+*/
+
 int ioc$verify_chan(unsigned short int chan, struct _ccb ** ccbp) {
   struct _ccb * ccb=&ctl$gl_ccbbase[chan];
   // also check channel num and access mode
+  /** TODO: need to be properly implemented */
   if (ccb->ccb$b_amod==1) {
     *ccbp=ccb;
     return SS$_NORMAL;
   } else 
     return 0;
 }
+
+/**
+   \brief translate eventual device name logical
+*/
 
 int ioc_std$trandevnam (void * descr_p, int flags, char *buf, int *outlen, void **out_p) {
 #if 0
@@ -192,6 +222,7 @@ int ioc_std$trandevnam (void * descr_p, int flags, char *buf, int *outlen, void 
   memcpy(buf,(ret.mylnmb)->lnmb$l_lnmx->lnmx$t_xlation,*outlen);
   return sts;
 #endif
+  /** check for :: - MISSING */
 }
 
 int ioc_std$search (void * descr_p, int flags, void *lock_val_p, struct _ucb **ucb_p, struct _ddb **ddb_p, struct _sb **sb_p) {

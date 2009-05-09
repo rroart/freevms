@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file queue.c
+   \brief CPU queue instructions
+   \author Roar Thronæs
+ */
 
 /* Not implemented: atomicity */
 /* Not implemented: long and quadword alignments */
@@ -126,15 +131,31 @@ struct myq {
   unsigned long blink;
 };
 
+/**
+   \brief is absolute queue empty
+   \param q queue header
+*/
+
 inline int aqempty(void * q) {
   struct myq *m=(struct myq *) q;
   return (q==m->flink);
 }
 
+/**
+   \brief is relative queue empty
+   \param q queue header
+*/
+
 inline int rqempty(void * q) {
   struct myq *m=(struct myq *) q;
   return (m->flink==0 && m->blink==0);
 }
+
+/**
+   \brief insqti for use at boottime
+   \param entry entry
+   \param header of queue
+*/
 
 void boot_insqti (void * entry, void * header) {
   signed long tmp1=*(signed long *)header;

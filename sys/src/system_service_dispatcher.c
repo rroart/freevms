@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file system_service_dispatcher.c
+   \brief dispatch system services
+   \author Roar Thronæs
+ */
 
 #include <linux/linkage.h>
 #include <linux/sched.h>
@@ -10,6 +15,11 @@
 #include <system_data_cells.h>
 #include <ipl.h>
 #include <sch_routines.h>
+
+/**
+   \brief run after ast called in lower level modes - see 5.2 7.5.3
+   \details clears astact bit and rewinds stack
+*/
 
 asmlinkage int cmod$astexit() {
   struct _pcb * p = ctl$gl_pcb;

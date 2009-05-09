@@ -130,6 +130,10 @@ long fixi=0;
 long fixs[1024];
 #endif
 
+/**
+   \brief modifies the stack so that it will call exe$wait again.
+*/
+
 void fixup_hib_pc(void * dummy) {
 #ifdef __i386__
   char ** addr = dummy + 0x28;

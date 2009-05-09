@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file sysevtsrv.c
+   \brief reading and clearing event flags
+   \author Roar Thronæs
+ */
 
 #include <linux/linkage.h>
 #include <linux/sched.h>
@@ -16,6 +21,12 @@
 
 #undef MYDEB_EFC
 #define MYDEB_EFC
+
+/**
+   \brief Returns a pointer to the event flag give a PCB and the event flag number.
+   \param p PCB pointer
+   \param efn event flag number
+*/
 
 inline unsigned long * getefcp(struct _pcb * p, unsigned long efn) {
   return &p->pcb$l_efcs + ((efn&96)>>5);
@@ -37,6 +48,11 @@ inline unsigned long * getefcno(unsigned long efn) {
 #ifdef MYDEB_EFC
 extern long efc[], efcc[];
 #endif
+
+/**
+   \brief clear event flag - see 5.2 9.8
+   \param efn event flag number
+ */
 
 asmlinkage int exe$clref(unsigned int efn) {
   int retval;
@@ -65,6 +81,12 @@ asmlinkage int exe$clref(unsigned int efn) {
     return SS$_WASCLR;
 }
 
+/**
+   \brief read event flag - see 5.2 9.8
+   \param efn event flag number
+   \param state return here
+ */
+
 asmlinkage int exe$readef(unsigned int efn, unsigned int *state) {
   struct _pcb * p=current;
   int efncluster=(efn&224)>>5;
@@ -72,6 +94,11 @@ asmlinkage int exe$readef(unsigned int efn, unsigned int *state) {
   clusteraddr=getefc(p,efn);
   *state=*clusteraddr;
 }
+
+/**
+   \brief set event flag - see 5.2 9.8
+   \param efn event flag number
+ */
 
 asmlinkage int exe$setef(unsigned int efn) {
   struct _pcb * p=current;

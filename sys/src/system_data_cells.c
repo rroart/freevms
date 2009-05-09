@@ -2,6 +2,12 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file system_data_cells.c
+   \brief most of our global variables
+   \author Roar Thronæs
+ */
+
 
 #include<linux/vmalloc.h>
 #ifdef __x86_64__
@@ -760,7 +766,7 @@ unsigned long ioc$gl_cramh_blink;
 unsigned long ioc$gl_cramh_flink;
 unsigned long ioc$gl_cramh_pages;
 unsigned long ioc$gl_crbtmout;
-unsigned long ioc$gl_devlist=0; /* ddb liste */
+unsigned long ioc$gl_devlist=0; ///< ddb list
 unsigned long ioc$gl_dptlist;
 unsigned long ioc$gl_dtn_list;
 unsigned long ioc$gl_du_cddb;

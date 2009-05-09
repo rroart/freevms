@@ -8,7 +8,7 @@ No more recent flex than 2.5.4 must be used.
 
 Also tested distributions:
 Debian Sarge (gcc-3.3) and up to lenny. (Not sure of sarge anymore)
-	Install ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic sash bash-static
+	Install ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic sash bash-static doxygen
 	Have loop support or module.
 Also: Etch.
 For x86_64:
@@ -29,6 +29,7 @@ cd freevms
 ./envscript
 cd ..
 cd freevms386.iomm
+make doxygen
 make bzImage
 make download-bliss
 make build-bliss (run twice, for some reason first run quits with an error)

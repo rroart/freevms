@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file shell.c
+   \brief for pagetable and user space - TODO still more doc
+   \author Roar Thronæs
+ */
 
 #include<linux/linkage.h>
 #include<linux/sched.h>
@@ -68,6 +73,13 @@ void init_p1pp_long_long(unsigned long addr, signed long offset, signed long lon
   *valp=val;
 }
 
+/**
+   \brief initialization of p1 data
+   \param pcb process pcb
+   \param phd process phd
+   \param offset an offset
+*/
+
 void init_p1pp_data(struct _pcb * pcb, struct _phd * phd,signed long offset) {
   init_p1pp_long(&ctl$gl_pcb,offset,pcb);
   init_p1pp_long(&ctl$gl_phd,offset,phd);
@@ -76,6 +88,14 @@ void init_p1pp_data(struct _pcb * pcb, struct _phd * phd,signed long offset) {
 }
 
 // do this after init_fork_p1pp
+
+/**
+   \brief initialization of p1 space when not(?) forking
+   \param pcb new process pcb
+   \param phd new process phd
+   \param pcb old process pcb
+   \param phd old process phd
+*/
 
 int shell_init_other(struct _pcb * pcb, struct _pcb * oldpcb, long addr, long oldaddr) {
   pgd_t *pgd;
@@ -397,6 +417,14 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   ctl$gq_procpriv=ctl$gl_pcb->pcb$l_priv;
 }
 
+/**
+   \brief initialization of p1 space when forking
+   \param pcb new process pcb
+   \param phd new process phd
+   \param pcb old process pcb
+   \param phd old process phd
+*/
+
 int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, struct _phd * oldphd) {
   int uml_map=0;
 
@@ -571,6 +599,11 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
   return uml_map;
 }
 
+/**
+   \brief make address readable from user space
+   \param addr address
+*/
+
 #ifdef CONFIG_VMS
 int user_spaceable_addr(void * addr) {
 #ifdef __i386__
@@ -623,6 +656,10 @@ int user_spaceable_addr(void * addr) {
   }
 #endif
 }
+
+/**
+   \brief make systime readable from user space
+*/
 
 int user_spaceable() {
 #if 0
@@ -732,6 +769,10 @@ unsigned long ctl$ag_clidata P1PP ;
 unsigned long ctl$gl_fixuplnk P1PP ;
 unsigned long ctl$gl_iaflnkptr P1PP ;
 #endif
+
+/**
+   \brief syscall code to be used in the future?
+*/
 
 #ifdef __x86_64__
 int __attribute__ ((section (".vsyscall_5"))) exe$syscall() {

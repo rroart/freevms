@@ -3,6 +3,12 @@
 
 // Author. Roar Thronæs.
 // Author. Roger Tucker.
+/**
+   \file astdel.c
+   \brief queuing and delivering asts
+   \author Roar Thronæs
+   \author Roger Tucker
+ */
 
 #include <linux/linkage.h>
 #include <system_data_cells.h>
@@ -35,6 +41,10 @@ extern int mydebug5;
 
 void sch$newlvl(struct _pcb *p);
 
+/**
+   \brief debug code - test cpu modes
+ */
+
 static int checkq(struct _acb * head) {
   struct _acb * tmp = head->acb$l_astqfl;
   signed char tmpmode1, tmpmode2;
@@ -54,6 +64,13 @@ static int checkq(struct _acb * head) {
 long qast[32*1024];
 long qastc[32] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 #endif
+
+/**
+   \brief queuing an ast to a process - see 5.2 7.4
+   \param pid the process id
+   \param priclass priority class
+   \param a ast control block
+*/
 
 int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   int savipl;
@@ -76,12 +93,14 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
 #endif
   int status=SS$_NORMAL;
   int kernelmode;
-  /* lock */
+  /** spinlock sched */
   savipl=getipl();
   setipl(IPL$_SYNCH);
   vmslock(&SPIN_SCHED,-1);
+  /** does the process exist */
   struct _pcb * p=exe$ipid_to_pcb(pid);
   if (!p) {
+    /** if nodelete clear deallocate - missing */
     vmsunlock(&SPIN_SCHED,-1);
     setipl(savipl);
     return SS$_NONEXPR;
@@ -90,6 +109,8 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   checkq(&p->pcb$l_astqfl);
 #endif
   struct _acb * tmp =  p->pcb$l_astqbl;
+  /** scan the ast list */
+  /** TODO: check if sort according to mode */
   if (!aqempty(&p->pcb$l_astqfl)) {
     signed char mode = a->acb$b_rmod & 0x93;
     struct _acb * head = &p->pcb$l_astqfl;
@@ -102,10 +123,15 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
     }
     tmp = tmp->acb$l_astqbl;
   }
+  /** insert ast in the queue */
   insque(a,tmp);
 #ifdef ASTDEBUG
   checkq(&p->pcb$l_astqfl);
 #endif
+  /** calculate astlvl */
+  /** choose first and innermost level from queue - MISSING */
+  /** handle current on same and other cpu - MISSING */
+  /** handle outswapped - MISSING */
   if ((a->acb$b_rmod & ACB$M_KAST)==0)
     kernelmode=a->acb$b_rmod & 3;
   else
@@ -113,9 +139,12 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
   p->phd$b_astlvl=kernelmode;
   /* just simple insert , no pris yet */
   //printk("bef rse\n");
+  /** unless current process, invoke sch$rse */
   if (p->pcb$w_state!=SCH$C_CUR)
     sch$rse(p, priclass, EVT$_AST);
   else {
+    /** otherwise make the process computable */
+    /** TODO: check smp */
     struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
     struct _pcb * curp=ctl$gl_pcb;
     if (p==cpu->cpu$l_curpcb) // etc // smp not enabled
@@ -130,7 +159,7 @@ int sch$qast(unsigned long pid, int priclass, struct _acb * a) {
 #endif
   }
   //printk("aft rse\n");
-  /* unlock */
+  /** release spinlock */
   vmsunlock(&SPIN_SCHED,-1);
   setipl(savipl);
   return status;
@@ -273,6 +302,12 @@ int exe$astdel_wrap2(struct _pcb * p, struct _acb * acb) {
   8: original eip
 */
 
+/**
+   \brief execute ast in the right mode - see 5.2 7.5.1
+   \details params on the stack. code residing in user-readable part
+   afterwards call clrast. exe$astret might be here, see 5.2 7.5.3
+*/
+
 int exe$astdel() {
 #if 0
   long (*ast)();
@@ -363,6 +398,14 @@ int exe$astdel_prep2(long stack, long ast, long astprm) {
 long cstab[4] = { __KERNEL_CS, __EXECUTIVE_CS, __SUPERVISOR_CS, __USER_CS };
 long sstab[4] = { __KERNEL_CS | 8, __EXECUTIVE_CS | 8, __SUPERVISOR_CS | 8, __USER_CS | 8 };
 
+/**
+   \brief prepare arg list on the stack of the ast's access mode
+   \param stack ast stack
+   \param ast ast routine
+   \param astprm parameter
+   \param ss stack segment?
+*/
+
 int exe$astdel_prep2_new(long stack, long ast, long astprm, long cs, long ss) {
   __asm__ __volatile__(
 		       "pushfl\n\t"
@@ -450,6 +493,12 @@ int exe$astdel_prep(long a, long b, long c) {
 		       );
 }
 #endif
+
+/**
+   \brief execute ast in the right mode - see 5.2 7.5.1
+   \details params on the stack. code residing in user-readable part
+   afterwards call clrast. exe$astret might be here, see 5.2 7.5.3
+*/
 
 #ifdef __x86_64__
 int __attribute__ ((section (".vsyscall_4"))) exe$astdel() {
@@ -573,6 +622,10 @@ int myacbi=0;
 long myacbs[1024];
 #endif
 
+/**
+   \brief delivering an ast - see 5.2 7.5
+*/
+
 asmlinkage void sch$astdel(int dummy) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];
   struct _pcb * p=ctl$gl_pcb;
@@ -595,6 +648,7 @@ asmlinkage void sch$astdel(int dummy) {
   myacbs[myacbi++]=ctl$gl_pcb->pcb$b_astact;
 #endif
  more:
+  /** spinlock sched */
   setipl(IPL$_SYNCH); // also IPL$_SCHED
   vmslock(&SPIN_SCHED,-1);
 #ifdef ASTDEBUG
@@ -605,6 +659,8 @@ asmlinkage void sch$astdel(int dummy) {
      //printk("here ast\n");
      for (i=0; i<1000000; i++) ;
      } */
+  /** empty queue, spurious interrupt, drop spinlock, return */
+  /** TODO: check if astlvl be 4 or sch$newlvl necessary */
   if (aqempty(&p->pcb$l_astqfl)) {
     vmsunlock(&SPIN_SCHED,-1);
     sch$newlvl(p);
@@ -614,6 +670,7 @@ asmlinkage void sch$astdel(int dummy) {
      //printk("here ast2 %x %x %x\n",p->pid,p->pcb$l_astqfl,&p->pcb$l_astqfl);
      for (j=0; j<20; j++) for (i=0; i<1000000000; i++) ;
      } */
+  /** remove first acb from queue */
   acb=remque(p->pcb$l_astqfl,0);
 #ifdef ASTDEBUG
   myacbs[myacbi++]=acb;
@@ -638,9 +695,10 @@ asmlinkage void sch$astdel(int dummy) {
   //  printast(acb);
   //  mydebug5=1;
   //  printk(KERN_EMERG "astdel %x\n",acb);
+  /** test if kernel mode ast */
   if (acb->acb$b_rmod & ACB$M_KAST) {
     acb->acb$b_rmod&=~ACB$M_KAST;
-    /* unlock */
+    /** unlock spinlock, lower ipl to 2 */
     vmsunlock(&SPIN_SCHED,-1);
     //printk("astdel1 %x \n",acb->acb$l_kast);
     setipl(IPL$_ASTDEL);
@@ -661,21 +719,29 @@ asmlinkage void sch$astdel(int dummy) {
 #ifdef __i386__
   //      printk("a1 ");
 #endif
+  /** dispatch kernel mode ast by simply calling it */
     acb->acb$l_kast(acb);
 #ifdef __i386__
     //      printk("a2 ");
 #endif
     //p->pcb$b_astact=0;
     // do not do this? if ((acb->acb$b_rmod&ACB$M_NODELETE)==0) kfree(acb);
+    /** on return from the ast just go to start again */
     goto more;
   }
+  /** if else, an ordinary ast */
   //printk("astdel2 %x %x \n",acb->acb$l_ast,acb->acb$l_astprm);
   // avoid leftovers
+  /** check if ok privileged mode */
   if ((current->pslstk[current->pslindex-1]&3)<(acb->acb$b_rmod&3)) goto out;
   // skip if disabled
+  /** spurious interrupt test, is ast enabled */
   if (!test_bit(acb->acb$b_rmod&3,&p->pcb$b_asten)) goto out;
   // test if busy already
+  /** another spurious test, check if astdel already active */
+  /** setting astact bit */
   if (test_and_set_bit(acb->acb$b_rmod&3,&p->pcb$b_astact)) {
+    /** if not ok, spurious interrupt found, reinsert, set new level, unlock and return */
   out:
 #ifdef ASTDEBUG
     myacbs[myacbi++]=0xff000000 | ((current->pslstk[current->pslindex-1]&3)<<16) | (ctl$gl_pcb->pcb$b_asten << 8) | (ctl$gl_pcb->pcb$b_astact );
@@ -688,8 +754,12 @@ asmlinkage void sch$astdel(int dummy) {
     vmsunlock(&SPIN_SCHED,-1);
     return;
   }
+  /** check soft_ast_disable - MISSING */
+  /** if ast is deliverable */
+  /** check quota bit and return quota - MISSING */
+  /** store new astlvl values */
   p->phd$b_astlvl=p->pr_astlvl=(acb->acb$b_rmod & 3) + 1;
-  //unlock
+  /** unlock spinlock, set ipl */
   vmsunlock(&SPIN_SCHED,-1);
   setipl(IPL$_ASTDEL);
   if (((unsigned long)acb->acb$l_ast<0x80000000)&&((unsigned long)acb->acb$l_ast>0xb0000000)) {
@@ -706,6 +776,7 @@ asmlinkage void sch$astdel(int dummy) {
 #ifdef __i386__
   //  printk("a3 ");
 #endif
+  /** maybe run piggyback kernel ast */
   if (acb->acb$b_rmod&ACB$M_PKAST) {
     acb->acb$b_rmod&=~ACB$M_PKAST; // check
     if (acb->acb$b_rmod&3)
@@ -723,15 +794,18 @@ asmlinkage void sch$astdel(int dummy) {
   long (*ast)() = acb->acb$l_ast;
   long astprm = acb->acb$l_astprm;
   int rmod = acb->acb$b_rmod;
+  /** if neither nodelete nor pkast set, deallocate ast */
   if ((acb->acb$b_rmod&(ACB$M_NODELETE|ACB$M_PKAST))==0) kfree(acb);
   if (rmod&3) {
 #ifdef __i386__
+    /** for 386, make addresses readable from user space, bad temp hack. TODO: fix */
     user_spaceable_addr(exe$astdel); // bad temp hack
     user_spaceable_addr(&dummy); // bad temp hack
 #endif
 #if 0
     int sts = exe$astdel_prep(&dummy,ast,astprm);
 #else
+    /** build arg list on the stack of the ast's access mode */
 #ifdef __i386__
     int sts = exe$astdel_prep2_new(p->ipr_sp[rmod&3],ast,astprm,cstab[rmod&3],sstab[rmod&3]);
 #else
@@ -739,10 +813,15 @@ asmlinkage void sch$astdel(int dummy) {
 #endif
 #endif
   } else {
+    /** set ipl 0 before kernel mode ast */
     setipl(0);
+    /** call ast in kernel mode */
     if(ast) ast(astprm); /* ? */
     // simulate exe$astdel and cmod$astexit
+    /** TODO: check it these must be here or be moved */
+    /** clear astatc */
     test_and_clear_bit(rmod&3, &p->pcb$b_astact); // check
+    /** compute new astlvl */
     sch$newlvl(p);
   }
 #endif
@@ -750,6 +829,11 @@ asmlinkage void sch$astdel(int dummy) {
   //      printk("a4 ");
 #endif
 }
+
+/** 
+    \brief compute new astlvl
+    \param p pcb
+*/
 
 void sch$newlvl(struct _pcb *p) {
   int newlvl;

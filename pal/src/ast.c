@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file ast.c
+   \brief CPU ast handling
+   \author Roar Thronæs
+ */
 
 #include<linux/linkage.h>
 #include<acbdef.h>
@@ -12,6 +17,10 @@
 #include <system_data_cells.h>
 
 int in_sw_ast;
+
+/**
+   \brief mark the cpu sisr register to indicate we want an ast interrupt
+*/
 
 asmlinkage void sw_ast(void) {
   struct _cpu * cpu=smp$gl_cpu_data[smp_processor_id()];

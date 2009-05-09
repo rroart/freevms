@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file exception_init.c
+   \brief misc important hairy system routines
+   \author Roar Thronæs
+ */
 
 #include <ssdef.h>
 #include <starlet.h>
@@ -12,6 +17,12 @@
 #include<linux/linkage.h>
 #include<asm/unistd.h>
 #include "../../starlet/src/sysdep.h"
+
+/**
+   \brief wait until event flag set and eventual iosb flag too - see 5.2 6.3.6.3
+   \param efn event flag number
+   \param iosb io status block
+*/
 
 int exe$synch(unsigned int efn, struct _iosb *iosb) {
   if (!iosb) {
@@ -28,6 +39,10 @@ int exe$synch(unsigned int efn, struct _iosb *iosb) {
   exe$clref(efn);
   goto again;
 }
+
+/**
+   \brief to be executed after lower mode asts
+*/
 
 int exe$clrast(void) {
   return cmod$astexit(); // check. should be system call?

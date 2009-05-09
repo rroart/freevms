@@ -150,4 +150,7 @@ telnet:
 	make; \
 	cd ../../..
 
+doxygen:
+	doxygen doc/doxygen.conf
+
 include Makefile.kernel

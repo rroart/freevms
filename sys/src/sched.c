@@ -3,6 +3,11 @@
 
 // Author. Roar Thronæs.
 // Modified Linux source file, 2001-2004
+/**
+   \file sched.c
+   \brief Scheduling - TODO still more doc
+   \author Roar Thronæs
+*/
 
 /*
  *  linux/kernel/sched.c
@@ -89,6 +94,10 @@ extern void mem_use(void);
 int mydebug4 = 0;
 int mydebug5 = 0;
 int mydebug6 = 1;
+
+/**
+   \brief check content ok
+*/
 
 mycheckaddr(unsigned int ctl){
 #if 1
@@ -389,6 +398,10 @@ send_now_idle:
 #endif
 }
 
+/**
+   \brief is the task on comqueue?
+*/
+
 int task_on_comqueue(struct _pcb *p) {
   int i,found=0;
   struct _pcb  *tmp2;
@@ -602,6 +615,10 @@ extern int fix_init_thread;
 
 int countme=500;
 
+/**
+   \brief rescheduling - see 5.2 12.6.4
+*/
+
 asmlinkage void sch$resched(void) {
   int cpuid = smp_processor_id();
   struct _cpu * cpu=smp$gl_cpu_data[cpuid]; 
@@ -621,10 +638,13 @@ asmlinkage void sch$resched(void) {
   regtrap(REG_INTR,IPL$_RESCHED);
 #endif
 
+  /** spinlock sched and set ipl */
   setipl(IPL$_SCHED);
   vmslock(&SPIN_SCHED,-1);
 
   spin_lock_irq(&runqueue_lock); /* eventually change to sched? */
+
+  /** get current pcb and priority */
 
   curpcb=cpu->cpu$l_curpcb;
 
@@ -632,9 +652,16 @@ asmlinkage void sch$resched(void) {
 
   curpri=cpu->cpu$b_cur_pri;
 
+  /** clear bit in cpu_priority table */
+
   sch$al_cpu_priority[curpri]=sch$al_cpu_priority[curpri] & (~ cpu->cpu$l_cpuid_mask );
+
+  /** if no process with this pri on any cpu, clear bit in active_priority table */
+
   if (!sch$al_cpu_priority[curpri])
     sch$gl_active_priority=sch$gl_active_priority & (~ (1 << (31-curpri)));
+
+  /** now some if's remaining from linux - TODO: check if still needed */
 
   if (curpcb == idle_task(curpcb->pcb$l_cpu_id))
     goto out;
@@ -662,9 +689,18 @@ asmlinkage void sch$resched(void) {
     mycheckaddr(0);
     //if (curpcb==qhead) panic(" a panic\n");
 #endif
+
+    /** set pri bit in comqs */
+
     sch$gl_comqs=sch$gl_comqs | (1 << curpri);
     //    curpcb->state=TASK_INTERRUPTIBLE; /* soon SCH$C_COM ? */
+
+    /** set state of cur pcb to COM */
+
     curpcb->pcb$w_state=SCH$C_COM;
+
+    /** insert pcb at tail of comqueue */
+
 #ifdef __i386__    
     qhead=*(unsigned long *)&sch$aq_comt[curpri];
 #else
@@ -679,6 +715,7 @@ asmlinkage void sch$resched(void) {
 #ifdef DEBUG_SCHED
     mycheckaddr(42);
 #endif
+    /** linux leftover */
     nr_running++;
 #ifdef DEBUG_SCHED
     after=numproc();
@@ -690,10 +727,12 @@ asmlinkage void sch$resched(void) {
 #endif
 
   out:
+    /** clear idle_cpus to signal all idle cpus to try to reschedule */
     sch$gl_idle_cpus=0;
 #if 0
   }
 #endif
+  /** go some intro sch$sched */
   sch$sched(1);
 }
 
@@ -761,13 +800,23 @@ asmlinkage void sch$sched(int from_sch$resched) {
   vmslock(&SPIN_SCHED,-1);
 #endif
 
+  /** clear cpu_priority for current pri bit - TODO: where did this come from? */
+
   sch$al_cpu_priority[curpri]=sch$al_cpu_priority[curpri] & (~ cpu->cpu$l_cpuid_mask );
+
+  /** skip if ... TODO: from where? */
+
   if (sch$al_cpu_priority[curpri]) 
     goto skip_lock;
+
+  /** clear active_priority for current pri bit - TODO: where did this come from? */
+
   sch$gl_active_priority=sch$gl_active_priority & (~ (1 << (31-curpri)));
 
   //if (spl(IPL$_SCHED)) return;
   //  old=spl(IPL$_SCHED);
+
+  /** now 4 linux leftovers */
 
   spin_lock_prefetch(&runqueue_lock);
 
@@ -779,8 +828,12 @@ asmlinkage void sch$sched(int from_sch$resched) {
 
  skip_lock:
 
+  /** reset cpu affinity TODO: from where? */
+
   affinity=0;
   struct _pcb * aff_next = 0;
+
+  /** find highest pri comqueue */
 
   tmppri=ffs(sch$gl_comqs);
 #ifdef DEBUG_SCHED
@@ -789,15 +842,20 @@ asmlinkage void sch$sched(int from_sch$resched) {
 #endif
 
   if (!tmppri) {
+    /** if none found, idle */
 #if 0
     // spot for more vms sched
     goto sch$idle;
 #endif
   go_idle:
+    /** set bit in idle_cpus */
     sch$gl_idle_cpus=sch$gl_idle_cpus | (cpu->cpu$l_cpuid_mask);
+    /** store null pcb and -1 pri: MISSING check why */
+    /** necessary idle_task line from linux */
     next=idle_task(cpuid);
     goto skip_cap;
   } else {
+    /** if pcb in queue */
     tmppri--;
   gethead:
     qhead=*(unsigned long *)&sch$aq_comh[tmppri];
@@ -814,8 +872,14 @@ asmlinkage void sch$sched(int from_sch$resched) {
 #ifdef DEBUG_SCHED
     mycheckaddr(42);
 #endif
+
+    /** get new pcb from selected comqueue */
     next=(struct _pcb *) remque(qhead,next);
+
+    /** zero next pcb queue header TODO: check if still needed */
     qhead_init(next); // temp measure since we don't insert into wqs
+
+    /** linux pcb count leftover */
     nr_running--;
 #ifdef DEBUG_SCHED
     after=numproc();
@@ -828,6 +892,8 @@ asmlinkage void sch$sched(int from_sch$resched) {
     if (mydebug4) printk("comh %x %x\n",sch$aq_comh[tmppri],((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl);
 #endif
     //if (sch$aq_comh[tmppri]==((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl)
+
+    /** if last in queue clear comqs bit */
     if (sch$aq_comh[tmppri]==&sch$aq_comh[tmppri])
       sch$gl_comqs=sch$gl_comqs & (~(1 << tmppri));
 #ifdef DEBUG_SCHED
@@ -853,6 +919,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
     panic("DYN$C_PCB\n");
 #endif
   /* And no capabilities yet */
+  /** test process capabilities */
   if ((next->pcb$l_capability & cpu->cpu$l_capability) != next->pcb$l_capability) {
     if (next->pcb$l_capability & CPB$M_IMPLICIT_AFFINITY) {
       if (next->pcb$l_affinity == cpu->cpu$l_phy_cpuid)
@@ -922,19 +989,30 @@ asmlinkage void sch$sched(int from_sch$resched) {
   }
  skip_cap:
 
+  /** if the capabilities match, store new pcb in per-cpu db */
   cpu->cpu$l_curpcb=next;
   cpu->cpu$b_ipl=next->psl_ipl;
+
+  /** change new pcb to CUR state */
   next->state=TASK_RUNNING;
   next->pcb$w_state = SCH$C_CUR;
+
+  /** store cpu id in pcb */
   next->pcb$l_cpu_id=cpu->cpu$l_phy_cpuid;
 
+  /** modify new pcb pri */
   if (next->pcb$b_pri<next->pcb$b_prib) next->pcb$b_pri++;
 
+  /** copy new pri in cpu pri db */
   cpu->cpu$b_cur_pri=next->pcb$b_pri;
 
+  /** clear idle_cpus mask TODO: check setting cpuid_mask */
   sch$gl_idle_cpus=sch$gl_idle_cpus & (~ cpu->cpu$l_cpuid_mask);
+
+  /** set bit it cpu_priority table to cpuid_mask */
   sch$al_cpu_priority[cpu->cpu$b_cur_pri]=sch$al_cpu_priority[cpu->cpu$b_cur_pri] | (cpu->cpu$l_cpuid_mask);
   
+  /** set bit in active_priority */
   sch$gl_active_priority=sch$gl_active_priority | (1 << (31-cpu->cpu$b_cur_pri));
 
 #ifdef DEBUG_SCHED
@@ -952,6 +1030,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
 #ifdef DEBUG_SCHED
   if (mydebug4) { int i; for(i=0;i<100000000;i++) ; }
 #endif
+  /** this if is a linux leftover */
   if (next == curpcb) { /* does not belong in vms, but must be here */
     // handles idle_task
     spin_unlock_irq(&runqueue_lock);
@@ -962,8 +1041,10 @@ asmlinkage void sch$sched(int from_sch$resched) {
     return;
   } 
 
+  /** sets pcb cpu_id again TODO: not needed? */
   next->pcb$l_cpu_id = curpcb->pcb$l_cpu_id;
 
+  /** spinunlock */
   spin_unlock_irq(&runqueue_lock);
   vmsunlock(&SPIN_SCHED,-1);
 
@@ -976,6 +1057,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
       { int j; for(j=0;j<1000000000;j++) ; }
     }
 
+  /** linux count line */
   kstat.context_swtch++;
   /*
    * there are 3 processes which are affected by a context switch:
@@ -986,6 +1068,8 @@ asmlinkage void sch$sched(int from_sch$resched) {
    * but curpcb is set to (the just run) 'last' process by switch_to().
    * This might sound slightly confusing but makes tons of sense.
    */
+  /** from here, prepare_to_switch() and switch_to() are from linux,
+      due to missing LDPCTX and SVPCTX etc */
   prepare_to_switch();
   {
     struct mm_struct *mm = next->mm;
@@ -1016,6 +1100,7 @@ asmlinkage void sch$sched(int from_sch$resched) {
   //  if (mydebug6) printk("bef swto %x %x\n",curpcb,next);
 #endif
 
+  /** need to set astlvl */
   next->pr_astlvl=next->phd$b_astlvl;
   if (from_sch$resched==0) {
     // myrei();
