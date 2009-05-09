@@ -4,7 +4,6 @@ FreeVMS is still at an early stage.
 It can be compiled more ordinarily as a kernel with some VMS scheduling extensions (ruffly said, it has more) which is able to boot minimally with init, network and sshd.
 Alternatively, it can be compiled with CONFIG_VMS, which means you get VMS memory management and I/O, but only can boot single-user.
 It can only be compiled on i386, because it is useless and waste of resources to try another arch at this moment.
-It is possible to compile UML, User-Mode Linux on i386, because it facilitates better debugging, but also other bugs.
 Even with CONFIG, there is still lots of memory management bits left to do.
 P1 space, 4 level CPU modes (even though i386 may lack some features to use this fully) is in the process of being developed.
 
@@ -138,7 +137,6 @@ Hardware interrupts
 The interval timer interrupt goes off to exe$hwclkint in the timeschdl module.
 Since I have got no SMP machine available, there is no SMP support and therefore no interprocessor interrupt.
 Hardware interrupts has been prepared to use IPLs by having pushed psl and added myrei in hw_irq.h
-Similar code has been added to uml.
 
 [linux.include.asm-i386]
 hw_irq.h
@@ -173,7 +171,6 @@ System service dispatching
 Currently, CHMx is not implemented.
 System services are implemented like Linux system calls.
 While the usual calls are on int 0x80, ours are on 0x81 to 0x84, to prepare for our own CPU modes.
-With uml there is no other vectors, so it just goes after the other calls.
 Since the i386 can not handle more than 5 parameters, we use a wrapper struct to have more than 5.
 
 [linux.arch.i386.kernel]
@@ -189,7 +186,9 @@ ASTs
 These are emulated, but just barely.
 Even user ASTs run in kernel mode, so that must be fixed.
 Preferably by setting up some stacks?
-On uml ASTs in user space makes it crash.
+
+[sys.src]
+astdel
 
 ****************
 
@@ -214,6 +213,8 @@ Mutexes have been implemented, and should follow the internals book.
 
 Event flags
 
+See chapter 9 in 5.2 book, the implementation is based on that.
+
 There are some internal event flags used.
 
 Event flag 26 is not yet used.
@@ -221,6 +222,17 @@ Event flag 27 is not yet used.
 Event flag 28 is used by terminal I/O in tty_io. 
 Event flag 29 is used in rm3get and rms.
 Event flag 30 is used by vmsbuffer, EXT2 ext2vms and ODS2 access.
+
+[lib.src]
+cebdef
+pcbdef
+[linux.include.linux]
+sched
+[sys.src]
+postef
+sysascefc
+sysevtsrv
+syswait
 
 ****************
 
@@ -271,7 +283,7 @@ Memory management overview and data structures
 
 A lot is implemented, including P1.
 Struct _rde have been borrowed from newer VMS, and is similar to the Linux struct vm_area_struct and is used to replace it.
-The module vmspte.h contains a lot of extensions to the existing i386 and uml page pte bits.
+The module vmspte.h contains a lot of extensions to the existing i386 page pte bits.
 Copy-on-reference is not present.
 
 [sys.src]
@@ -299,7 +311,6 @@ P1 space layout:
 0x7ff9000: future executive stack, temp placed
 
 0x7fffe000-up: Stack top for user stack, defined in exec.c and tlb.c
-(Had to change on uml to 0x7fc00000, the nearest page table boundary)
 0x7fffe000, 0x1000: Fork temporary P1 Pointer Page, hardcoded in shell.c
 0x7ffff000, 0x1000: P1 Pointer Page, hardcoded in shell.c
 
@@ -343,6 +354,16 @@ Overview of the I/O subsystem
 ****************
 
 I/O system services
+$alloc and $dalloc is not implemented.
+
+[sys.src]
+assign
+comdrvsub
+dassgn
+forkcntrl
+iosubnpag
+iosubpagd
+sysqioreq
 
 ****************
 
@@ -399,9 +420,6 @@ The read buffer is a DYN$C_BUFIO, which is later moved by movbuf in bufpost.
 The key interpreting is done in the terminal class driver, which just passes
 the characters through. (Which explains the messy output.)
 
-For the following, note that UML is not modified with regard to the new
-terminal drivers, so it might not work if UML were to be fixed.
-
 The main 386 module is vmsconsole (not derived from console).
 As of now, the previous read routine kbd$fdtread in pc_keyb is no longer
 used.
@@ -448,9 +466,6 @@ In copy_mm there is a called routine dup_mmap. Dup_mmap is changed in the manner
 The cutting of threading support also implies that you can not use daemonize() with the kernel threads (which now longer are threads really).
 The initialization of the P1 space in done with init_fork_p1pp.
 There has to be 3 different initializations for p1pp, because startup, fork and exe$procstrt each have different contexts and needs.
-The uml_map returned from init_fork_p1pp is only usable in uml, because with uml you have to delay the mapping of P1 space until the actual process is made.
-
-(The uml stuff is omitted until it works properly)
 
 Then sometime later we begin setting prib and other pcb and cpu stuff.
 The counter is removed because VMS uses pri and prib.
