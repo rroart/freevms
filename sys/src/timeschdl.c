@@ -3,6 +3,11 @@
 
 // Author. Roar Thronæs.
 // Modified Linux source file, 2001-2004. Based on timer.c. 
+/**
+   \file timeschdl.c
+   \brief timer system hardware interrupt
+   \author Roar Thronæs
+*/
 
 #include<queue.h>
 #include <asmlink.h>
@@ -85,13 +90,18 @@ extern int use_tsc;
 
 int exetimeout=0;
 
+/**
+   \brief regular system job - see 5.2 11.8.2
+*/
+
 void exe$timeout(void) {
-  /* do sch$swpwake() if appropiate ???? */
+  /** do sch$swpwake() if appropiate */
   sch$swpwake();
+  /** passed one second uptime */
   exe$gl_abstim++;
-  /* do erl$wake() if appropiate ???? */
-  /* ecc$reenable() */
-  /* scan i/o db etc */
+  /** do erl$wake() if appropiate - MISSING */
+  /** ecc$reenable() - MISSING */
+  /** scan i/o db etc for timeous */
   {
     struct _ddb * d=ioc$gl_devlist;
     if (d == 0) goto skip;
@@ -111,8 +121,11 @@ void exe$timeout(void) {
 	//printk("unitcmp %x %x\n",unit,tmp->ucb$w_unit);
 	if (tmp->ucb$l_duetim && tmp->ucb$l_duetim < exe$gl_abstim) {
 	  if (tmp->ucb$l_fpc) {
+	    /** forklock - MISSING */
 	    printk("ucb timeout %x %x\n", tmp, tmp->ucb$l_irp);
+	    /** call device timeout routine to restart i/o if needed */
 	    tmp->ucb$l_fpc(tmp->ucb$l_fr3, tmp->ucb$l_fr4);
+	    /** forkunlock - MISSING */
 	  }
 	}
 	tmp=tmp->ucb$l_link;
@@ -123,15 +136,16 @@ void exe$timeout(void) {
   skip:
     {}
   }
-  /* scan crbs */
-  /* if running monitor... */
-  /* scan fork and wait queue. soon to be implemented */
-  /* scan lock mgr etc */
+  /** scan crbs for more timeouts - MISSING */
+  /** if running monitor... scan data - MISSING */
+  /** scan fork and wait queue. soon to be implemented - MISSING */
+  /** scan lock mgr etc to handle deadlock - MISSING practically */
   if (lck$gq_timoutq)
     if (exe$gl_abstim>=((struct _lkb *)lck$gq_timoutq)->lkb$l_duetime)
       lck$searchdlck();
+  /** call one_sec */
   sch$one_sec();
-  /* sch$ravail() */
+  /** 4 sch$ravail() - MISSING */
 #ifdef __i386__
   if (exetimeout) printk("exe$timeout %x %x %x\n",cur_task->pcb$l_pid,current->pcb$l_pid,current->thread.eip);
 #else
@@ -145,6 +159,10 @@ void printtq(struct _tqe * t) {
   printk("%x %x %x %x\n",t,t->tqe$l_tqfl,t->tqe$q_delta,t->tqe$q_time);
 }
 
+/**
+   \brief software timer interrupt service routine - see 5.2 11.8
+*/
+
 asmlinkage void exe$swtimint(void) {
   static signed int times=0;
 
@@ -156,28 +174,50 @@ asmlinkage void exe$swtimint(void) {
 
   setipl(IPL$_TIMERFORK);
 
+  /** linux leftover or something? */
   times++;
+
+  /** locate process header */
+  /** test for quantum end and maybe run sch$qend */
   if (current->pcb$w_quant>=0 && current->pcb$w_quant<128) 
     sch$qend(current);
+  /** note that the spinlocks are now inside sch$qend */
 
   //  printk(".");
   /* check tqe from EXE$GL_TQFL */
+  /** test if primary cpu */
   if (smp_processor_id()==0) {
+    /** acquire both TIMER and HWCLK spinlocks */
     vmslock(&SPIN_TIMER,IPL$_TIMER);
     vmslock(&SPIN_HWCLK,IPL$_HWCLK);
     // get rid of duplicated locking with goto label?
+
+    /** iterate */
+    /** compare system time with 1st time for timer entry */
     while (vmstimerconf && exe$gq_systime>=exe$gq_1st_time) {
       struct _tqe * t, * dummy=0;
       //    printk(".");
       //if (times>=0 && times<5)   printtq(exe$gl_tqfl);
       //if (times>=0 && times<5)   printtq(exe$gl_tqfl->tqe$l_tqfl);
+      /** remove first tqe from queue */
       t=remque(exe$gl_tqfl->tqe$l_tqfl,dummy);
+      /** release both TIMER and HWCLK spinlocks */
       vmsunlock(&SPIN_HWCLK,IPL$_TIMER);
       vmsunlock(&SPIN_TIMER,-1);
       //if (times>=0 && times<5)   printtq(t);
       //if (times>=0 && times<5)   printtq(exe$gl_tqfl);
+      /** 11.8.1 process timer requests */
+      /** if TQTYPE CHK_CPUTIM ... - MISSING */
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_TMSNGL) {
+	/** test if process still alive - MISSING */
+	/** if not or if illegal efn, deallocate tqe - MISSING */
 	sch$postef(t->tqe$l_pid,PRI$_TIMER,t->tqe$b_efn);
+	/** increment jib tqcnt - MISSING */
+	/** test jib flags to see if someone waits - MISSING */
+	/** run sch$chse for each such process - MISSING */
+	/** test if acb quota in tqe set, user wants ast - MISSING */
+	/** copy some field to ast - MISSING */
+	/** call qast */
 	sch$qast(t->tqe$l_pid,PRI$_TIMER,(struct _acb *) t);
 	//	void (*f)(void);
 	//	f=t->tqe$l_fpc;
@@ -185,21 +225,32 @@ asmlinkage void exe$swtimint(void) {
 	//	printk("herexxx\n");
 	//		printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
       }
+      /** 11.8,2 periodic system routine requests TODO check if right */
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_SSSNGL) {
 	void (*f)(void);
 	f=t->tqe$l_fpc;
+	/** just call it */
 	//		printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
 	if (f) f();
 	//		printk(KERN_EMERG "after f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
       }
+      /** 11.8.3 scheduled wakeup requests */
       if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_WKSNGL) {
+	/** get sched spinlock TODO says who? */
 	vmslock(&SPIN_SCHED,-1);
+	/** test if process still alive - MISSING */
+	/** if so, and rqpid still exists, increment astcnt - MISSING */
+	/** if not deallocate tqe - MISSING */
+	/** call sch$wake to wake it up */
 	sch$wake(t->tqe$l_pid);
+	/** if no repeat, do cleanup - MISSING */
+	/** release sched spinlock TODO says who? */
 	vmsunlock(&SPIN_SCHED,-1);
 	//	void (*f)(void);
 	//	f=t->tqe$l_fpc;
 	//	printk(KERN_EMERG "xbefore f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
       }
+      /** if repeat add tqe delta to tqe time, and do instimq */
       if (t->tqe$b_rqtype & TQE$M_REPEAT) {
 	t->tqe$q_time=exe$gq_systime+t->tqe$q_delta;
 	//	if (times>=0 && times<5) printk("i\n");
@@ -226,6 +277,7 @@ asmlinkage void exe$swtimint(void) {
 	//if (times>=0 && times<5) printk("i\n");
 	//	insque(t,exe$gl_tqfl); /* move this to a sort */
       }
+      /** acquire both TIMER and HWCLK spinlocks */
       vmslock(&SPIN_TIMER,IPL$_TIMER);
       vmslock(&SPIN_HWCLK,IPL$_HWCLK);
       exe$gq_1st_time=exe$gl_tqfl->tqe$l_tqfl->tqe$q_time;
@@ -256,6 +308,11 @@ asmlinkage void exe$swtimint(void) {
 extern int hwclkdone;
 #endif
 
+/**
+   \brief interval timer interrupt service routine - see 5.2 11.7
+   \details 386 and x86_64 has overlapping code
+*/
+
 #ifdef __i386__
 void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
   /* reset pr$_iccs */
@@ -274,6 +331,10 @@ int hwclkdone=1;
 
   setipl(IPL$_HWCLK);
 #endif
+
+  /** smp and sanity timer mechanism - MISSING */
+
+  /** now some linux parts until gq_systime set */
 
   // on UP or primary SMP cpu:
   if (smp_processor_id()==0) {
@@ -310,13 +371,24 @@ int hwclkdone=1;
 #endif
 #endif /* __arch_um__ */
 
+    /** hwclk spinlock - MISSING */
+
+    /** update gq_systime and abstim ticks */
+
     exe$gq_systime+=exe$gl_ticklength;
 
     (*(unsigned long *)&jiffies)++;
     exe$gl_abstim_tics=jiffies;
 
+    /** compare system time with 1st time for timer entry */
+    /** if larger, invoke TIMERFORK softint */
+
     if (exe$gq_systime>=exe$gq_1st_time) 
       SOFTINT_TIMERFORK_VECTOR;
+
+    /** uptime time statistics with cpu kernel base - MISSING */
+
+    /** if to be charged, checking busywait and interrupt stack - MISSING */
 
 #ifndef CONFIG_SMP_NOT_NOT
     // check. do this anyway.
@@ -333,18 +405,22 @@ int hwclkdone=1;
       //  printk(":");
       //	if (p->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
       // { int i; for (i=0; i<1000000; i++ ) ; }}
+      /** linux leftover, TODO, check if needed */
       update_one_process(p, user_tick, system, cpu);
       if (p->pcb$l_pid==0) { if (++pid0count>5) { pid0count=0; /*p->need_resched=1;*/}}  /* Will be removed in the future */
       if (p->pcb$l_pid==INIT_PID) { if (++pid1count>5) { pid1count=0; /*p->need_resched=1;*/}}  /* Will be removed in the future */
       if (p->pcb$l_pid) {
+	/** update cputim and quantum, and do TIMERFORK softint if spent */
 	p->pcb$l_phd->phd$l_cputim++;
 	p->pcb$w_quant+=QUANTADD;
+	/** TODO check counting */
 	if (++p->pcb$w_quant  >= 0 ) {
 	  if (p->pcb$w_quant<128) {
 	    SOFTINT_TIMERFORK_VECTOR;
 	    //		    sch$resched();
 	  }
 	}
+	/** the rest is linux leftovers */
 	if (p->pcb$b_prib == 31)
 	  kstat.per_cpu_nice[cpu] += user_tick;
 	else
@@ -390,6 +466,11 @@ int hwclkdone=1;
 }
 #endif
 
+/**
+   \brief interval timer interrupt service routine - see 5.2 11.7
+   \details 386 and x86_64 has overlapping code
+*/
+
 #ifdef __x86_64__
 extern unsigned int hpet_tick;					/* HPET clocks / interrupt */
 extern int report_lost_ticks;					/* command line option */
@@ -414,6 +495,10 @@ void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 
 	setipl(IPL$_HWCLK);
 #endif
+
+	/** smp and sanity timer mechanism - MISSING */
+	
+	/** now some linux parts until gq_systime set */
 
 	write_lock(&xtime_lock);
 	vxtime_lock();
@@ -470,26 +555,40 @@ void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 		}
 	}
 
+	/** hwclk spinlock - MISSING */
+	
+	/** update gq_systime and abstim ticks */
+
 	exe$gq_systime+=exe$gl_ticklength;
 
 	exe$gl_abstim_tics=jiffies;
 
+	/** compare system time with 1st time for timer entry */
+	/** if larger, invoke TIMERFORK softint */
+
 	if (exe$gq_systime>=exe$gq_1st_time) 
 	  SOFTINT_TIMERFORK_VECTOR;
+
+	/** uptime time statistics with cpu kernel base - MISSING */
+
+	/** if to be charged, checking busywait and interrupt stack - MISSING */
 
 	int cpu = smp_processor_id();
 	struct _pcb * p = ctl$gl_pcb;
 	if (p->pcb$l_pid==0) { if (++pid0count>5) { pid0count=0; /*p->need_resched=1;*/}}  /* Will be removed in the future */
 	if (p->pcb$l_pid==INIT_PID) { if (++pid1count>5) { pid1count=0; /*p->need_resched=1;*/}}  /* Will be removed in the future */
 	if (p->pcb$l_pid) {
+	  /** update cputim and quantum, and do TIMERFORK softint if spent */
 	  p->pcb$l_phd->phd$l_cputim++;
 	  p->pcb$w_quant+=QUANTADD;
+	  /** TODO check counting */
 	  if (++p->pcb$w_quant  >= 0 ) {
 	    if (p->pcb$w_quant<128) {
 	      SOFTINT_TIMERFORK_VECTOR;
 	      //		    sch$resched();
 	    }
 	  }
+	/** the rest is linux leftovers */
 	}
 #if 0
 	// not yet 

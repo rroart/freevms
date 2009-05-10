@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file iosubrams.c
+   \brief QIO subroutines
+   \author Roar Thronæs
+*/
 
 #include <linux/kernel.h>
 #include <asmlink.h>
@@ -18,6 +23,18 @@
 #include<ipldef.h>
 #include<wcbdef.h>
 #include<ssdef.h>
+
+/**
+   \brief map virtual block to logical block - see 5.2 21.8.2
+   \param vbn virtual block number
+   \param numbytes yet unused
+   \param wcb window control block
+   \param irp yet unused
+   \param ucb yet unused
+   \param lbn_p return logical block value
+   \param notmapped_p yet unused
+   \param new_ucb_p yet unused
+*/
 
 int ioc_std$mapvblk (unsigned int vbn, unsigned int numbytes, struct _wcb *wcb, struct _irp *irp, struct _ucb *ucb, unsigned int *lbn_p, unsigned *notmapped_p, struct _ucb **new_ucb_p) {
   struct _wcb * head=wcb;

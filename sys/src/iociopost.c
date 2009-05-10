@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file iociopost.c
+   \brief QIO I/O postprocessing - TODO still more doc
+   \author Roar Thronæs
+*/
 
 #include<linux/smp.h>
 #include<linux/kernel.h>
@@ -26,6 +31,11 @@
 #include <linux/slab.h>
 #include <statedef.h>
 
+/**
+   \brief free single buffer or buffer chain
+   \param d buffer
+*/
+
 kfreebuf(void * d) {
   struct _bufio * bd = d;
   struct _cxb * cx = d;
@@ -49,6 +59,12 @@ kfreebuf(void * d) {
     panic("kfreebuf\n");
   }
 }
+
+/**
+   \brief move i/o buffer data
+   \details may be single buffer or chain, then free the buffer
+   \param i irp containing the buffer
+*/
 
 movbuf(struct _irp * i) {
   // still skipping access checks and such
@@ -89,9 +105,20 @@ movbuf(struct _irp * i) {
   i->irp$l_svapte = 0;
 }
 
+/**
+   \brief dirpost entry point
+   \details TODO restructure
+ */
+
 dirpost(struct _irp * i) {
   printk("doing dirpost\n");
 }
+
+/**
+   \brief buffered read completion - see 5.2 21.7.3.1
+   \details dirpost may be mixed into this, too? TODO check
+   \param i irp
+*/
 
 bufpost(struct _irp * i) {
   struct _acb * a=(struct _acb *) i;
@@ -100,6 +127,8 @@ bufpost(struct _irp * i) {
   //printk("doing bufpost\n");
   /* do iosb soon? */
 
+  /** TODO common entrypoint and if bufio bit set only do bufio part? */
+  /** increment biocnt TODO redo */
   if (i->irp$l_sts & IRP$M_BUFIO) 
     phd->phd$l_biocnt++;
   else
@@ -109,6 +138,10 @@ bufpost(struct _irp * i) {
 #define         IO$_WRITELBLK           32
 #define         IO$_WRITEVBLK           48
   int fcode = i->irp$l_func&63;
+  /** 21.7.3.1 buffered read completion */
+  /** a little workaround, must be there, but forgot most of it TODO */
+  /** TODO maybe because some dirio ended up here? TODO check driver configs */
+  /** invoke movbuf */
   int skipmovbuf = (fcode==IO$_WRITEPBLK) || (fcode==IO$_WRITELBLK) || (fcode==IO$_WRITEVBLK); // temp workaround
   if (skipmovbuf) {
     if (i->irp$l_svapte && i->irp$l_svapte!=&i->irp$l_svapte) {
@@ -118,19 +151,24 @@ bufpost(struct _irp * i) {
   } else
     movbuf(i);
 
+  /** if mailbox read, call ravail. TODO check read func */
   if (i->irp$l_sts&IRP$M_MBXIO)
     sch_std$ravail(RSN$_MAILBOX);
 
-  // dirpost to begin here
+  /** dirpost to begin here? */
+  /** 21.7.3.2 common completion */
 
-  // should be either of these
+  /** should be either of these iocnt increments */
   phd->phd$l_biocnt++;
   phd->phd$l_diocnt++;
 
-  // copy diagnostic
+  /** copy eventual diagnostic with movbuf - MISSING */
 
-  // decr ccb$w_ioc
+  /** decr ccb$w_ioc - MISSING */
 
+  /** if last channel i/o and deaccess pending, call ioc$wakacp - MISSING */
+
+  /** set iosb iost etc */
 #ifdef __i386__
   if (i->irp$l_iosb) {
     memcpy(i->irp$l_iosb,&i->irp$l_iost1,8);
@@ -142,16 +180,29 @@ bufpost(struct _irp * i) {
   }
 #endif
 
-  // do an eventually setting of common event flag
+  /** do an eventual setting of common event flag - MISSING */
+
+  /** deallocate irpes, if any - MISSING? */
+
+  /** check for quota bit set, then do ast - MISSING TODO redo */
 
   if (a->acb$l_ast) {
     a->acb$b_rmod&=~ACB$M_KAST;
     a->acb$b_rmod&=~ACB$M_NODELETE;
+    /** post event flag */
     sch$postef(pcb->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
+    /** queue ast */
     sch$qast(i->irp$l_pid,PRI$_NULL,i);
   } else
     kfree(i);
+  /** otherwise free irp */
+
+  /** return to sch$astdel */
 }
+
+/**
+   \brief I/O postprocessing - se 5.2 21.7
+*/
 
 asmlinkage void ioc$iopost(void) {
   struct _irp * i = 0;
@@ -163,6 +214,7 @@ asmlinkage void ioc$iopost(void) {
   regtrap(REG_INTR, IPL$_IOPOST);
 #endif
 
+  /** set ipl */
   setipl(IPL$_IOPOST);
   if (ctl$gl_pcb->pcb$l_cpu_id != smp$gl_primid)
     printk("iociopost 1\n");
@@ -173,8 +225,10 @@ asmlinkage void ioc$iopost(void) {
 #if 0
   int savipl2 = vmslock(&SPIN_IOPOST, 8);
 #else
+  /** extra global cli TODO check why and still needed? */
     __global_cli();
 #endif
+    /** fetch irp from postprocessing queues */
   if (ctl$gl_pcb->pcb$l_cpu_id == smp$gl_primid && !rqempty(&ioc$gq_postiq)) {
     i=remqhi(&ioc$gq_postiq,i);
 #if 0
@@ -194,6 +248,9 @@ asmlinkage void ioc$iopost(void) {
       return;
     }
   }
+  /** 21.7.1 check if negative irp pid (a routine), then perform system i/o completion and call this - MISSING */
+
+  /** 21.7.2 normal i/o completion */
   p=exe$ipid_to_pcb(i->irp$l_pid);
 
 #if 0
@@ -204,15 +261,25 @@ asmlinkage void ioc$iopost(void) {
   return; // the rest is not finished
 #endif
 
+  /** checks bufio flag */
   if (i->irp$l_sts & IRP$M_BUFIO) goto bufio;
 
  dirio:
+  /** 21.7.2.2 buffered i/o completion */
+
+  /** maybe do ioc$mapvblk - MISSING */
+  /** do mmg$unlock - MISSING */
+  /** test present irpes - MISSING */
+  /** increment diocnt - MISSING? */
+  /** store bufpost ast in irp and use kast */
   i->irp$b_rmod|=ACB$M_KAST;
   if (i->irp$l_ast)
     i->irp$b_rmod|=ACB$M_NODELETE;
   ((struct _acb *) i)->acb$l_kast=dirpost;
   // not this? ((struct _acb *) i)->acb$l_astprm=i;
   /* find other class than 1 */
+  /** 21.7.2.3 final steps in ioc$iopost - TODO restructure, double */
+  /** spinlock */
   int savipl=vmslock(&SPIN_SCHED,IPL$_SYNCH);
   if (p->pcb$w_state != SCH$C_CUR) { // internals book says change order
     sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
@@ -221,10 +288,18 @@ asmlinkage void ioc$iopost(void) {
     sch$qast(i->irp$l_pid,PRI$_IOCOM,i);
     sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
   }
+  /** spinunlock */
   vmsunlock(&SPIN_SCHED,savipl);
+  /** reiterate */
   goto again;
 
  bufio:
+  /** 21.7.2.1 buffered i/o completion */
+  /** increment biocnt - MISSING? */
+  /** if filacp set also incr diocnt - MISSING */
+  /** invoke credit_bytcnt - MISSING */
+
+  /** store bufpost ast in irp and use kast */
   i->irp$b_rmod|=ACB$M_KAST;
   if (i->irp$l_ast)
     i->irp$b_rmod|=ACB$M_NODELETE;
@@ -233,6 +308,8 @@ asmlinkage void ioc$iopost(void) {
   ((struct _acb *) i)->acb$l_kast=bufpost;
   // not this?  ((struct _acb *) i)->acb$l_astprm=i;
   /* find other class than 1 */
+  /** 21.7.2.3 final steps in ioc$iopost - TODO restructure, double */
+  /** spinlock */
   savipl=vmslock(&SPIN_SCHED,IPL$_SYNCH);
   if (p->pcb$w_state != SCH$C_CUR) { // internals book says change order
     sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
@@ -241,11 +318,17 @@ asmlinkage void ioc$iopost(void) {
     sch$qast(i->irp$l_pid,PRI$_IOCOM,i);
     sch$postef(p->pcb$l_pid,PRI$_IOCOM,i->irp$b_efn);
   }
+  /** spinunlock */
   vmsunlock(&SPIN_SCHED,savipl);
+  /** reiterate */
   goto again;
 
   ioc$bufpost(0);
 }
+
+/**
+   \details needed by end of file system dispatcher
+ */
 
 ioc$bufpost(struct _irp * i){
   i->irp$b_rmod|=ACB$M_KAST; // think this belongs here too
