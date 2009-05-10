@@ -126,19 +126,43 @@ int exe$altquepkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
   return SS$_NORMAL;
 }
 
+/**
+   \brief completing the i/o request in the fdt routine - see 5.2 21.6.3.3
+   \param status1
+   \param status2
+   \param i irp
+   \param p pcb
+   \param u ucb
+*/
+
 int exe$finishio (long status1, long status2, struct _irp * i, struct _pcb * p, struct _ucb * u) {
-  /* do iosb stuff */
+  /** incr ucb operation count - MISSING */
+  /** store statuses in irp iost/media */
   i->irp$l_iost1=status1;
   i->irp$l_iost2=status2;
+  /** do forklock */
   int savipl = forklock(u->ucb$b_flck, u->ucb$b_flck);
+  /** insert irp in cpu's postprocessing queue. TODO check if only for the primary cpu */
   insque(i,smp$gl_cpu_data[smp$gl_primid /* smp_processor_id() */]->cpu$l_psbl); // check. bug?
   SOFTINT_IOPOST_VECTOR;
+  /** unlock forklock */
   forkunlock(u->ucb$b_flck, savipl);
+  /** set ipl 0 */
   setipl(0);
+  /** SS$_NORMAL for QIO return value */
   return SS$_NORMAL;
 }
 
+/**
+   \brief completing the i/o request in the fdt routine - see 5.2 21.6.3.3
+   \param status
+   \param i irp
+   \param p pcb
+   \param u ucb
+*/
+
 int exe$finishioc (long status, struct _irp * i, struct _pcb * p, struct _ucb * u) {
+  /** just go to finish io */
   return exe$finishio(status,0,i,p,u);
 }
 
