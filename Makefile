@@ -107,11 +107,6 @@ image-kernel-iomm:
 	make image-kernel-iomm; \
 	cd ..
 
-image-kernel-noiomm:
-	cd diskimage; \
-	make image-kernel-noiomm; \
-	cd ..
-
 environment:
 	./envscript
 
