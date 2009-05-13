@@ -4,8 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#if 0
 #ifdef __i386__
 int errno;
+#endif
 #endif
 
 int print_routine (long, ...);
