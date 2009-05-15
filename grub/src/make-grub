@@ -7,6 +7,7 @@ CC=gcc-3.3
 else
 CC=gcc-3.4
 LDFLAGS=-static
+LIBS=
 fi
 rm -rf grub-0.95
 tar xzf grub-0.95.tar.gz
