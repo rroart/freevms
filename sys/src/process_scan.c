@@ -2,13 +2,25 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file process_scan.c
+   \brief scan process
+   \author Roar Thronæs
+*/
 
 #include <linux/sched.h>
 #include <system_data_cells.h>
 
+/** system service process_scan - MISSING */
+
 // we will need struct _pscanctx soon
 
 unsigned long pscan_id = 2;
+
+/**
+   \brief get next pcb
+   \details fix implementation. make multiuser version
+*/
 
 int exe$pscan_next_id(struct _pcb ** p) {
   int i;

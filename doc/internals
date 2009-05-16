@@ -140,6 +140,8 @@ Hardware interrupts has been prepared to use IPLs by having pushed psl and added
 
 [linux.include.asm-i386]
 hw_irq.h
+[sys.src]
+timeschdl
 
 ****************
 
@@ -183,17 +185,23 @@ sys_call_table.c
 
 ASTs
 
-These are emulated, but just barely.
-Even user ASTs run in kernel mode, so that must be fixed.
-Preferably by setting up some stacks?
+These are implemented, but just barely.
 
+[pal.src]
+ast
+ipl
 [sys.src]
 astdel
+comdrvsub
+sysastcon
 
 ****************
 
 Synchronization techniques
 
+IPL are done by setipl and getipl.
+
+Special instructions:
 Some atomic and uninterruptible instructions have been attempted,
 but still a lot remain.
 Interlocked instructions ADAWI, BBCCI, BBSSI, INSQHI, INSQTI, REMQHI, REMQTI
@@ -206,8 +214,20 @@ test_and_set_bit. These use spinlocks.
 Currently, REM/INSQ[TH]I are implemented with spinlocks, and an
 explicit spinlock have to be used with it (only SPIN_IOPOST for now).
 
+Static spinlocks are called by using vmslock and vmsunlock, with parameters
+the spinlock datastructure itself, and the new ipl, or -1 for no change.
+Otherwise, the usual forklock, forkunlock should work.
+Devicelocking is done by either of the other two.
+
 Mutexes have been implemented, and should follow the internals book.
 
+[pal.src]
+ipl
+[sys.src]
+forklock
+internals
+spinlocks
+mutex
 
 ****************
 
@@ -232,6 +252,7 @@ sched
 postef
 sysascefc
 sysevtsrv
+sysschevt
 syswait
 
 ****************
@@ -246,6 +267,12 @@ No deadlock checking.
 
 Time support
 
+[sys.src]
+exsubrout
+syscanevt
+syssetime
+timeschdl
+
 ****************
 
 Process control
@@ -253,6 +280,15 @@ Process control
 The services hiber and wait work about as usual.
 Note that fixup_hib_pc is central in the semantics, it edits the eip
 return address, which was pushed on the stack when the interrupt occured.
+
+[sys.src]
+rse
+sysparprc
+syspcntrl
+syssetpri
+sysforcex
+sysgetjpi
+process_scan
 
 ****************
 
@@ -275,7 +311,10 @@ The 51$ Set PCB base is not done.
 LDPCTX is not done, and from now the rest is from Linux (if (next == curpcb)...) (except astlvl).
 
 [sys.src]
-sched.c
+capability
+rse
+sched
+sys_affinity
 
 ****************
 
@@ -361,8 +400,12 @@ assign
 comdrvsub
 dassgn
 forkcntrl
+iociopost
 iosubnpag
 iosubpagd
+iosubrams
+sysacpfdt
+syscancel
 sysqioreq
 
 ****************

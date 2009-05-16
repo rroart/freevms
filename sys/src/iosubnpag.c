@@ -73,6 +73,13 @@ long reqcom[32*1024];
 long reqcomc[32]={ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 #endif
 
+/**
+   \brief i/o request complete - see 5.2 22.3.4
+   \param iosb1 value status
+   \param iosb2 value status
+   \param u ucb
+*/
+
 void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   int qemp;
   int savipl;
@@ -94,8 +101,20 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
       reqcomc[pid]=0;
   }
 #endif
+  /** if error log do error stuff and erl$releasemb - MISSING */
+
+  /** increase ucb i/o count - MISSING */
+
+  /** store final i/o status values */
   i->irp$l_iost1=iosb1; /* ok? */
   i->irp$l_iost2=iosb2;
+
+  /** if tape device ... - MISSING */
+
+  /** if error completion and is disk or tape, check mount verification - MISSING */
+
+  /** some more work if tape errors - MISSING */
+
   //  exetimeout=0;
   //    { int i,j; for(j=0;j<20;j++) for(i=0;i<1000000000;i++); }
   //printk("reqcom %x\n",i);
@@ -105,13 +124,22 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
     goto end;
   }
 
+  /** test and save current ipl, and maybe raise ipl */
+
   savipl=getipl();
   if (savipl<IPL$_IOPOST)
     setipl(IPL$_IOPOST);
   
+  /** spinlock, interlocking */
+
   vmslock(&SPIN_IOPOST, -1);
+
+  /** insert irp in the interlocked systemwide i/o postprocessing queue */
   qemp=rqempty(&ioc$gq_postiq);
   insqti(i,&ioc$gq_postiq);
+
+  /** spinunlock */
+
   vmsunlock(&SPIN_IOPOST, -1);
 #if 0
   long * l2=&ioc$gq_postiq;
@@ -123,9 +151,13 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
 #endif
   if (!qemp) goto notempty;
 
+  /** if first element, do */
+
+  /** if primary cpu, request iopost softint */
   if (smp_processor_id() == smp$gl_primid) {
     SOFTINT_IOPOST_VECTOR;
   } else {
+    /** send interprocessor interrupt to do it on primary cpu */
     smp_send_work(CPU$M_IOPOST, 0);
     /* request interprocessor interrupt */
   }
@@ -133,17 +165,25 @@ void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u) {
   {
   }
 
+  /** restore saved ipl */
   setipl(savipl);
 
+  /** if mount verification ... - MISSING */
+
+  /** if the unit has pending i/o requests */
   qemp=aqempty(u->ucb$l_ioqfl);
   if (qemp) goto end;
   //printk("ioq %x %x",i,u->ucb$l_ioqfl);
+  /** remove one from queue */
   i=remque(u->ucb$l_ioqfl,i);
   //printk("ioq %x %x",i,u->ucb$l_ioqfl);
+  /** initiate i/o on it */
   return ioc$initiate(i,u);
  end:
+  /** if no pending i/o request, clear bsy flag */
   if (aqempty(u->ucb$l_ioqfl))
     u->ucb$l_sts&=~UCB$M_BSY;
+  /** enter ioc$relchan - MISSING */
   //printk("end of reqcom\n");
 }
 

@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file rse.c
+   \brief report system event
+   \author Roar Thronæs
+*/
 
 #include<linux/sched.h>
 #include <asmlink.h>
@@ -85,6 +90,10 @@ int sch$qend(struct _pcb * p) {
   return 1;
 }
 
+/**
+   \brief pixscan priority boots - see 5.2 12.5.6
+*/
+
 int sch$pixscan(void) {
   unsigned long tmp;
   struct _pcb *tmp2;
@@ -93,15 +102,23 @@ int sch$pixscan(void) {
 
   //printk("pixscan 1\n");
 
+  /** test sgn pixscan and maybe return */
   if (!sgn$gw_pixscan) return;
-  /* get sched spinlock */
+  /** get sched spinlock */
   vmslock(&SPIN_SCHED,-1);
+  /** determine if any processes eligible for boost, use comq and comoq */
+  /** if none, return */
   if (!((sch$gl_comqs & 0x7fff0000) || (sch$gl_comoqs & 0x7fff0000))) goto out;
   tmppri=ffs(comqs);
   tmppri--;
+  /** compute highest pri of these two - MISSING */
   
   //printk("pri %x|",tmppri);
-  goto out; /* not this yet */
+  goto out; /** not implement this yet - MISSING actually partially in place */
+  /** use abstim bit as coin - MISSING */
+  /** scan queues */
+  /** continue until max reached or max boosts reached */
+  /** and DORMANTWAIT reached */
   for(i=30;i>tmppri && scanned;i--) {
     tmp=*(unsigned long *)&sch$aq_comh[i];
     if(*(unsigned long *)tmp == tmp) {; } else {
@@ -109,8 +126,11 @@ int sch$pixscan(void) {
       do {
 	//printk("tmp2 %x|",tmp2);
 	if (!(tmp2>=&sch$aq_comh[0] && tmp2<=&sch$aq_comh[33])) {
+	  /** compare onqtime dormantwait abstim_tics */
 	  if (tmp2->pcb$l_onqtime+100*sch$gw_dormantwait<exe$gl_abstim_tics) {
+	    /** set loworder bits in pixhist if found */
 	    tmp2->pcb$l_pixhist|=1;
+	    /** if found, boost */
 	    sch$chsep(tmp2,tmppri);
 	    scanned--;
 	    if (!scanned) goto out;
@@ -123,13 +143,17 @@ int sch$pixscan(void) {
     }
   }
   out:
-    /* release spinlock */
+  /** release spinlock */
   //printk("\n2\n");
   vmsunlock(&SPIN_SCHED,-1);
   return;
 }
 
 int myp3, myp2, mycomq, mypri, sqfl;
+
+/**
+   \brief change pri state etc according to priclass etc - see 5.2 12.5.5
+*/
 
 void sch$chsep(struct _pcb * p,unsigned char newpri) {
   int ipl = getipl();
@@ -144,6 +168,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
   mycomq=sch$gl_comqs;
   mypri=p2->pcb$b_pri;
   sqfl=p3->pcb$l_sqfl;
+  /** set comqs or comoqs bits */
   if (p3==p3->pcb$l_sqfl) {
       if (p2->pcb$w_state==SCH$C_COM) {
 	sch$gl_comqs&=(~(1 << p2->pcb$b_pri));
@@ -153,6 +178,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
   }
   mycheckaddr(0);
   p->pcb$b_pri=newpri;
+  /** if now computable process is outswapped... - MISSING */
   //  if (!(p->pcb$l_sts & PCB$M_RES)) { not yet used
   if (0) {
     sch$swpwake();
@@ -168,6 +194,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
     mycheckaddr(0);
     return;
   }
+  /** if resident, change state to COM */
   p2->pcb$w_state=SCH$C_COM;
   p2->state=TASK_RUNNING;
   mycheckaddr(0);
@@ -177,6 +204,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
   if (p2==ctl$gl_pcb)  // another temp workaround
     panic("t2\n");
 #endif
+  /** do affinities */
   if (sch$gl_idle_cpus || sch$gl_capability_sequence != p2->pcb$l_capability_seq) {
     // any one idle?
     // recompute caps if necessary
@@ -236,6 +264,7 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
   sch$gl_idle_cpus &= ~(1<<p2->pcb$l_cpu_id);
 #endif
 #endif
+  /** insert into comq */
  do_return:
 #ifdef __i386__
   insque(p2,*(unsigned long *)&sch$aq_comt[newpri]);
@@ -248,9 +277,15 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
 #endif
 }
 
+/**
+   \brief change pri state etc according to priclass etc - see 5.2 12.5.5
+*/
+
 // need more statequeues before sch$chse*
   void sch$chse(struct _pcb * p, unsigned char class) {
     unsigned char pri=0,newpri;
+
+    /** do pri adjustments */
 
     switch (class) {
     case PRI$_NULL:
@@ -276,10 +311,16 @@ void sch$chsep(struct _pcb * p,unsigned char newpri) {
     sch$chsep(p,newpri);
   }
 
+/**
+   \brief set wake and report it - see 5.2 13.3.1
+*/
+
 void sch$wake(unsigned long pid) {
   struct _pcb * p=exe$ipid_to_pcb(pid);
   if (!p) return;
+  /** set pending wake flag */
   p->pcb$l_sts |= PCB$M_WAKEPEN;
+  /** report wake scheduling event */
   sch$rse(p,PRI$_RESAVL,EVT$_WAKE);
 }
 
@@ -294,6 +335,13 @@ void sch$swpwake(void) {
   return;
 }
 
+/**
+   \brief event reporting - see 5.2 12.5.5
+   \param p pcb
+   \param class priority class
+   \param event type of event
+*/
+
 // called sch$report_event in 1.5
 void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
   unsigned long dummy = 0;
@@ -301,6 +349,11 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
   int ipl = getipl();
   if (ipl != 8 || SPIN_SCHED.spl$l_spinlock == 0)
     panic("rse %x %x\n",ipl,SPIN_SCHED.spl$l_spinlock);
+
+  /** based on current pcb state, check if event is significant for the process */
+
+  /** AST events are signicant to almost all states except SUSPs, COMs, CUR */
+  /** result in COM or COMO */
 
   switch (event) {
   case EVT$_AST:
@@ -332,6 +385,8 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
   case EVT$_FPGA:
     if (p->pcb$w_state==SCH$C_FPG) goto fpga;
 
+    /** wake is only signicant for HIBs */
+
   case EVT$_WAKE:
     switch (p->pcb$w_state) {
     case SCH$C_HIB:
@@ -356,6 +411,8 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
       goto setpri;
     }
 
+    /** swapout is only significant for COM HIB LEF SUSP */
+
   case EVT$_SWPOUT:
     switch (p->pcb$w_state) {
     case SCH$C_COM:
@@ -367,9 +424,11 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
   }
 
   /* bugcheck */
+  /** else ignore and return */
   return;
 
  cef:
+  /** test for cef resident */
   if (!(p->pcb$l_sts & PCB$M_RES)) goto lefo;
  event:
   //p->pcb$b_reserved_b1 == SS$_NORMAL; // temp place. iosb will need this
@@ -387,33 +446,52 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
  pfcom:
  setpri:
 
+  /** for the most */
  common:
+  /** if to be computable - MISSING */
+  /** remove from waitqueue - MISSING actually commented out for some earlier(?) serious reason */
   // p2=remque(p,dummy);
+  /** adjust waitqueue count */
   if (p->pcb$w_state < SCH$C_COM)
     sch$aq_wqhdr[p->pcb$w_state].wqh$l_wqcnt--;
+  /** adjust pcb onqtime */
   p->pcb$l_onqtime+=(exe$gl_abstim_tics-p->pcb$l_waitime);
   sch$unwait(p);
+  /** do priority adjustment, set to COM etc */
   sch$chse(p,class);
   return;
 
+  /** for swapout */
  swpout:
   if (p->pcb$w_state!=SCH$C_COM) {
+    /** for non-COM */
+    /** remove from resident wait queue */
     p2=remque(p,dummy);
+    /** adjust waitqueue count */
     sch$aq_wqhdr[p->pcb$w_state].wqh$l_wqcnt--;
+    /** insert into outswapped wait queue */
+    /** set state */
     (p->pcb$w_state)++;
     insque(p,sch$aq_wqhdr[p->pcb$w_state].wqh$l_wqfl);
+    /** adjust waitqueue count */
     sch$aq_wqhdr[p->pcb$w_state].wqh$l_wqcnt++;
   } else {
+    /** for COM */
     int tmppri=p->pcb$b_pri;
     unsigned long qhead;
 
     mycheckaddr(0);
+    /** remove from COM pri queue */
     p2=remque(p,dummy);
+    /** if com pri queue empty, clear sch$gl_comqs bit */
     if (sch$aq_comh[tmppri]==&sch$aq_comh[tmppri])
       sch$gl_comqs=sch$gl_comqs & (~(1 << tmppri));
+    /** set state */
     (p->pcb$w_state)++;
     mycheckaddr(0);
+    /** set bit in sch$gl_comoqs */
     sch$gl_comoqs=sch$gl_comoqs | (1 << tmppri);
+    /** insert into COMO wait queue */
 #ifdef __i386__
     qhead=*(unsigned long *)&sch$aq_comot[tmppri];
 #else
@@ -425,6 +503,10 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
   return;
 }
 
+/**
+   \brief change process priority - see 5.2 12.5.3
+*/
+
 void sch$change_cur_priority(struct _pcb *p, unsigned char newpri) {
   /* lacks sch$al_cpu etc stuff */
   int tmppri;
@@ -432,18 +514,26 @@ void sch$change_cur_priority(struct _pcb *p, unsigned char newpri) {
   int cpuid = p2->pcb$l_cpu_id;
   struct _cpu * cpu=smp$gl_cpu_data[cpuid];
   /* lacks sch$al_cpu etc stuff */
+  /** clear old pri bit in cpu_priority */
   sch$al_cpu_priority[cpu->cpu$b_cur_pri]=sch$al_cpu_priority[cpu->cpu$b_cur_pri] & (~cpu->cpu$l_cpuid_mask);
+  /** if no other at same pri, clear bit in active_priority */
   if (sch$al_cpu_priority[cpu->cpu$b_cur_pri] == 0)
     sch$gl_active_priority &= ~(1<<(31-cpu->cpu$b_cur_pri));
+  /** copy new pri to cur_pri and pri */
   cpu->cpu$b_cur_pri=newpri;
   p2->pcb$b_pri=newpri;
+  /** set new pri bit in cpu_priority */
   sch$al_cpu_priority[cpu->cpu$b_cur_pri]=sch$al_cpu_priority[cpu->cpu$b_cur_pri] & (~cpu->cpu$l_cpuid_mask);
+  /** set corresponding bit in active_priority */
   if (sch$al_cpu_priority[cpu->cpu$b_cur_pri] == 0)
     sch$gl_active_priority &= ~(1<<(31-cpu->cpu$b_cur_pri));
+  /** find lsb in comqs */
   tmppri=ffs(sch$gl_comqs);
   tmppri--;
+  /** compare with newpri, and return if bigger */
   if (newpri>=tmppri) return;
 #if 1
+  /** otherwise, request resched softint, locally or by intercpu interrupt */
   if (cpuid != smp_processor_id())
     smp_send_work(CPU$M_RESCHED, cpuid);
   else
@@ -454,7 +544,12 @@ void sch$change_cur_priority(struct _pcb *p, unsigned char newpri) {
   // interprocessor interrupt not implemented?
 }
 
+/**
+   \brief run once in a sec
+*/
+
 void sch$one_sec(void) {
+  /** mainly run pixscan */
   sch$pixscan();
     }
 

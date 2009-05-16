@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file sysforcex.c
+   \brief system service forced exit
+   \author Roar Thronæs
+*/
 
 #include<linux/linkage.h>
 #include<linux/sched.h>
@@ -24,6 +29,10 @@
 
 asmlinkage int exe$exit(unsigned int code);
 
+/**
+   \brief system service force exit - see 5.2 13.3.3
+*/
+
 asmlinkage int exe$forcex(unsigned int *pidadr, void *prcnam, unsigned int code){
   struct _pcb *p;
   struct _acb *a;
@@ -34,18 +43,24 @@ asmlinkage int exe$forcex(unsigned int *pidadr, void *prcnam, unsigned int code)
   if (pidadr && ((*pidadr)&0x80000000)) 
     return cwps$forcex(pidadr,prcnam,code);
 #endif
+  /** invoke nampid translation */
   sts=exe$nampid(current,pidadr,prcnam,&retpcb,&ipid,&epid);
   p=retpcb;
+  /** if remote invoke cwps force - NOTE cluster out of order */
   if (sts==SS$_REMOTE_PROC)
     return cwps$forcex(pidadr,prcnam,code);
+  /** unlock spin */
   vmsunlock(&SPIN_SCHED,0);
+  /** if not found return */
   if (!p) return 0;
+  /** set forcepen flag in pcb */
   p->pcb$l_sts|=PCB$M_FORCPEN;
   a=kmalloc(sizeof(struct _acb),GFP_KERNEL);
   memset(a,0,sizeof(struct _acb));
   a->acb$l_pid=p->pcb$l_pid;
   a->acb$l_ast=&exe$exit;
   a->acb$l_astprm=code;
+  /** queue a user mode (TODO check mode) to process, running exe$exit */
   return sch$qast(p->pcb$l_pid,PRI$_RESAVL,a);
   
   /*no cwps*/

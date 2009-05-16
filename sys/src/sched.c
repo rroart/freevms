@@ -918,7 +918,6 @@ asmlinkage void sch$sched(int from_sch$resched) {
   if (next->pcb$b_type != DYN$C_PCB)
     panic("DYN$C_PCB\n");
 #endif
-  /* And no capabilities yet */
   /** test process capabilities */
   if ((next->pcb$l_capability & cpu->cpu$l_capability) != next->pcb$l_capability) {
     if (next->pcb$l_capability & CPB$M_IMPLICIT_AFFINITY) {

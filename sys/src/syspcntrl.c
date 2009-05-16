@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file syspcntrl.c
+   \brief system process controll
+   \author Roar Thronæs
+*/
 
 #include<linux/unistd.h>
 #include<linux/linkage.h>
@@ -26,11 +31,19 @@
 
 unsigned long maxprocesscnt=MAXPROCESSCNT;
 
+/**
+   \brief determine whether request process has privs to examine or modify
+   \param p pcb
+*/
+
 int exe$process_check_priv(struct _pcb * p) {
   int priv = ctl$gl_pcb->pcb$l_priv;
-  // check group priv later
+  /** if on the same job tree, success - MISSING */
+  /** if the same uic, success - MISSING */
+  /** if WORLD priv, success TODO fix this */
   if (p != ctl$gl_pcb && (priv & PRV$M_WORLD) == 0) {
     return SS$_NOPRIV;
+  /** if group priv and group, success - MISSING */
   }
   return SS$_NORMAL;
 }
@@ -149,11 +162,16 @@ void fixup_hib_pc(void * dummy) {
 #endif
 }
 
+/**
+   \brief set process in hibernate state - see 5.2 13.3.1
+*/
+
 asmlinkage int exe$hiber(long dummy) {
+  /** some tricks for the return stack */
 #ifdef __x86_64__
   __asm__ __volatile__ ("movq %%rsp,%0; ":"=r" (dummy) );
 #endif
-  /* spinlock sched */
+  /** spinlock sched */
   struct _pcb * p=current;
   vmslock(&SPIN_SCHED,IPL$_SCHED);
 #if 0
@@ -161,31 +179,48 @@ asmlinkage int exe$hiber(long dummy) {
     p->pcb$l_sts&=~PCB$M_WAKEPEN;
   }
 #endif
-  /* release spin */
-  /* set ipl 0 ? */
 
+  /** test and clear, bbcci equivalent, on wakepen bit */
   if (test_and_clear_bit(12,&p->pcb$l_sts)) { // PCB$M_WAKEPEN 0x1000 12 bits
+    /** if wake request preceding */
+    /** release spin */
     vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
+    /** set ipl 0 ? */
     setipl(0);
     return SS$_NORMAL;
   }
   /* cwps stuff not yet */
+  /** otherwise */
+  /** some tricks for the return stack */
 #ifdef __i386__
   fixup_hib_pc(&dummy);
 #else
   fixup_hib_pc(dummy-0x10/*-0x30*/);
 #endif
+  /** go into hibernate wait */
   int ret = sch$wait(p,sch$gq_hibwq);
   setipl(0); // unstandard, but sch$wait might leave at ipl 8
   return ret;
 }
 
-/* return params not as specified */
+/**
+   \brief locating the process and checking privileges - see 5.2 13.1.2
+   \param p pcb
+   \param pidadr epid
+   \param prcnam process name
+   \param retipid return val ipid
+   \param retepid return val epid
+   \details with no cwps
+*/
+
+   /** return params not as specified */
 int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb ** retpcb, unsigned long * retipid, unsigned long *retepid) {
   int sts = SS$_NORMAL;
   int ipid = 0;
   unsigned long *vec=sch$gl_pcbvec;
-  /* sched spinlock */
+  /** determine if requesting process is target process - MISSING */
+  /** if so do priv checks - MISSING partially */
+  /** sched spinlock, and on success do not unlock */
   vmslock(&SPIN_SCHED,IPL$_SCHED);
   *retpcb=0;
   *retipid=0;
@@ -196,12 +231,16 @@ int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb 
     *retpcb=p;
     return SS$_NORMAL;
   }
+  /** try to locate using the epid */
   if (pidadr && *pidadr) {
     ipid=exe$epid_to_ipid(*pidadr);
+    /** indications about remote pcb, give REMOTE_PROC, TODO reimplement */
     if (ipid==0 && is_cluster_on())
       return SS$_REMOTE_PROC;
+    /** if unknown node, return NONEXPR - MISSING */
     if (ipid == 0)
       goto not_found;
+    /** check privs for examining or modifying process */
     sts = exe$process_check_priv (vec[ipid&0xffff]);
     if ((sts & 1) == 0)
       goto error;
@@ -210,14 +249,19 @@ int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb 
     *retepid=*pidadr;
     return SS$_NORMAL;
   }
+  /** try to locate using the process name */
   if (prcnam) {
     int i;
     struct dsc$descriptor * d = prcnam;
     // compare stuff etc
+    /** indications about remote process, give REMOTE_PROC, TODO reimplement */
+    /** if process name indicates unknown node, return NOSUCHNODE - MISSING */
+    /** if process name uses incorrectly formated nodename, return IVLOGNAM - MISSING */
     for (i=2;i<MAXPROCESSCNT;i++) {
       if (vec[i]!=0) { // change to nullpcb later
 	struct _pcb * p=vec[i];
 	if (strncmp(d->dsc$a_pointer,p->pcb$t_lname,d->dsc$w_length)==0) {
+	  /** check privs for examining or modifying process */
 	  sts = exe$process_check_priv (vec[ipid&0xffff]);
 	  if ((sts & 1) == 0)
 	    goto error;
@@ -232,6 +276,7 @@ int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb 
     return SS$_NORMAL;
   }
   /* should not get here */
+  /** return NOPRIV - MISSING mostly */
  not_found:
   vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
   return 0;
@@ -265,44 +310,70 @@ void * exe$nampid2(struct _pcb *p, unsigned long *pidadr, void *prcnam) {
 }
 #endif
 
+/**
+   \brief wake system service - see 5.2 13.3.1
+*/
+
 asmlinkage int exe$wake(unsigned long *pidadr, void *prcnam) {
   struct _pcb * retpcb, *p;
   unsigned long retipid, retepid;
+  /** invoke nampid translation */
   int sts=exe$nampid(current,pidadr,prcnam,&retpcb,&retipid,&retepid);
   p=retpcb;
   if (p) {
+    /** if found */
+    /** invoke wake */
     sch$wake(p->pcb$l_pid);
+    /** unlock spin sched */
     vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
     return;
   }
-  /* no cwps stuff yet */
+  /** cwps stuff - MISSING */
   setipl(0);
 }
 
-asmlinkage int exe$suspnd(unsigned int *pidadr, void *prcnam, unsigned int flags ) {
+/**
+   \brief suspend process MISSING - see 5.2 13.3.2
+*/
 
+asmlinkage int exe$suspnd(unsigned int *pidadr, void *prcnam, unsigned int flags ) {
+  /** MISSING */
 }
+
+/**
+   \brief resume suspended process MISSING - see 5.2 13.3.2.2
+*/
 
 asmlinkage int exe$resume (unsigned int *pidadr, void *prcnam) {
   struct _pcb * retpcb, *p;
   unsigned long retipid, retepid;
+  /** invoke nampid translation */
   int sts=exe$nampid(current,pidadr,prcnam,&retpcb,&retipid,&retepid);
   p=retpcb;
+  /** unlock spin */
   vmsunlock(&SPIN_SCHED,0);
   if (p) {
+    /** if found */
+    /** report scheduling event */
     sch$rse(p,PRI$_RESAVL,EVT$_RESUME);
     return;
   }
-  /* no cwps here either */
+  /** cwps - MISSING */
   return SS$_NORMAL;
 }
 
 //asmlinkage int sys_$setpri(unsigned int *pidadr, void *prcnam, unsigned int pri, unsigned int *prvpri, unsigned int*pol, unsigned int *prvpol) {
+
+/**
+   \brief set process name - see 5.2 13.4.3
+*/
+
 asmlinkage int exe$setprn(struct dsc$descriptor *s) {
   struct _pcb *p=0;
 
   if (!p) p=current;
   p=current;
+  /** put name into lname field */
   strncpy(p->pcb$t_lname,s->dsc$a_pointer,s->dsc$w_length);
   p->pcb$t_lname[s->dsc$w_length]=0;
   return SS$_NORMAL;

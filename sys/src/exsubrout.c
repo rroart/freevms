@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file exsubrout.c
+   \brief subroutines
+   \author Roar Thronæs
+*/
 
 #include <system_data_cells.h>
 #include <ipldef.h>
@@ -12,6 +17,12 @@
 
 #include <linux/mm.h>
 #include <linux/slab.h>
+
+/**
+   \brief insert tqe in timer queue
+   \details sorted according to time
+   \param t tqe
+*/
 
 void exe$instimq(struct _tqe * t) {
   static signed int times=-500;
@@ -34,7 +45,16 @@ void exe$instimq(struct _tqe * t) {
   vmsunlock(&SPIN_TIMER,savipl);
 }
 
+/**
+   \brief remove request id from timer queue - see 5.2 11.6.2
+   \param acmode access mode
+   \param reqid request id
+   \param remval
+   \param ipid internal pid
+*/
+
 void exe_std$rmvtimq(int acmode, int reqid, int remval, int ipid) {
+  /** handle acmode - MISSING */
   struct _tqe *tmp=exe$gl_tqfl->tqe$l_tqfl,*next;
   //int savipl=vmslock(&SPIN_TIMER,IPL$_TIMER);
   while (tmp && tmp!=exe$gl_tqfl) {

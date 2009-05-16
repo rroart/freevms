@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file sysgetjpi.c
+   \brief system get job and process information
+   \author Roar Thronæs
+*/
 
 #include<linux/linkage.h>
 #include<linux/sched.h>
@@ -17,14 +22,29 @@
 
 // this behaves like getjpiw for now
 
+/**
+   \brief system service get job or process info - see 5.2 13.2.3
+   \details make multiuser version
+*/
+
 asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long long astprm) {
   struct _pcb * p;
   int sts;
   struct item_list_3 * it=itmlst;
+  /** test list item entries */
+  /** use pidadr - MISSING */
+  /** clear event flag */
   exe$clref(efn);
+  /** find next pcb */
   sts=exe$pscan_next_id(&p);
   if (sts==0)
     return SS$_NOMOREPROC;
+  /** invoke nampid - MISSING */
+  /** if other node, cwps - MISSING */
+  /** iosb writecheck - MISSING */
+  /** if ast, check ast quota and charge - MISSING */
+  /** writetest for buffer descriptors - MISSING */
+  /** gather some usual informastion - TODO still more remains */
   while (it->item_code) {
     switch (it->item_code) {
     case JPI$_PRCNAM:
@@ -111,13 +131,21 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
     it++;
   }
 
+  /** post event flag */
   struct _pcb * pcb = ctl$gl_pcb;
   sch$postef(pcb->pcb$l_pid, PRI$_NULL, efn);
 
+  /** eventual ast queue - MISSING */
+
+  /** eventual iosb write */
   if (iosb)
     iosb->iosb$w_status=SS$_NORMAL;
 
   return SS$_NORMAL;
+
+  /** handle target process, kast etc - MISSING */
+  /** handle target process, status, state - MISSING */
+
 }
 
 asmlinkage int exe$getjpiw(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long long astprm) {

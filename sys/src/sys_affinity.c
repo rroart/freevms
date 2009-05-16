@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file sys_affinity.c
+   \brief system service affinities
+   \author Roar Thronæs
+*/
 
 #include <linux/config.h>
 #include <linux/linkage.h>
@@ -17,6 +22,11 @@
 #include <exe_routines.h>
 #include <capdef.h>
 #include <starlet.h>
+
+/**
+   \brief system service for explicit affinity mask - see 7.0 2.5.2
+   \details lots of flags and checks unimplemented
+*/
 
 // lots of flags and checks unimplemented
 asmlinkage int exe$process_affinity (unsigned int *pidadr, void *prcnam, struct _generic_64 *select_mask, struct _generic_64 *modify_mask, struct _generic_64 *prev_mask, struct _generic_64 *flags,...) {
@@ -39,6 +49,7 @@ asmlinkage int exe$process_affinity (unsigned int *pidadr, void *prcnam, struct 
     mask = *(int*)select_mask & ~(*(int*)modify_mask);
     sch$clear_affinity(pcb, mask, flags, 0 /*prev_mask*/);
     mask = *(int*)select_mask & (*(int*)modify_mask);
+    /** call set_affinity */
     sch$set_affinity(pcb, mask, flags, 0 /*prev_mask*/);
     if (prev_mask)
       *(int*)prev_mask = prev;
@@ -49,6 +60,11 @@ asmlinkage int exe$process_affinity (unsigned int *pidadr, void *prcnam, struct 
   vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
   return SS$_NORMAL;
 }
+
+/**
+   \brief system service for implicit affinity mask - see 7.0 2.5.4
+   \details lots of flags and checks unimplemented
+*/
 
 asmlinkage int exe$set_implicit_affinity (unsigned int *pidadr, void *prcnam, struct _generic_64 *state, int cpu_id, struct _generic_64 *prev_mask) {
   int flag = 0;
@@ -72,11 +88,13 @@ asmlinkage int exe$set_implicit_affinity (unsigned int *pidadr, void *prcnam, st
       *(int*)prev_mask = sch$gl_default_process_cap;
     sch$gl_default_process_cap = state;
   }
+  /** maybe do acquire affinity */
   if (flag & CAP$M_IMPLICIT_AFFINITY_SET) {
     if (prev_mask)
       *(int*)prev_mask = pcb->pcb$l_capability;
     sch$acquire_affinity(pcb, 0, cpu_id);
   }
+  /** maybe do release affinity */
   if (flag & CAP$M_IMPLICIT_AFFINITY_CLEAR) {
     if (prev_mask)
       *(int*)prev_mask = pcb->pcb$l_capability;
