@@ -1,5 +1,7 @@
 #!/bin/sh
 
+LIBS=
+
 unamem=`uname -m`
 
 if [ $unamem = x86_64 ]; then
