@@ -2,6 +2,11 @@
 // $Locker$
 
 // Author. Roar Thronæs.
+/**
+   \file syscredel.c
+   \brief MM create or delete
+   \author Roar Thronæs
+*/
 
 #include<linux/config.h>
 #include<linux/unistd.h>
@@ -251,27 +256,62 @@ int inline insrde(struct _rde * elem, struct _rde * head) {
 
 int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte);
 
+/**
+   \brief create or delete page - see 5.2 15.1
+   \param first address
+   \param last address
+   \param pagesubr page crepag or credel subroutine
+   \param inadr not yet used
+   \param retadr return address not yet used
+   \param acmodeagain not yet used
+   \param p pcb struct
+   \param numpager number of pages, not yet used
+*/
+
 int mmg$credel(int acmode, void * first, void * last, void (* pagesubr)(), struct _va_range *inadr, struct _va_range *retadr, unsigned int acmodeagain, struct _pcb * p, int numpages) {
   unsigned long tmp=first;
+  /** initialize template pte */
   int newpte=0; // lots of zeros for demand page zero
+  /** test if in system space, and return error */
   if (((long)first & 0x80000000) || ((long)last & 0x80000000))
     return SS$_NOPRIV;
+  /** set pagesubr in scratch space */
   mymmg.mmg$l_pagesubr=pagesubr;
+  /** set svstartva in scratch - MISSING */
+  /** iterate until last */
   while (tmp<last) {
+    /** invoke per-page pagesubr */
     pagesubr(0,tmp,p,+PAGE_SIZE,0,newpte);      // crepag or del
     tmp=tmp+PAGE_SIZE;
   }
   return SS$_NORMAL;
 }
 
+/**
+   \brief system service for virtual address space creation - see 5.2 15.2 15.3.1
+   \param inadr address range
+   \param retadr returned address range
+   \param acmode access mode
+*/
+
 asmlinkage int exe$cretva (struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
+  /** create stack scratch space - MISSING */
+  /** template pte - (seems to be in credel) */
+  /** set ipl 2 - MISSING */
+  /** test page ownership and access mode - MISSING */
+  /** call credel */
   struct _rde * tmprde = mmg$lookup_rde_va (inadr->va_range$ps_start_va, current->pcb$l_phd, 0, 2);
   void * first=inadr->va_range$ps_start_va;
   void * last=inadr->va_range$ps_end_va;
+  /** test address range in system space, and return NOPRIV - (seems to be in credel) */
+  /** test overlapping addresses - MISSING */
+  /** does only credel, no fast_create */
   struct _pcb * p=current;
   struct _rde * rde;
   unsigned long numpages=(last-first)/PAGE_SIZE;
   mmg$credel(acmode, first, last, mmg$crepag, inadr, retadr, acmode, p, numpages);
+  /** return pagefile quota, peak pagefile usage - MISSING */
+  /** set ipl 0 - MISSING */
 }
 
 int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {

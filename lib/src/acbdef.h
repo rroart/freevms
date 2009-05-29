@@ -1,6 +1,12 @@
 #ifndef acbdef_h
 #define acbdef_h
  
+/**
+   \file acbdef.h
+   \brief AST Control Block - see 5.2 7.2.2
+   \author Roar Thronæs
+ */
+
 #define	ACB$M_FLAGS_VALID	0x4
 #define	ACB$M_POSIX_ACB	0x8
 #define	ACB$M_PKAST	0x10
@@ -35,12 +41,12 @@
 #define	__RELEASE_ASTFAULT	0x0aef0000
 	
 struct _acb {
-    struct _acb *acb$l_astqfl;          
+    struct _acb *acb$l_astqfl; /** link acb into pcbs ast queue */
     struct _acb *acb$l_astqbl;          
     unsigned short int acb$w_size;      
     unsigned char acb$b_type;           
-    unsigned char acb$b_rmod;       
-    unsigned long acb$l_pid;             
+    unsigned char acb$b_rmod; /** field contents above, bit 0:1 access mode, 4 pkast, 5 nodelete, 6 quota, 7 kast */
+    unsigned long acb$l_pid; /** associated process id */
     void (*acb$l_ast)(unsigned long);            
     unsigned long acb$l_astprm;          
     void (*acb$l_kast)(unsigned long);               
