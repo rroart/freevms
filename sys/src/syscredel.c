@@ -48,6 +48,8 @@
 // mmg$try_all
 // create_bufobj
 
+/** note that adjstk - 5.2 15.3.3 - is MISSING */
+
 inline struct _rde * mmg$lookup_rde_va (void * va, struct _phd * const phd, int function, int ipl);
 inline struct _rde * mmg$search_rde_va (void * va, struct _rde *head, struct _rde **prev, struct _rde **next);
 
@@ -190,6 +192,16 @@ asmlinkage int exe$deltva(struct _va_range *inadr, struct _va_range *retadr, uns
   mmg$credel(acmode, first, last, mmg$delpag, inadr, retadr, acmode, p, numpages);
 }
 
+/**
+   \brief system service for expanding region with zero ptes - see 5.2 15.3.2
+   note that this is not tested at all and probably does not work
+   consider this as MISSING
+   \param pagcnt page count
+   \param retadr return address
+   \param acmode access mode
+   \param region which region
+*/
+
 asmlinkage int exe$expreg(unsigned int pagcnt, struct _va_range *retadr,unsigned int acmode, char region) {
 #ifdef __arch_um__
   int prot_pte=0x51|_PAGE_RW;
@@ -314,6 +326,10 @@ asmlinkage int exe$cretva (struct _va_range *inadr, struct _va_range *retadr, un
   /** set ipl 0 - MISSING */
 }
 
+/**
+   \brief routine for single virtual address space creation - see 5.2 15.3.1
+*/
+
 int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
 
   pgd_t *pgd;
@@ -322,7 +338,8 @@ int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection
   pte_t *pte = 0;
   struct mm_struct * mm=current->mm;
   unsigned long address=va;
-  
+
+  /** test if it is within its address space - MISSING */
   if (va>=rde->rde$pq_first_free_va) {
 
   }
@@ -340,10 +357,15 @@ int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection
 #endif
   }
 
+  /** check if we should set the new pte */
   *(unsigned long *)pte=newpte; // do this anyway
+  /** test whether page already exists and return va_in_use if so */
+  /** test if overmap allowed and do eventual delpag - MISSING */
   if ((long)(*(long *)pte)) {
     return SS$_VA_IN_USE;
   } else {
+    /** charge pagefile quota - MISSING */
+    /** store requested value into the pte */
     *(unsigned long *)pte=newpte;
   }
 

@@ -66,6 +66,13 @@ Bochs use:
 	found in /vms$common.
 	Use make image-kernel-iomm to install the kernel.
 
+Qemu use:
+        qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio
+
+Virtualbox use:
+	Just use it with both a and c images.
+	Barely tested with one CPU, will do more.
+
 NOTE on VFS ODS2 module autobuild:
 Use lenny (stable), sarge may still work if lucky.
 Install module-assistant and debhelper.

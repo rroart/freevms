@@ -17,8 +17,12 @@
 #include<va_rangedef.h>
 #include<wsldef.h>
 
-int mmg$vfysecflg(void) {
+/**
+   \brief test compatibility of the flags arguments to crmpsc - see 5.2 15.4.1.1
+*/
 
+int mmg$vfysecflg(void) {
+  /** MISSING content */
 }
 
 int exe$dgblsc(void) {

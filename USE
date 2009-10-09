@@ -21,6 +21,10 @@ Bochsrc FreeVMS-related config:
 Qemu use:
 	qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio
 
+Virtualbox use:
+	Just use it with both a and c images.
+	Barely tested with one CPU, will do more.
+
 The default is DCL for CONFIG_VMS mode.
 
 When booting bochs, there are mainly 4 usable choices:

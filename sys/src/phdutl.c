@@ -131,5 +131,10 @@ mmg$imgreset() {
 
 }
 
+/**
+   \brief check process section table for deallocatable sections - see 5.2 15.4.1
+*/
+
 mmg$dalcstxscn(void) {
+  /** MISSING content */
 }
