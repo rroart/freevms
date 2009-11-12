@@ -46,6 +46,9 @@ make image-kernel-iomm (as root)
 (Then create an INET$CONFIG)
 (Then do the steps in NOTE on VFS ODS2 module autobuild, or equivalents)
 ./dcl/src/install.sh
+To make VirtualBox images, do make vbimage, make createvb
+and do VBoxManage startvm FreeVMS
+(You may have to edit VirtualBox.xml and remove images yourself)
 
 Next see the USE file (after compiling or installing bochs).
 

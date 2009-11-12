@@ -349,6 +349,8 @@ CONFIG_WINBOND_840=y
 # CONFIG_PLIP is not set
 # CONFIG_PPP is not set
 # CONFIG_SLIP is not set
+CONFIG_E1000=y
+# CONFIG_E1000_NAPI is not set
 
 #
 # Wireless LAN (non-hamradio)

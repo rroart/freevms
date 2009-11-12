@@ -253,6 +253,8 @@
 #undef  CONFIG_HAMACHI
 #undef  CONFIG_YELLOWFIN
 #undef  CONFIG_SK98LIN
+#define CONFIG_E1000
+#undef CONFIG_E1000_NAPI
 
 /*
  * Character devices
