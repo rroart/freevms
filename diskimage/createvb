@@ -1,0 +1,9 @@
+cd diskimage
+VBoxManage modifyvm FreeVMS --floppy empty
+VBoxManage modifyvm FreeVMS --hda none
+VBoxManage unregistervm FreeVMS --delete
+VBoxManage createvm --name FreeVMS --ostype Other --register
+VBoxManage modifyvm FreeVMS --floppy `pwd`/a.img
+VBoxManage modifyvm FreeVMS --hda `pwd`/c.vdi
+VBoxManage modifyvm FreeVMS --nictype1 82540EM
+VBoxManage modifyvm FreeVMS --memory 32

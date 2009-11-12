@@ -107,6 +107,16 @@ image-kernel-iomm:
 	make image-kernel-iomm; \
 	cd ..
 
+vbimage:
+	cd diskimage; \
+	make vbimage; \
+	cd ..
+
+createvb:
+	cd createvb; \
+	make vbimage; \
+	cd ..
+
 environment:
 	./envscript
 

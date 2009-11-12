@@ -1,0 +1,4 @@
+#!/bin/sh
+cd diskimage
+[ -f c.vdi ] && mv c.vdi c.vdi.old
+VBoxManage convertfromraw c.img c.vdi

@@ -3,3 +3,10 @@ image-kernel-iomm:
 
 image:
 	./createimage
+
+vbimage:
+	./createvbimage
+
+createvb:
+	./createvb
+
