@@ -49,6 +49,7 @@ make image-kernel-iomm (as root)
 To make VirtualBox images, do make vbimage, make createvb
 and do VBoxManage startvm FreeVMS
 (You may have to edit VirtualBox.xml and remove images yourself)
+Enable IO Apic
 
 Next see the USE file (after compiling or installing bochs).
 
@@ -79,7 +80,7 @@ Virtualbox use:
 NOTE on VFS ODS2 module autobuild:
 Use lenny (stable), sarge may still work if lucky.
 Install module-assistant and debhelper.
-Do dpkg -i ods2-source_0.9.3.w7_all.deb.
+Do dpkg -i ods2-source_0.9.3.w7_all.deb. (Check current version)
 Do m-a prepare, m-a update, m-a get ods2, m-a a-i ods2.
 Run the following after you have got a working system on ext2:
 dcl/src/install.sh
