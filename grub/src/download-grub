@@ -1,3 +1,2 @@
 #!/bin/sh
-ncftpget ftp://ftp.nvg.ntnu.no/pub/vms/freevms/grub-0.95-diff1
 ncftpget ftp://alpha.gnu.org/gnu/grub/grub-0.95.tar.gz

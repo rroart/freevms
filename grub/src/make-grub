@@ -12,7 +12,7 @@ fi
 rm -rf grub-0.95
 tar xzf grub-0.95.tar.gz
 cd grub-0.95
-patch -p1 < ../grub-0.95-diff1
+patch -p1 < ../../../subprojects/grub-0.95-diff1
 cd ..
 mkdir build
 cd build

@@ -1,3 +1,2 @@
 #!/bin/sh
-ncftpget ftp://ftp.nvg.ntnu.no/pub/vms/freevms/linker-0_2_6
-ncftpget ftp://ftp.gnu.org/pub/gnu/binutils/binutils-2.16.tar.gz
+wget http://mirrors.usc.edu/pub/gnu/binutils/binutils-2.16.tar.gz

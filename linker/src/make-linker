@@ -5,7 +5,7 @@ CC=
 rm -rf binutils-2.16
 tar xzf binutils-2.16.tar.gz
 cd binutils-2.16
-patch -p1 < ../linker-0_2_6
+patch -p1 < ../../../subprojects/linker-0_2_6
 cd ..
 mkdir build
 cd build
