@@ -1,0 +1,50 @@
+--- binutils-2.16/ld/scripttempl/i386vms.sc.orig	2014-08-06 10:02:43.000000000 +0200
++++ binutils-2.16/ld/scripttempl/i386vms.sc	2014-08-06 12:10:17.000000000 +0200
+@@ -249,8 +249,20 @@
+ EOF
+ fi
+ cat <<EOF
+-  .rel.plt      ${RELOCATING-0} : { *(.rel.plt) }
+-  .rela.plt     ${RELOCATING-0} : { *(.rela.plt) }
++  .rel.plt      ${RELOCATING-0} :
++  {
++    *(.rel.plt)
++    PROVIDE (__rel_iplt_start = .);
++    *(.rel.iplt)
++    PROVIDE (__rel_iplt_end = .);
++  }
++  .rela.plt       ${RELOCATING-0} :
++  {
++    *(.rela.plt)
++    PROVIDE (__rela_iplt_start = .);
++    *(.rela.iplt)
++    PROVIDE (__rela_iplt_end = .);
++  }
+   ${OTHER_PLT_RELOC_SECTIONS}
+ 
+   /DISCARD/         ${RELOCATING-0} : 
+--- binutils-2.16/ld/scripttempl/x86_64vms.sc.orig	2014-08-06 10:02:43.000000000 +0200
++++ binutils-2.16/ld/scripttempl/x86_64vms.sc	2014-08-06 12:10:35.000000000 +0200
+@@ -249,8 +249,20 @@
+ EOF
+ fi
+ cat <<EOF
+-  .rel.plt      ${RELOCATING-0} : { *(.rel.plt) }
+-  .rela.plt     ${RELOCATING-0} : { *(.rela.plt) }
++  .rel.plt      ${RELOCATING-0} :
++  {
++    *(.rel.plt)
++    PROVIDE (__rel_iplt_start = .);
++    *(.rel.iplt)
++    PROVIDE (__rel_iplt_end = .);
++  }
++  .rela.plt       ${RELOCATING-0} :
++  {
++    *(.rela.plt)
++    PROVIDE (__rela_iplt_start = .);
++    *(.rela.iplt)
++    PROVIDE (__rela_iplt_end = .);
++  }
+   ${OTHER_PLT_RELOC_SECTIONS}
+ 
+   /DISCARD/         ${RELOCATING-0} : 
