@@ -3,9 +3,9 @@ CFLAGS=
 CPPFLAGS=
 unamem=`uname -m`
 if [ $unamem != x86_64 ]; then
-CC=gcc-3.3
+CC=gcc
 else
-CC=gcc-3.4
+CC=gcc
 LDFLAGS=-static
 LIBS=
 fi

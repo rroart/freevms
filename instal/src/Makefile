@@ -20,7 +20,7 @@ install: all
 
 ifeq ($(ARCH),x86_64)
 MODEL = -mcmodel=medium
-MODELGCC = gcc-3.4
+MODELGCC = gcc
 else
 MODEL =
 MODELGCC = gcc
