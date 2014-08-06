@@ -12,6 +12,7 @@ mod-subdirs     :=
 
 O_TARGET := net.o
 
+# This directory is not in use, don't delete, in case a need to borrow drivers
 ifneq ($(CONFIG_VMS),y)
 
 # All of the (potential) objects that export symbols.
