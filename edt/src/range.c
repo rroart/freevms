@@ -40,7 +40,7 @@
 const char bufnamechars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
 
 static int range_mult_run (char *cp, char **cp_r, int (*entry) (void *param, Buffer *buffer, Line *line), void *param);
-static int getline (char *cp, char **cp_r, Position *position);
+static int getline2 (char *cp, char **cp_r, Position *position);
 
 /************************************************************************/
 /*									*/
@@ -97,7 +97,7 @@ int range_single (char *cp, char **cp_r, Position *position_r)
 
   /* Get line */
 
-  rc = getline (cp, &cp, &position);			/* process line spec */
+  rc = getline2 (cp, &cp, &position);			/* process line spec */
   if (rc < 0) return (-1);				/* fatal syntax error */
 
   /* Nothing more to do, return pointer to terminator */
@@ -264,7 +264,7 @@ loop:
     pos.buffer = buffer;
     pos.line   = firstline;
     pos.offset = 0;
-    rc = getline (cp, &cp, &pos);						/* process first line number */
+    rc = getline2 (cp, &cp, &pos);						/* process first line number */
     if (rc < 0) return (-1);							/* fatal syntax error */
     if (rc > 0) {
       valid = 1;								/* we found something legitimate */
@@ -275,7 +275,7 @@ loop:
       valid = 1;								/* if so, we found something legitimate */
       pos.line = lastline;
       pos.offset = 0;
-      rc = getline (cp + 1, &cp, &pos);						/* get last line number */
+      rc = getline2 (cp + 1, &cp, &pos);						/* get last line number */
       if (rc < 0) return (-1);							/* fatal syntax error */
       if (rc == 0) lastline = NULL;						/* if missing, use end of buffer */
       else lastline = pos.line;
@@ -385,7 +385,7 @@ badrange:
 
 static int search_setup (char *cp, char **cp_r, const char **p_r, char *c_r);
 
-static int getline (char *cp, char **cp_r, Position *position)
+static int getline2 (char *cp, char **cp_r, Position *position)
 
 {
   char c, *p, *q, *s;
