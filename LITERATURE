@@ -13,3 +13,22 @@ Unix kernel books, like:
 Secondary(?):
 
 VAXcluster principles
+
+Found on the net:
+
+http://bitsavers.trailing-edge.com/pdf/dec/vax/, more specifically
+http://bitsavers.trailing-edge.com/pdf/dec/vax/vms/training/
+http://bitsavers.trailing-edge.com/pdf/dec/vax/archSpec/
+
+Here we can find downloadable books, the most interesting may be:
+EY-C171E-DP VMS Internals and Data Structures 5.2 1991
+EY-F575E-DP VMS File System Internals 1990
+EL-00032-00-decStd32 Jan90, an internal Vax Architecture Reference Manual
+
+And to lesser degree:
+EY-0016E-ID-0001 VMS Internals Source Listings 1982
+
+Plus, on the web:
+http://daviddeley.com/programming/docs/rmsinternals.htm
+http://www.sture.ch/vms/rmsint2.txt
+
