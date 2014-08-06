@@ -49,18 +49,10 @@ CONSOLE  =
 endif
 SERIAL   =serial.o
 
-ifeq ($(ARCH),um)
-  KEYMAP   =
-  KEYBD    =
-  CONSOLE  =
-endif
-
 ifndef CONFIG_VMS
 obj-$(CONFIG_VT) += vt.o vc_screen.o consolemap.o consolemap_deftbl.o $(CONSOLE) selection.o
 else
-ifneq ($(ARCH),um)
 obj-y += consolemap.o consolemap_deftbl.o
-endif
 endif
 ifndef CONFIG_VMS
 obj-$(CONFIG_SERIAL) += $(SERIAL)
