@@ -845,10 +845,6 @@ static void __init do_boot_cpu (int apicid)
 
 	idle->thread.eip = (unsigned long) start_secondary;
 
-#ifndef CONFIG_VMS
-	del_from_runqueue(idle);
-	unhash_process(idle);
-#else
 	long * l = idle->pcb$l_sqfl;
 	remque(&idle->pcb$l_sqfl, 0);
 	if (((long)l)==(*l))
@@ -857,7 +853,6 @@ static void __init do_boot_cpu (int apicid)
 	idle->pcb$b_pri   = 31;
 	idle->pcb$w_quant = 0;
 	smp$gl_cpu_data[cpu]->cpu$b_cur_pri = idle->pcb$b_pri;
-#endif
 	init_tasks[cpu] = idle;
 	smp$gl_cpu_data[cpu]->cpu$l_curpcb = idle;
 #if 0

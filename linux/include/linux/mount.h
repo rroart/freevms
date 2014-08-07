@@ -42,12 +42,6 @@ extern void __mntput(struct vfsmount *mnt);
 
 static inline void mntput(struct vfsmount *mnt)
 {
-#ifndef CONFIG_VMS
-	if (mnt) {
-		if (atomic_dec_and_test(&mnt->mnt_count))
-			__mntput(mnt);
-	}
-#endif
 }
 
 #endif

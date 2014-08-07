@@ -294,10 +294,6 @@ static unsigned long load_elf_interp(struct elfhdr * interp_elf_ex,
 		goto out;
 	if (!elf_check_arch(interp_elf_ex))
 		goto out;
-#ifndef CONFIG_VMS
-	if (!interpreter->f_op || !interpreter->f_op->mmap)
-		goto out;
-#endif
 
 	/*
 	 * If the size of this structure has changed, then punt, since
@@ -337,13 +333,9 @@ static unsigned long load_elf_interp(struct elfhdr * interp_elf_ex,
 	    if (interp_elf_ex->e_type == ET_EXEC || load_addr_set)
 	    	elf_type |= MAP_FIXED;
 
-#ifndef CONFIG_VMS
-	    map_addr = elf_map(interpreter, load_addr + vaddr, eppnt, elf_prot, elf_type);
-#else
 	    struct vms_fd * vms_fd = fget(interpreter);
 	    struct file * file = vms_fd->vfd$l_fd_p;
 	    map_addr = elf_map(fget(interpreter), load_addr + vaddr, eppnt, elf_prot, elf_type);
-#endif
 	    
 	    if (BAD_ADDR(map_addr))
 	    	goto out_close;
@@ -484,11 +476,6 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	if (!elf_check_arch(&elf_ex))
 		goto out;
 
-#ifndef CONFIG_VMS
-	  if (!bprm->file->f_op||!bprm->file->f_op->mmap)
-	    goto out;
-#endif
-
 	/* Now read in all of the header information */
 
 	retval = -ENOMEM;
@@ -505,15 +492,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	if (retval < 0)
 		goto out_free_ph;
 
-#ifndef CONFIG_VMS
-	retval = get_unused_fd();
-	if (retval < 0)
-		goto out_free_ph;
-	get_file(bprm->file);
-	fd_install(elf_exec_fileno = retval, bprm->file);
-#else
 	elf_exec_fileno = bprm->file;
-#endif
 
 	elf_ppnt = elf_phdata;
 	elf_bss = 0;
@@ -557,12 +536,8 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 
 			SET_PERSONALITY(elf_ex, ibcs2_interpreter);
 
-#ifndef CONFIG_VMS
-			interpreter = open_exec(elf_interpreter);
-#else
 			interpreter = rms_open_exec(elf_interpreter);
 			//interpreter = open_exec(elf_interpreter);
-#endif
 			retval = PTR_ERR(interpreter);
 			if (IS_ERR(interpreter))
 				goto out_free_interp;
@@ -645,9 +620,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	   change some of these later */
 	current->mm->rss = 0;
 	setup_arg_pages(bprm); /* XXX: check error */
-#ifdef CONFIG_MM_VMS
 	flush_tlb_all();
-#endif
 	current->mm->start_stack = bprm->p;
 
 	/* Now we do a little grungy work by mmaping the ELF image into
@@ -695,13 +668,9 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 			load_bias = ELF_PAGESTART(ELF_ET_DYN_BASE - vaddr);
 		}
 
-#ifndef CONFIG_VMS
-		error = elf_map(bprm->file, load_bias + vaddr, elf_ppnt, elf_prot, elf_flags);
-#else
 		struct vms_fd * vms_fd = fget(bprm->file);
 		struct file * file = vms_fd->vfd$l_fd_p;
 		error = elf_map(file, load_bias + vaddr, elf_ppnt, elf_prot, elf_flags);
-#endif
 		if (BAD_ADDR(error))
 			continue;
 
@@ -748,10 +717,6 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 						    interpreter,
 						    &interp_load_addr);
 
-#ifndef CONFIG_VMS
-		allow_write_access(interpreter);
-		fput(interpreter);
-#endif
 		kfree(elf_interpreter);
 
 		if (BAD_ADDR(elf_entry)) {
@@ -859,10 +824,6 @@ out:
 
 	/* error cleanup */
 out_free_dentry:
-#ifndef CONFIG_VMS
-	allow_write_access(interpreter);
-	fput(interpreter);
-#endif
 out_free_interp:
 	if (elf_interpreter)
 		kfree(elf_interpreter);
@@ -894,12 +855,6 @@ static int load_elf_library(struct file *file)
 	/* First of all, some simple consistency checks */
 	if (elf_ex.e_type != ET_EXEC || elf_ex.e_phnum > 2 ||
 	   !elf_check_arch(&elf_ex) 
-#ifndef CONFIG_VMS
-|| !file->f_op || !file->f_op->mmap
-	    /* should add a
-	if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB)
-	    */
-#endif
 	    )
 		goto out;
 
@@ -972,21 +927,11 @@ out:
  */
 static int dump_write(struct file *file, const void *addr, int nr)
 {
-#ifndef CONFIG_VMS
-    return file->f_op->write(file, addr, nr, &file->f_pos) == nr;
-#endif
   return 0;
 }
 
 static int dump_seek(struct file *file, off_t off)
 {
-#ifndef CONFIG_VMS
-	if (file->f_op->llseek) {
-		if (file->f_op->llseek(file, off, 0) != off)
-			return 0;
-	} else
-		file->f_pos = off;
-#endif
 	return 1;
 }
 
@@ -1003,20 +948,6 @@ static inline int maydump(struct vm_area_struct *vma)
 	 * If we may not read the contents, don't allow us to dump
 	 * them either. "dump_write()" can't handle it anyway.
 	 */
-#ifndef CONFIG_MM_VMS
-	if (!(vma->vm_flags & VM_READ))
-		return 0;
-
-	/* Do not dump I/O mapped devices! -DaveM */
-	if (vma->vm_flags & VM_IO)
-		return 0;
-#if 1
-	if (vma->vm_flags & (VM_WRITE|VM_GROWSUP|VM_GROWSDOWN))
-		return 1;
-	if (vma->vm_flags & (VM_READ|VM_EXEC|VM_EXECUTABLE|VM_SHARED))
-		return 0;
-#endif
-#else
 	if (!(vma->rde$l_flags & VM_READ))
 		return 0;
 
@@ -1028,7 +959,6 @@ static inline int maydump(struct vm_area_struct *vma)
 		return 1;
 	if (vma->rde$l_flags & (VM_READ|VM_EXEC|VM_EXECUTABLE|VM_SHARED))
 		return 0;
-#endif
 #endif
 	return 1;
 }
@@ -1088,14 +1018,6 @@ static int writenote(struct memelfnote *men, struct file *file)
 	en.n_descsz = men->datasz;
 	en.n_type = men->type;
 
-#ifndef CONFIG_VMS
-	DUMP_WRITE(&en, sizeof(en));
-	DUMP_WRITE(men->name, en.n_namesz);
-	/* XXX - cast from long long to long to avoid need for libgcc.a */
-	DUMP_SEEK(roundup((unsigned long)file->f_pos, 4));	/* XXX */
-	DUMP_WRITE(men->data, men->datasz);
-	DUMP_SEEK(roundup((unsigned long)file->f_pos, 4));	/* XXX */
-#endif
 	return 1;
 }
 #undef DUMP_WRITE
@@ -1130,10 +1052,6 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 	struct elf_prstatus prstatus;	/* NT_PRSTATUS */
 	elf_fpregset_t fpu;		/* NT_PRFPREG */
 	struct elf_prpsinfo psinfo;	/* NT_PRPSINFO */
-
-#ifdef CONFIG_VMS
-	return has_dumped;
-#endif
 
 	/* first copy the parameters from user space */
 	memset(&psinfo, 0, sizeof(psinfo));
@@ -1296,48 +1214,6 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 	dataoff = offset = roundup(offset, ELF_EXEC_PAGESIZE);
 
 	/* Write program headers for segments dump */
-#ifndef CONFIG_MM_VMS
-	for(vma = current->mm->mmap; vma != NULL; vma = vma->vm_next) {
-		struct elf_phdr phdr;
-		size_t sz;
-
-		sz = vma->vm_end - vma->vm_start;
-
-		phdr.p_type = PT_LOAD;
-		phdr.p_offset = offset;
-		phdr.p_vaddr = vma->vm_start;
-		phdr.p_paddr = 0;
-		phdr.p_filesz = maydump(vma) ? sz : 0;
-		phdr.p_memsz = sz;
-		offset += phdr.p_filesz;
-		phdr.p_flags = vma->vm_flags & VM_READ ? PF_R : 0;
-		if (vma->vm_flags & VM_WRITE) phdr.p_flags |= PF_W;
-		if (vma->vm_flags & VM_EXEC) phdr.p_flags |= PF_X;
-		phdr.p_align = ELF_EXEC_PAGESIZE;
-
-		DUMP_WRITE(&phdr, sizeof(phdr));
-	}
-
-	for(i = 0; i < numnote; i++)
-		if (!writenote(&notes[i], file))
-			goto end_coredump;
-
-	DUMP_SEEK(dataoff);
-
-	for(vma = current->mm->mmap; vma != NULL; vma = vma->vm_next) {
-		unsigned long addr;
-
-		if (!maydump(vma))
-			continue;
-
-#ifdef DEBUG
-		printk("elf_core_dump: writing %08lx-%08lx\n", vma->vm_start, vma->vm_end);
-#endif
-
-		for (addr = vma->vm_start;
-		     addr < vma->vm_end;
-		     addr += PAGE_SIZE) {
-#else
 	for(vma = current->pcb$l_phd->phd$ps_p0_va_list_flink; vma != &current->pcb$l_phd->phd$ps_p0_va_list_flink; vma = vma->rde$ps_va_list_flink) {
 		struct elf_phdr phdr;
 		size_t sz;
@@ -1378,28 +1254,9 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 		for (addr = vma->rde$ps_start_va;
 		     addr < (vma->rde$ps_start_va + vma->rde$q_region_size);
 		     addr += PAGE_SIZE) {
-#endif
 			struct page* page;
 			struct vm_area_struct *vma;
 
-#ifndef CONFIG_VMS
-			if (get_user_pages(current, current->mm, addr, 1, 0, 1,
-						&page, &vma) <= 0) {
-				DUMP_SEEK (file->f_pos + PAGE_SIZE);
-			} else {
-				if (page == ZERO_PAGE(addr)) {
-					DUMP_SEEK (file->f_pos + PAGE_SIZE);
-				} else {
-					void *kaddr;
-					flush_cache_page(vma, addr);
-					kaddr = kmap(page);
-					DUMP_WRITE(kaddr, PAGE_SIZE);
-					flush_page_to_ram(page);
-					kunmap(page);
-				}
-				put_page(page);
-			}
-#endif
 		}
 	}
 
@@ -1444,15 +1301,9 @@ int exe$imgact_elf(void * name, void * hdrbuf) {
   struct linux_binprm bprm;
   struct file * file = 0;
   int retval = SS$_NORMAL; 
-#ifdef CONFIG_VMS
   file = rms_open_exec(filename);
-#endif
   if (file) goto fcb_found;
   
-#ifndef CONFIG_VMS
-  file = open_exec(filename);
-#endif
-
   retval = PTR_ERR(file);
   //printk("here 5\n");
   if (IS_ERR(file))
@@ -1470,11 +1321,7 @@ int exe$imgact_elf(void * name, void * hdrbuf) {
   bprm.argc = 0;
   bprm.envc = 0;
   //  bprm.argv = 0;
-#ifdef CONFIG_VMS
   retval = rms_prepare_binprm(&bprm);
-#else
-  retval = prepare_binprm(&bprm);
-#endif
   void * func = load_elf_binary(&bprm, 0);
   struct elfhdr * elf = hdrbuf;
 #if 0

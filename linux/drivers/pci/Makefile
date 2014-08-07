@@ -14,9 +14,6 @@ O_TARGET := driver.o
 export-objs := pci.o
 
 obj-$(CONFIG_PCI) += pci.o quirks.o compat.o names.o
-ifneq ($(CONFIG_VMS),y)
-obj-$(CONFIG_PROC_FS) += proc.o
-endif
 
 ifndef CONFIG_SPARC64
 obj-$(CONFIG_PCI) += setup-res.o

@@ -391,11 +391,6 @@ void ctrl_alt_del(void)
 		routine: deferred_cad,
 	};
 
-#ifndef CONFIG_VMS
-	if (C_A_D)
-		schedule_task(&cad_tq);
-	else
-#endif
 		kill_proc(cad_pid, SIGINT, 1);
 }
 	

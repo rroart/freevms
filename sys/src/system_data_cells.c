@@ -937,12 +937,8 @@ unsigned long mmg$gl_npagnext;
 unsigned long mmg$gl_page_size;
 unsigned long mmg$gl_page_to_vbn;
 unsigned long mmg$gl_pagedyn;
-#ifndef CONFIG_VMS
-unsigned long mmg$gl_pagswpvc=swap_info;
-#else
 extern struct swap_info_struct swap_info_pfl[];
 unsigned long mmg$gl_pagswpvc=swap_info_pfl;
-#endif
 unsigned long mmg$gl_pfn_memory_map;
 unsigned long mmg$gl_pfnlock_pages;
 unsigned long mmg$gl_phymem;
@@ -2165,9 +2161,7 @@ void __init vms_init2(void) {
   exe$gq_boottime = exe$gq_systime;
 
   xqp_init2();
-#ifdef CONFIG_VMS
   exttwo_init2(0);
-#endif
 
 #if 0
 #ifdef CONFIG_BLK_DEV_FD_VMS
@@ -2180,13 +2174,11 @@ void __init vms_init4(void) {
   __fl_init();
   //nl_init(); /* first */  
   //rnd_init();
-#ifdef CONFIG_VMS
   tty_vmsinit();
   ft_vmsinit();
   pn_vmsinit();
   tz_vmsinit();
   ip4_vmsinit();
-#endif
   void exe$reclaim_pool_gentle(void * pool);
   signed long long time=-10000000*60;
   exe$setimr(0, &time, exe$reclaim_pool_gentle, exe$gs_npp_npool, 0);

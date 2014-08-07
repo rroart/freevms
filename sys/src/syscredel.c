@@ -59,7 +59,6 @@ asmlinkage void exe$cntreg(void) {
 int vava=0;
 
 int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
-#ifdef CONFIG_VMS
   //spinlock  , too
   int savipl=getipl();
   setipl(IPL$_MMG);
@@ -173,7 +172,6 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
   __flush_tlb(); //flush_tlb_range(current->mm, page, page + PAGE_SIZE);
   setipl(savipl);
   return SS$_NORMAL;
-#endif
 }
 
 asmlinkage int exe$deltva(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {

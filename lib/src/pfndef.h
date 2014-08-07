@@ -76,12 +76,8 @@ struct _plnk {
   };
 };
 
-#ifdef CONFIG_MM_VMS
 #define _pfn page
 typedef struct page {
-#else
-struct _pfn {
-#endif
   union  {
     struct _plnk pfn$r_shm_list_link;
     struct _shm_id pfn$r_shm_reg_id;        
@@ -205,11 +201,7 @@ struct _pfn {
   /*	void *virtual;*/			/* Kernel virtual address (NULL if
 					   not kmapped, ie. highmem) */
   //struct zone_struct *zone;	/* Memory zone we are in. */
-#ifdef CONFIG_MM_VMS
 } mem_map_t;
-#else
-};
-#endif
 	
 struct _prvpfn {
   struct _prvpfn *prvpfn$l_sqfl;      

@@ -38,14 +38,8 @@ asmlinkage void exe$revokid      (void) { }
 myopenfile(char * filename, char * rmsfilename) {
   struct file * file=0;
   extern int mount_root_vfs;
-#ifndef CONFIG_VMS
-  if (mount_root_vfs)
-    file = filp_open(filename,O_RDONLY,0);
-#endif
   if (!IS_ERR(file)) {
-#ifdef CONFIG_VMS
     file = rms_open_exec(rmsfilename);
-#endif
   }
   return file;
 }
@@ -53,11 +47,7 @@ myopenfile(char * filename, char * rmsfilename) {
 myread(void * file, void * buf, int size) {
   unsigned long long pos=0;
 #if 0
-#ifdef CONFIG_VMS
     int retsize=rms_generic_file_read(file,buf,size,&pos);
-#else
-    int retsize=generic_file_read(file,buf,size,&pos);
-#endif
 #else
     int retsize = kernel_read(file,0,buf,size);
 #endif

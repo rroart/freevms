@@ -58,8 +58,6 @@ unsigned long long ioc$gq_lrpiq;
 unsigned long long ioc$gq_srpiq;
 #endif
 
-#ifdef CONFIG_VMS
-
 zone_t thezone = {
   lock: SPIN_LOCK_UNLOCKED
 };
@@ -512,7 +510,6 @@ static int __init setup_mem_frac(char *str)
 }
 
 __setup("memfrac=", setup_mem_frac);
-#endif
 
 int exe$alononpaged() {
   printk("alononpaged not implemented\n");

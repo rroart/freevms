@@ -485,25 +485,6 @@ struct ifconf32 {
 #ifdef CONFIG_NET
 static int dev_ifname32(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
-#ifndef CONFIG_VMS
-	struct net_device *dev;
-	struct ifreq32 ifr32;
-	int err;
-
-	if (copy_from_user(&ifr32, (struct ifreq32 *)arg, sizeof(struct ifreq32)))
-		return -EFAULT;
-
-	dev = dev_get_by_index(ifr32.ifr_ifindex);
-	if (!dev)
-		return -ENODEV;
-
-	strncpy(ifr32.ifr_name, dev->name, sizeof(ifr32.ifr_name)-1);
-	ifr32.ifr_name[sizeof(ifr32.ifr_name)-1] = 0; 
-	dev_put(dev);
-	
-	err = copy_to_user((struct ifreq32 *)arg, &ifr32, sizeof(struct ifreq32));
-	return (err ? -EFAULT : 0);
-#endif
 }
 #endif
 
@@ -835,62 +816,7 @@ extern __inline__ void sockfd_put(struct socket *sock)
 
 static int routing_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
-#ifndef CONFIG_VMS
-	int ret;
-	void *r = NULL;
-	struct in6_rtmsg r6;
-	struct rtentry r4;
-	char devname[16];
-	u32 rtdev;
-	mm_segment_t old_fs = get_fs();
-	
-	struct socket *mysock = sockfd_lookup(fd, &ret);
-
-	if (mysock && mysock->sk && mysock->sk->family == AF_INET6) { /* ipv6 */
-		ret = copy_from_user (&r6.rtmsg_dst, &(((struct in6_rtmsg32 *)arg)->rtmsg_dst),
-			3 * sizeof(struct in6_addr));
-		ret |= __get_user (r6.rtmsg_type, &(((struct in6_rtmsg32 *)arg)->rtmsg_type));
-		ret |= __get_user (r6.rtmsg_dst_len, &(((struct in6_rtmsg32 *)arg)->rtmsg_dst_len));
-		ret |= __get_user (r6.rtmsg_src_len, &(((struct in6_rtmsg32 *)arg)->rtmsg_src_len));
-		ret |= __get_user (r6.rtmsg_metric, &(((struct in6_rtmsg32 *)arg)->rtmsg_metric));
-		ret |= __get_user (r6.rtmsg_info, &(((struct in6_rtmsg32 *)arg)->rtmsg_info));
-		ret |= __get_user (r6.rtmsg_flags, &(((struct in6_rtmsg32 *)arg)->rtmsg_flags));
-		ret |= __get_user (r6.rtmsg_ifindex, &(((struct in6_rtmsg32 *)arg)->rtmsg_ifindex));
-		
-		r = (void *) &r6;
-	} else { /* ipv4 */
-		ret = copy_from_user (&r4.rt_dst, &(((struct rtentry32 *)arg)->rt_dst), 3 * sizeof(struct sockaddr));
-		ret |= __get_user (r4.rt_flags, &(((struct rtentry32 *)arg)->rt_flags));
-		ret |= __get_user (r4.rt_metric, &(((struct rtentry32 *)arg)->rt_metric));
-		ret |= __get_user (r4.rt_mtu, &(((struct rtentry32 *)arg)->rt_mtu));
-		ret |= __get_user (r4.rt_window, &(((struct rtentry32 *)arg)->rt_window));
-		ret |= __get_user (r4.rt_irtt, &(((struct rtentry32 *)arg)->rt_irtt));
-		ret |= __get_user (rtdev, &(((struct rtentry32 *)arg)->rt_dev));
-		if (rtdev) {
-			ret |= copy_from_user (devname, (char *)A(rtdev), 15);
-			r4.rt_dev = devname; devname[15] = 0;
-		} else
-			r4.rt_dev = 0;
-
-		r = (void *) &r4;
-	}
-
-	if (ret) {
-		ret = -EFAULT;
-		goto out;
-	}
-
-	set_fs (KERNEL_DS);
-	ret = sys_ioctl (fd, cmd, (long) r);
-	set_fs (old_fs);
-out:
-	if (mysock)
-		sockfd_put(mysock);
-
-	return ret;
-#else
 	return -EPERM;
-#endif
 }
 
 struct hd_geometry32 {
@@ -1961,28 +1887,6 @@ extern int tty_ioctl(struct inode * inode, struct file * file, unsigned int cmd,
 
 static int vt_check(struct file *file)
 {
-#ifndef CONFIG_VMS
-	struct tty_struct *tty;
-	struct inode *inode = file->f_dentry->d_inode;
-	
-	if (file->f_op->ioctl != tty_ioctl)
-		return -EINVAL;
-	                
-	tty = (struct tty_struct *)file->private_data;
-	if (tty_paranoia_check(tty, inode->i_rdev, "tty_ioctl"))
-		return -EINVAL;
-	                                                
-	if (tty->driver.ioctl != vt_ioctl)
-		return -EINVAL;
-	
-	/*
-	 * To have permissions to do most of the vt ioctls, we either have
-	 * to be the owner of the tty, or super-user.
-	 */
-	if (current->tty == tty || suser())
-		return 1;
-	return 0;                                                    
-#endif
 }
 
 struct consolefontdesc32 {

@@ -4,9 +4,7 @@
 // Author. Roar Thronæs.
 // Modified Linux source file, 2001-2004  
 
-#ifdef CONFIG_MM_VMS
 #include <vmsmm.h>
-#else
 
 #ifndef _LINUX_MM_H
 #define _LINUX_MM_H

@@ -306,9 +306,7 @@ int exe$procstrt(struct _pcb * p) {
   if (strncmp(".exe",pqb->pqb$t_image+len-4,4)) goto do_execve;
 
   xqp_init2();
-#ifdef CONFIG_VMS
   exttwo_init2(0);
-#endif
 
   aname.dsc$w_length=len-4;
   aname.dsc$a_pointer=pqb->pqb$t_image;
@@ -338,7 +336,6 @@ int exe$procstrt(struct _pcb * p) {
   // this is an actual system call
   void ** argv = 0;
   void * args[2];
-#ifdef CONFIG_VMS
   int found = strcmp(pqb->pqb$t_input,"[vms$common.sysexe]startup.com")==0;
   found |= strcmp(pqb->pqb$t_input,"[vms$common.sysexe]install.com")==0;
   if (found) {
@@ -366,7 +363,6 @@ int exe$procstrt(struct _pcb * p) {
     if (pqb->pqb$t_error[0]) sys_open_term(p->pcb$t_terminal);
 #endif
   }
-#endif
   execve(pqb->pqb$t_image,argv,0); //(,regs);
   set_fs(fs);
 
