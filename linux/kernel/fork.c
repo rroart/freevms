@@ -129,59 +129,7 @@ spinlock_t lastpid_lock = SPIN_LOCK_UNLOCKED;
 	mmlist_nr++;
 	spin_unlock(&mmlist_lock);
 
-#ifndef CONFIG_MM_VMS
-	for (mpnt = current->mm->mmap ; mpnt ; mpnt = mpnt->vm_next) {
-		struct file *file;
-
-		retval = -ENOMEM;
-		if(mpnt->vm_flags & VM_DONTCOPY)
-			continue;
-		tmp = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
-		if (!tmp)
-			goto fail_nomem;
-		*tmp = *mpnt;
-		tmp->vm_flags &= ~VM_LOCKED;
-		tmp->vm_mm = mm;
-		tmp->vm_next = NULL;
-		file = tmp->vm_file;
-		if (file) {
-			struct inode *inode = file->f_dentry->d_inode;
-			get_file(file);
-			if (tmp->vm_flags & VM_DENYWRITE)
-				atomic_dec(&inode->i_writecount);
-      
-			/* insert tmp into the share list, just after mpnt */
-			spin_lock(&inode->i_mapping->i_shared_lock);
-			if((tmp->vm_next_share = mpnt->vm_next_share) != NULL)
-				mpnt->vm_next_share->vm_pprev_share =
-					&tmp->vm_next_share;
-			mpnt->vm_next_share = tmp;
-			tmp->vm_pprev_share = &mpnt->vm_next_share;
-			spin_unlock(&inode->i_mapping->i_shared_lock);
-		}
-
-		/*
-		 * Link in the new vma and copy the page table entries:
-		 * link in first so that swapoff can see swap entries.
-		 */
-		spin_lock(&mm->page_table_lock);
-		*pprev = tmp;
-		pprev = &tmp->vm_next;
-		mm->map_count++;
-		retval = copy_page_range(mm, current->mm, tmp);
-		spin_unlock(&mm->page_table_lock);
-
-		if (tmp->vm_ops && tmp->vm_ops->open)
-			tmp->vm_ops->open(tmp);
-
-		if (retval)
-			goto fail_nomem;
-	}
-#endif
 	retval = 0;
-#ifndef CONFIG_MM_VMS
-	build_mmap_rb(mm);
-#endif
 
 fail_nomem:
 	flush_tlb_mm(current->mm);
@@ -194,7 +142,6 @@ static inline int dup_phd(struct _pcb * p, struct _pcb * old) {
     memcpy(p->pcb$l_phd,old->pcb$l_phd,sizeof(struct _phd));
   else
     memset(p->pcb$l_phd,0,sizeof(struct _phd));
-#ifdef CONFIG_MM_VMS
   qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
   if (old->pcb$l_phd) {
     if (old->pcb$l_phd->phd$l_wslist) {
@@ -216,11 +163,7 @@ static inline int dup_phd(struct _pcb * p, struct _pcb * old) {
       memcpy(p->pcb$l_phd->phd$l_pst_base_offset,old->pcb$l_phd->phd$l_pst_base_offset,PROCSECTCNT*sizeof(struct _secdef));
     }
   }
-#endif
 }
-
-
-#ifdef CONFIG_MM_VMS
 
 inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
 {
@@ -267,7 +210,6 @@ fail_nomem:
 	flush_tlb_mm(current->mm);
 	return retval;
 }
-#endif
 
 spinlock_t mmlist_lock __cacheline_aligned = SPIN_LOCK_UNLOCKED;
 int mmlist_nr;
@@ -409,9 +351,7 @@ static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
 
 	down_write(&oldmm->mmap_sem);
 	retval = dup_mmap(mm);
-#ifdef CONFIG_MM_VMS
 	retval = dup_stuff(mm,tsk->pcb$l_phd);
-#endif
 	up_write(&oldmm->mmap_sem);
 
 	if (retval)
@@ -761,7 +701,6 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	p->tty_old_pgrp = 0;
 	p->times.tms_utime = p->times.tms_stime = 0;
 	p->times.tms_cutime = p->times.tms_cstime = 0;
-#ifdef CONFIG_SMP
 	{
 		int i;
 		p->cpus_runnable = ~0UL;
@@ -771,7 +710,6 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 			p->per_cpu_utime[i] = p->per_cpu_stime[i] = 0;
 		spin_lock_init(&p->sigmask_lock);
 	}
-#endif
 	p->lock_depth = -1;		/* -1 = no lock */
 	p->start_time = jiffies;
 
@@ -784,7 +722,6 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	else
 	  memset(p->pcb$l_phd,0,sizeof(struct _phd));
 
-#ifdef CONFIG_MM_VMS
 	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
 	{
 	  qhead_init(&p->pcb$l_phd->phd$ps_p0_va_list_flink);
@@ -801,7 +738,6 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	  //p->pcb$l_phd->phd$l_pst_last=PROCSECTCNT-1;
 	  //p->pcb$l_phd->phd$l_pst_free=0;
 	}
-#endif
 #endif
 
 	retval = -ENOMEM;

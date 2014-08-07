@@ -122,56 +122,7 @@ static inline void put_binfmt(struct linux_binfmt * fmt)
  */
 asmlinkage long sys_uselib(const char * library)
 {
-#ifndef CONFIG_VMS
-	struct file * file;
-	struct nameidata nd;
-	int error;
-
-	error = user_path_walk(library, &nd);
-	if (error)
-		goto out;
-
-	error = -EINVAL;
-	if (!S_ISREG(nd.dentry->d_inode->i_mode))
-		goto exit;
-
-	error = permission(nd.dentry->d_inode, MAY_READ | MAY_EXEC);
-	if (error)
-		goto exit;
-
-	file = dentry_open(nd.dentry, nd.mnt, O_RDONLY);
-	error = PTR_ERR(file);
-	if (IS_ERR(file))
-		goto out;
-
-	error = -ENOEXEC;
-	if(file->f_op && file->f_op->read) {
-		struct linux_binfmt * fmt;
-
-		read_lock(&binfmt_lock);
-		for (fmt = formats ; fmt ; fmt = fmt->next) {
-			if (!fmt->load_shlib)
-				continue;
-			if (!try_inc_mod_count(fmt->module))
-				continue;
-			read_unlock(&binfmt_lock);
-			error = fmt->load_shlib(file);
-			read_lock(&binfmt_lock);
-			put_binfmt(fmt);
-			if (error != -ENOEXEC)
-				break;
-		}
-		read_unlock(&binfmt_lock);
-	}
-	fput(file);
-out:
-  	return error;
-exit:
-	path_release(&nd);
-	goto out;
-#else
 	return 0;
-#endif
 }
 
 /*
@@ -304,9 +255,6 @@ void put_dirty_page(struct task_struct * tsk, struct page *page, unsigned long a
 	if (!pte_none(*pte))
 		goto out;
 #endif
-#ifndef CONFIG_VMS
-	lru_cache_add(page);
-#endif
 	flush_dcache_page(page);
 	flush_page_to_ram(page);
 	set_pte(pte, pte_mkdirty(pte_mkwrite(mk_pte(page, PAGE_COPY))));
@@ -328,11 +276,7 @@ out:
 int setup_arg_pages(struct linux_binprm *bprm)
 {
 	unsigned long stack_base;
-#ifndef CONFIG_MM_VMS
-	struct vm_area_struct *mpnt;
-#else
 	struct _rde *mpnt;
-#endif
 	int i;
 
 #define STACK_TOP1 STACK_TOP
@@ -360,19 +304,6 @@ int setup_arg_pages(struct linux_binprm *bprm)
 	
 	down_write(&current->mm->mmap_sem);
 	{
-#ifndef CONFIG_MM_VMS
-		mpnt->vm_mm = current->mm;
-		mpnt->vm_start = PAGE_MASK & (unsigned long) bprm->p;
-		mpnt->vm_end = STACK_TOP1;
-		mpnt->vm_page_prot = PAGE_COPY;
-		mpnt->vm_flags = VM_STACK_FLAGS;
-		mpnt->vm_ops = NULL;
-		mpnt->vm_pgoff = 0;
-		mpnt->vm_file = NULL;
-		mpnt->vm_private_data = (void *) 0;
-		insert_vm_struct(current->mm, mpnt);
-		current->mm->total_vm = (mpnt->vm_end - mpnt->vm_start) >> PAGE_SHIFT;
-#else
 		mpnt->rde$pq_start_va = PAGE_MASK & (unsigned long) bprm->p;
 		mpnt->rde$q_region_size = STACK_TOP1 - (unsigned long) mpnt->rde$pq_start_va;
 		mpnt->rde$q_region_size = 0x1000;
@@ -380,7 +311,6 @@ int setup_arg_pages(struct linux_binprm *bprm)
 		mpnt->rde$l_flags = VM_STACK_FLAGS;
 		insrde(mpnt,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 		//flush_tlb_range(current->mm, mpnt->rde$pq_start_va, mpnt->rde$pq_start_va + PAGE_SIZE);
-#endif
 	} 
 
 	for (i = 0 ; i < MAX_ARG_PAGES ; i++) {
@@ -396,46 +326,6 @@ int setup_arg_pages(struct linux_binprm *bprm)
 	return 0;
 }
 
-#ifndef CONFIG_VMS
-struct file *open_exec(const char *name)
-{
-	struct nameidata nd;
-	struct inode *inode;
-	struct file *file;
-	int err = 0;
-
-	if (path_init(name, LOOKUP_FOLLOW|LOOKUP_POSITIVE, &nd))
-		err = path_walk(name, &nd);
-	file = ERR_PTR(err);
-	if (!err) {
-		inode = nd.dentry->d_inode;
-		file = ERR_PTR(-EACCES);
-		if (!(nd.mnt->mnt_flags & MNT_NOEXEC) &&
-		    S_ISREG(inode->i_mode)) {
-			int err = permission(inode, MAY_EXEC);
-			if (!err && !(inode->i_mode & 0111))
-				err = -EACCES;
-			file = ERR_PTR(err);
-			if (!err) {
-				file = dentry_open(nd.dentry, nd.mnt, O_RDONLY);
-				if (!IS_ERR(file)) {
-					err = deny_write_access(file);
-					if (err) {
-						fput(file);
-						file = ERR_PTR(err);
-					}
-				}
-out:
-				return file;
-			}
-		}
-		path_release(&nd);
-	}
-	goto out;
-}
-#endif
-
-#ifdef CONFIG_VMS
 struct file *rms_open_exec(const char *name)
 {
 	struct file *file=0;
@@ -477,7 +367,6 @@ struct file *rms_open_exec(const char *name)
 	return sys_open(vms_filename,0,0);
 #endif
 }
-#endif
 
 int kernel_read(struct file *file, unsigned long offset,
 	char * addr, unsigned long count)
@@ -486,7 +375,6 @@ int kernel_read(struct file *file, unsigned long offset,
 	loff_t pos = offset;
 	int result = -ENOSYS;
 
-#ifdef CONFIG_VMS
 #if 0
 	if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
 #endif
@@ -495,7 +383,6 @@ int kernel_read(struct file *file, unsigned long offset,
 #else
 	asmlinkage ssize_t sys_pread(unsigned int fd, char * buf, size_t count, loff_t pos);
 	return sys_pread(file,addr,count,offset);
-#endif
 #endif
 	if (!file->f_op->read)
 		goto fail;
@@ -508,7 +395,6 @@ fail:
 }
 
 #if 0
-#ifdef CONFIG_VMS
 int rms_kernel_read(struct file *file, unsigned long offset,
 	char * addr, unsigned long count)
 {
@@ -535,7 +421,6 @@ fail:
 	return rab->rab$w_rsz;
 #endif
 }
-#endif
 #endif
 
 static int exec_mmap(void)
@@ -711,9 +596,7 @@ int flush_old_exec(struct linux_binprm * bprm)
 	if (current->euid == current->uid && current->egid == current->gid)
 		current->mm->dumpable = 1;
 	name = bprm->filename;
-#ifdef CONFIG_VMS
 	if (current->pcb$l_pqb) goto skip_name;  // if creprc was done
-#endif
 	for (i=0; (ch = *(name++)) != '\0';) {
 		if (ch == '/')
 			i = 0;
@@ -730,17 +613,11 @@ int flush_old_exec(struct linux_binprm * bprm)
 	de_thread(current);
 #endif
 
-#ifdef CONFIG_VMS
 #if 0
 	if (((struct _fcb *)(bprm->file))->fcb$b_type!=DYN$C_FCB)
 #endif
-#endif
 	if (bprm->e_uid != current->euid || bprm->e_gid != current->egid || 
-#ifndef CONFIG_VMS
-	    permission(bprm->file->f_dentry->d_inode,MAY_READ))
-#else
 	    1)
-#endif
 		current->mm->dumpable = 0;
 
 	/* An exec changes our domain. We are no longer part of the thread
@@ -836,7 +713,6 @@ int prepare_binprm(struct linux_binprm *bprm)
 	return kernel_read(bprm->file,0,bprm->buf,BINPRM_BUF_SIZE);
 }
 
-#ifdef CONFIG_VMS
 int rms_prepare_binprm(struct linux_binprm *bprm)
 {
 	int mode;
@@ -903,7 +779,6 @@ int rms_prepare_binprm(struct linux_binprm *bprm)
 	memset(bprm->buf,0,BINPRM_BUF_SIZE);
 	return kernel_read(bprm->file,0,bprm->buf,BINPRM_BUF_SIZE);
 }
-#endif
 
 /*
  * This function is used to produce the new IDs and capabilities
@@ -1054,17 +929,13 @@ int search_binary_handler(struct linux_binprm *bprm,struct pt_regs *regs)
 			if (retval >= 0) {
 				put_binfmt(fmt);
 #if 0
-#ifdef CONFIG_MM_VMS
 				if (((struct _fcb *)(bprm->file))->fcb$b_type!=DYN$C_FCB) {
-#endif
 #endif
 				  allow_write_access(bprm->file);
 				  if (bprm->file)
 				    fput(bprm->file);
-#ifdef CONFIG_MM_VMS
 #if 0
 				}
-#endif
 #endif
 				bprm->file = NULL;
 				current->did_exec = 1;
@@ -1133,20 +1004,14 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 #endif
 	//printk("after lnm_init_prc\n");
 
-#ifdef CONFIG_VMS
 	xqp_init2();
 	extern void * global_e2_vcb;
 	exttwo_init2(global_e2_vcb);
-#endif
 
-#ifdef CONFIG_VMS
 	file = rms_open_exec(filename);
-#endif
 	if (((long)file) >= 0) goto fcb_found;
 
-#ifndef CONFIG_VMS
 	file = open_exec(filename);
-#endif
 
 	retval = PTR_ERR(file);
 	//printk("here 5\n");
@@ -1163,9 +1028,7 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	bprm.loader = 0;
 	bprm.exec = 0;
 	if ((bprm.argc = count(argv, bprm.p / sizeof(void *))) < 0) {
-#ifdef CONFIG_VMS
 	  printk("uh oh, argv error\n");
-#endif
 		allow_write_access(file);
 		fput(file);
 		//printk("here 7 %x\n",bprm.argc);
@@ -1173,23 +1036,19 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	}
 
 	if ((bprm.envc = count(envp, bprm.p / sizeof(void *))) < 0) {
-#ifdef CONFIG_VMS
 	  printk("uh oh, envp error\n");
-#endif
 		allow_write_access(file);
 		fput(file);
 		//printk("here 6\n");
 		return bprm.envc;
 	}
 
-#ifdef CONFIG_VMS
 #if 0
 	if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
 #endif
 	  retval = rms_prepare_binprm(&bprm);
 #else
 	retval = prepare_binprm(&bprm);
-#endif
 	//printk("here 4\n");
 	if (retval < 0) 
 		goto out; 
@@ -1217,20 +1076,16 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 
 out:
 	/* Something went wrong, return the inode and free the argument pages*/
-#ifdef CONFIG_VMS
 	printk("uh oh, something went wrong error\n");
 #if 0
 	if (((struct _fcb *)file)->fcb$b_type!=DYN$C_FCB) {
 #else
 	  if (0) {
 #endif
-#endif
 	allow_write_access(bprm.file);
 	if (bprm.file)
 		fput(bprm.file);
-#ifdef CONFIG_VMS
 	}
-#endif
 
 	for (i = 0 ; i < MAX_ARG_PAGES ; i++) {
 		struct page * page = bprm.page[i];
@@ -1253,60 +1108,11 @@ void set_binfmt(struct linux_binfmt *new)
 
 int do_coredump(long signr, struct pt_regs * regs)
 {
-#ifndef CONFIG_VMS
-	struct linux_binfmt * binfmt;
-	char corename[6+sizeof(current->pcb$t_lname)+10];
-	struct file * file;
-	struct inode * inode;
-	int retval = 0;
-
-	lock_kernel();
-	binfmt = current->binfmt;
-	if (!binfmt || !binfmt->core_dump)
-		goto fail;
-	if (!current->mm->dumpable)
-		goto fail;
-	current->mm->dumpable = 0;
-	if (current->rlim[RLIMIT_CORE].rlim_cur < binfmt->min_coredump)
-		goto fail;
-
-	memcpy(corename,"core.", 5);
-	corename[4] = '\0';
- 	if (core_uses_pid || atomic_read(&current->mm->mm_users) != 1)
- 		sprintf(&corename[4], ".%d", current->pcb$l_pid);
-	file = filp_open(corename, O_CREAT | 2 | O_NOFOLLOW, 0600);
-	if (IS_ERR(file))
-		goto fail;
-	inode = file->f_dentry->d_inode;
-	if (inode->i_nlink > 1)
-		goto close_fail;	/* multiple links - don't dump */
-	if (d_unhashed(file->f_dentry))
-		goto close_fail;
-
-	if (!S_ISREG(inode->i_mode))
-		goto close_fail;
-	if (!file->f_op)
-		goto close_fail;
-	if (!file->f_op->write)
-		goto close_fail;
-	if (do_truncate(file->f_dentry, 0) != 0)
-		goto close_fail;
-
-	retval = binfmt->core_dump(signr, regs, file);
-
-close_fail:
-	filp_close(file, NULL);
-fail:
-	unlock_kernel();
-	return retval;
-#else
 	return -EPERM;
-#endif
 }
 
 init_phd(struct _phd * phd) {
 	memset(phd,0,sizeof(struct _phd));
-#ifdef CONFIG_MM_VMS
 	// p->pcb$l_phd->phd$q_ptbr=p->mm->pgd; // wait a bit or move it?
 	{
 	  qhead_init(&phd->phd$ps_p0_va_list_flink);
@@ -1336,5 +1142,4 @@ init_phd(struct _phd * phd) {
 	  phd->phd$l_pst_last=PROCSECTCNT-1;
 	  phd->phd$l_pst_free=0;
 	}
-#endif
 }

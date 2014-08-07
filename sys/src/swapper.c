@@ -36,8 +36,6 @@
 
 #include <vfddef.h>
 
-#ifdef CONFIG_VMS
-
 struct mm_struct *swap_mm = &init_mm;
 
 DECLARE_WAIT_QUEUE_HEAD(kswapd_wait);
@@ -93,10 +91,8 @@ int kswapd(void *unused)
 	sys$hiber();
 
 	xqp_init2();
-#ifdef CONFIG_VMS
 	extern void * global_e2_vcb;
 	exttwo_init2(global_e2_vcb);
-#endif
 
 #if 0
 	daemonize();
@@ -106,13 +102,7 @@ int kswapd(void *unused)
 	sigfillset(&tsk->blocked);
 
 	struct file * file=0;
-#ifndef CONFIG_VMS
-	extern int mount_root_vfs;
-	if (mount_root_vfs)
-	  file = filp_open("/vms$common/sysexe/pagefile.sys",O_RDONLY,0);
-#else
 	file = rms_open_exec("[vms$common.sysexe]pagefile.sys");
-#endif
 	if (!IS_ERR(file)) {
 	  char * c, *b, *n;
 	  char buf[1024];
@@ -215,7 +205,6 @@ int __init kswapd_init(void)
 
 #if 0
 module_init(kswapd_init)
-#endif
 #endif
 
 struct _lnmth lnm_sys_dir_table_header;

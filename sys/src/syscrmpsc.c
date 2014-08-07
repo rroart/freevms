@@ -32,7 +32,6 @@
 #include <linux/slab.h>
 
 asmlinkage int exe$crmpsc_wrap(struct struct_crmpsc * s) {
-#ifdef CONFIG_VMS
   int ret;
 #if 0
   int chan=s->chan;
@@ -48,7 +47,6 @@ asmlinkage int exe$crmpsc_wrap(struct struct_crmpsc * s) {
   if (file) fput(file);
 #endif
   return ret;
-#endif
 }
 
 asmlinkage int exe$mgblsc_wrap(struct struct_mgblsc * s) {

@@ -72,7 +72,6 @@ asmlinkage void do_invalid_op(struct pt_regs *, unsigned long);
 unsigned long findpte_new(struct mm_struct *mm, unsigned long address);
 
 //mmg$pagefault()
-#ifdef CONFIG_MM_VMS
 
 signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _mypte * pte) {
   int ipl=getipl();
@@ -826,8 +825,6 @@ vmalloc_fault:
 
 #endif
 
-#ifdef CONFIG_VMS
-
 #if 0
 long myindex=0;
 long mystack[1024];
@@ -1571,5 +1568,3 @@ vmalloc_fault:
 		return;
 	}
 }
-#endif
-#endif

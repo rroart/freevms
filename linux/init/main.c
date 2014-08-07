@@ -642,10 +642,6 @@ asmlinkage void __init start_kernel(void)
 	kernel_puts("puts 9\n");
 	sched_init();
 	kernel_puts("puts 10\n");
-#ifndef CONFIG_VMS
-	softirq_init();
-	kernel_puts("puts 11\n");
-#endif
 	time_init();
 	kernel_puts("puts 12\n");
 	vms_init2();
@@ -700,20 +696,12 @@ asmlinkage void __init start_kernel(void)
 
 	fork_init(mempages);
 	proc_caches_init();
-#ifndef CONFIG_VMS
-	vfs_caches_init(mempages);
-#endif
 	buffer_init(mempages);
 	page_cache_init(mempages);
 #if defined(CONFIG_ARCH_S390)
 	ccwcache_init();
 #endif
 	signals_init();
-#ifndef CONFIG_VMS
-#ifdef CONFIG_PROC_FS
-	proc_root_init();
-#endif
-#endif
 #if defined(CONFIG_SYSVIPC)
 	ipc_init();
 #endif
@@ -768,9 +756,6 @@ static void __init do_initcalls(void)
 
 	//printk("bef flush\n");
 	/* Make sure there is no pending stuff from the initcall sequence */
-#ifndef CONFIG_VMS
-	flush_scheduled_tasks();
-#endif
 }
 
 /*
@@ -845,15 +830,6 @@ static void __init do_basic_setup(void)
 	tc_init();
 #endif
 
-#ifndef CONFIG_VMS
-	/* Networking initialization needs a process context */ 
-	sock_init();
-	printk("%%KERNEL-I-DEBUG, After sock_init\n");
-#endif
-#ifndef CONFIG_VMS
-	start_context_thread();
-	printk("%%KERNEL-I-DEBUG, After start_context_thread\n");
-#endif
 	do_initcalls();
 	printk("%%KERNEL-I-DEBUG, After do_initcalls\n");
 
@@ -869,65 +845,6 @@ static void __init do_basic_setup(void)
 extern void rd_load(void);
 extern void initrd_load(void);
 
-#ifndef CONFIG_VMS
-/*
- * Prepare the namespace - decide what/where to mount, load ramdisks, etc.
- */
-static void prepare_namespace(void)
-{
-#ifdef CONFIG_BLK_DEV_INITRD
-	int real_root_mountflags = root_mountflags;
-	if (!initrd_start)
-		mount_initrd = 0;
-	if (mount_initrd)
-		root_mountflags &= ~MS_RDONLY;
-	real_root_dev = ROOT_DEV;
-#endif
-
-#ifdef CONFIG_BLK_DEV_RAM
-#ifdef CONFIG_BLK_DEV_INITRD
-	if (mount_initrd)
-		initrd_load();
-	else
-#endif
-	rd_load();
-#endif
-
-#ifndef CONFIG_VMS
-	if (mount_root_vfs)
-	/* Mount the root filesystem.. */
-	mount_root();
-
-	mount_devfs_fs ();
-#endif
-
-#ifdef CONFIG_BLK_DEV_INITRD
-	root_mountflags = real_root_mountflags;
-	if (mount_initrd && ROOT_DEV != real_root_dev
-	    && MAJOR(ROOT_DEV) == RAMDISK_MAJOR && MINOR(ROOT_DEV) == 0) {
-		int error;
-		int i, pid;
-
-		pid = kernel_thread(do_linuxrc, "/linuxrc", SIGCHLD);
-		if (pid > 0) {
-			while (pid != wait(&i)) {
-			  //				current->policy |= SCHED_YIELD;
-				//schedule();
-			  SOFTINT_RESCHED_VECTOR;
-			}
-		}
-		if (MAJOR(real_root_dev) != RAMDISK_MAJOR
-		     || MINOR(real_root_dev) != 0) {
-			error = change_root(real_root_dev,"/initrd");
-			if (error)
-				printk(KERN_ERR "Change root to /initrd: "
-				    "error %d\n",error);
-		}
-	}
-#endif
-}
-#endif
-
 extern int mydebug5;
 extern int mydebug6;
 
@@ -936,17 +853,12 @@ int scs_init_done = 0;
 static int init(void * unused)
 {
 	lock_kernel();
-#ifdef CONFIG_VMS
 	user_spaceable();
-#endif
-#ifdef CONFIG_VMS
 	xqp_init2();
 	extern void * global_e2_vcb;
 	exttwo_init2(global_e2_vcb);
-#endif
 	do_basic_setup();
 	printk("%%KERNEL-I-DEBUG, After do_basic_setup\n");
-#ifdef CONFIG_VMS
 	if (mount_root_ext2)
 	  vms_mount();
 	else
@@ -957,15 +869,7 @@ static int init(void * unused)
 	cre_syscommon(vmsdev);
 	int __init kswapd_init(void);
 	kswapd_init();
-#endif
-#ifndef CONFIG_VMS
-	prepare_namespace();
-	printk("%%KERNEL-I-DEBUG, After prepare_namspace\n");
-#endif 
-
-#ifdef CONFIG_VMS
 	probe_units();
-#endif
 
 	/*
 	 * Ok, we have completed the initial bootup, and
@@ -978,10 +882,6 @@ static int init(void * unused)
 	//	mydebug5=1;
 	//	mydebug6=1;
 	printk("%%KERNEL-I-DEBUG, After unlock_kernel\n");
-#ifndef CONFIG_VMS
-	if (mount_root_vfs && open("/dev/console", O_RDWR, 0) < 0)
-		printk("Warning: unable to open an initial console.\n");
-#else
 #if 0
 	open_tty();
 #else
@@ -990,7 +890,6 @@ static int init(void * unused)
 #else
 	void sys_open_term();
 	sys_open_term("opa0:");
-#endif
 #endif
 #endif
 	printk("%%KERNEL-I-DEBUG, Before dup\n");
@@ -1014,7 +913,6 @@ static int init(void * unused)
         init_cwps();
 #endif
 
-#ifdef CONFIG_VMS
 	extern void job_control();
 	kernel_thread(job_control, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
 	extern void Main(void);
@@ -1057,7 +955,6 @@ static int init(void * unused)
 	    scs_init2();
 #endif
 	}
-#endif
 
 #ifdef __i386__
 	if (execute_command)

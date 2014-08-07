@@ -1026,23 +1026,7 @@ static inline void task_unlock(struct task_struct *p)
 static inline char * d_path(struct dentry *dentry, struct vfsmount *vfsmnt,
 				char *buf, int buflen)
 {
-#ifndef CONFIG_VMS
-	char *res;
-	struct vfsmount *rootmnt;
-	struct dentry *root;
-	read_lock(&current->fs->lock);
-	rootmnt = mntget(current->fs->rootmnt);
-	root = dget(current->fs->root);
-	read_unlock(&current->fs->lock);
-	spin_lock(&dcache_lock);
-	res = __d_path(dentry, vfsmnt, root, rootmnt, buf, buflen);
-	spin_unlock(&dcache_lock);
-	dput(root);
-	mntput(rootmnt);
-	return res;
-#else
 	return 0;
-#endif
 }
 
 #endif /* __KERNEL__ */

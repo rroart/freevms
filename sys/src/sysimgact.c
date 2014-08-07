@@ -84,7 +84,6 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
   struct file * f;
   struct _ihd * header=hdrbuf;
   struct _ihd * ehdr32=header;
-#ifdef CONFIG_VMS
   struct _iha * active;
   struct _isd * section;
   struct _ihi * ihid;
@@ -290,22 +289,4 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     r->va_range$ps_start_va=0;
     r->va_range$ps_end_va=img_inadr.va_range$ps_end_va;
   }
-
-#else
-  loff_t pos=0;
-  mm_segment_t fs;
-#ifndef CONFIG_VMS
-  f=open_exec(dscdflnam->dsc$a_pointer);
-  if (f==0) return 0;
-#endif
-#if 0
-  fs = get_fs();
-  set_fs(KERNEL_DS);
-  generic_file_read(f, header, 512, &pos);
-  set_fs(fs);
-#else
-  kernel_read(f, 0, header, 512);
-#endif
-  return exe$imgact_elf(dscdflnam,ehdr32);
-#endif
 }

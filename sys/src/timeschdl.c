@@ -418,12 +418,6 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
     }
 #endif
 
-#ifndef CONFIG_VMS
-    mark_bh(TIMER_BH);
-    if (TQ_ACTIVE(tq_timer))
-      mark_bh(TQUEUE_BH);
-#endif
-
 #ifdef __i386__
 #ifndef CONFIG_X86_LOCAL_APIC
     if (!user_mode(regs))

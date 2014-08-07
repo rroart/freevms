@@ -164,14 +164,10 @@ int shell_init_other(struct _pcb * pcb, struct _pcb * oldpcb, long addr, long ol
   }
   spin_unlock(&mm->page_table_lock);
 
-#ifdef CONFIG_VMS
   int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
   int pfn=mmg$ininewpfn(pcb,pcb->pcb$l_phd,page,pte);
   vmsunlock(&SPIN_MMG, ipl);
   mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
-#else
-  int pfn=_alloc_pages(GFP_KERNEL,0)-mem_map;
-#endif
 #define _PAGE_NEWPAGE 0
   *(unsigned long *)pte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
   *(unsigned long *)oldpte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
@@ -329,14 +325,10 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   }
   spin_unlock(&mm->page_table_lock);
 
-#ifdef CONFIG_VMS
   int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
   int pfn=mmg$ininewpfn(pcb,phd,page,pte);
   vmsunlock(&SPIN_MMG, ipl);
   mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
-#else
-  int pfn=_alloc_pages(GFP_KERNEL,0)-mem_map;
-#endif
 #define _PAGE_NEWPAGE 0
   *(unsigned long *)pte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
   ctl$gl_pcb=pcb;
@@ -428,9 +420,7 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 
     down_write(&oldmm->mmap_sem);
     // not needed? retval = dup_mmap(mm);
-#ifdef CONFIG_MM_VMS
     retval = dup_stuff(mm,tsk->pcb$l_phd);
-#endif
     up_write(&oldmm->mmap_sem);
     
     if (retval)
@@ -508,14 +498,10 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
   //printk("%x %x %x %x\n",swapper_pg_dir,pgd,pmd,pte);
   //printk("%x %x %x %x\n",swapper_pg_dir,oldpgd,oldpmd,oldpte);
 
-#ifdef CONFIG_VMS
   int ipl = vmslock(&SPIN_MMG, IPL$_MMG);
   int pfn=mmg$ininewpfn(pcb,phd,page,pte);
   vmsunlock(&SPIN_MMG, ipl);
   mem_map[pfn].pfn$q_bak=*(unsigned long *)pte;
-#else
-  int pfn=_alloc_pages(GFP_KERNEL,0)-mem_map;
-#endif
 #define _PAGE_NEWPAGE 0
   *(unsigned long *)pte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
   *(unsigned long *)oldpte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
@@ -555,7 +541,6 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
    \param addr address
 */
 
-#ifdef CONFIG_VMS
 int user_spaceable_addr(void * addr) {
 #ifdef __i386__
   struct _pcb * pcb = ctl$gl_pcb;
@@ -719,7 +704,6 @@ unsigned long ctl$gl_usrundwn_exec P1PP ;
 unsigned long ctl$ag_clidata P1PP ;
 unsigned long ctl$gl_fixuplnk P1PP ;
 unsigned long ctl$gl_iaflnkptr P1PP ;
-#endif
 
 /**
    \brief syscall code to be used in the future?

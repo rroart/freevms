@@ -544,8 +544,6 @@ mypfncheckaddr(){
 #endif 
 }
 
-#ifdef CONFIG_VMS
-
 int mmg$relpfn(signed int pfn) {
   pte_t * pte = mem_map[pfn].pfn$q_pte_index;
   *(unsigned long *)pte&=~(_PAGE_PRESENT|_PAGE_TYP1);
@@ -588,5 +586,3 @@ mmg$delpfnlst(int type, int pfn) {
 #endif
   mmg$relpfn(pfn);
 }
-
-#endif

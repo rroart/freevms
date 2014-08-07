@@ -89,10 +89,6 @@ void show_mem(void)
 		total++;
 		if (PageReserved(mem_map+i))
 			reserved++;
-#ifndef CONFIG_VMS
-		else if (PageSwapCache(mem_map+i))
-			cached++;
-#endif
 		else if (page_count(mem_map+i))
 			shared += page_count(mem_map+i) - 1;
 	}
@@ -413,15 +409,6 @@ void __init init_memory_mapping(void)
 
 void __init zap_low_mappings (void)
 {
-#ifndef CONFIG_VMS
-	int i;
-	for (i = 0; i < NR_CPUS; i++) {
-		if (cpu_pda[i].level4_pgt) 
-			cpu_pda[i].level4_pgt[0] = 0; 
-	}
-
-	flush_tlb_all();
-#endif
 }
 
 #ifndef CONFIG_DISCONTIGMEM

@@ -41,15 +41,6 @@ int alloc_kiobuf_bhs(struct kiobuf * kiobuf)
 	int i;
 
 	for (i = 0; i < KIO_MAX_SECTORS; i++)
-#ifndef CONFIG_VMS
-		if (!(kiobuf->bh[i] = kmem_cache_alloc(bh_cachep, SLAB_KERNEL))) {
-			while (i--) {
-				kmem_cache_free(bh_cachep, kiobuf->bh[i]);
-				kiobuf->bh[i] = NULL;
-			}
-			return -ENOMEM;
-		}
-#else
 		if (!(kiobuf->bh[i] = kmalloc(sizeof (struct buffer_head*), GFP_KERNEL))) {
 			while (i--) {
 				kfree(kiobuf->bh[i]);
@@ -57,7 +48,6 @@ int alloc_kiobuf_bhs(struct kiobuf * kiobuf)
 			}
 			return -ENOMEM;
 		}
-#endif
 	return 0;
 }
 
@@ -66,11 +56,7 @@ void free_kiobuf_bhs(struct kiobuf * kiobuf)
 	int i;
 
 	for (i = 0; i < KIO_MAX_SECTORS; i++) {
-#ifndef CONFIG_VMS
-		kmem_cache_free(bh_cachep, kiobuf->bh[i]);
-#else
 		kfree(kiobuf->bh[i]);
-#endif
 		kiobuf->bh[i] = NULL;
 	}
 }
@@ -155,9 +141,6 @@ void kiobuf_wait_for_io(struct kiobuf *kiobuf)
 repeat:
 	set_task_state(tsk, TASK_UNINTERRUPTIBLE);
 	if (atomic_read(&kiobuf->io_count) != 0) {
-#ifndef CONFIG_VMS
-		run_task_queue(&tq_disk);
-#endif
 		schedule();
 		if (atomic_read(&kiobuf->io_count) != 0)
 			goto repeat;
