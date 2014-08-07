@@ -222,16 +222,8 @@ static char * plus_colon(char * name) {
 }
 int exe$procstrt(struct _pcb * p) {
 #if 0
-#ifdef __arch_um__
-  asm volatile ("movl 0x9ffffff0,%esp");
-#else
   asm volatile ("movl 0xbffffff0,%esp");
 #endif
-#endif
-#ifdef __arch_um__
-  //  p=ctl$gl_pcb;
-  flush_tlb_mm(p->mm);
-#else
 #ifdef __i386__
 #if 0
   __asm__ ("movl %%edi,%0; ":"=r" (p));
@@ -247,7 +239,6 @@ int exe$procstrt(struct _pcb * p) {
 #endif
 #endif
   // warning: very risky one, chance
-#endif
   // get pcb and copy pqb
   // store rms dispatcher address
   // initialize dispatch vector for system services
@@ -308,12 +299,6 @@ int exe$procstrt(struct _pcb * p) {
   p->pcb$l_priv=ctl$gq_procpriv;
 
   int len = strlen(pqb->pqb$t_image);
-
-#ifdef __arch_um__
-  struct pt_regs * regs = &p;
-  regs = &current->thread.regs;
-#else
-#endif
 
   // not?  init_p1pp(p,p->pcb$l_phd);
   lnm_init_prc(current);

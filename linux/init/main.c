@@ -39,9 +39,6 @@
 #include <linux/iobuf.h>
 #include <linux/bootmem.h>
 #include <linux/tty.h>
-#ifdef __arch_um__
-#include <asm-i386/hw_irq.h>
-#endif
 
 #include <asm/io.h>
 #include <asm/bugs.h>
@@ -115,9 +112,7 @@ void early_printk(const char *fmt, ...);
 #error Sorry, your GCC is too old. It builds incorrect kernels.
 #endif
 
-#ifndef __arch_um__
 extern char _stext, _etext;
-#endif
 extern char *linux_banner;
 
 static int init(void *);
@@ -1064,13 +1059,6 @@ static int init(void * unused)
 	}
 #endif
 
-#ifdef CONFIG_VMS
-#ifdef __arch_um__
- go:
-	exe$hiber();
-	goto go;
-#endif
-#endif
 #ifdef __i386__
 	if (execute_command)
 		execve(execute_command,argv_init,envp_init);
@@ -1192,12 +1180,6 @@ void kernel_puts(const char *s)
   outb_p(0xff & (pos >> 1), vidport+1);
 }
 
-#endif
-
-#ifdef __arch_um__
-void kernel_puts(const char *s) {
-  printk("%s",s);
-}
 #endif
 
 #ifdef __x86_64__

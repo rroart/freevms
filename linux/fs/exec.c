@@ -335,12 +335,8 @@ int setup_arg_pages(struct linux_binprm *bprm)
 #endif
 	int i;
 
-#ifdef __arch_um__
-#define STACK_TOP1 0x7ffe0000
-#else
 #define STACK_TOP1 STACK_TOP
 #define STACK_TOP1 0x7ffe0000
-#endif
 
 	// check. related to CLI supervisor
 #ifdef __i386__

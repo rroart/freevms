@@ -90,7 +90,7 @@ do { __asm__ __volatile__ ( \
 ); \
 } while (0);
 
-#if defined(CONFIG_VMS) && !defined(__arch_um__)
+#if defined(CONFIG_VMS)
 #if 0
 #define SOFTINT_POWER_VECTOR do { __asm__ __volatile__ ("int $0xaf\n"); } while (0);
 #define SOFTINT_EMB_VECTOR do { __asm__ __volatile__ ("int $0xae\n"); } while (0);
@@ -233,16 +233,10 @@ extern void send_IPI(int dest, int vector);
 
 extern unsigned long io_apic_irqs;
 
-#ifndef __arch_um__
 extern atomic_t irq_err_count;
-#endif
 extern atomic_t irq_mis_count;
 
-#ifdef __arch_um__
-extern unsigned long _stext, _etext;
-#else
 extern char _stext, _etext;
-#endif
 
 /* PUSHR_ALL to PUSHPSL corresponds to stuff in entry.S */
 

@@ -756,16 +756,10 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
     b+=16;
     printk("maybe creating remote ddb %s on other node\n",devnam);
 #ifdef CONFIG_VMS
-#ifdef __arch_um__
-    if (0==strncmp(devnam,"daa",3)) 
-      ddb=ubd_iodb_vmsinit();
-#endif
-#ifndef __arch_um__
     if (0==strncmp(devnam,"dqa",3)) {
       ddb=ide_iodb_vmsinit(1);
       du_iodb_clu_vmsinit(ddb->ddb$ps_ucb);
     }
-#endif
 #endif
     if (0==strncmp(devnam,"dua",3)) 
       ddb=du_iodb_vmsinit();
@@ -783,18 +777,12 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
       devnam[3]=48+i;
       ucb=0;
 #ifdef CONFIG_VMS
-#ifdef __arch_um__
-      if (0==strncmp(devnam,"daa",3)) 
-	ucb = ubd_iodbunit_vmsinit(ddb,i,&d);
-#endif
-#ifndef __arch_um__
       if (0==strncmp(devnam,"dqa",3)) 
 	ucb = ide_iodbunit_vmsinit(ddb,i,&d);
       if (0==strncmp(devnam,"dqa",3)) 
 	((struct _mscp_ucb *)ucb)->ucb$w_mscpunit=ucb->ucb$w_unit;
       if (0==strncmp(devnam,"dqa",3)) 
 	printk("UCB MSCPUNIT %x\n",((struct _mscp_ucb *)ucb)->ucb$w_mscpunit);
-#endif
 #endif
       if (0==strncmp(devnam,"dua",3)) 
 	ucb = du_iodbunit_vmsinit(ddb,i,&d);
