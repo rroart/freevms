@@ -833,12 +833,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 #endif
 	//printk("phd %x %x %x\n",tsk,tsk->pcb$l_pid,tsk->pcb$l_phd);
 	//printk("phd %x %x %x\n",current,current->pcb$l_pid,current->pcb$l_phd);
-#ifndef __arch_um__
 	retval = copy_thread(0, clone_flags, stack_start, stack_size, p, regs);
-#else
-	if (uml_map==0) BUG();
-	retval = copy_thread(uml_map, clone_flags, stack_start, stack_size, p, regs);
-#endif
 	if (retval)
 		goto bad_fork_cleanup_mm;
 	p->semundo = NULL;

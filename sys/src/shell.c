@@ -231,15 +231,11 @@ void init_sys_p1pp() {
   pgd = pgd_offset_k(page);
 #endif
 
-#ifdef __arch_um__
-  *(unsigned long *)pgd=pt|_PAGE_PRESENT|_PAGE_RW;
-#else
 #ifdef __i386__
   *(unsigned long *)pgd=__pa(pt)|_PAGE_PRESENT|_PAGE_RW;
 #else
 #if 0
   *(unsigned long *)pgd=__pa(pu)|_PAGE_PRESENT|_PAGE_RW; // already there
-#endif
 #endif
 #endif
 
@@ -257,11 +253,6 @@ void init_sys_p1pp() {
   *(unsigned long *)pmd=__pa(pt)|_PAGE_PRESENT|_PAGE_RW;
 #endif
 
-#ifdef __arch_um__
-  pte = pte_offset(pmd, page);
-  pte2 = pte_offset(pmd, x2p);
-  pte3 = pte_offset(pmd, e2p);
-#else
 #ifdef __i386__
   pte = pte_offset(((pmd_t*)__pa(pmd)), page);
   pte2 = pte_offset(((pmd_t*)__pa(pmd)), x2p);
@@ -271,7 +262,6 @@ void init_sys_p1pp() {
   pte2 = pte_offset(((pmd_t*)/*__pa*/(pmd)), x2p);
   pte3 = pte_offset(((pmd_t*)/*__pa*/(pmd)), e2p);
 #endif
-#endif
 
   char c[40];
   sprintf(c,"%lx %lx %lx %lx %lx\n",swapper_pg_dir,pgd,pud,pmd,pte);
@@ -279,27 +269,10 @@ void init_sys_p1pp() {
   kernel_puts("pte\n");
   kernel_puts(c);
 
-#ifdef __arch_um__
-  long pfn=pa>>12;
-  long pfn2=x2>>12;
-  long pfn3=e2>>12;
-#else
   long pfn=__pa(pa)>>12;
   long pfn2=__pa(x2)>>12;
   long pfn3=__pa(e2)>>12;
-#endif
 
-#ifdef __arch_um__
-  *(unsigned long *)pte=((unsigned long)(pfn<<PAGE_SHIFT))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-  unmap(page,4096);
-  map(page, pte_address(*pte), PAGE_SIZE, 1, 1, 0);
-  //  my_fix_range(mm, page, page + PAGE_SIZE, 1);
-  ctl$gl_pcb=&init_task_union;
-#if 0
-  flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
-#endif
-  memset(page,0,PAGE_SIZE); // must zero content also
-#else
 #define _PAGE_NEWPAGE 0
   *(unsigned long *)pte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
   *(unsigned long *)pte2=((unsigned long)/*__va*/(pfn2*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
@@ -321,7 +294,6 @@ void init_sys_p1pp() {
   kernel_puts("memset page\n");
   if ( (*(unsigned long*)0x7ffff000)==0)
     kernel_puts("not 42\n");
-#endif
 
   init_p1pp_data(pcb,phd,0);
   ctl$gq_procpriv=ctl$gl_pcb->pcb$l_priv;
@@ -365,14 +337,6 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
 #else
   int pfn=_alloc_pages(GFP_KERNEL,0)-mem_map;
 #endif
-#ifdef __arch_um__
-  *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-#if 0
-  flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
-#endif
-  my_fix_range(mm, page, page + PAGE_SIZE, 1);
-  memset(page,0,PAGE_SIZE); // must zero content also
-#else
 #define _PAGE_NEWPAGE 0
   *(unsigned long *)pte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
   ctl$gl_pcb=pcb;
@@ -403,7 +367,6 @@ void init_p1pp(struct _pcb * pcb, struct _phd * phd) {
   printk("memset page\n");
   if ( (*(unsigned long*)0x7ffff000)==0)
     printk("not 42\n");
-#endif
 #endif
 #if 0
   do_mmap_pgoff(0,page,4096,PROT_READ | PROT_WRITE,MAP_FIXED | MAP_PRIVATE,0);
@@ -553,17 +516,6 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
 #else
   int pfn=_alloc_pages(GFP_KERNEL,0)-mem_map;
 #endif
-#ifdef __arch_um__
-  *(unsigned long *)pte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-  *(unsigned long *)oldpte=((unsigned long)__va(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-  uml_map=__va(pfn*PAGE_SIZE);
-#if 0
-  flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
-  flush_tlb_range(oldpcb->mm, oldpage, oldpage + PAGE_SIZE);
-#endif
-  my_fix_range(oldmm, oldpage, oldpage + PAGE_SIZE, 1);
-  memset(oldpage,0,PAGE_SIZE); // must zero content also
-#else
 #define _PAGE_NEWPAGE 0
   *(unsigned long *)pte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
   *(unsigned long *)oldpte=((unsigned long)/*__va*/(pfn*PAGE_SIZE))|_PAGE_NEWPAGE|_PAGE_PRESENT|_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
@@ -588,7 +540,6 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
   printk("memset page\n");
   if ( (*(unsigned long*)0x7fffe000)==0)
     printk("not 42\n");
-#endif
 #endif
 
   init_p1pp_data(pcb,phd,-4096);

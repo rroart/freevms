@@ -176,14 +176,10 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
 
     img_inadr.va_range$ps_start_va=base+(section->isd$v_vpn<<PAGE_SHIFT);
     img_inadr.va_range$ps_end_va=img_inadr.va_range$ps_start_va+section->isd$w_pagcnt*PAGE_SIZE;
-#ifdef __arch_um__
-    exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x51 ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
-#else
     int rwfl=0;
     if (rw)
       rwfl=_PAGE_RW;
     exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x45|rwfl ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
-#endif 
     // printk("range %x %x\n",img_inadr.va_range$ps_start_va,img_inadr.va_range$ps_end_va);
     exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/chan,0,section->isd$l_vbn,0,0);
   skip_it:
@@ -277,14 +273,10 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
 
     img_inadr.va_range$ps_start_va=section->isd$v_vpn<<PAGE_SHIFT;
     img_inadr.va_range$ps_end_va=img_inadr.va_range$ps_start_va+section->isd$w_pagcnt*PAGE_SIZE;
-#ifdef __arch_um__
-    exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x51 ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
-#else
     int rwfl=0;
     if (rw)
       rwfl=_PAGE_RW;
     exe$create_region_32 (section->isd$w_pagcnt*PAGE_SIZE,0x45|rwfl ,0x187500   ,0,0,0,img_inadr.va_range$ps_start_va);
-#endif
     //printk("range %x %x\n",img_inadr.va_range$ps_start_va,img_inadr.va_range$ps_end_va);
     exe$crmpsc(&img_inadr,0,0,0,0,0,0,/*(unsigned short int)*/f,0,section->isd$l_vbn,0,0);
 #endif

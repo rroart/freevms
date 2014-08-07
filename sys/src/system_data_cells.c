@@ -576,11 +576,6 @@ unsigned long exe$gl_sysucb;
 unsigned long exe$gl_sysuic;
 unsigned long exe$gl_tenusec;
 unsigned long exe$gl_tickadjust;
-#if 0
-#ifdef __arch_um__
-unsigned long exe$gl_ticklength=100000;
-#endif
-#endif
 #ifdef __i386
 unsigned long exe$gl_ticklength=100000;
 #endif
@@ -2203,10 +2198,6 @@ void __init vms_init3(void) {
   mmg$gl_sysphd=&system_phd;
   init_phd(&system_phd);
 
-#ifdef __arch_um__
-  gettimeofday(&xtime, NULL);
-#endif
-  
   csid = xtime.tv_sec;
 }
 

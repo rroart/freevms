@@ -370,16 +370,6 @@ extern struct page * FASTCALL(_alloc_pages(unsigned int gfp_mask, unsigned int o
 extern struct page * FASTCALL(__alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_t *zonelist));
 extern struct page * alloc_pages_node(int nid, unsigned int gfp_mask, unsigned int order);
 
-#ifdef __arch_um__
-#ifndef HAVE_ARCH_VALIDATE
-static inline struct page *arch_validate(struct page *page, 
-                                        unsigned int gfp_mask, int order)
-{
-        return(page);
-}
-#endif
-#endif
-
 static inline struct page * alloc_pages(unsigned int gfp_mask, unsigned int order)
 {
 	/*
@@ -387,11 +377,7 @@ static inline struct page * alloc_pages(unsigned int gfp_mask, unsigned int orde
 	 */
 	if (order >= MAX_ORDER)
 		return NULL;
-#ifndef __arch_um__
 	return _alloc_pages(gfp_mask, order);
-#else
-	return arch_validate(_alloc_pages(gfp_mask, order), gfp_mask, order);
-#endif
 }
 
 #define alloc_page(gfp_mask) alloc_pages(gfp_mask, 0)

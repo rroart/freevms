@@ -61,9 +61,6 @@
 #include <cpbdef.h>
 #include <rsndef.h>
 #include <statedef.h>
-#ifdef __arch_um__
-#include <asm-i386/hw_irq.h>
-#endif
 
 #undef DEBUG_SCHED
 

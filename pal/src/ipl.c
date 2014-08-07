@@ -64,15 +64,6 @@ inline void setpslmod(int mod) {
 
 inline asmlinkage void pushpsli(void) {
   pushpsl();
-#if 0
-#ifdef __arch_um__
-  current->psl_cur_mod=0;
-  current->psl_prv_mod=0;
-  current->psl_is=1;
-  current->psl_ipl=22;
-  smp$gl_cpu_data[0]->cpu$b_ipl=current->psl_ipl;
-#endif
-#endif
 }
 
 /**
@@ -374,10 +365,6 @@ inline char intr_blocked(unsigned char this) {
       mydebug6=1;
 #else
       mydebugi=1;
-#ifdef __arch_um__
-      setipl(0);  // a fix for an error of unknown origin
-      printk("lockup fixed by setting ipl 0\n");
-#endif
 #endif
     }
     mysti(flag);
@@ -569,20 +556,3 @@ long inline mycli(void) {
 }
 #endif
 
-#ifdef __arch_um__
-void inline mysti(int flags) { 
-  in_atomic=0;
-  if (flags) unblock_signals();
-  vmsunlock(&SPIN_ATOMIC,-1);
-}
-
-int inline mycli(void) {
-  int retval=timer_on;
-  vmslock(&SPIN_ATOMIC,-1);
-  if (in_atomic && in_atomic==current->pcb$l_pid) panic("test\n");
-  if (in_atomic && in_atomic!=current->pcb$l_pid) printk("halfpancimycli\n");
-  block_signals();
-  in_atomic=current->pcb$l_pid;
-  return retval;
-}
-#endif
