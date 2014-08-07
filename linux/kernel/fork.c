@@ -916,9 +916,6 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	if (p->ptrace & PT_PTRACED)
 		send_sig(SIGSTOP, p, 1);
 	//printk("fork befwak\n");
-#ifndef CONFIG_VMS
-	wake_up_process(p);		/* do this last */
-#else
 	p->state = TASK_INTERRUPTIBLE;
 	p->pcb$w_state = SCH$C_HIB;
 	((struct _wqh *)sch$gq_mwait)->wqh$l_wqcnt++; // temp fix
@@ -927,7 +924,6 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	sch$rse(p,PRI$_RESAVL,EVT$_WAKE); // check if this is right
 	vmsunlock(&SPIN_MMG,-1);
 	vmsunlock(&SPIN_SCHED,0);
-#endif
 	//	wake_up_process2(p,PRI$_TICOM);		/* do this last */
 	++total_forks;
 	if (clone_flags & CLONE_VFORK)
