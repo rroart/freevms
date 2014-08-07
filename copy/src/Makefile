@@ -1,6 +1,7 @@
 FLAGS = -static
 
-all: i386/copy${EXE} i386/copy${NOEXE} i386/copy${EXE_ELF}
+all: i386/copy${EXE} i386/copy${NOEXE}
+#i386/copy${EXE_ELF}
 
 clean:
 	rm *.o i386/*

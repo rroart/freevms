@@ -6,7 +6,8 @@ LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux
 
 FLAGS = -static
 
-all: set.a show.a i386/create${NOEXE} i386/create${EXE} i386/create${EXE_ELF} i386/type${NOEXE} i386/type${EXE} i386/type${EXE_ELF} i386/show${NOEXE} i386/set${NOEXE}
+all: set.a show.a i386/create${NOEXE} i386/create${EXE} i386/type${NOEXE} i386/type${EXE} i386/show${NOEXE} i386/set${NOEXE}
+#i386/create${EXE_ELF} i386/type${EXE_ELF} 
 
 clean:
 	rm *.o *.a i386/*
