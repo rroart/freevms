@@ -6,7 +6,8 @@ include $(TOPDIR)/Rules.make
 
 FLAGS = -static
 
-all: i386/vmount${NOEXE} i386/vmount${EXE} i386/vmount${EXE_ELF}
+all: i386/vmount${NOEXE} i386/vmount${EXE}
+#i386/vmount${EXE_ELF}
 
 clean:
 	rm *.o *.a i386/*

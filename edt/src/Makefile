@@ -39,7 +39,8 @@ CC = gcc -g -O2 -c
 
 EXTERNAL =
 
-all: $(OBJS) i386/edt${EXE} i386/edt${NOEXE} i386/edt${EXE_ELF}
+all: $(OBJS) i386/edt${EXE} i386/edt${NOEXE}
+#i386/edt${EXE_ELF}
 
 clean:
 	rm *.o i386/*

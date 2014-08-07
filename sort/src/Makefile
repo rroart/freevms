@@ -10,7 +10,8 @@ SORTLIB_PIC = sortrtl_pic.a
 ELFLIB = i386/sortrtl$(EXE_ELF)
 EXELIB = i386/sortrtl$(EXE)
 
-all : $(SORTLIB) $(SORTLIB_PIC) $(ELFLIB) $(EXELIB) tests
+all : $(SORTLIB) $(SORTLIB_PIC) $(EXELIB) tests
+#$(ELFLIB)
 
 install: all
 	install -d ../../rooti386/vms"$$"common/syslib
