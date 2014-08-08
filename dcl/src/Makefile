@@ -25,12 +25,16 @@ OBJS = cli.o clicall.o cliexpr.o
 i386/dcl${NOEXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL)
 	install -d i386
 ifeq ($(ARCH),i386)
-	gcc -s -nostdlib -static -Wl,-Telf_i386.x $(OBJS) $(EXTERNAL) $(VMSLIBS) $(OLDLIBDL_I386) $(OLDLIBELF_I386) -o i386/dcl${NOEXE} $(OLDCRT1_I386) $(OLDCRTI_I386) $(OLDLIBC_I386) -lgcc_eh -lgcc $(OLDLIBC_I386) 
-	gcc -g -nostdlib -static -Wl,-Telf_i386.x $(OBJS) $(EXTERNAL) $(VMSLIBS) $(OLDLIBDL_I386) $(OLDLIBELF_I386) -o i386/dcld${NOEXE} $(OLDCRT1_I386) $(OLDCRTI_I386) $(OLDLIBC_I386) -lgcc_eh -lgcc $(OLDLIBC_I386) 
+	gcc -s -static -Wl,-Telf_i386.x -L$(OLDLIBCDIR_I386) -L$(OLDLIBELFDIR_I386) $(OBJS) $(EXTERNAL) $(VMSLIBS) -ldl -lelf -o i386/dcl${NOEXE}
+	gcc -g -static -Wl,-Telf_i386.x -L$(OLDLIBCDIR_I386) -L$(OLDLIBELFDIR_I386) $(OBJS) $(EXTERNAL) $(VMSLIBS) -ldl -lelf -o i386/dcld${NOEXE}
+#	gcc -s -nostdlib -static -Wl,-Telf_i386.x $(OBJS) $(EXTERNAL) $(VMSLIBS) $(OLDLIBDL_I386) $(OLDLIBELF_I386) -o i386/dcl${NOEXE} $(OLDCRT1_I386) $(OLDCRTI_I386) /usr/lib/gcc/i486-linux-gnu/4.4.5/crtbeginT.o $(OLDLIBC_I386) -lgcc_eh -lgcc $(OLDLIBC_I386) /usr/lib/gcc/i486-linux-gnu/4.4.5/crtend.o $(OLDCRTN_I386) 
+#	gcc -g -nostdlib -static -Wl,-Telf_i386.x $(OBJS) $(EXTERNAL) $(VMSLIBS) $(OLDLIBDL_I386) $(OLDLIBELF_I386) -o i386/dcld${NOEXE} $(OLDCRT1_I386) $(OLDCRTI_I386) $(OLDLIBC_I386) -lgcc_eh -lgcc $(OLDLIBC_I386) $(OLDCRTN_I386) 
 endif
 ifeq ($(ARCH),x86_64)
-	gcc -s -nostdlib -static -Wl,-Telf_x86_64.x $(OBJS) $(EXTERNAL) $(VMSLIBS) $(OLDLIBDL_AMD64) $(OLDLIBELF_AMD64) -o i386/dcl${NOEXE} $(OLDCRT1_AMD64) $(OLDCRTI_AMD64) $(OLDLIBC_AMD64) -lgcc_eh -lgcc $(OLDLIBC_AMD64) 
-	gcc -g -nostdlib -static -Wl,-Telf_x86_64.x $(OBJS) $(EXTERNAL) $(VMSLIBS) $(OLDLIBDL_AMD64) $(OLDLIBELF_AMD64) -o i386/dcld${NOEXE} $(OLDCRT1_AMD64) $(OLDCRTI_AMD64) $(OLDLIBC_AMD64) -lgcc_eh -lgcc $(OLDLIBC_AMD64) 
+	gcc -s -static -Wl,-Telf_x86_64.x $(OBJS) $(EXTERNAL) $(VMSLIBS) -ldl -lelf -o i386/dcl${NOEXE}
+	gcc -g -static -Wl,-Telf_x86_64.x $(OBJS) $(EXTERNAL) $(VMSLIBS) -ldl -lelf -o i386/dcld${NOEXE}
+#	gcc -s -nostdlib -static -Wl,-Telf_x86_64.x $(OBJS) $(EXTERNAL) $(VMSLIBS) $(OLDLIBDL_AMD64) $(OLDLIBELF_AMD64) -o i386/dcl${NOEXE} $(OLDCRT1_AMD64) $(OLDCRTI_AMD64) $(OLDLIBC_AMD64) -lgcc_eh -lgcc $(OLDLIBC_AMD64) $(OLDCRTN_AMD64)
+#	gcc -g -nostdlib -static -Wl,-Telf_x86_64.x $(OBJS) $(EXTERNAL) $(VMSLIBS) $(OLDLIBDL_AMD64) $(OLDLIBELF_AMD64) -o i386/dcld${NOEXE} $(OLDCRT1_AMD64) $(OLDCRTI_AMD64) $(OLDLIBC_AMD64) -lgcc_eh -lgcc $(OLDLIBC_AMD64) $(OLDCRTN_AMD64) 
 endif
 
 i386/dcl${EXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL)

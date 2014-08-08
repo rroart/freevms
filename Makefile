@@ -39,6 +39,10 @@ export EXTERNAL_PIC = $(TOPDIR)/cdu/src/cdu_pic.a
 export EXTERNAL2 = $(TOPDIR)/cdu/src/cdu2.a
 export EXTERNAL2_PIC = $(TOPDIR)/cdu/src/cdu2_pic.a
 
+export OLDLIBCDIR_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/lib
+export OLDLIBCDIR_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/lib
+export OLDLIBELFDIR_I386 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_i386/usr/lib
+export OLDLIBELFDIR_AMD64 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_amd64/usr/lib
 export OLDLIBC_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/lib/libc.a
 export OLDLIBC_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/lib/libc.a
 export OLDLIBDL_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/lib/libdl.a
@@ -47,6 +51,8 @@ export OLDCRT1_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/
 export OLDCRT1_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/lib/crt1.o
 export OLDCRTI_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/lib/crti.o
 export OLDCRTI_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/lib/crti.o
+export OLDCRTN_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/lib/crtn.o
+export OLDCRTN_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/lib/crtn.o
 export OLDLIBELF_I386 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_i386/usr/lib/libelf.a
 export OLDLIBELF_AMD64 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_amd64/usr/lib/libelf.a
 
