@@ -22,4 +22,6 @@ cd ..
 	(cd drivers/ide; ln -s ../../../driver/src/id/ide-pci.c myide-pci.c )
 	(cd drivers/ide; ln -s ../../../driver/src/id/ide-dma.c myide-dma.c )
 
+(cd debian; for X in *.deb; do dpkg -x $X `echo $X | sed -e "s/.deb//"`; done)
+
 echo you have read the HOWTO and done a make in ..?
