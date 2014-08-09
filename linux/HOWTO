@@ -31,14 +31,9 @@ cd ..
 cd freevms386.iomm
 make doxygen
 make bzImage
-make download-bliss
-make build-bliss (run twice, for some reason first run quits with an error)
 make download-linker
 make build-linker
-make download-grub
-make build-grub
 make vmsall
-make telnet (32-bit only, and remember to change close to close2 in routines.b32)
 make rootinstall
 make image (as root)
 make image-install (as root)
@@ -50,6 +45,13 @@ To make VirtualBox images, do make vbimage, make createvb
 and do VBoxManage startvm FreeVMS
 (You may have to edit VirtualBox.xml and remove images yourself)
 Enable IO Apic
+
+Not to be done anymore:
+make download-bliss
+make build-bliss (run twice, for some reason first run quits with an error)
+make download-grub
+make build-grub (for the time being, use a premade a.img instead)
+make telnet (32-bit only, and remember to change close to close2 in routines.b32)
 
 Next see the USE file (after compiling or installing bochs).
 
