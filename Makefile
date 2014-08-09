@@ -11,6 +11,7 @@ export LIBGCC = $(shell gcc -print-libgcc-file-name)
 export LIBGCC_EH = $(shell gcc -print-file-name=libgcc_eh.a)
 export LIBGCC += $(LIBGCC_EH)
 
+# this is only used by exe_ele, which is going away after cleaning
 export LIBC = /usr/lib/libc.a
 
 export EXE = .exe
@@ -24,21 +25,9 @@ export VMSLIBS = $(TOPDIR)/librtl/src/librtl.a $(TOPDIR)/starlet/src/starlet.a
 export VMSLIBS_PIC = $(TOPDIR)/librtl/src/librtl_pic.a $(TOPDIR)/starlet/src/starlet_pic.a
 export VMSDLIBS_EXE = $(TOPDIR)/librtl/src/i386/librtl$(EXE) $(TOPDIR)/starlet/src/i386/starlet$(EXE)
 export VMSDLIBS_EXE_ELF = $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF) $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
-export LINKER = $(TOPDIR)/linker/src/linker
 
-export LINKPRE = -Bstatic
-#export LINKPRE = -Bstatic -s 
-export LINKPOST = /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/libc.a
-
-export ROOTI386 = $(TOPDIR)/rooti386
-export ROOTI386_COMMON = $(TOPDIR)/rooti386/vms"$$$$"common
-export ROOTI386_COMMON_SYSEXE = $(TOPDIR)/rooti386/vms"$$$$"common/sysexe
-
-export EXTERNAL = $(TOPDIR)/cdu/src/cdu.a
-export EXTERNAL_PIC = $(TOPDIR)/cdu/src/cdu_pic.a
-export EXTERNAL2 = $(TOPDIR)/cdu/src/cdu2.a
-export EXTERNAL2_PIC = $(TOPDIR)/cdu/src/cdu2_pic.a
-
+export OLDLIBCINCLUDEDIR_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/include
+export OLDLIBCINCLUDEDIR_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/include
 export OLDLIBCDIR_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/lib
 export OLDLIBCDIR_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/lib
 export OLDLIBELFDIR_I386 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_i386/usr/lib
@@ -55,6 +44,32 @@ export OLDCRTN_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/
 export OLDCRTN_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/lib/crtn.o
 export OLDLIBELF_I386 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_i386/usr/lib/libelf.a
 export OLDLIBELF_AMD64 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_amd64/usr/lib/libelf.a
+
+export LINKER = $(TOPDIR)/linker/src/linker
+
+SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ -e s/arm.*/arm/ -e s/sa110/arm/)
+ARCH := $(SUBARCH)
+export LINKPRE = -Bstatic
+#export LINKPRE = -Bstatic -s 
+# for use with freevms linker, use old libs
+ifeq ($(ARCH),i386)
+export LINKPOST = $(OLDCRT1_I386) $(OLDCRTI_I386) $(OLDLIBC_I386)
+#so far only for edt
+export OLDLIBCINCLUDEDIR = $(OLDLIBCINCLUDEDIR_I386)
+endif
+ifeq ($(ARCH),x86_64)
+export LINKPOST = /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/libc.a
+export OLDLIBCINCLUDEDIR = /usr/include
+endif
+
+export ROOTI386 = $(TOPDIR)/rooti386
+export ROOTI386_COMMON = $(TOPDIR)/rooti386/vms"$$$$"common
+export ROOTI386_COMMON_SYSEXE = $(TOPDIR)/rooti386/vms"$$$$"common/sysexe
+
+export EXTERNAL = $(TOPDIR)/cdu/src/cdu.a
+export EXTERNAL_PIC = $(TOPDIR)/cdu/src/cdu_pic.a
+export EXTERNAL2 = $(TOPDIR)/cdu/src/cdu2.a
+export EXTERNAL2_PIC = $(TOPDIR)/cdu/src/cdu2_pic.a
 
 vmsall:
 	for X in $(VMSSUBDIRS); do \
@@ -106,7 +121,7 @@ rootinstall:
 		make install; \
 		cd ../../..; \
 	done; \
-	make -f Makefile.linux install
+#	make -f Makefile.linux install
 
 image-install:
 	make rootinstall; \

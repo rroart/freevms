@@ -48,31 +48,7 @@ mount -t ext2 /dev/loop0 /mnt
 
 mkdir /mnt/boot
 
-#mkdir /mnt/dev
-#(cd /mnt/dev; /dev/MAKEDEV hda hdb fd ptyp console )
-
-mkdir -p /mnt/bin /mnt/sbin /mnt/etc /mnt/usr /mnt/usr/sbin /mnt/usr/bin /mnt/lib
-
-cd /bin
-cp -pi /bin/bash-static /bin/sash /mnt/bin
-#cp -pi cat cp dd df dmesg echo ed grep hostname ln ls mkdir mount mv ps rm sh umount uname /mnt/bin
-cd -
-
-cd /sbin
-#cp -pi fsck fsck.ext2 ifconfig route sash /mnt/sbin
-cd -
-
-cd /usr/bin
-#cp -pi head id /mnt/usr/bin
-cd -
-
-cd /lib
-#cp -pi ld-linux.so.2 libc.so.6 libcom_err.so.2 libdl.so.2 libext2fs.so.2 libpcre.so.0 libtermcap.so.2 libproc.so.2* /mnt/lib
-cd -
-
-cd /etc
-#cp -pi *passwd* *group* *shadow* /mnt/etc
-cd -
+mkdir -p /mnt/etc
 
 mkdir -p /mnt/vms\$common/sysexe
 dd if=/dev/zero count=128 of=/mnt/vms\$common/sysexe/pagefile.sys

@@ -124,7 +124,7 @@ ln_command.o: ln_command.c cmdtbl.h
 	$(CC) ln_command.c
 
 os.linux.o: os.c
-	$(CC) -o os.linux.o os.c
+	$(CC) -I$(OLDLIBCINCLUDEDIR) -o os.linux.o os.c
 
 output.o: output.c
 	$(CC) output.c
