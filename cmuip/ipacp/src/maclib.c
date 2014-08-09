@@ -220,8 +220,13 @@
 #define _LINUX_STRING_H_
 	  //#include <linux/slab.h>
 #include <linux/types.h>
+#endif
+#include <linux/sched.h>
+
+#ifdef __x86_64__
 #include <string.h>
 #endif
+
 #include <linux/sched.h>
 
 #include <system_data_cells.h>
@@ -236,7 +241,9 @@
 #include <linux/mm.h>
 #ifdef __x86_64__
 #include <linux/slab.h>
+#if 0
 #include <string.h>
+#endif
 #endif
 
 #include <misc.h>
