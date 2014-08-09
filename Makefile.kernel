@@ -38,11 +38,14 @@ CROSS_COMPILE 	=
 # Include the make variables (CC, etc...)
 #
 
-AS		= $(CROSS_COMPILE)as
-LD		= $(CROSS_COMPILE)ld
 ifeq ($(ARCH),x86_64)
 CC		= $(CROSS_COMPILE)gcc
+CC 		= $(TOPDIR)/debian/gcc-3.3/usr/bin/gcc-3.3
+LD		= $(TOPDIR)/debian/binutils-2.17/usr/bin/ld
+AS		= $(TOPDIR)/debian/binutils-2.17/usr/bin/as
 else
+AS		= $(CROSS_COMPILE)as
+LD		= $(CROSS_COMPILE)ld
 CC		= $(CROSS_COMPILE)gcc
 endif
 CPP		= $(CC) -E
