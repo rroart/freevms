@@ -544,14 +544,9 @@ mypfncheckaddr(){
 #endif 
 }
 
-#ifdef CONFIG_VMS
-
 int mmg$relpfn(signed int pfn) {
   pte_t * pte = mem_map[pfn].pfn$q_pte_index;
   *(unsigned long *)pte&=~(_PAGE_PRESENT|_PAGE_TYP1);
-#ifndef __arch_um__
-  __flush_tlb(); //flush_tlb_range(current->mm, page, page + PAGE_SIZE);
-#endif
   if (mem_map[pfn].pfn$l_page_state&PFN$M_MODIFY) {
     // do more dealloc
     // maybe backingstore related?
@@ -591,5 +586,3 @@ mmg$delpfnlst(int type, int pfn) {
 #endif
   mmg$relpfn(pfn);
 }
-
-#endif

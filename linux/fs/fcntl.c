@@ -263,90 +263,6 @@ static long do_fcntl(unsigned int fd, unsigned int cmd,
 		     unsigned long arg, struct file * filp)
 {
 	long err = -EINVAL;
-#ifndef CONFIG_VMS
-
-	switch (cmd) {
-		case F_DUPFD:
-			if (arg < NR_OPEN) {
-				get_file(filp);
-				err = dupfd(filp, arg);
-			}
-			break;
-		case F_GETFD:
-			err = get_close_on_exec(fd);
-			break;
-		case F_SETFD:
-			err = 0;
-			set_close_on_exec(fd, arg&1);
-			break;
-		case F_GETFL:
-#ifndef CONFIG_VMS
-			err = filp->f_flags;
-#else
-			err = O_RDONLY;
-#endif
-			break;
-		case F_SETFL:
-			lock_kernel();
-			err = setfl(fd, filp, arg);
-			unlock_kernel();
-			break;
-		case F_GETLK:
-			err = fcntl_getlk(fd, (struct flock *) arg);
-			break;
-		case F_SETLK:
-		case F_SETLKW:
-			err = fcntl_setlk(fd, cmd, (struct flock *) arg);
-			break;
-		case F_GETOWN:
-			/*
-			 * XXX If f_owner is a process group, the
-			 * negative return value will get converted
-			 * into an error.  Oops.  If we keep the
-			 * current syscall conventions, the only way
-			 * to fix this will be in libc.
-			 */
-			err = filp->f_owner.pid;
-			break;
-		case F_SETOWN:
-			lock_kernel();
-			filp->f_owner.pid = arg;
-			filp->f_owner.uid = current->uid;
-			filp->f_owner.euid = current->euid;
-			err = 0;
-			if (S_ISSOCK (filp->f_dentry->d_inode->i_mode))
-				err = sock_fcntl (filp, F_SETOWN, arg);
-			unlock_kernel();
-			break;
-		case F_GETSIG:
-			err = filp->f_owner.signum;
-			break;
-		case F_SETSIG:
-			/* arg == 0 restores default behaviour. */
-			if (arg < 0 || arg > _NSIG) {
-				break;
-			}
-			err = 0;
-			filp->f_owner.signum = arg;
-			break;
-		case F_GETLEASE:
-			err = fcntl_getlease(filp);
-			break;
-		case F_SETLEASE:
-			err = fcntl_setlease(fd, filp, arg);
-			break;
-		case F_NOTIFY:
-			err = fcntl_dirnotify(fd, filp, arg);
-			break;
-		default:
-			/* sockets need a few special fcntls. */
-			err = -EINVAL;
-			if (S_ISSOCK (filp->f_dentry->d_inode->i_mode))
-				err = sock_fcntl (filp, cmd, arg);
-			break;
-	}
-
-#endif
 	return err;
 }
 
@@ -366,9 +282,6 @@ asmlinkage long sys_fcntl(unsigned int fd, unsigned int cmd, unsigned long arg)
 
 	err = do_fcntl(fd, cmd, arg, filp);
 
-#ifndef CONFIG_VMS
- 	fput(filp);
-#endif
 out:
 	return err;
 }
@@ -398,9 +311,6 @@ asmlinkage long sys_fcntl64(unsigned int fd, unsigned int cmd, unsigned long arg
 			err = do_fcntl(fd, cmd, arg, filp);
 			break;
 	}
-#ifndef CONFIG_VMS
-	fput(filp);
-#endif
 out:
 	return err;
 }

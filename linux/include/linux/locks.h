@@ -36,16 +36,10 @@ extern void FASTCALL(unlock_buffer(struct buffer_head *bh));
 
 static inline void lock_super(struct super_block * sb)
 {
-#ifndef CONFIG_VMS
-	down(&sb->s_lock);
-#endif
 }
 
 static inline void unlock_super(struct super_block * sb)
 {
-#ifndef CONFIG_VMS
-	up(&sb->s_lock);
-#endif
 }
 
 #endif /* _LINUX_LOCKS_H */

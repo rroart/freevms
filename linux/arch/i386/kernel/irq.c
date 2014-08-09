@@ -463,10 +463,6 @@ int handle_IRQ_event(unsigned int irq, struct pt_regs * regs, struct irqaction *
 		action->handler(irq, action->dev_id, regs);
 		action = action->next;
 	} while (action);
-#ifndef CONFIG_VMS
-	if (status & SA_SAMPLE_RANDOM)
-		add_interrupt_randomness(irq);
-#endif
 	__cli();
 
 	irq_exit(cpu, irq);
@@ -657,10 +653,6 @@ out:
 	desc->handler->end(irq);
 	spin_unlock(&desc->lock);
 
-#ifndef CONFIG_VMS
-	if (softirq_pending(cpu))
-		do_softirq();
-#endif
 	return 1;
 }
 
@@ -1017,9 +1009,6 @@ int setup_irq(unsigned int irq, struct irqaction * new)
 		 * installing a new handler, but is this really a problem,
 		 * only the sysadmin is able to do this.
 		 */
-#ifndef CONFIG_VMS
-		rand_initialize_irq(irq);
-#endif
 	}
 
 	/*
@@ -1173,57 +1162,11 @@ static void register_irq_proc (unsigned int irq)
 	memset(name, 0, MAX_NAMELEN);
 	sprintf(name, "%d", irq);
 
-#ifndef CONFIG_VMS
-	/* create /proc/irq/1234 */
-	irq_dir[irq] = proc_mkdir(name, root_irq_dir);
-
-#if CONFIG_SMP
-	{
-		struct proc_dir_entry *entry;
-
-		/* create /proc/irq/1234/smp_affinity */
-		entry = create_proc_entry("smp_affinity", 0600, irq_dir[irq]);
-
-		if (entry) {
-			entry->nlink = 1;
-			entry->data = (void *)(long)irq;
-			entry->read_proc = irq_affinity_read_proc;
-			entry->write_proc = irq_affinity_write_proc;
-		}
-
-		smp_affinity_entry[irq] = entry;
-	}
-#endif
-#endif
 }
 
 unsigned long prof_cpu_mask = -1;
 
 void init_irq_proc (void)
 {
-#ifndef CONFIG_VMS
-	struct proc_dir_entry *entry;
-	int i;
-
-	/* create /proc/irq */
-	root_irq_dir = proc_mkdir("irq", 0);
-
-	/* create /proc/irq/prof_cpu_mask */
-	entry = create_proc_entry("prof_cpu_mask", 0600, root_irq_dir);
-
-	if (!entry)
-	    return;
-
-	entry->nlink = 1;
-	entry->data = (void *)&prof_cpu_mask;
-	entry->read_proc = prof_cpu_mask_read_proc;
-	entry->write_proc = prof_cpu_mask_write_proc;
-
-	/*
-	 * Create entries for all existing IRQs.
-	 */
-	for (i = 0; i < NR_IRQS; i++)
-		register_irq_proc(i);
-#endif
 }
 

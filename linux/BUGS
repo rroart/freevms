@@ -23,17 +23,7 @@ Uml for the moment is broken.
 ASTs to user space crashes UML, usually.
 Asts not working due to use of exe$ instead of sys$
 
-For non-CONFIG_VMS:
-Init crashes with keventd after rc.sysinit has finished.
-Cluster networking on a real PC hangs one of them.
-Creprc has some output problems.
-Process sessions has some problems.
-The 60 sec limit and one login only for loginout. (panics). (not anymore).
-Ods-2 may get problems with directory file > 1.
-Logicals only can be used with show logical, define and create /name_table;
-nowhere else yet. (And only without nesting.)
-
-For CONFIG_VMS:
+For FreeVMS:
 RMS $get does not work in IPACP CNF$Configure_ACP.
 With ext2 copy there are some fs problems. (See fsck)
 With ext2 truncate is broke/not implemented.

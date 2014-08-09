@@ -50,73 +50,6 @@ static int file_ioctl(struct file *filp,unsigned int cmd,unsigned long arg)
 
 asmlinkage long sys_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 {	
-#ifndef CONFIG_VMS
-	struct file * filp;
-	unsigned int flag;
-	int on, error = -EBADF;
-
-	filp = fget(fd);
-	if (!filp)
-		goto out;
-	error = 0;
-	lock_kernel();
-	switch (cmd) {
-		case FIOCLEX:
-			set_close_on_exec(fd, 1);
-			break;
-
-		case FIONCLEX:
-			set_close_on_exec(fd, 0);
-			break;
-
-		case FIONBIO:
-			if ((error = get_user(on, (int *)arg)) != 0)
-				break;
-			flag = O_NONBLOCK;
-#ifdef __sparc__
-			/* SunOS compatibility item. */
-			if(O_NONBLOCK != O_NDELAY)
-				flag |= O_NDELAY;
-#endif
-			if (on)
-				filp->f_flags |= flag;
-			else
-				filp->f_flags &= ~flag;
-			break;
-
-		case FIOASYNC:
-			if ((error = get_user(on, (int *)arg)) != 0)
-				break;
-			flag = on ? FASYNC : 0;
-
-			/* Did FASYNC state change ? */
-			if ((flag ^ filp->f_flags) & FASYNC) {
-				if (filp->f_op && filp->f_op->fasync)
-					error = filp->f_op->fasync(fd, filp, on);
-				else error = -ENOTTY;
-			}
-			if (error != 0)
-				break;
-
-			if (on)
-				filp->f_flags |= FASYNC;
-			else
-				filp->f_flags &= ~FASYNC;
-			break;
-
-		default:
-			error = -ENOTTY;
-			if (S_ISREG(filp->f_dentry->d_inode->i_mode))
-				error = file_ioctl(filp, cmd, arg);
-			else if (filp->f_op && filp->f_op->ioctl)
-				error = filp->f_op->ioctl(filp->f_dentry->d_inode, filp, cmd, arg);
-	}
-	unlock_kernel();
-	fput(filp);
-
-out:
-	return error;
-#else
 	struct vms_fd * vms_fd = fget(fd);
 	int cmu_ioctl(int, int, long);
 	if (vms_fd->vfd$l_is_cmu)
@@ -131,5 +64,4 @@ out:
 	if (cmd == TCGETS)
 	  ((struct termios *)a)->c_lflag = ECHOCTL; // check
 	return 0;
-#endif
 }

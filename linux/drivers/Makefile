@@ -13,11 +13,7 @@ subdir-m :=	$(subdir-y)
 
 
 subdir-$(CONFIG_PCI)		+= pci
-ifneq ($(CONFIG_VMS),y)
-subdir-$(CONFIG_MTD)		+= mtd
-endif
 subdir-$(CONFIG_VT)		+= video
 subdir-$(CONFIG_IDE)		+= ide
-#subdir-$(CONFIG_SCSI)		+= scsi
 
 include $(TOPDIR)/Rules.make
