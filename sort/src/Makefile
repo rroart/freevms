@@ -7,8 +7,8 @@ SORTOBJ_PIC = $(addprefix pic/,$(SORTOBJ))
 
 SORTLIB = sortrtl.a
 SORTLIB_PIC = sortrtl_pic.a
-ELFLIB = i386/sortrtl$(EXE_ELF)
-EXELIB = i386/sortrtl$(EXE)
+#ELFLIB = i386/sortrtl$(EXE_ELF)
+#EXELIB = i386/sortrtl$(EXE)
 
 all : $(SORTLIB) $(SORTLIB_PIC) $(ELFLIB) $(EXELIB) tests
 

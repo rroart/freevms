@@ -7,8 +7,8 @@ SMGOBJ_PIC = $(addprefix pic/,$(SMGOBJ))
 
 SMGLIB = smgrtl.a
 SMGLIB_PIC = smgrtl_pic.a
-ELFLIB = i386/smgrtl$(EXE_ELF)
-EXELIB = i386/smgrtl$(EXE)
+#ELFLIB = i386/smgrtl$(EXE_ELF)
+#EXELIB = i386/smgrtl$(EXE)
 
 all : $(SMGLIB) $(SMGLIB_PIC) $(ELFLIB) $(EXELIB) tests
 
