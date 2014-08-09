@@ -29,7 +29,7 @@ nokernel/%.o: %.c
 ifeq ($(ARCH),x86_64)
 nokernel/maclib.o: maclib.c 
 	install -d nokernel
-	$(CC) -mcmodel=large -c -I../../../starlet/src -I../../../librtl/src -I../../../lib/src/ -I../../../sys/src $(CFLAGS_NOKERNEL) -o $@ $<
+	$(HOSTCC) -mcmodel=large -c -I../../../starlet/src -I../../../librtl/src -I../../../lib/src/ -I../../../sys/src $(CFLAGS_NOKERNEL) -o $@ $<
 endif
 
 OBJS = $(nokernel_objs)
