@@ -78,7 +78,7 @@ OTSOBJ_PIC = $(addprefix pic/,$(OTSOBJ))
 STRLIB = librtl.a
 STRLIB_PIC = librtl_pic.a
 #ELFLIB = i386/librtl$(EXE_ELF)
-#EXELIB = i386/librtl$(EXE)
+EXELIB = i386/librtl$(EXE)
 
 all : $(STRLIB) $(STRLIB_PIC) $(EXELIB) tests
 #$(ELFLIB)
