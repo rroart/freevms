@@ -1912,9 +1912,7 @@ void __init tty_init(void)
 
 	con_vmsinit();
 
-#ifndef __arch_um__
 	kbd_vmsinit();
-#endif
 
 #ifdef CONFIG_UNIX98_PTYS
 	dev_ptmx_driver = dev_tty_driver;
@@ -1929,9 +1927,7 @@ void __init tty_init(void)
 		panic("Couldn't register /dev/ptmx driver\n");
 #endif
 
-#ifndef __arch_um__
 	kbd_init();
-#endif
 }
 
 #if 1

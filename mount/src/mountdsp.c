@@ -70,9 +70,7 @@ asmlinkage int exe$mount(void *itmlst) {
   devs[0]=do_translate(it[0].bufaddr);
 
   if (it[1].item_code) {
-#ifdef CONFIG_VMS
     status=mounte2(1,1,devs,labs,&vcb);
-#endif
   } else {
     status=mount(1,1,devs,labs,&vcb);
   }

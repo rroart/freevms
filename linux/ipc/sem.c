@@ -71,9 +71,7 @@
 #include <asm/uaccess.h>
 #include "util.h"
 
-#ifdef CONFIG_VMS
 #undef CONFIG_PROC_FS
-#endif
 
 #define sem_lock(id)	((struct sem_array*)ipc_lock(&sem_ids,id))
 #define sem_unlock(id)	ipc_unlock(&sem_ids,id)

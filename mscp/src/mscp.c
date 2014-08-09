@@ -199,14 +199,10 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
 	long long dummy;
 	int sts=ioc$search(&dummy, &disk);
 	if (sts!=SS$_NORMAL) {
-#ifndef __arch_um__
-#ifdef CONFIG_VMS
 	  ddb=ide_iodb_vmsinit(1);
 	  du_iodb_clu_vmsinit(ddb->ddb$ps_ucb);
 	  struct _ucb * ucb = ddb->ddb$ps_ucb;
 	  ucb->ucb$l_ddt=&du$ddt;
-#endif
-#endif
 	  if (ddb)
 	    ddb->ddb$ps_sb=&othersb;
 	} else {
@@ -214,8 +210,6 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
 	  struct _ucb * u = *l;
 	  ddb = u->ucb$l_ddb;
 	}
-#ifndef __arch_um__
-#ifdef CONFIG_VMS
 	int i=basic->mscp$w_unit;
 	$DESCRIPTOR(d, "dqa0");
 	char * c= d.dsc$a_pointer;
@@ -224,8 +218,6 @@ int mscplisten(void * packet, struct _cdt * c, struct _pdt * p) {
 	ucb->ucb$l_ddt=&du$ddt;
 	((struct _mscp_ucb *)ucb)->ucb$w_mscpunit=ucb->ucb$w_unit;
 	printk("UCB MSCPUNIT %x\n",((struct _mscp_ucb *)ucb)->ucb$w_mscpunit);
-#endif
-#endif
       }
     }
   }

@@ -609,9 +609,6 @@ static void ide_init_queue(ide_drive_t *drive)
 	request_queue_t *q = &drive->queue;
 
 	q->queuedata = HWGROUP(drive);
-#ifndef CONFIG_VMS
-	blk_init_queue(q, do_ide_request);
-#endif
 }
 
 /*
@@ -794,11 +791,7 @@ static void init_gendisk (ide_hwif_t *hwif)
 		/* IDE can do up to 128K per request. */
 		*max_sect++ = 255;
 #endif
-#ifndef CONFIG_VMS
-		*max_ra++ = vm_max_readahead;
-#else
 		*max_ra++ = 0;
-#endif
 	}
 
 	for (unit = 0; unit < units; ++unit)
@@ -857,13 +850,6 @@ static int hwif_init (ide_hwif_t *hwif)
 	
 	hwif->present = 0; /* we set it back to 1 if all is ok below */
 
-#ifndef CONFIG_VMS
-	if (devfs_register_blkdev (hwif->major, hwif->name, ide_fops)) {
-		printk("%s: UNABLE TO GET MAJOR NUMBER %d\n", hwif->name, hwif->major);
-		return (hwif->present = 0);
-	}
-#endif
-	
 	if (init_irq(hwif)) {
 		int i = hwif->irq;
 		/*
@@ -872,17 +858,11 @@ static int hwif_init (ide_hwif_t *hwif)
 		 */
 		if (!(hwif->irq = ide_default_irq(hwif->io_ports[IDE_DATA_OFFSET]))) {
 			printk("%s: Disabled unable to get IRQ %d.\n", hwif->name, i);
-#ifndef CONFIG_VMS
-			(void) unregister_blkdev (hwif->major, hwif->name);
-#endif
 			return (hwif->present = 0);
 		}
 		if (init_irq(hwif)) {
 			printk("%s: probed IRQ %d and default IRQ %d failed.\n",
 				hwif->name, i, hwif->irq);
-#ifndef CONFIG_VMS
-			(void) unregister_blkdev (hwif->major, hwif->name);
-#endif
 			return (hwif->present = 0);
 		}
 		printk("%s: probed IRQ %d failed, using default.\n",

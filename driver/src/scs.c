@@ -102,8 +102,6 @@ void scs_msg_ctl_fill(char * buf, struct _cdt * cdt, unsigned char msgflg);
 struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri);
 static inline void scs_rt_finish_output2(char *buf, int len, char *dst);
 
-#ifdef CONFIG_VMS
-
 #define DRV$MAX_PHYSICAL_BUFSIZE 1600
 #define     MAX_RCV_BUF   64
 
@@ -136,8 +134,6 @@ struct  scs_interface_structure
   };
 } scs_int_, * scs_int = &scs_int_;
 
-#endif
-
 int is_cluster_on() {
   return mypb.pb$w_state==PB$C_OPEN;
 }
@@ -157,34 +153,6 @@ static void scs_send_brd_hello(struct net_device *dev);
 static inline void scs_rt_finish_output2(char * buf , int len, char *dst)
 {
 
-#ifndef CONFIG_VMS 
-  struct sk_buff *skb = NULL;
-
-  if ((skb = alloc_skb(64 + len, GFP_ATOMIC)) == NULL)
-    return;
-
-  skb->protocol = __constant_htons(ETH_P_MYSCS);
-  skb->pkt_type = PACKET_OUTGOING;
-
-  skb_reserve(skb, 64);
-
-  skb->nh.raw = skb->data;
-  skb->dev = scs_default_device;
-  struct net_device *dev = skb->dev;
-
-  memcpy(skb->data, buf, len);
-
-  skb_put(skb,len);
-
-  if ((dev->type != ARPHRD_ETHER) && (dev->type != ARPHRD_LOOPBACK))
-    dst = NULL;
-
-  if (!dev->hard_header || (dev->hard_header(skb, dev, ETH_P_MYSCS,
-					     dst, NULL, skb->len) >= 0))
-    dev_queue_xmit(skb);
-  else
-    kfree_skb(skb);
-#else
   struct XE_iosb_structure IOS_, * IOS = &IOS_; 
   int sts = exe$qiow(4,	scs_int->sei$io_chan,
 		     IO$_WRITEVBLK,
@@ -193,7 +161,6 @@ static inline void scs_rt_finish_output2(char * buf , int len, char *dst)
 		     len, 0, 0,
 		     dst, 0);
 
-#endif
 }
 
 // this is not right, but works
@@ -261,22 +228,6 @@ static void scs_dev_timer_func(unsigned long arg)
 {
   struct net_device *dev = (struct net_device *)arg;
 
-#ifndef CONFIG_VMS
-  if (dev==0) {
-    void * newdev = __dev_get_by_name("eth0");
-    if (newdev)
-      dev = scs_default_device = newdev;
-  }
-
-  if (!do_once) {
-    if (dev) {
-      dev_open(dev);
-      dev_set_allmulti(dev, 1);
-      do_once=1;
-    }
-  }
-#endif
-
   if (dev) scs_send_brd_hello(dev);
 
   scs_dev_set_timer(dev);
@@ -302,20 +253,13 @@ static void scs_dev_set_timer()
   }
 }
 
-#ifndef CONFIG_VMS
 void __init scs_dev_init(void)
-#else
-void __init scs_dev_init(void)
-#endif
 {
   scs_dev_set_timer();
 }
 
 void __exit scs_dev_cleanup(void)
 {
-#ifndef CONFIG_VMS
-	rtnetlink_links[PF_DECnet] = NULL;
-#endif
 }
 
 static int first_hello=0;
@@ -327,13 +271,7 @@ extern int startconnect(int);
 
 int scs_neigh_endnode_hello(struct sk_buff *skb)
 {
-#ifndef CONFIG_VMS
-	struct _nisca *msg = skb->data;
-
-	msg=getcc(msg);
-#else
 	struct _nisca *msg = (long)getcc(skb);
-#endif
 
  	if (0==strncmp("NODNAM",&msg->nisca$t_nodename[1],6))
 	  return 1;
@@ -360,57 +298,8 @@ int scs_neigh_endnode_hello(struct sk_buff *skb)
 	memcpy(&mypb.pb$b_rstation,&msg->nisca$ab_lan_hw_addr,6);
 	memcpy(&othersb.sb$t_nodename,&msg->nisca$t_nodename,8);
 
-#ifndef CONFIG_VMS
-	kfree_skb(skb);
-#endif
 	return 0;
 }
-
-#ifndef CONFIG_VMS
-/*
- * This function uses a slightly different lookup method
- * to find its sockets, since it searches on object name/number
- * rather than port numbers. Various tests are done to ensure that
- * the incoming data is in the correct format before it is queued to
- * a socket.
- */
-
-/*
- * If sk == NULL, then we assume that we are supposed to be making
- * a routing layer skb. If sk != NULL, then we are supposed to be
- * creating an skb for the NSP layer.
- *
- * The eventual aim is for each socket to have a cached header size
- * for its outgoing packets, and to set hdr from this when sk != NULL.
- */
-struct sk_buff *scs_alloc_skb2(struct _cdt *sk, int size, int pri)
-{
-	struct sk_buff *skb;
-	int hdr = 64;
-
-#ifndef CONFIG_VMS
-	if ((skb = alloc_skb(size + hdr, pri)) == NULL)
-		return NULL;
-#else
-	if ((skb = alloc_skb(size + hdr, pri)) == NULL)
-		return NULL;
-#endif
-
-	skb->protocol = __constant_htons(ETH_P_MYSCS);
-	skb->pkt_type = PACKET_OUTGOING;
-
-	//	if (sk)
-	//	skb_set_owner_w(skb, sk);
-
-#ifndef CONFIG_VMS
-	skb_reserve(skb, hdr);
-#else
-	skb_reserve(skb, hdr);
-#endif
-
-	return skb;
-}
-#endif
 
 void scs_msg_ctl_comm(struct _cdt *sk, unsigned char msgflg)
 {
@@ -755,18 +644,10 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
     memcpy(devnam,b+1,16);
     b+=16;
     printk("maybe creating remote ddb %s on other node\n",devnam);
-#ifdef CONFIG_VMS
-#ifdef __arch_um__
-    if (0==strncmp(devnam,"daa",3)) 
-      ddb=ubd_iodb_vmsinit();
-#endif
-#ifndef __arch_um__
     if (0==strncmp(devnam,"dqa",3)) {
       ddb=ide_iodb_vmsinit(1);
       du_iodb_clu_vmsinit(ddb->ddb$ps_ucb);
     }
-#endif
-#endif
     if (0==strncmp(devnam,"dua",3)) 
       ddb=du_iodb_vmsinit();
     if (0==strncmp(devnam,"dfa",3)) {
@@ -782,20 +663,12 @@ void cf_listen (void * packet, struct _cdt * c, struct _pdt * p) {
     for (i=0;i<num;i++) {
       devnam[3]=48+i;
       ucb=0;
-#ifdef CONFIG_VMS
-#ifdef __arch_um__
-      if (0==strncmp(devnam,"daa",3)) 
-	ucb = ubd_iodbunit_vmsinit(ddb,i,&d);
-#endif
-#ifndef __arch_um__
       if (0==strncmp(devnam,"dqa",3)) 
 	ucb = ide_iodbunit_vmsinit(ddb,i,&d);
       if (0==strncmp(devnam,"dqa",3)) 
 	((struct _mscp_ucb *)ucb)->ucb$w_mscpunit=ucb->ucb$w_unit;
       if (0==strncmp(devnam,"dqa",3)) 
 	printk("UCB MSCPUNIT %x\n",((struct _mscp_ucb *)ucb)->ucb$w_mscpunit);
-#endif
-#endif
       if (0==strncmp(devnam,"dua",3)) 
 	ucb = du_iodbunit_vmsinit(ddb,i,&d);
       if (0==strncmp(devnam,"dfa",3)) 
@@ -960,17 +833,6 @@ int scs_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt)
       struct _nisca *dx;
       int (*func)();
 
-#ifndef CONFIG_VMS
-      if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
-              goto out;
-
-#if 0
-      skb_pull(skb, 2);
-
-      skb_trim(skb, len);
-#endif
-#endif
-
       msg=skb->data;
       nisca=gettr(msg);
       scs=getppdscs(msg);
@@ -1009,9 +871,6 @@ int scs_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt)
 	//	nisca_snt_dg(skb,scs);
 	return NF_HOOK(PF_DECnet, NF_SCS_HELLO, skb, skb->dev, NULL, nisca_snt_dg);
 dump_it:
-#ifndef CONFIG_VMS
-kfree_skb(skb);
-#endif
 out:
 return NET_RX_DROP;
 }
@@ -1026,7 +885,6 @@ int do_opc_dispatch(struct sk_buff *skb)
   return func(skb,ppd);
 }
 
-#ifdef CONFIG_VMS
 //extern signed long XE_BROADCAST[];
 signed long XE_BROADCAST[3]= { -1 , -1 , -1}; // check
 
@@ -1371,11 +1229,6 @@ int scs_rcv2(char * bufh, char * buf)
   //	nisca_snt_dg(skb,scs);
   return NF_HOOK(PF_DECnet, NF_SCS_HELLO, buf, 0, NULL, nisca_snt_dg);
  dump_it:
-#ifndef CONFIG_VMS
-  kfree_skb(skb);
-#endif
  out:
   return NET_RX_DROP;
 }
-
-#endif

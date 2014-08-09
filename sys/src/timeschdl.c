@@ -292,9 +292,6 @@ asmlinkage void exe$swtimint(void) {
 }
 
 /* vax has 100 Hz clock interrupts. Quantum is in those 10 ns units */
-#ifdef __arch_um__
-#define QUANTADD 1
-#endif
 #ifdef __i386
 /* 100Hz interrupts here */
 #define QUANTADD 1
@@ -302,10 +299,6 @@ asmlinkage void exe$swtimint(void) {
 #ifdef __x86_64__
 /* 100Hz interrupts here? */
 #define QUANTADD 1
-#endif
-
-#ifdef __arch_um__
-extern int hwclkdone;
 #endif
 
 /**
@@ -317,10 +310,6 @@ extern int hwclkdone;
 void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs) {
   /* reset pr$_iccs */
   /* smp sanity timer */
-
-#ifdef __arch_um__
-int hwclkdone=1;
-#endif
 
 #if 0
 // this did not go well, for some reason
@@ -343,7 +332,6 @@ int hwclkdone=1;
 
     write_lock(&xtime_lock);
 
-#ifndef __arch_um__
     if (use_tsc)
       {
 	rdtscl(last_tsc_low);
@@ -369,7 +357,6 @@ int hwclkdone=1;
       spin_unlock(&i8259A_lock);
     }
 #endif
-#endif /* __arch_um__ */
 
     /** hwclk spinlock - MISSING */
 
@@ -431,12 +418,6 @@ int hwclkdone=1;
     }
 #endif
 
-#ifndef CONFIG_VMS
-    mark_bh(TIMER_BH);
-    if (TQ_ACTIVE(tq_timer))
-      mark_bh(TQUEUE_BH);
-#endif
-
 #ifdef __i386__
 #ifndef CONFIG_X86_LOCAL_APIC
     if (!user_mode(regs))
@@ -448,17 +429,13 @@ int hwclkdone=1;
 #endif
 
     if ((time_status & STA_UNSYNC) == 0 &&
-#ifndef __arch_um__
 	xtime.tv_sec > last_rtc_update + 660 &&
-#endif
 	xtime.tv_usec >= 500000 - ((unsigned) tick) / 2 &&
 	xtime.tv_usec <= 500000 + ((unsigned) tick) / 2) {
-#ifndef __arch_um__
       if (set_rtc_mmss(xtime.tv_sec) == 0)
 	last_rtc_update = xtime.tv_sec;
       else
 	last_rtc_update = xtime.tv_sec - 600;
-#endif
     }
 
     write_unlock(&xtime_lock);

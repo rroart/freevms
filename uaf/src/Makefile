@@ -4,7 +4,8 @@ VMLINUX = ../../linux/vmlinux
 LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux 
 
 ifneq ($(ARCH),x86_64)
-all: i386/authorize${NOEXE} i386/authorize${EXE_ELF} uafgen i386/sysuaf.dat
+all: i386/authorize${NOEXE} uafgen i386/sysuaf.dat
+#i386/authorize${EXE_ELF} 
 else
 all: i386/authorize${NOEXE} uafgen i386/sysuaf.dat
 endif

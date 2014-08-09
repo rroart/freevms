@@ -10,7 +10,8 @@ SMGLIB_PIC = smgrtl_pic.a
 #ELFLIB = i386/smgrtl$(EXE_ELF)
 #EXELIB = i386/smgrtl$(EXE)
 
-all : $(SMGLIB) $(SMGLIB_PIC) $(ELFLIB) $(EXELIB) tests
+all : $(SMGLIB) $(SMGLIB_PIC) $(EXELIB) tests
+#$(ELFLIB)
 
 install: all
 	install -d ../../rooti386/vms"$$"common/syslib

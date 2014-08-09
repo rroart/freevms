@@ -130,130 +130,33 @@ EXPORT_SYMBOL(create_bounce);
 #endif
 
 /* filesystem internal functions */
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(def_blk_fops);
-EXPORT_SYMBOL(update_atime);
-EXPORT_SYMBOL(get_fs_type);
-EXPORT_SYMBOL(get_super);
-EXPORT_SYMBOL(drop_super);
-#endif
 EXPORT_SYMBOL(getname);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(names_cachep);
-#endif
 EXPORT_SYMBOL(fput);
 EXPORT_SYMBOL(fget);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(igrab);
-EXPORT_SYMBOL(iunique);
-EXPORT_SYMBOL(iget4);
-EXPORT_SYMBOL(iput);
-EXPORT_SYMBOL(force_delete);
-EXPORT_SYMBOL(follow_up);
-EXPORT_SYMBOL(follow_down);
-EXPORT_SYMBOL(lookup_mnt);
-EXPORT_SYMBOL(path_init);
-EXPORT_SYMBOL(path_walk);
-EXPORT_SYMBOL(path_release);
-EXPORT_SYMBOL(__user_walk);
-EXPORT_SYMBOL(lookup_one_len);
-EXPORT_SYMBOL(lookup_hash);
-#endif
 EXPORT_SYMBOL(sys_close);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(dcache_lock);
-EXPORT_SYMBOL(d_alloc_root);
-EXPORT_SYMBOL(d_delete);
-EXPORT_SYMBOL(dget_locked);
-EXPORT_SYMBOL(d_validate);
-EXPORT_SYMBOL(d_rehash);
-EXPORT_SYMBOL(d_invalidate);	/* May be it will be better in dcache.h? */
-EXPORT_SYMBOL(d_move);
-EXPORT_SYMBOL(d_instantiate);
-EXPORT_SYMBOL(d_alloc);
-EXPORT_SYMBOL(d_lookup);
-EXPORT_SYMBOL(__d_path);
-#endif
 EXPORT_SYMBOL(mark_buffer_dirty);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(set_buffer_async_io); /* for reiserfs_writepage */
-#endif
 EXPORT_SYMBOL(__mark_buffer_dirty);
 EXPORT_SYMBOL(__mark_inode_dirty);
 EXPORT_SYMBOL(get_empty_filp);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(init_private_file);
-EXPORT_SYMBOL(filp_open);
-EXPORT_SYMBOL(filp_close);
-EXPORT_SYMBOL(put_filp);
-EXPORT_SYMBOL(files_lock);
-EXPORT_SYMBOL(check_disk_change);
-EXPORT_SYMBOL(__invalidate_buffers);
-EXPORT_SYMBOL(invalidate_bdev);
-EXPORT_SYMBOL(invalidate_inodes);
-EXPORT_SYMBOL(invalidate_device);
-EXPORT_SYMBOL(invalidate_inode_pages);
-EXPORT_SYMBOL(truncate_inode_pages);
-#endif
 EXPORT_SYMBOL(fsync_dev);
 EXPORT_SYMBOL(fsync_no_super);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(permission);
-EXPORT_SYMBOL(vfs_permission);
-EXPORT_SYMBOL(inode_setattr);
-EXPORT_SYMBOL(inode_change_ok);
-EXPORT_SYMBOL(write_inode_now);
-EXPORT_SYMBOL(notify_change);
-#endif
 EXPORT_SYMBOL(set_blocksize);
 EXPORT_SYMBOL(getblk);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(cdget);
-EXPORT_SYMBOL(cdput);
-#endif
 EXPORT_SYMBOL(bdget);
 EXPORT_SYMBOL(bdput);
 EXPORT_SYMBOL(bread);
 EXPORT_SYMBOL(__brelse);
 EXPORT_SYMBOL(__bforget);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(ll_rw_block);
-EXPORT_SYMBOL(submit_bh);
-#endif
 EXPORT_SYMBOL(unlock_buffer);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(__wait_on_buffer);
-EXPORT_SYMBOL(___wait_on_page);
-#endif
 EXPORT_SYMBOL(generic_direct_IO);
 EXPORT_SYMBOL(discard_bh_page);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(block_write_full_page);
-EXPORT_SYMBOL(block_read_full_page);
-EXPORT_SYMBOL(block_prepare_write);
-#endif
 EXPORT_SYMBOL(block_sync_page);
 EXPORT_SYMBOL(generic_cont_expand);
 EXPORT_SYMBOL(cont_prepare_write);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(generic_commit_write);
-#endif
 EXPORT_SYMBOL(block_truncate_page);
 EXPORT_SYMBOL(generic_block_bmap);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(generic_file_read);
-EXPORT_SYMBOL(do_generic_file_read);
-EXPORT_SYMBOL(generic_file_write);
-#endif
 EXPORT_SYMBOL(generic_file_mmap);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(generic_ro_fops);
-#endif
 EXPORT_SYMBOL(generic_buffer_fdatasync);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(page_hash_bits);
-EXPORT_SYMBOL(page_hash_table);
-#endif
 EXPORT_SYMBOL(file_lock_list);
 EXPORT_SYMBOL(locks_init_lock);
 EXPORT_SYMBOL(locks_copy_lock);
@@ -263,80 +166,19 @@ EXPORT_SYMBOL(posix_block_lock);
 EXPORT_SYMBOL(posix_unblock_lock);
 EXPORT_SYMBOL(posix_locks_deadlock);
 EXPORT_SYMBOL(locks_mandatory_area);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(dput);
-EXPORT_SYMBOL(have_submounts);
-EXPORT_SYMBOL(d_find_alias);
-EXPORT_SYMBOL(d_prune_aliases);
-EXPORT_SYMBOL(prune_dcache);
-EXPORT_SYMBOL(shrink_dcache_sb);
-EXPORT_SYMBOL(shrink_dcache_parent);
-EXPORT_SYMBOL(find_inode_number);
-EXPORT_SYMBOL(is_subdir);
-#endif
 EXPORT_SYMBOL(get_unused_fd);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(vfs_create);
-EXPORT_SYMBOL(vfs_kdir);
-EXPORT_SYMBOL(vfs_mknod);
-EXPORT_SYMBOL(vfs_symlink);
-EXPORT_SYMBOL(vfs_link);
-EXPORT_SYMBOL(vfs_rmdir);
-EXPORT_SYMBOL(vfs_unlink);
-EXPORT_SYMBOL(vfs_rename);
-EXPORT_SYMBOL(vfs_statfs);
-#endif
 EXPORT_SYMBOL(generic_read_dir);
 EXPORT_SYMBOL(generic_file_llseek);
 EXPORT_SYMBOL(no_llseek);
 EXPORT_SYMBOL(__pollwait);
 EXPORT_SYMBOL(poll_freewait);
 EXPORT_SYMBOL(ROOT_DEV);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(__find_get_page);
-EXPORT_SYMBOL(__find_lock_page);
-EXPORT_SYMBOL(grab_cache_page);
-EXPORT_SYMBOL(grab_cache_page_nowait);
-EXPORT_SYMBOL(read_cache_page);
-EXPORT_SYMBOL(set_page_dirty);
-EXPORT_SYMBOL(vfs_readlink);
-EXPORT_SYMBOL(vfs_follow_link);
-EXPORT_SYMBOL(page_readlink);
-EXPORT_SYMBOL(page_follow_link);
-EXPORT_SYMBOL(page_symlink_inode_operations);
-EXPORT_SYMBOL(block_symlink);
-EXPORT_SYMBOL(vfs_readdir);
-EXPORT_SYMBOL(__get_lease);
-EXPORT_SYMBOL(lease_get_mtime);
-EXPORT_SYMBOL(lock_may_read);
-EXPORT_SYMBOL(lock_may_write);
-EXPORT_SYMBOL(dcache_readdir);
-#endif
 
 /* for stackable file systems (lofs, wrapfs, cryptfs, etc.) */
 EXPORT_SYMBOL(default_llseek);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(dentry_open);
-EXPORT_SYMBOL(filemap_nopage);
-#endif
 EXPORT_SYMBOL(filemap_sync);
 EXPORT_SYMBOL(filemap_fdatasync);
 EXPORT_SYMBOL(filemap_fdatawait);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(lock_page);
-EXPORT_SYMBOL(unlock_page);
-#endif
-
-/* device registration */
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(register_chrdev);
-EXPORT_SYMBOL(unregister_chrdev);
-EXPORT_SYMBOL(register_blkdev);
-EXPORT_SYMBOL(unregister_blkdev);
-EXPORT_SYMBOL(tty_register_driver);
-EXPORT_SYMBOL(tty_unregister_driver);
-EXPORT_SYMBOL(tty_std_termios);
-#endif
 
 /* block device driver support */
 EXPORT_SYMBOL(blksize_size);
@@ -345,48 +187,16 @@ EXPORT_SYMBOL(blk_size);
 EXPORT_SYMBOL(blk_dev);
 EXPORT_SYMBOL(is_read_only);
 EXPORT_SYMBOL(set_device_ro);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(bmap);
-#endif
 EXPORT_SYMBOL(sync_dev);
 EXPORT_SYMBOL(devfs_register_partitions);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(blkdev_open);
-#endif
 EXPORT_SYMBOL(blkdev_get);
 EXPORT_SYMBOL(blkdev_put);
 EXPORT_SYMBOL(ioctl_by_bdev);
 EXPORT_SYMBOL(grok_partitions);
 EXPORT_SYMBOL(register_disk);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(tq_disk);
-#endif
 EXPORT_SYMBOL(init_buffer);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(refile_buffer);
-#endif
 EXPORT_SYMBOL(max_sectors);
 EXPORT_SYMBOL(max_readahead);
-
-/* tty routines */
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(tty_hangup);
-EXPORT_SYMBOL(tty_wait_until_sent);
-EXPORT_SYMBOL(tty_check_change);
-EXPORT_SYMBOL(tty_hung_up_p);
-EXPORT_SYMBOL(tty_flip_buffer_push);
-EXPORT_SYMBOL(tty_get_baud_rate);
-EXPORT_SYMBOL(do_SAK);
-#endif
-
-/* filesystem registration */
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(register_filesystem);
-EXPORT_SYMBOL(unregister_filesystem);
-EXPORT_SYMBOL(kern_mount);
-EXPORT_SYMBOL(__mntput);
-EXPORT_SYMBOL(may_umount);
-#endif
 
 /* executable format registration */
 EXPORT_SYMBOL(register_binfmt);
@@ -520,11 +330,6 @@ EXPORT_SYMBOL(sscanf);
 EXPORT_SYMBOL(vsprintf);
 EXPORT_SYMBOL(vsnprintf);
 EXPORT_SYMBOL(vsscanf);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(kdevname);
-EXPORT_SYMBOL(bdevname);
-EXPORT_SYMBOL(cdevname);
-#endif
 EXPORT_SYMBOL(simple_strtol);
 EXPORT_SYMBOL(simple_strtoul);
 EXPORT_SYMBOL(simple_strtoull);
@@ -537,10 +342,6 @@ EXPORT_SYMBOL(machine_restart);
 EXPORT_SYMBOL(machine_halt);
 EXPORT_SYMBOL(machine_power_off);
 EXPORT_SYMBOL(_ctype);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(secure_tcp_sequence_number);
-EXPORT_SYMBOL(get_random_bytes);
-#endif
 EXPORT_SYMBOL(securebits);
 EXPORT_SYMBOL(cap_bset);
 EXPORT_SYMBOL(reparent_to_init);
@@ -560,10 +361,6 @@ EXPORT_SYMBOL(setup_arg_pages);
 EXPORT_SYMBOL(copy_strings_kernel);
 EXPORT_SYMBOL(do_execve);
 EXPORT_SYMBOL(flush_old_exec);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(kernel_read);
-EXPORT_SYMBOL(open_exec);
-#endif
 
 /* Miscellaneous access points */
 EXPORT_SYMBOL(si_meminfo);
@@ -571,27 +368,8 @@ EXPORT_SYMBOL(si_meminfo);
 /* Added to make file system as module */
 EXPORT_SYMBOL(sys_tz);
 EXPORT_SYMBOL(file_fsync);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(fsync_inode_buffers);
-EXPORT_SYMBOL(fsync_inode_data_buffers);
-EXPORT_SYMBOL(clear_inode);
-#endif
 EXPORT_SYMBOL(___strtok);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(init_special_inode);
-#endif
 EXPORT_SYMBOL(read_ahead);
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(get_hash_table);
-EXPORT_SYMBOL(get_empty_inode);
-EXPORT_SYMBOL(insert_inode_hash);
-EXPORT_SYMBOL(remove_inode_hash);
-EXPORT_SYMBOL(buffer_insert_inode_queue);
-EXPORT_SYMBOL(make_bad_inode);
-EXPORT_SYMBOL(is_bad_inode);
-EXPORT_SYMBOL(event);
-EXPORT_SYMBOL(brw_page);
-#endif
 
 #ifdef CONFIG_UID16
 EXPORT_SYMBOL(overflowuid);
@@ -613,23 +391,6 @@ EXPORT_SYMBOL(get_write_access);
 EXPORT_SYMBOL(strnicmp);
 EXPORT_SYMBOL(strspn);
 EXPORT_SYMBOL(strsep);
-
-/* software interrupts */
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(tasklet_hi_vec);
-EXPORT_SYMBOL(tasklet_vec);
-EXPORT_SYMBOL(bh_task_vec);
-EXPORT_SYMBOL(init_bh);
-EXPORT_SYMBOL(remove_bh);
-EXPORT_SYMBOL(tasklet_init);
-EXPORT_SYMBOL(tasklet_kill);
-EXPORT_SYMBOL(__run_task_queue);
-EXPORT_SYMBOL(do_softirq);
-EXPORT_SYMBOL(raise_softirq);
-EXPORT_SYMBOL(cpu_raise_softirq);
-EXPORT_SYMBOL(__tasklet_schedule);
-EXPORT_SYMBOL(__tasklet_hi_schedule);
-#endif
 
 /* init task, for moving kthread roots - ought to export a function ?? */
 

@@ -20,7 +20,7 @@ If complaints about modversion.h, do a make update-modverfile.
 Make dep in linux is broken, so you might have to do make bzImage twice.
 
 NOTE on kernel config with VMS options:
-There is only one option, CONFIG_VMS (replaces and includes CONFIG_VMS_IO/MM)
+There is only one option for FreeVMS.
 Do not boot with init=/bin/sh.
 
 Example build i386:

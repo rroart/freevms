@@ -198,7 +198,6 @@ find_it(void * sh, char * s, void ** retiaf ) {
 }
 
 asmlinkage int exe$imgfix(void) {
-#ifdef CONFIG_VMS
 
   char buf[512];
 
@@ -343,7 +342,6 @@ asmlinkage int exe$imgfix(void) {
 
   ctl$gl_iaflnkptr=0;
   ctl$gl_fixuplnk=0;
-#endif
   return SS$_NORMAL;   
 }
 

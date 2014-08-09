@@ -42,112 +42,8 @@
 
 extern int max_threads;
 
-#ifndef CONFIG_VMS
-static inline void
-use_init_fs_context(void)
-{
-	struct fs_struct *our_fs, *init_fs;
-	struct dentry *root, *pwd;
-	struct vfsmount *rootmnt, *pwdmnt;
-
-	/*
-	 * Make modprobe's fs context be a copy of init's.
-	 *
-	 * We cannot use the user's fs context, because it
-	 * may have a different root than init.
-	 * Since init was created with CLONE_FS, we can grab
-	 * its fs context from "init_task".
-	 *
-	 * The fs context has to be a copy. If it is shared
-	 * with init, then any chdir() call in modprobe will
-	 * also affect init and the other threads sharing
-	 * init_task's fs context.
-	 *
-	 * We created the exec_modprobe thread without CLONE_FS,
-	 * so we can update the fields in our fs context freely.
-	 */
-
-	init_fs = init_task.fs;
-	read_lock(&init_fs->lock);
-	rootmnt = mntget(init_fs->rootmnt);
-	root = dget(init_fs->root);
-	pwdmnt = mntget(init_fs->pwdmnt);
-	pwd = dget(init_fs->pwd);
-	read_unlock(&init_fs->lock);
-
-	/* FIXME - unsafe ->fs access */
-	our_fs = current->fs;
-	our_fs->umask = init_fs->umask;
-	set_fs_root(our_fs, rootmnt, root);
-	set_fs_pwd(our_fs, pwdmnt, pwd);
-	write_lock(&our_fs->lock);
-	if (our_fs->altroot) {
-		struct vfsmount *mnt = our_fs->altrootmnt;
-		struct dentry *dentry = our_fs->altroot;
-		our_fs->altrootmnt = NULL;
-		our_fs->altroot = NULL;
-		write_unlock(&our_fs->lock);
-		dput(dentry);
-		mntput(mnt);
-	} else 
-		write_unlock(&our_fs->lock);
-	dput(root);
-	mntput(rootmnt);
-	dput(pwd);
-	mntput(pwdmnt);
-}
-#endif
-
 int exec_usermodehelper(char *program_path, char *argv[], char *envp[])
 {
-#ifndef CONFIG_VMS
-	int i;
-	struct task_struct *curtask = current;
-
-	curtask->session = INIT_PID;
-	curtask->pgrp = INIT_PID;
-
-	use_init_fs_context();
-
-	/* Prevent parent user process from sending signals to child.
-	   Otherwise, if the modprobe program does not exist, it might
-	   be possible to get a user defined signal handler to execute
-	   as the super user right after the execve fails if you time
-	   the signal just right.
-	*/
-	spin_lock_irq(&curtask->sigmask_lock);
-	sigemptyset(&curtask->blocked);
-	flush_signals(curtask);
-	flush_signal_handlers(curtask);
-	recalc_sigpending(curtask);
-	spin_unlock_irq(&curtask->sigmask_lock);
-
-	for (i = 0; i < curtask->files->max_fds; i++ ) {
-		if (curtask->files->fd[i]) close(i);
-	}
-
-	/* Drop the "current user" thing */
-	{
-		struct user_struct *user = curtask->user;
-		curtask->user = INIT_USER;
-		atomic_inc(&INIT_USER->__count);
-		atomic_inc(&INIT_USER->processes);
-		atomic_dec(&user->processes);
-		free_uid(user);
-	}
-
-	/* Give kmod all effective privileges.. */
-	curtask->euid = curtask->fsuid = 0;
-	curtask->egid = curtask->fsgid = 0;
-	cap_set_full(curtask->cap_effective);
-
-	/* Allow execve args to be in kernel space. */
-	set_fs(KERNEL_DS);
-
-	/* Go, go, go... */
-	if (execve(program_path, argv, envp) < 0)
-		return -errno;
-#endif
 	return 0;
 }
 
@@ -353,17 +249,7 @@ int call_usermodehelper(char *path, char **argv, char **envp)
 	if (path[0] == '\0')
 		goto out;
 
-#ifndef CONFIG_VMS
-	if (current_is_keventd()) {
-		/* We can't wait on keventd! */
-#endif
 		__call_usermodehelper(&sub_info);
-#ifndef CONFIG_VMS
-	} else {
-		schedule_task(&tqs);
-		wait_for_completion(&work);
-	}
-#endif
 out:
 	return sub_info.retval;
 }

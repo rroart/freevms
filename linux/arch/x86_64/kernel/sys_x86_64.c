@@ -33,19 +33,7 @@
  */
 asmlinkage long sys_pipe(unsigned long * fildes)
 {
-#ifndef CONFIG_VMS
-	int fd[2];
-	int error;
-
-	error = do_pipe(fd);
-	if (!error) {
-		if (copy_to_user(fildes, fd, 2*sizeof(int)))
-			error = -EFAULT;
-	}
-	return error;
-#else
 	return -EPERM;
-#endif
 }
 
 long sys_mmap(unsigned long addr, unsigned long len, unsigned long prot, unsigned long flags,
@@ -73,10 +61,6 @@ long sys_mmap(unsigned long addr, unsigned long len, unsigned long prot, unsigne
 	error = do_mmap_pgoff(file, addr, len, prot, flags, off >> PAGE_SHIFT);
 	up_write(&current->mm->mmap_sem);
 
-#ifndef CONFIG_VMS
-	if (file)
-		fput(file);
-#endif
 out:
 	return error;
 }
@@ -84,11 +68,7 @@ out:
 
 unsigned long arch_get_unmapped_area(struct file *filp, unsigned long addr, unsigned long len, unsigned long pgoff, unsigned long flags)
 {
-#ifndef CONFIG_VMS
-	struct vm_area_struct *vma;
-#else
 	struct _rde *vma;
-#endif
 	unsigned long end = TASK_SIZE;
 
 	if (current->thread.flags & THREAD_IA32) {
@@ -115,16 +95,6 @@ unsigned long arch_get_unmapped_area(struct file *filp, unsigned long addr, unsi
 		return -ENOMEM;
 	addr = PAGE_ALIGN(addr);
 
-#ifndef CONFIG_VMS
-	for (vma = find_vma(current->mm, addr); ; vma = vma->vm_next) {
-		/* At this point:  (!vma || addr < vma->vm_end). */
-		if (end - len < addr)
-			return -ENOMEM;
-		if (!vma || addr + len <= vma->vm_start)
-			return addr;
-		addr = vma->vm_end;
-	}
-#else
 	for (vma = find_vma(current->pcb$l_phd, addr); ; vma = vma->rde$ps_va_list_flink) {
 		/* At this point:  (!vma || addr < vma->vm_end). */
 		if (end - len < addr)
@@ -133,7 +103,6 @@ unsigned long arch_get_unmapped_area(struct file *filp, unsigned long addr, unsi
 			return addr;
 		addr = vma->rde$pq_start_va + vma->rde$q_region_size;
 	}
-#endif
 }
 
 asmlinkage long sys_uname(struct new_utsname * name)

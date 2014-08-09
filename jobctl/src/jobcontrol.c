@@ -15,8 +15,6 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 
-#ifdef CONFIG_VMS
-
 // do this as an ordinary process after we get privileged images
 
 short int mbx_buffer[128];
@@ -68,5 +66,3 @@ int job_control(void *unused)
   sys$hiber();
   printk("job control should not get past sys$hiber\n");
 }
-
-#endif

@@ -8,8 +8,6 @@
 #include <pfldef.h>
 #include <ssdef.h>
 
-#ifdef CONFIG_VMS
-
 extern int myswapfile;
 
 int mmg$allocpagfil1(int size, int * page) {
@@ -40,5 +38,3 @@ int mmg$dallocpagfil1(int page) {
   pfl->pfl$l_frepagcnt++;
   return SS$_NORMAL;
 }
-
-#endif

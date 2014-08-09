@@ -77,10 +77,10 @@ Check if we can stop use prv bits in pcb and only use cpu bits.
 Input/output:
 Make echoing work in putnextchar (right before reqcom)
 Check whether ddb$t_name has len first
-Use correct interface to network module in CONFIG_VMS (promiscuous mode (NMA$C_PCLI_PRM) needs protocol, but that mode is not yet implemented).
+Use correct interface to network module in FreeVMS (promiscuous mode (NMA$C_PCLI_PRM) needs protocol, but that mode is not yet implemented).
 Look at how ne2000 is probed
 Rewrite ide driver or make it use VMS data structures.
-Fix CONFIG_VMS network drivers.
+Fix network drivers.
 For ide disk set ucb$l_maxblock and more, like in file.c
 After some time even more driver support might be cut/broke (the most).
 In trandevnam make it use lnm$file_dev.
@@ -111,7 +111,7 @@ Clustering:
 Do MSCP protocol a bit more properly
 Do more SCA/SCS stuff.
 Get getdx to add 2?
-Might move clustering to just CONFIG_VMS mode, and go from socket to QIO.
+Might move clustering to just FreeVMS mode, and go from socket to QIO.
 
 Networking:
 For CMUIP: do checks upon parts with // check // not yet // was. more such?

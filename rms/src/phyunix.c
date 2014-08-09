@@ -76,12 +76,8 @@ unsigned phyio_init(int devlen,char *devnam,struct file **handle,struct phyio_in
     cp = strchr(devbuf,':');
     if (cp != NULL) *cp = '\0';
     //    tmpname=getname(devnam);
-#ifndef CONFIG_VMS
-    vmsfd = filp_open(devbuf,O_RDONLY,0); // or RDWR
-#else
     panic("no %s\n",devbuf);
     vmsfd = -1;
-#endif
     //    putname(tmpname);
     if (IS_ERR(vmsfd))
       return SS$_NOSUCHDEV;

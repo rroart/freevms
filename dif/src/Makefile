@@ -1,6 +1,7 @@
 FLAGS = -static
 
-all: i386/diff${EXE} i386/diff${NOEXE} i386/diff${EXE_ELF}
+all: i386/diff${EXE} i386/diff${NOEXE}
+#i386/diff${EXE_ELF}
 
 clean:
 	rm *.o i386/*
