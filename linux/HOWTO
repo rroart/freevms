@@ -1,30 +1,22 @@
 So far:
 
 About GCC/Distributions.
-Due to use of anonymous structures a more recent gcc is needed.
-As old as gcc 3.4 must be used sometimes.
-Gcc 4.3 might be used mostly.
-No more recent flex than 2.5.4 must be used.
+Only Debian 6 is tested/supported.
+Only gcc-4.4.5 (with older gcc-3.3 for x86_64) is tested/supported.
+No more recent flex than 2.5.4 must be used (for Bliss).
 
-Also tested distributions:
-Debian Sarge (gcc-3.3) and up to lenny. (Not sure of sarge anymore)
-Latest Ubuntu/x86_64 tested is Hardy (LTS). Heard problems reports for newer.
-	Install ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic sash bash-static doxygen
-	Have loop support or module.
-For x86_64:
-Ubuntu dapper:
-	Install also gcc-3.3 gcc-3.4 ia32-libs-dev
+CPU status:
+I386: some instability.
+X86_64: very unstable.
 
-NOTE on kernel build:
-If complaints about modversion.h, do a make update-modverfile.
-Make dep in linux is broken, so you might have to do make bzImage twice.
+Install build-essential wget ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic sash bash-static doxygen dejagnu bison.
 
 NOTE on kernel config with VMS options:
 There is only one option for FreeVMS.
 Do not boot with init=/bin/sh.
 
 Example build i386:
-tar xzf freevms-0_1_2.tgz
+git clone git@github.com:/rroart/freevms.git (or pull)
 cd freevms
 ./envscript
 cd ..
@@ -38,19 +30,17 @@ make rootinstall
 make image (as root)
 make image-install (as root)
 make image-kernel-iomm (as root)
-(Then create an INET$CONFIG)
+
+Not to be done currently:
+make download-grub
+make build-grub (for the time being, use a premade a.img instead)
+(Create an INET$CONFIG)
 (Then do the steps in NOTE on VFS ODS2 module autobuild, or equivalents)
 ./dcl/src/install.sh
-To make VirtualBox images, do make vbimage, make createvb
-and do VBoxManage startvm FreeVMS
-(You may have to edit VirtualBox.xml and remove images yourself)
-Enable IO Apic
 
 Not to be done anymore:
 make download-bliss
 make build-bliss (run twice, for some reason first run quits with an error)
-make download-grub
-make build-grub (for the time being, use a premade a.img instead)
 make telnet (32-bit only, and remember to change close to close2 in routines.b32)
 
 Next see the USE file (after compiling or installing bochs).
@@ -73,7 +63,13 @@ Bochs use:
 	Use make image-kernel-iomm to install the kernel.
 
 Qemu use:
-        qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio
+        qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
+
+Virtualbox info:
+	   To make VirtualBox images, do make vbimage, make createvb
+	   and do VBoxManage startvm FreeVMS
+	   (You may have to edit VirtualBox.xml and remove images yourself)
+	   Enable IO Apic
 
 Virtualbox use:
 	Just use it with both a and c images.
