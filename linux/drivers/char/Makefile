@@ -22,8 +22,7 @@ obj-y	 += pty.o
 # This list comes from 'grep -l EXPORT_SYMBOL *.[hc]'.
 
 export-objs     :=	sysrq.o \
-			pty.o selection.o serial.o \
-			generic_serial.o
+			pty.o
 
 mod-subdirs	:=	
 

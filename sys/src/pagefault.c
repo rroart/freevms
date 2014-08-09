@@ -823,8 +823,6 @@ vmalloc_fault:
 }
 #endif
 
-#endif
-
 #if 0
 long myindex=0;
 long mystack[1024];
@@ -1568,3 +1566,4 @@ vmalloc_fault:
 		return;
 	}
 }
+#endif

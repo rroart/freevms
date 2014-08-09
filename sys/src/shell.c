@@ -611,7 +611,6 @@ int user_spaceable() {
   *l|=0x0000600000000000;
 #endif
 }
-#endif
 
 #ifdef __i386__
 #define P1PP __attribute__ ((section ("p1pp")))
@@ -704,6 +703,7 @@ unsigned long ctl$gl_usrundwn_exec P1PP ;
 unsigned long ctl$ag_clidata P1PP ;
 unsigned long ctl$gl_fixuplnk P1PP ;
 unsigned long ctl$gl_iaflnkptr P1PP ;
+#endif
 
 /**
    \brief syscall code to be used in the future?

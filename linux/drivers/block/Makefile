@@ -10,7 +10,7 @@
 
 O_TARGET := block.o
 
-export-objs	:= blkpg.o loop.o genhd.o
+export-objs	:= blkpg.o genhd.o
 
 obj-y	:= blkpg.o genhd.o vmsblock.o
 
