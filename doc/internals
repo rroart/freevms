@@ -2,7 +2,7 @@ System overview
 
 FreeVMS is still at an early stage.
 It can be compiled more ordinarily as a kernel with some VMS scheduling extensions (ruffly said, it has more) which is able to boot minimally with init, network and sshd.
-Alternatively, it can be compiled with CONFIG_VMS, which means you get VMS memory management and I/O, but only can boot single-user.
+It can be compiled only as FreeVMS, which means you get VMS memory management and I/O, but only can boot single-user.
 It can only be compiled on i386, because it is useless and waste of resources to try another arch at this moment.
 Even with CONFIG, there is still lots of memory management bits left to do.
 P1 space, 4 level CPU modes (even though i386 may lack some features to use this fully) is in the process of being developed.
@@ -500,12 +500,12 @@ vmsconsole.c
 
 Fork and exec
 
-During the work of getting fork to work under CONFIG_VMS mode, it became clear that fork is a very delicate process.
+During the work of getting fork to work for FreeVMS, it became clear that fork is a very delicate process.
 I am not doing anything different until pid and epid is allocated (replaces the linux get_pid).
 Then nothing is different until dup_phd.
 The dup_phd does something similar as dup_mm, it duplicates the phd.
 Then the next different is copy_mm. Because of now having P1 space, it has to ignore the CLONE_VM flags, and hereby the threading support is gone, at least until scheduling from the VMS 7.0 book is implemented.
-In copy_mm there is a called routine dup_mmap. Dup_mmap is changed in the manner that copying the vm_area_structs is not done with CONFIG_VMS mode, the copying of regions is done in dup_stuff instead.
+In copy_mm there is a called routine dup_mmap. Dup_mmap is changed in the manner that copying the vm_area_structs is not done with FreeVMS, the copying of regions is done in dup_stuff instead.
 The cutting of threading support also implies that you can not use daemonize() with the kernel threads (which now longer are threads really).
 The initialization of the P1 space in done with init_fork_p1pp.
 There has to be 3 different initializations for p1pp, because startup, fork and exe$procstrt each have different contexts and needs.
@@ -514,14 +514,14 @@ Then sometime later we begin setting prib and other pcb and cpu stuff.
 The counter is removed because VMS uses pri and prib.
 
 The do_execve routine is extended with rms_open_exec before open_exec.
-With CONFIG_VMS there is a routine rms_open_exec which open executable files.
-With CONFIG_VMS the kernel_read routines is extended with RMS reading capabilities by using rms_kernel_read (which does basically the same as kernel read).
+With FreeVMS there is a routine rms_open_exec which open executable files.
+With FreeVMS the kernel_read routines is extended with RMS reading capabilities by using rms_kernel_read (which does basically the same as kernel read).
 De_thread is now omitted (can not exactly remember why).
 Rms_prepare_binprm does the equivalent of prepare_binprm.
 There is a lot of DYN$C_FCB checks (to be described later).
 Init_phd does basically initialize the new phd.
 
-The setup_arg_pages, called from binfmt_elf.c, has been extended with regions from CONFIG_VMS.
+The setup_arg_pages, called from binfmt_elf.c, has been extended with regions.
 At last, it calls as usual the load_elf_binary in binfmt_elf.c.
 
 Flush_old_exec, executed from binfmt_elf.c, has got some new lines doing alloc and config of new phd, p1pp initialization and lnm initialization.
@@ -543,15 +543,15 @@ Process creation
 Image initiation
 
 There are 3 kind of images.
-The .exe, which are VMS-like, and works only under CONFIG_VMS.
-The .ele, which are ELF shared object, can be run under CONFIG_VMS.
-Ordinary ELF executables and shared objects can be run from no-CONFIG_VMS.
+The .exe, which are VMS-like, and works only under FreeVMS.
+The .ele, which are ELF shared object, can not be run under FreeVMS anymore.
+Ordinary ELF executables and shared objects can not run anymore..
 Most recently added is the possibility to load an ordinary ELF executable and
 run a routine from it.
 The .exe, .ele and ELF executables can be loaded and run from DCL with run.
 The addition of ELF executables is very recent, and may have problems.
-DCL commands in other images is .exe for CONFIG_VMS, and .ele for
-non-CONFIG_VMS.
+DCL commands in other images is .exe for FreeVMS, and .ele for
+some images previously runnable.
 That is because .ele is a more recent addition, and the dl library may not
 understand VMS paths.
 
@@ -672,7 +672,7 @@ It was based on decnet code, and some parts remain.
 At an earlier time, scs_init2 is invoked by Linux module code.
 It just registers the socket and start things with scs_dev_init.
 Scs_dev_init mainly sets a timer which sends a hello regularily.
-If CONFIG_VMS is there, it does nothing.
+This is currently not set up to work in FreeVMS.
 
 In module main.c, it is started by scs_init, then mscp, dlminit, init_cwps are run.
 Scs_init sets up directory services (not yet used, though), and sets up basic data structures.
@@ -711,7 +711,7 @@ It then dispatches whether is was a hello to scs_neigh_endnode_hello and if a co
 Opc_msgrec handles protocol and connection setup.
 Nisca_snt_dg dispatches to the input routine designated by the connection id.
 
-Clustering is not yet ready for CONFIG_VMS networking.
+Clustering is not yet ready for FreeVMS networking.
 
 Configure process
 As described in 4.9 Configure Process (and 4.14)

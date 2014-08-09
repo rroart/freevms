@@ -66,12 +66,8 @@ struct file * get_empty_filp(void)
 	 */
 	if (files_stat.nr_files < files_stat.max_files) {
 		file_list_unlock();
-#ifndef CONFIG_VMS
-		f = kmem_cache_alloc(filp_cachep, SLAB_KERNEL);
-#else
 		f = kmalloc(sizeof(*f), GFP_KERNEL);
 		memset(f, 0, sizeof(*f));
-#endif
 		file_list_lock();
 		if (f) {
 			files_stat.nr_files++;
@@ -88,63 +84,8 @@ struct file * get_empty_filp(void)
 	return NULL;
 }
 
-#ifndef CONFIG_VMS
-/*
- * Clear and initialize a (private) struct file for the given dentry,
- * and call the open function (if any).  The caller must verify that
- * inode->i_fop is not NULL.
- */
-int init_private_file(struct file *filp, struct dentry *dentry, int mode)
-{
-	memset(filp, 0, sizeof(*filp));
-	filp->f_mode   = mode;
-	atomic_set(&filp->f_count, 1);
-	filp->f_dentry = dentry;
-	filp->f_uid    = current->fsuid;
-	filp->f_gid    = current->fsgid;
-	filp->f_op     = dentry->d_inode->i_fop;
-	if (filp->f_op->open)
-		return filp->f_op->open(dentry->d_inode, filp);
-	else
-		return 0;
-}
-#endif
-
 void fastcall fput(struct file * file)
 {
-#ifndef CONFIG_VMS
-#ifndef CONFIG_VMS
-	struct dentry * dentry = file->f_dentry;
-	struct vfsmount * mnt = file->f_vfsmnt;
-	struct inode * inode = dentry->d_inode;
-#endif
-
-	if (atomic_dec_and_test(&file->f_count)) {
-		locks_remove_flock(file);
-
-		if (file->f_iobuf)
-			free_kiovec(1, &file->f_iobuf);
-
-#ifndef CONFIG_VMS
-		if (file->f_op && file->f_op->release)
-			file->f_op->release(inode, file);
-		fops_put(file->f_op);
-		if (file->f_mode & FMODE_WRITE)
-			put_write_access(inode);
-#endif
-		file_list_lock();
-		file->f_dentry = NULL;
-		file->f_vfsmnt = NULL;
-		list_del(&file->f_list);
-		list_add(&file->f_list, &free_list);
-		files_stat.nr_free_files++;
-		file_list_unlock();
-#ifndef CONFIG_VMS
-		dput(dentry);
-		mntput(mnt);
-#endif
-	}
-#endif
 }
 
 struct file * fastcall fget(unsigned int fd)
@@ -164,15 +105,6 @@ struct file * fastcall fget(unsigned int fd)
 
 void put_filp(struct file *file)
 {
-#ifndef CONFIG_VMS
-	if(atomic_dec_and_test(&file->f_count)) {
-		file_list_lock();
-		list_del(&file->f_list);
-		list_add(&file->f_list, &free_list);
-		files_stat.nr_free_files++;
-		file_list_unlock();
-	}
-#endif
 }
 
 void file_move(struct file *file, struct list_head *list)

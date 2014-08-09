@@ -10,41 +10,12 @@
 
 O_TARGET := block.o
 
-ifneq ($(CONFIG_VMS),y)
-export-objs	:= ll_rw_blk.o blkpg.o loop.o DAC960.o genhd.o
-else
-export-objs	:= ll_rw_blk.o blkpg.o loop.o genhd.o
-endif
+export-objs	:= blkpg.o loop.o genhd.o
 
-ifneq ($(CONFIG_VMS),y)
-obj-y	:= ll_rw_blk.o blkpg.o genhd.o elevator.o
-else
 obj-y	:= blkpg.o genhd.o vmsblock.o
-endif
 
 ifeq ($(ARCH),i386)
-#obj-$(CONFIG_VMS)		+= pvdriver.o
-endif
-
-ifneq ($(CONFIG_VMS),y)
-obj-$(CONFIG_MAC_FLOPPY)	+= swim3.o
-obj-$(CONFIG_BLK_DEV_FD)	+= floppy.o
-obj-$(CONFIG_AMIGA_FLOPPY)	+= amiflop.o
-obj-$(CONFIG_ATARI_FLOPPY)	+= ataflop.o
-obj-$(CONFIG_BLK_DEV_SWIM_IOP)	+= swim_iop.o
-obj-$(CONFIG_ATARI_ACSI)	+= acsi.o
-obj-$(CONFIG_ATARI_SLM)		+= acsi_slm.o
-obj-$(CONFIG_AMIGA_Z2RAM)	+= z2ram.o
-obj-$(CONFIG_BLK_DEV_RAM)	+= rd.o
-obj-$(CONFIG_BLK_DEV_LOOP)	+= loop.o
-obj-$(CONFIG_BLK_DEV_PS2)	+= ps2esdi.o
-obj-$(CONFIG_BLK_DEV_XD)	+= xd.o
-obj-$(CONFIG_BLK_CPQ_DA)	+= cpqarray.o
-obj-$(CONFIG_BLK_CPQ_CISS_DA)  += cciss.o
-obj-$(CONFIG_BLK_DEV_DAC960)	+= DAC960.o
-
-obj-$(CONFIG_BLK_DEV_NBD)	+= nbd.o
-
+#obj-y				+= pvdriver.o
 endif
 
 include $(TOPDIR)/Rules.make

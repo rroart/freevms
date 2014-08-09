@@ -222,16 +222,8 @@ static char * plus_colon(char * name) {
 }
 int exe$procstrt(struct _pcb * p) {
 #if 0
-#ifdef __arch_um__
-  asm volatile ("movl 0x9ffffff0,%esp");
-#else
   asm volatile ("movl 0xbffffff0,%esp");
 #endif
-#endif
-#ifdef __arch_um__
-  //  p=ctl$gl_pcb;
-  flush_tlb_mm(p->mm);
-#else
 #ifdef __i386__
 #if 0
   __asm__ ("movl %%edi,%0; ":"=r" (p));
@@ -247,7 +239,6 @@ int exe$procstrt(struct _pcb * p) {
 #endif
 #endif
   // warning: very risky one, chance
-#endif
   // get pcb and copy pqb
   // store rms dispatcher address
   // initialize dispatch vector for system services
@@ -309,21 +300,13 @@ int exe$procstrt(struct _pcb * p) {
 
   int len = strlen(pqb->pqb$t_image);
 
-#ifdef __arch_um__
-  struct pt_regs * regs = &p;
-  regs = &current->thread.regs;
-#else
-#endif
-
   // not?  init_p1pp(p,p->pcb$l_phd);
   lnm_init_prc(current);
 
   if (strncmp(".exe",pqb->pqb$t_image+len-4,4)) goto do_execve;
 
   xqp_init2();
-#ifdef CONFIG_VMS
   exttwo_init2(0);
-#endif
 
   aname.dsc$w_length=len-4;
   aname.dsc$a_pointer=pqb->pqb$t_image;
@@ -353,7 +336,6 @@ int exe$procstrt(struct _pcb * p) {
   // this is an actual system call
   void ** argv = 0;
   void * args[2];
-#ifdef CONFIG_VMS
   int found = strcmp(pqb->pqb$t_input,"[vms$common.sysexe]startup.com")==0;
   found |= strcmp(pqb->pqb$t_input,"[vms$common.sysexe]install.com")==0;
   if (found) {
@@ -381,7 +363,6 @@ int exe$procstrt(struct _pcb * p) {
     if (pqb->pqb$t_error[0]) sys_open_term(p->pcb$t_terminal);
 #endif
   }
-#endif
   execve(pqb->pqb$t_image,argv,0); //(,regs);
   set_fs(fs);
 

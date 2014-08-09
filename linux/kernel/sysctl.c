@@ -39,9 +39,7 @@
 
 #include <asm/uaccess.h>
 
-#ifdef CONFIG_VMS
 #undef CONFIG_PROC_FS
-#endif
 
 #ifdef CONFIG_ROOT_NFS
 #include <linux/nfs_fs.h>
@@ -119,12 +117,6 @@ static struct ctl_table_header root_table_header =
 
 static ctl_table kern_table[];
 static ctl_table vm_table[];
-#ifdef CONFIG_NET
-#ifndef CONFIG_VMS
-// not yet?
-extern ctl_table net_table[];
-#endif
-#endif
 static ctl_table proc_table[];
 static ctl_table fs_table[];
 static ctl_table debug_table[];
@@ -160,10 +152,6 @@ static ctl_table root_table[] = {
 	{CTL_KERN, "kernel", NULL, 0, 0555, kern_table},
 	{CTL_VM, "vm", NULL, 0, 0555, vm_table},
 #ifdef CONFIG_NET
-#ifndef CONFIG_VMS
-	// not yet?
-	{CTL_NET, "net", NULL, 0, 0555, net_table},
-#endif
 #endif
 	{CTL_PROC, "proc", NULL, 0, 0555, proc_table},
 	{CTL_FS, "fs", NULL, 0, 0555, fs_table},
@@ -257,9 +245,6 @@ static ctl_table kern_table[] = {
 	 0600, NULL, &proc_dointvec},
 	{KERN_MAX_THREADS, "threads-max", &max_threads, sizeof(int),
 	 0644, NULL, &proc_dointvec},
-#ifndef CONFIG_VMS
-	{KERN_RANDOM, "random", NULL, 0, 0555, random_table},
-#endif
 	{KERN_OVERFLOWUID, "overflowuid", &overflowuid, sizeof(int), 0644, NULL,
 	 &proc_dointvec_minmax, &sysctl_intvec, NULL,
 	 &minolduid, &maxolduid},
@@ -289,12 +274,6 @@ static ctl_table vm_table[] = {
 	 &pgt_cache_water, 2*sizeof(int), 0644, NULL, &proc_dointvec},
 	{VM_PAGE_CLUSTER, "page-cluster", 
 	 &page_cluster, sizeof(int), 0644, NULL, &proc_dointvec},
-#ifndef CONFIG_VMS
-	{VM_MIN_READAHEAD, "min-readahead",
-	&vm_min_readahead,sizeof(int), 0644, NULL, &proc_dointvec},
-	{VM_MAX_READAHEAD, "max-readahead",
-	&vm_max_readahead,sizeof(int), 0644, NULL, &proc_dointvec},
-#endif
 	{0}
 };
 
@@ -303,32 +282,6 @@ static ctl_table proc_table[] = {
 };
 
 static ctl_table fs_table[] = {
-#ifndef CONFIG_VMS
-	{FS_NRINODE, "inode-nr", &inodes_stat, 2*sizeof(int),
-	 0444, NULL, &proc_dointvec},
-	{FS_STATINODE, "inode-state", &inodes_stat, 7*sizeof(int),
-	 0444, NULL, &proc_dointvec},
-	{FS_NRFILE, "file-nr", &files_stat, 3*sizeof(int),
-	 0444, NULL, &proc_dointvec},
-	{FS_MAXFILE, "file-max", &files_stat.max_files, sizeof(int),
-	 0644, NULL, &proc_dointvec},
-	{FS_NRDQUOT, "dquot-nr", &nr_dquots, 2*sizeof(int),
-	 0444, NULL, &proc_dointvec},
-	{FS_DENTRY, "dentry-state", &dentry_stat, 6*sizeof(int),
-	 0444, NULL, &proc_dointvec},
-	{FS_OVERFLOWUID, "overflowuid", &fs_overflowuid, sizeof(int), 0644, NULL,
-	 &proc_dointvec_minmax, &sysctl_intvec, NULL,
-	 &minolduid, &maxolduid},
-	{FS_OVERFLOWGID, "overflowgid", &fs_overflowgid, sizeof(int), 0644, NULL,
-	 &proc_dointvec_minmax, &sysctl_intvec, NULL,
-	 &minolduid, &maxolduid},
-	{FS_LEASES, "leases-enable", &leases_enable, sizeof(int),
-	 0644, NULL, &proc_dointvec},
-	{FS_DIR_NOTIFY, "dir-notify-enable", &dir_notify_enable,
-	 sizeof(int), 0644, NULL, &proc_dointvec},
-	{FS_LEASE_TIME, "lease-break-time", &lease_break_time, sizeof(int),
-	 0644, NULL, &proc_dointvec},
-#endif
 	{0}
 };
 
@@ -344,62 +297,11 @@ extern void init_irq_proc (void);
 
 void __init sysctl_init(void)
 {
-#ifndef CONFIG_VMS
-#ifdef CONFIG_PROC_FS
-	register_proc_table(root_table, proc_sys_root);
-	init_irq_proc();
-#endif
-#endif
 }
-
-#ifndef CONFIG_VMS
-int do_sysctl(int *name, int nlen, void *oldval, size_t *oldlenp,
-	       void *newval, size_t newlen)
-{
-	struct list_head *tmp;
-
-	if (nlen <= 0 || nlen >= CTL_MAXNAME)
-		return -ENOTDIR;
-	if (oldval) {
-		int old_len;
-		if (!oldlenp || get_user(old_len, oldlenp))
-			return -EFAULT;
-	}
-	tmp = &root_table_header.ctl_entry;
-	do {
-		struct ctl_table_header *head =
-			list_entry(tmp, struct ctl_table_header, ctl_entry);
-		void *context = NULL;
-		int error = parse_table(name, nlen, oldval, oldlenp, 
-					newval, newlen, head->ctl_table,
-					&context);
-		if (context)
-			kfree(context);
-		if (error != -ENOTDIR)
-			return error;
-		tmp = tmp->next;
-	} while (tmp != &root_table_header.ctl_entry);
-	return -ENOTDIR;
-}
-#endif
 
 extern asmlinkage long sys_sysctl(struct __sysctl_args *args)
 {
-#ifndef CONFIG_VMS
-	struct __sysctl_args tmp;
-	int error;
-
-	if (copy_from_user(&tmp, args, sizeof(tmp)))
-		return -EFAULT;
-		
-	lock_kernel();
-	error = do_sysctl(tmp.name, tmp.nlen, tmp.oldval, tmp.oldlenp,
-			  tmp.newval, tmp.newlen);
-	unlock_kernel();
-	return error;
-#else
 	return -EPERM;
-#endif
 }
 
 /*

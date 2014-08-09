@@ -198,9 +198,6 @@ __set_personality(u_long personality)
 	current->personality = personality;
 	oep = current->exec_domain;
 	current->exec_domain = ep;
-#ifndef CONFIG_VMS
-	set_fs_altroot();
-#endif
 
 	put_exec_domain(oep);
 

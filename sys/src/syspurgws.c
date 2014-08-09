@@ -21,7 +21,6 @@
 #include <misc_routines.h>
 
 int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
-#ifdef CONFIG_VMS
   // acquire mmg spin
   struct page * page;
   struct _phd * phd;
@@ -33,11 +32,7 @@ int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirecti
   struct _mypte *pte = findpte_new(mm,va);
   if (pte->pte$v_valid==0)
     return SS$_NORMAL;
-#ifdef __arch_um__
-  pfn=__pa(pte->pte$v_pfn<<PAGE_SHIFT)>>PAGE_SHIFT;
-#else
   pfn=pte->pte$v_pfn;
-#endif
   page=&mem_map[pfn];
   phd=p->pcb$l_phd;
   wsl=phd->phd$l_wslist;
@@ -59,7 +54,6 @@ int mmg$purgwsscn(int acmode, void * va, struct _pcb * p, signed int pagedirecti
   mmg$frewslx(p, va, findpte_new(mm, va), page->pfn$l_wslx_qw);
 
   return SS$_NORMAL;
-#endif
 }
 
 int mmg$purgwspag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {

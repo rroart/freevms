@@ -578,13 +578,11 @@ void CNF$Configure_ACP (void)
 // dev_config and memory management info.
 
 #ifndef NOKERNEL
-#ifdef CONFIG_VMS
     fs = get_fs();
     set_fs(get_ds());
 
     long prev_xqp_fcb = get_xqp_prim_fcb();
     long prev_x2p_fcb = get_x2p_prim_fcb();
-#endif
 #endif
     if (BLISSIFNOT(BLISSIF(RC = sys$open(CFFAB,0,0)) &&
 	    BLISSIF(RC = sys$connect(CFRAB,0,0))))
@@ -599,9 +597,7 @@ void CNF$Configure_ACP (void)
     dev_count = 0;		// No devices
 
 #ifndef NOKERNEL 
-#ifdef CONFIG_VMS
 #define RMS_WORKAROUND
-#endif
 #endif
 #ifdef RMS_WORKAROUND
     struct file * filp;

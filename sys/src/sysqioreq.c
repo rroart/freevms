@@ -374,12 +374,10 @@ int exe$qioacppkt (struct _irp * i, struct _pcb * p, struct _ucb * u) {
     return SS$_NORMAL;
   }
   /** one temporary FreeVMS hacks in the if for ext2 */
-#ifdef CONFIG_VMS
   if (a->aqb$l_acppid==1) {
     exe$qioqe2ppkt(p,i);
     return SS$_NORMAL;
   }
-#endif
   wasempty=aqempty(&a->aqb$l_acpqfl);
   /** insert irp into aqbs i/o queue */
   insque(i,&a->aqb$l_acpqfl);
@@ -450,7 +448,6 @@ void exe$qioqxqppkt (struct _pcb * p, struct _irp * i) {
    \param p pcb
 */
 
-#ifdef CONFIG_VMS
 void exe$qioqe2ppkt (struct _pcb * p, struct _irp * i) {
   struct _acb *a=&i->irp$l_fqfl;
   /** getting the xqp data area is not used anymore? */
@@ -468,7 +465,6 @@ void exe$qioqe2ppkt (struct _pcb * p, struct _irp * i) {
   sch$qast(p->pcb$l_pid,PRI$_RESAVL,a);
   /** set ipl 0 - MISSING? TODO or why not? */
 }
-#endif
 
 asmlinkage int exe$qiow_wrap(struct struct_qio * s) {
   return exe$qiow(s->efn,s->chan,s->func,s->iosb,s->astadr,s->astprm,s->p1,s->p2,s->p3,s->p4,s->p5,s->p6);

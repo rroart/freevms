@@ -59,7 +59,6 @@ asmlinkage void exe$cntreg(void) {
 int vava=0;
 
 int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte) {
-#ifdef CONFIG_VMS
   //spinlock  , too
   int savipl=getipl();
   setipl(IPL$_MMG);
@@ -170,12 +169,9 @@ int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection,
 
  out:
 
-#ifndef __arch_um__
   __flush_tlb(); //flush_tlb_range(current->mm, page, page + PAGE_SIZE);
-#endif
   setipl(savipl);
   return SS$_NORMAL;
-#endif
 }
 
 asmlinkage int exe$deltva(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode) {
@@ -203,11 +199,7 @@ asmlinkage int exe$deltva(struct _va_range *inadr, struct _va_range *retadr, uns
 */
 
 asmlinkage int exe$expreg(unsigned int pagcnt, struct _va_range *retadr,unsigned int acmode, char region) {
-#ifdef __arch_um__
-  int prot_pte=0x51|_PAGE_RW;
-#else
   int prot_pte=0x45|_PAGE_RW;
-#endif
   int sts = SS$_NORMAL;
   // region is default 0, and region rde are not used like in vms
 

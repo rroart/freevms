@@ -335,20 +335,6 @@ repeat:
 	spin_unlock_irq(&timerlist_lock);
 }
 
-#ifndef CONFIG_VMS
-spinlock_t tqueue_lock = SPIN_LOCK_UNLOCKED;
-
-void tqueue_bh(void)
-{
-	run_task_queue(&tq_timer);
-}
-
-void immediate_bh(void)
-{
-	run_task_queue(&tq_immediate);
-}
-#endif
-
 /*
  * this routine handles the overflow of the microsecond field
  *
@@ -701,14 +687,6 @@ static inline void update_times(void)
 	calc_load(ticks);
 }
 
-#ifndef CONFIG_VMS
-void timer_bh(void)
-{
-	update_times();
-	run_timer_list();
-}
-#endif
-
 /* maybe change to exe$hwclkint sometime ? */
 /* the main loop described might be here */  
 void do_timer(struct pt_regs *regs)
@@ -719,11 +697,6 @@ void do_timer(struct pt_regs *regs)
 	/* SMP process accounting uses the local APIC timer */
 
 	update_process_times(user_mode(regs));
-#endif
-#ifndef CONFIG_VMS
-	mark_bh(TIMER_BH);
-	if (TQ_ACTIVE(tq_timer))
-		mark_bh(TQUEUE_BH);
 #endif
 }
 

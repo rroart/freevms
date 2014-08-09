@@ -107,11 +107,7 @@
 #define CONFIG_PROC_FS 1
 #define CONFIG_DEVPTS_FS 1
 
-#ifndef CONFIG_VMS
-#define CONFIG_EXT2_FS 1
-#else
 #define CONFIG_EXTTWO_FS 1
-#endif
 
 /*
  * Partition Types

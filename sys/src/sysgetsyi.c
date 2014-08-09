@@ -52,11 +52,7 @@ asmlinkage int exe$getsyi(unsigned int efn, unsigned int *csidadr, void *nodenam
 
     case SYI$_LASTFLD:
       {
-#ifdef CONFIG_VMS
 	int mem=1;
-#else
-	int mem=0;
-#endif
 	memcpy(it->bufaddr,&mem,4);
       }
       break;
