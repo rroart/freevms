@@ -1011,8 +1011,6 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	file = rms_open_exec(filename);
 	if (((long)file) >= 0) goto fcb_found;
 
-	file = open_exec(filename);
-
 	retval = PTR_ERR(file);
 	//printk("here 5\n");
 	if (IS_ERR(file))
@@ -1047,8 +1045,6 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
 	if (((struct _fcb *)file)->fcb$b_type==DYN$C_FCB)
 #endif
 	  retval = rms_prepare_binprm(&bprm);
-#else
-	retval = prepare_binprm(&bprm);
 	//printk("here 4\n");
 	if (retval < 0) 
 		goto out; 
