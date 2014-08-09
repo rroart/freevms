@@ -35,17 +35,15 @@ obj-y     = sched.o \
 	    system_service_dispatcher.o vmslib.o spinlocks.o smprout.o \
 	    capability.o sys_affinity.o svapte.o
 
-ifeq ($(CONFIG_VMS),y)
 export-objs := vmsfilemap.o vmsbuffer.o
-endif
 
-obj-$(CONFIG_VMS) += vmsbootmem.o ptalloc.o \
+obj-y += vmsbootmem.o ptalloc.o \
 			vmsslab.o wrtmfypag.o \
 			vmsmmap.o vmsfilemap.o vmsmemory.o vmsmremap.o \
 	 		vmsmprotect.o vmsmlock.o vmsvmalloc.o \
 			vmsswapfile.o allocpfn.o
 
-obj-$(CONFIG_VMS) += vmsbuffer.o
+obj-y += vmsbuffer.o
 
 include $(TOPDIR)/Rules.make
 

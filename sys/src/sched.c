@@ -61,15 +61,9 @@
 #include <cpbdef.h>
 #include <rsndef.h>
 #include <statedef.h>
-#ifdef __arch_um__
-#include <asm-i386/hw_irq.h>
-#endif
 
 #undef DEBUG_SCHED
 
-#ifdef CONFIG_VMS
-#define DEBUG_SCHED
-#endif
 #define DEBUG_SCHED
 
 /* try to cut out wake_up_process schedule_timeout __wake_up __wake_up_sync 
@@ -1178,26 +1172,10 @@ static inline void __wake_up_common (wait_queue_head_t *q, unsigned int mode,
 
 void fastcall __wake_up(wait_queue_head_t *q, unsigned int mode, int nr)
 {
-#ifndef CONFIG_VMS
-	if (q) {
-		unsigned long flags;
-		wq_read_lock_irqsave(&q->lock, flags);
-		__wake_up_common(q, mode, nr, 0);
-		wq_read_unlock_irqrestore(&q->lock, flags);
-	}
-#endif
 }
 
 void fastcall __wake_up_sync(wait_queue_head_t *q, unsigned int mode, int nr)
 {
-#ifndef CONFIG_VMS
-	if (q) {
-		unsigned long flags;
-		wq_read_lock_irqsave(&q->lock, flags);
-		__wake_up_common(q, mode, nr, 1);
-		wq_read_unlock_irqrestore(&q->lock, flags);
-	}
-#endif
 }
 
 void fastcall complete(struct completion *x)
@@ -1212,25 +1190,6 @@ void fastcall complete(struct completion *x)
 
 void fastcall wait_for_completion(struct completion *x)
 {
-#ifndef CONFIG_VMS
-	spin_lock_irq(&x->wait.lock);
-	if (!x->done) {
-		DECLARE_WAITQUEUE(wait, current);
-
-		wait.flags |= WQ_FLAG_EXCLUSIVE;
-		__add_wait_queue_tail(&x->wait, &wait);
-		do {
-			__set_current_state(TASK_UNINTERRUPTIBLE);
-			current->pcb$w_state = 0;
-			spin_unlock_irq(&x->wait.lock);
-			schedule();
-			spin_lock_irq(&x->wait.lock);
-		} while (!x->done);
-		__remove_wait_queue(&x->wait, &wait);
-	}
-	x->done--;
-	spin_unlock_irq(&x->wait.lock);
-#endif
 }
 
 #define	SLEEP_ON_VAR				\
@@ -1827,12 +1786,6 @@ void __init sched_init(void)
   //	{ int i,j; for(j=0;j<2;j++) for(i=0;i<1000000000;i++); }
 
   init_timervecs();
-
-#ifndef CONFIG_VMS
-  init_bh(TIMER_BH, timer_bh);
-  init_bh(TQUEUE_BH, tqueue_bh);
-  init_bh(IMMEDIATE_BH, immediate_bh);
-#endif
 
 	/*
 	 * The boot idle thread does lazy MMU switching as well:

@@ -1,6 +1,7 @@
 FLAGS = -static
 
-all: i386/delete${EXE} i386/delete${NOEXE} i386/delete${EXE_ELF}
+all: i386/delete${EXE} i386/delete${NOEXE}
+#i386/delete${EXE_ELF}
 
 clean:
 	rm *.o i386/*

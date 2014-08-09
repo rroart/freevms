@@ -130,11 +130,7 @@ EXPORT_SYMBOL(__global_restore_flags);
 EXPORT_SYMBOL(smp_call_function);
 
 /* TLB flushing */
-#ifndef CONFIG_VMS
-EXPORT_SYMBOL(flush_tlb_page);
-#else
 EXPORT_SYMBOL(flush_tlb_page2);
-#endif
 #endif
 
 #ifdef CONFIG_MCA
@@ -200,11 +196,6 @@ EXPORT_SYMBOL(atomic_dec_and_lock);
 #endif
 
 EXPORT_SYMBOL(die_chain);
-
-#ifndef CONFIG_VMS
-extern void do_softirq_thunk(void);
-EXPORT_SYMBOL_NOVERS(do_softirq_thunk);
-#endif
 
 extern unsigned long __supported_pte_mask; 
 EXPORT_SYMBOL(__supported_pte_mask);

@@ -121,9 +121,7 @@ void mmg$purgempl(unsigned long command) {
 #endif
   *(unsigned long *)pte|=_PAGE_PRESENT;
 
-#ifndef __arch_um__
   __flush_tlb();
-#endif
 
   extern int myswapfile;
   struct _pfl * pfl = myswapfile;
@@ -141,9 +139,7 @@ void mmg$purgempl(unsigned long command) {
 #if 0
   *pte=oldpte;
 #endif
-#ifndef __arch_um__
   __flush_tlb();
-#endif
 #if 0
   vfree(mypage);
 #endif

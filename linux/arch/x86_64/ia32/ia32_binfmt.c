@@ -230,11 +230,7 @@ extern void put_dirty_page(struct task_struct * tsk, struct page *page, unsigned
 int ia32_setup_arg_pages(struct linux_binprm *bprm)
 {
 	unsigned long stack_base;
-#ifndef CONFIG_MM_VMS
-	struct vm_area_struct *mpnt;
-#else
 	struct _rde *mpnt;
-#endif
 	int i, ret;
 
 #define IA32_STACK_TOP1 STACK_TOP
@@ -252,32 +248,12 @@ int ia32_setup_arg_pages(struct linux_binprm *bprm)
 	
 	down_write(&current->mm->mmap_sem);
 	{
-#ifndef CONFIG_MM_VMS
-		mpnt->vm_mm = current->mm;
-		mpnt->vm_start = PAGE_MASK & (unsigned long) bprm->p;
-		mpnt->vm_end = IA32_STACK_TOP;
-		mpnt->vm_flags = vm_stack_flags32; 
-		mpnt->vm_page_prot = (mpnt->vm_flags & VM_EXEC) ? 
-			PAGE_COPY_EXEC : PAGE_COPY;
-		mpnt->vm_ops = NULL;
-		mpnt->vm_pgoff = 0;
-		mpnt->vm_file = NULL;
-		mpnt->vm_private_data = (void *) 0;
-		if (0 /* not yet:(ret = insert_vm_struct(current->mm, mpnt))*/) {
-			up_write(&current->mm->mmap_sem);
-			kmem_cache_free(vm_area_cachep, mpnt);
-			return ret;
-		} else
-		  insert_vm_struct(current->mm, mpnt);
-		current->mm->total_vm = (mpnt->vm_end - mpnt->vm_start) >> PAGE_SHIFT;
-#else
 		mpnt->rde$pq_start_va = PAGE_MASK & (unsigned long) bprm->p;
 		mpnt->rde$q_region_size = IA32_STACK_TOP1 - (unsigned long) mpnt->rde$pq_start_va;
 		mpnt->rde$r_regprot.regprt$l_region_prot = _PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED;//PAGE_COPY;
 		mpnt->rde$l_flags = vm_stack_flags32;
 		insrde(mpnt,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
 		//flush_tlb_range(current->mm, mpnt->rde$pq_start_va, mpnt->rde$pq_start_va + PAGE_SIZE);
-#endif
 	} 
 
 	for (i = 0 ; i < MAX_ARG_PAGES ; i++) {

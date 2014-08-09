@@ -5,7 +5,8 @@ LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux
 
 
 ifneq ($(ARCH),x86_64)
-all: i386/sysman${NOEXE} i386/sysman${EXE_ELF}
+all: i386/sysman${NOEXE}
+#i386/sysman${EXE_ELF}
 else
 all: i386/sysman${NOEXE}
 endif

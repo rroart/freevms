@@ -264,16 +264,6 @@ static inline void __put_fs_struct(struct fs_struct *fs)
 {
 	/* No need to hold fs->lock if we are killing it */
 	if (atomic_dec_and_test(&fs->count)) {
-#ifndef CONFIG_VMS
-		dput(fs->root);
-		mntput(fs->rootmnt);
-		dput(fs->pwd);
-		mntput(fs->pwdmnt);
-		if (fs->altroot) {
-			dput(fs->altroot);
-			mntput(fs->altrootmnt);
-		}
-#endif
 		kmem_cache_free(fs_cachep, fs);
 	}
 }
@@ -476,13 +466,11 @@ fake_volatile:
 	acct_process(code);
 #endif
 	__exit_mm(tsk);
-#ifdef CONFIG_MM_VMS
 	kfree(tsk->pcb$l_phd->phd$l_wslist);
 	kfree(tsk->pcb$l_phd->phd$l_wslock);
 	kfree(tsk->pcb$l_phd->phd$l_wsdyn);
 	kfree(tsk->pcb$l_phd->phd$l_pst_base_offset);
 	kfree(tsk->pcb$l_phd);
-#endif
 
 	lock_kernel();
 	sem_exit();

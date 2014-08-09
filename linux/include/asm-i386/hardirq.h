@@ -10,9 +10,6 @@
 #include <linux/config.h>
 #include <linux/threads.h>
 #include <linux/irq.h>
-#ifdef __arch_um__
-#include <asm/processor.h>		/* for cpu_relax */
-#endif
 
 /* assembly code in softirq.h is sensitive to the offsets of these fields */
 typedef struct {

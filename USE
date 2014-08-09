@@ -25,7 +25,7 @@ Virtualbox use:
 	Just use it with both a and c images.
 	Barely tested with one CPU, will do more.
 
-The default is DCL for CONFIG_VMS mode.
+The default is DCL for FreeVMS.
 
 When booting bochs, there are mainly 4 usable choices:
  x freevms.iomm.dcl                                                        x
@@ -45,7 +45,7 @@ When ext2 root / is mounted under RMS, it is possible to do type [etc]group.
 
 running commands:
 	DCL: typically command
-	/bin/sh: /vms\$common/sysexe/command (only for non-CONFIG_VMS,
+	/bin/sh: /vms\$common/sysexe/command (may not work anymore,
 		and if starting commands this way is still supported)
 	note: abbreviation may or may not work
 
@@ -58,7 +58,7 @@ DCL:
 RUN/MCR:
 	use them as "usual"
 	no qualifiers
-	do not run .ele files in CONFIG_VMS mode.
+	do not run .ele files (will be removed soon).
 	
 Set symbol:
 	sym = val
@@ -74,7 +74,7 @@ DIRECTORY:
 CREATE /DIRECTORY:
 	create /directory name
 	Use plain name without [], in directory where it is to be created
-	ODS-2 and non-CONFIG_VMS only.
+	ODS-2 only.
 
 CLOSE:
 	parameter logical
@@ -217,13 +217,13 @@ INIT:
 DFU:
 	mount dqa002:
 	run sys$system:dfu
-	commands: verify/report dqa002:; CONFIG_VMS mode
+	commands: verify/report dqa002:;
 
 ******************************
 
 Clustering:
 Do not use this now, wait until we get a new network engine.
-Now works with CONFIG_VMS (without, there are problems with timer queue?).
+May not work, not tested for a long time (without, there are problems with timer queue?).
 You need to have the nodename in params.dat.
 The two first letters in the nodename must be different.
 Also, the name must be max (or exactly) 4 letters.
