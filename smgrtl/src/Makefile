@@ -15,7 +15,7 @@ all : $(SMGLIB) $(SMGLIB_PIC) $(EXELIB) tests
 
 install: all
 	install -d ../../rooti386/vms"$$"common/syslib
-	install i386/*.ele ../../rooti386/vms"$$"common/syslib
+#	install i386/*.ele ../../rooti386/vms"$$"common/syslib
 	install i386/*.exe ../../rooti386/vms"$$"common/syslib
 
 clean :
