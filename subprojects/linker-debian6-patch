@@ -48,3 +48,82 @@
    ${OTHER_PLT_RELOC_SECTIONS}
  
    /DISCARD/         ${RELOCATING-0} : 
+--- binutils-2.16/bfd/nisse.c.orig	2014-08-06 12:20:27.000000000 +0200
++++ binutils-2.16/bfd/nisse.c	2014-08-09 10:38:40.000000000 +0200
+@@ -43,7 +43,7 @@
+ };
+ 
+ #ifdef __i386__
+-static char * sections[] = { ".none", ".text", ".data", ".bss", ".comment", ".rodata", ".symstr", ".symtab", ".fix", 0 };
++static char * sections[] = { ".none", ".text", ".data", ".bss", ".comment", ".rodata", ".tdata", ".tbss", ".gcc_except_table", ".symstr", ".symtab", ".fix", 0 };
+ #else
+ static char * sections[] = { ".none", ".text", ".data", ".bss", ".comment", ".rodata", ".tdata", ".tbss", ".gcc_except_table", ".symstr", ".symtab", ".fix", 0 };
+ #endif
+@@ -450,10 +450,17 @@
+ 
+   for (o = abfd->sections; o != NULL; o = o->next)
+     {
++      // remove noise
++      // printf("section name %s\n", o->name);
++      // also handles more debug sections
+ 		if (0==strncmp(o->name,".debug",6))
+ 		  continue;
+ 		if (0==strncmp(o->name,".gnu",4))
+ 		  continue;
++		if (0==strncmp(o->name,".rel.plt",8))
++		  continue;
++		if (0==strncmp(o->name,".rela.plt",9))
++		  continue;
+ 		if (search_sect(o->name)>5)
+ 		  continue;
+       //printf("name %s %x %x %x %x\n",o->output_section->name,o->output_section->flags,o->output_section->filepos,o->output_section->output_offset,o->output_section->rawsize);
+@@ -652,7 +659,8 @@
+ 	 if (!is_abfd_sect(abfd,as.section))
+ 		continue;
+ #endif
+-	 printf("symo %s %x %x %x\n",bfd_get_outsymbols (abfd)[i]->name,bfd_get_outsymbols (abfd)[i]->value,bfd_get_outsymbols (abfd)[i]->flags, j=bfd_get_outsymbols (abfd)[i]->section->index);
++	 // remove noise
++	 //printf("symo %s %x %x %x\n",bfd_get_outsymbols (abfd)[i]->name,bfd_get_outsymbols (abfd)[i]->value,bfd_get_outsymbols (abfd)[i]->flags, j=bfd_get_outsymbols (abfd)[i]->section->index);
+ 	 as.name=index;
+ 	 as.value+=as.section->output_offset;
+ 	 if (bfd_is_und_section(as.section))
+@@ -1516,7 +1524,8 @@
+ 		goto do_next;
+ 	 done[section->isd$v_pfc]=1;
+ #endif
+-	 //printf("sn %s\n",sections[section->isd$v_pfc]);
++	 // remove noise
++	 // printf("read sect %x %x %x %x %x %x %x %x\n", ((unsigned long)section-(unsigned long)buffer)>>9, section, section->isd$w_size, section->isd$w_pagcnt, section->isd$l_vpnpfc, section->isd$l_flags, section->isd$l_vbn, section->isd$l_ident);
+ 	 if (section->isd$v_gbl)
+ 		as = bfd_make_section(abfd, &section->isd$t_gblnam);
+ 	 else
+@@ -1529,7 +1538,7 @@
+ 	 as->index=i;
+ #endif
+ 	 i++;
+-	 if (section->isd$w_size==0xffffffff) {
++	 if (section->isd$w_size==(unsigned short int) 0xffffffff) {
+ 		int no=((unsigned long)section-(unsigned long)buffer)>>9;
+ 		section=buffer+512*(no+1);
+ 		continue;
+@@ -1665,7 +1674,8 @@
+ 	 sym->section = dst.section;
+ #endif
+ 	 sym->name = (long)symstr+dst.name;
+-	 printf("symi %s %x %x %x\n",sym->name,sym->value,sym->flags, sym->section->index);
++	 // remove noise
++	 //printf("symi %s %x %x %x\n",sym->name,sym->value,sym->flags, sym->section->index);
+ #if 0
+ 	 symstr += strlen(symstr);
+ 	 symstr++;
+--- binutils-2.16/binutils/readnisse.c.orig	2014-08-06 12:20:27.000000000 +0200
++++ binutils-2.16/binutils/readnisse.c	2014-08-09 08:21:34.000000000 +0200
+@@ -9997,7 +9997,7 @@
+       while (section<(buffer+512*ehdr32->ihd$b_hdrblkcnt)) {
+ 	if (section->isd$w_size==0)
+ 	  break;
+-	if (section->isd$w_size==0xffffffff) {
++	if (section->isd$w_size==(unsigned short int) 0xffffffff) {
+ 	  int no=((unsigned long)section-(unsigned long)buffer)>>9;
+ 	  section=buffer+512*(no+1);
+ 	  continue;
