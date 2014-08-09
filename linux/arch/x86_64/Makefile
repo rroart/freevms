@@ -35,6 +35,18 @@ export IA32_CC IA32_LD IA32_AS IA32_OBJCOPY IA32_CPP
 
 LD=$(CROSS_COMPILE)ld -m elf_x86_64
 OBJCOPY=$(CROSS_COMPILE)objcopy -O binary -R .note -R .comment -S
+####
+IA32_CC := $(TOPDIR)/debian/gcc-3.3/usr/bin/gcc-3.3 -m32 -O2 -fomit-frame-pointer -nostdinc -I $(HPATH)
+IA32_LD := $(TOPDIR)/debian/binutils-2.17/usr/bin/ld -m elf_i386
+IA32_AS := $(TOPDIR)/debian/gcc-3.3/usr/bin/gcc-3.3 -m32 -Wa,--32 -D__ASSEMBLY__ -traditional -c -nostdinc -I $(HPATH) 
+IA32_OBJCOPY := $(TOPDIR)/debian/binutils-2.17/usr/bin/objcopy
+IA32_CPP := $(TOPDIR)/debian/gcc-3.3/usr/bin/gcc-3.3 -m32 -E
+export IA32_CC IA32_LD IA32_AS IA32_OBJCOPY IA32_CPP
+
+
+LD=$(TOPDIR)/debian/binutils-2.17/usr/bin/ld -m elf_x86_64
+OBJCOPY=$(TOPDIR)/debian/binutils-2.17/usr/bin/objcopy -O binary -R .note -R .comment -S
+####
 LDFLAGS=-e stext
 LINKFLAGS =-T $(TOPDIR)/linux/arch/x86_64/vmlinux.lds $(LDFLAGS)
 
