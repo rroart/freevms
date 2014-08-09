@@ -31,9 +31,7 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
 
-#ifndef __arch_um__
 #include<asm/uaccess.h>
-#endif
 
 struct _generic_64 {
   long long l;
@@ -302,10 +300,6 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	mmlist_nr++;
 	spin_unlock(&mmlist_lock);
 
-#ifdef __arch_um__
-	flush_tlb_mm(mm); // check this
-#endif
-
 	// Now we are getting into the area that is really the swappers
 
 	// To be moved to shell.c and swp$shelinit later
@@ -328,17 +322,9 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 	shell_init_other(p,ctl$gl_pcb,0x7ff90000-0x2000,0x7fffe000);
 #endif
 	int exe$procstrt(struct _pcb * p);
-#ifdef __arch_um__
-	current->thread.request.u.thread.proc = exe$procstrt;
-	current->thread.request.u.thread.arg = p;
-	retval = new_thread(0, clone_flags, 0, 0, p, 0);
-
-	void * regs = &p->thread.regs;
-#else
 	struct pt_regs * regs = &pidadr;
 	//printk("newthread %x\n",p),
 	retval = new_thread(0, clone_flags, 0, 0, p, 0);
-#endif
 
 	int eip=0,esp=0;
 

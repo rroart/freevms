@@ -1,6 +1,7 @@
 FLAGS = -static
 
-all: i386/directory${EXE} i386/directory${NOEXE} i386/directory${EXE_ELF} i386/ddirectory${EXE} i386/ddirectory${NOEXE} i386/ddirectory${EXE_ELF}
+all: i386/directory${EXE} i386/directory${NOEXE} i386/ddirectory${EXE} i386/ddirectory${NOEXE}
+#i386/ddirectory${EXE_ELF} i386/directory${EXE_ELF}
 
 clean:
 	rm *.o i386/*

@@ -783,14 +783,6 @@ asmlinkage void sch$astdel(int dummy) {
       printk("error: pkast not kernel mode\n"); 
     if(acb->acb$l_kast) acb->acb$l_kast(acb->acb$l_astprm); /* ? */
   }
-#ifdef __arch_um__
-  if (((unsigned long)acb->acb$l_ast<0x80000000)) {
-    // funny, this printk resulted in tracing too
-    // printk("no user ast, avoiding tracing against myself. ast astprm pid %x %x %x %x\n",acb->acb$l_ast,acb->acb$l_astprm,p->pcb$l_pid,p->pid);
-  } else {
-    if(acb->acb$l_ast) acb->acb$l_ast(acb->acb$l_astprm); /* ? */
-  }
-#else
   long (*ast)() = acb->acb$l_ast;
   long astprm = acb->acb$l_astprm;
   int rmod = acb->acb$b_rmod;
@@ -810,7 +802,6 @@ asmlinkage void sch$astdel(int dummy) {
     int sts = exe$astdel_prep2_new(p->ipr_sp[rmod&3],ast,astprm,cstab[rmod&3],sstab[rmod&3]);
 #else
     int sts = exe$astdel_prep2_new(p->ipr_sp[rmod&3],ast,astprm,0,cstab[rmod&3],sstab[rmod&3]);
-#endif
 #endif
   } else {
     /** set ipl 0 before kernel mode ast */

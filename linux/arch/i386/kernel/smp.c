@@ -450,24 +450,6 @@ void flush_tlb_mm (struct mm_struct * mm)
 		flush_tlb_others(cpu_mask, mm, FLUSH_ALL);
 }
 
-#ifndef CONFIG_VMS
-void flush_tlb_page(struct vm_area_struct * vma, unsigned long va)
-{
-	struct mm_struct *mm = vma->vm_mm;
-	unsigned long cpu_mask = mm->cpu_vm_mask & ~(1 << smp_processor_id());
-
-	if (current->active_mm == mm) {
-		if(current->mm)
-			__flush_tlb_one(va);
-		 else
-		 	leave_mm(smp_processor_id());
-	}
-
-	if (cpu_mask)
-		flush_tlb_others(cpu_mask, mm, va);
-}
-#endif
-
 void flush_tlb_page2(struct mm_struct * mm, unsigned long va)
 {
 	unsigned long cpu_mask = mm->cpu_vm_mask & ~(1 << smp_processor_id());
@@ -564,9 +546,6 @@ int smp_call_function (void (*func) (void *info), void *info, int nonatomic,
 	if (wait)
 		atomic_set(&data.finished, 0);
 
-#ifndef CONFIG_VMS
-	spin_lock_bh(&call_lock);
-#endif
 	call_data = &data;
 	wmb();
 	/* Send a message to all other CPUs and wait for them to respond */
@@ -579,9 +558,6 @@ int smp_call_function (void (*func) (void *info), void *info, int nonatomic,
 	if (wait)
 		while (atomic_read(&data.finished) != cpus)
 			barrier();
-#ifndef CONFIG_VMS
-	spin_unlock_bh(&call_lock);
-#endif
 
 	return 0;
 }

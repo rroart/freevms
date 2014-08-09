@@ -501,9 +501,7 @@ int ide_vmsinit(void) {
 #include <linux/kmod.h>
 #endif /* CONFIG_KMOD */
 
-#ifdef CONFIG_VMS
 #undef CONFIG_PROC_FS
-#endif
 
 #ifdef __x86_64__
 #define ide_release_region(from,extent) release_region((from), (extent))

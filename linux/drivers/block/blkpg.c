@@ -152,16 +152,9 @@ int del_partition(kdev_t dev, struct blkpg_partition *p) {
 
 	/* partition in use? Incomplete check for now. */
 	devp = MKDEV(MAJOR(dev), minor);
-#ifndef CONFIG_VMS
-	if (is_mounted(devp) || is_swap_partition(devp))
-		return -EBUSY;
-#endif
 
 	/* all seems OK */
 	fsync_dev(devp);
-#ifndef CONFIG_VMS
-	invalidate_buffers(devp);
-#endif
 
 	g->part[minor].start_sect = 0;
 	g->part[minor].nr_sects = 0;
@@ -240,9 +233,6 @@ int blk_ioctl(kdev_t dev, unsigned int cmd, unsigned long arg)
 			if(!capable(CAP_SYS_ADMIN))
 				return -EACCES;
 			fsync_dev(dev);
-#ifndef CONFIG_VMS
-			invalidate_buffers(dev);
-#endif
 			return 0;
 
 		case BLKSSZGET:
@@ -269,14 +259,6 @@ int blk_ioctl(kdev_t dev, unsigned int cmd, unsigned long arg)
 
 		case BLKPG:
 			return blkpg_ioctl(dev, (struct blkpg_ioctl_arg *) arg);
-#ifndef CONFIG_VMS			
-		case BLKELVGET:
-			return blkelvget_ioctl(&blk_get_queue(dev)->elevator,
-					       (blkelv_ioctl_arg_t *) arg);
-		case BLKELVSET:
-			return blkelvset_ioctl(&blk_get_queue(dev)->elevator,
-					       (blkelv_ioctl_arg_t *) arg);
-#endif
 		case BLKBSZGET:
 			/* get the logical block size (cf. BLKSSZGET) */
 			intval = BLOCK_SIZE;
@@ -295,10 +277,6 @@ int blk_ioctl(kdev_t dev, unsigned int cmd, unsigned long arg)
 			if (intval > PAGE_SIZE || intval < 512 ||
 			    (intval & (intval - 1)))
 				return -EINVAL;
-#ifndef CONFIG_VMS
-			if (is_mounted (dev) || is_swap_partition (dev))
-				return -EBUSY;
-#endif
 			set_blocksize (dev, intval);
 			return 0;
 

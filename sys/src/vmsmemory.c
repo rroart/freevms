@@ -906,16 +906,9 @@ skip_copy_pte_range:		address = (address + PUD_SIZE) & PUD_MASK;
 				    mem_map[page].virtual=__va(page*PAGE_SIZE);
 				    ((unsigned long)wsle->wsl$pq_va)|=(unsigned long)mem_map[page].virtual;
 #endif
-#ifdef __arch_um__
-				    *(unsigned long *)mypte=((unsigned long)(__va(page*PAGE_SIZE)))|((*(unsigned long *)mypte)&0xfff);
-#else
 				    *(unsigned long *)mypte=((unsigned long)(page*PAGE_SIZE))|((*(unsigned long *)mypte)&0xfff);
-#endif
 				    //*(unsigned long *)mypte|=_PAGE_PRESENT;
 				    //*(unsigned long *)mypte|=_PAGE_RW|_PAGE_USER|_PAGE_ACCESSED|_PAGE_DIRTY;
-#ifdef __arch_um__				   
-				    //flush_tlb_range(dst, address2, address2 + PAGE_SIZE);
-#endif
 				    if (0 && __va(page*PAGE_SIZE)>0xc0500000) goto there;
 				    if (0 && ( address2<0x100000 || __va(page*PAGE_SIZE)<0x100000)) {
 				    there:
@@ -925,11 +918,7 @@ skip_copy_pte_range:		address = (address + PUD_SIZE) & PUD_MASK;
 #endif				     
 				      panic("die is cast\n");
 				    }
-#ifdef __arch_um__
-				    memcpy(__va(page*PAGE_SIZE),address2,PAGE_SIZE);
-#else
 				    memcpy(__va(page*PAGE_SIZE),__va(address2),PAGE_SIZE);
-#endif
 				} else {
 				  static int mydebugg = 0;
 				  if (mydebugg) {

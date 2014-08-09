@@ -1,6 +1,7 @@
 FLAGS = -static
 
-all: i386/search${EXE} i386/search${NOEXE} i386/search${EXE_ELF}
+all: i386/search${EXE} i386/search${NOEXE}
+#i386/search${EXE_ELF}
 
 clean:
 	rm *.o i386/*

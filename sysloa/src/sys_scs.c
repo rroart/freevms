@@ -336,16 +336,10 @@ int /*__init*/ scs_init(void) {
   scs_std$listen(cf_listen,cf_myerr,"configure","hw conf",0); 
 
   extern int mount_root_vfs;
-#ifndef CONFIG_VMS
-  if (mount_root_vfs)
-    file = filp_open("/vms$common/sysexe/params.dat",O_RDONLY,0);
-#else
   file = rms_open_exec("[vms$common.sysexe]params.dat");
-#endif
   if (!IS_ERR(file)) {
     char * c, *b, *n;
     char buf[1024];
-#ifdef CONFIG_VMS
     if (file==0)
       goto out2;
 #if 0
@@ -353,9 +347,6 @@ int /*__init*/ scs_init(void) {
 #else
     asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count);
     int size=sys_read(file, buf, 1024);
-#endif
-#else
-    int size=generic_file_read(file,buf,1024,&pos);
 #endif
     int i=0;
     b=buf;
@@ -469,21 +460,11 @@ static struct net_proto_family	scs_family_ops = {
 
 static char banner[] __initdata = KERN_INFO "%%KERNEL-I-STARTUP, NET5: MYSCS, based on DECnet for Linux: V.2.4.15-pre5s (C) 1995-2001 Linux DECnet Project Team\n";
 
-#ifndef CONFIG_VMS
-static int __init scs_init2(void)
-#else
 int scs_init2(void)
-#endif
 {
         printk(banner);
 
-#ifndef CONFIG_VMS
-	sock_register(&scs_family_ops);
-	dev_add_pack(&scs_dix_packet_type);
-	register_netdevice_notifier(&scs_dev_notifier);
-#else
 	scs_startdev(0,0,0);
-#endif
 
 	scs_dev_init();
 
@@ -505,17 +486,9 @@ int scs_init2(void)
 
 static void __exit scs_exit(void)
 {
-#ifndef CONFIG_VMS
-	unregister_netdevice_notifier(&scs_dev_notifier);
-#endif
-
 	scs_dev_cleanup();
 }
 
-#ifndef CONFIG_VMS
-module_init(scs_init2);
-module_exit(scs_exit);
-#endif
 //#endif /* #if 0 second one */
 
 int   scs_std$reqdata( struct _pdt *pdt_p, struct _cdrp *cdrp_p, void (*complete)() ) {

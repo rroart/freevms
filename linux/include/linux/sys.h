@@ -10,11 +10,7 @@
 /*
  * system call entry points ... but not all are defined
  */
-#ifdef __arch_um__
-#define NR_syscalls 512
-#else
 #define NR_syscalls 256
-#endif
 #define NR_vmssyscalls 256
 #define NR_vmssyscalls1 256
 #define NR_vmssyscalls3 256

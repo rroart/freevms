@@ -27,13 +27,6 @@
 
 #if 0
 #include <linux/kernel.h>
-#ifndef CONFIG_VMS
-// tmp place
-extern void __out_of_line_bug(int line) ATTRIB_NORET;
-int out_of_line_bug(int line) {
-  __out_of_line_bug(line);
-}
-#endif
 #endif
 
 #include <linux/config.h>
@@ -380,20 +373,7 @@ asmlinkage long sys32_mprotect(unsigned long start, size_t len, unsigned long pr
 asmlinkage long
 sys32_pipe(int *fd)
 {
-#ifndef CONFIG_VMS
-	int retval;
-	int fds[2];
-
-	retval = do_pipe(fds);
-	if (retval)
-		goto out;
-	if (copy_to_user(fd, fds, sizeof(fds)))
-		retval = -EFAULT;
-  out:
-	return retval;
-#else
 	return -EPERM;
-#endif
 }
 
 asmlinkage long
@@ -1920,54 +1900,7 @@ struct sysctl_ia32 {
 asmlinkage long
 sys32_sysctl(struct sysctl_ia32 *args32)
 {
-#ifndef CONFIG_VMS
-#ifndef CONFIG_SYSCTL
-	return -ENOSYS; 
-#else
-	struct sysctl_ia32 a32;
-	mm_segment_t old_fs = get_fs ();
-	void *oldvalp, *newvalp;
-	size_t oldlen;
-	int *namep;
-	long ret;
-	extern int do_sysctl(int *name, int nlen, void *oldval, size_t *oldlenp,
-		     void *newval, size_t newlen);
-
-
-	if (copy_from_user(&a32, args32, sizeof (a32)))
-		return -EFAULT;
-
-	/*
-	 * We need to pre-validate these because we have to disable address checking
-	 * before calling do_sysctl() because of OLDLEN but we can't run the risk of the
-	 * user specifying bad addresses here.  Well, since we're dealing with 32 bit
-	 * addresses, we KNOW that access_ok() will always succeed, so this is an
-	 * expensive NOP, but so what...
-	 */
-	namep = (int *) A(a32.name);
-	oldvalp = (void *) A(a32.oldval);
-	newvalp = (void *) A(a32.newval);
-
-	if ((oldvalp && get_user(oldlen, (int *) A(a32.oldlenp)))
-	    || !access_ok(VERIFY_WRITE, namep, 0)
-	    || !access_ok(VERIFY_WRITE, oldvalp, 0)
-	    || !access_ok(VERIFY_WRITE, newvalp, 0))
-		return -EFAULT;
-
-	set_fs(KERNEL_DS);
-	lock_kernel();
-	ret = do_sysctl(namep, a32.nlen, oldvalp, &oldlen, newvalp, (size_t) a32.newlen);
-	unlock_kernel();
-	set_fs(old_fs);
-
-	if (oldvalp && put_user (oldlen, (int *) A(a32.oldlenp)))
-		return -EFAULT;
-
-	return ret;
-#endif
-#else
 	return -EPERM;
-#endif
 }
 
 extern asmlinkage ssize_t sys_pread(unsigned int fd, char * buf,

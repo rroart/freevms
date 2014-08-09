@@ -1,4 +1,5 @@
-all: starlet.a i386/starlet${EXE_ELF} i386/starlet${EXE} starletum.a starlet_pic.a
+all: starlet.a i386/starlet${EXE} starletum.a starlet_pic.a
+#i386/starlet${EXE_ELF} 
 
 install: all
 	install -d ../../rooti386/vms"$$"common/syslib

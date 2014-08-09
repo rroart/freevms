@@ -224,21 +224,12 @@ static inline void flush_tlb_mm(struct mm_struct *mm)
 		__flush_tlb();
 }
 
-#ifndef CONFIG_MM_VMS
-static inline void flush_tlb_page(struct vm_area_struct *vma,
-	unsigned long addr)
-{
-	if (vma->vm_mm == current->active_mm)
-		__flush_tlb_one(addr);
-}
-#else
 static inline void flush_tlb_page2(struct mm_struct *mm,
 	unsigned long addr)
 {
 	if (mm == current->active_mm)
 		__flush_tlb_one(addr);
 }
-#endif
 
 static inline void flush_tlb_range(struct mm_struct *mm,
 	unsigned long start, unsigned long end)

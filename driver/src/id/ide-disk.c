@@ -66,9 +66,7 @@
 #include <ioc_routines.h>
 #include <misc_routines.h>
 
-#ifdef CONFIG_VMS
 #undef CONFIG_PROC_FS
-#endif
 
 #ifdef CONFIG_BLK_DEV_PDC4030
 #define IS_PDC4030_DRIVE (HWIF(drive)->chipset == ide_pdc4030)

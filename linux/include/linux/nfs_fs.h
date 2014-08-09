@@ -128,17 +128,11 @@ do { \
 static inline
 loff_t page_offset(struct page *page)
 {
-#ifndef CONFIG_VMS
-	return ((loff_t)page->index) << PAGE_CACHE_SHIFT;
-#endif
 }
 
 static inline
 unsigned long page_index(struct page *page)
 {
-#ifndef CONFIG_VMS
-	return page->index;
-#endif
 }
 
 #ifdef __KERNEL__

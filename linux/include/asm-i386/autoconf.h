@@ -75,9 +75,6 @@
 /*
  * Block devices
  */
-#ifndef CONFIG_VMS
-#define CONFIG_BLK_DEV_FD 1
-#endif
 #undef  CONFIG_BLK_DEV_XD
 #undef  CONFIG_PARIDE
 #undef  CONFIG_BLK_CPQ_DA
