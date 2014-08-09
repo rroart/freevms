@@ -19,7 +19,7 @@ install: all
 	install i386/install ../../rooti386/vms"$$"common/sysexe
 
 ifeq ($(ARCH),x86_64)
-MODEL = -mcmodel=medium
+MODEL = -mcmodel=large
 MODELGCC = gcc
 else
 MODEL =
