@@ -54,12 +54,22 @@ export LINKPRE = -Bstatic
 # for use with freevms linker, use old libs
 ifeq ($(ARCH),i386)
 export LINKPOST = $(OLDCRT1_I386) $(OLDCRTI_I386) $(OLDLIBC_I386)
+export OLDLIBC = $(OLDLIBC_I386)
+export OLDLIBDL = $(OLDLIBDL_I386)
+export OLDLIBELF = $(OLDLIBELF_I386)
+export OLDLIBCDIR = $(OLDLIBCDIR_I386)
+export OLDLIBELFDIR = $(OLDLIBELFDIR_I386)
 #so far only for edt
 export OLDLIBCINCLUDEDIR = $(OLDLIBCINCLUDEDIR_I386)
 endif
 ifeq ($(ARCH),x86_64)
-export LINKPOST = /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/libc.a
-export OLDLIBCINCLUDEDIR = /usr/include
+export LINKPOST = $(OLDCRT1_AMD64) $(OLDCRTI_AMD64) $(OLDLIBC_AMD64)
+export OLDLIBC = $(OLDLIBC_AMD64)
+export OLDLIBDL = $(OLDLIBDL_AMD64)
+export OLDLIBELF = $(OLDLIBELF_AMD64)
+export OLDLIBCDIR = $(OLDLIBCDIR_AMD64)
+export OLDLIBELFDIR = $(OLDLIBELFDIR_AMD64)
+export OLDLIBCINCLUDEDIR = $(OLDLIBCINCLUDEDIR_AMD64)
 endif
 
 export ROOTI386 = $(TOPDIR)/rooti386
