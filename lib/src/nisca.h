@@ -169,7 +169,7 @@ struct _nisca {
       };
       unsigned long nisca$l_sta_info;
       union {
-	unsigned long nisca$l_sta_info;
+	unsigned long nisca$l_sta_info1;
 	struct {
 	  char fill;
 	  unsigned m : 1;
