@@ -53,8 +53,10 @@ struct save_context_frame {
 #define switch_to(prev,next,last,pgtp,pgt) do { void *l; \
 	asm volatile(SAVE_CONTEXT					\
 		     "movq %%rsp,%0\n\t"	/* save RSP */		\
-"movq %%rdx, %%cr3\n\t" \
+		     "cli\n\t"						\
+		     "movq %%rdx, %%cr3\n\t"				\
 		     "movq %3,%%rsp\n\t"	/* restore RSP */	\
+		     "sti\n\t"						\
 		     "leaq thread_return(%%rip),%%rax\n\t"		\
 		     "movq %%rax,%1\n\t"	/* save RIP */		\
 		     "pushq %4\n\t"		/* setup new RIP */	\
