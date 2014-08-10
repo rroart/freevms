@@ -288,7 +288,7 @@ struct _mscp_basic_pkt {
       struct  {
 	union  {
 	  struct  {
-	    unsigned mscp$v_filler : 5;
+	    unsigned mscp$v_filler3 : 5;
 	    unsigned mscp$v_sc_sdign : 1;
 	    unsigned mscp$v_sc_stcon : 1;
 	    unsigned mscp$v_sc_dupun : 1;
@@ -298,7 +298,7 @@ struct _mscp_basic_pkt {
 	    unsigned mscp$v_fill_20_ : 5;
 	  };
 	  struct  {
-	    unsigned mscp$v_filler : 10;
+	    unsigned mscp$v_filler4 : 10;
 	    unsigned mscp$v_sc_inrep : 1;
 	    unsigned mscp$v_sc_ivrct : 1;
 	    unsigned mscp$v_sc_rdony : 1;
@@ -308,7 +308,7 @@ struct _mscp_basic_pkt {
       };
 
       struct  {
-	unsigned mscp$v_filler : 5;
+	unsigned mscp$v_filler5 : 5;
 	unsigned mscp$v_sc_novol : 1;
 	unsigned mscp$v_sc_inopr : 1;
 	unsigned mscp$v_dupun : 1;
@@ -319,7 +319,7 @@ struct _mscp_basic_pkt {
       };
 
       struct  {
-	unsigned mscp$v_filler : 5;
+	unsigned mscp$v_filler6 : 5;
 	unsigned mscp$v_reserved1 : 1;
 	unsigned mscp$v_sc_cpyip : 1;
 	unsigned mscp$v_sc_nomem : 1;
@@ -329,9 +329,9 @@ struct _mscp_basic_pkt {
       };
 
       struct  {
-	unsigned mscp$v_filler1 : 8;
+	unsigned mscp$v_filler7 : 8;
 	unsigned mscp$v_sc_datal : 1;
-	unsigned mscp$v_filler2 : 3;
+	unsigned mscp$v_filler8 : 3;
 	unsigned mscp$v_sc_softw : 1;
 	unsigned mscp$v_sc_hardw : 1;
 	unsigned mscp$v_fill_24_ : 2;
@@ -339,10 +339,10 @@ struct _mscp_basic_pkt {
 
       struct  {
 	struct  {
-	  unsigned mscp$v_filler1 : 1;
+	  unsigned mscp$v_filler9 : 1;
 	  unsigned mscp$v_sc_allof : 1;
 	  unsigned mscp$v_sc_tabfu : 1;
-	  unsigned mscp$v_filler2 : 1;
+	  unsigned mscp$v_filler10 : 1;
 	  unsigned mscp$v_sc_noent : 1;
 	  unsigned mscp$v_fill_25_ : 3;
 	};
@@ -805,7 +805,7 @@ struct _stcon {
     union  {
       unsigned short int mscp$w_tu_cnt_flgs;
       struct  {
-	unsigned mscp$v_filler : 14;
+	unsigned mscp$v_filler1 : 14;
 	unsigned mscp$v_cf_mtden : 1;
 	unsigned mscp$v_cf_srt : 1;
       };
