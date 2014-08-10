@@ -335,7 +335,7 @@ int exe$procstrt(struct _pcb * p) {
  
   // this is an actual system call
   void ** argv = 0;
-  void * args[2];
+  void * args[2] = { 0, 0 };
   int found = strcmp(pqb->pqb$t_input,"[vms$common.sysexe]startup.com")==0;
   found |= strcmp(pqb->pqb$t_input,"[vms$common.sysexe]install.com")==0;
   if (found) {
