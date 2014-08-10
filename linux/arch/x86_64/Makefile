@@ -35,36 +35,37 @@ export IA32_CC IA32_LD IA32_AS IA32_OBJCOPY IA32_CPP
 
 LD=$(CROSS_COMPILE)ld -m elf_x86_64
 OBJCOPY=$(CROSS_COMPILE)objcopy -O binary -R .note -R .comment -S
-####
-IA32_CC := $(TOPDIR)/debian/gcc-3.3/usr/bin/gcc-3.3 -m32 -O2 -fomit-frame-pointer -nostdinc -I $(HPATH)
-IA32_LD := $(TOPDIR)/debian/binutils-2.17/usr/bin/ld -m elf_i386
-IA32_AS := $(TOPDIR)/debian/gcc-3.3/usr/bin/gcc-3.3 -m32 -Wa,--32 -D__ASSEMBLY__ -traditional -c -nostdinc -I $(HPATH) 
-IA32_OBJCOPY := $(TOPDIR)/debian/binutils-2.17/usr/bin/objcopy
-IA32_CPP := $(TOPDIR)/debian/gcc-3.3/usr/bin/gcc-3.3 -m32 -E
-export IA32_CC IA32_LD IA32_AS IA32_OBJCOPY IA32_CPP
-
-
-LD=$(TOPDIR)/debian/binutils-2.17/usr/bin/ld -m elf_x86_64
-OBJCOPY=$(TOPDIR)/debian/binutils-2.17/usr/bin/objcopy -O binary -R .note -R .comment -S
-####
 LDFLAGS=-e stext
 LINKFLAGS =-T $(TOPDIR)/linux/arch/x86_64/vmlinux.lds $(LDFLAGS)
+
+# Linux 3.16 uses these
+CFLAGS += $(call check_gcc,-funit-at-a-time,)
+CFLAGS += $(call check_gcc,-mno-sse -mno-mmx -mno-sse2 -mno-3dnow,)
+CFLAGS += $(call check_gcc,-mno-avx,)
+CFLAGS += $(call check_gcc,-maccumulate-outgoing-args,)
+CFLAGS += $(call check_gcc,-mno-80387,)
+CFLAGS += $(call check_gcc,-mno-fp-ret-in-387,)
+CFLAGS += $(call check_gcc,-mpreferred-stack-boundary=3,)
+# Note that the line with no-sse etc was critical for gcc-4 usage
 
 CFLAGS += -mno-red-zone
 CFLAGS += -mcmodel=kernel
 CFLAGS += -pipe
-CFLAGS += -fno-reorder-blocks
+#CFLAGS += -fno-reorder-blocks
 # needed for later gcc 3.1
-CFLAGS += -finline-limit=2000
+# not in 3.16
+#CFLAGS += -finline-limit=2000
 # needed for earlier gcc 3.1
-CFLAGS += -fno-strength-reduce
+# not in 3.16
+#CFLAGS += -fno-strength-reduce
 CFLAGS += -Wno-sign-compare
 #CFLAGS += -g
 ifneq ($(CONFIG_X86_REMOTE_DEBUG),y)
 CFLAGS += -fno-asynchronous-unwind-tables
 endif
-# this is needed right now for the 32bit ioctl code
-CFLAGS += $(call check_gcc,-fno-unit-at-a-time,)
+# this is needed right now for the 32bit ioctl code (no-unit-at-a-time)
+# Linux 3.16 uses these
+CFLAGS += $(call check_gcc,-funit-at-a-time,)
 
 ifdef CONFIG_MK8
 CFLAGS += $(call check_gcc,-march=k8,)
