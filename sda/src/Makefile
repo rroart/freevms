@@ -79,15 +79,15 @@ pic/sda_proc.o: sda_proc.c
 
 i386/sda$(EXE): $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 	install -d i386
-	$(LINKER) $(LINKPRE) $(OBJS) $(LIBGCC) $(EXTERNAL) $(VMSLIBS) /usr/lib/libelf.a /usr/lib/libdl.a $(LINKPOST) --just-symbols=$(VMLINUX) $(LIBGCC) -o i386/sda{EXE}
+	$(LINKER) $(LINKPRE) $(OBJS) $(LIBGCC) $(EXTERNAL) $(VMSLIBS) -lelf -ldl $(LINKPOST) --just-symbols=$(VMLINUX) $(LIBGCC) -o i386/sda{EXE}
 
 i386/sda${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 	install -d i386
-	gcc -g -static $(OBJS) -lc $(EXTERNAL) $(VMSLIBS) /usr/lib/libelf.a /usr/lib/libdl.a $(LINKVMLINUX) -o i386/sda${NOEXE}
+	gcc -g -static $(OBJS) -lc $(EXTERNAL) $(VMSLIBS) -lelf -ldl $(LINKVMLINUX) -o i386/sda${NOEXE}
 
 ifneq ($(ARCH),x86_64)
 i386/sda${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC) $(VMLINUX)
-	ld -Bshareable $(OBJS_PIC) $(EXTERNAL_PIC) $(VMSLIBS_PIC) /usr/lib/libelf.a /usr/lib/libdl.a $(LIBC) $(LIBGCC) --just-symbols=$(VMLINUX) -o i386/sda${EXE_ELF}
+	ld -Bshareable $(OBJS_PIC) $(EXTERNAL_PIC) $(VMSLIBS_PIC) -lelf -ldl $(LIBC) $(LIBGCC) --just-symbols=$(VMLINUX) -o i386/sda${EXE_ELF}
 endif
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
