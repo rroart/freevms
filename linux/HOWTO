@@ -11,9 +11,7 @@ X86_64: some more instability.
 
 Install build-essential wget ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic sash bash-static doxygen dejagnu bison.
 
-NOTE on kernel config with VMS options:
-There is only one option for FreeVMS.
-Do not boot with init=/bin/sh.
+There are no config options.
 
 Example build i386:
 git clone git@github.com:/rroart/freevms.git (or pull)
@@ -44,6 +42,8 @@ make build-bliss (run twice, for some reason first run quits with an error)
 make telnet (32-bit only, and remember to change close to close2 in routines.b32)
 
 Next see the USE file (after compiling or installing bochs).
+
+Note that only the two first entries are bootable.
 
 Bochs:
 	Configure with at least 
