@@ -2,12 +2,12 @@ So far:
 
 About GCC/Distributions.
 Only Debian 6 is tested/supported.
-Only gcc-4.4.5 (with older gcc-3.3 for x86_64) is tested/supported.
+Only gcc-4.4.5 is tested/supported.
 No more recent flex than 2.5.4 must be used (for Bliss).
 
 CPU status:
 I386: some instability.
-X86_64: very unstable.
+X86_64: some more instability.
 
 Install build-essential wget ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic sash bash-static doxygen dejagnu bison.
 
