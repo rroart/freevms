@@ -191,7 +191,7 @@ type_clause_list type_clause { $$ = chainon ($1, $2); }
 verb_clause:
 K_CLIFLAGS cli_flag_list
 {
-  $$ = build_nt(CLIFLAGS_CLAUSE, $2)
+  $$ = build_nt(CLIFLAGS_CLAUSE, $2);
 }
 |
 K_CLIROUTINE
@@ -203,12 +203,12 @@ T_NAME
   tnamemode=0; 
 }
 {
-  $$ = build_nt(CLIROUTINE_CLAUSE, $3)
+  $$ = build_nt(CLIROUTINE_CLAUSE, $3);
 }
 |
 K_DISALLOW bool_expr_list
 {
-  $$ = build_nt(DISALLOW_CLAUSE, $2)
+  $$ = build_nt(DISALLOW_CLAUSE, $2);
 }
 |
 K_IMAGE
@@ -358,12 +358,12 @@ clauses
 clauses:
 K_CLIFLAGS cli_flag_list
 {
-  $$ = build_nt(CLIFLAGS_CLAUSE, $2)
+  $$ = build_nt(CLIFLAGS_CLAUSE, $2);
 }
 |
 K_DEFAULT
 {
-  $$ = build_nt(DEFAULT_CLAUSE)
+  $$ = build_nt(DEFAULT_CLAUSE);
 }
 |
 K_LABEL '='
@@ -375,66 +375,66 @@ T_NAME
   tnamemode=0; 
 }
 {
-  $$ = build_nt(LABEL_CLAUSE, $4)
+  $$ = build_nt(LABEL_CLAUSE, $4);
 }
 |
 K_SYNTAX '=' T_NAME
 {
-  $$ = build_nt(SYNTAX_CLAUSE, $3)
+  $$ = build_nt(SYNTAX_CLAUSE, $3);
 }
 |
 K_VALUE value_clauses_start
 {
-  $$ = build_nt(VALUE_CLAUSE, $2)
+  $$ = build_nt(VALUE_CLAUSE, $2);
 }
 ;
 
 cli_flag:
 K_ABBREVIATE
 {
-  $$ = build_nt(ABBREVIATE_CLAUSE)
+  $$ = build_nt(ABBREVIATE_CLAUSE);
 }
 |
 K_FOREIGN
 {
-  $$ = build_nt(FOREIGN_CLAUSE)
+  $$ = build_nt(FOREIGN_CLAUSE);
 }
 |
 K_IMMEDIATE
 {
-  $$ = build_nt(IMMEDIATE_CLAUSE)
+  $$ = build_nt(IMMEDIATE_CLAUSE);
 }
 |
 K_MCRIGNORE
 {
-  $$ = build_nt(MCRIGNORE_CLAUSE)
+  $$ = build_nt(MCRIGNORE_CLAUSE);
 }
 |
 K_MCROPTDELIM
 {
-  $$ = build_nt(MCROPTDELIM_CLAUSE)
+  $$ = build_nt(MCROPTDELIM_CLAUSE);
 }
 |
 K_MCRPARSE
 {
-  $$ = build_nt(MCRPARSE_CLAUSE)
+  $$ = build_nt(MCRPARSE_CLAUSE);
 }
 |
 K_NOSTATUS
 {
-  $$ = build_nt(NOSTATUS_CLAUSE)
+  $$ = build_nt(NOSTATUS_CLAUSE);
 }
 ;
 
 keyword_clause:
 K_NEGATABLE
 {
-  $$ = build_nt(NEGATABLE_CLAUSE)
+  $$ = build_nt(NEGATABLE_CLAUSE);
 }
 |
 K_NONNEGATABLE
 {
-  $$ = build_nt(NONNEGATABLE_CLAUSE)
+  $$ = build_nt(NONNEGATABLE_CLAUSE);
 }
 |
 clauses
@@ -473,12 +473,12 @@ value_clause
 value_clause:
 K_CONCATENATE
 {
-  $$ = build_nt(CONCATENATE_CLAUSE)
+  $$ = build_nt(CONCATENATE_CLAUSE);
 }
 |
 K_NOCONCATENATE
 {
-  $$ = build_nt(NOCONCATENATE_CLAUSE)
+  $$ = build_nt(NOCONCATENATE_CLAUSE);
 }
 |
 K_DEFAULT '='
@@ -490,27 +490,27 @@ name_or_string
   tnamemode=0; 
 }
 {
-  $$ = build_nt(DEFAULT_CLAUSE, $4)
+  $$ = build_nt(DEFAULT_CLAUSE, $4);
 }
 |
 K_IMPCAT
 {
-  $$ = build_nt(IMPCAT_CLAUSE)
+  $$ = build_nt(IMPCAT_CLAUSE);
 }
 |
 K_LIST
 {
-  $$ = build_nt(LIST_CLAUSE)
+  $$ = build_nt(LIST_CLAUSE);
 }
 |
 K_REQUIRED
 {
-  $$ = build_nt(REQUIRED_CLAUSE)
+  $$ = build_nt(REQUIRED_CLAUSE);
 }
 |
 K_TYPE '=' T_NAME
 {
-  $$ = build_nt(TYPE_CLAUSE, $3)
+  $$ = build_nt(TYPE_CLAUSE, $3);
 }
 ;
 
@@ -522,7 +522,7 @@ K_OR
 }
 bool_expr_list2
 {
-  $$ = build_nt(OR_BOOL, $2, $4)
+  $$ = build_nt(OR_BOOL, $2, $4);
 }
 |
 bool_expr_list2
@@ -536,7 +536,7 @@ K_AND
 }
 bool_expr
 {
-  $$ = build_nt(AND_BOOL, $2, $4)
+  $$ = build_nt(AND_BOOL, $2, $4);
 }
 |
 bool_expr
@@ -560,7 +560,7 @@ T_NAME
   tnamemode=0; 
 }
 {
-  $$ = build_nt(NOT_BOOL, $3)
+  $$ = build_nt(NOT_BOOL, $3);
 }
 |
 T_NAME
@@ -573,7 +573,7 @@ K_ANY2 '(' any_list ')'
   tnamemode=0; 
 }
 {
-  $$ = build_nt(ANY2_UNIT, $3)
+  $$ = build_nt(ANY2_UNIT, $3);
 }
 ;
 

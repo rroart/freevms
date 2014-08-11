@@ -196,7 +196,7 @@ K_TITLE { tnamemode = 1; } name_list
 
 maybe_fac_switch:
 {
-  $$ = 0
+  $$ = 0;
 }
 |
 fac_switch
