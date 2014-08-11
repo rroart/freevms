@@ -1,4 +1,4 @@
-FREEVMS_RELEASE = 0_3_16
+FREEVMS_RELEASE = 0_3_16_DEV
 VERSION = 2
 PATCHLEVEL = 4
 SUBLEVEL = 18
@@ -285,11 +285,12 @@ linux/include/linux/compile.h: $(CONFIGURATION) linux/include/linux/version.h ne
 	@echo \#define LINUX_COMPILER \"`$(CC) $(CFLAGS) -v 2>&1 | tail -1`\" >> .ver
 	@mv -f .ver $@
 
-linux/include/linux/version.h: ./Makefile.kernel
+linux/include/linux/version.h: ./Makefile.kernel linux/include/linux/compile.h
 	@echo \#define UTS_RELEASE \"$(KERNELRELEASE)\" > .ver
 	@echo \#define LINUX_VERSION_CODE `expr $(VERSION) \\* 65536 + $(PATCHLEVEL) \\* 256 + $(SUBLEVEL)` >> .ver
 	@echo '#define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))' >>.ver
 	@echo \#define FREEVMS_RELEASE \"$(FREEVMS_RELEASE)\" >> .ver
+	@echo \#define FREEVMS_BUILD `cat .version` >> .ver
 	@mv -f .ver $@
 
 comma	:= ,

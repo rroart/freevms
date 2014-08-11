@@ -38,6 +38,9 @@ show.a: showsystem.o showdevice.o showwork.o showlog.o showmemory.o misc.o
 showmemory.o: showmemory.c
 	$(MODELGCC) $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
+showsystem.o: showsystem.c ../../linux/include/linux/version.h
+	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+
 %.o: %.c
 	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 

@@ -11,6 +11,8 @@
 #include <syidef.h>
 #include <misc.h>
 
+#include "../../linux/include/linux/version.h"
+
 static char * states[]={"NONE","COLPG","MWAIT","CEF","PFW","LEF","LEFO","HIB","HIBO","SUSP","SUSPO","FPG","COM","COMO","CUR"};
 
 show_system(){
@@ -112,7 +114,16 @@ lst[10].retlenaddr=&deltalen;
 lst[11].buflen=0;
 lst[11].item_code=0;
 // printf(" FreeVMS V0.0  on node %6s  NN-OOO-2003 PP:QQ:RR.SS  Uptime  TT XX:YY:ZZ\n",scsnode);
- printf(" FreeVMS V%s on node %6s  %s  Uptime  %s\n", version, scsnode, timestr, timestr2);
+#ifdef __x86_64__
+ int bits = 64;
+#endif
+#ifdef __i386__
+ int bits = 32;
+#endif
+#ifndef FREEVMS_BUILD
+#define FREEVMS_BUILD 1
+#endif
+ printf(" FreeVMS %d V%s build %d on node %6s  %s  Uptime  %s\n", bits,version, FREEVMS_BUILD, scsnode, timestr, timestr2);
  printf("  Pid    Process Name    State  Pri      I/O       CPU       Page flts  Pages\n");
 
 do {
