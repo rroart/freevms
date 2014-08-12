@@ -85,6 +85,8 @@ extern int irda_device_init(void);
 #include <misc_routines.h>
 #include <exe_routines.h>
 
+#include <linux/version.h>
+
 void __init vms_init(void);
 void __init vms_init2(void);
 void __init vms_init4(void);
@@ -944,6 +946,8 @@ static int init(void * unused)
 	  exe$creprc(0,image,0,&out,&out,&priv,0,&name,8,0x40001,0,PRC$M_NOUAF);
 	}
 #endif
+#if 0
+	// print no info here, wait until after it is working again
 	if (mydevice==0)
 	  printk("%%KERNEL-I-DEBUG, No network module. Can not start clustering.\n");
 	else {
@@ -955,6 +959,18 @@ static int init(void * unused)
 	    scs_init2();
 #endif
 	}
+#endif
+
+#ifdef __x86_64__
+ int bits = 64;
+#endif
+#ifdef __i386__
+ int bits = 32;
+#endif
+#ifndef FREEVMS_BUILD
+#define FREEVMS_BUILD 1
+#endif
+ printk("FreeVMS %d V%s build %d\n", bits, FREEVMS_RELEASE, FREEVMS_BUILD);
 
 #ifdef __i386__
 	if (execute_command)
