@@ -1055,10 +1055,12 @@ void __init trap_init(void)
 	_set_gate_exe(idt_table+0xb0,15,3,test_exe);
 	_set_gate_sup(idt_table+0xb1,15,3,test_sup);
 #endif
+	// legal to bo called from exe mode?
 	extern void exe_cli();
 	extern void exe_sti();
 	_set_gate(idt_table+0xb2,15,1,exe_cli);
 	_set_gate(idt_table+0xb3,15,1,exe_sti);
+	// legal to bo called from sup mode?
 	extern void sup_cli();
 	extern void sup_sti();
 	_set_gate(idt_table+0xb4,15,2,sup_cli);
