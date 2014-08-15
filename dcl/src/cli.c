@@ -4514,6 +4514,10 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
       goto no_func;
     }
     printf("entering image? %x\n",func);
+    // for i386, when this is called, we are in sup mode
+    // for x86_64, when this is called, we are in user mode (sup is todo)
+    // on a side note, we are using exec mode for both cpu
+    // so it is only x86_64 that has an unused mode yet, sup
     if (is_user_mode())
       func(argc,argv++);
     else
