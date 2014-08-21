@@ -10,6 +10,28 @@
 #include <descrip.h>
 #include <misc.h>
 
+// i386
+/*
+move three param to eax esi ecx
+this is running in sup mode?
+
+dec esp by 0x1000
+copy stack content, total 0x1000?
+jump to func
+
+if not user mode:
+copy stack content?
+call sup_cli
+prepare stack with user mode data for returning to func
+call sup_sti by interrupt
+ */
+// x86_64
+/*
+copy stack content?
+prepare call param?
+just jump to func, without changing mode?
+ */
+
 static int myfunc(int (*func)(),void * start, int count) {
 #ifdef __i386__
   __asm__ __volatile__(
@@ -81,6 +103,8 @@ static int myfunc(int (*func)(),void * start, int count) {
 #endif
 }
 
+// set up exit handlers for dummy_routine
+
 static int mymyfunc(int dummy,int (*func)(),void * start, int count) {
 #ifdef __i386__ 
   long * ret = &func;
@@ -118,6 +142,10 @@ static long mymymyfunc(int (*func)(),void * start, int count) {
 #endif
 }
 
+// do exit, and make exit handlers start func set in mymyfunc?
+
+// this dummy_routine seems to return to load_elf, first line
+
 static int dummy_routine(void) {
 #ifdef __i386__
   exit(0);
@@ -126,6 +154,9 @@ static int dummy_routine(void) {
 #endif
   return 0;
 }
+
+// I think the use of dummy_routine is because we will use main directly
+// the elf entry does stuff we don't want or need
 
 int load_elf(char * filename) {
   int sts;
@@ -269,3 +300,15 @@ long elf_get_symbol(char * filename, char * name){
   close(fildes);
   return val;
 }
+
+/*
+before mymymyfunc, it replaces entry point with dummy_routine, so to run main?
+mymymyfunc does something forgotten, related to return val, and then mymyfunc
+mymyfunc sets exit handlers with func, and goes to myfunc
+myfunc (for both i386/x86_64) x86_64 just sets call param and calls, same mode
+for i386 if same mode, copies stack prepares and jumps to func
+for i386 different mode, copies stack, prepares for return to usermode
+then to dummy_routine, which does exit
+exit again goes exit handlers, and goes to main?
+but returned to loadelf wrongly
+ */

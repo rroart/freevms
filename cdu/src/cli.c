@@ -29,6 +29,8 @@
 
 #include <misc.h>
 
+// return 1 in eax if in user mode
+
 int is_user_mode() {
   __asm__ __volatile__ (
 			"movw %cs, %ax\n\t"
@@ -775,6 +777,20 @@ static void do_userfunc(long (*func)(), long argc, long argv) {
   sys$exit(0);
 }
 
+// i386
+/*
+this is running in sup mode
+move three param to newly constructed stack?
+call supcli?
+get ctl$gl_pcb
+mov 15 to psl
+get sp for user level
+more prep stack
+set up userlevel for ds es segm
+call sup_sti by interrupt
+will return to do_userfunc in usermode
+ */
+
 // check. related to CLI supervisor
 static int userfunc(long (*func)(), long argc, long argv) {
 #ifdef __i386__
@@ -807,6 +823,8 @@ static int userfunc(long (*func)(), long argc, long argv) {
 			);
 #endif
 }
+
+// prepare exit handler for what to do after running exit
 
 // check. related to CLI supervisor
 static int mymyuserfunc(int dummy,int (*func)(),void * start, long count) {
@@ -844,3 +862,14 @@ int mymymyuserfunc(int (*func)(),void * start, long count) {
 #endif
 }
 
+/*
+  if not in the user mode, mymymyuserfunc is run
+  forgotten what is exactly does, but probably something with the return value?
+  call then mymyuserfunc
+  it sets up the exit handler, then to userfunc
+  userfunc is only for i386, x86_64 broken/missing here?
+  userfunc sets up a new stack, copies, sets up for iret return to user mode
+  running do_userfunc
+  do_userfunc runs the func, then does exit
+  with exithandler, the func is double run, wrong?
+*/
