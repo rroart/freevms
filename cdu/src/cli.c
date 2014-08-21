@@ -768,6 +768,8 @@ unsigned int cli$dispatch(int userarg){
 }
 
 // check. related to CLI supervisor
+// for i386 (at least) this is the last part before running the image main
+// this is for i386 done in user mode
 static void do_userfunc(long (*func)(), long argc, long argv) {
   func(argc, argv);
   sys$exit(0);
