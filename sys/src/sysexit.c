@@ -36,7 +36,8 @@ asmlinkage int exe$exit(unsigned int code) {
 #endif
     }
 #else
-    char ** addr = ((long)dummy+0x60);
+    // compiler change problem? was: char ** addr = ((long)dummy+0x60);
+    char ** addr = ((long)dummy+0x58);
     (*addr)=exh->exh$l_handler;
     if (exh->exh$l_first_arg) {
       addr = ((long)addr) + 0x18;
