@@ -298,7 +298,7 @@ comma	:= ,
 init/version.o: linux/init/version.c linux/include/linux/compile.h linux/include/config/MARKER
 	$(CC) $(CFLAGS) $(CFLAGS_KERNEL) -DUTS_MACHINE='"$(ARCH)"' -DKBUILD_BASENAME=$(subst $(comma),_,$(subst -,_,$(*F))) -c -o init/version.o init/version.c
 
-init/main.o: linux/init/main.c linux/include/config/MARKER
+init/main.o: linux/init/main.c linux/include/config/MARKER linux/include/linux/version.h
 	$(CC) $(CFLAGS) $(CFLAGS_KERNEL) $(PROFILING) -DKBUILD_BASENAME=$(subst $(comma),_,$(subst -,_,$(*F))) -c -o $*.o $<
 
 fs lib mm ipc kernel drivers net: dummy
