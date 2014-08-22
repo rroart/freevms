@@ -72,8 +72,8 @@ i386/type${EXE}: $(VMSLIBS) type.o $(EXTERNAL)
 
 i386/show${NOEXE}: show.a showmain.o $(VMLINUX)
 	install -d i386
-	gcc -g -static showmain.o show.a -lc $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/show${NOEXE}
+	gcc -g -static showmain.o show.a -L$(OLDLIBCDIR) -lc $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/show${NOEXE}
 
 i386/set${NOEXE}: set.a setmain.o $(VMLINUX)
 	install -d i386
-	gcc -g -static setmain.o set.a -lc $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/set${NOEXE}
+	gcc -g -static setmain.o set.a -L$(OLDLIBCDIR) -lc $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/set${NOEXE}
