@@ -89,6 +89,7 @@ show_memory(){
   if (user_pagefile==0)
     goto skip;
   printf("Paging File Usage (4KB pages):                 Index        Free        Size\n");
+  // when run, this is in a memory page leak, not too important too fix yet
   printf("  [vms$common.sysexe]pagefile.sys                                      \n");
 #if 0
   printf("                                                 254       21660       25080\n");
