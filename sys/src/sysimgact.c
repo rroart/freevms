@@ -185,11 +185,15 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     section=(unsigned long)section+section->isd$w_size;
   }
 
+  // this is not yet in use, it seems
+  // with base 0 we get memory problems, skip now, fix later
   struct _iaf * iaf=(unsigned long)base+(((int)ehdr32->ihd$l_iafva)<<9);
+  if (base > 0) {
   iaf->iaf$l_fixuplnk=ctl$gl_fixuplnk;
   ctl$gl_fixuplnk=iaf;
   iaf->iaf$l_iaflink=hdrbuf;
   iaf->iaf$l_permctx=base;
+  }
   section=buffer;
 
   no=0;
@@ -240,6 +244,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
     int shli=no;
     shlst[shli].shl$l_baseva=img_inadr.va_range$ps_start_va;
 
+    if (base == 0) goto tmpskip;
     struct _iaf * tmpiaf=ctl$gl_fixuplnk;
     for(;tmpiaf;tmpiaf=tmpiaf->iaf$l_fixuplnk) {
       struct _ihd * ihd=tmpiaf->iaf$l_iaflink;
@@ -253,6 +258,8 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
 	goto skip_it2;
       }
     }
+  tmpskip:
+    {}
 
     struct _va_range out;
     printk("Loading image %s from %s\n",imgnam,image);
