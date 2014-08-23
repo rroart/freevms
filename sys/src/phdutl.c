@@ -16,6 +16,7 @@
 #include <mmg_routines.h>
 #include <exe_routines.h>
 #include <linux/slab.h>
+#include <secdef.h>
 
 #define DEBUG_LEAK
 #undef DEBUG_LEAK
@@ -45,6 +46,18 @@ mmg$imgreset() {
   va.va_range$ps_end_va=0x60000000;
   exe$deltva(&va,0,0);
 #endif
+  // this may belong here? check internal books?
+  struct _pcb * p=ctl$gl_pcb;
+  struct _secdef *sec, *pstl;
+  pstl=p->pcb$l_phd->phd$l_pst_base_offset;
+  int next;
+  while ((next = p->pcb$l_phd->phd$l_pst_free) >= 0) {
+    sec=&pstl[next - 1];
+    if (sec->sec$l_vpx >= 0x60000000) { // keep dcl parts
+      break;
+    }
+    p->pcb$l_phd->phd$l_pst_free--;
+  }
 
   // should also remove related rdes?
   struct _rde * rde_head = &ctl$gl_pcb->pcb$l_phd->phd$ps_p0_va_list_flink;
@@ -81,6 +94,17 @@ mmg$imgreset() {
     }
   cont:
     tmp=next;
+  }
+
+  if (0) {
+    // this will show eventual leaks, like the one in showmemory.c
+    // one more rde each time show memory is used
+  tmp = rde_head->rde$ps_va_list_flink;
+  while (tmp!=rde_head) {
+    struct _rde * next=tmp->rde$ps_va_list_flink;
+    printk("remain rde %x %x %x %x %x\n",rde_head, tmp,tmp->rde$pq_start_va,tmp->rde$q_region_size);
+    tmp=next;
+  }
   }
 
   // delete nonpermanent P1
