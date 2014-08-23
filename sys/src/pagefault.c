@@ -427,7 +427,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code) {
 	    struct _rde * rde;
 	    unsigned long offset;// in PAGE_SIZE units
 
-	    if (index>64) {
+	    if (index >= PROCSECTCNT) {
 	      printk("wrong %x %x %x %x\n",address,page,pte,*pte);
 	      die("Wrong\n",regs,error_code);
 	      panic("Wrong\n");
