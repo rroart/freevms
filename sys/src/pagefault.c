@@ -831,6 +831,8 @@ long mystack3[1024];
 long mystack4[1024];
 #endif
 
+// only minimalized, could be nothing, but due to big image, only
+// free those with image type bak thay may be brought back easily
 int mmg$frewsle(struct _pcb * p, void * va) {
   struct _phd * phd = p->pcb$l_phd;
   struct _wsl * wsl = phd->phd$l_wslist;
@@ -859,26 +861,41 @@ int mmg$frewsle(struct _pcb * p, void * va) {
   if ((((int)wsle.wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_PPGTBL||(((int)wsle.wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_GPGTBL) {
     // can not be used
   }
+  // don't need, covered below?
+  /*
+  if ((((int)wsle.wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_UNKNOWN) { // at the end?
+    goto more;
+  }
+  */
+
   // check if it points to a dead page table
   // but empty but translation buffer, skip
   // if selected for reuse and non-empty
   // if not selected incr inde and start again
 
+ try:
+  if ((((unsigned long)wsle.wsl$pq_va)&WSL$M_VALID) == 0) {
+    goto more;
+  }
   index=phd->phd$l_wsnext;
   va2=((unsigned long)wsle.wsl$pq_va)&0xfffff000;
   pte=findpte_new(p->mm,va2);
 
+  if (pte == 0) {
+    goto more;
+  }
+
   {
     signed long pfn=((struct _mypte*)pte)->pte$v_pfn;
 
-#if 0
-    //if dem zero (data page)?
-    if ((mem_map[pfn].pfn$q_bak&PTE$M_TYP0)==0)
+    // temp fix, the freeing is very rotten, don't run yet
+    // only for image files, to be read back
+    if (mem_map[pfn].pfn$q_bak != (_PAGE_TYP1 | _PAGE_TYP0)) {
       goto more;
+    }
 
     if (*pte&_PAGE_DIRTY)
       goto more;
-#endif
     if ((unsigned long)va2>=0x70000000) goto more;
   }
 
@@ -927,7 +944,7 @@ int mmg$frewslx(struct _pcb * p, void * va,unsigned long * pte, unsigned long in
   return SS$_NORMAL;
 }
 
-mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index,int pte) {
+mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index, unsigned long pte) {
   struct _wsl * wsl = phd->phd$l_wslist;
 
   if ((((unsigned long)wsl[index].wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_GLOBAL) {
@@ -938,6 +955,11 @@ mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index,int pte) {
 
   if ((((unsigned long)wsl[index].wsl$pq_va)&WSL$M_PAGTYP)==WSL$C_PROCESS) {
     //*pte = mem_map[pfn].pfn$q_bak; // need this  here too?
+    // very limited support for images only
+    signed long pfn=((struct _mypte*)pte)->pte$v_pfn;
+    if (mem_map[pfn].pfn$q_bak == (_PAGE_TYP1 | _PAGE_TYP0)) {
+      *(unsigned long *) pte = mem_map[pfn].pfn$q_bak;
+    }
     pcb->pcb$l_ppgcnt--;
   }
 
