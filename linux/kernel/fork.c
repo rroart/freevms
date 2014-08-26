@@ -47,6 +47,7 @@
 #include <internals.h>
 #include <ipldef.h>
 #include <vfddef.h>
+#include <wsldef.h>
 
 /* The idle threads do not count.. */
 int nr_threads;
@@ -147,6 +148,9 @@ static inline int dup_phd(struct _pcb * p, struct _pcb * old) {
     if (old->pcb$l_phd->phd$l_wslist) {
       p->pcb$l_phd->phd$l_wslist=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);
       memcpy(((void*)p->pcb$l_phd->phd$l_wslist),old->pcb$l_phd->phd$l_wslist,PHD_INT_SIZE*512);
+      // mark the end of the array somehow?
+      struct _wsl * wsl = p->pcb$l_phd->phd$l_wslist;
+      wsl[p->pcb$l_phd->phd$l_wslast].wsl$pq_va = WSL$C_UNKNOWN;
     }
     if (old->pcb$l_phd->phd$l_wslock) {
       p->pcb$l_phd->phd$l_wslock=kmalloc(PHD_INT_SIZE*512,GFP_KERNEL);

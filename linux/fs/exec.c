@@ -63,6 +63,7 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <queue.h>
+#include<wsldef.h>
 
 int core_uses_pid;
 
@@ -1132,6 +1133,10 @@ init_phd(struct _phd * phd) {
 	    for(i=0; i<512; i++)
 	      wsl[i].wsl$v_valid=1;
 	  }
+#else
+	  // mark the end of the array somehow?
+	  struct _wsl * wsl = phd->phd$l_wslist;
+	  wsl[phd->phd$l_wslast].wsl$pq_va = WSL$C_UNKNOWN;
 #endif
 	  phd->phd$l_pst_base_offset=kmalloc(PROCSECTCNT*sizeof(struct _secdef),GFP_KERNEL);
 	  memset((void*)phd->phd$l_pst_base_offset,0,PROCSECTCNT*sizeof(struct _secdef));
