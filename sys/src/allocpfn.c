@@ -545,8 +545,11 @@ mypfncheckaddr(){
 }
 
 int mmg$relpfn(signed int pfn) {
+  /*
+    pfn for wrong pte might modified, leave this be until correcting
   pte_t * pte = mem_map[pfn].pfn$q_pte_index;
   *(unsigned long *)pte&=~(_PAGE_PRESENT|_PAGE_TYP1);
+  */
   if (mem_map[pfn].pfn$l_page_state&PFN$M_MODIFY) {
     // do more dealloc
     // maybe backingstore related?
@@ -569,11 +572,21 @@ mmg$delconpfn(struct _pcb * p, int pfn) {
   struct _pfn * pfnp=&mem_map[pfn];
   unsigned long * pte = pfnp->pfn$q_pte_index;
   if (pte) {
+    /*
+      this is related to swapping or something else?
+      anyway, not to be implemented now
+      it was pointing to the old pte
+      usage here is totally wrong, make things break randomly
     *pte=pfnp->pfn$q_bak;
+    */
 #ifndef __arch_um__
     __flush_tlb(); //flush_tlb_range(current->mm, page, page + PAGE_SIZE);
 #endif
+    /*
+      pfn for wrong pte might modified, leave this be until correcting
+      sharecount and refcount is not yet used, so no bit problem
     mmg$decptref(p->pcb$l_phd,pte);
+     */
     pfnp->pfn$q_pte_index=0;
   }
 }
