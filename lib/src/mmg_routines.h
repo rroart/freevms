@@ -219,7 +219,7 @@ signed long mmg$rempfn(unsigned long type, int pfn);
 #else
 signed long mmg$rempfn(unsigned long type, struct _pfn * pfn);
 #endif
-mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index,int pte);
+mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index,unsigned long pte);
 mmg$delpfnlst(int type, int pfn);
 mmg$dalcstxscn(void);
 mmg$gsdscn(void * input_gsnam, unsigned long long * input_ident, int section_flags, char *return_gsnam, unsigned long long  *return_ident, struct _gsd **gsd);
