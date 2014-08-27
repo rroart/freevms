@@ -29,16 +29,9 @@ File system:
 Bootloader:
 	GRUB with ODS-2 support to boot kernel
 
-Clustering:
-	SCA/SCS-ish protocols
-	CONFIGURE process
-	CWPS (forcex/stop only)
-	MSCP (does not currently work due to lost network packets)
-
 Networking:
 	CMUIP (can now do both outgoing and ingoing TCP/IP)
 	Partial BSD socket interface
-	Telnet client (32-bit only), temporarily out of order
 
 Shell:
 	DCL
