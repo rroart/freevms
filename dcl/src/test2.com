@@ -1,0 +1,2 @@
+show dev
+show mem
