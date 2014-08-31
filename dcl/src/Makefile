@@ -3,7 +3,7 @@ LEX = flex
 EXTERNAL = ../../cliutl/src/show.a ../../cliutl/src/set.a ../../cdu/src/cdu.a ../../cdu/src/dcltables.o
 
 #all: i386/dcl${NOEXE} i386/dcl${EXE}
-all: i386/dcl${NOEXE} startup.com install.com
+all: i386/dcl${NOEXE} startup.com install.com test1.com test2.com
 
 clean:
 	rm *.o i386/*

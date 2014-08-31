@@ -5,7 +5,7 @@ Previous:
 0.2: ODS-2 about as usable as Ext2.
 0.3: SMP and 64-bit support.
 
-Next (A-H in more or less probable order)?:
+Next (A-H in more or less probable order, from 0.5-)?:
 0.F: New cluster network engine, based on CMU IP stack engine.
 0.G. More CWPS
 0.E: A much more developed CLI 
@@ -15,6 +15,8 @@ Next (A-H in more or less probable order)?:
 0.A: Security features.
 0.H: PAL (no 1.0 without it)
 1.0/2.0: FreeVMS being able to recompile itself on FreeVMS.
+
+0.4: inactive and inconclusive, not a branch of this freevms
 
 FreeVMS tasklist
 

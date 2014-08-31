@@ -1,0 +1,28 @@
+tested feature, with 64/32, version, ods2/ext2
+
+(Also test scripts in dcl/src/*.com and sys$system:*.com)
+
+mount dqa2 (only 32 0_3_16_dev, 64 crashing)
+
+set default (0_3_16_dev)
+show default (0_3_16_dev)
+show time (0_3_16_dev)
+show working_set (0_3_16_dev)
+show logical sys$system (0_3_16_dev)
+define mylogical test (0_3_16_dev)
+write sys$output "test" (0_3_16_dev)
+sysman + exit (0_3_16_dev)
+install add sys$system:sda (0_3_16_dev)
+dir (0_3_16_dev, ext2)
+dir /file (only 32 0_3_16_dev, ods2/ext2, 64 untested/crashing)
+dir /size (only 32 0_3_16_dev, ods2/ext2, 64 untested/crashing)
+dir /date (only 32 0_3_16_dev, ods2/ext2, 64 untested/crashing)
+dir /acl (only 32 0_3_16_dev, ods2/ext2, 64 untested/crashing)
+type sys$system:install.com (only 32 0_3_16_dev, ext2, 64 untested)
+create /dir dqa2:[000000]test.dir (only 32 0_3_16_dev, ods2, 64 untested)
+copy sys$system:directory.exe dqa2:[test] (only 32 0_3_16_dev, ext2->ods2 no result, 64 untested
+
+show system (0_3_16_dev)
+show memory (0_3_16_dev)
+symbol="symbol" (only 32 0_3_16_dev, 64 crashing)
+show symbol symbol (only 32 0_3_16_dev, 64 untested)

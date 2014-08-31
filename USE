@@ -1,13 +1,6 @@
-Current as of FreeVMS 0.3.7.
-	Warning: there may be some more unstability compared to 0.2.3
-	due to changes in AST system and modes to resemble VMS more.
-	Now also changes in interrupts and multiprocessing.
+Current as of FreeVMS 0.3.
 	Do not use any write on Ext2 file system.
 	IPACP is now working on i386 again, and partially on x86_64.
-	Telnet client is now working on i386 again.
-	Do not expect as much of the x86_64 version;
-	it has improved, though, and I have seen no fire yet.
-	Bliss-64 may have something lacking with req and telnet.
 
 Bochsrc FreeVMS-related config:
 	floppya: 1_44=a.img, status=inserted
@@ -28,13 +21,8 @@ Virtualbox use:
 The default is DCL for FreeVMS.
 
 When booting bochs, there are mainly 4 usable choices:
- x freevms.iomm.dcl                                                        x
- x freevms.iomm.default                                                    x
- x freevms.iomm.ods2.dcl                                                   x
- x freevms.iomm.ods2.default                                               x
-and also:
- x freevms.iomm.bash-static                                                x
- x freevms.iomm.sash                                                       x
+  freevms.dcl
+  freevms.default
 
 The ODS-2 named are of course with ODS-2, and the rest with ext2 root.
 The DCL choice jumps straight into DCL (just as if you had a conversational
@@ -203,14 +191,6 @@ MOUNT:
 	Go to image directory
 	Mount dqa002 (if using ext2 root).
 
-	Mount file (not partition) (option is not recently tested).
-	Must be a file in /. 
-
-	Cluster mount
-	The other file image must be mounted
-	mount other$dfa0
-	Then use as dir other$dfa0 etc
-
 INIT: 
 	From shell on compiler box (no DCL): init filename volume-name size 
 
@@ -218,39 +198,3 @@ DFU:
 	mount dqa002:
 	run sys$system:dfu
 	commands: verify/report dqa002:;
-
-******************************
-
-Clustering:
-Do not use this now, wait until we get a new network engine.
-May not work, not tested for a long time (without, there are problems with timer queue?).
-You need to have the nodename in params.dat.
-The two first letters in the nodename must be different.
-Also, the name must be max (or exactly) 4 letters.
-Clustering starts automatically.
-Within 10 secs, you will see a "scs received hello"
-After 10 secs, you will see starting cluster connects and some CON_RSPs.
-Later you may see something about probing and MSCP units.
-Wait until you see these kernel messages.
-Currently "disabled" due to new CONFIGURE: Then you can do mount other$dfa0 etc.
-
-config file:
-	/vms\$common/sysexe/params.dat must have
-	SCSNODE=name
-	SCSDEVICE=eua0
-	(or whatever device it is)
-	This replaces/will replace the use of hostname for clustering
-
-******************************
-
-Outdated, as working uml is dead:
-
-starting uml example:
-	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=/vms\$common/sysexe/dcl
-
-UML ubd devices show up as daa0 etc.
-
-starting uml example:
-	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=[vms\$common.sysexe]dcl
-	./linux debug eth0=mcast ubd0=../../uml/root_fs mem=16M init=[bin]sh
-
