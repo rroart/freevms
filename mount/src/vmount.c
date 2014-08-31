@@ -210,9 +210,15 @@ unsigned domount(int userarg)
         }
     }
 #endif
+#if 0
+    // amd64 not happy with this?
     while (cli$get_value(&p, &o, &retlen)&1) {
       devs[devices++] = strdup(c);
     }
+#else
+    cli$get_value(&p, &o, &retlen);
+    devs[devices++] = strdup(c);
+#endif
     if (bind_sts&1) {
       for (dev = 0; dev < devices; dev ++) {
 	short int chan;

@@ -28,6 +28,8 @@ export VMSDLIBS_EXE_ELF = $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF) $(TOPDIR)/s
 
 export OLDLIBCINCLUDEDIR_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/include
 export OLDLIBCINCLUDEDIR_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/include
+export OLDLIBELFINCLUDEDIR_I386 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_i386/usr/include
+export OLDLIBELFINCLUDEDIR_AMD64 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_amd64/usr/include
 export OLDLIBCDIR_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/lib
 export OLDLIBCDIR_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/lib
 export OLDLIBELFDIR_I386 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_i386/usr/lib
@@ -59,6 +61,7 @@ export OLDLIBDL = $(OLDLIBDL_I386)
 export OLDLIBELF = $(OLDLIBELF_I386)
 export OLDLIBCDIR = $(OLDLIBCDIR_I386)
 export OLDLIBELFDIR = $(OLDLIBELFDIR_I386)
+export OLDLIBELFINCLUDEDIR = $(OLDLIBELFINCLUDEDIR_I386)
 #so far only for edt
 export OLDLIBCINCLUDEDIR = $(OLDLIBCINCLUDEDIR_I386)
 endif
@@ -69,8 +72,10 @@ export OLDLIBDL = $(OLDLIBDL_AMD64)
 export OLDLIBELF = $(OLDLIBELF_AMD64)
 export OLDLIBCDIR = $(OLDLIBCDIR_AMD64)
 export OLDLIBELFDIR = $(OLDLIBELFDIR_AMD64)
+export OLDLIBELFINCLUDEDIR = $(OLDLIBELFINCLUDEDIR_AMD64)
 export OLDLIBCINCLUDEDIR = $(OLDLIBCINCLUDEDIR_AMD64)
 endif
+export OLDINCLUDE=-I${OLDLIBCINCLUDEDIR} -I${OLDLIBELFINCLUDEDIR}
 
 export ROOTI386 = $(TOPDIR)/rooti386
 export ROOTI386_COMMON = $(TOPDIR)/rooti386/vms"$$$$"common

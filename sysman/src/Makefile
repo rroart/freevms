@@ -31,25 +31,25 @@ OBJS = sm_load.o sm_main.o sysman_parse.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 %.o: %.c
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
+	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
 
 pic/%.o: %.c
 	install -d pic
 	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
 
 device.o: device.c
-	$(MODELGCC) $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/device.o: device.c
 	install -d pic
-	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/sysman_parse.o: sysman_parse.c
 	install -d pic
 	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I$(TOPDIR)/cdu/src -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 sda_spin.o: sda_spin.c
-	$(MODELGCC) $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
 
 pic/sda_spin.o: sda_spin.c
 	install -d pic
@@ -75,7 +75,7 @@ librtl$(EXE_ELF): $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 	ln -s $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 
 sysman_parse.o: sysman_parse.c
-	gcc -I$(TOPDIR)/cdu/src -c sysman_parse.c
+	gcc ${OLDINCLUDE} -I$(TOPDIR)/cdu/src -c sysman_parse.c
 
 sysman_parse.c: sysman_parse.cld
 	../../cdu/src/cdu sysman_parse.cld

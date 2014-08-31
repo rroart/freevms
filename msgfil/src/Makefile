@@ -25,7 +25,7 @@ msg.a: parse.o lex.o msgmain.o tree.o stringpool.o hashtable.o msg-lang.o msg.o 
 	ar r msg.a parse.o lex.o msgmain.o tree.o stringpool.o hashtable.o msg-lang.o msg.o
 
 %.o: %.c msg.h
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 parse.h: parse.c parse.y
 parse.c: parse.y

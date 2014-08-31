@@ -1,9 +1,13 @@
-all: starlet.a i386/starlet${EXE} starletum.a starlet_pic.a
+all: starlet.a starletum.a starlet_pic.a
+#i386/starlet${EXE} 
 #i386/starlet${EXE_ELF} 
+
+clean:
+	rm *.o i386/*
 
 install: all
 	install -d ../../rooti386/vms"$$"common/syslib
-	install i386/*.* ../../rooti386/vms"$$"common/syslib
+#	install i386/*.* ../../rooti386/vms"$$"common/syslib
 
 i386/starlet${EXE_ELF}: pic/starlet.o pic/rms.o pic/errno.o
 	install -d i386
@@ -42,13 +46,13 @@ vmsopt.a:	vmsopt.o
 		rm vmsopt.a; ar q vmsopt.a vmsopt.o; ranlib vmsopt.a
 
 vmsopt.o:	vmsopt.c
-		gcc -O2 -o vmsopt.o -c vmsopt.c
+		gcc ${OLDINCLUDE} -O2 -o vmsopt.o -c vmsopt.c
 
 errno.o: 	errno.c
-		gcc -c errno.c
+		gcc ${OLDINCLUDE} -c errno.c
 
 %.o: %.c
-		gcc -c -I. $< -o $@
+		gcc ${OLDINCLUDE} -c -I. $< -o $@
 
 pic/%.o: %.c
 		install -d pic

@@ -16,14 +16,14 @@ install: all
 OBJS = dfu.o dfu_bitmap.o dfu_filedir.o dfu_ifscan.o dfu_tables.o
 
 %.o: %.c
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../cdu/src $< -o $@
+	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../cdu/src $< -o $@
 
 dfu_tables.c: ../../cdu/src/cdu dfu_tables.cld
 	../../cdu/src/cdu dfu_tables.cld
 
 i386/dfu${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL)
 	install -d i386
-	gcc -g -static $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL) $(VMSLIBS) -ldl -lelf -o i386/dfu${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) $(EXTERNAL) $(SMGRTL) $(SORRTL) $(VMSLIBS) -ldl -lelf -o i386/dfu${NOEXE}
 
 i386/dfu${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL)
 	install -d i386

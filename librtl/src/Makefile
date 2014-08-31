@@ -80,13 +80,14 @@ STRLIB_PIC = librtl_pic.a
 #ELFLIB = i386/librtl$(EXE_ELF)
 EXELIB = i386/librtl$(EXE)
 
-all : $(STRLIB) $(STRLIB_PIC) $(EXELIB) tests
+all : $(STRLIB) $(STRLIB_PIC) tests
+#$(EXELIB) 
 #$(ELFLIB)
 
 install: all
 	install -d ../../rooti386/vms"$$"common/syslib
 #	install i386/*.ele ../../rooti386/vms"$$"common/syslib
-	install i386/*.exe ../../rooti386/vms"$$"common/syslib
+#	install i386/*.exe ../../rooti386/vms"$$"common/syslib
 
 clean :
 	- rm *.o

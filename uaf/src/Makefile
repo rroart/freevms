@@ -31,7 +31,7 @@ OBJS = authmain.o auth_parse.o authshow.o authmisc.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 %.o: %.c
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/%.o: %.c
 	install -d pic
@@ -43,7 +43,7 @@ i386/authorize$(EXE): $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 
 i386/authorize${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 	install -d i386
-	gcc -g -static $(OBJS) -lc $(EXTERNAL) $(VMSLIBS) -lelf -ldl $(LINKVMLINUX) -o i386/authorize${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -lc $(EXTERNAL) $(VMSLIBS) -lelf -ldl $(LINKVMLINUX) -o i386/authorize${NOEXE}
 
 ifneq ($(ARCH),x86_64)
 i386/authorize${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC) $(VMLINUX)
@@ -57,10 +57,10 @@ librtl$(EXE_ELF): $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 	ln -s $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 
 auth_parse.o: auth_parse.c
-	gcc -I$(TOPDIR)/cdu/src -c auth_parse.c
+	gcc ${OLDINCLUDE} -I$(TOPDIR)/cdu/src -c auth_parse.c
 
 pic/auth_parse.o: auth_parse.c
-	gcc -I$(TOPDIR)/cdu/src -c auth_parse.c -o pic/auth_parse.o
+	gcc ${OLDINCLUDE} -I$(TOPDIR)/cdu/src -c auth_parse.c -o pic/auth_parse.o
 
 auth_parse.c: auth_parse.cld
 	../../cdu/src/cdu auth_parse.cld

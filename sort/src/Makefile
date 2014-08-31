@@ -10,13 +10,14 @@ SORTLIB_PIC = sortrtl_pic.a
 #ELFLIB = i386/sortrtl$(EXE_ELF)
 EXELIB = i386/sortrtl$(EXE)
 
-all : $(SORTLIB) $(SORTLIB_PIC) $(EXELIB) tests
+all : $(SORTLIB) $(SORTLIB_PIC) tests
+#$(EXELIB) 
 #$(ELFLIB)
 
 install: all
 	install -d ../../rooti386/vms"$$"common/syslib
 #	install i386/*.ele ../../rooti386/vms"$$"common/syslib
-	install i386/*.exe ../../rooti386/vms"$$"common/syslib
+#	install i386/*.exe ../../rooti386/vms"$$"common/syslib
 
 clean :
 	- rm *.o
@@ -47,5 +48,5 @@ pic/%.o: %.c
 
 %.o: %.c 
 	install -d pic
-	$(CC) -g $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -c -o $@ $<
+	$(CC) -g ${OLDINCLUDE} $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -c -o $@ $<
 

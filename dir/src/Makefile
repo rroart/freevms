@@ -1,6 +1,7 @@
 FLAGS = -static
 
-all: i386/directory${EXE} i386/directory${NOEXE}
+all: i386/directory${NOEXE}
+#i386/directory${EXE} 
 #i386/ddirectory${EXE} i386/ddirectory${NOEXE}
 #i386/ddirectory${EXE_ELF} i386/directory${EXE_ELF}
 
@@ -9,14 +10,14 @@ clean:
 
 install: all
 	install -d ../../rooti386/vms"$$"common/sysexe
-	install i386/*.* ../../rooti386/vms"$$"common/sysexe
-	install i386/directory ../../rooti386/vms"$$"common/sysexe
+	install i386/* ../../rooti386/vms"$$"common/sysexe
+#	install i386/directory ../../rooti386/vms"$$"common/sysexe
 
 OBJS = directory.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 %.o: %.c
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/%.o: %.c 
 	install -d pic
@@ -24,7 +25,7 @@ pic/%.o: %.c
 
 i386/directory${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL)
 	install -d i386
-	gcc -g -static $(OBJS) $(VMSLIBS) $(EXTERNAL) -o i386/directory${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) -o i386/directory${NOEXE}
 
 i386/directory${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC)
 	ld -Bshareable $(OBJS_PIC) $(VMSLIBS_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o i386/directory${EXE_ELF}

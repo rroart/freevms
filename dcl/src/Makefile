@@ -17,7 +17,7 @@ OBJS = cli.o clicall.o cliexpr.o
 #clilex.o
 
 %.o: %.c
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 #clilex.c: clilex.l
 #	$(LEX) $(LEXFLAGS) -oclilex.c clilex.l

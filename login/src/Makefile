@@ -4,7 +4,7 @@ clean:
 	rm *.o loginout
 
 login.o: login.c
-	gcc -g -c login.c
+	gcc -g -c ${OLDINCLUDE} login.c
 
 loginout: login.o 
 	gcc -g -static -o $@ $^

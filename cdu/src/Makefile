@@ -36,7 +36,7 @@ cdu_pic.a: $(OBJS_PIC) cli.h
 	ar r cdu_pic.a $(OBJS_PIC)
 
 %.o: %.c cli.h
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/%.o: %.c 
 	install -d pic

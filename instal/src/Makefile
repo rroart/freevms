@@ -31,17 +31,17 @@ OBJS = instmain.o inst_parse.o instadd.o instmisc.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 %.o: %.c
-	gcc -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/%.o: %.c
 	install -d pic
 	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 instadd.o: instadd.c
-	$(MODELGCC) $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 instmisc.o: instmisc.c
-	$(MODELGCC) $(MODEL) -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/instadd.o: instadd.c
 	install -d pic
@@ -71,7 +71,7 @@ librtl$(EXE_ELF): $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 	ln -s $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 
 inst_parse.o: inst_parse.c
-	gcc -I$(TOPDIR)/cdu/src -c inst_parse.c
+	gcc ${OLDINCLUDE} -I$(TOPDIR)/cdu/src -c inst_parse.c
 
 inst_parse.c: inst_parse.cld
 	../../cdu/src/cdu inst_parse.cld
