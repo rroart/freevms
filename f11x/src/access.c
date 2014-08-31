@@ -1482,13 +1482,24 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       //sts = device_lookup(strlen(devnam[device]),devnam[device],1,&ucbret);
       //if (!(sts & 1)) break;
       //      ucb->handle=vcbdev->dev->handle;
+#ifdef __x86_64__
+      void * home2 = kmalloc(sizeof(struct _hm2), GFP_KERNEL);
+#endif
       for (hba = 1; hba <= HOME_LIMIT; hba++) {
+#ifdef __x86_64__
+	sts = sys$qiow(XQP_EF,chan,IO$_READLBLK,&iosb,0,0,(char *) home2,sizeof(struct _hm2),hba,ucb->ucb$w_fill_0,0,0);
+	memcpy(&home, home2, sizeof(struct _hm2));
+#else
 	sts = sys$qiow(XQP_EF,chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct _hm2),hba,ucb->ucb$w_fill_0,0,0);
+#endif
 	if (!(sts & 1)) break;
 	if (hba == VMSLONG(home.hm2$l_homelbn) &&
 	    memcmp(home.hm2$t_format,"DECFILE11B  ",12) == 0) break;
 	sts = SS$_DATACHECK;
       }
+#ifdef __x86_64__
+      kfree(home2);
+#endif
       if (sts & 1) {
 	if (VMSWORD(home.hm2$w_checksum2) != checksum((unsigned short *) &home)) {
 	  sts = SS$_DATACHECK;
