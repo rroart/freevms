@@ -1,5 +1,5 @@
 define verb copy
-	image copy
+	image copy_ele
 	routine copy
 	parameter p1
 	parameter p2
@@ -9,19 +9,19 @@ define syntax delete_symbol
 	parameter p1
 
 define verb delete
-	image delete
+	image delete_ele
 	routine del
 	parameter p1
 	qualifier symbol,syntax=delete_symbol
 
 define verb difference
-	image diff
+	image diff_ele
 	routine diff
 	parameter p1
 	parameter p2
 
 define verb directory
-	image directory
+	image directory_ele
 	routine dir
 	parameter p1
 	qualifier acl
@@ -30,19 +30,19 @@ define verb directory
 	qualifier size
 
 define verb mount
-	image vmount
+	image vmount_ele
 	routine domount
 	parameter p1,value(list)
 	qualifier bind
 
 define verb search
-	image search
+	image search_ele
 	routine search
 	parameter p1
 	parameter p2
 
 define verb type
-	image type
+	image type_ele
 	routine typ
 	parameter p1
 
@@ -133,7 +133,7 @@ define syntax name_table
 	parameter p1
 
 define verb create 
-	image create
+	image create_ele
 	routine main
 	qualifier directory
 	qualifier name_table,syntax=name_table
@@ -151,14 +151,14 @@ define verb define
 	parameter p2
 
 define verb export
-	image copy
+	image copy_ele
 	routine export
 	qualifier binary
 	parameter p1
 	parameter p2
 
 define verb import
-	image copy
+	image copy_ele
 	routine import
 	parameter p1
 	parameter p2
@@ -213,7 +213,7 @@ define verb sysman
 	routine main
 
 define verb dfu
-	image dfu
+	image dfu_ele
 	routine verify_command
 
 define verb dcopy
