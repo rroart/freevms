@@ -15,11 +15,14 @@ obj-y2 := main.o tcp.o tcp_user.o tcp_segin.o tcp_telnet.o tcp_telnet_misc.o udp
 
 all: i386/ipacp${NOEXE}
 
+clean:
+	rm nokernel/*.o i386/*
+
 install: all
 	install -d ../../../rooti386/vms"$$"common/sysexe
 	install i386/ipacp ../../../rooti386/vms"$$"common/sysexe
 
-CFLAGS_NOKERNEL = -I$(TOPDIR)/cmuip/central/include -I$(TOPDIR)/linux/include -I$(TOPDIR) -DNOKERNEL -D__KERNEL__
+CFLAGS_NOKERNEL = -I$(TOPDIR)/cmuip/central/include -I$(TOPDIR)/linux/include -I$(TOPDIR) ${OLDINCLUDE} -DNOKERNEL -D__KERNEL__
 
 nokernel_objs := $(addprefix nokernel/,$(obj-y2))
 nokernel/%.o: %.c 
@@ -39,5 +42,5 @@ LINKVMLINUX = -Wl,--just-symbols=../../../linux/vmlinux
 
 i386/ipacp${NOEXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL) $(VMLINUX)
 	install -d i386
-	gcc -s -static $(OBJS) $(EXTERNAL) $(VMSLIBS) $(CHECKSUM) -lc $(LINKVMLINUX) -o i386/ipacp${NOEXE}
-	gcc -g -static $(OBJS) $(EXTERNAL) $(VMSLIBS) $(CHECKSUM) -lc $(LINKVMLINUX) -o i386/ipacpd${NOEXE}
+	gcc -s -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) $(EXTERNAL) $(VMSLIBS) $(CHECKSUM) -lc $(LINKVMLINUX) -o i386/ipacp${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) $(EXTERNAL) $(VMSLIBS) $(CHECKSUM) -lc $(LINKVMLINUX) -o i386/ipacpd${NOEXE}
