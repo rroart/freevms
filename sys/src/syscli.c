@@ -46,7 +46,7 @@ int mod_sym(symbol * sym, struct dsc$descriptor * val) {
   memcpy(s->svalue,val->dsc$a_pointer,val->dsc$w_length);
 }
 
-int find_sym(struct dsc$descriptor * sym) {
+long find_sym(struct dsc$descriptor * sym) {
   symbol * tmp = ctl$ag_clidata;
   while (tmp) {
 #if 0

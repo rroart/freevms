@@ -1,6 +1,8 @@
 #ifndef clidef_h
 #define clidef_h
 
+#include <descrip.h>
+
 #define CLI$M_DEBUG 0x1
 #define CLI$M_DBGTRU 0x2
 #define CLI$M_VERIFY 0x4
@@ -195,9 +197,9 @@ struct _clidef1 {
 	
 struct _clidef2 {
   char clidef$$_fill_8 [8]; // check. was 4. or fix "align" in def1
-  unsigned long long cli$q_namdesc;     
-  unsigned long long cli$q_valdesc;     
-  unsigned long long cli$q_tabdesc;     
+  struct dsc$descriptor cli$q_namdesc;     
+  struct dsc$descriptor cli$q_valdesc;     
+  struct dsc$descriptor cli$q_tabdesc;     
   int cli$l_itmlst;                   
   int cli$l_attr;                     
 
