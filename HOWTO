@@ -21,8 +21,6 @@ cd ..
 cd freevms386.iomm
 make doxygen
 make bzImage
-make download-linker
-make build-linker
 make vmsall
 make rootinstall
 make image (as root)
@@ -30,6 +28,8 @@ make image-install (as root)
 make image-kernel-iomm (as root)
 
 Not to be done currently:
+make download-linker
+make build-linker (for the time being, due to info loss (R_X86_64_GOTTPOFF))
 make download-grub
 make build-grub (for the time being, use a premade a.img instead)
 (Create an INET$CONFIG)
