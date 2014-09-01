@@ -326,7 +326,15 @@ void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lb
     ucb = ucblst[vcb->vcb$l_rvn - 1]; // check
   } else 
     ucb = vcb->vcb$l_rvt;
+#ifdef __x86_64__
+      // x86_64 dma driver did not like the user stack, either (low area)
+      void * buf2 = kmalloc(512*count, GFP_KERNEL);
+      memcpy(buf2, buf, 512*count);
+  unsigned long sts=sys$qiow(XQP_EF,xqp->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf2,512*count,phyblk,ucb->ucb$w_fill_0,0,0);
+  kfree(buf2);
+#else
   unsigned long sts=sys$qiow(XQP_EF,xqp->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,ucb->ucb$w_fill_0,0,0);
+#endif
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
 }
@@ -1483,6 +1491,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
       //if (!(sts & 1)) break;
       //      ucb->handle=vcbdev->dev->handle;
 #ifdef __x86_64__
+      // x86_64 dma driver did not like the kernel stack (low area)
       void * home2 = kmalloc(sizeof(struct _hm2), GFP_KERNEL);
 #endif
       for (hba = 1; hba <= HOME_LIMIT; hba++) {
