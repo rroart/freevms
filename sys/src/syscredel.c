@@ -341,12 +341,11 @@ int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection
   pmd = pmd_alloc(mm, pud, address);
   if (pmd) {
 #ifdef __i386__
+    // there is some lock prob for 64 bit
     spin_lock(&mm->page_table_lock);
 #endif
     pte = pte_alloc(mm, pmd, address);
-#ifdef __i386__
     spin_unlock(&mm->page_table_lock);
-#endif
   }
 
   /** check if we should set the new pte */
