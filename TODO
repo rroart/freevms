@@ -7,10 +7,7 @@ Check use of relative queues; is fork use of & correct?
 Check waitall and wait
 sysimgact use PAGE_ instead of numbers.
 Look at having images as ELF? (Itanic is going to use ELF, it seems)
-Make a make linker autobuild (done)
 Use sys$ with system service call instead in exe$ in ipacp etc, to make asts etc function properly. (Note: doing that in vmsbuffer.c was unstable)
-Try to upgrade 2.4.18 uml part from 11 to the newest (irrelevant, uml died)
-Use real interrupts instead of calls for sch$reshed iofork etc (done)
 Use setpsli even in more interrupts/exceptions?
 Look at how simple and complex buffers are allocated and freed
 Update FCB at the same time as read/write attrib?
@@ -84,7 +81,6 @@ Fix network drivers.
 For ide disk set ucb$l_maxblock and more, like in file.c
 After some time even more driver support might be cut/broke (the most).
 In trandevnam make it use lnm$file_dev.
-Tty_read with correct size read. (now done)
 Acpqfl change from absolute to relative.
 Ctrl-asts with flck (without that ipl queueing crashes).
 Better handling of bufpost and write?

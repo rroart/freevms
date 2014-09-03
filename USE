@@ -1,26 +1,13 @@
+For when features were tested, see TESTING.
+
 Current as of FreeVMS 0.3.
-	Do not use any write on Ext2 file system.
-	IPACP is now working on i386 again, and partially on x86_64.
-
-Bochsrc FreeVMS-related config:
-	floppya: 1_44=a.img, status=inserted
-	ata0-master: type=disk, path=c.img, cylinders=8, heads=255, spt=63
-	boot: a
-	Skip ne2k if you just downloaded and tried the image.
-	ne2k: ioaddr=0x280, irq=9, mac=b0:c4:20:00:00:00, ethmod=linux, ethdev=eth0 (on c.img, on c2.img it must be different) 
-
-	ips: must be properly set to work. test yourself.
 
 Qemu use:
-	qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio
-
-Virtualbox use:
-	Just use it with both a and c images.
-	Barely tested with one CPU, will do more.
+	qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none 
 
 The default is DCL for FreeVMS.
 
-When booting bochs, there are mainly 4 usable choices:
+When booting bochs, there are mainly 2 usable choices:
   freevms.dcl
   freevms.default
 
@@ -43,13 +30,10 @@ DCL:
 	if not too much crashed, it can be rebooted with ctrl-p
 	Ctrl-D/E/F/H and backspace also works.
 
-RUN/MCR:
-	use them as "usual"
-	no qualifiers
-	do not run .ele files (will be removed soon).
-	
 Set symbol:
 	sym = val
+
+Note for Ext2, do not use any write on Ext2 file system.
 
 DELETE:
 	file or symbol
@@ -64,18 +48,11 @@ CREATE /DIRECTORY:
 	Use plain name without [], in directory where it is to be created
 	ODS-2 only.
 
-CLOSE:
-	parameter logical
-
 COPY:
 	copy/import/export
 
-DIFFERENCE/SEARCH/TYPE:
+SEARCH/TYPE:
 	as is, no qualifiers
-
-OPEN:
-	no qualifiers yet
-	parameters the usual logical filename
 
 SET PROCESS:
 	qualifiers: /name /priority
@@ -85,9 +62,6 @@ SET PROMPT:
 
 SET DEFAULT:
 	set default pathname
-
-SET SECURITY:
-	set security/acl=(identifier=number,access=read+write+etc)
 
 SHOW DEFAULT:
 	show default	
@@ -112,15 +86,6 @@ SHOW SYMBOL:
 SHOW TIME:
 	show time
 
-STOP:
-	It can now be given hexadecimal numbers 
-	It must be used with VMS PIDs if to be used         
-	in a cluster (the Unix pids can be used on the local node).
-	(Stop on cluster works again)
-
-	stop /id=proc
-	stop name
-
 DEFINE:
 	define /table table logical equivalence
 
@@ -140,10 +105,6 @@ SET WORKING_SET:
 	set working_set /quota=delta
 	set working_set /extent=delta
 
-READ:
-	no qualifiers yet
-	parameters logical symbol
-
 WRITE:
 	no qualifiers yet
 	parameters logical something-to-write
@@ -153,23 +114,6 @@ SYSMAN:
 	can only do sysman io load sys$loadable_images:random.exe, and
 	this driver currently does nothing (yet)
 
-Networking:
-
-CMUIP:
-	Skip this if you just downloaded and tried the image.
-	see example file INET$CONFIG.
-	DEVICE_INIT:ETHER:era0:00-00-00-00-00-00:192.168.0.42:255.255.0.0
-	VARIABLE:TELNET_SERVICE:1
-	GATEWAY:gateway.com:192.168.0.1:0.0.0.0:0.0.0.0
-
-Telnet:
-	Start with telnet.
-	Do connect ipv4-address. (Temporarily out of order.)
-	It is possible to telnet to another FreeVMS node, no other.
-	When using the local CMUIP telnet client, there is now more
-	negotiations, and this may trigger errors due to missing
-	initializations in the original code.
-
 System administration utilities:
 
 ANALYZE /SYSTEM:
@@ -177,11 +121,6 @@ ANALYZE /SYSTEM:
 	examine addr/name or addr/name n
 	show process /index=n
 	show address a (i386 only)
-
-AUTHORIZE:
-	run sys$system:authorize
-	show user
-	does not return to DCL
 
 INSTALL:
 	install add/priv=(list) file
@@ -193,8 +132,3 @@ MOUNT:
 
 INIT: 
 	From shell on compiler box (no DCL): init filename volume-name size 
-
-DFU:
-	mount dqa002:
-	run sys$system:dfu
-	commands: verify/report dqa002:;

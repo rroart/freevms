@@ -45,35 +45,8 @@ Next see the USE file (after compiling or installing bochs).
 
 Note that only the two first entries are bootable.
 
-Bochs:
-	Configure with at least 
-	--enable-debugger --enable-ne2000 --enable-cpu-level=6 --enable-sse
-	And maybe --enable-pci --enable-x86-64 --enable-sse2 remove sse
-	Maybe --enable-smp
-
-Bochs use:
-	Use make image to make a floppy and disk image.
-	Set bochs to boot the floppy grub image, and set
-	c.img to cyl=4, heads=255, spt=63
-	The make image script works on Debian stable, and may need some
-	tailoring other places.
-
-	Use make image-install to install the FreeVMS binaries to be
-	found in /vms$common.
-	Use make image-kernel-iomm to install the kernel.
-
 Qemu use:
         qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
-
-Virtualbox info:
-	   To make VirtualBox images, do make vbimage, make createvb
-	   and do VBoxManage startvm FreeVMS
-	   (You may have to edit VirtualBox.xml and remove images yourself)
-	   Enable IO Apic
-
-Virtualbox use:
-	Just use it with both a and c images.
-	Barely tested with one CPU, will do more.
 
 NOTE on VFS ODS2 module autobuild:
 Use lenny (stable), sarge may still work if lucky.
@@ -82,4 +55,15 @@ Do dpkg -i ods2-source_0.9.3.w7_all.deb. (Check current version)
 Do m-a prepare, m-a update, m-a get ods2, m-a a-i ods2.
 Run the following after you have got a working system on ext2:
 dcl/src/install.sh
+
+Networking:
+
+Run qemu with ne2k.
+
+CMUIP:
+	Skip this if you just downloaded and tried the image.
+	see example file INET$CONFIG.
+	DEVICE_INIT:ETHER:era0:00-00-00-00-00-00:192.168.0.42:255.255.0.0
+	VARIABLE:TELNET_SERVICE:1
+	GATEWAY:gateway.com:192.168.0.1:0.0.0.0:0.0.0.0
 

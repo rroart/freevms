@@ -12,31 +12,23 @@ Core kernel features:
 	Scheduling, time support, process control and communication
 	Memory management: Working set list, swapper, pools
 	Input/output: QIO, mailboxes, terminal driver
-	Image support: VMS Images and ELF
+	Image support: ELF
 	Miscellaneous: Logical names SMP (only ordinary dual tested)
 
 File system:
 	RMS read/write SEQ (yes) IDX (too little to be usable)
 	RMS can be run on both ODS-2 and Ext2 (but less functionality on Ext2)
+	EXT2 read/execute
 	ODS-2 read/write/execute
-	ODS-5 readonly 
 	ODS-2 initialize
-	DFU doing analyze/disk (32-bit currently)
 	XQP (for ODS-2, and something like it for Ext2)
-	ODS-2 can have bootable kernel and user environment
-	ODS-2 with unused ACL
 
 Bootloader:
 	GRUB with ODS-2 support to boot kernel
 
-Networking:
-	CMUIP (can now do both outgoing and ingoing TCP/IP)
-	Partial BSD socket interface
-
 Shell:
 	DCL
 		Mcr, run
-		Simple @ scripts
 		Basis CLD and CLI$ support
 		Simple symbol support
 	DCL builtin
@@ -44,20 +36,10 @@ Shell:
 		set default/prompt/process
 		show default/time
 	DCL utilities
-		copy, delete, directory, edt, init, mount, search, type
+		copy, delete, directory, init, mount, search, type
 		create /name_table
 		set working_set
 		show device/system/logical/working_set
-
-Editor:
-	EDT (from Ozone, and can not yet be used fully)
-
-Programming language:
-	Bliss (i386, x86_64)
-	GCC variable argument count (i386)
-
-Linker:
-	LINKER (simple, static images. Can do some dynamic linking.)
 
 RTL:
 	STR$
@@ -65,12 +47,7 @@ RTL:
 	SMG$
 
 Misc utilities:
-	Backup
 	CDU (mainly parses a CLD file)
 	MSG (generates numbers only)
-	Authorize (with show only)
 	Install (with add only)
-	Analyze/system (with show dev only)
-
-System calls/services:
-	Not listed here anymore
+	Analyze/system
