@@ -1,7 +1,5 @@
 tested feature, with 64/32, version, ods2/ext2
 
-(Also test scripts in dcl/src/*.com and sys$system:*.com)
-
 mount dqa2 (0_3_16_dev)
 
 set default (0_3_16_dev)
