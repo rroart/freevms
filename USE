@@ -5,18 +5,15 @@ Current as of FreeVMS 0.3.
 Qemu use:
 	qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none 
 
-The default is DCL for FreeVMS.
-
 When booting bochs, there are mainly 2 usable choices:
-  freevms.dcl
-  freevms.default
+  freevms.ext2.dcl
+  freevms.ext2.default
 
-The ODS-2 named are of course with ODS-2, and the rest with ext2 root.
 The DCL choice jumps straight into DCL (just as if you had a conversational
 boot, set startup_p1 "min" and set /startup opa0:), the default does
 a subset of startup, and you have to press a key to get a DCL CLI.
 
-When ext2 root / is mounted under RMS, it is possible to do type [etc]group.
+Note for Ext2, do not use any write on Ext2 file system.
 
 running commands:
 	DCL: typically command
@@ -33,7 +30,19 @@ DCL:
 Set symbol:
 	sym = val
 
-Note for Ext2, do not use any write on Ext2 file system.
+ANALYZE /SYSTEM:
+	show device, show locks, show spinlocks and exit
+
+COPY:
+	copy/import/export
+
+CREATE /DIRECTORY:
+	create /directory name
+	Use plain name without [], in directory where it is to be created
+	ODS-2 only.
+
+DEFINE:
+	define logical equivalence
 
 DELETE:
 	file or symbol
@@ -43,85 +52,6 @@ DIRECTORY:
 	directory
 	qualifiers: /file /size /date /acl
 
-CREATE /DIRECTORY:
-	create /directory name
-	Use plain name without [], in directory where it is to be created
-	ODS-2 only.
-
-COPY:
-	copy/import/export
-
-SEARCH/TYPE:
-	as is, no qualifiers
-
-SET PROCESS:
-	qualifiers: /name /priority
-
-SET PROMPT:
-	set prompt string OR set prompt
-
-SET DEFAULT:
-	set default pathname
-
-SHOW DEFAULT:
-	show default	
-
-SHOW DEVICES:
-	at current only shows drivers
-	show devices
-	386 ide devices partitions show up as dqa001 etc. (hdb2 -> dqb002 etc)
-
-SHOW MEMORY:
-	show memory
-
-SHOW STATUS:
-	show status
-
-SHOW SYSTEM:
-	show system
-
-SHOW SYMBOL:
-	show symbol sym
-
-SHOW TIME:
-	show time
-
-DEFINE:
-	define /table table logical equivalence
-
-CREATE /NAME_TABLE
-	create /name_table /parent_table parent name
-	create /name_table name
-
-SHOW LOGICAL:
-	show logical /table table logical
-
-SHOW WORKING_SET:
-	show working_set
-
-SET WORKING_SET:
-	adds or subtracts to working set quota
-	does not work exactly to specs
-	set working_set /quota=delta
-	set working_set /extent=delta
-
-WRITE:
-	no qualifiers yet
-	parameters logical something-to-write
-
-SYSMAN:
-	io load drivername
-	can only do sysman io load sys$loadable_images:random.exe, and
-	this driver currently does nothing (yet)
-
-System administration utilities:
-
-ANALYZE /SYSTEM:
-	has show device, show locks, show spinlocks and exit
-	examine addr/name or addr/name n
-	show process /index=n
-	show address a (i386 only)
-
 INSTALL:
 	install add/priv=(list) file
 
@@ -130,5 +60,56 @@ MOUNT:
 	Go to image directory
 	Mount dqa002 (if using ext2 root).
 
-INIT: 
-	From shell on compiler box (no DCL): init filename volume-name size 
+SEARCH:
+	as is, no qualifiers
+
+SET DEFAULT:
+	set default pathname
+
+SET PROCESS:
+	qualifiers: /name /priority
+
+SET PROMPT:
+	set prompt string OR set prompt
+
+SET WORKING_SET:
+	adds or subtracts to working set quota
+	does not work exactly to specs
+	set working_set /quota=delta
+	set working_set /extent=delta
+
+SHOW DEFAULT:
+	show default	
+
+SHOW DEVICES:
+	at current only shows drivers
+	show devices
+
+SHOW LOGICAL:
+	show logical /table table logical
+
+SHOW MEMORY:
+	show memory
+
+SHOW STATUS:
+	show status
+
+SHOW SYMBOL:
+	show symbol sym
+
+SHOW SYSTEM:
+	show system
+
+SHOW TIME:
+	show time
+
+SHOW WORKING_SET:
+	show working_set
+
+TYPE:
+	as is, no qualifiers
+
+WRITE:
+	no qualifiers yet
+	parameters logical something-to-write
+

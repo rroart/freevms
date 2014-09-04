@@ -3,7 +3,6 @@ So far:
 About GCC/Distributions.
 Only Debian 6 and 7 is tested/supported.
 Only gcc-4.4.5 and 4.7.2 is tested/supported.
-No more recent flex than 2.5.4 must be used (for Bliss).
 
 CPU status:
 I386: some instability.
@@ -27,6 +26,18 @@ make image (as root)
 make image-install (as root)
 make image-kernel-iomm (as root)
 
+****
+
+Next see the USE file (after compiling or installing qemu).
+
+****
+
+Linux utility:
+
+INIT: 
+	From shell on compiler box (no DCL): init filename volume-name size 
+****
+
 Not to be done currently:
 make download-linker
 make build-linker (for the time being, due to info loss (R_X86_64_GOTTPOFF))
@@ -36,14 +47,13 @@ make build-grub (for the time being, use a premade a.img instead)
 (Then do the steps in NOTE on VFS ODS2 module autobuild, or equivalents)
 ./dcl/src/install.sh
 
+****
+
 Not to be done anymore:
 make download-bliss
 make build-bliss (run twice, for some reason first run quits with an error)
 make telnet (32-bit only, and remember to change close to close2 in routines.b32)
-
-Next see the USE file (after compiling or installing bochs).
-
-Note that only the two first entries are bootable.
+No more recent flex than 2.5.4 must be used (for Bliss).
 
 Qemu use:
         qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
@@ -56,9 +66,13 @@ Do m-a prepare, m-a update, m-a get ods2, m-a a-i ods2.
 Run the following after you have got a working system on ext2:
 dcl/src/install.sh
 
+****
+
+For future use:
+
 Networking:
 
-Run qemu with ne2k.
+Run qemu with ne2k/3com.
 
 CMUIP:
 	Skip this if you just downloaded and tried the image.

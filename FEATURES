@@ -37,7 +37,6 @@ Shell:
 		show default/time
 	DCL utilities
 		copy, delete, directory, init, mount, search, type
-		create /name_table
 		set working_set
 		show device/system/logical/working_set
 

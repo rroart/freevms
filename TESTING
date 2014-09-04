@@ -1,17 +1,42 @@
 tested feature, with 64/32, version, ods2/ext2
 
-mount dqa2 (0_3_16_dev)
-
 set default (0_3_16_dev)
 show default (0_3_16_dev)
 show device (0_3_16_dev)
 show time (0_3_16_dev)
-show working_set (0_3_16_dev)
+set prompt test (0_3_16_dev)
+show status (0_3_16_dev)
+show system (0_3_16_dev)
+show memory (0_3_16_dev)
+
+xyz="abc" (0_3_16_dev)
+show symbol xyz (0_3_16_dev)
+delete /symbol xyz (0_3_16_dev)
+
 show logical sys$system (0_3_16_dev)
 define mylogical test (0_3_16_dev)
+
 write sys$output "test" (0_3_16_dev)
+
 sysman + exit (0_3_16_dev)
 install add sys$system:sda (0_3_16_dev)
+
+show working_set (0_3_16_dev)
+set work /quot (0_3_16_dev, resulting content problem)
+set work /exte (0_3_16_dev, resulting content problem)
+
+set process /ident (untested)
+set process /name=test (0_3_16_dev)
+set process /prio=15 (0_3_16_dev)
+
+analyze /system show spinlocks (0_3_16_dev)
+analyze /system show locks (0_3_16_dev)
+analyze /system show device (0_3_16_dev)
+analyze /system show process (32 bit 0_3_16 dev, 64 bit crash)
+analyze /system show address (both crashes)
+
+Filesystem:
+mount dqa2 (0_3_16_dev, ext2->ods2)
 dir (0_3_16_dev, ext2->ods2/ext2)
 dir /file (0_3_16_dev, ext2->ods2/ext2)
 dir /size (0_3_16_dev, ext2->ods2/ext2)
@@ -23,27 +48,7 @@ delete test.dir;1 (0_3_16_dev, ext2->ods2)
 copy sys$system:directory.exe dqa2:[test] (32 bit 0_3_16_dev missing content, ext2->ods2, 64 bit problem with paging)
 search sys$system:*.com common (0_3_16_dev, ext2->ext2, wrong output)
 
-set prompt test (0_3_16_dev)
-show status (0_3_16_dev)
-show system (0_3_16_dev)
-show memory (0_3_16_dev)
-xyz="abc" (0_3_16_dev)
-show symbol xyz (0_3_16_dev)
-delete /symbol xyz (0_3_16_dev)
-
-set process /ident (untested)
-set process /name=test (0_3_16_dev)
-set process /prio=15 (0_3_16_dev)
-
-set work /quot (0_3_16_dev, resulting content problem)
-set work /exte (0_3_16_dev, resulting content problem)
-
-analyze /system show spinlocks (0_3_16_dev)
-analyze /system show locks (0_3_16_dev)
-analyze /system show device (0_3_16_dev)
-analyze /system show process (32 bit 0_3_16 dev, 64 bit crash)
-analyze /system show address (both crashes)
-
+Untested:
 set security (untested)
 create /name (untested)
 stop (untested)
@@ -52,7 +57,7 @@ read (untested)
 close (untested)
 open (untested)
 define /table (untested)
-if/then/else/endif (untested)
+dcl if/then/else/endif (untested)
 dcl expression (untested)
 dcl scripting (untested)
 sysman (undeveloped), just exit
