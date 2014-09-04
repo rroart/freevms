@@ -4,6 +4,7 @@ Current as of FreeVMS 0.3.
 
 Qemu use:
 	qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none 
+	(qemu-system-i386/qemu-system-x86_64)
 
 When booting bochs, there are mainly 2 usable choices:
   freevms.ext2.dcl
@@ -17,8 +18,6 @@ Note for Ext2, do not use any write on Ext2 file system.
 
 running commands:
 	DCL: typically command
-	/bin/sh: /vms\$common/sysexe/command (may not work anymore,
-		and if starting commands this way is still supported)
 	note: abbreviation may or may not work
 
 General utilities:
