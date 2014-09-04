@@ -48,10 +48,6 @@
 #include <linux/shm.h>
 #include <linux/slab.h>
 #include <linux/uio.h>
-#include <linux/nfs_fs.h>
-#include <linux/smb_fs.h>
-#include <linux/smb_mount.h>
-#include <linux/ncp_fs.h>
 #include <linux/quota.h>
 #include <linux/module.h>
 #include <linux/sunrpc/svc.h>
@@ -78,6 +74,8 @@
 #include <net/scm.h>
 #include <net/sock.h>
 #include <asm/ia32.h>
+
+#include <linux/vmalloc.h>
 
 #define A(__x)		((unsigned long)(__x))
 #define AA(__x)		((unsigned long)(__x))

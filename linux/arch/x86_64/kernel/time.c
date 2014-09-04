@@ -27,6 +27,7 @@
 #include <linux/ioport.h>
 #include <asm/vsyscall.h>
 #include <asm/timex.h>
+#include <linux/timex.h>
 
 extern rwlock_t xtime_lock;
 spinlock_t rtc_lock = SPIN_LOCK_UNLOCKED;

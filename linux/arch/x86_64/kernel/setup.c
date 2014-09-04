@@ -53,6 +53,7 @@
 #include <asm/mmu_context.h>
 #include <asm/bootsetup.h>
 #include <asm/proto.h>
+#include <linux/timex.h>
 
 int acpi_disabled;
 EXPORT_SYMBOL(acpi_disabled);

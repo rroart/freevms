@@ -723,7 +723,9 @@ extern int FASTCALL(wake_up_process2(struct task_struct * tsk,int priclass));
 #define wake_up_interruptible_sync2(x,priclass)	__wake_up_sync2((x),TASK_INTERRUPTIBLE, 1,priclass)
 #define wake_up_interruptible_sync_nr2(x,priclass) __wake_up_sync2((x),TASK_INTERRUPTIBLE,  nr,priclass)
 
+#ifdef __i386__
 asmlinkage long sys_wait4(pid_t pid,unsigned int * stat_addr, int options, struct rusage * ru);
+#endif
 
 extern int in_group_p(gid_t);
 extern int in_egroup_p(gid_t);

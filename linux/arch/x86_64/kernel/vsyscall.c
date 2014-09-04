@@ -46,6 +46,7 @@
 #include <asm/io.h>
 #include <asm/msr.h>
 #include <asm/unistd.h>
+#include <asm/timex.h>
 
 #define __vsyscall(nr) __attribute__ ((unused,__section__(".vsyscall_" #nr)))
 

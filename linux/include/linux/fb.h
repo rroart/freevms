@@ -251,7 +251,6 @@ extern int GET_FB_IDX(kdev_t rdev);
 
 #include <linux/fs.h>
 #include <linux/init.h>
-#include <linux/devfs_fs_kernel.h>
 
 
 struct fb_info;
@@ -310,8 +309,6 @@ struct fb_info {
    struct display *disp;		/* initial display variable */
    struct vc_data *display_fg;		/* Console visible on this display */
    char fontname[40];			/* default font name */
-   devfs_handle_t devfs_handle;         /* Devfs handle for new name         */
-   devfs_handle_t devfs_lhandle;        /* Devfs handle for compat. symlink  */
    int (*changevar)(int);		/* tell console var has changed */
    int (*switch_con)(int, struct fb_info*);
 					/* tell fb to switch consoles */

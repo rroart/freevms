@@ -38,6 +38,7 @@
 #include <asm/proto.h>
 
 void sig_exit(int sig, int exit_code, struct siginfo *info);
+extern asmlinkage long sys_wait4(pid_t, unsigned int *, int, struct rusage *);
 
 #define DEBUG_SIG 0
 

@@ -19,7 +19,6 @@
 #ifdef __KERNEL__
 #include <linux/timer.h>
 #include <linux/if.h>
-#include <linux/proc_fs.h>
 #endif /* __KERNEL__ */
 
 #include <linux/types.h>

@@ -7,7 +7,6 @@
 #ifdef __KERNEL__
 
 #include <linux/poll.h>
-#include <linux/devfs_fs_kernel.h>
 
 struct video_device
 {
@@ -30,7 +29,6 @@ struct video_device
 	void *priv;		/* Used to be 'private' but that upsets C++ */
 	int busy;
 	int minor;
-	devfs_handle_t devfs_handle;
 };
 
 #define VIDEO_MAJOR	81

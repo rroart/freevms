@@ -123,6 +123,7 @@ asmlinkage long sys_pause(void)
 	return -ERESTARTNOHAND;
 }
 
+extern asmlinkage long sys_shmat (int shmid, char *shmaddr, int shmflg, ulong *raddr);
 asmlinkage long wrap_sys_shmat(int shmid, char *shmaddr, int shmflg)
 {
 	unsigned long raddr;

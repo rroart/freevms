@@ -212,11 +212,6 @@ struct atm_cirange {
 #include <net/sock.h>
 #include <asm/atomic.h>
 
-#ifdef CONFIG_PROC_FS
-#include <linux/proc_fs.h>
-#endif
-
-
 struct k_atm_aal_stats {
 #define __HANDLE_ITEM(i) atomic_t i
 	__AAL_STAT_ITEMS

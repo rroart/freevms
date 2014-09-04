@@ -24,6 +24,9 @@
 
 extern int sem_ctls[];
 
+extern asmlinkage long sys_shmat (int shmid, char *shmaddr, int shmflg, ulong *raddr);
+extern asmlinkage long sys_shmctl (int shmid, int cmd, struct shmid_ds *buf);
+
 /*
  * sys32_ipc() is the de-multiplexer for the SysV IPC calls in 32bit emulation..
  *

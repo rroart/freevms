@@ -37,7 +37,6 @@
 #include <linux/init.h>
 #include <linux/kernel_stat.h>
 #include <linux/irq.h>
-#include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 
 #include <asm/atomic.h>
@@ -1189,23 +1188,5 @@ unsigned long prof_cpu_mask = -1;
 
 void init_irq_proc (void)
 {
-	struct proc_dir_entry *entry;
-	int i;
-
-	entry = 0;
-
-	if (!entry)
-	    return;
-
-	entry->nlink = 1;
-	entry->data = (void *)&prof_cpu_mask;
-	entry->read_proc = prof_cpu_mask_read_proc;
-	entry->write_proc = prof_cpu_mask_write_proc;
-
-	/*
-	 * Create entries for all existing IRQs.
-	 */
-	for (i = 0; i < NR_IRQS; i++)
-		register_irq_proc(i);
 }
 

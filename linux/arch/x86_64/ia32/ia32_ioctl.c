@@ -43,9 +43,6 @@
 #include <linux/mtio.h>
 #include <linux/cdrom.h>
 #include <linux/loop.h>
-#include <linux/auto_fs.h>
-#include <linux/auto_fs4.h>
-#include <linux/devfs_fs.h>
 #include <linux/tty.h>
 #include <linux/vt_kern.h>
 #include <linux/fb.h>
@@ -53,7 +50,6 @@
 #include <linux/videodev.h>
 #include <linux/netdevice.h>
 #include <linux/raw.h>
-#include <linux/smb_fs.h>
 #include <linux/blkpg.h>
 #include <linux/blk.h>
 #include <linux/elevator.h>
@@ -1996,24 +1992,6 @@ static int do_unimap_ioctl(unsigned int fd, unsigned int cmd, struct unimapdesc3
 	return 0;
 }
 
-static int do_smb_getmountuid(unsigned int fd, unsigned int cmd, unsigned long arg)
-{
-	mm_segment_t old_fs = get_fs();
-	__kernel_uid_t kuid;
-	int err;
-
-	cmd = SMB_IOC_GETMOUNTUID;
-
-	set_fs(KERNEL_DS);
-	err = sys_ioctl(fd, cmd, (unsigned long)&kuid);
-	set_fs(old_fs);
-
-	if (err >= 0)
-		err = put_user(kuid, (__kernel_uid_t32 *)arg);
-
-	return err;
-}
-
 struct atmif_sioc32 {
         int                number;
         int                length;
@@ -2687,11 +2665,6 @@ static int blkpg_ioctl_trans(unsigned int fd, unsigned int cmd, struct blkpg_ioc
 	return err;
 }
 
-static int ioc_settimeout(unsigned int fd, unsigned int cmd, unsigned long arg)
-{
-	return rw_long(fd, AUTOFS_IOC_SETTIMEOUT, arg);
-}
-
 #ifndef TIOCGDEV
 #define TIOCGDEV       _IOR('T',0x32, unsigned int)
 #endif
@@ -2949,58 +2922,6 @@ struct usbdevfs_ctrltransfer32 {
 };
 
 #define USBDEVFS_CONTROL32           _IOWR('U', 0, struct usbdevfs_ctrltransfer32)
-
-static int do_usbdevfs_control(unsigned int fd, unsigned int cmd, unsigned long arg)
-{
-	struct usbdevfs_ctrltransfer kctrl;
-	struct usbdevfs_ctrltransfer32 *uctrl;
-	mm_segment_t old_fs;
-	__u32 udata;
-	void *uptr, *kptr;
-	int err;
-
-	uctrl = (struct usbdevfs_ctrltransfer32 *) arg;
-
-	if (copy_from_user(&kctrl, uctrl,
-			   (sizeof(struct usbdevfs_ctrltransfer) -
-			    sizeof(void *))))
-		return -EFAULT;
-
-	if (get_user(udata, &uctrl->data))
-		return -EFAULT;
-	uptr = (void *) A(udata);
-
-	/* In usbdevice_fs, it limits the control buffer to a page,
-	 * for simplicity so do we.
-	 */
-	if (!uptr || kctrl.length > PAGE_SIZE)
-		return -EINVAL;
-
-	kptr = (void *)__get_free_page(GFP_KERNEL);
-
-	if ((kctrl.requesttype & 0x80) == 0) {
-		err = -EFAULT;
-		if (copy_from_user(kptr, uptr, kctrl.length))
-			goto out;
-	}
-
-	kctrl.data = kptr;
-
-	old_fs = get_fs();
-	set_fs(KERNEL_DS);
-	err = sys_ioctl(fd, USBDEVFS_CONTROL, (unsigned long)&kctrl);
-	set_fs(old_fs);
-
-	if (err >= 0 &&
-	    ((kctrl.requesttype & 0x80) != 0)) {
-		if (copy_to_user(uptr, kptr, kctrl.length))
-			err = -EFAULT;
-	}
-
-out:
-	free_page((unsigned long) kptr);
-	return err;
-}
 
 struct usbdevfs_bulktransfer32 {
 	unsigned int ep;
@@ -4044,13 +3965,6 @@ COMPATIBLE_IOCTL(AUTOFS_IOC_ASKREGHOST)
 COMPATIBLE_IOCTL(AUTOFS_IOC_TOGGLEREGHOST)
 COMPATIBLE_IOCTL(AUTOFS_IOC_ASKUMOUNT)
 #endif
-/* DEVFS */
-COMPATIBLE_IOCTL(DEVFSDIOC_GET_PROTO_REV)
-COMPATIBLE_IOCTL(DEVFSDIOC_SET_EVENT_MASK)
-COMPATIBLE_IOCTL(DEVFSDIOC_RELEASE_EVENT_QUEUE)
-COMPATIBLE_IOCTL(DEVFSDIOC_SET_DEBUG_MASK)
-/* SMB ioctls which do not need any translations */
-COMPATIBLE_IOCTL(SMB_IOC_NEWCONN)
 /* Little a */
 COMPATIBLE_IOCTL(ATMSIGD_CTRL)
 COMPATIBLE_IOCTL(ATMARPD_CTRL)
@@ -4308,7 +4222,6 @@ HANDLE_IOCTL(CDROM_SEND_PACKET, cdrom_ioctl_trans)
 HANDLE_IOCTL(LOOP_SET_STATUS, loop_status)
 HANDLE_IOCTL(LOOP_GET_STATUS, loop_status)
 #define AUTOFS_IOC_SETTIMEOUT32 _IOWR(0x93,0x64,unsigned int)
-HANDLE_IOCTL(AUTOFS_IOC_SETTIMEOUT32, ioc_settimeout)
 HANDLE_IOCTL(PIO_FONTX, do_fontx_ioctl)
 HANDLE_IOCTL(GIO_FONTX, do_fontx_ioctl)
 HANDLE_IOCTL(PIO_UNIMAP, do_unimap_ioctl)
@@ -4328,7 +4241,6 @@ HANDLE_IOCTL(VIDIOCGFREQ32, do_video_ioctl)
 HANDLE_IOCTL(VIDIOCSFREQ32, do_video_ioctl)
 /* One SMB ioctl needs translations. */
 #define SMB_IOC_GETMOUNTUID_32 _IOR('u', 1, __kernel_uid_t32)
-HANDLE_IOCTL(SMB_IOC_GETMOUNTUID_32, do_smb_getmountuid)
 HANDLE_IOCTL(ATM_GETLINKRATE32, do_atm_ioctl)
 HANDLE_IOCTL(ATM_GETNAMES32, do_atm_ioctl)
 HANDLE_IOCTL(ATM_GETTYPE32, do_atm_ioctl)
@@ -4373,7 +4285,6 @@ HANDLE_IOCTL(LV_STATUS_BYDEV, do_lvm_ioctl)
 /* VFAT */
 HANDLE_IOCTL(VFAT_IOCTL_READDIR_BOTH32, vfat_ioctl32)
 HANDLE_IOCTL(VFAT_IOCTL_READDIR_SHORT32, vfat_ioctl32)
-HANDLE_IOCTL(USBDEVFS_CONTROL32, do_usbdevfs_control)
 HANDLE_IOCTL(USBDEVFS_BULK32, do_usbdevfs_bulk)
 /*HANDLE_IOCTL(USBDEVFS_SUBMITURB32, do_usbdevfs_urb)*/
 HANDLE_IOCTL(USBDEVFS_REAPURB32, do_usbdevfs_reapurb)

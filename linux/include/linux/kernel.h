@@ -115,6 +115,7 @@ extern const char *print_tainted(void);
 
 extern void dump_stack(void);
 
+#ifdef __i386__
 #if DEBUG
 #define pr_debug(fmt,arg...) \
 	printk(KERN_DEBUG fmt,##arg)
@@ -125,6 +126,7 @@ extern void dump_stack(void);
 
 #define pr_info(fmt,arg...) \
 	printk(KERN_INFO fmt,##arg)
+#endif
 
 /*
  *      Display an IP address in readable format.

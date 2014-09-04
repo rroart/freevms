@@ -25,6 +25,9 @@
 
 #include <linux/config.h>
 #include <linux/types.h>
+#ifdef __x86_64__
+#include <linux/sched.h>
+#endif
 #include <linux/unistd.h>
 #include <linux/string.h>
 #include <linux/ctype.h>
