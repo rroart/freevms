@@ -406,6 +406,7 @@ long sstab[4] = { __KERNEL_CS | 8, __EXECUTIVE_CS | 8, __SUPERVISOR_CS | 8, __US
    \param ss stack segment?
 */
 
+__attribute__((noinline))
 int exe$astdel_prep2_new(long stack, long ast, long astprm, long cs, long ss) {
   __asm__ __volatile__(
 		       "pushfl\n\t"
