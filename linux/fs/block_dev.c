@@ -19,7 +19,6 @@
 #include <linux/slab.h>
 #include <linux/kmod.h>
 #include <linux/major.h>
-#include <linux/devfs_fs_kernel.h>
 #include <linux/smp_lock.h>
 #include <linux/iobuf.h>
 #include <linux/highmem.h>
@@ -384,16 +383,6 @@ int check_disk_change(kdev_t dev)
 	i = MAJOR(dev);
 	if (i < MAX_BLKDEV)
 		bdops = blkdevs[i].bdops;
-	if (bdops == NULL) {
-		devfs_handle_t de;
-
-		de = devfs_find_handle (NULL, NULL, i, MINOR (dev),
-					DEVFS_SPECIAL_BLK, 0);
-		if (de) {
-			bdops = devfs_get_ops (de);
-			devfs_put_ops (de); /* We're running in owner module */
-		}
-	}
 	if (bdops == NULL)
 		return 0;
 	if (bdops->check_media_change == NULL)

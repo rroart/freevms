@@ -15,8 +15,6 @@
 #include <linux/slab.h>
 #include <linux/smp_lock.h>
 #include <linux/kernel_stat.h>
-#include <linux/swap.h>
-#include <linux/swapctl.h>
 #include <linux/blkdev.h> /* for blk_size */
 #include <linux/vmalloc.h>
 #include <linux/pagemap.h>
@@ -39,8 +37,7 @@ static const char Unused_file[] = "Unused swap file entry ";
 static const char Bad_offset[] = "Bad swap offset entry ";
 static const char Unused_offset[] = "Unused swap offset entry ";
 
-struct swap_list_t swap_list = {-1, -1};
-
+#define MAX_SWAPFILES 32
 struct _pfl swap_info_pfl[MAX_SWAPFILES];
 
 #define SWAPFILE_CLUSTER 256
@@ -143,5 +140,4 @@ void swap_setup(void){
 
 int page_cluster;
 
-pager_daemon_t pager_daemon;
 

@@ -21,7 +21,6 @@
 #include <linux/quotaops.h>
 #include <linux/acct.h>
 #include <linux/module.h>
-#include <linux/devfs_fs_kernel.h>
 
 #include <asm/uaccess.h>
 

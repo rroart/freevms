@@ -27,7 +27,6 @@
 #include <linux/init.h>
 #include <linux/file.h>
 #include <linux/mman.h>
-#include <linux/proc_fs.h>
 #include <asm/uaccess.h>
 #include <misc_routines.h>
 
@@ -71,10 +70,6 @@ static void shm_close (struct vm_area_struct *shmd);
 static int sysvipc_shm_read_proc(char *buffer, char **start, off_t offset, int length, int *eof, void *data);
 #endif
 
-size_t	shm_ctlmax = SHMMAX;
-size_t 	shm_ctlall = SHMALL;
-int 	shm_ctlmni = SHMMNI;
-
 static int shm_tot; /* total number of shared memory pages */
 
 void __init shm_init (void)
@@ -96,13 +91,6 @@ static inline struct shmid_kernel *shm_rmid(int id)
 {
 	return (struct shmid_kernel *)ipc_rmid(&shm_ids,id);
 }
-
-static inline int shm_addid(struct shmid_kernel *shp)
-{
-	return ipc_addid(&shm_ids, &shp->shm_perm, shm_ctlmni+1);
-}
-
-
 
 static inline void shm_inc (int id) {
 	struct shmid_kernel *shp;
@@ -220,90 +208,20 @@ struct shm_setbuf {
 
 static inline unsigned long copy_shmid_from_user(struct shm_setbuf *out, void *buf, int version)
 {
-	switch(version) {
-	case IPC_64:
-	    {
-		struct shmid64_ds tbuf;
-
-		if (copy_from_user(&tbuf, buf, sizeof(tbuf)))
-			return -EFAULT;
-
-		out->uid	= tbuf.shm_perm.uid;
-		out->gid	= tbuf.shm_perm.gid;
-		out->mode	= tbuf.shm_flags;
-
-		return 0;
-	    }
-	case IPC_OLD:
-	    {
-		struct shmid_ds tbuf_old;
-
-		if (copy_from_user(&tbuf_old, buf, sizeof(tbuf_old)))
-			return -EFAULT;
-
-		out->uid	= tbuf_old.shm_perm.uid;
-		out->gid	= tbuf_old.shm_perm.gid;
-		out->mode	= tbuf_old.shm_flags;
-
-		return 0;
-	    }
-	default:
 		return -EINVAL;
-	}
 }
 
 static inline unsigned long copy_shminfo_to_user(void *buf, struct shminfo64 *in, int version)
 {
-	switch(version) {
-	case IPC_64:
-		return copy_to_user(buf, in, sizeof(*in));
-	case IPC_OLD:
-	    {
-		struct shminfo out;
-
-		if(in->shmmax > INT_MAX)
-			out.shmmax = INT_MAX;
-		else
-			out.shmmax = (int)in->shmmax;
-
-		out.shmmin	= in->shmmin;
-		out.shmmni	= in->shmmni;
-		out.shmseg	= in->shmseg;
-		out.shmall	= in->shmall; 
-
-		return copy_to_user(buf, &out, sizeof(out));
-	    }
-	default:
-		return -EINVAL;
-	}
 }
 
 static void shm_get_stat (unsigned long *rss, unsigned long *swp) 
 {
-	struct shmem_inode_info *info;
-	int i;
-
-	*rss = 0;
-	*swp = 0;
-
-	for(i = 0; i <= shm_ids.max_id; i++) {
-		struct shmid_kernel* shp;
-		struct inode * inode;
-
-		shp = shm_get(i);
-		if(shp == NULL)
-			continue;
-		inode = shp->shm_file->f_dentry->d_inode;
-		info = SHMEM_I(inode);
-		spin_lock (&info->lock);
-		*rss += inode->i_mapping->nrpages;
-		*swp += info->swapped;
-		spin_unlock (&info->lock);
-	}
 }
 
 asmlinkage long sys_shmctl (int shmid, int cmd, struct shmid_ds *buf)
 {
+  return -EINVAL;
 }
 
 /*
@@ -311,101 +229,7 @@ asmlinkage long sys_shmctl (int shmid, int cmd, struct shmid_ds *buf)
  */
 asmlinkage long sys_shmat (int shmid, char *shmaddr, int shmflg, ulong *raddr)
 {
-	struct shmid_kernel *shp;
-	unsigned long addr;
-	unsigned long size;
-	struct file * file;
-	int    err;
-	unsigned long flags;
-	unsigned long prot;
-	unsigned long o_flags;
-	int acc_mode;
-	void *user_addr;
-
-	if (shmid < 0)
-		return -EINVAL;
-
-	if ((addr = (ulong)shmaddr)) {
-		if (addr & (SHMLBA-1)) {
-			if (shmflg & SHM_RND)
-				addr &= ~(SHMLBA-1);	   /* round down */
-			else
-				return -EINVAL;
-		}
-		flags = MAP_SHARED | MAP_FIXED;
-	} else {
-		if ((shmflg & SHM_REMAP))
-			return -EINVAL;
-
-		flags = MAP_SHARED;
-	}
-
-	if (shmflg & SHM_RDONLY) {
-		prot = PROT_READ;
-		o_flags = O_RDONLY;
-		acc_mode = S_IRUGO;
-	} else {
-		prot = PROT_READ | PROT_WRITE;
-		o_flags = O_RDWR;
-		acc_mode = S_IRUGO | S_IWUGO;
-	}
-
-	/*
-	 * We cannot rely on the fs check since SYSV IPC does have an
-	 * additional creator id...
-	 */
-	shp = shm_lock(shmid);
-	if(shp == NULL)
-		return -EINVAL;
-	err = shm_checkid(shp,shmid);
-	if (err) {
-		shm_unlock(shmid);
-		return err;
-	}
-	if (ipcperms(&shp->shm_perm, acc_mode)) {
-		shm_unlock(shmid);
-		return -EACCES;
-	}
-	file = shp->shm_file;
-	size = file->f_dentry->d_inode->i_size;
-	shp->shm_nattch++;
-	shm_unlock(shmid);
-
-	down_write(&current->mm->mmap_sem);
-	if (addr && !(shmflg & SHM_REMAP)) {
-		user_addr = ERR_PTR(-EINVAL);
-		if (find_vma_intersection2(current->pcb$l_phd, addr, addr + size))
-			goto invalid;
-		/*
-		 * If shm segment goes below stack, make sure there is some
-		 * space left for the stack to grow (at least 4 pages).
-		 */
-		if (addr < current->mm->start_stack &&
-		    addr > current->mm->start_stack - size - PAGE_SIZE * 5)
-			goto invalid;
-	}
-		
-	user_addr = (void*) do_mmap (file, addr, size, prot, flags, 0);
-
-invalid:
-	up_write(&current->mm->mmap_sem);
-
-	down (&shm_ids.sem);
-	if(!(shp = shm_lock(shmid)))
-		BUG();
-	shp->shm_nattch--;
-	if(shp->shm_nattch == 0 &&
-	   shp->shm_flags & SHM_DEST)
-		shm_destroy (shp);
-	shm_unlock(shmid);
-	up (&shm_ids.sem);
-
-	*raddr = (unsigned long) user_addr;
-	err = 0;
-	if (IS_ERR(user_addr))
-		err = PTR_ERR(user_addr);
-	return err;
-
+  return -EINVAL;
 }
 
 /*

@@ -27,8 +27,6 @@
 #include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/sysctl.h>
-#include <linux/swapctl.h>
-#include <linux/proc_fs.h>
 #include <linux/ctype.h>
 #include <linux/utsname.h>
 #include <linux/capability.h>
@@ -222,12 +220,6 @@ static ctl_table kern_table[] = {
 	{KERN_RTSIGMAX, "rtsig-max", &max_queued_signals, sizeof(int),
 	 0644, NULL, &proc_dointvec},
 #ifdef CONFIG_SYSVIPC
-	{KERN_SHMMAX, "shmmax", &shm_ctlmax, sizeof (size_t),
-	 0644, NULL, &proc_doulongvec_minmax},
-	{KERN_SHMALL, "shmall", &shm_ctlall, sizeof (size_t),
-	 0644, NULL, &proc_doulongvec_minmax},
-	{KERN_SHMMNI, "shmmni", &shm_ctlmni, sizeof (int),
-	 0644, NULL, &proc_dointvec},
 	{KERN_MSGMAX, "msgmax", &msg_ctlmax, sizeof (int),
 	 0644, NULL, &proc_dointvec},
 	{KERN_MSGMNI, "msgmni", &msg_ctlmni, sizeof (int),
@@ -268,8 +260,6 @@ static ctl_table vm_table[] = {
 	 &bdflush_min, &bdflush_max},
 	{VM_OVERCOMMIT_MEMORY, "overcommit_memory", &sysctl_overcommit_memory,
 	 sizeof(sysctl_overcommit_memory), 0644, NULL, &proc_dointvec},
-	{VM_PAGERDAEMON, "kswapd",
-	 &pager_daemon, sizeof(pager_daemon_t), 0644, NULL, &proc_dointvec},
 	{VM_PGT_CACHE, "pagetable_cache", 
 	 &pgt_cache_water, 2*sizeof(int), 0644, NULL, &proc_dointvec},
 	{VM_PAGE_CLUSTER, "page-cluster", 

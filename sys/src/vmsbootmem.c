@@ -18,8 +18,6 @@
 #include <linux/config.h>
 #include <linux/mm.h>
 #include <linux/kernel_stat.h>
-#include <linux/swap.h>
-#include <linux/swapctl.h>
 #include <linux/interrupt.h>
 #include <linux/init.h>
 #include <linux/bootmem.h>

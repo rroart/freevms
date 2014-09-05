@@ -31,7 +31,6 @@
 #include <linux/slab.h>
 #include <linux/locks.h>
 #include <linux/smp_lock.h>
-#include <linux/devfs_fs_kernel.h>
 #include <linux/fd.h>
 #include <linux/init.h>
 #include <linux/major.h>
@@ -39,10 +38,6 @@
 #include <linux/acct.h>
 
 #include <asm/uaccess.h>
-
-#include <linux/nfs_fs.h>
-#include <linux/nfs_fs_sb.h>
-#include <linux/nfs_mount.h>
 
 #include <linux/kmod.h>
 #define __NO_VERSION__

@@ -53,6 +53,7 @@
 #include <asm/pgalloc.h>
 #include <asm/smpboot.h>
 #include <asm/mmu_context.h>
+#include <asm/timex.h>
 
 #include <exe_routines.h>
 #include <sch_routines.h>

@@ -6,8 +6,6 @@
 
 #include <linux/config.h>
 #include <linux/mm.h>
-#include <linux/swap.h>
-#include <linux/swapctl.h>
 #include <linux/interrupt.h>
 #include <linux/pagemap.h>
 #include <linux/bootmem.h>
@@ -212,9 +210,11 @@ struct page * fastcall __alloc_pages(unsigned int gfp_mask, unsigned int order, 
 	printk("should not be here now\n");
 
 	mb();
+	extern wait_queue_head_t kswapd_wait;
 	if (waitqueue_active(&kswapd_wait))
 		wake_up_interruptible(&kswapd_wait);
 
+	extern int fastcall try_to_free_pages(zone_t *classzone, unsigned int gfp_mask, unsigned int order);
 rebalance:
 	try_to_free_pages(classzone, gfp_mask, order);
 

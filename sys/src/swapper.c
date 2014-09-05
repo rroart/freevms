@@ -7,8 +7,6 @@
 #include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/kernel_stat.h>
-#include <linux/swap.h>
-#include <linux/swapctl.h>
 #include <linux/smp_lock.h>
 #include <linux/pagemap.h>
 #include <linux/init.h>
@@ -192,6 +190,8 @@ int kswapd(void *unused)
 		//		run_task_queue(&tq_disk);
 	}
 }
+
+extern void swap_setup(void);
 
 int __init kswapd_init(void)
 {

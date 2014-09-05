@@ -23,6 +23,7 @@
 #include <asm/smp.h>
 #include <asm/mtrr.h>
 #include <asm/mpspec.h>
+#include <asm/timex.h>
 
 unsigned int nmi_watchdog = NMI_NONE;
 static unsigned int nmi_hz = HZ;

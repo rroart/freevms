@@ -8,7 +8,6 @@
 
 #include <linux/mm.h>
 #include <linux/unistd.h>
-#include <linux/swap.h>
 #include <linux/smp_lock.h>
 
 #include <asm/uaccess.h>
@@ -30,7 +29,6 @@ asmlinkage long sys_sysinfo(struct sysinfo *info)
 	sti();
 
 	si_meminfo(&val);
-	si_swapinfo(&val);
 
 	{
 		unsigned long mem_total, sav_total;

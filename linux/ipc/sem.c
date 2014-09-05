@@ -67,7 +67,6 @@
 #include <linux/slab.h>
 #include <linux/spinlock.h>
 #include <linux/init.h>
-#include <linux/proc_fs.h>
 #include <asm/uaccess.h>
 #include "util.h"
 

@@ -71,8 +71,6 @@
 #include <linux/net.h>
 #include <linux/interrupt.h>
 #include <linux/netdevice.h>
-#include <linux/proc_fs.h>
-#include <linux/wanrouter.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <linux/init.h>

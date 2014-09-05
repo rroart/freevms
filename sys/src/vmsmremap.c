@@ -15,7 +15,6 @@
 #include <linux/smp_lock.h>
 #include <linux/shm.h>
 #include <linux/mman.h>
-#include <linux/swap.h>
 
 #include <asm/uaccess.h>
 #include <asm/pgalloc.h>
