@@ -449,7 +449,7 @@ asmlinkage int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, uns
   return sts;
 }
 
-void lock_iosb_kast(int par) {
+void lock_iosb_kast(long par) {
   struct _lkb * lck = par;
   struct _lksb * lksb = lck->lkb$l_lksb;
   if (lck->lkb$l_status&LKB$M_ASYNC) {
@@ -630,7 +630,7 @@ int grant_queued(struct _rsb * res, int ggmode_not, int docvt, int dowt) {
       if (test_bit(tmp->lkb$b_rqmode,&lck$ar_compat_tbl[res->rsb$b_ggmode])) {
 	struct _lkb * lck=tmp;
 	struct _lkb * next=tmp->lkb$l_sqfl;
-	remque(((int)tmp)+diff,0);
+	remque(((long)tmp)+diff,0);
 	lck$grant_lock(lck ,res,lck->lkb$b_grmode,lck->lkb$b_rqmode,0,0,res->rsb$b_ggmode);
 	tmp=next;
 	continue;
@@ -640,7 +640,7 @@ int grant_queued(struct _rsb * res, int ggmode_not, int docvt, int dowt) {
 	if (test_bit(tmp->lkb$b_rqmode,&lck$ar_compat_tbl[newmode])) {
 	  struct _lkb * lck=tmp;
 	  struct _lkb * next=tmp->lkb$l_sqfl;
-	  remque(((int)tmp)+diff,0);
+	  remque(((long)tmp)+diff,0);
 	  lck$grant_lock(lck ,res,lck->lkb$b_grmode,lck->lkb$b_rqmode,0,0,res->rsb$b_ggmode);
 	  tmp=next;
 	  continue;
