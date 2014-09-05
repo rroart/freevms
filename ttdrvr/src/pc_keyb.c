@@ -339,7 +339,6 @@ int kbd_vmsinit(void) {
 #include <linux/delay.h>
 #include <linux/random.h>
 #include <linux/poll.h>
-#include <linux/miscdevice.h>
 #include <linux/slab.h>
 #include <linux/kbd_kern.h>
 #include <linux/vt_kern.h>
@@ -1410,18 +1409,10 @@ static ssize_t read_aux(struct _irp * i, struct _pcb * p, struct _ucb * u, struc
 {
   char * buffer = i->irp$l_qio_p1;
   size_t count = i->irp$l_qio_p2;
-#if 0
-	DECLARE_WAITQUEUE(wait, current);
-#endif
 	ssize_t i = count;
 	unsigned char c;
 
 	if (queue_empty()) {
-#if 0
-		if (file->f_flags & O_NONBLOCK)
-			return -EAGAIN;
-		add_wait_queue(&queue->proc_list, &wait);
-#endif
 repeat:
 		set_current_state(TASK_INTERRUPTIBLE);
 		if (queue_empty() /*&& !signal_pending(current)*/) {
@@ -1436,14 +1427,6 @@ repeat:
 		put_user(c, buffer++);
 		i--;
 	}
-#if 0
-	if (count-i) {
-		file->f_dentry->d_inode->i_atime = CURRENT_TIME;
-		return count-i;
-	}
-	if (signal_pending(current))
-		return -ERESTARTSYS;
-#endif
 	return 0;
 }
 
@@ -1471,9 +1454,6 @@ static ssize_t write_aux(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
 		retval = -EIO;
 		if (written) {
 			retval = written;
-#if 0
-			file->f_dentry->d_inode->i_mtime = CURRENT_TIME;
-#endif
 		}
 	}
 
@@ -1489,26 +1469,9 @@ static unsigned int aux_poll(struct file *file, poll_table * wait)
 	return 0;
 }
 
-#if 0
-struct file_operations psaux_fops = {
-	read:		read_aux,
-	write:		write_aux,
-	poll:		aux_poll,
-	open:		open_aux,
-	release:	release_aux,
-	fasync:		fasync_aux,
-};
-#endif
-
 /*
  * Initialize driver.
  */
-#if 0
-static struct miscdevice psaux_mouse = {
-	PSMOUSE_MINOR, "psaux", &psaux_fops
-};
-#endif
-
 static int __init psaux_init(void)
 {
 	int retval;
@@ -1516,17 +1479,9 @@ static int __init psaux_init(void)
 	if (!detect_auxiliary_port())
 		return -EIO;
 
-#if 0
-	if ((retval = misc_register(&psaux_mouse)))
-		return retval;
-#endif
-
 	queue = (struct aux_queue *) kmalloc(sizeof(*queue), GFP_KERNEL);
 	if (queue == NULL) {
 		printk(KERN_ERR "psaux_init(): out of memory\n");
-#if 0
-		misc_deregister(&psaux_mouse);
-#endif
 		return -ENOMEM;
 	}
 	memset(queue, 0, sizeof(*queue));

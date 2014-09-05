@@ -73,7 +73,6 @@
 
 #if defined(DISPLAY_PIIX_TIMINGS) && defined(CONFIG_PROC_FS)
 #include <linux/stat.h>
-#include <linux/proc_fs.h>
 
 static int piix_get_info(char *, char **, off_t, int);
 extern int (*piix_display_info)(char *, char **, off_t, int); /* ide-proc.c */

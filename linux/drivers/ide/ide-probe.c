@@ -762,7 +762,6 @@ static void init_gendisk (ide_hwif_t *hwif)
 	struct gendisk *gd;
 	unsigned int unit, units, minors;
 	int *bs, *max_sect, *max_ra;
-	extern devfs_handle_t ide_devfs_handle;
 
 	/* figure out maximum drive number on the interface */
 	for (units = MAX_DRIVES; units > 0; --units) {
@@ -805,10 +804,7 @@ static void init_gendisk (ide_hwif_t *hwif)
 	gd->real_devices= hwif;			/* ptr to internal data */
 	gd->next	= NULL;			/* linked list of major devs */
 	gd->fops        = ide_fops;             /* file operations */
-	gd->de_arr	= kmalloc (sizeof *gd->de_arr * units, GFP_KERNEL);
 	gd->flags	= kmalloc (sizeof *gd->flags * units, GFP_KERNEL);
-	if (gd->de_arr)
-		memset (gd->de_arr, 0, sizeof *gd->de_arr * units);
 	if (gd->flags)
 		memset (gd->flags, 0, sizeof *gd->flags * units);
 
@@ -824,8 +820,6 @@ static void init_gendisk (ide_hwif_t *hwif)
 			sprintf (name, "host%d/bus%d/target%d/lun%d",
 				 (hwif->channel && hwif->mate) ? hwif->mate->index : hwif->index,
 				 hwif->channel, unit, hwif->drives[unit].lun);
-			hwif->drives[unit].de =
-				devfs_mk_dir (ide_devfs_handle, name, NULL);
 		}
 	}
 }

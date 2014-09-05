@@ -16,7 +16,6 @@
 #include <linux/string.h>
 #include <linux/list.h>
 #include <linux/mmzone.h>
-#include <linux/swap.h>
 #include <linux/rbtree.h>
 
 extern unsigned long max_mapnr;

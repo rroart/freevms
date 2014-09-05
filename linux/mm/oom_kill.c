@@ -23,8 +23,6 @@
 
 #include <linux/mm.h>
 #include <linux/sched.h>
-#include <linux/swap.h>
-#include <linux/swapctl.h>
 #include <linux/timex.h>
 #include <asm/hw_irq.h>
 
@@ -215,6 +213,7 @@ void out_of_memory(void)
 	/*
 	 * Enough swap space left?  Not OOM.
 	 */
+	extern int nr_swap_pages;
 	if (nr_swap_pages > 0)
 		return;
 

@@ -13,7 +13,7 @@ mod-subdirs :=
 
 obj-y :=	open.o read_write.o file_table.o \
 		super.o block_dev.o stat.o exec.o namei.o \
-		fcntl.o ioctl.o readdir.o select.o locks.o \
+		fcntl.o ioctl.o readdir.o select.o \
 		dcache.o file.o iobuf.o \
 		filesystems.o namespace.o seq_file.o
 

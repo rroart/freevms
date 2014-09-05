@@ -22,7 +22,6 @@
 #include <linux/ptrace.h>
 #include <linux/mman.h>
 #include <linux/mm.h>
-#include <linux/swap.h>
 #include <linux/smp.h>
 #include <linux/init.h>
 #ifdef CONFIG_BLK_DEV_INITRD
@@ -48,6 +47,10 @@ mmu_gather_t mmu_gathers[NR_CPUS];
 unsigned long highstart_pfn, highend_pfn;
 static unsigned long totalram_pages;
 static unsigned long totalhigh_pages;
+
+extern atomic_t buffermem_pages;
+extern int nr_swap_pages;
+extern unsigned int nr_free_pages(void);
 
 int do_check_pgt_cache(int low, int high)
 {

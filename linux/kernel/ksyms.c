@@ -37,7 +37,6 @@
 #include <linux/skbuff.h>
 #include <linux/genhd.h>
 #include <linux/blkpg.h>
-#include <linux/swap.h>
 #include <linux/ctype.h>
 #include <linux/file.h>
 #include <linux/iobuf.h>
@@ -55,9 +54,6 @@
 #include <linux/seq_file.h>
 #include <asm/checksum.h>
 
-#if defined(CONFIG_PROC_FS)
-#include <linux/proc_fs.h>
-#endif
 #ifdef CONFIG_KMOD
 #include <linux/kmod.h>
 #endif
@@ -157,15 +153,6 @@ EXPORT_SYMBOL(block_truncate_page);
 EXPORT_SYMBOL(generic_block_bmap);
 EXPORT_SYMBOL(generic_file_mmap);
 EXPORT_SYMBOL(generic_buffer_fdatasync);
-EXPORT_SYMBOL(file_lock_list);
-EXPORT_SYMBOL(locks_init_lock);
-EXPORT_SYMBOL(locks_copy_lock);
-EXPORT_SYMBOL(posix_lock_file);
-EXPORT_SYMBOL(posix_test_lock);
-EXPORT_SYMBOL(posix_block_lock);
-EXPORT_SYMBOL(posix_unblock_lock);
-EXPORT_SYMBOL(posix_locks_deadlock);
-EXPORT_SYMBOL(locks_mandatory_area);
 EXPORT_SYMBOL(get_unused_fd);
 EXPORT_SYMBOL(generic_read_dir);
 EXPORT_SYMBOL(generic_file_llseek);
@@ -188,7 +175,6 @@ EXPORT_SYMBOL(blk_dev);
 EXPORT_SYMBOL(is_read_only);
 EXPORT_SYMBOL(set_device_ro);
 EXPORT_SYMBOL(sync_dev);
-EXPORT_SYMBOL(devfs_register_partitions);
 EXPORT_SYMBOL(blkdev_get);
 EXPORT_SYMBOL(blkdev_put);
 EXPORT_SYMBOL(ioctl_by_bdev);

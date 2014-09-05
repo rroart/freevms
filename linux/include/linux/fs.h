@@ -287,36 +287,8 @@ extern void set_bh_page(struct buffer_head *bh, struct page *page, unsigned long
 #define touch_buffer(bh)	mark_page_accessed(bh->b_page)
 
 
-#include <linux/pipe_fs_i.h>
-#include <linux/minix_fs_i.h>
 #include <linux/ext2_fs_i.h>
 #include <linux/ext3_fs_i.h>
-#include <linux/hpfs_fs_i.h>
-#include <linux/ntfs_fs_i.h>
-#include <linux/msdos_fs_i.h>
-#include <linux/umsdos_fs_i.h>
-#include <linux/iso_fs_i.h>
-#include <linux/nfs_fs_i.h>
-#include <linux/sysv_fs_i.h>
-#include <linux/affs_fs_i.h>
-#include <linux/ufs_fs_i.h>
-#include <linux/efs_fs_i.h>
-#include <linux/coda_fs_i.h>
-#include <linux/romfs_fs_i.h>
-#include <linux/shmem_fs.h>
-#include <linux/smb_fs_i.h>
-#include <linux/hfs_fs_i.h>
-#include <linux/adfs_fs_i.h>
-#include <linux/qnx4_fs_i.h>
-#include <linux/reiserfs_fs_i.h>
-#include <linux/bfs_fs_i.h>
-#include <linux/udf_fs_i.h>
-#include <linux/ncp_fs_i.h>
-#include <linux/proc_fs_i.h>
-#include <linux/usbdev_fs_i.h>
-#include <linux/hostfs_fs_i.h>
-#include <linux/jffs2_fs_i.h>
-#include <linux/cramfs_fs_sb.h>
 
 /*
  * Attribute flags.  These should be or-ed together to figure out what
@@ -479,35 +451,8 @@ struct inode {
 	unsigned int		i_attr_flags;
 	__u32			i_generation;
 	union {
-		struct minix_inode_info		minix_i;
 		struct ext2_inode_info		ext2_i;
 		struct ext3_inode_info		ext3_i;
-		struct hpfs_inode_info		hpfs_i;
-		struct ntfs_inode_info		ntfs_i;
-		struct msdos_inode_info		msdos_i;
-		struct umsdos_inode_info	umsdos_i;
-		struct iso_inode_info		isofs_i;
-		struct nfs_inode_info		nfs_i;
-		struct sysv_inode_info		sysv_i;
-		struct affs_inode_info		affs_i;
-		struct ufs_inode_info		ufs_i;
-		struct efs_inode_info		efs_i;
-		struct romfs_inode_info		romfs_i;
-		struct shmem_inode_info		shmem_i;
-		struct coda_inode_info		coda_i;
-		struct smb_inode_info		smbfs_i;
-		struct hfs_inode_info		hfs_i;
-		struct adfs_inode_info		adfs_i;
-		struct qnx4_inode_info		qnx4_i;
-		struct reiserfs_inode_info	reiserfs_i;
-		struct bfs_inode_info		bfs_i;
-		struct udf_inode_info		udf_i;
-		struct ncp_inode_info		ncpfs_i;
-		struct proc_inode_info		proc_i;
-		struct socket			socket_i;
-		struct usbdev_inode_info        usbdev_i;
-	        struct hostfs_inode_info	hostfs_i;
- 		struct jffs2_inode_info		jffs2_i;
 		void				*generic_ip;
 	} u;
 };
@@ -586,10 +531,6 @@ struct file_lock {
 	void (*fl_remove)(struct file_lock *);	/* lock removal callback */
 
 	struct fasync_struct *	fl_fasync; /* for lease break notifications */
-
-	union {
-		struct nfs_lock_info	nfs_fl;
-	} fl_u;
 };
 
 /* The following constant reflects the upper bound of the file/locking space */
@@ -669,30 +610,8 @@ struct quota_mount_options
 #define MNT_FORCE	0x00000001	/* Attempt to forcibily umount */
 #define MNT_DETACH	0x00000002	/* Just detach from the tree */
 
-#include <linux/minix_fs_sb.h>
 #include <linux/ext2_fs_sb.h>
 #include <linux/ext3_fs_sb.h>
-#include <linux/hpfs_fs_sb.h>
-#include <linux/ntfs_fs_sb.h>
-#include <linux/msdos_fs_sb.h>
-#include <linux/iso_fs_sb.h>
-#include <linux/nfs_fs_sb.h>
-#include <linux/sysv_fs_sb.h>
-#include <linux/affs_fs_sb.h>
-#include <linux/ufs_fs_sb.h>
-#include <linux/efs_fs_sb.h>
-#include <linux/romfs_fs_sb.h>
-#include <linux/smb_fs_sb.h>
-#include <linux/hfs_fs_sb.h>
-#include <linux/adfs_fs_sb.h>
-#include <linux/qnx4_fs_sb.h>
-#include <linux/reiserfs_fs_sb.h>
-#include <linux/bfs_fs_sb.h>
-#include <linux/udf_fs_sb.h>
-#include <linux/ncp_fs_sb.h>
-#include <linux/usbdev_fs_sb.h>
-#include <linux/cramfs_fs_sb.h>
-#include <linux/jffs2_fs_sb.h>
 
 extern struct list_head super_blocks;
 extern spinlock_t sb_lock;
@@ -726,31 +645,8 @@ struct super_block {
 	struct quota_mount_options s_dquot;	/* Diskquota specific options */
 
 	union {
-		struct minix_sb_info	minix_sb;
 		struct ext2_sb_info	ext2_sb;
 		struct ext3_sb_info	ext3_sb;
-		struct hpfs_sb_info	hpfs_sb;
-		struct ntfs_sb_info	ntfs_sb;
-		struct msdos_sb_info	msdos_sb;
-		struct isofs_sb_info	isofs_sb;
-		struct nfs_sb_info	nfs_sb;
-		struct sysv_sb_info	sysv_sb;
-		struct affs_sb_info	affs_sb;
-		struct ufs_sb_info	ufs_sb;
-		struct efs_sb_info	efs_sb;
-		struct shmem_sb_info	shmem_sb;
-		struct romfs_sb_info	romfs_sb;
-		struct smb_sb_info	smbfs_sb;
-		struct hfs_sb_info	hfs_sb;
-		struct adfs_sb_info	adfs_sb;
-		struct qnx4_sb_info	qnx4_sb;
-		struct reiserfs_sb_info	reiserfs_sb;
-		struct bfs_sb_info	bfs_sb;
-		struct udf_sb_info	udf_sb;
-		struct ncp_sb_info	ncpfs_sb;
-		struct usbdev_sb_info   usbdevfs_sb;
-		struct jffs2_sb_info	jffs2_sb;
-		struct cramfs_sb_info	cramfs_sb;
 		void			*generic_sbp;
 	} u;
 	/*

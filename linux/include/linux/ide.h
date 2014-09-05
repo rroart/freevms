@@ -12,8 +12,6 @@
 #include <linux/hdreg.h>
 #include <linux/hdsmart.h>
 #include <linux/blkdev.h>
-#include <linux/proc_fs.h>
-#include <linux/devfs_fs_kernel.h>
 #include <asm/hdreg.h>
 
 /*
@@ -359,7 +357,6 @@ typedef struct ide_drive_s {
 	char		name[4];	/* drive name, such as "hda" */
 	void 		*driver;	/* (ide_driver_t *) */
 	void		*driver_data;	/* extra driver data */
-	devfs_handle_t	de;		/* directory for device */
 	struct proc_dir_entry *proc;	/* /proc/ide/ directory entry */
 	void		*settings;	/* /proc/ide/ drive settings */
 	char		driver_req[10];	/* requests specific driver */
@@ -595,45 +592,6 @@ int ide_write_setting(ide_drive_t *drive, ide_settings_t *setting, int val);
 void ide_add_generic_settings(ide_drive_t *drive);
 
 /*
- * /proc/ide interface
- */
-typedef struct {
-	const char	*name;
-	mode_t		mode;
-	read_proc_t	*read_proc;
-	write_proc_t	*write_proc;
-} ide_proc_entry_t;
-
-#ifdef CONFIG_PROC_FS
-void proc_ide_create(void);
-void proc_ide_destroy(void);
-void destroy_proc_ide_drives(ide_hwif_t *);
-void create_proc_ide_interfaces(void);
-void ide_add_proc_entries(struct proc_dir_entry *dir, ide_proc_entry_t *p, void *data);
-void ide_remove_proc_entries(struct proc_dir_entry *dir, ide_proc_entry_t *p);
-read_proc_t proc_ide_read_capacity;
-read_proc_t proc_ide_read_geometry;
-
-/*
- * Standard exit stuff:
- */
-#define PROC_IDE_READ_RETURN(page,start,off,count,eof,len) \
-{					\
-	len -= off;			\
-	if (len < count) {		\
-		*eof = 1;		\
-		if (len <= 0)		\
-			return 0;	\
-	} else				\
-		len = count;		\
-	*start = page + off;		\
-	return len;			\
-}
-#else
-#define PROC_IDE_READ_RETURN(page,start,off,count,eof,len) return 0;
-#endif
-
-/*
  * Subdrivers support.
  */
 #define IDE_SUBDRIVER_VERSION	1
@@ -670,7 +628,6 @@ typedef struct ide_driver_s {
 	ide_pre_reset_proc		*pre_reset;
 	ide_capacity_proc		*capacity;
 	ide_special_proc		*special;
-	ide_proc_entry_t		*proc;
 	ide_driver_reinit_proc		*driver_reinit;
 } ide_driver_t;
 
@@ -905,7 +862,6 @@ void ide_init_subdrivers (void);
 
 #ifndef _IDE_C
 extern struct block_device_operations ide_fops[];
-extern ide_proc_entry_t generic_subdriver_entries[];
 #endif
 
 #ifdef _IDE_C

@@ -72,7 +72,7 @@ For future use:
 
 Networking:
 
-Run qemu with ne2k/3com.
+Run qemu with ne2k, -net nic,model=ne2k_pci -s -redir tcp:10023::23 -net user
 
 CMUIP:
 	Skip this if you just downloaded and tried the image.

@@ -22,11 +22,9 @@
 #include <linux/mman.h>
 #include <linux/locks.h>
 #include <linux/pagemap.h>
-#include <linux/swap.h>
 #include <linux/smp_lock.h>
 #include <linux/blkdev.h>
 #include <linux/file.h>
-#include <linux/swapctl.h>
 #include <linux/init.h>
 #include <linux/mm.h>
 #include <linux/iobuf.h>
@@ -694,6 +692,7 @@ static ssize_t do_readahead(struct file *file, unsigned long index, unsigned lon
 		nr = max;
 
 	/* And limit it to a sane percentage of the inactive list.. */
+	extern int nr_inactive_pages;
 	max = nr_inactive_pages / 2;
 	if (nr > max)
 		nr = max;

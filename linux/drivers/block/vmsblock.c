@@ -6,7 +6,6 @@
 #include <linux/config.h>
 #include <linux/locks.h>
 #include <linux/mm.h>
-#include <linux/swap.h>
 #include <linux/init.h>
 #include <linux/smp_lock.h>
 #include <linux/completion.h>
@@ -128,6 +127,7 @@ int __init blk_dev_init(void)
 	memset(max_readahead, 0, sizeof(max_readahead));
 	memset(max_sectors, 0, sizeof(max_sectors));
 
+	extern unsigned int nr_free_pages(void);
 	total_ram = nr_free_pages() << (PAGE_SHIFT - 10);
 
 	/*

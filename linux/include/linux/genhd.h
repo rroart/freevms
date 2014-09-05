@@ -56,12 +56,10 @@ struct partition {
 } __attribute__((packed));
 
 #ifdef __KERNEL__
-#  include <linux/devfs_fs_kernel.h>
 
 struct hd_struct {
 	unsigned long start_sect;
 	unsigned long nr_sects;
-	devfs_handle_t de;              /* primary (master) devfs entry  */
 	int number;                     /* stupid old code wastes space  */
 };
 
@@ -82,7 +80,6 @@ struct gendisk {
 	struct gendisk *next;
 	struct block_device_operations *fops;
 
-	devfs_handle_t *de_arr;         /* one per physical disc */
 	char *flags;                    /* one per physical disc */
 };
 

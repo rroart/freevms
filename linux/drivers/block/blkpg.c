@@ -40,7 +40,6 @@
 #include <linux/blk.h>			/* for set_device_ro() */
 #include <linux/blkpg.h>
 #include <linux/genhd.h>
-#include <linux/swap.h>			/* for is_swap_partition() */
 #include <linux/module.h>               /* for EXPORT_SYMBOL */
 
 #include <asm/uaccess.h>

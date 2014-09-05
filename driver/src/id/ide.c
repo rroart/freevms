@@ -486,7 +486,6 @@ int ide_vmsinit(void) {
 #include <linux/pci.h>
 #include <linux/delay.h>
 #include <linux/ide.h>
-#include <linux/devfs_fs_kernel.h>
 #include <linux/completion.h>
 
 #include <asm/byteorder.h>
@@ -500,8 +499,6 @@ int ide_vmsinit(void) {
 #ifdef CONFIG_KMOD
 #include <linux/kmod.h>
 #endif /* CONFIG_KMOD */
-
-#undef CONFIG_PROC_FS
 
 #ifdef __x86_64__
 #define ide_release_region(from,extent) release_region((from), (extent))
@@ -2418,13 +2415,6 @@ abort:
 	return 1;
 }
 
-#ifdef CONFIG_PROC_FS
-ide_proc_entry_t generic_subdriver_entries[] = {
-	{ "capacity",	S_IFREG|S_IRUGO,	proc_ide_read_capacity,	NULL },
-	{ NULL, 0, NULL, NULL }
-};
-#endif
-
 /*
  * Note that we only release the standard ports,
  * and do not even try to handle any extra ports
@@ -2507,9 +2497,6 @@ void ide_unregister (unsigned int index)
 #endif
 			}
 		}
-#ifdef CONFIG_PROC_FS
-		destroy_proc_ide_drives(hwif);
-#endif
 	}
 	cli();
 	hwgroup = hwif->hwgroup;
@@ -2540,10 +2527,6 @@ void ide_unregister (unsigned int index)
 	d = hwgroup->drive;
 	for (i = 0; i < MAX_DRIVES; ++i) {
 		drive = &hwif->drives[i];
-		if (drive->de) {
-			devfs_unregister (drive->de);
-			drive->de = NULL;
-		}
 		if (!drive->present)
 			continue;
 		while (hwgroup->drive->next != drive)
@@ -2594,8 +2577,6 @@ void ide_unregister (unsigned int index)
 		del_gendisk(gd);
 		kfree(gd->sizes);
 		kfree(gd->part);
-		if (gd->de_arr)
-			kfree (gd->de_arr);
 		if (gd->flags)
 			kfree (gd->flags);
 		kfree(gd);
@@ -2711,9 +2692,6 @@ found:
 
 	if (!initializing) {
 		ide_probe_module();
-#ifdef CONFIG_PROC_FS
-		create_proc_ide_interfaces();
-#endif
 		ide_driver_module();
 	}
 
@@ -3840,10 +3818,6 @@ void __init ide_init_builtin_drivers (void)
 #endif /* __mc68000__ || CONFIG_APUS */
 #endif /* CONFIG_BLK_DEV_IDE */
 
-#ifdef CONFIG_PROC_FS
-	proc_ide_create();
-#endif
-
 	/*
 	 * Attempt to match drivers for the available drives
 	 */
@@ -3996,10 +3970,6 @@ int ide_register_subdriver (ide_drive_t *drive, ide_driver_t *driver, int versio
 	}
 	drive->revalidate = 1;
 	drive->suspend_reset = 0;
-#ifdef CONFIG_PROC_FS
-	ide_add_proc_entries(drive->proc, generic_subdriver_entries, drive);
-	ide_add_proc_entries(drive->proc, driver->proc, drive);
-#endif
 	return 0;
 }
 
@@ -4016,10 +3986,6 @@ int ide_unregister_subdriver (ide_drive_t *drive)
 #if defined(CONFIG_BLK_DEV_ISAPNP) && defined(CONFIG_ISAPNP) && defined(MODULE)
 	pnpide_init(0);
 #endif /* CONFIG_BLK_DEV_ISAPNP */
-#ifdef CONFIG_PROC_FS
-	ide_remove_proc_entries(drive->proc, DRIVER(drive)->proc);
-	ide_remove_proc_entries(drive->proc, generic_subdriver_entries);
-#endif
 	auto_remove_settings(drive);
 	drive->driver = NULL;
 	restore_flags(flags);		/* all CPUs */
@@ -4067,7 +4033,6 @@ EXPORT_SYMBOL(ide_spin_wait_hwgroup);
 /*
  * Probe module
  */
-devfs_handle_t ide_devfs_handle;
 
 EXPORT_SYMBOL(ide_probe);
 EXPORT_SYMBOL(drive_is_flashcard);
@@ -4076,7 +4041,6 @@ EXPORT_SYMBOL(ide_intr);
 EXPORT_SYMBOL(ide_fops);
 EXPORT_SYMBOL(ide_get_queue);
 EXPORT_SYMBOL(ide_add_generic_settings);
-EXPORT_SYMBOL(ide_devfs_handle);
 EXPORT_SYMBOL(do_ide_request);
 /*
  * Driver module
@@ -4106,12 +4070,6 @@ EXPORT_SYMBOL(ide_wait_cmd);
 EXPORT_SYMBOL(ide_wait_cmd_task);
 EXPORT_SYMBOL(ide_delay_50ms);
 EXPORT_SYMBOL(ide_stall_queue);
-#ifdef CONFIG_PROC_FS
-EXPORT_SYMBOL(ide_add_proc_entries);
-EXPORT_SYMBOL(ide_remove_proc_entries);
-EXPORT_SYMBOL(proc_ide_read_geometry);
-EXPORT_SYMBOL(create_proc_ide_interfaces);
-#endif
 EXPORT_SYMBOL(ide_add_setting);
 EXPORT_SYMBOL(ide_remove_setting);
 
@@ -4136,7 +4094,6 @@ int __init ide_init (void)
 	printk(KERN_INFO "ide here\n");
 	if (!banner_printed) {
 		printk(KERN_INFO "Uniform Multi-Platform E-IDE driver " REVISION "\n");
-		ide_devfs_handle = devfs_mk_dir (NULL, "ide", NULL);
 		system_bus_speed = ide_system_bus_speed();
 		banner_printed = 1;
 	}
@@ -4197,9 +4154,6 @@ void cleanup_module (void)
 #endif /* (CONFIG_BLK_DEV_IDEDMA) && !(CONFIG_DMA_NONPCI) */
 	}
 
-#ifdef CONFIG_PROC_FS
-	proc_ide_destroy();
-#endif
 	devfs_unregister (ide_devfs_handle);
 }
 

@@ -17,7 +17,6 @@ extern unsigned long event;
 #include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/times.h>
-#include <linux/timex.h>
 #include <linux/rbtree.h>
 
 #include <asm/system.h>

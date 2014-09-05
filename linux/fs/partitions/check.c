@@ -28,17 +28,7 @@
 
 #include "check.h"
 
-#include "acorn.h"
-#include "amiga.h"
-#include "atari.h"
-#include "ldm.h"
-#include "mac.h"
 #include "msdos.h"
-#include "osf.h"
-#include "sgi.h"
-#include "sun.h"
-#include "ibm.h"
-#include "ultrix.h"
 
 #include <sys$routines.h>
 #include <misc_routines.h>
@@ -108,14 +98,6 @@ char *disk_name (struct gendisk *hd, int minor, char *buf)
 	const char *maj = hd->major_name;
 	unsigned int unit = (minor >> hd->minor_shift);
 	unsigned int part = (minor & ((1 << hd->minor_shift) -1 ));
-
-	if ((unit < hd->nr_real) && hd->part[minor].de) {
-		int pos;
-
-		pos = devfs_generate_path (hd->part[minor].de, buf, 64);
-		if (pos >= 0)
-			return buf + pos;
-	}
 
 #ifdef CONFIG_ARCH_S390
 	if (genhd_dasd_name
@@ -227,7 +209,6 @@ void add_gd_partition(struct gendisk *hd, int minor, int start, int size)
 
 static void check_partition(struct gendisk *hd, kdev_t dev, int first_part_minor)
 {
-	devfs_handle_t de = NULL;
 	static int first_time = 1;
 	unsigned long first_sector;
 	struct block_device *bdev;
@@ -248,9 +229,7 @@ static void check_partition(struct gendisk *hd, kdev_t dev, int first_part_minor
 		return;
 	}
 
-	if (hd->de_arr)
-		de = hd->de_arr[MINOR(dev) >> hd->minor_shift];
-	i = devfs_generate_path (de, buf, sizeof buf);
+	i = -1;
 	if (i >= 0)
 		printk(KERN_INFO " /dev/%s:", buf + i);
 	else
@@ -273,95 +252,6 @@ setup_devfs:
 	truncate_inode_pages(bdev->bd_inode->i_mapping, 0);
 	bdput(bdev);
 	i = first_part_minor - 1;
-	devfs_register_partitions (hd, i, hd->sizes ? 0 : 1);
-}
-
-#ifdef CONFIG_DEVFS_FS
-static void devfs_register_partition (struct gendisk *dev, int minor, int part)
-{
-	int devnum = minor >> dev->minor_shift;
-	devfs_handle_t dir;
-	unsigned int devfs_flags = DEVFS_FL_DEFAULT;
-	char devname[16];
-
-	if (dev->part[minor + part].de) return;
-	dir = devfs_get_parent (dev->part[minor].de);
-	if (!dir) return;
-	if ( dev->flags && (dev->flags[devnum] & GENHD_FL_REMOVABLE) )
-		devfs_flags |= DEVFS_FL_REMOVABLE;
-	sprintf (devname, "part%d", part);
-	dev->part[minor + part].de =
-	    devfs_register (dir, devname, devfs_flags,
-			    dev->major, minor + part,
-			    S_IFBLK | S_IRUSR | S_IWUSR,
-			    dev->fops, NULL);
-}
-
-static struct unique_numspace disc_numspace = UNIQUE_NUMBERSPACE_INITIALISER;
-
-static void devfs_register_disc (struct gendisk *dev, int minor)
-{
-	int pos = 0;
-	int devnum = minor >> dev->minor_shift;
-	devfs_handle_t dir, slave;
-	unsigned int devfs_flags = DEVFS_FL_DEFAULT;
-	char dirname[64], symlink[16];
-	static devfs_handle_t devfs_handle;
-
-	if (dev->part[minor].de) return;
-	if ( dev->flags && (dev->flags[devnum] & GENHD_FL_REMOVABLE) )
-		devfs_flags |= DEVFS_FL_REMOVABLE;
-	if (dev->de_arr) {
-		dir = dev->de_arr[devnum];
-		if (!dir)  /*  Aware driver wants to block disc management  */
-			return;
-		pos = devfs_generate_path (dir, dirname + 3, sizeof dirname-3);
-		if (pos < 0) return;
-		strncpy (dirname + pos, "../", 3);
-	}
-	else {
-		/*  Unaware driver: construct "real" directory  */
-		sprintf (dirname, "../%s/disc%d", dev->major_name, devnum);
-		dir = devfs_mk_dir (NULL, dirname + 3, NULL);
-	}
-	if (!devfs_handle)
-		devfs_handle = devfs_mk_dir (NULL, "discs", NULL);
-	dev->part[minor].number = devfs_alloc_unique_number (&disc_numspace);
-	sprintf (symlink, "disc%d", dev->part[minor].number);
-	devfs_mk_symlink (devfs_handle, symlink, DEVFS_FL_DEFAULT,
-			  dirname + pos, &slave, NULL);
-	dev->part[minor].de =
-	    devfs_register (dir, "disc", devfs_flags, dev->major, minor,
-			    S_IFBLK | S_IRUSR | S_IWUSR, dev->fops, NULL);
-	devfs_auto_unregister (dev->part[minor].de, slave);
-	if (!dev->de_arr)
-		devfs_auto_unregister (slave, dir);
-}
-#endif  /*  CONFIG_DEVFS_FS  */
-
-void devfs_register_partitions (struct gendisk *dev, int minor, int unregister)
-{
-#ifdef CONFIG_DEVFS_FS
-	int part;
-
-	if (!unregister)
-		devfs_register_disc (dev, minor);
-	for (part = 1; part < dev->max_p; part++) {
-		if ( unregister || (dev->part[minor].nr_sects < 1) ||
-		     (dev->part[part + minor].nr_sects < 1) ) {
-			devfs_unregister (dev->part[part + minor].de);
-			dev->part[part + minor].de = NULL;
-			continue;
-		}
-		devfs_register_partition (dev, minor, part);
-	}
-	if (unregister) {
-		devfs_unregister (dev->part[minor].de);
-		dev->part[minor].de = NULL;
-		devfs_dealloc_unique_number (&disc_numspace,
-					     dev->part[minor].number);
-	}
-#endif  /*  CONFIG_DEVFS_FS  */
 }
 
 /*
@@ -393,8 +283,6 @@ void grok_partitions(struct gendisk *dev, int drive, unsigned minors, long size)
 
 	dev->part[first_minor].nr_sects = size;
 	/* No such device or no minors to use for partitions */
-	if ( !size && dev->flags && (dev->flags[drive] & GENHD_FL_REMOVABLE) )
-		devfs_register_partitions (dev, first_minor, 0);
 	if (!size || minors == 1)
 		return;
 

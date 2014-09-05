@@ -119,6 +119,7 @@
 #include <asm/dma.h>
 #include <asm/mpspec.h>
 #include <asm/mmu_context.h>
+#include <linux/timex.h>
 
 #include <misc_routines.h>
 

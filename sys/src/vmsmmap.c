@@ -14,8 +14,6 @@
 #include <linux/shm.h>
 #include <linux/mman.h>
 #include <linux/pagemap.h>
-#include <linux/swap.h>
-#include <linux/swapctl.h>
 #include <linux/smp_lock.h>
 #include <linux/init.h>
 #include <linux/file.h>
@@ -88,6 +86,8 @@ int vm_enough_memory(long pages)
 	    return 1;
 
 	/* The page cache contains buffer pages these days.. */
+	extern unsigned int nr_free_pages(void);
+	extern int nr_swap_pages;
 	free = 0;//atomic_read(&page_cache_size);
 	free += nr_free_pages();
 	free += nr_swap_pages;

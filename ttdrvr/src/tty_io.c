@@ -82,7 +82,6 @@
 #include <linux/tty.h>
 #include <linux/tty_driver.h>
 #include <linux/tty_flip.h>
-#include <linux/devpts_fs.h>
 #include <linux/file.h>
 #include <linux/console.h>
 #include <linux/timer.h>
@@ -92,7 +91,6 @@
 #include <linux/string.h>
 #include <linux/slab.h>
 #include <linux/poll.h>
-#include <linux/proc_fs.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/smp_lock.h>
@@ -104,7 +102,6 @@
 #include <linux/kbd_kern.h>
 #include <linux/vt_kern.h>
 #include <linux/selection.h>
-#include <linux/devfs_fs_kernel.h>
 
 #include <linux/kmod.h>
 

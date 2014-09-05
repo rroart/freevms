@@ -20,14 +20,12 @@
 #include <linux/major.h>
 #include <linux/mm.h>
 #include <linux/init.h>
-#include <linux/devfs_fs_kernel.h>
 
 #include <asm/uaccess.h>
 #include <asm/system.h>
 #include <asm/bitops.h>
 
 #define BUILDING_PTY_C 1
-#include <linux/devpts_fs.h>
 
 struct pty_struct {
 	int	magic;
@@ -322,12 +320,6 @@ static int pty_open(struct tty_struct *tty, struct file * filp)
 	clear_bit(TTY_OTHER_CLOSED, &tty->link->flags);
 	wake_up_interruptible(&pty->open_wait);
 	set_bit(TTY_THROTTLED, &tty->flags);
-	/*  Register a slave for the master  */
-	if (tty->driver.major == PTY_MASTER_MAJOR)
-		tty_register_devfs(&tty->link->driver,
-				   DEVFS_FL_CURRENT_OWNER | DEVFS_FL_WAIT,
-				   tty->link->driver.minor_start +
-				   MINOR(tty->device)-tty->driver.minor_start);
 	retval = 0;
 out:
 	return retval;
@@ -420,7 +412,6 @@ int __init pty_init(void)
 
 	/* Unix98 devices */
 #ifdef CONFIG_UNIX98_PTYS
-	devfs_mk_dir (NULL, "pts", NULL);
 	printk("pty: %d Unix98 ptys configured\n", UNIX98_NR_MAJORS*NR_PTYS);
 	for ( i = 0 ; i < UNIX98_NR_MAJORS ; i++ ) {
 		int j;

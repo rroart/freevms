@@ -299,13 +299,8 @@ asmlinkage long sys_fcntl64(unsigned int fd, unsigned int cmd, unsigned long arg
 
 	switch (cmd) {
 		case F_GETLK64:
-			err = fcntl_getlk64(fd, (struct flock64 *) arg);
-			break;
 		case F_SETLK64:
-			err = fcntl_setlk64(fd, cmd, (struct flock64 *) arg);
-			break;
 		case F_SETLKW64:
-			err = fcntl_setlk64(fd, cmd, (struct flock64 *) arg);
 			break;
 		default:
 			err = do_fcntl(fd, cmd, arg, filp);
@@ -469,6 +464,13 @@ static int __init fasync_init(void)
 	if (!fasync_cache)
 		panic("cannot create fasync slab cache");
 	return 0;
+}
+
+asmlinkage long sys_flock(unsigned int fd, unsigned int cmd)
+{
+  int error;
+  error = -EBADF;
+  return error;
 }
 
 module_init(fasync_init)

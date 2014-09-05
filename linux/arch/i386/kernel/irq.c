@@ -37,7 +37,6 @@
 #include <linux/init.h>
 #include <linux/kernel_stat.h>
 #include <linux/irq.h>
-#include <linux/proc_fs.h>
 
 #include <asm/atomic.h>
 #include <asm/io.h>

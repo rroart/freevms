@@ -66,8 +66,6 @@
 #include <ioc_routines.h>
 #include <misc_routines.h>
 
-#undef CONFIG_PROC_FS
-
 #ifdef CONFIG_BLK_DEV_PDC4030
 #define IS_PDC4030_DRIVE (HWIF(drive)->chipset == ide_pdc4030)
 #else
@@ -639,90 +637,7 @@ static void idedisk_pre_reset (ide_drive_t *drive)
 		drive->special.b.set_multmode = 1;
 }
 
-#ifdef CONFIG_PROC_FS
-
-static int smart_enable(ide_drive_t *drive)
-{
-	return ide_wait_cmd(drive, WIN_SMART, 0, SMART_ENABLE, 0, NULL);
-}
-
-static int get_smart_values(ide_drive_t *drive, byte *buf)
-{
-	(void) smart_enable(drive);
-	return ide_wait_cmd(drive, WIN_SMART, 0, SMART_READ_VALUES, 1, buf);
-}
-
-static int get_smart_thresholds(ide_drive_t *drive, byte *buf)
-{
-	(void) smart_enable(drive);
-	return ide_wait_cmd(drive, WIN_SMART, 0, SMART_READ_THRESHOLDS, 1, buf);
-}
-
-static int proc_idedisk_read_cache
-	(char *page, char **start, off_t off, int count, int *eof, void *data)
-{
-	ide_drive_t	*drive = (ide_drive_t *) data;
-	char		*out = page;
-	int		len;
-
-	if (drive->id)
-		len = sprintf(out,"%i\n", drive->id->buf_size / 2);
-	else
-		len = sprintf(out,"(none)\n");
-	PROC_IDE_READ_RETURN(page,start,off,count,eof,len);
-}
-
-static int proc_idedisk_read_smart_thresholds
-	(char *page, char **start, off_t off, int count, int *eof, void *data)
-{
-	ide_drive_t	*drive = (ide_drive_t *)data;
-	int		len = 0, i = 0;
-
-	if (!get_smart_thresholds(drive, page)) {
-		unsigned short *val = ((unsigned short *)page) + 2;
-		char *out = ((char *)val) + (SECTOR_WORDS * 4);
-		page = out;
-		do {
-			out += sprintf(out, "%04x%c", le16_to_cpu(*val), (++i & 7) ? ' ' : '\n');
-			val += 1;
-		} while (i < (SECTOR_WORDS * 2));
-		len = out - page;
-	}
-	PROC_IDE_READ_RETURN(page,start,off,count,eof,len);
-}
-
-static int proc_idedisk_read_smart_values
-	(char *page, char **start, off_t off, int count, int *eof, void *data)
-{
-	ide_drive_t	*drive = (ide_drive_t *)data;
-	int		len = 0, i = 0;
-
-	if (!get_smart_values(drive, page)) {
-		unsigned short *val = ((unsigned short *)page) + 2;
-		char *out = ((char *)val) + (SECTOR_WORDS * 4);
-		page = out;
-		do {
-			out += sprintf(out, "%04x%c", le16_to_cpu(*val), (++i & 7) ? ' ' : '\n');
-			val += 1;
-		} while (i < (SECTOR_WORDS * 2));
-		len = out - page;
-	}
-	PROC_IDE_READ_RETURN(page,start,off,count,eof,len);
-}
-
-static ide_proc_entry_t idedisk_proc[] = {
-	{ "cache",		S_IFREG|S_IRUGO,	proc_idedisk_read_cache,		NULL },
-	{ "geometry",		S_IFREG|S_IRUGO,	proc_ide_read_geometry,			NULL },
-	{ "smart_values",	S_IFREG|S_IRUSR,	proc_idedisk_read_smart_values,		NULL },
-	{ "smart_thresholds",	S_IFREG|S_IRUSR,	proc_idedisk_read_smart_thresholds,	NULL },
-	{ NULL, 0, NULL, NULL }
-};
-
-#else
-
 #define	idedisk_proc	NULL
-
-#endif	/* CONFIG_PROC_FS */
 
 static int set_multcount(ide_drive_t *drive, int arg)
 {
@@ -795,7 +710,6 @@ static void idedisk_setup (ide_drive_t *drive)
 		ide_hwif_t *hwif = HWIF(drive);
 
 		if (drive != &hwif->drives[i]) continue;
-		hwif->gd->de_arr[i] = drive->de;
 		if (drive->removable)
 			hwif->gd->flags[i] |= GENHD_FL_REMOVABLE;
 		break;
@@ -902,7 +816,6 @@ static ide_driver_t idedisk_driver = {
 	pre_reset:		idedisk_pre_reset,
 	capacity:		idedisk_capacity,
 	special:		idedisk_special,
-	proc:			idedisk_proc,
 	driver_reinit:		idedisk_reinit,
 };
 
@@ -928,10 +841,6 @@ static void __exit idedisk_exit (void)
 		}
 		/* We must remove proc entries defined in this module.
 		   Otherwise we oops while accessing these entries */
-#ifdef CONFIG_PROC_FS
-		if (drive->proc)
-			ide_remove_proc_entries(drive->proc, idedisk_proc);
-#endif
 	}
 	ide_unregister_module(&idedisk_module);
 }

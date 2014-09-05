@@ -15,6 +15,7 @@
 #include <linux/delay.h>
 #include <asm/processor.h>
 #include <asm/delay.h>
+#include <asm/msr.h>
 
 #ifdef CONFIG_SMP
 #include <asm/smp.h>
