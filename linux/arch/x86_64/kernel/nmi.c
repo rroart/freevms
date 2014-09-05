@@ -26,6 +26,7 @@
 #include <asm/mpspec.h>
 #include <asm/proto.h>
 #include <asm/kdebug.h>
+#include <asm/timex.h>
 
 unsigned int nmi_watchdog = NMI_LOCAL_APIC;
 static unsigned int nmi_hz = HZ;
