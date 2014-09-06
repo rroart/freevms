@@ -888,7 +888,13 @@ asmlinkage void sch$sched(int from_sch$resched) {
     //if (sch$aq_comh[tmppri]==((struct _pcb *) sch$aq_comh[tmppri])->pcb$l_sqfl)
 
     /** if last in queue clear comqs bit */
+#ifdef __i386__
     if (sch$aq_comh[tmppri]==&sch$aq_comh[tmppri])
+#else
+    // the above was optmized to true in x86_64?
+    long * addr = &sch$aq_comh[tmppri];
+    if ((*addr) == ((long) addr))
+#endif
       sch$gl_comqs=sch$gl_comqs & (~(1 << tmppri));
 #ifdef DEBUG_SCHED
     mycheckaddr(next);

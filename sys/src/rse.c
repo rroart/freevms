@@ -484,7 +484,13 @@ void sch$rse(struct _pcb * p, unsigned char class, unsigned char event) {
     /** remove from COM pri queue */
     p2=remque(p,dummy);
     /** if com pri queue empty, clear sch$gl_comqs bit */
+#ifdef __i386__
     if (sch$aq_comh[tmppri]==&sch$aq_comh[tmppri])
+#else
+    // the above was optmized to true in x86_64?
+    long * addr = &sch$aq_comh[tmppri];
+    if ((*addr) == ((long) addr))
+#endif
       sch$gl_comqs=sch$gl_comqs & (~(1 << tmppri));
     /** set state */
     (p->pcb$w_state)++;
