@@ -212,7 +212,7 @@ int ip$init_tables() {
   return SS$_NORMAL;
 }
 
-long ip_iodb_vmsinit(int dev) {
+long ip_iodb_vmsinit(long dev) {
 #if 0
   struct _ucb * ucb=&ip$ucb;
   struct _ddb * ddb=&ip$ddb;
@@ -266,7 +266,7 @@ long ip_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
 
 extern char * mydevice;
 
-int ip_vmsinit(int dev) {
+int ip_vmsinit(long dev) {
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
 
   unsigned short chan0, chan1, chan2;

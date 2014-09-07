@@ -281,7 +281,7 @@ static inline char *pci_name(struct pci_dev *pdev)
 #include<ucbnidef.h>
 
 // freevms decls
-int ip_vmsinit(int dev);
+int ip_vmsinit(long dev);
 void * lan$alloc_cxb(int len);
 int lan$netif_rx(struct _ucb * u, void * bdsc);
 

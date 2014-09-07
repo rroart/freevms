@@ -207,7 +207,7 @@ int ec$init_tables() {
   return SS$_NORMAL;
 }
 
-long ec_iodb_vmsinit(int dev) {
+long ec_iodb_vmsinit(long dev) {
 #if 0
   struct _ucb * ucb=&ec$ucb;
   struct _ddb * ddb=&ec$ddb;
@@ -261,7 +261,7 @@ long ec_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
 
 extern char * mydevice;
 
-int ec_vmsinit(int dev) {
+int ec_vmsinit(long dev) {
   //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
 
   unsigned short chan0, chan1, chan2;

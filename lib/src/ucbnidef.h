@@ -39,7 +39,7 @@ struct _ucbnidef {
   unsigned int ucb$l_ni_mbs;
   unsigned int ucb$l_ni_med;
   unsigned int ucb$l_ni_mrb;
-  int ucb$l_extra_l_1;
+  long ucb$l_extra_l_1;
   unsigned char ucb$g_ni_pid [8];
   unsigned int ucb$l_ni_prm;
   unsigned int ucb$l_ni_sap;
