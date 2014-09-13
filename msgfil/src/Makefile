@@ -24,8 +24,11 @@ message2.a: msg2.o
 msg.a: parse.o lex.o msgmain.o tree.o stringpool.o hashtable.o msg-lang.o msg.o msg.h
 	ar r msg.a parse.o lex.o msgmain.o tree.o stringpool.o hashtable.o msg-lang.o msg.o
 
+parse.o: parse.c
+	$(CC) -g $(EXTRA_CFLAGS) -c -o parse.o parse.c
+
 %.o: %.c msg.h
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c $(CFLAGS) ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 parse.h: parse.c parse.y
 parse.c: parse.y
@@ -43,3 +46,5 @@ lex.c: lex.l parse.h
 
 msgtables.c: message all.msg
 	./message all.msg
+
+include $(TOPDIR)/Rules.make.freevms

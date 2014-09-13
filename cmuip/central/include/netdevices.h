@@ -59,7 +59,7 @@
 	    extern sys$wake(); \
 	     \
 	    IPACP_Interface->ACPI$Sleeping = FALSE; \
-	    sys$wake(); \
+	    sys$wake(0,0);			    \
 	    } \
 	}
 

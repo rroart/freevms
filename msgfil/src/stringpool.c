@@ -53,6 +53,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 
 #include<stdio.h>
+#include <ctype.h>
 
 #if 0
 #include "config.h"

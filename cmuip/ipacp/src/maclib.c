@@ -216,6 +216,8 @@
 #include <pcbdef.h>
 	  // not yet PR780DEF
 
+#include "cmuip.h"
+
 #ifdef __x86_64__
 #define _LINUX_STRING_H_
 	  //#include <linux/slab.h>
@@ -232,6 +234,7 @@
 #include <system_data_cells.h>
 
 #include <descrip.h>
+#include <starlet.h>
 
 #include "netvms.h"
 
@@ -449,7 +452,7 @@ int mount_ip_device() {
 
   // Indicate we now own the device, set my PID in ACP queue blk.
 
-  R0 = lock_iodb();
+  R0 = lock_iodb(0);
 
 #ifdef VMS_V4
   SETIPL	#IPL$_SYNCH		// synchronize with VMS
@@ -465,7 +468,7 @@ int mount_ip_device() {
 #ifndef VMS_V4
   FORKUNLOCK(R5->ucb$b_flck,-1);			// R5->ucb$b_flck
 #endif
-  R0 = unlock_iodb();
+  R0 = unlock_iodb(0);
 
 #ifdef VMS_V4
   SETIPL	#0				// timeshare

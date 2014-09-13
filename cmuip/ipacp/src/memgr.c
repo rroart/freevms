@@ -150,6 +150,7 @@ MODULE MEMGR(Ident="2.8",LANGUAGE(BLISS32),
   // not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// Include transportablity package
 #include "netvms.h"			// VMS specifics
 #include "tcp.h"			// TCP related definitions
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"		// Local Macros
 #include "structure.h"		// Structure & Field definitions
 

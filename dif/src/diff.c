@@ -118,6 +118,8 @@
 #include <hm2def.h>
 #include "../../rms/src/cache.h"
 #include "../../f11x/src/access.h"
+#include <starlet.h>
+#include <cli$routines.h>
 //#include "rms.h"
 #endif
 
@@ -183,14 +185,14 @@ unsigned diff(int userarg)
         printf("Could not open file %s\n",c1);
         sts = 0;
     } else {
-        if ((sts = sys$open(&fab)) & 1) {
+      if ((sts = sys$open(&fab, 0, 0)) & 1) {
             struct _rabdef rab = cc$rms_rab;
             rab.rab$l_fab = &fab;
-            if ((sts = sys$connect(&rab)) & 1) {
+            if ((sts = sys$connect(&rab, 0, 0)) & 1) {
                 char rec[MAXREC + 2],cpy[MAXREC + 1];
                 rab.rab$l_ubf = rec;
                 rab.rab$w_usz = MAXREC;
-                while ((sts = sys$get(&rab)) & 1) {
+                while ((sts = sys$get(&rab, 0, 0)) & 1) {
                     strcpy(rec + rab.rab$w_rsz,"\n");
                     fgets(cpy,MAXREC,tof);
                     if (strcmp(rec,cpy) != 0) {
@@ -201,9 +203,9 @@ unsigned diff(int userarg)
                         records++;
                     }
                 }
-                sys$disconnect(&rab);
+                sys$disconnect(&rab, 0, 0);
             }
-            sys$close(&fab);
+            sys$close(&fab, 0, 0);
         }
         fclose(tof);
         if (sts == RMS$_EOF) sts = 1;

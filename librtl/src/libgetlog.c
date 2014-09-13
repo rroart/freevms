@@ -2,6 +2,7 @@
 #include <lnmdef.h>
 #include <misc.h>
 #include <ssdef.h>
+#include <starlet.h>
 
 int lib$get_logical(void * logical_name , void * resultant_string, unsigned short * resultant_length , void * table_name, int * max_index , unsigned int * index , unsigned char * acmode , unsigned int * flags) {
   struct _iosb iosb;

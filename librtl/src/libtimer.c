@@ -8,6 +8,11 @@
 #include <libdef.h>
 #include <ssdef.h>
 #include <starlet.h>
+#include <lib$routines.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // note will use -1 for void really
 

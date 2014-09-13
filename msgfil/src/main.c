@@ -12,10 +12,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>
+#include <stdlib.h>
 
 int vms_mm=0;
 
 #include "tree.h"
+
+#include "../../cdu/src/cli.h"
+
+extern char *strndup (__const char *__string, size_t __n);
+
+genwrite();
 
 char * module_name;
 
@@ -44,6 +51,6 @@ main(int argc, char ** argv) {
   return 0;
 }
 
-int get_cli_int() {
+void * get_cli_int(char * c) {
   return 0;
 }

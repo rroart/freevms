@@ -5,7 +5,11 @@
 
 // Borrowed lots of stuff from gcc-4.1.1 c-parser.c
 
+#include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+#include "../../cdu/src/cli.h"
 #include "../../cdu/src/cliparse.h"
 #include <descrip.h>
 #include <ssdef.h>

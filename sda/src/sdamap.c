@@ -1,4 +1,6 @@
-#include <System_map.h>
+#include "System_map.h"
+
+#include <string.h>
 
 extern struct System_map System_map[];
 

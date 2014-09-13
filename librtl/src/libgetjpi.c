@@ -1,6 +1,9 @@
 #include <descrip.h>
 #include <misc.h>
 #include <ssdef.h>
+#include <iosbdef.h>
+#include <lib$routines.h>
+#include <starlet.h>
 
 int lib$getjpi(signed int * item_code, unsigned int * process_id, void * process_name, signed int * longword_integer_value, void * resultant_string, unsigned short * resultant_length) {
   struct _iosb iosb;
@@ -44,7 +47,7 @@ int lib$getjpi(signed int * item_code, unsigned int * process_id, void * process
   itmlst[0].bufaddr=bufaddr;
   itmlst[1].item_code=0;
 
-  sts=sys$getjpiw(efn,process_id,process_name,itmlst,&iosb,0,0,0);
+  sts=sys$getjpiw(efn,process_id,process_name,itmlst,&iosb,0,0);
 
   if ((sts&1)==0)
     return sts;

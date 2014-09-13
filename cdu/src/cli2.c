@@ -8,6 +8,9 @@
 #include <ssdef.h>
 #include "cli.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 int my_cdu_search_next(int i, int type, char * s, int size, int * retval) {
   if (size==0)
     return 0;

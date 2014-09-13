@@ -70,6 +70,7 @@ MODULE IP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 // Include standard definition files
 
 //LIBRARY "SYS$LIBRARY:STARLET";
+#include <starlet.h>
 // not yet #include "SYS$LIBRARY:LIB";
 #include <cmuip/central/include/neterror.h>
 // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT
@@ -77,6 +78,7 @@ MODULE IP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 #include <cmuip/central/include/netcommon.h>
 #include <cmuip/central/include/nettcpip.h>			// IP & ICMP definitions
 #include "structure.h"
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"
 
 #include <ssdef.h>
@@ -107,7 +109,7 @@ extern signed long
 
 // MACLIB.MAR
 
-extern  void    swapbytes();
+extern      swapbytes();
 extern  void    MOVBYT();
 //extern     Calc_Checksum();
 
@@ -1125,7 +1127,6 @@ void ipu$receive(struct user_recv_args * Uargs)
 
 void ipu$info(struct user_info_args * Uargs)
     {
-extern	user$net_connection_info ();
 	struct IPCB_Structure * IPCB;
     signed long
 	RC;

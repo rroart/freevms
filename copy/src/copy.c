@@ -118,6 +118,8 @@
 #include <hm2def.h>
 #include "../../rms/src/cache.h"
 #include "../../f11x/src/access.h"
+#include <starlet.h>
+#include <cli$routines.h>
 //#include "rms.h"
 #endif
 
@@ -187,20 +189,20 @@ unsigned copy(int userarg)
     ofab.fab$l_fna = c2;
     ofab.fab$b_fns = strlen(ofab.fab$l_fna);
 
-    sts = sys$parse(&ifab);
+    sts = sys$parse(&ifab, 0, 0);
     if (sts & 1) {
         inam.nam$l_rsa = rsa;
         inam.nam$b_rss = NAM$C_MAXRSS;
         ifab.fab$l_fop = FAB$M_NAM;
-        while ((sts = sys$search(&ifab)) & 1) {
-            sts = sys$open(&ifab);
+        while ((sts = sys$search(&ifab, 0, 0)) & 1) {
+	  sts = sys$open(&ifab, 0, 0);
             if ((sts & 1) == 0) {
                 printf("%%COPY-F-OPENFAIL, Open error: %d\n",sts);
                 perror("-COPY-F-ERR ");
             } else {
                 struct _rabdef irab = cc$rms_rab;
                 irab.rab$l_fab = &ifab;
-                if ((sts = sys$connect(&irab)) & 1) {
+                if ((sts = sys$connect(&irab, 0, 0)) & 1) {
 		  char name[NAM$C_MAXRSS + 1];
 		  unsigned records = 0;
 
@@ -212,10 +214,10 @@ unsigned copy(int userarg)
 
 		  memcpy(name,c2,strlen(c2));
 
-		  if ((sts = sys$create(&ofab)) & 1) {
+		  if ((sts = sys$create(&ofab, 0, 0)) & 1) {
 		    struct _rabdef orab = cc$rms_rab;
 		    orab.rab$l_fab = &ofab;
-		    if ((sts = sys$connect(&orab)) & 1) {
+		    if ((sts = sys$connect(&orab, 0, 0)) & 1) {
 		      char rec[MAXREC + 2];
 		      orab.rab$l_rbf = rec;
 		      orab.rab$w_usz = MAXREC;
@@ -227,10 +229,10 @@ unsigned copy(int userarg)
                         filecount++;
                         irab.rab$l_ubf = rec;
                         irab.rab$w_usz = MAXREC;
-                        while ((sts = sys$get(&irab)) & 1) {
+                        while ((sts = sys$get(&irab, 0, 0)) & 1) {
 			  orab.rab$l_rbf = irab.rab$l_rbf;
 			  orab.rab$w_rsz = irab.rab$w_rsz;
-			  sts = sys$put(&orab);
+			  sts = sys$put(&orab, 0, 0);
 			  if ((sts & 1) == 0) {
 			    printf("%%COPY-F- fwrite error!!\n");
 			    perror("-COPY-F-ERR ");
@@ -247,13 +249,13 @@ unsigned copy(int userarg)
                         printf("%%COPY-F-ERROR Status: %d for %s\n",sts,rsa);
                         sts = 1;
 		      }
-		      sys$disconnect(&orab);
+		      sys$disconnect(&orab, 0, 0);
 		    }
-		    sys$close(&ofab);
+		    sys$close(&ofab, 0, 0);
 		  }
-		  sys$disconnect(&irab);
+		  sys$disconnect(&irab, 0, 0);
 		}
-		sys$close(&ifab);
+		sys$close(&ifab, 0, 0);
 	    }
 	}
 	if (sts == RMS$_NMF) sts = 1;
@@ -306,20 +308,20 @@ unsigned export(int userarg)
     fab.fab$l_nam = &nam;
     fab.fab$l_fna = c1;
     fab.fab$b_fns = strlen(fab.fab$l_fna);
-    sts = sys$parse(&fab);
+    sts = sys$parse(&fab, 0, 0);
     if (sts & 1) {
         nam.nam$l_rsa = rsa;
         nam.nam$b_rss = NAM$C_MAXRSS;
         fab.fab$l_fop = FAB$M_NAM;
-        while ((sts = sys$search(&fab)) & 1) {
-            sts = sys$open(&fab);
+        while ((sts = sys$search(&fab, 0, 0)) & 1) {
+	  sts = sys$open(&fab, 0, 0);
             if ((sts & 1) == 0) {
                 printf("%%EXPORT-F-OPENFAIL, Open error: %d\n",sts);
                 perror("-EXPORT-F-ERR ");
             } else {
                 struct _rabdef rab = cc$rms_rab;
                 rab.rab$l_fab = &fab;
-                if ((sts = sys$connect(&rab)) & 1) {
+                if ((sts = sys$connect(&rab, 0, 0)) & 1) {
                     FILE *tof;
                     char name[NAM$C_MAXRSS + 1];
                     unsigned records = 0;
@@ -366,7 +368,7 @@ unsigned export(int userarg)
                         filecount++;
                         rab.rab$l_ubf = rec;
                         rab.rab$w_usz = MAXREC;
-                        while ((sts = sys$get(&rab)) & 1) {
+                        while ((sts = sys$get(&rab, 0, 0)) & 1) {
                             unsigned rsz = rab.rab$w_rsz;
                             if ((binary_sts & 1) == 0 &&
                                  fab.fab$b_rat & PRINT_ATTR) rec[rsz++] = '\n';
@@ -383,7 +385,7 @@ unsigned export(int userarg)
                             perror("-EXPORT-F-ERR ");
                         }
                     }
-                    sys$disconnect(&rab);
+                    sys$disconnect(&rab, 0, 0);
                     rsa[nam.nam$b_rsl] = '\0';
                     if (sts == RMS$_EOF) {
                         printf("%%EXPORT-S-COPIED, %s copied to %s (%d record%s)\n",
@@ -393,7 +395,7 @@ unsigned export(int userarg)
                         sts = 1;
                     }
                 }
-                sys$close(&fab);
+                sys$close(&fab, 0, 0);
             }
         }
         if (sts == RMS$_NMF) sts = 1;
@@ -441,21 +443,21 @@ unsigned import(int userarg)
         struct _fabdef fab = cc$rms_fab;
         fab.fab$l_fna = c2;
         fab.fab$b_fns = strlen(fab.fab$l_fna);
-        if ((sts = sys$create(&fab)) & 1) {
+        if ((sts = sys$create(&fab, 0, 0)) & 1) {
             struct _rabdef rab = cc$rms_rab;
             rab.rab$l_fab = &fab;
-            if ((sts = sys$connect(&rab)) & 1) {
+            if ((sts = sys$connect(&rab, 0, 0)) & 1) {
                 char rec[MAXREC + 2];
                 rab.rab$l_rbf = rec;
                 rab.rab$w_usz = MAXREC;
                 while (fgets(rec,sizeof(rec),fromf) != NULL) {
                     rab.rab$w_rsz = strlen(rec);
-                    sts = sys$put(&rab);
+                    sts = sys$put(&rab, 0, 0);
                     if ((sts & 1) == 0) break;
                 }
-                sys$disconnect(&rab);
+                sys$disconnect(&rab, 0, 0);
             }
-            sys$close(&fab);
+            sys$close(&fab, 0, 0);
         }
         fclose(fromf);
         if (!(sts & 1)) {

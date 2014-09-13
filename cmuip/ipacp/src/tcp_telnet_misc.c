@@ -63,11 +63,13 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 #endif
 
 #include<descrip.h> 
+#include<starlet.h>
 
   // not yet#include "SYS$LIBRARY:LIB";		// JC
 //LIBRARY "SYS$LIBRARY:STARLET";
   // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS common definitions
 #include "telnet.h"		// TELNET protocol definitions
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"		// Local (tcp) Macro defintions.
 
 #include<ssdef.h>

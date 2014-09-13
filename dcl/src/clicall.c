@@ -3,8 +3,14 @@
 
 // Author. Roar Thronæs.
 
+#include <stdio.h>
+#include <string.h>
+
 #include <descrip.h>
 #include <ssdef.h>
+#include <starlet.h>
+#include <cli$routines.h>
+#include <lib$routines.h>
 
 int set_symbol(char * symstr, char * valstr) {
   struct dsc$descriptor sym_, *sym=&sym_;

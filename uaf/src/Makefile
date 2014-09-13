@@ -30,9 +30,6 @@ endif
 OBJS = authmain.o auth_parse.o authshow.o authmisc.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
-%.o: %.c
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
-
 pic/%.o: %.c
 	install -d pic
 	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
@@ -57,10 +54,10 @@ librtl$(EXE_ELF): $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 	ln -s $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 
 auth_parse.o: auth_parse.c
-	gcc ${OLDINCLUDE} -I$(TOPDIR)/cdu/src -c auth_parse.c
+	gcc $(CFLAGS) ${OLDINCLUDE} -I$(TOPDIR)/cdu/src -c auth_parse.c
 
 pic/auth_parse.o: auth_parse.c
-	gcc ${OLDINCLUDE} -I$(TOPDIR)/cdu/src -c auth_parse.c -o pic/auth_parse.o
+	gcc $(CFLAGS) ${OLDINCLUDE} -I$(TOPDIR)/cdu/src -c auth_parse.c -o pic/auth_parse.o
 
 auth_parse.c: auth_parse.cld
 	../../cdu/src/cdu auth_parse.cld
@@ -71,3 +68,5 @@ uafgen: uafgen.o sysuaf.dat
 i386/sysuaf.dat: uafgen sysuaf.dat
 	install -d i386
 	./uafgen
+
+include $(TOPDIR)/Rules.make.freevms

@@ -10,6 +10,9 @@
 #include <string.h>
 #include <iodef.h>
 #include <ssdef.h>
+#include <starlet.h>
+
+#include "smg.h"
 
 extern int smgunix;
 

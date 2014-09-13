@@ -10,8 +10,12 @@
 #include<iledef.h>
 #include<misc.h>
 #include<ossdef.h>
-#include<stdio.h>
 #include<ssdef.h>
+#include<cli$routines.h>
+
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
 
 /* Author: Roar Thronæs */
 

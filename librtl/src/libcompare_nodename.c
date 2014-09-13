@@ -50,6 +50,10 @@
 //Prototype
 int	not_valid_node_name (const struct dsc$descriptor_s *nodename);
 
+unsigned long lib$expand_nodename (const struct dsc$descriptor_s *name,
+				   struct dsc$descriptor_s  *xname,
+				   unsigned short *xname_len);
+
 // LIB$COMPARE_NODENAME
 unsigned long lib$compare_nodename (const struct dsc$descriptor_s *nodename1,
 				    const struct dsc$descriptor_s *nodename2,

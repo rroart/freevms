@@ -31,15 +31,12 @@ OBJS = sdamain.o sda_parse.o device.o misc.o sda_lock.o sda_dump.o sda_exam.o \
 	sda_proc.o sda_spin.o sda_addr.o System_map.o sdamap.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
-%.o: %.c
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
-
 pic/%.o: %.c
 	install -d pic
 	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
 
 device.o: device.c
-	$(MODELGCC) $(MODEL) -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c $(CFLAGS) $< -o $@
 
 pic/device.o: device.c
 	install -d pic
@@ -50,28 +47,28 @@ pic/sda_parse.o: sda_parse.c
 	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I$(TOPDIR)/cdu/src -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 sda_spin.o: sda_spin.c
-	$(MODELGCC) $(MODEL) -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c $(CFLAGS) $< -o $@
 
 pic/sda_spin.o: sda_spin.c
 	install -d pic
 	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include $< -o $@
 
 sda_lock.o: sda_lock.c
-	$(MODELGCC) $(MODEL) -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c $(CFLAGS) $< -o $@
 
 pic/sda_lock.o: sda_lock.c
 	install -d pic
 	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
 
 sda_addr.o: sda_addr.c
-	$(MODELGCC) $(MODEL) -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
+	$(MODELGCC) $(MODEL) -g -c $(CFLAGS) $< -o $@
 
 pic/sda_addr.o: sda_addr.c
 	install -d pic
 	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
 
 sda_proc.o: sda_proc.c
-	$(MODELGCC) $(MODEL) -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ -I../../linux/include -I. $< -o $@
+	$(MODELGCC) $(MODEL) -g -c $(CFLAGS) $< -o $@
 
 pic/sda_proc.o: sda_proc.c
 	install -d pic
@@ -97,10 +94,12 @@ librtl$(EXE_ELF): $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 	ln -s $(TOPDIR)/librtl/src/i386/librtl$(EXE_ELF)
 
 sda_parse.o: sda_parse.c
-	gcc ${OLDINCLUDE} -I$(TOPDIR)/cdu/src -c sda_parse.c
+	gcc $(CFLAGS) ${OLDINCLUDE} -I$(TOPDIR)/cdu/src -c sda_parse.c
 
 sda_parse.c: sda_parse.cld
 	../../cdu/src/cdu sda_parse.cld
 
 System_map.c: ../../linux/vmlinux make_map.sh
 	./make_map.sh
+
+include $(TOPDIR)/Rules.make.freevms

@@ -46,6 +46,7 @@ MODULE
 //LIBRARY "SYS$LIBRARY:XPORT";
 #include <starlet.h>
 #include	"tcp.h" 
+#include "cmuip.h" // needed before tcpmacros.h
 #include	"tcpmacros.h" 
 
 #include <ssdef.h>

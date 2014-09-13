@@ -4,11 +4,14 @@
 // Author. Roar Thronæs.
 
 #include <stdio.h> 
+#include <string.h>
+
 #include <ssdef.h> 
 #include <descrip.h> 
 #include <lnmdef.h>
 #include <starlet.h>
 #include <misc.h> 
+#include <cli$routines.h>
 
 // this will be a bit limited because we can not use the kernel routines for
 // now, but instead the system services

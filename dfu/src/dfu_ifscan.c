@@ -22,12 +22,16 @@
 #pragma message disable(GLOBALEXT)
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "file_hdr.h"
 #include "home2def.h"
 #include <ssdef.h>
-#include <stdio.h>
 #include <descrip.h>
 #include "fibdef.h"
+#include <starlet.h>
 #include <clidef.h>
 #include <climsgdef.h>
 #if 0
@@ -35,6 +39,10 @@
 #endif
 #include <libdef.h>
 #include <sor$routines.h>
+#include <str$routines.h>
+#include <cli$routines.h>
+#include <lib$routines.h>
+#include <smg$routines.h>
 #include <atrdef.h>
 #include <dcdef.h>
 #include <devdef.h>
@@ -45,6 +53,8 @@
 #include <trmdef.h>
 #include <smgdef.h>
 #include "smgdef2.h"
+
+#include "dfu.h"
 
 #define globalvalue int
 #define TRUE 1
@@ -437,7 +447,7 @@ int search_command (int mask)
 #endif
 /* All qualifiers parsed */
 
-  if (matstat == TRUE) status = lib$init_timer();
+  if (matstat == TRUE) status = lib$init_timer(0);
   clean_flags.channels = 0;
   clean_flags.events = 0;
   clean_flags.expreg = 0;
@@ -660,39 +670,39 @@ int search_command (int mask)
 
 /* Check date/time options */
 	if (matbefcreated == TRUE) 
-	{ status = lib$subx(&cre_bef, &id->credate[0], &diff);
+	  { status = lib$subx(&cre_bef, &id->credate[0], &diff, 0);
           if (diff.date[1] <= 0) goto nexti;
         }
 	if (matsincreated == TRUE) 
-	{ status = lib$subx(&cre_sin, &id->credate[0], &diff);
+	  { status = lib$subx(&cre_sin, &id->credate[0], &diff, 0);
           if (diff.date[1] > 0 ) goto nexti;
         }
 	if (matbefmodified == TRUE) 
-	{ status = lib$subx(&mod_bef, &id->revdate[0], &diff);
+	  { status = lib$subx(&mod_bef, &id->revdate[0], &diff, 0);
           if (diff.date[1] <= 0) goto nexti;
         }
 	if (matsinmodified == TRUE) 
-	{ status = lib$subx(&mod_sin, &id->revdate[0], &diff);
+	  { status = lib$subx(&mod_sin, &id->revdate[0], &diff, 0);
           if (diff.date[1] > 0 ) goto nexti;
         }
 	if (matbefbackup == TRUE) 
 /* Skip files without backup date */
 	{ if (id->bakdate[0] == 0 && id->bakdate[1] == 0) goto nexti;
-	  status = lib$subx(&bak_bef, &id->bakdate[0], &diff);
+	  status = lib$subx(&bak_bef, &id->bakdate[0], &diff, 0);
           if (diff.date[1] <= 0) goto nexti;
         }
 	if (matsinbackup == TRUE) 
-	{ status = lib$subx(&bak_sin, &id->bakdate[0], &diff);
+	  { status = lib$subx(&bak_sin, &id->bakdate[0], &diff, 0);
           if (diff.date[1] > 0 ) goto nexti;
         }
 	if (matbefexpired == TRUE) 
 /* Skip files without expiration date */
 	{ if (id->expdate[0] == 0 && id->expdate[1] == 0) goto nexti;
-	  status = lib$subx(&exp_bef, &id->expdate[0], &diff);
+	  status = lib$subx(&exp_bef, &id->expdate[0], &diff, 0);
           if (diff.date[1] <= 0) goto nexti;
         }
 	if (matsinexpired == TRUE) 
-	{ status = lib$subx(&exp_sin, &id->expdate[0], &diff);
+	  { status = lib$subx(&exp_sin, &id->expdate[0], &diff, 0);
           if (diff.date[1] > 0 ) goto nexti;
         }
 	if (matnonebackup == TRUE )
@@ -922,7 +932,7 @@ int report_command(int mask)
   clean_flags.fopen = 1;
 
 /* All qualifiers parsed */
-  if (matstat == TRUE) status = lib$init_timer();
+  if (matstat == TRUE) status = lib$init_timer(0);
   clean_flags.sort = 0;
   clean_flags.channels = 0;
   clean_flags.events = 0;
@@ -1360,7 +1370,7 @@ int undel_command(int mask)
   clean_flags.events = 0;
   clean_flags.expreg = 0;
   modifiers = SMG$M_NOKEEP | SMG$M_NORECALL;
-  if (matstat == TRUE) status = lib$init_timer();
+  if (matstat == TRUE) status = lib$init_timer(0);
 
 /* Open the volume (set) , read in the home block */
 
@@ -2017,7 +2027,7 @@ int verify_command(int mask)
 
 /* All qualifiers parsed */
   first = NULL; list = NULL;
-  if (matstat == TRUE) status = lib$init_timer();
+  if (matstat == TRUE) status = lib$init_timer(0);
   clean_flags.channels = 0;
   clean_flags.sort = 0;
   clean_flags.events = 0;

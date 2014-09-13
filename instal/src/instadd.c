@@ -6,6 +6,10 @@
 #include<descrip.h>
 #include<kfedef.h>
 #include<prvdef.h>
+#include<cli$routines.h>
+
+#include <stdio.h>
+#include <string.h>
 
 char * privs[] = {
   "",
@@ -50,6 +54,9 @@ char * privs[] = {
   "SECURITY",
   ""
 };
+
+int inst$getmem(const void *src, void *dest, int n);
+int inst$alononpaged(int reqsize, int *alosize_p, void **pool_p);
 
 int inst$find_priv(struct dsc$descriptor * name) {
   int i;

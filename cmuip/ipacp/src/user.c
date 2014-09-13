@@ -301,12 +301,14 @@ MODULE USER(IDENT="6.7a",LANGUAGE(BLISS32),
 
 // not yet #include <cmuip/central/include/netxport.h"	// BLISS transportablity package
 //LIBRARY <starlet.h>	// VMS system definitions ** Not STARLET **
+#include <starlet.h>
 // not yet #include "SYS$LIBRARY:LIB";	// VMS system definitions ** Not STARLET **
 #include <cmuip/central/include/neterror.h>	// Network error messages
 #include <cmuip/central/include/netcommon.h>	// Various VMS specifics
 #include "netvms.h"		// Various VMS specifics
 #include "structure.h"		// TCB & Segment Structure definitions
 //LIBRARY "tcp.h"			// TCP related definitions
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"		// Include local macros
 #include <cmuip/central/include/netconfig.h> // Transport devices interface
 
@@ -394,7 +396,7 @@ extern  void    OPR_FAO();
 
 extern     void set_ip_device_offline();
 extern     user_requests_avail();
-extern     void VMS_IO$POST();
+extern      VMS_IO$POST();
 extern     void MOVBYT();
 extern     void SwapBytes();
 extern     Time_Stamp();
@@ -1715,8 +1717,8 @@ void ACCESS_INIT (void)
 
     if (access_flags&ACF_ALLOPENS)
 	{
-	if (! sys$asctoid(INTERNET_STRING,
-			INTERNET_ID))
+	if (! sys$asctoid(&INTERNET_STRING,
+			  &INTERNET_ID, 0))
 	    {
 	    OPR$FAO("% Failed to find identifier !AS - access check disabled",
 		    INTERNET_STRING);
@@ -1729,8 +1731,8 @@ void ACCESS_INIT (void)
 
     if (access_flags&ACF_ARPAHOST)
 	{
-	if (! sys$asctoid(ARPANET_STRING,
-			ARPANET_ID))
+	if (! sys$asctoid(&ARPANET_STRING,
+			  &ARPANET_ID, 0))
 	    {
 	    OPR$FAO("% Failed to find identifier !AS - access check disabled",
 		    ARPANET_STRING);

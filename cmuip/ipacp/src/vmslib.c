@@ -13,8 +13,12 @@
 #include <linux/mm.h>
 #endif
 
+#include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "cmuip.h"
 
 #ifdef NOKERNEL
 #define printk myprintk

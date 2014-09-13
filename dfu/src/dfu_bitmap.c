@@ -23,9 +23,16 @@
 #include <ssdef.h>
 #include <iodef.h>
 #include <libdef.h>
-#include <stdio.h>
 #include <descrip.h>
+#include <starlet.h>
+#include <lib$routines.h>
 #include "file_hdr.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "dfu.h"
 
 #define globalvalue int
 #define TRUE 1
@@ -65,7 +72,7 @@ static struct { unsigned short iosb_1;
 	        short spec; 
 	      } iostat;
 
-globalvalue DFU_EXPREG;
+extern globalvalue DFU_EXPREG;
 
 int read_bitmap(short chan, int xpages, Boolean locked, int *addr)
 

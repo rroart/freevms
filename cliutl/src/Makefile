@@ -37,13 +37,10 @@ show.a: showsystem.o showdevice.o showwork.o showlog.o showmemory.o misc.o
 	ar r show.a showsystem.o showdevice.o showwork.o showlog.o showmemory.o misc.o
 
 showmemory.o: showmemory.c
-	$(MODELGCC) $(MODEL) -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	$(MODELGCC) $(MODEL) -g -c $(CFLAGS) -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 showsystem.o: showsystem.c ../../linux/include/linux/version.h
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
-
-%.o: %.c
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c $(CFLAGS) -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/%.o: %.c
 	install -d pic
@@ -78,3 +75,5 @@ i386/show${NOEXE}: show.a showmain.o $(VMLINUX)
 i386/set${NOEXE}: set.a setmain.o $(VMLINUX)
 	install -d i386
 	gcc -g -static setmain.o set.a -L$(OLDLIBCDIR) -lc $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/set${NOEXE}
+
+include $(TOPDIR)/Rules.make.freevms

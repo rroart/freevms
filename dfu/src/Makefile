@@ -15,8 +15,8 @@ install: all
 
 OBJS = dfu.o dfu_bitmap.o dfu_filedir.o dfu_ifscan.o dfu_tables.o
 
-%.o: %.c
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../cdu/src $< -o $@
+dfu_tables.o: dfu_tables.c
+	$(CC) -g $(EXTRA_CFLAGS) -I../../cdu/src -c -o dfu_tables.o dfu_tables.c
 
 dfu_tables.c: ../../cdu/src/cdu dfu_tables.cld
 	../../cdu/src/cdu dfu_tables.cld
@@ -28,3 +28,5 @@ i386/dfu${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL)
 i386/dfu${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL)
 	install -d i386
 	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL) $(VMSLIBS) /usr/lib/libdl.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dfu${EXE}
+
+include $(TOPDIR)/Rules.make.freevms

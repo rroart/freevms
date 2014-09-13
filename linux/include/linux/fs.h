@@ -11,7 +11,7 @@
 #include <linux/limits.h>
 #include <linux/wait.h>
 #include <linux/types.h>
-#include <linux/vfs.h>
+//#include <linux/vfs.h>
 #include <linux/net.h>
 #include <linux/kdev_t.h>
 #include <linux/ioctl.h>

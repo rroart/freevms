@@ -16,9 +16,6 @@ install: all
 OBJS = directory.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
-%.o: %.c
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
-
 pic/%.o: %.c 
 	install -d pic
 	gcc -fpic -fPIC -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
@@ -65,3 +62,5 @@ i386/ddirectory${EXE}: $(VMSDLIBS_EXE) $(OBJS) $(EXTERNAL)
 	install -d i386
 	$(LINKER) $(OBJS) $(TOPDIR)/starlet/src/i386/starlet.exe $(TOPDIR)/librtl/src/i386/librtl.exe $(LIBGCC) $(EXTERNAL) /usr/lib/crt1.o /usr/lib/crti.o $(LIBGCC) -o i386/ddirectory${EXE}
 endif
+
+include $(TOPDIR)/Rules.make.freevms

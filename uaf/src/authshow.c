@@ -7,6 +7,12 @@
 #include<iledef.h>
 #include<prvdef.h>
 #include<uaidef.h>
+#include<cli$routines.h>
+#include<starlet.h>
+
+#include<stdio.h>
+#include<string.h>
+#include <strings.h>
 
 char * privs[] = {
   "",

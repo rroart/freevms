@@ -5,8 +5,11 @@
 
 #include<descrip.h>
 #include<ssdef.h>
+#include<lib$routines.h>
+#include<cli$routines.h>
 
 #include<stdio.h>
+#include<string.h>
 
 int main(int argc, char *argv[])
 {

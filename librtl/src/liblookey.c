@@ -8,6 +8,8 @@
 #include <ssdef.h>
 #include <starlet.h>
 
+#include <string.h>
+
 // no check for LIB$_INVARG, LIB$_INSVIRMEM
 
 int lib$lookup_key (void * search_string, long * key_table_array, long * key_value, void * keyword_string, unsigned short int * resultant_length) {

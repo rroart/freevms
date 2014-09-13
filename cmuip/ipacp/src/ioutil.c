@@ -119,6 +119,7 @@ extern 	void FATAL_FAO(long, ...);
 //LIBRARY "SYS$LIBRARY:LIB";			// JC
 //not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";
 #include <cmuip/central/include/netcommon.h>
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"
 #include "structure.h"
 

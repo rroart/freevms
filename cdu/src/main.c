@@ -9,7 +9,11 @@
 #define true 1
 #define false 0
 
+#include <cli$routines.h>
+
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 int vms_mm=0;
 
@@ -17,6 +21,19 @@ int vms_mm=0;
 #include "cld.h"
 
 #include "cli.h"
+
+extern char *strndup (__const char *__string, size_t __n);
+
+int gencode_value_clauses(tree t,struct _cdu * cdu);
+int gencode_qual_clauses(tree t,struct _cdu * cdu);
+int gencode_para_clauses(tree t,struct _cdu * cdu);
+int gencode_keyw_clauses(tree t,struct _cdu * cdu);
+int gencode_single_clause(tree t,struct _cdu * cdu);
+int gencode_cliflags(tree t,struct _cdu * cdu); 
+int gencode_type(tree t,struct _cdu * cdu); 
+int gencode_verb(tree t,struct _cdu * cdu);
+genwrite();
+int gencode(tree t);
 
 main(int argc, char ** argv) {
   char * name = 0;
@@ -38,7 +55,7 @@ main(int argc, char ** argv) {
   return 0;
 }
 
-int get_cli_int() {
+void * get_cli_int(char * c) {
   return 0;
 }
 

@@ -1,6 +1,8 @@
 #include<libdef.h>
 #include<ssdef.h>
 
+#include <stdio.h>
+
 // borrowed from 2.6.14 bitops.h bitops.c
 
 /**

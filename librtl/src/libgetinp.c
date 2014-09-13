@@ -4,6 +4,9 @@
 #include <rabdef.h>
 #include <starlet.h>
 
+#include <stdlib.h>
+#include <strings.h>
+
 static struct _fabdef * input_fab = 0;
 static struct _rabdef * input_rab = 0;
 

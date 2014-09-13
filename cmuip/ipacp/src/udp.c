@@ -198,6 +198,7 @@ MODULE UDP( IDENT="4.0e",LANGUAGE(BLISS32),
 #include <cmuip/central/include/netcommon.h>
 #include <cmuip/central/include/nettcpip.h> 
 #include "structure.h"
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"
 #include "snmp.h"
 
@@ -229,7 +230,7 @@ extern signed long
 
 // MACLIB.MAR
 
-extern  void    swapbytes();
+extern      swapbytes();
 extern  void    MOVBYT();
 
 // MEMGR.BLI
@@ -1680,7 +1681,6 @@ void udp$receive(struct user_recv_args * Uargs)
 
 void udp$info(struct user_info_args * Uargs)
     {
-	user$net_connection_info ();
 	struct UDPCB_Structure * UDPCB;
     signed long
 	RC;

@@ -73,7 +73,10 @@ SOFTWARE.
 
 #include "mib.h"
 
+#include "cmuip.h"
+
 #include <linux/string.h>
+#include <strings.h>
 
 int	snmp_input();
 void	snmp_trap();

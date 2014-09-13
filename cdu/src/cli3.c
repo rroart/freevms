@@ -1,5 +1,9 @@
 #include "cliparse.h"
 
+#include <string.h>
+
+int clilex ( void );
+
 static void
 c_lex_one_token (c_token *token)
 {

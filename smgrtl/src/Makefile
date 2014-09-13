@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -I. -I../../starlet/src -I../../librtl/src -DNOKERNEL
+CFLAGS += -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -DNOKERNEL
 
 SMGOBJ = \
 	smgchar.o smgpaste.o smgread.o smgview.o smgvirdis.o smgvirkey.o
@@ -46,7 +46,4 @@ pic/%.o: %.c
 	install -d pic
 	$(CC) -fpic -fPIC $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -c -o $@ $<
 
-%.o: %.c 
-	install -d pic
-	$(CC) -g ${OLDINCLUDE} $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -c -o $@ $<
-
+include $(TOPDIR)/Rules.make.freevms

@@ -4,13 +4,18 @@
 // Author. Roar Thronæs.
 
 #include <stdio.h> 
+#include <string.h>
+
 #include <ssdef.h> 
 #include <descrip.h> 
 #include <spldef.h>
 #include <starlet.h>
 #include <misc.h>
+#include <cli$routines.h>
 
 #include <system_data_cells.h>
+
+int sda$getmem(const void *src, void *dest, int n);
 
 static int print_spin(char * name, void * addr) {
   struct _spl spl;

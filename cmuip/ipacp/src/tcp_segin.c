@@ -344,6 +344,7 @@ MODULE SEGIN(IDENT="6.7",LANGUAGE(BLISS32),
 #include <cmuip/central/include/nettcpip.h>	// TCP/IP protocols
 
 #include "structure.h"		// TCB & Segment Structure definitions
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"		// Local macros
 #include "tcp.h"			// TCP related definitions
 #include "snmp.h"			// Simple Network Management Protocol
@@ -399,7 +400,7 @@ extern  void    mm$uarg_free();
 
 // TCP.BLI
 
-extern  void    tcp$send_data();
+extern      tcp$send_data();
 extern     tcp$send_ctl();
 extern  void    tcp$enqueue_ack();
 extern  void    tcp$send_ack();
@@ -417,7 +418,7 @@ extern  void    NML$GETNAME();
 // MACLIB.MAR
 
 extern     Time_Stamp();
-extern  void    swapbytes();
+extern     swapbytes();
 
 // IOUTIL.BLI
 
@@ -1382,7 +1383,7 @@ extern	STR$COPY_DX	();
 	else WKS_LIST[WIX].WKS$Quotas = 0;
 
     WKS_LIST[WIX].WKS$Stat = STAT;
-    CH$MOVE(8,PRIV,WKS_LIST[WIX].WKS$Priv);
+    CH$MOVE(8,PRIV,&WKS_LIST[WIX].WKS$Priv);
     WKS_LIST[WIX].WKS$Prior = PRIOR;
     if (MAXSRV == 0)
       WKS_LIST[WIX].WKS$MaxSrv=GLOBAL_MAXSRV;

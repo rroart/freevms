@@ -35,8 +35,14 @@ cdu.a: $(OBJS) cli.h
 cdu_pic.a: $(OBJS_PIC) cli.h
 	ar r cdu_pic.a $(OBJS_PIC)
 
+parse.o: parse.c
+	$(CC) -g $(EXTRA_CFLAGS) -I../../cdu/src -c -o parse.o parse.c
+
+clilex.o: clilex.c
+	$(CC) -g $(EXTRA_CFLAGS) -I../../librtl/src -I../../starlet/src -c -o clilex.o clilex.c
+
 %.o: %.c cli.h
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c $(CFLAGS) ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/%.o: %.c 
 	install -d pic
@@ -61,3 +67,5 @@ clilex.c: clilex.l
 
 dcltables.c: cdu ../../cld/src/all.cld
 	./cdu ../../cld/src/all.cld
+
+include $(TOPDIR)/Rules.make.freevms

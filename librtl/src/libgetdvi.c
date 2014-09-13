@@ -1,6 +1,8 @@
 #include <descrip.h>
 #include <misc.h>
 #include <ssdef.h>
+#include <lib$routines.h>
+#include <starlet.h>
 
 int lib$getdvi(signed int * item_code, unsigned short int * channel, void * device_name, signed int * longword_integer_value, void * resultant_string, unsigned short * resultant_length) {
   struct _iosb iosb;

@@ -8,6 +8,9 @@
 #include <ssdef.h>
 #include <starlet.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 // long has been chosen over int because of different behaviour on amd64 than axp
 
 #define MAX_ZONE 16

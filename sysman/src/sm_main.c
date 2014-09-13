@@ -4,8 +4,13 @@
 // Author. Roar Thronæs.
 
 #include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
 
 #include<descrip.h> 
+#include<cli$routines.h>
+#include<lib$routines.h>
 
 #ifdef __i386__
 //int errno;
@@ -66,7 +71,7 @@ main() {
     fflush(stdout);
     int sts = cli$dcl_parse(&o, &sysman_parse, 0, 0, 0);
     if (sts&1) 
-      cli$dispatch();
+      cli$dispatch(0);
     return 1;
   }
 
@@ -86,7 +91,7 @@ main() {
     int sts = cli$dcl_parse(&command_line, sysman_parse, 0, 0, 0);
     hexmode = 0;
     if (sts&1) 
-      cli$dispatch();
+      cli$dispatch(0);
   }
 }
 

@@ -14,9 +14,6 @@ install: all
 OBJS = diff.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
-%.o: %.c
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
-
 pic/%.o: %.c
 	install -d pic
 	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
@@ -31,3 +28,5 @@ i386/diff${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC)
 i386/diff${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL)
 	install -d i386
 	$(LINKER) $(LINKPRE) $(OBJS) $(VMSLIBS) $(LIBGCC) $(EXTERNAL) --start-group $(LINKPOST) $(LIBGCC) --end-group -o i386/diff${EXE}
+
+include $(TOPDIR)/Rules.make.freevms

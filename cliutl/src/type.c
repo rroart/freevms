@@ -118,6 +118,8 @@
 #include <hm2def.h>
 #include "../../rms/src/cache.h"
 #include "../../f11x/src/access.h"
+#include<starlet.h>
+#include<cli$routines.h>
 //#include "rms.h"
 #endif
 
@@ -167,23 +169,23 @@ unsigned typ(int userarg)
     struct _fabdef fab = cc$rms_fab;
     fab.fab$l_fna = c;
     fab.fab$b_fns = strlen(fab.fab$l_fna);
-    if ((sts = sys$open(&fab)) & 1) {
+    if ((sts = sys$open(&fab, 0, 0)) & 1) {
         struct _rabdef rab = cc$rms_rab;
         rab.rab$l_fab = &fab;
-        if ((sts = sys$connect(&rab)) & 1) {
+        if ((sts = sys$connect(&rab, 0, 0)) & 1) {
             char rec[MAXREC + 2];
             rab.rab$l_ubf = rec;
             rab.rab$w_usz = MAXREC;
-            while ((sts = sys$get(&rab)) & 1) {
+            while ((sts = sys$get(&rab, 0, 0)) & 1) {
                 unsigned rsz = rab.rab$w_rsz;
                 if (fab.fab$b_rat & PRINT_ATTR) rec[rsz++] = '\n';
                 rec[rsz++] = '\0';
                 fputs(rec,stdout);
                 records++;
             }
-            sys$disconnect(&rab);
+            sys$disconnect(&rab, 0, 0);
         }
-        sys$close(&fab);
+        sys$close(&fab, 0, 0);
         if (sts == RMS$_EOF) sts = 1;
     }
     if ((sts & 1) == 0) {

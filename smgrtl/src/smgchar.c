@@ -4,12 +4,14 @@
 // Author. Roar Thronæs.
 
 #include <descrip.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <ssdef.h>
 #include <iodef.h>
+#include <starlet.h>
+#include <smg$routines.h>
+#include "smg.h"
 
 extern int smgunix;
 
@@ -27,7 +29,7 @@ int smg$set_term_characteristics (long * pasteboard_id, int * on_characteristics
   int status;
   if (smgunix)
     return SS$_NORMAL;
-  status = sys$qiow (0, chan, IO$_SENSEMODE, &io_stats, 0, 0, buf, buflen);
+  status = sys$qiow (0, chan, IO$_SENSEMODE, &io_stats, 0, 0, buf, buflen, 0, 0, 0, 0);
   if (old_characteristics1)
     *old_characteristics1 = buf[0];
   if (old_characteristics2)
@@ -48,7 +50,7 @@ int smg$set_term_characteristics (long * pasteboard_id, int * on_characteristics
     buf[1] &= ~(*off_characteristics2);
   if (off_characteristics3)
     buf[2] &= ~(*off_characteristics3);
-  status = sys$qiow (0, chan, IO$_SETMODE, &io_stats, 0, 0, buf, buflen);
+  status = sys$qiow (0, chan, IO$_SETMODE, &io_stats, 0, 0, buf, buflen, 0, 0, 0, 0);
   return SS$_NORMAL;
 }
 

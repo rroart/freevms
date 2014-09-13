@@ -20,6 +20,9 @@
 #include<fh2def.h>
 #include <misc.h> 
 
+#include<stdio.h>
+#include<string.h>
+
 // change to w_[df]id_rvn from b_ later
 
 unsigned long lib$create_dir(const void * v) {

@@ -12,6 +12,8 @@
 
 int do_ret = 0;
 
+show_memory();
+
 main() {
 
   show_memory();

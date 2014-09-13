@@ -116,10 +116,12 @@ MODULE TELNET(IDENT="1.11",LANGUAGE(BLISS32),
 #include<descrip.h> 
 
 #include <starlet.h>	// VMS system definitions
+#include <lib$routines.h>
 // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS common definitions
 #include <cmuip/central/include/neterror.h>	// Network error codes
 #include "netvms.h"
 			// VMS-specific definitions
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"		// System-wide Macro definitions
 #include "structure.h"		// System-wide structure definitions
 #include "tcp.h"			// TCP related definitions
@@ -534,7 +536,7 @@ void namelook_done(TVT,rc,namlen,name)
 		TCB->foreign_port
 			     );
     else
-      rc = sys$fao(ctr2,
+      rc = sys$fao(&ctr2,
 		&accpornam->dsc$w_length,accpornam,
 		namlen,name
 		);
@@ -565,7 +567,7 @@ TELNET_OPEN(TCB)
       extern LIB$GETDVI();
       extern Print();
       extern Line_Changed_AST();
-      extern NML$GETNAME();
+      extern void NML$GETNAME();
 
       unsigned char 	nambuf[256];
       struct dsc$descriptor nam_ = {

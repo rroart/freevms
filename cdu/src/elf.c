@@ -3,12 +3,20 @@
 
 // Author. Roar Thronæs.
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <libelf/libelf.h>
 #include <ssdef.h>
 #include <descrip.h>
 #include <misc.h>
+#include <starlet.h>
+#include "../../cdu/src/cli.h"
 
 // i386
 /*

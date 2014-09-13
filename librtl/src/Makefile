@@ -18,7 +18,7 @@
 #		Merged together my basic and string libraries, so I
 #		only has one subdirectory to worry about.
 #
-CFLAGS = -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -I. -I../../starlet/src -I../../lib/src -DNOKERNEL
+CFLAGS += -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -DNOKERNEL
 
 STROBJ = \
 	str_analyze_sdesc.o stranalyze_sdesc_64.o \
@@ -172,3 +172,4 @@ libextzv.o: libextzv.c
 
 libasnmbx.o: libasnmbx.c
 
+include $(TOPDIR)/Rules.make.freevms

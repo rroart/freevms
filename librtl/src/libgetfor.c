@@ -8,6 +8,8 @@
 #include <descrip.h>
 #include <ssdef.h>
 
+#include <string.h>
+
 // use clicall for this some time in the future
 
 #ifdef __i386__

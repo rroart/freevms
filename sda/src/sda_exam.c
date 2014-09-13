@@ -8,6 +8,15 @@
 #include <descrip.h> 
 #include <starlet.h>
 #include <misc.h>
+#include<cli$routines.h>
+#include<starlet.h>
+
+#include <stdlib.h>
+#include <string.h>
+
+int sda$getmem(const void *src, void *dest, int n);
+int sda_find_addr(char * name, long * addr);
+int sda_find_symbol(long addr, char ** name, long * offset);
 
 void stringify(char * src, char * dst, int size) {
   for ( ; size; size--, src++, dst++) {

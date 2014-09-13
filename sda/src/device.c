@@ -4,8 +4,13 @@
 // Author. Roar Thronæs.
 
 #include<ddbdef.h>
-
 #include<descrip.h>
+#include<cli$routines.h>
+
+#include <stdio.h>
+#include <string.h>
+
+int sda$getmem(const void *src, void *dest, int n);
 
 int show_device() {
   printf("\n");

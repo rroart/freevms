@@ -1,3 +1,5 @@
+TOPDIR	:= $(shell /bin/pwd)
+
 VMSSUBDIRS = crtl starlet librtl smgrtl sort cld cdu msgfil cliutl backup dir init login dcl edt dfu mount copy delete dif util32 sda instal uaf sysman
 VMSSUBDIRSINST = crtl starlet librtl smgrtl sort cld cliutl dir dcl login init edt dfu mount copy delete dif util32 sda instal uaf sysman driver
 VMSSUBDIRS2 = 
@@ -86,20 +88,41 @@ export EXTERNAL_PIC = $(TOPDIR)/cdu/src/cdu_pic.a
 export EXTERNAL2 = $(TOPDIR)/cdu/src/cdu2.a
 export EXTERNAL2_PIC = $(TOPDIR)/cdu/src/cdu2_pic.a
 
+#
+# standard CFLAGS
+#
+
+HPATH   	= $(TOPDIR)/linux/include
+
+CC	:= gcc
+HOSTCC  	= gcc
+
+CPPFLAGS := -I$(TOPDIR)/sys/src -I$(TOPDIR)/lib/src -I$(TOPDIR)/librtl/src -I$(TOPDIR)/starlet/src -I$(HPATH) $(OLDINCLUDE)
+
+CFLAGS := -Werror-implicit-function-declaration $(CPPFLAGS) -Wall -Wstrict-prototypes -Wno-trigraphs
+#CFLAGS += -fno-builtin-sprintf -O2 -fomit-frame-pointer -fno-strict-aliasing -fno-common
+CFLAGS += -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -DNOKERNEL
+
+HOSTCFLAGS	= -Werror-implicit-function-declaration -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -I$(TOPDIR)/linux/include2
+
+export	VERSION PATCHLEVEL SUBLEVEL EXTRAVERSION KERNELRELEASE ARCH \
+	CONFIG_SHELL TOPDIR HPATH HOSTCC HOSTCFLAGS CROSS_COMPILE AS LD CC \
+	CPP AR NM STRIP OBJCOPY OBJDUMP MAKE MAKEFILES GENKSYMS MODFLAGS PERL
+
 vmsall:
 	for X in $(VMSSUBDIRS); do \
 		cd $$X/src; \
-		make; \
+		make CFLAGS="$(CFLAGS)"; \
 		cd ../..; \
 	done; \
 	for X in $(VMSSUBDIRS2); do \
 		cd $$X; \
-		make; \
+		make CFLAGS="$(CFLAGS)"; \
 		cd ..; \
 	done; \
 	for X in $(VMSSUBDIRS3); do \
 		cd $$X; \
-		make; \
+		make CFLAGS="$(CFLAGS)"; \
 		cd ../../..; \
 	done;
 
@@ -205,4 +228,5 @@ telnet:
 doxygen:
 	doxygen doc/doxygen.conf
 
-include Makefile.kernel
+bzImage:
+	make -f Makefile.kernel bzImage

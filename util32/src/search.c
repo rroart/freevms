@@ -118,6 +118,8 @@
 #include <hm2def.h>
 #include "../../rms/src/cache.h"
 #include "../../f11x/src/access.h"
+#include <starlet.h>
+#include <cli$routines.h>
 //#include "rms.h"
 #endif
 
@@ -198,25 +200,25 @@ unsigned search(int userarg)
     fab.fab$b_fns = strlen(fab.fab$l_fna);
     fab.fab$l_dna = "";
     fab.fab$b_dns = strlen(fab.fab$l_dna);
-    sts = sys$parse(&fab);
+    sts = sys$parse(&fab, 0, 0);
     if (sts & 1) {
         nam.nam$l_rsa = rsa;
         nam.nam$b_rss = NAM$C_MAXRSS;
         fab.fab$l_fop = FAB$M_NAM;
-        while ((sts = sys$search(&fab)) & 1) {
-            sts = sys$open(&fab);
+        while ((sts = sys$search(&fab, 0, 0)) & 1) {
+	  sts = sys$open(&fab, 0, 0);
             if ((sts & 1) == 0) {
                 printf("%%SEARCH-F-OPENFAIL, Open error: %d\n",sts);
             } else {
                 struct _rabdef rab = cc$rms_rab;
                 rab.rab$l_fab = &fab;
-                if ((sts = sys$connect(&rab)) & 1) {
+                if ((sts = sys$connect(&rab, 0, 0)) & 1) {
                     int printname = 1;
                     char rec[MAXREC + 2];
                     filecount++;
                     rab.rab$l_ubf = rec;
                     rab.rab$w_usz = MAXREC;
-                    while ((sts = sys$get(&rab)) & 1) {
+                    while ((sts = sys$get(&rab, 0, 0)) & 1) {
                         register char *strng = rec;
                         register char *strngend = strng + (rab.rab$w_rsz - (searend - searstr));
                         while (strng < strngend) {
@@ -245,13 +247,13 @@ unsigned search(int userarg)
                             }
                         }
                     }
-                    sys$disconnect(&rab);
+                    sys$disconnect(&rab, 0, 0);
                 }
                 if (sts == SS$_NOTINSTALL) {
                     printf("%%SEARCH-W-NOIMPLEM, file operation not implemented\n");
                     sts = 1;
                 }
-                sys$close(&fab);
+                sys$close(&fab, 0, 0);
             }
         }
         if (sts == RMS$_NMF || sts == RMS$_FNF) sts = 1;

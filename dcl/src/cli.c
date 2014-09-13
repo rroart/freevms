@@ -28,6 +28,12 @@
 /************************************************************************/
 
 #include <stdio.h> 
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <libgen.h>
 
 #include <iodef.h>
 #include <jpidef.h>
@@ -39,11 +45,14 @@
 #include <descrip.h> 
 #include <starlet.h>
 #include<va_rangedef.h>
-
+#include<starlet.h>
+#include<cli$routines.h>
+#include<lib$routines.h>
 #include<ihddef.h>
 #include<ihadef.h>
 #include<syidef.h>
 #include<misc.h>
+#include "../../cdu/src/cli.h"
 
 #include <string.h>
 
@@ -54,9 +63,17 @@
 #include<sys/types.h>
 #include<linux/elf.h>
 
-#if 0
-#include "cliparse.h"
+#if 1
+#include "../../cdu/src/cliparse.h"
 #endif
+
+//struct c_expr
+void * c_parser_binary_expression (c_parser *parser, struct c_expr *after);
+void * c_parser_binary_expression2 (int a, int b);
+void * c_parser_binary_expression3 (int a, int b);
+void * c_parser_binary_expression4 (int a, int b);
+void * c_parser_binary_expression (c_parser *parser, struct c_expr *after);
+void * c_parser_binary_expression2_as_string (int a, int b, char * s);
 
 #define oz_util_h_console stdout
 
@@ -4528,7 +4545,7 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
 #endif
   }
 
-  sys$rundwn();
+  sys$rundwn(0);
 
   return SS$_NORMAL;
 
@@ -4574,12 +4591,13 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
   }
   return SS$_NORMAL;
 
-  sts = setup_runopts (h_error, runopts);
+  //sts = setup_runopts (h_error, runopts);
   if (sts != SS$_NORMAL) goto rtn;
 
   /* Spawn the image */
   posix_spawn();
 
+  // this is wrong params
   sts = sys$creprc /* was: spawn */ (&runopts -> h_job, 
                       image, 
                       runopts -> h_in, 
@@ -4590,7 +4608,7 @@ static unsigned long runimage (unsigned long h_error, Runopts *runopts, const ch
                       runopts -> defdir, 
                       argc, 
                       argv, 
-                      NULL, 
+				     //                      NULL, 
                       &(runopts -> h_thread), 
                       &(runopts -> h_process));
   if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u spawning image %s\n", sts, image);

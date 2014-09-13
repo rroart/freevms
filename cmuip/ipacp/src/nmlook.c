@@ -109,6 +109,7 @@ MODULE NMLOOK(IDENT="1.2b",LANGUAGE(BLISS32),
 #include "netvms.h"
 #include <cmuip/central/include/neterror.h>
 #include <cmuip/central/include/namsym.h>
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"
 
 #include <ssdef.h>
@@ -426,7 +427,7 @@ ITMLIST[1].bufaddr=0;
 		     SRVPRCNAM,
 		     SRVPRIOR,
 		     myuic,
-			0, SRVSTATUS, 0, 0, 0
+			0, SRVSTATUS/*, 0, 0, 0*/
 		     );
 	if (BLISSIFNOT(RC))
 	    {

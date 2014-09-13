@@ -77,4 +77,31 @@ static struct _cdu ** root_cdu=0x3f000010;
 static void ** comdsc = 0x3f000018; 
 #endif
 
+int mymymyuserfunc(int (*func)(),void * start, long count, int dum0, int dum1);
+cli_scan_bytes( char *bytes, int len );
+int load_elf(char * filename);
+long elf_get_symbol(char * filename, char * name);
+void * get_cli_int(char * c);
+cli_token(char * str, int * retlen);
+void initparser();
+void push_cond_stack(int);
+void pop_cond_stack(void);
+get_prev_cond_stack(void);
+get_cond_stack(void);
+set_process(int argc, char**argv);
+show_device();
+show_logical(int argc, char**argv);
+set_working_set(int argc, char**argv);
+show_working_set();
+posix_spawn();
+void init_stringpool (void);
+char * cli_scan_string( const char * yy_str );
+int yylex ( void );
+int clilex ( void );
+int yyparse ();
+int cliconditional(int key);
+int set_symbol(char * symstr, char * valstr);
+int is_user_mode();
+void * getparser();
+
 #endif

@@ -16,9 +16,6 @@ install: all
 OBJS = cli.o clicall.o cliexpr.o
 #clilex.o
 
-%.o: %.c
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
-
 #clilex.c: clilex.l
 #	$(LEX) $(LEXFLAGS) -oclilex.c clilex.l
 
@@ -43,3 +40,4 @@ i386/dcl${EXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL)
 	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(VMSLIBS) /usr/lib/libdl.a /usr/lib/libiberty.a $(LIBGCC) $(LINKPOST) $(LIBGCC) -o i386/dcl${EXE}
 # DCL linked like this is just for testing (DCL is really special)
 
+include $(TOPDIR)/Rules.make.freevms

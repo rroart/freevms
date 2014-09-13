@@ -3,7 +3,15 @@
 
 // Author. Roar Thronæs.
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
 #include <descrip.h>
+#include <cli$routines.h>
+
+int init_module(void *, int, int);
 
 int sm$load_driver() {
   int retlen;

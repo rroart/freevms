@@ -7,7 +7,9 @@
 //#include"../../starlet/src/vmsopt.h" 
 #include<descrip.h>
 #include<stdio.h>
+#include<stdlib.h>
 #include<ssdef.h>
+#include<cli$routines.h>
 
 /* Author: Roar Thronæs */
 

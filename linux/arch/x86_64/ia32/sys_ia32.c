@@ -53,7 +53,7 @@
 #include <linux/sunrpc/svc.h>
 #include <linux/nfsd/nfsd.h>
 #include <linux/nfsd/cache.h>
-#include <linux/nfsd/xdr.h>
+//#include <linux/nfsd/xdr.h>
 #include <linux/nfsd/syscall.h>
 #include <linux/poll.h>
 #include <linux/personality.h>
@@ -518,6 +518,8 @@ sys32_rt_sigprocmask(int how, sigset32_t *set, sigset32_t *oset,
 static int
 put_statfs (struct statfs32 *ubuf, struct statfs *kbuf)
 {
+  return -EFAULT;
+#if 0
 	if (verify_area(VERIFY_WRITE, ubuf, sizeof(struct statfs32)) ||
 	    __put_user (kbuf->f_type, &ubuf->f_type) ||
 	    __put_user (kbuf->f_bsize, &ubuf->f_bsize) ||
@@ -537,6 +539,7 @@ put_statfs (struct statfs32 *ubuf, struct statfs *kbuf)
 	    __put_user (0, &ubuf->f_spare[5]))
 		return -EFAULT;
 	return 0;
+#endif
 }
 
 extern asmlinkage long sys_statfs(const char * path, struct statfs * buf);
@@ -544,6 +547,8 @@ extern asmlinkage long sys_statfs(const char * path, struct statfs * buf);
 asmlinkage long
 sys32_statfs(const char * path, struct statfs32 *buf)
 {
+  return -EFAULT;
+#if 0
 	int ret;
 	struct statfs s;
 	mm_segment_t old_fs = get_fs();
@@ -559,6 +564,7 @@ sys32_statfs(const char * path, struct statfs32 *buf)
 	if (put_statfs(buf, &s))
 		return -EFAULT;
 	return ret;
+#endif
 }
 
 extern asmlinkage long sys_fstatfs(unsigned int fd, struct statfs * buf);
@@ -566,6 +572,8 @@ extern asmlinkage long sys_fstatfs(unsigned int fd, struct statfs * buf);
 asmlinkage long
 sys32_fstatfs(unsigned int fd, struct statfs32 *buf)
 {
+  return -EFAULT;
+#if 0
 	int ret;
 	struct statfs s;
 	mm_segment_t old_fs = get_fs();
@@ -576,6 +584,7 @@ sys32_fstatfs(unsigned int fd, struct statfs32 *buf)
 	if (put_statfs(buf, &s))
 		return -EFAULT;
 	return ret;
+#endif
 }
 
 struct timeval32

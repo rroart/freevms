@@ -213,6 +213,7 @@ MODULE XE_DRIVER(IDENT="5.0a",LANGUAGE(BLISS32),
 #include <cmuip/central/include/netcommon.h>	// CMU-OpenVMS/IP
 #include "netvms.h"		// VMS specifics
 #include <cmuip/central/include/netconfig.h>	// Device interface specs.
+#include "cmuip.h" // needed before netdevices.h
 #include <cmuip/central/include/netdevices.h>	// Helpfull macros...
 
 #include "xedrv.h"
@@ -225,6 +226,8 @@ MODULE XE_DRIVER(IDENT="5.0a",LANGUAGE(BLISS32),
 #include <xmdef.h>
 #include<starlet.h>
 
+#include <string.h>
+
 #ifndef NOKERNEL
 #define sys$cancel exe$cancel
 #define sys$assign exe$assign
@@ -235,7 +238,7 @@ extern    Time_Stamp();
 extern     swapbytes();
 
 // NETDEVICES.OBJ
-extern      ASCII_HEX_BYTES();
+extern      void ASCII_HEX_BYTES();
 
 // XEDRV_ARP.BLI
 

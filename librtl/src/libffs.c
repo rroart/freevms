@@ -1,6 +1,8 @@
 #include<libdef.h>
 #include<ssdef.h>
 
+#include<stdio.h>
+#include<strings.h>
 #include<linux/bitops.h>
 
 int lib$ffs(int * pos, char * size, int * base,int * ret) {

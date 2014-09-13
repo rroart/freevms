@@ -237,6 +237,7 @@ extern 	void FATAL_FAO(long, ...);
      // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// String descriptor stuff
 #include "netvms.h"		// Special VMS definitions
 #include "structure.h"	// Data structures
+#include "cmuip.h" // needed before tcpmacros.h
 #include	"tcpmacros.h"	// ACP-wide macros
 #include "snmp.h"		// MIB definitions
 #include <cmuip/central/include/netcommon.h> // Common Defs
@@ -264,7 +265,7 @@ extern 	void FATAL_FAO(long, ...);
 #if 0
 extern  void    OPR_FAO();
 #endif
-extern  void    send_2_operator();
+extern      send_2_operator();
 extern     LIB$GET_VM ();
 extern  void    SWAPBYTES();
 extern     GET_IP_ADDR();

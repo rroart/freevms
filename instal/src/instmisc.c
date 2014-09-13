@@ -5,6 +5,8 @@
 
 // like memcpy
 
+#include <starlet.h>
+
 int memcpy(void *dest, const void *src, int n);
 
 int inst$getmem(const void *src, void *dest, int n) {

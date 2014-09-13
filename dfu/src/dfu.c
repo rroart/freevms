@@ -17,11 +17,16 @@
 #pragma message disable(GLOBALEXT)
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <clidef.h>         
 #include <climsgdef.h>
 #include <descrip.h>
 #include <stdio.h>
 #include <lib$routines.h>
+#include <cli$routines.h>
+#include <smg$routines.h>
 #include <ssdef.h>
 #include <jpidef.h>
 #include <smgdef.h>
@@ -32,7 +37,11 @@
 #include <syidef.h>
 #include <misc.h>
 #endif
+#include <starlet.h>
+#include <smg$routines.h>
 #include "smgdef2.h"
+
+#include "dfu.h"
 
 #define globalvalue extern int
 #define TRUE 1
@@ -216,7 +225,7 @@ main(int argc, char *argv[])
    SMG$CREATE_VIRTUAL_KEYBOARD(&keyb_id,0,0,0,0);
    if (smg$enable)
 /* Setup key table */
-   { SMG$ERASE_PASTEBOARD(&paste_id);
+     { SMG$ERASE_PASTEBOARD(&paste_id, 0, 0, 0, 0, 0, 0);
      SMG$CREATE_KEY_TABLE(&key_tab); 
      colls -=2; orig_colls = colls;
      smg_flag = SMG$M_KEY_NOECHO + SMG$M_KEY_TERMINATE;
@@ -234,8 +243,8 @@ main(int argc, char *argv[])
      SMG$CREATE_VIRTUAL_DISPLAY(&i2, &colls, &status_id, 0 , 0, 0);
      SMG$CREATE_VIRTUAL_DISPLAY(&i2, &colls, &disp2_id, 0 , 0, 0);
      SMG$SET_BROADCAST_TRAPPING(&paste_id,brdcst_ast,0);
-     SMG$LABEL_BORDER(&disp1_id, &top_txt, 0, 0,&SMG$M_BOLD);
-     SMG$LABEL_BORDER(&status_id, &status_txt, 0, 0,&SMG$M_BOLD);
+     SMG$LABEL_BORDER(&disp1_id, &top_txt, 0, 0,&SMG$M_BOLD, 0, 0);
+     SMG$LABEL_BORDER(&status_id, &status_txt, 0, 0,&SMG$M_BOLD, 0, 0);
      SMG$PASTE_VIRTUAL_DISPLAY(&disp1_id, &paste_id, &i2,&i2,0);
      x = rows - 4;
      SMG$PASTE_VIRTUAL_DISPLAY(&status_id, &paste_id, &x,&i2,0);
@@ -490,7 +499,7 @@ void prev_screen(void)
 {
   int row_start, cnt;
 
-  SMG$GET_VIEWPORT_CHAR(&disp1_id, &row_start);
+  SMG$GET_VIEWPORT_CHAR(&disp1_id, &row_start, 0, 0, 0);
   cnt = row_start - 1;
   if (cnt <= 1)
      SMG$RING_BELL(&disp1_id);
@@ -508,7 +517,7 @@ void next_screen(void)
 {
   int row_start, cnt;
 
-  SMG$GET_VIEWPORT_CHAR(&disp1_id, &row_start);
+  SMG$GET_VIEWPORT_CHAR(&disp1_id, &row_start, 0, 0, 0);
   cnt = 508 - rows - row_start;
   if (cnt <= 1)
      SMG$RING_BELL(&disp1_id);
@@ -551,14 +560,14 @@ void toggle_width(void)
 /* Routine to change terminal width */
 {
   if (colls > 80)
-    SMG$CHANGE_PBD_CHARACTERISTICS(&paste_id, &i80, &colls);
+    SMG$CHANGE_PBD_CHARACTERISTICS(&paste_id, &i80, &colls, 0, 0, 0, 0);
    else           
-    SMG$CHANGE_PBD_CHARACTERISTICS(&paste_id, &i132, &colls);
+    SMG$CHANGE_PBD_CHARACTERISTICS(&paste_id, &i132, &colls, 0, 0, 0, 0);
   colls -=2;
-  SMG$CHANGE_VIRTUAL_DISPLAY(&disp1_id,0,&colls);
+  SMG$CHANGE_VIRTUAL_DISPLAY(&disp1_id,0,&colls, 0, 0, 0);
   SMG$CHANGE_VIEWPORT(&disp1_id,0,0,0,&colls);
-  SMG$CHANGE_VIRTUAL_DISPLAY(&status_id,0,&colls);
-  SMG$CHANGE_VIRTUAL_DISPLAY(&disp2_id,0,&colls);
+  SMG$CHANGE_VIRTUAL_DISPLAY(&status_id,0,&colls, 0, 0, 0);
+  SMG$CHANGE_VIRTUAL_DISPLAY(&disp2_id,0,&colls, 0, 0, 0);
 }
   
 int dfu_check_access(int *mask)
@@ -711,7 +720,7 @@ void put_status(int x)
   $DESCRIPTOR(stat_descr, outbuf);
   if (smg$enable)
   { stat_descr.dsc$w_length = strlen(outbuf);
-    SMG$PUT_CHARS(&status_id, &stat_descr, &x, &i2, &SMG$M_ERASE_LINE);
+    SMG$PUT_CHARS(&status_id, &stat_descr, &x, &i2, &SMG$M_ERASE_LINE, 0, 0, 0);
   }
 }
 
@@ -721,7 +730,7 @@ void put_disp(void)
 
   if (smg$enable)
   { to_disp.dsc$w_length = strlen(outbuf);
-    SMG$PUT_LINE(&disp1_id, &to_disp,0,0,0,&SMG$M_WRAP_CHAR,0,0);
+    SMG$PUT_LINE(&disp1_id, &to_disp,0,0,0,&SMG$M_WRAP_CHAR,0);
   }
    else printf("%s\n",outbuf);
 }

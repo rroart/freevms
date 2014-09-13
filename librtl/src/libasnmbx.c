@@ -7,6 +7,8 @@
 #include <misc.h>
 #include <descrip.h>
 #include <dvidef.h>
+#include <starlet.h>
+#include <lib$routines.h>
 
 #ifndef NOKERNEL
 #define sys$assign exe$assign
@@ -14,7 +16,7 @@
 #define sys$crembx exe$crembx
 #endif
 
-int lib$asn_wth_mbx (void * device_name , long * maximum_message_size, long * buffer_quota , short * device_channel , short * mailbox_channel) {
+int lib$asn_wth_mbx (const void * device_name , const long * maximum_message_size, const long * buffer_quota , unsigned short * device_channel , unsigned short * mailbox_channel) {
   struct _iosb iosb;
   struct item_list_3 itmlst[2];
   int retlen;

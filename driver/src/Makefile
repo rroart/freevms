@@ -1,6 +1,6 @@
-all:
+all: driver.o
 
-install: 
+install:
 #i386/random.exe i386/null.exe driver.o
 	install -d ../../rooti386/vms"$$"common/sys"$$"ldr
 #	install i386/*.exe ../../rooti386/vms"$$"common/sys"$$"ldr

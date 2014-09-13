@@ -24,7 +24,7 @@ unsigned long lib$analyze_sdesc_64 (const struct dsc$descriptor_s* descrip,
 
 unsigned long lib$ascii_to_uid();
 
-unsigned long lib$asn_wth_mbx(const void *,const long *,const long *,
+int lib$asn_wth_mbx(const void *,const long *,const long *,
 			      unsigned short *,unsigned short *);
 
 int lib$ast_in_prog(void);		
@@ -62,6 +62,8 @@ unsigned long lib$crc(const void *,const long *,const void *);
 void lib$crc_table(const unsigned long *,void *);
 
 unsigned long lib$create_dir(const void *,...);
+
+unsigned long lib$create_dir2 (char *crea_file, int all_size);
 
 unsigned long lib$create_user_vm_zone(unsigned long *,...);
 
@@ -176,7 +178,7 @@ unsigned int lib$free_ef(const unsigned int *);
 
 unsigned long lib$free_lun(const long *);
 
-unsigned long lib$free_timer(void *);
+int lib$free_timer (long * context);
 
 unsigned long lib$free_vm(const long *,const void *,...);
 
@@ -206,14 +208,17 @@ unsigned long lib$get_vm(const long *,void *,...);
 
 unsigned long lib$get_vm_page(const long *,void *);
 
-unsigned long lib$getdvi(const long *,const unsigned short *,const void *,long *,...);
+// not now: int lib$getdvi(const long *,const unsigned short *,const void *,long *,...);
+int lib$getdvi(signed int * item_code, unsigned short int * channel, void * device_name, signed int * longword_integer_value, void * resultant_string, unsigned short * resultant_length);
 
-unsigned long lib$getjpi(const long *,const unsigned long *,const void *,long *,...);
+// not now: unsigned long lib$getjpi(const long *,const unsigned long *,const void *,long *,...);
+int lib$getjpi(signed int * item_code, unsigned int * process_id, void * process_name, signed int * longword_integer_value, void * resultant_string, unsigned short * resultant_length);
 
 unsigned long lib$getqui(const long *,const long *,const long *,const void *,
 			 const unsigned long *,long *,...);
 
-unsigned long lib$getsyi(const long *,void *,...);
+// not now: unsigned long lib$getsyi(const long *,void *,...);
+int lib$getsyi(signed int * item_code, void * resultant_value, void * resultant_string, unsigned short * resultant_length, unsigned int cluster_system_id, void * node_name);
 
 int lib$ichar(const struct dsc$descriptor_s *);
 
@@ -222,7 +227,7 @@ unsigned long lib$index(const struct dsc$descriptor_s *,
 
 unsigned long lib$init_date_time_context(unsigned long *,const long *,const void *);
 
-unsigned long lib$init_timer();
+int lib$init_timer(long * context);
 
 long int lib$insert_tree(void *,void *,const unsigned long *,
 			 const int (*)(void *,void *,void *),
@@ -308,7 +313,7 @@ unsigned long lib$sfreen_dd(const unsigned *,void *);
 
 unsigned long lib$sget1_dd(const unsigned short *,void *);
 
-unsigned long lib$show_timer();
+int lib$show_timer (void * handle_address, int * code, int (*user_action_procedure)(), unsigned long user_argument_value);
 
 unsigned long lib$show_vm();
 
@@ -328,7 +333,8 @@ int lib$spanc(const void *,const unsigned char *,const unsigned char *);
 
 unsigned long lib$spawn();
 
-unsigned long lib$stat_timer(const int *,void *,...);
+// not now: unsigned long lib$stat_timer(const int *,void *,...);
+int lib$stat_timer (int * code, long * value_argument, void * handle_address);
 
 unsigned long lib$stat_vm(const int *,void *);
 

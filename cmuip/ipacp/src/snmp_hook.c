@@ -92,6 +92,7 @@ typedef unsigned long u_long;
 // not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS common definitions
 //LIBRARY "CMUIP_SRC:[CENTRAL]NETERROR";	// Network error codes
 #include <cmuip/central/include/netconfig.h>			// VMS-specific definitions
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"		// System-wide Macro definitions
 //LIBRARY "structure.h"		// System-wide structure definitions
 #include "asn1.h"			// ASN defs

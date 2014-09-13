@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/types.h>
+#include <string.h>
 
 #define ASTERISK '*'		/* The '*' metacharacter */
 #define QUESTION '?'		/* The '?' metacharacter */

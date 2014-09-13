@@ -10,8 +10,11 @@
 #define false 0
 
 #include<stdio.h>
+#include<string.h>
 
 extern char * module_name;
+
+extern char *strndup (__const char *__string, size_t __n);
 
 int out;
 

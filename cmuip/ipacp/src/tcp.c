@@ -419,6 +419,8 @@ MODULE TCP(IDENT="8.2",LANGUAGE(BLISS32),
 #include "netvms.h"	// Include Local OS Dependent stuff.
 #include <cmuip/central/include/nettcpip.h>	// TCP/IP protocols
 
+#include "cmuip.h" // needed before tcpmacros.h
+
 #include "tcp.h"			// TCP related defintions.
 #include "tcpmacros.h"		// Local (tcp) Macro defintions.
 #include "structure.h"		// Structure Definitions
@@ -444,7 +446,7 @@ MODULE TCP(IDENT="8.2",LANGUAGE(BLISS32),
 extern int   Time_Stamp(void);
 extern  Calc_CheckSum();
 extern void     MovByt();
-extern  void    swapbytes();
+extern     swapbytes();
 extern  void    cq_enqueue();
 extern  void    cq_dequeue();
 extern  void    cq_deqcopy();
@@ -1220,7 +1222,7 @@ Side Effects:
 	deleted due to timeouts.  Segment retransmission queue is examined.
 */
 
-tcp$send_data();
+int tcp$send_data();
 void    tcp$enqueue_ack();
 void    tcp$send_ack();
 void    do_probe();

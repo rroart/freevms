@@ -12,6 +12,8 @@
 #include <ssdef.h>
 #include <smgdef.h>
 
+#include "smg.h"
+
 struct viewport {
   long smg$l_link;
   int smg$l_viewport_row_start;

@@ -75,6 +75,7 @@ MODULE ICMP(IDENT="1.0B",LANGUAGE(BLISS32),
 #include "netvms.h">		// VMS specific
 #include <cmuip/central/include/nettcpip.h>		// IP & ICMP definitions
 #include "structure.h"		// TCB & Segment Structure definition
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"		// Local macros
 #include "snmp.h"
 
@@ -93,10 +94,10 @@ extern  void    ASCII_DEC_BYTES();
 
 // MacLib.mar
 extern     CALC_CHECKSUM();		// MacLib
-extern  void    swapbytes();	// MacLib
+extern      swapbytes();	// MacLib
 
 // IP.bli
-extern  void    ip$send();
+//extern  void    ip$send();
 extern  void    ip$log();
 
 // TCP_Segin

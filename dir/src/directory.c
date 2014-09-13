@@ -72,7 +72,6 @@
 #define VMSIOx on
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -121,6 +120,8 @@
 #include <hm2def.h>
 #include "../../rms/src/cache.h"
 #include "../../f11x/src/access.h"
+#include <starlet.h>
+#include<cli$routines.h>
 //#include "rms.h"
 #endif
 
@@ -185,7 +186,7 @@ unsigned dir(int userarg)
     fab.fab$b_fns = strlen(fab.fab$l_fna);
     fab.fab$l_dna = "*.*;*";
     fab.fab$b_dns = strlen(fab.fab$l_dna);
-    sts = sys$parse(&fab);
+    sts = sys$parse(&fab, 0, 0);
     if (sts & 1) {
         char dir[NAM$C_MAXRSS + 1];
         int namelen;
@@ -200,7 +201,7 @@ unsigned dir(int userarg)
         nam.nam$l_rsa = rsa;
         nam.nam$b_rss = NAM$C_MAXRSS;
         fab.fab$l_fop = FAB$M_NAM;
-        while ((sts = sys$search(&fab)) & 1) {
+        while ((sts = sys$search(&fab, 0, 0)) & 1) {
             if (dirlen != nam.nam$b_dev + nam.nam$b_dir ||
                 memcmp(rsa,dir,nam.nam$b_dev + nam.nam$b_dir) != 0) {
                 if (dirfiles > 0) {
@@ -244,11 +245,11 @@ unsigned dir(int userarg)
                 } else {
                     printf("%-19s",rsa + dirlen);
                 }
-                sts = sys$open(&fab);
+                sts = sys$open(&fab, 0, 0);
                 if ((sts & 1) == 0) {
                     printf("Open error: %d\n",sts);
                 } else {
-                    sts = sys$close(&fab);
+                    sts = sys$close(&fab, 0, 0);
                     if (file_id_sts & 1) {
                         char fileid[100];
                         sprintf(fileid,"(%d,%d,%d)",

@@ -72,6 +72,7 @@ SOFTWARE.
 
 #include "mib.h"
 
+#include "cmuip.h"
 
 u_char *
 snmp_parse_var_op(data, var_name, var_name_len, var_val_type, var_val_len, var_val, listlength)

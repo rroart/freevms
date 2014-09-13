@@ -26,6 +26,8 @@ FFFFF.7FCCBE80 F11B$aOBELIXSYS   ....          Kern
 
 // missing LKI codes, do this as privileged as show memory?
 
+int sda$getmem(const void *src, void *dest, int n);
+
 show_locks(){
   int i;
   char rsbname[15];

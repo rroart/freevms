@@ -36,10 +36,10 @@
 
 #define special_file(m) (S_ISCHR(m)||S_ISBLK(m)||S_ISFIFO(m)||S_ISSOCK(m))
 
+#if 0
 int vfs_statfs(struct super_block *sb, struct statfs *buf)
 {
 	int retval = -ENODEV;
-
 	if (sb) {
 		retval = -ENOSYS;
 		if (sb->s_op && sb->s_op->statfs) {
@@ -51,7 +51,7 @@ int vfs_statfs(struct super_block *sb, struct statfs *buf)
 	}
 	return retval;
 }
-
+#endif
 
 asmlinkage long sys_statfs(const char * path, struct statfs * buf)
 {

@@ -1,0 +1,10 @@
+#
+# This file contains rules which are shared between multiple Makefiles.
+#
+
+#
+# Common rules
+#
+
+%.o: %.c
+	$(CC) -g $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -c -o $@ $<

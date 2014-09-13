@@ -4,6 +4,10 @@
 #include <ssdef.h>
 #include <tpadef.h>
 
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+
 // or rather use diutpa.b36 and diutpamac.r36?
 
 /*

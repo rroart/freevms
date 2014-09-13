@@ -9,6 +9,9 @@
 #include <rabdef.h>
 #include <starlet.h>
 
+#include <stdlib.h>
+#include <strings.h>
+
 static struct _fabdef * output_fab = 0;
 static struct _rabdef * output_rab = 0;
 

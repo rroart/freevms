@@ -8,6 +8,13 @@
 #include<descrip.h>
 #include<stdio.h>
 #include<ssdef.h>
+#include<cli$routines.h>
+
+#include<stdlib.h>
+#include<string.h>
+
+int SYS$DELTVA(long in[2], long ret[2], int a);
+int SYS$EXPREG(int pagcnt, long ret[2], int a, int b);
 
 /* Author: Roar Thronæs */
 

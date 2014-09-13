@@ -9,6 +9,10 @@
 #include <ssdef.h>
 #include <starlet.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 // lots of missing checks, bugs and endianness here
 // but at least the basic functionality is in place
 

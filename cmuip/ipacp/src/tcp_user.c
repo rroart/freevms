@@ -191,6 +191,7 @@ MODULE TCP_USER(IDENT="3.7",LANGUAGE(BLISS32),
 #include <cmuip/central/include/netcommon.h>// Network common defs
 #include <cmuip/central/include/nettcpip.h>	// TCP/IP protocols
 #include "structure.h"		// TCP system data structure definitions
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"		// System macro definitions
 #include "tcp.h"			// TCP related definitions
 
@@ -270,14 +271,14 @@ extern  void    IP$SET_HOSTS();
 extern     void set_ip_device_offline();
 extern     User_Requests_Avail();
 extern     void MOVBYT();
-extern     void swapbytes();
+extern      swapbytes();
 extern     Time_Stamp();
 
 // TCP.BLI
 
 extern     tcp$send_ctl();
 extern  void    tcp$enqueue_ack();
-extern  void    tcp$send_data();
+extern      tcp$send_data();
 extern  void    tcp$set_tcb_state();
 extern  void    tcp$inactivate_tcb();
 extern     tcp$tcb_close();

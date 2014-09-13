@@ -18,7 +18,7 @@ install: all
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
 vmount.o: vmount.c
-	gcc -g -c ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c $(CFLAGS) -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/vmount.o: vmount.c
 	install -d pic

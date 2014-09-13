@@ -131,6 +131,7 @@ MODULE ARP( IDENT="1.9A",LANGUAGE(BLISS32),
 #include "netvms.h"   // VMS peculiarities.
 #include <cmuip/central/include/netcommon.h>   // CMU-OpenVMS/IP common decls
 #include <cmuip/central/include/netconfig.h>   // Device interface specs.
+#include "cmuip.h" // needed before netdevices.h
 #include <cmuip/central/include/netdevices.h>  // Helpfull macros...
 
 #include "xedrv.h"

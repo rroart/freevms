@@ -76,6 +76,7 @@ MODULE TCP_MECH(IDENT="1.0c",LANGUAGE(BLISS32),
 #include <cmuip/central/include/netcommon.h> // Network common defs
 #include <cmuip/central/include/nettcpip.h>	// TCP/IP protocols
 #include "structure.h"		// TCP system data structure definitions
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"		// System macro definitions
 #include "tcp.h"			// TCP related definitions
 #include "snmp.h"			// Simple Network Management Protocol

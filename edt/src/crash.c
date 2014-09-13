@@ -16,6 +16,7 @@
 //---2001-10-06
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "edt.h"
 
 void crash (char *message)

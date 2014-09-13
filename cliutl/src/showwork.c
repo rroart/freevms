@@ -4,6 +4,9 @@
 // Author. Roar Thronæs.
 
 #include <stdio.h> 
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <ssdef.h> 
 #include <descrip.h> 
 #include <jpidef.h>

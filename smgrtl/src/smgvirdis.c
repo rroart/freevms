@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <ssdef.h>
+#include <smg$routines.h>
+
+#include "smg.h"
 
 struct virtual_display {
   long smg$l_viewport;

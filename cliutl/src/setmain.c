@@ -12,6 +12,8 @@
 
 int do_ret = 0;
 
+set_security();
+
 main() {
 
   set_security();

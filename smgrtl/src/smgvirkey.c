@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ssdef.h>
+#include <starlet.h>
 
 struct virtual_keyboard {
   short int smg$w_chan;

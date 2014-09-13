@@ -37,6 +37,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #define GTY(x)
 #define HOST_BITS_PER_WIDE_INT 64
@@ -71,6 +72,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #endif
 
 long ggc_calloc (long s1, long s2);
+const * ggc_alloc_string (const char *contents, int length);
 
 #define htab_create_ggc(SIZE, HASH, EQ, DEL) \
   htab_create_alloc (SIZE, HASH, EQ, DEL, ggc_calloc, NULL)

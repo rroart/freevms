@@ -66,6 +66,8 @@ SOFTWARE.
 
 #include "asn1.h"
 
+#include <strings.h>
+
 #ifndef NULL
 #define NULL	0
 #endif

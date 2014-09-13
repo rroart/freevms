@@ -11,6 +11,9 @@
 #include <iodef.h>
 #include <ssdef.h>
 #include <smgdef.h>
+#include <starlet.h>
+#include <smg$routines.h>
+#include "smg.h"
 
 int smgunix = 1;
 

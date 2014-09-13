@@ -46,7 +46,4 @@ pic/%.o: %.c
 	install -d pic
 	$(CC) -fpic -fPIC $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -c -o $@ $<
 
-%.o: %.c 
-	install -d pic
-	$(CC) -g ${OLDINCLUDE} $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -c -o $@ $<
-
+include $(TOPDIR)/Rules.make.freevms

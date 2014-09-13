@@ -118,6 +118,8 @@
 #include <hm2def.h>
 #include "../../rms/src/cache.h"
 #include "../../f11x/src/access.h"
+#include <starlet.h>
+#include <cli$routines.h>
 //#include "rms.h"
 #endif
 
@@ -171,7 +173,7 @@ unsigned del(int userarg)
     fab.fab$l_nam = &nam;
     fab.fab$l_fna = c;
     fab.fab$b_fns = strlen(fab.fab$l_fna);
-    sts = sys$parse(&fab);
+    sts = sys$parse(&fab, 0, 0);
     if (sts & 1) {
         if (nam.nam$b_ver < 2) {
             printf("%%DELETE-F-NOVER, you must specify a version!!\n");
@@ -179,10 +181,10 @@ unsigned del(int userarg)
             nam.nam$l_rsa = rsa;
             nam.nam$b_rss = NAM$C_MAXRSS;
             fab.fab$l_fop = FAB$M_NAM;
-            while ((sts = sys$search(&fab)) & 1) {
-	      sts = sys$open(&fab);
-	      sts = sys$close(&fab);
-                sts = sys$erase(&fab);
+            while ((sts = sys$search(&fab, 0, 0)) & 1) {
+	      sts = sys$open(&fab, 0, 0);
+	      sts = sys$close(&fab, 0, 0);
+	      sts = sys$erase(&fab, 0, 0);
                 if ((sts & 1) == 0) {
                     printf("%%DELETE-F-DELERR, Delete error: %d\n",sts);
                 } else {

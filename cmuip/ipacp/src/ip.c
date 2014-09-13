@@ -221,6 +221,7 @@ MODULE IP(IDENT="4.5c",LANGUAGE(BLISS32),
 #include <cmuip/central/include/nettcpip.h>		// IP definitions
 #include "netvms.h"		// VMS specifics
 #include "structure.h"		// TCB & Segment Structure definition
+#include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"		// Local macros
 #include "snmp.h"
 
@@ -259,7 +260,7 @@ extern  void    QL_FAO();
 extern     Calc_checksum();
 //extern     Gen_Checksum();
 extern  void    MovByt();
-extern  void    swapbytes();
+extern      swapbytes();
 
 // Memgr.bli
 

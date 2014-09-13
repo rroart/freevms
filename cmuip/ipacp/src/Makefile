@@ -22,12 +22,12 @@ install: all
 	install -d ../../../rooti386/vms"$$"common/sysexe
 	install i386/ipacp ../../../rooti386/vms"$$"common/sysexe
 
-CFLAGS_NOKERNEL = -I$(TOPDIR)/cmuip/central/include -I$(TOPDIR)/linux/include -I$(TOPDIR) ${OLDINCLUDE} -DNOKERNEL -D__KERNEL__
+CFLAGS_NOKERNEL =  $(CFLAGS) -I$(TOPDIR)/cmuip/central/include -I$(TOPDIR)/linux/include -I$(TOPDIR) -DNOKERNEL -D__KERNEL__
 
 nokernel_objs := $(addprefix nokernel/,$(obj-y2))
 nokernel/%.o: %.c 
 	install -d nokernel
-	$(CC) -c -I../../../starlet/src -I../../../librtl/src -I../../../lib/src/ -I../../../sys/src $(CFLAGS_NOKERNEL) -o $@ $<
+	$(CC) -c $(CFLAGS_NOKERNEL) -o $@ $<
 
 ifeq ($(ARCH),x86_64)
 nokernel/maclib.o: maclib.c 
@@ -44,3 +44,5 @@ i386/ipacp${NOEXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL) $(VMLINUX)
 	install -d i386
 	gcc -s -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) $(EXTERNAL) $(VMSLIBS) $(CHECKSUM) -lc $(LINKVMLINUX) -o i386/ipacp${NOEXE}
 	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) $(EXTERNAL) $(VMSLIBS) $(CHECKSUM) -lc $(LINKVMLINUX) -o i386/ipacpd${NOEXE}
+
+include $(TOPDIR)/Rules.make.freevms

@@ -10,6 +10,11 @@
 #define false 0
 
 #include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include<dlfcn.h>
 #include<sys/mman.h>
 
@@ -21,6 +26,7 @@
 #include<ssdef.h>
 #include<va_rangedef.h>
 #include<climsgdef.h>
+#include<starlet.h>
 
 #include "tree.h"
 #include "cld.h"
@@ -760,7 +766,7 @@ unsigned int cli$dispatch(int userarg){
   if (!internal) {
     if (handle==0) {
       //printf("after image\n");
-      sys$rundwn();
+      sys$rundwn(0);
     } else {
       dlclose(handle);
     }
@@ -845,7 +851,7 @@ static int mymyuserfunc(int dummy,int (*func)(),void * start, long count) {
 }
 
 // check. related to CLI supervisor
-int mymymyuserfunc(int (*func)(),void * start, long count) {
+int mymymyuserfunc(int (*func)(),void * start, long count, int dum0, int dum1) {
   register int __res;
 #ifdef __i386__
   __asm__ ( "movl %%ebp,%%eax\n\t" :"=a" (__res) );

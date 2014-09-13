@@ -1,6 +1,8 @@
 #include <descrip.h>
 #include <misc.h>
 #include <ssdef.h>
+#include <lib$routines.h>
+#include <starlet.h>
 
 int lib$getsyi(signed int * item_code, void * resultant_value, void * resultant_string, unsigned short * resultant_length, unsigned int cluster_system_id, void * node_name) {
   struct _iosb iosb;
@@ -39,7 +41,7 @@ int lib$getsyi(signed int * item_code, void * resultant_value, void * resultant_
   itmlst[0].bufaddr=bufaddr;
   itmlst[1].item_code=0;
 
-  sts=sys$getsyiw(efn,cluster_system_id,node_name,itmlst,&iosb,0,0,0);
+  sts=sys$getsyiw(efn,cluster_system_id,node_name,itmlst,&iosb,0,0);
 
   if ((sts&1)==0)
     return sts;

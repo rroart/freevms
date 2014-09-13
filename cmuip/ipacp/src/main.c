@@ -462,6 +462,9 @@ extern     mount_ip_device();
 ! External Data
 #endif
 
+#include <stdio.h>
+#include <string.h>
+
 #include <ssdef.h>
 #include <descrip.h>
 #include <lnmdef.h>
@@ -473,10 +476,14 @@ extern     mount_ip_device();
 #include <netcommon.h>
 #include <nettcpip.h>
 
+#include <starlet.h>
+
 #include "netvms.h"
+#include "cmuip.h" // need this before tcpmacros
 #include "tcpmacros.h"
 #include "structure.h"
 #include "neterror.h"
+
 
 #ifndef NOKERNEL
 #define sys$bintim exe$bintim
@@ -763,7 +770,7 @@ Side Effects:
 // processing.
 
 	    sleeping = FALSE;
-	    sys$canwak();
+	    sys$canwak(0, 0);
 	    } else {
 	    XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: Not sleeping!/",0);
 	    }
@@ -986,7 +993,7 @@ void RESET_PROCNAME (void) {
 
 // Reset our process name.
 
-    sys$setprn(namdsc);
+    sys$setprn(&namdsc);
 }
 
 void ip4acp_main(void) {
@@ -1006,7 +1013,7 @@ struct dsc$descriptor myname;
   items[0].retlenaddr=&eqv_len;
   bzero(&items[1],sizeof(struct item_list_3));
 
-  rc = sys$trnlnm(0,tabnam,lognam,0,items);
+  rc = sys$trnlnm(0,&tabnam,&lognam,0,items);
 
   if (rc == SS$_NOLOGNAM || rc==0) {
 	myname.dsc$w_length = 14; // set the proper length since fixed string.

@@ -9,6 +9,8 @@
 #include <starlet.h>
 #include <misc.h>
 
+int cliutl$getmem(const void *src, void *dest, int n);
+
 show_memory(){
   int sts;
   int i;

@@ -21,24 +21,33 @@
 #pragma message disable(INCOMPARRY)
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <ssdef.h>
 #include <atrdef.h>
 #include <libdef.h>
-#include <stdio.h>
 #include <descrip.h>
 #include <climsgdef.h>
 #include <syidef.h>
 #include <rms.h>
+#include <starlet.h>
 #include "fibdef.h"
 #include "file_hdr.h"
 #include <iodef.h>
 #include <sor$routines.h>
+#include <cli$routines.h>
+#include <lib$routines.h>
+#include <smg$routines.h>
 #include <smgdef.h>
 #include <trmdef.h>
 #ifndef IO$M_MOVEFILE
 #define IO$M_MOVEFILE 4096
 #endif
 #include "smgdef2.h"
+
+#include "dfu.h"
 
 #define globalvalue int
 #define TRUE 1
@@ -93,7 +102,7 @@ static struct {unsigned short iosb_1;
   unsigned int length; short spec; 
   } iostat;
 
-globalvalue DFU_ASSIGN, DFU_NOPRIV;
+extern globalvalue DFU_ASSIGN, DFU_NOPRIV;
 
 int display_stat();
 
@@ -854,7 +863,7 @@ int delete_command(mask)
 /* Nolog entered */
   status = parse_item("nolog", &dummy_descr, 0, &matnolog, 2);
 
-  if (matstat) status = lib$init_timer();
+  if (matstat) status = lib$init_timer(0);
 /* Now follow different code path depending on the /DIRECTORY qualifier */
   if (!matdir)
   {
@@ -1047,7 +1056,7 @@ int defrag_command(mask)
   { sprintf(outbuf,"%%DFU-E-NOFILSPEC, No file specified on command line");
     put_disp(); return(SS$_NOSUCHFILE);
   }
-  if (matstat) status = lib$init_timer();
+  if (matstat) status = lib$init_timer(0);
   x = strindex(&fname," ",86); fname[x] = '\0';
 
   { sprintf(outbuf,"%%DFU-I-DEFRAG, Start defragmenting file(s) ...");
@@ -1342,14 +1351,14 @@ int directory_command(mask)
 /* Follow different code path for this function */
   { /* Call build_dir_table. This function scans indexf.sys, builds 
 	a directory table, and calls scan_directories */
-    if (matstat) status = lib$init_timer();
+    if (matstat) status = lib$init_timer(0);
     status = build_dir_table(&dname, matoutput);
     if (matstat) lib$show_timer(0,0,display_stat,0);
     fclose(fp);
     return(status); /*Thats all*/
   }
    else
-  { if (matstat) status = lib$init_timer();
+  { if (matstat) status = lib$init_timer(0);
     if (matcreate) create_dir(&dname,alloc);
      else
     { if (dname[0] == '@')
@@ -1385,7 +1394,7 @@ int directory_command(mask)
   }
   sprintf(outbuf,"\n%%DFU-I-READY, DIRECTORY command ready");
   put_disp();
-  if (matstat) status = lib$show_timer(0,0,display_stat);
+  if (matstat) status = lib$show_timer(0,0,display_stat,0);
   fclose(fp);
   return(1);
 }
@@ -1434,14 +1443,14 @@ void create_dir (char *crea_file, int all_size)
   nam.nam$l_esa = (char *) &exp_str;
     
   for (i = 1; i <= 255; i++) buf[i] = 0;
-  status=sys$create(&fab);
-  if (status & 1) status = sys$connect(&rab);
-  if (status & 1) status = sys$write(&rab);
-  if (status & 1) status = sys$close(&fab);
+  status=sys$create(&fab, 0, 0);
+  if (status & 1) status = sys$connect(&rab, 0, 0);
+  if (status & 1) status = sys$write(&rab, 0, 0);
+  if (status & 1) status = sys$close(&fab, 0, 0);
   
   fab.fab$l_fop = FAB$M_UFO;
   fab.fab$l_nam = &nam;
-  if (status & 1)  status = sys$open(&fab);
+  if (status & 1)  status = sys$open(&fab, 0, 0);
   channel = fab.fab$l_stv;
   uchar = FH2$M_DIRECTORY;
   fib.fib$l_exsz = 0;

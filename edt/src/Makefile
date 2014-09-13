@@ -35,7 +35,7 @@ OBJS =	\
 
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
-CC = gcc -g -O2 -c ${OLDINCLUDE} 
+CC = gcc -g -O2 -c $(CFLAGS)
 
 EXTERNAL =
 
@@ -167,3 +167,4 @@ i386/edt${EXE}: $(LIB) $(EXTERNAL)
 	install -d i386
 	$(LINKER) $(LINKPRE) $(OBJS) $(EXTERNAL) $(LIBGCC) --start-group $(LINKPOST) $(LIBGCC) --end-group -o i386/edt${EXE}
 
+include $(TOPDIR)/Rules.make.freevms

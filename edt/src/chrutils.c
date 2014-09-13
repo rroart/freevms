@@ -16,6 +16,7 @@
 //---2001-10-06
 
 #include <stdio.h>
+#include <string.h>
 #include "edt.h"
 
 char *skipspaces (char *s)

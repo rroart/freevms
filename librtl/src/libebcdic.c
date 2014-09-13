@@ -10,6 +10,8 @@
 #include <ssdef.h>
 #include <starlet.h>
 
+#include <str$routines.h>
+
 unsigned char lib$ab_asc_ebc_not[256] = {
     0,  1,  2,  3, 55, 45, 46, 47, 22,  5, 37, 11, 12, 13, 14, 15,
    16, 17, 18, 19, 60, 61, 50, 38, 24, 25, 63, 39, 28, 29, 30, 31,
