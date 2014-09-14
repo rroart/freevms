@@ -51,8 +51,6 @@
 #define SYS$GETSYIW sys$getsyiw
 #define SYS$GETDVIW sys$getdviw
 
-typedef unsigned long Boolean;
-
 typedef struct _usg { int owner, flag, rsize, asize, hdr;};
 
 typedef struct _qb { int flags, uic_long, usage, permquota, 

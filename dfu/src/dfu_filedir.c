@@ -72,8 +72,6 @@
 #define NAM _namdef
 #define RAB _rabdef
 
-typedef unsigned long Boolean;
-
 typedef struct _d_e {unsigned short size, versionlim;
           unsigned char flags, count, name[]; };
 typedef struct _f_e {unsigned short version, fid_num, fid_seq;

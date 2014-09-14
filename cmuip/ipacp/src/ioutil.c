@@ -134,7 +134,9 @@ extern 	void FATAL_FAO(long, ...);
 
 #include <stdarg.h>
 #include <linux/config.h>
+#ifdef __x86_64__
 #include <linux/mm.h>
+#endif
 
 #ifndef NOKERNEL
 #define sys$open exe$open

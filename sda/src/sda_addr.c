@@ -4,12 +4,19 @@
 // Author. Roar Thronæs.
 
 #if 0
+// makes overlapping type trouble
 #include <stdio.h> 
+#include <stdlib.h>
+#else
+int printf(const char *format, ...);
+long int strtol(const char *nptr, char **endptr, int base);
 #endif
+
 #include <ssdef.h> 
 #include <descrip.h> 
 #include <starlet.h>
 #include <misc.h>
+#include <cli$routines.h>
 
 #define __KERNEL__
 #include <linux/config.h>
@@ -22,6 +29,10 @@
 #include <linux/mm.h>
 #include <system_data_cells.h>
 #undef __KERNEL__
+
+int sda$getmem(const void *src, void *dest, int n);
+int sda$getmemlong(const void *src, void *dest);
+int sda_find_addr(char * name, long * addr);
 
 int show$address(int mask) {
 #ifdef __i386__
