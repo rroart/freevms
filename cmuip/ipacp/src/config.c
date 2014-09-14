@@ -254,9 +254,7 @@ extern 	void FATAL_FAO(long, ...);
 #ifndef NOKERNEL
 #include <asm/uaccess.h>
 #endif
-#ifdef __i386__
 #include <string.h>
-#endif
 
 #ifndef NOKERNEL
 #define sys$open exe$open
