@@ -693,6 +693,7 @@ Side Effects:
 	$DESCRIPTOR(Long_Nap,"0 12:0:0.0");		// hours.
     //    LITERAL
 #define	SHORT_NAP (20*CSEC)
+#define	SHORTER_NAP (2*CSEC)
     extern
 	tcb_count;
 #if 0
@@ -723,7 +724,7 @@ Side Effects:
 //		Delay = 100 ;
 		delay = 0 ;
 	    }
-	    rto = MINU(SHORT_NAP,delay) ;
+	    rto = MINU(SHORTER_NAP,delay) ;
 	    if (rto <= 0) {
 		XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: No sleep, RTO=!UL!/",0,rto);
 		rto = 0;
