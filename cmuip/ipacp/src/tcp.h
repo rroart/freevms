@@ -219,24 +219,24 @@ struct  tcb_structure {
     void * ucb_adrs;	// UCB address for this TCB
     unsigned int vtcb_index;	// VALID_TCB index for this TCB
     unsigned int user_id;	// Owning process ID
-    unsigned int rx_timer;	// Time to do retransmit for this TCB
-    unsigned int rx_timeout;	// Retransmission time-out for TCB
+    unsigned long long rx_timer;	// Time to do retransmit for this TCB
+    unsigned long long rx_timeout;	// Retransmission time-out for TCB
     signed int rx_count;	// # of retransmissions done
     unsigned int rx_seq;	// Retransmission sequence start
     unsigned int rx_ctl;	// Control segment type
-    unsigned int xmit_start_time;	// Time first item queued on RX timer
+    unsigned long long xmit_start_time;	// Time first item queued on RX timer
   union {
-    unsigned int time_wait_timer;	// Time_Wait Counter.
-    unsigned int ack_timer;	// spontaneous ack timer.
+    unsigned long long time_wait_timer;	// Time_Wait Counter.
+    unsigned long long ack_timer;	// spontaneous ack timer.
   };
-    unsigned int delayed_ack_timer;	// Delayed ACK timer.
-    unsigned int squench_timer;	// Source Quench timer.
+    unsigned long long delayed_ack_timer;	// Delayed ACK timer.
+    unsigned long long squench_timer;	// Source Quench timer.
     unsigned int user_timeval;	// Amount of time before idle
-    unsigned int user_timeout;	// Time which connection will be closed
-    unsigned int probe_time;	// time when we need to probe again
-    unsigned int connection_timeout;	// Time which connection will be reset.
-    unsigned int inactive_timeout;	// time which conn will be deleted.
-    unsigned int function_timer;	// User function timeout.
+    unsigned long long user_timeout;	// Time which connection will be closed
+    unsigned long long probe_time;	// time when we need to probe again
+    unsigned long long connection_timeout;	// Time which connection will be reset.
+    unsigned long long inactive_timeout;	// time which conn will be deleted.
+    unsigned long long function_timer;	// User function timeout.
     void * tvtdata;	// Pointer to TVT data block if IS_TVT
     void (* timeout_routine)();	// For TVT's, internal timeout routine
     void * argblk;	// Points at user's i/o request argblk.
@@ -254,7 +254,7 @@ struct  tcb_structure {
     signed int inactive_code;	// Reason TCB was set inactive.
     unsigned int ack_size;	// # of data bytes to be ack'ed.
     unsigned int snd_ack_threshold;	// Number of bytes before window update
-    unsigned int snd_delay_timer;	// Time to wait before forcing send
+    unsigned long long snd_delay_timer;	// Time to wait before forcing send
   union {
     unsigned int tcb$flags;	// Reserve some space for flags
     struct {

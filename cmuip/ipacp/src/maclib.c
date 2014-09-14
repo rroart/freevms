@@ -1385,7 +1385,7 @@ static int getmem(const void *src, void *dest, int n) {
 //--
 
 //Entry	Time_Stamp, 0
-int Time_Stamp()
+long long Time_Stamp()
 {
   long R1,R2,R3,R4,R5,R6,R7,R8,R9;
   long long R0;

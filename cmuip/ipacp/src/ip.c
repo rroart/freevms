@@ -237,7 +237,6 @@ MODULE IP(IDENT="4.5c",LANGUAGE(BLISS32),
 #define Calc_Checksum(x,y) ip_compute_csum(y,x)
 #define Gen_Checksum(a,b,c,d,e) csum_tcpudp_magic(c,d,a,e,csum_partial(b,a,0))
 
-extern     TIME_STAMP();
 extern  void    LOG_FAO();
 extern  void    LOG_OUTPUT();
 #if 0
@@ -336,7 +335,7 @@ unsigned short     ra$bufsize	;	// Size of buffer
 void *     ra$data	;	// Pointer to start of protocol data in buffer
 void *     ra$datend	;	// Pointer to first free byte in buffer
 unsigned int     ra$octet	;	// Fragment octet offset we are waiting for
-unsigned int     ra$timeout	;// Timer for how long to wait for fragments
+unsigned long long     ra$timeout	;// Timer for how long to wait for fragments
     };
 
 #define    RA$DATA_SIZE sizeof(struct RA$DATA_BLOCK)
@@ -1551,7 +1550,7 @@ void IP_FRAGMENT_CHECK  (void)
 //
     {
       struct RA$DATA_BLOCK * RAPTR;
-    signed long
+    signed long long
 	NOW,
 	RANXT;
 

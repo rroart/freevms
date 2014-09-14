@@ -443,7 +443,6 @@ MODULE TCP(IDENT="8.2",LANGUAGE(BLISS32),
 
 // MACLIB.MAR
 
-extern int   Time_Stamp(void);
 extern  Calc_CheckSum();
 extern void     MovByt();
 extern     swapbytes();
@@ -895,9 +894,9 @@ Side Effects:
 
  void    Build_Header();
 
-tcp$check_rexmit_queue(struct tcb_structure * tcb)
+long long tcp$check_rexmit_queue(struct tcb_structure * tcb)
     {
-    unsigned long
+    unsigned long long
 	now	,
 	nxtime	,
       delta;
@@ -1082,7 +1081,7 @@ void rexmit_enqueue(tcb,SEQsize,CTLTYPE)
     REGISTER
 	struct Queue_Blk_Structure(QB_RT_Fields) * QB;
 #endif
-    unsigned long
+    unsigned long long
 	now;
 
     now = Time_Stamp();		// get current time
@@ -1149,7 +1148,7 @@ Side Effects:
 void tcp$dump_tcb ( struct tcb_structure * tcb )
     {
       char fhstr_str[20], lhstr_str[20];
-    unsigned long
+    unsigned long long
 	now	,
       rxtime	;
     struct dsc$descriptor
@@ -1227,7 +1226,7 @@ void    tcp$enqueue_ack();
 void    tcp$send_ack();
 void    do_probe();
 
-Check_TCB ( struct tcb_structure * tcb , signed long Idx , unsigned long now, unsigned long * nxtime ) // check switch if
+Check_TCB ( struct tcb_structure * tcb , signed long Idx , unsigned long now, unsigned long long * nxtime ) // check switch if
     {
 
     if ($$LOGF(LOG$TCBCHECK+LOG$TCBDUMP))
@@ -1338,7 +1337,7 @@ Check_TCB ( struct tcb_structure * tcb , signed long Idx , unsigned long now, un
     [OTHERWISE]: 
 #endif
 	{
-	unsigned long
+	unsigned long long
 		delay,
 		min_time,
 		rx_time ;
@@ -1464,12 +1463,12 @@ Side Effects:
 	deleted due to timeouts.  Segment retransmission queue is examined.
 */
 
-tcp$service_connections (void)
+long long tcp$service_connections (void)
 {
   extern	VTCB_Scan();
-  register unsigned long now;
+  register unsigned long long now;
   register struct tcb_structure * tcb;
-  unsigned long nxtime;
+  unsigned long long nxtime;
   signed long count;
   //  struct _iosbdef ios;
 
@@ -1573,7 +1572,7 @@ tcp$send_data(struct tcb_structure * tcb)
 {
   struct segment_structure * seg;
   struct queue_blk_structure(qb_send_fields) * qb;
-  unsigned long
+  unsigned long long
     now,
     delay;
   signed long
@@ -1831,7 +1830,7 @@ Side Effects:
 
 void tcp$enqueue_ack(struct tcb_structure * tcb)
     {
-    unsigned long
+    unsigned long long
 	delay,
 	now;
 

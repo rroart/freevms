@@ -683,7 +683,7 @@ Side Effects:
 	set before hibernation to reduce system impact.
 */
 
-	void  wait_for_something_2_do(unsigned nxtime) {
+	void  wait_for_something_2_do(unsigned long long nxtime) {
 	  //    BIND
 	// Range of pages to purge from WS.
 #if 0
@@ -700,8 +700,8 @@ Side Effects:
 	qb: REF Queue_Blk_Structure(QB_RT_Fields);
 #endif
     //    LOCAL
-	unsigned now,
-	  rto,
+    unsigned long long now;
+	  unsigned rto,
 	  delay;
       char Big_Sleep = FALSE;
 	unsigned long long BTime;	// Binary rep of time.
@@ -924,7 +924,7 @@ void Main (void) {
 
 // Main processing loop....till forever or time 2 Exit.
     do {
-	    long nxtime ;
+	    long long nxtime ;
 
 	SEG$Process_Received_Segments();
 	user$process_user_requests();
@@ -1078,7 +1078,7 @@ struct dsc$descriptor myname;
 // Main processing loop....till forever or time 2 Exit.
 
     do {
-	    unsigned long nxtime;
+	    unsigned long long nxtime;
 
 	SEG$Process_Received_Segments();
 	user$process_user_requests();

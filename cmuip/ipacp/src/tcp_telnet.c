@@ -160,7 +160,6 @@ extern  void    tcp$enqueue_ack();
 extern  void    tcp$send_ack();
 extern     tcp$send_data();
 extern     tcp$tcb_init();
-extern     TIME_STAMP();
 extern     check_unique_conn();
  void    Conect_Insert();
 
@@ -1392,7 +1391,7 @@ void TCP_WRITE(TVT)
 	struct TVT$BLOCK * TVT;
     {
       struct tcb_structure * TCB;
-    unsigned long
+    unsigned long long
       Now;
 signed long	CHWMAX,
 	CHWCNT,

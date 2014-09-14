@@ -60,7 +60,7 @@ struct  XE_Interface_Structure
   void *     XEI$ARP_Block		;
   unsigned short     XEI$Phy_Size		;
   unsigned char     xei$phy_addr		[6];
-  unsigned int     XEI$restart_time		;
+  unsigned long long     XEI$restart_time		;
   unsigned short     XEI$restart_count		;
   unsigned short     XEI$retry_count		;
   unsigned short     XEI$max_retry		;

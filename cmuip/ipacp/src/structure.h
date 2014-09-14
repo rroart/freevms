@@ -210,7 +210,7 @@ struct qb_send_fields
   signed  int     sn$size;	// # of bytes to send.
   void *     sn$data ;		// Start of data buffer.
   void *     sn$uargs;		// Address of user arg blk.
-  signed short int     sn$timeout;	// connection timeout (time).
+  unsigned long long    sn$timeout;	// connection timeout (time).
   union {
     signed char     sn$flags;
     struct {
@@ -256,7 +256,7 @@ struct qb_nr_fields
   signed int     nr$data_size;	// # of data bytes available.
   void *     nr$uptr;		// pointer to new data
   signed int     nr$ucount;	// count of new data
-  signed int     nr$timeout;
+  signed long long     nr$timeout;
   signed int     nr$src_adrs;	// Internet address.
   signed int     nr$dest_adrs;	// Internet address.
   signed short     nr$src_port;		// SYN wait list: Source Port

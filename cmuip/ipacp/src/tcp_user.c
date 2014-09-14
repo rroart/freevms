@@ -272,7 +272,6 @@ extern     void set_ip_device_offline();
 extern     User_Requests_Avail();
 extern     void MOVBYT();
 extern      swapbytes();
-extern     Time_Stamp();
 
 // TCP.BLI
 

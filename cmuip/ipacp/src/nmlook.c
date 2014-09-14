@@ -155,7 +155,6 @@ extern  void    LOG_FAO();
 #if 0
 extern  void    OPR_FAO();
 #endif
-extern     Time_Stamp();
 extern     user$clock_base();
 
 extern signed long
@@ -724,7 +723,7 @@ void NML$DUMP (void)
     {
       struct NQENTRY * NQE;
       struct NQENTRY * PNQE;
-    signed long
+    signed long long
 	NOW;
 
     NOW = Time_Stamp();

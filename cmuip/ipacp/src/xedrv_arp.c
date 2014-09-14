@@ -152,7 +152,6 @@ extern
 
 
 // NETMACLIB.OBJ
-extern     Time_Stamp();
 extern     swapbytes();
 
 // NETDEVICES.OBJ
@@ -217,7 +216,7 @@ MACRO ARP_BLK = BLOCK->ARP_BLK_LEN FIELD(ARP_BLK_FIELDS) %;
 struct ACACHE_BLK
   {
     void  *   AC$NEXT	;	// Next entry on hash chain
-    unsigned int     AC$EXPIRE	; // Expiration time of this entry
+    unsigned long long     AC$EXPIRE	; // Expiration time of this entry
     unsigned int     AC$RFTIME	; // Next time to try refresh
     void *     AC$DEVICE	;	// pntr to dev_config entry of this address
     unsigned int     AC$IPADDR	;	// IP address
@@ -438,8 +437,8 @@ struct ACACHE_BLK * ACPTR;
     else
 	{			// Found it - copy cached data and give success
 	signed long
-	    HWLEN,
-	    NOW,
+	  HWLEN;
+	    signed long long NOW,
 	    CTIME;
 
 // Ignore this entry if it isn't valid yet

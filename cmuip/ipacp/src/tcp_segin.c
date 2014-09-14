@@ -417,7 +417,6 @@ extern  void    NML$GETNAME();
 
 // MACLIB.MAR
 
-extern     Time_Stamp();
 extern     swapbytes();
 
 // IOUTIL.BLI
@@ -1258,7 +1257,7 @@ X:  {
 
 //SBTTL "Timeout_Syn_Wait_List - Check SYN wait list for expired entries"
 
-void SEG$Timeout_Syn_Wait_List(unsigned Now) 
+void SEG$Timeout_Syn_Wait_List(unsigned long long Now) 
     {
 struct queue_blk_structure(qb_nr_fields) * QB;
     signed long

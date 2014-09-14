@@ -234,7 +234,6 @@ MODULE XE_DRIVER(IDENT="5.0a",LANGUAGE(BLISS32),
 #endif
 
 // NETMACLIB.OBJ
-extern    Time_Stamp();
 extern     swapbytes();
 
 // NETDEVICES.OBJ
@@ -678,8 +677,8 @@ void XE_Shutdown ( XE_Int , restart )
 	struct XE_Interface_Structure * XE_Int;
     {
     signed long
-	RC,
-      now;
+      RC;
+      signed long long now;
      Device_Configuration_Entry * dev_config;
 	 struct XE_iosb_structure IOS_, * IOS=&IOS_;
 
@@ -751,7 +750,7 @@ void XE_Shutdown ( XE_Int , restart )
 
 XE$CHECK ( Device_Configuration_Entry * dev_config )
     {
-    signed long
+    signed long long
 	now;
 	struct XE_Interface_Structure * XE_Int = dev_config-> dc_dev_interface  ;
 

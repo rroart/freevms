@@ -399,7 +399,6 @@ extern     user_requests_avail();
 extern      VMS_IO$POST();
 extern     void MOVBYT();
 extern     void SwapBytes();
-extern     Time_Stamp();
 
 // NMLOOK.BLI
 
