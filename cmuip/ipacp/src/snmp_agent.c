@@ -45,6 +45,10 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
+#ifdef __i386__
+#define _I386_STRING_H_
+#endif
+
 #ifdef KINETICS
 #include "gw.h"
 #include "ab.h"

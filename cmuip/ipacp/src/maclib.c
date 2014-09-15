@@ -192,6 +192,10 @@
 
 // VMS External Definitions.
 
+#ifdef __i386__
+#define _I386_STRING_H_
+#endif
+
 #include <arbdef.h>		// Access Rights Block defs.
 #include <aqbdef.h>		// ACP Queue Block
 	  // not yet #include <chfdef.h>		// Condition Handler Facility.
@@ -222,14 +226,16 @@
 #define _LINUX_STRING_H_
 	  //#include <linux/slab.h>
 #include <linux/types.h>
-#endif
 #include <linux/sched.h>
+#endif
 
 #ifdef __x86_64__
 #include <string.h>
 #endif
 
+#ifdef __x86_64__
 #include <linux/sched.h>
+#endif
 
 #include <system_data_cells.h>
 

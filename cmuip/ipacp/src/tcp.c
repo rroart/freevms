@@ -412,6 +412,9 @@ MODULE TCP(IDENT="8.2",LANGUAGE(BLISS32),
 
 // Include System libraries.
 
+#ifdef __i386__
+#include <net/checksum.h>
+#endif
 #include <starlet.h>	// VMS system definitions
 // not yet #include <cmuip/central/include/netxport.h>	// Bliss transportable library defs.
 #include <cmuip/central/include/neterror.h>	// Network error codes
@@ -432,7 +435,9 @@ MODULE TCP(IDENT="8.2",LANGUAGE(BLISS32),
 // not yet? #include <iosbdef.h>
 
 #undef TCP_DATA_OFFSET
+#ifdef __x86_64__
 #include <net/checksum.h>
+#endif
 #define TCP_DATA_OFFSET 5 
 #define Calc_Checksum(x,y) ip_compute_csum(y,x)
 #define Gen_Checksum(a,b,c,d,e) csum_tcpudp_magic(c,d,a,e,csum_partial(b,a,0))

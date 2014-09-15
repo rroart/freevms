@@ -118,8 +118,12 @@ void *memcpy(void *dest, const void *src, unsigned long n);
 void *memset(void *s, int c, unsigned long n);
 #else
 unsigned int strlen(const char *s);
+#ifndef memcpy
 void *memcpy(void *dest, const void *src, unsigned int n);
+#endif
+#ifndef memset
 void *memset(void *s, int c, unsigned int n);
+#endif
 #endif
 // from stdlib.h, which inclusion make type overlap
 void free(void *ptr);
@@ -127,6 +131,15 @@ void free(void *ptr);
 void *malloc(unsigned long size);
 #else
 void *malloc(unsigned int size);
+#endif
+
+#ifdef __i386__
+//externals of cmuip
+int aqempty(void * q);
+int exe_std$alononpaged (int reqsize, int *alosize_p, void **pool_p);
+void qhead_init(void * l);
+int ioc$searchdev(struct return_values *r, void * devnam);
+int exe$ipid_to_epid(unsigned long pid);
 #endif
 
 #endif

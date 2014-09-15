@@ -251,7 +251,12 @@ extern 	void FATAL_FAO(long, ...);
 #include <prvdef.h>
 #include <pqldef.h>
 
+#ifndef NOKERNEL
 #include <asm/uaccess.h>
+#endif
+#ifdef __i386__
+#include <string.h>
+#endif
 
 #ifndef NOKERNEL
 #define sys$open exe$open
@@ -569,7 +574,9 @@ void CNF$Configure_ACP (void)
 	cfield [STRSIZ],
 	cflen,
 	cptr;
+#ifndef NOKERNEL
       mm_segment_t fs;
+#endif
 
 // Initialize all the variables before they are set by the config script
 

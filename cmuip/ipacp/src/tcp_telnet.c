@@ -134,7 +134,9 @@ MODULE TELNET(IDENT="1.11",LANGUAGE(BLISS32),
 #include<msgdef.h>
 #include<lnmdef.h>
 #include<misc.h>
+#ifdef __x86_64__
 #include<linux/sched.h>
+#endif
 #include<acbdef.h>
 extern signed long log_state,
     local_name,
