@@ -75,8 +75,6 @@
 #define CLI$PRESENT cli$present
 #define CLI$GET_VALUE cli$get_value
 
-typedef unsigned long Boolean;
-
 typedef struct _flist { char name[86]; 
                         short flen; };
 typedef struct _quad { int date[2]; };

@@ -104,7 +104,6 @@ int SYS$DELTVA(long in[2], long ret[2], int a) {
   ret[1]=in[1];
   return SS$_NORMAL;
 }
-typedef unsigned long Boolean;
 
 int verify_command(int mask);
 int report_command(int mask);
