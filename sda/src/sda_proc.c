@@ -59,7 +59,14 @@ int sda$show_process(int mask) {
     
   }
 
+#ifdef __x86_64__
+  // do it like this until address perms set
+  unsigned long *vecp=&sch$gl_pcbvec;
+  unsigned long *vec;
+  sda$getmemlong(vecp, &vec);
+#else
   unsigned long *vec=sch$gl_pcbvec;
+#endif
   struct _pcb * pcb_p;
   struct _pcb pcb;
   sda$getmemlong(&vec[index], &pcb_p);
@@ -71,8 +78,13 @@ int sda$show_process(int mask) {
   printf("Process status:          %8x\n", pcb.pcb$l_sts);
   printf("        status2:         %8x\n\n", pcb.pcb$l_sts2);
 #endif
+#ifdef __x86_64__
+  printf("PCB address      %16lx    JIB address              %16lx\n",pcb_p,pcb.pcb$l_jib);
+  printf("PHD address      %16lx    Swapfile disk address    %16lx\n",pcb.pcb$l_phd,0);
+#else
   printf("PCB address              %8x    JIB address              %8x\n",pcb_p,pcb.pcb$l_jib);
   printf("PHD address              %8x    Swapfile disk address    %8x\n",pcb.pcb$l_phd,0);
+#endif
 #if 0
   printf("KTB vector address       %8x    HWPCB address   %8x.%8x\n");
   printf("Callback vector address  %8x    Termination mailbox          %8x\n");
