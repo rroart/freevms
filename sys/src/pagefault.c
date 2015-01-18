@@ -892,6 +892,11 @@ int mmg$frewsle(struct _pcb * p, void * va) {
       goto more;
     }
 
+    // unstandard, not in the book, added anyway until paging is fixed
+    if (mem_map[pfn].pfn$l_page_state&PFN$M_MODIFY) {
+      goto more;
+    }
+
     if (*pte&_PAGE_DIRTY)
       goto more;
     if ((unsigned long)va2>=0x70000000) goto more;
