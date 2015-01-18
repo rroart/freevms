@@ -333,7 +333,12 @@ void * f11b_write_block(struct _vcb * vcb, unsigned char * buf, unsigned long lb
   unsigned long sts=sys$qiow(XQP_EF,xqp->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf2,512*count,phyblk,ucb->ucb$w_fill_0,0,0);
   kfree(buf2);
 #else
-  unsigned long sts=sys$qiow(XQP_EF,xqp->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf,512*count,phyblk,ucb->ucb$w_fill_0,0,0);
+  // and also seems that the 386 driver wants it like x86_64
+  // 386 did not crash, but wrote only empty buffer
+      void * buf2 = kmalloc(512*count, GFP_KERNEL);
+      memcpy(buf2, buf, 512*count);
+  unsigned long sts=sys$qiow(XQP_EF,xqp->io_channel,IO$_WRITELBLK,&myiosb,0,0,buf2,512*count,phyblk,ucb->ucb$w_fill_0,0,0);
+  kfree(buf2);
 #endif
   if (iosb) iosb->iosb$w_status=myiosb.iosb$w_status;
   return buf;
