@@ -6,7 +6,6 @@ Misc:
 Check use of relative queues; is fork use of & correct?
 Check waitall and wait
 sysimgact use PAGE_ instead of numbers.
-Look at having images as ELF? (Itanic is going to use ELF, it seems)
 Use sys$ with system service call instead in exe$ in ipacp etc, to make asts etc function properly. (Note: doing that in vmsbuffer.c was unstable)
 Use setpsli even in more interrupts/exceptions?
 Look at how simple and complex buffers are allocated and freed
@@ -120,10 +119,3 @@ Find the newest cmuip patches
 Check all local big strings, like DESC$STR_ALLOC 1000 etc. replace?
 Will do more with the IP stuff.
 Why nmap kills telnetd.
-
-Compiling:
-Gcc 3.4.x compile
-Check for more of the following in cmuip code (and more):
-signed long vtcb_ptr[0]; and replace with like: long * vtcb_ptr;
-Gcc 3.4 had problems with the first.
-
