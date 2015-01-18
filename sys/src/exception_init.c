@@ -19,7 +19,7 @@
 #include "../../starlet/src/sysdep.h"
 
 /**
-   \brief wait until event flag set and eventual iosb flag too - see 5.2 6.3.6.3
+   \brief wait until event flag set and eventual iosb flag too - see 5.2 6.3.6.3 (recheck the implementation of this routine)
    \param efn event flag number
    \param iosb io status block
 */
