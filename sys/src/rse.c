@@ -331,7 +331,9 @@ void sch$swpwake(void) {
 
   return;
  wake:
+  vmslock(&SPIN_SCHED,IPL$_SCHED);
   sch$wake(sch$gl_swppid); /*not yet set*/
+  vmsunlock(&SPIN_SCHED,-1);
   return;
 }
 
