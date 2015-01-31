@@ -32,6 +32,8 @@ Next see the USE file (after compiling or installing qemu).
 
 ****
 
+ODS2:
+
 Linux utility:
 
 INIT: 
@@ -39,7 +41,23 @@ INIT:
 
 ODS2 install:
 
-     @ sys$system:install.com
+	@ sys$system:install.com
+
+****
+
+TCP/IP networking:
+
+	Skip this if you just downloaded and tried the image.
+
+CMUIP:
+	See example file examples/INET$CONFIG,
+	place in file system root directory:
+	DEVICE_INIT:ETHER:era0:00-00-00-00-00-00:192.168.0.42:255.255.0.0
+	VARIABLE:TELNET_SERVICE:1
+	GATEWAY:gateway.com:192.168.0.1:0.0.0.0:0.0.0.0
+
+	See http://en.wikibooks.org/wiki/QEMU/Networking
+	qemu-system-x86_64 -fda a.img -hda c.img -boot a -monitor stdio -net nic,model=ne2k_pci -net tap,ifname=tap0,script=no,downscript=no -s
 
 ****
 
@@ -70,21 +88,4 @@ Do dpkg -i ods2-source_0.9.3.w7_all.deb. (Check current version)
 Do m-a prepare, m-a update, m-a get ods2, m-a a-i ods2.
 Run the following after you have got a working system on ext2:
 dcl/src/install.sh
-
-****
-
-For future use:
-
-Networking:
-
-Run qemu with ne2k, -net nic,model=ne2k_pci -s -redir tcp:10023::23 -net user
-
-or qemu-system-i386 -fda a.img -hda c.img -boot a -monitor stdio -net nic,model=ne2k_pci -s -net tap,ifname=tap0,script=no,downscript=no
-
-CMUIP:
-	Skip this if you just downloaded and tried the image.
-	see example file INET$CONFIG.
-	DEVICE_INIT:ETHER:era0:00-00-00-00-00-00:192.168.0.42:255.255.0.0
-	VARIABLE:TELNET_SERVICE:1
-	GATEWAY:gateway.com:192.168.0.1:0.0.0.0:0.0.0.0
 
