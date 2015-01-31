@@ -918,8 +918,11 @@ void __init trap_init(void)
 
         extern void exe_cli();
         extern void exe_sti();
-	_set_gate(idt_table+0xb2,15,exe_cli,1,0);
-	_set_gate(idt_table+0xb3,15,exe_sti,1,0);
+	// use type 14 (interrupt gate), which disables interrupts on entry
+	// (previously 15 (trap gate), which did not, and caused double_fault
+	// consider the same for i386
+	_set_gate(idt_table+0xb2,14,exe_cli,1,0);
+	_set_gate(idt_table+0xb3,14,exe_sti,1,0);
 
 	/*
 	 * Should be a barrier for any external CPU state.
