@@ -40,6 +40,9 @@ Shell:
 		set working_set
 		show device/system/logical/working_set
 
+Network:
+	CMUIP (TCP/IP)
+
 RTL:
 	STR$
 	LIB$
