@@ -1,2 +1,2 @@
-show dev
-show mem
+$ show dev
+$ show mem

@@ -9,6 +9,8 @@ $ write sys$output "creating syslib"
 $ crea /dire syslib.dir
 $ write sys$output "creating sysexe"
 $ crea /dire sysexe.dir
+$ write sys$output "creating systest"
+$ crea /dire systest.dir
 $ set def dqa1:[000000]
 $ write sys$output "copying kernel"
 $ copy [boot]freevms.iomm dqa2:[000000]freevms1.elf
@@ -57,12 +59,25 @@ $ write sys$output "copying sysman"
 $ copy sys$system:sysman sysman
 $ write sys$output "copying sysuaf.dat"
 $ copy sys$system:sysuaf.dat sysuaf.dat
-$ write sys$output "copying test1.com"
-$ copy sys$system:test1.com test1.com
-$ write sys$output "copying test2.com"
-$ copy sys$system:test2.com test2.com
 $ write sys$output "copying type"
 $ copy sys$system:type type
 $ write sys$output "copying vmount"
 $ copy sys$system:vmount vmount
+$ set def [vms$common.systest]
+$ write sys$output "copying test1.com"
+$ copy sys$system:test1.com test1.com
+$ write sys$output "copying test2.com"
+$ copy sys$system:test2.com test2.com
+$ write sys$output "copying test3.com"
+$ copy sys$system:test3.com test3.com
+$ write sys$output "copying test4.com"
+$ copy sys$system:test4.com test4.com
+$ write sys$output "copying test5.com"
+$ copy sys$system:test5.com test5.com
+$ write sys$output "copying test6.com"
+$ copy sys$system:test6.com test6.com
+$ write sys$output "copying test7.com"
+$ copy sys$system:test7.com test7.com
+$ write sys$output "copying test8.com"
+$ copy sys$system:test8.com test8.com
 $ write sys$output "%INSTALL-I-STARTUP, FreeVMS limited ODS2 install done"

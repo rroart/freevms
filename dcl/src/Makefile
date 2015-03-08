@@ -3,15 +3,17 @@ LEX = flex
 EXTERNAL = ../../cliutl/src/show.a ../../cliutl/src/set.a ../../cdu/src/cdu.a ../../cdu/src/dcltables.o
 
 #all: i386/dcl${NOEXE} i386/dcl${EXE}
-all: i386/dcl${NOEXE} startup.com install.com test1.com test2.com
+all: i386/dcl${NOEXE} startup.com install.com test1.com test2.com test3.com test4.com test5.com test6.com test7.com test8.com
 
 clean:
 	rm *.o i386/*
 
 install: all
 	install -d ../../rooti386/vms"$$"common/sysexe
+	install -d ../../rooti386/vms"$$"common/systest
 	install i386/* ../../rooti386/vms"$$"common/sysexe
-	install *.com ../../rooti386/vms"$$"common/sysexe
+	install [is]*.com ../../rooti386/vms"$$"common/sysexe
+	install test*.com ../../rooti386/vms"$$"common/systest
 
 OBJS = cli.o clicall.o cliexpr.o
 #clilex.o
