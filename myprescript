@@ -22,5 +22,4 @@ done
 
 (cd linux/arch/i386; unshadow config )
 (cd linux/arch/x86_64; unshadow config )
-(cd linux/arch/um; unshadow config )
 (cd linux/include/linux; unshadow autoconf.h )

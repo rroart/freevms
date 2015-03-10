@@ -33,7 +33,7 @@ unamem=`uname -m`
 
 if [ $unamem = x86_64 ]; then
 
-(mkdir freevmsx86_64.iomm; cd freevmsx86_64.iomm; ../freevms/myprescript; cd linux; ./prescript; cd ..; make symlinks; make linux/include/linux/compile.h)
+(mkdir freevmsx86_64.iomm; cd freevmsx86_64.iomm; ../freevms/myprescript; cd linux; ./prescript; cd ..; make -f Makefile.kernel symlinks; make -f Makefile.kernel linux/include/linux/compile.h)
 
 else
 
