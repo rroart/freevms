@@ -23,7 +23,7 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 TOPDIR	:= $(shell /bin/pwd)
 
 HPATH   	= $(TOPDIR)/linux/include
-FINDHPATH	= $(HPATH)/asm $(HPATH)/linux $(HPATH)/scsi $(HPATH)/net $(TOPDIR)/sys/src $(TOPDIR)/lib/src $(TOPDIR)/librtl/src $(TOPDIR)/starlet/src $(TOPDIR)/pal/src -I$(TOPDIR)/linux/include2
+FINDHPATH	= $(HPATH)/asm $(HPATH)/linux $(HPATH)/scsi $(HPATH)/net $(TOPDIR)/sys/src $(TOPDIR)/lib/src $(TOPDIR)/librtl/src $(TOPDIR)/starlet/src $(TOPDIR)/pal/src $(TOPDIR)/linux/include2
 
 ifeq ($(ARCH),x86_64)
 HOSTCC  	= gcc
