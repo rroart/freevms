@@ -404,9 +404,9 @@ sums:
 dep-files: linux/scripts/mkdep archdep linux/include/linux/version.h
 	linux/scripts/mkdep -- linux/init/*.c > .depend
 	linux/scripts/mkdep -- `find $(FINDHPATH) -name SCCS -prune -o -follow -name \*.h ! -name modversions.h -print` > .hdepend
-	$(MAKE) $(patsubst %,_sfdep_%,$(SUBDIRS)) _FASTDEP_ALL_SUB_DIRS="$(SUBDIRS)"
+	$(MAKE) $(patsubst %,_sfdep_%,$(SUBDIRS)) _FASTDEP_ALL_SUB_DIRS="$(SUBDIRS)" -f Makefile.kernel
 ifdef CONFIG_MODVERSIONS
-	$(MAKE) update-modverfile
+	$(MAKE) update-modverfile -f Makefile.kernel
 endif
 
 ifdef CONFIG_MODVERSIONS
