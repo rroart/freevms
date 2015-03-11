@@ -1,8 +1,8 @@
 So far:
 
 About GCC/Distributions.
-Only Debian 6 and 7 is tested/supported.
-Only gcc-4.4.5 and 4.7.2 is tested/supported.
+Only Debian 6 (i386) and 7 (x86_64) are tested/supported.
+Only gcc-4.4.5 and 4.7.2 are tested/supported.
 
 CPU status:
 I386: some instability.
