@@ -25,6 +25,7 @@ make rootinstall
 make image (as root)
 make image-install (as root)
 make image-kernel-iomm (as root)
+(but don't use the created a.img, use the downloaded one)
 
 ****
 
